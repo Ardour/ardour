@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -152,7 +152,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	table->attach (*filter_box, 0, 7, 5, 6, FILL|EXPAND, FILL, 5, 5);
 
-	table->attach(*btn_add, 1, 2, 6, 7, FILL, FILL, 5, 5); 
+	table->attach(*btn_add, 1, 2, 6, 7, FILL, FILL, 5, 5);
 	table->attach(*btn_remove, 3, 4, 6, 7, FILL, FILL, 5, 5);
 	table->attach(*btn_update, 5, 6, 6, 7, FILL, FILL, 5, 5);
 
@@ -172,7 +172,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	plugin_display.signal_button_press_event().connect_notify (mem_fun(*this, &PluginSelector::row_clicked));
 	plugin_display.get_selection()->signal_changed().connect (mem_fun(*this, &PluginSelector::display_selection_changed));
 	plugin_display.grab_focus();
-	
+
 	btn_update->signal_clicked().connect (mem_fun(*this, &PluginSelector::btn_update_clicked));
 	btn_add->signal_clicked().connect(mem_fun(*this, &PluginSelector::btn_add_clicked));
 	btn_remove->signal_clicked().connect(mem_fun(*this, &PluginSelector::btn_remove_clicked));
@@ -192,7 +192,7 @@ void
 PluginSelector::set_session (Session* s)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PluginSelector::set_session), s));
-	
+
 	session = s;
 
 	if (session) {
@@ -211,7 +211,7 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 	}
 
 	if (!filterstr.empty()) {
-		
+
 		if (mode == _("Name contains")) {
 			compstr = info->name;
 		} else if (mode == _("Category contains")) {
@@ -237,7 +237,7 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 			compstr = info->creator;
 		} else if (mode == _("Library contains")) {
 			compstr = info->path;
-		} 
+		}
 
 		if (compstr.empty()) {
 			return false;
@@ -260,7 +260,7 @@ PluginSelector::setup_filter_string (string& filterstr)
 {
 	filterstr = filter_entry.get_text ();
 	transform (filterstr.begin(), filterstr.end(), filterstr.begin(), ::toupper);
-}	
+}
 
 void
 PluginSelector::refill ()
@@ -310,15 +310,15 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filte
 			newrow[plugin_columns.audio_ins] = buf;
 			snprintf (buf, sizeof(buf), "%d", (*i)->n_inputs.n_midi());
 			newrow[plugin_columns.midi_ins] = buf;
-			
-			snprintf (buf, sizeof(buf), "%d", (*i)->n_outputs.n_audio());		
+
+			snprintf (buf, sizeof(buf), "%d", (*i)->n_outputs.n_audio());
 			newrow[plugin_columns.audio_outs] = buf;
-			snprintf (buf, sizeof(buf), "%d", (*i)->n_outputs.n_midi());		
+			snprintf (buf, sizeof(buf), "%d", (*i)->n_outputs.n_midi());
 			newrow[plugin_columns.midi_outs] = buf;
 
 			newrow[plugin_columns.plugin] = *i;
 		}
-	}	
+	}
 }
 
 void
@@ -352,7 +352,7 @@ void
 PluginSelector::au_refiller (const std::string& filterstr)
 #else
 PluginSelector::au_refiller (const std::string&)
-#endif	
+#endif
 {
 #ifdef HAVE_AUDIOUNITS
 	refiller (manager->au_plugin_info(), filterstr, "AU");
@@ -393,7 +393,7 @@ void
 PluginSelector::btn_remove_clicked()
 {
 	TreeModel::iterator iter = added_list.get_selection()->get_selected();
-	
+
 	amodel->erase(iter);
 	if (amodel->children().empty()) {
 		set_response_sensitive (RESPONSE_APPLY, false);
@@ -448,7 +448,7 @@ PluginSelector::run ()
 		if (interested_object && !plugins.empty()) {
 			interested_object->use_plugins (plugins);
 		}
-		
+
 		break;
 
 	default:
@@ -474,7 +474,7 @@ PluginSelector::filter_entry_changed ()
 	refill ();
 }
 
-void 
+void
 PluginSelector::filter_mode_changed ()
 {
 	std::string mode = filter_mode.get_active_text ();
@@ -507,7 +507,7 @@ struct PluginMenuCompare {
 		    /* same creator ... compare names */
 		    if (strcasecmp (a->name.c_str(), b->name.c_str()) < 0) {
 			    return true;
-		    } 
+		    }
 	    }
 	    return false;
     }
@@ -524,7 +524,7 @@ PluginSelector::plugin_menu()
 	if (!_menu) {
 		_menu = new Menu();
 		_menu->set_name("ArdourContextMenu");
-	} 
+	}
 
 	MenuList& items = _menu->items();
 	Menu* favs = new Menu();
@@ -561,9 +561,9 @@ PluginSelector::plugin_menu()
 		if (manager->is_a_favorite_plugin (*i)) {
 			favs->items().push_back (MenuElem ((*i)->name, (bind (mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
 		}
-		
+
 		/* stupid LADSPA creator strings */
-		
+
 		while (pos < creator.length() && (isalnum (creator[pos]) || isspace (creator[pos]))) ++pos;
 		creator = creator.substr (0, pos);
 
@@ -575,10 +575,10 @@ PluginSelector::plugin_menu()
 			submenu_map.insert (pair<Glib::ustring,Menu*> (creator, submenu));
 			submenu->set_name("ArdourContextMenu");
 		}
-		
+
 		submenu->items().push_back (MenuElem ((*i)->name, (bind (mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
 	}
-	
+
 	return *_menu;
 }
 
@@ -596,7 +596,7 @@ PluginSelector::plugin_chosen_from_menu (const PluginInfoPtr& pi)
 	interested_object = 0;
 }
 
-void 
+void
 PluginSelector::favorite_changed (const Glib::ustring& path)
 {
 	PluginInfoPtr pi;
@@ -606,9 +606,9 @@ PluginSelector::favorite_changed (const Glib::ustring& path)
 	}
 
 	in_row_change = true;
-	
+
 	TreeModel::iterator iter = plugin_model->get_iter (path);
-	
+
 	if (iter) {
 
 		bool favorite = !(*iter)[plugin_columns.favorite];
@@ -620,13 +620,13 @@ PluginSelector::favorite_changed (const Glib::ustring& path)
 		/* save new favorites list */
 
 		pi = (*iter)[plugin_columns.plugin];
-		
+
 		if (favorite) {
 			manager->add_favorite (pi->type, pi->unique_id);
 		} else {
 			manager->remove_favorite (pi->type, pi->unique_id);
 		}
-		
+
 		manager->save_favorites ();
 	}
 	in_row_change = false;

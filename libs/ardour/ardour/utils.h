@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999 Paul Davis 
+    Copyright (C) 1999 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ static inline float f_max(float x, float a) {
 	x += fabsf (x);
 	x *= 0.5f;
 	x += a;
-	
+
 	return (x);
 }
 

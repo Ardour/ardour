@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ using namespace PBD;
 
 gint AudioEngine::m_meter_exit;
 
-AudioEngine::AudioEngine (string client_name) 
+AudioEngine::AudioEngine (string client_name)
 	: ports (new Ports)
 {
 	session = 0;
@@ -82,7 +82,7 @@ AudioEngine::AudioEngine (string client_name)
 	}
 
 	Port::set_engine (this);
-	
+
 	// Initialize parameter metadata (e.g. ranges)
 	Evoral::Parameter p(NullAutomation);
 	p = EventTypeMap::instance().new_parameter(NullAutomation);
@@ -106,12 +106,12 @@ AudioEngine::~AudioEngine ()
 	{
 		Glib::Mutex::Lock tm (_process_lock);
 		session_removed.signal ();
-		
+
 		if (_running) {
 			jack_client_close (_jack);
 			_jack = 0;
 		}
-		
+
 		stop_metering_thread ();
 	}
 }
@@ -146,13 +146,13 @@ AudioEngine::start ()
 	if (!_running) {
 
 		nframes_t blocksize = jack_get_buffer_size (_jack);
-		
+
 		if (session) {
 			BootMessage (_("Connect session to engine"));
 
 			session->set_block_size (blocksize);
 			session->set_frame_rate (jack_get_sample_rate (_jack));
-			
+
 			/* page in as much of the session process code as we
 			   can before we really start running.
 			*/
@@ -224,10 +224,10 @@ AudioEngine::get_sync_offset (nframes_t& offset) const
 #ifdef HAVE_JACK_VIDEO_SUPPORT
 
 	jack_position_t pos;
-	
+
 	if (_jack) {
 		(void) jack_transport_query (_jack, &pos);
-		
+
 		if (pos.valid & JackVideoFrameOffset) {
 			offset = pos.video_offset;
 			return true;
@@ -346,7 +346,7 @@ AudioEngine::process_callback (nframes_t nframes)
 
 	/// The number of frames that will have been processed when we've finished
 	nframes_t next_processed_frames;
-	
+
 	/* handle wrap around of total frames counter */
 
 	if (max_frames - _processed_frames < nframes) {
@@ -395,7 +395,7 @@ AudioEngine::process_callback (nframes_t nframes)
 			session->process (nframes);
 		}
 	}
-	
+
 	if (_freewheeling) {
 		return 0;
 	}
@@ -410,13 +410,13 @@ AudioEngine::process_callback (nframes_t nframes)
 		boost::shared_ptr<Ports> p = ports.reader();
 
 		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-			
+
 			Port *port = (*i);
 			bool x;
-			
+
 			if (port->_last_monitor != (x = port->monitoring_input ())) {
 				port->_last_monitor = x;
-				/* XXX I think this is dangerous, due to 
+				/* XXX I think this is dangerous, due to
 				   a likely mutex in the signal handlers ...
 				*/
 				 port->MonitorInputChanged (x); /* EMIT SIGNAL */
@@ -430,14 +430,14 @@ AudioEngine::process_callback (nframes_t nframes)
 		boost::shared_ptr<Ports> p = ports.reader();
 
 		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-			
+
 			Port *port = (*i);
-			
+
 			if (port->sends_output()) {
 				port->get_buffer(nframes).silence(nframes);
 			}
 		}
-	} 
+	}
 
 	// Finalize ports
 
@@ -460,12 +460,12 @@ AudioEngine::jack_sample_rate_callback (nframes_t nframes)
 {
 	_frame_rate = nframes;
 	_usecs_per_cycle = (int) floor ((((double) frames_per_cycle() / nframes)) * 1000000.0);
-	
+
 	/* check for monitor input change every 1/10th of second */
 
 	monitor_check_interval = nframes / 10;
 	last_monitor_check = 0;
-	
+
 	if (session) {
 		session->set_frame_rate (nframes);
 	}
@@ -536,7 +536,7 @@ AudioEngine::meter_thread ()
 	}
 }
 
-void 
+void
 AudioEngine::set_session (Session *s)
 {
 	Glib::Mutex::Lock pl (_process_lock);
@@ -546,11 +546,11 @@ AudioEngine::set_session (Session *s)
 		session = s;
 
 		nframes_t blocksize = jack_get_buffer_size (_jack);
-		
+
 		/* page in as much of the session process code as we
 		   can before we really start running.
 		*/
-		
+
 		boost::shared_ptr<Ports> p = ports.reader();
 
 		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
@@ -572,7 +572,7 @@ AudioEngine::set_session (Session *s)
 	}
 }
 
-void 
+void
 AudioEngine::remove_session ()
 {
 	Glib::Mutex::Lock lm (_process_lock);
@@ -587,7 +587,7 @@ AudioEngine::remove_session ()
 	} else {
 		session = 0;
 	}
-	
+
 	remove_all_ports ();
 }
 
@@ -597,19 +597,19 @@ AudioEngine::port_registration_failure (const std::string& portname)
 	string full_portname = jack_client_name;
 	full_portname += ':';
 	full_portname += portname;
-	
-	
+
+
 	jack_port_t* p = jack_port_by_name (_jack, full_portname.c_str());
 	string reason;
-	
+
 	if (p) {
 		reason = string_compose (_("a port with the name \"%1\" already exists: check for duplicated track/bus names"), portname);
 	} else {
 		reason = _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.");
 	}
-	
+
 	throw PortRegistrationFailure (string_compose (_("AudioEngine: cannot register port \"%1\": %2"), portname, reason).c_str());
-}	
+}
 
 Port *
 AudioEngine::register_port (DataType dtype, const string& portname, bool input)
@@ -624,7 +624,7 @@ AudioEngine::register_port (DataType dtype, const string& portname, bool input)
 		} else {
 			throw PortRegistrationFailure("unable to create port (unknown type)");
 		}
-		
+
 		size_t& old_buffer_size  = _raw_buffer_sizes[newport->type()];
 		size_t  port_buffer_size = newport->raw_buffer_size(0);
 		if (port_buffer_size > old_buffer_size) {
@@ -667,7 +667,7 @@ AudioEngine::unregister_port (Port& port)
 {
 	/* caller must hold process lock */
 
-	if (!_running) { 
+	if (!_running) {
 		/* probably happening when the engine has been halted by JACK,
 		   in which case, there is nothing we can do here.
 		   */
@@ -677,7 +677,7 @@ AudioEngine::unregister_port (Port& port)
 	{
 		RCUWriter<Ports> writer (ports);
 		boost::shared_ptr<Ports> ps = writer.get_copy ();
-		
+
 		for (Ports::iterator i = ps->begin(); i != ps->end(); ++i) {
 			if ((*i) == &port) {
 				delete *i;
@@ -685,18 +685,18 @@ AudioEngine::unregister_port (Port& port)
 				break;
 			}
 		}
-		
+
 		/* writer goes out of scope, forces update */
 	}
-		
+
 	return 0;
 }
 
-int 
+int
 AudioEngine::connect (const string& source, const string& destination)
 {
 	/* caller must hold process lock */
-	
+
 	int ret;
 
 	if (!_running) {
@@ -722,23 +722,23 @@ AudioEngine::connect (const string& source, const string& destination)
 		/* neither port is known to us, and this API isn't intended for use as a general patch bay */
 		ret = -1;
 	}
-	
+
 	if (ret > 0) {
 		/* already exists - no error, no warning */
 	} else if (ret < 0) {
-		error << string_compose(_("AudioEngine: cannot connect %1 (%2) to %3 (%4)"), 
-					source, s, destination, d) 
+		error << string_compose(_("AudioEngine: cannot connect %1 (%2) to %3 (%4)"),
+					source, s, destination, d)
 		      << endmsg;
 	}
 
 	return ret;
 }
 
-int 
+int
 AudioEngine::disconnect (const string& source, const string& destination)
 {
 	/* caller must hold process lock */
-	
+
 	int ret;
 
 	if (!_running) {
@@ -749,7 +749,7 @@ AudioEngine::disconnect (const string& source, const string& destination)
 			return -1;
 		}
 	}
-	
+
 	string s = make_port_name_non_relative (source);
 	string d = make_port_name_non_relative (destination);
 
@@ -836,7 +836,7 @@ AudioEngine::get_port_by_name (const string& portname)
 	} else {
 		s = portname;
 	}
-	
+
 	Glib::Mutex::Lock lm (_process_lock);
 	return get_port_by_name_locked (s);
 }
@@ -909,7 +909,7 @@ AudioEngine::halted (void *arg)
 }
 
 bool
-AudioEngine::can_request_hardware_monitoring () 
+AudioEngine::can_request_hardware_monitoring ()
 {
 	const char ** ports;
 
@@ -952,11 +952,11 @@ AudioEngine::n_physical_inputs (DataType type) const
 {
 	const char ** ports;
 	uint32_t i = 0;
-	
+
 	if (!_jack) {
 		return 0;
 	}
-	
+
 	if ((ports = jack_get_ports (_jack, NULL, type.to_jack_type(), JackPortIsPhysical|JackPortIsOutput)) == 0) {
 		return 0;
 	}
@@ -973,11 +973,11 @@ AudioEngine::get_physical_inputs (DataType type, vector<string>& ins)
 {
 	const char ** ports;
 	uint32_t i = 0;
-	
+
 	if (!_jack) {
 		return;
 	}
-	
+
 	if ((ports = jack_get_ports (_jack, NULL, type.to_jack_type(), JackPortIsPhysical|JackPortIsOutput)) == 0) {
 		return;
 	}
@@ -995,11 +995,11 @@ AudioEngine::get_physical_outputs (DataType type, vector<string>& outs)
 {
 	const char ** ports;
 	uint32_t i = 0;
-	
+
 	if (!_jack) {
 		return;
 	}
-	
+
 	if ((ports = jack_get_ports (_jack, NULL, type.to_jack_type(), JackPortIsPhysical|JackPortIsInput)) == 0) {
 		return;
 	}
@@ -1031,7 +1031,7 @@ AudioEngine::get_nth_physical (DataType type, uint32_t n, int flag)
 	}
 
 	ports = jack_get_ports (_jack, NULL, type.to_jack_type(), JackPortIsPhysical|flag);
-	
+
 	if (ports == 0) {
 		return "";
 	}
@@ -1059,7 +1059,7 @@ AudioEngine::update_total_latency (const Port& port)
 		if (!_has_run) {
 			fatal << _("update_total_latency() called before engine was started") << endmsg;
 			/*NOTREACHED*/
-		} 
+		}
 	}
 
 	port.recompute_total_latency ();
@@ -1150,13 +1150,13 @@ AudioEngine::remove_all_ports ()
 		for (Ports::iterator i = ps->begin(); i != ps->end(); ++i) {
 			delete *i;
 		}
-		
+
 		ps->clear ();
 	}
 }
 
-static void 
-ardour_jack_error (const char* msg) 
+static void
+ardour_jack_error (const char* msg)
 {
 	error << "JACK: " << msg << endmsg;
 }
@@ -1181,11 +1181,11 @@ AudioEngine::connect_to_jack (string client_name)
 	}
 
 	jack_set_error_function (ardour_jack_error);
-	
+
 	return 0;
 }
 
-int 
+int
 AudioEngine::disconnect_from_jack ()
 {
 	if (!_jack) {
@@ -1196,7 +1196,7 @@ AudioEngine::disconnect_from_jack ()
 		stop_metering_thread ();
 	}
 
-	{ 
+	{
 		Glib::Mutex::Lock lm (_process_lock);
 		jack_client_close (_jack);
 		_jack = 0;
@@ -1235,14 +1235,14 @@ AudioEngine::reconnect_to_jack ()
 	for (i = p->begin(); i != p->end(); ++i) {
 		if ((*i)->reestablish ()) {
 			break;
-		} 
+		}
 	}
 
 	if (i != p->end()) {
 		/* failed */
 		remove_all_ports ();
 		return -1;
-	} 
+	}
 
 
 	if (session) {
@@ -1250,14 +1250,14 @@ AudioEngine::reconnect_to_jack ()
 		nframes_t blocksize = jack_get_buffer_size (_jack);
 		session->set_block_size (blocksize);
 		session->set_frame_rate (jack_get_sample_rate (_jack));
-		
+
 		_raw_buffer_sizes[DataType::AUDIO] = blocksize * sizeof(float);
 		cout << "FIXME: Assuming maximum MIDI buffer size " << blocksize * 4 << "bytes" << endl;
 		_raw_buffer_sizes[DataType::MIDI] = blocksize * 4;
 	}
 
 	last_monitor_check = 0;
-	
+
 	jack_on_shutdown (_jack, halted, this);
 	jack_set_graph_order_callback (_jack, _graph_order_callback, this);
 	jack_set_thread_init_callback (_jack, _thread_init_callback, this);
@@ -1267,11 +1267,11 @@ AudioEngine::reconnect_to_jack ()
 	jack_set_xrun_callback (_jack, _xrun_callback, this);
 	jack_set_sync_callback (_jack, _jack_sync_callback, this);
 	jack_set_freewheel_callback (_jack, _freewheel_callback, this);
-	
+
 	if (session && session->config.get_jack_time_master()) {
 		jack_set_timebase_callback (_jack, 0, _jack_timebase_callback, this);
-	} 
-	
+	}
+
 	if (jack_activate (_jack) == 0) {
 		_running = true;
 		_has_run = true;
@@ -1280,7 +1280,7 @@ AudioEngine::reconnect_to_jack ()
 	}
 
 	/* re-establish connections */
-	
+
 	for (i = p->begin(); i != p->end(); ++i) {
 		(*i)->reconnect ();
 	}
@@ -1317,13 +1317,13 @@ AudioEngine::update_total_latencies ()
 	}
 #endif
 }
-		
+
 string
 AudioEngine::make_port_name_relative (string portname)
 {
 	string::size_type len;
 	string::size_type n;
-	
+
 	len = portname.length();
 
 	for (n = 0; n < len; ++n) {
@@ -1331,7 +1331,7 @@ AudioEngine::make_port_name_relative (string portname)
 			break;
 		}
 	}
-	
+
 	if ((n != len) && (portname.substr (0, n) == jack_client_name)) {
 		return portname.substr (n+1);
 	}
@@ -1351,7 +1351,7 @@ AudioEngine::make_port_name_non_relative (string portname)
 	str  = jack_client_name;
 	str += ':';
 	str += portname;
-	
+
 	return str;
 }
 

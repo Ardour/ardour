@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@
 
 // if these headers come before sigc++ is included
 // the parser throws ObjC++ errors. (nil is a keyword)
-#ifdef HAVE_COREAUDIO 
+#ifdef HAVE_COREAUDIO
 #include "ardour/coreaudiosource.h"
 #include <AudioToolbox/ExtendedAudioFile.h>
 #include <AudioToolbox/AudioFormat.h>
@@ -79,7 +79,7 @@ struct SizedSampleBuffer {
     nframes_t size;
     Sample* buf;
 
-    SizedSampleBuffer (nframes_t sz) : size (sz) { 
+    SizedSampleBuffer (nframes_t sz) : size (sz) {
 	    buf = new Sample[size];
     }
 
@@ -163,33 +163,33 @@ AudioFileSource::find_broken_peakfile (ustring peak_path, ustring audio_path)
 	ustring str;
 
 	/* check for the broken location in use by 2.0 for several months */
-	
+
 	str = broken_peak_path (audio_path);
-	
+
 	if (Glib::file_test (str, Glib::FILE_TEST_EXISTS)) {
-		
+
 		if (is_embedded()) {
-			
-			/* it would be nice to rename it but the nature of 
+
+			/* it would be nice to rename it but the nature of
 			   the bug means that we can't reliably use it.
 			*/
-			
+
 			peak_path = str;
-			
+
 		} else {
 			/* all native files are mono, so we can just rename
 			   it.
 			*/
 			::rename (str.c_str(), peak_path.c_str());
 		}
-		
+
 	} else {
 		/* Nasty band-aid for older sessions that were created before we
 		   used libsndfile for all audio files.
 		*/
-		
-		
-		str = old_peak_path (audio_path);	
+
+
+		str = old_peak_path (audio_path);
 		if (Glib::file_test (str, Glib::FILE_TEST_EXISTS)) {
 			peak_path = str;
 		}
@@ -267,7 +267,7 @@ AudioFileSource::set_state (const XMLNode& node)
 	if (AudioSource::set_state (node)) {
 		return -1;
 	}
-	
+
 	if (FileSource::set_state (node)) {
 		return -1;
 	}
@@ -281,7 +281,7 @@ AudioFileSource::mark_streaming_write_completed ()
 	if (!writable()) {
 		return;
 	}
-	
+
 	/* XXX notice that we're readers of _peaks_built
 	   but we must hold a solid lock on PeaksReady.
 	*/
@@ -311,10 +311,10 @@ AudioFileSource::is_empty (Session& /*s*/, ustring path)
 {
 	SoundFileInfo info;
 	string err;
-	
+
 	if (!get_soundfile_info (path, info, err)) {
 		/* dangerous: we can't get info, so assume that its not empty */
-		return false; 
+		return false;
 	}
 
 	return info.length == 0;

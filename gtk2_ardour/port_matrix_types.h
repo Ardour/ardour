@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,14 +26,14 @@ struct PortMatrixNode
 {
 	PortMatrixNode () {}
 	PortMatrixNode (ARDOUR::BundleChannel r, ARDOUR::BundleChannel c) : row (r), column (c) {}
-	
+
 	bool operator== (PortMatrixNode const& other) const {
 		return row == other.row && column == other.column;
 	}
 	bool operator!= (PortMatrixNode const& other) const {
 		return row != other.row || column != other.column;
 	}
-	
+
 	ARDOUR::BundleChannel row;
 	ARDOUR::BundleChannel column;
 

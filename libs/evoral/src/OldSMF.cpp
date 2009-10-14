@@ -1,16 +1,16 @@
 /* This file is part of Evoral.
  * Copyright (C) 2008 Dave Robillard <http://drobilla.net>
  * Copyright (C) 2000-2008 Paul Davis
- * 
+ *
  * Evoral is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation; either version 2 of the License, or (at your option) any later
  * version.
- * 
+ *
  * Evoral is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
@@ -87,7 +87,7 @@ SMF<Time>::open(const std::string& path) THROW_FILE_ERROR
 		flush_header();
 		flush_footer();
 	}
-		
+
 	return (_fd == 0) ? -1 : 0;
 }
 
@@ -115,7 +115,7 @@ void
 SMF<Time>::seek_to_footer_position()
 {
 	uint8_t buffer[4];
-	
+
 	// Check if there is a track end marker at the end of the data
 	fseek(_fd, -4, SEEK_END);
 	size_t read_bytes = fread(buffer, sizeof(uint8_t), 4, _fd);
@@ -145,7 +145,7 @@ int
 SMF<Time>::flush_header()
 {
 	// FIXME: write timeline position somehow?
-	
+
 	//cerr << path() << " SMF Flushing header\n";
 
 	assert(_fd);
@@ -163,7 +163,7 @@ SMF<Time>::flush_header()
 	//assert(_fd);
 	fseek(_fd, 0, SEEK_SET);
 	write_chunk("MThd", 6, data);
-	write_chunk_header("MTrk", _track_size); 
+	write_chunk_header("MTrk", _track_size);
 
 	fflush(_fd);
 
@@ -224,7 +224,7 @@ SMF<Time>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 	} catch (...) {
 		return -1; // Premature EOF
 	}
-	
+
 	if (feof(_fd)) {
 		return -1; // Premature EOF
 	}
@@ -249,7 +249,7 @@ SMF<Time>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 			return 0;
 		}
 	}
-	
+
 	int event_size = midi_event_size((unsigned char)status);
 	if (event_size <= 0) {
 		if ((status & 0xff) == MIDI_CMD_COMMON_SYSEX) {
@@ -259,11 +259,11 @@ SMF<Time>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 			return 0;
 		}
 	}
-	
+
 	// Make sure we have enough scratch buffer
 	if (*size < (unsigned)event_size)
 		*buf = (uint8_t*)realloc(*buf, event_size);
-	
+
 	*size = event_size;
 
 	(*buf)[0] = (unsigned char)status;
@@ -275,7 +275,7 @@ SMF<Time>::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 		printf("%X ", (*buf)[i]);
 	}
 	printf("\n");*/
-	
+
 	return (int)*size;
 }
 
@@ -285,7 +285,7 @@ SMF<Time>::append_event_delta(uint32_t delta_t, const Event<Time>& ev)
 {
 	if (ev.size() == 0)
 		return;
-	
+
 	size_t stamp_size = write_var_len(delta_t);
 	if (ev.buffer()[0] == MIDI_CMD_COMMON_SYSEX) {
 		fputc(MIDI_CMD_COMMON_SYSEX, _fd);
@@ -333,7 +333,7 @@ void
 SMF<Time>::write_chunk(const char id[4], uint32_t length, void* data)
 {
 	write_chunk_header(id, length);
-	
+
 	fwrite(data, 1, length, _fd);
 }
 

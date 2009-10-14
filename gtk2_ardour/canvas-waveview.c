@@ -1,5 +1,5 @@
 /*
-     Copyright (C) 2000-2002 Paul Davis 
+     Copyright (C) 2000-2002 Paul Davis
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -163,106 +163,106 @@ gnome_canvas_waveview_class_init (GnomeCanvasWaveViewClass *class)
 		  PROP_DATA_SRC,
 		  g_param_spec_pointer ("data_src", NULL, NULL,
 					(G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 g_object_class_install_property
 		 (gobject_class,
 		  PROP_CHANNEL,
 		  g_param_spec_uint ("channel", NULL, NULL,
 				     0, G_MAXUINT, 0,
 				     (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 g_object_class_install_property
 		 (gobject_class,
 		  PROP_LENGTH_FUNCTION,
 		  g_param_spec_pointer ("length_function", NULL, NULL,
 					(G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 g_object_class_install_property
                 (gobject_class,
                  PROP_SOURCEFILE_LENGTH_FUNCTION,
                  g_param_spec_pointer ("sourcefile_length_function", NULL, NULL,
 				       (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 g_object_class_install_property
 		 (gobject_class,
 		  PROP_PEAK_FUNCTION,
 		  g_param_spec_pointer ("peak_function", NULL, NULL,
 					(G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 g_object_class_install_property
 		 (gobject_class,
 		  PROP_GAIN_FUNCTION,
 		  g_param_spec_pointer ("gain_function", NULL, NULL,
 					(G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 g_object_class_install_property
 		 (gobject_class,
                  PROP_GAIN_SRC,
                  g_param_spec_pointer ("gain_src", NULL, NULL,
 				       (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	
+
 	 g_object_class_install_property
 		 (gobject_class,
 		  PROP_CACHE,
 		  g_param_spec_pointer ("cache", NULL, NULL,
 					(G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 g_object_class_install_property
 		 (gobject_class,
 		  PROP_CACHE_UPDATER,
                  g_param_spec_boolean ("cache_updater", NULL, NULL,
 				       FALSE,
 				       (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 g_object_class_install_property
 		 (gobject_class,
 		  PROP_SAMPLES_PER_UNIT,
 		  g_param_spec_double ("samples_per_unit", NULL, NULL,
 				       0.0, G_MAXDOUBLE, 0.0,
 				       (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 g_object_class_install_property
 		 (gobject_class,
 		  PROP_AMPLITUDE_ABOVE_AXIS,
 		  g_param_spec_double ("amplitude_above_axis", NULL, NULL,
 				       0.0, G_MAXDOUBLE, 0.0,
 				       (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 g_object_class_install_property
 		 (gobject_class,
 		  PROP_X,
 		  g_param_spec_double ("x", NULL, NULL,
 				       0.0, G_MAXDOUBLE, 0.0,
 				       (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 g_object_class_install_property
 		 (gobject_class,
 		  PROP_Y,
 		  g_param_spec_double ("y", NULL, NULL,
 				       0.0, G_MAXDOUBLE, 0.0,
 				       (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 g_object_class_install_property
 		 (gobject_class,
 		  PROP_HEIGHT,
 		  g_param_spec_double ("height", NULL, NULL,
 				       0.0, G_MAXDOUBLE, 0.0,
 				       (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 g_object_class_install_property
 		 (gobject_class,
 		  PROP_WAVE_COLOR,
 		  g_param_spec_uint ("wave_color", NULL, NULL,
 				     0, G_MAXUINT, 0,
 				     (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 g_object_class_install_property
 		 (gobject_class,
 		  PROP_CLIP_COLOR,
 		  g_param_spec_uint ("clip_color", NULL, NULL,
 				     0, G_MAXUINT, 0,
 				     (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 g_object_class_install_property
 		 (gobject_class,
 		  PROP_ZERO_COLOR,
@@ -283,7 +283,7 @@ gnome_canvas_waveview_class_init (GnomeCanvasWaveViewClass *class)
 		  g_param_spec_boolean ("filled", NULL, NULL,
 					FALSE,
 					(G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 g_object_class_install_property
 		 (gobject_class,
 		  PROP_RECTIFIED,
@@ -304,16 +304,16 @@ gnome_canvas_waveview_class_init (GnomeCanvasWaveViewClass *class)
 		  g_param_spec_boolean ("logscaled", NULL, NULL,
 					FALSE,
 					(G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 g_object_class_install_property
 		 (gobject_class,
 		  PROP_REGION_START,
 		  g_param_spec_uint ("region_start", NULL, NULL,
 				     0, G_MAXUINT, 0,
 				     (G_PARAM_READABLE | G_PARAM_WRITABLE)));
-	 
+
 	 object_class->destroy = gnome_canvas_waveview_destroy;
-	 
+
 	 item_class->update = gnome_canvas_waveview_update;
 	 item_class->bounds = gnome_canvas_waveview_bounds;
 	 item_class->point = gnome_canvas_waveview_point;
@@ -418,12 +418,12 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 #if DEBUG_CACHE
 	// printf("waveview->region_start == %lu\n",waveview->region_start);
 	// c_stacktrace ();
-	printf ("\n\n=> 0x%x cache @ 0x%x range: %lu - %lu request: %lu - %lu (%lu frames)\n", 
+	printf ("\n\n=> 0x%x cache @ 0x%x range: %lu - %lu request: %lu - %lu (%lu frames)\n",
 		waveview, cache,
 		cache->start, cache->end,
 		start_sample, end_sample, end_sample - start_sample);
 #endif
-		
+
 	if (cache->start <= start_sample && cache->end >= end_sample) {
 #if DEBUG_CACHE
 		// printf ("0x%x: cache hit for %lu-%lu (cache holds: %lu-%lu\n",
@@ -433,11 +433,11 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 	}
 
 	/* make sure the cache is at least twice as wide as the screen width, and put the start sample
-	   in the middle, ensuring that we cover the end_sample. 
+	   in the middle, ensuring that we cover the end_sample.
 	*/
 
 	/* Note the assumption that we have a 1:1 units:pixel ratio for the canvas. Its everywhere ... */
-	
+
 	half_width = (gulong) floor ((waveview->screen_width * waveview->samples_per_unit)/2.0 + 0.5);
 
 	if (start_sample < half_width) {
@@ -462,7 +462,7 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 	}
 
 #if DEBUG_CACHE
-	fprintf (stderr, "AVAILABLE FRAMES = %lu of %lu, start = %lu, sstart = %lu, cstart = %lu\n", 
+	fprintf (stderr, "AVAILABLE FRAMES = %lu of %lu, start = %lu, sstart = %lu, cstart = %lu\n",
 		 rf3, waveview->sourcefile_length_function (waveview->data_src, waveview->samples_per_unit),
 		 waveview->region_start, start_sample, new_cache_start);
 #endif
@@ -489,7 +489,7 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 	ostart = new_cache_start;
 
 #ifdef CACHE_MEMMOVE_OPTIMIZATION
-	
+
 	/* data is not entirely in the cache, so go fetch it, making sure to fill the cache */
 
 	/* some of the required cache entries are in the cache, but in the wrong
@@ -497,24 +497,24 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 	*/
 
 	if (cache->start < new_cache_start && new_cache_start < cache->end) {
-		
-		/* case one: the common area is at the end of the existing cache. move it 
+
+		/* case one: the common area is at the end of the existing cache. move it
 		   to the beginning of the cache, and set up to refill whatever remains.
-		   
-		   
+
+
 			   wv->cache_start                                        wv->cache_end
 			   |-------------------------------------------------------| cache
 			                                       |--------------------------------| requested
 			                                       <------------------->
 			                                             "present"
-			                                    new_cache_start                      new_cache_end       
+			                                    new_cache_start                      new_cache_end
 		*/
-				
+
 
 		present_frames = cache->end - new_cache_start;
 		present_entries = (gulong) floor (present_frames / waveview->samples_per_unit);
 
-#if DEBUG_CACHE		
+#if DEBUG_CACHE
 		fprintf (stderr, "existing material at end of current cache, move to start of new cache\n"
 			 "\tcopy from %lu to start\n", cache->data_size - present_entries);
 #endif
@@ -522,7 +522,7 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 		memmove (&cache->data[0],
 			 &cache->data[cache->data_size - present_entries],
 			 present_entries * sizeof (GnomeCanvasWaveViewCacheEntry));
-		
+
 #if DEBUG_CACHE
 		fprintf (stderr, "satisfied %lu of %lu frames, offset = %lu, will start at %lu (ptr = 0x%x)\n",
 			 present_frames, required_frames, present_entries, new_cache_start + present_entries,
@@ -536,8 +536,8 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 
 	} else if (new_cache_end > cache->start && new_cache_end < cache->end) {
 
-		/* case two: the common area lives at the beginning of the existing cache. 
-		   
+		/* case two: the common area lives at the beginning of the existing cache.
+
                                             wv->cache_start                                      wv->cache_end
 			                     |-----------------------------------------------------|
                               |--------------------------------|
@@ -546,15 +546,15 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 
                              new_cache_start                      new_cache_end
 		*/
-		
+
 		present_frames = new_cache_end - cache->start;
 		present_entries = (gulong) floor (present_frames / waveview->samples_per_unit);
 
 		memmove (&cache->data[cache->data_size - present_entries],
 			 &cache->data[0],
 			 present_entries * sizeof (GnomeCanvasWaveViewCacheEntry));
-		
-#if DEBUG_CACHE		
+
+#if DEBUG_CACHE
 		fprintf (stderr, "existing material at start of current cache, move to start of end cache\n");
 #endif
 
@@ -568,7 +568,7 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 		offset = 0;
 		required_frames -= present_frames;
 
-		
+
 	} else {
 		copied = 0;
 		offset = 0;
@@ -605,7 +605,7 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 		waveview->peak_function (waveview->data_src, npeaks, new_cache_start, required_frames, cache->data + offset, waveview->channel,waveview->samples_per_unit);
 
 		/* take into account any copied peaks */
-		
+
 		npeaks += copied;
 	} else {
 		npeaks = copied;
@@ -634,15 +634,15 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 		}
 
 		free (gain);
-	
+
 	}
 
 	/* do optional log scaling.  this implementation is not particularly efficient */
-	
+
 	if (waveview->logscaled) {
 		guint32 n;
 		GnomeCanvasWaveViewCacheEntry* buf = cache->data;
-		
+
 		for (n = 0; n < cache->data_size; ++n) {
 
 			if (buf[n].max > 0.0f) {
@@ -650,7 +650,7 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 			} else if (buf[n].max < 0.0f) {
 				buf[n].max = -alt_log_meter(fast_coefficient_to_dB(-buf[n].max));
 			}
-			
+
 			if (buf[n].min > 0.0f) {
 				buf[n].min = alt_log_meter(fast_coefficient_to_dB(buf[n].min));
 			} else if (buf[n].min < 0.0f) {
@@ -664,7 +664,7 @@ gnome_canvas_waveview_ensure_cache (GnomeCanvasWaveView *waveview, gulong start_
 
   out:
 #if DEBUG_CACHE
-	fprintf (stderr, "return cache index = %d\n", 
+	fprintf (stderr, "return cache index = %d\n",
 		 (guint32) floor ((((double) (start_sample - cache->start)) / waveview->samples_per_unit) + 0.5));
 #endif
 	return (guint32) floor ((((double) (start_sample - cache->start)) / waveview->samples_per_unit) + 0.5);
@@ -680,7 +680,7 @@ gnome_canvas_waveview_set_data_src (GnomeCanvasWaveView *waveview, void *data_sr
 			waveview->reload_cache_in_render = TRUE;
 			return;
 		}
-	
+
 		waveview->cache->start  = 0;
 		waveview->cache->end = 0;
 	}
@@ -694,11 +694,11 @@ gnome_canvas_waveview_set_channel (GnomeCanvasWaveView *waveview, guint32 chan)
 	if (waveview->channel == chan) {
 		return;
 	}
-	
+
 	waveview->channel = chan;
 }
 
-static void 
+static void
 gnome_canvas_waveview_reset_bounds (GnomeCanvasItem *item)
 
 {
@@ -727,8 +727,8 @@ gnome_canvas_waveview_reset_bounds (GnomeCanvasItem *item)
 	gnome_canvas_update_bbox (item, Ix1, Iy1, Ix2, Iy2);
 }
 
-/* 
- * CANVAS CALLBACKS 
+/*
+ * CANVAS CALLBACKS
  */
 
 static void
@@ -739,7 +739,7 @@ gnome_canvas_waveview_set_property (GObject      *object,
 
 {
 	(void) pspec;
-	
+
 	GnomeCanvasItem *item;
 	GnomeCanvasWaveView *waveview;
 	int redraw = FALSE;
@@ -929,8 +929,8 @@ gnome_canvas_waveview_get_property (
 		GValue       *value,
 		GParamSpec   *pspec)
 {
-	
-   
+
+
 	g_return_if_fail (object != NULL);
 	g_return_if_fail (GNOME_IS_CANVAS_WAVEVIEW (object));
 
@@ -1083,7 +1083,7 @@ gnome_canvas_waveview_update (GnomeCanvasItem *item, double *affine, ArtSVP *cli
 		      &waveview->fill_a);
 
 //	check_cache (waveview, "end of update");
-}				   
+}
 
 static void
 gnome_canvas_waveview_render (GnomeCanvasItem *item,
@@ -1186,7 +1186,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 
 	clip_length = MIN(5,(waveview->height/4));
 
-	/* 
+	/*
 	   Now draw each line, clipping it appropriately. The clipping
 	   is done by the macros PAINT_FOO().
 	*/
@@ -1240,40 +1240,40 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 			guint index = cache_index + (end - begin);
 
 			if (index >= waveview->cache->data_size) {
-				
+
 				/* the data we want is off the end of the cache, which must mean its beyond
 				   the end of the region's source; hence the peak values are 0 */
 				last_pymax = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
 				last_pymin = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
-				
+
 			} else {
-				
+
 				last_pymax = (int) rint ((item->y1 + origin - MIN(waveview->cache->data[index].max, 1.0) * half_height) * item->canvas->pixels_per_unit);
 				last_pymin = (int) rint ((item->y1 + origin - MAX(waveview->cache->data[index].min, -1.0) * half_height) * item->canvas->pixels_per_unit);
-				
+
 			}
-				
+
 		}
 
-		/* 
+		/*
 		 * initialize NEXT* variables for the first run, duplicated in the loop for speed
 		 */
 		max = waveview->cache->data[cache_index].max;
 		min = waveview->cache->data[cache_index].min;
-		
+
 		if (max >= 1.0) {
 			max = 1.0;
 			next_clip_max = 1;
 		}
-		
+
 		if (min <= -1.0) {
 			min = -1.0;
 			next_clip_min = 1;
 		}
-		
+
 		max *= half_height;
 		min *= half_height;
-		
+
 		next_pymax = (int) rint ((item->y1 + origin - max) * item->canvas->pixels_per_unit);
 		next_pymin = (int) rint ((item->y1 + origin - min) * item->canvas->pixels_per_unit);
 
@@ -1311,7 +1311,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 					max = 1.0;
 					next_clip_max = 1;
 				}
-				
+
 				if (min <= -1.0) {
 					min = -1.0;
 					next_clip_min = 1;
@@ -1319,11 +1319,11 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 
 				max *= half_height;
 				min *= half_height;
-				
+
 				next_pymax = (int) rint ((item->y1 + origin - max) * item->canvas->pixels_per_unit);
 				next_pymin = (int) rint ((item->y1 + origin - min) * item->canvas->pixels_per_unit);
 			}
-			
+
 			/* render */
 			if (pymax == pymin) {
 				PAINT_DOTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymin);
@@ -1370,7 +1370,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 			if (clip_max) {
 				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymax, pymax+clip_length);
 			}
-			
+
 			if (clip_min) {
 				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymin-clip_length, pymin);
 			}
@@ -1426,7 +1426,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		if(last_pymax < 0) {
 			/* take the index of one sample right of what we render */
 			int index = cache_index + (end - begin);
-			
+
 			max = MIN(waveview->cache->data[index].max, 1.0);
 			min = MAX(waveview->cache->data[index].min, -1.0);
 
@@ -1437,26 +1437,26 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 			last_pymax = (int) rint ((item->y1 + waveview->height - max * waveview->height) * item->canvas->pixels_per_unit);
 		}
 
-		/* 
+		/*
 		 * initialize NEXT* variables for the first run, duplicated in the loop for speed
 		 */
 		max = waveview->cache->data[cache_index].max;
 		min = waveview->cache->data[cache_index].min;
-		
+
 		if (max >= 1.0) {
 			max = 1.0;
 			next_clip_max = 1;
 		}
-		
+
 		if (min <= -1.0) {
 			min = -1.0;
 			next_clip_min = 1;
 		}
-		
+
 		if (fabs (min) > fabs (max)) {
 			max = fabs (min);
-		} 
-		
+		}
+
 		next_pymax = (int) rint ((item->y1 + waveview->height - max * waveview->height) * item->canvas->pixels_per_unit);
 
 		/*
@@ -1479,24 +1479,24 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 
 				max = waveview->cache->data[cache_index].max;
 				min = waveview->cache->data[cache_index].min;
-				
+
 				if (max >= 1.0) {
 					max = 1.0;
 					next_clip_max = 1;
 				}
-				
+
 				if (min <= -1.0) {
 					min = -1.0;
 					next_clip_min = 1;
 				}
-				
+
 				if (fabs (min) > fabs (max)) {
 					max = fabs (min);
-				} 
-				
+				}
+
 				next_pymax = (int) rint ((item->y1 + waveview->height - max * waveview->height) * item->canvas->pixels_per_unit);
 			}
-			
+
 			/* render */
 			if (pymax == pymin) {
 				PAINT_DOTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymin);
@@ -1528,7 +1528,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 			if (clip_max) {
 				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymax, pymax+clip_length);
 			}
-			
+
 			if (clip_min) {
 				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymin-clip_length, pymin);
 			}
@@ -1540,68 +1540,68 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 		cache_index = gnome_canvas_waveview_ensure_cache (waveview, s1, s2);
 
 		for (x = begin; x < end; x++) {
-			
+
 			double max, min;
 			int clip_max, clip_min;
-			
+
 			clip_max = 0;
 			clip_min = 0;
-			
+
 			max = waveview->cache->data[cache_index].max;
 			min = waveview->cache->data[cache_index].min;
-			
+
 			if (max >= 1.0) {
 				max = 1.0;
 				clip_max = 1;
 			}
-			
+
 			if (min <= -1.0) {
 				min = -1.0;
 				clip_min = 1;
 			}
-			
+
 			if (rectify) {
-				
+
 				if (fabs (min) > fabs (max)) {
 					max = fabs (min);
-				} 
-				
+				}
+
 				max = max * waveview->height;
-				
+
 				pymax = (int) rint ((item->y1 + waveview->height - max) * item->canvas->pixels_per_unit);
 				pymin = (int) rint ((item->y1 + waveview->height) * item->canvas->pixels_per_unit);
-				
+
 			} else {
-				
+
 				max = max * half_height;
 				min = min * half_height;
-				
+
 				pymax = (int) rint ((item->y1 + origin - max) * item->canvas->pixels_per_unit);
 				pymin = (int) rint ((item->y1 + origin - min) * item->canvas->pixels_per_unit);
 			}
-			
+
 			/* OK, now fill the RGB buffer at x=i with a line between pymin and pymax,
 			   or, if samples_per_unit == 1, then a dot at each location.
 			*/
-			
+
 			if (pymax == pymin) {
 				PAINT_DOTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymin);
 			} else {
 				PAINT_VERTA(buf, waveview->wave_r, waveview->wave_g, waveview->wave_b, waveview->wave_a, x, pymax, pymin);
 			}
-			
+
 			/* show clipped waveforms with small red lines */
-			
+
 			if (clip_max) {
 				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymax, pymax+clip_length);
 			}
-			
+
 			if (clip_min) {
 				PAINT_VERTA(buf, waveview->clip_r, waveview->clip_g, waveview->clip_b, waveview->clip_a, x, pymin-clip_length, pymin);
 			}
 
 			/* presto, we're done */
-		
+
 			cache_index++;
 		}
 	}
@@ -1609,7 +1609,7 @@ gnome_canvas_waveview_render (GnomeCanvasItem *item,
 	if (!waveview->rectified && waveview->zero_line) {
 		// Paint zeroline.
 		//PAINT_HORIZA(buf, waveview->zero_r, waveview->zero_g, waveview->zero_b, waveview->zero_a, begin, endi-1, origin );
-		
+
 		unsigned char zero_r, zero_g, zero_b, zero_a;
 		UINT_TO_RGBA( waveview->zero_color, &zero_r, &zero_g, &zero_b, &zero_a );
 		int zeroline_y = (int) rint ((item->y1 + origin) * item->canvas->pixels_per_unit);
@@ -1718,7 +1718,7 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 	printf ("%p r (%d,%d)(%d,%d)[%d x %d] bbox (%d,%d)(%d,%d)[%d x %d]"
 		" draw (%.1f,%.1f)(%.1f,%.1f)[%.1f x %.1f] s= %lu..%lu\n",
 		waveview,
-		x, y, 
+		x, y,
 		x + width,
 		y + height,
 		width,
@@ -1737,7 +1737,7 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 #endif
 
 	/* draw the top half */
-	
+
 	for (xoff = ulx; xoff < lrx; xoff++) {
 		double max, min;
 
@@ -1747,19 +1747,19 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 		if (min <= -1.0) {
 			min = -1.0;
 		}
-		
+
 		if (max >= 1.0) {
 			max = 1.0;
 		}
-		
+
 		if (rectify) {
 			if (fabs (min) > fabs (max)) {
 				max = fabs (min);
-			} 
-		} 
-		
+			}
+		}
+
 		yoff = origin - (waveview->half_height * max) + 0.5;
-		
+
 		if (xoff == ulx) {
 			/* first point */
 			cairo_move_to (cr, xoff+0.5, yoff);
@@ -1771,9 +1771,9 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 	}
 
 	/* from the final top point, move out of the clip zone */
-	
+
 	cairo_line_to (cr, xoff + 10, yoff);
-	
+
 	/* now draw the bottom half */
 
 	for (--xoff, --cache_index; xoff >= ulx; --xoff) {
@@ -1794,23 +1794,23 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 	/* from the final lower point, move out of the clip zone */
 
 	cairo_line_to (cr, xoff - 10, yoff);
-	
+
 	/* close path to fill */
 
 	cairo_close_path (cr);
 
 	/* fill and stroke */
 
-	cairo_set_source_rgba (cr, 
-			       (waveview->fill_r/255.0), 
-			       (waveview->fill_g/255.0), 
-			       (waveview->fill_b/255.0), 
+	cairo_set_source_rgba (cr,
+			       (waveview->fill_r/255.0),
+			       (waveview->fill_g/255.0),
+			       (waveview->fill_b/255.0),
 			       (waveview->fill_a/255.0));
 	cairo_fill_preserve (cr);
-	cairo_set_source_rgba (cr, 
-			       (waveview->wave_r/255.0), 
-			       (waveview->wave_g/255.0), 
-			       (waveview->wave_b/255.0), 
+	cairo_set_source_rgba (cr,
+			       (waveview->wave_r/255.0),
+			       (waveview->wave_g/255.0),
+			       (waveview->wave_b/255.0),
 			       (waveview->wave_a/255.0));
 	cairo_stroke (cr);
 
@@ -1827,13 +1827,13 @@ gnome_canvas_waveview_draw (GnomeCanvasItem *item,
 			cairo_line_to (cr, xoff, yoff1 + clip_length);
 			cairo_stroke (cr);
 		}
-		
+
 		if (clip_min) {
 			cairo_move_to (cr, xoff, yoff2);
 			cairo_line_to (cr, xoff, yoff2 - clip_length);
 			cairo_stroke (cr);
 		}
-		
+
 #endif
 
 static void
@@ -1856,7 +1856,7 @@ gnome_canvas_waveview_bounds (GnomeCanvasItem *item, double *x1, double *y1, dou
 	gnome_canvas_item_i2w (item, &x, &y);
 	gnome_canvas_w2c_d (GNOME_CANVAS(item->canvas), x, y, &c, &d);
 	printf ("item bounds now (%g,%g),(%g,%g)\n", a, b, c, d);
-#endif		
+#endif
 
 }
 
@@ -1869,8 +1869,8 @@ gnome_canvas_waveview_point (GnomeCanvasItem *item, double x, double y, int cx, 
 	(void) cx;
 	(void) cy;
 	(void) actual_item;
-	
-	/* XXX for now, point is never inside the wave 
+
+	/* XXX for now, point is never inside the wave
 	GnomeCanvasWaveView *waveview;
 	double x1, y1, x2, y2;
 	double dx, dy;
@@ -1888,7 +1888,7 @@ gnome_canvas_waveview_point (GnomeCanvasItem *item, double x, double y, int cx, 
 	gnome_canvas_waveview_bounds (item, &x1, &y1, &x2, &y2);
 
 	/* Is point inside rectangle */
-	
+
 	if ((x >= x1) && (y >= y1) && (x <= x2) && (y <= y2)) {
 		return 0.0;
 	}

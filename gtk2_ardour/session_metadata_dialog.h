@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Paul Davis 
+    Copyright (C) 2008 Paul Davis
     Author: Sakari Bergen
 
     This program is free software; you can redistribute it and/or modify it
@@ -31,7 +31,7 @@
 #include "ardour/session_metadata.h"
 
 class MetadataField;
-typedef boost::shared_ptr<MetadataField> MetadataPtr; 
+typedef boost::shared_ptr<MetadataField> MetadataPtr;
 
 /// Wraps a metadata field to be used in a GUI
 class MetadataField {
@@ -39,13 +39,13 @@ class MetadataField {
 	MetadataField (Glib::ustring const & field_name);
 	virtual ~MetadataField();
 	virtual MetadataPtr copy () = 0;
-	
+
 	virtual void save_data (ARDOUR::SessionMetadata & data) const = 0;
 	virtual void load_data (ARDOUR::SessionMetadata const & data) = 0;
-	
+
 	virtual Glib::ustring name() { return _name; }
 	virtual Glib::ustring value() { return _value; }
-	
+
 	/// Get widget containing name of field
 	virtual Gtk::Widget & name_widget () = 0;
 	/// Get label containing value of field
@@ -65,23 +65,23 @@ class TextMetadataField : public MetadataField {
   public:
 	TextMetadataField (Getter getter, Setter setter, Glib::ustring const & field_name, guint width = 50);
 	MetadataPtr copy ();
-	
+
 	void save_data (ARDOUR::SessionMetadata & data) const;
 	void load_data (ARDOUR::SessionMetadata const & data);
-	
+
 	Gtk::Widget & name_widget ();
 	Gtk::Widget & value_widget ();
 	Gtk::Widget & edit_widget ();
   private:
 	void update_value ();
-	
+
 	Getter getter;
 	Setter setter;
-	
+
 	Gtk::Label* label;
 	Gtk::Label* value_label;
 	Gtk::Entry* entry;
-	
+
 	uint width;
 };
 
@@ -93,10 +93,10 @@ class NumberMetadataField : public MetadataField {
   public:
 	NumberMetadataField (Getter getter, Setter setter, Glib::ustring const & field_name, guint numbers, guint width = 50);
 	MetadataPtr copy ();
-	
+
 	void save_data (ARDOUR::SessionMetadata & data) const;
 	void load_data (ARDOUR::SessionMetadata const & data);
-	
+
 	Gtk::Widget & name_widget ();
 	Gtk::Widget & value_widget ();
 	Gtk::Widget & edit_widget ();
@@ -104,14 +104,14 @@ class NumberMetadataField : public MetadataField {
 	void update_value ();
 	Glib::ustring uint_to_str (uint32_t i) const;
 	uint32_t str_to_uint (Glib::ustring const & str) const;
-	
+
 	Getter getter;
 	Setter setter;
-	
+
 	Gtk::Label* label;
 	Gtk::Label* value_label;
 	Gtk::Entry* entry;
-	
+
 	guint numbers;
 	guint width;
 };
@@ -121,19 +121,19 @@ class SessionMetadataSet {
   public:
 	SessionMetadataSet (Glib::ustring const & name);
 	virtual ~SessionMetadataSet () {};
-	
+
 	void add_data_field (MetadataPtr field);
-	
+
 	/// Sets session, into which the data is eventually saved
 	virtual void set_session (ARDOUR::Session * s) { session = s; }
 	/// allows loading extra data into data sets (for importing etc.)
 	virtual void load_extra_data (ARDOUR::SessionMetadata const & /*data*/) { }
 	/// Saves data to session
 	virtual void save_data () = 0;
-	
+
 	virtual Gtk::Widget & get_widget () = 0;
 	virtual Gtk::Widget & get_tab_widget () = 0;
-	
+
   protected:
 	typedef std::list<MetadataPtr> DataList;
 	DataList list;
@@ -145,15 +145,15 @@ class SessionMetadataSet {
 class SessionMetadataSetEditable : public SessionMetadataSet {
   public:
 	SessionMetadataSetEditable (Glib::ustring const & name);
-	
+
 	Gtk::Widget & get_widget () { return vbox; }
 	Gtk::Widget & get_tab_widget ();
-	
+
 	/// Sets session and loads data
 	void set_session (ARDOUR::Session * s);
 	/// Saves from MetadataFields into data
 	void save_data ();
-	
+
   private:
 	Gtk::VBox vbox;
 	Gtk::Table table;
@@ -164,20 +164,20 @@ class SessionMetadataSetEditable : public SessionMetadataSet {
 class SessionMetadataSetImportable : public SessionMetadataSet {
   public:
 	SessionMetadataSetImportable (Glib::ustring const & name);
-	
+
 	Gtk::Widget & get_widget () { return tree_view; }
 	Gtk::Widget & get_tab_widget ();
 	Gtk::Widget & get_select_all_widget ();
-	
+
 	/// Loads importable data from data
 	void load_extra_data (ARDOUR::SessionMetadata const & data);
 	/// Saves from importable data (see load_data) to session_data
 	void save_data ();
-	
+
   private:
 	DataList & session_list; // References MetadataSet::list
 	DataList import_list;
-	
+
 	struct Columns : public Gtk::TreeModel::ColumnRecord
 	{
 	  public:
@@ -185,17 +185,17 @@ class SessionMetadataSetImportable : public SessionMetadataSet {
 		Gtk::TreeModelColumn<Glib::ustring>     values;
 		Gtk::TreeModelColumn<bool>        import;
 		Gtk::TreeModelColumn<MetadataPtr> data;
-	
+
 		Columns() { add (field); add (values); add (import); add (data); }
 	};
-	
+
 	Glib::RefPtr<Gtk::ListStore>  tree;
 	Columns                       tree_cols;
 	Gtk::TreeView                 tree_view;
-	
-	Gtk::Label                    tab_widget;	
+
+	Gtk::Label                    tab_widget;
 	Gtk::CheckButton              select_all_check;
-	
+
 	void select_all ();
 	void selection_changed (Glib::ustring const & path);
 };
@@ -215,20 +215,20 @@ class SessionMetadataDialog : public ArdourDialog
 	void init_data ();
 	void load_extra_data (ARDOUR::SessionMetadata const & data);
 	void save_data ();
-	
+
 	virtual void init_gui () = 0;
 	virtual void save_and_close ();
 	virtual void end_dialog ();
-	
+
 	void warn_user (Glib::ustring const & string);
-	
+
 	typedef std::list<Gtk::Widget *> WidgetList;
 	typedef boost::shared_ptr<WidgetList> WidgetListPtr;
 	typedef Gtk::Widget & (DataSet::*WidgetFunc) ();
-	
+
 	/// Returns list of widgets gathered by calling f for each data set
 	WidgetListPtr get_custom_widgets (WidgetFunc f);
-	
+
 	/// Adds a widget to the table (vertical stacking) with automatic spacing
 	void add_widget (Gtk::Widget & widget);
 
@@ -242,7 +242,7 @@ class SessionMetadataDialog : public ArdourDialog
 	typedef boost::shared_ptr<SessionMetadataSet> DataSetPtr;
 	typedef std::list<DataSetPtr> DataSetList;
 	DataSetList data_list;
-	
+
 	Gtk::Button *     save_button;
 	Gtk::Button *     cancel_button;
 };
@@ -264,11 +264,11 @@ class SessionMetadataImporter : public SessionMetadataDialog<SessionMetadataSetI
 
   private:
 	void init_gui ();
-	
+
 	// Select all from -widget
 	Gtk::HBox    selection_hbox;
 	Gtk::Label   selection_label;
-	
+
 };
 
 #endif

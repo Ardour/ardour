@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ using namespace ARDOUR;
  *  @param minimum_length Minimum length of silence period to recognise, in samples.
  *  @param fade_length Length of fade in/out to apply to trimmed regions, in samples.
  */
- 
+
 StripSilence::StripSilence (Session & s, double threshold, nframes_t minimum_length, nframes_t fade_length)
 	: Filter (s), _threshold (threshold), _minimum_length (minimum_length), _fade_length (fade_length)
 {
@@ -42,7 +42,7 @@ int
 StripSilence::run (boost::shared_ptr<Region> r)
 {
 	results.clear ();
-	
+
 	/* we only operate on AudioRegions, for now, though this could be adapted to MIDI
 	   as well I guess */
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
@@ -75,7 +75,7 @@ StripSilence::run (boost::shared_ptr<Region> r)
 	region->set_name (session.new_region_name (region->name ()));
 	boost::shared_ptr<AudioRegion> last_region = region;
 	results.push_back (region);
-	
+
 	if (s->first == 0) {
 		/* the region starts with some silence */
 
@@ -83,7 +83,7 @@ StripSilence::run (boost::shared_ptr<Region> r)
 		** to set_start will fail */
 		region->set_length (region->length() - s->second + _fade_length, 0);
 		region->set_start (start + s->second - _fade_length, 0);
-		region->set_position (pos + s->second - _fade_length, 0); 
+		region->set_position (pos + s->second - _fade_length, 0);
 		region->set_fade_in_active (true);
 		region->set_fade_in (AudioRegion::Linear, _fade_length);
 		s++;

@@ -1,16 +1,16 @@
 /* This file is part of Evoral.
  * Copyright (C) 2008 Dave Robillard <http://drobilla.net>
  * Copyright (C) 2000-2008 Paul Davis
- * 
+ *
  * Evoral is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation; either version 2 of the License, or (at your option) any later
  * version.
- * 
+ *
  * Evoral is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
@@ -72,22 +72,22 @@ ControlSet::control (const Parameter& parameter, bool create_if_missing)
 bool
 ControlSet::find_next_event (FrameTime now, FrameTime end, ControlEvent& next_event) const
 {
-	Controls::const_iterator li;	
+	Controls::const_iterator li;
 
 	next_event.when = std::numeric_limits<FrameTime>::max();
-	
+
   	for (li = _controls.begin(); li != _controls.end(); ++li) {
 		ControlList::const_iterator i;
 		boost::shared_ptr<const ControlList> alist (li->second->list());
 		ControlEvent cp (now, 0.0f);
-		
+
  		for (i = lower_bound (alist->begin(), alist->end(), &cp, ControlList::time_comparator);
 				i != alist->end() && (*i)->when < end; ++i) {
  			if ((*i)->when > now) {
- 				break; 
+ 				break;
  			}
  		}
- 		
+
  		if (i != alist->end() && (*i)->when < end) {
  			if ((*i)->when < next_event.when) {
  				next_event.when = (*i)->when;

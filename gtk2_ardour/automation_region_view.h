@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -48,18 +48,18 @@ public:
 	                     Gdk::Color const & basic_color);
 
 	~AutomationRegionView() {}
-	
+
 	void init (Gdk::Color const & basic_color, bool wfd);
-	
+
 	inline AutomationTimeAxisView* automation_view() const
 		{ return dynamic_cast<AutomationTimeAxisView*>(&trackview); }
-	
+
 	void set_line(boost::shared_ptr<AutomationLine> line) { _line = line; }
 	boost::shared_ptr<AutomationLine> line() { return _line; }
-	
+
 	// We are a ghost.  Meta ghosts?  Crazy talk.
 	virtual GhostRegion* add_ghost(TimeAxisView&) { return NULL; }
-	
+
 	void set_height (double);
 	void reset_width_dependent_items(double pixel_width);
 

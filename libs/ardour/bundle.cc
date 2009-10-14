@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -84,7 +84,7 @@ Bundle::Bundle (boost::shared_ptr<Bundle> other)
 	  _signals_suspended (other->_signals_suspended),
 	  _pending_change (other->_pending_change)
 {
-	
+
 }
 
 uint32_t
@@ -136,7 +136,7 @@ Bundle::remove_port_from_channel (uint32_t ch, string portname)
 		Glib::Mutex::Lock lm (_channel_mutex);
 		PortList& pl = _channel[ch].ports;
 		PortList::iterator i = find (pl.begin(), pl.end(), portname);
-		
+
 		if (i != pl.end()) {
 			pl.erase (i);
 			changed = true;
@@ -183,7 +183,7 @@ bool
 Bundle::port_attached_to_channel (uint32_t ch, std::string portname)
 {
 	assert (ch < nchannels());
-	
+
 	Glib::Mutex::Lock lm (_channel_mutex);
 	return (std::find (_channel[ch].ports.begin (), _channel[ch].ports.end (), portname) != _channel[ch].ports.end ());
 }
@@ -283,7 +283,7 @@ void
 Bundle::add_channels_from_bundle (boost::shared_ptr<Bundle> other)
 {
 	uint32_t const ch = nchannels ();
-	
+
 	for (uint32_t i = 0; i < other->nchannels(); ++i) {
 
 		std::stringstream s;
@@ -361,7 +361,7 @@ void
 Bundle::remove_ports_from_channel (uint32_t ch)
 {
 	assert (ch < nchannels ());
-	
+
 	{
 		Glib::Mutex::Lock lm (_channel_mutex);
 		_channel[ch].ports.clear ();
@@ -396,7 +396,7 @@ Bundle::emit_changed (Change c)
 		Changed (c);
 	}
 }
-		
+
 bool
 Bundle::connected_to (boost::shared_ptr<Bundle> other, AudioEngine & engine)
 {
@@ -410,7 +410,7 @@ Bundle::connected_to (boost::shared_ptr<Bundle> other, AudioEngine & engine)
 	for (uint32_t i = 0; i < nchannels(); ++i) {
 		Bundle::PortList const & A = channel_ports (i);
 		Bundle::PortList const & B = other->channel_ports (i);
-		
+
 		for (uint32_t j = 0; j < A.size(); ++j) {
 			for (uint32_t k = 0; k < B.size(); ++k) {
 

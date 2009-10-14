@@ -1,16 +1,16 @@
 /*
-    Copyright (C) 2006 Paul Davis 
-    
+    Copyright (C) 2006 Paul Davis
+
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
     Software Foundation; either version 2 of the License, or (at your option)
     any later version.
-    
+
     This program is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
-    
+
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     675 Mass Ave, Cambridge, MA 02139, USA.
@@ -41,7 +41,7 @@ public:
 		}
 		_written = true;
 	}
-	
+
 	/** Read @a len frames @a src starting at @a src_offset into self starting at @ dst_offset*/
 	void read_from (const Buffer& src, nframes_t len, nframes_t dst_offset = 0, nframes_t src_offset = 0) {
 		assert(&src != this);
@@ -63,7 +63,7 @@ public:
 		assert (ab);
 		accumulate_from (*ab, len, dst_offset, src_offset);
 	}
-	
+
 	/** Acumulate (add) @a len frames @a src starting at @a src_offset into self starting at @ dst_offset*/
 	void accumulate_from (const AudioBuffer& src, nframes_t len, nframes_t dst_offset = 0, nframes_t src_offset = 0) {
 		assert(_capacity > 0);
@@ -77,7 +77,7 @@ public:
 		_silent = (src.silent() && _silent);
 		_written = true;
 	}
-	
+
 	/** Acumulate (add) @a len frames @a src starting at @a src_offset into self starting at @ dst_offset
 	 * scaling by @a gain_coeff */
 	void accumulate_with_gain_from (const AudioBuffer& src, nframes_t len, gain_t gain_coeff, nframes_t dst_offset = 0, nframes_t src_offset = 0) {
@@ -112,13 +112,13 @@ public:
 		_silent = (_silent && gain_coeff == 0);
 		_written = true;
 	}
-	
+
 	void apply_gain (gain_t gain, nframes_t len) {
 		apply_gain_to_buffer (_data, len, gain);
 	}
 
 	/** Set the data contained by this buffer manually (for setting directly to jack buffer).
-	 * 
+	 *
 	 * Constructor MUST have been passed capacity=0 or this will die (to prevent mem leaks).
 	 */
 	void set_data (Sample* data, size_t size) {
@@ -131,20 +131,20 @@ public:
 	}
 
 	/** Reallocate the buffer used internally to handle at least @nframes of data
-	 * 
+	 *
 	 * Constructor MUST have been passed capacity!=0 or this will die (to prevent mem leaks).
 	 */
 	void resize (size_t nframes);
 
 
-	const Sample* data (nframes_t offset = 0) const { 
-		assert(offset <= _capacity); 
-		return _data + offset; 
+	const Sample* data (nframes_t offset = 0) const {
+		assert(offset <= _capacity);
+		return _data + offset;
 	}
 
-	Sample* data (nframes_t offset = 0) { 
-		assert(offset <= _capacity); 
-		return _data + offset; 
+	Sample* data (nframes_t offset = 0) {
+		assert(offset <= _capacity);
+		return _data + offset;
 	}
 
 	void prepare () { _written = false; }
@@ -154,7 +154,7 @@ public:
 	bool    _owns_data;
 	bool    _written;
 	Sample* _data; ///< Actual buffer contents
-	
+
 };
 
 

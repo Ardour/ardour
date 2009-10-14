@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ class MuteMaster : public AutomationControl
 		Listen    = 0x4,
 		Main      = 0x8
 	};
-	
+
 	MuteMaster (Session& s, const std::string& name);
 	~MuteMaster() {}
 
@@ -48,7 +48,7 @@ class MuteMaster : public AutomationControl
 
 	bool muted_at (MutePoint mp) const { return _mute_point & mp; }
 	bool muted() const { return _mute_point != MutePoint (0); }
-	
+
 	gain_t mute_gain_at (MutePoint) const;
 
 	void clear_mute ();

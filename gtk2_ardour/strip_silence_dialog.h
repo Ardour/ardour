@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,13 +43,13 @@ public:
 	nframes_t fade_length () const {
 		return _fade_length.get_value_as_int ();
 	}
-	
+
 private:
 	void create_waves ();
 	void peaks_ready ();
 	void canvas_allocation (Gtk::Allocation &);
 	void update_silence_rects ();
-	
+
 	Gtk::SpinButton _threshold;
 	Gtk::SpinButton _minimum_length;
 	Gtk::SpinButton _fade_length;

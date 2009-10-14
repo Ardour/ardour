@@ -87,7 +87,7 @@ ArdourDialog::on_show ()
 	Dialog::on_show ();
 }
 
-void 
+void
 ArdourDialog::init ()
 {
 	session = 0;

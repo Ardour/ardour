@@ -1,6 +1,6 @@
 /*
-    Copyright (C) 2006 Paul Davis 
-	
+    Copyright (C) 2006 Paul Davis
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -62,7 +62,7 @@ static string preset_search_path = "/Library/Audio/Presets:/Network/Library/Audi
 static string preset_suffix = ".aupreset";
 static bool preset_search_path_initialized = false;
 
-static OSStatus 
+static OSStatus
 _render_callback(void *userData,
 		 AudioUnitRenderActionFlags *ioActionFlags,
 		 const AudioTimeStamp    *inTimeStamp,
@@ -73,7 +73,7 @@ _render_callback(void *userData,
 	return ((AUPlugin*)userData)->render_callback (ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
 }
 
-static int 
+static int
 save_property_list (CFPropertyListRef propertyList, Glib::ustring path)
 
 {
@@ -81,7 +81,7 @@ save_property_list (CFPropertyListRef propertyList, Glib::ustring path)
 	int fd;
 
 	// Convert the property list into XML data.
-	
+
 	xmlData = CFPropertyListCreateXMLData( kCFAllocatorDefault, propertyList);
 
 	if (!xmlData) {
@@ -119,10 +119,10 @@ save_property_list (CFPropertyListRef propertyList, Glib::ustring path)
 	close (fd);
 	return 0;
 }
- 
 
-static CFPropertyListRef 
-load_property_list (Glib::ustring path) 
+
+static CFPropertyListRef
+load_property_list (Glib::ustring path)
 {
 	int fd;
 	CFPropertyListRef propertyList;
@@ -130,12 +130,12 @@ load_property_list (Glib::ustring path)
 	CFStringRef       errorString;
 
 	// Read the XML file.
-	
+
 	if ((fd = open (path.c_str(), O_RDONLY)) < 0) {
 		return propertyList;
 
 	}
-	
+
 	off_t len = lseek (fd, 0, SEEK_END);
 	char* buf = new char[len];
 	lseek (fd, 0, SEEK_SET);
@@ -145,13 +145,13 @@ load_property_list (Glib::ustring path)
 		close (fd);
 		return propertyList;
 	}
-	
+
 	close (fd);
 
 	xmlData = CFDataCreateWithBytesNoCopy (kCFAllocatorDefault, (UInt8*) buf, len, kCFAllocatorNull);
-	
+
 	// Reconstitute the dictionary using the XML data.
-	
+
 	propertyList = CFPropertyListCreateFromXMLData( kCFAllocatorDefault,
 							xmlData,
 							kCFPropertyListImmutable,
@@ -164,7 +164,7 @@ load_property_list (Glib::ustring path)
 }
 
 //-----------------------------------------------------------------------------
-static void 
+static void
 set_preset_name_in_plist (CFPropertyListRef plist, string preset_name)
 {
 	if (!plist) {
@@ -175,7 +175,7 @@ set_preset_name_in_plist (CFPropertyListRef plist, string preset_name)
 	if (CFGetTypeID (plist) == CFDictionaryGetTypeID()) {
 		CFDictionarySetValue ((CFMutableDictionaryRef)plist, CFSTR(kAUPresetNameKey), pn);
 	}
-	
+
 	CFRelease (pn);
 }
 
@@ -199,7 +199,7 @@ get_preset_name_in_plist (CFPropertyListRef plist)
 			if (CFStringGetCString (str, local_buffer, len, kCFStringEncodingUTF8)) {
 				ret = local_buffer;
 			}
-		} 
+		}
 	}
 	return ret;
 }
@@ -213,7 +213,7 @@ Boolean ComponentDescriptionsMatch_General(const ComponentDescription * inCompon
 	if ( (inComponentDescription1 == NULL) || (inComponentDescription2 == NULL) )
 		return FALSE;
 
-	if ( (inComponentDescription1->componentSubType == inComponentDescription2->componentSubType) 
+	if ( (inComponentDescription1->componentSubType == inComponentDescription2->componentSubType)
 			&& (inComponentDescription1->componentManufacturer == inComponentDescription2->componentManufacturer) )
 	{
 		// only sub-type and manufacturer IDs need to be equal
@@ -250,7 +250,7 @@ Boolean ComponentAndDescriptionMatch_General(Component inComponent, const Compon
 
 //--------------------------------------------------------------------------
 // determine if 2 ComponentDescriptions are basically equal
-// (by that, I mean that the important identifying values are compared, 
+// (by that, I mean that the important identifying values are compared,
 // but not the ComponentDescription flags)
 Boolean ComponentDescriptionsMatch(const ComponentDescription * inComponentDescription1, const ComponentDescription * inComponentDescription2)
 {
@@ -289,7 +289,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	  current_offset (0),
 	  current_buffers (0),
 	frames_processed (0)
-{			
+{
 	if (!preset_search_path_initialized) {
 		Glib::ustring p = Glib::get_home_dir();
 		p += "/Library/Audio/Presets:";
@@ -311,7 +311,7 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 	, current_offset (0)
 	, current_buffers (0)
 	, frames_processed (0)
-	  
+
 {
 	init ();
 }
@@ -344,13 +344,13 @@ AUPlugin::init ()
 		error << _("AudioUnit: Could not convert CAComponent to CAAudioUnit") << endmsg;
 		throw failed_constructor ();
 	}
-	
+
 	AURenderCallbackStruct renderCallbackInfo;
 
 	renderCallbackInfo.inputProc = _render_callback;
 	renderCallbackInfo.inputProcRefCon = this;
 
-	if ((err = unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 
+	if ((err = unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input,
 					 0, (void*) &renderCallbackInfo, sizeof(renderCallbackInfo))) != 0) {
 		cerr << "cannot install render callback (err = " << err << ')' << endl;
 		throw failed_constructor();
@@ -381,8 +381,8 @@ void
 AUPlugin::discover_parameters ()
 {
 	/* discover writable parameters */
-	
-	AudioUnitScope scopes[] = { 
+
+	AudioUnitScope scopes[] = {
 		kAudioUnitScope_Global,
 		kAudioUnitScope_Output,
 		kAudioUnitScope_Input
@@ -393,7 +393,7 @@ AUPlugin::discover_parameters ()
 	for (uint32_t i = 0; i < sizeof (scopes) / sizeof (scopes[0]); ++i) {
 
 		AUParamInfo param_info (unit->AU(), false, false, scopes[i]);
-		
+
 		for (uint32_t i = 0; i < param_info.NumParams(); ++i) {
 
 			AUParameterDescriptor d;
@@ -472,10 +472,10 @@ AUPlugin::discover_parameters ()
 			d.toggled = (info.unit & kAudioUnitParameterUnit_Boolean) ||
 				(d.integer_step && ((d.upper - d.lower) == 1.0));
 			d.sr_dependent = (info.unit & kAudioUnitParameterUnit_SampleFrames);
-			d.automatable = !d.toggled && 
+			d.automatable = !d.toggled &&
 				!(info.flags & kAudioUnitParameterFlag_NonRealTime) &&
 				(info.flags & kAudioUnitParameterFlag_IsWritable);
-			
+
 			d.logarithmic = (info.flags & kAudioUnitParameterFlag_DisplayLogarithmic);
 			d.unit = info.unit;
 
@@ -551,7 +551,7 @@ AUPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& pd) con
 	if (which < descriptors.size()) {
 		pd = descriptors[which];
 		return 0;
-	} 
+	}
 	return -1;
 }
 
@@ -604,7 +604,7 @@ AUPlugin::_set_block_size (nframes_t nframes)
 		initialized = false;
 	}
 
-	if ((err = unit->SetProperty (kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 
+	if ((err = unit->SetProperty (kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global,
 				      0, &numFrames, sizeof (numFrames))) != noErr) {
 		cerr << "cannot set max frames (err = " << err << ')' << endl;
 		return -1;
@@ -702,7 +702,7 @@ AUPlugin::can_do (int32_t in, int32_t& out)
 				plugcnt = 1;
 			}
 		}
-		
+
 		if (possible_in == -1) {
 
 			/* wildcard for input */
@@ -724,8 +724,8 @@ AUPlugin::can_do (int32_t in, int32_t& out)
 				out = possible_out;
 				plugcnt = 1;
 			}
-		}	
-			
+		}
+
 		if (possible_in == -2) {
 
 			if (possible_out == -1) {
@@ -778,7 +778,7 @@ AUPlugin::can_do (int32_t in, int32_t& out)
 		if (possible_in == in) {
 
 			/* exact number of inputs ... must match obviously */
-			
+
 			if (possible_out == -1) {
 				/* out must match in */
 				out = in;
@@ -824,8 +824,8 @@ AUPlugin::set_output_format (AudioStreamBasicDescription& fmt)
 		free (buffers);
 		buffers = 0;
 	}
-	
-	buffers = (AudioBufferList *) malloc (offsetof(AudioBufferList, mBuffers) + 
+
+	buffers = (AudioBufferList *) malloc (offsetof(AudioBufferList, mBuffers) +
 					      fmt.mChannelsPerFrame * sizeof(AudioBuffer));
 
 	Glib::Mutex::Lock em (_session.engine().process_lock());
@@ -877,7 +877,7 @@ AUPlugin::output_streams() const
 	return output_channels;
 }
 
-OSStatus 
+OSStatus
 AUPlugin::render_callback(AudioUnitRenderActionFlags *ioActionFlags,
 			  const AudioTimeStamp    *inTimeStamp,
 			  UInt32       inBusNumber,
@@ -928,7 +928,7 @@ AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, 
 
 		current_maxbuf = 0;
 		frames_processed += nframes;
-		
+
 		for (uint32_t i = 0; i < maxbuf; ++i) {
 			if (bufs[i] + offset != buffers->mBuffers[i].mData) {
 				memcpy (bufs[i]+offset, buffers->mBuffers[i].mData, nframes * sizeof (Sample));
@@ -1005,7 +1005,7 @@ AUPlugin::get_state()
 	}
 
 	// Convert the property list into XML data.
-	
+
 	xmlData = CFPropertyListCreateXMLData( kCFAllocatorDefault, propertyList);
 
 	if (!xmlData) {
@@ -1034,7 +1034,7 @@ AUPlugin::get_state()
 		seen_get_state_message = true;
 	}
 #endif
-	
+
 	return *root;
 }
 
@@ -1050,7 +1050,7 @@ AUPlugin::set_state(const XMLNode& node)
 		error << _("Bad node sent to AUPlugin::set_state") << endmsg;
 		return -1;
 	}
-	
+
 	if (node.children().empty()) {
 		return -1;
 	}
@@ -1071,14 +1071,14 @@ AUPlugin::set_state(const XMLNode& node)
 							&errorString);
 
 	CFRelease (xmlData);
-	
+
 	if (propertyList) {
 		if (unit->SetAUPreset (propertyList) == noErr) {
 			ret = 0;
-		} 
+		}
 		CFRelease (propertyList);
 	}
-	
+
 	return ret;
 #else
 	if (!seen_set_state_message) {
@@ -1101,14 +1101,14 @@ AUPlugin::load_preset (const string preset_label)
 	if (x == preset_map.end()) {
 		return false;
 	}
-	
+
 	if ((propertyList = load_property_list (x->second)) != 0) {
 		if (unit->SetAUPreset (propertyList) == noErr) {
 			ret = true;
 		}
 		CFRelease(propertyList);
 	}
-	
+
 	return ret;
 #else
 	if (!seen_loading_message) {
@@ -1131,7 +1131,7 @@ AUPlugin::save_preset (string preset_name)
 
 	std::string m = maker();
 	std::string n = name();
-	
+
 	strip_whitespace_edges (m);
 	strip_whitespace_edges (n);
 
@@ -1141,7 +1141,7 @@ AUPlugin::save_preset (string preset_name)
 	v.push_back ("Presets");
 	v.push_back (m);
 	v.push_back (n);
-	
+
 	user_preset_path = Glib::build_filename (v);
 
 	if (g_mkdir_with_parents (user_preset_path.c_str(), 0775) < 0) {
@@ -1156,11 +1156,11 @@ AUPlugin::save_preset (string preset_name)
 	// add the actual preset name */
 
 	v.push_back (preset_name + preset_suffix);
-		
+
 	// rebuild
 
 	user_preset_path = Glib::build_filename (v);
-	
+
 	set_preset_name_in_plist (propertyList, preset_name);
 
 	if (save_property_list (propertyList, user_preset_path)) {
@@ -1183,7 +1183,7 @@ AUPlugin::save_preset (string preset_name)
 
 //-----------------------------------------------------------------------------
 // this is just a little helper function used by GetAUComponentDescriptionFromPresetFile()
-static SInt32 
+static SInt32
 GetDictionarySInt32Value(CFDictionaryRef inAUStateDictionary, CFStringRef inDictionaryKey, Boolean * outSuccess)
 {
 	CFNumberRef cfNumber;
@@ -1211,7 +1211,7 @@ GetDictionarySInt32Value(CFDictionaryRef inAUStateDictionary, CFStringRef inDict
 		return 0;
 }
 
-static OSStatus 
+static OSStatus
 GetAUComponentDescriptionFromStateData(CFPropertyListRef inAUStateData, ComponentDescription * outComponentDescription)
 {
         CFDictionaryRef auStateDictionary;
@@ -1221,7 +1221,7 @@ GetAUComponentDescriptionFromStateData(CFPropertyListRef inAUStateData, Componen
 
         if ( (inAUStateData == NULL) || (outComponentDescription == NULL) )
                 return paramErr;
-	
+
         // the property list for AU state data must be of the dictionary type
         if (CFGetTypeID(inAUStateData) != CFDictionaryGetTypeID()) {
                 return kAudioUnitErr_InvalidPropertyValue;
@@ -1259,7 +1259,7 @@ static bool au_preset_filter (const string& str, void* arg)
 	/* Not a dotfile, has a prefix before a period, suffix is aupreset */
 
 	bool ret;
-	
+
 	ret = (str[0] != '.' && str.length() > 9 && str.find (preset_suffix) == (str.length() - preset_suffix.length()));
 
 	if (ret && arg) {
@@ -1284,32 +1284,32 @@ static bool au_preset_filter (const string& str, void* arg)
 			match = m;
 			match += '/';
 			match += n;
-			
+
 			ret = str.find (match) != string::npos;
 		}
 	}
-	
+
 	return ret;
 }
 
-bool 
+bool
 check_and_get_preset_name (Component component, const string& pathstr, string& preset_name)
 {
         OSStatus status;
         CFPropertyListRef plist;
 	ComponentDescription presetDesc;
 	bool ret = false;
-		
+
 	plist = load_property_list (pathstr);
 
 	if (!plist) {
 		return ret;
 	}
-	
+
 	// get the ComponentDescription from the AU preset file
-	
+
 	status = GetAUComponentDescriptionFromStateData(plist, &presetDesc);
-	
+
 	if (status == noErr) {
 		if (ComponentAndDescriptionMatch_Loosely(component, &presetDesc)) {
 
@@ -1332,7 +1332,7 @@ check_and_get_preset_name (Component component, const string& pathstr, string& p
 					}
 				}
 			}
-		} 
+		}
 	}
 
 	CFRelease (plist);
@@ -1344,7 +1344,7 @@ std::string
 AUPlugin::current_preset() const
 {
 	string preset_name;
-	
+
 #ifdef AU_STATE_SUPPORT
 	CFPropertyListRef propertyList;
 
@@ -1364,7 +1364,7 @@ AUPlugin::get_presets ()
 	PathScanner scanner;
 
 	preset_files = scanner (preset_search_path, au_preset_filter, this, true, true, -1, true);
-	
+
 	if (!preset_files) {
 		return presets;
 	}
@@ -1387,13 +1387,13 @@ AUPlugin::get_presets ()
 		if (check_and_get_preset_name (get_comp()->Comp(), path, preset_name)) {
 			presets.push_back (preset_name);
 			preset_map[preset_name] = path;
-		} 
+		}
 
 		delete *x;
 	}
 
 	delete preset_files;
-	
+
 	return presets;
 }
 
@@ -1422,13 +1422,13 @@ AUPluginInfo::load (Session& session)
 		PluginPtr plugin;
 
 		boost::shared_ptr<CAComponent> comp (new CAComponent(*descriptor));
-		
+
 		if (!comp->IsValid()) {
 			error << ("AudioUnit: not a valid Component") << endmsg;
 		} else {
 			plugin.reset (new AUPlugin (session.engine(), session, comp));
 		}
-		
+
 		plugin->set_info (PluginInfoPtr (new AUPluginInfo (*this)));
 		return plugin;
 	}
@@ -1454,7 +1454,7 @@ AUPluginInfo::discover ()
 	}
 
 	PluginInfoList plugs;
-	
+
 	discover_fx (plugs);
 	discover_music (plugs);
 	discover_generators (plugs);
@@ -1512,7 +1512,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		CAComponentDescription temp;
 		GetComponentInfo (comp, &temp, NULL, NULL, NULL);
 
-		AUPluginInfoPtr info (new AUPluginInfo 
+		AUPluginInfoPtr info (new AUPluginInfo
 				      (boost::shared_ptr<CAComponentDescription> (new CAComponentDescription(temp))));
 
 		/* no panners, format converters or i/o AU's for our purposes
@@ -1649,14 +1649,14 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		if (cacomp.GetResourceVersion (info->version) != noErr) {
 			info->version = 0;
 		}
-		
+
 		if (cached_io_configuration (info->unique_id, info->version, cacomp, info->cache, info->name)) {
 
 			/* here we have to map apple's wildcard system to a simple pair
 			   of values. in ::can_do() we use the whole system, but here
 			   we need a single pair of values. XXX probably means we should
 			   remove any use of these values.
- 			*/
+			*/
 
 			info->n_inputs = info->cache.io_configs.front().first;
 			info->n_outputs = info->cache.io_configs.front().second;
@@ -1670,16 +1670,16 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		} else {
 			error << string_compose (_("Cannot get I/O configuration info for AU %1"), info->name) << endmsg;
 		}
-		
+
 		comp = FindNextComponent (comp, &desc);
 	}
 }
 
 bool
-AUPluginInfo::cached_io_configuration (const std::string& unique_id, 
+AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 				       UInt32 version,
-				       CAComponent& comp, 
-				       AUPluginCachedInfo& cinfo, 
+				       CAComponent& comp,
+				       AUPluginCachedInfo& cinfo,
 				       const std::string& name)
 {
 	std::string id;
@@ -1706,9 +1706,9 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 	AUChannelInfo* channel_info;
 	UInt32 cnt;
 	int ret;
-	
+
 	ARDOUR::BootMessage (string_compose (_("Checking AudioUnit: %1"), name));
-	
+
 	try {
 
 		if (CAAudioUnit::Open (comp, unit) != noErr) {
@@ -1722,7 +1722,7 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 		return false;
 
 	}
-		
+
 	if ((ret = unit.GetChannelInfo (&channel_info, cnt)) < 0) {
 		return false;
 	}
@@ -1733,9 +1733,9 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 		cinfo.io_configs.push_back (pair<int,int> (-1, -1));
 
 	} else {
-		
+
 		/* store each configuration */
-		
+
 		for (uint32_t n = 0; n < cnt; ++n) {
 			cinfo.io_configs.push_back (pair<int,int> (channel_info[n].inChannels,
 								   channel_info[n].outChannels));
@@ -1762,7 +1762,7 @@ AUPluginInfo::save_cached_info ()
 	XMLNode* node;
 
 	node = new XMLNode (X_("AudioUnitPluginCache"));
-	
+
 	for (map<string,AUPluginCachedInfo>::iterator i = cached_info.begin(); i != cached_info.end(); ++i) {
 		XMLNode* parent = new XMLNode (X_("plugin"));
 		parent->add_property ("id", i->first);
@@ -1798,7 +1798,7 @@ AUPluginInfo::load_cached_info ()
 {
 	Glib::ustring path = au_cache_path ();
 	XMLTree tree;
-	
+
 	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
 		return 0;
 	}
@@ -1815,9 +1815,9 @@ AUPluginInfo::load_cached_info ()
 	const XMLNodeList children = root->children();
 
 	for (XMLNodeConstIterator iter = children.begin(); iter != children.end(); ++iter) {
-		
+
 		const XMLNode* child = *iter;
-		
+
 		if (child->name() == X_("plugin")) {
 
 			const XMLNode* gchild;
@@ -1846,7 +1846,7 @@ AUPluginInfo::load_cached_info ()
 					    ((oprop = gchild->property (X_("out"))) != 0)) {
 						in = atoi (iprop->value());
 						out = atoi (iprop->value());
-						
+
 						cinfo.io_configs.push_back (pair<int,int> (in, out));
 					}
 				}
@@ -1882,16 +1882,16 @@ AUPluginInfo::get_names (CAComponentDescription& comp_desc, std::string& name, G
 			DisposeHandle(nameHandle);
 		}
 	}
-    
+
 	// if Marc-style fails, do the original way
 	if (itemName == NULL) {
 		CFStringRef compTypeString = UTCreateStringForOSType(comp_desc.componentType);
 		CFStringRef compSubTypeString = UTCreateStringForOSType(comp_desc.componentSubType);
 		CFStringRef compManufacturerString = UTCreateStringForOSType(comp_desc.componentManufacturer);
-    
-		itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"), 
+
+		itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"),
 			compTypeString, compManufacturerString, compSubTypeString);
-    
+
 		if (compTypeString != NULL)
 			CFRelease(compTypeString);
 		if (compSubTypeString != NULL)
@@ -1899,7 +1899,7 @@ AUPluginInfo::get_names (CAComponentDescription& comp_desc, std::string& name, G
 		if (compManufacturerString != NULL)
 			CFRelease(compManufacturerString);
 	}
-	
+
 	string str = CFStringRefToStdString(itemName);
 	string::size_type colon = str.find (':');
 
@@ -1925,10 +1925,10 @@ AUPluginInfo::stringify_descriptor (const CAComponentDescription& desc)
 
 	s << StringForOSType (desc.Type(), str);
 	s << " - ";
-		
+
 	s << StringForOSType (desc.SubType(), str);
 	s << " - ";
-		
+
 	s << StringForOSType (desc.Manu(), str);
 
 	return s.str();

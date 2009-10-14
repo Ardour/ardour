@@ -46,7 +46,7 @@ struct _GnomeCanvasCurve
     float* vector;
     size_t veclen;
     uint32_t color;
-    
+
     /* cached values set during update/used during render */
 
     unsigned char r, b, g, a;

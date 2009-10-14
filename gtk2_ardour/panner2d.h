@@ -52,7 +52,7 @@ class Panner2d : public Gtk::DrawingArea
   public:
 	Panner2d (boost::shared_ptr<ARDOUR::Panner>, int32_t height);
 	~Panner2d ();
-	
+
 	void allow_x_motion(bool);
 	void allow_y_motion(bool);
 	void allow_target_motion (bool);
@@ -73,7 +73,7 @@ class Panner2d : public Gtk::DrawingArea
 	Gtk::Adjustment& azimuth (uint32_t which);
 
 	boost::shared_ptr<ARDOUR::Panner> get_panner() const { return panner; }
-	
+
 	sigc::signal<void,int> PuckMoved;
 	sigc::signal<void,int> TargetMoved;
 
@@ -117,7 +117,7 @@ class Panner2d : public Gtk::DrawingArea
 	int height;
 
 	bool bypassflag;
-	
+
 	gint compute_x (float);
 	gint compute_y (float);
 
@@ -134,7 +134,7 @@ class Panner2dWindow : public Gtk::Window
 {
   public:
 	Panner2dWindow (boost::shared_ptr<ARDOUR::Panner>, int32_t height, uint32_t inputs);
-	
+
 	void reset (uint32_t n_inputs);
 
   private:

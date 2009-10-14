@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 */
 
-#ifndef __sndfile_source_h__ 
+#ifndef __sndfile_source_h__
 #define __sndfile_source_h__
 
 #include <sndfile.h>
@@ -34,9 +34,9 @@ class SndFileSource : public AudioFileSource {
 
 	/* Constructor to be called for new in-session files */
 	SndFileSource (Session&, const Glib::ustring& path, bool embedded,
-			SampleFormat samp_format, HeaderFormat hdr_format, nframes_t rate, 
+			SampleFormat samp_format, HeaderFormat hdr_format, nframes_t rate,
 			Flag flags = SndFileSource::default_writable_flags);
-		       
+
 	/** Constructor to be called for existing in-session files */
 	SndFileSource (Session&, const XMLNode&);
 

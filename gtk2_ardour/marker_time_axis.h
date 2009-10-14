@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ class MarkerTimeAxis : public VisualTimeAxis
 	public:
 		//---------------------------------------------------------------------------------------//
 		// Constructor / Desctructor
-		
+
 		/**
 		 * Constructs a new MarkerTimeAxis
 		 *
@@ -66,24 +66,24 @@ class MarkerTimeAxis : public VisualTimeAxis
 		 * @param tav the associated track view that this MarkerTimeAxis is marking up
 		 */
 		MarkerTimeAxis(PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas, const std::string & name, TimeAxisView* tav) ;
-		
+
 		/**
 		 * Destructor
 		 * Responsible for destroying any marker items upon this time axis
 		 */
 		virtual ~MarkerTimeAxis() ;
-		
-		
+
+
 		//---------------------------------------------------------------------------------------//
 		// ui methods & data
-		
+
 		/**
 		 * Sets the height of this TrackView to one of the defined TrackHeights
 		 *
 		 * @param h the number of pixels to set the height to
 		 */
 		virtual void set_height(uint32_t h) ;
-		
+
 		/**
 		 * Sets the number of samples per unit that are used.
 		 * This is used to determine the sizes of items upon this time axis
@@ -91,8 +91,8 @@ class MarkerTimeAxis : public VisualTimeAxis
 		 * @param spu the number of samples per unit
 		 */
 		virtual void set_samples_per_unit(double spu) ;
-		
-		
+
+
 		/**
 		 * Show the popup edit menu
 		 *
@@ -102,8 +102,8 @@ class MarkerTimeAxis : public VisualTimeAxis
 		 * @param with_item true if an item has been selected upon the time axis, used to set context menu
 		 */
 		void popup_marker_time_axis_edit_menu(int button, int32_t time, MarkerView* clicked_mv, bool with_item) ;
-		
-		
+
+
 		//---------------------------------------------------------------------------------------//
 		// Parent/Child helper object accessors
 
@@ -113,7 +113,7 @@ class MarkerTimeAxis : public VisualTimeAxis
 		 * @return the view helper of this TimeAxis
 		 */
 		MarkerTimeAxisView* get_view() ;
-		
+
 		/**
 		 * Returns the TimeAxisView that this markerTimeAxis is marking up
 		 *
@@ -123,18 +123,18 @@ class MarkerTimeAxis : public VisualTimeAxis
 
 
 	private:
-	
+
 		/**
 		 * convenience method to select a new track color and apply it to the view and view items
 		 *
 		 */
 		void select_track_color() ;
-		
+
 		/**
 		 * Handles the building of the popup menu
 		 */
 		virtual void build_display_menu() ;
-		
+
 		/**
 		 * handles the building of the MarkerView sub menu
 		 */
@@ -142,17 +142,17 @@ class MarkerTimeAxis : public VisualTimeAxis
 
 		/** The associated TimeAxis that this MarkerTimeAxis is marking up */
 		TimeAxisView* marked_time_axis ;
-		
+
 		/** Our time axis view helper */
 		MarkerTimeAxisView *view ;
 
-		/** the popup menu available by clicking upon this time axis */		
+		/** the popup menu available by clicking upon this time axis */
 		Gtk::Menu *marker_menu ;
-		
+
 		/** specialized sub menu available when clicking upon and item upon this time axis */
 		Gtk::Menu *marker_item_menu ;
-		
-		
+
+
 } ; /* class MarkerTimeAxis */
 
 #endif /* __ardour_imageframe_time_axis_h__ */

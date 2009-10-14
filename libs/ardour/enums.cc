@@ -177,7 +177,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (ChannelColors);
 	REGISTER_ENUM (TrackColor);
 	REGISTER (_ColorMode);
-	
+
 	REGISTER_ENUM (MeterFalloffOff);
 	REGISTER_ENUM (MeterFalloffSlowest);
 	REGISTER_ENUM (MeterFalloffSlow);

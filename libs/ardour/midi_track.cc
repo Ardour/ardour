@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 	By Dave Robillard, 2006
 
     This program is free software; you can redistribute it and/or modify
@@ -99,7 +99,7 @@ MidiTrack::use_new_diskstream ()
 	_session.add_diskstream (ds);
 
 	set_diskstream (boost::dynamic_pointer_cast<MidiDiskstream> (ds));
-}	
+}
 
 int
 MidiTrack::set_diskstream (boost::shared_ptr<MidiDiskstream> ds)
@@ -117,9 +117,9 @@ MidiTrack::set_diskstream (boost::shared_ptr<MidiDiskstream> ds)
 	DiskstreamChanged (); /* EMIT SIGNAL */
 
 	return 0;
-}	
+}
 
-int 
+int
 MidiTrack::use_diskstream (string name)
 {
 	boost::shared_ptr<MidiDiskstream> dstream;
@@ -130,21 +130,21 @@ MidiTrack::use_diskstream (string name)
 		error << string_compose(_("MidiTrack: midi diskstream \"%1\" not known by session"), name) << endmsg;
 		return -1;
 	}
-	
+
 	cerr << "\n\n\nMIDI found DS\n";
 	return set_diskstream (dstream);
 }
 
-int 
+int
 MidiTrack::use_diskstream (const PBD::ID& id)
 {
 	boost::shared_ptr<MidiDiskstream> dstream;
 
 	if ((dstream = boost::dynamic_pointer_cast<MidiDiskstream> (_session.diskstream_by_id (id))) == 0) {
-	  	error << string_compose(_("MidiTrack: midi diskstream \"%1\" not known by session"), id) << endmsg;
+		error << string_compose(_("MidiTrack: midi diskstream \"%1\" not known by session"), id) << endmsg;
 		return -1;
 	}
-	
+
 	return set_diskstream (dstream);
 }
 
@@ -169,10 +169,10 @@ MidiTrack::_set_state (const XMLNode& node, bool call_base)
 	if (Route::_set_state (node, call_base)) {
 		return -1;
 	}
-	
+
 	// No destructive MIDI tracks (yet?)
 	_mode = Normal;
-	
+
 	if ((prop = node.property (X_("note-mode"))) != 0) {
 		_note_mode = NoteMode (string_2_enum (prop->value(), _note_mode));
 	} else {
@@ -188,7 +188,7 @@ MidiTrack::_set_state (const XMLNode& node, bool call_base)
 	}
 
 	if ((prop = node.property ("diskstream-id")) == 0) {
-		
+
 		/* some old sessions use the diskstream name rather than the ID */
 
 		if ((prop = node.property ("diskstream")) == 0) {
@@ -202,10 +202,10 @@ MidiTrack::_set_state (const XMLNode& node, bool call_base)
 		}
 
 	} else {
-		
+
 		PBD::ID id (prop->value());
 		PBD::ID zero ("0");
-		
+
 		/* this wierd hack is used when creating tracks from a template. there isn't
 		   a particularly good time to interpose between setting the first part of
 		   the track state (notably Route::set_state() and the track mode), and the
@@ -215,7 +215,7 @@ MidiTrack::_set_state (const XMLNode& node, bool call_base)
 		*/
 
 		cerr << "\n\n\n\n MIDI track " << name() << " found DS id " << id << endl;
-		
+
 		if (id == zero) {
 			use_new_diskstream ();
 		} else if (use_diskstream (id)) {
@@ -248,7 +248,7 @@ MidiTrack::_set_state (const XMLNode& node, bool call_base)
 	return 0;
 }
 
-XMLNode& 
+XMLNode&
 MidiTrack::state(bool full_state)
 {
 	XMLNode& root (Route::state(full_state));
@@ -267,7 +267,7 @@ MidiTrack::state(bool full_state)
 			(*i)->id.print (buf, sizeof(buf));
 			inode->add_property (X_("id"), buf);
 			inode->add_child_copy ((*i)->state);
-		
+
 			freeze_node->add_child_nocopy (*inode);
 		}
 
@@ -275,14 +275,14 @@ MidiTrack::state(bool full_state)
 	}
 
 	/* Alignment: act as a proxy for the diskstream */
-	
+
 	XMLNode* align_node = new XMLNode (X_("Alignment"));
 	AlignStyle as = _diskstream->alignment_style ();
 	align_node->add_property (X_("style"), enum_2_string (as));
 	root.add_child_nocopy (*align_node);
 
 	root.add_property (X_("note-mode"), enum_2_string (_note_mode));
-	
+
 	/* we don't return diskstream state because we don't
 	   own the diskstream exclusively. control of the diskstream
 	   state is ceded to the Session, even if we create the
@@ -291,7 +291,7 @@ MidiTrack::state(bool full_state)
 
 	_diskstream->id().print (buf, sizeof(buf));
 	root.add_property ("diskstream-id", buf);
-	
+
 	root.add_child_nocopy (_rec_enable_control->get_state());
 
 	root.add_property ("step-editing", (_step_editing ? "yes" : "no"));
@@ -299,7 +299,7 @@ MidiTrack::state(bool full_state)
 	root.add_property ("midi-thru", (_midi_thru ? "yes" : "no"));
 	snprintf (buf, sizeof (buf), "%d", (int) _default_channel);
 	root.add_property ("default-channel", buf);
-	
+
 	return root;
 }
 
@@ -321,12 +321,12 @@ MidiTrack::set_state_part_two ()
 	if ((fnode = find_named_node (*pending_state, X_("freeze-info"))) != 0) {
 
 		_freeze_record.state = Frozen;
-		
+
 		for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
 			delete *i;
 		}
 		_freeze_record.processor_info.clear ();
-		
+
 		if ((prop = fnode->property (X_("playlist"))) != 0) {
 			boost::shared_ptr<Playlist> pl = _session.playlist_by_name (prop->value());
 			if (pl) {
@@ -337,23 +337,23 @@ MidiTrack::set_state_part_two ()
 			return;
 			}
 		}
-		
+
 		if ((prop = fnode->property (X_("state"))) != 0) {
 			_freeze_record.state = FreezeState (string_2_enum (prop->value(), _freeze_record.state));
 		}
-		
+
 		XMLNodeConstIterator citer;
 		XMLNodeList clist = fnode->children();
-		
+
 		for (citer = clist.begin(); citer != clist.end(); ++citer) {
 			if ((*citer)->name() != X_("processor")) {
 				continue;
 			}
-			
+
 			if ((prop = (*citer)->property (X_("id"))) == 0) {
 				continue;
 			}
-			
+
 			FreezeRecordProcessorInfo* frii = new FreezeRecordProcessorInfo (*((*citer)->children().front()),
 										   boost::shared_ptr<Processor>());
 			frii->id = prop->value ();
@@ -384,7 +384,7 @@ MidiTrack::set_state_part_two ()
 		}
 	}
 	return;
-}	
+}
 
 int
 MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, int declick,
@@ -392,7 +392,7 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 {
 	int dret;
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
-	
+
 	{
 		Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
 		if (lm.locked()) {
@@ -413,14 +413,14 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 
 	nframes_t transport_frame = _session.transport_frame();
 
-	
+
 	if ((nframes = check_initial_delay (nframes, transport_frame)) == 0) {
 		/* need to do this so that the diskstream sets its
 		   playback distance to zero, thus causing diskstream::commit
 		   to do nothing.
 		   */
 		return diskstream->process (transport_frame, 0, can_record, rec_monitors_input);
-	} 
+	}
 
 	_silent = false;
 
@@ -442,7 +442,7 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 		*/
 
 		passthru (start_frame, end_frame, nframes, 0);
-		
+
 	} else {
 		/*
 		   XXX is it true that the earlier test on n_outputs()
@@ -458,12 +458,12 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 		//const size_t limit = n_process_buffers().n_audio();
 		BufferSet& bufs = _session.get_scratch_buffers (n_process_buffers());
 		MidiBuffer& mbuf (bufs.get_midi (0));
-		
+
 		diskstream->get_playback (mbuf, start_frame, end_frame);
 
 		/* append immediate messages to the first MIDI buffer (thus sending it to the first output port) */
 
-		write_out_of_band_data (bufs, start_frame, end_frame, nframes);	
+		write_out_of_band_data (bufs, start_frame, end_frame, nframes);
 
 		// Feed the data through the MidiStateTracker
 		bool did_loop;
@@ -487,7 +487,7 @@ MidiTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
 }
 
 int
-MidiTrack::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
+MidiTrack::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 		    bool state_changing, bool can_record, bool rec_monitors_input)
 {
 	int ret = Track::no_roll (nframes, start_frame, end_frame, state_changing, can_record, rec_monitors_input);
@@ -499,13 +499,13 @@ MidiTrack::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_fram
 	return ret;
 }
 
-void 
+void
 MidiTrack::handle_transport_stopped (bool abort, bool did_locate, bool flush_processors)
 {
 	/* turn off any notes that are on */
 
-	MidiBuffer buf (1024); // XXX is this a reasonable size ? 
-	
+	MidiBuffer buf (1024); // XXX is this a reasonable size ?
+
 	_midi_state_tracker.resolve_notes (buf, 0); // time is zero because notes are immediate
 
 	for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
@@ -514,7 +514,7 @@ MidiTrack::handle_transport_stopped (bool abort, bool did_locate, bool flush_pro
 
 	Route::handle_transport_stopped (abort, did_locate, flush_processors);
 }
-	
+
 
 void
 MidiTrack::push_midi_input_to_step_edit_ringbuffer (nframes_t nframes)
@@ -530,7 +530,7 @@ MidiTrack::push_midi_input_to_step_edit_ringbuffer (nframes_t nframes)
 		for (MidiBuffer::const_iterator e = mb->begin(); e != mb->end(); ++e) {
 
 			const Evoral::MIDIEvent<nframes_t> ev(*e, false);
-			
+
 			/* we don't care about the time for this purpose */
 
 			_step_edit_ring_buffer.write (0, ev.type(), ev.size(), ev.buffer());
@@ -605,7 +605,7 @@ MidiTrack::set_note_mode (NoteMode m)
 }
 
 void
-MidiTrack::midi_panic() 
+MidiTrack::midi_panic()
 {
 	for (uint8_t channel = 0; channel <= 0xF; channel++) {
 		uint8_t ev[3] = { MIDI_CMD_CONTROL | channel, MIDI_CTL_SUSTAIN, 0 };
@@ -645,7 +645,7 @@ MidiTrack::MidiControl::set_value(float val)
 	} else {
 		valid = true;
 	}
-	
+
 	if (!valid) {
 		return;
 	}
@@ -661,25 +661,25 @@ MidiTrack::MidiControl::set_value(float val)
 			ev[1] = _list->parameter().id();
 			ev[2] = int(val);
 			break;
-			
+
 		case MidiPgmChangeAutomation:
 			size = 2;
 			ev[0] += MIDI_CMD_PGM_CHANGE;
 			ev[1] = int(val);
 			break;
-			
+
 		case MidiChannelPressureAutomation:
 			size = 2;
 			ev[0] += MIDI_CMD_CHANNEL_PRESSURE;
 			ev[1] = int(val);
 			break;
-			
+
 		case MidiPitchBenderAutomation:
 			ev[0] += MIDI_CMD_BENDER;
 			ev[1] = 0x7F & int(val);
 			ev[2] = 0x7F & (int(val) >> 7);
 			break;
-			
+
 		default:
 			assert(false);
 		}
@@ -687,7 +687,7 @@ MidiTrack::MidiControl::set_value(float val)
 	}
 
 	AutomationControl::set_value(val);
-} 
+}
 
 void
 MidiTrack::set_step_editing (bool yn)

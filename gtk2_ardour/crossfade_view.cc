@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,21 +42,21 @@ using namespace Canvas;
 
 sigc::signal<void,CrossfadeView*> CrossfadeView::GoingAway;
 
-CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent, 
-			      RouteTimeAxisView &tv, 
-			      boost::shared_ptr<Crossfade> xf, 
+CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
+			      RouteTimeAxisView &tv,
+			      boost::shared_ptr<Crossfade> xf,
 			      double spu,
 			      Gdk::Color& basic_color,
 			      AudioRegionView& lview,
 			      AudioRegionView& rview)
-			      
 
-	: TimeAxisViewItem ("xfade" /*xf.name()*/, *parent, tv, spu, basic_color, xf->position(), 
+
+	: TimeAxisViewItem ("xfade" /*xf.name()*/, *parent, tv, spu, basic_color, xf->position(),
 			    xf->length(), false, TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowFrame)),
 	  crossfade (xf),
 	  left_view (lview),
 	  right_view (rview)
-	
+
 {
 	_valid = true;
 	_visible = true;
@@ -68,7 +68,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 	fade_out = new Line (*group);
 	fade_out->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeLine.get();
 	fade_out->property_width_pixels() = 1;
-	
+
 	set_height (get_time_axis_view().current_height());
 
 	/* no frame around the xfade or overlap rects */
@@ -79,9 +79,9 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 
 	vestigial_frame->hide();
 	show_vestigial = false;
-	
+
 	group->signal_event().connect (bind (mem_fun (tv.editor(), &PublicEditor::canvas_crossfade_view_event), group, this));
-	
+
 	crossfade_changed (Change (~0));
 
 	crossfade->StateChanged.connect (mem_fun(*this, &CrossfadeView::crossfade_changed));
@@ -139,7 +139,7 @@ CrossfadeView::crossfade_changed (Change what_changed)
 	if (what_changed & Crossfade::FollowOverlapChanged) {
 		need_redraw_curves = true;
 	}
-	
+
 	if (what_changed & Crossfade::ActiveChanged) {
 		/* calls redraw_curves */
 		active_changed ();
@@ -151,7 +151,7 @@ CrossfadeView::crossfade_changed (Change what_changed)
 void
 CrossfadeView::redraw_curves ()
 {
-	Points* points; 
+	Points* points;
 	int32_t npoints;
 	float* vec;
 
@@ -177,7 +177,7 @@ CrossfadeView::redraw_curves ()
 	} else {
 		fade_in->show();
 		fade_out->show();
-	} 
+	}
 
 	points = get_canvas_points ("xfade edit redraw", npoints);
 	vec = new float[npoints];

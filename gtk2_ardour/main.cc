@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2001-2007 Paul Davis
-    
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -81,7 +81,7 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 
 	win.add_button (Stock::QUIT, RESPONSE_CLOSE);
 	win.set_default_response (RESPONSE_CLOSE);
-	
+
 	win.show_all ();
 	win.set_position (Gtk::WIN_POS_CENTER);
 
@@ -165,7 +165,7 @@ fixup_bundle_environment ()
 	}
 	path += dir_path;
 	path += "/../Plugins";
-	
+
 	setenv ("LADSPA_PATH", path.c_str(), 1);
 
 	cstr = getenv ("VAMP_PATH");
@@ -177,7 +177,7 @@ fixup_bundle_environment ()
 	}
 	path += dir_path;
 	path += "/../Frameworks";
-	
+
 	setenv ("VAMP_PATH", path.c_str(), 1);
 
 	cstr = getenv ("ARDOUR_CONTROL_SURFACE_PATH");
@@ -189,7 +189,7 @@ fixup_bundle_environment ()
 	}
 	path += dir_path;
 	path += "/../Surfaces";
-	
+
 	setenv ("ARDOUR_CONTROL_SURFACE_PATH", path.c_str(), 1);
 
 	cstr = getenv ("LV2_PATH");
@@ -201,7 +201,7 @@ fixup_bundle_environment ()
 	}
 	path += dir_path;
 	path += "/../Plugins";
-	
+
 	setenv ("LV2_PATH", path.c_str(), 1);
 
 	path = dir_path;
@@ -211,12 +211,12 @@ fixup_bundle_environment ()
 
 	path = dir_path;
 	path += "/../Resources/locale";
-	
+
 	localedir = strdup (path.c_str());
 
 	/* write a pango.rc file and tell pango to use it. we'd love
 	   to put this into the Ardour.app bundle and leave it there,
-	   but the user may not have write permission. so ... 
+	   but the user may not have write permission. so ...
 
 	   we also have to make sure that the user ardour directory
 	   actually exists ...
@@ -228,7 +228,7 @@ fixup_bundle_environment ()
 	catch (const sys::filesystem_error& ex) {
 		error << _("Could not create user configuration directory") << endmsg;
 	}
-	
+
 	sys::path pangopath = user_config_directory();
 	pangopath /= "pango.rc";
 	path = pangopath.to_string();
@@ -244,7 +244,7 @@ fixup_bundle_environment ()
 		pangopath /= "..";
 		pangopath /= "Resources";
 		pangopath /= "pango.modules";
-			
+
 		pangorc << pangopath.to_string() << endl;
 
 		pangorc.close ();
@@ -257,7 +257,7 @@ fixup_bundle_environment ()
 	setenv ("CHARSETALIASDIR", path.c_str(), 1);
 
 	// font config
-	
+
 	path = dir_path;
 	path += "/../Resources/fonts.conf";
 
@@ -272,10 +272,10 @@ fixup_bundle_environment ()
 
 	if (getenv ("ARDOUR_WITH_JACK")) {
 		// JACK driver dir
-		
+
 		path = dir_path;
 		path += "/../Frameworks";
-		
+
 		setenv ("JACK_DRIVER_DIR", path.c_str(), 1);
 	}
 }
@@ -307,7 +307,7 @@ int main (int argc, char *argv[])
 #endif
 {
 	vector<Glib::ustring> null_file_list;
-	
+
 #ifdef __APPLE__
 	fixup_bundle_environment ();
 #endif
@@ -346,17 +346,17 @@ int main (int argc, char *argv[])
 	if (curvetest_file) {
 		return curvetest (curvetest_file);
 	}
-	
-	cout << _("Ardour/GTK ") 
+
+	cout << _("Ardour/GTK ")
 	     << VERSIONSTRING
 	     << _(" (built using ")
 	     << svn_revision
 #ifdef __GNUC__
-	     << _(" and GCC version ") << __VERSION__ 
+	     << _(" and GCC version ") << __VERSION__
 #endif
 	     << ')'
 	     << endl;
-	
+
 	if (just_version) {
 		exit (0);
 	}
@@ -380,7 +380,7 @@ int main (int argc, char *argv[])
 		cerr << _("Cannot install SIGPIPE error handler") << endl;
 	}
 
-        try { 
+        try {
 		ui = new ARDOUR_UI (&argc, &argv);
 	} catch (failed_constructor& err) {
 		error << _("could not create ARDOUR GUI") << endmsg;

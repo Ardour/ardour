@@ -38,7 +38,7 @@ class AudiofileTagger
   public:
 
 	/* Tags file with metadata, return true on success */
-	
+
 	static bool tag_file (std::string const & filename, SessionMetadata const & metadata);
 
   private:

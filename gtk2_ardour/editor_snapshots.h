@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2009 Paul Davis 
+    Copyright (C) 2000-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,11 +37,11 @@ public:
 	void redisplay ();
 
 private:
-	
+
 	Gtk::ScrolledWindow _scroller;
-	
+
 	struct Columns : public Gtk::TreeModel::ColumnRecord {
-		Columns () { 
+		Columns () {
 			add (visible_name);
 			add (real_name);
 		}

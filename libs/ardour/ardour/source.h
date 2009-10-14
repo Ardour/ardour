@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 
 #include <boost/utility.hpp>
 #include <sigc++/signal.h>
-#include "pbd/statefuldestructible.h" 
+#include "pbd/statefuldestructible.h"
 
 #include "ardour/ardour.h"
 #include "ardour/session_object.h"
@@ -53,39 +53,39 @@ class Source : public SessionObject, public boost::noncopyable
 
 	Source (Session&, DataType type, const std::string& name, Flag flags=Flag(0));
 	Source (Session&, const XMLNode&);
-	
+
 	virtual ~Source ();
-	
+
 	DataType type() { return _type; }
 
 	time_t timestamp() const { return _timestamp; }
 	void stamp (time_t when) { _timestamp = when; }
-	
+
 	virtual sframes_t length (sframes_t pos) const = 0;
 	virtual void      update_length (sframes_t pos, sframes_t cnt) = 0;
-	
+
 	virtual const Glib::ustring& path() const = 0;
 
 	virtual nframes64_t natural_position() const { return 0; }
 
 	void mark_for_remove();
-	
+
 	virtual void mark_streaming_write_started () {}
 	virtual void mark_streaming_write_completed () = 0;
 
 	virtual void session_saved() {}
-	
+
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
-	
+
 	bool         destructive() const       { return (_flags & Destructive); }
 	bool         writable () const         { return (_flags & Writable); }
 	virtual bool set_destructive (bool /*yn*/) { return false; }
 	virtual bool length_mutable() const    { return false; }
-	
+
 	void use ()    { _in_use++; }
 	void disuse () { if (_in_use) { _in_use--; } }
-	
+
 	void add_playlist (boost::shared_ptr<ARDOUR::Playlist>);
 	void remove_playlist (boost::weak_ptr<ARDOUR::Playlist>);
 
@@ -95,21 +95,21 @@ class Source : public SessionObject, public boost::noncopyable
 	sigc::signal<void,boost::shared_ptr<Source> > Switched;
 
 	bool has_been_analysed() const;
-	virtual bool can_be_analysed() const { return false; } 
+	virtual bool can_be_analysed() const { return false; }
 	virtual void set_been_analysed (bool yn);
 	virtual bool check_for_analysis_data_on_disk();
 
 	sigc::signal<void> AnalysisChanged;
-	
+
 	AnalysisFeatureList transients;
 	std::string get_transients_path() const;
 	int load_transients (const std::string&);
-	
+
 	sframes_t    timeline_position() const { return _timeline_position; }
 	virtual void set_timeline_position (sframes_t pos);
-	
+
 	void set_allow_remove_if_empty (bool yn);
-	
+
 	Glib::Mutex& mutex()       { return _lock; }
 	Flag         flags() const { return _flags; }
 
@@ -122,7 +122,7 @@ class Source : public SessionObject, public boost::noncopyable
 	mutable Glib::Mutex _lock;
 	mutable Glib::Mutex _analysis_lock;
 	Glib::Mutex         _playlist_lock;
-	
+
 	typedef std::map<boost::shared_ptr<ARDOUR::Playlist>, uint32_t > PlaylistMap;
 	PlaylistMap _playlists;
 

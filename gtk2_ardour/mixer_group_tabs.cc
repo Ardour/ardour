@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ MixerGroupTabs::MixerGroupTabs (Mixer_UI* m)
 	  _mixer (m),
 	  _menu (0)
 {
-	
+
 }
 
 
@@ -43,7 +43,7 @@ list<GroupTabs::Tab>
 MixerGroupTabs::compute_tabs () const
 {
 	list<Tab> tabs;
-	
+
 	Tab tab;
 	tab.from = 0;
 	tab.group = 0;
@@ -94,7 +94,7 @@ MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 	} else {
 		cairo_set_source_rgba (cr, 1, 1, 1, 0.2);
 	}
-	
+
 	cairo_arc (cr, tab.from + arc_radius, _height, arc_radius, M_PI, 3 * M_PI / 2);
 	cairo_line_to (cr, tab.to - arc_radius, 0);
 	cairo_arc (cr, tab.to - arc_radius, _height, arc_radius, 3 * M_PI / 2, 2 * M_PI);
@@ -123,37 +123,37 @@ void
 MixerGroupTabs::reflect_tabs (list<Tab> const & tabs)
 {
 	list<Tab>::const_iterator j = tabs.begin ();
-	
+
 	int32_t x = 0;
 	TreeModel::Children rows = _mixer->track_model->children ();
 	for (TreeModel::Children::iterator i = rows.begin(); i != rows.end(); ++i) {
 
 		MixerStrip* s = (*i)[_mixer->track_columns.strip];
-		
+
 		if (s->route()->is_master() || s->route()->is_control() || !s->marked_for_display()) {
 			continue;
 		}
-		
+
 		if (j == tabs.end()) {
-			
+
 			/* already run out of tabs, so no edit group */
 			s->route()->set_route_group (0, this);
-			
+
 		} else {
-			
+
 			if (x >= j->to) {
 				/* this tab finishes before this track starts, so onto the next tab */
 				++j;
 			}
-			
+
 			double const h = x + s->get_width() / 2;
-			
+
 			if (j->from < h && j->to > h) {
 				s->route()->set_route_group (j->group, this);
 			} else {
 				s->route()->set_route_group (0, this);
 			}
-			
+
 		}
 
 		x += s->get_width ();
@@ -166,12 +166,12 @@ MixerGroupTabs::get_menu (RouteGroup* g)
 	if (g == 0) {
 		return 0;
 	}
-	
+
 	using namespace Menu_Helpers;
-	
+
 	delete _menu;
 	_menu = new Menu;
-	
+
 	MenuList& items = _menu->items ();
 	items.push_back (MenuElem (_("Edit..."), bind (mem_fun (*this, &MixerGroupTabs::edit_group), g)));
 	items.push_back (MenuElem (_("Subgroup"), bind (mem_fun (*this, &MixerGroupTabs::make_subgroup), g)));

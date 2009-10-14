@@ -38,10 +38,10 @@ class AutomationControl : public PBD::Controllable, public Evoral::Control
 {
 public:
 	AutomationControl(ARDOUR::Session&,
-			  const Evoral::Parameter& parameter,
-			  boost::shared_ptr<ARDOUR::AutomationList> l=boost::shared_ptr<ARDOUR::AutomationList>(),
-			  const std::string& name="");
-	
+			const Evoral::Parameter& parameter,
+			boost::shared_ptr<ARDOUR::AutomationList> l=boost::shared_ptr<ARDOUR::AutomationList>(),
+			const std::string& name="");
+
 	boost::shared_ptr<AutomationList> alist() const {
 		return boost::dynamic_pointer_cast<AutomationList>(_list);
 	}
@@ -51,24 +51,24 @@ public:
 	inline bool automation_playback() const {
 		return ((ARDOUR::AutomationList*)_list.get())->automation_playback();
 	}
-	
+
 	inline bool automation_write() const {
 		return ((ARDOUR::AutomationList*)_list.get())->automation_write();
 	}
-	
+
 	inline AutoState automation_state() const {
 		return ((ARDOUR::AutomationList*)_list.get())->automation_state();
 	}
-	
+
 	inline void set_automation_state(AutoState as) {
 		return ((ARDOUR::AutomationList*)_list.get())->set_automation_state(as);
 	}
-	
+
 	inline void start_touch() {
 		set_touching (true);
 		return ((ARDOUR::AutomationList*)_list.get())->start_touch();
 	}
-	
+
 	inline void stop_touch() {
 		set_touching (false);
 		return ((ARDOUR::AutomationList*)_list.get())->stop_touch();

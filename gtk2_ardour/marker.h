@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001 Paul Davis 
+    Copyright (C) 2001 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ class Marker : public PBD::Destructible
 	};
 
 
-	Marker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const std::string& text, Type, 
+	Marker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const std::string& text, Type,
 		nframes_t frame = 0, bool handle_events = true);
 
 	virtual ~Marker ();
@@ -68,12 +68,12 @@ class Marker : public PBD::Destructible
 	void set_position (nframes64_t);
 	void set_name (const std::string&);
 	void set_color_rgba (uint32_t rgba);
-	
+
 	nframes64_t position() const { return frame_position; }
 
 	ArdourCanvas::Group * get_parent() { return _parent; }
 	void reparent (ArdourCanvas::Group & parent);
-	
+
 	void hide ();
 	void show ();
 
@@ -97,7 +97,7 @@ class Marker : public PBD::Destructible
 	unsigned char shift; /* should be double, but its always small and integral */
 	Type          _type;
 	int           name_height;
-	
+
 	void reposition ();
 };
 

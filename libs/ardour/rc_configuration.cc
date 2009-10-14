@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999-2006 Paul Davis 
+    Copyright (C) 1999-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #include <unistd.h>
 #include <cstdio> /* for snprintf, grrr */
 
-#include <glib.h>  
+#include <glib.h>
 #include <glib/gstdio.h> /* for g_stat() */
 #include <glibmm/miscutils.h>
 
@@ -55,7 +55,7 @@ RCConfiguration::RCConfiguration ()
 	:
 /* construct variables */
 #undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
+#undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(Type,var,name,value) var (name,value),
 #define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) var (name,value,mutator),
 #include "ardour/rc_configuration_vars.h"
@@ -74,7 +74,7 @@ RCConfiguration::load_state ()
 	struct stat statbuf;
 
 	/* load system configuration first */
-	
+
 	if (find_file_in_search_path (ardour_search_path() + system_config_search_path(),
 			"ardour_system.rc", system_rc_file) )
 	{
@@ -84,19 +84,19 @@ RCConfiguration::load_state ()
 		string rcfile = system_rc_file.to_string();
 
 		/* stupid XML Parser hates empty files */
-		
+
 		if (g_stat (rcfile.c_str(), &statbuf)) {
 			return -1;
 		}
 
 		if (statbuf.st_size != 0) {
 			cerr << string_compose (_("Loading system configuration file %1"), rcfile) << endl;
-			
+
 			if (!tree.read (rcfile.c_str())) {
 				error << string_compose(_("Ardour: cannot read system configuration file \"%1\""), rcfile) << endmsg;
 				return -1;
 			}
-			
+
 			if (set_state (*tree.root())) {
 				error << string_compose(_("Ardour: system configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 				return -1;
@@ -126,19 +126,19 @@ RCConfiguration::load_state ()
 
 		if (statbuf.st_size != 0) {
 			cerr << string_compose (_("Loading user configuration file %1"), rcfile) << endl;
-			
+
 			if (!tree.read (rcfile)) {
 				error << string_compose(_("Ardour: cannot read configuration file \"%1\""), rcfile) << endmsg;
 				return -1;
 			}
-			
+
 			if (set_state (*tree.root())) {
 				error << string_compose(_("Ardour: user configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 				return -1;
 			}
 		} else {
 			warning << _("your Ardour configuration file is empty. This is not normal.") << endmsg;
-		}	
+		}
 	}
 
 	if (!found)
@@ -161,7 +161,7 @@ RCConfiguration::save_state()
 		error << "Could not create user configuration directory" << endmsg;
 		return -1;
 	}
-	
+
 	sys::path rcfile_path(user_config_directory());
 
 	rcfile_path /= "ardour.rc";
@@ -202,19 +202,19 @@ RCConfiguration::get_state ()
 
 	MIDI::Manager::PortMap::const_iterator i;
 	const MIDI::Manager::PortMap& ports = MIDI::Manager::instance()->get_midi_ports();
-	
+
 	for (i = ports.begin(); i != ports.end(); ++i) {
 		root->add_child_nocopy(i->second->get_state());
 	}
-	
+
 	root->add_child_nocopy (get_variables ());
-	
+
 	if (_extra_xml) {
 		root->add_child_copy (*_extra_xml);
 	}
-	
+
 	root->add_child_nocopy (ControlProtocolManager::instance().get_state());
-	
+
 	return *root;
 }
 
@@ -227,14 +227,14 @@ RCConfiguration::get_variables ()
 	node = new XMLNode ("Config");
 
 #undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
+#undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(type,var,Name,value) \
 	var.add_to_node (*node);
 #define CONFIG_VARIABLE_SPECIAL(type,var,Name,value,mutator) \
 	var.add_to_node (*node);
 #include "ardour/rc_configuration_vars.h"
 #undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
+#undef  CONFIG_VARIABLE_SPECIAL
 
 	return *node;
 }
@@ -271,9 +271,9 @@ RCConfiguration::set_state (const XMLNode& root)
 			}
 
 		} else if (node->name() == "Config") {
-			
+
 			set_variables (*node);
-			
+
 		} else if (node->name() == "Extra") {
 			_extra_xml = new XMLNode (*node);
 
@@ -291,7 +291,7 @@ void
 RCConfiguration::set_variables (const XMLNode& node)
 {
 #undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
+#undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(type,var,name,value) \
 	if (var.set_from_node (node)) { \
 		ParameterChanged (name);		  \
@@ -304,16 +304,16 @@ RCConfiguration::set_variables (const XMLNode& node)
 #include "ardour/rc_configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
-	
+
 }
 void
 RCConfiguration::map_parameters (sigc::slot<void, std::string> theSlot)
 {
 #undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
+#undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(type,var,name,value)                 theSlot (name);
 #define CONFIG_VARIABLE_SPECIAL(type,var,name,value,mutator) theSlot (name);
 #include "ardour/rc_configuration_vars.h"
 #undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
+#undef  CONFIG_VARIABLE_SPECIAL
 }

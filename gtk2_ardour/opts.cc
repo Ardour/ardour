@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2001 Paul Davis
-    
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -54,8 +54,8 @@ print_help (const char *execname)
 	     << _("  -c, --name  name                 Use a specific jack client name, default is ardour\n")
 	     << _("  -d, --disable-plugins            Disable all plugins in an existing session\n")
 	     << _("  -n, --show-splash                Show splash screen\n")
-	     << _("  -m, --menus file                 Use \"file\" for Ardour menus\n")                       
-	     << _("  -N, --new session-name           Create a new session from the command line\n")                       
+	     << _("  -m, --menus file                 Use \"file\" for Ardour menus\n")
+	     << _("  -N, --new session-name           Create a new session from the command line\n")
 	     << _("  -O, --no-hw-optimizations        Disable h/w specific optimizations\n")
 	     << _("  -S, --sync	                      Draw the gui synchronously \n")
 #ifdef VST_SUPPORT
@@ -115,7 +115,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		switch (c) {
 		case 0:
 			break;
-		
+
 		case 'v':
 			just_version = true;
 			break;
@@ -127,7 +127,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		case 'b':
 			show_key_actions = true;
 			break;
-			
+
 		case 'd':
 			ARDOUR::Session::set_disable_all_loaded_plugins (true);
 			break;
@@ -144,7 +144,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 			//undocumented OS X finder -psn_XXXXX argument
 			finder_invoked_ardour = true;
 			break;
-		
+
 		case 'S':
 		//	; just pass this through to gtk it will figure it out
 			break;
@@ -157,7 +157,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		case 'O':
 			try_hw_optimization = false;
 			break;
- 		
+
 		case 'V':
 #ifdef VST_SUPPORT
 			use_vst = false;

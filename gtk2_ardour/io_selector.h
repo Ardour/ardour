@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2007 Paul Davis 
+    Copyright (C) 2002-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ class IOSelector : public PortMatrix
 	std::string channel_noun () const {
 		return _("port");
 	}
-	
+
 	uint32_t n_io_ports () const;
 	boost::shared_ptr<ARDOUR::IO> const io () { return _io; }
 	void setup_ports (int);
@@ -80,10 +80,10 @@ class IOSelectorWindow : public Gtk::Window
   protected:
 	void on_map ();
 	void on_show ();
-	
+
   private:
 	IOSelector _selector;
-	
+
 	void io_name_changed (void *src);
 	bool wm_delete (GdkEventAny*);
 };
@@ -91,9 +91,9 @@ class IOSelectorWindow : public Gtk::Window
 
 class PortInsertUI : public Gtk::VBox
 {
-  public: 
+  public:
 	PortInsertUI (Gtk::Window*, ARDOUR::Session&, boost::shared_ptr<ARDOUR::PortInsert>);
-	
+
 	void redisplay ();
 	void finished (IOSelector::Result);
 
@@ -104,20 +104,20 @@ class PortInsertUI : public Gtk::VBox
 
 class PortInsertWindow : public ArdourDialog
 {
-  public: 
+  public:
 	PortInsertWindow (ARDOUR::Session&, boost::shared_ptr<ARDOUR::PortInsert>, bool can_cancel = false);
-	
+
   protected:
 	void on_map ();
-	
+
   private:
 	PortInsertUI _portinsertui;
 	Gtk::VBox vbox;
-	
+
 	Gtk::Button ok_button;
 	Gtk::Button cancel_button;
 	Gtk::Frame button_frame;
-	
+
 	void cancel ();
 	void accept ();
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -155,14 +155,14 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 
 	add_button->signal_clicked().connect (mem_fun (*this, &EditorRouteGroups::new_route_group));
 	remove_button->signal_clicked().connect (mem_fun (*this, &EditorRouteGroups::remove_selected));
-	
+
 	button_box->pack_start (*add_button);
 	button_box->pack_start (*remove_button);
 
 	_display_packer->pack_start (_scroller, true, true);
 	_display_packer->pack_start (*button_box, false, false);
 }
-	
+
 
 Gtk::Menu*
 EditorRouteGroups::menu (RouteGroup* g)
@@ -272,7 +272,7 @@ EditorRouteGroups::new_from_selection ()
 				rtv->route()->set_route_group (g, this);
 			}
 		}
-		
+
 	} else {
 		delete g;
 	}
@@ -300,7 +300,7 @@ EditorRouteGroups::new_from_rec_enabled ()
 				rtv->route()->set_route_group (g, this);
 			}
 		}
-		
+
 	} else {
 		delete g;
 	}
@@ -328,7 +328,7 @@ EditorRouteGroups::new_from_soloed ()
 				rtv->route()->set_route_group (g, this);
 			}
 		}
-		
+
 	} else {
 		delete g;
 	}
@@ -353,7 +353,7 @@ EditorRouteGroups::remove_selected ()
 
 	TreeView::Selection::ListHandle_Path::iterator i = rows.begin();
 	TreeIter iter;
-	
+
 	/* selection mode is single, so rows.begin() is it */
 
 	if ((iter = _model->get_iter (*i))) {
@@ -387,7 +387,7 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 	if (p) {
 		iter = _model->get_iter (path);
 	}
-	
+
 	if (iter) {
 		group = (*iter)[_columns.routegroup];
 	}
@@ -413,8 +413,8 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 					return true;
 				}
 			}
-			
-		} 
+
+		}
 		break;
 
 	case 1:
@@ -497,11 +497,11 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 	default:
 		break;
 	}
-	
+
 	return false;
  }
 
-void 
+void
 EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator& iter)
 {
 	RouteGroup* group;
@@ -549,7 +549,7 @@ EditorRouteGroups::add (RouteGroup* group)
 	bool focus = false;
 
 	TreeModel::Row row = *(_model->append());
-	
+
 	row[_columns.is_visible] = !group->is_hidden();
 	row[_columns.gain] = group->property(RouteGroup::Gain);
 	row[_columns.record] = group->property(RouteGroup::RecEnable);
@@ -571,7 +571,7 @@ EditorRouteGroups::add (RouteGroup* group)
 
 	group->FlagsChanged.connect (bind (mem_fun (*this, &EditorRouteGroups::flags_changed), group));
 
-	if (focus) {  
+	if (focus) {
 		TreeViewColumn* col = _display.get_column (0);
 		CellRendererText* name_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
 		_display.set_cursor (_model->get_path (row), *col, *name_cell, true);
@@ -634,13 +634,13 @@ EditorRouteGroups::name_edit (const Glib::ustring& path, const Glib::ustring& ne
 {
 	RouteGroup* group;
 	TreeIter iter;
-	
+
 	if ((iter = _model->get_iter (path))) {
-	
+
 		if ((group = (*iter)[_columns.routegroup]) == 0) {
 			return;
 		}
-		
+
 		if (new_text != group->name()) {
 			group->set_name (new_text);
 		}
@@ -694,7 +694,7 @@ EditorRouteGroups::collect (RouteGroup* g)
 
 			boost::shared_ptr<Route> r = rtv->route ();
 			int const k = r->order_key (N_ ("editor"));
-			
+
 			if (*i == r.get()) {
 
 				if (coll == -1) {
@@ -703,19 +703,19 @@ EditorRouteGroups::collect (RouteGroup* g)
 				} else {
 					--diff;
 				}
-				
+
 				r->set_order_key (N_ ("editor"), coll);
-				
+
 				++coll;
 				++i;
-				
+
 			} else {
-				
+
 				r->set_order_key (N_ ("editor"), k + diff);
-				
+
 			}
 		}
-			
+
 		++j;
 	}
 

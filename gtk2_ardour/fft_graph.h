@@ -38,22 +38,22 @@ class AnalysisWindow;
 class FFTGraph : public Gtk::DrawingArea
 {
 	public:
-		
+
 		FFTGraph(int windowSize);
 		~FFTGraph();
 
 		void set_analysis_window(AnalysisWindow *a_window);
-		
+
 		int windowSize() const { return _windowSize; }
 		void setWindowSize(int windowSize);
 
 		void redraw();
 		bool on_expose_event (GdkEventExpose* event);
-		
+
 		void on_size_request(Gtk::Requisition* requisition);
 		void on_size_allocate(Gtk::Allocation & alloc);
 		FFTResult *prepareResult(Gdk::Color color, std::string trackname);
-		
+
 		void set_show_minmax     (bool v) { _show_minmax     = v; redraw(); }
 		void set_show_normalized (bool v) { _show_normalized = v; redraw(); }
 
@@ -64,7 +64,7 @@ class FFTGraph : public Gtk::DrawingArea
 		void setWindowSize_internal(int windowSize);
 
 		void draw_scales(Glib::RefPtr<Gdk::Window> window);
-		
+
 		static const int minScaleWidth = 512;
 		static const int minScaleHeight = 420;
 
@@ -77,7 +77,7 @@ class FFTGraph : public Gtk::DrawingArea
 
 		int width;
 		int height;
-		
+
 		int _windowSize;
 		int _dataSize;
 

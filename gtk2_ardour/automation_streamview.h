@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001, 2007 Paul Davis 
+    Copyright (C) 2001, 2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -48,23 +48,23 @@ class AutomationStreamView : public StreamView
 	void set_automation_state (ARDOUR::AutoState state);
 
 	void redisplay_diskstream ();
-	
-	inline double contents_height() const { 
+
+	inline double contents_height() const {
 		return (_trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2);
 	}
-	
+
   private:
 	void setup_rec_box ();
-	void rec_data_range_ready (jack_nframes_t start, jack_nframes_t dur); 
+	void rec_data_range_ready (jack_nframes_t start, jack_nframes_t dur);
 	void update_rec_regions (jack_nframes_t start, jack_nframes_t dur);
-	
+
 	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_data, bool recording = false);
 	void        display_region(AutomationRegionView* region_view);
-	
+
 	void color_handler ();
-	
+
 	boost::shared_ptr<AutomationController> _controller;
-	
+
 	AutomationTimeAxisView& _automation_view;
 };
 

@@ -59,11 +59,11 @@ class RouteUI : public virtual AxisView
 	bool is_midi_track() const;
 
 	boost::shared_ptr<ARDOUR::Route> route() const { return _route; }
-	
+
 	boost::shared_ptr<ARDOUR::Track>      track() const;
 	boost::shared_ptr<ARDOUR::AudioTrack> audio_track() const;
 	boost::shared_ptr<ARDOUR::MidiTrack>  midi_track() const;
-	
+
 	boost::shared_ptr<ARDOUR::Diskstream> get_diskstream() const;
 
 	std::string name() const;
@@ -71,7 +71,7 @@ class RouteUI : public virtual AxisView
 	// protected: XXX sigh this should be here
 
 	boost::shared_ptr<ARDOUR::Route> _route;
-	
+
 	void set_color (const Gdk::Color & c);
 	bool choose_color ();
 
@@ -91,10 +91,10 @@ class RouteUI : public virtual AxisView
 
 	void send_blink (bool);
 	sigc::connection send_blink_connection;
-	
+
 	virtual std::string solo_button_name () const { return "SoloButton"; }
 	virtual std::string safe_solo_button_name () const { return "SafeSoloButton"; }
-	
+
 	Gtk::Menu* mute_menu;
 	Gtk::Menu* solo_menu;
 	Gtk::Menu* sends_menu;
@@ -103,7 +103,7 @@ class RouteUI : public virtual AxisView
 	void ensure_xml_node ();
 
 	virtual XMLNode* get_automation_child_xml_node (Evoral::Parameter param);
-	
+
 	bool mute_press(GdkEventButton*);
 	bool mute_release(GdkEventButton*);
 	bool solo_press(GdkEventButton*);
@@ -145,7 +145,7 @@ class RouteUI : public virtual AxisView
 
 	void build_mute_menu(void);
 	void init_mute_menu(ARDOUR::MuteMaster::MutePoint, Gtk::CheckMenuItem*);
-	
+
 	void set_route_group_solo (boost::shared_ptr<ARDOUR::Route>, bool);
 	void set_route_group_mute (boost::shared_ptr<ARDOUR::Route>, bool);
 	void set_route_group_rec_enable (boost::shared_ptr<ARDOUR::Route>, bool);
@@ -156,7 +156,7 @@ class RouteUI : public virtual AxisView
 	static gint idle_remove_this_route (RouteUI *);
 
 	void route_rename();
-	
+
 	virtual void name_changed ();
 	void route_removed ();
 
@@ -188,7 +188,7 @@ class RouteUI : public virtual AxisView
 	void adjust_latency ();
 	void save_as_template ();
 	void open_remote_control_id_dialog ();
- 
+
    protected:
  	std::vector<sigc::connection> connections;
 	bool self_destruct;

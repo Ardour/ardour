@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ using namespace ARDOUR;
 EditorGroupTabs::EditorGroupTabs (Editor* e)
 	: GroupTabs (e)
 {
-	
+
 }
 
 list<GroupTabs::Tab>
@@ -48,7 +48,7 @@ EditorGroupTabs::compute_tabs () const
 		if ((*i)->marked_for_display() == false) {
 			continue;
 		}
-		
+
 		RouteGroup* g = (*i)->route_group ();
 
 		if (g != tab.group) {
@@ -85,7 +85,7 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 	} else {
 		cairo_set_source_rgba (cr, 1, 1, 1, 0.2);
 	}
-	
+
 	cairo_move_to (cr, 0, tab.from + arc_radius);
 	cairo_arc (cr, _width, tab.from + arc_radius, arc_radius, M_PI, 3 * M_PI / 2);
 	cairo_line_to (cr, _width, tab.to);
@@ -116,7 +116,7 @@ void
 EditorGroupTabs::reflect_tabs (list<Tab> const & tabs)
 {
 	list<Tab>::const_iterator j = tabs.begin ();
-	
+
 	int32_t y = 0;
 	for (Editor::TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
 
@@ -128,12 +128,12 @@ EditorGroupTabs::reflect_tabs (list<Tab> const & tabs)
 		if (rtv) {
 
 			if (j == tabs.end()) {
-				
+
 				/* already run out of tabs, so no edit group */
 				rtv->route()->set_route_group (0, this);
-				
+
 			} else {
-				
+
 				if (y >= j->to) {
 					/* this tab finishes before this track starts, so onto the next tab */
 					++j;
@@ -146,7 +146,7 @@ EditorGroupTabs::reflect_tabs (list<Tab> const & tabs)
 				} else {
 					rtv->route()->set_route_group (0, this);
 				}
-				
+
 			}
 		}
 

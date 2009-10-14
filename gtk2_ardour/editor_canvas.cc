@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2005 Paul Davis 
+    Copyright (C) 2005 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,22 +69,22 @@ GType gnome_canvas_imageframe_get_type(void);
 
 }
 
-static void ardour_canvas_type_init() 
+static void ardour_canvas_type_init()
 {
 	// Map gtypes to gtkmm wrapper-creation functions:
-	
+
 	Glib::wrap_register(gnome_canvas_simpleline_get_type(), &Gnome::Canvas::SimpleLine_Class::wrap_new);
 	Glib::wrap_register(gnome_canvas_simplerect_get_type(), &Gnome::Canvas::SimpleRect_Class::wrap_new);
 	Glib::wrap_register(gnome_canvas_waveview_get_type(), &Gnome::Canvas::WaveView_Class::wrap_new);
 	// Glib::wrap_register(gnome_canvas_imageframe_get_type(), &Gnome::Canvas::ImageFrame_Class::wrap_new);
-	
+
 	// Register the gtkmm gtypes:
 
 	(void) Gnome::Canvas::WaveView::get_type();
 	(void) Gnome::Canvas::SimpleLine::get_type();
 	(void) Gnome::Canvas::SimpleRect::get_type();
 	(void) Gnome::Canvas::ImageFrame::get_type();
-} 
+}
 
 void
 Editor::initialize_canvas ()
@@ -94,7 +94,7 @@ Editor::initialize_canvas ()
 	} else {
 		track_canvas = new ArdourCanvas::CanvasAA ();
 	}
-	
+
 	ArdourCanvas::init ();
 	ardour_canvas_type_init ();
 
@@ -120,11 +120,11 @@ Editor::initialize_canvas ()
 	verbose_canvas_cursor->property_anchor() = ANCHOR_NW;
 
 	delete font;
-	
+
 	verbose_cursor_visible = false;
 
 	/* on the bottom, an image */
-	
+
 	if (Profile->get_sae()) {
 		Image img (::get_icon (X_("saelogo")));
 		logo_item = new ArdourCanvas::Pixbuf (*track_canvas->root(), 0.0, 0.0, img.get_pixbuf());
@@ -135,7 +135,7 @@ Editor::initialize_canvas ()
 		logo_item->show ();
 	}
 
-	/* a group to hold time (measure) lines */	
+	/* a group to hold time (measure) lines */
 	time_line_group = new ArdourCanvas::Group (*track_canvas->root());
 
 #ifdef GTKOSX
@@ -186,7 +186,7 @@ Editor::initialize_canvas ()
 		range_marker_bar->property_outline_pixels() = 0;
 	}
 	range_marker_bar->property_outline_what() = (0x1 | 0x8);
-	
+
 	transport_marker_bar_group = new ArdourCanvas::Group (*track_canvas->root ());
 	if (Profile->get_sae()) {
 		transport_marker_bar = new ArdourCanvas::SimpleRect (*transport_marker_bar_group, 0.0, 0.0,  physical_screen_width, (timebar_height - 1));
@@ -206,7 +206,7 @@ Editor::initialize_canvas ()
 		marker_bar->property_outline_pixels() = 0;
 	}
 	marker_bar->property_outline_what() = (0x1 | 0x8);
-	
+
 	cd_marker_bar_group = new ArdourCanvas::Group (*track_canvas->root ());
 	if (Profile->get_sae()) {
 		cd_marker_bar = new ArdourCanvas::SimpleRect (*cd_marker_bar_group, 0.0, 0.0, physical_screen_width, (timebar_height - 1));
@@ -245,27 +245,27 @@ Editor::initialize_canvas ()
 	transport_punchin_line->property_x2() = 0.0;
 	transport_punchin_line->property_y2() = physical_screen_height;
 	transport_punchin_line->hide ();
-	
+
 	transport_punchout_line  = new ArdourCanvas::SimpleLine (*_master_group);
 	transport_punchout_line->property_x1() = 0.0;
 	transport_punchout_line->property_y1() = 0.0;
 	transport_punchout_line->property_x2() = 0.0;
 	transport_punchout_line->property_y2() = physical_screen_height;
 	transport_punchout_line->hide();
-	
+
 	// used to show zoom mode active zooming
 	zoom_rect = new ArdourCanvas::SimpleRect (*_master_group, 0.0, 0.0, 0.0, 0.0);
 	zoom_rect->property_outline_pixels() = 1;
 	zoom_rect->hide();
-	
+
 	zoom_rect->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_zoom_rect_event), (ArdourCanvas::Item*) 0));
-	
+
 	// used as rubberband rect
 	rubberband_rect = new ArdourCanvas::SimpleRect (*_trackview_group, 0.0, 0.0, 0.0, 0.0);
 
 	rubberband_rect->property_outline_pixels() = 1;
 	rubberband_rect->hide();
-	
+
 	tempo_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_tempo_bar_event), tempo_bar));
 	meter_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_meter_bar_event), meter_bar));
 	marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_marker_bar_event), marker_bar));
@@ -295,7 +295,7 @@ Editor::initialize_canvas ()
 	/* set up drag-n-drop */
 
 	vector<TargetEntry> target_table;
-	
+
 	// Drag-N-Drop from the region list can generate this target
 	target_table.push_back (TargetEntry ("regions"));
 
@@ -336,7 +336,7 @@ Editor::track_canvas_size_allocated ()
 			height += (*i)->effective_height ();
 			(*i)->clip_to_viewport ();
 		}
-		
+
 		full_canvas_height = height + canvas_timebars_vsize;
 	}
 
@@ -344,7 +344,7 @@ Editor::track_canvas_size_allocated ()
 		if (playhead_cursor) {
 			playhead_cursor->set_length (_canvas_height);
 		}
- 	
+
 		for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
 			(*x)->set_line_vpos (0, _canvas_height);
 		}
@@ -352,7 +352,7 @@ Editor::track_canvas_size_allocated ()
 		vertical_adjustment.set_page_size (_canvas_height);
 		last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
 		if ((vertical_adjustment.get_value() + _canvas_height) >= vertical_adjustment.get_upper()) {
-			/* 
+			/*
 			   We're increasing the size of the canvas while the bottom is visible.
 			   We scroll down to keep in step with the controls layout.
 			*/
@@ -381,14 +381,14 @@ Editor::controls_layout_size_request (Requisition* req)
 	}
 
 	gint height = min ((gint) pos, (gint) (physical_screen_height - 600));
-	
+
 	bool changed = false;
 
 	gint w = edit_controls_vbox.get_width();
 	if (_group_tabs->is_mapped()) {
 		w += _group_tabs->get_width ();
 	}
-		
+
 	gint width = max (w, controls_layout.get_width());
 
 	/* don't get too big. the fudge factors here are just guesses */
@@ -407,7 +407,7 @@ Editor::controls_layout_size_request (Requisition* req)
 		}
 		req->width = width;
 
-		/* this one is important: it determines how big the layout thinks it really is, as 
+		/* this one is important: it determines how big the layout thinks it really is, as
 		   opposed to what it displays on the screen
 		*/
 		controls_layout.property_width () = vbox_width;
@@ -426,7 +426,7 @@ Editor::controls_layout_size_request (Requisition* req)
 	if (changed) {
 		controls_layout_size_request_connection = controls_layout.signal_size_request().connect (mem_fun (*this, &Editor::controls_layout_size_request));
 	}
-	//cerr << "sizes = " << req->width << " " << edit_controls_vbox.get_width() << " " << controls_layout.get_width() << " " << zoom_box.get_width() << " " << time_button_frame.get_width() << endl;//DEBUG	
+	//cerr << "sizes = " << req->width << " " << edit_controls_vbox.get_width() << " " << controls_layout.get_width() << " " << zoom_box.get_width() << " " << time_button_frame.get_width() << endl;//DEBUG
 }
 
 bool
@@ -438,9 +438,9 @@ Editor::track_canvas_map_handler (GdkEventAny* /*ev*/)
 	return false;
 }
 
-void  
+void
 Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context,
-					 int x, int y, 
+					 int x, int y,
 					 const SelectionData& data,
 					 guint info, guint time)
 {
@@ -471,21 +471,21 @@ Editor::drop_paths_part_two (const vector<ustring>& paths, nframes64_t frame, do
 		frame = 0;
 
 		if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
-			do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, frame); 
+			do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, frame);
 		} else {
 			do_embed (paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
 		}
-		
+
 	} else if ((tv = dynamic_cast<RouteTimeAxisView*> (tvp.first)) != 0) {
 
 		/* check that its an audio track, not a bus */
-		
+
 		if (tv->get_diskstream()) {
 			/* select the track, then embed/import */
 			selection->set (tv);
 
 			if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
-				do_import (paths, Editing::ImportSerializeFiles, Editing::ImportToTrack, SrcBest, frame); 
+				do_import (paths, Editing::ImportSerializeFiles, Editing::ImportToTrack, SrcBest, frame);
 			} else {
 				do_embed (paths, Editing::ImportSerializeFiles, ImportToTrack, frame);
 			}
@@ -495,7 +495,7 @@ Editor::drop_paths_part_two (const vector<ustring>& paths, nframes64_t frame, do
 
 void
 Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
-		    int x, int y, 
+		    int x, int y,
 		    const SelectionData& data,
 		    guint info, guint time)
 {
@@ -507,20 +507,20 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 	double cy;
 
 	if (convert_drop_to_paths (paths, context, x, y, data, info, time) == 0) {
-		
+
 		/* D-n-D coordinates are window-relative, so convert to "world" coordinates
 		 */
 
 		track_canvas->window_to_world (x, y, wx, wy);
-		
+
 		ev.type = GDK_BUTTON_RELEASE;
 		ev.button.x = wx;
 		ev.button.y = wy;
-		
+
 		frame = event_frame (&ev, 0, &cy);
-		
+
 		snap_to (frame);
-		
+
 #ifdef GTKOSX
 		/* We are not allowed to call recursive main event loops from within
 		   the main event loop with GTK/Quartz. Since import/embed wants
@@ -537,7 +537,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 
 void
 Editor::drop_regions (const RefPtr<Gdk::DragContext>& /*context*/,
-		      int /*x*/, int /*y*/, 
+		      int /*x*/, int /*y*/,
 		      const SelectionData& /*data*/,
 		      guint /*info*/, guint /*time*/)
 {
@@ -586,7 +586,7 @@ Editor::maybe_autoscroll (GdkEventMotion* event, bool allow_vert)
 	if ((autoscroll_x != last_autoscroll_x) || (autoscroll_y != last_autoscroll_y) || (autoscroll_x == 0 && autoscroll_y == 0)) {
 		stop_canvas_autoscroll ();
 	}
-	
+
 	if (startit && autoscroll_timeout_tag < 0) {
 		start_canvas_autoscroll (autoscroll_x, autoscroll_y);
 	}
@@ -672,13 +672,13 @@ Editor::autoscroll_canvas ()
 		new_pixel = min (top_of_bottom_of_canvas, new_pixel);
 
 		target_pixel = _drag->current_pointer_y() + autoscroll_y_distance;
-		
+
 		/* don't move to the full canvas height because the item will be invisible
 		   (its top edge will line up with the bottom of the visible canvas.
 		*/
 
 		target_pixel = min (target_pixel, full_canvas_height - 10);
-		
+
 	} else {
 	  	target_pixel = _drag->current_pointer_y();
 		new_pixel = vertical_pos;
@@ -717,7 +717,7 @@ Editor::autoscroll_canvas ()
 		autoscroll_timeout_tag = g_idle_add ( _autoscroll_canvas, this);
 		return false;
 
-	} 
+	}
 
 	return true;
 }
@@ -737,7 +737,7 @@ Editor::start_canvas_autoscroll (int dx, int dy)
 	autoscroll_x_distance = (nframes64_t) floor (current_page_frames()/50.0);
 	autoscroll_y_distance = fabs (dy * 5); /* pixels */
 	autoscroll_cnt = 0;
-	
+
 	/* do it right now, which will start the repeated callbacks */
 
 	autoscroll_canvas ();
@@ -921,7 +921,7 @@ Editor::update_canvas_now ()
 	   and need_redraw to FALSE without checking to see if an idle handler is scheduled.
 	   If one is scheduled, GC should probably remove it.
 	*/
-	
+
 	GnomeCanvas* c = track_canvas->gobj ();
 	if (c->need_update || c->need_redraw) {
 		track_canvas->update_now ();

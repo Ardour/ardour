@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001 Paul Davis 
+    Copyright (C) 2001 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@
 using namespace std;
 using namespace ARDOUR;
 
-Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, const string& annotation, 
+Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, const string& annotation,
 		Type type, nframes_t frame, bool handle_events)
 
 	: editor (ed), _parent(&parent), _type(type)
@@ -55,7 +55,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	     ^        |
 	     |	      V
            (0,5)    (6,5)
-	       \    / 
+	       \    /
                (3,10)
 
 
@@ -72,17 +72,17 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
            Start:
 
-	   0,0\ 
-       	    |  \        
+	   0,0\
+       	    |  \
             |   \ 6,6
 	    |	/
             |  /
-           0,12 
+           0,12
 
 	   End:
 
 	       /12,0
-	      /     | 
+	      /     |
              /      |
 	   6,6      |
              \      |
@@ -90,15 +90,15 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
                \    |
 	       12,12
 
-	     
+
 	   TransportStart:
 
 	     0,0
-	      | \ 
-	      |  \ 
-	      |   \ 
+	      | \
+	      |  \
+	      |   \
 	      |    \
-	      |     \  
+	      |     \
 	     0,13 --- 13,13
 
 	   TransportEnd:
@@ -110,7 +110,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	        /      |
 	       /       |
 	     0,13 ------ 13,13
-	     
+
 
 	     PunchIn:
 
@@ -118,23 +118,23 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	      |       /
 	      |      /
 	      |     /
-	      |    / 
-	      |   / 
-	      |  / 
+	      |    /
+	      |   /
+	      |  /
 	     0,13
 
 	     PunchOut
 
 	   0,0 -->-13,0
-	    \       | 
+	    \       |
 	     \      |
 	      \     |
 	       \    |
 	        \   |
 	         \  |
 	         13,13
-	     
-	   
+
+
 	*/
 
 	switch (type) {
@@ -144,10 +144,10 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
 		points->push_back (Gnome::Art::Point (6.0, 0.0));
 		points->push_back (Gnome::Art::Point (6.0, 5.0));
-		points->push_back (Gnome::Art::Point (3.0, 10.0));		
-		points->push_back (Gnome::Art::Point (0.0, 5.0));		
-		points->push_back (Gnome::Art::Point (0.0, 0.0));		
-		
+		points->push_back (Gnome::Art::Point (3.0, 10.0));
+		points->push_back (Gnome::Art::Point (0.0, 5.0));
+		points->push_back (Gnome::Art::Point (0.0, 0.0));
+
 		shift = 3;
 		label_offset = 8.0;
 		break;
@@ -157,11 +157,11 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 		points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (3.0, 0.0));
-		points->push_back (Gnome::Art::Point (6.0, 5.0));		
-		points->push_back (Gnome::Art::Point (6.0, 10.0));  		
-		points->push_back (Gnome::Art::Point (0.0, 10.0));		
-		points->push_back (Gnome::Art::Point (0.0, 5.0)); 		
-		points->push_back (Gnome::Art::Point (3.0, 0.0));  		
+		points->push_back (Gnome::Art::Point (6.0, 5.0));
+		points->push_back (Gnome::Art::Point (6.0, 10.0));
+		points->push_back (Gnome::Art::Point (0.0, 10.0));
+		points->push_back (Gnome::Art::Point (0.0, 5.0));
+		points->push_back (Gnome::Art::Point (3.0, 0.0));
 
 		shift = 3;
 		label_offset = 8.0;
@@ -169,10 +169,10 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 	case Start:
 	        points = new ArdourCanvas::Points ();
-		points->push_back (Gnome::Art::Point (0.0, 0.0)); 		
-		points->push_back (Gnome::Art::Point (6.5, 6.5)); 		
-		points->push_back (Gnome::Art::Point (0.0, 13.0)); 		
-		points->push_back (Gnome::Art::Point (0.0, 0.0));	
+		points->push_back (Gnome::Art::Point (0.0, 0.0));
+		points->push_back (Gnome::Art::Point (6.5, 6.5));
+		points->push_back (Gnome::Art::Point (0.0, 13.0));
+		points->push_back (Gnome::Art::Point (0.0, 0.0));
 
 		shift = 0;
 		label_offset = 13.0;
@@ -181,21 +181,21 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	case End:
 		points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (6.5, 6.5));
-		points->push_back (Gnome::Art::Point (13.0, 0.0));		
-		points->push_back (Gnome::Art::Point (13.0, 13.0));			
-		points->push_back (Gnome::Art::Point (6.5, 6.5));		
-		
+		points->push_back (Gnome::Art::Point (13.0, 0.0));
+		points->push_back (Gnome::Art::Point (13.0, 13.0));
+		points->push_back (Gnome::Art::Point (6.5, 6.5));
+
 		shift = 13;
 		label_offset = 6.0;
 		break;
 
 	case LoopStart:
 		points = new ArdourCanvas::Points ();
-		points->push_back (Gnome::Art::Point (0.0, 0.0));	
-		points->push_back (Gnome::Art::Point (13.0, 13.0));		
-		points->push_back (Gnome::Art::Point (0.0, 13.0));		
-		points->push_back (Gnome::Art::Point (0.0, 0.0));		
-		
+		points->push_back (Gnome::Art::Point (0.0, 0.0));
+		points->push_back (Gnome::Art::Point (13.0, 13.0));
+		points->push_back (Gnome::Art::Point (0.0, 13.0));
+		points->push_back (Gnome::Art::Point (0.0, 0.0));
+
 		shift = 0;
 		label_offset = 12.0;
 		break;
@@ -203,10 +203,10 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	case LoopEnd:
 		points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (13.0,  0.0));
-		points->push_back (Gnome::Art::Point (13.0, 13.0));	
-		points->push_back (Gnome::Art::Point (0.0, 13.0));		
+		points->push_back (Gnome::Art::Point (13.0, 13.0));
+		points->push_back (Gnome::Art::Point (0.0, 13.0));
 		points->push_back (Gnome::Art::Point (13.0, 0.0));
-		
+
 		shift = 13;
 		label_offset = 0.0;
 		break;
@@ -214,25 +214,25 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	case  PunchIn:
 		points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
-		points->push_back (Gnome::Art::Point (13.0, 0.0));		
-		points->push_back (Gnome::Art::Point (0.0, 13.0));	
-		points->push_back (Gnome::Art::Point (0.0, 0.0));	
+		points->push_back (Gnome::Art::Point (13.0, 0.0));
+		points->push_back (Gnome::Art::Point (0.0, 13.0));
+		points->push_back (Gnome::Art::Point (0.0, 0.0));
 
 		shift = 0;
 		label_offset = 13.0;
 		break;
-		
+
 	case  PunchOut:
 		points = new ArdourCanvas::Points ();
 		points->push_back (Gnome::Art::Point (0.0, 0.0));
-		points->push_back (Gnome::Art::Point (12.0, 0.0));			
-		points->push_back (Gnome::Art::Point (12.0, 12.0));		
-		points->push_back (Gnome::Art::Point (0.0, 0.0));		
+		points->push_back (Gnome::Art::Point (12.0, 0.0));
+		points->push_back (Gnome::Art::Point (12.0, 12.0));
+		points->push_back (Gnome::Art::Point (0.0, 0.0));
 
 		shift = 13;
 		label_offset = 0.0;
 		break;
-		
+
 	}
 
 	frame_position = frame;
@@ -252,24 +252,24 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 	/* setup name pixbuf sizes */
 	name_font = get_font_for_style (N_("MarkerText"));
-	
+
 	Gtk::Window win;
 	Gtk::Label foo;
 	win.add (foo);
-	
+
 	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (X_("Hg")); /* ascender + descender */
 	int width;
 	int height;
-	
+
 	layout->set_font_description (*name_font);
 	Gtkmm2ext::get_ink_pixel_size (layout, width, height);
 	name_height = height + 6;
-	
+
 	name_pixbuf = new ArdourCanvas::Pixbuf(*group);
 	name_pixbuf->property_x() = label_offset;
-	
+
 	set_name (annotation.c_str());
-	
+
 	editor.ZoomChanged.connect (mem_fun (*this, &Marker::reposition));
 
 	mark->set_data ("marker", this);
@@ -339,7 +339,7 @@ Marker::show_line ()
 	}
 }
 
-void 
+void
 Marker::hide_line ()
 {
 	if (line) {
@@ -358,12 +358,12 @@ Marker::set_name (const string& new_name)
 {
 	uint32_t pb_width;
 	double font_size;
-	
+
 	font_size = name_font->get_size() / Pango::SCALE;
 	pb_width = new_name.length() * font_size;
-	
+
 	Glib::RefPtr<Gdk::Pixbuf> buf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, pb_width, name_height);
-	
+
 	cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, pb_width, name_height);
 	cairo_t *cr = cairo_create (surface);
 	cairo_text_extents_t te;
@@ -372,21 +372,21 @@ Marker::set_name (const string& new_name)
 				CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 	cairo_set_font_size (cr, font_size);
 	cairo_text_extents (cr, new_name.c_str(), &te);
-	
+
 	cairo_move_to (cr, 0.5,
 		       0.5 - te.height / 2 - te.y_bearing + name_height / 2);
 	cairo_show_text (cr, new_name.c_str());
-	
+
 	unsigned char* src = cairo_image_surface_get_data (surface);
 	convert_bgra_to_rgba(src, buf->get_pixels(), pb_width, name_height);
-	
+
 	cairo_destroy(cr);
 	name_pixbuf->property_pixbuf() = buf;
-	
+
 	if (_type == End || _type == LoopEnd || _type == PunchOut) {
 		name_pixbuf->property_x() = -(te.width);
         }
-	
+
 }
 
 void
@@ -408,7 +408,7 @@ void
 Marker::reposition ()
 {
 	set_position (frame_position);
-}	
+}
 
 void
 Marker::show ()
@@ -431,7 +431,7 @@ Marker::set_color_rgba (uint32_t color)
 
 /***********************************************************************/
 
-TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, 
+TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text,
 			  ARDOUR::TempoSection& temp)
 	: Marker (editor, parent, rgba, text, Tempo, 0, false),
 	  _tempo (temp)
@@ -446,8 +446,8 @@ TempoMarker::~TempoMarker ()
 
 /***********************************************************************/
 
-MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text, 
-			  ARDOUR::MeterSection& m) 
+MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Group& parent, guint32 rgba, const string& text,
+			  ARDOUR::MeterSection& m)
 	: Marker (editor, parent, rgba, text, Meter, 0, false),
 	  _meter (m)
 {

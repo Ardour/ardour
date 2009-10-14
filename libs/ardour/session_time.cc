@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 1999-2002 Paul Davis 
+  Copyright (C) 1999-2002 Paul Davis
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -57,43 +57,43 @@ float
 Session::smpte_frames_per_second() const
 {
 	switch (config.get_smpte_format()) {
-		case smpte_23976: 
+		case smpte_23976:
 			return 23.976;
 
 			break;
-		case smpte_24: 
+		case smpte_24:
 			return 24;
 
 			break;
-		case smpte_24976: 
+		case smpte_24976:
 			return 24.976;
 
 			break;
-		case smpte_25: 
+		case smpte_25:
 			return 25;
 
 			break;
-		case smpte_2997: 
+		case smpte_2997:
 			return 29.97;
 
 			break;
-		case smpte_2997drop: 
+		case smpte_2997drop:
 			return 29.97;
 
 			break;
-		case smpte_30: 
+		case smpte_30:
 			return 30;
 
 			break;
-		case smpte_30drop: 
+		case smpte_30drop:
 			return 30;
 
 			break;
-		case smpte_5994: 
+		case smpte_5994:
 			return 59.94;
 
 			break;
-		case smpte_60: 
+		case smpte_60:
 			return 60;
 
 			break;
@@ -106,43 +106,43 @@ bool
 Session::smpte_drop_frames() const
 {
 	switch (config.get_smpte_format()) {
-		case smpte_23976: 
+		case smpte_23976:
 			return false;
 
 			break;
-		case smpte_24: 
+		case smpte_24:
 			return false;
 
 			break;
-		case smpte_24976: 
+		case smpte_24976:
 			return false;
 
 			break;
-		case smpte_25: 
+		case smpte_25:
 			return false;
 
 			break;
-		case smpte_2997: 
+		case smpte_2997:
 			return false;
 
 			break;
-		case smpte_2997drop: 
+		case smpte_2997drop:
 			return true;
 
 			break;
-		case smpte_30: 
+		case smpte_30:
 			return false;
 
 			break;
-		case smpte_30drop: 
+		case smpte_30drop:
 			return true;
 
 			break;
-		case smpte_5994: 
+		case smpte_5994:
 			return false;
 
 			break;
-		case smpte_60: 
+		case smpte_60:
 			return false;
 
 			break;
@@ -219,9 +219,9 @@ Session::smpte_to_sample( SMPTE::Time& smpte, nframes_t& sample, bool use_offset
 		// approx. 0.2 frames too early. This adds up with 0.2 too early for each minute until we are 1.8
 		// frames too early at 0:9:0:2 (9 * 0.2 = 1.8). The 10th minute brings us 1.8 frames later again
 		// (at end of 0:9:59:29), which sums up to 0 (we are back to zero at 0:10:0:0 :-).
-		// 
+		//
 		// In table form:
-		// 
+		//
 		// SMPTE value    frames offset   subframes offset   seconds (rounded)  44100 sample (rounded)
 		//  0:00:00:00        0.0             0                     0.000                0 (accurate)
 		//  0:00:59:29        1.8           144                    60.027          2647177
@@ -257,20 +257,20 @@ Session::smpte_to_sample( SMPTE::Time& smpte, nframes_t& sample, bool use_offset
 		nframes_t exceeding_samples = (nframes_t) rint(exceeding_df_frames * _frames_per_smpte_frame);
 		sample = base_samples + exceeding_samples;
 	} else {
-		/* 
-		   Non drop is easy.. just note the use of 
+		/*
+		   Non drop is easy.. just note the use of
 		   rint(smpte.rate) * _frames_per_smpte_frame
-		   (frames per SMPTE second), which is larger than  
+		   (frames per SMPTE second), which is larger than
 		   frame_rate() in the non-integer SMPTE rate case.
 		*/
 
 		sample = (nframes_t)rint((((smpte.hours * 60 * 60) + (smpte.minutes * 60) + smpte.seconds) * (rint(smpte.rate) * _frames_per_smpte_frame)) + (smpte.frames * _frames_per_smpte_frame));
 	}
-  
+
 	if (use_subframes) {
 		sample += (long) (((double)smpte.subframes * _frames_per_smpte_frame) / config.get_subframes_per_frame());
 	}
-  
+
 	if (use_offset) {
 		if (smpte_offset_negative()) {
 			if (sample >= smpte_offset()) {
@@ -317,11 +317,11 @@ Session::sample_to_smpte( nframes_t sample, SMPTE::Time& smpte, bool use_offset,
 			}
 		}
 	}
-  
+
 	double smpte_frames_left_exact;
 	double smpte_frames_fraction;
 	unsigned long smpte_frames_left;
-  
+
 	// Extract whole hours. Do this to prevent rounding errors with
 	// high sample numbers in the calculations that follow.
 	smpte.hours = offset_sample / _frames_per_hour;
@@ -331,7 +331,7 @@ Session::sample_to_smpte( nframes_t sample, SMPTE::Time& smpte, bool use_offset,
 	smpte_frames_left_exact = (double) offset_sample / _frames_per_smpte_frame;
 	smpte_frames_fraction = smpte_frames_left_exact - floor( smpte_frames_left_exact );
 	smpte.subframes = (long) rint(smpte_frames_fraction * config.get_subframes_per_frame());
-  
+
 	// XXX Not sure if this is necessary anymore...
 	if (smpte.subframes == config.get_subframes_per_frame()) {
 		// This can happen with 24 fps (and 29.97 fps ?)
@@ -357,7 +357,7 @@ Session::sample_to_smpte( nframes_t sample, SMPTE::Time& smpte, bool use_offset,
 			exceeding_df_frames -= extra_minutes_minus_1 * 1798; // take away the (extra) minutes just found
 			smpte.minutes += extra_minutes_minus_1 + 1; // update with exceeding minutes
 		}
-    
+
 		// Adjust frame numbering for dropped frames (frame 0 and 1 skipped at start of every minute except every 10th)
 		if (smpte.minutes % 10) {
 			// Every minute except every 10th
@@ -414,7 +414,7 @@ Session::smpte_time_subframes (nframes_t when, SMPTE::Time& smpte)
 		smpte = last_smpte;
 		return;
 	}
-  
+
 	sample_to_smpte( when, smpte, true /* use_offset */, true /* use_subframes */ );
 
 	last_smpte_when = when;
@@ -453,13 +453,13 @@ Session::jack_sync_callback (jack_transport_state_t state,
 	switch (state) {
 	case JackTransportStopped:
 		if (slave && _transport_frame != pos->frame && post_transport_work == 0) {
-		 	request_locate (pos->frame, false);
+			request_locate (pos->frame, false);
 			// cerr << "SYNC: stopped, locate to " << pos->frame << " from " << _transport_frame << endl;
 			return false;
 		} else {
 			return true;
 		}
-		
+
 	case JackTransportStarting:
 		// cerr << "SYNC: starting @ " << pos->frame << " a@ " << _transport_frame << " our work = " <<  post_transport_work << " pos matches ? " << (_transport_frame == pos->frame) << endl;
 		if (slave) {
@@ -479,7 +479,7 @@ Session::jack_sync_callback (jack_transport_state_t state,
 	default:
 		error << string_compose (_("Unknown JACK transport state %1 in sync callback"), state)
 		      << endmsg;
-	} 
+	}
 
 	return true;
 }
@@ -498,12 +498,12 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 	pos->valid = JackPositionTimecode;
 
 	/* BBT info */
-	
+
 	if (_tempo_map) {
 
 		TempoMap::Metric metric (_tempo_map->metric_at (_transport_frame));
 		_tempo_map->bbt_time_with_metric (_transport_frame, bbt, metric);
-		
+
 		pos->bar = bbt.bars;
 		pos->beat = bbt.beats;
 		pos->tick = bbt.ticks;
@@ -559,16 +559,16 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 
 		}
 
-	} 
+	}
 
-#endif		
+#endif
 }
 
 ARDOUR::nframes_t
 Session::convert_to_frames_at (nframes_t /*position*/, AnyTime const & any)
 {
 	double secs;
-	
+
 	switch (any.type) {
 	case AnyTime::BBT:
 		return _tempo_map->frame_time ( any.bbt);
@@ -580,7 +580,7 @@ Session::convert_to_frames_at (nframes_t /*position*/, AnyTime const & any)
 		secs += any.smpte.minutes * 60;
 		secs += any.smpte.seconds;
 		secs += any.smpte.frames / smpte_frames_per_second();
-		if (_smpte_offset_negative) 
+		if (_smpte_offset_negative)
 		{
 			return (nframes_t) floor (secs * frame_rate()) - _smpte_offset;
 		}

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004 Paul Davis 
+    Copyright (C) 2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 
 	  preroll_button (_("With Pre-roll")),
 	  postroll_button (_("With Post-roll")),
-	  
+
 	  miny (my),
 	  maxy (mxy),
 
@@ -124,7 +124,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 	canvas = new ArdourCanvas::CanvasAA ();
 	canvas->signal_size_allocate().connect (mem_fun(*this, &CrossfadeEditor::canvas_allocation));
 	canvas->set_size_request (425, 200);
-	
+
 	toplevel = new ArdourCanvas::SimpleRect (*(canvas->root()));
 	toplevel->property_x1() =  0.0;
 	toplevel->property_y1() =  0.0;
@@ -134,21 +134,21 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 	toplevel->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorBase.get();
 	toplevel->property_outline_pixels() =  0;
 	toplevel->signal_event().connect (mem_fun (*this, &CrossfadeEditor::canvas_event));
-	
+
 	fade[Out].line = new ArdourCanvas::Line (*(canvas->root()));
 	fade[Out].line->property_width_pixels() = 1;
 	fade[Out].line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorLine.get();
-		
+
 	fade[Out].shading = new ArdourCanvas::Polygon (*(canvas->root()));
 	fade[Out].shading->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorLineShading.get();
 
 	fade[In].line = new ArdourCanvas::Line (*(canvas->root()));
 	fade[In].line->property_width_pixels() = 1;
 	fade[In].line->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorLine.get();
-		
+
 	fade[In].shading = new ArdourCanvas::Polygon (*(canvas->root()));
 	fade[In].shading->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorLineShading.get();
-	
+
 	fade[In].shading->signal_event().connect (mem_fun (*this, &CrossfadeEditor::canvas_event));
 	fade[In].line->signal_event().connect (mem_fun (*this, &CrossfadeEditor::curve_event));
 	fade[Out].shading->signal_event().connect (mem_fun (*this, &CrossfadeEditor::canvas_event));
@@ -161,7 +161,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 	select_out_button.signal_clicked().connect (bind (mem_fun (*this, &CrossfadeEditor::curve_select_clicked), Out));
 
 	HBox* acbox = manage (new HBox);
-	
+
 	audition_box.set_border_width (7);
 	audition_box.set_spacing (5);
 	audition_box.set_homogeneous (false);
@@ -172,7 +172,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 	audition_box.pack_start (audition_right_dry_button, false, false);
 
 	Frame* audition_frame = manage (new Frame (_("Audition")));
-	
+
 	audition_frame->set_name (X_("CrossfadeEditFrame"));
 	audition_frame->add (audition_box);
 
@@ -271,7 +271,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 	curve_button_box.pack_start (fade_out_table, false, false, 12);
 	curve_button_box.pack_start (*vpacker2, false, false, 12);
 	curve_button_box.pack_start (fade_in_table, false, false, 12);
-	
+
 	get_vbox()->pack_start (*canvas_frame, true, true);
 	get_vbox()->pack_start (curve_button_box, false, false);
 
@@ -339,7 +339,7 @@ CrossfadeEditor::set (const ARDOUR::AutomationList& curve, WhichFade which)
 	for (list<Point*>::iterator i = fade[which].points.begin(); i != fade[which].points.end(); ++i) {
 			delete *i;
 	}
-	
+
 	fade[which].points.clear ();
 	fade[which].gain_curve.clear ();
 	fade[which].normative_curve.clear ();
@@ -347,30 +347,30 @@ CrossfadeEditor::set (const ARDOUR::AutomationList& curve, WhichFade which)
 	if (curve.empty()) {
 		goto out;
 	}
-	
+
 	the_end = curve.end();
 	--the_end;
-	
+
 	firstx = (*curve.begin())->when;
 	endx = (*the_end)->when;
 
 	for (ARDOUR::AutomationList::const_iterator i = curve.begin(); i != curve.end(); ++i) {
-		
+
 		double xfract = ((*i)->when - firstx) / (endx - firstx);
 		double yfract = ((*i)->value - miny) / (maxy - miny);
-		
+
 		Point* p = make_point ();
 
 		p->move_to (x_coordinate (xfract), y_coordinate (yfract),
 			    xfract, yfract);
-		
+
 		fade[which].points.push_back (p);
 	}
 
 	/* no need to sort because curve is already time-ordered */
 
   out:
-	
+
 	swap (which, current);
 	redraw ();
 	swap (which, current);
@@ -402,7 +402,7 @@ CrossfadeEditor::point_event (GdkEvent* event, Point* point)
 		if (Keyboard::is_delete_event (&event->button)) {
 			fade[current].points.remove (point);
 			delete point;
-		} 
+		}
 
 		redraw ();
 		break;
@@ -420,7 +420,7 @@ CrossfadeEditor::point_event (GdkEvent* event, Point* point)
 			}
 
 			new_y = 1.0 - ((event->motion.y - canvas_border)/effective_height());
-			point->move_to (x_coordinate (new_x), y_coordinate (new_y), 
+			point->move_to (x_coordinate (new_x), y_coordinate (new_y),
 					new_x, new_y);
 			redraw ();
 		}
@@ -465,7 +465,7 @@ CrossfadeEditor::make_point ()
 	p->curve = fade[current].line;
 
 	p->box->signal_event().connect (bind (mem_fun (*this, &CrossfadeEditor::point_event), p));
-	
+
 	return p;
 }
 
@@ -475,12 +475,12 @@ CrossfadeEditor::add_control_point (double x, double y)
 	PointSorter cmp;
 
 	/* enforce end point x location */
-	
+
 	if (fade[current].points.empty()) {
 		x = 0.0;
 	} else if (fade[current].points.size() == 1) {
 		x = 1.0;
-	} 
+	}
 
 	Point* p = make_point ();
 
@@ -518,9 +518,9 @@ CrossfadeEditor::canvas_allocation (Gtk::Allocation& /*alloc*/)
 		toplevel->property_x2() = (double) canvas->get_allocation().get_width() + canvas_border;
 		toplevel->property_y2() = (double) canvas->get_allocation().get_height() + canvas_border;
 	}
-	
-	canvas->set_scroll_region (0.0, 0.0, 
-				   canvas->get_allocation().get_width(), 
+
+	canvas->set_scroll_region (0.0, 0.0,
+				   canvas->get_allocation().get_width(),
 				   canvas->get_allocation().get_height());
 
 	Point* end = make_point ();
@@ -547,9 +547,9 @@ CrossfadeEditor::canvas_allocation (Gtk::Allocation& /*alloc*/)
 		(*i)->move_to (x_coordinate((*i)->x), y_coordinate((*i)->y),
 			       (*i)->x, (*i)->y);
 	}
-	
+
 	end = make_point ();
-	
+
 	if (fade[Out].points.size() > 1) {
 		Point* old_end = fade[Out].points.back();
 		fade[Out].points.pop_back ();
@@ -572,7 +572,7 @@ CrossfadeEditor::canvas_allocation (Gtk::Allocation& /*alloc*/)
 			       y_coordinate ((*i)->y),
 			       (*i)->x, (*i)->y);
 	}
-	
+
 	WhichFade old_current = current;
 	current = In;
 	redraw ();
@@ -655,7 +655,7 @@ CrossfadeEditor::redraw ()
 	float vec[npoints];
 
 	fade[current].normative_curve.curve().get_vector (0, 1.0, vec, npoints);
-	
+
 	ArdourCanvas::Points pts;
 	ArdourCanvas::Points spts;
 
@@ -687,11 +687,11 @@ CrossfadeEditor::redraw ()
 		spts[2].set_x (effective_width() + canvas_border);
 		spts[2].set_y (canvas_border);
 
-		
+
 	} else {
 
 		/*  upper left */
-		
+
 		spts[0].set_x (canvas_border);
 		spts[0].set_y (canvas_border);
 
@@ -712,7 +712,7 @@ CrossfadeEditor::redraw ()
 	for (size_t i = 0; i < npoints; ++i) {
 
 		double y = vec[i];
-		
+
 		pts[i].set_x (canvas_border + i);
 		pts[i].set_y  (y_coordinate (y));
 
@@ -731,20 +731,20 @@ CrossfadeEditor::redraw ()
 void
 CrossfadeEditor::apply_preset (Preset *preset)
 {
-  
+
 	WhichFade wf =  find(fade_in_presets->begin(), fade_in_presets->end(), preset) != fade_in_presets->end() ? In : Out;
-	
+
 	if (current != wf) {
-	  
+
 	      	if (wf == In) {
 			select_in_button.clicked();
 		} else {
 			select_out_button.clicked();
 		}
-		
+
 		curve_select_clicked (wf);
-	}  
-	
+	}
+
 	for (list<Point*>::iterator i = fade[current].points.begin(); i != fade[current].points.end(); ++i) {
 		delete *i;
 	}
@@ -910,7 +910,7 @@ CrossfadeEditor::build_presets ()
 		p->push_back (PresetPoint (0.976959, 0.697222));
 		p->push_back (PresetPoint (1, 1));
 		fade_in_presets->push_back (p);
-		
+
 		p = new Preset ("Slow cut", "crossfade-in-slow-cut");
 		p->push_back (PresetPoint (0, 0));
 		p->push_back (PresetPoint (0.304147, 0.0694444));
@@ -920,7 +920,7 @@ CrossfadeEditor::build_presets ()
 		p->push_back (PresetPoint (0.919355, 0.730556));
 		p->push_back (PresetPoint (1, 1));
 		fade_in_presets->push_back (p);
-		
+
 		p = new Preset ("Fast cut", "crossfade-in-fast-cut");
 		p->push_back (PresetPoint (0, 0));
 		p->push_back (PresetPoint (0.0737327, 0.308333));
@@ -942,7 +942,7 @@ CrossfadeEditor::build_presets ()
 		p->push_back (PresetPoint (1, 1));
 		fade_in_presets->push_back (p);
 	}
-	
+
 	/* FADE OUT */
 
 	// p = new Preset ("regout.xpm");
@@ -985,7 +985,7 @@ CrossfadeEditor::build_presets ()
 	p->push_back (PresetPoint (0.833333, 0.282192));
 	p->push_back (PresetPoint (1.000000, 0.000000));
 	fade_out_presets->push_back (p);
-	
+
 	if (!Profile->get_sae()) {
 		// p = new Preset ("hiout.xpm");
 		p = new Preset ("Short cut", "crossfade-out-short-cut");
@@ -997,7 +997,7 @@ CrossfadeEditor::build_presets ()
 		p->push_back (PresetPoint (0.976852, 0.22865));
 		p->push_back (PresetPoint (1, 0));
 		fade_out_presets->push_back (p);
-		
+
 		p = new Preset ("Slow cut", "crossfade-out-slow-cut");
 		p->push_back (PresetPoint (0, 1));
 		p->push_back (PresetPoint (0.228111, 0.988889));
@@ -1007,7 +1007,7 @@ CrossfadeEditor::build_presets ()
 		p->push_back (PresetPoint (0.9262673, 0.308333));
 		p->push_back (PresetPoint (1, 0));
 		fade_out_presets->push_back (p);
-		
+
 		p = new Preset ("Fast cut", "crossfade-out-fast-cut");
 		p->push_back (PresetPoint (0, 1));
 		p->push_back (PresetPoint (0.080645, 0.730556));
@@ -1016,7 +1016,7 @@ CrossfadeEditor::build_presets ()
 		p->push_back (PresetPoint (0.695853, 0.0694444));
 		p->push_back (PresetPoint (1, 0));
 		fade_out_presets->push_back (p);
-		
+
 		// p = new Preset ("loout.xpm");
 		p = new Preset ("Long cut", "crossfade-out-long-cut");
 		p->push_back (PresetPoint (0, 1));
@@ -1027,7 +1027,7 @@ CrossfadeEditor::build_presets ()
 		p->push_back (PresetPoint (0.610599, 0.0333333));
 		p->push_back (PresetPoint (1, 0));
 		fade_out_presets->push_back (p);
-		
+
 	}
 }
 
@@ -1035,9 +1035,9 @@ void
 CrossfadeEditor::curve_select_clicked (WhichFade wf)
 {
 	current = wf;
-	
+
 	if (wf == In) {
-		
+
 		for (vector<ArdourCanvas::WaveView*>::iterator i = fade[In].waves.begin(); i != fade[In].waves.end(); ++i) {
 			(*i)->property_wave_color() = ARDOUR_UI::config()->canvasvar_SelectedCrossfadeEditorWave.get();
 			(*i)->property_fill_color() = ARDOUR_UI::config()->canvasvar_SelectedCrossfadeEditorWave.get();
@@ -1081,7 +1081,7 @@ CrossfadeEditor::curve_select_clicked (WhichFade wf)
 		for (list<Point*>::iterator i = fade[In].points.begin(); i != fade[In].points.end(); ++i) {
 			(*i)->box->hide();
 		}
-		
+
 		for (list<Point*>::iterator i = fade[Out].points.begin(); i != fade[Out].points.end(); ++i) {
 			(*i)->box->show();
 		}
@@ -1089,7 +1089,7 @@ CrossfadeEditor::curve_select_clicked (WhichFade wf)
 	}
 }
 
-double 
+double
 CrossfadeEditor::x_coordinate (double& xfract) const
 {
 	xfract = min (1.0, xfract);
@@ -1125,9 +1125,9 @@ CrossfadeEditor::make_waves (boost::shared_ptr<AudioRegion> region, WhichFade wh
 	spu = xfade->length() / (double) effective_width();
 
 	for (uint32_t n = 0; n < nchans; ++n) {
-		
+
 		gdouble yoff = n * ht;
-		
+
 		if (region->audio_source(n)->peaks_ready (bind (mem_fun(*this, &CrossfadeEditor::peaks_ready), region, which), peaks_ready_connection)) {
 			WaveView* waveview = new WaveView (*(canvas->root()));
 
@@ -1147,7 +1147,7 @@ CrossfadeEditor::make_waves (boost::shared_ptr<AudioRegion> region, WhichFade wh
 			waveview->property_amplitude_above_axis() = 2.0;
 			waveview->property_wave_color() = color;
 			waveview->property_fill_color() = color;
-			
+
 			if (which==In)
 				waveview->property_region_start() = region->start();
 			else
@@ -1212,11 +1212,11 @@ CrossfadeEditor::audition (Audition which)
 		right_length = xfade->in()->length();
 	}
 
-	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->out(), left_start_offset, left_length, "xfade out", 
+	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->out(), left_start_offset, left_length, "xfade out",
 													      0, Region::DefaultFlags, false)));
-	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->in(), 0, right_length, "xfade in", 
+	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->in(), 0, right_length, "xfade in",
 													       0, Region::DefaultFlags, false)));
-	
+
 	//apply a 20ms declicking fade at the start and end of auditioning
 	left->set_fade_in_active(true);
 	left->set_fade_in_length(session.frame_rate() / 50);
@@ -1225,7 +1225,7 @@ CrossfadeEditor::audition (Audition which)
 
 	pl.add_region (left, 0);
 	pl.add_region (right, 1 + preroll);
-	
+
 	if (which == Left) {
 		right->set_scale_amplitude (0.0);
 	} else if (which == Right) {
@@ -1247,9 +1247,9 @@ CrossfadeEditor::audition_both ()
 void
 CrossfadeEditor::audition_left_dry ()
 {
-	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->out(), xfade->out()->length() - xfade->length(), xfade->length(), "xfade left", 
+	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->out(), xfade->out()->length() - xfade->length(), xfade->length(), "xfade left",
 													      0, Region::DefaultFlags, false)));
-	
+
 	session.audition_region (left);
 }
 
@@ -1262,7 +1262,7 @@ CrossfadeEditor::audition_left ()
 void
 CrossfadeEditor::audition_right_dry ()
 {
-	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->in(), 0, xfade->length(), "xfade in", 
+	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->in(), 0, xfade->length(), "xfade in",
 													       0, Region::DefaultFlags, false)));
 	session.audition_region (right);
 }
@@ -1272,7 +1272,7 @@ CrossfadeEditor::audition_right ()
 {
 	audition (Right);
 }
-	
+
 void
 CrossfadeEditor::cancel_audition ()
 {
@@ -1298,7 +1298,7 @@ void
 CrossfadeEditor::audition_right_toggled ()
 {
 	bool x;
-	
+
 	if ((x = audition_right_button.get_active ()) != session.is_auditioning()) {
 
 		if (x) {
@@ -1345,7 +1345,7 @@ CrossfadeEditor::audition_left_dry_toggled ()
 	bool x;
 
 	if ((x = audition_left_dry_button.get_active ()) != session.is_auditioning()) {
-		
+
 		if (x) {
 			audition_left_dry ();
 		} else {

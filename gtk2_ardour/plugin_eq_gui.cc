@@ -52,7 +52,7 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	set_buffer_size(4096, 16384);
 	//set_buffer_size(4096, 4096);
 
-	_log_coeff = (1.0 - 2.0 * (1000.0/(_samplerate/2.0))) / powf(1000.0/(_samplerate/2.0), 2.0); 
+	_log_coeff = (1.0 - 2.0 * (1000.0/(_samplerate/2.0))) / powf(1000.0/(_samplerate/2.0), 2.0);
 	_log_max = log10f(1 + _log_coeff);
 
 
@@ -66,7 +66,7 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 
 	_analysis_area->signal_expose_event().connect( sigc::mem_fun (*this, &PluginEqGui::expose_analysis_area));
 	_analysis_area->signal_size_allocate().connect( sigc::mem_fun (*this, &PluginEqGui::resize_analysis_area));
-	
+
 
 	// dB selection
 	dBScaleModel = Gtk::ListStore::create(dBColumns);
@@ -96,12 +96,12 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 
 	dBScaleCombo -> signal_changed().connect( sigc::mem_fun(*this, &PluginEqGui::change_dB_scale) );
 
-	Gtk::Label *dBComboLabel = new Gtk::Label("dB scale");	
+	Gtk::Label *dBComboLabel = new Gtk::Label("dB scale");
 
 	Gtk::HBox *dBSelectBin = new Gtk::HBox(false, 5);
 	dBSelectBin->add( *manage(dBComboLabel));
 	dBSelectBin->add( *manage(dBScaleCombo));
-	
+
 	// Phase checkbutton
 	_phase_button = new Gtk::CheckButton("Show phase");
 	_phase_button->set_active(true);
@@ -128,7 +128,7 @@ PluginEqGui::~PluginEqGui()
 	delete _signal_output_fft;
 
 	_plugin->deactivate();
-	
+
 	// all gui objects are *manage'd by the inherited Table object
 }
 
@@ -189,7 +189,7 @@ PluginEqGui::change_dB_scale()
 		_min_dB = row[dBColumns.dBMin];
 		_max_dB = row[dBColumns.dBMax];
 		_step_dB = row[dBColumns.dBStep];
-		
+
 
 		redraw_scales();
 	}
@@ -204,7 +204,7 @@ PluginEqGui::redraw_scales()
 		_analysis_scale_surface = 0;
 	}
 
-	_analysis_area->queue_draw();	
+	_analysis_area->queue_draw();
 
 	// TODO: Add graph legend!
 }
@@ -221,9 +221,9 @@ PluginEqGui::set_buffer_size(uint32_t size, uint32_t signal_size)
 	FFT *tmp3 = _signal_output_fft;
 
 	try {
-		_impulse_fft       = new FFT(size); 
-		_signal_input_fft  = new FFT(signal_size); 
-		_signal_output_fft = new FFT(signal_size); 
+		_impulse_fft       = new FFT(size);
+		_signal_input_fft  = new FFT(signal_size);
+		_signal_output_fft = new FFT(signal_size);
 	} catch( ... ) {
 		// Don't care about lost memory, we're screwed anyhow
 		_impulse_fft       = tmp1;
@@ -235,7 +235,7 @@ PluginEqGui::set_buffer_size(uint32_t size, uint32_t signal_size)
 	delete tmp1;
 	delete tmp2;
 	delete tmp3;
-		
+
 	_buffer_size = size;
 	_signal_buffer_size = signal_size;
 
@@ -254,7 +254,7 @@ PluginEqGui::set_buffer_size(uint32_t size, uint32_t signal_size)
 	_collect_bufferset.set_count(chanCount);
 }
 
-void 
+void
 PluginEqGui::resize_analysis_area(Gtk::Allocation& size)
 {
 	_analysis_width  = (float)size.get_width();
@@ -289,7 +289,7 @@ PluginEqGui::signal_collect_callback(ARDOUR::BufferSet *in, ARDOUR::BufferSet *o
 	for (uint32_t i = 0; i < _plugin_insert->input_streams().n_audio(); ++i) {
 		_signal_input_fft ->analyze(in ->get_audio(i).data(), FFT::HANN);
 	}
-	
+
 	for (uint32_t i = 0; i < _plugin_insert->output_streams().n_audio(); ++i) {
 		_signal_output_fft->analyze(out->get_audio(i).data(), FFT::HANN);
 	}
@@ -300,7 +300,7 @@ PluginEqGui::signal_collect_callback(ARDOUR::BufferSet *in, ARDOUR::BufferSet *o
 	_signal_analysis_running = false;
 
 	// This signals calls expose_analysis_area()
-	_analysis_area->queue_draw();	
+	_analysis_area->queue_draw();
 }
 
 void
@@ -326,7 +326,7 @@ PluginEqGui::run_impulse_analysis()
 
 	// Gather all output, taking latency into account.
 	_impulse_fft->reset();
-		
+
 	// Silence collect buffers to copy data to, can't use silence() because consecutive calls won't work
 	for (uint32_t i = 0; i < outputs; ++i) {
 		ARDOUR::AudioBuffer &buf = _collect_bufferset.get_audio(i);
@@ -361,7 +361,7 @@ PluginEqGui::run_impulse_analysis()
 				//std::cerr << (++C) << ": copying " << length << " frames to _collect_bufferset.get_audio(i)+" << target_offset << " from bufferset at offset " << f << std::endl;
 				for (uint32_t i = 0; i < outputs; ++i) {
 					memcpy(_collect_bufferset.get_audio(i).data(target_offset),
-                                       		_bufferset.get_audio(i).data() + f, 
+                                       		_bufferset.get_audio(i).data() + f,
                                        		length * sizeof(float));
 				}
 
@@ -394,7 +394,7 @@ PluginEqGui::run_impulse_analysis()
 	_impulse_fft->calculate();
 
 	// This signals calls expose_analysis_area()
-	_analysis_area->queue_draw();	
+	_analysis_area->queue_draw();
 }
 
 bool
@@ -409,8 +409,8 @@ void
 PluginEqGui::draw_analysis_scales(cairo_t *ref_cr)
 {
 	// TODO: check whether we need rounding
-	_analysis_scale_surface = cairo_surface_create_similar(cairo_get_target(ref_cr), 
-							     CAIRO_CONTENT_COLOR, 
+	_analysis_scale_surface = cairo_surface_create_similar(cairo_get_target(ref_cr),
+							     CAIRO_CONTENT_COLOR,
 							     _analysis_width,
 							     _analysis_height);
 
@@ -425,9 +425,9 @@ PluginEqGui::draw_analysis_scales(cairo_t *ref_cr)
 	if (_phase_button->get_active()) {
 		draw_scales_phase(_analysis_area, cr);
 	}
-	
+
         cairo_destroy(cr);
-	
+
 }
 
 void
@@ -440,7 +440,7 @@ PluginEqGui::redraw_analysis_area()
 	if (_analysis_scale_surface == 0) {
 		draw_analysis_scales(cr);
 	}
-	
+
 
 	cairo_copy_page(cr);
 
@@ -462,7 +462,7 @@ PluginEqGui::redraw_analysis_area()
 
 #define PHASE_PROPORTION 0.5
 
-void 
+void
 PluginEqGui::draw_scales_phase(Gtk::Widget */*w*/, cairo_t *cr)
 {
 	float y;
@@ -485,16 +485,16 @@ PluginEqGui::draw_scales_phase(Gtk::Widget */*w*/, cairo_t *cr)
 		cairo_text_extents(cr, buf, &t_ext);
 		cairo_move_to(cr, _analysis_width - t_ext.width - t_ext.x_bearing - 2.0, y - extents.descent);
 		cairo_show_text(cr, buf);
-		
+
 		if (i == 0)
 			continue;
-		
+
 
         	cairo_set_source_rgba(cr, .8, .9, 0.2, 0.6/(float)i);
 		cairo_move_to(cr, 0.0,            y);
 		cairo_line_to(cr, _analysis_width, y);
 
-		
+
 		y = _analysis_height/2.0 + (float)i*(_analysis_height/8.0)*PHASE_PROPORTION;
 
 		// label
@@ -514,7 +514,7 @@ PluginEqGui::draw_scales_phase(Gtk::Widget */*w*/, cairo_t *cr)
 	}
 }
 
-void 
+void
 PluginEqGui::plot_impulse_phase(Gtk::Widget *w, cairo_t *cr)
 {
 	float x,y;
@@ -533,7 +533,7 @@ PluginEqGui::plot_impulse_phase(Gtk::Widget *w, cairo_t *cr)
 		x *= _analysis_width;
 
 		y  = _analysis_height/2.0 - (_impulse_fft->phase_at_bin(i)/M_PI)*(_analysis_height/2.0)*PHASE_PROPORTION;
-	
+
 		if ( i == 0 ) {
 			cairo_move_to(cr, x, y);
 
@@ -548,8 +548,8 @@ PluginEqGui::plot_impulse_phase(Gtk::Widget *w, cairo_t *cr)
 
 			avgY = 0;
 			avgNum = 0;
-				
-		}	
+
+		}
 
 		prevX = rint(x);
 		avgY += y;
@@ -564,7 +564,7 @@ void
 PluginEqGui::draw_scales_power(Gtk::Widget */*w*/, cairo_t *cr)
 {
 	static float scales[] = { 30.0, 70.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 5000.0, 10000.0, 15000.0, 20000.0, -1.0 };
-	
+
 	float divisor = _samplerate / 2.0 / _impulse_fft->bins();
 	float x;
 
@@ -634,8 +634,8 @@ PluginEqGui::draw_scales_power(Gtk::Widget */*w*/, cairo_t *cr)
 		}
 	}
 
-	
-	
+
+
 	for (float dB = - _step_dB; dB > _min_dB; dB -= _step_dB ) {
 		snprintf(buf, 256, "%0.0f", dB );
 
@@ -663,7 +663,7 @@ power_to_dB(float a)
 	return 10.0 * log10f(a);
 }
 
-void 
+void
 PluginEqGui::plot_impulse_amplitude(Gtk::Widget *w, cairo_t *cr)
 {
 	float x,y;
@@ -701,7 +701,7 @@ PluginEqGui::plot_impulse_amplitude(Gtk::Widget *w, cairo_t *cr)
 
 			avgY = 0;
 			avgNum = 0;
-				
+
 		}
 
 		prevX = rint(x);
@@ -735,7 +735,7 @@ PluginEqGui::plot_signal_amplitude_difference(Gtk::Widget *w, cairo_t *cr)
 		float power_out = power_to_dB(_signal_output_fft->power_at_bin(i));
 		float power_in  = power_to_dB(_signal_input_fft ->power_at_bin(i));
 		float power = power_out - power_in;
-		
+
 		// for SaBer
 		/*
 		double p = 10.0 * log10( 1.0 + (double)_signal_output_fft->power_at_bin(i) - (double)
@@ -775,7 +775,7 @@ PluginEqGui::plot_signal_amplitude_difference(Gtk::Widget *w, cairo_t *cr)
 
 			avgY = 0;
 			avgNum = 0;
-				
+
 		}
 
 		prevX = rint(x);
@@ -785,5 +785,5 @@ PluginEqGui::plot_signal_amplitude_difference(Gtk::Widget *w, cairo_t *cr)
 
 	cairo_stroke(cr);
 
-	
+
 }

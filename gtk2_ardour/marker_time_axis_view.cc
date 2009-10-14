@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ using namespace Editing;
 
 //---------------------------------------------------------------------------------------//
 // Constructor / Desctructor
-		
+
 /**
  * Construct a new MarkerTimeAxisView helper time axis helper
  *
@@ -61,7 +61,7 @@ MarkerTimeAxisView::MarkerTimeAxisView(MarkerTimeAxis& tv)
 	canvas_rect->property_y2() = (double)20;
 	canvas_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerTrack.get();
 	canvas_rect->property_fill_color_rgba() = stream_base_color;
-		   
+
 	canvas_rect->signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_marker_time_axis_view_event), canvas_rect, &_trackview));
 
 	_samples_per_unit = _trackview.editor.get_current_zoom() ;
@@ -80,17 +80,17 @@ MarkerTimeAxisView::~MarkerTimeAxisView()
 	for(MarkerViewList::iterator iter = marker_view_list.begin(); iter != marker_view_list.end(); ++iter)
 	{
 		MarkerView* mv = (*iter) ;
-		
+
 		MarkerViewList::iterator next = iter ;
 		next++ ;
 		marker_view_list.erase(iter) ;
 
 		delete mv ;
 		mv = 0 ;
-		
+
 		iter = next ;
 	}
-	
+
 	delete canvas_rect;
 	canvas_rect = 0 ;
 
@@ -113,7 +113,7 @@ MarkerTimeAxisView::set_height(gdouble h)
 	if (h < 10.0 || h > 1000.0) {
 		return -1;
 	}
-	
+
 	canvas_rect->property_y2() = h;
 
 	for (MarkerViewList::iterator i = marker_view_list.begin(); i != marker_view_list.end(); ++i) {
@@ -140,7 +140,7 @@ MarkerTimeAxisView::set_position(gdouble x, gdouble y)
 /**
  * Sets the current samples per unit.
  * this method tells each item upon the time axis of the change
- * 
+ *
  * @param spu the new samples per canvas unit value
  */
 int
@@ -149,7 +149,7 @@ MarkerTimeAxisView::set_samples_per_unit(gdouble spp)
 	if(spp < 1.0) {
 		return -1 ;
 	}
-	
+
 	_samples_per_unit = spp ;
 
 	for(MarkerViewList::iterator i = marker_view_list.begin(); i != marker_view_list.end(); ++i)
@@ -178,7 +178,7 @@ MarkerTimeAxisView::apply_color(Gdk::Color& color)
 
 //---------------------------------------------------------------------------------------//
 // Child MarkerView Accessors/Mutators
-		
+
 /**
  * Adds a marker view to the list of items upon this time axis view helper
  * the new MarkerView is returned
@@ -189,7 +189,7 @@ MarkerTimeAxisView::apply_color(Gdk::Color& color)
  * @param start the position the new item should be placed upon the time line
  * @param duration the duration the new item should be placed upon the timeline
  * @param src the identity of the object that initiated the change
- */	 
+ */
 MarkerView*
 MarkerTimeAxisView::add_marker_view(ImageFrameView* ifv, std::string mark_type, std::string mark_id, nframes_t start, nframes_t dur, void* src)
 {
@@ -197,7 +197,7 @@ MarkerTimeAxisView::add_marker_view(ImageFrameView* ifv, std::string mark_type, 
 	{
 		return(0) ;
 	}
-	
+
 	MarkerView* mv = new MarkerView(canvas_group,
 		 &_trackview,
 		 ifv,
@@ -207,14 +207,14 @@ MarkerTimeAxisView::add_marker_view(ImageFrameView* ifv, std::string mark_type, 
 		 mark_id,
 		 start,
 		 dur) ;
-	
+
 	ifv->add_marker_view_item(mv, src) ;
 	marker_view_list.push_front(mv) ;
-	
+
 	mv->GoingAway.connect(bind (mem_fun(*this,&MarkerTimeAxisView::remove_marker_view), (void*)this)) ;
-	
+
 	 MarkerViewAdded(mv,src) ; /* EMIT_SIGNAL */
-	
+
 	return(mv) ;
 }
 
@@ -228,7 +228,7 @@ MarkerView*
 MarkerTimeAxisView::get_named_marker_view(std::string item_id)
 {
 	MarkerView* mv =  0 ;
-	
+
 	for(MarkerViewList::iterator i = marker_view_list.begin(); i != marker_view_list.end(); ++i)
 	{
 		if(((MarkerView*)*i)->get_item_name() == item_id)
@@ -252,14 +252,14 @@ void
 MarkerTimeAxisView::remove_selected_marker_view(void* src)
 {
 	std::string removed ;
-	
+
 	if (selected_time_axis_item)
 	{
 		MarkerViewList::iterator i ;
 		if((i = find (marker_view_list.begin(), marker_view_list.end(), selected_time_axis_item)) != marker_view_list.end())
 		{
 			marker_view_list.erase(i) ;
-			
+
 			 MarkerViewRemoved(selected_time_axis_item->get_item_name(),src) ; /* EMIT_SIGNAL */
 
 			delete(selected_time_axis_item) ;
@@ -283,24 +283,24 @@ MarkerView*
 MarkerTimeAxisView::remove_named_marker_view(std::string item_id, void* src)
 {
 	MarkerView* mv = 0 ;
-	
+
 	MarkerViewList::iterator i = marker_view_list.begin() ;
-	
+
 	for(MarkerViewList::iterator iter = marker_view_list.begin(); iter != marker_view_list.end(); ++iter)
 	{
 		if(((MarkerView*)*i)->get_item_name() == item_id)
 		{
 			mv = ((MarkerView*)*i) ;
 			marker_view_list.erase(i) ;
-						
+
 			 MarkerViewRemoved(mv->get_item_name(), src) ; /* EMIT_SIGNAL */
-			
+
 			// break from the for loop
 			break;
 		}
 		i++ ;
 	}
-	
+
 	return(mv) ;
 }
 
@@ -314,12 +314,12 @@ void
 MarkerTimeAxisView::remove_marker_view(MarkerView* mv, void* src)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &MarkerTimeAxisView::remove_marker_view), mv, src));
-	
+
 	MarkerViewList::iterator i;
 
 	if((i = find (marker_view_list.begin(), marker_view_list.end(), mv)) != marker_view_list.end()) {
 		marker_view_list.erase(i) ;
-		
+
 		// Assume this remove happened locally, else use remove_named_marker_time_axis
 		// let listeners know that the named MarkerTimeAxis has been removed
 		 MarkerViewRemoved(mv->get_item_name(), src) ; /* EMIT_SIGNAL */
@@ -365,7 +365,7 @@ MarkerTimeAxisView::clear_selected_time_axis_item()
 {
 	selected_time_axis_item = 0 ;
 }
-		
+
 /**
  * Returnsthe currently selected item upon this time axis
  *

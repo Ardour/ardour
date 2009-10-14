@@ -19,13 +19,13 @@ class Analyser {
 	static void init ();
 	static void queue_source_for_analysis (boost::shared_ptr<Source>, bool force);
 	static void work ();
-	
+
   private:
 	static Analyser* the_analyser;
 	static Glib::StaticMutex analysis_queue_lock;
 	static Glib::Cond* SourcesToAnalyse;
 	static std::list<boost::weak_ptr<Source> > analysis_queue;
-	
+
 	static void analyse_audio_file_source (boost::shared_ptr<AudioFileSource>);
 };
 

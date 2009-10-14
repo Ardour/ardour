@@ -60,7 +60,7 @@ public:
 		t->attach (*l, 0, 1, n, n + 1, EXPAND | FILL, FILL);
 		t->attach (_mtc_combo, 1, 2, n, n + 1, EXPAND | FILL, EXPAND | FILL);
 		++n;
-		
+
 		l = manage (new Label (_("MIDI clock:")));
 		l->set_alignment (1, 0.5);
 		t->attach (*l, 0, 1, n, n + 1, FILL, FILL);
@@ -102,7 +102,7 @@ public:
 			_mpc_combo.set_active_text (_rc_config->get_midi_port_name());
 		} else if (p == "midi-clock-port-name") {
 			_midi_clock_combo.set_active_text (_rc_config->get_midi_clock_port_name());
-		} 
+		}
 	}
 
 	void set_state_from_config ()
@@ -132,7 +132,7 @@ public:
 	{
 		_rc_config->set_midi_clock_port_name (_midi_clock_combo.get_active_text());
 	}
-	
+
 private:
 
 	void model_changed (TreeModel::Path const &, TreeModel::iterator const & i)
@@ -145,7 +145,7 @@ private:
 		}
 
 		if (port->input()) {
-			
+
 			if (r[_model.online] == port->input()->offline()) {
 				port->input()->set_offline (!r[_model.online]);
 			}
@@ -160,11 +160,11 @@ private:
 			if (r[_model.trace_output] != port->output()->tracing()) {
 				port->output()->trace (r[_model.trace_output], &cerr, string (port->name()) + _(" output: "));
 			}
-			
+
 		}
 
-		
-				
+
+
 	}
 
 	void setup_ports_combo (ComboBoxText& c)
@@ -228,7 +228,7 @@ private:
 		dialog.set_position (WIN_POS_MOUSE);
 
 		dialog.show ();
-		
+
 		int const r = dialog.run ();
 
 		switch (r) {
@@ -251,17 +251,17 @@ private:
 		}
 
 		XMLNode node (X_("MIDI-port"));
-		
+
 		node.add_property ("tag", dialog.port_name.get_text());
 		node.add_property ("device", X_("ardour")); // XXX this can't be right for all types
 		node.add_property ("type", MIDI::PortFactory::default_port_type());
 		node.add_property ("mode", smod);
-		
+
 		if (MIDI::Manager::instance()->add_port (node) != 0) {
 			ports_changed ();
 		}
 	}
-	
+
 	class MIDIModelColumns : public TreeModelColumnRecord
 	{
 	public:
@@ -321,7 +321,7 @@ public:
 
 		_box->pack_start (*t, false, false);
 	}
-	
+
 	void parameter_changed (string const & p)
 	{
 		if (p == "click-sound") {
@@ -337,7 +337,7 @@ public:
 		parameter_changed ("click-emphasis-sound");
 	}
 
-private:	
+private:
 
 	void click_browse_clicked ()
 	{
@@ -345,7 +345,7 @@ private:
 
 		sfdb.show_all ();
 		sfdb.present ();
-		
+
 		if (sfdb.run () == RESPONSE_OK) {
 			click_chosen (sfdb.get_filename());
 		}
@@ -363,7 +363,7 @@ private:
 
 		sfdb.show_all ();
 		sfdb.present ();
-		
+
 		if (sfdb.run () == RESPONSE_OK) {
 			click_emphasis_chosen (sfdb.get_filename());
 		}
@@ -463,7 +463,7 @@ public:
 	{
 		_rc_config->set_saved_history_depth (_save_undo_spin.get_value_as_int ());
 	}
-	
+
 private:
 	RCConfiguration* _rc_config;
 	CheckButton _limit_undo_button;
@@ -519,7 +519,7 @@ public:
 		  _delete_button_spin (_delete_button_adjustment),
 		  _edit_button_adjustment (3, 1, 5),
 		  _edit_button_spin (_edit_button_adjustment)
-		
+
 	{
 		/* internationalize and prepare for use with combos */
 
@@ -639,7 +639,7 @@ private:
 		string const txt = _keyboard_layout_selector.get_active_text();
 
 		/* XXX: config...?  for all this keyboard stuff */
-		
+
 		for (map<string,string>::iterator i = Keyboard::binding_files.begin(); i != Keyboard::binding_files.end(); ++i) {
 			if (txt == i->first) {
 				if (Keyboard::load_keybindings (i->second)) {
@@ -652,7 +652,7 @@ private:
 	void edit_modifier_chosen ()
 	{
 		string const txt = _edit_modifier_combo.get_active_text();
-		
+
 		for (int i = 0; modifiers[i].name; ++i) {
 			if (txt == _(modifiers[i].name)) {
 				Keyboard::set_edit_modifier (modifiers[i].modifier);
@@ -664,7 +664,7 @@ private:
 	void delete_modifier_chosen ()
 	{
 		string const txt = _delete_modifier_combo.get_active_text();
-		
+
 		for (int i = 0; modifiers[i].name; ++i) {
 			if (txt == _(modifiers[i].name)) {
 				Keyboard::set_delete_modifier (modifiers[i].modifier);
@@ -672,11 +672,11 @@ private:
 			}
 		}
 	}
-	
+
 	void snap_modifier_chosen ()
 	{
 		string const txt = _snap_modifier_combo.get_active_text();
-		
+
 		for (int i = 0; modifiers[i].name; ++i) {
 			if (txt == _(modifiers[i].name)) {
 				Keyboard::set_snap_modifier (modifiers[i].modifier);
@@ -694,7 +694,7 @@ private:
 	{
 		Keyboard::set_edit_button (_edit_button_spin.get_value_as_int());
 	}
-	
+
 	ComboBoxText _keyboard_layout_selector;
 	ComboBoxText _edit_modifier_combo;
 	ComboBoxText _delete_modifier_combo;
@@ -740,9 +740,9 @@ public:
 	{
 		parameter_changed ("font-scale");
 	}
-	
+
 private:
-	
+
 	void dpi_changed ()
 	{
 		_rc_config->set_font_scale ((long) floor (_dpi_adjustment.get_value() * 1024));
@@ -774,7 +774,7 @@ public:
 
 
 		parameter_changed ("solo-mute-gain");
-		
+
 		Label* l = manage (new Label (_("Solo mute cut (dB):")));
 		l->set_name ("OptionsLabel");
 
@@ -785,7 +785,7 @@ public:
 		h->pack_start (_db_display, false, false);
 
 		set_size_request_to_display_given_text (_db_display, "-99.0", 12, 12);
-		
+
 		_box->pack_start (*h, false, false);
 
 		_db_adjustment.signal_value_changed().connect (mem_fun (*this, &SoloMuteOptions::db_changed));
@@ -814,9 +814,9 @@ public:
 	{
 		parameter_changed ("solo-mute-gain");
 	}
-	
+
 private:
-	
+
 	void db_changed ()
 	{
 		_rc_config->set_solo_mute_gain (slider_position_to_gain (_db_adjustment.get_value()));
@@ -856,7 +856,7 @@ public:
 	void set_state_from_config ()
 	{
 		_store->clear ();
-		
+
 		ControlProtocolManager& m = ControlProtocolManager::instance ();
 		for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
 
@@ -903,7 +903,7 @@ private:
         class ControlSurfacesModelColumns : public TreeModelColumnRecord
 	{
 	public:
-		
+
 		ControlSurfacesModelColumns ()
 		{
 			add (name);
@@ -931,7 +931,7 @@ RCOptionEditor::RCOptionEditor ()
 	/* MISC */
 
 	add_option (_("Misc"), new OptionEditorHeading (_("Metering")));
-	
+
 	ComboOption<float>* mht = new ComboOption<float> (
 		"meter-hold",
 		_("Meter hold time"),
@@ -943,7 +943,7 @@ RCOptionEditor::RCOptionEditor ()
 	mht->add (MeterHoldShort, _("short"));
 	mht->add (MeterHoldMedium, _("medium"));
 	mht->add (MeterHoldLong, _("long"));
-	
+
 	add_option (_("Misc"), mht);
 
 	ComboOption<float>* mfo = new ComboOption<float> (
@@ -964,15 +964,15 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Misc"), mfo);
 
 	add_option (_("Misc"), new OptionEditorHeading (_("Undo")));
-	
+
 	add_option (_("Misc"), new UndoOptions (_rc_config));
 
 	add_option (_("Misc"), new OptionEditorHeading (_("Misc")));
-	
+
 #ifndef GTKOSX
 	/* font scaling does nothing with GDK/Quartz */
 	add_option (_("Misc"), new FontScalingOptions (_rc_config));
-#endif	
+#endif
 
 	add_option (_("Misc"),
 	     new BoolOption (
@@ -981,7 +981,7 @@ RCOptionEditor::RCOptionEditor ()
 		     mem_fun (*_rc_config, &RCConfiguration::get_verify_remove_last_capture),
 		     mem_fun (*_rc_config, &RCConfiguration::set_verify_remove_last_capture)
 		     ));
-	
+
 	add_option (_("Misc"),
 	     new BoolOption (
 		     "periodic-safety-backups",
@@ -1141,7 +1141,7 @@ RCOptionEditor::RCOptionEditor ()
 	wfs->add (Logarithmic, _("logarithmic"));
 
 	add_option (_("Editor"), wfs);
-	
+
 	ComboOption<WaveformShape>* wfsh = new ComboOption<WaveformShape> (
 		"waveform-shape",
 		_("Waveform shape"),
@@ -1159,7 +1159,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Audio"), new OptionEditorHeading (_("Solo")));
 
 
-	add_option (_("Audio"), 
+	add_option (_("Audio"),
 	     new BoolOption (
 		     "solo-control-is-listen-control",
 		     _("Solo controls are Listen controls"),
@@ -1278,23 +1278,23 @@ RCOptionEditor::RCOptionEditor ()
 		mem_fun (*_rc_config, &RCConfiguration::get_denormal_model),
 		mem_fun (*_rc_config, &RCConfiguration::set_denormal_model)
 		);
-	
+
 	dm->add (DenormalNone, _("no processor handling"));
-	
+
 	FPU fpu;
-	
+
 	if (fpu.has_flush_to_zero()) {
 		dm->add (DenormalFTZ, _("use FlushToZero"));
 	}
-	
+
 	if (fpu.has_denormals_are_zero()) {
 		dm->add (DenormalDAZ, _("use DenormalsAreZero"));
 	}
-	
+
 	if (fpu.has_flush_to_zero() && fpu.has_denormals_are_zero()) {
 		dm->add (DenormalFTZDAZ, _("use FlushToZero and DenormalsAreZerO"));
 	}
-	
+
 	add_option (_("Audio"), dm);
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Plugins")));

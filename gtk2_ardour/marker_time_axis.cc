@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ MarkerTimeAxis::MarkerTimeAxis (PublicEditor& ed, ARDOUR::Session& sess, Canvas&
 {
 	/* the TimeAxisView these markers are associated with */
 	marked_time_axis = tav ;
-	
+
 	_color = unique_random_color() ;
 	time_axis_name = name ;
 
@@ -80,7 +80,7 @@ MarkerTimeAxis::MarkerTimeAxis (PublicEditor& ed, ARDOUR::Session& sess, Canvas&
 
 	// set the initial time axis text label
 	label_view() ;
-		
+
 	// set the initial height of this time axis
 	set_height(hSmall) ;
 }
@@ -105,18 +105,18 @@ MarkerTimeAxis::~MarkerTimeAxis()
 
 //---------------------------------------------------------------------------------------//
 // ui methods & data
-	
+
 void
 MarkerTimeAxis::set_height (uint32_t h)
 {
 	VisualTimeAxis::set_height(h) ;
-	
+
 	// tell out view helper of the change too
 	if (view != 0)
 	{
 		view->set_height((double) height) ;
 	}
-	
+
 	// tell those interested that we have had our height changed
 	 gui_changed("track_height",(void*)0) ; /* EMIT_SIGNAL */
 }
@@ -161,7 +161,7 @@ MarkerTimeAxis::popup_marker_time_axis_edit_menu(int button, int32_t time, Marke
 	{
 		marker_item_menu->set_sensitive(false) ;
 	}
-	
+
 	marker_menu->popup(button,time) ;
 }
 
@@ -205,7 +205,7 @@ MarkerTimeAxis::build_display_menu()
 	items.push_back(MenuElem (_("Height"), *size_menu));
 	items.push_back(MenuElem (_("Color"), mem_fun(*this, &MarkerTimeAxis::select_track_color)));
 	items.push_back(SeparatorElem()) ;
-	
+
 	items.push_back(MenuElem (_("Remove"), bind(mem_fun(*this, &MarkerTimeAxis::remove_this_time_axis), (void*)this)));
 }
 
@@ -221,7 +221,7 @@ MarkerTimeAxis::build_marker_menu()
 	marker_menu = manage(new Menu) ;
 	marker_menu->set_name ("ArdourContextMenu");
 	MenuList& items = marker_menu->items();
-	
+
 	marker_item_menu = manage(new Menu) ;
 	marker_item_menu->set_name ("ArdourContextMenu");
 	MenuList& marker_sub_items = marker_item_menu->items() ;
@@ -230,7 +230,7 @@ MarkerTimeAxis::build_marker_menu()
 	Menu* duration_menu = manage(new Menu) ;
 	duration_menu->set_name ("ArdourContextMenu");
 	MenuList& duration_items = duration_menu->items() ;
-	
+
 	if(view)
 	{
 		duration_items.push_back(MenuElem (_("1 seconds"), bind (mem_fun (view, &MarkerTimeAxisView::set_marker_duration_sec), 1.0))) ;
@@ -246,7 +246,7 @@ MarkerTimeAxis::build_marker_menu()
 
 	marker_sub_items.push_back(SeparatorElem()) ;
 	marker_sub_items.push_back(MenuElem (_("Remove Marker"), bind(mem_fun(view, &MarkerTimeAxisView::remove_selected_marker_view),(void*)this))) ;
-	
+
 	items.push_back(MenuElem(_("Marker"), *marker_item_menu)) ;
 	items.push_back(MenuElem (_("Rename Track"), mem_fun(*this,&MarkerTimeAxis::start_time_axis_rename))) ;
 

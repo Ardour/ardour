@@ -56,10 +56,10 @@ BroadcastInfo::BroadcastInfo () :
 {
 	info = new SF_BROADCAST_INFO;
 	memset (info, 0, sizeof (*info));
-	
+
 	// Note: Set version to 1 when UMID is used, otherwise version should stay at 0
 	info->version = 0;
-	
+
 	time_t rawtime;
 	std::time (&rawtime);
 	_time = *localtime (&rawtime);
@@ -85,16 +85,16 @@ BroadcastInfo::load_from_file (std::string const & filename)
 {
 	SNDFILE * file = 0;
 	SF_INFO info;
-	
+
 	info.format = 0;
-	
+
 	if (!(file = sf_open (filename.c_str(), SFM_READ, &info))) {
 		update_error();
 		return false;
 	}
-	
+
 	bool ret = load_from_file (file);
-	
+
 	sf_close (file);
 	return ret;
 }
@@ -107,7 +107,7 @@ BroadcastInfo::load_from_file (SNDFILE* sf)
 		_has_info = false;
 		return false;
 	}
-	
+
 	_has_info = true;
 	return true;
 }
@@ -124,7 +124,7 @@ BroadcastInfo::get_time_reference () const
 	if (!_has_info) {
 		return 0;
 	}
-	
+
 	int64_t ret = (uint32_t) info->time_reference_high;
 	ret <<= 32;
 	ret |= (uint32_t) info->time_reference_low;
@@ -135,17 +135,17 @@ struct tm
 BroadcastInfo::get_origination_time () const
 {
 	struct tm ret;
-	
+
 	std::string date = info->origination_date;
 	ret.tm_year = atoi (date.substr (0, 4)) - 1900;
 	ret.tm_mon = atoi (date.substr (5, 2));
 	ret.tm_mday = atoi (date.substr (8, 2));
-	
+
 	std::string time = info->origination_time;
 	ret.tm_hour = atoi (time.substr (0,2));
 	ret.tm_min = atoi (time.substr (3,2));
 	ret.tm_sec = atoi (time.substr (6,2));
-	
+
 	return ret;
 }
 
@@ -166,16 +166,16 @@ BroadcastInfo::write_to_file (std::string const & filename)
 {
 	SNDFILE * file = 0;
 	SF_INFO info;
-	
+
 	info.format = 0;
-	
+
 	if (!(file = sf_open (filename.c_str(), SFM_RDWR, &info))) {
 		update_error();
 		return false;
 	}
-	
+
 	bool ret = write_to_file (file);
-	
+
 	sf_close (file);
 	return ret;
 }
@@ -187,7 +187,7 @@ BroadcastInfo::write_to_file (SNDFILE* sf)
 		update_error();
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -195,7 +195,7 @@ void
 BroadcastInfo::set_description (std::string const & desc)
 {
 	_has_info = true;
-	
+
 	snprintf_bounded_null_filled (info->description, sizeof (info->description), desc.c_str());
 }
 
@@ -203,7 +203,7 @@ void
 BroadcastInfo::set_time_reference (int64_t when)
 {
 	_has_info = true;
-	
+
 	info->time_reference_high = (when >> 32);
 	info->time_reference_low = (when & 0xffffffff);
 }
@@ -212,16 +212,16 @@ void
 BroadcastInfo::set_origination_time (struct tm * now)
 {
 	_has_info = true;
-	
+
 	if (now) {
 		_time = *now;
 	}
-	
+
 	snprintf_bounded_null_filled (info->origination_date, sizeof (info->origination_date), "%4d-%02d-%02d",
 		  _time.tm_year + 1900,
 		  _time.tm_mon + 1,
 		  _time.tm_mday);
-	
+
 	snprintf_bounded_null_filled (info->origination_time, sizeof (info->origination_time), "%02d:%02d:%02d",
 		  _time.tm_hour,
 		  _time.tm_min,
@@ -232,12 +232,12 @@ void
 BroadcastInfo::set_originator (std::string const & str)
 {
 	_has_info = true;
-	
+
 	if (!str.empty()) {
 		snprintf_bounded_null_filled (info->originator, sizeof (info->originator), str.c_str());
 		return;
 	}
-	
+
 	snprintf_bounded_null_filled (info->originator, sizeof (info->originator), Glib::get_real_name().c_str());
 }
 
@@ -245,21 +245,21 @@ void
 BroadcastInfo::set_originator_ref (Session const & session, std::string const & str)
 {
 	_has_info = true;
-	
+
 	if (!str.empty()) {
 		snprintf_bounded_null_filled (info->originator_reference, sizeof (info->originator_reference), str.c_str());
 		return;
 	}
-	
+
 	/* random code is 9 digits */
-	
+
 	int random_code = random() % 999999999;
-	
+
 	/* Serial number is 12 chars */
-	
+
 	std::ostringstream serial_number;
 	serial_number << "ARDOUR" << "r" <<  std::setfill('0') << std::right << std::setw(5) << svn_revision;
-	
+
 	snprintf_bounded_null_filled (info->originator_reference, sizeof (info->originator_reference), "%2s%3s%12s%02d%02d%02d%9d",
 		  session.config.get_bwf_country_code().c_str(),
 		  session.config.get_bwf_organization_code().c_str(),
@@ -268,7 +268,7 @@ BroadcastInfo::set_originator_ref (Session const & session, std::string const & 
 		  _time.tm_min,
 		  _time.tm_sec,
 		  random_code);
-	
+
 }
 
 void

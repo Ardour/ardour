@@ -43,7 +43,7 @@ class ExportFormatBase {
 		T_None = 0,
 		T_Sndfile
 	};
-	
+
 	enum FormatId {
 		F_None = 0,
 		F_WAV = SF_FORMAT_WAV,
@@ -55,7 +55,7 @@ class ExportFormatBase {
 		F_FLAC = SF_FORMAT_FLAC,
 		F_Ogg = SF_FORMAT_OGG
 	};
-	
+
 	enum Endianness {
 		E_FileDefault = SF_ENDIAN_FILE, /* Default file endian-ness. */
 		E_Little = SF_ENDIAN_LITTLE,    /* Force little endian-ness. */
@@ -74,14 +74,14 @@ class ExportFormatBase {
 		SF_Double = SF_FORMAT_DOUBLE,
 		SF_Vorbis = SF_FORMAT_VORBIS
 	};
-	
+
 	enum DitherType {
 		D_None = GDitherNone,
 		D_Rect = GDitherRect,
 		D_Tri = GDitherTri,
 		D_Shaped = GDitherShaped
 	};
-	
+
 	enum Quality {
 		Q_None = 0,
 		Q_Any,
@@ -89,7 +89,7 @@ class ExportFormatBase {
 		Q_LosslessCompression,
 		Q_LossyCompression
 	};
-	
+
 	enum SampleRate {
 		SR_None = 0,
 		SR_22_05 = 220500,
@@ -99,7 +99,7 @@ class ExportFormatBase {
 		SR_96 = 96000,
 		SR_192 = 192000
 	};
-	
+
 	enum SRCQuality {
 		SRC_SincBest = SRC_SINC_BEST_QUALITY,
 		SRC_SincMedium = SRC_SINC_MEDIUM_QUALITY,
@@ -107,31 +107,31 @@ class ExportFormatBase {
 		SRC_ZeroOrderHold = SRC_ZERO_ORDER_HOLD,
 		SRC_Linear = SRC_LINEAR
 	};
-	
+
 	/// Class for managing selection and compatibility states
 	class SelectableCompatible {
 	  public:
-		SelectableCompatible () :
-		  _selected (false), _compatible (true) { }
+		SelectableCompatible ()
+			: _selected (false), _compatible (true) { }
 		~SelectableCompatible () {}
-		
+
 		sigc::signal<void, bool> SelectChanged;
 		sigc::signal<void, bool> CompatibleChanged;
-		
+
 		bool selected () const { return _selected; }
 		bool compatible () const { return _compatible; }
 		Glib::ustring name () const { return _name; }
-		
+
 		void set_selected (bool value);
 		void set_compatible (bool value);
-		
+
 	  protected:
 		void set_name (Glib::ustring name) { _name = name; }
-		
+
 	  private:
 		bool _selected;
 		bool _compatible;
-		
+
 		Glib::ustring _name;
 	};
 
@@ -139,9 +139,9 @@ class ExportFormatBase {
 
 	ExportFormatBase ();
 	ExportFormatBase (ExportFormatBase const & other);
-	
+
 	virtual ~ExportFormatBase ();
-	
+
 	boost::shared_ptr<ExportFormatBase> get_intersection (ExportFormatBase const & other) const;
 	boost::shared_ptr<ExportFormatBase> get_difference (ExportFormatBase const & other) const;
 	boost::shared_ptr<ExportFormatBase> get_union (ExportFormatBase const & other) const;
@@ -151,13 +151,13 @@ class ExportFormatBase {
 	bool sample_rates_empty () const { return sample_rates.empty (); }
 	bool formats_empty () const { return format_ids.empty (); }
 	bool qualities_empty () const { return qualities.empty (); }
-	
+
 	bool has_endianness (Endianness endianness) const { return endiannesses.find (endianness) != endiannesses.end() ; }
 	bool has_sample_format (SampleFormat format) const { return sample_formats.find (format) != sample_formats.end(); }
 	bool has_sample_rate (SampleRate rate) const { return sample_rates.find (rate) != sample_rates.end(); }
 	bool has_format (FormatId format) const { return format_ids.find (format) != format_ids.end(); }
 	bool has_quality (Quality quality) const { return qualities.find (quality) != qualities.end(); }
-	
+
 	void set_extension (Glib::ustring const & extension) { _extension = extension; }
 	Glib::ustring const & extension () const { return _extension; }
 
@@ -172,22 +172,22 @@ class ExportFormatBase {
 	typedef std::set<SampleRate> SampleRateSet;
 	typedef std::set<FormatId> FormatSet;
 	typedef std::set<Quality> QualitySet;
-	
+
 	EndianSet       endiannesses;
 	SampleRateSet   sample_rates;
 	FormatSet       format_ids;
 	QualitySet      qualities;
-	
+
   private:
 
 	Glib::ustring  _extension;
-	
+
 	enum SetOperation {
 		SetUnion,
 		SetDifference,
 		SetIntersection
 	};
-	
+
 	boost::shared_ptr<ExportFormatBase> do_set_operation (ExportFormatBase const & other, SetOperation operation) const;
 };
 

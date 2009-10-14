@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 */
 
-#ifndef __ardour_silentfilesource_h__ 
+#ifndef __ardour_silentfilesource_h__
 #define __ardour_silentfilesource_h__
 
 #include <cstring>
@@ -32,9 +32,9 @@ public:
 	float sample_rate () const { return _sample_rate; }
 
 	void set_length (nframes_t len) { _length = len; }
-	
+
 	bool destructive() const { return false; }
-	bool can_be_analysed() const { return false; } 
+	bool can_be_analysed() const { return false; }
 
 protected:
 	friend class SourceFactory;
@@ -56,12 +56,12 @@ protected:
 
 	void set_header_timeline_position () {}
 
- 	int read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t /*start*/, nframes_t /*cnt*/,
-				 double /*samples_per_unit*/, nframes_t /*fpp*/) const {
+	int read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t /*start*/, nframes_t /*cnt*/,
+	double /*samples_per_unit*/, nframes_t /*fpp*/) const {
 		memset (peaks, 0, sizeof (PeakData) * npeaks);
 		return 0;
 	}
-	
+
 	float _sample_rate;
 };
 

@@ -71,27 +71,27 @@ class ExportElementFactory
 class ExportHandler : public ExportElementFactory, public sigc::trackable
 {
   private:
-	
+
 	/* Stuff for export configs
 	 * The multimap maps timespans to file specifications
 	 */
-	
+
 	struct FileSpec {
-	
+
 		FileSpec (ChannelConfigPtr channel_config, FormatPtr format, FilenamePtr filename) :
 		  channel_config (channel_config),
 		  format (format),
 		  filename (filename)
 		  {}
-	
+
 		ChannelConfigPtr channel_config;
 		FormatPtr        format;
 		FilenamePtr      filename;
 	};
-	
+
 	typedef std::pair<TimespanPtr, FileSpec> ConfigPair;
 	typedef std::multimap<TimespanPtr, FileSpec> ConfigMap;
-	
+
 	typedef boost::shared_ptr<ExportProcessor> ProcessorPtr;
 	typedef boost::shared_ptr<ExportStatus> StatusPtr;
 
@@ -102,7 +102,7 @@ class ExportHandler : public ExportElementFactory, public sigc::trackable
 
 	friend boost::shared_ptr<ExportHandler> Session::get_export_handler();
 	ExportHandler (Session & session);
-	
+
   public:
 	~ExportHandler ();
 
@@ -115,62 +115,62 @@ class ExportHandler : public ExportElementFactory, public sigc::trackable
 	ProcessorPtr       processor;
 	StatusPtr          export_status;
 	ConfigMap          config_map;
-	
+
 	bool               realtime;
-	
+
 	sigc::connection          files_written_connection;
 	std::list<Glib::ustring> files_written;
-	
+
 	/* CD Marker stuff */
-	
+
 	struct CDMarkerStatus {
 		CDMarkerStatus (std::string out_file, TimespanPtr timespan, FormatPtr format, std::string filename) :
 		  out (out_file.c_str()), timespan (timespan), format (format), filename (filename),
 		  track_number (1), track_position (0), track_duration (0), track_start_frame (0),
 		  index_number (1), index_position (0)
 		  {}
-		
+
 		/* General info */
 		std::ofstream  out;
 		TimespanPtr    timespan;
 		FormatPtr      format;
 		std::string    filename;
 		Location *     marker;
-		
+
 		/* Track info */
 		uint32_t       track_number;
 		nframes_t      track_position;
 		nframes_t      track_duration;
 		nframes_t      track_start_frame;
-		
+
 		/* Index info */
 		uint32_t       index_number;
 		nframes_t      index_position;
 	};
-	
-	
+
+
 	void export_cd_marker_file (TimespanPtr timespan, FormatPtr file_format, std::string filename, CDMarkerFormat format);
-	
+
 	void write_cue_header (CDMarkerStatus & status);
 	void write_toc_header (CDMarkerStatus & status);
-	
+
 	void write_track_info_cue (CDMarkerStatus & status);
 	void write_track_info_toc (CDMarkerStatus & status);
 
 	void write_index_info_cue (CDMarkerStatus & status);
 	void write_index_info_toc (CDMarkerStatus & status);
-	
+
 	void frames_to_cd_frames_string (char* buf, nframes_t when);
-	
+
 	int cue_tracknum;
 	int cue_indexnum;
-	
+
 	/* Timespan management */
-	
+
 	void start_timespan ();
 	void finish_timespan ();
 	void timespan_thread_finished ();
-	
+
 	typedef std::pair<ConfigMap::iterator, ConfigMap::iterator> TimespanBounds;
 	TimespanPtr          current_timespan;
 	ConfigMap::iterator  current_map_it;

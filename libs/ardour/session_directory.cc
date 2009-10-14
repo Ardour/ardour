@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2007 Tim Mayberry 
+	Copyright (C) 2007 Tim Mayberry
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -140,7 +140,7 @@ SessionDirectory::export_path () const
 const vector<path>
 SessionDirectory::sub_directories () const
 {
-	vector<path> tmp_paths; 
+	vector<path> tmp_paths;
 
 	tmp_paths.push_back ( sound_path () );
 	tmp_paths.push_back ( midi_path () );

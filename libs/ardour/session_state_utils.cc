@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2007 Tim Mayberry 
+	Copyright (C) 2007 Tim Mayberry
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ get_state_files_in_directory (const sys::path & directory_path,
 			      vector<sys::path> & result)
 {
 	Glib::PatternSpec state_file_pattern('*' + string(statefile_suffix));
-	
+
 	find_matching_files_in_directory (directory_path, state_file_pattern,
 			result);
 }

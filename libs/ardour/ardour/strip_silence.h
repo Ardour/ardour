@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,12 +21,12 @@
 
 namespace ARDOUR {
 
-/// A filter to strip silence from regions	
+/// A filter to strip silence from regions
 class StripSilence : public Filter {
 
 public:
 	StripSilence (Session &, double, nframes_t, nframes_t);
-	
+
 	int run (boost::shared_ptr<ARDOUR::Region>);
 
 private:

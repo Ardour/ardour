@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@
 #include "evoral/TimeConverter.hpp"
 
 #include "pbd/undo.h"
-#include "pbd/statefuldestructible.h" 
+#include "pbd/statefuldestructible.h"
 
 #include "ardour/automation_list.h"
 #include "ardour/types.h"
@@ -66,13 +66,13 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 
 	void set_selected_points (PointSelection&);
 	void get_selectables (nframes_t& start, nframes_t& end,
-			      double botfrac, double topfrac, 
+			      double botfrac, double topfrac,
 			      std::list<Selectable*>& results);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
 
 	virtual void remove_point (ControlPoint&);
 	bool control_points_adjacent (double xval, uint32_t& before, uint32_t& after);
-	
+
 	/* dragging API */
 	virtual void start_drag (ControlPoint*, nframes_t x, float fraction);
 	virtual void point_drag(ControlPoint&, nframes_t x, float, bool with_push);
@@ -129,13 +129,13 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	void set_colors();
 
 	void modify_point_y (ControlPoint&, double);
-	
+
   protected:
 
 	std::string    _name;
 	guint32   _height;
 	uint32_t  _line_color;
-	
+
 	boost::shared_ptr<ARDOUR::AutomationList> alist;
 
 	bool    _visible                  : 1;
@@ -162,11 +162,11 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 
 	static void invalidate_point (ALPoints&, uint32_t index);
 	static bool invalid_point (ALPoints&, uint32_t index);
-	
+
 	void determine_visible_control_points (ALPoints&);
 	void sync_model_with_view_point (ControlPoint&, bool did_push, int64_t distance);
 	void sync_model_with_view_line (uint32_t, uint32_t);
-	
+
 	virtual void change_model (ARDOUR::AutomationList::iterator, double x, double y);
 
 	void reset_callback (const Evoral::ControlList&);
@@ -174,7 +174,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 
 	virtual bool event_handler (GdkEvent*);
 	virtual void add_model_point (ALPoints& tmp_points, double frame, double yfract);
-	
+
   private:
 	uint32_t drags;
 	double   first_drag_fraction;

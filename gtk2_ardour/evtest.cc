@@ -11,18 +11,18 @@ print_event (GdkEvent* event)
 
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
-		cerr << "Button press, button = " 
+		cerr << "Button press, button = "
 		     << event->button.button
 		     << " state "
-		     << event->button.state 
+		     << event->button.state
 		     << endl;
 		break;
 
 	case GDK_BUTTON_RELEASE:
-		cerr << "Button release, button = " 
+		cerr << "Button release, button = "
 		     << event->button.button
 		     << " state "
-		     << event->button.state 
+		     << event->button.state
 		     << endl;
 		break;
 
@@ -37,7 +37,7 @@ print_event (GdkEvent* event)
 	case GDK_KEY_PRESS:
 		cerr << "Key press, keycode = "
 		     << event->key.keyval
-		     << " name " 
+		     << " name "
 		     << gdk_keyval_name (event->key.keyval)
 		     << " state = "
 		     << event->key.state
@@ -51,7 +51,7 @@ print_event (GdkEvent* event)
 	case GDK_KEY_RELEASE:
 		cerr << "Key release, keycode = "
 		     << event->key.keyval
-		     << " name " 
+		     << " name "
 		     << gdk_keyval_name (event->key.keyval)
 		     << " state = "
 		     << event->key.state
@@ -77,7 +77,7 @@ main (int argc, char* argv[])
 	Gtk::Main app (&argc, &argv);
 	Gtk::Window window;
 	Gtk::EventBox eventbox;
-	
+
 	window.add (eventbox);
 	window.set_size_request (250, 250);
 

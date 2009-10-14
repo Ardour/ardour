@@ -50,9 +50,9 @@ class ExportDialog : public ArdourDialog {
 
 	explicit ExportDialog (PublicEditor & editor, Glib::ustring title = _("Export"));
 	~ExportDialog ();
-	
+
 	void set_session (ARDOUR::Session* s);
-	
+
 	/* Responses */
 
 	enum Responses {
@@ -65,7 +65,7 @@ class ExportDialog : public ArdourDialog {
 
 	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
-	
+
 	HandlerPtr      handler;
 	ManagerPtr      profile_manager;
 
@@ -79,10 +79,10 @@ class ExportDialog : public ArdourDialog {
 	boost::shared_ptr<ExportTimespanSelector> timespan_selector;
 	boost::shared_ptr<ExportChannelSelector>  channel_selector;
 	boost::shared_ptr<ExportFileNotebook>     file_notebook;
-	
+
 	Gtk::VBox                                 warning_widget;
 	Gtk::VBox                                 progress_widget;
-	
+
 	Gtk::Label *                              timespan_label;
 	Gtk::Label *                              channels_label;
 
@@ -92,46 +92,46 @@ class ExportDialog : public ArdourDialog {
 
 	void notify_errors ();
 	void close_dialog ();
-	
+
 	void sync_with_manager ();
 	void update_warnings ();
 	void show_conflicting_files ();
 
 	void export_rt ();
 	void export_fw ();
-	
+
 	void show_progress ();
 	gint progress_timeout ();
-	
+
 	typedef boost::shared_ptr<ARDOUR::ExportStatus> StatusPtr;
-	
+
 	PublicEditor &  editor;
 	StatusPtr       status;
-	
+
 	/*** GUI components ***/
-	
+
 	/* Warning area */
-	
+
 	Gtk::HBox           warn_hbox;
 	Gtk::Label          warn_label;
 	Glib::ustring       warn_string;
-	
+
 	Gtk::HBox           list_files_hbox;
 	Gtk::Label          list_files_label;
 	Gtk::Button         list_files_button;
 	Glib::ustring       list_files_string;
-	
+
 	void add_error (Glib::ustring const & text);
 	void add_warning (Glib::ustring const & text);
-	
+
 	/* Progress bar */
-	
+
 	Gtk::Label              progress_label;
 	Gtk::ProgressBar        progress_bar;
 	sigc::connection        progress_connection;
-	
+
 	/* Buttons */
-	
+
 	Gtk::Button *           cancel_button;
 	Gtk::Button *           rt_export_button;
 	Gtk::Button *           fast_export_button;
@@ -145,7 +145,7 @@ class ExportRangeDialog : public ExportDialog
 
   private:
 	void init_components ();
-	
+
 	Glib::ustring range_id;
 };
 
@@ -166,7 +166,7 @@ class ExportRegionDialog : public ExportDialog
   private:
 	void init_gui ();
 	void init_components ();
-	
+
 	ARDOUR::AudioRegion const & region;
 	ARDOUR::AudioTrack & track;
 };

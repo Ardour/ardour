@@ -210,7 +210,7 @@ path_is_paired (ustring path, ustring& pair_base)
 		path = path.substr(pos+1);
 	}
 
- 	/* remove filename suffixes etc. */
+	/* remove filename suffixes etc. */
 
 	if ((pos = path.find_last_of ('.')) != string::npos) {
 		path = path.substr (0, pos);
@@ -425,7 +425,7 @@ meter_falloff_from_float (float val)
 	}
 	else if (val <= METER_FALLOFF_FASTER) {
 		return MeterFalloffFaster;
- 	}
+	}
 	else {
 		return MeterFalloffFastest;
 	}

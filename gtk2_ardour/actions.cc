@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2005 Paul Davis 
+    Copyright (C) 2005 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ ActionManager::init ()
 	find_file_in_search_path (spath, "ardour.menus", ui_file);
 
 	bool loaded = false;
-	
+
 	try {
 		ui_manager->add_ui_from_file (ui_file.to_string());
 		loaded = true;
@@ -142,12 +142,12 @@ ActionManager::register_toggle_action (RefPtr<ActionGroup> group, const char * n
 	return act;
 }
 
-bool 
+bool
 ActionManager::lookup_entry (const ustring accel_path, Gtk::AccelKey& key)
 {
 	GtkAccelKey gkey;
 	bool known = gtk_accel_map_lookup_entry (accel_path.c_str(), &gkey);
-	
+
 	if (known) {
 		key = AccelKey (gkey.accel_key, Gdk::ModifierType (gkey.accel_mods));
 	} else {
@@ -177,11 +177,11 @@ ActionManager::get_all_actions (vector<string>& groups, vector<string>& names, v
 	GList* acts;
 
 	for (node = list; node; node = g_list_next (node)) {
-		
+
 		GtkActionGroup* group = (GtkActionGroup*) node->data;
-		
+
 		/* first pass: collect them all */
-		
+
 		typedef std::list<Glib::RefPtr<Gtk::Action> > action_list;
 		action_list the_acts;
 
@@ -189,9 +189,9 @@ ActionManager::get_all_actions (vector<string>& groups, vector<string>& names, v
 			GtkAction* action = (GtkAction*) acts->data;
 			the_acts.push_back (Glib::wrap (action, true));
 		}
-		
+
 		/* now sort by label */
-		
+
 		SortActionsByLabel cmp;
 		the_acts.sort (cmp);
 
@@ -201,7 +201,7 @@ ActionManager::get_all_actions (vector<string>& groups, vector<string>& names, v
 
 			groups.push_back (gtk_action_group_get_name(group));
 			names.push_back (accel_path.substr (accel_path.find_last_of ('/') + 1));
-			
+
 			AccelKey key;
 			lookup_entry (accel_path, key);
 			bindings.push_back (AccelKey (key.get_key(), Gdk::ModifierType (key.get_mod())));
@@ -221,11 +221,11 @@ ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, ve
 	GList* acts;
 
 	for (node = list; node; node = g_list_next (node)) {
-		
+
 		GtkActionGroup* group = (GtkActionGroup*) node->data;
-		
+
 		/* first pass: collect them all */
-		
+
 		typedef std::list<Glib::RefPtr<Gtk::Action> > action_list;
 		action_list the_acts;
 
@@ -233,9 +233,9 @@ ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, ve
 			GtkAction* action = (GtkAction*) acts->data;
 			the_acts.push_back (Glib::wrap (action, true));
 		}
-		
+
 		/* now sort by label */
-		
+
 		SortActionsByLabel cmp;
 		the_acts.sort (cmp);
 
@@ -246,16 +246,16 @@ ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, ve
 
 			names.push_back (label);
 			paths.push_back (accel_path);
-			
+
 			AccelKey key;
 			bool known = lookup_entry (accel_path, key);
-			
+
 			if (known) {
 				keys.push_back (ui_manager->get_accel_group()->name (key.get_key(), Gdk::ModifierType (key.get_mod())));
 			} else {
 				keys.push_back (unbound_string);
 			}
-			
+
 			bindings.push_back (AccelKey (key.get_key(), Gdk::ModifierType (key.get_mod())));
 		}
 	}
@@ -300,11 +300,11 @@ ActionManager::get_action (const char* group_name, const char* action_name)
 	for (node = list; node; node = g_list_next (node)) {
 
 		GtkActionGroup* _ag = (GtkActionGroup*) node->data;
-		
+
 		if (strcmp (group_name,  gtk_action_group_get_name (_ag)) == 0) {
-			
+
 			GtkAction* _act;
-			
+
 			if ((_act = gtk_action_group_get_action (_ag, action_name)) != 0) {
 				act = Glib::wrap (_act, true);
 				break;
@@ -315,7 +315,7 @@ ActionManager::get_action (const char* group_name, const char* action_name)
 	return act;
 }
 
-void 
+void
 ActionManager::set_sensitive (vector<RefPtr<Action> >& actions, bool state)
 {
 	for (vector<RefPtr<Action> >::iterator i = actions.begin(); i != actions.end(); ++i) {
@@ -368,10 +368,10 @@ ActionManager::toggle_config_state (const char* group, const char* action, bool 
 
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		
+
 		if (tact) {
 			bool x = (Config->*get)();
-			
+
 			if (x != tact->get_active()) {
 				(Config->*set) (!x);
 			}
@@ -411,7 +411,7 @@ ActionManager::map_some_state (const char* group, const char* action, bool (RCCo
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 
 		if (tact) {
-			
+
 			bool x = (Config->*get)();
 
 			if (tact->get_active() != x) {
@@ -433,7 +433,7 @@ ActionManager::map_some_state (const char* group, const char* action, sigc::slot
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 
 		if (tact) {
-			
+
 			bool const x = get ();
 
 			if (tact->get_active() != x) {

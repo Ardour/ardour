@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004 Paul Davis 
+    Copyright (C) 2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -74,15 +74,15 @@ VSTPlugin::VSTPlugin (AudioEngine& e, Session& session, FSTHandle* h)
 
 	/* set rate and blocksize */
 
-	_plugin->dispatcher (_plugin, effSetSampleRate, 0, 0, NULL, 
+	_plugin->dispatcher (_plugin, effSetSampleRate, 0, 0, NULL,
 			     (float) session.frame_rate());
-	_plugin->dispatcher (_plugin, effSetBlockSize, 0, 
+	_plugin->dispatcher (_plugin, effSetBlockSize, 0,
 			     session.get_block_size(), NULL, 0.0f);
-	
+
 	/* set program to zero */
 
 	_plugin->dispatcher (_plugin, effSetProgram, 0, 0, NULL, 0.0f);
-	
+
 	// Plugin::setup_controls ();
 }
 
@@ -95,7 +95,7 @@ VSTPlugin::VSTPlugin (const VSTPlugin &other)
 		throw failed_constructor();
 	}
 	_plugin = _fst->plugin;
-	
+
 	// Plugin::setup_controls ();
 }
 
@@ -118,7 +118,7 @@ float
 VSTPlugin::default_value (uint32_t port)
 {
 	return 0;
-}	
+}
 
 void
 VSTPlugin::set_parameter (uint32_t which, float val)
@@ -131,7 +131,7 @@ float
 VSTPlugin::get_parameter (uint32_t which) const
 {
 	return _plugin->getParameter (_plugin, which);
-	
+
 }
 
 uint32_t
@@ -156,10 +156,10 @@ VSTPlugin::get_state()
 	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 
 		/* fetch the current chunk */
-		
+
 		guchar* data;
 		long  data_size;
-		
+
 		if ((data_size = _plugin->dispatcher (_plugin, 23 /* effGetChunk */, 0, 0, &data, false)) == 0) {
 			return *root;
 		}
@@ -173,7 +173,7 @@ VSTPlugin::get_state()
 		g_free (encoded_data);
 
 		root->add_child_nocopy (*chunk_node);
-		
+
 	} else {
 
 		XMLNode* parameters = new XMLNode ("parameters");
@@ -210,7 +210,7 @@ VSTPlugin::set_state(const XMLNode& node)
 
 	XMLNode* child;
 	int ret = -1;
-	
+
 	if ((child = find_named_node (node, X_("chunk"))) != 0) {
 
 		XMLPropertyList::const_iterator i;
@@ -228,7 +228,7 @@ VSTPlugin::set_state(const XMLNode& node)
 		}
 
 	} else if ((child = find_named_node (node, X_("parameters"))) != 0) {
-		
+
 		XMLPropertyList::const_iterator i;
 
 		for (i = child->properties().begin(); i != child->properties().end(); ++i) {
@@ -274,28 +274,28 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 			desc.lower = 0;
 			desc.upper = 1.0;
 		}
-		
+
 		if (prop.flags & kVstParameterUsesIntStep) {
-			
+
 			desc.step = prop.stepInteger;
 			desc.smallstep = prop.stepInteger;
 			desc.largestep = prop.stepInteger;
-			
+
 		} else if (prop.flags & kVstParameterUsesFloatStep) {
-			
+
 			desc.step = prop.stepFloat;
 			desc.smallstep = prop.smallStepFloat;
 			desc.largestep = prop.largeStepFloat;
-			
+
 		} else {
-			
+
 			float range = desc.upper - desc.lower;
-			
+
 			desc.step = range / 100.0f;
 			desc.smallstep = desc.step / 2.0f;
 			desc.largestep = desc.step * 10.0f;
 		}
-		
+
 		desc.toggled = prop.flags & kVstParameterIsSwitch;
 		desc.logarithmic = false;
 		desc.sr_dependent = false;
@@ -402,10 +402,10 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		outs[i] = bufs.get_audio(min((uint32_t) out_index, nbufs - 1)).data() + offset;
 
 		/* unbelievably, several VST plugins still rely on Cubase
-		   behaviour and do not silence the buffer in processReplacing 
+		   behaviour and do not silence the buffer in processReplacing
 		   when they have no output.
 		*/
-		
+
 		// memset (outs[i], 0, sizeof (Sample) * nframes);
 		out_index++;
 	}
@@ -414,7 +414,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 	/* we already know it can support processReplacing */
 
 	_plugin->processReplacing (_plugin, ins, outs, nframes);
-	
+
 	return 0;
 }
 
@@ -504,9 +504,9 @@ VSTPluginInfo::load (Session& session)
 
 		if (Config->get_use_vst()) {
 			FSTHandle* handle;
-			
+
 			handle = fst_load(path.c_str());
-	
+
 			if ( (int)handle == -1) {
 				error << string_compose(_("VST: cannot load module from \"%1\""), path) << endmsg;
 			} else {
@@ -519,7 +519,7 @@ VSTPluginInfo::load (Session& session)
 
 		plugin->set_info(PluginInfoPtr(new VSTPluginInfo(*this)));
 		return plugin;
-	}	
+	}
 
 	catch (failed_constructor &err) {
 		return PluginPtr ((Plugin*) 0);

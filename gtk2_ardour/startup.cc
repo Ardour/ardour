@@ -35,7 +35,7 @@ static string poor_mans_glob (string path)
 	replace_all (copy, "~", Glib::get_home_dir());
 	return copy;
 }
-	
+
 
 ArdourStartup::ArdourStartup ()
 	: applying (false)
@@ -73,7 +73,7 @@ Ardour will play NO role in monitoring"))
 	set_resizable (false);
 	set_position (WIN_POS_CENTER);
 	set_border_width (12);
-	
+
 	sys::path icon_file;
 
 	if (!find_file_in_search_path (ardour_search_path() + system_data_search_path().add_subdirectory_to_paths("icons"), "ardour_icon_48px.png", icon_file)) {
@@ -178,7 +178,7 @@ ArdourStartup::session_name (bool& should_be_new)
 		should_be_new = false;
 
 		TreeIter iter = recent_session_display.get_selection()->get_selected();
-		
+
 		if (iter) {
 			return (*iter)[recent_session_columns.visible_name];
 		}
@@ -198,7 +198,7 @@ ArdourStartup::session_folder ()
 
 		if (iter) {
 			return (*iter)[recent_session_columns.fullpath];
-		} 
+		}
 		return "";
 	}
 }
@@ -215,7 +215,7 @@ ArdourStartup::setup_audio_page ()
 	audio_page_index = append_page (*engine_dialog);
 	set_page_type (*engine_dialog, ASSISTANT_PAGE_CONTENT);
 	set_page_title (*engine_dialog, _("Audio Setup"));
-	
+
 	/* the default parameters should work, so the page is potentially complete */
 
 	set_page_complete (*engine_dialog, true);
@@ -235,7 +235,7 @@ ideas about music and sound.\n\
 There are a few things that need to configured before you start\n\
 using the program.</span>\
 "));
-	
+
 	HBox* hbox = manage (new HBox);
 	HBox* vbox = manage (new HBox);
 
@@ -265,12 +265,12 @@ ArdourStartup::default_dir_changed ()
 void
 ArdourStartup::setup_first_time_config_page ()
 {
-	default_dir_chooser = manage (new FileChooserButton (_("Default folder for Ardour sessions"), 
+	default_dir_chooser = manage (new FileChooserButton (_("Default folder for Ardour sessions"),
 							     FILE_CHOOSER_ACTION_SELECT_FOLDER));
 	Gtk::Label* txt = manage (new Label);
 	HBox* hbox = manage (new HBox);
 	VBox* vbox = manage (new VBox);
-	
+
 	txt->set_markup (_("\
 Each project that you work on with Ardour has its own folder.\n\
 These can require a lot of disk space if you are recording audio.\n\
@@ -307,7 +307,7 @@ ArdourStartup::setup_monitoring_choice_page ()
 {
 	mon_vbox.set_spacing (18);
 	mon_vbox.set_border_width (24);
-	
+
 	HBox* hbox = manage (new HBox);
 	VBox* vbox = manage (new VBox);
 	RadioButton::Group g (monitor_via_hardware_button.get_group());
@@ -354,7 +354,7 @@ ArdourStartup::setup_initial_choice_page ()
 
 	HBox* centering_hbox = manage (new HBox);
 	VBox* centering_vbox = manage (new VBox);
-	
+
 	centering_vbox->set_spacing (6);
 
 	centering_vbox->pack_start (ic_new_session_button, false, true);
@@ -445,13 +445,13 @@ ArdourStartup::on_apply ()
 		if (default_dir_chooser) {
 			Config->set_default_session_parent_dir (default_dir_chooser->get_current_folder());
 		}
-		
+
 		if (monitor_via_hardware_button.get_active()) {
 			Config->set_monitoring_model (ExternalMonitoring);
 		} else if (monitor_via_ardour_button.get_active()) {
 			Config->set_monitoring_model (SoftwareMonitoring);
 		}
-		
+
 		Config->save_state ();
 	}
 
@@ -462,7 +462,7 @@ void
 ArdourStartup::on_prepare (Gtk::Widget* page)
 {
 	if (page == &session_vbox) {
-		
+
 		if (ic_new_session_button.get_active()) {
 			/* new session requested */
 			setup_new_session_page ();
@@ -470,14 +470,14 @@ ArdourStartup::on_prepare (Gtk::Widget* page)
 			/* existing session requested */
 			setup_existing_session_page ();
 		}
-	} 
+	}
 }
 
 void
 ArdourStartup::populate_session_templates ()
 {
 	vector<TemplateInfo> templates;
-	
+
 	find_session_templates (templates);
 
 	template_model->clear ();
@@ -486,7 +486,7 @@ ArdourStartup::populate_session_templates ()
 		TreeModel::Row row;
 
 		row = *(template_model->append ());
-		
+
 		row[session_template_columns.name] = (*x).name;
 		row[session_template_columns.path] = (*x).path;
 	}
@@ -505,38 +505,38 @@ ArdourStartup::setup_new_session_page ()
 		VBox *vbox1 = manage (new VBox);
 		HBox* hbox1 = manage (new HBox);
 		Label* label1 = manage (new Label);
-		
+
 		vbox1->set_spacing (6);
 
 		hbox1->set_spacing (6);
 		hbox1->pack_start (*label1, false, false);
 		hbox1->pack_start (new_name_entry, true, true);
-		
+
 		label1->set_text (_("Session name:"));
-		
+
 
 		if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 			new_name_entry.set_text  (Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name));
 			/* name provided - they can move right along */
 			set_page_complete (session_vbox, true);
 		}
-		
+
 		new_name_entry.signal_changed().connect (mem_fun (*this, &ArdourStartup::new_name_changed));
 		new_name_entry.signal_activate().connect (mem_fun (*this, &ArdourStartup::move_along_now));
-		
+
 		vbox1->pack_start (*hbox1, true, true);
 
 		/* --- */
 
 		HBox* hbox2 = manage (new HBox);
 		Label* label2 = manage (new Label);
-		
+
 		hbox2->set_spacing (6);
 		hbox2->pack_start (*label2, false, false);
 		hbox2->pack_start (new_folder_chooser, true, true);
-		
+
 		label2->set_text (_("Create session folder in:"));
-		
+
 		if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 			new_folder_chooser.set_current_folder (poor_mans_glob (Glib::path_get_dirname (ARDOUR_COMMAND_LINE::session_name)));
 		} else {
@@ -557,7 +557,7 @@ ArdourStartup::setup_new_session_page ()
 		populate_session_templates ();
 
 		vbox2->set_spacing (6);
-	
+
 		label3->set_markup (_("<b>Options</b>"));
 		label3->set_alignment (0.0, 0.0);
 
@@ -579,37 +579,37 @@ ArdourStartup::setup_new_session_page ()
 			hbox4a->set_spacing (6);
 			hbox4a->pack_start (use_template_button, false, false);
 			hbox4a->pack_start (template_chooser, true, true);
-			
+
 			template_chooser.set_model (template_model);
-			
+
 			Gtk::CellRendererText* text_renderer = Gtk::manage (new Gtk::CellRendererText);
 			text_renderer->property_editable() = false;
-			
+
 			template_chooser.pack_start (*text_renderer);
 			template_chooser.add_attribute (text_renderer->property_text(), session_template_columns.name);
 			template_chooser.set_active (0);
-			
+
 			use_template_button.show();
 			template_chooser.show ();
 
 			vbox3->pack_start (*hbox4a, false, false);
 		}
-			
+
 		/* --- */
 
 		if (!new_user) {
 			session_template_chooser.set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
-			
+
 			HBox* hbox4b = manage (new HBox);
 			use_session_as_template_button.set_label (_("Use an existing session as a template:"));
-			
+
 			hbox4b->set_spacing (6);
 			hbox4b->pack_start (use_session_as_template_button, false, false);
 			hbox4b->pack_start (session_template_chooser, true, true);
-			
+
 			use_session_as_template_button.show ();
 			session_template_chooser.show ();
-			
+
 			Gtk::FileFilter* template_filter = manage (new (Gtk::FileFilter));
 			template_filter->add_pattern(X_("*.template"));
 			session_template_chooser.set_filter (*template_filter);
@@ -619,12 +619,12 @@ ArdourStartup::setup_new_session_page ()
 		}
 
 		/* --- */
-		
+
 		HBox* hbox5 = manage (new HBox);
-	
+
 		hbox5->set_spacing (6);
 		hbox5->pack_start (more_new_session_options_button, false, false);
-		
+
 		more_new_session_options_button.show ();
 		more_new_session_options_button.signal_clicked().connect (mem_fun (*this, &ArdourStartup::more_new_session_options_button_clicked));
 
@@ -660,7 +660,7 @@ ArdourStartup::redisplay_recent_sessions ()
 {
 	std::vector<sys::path> session_directories;
 	RecentSessionsSorter cmp;
-	
+
 	recent_session_display.set_model (Glib::RefPtr<TreeModel>(0));
 	recent_session_model->clear ();
 
@@ -674,11 +674,11 @@ ArdourStartup::redisplay_recent_sessions ()
 	//
 	// sort them alphabetically
 	sort (rs.begin(), rs.end(), cmp);
-	
+
 	for (ARDOUR::RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
 	        session_directories.push_back ((*i).second);
 	}
-	
+
 	for (vector<sys::path>::const_iterator i = session_directories.begin(); i != session_directories.end(); ++i)
 	{
 		std::vector<sys::path> state_file_paths;
@@ -690,7 +690,7 @@ ArdourStartup::redisplay_recent_sessions ()
 		vector<string*>* states;
 		vector<const gchar*> item;
 		string fullpath = (*i).to_string();
-		
+
 		/* remove any trailing / */
 
 		if (fullpath[fullpath.length()-1] == '/') {
@@ -701,22 +701,22 @@ ArdourStartup::redisplay_recent_sessions ()
 		if (!Glib::file_test(fullpath.c_str(), Glib::FILE_TEST_EXISTS)) {
 			/* session doesn't exist */
 			continue;
-		}		
-		
+		}
+
 		/* now get available states for this session */
 
 		if ((states = Session::possible_states (fullpath)) == 0) {
 			/* no state file? */
 			continue;
 		}
-	  
+
 		std::vector<string> state_file_names(get_file_names_no_extension (state_file_paths));
 
 		Gtk::TreeModel::Row row = *(recent_session_model->append());
 
 		row[recent_session_columns.visible_name] = Glib::path_get_basename (fullpath);
 		row[recent_session_columns.fullpath] = fullpath;
-		
+
 		if (state_file_names.size() > 1) {
 
 			// add the children
@@ -760,13 +760,13 @@ ArdourStartup::setup_existing_session_page ()
 		recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
 		recent_session_display.set_headers_visible (false);
 		recent_session_display.get_selection()->set_mode (SELECTION_BROWSE);
-		
+
 		recent_session_display.get_selection()->signal_changed().connect (mem_fun (*this, &ArdourStartup::recent_session_row_selected));
-		
+
 		recent_scroller.add (recent_session_display);
 		recent_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 		recent_scroller.set_shadow_type	(Gtk::SHADOW_IN);
-		
+
 		recent_session_display.show();
 	}
 
@@ -801,7 +801,7 @@ ArdourStartup::setup_more_options_page ()
 	_input_limit_count.set_adjustment (_input_limit_count_adj);
 	_control_bus_channel_count.set_adjustment (_control_bus_channel_count_adj);
 	_master_bus_channel_count.set_adjustment (_master_bus_channel_count_adj);
-	
+
 	chan_count_label_1.set_text (_("channels"));
 	chan_count_label_2.set_text (_("channels"));
 	chan_count_label_3.set_text (_("channels"));
@@ -856,14 +856,14 @@ ArdourStartup::setup_more_options_page ()
 
 	advanced_table.set_row_spacings(0);
 	advanced_table.set_col_spacings(0);
-	
+
 	_connect_inputs.set_label (_("Automatically connect to physical_inputs"));
 	_connect_inputs.set_flags(Gtk::CAN_FOCUS);
 	_connect_inputs.set_relief(Gtk::RELIEF_NORMAL);
 	_connect_inputs.set_mode(true);
 	_connect_inputs.set_active(true);
 	_connect_inputs.set_border_width(0);
-	
+
 	_limit_input_ports.set_label (_("Use only"));
 	_limit_input_ports.set_flags(Gtk::CAN_FOCUS);
 	_limit_input_ports.set_relief(Gtk::RELIEF_NORMAL);
@@ -889,7 +889,7 @@ ArdourStartup::setup_more_options_page ()
 	bus_frame.set_label_align(0,0.5);
 	bus_frame.add(bus_hbox);
 	bus_frame.set_label_widget(bus_label);
-	
+
 	bus_table.set_row_spacings (0);
 	bus_table.set_col_spacings (0);
 	bus_table.attach (_create_master_bus, 0, 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 0);
@@ -1000,7 +1000,7 @@ ArdourStartup::setup_more_options_page ()
 	 * default. this is entirely by design - this page
 	 * should be skipped unless explicitly requested.
 	 */
-	
+
 	session_options_page_index = append_page (more_options_vbox);
 	set_page_title (more_options_vbox, _("Advanced Session Options"));
 	set_page_complete (more_options_vbox, true);

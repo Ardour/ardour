@@ -1,16 +1,16 @@
 /* This file is part of Evoral.
  * Copyright (C) 2008 Dave Robillard <http://drobilla.net>
  * Copyright (C) 2000-2008 Paul Davis
- * 
+ *
  * Evoral is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation; either version 2 of the License, or (at your option) any later
  * version.
- * 
+ *
  * Evoral is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
@@ -40,7 +40,7 @@ struct MIDIEvent : public Event<Time> {
 	MIDIEvent(EventType type=0, Time time=0, uint32_t size=0, uint8_t* buf=NULL, bool alloc=false)
 		: Event<Time>(type, time, size, buf, alloc)
 	{}
-	
+
 	MIDIEvent(const Event<Time>& copy, bool alloc)
 		: Event<Time>(copy, alloc)
 	{}
@@ -48,7 +48,7 @@ struct MIDIEvent : public Event<Time> {
 #ifdef EVORAL_MIDI_XML
 	/** Event from XML ala http://www.midi.org/dtds/MIDIEvents10.dtd */
 	MIDIEvent(const XMLNode& event);
-	
+
 	/** Event to XML ala http://www.midi.org/dtds/MIDIEvents10.dtd */
 	boost::shared_ptr<XMLNode> to_xml() const;
 #endif
@@ -70,7 +70,7 @@ struct MIDIEvent : public Event<Time> {
 	inline uint8_t  note()                  const { return (this->_buf[1]); }
 	inline uint8_t  velocity()              const { return (this->_buf[2]); }
         inline void     set_velocity(uint8_t value)   { this->_buf[2] = value; }
-        inline void     scale_velocity(float factor)  { 
+        inline void     scale_velocity(float factor)  {
 		if (factor < 0) factor = 0;
 		this->_buf[2] = (uint8_t) lrintf (this->_buf[2]*factor);
 		if (this->_buf[2] > 127) this->_buf[2] = 127;

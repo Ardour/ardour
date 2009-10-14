@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -170,7 +170,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 	_scale_amplitude = other->_scale_amplitude;
 
 	assert(_type == DataType::AUDIO);
-	
+
 	listen_to_my_curves ();
 	connect_to_analysis_changed ();
 
@@ -321,7 +321,7 @@ ARDOUR::nframes_t
 AudioRegion::read_peaks (PeakData *buf, nframes_t npeaks, nframes_t offset, nframes_t cnt, uint32_t chan_n, double samples_per_unit) const
 {
 	if (chan_n >= _sources.size()) {
-		return 0; 
+		return 0;
 	}
 
 	if (audio_source(chan_n)->read_peaks (buf, npeaks, offset, cnt, samples_per_unit)) {
@@ -366,16 +366,16 @@ AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_bu
 {
 	/* do not read gain/scaling/fades and do not count this disk i/o in statistics */
 
-	return _read_at (_master_sources, _master_sources.front()->length(_master_sources.front()->timeline_position()), 
+	return _read_at (_master_sources, _master_sources.front()->length(_master_sources.front()->timeline_position()),
 			 buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, 0, 0, ReadOps (0));
 }
 
 nframes_t
 AudioRegion::_read_at (const SourceList& /*srcs*/, nframes_t limit,
 		Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
-		sframes_t position, nframes_t cnt, 
-		uint32_t chan_n, 
-	        nframes_t /*read_frames*/, 
+		sframes_t position, nframes_t cnt,
+		uint32_t chan_n,
+	        nframes_t /*read_frames*/,
 		nframes_t /*skip_frames*/,
 		ReadOps rops) const
 {
@@ -424,13 +424,13 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, nframes_t limit,
 		if (src->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
 			return 0; /* "read nothing" */
 		}
-		
+
 		if (rops & ReadOpsCount) {
 			_read_data_count += src->read_data_count();
 		}
 
 	} else {
-		
+
 		/* track is N-channel, this region has less channels; silence the ones
 		   we don't have.
 		*/
@@ -439,53 +439,53 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, nframes_t limit,
 	}
 
 	if (rops & ReadOpsFades) {
-	
+
 		/* fade in */
 
 		if ((_flags & FadeIn) && _session.config.get_use_region_fades()) {
-			
+
 			nframes_t fade_in_length = (nframes_t) _fade_in->back()->when;
-			
+
 			/* see if this read is within the fade in */
-			
+
 			if (internal_offset < fade_in_length) {
-				
+
 				nframes_t fi_limit;
-				
+
 				fi_limit = min (to_read, fade_in_length - internal_offset);
-				
+
 
 				_fade_in->curve().get_vector (internal_offset, internal_offset+fi_limit, gain_buffer, fi_limit);
-				
+
 				for (nframes_t n = 0; n < fi_limit; ++n) {
 					mixdown_buffer[n] *= gain_buffer[n];
 				}
 			}
 		}
-		
+
 		/* fade out */
-		
+
 		if ((_flags & FadeOut) && _session.config.get_use_region_fades()) {
 
 			/* see if some part of this read is within the fade out */
-			
+
 		/* .................        >|            REGION
 		                             limit
- 					    
+
                                  {           }            FADE
 				             fade_out_length
-                                 ^					     
+                                 ^
                                  limit - fade_out_length
                         |--------------|
                         ^internal_offset
                                        ^internal_offset + to_read
-				       
+
 				       we need the intersection of [internal_offset,internal_offset+to_read] with
 				       [limit - fade_out_length, limit]
-				       
+
 		*/
 
-	
+
 			nframes_t fade_out_length = (nframes_t) _fade_out->back()->when;
 			nframes_t fade_interval_start = max(internal_offset, limit-fade_out_length);
 			nframes_t fade_interval_end   = min(internal_offset + to_read, limit);
@@ -496,22 +496,22 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, nframes_t limit,
 				nframes_t fo_limit = fade_interval_end - fade_interval_start;
 				nframes_t curve_offset = fade_interval_start - (limit-fade_out_length);
 				nframes_t fade_offset = fade_interval_start - internal_offset;
-				
+
 				_fade_out->curve().get_vector (curve_offset, curve_offset+fo_limit, gain_buffer, fo_limit);
 
 				for (nframes_t n = 0, m = fade_offset; n < fo_limit; ++n, ++m) {
 					mixdown_buffer[m] *= gain_buffer[n];
 				}
-			} 
-			
+			}
+
 		}
 	}
-		
+
 	/* Regular gain curves and scaling */
-	
+
 	if ((rops & ReadOpsOwnAutomation) && envelope_active())  {
 		_envelope->curve().get_vector (internal_offset, internal_offset + to_read, gain_buffer, to_read);
-			
+
 		if ((rops & ReadOpsOwnScaling) && _scale_amplitude != 1.0f) {
 			for (nframes_t n = 0; n < to_read; ++n) {
 				mixdown_buffer[n] *= gain_buffer[n] * _scale_amplitude;
@@ -523,29 +523,29 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, nframes_t limit,
 		}
 	} else if ((rops & ReadOpsOwnScaling) && _scale_amplitude != 1.0f) {
 
-		// XXX this should be using what in 2.0 would have been: 
+		// XXX this should be using what in 2.0 would have been:
 		// Session::apply_gain_to_buffer (mixdown_buffer, to_read, _scale_amplitude);
 
 		for (nframes_t n = 0; n < to_read; ++n) {
 			mixdown_buffer[n] *= _scale_amplitude;
 		}
 	}
-	
+
 	if (!opaque()) {
-		
+
 		/* gack. the things we do for users.
 		 */
-		
+
 		buf += buf_offset;
-			
+
 		for (nframes_t n = 0; n < to_read; ++n) {
 			buf[n] += mixdown_buffer[n];
 		}
-	} 
+	}
 
 	return to_read;
 }
-	
+
 XMLNode&
 AudioRegion::state (bool full)
 {
@@ -554,7 +554,7 @@ AudioRegion::state (bool full)
 	char buf[64];
 	char buf2[64];
 	LocaleGuard lg (X_("POSIX"));
-	
+
 	node.add_property ("flags", enum_2_string (_flags));
 
 	snprintf (buf, sizeof(buf), "%.12g", _scale_amplitude);
@@ -578,9 +578,9 @@ AudioRegion::state (bool full)
 	node.add_property ("channels", buf);
 
 	if (full) {
-	
+
 		child = node.add_child (X_("FadeIn"));
-		
+
 		if ((_flags & DefaultFadeIn)) {
 			child->add_property (X_("default"), X_("yes"));
 		} else {
@@ -588,23 +588,23 @@ AudioRegion::state (bool full)
 		}
 
 		child->add_property (X_("active"), _fade_in_disabled ? X_("no") : X_("yes"));
-		
+
 		child = node.add_child (X_("FadeOut"));
-		
+
 		if ((_flags & DefaultFadeOut)) {
 			child->add_property (X_("default"), X_("yes"));
 		} else {
 			child->add_child_nocopy (_fade_out->get_state ());
 		}
-		
+
 		child->add_property (X_("active"), _fade_out_disabled ? X_("no") : X_("yes"));
 	}
-	
+
 	child = node.add_child ("Envelope");
 
 	if (full) {
 		bool default_env = false;
-		
+
 		// If there are only two points, the points are in the start of the region and the end of the region
 		// so, if they are both at 1.0f, that means the default region.
 
@@ -614,7 +614,7 @@ AudioRegion::state (bool full)
 			if (_envelope->front()->when == 0 && _envelope->back()->when == _length) {
 				default_env = true;
 			}
-		} 
+		}
 
 		if (default_env) {
 			child->add_property ("default", "yes");
@@ -677,16 +677,16 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 	} else {
 		_scale_amplitude = 1.0;
 	}
-	
+
 	/* Now find envelope description and other misc child items */
-				
+
 	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		
+
 		XMLNode *child;
 		XMLProperty *prop;
-		
+
 		child = (*niter);
-		
+
 		if (child->name() == "Envelope") {
 
 			_envelope->clear ();
@@ -699,9 +699,9 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 			_envelope->truncate_end (_length);
 
 		} else if (child->name() == "FadeIn") {
-			
+
 			_fade_in->clear ();
-			
+
 			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0) {
 				set_default_fade_in ();
 			} else {
@@ -720,7 +720,7 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 			}
 
 		} else if (child->name() == "FadeOut") {
-			
+
 			_fade_out->clear ();
 
 			if ((prop = child->property ("default")) != 0 || (prop = child->property ("steepness")) != 0) {
@@ -729,7 +729,7 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 				XMLNode* grandchild = child->child ("AutomationList");
 				if (grandchild) {
 					_fade_out->set_state (*grandchild);
-				} 
+				}
 			}
 
 			if ((prop = child->property ("active")) != 0) {
@@ -740,7 +740,7 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 				}
 			}
 
-		} 
+		}
 	}
 
 	if (send) {
@@ -997,10 +997,10 @@ AudioRegion::set_default_envelope ()
 void
 AudioRegion::recompute_at_end ()
 {
-	/* our length has changed. recompute a new final point by interpolating 
+	/* our length has changed. recompute a new final point by interpolating
 	   based on the the existing curve.
 	*/
-	
+
 	_envelope->freeze ();
 	_envelope->truncate_end (_length);
 	_envelope->set_max_xval (_length);
@@ -1015,7 +1015,7 @@ AudioRegion::recompute_at_end ()
 		_fade_out->extend_to (_length);
 		send_change (FadeOutChanged);
 	}
-}	
+}
 
 void
 AudioRegion::recompute_at_start ()
@@ -1070,7 +1070,7 @@ AudioRegion::separate_by_channel (Session& /*session*/, vector<boost::shared_ptr
 		Flag f = Flag (_flags & ~WholeFile);
 
 		v.push_back(RegionFactory::create (srcs, _start, _length, new_name, _layer, f));
-		
+
 		++n;
 	}
 
@@ -1087,65 +1087,65 @@ int
 AudioRegion::exportme (Session& /*session*/, ARDOUR::ExportSpecification& /*spec*/)
 {
 	// TODO EXPORT
-// 	const nframes_t blocksize = 4096;
-// 	nframes_t to_read;
-// 	int status = -1;
-// 
-// 	spec.channels = _sources.size();
-// 
-// 	if (spec.prepare (blocksize, session.frame_rate())) {
-// 		goto out;
-// 	}
-// 
-// 	spec.pos = 0;
-// 	spec.total_frames = _length;
-// 
-// 	while (spec.pos < _length && !spec.stop) {
-// 		
-// 		
-// 		/* step 1: interleave */
-// 		
-// 		to_read = min (_length - spec.pos, blocksize);
-// 		
-// 		if (spec.channels == 1) {
-// 
-// 			if (read_raw_internal (spec.dataF, _start + spec.pos, to_read) != to_read) {
-// 				goto out;
-// 			}
-// 
-// 		} else {
-// 
-// 			Sample buf[blocksize];
-// 
-// 			for (uint32_t chan = 0; chan < spec.channels; ++chan) {
-// 				
-// 				if (audio_source(chan)->read (buf, _start + spec.pos, to_read) != to_read) {
-// 					goto out;
-// 				}
-// 				
-// 				for (nframes_t x = 0; x < to_read; ++x) {
-// 					spec.dataF[chan+(x*spec.channels)] = buf[x];
-// 				}
-// 			}
-// 		}
-// 		
-// 		if (spec.process (to_read)) {
-// 			goto out;
-// 		}
-// 		
-// 		spec.pos += to_read;
-// 		spec.progress = (double) spec.pos /_length;
-// 		
-// 	}
-// 	
-// 	status = 0;
-// 
-//   out:	
-// 	spec.running = false;
-// 	spec.status = status;
-// 	spec.clear();
-// 	
-// 	return status;
+//	const nframes_t blocksize = 4096;
+//	nframes_t to_read;
+//	int status = -1;
+//
+//	spec.channels = _sources.size();
+//
+//	if (spec.prepare (blocksize, session.frame_rate())) {
+//		goto out;
+//	}
+//
+//	spec.pos = 0;
+//	spec.total_frames = _length;
+//
+//	while (spec.pos < _length && !spec.stop) {
+//
+//
+//		/* step 1: interleave */
+//
+//		to_read = min (_length - spec.pos, blocksize);
+//
+//		if (spec.channels == 1) {
+//
+//			if (read_raw_internal (spec.dataF, _start + spec.pos, to_read) != to_read) {
+//				goto out;
+//			}
+//
+//		} else {
+//
+//			Sample buf[blocksize];
+//
+//			for (uint32_t chan = 0; chan < spec.channels; ++chan) {
+//
+//				if (audio_source(chan)->read (buf, _start + spec.pos, to_read) != to_read) {
+//					goto out;
+//				}
+//
+//				for (nframes_t x = 0; x < to_read; ++x) {
+//					spec.dataF[chan+(x*spec.channels)] = buf[x];
+//				}
+//			}
+//		}
+//
+//		if (spec.process (to_read)) {
+//			goto out;
+//		}
+//
+//		spec.pos += to_read;
+//		spec.progress = (double) spec.pos /_length;
+//
+//	}
+//
+//	status = 0;
+//
+//  out:
+//	spec.running = false;
+//	spec.status = status;
+//	spec.clear();
+//
+//	return status;
 	return 0;
 }
 
@@ -1157,7 +1157,7 @@ AudioRegion::set_scale_amplitude (gain_t g)
 	_scale_amplitude = g;
 
 	/* tell the diskstream we're in */
-	
+
 	if (pl) {
 		pl->Modified();
 	}
@@ -1203,7 +1203,7 @@ AudioRegion::normalize_to (float target_dB)
 			if (read_raw_internal (buf, fpos, to_read, 0) != to_read) {
 				return;
 			}
-			
+
 			maxamp = compute_peak (buf, to_read, maxamp);
 		}
 
@@ -1321,7 +1321,7 @@ AudioRegion::source_offset_changed ()
 	if (afs && afs->destructive()) {
 		// set_start (source()->natural_position(), this);
 		set_position (source()->natural_position(), this);
-	} 
+	}
 }
 
 boost::shared_ptr<AudioSource>
@@ -1346,14 +1346,14 @@ AudioRegion::get_transients (AnalysisFeatureList& results, bool force_new)
 	}
 
 	SourceList::iterator s;
-	
+
 	for (s = _sources.begin() ; s != _sources.end(); ++s) {
 		if (!(*s)->has_been_analysed()) {
 			cerr << "For " << name() << " source " << (*s)->name() << " has not been analyzed\n";
 			break;
 		}
 	}
-	
+
 	if (s == _sources.end()) {
 		/* all sources are analyzed, merge data from each one */
 
@@ -1368,14 +1368,14 @@ AudioRegion::get_transients (AnalysisFeatureList& results, bool force_new)
 			AnalysisFeatureList::iterator high = upper_bound ((*s)->transients.begin(),
 									  (*s)->transients.end(),
 									  _start + _length);
-									 
+
 			/* and add them */
 
 			results.insert (results.end(), low, high);
 		}
 
 		TransientDetector::cleanup_transients (results, pl->session().frame_rate(), 3.0);
-		
+
 		/* translate all transients to current position */
 
 		for (AnalysisFeatureList::iterator x = results.begin(); x != results.end(); ++x) {
@@ -1418,19 +1418,19 @@ then quit ardour and restart."));
 		}
 
 		/* translate all transients to give absolute position */
-		
+
 		for (AnalysisFeatureList::iterator i = these_results.begin(); i != these_results.end(); ++i) {
 			(*i) += _position;
 		}
 
 		/* merge */
-		
+
 		_transients.insert (_transients.end(), these_results.begin(), these_results.end());
 	}
-	
+
 	if (!results.empty()) {
 		if (existing_results) {
-			
+
 			/* merge our transients into the existing ones, then clean up
 			   those.
 			*/
@@ -1467,7 +1467,7 @@ AudioRegion::find_silence (Sample threshold, nframes_t min_length) const
 	nframes_t const block_size = 64 * 1024;
 	Sample loudest[block_size];
 	Sample buf[block_size];
-	
+
 	nframes_t pos = _start;
 	nframes_t const end = _start + _length - 1;
 
@@ -1519,7 +1519,7 @@ AudioRegion::find_silence (Sample threshold, nframes_t min_length) const
 
 extern "C" {
 
-	int region_read_peaks_from_c (void *arg, uint32_t npeaks, uint32_t start, uint32_t cnt, intptr_t data, uint32_t n_chan, double samples_per_unit) 
+	int region_read_peaks_from_c (void *arg, uint32_t npeaks, uint32_t start, uint32_t cnt, intptr_t data, uint32_t n_chan, double samples_per_unit)
 {
 	return ((AudioRegion *) arg)->read_peaks ((PeakData *) data, (nframes_t) npeaks, (nframes_t) start, (nframes_t) cnt, n_chan,samples_per_unit);
 }

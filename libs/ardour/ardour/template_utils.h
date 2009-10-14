@@ -15,8 +15,8 @@ namespace ARDOUR {
 	PBD::sys::path user_route_template_directory ();
 
 	struct TemplateInfo {
-	    std::string name;
-	    std::string path;
+		std::string name;
+		std::string path;
 	};
 
 	void find_route_templates (std::vector<TemplateInfo>& template_names);

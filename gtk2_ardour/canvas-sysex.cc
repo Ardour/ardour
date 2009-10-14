@@ -34,10 +34,10 @@ CanvasSysEx::CanvasSysEx(
 		double          x,
 		double          y)
 	: CanvasFlag(
-			region, 
-			parent, 
-			height, 
-			ARDOUR_UI::config()->canvasvar_MidiSysExOutline.get(), 
+			region,
+			parent,
+			height,
+			ARDOUR_UI::config()->canvasvar_MidiSysExOutline.get(),
 			ARDOUR_UI::config()->canvasvar_MidiSysExFill.get(),
 			x,
 			y)
@@ -58,19 +58,19 @@ CanvasSysEx::on_event(GdkEvent* ev)
 			return true;
 		}
 		break;
-		
+
 	case GDK_SCROLL:
 		if (ev->scroll.direction == GDK_SCROLL_UP) {
 			return true;
 		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
 			return true;
-		} 
+		}
 		break;
-		
+
 	default:
 		break;
 	}
-	
+
 	return false;
 }
 

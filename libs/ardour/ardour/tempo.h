@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,8 +27,8 @@
 #include <glibmm/thread.h>
 
 #include "pbd/undo.h"
-#include "pbd/stateful.h" 
-#include "pbd/statefuldestructible.h" 
+#include "pbd/stateful.h"
+#include "pbd/statefuldestructible.h"
 
 #include <sigc++/signal.h>
 
@@ -41,7 +41,7 @@ class Meter;
 class Tempo {
   public:
 	Tempo (double bpm, double type=4.0) // defaulting to quarter note
-		: _beats_per_minute (bpm), _note_type(type) {} 
+		: _beats_per_minute (bpm), _note_type(type) {}
 
 	double beats_per_minute () const { return _beats_per_minute;}
 	double note_type () const { return _note_type;}
@@ -56,12 +56,12 @@ class Meter {
   public:
 	static const double ticks_per_beat;
 
-	Meter (double bpb, double bt) 
+	Meter (double bpb, double bt)
 		: _beats_per_bar (bpb), _note_type (bt) {}
 
 	double beats_per_bar () const { return _beats_per_bar; }
 	double note_divisor() const { return _note_type; }
-	
+
 	double frames_per_bar (const Tempo&, nframes_t sr) const;
 
   protected:
@@ -154,22 +154,22 @@ class TempoMap : public PBD::StatefulDestructible
 	};
 
 	struct BBTPoint {
-	    BBTPointType type;
-	    nframes_t frame;
-	    const Meter* meter;
-	    const Tempo* tempo;
-	    uint32_t bar;
-	    uint32_t beat;
-	    
-	    BBTPoint (const Meter& m, const Tempo& t, nframes_t f,
-				BBTPointType ty, uint32_t b, uint32_t e) 
-		    : type (ty), frame (f), meter (&m), tempo (&t), bar (b), beat (e) {}
+		BBTPointType type;
+		nframes_t frame;
+		const Meter* meter;
+		const Tempo* tempo;
+		uint32_t bar;
+		uint32_t beat;
+
+		BBTPoint (const Meter& m, const Tempo& t, nframes_t f,
+				BBTPointType ty, uint32_t b, uint32_t e)
+			: type (ty), frame (f), meter (&m), tempo (&t), bar (b), beat (e) {}
 	};
 
 	typedef std::vector<BBTPoint> BBTPointList;
-	
+
 	template<class T> void apply_with_metrics (T& obj, void (T::*method)(const Metrics&)) {
-	        Glib::RWLock::ReaderLock lm (lock);
+		Glib::RWLock::ReaderLock lm (lock);
 		(obj.*method)(*metrics);
 	}
 
@@ -197,7 +197,7 @@ class TempoMap : public PBD::StatefulDestructible
 
 	void move_tempo (TempoSection&, const BBT_Time& to);
 	void move_meter (MeterSection&, const BBT_Time& to);
-	
+
 	void remove_tempo(const TempoSection&);
 	void remove_meter(const MeterSection&);
 
@@ -223,17 +223,17 @@ class TempoMap : public PBD::StatefulDestructible
 	class Metric {
 	  public:
 		Metric (const Meter& m, const Tempo& t) : _meter (&m), _tempo (&t), _frame (0) {}
-		
+
 		void set_tempo (const Tempo& t)    { _tempo = &t; }
 		void set_meter (const Meter& m)    { _meter = &m; }
 		void set_frame (nframes_t f)       { _frame = f; }
 		void set_start (const BBT_Time& t) { _start = t; }
-		
+
 		const Meter&    meter() const { return *_meter; }
 		const Tempo&    tempo() const { return *_tempo; }
 		nframes_t       frame() const { return _frame; }
 		const BBT_Time& start() const { return _start; }
-		
+
 	  private:
 		const Meter*   _meter;
 		const Tempo*   _tempo;
@@ -265,7 +265,7 @@ class TempoMap : public PBD::StatefulDestructible
 	bool                 last_bbt_valid;
 	BBT_Time             last_bbt;
 	mutable Glib::RWLock lock;
-	
+
 	void timestamp_metrics (bool use_bbt);
 
 	nframes_t round_to_type (nframes_t fr, int dir, BBTPointType);

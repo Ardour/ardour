@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001-2006 Paul Davis 
+    Copyright (C) 2001-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ static const int32_t sync_mark_width = 9;
 
 sigc::signal<void,RegionView*> RegionView::RegionViewGoingAway;
 
-RegionView::RegionView (ArdourCanvas::Group*              parent, 
+RegionView::RegionView (ArdourCanvas::Group*              parent,
                         TimeAxisView&                     tv,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double                            spu,
@@ -101,7 +101,7 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 	, TimeAxisViewItem (other)
 	, _time_converter(other._time_converter)
 {
-	/* this is a pseudo-copy constructor used when dragging regions 
+	/* this is a pseudo-copy constructor used when dragging regions
 	   around on the canvas.
 	*/
 
@@ -114,7 +114,7 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 	_height = other._height;
 }
 
-RegionView::RegionView (ArdourCanvas::Group*         parent, 
+RegionView::RegionView (ArdourCanvas::Group*         parent,
                         TimeAxisView&                tv,
                         boost::shared_ptr<ARDOUR::Region> r,
                         double                       spu,
@@ -154,7 +154,7 @@ RegionView::init (Gdk::Color const & basic_color, bool wfd)
 	if (name_highlight) {
 		name_highlight->set_data ("regionview", this);
 		name_highlight->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_highlight_event), name_highlight, this));
-		
+
 		frame_handle_start->set_data ("regionview", this);
 		frame_handle_start->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_frame_handle_event), frame_handle_start, this));
 
@@ -210,7 +210,7 @@ RegionView::_lock_toggle (ArdourCanvas::Item*, GdkEvent* ev, void* arg)
 		break;
 	default:
 		break;
-	} 
+	}
 	return FALSE;
 }
 
@@ -268,7 +268,7 @@ RegionView::region_resized (Change what_changed)
 		set_duration (_region->length(), 0);
 
 		unit_length = _region->length() / samples_per_unit;
-		
+
  		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 
  			(*i)->set_duration (unit_length);
@@ -351,7 +351,7 @@ RegionView::set_duration (nframes64_t frames, void *src)
 	if (!TimeAxisViewItem::set_duration (frames, src)) {
 		return false;
 	}
-	
+
 	for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 		(*i)->set_duration (_region->length() / samples_per_unit);
 	}
@@ -363,7 +363,7 @@ void
 RegionView::set_colors ()
 {
 	TimeAxisViewItem::set_colors ();
-	
+
 	if (sync_mark) {
 		sync_mark->property_fill_color_rgba() = fill_color;
 		sync_line->property_fill_color_rgba() = fill_color;
@@ -390,7 +390,7 @@ RegionView::fake_set_opaque (bool yn)
        } else {
                fill_opacity = 60;
        }
-       
+
        set_frame_color ();
 }
 
@@ -458,7 +458,7 @@ RegionView::region_sync_changed ()
 	if (!sync_mark) {
 
 		/* points set below */
-		
+
 		sync_mark = new ArdourCanvas::Polygon (*group);
 		sync_mark->property_fill_color_rgba() = fill_color;
 
@@ -474,13 +474,13 @@ RegionView::region_sync_changed ()
 	if (sync_offset == 0) {
 
 		/* no sync mark - its the start of the region */
-		
+
 		sync_mark->hide();
 		sync_line->hide ();
 
 	} else {
 
-		if ((sync_dir < 0) || ((sync_dir > 0) && (sync_offset > _region->length()))) { 
+		if ((sync_dir < 0) || ((sync_dir > 0) && (sync_offset > _region->length()))) {
 
 			/* no sync mark - its out of the bounds of the region */
 
@@ -492,14 +492,14 @@ RegionView::region_sync_changed ()
 			/* lets do it */
 
 			Points points;
-			
+
 			//points = sync_mark->property_points().get_value();
-			
+
 			double offset = sync_offset / samples_per_unit;
 			points.push_back (Gnome::Art::Point (offset - ((sync_mark_width-1)/2), 1));
 			points.push_back (Gnome::Art::Point (offset + ((sync_mark_width-1)/2), 1));
 			points.push_back (Gnome::Art::Point (offset, sync_mark_width - 1));
-			points.push_back (Gnome::Art::Point (offset - ((sync_mark_width-1)/2), 1));	
+			points.push_back (Gnome::Art::Point (offset - ((sync_mark_width-1)/2), 1));
 			sync_mark->property_points().set_value (points);
 			sync_mark->show ();
 
@@ -614,7 +614,7 @@ RegionView::update_coverage_frames (LayerDisplay d)
 
 	uint32_t const color = frame->property_fill_color_rgba ();
 	uint32_t const base_alpha = UINT_RGBA_A (color);
-	
+
 	while (t < end) {
 
 		t++;

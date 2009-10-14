@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace sigc;
 using namespace Gtk;
-	
+
 /**
  * Abstract Constructor for base visual time axis classes
  *
@@ -74,12 +74,12 @@ VisualTimeAxis::VisualTimeAxis(const string & name, PublicEditor& ed, ARDOUR::Se
 {
 	time_axis_name = name ;
 	_color = unique_random_color() ;
-	
+
 	name_entry.signal_activate().connect(mem_fun(*this, &VisualTimeAxis::name_entry_changed)) ;
 	name_entry.signal_button_press_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_button_press_handler)) ;
 	name_entry.signal_button_release_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_button_release_handler)) ;
 	name_entry.signal_key_release_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_key_release_handler)) ;
-	
+
 	size_button.set_name("TrackSizeButton") ;
 	visual_button.set_name("TrackVisualButton") ;
 	hide_button.set_name("TrackRemoveButton") ;
@@ -90,7 +90,7 @@ VisualTimeAxis::VisualTimeAxis(const string & name, PublicEditor& ed, ARDOUR::Se
 	ARDOUR_UI::instance()->tooltips().set_tip(size_button,_("Display Height")) ;
 	ARDOUR_UI::instance()->tooltips().set_tip(visual_button, _("Visual options")) ;
 	ARDOUR_UI::instance()->tooltips().set_tip(hide_button, _("Hide this track")) ;
-		
+
 	controls_table.attach (hide_button, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	controls_table.attach (visual_button, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	controls_table.attach (size_button, 2, 3, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
@@ -99,7 +99,7 @@ VisualTimeAxis::VisualTimeAxis(const string & name, PublicEditor& ed, ARDOUR::Se
 	size_button.unset_flags(Gtk::CAN_FOCUS) ;
 	hide_button.unset_flags(Gtk::CAN_FOCUS) ;
 	visual_button.unset_flags(Gtk::CAN_FOCUS) ;
-	
+
 	set_height (hNormal) ;
 }
 
@@ -119,13 +119,13 @@ void
 VisualTimeAxis::set_time_axis_name(const string & name, void* src)
 {
 	std::string old_name = time_axis_name ;
-	
+
 	if(name != time_axis_name)
 	{
 		time_axis_name = name ;
 		label_view() ;
 		editor.route_name_changed(this) ;
-	
+
 		 NameChanged(time_axis_name, old_name, src) ; /* EMIT_SIGNAL */
 	}
 }
@@ -143,13 +143,13 @@ VisualTimeAxis::name() const
 /**
  * Sets the height of this TrackView to one of the defined TrackHeghts
  *
- * @param h 
+ * @param h
  */
 void
 VisualTimeAxis::set_height(uint32_t h)
 {
 	TimeAxisView::set_height(h);
-	
+
 	if (h >= hNormal) {
 		hide_name_label ();
 		show_name_entry ();
@@ -185,9 +185,9 @@ VisualTimeAxis::hide_click()
 {
 	// LAME fix for hide_button display refresh
 	hide_button.set_sensitive(false);
-	
+
 	editor.hide_track_in_display (*this);
-	
+
 	hide_button.set_sensitive(true);
 }
 
@@ -216,7 +216,7 @@ VisualTimeAxis::choose_time_axis_color()
 	Gdk::Color color ;
 	gdouble current[4] ;
 	Gdk::Color current_color ;
-	
+
 	current[0] = _color.get_red() / 65535.0 ;
 	current[1] = _color.get_green() / 65535.0 ;
 	current[2] = _color.get_blue() / 65535.0 ;
@@ -224,7 +224,7 @@ VisualTimeAxis::choose_time_axis_color()
 
 	current_color.set_rgb_p (current[0],current[1],current[2]);
 	color = Gtkmm2ext::UI::instance()->get_color(_("ardour: color selection"),picked, &current_color) ;
-	
+
 	if (picked)
 	{
 		set_time_axis_color(color) ;
@@ -300,7 +300,7 @@ VisualTimeAxis::idle_remove_this_time_axis(VisualTimeAxis* ta, void* src)
 
 //---------------------------------------------------------------------------------------//
 // Handle TimeAxis rename
-		
+
 /**
  * Construct a new prompt to receive a new name for this TimeAxis
  *
@@ -325,7 +325,7 @@ VisualTimeAxis::start_time_axis_rename()
 		    ARDOUR_UI::instance()->popup_error (_("A track already exists with that name"));
 		    return ;
 		  }
-	  
+
 		  set_time_axis_name(result, this) ;
 	  }
 	}
@@ -348,13 +348,13 @@ VisualTimeAxis::label_view()
 
 
 //---------------------------------------------------------------------------------------//
-// Handle name entry signals 
+// Handle name entry signals
 
 void
 VisualTimeAxis::name_entry_changed()
 {
 	string x = name_entry.get_text ();
-	
+
 	if (x == time_axis_name) {
 		return;
 	}
@@ -374,7 +374,7 @@ VisualTimeAxis::name_entry_changed()
 	}
 }
 
-gint 
+gint
 VisualTimeAxis::name_entry_button_press_handler(GdkEventButton *ev)
 {
 	if (ev->button == 3) {
@@ -383,7 +383,7 @@ VisualTimeAxis::name_entry_button_press_handler(GdkEventButton *ev)
 	return FALSE;
 }
 
-gint 
+gint
 VisualTimeAxis::name_entry_button_release_handler(GdkEventButton *ev)
 {
 	return FALSE;
@@ -407,7 +407,7 @@ VisualTimeAxis::name_entry_key_release_handler(GdkEventKey* ev)
 
 //---------------------------------------------------------------------------------------//
 // Super class methods not handled by VisualTimeAxis
-		
+
 void
 VisualTimeAxis::show_timestretch (nframes_t start, nframes_t end)
 {

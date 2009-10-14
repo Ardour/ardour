@@ -46,39 +46,39 @@ class ExportFormatManager : public sigc::trackable
 	typedef boost::shared_ptr<ExportFormatCompatibility> CompatPtr;
 	typedef boost::weak_ptr<ExportFormatCompatibility> WeakCompatPtr;
 	typedef std::list<CompatPtr> CompatList;
-	
+
 	typedef boost::shared_ptr<ExportFormat> FormatPtr;
 	typedef boost::weak_ptr<ExportFormat> WeakFormatPtr;
 	typedef std::list<FormatPtr> FormatList;
-	
+
 	typedef HasSampleFormat::SampleFormatPtr SampleFormatPtr;
 	typedef HasSampleFormat::SampleFormatList SampleFormatList;
 	typedef HasSampleFormat::WeakSampleFormatPtr WeakSampleFormatPtr;
-	
+
 	typedef HasSampleFormat::DitherTypePtr DitherTypePtr;
 	typedef HasSampleFormat::WeakDitherTypePtr WeakDitherTypePtr;
-	
+
 	typedef boost::shared_ptr<ExportFormatSpecification> SpecPtr;
 	typedef boost::shared_ptr<ExportFormatBase> FormatBasePtr;
-	
+
 	/* Quality states */
-	
+
 	class QualityState : public ExportFormatBase::SelectableCompatible {
-	  public:
+	public:
 		QualityState (ExportFormatBase::Quality quality, Glib::ustring name) :
-		  quality (quality) { set_name (name); }
+			quality (quality) { set_name (name); }
 		ExportFormatBase::Quality  quality;
 	};
 	typedef boost::shared_ptr<QualityState> QualityPtr;
 	typedef boost::weak_ptr<QualityState> WeakQualityPtr;
 	typedef std::list<QualityPtr> QualityList;
-	
+
 	/* Sample rate states */
-	
+
 	class SampleRateState : public ExportFormatBase::SelectableCompatible {
 	  public:
-		SampleRateState (ExportFormatBase::SampleRate rate, Glib::ustring name) :
-		  rate (rate) { set_name (name); }
+		SampleRateState (ExportFormatBase::SampleRate rate, Glib::ustring name)
+			: rate (rate) { set_name (name); }
 		ExportFormatBase::SampleRate  rate;
 	};
 	typedef boost::shared_ptr<SampleRateState> SampleRatePtr;
@@ -100,11 +100,11 @@ class ExportFormatManager : public sigc::trackable
 	QualityList const & get_qualities () { return qualities; }
 	FormatList const & get_formats () { return formats; }
 	SampleRateList const & get_sample_rates () { return sample_rates; }
-	
+
 	/* Non interactive selections */
-	
+
 	void set_name (Glib::ustring name);
-	
+
 	void select_src_quality (ExportFormatBase::SRCQuality value);
 	void select_trim_beginning (bool value);
 	void select_silence_beginning (AnyTime const & time);
@@ -127,41 +127,41 @@ class ExportFormatManager : public sigc::trackable
 	void add_sample_rate (SampleRatePtr ptr);
 
 	/* Connected to signals */
-	
+
 	void change_compatibility_selection (bool select, WeakCompatPtr const & compat);
 	void change_quality_selection (bool select, WeakQualityPtr const & quality);
 	void change_format_selection (bool select, WeakFormatPtr const & format);
 	void change_sample_rate_selection (bool select, WeakSampleRatePtr const & rate);
-	
+
 	void change_sample_format_selection (bool select, WeakSampleFormatPtr const & format);
 	void change_dither_type_selection (bool select, WeakDitherTypePtr const & type);
-	
+
 	/* Do actual selection */
-	
+
 	void select_compatibility (WeakCompatPtr const & compat);
 	void select_quality (QualityPtr const & quality);
 	void select_format (FormatPtr const & format);
 	void select_sample_rate (SampleRatePtr const & rate);
-	
+
 	void select_sample_format (SampleFormatPtr const & format);
 	void select_dither_type (DitherTypePtr const & type);
-	
+
 	bool pending_selection_change;
 	void selection_changed ();
-	
+
 	/* Formats and compatibilities */
-	
+
 	QualityPtr    get_selected_quality ();
 	FormatPtr     get_selected_format ();
 	SampleRatePtr get_selected_sample_rate ();
-	
+
 	SampleFormatPtr get_selected_sample_format ();
-	
+
 	FormatBasePtr get_compatibility_intersection ();
-	
+
 	FormatBasePtr   universal_set;
 	SpecPtr         current_selection;
-	
+
 	CompatList      compatibilities;
 	QualityList     qualities;
 	FormatList      formats;

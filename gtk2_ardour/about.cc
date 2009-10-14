@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -220,13 +220,13 @@ About::About ()
 	set_website (X_("http://ardour.org/"));
 	set_website_label (_("visit http://www.ardour.org/"));
 	set_version ((string_compose(_("%1\n(built from revision %2)"),
-				     VERSIONSTRING, 
+				     VERSIONSTRING,
 				     svn_revision)));
-	
+
 
 #ifdef WITH_PAYMENT_OPTIONS
 	paypal_button.add (paypal_pixmap);
-	
+
 	HBox *payment_box = manage (new HBox);
 	payment_box->pack_start (paypal_button, true, false);
 
@@ -247,15 +247,15 @@ About::goto_paypal ()
 	char *argv[4];
 	char *docfile = "foo";
 	int grandchild;
-	
+
 	if (fork() == 0) {
 
 		/* child */
 
 		if ((grandchild = fork()) == 0) {
-			
+
 			/* grandchild */
-			
+
 			argv[0] = "mozilla";
 			argv[1] = "-remote";
 			snprintf (buf, sizeof(buf), "openurl(%s)", docfile);
@@ -270,6 +270,6 @@ About::goto_paypal ()
 			waitpid (grandchild, &status, 0);
 		}
 
-	} 
+	}
 }
 #endif

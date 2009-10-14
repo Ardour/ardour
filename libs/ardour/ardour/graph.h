@@ -34,10 +34,10 @@ class GraphSink  {
   public:
 	GraphSink () : end_of_input (false) {}
 	virtual ~GraphSink () { end_of_input = false; }
-	
+
 	// writes data and return number of frames written
 	virtual nframes_t write (T * data, nframes_t frames) = 0;
-	
+
 	// Notifies end of input. All left over data must be written at this stage
 	virtual void set_end_of_input (bool state = true)
 	{
@@ -54,7 +54,7 @@ class GraphSource  {
   public:
 	GraphSource () {}
 	virtual ~GraphSource () {}
-	
+
 	virtual nframes_t read (T * data, nframes_t frames) = 0;
 };
 
@@ -64,19 +64,19 @@ class GraphSinkVertex : public GraphSink<TIn> {
   public:
 	GraphSinkVertex () {}
 	virtual ~GraphSinkVertex () {}
-	
+
 	void pipe_to (boost::shared_ptr<GraphSink<TOut> > dest) {
 		piped_to = dest;
 	}
-	
+
 	nframes_t write (TIn * data, nframes_t frames)
 	{
 		if (!piped_to) {
 			return -1;
 		}
 		return process (data, frames);
-	}	
-	
+	}
+
 	virtual void set_end_of_input (bool state = true)
 	{
 		if (!piped_to) {
@@ -85,10 +85,10 @@ class GraphSinkVertex : public GraphSink<TIn> {
 		piped_to->set_end_of_input (state);
 		GraphSink<TIn>::end_of_input = state;
 	}
-	
+
   protected:
 	boost::shared_ptr<GraphSink<TOut> > piped_to;
-	
+
 	/* process must process data,
 	   use piped_to->write to write the data
 	   and return number of frames written */

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2003 Paul Davis 
+    Copyright (C) 2000-2003 Paul Davis
     Written by Colin Law, CMT, Glasgow
 
     This program is free software; you can redistribute it and/or modify
@@ -50,7 +50,7 @@ TimeAxisView*
 Editor::get_named_time_axis(const string & name)
 {
 	TimeAxisView* tav = 0 ;
-	
+
 	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i)
 	{
 		if (((TimeAxisView*)*i)->name() == name)
@@ -85,7 +85,7 @@ Editor::connect_to_image_compositor()
 	{
 		image_socket_listener = ImageFrameSocketHandler::create_instance(*this) ;
 	}
-	
+
 	if(image_socket_listener->is_connected() == true)
 	{
 		return ;
@@ -93,16 +93,16 @@ Editor::connect_to_image_compositor()
 
 	// XXX should really put this somewhere safe
 	const char * host_ip = "127.0.0.1" ;
-	
+
 	bool retcode = image_socket_listener->connect(host_ip, ardourvis::DEFAULT_PORT) ;
-	
+
 	if(retcode == false)
 	{
 		// XXX need to get some return status here
 		warning << "Image Compositor Connection attempt failed" << std::endl ;
 		return ;
 	}
-	
+
 	// add the socket to the gui loop, and keep the retuned tag value of the input
 	gint tag = gdk_input_add(image_socket_listener->get_socket_descriptor(), GDK_INPUT_READ,ImageFrameSocketHandler::image_socket_callback,image_socket_listener) ;
 	image_socket_listener->set_gdk_input_tag(tag) ;
@@ -122,7 +122,7 @@ Editor::scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item)
 	} else {
 		x_pos = item->get_position() - offset + (item->get_duration() / 2);
 	}
-	
+
 	reset_x_origin (x_pos);
 }
 
@@ -139,11 +139,11 @@ void
 Editor::popup_imageframe_edit_menu(int button, int32_t time, ArdourCanvas::Item* ifv, bool with_item)
 {
 	ImageFrameTimeAxis* ifta = dynamic_cast<ImageFrameTimeAxis*>(clicked_axisview) ;
-	
+
 	if(ifta)
 	{
 		ImageFrameTimeAxisGroup* iftag = ifta->get_view()->get_selected_imageframe_group() ;
-	
+
 		if(iftag)
 		{
 			ImageFrameView* selected_ifv = ifta->get_view()->get_selected_imageframe_view() ;
@@ -156,7 +156,7 @@ void
 Editor::popup_marker_time_axis_edit_menu(int button, int32_t time, ArdourCanvas::Item* ifv, bool with_item)
 {
 	MarkerTimeAxis* mta = dynamic_cast<MarkerTimeAxis*>(clicked_axisview) ;
-	
+
 	if(mta)
 	{
 		MarkerView* selected_mv = mta->get_view()->get_selected_time_axis_item() ;
@@ -179,7 +179,7 @@ Editor::canvas_imageframe_item_view_event (GdkEvent *event, ArdourCanvas::Item* 
 {
 	gint ret = FALSE ;
 	ImageFrameTimeAxisGroup* iftag = 0 ;
-	
+
 	switch (event->type)
 	{
 		case GDK_BUTTON_PRESS:
@@ -207,7 +207,7 @@ Editor::canvas_imageframe_start_handle_event (GdkEvent *event, ArdourCanvas::Ite
 {
 	gint ret = FALSE ;
 	ImageFrameTimeAxisGroup* iftag = 0 ;
-	
+
 	switch (event->type)
 	{
 		case GDK_BUTTON_PRESS:
@@ -216,7 +216,7 @@ Editor::canvas_imageframe_start_handle_event (GdkEvent *event, ArdourCanvas::Ite
 			clicked_axisview = &ifv->get_time_axis_view() ;
 			iftag = ifv->get_time_axis_group() ;
 			dynamic_cast<ImageFrameTimeAxis*>(clicked_axisview)->get_view()->set_selected_imageframe_view(iftag, ifv);
-			
+
 			ret = button_press_handler (item, event, ImageFrameHandleStartItem) ;
 			break ;
 		case GDK_BUTTON_RELEASE:
@@ -242,7 +242,7 @@ Editor::canvas_imageframe_end_handle_event (GdkEvent *event, ArdourCanvas::Item*
 {
 	gint ret = FALSE ;
 	ImageFrameTimeAxisGroup* iftag = 0 ;
-	
+
 	switch (event->type)
 	{
 		case GDK_BUTTON_PRESS:
@@ -251,7 +251,7 @@ Editor::canvas_imageframe_end_handle_event (GdkEvent *event, ArdourCanvas::Item*
 			clicked_axisview = &ifv->get_time_axis_view() ;
 			iftag = ifv->get_time_axis_group() ;
 			dynamic_cast<ImageFrameTimeAxis*>(clicked_axisview)->get_view()->set_selected_imageframe_view(iftag, ifv);
-			
+
 			ret = button_press_handler (item, event, ImageFrameHandleEndItem) ;
 			break ;
 		case GDK_BUTTON_RELEASE:
@@ -429,10 +429,10 @@ Editor::start_imageframe_grab(ArdourCanvas::Item* item, GdkEvent* event)
 	drag_info.motion_callback = &Editor::imageframe_drag_motion_callback;
 	drag_info.finished_callback = &Editor::timeaxis_item_drag_finished_callback;
 	drag_info.last_frame_position = ifv->get_position() ;
- 
+
 	drag_info.source_trackview = &ifv->get_time_axis_view() ;
 	drag_info.dest_trackview = drag_info.source_trackview;
-	
+
 	/* this is subtle. raising the regionview itself won't help,
 	   because raise_to_top() just puts the item on the top of
 	   its parent's stack. so, we need to put the trackview canvas_display group
@@ -482,7 +482,7 @@ Editor::start_markerview_grab(ArdourCanvas::Item* item, GdkEvent* event)
 	cursor_group->raise_to_top ();
 
 	start_grab(event) ;
-  
+
 	drag_info.pointer_frame_offset = pixel_to_frame(drag_info.grab_x) - drag_info.last_frame_position ;
 }
 
@@ -504,14 +504,14 @@ Editor::markerview_drag_motion_callback(ArdourCanvas::Item*, GdkEvent* event)
 	{
 		pending_region_position = pointer_frame - drag_info.pointer_frame_offset ;
 		snap_to(pending_region_position) ;
-		
+
 		// we dont allow marker items to extend beyond, or in front of the marked items so
 		// cap the value to the marked items position and duration
-		if((pending_region_position + mv->get_duration()) >= ((mv->get_marked_item()->get_position()) + (mv->get_marked_item()->get_duration()))) 
+		if((pending_region_position + mv->get_duration()) >= ((mv->get_marked_item()->get_position()) + (mv->get_marked_item()->get_duration())))
 		{
 			pending_region_position = (mv->get_marked_item()->get_position() + mv->get_marked_item()->get_duration()) - (mv->get_duration()) ;
 		}
-		else if(pending_region_position <= mv->get_marked_item()->get_position()) 
+		else if(pending_region_position <= mv->get_marked_item()->get_position())
 		{
 			pending_region_position = mv->get_marked_item()->get_position() ;
 		}
@@ -522,7 +522,7 @@ Editor::markerview_drag_motion_callback(ArdourCanvas::Item*, GdkEvent* event)
   	}
 
 	drag_info.last_frame_position = pending_region_position ;
-	
+
 	// we treat this as a special case, usually we want to send the identitiy of the caller
 	// but in this case, that would trigger our socket handler to handle the event, sending
 	// notification to the image compositor. This would be fine, except that we have not
@@ -538,9 +538,9 @@ void
 Editor::imageframe_drag_motion_callback(ArdourCanvas::Item*, GdkEvent* event)
 {
 	double cx, cy ;
-	
+
 	ImageFrameView* ifv = reinterpret_cast<ImageFrameView*>(drag_info.data) ;
-	
+
 	nframes64_t pending_region_position;
 	nframes64_t pointer_frame;
 
@@ -561,7 +561,7 @@ Editor::imageframe_drag_motion_callback(ArdourCanvas::Item*, GdkEvent* event)
 	drag_info.grab_x = cx;
 	//drag_info.last_frame_position = pending_region_position ;
 	drag_info.current_pointer_frame = pending_region_position ;
-	
+
 	// we treat this as a special case, usually we want to send the identitiy of the caller
 	// but in this case, that would trigger our socket handler to handle the event, sending
 	// notification to the image compositor. This would be fine, except that we have not
@@ -569,7 +569,7 @@ Editor::imageframe_drag_motion_callback(ArdourCanvas::Item*, GdkEvent* event)
 	// completed the drag, only then do we want the image compositor notofied.
 	// We therefore set the caller identity to the special case of 0
 	ifv->set_position(pending_region_position, 0) ;
-	
+
 	show_verbose_time_cursor(pending_region_position) ;
 }
 
@@ -598,7 +598,7 @@ Editor::timeaxis_item_drag_finished_callback(ArdourCanvas::Item*, GdkEvent* even
 	{
 		/* base the new region position on the current position of the regionview.*/
 		where = drag_info.current_pointer_frame ;
-		
+
 		// final call to set position after the motion to tell interested parties of the new position
 		tavi->set_position(where, this) ;
 	}
@@ -606,7 +606,7 @@ Editor::timeaxis_item_drag_finished_callback(ArdourCanvas::Item*, GdkEvent* even
 	{
 		//where = tavi->get_position() ;
 	}
-  
+
 
 }
 
@@ -632,9 +632,9 @@ Editor::imageframe_start_handle_op(ArdourCanvas::Item* item, GdkEvent* event)
 		drag_info.cumulative_x_drag = 0;
 		drag_info.motion_callback = &Editor::imageframe_start_handle_trim_motion ;
 		drag_info.finished_callback = &Editor::imageframe_start_handle_end_trim ;
-		
+
 		start_grab(event) ;
-		
+
 		show_verbose_time_cursor(ifv->get_position(), 10) ;
 	}
 }
@@ -648,14 +648,14 @@ Editor::imageframe_end_handle_op(ArdourCanvas::Item* item, GdkEvent* event)
 	if(ifta)
 	{
 		ImageFrameView* ifv = ifta->get_view()->get_selected_imageframe_view() ;
-	
+
 		if (ifv == 0)
 		{
 			fatal << _("programming error: no ImageFrameView selected") << endmsg ;
 			/*NOTREACHED*/
 			return ;
 		}
-	
+
 		drag_info.item = ifv->get_canvas_frame() ;
 		drag_info.data = ifv ;
 		drag_info.grab_x = event->motion.x ;
@@ -673,11 +673,11 @@ void
 Editor::imageframe_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* event)
 {
 	ImageFrameView* ifv = reinterpret_cast<ImageFrameView*> (drag_info.data) ;
-	
+
 	nframes64_t start = 0 ;
 	nframes64_t end = 0 ;
 	nframes64_t pointer_frame = event_frame(event) ;
-	
+
 	// chekc th eposition of the item is not locked
 	if(!ifv->get_position_locked()) {
 		snap_to(pointer_frame) ;
@@ -685,18 +685,18 @@ Editor::imageframe_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* 
 		if(pointer_frame != drag_info.last_pointer_frame) {
 			start = ifv->get_position() ;
 			end = ifv->get_position() + ifv->get_duration() ;
-			
+
 			if (pointer_frame > end) {
 				start = end ;
 			} else {
 				start = pointer_frame ;
 			}
-			
+
 			// are we getting bigger or smaller?
 			nframes64_t new_dur_val = end - start ;
-			
+
 			// start handle, so a smaller pointer frame increases our component size
-			if(pointer_frame <= drag_info.grab_frame) 
+			if(pointer_frame <= drag_info.grab_frame)
 			{
 				if(ifv->get_max_duration_active() && (new_dur_val > ifv->get_max_duration()))
 				{
@@ -720,9 +720,9 @@ Editor::imageframe_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* 
 					// current values are ok
 				}
 			}
-		
+
 			drag_info.last_pointer_frame = pointer_frame ;
-	
+
 			/* re-calculatethe duration and position of the imageframeview */
 			drag_info.cumulative_x_drag = new_dur_val ;
 
@@ -736,7 +736,7 @@ Editor::imageframe_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* 
 			ifv->set_position(start, 0) ;
 		}
 	}
-	
+
 	show_verbose_time_cursor(start, 10) ;
 }
 
@@ -744,7 +744,7 @@ void
 Editor::imageframe_start_handle_end_trim(ArdourCanvas::Item* item, GdkEvent* event)
 {
 	ImageFrameView* ifv = reinterpret_cast<ImageFrameView *> (drag_info.data) ;
-	
+
 	if (drag_info.cumulative_x_drag == 0)
 	{
 		/* just a click */
@@ -752,7 +752,7 @@ Editor::imageframe_start_handle_end_trim(ArdourCanvas::Item* item, GdkEvent* eve
 	else
 	{
 		nframes64_t temp = ifv->get_position() + ifv->get_duration() ;
-		
+
 		ifv->set_position((nframes64_t) (temp - drag_info.cumulative_x_drag), this) ;
 		ifv->set_duration((nframes64_t) drag_info.cumulative_x_drag, this) ;
 	}
@@ -762,14 +762,14 @@ void
 Editor::imageframe_end_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* event)
 {
 	ImageFrameView* ifv = reinterpret_cast<ImageFrameView *> (drag_info.data) ;
-	
+
 	nframes64_t start = 0 ;
 	nframes64_t end = 0 ;
 	nframes64_t pointer_frame = event_frame(event) ;
 	nframes64_t new_dur_val = 0 ;
 
 	snap_to(pointer_frame) ;
-	
+
 	if (pointer_frame != drag_info.last_pointer_frame)
 	{
 		start = ifv->get_position() ;
@@ -782,9 +782,9 @@ Editor::imageframe_end_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* ev
 		{
 			end = pointer_frame ;
 		}
-		
+
 		new_dur_val = end - start ;
-		
+
 		// are we getting bigger or smaller?
 		if(pointer_frame >= drag_info.last_pointer_frame)
 		{
@@ -800,10 +800,10 @@ Editor::imageframe_end_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* ev
 				new_dur_val = ifv->get_min_duration() ;
 			}
 		}
-		
+
 		drag_info.last_pointer_frame = pointer_frame ;
 		drag_info.cumulative_x_drag = new_dur_val ;
-		
+
 		// we treat this as a special case, usually we want to send the identitiy of the caller
 		// but in this case, that would trigger our socket handler to handle the event, sending
 		// notification to the image compositor. This would be fine, except that we have not
@@ -812,7 +812,7 @@ Editor::imageframe_end_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* ev
 		// We therefore set the caller identity to the special case of 0
 		ifv->set_duration(new_dur_val, 0) ;
 	}
-	
+
 	show_verbose_time_cursor(new_dur_val, 10) ;
 }
 
@@ -870,15 +870,15 @@ Editor::markerview_item_end_handle_op(ArdourCanvas::Item* item, GdkEvent* event)
 		/*NOTREACHED*/
 		return ;
 	}
-	
+
 	drag_info.item = mv->get_canvas_frame() ;
 	drag_info.data = mv ;
 	drag_info.grab_x = event->motion.x ;
  	drag_info.cumulative_x_drag = 0 ;
-	
+
 	drag_info.motion_callback = &Editor::markerview_end_handle_trim_motion ;
  	drag_info.finished_callback = &Editor::markerview_end_handle_end_trim ;
-	
+
 	start_grab(event, trimmer_cursor) ;
 }
 
@@ -887,11 +887,11 @@ void
 Editor::markerview_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* event)
 {
 	MarkerView* mv = reinterpret_cast<MarkerView*> (drag_info.data) ;
-	
+
 	nframes64_t start = 0 ;
 	nframes64_t end = 0 ;
 	nframes64_t pointer_frame = event_frame(event) ;
-	
+
 	// chekc th eposition of the item is not locked
 	if(!mv->get_position_locked())
 	{
@@ -900,7 +900,7 @@ Editor::markerview_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* 
 		{
 			start = mv->get_position() ;
 			end = mv->get_position() + mv->get_duration() ;
-			
+
 			if (pointer_frame > end)
 			{
 				start = end ;
@@ -909,10 +909,10 @@ Editor::markerview_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* 
 			{
 				start = pointer_frame ;
 			}
-			
+
 			// are we getting bigger or smaller?
 			nframes64_t new_dur_val = end - start ;
-			
+
 			if(pointer_frame <= drag_info.grab_frame)
 			{
 				if(mv->get_max_duration_active() && (new_dur_val > mv->get_max_duration()))
@@ -937,12 +937,12 @@ Editor::markerview_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* 
 					// current values are ok
 				}
 			}
-		
+
 			drag_info.last_pointer_frame = pointer_frame ;
-	
+
 			/* re-calculatethe duration and position of the imageframeview */
 			drag_info.cumulative_x_drag = new_dur_val ;
-	 
+
 			// we treat this as a special case, usually we want to send the identitiy of the caller
 			// but in this case, that would trigger our socket handler to handle the event, sending
 			// notification to the image compositor. This would be fine, except that we have not
@@ -953,7 +953,7 @@ Editor::markerview_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* 
 			mv->set_position(start, 0) ;
 		}
 	}
-	
+
 	show_verbose_time_cursor(start, 10) ;
 }
 
@@ -961,7 +961,7 @@ void
 Editor::markerview_start_handle_end_trim(ArdourCanvas::Item* item, GdkEvent* event)
 {
 	MarkerView* mv = reinterpret_cast<MarkerView*> (drag_info.data) ;
-	
+
 	if (drag_info.cumulative_x_drag == 0)
 	{
 		/* just a click */
@@ -969,7 +969,7 @@ Editor::markerview_start_handle_end_trim(ArdourCanvas::Item* item, GdkEvent* eve
 	else
 	{
 		nframes64_t temp = mv->get_position() + mv->get_duration() ;
-		
+
 		mv->set_position((nframes64_t) (temp - drag_info.cumulative_x_drag), this) ;
 		mv->set_duration((nframes64_t) drag_info.cumulative_x_drag, this) ;
 	}
@@ -979,19 +979,19 @@ void
 Editor::markerview_end_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* event)
 {
 	MarkerView* mv = reinterpret_cast<MarkerView*> (drag_info.data) ;
-	
+
 	nframes64_t start = 0 ;
 	nframes64_t end = 0 ;
 	nframes64_t pointer_frame = event_frame(event) ;
 	nframes64_t new_dur_val = 0 ;
 
 	snap_to(pointer_frame) ;
-	
+
 	if (pointer_frame != drag_info.last_pointer_frame)
 	{
 		start = mv->get_position() ;
 		end = mv->get_position() + mv->get_duration() ;
-		
+
 		if(pointer_frame < start)
 		{
 			end = start ;
@@ -1000,16 +1000,16 @@ Editor::markerview_end_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* ev
 		{
 			end = pointer_frame ;
 		}
-		
+
 		new_dur_val = end - start ;
-		
+
 		// are we getting bigger or smaller?
 		if(pointer_frame >= drag_info.last_pointer_frame)
 		{
 			// we cant extend beyond the item we are marking
 			ImageFrameView* marked_item = mv->get_marked_item() ;
 			nframes64_t marked_end = marked_item->get_position() + marked_item->get_duration() ;
-			
+
 			if(mv->get_max_duration_active() && (new_dur_val > mv->get_max_duration()))
 			{
 				if((start + mv->get_max_duration()) > marked_end)
@@ -1037,7 +1037,7 @@ Editor::markerview_end_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* ev
 
 		drag_info.last_pointer_frame = pointer_frame ;
 		drag_info.cumulative_x_drag = new_dur_val ;
-		
+
 		// we treat this as a special case, usually we want to send the identitiy of the caller
 		// but in this case, that would trigger our socket handler to handle the event, sending
 		// notification to the image compositor. This would be fine, except that we have not
@@ -1046,7 +1046,7 @@ Editor::markerview_end_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* ev
 		// We therefore set the caller identity to the special case of 0
 		mv->set_duration(new_dur_val, 0) ;
 	}
-	
+
 	show_verbose_time_cursor(new_dur_val, 10) ;
 }
 

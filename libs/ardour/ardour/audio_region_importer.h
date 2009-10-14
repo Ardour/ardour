@@ -44,9 +44,9 @@ class AudioRegionImportHandler : public ElementImportHandler
 	// Inerface implementation
 	AudioRegionImportHandler (XMLTree const & source, Session & session);
 	std::string get_info () const;
-	
+
 	void create_regions_from_children (XMLNode const & node, ElementList & list);
-	
+
 	// Source management
 	bool check_source (std::string const & filename) const;
 	void add_source (std::string const & filename, boost::shared_ptr<Source> const & source);
@@ -77,7 +77,7 @@ class AudioRegionImporter : public ElementImporter
 	// Interface implementation
 	std::string get_info () const;
 	Session::ImportStatus * get_import_status () { return &status; }
-	
+
 	// other stuff
 	void add_sources_to_session ();
 	XMLNode const & get_xml ();
@@ -95,11 +95,11 @@ class AudioRegionImporter : public ElementImporter
 	PBD::ID id;
 	std::list<std::string> filenames;
 	Session::ImportStatus status;
-	
+
 	bool parse_xml_region ();
 	bool parse_source_xml ();
 	PBD::sys::path get_sound_dir (XMLTree const & tree);
-	
+
 	void prepare_region ();
 	void prepare_sources ();
 	std::vector<boost::shared_ptr<Region> > region;

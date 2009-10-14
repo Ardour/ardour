@@ -33,7 +33,7 @@ namespace ARDOUR {
 	class ExportProfileManager;
 }
 
-/// 
+///
 class ExportFormatSelector : public Gtk::HBox {
 
   private:
@@ -45,16 +45,16 @@ class ExportFormatSelector : public Gtk::HBox {
 
 	ExportFormatSelector ();
 	~ExportFormatSelector ();
-	
+
 	void set_state (ARDOUR::ExportProfileManager::FormatStatePtr state_, ARDOUR::Session * session_);
 	void update_format_list ();
-	
+
 	sigc::signal<void, FormatPtr> FormatEdited;
 	sigc::signal<void, FormatPtr> FormatRemoved;
 	sigc::signal<FormatPtr, FormatPtr> NewFormat;
-	
+
 	/* Compatibility with other elements */
-	
+
 	sigc::signal<void> CriticalSelectionChanged;
 
   private:
@@ -76,7 +76,7 @@ class ExportFormatSelector : public Gtk::HBox {
 	  public:
 		Gtk::TreeModelColumn<FormatPtr>      format;
 		Gtk::TreeModelColumn<Glib::ustring>  label;
-	
+
 		FormatCols () { add (format); add (label); }
 	};
 	FormatCols                   format_cols;

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004 Paul Davis 
+    Copyright (C) 2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #include <dlfcn.h>
 
 #include <sigc++/signal.h>
-#include "pbd/stateful.h" 
+#include "pbd/stateful.h"
 #include <jack/types.h>
 #include "ardour/plugin.h"
 
@@ -50,7 +50,7 @@ class VSTPlugin : public ARDOUR::Plugin
 	~VSTPlugin ();
 
 	/* Plugin interface */
-	
+
 	std::string unique_id() const;
 	const char * label() const;
 	const char * name() const;
@@ -104,7 +104,7 @@ class VSTPluginInfo : public PluginInfo
   public:
 	VSTPluginInfo () {}
 	~VSTPluginInfo () {}
-	
+
 	PluginPtr load (Session& session);
 };
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@
 
 #include "ardour_dialog.h"
 
-struct TempoDialog : public ArdourDialog 
+struct TempoDialog : public ArdourDialog
 {
 	Gtk::ComboBoxText note_types;
 	std::vector<std::string> strings;
@@ -48,14 +48,14 @@ struct TempoDialog : public ArdourDialog
 	Gtk::Label   when_bar_label;
 	Gtk::Label   when_beat_label;
 	char buf[64];
-    
+
 	TempoDialog (ARDOUR::TempoMap&, nframes_t, const std::string & action);
 	TempoDialog (ARDOUR::TempoSection&, const std::string & action);
 
 	double get_bpm ();
 	double get_note_type ();
 	bool   get_bbt_time (ARDOUR::BBT_Time&);
-    
+
 private:
 	void init (const ARDOUR::BBT_Time& start, double, double, bool);
 	void bpm_changed ();
@@ -65,7 +65,7 @@ private:
 	void note_types_change ();
 };
 
-struct MeterDialog : public ArdourDialog 
+struct MeterDialog : public ArdourDialog
 {
 	Gtk::Entry   bpb_entry;
 	Gtk::ComboBoxText note_types;
@@ -74,7 +74,7 @@ struct MeterDialog : public ArdourDialog
 	Gtk::Button  cancel_button;
 	Gtk::Entry   when_bar_entry;
 	char buf[64];
-    
+
 	MeterDialog (ARDOUR::TempoMap&, nframes_t, const std::string & action);
 	MeterDialog (ARDOUR::MeterSection&, const std::string & action);
 

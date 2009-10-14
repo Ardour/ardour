@@ -30,7 +30,7 @@ using namespace ARDOUR;
 // Debug wrappers
 
 float
-debug_compute_peak (ARDOUR::Sample *buf, nframes_t nsamples, float current) 
+debug_compute_peak (ARDOUR::Sample *buf, nframes_t nsamples, float current)
 {
 	if ( ((intptr_t)buf % 16) != 0) {
 		std::cerr << "compute_peak(): buffer unaligned!" << std::endl;
@@ -83,14 +83,14 @@ debug_mix_buffers_no_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, nframes_t n
 
 
 float
-default_compute_peak (const ARDOUR::Sample * buf, nframes_t nsamples, float current) 
+default_compute_peak (const ARDOUR::Sample * buf, nframes_t nsamples, float current)
 {
 	for (nframes_t i = 0; i < nsamples; ++i) {
 		current = f_max (current, fabsf (buf[i]));
 	}
 
 	return current;
-}	
+}
 
 void
 default_find_peaks (const ARDOUR::Sample * buf, nframes_t nframes, float *min, float *max)
@@ -101,7 +101,7 @@ default_find_peaks (const ARDOUR::Sample * buf, nframes_t nframes, float *min, f
 	a = *max;
 	b = *min;
 
-	for (i = 0; i < nframes; i++) 
+	for (i = 0; i < nframes; i++)
 	{
 		a = fmax (buf[i], a);
 		b = fmin (buf[i], b);
@@ -113,7 +113,7 @@ default_find_peaks (const ARDOUR::Sample * buf, nframes_t nframes, float *min, f
 
 void
 default_apply_gain_to_buffer (ARDOUR::Sample * buf, nframes_t nframes, float gain)
-{		
+{
 	for (nframes_t i=0; i<nframes; i++)
 		buf[i] *= gain;
 }
@@ -173,5 +173,5 @@ veclib_mix_buffers_no_gain (ARDOUR::Sample * dst, const ARDOUR::Sample * src, nf
 }
 
 #endif
-		
+
 

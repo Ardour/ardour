@@ -30,11 +30,11 @@ class ExportPresetSelector : public Gtk::HBox
 {
 
   public:
-	
+
 	ExportPresetSelector ();
-	
+
 	void set_manager (boost::shared_ptr<ARDOUR::ExportProfileManager> manager);
-	
+
 	sigc::signal<void> CriticalSelectionChanged;
 
   private:
@@ -42,31 +42,31 @@ class ExportPresetSelector : public Gtk::HBox
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
 	typedef ARDOUR::ExportProfileManager::PresetPtr PresetPtr;
 	typedef ARDOUR::ExportProfileManager::PresetList PresetList;
-	
+
 	ManagerPtr       profile_manager;
 	sigc::connection select_connection;
-	
+
 	void sync_with_manager ();
 	void update_selection ();
 	void save_current ();
 	void remove_current ();
-	
+
 	struct PresetCols : public Gtk::TreeModelColumnRecord
 	{
 	  public:
 		Gtk::TreeModelColumn<PresetPtr>      preset;
 		Gtk::TreeModelColumn<Glib::ustring>  label;
-	
+
 		PresetCols () { add (preset); add (label); }
 	};
 	PresetCols                   cols;
 	Glib::RefPtr<Gtk::ListStore> list;
 	PresetPtr                    current;
 	PresetPtr                    previous;
-	
+
 	Gtk::Label          label;
 	Gtk::ComboBoxEntry  entry;
-	
+
 	Gtk::Button         save_button;
 	Gtk::Button         remove_button;
 	Gtk::Button         new_button;

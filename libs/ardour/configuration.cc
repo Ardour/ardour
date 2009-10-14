@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999-2009 Paul Davis 
+    Copyright (C) 1999-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -48,20 +48,20 @@ bool
 ConfigVariableBase::set_from_node (XMLNode const & node)
 {
 	if (node.name() == "Config" || node.name() == "Canvas" || node.name() == "UI") {
-		
+
 		/* ardour.rc */
-		
+
 		const XMLProperty* prop;
 		XMLNodeList nlist;
 		XMLNodeConstIterator niter;
 		XMLNode* child;
-		
+
 		nlist = node.children();
-		
+
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-			
+
 			child = *niter;
-			
+
 			if (child->name() == "Option") {
 				if ((prop = child->property ("name")) != 0) {
 					if (prop->value() == _name) {
@@ -73,7 +73,7 @@ ConfigVariableBase::set_from_node (XMLNode const & node)
 				}
 			}
 		}
-			
+
 	} else if (node.name() == "Options") {
 
 		/* session file */
@@ -82,13 +82,13 @@ ConfigVariableBase::set_from_node (XMLNode const & node)
 		XMLNodeConstIterator oiter;
 		XMLNode* option;
 		const XMLProperty* opt_prop;
-		
+
 		olist = node.children();
-		
+
 		for (oiter = olist.begin(); oiter != olist.end(); ++oiter) {
-			
+
 			option = *oiter;
-			
+
 			if (option->name() == _name) {
 				if ((opt_prop = option->property ("val")) != 0) {
 					set_from_string (opt_prop->value());
@@ -97,7 +97,7 @@ ConfigVariableBase::set_from_node (XMLNode const & node)
 			}
 		}
 	}
-	
+
 	return false;
 }
 
@@ -125,7 +125,7 @@ ConfigVariableBase::notify ()
 void
 ConfigVariableBase::miss ()
 {
-	// placeholder for any debugging desired when a config variable 
+	// placeholder for any debugging desired when a config variable
 	// is set but to the same value as it already has
 }
 

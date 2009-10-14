@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999-2006 Paul Davis 
+    Copyright (C) 1999-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ UIConfiguration::load_defaults ()
 		string rcfile = default_ui_rc_file.to_string();
 
 		cerr << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
-		
+
 		if (!tree.read (rcfile.c_str())) {
 			error << string_compose(_("Ardour: cannot read default ui configuration file \"%1\""), rcfile) << endmsg;
 			return -1;
@@ -93,14 +93,14 @@ UIConfiguration::load_defaults ()
 	}
 	return found;
 }
-	
+
 int
 UIConfiguration::load_state ()
 {
 	bool found = false;
-	
+
 	sys::path default_ui_rc_file;
-	
+
 	if ( find_file_in_search_path (ardour_search_path() + system_config_search_path(),
 			"ardour3_ui_default.conf", default_ui_rc_file) )
 	{
@@ -110,7 +110,7 @@ UIConfiguration::load_state ()
 		string rcfile = default_ui_rc_file.to_string();
 
 		cerr << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
-		
+
 		if (!tree.read (rcfile.c_str())) {
 			error << string_compose(_("Ardour: cannot read default ui configuration file \"%1\""), rcfile) << endmsg;
 			return -1;
@@ -129,7 +129,7 @@ UIConfiguration::load_state ()
 	{
 		XMLTree tree;
 		found = true;
-	
+
 		string rcfile = user_ui_rc_file.to_string();
 
 		cerr << string_compose (_("Loading user ui configuration file %1"), rcfile) << endl;
@@ -164,7 +164,7 @@ UIConfiguration::save_state()
 		error << "Could not create user configuration directory" << endmsg;
 		return -1;
 	}
-	
+
 	sys::path rcfile_path(user_config_directory());
 
 	rcfile_path /= "ardour3_ui.conf";
@@ -189,14 +189,14 @@ UIConfiguration::get_state ()
 	LocaleGuard lg (X_("POSIX"));
 
 	root = new XMLNode("Ardour");
-	
+
 	root->add_child_nocopy (get_variables ("UI"));
 	root->add_child_nocopy (get_variables ("Canvas"));
-	
+
 	if (_extra_xml) {
 		root->add_child_copy (*_extra_xml);
 	}
-	
+
 	return *root;
 }
 
@@ -268,7 +268,7 @@ void
 UIConfiguration::pack_canvasvars ()
 {
 #undef  CANVAS_VARIABLE
-#define CANVAS_VARIABLE(var,name) canvas_colors.push_back(&var); 
+#define CANVAS_VARIABLE(var,name) canvas_colors.push_back(&var);
 #include "canvas_vars.h"
 #undef  CANVAS_VARIABLE
 }

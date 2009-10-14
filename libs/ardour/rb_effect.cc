@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004-2007 Paul Davis 
+    Copyright (C) 2004-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -83,7 +83,7 @@ RBEffect::run (boost::shared_ptr<Region> r)
 
 	cerr << "RBEffect: source region: position = " << region->position()
 	     << ", start = " << region->start()
-	     << ", length = " << region->length() 
+	     << ", length = " << region->length()
 	     << ", ancestral_start = " << region->ancestral_start()
 	     << ", ancestral_length = " << region->ancestral_length()
 	     << ", stretch " << region->stretch()
@@ -91,33 +91,33 @@ RBEffect::run (boost::shared_ptr<Region> r)
 
 	/*
 	   We have two cases to consider:
-	  
+
 	   1. The region has not been stretched before.
-	  
+
 	   In this case, we just want to read region->length() frames
 	   from region->start().
-	  
+
 	   We will create a new region of region->length() *
 	   tsr.time_fraction frames.  The new region will have its
 	   start set to 0 (because it has a new audio file that begins
 	   at the start of the stretched area) and its ancestral_start
 	   set to region->start() (so that we know where to begin
 	   reading if we want to stretch it again).
-	  
+
 	   2. The region has been stretched before.
-	  
+
 	   The region starts at region->start() frames into its
 	   (possibly previously stretched) source file.  But we don't
 	   want to read from its source file; we want to read from the
 	   file it was originally stretched from.
-	   
+
 	   The region's source begins at region->ancestral_start()
 	   frames into its master source file.  Thus, we need to start
 	   reading at region->ancestral_start() + (region->start() /
 	   region->stretch()) frames into the master source.  This
 	   value will also become the ancestral_start for the new
 	   region.
-	   
+
 	   We cannot use region->ancestral_length() to establish how
 	   many frames to read, because it won't be up to date if the
 	   region has been trimmed since it was last stretched.  We
@@ -125,10 +125,10 @@ RBEffect::run (boost::shared_ptr<Region> r)
 	   stretch them by tsr.time_fraction * region->stretch(), for
 	   a new region of region->length() * tsr.time_fraction
 	   frames.
-	  
+
 	   Case 1 is of course a special case of 2, where
 	   region->ancestral_start() == 0 and region->stretch() == 1.
-	  
+
 	   When we ask to read from a region, we supply a position on
 	   the global timeline.  The read function calculates the
 	   offset into the source as (position - region->position()) +
@@ -138,9 +138,9 @@ RBEffect::run (boost::shared_ptr<Region> r)
 	   n frames into the master source, we need to provide n -
 	   region->start() + region->position() as our position
 	   argument to master_read_at().
-	  
+
 	   Note that region->ancestral_length() is not used.
-	  
+
 	   I hope this is clear.
 	*/
 
@@ -158,7 +158,7 @@ RBEffect::run (boost::shared_ptr<Region> r)
 	RubberBandStretcher stretcher
 		(session.frame_rate(), channels,
 		 (RubberBandStretcher::Options) tsr.opts, stretch, shift);
-	
+
 	tsr.progress = 0.0f;
 	tsr.done = false;
 
@@ -174,7 +174,7 @@ RBEffect::run (boost::shared_ptr<Region> r)
 	} else if (shift == 1.0) {
 		snprintf (suffix, sizeof (suffix), "@%d", (int) floor (stretch * 100.0f));
 	} else {
-		snprintf (suffix, sizeof (suffix), "@%d-%d", 
+		snprintf (suffix, sizeof (suffix), "@%d-%d",
 			  (int) floor (stretch * 100.0f),
 			  (int) floor (shift * 100.0f));
 	}
@@ -202,18 +202,18 @@ RBEffect::run (boost::shared_ptr<Region> r)
 	avail = 0;
 	done = 0;
 
-	try { 
+	try {
 		while (pos < read_duration && !tsr.cancel) {
-			
+
 			nframes_t this_read = 0;
 
 			for (uint32_t i = 0; i < channels; ++i) {
-				
+
 				this_read = 0;
 
 				nframes_t this_time;
 				this_time = min(bufsize, read_duration - pos);
-				
+
 				nframes_t this_position;
 				this_position = read_start + pos -
 					region->start() + region->position();
@@ -225,7 +225,7 @@ RBEffect::run (boost::shared_ptr<Region> r)
 					 this_position,
 					 this_time,
 					 i);
-				
+
 				if (this_read != this_time) {
 					error << string_compose
 						(_("tempoize: error reading data from %1 at %2 (wanted %3, got %4)"),
@@ -233,7 +233,7 @@ RBEffect::run (boost::shared_ptr<Region> r)
 					goto out;
 				}
 			}
-			
+
 			pos += this_read;
 			done += this_read;
 
@@ -241,16 +241,16 @@ RBEffect::run (boost::shared_ptr<Region> r)
 
 			stretcher.study(buffers, this_read, pos == read_duration);
 		}
-		
+
 		done = 0;
 		pos = 0;
 
 		while (pos < read_duration && !tsr.cancel) {
-			
+
 			nframes_t this_read = 0;
-			
+
 			for (uint32_t i = 0; i < channels; ++i) {
-				
+
 				this_read = 0;
 				nframes_t this_time;
 				this_time = min(bufsize, read_duration - pos);
@@ -258,7 +258,7 @@ RBEffect::run (boost::shared_ptr<Region> r)
 				nframes_t this_position;
 				this_position = read_start + pos -
 					region->start() + region->position();
-				
+
 				this_read = region->master_read_at
 					(buffers[i],
 					 buffers[i],
@@ -266,7 +266,7 @@ RBEffect::run (boost::shared_ptr<Region> r)
 					 this_position,
 					 this_time,
 					 i);
-				
+
 				if (this_read != this_time) {
 					error << string_compose
 						(_("tempoize: error reading data from %1 at %2 (wanted %3, got %4)"),
@@ -289,7 +289,7 @@ RBEffect::run (boost::shared_ptr<Region> r)
 				this_read = min(bufsize, uint32_t(avail));
 
 				stretcher.retrieve(buffers, this_read);
-			
+
 				for (uint32_t i = 0; i < nsrcs.size(); ++i) {
 
 					boost::shared_ptr<AudioSource> asrc = boost::dynamic_pointer_cast<AudioSource>(nsrcs[i]);
@@ -317,7 +317,7 @@ RBEffect::run (boost::shared_ptr<Region> r)
 				if (!asrc) {
 					continue;
 				}
-				
+
 				if (asrc->write(buffers[i], this_read) !=
 				    this_read) {
 					error << string_compose (_("error writing tempo-adjusted data to %1"), nsrcs[i]->name()) << endmsg;
@@ -372,7 +372,7 @@ RBEffect::run (boost::shared_ptr<Region> r)
 			(*si)->mark_for_remove ();
 		}
 	}
-	
+
 	tsr.done = true;
 
 	return ret;
@@ -381,4 +381,4 @@ RBEffect::run (boost::shared_ptr<Region> r)
 
 
 
-    
+

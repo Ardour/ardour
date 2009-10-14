@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2007 Tim Mayberry 
+	Copyright (C) 2007 Tim Mayberry
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -40,9 +40,9 @@ TapeFileMatcher::TapeFileMatcher()
 					tape_file_regex_string, REG_EXTENDED|REG_NOSUB)))
 	{
 		char msg[256];
-		
+
 		regerror (err, &m_compiled_pattern, msg, sizeof (msg));
-		
+
 		PBD::error << string_compose (_("Cannot compile tape track regexp for use (%1)"), msg) << endmsg;
 		// throw
 	}

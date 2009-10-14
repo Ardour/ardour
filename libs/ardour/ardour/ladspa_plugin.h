@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 
 #include <sigc++/signal.h>
 
-#include "pbd/stateful.h" 
+#include "pbd/stateful.h"
 
 #include <jack/types.h>
 #include "ardour/ladspa.h"
@@ -45,7 +45,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 	~LadspaPlugin ();
 
 	/* Plugin interface */
-	
+
 	std::string unique_id() const;
 	const char* label() const           { return _descriptor->Label; }
 	const char* name() const            { return _descriptor->Name; }
@@ -57,10 +57,10 @@ class LadspaPlugin : public ARDOUR::Plugin
 	float       get_parameter (uint32_t port) const;
 	int         get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
 	uint32_t    nth_parameter (uint32_t port, bool& ok) const;
-	
+
 	std::set<Evoral::Parameter> automatable() const;
 
-	void activate () { 
+	void activate () {
 		if (!_was_activated && _descriptor->activate)
 			_descriptor->activate (_handle);
 
@@ -83,7 +83,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 	}
 
 	void set_block_size (nframes_t /*nframes*/) {}
-	
+
 	int connect_and_run (BufferSet& bufs,
 			ChanMapping in, ChanMapping out,
 			nframes_t nframes, nframes_t offset);
@@ -105,7 +105,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 	bool has_editor() const { return false; }
 
 	int require_output_streams (uint32_t);
-	
+
 	/* LADSPA extras */
 
 	LADSPA_Properties           properties() const                { return _descriptor->Properties; }
@@ -114,7 +114,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 	LADSPA_PortDescriptor       port_descriptor(uint32_t i) const { return _descriptor->PortDescriptors[i]; }
 	const LADSPA_PortRangeHint* port_range_hints() const          { return _descriptor->PortRangeHints; }
 	const char * const *        port_names() const                { return _descriptor->PortNames; }
-	
+
 	void set_gain (float gain)                    { _descriptor->set_run_adding_gain (_handle, gain); }
 	void run_adding (uint32_t nsamples)           { _descriptor->run_adding (_handle, nsamples); }
 	void connect_port (uint32_t port, float *ptr) { _descriptor->connect_port (_handle, port, ptr); }
@@ -136,7 +136,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 };
 
 class LadspaPluginInfo : public PluginInfo {
-  public:	
+  public:
 	LadspaPluginInfo () { };
 	~LadspaPluginInfo () { };
 

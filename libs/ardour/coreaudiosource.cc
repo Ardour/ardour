@@ -38,8 +38,8 @@ using namespace ARDOUR;
 using namespace PBD;
 
 CoreAudioSource::CoreAudioSource (Session& s, const XMLNode& node)
-	: 	Source (s, node),
-	AudioFileSource (s, node)
+	: Source (s, node)
+	, AudioFileSource (s, node)
 {
 	init ();
 }
@@ -54,7 +54,7 @@ CoreAudioSource::CoreAudioSource (Session& s, const string& path, bool, int chn,
 	init ();
 }
 
-void 
+void
 CoreAudioSource::init ()
 {
 	/* note that we temporarily truncated _id at the colon */
@@ -63,7 +63,7 @@ CoreAudioSource::init ()
 
 		CAStreamBasicDescription file_format (af.GetFileDataFormat());
 		n_channels = file_format.NumberChannels();
-		
+
 		if (_channel >= n_channels) {
 			error << string_compose("CoreAudioSource: file only contains %1 channels; %2 is invalid as a channel number (%3)", n_channels, _channel, name()) << endmsg;
 			throw failed_constructor();
@@ -81,8 +81,8 @@ CoreAudioSource::init ()
 		af.SetClientFormat (client_format);
 
 	} catch (CAXException& cax) {
-		
-		error << string_compose(_("CoreAudioSource: cannot open file \"%1\" for %2"), 
+
+		error << string_compose(_("CoreAudioSource: cannot open file \"%1\" for %2"),
 					_path, (writable() ? "read+write" : "reading")) << endmsg;
 		throw failed_constructor ();
 	}
@@ -99,19 +99,19 @@ CoreAudioSource::safe_read (Sample* dst, nframes_t start, nframes_t cnt, AudioBu
 	nframes_t nread = 0;
 
 	while (nread < cnt) {
-		
+
 		try {
 			af.Seek (start+nread);
 		} catch (CAXException& cax) {
 			error << string_compose("CoreAudioSource: %1 to %2 (%3)", cax.mOperation, start+nread, _name.substr (1)) << endmsg;
 			return -1;
 		}
-		
+
 		UInt32 new_cnt = cnt - nread;
-		
+
 		abl.mBuffers[0].mDataByteSize = new_cnt * n_channels * sizeof(Sample);
 		abl.mBuffers[0].mData = dst + nread;
-			
+
 		try {
 			af.Read (new_cnt, &abl);
 		} catch (CAXException& cax) {
@@ -137,7 +137,7 @@ CoreAudioSource::safe_read (Sample* dst, nframes_t start, nframes_t cnt, AudioBu
 		return 0;
 	}
 }
-	
+
 
 nframes_t
 CoreAudioSource::read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) const
@@ -151,17 +151,17 @@ CoreAudioSource::read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) con
 	if (start > _length) {
 
 		/* read starts beyond end of data, just memset to zero */
-		
+
 		file_cnt = 0;
 
 	} else if (start + cnt > _length) {
-		
+
 		/* read ends beyond end of data, read some, memset the rest */
-		
+
 		file_cnt = _length - start;
 
 	} else {
-		
+
 		/* read is entirely within data */
 
 		file_cnt = cnt;
@@ -184,7 +184,7 @@ CoreAudioSource::read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) con
 	}
 
 	Sample* interleave_buf = get_interleave_buffer (file_cnt * n_channels);
-	
+
 	if (safe_read (interleave_buf, start, file_cnt, abl) != 0) {
 		return 0;
 	}
@@ -192,9 +192,9 @@ CoreAudioSource::read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) con
 	_read_data_count = cnt * sizeof(float);
 
 	Sample *ptr = interleave_buf + _channel;
-	
+
 	/* stride through the interleaved data */
-	
+
 	for (uint32_t n = 0; n < file_cnt; ++n) {
 		dst[n] = *ptr;
 		ptr += n_channels;
@@ -227,7 +227,7 @@ CoreAudioSource::update_header (sframes_t when, struct tm&, time_t)
 int
 CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg)
 {
-	FSRef ref; 
+	FSRef ref;
 	ExtAudioFileRef af = 0;
 	size_t size;
 	CFStringRef name;
@@ -236,18 +236,18 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string& 
 	if (FSPathMakeRef ((UInt8*)path.c_str(), &ref, 0) != noErr) {
 		goto out;
 	}
-	
+
 	if (ExtAudioFileOpen(&ref, &af) != noErr) {
 		goto out;
 	}
-	
+
 	AudioStreamBasicDescription absd;
 	memset(&absd, 0, sizeof(absd));
 	size = sizeof(AudioStreamBasicDescription);
 	if (ExtAudioFileGetProperty (af, kExtAudioFileProperty_FileDataFormat, &size, &absd) != noErr) {
 		goto out;
 	}
-	
+
 	_info.samplerate = absd.mSampleRate;
 	_info.channels   = absd.mChannelsPerFrame;
 
@@ -255,7 +255,7 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string& 
 	if (ExtAudioFileGetProperty(af, kExtAudioFileProperty_FileLengthFrames, &size, &_info.length) != noErr) {
 		goto out;
 	}
-	
+
 	size = sizeof(CFStringRef);
 	if (AudioFormatGetProperty(kAudioFormatProperty_FormatName, sizeof(absd), &absd, &size, &name) != noErr) {
 		goto out;
@@ -269,12 +269,12 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string& 
 		} else {
 			_info.format_name += "little-endian";
 		}
-		
+
 		char buf[32];
 		snprintf (buf, sizeof (buf), " %" PRIu32 " bit", absd.mBitsPerChannel);
 		_info.format_name += buf;
 		_info.format_name += '\n';
-		
+
 		if (absd.mFormatFlags & kAudioFormatFlagIsFloat) {
 			_info.format_name += "float";
 		} else {
@@ -285,14 +285,14 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string& 
 			}
 			/* integer is typical, do not show it */
 		}
-		
+
 		if (_info.channels > 1) {
 			if (absd.mFormatFlags & kAudioFormatFlagIsNonInterleaved) {
 				_info.format_name += " noninterleaved";
 			}
 			/* interleaved is the normal case, do not show it */
 		}
-		
+
 		_info.format_name += ' ';
 	}
 
@@ -363,9 +363,9 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string& 
 
 	_info.timecode = 0;
 	ret = 0;
-	
+
   out:
 	ExtAudioFileDispose (af);
 	return ret;
-	
+
 }

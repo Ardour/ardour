@@ -44,11 +44,11 @@ AudioRegionImportHandler::AudioRegionImportHandler (XMLTree const & source, Sess
 {
 	XMLNode const * root = source.root();
 	XMLNode const * regions;
-	
+
 	if (!(regions = root->child (X_("Regions")))) {
 		throw failed_constructor();
 	}
-	
+
 	create_regions_from_children (*regions, elements);
 }
 
@@ -105,7 +105,7 @@ AudioRegionImportHandler::get_new_id (PBD::ID & old_id) const
 }
 
 /*** AudioRegionImporter ***/
-AudioRegionImporter::AudioRegionImporter (XMLTree const & source, Session & session, AudioRegionImportHandler & handler, XMLNode const & node) : 
+AudioRegionImporter::AudioRegionImporter (XMLTree const & source, Session & session, AudioRegionImportHandler & handler, XMLNode const & node) :
   ElementImporter (source, session),
   xml_region (node),
   handler (handler),
@@ -129,26 +129,26 @@ AudioRegionImporter::get_info () const
 	nframes_t length, position;
 	SMPTE::Time length_time, position_time;
 	std::ostringstream oss;
-	
+
 	// Get sample positions
 	std::istringstream iss_length(xml_region.property ("length")->value());
 	iss_length >> length;
 	std::istringstream iss_position(xml_region.property ("position")->value());
 	iss_position >> position;
-	
+
 	// Convert to smpte
 	session.sample_to_smpte(length, length_time, true, false);
 	session.sample_to_smpte(position, position_time, true, false);
-	
+
 	// return info
 	oss << _("Length: ") <<
 	  smpte_to_string(length_time) <<
-	  _("\nPosition: ") << 
+	  _("\nPosition: ") <<
 	  smpte_to_string(position_time) <<
 	  _("\nChannels: ") <<
 	  xml_region.property ("channels")->value();
 
-	
+
 	return oss.str();
 }
 
@@ -172,11 +172,11 @@ AudioRegionImporter::_move ()
 			return;
 		}
 	}
-	
+
 	if (broken()) {
 		return;
 	}
-	
+
 	session.add_regions (region);
 }
 
@@ -186,7 +186,7 @@ AudioRegionImporter::parse_xml_region ()
 	XMLPropertyList const & props = xml_region.properties();
 	bool id_ok = false;
 	bool name_ok = false;
-	
+
 	for (XMLPropertyList::const_iterator it = props.begin(); it != props.end(); ++it) {
 		string prop = (*it)->name();
 		if (!prop.compare ("type") || !prop.compare ("stretch") ||
@@ -216,17 +216,17 @@ AudioRegionImporter::parse_xml_region ()
 			std::cerr << string_compose (X_("AudioRegionImporter (%1): did not recognise XML-property \"%2\""), name, prop) << endmsg;
 		}
 	}
-	
+
 	if (!id_ok) {
 		error << string_compose (X_("AudioRegionImporter (%1): did not find necessary XML-property \"id\""), name) << endmsg;
 		return false;
 	}
-	
+
 	if (!name_ok) {
 		error << X_("AudioRegionImporter: did not find necessary XML-property \"name\"") << endmsg;
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -239,23 +239,23 @@ AudioRegionImporter::parse_source_xml ()
 	PBD::sys::path source_path;
 	XMLNode * source_node;
 	XMLProperty *prop;
-	
+
 	// Get XML for sources
 	if (!(source_node = source.root()->child (X_("Sources")))) {
 		return false;
 	}
 	XMLNodeList const & sources = source_node->children();
-	
+
 	// Get source for each channel
 	if (!(prop = xml_region.property ("channels"))) {
 		error << string_compose (X_("AudioRegionImporter (%1): did not find necessary XML-property \"channels\""), name) << endmsg;
 		return false;
 	}
-	
+
 	channels = atoi (prop->value());
 	for (uint32_t i = 0; i < channels; ++i) {
 		bool source_found = false;
-		
+
 		// Get id for source-n
 		snprintf (buf, sizeof(buf), X_("source-%d"), i);
 		prop = xml_region.property (buf);
@@ -264,7 +264,7 @@ AudioRegionImporter::parse_source_xml ()
 			return false;
 		}
 		string source_id = prop->value();
-		
+
 		// Get source
 		for (XMLNodeList::const_iterator it = sources.begin(); it != sources.end(); it++) {
 			prop = (*it)->property ("id");
@@ -277,18 +277,18 @@ AudioRegionImporter::parse_source_xml ()
 				}
 				source_path /= prop->value();
 				filenames.push_back (source_path.to_string());
-				
+
 				source_found = true;
 				break;
 			}
 		}
-		
+
 		if (!source_found) {
 			error << string_compose (X_("AudioRegionImporter (%1): could not find all necessary sources"), name) << endmsg;
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -299,7 +299,7 @@ AudioRegionImporter::get_sound_dir (XMLTree const & tree)
 	source_dir = source_dir.branch_path();
 	SessionDirectory session_dir(source_dir);
 	source_dir = session_dir.sound_path();
-	
+
 	return source_dir;
 }
 
@@ -309,15 +309,15 @@ AudioRegionImporter::prepare_region ()
 	if (region_prepared) {
 		return;
 	}
-	
+
 	SourceList source_list;
 	prepare_sources();
-	
+
 	// Create source list
 	for (std::list<string>::iterator it = filenames.begin(); it != filenames.end(); ++it) {
 		source_list.push_back (handler.get_source (*it));
 	}
-	
+
 	// create region and update XML
 	region.push_back (RegionFactory::create (source_list, xml_region));
 	if (*region.begin()) {
@@ -336,7 +336,7 @@ AudioRegionImporter::prepare_sources ()
 	if (sources_prepared) {
 		return;
 	}
-	
+
 	status.total = 0;
 	status.replace_existing_source = false;
 	status.done = false;
@@ -344,7 +344,7 @@ AudioRegionImporter::prepare_sources ()
 	status.freeze = false;
 	status.progress = 0.0;
 	status.quality = SrcBest; // TODO other qualities also
-	
+
 	// Get sources that still need to be imported
 	for (std::list<string>::iterator it = filenames.begin(); it != filenames.end(); ++it) {
 		if (!handler.check_source (*it)) {
@@ -352,11 +352,11 @@ AudioRegionImporter::prepare_sources ()
 			status.total++;
 		}
 	}
-	
+
 	// import files
 	// TODO: threading & exception handling
 	session.import_audiofiles (status);
-	
+
 	// Add imported sources to handlers map
 	std::vector<Glib::ustring>::iterator file_it = status.paths.begin();
 	for (SourceList::iterator source_it = status.sources.begin(); source_it != status.sources.end(); ++source_it) {
@@ -367,10 +367,10 @@ AudioRegionImporter::prepare_sources ()
 			handler.set_errors();
 			set_broken();
 		}
-		
+
 		++file_it;
 	}
-	
+
 	sources_prepared = true;
 }
 
@@ -380,22 +380,22 @@ AudioRegionImporter::add_sources_to_session ()
 	if (!sources_prepared) {
 		prepare_sources();
 	}
-	
+
 	if (broken()) {
 		return;
 	}
-	
+
 	for (std::list<string>::iterator it = filenames.begin(); it != filenames.end(); ++it) {
 		session.add_source (handler.get_source (*it));
 	}
 }
 
-XMLNode const & 
+XMLNode const &
 AudioRegionImporter::get_xml ()
 {
 	if(!region_prepared) {
 		prepare_region();
 	}
-	
+
 	return xml_region;
 }

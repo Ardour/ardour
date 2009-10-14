@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999-2004 Paul Davis 
+    Copyright (C) 1999-2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -100,8 +100,8 @@ Session::dump_events () const
         if ((Events::const_iterator) next_event == events.end()) {
 		cerr << "none" << endl;
 	} else {
-		cerr << "at " << (*next_event)->action_frame << ' ' 
-		     << (*next_event)->type << " target = " 
+		cerr << "at " << (*next_event)->action_frame << ' '
+		     << (*next_event)->type << " target = "
 		     << (*next_event)->target_frame << endl;
 	}
 	cerr << "Immediate events pending:\n";
@@ -138,7 +138,7 @@ Session::merge_event (Event* ev)
 		_clear_event_type (ev->type);
 		delete ev;
 		return;
-		
+
 	case Event::Add:
 		break;
 	}
@@ -149,7 +149,7 @@ Session::merge_event (Event* ev)
 		process_event (ev);
 		return;
 	}
-	
+
 	switch (ev->type) {
 	case Event::AutoLoop:
 	case Event::StopOnce:
@@ -159,7 +159,7 @@ Session::merge_event (Event* ev)
 	default:
 		for (Events::iterator i = events.begin(); i != events.end(); ++i) {
 			if ((*i)->type == ev->type && (*i)->action_frame == ev->action_frame) {
-			  error << string_compose(_("Session: cannot have two events of type %1 at the same frame (%2)."), 
+			  error << string_compose(_("Session: cannot have two events of type %1 at the same frame (%2)."),
 						 event_names[ev->type], ev->action_frame) << endmsg;
 				return;
 			}
@@ -210,7 +210,7 @@ Session::_remove_event (Session::Event* ev)
 {
 	bool ret = false;
 	Events::iterator i;
-	
+
 	for (i = events.begin(); i != events.end(); ++i) {
 		if ((*i)->type == ev->type && (*i)->action_frame == ev->action_frame) {
 			if ((*i) == ev) {
@@ -237,7 +237,7 @@ void
 Session::_clear_event_type (Event::Type type)
 {
 	Events::iterator i, tmp;
-	
+
 	for (i = events.begin(); i != events.end(); ) {
 
 		tmp = i;
@@ -276,7 +276,7 @@ Session::set_next_event ()
 	if (events.empty()) {
 		next_event = events.end();
 		return;
-	} 
+	}
 
 	if (next_event == events.end()) {
 		next_event = events.begin();
@@ -306,7 +306,7 @@ Session::process_event (Event* ev)
 	*/
 
 	if (non_realtime_work_pending()) {
-		
+
 		/* except locates, which we have the capability to handle */
 
 		if (ev->type != Event::Locate) {
@@ -363,7 +363,7 @@ Session::process_event (Event* ev)
 	case Event::SetTransportSpeed:
 		set_transport_speed (ev->speed, ev->yes_or_no);
 		break;
-		
+
 	case Event::PunchIn:
 		// cerr << "PunchIN at " << transport_frame() << endl;
 		if (config.get_punch_in() && record_status() == Enabled) {
@@ -372,7 +372,7 @@ Session::process_event (Event* ev)
 		remove = false;
 		del = false;
 		break;
-		
+
 	case Event::PunchOut:
 		// cerr << "PunchOUT at " << transport_frame() << endl;
 		if (config.get_punch_out()) {
@@ -398,7 +398,7 @@ Session::process_event (Event* ev)
 		remove = false;
 		del = false;
 		break;
-		
+
 	case Event::RangeLocate:
 		start_locate (ev->target_frame, true, true, false);
 		remove = false;

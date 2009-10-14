@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ class MidiOperator {
   public:
 	MidiOperator () {}
 	virtual ~MidiOperator() {}
-	
+
 	virtual Command* operator() (boost::shared_ptr<ARDOUR::MidiModel>, std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>&) = 0;
 	virtual std::string name() const = 0;
 };

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ using namespace Editing;
 
 //---------------------------------------------------------------------------------------//
 // Constructor / Desctructor
-		
+
 /**
  * Constructs a new ImageFrameTimeAxisView.
  *
@@ -69,17 +69,17 @@ ImageFrameTimeAxisView::ImageFrameTimeAxisView (ImageFrameTimeAxis& tv)
 }
 
 /**
- * Destructor 
+ * Destructor
  * Responsible for destroying all items tat may have been added to this time axis
  */
 ImageFrameTimeAxisView::~ImageFrameTimeAxisView()
 {
 	// Destroy all the ImageFrameGroups that we have
-	
+
 	for(ImageFrameGroupList::iterator iter = imageframe_groups.begin(); iter != imageframe_groups.end(); ++iter)
 	{
 		ImageFrameTimeAxisGroup* iftag = (*iter) ;
-		
+
 		ImageFrameGroupList::iterator next = iter ;
 		next++ ;
 
@@ -88,16 +88,16 @@ ImageFrameTimeAxisView::~ImageFrameTimeAxisView()
 
 		delete iftag ;
 		iftag = 0 ;
-		
+
 		iter = next ;
 	}
-	
+
 }
 
 
 //---------------------------------------------------------------------------------------//
 // ui methods & data
-	
+
 /**
  * Sets the height of the time axis view and the item upon it
  *
@@ -110,7 +110,7 @@ ImageFrameTimeAxisView::set_height (gdouble h)
 	if (h < 10.0 || h > 1000.0) {
 		return(-1) ;
 	}
-	
+
 	canvas_rect.property_y2() = h ;
 
 
@@ -121,7 +121,7 @@ ImageFrameTimeAxisView::set_height (gdouble h)
 
 	return(0) ;
 }
-	
+
 /**
  * Sets the position of this view helper on the canvas
  *
@@ -141,10 +141,10 @@ ImageFrameTimeAxisView::set_position (gdouble x, gdouble y)
 /**
  * Sets the current samples per unit.
  * this method tells each item upon the time axis of the change
- * 
+ *
  * @param spu the new samples per canvas unit value
  */
-int 
+int
 ImageFrameTimeAxisView::set_samples_per_unit (gdouble spp)
 {
 	if (spp < 1.0) {
@@ -152,12 +152,12 @@ ImageFrameTimeAxisView::set_samples_per_unit (gdouble spp)
 	}
 
 	_samples_per_unit = spp;
-	
+
 	for(ImageFrameGroupList::const_iterator citer = imageframe_groups.begin(); citer != imageframe_groups.end(); ++citer)
 	{
 		(*citer)->set_item_samples_per_units(spp) ;
 	}
-	
+
 	return(0) ;
 }
 
@@ -190,7 +190,7 @@ ImageFrameTimeAxisView::reset_samples_per_unit ()
 
 //---------------------------------------------------------------------------------------//
 // Child ImageFrameTimeAxisGroup Accessors/Mutators
-		
+
 /**
  * Adds an ImageFrameTimeAxisGroup to the list of items upon this time axis view helper
  * the new ImageFrameTimeAxisGroup is returned
@@ -202,7 +202,7 @@ ImageFrameTimeAxisGroup*
 ImageFrameTimeAxisView::add_imageframe_group(std::string group_id, void* src)
 {
 	ImageFrameTimeAxisGroup* iftag = 0 ;
-	
+
 	//check that there is not already a group with that id
 	if(get_named_imageframe_group(group_id) != 0)
 	{
@@ -213,9 +213,9 @@ ImageFrameTimeAxisView::add_imageframe_group(std::string group_id, void* src)
 		iftag = new ImageFrameTimeAxisGroup(*this, group_id) ;
 
 		imageframe_groups.push_front(iftag) ;
-	
+
 		iftag->GoingAway.connect(bind(mem_fun(*this,&ImageFrameTimeAxisView::remove_imageframe_group), iftag, (void*)this)) ;
-	
+
 		 ImageFrameGroupAdded(iftag, src) ; /* EMIT_SIGNAL */
 	}
 
@@ -232,7 +232,7 @@ ImageFrameTimeAxisGroup*
 ImageFrameTimeAxisView::get_named_imageframe_group(std::string group_id)
 {
 	ImageFrameTimeAxisGroup* iftag =  0 ;
-	
+
 	for(ImageFrameGroupList::iterator i = imageframe_groups.begin(); i != imageframe_groups.end(); ++i)
 	{
 		if (((ImageFrameTimeAxisGroup*)*i)->get_group_name() == group_id)
@@ -241,7 +241,7 @@ ImageFrameTimeAxisView::get_named_imageframe_group(std::string group_id)
 			break ;
 		}
 	}
-	
+
 	return(iftag) ;
 }
 
@@ -257,27 +257,27 @@ ImageFrameTimeAxisGroup*
 ImageFrameTimeAxisView::remove_named_imageframe_group(std::string group_id, void* src)
 {
 	ImageFrameTimeAxisGroup* removed = 0 ;
-	
+
 	for(ImageFrameGroupList::iterator iter = imageframe_groups.begin(); iter != imageframe_groups.end(); ++iter)
 	{
 		if(((ImageFrameTimeAxisGroup*)*iter)->get_group_name() == group_id)
 		{
 			removed = (*iter) ;
 			imageframe_groups.erase(iter) ;
-			
+
 			if(removed == selected_imageframe_group)
 			{
 				selected_imageframe_group = 0 ;
 			}
-			
+
 			 ImageFrameGroupRemoved(removed->get_group_name(), src) ; /* EMIT_SIGNAL */
-			
+
 			// break from the for loop
 			break ;
 		}
 		iter++ ;
 	}
-	
+
 	return(removed) ;
 }
 
@@ -296,7 +296,7 @@ ImageFrameTimeAxisView::remove_imageframe_group(ImageFrameTimeAxisGroup* iftag, 
 	if((i = find (imageframe_groups.begin(), imageframe_groups.end(), iftag)) != imageframe_groups.end())
 	{
 		imageframe_groups.erase(i) ;
-		
+
 		 ImageFrameGroupRemoved(iftag->get_group_name(), src) ; /* EMIT_SIGNAL */
 	}
 }
@@ -306,7 +306,7 @@ ImageFrameTimeAxisView::remove_imageframe_group(ImageFrameTimeAxisGroup* iftag, 
 
 //---------------------------------------------------------------------------------------//
 // Selected group methods
-		
+
 /**
  * Sets the currently selected group upon this time axis
  *
@@ -319,7 +319,7 @@ ImageFrameTimeAxisView::set_selected_imageframe_group(ImageFrameTimeAxisGroup* i
 	{
 		selected_imageframe_group->set_selected(false) ;
 	}
-	
+
 	selected_imageframe_group = iftag ;
 	selected_imageframe_group->set_selected(true) ;
 }
@@ -337,7 +337,7 @@ ImageFrameTimeAxisView::clear_selected_imageframe_group()
 	}
 	selected_imageframe_group = 0 ;
 }
-		
+
 /**
  * Returns the currently selected group upon this time axis
  *
@@ -351,7 +351,7 @@ ImageFrameTimeAxisView::get_selected_imageframe_group() const
 
 //---------------------------------------------------------------------------------------//
 // Selected item methods
-		
+
 /**
  * Sets the currently selected imag frame view item
  *
@@ -362,12 +362,12 @@ void
 ImageFrameTimeAxisView::set_selected_imageframe_view(ImageFrameTimeAxisGroup* iftag, ImageFrameView* ifv)
 {
 	set_selected_imageframe_group(iftag) ;
-	
+
 	if(selected_imageframe_view)
 	{
 		selected_imageframe_view->set_selected(false) ;
 	}
-	
+
 	selected_imageframe_view = ifv ;
 	selected_imageframe_view->set_selected(true) ;
 }
@@ -383,14 +383,14 @@ ImageFrameTimeAxisView::clear_selected_imageframe_item(bool clear_group)
 	{
 		clear_selected_imageframe_group() ;
 	}
-	
+
 	if(selected_imageframe_view)
 	{
 		selected_imageframe_view->set_selected(false) ;
 	}
 	selected_imageframe_view = 0 ;
 }
-		
+
 /**
  * Returns the currently selected image frame view item upon this time axis
  *
@@ -404,7 +404,7 @@ ImageFrameTimeAxisView::get_selected_imageframe_view() const
 
 
 
- 
+
 void
 ImageFrameTimeAxisView::set_imageframe_duration_sec(double sec)
 {
@@ -429,7 +429,7 @@ ImageFrameTimeAxisView::remove_selected_imageframe_item(void* src)
 	{
 		ImageFrameView* temp_item = selected_imageframe_view ;
 		selected_imageframe_group->remove_imageframe_item(temp_item, src) ;
-		
+
 		// XXX although we have removed the item from the group, we need the group id still set within the
 		//     item as the remove method requires this data when telling others about the deletion
 		//     to fully specify the item we need the track, group and item id

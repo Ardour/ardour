@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ Editor::keyboard_selection_begin ()
 				pending_keyboard_selection_start = where;
 				have_pending_keyboard_selection = true;
 			}
-				
+
 		}
 	}
 }

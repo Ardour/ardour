@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,11 +36,11 @@ class UserBundle : public Bundle, public PBD::Stateful {
 	UserBundle (XMLNode const &, bool);
 
 	XMLNode& get_state ();
-	
+
   private:
 	int set_state (XMLNode const &);
 };
 
 }
-	
+
 #endif

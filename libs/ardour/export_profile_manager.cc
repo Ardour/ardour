@@ -63,21 +63,21 @@ ExportProfileManager::ExportProfileManager (Session & s) :
 	export_config_dir = user_config_directory();
 	export_config_dir /= "export";
 	search_path += export_config_dir;
-	
+
 	search_path += ardour_search_path().add_subdirectory_to_paths("export");
 	search_path += system_config_search_path().add_subdirectory_to_paths("export");;
-	
+
 	/* create export config directory if necessary */
 
 	if (!sys::exists (export_config_dir)) {
 		sys::create_directory (export_config_dir);
 	}
-	
+
 	load_presets ();
 	load_formats ();
-	
+
 	/* Initialize all lists with an empty config */
-	
+
 	XMLNodeList dummy;
 	init_timespans (dummy);
 	init_channel_configs (dummy);
@@ -88,7 +88,7 @@ ExportProfileManager::ExportProfileManager (Session & s) :
 ExportProfileManager::~ExportProfileManager ()
 {
 	if (single_range_mode) { return; }
-	
+
 	XMLNode * instant_xml (new XMLNode ("ExportProfile"));
 	serialize_profile (*instant_xml);
 	session.add_instant_xml (*instant_xml, false);
@@ -111,15 +111,15 @@ ExportProfileManager::prepare_for_export ()
 {
 	ChannelConfigPtr channel_config = channel_configs.front()->config;
 	TimespanListPtr ts_list = timespans.front()->timespans;
-	
+
 	FormatStateList::const_iterator format_it;
 	FilenameStateList::const_iterator filename_it;
-	
+
 	for (TimespanList::iterator ts_it = ts_list->begin(); ts_it != ts_list->end(); ++ts_it) {
 		for (format_it = formats.begin(), filename_it = filenames.begin();
 		     format_it != formats.end() && filename_it != filenames.end();
 		     ++format_it, ++filename_it) {
-		
+
 //			filename->include_timespan = (ts_list->size() > 1); Disabled for now...
 			handler->add_export_config (*ts_it, channel_config, (*format_it)->format, (*filename_it)->filename);
 		}
@@ -138,13 +138,13 @@ ExportProfileManager::load_preset (PresetPtr preset)
 	if ((state = preset->get_local_state())) {
 		set_local_state (*state);
 	} else { ok = false; }
-	
+
 	if ((state = preset->get_global_state())) {
 		if (!set_global_state (*state)) {
 			ok = false;
 		}
 	} else { ok = false; }
-	
+
 	return ok;
 }
 
@@ -167,7 +167,7 @@ ExportProfileManager::save_preset (string const & name)
 		current_preset.reset (new ExportPreset (filename, session));
 		preset_list.push_back (current_preset);
 	}
-	
+
 	XMLNode * global_preset = new XMLNode ("ExportPreset");
 	XMLNode * local_preset = new XMLNode ("ExportPreset");
 
@@ -177,9 +177,9 @@ ExportProfileManager::save_preset (string const & name)
 	current_preset->set_name (name);
 	current_preset->set_global_state (*global_preset);
 	current_preset->set_local_state (*local_preset);
-	
+
 	current_preset->save (filename);
-	
+
 	return current_preset;
 }
 
@@ -200,7 +200,7 @@ ExportProfileManager::remove_preset ()
 		sys::remove (it->second);
 		preset_file_map.erase (it);
 	}
-	
+
 	current_preset->remove_local();
 	current_preset.reset();
 }
@@ -209,9 +209,9 @@ void
 ExportProfileManager::load_preset_from_disk (PBD::sys::path const & path)
 {
 	PresetPtr preset (new ExportPreset (path.to_string(), session));
-	
+
 	/* Handle id to filename mapping and don't add duplicates to list */
-	
+
 	FilePair pair (preset->id(), path);
 	if (preset_file_map.insert (pair).second) {
 		preset_list.push_back (preset);
@@ -263,7 +263,7 @@ ExportProfileManager::serialize_local_profile (XMLNode & root)
 	for (TimespanStateList::iterator it = timespans.begin(); it != timespans.end(); ++it) {
 		root.add_child_nocopy (serialize_timespan (*it));
 	}
-	
+
 	for (ChannelConfigStateList::iterator it = channel_configs.begin(); it != channel_configs.end(); ++it) {
 		root.add_child_nocopy ((*it)->config->get_state());
 	}
@@ -291,7 +291,7 @@ ExportProfileManager::set_selection_range (nframes_t start, nframes_t end)
 	} else {
 		selection_range.reset();
 	}
-	
+
 	for (TimespanStateList::iterator it = timespans.begin(); it != timespans.end(); ++it) {
 		(*it)->selection_range = selection_range;
 	}
@@ -301,13 +301,13 @@ std::string
 ExportProfileManager::set_single_range (nframes_t start, nframes_t end, Glib::ustring name)
 {
 	single_range_mode = true;
-	
+
 	single_range.reset (new Location());
 	single_range->set_name (name);
 	single_range->set (start, end);
-	
+
 	update_ranges ();
-	
+
 	return single_range->id().to_s();
 }
 
@@ -316,7 +316,7 @@ ExportProfileManager::init_timespans (XMLNodeList nodes)
 {
 	timespans.clear ();
 	update_ranges ();
-	
+
 	bool ok = true;
 	for (XMLNodeList::const_iterator it = nodes.begin(); it != nodes.end(); ++it) {
 		TimespanStatePtr span = deserialize_timespan (**it);
@@ -324,13 +324,13 @@ ExportProfileManager::init_timespans (XMLNodeList nodes)
 			timespans.push_back (span);
 		} else { ok = false; }
 	}
-	
+
 	if (timespans.empty()) {
 		TimespanStatePtr timespan (new TimespanState (session_range, selection_range, ranges));
 		timespans.push_back (timespan);
 		return false;
 	}
-	
+
 	return ok;
 }
 
@@ -339,14 +339,14 @@ ExportProfileManager::deserialize_timespan (XMLNode & root)
 {
 	TimespanStatePtr state (new TimespanState (session_range, selection_range, ranges));
 	XMLProperty const * prop;
-	
+
 	XMLNodeList spans = root.children ("Range");
 	for (XMLNodeList::iterator node_it = spans.begin(); node_it != spans.end(); ++node_it) {
-		
+
 		prop = (*node_it)->property ("id");
 		if (!prop) { continue; }
 		ustring id = prop->value();
-	
+
 		for (LocationList::iterator it = ranges->begin(); it != ranges->end(); ++it) {
 			if ((!id.compare ("session") && *it == session_range.get()) ||
 			    (!id.compare ("selection") && *it == selection_range.get()) ||
@@ -359,11 +359,11 @@ ExportProfileManager::deserialize_timespan (XMLNode & root)
 			}
 		}
 	}
-	
+
 	if ((prop = root.property ("format"))) {
 		state->time_format = (TimeFormat) string_2_enum (prop->value(), TimeFormat);
 	}
-	
+
 	return state;
 }
 
@@ -372,24 +372,24 @@ ExportProfileManager::serialize_timespan (TimespanStatePtr state)
 {
 	XMLNode & root = *(new XMLNode ("ExportTimespan"));
 	XMLNode * span;
-	
+
 	update_ranges ();
-	
+
 	for (TimespanList::iterator it = state->timespans->begin(); it != state->timespans->end(); ++it) {
 		if ((span = root.add_child ("Range"))) {
 			span->add_property ("id", (*it)->range_id());
 		}
 	}
-	
+
 	root.add_property ("format", enum_2_string (state->time_format));
-	
+
 	return root;
 }
 
 void
 ExportProfileManager::update_ranges () {
 	ranges->clear();
-	
+
 	if (single_range_mode) {
 		ranges->push_back (single_range.get());
 		return;
@@ -400,15 +400,15 @@ ExportProfileManager::update_ranges () {
 	session_range->set_name (_("Session"));
 	session_range->set (session.current_start_frame(), session.current_end_frame());
 	ranges->push_back (session_range.get());
-	
+
 	/* Selection */
-	
+
 	if (selection_range) {
 		ranges->push_back (selection_range.get());
 	}
-	
+
 	/* ranges */
-	
+
 	LocationList const & list (session.locations()->list());
 	for (LocationList::const_iterator it = list.begin(); it != list.end(); ++it) {
 		if ((*it)->is_range_marker()) {
@@ -422,18 +422,18 @@ ExportProfileManager::init_channel_configs (XMLNodeList nodes)
 {
 	channel_configs.clear();
 
-	if (nodes.empty()) {	
+	if (nodes.empty()) {
 		ChannelConfigStatePtr config (new ChannelConfigState (handler->add_channel_config()));
 		channel_configs.push_back (config);
 		return false;
 	}
-	
+
 	for (XMLNodeList::const_iterator it = nodes.begin(); it != nodes.end(); ++it) {
 		ChannelConfigStatePtr config (new ChannelConfigState (handler->add_channel_config()));
 		config->config->set_state (**it);
 		channel_configs.push_back (config);
 	}
-	
+
 	return true;
 }
 
@@ -468,46 +468,46 @@ ExportProfileManager::save_format_to_disk (FormatPtr format)
 
 	Glib::ustring new_name = format->name();
 	new_name += export_format_suffix;
-	
+
 	sys::path new_path (export_config_dir);
 	new_path /= new_name;
 
 	/* Check if format is on disk already */
 	FileMap::iterator it;
 	if ((it = format_file_map.find (format->id())) != format_file_map.end()) {
-		
+
 		/* Check if config is not in user config dir */
 		if (it->second.branch_path().to_string().compare (export_config_dir.to_string())) {
-		
+
 			/* Write new file */
-		
+
 			XMLTree tree (new_path.to_string());
 			tree.set_root (&format->get_state());
 			tree.write();
-		
+
 		} else {
-		
+
 			/* Update file and rename if necessary */
-		
+
 			XMLTree tree (it->second.to_string());
 			tree.set_root (&format->get_state());
 			tree.write();
-			
+
 			if (new_name.compare (it->second.leaf())) {
 				sys::rename (it->second, new_path);
 			}
 		}
-		
+
 		it->second = new_path;
-		
+
 	} else {
 		/* Write new file */
-		
+
 		XMLTree tree (new_path.to_string());
 		tree.set_root (&format->get_state());
 		tree.write();
 	}
-	
+
 	FormatListChanged ();
 	return new_path;
 }
@@ -527,13 +527,13 @@ ExportProfileManager::remove_format_profile (FormatPtr format)
 		sys::remove (it->second);
 		format_file_map.erase (it);
 	}
-	
+
 	FormatListChanged ();
 }
 
 ExportProfileManager::FormatPtr
 ExportProfileManager::get_new_format (FormatPtr original)
-{	
+{
 	FormatPtr format;
 	if (original) {
 		format.reset (new ExportFormatSpecification (*original));
@@ -541,14 +541,14 @@ ExportProfileManager::get_new_format (FormatPtr original)
 		format = handler->add_format();
 		format->set_name ("empty format");
 	}
-	
+
 	sys::path path = save_format_to_disk (format);
 	FilePair pair (format->id(), path);
 	format_file_map.insert (pair);
-	
+
 	format_list->push_back (format);
 	FormatListChanged ();
-	
+
 	return format;
 }
 
@@ -564,13 +564,13 @@ ExportProfileManager::init_formats (XMLNodeList nodes)
 			formats.push_back (format);
 		} else { ok = false; }
 	}
-	
+
 	if (formats.empty ()) {
 		FormatStatePtr format (new FormatState (format_list, FormatPtr ()));
 		formats.push_back (format);
 		return false;
 	}
-	
+
 	return ok;
 }
 
@@ -579,11 +579,11 @@ ExportProfileManager::deserialize_format (XMLNode & root)
 {
 	XMLProperty * prop;
 	UUID id;
-	
+
 	if ((prop = root.property ("id"))) {
 		id = prop->value();
 	}
-	
+
 	for (FormatList::iterator it = format_list->begin(); it != format_list->end(); ++it) {
 		if ((*it)->id() == id) {
 			return FormatStatePtr (new FormatState (format_list, *it));
@@ -597,10 +597,10 @@ XMLNode &
 ExportProfileManager::serialize_format (FormatStatePtr state)
 {
 	XMLNode * root = new XMLNode ("ExportFormat");
-	
+
 	string id = state->format ? state->format->id().to_s() : "";
 	root->add_property ("id", id);
-	
+
 	return *root;
 }
 
@@ -619,14 +619,14 @@ ExportProfileManager::load_format_from_disk (PBD::sys::path const & path)
 {
 	XMLTree const tree (path.to_string());
 	FormatPtr format = handler->add_format (*tree.root());
-	
+
 	/* Handle id to filename mapping and don't add duplicates to list */
-	
+
 	FilePair pair (format->id(), path);
 	if (format_file_map.insert (pair).second) {
 		format_list->push_back (format);
 	}
-	
+
 	FormatListChanged ();
 }
 
@@ -659,13 +659,13 @@ ExportProfileManager::init_filenames (XMLNodeList nodes)
 		filename->set_state (**it);
 		filenames.push_back (FilenameStatePtr (new FilenameState (filename)));
 	}
-	
+
 	if (filenames.empty()) {
 		FilenameStatePtr filename (new FilenameState (handler->add_filename()));
 		filenames.push_back (filename);
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -676,26 +676,26 @@ ExportProfileManager::get_warnings ()
 
 	ChannelConfigStatePtr channel_config_state = channel_configs.front();
 	TimespanStatePtr timespan_state = timespans.front();
-	
+
 	/*** Check "global" config ***/
-	
+
 	TimespanListPtr timespans = timespan_state->timespans;
 	ChannelConfigPtr channel_config = channel_config_state->config;
 
 	/* Check Timespans are not empty */
-	
+
 	if (timespans->empty()) {
 		warnings->errors.push_back (_("No timespan has been selected!"));
 	}
 
 	/* Check channel config ports */
-	
+
 	if (!channel_config->all_channels_have_ports ()) {
 		warnings->warnings.push_back (_("Some channels are empty"));
 	}
-	
+
 	/*** Check files ***/
-	
+
 	FormatStateList::const_iterator format_it;
 	FilenameStateList::const_iterator filename_it;
 	for (format_it = formats.begin(), filename_it = filenames.begin();
@@ -703,7 +703,7 @@ ExportProfileManager::get_warnings ()
 	     ++format_it, ++filename_it) {
 			check_config (warnings, timespan_state, channel_config_state, *format_it, *filename_it);
 	}
-	
+
 	return warnings;
 }
 
@@ -733,32 +733,32 @@ ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
 		                     format->channel_limit(),
 		                     channel_config->get_n_chans()));
 	}
-	
+
 	if (!warnings->errors.empty()) { return; }
-	
+
 	/* Check filenames */
-	
+
 //	filename->include_timespan = (timespans->size() > 1); Disabled for now...
-	
+
 	for (std::list<TimespanPtr>::iterator timespan_it = timespans->begin(); timespan_it != timespans->end(); ++timespan_it) {
 		filename->set_timespan (*timespan_it);
-	
+
 		if (channel_config->get_split()) {
 			filename->include_channel = true;
-			
+
 			for (uint32_t chan = 1; chan <= channel_config->get_n_chans(); ++chan) {
 				filename->set_channel (chan);
-				
+
 				Glib::ustring path = filename->get_path (format);
-				
+
 				if (sys::exists (sys::path (path))) {
 					warnings->conflicting_filenames.push_back (path);
 				}
 			}
-			
+
 		} else {
 			Glib::ustring path = filename->get_path (format);
-			
+
 			if (sys::exists (sys::path (path))) {
 				warnings->conflicting_filenames.push_back (path);
 			}

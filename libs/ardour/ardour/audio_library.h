@@ -38,7 +38,7 @@ class AudioLibrary
 	void search_members_and (std::vector<std::string>& results, const std::vector<std::string> tags);
 
 	void save_changes();
-	
+
   private:
 	std::string src;
 };

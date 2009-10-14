@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Hans Baier 
+    Copyright (C) 2008 Hans Baier
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,89 +40,88 @@ private:
 	MidiPatchManager() {};
 	MidiPatchManager( const MidiPatchManager& );
 	MidiPatchManager& operator= (const MidiPatchManager&);
-	
-	static MidiPatchManager* _manager; 
-	
+
+	static MidiPatchManager* _manager;
+
 public:
 	typedef std::map<std::string, boost::shared_ptr<MIDINameDocument> > MidiNameDocuments;
-	
+
 	virtual ~MidiPatchManager() { _manager = 0; }
-	
-	static MidiPatchManager& instance() { 
+
+	static MidiPatchManager& instance() {
 		if (_manager == 0) {
 			_manager = new MidiPatchManager();
 		}
-		return *_manager; 
-	}
-	
-	void set_session (ARDOUR::Session&);
-	
-	boost::shared_ptr<MIDINameDocument> document_by_model(std::string model_name) 
-		{ return _documents[model_name]; }
-	
-	boost::shared_ptr<MasterDeviceNames> master_device_by_model(std::string model_name) 
-		{ return _master_devices_by_model[model_name]; }
-	
-	boost::shared_ptr<ChannelNameSet> find_channel_name_set(
-			std::string model, 
-			std::string custom_device_mode, 
-			uint8_t channel) {
-		boost::shared_ptr<MIDI::Name::MasterDeviceNames> master_device = master_device_by_model(model);
-		
-		if (master_device != 0 && custom_device_mode != "") {
-			return master_device->
-			         channel_name_set_by_device_mode_and_channel(custom_device_mode, channel);
-		} else {
-			return boost::shared_ptr<ChannelNameSet>();
-		}		
+		return *_manager;
 	}
 
-	
+	void set_session (ARDOUR::Session&);
+
+	boost::shared_ptr<MIDINameDocument> document_by_model(std::string model_name)
+		{ return _documents[model_name]; }
+
+	boost::shared_ptr<MasterDeviceNames> master_device_by_model(std::string model_name)
+		{ return _master_devices_by_model[model_name]; }
+
+	boost::shared_ptr<ChannelNameSet> find_channel_name_set(
+			std::string model,
+			std::string custom_device_mode,
+			uint8_t channel) {
+		boost::shared_ptr<MIDI::Name::MasterDeviceNames> master_device = master_device_by_model(model);
+
+		if (master_device != 0 && custom_device_mode != "") {
+			return master_device->channel_name_set_by_device_mode_and_channel(custom_device_mode, channel);
+		} else {
+			return boost::shared_ptr<ChannelNameSet>();
+		}
+	}
+
+
 	boost::shared_ptr<Patch> find_patch(
-			std::string model, 
-			std::string custom_device_mode, 
-			uint8_t channel, 
+			std::string model,
+			std::string custom_device_mode,
+			uint8_t channel,
 			PatchPrimaryKey patch_key) {
-		
+
 		boost::shared_ptr<ChannelNameSet> channel_name_set = find_channel_name_set(model, custom_device_mode, channel);
-		
+
 		if (channel_name_set) {
-			return  channel_name_set->find_patch(patch_key);			
+			return  channel_name_set->find_patch(patch_key);
 		} else {
 			return boost::shared_ptr<Patch>();
 		}
 	}
-	
+
 	boost::shared_ptr<Patch> previous_patch(
-			std::string model, 
-			std::string custom_device_mode, 
-			uint8_t channel, 
+			std::string model,
+			std::string custom_device_mode,
+			uint8_t channel,
 			PatchPrimaryKey patch_key) {
-		
+
 		boost::shared_ptr<ChannelNameSet> channel_name_set = find_channel_name_set(model, custom_device_mode, channel);
-		
+
 		if (channel_name_set) {
-			return  channel_name_set->previous_patch(patch_key);			
+			return  channel_name_set->previous_patch(patch_key);
 		} else {
 			return boost::shared_ptr<Patch>();
 		}
 	}
-	
+
 	boost::shared_ptr<Patch> next_patch(
-			std::string model, 
-			std::string custom_device_mode, 
-			uint8_t channel, 
+			std::string model,
+			std::string custom_device_mode,
+			uint8_t channel,
 			PatchPrimaryKey patch_key) {
-		
+
 		boost::shared_ptr<ChannelNameSet> channel_name_set = find_channel_name_set(model, custom_device_mode, channel);
-		
+
 		if (channel_name_set) {
-			return  channel_name_set->next_patch(patch_key);			
+			return  channel_name_set->next_patch(patch_key);
 		} else {
 			return boost::shared_ptr<Patch>();
 		}
 	}
-	
+
 	std::list<std::string> custom_device_mode_names_by_model(std::string model_name) {
 		if (model_name != "") {
 			return master_device_by_model(model_name)->custom_device_mode_names();
@@ -130,13 +129,13 @@ public:
 			return std::list<std::string>();
 		}
 	}
-	
+
 	const MasterDeviceNames::Models& all_models() const { return _all_models; }
-	
+
 private:
 	void drop_session();
 	void refresh();
-	
+
 	ARDOUR::Session*                        _session;
 	MidiNameDocuments                       _documents;
 	MIDINameDocument::MasterDeviceNamesList _master_devices_by_model;

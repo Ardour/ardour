@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ void
 EditorCursor::set_position (nframes64_t frame)
 {
 	PositionChanged (frame);
-	
+
 	double new_pos =  editor.frame_to_unit (frame);
 
 	if (new_pos != points.front().get_x()) {
@@ -76,12 +76,12 @@ EditorCursor::set_position (nframes64_t frame)
 void
 EditorCursor::set_length (double units)
 {
-	length = units; 
+	length = units;
 	points.back().set_y (points.front().get_y() + length);
 	canvas_item.property_points() = points;
 }
 
-void 
+void
 EditorCursor::set_y_axis (double position)
 {
         points.front().set_y (position);

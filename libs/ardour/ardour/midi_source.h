@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 	Written by Dave Robillard, 2006
 
     This program is free software; you can redistribute it and/or modify
@@ -46,7 +46,7 @@ class MidiSource : virtual public Source
 	MidiSource (Session& session, std::string name, Source::Flag flags = Source::Flag(0));
 	MidiSource (Session& session, const XMLNode&);
 	virtual ~MidiSource ();
-	
+
 	/** Read the data in a given time range from the MIDI source.
 	 * All time stamps in parameters are in audio frames (even if the source has tempo time).
 	 * \param dst Ring buffer where read events are written
@@ -69,14 +69,14 @@ class MidiSource : virtual public Source
 
 	virtual void append_event_unlocked_frames(const Evoral::Event<nframes_t>& ev,
 			sframes_t source_start) = 0;
-	
+
 	virtual sframes_t length (sframes_t pos) const;
 	virtual void      update_length (sframes_t pos, sframes_t cnt);
 
 	virtual void mark_streaming_midi_write_started (NoteMode mode, sframes_t start_time);
 	virtual void mark_streaming_write_started ();
 	virtual void mark_streaming_write_completed ();
-	
+
 	virtual void session_saved();
 
 	std::string captured_for() const               { return _captured_for; }
@@ -86,13 +86,13 @@ class MidiSource : virtual public Source
 	uint32_t write_data_count() const { return _write_data_count; }
 
 	static sigc::signal<void,MidiSource*> MidiSourceCreated;
-	       
+
 	// Signal a range of recorded data is available for reading from model()
 	mutable sigc::signal<void,sframes_t,nframes_t> ViewDataRangeReady;
-	
+
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
-	
+
 	bool length_mutable() const { return true; }
 
 	virtual void load_model(bool lock=true, bool force_reload=false) = 0;
@@ -104,14 +104,14 @@ class MidiSource : virtual public Source
 	void invalidate();
 
 	void set_note_mode(NoteMode mode);
-	
+
 	boost::shared_ptr<MidiModel> model() { return _model; }
 	void set_model(boost::shared_ptr<MidiModel> m) { _model = m; }
 	void drop_model() { _model.reset(); }
 
   protected:
 	virtual void flush_midi() = 0;
-	
+
 	virtual nframes_t read_unlocked (MidiRingBuffer<nframes_t>& dst,
 			sframes_t position,
 			sframes_t start, nframes_t cnt,
@@ -120,16 +120,16 @@ class MidiSource : virtual public Source
 	virtual nframes_t write_unlocked (MidiRingBuffer<nframes_t>& dst,
 			sframes_t position,
 			nframes_t cnt) = 0;
-	
+
 	std::string      _captured_for;
 	mutable uint32_t _read_data_count;  ///< modified in read()
 	mutable uint32_t _write_data_count; ///< modified in write()
-	
+
 	boost::shared_ptr<MidiModel> _model;
 	bool                         _writing;
-	
+
 	mutable Evoral::Sequence<Evoral::MusicalTime>::const_iterator _model_iter;
-	
+
 	mutable double    _length_beats;
 	mutable sframes_t _last_read_end;
 	sframes_t         _last_write_end;

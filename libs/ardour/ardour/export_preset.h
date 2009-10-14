@@ -44,10 +44,10 @@ class ExportPreset {
 	// Note: The set_..._state functions take ownership of the XMLNode
 	void set_global_state (XMLNode & state);
 	void set_local_state (XMLNode & state);
-	
+
 	XMLNode const * get_global_state () const { return global.root(); }
 	XMLNode const * get_local_state () const { return local; }
-	
+
 	void save (std::string const & filename);
 	void remove_local () const;
 
@@ -65,7 +65,7 @@ class ExportPreset {
 	Session &   session;
 	XMLTree     global;
 	XMLNode *   local;
-	
+
 };
 
 } // namespace ARDOUR

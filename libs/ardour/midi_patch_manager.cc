@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Hans Baier 
+    Copyright (C) 2008 Hans Baier
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ MidiPatchManager::set_session (Session& s)
 {
 	_session = &s;
 	_session->GoingAway.connect (mem_fun (*this, &MidiPatchManager::drop_session));
-	
+
 	refresh();
 }
 
@@ -56,27 +56,27 @@ MidiPatchManager::refresh()
 	_documents.clear();
 	_master_devices_by_model.clear();
 	_all_models.clear();
-	
+
 	path path_to_patches = _session->session_directory().midi_patch_path();
-	
+
 	if (!exists(path_to_patches)) {
 		return;
 	}
-	
+
 	assert(is_directory(path_to_patches));
-	
+
 	Glib::PatternSpec pattern(Glib::ustring("*.midnam"));
 	vector<path> result;
-	
+
 	find_matching_files_in_directory(path_to_patches, pattern, result);
 
 	cerr << "Loading " << result.size() << " MIDI patches from " << path_to_patches.to_string() << endl;
-	
+
 	for (vector<path>::iterator i = result.begin(); i != result.end(); ++i) {
 		boost::shared_ptr<MIDINameDocument> document(new MIDINameDocument(i->to_string()));
-		for (MIDINameDocument::MasterDeviceNamesList::const_iterator device = 
+		for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
 					document->master_device_names_by_model().begin();
-			 	device != document->master_device_names_by_model().end();
+				device != document->master_device_names_by_model().end();
 				++device) {
 			//cerr << "got model " << device->first << endl;
 			// have access to the documents by model name
@@ -84,7 +84,7 @@ MidiPatchManager::refresh()
 			// build a list of all master devices from all documents
 			_master_devices_by_model[device->first] = device->second;
 			_all_models.push_back(device->first);
-			
+
 			// make sure there are no double model names
 			// TODO: handle this gracefully.
 			assert(_documents.count(device->first) == 1);

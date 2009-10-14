@@ -37,9 +37,9 @@ public:
 			double          height,
 			double          x,
 			double          y);
-	
+
 	virtual ~CanvasSysEx();
-	
+
 	virtual bool on_event(GdkEvent* ev);
 };
 

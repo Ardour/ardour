@@ -19,14 +19,14 @@ public:
 	{
 		_port_group.reset (new PortGroup (""));
 		_ports[OURS].add_group (_port_group);
-		
+
 		setup_all_ports ();
 	}
 
 	void setup_ports (int dim)
 	{
 		cerr << _session.the_auditioner()->output()->n_ports() << "\n";
-		
+
 		if (dim == OURS) {
 			_port_group->clear ();
 			_port_group->add_bundle (_session.click_io()->bundle());
@@ -40,7 +40,7 @@ public:
 	{
 		Bundle::PortList const & our_ports = c[OURS].bundle->channel_ports (c[OURS].channel);
 		Bundle::PortList const & other_ports = c[OTHER].bundle->channel_ports (c[OTHER].channel);
-		
+
 		if (c[OURS].bundle == _session.click_io()->bundle()) {
 
 			for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
@@ -48,7 +48,7 @@ public:
 
 					Port* f = _session.engine().get_port_by_name (*i);
 					assert (f);
-					
+
 					if (s) {
 						_session.click_io()->connect (f, *j, 0);
 					} else {
@@ -63,14 +63,14 @@ public:
 	{
 		Bundle::PortList const & our_ports = c[OURS].bundle->channel_ports (c[OURS].channel);
 		Bundle::PortList const & other_ports = c[OTHER].bundle->channel_ports (c[OTHER].channel);
-		
+
 		if (c[OURS].bundle == _session.click_io()->bundle()) {
-			
+
 			for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
 				for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
 					Port* f = _session.engine().get_port_by_name (*i);
 					assert (f);
-					
+
 					if (f->connected_to (*j)) {
 						return PortMatrixNode::ASSOCIATED;
 					} else {
@@ -95,13 +95,13 @@ public:
 	bool can_remove_channels (boost::shared_ptr<Bundle>) const {
 		return false;
 	}
-	
+
 	void remove_channel (ARDOUR::BundleChannel) {}
-	
+
 	std::string disassociation_verb () const {
 		return _("Disassociate");
 	}
-	
+
 private:
 	/* see PortMatrix: signal flow from 0 to 1 (out to in) */
 	enum {
@@ -241,7 +241,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	smf->add (smpte_60, _("60"));
 
 	add_option (_("Sync"), smf);
-		
+
 	add_option (_("Sync"), new BoolOption (
 			    "timecode-source-is-synced",
 			    _("Timecode source is synced"),
@@ -265,9 +265,9 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	vpu->add (-4.1667 + 0.1, _("-4.1667 + 0.1%"));
 	vpu->add (-4.1667, _("-4.1667"));
 	vpu->add (-4.1667 - 0.1, _("-4.1667 - 0.1%"));
-		
+
 	add_option (_("Sync"), vpu);
-	
+
 	/* MISC */
 
 	add_option (_("Misc"), new OptionEditorHeading (_("Audio file format")));
@@ -313,9 +313,9 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	lm->add (AddHigher, _("most recently added is higher"));
 
 	add_option (_("Misc"), lm);
-	
+
 	add_option (_("Misc"), new OptionEditorHeading (_("Broadcast WAVE metadata")));
-	
+
 	add_option (_("Misc"), new EntryOption (
 			    "bwf-country-code",
 			    _("Country code"),

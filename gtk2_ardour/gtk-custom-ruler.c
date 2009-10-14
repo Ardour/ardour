@@ -21,7 +21,7 @@
  * Modified by the GTK+ Team and others 1997-1999.  See the AUTHORS
  * file for a list of people on the GTK+ Team.  See the ChangeLog
  * files for a list of changes.  These files are distributed with
- * GTK+ at ftp://ftp.gtk.org/pub/gtk/. 
+ * GTK+ at ftp://ftp.gtk.org/pub/gtk/.
  */
 
 /* modified by andreas meyer <hexx3000@gmx.de> */
@@ -66,7 +66,7 @@ default_metric_get_marks (GtkCustomRulerMark **marks, gdouble lower, gdouble upp
 	(void) lower;
 	(void) upper;
 	(void) maxchars;
-	
+
 	return 0;
 }
 
@@ -80,7 +80,7 @@ static GtkWidgetClass *parent_class;
 GType gtk_custom_ruler_get_type (void)
 {
 	static GType ruler_type = 0;
-	
+
 	if (!ruler_type)
 	{
 		static const GTypeInfo ruler_info =
@@ -96,11 +96,11 @@ GType gtk_custom_ruler_get_type (void)
 				(GInstanceInitFunc) gtk_custom_ruler_init,
 				NULL			/* value_table */
 			};
-		
+
 		ruler_type = g_type_register_static (GTK_TYPE_WIDGET, "GtkCustomRuler",
 					   &ruler_info, 0);
 	}
-	
+
 	return ruler_type;
 }
 
@@ -109,15 +109,15 @@ gtk_custom_ruler_class_init (GtkCustomRulerClass * class)
 {
 	GObjectClass   *gobject_class;
 	GtkWidgetClass *widget_class;
-	
+
 	gobject_class = (GObjectClass *) class;
 	widget_class = (GtkWidgetClass*) class;
-	
+
 	parent_class = g_type_class_peek_parent (class);
-	
+
 	gobject_class->set_property = gtk_custom_ruler_set_property;
 	gobject_class->get_property = gtk_custom_ruler_get_property;
-	
+
 	widget_class->realize = gtk_custom_ruler_realize;
 	widget_class->unrealize = gtk_custom_ruler_unrealize;
 	widget_class->size_allocate = gtk_custom_ruler_size_allocate;
@@ -134,8 +134,8 @@ gtk_custom_ruler_class_init (GtkCustomRulerClass * class)
 							      -G_MAXDOUBLE,
 							      G_MAXDOUBLE,
 							      0.0,
-							      G_PARAM_READWRITE));  
-	
+							      G_PARAM_READWRITE));
+
 	g_object_class_install_property (gobject_class,
 					 PROP_UPPER,
 					 g_param_spec_double ("upper",
@@ -144,8 +144,8 @@ gtk_custom_ruler_class_init (GtkCustomRulerClass * class)
 							      -G_MAXDOUBLE,
 							      G_MAXDOUBLE,
 							      0.0,
-							      G_PARAM_READWRITE));  
-	
+							      G_PARAM_READWRITE));
+
 	g_object_class_install_property (gobject_class,
 					 PROP_POSITION,
 					 g_param_spec_double ("position",
@@ -154,8 +154,8 @@ gtk_custom_ruler_class_init (GtkCustomRulerClass * class)
 							      -G_MAXDOUBLE,
 							      G_MAXDOUBLE,
 							      0.0,
-							      G_PARAM_READWRITE));  
-	
+							      G_PARAM_READWRITE));
+
 	g_object_class_install_property (gobject_class,
 					 PROP_MAX_SIZE,
 					 g_param_spec_double ("max_size",
@@ -164,7 +164,7 @@ gtk_custom_ruler_class_init (GtkCustomRulerClass * class)
 							      -G_MAXDOUBLE,
 							      G_MAXDOUBLE,
 							      0.0,
-							      G_PARAM_READWRITE));  
+							      G_PARAM_READWRITE));
 
 	g_object_class_install_property (gobject_class,
 					 PROP_SHOW_POSITION,
@@ -172,7 +172,7 @@ gtk_custom_ruler_class_init (GtkCustomRulerClass * class)
 							       _("Show Position"),
 							       _("Draw current ruler position"),
 							       TRUE,
-							       G_PARAM_READWRITE));  
+							       G_PARAM_READWRITE));
 }
 
 static void
@@ -199,7 +199,7 @@ gtk_custom_ruler_set_property (GObject      *object,
 			       GParamSpec   *pspec)
 {
 	(void) pspec;
-	
+
   GtkCustomRuler *ruler = GTK_CUSTOM_RULER (object);
 
   switch (prop_id)
@@ -233,7 +233,7 @@ gtk_custom_ruler_get_property (GObject      *object,
 			       GParamSpec   *pspec)
 {
   GtkCustomRuler *ruler = GTK_CUSTOM_RULER (object);
-  
+
   switch (prop_id)
     {
     case PROP_LOWER:
@@ -346,14 +346,14 @@ gtk_custom_ruler_draw_ticks (GtkCustomRuler * ruler)
 
         if (GTK_CUSTOM_RULER_GET_CLASS (ruler)->draw_ticks)
                 GTK_CUSTOM_RULER_GET_CLASS (ruler)->draw_ticks (ruler);
-  
+
 }
 
 void
 gtk_custom_ruler_draw_pos (GtkCustomRuler * ruler)
 {
         g_return_if_fail (GTK_IS_CUSTOM_RULER (ruler));
-  
+
         if (GTK_CUSTOM_RULER_GET_CLASS (ruler)->draw_pos && ruler->show_position)
                 GTK_CUSTOM_RULER_GET_CLASS (ruler)->draw_pos (ruler);
 }
@@ -445,7 +445,7 @@ gtk_custom_ruler_expose (GtkWidget * widget, GdkEventExpose * event)
 		gdk_draw_pixmap (widget->window,
 				 ruler->non_gr_exp_gc,
 				 ruler->backing_store, 0, 0, 0, 0, widget->allocation.width, widget->allocation.height);
-		
+
 		gtk_custom_ruler_draw_pos (ruler);
 	}
 

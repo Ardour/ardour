@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Tim Mayberry 
+    Copyright (C) 2007 Tim Mayberry
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ control_protocol_search_path ()
 {
 	bool surfaces_path_defined = false;
 	SearchPath spath_env(Glib::getenv(surfaces_env_variable_name, surfaces_path_defined));
-	
+
 	if (surfaces_path_defined)
 	{
 		return spath_env;

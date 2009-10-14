@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2007 Paul Davis 
+    Copyright (C) 2002-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ namespace Gnome {
 	}
 }
 
-class ControlPoint 
+class ControlPoint
 {
   public:
 	ControlPoint (AutomationLine& al);
@@ -54,13 +54,13 @@ class ControlPoint
 		Start,
 		End
 	};
-	
+
 	void move_to (double x, double y, ShapeType);
 	void reset (double x, double y, ARDOUR::AutomationList::iterator, uint32_t, ShapeType);
 	double get_x() const { return _x; }
 	double get_y() const { return _y; }
 
-	void hide (); 
+	void hide ();
 	void show ();
 	void show_color (bool entered, bool hide_too);
 
@@ -73,7 +73,7 @@ class ControlPoint
 	void     set_selected(bool yn)      { _selected = yn; }
 	uint32_t view_index() const         { return _view_index; }
 	void     set_view_index(uint32_t i) { _view_index = i; }
-	
+
 	ARDOUR::AutomationList::iterator model() const { return _model; }
 	AutomationLine&                  line()  const { return _line; }
 	ArdourCanvas::Item*              item()  const { return _item; }

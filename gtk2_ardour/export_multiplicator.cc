@@ -51,7 +51,7 @@ ExportMultiplicator::set_manager (boost::shared_ptr<ARDOUR::ExportProfileManager
 {
 	manager = _manager;
 	manager->GraphChanged.connect (sigc::mem_fun (*this, &ExportMultiplicator::redraw));
-	
+
 	redraw();
 }
 
@@ -61,59 +61,59 @@ ExportMultiplicator::redraw ()
 	if (!manager) { return; }
 
 	graph = &manager->get_graph();
-	
+
 	/* Empty table */
-	
+
 	table.foreach (sigc::mem_fun (table, &Gtk::Table::remove));
 	widget_map.clear();
 
 	/* Calculate table dimensions */
-	
+
 	uint32_t max_width = 0;
 	GraphLevel max_level = NoLevel;
-	
+
 	if (graph->timespans.size() > max_width) {
 		max_width = graph->timespans.size();
 		max_level = Timespans;
 	}
-	
+
 	if (graph->channel_configs.size() > max_width) {
 		max_width = graph->channel_configs.size();
 		max_level = ChannelConfigs;
 	}
-	
+
 	if (graph->formats.size() > max_width) {
 		max_width = graph->formats.size();
 		max_level = Formats;
 	}
-	
+
 	if (graph->filenames.size() > max_width) {
 		max_width = graph->filenames.size();
 		max_level = Filenames;
 	}
-	
+
 	table.resize (4, max_width);
-	
+
 	std::cout << "Table width: " << max_width << std::endl;
-	
+
 	/* Fill table */
-	
+
 	for (list<ExportProfileManager::TimespanNodePtr>::const_iterator it = graph->timespans.begin(); it != graph->timespans.end(); ++it) {
 		draw_timespan (*it, get_bounds (it->get(), Timespans, max_level));
 	}
-	
+
 	for (list<ExportProfileManager::ChannelConfigNodePtr>::const_iterator it = graph->channel_configs.begin(); it != graph->channel_configs.end(); ++it) {
 		draw_channel_config (*it, get_bounds (it->get(), ChannelConfigs, max_level));
 	}
-	
+
 	for (list<ExportProfileManager::FormatNodePtr>::const_iterator it = graph->formats.begin(); it != graph->formats.end(); ++it) {
 		draw_format (*it, get_bounds (it->get(), Formats, max_level));
 	}
-	
+
 	for (list<ExportProfileManager::FilenameNodePtr>::const_iterator it = graph->filenames.begin(); it != graph->filenames.end(); ++it) {
 		draw_filename (*it, get_bounds (it->get(), Filenames, max_level));
 	}
-	
+
 	show_all_children ();
 }
 
@@ -124,9 +124,9 @@ ExportMultiplicator::get_bounds (ARDOUR::ExportProfileManager::GraphNode * node,
 
 	uint32_t left_bound = 0;
 	uint32_t right_bound = 0;
-	
+
 	bool left_bound_found = false;
-	
+
 	bool (ExportProfileManager::GraphNode::*relation_func) (ExportProfileManager::GraphNode const *) const;
 	if (max_level < current_level) {
 		std::cout << "using 'is_ancestor_of'" << std::endl;
@@ -138,7 +138,7 @@ ExportMultiplicator::get_bounds (ARDOUR::ExportProfileManager::GraphNode * node,
 		std::cout << "using 'equals'" << std::endl;
 		relation_func = &ExportProfileManager::GraphNode::equals;
 	}
-	
+
 	switch (max_level) {
 	  case Timespans:
 		for (list<ExportProfileManager::TimespanNodePtr>::const_iterator it = graph->timespans.begin(); it != graph->timespans.end(); ++it) {
@@ -147,7 +147,7 @@ ExportMultiplicator::get_bounds (ARDOUR::ExportProfileManager::GraphNode * node,
 			} else if (!left_bound_found) {
 				++left_bound;
 			}
-			
+
 			if (left_bound_found && !CALL_MEMBER_FN(**it, relation_func) (node)) {
 				break;
 			} else {
@@ -155,7 +155,7 @@ ExportMultiplicator::get_bounds (ARDOUR::ExportProfileManager::GraphNode * node,
 			}
 		}
 		break;
-	
+
 	  case ChannelConfigs:
 		for (list<ExportProfileManager::ChannelConfigNodePtr>::const_iterator it = graph->channel_configs.begin(); it != graph->channel_configs.end(); ++it) {
 			if (CALL_MEMBER_FN(**it, relation_func) (node)) {
@@ -163,7 +163,7 @@ ExportMultiplicator::get_bounds (ARDOUR::ExportProfileManager::GraphNode * node,
 			} else if (!left_bound_found) {
 				++left_bound;
 			}
-			
+
 			if (left_bound_found && !CALL_MEMBER_FN(**it, relation_func) (node)) {
 				break;
 			} else {
@@ -171,7 +171,7 @@ ExportMultiplicator::get_bounds (ARDOUR::ExportProfileManager::GraphNode * node,
 			}
 		}
 		break;
-	
+
 	  case Formats:
 		for (list<ExportProfileManager::FormatNodePtr>::const_iterator it = graph->formats.begin(); it != graph->formats.end(); ++it) {
 			if (CALL_MEMBER_FN(**it, relation_func) (node)) {
@@ -179,7 +179,7 @@ ExportMultiplicator::get_bounds (ARDOUR::ExportProfileManager::GraphNode * node,
 			} else if (!left_bound_found) {
 				++left_bound;
 			}
-			
+
 			if (left_bound_found && !CALL_MEMBER_FN(**it, relation_func) (node)) {
 				break;
 			} else {
@@ -187,7 +187,7 @@ ExportMultiplicator::get_bounds (ARDOUR::ExportProfileManager::GraphNode * node,
 			}
 		}
 		break;
-	
+
 	  case Filenames:
 		for (list<ExportProfileManager::FilenameNodePtr>::const_iterator it = graph->filenames.begin(); it != graph->filenames.end(); ++it) {
 			if (CALL_MEMBER_FN(**it, relation_func) (node)) {
@@ -197,7 +197,7 @@ ExportMultiplicator::get_bounds (ARDOUR::ExportProfileManager::GraphNode * node,
 				std::cout << "filename relation check returned false" << std::endl;
 				++left_bound;
 			}
-			
+
 			if (left_bound_found && !CALL_MEMBER_FN(**it, relation_func) (node)) {
 				break;
 			} else {
@@ -205,12 +205,12 @@ ExportMultiplicator::get_bounds (ARDOUR::ExportProfileManager::GraphNode * node,
 			}
 		}
 		break;
-	
+
 	  case NoLevel:
 		// Not reached !
 		break;
 	}
-	
+
 	return std::pair<uint32_t, uint32_t> (left_bound, right_bound);
 }
 
@@ -247,10 +247,10 @@ ExportMultiplicator::get_hbox (TablePosition position)
 {
 	WidgetMap::iterator it = widget_map.find (position);
 	if (it != widget_map.end()) { return it->second; }
-	
+
 	boost::shared_ptr<Gtk::HBox> widget = widget_map.insert (WidgetPair (position, boost::shared_ptr<Gtk::HBox> (new Gtk::HBox ()))).first->second;
 	table.attach (*widget, position.left, position.right, position.row - 1, position.row);
-	
+
 	return widget;
 }
 
@@ -264,10 +264,10 @@ ExportMultiplicator::ButtonWidget::ButtonWidget (Glib::ustring name, boost::shar
 	menu_actions = Gtk::ActionGroup::create();
 	menu_actions->add (Gtk::Action::create ("Split", _("_Split here")), sigc::mem_fun (*this, &ExportMultiplicator::ButtonWidget::split));
 	menu_actions->add (Gtk::Action::create ("Remove", _("_Remove")), sigc::mem_fun (*this, &ExportMultiplicator::ButtonWidget::remove));
-	
+
 	ui_manager = Gtk::UIManager::create();
 	ui_manager->insert_action_group (menu_actions);
-	
+
 	Glib::ustring ui_info =
 		"<ui>"
 		"  <popup name='PopupMenu'>"
@@ -277,11 +277,11 @@ ExportMultiplicator::ButtonWidget::ButtonWidget (Glib::ustring name, boost::shar
 		"</ui>";
 
 	ui_manager->add_ui_from_string (ui_info);
-	menu = dynamic_cast<Gtk::Menu*> (ui_manager->get_widget ("/PopupMenu")); 
+	menu = dynamic_cast<Gtk::Menu*> (ui_manager->get_widget ("/PopupMenu"));
 
 	add_events (Gdk::BUTTON_PRESS_MASK);
 	signal_button_press_event ().connect (sigc::mem_fun (*this, &ExportMultiplicator::ButtonWidget::on_button_press_event));
-	
+
 	modify_bg (Gtk::STATE_NORMAL, Gdk::Color ("#0000"));
 	set_border_width (1);
 	vbox.pack_start (label, true, true, 4);
@@ -294,7 +294,7 @@ ExportMultiplicator::ButtonWidget::on_button_press_event (GdkEventButton* event)
 	if(event->type != GDK_BUTTON_PRESS) { return false; }
 	if (event->button == 1) {
 		node->select (!node->selected ());
-		
+
 		if (node->selected ()) {
 			unset_bg (Gtk::STATE_NORMAL);
 			modify_bg (Gtk::STATE_NORMAL, Gdk::Color ("#194756"));
@@ -302,14 +302,14 @@ ExportMultiplicator::ButtonWidget::on_button_press_event (GdkEventButton* event)
 			unset_bg (Gtk::STATE_NORMAL);
 			modify_bg (Gtk::STATE_NORMAL, Gdk::Color ("#0000"));
 		}
-		
+
 		return true;
-		
+
 	} else if (event->button == 3) {
 		int x, y;
 		get_pointer (x, y);
 		split_position = (float) x / get_width();
-	
+
 		menu->popup (event->button, event->time);
 		return true;
 	}

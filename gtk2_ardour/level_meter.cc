@@ -100,7 +100,7 @@ LevelMeter::update_meters ()
 	if (!_meter) {
 		return 0.0f;
 	}
-	
+
 	for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
 		if ((*i).packed) {
 			peak = _meter->peak_power (n);
@@ -123,12 +123,12 @@ LevelMeter::parameter_changed (string p)
 	ENSURE_GUI_THREAD (bind (mem_fun(*this, &LevelMeter::parameter_changed), p));
 
 	if (p == "meter-hold") {
-	
+
 		vector<MeterInfo>::iterator i;
 		uint32_t n;
-		
+
 		for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
-			
+
 			(*i).meter->set_hold_count ((uint32_t) floor(Config->get_meter_hold()));
 		}
 	}
@@ -160,7 +160,7 @@ LevelMeter::setup_meters (int len, int initial_width)
  	if (!_meter) {
  		return; /* do it later or never */
  	}
- 
+
 	int32_t nmidi = _meter->input_streams().n_midi();
 	uint32_t nmeters = _meter->input_streams().n_total();
 	regular_meter_width = initial_width;
@@ -223,7 +223,7 @@ LevelMeter::meter_button_release (GdkEventButton* ev, uint32_t /*which*/)
 	}
 	return true;
 }
-	
+
 
 void LevelMeter::clear_meters ()
 {

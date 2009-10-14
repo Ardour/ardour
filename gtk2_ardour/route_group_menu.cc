@@ -39,7 +39,7 @@ void
 RouteGroupMenu::rebuild (RouteGroup* curr)
 {
 	using namespace Menu_Helpers;
-	
+
 	items().clear ();
 
 	items().push_back (MenuElem (_("New group..."), mem_fun (*this, &RouteGroupMenu::new_group)));
@@ -51,7 +51,7 @@ RouteGroupMenu::rebuild (RouteGroup* curr)
 	if (curr == 0) {
 		static_cast<RadioMenuItem*> (&items().back())->set_active ();
 	}
-		
+
 	_session.foreach_route_group (bind (mem_fun (*this, &RouteGroupMenu::add_item), curr, &group));
 }
 
@@ -61,10 +61,10 @@ RouteGroupMenu::add_item (RouteGroup* rg, RouteGroup* curr, RadioMenuItem::Group
 	using namespace Menu_Helpers;
 
 	items().push_back (RadioMenuElem (*group, rg->name(), bind (mem_fun(*this, &RouteGroupMenu::set_group), rg)));
-	
+
 	if (rg == curr) {
 		static_cast<RadioMenuItem*> (&items().back())->set_active ();
-	}	
+	}
 }
 
 void

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2007 Paul Davis 
+    Copyright (C) 2002-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ IOSelector::IOSelector (Gtk::Window* p, ARDOUR::Session& session, boost::shared_
 
 	_port_group.reset (new PortGroup (""));
 	_ports[_ours].add_group (_port_group);
-	
+
 	setup_all_ports ();
 }
 
@@ -71,7 +71,7 @@ IOSelector::setup_ports (int dim)
 	if (dim == _other) {
 
 		_ports[_other].gather (_session, _find_inputs_for_io_outputs);
-		
+
 	} else {
 
 		_port_group->clear ();
@@ -124,7 +124,7 @@ IOSelector::get_state (ARDOUR::BundleChannel c[2]) const
 			/* since we are talking about an IO, our ports should all have an associated Port *,
 			   so the above call should never fail */
 			assert (f);
-			
+
 			if (!f->connected_to (*j)) {
 				/* if any one thing is not connected, all bets are off */
 				return PortMatrixNode::NOT_ASSOCIATED;
@@ -190,13 +190,13 @@ IOSelectorWindow::on_show ()
 	Gtk::Window::on_show ();
 	pair<uint32_t, uint32_t> const pm_max = _selector.max_size ();
 	resize_window_to_proportion_of_monitor (this, pm_max.first, pm_max.second);
-}	
+}
 
 void
 IOSelectorWindow::io_name_changed (void* src)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &IOSelectorWindow::io_name_changed), src));
-	
+
 	string title;
 
 	if (!_selector.find_inputs_for_io_outputs()) {
@@ -214,7 +214,7 @@ PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session& sess, boost::s
 {
 	output_selector.set_min_height_divisor (2);
 	input_selector.set_min_height_divisor (2);
-	
+
 	pack_start (output_selector, true, true);
 	pack_start (input_selector, true, true);
 }
@@ -245,7 +245,7 @@ PortInsertWindow::PortInsertWindow (ARDOUR::Session& sess, boost::shared_ptr<ARD
 	string title = _("ardour: ");
 	title += pi->name();
 	set_title (title);
-	
+
 	ok_button.set_name ("IOSelectorButton");
 	if (!can_cancel) {
 		ok_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::CLOSE, Gtk::ICON_SIZE_BUTTON)));
@@ -266,7 +266,7 @@ PortInsertWindow::PortInsertWindow (ARDOUR::Session& sess, boost::shared_ptr<ARD
 	cancel_button.signal_clicked().connect (mem_fun (*this, &PortInsertWindow::cancel));
 
 	signal_delete_event().connect (mem_fun (*this, &PortInsertWindow::wm_delete), false);
-	
+
 	going_away_connection = pi->GoingAway.connect (mem_fun (*this, &PortInsertWindow::plugin_going_away));
 }
 
@@ -281,7 +281,7 @@ void
 PortInsertWindow::plugin_going_away ()
 {
 	ENSURE_GUI_THREAD (mem_fun (*this, &PortInsertWindow::plugin_going_away));
-	
+
 	going_away_connection.disconnect ();
 	delete_when_idle (this);
 }

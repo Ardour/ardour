@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2003-2008 Fons Adriaensen <fons@kokkinizita.net>
-    
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -18,25 +18,25 @@
 
 #include <ardour/mtdm.h>
 
-MTDM::MTDM (void) 
+MTDM::MTDM (void)
 	: _cnt (0)
 	, _inv (0)
 {
 	int   i;
 	Freq  *F;
-	
+
 	_freq [0].f = 4096;
 	_freq [1].f =  512;
 	_freq [2].f = 1088;
 	_freq [3].f = 1544;
 	_freq [4].f = 2049;
-	
+
 	_freq [0].a = 0.2f;
 	_freq [1].a = 0.1f;
 	_freq [2].a = 0.1f;
 	_freq [3].a = 0.1f;
 	_freq [4].a = 0.1f;
-	
+
 	for (i = 0, F = _freq; i < 5; i++, F++) {
 		F->p = 128;
 		F->xa = F->ya = 0.0f;
@@ -44,27 +44,27 @@ MTDM::MTDM (void)
 	}
 }
 
-int 
+int
 MTDM::process (size_t len, float *ip, float *op)
 {
 	int    i;
 	float  vip, vop, a, c, s;
 	Freq   *F;
-	
+
 	while (len--)
 	{
 		vop = 0.0f;
 		vip = *ip++;
 		for (i = 0, F = _freq; i < 5; i++, F++)
 		{
-			a = 2 * (float) M_PI * (F->p & 65535) / 65536.0; 
+			a = 2 * (float) M_PI * (F->p & 65535) / 65536.0;
 			F->p += F->f;
-			c =  cosf (a); 
-			s = -sinf (a); 
+			c =  cosf (a);
+			s = -sinf (a);
 			vop += F->a * s;
 			F->xa += s * vip;
 			F->ya += c * vip;
-		} 
+		}
 		*op++ = vop;
 		if (++_cnt == 16)
 		{
@@ -81,13 +81,13 @@ MTDM::process (size_t len, float *ip, float *op)
 	return 0;
 }
 
-int 
+int
 MTDM::resolve ()
 {
 	int     i, k, m;
 	double  d, e, f0, p;
 	Freq    *F = _freq;
-	
+
 	if (hypot (F->xf, F->yf) < 0.01) {
 		return -1;
 	}
@@ -120,13 +120,13 @@ MTDM::resolve ()
 			_err = e;
 		}
 		if (e > 0.4) {
-			return 1; 
+			return 1;
 		}
 		d += m * (k & 7);
 		m *= 8;
-	}  
+	}
 
 	_del = 16 * d;
-	
+
 	return 0;
 }

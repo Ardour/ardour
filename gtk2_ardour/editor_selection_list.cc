@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -154,7 +154,7 @@ Editor::create_named_selection ()
 	if (selection->time.empty()) {
 		return;
 	}
-	
+
 	TrackViewList *views = get_valid_views (selection->time.track, selection->time.group);
 
 	if (views->empty()) {
@@ -166,9 +166,9 @@ Editor::create_named_selection ()
 	list<boost::shared_ptr<Playlist> > thelist;
 
 	for (TrackViewList::iterator i = views->begin(); i != views->end(); ++i) {
-		
+
 		boost::shared_ptr<Playlist> pl = (*i)->playlist();
-		
+
 		if (pl && (what_we_found = pl->copy (selection->time, false)) != 0) {
 			thelist.push_back (what_we_found);
 		}
@@ -177,20 +177,20 @@ Editor::create_named_selection ()
 	if (!thelist.empty()) {
 
 		ArdourPrompter p;
-		
+
 		p.set_prompt (_("Name for Chunk:"));
 		p.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
 		p.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 		p.change_labels (_("Create Chunk"), _("Forget it"));
 		p.show_all ();
-		
+
 		switch (p.run ()) {
-			
+
 		case Gtk::RESPONSE_ACCEPT:
 			p.get_result (name);
 			if (name.empty()) {
 				return;
-			}	
+			}
 			break;
 		default:
 			return;
@@ -199,7 +199,7 @@ Editor::create_named_selection ()
 		new NamedSelection (name, thelist); // creation will add it to the model
 
 		/* make the one we just added be selected */
-		
+
 		TreeModel::Children::iterator added = named_selection_model->children().end();
 		--added;
 		named_selection_display.get_selection()->select (*added);

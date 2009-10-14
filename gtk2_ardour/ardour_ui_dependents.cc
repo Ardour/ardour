@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 	mixer->connect_to_session (s);
 
 	/* its safe to do this now */
-	
+
 	BootMessage (_("Reload Session History"));
 	s->restore_history ("");
 }
@@ -93,7 +93,7 @@ void
 ARDOUR_UI::goto_editor_window ()
 {
 	if (splash && splash->is_visible()) {
-		// in 2 seconds, hide the splash screen 
+		// in 2 seconds, hide the splash screen
 		Glib::signal_timeout().connect (bind (sigc::ptr_fun (_hide_splash), this), 2000);
 	}
 

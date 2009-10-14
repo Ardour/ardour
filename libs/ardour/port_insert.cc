@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000,2007 Paul Davis 
+    Copyright (C) 2000,2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -115,7 +115,7 @@ PortInsert::set_state(const XMLNode& node)
 		error << _("XML node describing port insert is missing the `type' field") << endmsg;
 		return -1;
 	}
-	
+
 	if (prop->value() != "port") {
 		error << _("non-port insert XML used for port plugin insert") << endmsg;
 		return -1;
@@ -137,13 +137,13 @@ PortInsert::set_state(const XMLNode& node)
 			break;
 		}
 	}
-	
+
 	Processor::set_state (*insert_node);
 
 	return 0;
 }
 
-ARDOUR::nframes_t 
+ARDOUR::nframes_t
 PortInsert::signal_latency() const
 {
 	/* because we deliver and collect within the same cycle,

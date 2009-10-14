@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #include <sigc++/signal.h>
 
 #include "pbd/undo.h"
-#include "pbd/statefuldestructible.h" 
+#include "pbd/statefuldestructible.h"
 
 #include "ardour/ardour.h"
 #include "ardour/audioregion.h"
@@ -44,29 +44,29 @@ class Crossfade : public ARDOUR::AudioRegion
   public:
 
 	class NoCrossfadeHere: std::exception {
-	  public:
+	public:
 		virtual const char *what() const throw() { return "no crossfade should be constructed here"; }
 	};
-	
+
 	/* constructor for "fixed" xfades at each end of an internal overlap */
 
 	Crossfade (boost::shared_ptr<ARDOUR::AudioRegion> in, boost::shared_ptr<ARDOUR::AudioRegion> out,
-		   nframes_t position,
-		   nframes_t initial_length,
-		   AnchorPoint);
+			nframes_t position,
+			nframes_t initial_length,
+			AnchorPoint);
 
 	/* constructor for xfade between two regions that are overlapped in any way
 	   except the "internal" case.
 	*/
-	
+
 	Crossfade (boost::shared_ptr<ARDOUR::AudioRegion> in, boost::shared_ptr<ARDOUR::AudioRegion> out, CrossfadeModel, bool active);
 
 
 	/* copy constructor to copy a crossfade with new regions. used (for example)
-	   when a playlist copy is made 
+	   when a playlist copy is made
 	*/
 	Crossfade (boost::shared_ptr<Crossfade>, boost::shared_ptr<ARDOUR::AudioRegion>, boost::shared_ptr<ARDOUR::AudioRegion>);
-	
+
 	/* the usual XML constructor */
 
 	Crossfade (const Playlist&, XMLNode&);
@@ -79,13 +79,13 @@ class Crossfade : public ARDOUR::AudioRegion
 
 	boost::shared_ptr<ARDOUR::AudioRegion> in() const { return _in; }
 	boost::shared_ptr<ARDOUR::AudioRegion> out() const { return _out; }
-	
-	nframes_t read_at (Sample *buf, Sample *mixdown_buffer, 
-				float *gain_buffer, sframes_t position, nframes_t cnt, 
-				uint32_t chan_n,
-				nframes_t read_frames = 0,
-				nframes_t skip_frames = 0) const;
-	
+
+	nframes_t read_at (Sample *buf, Sample *mixdown_buffer,
+			float *gain_buffer, sframes_t position, nframes_t cnt,
+			uint32_t chan_n,
+			nframes_t read_frames = 0,
+			nframes_t skip_frames = 0) const;
+
 	bool refresh ();
 
 	uint32_t upper_layer () const {
@@ -124,16 +124,16 @@ class Crossfade : public ARDOUR::AudioRegion
 	bool can_follow_overlap() const;
 	void set_follow_overlap (bool yn);
 
-	AutomationList& fade_in() { return _fade_in; } 
+	AutomationList& fade_in() { return _fade_in; }
 	AutomationList& fade_out() { return _fade_out; }
 
 	nframes_t set_xfade_length (nframes_t);
 
 	bool is_dependent() const { return true; }
-	bool depends_on (boost::shared_ptr<Region> other) const { 
-		return other == _in || other == _out; 
+	bool depends_on (boost::shared_ptr<Region> other) const {
+		return other == _in || other == _out;
 	}
-	
+
 	static nframes_t short_xfade_length() { return _short_xfade_length; }
 	static void set_short_xfade_length (nframes_t n);
 
@@ -168,10 +168,10 @@ class Crossfade : public ARDOUR::AudioRegion
 	bool update ();
 
   protected:
-	nframes_t read_raw_internal (Sample*, sframes_t, nframes_t, int) const;	
+	nframes_t read_raw_internal (Sample*, sframes_t, nframes_t, int) const;
 };
 
 
 } // namespace ARDOUR
 
-#endif /* __ardour_overlap_h__ */	
+#endif /* __ardour_overlap_h__ */

@@ -38,7 +38,7 @@ pcm_let2f_array (tribyte *src, int count, float *dest)
 	static const float normfact = 1.0 / ((float) 0x80000000);
 
 	unsigned char	*ucptr ;
-	int 			value ;
+	int				value ;
 
 	ucptr = ((unsigned char*) src) + 3 * count ;
 	while (--count >= 0)
@@ -53,11 +53,11 @@ pcm_bet2f_array (tribyte *src, int count, float *dest)
 {
 	/* Special normfactor because tribyte value is read into an int. */
 	static const float normfact = 1.0 / ((float) 0x80000000);
-	
+
 	unsigned char	*ucptr ;
 	int				value ;
 
-	
+
 	ucptr = ((unsigned char*) src) + 3 * count ;
 	while (--count >= 0)
 	{	ucptr -= 3 ;
@@ -125,7 +125,7 @@ void
 pcm_f2bet_array (const float *src, tribyte *dest, int count)
 {
 	static const float normfact = (1.0 * 0x7FFFFF);
-	
+
 	unsigned char	*ucptr ;
 	int				value ;
 

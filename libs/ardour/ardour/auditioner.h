@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001 Paul Davis 
+    Copyright (C) 2001 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ class Auditioner : public AudioTrack
 
 	int  play_audition (nframes_t nframes);
 
-	void cancel_audition () { 
+	void cancel_audition () {
 		g_atomic_int_set (&_active, 0);
 	}
 
@@ -63,7 +63,7 @@ class Auditioner : public AudioTrack
 	static void *_drop_ports (void *);
 	void actually_drop_ports ();
 	void output_changed (IOChange, void*);
-};	
+};
 
 }; /* namespace ARDOUR */
 

@@ -116,7 +116,7 @@ ExportHandler::~ExportHandler ()
 			sys::remove (sys::path (*it));
 		}
 	}
-	
+
 	channel_config_connection.disconnect();
 	files_written_connection.disconnect();
 }
@@ -127,7 +127,7 @@ ExportHandler::add_export_config (TimespanPtr timespan, ChannelConfigPtr channel
 	FileSpec spec (channel_config, format, filename);
 	ConfigPair pair (timespan, spec);
 	config_map.insert (pair);
-	
+
 	return true;
 }
 
@@ -177,7 +177,7 @@ ExportHandler::export_cd_marker_file (TimespanPtr timespan, FormatPtr file_forma
 {
 	string filepath;
 	string basename = Glib::path_get_basename(filename);
-	
+
 	size_t ext_pos = basename.rfind('.');
 	if (ext_pos != string::npos) {
 		basename = basename.substr(0, ext_pos); /* strip file extension, if there is one */
@@ -203,18 +203,18 @@ ExportHandler::export_cd_marker_file (TimespanPtr timespan, FormatPtr file_forma
 	  default:
 		return;
 	}
-	
+
 	CDMarkerStatus status (filepath, timespan, file_format, filename);
 
 	if (!status.out) {
 		error << string_compose(_("Editor: cannot open \"%1\" as export file for CD marker file"), filepath) << endmsg;
 		return;
 	}
-	
+
 	(this->*header_func) (status);
-	
+
 	/* Get locations and sort */
-	
+
 	Locations::LocationList const & locations (session.locations()->list());
 	Locations::LocationList::const_iterator i;
 	Locations::LocationList temp;
@@ -229,7 +229,7 @@ ExportHandler::export_cd_marker_file (TimespanPtr timespan, FormatPtr file_forma
 		// TODO One index marker for whole thing
 		return;
 	}
-	
+
 	LocationSortByStart cmp;
 	temp.sort (cmp);
 	Locations::LocationList::const_iterator nexti;
@@ -246,45 +246,45 @@ ExportHandler::export_cd_marker_file (TimespanPtr timespan, FormatPtr file_forma
 		if ((*i)->start() < last_end_time) {
 			if ((*i)->is_mark()) {
 				/* Index within track */
-				
+
 				status.index_position = (*i)->start() - timespan->get_start();
 				(this->*index_func) (status);
 			}
-			
+
 			continue;
 		}
 
 		/* A track, defined by a cd range marker or a cd location marker outside of a cd range */
-		
+
 		status.track_position = last_end_time - timespan->get_start();
 		status.track_start_frame = (*i)->start() - timespan->get_start();  // everything before this is the pregap
 		status.track_duration = 0;
-		
+
 		if ((*i)->is_mark()) {
 			// a mark track location needs to look ahead to the next marker's start to determine length
 			nexti = i;
 			++nexti;
-			
+
 			if (nexti != temp.end()) {
 				status.track_duration = (*nexti)->start() - last_end_time;
-				
+
 				last_start_time = (*i)->start();
 				last_end_time = (*nexti)->start();
 			} else {
 				// this was the last marker, use timespan end
 				status.track_duration = timespan->get_end() - last_end_time;
-				
+
 				last_start_time = (*i)->start();
 				last_end_time = timespan->get_end();
 			}
 		} else {
 			// range
 			status.track_duration = (*i)->end() - last_end_time;
-			
+
 			last_start_time = (*i)->start();
 			last_end_time = (*i)->end();
 		}
-		
+
 		(this->*track_func) (status);
 	}
 }
@@ -349,31 +349,31 @@ ExportHandler::write_track_info_cue (CDMarkerStatus & status)
 
 	snprintf (buf, sizeof(buf), "  TRACK %02d AUDIO", status.track_number);
 	status.out << buf << endl;
-	
+
 	status.out << "    FLAGS" ;
 	if (status.marker->cd_info.find("scms") != status.marker->cd_info.end())  {
 		status.out << " SCMS ";
 	} else {
 		status.out << " DCP ";
 	}
-	
+
 	if (status.marker->cd_info.find("preemph") != status.marker->cd_info.end())  {
 		status.out << " PRE";
 	}
 	status.out << endl;
-	
+
 	if (status.marker->cd_info.find("isrc") != status.marker->cd_info.end())  {
 		status.out << "    ISRC " << status.marker->cd_info["isrc"] << endl;
-		
+
 	}
 	if (status.marker->name() != "") {
 		status.out << "    TITLE \"" << status.marker->name() << "\"" << endl;
 	}
-	
+
 	if (status.marker->cd_info.find("performer") != status.marker->cd_info.end()) {
 		status.out << "    PERFORMER \"" <<  status.marker->cd_info["performer"] << "\"" << endl;
 	}
-	
+
 	if (status.marker->cd_info.find("string_composer") != status.marker->cd_info.end()) {
 		status.out << "    SONGWRITER \"" << status.marker->cd_info["string_composer"]  << "\"" << endl;
 	}
@@ -382,10 +382,10 @@ ExportHandler::write_track_info_cue (CDMarkerStatus & status)
 		frames_to_cd_frames_string (buf, status.track_position);
 		status.out << "    INDEX 00" << buf << endl;
 	}
-	
+
 	frames_to_cd_frames_string (buf, status.track_start_frame);
 	status.out << "    INDEX 01" << buf << endl;
-	
+
 	status.index_number = 2;
 	status.track_number++;
 }
@@ -396,22 +396,22 @@ ExportHandler::write_track_info_toc (CDMarkerStatus & status)
 	gchar buf[18];
 
 	status.out << endl << "TRACK AUDIO" << endl;
-		
+
 	if (status.marker->cd_info.find("scms") != status.marker->cd_info.end())  {
 		status.out << "NO ";
 	}
 	status.out << "COPY" << endl;
-	
+
 	if (status.marker->cd_info.find("preemph") != status.marker->cd_info.end())  {
 		status.out << "PRE_EMPHASIS" << endl;
 	} else {
 		status.out << "NO PRE_EMPHASIS" << endl;
 	}
-	
+
 	if (status.marker->cd_info.find("isrc") != status.marker->cd_info.end())  {
 		status.out << "ISRC \"" << status.marker->cd_info["isrc"] << "\"" << endl;
 	}
-	
+
 	status.out << "CD_TEXT {" << endl << "  LANGUAGE 0 {" << endl << "     TITLE \"" << status.marker->name() << "\"" << endl;
 	if (status.marker->cd_info.find("performer") != status.marker->cd_info.end()) {
 		status.out << "     PERFORMER \"" << status.marker->cd_info["performer"]  << "\"" << endl;
@@ -419,23 +419,23 @@ ExportHandler::write_track_info_toc (CDMarkerStatus & status)
 	if (status.marker->cd_info.find("string_composer") != status.marker->cd_info.end()) {
 		status.out  << "     COMPOSER \"" << status.marker->cd_info["string_composer"] << "\"" << endl;
 	}
-	
-	if (status.marker->cd_info.find("isrc") != status.marker->cd_info.end()) {			  
+
+	if (status.marker->cd_info.find("isrc") != status.marker->cd_info.end()) {
 		status.out  << "     ISRC \"";
 		status.out << status.marker->cd_info["isrc"].substr(0,2) << "-";
 		status.out << status.marker->cd_info["isrc"].substr(2,3) << "-";
 		status.out << status.marker->cd_info["isrc"].substr(5,2) << "-";
 		status.out << status.marker->cd_info["isrc"].substr(7,5) << "\"" << endl;
 	}
-	
+
 	status.out << "  }" << endl << "}" << endl;
-	
+
 	frames_to_cd_frames_string (buf, status.track_position);
 	status.out << "FILE \"" << status.filename << "\" " << buf;
-	
+
 	frames_to_cd_frames_string (buf, status.track_duration);
 	status.out << buf << endl;
-	
+
 	frames_to_cd_frames_string (buf, status.track_start_frame - status.track_position);
 	status.out << "START" << buf << endl;
 }
@@ -449,7 +449,7 @@ ExportHandler::write_index_info_cue (CDMarkerStatus & status)
 	status.out << buf;
 	frames_to_cd_frames_string (buf, status.index_position);
 	status.out << buf << endl;
-	
+
 	cue_indexnum++;
 }
 
@@ -488,11 +488,11 @@ ExportHandler::start_timespan ()
 	}
 
 	current_timespan = config_map.begin()->first;
-	
+
 	/* Register channel configs with timespan */
-	
+
 	timespan_bounds = config_map.equal_range (current_timespan);
-	
+
 	for (ConfigMap::iterator it = timespan_bounds.first; it != timespan_bounds.second; ++it) {
 		it->second.channel_config->register_with_timespan (current_timespan);
 	}
@@ -507,29 +507,29 @@ void
 ExportHandler::finish_timespan ()
 {
 	current_timespan->process_connection.disconnect ();
-	
+
 	/* Register formats and filenames to relevant channel configs */
-	
+
 	export_status->total_formats = 0;
 	export_status->format = 0;
-	
+
 	for (ConfigMap::iterator it = timespan_bounds.first; it != timespan_bounds.second; ++it) {
-	
+
 		export_status->total_formats++;
-	
+
 		/* Setup filename */
-		
+
 		it->second.filename->set_timespan (current_timespan);
 		it->second.filename->set_channel_config (it->second.channel_config);
-		
+
 		/* Do actual registration */
-	
+
 		ChannelConfigPtr chan_config = it->second.channel_config;
 		chan_config->register_file_config (it->second.format, it->second.filename);
 	}
-	
+
 	/* Start writing files by doing a manual call to timespan_thread_finished */
-	
+
 	current_map_it = timespan_bounds.first;
 	timespan_thread_finished ();
 }
@@ -540,44 +540,44 @@ ExportHandler::timespan_thread_finished ()
 	channel_config_connection.disconnect();
 
 	if (current_map_it != timespan_bounds.second) {
-	
+
 		/* Get next configuration as long as no new export process is started */
-		
+
 		ChannelConfigPtr cc = current_map_it->second.channel_config;
 		while (!cc->write_files(processor)) {
-	
+
 			++current_map_it;
-			
+
 			if (current_map_it == timespan_bounds.second) {
-			
+
 				/* reached end of bounds, this call will end up in the else block below */
-			
+
 				timespan_thread_finished ();
 				return;
 			}
-			
+
 			cc = current_map_it->second.channel_config;
 		}
-	
+
 		channel_config_connection = cc->FilesWritten.connect (sigc::mem_fun (*this, &ExportHandler::timespan_thread_finished));
 		++current_map_it;
-	
+
 	} else { /* All files are written from current timespan, reset timespan and start new */
-	
+
 		/* Unregister configs and remove configs with this timespan */
-	
+
 		for (ConfigMap::iterator it = timespan_bounds.first; it != timespan_bounds.second;) {
 			it->second.channel_config->unregister_all ();
-			
+
 			ConfigMap::iterator to_erase = it;
 			++it;
 			config_map.erase (to_erase);
 		}
-		
+
 		/* Start new timespan */
-	
+
 		start_timespan ();
-	
+
 	}
 }
 

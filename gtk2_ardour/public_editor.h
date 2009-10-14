@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
 #include "evoral/types.hpp"
 #include "ardour/route_group.h"
 
-#include "pbd/statefuldestructible.h" 
+#include "pbd/statefuldestructible.h"
 
 #include "editing.h"
 #include "canvas.h"
@@ -118,10 +118,10 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	 * @param t Snap threshold in `units'.
 	 */
 	virtual void set_snap_threshold (double t) = 0;
-	
+
 	/** Snap a value according to the current snap setting. */
 	virtual void snap_to (nframes64_t& first, int32_t direction = 0, bool for_mark = false) = 0;
-	
+
 	/** Undo some transactions.
 	 * @param n Number of transactions to undo.
 	 */
@@ -154,7 +154,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	    rather than regions as black-box objects. For Ardour3, this is aimed at
 	    editing MIDI regions but may expand in the future to other types of regions.
 	*/
-	
+
 	virtual void set_internal_edit (bool yn) = 0;
 
 	/** @return Whether editing is currently in "internal" mode or not
@@ -187,7 +187,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void transition_to_rolling (bool fwd) = 0;
 	virtual nframes64_t unit_to_frame (double unit) const = 0;
 	// XXX remove me when libardour goes nframes64_t
-	double frame_to_unit (nframes_t frame) const { 
+	double frame_to_unit (nframes_t frame) const {
 		return frame_to_unit ((nframes64_t) frame);
 	}
 	virtual double frame_to_unit (nframes64_t frame) const = 0;
@@ -204,10 +204,10 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 
 	/** Open main export dialog */
 	virtual void export_audio () = 0;
-	
+
 	/** Open export dialog with current selection pre-selected */
 	virtual void export_selection () = 0;
-	
+
 	/** Open export dialog with current range pre-selected */
 	virtual void export_range () = 0;
 

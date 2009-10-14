@@ -25,7 +25,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
- 
+
 #define GDITHER_SH_BUF_SIZE 8
 #define GDITHER_SH_BUF_MASK 7
 

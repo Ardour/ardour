@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -101,7 +101,7 @@ Send::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_
 
 	// we have to copy the input, because deliver_output() may alter the buffers
 	// in-place, which a send must never do.
-	
+
 	BufferSet& sendbufs = _session.get_mix_buffers (bufs.count());
 	sendbufs.read_from (bufs, nframes);
 	assert(sendbufs.count() == bufs.count());
@@ -118,7 +118,7 @@ Send::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_
 	Delivery::run (sendbufs, start_frame, end_frame, nframes);
 
 	/* consider metering */
-	
+
 	if (_metering) {
 		if (_amp->gain_control()->get_value() == 0) {
 			_meter->reset();
@@ -166,7 +166,7 @@ Send::set_state(const XMLNode& node)
 	const XMLNode* insert_node = &node;
 
 	/* XXX need to load automation state & data for amp */
-	
+
 	Delivery::set_state (*insert_node);
 
 	return 0;
@@ -178,7 +178,7 @@ Send::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 	/* sends have no impact at all on the channel configuration of the
 	   streams passing through the route. so, out == in.
 	*/
-	
+
 	out = in;
 	return true;
 }
@@ -189,13 +189,13 @@ Send::configure_io (ChanCount in, ChanCount out)
 	if (!_amp->configure_io (in, out) || !_meter->configure_io (in, out)) {
 		return false;
 	}
-	
+
 	if (!Processor::configure_io (in, out)) {
 		return false;
 	}
 
 	reset_panner ();
-	
+
 	return true;
 }
 
@@ -213,7 +213,7 @@ Send::make_unique (XMLNode &state, Session &session)
 	state.property("bitslot")->set_value (buf);
 
 	std::string const name = string_compose (_("send %1"), bitslot);
-	
+
 	state.property("name")->set_value (name);
 
 	XMLNode* io = state.child ("IO");

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ AddMidiCCTrackDialog::AddMidiCCTrackDialog ()
 
 	_chan_spinner.set_name ("AddMidiCCTrackDialogSpinner");
 	_cc_num_spinner.set_name ("AddMidiCCTrackDialogSpinner");
-	
+
 	HBox *chan_box = manage (new HBox());
 	Label *chan_label = manage(new Label("Channel: "));
 	chan_box->pack_start(*chan_label, true, true, 4);
@@ -65,7 +65,7 @@ AddMidiCCTrackDialog::AddMidiCCTrackDialog ()
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::ADD, RESPONSE_ACCEPT);
-	
+
 	_chan_spinner.show();
 	chan_box->show();
 	chan_label->show();

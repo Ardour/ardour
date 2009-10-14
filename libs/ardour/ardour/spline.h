@@ -45,38 +45,38 @@ void    spline_fill (Spline *, float x0, float x1, float *vec, uint32_t veclen);
 float   spline_get_max_x (Spline *);
 float   spline_get_min_x (Spline *);
 
-struct _spline 
+struct _spline
 {
-    float        *deriv2;
-    float        *x;
-    float        *y;
-    float         max_x;
-    float         min_x;
-    SplinePoint  *points;
-    uint32_t npoints;
-    uint32_t space;
+	float        *deriv2;
+	float        *x;
+	float        *y;
+	float         max_x;
+	float         min_x;
+	SplinePoint  *points;
+	uint32_t      npoints;
+	uint32_t      space;
 
 #ifdef  __cplusplus
 
-    void set (uint32_t n, SplinePoint *points) {
-	    spline_set (this, n, points);
-    }
+	void set (uint32_t n, SplinePoint *points) {
+		spline_set (this, n, points);
+	}
 
-    void add (uint32_t n, SplinePoint *points) {
-	    spline_add (this, n, points);
-    }
+	void add (uint32_t n, SplinePoint *points) {
+		spline_add (this, n, points);
+	}
 
-    void solve () {
-	    spline_solve (this);
-    }
+	void solve () {
+		spline_solve (this);
+	}
 
-    float eval (float val) {
-	    return spline_eval (this, val);
-    }
-    
-    void fill (float x0, float x1, float *vec, uint32_t veclen) {
-	    spline_fill (this, x0, x1, vec, veclen);
-    }
+	float eval (float val) {
+		return spline_eval (this, val);
+	}
+
+	void fill (float x0, float x1, float *vec, uint32_t veclen) {
+		spline_fill (this, x0, x1, vec, veclen);
+	}
 
 #endif /* __cplusplus */
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 
 #ifdef WAF_BUILD
 #include "libardour-config.h"
-#endif 
+#endif
 
 #include "ardour/filter.h"
 

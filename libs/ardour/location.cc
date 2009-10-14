@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -83,7 +83,7 @@ Location::operator= (const Location& other)
 	_locked = false;
 
 	/* "changed" not emitted on purpose */
-	
+
 	return this;
 }
 
@@ -121,7 +121,7 @@ Location::set_start (nframes64_t s)
 	}
 
 	if (s != _start) {
-		_start = s; 
+		_start = s;
 		start_changed(this); /* EMIT SIGNAL */
 	}
 
@@ -159,7 +159,7 @@ Location::set_end (nframes64_t e)
 	}
 
 	if (e != _end) {
-		_end = e; 
+		_end = e;
 		 end_changed(this); /* EMIT SIGNAL */
 	}
 	return 0;
@@ -177,7 +177,7 @@ Location::set (nframes64_t start, nframes64_t end)
 	} else if (((is_auto_punch() || is_auto_loop()) && start >= end) || (start > end)) {
 		return -1;
 	}
-	
+
 	if (_start != start) {
 		_start = start;
 		start_changed(this); /* EMIT SIGNAL */
@@ -191,7 +191,7 @@ Location::set (nframes64_t start, nframes64_t end)
 }
 
 int
-Location::move_to (nframes64_t pos) 
+Location::move_to (nframes64_t pos)
 {
 	if (_locked) {
 		return -1;
@@ -200,10 +200,10 @@ Location::move_to (nframes64_t pos)
 	if (_start != pos) {
 		_start = pos;
 		_end = _start + length();
-		
+
 		changed (this); /* EMIT SIGNAL */
 	}
-	
+
 	return 0;
 }
 
@@ -256,7 +256,7 @@ Location::set_is_range_marker (bool yn, void *src)
 }
 
 void
-Location::set_auto_punch (bool yn, void *src) 
+Location::set_auto_punch (bool yn, void *src)
 {
 	if (is_mark() || _start == _end) {
 		return;
@@ -268,7 +268,7 @@ Location::set_auto_punch (bool yn, void *src)
 }
 
 void
-Location::set_auto_loop (bool yn, void *src) 
+Location::set_auto_loop (bool yn, void *src)
 {
 	if (is_mark() || _start == _end) {
 		return;
@@ -304,7 +304,7 @@ Location::set_mark (bool yn)
 	if (_start != _end) {
 		return;
 	}
-	
+
 	set_flag_internal (yn, IsMark);
 }
 
@@ -316,11 +316,11 @@ Location::cd_info_node(const string & name, const string & value)
 
 	root->add_property("name", name);
 	root->add_property("value", value);
-	
+
 	return *root;
 }
 
- 
+
 XMLNode&
 Location::get_state (void)
 {
@@ -354,7 +354,7 @@ Location::set_state (const XMLNode& node)
 	XMLNodeList cd_list = node.children();
 	XMLNodeConstIterator cd_iter;
 	XMLNode *cd_node;
-	
+
 	string cd_name;
 	string cd_value;
 
@@ -373,32 +373,32 @@ Location::set_state (const XMLNode& node)
 		error << _("XML node for Location has no name information") << endmsg;
 		return -1;
 	}
-		
+
 	set_name (prop->value());
-		
+
 	if ((prop = node.property ("start")) == 0) {
-		error << _("XML node for Location has no start information") << endmsg; 
+		error << _("XML node for Location has no start information") << endmsg;
 		return -1;
 	}
-		
+
 		/* can't use set_start() here, because _end
 		   may make the value of _start illegal.
 		*/
-		
+
 	sscanf (prop->value().c_str(), "%" PRId64, &_start);
-	
+
 	if ((prop = node.property ("end")) == 0) {
-		  error << _("XML node for Location has no end information") << endmsg; 
+		  error << _("XML node for Location has no end information") << endmsg;
 		  return -1;
 	}
-		
+
 	sscanf (prop->value().c_str(), "%" PRId64, &_end);
-		
+
 	if ((prop = node.property ("flags")) == 0) {
-		  error << _("XML node for Location has no flags information") << endmsg; 
+		  error << _("XML node for Location has no flags information") << endmsg;
 		  return -1;
 	}
-		
+
 	_flags = Flags (string_2_enum (prop->value(), _flags));
 
 	if ((prop = node.property ("locked")) != 0) {
@@ -408,32 +408,32 @@ Location::set_state (const XMLNode& node)
 	}
 
 	for (cd_iter = cd_list.begin(); cd_iter != cd_list.end(); ++cd_iter) {
-		  
+
 		  cd_node = *cd_iter;
-		  
+
 		  if (cd_node->name() != "CD-Info") {
 		    continue;
 		  }
-		  
+
 		  if ((prop = cd_node->property ("name")) != 0) {
 		    cd_name = prop->value();
 		  } else {
 		    throw failed_constructor ();
 		  }
-		  
+
 		  if ((prop = cd_node->property ("value")) != 0) {
 		    cd_value = prop->value();
 		  } else {
 		    throw failed_constructor ();
 		  }
-		  
-		  
+
+
 		  cd_info[cd_name] = cd_value;
-		  
+
 	}
 
 	changed(this); /* EMIT SIGNAL */
-		
+
 	return 0;
 }
 
@@ -445,7 +445,7 @@ Locations::Locations ()
 	current_location = 0;
 }
 
-Locations::~Locations () 
+Locations::~Locations ()
 {
 	for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
 		LocationList::iterator tmp = i;
@@ -499,7 +499,7 @@ Locations::next_available_name(string& result,string base)
 		}
 	}
 	for (int k=1; k<=SUFFIX_MAX; k++) {
-		if (available[k]) { 
+		if (available[k]) {
 			snprintf (buf, 31, "%d", k);
 			result += buf;
 			return 1;
@@ -515,7 +515,7 @@ Locations::set_current_unlocked (Location *loc)
 		error << _("Locations: attempt to use unknown location as selected location") << endmsg;
 		return -1;
 	}
-	
+
 	current_location = loc;
 	return 0;
 }
@@ -543,7 +543,7 @@ Locations::clear ()
 
 	changed (); /* EMIT SIGNAL */
 	current_changed (0); /* EMIT SIGNAL */
-}	
+}
 
 void
 Locations::clear_markers ()
@@ -565,7 +565,7 @@ Locations::clear_markers ()
 	}
 
 	changed (); /* EMIT SIGNAL */
-}	
+}
 
 void
 Locations::clear_ranges ()
@@ -573,7 +573,7 @@ Locations::clear_ranges ()
 	{
 		Glib::Mutex::Lock lm (lock);
 		LocationList::iterator tmp;
-		
+
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
 
 			tmp = i;
@@ -592,7 +592,7 @@ Locations::clear_ranges ()
 
 	changed (); /* EMIT SIGNAL */
 	current_changed (0); /* EMIT SIGNAL */
-}	
+}
 
 void
 Locations::add (Location *loc, bool make_current)
@@ -605,12 +605,12 @@ Locations::add (Location *loc, bool make_current)
 			current_location = loc;
 		}
 	}
-	
+
 	added (loc); /* EMIT SIGNAL */
 
 	if (make_current) {
 		 current_changed (current_location); /* EMIT SIGNAL */
-	} 
+	}
 }
 
 void
@@ -640,9 +640,9 @@ Locations::remove (Location *loc)
 			}
 		}
 	}
-	
+
 	if (was_removed) {
-		
+
 		removed (loc); /* EMIT SIGNAL */
 
 		if (was_current) {
@@ -665,13 +665,13 @@ Locations::get_state ()
 	XMLNode *node = new XMLNode ("Locations");
 	LocationList::iterator iter;
 	Glib::Mutex::Lock lm (lock);
-       
+
 	for (iter  = locations.begin(); iter != locations.end(); ++iter) {
 		node->add_child_nocopy ((*iter)->get_state ());
 	}
 
 	return *node;
-}	
+}
 
 int
 Locations::set_state (const XMLNode& node)
@@ -683,7 +683,7 @@ Locations::set_state (const XMLNode& node)
 		error << _("incorrect XML mode passed to Locations::set_state") << endmsg;
 		return -1;
 	}
-	
+
 	nlist = node.children();
 
 	locations.clear ();
@@ -693,7 +693,7 @@ Locations::set_state (const XMLNode& node)
 		Glib::Mutex::Lock lm (lock);
 
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-			
+
 			try {
 
 				Location *loc = new Location (**niter);
@@ -704,7 +704,7 @@ Locations::set_state (const XMLNode& node)
 				error << _("could not load location from session file - ignored") << endmsg;
 			}
 		}
-		
+
 		if (locations.size()) {
 
 			current_location = locations.front();
@@ -714,18 +714,18 @@ Locations::set_state (const XMLNode& node)
 	}
 
 	changed (); /* EMIT SIGNAL */
-	 
-	return 0;
-}	
 
-struct LocationStartEarlierComparison 
+	return 0;
+}
+
+struct LocationStartEarlierComparison
 {
     bool operator() (Location *a, Location *b) {
 	return a->start() < b->start();
     }
 };
 
-struct LocationStartLaterComparison 
+struct LocationStartLaterComparison
 {
     bool operator() (Location *a, Location *b) {
 	return a->start() > b->start();
@@ -746,7 +746,7 @@ Locations::first_location_before (nframes64_t frame, bool include_special_ranges
 	locs.sort (cmp);
 
 	/* locs is now sorted latest..earliest */
-	
+
 	for (LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
 		if (!include_special_ranges && ((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
 			continue;
@@ -773,7 +773,7 @@ Locations::first_location_after (nframes64_t frame, bool include_special_ranges)
 	locs.sort (cmp);
 
 	/* locs is now sorted earliest..latest */
-	
+
 	for (LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
 		if (!include_special_ranges && ((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
 			continue;
@@ -800,7 +800,7 @@ Locations::first_mark_before (nframes64_t frame, bool include_special_ranges)
 	locs.sort (cmp);
 
 	/* locs is now sorted latest..earliest */
-	
+
 	for (LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
 		if (!include_special_ranges && ((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
 			continue;
@@ -840,7 +840,7 @@ Locations::first_mark_after (nframes64_t frame, bool include_special_ranges)
 	locs.sort (cmp);
 
 	/* locs is now sorted earliest..latest */
-	
+
 	for (LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
 		if (!include_special_ranges && ((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
 			continue;
@@ -875,7 +875,7 @@ Locations::end_location () const
 		}
 	}
 	return 0;
-}	
+}
 
 Location*
 Locations::start_location () const
@@ -886,7 +886,7 @@ Locations::start_location () const
 		}
 	}
 	return 0;
-}	
+}
 
 Location*
 Locations::auto_loop_location () const
@@ -897,7 +897,7 @@ Locations::auto_loop_location () const
 		}
 	}
 	return 0;
-}	
+}
 
 Location*
 Locations::auto_punch_location () const
@@ -908,7 +908,7 @@ Locations::auto_punch_location () const
 		}
 	}
        return 0;
-}	
+}
 
 uint32_t
 Locations::num_range_markers () const
@@ -940,7 +940,7 @@ Locations::find_all_between (nframes64_t start, nframes64_t end, LocationList& l
 	Glib::Mutex::Lock lm (lock);
 
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
-		if ((flags == 0 || (*i)->matches (flags)) && 
+		if ((flags == 0 || (*i)->matches (flags)) &&
 		    ((*i)->start() >= start && (*i)->end() < end)) {
 			ll.push_back (*i);
 		}

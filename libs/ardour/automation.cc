@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ struct AutomationEvent {
     void (AutomatedObject::*function) (void *);
     void *arg;
 
-    void operator() (){ 
+    void operator() (){
 	    object->function (arg);
     }
 };

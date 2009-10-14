@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@
 #include <glibmm/thread.h>
 
 #include "pbd/undo.h"
-#include "pbd/stateful.h" 
-#include "pbd/statefuldestructible.h" 
+#include "pbd/stateful.h"
+#include "pbd/statefuldestructible.h"
 
 #include "ardour/ardour.h"
 
@@ -53,16 +53,16 @@ class Location : public PBD::StatefulDestructible
 	};
 
 	Location (nframes64_t sample_start,
-		  nframes64_t sample_end,
-		  const std::string &name,
-		  Flags bits = Flags(0))		
-		
+			nframes64_t sample_end,
+			const std::string &name,
+			Flags bits = Flags(0))
+
 		: _name (name),
 		_start (sample_start),
 		_end (sample_end),
 		_flags (bits),
 		_locked (false) { }
-	
+
 	Location () {
 		_start = 0;
 		_end = 0;
@@ -77,7 +77,7 @@ class Location : public PBD::StatefulDestructible
 	bool locked() const { return _locked; }
 	void lock() { _locked = true; changed (this); }
 	void unlock() { _locked = false; changed (this); }
-	
+
 	nframes64_t start() const  { return _start; }
 	nframes64_t end() const { return _end; }
 	nframes64_t length() const { return _end - _start; }
@@ -118,7 +118,7 @@ class Location : public PBD::StatefulDestructible
 	/* this is sent only when both start&end change at the same time */
 
 	sigc::signal<void,Location*> changed;
-   
+
 	/* CD Track / CD-Text info */
 
 	std::map<std::string, std::string> cd_info;
@@ -145,7 +145,7 @@ class Locations : public PBD::StatefulDestructible
 
 	Locations ();
 	~Locations ();
-	
+
 	const LocationList& list() { return locations; }
 
 	void add (Location *, bool make_current = false);

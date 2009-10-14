@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@ Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
 {
 	init (flag);
 }
-	
+
 Diskstream::Diskstream (Session& sess, const XMLNode& /*node*/)
 	: SessionObject(sess, "unnamed diskstream")
 {
@@ -183,21 +183,21 @@ Diskstream::realtime_set_speed (double sp, bool global)
 {
 	bool changed = false;
 	double new_speed = sp * _session.transport_speed();
-	
+
 	if (_visible_speed != sp) {
 		_visible_speed = sp;
 		changed = true;
 	}
-	
+
 	if (new_speed != _actual_speed) {
-		
-		nframes_t required_wrap_size = (nframes_t) floor (_session.get_block_size() * 
+
+		nframes_t required_wrap_size = (nframes_t) floor (_session.get_block_size() *
 									    fabs (new_speed)) + 1;
-		
+
 		if (required_wrap_size > wrap_buffer_size) {
 			_buffer_reallocation_required = true;
 		}
-		
+
 		_actual_speed = new_speed;
 		_target_speed = fabs(_actual_speed);
 	}
@@ -326,14 +326,14 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 		if (_playlist) {
 			_playlist->release();
 		}
-			
+
 		_playlist = playlist;
 		_playlist->use();
 
 		if (!in_set_state && recordable()) {
 			reset_write_sources (false);
 		}
-		
+
 		plmod_connection = _playlist->Modified.connect (mem_fun (*this, &Diskstream::playlist_modified));
 		plgone_connection = _playlist->GoingAway.connect (bind (mem_fun (*this, &Diskstream::playlist_deleted), boost::weak_ptr<Playlist>(_playlist)));
 		plregion_connection = _playlist->RangesMoved.connect (mem_fun (*this, &Diskstream::playlist_ranges_moved));
@@ -348,7 +348,7 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 		_session.request_overwrite_buffer (this);
 		overwrite_queued = true;
 	}
-	
+
 	PlaylistChanged (); /* EMIT SIGNAL */
 	_session.set_dirty ();
 
@@ -367,7 +367,7 @@ Diskstream::playlist_modified ()
 	if (!i_am_the_modifier && !overwrite_queued) {
 		_session.request_overwrite_buffer (this);
 		overwrite_queued = true;
-	} 
+	}
 }
 
 void
@@ -377,14 +377,14 @@ Diskstream::playlist_deleted (boost::weak_ptr<Playlist> wpl)
 
 	if (pl == _playlist) {
 
-		/* this catches an ordering issue with session destruction. playlists 
+		/* this catches an ordering issue with session destruction. playlists
 		   are destroyed before diskstreams. we have to invalidate any handles
 		   we have to the playlist.
 		*/
-		
+
 		if (_playlist) {
 			_playlist.reset ();
-		} 
+		}
 	}
 }
 
@@ -394,9 +394,9 @@ Diskstream::set_name (const string& str)
 	if (str != _name) {
 		assert(playlist());
 		playlist()->set_name (str);
-		
+
 		SessionObject::set_name(str);
-		
+
 		if (!in_set_state && recordable()) {
 			/* rename existing capture files so that they have the correct name */
 			return rename_write_sources ();
@@ -416,7 +416,7 @@ Diskstream::remove_region_from_last_capture (boost::weak_ptr<Region> wregion)
 	if (!region) {
 		return;
 	}
-	
+
 	_last_capture_regions.remove (region);
 }
 
@@ -435,7 +435,7 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<nframes_t> > const & 
 
 		movements.push_back(Evoral::RangeMove<double>(i->from, i->length, i->to));
 	}
-	
+
 	/* move panner automation */
 	boost::shared_ptr<Panner> p = _route->main_outs()->panner ();
 	if (p) {
@@ -460,13 +460,13 @@ Diskstream::move_processor_automation (boost::weak_ptr<Processor> p,
 	if (!processor) {
 		return;
 	}
-	
+
 	list< Evoral::RangeMove<double> > movements;
 	for (list< Evoral::RangeMove<nframes_t> >::const_iterator i = movements_frames.begin();
 		   i != movements_frames.end(); ++i) {
 		movements.push_back(Evoral::RangeMove<double>(i->from, i->length, i->to));
 	}
-	
+
 	set<Evoral::Parameter> const a = processor->what_can_be_automated ();
 
 	for (set<Evoral::Parameter>::iterator i = a.begin (); i != a.end (); ++i) {

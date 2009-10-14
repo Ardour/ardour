@@ -55,7 +55,7 @@ class ArdourStartup : public Gtk::Assistant {
 
 	bool connect_outs_to_master() const;
 	bool connect_outs_to_physical() const ;
-	
+
   private:
 	bool applying;
 	bool config_modified;
@@ -104,11 +104,11 @@ class ArdourStartup : public Gtk::Assistant {
 	void setup_session_page ();
 	Gtk::VBox session_vbox;
 	Gtk::HBox session_hbox;
-	
+
 	/* recent sessions */
-	
+
 	void setup_existing_session_page ();
-	
+
 	struct RecentSessionsSorter {
 	    bool operator() (std::pair<std::string,std::string> a, std::pair<std::string,std::string> b) const {
 		    return cmp_nocase(a.first, b.first) == -1;
@@ -133,7 +133,7 @@ class ArdourStartup : public Gtk::Assistant {
 	void recent_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col);
 
 	/* audio setup page */
-	
+
 	void setup_audio_page ();
 	EngineControl* engine_dialog;
 
@@ -145,7 +145,7 @@ class ArdourStartup : public Gtk::Assistant {
 	Gtk::FileChooserButton session_template_chooser;
 
 	struct SessionTemplateColumns : public Gtk::TreeModel::ColumnRecord {
-		SessionTemplateColumns () { 
+		SessionTemplateColumns () {
 			add (name);
 			add (path);
 		}
@@ -202,7 +202,7 @@ class ArdourStartup : public Gtk::Assistant {
 
 	Gtk::CheckButton _create_master_bus;
 	Gtk::SpinButton _master_bus_channel_count;
-       	
+
 	Gtk::CheckButton _create_control_bus;
 	Gtk::SpinButton _control_bus_channel_count;
 
@@ -210,7 +210,7 @@ class ArdourStartup : public Gtk::Assistant {
 	Gtk::CheckButton _limit_input_ports;
 	Gtk::SpinButton _input_limit_count;
 
-	Gtk::CheckButton _connect_outputs;	
+	Gtk::CheckButton _connect_outputs;
 	Gtk::CheckButton _limit_output_ports;
 	Gtk::SpinButton _output_limit_count;
 
@@ -252,7 +252,7 @@ class ArdourStartup : public Gtk::Assistant {
 	gint session_options_page_index;
 
 	void move_along_now ();
-	
+
 };
 
 #endif /* __gtk2_ardour_startup_h__ */

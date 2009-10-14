@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2009 Paul Davis 
+    Copyright (C) 2002-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,37 +26,37 @@
 
 namespace ARDOUR {
 
-class AudioPort : public Port 
+class AudioPort : public Port
 {
    public:
 	~AudioPort ();
-	
+
 	DataType type () const {
 		return DataType::AUDIO;
 	}
-	
+
 	void cycle_start (nframes_t);
 	void cycle_end (nframes_t);
 	void cycle_split ();
-	
+
 	size_t raw_buffer_size(jack_nframes_t nframes) const;
 
 	Buffer& get_buffer (nframes_t nframes, nframes_t offset = 0) {
 		return get_audio_buffer (nframes, offset);
 	}
-	
+
 	AudioBuffer& get_audio_buffer (nframes_t nframes, nframes_t offset = 0);
 
   protected:
 	friend class AudioEngine;
 
 	AudioPort (std::string const &, Flags);
-  
+
   private:
 	AudioBuffer* _buffer;
 
 };
- 
+
 } // namespace ARDOUR
 
 #endif /* __ardour_audio_port_h__ */

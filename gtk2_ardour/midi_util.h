@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,7 @@ inline static void clamp_to_0_127(uint8_t &val)
 		val = 127;
 	} else if ((192 <= val) && (val < 255)) {
 		val = 0;
-	} 
+	}
 }
 
 #endif /* __gtk_ardour_midi_util_h__ */

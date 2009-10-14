@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2009 Paul Davis 
+    Copyright (C) 2000-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ public:
 	}
 
 	void clear ();
-	
+
 	void toggle_full ();
 	void toggle_show_auto_regions ();
 	void reset_sort_direction (bool);
@@ -63,7 +63,7 @@ public:
 	}
 
 private:
-	
+
 	struct Columns : public Gtk::TreeModel::ColumnRecord {
 		Columns () {
 			add (name);
@@ -82,7 +82,7 @@ private:
 			add (used);
 			add (path);
 		}
-		
+
 		Gtk::TreeModelColumn<Glib::ustring> name;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Region> > region;
 		Gtk::TreeModelColumn<Gdk::Color> color_;
@@ -99,9 +99,9 @@ private:
 		Gtk::TreeModelColumn<Glib::ustring> used;
 		Gtk::TreeModelColumn<Glib::ustring> path;
 	};
-	    
+
 	Columns _columns;
-	
+
 	void region_changed (ARDOUR::Change, boost::weak_ptr<ARDOUR::Region>);
 	void selection_changed ();
 	sigc::connection _change_connection;
@@ -148,4 +148,4 @@ private:
 	std::list<boost::shared_ptr<ARDOUR::Region> > tmp_region_list;
 };
 
-       
+

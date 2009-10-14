@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you an redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ fit_to_pixels (const ustring& str, int pixel_width, Pango::FontDescription& font
 			actual_width = width;
 			break;
 		}
-		
+
 		ustr.erase (last--);
 		shorter_by++;
 
@@ -128,7 +128,7 @@ fit_to_pixels (cairo_t* cr, std::string name, double avail)
 
 	bool abbreviated = false;
 	uint32_t width = 0;
-		
+
 	while (1) {
 		cairo_text_extents_t ext;
 		cairo_text_extents (cr, name.c_str(), &ext);
@@ -187,9 +187,9 @@ xpm2rgb (const char** xpm, uint32_t& w, uint32_t& h)
 	uint32_t t, x, y, colors, cpp;
 	unsigned char c;
 	unsigned char *savergb, *rgb;
-	
+
 	// PARSE HEADER
-	
+
 	if ( sscanf(xpm[0], "%u%u%u%u", &w, &h, &colors, &cpp) != 4 ) {
 		error << string_compose (_("bad XPM header %1"), xpm[0])
 		      << endmsg;
@@ -197,13 +197,13 @@ xpm2rgb (const char** xpm, uint32_t& w, uint32_t& h)
 	}
 
 	savergb = rgb = (unsigned char*) malloc (h * w * 3);
-	
+
 	// LOAD XPM COLORMAP LONG ENOUGH TO DO CONVERSION
 	for (t = 0; t < colors; ++t) {
 		sscanf (xpm[t+1], "%c c #%lx", &c, &val);
 		vals[c] = val;
 	}
-	
+
 	// COLORMAP -> RGB CONVERSION
 	//    Get low 3 bytes from vals[]
 	//
@@ -240,7 +240,7 @@ xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h)
 	}
 
 	savergb = rgb = (unsigned char*) malloc (h * w * 4);
-	
+
 	// LOAD XPM COLORMAP LONG ENOUGH TO DO CONVERSION
 
 	if (strstr (xpm[1], "None")) {
@@ -255,7 +255,7 @@ xpm2rgba (const char** xpm, uint32_t& w, uint32_t& h)
 		sscanf (xpm[t+1], "%c c #%lx", &c, &val);
 		vals[c] = val;
 	}
-	
+
 	// COLORMAP -> RGB CONVERSION
 	//    Get low 3 bytes from vals[]
 	//
@@ -311,17 +311,17 @@ get_font_for_style (string widgetname)
 	style = foobar.get_style ();
 
 	Glib::RefPtr<const Pango::Layout> layout = foobar.get_layout();
-	
+
 	PangoFontDescription *pfd = (PangoFontDescription *)pango_layout_get_font_description((PangoLayout *)layout->gobj());
-	
+
 	if (!pfd) {
-		
+
 		/* layout inherited its font description from a PangoContext */
 
 		PangoContext* ctxt = (PangoContext*) pango_layout_get_context ((PangoLayout*) layout->gobj());
 		pfd =  pango_context_get_font_description (ctxt);
 		return new Pango::FontDescription (pfd, true); /* make a copy */
-	} 
+	}
 
 	return new Pango::FontDescription (pfd, true); /* make a copy */
 }
@@ -340,12 +340,12 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a, s
 	}
 
 	Gtk::Label foo;
-	
+
 	window->add (foo);
 
 	foo.set_name (style);
 	foo.ensure_style ();
-	
+
 	GtkRcStyle* waverc = foo.get_style()->gobj()->rc_style;
 
 	if (waverc) {
@@ -353,7 +353,7 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a, s
 			r = waverc->fg[state].red / 257;
 			g = waverc->fg[state].green / 257;
 			b = waverc->fg[state].blue / 257;
- 
+
 			/* what a hack ... "a" is for "active" */
 			if (state == Gtk::STATE_NORMAL && rgba) {
 				a = waverc->fg[GTK_STATE_ACTIVE].red / 257;
@@ -377,7 +377,7 @@ rgba_from_style (string style, uint32_t r, uint32_t g, uint32_t b, uint32_t a, s
 	}
 
 	window->remove ();
-	
+
 	if (state == Gtk::STATE_NORMAL && rgba) {
 		return (uint32_t) RGBA_TO_UINT(r,g,b,a);
 	} else {
@@ -491,7 +491,7 @@ gc_from_style (string widget_style_name, int state, string attr)
 }
 
 
-bool 
+bool
 canvas_item_visible (ArdourCanvas::Item* item)
 {
 	return (item->gobj()->object.flags & GNOME_CANVAS_ITEM_VISIBLE) ? true : false;
@@ -535,8 +535,8 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	if (focus) {
 		if (GTK_IS_ENTRY(focus) || Keyboard::some_magic_widget_has_focus()) {
 			special_handling_of_unmodified_accelerators = true;
-		} 
-	} 
+		}
+	}
 
 #ifdef GTKOSX
 	/* should this be universally true? */
@@ -547,7 +547,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 
 #ifdef DEBUG_ACCELERATOR_HANDLING
 	if (debug) {
-		cerr << "Win = " << win << " Key event: code = " << ev->keyval << " state = " << hex << ev->state << dec << " special handling ? " 
+		cerr << "Win = " << win << " Key event: code = " << ev->keyval << " state = " << hex << ev->state << dec << " special handling ? "
 		     << special_handling_of_unmodified_accelerators
 		     << " magic widget focus ? "
 		     << Keyboard::some_magic_widget_has_focus()
@@ -566,18 +566,18 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	       the focus widget and/or focus chain
 
 	   The problem with this is that if the accelerators include
-	   keys without modifiers, such as the space bar or the 
+	   keys without modifiers, such as the space bar or the
 	   letter "e", then pressing the key while typing into
 	   a text entry widget results in the accelerator being
 	   activated, instead of the desired letter appearing
 	   in the text entry.
 
 	   There is no good way of fixing this, but this
-	   represents a compromise. The idea is that 
+	   represents a compromise. The idea is that
 	   key events involving modifiers (not Shift)
 	   get routed into the activation pathway first, then
 	   get propagated to the focus widget if necessary.
-	   
+
 	   If the key event doesn't involve modifiers,
 	   we deliver to the focus widget first, thus allowing
 	   it to get "normal text" without interference
@@ -648,9 +648,9 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 #endif
 		return gtk_window_propagate_key_event (win, ev);
 	}
-	
+
 	/* no modifiers, propagate first */
-	
+
 #ifdef DEBUG_ACCELERATOR_HANDLING
 	if (debug) {
 		cerr << "\tpropagate, then activate\n";
@@ -664,15 +664,15 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 #endif
 
 		if (allow_activating) {
-			
+
 #ifdef GTKOSX
 			if (gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
 				return true;
 			}
 #endif
 			return gtk_window_activate_key (win, ev);
-		} 
-			
+		}
+
 	} else {
 #ifdef DEBUG_ACCELERATOR_HANDLING
 		if (debug) {
@@ -690,22 +690,22 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	return true;
 }
 
-Glib::RefPtr<Gdk::Pixbuf>	
+Glib::RefPtr<Gdk::Pixbuf>
 get_xpm (std::string name)
 {
 	if (!xpm_map[name]) {
 
 		SearchPath spath(ARDOUR::ardour_search_path());
 		spath += ARDOUR::system_data_search_path();
-		
+
 		spath.add_subdirectory_to_paths("pixmaps");
-		
+
 		sys::path data_file_path;
-		
+
 		if(!find_file_in_search_path (spath, name, data_file_path)) {
 			fatal << string_compose (_("cannot find XPM file for %1"), name) << endmsg;
 		}
-		
+
 		try {
 			xpm_map[name] =  Gdk::Pixbuf::create_from_file (data_file_path.to_string());
 		} catch(const Glib::Error& e)	{
@@ -736,7 +736,7 @@ get_icon_path (const char* cname)
 	return data_file_path.to_string();
 }
 
-Glib::RefPtr<Gdk::Pixbuf>	
+Glib::RefPtr<Gdk::Pixbuf>
 get_icon (const char* cname)
 {
 	Glib::RefPtr<Gdk::Pixbuf> img;
@@ -760,22 +760,22 @@ longest (vector<string>& strings)
 
 	vector<string>::iterator longest = strings.begin();
 	string::size_type longest_length = (*longest).length();
-	
+
 	vector<string>::iterator i = longest;
 	++i;
 
 	while (i != strings.end()) {
-		
+
 		string::size_type len = (*i).length();
-		
+
 		if (len > longest_length) {
 			longest = i;
 			longest_length = len;
-		} 
-		
+		}
+
 		++i;
 	}
-	
+
 	return *longest;
 }
 
@@ -819,7 +819,7 @@ key_is_legal_for_numeric_entry (guint keyval)
 	case GDK_Left:
 	case GDK_Right:
 		return true;
-		
+
 	default:
 		break;
 	}
@@ -836,7 +836,7 @@ set_pango_fontsize ()
 	pango_ft2_font_map_set_resolution ((PangoFT2FontMap*) pango_ft2_font_map_for_display(), val/1024, val/1024);
 
 	/* Cairo rendering, in case there is any */
-	
+
 	pango_cairo_font_map_set_resolution ((PangoCairoFontMap*) pango_cairo_font_map_get_default(), val/1024);
 }
 
@@ -862,35 +862,35 @@ possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval)
 	case GDK_ISO_Left_Tab:
 		fakekey = GDK_nabla;
 		break;
-		
+
 	case GDK_Up:
 		fakekey = GDK_uparrow;
 		break;
-		
+
 	case GDK_Down:
 		fakekey = GDK_downarrow;
 		break;
-		
+
 	case GDK_Right:
 		fakekey = GDK_rightarrow;
 		break;
-		
+
 	case GDK_Left:
 		fakekey = GDK_leftarrow;
 		break;
-		
+
 	default:
 		break;
 	}
-	
+
 	if (fakekey != GDK_VoidSymbol) {
 		keyval = fakekey;
 		return true;
-	} 
+	}
 
 	return false;
 }
-		
+
 
 inline guint8
 convert_color_channel (guint8 src,
@@ -907,7 +907,7 @@ convert_bgra_to_rgba (guint8 const* src,
 {
 	guint8 const* src_pixel = src;
 	guint8*       dst_pixel = dst;
-	
+
 	for (int y = 0; y < height; y++)
 		for (int x = 0; x < width; x++)
 		{
@@ -918,7 +918,7 @@ convert_bgra_to_rgba (guint8 const* src,
 			dst_pixel[2] = convert_color_channel (src_pixel[0],
 							      src_pixel[3]);
 			dst_pixel[3] = src_pixel[3];
-			
+
 			dst_pixel += 4;
 			src_pixel += 4;
 		}

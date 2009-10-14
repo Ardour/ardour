@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, boost:
 	}
 
 	set_name (sendto->name());
-	
+
 	_send_to->GoingAway.connect (mem_fun (*this, &InternalSend::send_to_going_away));
 }
 
@@ -79,16 +79,16 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 
 	// we have to copy the input, because we may alter the buffers with the amp
 	// in-place, which a send must never do.
-	
+
 	assert(mixbufs.available() >= bufs.count());
 	mixbufs.read_from (bufs, nframes);
-	
+
 	/* gain control */
 
 	gain_t tgain = target_gain ();
-	
+
 	if (tgain != _current_gain) {
-		
+
 		/* target gain has changed */
 
 		Amp::apply_gain (mixbufs, nframes, _current_gain, tgain);
@@ -109,7 +109,7 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 		Amp::apply_simple_gain (mixbufs, nframes, tgain);
 	}
 
-	
+
 	// Can't automate gain for sends or returns yet because we need different buffers
 	// so that we don't overwrite the main automation data for the route amp
 	// _amp->setup_gain_automation (start_frame, end_frame, nframes);
@@ -119,7 +119,7 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 	/* XXX NEED TO PAN */
 
 	/* consider metering */
-	
+
 	if (_metering) {
 		if (_amp->gain_control()->get_value() == 0) {
 			_meter->reset();
@@ -160,7 +160,7 @@ InternalSend::state (bool full)
 	if (_send_to) {
 		node.add_property ("target", _send_to->id().to_s());
 	}
-	
+
 	return node;
 }
 
@@ -192,7 +192,7 @@ InternalSend::set_state (const XMLNode& node)
 			connect_when_legal ();
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -209,8 +209,8 @@ InternalSend::connect_when_legal ()
 	if ((_send_to = _session.route_by_id (_send_to_id)) == 0) {
 		error << X_("cannot find route to connect to") << endmsg;
 		return -1;
-	} 
-	
+	}
+
 	if ((target = _send_to->get_return_buffer ()) == 0) {
 		error << X_("target for internal send has no return buffer") << endmsg;
 		return -1;
@@ -219,7 +219,7 @@ InternalSend::connect_when_legal ()
 	return 0;
 }
 
-bool 
+bool
 InternalSend::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 {
 	out = in;
@@ -258,5 +258,5 @@ InternalSend::visible () const
 		return true;
 	}
 
-	return false; 
+	return false;
 }

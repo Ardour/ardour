@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -59,7 +59,7 @@ Diamond::move_to (double x, double y)
 
 	points->coords[4] = _x;
 	points->coords[5] = _y;
-	
+
 	points->coords[6] = _x - _h;
 	points->coords[7] = _y + _h;
 

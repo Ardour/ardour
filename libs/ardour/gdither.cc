@@ -35,7 +35,7 @@
 #include <math.h>
 #endif
 
-#undef  __USE_SVID 
+#undef  __USE_SVID
 #define __USE_SVID 1
 #ifdef __cplusplus
 #include <cstdlib>
@@ -163,13 +163,13 @@ void gdither_free(GDither s)
     }
 }
 
-inline static void gdither_innner_loop(const GDitherType dt, 
-    const uint32_t stride, const float bias, const float scale, 
+inline static void gdither_innner_loop(const GDitherType dt,
+    const uint32_t stride, const float bias, const float scale,
 
-    const uint32_t post_scale, const int bit_depth, 
-    const uint32_t channel, const uint32_t length, float *ts, 
+    const uint32_t post_scale, const int bit_depth,
+    const uint32_t channel, const uint32_t length, float *ts,
 
-    GDitherShapedState *ss, float *x, void *y, const int clamp_u, 
+    GDitherShapedState *ss, float *x, void *y, const int clamp_u,
 
     const int clamp_l)
 {
@@ -216,7 +216,7 @@ inline static void gdither_innner_loop(const GDitherType dt,
 	    ss->buffer[ss->phase] = (float)lrintf(tmp) - ideal;
 	    break;
 	}
-	
+
 	clamped = lrintf(tmp);
 	if (clamped > clamp_u) {
 		clamped = clamp_u;
@@ -239,13 +239,13 @@ inline static void gdither_innner_loop(const GDitherType dt,
 }
 
 /* floating pint version of the inner loop function */
-inline static void gdither_innner_loop_fp(const GDitherType dt, 
-    const uint32_t stride, const float bias, const float scale, 
+inline static void gdither_innner_loop_fp(const GDitherType dt,
+    const uint32_t stride, const float bias, const float scale,
 
-    const float post_scale, const int bit_depth, 
-    const uint32_t channel, const uint32_t length, float *ts, 
+    const float post_scale, const int bit_depth,
+    const uint32_t channel, const uint32_t length, float *ts,
 
-    GDitherShapedState *ss, float *x, void *y, const int clamp_u, 
+    GDitherShapedState *ss, float *x, void *y, const int clamp_u,
 
     const int clamp_l)
 {
@@ -291,7 +291,7 @@ inline static void gdither_innner_loop_fp(const GDitherType dt,
 	    ss->buffer[ss->phase] = (float)lrintf(tmp) - ideal;
 	    break;
 	}
-	
+
 	clamped = rintf(tmp);
 	if (clamped > clamp_u) {
 		clamped = clamp_u;

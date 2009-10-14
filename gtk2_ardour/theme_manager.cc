@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -57,13 +57,13 @@ ThemeManager::ThemeManager()
 	Gtkmm2ext::WindowTitle title (Glib::get_application_name ());
 	title += _("Theme Manager");
 	set_title (title.get_string ());
-  
+
 	color_list = ListStore::create (columns);
 	color_display.set_model (color_list);
 	color_display.append_column (_("Object"), columns.name);
 	color_display.append_column (_("Color"), columns.color);
-	color_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));	
-	color_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));	
+	color_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
+	color_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	color_display.set_reorderable (false);
 	color_display.get_selection()->set_mode (SELECTION_NONE);
 	color_display.set_headers_visible (true);
@@ -71,10 +71,10 @@ ThemeManager::ThemeManager()
 	CellRenderer* color_cell = color_display.get_column_cell_renderer (1);
 	TreeViewColumn* color_column = color_display.get_column (1);
 	color_column->add_attribute (color_cell->property_cell_background_gdk(), columns.gdkcolor);
-	
+
 	scroller.add (color_display);
 	scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
-	
+
 	RadioButton::Group group = dark_button.get_group();
 	light_button.set_group(group);
 	theme_selection_hbox.set_homogeneous(false);
@@ -121,7 +121,7 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 	int celly;
 
 	UIConfigVariable<uint32_t> *ccvar;
-	
+
 	if (!color_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		return false;
 	}
@@ -151,7 +151,7 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 			case RESPONSE_CANCEL:
 				break;
 			case RESPONSE_ACCEPT:
-				color = color_dialog.get_colorsel()->get_current_color(); 
+				color = color_dialog.get_colorsel()->get_current_color();
 				a = color_dialog.get_colorsel()->get_current_alpha();
 				r = (int) floor (color.get_red_p() * 255.0);
 				g = (int) floor (color.get_green_p() * 255.0);
@@ -198,7 +198,7 @@ load_rc_file (const string& filename, bool themechange)
 	if (!find_file_in_search_path (spath, filename, rc_file_path)) {
 		warning << string_compose(
 				_("Unable to find UI style file %1 in search path %2. Ardour will look strange"),
-				filename, spath.to_string()) 
+				filename, spath.to_string())
 				<< endmsg;
 		return;
 	}
@@ -211,7 +211,7 @@ load_rc_file (const string& filename, bool themechange)
 /* hmm, this is a problem. the profile doesn't
    exist when the theme manager is constructed
    and toggles buttons during "normal" GTK setup.
-   
+
    a better solution will be to make all Profile
    methods static or something.
 
@@ -255,7 +255,7 @@ ThemeManager::setup_theme ()
 	color_list->clear();
 
 	for (std::vector<UIConfigVariable<uint32_t> *>::iterator i = ARDOUR_UI::config()->canvas_colors.begin(); i != ARDOUR_UI::config()->canvas_colors.end(); i++) {
-		
+
 		TreeModel::Row row = *(color_list->append());
 
 		Gdk::Color col;

@@ -26,11 +26,11 @@ AudioAnalyser::AudioAnalyser (float sr, AnalysisPluginKey key)
 	, plugin_key (key)
 {
 	/* create VAMP plugin and initialize */
-	
+
 	if (initialize_plugin (plugin_key, sample_rate)) {
 		error << string_compose (_("cannot load VAMP plugin \"%1\""), key) << endmsg;
 		throw failed_constructor();
-	} 
+	}
 }
 
 AudioAnalyser::~AudioAnalyser ()
@@ -50,7 +50,7 @@ AudioAnalyser::initialize_plugin (AnalysisPluginKey key, float sr)
 	if (!plugin) {
 		error << string_compose (_("VAMP Plugin \"%1\" could not be loaded"), key) << endmsg;
 		return -1;
-	} 
+	}
 
 	/* we asked for the buffering adapter, so set the blocksize to
 	   something that makes for efficient disk i/o
@@ -79,7 +79,7 @@ AudioAnalyser::reset ()
 		plugin->reset ();
 	}
 }
-	
+
 int
 AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 {
@@ -96,7 +96,7 @@ AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 	if (!path.empty()) {
 
 		/* store data in tmp file, not the real one */
-		
+
 		tmp_path = path;
 		tmp_path += ".tmp";
 
@@ -112,11 +112,11 @@ AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 	while (!done) {
 
 		nframes64_t to_read;
-		
+
 		/* read from source */
 
 		to_read = min ((len - pos), bufsize);
-		
+
 		if (src->read (data, pos, to_read, channel) != to_read) {
 			goto out;
 		}
@@ -126,7 +126,7 @@ AudioAnalyser::analyse (const string& path, Readable* src, uint32_t channel)
 		if (to_read != bufsize) {
 			memset (data + to_read, 0, (bufsize - to_read) * sizeof (Sample));
 		}
-		
+
 		features = plugin->process (bufs, RealTime::fromSeconds ((double) pos / sample_rate));
 
 		if (use_features (features, (path.empty() ? 0 : &ofile))) {

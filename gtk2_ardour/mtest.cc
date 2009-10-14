@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ make_action (Glib::RefPtr<ActionGroup> group, string name, string label, RefPtr<
 	act->set_accel_group (accels);
 
 	cerr << "action " << name << " has path " << act->get_accel_path() << endl;
-	
+
 	return act;
 }
 
@@ -64,12 +64,12 @@ make_action (Glib::RefPtr<ActionGroup> group, string name, string label)
 	return act;
 }
 
-bool 
+bool
 lookup_entry (const ustring accel_path, Gtk::AccelKey& key)
 {
 	GtkAccelKey gkey;
 	bool known = gtk_accel_map_lookup_entry (accel_path.c_str(), &gkey);
-	
+
 	if (known) {
 		key = AccelKey (gkey.accel_key, Gdk::ModifierType (gkey.accel_mods));
 	} else {
@@ -83,9 +83,9 @@ RefPtr<ActionGroup>
 copy_actions (const RefPtr<ActionGroup> src)
 {
 	RefPtr<ActionGroup> grp = ActionGroup::create (src->get_name());
-	
+
 	ListHandle<RefPtr<Action> > group_actions = src->get_actions();
-	
+
 	for (ListHandle<RefPtr<Action> >::iterator a = group_actions.begin(); a != group_actions.end(); ++a) {
 		RefPtr<Action> act = Action::create ((*a)->get_name(), (*a)->property_label());
 		grp->add (act);
@@ -129,7 +129,7 @@ main (int argc, char* argv[])
 
 	uimanager->add_ui_from_file ("mtest.menus");
 	other_uimanager->add_ui_from_file ("mtest_other.menus");
-	
+
 	// AccelMap::load ("mtest.bindings");
 
 	RefPtr<AccelGroup> accels = hidden.get_accel_group();
@@ -142,7 +142,7 @@ main (int argc, char* argv[])
 
 	make_action (shared_actions, "Bar", "bar", accels, bind (sigc::ptr_fun (printit), "barshared"), GDK_p, Gdk::CONTROL_MASK);
 	RefPtr<Action> act = make_action (shared_actions, "Baz", "baz", accels, bind (sigc::ptr_fun (printit), "baz-shared"), GDK_p, Gdk::SHIFT_MASK);
-	
+
 	act->connect_proxy (button);
 	act->connect_proxy (other_button);
 

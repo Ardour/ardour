@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ ImageFrameTimeAxis::ImageFrameTimeAxis(const string & track_id, PublicEditor& ed
 	  VisualTimeAxis(track_id, ed, sess, canvas)
 {
 	_color = unique_random_color() ;
-	
+
 	selection_group = new ArdourCanvas::Group (*canvas_display);
 	selection_group->hide();
 
@@ -73,13 +73,13 @@ ImageFrameTimeAxis::ImageFrameTimeAxis(const string & track_id, PublicEditor& ed
 
 	/* create our new image frame view */
 	view = new ImageFrameTimeAxisView(*this) ;
-	
+
 	/* create the Image Frame Edit Menu */
 	create_imageframe_menu() ;
-	
+
 	// set the initial time axis text label
 	label_view() ;
-		
+
 	// set the initial height of this time axis
 	set_height(hNormal) ;
 }
@@ -91,28 +91,28 @@ ImageFrameTimeAxis::ImageFrameTimeAxis(const string & track_id, PublicEditor& ed
 ImageFrameTimeAxis::~ImageFrameTimeAxis ()
 {
 	 GoingAway() ; /* EMIT_SIGNAL */
-	
+
 	// Destroy all the marker views we may have associaited with this TimeAxis
 	for(MarkerTimeAxisList::iterator iter = marker_time_axis_list.begin(); iter != marker_time_axis_list.end(); ++iter)
 	{
 		MarkerTimeAxis* mta = *iter ;
 		MarkerTimeAxisList::iterator next = iter ;
 		next++ ;
-		
+
 		marker_time_axis_list.erase(iter) ;
 
 		delete mta ;
 		mta = 0 ;
-		
+
 		iter = next ;
 	}
-	
+
 	delete image_action_menu ;
 	image_action_menu = 0 ;
-	
+
 	delete selection_group;
 	selection_group = 0 ;
-	
+
 	// Destroy our Axis View helper
 	delete view ;
 	view = 0 ;
@@ -124,19 +124,19 @@ ImageFrameTimeAxis::~ImageFrameTimeAxis ()
 /**
  * Sets the height of this TrackView to one of ths TrackHeghts
  *
- * @param h 
+ * @param h
  */
 void
 ImageFrameTimeAxis::set_height (uint32_t h)
 {
 	VisualTimeAxis::set_height(h) ;
-	
+
 	// tell out view helper of the change too
 	if(view != 0)
 	{
 		view->set_height((double) height) ;
 	}
-	
+
 	// tell those interested that we have had our height changed
 	 gui_changed("track_height",(void*)0); /* EMIT_SIGNAL */
 }
@@ -194,7 +194,7 @@ ImageFrameTimeAxis::popup_imageframe_edit_menu(int button, int32_t time, ImageFr
 	{
 		imageframe_item_menu->set_sensitive(false) ;
 	}
-	
+
 	imageframe_menu->popup(button,time) ;
 }
 
@@ -240,7 +240,7 @@ ImageFrameTimeAxis::build_display_menu()
 	image_action_menu = new Menu() ;
 	image_action_menu->set_name ("ArdourContextMenu");
 	MenuList image_items = image_action_menu->items() ;
-	
+
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Height"), *size_menu));
 	items.push_back (MenuElem (_("Color"), mem_fun(*this, &ImageFrameTimeAxis::select_track_color)));
@@ -261,7 +261,7 @@ ImageFrameTimeAxis::create_imageframe_menu()
 	imageframe_menu = manage(new Menu) ;
 	imageframe_menu->set_name ("ArdourContextMenu");
 	MenuList& items = imageframe_menu->items();
-	
+
 	imageframe_item_menu = manage(new Menu) ;
 	imageframe_item_menu->set_name ("ArdourContextMenu");
 	MenuList& imageframe_sub_items = imageframe_item_menu->items() ;
@@ -290,7 +290,7 @@ ImageFrameTimeAxis::create_imageframe_menu()
 	{
 		imageframe_sub_items.push_back(MenuElem (_("Remove Frame"), bind(mem_fun (view, &ImageFrameTimeAxisView::remove_selected_imageframe_item), (void*)this))) ;
 	}
-	
+
 	items.push_back(MenuElem(_("Image Frame"), *imageframe_item_menu)) ;
 	items.push_back(MenuElem (_("Rename Track"), mem_fun(*this,&ImageFrameTimeAxis::start_time_axis_rename))) ;
 
@@ -315,7 +315,7 @@ bool
 ImageFrameTimeAxis::add_marker_time_axis(MarkerTimeAxis* marker_track, void* src)
 {
 	bool ret = false ;
-	
+
 	if(get_named_marker_time_axis(marker_track->name()) != 0)
 	{
 		ret = false ;
@@ -324,11 +324,11 @@ ImageFrameTimeAxis::add_marker_time_axis(MarkerTimeAxis* marker_track, void* src
 	{
 		marker_time_axis_list.push_back(marker_track) ;
 		marker_track->GoingAway.connect(bind(mem_fun(*this, &ImageFrameTimeAxis::remove_time_axis_view), marker_track, (void*)this));
-	
+
 		 MarkerTimeAxisAdded(marker_track, src) ; /* EMIT_SIGNAL */
 		ret = true ;
 	}
-	
+
 	return(ret) ;
 }
 
@@ -342,7 +342,7 @@ MarkerTimeAxis*
 ImageFrameTimeAxis::get_named_marker_time_axis(const string & track_id)
 {
 	MarkerTimeAxis* mta =  0 ;
-	
+
 	for (MarkerTimeAxisList::iterator i = marker_time_axis_list.begin(); i != marker_time_axis_list.end(); ++i)
 	{
 		if (((MarkerTimeAxis*)*i)->name() == track_id)
@@ -365,21 +365,21 @@ MarkerTimeAxis*
 ImageFrameTimeAxis::remove_named_marker_time_axis(const string & track_id, void* src)
 {
 	MarkerTimeAxis* mta = 0 ;
-	
+
 	for(MarkerTimeAxisList::iterator i = marker_time_axis_list.begin(); i != marker_time_axis_list.end(); ++i)
 	{
 		if (((MarkerTimeAxis*)*i)->name() == track_id)
 		{
 			mta = ((MarkerTimeAxis*)*i) ;
-			
+
 			// the iterator is invalid after this call, so we can no longer use it as is.
 			marker_time_axis_list.erase(i) ;
-			
+
 			 MarkerTimeAxisRemoved(mta->name(), src) ; /* EMIT_SIGNAL */
 			break ;
 		}
 	}
-	
+
 	return(mta) ;
 }
 
@@ -394,7 +394,7 @@ void
 ImageFrameTimeAxis::remove_time_axis_view(MarkerTimeAxis* mta, void* src)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameTimeAxis::remove_time_axis_view), mta, src));
-	
+
 	MarkerTimeAxisList::iterator i;
 	if((i = find (marker_time_axis_list.begin(), marker_time_axis_list.end(), mta)) != marker_time_axis_list.end())
 	{

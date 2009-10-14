@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004-2007 Paul Davis 
+    Copyright (C) 2004-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs, s
 				PBD::basename_nosuffix (names[i]), string (""));
 
 		if (path.length() == 0) {
-			error << string_compose (_("filter: error creating name for new file based on %1"), region->name()) 
+			error << string_compose (_("filter: error creating name for new file based on %1"), region->name())
 			      << endmsg;
 			return -1;
 		}
@@ -72,7 +72,7 @@ Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs, s
 				SourceFactory::createWritable (region->data_type(), session,
 					path, true,
 					false, session.frame_rate())));
-		} 
+		}
 
 		catch (failed_constructor& err) {
 			error << string_compose (_("filter: error creating new file %1 (%2)"), path, strerror (errno)) << endmsg;
@@ -102,15 +102,15 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 			afs->update_header (region->position(), *now, xnow);
 			afs->mark_immutable ();
 		}
-		
+
 		boost::shared_ptr<SMFSource> smfs = boost::dynamic_pointer_cast<SMFSource>(*si);
 		if (smfs) {
 			smfs->set_timeline_position (region->position());
 			smfs->flush ();
 		}
-		
+
 		/* now that there is data there, requeue the file for analysis */
-		
+
 		Analyser::queue_source_for_analysis (*si, false);
 	}
 
@@ -121,7 +121,7 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 	}
 	results.clear ();
 
-	boost::shared_ptr<Region> r = RegionFactory::create (nsrcs, 0, region->length(), region_name, 0, 
+	boost::shared_ptr<Region> r = RegionFactory::create (nsrcs, 0, region->length(), region_name, 0,
 							     Region::Flag (Region::WholeFile|Region::DefaultFlags));
 	r->set_position (region->position(), 0);
 
@@ -131,7 +131,7 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 		audio_r->set_scale_amplitude (audio_region->scale_amplitude());
 	}
 	results.push_back (r);
-	
+
 	return 0;
 }
 

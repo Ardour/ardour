@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include <sigc++/signal.h>
 #include <glibmm/ustring.h>
 
-#include "pbd/statefuldestructible.h" 
+#include "pbd/statefuldestructible.h"
 #include "pbd/controllable.h"
 
 #include <jack/types.h>
@@ -53,13 +53,13 @@ class PluginInfo {
   public:
 	PluginInfo () { }
 	PluginInfo (const PluginInfo &o)
-		: name(o.name), 
-		category (o.category), 
+		: name(o.name),
+		category (o.category),
 		creator (o.creator),
-		path (o.path), 
-		n_inputs(o.n_inputs), 
+		path (o.path),
+		n_inputs(o.n_inputs),
 		n_outputs(o.n_outputs),
-		unique_id(o.unique_id), 
+		unique_id(o.unique_id),
 		index(o.index) {}
 	virtual ~PluginInfo () { }
 
@@ -70,7 +70,7 @@ class PluginInfo {
 	ChanCount n_inputs;
 	ChanCount n_outputs;
 	ARDOUR::PluginType type;
-	
+
 	std::string unique_id;
 
 	virtual PluginPtr load (Session& session) = 0;
@@ -89,23 +89,23 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	Plugin (ARDOUR::AudioEngine&, ARDOUR::Session&);
 	Plugin (const Plugin&);
 	virtual ~Plugin ();
-	
+
 	struct ParameterDescriptor {
 
-	    /* essentially a union of LADSPA and VST info */
+		/* essentially a union of LADSPA and VST info */
 
-	    bool integer_step;
-	    bool toggled;
-	    bool logarithmic;
-	    bool sr_dependent;
-	    std::string label;
-	    float lower;
-	    float upper;
-	    float step;
-	    float smallstep;
-	    float largestep;
-	    bool min_unbound;
-	    bool max_unbound;
+		bool integer_step;
+		bool toggled;
+		bool logarithmic;
+		bool sr_dependent;
+		std::string label;
+		float lower;
+		float upper;
+		float step;
+		float smallstep;
+		float largestep;
+		bool min_unbound;
+		bool max_unbound;
 	};
 
 	virtual std::string unique_id() const = 0;
@@ -125,7 +125,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual int connect_and_run (BufferSet& bufs,
 			ChanMapping in, ChanMapping out,
 			nframes_t nframes, nframes_t offset) = 0;
-	
+
 	virtual std::set<Evoral::Parameter> automatable() const = 0;
 	virtual std::string describe_parameter (Evoral::Parameter) = 0;
 	virtual std::string state_node_name() const = 0;
@@ -191,9 +191,9 @@ class Plugin : public PBD::StatefulDestructible, public Latent
   protected:
 	friend class PluginInsert;
 	friend struct PluginInsert::PluginControl;
-	
+
 	virtual void set_parameter (uint32_t which, float val) = 0;
-	
+
 	bool save_preset (std::string uri, std::string domain /* vst, ladspa etc. */);
 
 	ARDOUR::AudioEngine&     _engine;
@@ -206,5 +206,5 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 PluginPtr find_plugin(ARDOUR::Session&, std::string unique_id, ARDOUR::PluginType);
 
 } // namespace ARDOUR
- 
+
 #endif /* __ardour_plugin_h__ */

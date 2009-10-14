@@ -33,19 +33,19 @@ namespace ARDOUR
 class ExportFailed : public std::exception
 {
   public:
-	ExportFailed (std::string const & reason) :
-	  reason (reason.c_str())
+	ExportFailed (std::string const & reason)
+		: reason (reason.c_str())
 	{
 		PBD::error << string_compose (_("Export failed: %1"), reason) << endmsg;
 	}
-	
+
 	~ExportFailed () throw() { }
-	
+
 	const char* what() const throw()
 	{
 		return reason;
 	}
-	
+
   private:
 
 	const char * reason;

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -46,11 +46,11 @@ Port::Port (std::string const & n, DataType t, Flags f)
 
 	/* Unfortunately we have to pass the DataType into this constructor so that we can
 	   create the right kind of JACK port; aside from this we'll use the virtual function type ()
-	   to establish type. 
+	   to establish type.
 	*/
 
 	assert (_name.find_first_of (':') == std::string::npos);
-	
+
 	if ((_jack_port = jack_port_register (_engine->jack (), _name.c_str (), t.to_jack_type (), _flags, 0)) == 0) {
 		throw failed_constructor ();
 	}
@@ -100,7 +100,7 @@ Port::get_connections (std::vector<std::string> & c) const
 			++n;
 		}
 	}
-	
+
 	return n;
 }
 
@@ -113,13 +113,13 @@ Port::connect (std::string const & other)
 	std::string const this_shrt = _engine->make_port_name_non_relative (_name);
 
 	int r = 0;
-		
+
 	if (sends_output ()) {
 		r = jack_connect (_engine->jack (), this_shrt.c_str (), other_shrt.c_str ());
 	} else {
 		r = jack_connect (_engine->jack (), other_shrt.c_str (), this_shrt.c_str());
 	}
-	
+
 	if (r == 0) {
 		_connections.insert (other);
 	}
@@ -136,17 +136,17 @@ Port::disconnect (std::string const & other)
 	std::string const this_shrt = _engine->make_port_name_non_relative (_name);
 
 	int r = 0;
-	
+
 	if (sends_output ()) {
 		r = jack_disconnect (_engine->jack (), this_shrt.c_str (), other_shrt.c_str ());
 	} else {
 		r = jack_disconnect (_engine->jack (), other_shrt.c_str (), this_shrt.c_str ());
 	}
-	
+
 	if (r == 0) {
 		_connections.erase (other);
 	}
-	
+
 return r;
 }
 
@@ -200,9 +200,9 @@ Port::reset ()
 void
 Port::recompute_total_latency () const
 {
-#ifdef HAVE_JACK_RECOMPUTE_LATENCY	
+#ifdef HAVE_JACK_RECOMPUTE_LATENCY
 	jack_recompute_total_latency (_engine->jack (), _jack_port);
-#endif	
+#endif
 }
 
 nframes_t
@@ -253,7 +253,7 @@ Port::set_name (std::string const & n)
 	int const r = jack_port_set_name (_jack_port, n.c_str());
 
 	if (r == 0) {
-		_name = n; 
+		_name = n;
 	}
 
 	return r;

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ class Mixer_UI : public Gtk::Window
 	~Mixer_UI();
 
 	void connect_to_session (ARDOUR::Session *);
-	
+
 	PluginSelector&  plugin_selector() { return *_plugin_selector; }
 
 	void  set_strip_width (Width);
@@ -84,7 +84,7 @@ class Mixer_UI : public Gtk::Window
 	ARDOUR::Session         *session;
 
 	bool					_visible;
-	
+
 	Gtk::HBox				global_hpacker;
 	Gtk::VBox				global_vpacker;
 	Gtk::ScrolledWindow		scroller;
@@ -108,7 +108,7 @@ class Mixer_UI : public Gtk::Window
 
 	// for restoring window geometry.
 	int m_root_x, m_root_y, m_width, m_height;
-	
+
 	void set_window_pos_and_size ();
 	void get_window_pos_and_size ();
 
@@ -116,7 +116,7 @@ class Mixer_UI : public Gtk::Window
 	bool on_key_release_event (GdkEventKey*);
 
 	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
-	
+
 	std::list<MixerStrip *> strips;
 
 	bool strip_scroller_button_release (GdkEventButton*);
@@ -144,7 +144,7 @@ class Mixer_UI : public Gtk::Window
 	gint stop_updating ();
 
 	void disconnect_from_session ();
-	
+
 	sigc::connection fast_screen_update_connection;
 	void fast_update_strips ();
 
@@ -154,7 +154,7 @@ class Mixer_UI : public Gtk::Window
 	bool no_track_list_redisplay;
 	bool track_display_button_press (GdkEventButton*);
 	void strip_width_changed ();
-	
+
 	void track_list_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
 	void track_list_delete (const Gtk::TreeModel::Path&);
 	void track_list_reorder (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter, int* new_order);
@@ -164,7 +164,7 @@ class Mixer_UI : public Gtk::Window
 
 	void set_all_strips_visibility (bool yn);
 	void set_all_audio_visibility (int tracks, bool yn);
-	
+
 	void hide_all_routes ();
 	void show_all_routes ();
 	void show_all_audiobus ();
@@ -199,7 +199,7 @@ class Mixer_UI : public Gtk::Window
 	void group_flags_changed (void *src, ARDOUR::RouteGroup *);
 
 	/* various treeviews */
-	
+
 	struct TrackDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    TrackDisplayModelColumns () {
 		    add (text);
@@ -214,7 +214,7 @@ class Mixer_UI : public Gtk::Window
 	};
 
 	struct GroupDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    GroupDisplayModelColumns() { 
+	    GroupDisplayModelColumns() {
 		    add (visible);
 		    add (text);
 		    add (group);

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -91,7 +91,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	mute_button->set_active (false);
 	solo_button->set_active (false);
-	
+
 	if (is_audio_track()) {
 		controls_ebox.set_name ("AudioTrackControlsBaseUnselected");
 	} else { // bus
@@ -106,7 +106,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	if (automation_track (GainAutomation) == 0) {
 		create_automation_child (GainAutomation, false);
 	}
-	
+
 	if (_route->panner()) {
 		_route->panner()->Changed.connect (bind (
 				mem_fun(*this, &AudioTimeAxisView::ensure_pan_views),
@@ -158,7 +158,7 @@ AudioTimeAxisView::show_at (double y, int& nth, Gtk::VBox *parent)
 {
 	ensure_xml_node ();
 	xml_node->add_property ("shown-editor", "yes");
-		
+
 	return TimeAxisView::show_at (y, nth, parent);
 }
 
@@ -185,7 +185,7 @@ AudioTimeAxisView::append_extra_display_menu_items ()
 		items.push_back (MenuElem (_("Show all crossfades"), mem_fun(*this, &AudioTimeAxisView::show_all_xfades)));
 	}
 }
-	
+
 Gtk::Menu*
 AudioTimeAxisView::build_mode_menu()
 {
@@ -245,7 +245,7 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 			return;
 		}
 
-		boost::shared_ptr<AutomationTimeAxisView> 
+		boost::shared_ptr<AutomationTimeAxisView>
 			gain_track(new AutomationTimeAxisView (_session,
 							       _route, _route->amp(), c,
 							       _editor,
@@ -285,7 +285,7 @@ AudioTimeAxisView::ensure_pan_views (bool show)
 		boost::shared_ptr<ARDOUR::AutomationControl> pan_control
 			= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
 				_route->panner()->data().control(*p));
-		
+
 		if (pan_control->parameter().type() == NullAutomation) {
 			error << "Pan control has NULL automation type!" << endmsg;
 			continue;
@@ -299,13 +299,13 @@ AudioTimeAxisView::ensure_pan_views (bool show)
 
 			boost::shared_ptr<AutomationTimeAxisView> pan_track (
 				new AutomationTimeAxisView (_session,
-							    _route, _route->panner(), pan_control, 
+							    _route, _route->panner(), pan_control,
 							    _editor,
 							    *this,
 							    false,
 							    parent_canvas,
 							    name));
-			
+
 			add_automation_child (*p, pan_track, show);
 		}
 	}
@@ -329,7 +329,7 @@ AudioTimeAxisView::toggle_gain_track ()
 		}
 
 		/* now trigger a redisplay */
-		
+
 		if (!no_redraw) {
 			 _route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
 		}
@@ -369,7 +369,7 @@ AudioTimeAxisView::toggle_pan_track ()
 	}
 }
 #endif
-		
+
 void
 AudioTimeAxisView::show_all_automation ()
 {
@@ -419,7 +419,7 @@ void
 AudioTimeAxisView::hide_all_xfades ()
 {
 	AudioStreamView* asv = audio_view();
-	
+
 	if (asv) {
 		asv->hide_all_xfades ();
 	}

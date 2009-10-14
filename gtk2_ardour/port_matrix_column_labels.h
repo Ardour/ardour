@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2009 Paul Davis 
+    Copyright (C) 2002-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ public:
 	PortMatrixColumnLabels (PortMatrix *, PortMatrixBody *);
 
 	void button_press (double, double, int, uint32_t);
-  
+
 	double component_to_parent_x (double x) const;
 	double parent_to_component_x (double x) const;
 	double component_to_parent_y (double y) const;
@@ -47,14 +47,14 @@ public:
 	uint32_t overhang () const {
 		return _overhang;
 	}
-		
+
 private:
 	void render_bundle_name (cairo_t *, Gdk::Color, Gdk::Color, double, double, boost::shared_ptr<ARDOUR::Bundle>);
 	void render_channel_name (cairo_t *, Gdk::Color, Gdk::Color, double, double, ARDOUR::BundleChannel const &);
 	double channel_x (ARDOUR::BundleChannel const &) const;
 	double channel_y (ARDOUR::BundleChannel const &) const;
 	void queue_draw_for (ARDOUR::BundleChannel const &);
-	
+
 	void render (cairo_t *);
 	void compute_dimensions ();
 	double basic_text_x_pos (int) const;

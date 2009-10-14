@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ class PluginSelector : public ArdourDialog
 	PluginSelector (ARDOUR::PluginManager *);
 
 	void set_interested_object (PluginInterestedObject&);
-	
+
 	int run (); // XXX should we try not to overload the non-virtual Gtk::Dialog::run() ?
 
 	void set_session (ARDOUR::Session*);
@@ -62,7 +62,7 @@ class PluginSelector : public ArdourDialog
 	void filter_button_clicked ();
 	void filter_entry_changed ();
 	void filter_mode_changed ();
-	
+
 	struct PluginColumns : public Gtk::TreeModel::ColumnRecord {
 		PluginColumns () {
 			add (favorite);

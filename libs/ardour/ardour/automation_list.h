@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 
 #include "pbd/undo.h"
 #include "pbd/xml++.h"
-#include "pbd/statefuldestructible.h" 
+#include "pbd/statefuldestructible.h"
 
 #include "ardour/ardour.h"
 
@@ -50,7 +50,7 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 
 	AutomationList& operator= (const AutomationList&);
 	bool operator== (const AutomationList&);
-	
+
 	void freeze();
 	void thaw ();
 	void mark_dirty () const;
@@ -69,9 +69,9 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 	bool automation_write () const {
 		return (_state & Write) || ((_state & Touch) && _touching);
 	}
-	
+
 	sigc::signal<void> StateChanged;
-	
+
 	static sigc::signal<void, AutomationList*> AutomationListCreated;
 	mutable sigc::signal<void> Dirty;
 
@@ -79,7 +79,7 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 	void stop_touch ();
 	bool touching() const { return _touching; }
 
-	XMLNode& get_state(void); 
+	XMLNode& get_state(void);
 	int set_state (const XMLNode &s);
 	XMLNode& state (bool full);
 	XMLNode& serialize_events ();
@@ -87,9 +87,9 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
   private:
 	void create_curve_if_necessary ();
 	int deserialize_events (const XMLNode&);
-	
+
 	void maybe_signal_changed ();
-	
+
 	AutoState _state;
 	AutoStyle _style;
 	bool      _touching;

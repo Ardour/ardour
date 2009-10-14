@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001-2007 Paul Davis 
+    Copyright (C) 2001-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -98,7 +98,7 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
 		if ((*i)->region() == region) {
-			
+
 			/* great. we already have an AutomationRegionView for this Region. use it again. */
 			AutomationRegionView* arv = dynamic_cast<AutomationRegionView*>(*i);;
 
@@ -111,14 +111,14 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 			return NULL;
 		}
 	}
-	
+
 	region_view = new AutomationRegionView (canvas_group, _automation_view, region,
 			_controller->controllable()->parameter(), list,
 			_samples_per_unit, region_color);
-		
+
 	region_view->init (region_color, false);
 	region_views.push_front (region_view);
-	
+
 	/* follow global waveform setting */
 
 	if (wfd) {
@@ -130,7 +130,7 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 
 	/* catch regionview going away */
 	region->GoingAway.connect (bind (mem_fun (*this, &AutomationStreamView::remove_region_view), region));
-	
+
 	RegionViewAdded (region_view);
 
 	return region_view;
@@ -170,7 +170,7 @@ AutomationStreamView::redisplay_diskstream ()
 			sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view))
 			);
 	}
-	
+
 	// Stack regions by layer, and remove invalid regions
 	layer_regions();
 }
@@ -190,9 +190,9 @@ void
 AutomationStreamView::rec_data_range_ready (jack_nframes_t start, jack_nframes_t dur)
 {
 	// this is called from the butler thread for now
-	
+
 	ENSURE_GUI_THREAD(bind (mem_fun (*this, &AutomationStreamView::rec_data_range_ready), start, dur));
-	
+
 	this->update_rec_regions (start, dur);
 }
 
@@ -201,7 +201,7 @@ AutomationStreamView::color_handler ()
 {
 	/*if (_trackview.is_midi_track()) {
 		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
-	} 
+	}
 
 	if (!_trackview.is_midi_track()) {
 		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();;

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004 Paul Davis 
+    Copyright (C) 2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 	vst_preset_combo.signal_changed().connect (mem_fun (*this, &VSTPluginUI::preset_chosen));
 
 	bypass_button.set_active (!insert->active());
-	
+
 	pack_start (preset_box, false, false);
 	pack_start (socket, true, true);
 	pack_start (plugin_analysis_expander, true, true);
@@ -90,7 +90,7 @@ VSTPluginUI::package (Gtk::Window& win)
 	/*
 	   this assumes that the window's owner understands the XEmbed protocol.
 	*/
-	
+
 	socket.add_id (fst_get_XID (vst->fst()));
 
 	fst_move_window_into_view (vst->fst());
@@ -154,15 +154,15 @@ VSTPluginUI::create_preset_store ()
 		if (vst_version >= 2) {
 			fst->plugin->dispatcher (fst->plugin, 29, i, 0, buf, 0.0);
 		}
-		
+
 		row[preset_columns.name] = buf;
 		row[preset_columns.number] = i;
 	}
-	
+
 	if (fst->plugin->numPrograms > 0) {
 		fst->plugin->dispatcher( fst->plugin, effSetProgram, 0, 0, NULL, 0.0 );
 	}
-	
+
 	vst_preset_combo.set_model (preset_model);
 
 	CellRenderer* renderer = manage (new CellRendererText());
@@ -181,7 +181,7 @@ static Display *the_gtk_display;
 static error_handler_t wine_error_handler;
 static error_handler_t gtk_error_handler;
 
-static int 
+static int
 fst_xerror_handler( Display *disp, XErrorEvent *ev )
 {
 	if (disp == the_gtk_display) {

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,22 +37,22 @@ class JackPort : public virtual Port, public PortConnectableByName {
 
 	~JackPort();
 
-	std::string short_name() const { 
+	std::string short_name() const {
 		return jack_port_short_name (_port);
 	}
-	
+
 	int set_name (const std::string& str);
-	
+
 	bool connected () const {
 		return jack_port_connected (_port);
 	}
-	
+
 	int reestablish ();
 	int reconnect ();
 
 	int connect (Port& other) {
-		if( _flags & IsOutput ) {
-		    return 0;
+		if (_flags & IsOutput) {
+			return 0;
 		}
 		return connect (other.name());
 	}
@@ -73,7 +73,7 @@ class JackPort : public virtual Port, public PortConnectableByName {
 	}
 
 	int get_connections (std::vector<std::string>& names) const;
-	
+
 	bool monitoring_input () const {
 		return jack_port_monitoring_input (_port);
 	}
@@ -104,12 +104,12 @@ class JackPort : public virtual Port, public PortConnectableByName {
 	JackPort (const std::string&, DataType type, Flags flags);
 	jack_port_t*  _port;
 
- 	int disconnect ();
+	int disconnect ();
 	void recompute_total_latency() const;
 
 	std::set<std::string> _named_connections;
 };
- 
+
 } // namespace ARDOUR
 
 #endif /* __ardour_jack_port_h__ */

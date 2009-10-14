@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@
 #include <sigc++/signal.h>
 
 #include "pbd/undo.h"
-#include "pbd/stateful.h" 
+#include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
 
 #include "evoral/types.hpp"
@@ -62,7 +62,7 @@ class Playlist : public SessionObject,
 	Playlist (boost::shared_ptr<const Playlist>, std::string name, bool hidden = false);
 	Playlist (boost::shared_ptr<const Playlist>, nframes_t start, nframes_t cnt, std::string name, bool hidden = false);
 
-	virtual ~Playlist ();  
+	virtual ~Playlist ();
 
 	void set_region_ownership ();
 
@@ -148,10 +148,10 @@ class Playlist : public SessionObject,
 	uint32_t read_data_count() const { return _read_data_count; }
 
 	const PBD::ID& get_orig_diskstream_id () const { return _orig_diskstream_id; }
-	void set_orig_diskstream_id (const PBD::ID& did) { _orig_diskstream_id = did; }  
+	void set_orig_diskstream_id (const PBD::ID& did) { _orig_diskstream_id = did; }
 
 	/* destructive editing */
-	
+
 	virtual bool destroy_region (boost::shared_ptr<Region>) = 0;
 
 	/* special case function used by UI selection objects, which have playlists that actually own the regions
@@ -163,7 +163,7 @@ class Playlist : public SessionObject,
 	bool explicit_relayering () const {
 		return _explicit_relayering;
 	}
-	
+
 	void set_explicit_relayering (bool e);
 
   protected:
@@ -171,20 +171,20 @@ class Playlist : public SessionObject,
 
   protected:
 	struct RegionLock {
-	    RegionLock (Playlist *pl, bool do_block_notify = true) : playlist (pl), block_notify (do_block_notify) {
-		    playlist->region_lock.lock();
-		    if (block_notify) {
-			    playlist->delay_notifications();
-		    }
-	    }
-	    ~RegionLock() { 
-		    playlist->region_lock.unlock();
-		    if (block_notify) {
-			    playlist->release_notifications ();
-		    }
-	    }
-	    Playlist *playlist;
-	    bool block_notify;
+		RegionLock (Playlist *pl, bool do_block_notify = true) : playlist (pl), block_notify (do_block_notify) {
+			playlist->region_lock.lock();
+			if (block_notify) {
+				playlist->delay_notifications();
+			}
+		}
+		~RegionLock() {
+			playlist->region_lock.unlock();
+			if (block_notify) {
+				playlist->release_notifications ();
+			}
+		}
+		Playlist *playlist;
+		bool block_notify;
 	};
 
 	friend class RegionLock;
@@ -219,8 +219,8 @@ class Playlist : public SessionObject,
 	uint32_t        _read_data_count;
 	PBD::ID         _orig_diskstream_id;
 	uint64_t         layer_op_counter;
-	nframes_t   freeze_length;
-	bool		 auto_partition;
+	nframes_t        freeze_length;
+	bool             auto_partition;
 
 	/** true if relayering should be done using region's current layers and their `pending explicit relayer'
 	 *  flags; otherwise false if relayering should be done using the layer-model (most recently moved etc.)
@@ -230,7 +230,7 @@ class Playlist : public SessionObject,
 
 	void init (bool hide);
 
-	bool holding_state () const { 
+	bool holding_state () const {
 		return g_atomic_int_get (&block_notifications) != 0 ||
 			g_atomic_int_get (&ignore_state_changes) != 0;
 	}
@@ -265,7 +265,7 @@ class Playlist : public SessionObject,
 	void splice_unlocked (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude);
 
 	virtual void finalize_split_region (boost::shared_ptr<Region> /*original*/, boost::shared_ptr<Region> /*left*/, boost::shared_ptr<Region> /*right*/) {}
-	
+
 	virtual void check_dependents (boost::shared_ptr<Region> /*region*/, bool /*norefresh*/) {}
 	virtual void refresh_dependents (boost::shared_ptr<Region> /*region*/) {}
 	virtual void remove_dependents (boost::shared_ptr<Region> /*region*/) {}
@@ -275,7 +275,7 @@ class Playlist : public SessionObject,
 	boost::shared_ptr<Region> region_by_id (PBD::ID);
 
 	bool add_region_internal (boost::shared_ptr<Region>, nframes_t position);
-	
+
 	int remove_region_internal (boost::shared_ptr<Region>);
 	RegionList *find_regions_at (nframes_t frame);
 	void copy_regions (RegionList&) const;
@@ -283,14 +283,14 @@ class Playlist : public SessionObject,
 
 	nframes_t _get_maximum_extent() const;
 
-	boost::shared_ptr<Playlist> cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf)(nframes_t, nframes_t, bool), 
-					      std::list<AudioRange>& ranges, bool result_is_hidden);
+	boost::shared_ptr<Playlist> cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf)(nframes_t, nframes_t, bool),
+			std::list<AudioRange>& ranges, bool result_is_hidden);
 	boost::shared_ptr<Playlist> cut (nframes_t start, nframes_t cnt, bool result_is_hidden);
 	boost::shared_ptr<Playlist> copy (nframes_t start, nframes_t cnt, bool result_is_hidden);
 
 	int move_region_to_layer (layer_t, boost::shared_ptr<Region> r, int dir);
 	void relayer ();
-	
+
 	void unset_freeze_parent (Playlist*);
 	void unset_freeze_child (Playlist*);
 

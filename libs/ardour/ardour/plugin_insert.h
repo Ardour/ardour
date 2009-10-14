@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000,2007 Paul Davis 
+    Copyright (C) 2000,2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -49,14 +49,14 @@ class PluginInsert : public Processor
 	~PluginInsert ();
 
 	static const std::string port_automation_node_name;
-	
+
 	XMLNode& state(bool);
 	XMLNode& get_state(void);
 	int set_state(const XMLNode&);
 
 	void run (BufferSet& in, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 	void silence (nframes_t nframes);
-	
+
 	void activate ();
 	void deactivate ();
 
@@ -75,22 +75,22 @@ class PluginInsert : public Processor
 
 	bool is_generator() const;
 
-	struct PluginControl : public AutomationControl 
+	struct PluginControl : public AutomationControl
 	{
- 	    PluginControl (PluginInsert* p, const Evoral::Parameter &param,
- 		    boost::shared_ptr<AutomationList> list = boost::shared_ptr<AutomationList>());
-	    
+		PluginControl (PluginInsert* p, const Evoral::Parameter &param,
+				boost::shared_ptr<AutomationList> list = boost::shared_ptr<AutomationList>());
+
 		void set_value (float val);
-	    float get_value (void) const;
-	
-	  private:
- 		PluginInsert* _plugin;
+		float get_value (void) const;
+
+	private:
+		PluginInsert* _plugin;
 		bool _logarithmic;
 		bool _toggled;
 	};
 
 	boost::shared_ptr<Plugin> plugin(uint32_t num=0) const {
-		if (num < _plugins.size()) { 
+		if (num < _plugins.size()) {
 			return _plugins[num];
 		} else {
 			return _plugins[0]; // we always have one
@@ -104,7 +104,7 @@ class PluginInsert : public Processor
 	nframes_t signal_latency() const;
 
 	boost::shared_ptr<Plugin> get_impulse_analysis_plugin();
-	
+
 	void collect_signal_for_analysis(nframes_t nframes);
 
 	sigc::signal<void, BufferSet*, BufferSet*> AnalysisDataGathered;
@@ -114,12 +114,12 @@ class PluginInsert : public Processor
 	PluginInsert (const PluginInsert&);
 
 	void parameter_changed (Evoral::Parameter, float);
-	
+
 	void  set_parameter (Evoral::Parameter param, float val);
 	float get_parameter (Evoral::Parameter param);
 
 	float default_parameter_value (const Evoral::Parameter& param);
-	
+
 	typedef std::vector<boost::shared_ptr<Plugin> > Plugins;
 	Plugins _plugins;
 
@@ -130,7 +130,7 @@ class PluginInsert : public Processor
 
 	BufferSet _signal_analysis_inputs;
 	BufferSet _signal_analysis_outputs;
-	
+
 	void automation_run (BufferSet& bufs, nframes_t nframes);
 	void connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now = 0);
 

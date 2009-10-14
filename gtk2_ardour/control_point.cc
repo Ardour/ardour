@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2007 Paul Davis 
+    Copyright (C) 2002-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@ ControlPoint::ControlPoint (const ControlPoint& other, bool /*dummy_arg_to_force
 	_item->property_fill() = false;
 	_item->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_ControlPointOutline.get();
 	_item->property_outline_pixels() = 1;
-	
+
 	/* NOTE: no event handling in copied ControlPoints */
 
 	hide ();
@@ -111,7 +111,7 @@ ControlPoint::set_visible (bool yn)
 {
 	_item->property_draw() = (gboolean) yn;
 }
-	
+
 void
 ControlPoint::reset (double x, double y, AutomationList::iterator mi, uint32_t vi, ShapeType shape)
 {
@@ -157,7 +157,7 @@ ControlPoint::set_size (double sz)
 {
 	_size = sz;
 
-#if 0	
+#if 0
 	if (_size > 6.0) {
 		item->property_fill() = (gboolean) TRUE;
 	} else {

@@ -1,16 +1,16 @@
 /*
-    Copyright (C) 2006 Paul Davis 
-    
+    Copyright (C) 2006 Paul Davis
+
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
     Software Foundation; either version 2 of the License, or (at your option)
     any later version.
-    
+
     This program is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
-    
+
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     675 Mass Ave, Cambridge, MA 02139, USA.
@@ -59,7 +59,7 @@ public:
 	~BufferSet();
 
 	void clear();
-	
+
 	void attach_buffers(PortSet& ports, nframes_t nframes, nframes_t offset = 0);
 
 	/* the capacity here is a size_t and has a different interpretation depending
@@ -79,10 +79,10 @@ public:
 	void is_silent(bool yn) { _is_silent = yn; }
 	bool is_silent() const  { return _is_silent; }
 	void silence (nframes_t nframes, nframes_t offset);
-	bool is_mirror() const { return _is_mirror; } 
+	bool is_mirror() const { return _is_mirror; }
 
 	void set_count(const ChanCount& count) { assert(count <= _available); _count = count; }
-	
+
 	size_t buffer_capacity(DataType type) const;
 
 	Buffer& get(DataType type, size_t i);
@@ -90,7 +90,7 @@ public:
 	AudioBuffer& get_audio(size_t i) {
 		return (AudioBuffer&)get(DataType::AUDIO, i);
 	}
-	
+
 	MidiBuffer& get_midi(size_t i) {
 		return (MidiBuffer&)get(DataType::MIDI, i);
 	}
@@ -110,7 +110,7 @@ public:
 
 	// ITERATORS
 	// FIXME: possible to combine these?  templates?
-	
+
 	class audio_iterator {
 	public:
 		AudioBuffer& operator*()  { return _set.get_audio(_index); }
@@ -175,13 +175,13 @@ public:
 
 	iterator begin(DataType type) { return iterator(*this, type, 0); }
 	iterator end(DataType type)   { return iterator(*this, type, _count.get(type)); }
-	
+
 private:
 	typedef std::vector<Buffer*> BufferVec;
 
 	/// Vector of vectors, indexed by DataType
 	std::vector<BufferVec> _buffers;
-	
+
 #ifdef HAVE_SLV2
 	/// LV2 MIDI buffers (for conversion to/from MIDI buffers)
 	typedef std::vector< std::pair<bool, LV2EventBuffer*> > LV2Buffers;

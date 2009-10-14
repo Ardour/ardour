@@ -49,7 +49,7 @@ class EngineControl : public Gtk::VBox {
 	Gtk::CheckButton hw_monitor_button;
 	Gtk::CheckButton hw_meter_button;
 	Gtk::CheckButton verbose_output_button;
-	
+
 	Gtk::Button start_button;
 	Gtk::Button stop_button;
 	Gtk::HButtonBox button_box;
@@ -74,7 +74,7 @@ class EngineControl : public Gtk::VBox {
 	Gtk::HBox options_hbox;
 	Gtk::HBox device_hbox;
 	Gtk::Notebook notebook;
-	
+
 	bool _used;
 
 	void realtime_changed ();
@@ -94,7 +94,7 @@ class EngineControl : public Gtk::VBox {
 	std::vector<std::string> enumerate_freebob_devices ();
 	std::vector<std::string> enumerate_ffado_devices ();
 	std::vector<std::string> enumerate_dummy_devices ();
-#endif	
+#endif
 
 	void redisplay_latency ();
 	uint32_t get_rate();

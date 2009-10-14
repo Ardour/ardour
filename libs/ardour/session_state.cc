@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1999-2002 Paul Davis 
+  Copyright (C) 1999-2002 Paul Davis
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-    
+
 */
 
 
@@ -145,7 +145,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 		_writable = false;
 	} else {
 		cerr << "Session writable based on " << _path << endl;
-		_writable = true;	
+		_writable = true;
 	}
 
 	/* these two are just provisional settings. set_state()
@@ -234,7 +234,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	/* click sounds are unset by default, which causes us to internal
 	   waveforms for clicks.
 	*/
-	
+
 	click_length = 0;
 	click_emphasis_length = 0;
 	_clicking = false;
@@ -346,7 +346,7 @@ Session::second_stage_init (bool new_session)
 	}
 
 	/* handle this one in a different way than all others, so that its clear what happened */
-	
+
 	catch (AudioEngine::PortRegistrationFailure& err) {
 		error << err.what() << endmsg;
 		return -1;
@@ -362,7 +362,7 @@ Session::second_stage_init (bool new_session)
 	_engine.transport_locate (0);
 	deliver_mmc (MIDI::MachineControl::cmdMmcReset, 0);
 	deliver_mmc (MIDI::MachineControl::cmdLocate, 0);
-	
+
 	MidiClockTicker::instance().set_session(*this);
 	MIDI::Name::MidiPatchManager::instance().set_session(*this);
 
@@ -375,7 +375,7 @@ Session::second_stage_init (bool new_session)
 	config.set_end_marker_is_free (new_session);
 
 	_state_of_the_state = Clean;
-	
+
 	DirtyChanged (); /* EMIT SIGNAL */
 
 	if (state_was_pending) {
@@ -383,7 +383,7 @@ Session::second_stage_init (bool new_session)
 		remove_pending_capture_state ();
 		state_was_pending = false;
 	}
-	
+
 	BootMessage (_("Session loading complete"));
 
 	return 0;
@@ -397,7 +397,7 @@ Session::raid_path () const
 	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 		raid_search_path += sys::path((*i).path);
 	}
-	
+
 	return raid_search_path.to_string ();
 }
 
@@ -407,7 +407,7 @@ Session::setup_raid_path (string path)
 	if (path.empty()) {
 		return;
 	}
-	
+
 	space_and_path sp;
 	string fspath;
 
@@ -454,7 +454,7 @@ Session::ensure_subdirs ()
 		error << string_compose(_("Session: cannot create session sounds dir \"%1\" (%2)"), dir, strerror (errno)) << endmsg;
 		return -1;
 	}
-	
+
 	dir = session_directory().midi_path().to_string();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755) < 0) {
@@ -523,21 +523,21 @@ Session::create (bool& new_session, const string& mix_template, nframes_t initia
 				return 0;
 
 			} else {
-				error << string_compose (_("Could not open %1 for writing mix template"), out_path) 
+				error << string_compose (_("Could not open %1 for writing mix template"), out_path)
 					<< endmsg;
 				return -1;
 			}
 
 		} else {
-			error << string_compose (_("Could not open mix template %1 for reading"), in_path) 
+			error << string_compose (_("Could not open mix template %1 for reading"), in_path)
 				<< endmsg;
 			return -1;
 		}
 
 	}
-	
+
 	/* Instantiate metadata */
-	
+
 	_metadata = new SessionMetadata ();
 
 	/* set initial start + end point */
@@ -561,7 +561,7 @@ Session::load_diskstreams (const XMLNode& node)
 {
 	XMLNodeList          clist;
 	XMLNodeConstIterator citer;
-	
+
 	clist = node.children();
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
@@ -577,8 +577,8 @@ Session::load_diskstreams (const XMLNode& node)
 			} else {
 				error << _("Session: unknown diskstream type in XML") << endmsg;
 			}
-		} 
-		
+		}
+
 		catch (failed_constructor& err) {
 			error << _("Session: could not load diskstream via XML state") << endmsg;
 			return -1;
@@ -600,7 +600,7 @@ void
 Session::remove_pending_capture_state ()
 {
 	sys::path pending_state_file_path(_session_dir->root_path());
-	
+
 	pending_state_file_path /= legalize_for_path (_current_snapshot_name) + pending_suffix;
 
 	try
@@ -697,7 +697,7 @@ Session::save_state (string snapshot_name, bool pending)
 	if (!pending) {
 
 		/* proper save: use statefile_suffix (.ardour in English) */
-		
+
 		xml_path /= legalize_for_path (snapshot_name) + statefile_suffix;
 
 		/* make a backup copy of the old file */
@@ -741,7 +741,7 @@ Session::save_state (string snapshot_name, bool pending)
 		bool was_dirty = dirty();
 
 		_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
-		
+
 		if (was_dirty) {
 			DirtyChanged (); /* EMIT SIGNAL */
 		}
@@ -758,7 +758,7 @@ Session::restore_state (string snapshot_name)
 	if (load_state (snapshot_name) == 0) {
 		set_state (*state_tree->root());
 	}
-	
+
 	return 0;
 }
 
@@ -781,14 +781,14 @@ Session::load_state (string snapshot_name)
 
 		if (AskAboutPendingState()) {
 			state_was_pending = true;
-		} 
-	} 
+		}
+	}
 
 	if (!state_was_pending) {
 		xmlpath = _session_dir->root_path();
 		xmlpath /= legalize_for_path (snapshot_name) + statefile_suffix;
 	}
-	
+
 	if (!sys::exists (xmlpath)) {
 		error << string_compose(_("%1: session state information file \"%2\" doesn't exist!"), _name, xmlpath.to_string()) << endmsg;
 		return 1;
@@ -815,7 +815,7 @@ Session::load_state (string snapshot_name)
 	}
 
 	XMLNode& root (*state_tree->root());
-	
+
 	if (root.name() != X_("Session")) {
 		error << string_compose (_("Session file %1 is not an Ardour session"), xmlpath.to_string()) << endmsg;
 		delete state_tree;
@@ -849,7 +849,7 @@ Session::load_state (string snapshot_name)
 		}
 
 		info << string_compose (_("Copying old session file %1 to %2\nUse %2 with Ardour versions before 2.0 from now on"),
-					xmlpath.to_string(), backup_path.to_string()) 
+					xmlpath.to_string(), backup_path.to_string())
 		     << endmsg;
 
 		try
@@ -875,7 +875,7 @@ Session::load_options (const XMLNode& node)
 
 	config.set_variables (node);
 
-	/* now reset MIDI ports because the session can have its own 
+	/* now reset MIDI ports because the session can have its own
 	   MIDI configuration.
 	*/
 
@@ -895,9 +895,9 @@ Session::get_template()
 {
 	/* if we don't disable rec-enable, diskstreams
 	   will believe they need to store their capture
-	   sources in their state node. 
+	   sources in their state node.
 	*/
-	
+
 	disable_record (false);
 
 	return state(false);
@@ -913,11 +913,11 @@ Session::state(bool full_state)
 	char buf[16];
 	snprintf(buf, sizeof(buf), "%d.%d.%d", libardour3_major_version, libardour3_minor_version, libardour3_micro_version);
 	node->add_property("version", string(buf));
-		
+
 	/* store configuration settings */
 
 	if (full_state) {
-	
+
 		node->add_property ("name", _name);
 		snprintf (buf, sizeof (buf), "%" PRId32, _nominal_frame_rate);
 		node->add_property ("sample-rate", buf);
@@ -946,14 +946,14 @@ Session::state(bool full_state)
 				++next;
 				++i;
 			}
-			
+
 			child = node->add_child ("Path");
 			child->add_content (p);
 		}
 	}
 
 	/* save the ID counter */
-	
+
 	snprintf (buf, sizeof (buf), "%" PRIu64, ID::counter());
 	node->add_property ("id-counter", buf);
 
@@ -969,10 +969,10 @@ Session::state(bool full_state)
 		Glib::Mutex::Lock sl (source_lock);
 
 		for (SourceMap::iterator siter = sources.begin(); siter != sources.end(); ++siter) {
-			
+
 			/* Don't save information about non-destructive file sources that are empty */
 			/* FIXME: MIDI breaks if this is made FileSource like it should be... */
-			
+
 			boost::shared_ptr<AudioFileSource> fs;
 			if ((fs = boost::dynamic_pointer_cast<AudioFileSource> (siter->second)) != 0) {
 				if (!fs->destructive()) {
@@ -981,18 +981,18 @@ Session::state(bool full_state)
 					}
 				}
 			}
-			
+
 			child->add_child_nocopy (siter->second->get_state());
 		}
 	}
 
 	child = node->add_child ("Regions");
 
-	if (full_state) { 
+	if (full_state) {
 		Glib::Mutex::Lock rl (region_lock);
 
 		for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-			
+
 			/* only store regions not attached to playlists */
 
 			if (i->second->playlist() == 0) {
@@ -1003,7 +1003,7 @@ Session::state(bool full_state)
 
 	child = node->add_child ("DiskStreams");
 
-	{ 
+	{
 		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if (!(*i)->hidden()) {
@@ -1026,7 +1026,7 @@ Session::state(bool full_state)
 		loc.add (end);
 		node->add_child_nocopy (loc.get_state());
 	}
-	
+
 	child = node->add_child ("Bundles");
 	{
 		boost::shared_ptr<BundleList> bundles = _bundles.reader ();
@@ -1041,11 +1041,11 @@ Session::state(bool full_state)
 	child = node->add_child ("Routes");
 	{
 		boost::shared_ptr<RouteList> r = routes.reader ();
-		
+
 		RoutePublicOrderSorter cmp;
 		RouteList public_order (*r);
 		public_order.sort (cmp);
-		
+
 		for (RouteList::iterator i = public_order.begin(); i != public_order.end(); ++i) {
 			if (!(*i)->is_hidden()) {
 				if (full_state) {
@@ -1057,7 +1057,7 @@ Session::state(bool full_state)
 		}
 	}
 
-	
+
 	child = node->add_child ("RouteGroups");
 	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
 		child->add_child_nocopy ((*i)->get_state());
@@ -1088,8 +1088,8 @@ Session::state(bool full_state)
 			}
 		}
 	}
-	
-	
+
+
 	if (_click_io) {
 		child = node->add_child ("Click");
 		child->add_child_nocopy (_click_io->state (full_state));
@@ -1100,7 +1100,7 @@ Session::state(bool full_state)
 		for (NamedSelectionList::iterator i = named_selections.begin(); i != named_selections.end(); ++i) {
 			if (full_state) {
 				child->add_child_nocopy ((*i)->get_state());
-			} 
+			}
 		}
 	}
 
@@ -1131,7 +1131,7 @@ Session::set_state (const XMLNode& node)
 	int ret = -1;
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave);
-	
+
 	if (node.name() != X_("Session")){
 		fatal << _("programming error: Session: incorrect XML node sent to set_state()") << endmsg;
 		return -1;
@@ -1168,7 +1168,7 @@ Session::set_state (const XMLNode& node)
 		ID::init_counter (now);
 	}
 
-	
+
 	IO::disable_connecting ();
 
 	/* Object loading order:
@@ -1270,7 +1270,7 @@ Session::set_state (const XMLNode& node)
 	} else if (load_unused_playlists (*child)) {
 		goto out;
 	}
-	
+
 	if ((child = find_named_node (node, "NamedSelections")) != 0) {
 		if (load_named_selections (*child)) {
 			goto out;
@@ -1293,7 +1293,7 @@ Session::set_state (const XMLNode& node)
 		   later */
 		_bundle_xml_node = new XMLNode (*child);
 	}
-	
+
 	if ((child = find_named_node (node, "RouteGroups")) == 0) {
 		error << _("Session: XML state has no route groups section") << endmsg;
 		goto out;
@@ -1373,14 +1373,14 @@ Session::XMLRouteFactory (const XMLNode& node)
 	}
 
 	bool has_diskstream = (node.property ("diskstream") != 0 || node.property ("diskstream-id") != 0);
-	
+
 	DataType type = DataType::AUDIO;
 	const XMLProperty* prop = node.property("default-type");
 
 	if (prop) {
 		type = DataType(prop->value());
-	} 
-	
+	}
+
 	assert(type != DataType::NIL);
 
 	if (has_diskstream) {
@@ -1430,17 +1430,17 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 	const XMLProperty* type = node.property("type");
 
 	try {
-	
+
 	if ( !type || type->value() == "audio" ) {
 
 		return boost::shared_ptr<Region>(XMLAudioRegionFactory (node, full));
-	
+
 	} else if (type->value() == "midi") {
-		
+
 		return boost::shared_ptr<Region>(XMLMidiRegionFactory (node, full));
 
 	}
-	
+
 	} catch (failed_constructor& err) {
 		return boost::shared_ptr<Region> ();
 	}
@@ -1458,7 +1458,7 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool /*full*/)
 	SourceList master_sources;
 	uint32_t nchans = 1;
 	char buf[128];
-	
+
 	if (node.name() != X_("Region")) {
 		return boost::shared_ptr<AudioRegion>();
 	}
@@ -1471,7 +1471,7 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool /*full*/)
 		cerr << "no name for this region\n";
 		abort ();
 	}
-	
+
 	if ((prop = node.property (X_("source-0"))) == 0) {
 		if ((prop = node.property ("source")) == 0) {
 			error << _("Session: XMLNode describing a AudioRegion is incomplete (no source)") << endmsg;
@@ -1485,7 +1485,7 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool /*full*/)
 		error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), s_id) << endmsg;
 		return boost::shared_ptr<AudioRegion>();
 	}
-	
+
 	as = boost::dynamic_pointer_cast<AudioSource>(source);
 	if (!as) {
 		error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), s_id) << endmsg;
@@ -1499,14 +1499,14 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool /*full*/)
 	for (uint32_t n=1; n < nchans; ++n) {
 		snprintf (buf, sizeof(buf), X_("source-%d"), n);
 		if ((prop = node.property (buf)) != 0) {
-			
+
 			PBD::ID id2 (prop->value());
-			
+
 			if ((source = source_by_id (id2)) == 0) {
 				error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), id2) << endmsg;
 				return boost::shared_ptr<AudioRegion>();
 			}
-			
+
 			as = boost::dynamic_pointer_cast<AudioSource>(source);
 			if (!as) {
 				error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), id2) << endmsg;
@@ -1519,14 +1519,14 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool /*full*/)
 	for (uint32_t n = 0; n < nchans; ++n) {
 		snprintf (buf, sizeof(buf), X_("master-source-%d"), n);
 		if ((prop = node.property (buf)) != 0) {
-			
+
 			PBD::ID id2 (prop->value());
-			
+
 			if ((source = source_by_id (id2)) == 0) {
 				error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), id2) << endmsg;
 				return boost::shared_ptr<AudioRegion>();
 			}
-			
+
 			as = boost::dynamic_pointer_cast<AudioSource>(source);
 			if (!as) {
 				error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), id2) << endmsg;
@@ -1559,7 +1559,7 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool /*full*/)
 		}
 
 		return region;
-						       
+
 	}
 
 	catch (failed_constructor& err) {
@@ -1575,7 +1575,7 @@ Session::XMLMidiRegionFactory (const XMLNode& node, bool /*full*/)
 	boost::shared_ptr<MidiSource> ms;
 	SourceList sources;
 	uint32_t nchans = 1;
-	
+
 	if (node.name() != X_("Region")) {
 		return boost::shared_ptr<MidiRegion>();
 	}
@@ -1583,7 +1583,7 @@ Session::XMLMidiRegionFactory (const XMLNode& node, bool /*full*/)
 	if ((prop = node.property (X_("channels"))) != 0) {
 		nchans = atoi (prop->value().c_str());
 	}
-	
+
 	if ((prop = node.property ("name")) == 0) {
 		cerr << "no name for this region\n";
 		abort ();
@@ -1662,7 +1662,7 @@ Session::path_from_region_name (DataType type, string name, string identifier)
 
 	for (n = 0; n < 999999; ++n) {
 		if (identifier.length()) {
-			snprintf (buf, sizeof(buf), "%s%s%" PRIu32 "%s", name.c_str(), 
+			snprintf (buf, sizeof(buf), "%s%s%" PRIu32 "%s", name.c_str(),
 				  identifier.c_str(), n, ext.c_str());
 		} else {
 			snprintf (buf, sizeof(buf), "%s-%" PRIu32 "%s", name.c_str(),
@@ -1682,7 +1682,7 @@ Session::path_from_region_name (DataType type, string name, string identifier)
 
 	return "";
 }
-	
+
 
 int
 Session::load_sources (const XMLNode& node)
@@ -1770,7 +1770,7 @@ Session::save_template (string template_name)
 }
 
 int
-Session::rename_template (string old_name, string new_name) 
+Session::rename_template (string old_name, string new_name)
 {
 	sys::path old_path (user_template_directory());
 	old_path /= old_name + template_suffix;
@@ -1793,7 +1793,7 @@ Session::rename_template (string old_name, string new_name)
 }
 
 int
-Session::delete_template (string name) 
+Session::delete_template (string name)
 {
 	sys::path path = user_template_directory();
 	path /= name + template_suffix;
@@ -1818,7 +1818,7 @@ Session::refresh_disk_space ()
 	/* get freespace on every FS that is part of the session path */
 
 	_total_free_4k_blocks = 0;
-	
+
 	for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 		statfs ((*i).path.c_str(), &statfsbuf);
 
@@ -1843,8 +1843,8 @@ Session::get_best_session_directory_for_new_source ()
 	}
 
 	/* OK, here's the algorithm we're following here:
-	   
-	We want to select which directory to use for 
+
+	We want to select which directory to use for
 	the next file source to be created. Ideally,
 	we'd like to use a round-robin process so as to
 	get maximum performance benefits from splitting
@@ -1863,15 +1863,15 @@ Session::get_best_session_directory_for_new_source ()
 
 	So, we use a user-configurable space threshold. If
 	there are at least 2 filesystems with more than this
-	much space available, we use RR selection between them. 
+	much space available, we use RR selection between them.
 	If not, then we pick the filesystem with the most space.
 
 	This gets a good balance between the two
-	approaches.  
+	approaches.
 	*/
-	
+
 	refresh_disk_space ();
-	
+
 	int free_enough = 0;
 
 	for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
@@ -1907,13 +1907,13 @@ Session::get_best_session_directory_for_new_source ()
 		/* pick FS with the most freespace (and that
 		   seems to actually work ...)
 		*/
-		
+
 		vector<space_and_path> sorted;
 		space_and_path_ascending_cmp cmp;
 
 		sorted = session_dirs;
 		sort (sorted.begin(), sorted.end(), cmp);
-		
+
 		for (i = sorted.begin(); i != sorted.end(); ++i) {
 			if (create_session_directory ((*i).path)) {
 				result = (*i).path;
@@ -1938,7 +1938,7 @@ Session::load_playlists (const XMLNode& node)
 	set_dirty();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		
+
 		if ((playlist = XMLPlaylistFactory (**niter)) == 0) {
 			error << _("Session: cannot create Playlist from XML description.") << endmsg;
 		}
@@ -1959,7 +1959,7 @@ Session::load_unused_playlists (const XMLNode& node)
 	set_dirty();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		
+
 		if ((playlist = XMLPlaylistFactory (**niter)) == 0) {
 			error << _("Session: cannot create Playlist from XML description.") << endmsg;
 			continue;
@@ -1997,7 +1997,7 @@ Session::load_named_selections (const XMLNode& node)
 	set_dirty();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		
+
 		if ((ns = XMLNamedSelectionFactory (**niter)) == 0) {
 			error << _("Session: cannot create Named Selection from XML description.") << endmsg;
 		}
@@ -2033,24 +2033,24 @@ Session::analysis_dir () const
 int
 Session::load_bundles (XMLNode const & node)
 {
- 	XMLNodeList nlist = node.children();
- 	XMLNodeConstIterator niter;
+	XMLNodeList nlist = node.children();
+	XMLNodeConstIterator niter;
 
- 	set_dirty();
+	set_dirty();
 
- 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
- 		if ((*niter)->name() == "InputBundle") {
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if ((*niter)->name() == "InputBundle") {
 			add_bundle (boost::shared_ptr<UserBundle> (new UserBundle (**niter, true)));
- 		} else if ((*niter)->name() == "OutputBundle") {
- 			add_bundle (boost::shared_ptr<UserBundle> (new UserBundle (**niter, false)));
- 		} else {
- 			error << string_compose(_("Unknown node \"%1\" found in Bundles list from state file"), (*niter)->name()) << endmsg;
- 			return -1;
- 		}
- 	}
+		} else if ((*niter)->name() == "OutputBundle") {
+			add_bundle (boost::shared_ptr<UserBundle> (new UserBundle (**niter, false)));
+		} else {
+			error << string_compose(_("Unknown node \"%1\" found in Bundles list from state file"), (*niter)->name()) << endmsg;
+			return -1;
+		}
+	}
 
 	return 0;
-}				
+}
 
 int
 Session::load_route_groups (const XMLNode& node)
@@ -2067,9 +2067,9 @@ Session::load_route_groups (const XMLNode& node)
 			rg->set_state (**niter);
 		}
 	}
-	
+
 	return 0;
-}				
+}
 
 void
 Session::auto_save()
@@ -2094,12 +2094,12 @@ static string*
 remove_end(string* state)
 {
 	string statename(*state);
-	
+
 	string::size_type start,end;
 	if ((start = statename.find_last_of ('/')) != string::npos) {
 		statename = statename.substr (start+1);
 	}
-		
+
 	if ((end = statename.rfind(".ardour")) == string::npos) {
 		end = statename.length();
 	}
@@ -2108,16 +2108,16 @@ remove_end(string* state)
 }
 
 vector<string *> *
-Session::possible_states (string path) 
+Session::possible_states (string path)
 {
 	PathScanner scanner;
 	vector<string*>* states = scanner (path, state_file_filter, 0, false, false);
-	
+
 	transform(states->begin(), states->end(), states->begin(), remove_end);
-	
+
 	string_cmp cmp;
 	sort (states->begin(), states->end(), cmp);
-	
+
 	return states;
 }
 
@@ -2198,7 +2198,7 @@ Session::commit_reversible_command(Command *cmd)
 	_current_trans.pop();
 }
 
-Session::GlobalRouteBooleanState 
+Session::GlobalRouteBooleanState
 Session::get_global_route_boolean (bool (Route::*method)(void) const)
 {
 	GlobalRouteBooleanState s;
@@ -2207,11 +2207,11 @@ Session::get_global_route_boolean (bool (Route::*method)(void) const)
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->is_hidden()) {
 			RouteBooleanState v;
-			
+
 			v.first =* i;
 			Route* r = (*i).get();
 			v.second = (r->*method)();
-			
+
 			s.push_back (v);
 		}
 	}
@@ -2228,10 +2228,10 @@ Session::get_global_route_metering ()
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->is_hidden()) {
 			RouteMeterState v;
-			
+
 			v.first =* i;
 			v.second = (*i)->meter_point();
-			
+
 			s.push_back (v);
 		}
 	}
@@ -2240,7 +2240,7 @@ Session::get_global_route_metering ()
 }
 
 void
-Session::set_global_route_metering (GlobalRouteMeterState s, void* arg) 
+Session::set_global_route_metering (GlobalRouteMeterState s, void* arg)
 {
 	for (GlobalRouteMeterState::iterator i = s.begin(); i != s.end(); ++i) {
 
@@ -2296,7 +2296,7 @@ accept_all_state_files (const string& path, void */*arg*/)
 	return (path.length() > 7 && path.find (".ardour") == (path.length() - 7));
 }
 
-int 
+int
 Session::find_all_sources (string path, set<string>& result)
 {
 	XMLTree tree;
@@ -2318,7 +2318,7 @@ Session::find_all_sources (string path, set<string>& result)
 	set_dirty();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		
+
 		XMLProperty* prop;
 
 		if ((prop = (*niter)->property (X_("type"))) == 0) {
@@ -2335,7 +2335,7 @@ Session::find_all_sources (string path, set<string>& result)
 			/* external file, ignore */
 			continue;
 		}
-		
+
 		Glib::ustring found_path;
 		bool is_new;
 		uint16_t chan;
@@ -2365,7 +2365,7 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 	}
 
 	state_files = scanner (ripped, accept_all_state_files, (void *) 0, false, true);
-	
+
 	if (state_files == 0) {
 		/* impossible! */
 		return 0;
@@ -2394,7 +2394,7 @@ struct RegionCounter {
     AudioSourceList::iterator iter;
     boost::shared_ptr<Region> region;
     uint32_t count;
-    
+
     RegionCounter() : count (0) {}
 };
 
@@ -2402,7 +2402,7 @@ int
 Session::cleanup_sources (Session::cleanup_report& rep)
 {
 	// FIXME: needs adaptation to midi
-	
+
 	vector<boost::shared_ptr<Source> > dead_sources;
 	vector<boost::shared_ptr<Playlist> > playlists_tbd;
 	PathScanner scanner;
@@ -2415,10 +2415,10 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	bool used;
 	string spath;
 	int ret = -1;
-		
+
 	_state_of_the_state = (StateOfTheState) (_state_of_the_state | InCleanup);
 
-	
+
 	/* step 1: consider deleting all unused playlists */
 
 	for (PlaylistList::iterator x = unused_playlists.begin(); x != unused_playlists.end(); ++x) {
@@ -2456,7 +2456,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	rep.space = 0;
 
 	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ) {
-		
+
 		SourceMap::iterator tmp;
 
 		tmp = i;
@@ -2466,10 +2466,10 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		   capture files.
 		*/
 
- 		if (!i->second->used() && i->second->length(i->second->timeline_position()) > 0) {
+		if (!i->second->used() && i->second->length(i->second->timeline_position()) > 0) {
 			dead_sources.push_back (i->second);
 			i->second->GoingAway();
-		} 
+		}
 
 		i = tmp;
 	}
@@ -2491,7 +2491,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		i = nexti;
 	}
 
-	/* now do the same thing for the files that ended up in the sounds dir(s) 
+	/* now do the same thing for the files that ended up in the sounds dir(s)
 	   but are not referenced as sources in any snapshot.
 	*/
 
@@ -2505,23 +2505,23 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	   state file on disk still references sources we may have already
 	   dropped.
 	*/
-	
+
 	find_all_sources_across_snapshots (all_sources, true);
 
 	/*  add our current source list
 	 */
-	
+
 	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 		boost::shared_ptr<FileSource> fs;
-		
+
 		if ((fs = boost::dynamic_pointer_cast<FileSource> (i->second)) != 0) {
 			all_sources.insert (fs->path());
-		} 
+		}
 	}
 
 	char tmppath1[PATH_MAX+1];
 	char tmppath2[PATH_MAX+1];
-	
+
 	for (vector<string*>::iterator x = soundfiles->begin(); x != soundfiles->end(); ++x) {
 
 		used = false;
@@ -2554,7 +2554,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		}
 
 		string newpath;
-		
+
 		/* don't move the file across filesystems, just
 		   stick it in the `dead_sound_dir_name' directory
 		   on whichever filesystem it was already on.
@@ -2564,14 +2564,14 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 			/* old school, go up 1 level */
 
-			newpath = Glib::path_get_dirname (*x);      // "sounds" 
+			newpath = Glib::path_get_dirname (*x);      // "sounds"
 			newpath = Glib::path_get_dirname (newpath); // "session-name"
 
 		} else {
 
 			/* new school, go up 4 levels */
-			
-			newpath = Glib::path_get_dirname (*x);      // "audiofiles" 
+
+			newpath = Glib::path_get_dirname (*x);      // "audiofiles"
 			newpath = Glib::path_get_dirname (newpath); // "session-name"
 			newpath = Glib::path_get_dirname (newpath); // "interchange"
 			newpath = Glib::path_get_dirname (newpath); // "session-dir"
@@ -2587,15 +2587,15 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 
 		newpath += '/';
 		newpath += Glib::path_get_basename ((*x));
-		
+
 		if (access (newpath.c_str(), F_OK) == 0) {
-			
+
 			/* the new path already exists, try versioning */
-			
+
 			char buf[PATH_MAX+1];
 			int version = 1;
 			string newpath_v;
-			
+
 			snprintf (buf, sizeof (buf), "%s.%d", newpath.c_str(), version);
 			newpath_v = buf;
 
@@ -2603,7 +2603,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 				snprintf (buf, sizeof (buf), "%s.%d", newpath.c_str(), ++version);
 				newpath_v = buf;
 			}
-			
+
 			if (version == 999) {
 				error << string_compose (_("there are already 1000 files with names like %1; versioning discontinued"),
 						  newpath)
@@ -2611,11 +2611,11 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 			} else {
 				newpath = newpath_v;
 			}
-			
+
 		} else {
-			
+
 			/* it doesn't exist, or we can't read it or something */
-			
+
 		}
 
 		if (::rename ((*x).c_str(), newpath.c_str()) != 0) {
@@ -2652,7 +2652,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 	/* save state so we don't end up a session file
 	   referring to non-existent sources.
 	*/
-	
+
 	save_state ("");
 
   out:
@@ -2665,7 +2665,7 @@ int
 Session::cleanup_trash_sources (Session::cleanup_report& rep)
 {
 	// FIXME: needs adaptation for MIDI
-	
+
 	vector<space_and_path>::iterator i;
 	string dead_sound_dir;
 	struct dirent* dentry;
@@ -2676,7 +2676,7 @@ Session::cleanup_trash_sources (Session::cleanup_report& rep)
 	rep.space = 0;
 
 	for (i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		
+
 		dead_sound_dir = (*i).path;
 		dead_sound_dir += dead_sound_dir_name;
 
@@ -2687,8 +2687,8 @@ Session::cleanup_trash_sources (Session::cleanup_report& rep)
 		while ((dentry = readdir (dead)) != 0) {
 
 			/* avoid '.' and '..' */
-			
-			if ((dentry->d_name[0] == '.' && dentry->d_name[1] == '\0') || 
+
+			if ((dentry->d_name[0] == '.' && dentry->d_name[1] == '\0') ||
 			    (dentry->d_name[2] == '\0' && dentry->d_name[0] == '.' && dentry->d_name[1] == '.')) {
 				continue;
 			}
@@ -2718,7 +2718,7 @@ Session::cleanup_trash_sources (Session::cleanup_report& rep)
 		}
 
 		closedir (dead);
-		
+
 	}
 
 	return 0;
@@ -2742,7 +2742,7 @@ void
 Session::set_clean ()
 {
 	bool was_dirty = dirty();
-	
+
 	_state_of_the_state = Clean;
 
 
@@ -2775,7 +2775,7 @@ Session::add_controllable (boost::shared_ptr<Controllable> c)
 	Glib::Mutex::Lock lm (controllables_lock);
 	controllables.insert (c);
 }
-	
+
 struct null_deleter { void operator()(void const *) const {} };
 
 void
@@ -2793,13 +2793,13 @@ Session::remove_controllable (Controllable* c)
 	if (x != controllables.end()) {
 		controllables.erase (x);
 	}
-}	
+}
 
 boost::shared_ptr<Controllable>
 Session::controllable_by_id (const PBD::ID& id)
 {
 	Glib::Mutex::Lock lm (controllables_lock);
-	
+
 	for (Controllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
 		if ((*i)->id() == id) {
 			return *i;
@@ -2809,7 +2809,7 @@ Session::controllable_by_id (const PBD::ID& id)
 	return boost::shared_ptr<Controllable>();
 }
 
-void 
+void
 Session::add_instant_xml (XMLNode& node, bool write_to_config)
 {
 	if (_writable) {
@@ -2827,22 +2827,22 @@ Session::instant_xml (const string& node_name)
 	return Stateful::instant_xml (node_name, _path);
 }
 
-int 
+int
 Session::save_history (string snapshot_name)
 {
 	XMLTree tree;
-	
+
 	if (!_writable) {
 	        return 0;
-	}		       
+	}
 
- 	if (snapshot_name.empty()) {
+	if (snapshot_name.empty()) {
 		snapshot_name = _current_snapshot_name;
 	}
-  
- 	const string history_filename = legalize_for_path (snapshot_name) + history_suffix;
+
+	const string history_filename = legalize_for_path (snapshot_name) + history_suffix;
 	const string backup_filename = history_filename + backup_suffix;
- 	const sys::path xml_path = _session_dir->root_path() / history_filename;
+	const sys::path xml_path = _session_dir->root_path() / history_filename;
 	const sys::path backup_path = _session_dir->root_path() / backup_filename;
 
 	if (sys::exists (xml_path)) {
@@ -2855,13 +2855,13 @@ Session::save_history (string snapshot_name)
 			error << _("could not backup old history file, current history not saved") << endmsg;
 			return -1;
 		}
- 	}
+	}
 
 	if (!Config->get_save_history() || Config->get_saved_history_depth() < 0) {
 		return 0;
 	}
 
- 	tree.set_root (&_history.get_state (Config->get_saved_history_depth()));
+	tree.set_root (&_history.get_state (Config->get_saved_history_depth()));
 
 	if (!tree.write (xml_path.to_string()))
 	{
@@ -2892,10 +2892,10 @@ Session::restore_history (string snapshot_name)
 	if (snapshot_name.empty()) {
 		snapshot_name = _current_snapshot_name;
 	}
-	
+
 	const string xml_filename = legalize_for_path (snapshot_name) + history_suffix;
 	const sys::path xml_path = _session_dir->root_path() / xml_filename;
-	
+
 	cerr << "Loading history from " << xml_path.to_string() << endmsg;
 
 	if (!sys::exists (xml_path)) {
@@ -2913,67 +2913,67 @@ Session::restore_history (string snapshot_name)
 	// replace history
 	_history.clear();
 
-    for (XMLNodeConstIterator it  = tree.root()->children().begin(); it != tree.root()->children().end(); it++) {
-	    
-	    XMLNode *t = *it;
-	    UndoTransaction* ut = new UndoTransaction ();
-	    struct timeval tv;
-	    
-	    ut->set_name(t->property("name")->value());
-	    stringstream ss(t->property("tv-sec")->value());
-	    ss >> tv.tv_sec;
-	    ss.str(t->property("tv-usec")->value());
-	    ss >> tv.tv_usec;
-	    ut->set_timestamp(tv);
-	    
-	    for (XMLNodeConstIterator child_it  = t->children().begin();
+	for (XMLNodeConstIterator it  = tree.root()->children().begin(); it != tree.root()->children().end(); it++) {
+
+		XMLNode *t = *it;
+		UndoTransaction* ut = new UndoTransaction ();
+		struct timeval tv;
+
+		ut->set_name(t->property("name")->value());
+		stringstream ss(t->property("tv-sec")->value());
+		ss >> tv.tv_sec;
+		ss.str(t->property("tv-usec")->value());
+		ss >> tv.tv_usec;
+		ut->set_timestamp(tv);
+
+		for (XMLNodeConstIterator child_it  = t->children().begin();
 				child_it != t->children().end(); child_it++)
-	    {
-		    XMLNode *n = *child_it;
-		    Command *c;
-	
-		    if (n->name() == "MementoCommand" ||
+		{
+			XMLNode *n = *child_it;
+			Command *c;
+
+			if (n->name() == "MementoCommand" ||
 					n->name() == "MementoUndoCommand" ||
 					n->name() == "MementoRedoCommand") {
 
-			    if ((c = memento_command_factory(n))) {
-				    ut->add_command(c);
-			    }
-			    
-		    } else if (n->name() == X_("GlobalRouteStateCommand")) {
+				if ((c = memento_command_factory(n))) {
+					ut->add_command(c);
+				}
 
-			    if ((c = global_state_command_factory (*n))) {
-				    ut->add_command (c);
-			    }
-			    
-		    } else if (n->name() == "DeltaCommand") {
-		    	 PBD::ID  id(n->property("midi-source")->value());
-	    		 boost::shared_ptr<MidiSource> midi_source = 
-	    			 boost::dynamic_pointer_cast<MidiSource, Source>(source_by_id(id));
-		    	 if(midi_source) {
-		    		 ut->add_command(new MidiModel::DeltaCommand(midi_source->model(), *n));		    		 
-		    	 } else {
-		    		 error << "FIXME: Failed to downcast MidiSource for DeltaCommand" << endmsg;
-		    	 }
-		    } else if (n->name() == "DiffCommand") {
-		    	 PBD::ID  id(n->property("midi-source")->value());
-	    		 boost::shared_ptr<MidiSource> midi_source = 
-	    			 boost::dynamic_pointer_cast<MidiSource, Source>(source_by_id(id));
-		    	 if(midi_source) {
-		    		 ut->add_command(new MidiModel::DiffCommand(midi_source->model(), *n));		    		 
-		    	 } else {
-		    		 error << "FIXME: Failed to downcast MidiSource for DeltaCommand" << endmsg;
-		    	 }
+			} else if (n->name() == X_("GlobalRouteStateCommand")) {
 
-		    } else {
-			    error << string_compose(_("Couldn't figure out how to make a Command out of a %1 XMLNode."), n->name()) << endmsg;
-		    }
-	    }
+				if ((c = global_state_command_factory (*n))) {
+					ut->add_command (c);
+				}
 
-	    _history.add (ut);
-    }
+			} else if (n->name() == "DeltaCommand") {
+				PBD::ID  id(n->property("midi-source")->value());
+				boost::shared_ptr<MidiSource> midi_source =
+					boost::dynamic_pointer_cast<MidiSource, Source>(source_by_id(id));
+				if(midi_source) {
+					ut->add_command(new MidiModel::DeltaCommand(midi_source->model(), *n));
+				} else {
+					error << "FIXME: Failed to downcast MidiSource for DeltaCommand" << endmsg;
+				}
+			} else if (n->name() == "DiffCommand") {
+				PBD::ID  id(n->property("midi-source")->value());
+				boost::shared_ptr<MidiSource> midi_source =
+					boost::dynamic_pointer_cast<MidiSource, Source>(source_by_id(id));
+				if(midi_source) {
+					ut->add_command(new MidiModel::DiffCommand(midi_source->model(), *n));
+				} else {
+					error << "FIXME: Failed to downcast MidiSource for DeltaCommand" << endmsg;
+				}
 
-    return 0;
+			} else {
+				error << string_compose(_("Couldn't figure out how to make a Command out of a %1 XMLNode."), n->name()) << endmsg;
+			}
+		}
+
+		_history.add (ut);
+	}
+
+	return 0;
 }
 
 void
@@ -2982,20 +2982,20 @@ Session::config_changed (std::string p, bool ours)
 	if (ours) {
 		set_dirty ();
 	}
-	
+
 	if (p == "seamless-loop") {
-		
+
 	} else if (p == "rf-speed") {
-		
+
 	} else if (p == "auto-loop") {
-		
+
 	} else if (p == "auto-input") {
-		
+
 		if (Config->get_monitoring_model() == HardwareMonitoring && transport_rolling()) {
 			/* auto-input only makes a difference if we're rolling */
-			
+
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-			
+
 			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 				if ((*i)->record_enabled ()) {
 					(*i)->monitor_input (!config.get_auto_input());
@@ -3006,22 +3006,22 @@ Session::config_changed (std::string p, bool ours)
 	} else if (p == "punch-in") {
 
 		Location* location;
-		
+
 		if ((location = _locations.auto_punch_location()) != 0) {
-			
+
 			if (config.get_punch_in ()) {
 				replace_event (Event::PunchIn, location->start());
 			} else {
 				remove_event (location->start(), Event::PunchIn);
 			}
 		}
-		
+
 	} else if (p == "punch-out") {
 
 		Location* location;
-		
+
 		if ((location = _locations.auto_punch_location()) != 0) {
-			
+
 			if (config.get_punch_out()) {
 				replace_event (Event::PunchOut, location->end());
 			} else {
@@ -3032,7 +3032,7 @@ Session::config_changed (std::string p, bool ours)
 	} else if (p == "edit-mode") {
 
 		Glib::Mutex::Lock lm (playlist_lock);
-		
+
 		for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 			(*i)->set_edit_mode (Config->get_edit_mode ());
 		}
@@ -3058,7 +3058,7 @@ Session::config_changed (std::string p, bool ours)
 		}
 
 	} else if (p == "midi-control") {
-		
+
 		//poke_midi_thread ();
 
 	} else if (p == "raid-path") {
@@ -3104,11 +3104,11 @@ Session::config_changed (std::string p, bool ours)
 		}
 
 	} else if (p == "send-mtc") {
-		
+
 		/* only set the internal flag if we have
 		   a port.
 		*/
-		
+
 		if (_mtc_port != 0) {
 			session_send_mtc = Config->get_send_mtc();
 			if (session_send_mtc) {
@@ -3120,24 +3120,24 @@ Session::config_changed (std::string p, bool ours)
 		}
 
 	} else if (p == "send-mmc") {
-		
+
 		/* only set the internal flag if we have
 		   a port.
 		*/
-		
+
 		if (_mmc_port != 0) {
 			session_send_mmc = Config->get_send_mmc();
 		} else {
 			mmc = 0;
-			session_send_mmc = false; 
+			session_send_mmc = false;
 		}
 
 	} else if (p == "midi-feedback") {
-		
+
 		/* only set the internal flag if we have
 		   a port.
 		*/
-		
+
 		if (_mtc_port != 0) {
 			session_midi_feedback = Config->get_midi_feedback();
 		}
@@ -3176,7 +3176,7 @@ Session::config_changed (std::string p, bool ours)
 
 		if (_mmc_port && Config->get_initial_program_change() >= 0) {
 			MIDI::byte buf[2];
-			
+
 			buf[0] = MIDI::program; // channel zero by default
 			buf[1] = (Config->get_initial_program_change() & 0x7f);
 
@@ -3186,7 +3186,7 @@ Session::config_changed (std::string p, bool ours)
 
 		if (_mmc_port && Config->get_initial_program_change() >= 0) {
 			MIDI::byte* buf = new MIDI::byte[2];
-			
+
 			buf[0] = MIDI::program; // channel zero by default
 			buf[1] = (Config->get_initial_program_change() & 0x7f);
 			// deliver_midi (_mmc_port, buf, 2);

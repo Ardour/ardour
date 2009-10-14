@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ PluginManager::PluginManager ()
 	load_favorites ();
 
 #ifdef HAVE_AUDIOUNITS
-	ProcessSerialNumber psn = { 0, kCurrentProcess }; 
+	ProcessSerialNumber psn = { 0, kCurrentProcess };
 	OSStatus returnCode = TransformProcessType(& psn, kProcessTransformToForegroundApplication);
 	if( returnCode != 0) {
 		error << _("Cannot become GUI app") << endmsg;
@@ -128,7 +128,7 @@ PluginManager::PluginManager ()
 		ladspa_plugin_whitelist.push_back (1061); // feedback delay line (max 5s)
 		ladspa_plugin_whitelist.push_back (1216); // gverb
 		ladspa_plugin_whitelist.push_back (2150); // tap pitch shifter
-	} 
+	}
 
 #ifdef HAVE_SLV2
 	_lv2_world = new LV2World();
@@ -159,45 +159,45 @@ PluginManager::refresh ()
 void
 PluginManager::ladspa_refresh ()
 {
-  	_ladspa_plugin_info.clear ();
-	
- 	static const char *standard_paths[] = {
- 		"/usr/local/lib64/ladspa",
- 		"/usr/local/lib/ladspa",
- 		"/usr/lib64/ladspa",
- 		"/usr/lib/ladspa",
- 		"/Library/Audio/Plug-Ins/LADSPA",
- 		""
- 	};
- 	
- 	/* allow LADSPA_PATH to augment, not override standard locations */
- 
- 	/* Only add standard locations to ladspa_path if it doesn't
- 	 * already contain them. Check for trailing '/'s too.
- 	 */
- 	 
- 	int i;
- 	for (i = 0; standard_paths[i][0]; i++) {
- 		size_t found = ladspa_path.find(standard_paths[i]);
- 		if (found != ladspa_path.npos) {
- 			switch (ladspa_path[found + strlen(standard_paths[i])]) {
- 				case ':' :
- 				case '\0':
- 					continue;
- 				case '/' :
- 					if (ladspa_path[found + strlen(standard_paths[i]) + 1] == ':' ||
- 					    ladspa_path[found + strlen(standard_paths[i]) + 1] == '\0') {
- 						continue;
- 					}
- 			}
- 		}
- 		if (!ladspa_path.empty())
- 			ladspa_path += ":";
- 
- 		ladspa_path += standard_paths[i]; 
- 		
-  	}
-  
+	_ladspa_plugin_info.clear ();
+
+	static const char *standard_paths[] = {
+		"/usr/local/lib64/ladspa",
+		"/usr/local/lib/ladspa",
+		"/usr/lib64/ladspa",
+		"/usr/lib/ladspa",
+		"/Library/Audio/Plug-Ins/LADSPA",
+		""
+	};
+
+	/* allow LADSPA_PATH to augment, not override standard locations */
+
+	/* Only add standard locations to ladspa_path if it doesn't
+	 * already contain them. Check for trailing '/'s too.
+	 */
+
+	int i;
+	for (i = 0; standard_paths[i][0]; i++) {
+		size_t found = ladspa_path.find(standard_paths[i]);
+		if (found != ladspa_path.npos) {
+			switch (ladspa_path[found + strlen(standard_paths[i])]) {
+				case ':' :
+				case '\0':
+					continue;
+				case '/' :
+					if (ladspa_path[found + strlen(standard_paths[i]) + 1] == ':' ||
+					    ladspa_path[found + strlen(standard_paths[i]) + 1] == '\0') {
+						continue;
+					}
+			}
+		}
+		if (!ladspa_path.empty())
+			ladspa_path += ":";
+
+		ladspa_path += standard_paths[i];
+
+	}
+
 	ladspa_discover_from_path (ladspa_path);
 }
 
@@ -209,14 +209,14 @@ PluginManager::add_ladspa_directory (string path)
 		ladspa_path += ':';
 		ladspa_path += path;
 		return 0;
-	} 
+	}
 	return -1;
 }
 
 static bool ladspa_filter (const string& str, void */*arg*/)
 {
 	/* Not a dotfile, has a prefix before a period, suffix is "so" */
-	
+
 	return str[0] != '.' && (str.length() > 3 && str.find (".so") == (str.length() - 3));
 }
 
@@ -242,7 +242,7 @@ PluginManager::ladspa_discover_from_path (string /*path*/)
 
 static bool rdf_filter (const string &str, void */*arg*/)
 {
-	return str[0] != '.' && 
+	return str[0] != '.' &&
 		   ((str.find(".rdf")  == (str.length() - 4)) ||
             (str.find(".rdfs") == (str.length() - 5)) ||
 		    (str.find(".n3")   == (str.length() - 3)));
@@ -310,7 +310,7 @@ PluginManager::add_lrdf_data (const string &path)
 	vector_delete (rdf_files);
 }
 
-int 
+int
 PluginManager::ladspa_discover (string path)
 {
 	void *module;
@@ -341,7 +341,7 @@ PluginManager::ladspa_discover (string path)
 			if (find (ladspa_plugin_whitelist.begin(), ladspa_plugin_whitelist.end(), descriptor->UniqueID) == ladspa_plugin_whitelist.end()) {
 				continue;
 			}
-		} 
+		}
 
 		PluginInfoPtr info(new LadspaPluginInfo);
 		info->name = descriptor->Name;
@@ -352,11 +352,11 @@ PluginManager::ladspa_discover (string path)
 		info->n_inputs = ChanCount();
 		info->n_outputs = ChanCount();
 		info->type = ARDOUR::LADSPA;
-		
+
 		char buf[32];
 		snprintf (buf, sizeof (buf), "%lu", descriptor->UniqueID);
 		info->unique_id = buf;
-		
+
 		for (uint32_t n=0; n < descriptor->PortCount; ++n) {
 			if ( LADSPA_IS_PORT_AUDIO (descriptor->PortDescriptors[n]) ) {
 				if ( LADSPA_IS_PORT_INPUT (descriptor->PortDescriptors[n]) ) {
@@ -481,7 +481,7 @@ PluginManager::add_vst_directory (string path)
 		vst_path += ':';
 		vst_path += path;
 		return 0;
-	} 
+	}
 	return -1;
 }
 
@@ -530,7 +530,7 @@ PluginManager::vst_discover (string path)
 				    finfo->name)
 			<< endl;
 	}
-	
+
 	PluginInfoPtr info(new VSTPluginInfo);
 
 	/* what a joke freeware VST is */
@@ -541,7 +541,7 @@ PluginManager::vst_discover (string path)
 		info->name = finfo->name;
 	}
 
-	
+
 	snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
 	info->unique_id = buf;
 	info->category = "VST";
@@ -551,7 +551,7 @@ PluginManager::vst_discover (string path)
 	info->n_inputs.set_audio (finfo->numInputs);
 	info->n_outputs.set_audio (finfo->numOutputs);
 	info->type = ARDOUR::VST;
-	
+
 	_vst_plugin_info.push_back (info);
 	fst_free_info (finfo);
 
@@ -595,7 +595,7 @@ PluginManager::save_favorites ()
 			ofs << "VST";
 			break;
 		}
-		
+
 		ofs << ' ' << (*i).unique_id << endl;
 	}
 
@@ -612,7 +612,7 @@ PluginManager::load_favorites ()
 	if (!ifs) {
 		return;
 	}
-	
+
 	std::string stype;
 	std::string id;
 	PluginType type;
@@ -642,10 +642,10 @@ PluginManager::load_favorites ()
 			      << endmsg;
 			continue;
 		}
-		
+
 		add_favorite (type, id);
 	}
-	
+
 	ifs.close ();
 }
 

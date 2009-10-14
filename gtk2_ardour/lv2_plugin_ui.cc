@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Paul Davis 
+    Copyright (C) 2008 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -106,7 +106,7 @@ LV2PluginUI::start_updating(GdkEventAny*)
 {
 	if (!_output_ports.empty()) {
 		_screen_update_connection.disconnect();
-		_screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect 
+		_screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect
 			(mem_fun(*this, &LV2PluginUI::output_update));
 	}
 	return false;
@@ -138,7 +138,7 @@ LV2PluginUI::output_update()
 		uint32_t index = _output_ports[i];
 		parameter_changed(index, _lv2->get_parameter(index));
 	}
-	
+
 }
 
 LV2PluginUI::LV2PluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<LV2Plugin> lv2p)
@@ -194,7 +194,7 @@ LV2PluginUI::lv2ui_instantiate(const Glib::ustring& title)
 	if (is_external_ui) {
 		free(features_dst);
 	}
-			
+
 	uint32_t num_ports = slv2_plugin_get_num_ports(_lv2->slv2_plugin());
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		if (_lv2->parameter_is_output(i) && _lv2->parameter_is_control(i) && is_update_wanted(i)) {
@@ -214,7 +214,7 @@ LV2PluginUI::lv2ui_instantiate(const Glib::ustring& title)
 			g_external_uis.push_back(_external_ui_ptr);
 		}
 	}
-	
+
 	_values = new float[num_ports];
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		bool ok;
@@ -226,7 +226,7 @@ LV2PluginUI::lv2ui_instantiate(const Glib::ustring& title)
 			}
 		}
 	}
-		
+
 	_lv2->ParameterChanged.connect(mem_fun(*this, &LV2PluginUI::parameter_changed));
 }
 
@@ -300,7 +300,7 @@ LV2PluginUI::on_window_show(const Glib::ustring& title)
 
 		LV2_EXTERNAL_UI_SHOW(_external_ui_ptr);
 		_screen_update_connection.disconnect();
-		_screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect 
+		_screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect
 			(mem_fun(*this, &LV2PluginUI::output_update));
 		return false;
 	}

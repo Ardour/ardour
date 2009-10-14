@@ -46,7 +46,7 @@ ExportFormatBase::SelectableCompatible::set_compatible (bool value)
 
 ExportFormatBase::ExportFormatBase ()
 {
-	
+
 }
 
 ExportFormatBase::ExportFormatBase (ExportFormatBase const & other) :
@@ -61,7 +61,7 @@ ExportFormatBase::ExportFormatBase (ExportFormatBase const & other) :
 
 ExportFormatBase::~ExportFormatBase ()
 {
-	
+
 }
 
 boost::shared_ptr<ExportFormatBase>
@@ -86,9 +86,9 @@ boost::shared_ptr<ExportFormatBase>
 ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation operation) const
 {
 	boost::shared_ptr<ExportFormatBase> result (new ExportFormatBase ());
-	
+
 	/* Sets */
-	
+
 	// Endiannesses
 	{
 		EndianSet::const_iterator start1 = endiannesses.begin();
@@ -96,7 +96,7 @@ ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation
 		EndianSet::const_iterator start2 = other.endiannesses.begin();
 		EndianSet::const_iterator end2 = other.endiannesses.end();
 		std::insert_iterator<EndianSet> insert (result->endiannesses, result->endiannesses.begin());
-		
+
 		switch (operation) {
 		  case SetIntersection:
 			std::set_intersection (start1, end1, start2, end2, insert);
@@ -109,7 +109,7 @@ ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation
 			break;
 		}
 	}
-		
+
 	// Sample formats
 	{
 		SampleFormatSet::const_iterator start1 = sample_formats.begin();
@@ -117,7 +117,7 @@ ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation
 		SampleFormatSet::const_iterator start2 = other.sample_formats.begin();
 		SampleFormatSet::const_iterator end2 = other.sample_formats.end();
 		std::insert_iterator<SampleFormatSet> insert (result->sample_formats, result->sample_formats.begin());
-		
+
 		switch (operation) {
 		  case SetIntersection:
 			std::set_intersection (start1, end1, start2, end2, insert);
@@ -130,8 +130,8 @@ ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation
 			break;
 		}
 	}
-	
-		
+
+
 	// Sample rates
 	{
 		SampleRateSet::const_iterator start1 = sample_rates.begin();
@@ -139,7 +139,7 @@ ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation
 		SampleRateSet::const_iterator start2 = other.sample_rates.begin();
 		SampleRateSet::const_iterator end2 = other.sample_rates.end();
 		std::insert_iterator<SampleRateSet> insert (result->sample_rates, result->sample_rates.begin());
-	
+
 		switch (operation) {
 		  case SetIntersection:
 			std::set_intersection (start1, end1, start2, end2, insert);
@@ -152,7 +152,7 @@ ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation
 			break;
 		}
 	}
-	
+
 	// Format ids
 	{
 		FormatSet::const_iterator start1 = format_ids.begin();
@@ -160,7 +160,7 @@ ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation
 		FormatSet::const_iterator start2 = other.format_ids.begin();
 		FormatSet::const_iterator end2 = other.format_ids.end();
 		std::insert_iterator<FormatSet> insert (result->format_ids, result->format_ids.begin());
-	
+
 		switch (operation) {
 		  case SetIntersection:
 			std::set_intersection (start1, end1, start2, end2, insert);
@@ -173,7 +173,7 @@ ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation
 			break;
 		}
 	}
-	
+
 	// Qualities
 	{
 		QualitySet::const_iterator start1 = qualities.begin();
@@ -181,7 +181,7 @@ ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation
 		QualitySet::const_iterator start2 = other.qualities.begin();
 		QualitySet::const_iterator end2 = other.qualities.end();
 		std::insert_iterator<QualitySet> insert (result->qualities, result->qualities.begin());
-	
+
 		switch (operation) {
 		  case SetIntersection:
 			std::set_intersection (start1, end1, start2, end2, insert);
@@ -194,7 +194,7 @@ ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation
 			break;
 		}
 	}
-	
+
 	return result;
 }
 

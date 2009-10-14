@@ -18,7 +18,7 @@ CanvasNote::on_event(GdkEvent* ev)
 	}
 }
 
-void 
+void
 CanvasNote::move_event(double dx, double dy)
 {
 	property_x1() = property_x1() + dx;

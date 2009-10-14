@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@
 #include "pbd/fastlog.h"
 #include "pbd/ringbufferNPT.h"
 #include "pbd/stateful.h"
-#include "pbd/statefuldestructible.h" 
+#include "pbd/statefuldestructible.h"
 
 #include "ardour/ardour.h"
 #include "ardour/location.h"
@@ -59,7 +59,7 @@ class Send;
 class Session;
 
 class Diskstream : public SessionObject, public boost::noncopyable
-{	
+{
   public:
 	enum Flag {
 		Recordable  = 0x1,
@@ -71,7 +71,7 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	Diskstream (Session &, const std::string& name, Flag f = Recordable);
 	Diskstream (Session &, const XMLNode&);
 	virtual ~Diskstream();
-	
+
 	bool set_name (const std::string& str);
 
 	boost::shared_ptr<ARDOUR::IO> io() const { return _io; }
@@ -86,7 +86,7 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	AlignStyle alignment_style() const { return _alignment_style; }
 	void       set_align_style (AlignStyle);
 	void       set_persistent_align_style (AlignStyle a) { _persistent_alignment_style = a; }
-	
+
 	nframes_t roll_delay() const { return _roll_delay; }
 	void      set_roll_delay (nframes_t);
 
@@ -103,7 +103,7 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	bool           non_layered()  const { return _flags & NonLayered; }
 	bool           reversed()    const { return _actual_speed < 0.0f; }
 	double         speed()       const { return _visible_speed; }
-	
+
 	virtual void punch_in()  {}
 	virtual void punch_out() {}
 
@@ -122,7 +122,7 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	nframes_t current_capture_end()   const { return capture_start_frame + capture_captured; }
 	nframes_t get_capture_start_frame (uint32_t n=0);
 	nframes_t get_captured_frames (uint32_t n=0);
-	
+
 	ChanCount n_channels() { return _n_channels; }
 
 	static nframes_t disk_io_frames() { return disk_io_chunk_frames; }
@@ -131,7 +131,7 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	/* Stateful */
 	virtual XMLNode& get_state(void) = 0;
 	virtual int      set_state(const XMLNode& node) = 0;
-	
+
 	virtual void monitor_input (bool) {}
 
 	nframes_t    capture_offset() const { return _capture_offset; }
@@ -193,12 +193,12 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	virtual void recover (); /* called if commit will not be called, but process was */
 
 	//private:
-	
+
 	enum TransitionType {
 		CaptureStart = 0,
 		CaptureEnd
 	};
-	
+
 	struct CaptureTransition {
 		TransitionType   type;
 		nframes_t   capture_val; ///< The start or end file frame position
@@ -207,10 +207,10 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	/* The two central butler operations */
 	virtual int do_flush (RunContext context, bool force = false) = 0;
 	virtual int do_refill () = 0;
-	
+
 	/** For non-butler contexts (allocates temporary working buffers) */
 	virtual int do_refill_with_alloc() = 0;
-	
+
 	/* XXX fix this redundancy ... */
 
 	virtual void playlist_changed (Change);
@@ -221,8 +221,8 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	virtual void transport_looped (nframes_t transport_frame) = 0;
 
 	struct CaptureInfo {
-	    uint32_t start;
-	    uint32_t frames;
+		uint32_t start;
+		uint32_t frames;
 	};
 
 	virtual void init (Flag);
@@ -263,7 +263,7 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	/* items needed for speed change logic */
 	bool         _buffer_reallocation_required;
 	bool         _seek_required;
-	
+
 	bool          force_refill;
 	nframes_t     capture_start_frame;
 	nframes_t     capture_captured;
@@ -287,10 +287,10 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	nframes_t     wrap_buffer_size;
 	nframes_t     speed_buffer_size;
 
-	double        _speed;	
+	double        _speed;
 	double        _target_speed;
-	
-	nframes_t     file_frame;		
+
+	nframes_t     file_frame;
 	nframes_t     playback_sample;
 	nframes_t     playback_distance;
 	bool          commit_should_unlock;
@@ -312,7 +312,7 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	sigc::connection plmod_connection;
 	sigc::connection plgone_connection;
 	sigc::connection plregion_connection;
-	
+
 	Flag _flags;
 
 	void route_going_away ();

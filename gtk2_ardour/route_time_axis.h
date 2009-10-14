@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -89,7 +89,7 @@ public:
 	bool show_automation(Evoral::Parameter param);
 	void set_layer_display (LayerDisplay d);
 	LayerDisplay layer_display () const;
-		
+
 	boost::shared_ptr<ARDOUR::Region> find_next_region (nframes_t pos, ARDOUR::RegionPoint, int32_t dir);
 	nframes64_t find_next_region_boundary (nframes64_t pos, int32_t dir);
 
@@ -107,36 +107,36 @@ public:
 	/* group playlist name resolving */
 	std::string resolve_new_group_playlist_name(std::string &, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 
-	
+
 	void build_playlist_menu (Gtk::Menu *);
 
 	void add_underlay (StreamView*, bool update_xml = true);
 	void remove_underlay (StreamView*);
 	void build_underlay_menu(Gtk::Menu*);
-	
+
 	int set_state (const XMLNode&);
-	
+
 	/* This is a bit nasty to expose :/ */
 	struct RouteAutomationNode {
 		Evoral::Parameter                         param;
 		Gtk::CheckMenuItem*                       menu_item;
 		boost::shared_ptr<AutomationTimeAxisView> track;
-	    
+
 		RouteAutomationNode (Evoral::Parameter par, Gtk::CheckMenuItem* mi, boost::shared_ptr<AutomationTimeAxisView> tr)
 		    : param (par), menu_item (mi), track (tr) {}
 	};
 
 	virtual void create_automation_child (const Evoral::Parameter& param, bool show) = 0;
-	
+
 	/* make sure we get the right version of this */
 
 	XMLNode* get_automation_child_xml_node (Evoral::Parameter param) { return RouteUI::get_automation_child_xml_node (param); }
-	
+
 	typedef std::map<Evoral::Parameter, RouteAutomationNode*> AutomationTracks;
 	AutomationTracks automation_tracks() { return _automation_tracks; }
 
 	boost::shared_ptr<AutomationTimeAxisView> automation_child(Evoral::Parameter param);
-	
+
 	std::string         name() const;
 	StreamView*         view() const { return _view; }
 	ARDOUR::RouteGroup* route_group() const;
@@ -174,29 +174,29 @@ protected:
 	    Gtk::Menu*                           menu;
 	    std::vector<ProcessorAutomationNode*>     lines;
 
-	    ProcessorAutomationInfo (boost::shared_ptr<ARDOUR::Processor> i) 
+	    ProcessorAutomationInfo (boost::shared_ptr<ARDOUR::Processor> i)
 		    : processor (i), valid (true), menu (0) {}
 
 	    ~ProcessorAutomationInfo ();
 	};
-	
+
 
 	void diskstream_changed ();
 	void update_diskstream_display ();
-	
+
 	gint edit_click  (GdkEventButton *);
 
 	void processors_changed ();
-	
+
 	void add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Processor>);
 	void remove_processor_automation_node (ProcessorAutomationNode* pan);
 
 	void processor_menu_item_toggled (RouteTimeAxisView::ProcessorAutomationInfo*,
 	                                 RouteTimeAxisView::ProcessorAutomationNode*);
-	
+
 	void processor_automation_track_hidden (ProcessorAutomationNode*,
 	                                       boost::shared_ptr<ARDOUR::Processor>);
-	
+
 	void automation_track_hidden (Evoral::Parameter param);
 
 	RouteAutomationNode* automation_track(Evoral::Parameter param);
@@ -204,7 +204,7 @@ protected:
 
 	ProcessorAutomationNode*
 	find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> i, Evoral::Parameter);
-	
+
 	boost::shared_ptr<AutomationLine>
 	find_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> i, Evoral::Parameter);
 
@@ -212,7 +212,7 @@ protected:
 	void add_existing_processor_automation_curves (boost::weak_ptr<ARDOUR::Processor>);
 
 	void add_automation_child(Evoral::Parameter param, boost::shared_ptr<AutomationTimeAxisView> track, bool show=true);
-	
+
 	void reset_processor_automation_curves ();
 
 	void take_name_changed (void *src);
@@ -222,26 +222,26 @@ protected:
 	void update_rec_display ();
 
 	virtual void label_view ();
-	
+
 	void set_route_group_from_menu (ARDOUR::RouteGroup *);
 
 	void reset_samples_per_unit ();
 
 	void select_track_color();
-	
+
 	virtual void build_automation_action_menu ();
 	virtual void append_extra_display_menu_items () {}
 	void         build_display_menu ();
-	
+
 	void align_style_changed ();
 	void set_align_style (ARDOUR::AlignStyle);
-	
+
 	void         playlist_click ();
 	void         show_playlist_selector ();
 	void         playlist_changed ();
 
 	void rename_current_playlist ();
-	
+
 	void         automation_click ();
 	void         toggle_automation_track (Evoral::Parameter param);
 	virtual void show_all_automation ();
@@ -254,7 +254,7 @@ protected:
 	void hide_click ();
 
 	void speed_changed ();
-	
+
 	void map_frozen ();
 
 	void color_handler ();
@@ -264,7 +264,7 @@ protected:
 	StreamView*           _view;
 	ArdourCanvas::Canvas& parent_canvas;
 	bool                  no_redraw;
-  
+
 	Gtk::HBox   other_button_hbox;
 	Gtk::Table  button_table;
 	Gtk::Button processor_button;
@@ -274,7 +274,7 @@ protected:
 	Gtk::Button automation_button;
 	Gtk::Button hide_button;
 	Gtk::Button visual_button;
-	
+
 	Gtk::Menu           subplugin_menu;
 	Gtk::Menu*          automation_action_menu;
 	RouteGroupMenu*     route_group_menu;
@@ -304,14 +304,14 @@ protected:
 
 	typedef std::vector<boost::shared_ptr<AutomationLine> > ProcessorAutomationCurves;
 	ProcessorAutomationCurves processor_automation_curves;
-	
+
 	// Set from XML so context menu automation buttons can be correctly initialized
 	std::set<Evoral::Parameter> _show_automation;
 
 	AutomationTracks _automation_tracks;
 
 	void post_construct ();
-	
+
 	GainMeterBase gm;
 
 	static Glib::RefPtr<Gdk::Pixbuf> slider;

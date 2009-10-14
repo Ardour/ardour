@@ -1,16 +1,16 @@
 /*
-    Copyright (C) 2006 Paul Davis 
-    
+    Copyright (C) 2006 Paul Davis
+
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
     Software Foundation; either version 2 of the License, or (at your option)
     any later version.
-    
+
     This program is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
-    
+
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     675 Mass Ave, Cambridge, MA 02139, USA.
@@ -88,7 +88,7 @@ BufferSet::attach_buffers(PortSet& ports, nframes_t nframes, nframes_t offset)
 			v.push_back(&(p->get_buffer(nframes, offset)));
 		}
 	}
-	
+
 	_count = ports.count();
 	_available = ports.count();
 
@@ -110,7 +110,7 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 
 	// The vector of buffers of the type we care about
 	BufferVec& bufs = _buffers[type];
-	
+
 	// If we're a mirror just make sure we're ok
 	if (_is_mirror) {
 		assert(_count.get(type) >= num_buffers);
@@ -133,7 +133,7 @@ BufferSet::ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capac
 		for (size_t i = 0; i < num_buffers; ++i) {
 			bufs.push_back(Buffer::create(type, buffer_capacity));
 		}
-	
+
 		_available.set(type, num_buffers);
 		_count.set (type, num_buffers);
 	}
@@ -177,7 +177,7 @@ BufferSet::ensure_buffers(const ChanCount& chns, size_t buffer_capacity)
 		BufferVec& bufs = _buffers[*t];
 
 		uint32_t nbufs = chns.get (*t);
-		
+
 		if (nbufs == 0) {
 			// Nuke it
 			for (BufferVec::iterator i = bufs.begin(); i != bufs.end(); ++i) {
@@ -191,21 +191,21 @@ BufferSet::ensure_buffers(const ChanCount& chns, size_t buffer_capacity)
 		// rebuild it (so I'm lazy..)
 		if (bufs.size() < nbufs
 		    || (bufs.size() > 0 && bufs[0]->capacity() < buffer_capacity)) {
-			
+
 			// Nuke it
 			for (BufferVec::iterator i = bufs.begin(); i != bufs.end(); ++i) {
 				delete (*i);
 			}
 			bufs.clear();
-			
+
 			// Rebuild it
 			for (size_t i = 0; i < nbufs; ++i) {
 				bufs.push_back(Buffer::create(*t, buffer_capacity));
 			}
-			
+
 			_available.set (*t, nbufs);
 		}
-		
+
 #ifdef HAVE_SLV2
 		// Ensure enough low level MIDI format buffers are available for conversion
 		// in both directions (input & output, out-of-place)
@@ -215,13 +215,13 @@ BufferSet::ensure_buffers(const ChanCount& chns, size_t buffer_capacity)
 			}
 		}
 #endif
-		
+
 		// Post-conditions
 		assert(bufs[0]->type() == *t);
 		assert(bufs.size() == _available.get(*t));
 		assert(bufs[0]->capacity() >= buffer_capacity);
 	}
-	
+
 	assert (available() == chns);
 }
 
@@ -251,7 +251,7 @@ BufferSet::get_lv2_midi(bool input, size_t i)
 	MidiBuffer& mbuf = get_midi(i);
 	LV2Buffers::value_type b = _lv2_buffers.at(i * 2 + (input ? 0 : 1));
 	LV2EventBuffer* ebuf = b.second;
-	
+
 	ebuf->reset();
 	if (input) {
 		for (MidiBuffer::iterator e = mbuf.begin(); e != mbuf.end(); ++e) {

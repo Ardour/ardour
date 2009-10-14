@@ -33,7 +33,7 @@ class FFTGraph;
 class FFTResult
 {
 	public:
-		
+
 		~FFTResult();
 
 		void analyzeWindow(float *window);
@@ -44,15 +44,15 @@ class FFTResult
 		float avgAt(int x);
 		float maxAt(int x);
 		float minAt(int x);
-		
+
 		float minimum() const { return _minimum; }
 		float maximum() const { return _maximum; }
-		
+
 		Gdk::Color get_color() const { return _color; }
-		
+
 	private:
 		FFTResult(FFTGraph *graph, Gdk::Color color, std::string trackname);
-		
+
 		int 	_averages;
 
 		float*	_data_avg;
@@ -68,10 +68,10 @@ class FFTResult
 		float 	_maximum;
 
 		FFTGraph *_graph;
-		
+
 		Gdk::Color _color;
 		std::string _trackname;
-		
+
 	friend class FFTGraph;
 };
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2007 Paul Davis 
+    Copyright (C) 2002-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@
 
 namespace ARDOUR {
 
-class AudioEngine;	
-  
+class AudioEngine;
+
 /** A set of `channels', each of which is associated with 0 or more ports.
  *  Each channel has a name which can be anything useful.
  *  Intended for grouping things like, for example, a buss' outputs.
@@ -52,7 +52,7 @@ class Bundle : public sigc::trackable
 		bool operator== (Channel const &o) const {
 			return name == o.name && ports == o.ports;
 		}
-		
+
 		std::string name;
 		PortList ports;
 	};
@@ -61,7 +61,7 @@ class Bundle : public sigc::trackable
 	Bundle (std::string const &, bool i = true);
 	Bundle (std::string const &, DataType, bool i = true);
 	Bundle (boost::shared_ptr<Bundle>);
-	
+
 	virtual ~Bundle() {}
 
 	/** @return Number of channels that this Bundle has */
@@ -127,7 +127,7 @@ class Bundle : public sigc::trackable
 	sigc::signal<void, Change> Changed;
 
   protected:
-	
+
 	/// mutex for _channel_ports and _channel_names
 	/// XXX: is this necessary?
 	mutable Glib::Mutex _channel_mutex;
@@ -137,7 +137,7 @@ class Bundle : public sigc::trackable
 	int set_channels (std::string const &);
 	int parse_io_string (std::string const &, std::vector<std::string> &);
 	void emit_changed (Change);
-	
+
 	std::string _name;
 	DataType _type;
 	bool _ports_are_inputs;
@@ -151,14 +151,14 @@ class Bundle : public sigc::trackable
 struct BundleChannel
 {
 	BundleChannel () : channel (0) {}
-	
+
 	BundleChannel (boost::shared_ptr<Bundle> b, uint32_t c)
 		: bundle (b), channel (c) {}
-	
+
 	bool operator== (BundleChannel const& other) const {
 		return bundle == other.bundle && channel == other.channel;
 	}
-	
+
 	bool operator!= (BundleChannel const& other) const {
 		return bundle != other.bundle || channel != other.channel;
 	}
@@ -166,7 +166,7 @@ struct BundleChannel
 	boost::shared_ptr<Bundle> bundle;
 	uint32_t channel;
 };
-	
+
 }
 
 #endif /* __ardour_bundle_h__ */

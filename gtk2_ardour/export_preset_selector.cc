@@ -33,27 +33,27 @@ ExportPresetSelector::ExportPresetSelector () :
 	list = Gtk::ListStore::create (cols);
 	entry.set_model (list);
 	entry.set_text_column (cols.label);
-	
+
 	pack_start (label, false, false, 0);
 	pack_start (entry, true, true, 6);
 	pack_start (save_button, false, false, 0);
 	pack_start (remove_button, false, false, 6);
 	pack_start (new_button, false, false, 0);
-	
+
 	entry.set_name ("PaddedButton");
 	save_button.set_name ("PaddedButton");
 	remove_button.set_name ("PaddedButton");
 	new_button.set_name ("PaddedButton");
-	
+
 	save_button.set_sensitive (false);
 	remove_button.set_sensitive (false);
 	new_button.set_sensitive (false);
-	
+
 	select_connection = entry.signal_changed().connect (sigc::mem_fun (*this, &ExportPresetSelector::update_selection));
 	save_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportPresetSelector::save_current));
 	new_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportPresetSelector::save_current));
 	remove_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportPresetSelector::remove_current));
-	
+
 	show_all_children ();
 }
 
@@ -68,15 +68,15 @@ void
 ExportPresetSelector::sync_with_manager ()
 {
 	list->clear();
-	
+
 	PresetList const & presets = profile_manager->get_presets();
 	Gtk::ListStore::iterator tree_it;
-	
+
 	for (PresetList::const_iterator it = presets.begin(); it != presets.end(); ++it) {
 		tree_it = list->append();
 		tree_it->set_value (cols.preset, *it);
 		tree_it->set_value (cols.label, Glib::ustring ((*it)->name()));
-		
+
 		if (*it == current) {
 			select_connection.block (true);
 			entry.set_active (tree_it);
@@ -91,13 +91,13 @@ ExportPresetSelector::update_selection ()
 	Gtk::ListStore::iterator it = entry.get_active ();
 	Glib::ustring text = entry.get_entry()->get_text();
 	bool preset_name_exists = false;
-	
+
 	for (PresetList::const_iterator it = profile_manager->get_presets().begin(); it != profile_manager->get_presets().end(); ++it) {
 		if (!(*it)->name().compare (text)) { preset_name_exists = true; }
 	}
-	
+
 	if (list->iter_is_valid (it)) {
-	
+
 		previous = current = it->get_value (cols.preset);
 		if (!profile_manager->load_preset (current)) {
 			Gtk::MessageDialog dialog (_("The selected preset did not load successfully!\nPerhaps it references a format that has been removed?"),
@@ -106,14 +106,14 @@ ExportPresetSelector::update_selection ()
 		}
 		sync_with_manager ();
 		CriticalSelectionChanged();
-		
+
 		/* Make an edit, so that signal changed will be emitted on re-selection */
-		
+
 		select_connection.block (true);
 		entry.get_entry()->set_text ("");
 		entry.get_entry()->set_text (text);
 		select_connection.block (false);
-	
+
 	} else { // Text has been edited, this should not make any changes in the profile manager
 		if (previous && !text.compare (previous->name())) {
 			current = previous;
@@ -121,7 +121,7 @@ ExportPresetSelector::update_selection ()
 			current.reset ();
 		}
 	}
-	
+
 	save_button.set_sensitive (current);
 	remove_button.set_sensitive (current);
 	new_button.set_sensitive (!current && !text.empty() && !preset_name_exists);
@@ -131,7 +131,7 @@ void
 ExportPresetSelector::save_current ()
 {
 	if (!profile_manager) { return; }
-	
+
 	previous = current = profile_manager->save_preset (entry.get_entry()->get_text());
 	sync_with_manager ();
 	update_selection (); // Update preset widget states
@@ -141,7 +141,7 @@ void
 ExportPresetSelector::remove_current ()
 {
 	if (!profile_manager) { return; }
-	
+
 	profile_manager->remove_preset();
 	entry.get_entry()->set_text ("");
 	sync_with_manager ();

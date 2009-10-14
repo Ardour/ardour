@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 */
 
-#include <cstdio> // for sprintf, grrr 
+#include <cstdio> // for sprintf, grrr
 #include <cstdlib>
 #include <cmath>
 #include <string>
@@ -65,7 +65,7 @@ Editor::remove_metric_marks ()
 		delete_when_idle (*x);
 	}
 	metric_marks.clear ();
-}	
+}
 
 void
 Editor::draw_metric_marks (const Metrics& metrics)
@@ -74,21 +74,21 @@ Editor::draw_metric_marks (const Metrics& metrics)
 	const MeterSection *ms;
 	const TempoSection *ts;
 	char buf[64];
-	
+
 	remove_metric_marks ();
-	
+
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
-		
+
 		if ((ms = dynamic_cast<const MeterSection*>(*i)) != 0) {
 			snprintf (buf, sizeof(buf), "%g/%g", ms->beats_per_bar(), ms->note_divisor ());
-			metric_marks.push_back (new MeterMarker (*this, *meter_group, ARDOUR_UI::config()->canvasvar_MeterMarker.get(), buf, 
+			metric_marks.push_back (new MeterMarker (*this, *meter_group, ARDOUR_UI::config()->canvasvar_MeterMarker.get(), buf,
 								 *(const_cast<MeterSection*>(ms))));
 		} else if ((ts = dynamic_cast<const TempoSection*>(*i)) != 0) {
 			snprintf (buf, sizeof (buf), "%.2f", ts->beats_per_minute());
-			metric_marks.push_back (new TempoMarker (*this, *tempo_group, ARDOUR_UI::config()->canvasvar_TempoMarker.get(), buf, 
+			metric_marks.push_back (new TempoMarker (*this, *tempo_group, ARDOUR_UI::config()->canvasvar_TempoMarker.get(), buf,
 								 *(const_cast<TempoSection*>(ts))));
 		}
-		
+
 	}
 
 }
@@ -116,7 +116,7 @@ Editor::redisplay_tempo (bool immediate_redraw)
 	if (!session) {
 		return;
 	}
-	
+
 	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_frames()); // redraw rulers and measures
 
 	compute_current_bbt_points (leftmost_frame, leftmost_frame + current_page_frames());
@@ -159,7 +159,7 @@ Editor::compute_current_bbt_points (nframes_t leftmost, nframes_t rightmost)
 		next_beat.beats = 1;
 	}
 	next_beat.ticks = 0;
-	
+
 	delete current_bbt_points;
 	current_bbt_points = 0;
 
@@ -183,7 +183,7 @@ Editor::redraw_measures ()
 void
 Editor::draw_measures ()
 {
-	if (session == 0 || _show_measures == false || 
+	if (session == 0 || _show_measures == false ||
 	    !current_bbt_points || current_bbt_points->empty()) {
 		return;
 	}
@@ -204,7 +204,7 @@ Editor::mouse_add_new_tempo_event (nframes64_t frame)
 
 	TempoMap& map(session->tempo_map());
 	TempoDialog tempo_dialog (map, frame, _("add"));
-	
+
 	tempo_dialog.set_position (Gtk::WIN_POS_MOUSE);
 	//this causes compiz to display no border.
 	//tempo_dialog.signal_realize().connect (bind (sigc::ptr_fun (set_decoration), &tempo_dialog, Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
@@ -220,20 +220,20 @@ Editor::mouse_add_new_tempo_event (nframes64_t frame)
 
 	double bpm = 0;
 	BBT_Time requested;
-	
+
 	bpm = tempo_dialog.get_bpm ();
 	double nt = tempo_dialog.get_note_type();
 	bpm = max (0.01, bpm);
-	
+
 	tempo_dialog.get_bbt_time (requested);
-	
+
 	begin_reversible_command (_("add tempo mark"));
         XMLNode &before = map.get_state();
 	map.add_tempo (Tempo (bpm,nt), requested);
         XMLNode &after = map.get_state();
 	session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 	commit_reversible_command ();
-	
+
 	//map.dump (cerr);
 }
 
@@ -250,11 +250,11 @@ Editor::mouse_add_new_meter_event (nframes64_t frame)
 
 	meter_dialog.set_position (Gtk::WIN_POS_MOUSE);
 
-	//this causes compiz to display no border.. 
+	//this causes compiz to display no border..
 	//meter_dialog.signal_realize().connect (bind (sigc::ptr_fun (set_decoration), &meter_dialog, Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
 
 	ensure_float (meter_dialog);
-	
+
 	switch (meter_dialog.run ()) {
 	case RESPONSE_ACCEPT:
 		break;
@@ -264,7 +264,7 @@ Editor::mouse_add_new_meter_event (nframes64_t frame)
 
 	double bpb = meter_dialog.get_bpb ();
 	bpb = max (1.0, bpb); // XXX is this a reasonable limit?
-	
+
 	double note_type = meter_dialog.get_note_type ();
 	BBT_Time requested;
 
@@ -275,7 +275,7 @@ Editor::mouse_add_new_meter_event (nframes64_t frame)
 	map.add_meter (Meter (bpb, note_type), requested);
 	session->add_command(new MementoCommand<TempoMap>(map, &before, &map.get_state()));
 	commit_reversible_command ();
-	
+
 	//map.dump (cerr);
 }
 
@@ -293,7 +293,7 @@ Editor::remove_tempo_marker (ArdourCanvas::Item* item)
 	if ((tempo_marker = dynamic_cast<TempoMarker*> (marker)) == 0) {
 		fatal << _("programming error: marker for tempo is not a tempo marker!") << endmsg;
 		/*NOTREACHED*/
-	}		
+	}
 
 	if (tempo_marker->tempo().movable()) {
 	  Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::real_remove_tempo_marker), &tempo_marker->tempo()));
@@ -318,7 +318,7 @@ Editor::edit_meter_section (MeterSection* section)
 
 	double bpb = meter_dialog.get_bpb ();
 	bpb = max (1.0, bpb); // XXX is this a reasonable limit?
-	
+
 	double note_type = meter_dialog.get_note_type ();
 
 	begin_reversible_command (_("replace tempo mark"));
@@ -378,7 +378,7 @@ Editor::edit_tempo_marker (ArdourCanvas::Item *item)
 	if ((tempo_marker = dynamic_cast<TempoMarker*> (marker)) == 0) {
 		fatal << _("programming error: marker for tempo is not a tempo marker!") << endmsg;
 		/*NOTREACHED*/
-	}		
+	}
 
 	edit_tempo_section (&tempo_marker->tempo());
 }
@@ -397,8 +397,8 @@ Editor::edit_meter_marker (ArdourCanvas::Item *item)
 	if ((meter_marker = dynamic_cast<MeterMarker*> (marker)) == 0) {
 		fatal << _("programming error: marker for meter is not a meter marker!") << endmsg;
 		/*NOTREACHED*/
-	}		
-	
+	}
+
 	edit_meter_section (&meter_marker->meter());
 }
 
@@ -429,7 +429,7 @@ Editor::remove_meter_marker (ArdourCanvas::Item* item)
 	if ((meter_marker = dynamic_cast<MeterMarker*> (marker)) == 0) {
 		fatal << _("programming error: marker for meter is not a meter marker!") << endmsg;
 		/*NOTREACHED*/
-	}		
+	}
 
 	if (meter_marker->meter().movable()) {
 	  Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::real_remove_meter_marker), &meter_marker->meter()));

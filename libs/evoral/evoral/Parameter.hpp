@@ -2,16 +2,16 @@
 /* This file is part of Evoral.
  * Copyright (C) 2008 Dave Robillard <http://drobilla.net>
  * Copyright (C) 2000-2008 Paul Davis
- * 
+ *
  * Evoral is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation; either version 2 of the License, or (at your option) any later
  * version.
- * 
+ *
  * Evoral is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
@@ -45,9 +45,9 @@ public:
 	Parameter(uint32_t type, uint8_t channel=0, uint32_t id=0)
 		: _type(type), _id(id), _channel(channel)
 	{}
-    
+
 	virtual ~Parameter() {}
-    
+
 	inline uint32_t type()    const { return _type; }
 	inline uint8_t  channel() const { return _channel; }
 	inline uint32_t id()      const { return _id; }
@@ -60,26 +60,26 @@ public:
 	inline bool operator==(const Parameter& id) const {
 		return (_type == id._type && _channel == id._channel && _id == id._id );
 	}
-	
+
 	/** Strict weak ordering
 	 * See: http://www.sgi.com/tech/stl/StrictWeakOrdering.html
 	 * Sort Parameters first according to type then to id and lastly to channel.
-	 *  
+	 *
 	 * Proof:
 	 * <ol>
 	 * <li>Irreflexivity: f(x, x) is false because of the irreflexivity of \c < in each branch.</li>
-	 * <li>Antisymmetry: given x != y, f(x, y) implies !f(y, x) because of the same 
+	 * <li>Antisymmetry: given x != y, f(x, y) implies !f(y, x) because of the same
 	 *     property of \c < in each branch and the symmetry of operator==. </li>
 	 * <li>Transitivity: let f(x, y) and f(y, z) => f(x, z) be true.
 	 *    We prove by contradiction, assuming the contrary:
-	 *    f(x, y) and f(x, z) hold => !f(x, z) 
-	 *    
+	 *    f(x, y) and f(x, z) hold => !f(x, z)
+	 *
 	 *    That implies one of the following:
 	 * 	  <ol>
 	 *      <li> x == z which contradicts the assumption f(x, y) and f(y, x)
 	 *                 because of antisymmetry.
 	 *      </li>
-	 *      <li> f(z, x) is true. That would imply that one of the ivars (we call it i) 
+	 *      <li> f(z, x) is true. That would imply that one of the ivars (we call it i)
 	 *           of x is greater than the same ivar in z while all "previous" ivars
 	 *           are equal. That would imply that also in y all those "previous"
 	 *           ivars are equal and because if x.i > z.i it is impossible
@@ -87,7 +87,7 @@ public:
 	 *           time which contradicts the assumption.
 	 *      </li>
 	 *      Therefore f(x, z) is true (transitivity)
-	 *    </ol> 
+	 *    </ol>
 	 * </li>
 	 * </ol>
 	 */
@@ -99,12 +99,12 @@ public:
 		} else if (_type == other._type && _channel == other._channel && _id < other._id ) {
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	inline operator bool() const { return (_type != 0); }
-	
+
 	/** Not used in indentity/comparison */
 	struct Metadata {
 		Metadata(double low=0.0, double high=1.0, double mid=0.0)
@@ -114,11 +114,11 @@ public:
 		double max;
 		double normal;
 	};
-	
+
 	inline static void set_range(uint32_t type, double min, double max, double normal) {
 		_type_metadata[type] = Metadata(min, max, normal);
 	}
-	
+
 	inline void set_range(double min, double max, double normal) {
 		_metadata = boost::shared_ptr<Metadata>(new Metadata(min, max, normal));
 	}
@@ -136,12 +136,12 @@ public:
 
 protected:
 	// Default copy constructor is ok
-	
+
 	// ID (used in comparison)
 	uint32_t _type;
 	uint32_t _id;
 	uint8_t  _channel;
-	
+
 	boost::shared_ptr<Metadata> _metadata;
 
 	typedef std::map<uint32_t, Metadata> TypeMetadata;

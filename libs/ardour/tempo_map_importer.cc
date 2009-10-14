@@ -39,11 +39,11 @@ TempoMapImportHandler::TempoMapImportHandler (XMLTree const & source, Session & 
 {
 	XMLNode const * root = source.root();
 	XMLNode const * tempo_map;
-	
+
 	if (!(tempo_map = root->child (X_("TempoMap")))) {
 		throw failed_constructor();
 	}
-	
+
 	elements.push_back (ElementPtr ( new TempoMapImporter (source, session, *tempo_map)));
 }
 
@@ -54,7 +54,7 @@ TempoMapImportHandler::get_info () const
 }
 
 /*** TempoMapImporter ***/
-TempoMapImporter::TempoMapImporter (XMLTree const & source, Session & session, XMLNode const & node) : 
+TempoMapImporter::TempoMapImporter (XMLTree const & source, Session & session, XMLNode const & node) :
   ElementImporter (source, session),
   xml_tempo_map (node)
 {
@@ -68,7 +68,7 @@ TempoMapImporter::get_info () const
 	unsigned int tempos = 0;
 	unsigned int meters = 0;
 	XMLNodeList children = xml_tempo_map.children();
-	
+
 	for (XMLNodeIterator it = children.begin(); it != children.end(); it++) {
 		if ((*it)->name() == "Tempo") {
 			tempos++;
@@ -76,10 +76,10 @@ TempoMapImporter::get_info () const
 			meters++;
 		}
 	}
-	
+
 	// return info
 	oss << _("Tempo marks: ") << tempos << _("\nMeter marks: ") << meters;
-	
+
 	return oss.str();
 }
 

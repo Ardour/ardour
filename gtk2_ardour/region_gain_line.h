@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ class AudioRegionGainLine : public AutomationLine
 {
   public:
 	AudioRegionGainLine (const std::string & name, ARDOUR::Session&, AudioRegionView&, ArdourCanvas::Group& parent, boost::shared_ptr<ARDOUR::AutomationList>);
-	
+
 	void start_drag (ControlPoint*, nframes_t x, float fraction);
 	void end_drag (ControlPoint*);
 

@@ -46,14 +46,14 @@ ExportFormatSelector::ExportFormatSelector () :
 	edit_button.signal_clicked().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*this, &ExportFormatSelector::open_edit_dialog), false)));
 	remove_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportFormatSelector::remove_format));
 	new_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportFormatSelector::add_new_format));
-	
+
 	/* Format combo */
-	
+
 	format_list = Gtk::ListStore::create (format_cols);
 	format_combo.set_model (format_list);
 	format_combo.pack_start (format_cols.label);
 	format_combo.set_active (0);
-	
+
 	format_combo.signal_changed().connect (sigc::mem_fun (*this, &ExportFormatSelector::update_format_combo));
 }
 
@@ -67,7 +67,7 @@ ExportFormatSelector::set_state (ARDOUR::ExportProfileManager::FormatStatePtr co
 {
 	session = session_;
 	state = state_;
-	
+
 	update_format_list ();
 }
 
@@ -97,7 +97,7 @@ ExportFormatSelector::update_format_list ()
 	if (format_combo.get_active_row_number() == -1) {
 		format_combo.set_active (0);
 	}
-	
+
 	select_format (format_to_select);
 }
 
@@ -111,7 +111,7 @@ ExportFormatSelector::select_format (FormatPtr f)
 			break;
 		}
 	}
-	
+
 	CriticalSelectionChanged();
 }
 
@@ -119,7 +119,7 @@ void
 ExportFormatSelector::add_new_format ()
 {
 	FormatPtr new_format = state->format = NewFormat (state->format);
-	
+
 	if (open_edit_dialog (true) != Gtk::RESPONSE_APPLY) {
 		remove_format();
 		if (state->list->empty()) {
@@ -163,7 +163,7 @@ ExportFormatSelector::update_format_combo ()
 		edit_button.set_sensitive (false);
 		remove_button.set_sensitive (false);
 	}
-	
+
 	CriticalSelectionChanged();
 }
 

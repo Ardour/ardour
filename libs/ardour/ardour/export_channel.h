@@ -44,13 +44,13 @@ class ExportChannel
 
 	virtual void read (Sample * data, nframes_t frames) const = 0;
 	virtual bool empty () const = 0;
-	
+
 	/// Adds state to node passed
 	virtual void get_state (XMLNode * node) const = 0;
-	
+
 	/// Sets state from node passed
 	virtual void set_state (XMLNode * node, Session & session) = 0;
-	
+
 	// Operator< must be defined for usage in e.g. std::map or std::set to disallow duplicates when necessary
 	virtual bool operator< (ExportChannel const & other) const = 0;
 };
@@ -72,13 +72,13 @@ class PortExportChannel : public ExportChannel
 	typedef std::set<AudioPort *> PortSet;
 
 	PortExportChannel () {}
-	
+
 	void read (Sample * data, nframes_t frames) const;
 	bool empty () const { return ports.empty(); }
-	
+
 	void get_state (XMLNode * node) const;
 	void set_state (XMLNode * node, Session & session);
-	
+
 	bool operator< (ExportChannel const & other) const;
 
 	void add_port (AudioPort * port) { ports.insert (port); }
@@ -97,13 +97,13 @@ class RegionExportChannelFactory : public sigc::trackable
 		Fades,
 		Processed
 	};
-	
+
 	RegionExportChannelFactory (Session * session, AudioRegion const & region, AudioTrack & track, Type type);
 	~RegionExportChannelFactory ();
 
 	ExportChannelPtr create (uint32_t channel);
 	void read (uint32_t channel, Sample * data, nframes_t frames_to_read);
-	
+
   private:
 
 	int new_cycle_started () { buffers_up_to_date = false; return 0; }
@@ -119,7 +119,7 @@ class RegionExportChannelFactory : public sigc::trackable
 	bool buffers_up_to_date;
 	nframes_t region_start;
 	nframes_t position;
-	
+
 	Sample * mixdown_buffer;
 	Sample * gain_buffer;
 };
@@ -139,11 +139,11 @@ class RegionExportChannel : public ExportChannel
 
   private:
 
-	RegionExportChannel (RegionExportChannelFactory & factory, uint32_t channel) :
-	  factory (factory),
-	  channel (channel)
+	RegionExportChannel (RegionExportChannelFactory & factory, uint32_t channel)
+		: factory (factory)
+		, channel (channel)
 	{}
-	
+
 	RegionExportChannelFactory & factory;
 	uint32_t channel;
 };

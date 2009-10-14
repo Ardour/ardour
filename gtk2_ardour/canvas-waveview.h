@@ -59,7 +59,7 @@ struct _GnomeCanvasWaveViewCache
     guint64                       data_size;
     gulong                        start;
     gulong                        end;
-};    
+};
 
 GnomeCanvasWaveViewCache* gnome_canvas_waveview_cache_new ();
 void                    gnome_canvas_waveview_cache_destroy (GnomeCanvasWaveViewCache*);
@@ -67,7 +67,7 @@ void                    gnome_canvas_waveview_cache_destroy (GnomeCanvasWaveView
 struct _GnomeCanvasWaveView
 {
     GnomeCanvasItem item;
-    
+
     GnomeCanvasWaveViewCache *cache;
     gboolean                cache_updater;
     gint                    screen_width;
@@ -82,9 +82,9 @@ struct _GnomeCanvasWaveView
 
     /** x-axis: samples per canvas unit. */
     double samples_per_unit;
-    
+
     /** y-axis: amplitude_above_axis.
-     * 
+     *
      * the default is that an (scaled, normalized -1.0 ... +1.0) amplitude of 1.0
      * corresponds to the top of the area assigned to the waveview.
      *
@@ -107,7 +107,7 @@ struct _GnomeCanvasWaveView
     char rectified;
     char zero_line;
     char logscaled;
-	
+
     /* These are updated by the update() routine
        to optimize the render() routine, which may
        be called several times after a single update().

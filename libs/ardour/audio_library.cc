@@ -51,7 +51,7 @@ AudioLibrary::AudioLibrary ()
 	sfdb_file_path /= sfdb_file_name;
 
 	src = Glib::filename_to_uri (sfdb_file_path.to_string ());
-	
+
 	// workaround for possible bug in raptor that crashes when saving to a
 	// non-existant file.
 
@@ -77,11 +77,11 @@ AudioLibrary::set_tags (string member, vector<string> tags)
 {
 	sort (tags.begin(), tags.end());
 	tags.erase (unique(tags.begin(), tags.end()), tags.end());
-	
+
 	const string file_uri(Glib::filename_to_uri (member));
-	
+
 	lrdf_remove_uri_matches (file_uri.c_str());
-	
+
 	for (vector<string>::iterator i = tags.begin(); i != tags.end(); ++i) {
 		lrdf_add_triple (src.c_str(), file_uri.c_str(), TAG, (*i).c_str(), lrdf_literal);
 	}
@@ -91,27 +91,27 @@ vector<string>
 AudioLibrary::get_tags (string member)
 {
 	vector<string> tags;
-	
+
 	lrdf_statement pattern;
 	pattern.subject = strdup(Glib::filename_to_uri(member).c_str());
 	pattern.predicate = (char*)TAG;
 	pattern.object = 0;
 	pattern.object_type = lrdf_literal;
-	
+
 	lrdf_statement* matches = lrdf_matches (&pattern);
 	free (pattern.subject);
-	
+
 	lrdf_statement* current = matches;
 	while (current != 0) {
 		tags.push_back (current->object);
-		
+
 		current = current->next;
 	}
-	
+
 	lrdf_free_statements (matches);
-	
+
 	sort (tags.begin(), tags.end());
-	
+
 	return tags;
 }
 

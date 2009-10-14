@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2004 Paul Davis 
+    Copyright (C) 2002-2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ class AudioEngine : public sigc::trackable
 
 	AudioEngine (std::string client_name);
 	virtual ~AudioEngine ();
-	
+
 	jack_client_t* jack() const;
 	bool connected() const { return _jack != 0; }
 
@@ -94,12 +94,12 @@ class AudioEngine : public sigc::trackable
 		if (!_running || !_jack) return 0;
 		return jack_get_current_transport_frame (_jack);
 	}
-	
+
 	int request_buffer_size (nframes_t);
-	
+
 	nframes_t set_monitor_check_interval (nframes_t);
 
-	float get_cpu_load() { 
+	float get_cpu_load() {
 		if (!_running || !_jack) return 0;
 		return jack_cpu_load (_jack);
 	}
@@ -108,18 +108,18 @@ class AudioEngine : public sigc::trackable
 	void remove_session ();
 
 	class PortRegistrationFailure : public std::exception {
-	  public:
+	public:
 		PortRegistrationFailure (const char* why = "") {
 			reason = why;
 		}
 		virtual const char *what() const throw() { return reason; }
 
-	  private:
+	private:
 		const char* reason;
 	};
 
 	class NoBackendAvailable : public std::exception {
-	  public:
+	public:
 		virtual const char *what() const throw() { return "could not connect to engine backend"; }
 	};
 
@@ -128,11 +128,11 @@ class AudioEngine : public sigc::trackable
 	int   unregister_port (Port &);
 
 	void split_cycle (nframes_t offset);
-	
+
 	int connect (const std::string& source, const std::string& destination);
 	int disconnect (const std::string& source, const std::string& destination);
 	int disconnect (Port &);
-	
+
 	const char ** get_ports (const std::string& port_name_pattern, const std::string& type_name_pattern, uint32_t flags);
 
 	bool can_request_hardware_monitoring ();
@@ -204,7 +204,7 @@ class AudioEngine : public sigc::trackable
 	sigc::signal<void> Stopped;
 
 	/* this signal is emitted if a JACK port is registered or unregistered */
-	
+
 	sigc::signal<void> PortRegisteredOrUnregistered;
 
 	std::string make_port_name_relative (std::string);

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999 Paul Davis 
+    Copyright (C) 1999 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ using namespace Gtk;
 using namespace Glib;
 using namespace sigc;
 
-int	
+int
 ARDOUR_UI::setup_windows ()
 {
 	if (create_editor ()) {
@@ -80,18 +80,18 @@ ARDOUR_UI::setup_windows ()
 
 #ifdef TOP_MENUBAR
 	HBox* status_bar_packer = manage (new HBox);
-	
+
 	status_bar_label.set_size_request (300, -1);
 	status_bar_packer->pack_start (status_bar_label, true, true, 6);
 	status_bar_packer->pack_start (error_log_button, false, false);
-	
+
 	error_log_button.signal_clicked().connect (mem_fun (*this, &UI::toggle_errors));
 
 	editor->get_status_bar_packer().pack_start (*status_bar_packer, true, true);
 	editor->get_status_bar_packer().pack_start (menu_bar_base, false, false, 6);
 #else
  	top_packer.pack_start (menu_bar_base, false, false);
-#endif 
+#endif
 
  	top_packer.pack_start (transport_frame, false, false);
 
@@ -130,7 +130,7 @@ void
 ARDOUR_UI::transport_stopped ()
 {
 	stop_button.set_visual_state (1);
-	
+
 	roll_button.set_visual_state (0);
 	play_selection_button.set_visual_state (0);
 	auto_loop_button.set_visual_state (0);
@@ -206,15 +206,15 @@ ARDOUR_UI::setup_transport ()
 	transport_frame.set_name ("BaseFrame");
 	transport_frame.add (transport_base);
 
-	transport_tearoff->Detach.connect (bind (mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer), 
+	transport_tearoff->Detach.connect (bind (mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer),
 						 static_cast<Widget*>(&transport_frame)));
-	transport_tearoff->Attach.connect (bind (mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer), 
+	transport_tearoff->Attach.connect (bind (mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
 						 static_cast<Widget*> (&transport_frame), 1));
-	transport_tearoff->Hidden.connect (bind (mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer), 
+	transport_tearoff->Hidden.connect (bind (mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer),
 						 static_cast<Widget*>(&transport_frame)));
-	transport_tearoff->Visible.connect (bind (mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer), 
+	transport_tearoff->Visible.connect (bind (mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
 						  static_cast<Widget*> (&transport_frame), 1));
-	
+
 	shuttle_box.set_name ("TransportButton");
 	goto_start_button.set_name ("TransportButton");
 	goto_end_button.set_name ("TransportButton");
@@ -239,11 +239,11 @@ ARDOUR_UI::setup_transport ()
 	goto_start_button.set_size_request(29, -1);
 	goto_end_button.set_size_request(29, -1);
 	rec_button.set_size_request(29, -1);
-	
+
 	Widget* w;
 
 	stop_button.set_visual_state (1);
-	
+
 	w = manage (new Image (get_icon (X_("transport_start"))));
 	w->show();
 	goto_start_button.add (*w);
@@ -303,7 +303,7 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_box, _("Shuttle speed control"));
 	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_units_button, _("Select semitones or %%-age for speed display"));
 	ARDOUR_UI::instance()->tooltips().set_tip (speed_display_box, _("Current transport speed"));
-	
+
 	shuttle_box.set_flags (CAN_FOCUS);
 	shuttle_box.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 	shuttle_box.set_size_request (100, 15);
@@ -376,7 +376,7 @@ ARDOUR_UI::setup_transport ()
 
 	shuttle_units_button.set_name (X_("ShuttleButton"));
 	shuttle_units_button.signal_clicked().connect (mem_fun(*this, &ARDOUR_UI::shuttle_unit_clicked));
-	
+
 	shuttle_style_button.set_name (X_("ShuttleStyleButton"));
 
 	vector<string> shuttle_strings;
@@ -399,7 +399,7 @@ ARDOUR_UI::setup_transport ()
 	shbox->pack_start (*sdframe, false, false);
 	shbox->pack_start (shuttle_units_button, true, true);
 	shbox->pack_start (shuttle_style_button, false, false);
-	
+
 	svbox->pack_start (*sframe, false, false);
 	svbox->pack_start (*shbox, false, false);
 
@@ -429,7 +429,7 @@ ARDOUR_UI::setup_transport ()
 	transport_tearoff_hbox.pack_start (*clock_box, false, false, 0);
 
 	HBox* toggle_box = manage(new HBox);
-	
+
 	VBox* punch_box = manage (new VBox);
 	punch_box->pack_start (punch_in_button, false, false);
 	punch_box->pack_start (punch_out_button, false, false);
@@ -439,12 +439,12 @@ ARDOUR_UI::setup_transport ()
 	auto_box->pack_start (auto_play_button, false, false);
 	auto_box->pack_start (auto_return_button, false, false);
 	toggle_box->pack_start (*auto_box, false, false);
-	
+
 	VBox* io_box = manage (new VBox);
 	io_box->pack_start (auto_input_button, false, false);
 	io_box->pack_start (click_button, false, false);
 	toggle_box->pack_start (*io_box, false, false);
-	
+
 	/* desensitize */
 
 	set_transport_sensitivity (false);
@@ -457,7 +457,7 @@ ARDOUR_UI::setup_transport ()
 
 	transport_tearoff_hbox.pack_start (*toggle_box, false, false, 4);
 	transport_tearoff_hbox.pack_start (alert_box, false, false);
-	
+
 	if (Profile->get_sae()) {
 		Image* img = manage (new Image ((::get_icon (X_("sae")))));
 		transport_tearoff_hbox.pack_end (*img, false, false, 6);
@@ -531,7 +531,7 @@ ARDOUR_UI::solo_blink (bool onoff)
 	if (session == 0) {
 		return;
 	}
-	
+
 	if (session->soloing()) {
 		if (onoff) {
 			solo_alert_button.set_state (STATE_ACTIVE);
@@ -550,7 +550,7 @@ ARDOUR_UI::audition_blink (bool onoff)
 	if (session == 0) {
 		return;
 	}
-	
+
 	if (session->is_auditioning()) {
 		if (onoff) {
 			auditioning_alert_button.set_state (STATE_ACTIVE);
@@ -578,27 +578,27 @@ ARDOUR_UI::build_shuttle_context_menu ()
 
 	speed_items.push_back (RadioMenuElem (group, "8", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 8.0f)));
 	if (shuttle_max_speed == 8.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();	
+		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
 	}
 	speed_items.push_back (RadioMenuElem (group, "6", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 6.0f)));
 	if (shuttle_max_speed == 6.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();	
+		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
 	}
 	speed_items.push_back (RadioMenuElem (group, "4", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 4.0f)));
 	if (shuttle_max_speed == 4.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();	
+		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
 	}
 	speed_items.push_back (RadioMenuElem (group, "3", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 3.0f)));
 	if (shuttle_max_speed == 3.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();	
+		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
 	}
 	speed_items.push_back (RadioMenuElem (group, "2", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 2.0f)));
 	if (shuttle_max_speed == 2.0) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();	
+		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
 	}
 	speed_items.push_back (RadioMenuElem (group, "1.5", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 1.5f)));
 	if (shuttle_max_speed == 1.5) {
-		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();	
+		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
 	}
 
 	items.push_back (MenuElem (_("Maximum speed"), *speed_menu));
@@ -658,7 +658,7 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 	if (!session) {
 		return true;
 	}
-	
+
 	switch (ev->button) {
 	case 1:
 		mouse_shuttle (ev->x, true);
@@ -666,7 +666,7 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 		shuttle_box.remove_modal_grab ();
 		if (Config->get_shuttle_behaviour() == Sprung) {
 			if (session->config.get_auto_play() || roll_button.get_visual_state()) {
-				shuttle_fract = SHUTTLE_FRACT_SPEED1;				
+				shuttle_fract = SHUTTLE_FRACT_SPEED1;
 				session->request_transport_speed (1.0);
 				stop_button.set_visual_state (0);
 				roll_button.set_visual_state (1);
@@ -707,9 +707,9 @@ ARDOUR_UI::shuttle_box_scroll (GdkEventScroll* ev)
 	if (!session) {
 		return true;
 	}
-	
+
 	switch (ev->direction) {
-		
+
 	case GDK_SCROLL_UP:
 		shuttle_fract += 0.005;
 		break;
@@ -764,7 +764,7 @@ void
 ARDOUR_UI::use_shuttle_fract (bool force)
 {
 	microseconds_t now = get_microseconds();
-	
+
 	/* do not attempt to submit a motion-driven transport speed request
 	   more than once per process cycle.
 	 */
@@ -772,7 +772,7 @@ ARDOUR_UI::use_shuttle_fract (bool force)
 	if (!force && (last_shuttle_request - now) < (microseconds_t) engine->usecs_per_cycle()) {
 		return;
 	}
-	
+
 	last_shuttle_request = now;
 
 	if (Config->get_shuttle_units() == Semitones) {
@@ -790,7 +790,7 @@ ARDOUR_UI::use_shuttle_fract (bool force)
 
 		bool neg;
 		double fract;
-		
+
 		neg = (shuttle_fract < 0.0);
 
 		fract = 1 - sqrt (1 - (shuttle_fract * shuttle_fract)); // Formula A1
@@ -886,8 +886,8 @@ ARDOUR_UI::update_speed_display ()
 
 		last_speed_displayed = x;
 	}
-}	
-	
+}
+
 void
 ARDOUR_UI::set_transport_sensitivity (bool yn)
 {

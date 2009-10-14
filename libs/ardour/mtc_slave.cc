@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-4 Paul Davis 
+    Copyright (C) 2002-4 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ using namespace sigc;
 using namespace MIDI;
 using namespace PBD;
 
-MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p) 
+MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 	: session (s)
 {
 	can_notify_on_unknown_rate = true;
@@ -93,14 +93,14 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 {
 	nframes_t now = session.engine().frame_time();
 	SMPTE::Time smpte;
-	
+
 	smpte.hours = msg[3];
 	smpte.minutes = msg[2];
 	smpte.seconds = msg[1];
 	smpte.frames = msg[0];
 
 	last_mtc_fps_byte = msg[4];
-	
+
 	switch (msg[4]) {
 	case MTC_24_FPS:
 		smpte.rate = 24;
@@ -126,7 +126,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 		/* throttle error messages about unknown MTC rates */
 		if (can_notify_on_unknown_rate) {
 			error << string_compose (_("Unknown rate/drop value %1 in incoming MTC stream, session values used instead"),
-						 (int) msg[4]) 
+						 (int) msg[4])
 			      << endmsg;
 			can_notify_on_unknown_rate = false;
 		}
@@ -135,42 +135,42 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 	}
 
 	session.smpte_to_sample (smpte, mtc_frame, true, false);
-	
-	if (was_full) {
-		
-		current.guard1++; 	 
-		current.position = mtc_frame; 	 
-		current.timestamp = 0; 	 
-		current.guard2++; 	 
-		
-		session.request_locate (mtc_frame, false); 	 
-		session.request_transport_speed (0);
-		update_mtc_status (MIDI::Parser::MTC_Stopped); 	 
 
- 		reset ();
-		
+	if (was_full) {
+
+		current.guard1++;
+		current.position = mtc_frame;
+		current.timestamp = 0;
+		current.guard2++;
+
+		session.request_locate (mtc_frame, false);
+		session.request_transport_speed (0);
+		update_mtc_status (MIDI::Parser::MTC_Stopped);
+
+		reset ();
+
 	} else {
-		
+
 		/* We received the last quarter frame 7 quarter frames (1.75 mtc
 		   frames) after the instance when the contents of the mtc quarter
 		   frames were decided. Add time to compensate for the elapsed 1.75
 		   frames.
-		   Also compensate for audio latency. 
+		   Also compensate for audio latency.
 		*/
 
 		mtc_frame += (long) (1.75 * session.frames_per_smpte_frame()) + session.worst_output_latency();
-		
+
 		if (first_mtc_frame == 0) {
 			first_mtc_frame = mtc_frame;
 			first_mtc_time = now;
-		} 
-		
+		}
+
 		current.guard1++;
 		current.position = mtc_frame;
 		current.timestamp = now;
 		current.guard2++;
 	}
-	
+
 	last_inbound_frame = now;
 }
 
@@ -178,7 +178,7 @@ void
 MTC_Slave::handle_locate (const MIDI::byte* mmc_tc)
 {
 	MIDI::byte mtc[5];
-	
+
 	mtc[4] = last_mtc_fps_byte;
 	mtc[3] = mmc_tc[0] & 0xf; /* hrs only */
 	mtc[2] = mmc_tc[1];
@@ -257,7 +257,7 @@ MTC_Slave::ok() const
 	return true;
 }
 
-bool 
+bool
 MTC_Slave::speed_and_position (double& speed, nframes_t& pos)
 {
 	nframes_t now = session.engine().frame_time();
@@ -273,7 +273,7 @@ MTC_Slave::speed_and_position (double& speed, nframes_t& pos)
 		pos = last.position;
 		return true;
 	}
-	
+
 	/* no timecode for 1/4 second ? conclude that its stopped */
 
 	if (last_inbound_frame && now > last_inbound_frame && now - last_inbound_frame > session.frame_rate() / 4) {
@@ -317,9 +317,9 @@ MTC_Slave::speed_and_position (double& speed, nframes_t& pos)
 		elapsed = 0;
 
 	} else {
-	
+
 		/* scale elapsed time by the current MTC speed */
-		
+
 		if (last.timestamp && (now > last.timestamp)) {
 			elapsed = (nframes_t) floor (mtc_speed * (now - last.timestamp));
 		} else {
@@ -348,9 +348,9 @@ MTC_Slave::reset ()
 	   be being updated as we call this. but this
 	   supposed to be a realtime-safe call.
 	*/
-	
+
 	port->input()->reset_mtc_state ();
-	
+
 	last_inbound_frame = 0;
 	current.guard1++;
 	current.position = 0;

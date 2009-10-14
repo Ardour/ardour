@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ int
 Editor::time_stretch (RegionSelection& regions, float fraction)
 {
 	// FIXME: kludge, implement stretching of selection of both types
-	
+
 	if (regions.front()->region()->data_type() == DataType::AUDIO) {
 		// Audio, pop up timefx dialog
 		return time_fx (regions, fraction, false);
@@ -73,7 +73,7 @@ Editor::time_stretch (RegionSelection& regions, float fraction)
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&regions.front()->get_time_axis_view());
 		if (!rtv)
 			return -1;
-		
+
 		boost::shared_ptr<Playlist> playlist
 			= rtv->track()->diskstream()->playlist();
 
@@ -135,12 +135,12 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 		// one octave == 1200 cents
 		// adding one octave doubles the frequency
 		// ratio is 2^^octaves
-				
+
 		pitch_fraction = pow(2, cents/1200);
 
 		current_timefx->request.time_fraction = 1.0;
 		current_timefx->request.pitch_fraction = pitch_fraction;
-		
+
 	} else {
 
 		current_timefx->request.time_fraction = val;
@@ -166,26 +166,26 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 		BandLimitedTransients,
 		Transients
 	} transients = Transients;
-	
+
 	precise = current_timefx->precise_button.get_active();
 	preserve_formants = current_timefx->preserve_formants_button.get_active();
-	
+
 	txt = current_timefx->stretch_opts_selector.get_active_text ();
 
 	if (txt == rb_opt_strings[0]) {
-		transients = NoTransients; peaklock = false; longwin = true; shortwin = false; 
+		transients = NoTransients; peaklock = false; longwin = true; shortwin = false;
 	} else if (txt == rb_opt_strings[1]) {
-		transients = NoTransients; peaklock = false; longwin = false; shortwin = false; 
+		transients = NoTransients; peaklock = false; longwin = false; shortwin = false;
 	} else if (txt == rb_opt_strings[2]) {
-		transients = NoTransients; peaklock = true; longwin = false; shortwin = false; 
+		transients = NoTransients; peaklock = true; longwin = false; shortwin = false;
 	} else if (txt == rb_opt_strings[3]) {
-		transients = BandLimitedTransients; peaklock = true; longwin = false; shortwin = false; 
+		transients = BandLimitedTransients; peaklock = true; longwin = false; shortwin = false;
 	} else if (txt == rb_opt_strings[5]) {
-		transients = Transients; peaklock = false; longwin = false; shortwin = true; 
+		transients = Transients; peaklock = false; longwin = false; shortwin = true;
 	} else {
 		/* default/4 */
 
-		transients = Transients; peaklock = true; longwin = false; shortwin = false; 
+		transients = Transients; peaklock = true; longwin = false; shortwin = false;
 	}
 
 	if (realtime)          options |= RubberBandStretcher::OptionProcessRealTime;
@@ -194,7 +194,7 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 	if (!peaklock)         options |= RubberBandStretcher::OptionPhaseIndependent;
 	if (longwin)           options |= RubberBandStretcher::OptionWindowLong;
 	if (shortwin)          options |= RubberBandStretcher::OptionWindowShort;
-		
+
 	switch (transients) {
 	case NoTransients:
 		options |= RubberBandStretcher::OptionTransientsSmooth;
@@ -215,15 +215,15 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 	current_timefx->request.progress = 0.0f;
 	current_timefx->request.done = false;
 	current_timefx->request.cancel = false;
-	
+
 	/* re-connect the cancel button and delete events */
-	
+
 	current_timefx->first_cancel.disconnect();
 	current_timefx->first_delete.disconnect();
-	
-	current_timefx->first_cancel = current_timefx->cancel_button->signal_clicked().connect 
+
+	current_timefx->first_cancel = current_timefx->cancel_button->signal_clicked().connect
 		(mem_fun (current_timefx, &TimeFXDialog::cancel_in_progress));
-	current_timefx->first_delete = current_timefx->signal_delete_event().connect 
+	current_timefx->first_delete = current_timefx->signal_delete_event().connect
 		(mem_fun (current_timefx, &TimeFXDialog::delete_in_progress));
 
 	if (pthread_create_and_store ("timefx", &current_timefx->request.thread, 0, timefx_thread, current_timefx)) {
@@ -241,7 +241,7 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 	}
 
 	c.disconnect ();
-	
+
 	current_timefx->hide ();
 	return current_timefx->status;
 }
@@ -253,7 +253,7 @@ Editor::do_timefx (TimeFXDialog& dialog)
 	boost::shared_ptr<Playlist> playlist;
 	boost::shared_ptr<Region>   new_region;
 	bool in_command = false;
-	
+
 	for (RegionSelection::iterator i = dialog.regions.begin(); i != dialog.regions.end(); ) {
 		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*i);
 
@@ -265,7 +265,7 @@ Editor::do_timefx (TimeFXDialog& dialog)
 		TimeAxisView* tv = &(arv->get_time_axis_view());
 		RouteTimeAxisView* rtv;
 		RegionSelection::iterator tmp;
-		
+
 		tmp = i;
 		++tmp;
 
@@ -278,7 +278,7 @@ Editor::do_timefx (TimeFXDialog& dialog)
 			i = tmp;
 			continue;
 		}
-	
+
 		if ((playlist = t->diskstream()->playlist()) == 0) {
 			i = tmp;
 			continue;

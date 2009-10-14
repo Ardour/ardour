@@ -48,9 +48,9 @@ ExportFormatManager::~ExportFormatManager ()
 
 void
 ExportFormatManager::init_compatibilities ()
-{	
+{
 	CompatPtr c_ptr;
-	
+
 	c_ptr.reset (new ExportFormatCompatibility (_("CD")));
 	c_ptr->add_sample_rate (ExportFormatBase::SR_44_1);
 	c_ptr->add_format_id (ExportFormatBase::F_WAV);
@@ -59,7 +59,7 @@ ExportFormatManager::init_compatibilities ()
 	c_ptr->add_sample_format (ExportFormatBase::SF_16);
 	c_ptr->add_endianness (ExportFormatBase::E_FileDefault);
 	add_compatibility (c_ptr);
-	
+
 	c_ptr.reset (new ExportFormatCompatibility (_("DVD-A")));
 	c_ptr->add_sample_rate (ExportFormatBase::SR_44_1);
 	c_ptr->add_sample_rate (ExportFormatBase::SR_48);
@@ -73,7 +73,7 @@ ExportFormatManager::init_compatibilities ()
 	c_ptr->add_sample_format (ExportFormatBase::SF_24);
 	c_ptr->add_endianness (ExportFormatBase::E_FileDefault);
 	add_compatibility (c_ptr);
-	
+
 	c_ptr.reset (new ExportFormatCompatibility (_("iPod")));
 	c_ptr->add_sample_rate (ExportFormatBase::SR_44_1);
 	c_ptr->add_sample_rate (ExportFormatBase::SR_48);
@@ -84,7 +84,7 @@ ExportFormatManager::init_compatibilities ()
 	c_ptr->add_sample_format (ExportFormatBase::SF_24);
 	c_ptr->add_endianness (ExportFormatBase::E_FileDefault);
 	add_compatibility (c_ptr);
-	
+
 	c_ptr.reset (new ExportFormatCompatibility (_("Something else")));
 	c_ptr->add_sample_rate (ExportFormatBase::SR_44_1);
 	c_ptr->add_sample_rate (ExportFormatBase::SR_48);
@@ -112,10 +112,10 @@ ExportFormatManager::init_qualities ()
 
 void
 ExportFormatManager::init_formats ()
-{	
+{
 	FormatPtr f_ptr;
 	ExportFormatLinear * fl_ptr;
-	
+
 	f_ptr.reset (fl_ptr = new ExportFormatLinear ("AIFF", ExportFormatBase::F_AIFF));
 	fl_ptr->add_sample_format (ExportFormatBase::SF_U8);
 	fl_ptr->add_sample_format (ExportFormatBase::SF_8);
@@ -127,7 +127,7 @@ ExportFormatManager::init_formats ()
 	fl_ptr->set_default_sample_format (ExportFormatBase::SF_16);
 	fl_ptr->set_extension ("aiff");
 	add_format (f_ptr);
-	
+
 	f_ptr.reset (fl_ptr = new ExportFormatLinear ("AU", ExportFormatBase::F_AU));
 	fl_ptr->add_sample_format (ExportFormatBase::SF_8);
 	fl_ptr->add_sample_format (ExportFormatBase::SF_16);
@@ -138,10 +138,10 @@ ExportFormatManager::init_formats ()
 	fl_ptr->set_default_sample_format (ExportFormatBase::SF_16);
 	fl_ptr->set_extension ("au");
 	add_format (f_ptr);
-	
+
 	f_ptr.reset (new ExportFormatBWF ());
 	add_format (f_ptr);
-	
+
 	f_ptr.reset (fl_ptr = new ExportFormatLinear ("IRCAM", ExportFormatBase::F_IRCAM));
 	fl_ptr->add_sample_format (ExportFormatBase::SF_16);
 	fl_ptr->add_sample_format (ExportFormatBase::SF_24);
@@ -150,7 +150,7 @@ ExportFormatManager::init_formats ()
 	fl_ptr->set_default_sample_format (ExportFormatBase::SF_24);
 	fl_ptr->set_extension ("sf");
 	add_format (f_ptr);
-	
+
 	f_ptr.reset (fl_ptr = new ExportFormatLinear ("WAV", ExportFormatBase::F_WAV));
 	fl_ptr->add_sample_format (ExportFormatBase::SF_U8);
 	fl_ptr->add_sample_format (ExportFormatBase::SF_16);
@@ -161,7 +161,7 @@ ExportFormatManager::init_formats ()
 	fl_ptr->set_default_sample_format (ExportFormatBase::SF_16);
 	fl_ptr->set_extension ("wav");
 	add_format (f_ptr);
-	
+
 	f_ptr.reset (fl_ptr = new ExportFormatLinear ("W64", ExportFormatBase::F_W64));
 	fl_ptr->add_sample_format (ExportFormatBase::SF_U8);
 	fl_ptr->add_sample_format (ExportFormatBase::SF_16);
@@ -172,7 +172,7 @@ ExportFormatManager::init_formats ()
 	fl_ptr->set_default_sample_format (ExportFormatBase::SF_Double);
 	fl_ptr->set_extension ("w64");
 	add_format (f_ptr);
-	
+
 	f_ptr.reset (fl_ptr = new ExportFormatLinear ("RAW", ExportFormatBase::F_RAW));
 	fl_ptr->add_sample_format (ExportFormatBase::SF_U8);
 	fl_ptr->add_sample_format (ExportFormatBase::SF_8);
@@ -184,12 +184,12 @@ ExportFormatManager::init_formats ()
 	fl_ptr->set_default_sample_format (ExportFormatBase::SF_Float);
 	fl_ptr->set_extension ("raw");
 	add_format (f_ptr);
-	
+
 	try {
 		f_ptr.reset (new ExportFormatOggVorbis ());
 		add_format (f_ptr);
 	} catch (ExportFormatIncompatible & e) {}
-	
+
 	try {
 		f_ptr.reset (new ExportFormatFLAC ());
 		add_format (f_ptr);
@@ -201,9 +201,9 @@ ExportFormatManager::init_sample_rates ()
 {
 	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_22_05, "22,05 kHz")));
 	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_44_1, "44,1 kHz")));
-	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_48, "48 kHz")));	
-	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_88_2, "88,2 kHz")));	
-	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_96, "96 kHz")));	
+	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_48, "48 kHz")));
+	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_88_2, "88,2 kHz")));
+	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_96, "96 kHz")));
 	add_sample_rate (SampleRatePtr (new SampleRateState (ExportFormatBase::SR_192, "192 kHz")));
 }
 
@@ -227,11 +227,11 @@ ExportFormatManager::add_format (FormatPtr ptr)
 	formats.push_back (ptr);
 	ptr->SelectChanged.connect (sigc::bind (sigc::mem_fun (*this, &ExportFormatManager::change_format_selection), WeakFormatPtr (ptr)));
 	universal_set = universal_set->get_union (*ptr);
-	
+
 	/* Encoding options */
-	
+
 	boost::shared_ptr<HasSampleFormat> hsf;
-	
+
 	if (hsf = boost::dynamic_pointer_cast<HasSampleFormat> (ptr)) {
 		hsf->SampleFormatSelectChanged.connect (sigc::mem_fun (*this, &ExportFormatManager::change_sample_format_selection));
 		hsf->DitherTypeSelectChanged.connect (sigc::mem_fun (*this, &ExportFormatManager::change_dither_type_selection));
@@ -308,7 +308,7 @@ ExportFormatManager::change_compatibility_selection (bool select, WeakCompatPtr 
 	}
 
 	CompatPtr ptr = compat.lock();
-	
+
 	if (ptr && select) {
 		select_compatibility (ptr);
 	}
@@ -322,11 +322,11 @@ void
 ExportFormatManager::change_quality_selection (bool select, WeakQualityPtr const & quality)
 {
 	QualityPtr ptr = quality.lock ();
-	
+
 	if (!ptr) {
 		return;
 	}
-	
+
 	if (select) {
 		select_quality (ptr);
 	} else if (ptr->quality == current_selection->quality()) {
@@ -339,11 +339,11 @@ void
 ExportFormatManager::change_format_selection (bool select, WeakFormatPtr const & format)
 {
 	FormatPtr ptr = format.lock();
-	
+
 	if (!ptr) {
 		return;
 	}
-	
+
 	if (select) {
 		select_format (ptr);
 	} else if (ptr->get_format_id() == current_selection->format_id()) {
@@ -356,11 +356,11 @@ void
 ExportFormatManager::change_sample_rate_selection (bool select, WeakSampleRatePtr const & rate)
 {
 	SampleRatePtr ptr = rate.lock();
-	
+
 	if (!ptr) {
 		return;
 	}
-	
+
 	if (select) {
 		select_sample_rate (ptr);
 	} else if (ptr->rate == current_selection->sample_rate()) {
@@ -373,11 +373,11 @@ void
 ExportFormatManager::change_sample_format_selection (bool select, WeakSampleFormatPtr const & format)
 {
 	SampleFormatPtr ptr = format.lock();
-	
+
 	if (!ptr) {
 		return;
 	}
-	
+
 	if (select) {
 		select_sample_format (ptr);
 	} else if (ptr->format == current_selection->sample_format()) {
@@ -390,11 +390,11 @@ void
 ExportFormatManager::change_dither_type_selection (bool select, WeakDitherTypePtr const & type)
 {
 	DitherTypePtr ptr = type.lock();
-	
+
 	if (!ptr) {
 		return;
 	}
-	
+
 	if (select) {
 		select_dither_type (ptr);
 	} else if (ptr->type == current_selection->dither_type()) {
@@ -407,28 +407,28 @@ void
 ExportFormatManager::select_compatibility (WeakCompatPtr const & /*compat*/)
 {
 	/* Calculate compatibility intersection for the selection */
-	
+
 	FormatBasePtr compat_intersect = get_compatibility_intersection ();
-	
+
 	/* Unselect incompatible items */
-	
+
 	boost::shared_ptr<ExportFormatBase> select_intersect;
-	
+
 	select_intersect = compat_intersect->get_intersection (*current_selection);
 	if (select_intersect->qualities_empty()) {
 		select_quality (QualityPtr());
 	}
-	
+
 	select_intersect = compat_intersect->get_intersection (*current_selection);
 	if (select_intersect->formats_empty()) {
 		select_format (FormatPtr());
 	}
-	
+
 	select_intersect = compat_intersect->get_intersection (*current_selection);
 	if (select_intersect->sample_rates_empty()) {
 		select_sample_rate (SampleRatePtr());
 	}
-	
+
 	select_intersect = compat_intersect->get_intersection (*current_selection);
 	if (select_intersect->sample_formats_empty()) {
 		select_sample_format (SampleFormatPtr());
@@ -445,29 +445,29 @@ ExportFormatManager::select_quality (QualityPtr const & quality)
 
 	if (quality) {
 		current_selection->set_quality (quality->quality);
-		
+
 		/* Deselect format if it is incompatible */
-	
+
 		FormatPtr format = get_selected_format();
 		if (format && !format->has_quality (quality->quality)) {
 			format->set_selected (false);
 		}
-		
+
 	} else {
 		current_selection->set_quality (ExportFormatBase::Q_None);
-		
+
 		QualityPtr current_quality = get_selected_quality();
 		if (current_quality) {
 			current_quality->set_selected (false);
 		}
-		
+
 		/* Note:
 		 * A quality is never explicitly deselected without also deselecting the format
 		 * so we don't need to deselect the format here.
 		 * doing so causes extra complications
 		 */
 	}
-	
+
 	if (do_selection_changed) {
 		selection_changed ();
 	}
@@ -484,9 +484,9 @@ ExportFormatManager::select_format (FormatPtr const & format)
 	current_selection->set_format (format);
 
 	if (format) {
-		
+
 		/* Slect right quality for format */
-	
+
 		ExportFormatBase::Quality quality = format->get_quality();
 		for (QualityList::iterator it = qualities.begin (); it != qualities.end (); ++it) {
 			if ((*it)->quality == quality) {
@@ -495,16 +495,16 @@ ExportFormatManager::select_format (FormatPtr const & format)
 				(*it)->set_selected (false);
 			}
 		}
-		
+
 		/* Handle sample formats */
-		
+
 		ExportFormatBase::SampleFormat format_to_select;
 		if (format->sample_format_is_compatible (current_selection->sample_format())) {
 			format_to_select = current_selection->sample_format();
 		} else {
 			format_to_select = format->default_sample_format();
 		}
-		
+
 		boost::shared_ptr<HasSampleFormat> hsf;
 		if ((hsf = boost::dynamic_pointer_cast<HasSampleFormat> (format))) {
 			SampleFormatList sample_formats = hsf->get_sample_formats();
@@ -516,16 +516,16 @@ ExportFormatManager::select_format (FormatPtr const & format)
 				}
 			}
 		}
-		
+
 		current_selection->set_sample_format (format_to_select);
-		
+
 	} else {
 		FormatPtr current_format = get_selected_format ();
 		if (current_format) {
 			current_format->set_selected (false);
 		}
 	}
-	
+
 	if (do_selection_changed) {
 		selection_changed ();
 	}
@@ -544,13 +544,13 @@ ExportFormatManager::select_sample_rate (SampleRatePtr const & rate)
 		current_selection->set_sample_rate (rate->rate);
 	} else {
 		current_selection->set_sample_rate (ExportFormatBase::SR_None);
-		
+
 		SampleRatePtr current_rate = get_selected_sample_rate();
 		if (current_rate) {
 			current_rate->set_selected (false);
 		}
 	}
-	
+
 	if (do_selection_changed) {
 		selection_changed ();
 	}
@@ -569,13 +569,13 @@ ExportFormatManager::select_sample_format (SampleFormatPtr const & format)
 		current_selection->set_sample_format (format->format);
 	} else {
 		current_selection->set_sample_format (ExportFormatBase::SF_None);
-		
+
 		SampleFormatPtr current_format = get_selected_sample_format();
 		if (current_format) {
 			current_format->set_selected (false);
 		}
 	}
-	
+
 	if (do_selection_changed) {
 		selection_changed ();
 	}
@@ -595,7 +595,7 @@ ExportFormatManager::select_dither_type (DitherTypePtr const & type)
 	} else {
 		current_selection->set_dither_type (ExportFormatBase::D_None);
 	}
-	
+
 	if (do_selection_changed) {
 		selection_changed ();
 	}
@@ -605,46 +605,46 @@ void
 ExportFormatManager::selection_changed ()
 {
 	/* Get a list of incompatible compatibility selections */
-	
+
 	CompatList incompatibles;
 	for (CompatList::iterator it = compatibilities.begin(); it != compatibilities.end(); ++it) {
 		if (!current_selection->is_compatible_with (**it)) {
 			incompatibles.push_back (*it);
 		}
 	}
-	
+
 	/* Deselect them */
-	
+
 	for (CompatList::iterator it = incompatibles.begin(); it != incompatibles.end(); ++it) {
 		(*it)->set_selected (false);
 	}
-	
+
 	/* Mark compatibility for everything necessary */
-	
+
 	std::set<ExportFormatBase::Quality> compatible_qualities;
 	FormatBasePtr compat_intersect = get_compatibility_intersection ();
 	ExportFormatCompatibility global_compat (*compat_intersect);
-	
+
 	for (FormatList::iterator it = formats.begin(); it != formats.end(); ++it) {
 		if ((*it)->set_compatibility_state (global_compat)) {
 			compatible_qualities.insert ((*it)->get_quality());
 		}
 	}
-	
+
 	bool any_quality_compatible = true;
 	for (QualityList::iterator it = qualities.begin(); it != qualities.end(); ++it) {
 		if (compatible_qualities.find((*it)->quality) != compatible_qualities.end()) {
 			(*it)->set_compatible (true);
-			
+
 		} else {
 			(*it)->set_compatible (false);
-			
+
 			if ((*it)->quality != ExportFormatBase::Q_Any) {
 				any_quality_compatible = false;
 			}
 		}
 	}
-	
+
 	if (any_quality_compatible) {
 		for (QualityList::iterator it = qualities.begin(); it != qualities.end(); ++it) {
 			if ((*it)->quality == ExportFormatBase::Q_Any) {
@@ -653,7 +653,7 @@ ExportFormatManager::selection_changed ()
 			}
 		}
 	}
-	
+
 	for (SampleRateList::iterator it = sample_rates.begin(); it != sample_rates.end(); ++it) {
 		if (compat_intersect->has_sample_rate ((*it)->rate)) {
 			(*it)->set_compatible (true);
@@ -661,10 +661,10 @@ ExportFormatManager::selection_changed ()
 			(*it)->set_compatible (false);
 		}
 	}
-	
+
 	boost::shared_ptr<HasSampleFormat> hsf;
 	if (hsf = boost::dynamic_pointer_cast<HasSampleFormat> (get_selected_format())) {
-	
+
 		SampleFormatList sf_list = hsf->get_sample_formats();
 		for (SampleFormatList::iterator it = sf_list.begin(); it != sf_list.end(); ++it) {
 			if (compat_intersect->has_sample_format ((*it)->format)) {
@@ -673,15 +673,15 @@ ExportFormatManager::selection_changed ()
 				(*it)->set_compatible (false);
 			}
 		}
-	
+
 	}
-	
+
 	/* Signal completeness */
-	
+
 	CompleteChanged (current_selection->is_complete());
-	
+
 	/* Reset pending state */
-	
+
 	pending_selection_change = false;
 }
 
@@ -693,7 +693,7 @@ ExportFormatManager::get_selected_quality ()
 			return *it;
 		}
 	}
-	
+
 	return QualityPtr();
 }
 
@@ -707,7 +707,7 @@ ExportFormatManager::get_selected_format ()
 			return *it;
 		}
 	}
-	
+
 	return format;
 }
 
@@ -719,7 +719,7 @@ ExportFormatManager::get_selected_sample_rate ()
 			return *it;
 		}
 	}
-	
+
 	return SampleRatePtr();
 }
 
@@ -727,7 +727,7 @@ ExportFormatManager::SampleFormatPtr
 ExportFormatManager::get_selected_sample_format ()
 {
 	boost::shared_ptr<HasSampleFormat> hsf;
-	
+
 	if (hsf = boost::dynamic_pointer_cast<HasSampleFormat> (get_selected_format())) {
 		return hsf->get_selected_sample_format ();
 	} else {
@@ -740,13 +740,13 @@ ExportFormatManager::FormatBasePtr
 ExportFormatManager::get_compatibility_intersection ()
 {
 	FormatBasePtr compat_intersect = universal_set;
-	
+
 	for (CompatList::iterator it = compatibilities.begin(); it != compatibilities.end(); ++it) {
 		if ((*it)->selected ()) {
 			compat_intersect = compat_intersect->get_intersection (**it);
 		}
 	}
-	
+
 	return compat_intersect;
 }
 

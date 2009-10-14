@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -123,7 +123,7 @@ MidiRegion::set_position_internal (nframes_t pos, bool allow_bbt_recompute)
 	double length_beats = old_converter.from(_length);
 
 	Region::set_position_internal(pos, allow_bbt_recompute);
-	
+
 	BeatsFramesConverter new_converter(_session, pos - _start);
 
 	set_length(new_converter.to(length_beats), 0);
@@ -151,7 +151,7 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, MidiRingBuffer<nframes_t>& dst
 	/* precondition: caller has verified that we cover the desired section */
 
 	assert(chan_n == 0);
-	
+
 	if (position < _position) {
 		internal_offset = 0;
 		src_offset = _position - position;
@@ -164,7 +164,7 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, MidiRingBuffer<nframes_t>& dst
 	if (internal_offset >= _length) {
 		return 0; /* read nothing */
 	}
-	
+
 	if ((to_read = min (dur, _length - internal_offset)) == 0) {
 		return 0; /* read nothing */
 	}
@@ -189,15 +189,15 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, MidiRingBuffer<nframes_t>& dst
 	} else {
 		// when _start is greater than _position, we have to subtract
 		// _start from the note times in the midi source
-		negative_output_buffer_position = _start; 
+		negative_output_buffer_position = _start;
 	}
 
-#if 0	
+#if 0
 	cerr << "\t\tsource read from " << _position << " - " << _start << " (" << _position - _start << ") "
 	     << " start in source " << _start << " + " << internal_offset << " (" << _start + internal_offset << ") "
-	     << " dur = " << to_read 
-	     << " offset = " << output_buffer_position 
-	     << " negoffset = " << negative_output_buffer_position 
+	     << " dur = " << to_read
+	     << " offset = " << output_buffer_position
+	     << " negoffset = " << negative_output_buffer_position
 	     << endl;
 #endif
 
@@ -216,7 +216,7 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, MidiRingBuffer<nframes_t>& dst
 
 	return to_read;
 }
-	
+
 XMLNode&
 MidiRegion::state (bool full)
 {
@@ -224,11 +224,11 @@ MidiRegion::state (bool full)
 	char buf[64];
 	char buf2[64];
 	LocaleGuard lg (X_("POSIX"));
-	
+
 	node.add_property ("flags", enum_2_string (_flags));
 
 	// XXX these should move into Region
-	
+
 	for (uint32_t n=0; n < _sources.size(); ++n) {
 		snprintf (buf2, sizeof(buf2), "source-%d", n);
 		_sources[n]->id().print (buf, sizeof(buf));
@@ -257,7 +257,7 @@ MidiRegion::set_live_state (const XMLNode& node, Change& what_changed, bool send
 	Region::set_live_state (node, what_changed, false);
 
 	uint32_t old_flags = _flags;
-		
+
 	if ((prop = node.property ("flags")) != 0) {
 		_flags = Flag (string_2_enum (prop->value(), _flags));
 
@@ -302,7 +302,7 @@ MidiRegion::recompute_at_end ()
 	 * (non destructively) "chop" notes that pass the end boundary, to
 	 * prevent stuck notes.
 	 */
-}	
+}
 
 void
 MidiRegion::recompute_at_start ()

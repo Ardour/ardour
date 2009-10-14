@@ -1,16 +1,16 @@
 /*
-    Copyright (C) 2006 Paul Davis 
-    
+    Copyright (C) 2006 Paul Davis
+
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
     Software Foundation; either version 2 of the License, or (at your option)
     any later version.
-    
+
     This program is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
-    
+
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     675 Mass Ave, Cambridge, MA 02139, USA.
@@ -47,16 +47,16 @@ public:
 
 	/** nth port */
 	Port* port(size_t index) const;
-	
+
 	/** nth port of type @a t, or nth port if t = NIL */
 	Port* port(DataType t, size_t index) const;
 
 	AudioPort* nth_audio_port(size_t n) const;
-	
+
 	MidiPort* nth_midi_port(size_t n) const;
 
 	bool contains(const Port* port) const;
-	
+
 	/** Remove all ports from the PortSet.  Ports are not deregistered with
 	 * the engine, it's the caller's responsibility to not leak here!
 	 */
@@ -68,7 +68,7 @@ public:
 
 	// ITERATORS
 	// FIXME: possible to combine these?  templates?
-	
+
 	class iterator {
 	public:
 		Port& operator*()  { return *_set.port(_type, _index); }
@@ -91,12 +91,12 @@ public:
 	iterator begin(DataType type = DataType::NIL) {
 		return iterator(*this, type, 0);
 	}
-	
+
 	iterator end(DataType type = DataType::NIL) {
 		return iterator(*this, type,
 			(type == DataType::NIL) ? _count.n_total() : _count.get(type));
 	}
-	
+
 
 	class const_iterator {
 	public:
@@ -139,9 +139,9 @@ public:
 	audio_iterator audio_begin() { return audio_iterator(*this, 0); }
 	audio_iterator audio_end()   { return audio_iterator(*this, _count.n_audio()); }
 
-private:	
+private:
 	typedef std::vector<Port*> PortVec;
-	
+
 	// Vector of vectors, indexed by DataType::to_index()
 	std::vector<PortVec> _ports;
 

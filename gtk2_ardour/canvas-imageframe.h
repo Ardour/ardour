@@ -7,15 +7,15 @@
  *
  * Author: Federico Mena <federico@nuclecu.unam.mx>
  */
- 
- 
+
+
 #ifndef __GNOME_CANVAS_IMAGEFRAME_H__
 #define __GNOME_CANVAS_IMAGEFRAME_H__
 
 #include <stdint.h>
 
 #include <libgnomecanvas/libgnomecanvas.h>
-#include <gtk/gtkenums.h> 
+#include <gtk/gtkenums.h>
 
 #ifdef __cplusplus
 extern "C" {

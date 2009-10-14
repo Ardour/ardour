@@ -39,11 +39,11 @@ LocationImportHandler::LocationImportHandler (XMLTree const & source, Session & 
 {
 	XMLNode const *root = source.root();
 	XMLNode const * location_node;
-	
+
 	if (!(location_node = root->child ("Locations"))) {
 		throw failed_constructor();
 	}
-	
+
 	// Construct importable locations
 	XMLNodeList const & locations = location_node->children();
 	for (XMLNodeList::const_iterator it = locations.begin(); it != locations.end(); it++) {
@@ -62,7 +62,7 @@ LocationImportHandler::get_info () const
 }
 
 /*** LocationImporter ***/
-LocationImporter::LocationImporter (XMLTree const & source, Session & session, LocationImportHandler & handler, XMLNode const & node) : 
+LocationImporter::LocationImporter (XMLTree const & source, Session & session, LocationImportHandler & handler, XMLNode const & node) :
   ElementImporter (source, session),
   handler (handler),
   xml_location (node),
@@ -71,7 +71,7 @@ LocationImporter::LocationImporter (XMLTree const & source, Session & session, L
 	// Parse XML
 	bool name_ok = false;
 	XMLPropertyList props = xml_location.properties();
-	
+
 	for (XMLPropertyIterator it = props.begin(); it != props.end(); ++it) {
 		string prop = (*it)->name();
 		if (!prop.compare ("id") || !prop.compare ("flags") || !prop.compare ("locked")) {
@@ -87,7 +87,7 @@ LocationImporter::LocationImporter (XMLTree const & source, Session & session, L
 			std::cerr << string_compose (X_("LocationImporter did not recognise XML-property \"%1\""), prop) << endmsg;
 		}
 	}
-	
+
 	if (!name_ok) {
 		error << X_("LocationImporter did not find necessary XML-property \"name\"") << endmsg;
 		throw failed_constructor();
@@ -106,17 +106,17 @@ LocationImporter::get_info () const
 {
 	nframes_t start, end;
 	SMPTE::Time start_time, end_time;
-	
+
 	// Get sample positions
 	std::istringstream iss_start (xml_location.property ("start")->value());
 	iss_start >> start;
 	std::istringstream iss_end (xml_location.property ("end")->value());
 	iss_end >> end;
-	
+
 	// Convert to smpte
 	session.sample_to_smpte (start, start_time, true, false);
 	session.sample_to_smpte (end, end_time, true, false);
-	
+
 	// return info
 	std::ostringstream oss;
 	if (start == end) {
@@ -125,7 +125,7 @@ LocationImporter::get_info () const
 		oss << _("Range\nstart: ") << smpte_to_string (start_time) <<
 		  _("\nend: ") << smpte_to_string (end_time);
 	}
-	
+
 	return oss.str();
 }
 
@@ -137,30 +137,30 @@ LocationImporter::_prepare_move ()
 		location = new Location (original); // Updates id
 	} catch (failed_constructor& err) {
 		throw std::runtime_error (X_("Error in session file!"));
- 		return false;
+		return false;
 	}
-	
+
 	std::pair<bool, string> rename_pair;
-	
+
 	if (location->is_auto_punch()) {
 		rename_pair = Rename (_("The location is the Punch range. It will be imported as a normal range.\nYou may rename the imported location:"), name);
 		if (!rename_pair.first) {
 			return false;
 		}
-		
+
 		name = rename_pair.second;
 		location->set_auto_punch (false, this);
 		location->set_is_range_marker (true, this);
 	}
-	
+
 	if (location->is_auto_loop()) {
 		rename_pair = Rename (_("The location is a Loop range. It will be imported as a normal range.\nYou may rename the imported location:"), name);
 		if (!rename_pair.first) { return false; }
-		
+
 		location->set_auto_loop (false, this);
 		location->set_is_range_marker (true, this);
 	}
-	
+
 	// duplicate name checking
 	Locations::LocationList const & locations(session.locations()->list());
 	for (Locations::LocationList::const_iterator it = locations.begin(); it != locations.end(); ++it) {
@@ -170,7 +170,7 @@ LocationImporter::_prepare_move ()
 			name = rename_pair.second;
 		}
 	}
-	
+
 	location->set_name (name);
 
 	return true;
@@ -178,7 +178,7 @@ LocationImporter::_prepare_move ()
 
 void
 LocationImporter::_cancel_move ()
-{	
+{
 	delete location;
 	location = 0;
 }

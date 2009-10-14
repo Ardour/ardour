@@ -99,13 +99,13 @@ public:
 	void add_to_page (OptionEditorPage *);
 
 protected:
-	
+
 	Gtk::VBox* _box; ///< constituent box for subclasses to add widgets to
 };
 
 /** Base class for components which provide UI to change an option */
 class Option : public OptionEditorComponent {
-	
+
 public:
 	/** Construct an Option.
 	 *  @param i Option id (e.g. "plugins-stop-with-transport")
@@ -124,16 +124,16 @@ public:
 			set_state_from_config ();
 		}
 	}
-	
+
 	virtual void set_state_from_config () = 0;
 	virtual void add_to_page (OptionEditorPage*) = 0;
 
 	std::string id () const {
 		return _id;
 	}
-	
+
 private:
-	
+
 	std::string _id;
 	std::string _name;
 };
@@ -142,15 +142,15 @@ private:
 class BoolOption : public Option {
 
 public:
-	
+
 	BoolOption (std::string const &, std::string const &, sigc::slot<bool>, sigc::slot<bool, bool>);
 	void set_state_from_config ();
 	void add_to_page (OptionEditorPage*);
-	
+
 private:
 
 	void toggled ();
-	
+
 	sigc::slot<bool> _get; ///< slot to get the configuration variable's value
 	sigc::slot<bool, bool> _set;  ///< slot to set the configuration variable's value
 	Gtk::CheckButton* _button; ///< UI button
@@ -164,24 +164,24 @@ public:
 	EntryOption (std::string const &, std::string const &, sigc::slot<std::string>, sigc::slot<bool, std::string>);
 	void set_state_from_config ();
 	void add_to_page (OptionEditorPage*);
-	
+
 private:
 
 	void activated ();
-	
+
 	sigc::slot<std::string> _get; ///< slot to get the configuration variable's value
 	sigc::slot<bool, std::string> _set;  ///< slot to set the configuration variable's value
 	Gtk::Label* _label; ///< UI label
 	Gtk::Entry* _entry; ///< UI entry
 };
-	
+
 
 /** Component which provides the UI to handle an enumerated option using a GTK CheckButton.
  *  The template parameter is the enumeration.
  */
 template <class T>
 class ComboOption : public Option {
-	
+
 public:
 
 	/** Construct an ComboOption.
@@ -211,7 +211,7 @@ public:
 		while (r < _options.size() && _get () != _options[r]) {
 			++r;
 		}
-		
+
 		if (r < _options.size()) {
 			_combo->set_active (r);
 		}
@@ -230,7 +230,7 @@ public:
 		_options.push_back (e);
 		_combo->append_text (o);
 	}
-	
+
 	void changed () {
 		uint32_t const r = _combo->get_active_row_number ();
 		if (r < _options.size()) {
@@ -239,7 +239,7 @@ public:
 	}
 
 private:
-	
+
 	sigc::slot<T> _get;
 	sigc::slot<bool, T> _set;
 	Gtk::Label* _label;
@@ -288,14 +288,14 @@ public:
 		_spin = manage (new Gtk::SpinButton);
 		_spin->set_range (min, max);
 		_spin->set_increments (step, page);
-		
+
 		_box = manage (new Gtk::HBox);
 		_box->pack_start (*_spin, true, true);
 		_box->set_spacing (4);
 		if (unit.length()) {
 			_box->pack_start (*manage (new Gtk::Label (unit)), false, false);
 		}
-		
+
 		_spin->signal_value_changed().connect (sigc::mem_fun (*this, &SpinOption::changed));
 	}
 
@@ -308,12 +308,12 @@ public:
 	{
 		add_widgets_to_page (p, _label, _box);
 	}
-	
+
 	void changed ()
 	{
 		_set (static_cast<T> (_spin->get_value ()) * _scale);
 	}
-	
+
 private:
 	sigc::slot<T> _get;
 	sigc::slot<bool, T> _set;
@@ -347,9 +347,9 @@ public:
 	void add_option (std::string const &, OptionEditorComponent *);
 
 protected:
-	
+
 	ARDOUR::Configuration* _config;
-	
+
 private:
 
 	void parameter_changed (std::string const &);

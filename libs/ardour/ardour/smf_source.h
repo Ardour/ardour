@@ -18,7 +18,7 @@
 
 */
 
-#ifndef __ardour_smf_source_h__ 
+#ifndef __ardour_smf_source_h__
 #define __ardour_smf_source_h__
 
 #include <cstdio>
@@ -44,13 +44,13 @@ public:
 	SMFSource (Session& session, const XMLNode&, bool must_exist = false);
 
 	virtual ~SMFSource ();
-	
+
 	bool safe_file_extension (const Glib::ustring& path) const {
 		return safe_midi_file_extension(path);
 	}
 
 	bool set_name (const std::string& newname) { return (set_source_name(newname, false) == 0); }
-	
+
 	void append_event_unlocked_beats (const Evoral::Event<Evoral::MusicalTime>& ev);
 	void append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, sframes_t source_start);
 
@@ -64,7 +64,7 @@ public:
 	void destroy_model ();
 
 	void flush_midi ();
-	
+
 	static void set_header_position_offset (nframes_t offset, bool negative);
 
 	static bool safe_midi_file_extension (const Glib::ustring& path);

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -35,7 +35,7 @@ public:
 		: _session(session)
 		, _origin(origin)
 	{}
-	
+
 	sframes_t to(double beats)       const;
 	double    from(sframes_t frames) const;
 

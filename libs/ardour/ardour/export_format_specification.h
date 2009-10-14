@@ -46,14 +46,14 @@ class ExportFormatSpecification : public ExportFormatBase {
 	struct Time : public AnyTime {
 		Time (Session & session) : AnyTime (), session (session) {}
 		Time & operator= (AnyTime const & other);
-	
+
 		nframes_t get_frames (nframes_t target_rate) const;
-		
+
 		/* Serialization */
-		
+
 		XMLNode & get_state ();
 		int set_state (const XMLNode & node);
-		
+
 	  private:
 		Session & session;
 	};
@@ -62,18 +62,18 @@ class ExportFormatSpecification : public ExportFormatBase {
 	friend class ExportElementFactory;
 	explicit ExportFormatSpecification (Session & s);
 	ExportFormatSpecification (Session & s, XMLNode const & state);
-	
+
   public:
 	ExportFormatSpecification (ExportFormatSpecification const & other);
 	~ExportFormatSpecification ();
 
 	/* compatibility */
-	
+
 	bool is_compatible_with (ExportFormatCompatibility const & compatibility) const;
 	bool is_complete () const;
 
 	/* Modifying functions */
-	
+
 	void set_format (boost::shared_ptr<ExportFormat> format);
 
 	void set_name (Glib::ustring const & name) { _name = name; }
@@ -84,29 +84,29 @@ class ExportFormatSpecification : public ExportFormatBase {
 	void set_sample_format (SampleFormat value) { sample_formats.clear(); sample_formats.insert (value); }
 	void set_sample_rate (SampleRate value) { sample_rates.clear(); sample_rates.insert (value); }
 	void set_quality (Quality value) { qualities.clear(); qualities.insert (value); }
-	
+
 	void set_dither_type (DitherType value) { _dither_type = value; }
 	void set_src_quality (SRCQuality value) { _src_quality = value; }
 	void set_trim_beginning (bool value) { _trim_beginning = value; }
 	void set_trim_end (bool value) { _trim_end = value; }
 	void set_normalize (bool value) { _normalize = value; }
 	void set_normalize_target (float value) { _normalize_target = value; }
-	
+
 	void set_tag (bool tag_it) { _tag = tag_it; }
-	
+
 	void set_silence_beginning (AnyTime const & value) { _silence_beginning = value; }
 	void set_silence_end (AnyTime const & value) { _silence_end = value; }
-	
+
 	/* Accessing functions */
-	
+
 	PBD::UUID const & id () { return _id; }
 	Glib::ustring const & name () const { return _name; }
 	Glib::ustring description ();
-	
+
 	bool has_broadcast_info () const { return _has_broadcast_info; }
 	uint32_t channel_limit () const { return _channel_limit; }
 	Glib::ustring format_name () const { return _format_name; }
-	
+
 	Type type () const { return _type; }
 	FormatId format_id () const { return *format_ids.begin(); }
 	Endianness endianness () const { return *endiannesses.begin(); }
@@ -120,54 +120,54 @@ class ExportFormatSpecification : public ExportFormatBase {
 	bool trim_end () const { return _trim_end; }
 	bool normalize () const { return _normalize; }
 	float normalize_target () const { return _normalize_target; }
-	
+
 	bool tag () const { return _tag && supports_tagging; }
-	
+
 	nframes_t silence_beginning () const { return _silence_beginning.get_frames (sample_rate()); }
 	nframes_t silence_end () const { return _silence_end.get_frames (sample_rate()); }
-	
+
 	AnyTime silence_beginning_time () const { return _silence_beginning; }
 	AnyTime silence_end_time () const { return _silence_end; }
-	
+
 	/* Serialization */
-	
+
 	XMLNode & get_state ();
 	int set_state (const XMLNode & root);
 
-	
+
   private:
-	
+
 	Session &        session;
-	
+
 	/* The variables below do not have setters (usually set via set_format) */
-	
+
 	Glib::ustring  _format_name;
 	bool            has_sample_format;
 	bool            supports_tagging;
 	bool           _has_broadcast_info;
 	uint32_t       _channel_limit;
-	
+
 	/* The variables below have getters and setters */
-	
+
 	Glib::ustring   _name;
 	PBD::UUID       _id;
-	
+
 	Type            _type;
 	DitherType      _dither_type;
 	SRCQuality      _src_quality;
-	
+
 	bool            _tag;
-	
+
 	bool            _trim_beginning;
 	Time            _silence_beginning;
 	bool            _trim_end;
 	Time            _silence_end;
-	
+
 	bool            _normalize;
 	float           _normalize_target;
-	
+
 	/* serialization helpers */
-	
+
 	void add_option (XMLNode * node, std::string const & name, std::string const & value);
 	std::string get_option (XMLNode const * node, std::string const & name);
 

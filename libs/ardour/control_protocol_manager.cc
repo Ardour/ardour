@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ const string ControlProtocolManager::state_node_name = X_("ControlProtocols");
 ControlProtocolManager::ControlProtocolManager ()
 	: _session (0)
 {
-	
+
 }
 
 ControlProtocolManager::~ControlProtocolManager()
@@ -54,7 +54,7 @@ ControlProtocolManager::~ControlProtocolManager()
 
 	control_protocols.clear ();
 
-	
+
 	for (list<ControlProtocolInfo*>::iterator p = control_protocol_info.begin(); p != control_protocol_info.end(); ++p) {
 		delete (*p);
 	}
@@ -91,7 +91,7 @@ ControlProtocolManager::drop_session ()
 			delete *p;
 		}
 		control_protocols.clear ();
-		
+
 		for (list<ControlProtocolInfo*>::iterator p = control_protocol_info.begin(); p != control_protocol_info.end(); ++p) {
 			// otherwise the ControlProtocol instances are not recreated in set_session
 			if ((*p)->protocol) {
@@ -143,7 +143,7 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 	}
 
 	cpi.descriptor->destroy (cpi.descriptor, cpi.protocol);
-	
+
 	{
 		Glib::Mutex::Lock lm (protocols_lock);
 		list<ControlProtocol*>::iterator p = find (control_protocols.begin(), control_protocols.end(), cpi.protocol);
@@ -160,7 +160,7 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi)
 			cerr << "Programming error: ControlProtocolManager::teardown() called for " << cpi.name << ", but it was not found in control_protocol_info" << endl;
 		}
 	}
-	
+
 	cpi.protocol = 0;
 	dlclose (cpi.descriptor->module);
 	return 0;
@@ -223,9 +223,9 @@ ControlProtocolManager::control_protocol_discover (string path)
 			cpi->mandatory = descriptor->mandatory;
 			cpi->supports_feedback = descriptor->supports_feedback;
 			cpi->state = 0;
-			
+
 			control_protocol_info.push_back (cpi);
-			
+
 			info << string_compose(_("Control surface protocol discovered: \"%1\""), cpi->name) << endmsg;
 		}
 
@@ -310,7 +310,7 @@ ControlProtocolManager::set_state (const XMLNode& node)
 						} else {
 							cpi->state = 0;
 						}
-						
+
 						if (_session) {
 							instantiate (*cpi);
 						} else {
@@ -319,7 +319,7 @@ ControlProtocolManager::set_state (const XMLNode& node)
 					}
 				}
 			}
-		}    
+		}
 	}
 	return 0;
 }

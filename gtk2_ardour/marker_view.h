@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,21 +36,21 @@ class ImageFrameView ;
  * MarkerView defines a marker item that may be placed upon a MarkerTimeAxis.
  *
  * The aim of the MarkerView is to provide additional timing details for visual based time axis.
- * The MarkerView item is associated with one other TimeAxisViewItem and has a start and a duration.  
+ * The MarkerView item is associated with one other TimeAxisViewItem and has a start and a duration.
  */
 class MarkerView : public TimeAxisViewItem
 {
 	public:
 		//---------------------------------------------------------------------------------------//
 		// Constructor / Desctructor
-		
+
 		/**
 		 * Constructs a new MarkerView
-		 * 
+		 *
 		 * @param parent the parent canvas item
 		 * @param tv the parent TimeAxisView of this item
 		 * @param marked the Item that this item is to be assciated (marking) with
-		 * @param spu the current samples per unit 
+		 * @param spu the current samples per unit
 		 * @param base_color
 		 * @param mark_type the marker type/name text, eg fade out, pan up etc.
 		 * @param mark_id unique name/id of this item
@@ -72,27 +72,27 @@ class MarkerView : public TimeAxisViewItem
 		 * Destroys this Marker Item and removes the association between itself and the item it is marking.
 		 */
 		~MarkerView() ;
-		
+
 		static sigc::signal<void,MarkerView*> GoingAway;
-		
+
 		//---------------------------------------------------------------------------------------//
 		// Marker Type Methods
-		
+
 		/**
-		 * Sets the marker Type text of this this MarkerItem, eg fade_out, pan up etc. 
+		 * Sets the marker Type text of this this MarkerItem, eg fade_out, pan up etc.
 		 *
 		 * @param type_text the marker type text of this item
 		 */
 		void set_mark_type_text(std::string type_text) ;
-		
+
 		/**
-		 * Returns the marker Type of this this MarkerItem, eg fade_out, pan up etc. 
+		 * Returns the marker Type of this this MarkerItem, eg fade_out, pan up etc.
 		 *
 		 * @return the marker type text of this item
 		 */
 		std::string get_mark_type_text() const ;
 
-		
+
 		//---------------------------------------------------------------------------------------//
 		// Marked Item Methods
 
@@ -102,7 +102,7 @@ class MarkerView : public TimeAxisViewItem
 		 * @return the time axis item being marked by this item
 		 */
 		ImageFrameView* get_marked_item() ;
-		
+
 		/**
 		 * Sets the time axis item being marker by this item
 		 *
@@ -110,17 +110,17 @@ class MarkerView : public TimeAxisViewItem
 		 * @return the previously marked item, or 0 if no previous marked item exists
 		 */
 		ImageFrameView* set_marked_item(ImageFrameView* item) ;
-		
+
 		//---------------------------------------------------------------------------------//
 		// Emitted Signals
-		
+
 		/** Emitted when the mark type text is changed */
 		sigc::signal<void,std::string,void*> MarkTypeChanged ;
-		
+
 		/** Emitted when the Marked Item is changed */
 		sigc::signal<void,ImageFrameView*,void*> MarkedItemChanged ;
 
-		
+
 	protected:
 
 	private:
@@ -129,7 +129,7 @@ class MarkerView : public TimeAxisViewItem
 
 		/* a pointer to the time axis item this marker is assoiated(marking up) with */
 		ImageFrameView* marked_item ;
-		
+
 } ; /* class MarkerView */
 
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Paul Davis 
+    Copyright (C) 2008 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -60,8 +60,8 @@ PianoRollHeader::Color::set(const PianoRollHeader::Color& c)
 	b = c.b;
 }
 
-PianoRollHeader::PianoRollHeader(MidiStreamView& v) 
-	: _view(v) 
+PianoRollHeader::PianoRollHeader(MidiStreamView& v)
+	: _view(v)
 	, _highlighted_note(no_note)
 	, _clicked_note(no_note)
 	, _dragging(false)
@@ -90,7 +90,7 @@ create_path(Cairo::RefPtr<Cairo::Context> cr, double x[], double y[], int start,
 	}
 }
 
-inline void 
+inline void
 render_rect(Cairo::RefPtr<Cairo::Context> cr, int /*note*/, double x[], double y[],
 	     PianoRollHeader::Color& bg, PianoRollHeader::Color& tl_shadow, PianoRollHeader::Color& br_shadow)
 {
@@ -441,10 +441,10 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 			std::stringstream s;
 			double y = floor(_view.note_to_y(i)) - 0.5f;
 			double note_height = floor(_view.note_to_y(i - 1)) - y;
-			
+
 			int cn = i / 12;
 			s << "C" << cn;
-			
+
 			//cr->get_text_extents(s.str(), te);
 			cr->set_source_rgb(0.30f, 0.30f, 0.30f);
 			cr->move_to(2.0f, y + note_height - 1.0f - (note_height - font_size) / 2.0f);
@@ -501,7 +501,7 @@ PianoRollHeader::on_button_press_event (GdkEventButton* ev)
 			_active_notes[note] = true;
 			_clicked_note = note;
 			send_note_on(note);
-			
+
 			invalidate_note_range(note, note);
 		} else {
 			_clicked_note = no_note;
@@ -524,7 +524,7 @@ PianoRollHeader::on_button_release_event (GdkEventButton* ev)
 			_active_notes[note] = false;
 			_clicked_note = no_note;
 			send_note_off(note);
-			
+
 			invalidate_note_range(note, note);
 		}
 	}
@@ -545,7 +545,7 @@ bool
 PianoRollHeader::on_leave_notify_event (GdkEventCrossing*)
 {
 	invalidate_note_range(_highlighted_note, _highlighted_note);
-	
+
 	if (_clicked_note != no_note) {
 		_active_notes[_clicked_note] = false;
 		send_note_off(_clicked_note);
@@ -639,7 +639,7 @@ void
 PianoRollHeader::on_size_allocate(Gtk::Allocation& a)
 {
 	DrawingArea::on_size_allocate(a);
-	
+
 	_black_note_width = floor(0.7 * get_width()) + 0.5f;
 }
 

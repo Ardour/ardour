@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2002 Paul Davis 
+    Copyright (C) 2000-2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -68,9 +68,9 @@ RouteGroup::remove_when_going_away (Route *r)
 {
 	remove (r);
 }
-    
+
 int
-RouteGroup::remove (Route *r) 
+RouteGroup::remove (Route *r)
 {
 	list<Route *>::iterator i;
 
@@ -88,7 +88,7 @@ gain_t
 RouteGroup::get_min_factor(gain_t factor)
 {
 	gain_t g;
-	
+
 	for (list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
 		g = (*i)->amp()->gain();
 
@@ -97,9 +97,9 @@ RouteGroup::get_min_factor(gain_t factor)
 
 		if ( g <= 0.0000003f )
 			return 0.0f;
-		
+
 		factor = 0.0000003f/g - 1.0f;
-	}	
+	}
 	return factor;
 }
 
@@ -107,14 +107,14 @@ gain_t
 RouteGroup::get_max_factor(gain_t factor)
 {
 	gain_t g;
-	
+
 	for (list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
 		g = (*i)->amp()->gain();
-		
+
 		// if the current factor woulnd't raise this route above maximum
-		if ( (g+g*factor) <= 1.99526231f) 
+		if ( (g+g*factor) <= 1.99526231f)
 			continue;
-		
+
 		// if route gain is already at peak, return 0.0f factor
 	    if (g>=1.99526231f)
 			return 0.0f;
@@ -136,7 +136,7 @@ RouteGroup::get_state (void)
 	return *node;
 }
 
-int 
+int
 RouteGroup::set_state (const XMLNode& node)
 {
 	const XMLProperty *prop;
@@ -152,7 +152,7 @@ RouteGroup::set_state (const XMLNode& node)
 	if ((prop = node.property ("properties")) != 0) {
 		_properties = Property (string_2_enum (prop->value(), _properties));
 	}
-	
+
 	return 0;
 }
 
@@ -200,7 +200,7 @@ RouteGroup::set_hidden (bool yn, void *src)
 			_flags = Flag (_flags & ~Active);
 		}
 	} else {
-         	_flags = Flag (_flags & ~Hidden);
+		_flags = Flag (_flags & ~Hidden);
 		if (Config->get_hiding_groups_deactivates_groups()) {
 			_flags = Flag (_flags | Active);
 		}
@@ -210,8 +210,8 @@ RouteGroup::set_hidden (bool yn, void *src)
 }
 
 void
-RouteGroup::audio_track_group (set<AudioTrack*>& ats) 
-{	
+RouteGroup::audio_track_group (set<AudioTrack*>& ats)
+{
 	for (list<Route*>::iterator i = routes.begin(); i != routes.end(); ++i) {
 		AudioTrack* at = dynamic_cast<AudioTrack*>(*i);
 		if (at) {
@@ -238,7 +238,7 @@ RouteGroup::make_subgroup ()
 	for (list<Route*>::iterator i = routes.begin(); i != routes.end(); ++i) {
 		nin = max (nin, (*i)->output()->n_ports().n_audio());
 	}
-		
+
 	try {
 		/* use master bus etc. to determine default nouts */
 		rl = _session.new_audio_route (nin, 2, 0, 1);
@@ -250,7 +250,7 @@ RouteGroup::make_subgroup ()
 	subgroup_bus->set_name (_name);
 
 	boost::shared_ptr<Bundle> bundle = subgroup_bus->input()->bundle ();
-	
+
 	for (list<Route*>::iterator i = routes.begin(); i != routes.end(); ++i) {
 		(*i)->output()->disconnect (this);
 		(*i)->output()->connect_ports_to_bundle (bundle, this);

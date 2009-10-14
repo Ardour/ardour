@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -79,15 +79,15 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	ARDOUR::ColorMode color_mode() const { return _color_mode; }
 
 	void update_range();
-	
-	sigc::signal<void, ARDOUR::ChannelMode, uint16_t>& signal_channel_mode_changed() { 
-		return _channel_selector.mode_changed; 
+
+	sigc::signal<void, ARDOUR::ChannelMode, uint16_t>& signal_channel_mode_changed() {
+		return _channel_selector.mode_changed;
 	}
-	
+
 	sigc::signal<void, std::string, std::string>& signal_midi_patch_settings_changed() {
 		return _midi_patch_settings_changed;
 	}
-	
+
 	void start_step_editing ();
 	void stop_step_editing ();
 	void check_step_edit ();
@@ -95,10 +95,10 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
   private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
-	  		
+
 	void model_changed();
 	void custom_device_mode_changed();
-	
+
 	void append_extra_display_menu_items ();
 	void build_automation_action_menu ();
 	Gtk::Menu* build_note_mode_menu();
@@ -111,7 +111,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void route_active_changed ();
 
 	void add_insert_to_subplugin_menu (ARDOUR::Processor *);
-	
+
 	bool                         _ignore_signals;
 	Gtk::Menu                    _subplugin_menu;
 	MidiScroomer*                _range_scroomer;

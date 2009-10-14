@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include "i18n.h"
 
-namespace ARDOUR {                       
+namespace ARDOUR {
 
 const char* const template_suffix = X_(".template");
 const char* const statefile_suffix = X_(".ardour");

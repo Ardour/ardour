@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999-2002 Paul Davis 
+    Copyright (C) 1999-2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ static inline uint32_t next_power_of_two (uint32_t n)
 }
 
 /*---------------------------------------------------------------------------
- BUTLER THREAD 
+ BUTLER THREAD
  ---------------------------------------------------------------------------*/
 
 int
@@ -72,14 +72,14 @@ Session::start_butler_thread ()
 {
 	/* size is in Samples, not bytes */
 	audio_dstream_buffer_size = (uint32_t) floor (Config->get_audio_track_buffer_seconds() * (float) frame_rate());
-	
+
 	/* size is in bytes
 	 * XXX: Jack needs to tell us the MIDI buffer size
 	 * (i.e. how many MIDI bytes we might see in a cycle)
 	 */
 	midi_dstream_buffer_size = (uint32_t) floor (Config->get_midi_track_buffer_seconds() * (float)frame_rate());
 	MidiDiskstream::set_readahead_frames ((nframes_t) (Config->get_midi_readahead() * (float) frame_rate()));
-	
+
 	Crossfade::set_buffer_size (audio_dstream_buffer_size);
 
 	butler_should_run = false;
@@ -183,13 +183,13 @@ Session::butler_thread_work ()
 	while (true) {
 		pfd[0].fd = butler_request_pipe[0];
 		pfd[0].events = POLLIN|POLLERR|POLLHUP;
-		
+
 		if (poll (pfd, 1, (disk_work_outstanding ? 0 : -1)) < 0) {
-			
+
 			if (errno == EINTR) {
 				continue;
 			}
-			
+
 			error << string_compose (_("poll on butler request pipe failed (%1)"),
 					  strerror (errno))
 			      << endmsg;
@@ -200,39 +200,39 @@ Session::butler_thread_work ()
 			error << string_compose (_("Error on butler thread request pipe: fd=%1 err=%2"), pfd[0].fd, pfd[0].revents) << endmsg;
 			break;
 		}
-		
+
 		if (pfd[0].revents & POLLIN) {
 
 			char req;
-			
+
 			/* empty the pipe of all current requests */
-			
+
 			while (1) {
 				size_t nread = ::read (butler_request_pipe[0], &req, sizeof (req));
 				if (nread == 1) {
-					
+
 					switch ((ButlerRequest::Type) req) {
-						
+
 					case ButlerRequest::Wake:
 						break;
 
 					case ButlerRequest::Run:
 						butler_should_run = true;
 						break;
-						
+
 					case ButlerRequest::Pause:
 						butler_should_run = false;
 						break;
-						
+
 					case ButlerRequest::Quit:
 						pthread_exit_pbd (0);
 						/*NOTREACHED*/
 						break;
-						
+
 					default:
 						break;
 					}
-					
+
 				} else if (nread == 0) {
 					break;
 				} else if (errno == EAGAIN) {
@@ -267,7 +267,7 @@ Session::butler_thread_work ()
 			/* don't read inactive tracks */
 
 			boost::shared_ptr<IO> io = ds->io();
-			
+
 			if (io && !io->active()) {
 				continue;
 			}
@@ -280,7 +280,7 @@ Session::butler_thread_work ()
 				bytes += ds->read_data_count();
 				disk_work_outstanding = true;
 				break;
-				
+
 			default:
 				compute_io = false;
 				error << string_compose(_("Butler read ahead failure on dstream %1"), (*i)->name()) << endmsg;
@@ -293,13 +293,13 @@ Session::butler_thread_work ()
 			/* we didn't get to all the streams */
 			disk_work_outstanding = true;
 		}
-		
+
 		if (!err && transport_work_requested()) {
 			continue;
 		}
 
 		if (compute_io) {
-			end = get_microseconds(); 
+			end = get_microseconds();
 			if(end-begin > 0) {
 			_read_data_rate = (float) bytes / (float) (end - begin);
 			} else { _read_data_rate = 0; // infinity better
@@ -315,7 +315,7 @@ Session::butler_thread_work ()
 
 			/* note that we still try to flush diskstreams attached to inactive routes
 			 */
-			
+
 			switch ((*i)->do_flush (ButlerContext)) {
 			case 0:
 				bytes += (*i)->write_data_count();
@@ -324,12 +324,12 @@ Session::butler_thread_work ()
 				bytes += (*i)->write_data_count();
 				disk_work_outstanding = true;
 				break;
-				
+
 			default:
 				err++;
 				compute_io = false;
 				error << string_compose(_("Butler write-behind failure on dstream %1"), (*i)->name()) << endmsg;
-				/* don't break - try to flush all streams in case they 
+				/* don't break - try to flush all streams in case they
 				   are split across disks.
 				*/
 			}
@@ -346,7 +346,7 @@ Session::butler_thread_work ()
 			/* we didn't get to all the streams */
 			disk_work_outstanding = true;
 		}
-		
+
 		if (!err && transport_work_requested()) {
 			continue;
 		}
@@ -360,7 +360,7 @@ Session::butler_thread_work ()
 			_write_data_rate = 0; // Well, infinity would be better
 			}
 		}
-		
+
 		if (!disk_work_outstanding) {
 			refresh_disk_space ();
 		}

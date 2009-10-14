@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000,2007 Paul Davis 
+    Copyright (C) 2000,2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ class PortInsert : public IOProcessor
 	nframes_t signal_latency() const;
 
 	bool set_name (const std::string& name);
-	
+
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);
 
@@ -67,7 +67,7 @@ class PortInsert : public IOProcessor
 	PortInsert (const PortInsert&);
 
 	boost::shared_ptr<Delivery> _out;
-	
+
 	uint32_t bitslot;
 };
 

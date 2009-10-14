@@ -26,7 +26,7 @@
 #include <boost/utility.hpp>
 #include <slv2/slv2.h>
 #include "lv2ext/lv2_uri_map.h"
-	
+
 namespace ARDOUR {
 
 
@@ -35,7 +35,7 @@ namespace ARDOUR {
 class URIMap : public boost::noncopyable {
 public:
 	URIMap();
-	
+
 	LV2_Feature* feature() { return &uri_map_feature; }
 
 	uint32_t uri_to_id(const char* map,
@@ -43,11 +43,11 @@ public:
 
 private:
 	typedef std::map<std::string, uint32_t> Map;
-	
+
 	static uint32_t uri_map_uri_to_id(LV2_URI_Map_Callback_Data callback_data,
 	                                  const char*               map,
 	                                  const char*               uri);
-	
+
 	LV2_Feature         uri_map_feature;
 	LV2_URI_Map_Feature uri_map_feature_data;
 	Map                 uri_map;

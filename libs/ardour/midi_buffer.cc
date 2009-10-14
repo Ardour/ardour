@@ -1,17 +1,17 @@
 /*
-    Copyright (C) 2006-2007 Paul Davis 
+    Copyright (C) 2006-2007 Paul Davis
 	Author: Dave Robillard
-    
+
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
     Software Foundation; either version 2 of the License, or (at your option)
     any later version.
-    
+
     This program is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
-    
+
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     675 Mass Ave, Cambridge, MA 02139, USA.
@@ -34,7 +34,7 @@ MidiBuffer::MidiBuffer(size_t capacity)
 		silence(_capacity);
 	}
 }
-	
+
 MidiBuffer::~MidiBuffer()
 {
 	free(_data);
@@ -79,7 +79,7 @@ MidiBuffer::read_from (const Buffer& src, nframes_t nframes, nframes_t dst_offse
 	assert (&src != this);
 
 	const MidiBuffer& msrc = (MidiBuffer&) src;
-	
+
 	assert (_capacity >= msrc.size());
 
 	if (dst_offset == 0) {
@@ -88,7 +88,7 @@ MidiBuffer::read_from (const Buffer& src, nframes_t nframes, nframes_t dst_offse
 	}
 
 	/* XXX use dst_offset somehow */
-	
+
 	for (MidiBuffer::const_iterator i = msrc.begin(); i != msrc.end(); ++i) {
 		const Evoral::MIDIEvent<TimeType> ev(*i, false);
 		if (ev.time() >= src_offset && ev.time() < (nframes+src_offset)) {
@@ -123,7 +123,7 @@ MidiBuffer::push_back(const Evoral::MIDIEvent<TimeType>& ev)
 	const size_t stamp_size = sizeof(TimeType);
 	/*cerr << "MidiBuffer: pushing event @ " << ev.time()
 		<< " size = " << ev.size() << endl;*/
-	
+
 	if (_size + stamp_size + ev.size() >= _capacity) {
 		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
 		return false;
@@ -135,7 +135,7 @@ MidiBuffer::push_back(const Evoral::MIDIEvent<TimeType>& ev)
 	}
 
 	push_back(ev.time(), ev.size(), ev.buffer());
-	
+
 	return true;
 }
 
@@ -149,7 +149,7 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 	const size_t stamp_size = sizeof(TimeType);
 	/*cerr << "MidiBuffer: pushing event @ " << ev.time()
 		<< " size = " << ev.size() << endl;*/
-	
+
 	if (_size + stamp_size + size >= _capacity) {
 		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
 		return false;
@@ -166,7 +166,7 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 
 	_size += stamp_size + size;
 	_silent = false;
-	
+
 	return true;
 }
 
@@ -186,7 +186,7 @@ MidiBuffer::push_back(const jack_midi_event_t& ev)
 		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
 		return false;
 	}
-	
+
 	if (!Evoral::midi_event_is_valid(ev.buffer, ev.size)) {
 		cerr << "WARNING: MidiBuffer ignoring illegal MIDI event" << endl;
 		return false;
@@ -198,7 +198,7 @@ MidiBuffer::push_back(const jack_midi_event_t& ev)
 
 	_size += stamp_size + ev.size;
 	_silent = false;
-	
+
 	return true;
 }
 
@@ -221,13 +221,13 @@ MidiBuffer::reserve(TimeType time, size_t size)
 	// write timestamp
 	uint8_t* write_loc = _data + _size;
 	*((TimeType*)write_loc) = time;
-	
+
 	// move write_loc to begin of MIDI buffer data to write to
 	write_loc += stamp_size;
 
 	_size += stamp_size + size;
 	_silent = false;
-	
+
 	return write_loc;
 }
 
@@ -322,7 +322,7 @@ bool
 MidiBuffer::merge(const MidiBuffer& a, const MidiBuffer& b)
 {
 	_size = 0;
-	
+
 	if (this == &a) {
 	    merge_in_place(b);
 	}
@@ -330,7 +330,7 @@ MidiBuffer::merge(const MidiBuffer& a, const MidiBuffer& b)
 	if (this == &b) {
 	    merge_in_place(a);
 	}
-	
+
 	cerr << "FIXME: MIDI BUFFER MERGE" << endl;
 	return true;
 }

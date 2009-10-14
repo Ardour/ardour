@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,12 +37,12 @@ class ConfigVariableBase {
 	std::string name () const { return _name; }
 	void add_to_node (XMLNode&);
 	bool set_from_node (XMLNode const &);
-	
+
 	virtual std::string get_as_string () const = 0;
 	virtual void set_from_string (std::string const &) = 0;
 
 	void show_stored_value (const std::string&);
-	
+
 	static void set_show_stored_values (bool);
 
   protected:
@@ -96,14 +96,14 @@ template<class T>
 class ConfigVariableWithMutation : public ConfigVariable<T>
 {
   public:
-	ConfigVariableWithMutation (std::string name, T val, T (*m)(T)) 
+	ConfigVariableWithMutation (std::string name, T val, T (*m)(T))
 		: ConfigVariable<T> (name, val), mutator (m) {}
 
 	bool set (T val) {
 		if (unmutated_value != val) {
 			unmutated_value = val;
 			return ConfigVariable<T>::set (mutator (val));
-		} 
+		}
 		return false;
 	}
 

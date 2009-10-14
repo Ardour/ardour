@@ -1,4 +1,4 @@
-/* 
+/*
    Copyright (C) 2009 Paul Davis
 
 	This program is free software; you can redistribute it and/or modify
@@ -44,7 +44,7 @@ class MidiListEditor : public ArdourDialog
 
   private:
 	struct MidiListModelColumns : public Gtk::TreeModel::ColumnRecord {
-		MidiListModelColumns() { 
+		MidiListModelColumns() {
 			add (channel);
 			add (note);
 			add (note_name);
@@ -63,7 +63,7 @@ class MidiListEditor : public ArdourDialog
 		Gtk::TreeModelColumn<std::string> end;
 		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note;
 	};
-	
+
 	ARDOUR::Session&             session;
 	MidiListModelColumns         columns;
 	Glib::RefPtr<Gtk::ListStore> model;

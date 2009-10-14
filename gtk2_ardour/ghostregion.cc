@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -111,7 +111,7 @@ AudioGhostRegion::set_samples_per_unit (double spu)
 {
 	for (vector<WaveView*>::iterator i = waves.begin(); i != waves.end(); ++i) {
 		(*i)->property_samples_per_unit() = spu;
-	}		
+	}
 }
 
 void
@@ -124,7 +124,7 @@ AudioGhostRegion::set_height ()
 	GhostRegion::set_height();
 
 	ht = ((trackview.current_height()) / (double) waves.size());
-	
+
 	for (n = 0, i = waves.begin(); i != waves.end(); ++i, ++n) {
 		gdouble yoff = n * ht;
 		(*i)->property_height() = ht;
@@ -168,7 +168,7 @@ MidiGhostRegion::MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, doub
 MidiGhostRegion::MidiGhostRegion(MidiStreamView& msv, TimeAxisView& source_tv, double initial_unit_pos)
 	: GhostRegion(msv.midi_underlay_group, msv.trackview(), source_tv, initial_unit_pos)
 {
-	base_rect->lower_to_bottom();	
+	base_rect->lower_to_bottom();
 }
 
 MidiGhostRegion::~MidiGhostRegion()
@@ -267,7 +267,7 @@ MidiGhostRegion::update_range()
 	MidiGhostRegion::Note* note;
 	uint8_t note_num;
 	double y;
-	
+
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
 		if ((note = dynamic_cast<MidiGhostRegion::Note*>(*it)) != 0) {
 			note_num = note->event->note()->note();

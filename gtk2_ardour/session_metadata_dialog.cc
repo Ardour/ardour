@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Paul Davis 
+    Copyright (C) 2008 Paul Davis
     Author: Sakari Bergen
 
     This program is free software; you can redistribute it and/or modify it
@@ -97,11 +97,11 @@ Gtk::Widget &
 TextMetadataField::edit_widget ()
 {
 	entry = Gtk::manage (new Gtk::Entry());
-	
+
 	entry->set_text (_value);
 	entry->set_width_chars (width);
 	entry->signal_changed().connect (sigc::mem_fun(*this, &TextMetadataField::update_value));
-	
+
 	return *entry;
 }
 
@@ -175,12 +175,12 @@ Gtk::Widget &
 NumberMetadataField::edit_widget ()
 {
 	entry = Gtk::manage (new Gtk::Entry());
-	
+
 	entry->set_text (_value);
 	entry->set_width_chars (width);
 	entry->set_max_length (numbers);
 	entry->signal_changed().connect (sigc::mem_fun(*this, &NumberMetadataField::update_value));
-	
+
 	return *entry;
 }
 
@@ -204,7 +204,7 @@ NumberMetadataField::str_to_uint (ustring const & str) const
 	while ((i = tmp.find_first_not_of("1234567890")) != ustring::npos) {
 		tmp.erase (i, 1);
 	}
-	
+
 	std::istringstream iss(tmp);
 	uint32_t result = 0;
 	iss >> result;
@@ -249,9 +249,9 @@ void
 SessionMetadataSetEditable::set_session (ARDOUR::Session * s)
 {
 	session = s;
-	
+
 	ARDOUR::SessionMetadata const & data = session->metadata();
-	
+
 	table.resize (list.size(), 2);
 	uint32_t row = 0;
 	MetadataPtr field;
@@ -281,27 +281,27 @@ SessionMetadataSetImportable::SessionMetadataSetImportable (ustring const & name
 {
 	tree = Gtk::ListStore::create (tree_cols);
 	tree_view.set_model (tree);
-	
+
 	Gtk::TreeView::Column * viewcol;
-	
+
 	// Add import column
 	Gtk::CellRendererToggle * import_render = Gtk::manage(new Gtk::CellRendererToggle());
 	import_render->signal_toggled().connect (sigc::mem_fun(*this, &SessionMetadataSetImportable::selection_changed));
 	viewcol = Gtk::manage(new Gtk::TreeView::Column (_("Import"), *import_render));
 	viewcol->add_attribute (import_render->property_active(), tree_cols.import);
 	tree_view.append_column (*viewcol);
-	
+
 	// Add field name column
 	tree_view.append_column(_("Field"), tree_cols.field);
-	
+
 	// Add values column with pango markup
 	Gtk::CellRendererText * values_render = Gtk::manage(new Gtk::CellRendererText());
 	viewcol = Gtk::manage(new Gtk::TreeView::Column (_("Values (current value on top)"), *values_render));
 	viewcol->add_attribute (values_render->property_markup(), tree_cols.values);
 	tree_view.append_column (*viewcol);
-	
+
 	select_all_check.signal_toggled().connect (sigc::mem_fun(*this, &SessionMetadataSetImportable::select_all));
-	
+
 	session = 0;
 }
 
@@ -326,14 +326,14 @@ SessionMetadataSetImportable::load_extra_data (ARDOUR::SessionMetadata const & d
 		std::cerr << "Programming error: no session set for SessionMetaDataSetImportable (in load_data)!" << std::endl;
 		return;
 	}
-	
+
 	ARDOUR::SessionMetadata & session_data = session->metadata();
-	
+
 	MetadataPtr session_field;
 	MetadataPtr import_field;
 	DataList::iterator session_it;
 	DataList::iterator import_it;
-	
+
 	// Copy list and load data to import
 	for (session_it = session_list.begin(); session_it != session_list.end(); ++session_it) {
 		session_field = *session_it;
@@ -347,13 +347,13 @@ SessionMetadataSetImportable::load_extra_data (ARDOUR::SessionMetadata const & d
 	while (session_it != session_list.end() && import_it != import_list.end()) { // _should_ be the same...
 		session_field = *session_it;
 		import_field = *import_it;
-		
+
 		import_field->load_data(data); // hasn't been done yet
-		
+
 		// Make string for values TODO get color from somewhere?
 		ustring values = "<span weight=\"ultralight\" color=\"#777\">" + session_field->value() + "</span>\n"
 				+ "<span weight=\"bold\">" + import_field->value() + "</span>";
-		
+
 		Gtk::TreeModel::iterator row_iter = tree->append();
 		Gtk::TreeModel::Row row = *row_iter;
 
@@ -361,7 +361,7 @@ SessionMetadataSetImportable::load_extra_data (ARDOUR::SessionMetadata const & d
 		row[tree_cols.values] = values;
 		row[tree_cols.import] = false;
 		row[tree_cols.data] = import_field;
-		
+
 		++session_it;
 		++import_it;
 	}
@@ -392,7 +392,7 @@ SessionMetadataSetImportable::select_all ()
 {
 	select_all_check.set_inconsistent (false);
 	bool state = select_all_check.get_active();
-	
+
 	Gtk::TreeModel::Children fields = tree->children();
 	Gtk::TreeModel::Children::iterator it;
 	for (it = fields.begin(); it != fields.end(); ++it) {
@@ -404,7 +404,7 @@ void
 SessionMetadataSetImportable::selection_changed (ustring const & path)
 {
 	select_all_check.set_inconsistent (true);
-	
+
 	Gtk::TreeModel::iterator iter = tree->get_iter (path);
 	bool value((*iter)[tree_cols.import]);
 	(*iter)[tree_cols.import] = !value;
@@ -430,14 +430,14 @@ SessionMetadataDialog<DataSet>::init_data ()
 		std::cerr << "Programming error: no session set for SessionMetaDataDialog (in init_data)!" << std::endl;
 		return;
 	}
-	
+
 	init_track_data ();
 	init_album_data ();
 	init_people_data ();
-	
+
 	for (DataSetList::iterator it = data_list.begin(); it != data_list.end(); ++it) {
 		(*it)->set_session (session);
-		
+
 		notebook.append_page ((*it)->get_widget(), (*it)->get_tab_widget());
 	}
 }
@@ -493,7 +493,7 @@ SessionMetadataDialog<DataSet>::get_custom_widgets (WidgetFunc f)
 		DataSet * set = dynamic_cast<DataSet *> (it->get());
 		list->push_back (& CALL_MEMBER_FN (*set, f) ());
 	}
-	
+
 	return list;
 }
 
@@ -512,28 +512,28 @@ SessionMetadataDialog<DataSet>::init_track_data ()
 	data_list.push_back (data_set);
 
 	MetadataPtr ptr;
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::title, &ARDOUR::SessionMetadata::set_title, _("Title")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new NumberMetadataField (&ARDOUR::SessionMetadata::track_number, &ARDOUR::SessionMetadata::set_track_number, _("Track Number"), 3));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::subtitle, &ARDOUR::SessionMetadata::set_subtitle, _("Subtitle")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::grouping, &ARDOUR::SessionMetadata::set_grouping, _("Grouping")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::artist, &ARDOUR::SessionMetadata::set_artist, _("Artist")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::genre, &ARDOUR::SessionMetadata::set_genre, _("Genre")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::comment, &ARDOUR::SessionMetadata::set_comment, _("Comment")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::copyright, &ARDOUR::SessionMetadata::set_copyright, _("Copyright")));
 	data_set->add_data_field (ptr);
 }
@@ -544,33 +544,33 @@ SessionMetadataDialog<DataSet>::init_album_data ()
 {
 	DataSetPtr data_set (new DataSet (_("Album")));
 	data_list.push_back (data_set);
-	
+
 	MetadataPtr ptr;
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::album, &ARDOUR::SessionMetadata::set_album, _("Album")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new NumberMetadataField (&ARDOUR::SessionMetadata::year, &ARDOUR::SessionMetadata::set_year, _("Year"), 4));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::album_artist, &ARDOUR::SessionMetadata::set_album_artist, _("Album Artist")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new NumberMetadataField (&ARDOUR::SessionMetadata::total_tracks, &ARDOUR::SessionMetadata::set_total_tracks, _("Total Tracks"), 3));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::disc_subtitle, &ARDOUR::SessionMetadata::set_disc_subtitle, _("Disc Subtitle")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new NumberMetadataField (&ARDOUR::SessionMetadata::disc_number, &ARDOUR::SessionMetadata::set_disc_number, _("Disc Number"), 2));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new NumberMetadataField (&ARDOUR::SessionMetadata::total_discs, &ARDOUR::SessionMetadata::set_total_discs, _("Total Discs"), 2));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::compilation, &ARDOUR::SessionMetadata::set_compilation, _("Compilation")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::isrc, &ARDOUR::SessionMetadata::set_isrc, _("ISRC")));
 	data_set->add_data_field (ptr);
 }
@@ -583,31 +583,31 @@ SessionMetadataDialog<DataSet>::init_people_data ()
 	data_list.push_back (data_set);
 
 	MetadataPtr ptr;
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::lyricist, &ARDOUR::SessionMetadata::set_lyricist, _("Lyricist")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::composer, &ARDOUR::SessionMetadata::set_composer, _("Composer")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::conductor, &ARDOUR::SessionMetadata::set_conductor, _("Conductor")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::remixer, &ARDOUR::SessionMetadata::set_remixer, _("Remixer")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::arranger, &ARDOUR::SessionMetadata::set_arranger, _("Arranger")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::engineer, &ARDOUR::SessionMetadata::set_engineer, _("Engineer")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::producer, &ARDOUR::SessionMetadata::set_producer, _("Producer")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::dj_mixer, &ARDOUR::SessionMetadata::set_dj_mixer, _("DJ Mixer")));
 	data_set->add_data_field (ptr);
-	
+
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::mixer, &ARDOUR::SessionMetadata::set_mixer, _("Mixer")));
 	data_set->add_data_field (ptr);
 }
@@ -628,10 +628,10 @@ SessionMetadataEditor::~SessionMetadataEditor ()
 
 void
 SessionMetadataEditor::run ()
-{	
+{
 	init_data ();
 	init_gui();
-	
+
 	ArdourDialog::run();
 }
 
@@ -639,7 +639,7 @@ void
 SessionMetadataEditor::init_gui ()
 {
 	add_widget (notebook);
-	
+
 	show_all();
 }
 
@@ -659,14 +659,14 @@ SessionMetadataImporter::~SessionMetadataImporter ()
 
 void
 SessionMetadataImporter::run ()
-{	
+{
 	if (!session) {
 		std::cerr << "Programming error: no session set for SessionMetaDataImporter (in run)!" << std::endl;
 		return;
 	}
 
 	/* Open session file selector */
-	
+
 	Gtk::FileChooserDialog session_selector(_("Choose session to import metadata from"), Gtk::FILE_CHOOSER_ACTION_OPEN);
 	session_selector.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	session_selector.add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
@@ -699,30 +699,30 @@ SessionMetadataImporter::run ()
 	} else {
 		return;
 	}
-	
+
 	/* We have a session: load the data and run dialog */
-	
+
 	string filename = Glib::build_filename (path, name + ".ardour");
 	XMLTree session_tree;
 	if (!session_tree.read (filename)) {
 		warn_user (_("A proper ardour session file was not selected!"));
 		return;
 	}
-	
+
 	XMLNode * node = session_tree.root()->child ("Metadata");
-	
+
 	if (!node) {
 		warn_user (_("The session file didn't contain metadata!\nMaybe this is an old session format?"));
 		return;
 	}
-	
+
 	ARDOUR::SessionMetadata data;
 	data.set_state (*node);
-	
+
 	init_data ();
 	load_extra_data (data);
 	init_gui();
-	
+
 	ArdourDialog::run();
 }
 
@@ -733,13 +733,13 @@ SessionMetadataImporter::init_gui ()
 	add_widget (selection_hbox);
 	selection_label.set_text (_("Import all from:"));
 	selection_hbox.pack_start (selection_label, false, false);
-	
+
 	WidgetListPtr list = get_custom_widgets (&SessionMetadataSetImportable::get_select_all_widget);
 	for (WidgetList::iterator it = list->begin(); it != list->end(); ++it) {
 		selection_hbox.pack_start (**it, false, false, 6);
 	}
 
 	add_widget (notebook);
-	
+
 	show_all();
 }

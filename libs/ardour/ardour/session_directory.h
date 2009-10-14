@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2007 Tim Mayberry 
+	Copyright (C) 2007 Tim Mayberry
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ public:
 	const PBD::sys::path root_path() const { return m_root_path; }
 
 	/**
-	 * @return the absolute path to the directory in which 
+	 * @return the absolute path to the directory in which
 	 * the session stores audio files.
 	 *
 	 * If the session is an older session with an existing
@@ -50,16 +50,16 @@ public:
 	 * of root_path()/interchange/session_name/audiofiles
 	 */
 	const PBD::sys::path sound_path () const;
-	
+
 	/**
-	 * @return the absolute path to the directory in which 
+	 * @return the absolute path to the directory in which
 	 * the session stores MIDI files, ie
 	 * root_path()/interchange/session_name/midifiles
 	 */
 	const PBD::sys::path midi_path () const;
-	
+
 	/**
-	 * @return the absolute path to the directory in which 
+	 * @return the absolute path to the directory in which
 	 * the session stores MIDNAM patch files, ie
 	 * root_path()/interchange/session_name/patchfiles
 	 */
@@ -77,7 +77,7 @@ public:
 	 * session.
 	 */
 	const PBD::sys::path dead_sound_path () const;
-	
+
 	/**
 	 * @return The absolute path to the directory that midi
 	 * files are moved to when they are no longer part of the
@@ -92,7 +92,7 @@ public:
 	const PBD::sys::path export_path () const;
 
 	/**
-	 * @return true if session directory and all the required 
+	 * @return true if session directory and all the required
 	 * subdirectories exist.
 	 */
 	bool is_valid () const;

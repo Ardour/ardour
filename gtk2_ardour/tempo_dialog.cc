@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 */
 
-#include <cstdio> // for snprintf, grrr 
+#include <cstdio> // for snprintf, grrr
 
 #include <gtkmm/stock.h>
 #include <gtkmm2ext/utils.h>
@@ -76,7 +76,7 @@ TempoDialog::init (const BBT_Time& when, double bpm, double note_type, bool mova
 	strings.push_back (_("eighth (8)"));
 	strings.push_back (_("sixteenth (16)"));
 	strings.push_back (_("thirty-second (32)"));
-	
+
 	set_popdown_strings (note_types, strings, true);
 
 	if (note_type == 1.0f) {
@@ -109,19 +109,19 @@ TempoDialog::init (const BBT_Time& when, double bpm, double note_type, bool mova
 		when_bar_entry.set_text (buf);
 		snprintf (buf, sizeof (buf), "%" PRIu32, when.beats);
 		when_beat_entry.set_text (buf);
-		
+
 		when_bar_entry.set_name ("MetricEntry");
 		when_beat_entry.set_name ("MetricEntry");
-		
+
 		when_bar_label.set_name ("MetricLabel");
 		when_beat_label.set_name ("MetricLabel");
-		
+
 		table->attach (when_bar_label, 1, 2, 2, 3);
 		table->attach (when_bar_entry, 2, 3, 2, 3);
-		
+
 		table->attach (when_beat_label, 1, 2, 1, 2);
 		table->attach (when_beat_entry, 2, 3, 1, 2);
-		
+
 		Label* when_label = manage (new Label(_("Tempo begins at"), ALIGN_LEFT, ALIGN_CENTER));
 		table->attach (*when_label, 0, 1, 1, 2);
 	}
@@ -157,7 +157,7 @@ TempoDialog::bpm_button_press (GdkEventButton*)
 
 bool
 TempoDialog::bpm_button_release (GdkEventButton*)
-{	
+{
 	/* the value has been modified, accept should work now */
 
 	set_response_sensitive (RESPONSE_ACCEPT, true);
@@ -166,7 +166,7 @@ TempoDialog::bpm_button_release (GdkEventButton*)
 
 bool
 TempoDialog::entry_key_release (GdkEventKey*)
-{	
+{
 	if (when_beat_entry.get_text() != "" && when_bar_entry.get_text() != "") {
 	        set_response_sensitive (RESPONSE_ACCEPT, true);
 	} else {
@@ -175,11 +175,11 @@ TempoDialog::entry_key_release (GdkEventKey*)
 	return false;
 }
 
-double 
+double
 TempoDialog::get_bpm ()
 {
 	return bpm_spinner.get_value ();
-}	
+}
 
 bool
 TempoDialog::get_bbt_time (BBT_Time& requested)
@@ -187,7 +187,7 @@ TempoDialog::get_bbt_time (BBT_Time& requested)
 	if (sscanf (when_bar_entry.get_text().c_str(), "%" PRIu32, &requested.bars) != 1) {
 		return false;
 	}
-	
+
 	if (sscanf (when_beat_entry.get_text().c_str(), "%" PRIu32, &requested.beats) != 1) {
 		return false;
 	}
@@ -203,7 +203,7 @@ TempoDialog::get_note_type ()
 	double note_type = 0;
 	vector<string>::iterator i;
 	string text = note_types.get_active_text();
-	
+
 	for (i = strings.begin(); i != strings.end(); ++i) {
 		if (text == *i) {
 			if (sscanf (text.c_str(), "%*[^0-9]%lf", &note_type) != 1) {
@@ -213,8 +213,8 @@ TempoDialog::get_note_type ()
 				break;
 			}
 		}
-	} 
-	
+	}
+
 	if (i == strings.end()) {
 		if (sscanf (text.c_str(), "%lf", &note_type) != 1) {
 			error << string_compose(_("incomprehensible note type entry (%1)"), text) << endmsg;
@@ -238,7 +238,7 @@ MeterDialog::MeterDialog (TempoMap& map, nframes_t frame, const string & action)
 	  cancel_button (_("Cancel"))
 {
 	BBT_Time when;
-	frame = map.round_to_bar(frame,0); 
+	frame = map.round_to_bar(frame,0);
 	Meter meter (map.meter_at(frame));
 
 	map.bbt_time (frame, when);
@@ -267,7 +267,7 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	strings.push_back (_("eighth (8)"));
 	strings.push_back (_("sixteenth (16)"));
 	strings.push_back (_("thirty-second (32)"));
-	
+
 	set_popdown_strings (note_types, strings, true);
 
 	if (note_type == 1.0f) {
@@ -302,7 +302,7 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 		snprintf (buf, sizeof (buf), "%" PRIu32, when.bars);
 		when_bar_entry.set_text (buf);
 		when_bar_entry.set_name ("MetricEntry");
-		
+
 		Label* when_label = manage (new Label(_("Meter begins at bar:"), ALIGN_LEFT, ALIGN_CENTER));
 
 		table->attach (*when_label, 0, 1, 2, 3, FILL | EXPAND, FILL | EXPAND);
@@ -338,7 +338,7 @@ bool
 MeterDialog::entry_key_press (GdkEventKey* ev)
 {
 
-	switch (ev->keyval) { 
+	switch (ev->keyval) {
 
 	case GDK_0:
 	case GDK_1:
@@ -403,21 +403,21 @@ double
 MeterDialog::get_bpb ()
 {
 	double bpb = 0;
-	
+
 	if (sscanf (bpb_entry.get_text().c_str(), "%lf", &bpb) != 1) {
 		return 0;
 	}
 
 	return bpb;
 }
-	
+
 double
 MeterDialog::get_note_type ()
 {
 	double note_type = 0;
 	vector<string>::iterator i;
 	string text = note_types.get_active_text();
-	
+
 	for (i = strings.begin(); i != strings.end(); ++i) {
 		if (text == *i) {
 			if (sscanf (text.c_str(), "%*[^0-9]%lf", &note_type) != 1) {
@@ -427,8 +427,8 @@ MeterDialog::get_note_type ()
 				break;
 			}
 		}
-	} 
-	
+	}
+
 	if (i == strings.end()) {
 		if (sscanf (text.c_str(), "%lf", &note_type) != 1) {
 			error << string_compose(_("incomprehensible note type entry (%1)"), text) << endmsg;
@@ -446,7 +446,7 @@ MeterDialog::get_bbt_time (BBT_Time& requested)
 	if (sscanf (when_bar_entry.get_text().c_str(), "%" PRIu32, &requested.bars) != 1) {
 		return false;
 	}
-	
+
 	requested.beats = 1;
 
 	requested.ticks = 0;

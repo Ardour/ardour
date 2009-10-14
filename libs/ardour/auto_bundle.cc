@@ -10,7 +10,7 @@ ARDOUR::AutoBundle::AutoBundle (bool i)
 ARDOUR::AutoBundle::AutoBundle (std::string const & n, bool i)
 	: Bundle (n, i)
 {
-	
+
 }
 
 ARDOUR::ChanCount

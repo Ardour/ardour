@@ -31,17 +31,17 @@ ExportFileNotebook::ExportFileNotebook () :
   page_counter (1)
 {
 	/* Last page */
-	
+
 	new_file_button.set_image (*Gtk::manage (new Gtk::Image (::get_icon("add"))));
 	new_file_button.set_label (_(" Click here to add another format"));
 	new_file_button.set_alignment (0, 0.5);
 	new_file_button.set_relief (Gtk::RELIEF_NONE);
-	
+
 	new_file_hbox.pack_start (new_file_button, true, true);
 	append_page (new_file_dummy, new_file_hbox);
 	set_tab_label_packing (new_file_dummy, true, true, Gtk::PACK_START);
 	new_file_hbox.show_all_children ();
-	
+
 	page_change_connection = signal_switch_page().connect (sigc::mem_fun (*this, &ExportFileNotebook::handle_page_change));
 	new_file_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportFileNotebook::add_new_file_page));
 }
@@ -51,7 +51,7 @@ ExportFileNotebook::set_session_and_manager (ARDOUR::Session * s, boost::shared_
 {
 	session = s;
 	profile_manager = manager;
-	
+
 	sync_with_manager ();
 }
 
@@ -67,7 +67,7 @@ ExportFileNotebook::sync_with_manager ()
 		remove_page (0);
 	}
 	page_change_connection.block(false);
-	
+
 	page_counter = 1;
 	last_visible_page = 0;
 
@@ -82,7 +82,7 @@ ExportFileNotebook::sync_with_manager ()
 	     ++format_it, ++filename_it) {
 		add_file_page (*format_it, *filename_it);
 	}
-	
+
 	set_current_page (0);
 	CriticalSelectionChanged ();
 }
@@ -117,7 +117,7 @@ ExportFileNotebook::add_file_page (ARDOUR::ExportProfileManager::FormatStatePtr 
 	update_remove_file_page_sensitivity ();
 	show_all_children();
 	++page_counter;
-	
+
 	CriticalSelectionChanged ();
 }
 
@@ -129,7 +129,7 @@ ExportFileNotebook::remove_file_page (FilePage * page)
 
 	remove_page (*page);
 	update_remove_file_page_sensitivity ();
-	
+
 	CriticalSelectionChanged ();
 }
 
@@ -173,51 +173,51 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 	pack_start (format_align, false, false, 0);
 	pack_start (filename_label, false, false, 0);
 	pack_start (filename_align, false, false, 0);
-	
+
 	format_align.add (format_selector);
 	format_align.set_padding (6, 12, 18, 0);
-	
+
 	filename_align.add (filename_selector);
 	filename_align.set_padding (0, 12, 18, 0);
-	
+
 	Pango::AttrList bold;
 	Pango::Attribute b = Pango::Attribute::create_attr_weight (Pango::WEIGHT_BOLD);
 	bold.insert (b);
-	
+
 	format_label.set_attributes (bold);
 	filename_label.set_attributes (bold);
 	tab_label.set_attributes (bold);
-	
+
 	/* Set states */
 	format_selector.set_state (format_state, s);
  	filename_selector.set_state (filename_state, s);
-	
+
 	/* Signals */
-	
+
 	tab_close_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*parent, &ExportFileNotebook::remove_file_page), this));
-	
+
 	profile_manager->FormatListChanged.connect (sigc::mem_fun (format_selector, &ExportFormatSelector::update_format_list));
-	
+
 	format_selector.FormatEdited.connect (sigc::mem_fun (*this, &ExportFileNotebook::FilePage::save_format_to_manager));
 	format_selector.FormatRemoved.connect (sigc::mem_fun (*profile_manager, &ExportProfileManager::remove_format_profile));
 	format_selector.NewFormat.connect (sigc::mem_fun (*profile_manager, &ExportProfileManager::get_new_format));
-	
+
 	format_selector.CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportFileNotebook::FilePage::update_tab_label));
 	filename_selector.CriticalSelectionChanged.connect (CriticalSelectionChanged.make_slot());
-	
+
 	/* Tab widget */
-	
+
 	tab_close_button.add (*Gtk::manage (new Gtk::Image (::get_icon("close"))));
 	tab_close_alignment.add (tab_close_button);
 	tab_close_alignment.set (0.5, 0.5, 0, 0);
-	
+
 	tab_widget.pack_start (tab_label, false, false, 3);
 	tab_widget.pack_end (tab_close_alignment, false, false, 0);
 	tab_widget.show_all_children ();
 	update_tab_label ();
-	
+
 	/* Done */
-	
+
 	show_all_children ();
 }
 

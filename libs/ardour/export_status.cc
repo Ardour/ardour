@@ -36,16 +36,16 @@ ExportStatus::init ()
 	_aborted = false;
 	_finished = false;
 	_errors = false;
-	
+
 	stage = export_None;
 	progress = 0.0;
-	
+
 	total_timespans = 0;
 	timespan = 0;
-	
+
 	total_channel_configs = 0;
 	channel_config = 0;
-	
+
 	total_formats = 0;
 	format = 0;
 }

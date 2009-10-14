@@ -34,7 +34,7 @@ namespace ARDOUR {
 class Session;
 class ElementImporter;
 
-/// Virtual interface class for element import handlers 
+/// Virtual interface class for element import handlers
 class ElementImportHandler
 {
   public:
@@ -48,58 +48,58 @@ class ElementImportHandler
 	 * @param source XML tree to be parsed
 	 * @see elements
 	 */
-	ElementImportHandler (XMLTree const & source, ARDOUR::Session & session) :
-	  source (source), session (session) { }
-	
+	ElementImportHandler (XMLTree const & source, ARDOUR::Session & session)
+		: source (source), session (session) { }
+
 	virtual ~ElementImportHandler ();
-	
+
 	/** Gets a textual representation of the element type
 	 * @return textual representation of element type
 	 */
 	virtual std::string get_info () const = 0;
-	
+
 	/// Elements this handler handles
 	ElementList elements;
-	
+
 	/* For checking duplicates names against queued elements */
-	
+
 	/** Checks whether or not an element with some name is queued or not
 	 * @param name name to check
 	 * @return true if name is not used
 	 */
 	bool check_name (const std::string & name) const;
-	
+
 	/// Adds name to the list of used names
 	void add_name (std::string name);
-	
+
 	/// Removes name from the list of used names
 	void remove_name (const std::string & name);
-	
+
 	/// Checks wheter or not all elements can be imported cleanly
 	static bool dirty () { return _dirty; }
-	
+
 	/// Sets handler dirty
 	static void set_dirty () { _dirty = true; }
-	
+
 	/// Checks wheter or not all elements were imported cleanly
 	static bool errors () { return _errors; }
-	
+
 	/// Sets handler dirty
 	static void set_errors () { _errors = true; }
 
   protected:
 	/// Source session XML tree
 	XMLTree const &   source;
-	
+
 	/// Destination session
 	ARDOUR::Session & session;
-	
+
 	/// Session XML readability
 	static bool _dirty;
-	
+
 	/// Errors post initialization
 	static bool _errors;
-	
+
   private:
 	/// Set of names for duplicate checking
 	std::set<std::string> names;

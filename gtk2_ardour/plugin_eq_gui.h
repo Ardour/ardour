@@ -37,8 +37,8 @@ class PluginEqGui : public Gtk::Table
 	public:
 		PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert>);
 		~PluginEqGui();
-		
-	
+
+
 
 	private:
 		// Setup
@@ -92,7 +92,7 @@ class PluginEqGui : public Gtk::Table
 		nframes_t _buffer_size;
 		nframes_t _signal_buffer_size;
 
-		// buffers		
+		// buffers
 		ARDOUR::BufferSet _bufferset;
 		ARDOUR::BufferSet _collect_bufferset;
 

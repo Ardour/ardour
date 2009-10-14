@@ -1,17 +1,17 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
     Author: Dave Robillard
-    
+
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
     Software Foundation; either version 2 of the License, or (at your option)
     any later version.
-    
+
     This program is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
-    
+
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     675 Mass Ave, Cambridge, MA 02139, USA.
@@ -49,7 +49,7 @@ public:
 		MIDI = 1,
 		NIL = 2,
 	};
-	
+
 	/** Number of types (not including NIL).
 	 * WARNING: make sure this matches Symbol!
 	 */
@@ -78,7 +78,7 @@ public:
 			default:    return "";
 		}
 	}
-	
+
 	/** Inverse of the from-string constructor */
 	const char* to_string() const {
 		switch (_symbol) {
@@ -111,10 +111,10 @@ public:
 
 	static iterator begin() { return iterator(0); }
 	static iterator end()   { return iterator(num_types); }
-	
+
 	bool operator==(const Symbol symbol) { return (_symbol == symbol); }
 	bool operator!=(const Symbol symbol) { return (_symbol != symbol); }
-	
+
 	bool operator==(const DataType other) { return (_symbol == other._symbol); }
 	bool operator!=(const DataType other) { return (_symbol != other._symbol); }
 

@@ -1,4 +1,4 @@
-/* 
+/*
    Copyright (C) 2009 Paul Davis
 
 	This program is free software; you can redistribute it and/or modify
@@ -55,7 +55,7 @@ MidiListEditor::MidiListEditor (Session& s, boost::shared_ptr<MidiRegion> r)
 		renderer->property_editable() = true;
 		renderer->signal_edited().connect (mem_fun (*this, &MidiListEditor::edited));
 	}
-	
+
 	scroller.add (view);
 	scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 
@@ -109,7 +109,7 @@ MidiListEditor::redisplay_model ()
 		BBT_Time bbt;
 		BBT_Time dur;
 		stringstream ss;
-		
+
 		session.tempo_map().bbt_time (region->position(), bbt);
 
 		dur.bars = 0;
@@ -117,7 +117,7 @@ MidiListEditor::redisplay_model ()
 		dur.ticks = 0;
 
 		session.tempo_map().bbt_duration_at (region->position(), dur, 0);
-		
+
 		ss << bbt;
 		row[columns.start] = ss.str();
 		ss << dur;
@@ -125,7 +125,7 @@ MidiListEditor::redisplay_model ()
 
 		session.tempo_map().bbt_time (region->position(), bbt);
 		/* XXX get end point */
-		
+
 		ss << bbt;
 		row[columns.end] = ss.str();
 
@@ -133,4 +133,4 @@ MidiListEditor::redisplay_model ()
 	}
 
 	view.set_model (model);
-}	
+}

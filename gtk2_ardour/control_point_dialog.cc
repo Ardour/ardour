@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2008 Paul Davis 
+    Copyright (C) 2000-2008 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,9 +36,9 @@ ControlPointDialog::ControlPointDialog (ControlPoint* p)
 	assert (point_);
 
 	double const y_fraction = 1.0 - (p->get_y () / p->line().height ());
-	
+
 	value_.set_text (p->line().fraction_to_string (y_fraction));
-	
+
 	Gtk::HBox* b = Gtk::manage (new Gtk::HBox ());
 
 	b->pack_start (*Gtk::manage (new Gtk::Label (_("Value"))));
@@ -47,7 +47,7 @@ ControlPointDialog::ControlPointDialog (ControlPoint* p)
 	if (p->line ().get_uses_gain_mapping ()) {
 		b->pack_start (*Gtk::manage (new Gtk::Label (_("dB"))));
 	}
-	
+
 	get_vbox ()->pack_end (*b);
 	b->show_all ();
 

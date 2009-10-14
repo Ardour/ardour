@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004 Paul Davis 
+    Copyright (C) 2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,11 +50,11 @@ ARDOUR::read_recent_sessions (RecentSessions& rs)
 	sys::path recent_file_path(user_config_directory());
 
 	recent_file_path /= recent_file_name;
-	
+
 	const string path = recent_file_path.to_string();
 
 	ifstream recent (path.c_str());
-	
+
 	if (!recent) {
 		if (errno != ENOENT) {
 			error << string_compose (_("cannot open recent session file %1 (%2)"), path, strerror (errno)) << endmsg;
@@ -73,7 +73,7 @@ ARDOUR::read_recent_sessions (RecentSessions& rs)
 		if (!recent.good()) {
 			break;
 		}
-		
+
 		getline(recent, newpair.second);
 
 		if (!recent.good()) {
@@ -96,7 +96,7 @@ ARDOUR::write_recent_sessions (RecentSessions& rs)
 	sys::path recent_file_path(user_config_directory());
 
 	recent_file_path /= recent_file_name;
-	
+
 	const string path = recent_file_path.to_string();
 
 	ofstream recent (path.c_str());
@@ -108,10 +108,10 @@ ARDOUR::write_recent_sessions (RecentSessions& rs)
 	for (RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
 		recent << (*i).first << '\n' << (*i).second << endl;
 	}
-	
+
 	return 0;
 }
-	
+
 int
 ARDOUR::store_recent_sessions (string name, string path)
 {
@@ -127,7 +127,7 @@ ARDOUR::store_recent_sessions (string name, string path)
 	newpair.second = path;
 
 	rs.erase(remove(rs.begin(), rs.end(), newpair), rs.end());
-	
+
 	rs.push_front (newpair);
 
 	if (rs.size() > 10) {

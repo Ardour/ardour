@@ -39,43 +39,43 @@ class ElementImporter
 
 	ElementImporter (XMLTree const & source, ARDOUR::Session & session);
 	virtual ~ElementImporter ();
-	
+
 	/** Returns the element name
 	 * @return the name of the element
 	 */
 	virtual std::string get_name () const { return name; };
-	
+
 	/** Gets a textual representation of the element
 	 * @return a textual representation on this specific element
 	 */
 	virtual std::string get_info () const = 0;
-	
+
 	/** Gets import status, if applicable. */
 	virtual Session::ImportStatus * get_import_status () { return 0; }
-	
+
 	/** Prepares to move element
 	 *
 	 * @return whther or not the element could be prepared for moving
 	 */
 	bool prepare_move ();
-	
+
 	/** Cancels moving of element
 	 * If the element has been set to be moved, this cancels the move.
 	 */
 	void cancel_move ();
-	
+
 	/// Moves the element to the taget session
 	void move ();
-	
+
 	/// Check if element is broken. Cannot be moved if broken.
 	bool broken () { return _broken; }
-	
+
 	/// Signal that requests for anew name
 	static sigc::signal <std::pair<bool, std::string>, std::string, std::string> Rename;
-	
+
 	/// Signal for ok/cancel prompting
 	static sigc::signal <bool, std::string> Prompt;
-	
+
   protected:
 
 	/** Moves the element to the taget session
@@ -84,44 +84,44 @@ class ElementImporter
 	 */
 	virtual void _move () = 0;
 
-	/** Should take care of all tasks that need to be done 
+	/** Should take care of all tasks that need to be done
 	 * before moving the element. This includes prompting
 	 * the user for more information if necessary.
 	 *
 	 * @return whether or not the element can be moved
 	 */
 	virtual bool _prepare_move () = 0;
-	
-	/// Cancel move 
+
+	/// Cancel move
 	virtual void _cancel_move () = 0;
 
 	/// Source XML-tree
 	XMLTree const & source;
-	
+
 	/// Target session
 	ARDOUR::Session & session;
-	
+
 	/// Ture if the element has been prepared and queued for importing
 	bool queued () { return _queued; }
-	
+
 	/// Name of element
 	std::string  name;
-	
+
 	/// The sample rate of the session from which we are importing
 	nframes_t sample_rate;
-	
+
 	/// Converts smpte time to a string
 	std::string smpte_to_string (SMPTE::Time & time) const;
-	
+
 	/// Converts samples so that times match the sessions sample rate
 	nframes_t rate_convert_samples (nframes_t samples) const;
-	
+
 	/// Converts samples so that times match the sessions sample rate (for straight use in XML)
 	std::string rate_convert_samples (std::string const & samples) const;
-	
+
 	/// Set element broken
 	void set_broken () { _broken = true; }
-	
+
   private:
 	bool _queued;
 	bool _broken;

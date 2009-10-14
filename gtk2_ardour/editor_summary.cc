@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,9 +42,9 @@ EditorSummary::EditorSummary (Editor* e)
 	  _move_dragging (false),
 	  _moved (false),
 	  _zoom_dragging (false)
-	  
+
 {
-	
+
 }
 
 /** Connect to a session.
@@ -80,11 +80,11 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
 
 	/* Render the view rectangle */
-	
+
 	pair<double, double> x;
 	pair<double, double> y;
 	get_editor (&x, &y);
-	
+
 	cairo_move_to (cr, x.first, y.first);
 	cairo_line_to (cr, x.second, y.first);
 	cairo_line_to (cr, x.second, y.second);
@@ -109,7 +109,7 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 	_last_playhead = p;
 
 	cairo_destroy (cr);
-	
+
 	return true;
 }
 
@@ -120,7 +120,7 @@ void
 EditorSummary::render (cairo_t* cr)
 {
 	/* background */
-	
+
 	cairo_set_source_rgb (cr, 0, 0, 0);
 	cairo_rectangle (cr, 0, 0, _width, _height);
 	cairo_fill (cr);
@@ -130,7 +130,7 @@ EditorSummary::render (cairo_t* cr)
 	}
 
 	/* compute total height of all tracks */
-	
+
 	int h = 0;
 	int max_height = 0;
 	for (PublicEditor::TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
@@ -184,7 +184,7 @@ EditorSummary::render_region (RegionView* r, cairo_t* cr, nframes_t start, doubl
 {
 	uint32_t const c = r->get_fill_color ();
 	cairo_set_source_rgb (cr, UINT_RGBA_R (c) / 255.0, UINT_RGBA_G (c) / 255.0, UINT_RGBA_B (c) / 255.0);
-			
+
 	cairo_move_to (cr, (r->region()->position() - start) * _x_scale, y);
 	cairo_line_to (cr, ((r->region()->position() - start + r->region()->length())) * _x_scale, y);
 	cairo_stroke (cr);
@@ -219,7 +219,7 @@ EditorSummary::centre_on_click (GdkEventButton* ev)
 
 	double const w = xr.second - xr.first;
 	double const h = yr.second - yr.first;
-	
+
 	xr.first = ev->x - w / 2;
 	xr.second = ev->x + w / 2;
 	yr.first = ev->y - h / 2;
@@ -259,18 +259,18 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 		_start_editor_x = xr;
 		_start_editor_y = yr;
 		_start_mouse_x = ev->x;
-		_start_mouse_y = ev->y;			
-		
+		_start_mouse_y = ev->y;
+
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
 			/* primary-modifier-click: start a zoom drag */
-			
+
 			double const hx = (xr.first + xr.second) * 0.5;
 			_zoom_left = ev->x < hx;
 			_zoom_dragging = true;
 			_editor->_dragging_playhead = true;
-		
-			
+
+
 			/* In theory, we could support vertical dragging, which logically
 			   might scale track heights in order to make the editor reflect
 			   the dragged viewbox.  However, having tried this:
@@ -278,13 +278,13 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 			   b) it's quite slow
 			   c) it doesn't seem particularly useful, especially with the
 			   limited height of the summary
-			   
-			   So at the moment we don't support that...
-			*/			
 
-				
+			   So at the moment we don't support that...
+			*/
+
+
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
-			
+
 			/* secondary-modifier-click: locate playhead */
 			if (_session) {
 				_session->request_locate (ev->x / _x_scale + _session->current_start_frame());
@@ -293,17 +293,17 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 
 			centre_on_click (ev);
-			
+
 		} else {
-				
+
 			/* ordinary click: start a move drag */
-			
+
 			_move_dragging = true;
 			_moved = false;
 			_editor->_dragging_playhead = true;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -322,7 +322,7 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 {
 	pair<double, double> xr = _start_editor_x;
 	pair<double, double> yr = _start_editor_y;
-	
+
 	if (_move_dragging) {
 
 		_moved = true;
@@ -331,7 +331,7 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 		xr.second += ev->x - _start_mouse_x;
 		yr.first += ev->y - _start_mouse_y;
 		yr.second += ev->y - _start_mouse_y;
-		
+
 		set_editor (xr, yr);
 
 	} else if (_zoom_dragging) {
@@ -346,7 +346,7 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 
 		set_editor (xr, yr);
 	}
-		
+
 	return true;
 }
 
@@ -363,15 +363,15 @@ bool
 EditorSummary::on_scroll_event (GdkEventScroll* ev)
 {
 	/* mouse wheel */
-	
+
 	pair<double, double> xr;
 	pair<double, double> yr;
 	get_editor (&xr, &yr);
 
 	double const amount = 8;
-		
+
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-		
+
 		if (ev->direction == GDK_SCROLL_UP) {
 			xr.first += amount;
 			xr.second += amount;
@@ -381,7 +381,7 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 		}
 
 	} else {
-		
+
 		if (ev->direction == GDK_SCROLL_DOWN) {
 			yr.first += amount;
 			yr.second += amount;
@@ -389,9 +389,9 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 			yr.first -= amount;
 			yr.second -= amount;
 		}
-		
+
 	}
-	
+
 	set_editor (xr, yr);
 	return true;
 }
@@ -434,4 +434,4 @@ EditorSummary::playhead_position_changed (nframes64_t p)
 	}
 }
 
-	
+

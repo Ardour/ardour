@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2002 Paul Davis 
+    Copyright (C) 2000-2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
 #include "pbd/fastlog.h"
 #include "pbd/xml++.h"
 #include "pbd/undo.h"
-#include "pbd/stateful.h" 
+#include "pbd/stateful.h"
 #include "pbd/controllable.h"
 #include "pbd/destructible.h"
 
@@ -97,14 +97,14 @@ class Route : public SessionObject, public AutomatableControls
 
 	/* these are the core of the API of a Route. see the protected sections as well */
 
-	virtual int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
-			  int declick, bool can_record, bool rec_monitors_input);
+	virtual int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
+			int declick, bool can_record, bool rec_monitors_input);
 
-	virtual int no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
-			     bool state_changing, bool can_record, bool rec_monitors_input);
+	virtual int no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
+			bool state_changing, bool can_record, bool rec_monitors_input);
 
-	virtual int silent_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
-				 bool can_record, bool rec_monitors_input);
+	virtual int silent_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
+			bool can_record, bool rec_monitors_input);
 
 	virtual void toggle_monitor_input ();
 	virtual bool can_record() { return false; }
@@ -117,7 +117,7 @@ class Route : public SessionObject, public AutomatableControls
 	/* end of vfunc-based API */
 
 	void shift (nframes64_t, nframes64_t);
-	
+
 	void set_gain (gain_t val, void *src);
 	void inc_gain (gain_t delta, void *src);
 
@@ -136,7 +136,7 @@ class Route : public SessionObject, public AutomatableControls
 
 	void set_listen (bool yn, void* src);
 	bool listening () const;
-	
+
 	void set_phase_invert (bool yn);
 	bool phase_invert() const;
 
@@ -166,7 +166,7 @@ class Route : public SessionObject, public AutomatableControls
 			method (boost::weak_ptr<Processor> (*i));
 		}
 	}
-	
+
 	boost::shared_ptr<Processor> nth_processor (uint32_t n) {
 		Glib::RWLock::ReaderLock lm (_processor_lock);
 		ProcessorList::iterator i;
@@ -256,11 +256,11 @@ class Route : public SessionObject, public AutomatableControls
 
 	XMLNode& get_processor_state ();
 	virtual void set_processor_state (const XMLNode&);
-	
+
 	int save_as_template (const std::string& path, const std::string& name);
 
 	sigc::signal<void,void*> SelectedChanged;
-	
+
 	int listen_via (boost::shared_ptr<Route>, Placement p, bool active, bool aux);
 	void drop_listen (boost::shared_ptr<Route>);
 
@@ -275,7 +275,7 @@ class Route : public SessionObject, public AutomatableControls
 		SoloControllable (std::string name, Route&);
 		void set_value (float);
 		float get_value (void) const;
-		
+
 		Route& route;
 	};
 
@@ -287,8 +287,8 @@ class Route : public SessionObject, public AutomatableControls
 		return _mute_master;
 	}
 
-	boost::shared_ptr<MuteMaster> mute_master() const { 
-		return _mute_master; 
+	boost::shared_ptr<MuteMaster> mute_master() const {
+		return _mute_master;
 	}
 
 	/* Route doesn't own these items, but sub-objects that it does own have them
@@ -301,7 +301,7 @@ class Route : public SessionObject, public AutomatableControls
 
 	void automation_snapshot (nframes_t now, bool force=false);
 	void protect_automation ();
-	
+
 	void set_remote_control_id (uint32_t id);
 	uint32_t remote_control_id () const;
 	sigc::signal<void> RemoteControlIDChanged;
@@ -322,17 +322,17 @@ class Route : public SessionObject, public AutomatableControls
 
   protected:
 	nframes_t check_initial_delay (nframes_t, nframes_t&);
-	
+
 	void passthru (sframes_t start_frame, sframes_t end_frame,
-		       nframes_t nframes, int declick);
+			nframes_t nframes, int declick);
 
 	virtual void write_out_of_band_data (BufferSet& /* bufs */, sframes_t /* start_frame */, sframes_t /* end_frame */,
-					     nframes_t /* nframes */) {}
+			nframes_t /* nframes */) {}
 
 	virtual void process_output_buffers (BufferSet& bufs,
-					     sframes_t start_frame, sframes_t end_frame,
-					     nframes_t nframes, bool with_processors, int declick);
-	
+			sframes_t start_frame, sframes_t end_frame,
+			nframes_t nframes, bool with_processors, int declick);
+
 	boost::shared_ptr<IO> _input;
 	boost::shared_ptr<IO> _output;
 
@@ -354,7 +354,7 @@ class Route : public SessionObject, public AutomatableControls
 	bool           _solo_isolated;
 
 	bool           _denormal_protection;
-	
+
 	bool _recordable : 1;
 	bool _silent : 1;
 	bool _declickable : 1;
@@ -374,9 +374,9 @@ class Route : public SessionObject, public AutomatableControls
 
 	void passthru_silence (sframes_t start_frame, sframes_t end_frame,
 	                       nframes_t nframes, int declick);
-	
+
 	void silence (nframes_t nframes);
-	
+
 	sigc::connection input_signal_connection;
 
 	ChanCount processor_max_streams;
@@ -384,7 +384,7 @@ class Route : public SessionObject, public AutomatableControls
 
 	uint32_t pans_required() const;
 	ChanCount n_process_buffers ();
-	
+
 	virtual int  _set_state (const XMLNode&, bool call_base);
 
 	boost::shared_ptr<Amp>       _amp;
@@ -407,7 +407,7 @@ class Route : public SessionObject, public AutomatableControls
 	int configure_processors (ProcessorStreams*);
 	int configure_processors_unlocked (ProcessorStreams*);
 
-	bool add_processor_from_xml (const XMLNode&, ProcessorList::iterator iter);	
+	bool add_processor_from_xml (const XMLNode&, ProcessorList::iterator iter);
 
 	void placement_range (Placement p, ProcessorList::iterator& start, ProcessorList::iterator& end);
 };

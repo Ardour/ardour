@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,8 +36,8 @@ using namespace PBD;
 sigc::signal<void,boost::shared_ptr<Region> > RegionFactory::CheckNewRegion;
 
 boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<Region> region, nframes_t start, 
-		       nframes_t length, const std::string& name, 
+RegionFactory::create (boost::shared_ptr<Region> region, nframes_t start,
+		       nframes_t length, const std::string& name,
 		       layer_t layer, Region::Flag flags, bool announce)
 {
 	boost::shared_ptr<const AudioRegion> other_a;
@@ -94,8 +94,8 @@ RegionFactory::create (boost::shared_ptr<const Region> region)
 }
 
 boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<AudioRegion> region, nframes_t start, 
-		       nframes_t length, const std::string& name, 
+RegionFactory::create (boost::shared_ptr<AudioRegion> region, nframes_t start,
+		       nframes_t length, const std::string& name,
 		       layer_t layer, Region::Flag flags, bool announce)
 {
 	return create (boost::static_pointer_cast<Region> (region), start, length, name, layer, flags, announce);
@@ -141,8 +141,8 @@ RegionFactory::create (Session& session, XMLNode& node, bool yn)
 
 	return r;
 }
-	
-boost::shared_ptr<Region> 
+
+boost::shared_ptr<Region>
 RegionFactory::create (const SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Region::Flag flags, bool announce)
 {
 	if (srcs.empty()) {
@@ -150,7 +150,7 @@ RegionFactory::create (const SourceList& srcs, nframes_t start, nframes_t length
 	}
 
 	if (srcs[0]->type() == DataType::AUDIO) {
-		
+
 		AudioRegion* ar = new AudioRegion (srcs, start, length, name, layer, flags);
 		boost::shared_ptr<AudioRegion> arp (ar);
 		boost::shared_ptr<Region> ret (boost::static_pointer_cast<Region> (arp));
@@ -161,7 +161,7 @@ RegionFactory::create (const SourceList& srcs, nframes_t start, nframes_t length
 		return ret;
 
 	} else if (srcs[0]->type() == DataType::MIDI) {
-		
+
 		MidiRegion* ar = new MidiRegion (srcs, start, length, name, layer, flags);
 		boost::shared_ptr<MidiRegion> mrp (ar);
 		boost::shared_ptr<Region> ret (boost::static_pointer_cast<Region> (mrp));
@@ -174,9 +174,9 @@ RegionFactory::create (const SourceList& srcs, nframes_t start, nframes_t length
 	}
 
 	return boost::shared_ptr<Region> ();
-}	
+}
 
-boost::shared_ptr<Region> 
+boost::shared_ptr<Region>
 RegionFactory::create (SourceList& srcs, const XMLNode& node)
 {
 	if (srcs.empty()) {
@@ -198,7 +198,7 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 	return boost::shared_ptr<Region> ();
 }
 
-boost::shared_ptr<Region> 
+boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<Source> src, nframes_t start, nframes_t length, const string& name, layer_t layer, Region::Flag flags, bool announce)
 {
 	boost::shared_ptr<AudioSource> as;

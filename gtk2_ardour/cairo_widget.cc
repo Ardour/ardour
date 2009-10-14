@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ CairoWidget::on_expose_event (GdkEventExpose *event)
 	Gdk::Rectangle content (0, 0, _width, _height);
 	bool intersects;
 	r.intersect (content, intersects);
-	
+
 	if (intersects) {
 
 		GdkDrawable* drawable = get_window()->gobj ();
@@ -79,7 +79,7 @@ CairoWidget::on_expose_event (GdkEventExpose *event)
  			r.get_height()
 			);
 	}
-	
+
 	return true;
 }
 

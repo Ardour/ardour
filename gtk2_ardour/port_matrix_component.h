@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2009 Paul Davis 
+    Copyright (C) 2002-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ public:
 	void require_render () {
 		_render_required = true;
 	}
-	
+
 	void require_rebuild () {
 		_dimension_computation_required = true;
 		_render_required = true;
@@ -165,7 +165,7 @@ protected:
 			return Gdk::Color ("#444444");
 		}
 	}
-	
+
 	void set_source_rgb (cairo_t *, Gdk::Color const &);
 	void set_source_rgba (cairo_t *, Gdk::Color const &, double);
 	uint32_t group_size (boost::shared_ptr<const PortGroup>) const;
@@ -185,7 +185,7 @@ protected:
 	uint32_t _height; ///< full height of the contents
 	Gdk::Rectangle _parent_rectangle;
 
-private:	
+private:
 	GdkPixmap* _pixmap; ///< pixmap
 	bool _render_required; ///< true if the rendered pixmap is out of date
 	bool _dimension_computation_required; ///< true if the dimensions are out of date

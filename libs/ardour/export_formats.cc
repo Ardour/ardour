@@ -45,7 +45,7 @@ HasSampleFormat::HasSampleFormat (ExportFormatBase::SampleFormatSet & sample_for
   _sample_formats (sample_formats)
 {
 	/* Dither Types */
-	
+
 	add_dither_type (ExportFormatBase::D_Shaped, _("Shaped Noise"));
 	add_dither_type (ExportFormatBase::D_Tri, _("Triangular"));
 	add_dither_type (ExportFormatBase::D_Rect, _("Rectangular"));
@@ -56,7 +56,7 @@ void
 HasSampleFormat::add_sample_format (ExportFormatBase::SampleFormat format)
 {
 	_sample_formats.insert (format);
-	
+
 	SampleFormatPtr ptr (new SampleFormatState (format, get_sample_format_name (format)));
 	sample_format_states.push_back (ptr);
 	ptr->SelectChanged.connect (sigc::bind (SampleFormatSelectChanged.make_slot(), WeakSampleFormatPtr (ptr)));
@@ -82,7 +82,7 @@ HasSampleFormat::get_selected_sample_format ()
 			return *it;
 		}
 	}
-	
+
 	return SampleFormatPtr();
 }
 
@@ -94,7 +94,7 @@ HasSampleFormat::get_selected_dither_type ()
 			return *it;
 		}
 	}
-	
+
 	return DitherTypePtr();
 }
 
@@ -105,7 +105,7 @@ HasSampleFormat::update_sample_format_selection (bool)
 	if (!format) {
 		return;
 	}
-	
+
 	if (format->format == ExportFormatBase::SF_24 ||
 	    format->format == ExportFormatBase::SF_32 ||
 	    format->format == ExportFormatBase::SF_Float ||
@@ -132,13 +132,13 @@ HasSampleFormat::update_dither_type_selection (bool)
 	if (!type) {
 		return;
 	}
-	
+
 	if (!type->compatible()) {
 		SampleFormatPtr format = get_selected_sample_format();
 		if (format) {
 			format->set_selected (false);
 		}
-		
+
 		for (DitherTypeList::iterator it = dither_type_states.begin(); it != dither_type_states.end(); ++it) {
 			(*it)->set_compatible (true);
 		}
@@ -179,16 +179,16 @@ ExportFormatLinear::ExportFormatLinear (Glib::ustring name, FormatId format_id) 
 {
 	set_name (name);
 	set_format_id (format_id);
-	
+
 	add_sample_rate (SR_22_05);
 	add_sample_rate (SR_44_1);
 	add_sample_rate (SR_48);
 	add_sample_rate (SR_88_2);
 	add_sample_rate (SR_96);
 	add_sample_rate (SR_192);
-	
+
 	add_endianness (E_FileDefault);
-	
+
 	set_quality (Q_LosslessLinear);
 }
 
@@ -202,29 +202,29 @@ ExportFormatLinear::set_compatibility_state (ExportFormatCompatibility const & c
 	if (!compatibility.has_quality (Q_LosslessLinear)) {
 		compatible = false;
 	}
-	
+
 	if (!compatibility.has_format (get_format_id())) {
 		compatible = false;
 	}
 
 	boost::shared_ptr<ExportFormatBase> intersection = get_intersection (compatibility);
-	
+
 	if (intersection->endiannesses_empty()) {
 		compatible = false;
 	}
-	
+
 	if (intersection->sample_rates_empty()) {
 		compatible = false;
 	}
-	
+
 	if (intersection->sample_formats_empty()) {
 		compatible = false;
 	}
-	
+
 	set_compatible (compatible);
 
 	/* Sample Formats */
-	
+
 	for (SampleFormatList::iterator it = sample_format_states.begin(); it != sample_format_states.end(); ++it) {
 		(*it)->set_compatible (compatibility.has_sample_format ((*it)->format));
 	}
@@ -237,7 +237,7 @@ ExportFormatLinear::set_compatibility_state (ExportFormatCompatibility const & c
 ExportFormatOggVorbis::ExportFormatOggVorbis ()
 {
 	/* Check system compatibility */
-	
+
 	SF_INFO sf_info;
 	sf_info.channels = 2;
 	sf_info.samplerate = SR_44_1;
@@ -245,20 +245,20 @@ ExportFormatOggVorbis::ExportFormatOggVorbis ()
 	if (sf_format_check (&sf_info) != SF_TRUE) {
 		throw ExportFormatIncompatible();
 	}
-	
+
 	set_name ("Ogg Vorbis");
 	set_format_id (F_Ogg);
 	sample_formats.insert (SF_Vorbis);
-	
+
 	add_sample_rate (SR_22_05);
 	add_sample_rate (SR_44_1);
 	add_sample_rate (SR_48);
 	add_sample_rate (SR_88_2);
 	add_sample_rate (SR_96);
 	add_sample_rate (SR_192);
-	
+
 	add_endianness (E_FileDefault);
-	
+
 	set_extension ("ogg");
 	set_quality (Q_LossyCompression);
 }
@@ -277,7 +277,7 @@ ExportFormatFLAC::ExportFormatFLAC () :
   HasSampleFormat (sample_formats)
 {
 	/* Check system compatibility */
-	
+
 	SF_INFO sf_info;
 	sf_info.channels = 2;
 	sf_info.samplerate = SR_44_1;
@@ -285,23 +285,23 @@ ExportFormatFLAC::ExportFormatFLAC () :
 	if (sf_format_check (&sf_info) != SF_TRUE) {
 		throw ExportFormatIncompatible();
 	}
-	
+
 	set_name ("FLAC");
 	set_format_id (F_FLAC);
-	
+
 	add_sample_rate (SR_22_05);
 	add_sample_rate (SR_44_1);
 	add_sample_rate (SR_48);
 	add_sample_rate (SR_88_2);
 	add_sample_rate (SR_96);
 	add_sample_rate (SR_192);
-	
+
 	add_sample_format (SF_8);
 	add_sample_format (SF_16);
 	add_sample_format (SF_24);
-	
+
 	add_endianness (E_FileDefault);
-	
+
 	set_extension ("flac");
 	set_quality (Q_LosslessCompression);
 }
@@ -321,7 +321,7 @@ ExportFormatBWF::ExportFormatBWF () :
 {
 	set_name ("BWF");
 	set_format_id (F_WAV);
-	
+
 	add_sample_rate (SR_22_05);
 	add_sample_rate (SR_44_1);
 	add_sample_rate (SR_48);
@@ -335,9 +335,9 @@ ExportFormatBWF::ExportFormatBWF () :
 	add_sample_format (SF_32);
 	add_sample_format (SF_Float);
 	add_sample_format (SF_Double);
-	
+
 	add_endianness (E_FileDefault);
-	
+
 	set_extension ("wav");
 	set_quality (Q_LosslessLinear);
 }

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007-2009 Paul Davis 
+    Copyright (C) 2007-2009 Paul Davis
 	Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -30,24 +30,24 @@ class Session;
 
 class Quantize : public MidiOperator {
 public:
-	 Quantize (ARDOUR::Session&, QuantizeType type, 
-		   bool snap_start, bool snap_end,
-		   double start_grid, double end_grid, 
-		   float strength, float swing, float threshold);
-	 ~Quantize ();
+	Quantize (ARDOUR::Session&, QuantizeType type,
+			bool snap_start, bool snap_end,
+			double start_grid, double end_grid,
+			float strength, float swing, float threshold);
+	~Quantize ();
 
-	 Command* operator() (boost::shared_ptr<ARDOUR::MidiModel>, std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>&);
-	 std::string name() const { return std::string ("quantize"); }
+	Command* operator() (boost::shared_ptr<ARDOUR::MidiModel>, std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>&);
+	std::string name() const { return std::string ("quantize"); }
 
 private:
-	 ARDOUR::Session& session;
-	 bool   _snap_start;
-	 bool   _snap_end;
-	 double _start_grid;
-	 double _end_grid;
-	 float  _strength;
-	 float  _swing;
-	 float  _threshold;
+	ARDOUR::Session& session;
+	bool   _snap_start;
+	bool   _snap_end;
+	double _start_grid;
+	double _end_grid;
+	float  _strength;
+	float  _swing;
+	float  _threshold;
 };
 
 } /* namespace */

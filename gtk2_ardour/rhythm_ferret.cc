@@ -92,7 +92,7 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 
 	ferret_packer.set_spacing (6);
 	ferret_packer.set_border_width (6);
-	
+
 	vector<string> strings;
 
 	analysis_mode_strings = I18N (_analysis_mode_strings);
@@ -102,7 +102,7 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 
 	onset_function_strings = I18N (_onset_function_strings);
 	Gtkmm2ext::set_popdown_strings (onset_detection_function_selector, onset_function_strings);
-	/* Onset plugin uses complex domain as default function 
+	/* Onset plugin uses complex domain as default function
 	   XXX there should be a non-hacky way to set this
 	 */
 	onset_detection_function_selector.set_active_text (onset_function_strings[3]);
@@ -124,13 +124,13 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 	ferret_packer.pack_start (analyze_button, false, false);
 
 	analyze_button.signal_clicked().connect (mem_fun (*this, &RhythmFerret::run_analysis));
-	
+
 	box = manage (new HBox);
 	box->set_spacing (6);
 	box->pack_start (detection_threshold_label, false, false);
 	box->pack_start (detection_threshold_scale, true, true);
 	perc_onset_packer.pack_start (*box, false, false);
-		
+
 	box = manage (new HBox);
 	box->set_spacing (6);
 	box->pack_start (sensitivity_label, false, false);
@@ -142,13 +142,13 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 	box->pack_start (onset_function_label, false, false);
 	box->pack_start (onset_detection_function_selector, true, true);
 	note_onset_packer.pack_start (*box, false, false);
-		
+
 	box = manage (new HBox);
 	box->set_spacing (6);
 	box->pack_start (peak_picker_label, false, false);
 	box->pack_start (peak_picker_threshold_scale, true, true);
 	note_onset_packer.pack_start (*box, false, false);
-	
+
 	box = manage (new HBox);
 	box->set_spacing (6);
 	box->pack_start (silence_label, false, false);
@@ -158,7 +158,7 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 	analysis_mode_changed ();
 
 	ferret_frame.add (ferret_packer);
-	
+
 	logo = manage (new Gtk::Image (::get_icon (X_("ferret_02"))));
 
 	if (logo) {
@@ -171,7 +171,7 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 	lower_hpacker.set_spacing (6);
 
 	action_button.signal_clicked().connect (mem_fun (*this, &RhythmFerret::do_action));
-	
+
 	get_vbox()->set_border_width (6);
 	get_vbox()->set_spacing (6);
 	get_vbox()->pack_start (upper_hpacker, true, true);
@@ -210,7 +210,7 @@ RhythmFerret::get_analysis_mode () const
 
 	if (str == analysis_mode_strings[(int) NoteOnset]) {
 		return NoteOnset;
-	} 
+	}
 
 	return PercussionOnset;
 }
@@ -289,7 +289,7 @@ RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readabl
 		}
 
 		/* merge */
-		
+
 		results.insert (results.end(), these_results.begin(), these_results.end());
 		these_results.clear ();
 	}
@@ -323,29 +323,29 @@ RhythmFerret::run_note_onset_analysis (boost::shared_ptr<Readable> readable, nfr
 {
 	try {
 		OnsetDetector t (session->frame_rate());
-		
+
 		for (uint32_t i = 0; i < readable->n_channels(); ++i) {
-			
+
 			AnalysisFeatureList these_results;
-			
+
 			t.reset ();
-			
+
 			t.set_function (get_note_onset_function());
 			t.set_silence_threshold (silence_threshold_adjustment.get_value());
 			t.set_peak_threshold (peak_picker_threshold_adjustment.get_value());
-			
+
 			if (t.run ("", readable.get(), i, these_results)) {
 				continue;
 			}
-			
+
 			/* translate all transients to give absolute position */
-			
+
 			for (AnalysisFeatureList::iterator x = these_results.begin(); x != these_results.end(); ++x) {
 				(*x) += offset;
 			}
-			
+
 			/* merge */
-			
+
 			results.insert (results.end(), these_results.begin(), these_results.end());
 			these_results.clear ();
 		}
@@ -407,7 +407,7 @@ RhythmFerret::do_split_action ()
 
 		i = tmp;
 	}
-	
+
 	session->commit_reversible_command ();
 }
 

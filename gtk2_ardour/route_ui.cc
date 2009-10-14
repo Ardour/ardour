@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2006 Paul Davis 
+    Copyright (C) 2002-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ RouteUI::~RouteUI()
        /* derived classes should emit GoingAway so that they receive the signal
           when the object is still a legal derived instance.
        */
-	
+
 	delete solo_menu;
 	delete mute_menu;
 	delete sends_menu;
@@ -151,7 +151,7 @@ RouteUI::reset ()
 
 	delete mute_menu;
 	mute_menu = 0;
-	
+
 	if (xml_node) {
 		/* do not delete the node - its owned by the route */
 		xml_node = 0;
@@ -183,13 +183,13 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	mute_button->set_controllable (_route->mute_control());
 	solo_button->set_controllable (_route->solo_control());
-  
+
 	connections.push_back (_route->active_changed.connect (mem_fun (*this, &RouteUI::route_active_changed)));
 	connections.push_back (_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed)));
 	connections.push_back (_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed)));
 	connections.push_back (_route->listen_changed.connect (mem_fun(*this, &RouteUI::listen_changed)));
 	connections.push_back (_route->solo_isolated_changed.connect (mem_fun(*this, &RouteUI::solo_changed)));
-  
+
 	if (_session.writable() && is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
@@ -200,11 +200,11 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
  		rec_enable_button->set_controllable (t->rec_enable_control());
 
 		update_rec_display ();
-	} 
+	}
 
 	mute_button->unset_flags (Gtk::CAN_FOCUS);
 	solo_button->unset_flags (Gtk::CAN_FOCUS);
-	
+
 	mute_button->show();
 
 	if (_route->is_control()) {
@@ -243,7 +243,7 @@ RouteUI::mute_press(GdkEventButton* ev)
 			if (Keyboard::is_button2_event (ev)) {
 				// Primary-button2 click is the midi binding click
 				// button2-click is "momentary"
-				
+
 				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier))) {
 					wait_for_release = true;
 				} else {
@@ -274,7 +274,7 @@ RouteUI::mute_press(GdkEventButton* ev)
 					if (ev->button == 1) {
 						set_route_group_mute (_route, !_route->muted());
 					}
-					
+
 				} else {
 
 					/* plain click applies change to this route */
@@ -328,41 +328,41 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 		multiple_solo_change = false;
 		if (!ignore_toggle) {
-			
+
 			if (Keyboard::is_context_menu_event (ev)) {
-				
+
 				if (solo_menu == 0) {
 					build_solo_menu ();
 				}
-				
+
 				solo_menu->popup (1, ev->time);
-				
+
 			} else {
-				
+
 				if (Keyboard::is_button2_event (ev)) {
-					
+
 					// Primary-button2 click is the midi binding click
 					// button2-click is "momentary"
-					
+
 					if (!Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier))) {
 						wait_for_release = true;
 					} else {
 						return false;
 					}
 				}
-				
+
 				if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
-					
+
 					if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
-						
+
 						/* Primary-Tertiary-click applies change to all routes */
 						bool was_not_latched = false;
 						if (!Config->get_solo_latched ()) {
 							was_not_latched = true;
 							/*
-							  XXX it makes no sense to solo all tracks if we're 
-							  not in latched mode, but doing nothing feels like a bug, 
-							  so do it anyway 
+							  XXX it makes no sense to solo all tracks if we're
+							  not in latched mode, but doing nothing feels like a bug,
+							  so do it anyway
 							*/
 							Config->set_solo_latched (true);
 						}
@@ -376,9 +376,9 @@ RouteUI::solo_press(GdkEventButton* ev)
 						if (was_not_latched) {
 							Config->set_solo_latched (false);
 						}
-						
+
 					} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
-						
+
 						// Primary-Secondary-click: exclusively solo this track, not a toggle */
 
 						_session.begin_reversible_command (_("solo change"));
@@ -499,7 +499,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 			set_route_group_rec_enable (_route, !_route->record_enabled());
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
-			
+
 			/* do this on release */
 
 		} else {
@@ -521,11 +521,11 @@ void
 RouteUI::build_sends_menu ()
 {
 	using namespace Menu_Helpers;
-	
+
 	sends_menu = new Menu;
 	sends_menu->set_name ("ArdourContextMenu");
 	MenuList& items = sends_menu->items();
-	
+
 	items.push_back (MenuElem(_("Assign all tracks (prefader)"), bind (mem_fun (*this, &RouteUI::create_sends), PreFader)));
 	items.push_back (MenuElem(_("Assign all tracks (postfader)"), bind (mem_fun (*this, &RouteUI::create_sends), PostFader)));
 	items.push_back (MenuElem(_("Copy track gains to sends"), mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
@@ -616,7 +616,7 @@ RouteUI::send_blink (bool onoff)
 	if (!show_sends_button) {
 		return;
 	}
-		
+
 	if (onoff) {
 		show_sends_button->set_state (STATE_ACTIVE);
 	} else {
@@ -663,8 +663,8 @@ RouteUI::update_solo_display ()
 			ignore_toggle = true;
 			solo_button->set_active (x);
 			ignore_toggle = false;
-		} 
-		
+		}
+
 		if (_route->solo_isolated()) {
 			solo_button->set_visual_state (2);
 		} else if (x) {
@@ -704,7 +704,7 @@ RouteUI::update_mute_display ()
 	}
 
 	/* now attend to visual state */
-	
+
 	if (Config->get_show_solo_mutes()) {
 		if (_route->muted()) {
 			mute_button->set_visual_state (2);
@@ -753,7 +753,7 @@ RouteUI::update_rec_display ()
 	else {
 		return;
 	}
-	
+
 	/* now make sure its color state is correct */
 
 	if (model) {
@@ -779,7 +779,7 @@ void
 RouteUI::build_solo_menu (void)
 {
 	using namespace Menu_Helpers;
-	
+
 	solo_menu = new Menu;
 	solo_menu->set_name ("ArdourContextMenu");
 	MenuList& items = solo_menu->items();
@@ -794,18 +794,18 @@ RouteUI::build_solo_menu (void)
 
 	//items.push_back (SeparatorElem());
 	// items.push_back (MenuElem (_("MIDI Bind"), mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
-	
+
 }
 
 void
 RouteUI::build_mute_menu(void)
 {
 	using namespace Menu_Helpers;
-	
+
 	mute_menu = new Menu;
 	mute_menu->set_name ("ArdourContextMenu");
 
-#if FIX_ME_IN_3_0	
+#if FIX_ME_IN_3_0
 	MenuList& items = mute_menu->items();
 	CheckMenuItem* check;
 
@@ -822,7 +822,7 @@ RouteUI::build_mute_menu(void)
 	_route->post_fader_changed.connect(bind (mem_fun (*this, &RouteUI::post_fader_toggle), check));
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
-	
+
 	check = new CheckMenuItem(_("Control Outs"));
 	init_mute_menu(CONTROL_OUTS, check);
 	check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), CONTROL_OUTS, check));
@@ -952,9 +952,9 @@ void
 RouteUI::set_color (const Gdk::Color & c)
 {
 	char buf[64];
-	
+
 	_color = c;
-	
+
 	ensure_xml_node ();
 	snprintf (buf, sizeof (buf), "%d:%d:%d", c.get_red(), c.get_green(), c.get_blue());
 	xml_node->add_property ("color", buf);
@@ -978,7 +978,7 @@ XMLNode*
 RouteUI::get_automation_child_xml_node (Evoral::Parameter param)
 {
 	ensure_xml_node ();
-	
+
 	XMLNodeList kids = xml_node->children();
 	XMLNodeConstIterator iter;
 
@@ -1004,7 +1004,7 @@ int
 RouteUI::set_color_from_route ()
 {
 	XMLProperty *prop;
-	
+
 	RouteUI::ensure_xml_node ();
 
 	if ((prop = xml_node->property ("color")) != 0) {
@@ -1014,7 +1014,7 @@ RouteUI::set_color_from_route ()
 		_color.set_green(g);
 		_color.set_blue(b);
 		return 0;
-	} 
+	}
 	return 1;
 }
 
@@ -1064,12 +1064,12 @@ RouteUI::route_rename ()
         name_prompter.get_result (result);
         if (result.length()) {
 			_route->set_name (result);
-		}	
+		}
 		break;
 	}
 
 	return;
-  
+
 }
 
 void
@@ -1108,7 +1108,7 @@ RouteUI::toggle_polarity ()
 		bool x;
 
 		ENSURE_GUI_THREAD(mem_fun (*this, &RouteUI::toggle_polarity));
-		
+
 		if ((x = polarity_menu_item->get_active()) != _route->phase_invert()) {
 			_route->set_phase_invert (x);
 			if (x) {
@@ -1138,7 +1138,7 @@ RouteUI::toggle_denormal_protection ()
 		bool x;
 
 		ENSURE_GUI_THREAD(mem_fun (*this, &RouteUI::toggle_denormal_protection));
-		
+
 		if ((x = denormal_menu_item->get_active()) != _route->denormal_protection()) {
 			_route->set_denormal_protection (x);
 		}
@@ -1168,7 +1168,7 @@ void
 RouteUI::pre_fader_toggle(void* src, Gtk::CheckMenuItem* check)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RouteUI::pre_fader_toggle), src, check));
-	
+
 	bool yn = _route->get_mute_config(PRE_FADER);
 	if (check->get_active() != yn) {
 		check->set_active (yn);
@@ -1179,7 +1179,7 @@ void
 RouteUI::post_fader_toggle(void* src, Gtk::CheckMenuItem* check)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RouteUI::post_fader_toggle), src, check));
-	
+
 	bool yn = _route->get_mute_config(POST_FADER);
 	if (check->get_active() != yn) {
 		check->set_active (yn);
@@ -1190,7 +1190,7 @@ void
 RouteUI::control_outs_toggle(void* src, Gtk::CheckMenuItem* check)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RouteUI::control_outs_toggle), src, check));
-	
+
 	bool yn = _route->get_mute_config(CONTROL_OUTS);
 	if (check->get_active() != yn) {
 		check->set_active (yn);
@@ -1201,7 +1201,7 @@ void
 RouteUI::main_outs_toggle(void* src, Gtk::CheckMenuItem* check)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RouteUI::main_outs_toggle), src, check));
-	
+
 	bool yn = _route->get_mute_config(MAIN_OUTS);
 	if (check->get_active() != yn) {
 		check->set_active (yn);
@@ -1306,16 +1306,16 @@ RouteUI::save_as_template ()
 	sys::path path;
 	Glib::ustring safe_name;
 	string name;
-	
+
 	path = ARDOUR::user_route_template_directory ();
-	
+
 	if (g_mkdir_with_parents (path.to_string().c_str(), 0755)) {
 		error << string_compose (_("Cannot create route template directory %1"), path.to_string()) << endmsg;
 		return;
 	}
-	
+
 	Prompter p (true); // modal
-	
+
 	p.set_prompt (_("Template name:"));
 	switch (p.run()) {
 	case RESPONSE_ACCEPT:
@@ -1323,15 +1323,15 @@ RouteUI::save_as_template ()
 	default:
 		return;
 	}
-	
+
 	p.hide ();
 	p.get_result (name, true);
-	
+
 	safe_name = legalize_for_path (name);
 	safe_name += template_suffix;
-	
+
 	path /= safe_name;
-	
+
 	_route->save_as_template (path.to_string(), name);
 }
 
@@ -1349,7 +1349,7 @@ void
 RouteUI::parameter_changed (string const & p)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &RouteUI::parameter_changed), p));
-	
+
 	if (p == "disable-disarm-during-roll") {
 		check_rec_enable_sensitivity ();
 	} else if (p == "solo-control-is-listen-control") {

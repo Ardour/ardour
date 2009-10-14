@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ sigc::signal<void,NamedSelection*> NamedSelection::NamedSelectionCreated;
 
 typedef std::list<boost::shared_ptr<Playlist> > PlaylistList;
 
-NamedSelection::NamedSelection (string n, PlaylistList& l) 
+NamedSelection::NamedSelection (string n, PlaylistList& l)
 	: name (n)
 {
 	playlists = l;
@@ -65,7 +65,7 @@ NamedSelection::NamedSelection (Session& session, const XMLNode& node)
 	}
 
 	name = property->value();
-	
+
 	if ((lists_node = find_named_node (node, "Playlists")) == 0) {
 		return;
 	}
@@ -126,6 +126,6 @@ NamedSelection::get_state ()
 		plnode->add_property ("name", (*i)->name());
 		child->add_child_nocopy (*plnode);
 	}
-	
+
 	return *root;
 }

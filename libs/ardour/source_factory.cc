@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ Glib::Cond* SourceFactory::PeaksToBuild;
 Glib::StaticMutex SourceFactory::peak_building_lock = GLIBMM_STATIC_MUTEX_INIT;
 std::list<boost::weak_ptr<AudioSource> > SourceFactory::files_with_peaks;
 
-static void 
+static void
 peak_thread_work ()
 {
 	PBD::notify_gui_about_thread_creation (pthread_self(), string ("peakbuilder-") + to_string (pthread_self(), std::dec));
@@ -62,7 +62,7 @@ peak_thread_work ()
 	while (true) {
 
 		SourceFactory::peak_building_lock.lock ();
-		
+
 	  wait:
 		if (SourceFactory::files_with_peaks.empty()) {
 			SourceFactory::PeaksToBuild->wait (SourceFactory::peak_building_lock);
@@ -75,7 +75,7 @@ peak_thread_work ()
 		boost::shared_ptr<AudioSource> as (SourceFactory::files_with_peaks.front().lock());
 		SourceFactory::files_with_peaks.pop_front ();
 		SourceFactory::peak_building_lock.unlock ();
-		
+
 		if (!as) {
 			continue;
 		}
@@ -143,7 +143,7 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 	if (type == DataType::AUDIO) {
 
 		try {
-			
+
 			boost::shared_ptr<Source> ret (new SndFileSource (s, node));
 			if (setup_peakfile (ret, defer_peaks)) {
 				return boost::shared_ptr<Source>();
@@ -151,25 +151,25 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 			ret->check_for_analysis_data_on_disk ();
 			SourceCreated (ret);
 			return ret;
-		} 
-		
+		}
+
 		catch (failed_constructor& err) {
 
 #ifdef USE_COREAUDIO_FOR_FILES
-		
+
 			/* this is allowed to throw */
-			
+
 			boost::shared_ptr<Source> ret (new CoreAudioSource (s, node));
-			
+
 			if (setup_peakfile (ret, defer_peaks)) {
 				return boost::shared_ptr<Source>();
 			}
-			
+
 			ret->check_for_analysis_data_on_disk ();
 			SourceCreated (ret);
 			return ret;
 #else
-			throw; // rethrow 
+			throw; // rethrow
 #endif
 		}
 
@@ -190,25 +190,25 @@ SourceFactory::createReadable (DataType type, Session& s, const string& path, bo
 	if (type == DataType::AUDIO) {
 
 		if (!(flags & Destructive)) {
-			
+
 			try {
-				
+
 				boost::shared_ptr<Source> ret (new SndFileSource (s, path, embedded, chn, flags));
-				
+
 				if (setup_peakfile (ret, defer_peaks)) {
 					return boost::shared_ptr<Source>();
 				}
-				
+
 				ret->check_for_analysis_data_on_disk ();
 				if (announce) {
 					SourceCreated (ret);
 				}
 				return ret;
 			}
-			
+
 			catch (failed_constructor& err) {
 #ifdef USE_COREAUDIO_FOR_FILES
-				
+
 				boost::shared_ptr<Source> ret (new CoreAudioSource (s, path, embedded, chn, flags));
 				if (setup_peakfile (ret, defer_peaks)) {
 					return boost::shared_ptr<Source>();
@@ -218,7 +218,7 @@ SourceFactory::createReadable (DataType type, Session& s, const string& path, bo
 					SourceCreated (ret);
 				}
 				return ret;
-				
+
 #else
 				throw; // rethrow
 #endif
@@ -227,11 +227,11 @@ SourceFactory::createReadable (DataType type, Session& s, const string& path, bo
 		} else {
 			// eh?
 		}
-	
+
 	} else if (type == DataType::MIDI) {
-		
+
 		boost::shared_ptr<Source> ret (new SMFSource (s, path, embedded, SMFSource::Flag(0)));
-		
+
 		if (announce) {
 			SourceCreated (ret);
 		}
@@ -248,20 +248,20 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 		bool destructive, nframes_t rate, bool announce, bool defer_peaks)
 {
 	/* this might throw failed_constructor(), which is OK */
-	
+
 	if (type == DataType::AUDIO) {
 		boost::shared_ptr<Source> ret (new SndFileSource (s, path, embedded,
 				s.config.get_native_file_data_format(),
 				s.config.get_native_file_header_format(),
 				rate,
 				(destructive
-				 	? Source::Flag (SndFileSource::default_writable_flags | Source::Destructive)
-					: SndFileSource::default_writable_flags)));	
+					? Source::Flag (SndFileSource::default_writable_flags | Source::Destructive)
+					: SndFileSource::default_writable_flags)));
 
 		if (setup_peakfile (ret, defer_peaks)) {
 			return boost::shared_ptr<Source>();
 		}
-		
+
 		// no analysis data - this is a new file
 
 		if (announce) {
@@ -272,9 +272,9 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 	} else if (type == DataType::MIDI) {
 
 		boost::shared_ptr<Source> ret (new SMFSource (s, path, embedded, Source::Flag(0)));
-	
+
 		// no analysis data - this is a new file
-		
+
 		if (announce) {
 			SourceCreated (ret);
 		}

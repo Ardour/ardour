@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001, 2006 Paul Davis 
+    Copyright (C) 2001, 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -73,29 +73,29 @@ class MidiStreamView : public StreamView
 
 	inline uint8_t lowest_note()  const { return _lowest_note; }
 	inline uint8_t highest_note() const { return _highest_note; }
-	
+
 	void update_note_range(uint8_t note_num);
-	
+
 	void redisplay_diskstream ();
-	
+
 	inline double contents_height() const
 	{ return (_trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
-	
+
 	inline double note_to_y(uint8_t note) const
 		{ return contents_height()
 			- (note + 1 - lowest_note()) * note_height() + 1; }
-	
+
 	inline uint8_t y_to_note(double y) const
 		{ return (uint8_t)((contents_height() - y - 1)
 				/ contents_height() * (double)contents_note_range())
 				+ lowest_note(); }
-	
+
 	inline double note_height() const
 		{ return contents_height() / (double)contents_note_range(); }
-	
+
 	inline uint8_t contents_note_range() const
 		{ return highest_note() - lowest_note() + 1; }
-	
+
 	sigc::signal<void> NoteRangeChanged;
 
 	RegionView* create_region_view (boost::shared_ptr<ARDOUR::Region>, bool, bool);
@@ -106,13 +106,13 @@ class MidiStreamView : public StreamView
 	void rec_data_range_ready (
 			jack_nframes_t start,
 			jack_nframes_t dur,
-			boost::weak_ptr<ARDOUR::Source> src); 
+			boost::weak_ptr<ARDOUR::Source> src);
 
 	void update_rec_regions (
 			boost::shared_ptr<ARDOUR::MidiModel> data,
 			jack_nframes_t start,
 			jack_nframes_t dur);
-	
+
 	RegionView* add_region_view_internal (
 			boost::shared_ptr<ARDOUR::Region>,
 			bool wait_for_waves,
@@ -120,7 +120,7 @@ class MidiStreamView : public StreamView
 
 	void display_region(MidiRegionView* region_view, bool load_model);
 	void display_diskstream (boost::shared_ptr<ARDOUR::Diskstream> ds);
-	
+
 	void update_contents_height ();
 	void draw_note_lines();
 	void apply_note_range(uint8_t lowest, uint8_t highest, bool to_region_views);

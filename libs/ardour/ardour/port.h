@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 namespace ARDOUR {
 
 class AudioEngine;
-class Buffer;	
+class Buffer;
 
 class Port : public sigc::trackable, public boost::noncopyable
 {
@@ -101,7 +101,7 @@ public:
 	void set_latency (nframes_t);
 
 	virtual void reset ();
-	
+
 	/** @return the size of the raw buffer (bytes) for duration @a nframes (audio frames) */
 	virtual size_t raw_buffer_size(jack_nframes_t nframes) const = 0;
 
@@ -113,13 +113,13 @@ public:
 	virtual void flush_buffers (nframes_t, nframes_t offset = 0) {
 		(void) offset;
 	}
-	
+
 	static void set_engine (AudioEngine *);
 
 	sigc::signal<void, bool> MonitorInputChanged;
 
 protected:
-	
+
 	Port (std::string const &, DataType, Flags);
 
 	jack_port_t* _jack_port; ///< JACK port
@@ -133,7 +133,7 @@ private:
 	friend class AudioEngine;
 
 	void recompute_total_latency () const;
-	
+
 	/* XXX */
 	bool _last_monitor;
 

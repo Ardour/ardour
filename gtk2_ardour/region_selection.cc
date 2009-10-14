@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ RegionSelection::RegionSelection (const RegionSelection& other)
 
 	_current_start = other._current_start;
 	_current_end = other._current_end;
-	
+
 	for (RegionSelection::const_iterator i = other.begin(); i != other.end(); ++i) {
 		add (*i);
 	}
@@ -65,10 +65,10 @@ RegionSelection::operator= (const RegionSelection& other)
 	if (this != &other) {
 
 		clear_all();
-		
+
 		_current_start = other._current_start;
 		_current_end = other._current_end;
-		
+
 		for (RegionSelection::const_iterator i = other.begin(); i != other.end(); ++i) {
 			add (*i);
 		}
@@ -112,11 +112,11 @@ RegionSelection::add (RegionView* rv)
 	if (rv->region()->first_frame() < _current_start || empty()) {
 		_current_start = rv->region()->first_frame();
 	}
-	
+
 	if (rv->region()->last_frame() > _current_end || empty()) {
 		_current_end = rv->region()->last_frame();
 	}
-	
+
 	push_back (rv);
 
 	/* add to layer sorted list */
@@ -148,7 +148,7 @@ RegionSelection::remove (RegionView* rv)
 
 		// remove from layer sorted list
 		_bylayer.remove (rv);
-		
+
 		if (size() == 1) {
 
 			/* this is the last one, so when we delete it
@@ -159,37 +159,37 @@ RegionSelection::remove (RegionView* rv)
 			_current_end = 0;
 
 		} else {
-			
+
 			boost::shared_ptr<Region> region ((*r)->region());
-			
+
 			if (region->first_frame() == _current_start) {
-				
+
 				/* reset current start */
-				
+
 				nframes_t ref = max_frames;
-				
+
 				for (RegionSelection::iterator i = begin (); i != end(); ++i) {
 					if (region->first_frame() < ref) {
 						ref = region->first_frame();
 					}
 				}
-				
+
 				_current_start = ref;
-				
+
 			}
-			
+
 			if (region->last_frame() == _current_end) {
 
 				/* reset current end */
-				
+
 				nframes_t ref = 0;
-				
+
 				for (RegionSelection::iterator i = begin (); i != end(); ++i) {
 					if (region->first_frame() > ref) {
 						ref = region->first_frame();
 					}
 				}
-				
+
 				_current_end = ref;
 			}
 		}
@@ -251,7 +251,7 @@ RegionSelection::by_position (list<RegionView*>& foo) const
 
 struct RegionSortByTrack {
     bool operator() (const RegionView* a, const RegionView* b) const {
-	    
+
 	    /* really, track and position */
 
 	    if (a->get_trackview().order() == b->get_trackview().order()) {

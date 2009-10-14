@@ -13,8 +13,8 @@ class Latent {
 	virtual nframes_t signal_latency() const = 0;
 	nframes_t user_latency () const { return _user_latency; }
 
-	nframes_t effective_latency() const { 
-		if (_user_latency) { 
+	nframes_t effective_latency() const {
+		if (_user_latency) {
 			return _user_latency;
 		} else {
 			return signal_latency ();

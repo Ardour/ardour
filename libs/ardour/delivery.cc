@@ -1,16 +1,16 @@
 /*
-    Copyright (C) 2009 Paul Davis 
-    
+    Copyright (C) 2009 Paul Davis
+
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
     Software Foundation; either version 2 of the License, or (at your option)
     any later version.
-    
+
     This program is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
-    
+
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     675 Mass Ave, Cambridge, MA 02139, USA.
@@ -62,7 +62,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Mute
 
 {
 	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
-	
+
 	if (_output) {
 		_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
 	}
@@ -192,7 +192,7 @@ Delivery::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 		   of our output object.
 		*/
 
-		if (_output) { 
+		if (_output) {
 			if (_output->n_ports() != ChanCount::ZERO) {
 				out = _output->n_ports();
 				return true;
@@ -210,10 +210,10 @@ Delivery::can_support_io_configuration (const ChanCount& in, ChanCount& out) con
 	} else if (_role == Insert) {
 
 		/* the output buffers will be filled with data from the *input* ports
-		   of this Insert. 
+		   of this Insert.
 		*/
 
-		if (_input) { 
+		if (_input) {
 			if (_input->n_ports() != ChanCount::ZERO) {
 				out = _input->n_ports();
 				return true;
@@ -238,12 +238,12 @@ bool
 Delivery::configure_io (ChanCount in, ChanCount out)
 {
 	/* check configuration by comparison with our I/O port configuration, if appropriate.
-	   see ::can_support_io_configuration() for comments 
+	   see ::can_support_io_configuration() for comments
 	*/
 
 	if (_role == Main) {
 
-		if (_output) { 
+		if (_output) {
 			if (_output->n_ports() != out) {
 				if (_output->n_ports() != ChanCount::ZERO) {
 					fatal << _name << " programming error: configure_io with nports = " << _output->n_ports() << " called with " << in << " and " << out << " with " << _output->n_ports() << " output ports" << endmsg;
@@ -251,12 +251,12 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 				} else {
 					/* I/O not yet configured */
 				}
-			} 
+			}
 		}
 
 	} else if (_role == Insert) {
 
-		if (_input) { 
+		if (_input) {
 			if (_input->n_ports() != in) {
 				if (_input->n_ports() != ChanCount::ZERO) {
 					fatal << _name << " programming error: configure_io called with " << in << " and " << out << " with " << _input->n_ports() << " input ports" << endmsg;
@@ -294,7 +294,7 @@ Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nfra
 		goto out;
 	}
 
-	/* this setup is not just for our purposes, but for anything that comes after us in the 
+	/* this setup is not just for our purposes, but for anything that comes after us in the
 	   processing pathway that wants to use this->output_buffers() for some reason.
 	*/
 
@@ -306,9 +306,9 @@ Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nfra
 	// which cannot do this.
 
 	tgain = target_gain ();
-	
+
 	if (tgain != _current_gain) {
-		
+
 		/* target gain has changed */
 
 		Amp::apply_gain (bufs, nframes, _current_gain, tgain);
@@ -319,7 +319,7 @@ Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nfra
 		/* we were quiet last time, and we're still supposed to be quiet.
 		   Silence the outputs, and make sure the buffers are quiet too,
 		*/
-		
+
 		_output->silence (nframes);
 		Amp::apply_simple_gain (bufs, nframes, 0.0);
 		goto out;
@@ -379,7 +379,7 @@ Delivery::set_state (const XMLNode& node)
 	if (IOProcessor::set_state (node)) {
 		return -1;
 	}
-	
+
 	if ((prop = node.property ("role")) != 0) {
 		_role = Role (string_2_enum (prop->value(), _role));
 		// std::cerr << this << ' ' << _name << " set role to " << enum_2_string (_role) << std::endl;
@@ -388,10 +388,10 @@ Delivery::set_state (const XMLNode& node)
 	}
 
 	XMLNode* pan_node = node.child (X_("Panner"));
-	
+
 	if (pan_node) {
 		_panner->set_state (*pan_node);
-	} 
+	}
 
 	reset_panner ();
 
@@ -405,7 +405,7 @@ Delivery::reset_panner ()
 		if (!no_panner_reset) {
 
 			uint32_t ntargets;
-			
+
 			if (_output) {
 				ntargets = _output->n_ports().n_audio();
 			} else {
@@ -493,7 +493,7 @@ void
 Delivery::flush (nframes_t nframes)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
-	
+
 	PortSet& ports (_output->ports());
 
 	for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
@@ -525,7 +525,7 @@ Delivery::target_gain ()
 	} else {
 
 		MuteMaster::MutePoint mp;
-		
+
 		switch (_role) {
 		case Main:
 			mp = MuteMaster::Main;
@@ -542,9 +542,9 @@ Delivery::target_gain ()
 		}
 
 		if (_solo_isolated) {
-		
+
 			/* ... but we are isolated from all that nonsense */
-			
+
 			desired_gain = _mute_master->mute_gain_at (mp);
 
 		} else if (_session.soloing()) {

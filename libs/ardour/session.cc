@@ -563,14 +563,14 @@ Session::when_engine_running ()
 
                        for (int physport = 0; physport < 2; ++physport) {
                                string physical_output = _engine.get_nth_physical_output (DataType::AUDIO, physport);
-			       
+
                                if (physical_output.length()) {
                                        if (_click_io->add_port (physical_output, this)) {
                                                // relax, even though its an error
 				       }
 			       }
 		       }
-		       
+
                        if (_click_io->n_ports () > ChanCount::ZERO) {
                                _clicking = Config->get_clicking ();
                        }
@@ -596,7 +596,7 @@ Session::when_engine_running ()
 	   mono and stereo bundles, so that the common cases of mono
 	   and stereo tracks get bundles to put in their mixer strip
 	   in / out menus.  There may be a nicer way of achieving that;
-	   it doesn't really scale that well to higher channel counts 
+	   it doesn't really scale that well to higher channel counts
 	*/
 
 	/* mono output bundles */
@@ -605,11 +605,11 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
 
- 		shared_ptr<Bundle> c (new Bundle (buf, true));
+		shared_ptr<Bundle> c (new Bundle (buf, true));
 		c->add_channel (_("mono"));
- 		c->set_port (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
+		c->set_port (0, _engine.get_nth_physical_output (DataType::AUDIO, np));
 
- 		add_bundle (c);
+		add_bundle (c);
 	}
 
 	/* stereo output bundles */
@@ -634,11 +634,11 @@ Session::when_engine_running ()
 		char buf[32];
 		snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
 
- 		shared_ptr<Bundle> c (new Bundle (buf, false));
+		shared_ptr<Bundle> c (new Bundle (buf, false));
 		c->add_channel (_("mono"));
- 		c->set_port (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
+		c->set_port (0, _engine.get_nth_physical_input (DataType::AUDIO, np));
 
- 		add_bundle (c);
+		add_bundle (c);
 	}
 
 	/* stereo input bundles */
@@ -657,7 +657,7 @@ Session::when_engine_running ()
 			add_bundle (c);
 		}
 	}
-	
+
 	BootMessage (_("Setup signal flow and plugins"));
 
 	hookup_io ();
@@ -665,19 +665,19 @@ Session::when_engine_running ()
 	if (!no_auto_connect()) {
 
 		if (_master_out && Config->get_auto_connect_standard_busses()) {
-			
+
 			/* if requested auto-connect the outputs to the first N physical ports.
 			 */
 
 			uint32_t limit = _master_out->n_outputs().n_total();
-			
+
 			for (uint32_t n = 0; n < limit; ++n) {
 				Port* p = _master_out->output()->nth (n);
 				string connect_to = _engine.get_nth_physical_output (DataType (p->type()), n);
 
 				if (!connect_to.empty() && p->connected_to (connect_to) == false) {
 					if (_master_out->output()->connect (p, connect_to, this)) {
-						error << string_compose (_("cannot connect master output %1 to %2"), n, connect_to) 
+						error << string_compose (_("cannot connect master output %1 to %2"), n, connect_to)
 						      << endmsg;
 						break;
 					}
@@ -691,21 +691,21 @@ Session::when_engine_running ()
 			   are undefined, at best.
 			 */
 
-			/* control out listens to master bus (but ignores it 
+			/* control out listens to master bus (but ignores it
 			   under some conditions)
 			*/
 
 			uint32_t limit = _control_out->n_inputs().n_audio();
-			
+
 			if (_master_out) {
 				for (uint32_t n = 0; n < limit; ++n) {
 					AudioPort* p = _control_out->input()->ports().nth_audio_port (n);
 					AudioPort* o = _master_out->output()->ports().nth_audio_port (n);
-					
+
 					if (o) {
 						string connect_to = o->name();
 						if (_control_out->input()->connect (p, connect_to, this)) {
-							error << string_compose (_("cannot connect control input %1 to %2"), n, connect_to) 
+							error << string_compose (_("cannot connect control input %1 to %2"), n, connect_to)
 							      << endmsg;
 							break;
 						}
@@ -713,7 +713,7 @@ Session::when_engine_running ()
 				}
 			}
 
-			/* if control out is not connected, 
+			/* if control out is not connected,
 			   connect control out to physical outs, but use ones after the master if possible
 			*/
 
@@ -727,28 +727,28 @@ Session::when_engine_running ()
 						_control_out->output()->connect_ports_to_bundle (b, this);
 					} else {
 						warning << string_compose (_("The preferred I/O for the monitor bus (%1) cannot be found"),
-									   Config->get_monitor_bus_preferred_bundle()) 
+									   Config->get_monitor_bus_preferred_bundle())
 							<< endmsg;
 					}
 
 				} else {
 
 					/* XXX this logic is wrong for mixed port types */
-					
+
 					uint32_t shift = _master_out->n_outputs().n_audio();
 					uint32_t mod = _engine.n_physical_outputs (DataType::AUDIO);
 					limit = _control_out->n_outputs().n_audio();
 
 					cerr << "Connecting " << limit << " control out ports, shift is " << shift << " mod is " << mod << endl;
-					
+
 					for (uint32_t n = 0; n < limit; ++n) {
-						
+
 						Port* p = _control_out->output()->nth (n);
 						string connect_to = _engine.get_nth_physical_output (DataType (p->type()), (n+shift) % mod);
-						
+
 						if (!connect_to.empty()) {
 							if (_control_out->output()->connect (p, connect_to, this)) {
-								error << string_compose (_("cannot connect control output %1 to %2"), n, connect_to) 
+								error << string_compose (_("cannot connect control output %1 to %2"), n, connect_to)
 								      << endmsg;
 								break;
 							}
@@ -815,14 +815,14 @@ Session::hookup_io ()
 	if (_control_out) {
 
 		boost::shared_ptr<RouteList> r = routes.reader ();
-		
+
 		for (RouteList::iterator x = r->begin(); x != r->end(); ++x) {
 
 			if ((*x)->is_control() || (*x)->is_master()) {
 				continue;
 			}
 
-			(*x)->listen_via (_control_out, 
+			(*x)->listen_via (_control_out,
 					  (Config->get_listen_position() == AfterFaderListen ? PostFader : PreFader),
 					  false, false);
 		}
@@ -878,9 +878,9 @@ bool
 Session::record_enabling_legal () const
 {
 	/* this used to be in here, but survey says.... we don't need to restrict it */
- 	// if (record_status() == Recording) {
- 	//	return false;
- 	// }
+	// if (record_status() == Recording) {
+	//	return false;
+	// }
 
 	if (Config->get_all_safe()) {
 		return false;
@@ -1254,7 +1254,7 @@ Session::audible_frame () const
 	} else {
 		tf = _transport_frame;
 	}
-	
+
 	ret = tf;
 
 	if (!non_realtime_work_pending()) {
@@ -1273,8 +1273,8 @@ Session::audible_frame () const
 				if (tf < _last_roll_location + offset) {
 					return _last_roll_location;
 				}
-			} 
-			
+			}
+
 
 			/* forwards */
 			ret -= offset;
@@ -1759,7 +1759,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 				      << endmsg;
 				goto failed;
 			}
-			
+
 			if (track->output()->ensure_io (ChanCount(DataType::AUDIO, output_channels), false, this)) {
 				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
 							 input_channels, output_channels)
@@ -1789,7 +1789,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 				for (uint32_t x = 0; x < track->n_outputs().n_audio(); ++x) {
 					port = "";
-					
+
 					if (Config->get_output_auto_connect() & AutoConnectPhysical) {
 						port = physoutputs[(channels_used+x)%nphysical_out];
 					} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
@@ -1797,7 +1797,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 							port = _master_out->input()->nth (x % _master_out->input()->n_ports().n_audio())->name();
 						}
 					}
-					
+
 					if (port.length() && track->output()->connect (track->output()->nth(x), port, this)) {
 						break;
 					}
@@ -1957,11 +1957,11 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 
 			for (uint32_t x = 0; n_physical_audio_inputs && x < bus->input()->n_ports().n_audio(); ++x) {
 				port = "";
-				
+
 				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
 					port = physinputs[((n+x)%n_physical_audio_inputs)];
-				} 
-				
+				}
+
 				if (port.length() && bus->input()->connect (bus->input()->nth (x), port, this)) {
 					break;
 				}
@@ -2036,34 +2036,34 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 	while (how_many) {
 
 		XMLNode node_copy (*node); // make a copy so we can change the name if we need to
-	  
+
 		std::string node_name = IO::name_from_state (*node_copy.children().front());
 
 		/* generate a new name by adding a number to the end of the template name */
-		
+
 		do {
 			snprintf (name, sizeof (name), "%s %" PRIu32, node_name.c_str(), number);
-			
+
 			number++;
-			
+
 			if (route_by_name (name) == 0) {
 				break;
 			}
-			
+
 		} while (number < UINT_MAX);
-		
+
 		if (number == UINT_MAX) {
 			fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
 			/*NOTREACHED*/
 		}
-		
+
 		IO::set_name_in_state (*node_copy.children().front(), name);
 
 		Track::zero_diskstream_id_in_xml (node_copy);
 
 		try {
 			shared_ptr<Route> route (XMLRouteFactory (node_copy));
-	    
+
 			if (route == 0) {
 				error << _("Session: cannot create track/bus from template description") << endmsg;
 				goto out;
@@ -2077,23 +2077,23 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 				route->input()->changed (IOChange (ConfigurationChanged|ConnectionsChanged), this);
 				route->output()->changed (IOChange (ConfigurationChanged|ConnectionsChanged), this);
 			}
-			
+
 			route->set_remote_control_id (control_id);
 			++control_id;
-	    
+
 			ret.push_back (route);
 		}
-	  
+
 		catch (failed_constructor &err) {
 			error << _("Session: could not create new route from template") << endmsg;
 			goto out;
 		}
-	  
+
 		catch (AudioEngine::PortRegistrationFailure& pfe) {
 			error << pfe.what() << endmsg;
 			goto out;
 		}
-	  
+
 		--how_many;
 	}
 
@@ -2116,7 +2116,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 
 		/* if there is no control out and we're not in the middle of loading,
 		   resort the graph here. if there is a control out, we will resort
-		   toward the end of this method. if we are in the middle of loading, 
+		   toward the end of this method. if we are in the middle of loading,
 		   we will resort when done.
 		*/
 
@@ -2151,7 +2151,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 			if ((*x)->is_control() || (*x)->is_master()) {
 				continue;
 			}
-			(*x)->listen_via (_control_out, 
+			(*x)->listen_via (_control_out,
 					  (Config->get_listen_position() == AfterFaderListen ? PostFader : PreFader),
 					  false, false);
 		}
@@ -2412,7 +2412,7 @@ Session::route_solo_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 	/* now mod the solo level of all other routes except master & control outs
 	   so that they will be silent if appropriate.
 	*/
-	
+
 	solo_update_disabled = true;
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
@@ -2775,17 +2775,17 @@ void
 Session::update_region_name_map (boost::shared_ptr<Region> region)
 {
 	string::size_type last_period = region->name().find_last_of ('.');
-	
+
 	if (last_period != string::npos && last_period < region->name().length() - 1) {
-		
+
 		string base = region->name().substr (0, last_period);
 		string number = region->name().substr (last_period+1);
 		map<string,uint32_t>::iterator x;
-		
+
 		/* note that if there is no number, we get zero from atoi,
 		   which is just fine
 		*/
-		
+
 		region_name_map[base] = atoi (number);
 	}
 }
@@ -3800,7 +3800,7 @@ shared_ptr<Bundle>
 Session::bundle_by_name (string name) const
 {
 	boost::shared_ptr<BundleList> b = _bundles.reader ();
-	
+
 	for (BundleList::const_iterator i = b->begin(); i != b->end(); ++i) {
 		if ((*i)->name() == name) {
 			return* i;
@@ -4095,8 +4095,8 @@ Session::freeze (InterThreadInfo& itt)
 }
 
 boost::shared_ptr<Region>
-Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end, 	
-			  bool /*overwrite*/, vector<boost::shared_ptr<Source> >& srcs, 
+Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
+			  bool /*overwrite*/, vector<boost::shared_ptr<Source> >& srcs,
 			  InterThreadInfo& itt, bool enable_processing)
 {
 	boost::shared_ptr<Region> result;
@@ -4225,7 +4225,7 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 		/* construct a region to represent the bounced material */
 
 		result = RegionFactory::create (srcs, 0,
-				srcs.front()->length(srcs.front()->timeline_position()), 
+				srcs.front()->length(srcs.front()->timeline_position()),
 				region_name_from_path (srcs.front()->name(), true));
 	}
 
@@ -4237,7 +4237,7 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 			if (afs) {
 				afs->mark_for_remove ();
 			}
-			
+
 			(*src)->drop_references ();
 		}
 

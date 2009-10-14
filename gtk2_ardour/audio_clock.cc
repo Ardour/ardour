@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999 Paul Davis 
+    Copyright (C) 1999 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ const uint32_t AudioClock::field_length[(int) AudioClock::AudioFrames+1] = {
 	10   /* Audio Frame */
 };
 
-AudioClock::AudioClock (std::string clock_name, bool transient, std::string widget_name, bool allow_edit, bool duration, bool with_info) 
+AudioClock::AudioClock (std::string clock_name, bool transient, std::string widget_name, bool allow_edit, bool duration, bool with_info)
 	: _name (clock_name),
 	  is_transient (transient),
 	  is_duration (duration),
@@ -93,7 +93,7 @@ AudioClock::AudioClock (std::string clock_name, bool transient, std::string widg
 		smpte_lower_info_label = manage (new Label);
 		bbt_upper_info_label = manage (new Label);
 		bbt_lower_info_label = manage (new Label);
-		
+
 		frames_upper_info_label->set_name ("AudioClockFramesUpperInfo");
 		frames_lower_info_label->set_name ("AudioClockFramesLowerInfo");
 		smpte_upper_info_label->set_name ("AudioClockSMPTEUpperInfo");
@@ -113,7 +113,7 @@ AudioClock::AudioClock (std::string clock_name, bool transient, std::string widg
 		smpte_info_box.pack_start (*smpte_lower_info_label, true, true);
 		bbt_info_box.pack_start (*bbt_upper_info_label, true, true);
 		bbt_info_box.pack_start (*bbt_lower_info_label, true, true);
-		
+
 	} else {
 		frames_upper_info_label = 0;
 		frames_lower_info_label = 0;
@@ -121,18 +121,18 @@ AudioClock::AudioClock (std::string clock_name, bool transient, std::string widg
 		smpte_lower_info_label = 0;
 		bbt_upper_info_label = 0;
 		bbt_lower_info_label = 0;
-	}	
-	
+	}
+
 	audio_frames_ebox.add (audio_frames_label);
-	
+
 	frames_packer.set_homogeneous (false);
 	frames_packer.set_border_width (2);
 	frames_packer.pack_start (audio_frames_ebox, false, false);
-	
+
 	if (with_info) {
 		frames_packer.pack_start (frames_info_box, false, false, 5);
 	}
-	
+
 	frames_packer_hbox.pack_start (frames_packer, true, false);
 
 	hours_ebox.add (hours_label);
@@ -254,7 +254,7 @@ AudioClock::set_widget_name (string name)
 	ms_hours_ebox.set_name (name);
 	ms_minutes_ebox.set_name (name);
 	ms_seconds_ebox.set_name (name);
-	
+
 	colon1.set_name (name);
 	colon2.set_name (name);
 	colon3.set_name (name);
@@ -418,7 +418,7 @@ AudioClock::set (nframes_t when, bool force, nframes_t offset, char which)
  	if ((!force && !is_visible()) || session == 0) {
 		return;
 	}
-	
+
 	if (when == last_when && !offset && !force) {
 		return;
 	}
@@ -495,22 +495,22 @@ AudioClock::set_frames (nframes_t when, bool /*force*/)
 	char buf[32];
 	snprintf (buf, sizeof (buf), "%u", when);
 	audio_frames_label.set_text (buf);
-	
+
 	if (frames_upper_info_label) {
 		nframes_t rate = session->frame_rate();
-		
+
 		if (fmod (rate, 1000.0) == 0.000) {
 			sprintf (buf, "%uK", rate/1000);
 		} else {
 			sprintf (buf, "%.3fK", rate/1000.0f);
 		}
-		
+
 		if (frames_upper_info_label->get_text() != buf) {
 			frames_upper_info_label->set_text (buf);
 		}
-		
+
 		float vid_pullup = session->config.get_video_pullup();
-		
+
 		if (vid_pullup == 0.0) {
 			if (frames_lower_info_label->get_text () != _("none")) {
 				frames_lower_info_label->set_text(_("none"));
@@ -522,7 +522,7 @@ AudioClock::set_frames (nframes_t when, bool /*force*/)
 			}
 		}
 	}
-}	
+}
 
 void
 AudioClock::set_minsec (nframes_t when, bool force)
@@ -532,7 +532,7 @@ AudioClock::set_minsec (nframes_t when, bool force)
 	int hrs;
 	int mins;
 	float secs;
-	
+
 	left = when;
 	hrs = (int) floor (left / (session->frame_rate() * 60.0f * 60.0f));
 	left -= (nframes_t) floor (hrs * session->frame_rate() * 60.0f * 60.0f);
@@ -564,7 +564,7 @@ AudioClock::set_smpte (nframes_t when, bool force)
 {
 	char buf[32];
 	SMPTE::Time smpte;
-	
+
 	if (is_duration) {
 		session->smpte_duration (when, smpte);
 	} else {
@@ -599,20 +599,20 @@ AudioClock::set_smpte (nframes_t when, bool force)
 		frames_label.set_text (buf);
 		last_frames = smpte.frames;
 	}
-	
+
 	if (smpte_upper_info_label) {
 		double smpte_frames = session->smpte_frames_per_second();
-		
+
 		if ( fmod(smpte_frames, 1.0) == 0.0) {
-			sprintf (buf, "%u", int (smpte_frames)); 
+			sprintf (buf, "%u", int (smpte_frames));
 		} else {
 			sprintf (buf, "%.2f", smpte_frames);
 		}
-		
+
 		if (smpte_upper_info_label->get_text() != buf) {
 			smpte_upper_info_label->set_text (buf);
 		}
-		
+
 		if ((fabs(smpte_frames - 29.97) < 0.0001) || smpte_frames == 30) {
 			if (session->smpte_drop_frames()) {
 				sprintf (buf, "DF");
@@ -623,7 +623,7 @@ AudioClock::set_smpte (nframes_t when, bool force)
 			// there is no drop frame alternative
 			buf[0] = '\0';
 		}
-		
+
 		if (smpte_lower_info_label->get_text() != buf) {
 			smpte_lower_info_label->set_text (buf);
 		}
@@ -641,7 +641,7 @@ AudioClock::set_bbt (nframes_t when, bool force)
 		if (when == 0) {
 			bbt.bars = 0;
 			bbt.beats = 0;
-			bbt.ticks = 0;	
+			bbt.ticks = 0;
 		} else {
 			session->tempo_map().bbt_time (when, bbt);
 			bbt.bars--;
@@ -663,7 +663,7 @@ AudioClock::set_bbt (nframes_t when, bool force)
 	if (force || ticks_label.get_text () != buf) {
 		ticks_label.set_text (buf);
 	}
-	
+
 	if (bbt_upper_info_label) {
 		nframes64_t pos;
 
@@ -696,7 +696,7 @@ AudioClock::set_session (Session *s)
 		XMLProperty* prop;
 		XMLNode* node = session->extra_xml (X_("ClockModes"));
 		AudioClock::Mode amode;
-		
+
 		if (node) {
 			if ((prop = node->property (_name)) != 0) {
 				amode = AudioClock::Mode (string_2_enum (prop->value(), amode));
@@ -889,11 +889,11 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 	if (key_entry_state == field_length[field]) {
 		move_on = true;
 	}
-	
+
 	if (move_on) {
 
 		if (key_entry_state) {
-      
+
 			switch (field) {
 			case SMPTE_Hours:
 			case SMPTE_Minutes:
@@ -917,17 +917,17 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 			default:
 				break;
 			}
-			
+
 			ValueChanged(); /* EMIT_SIGNAL */
 		}
-		
+
 		/* move on to the next field.
 		 */
-		
+
 		switch (field) {
-			
+
 			/* SMPTE */
-			
+
 		case SMPTE_Hours:
 			minutes_ebox.grab_focus ();
 			break;
@@ -1130,7 +1130,7 @@ AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 		}
 		ops_menu->popup (1, ev->time);
 		return true;
-	} 
+	}
 
 	switch (ev->button) {
 	case 1:
@@ -1151,7 +1151,7 @@ AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 		case AudioFrames:
 			audio_frames_ebox.grab_focus();
 			break;
-			
+
 		case MS_Hours:
 			ms_hours_ebox.grab_focus();
 			break;
@@ -1161,7 +1161,7 @@ AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 		case MS_Seconds:
 			ms_seconds_ebox.grab_focus();
 			break;
-			
+
 		case Bars:
 			bars_ebox.grab_focus ();
 			break;
@@ -1173,7 +1173,7 @@ AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 			break;
 		}
 		break;
-		
+
 	default:
 		break;
 	}
@@ -1196,10 +1196,10 @@ AudioClock::field_button_press_event (GdkEventButton *ev, Field /*field*/)
 			set (frames, true);
 			ValueChanged (); /* EMIT_SIGNAL */
 					}
-	
+
                 /* make absolutely sure that the pointer is grabbed */
 		gdk_pointer_grab(ev->window,false ,
-				 GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK), 
+				 GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
 				 NULL,NULL,ev->time);
 		dragging = true;
 		drag_accum = 0;
@@ -1223,7 +1223,7 @@ AudioClock::field_button_press_event (GdkEventButton *ev, Field /*field*/)
 		return false;
 		break;
 	}
-	
+
 	return true;
 }
 
@@ -1255,13 +1255,13 @@ AudioClock::field_button_scroll_event (GdkEventScroll *ev, Field field)
 		      if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			     frames *= 10;
 		      }
-		      
+
 		      if ((double)current_time() - (double)frames < 0.0) {
 			     set (0, true);
 		      } else {
 			     set (current_time() - frames, true);
 		      }
-		      
+
 		      ValueChanged (); /* EMIT_SIGNAL */
 	       }
 	       break;
@@ -1270,7 +1270,7 @@ AudioClock::field_button_scroll_event (GdkEventScroll *ev, Field field)
 		return false;
 		break;
 	}
-	
+
 	return true;
 }
 
@@ -1280,7 +1280,7 @@ AudioClock::field_motion_notify_event (GdkEventMotion *ev, Field field)
 	if (session == 0 || !dragging) {
 		return false;
 	}
-	
+
 	float pixel_frame_scale_factor = 0.2f;
 
 /*
@@ -1289,7 +1289,7 @@ AudioClock::field_motion_notify_event (GdkEventMotion *ev, Field field)
 	}
 
 
-	if (Keyboard::modifier_state_contains (ev->state, 
+	if (Keyboard::modifier_state_contains (ev->state,
 					       Keyboard::PrimaryModifier|Keyboard::SecondaryModifier)) {
 
 		pixel_frame_scale_factor = 0.025f;
@@ -1309,19 +1309,19 @@ AudioClock::field_motion_notify_event (GdkEventMotion *ev, Field field)
 		dir = (drag_accum < 0 ? 1:-1);
 		pos = current_time();
 		frames = get_frames (field,pos,dir);
-		
+
 		if (frames  != 0 &&  frames * drag_accum < current_time()) {
-		
+
 			set ((nframes_t) floor (pos - drag_accum * frames), false); // minus because up is negative in computer-land
-		
+
 		} else {
 			set (0 , false);
-		
+
  		}
 
 	       	drag_accum= 0;
-		ValueChanged();	 /* EMIT_SIGNAL */	
-		
+		ValueChanged();	 /* EMIT_SIGNAL */
+
 
 	}
 
@@ -1448,11 +1448,11 @@ AudioClock::smpte_sanitize_display()
 	if (atoi(minutes_label.get_text()) > 59) {
 		minutes_label.set_text("59");
 	}
-	
+
 	if (atoi(seconds_label.get_text()) > 59) {
 		seconds_label.set_text("59");
 	}
-	
+
 	switch ((long)rint(session->smpte_frames_per_second())) {
 	case 24:
 		if (atoi(frames_label.get_text()) > 23) {
@@ -1472,7 +1472,7 @@ AudioClock::smpte_sanitize_display()
 	default:
 		break;
 	}
-	
+
 	if (session->smpte_drop_frames()) {
 		if ((atoi(minutes_label.get_text()) % 10) && (atoi(seconds_label.get_text()) == 0) && (atoi(frames_label.get_text()) < 2)) {
 			frames_label.set_text("02");
@@ -1486,10 +1486,10 @@ AudioClock::smpte_frame_from_display () const
 	if (session == 0) {
 		return 0;
 	}
-	
+
 	SMPTE::Time smpte;
 	nframes_t sample;
-	
+
 	smpte.hours = atoi (hours_label.get_text());
 	smpte.minutes = atoi (minutes_label.get_text());
 	smpte.seconds = atoi (seconds_label.get_text());
@@ -1498,7 +1498,7 @@ AudioClock::smpte_frame_from_display () const
 	smpte.drop= session->smpte_drop_frames();
 
 	session->smpte_to_sample( smpte, sample, false /* use_offset */, false /* use_subframes */ );
-	
+
 
 #if 0
 #define SMPTE_SAMPLE_TEST_1
@@ -1533,7 +1533,7 @@ AudioClock::smpte_frame_from_display () const
 			cout << "smpte2: " << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
 			break;
 		}
-    
+
 		if (smpte2.hours != smpte1.hours || smpte2.minutes != smpte1.minutes || smpte2.seconds != smpte2.seconds || smpte2.frames != smpte1.frames) {
 			cout << "ERROR: smpte2 not equal smpte1" << endl;
 			cout << "smpte1: " << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
@@ -1554,7 +1554,7 @@ AudioClock::smpte_frame_from_display () const
 #ifdef SMPTE_SAMPLE_TEST_2
 	// Test 2: use_offset = true, use_subframes = false
 	cout << "use_offset = true, use_subframes = false" << endl;
-  
+
 	smpte1.hours = 0;
 	smpte1.minutes = 0;
 	smpte1.seconds = 0;
@@ -1574,7 +1574,7 @@ AudioClock::smpte_frame_from_display () const
 //     cout << "sample: " << sample1 << endl;
 //     cout << "sample: " << sample1 << " -> ";
 //     cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
-    
+
 		if ((i > 0) && ( ((sample1 - oldsample) != sample_increment) && ((sample1 - oldsample) != (sample_increment + 1)) && ((sample1 - oldsample) != (sample_increment - 1)))) {
 			cout << "ERROR: sample increment not right: " << (sample1 - oldsample) << " != " << sample_increment << endl;
 			cout << "smpte1: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
@@ -1583,7 +1583,7 @@ AudioClock::smpte_frame_from_display () const
 			cout << "smpte2: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
 			break;
 		}
-    
+
 		if (smpte2.hours != smpte1.hours || smpte2.minutes != smpte1.minutes || smpte2.seconds != smpte2.seconds || smpte2.frames != smpte1.frames) {
 			cout << "ERROR: smpte2 not equal smpte1" << endl;
 			cout << "smpte1: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
@@ -1603,7 +1603,7 @@ AudioClock::smpte_frame_from_display () const
 
 #ifdef SMPTE_SAMPLE_TEST_3
 	// Test 3: use_offset = true, use_subframes = false, decrement
-	cout << "use_offset = true, use_subframes = false, decrement" << endl;  
+	cout << "use_offset = true, use_subframes = false, decrement" << endl;
 
 	session->sample_to_smpte( sample1, smpte1, true /* use_offset */, false /* use_subframes */ );
 	cout << "Starting at sample: " << sample1 << " -> ";
@@ -1617,7 +1617,7 @@ AudioClock::smpte_frame_from_display () const
 //     cout << "sample: " << sample1 << endl;
 //     cout << "sample: " << sample1 << " -> ";
 //     cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
-    
+
 		if ((i > 0) && ( ((oldsample - sample1) != sample_increment) && ((oldsample - sample1) != (sample_increment + 1)) && ((oldsample - sample1) != (sample_increment - 1)))) {
 			cout << "ERROR: sample increment not right: " << (oldsample - sample1) << " != " << sample_increment << endl;
 			cout << "smpte1: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
@@ -1626,7 +1626,7 @@ AudioClock::smpte_frame_from_display () const
 			cout << "smpte2: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
 			break;
 		}
-    
+
 		if (smpte2.hours != smpte1.hours || smpte2.minutes != smpte1.minutes || smpte2.seconds != smpte2.seconds || smpte2.frames != smpte1.frames) {
 			cout << "ERROR: smpte2 not equal smpte1" << endl;
 			cout << "smpte1: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
@@ -1648,7 +1648,7 @@ AudioClock::smpte_frame_from_display () const
 #ifdef SMPTE_SAMPLE_TEST_4
 	// Test 4: use_offset = true, use_subframes = true
 	cout << "use_offset = true, use_subframes = true" << endl;
-  
+
 	for (long sub = 5; sub < 80; sub += 5) {
 		smpte1.hours = 0;
 		smpte1.minutes = 0;
@@ -1656,16 +1656,16 @@ AudioClock::smpte_frame_from_display () const
 		smpte1.frames = 0;
 		smpte1.subframes = 0;
 		sample1 = oldsample = (sample_increment * sub) / 80;
-    
+
 		session->sample_to_smpte( sample1, smpte1, true /* use_offset */, true /* use_subframes */ );
-    
+
 		cout << "starting at sample: " << sample1 << " -> ";
 		cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << endl;
-    
+
 		for (int i = 0; i < 108003; i++) {
 			session->smpte_to_sample( smpte1, sample1, true /* use_offset */, true /* use_subframes */ );
 			session->sample_to_smpte( sample1, smpte2, true /* use_offset */, true /* use_subframes */ );
-      
+
 			if ((i > 0) && ( ((sample1 - oldsample) != sample_increment) && ((sample1 - oldsample) != (sample_increment + 1)) && ((sample1 - oldsample) != (sample_increment - 1)))) {
 				cout << "ERROR: sample increment not right: " << (sample1 - oldsample) << " != " << sample_increment << endl;
 				cout << "smpte1: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
@@ -1674,7 +1674,7 @@ AudioClock::smpte_frame_from_display () const
 				cout << "smpte2: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
 				//break;
 			}
-      
+
 			if (smpte2.hours != smpte1.hours || smpte2.minutes != smpte1.minutes || smpte2.seconds != smpte2.seconds || smpte2.frames != smpte1.frames || smpte2.subframes != smpte1.subframes) {
 				cout << "ERROR: smpte2 not equal smpte1" << endl;
 				cout << "smpte1: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
@@ -1686,7 +1686,7 @@ AudioClock::smpte_frame_from_display () const
 			oldsample = sample1;
 			session->smpte_increment( smpte1 );
 		}
-    
+
 		cout << "sample_increment: " << sample_increment << endl;
 		cout << "sample: " << sample1 << " -> ";
 		cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
@@ -1694,7 +1694,7 @@ AudioClock::smpte_frame_from_display () const
 		for (int i = 0; i < 108003; i++) {
 			session->smpte_to_sample( smpte1, sample1, true /* use_offset */, true /* use_subframes */ );
 			session->sample_to_smpte( sample1, smpte2, true /* use_offset */, true /* use_subframes */ );
-      
+
 			if ((i > 0) && ( ((oldsample - sample1) != sample_increment) && ((oldsample - sample1) != (sample_increment + 1)) && ((oldsample - sample1) != (sample_increment - 1)))) {
 				cout << "ERROR: sample increment not right: " << (oldsample - sample1) << " != " << sample_increment << endl;
 				cout << "smpte1: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
@@ -1703,7 +1703,7 @@ AudioClock::smpte_frame_from_display () const
 				cout << "smpte2: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
 				//break;
 			}
-      
+
 			if (smpte2.hours != smpte1.hours || smpte2.minutes != smpte1.minutes || smpte2.seconds != smpte2.seconds || smpte2.frames != smpte1.frames || smpte2.subframes != smpte1.subframes) {
 				cout << "ERROR: smpte2 not equal smpte1" << endl;
 				cout << "smpte1: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
@@ -1715,7 +1715,7 @@ AudioClock::smpte_frame_from_display () const
 			oldsample = sample1;
 			session->smpte_decrement( smpte1 );
 		}
-    
+
 		cout << "sample_decrement: " << sample_increment << endl;
 		cout << "sample: " << sample1 << " -> ";
 		cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
@@ -1726,7 +1726,7 @@ AudioClock::smpte_frame_from_display () const
 #ifdef SMPTE_SAMPLE_TEST_5
 	// Test 5: use_offset = true, use_subframes = false, increment seconds
 	cout << "use_offset = true, use_subframes = false, increment seconds" << endl;
-  
+
 	smpte1.hours = 0;
 	smpte1.minutes = 0;
 	smpte1.seconds = 0;
@@ -1747,13 +1747,13 @@ AudioClock::smpte_frame_from_display () const
 //     cout << "sample: " << sample1 << endl;
 //     cout << "sample: " << sample1 << " -> ";
 //     cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
-    
+
 //     if ((i > 0) && ( ((sample1 - oldsample) != sample_increment) && ((sample1 - oldsample) != (sample_increment + 1)) && ((sample1 - oldsample) != (sample_increment - 1))))
 //     {
 //       cout << "ERROR: sample increment not right: " << (sample1 - oldsample) << " != " << sample_increment << endl;
 //       break;
 //     }
-    
+
 		if (smpte2.hours != smpte1.hours || smpte2.minutes != smpte1.minutes || smpte2.seconds != smpte2.seconds || smpte2.frames != smpte1.frames) {
 			cout << "ERROR: smpte2 not equal smpte1" << endl;
 			cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
@@ -1775,7 +1775,7 @@ AudioClock::smpte_frame_from_display () const
 #ifdef SMPTE_SAMPLE_TEST_6
 	// Test 6: use_offset = true, use_subframes = false, increment minutes
 	cout << "use_offset = true, use_subframes = false, increment minutes" << endl;
-  
+
 	smpte1.hours = 0;
 	smpte1.minutes = 0;
 	smpte1.seconds = 0;
@@ -1796,13 +1796,13 @@ AudioClock::smpte_frame_from_display () const
 //     cout << "sample: " << sample1 << endl;
 //     cout << "sample: " << sample1 << " -> ";
 //     cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
-    
+
 //     if ((i > 0) && ( ((sample1 - oldsample) != sample_increment) && ((sample1 - oldsample) != (sample_increment + 1)) && ((sample1 - oldsample) != (sample_increment - 1))))
 //     {
 //       cout << "ERROR: sample increment not right: " << (sample1 - oldsample) << " != " << sample_increment << endl;
 //       break;
 //     }
-    
+
 		if (smpte2.hours != smpte1.hours || smpte2.minutes != smpte1.minutes || smpte2.seconds != smpte2.seconds || smpte2.frames != smpte1.frames) {
 			cout << "ERROR: smpte2 not equal smpte1" << endl;
 			cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
@@ -1823,7 +1823,7 @@ AudioClock::smpte_frame_from_display () const
 #ifdef SMPTE_SAMPLE_TEST_7
 	// Test 7: use_offset = true, use_subframes = false, increment hours
 	cout << "use_offset = true, use_subframes = false, increment hours" << endl;
-  
+
 	smpte1.hours = 0;
 	smpte1.minutes = 0;
 	smpte1.seconds = 0;
@@ -1844,13 +1844,13 @@ AudioClock::smpte_frame_from_display () const
 //     cout << "sample: " << sample1 << endl;
 //     cout << "sample: " << sample1 << " -> ";
 //     cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
-    
+
 //     if ((i > 0) && ( ((sample1 - oldsample) != sample_increment) && ((sample1 - oldsample) != (sample_increment + 1)) && ((sample1 - oldsample) != (sample_increment - 1))))
 //     {
 //       cout << "ERROR: sample increment not right: " << (sample1 - oldsample) << " != " << sample_increment << endl;
 //       break;
 //     }
-    
+
 		if (smpte2.hours != smpte1.hours || smpte2.minutes != smpte1.minutes || smpte2.seconds != smpte2.seconds || smpte2.frames != smpte1.frames) {
 			cout << "ERROR: smpte2 not equal smpte1" << endl;
 			cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
@@ -1868,7 +1868,7 @@ AudioClock::smpte_frame_from_display () const
 	cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
 #endif
 
-#endif  
+#endif
 
 	return sample;
 }
@@ -1929,7 +1929,7 @@ AudioClock::bbt_frame_duration_from_display (nframes_t pos) const
 	bbt.bars = atoi (bars_label.get_text());
 	bbt.beats = atoi (beats_label.get_text());
 	bbt.ticks = atoi (ticks_label.get_text());
-	
+
 	return session->tempo_map().bbt_duration_at(pos,bbt,1);
 }
 
@@ -1946,7 +1946,7 @@ AudioClock::build_ops_menu ()
 	ops_menu = new Menu;
 	MenuList& ops_items = ops_menu->items();
 	ops_menu->set_name ("ArdourContextMenu");
-	
+
 	if (!Profile->get_sae()) {
 		ops_items.push_back (MenuElem (_("Timecode"), bind (mem_fun(*this, &AudioClock::set_mode), SMPTE)));
 	}
@@ -1967,13 +1967,13 @@ AudioClock::set_mode (Mode m)
 	*/
 
 	clock_base.grab_focus ();
-		
+
 	if (_mode == m) {
 		return;
 	}
-	
+
 	clock_base.remove ();
-	
+
 	_mode = m;
 
 	switch (_mode) {
@@ -1999,7 +1999,7 @@ AudioClock::set_mode (Mode m)
 	}
 
 	set_size_requests ();
-	
+
 	set (last_when, true);
 	clock_base.show_all ();
 	key_entry_state = 0;
@@ -2042,7 +2042,7 @@ AudioClock::set_size_requests ()
 	case Off:
 		Gtkmm2ext::set_size_request_to_display_given_text (off_hbox, "00000", 5, 5);
 		break;
-		
+
 	}
 }
 

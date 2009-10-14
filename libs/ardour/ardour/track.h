@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,23 +37,23 @@ class Track : public Route
 	Track (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal, DataType default_type = DataType::AUDIO);
 
 	virtual ~Track ();
-	
+
 	bool set_name (const std::string& str);
 
 	TrackMode mode () const { return _mode; }
 	virtual int set_mode (TrackMode /*m*/) { return false; }
 	virtual bool can_use_mode (TrackMode /*m*/, bool& /*bounce_required*/) { return false; }
 	sigc::signal<void> TrackModeChanged;
-	
-	virtual int no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
-			     bool state_changing, bool can_record, bool rec_monitors_input);
-	
-	int silent_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
+
+	virtual int no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
+			bool state_changing, bool can_record, bool rec_monitors_input);
+
+	int silent_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 			bool can_record, bool rec_monitors_input);
 
-	virtual int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
-			  int declick, bool can_record, bool rec_monitors_input) = 0;
-	
+	virtual int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
+			int declick, bool can_record, bool rec_monitors_input) = 0;
+
 	void toggle_monitor_input ();
 
 	bool can_record();
@@ -73,7 +73,7 @@ class Track : public Route
 	};
 
 	FreezeState freeze_state() const;
- 
+
 	virtual void freeze (InterThreadInfo&) = 0;
 	virtual void unfreeze () = 0;
 
@@ -89,9 +89,9 @@ class Track : public Route
 
 	bool record_enabled() const;
 	void set_record_enable (bool yn, void *src);
-	
+
 	void set_meter_point (MeterPoint, void* src);
-	
+
 	sigc::signal<void> DiskstreamChanged;
 	sigc::signal<void> FreezeChange;
 
@@ -106,37 +106,37 @@ class Track : public Route
 
 	//private: (FIXME)
 	struct FreezeRecordProcessorInfo {
-	    FreezeRecordProcessorInfo(XMLNode& st, boost::shared_ptr<Processor> proc) 
-		    : state (st), processor (proc) {}
+		FreezeRecordProcessorInfo(XMLNode& st, boost::shared_ptr<Processor> proc)
+			: state (st), processor (proc) {}
 
-	    XMLNode                      state;
-	    boost::shared_ptr<Processor> processor;
-	    PBD::ID                      id;
+		XMLNode                      state;
+		boost::shared_ptr<Processor> processor;
+		PBD::ID                      id;
 	};
 
 	struct FreezeRecord {
-	    FreezeRecord()
-		: have_mementos(false)
-	    {}
+		FreezeRecord()
+			: have_mementos(false)
+		{}
 
-	    ~FreezeRecord();
+		~FreezeRecord();
 
-	    boost::shared_ptr<Playlist>        playlist;
-	    std::vector<FreezeRecordProcessorInfo*> processor_info;
-	    bool                               have_mementos;
-	    FreezeState                        state;
-	    gain_t                          gain;
-	    AutoState                       gain_automation_state;
-	    AutoState                       pan_automation_state;
+		boost::shared_ptr<Playlist>        playlist;
+		std::vector<FreezeRecordProcessorInfo*> processor_info;
+		bool                               have_mementos;
+		FreezeState                        state;
+		gain_t                          gain;
+		AutoState                       gain_automation_state;
+		AutoState                       pan_automation_state;
 	};
 
 	struct RecEnableControllable : public PBD::Controllable {
-	    RecEnableControllable (Track&);
-	    
-	    void set_value (float);
-	    float get_value (void) const;
+		RecEnableControllable (Track&);
 
-	    Track& track;
+		void set_value (float);
+		float get_value (void) const;
+
+		Track& track;
 	};
 
 	virtual void set_state_part_two () = 0;
@@ -146,7 +146,7 @@ class Track : public Route
 	sigc::connection      recenable_connection;
 	sigc::connection      ic_connection;
 	bool                  _destructive;
-	
+
 	boost::shared_ptr<RecEnableControllable> _rec_enable_control;
 };
 

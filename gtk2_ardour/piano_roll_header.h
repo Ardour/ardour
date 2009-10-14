@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Paul Davis 
+    Copyright (C) 2008 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ public:
 		Color();
 		Color(double _r, double _g, double _b);
 		inline void set(const Color& c);
-		
+
 		double r;
 		double g;
 		double b;
@@ -97,7 +97,7 @@ private:
 	uint8_t _clicked_note;
 	double _grab_y;
 	bool _dragging;
-	
+
 	double _note_height;
 	double _black_note_width;
 };

@@ -5,7 +5,7 @@
 using namespace Gnome::Canvas;
 using namespace std;
 
-void 
+void
 CanvasFlag::delete_allocated_objects()
 {
 	delete _text;
@@ -18,11 +18,11 @@ CanvasFlag::delete_allocated_objects()
 	_rect = 0;
 }
 
-void 
+void
 CanvasFlag::set_text(const string& a_text)
 {
 	delete_allocated_objects();
-	
+
 	_text = new InteractiveText(*this, this, 0.0, 0.0, Glib::ustring(a_text));
 	_text->property_justification() = Gtk::JUSTIFY_CENTER;
 	_text->property_fill_color_rgba() = _outline_color_rgba;
@@ -36,7 +36,7 @@ CanvasFlag::set_text(const string& a_text)
 	_rect = new InteractiveRect(*this, this, 0.0, 0.0, flagwidth, flagheight);
 	_rect->property_outline_color_rgba() = _outline_color_rgba;
 	_rect->property_fill_color_rgba() = _fill_color_rgba;
-	_text->raise_to_top();	
+	_text->raise_to_top();
 }
 
 CanvasFlag::~CanvasFlag()

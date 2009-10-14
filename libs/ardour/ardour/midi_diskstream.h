@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ class Send;
 class Session;
 
 class MidiDiskstream : public Diskstream
-{	
+{
   public:
 	MidiDiskstream (Session &, const string& name, Diskstream::Flag f = Recordable);
 	MidiDiskstream (Session &, const XMLNode&);
@@ -62,7 +62,7 @@ class MidiDiskstream : public Diskstream
 
 	float playback_buffer_load() const;
 	float capture_buffer_load() const;
-	
+
 	void get_playback(MidiBuffer& dst, nframes_t start, nframes_t end);
 
 	void set_record_enabled (bool yn);
@@ -78,16 +78,16 @@ class MidiDiskstream : public Diskstream
 	int set_state(const XMLNode& node);
 
 	void monitor_input (bool);
-	
+
 	MidiRingBuffer<nframes_t>*   playback_buffer () { return _playback_buf; }
 	MidiRingBuffer<nframes_t>*   capture_buffer ()  { return _capture_buf; }
 	boost::shared_ptr<SMFSource> write_source ()    { return _write_source; }
-	
+
 	int set_destructive (bool yn); // doom!
-	
+
 	void set_note_mode (NoteMode m);
-	
-	uint16_t get_channel_mask() { 
+
+	uint16_t get_channel_mask() {
 		uint16_t playback_mask = _playback_buf->get_channel_mask();
 #ifndef NDEBUG
 		uint16_t capture_mask  = _capture_buf->get_channel_mask();
@@ -97,10 +97,10 @@ class MidiDiskstream : public Diskstream
 	}
 
 	void set_channel_mode(ChannelMode mode, uint16_t mask) {
-		_playback_buf->set_channel_mode(mode, mask); 
-		_capture_buf->set_channel_mode(mode, mask); 
+		_playback_buf->set_channel_mode(mode, mask);
+		_capture_buf->set_channel_mode(mode, mask);
 	}
-	
+
 	ChannelMode get_channel_mode() {
 		ChannelMode playback_mode = _playback_buf->get_channel_mode();
 #ifndef NDEBUG
@@ -145,7 +145,7 @@ class MidiDiskstream : public Diskstream
 	/* The two central butler operations */
 	int do_flush (RunContext context, bool force = false);
 	int do_refill ();
-	
+
 	int do_refill_with_alloc();
 
 	int read (nframes_t& start, nframes_t cnt, bool reversed);
@@ -167,7 +167,7 @@ class MidiDiskstream : public Diskstream
 	void get_input_sources ();
 	void check_record_status (nframes_t transport_frame, nframes_t nframes, bool can_record);
 	void set_align_style_from_io();
-	
+
 	void engage_record_enable ();
 	void disengage_record_enable ();
 
@@ -176,7 +176,7 @@ class MidiDiskstream : public Diskstream
 	MidiPort*                    _source_port;
 	boost::shared_ptr<SMFSource> _write_source;
 	nframes_t                    _last_flush_frame;
-	NoteMode                     _note_mode;  
+	NoteMode                     _note_mode;
 	volatile gint                _frames_written_to_ringbuffer;
 	volatile gint                _frames_read_from_ringbuffer;
 };

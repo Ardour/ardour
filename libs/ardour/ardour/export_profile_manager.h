@@ -61,10 +61,10 @@ class ExportProfileManager
 
 	void load_profile ();
 	void prepare_for_export ();
-	
+
 	typedef boost::shared_ptr<ExportPreset> PresetPtr;
 	typedef std::list<PresetPtr> PresetList;
-	
+
 	PresetList const & get_presets () { return preset_list; }
 	bool load_preset (PresetPtr preset);
 	PresetPtr save_preset (std::string const & name);
@@ -75,27 +75,27 @@ class ExportProfileManager
 
 	typedef std::pair<PBD::UUID, PBD::sys::path> FilePair;
 	typedef std::map<PBD::UUID, PBD::sys::path> FileMap;
-	
+
 	HandlerPtr  handler;
 	Session &   session;
-	
+
 	void load_presets ();
 	void load_preset_from_disk (PBD::sys::path const & path);
-	
+
 	bool set_state (XMLNode const & root);
 	bool set_global_state (XMLNode const & root);
 	bool set_local_state (XMLNode const & root);
-	
+
 	void serialize_profile (XMLNode & root);
 	void serialize_global_profile (XMLNode & root);
 	void serialize_local_profile (XMLNode & root);
-	
+
 	PresetList preset_list;
 	PresetPtr  current_preset;
 	FileMap    preset_file_map;
-	
+
 	std::vector<PBD::sys::path> find_file (std::string const & pattern);
-	
+
 	PBD::sys::path  export_config_dir;
 	PBD::SearchPath search_path;
 
@@ -118,47 +118,47 @@ class ExportProfileManager
 	struct TimespanState {
 		TimespanListPtr timespans;
 		TimeFormat      time_format;
-		
+
 		boost::shared_ptr<Location> session_range;
 		boost::shared_ptr<Location> selection_range;
 		boost::shared_ptr<LocationList> ranges;
-		
+
 		TimespanState (boost::shared_ptr<Location> session_range,
 		               boost::shared_ptr<Location> selection_range,
 		               boost::shared_ptr<LocationList> ranges) :
 		  timespans (new TimespanList ()),
 		  time_format (SMPTE),
-		
+
 		  session_range (session_range),
 		  selection_range (selection_range),
 		  ranges (ranges)
 		{}
 	};
-	
+
 	typedef boost::shared_ptr<TimespanState> TimespanStatePtr;
 	typedef std::list<TimespanStatePtr> TimespanStateList;
-	
+
 	void set_selection_range (nframes_t start = 0, nframes_t end = 0);
 	std::string set_single_range (nframes_t start, nframes_t end, Glib::ustring name);
 	TimespanStateList const & get_timespans () { return check_list (timespans); }
-	
+
   private:
 
 	TimespanStateList timespans;
 
 	bool init_timespans (XMLNodeList nodes);
-	
+
 	TimespanStatePtr deserialize_timespan (XMLNode & root);
 	XMLNode & serialize_timespan (TimespanStatePtr state);
-	
+
 	/* Locations */
-	
+
 	void update_ranges ();
-	
+
 	boost::shared_ptr<Location>     session_range;
 	boost::shared_ptr<Location>     selection_range;
 	boost::shared_ptr<LocationList> ranges;
-	
+
 	bool                            single_range_mode;
 	boost::shared_ptr<Location>     single_range;
 
@@ -169,12 +169,12 @@ class ExportProfileManager
 
 	struct ChannelConfigState {
 		ChannelConfigPtr config;
-		
+
 		ChannelConfigState (ChannelConfigPtr ptr) : config (ptr) {}
 	};
 	typedef boost::shared_ptr<ChannelConfigState> ChannelConfigStatePtr;
 	typedef std::list<ChannelConfigStatePtr> ChannelConfigStateList;
-	
+
 	ChannelConfigStateList const & get_channel_configs () { return check_list (channel_configs); }
 
   private:
@@ -192,21 +192,21 @@ class ExportProfileManager
 	struct FormatState {
 		boost::shared_ptr<FormatList const> list;
 		FormatPtr                           format;
-		
+
 		FormatState (boost::shared_ptr<FormatList const> list, FormatPtr format) :
 		  list (list), format (format) {}
 	};
 	typedef boost::shared_ptr<FormatState> FormatStatePtr;
 	typedef std::list<FormatStatePtr> FormatStateList;
-	
+
 	FormatStateList const & get_formats () { return check_list (formats); }
 	FormatStatePtr duplicate_format_state (FormatStatePtr state);
 	void remove_format_state (FormatStatePtr state);
-	
+
 	PBD::sys::path save_format_to_disk (FormatPtr format);
 	void remove_format_profile (FormatPtr format);
 	FormatPtr get_new_format (FormatPtr original);
-	
+
 	sigc::signal<void> FormatListChanged;
 
   private:
@@ -218,26 +218,26 @@ class ExportProfileManager
 	XMLNode & serialize_format (FormatStatePtr state);
 
 	void load_formats ();
-	
+
 	FormatPtr load_format (XMLNode & node);
 	void load_format_from_disk (PBD::sys::path const & path);
 
 	boost::shared_ptr<FormatList> format_list;
 	FileMap                       format_file_map;
-	
+
 /* Filenames */
   public:
-	
+
 	typedef boost::shared_ptr<ExportFilename> FilenamePtr;
-	
+
 	struct FilenameState {
 		FilenamePtr  filename;
-		
+
 		FilenameState (FilenamePtr ptr) : filename (ptr) {}
 	};
 	typedef boost::shared_ptr<FilenameState> FilenameStatePtr;
 	typedef std::list<FilenameStatePtr> FilenameStateList;
-	
+
 	FilenameStateList const & get_filenames () { return check_list (filenames); }
 	FilenameStatePtr duplicate_filename_state (FilenameStatePtr state);
 	void remove_filename_state (FilenameStatePtr state);
@@ -245,7 +245,7 @@ class ExportProfileManager
   private:
 
 	FilenameStateList filenames;
-	
+
 	bool init_filenames (XMLNodeList nodes);
 	FilenamePtr load_filename (XMLNode & node);
 
@@ -256,9 +256,9 @@ class ExportProfileManager
 		std::list<Glib::ustring> warnings;
 		std::list<Glib::ustring> conflicting_filenames;
 	};
-	
+
 	boost::shared_ptr<Warnings> get_warnings ();
-	
+
   private:
 	void check_config (boost::shared_ptr<Warnings> warnings,
 	                   TimespanStatePtr timespan_state,

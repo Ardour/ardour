@@ -28,12 +28,12 @@ public:
 	LatencyBarController (Gtk::Adjustment& adj, LatencyGUI* g)
 		: BarController (adj, boost::shared_ptr<PBD::IgnorableControllable> (new PBD::IgnorableControllable ())),
 		  _latency_gui (g) {}
-	
+
 private:
 	LatencyGUI* _latency_gui;
-	
+
 	std::string get_label (int&);
-};	
+};
 
 class LatencyGUI : public Gtk::VBox
 {

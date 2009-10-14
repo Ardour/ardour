@@ -35,7 +35,7 @@ CAImportableSource::~CAImportableSource ()
 }
 
 nframes_t
-CAImportableSource::read (Sample* buffer, nframes_t nframes) 
+CAImportableSource::read (Sample* buffer, nframes_t nframes)
 {
 	nframes_t nread = 0;
 	AudioBufferList abl;
@@ -48,12 +48,12 @@ CAImportableSource::read (Sample* buffer, nframes_t nframes)
 	per_channel = nframes / abl.mBuffers[0].mNumberChannels;
 
 	while (nread < per_channel) {
-		
+
 		UInt32 new_cnt = per_channel - nread;
-		
+
 		abl.mBuffers[0].mDataByteSize = new_cnt * abl.mBuffers[0].mNumberChannels * sizeof(Sample);
 		abl.mBuffers[0].mData = buffer + nread;
-			
+
 		try {
 			af.Read (new_cnt, &abl);
 		} catch (CAXException& cax) {
@@ -73,18 +73,18 @@ CAImportableSource::read (Sample* buffer, nframes_t nframes)
 	if (!at_end && nread < per_channel) {
 		return 0;
 	} else {
-		return nread * 	abl.mBuffers[0].mNumberChannels;
+		return nread * abl.mBuffers[0].mNumberChannels;
 	}
 }
 
 uint
-CAImportableSource::channels () const 
+CAImportableSource::channels () const
 {
 	return af.GetFileDataFormat().NumberChannels();
 }
 
 nframes_t
-CAImportableSource::length () const 
+CAImportableSource::length () const
 {
 	return af.GetNumberFrames();
 }
@@ -114,5 +114,5 @@ CAImportableSource::seek (nframes_t pos)
 	}
 }
 
-	
+
 

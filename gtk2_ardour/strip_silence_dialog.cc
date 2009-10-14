@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,12 +42,12 @@ StripSilenceDialog::StripSilenceDialog (std::list<boost::shared_ptr<ARDOUR::Audi
 		w.view = 0;
 		w.samples_per_unit = 1;
 		_waves.push_back (w);
-		
+
 	}
-	
+
 	Gtk::HBox* hbox = Gtk::manage (new Gtk::HBox);
 	hbox->set_spacing (16);
-	
+
 	Gtk::Table* table = Gtk::manage (new Gtk::Table (4, 3));
 	table->set_spacings (4);
 
@@ -127,7 +127,7 @@ void
 StripSilenceDialog::create_waves ()
 {
 	int n = 0;
-	
+
 	for (std::list<Wave>::iterator i = _waves.begin(); i != _waves.end(); ++i) {
 		if (i->region->audio_source(0)->peaks_ready (mem_fun (*this, &StripSilenceDialog::peaks_ready), _peaks_ready_connection)) {
 			i->view = new WaveView (*(_canvas->root()));
@@ -173,12 +173,12 @@ void
 StripSilenceDialog::update_silence_rects ()
 {
 	int n = 0;
-		
+
 	for (std::list<Wave>::iterator i = _waves.begin(); i != _waves.end(); ++i) {
 		for (std::list<ArdourCanvas::SimpleRect*>::iterator j = i->silence_rects.begin(); j != i->silence_rects.end(); ++j) {
 			delete *j;
 		}
-		
+
 		i->silence_rects.clear ();
 
 		std::list<std::pair<nframes_t, nframes_t> > const silence =
@@ -194,7 +194,7 @@ StripSilenceDialog::update_silence_rects ()
 			r->property_outline_pixels() = 0;
 			r->property_fill_color_rgba() = RGBA_TO_UINT (128, 128, 128, 128);
 			i->silence_rects.push_back (r);
-			
+
 		}
 
 		++n;

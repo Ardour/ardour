@@ -80,14 +80,14 @@ find_session_templates (vector<TemplateInfo>& template_names)
 	spath += user_template_directory ();
 
 	templates = scanner (spath.to_string(), template_filter, 0, false, true);
-	
+
 	if (!templates) {
 		cerr << "Found nothing along " << spath.to_string() << endl;
 		return;
 	}
 
 	cerr << "Found " << templates->size() << " along " << spath.to_string() << endl;
-	
+
 	for (vector<string*>::iterator i = templates->begin(); i != templates->end(); ++i) {
 		string fullpath = *(*i);
 
@@ -117,11 +117,11 @@ find_route_templates (vector<TemplateInfo>& template_names)
 	spath += user_route_template_directory ();
 
 	templates = scanner (spath.to_string(), template_filter, 0, false, true);
-	
+
 	if (!templates) {
 		return;
 	}
-	
+
 	for (vector<string*>::iterator i = templates->begin(); i != templates->end(); ++i) {
 		string fullpath = *(*i);
 
@@ -132,7 +132,7 @@ find_route_templates (vector<TemplateInfo>& template_names)
 		}
 
 		XMLNode* root = tree.root();
-		
+
 		TemplateInfo rti;
 
 		rti.name = IO::name_from_state (*root->children().front());

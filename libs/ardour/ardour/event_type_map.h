@@ -41,7 +41,7 @@ public:
 	Evoral::Parameter    new_parameter(uint32_t type, uint8_t channel=0, uint32_t id=0) const;
 	Evoral::Parameter    new_parameter(const std::string& str) const;
 	std::string          to_symbol(const Evoral::Parameter& param) const;
-	
+
 	bool                 is_midi_parameter(const Evoral::Parameter& param);
 
 	static EventTypeMap& instance() { return event_type_map; }

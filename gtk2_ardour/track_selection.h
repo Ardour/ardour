@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ class TrackSelection : public std::list<TimeAxisView*>
 {
 public:
 	TrackSelection () {}
-		
+
 	TrackSelection (std::list<TimeAxisView*> const &);
 	std::list<TimeAxisView*> add (std::list<TimeAxisView*> const &);
 	bool contains (TimeAxisView const *) const;

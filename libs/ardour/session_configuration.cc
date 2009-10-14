@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ SessionConfiguration::SessionConfiguration ()
 	:
 /* construct variables */
 #undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
+#undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(Type,var,name,value) var (name,value),
 #define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) var (name,value,mutator),
 #include "ardour/session_configuration_vars.h"
@@ -37,7 +37,7 @@ SessionConfiguration::SessionConfiguration ()
 #undef  CONFIG_VARIABLE_SPECIAL
 	foo (0)
 {
-	
+
 }
 
 XMLNode&
@@ -62,14 +62,14 @@ SessionConfiguration::get_variables ()
 	node = new XMLNode ("Config");
 
 #undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
+#undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(type,var,Name,value) \
 	var.add_to_node (*node);
 #define CONFIG_VARIABLE_SPECIAL(type,var,Name,value,mutator) \
 	var.add_to_node (*node);
 #include "ardour/session_configuration_vars.h"
 #undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
+#undef  CONFIG_VARIABLE_SPECIAL
 
 	return *node;
 }
@@ -95,7 +95,7 @@ void
 SessionConfiguration::set_variables (const XMLNode& node)
 {
 #undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
+#undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(type,var,name,value) \
 	if (var.set_from_node (node)) { \
 		ParameterChanged (name);		  \
@@ -108,16 +108,16 @@ SessionConfiguration::set_variables (const XMLNode& node)
 #include "ardour/session_configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
-	
+
 }
 void
 SessionConfiguration::map_parameters (sigc::slot<void, std::string> theSlot)
 {
 #undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
+#undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(type,var,name,value)                 theSlot (name);
 #define CONFIG_VARIABLE_SPECIAL(type,var,name,value,mutator) theSlot (name);
 #include "ardour/session_configuration_vars.h"
 #undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
+#undef  CONFIG_VARIABLE_SPECIAL
 }

@@ -41,16 +41,16 @@ public:
  */
 class InteractiveText : public Text, public InteractiveItem {
 public:
-	InteractiveText(Group& parent, InteractiveItem* parent_item, double x, double y, const Glib::ustring& text) 
-		: Text(parent, x, y, text) 
+	InteractiveText(Group& parent, InteractiveItem* parent_item, double x, double y, const Glib::ustring& text)
+		: Text(parent, x, y, text)
 		, _parent_item(parent_item)
 	{}
-	
+
 	InteractiveText(Group& parent, InteractiveItem* parent_item)
 		: Text(parent)
 		, _parent_item(parent_item)
 	{}
-	
+
 	bool on_event(GdkEvent* ev) {
 		if(_parent_item) {
 			return _parent_item->on_event(ev);
@@ -58,7 +58,7 @@ public:
 			return false;
 		}
 	}
-	
+
 protected:
 	InteractiveItem* _parent_item;
 };
@@ -67,11 +67,11 @@ class InteractiveRect: public SimpleRect, public InteractiveItem
 {
 public:
 	InteractiveRect(Group& parent, InteractiveItem* parent_item,
-			double x1, double y1, double x2, double y2) 
-		: SimpleRect(parent, x1, y1, x2, y2) 
+			double x1, double y1, double x2, double y2)
+		: SimpleRect(parent, x1, y1, x2, y2)
 		, _parent_item(parent_item)
 	{}
-	
+
 	bool on_event(GdkEvent* ev) {
 		if (_parent_item) {
 			return _parent_item->on_event(ev);

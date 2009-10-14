@@ -25,11 +25,11 @@
 #include "export_dialog.h"
 
 
-class ExportRangeMarkersDialog : public ExportDialog 
+class ExportRangeMarkersDialog : public ExportDialog
 {
   public:
 	ExportRangeMarkersDialog (PublicEditor&);
-  
+
 	Gtk::FileChooserAction browse_action() const;
 
   protected:
@@ -38,7 +38,7 @@ class ExportRangeMarkersDialog : public ExportDialog
   	void export_data();
 
 	bool wants_dir() { return true; }
-  
+
   private:
 	// keeps the duration of all range_markers before the current
   	vector<nframes_t>	range_markers_durations_aggregated;
@@ -47,15 +47,15 @@ class ExportRangeMarkersDialog : public ExportDialog
   	nframes_t	total_duration;
   	// index of range marker, that get's exported right now
   	unsigned int	current_range_marker_index;
-	
+
   	// sets value of progress bar
   	virtual gint progress_timeout ();
-  
+
   	// initializes range_markers_durations_aggregated, range_markers_durations
 	// and total_duration
   	void init_progress_computing(ARDOUR::Locations::LocationList& locations);
 
-  	// searches for a filename like "<filename><nr>.<postfix>" in path, that 
+  	// searches for a filename like "<filename><nr>.<postfix>" in path, that
   	// does not exist
     string get_target_filepath(string path, string filename, string postfix);
 

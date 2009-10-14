@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2009 Paul Davis 
+    Copyright (C) 2000-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -162,7 +162,7 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 		antialias_button.set_name (N_("TimeFXButton"));
 		table->attach (antialias_button, 1, 3, 1, 2, Gtk::FILL, Gtk::EXPAND, 0, 0);
 
-#endif	
+#endif
 
 		add_button (_("Stretch/Shrink"), Gtk::RESPONSE_ACCEPT);
 
@@ -176,7 +176,7 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 	l->set_use_markup ();
 
 	progress_bar.set_name (N_("TimeFXProgress"));
-	
+
 	progress_box->pack_start (*l, false, false);
 	progress_box->pack_start (progress_bar, false, true);
 
@@ -186,7 +186,7 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 
 	get_vbox()->pack_start (*vbox, false, false);
 
-	
+
 	show_all_children ();
 }
 

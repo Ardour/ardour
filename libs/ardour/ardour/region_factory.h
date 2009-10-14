@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ class RegionFactory {
 	   in a pure Region copy, it will not be emitted.
 
 	   It must be emitted by derived classes, not Region
-	   itself, to permit dynamic_cast<> to be used to 
+	   itself, to permit dynamic_cast<> to be used to
 	   infer the type of Region.
 	*/
 	static sigc::signal<void,boost::shared_ptr<Region> > CheckNewRegion;
@@ -48,12 +48,12 @@ class RegionFactory {
 	   gcc 4.1 doesn't seem to be able to disambiguate them if they do.
 	*/
 
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Region>, nframes_t start, 
-						 nframes_t length, const std::string& name, 
-						 layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	static boost::shared_ptr<Region> create (boost::shared_ptr<AudioRegion>, nframes_t start, 
-						 nframes_t length, const std::string& name, 
-						 layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Region>, nframes_t start,
+			nframes_t length, const std::string& name,
+			layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
+	static boost::shared_ptr<Region> create (boost::shared_ptr<AudioRegion>, nframes_t start,
+			nframes_t length, const std::string& name,
+			layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region>, const SourceList&, const std::string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Source>, nframes_t start, nframes_t length, const std::string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
 	static boost::shared_ptr<Region> create (const SourceList &, nframes_t start, nframes_t length, const std::string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);

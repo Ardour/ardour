@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ Source::Source (Session& s, DataType type, const string& name, Flag flags)
 	fix_writable_flags ();
 }
 
-Source::Source (Session& s, const XMLNode& node) 
+Source::Source (Session& s, const XMLNode& node)
 	: SessionObject(s, "unnamed source")
 	, _type(DataType::AUDIO)
 	, _flags (Flag (Writable|CanRename))
@@ -119,7 +119,7 @@ Source::set_state (const XMLNode& node)
 	} else {
 		return -1;
 	}
-	
+
 	if ((prop = node.property ("id")) != 0) {
 		_id = prop->value ();
 	} else {
@@ -133,14 +133,14 @@ Source::set_state (const XMLNode& node)
 	if ((prop = node.property ("timestamp")) != 0) {
 		sscanf (prop->value().c_str(), "%ld", &_timestamp);
 	}
-	
+
 	if ((prop = node.property (X_("flags"))) != 0) {
 		_flags = Flag (string_2_enum (prop->value(), _flags));
 	} else {
 		_flags = Flag (0);
 
 	}
-	
+
 	/* old style, from the period when we had DestructiveFileSource */
 	if ((prop = node.property (X_("destructive"))) != 0) {
 		_flags = Flag (_flags | Destructive);
@@ -162,7 +162,7 @@ Source::add_playlist (boost::shared_ptr<Playlist> pl)
 		/* it already existed, bump count */
 		res.first->second++;
 	}
-		
+
 	pl->GoingAway.connect (bind (
 			mem_fun (*this, &Source::remove_playlist),
 			boost::weak_ptr<Playlist> (pl)));
@@ -209,7 +209,7 @@ Source::set_been_analysed (bool yn)
 		Glib::Mutex::Lock lm (_analysis_lock);
 		_analysed = yn;
 	}
-	
+
 	if (yn) {
 		load_transients (get_transients_path());
 		AnalysisChanged(); // EMIT SIGNAL
@@ -224,7 +224,7 @@ Source::load_transients (const string& path)
 	if (!file) {
 		return -1;
 	}
-	
+
 	transients.clear ();
 
 	stringstream strstr;
@@ -242,14 +242,14 @@ Source::load_transients (const string& path)
 	return 0;
 }
 
-string 
+string
 Source::get_transients_path () const
 {
 	vector<string> parts;
 	string s;
 
 	/* old sessions may not have the analysis directory */
-	
+
 	_session.ensure_subdirs ();
 
 	s = _session.analysis_dir ();
@@ -259,12 +259,12 @@ Source::get_transients_path () const
 	s += '.';
 	s += TransientDetector::operational_identifier();
 	parts.push_back (s);
-	
+
 	return Glib::build_filename (parts);
 }
 
 bool
-Source::check_for_analysis_data_on_disk () 
+Source::check_for_analysis_data_on_disk ()
 {
 	/* looks to see if the analysis files for this source are on disk.
 	   if so, mark us already analysed.

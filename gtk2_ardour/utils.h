@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ namespace Gtk {
 	class Paned;
 }
 
-static inline double 
+static inline double
 gain_to_slider_position (ARDOUR::gain_t g)
 {
 	if (g == 0) return 0;
@@ -45,7 +45,7 @@ gain_to_slider_position (ARDOUR::gain_t g)
 
 }
 
-static inline ARDOUR::gain_t 
+static inline ARDOUR::gain_t
 slider_position_to_gain (double pos)
 {
 	/* XXX Marcus writes: this doesn't seem right to me. but i don't have a better answer ... */

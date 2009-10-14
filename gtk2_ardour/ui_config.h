@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include <ostream>
 #include <iostream>
 
-#include "pbd/stateful.h" 
+#include "pbd/stateful.h"
 #include "pbd/xml++.h"
 #include "ardour/configuration_variable.h"
 

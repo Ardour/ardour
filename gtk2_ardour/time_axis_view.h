@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -180,10 +180,10 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	virtual void reveal_dependent_views (TimeAxisViewItem&) {}
 
 	/* editing operations */
-	
+
 	virtual bool cut_copy_clear (Selection&, Editing::CutCopyOp) { return false; }
 	virtual bool paste (nframes_t, float /*times*/, Selection&, size_t /*nth*/) { return false; }
-	
+
 	virtual void set_selected_regionviews (RegionSelection&) {}
 	virtual void set_selected_points (PointSelection&) {}
 
@@ -214,7 +214,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	virtual LayerDisplay layer_display () const { return Overlaid; }
 	virtual StreamView* view () const { return 0; }
-	
+
 	typedef std::vector<boost::shared_ptr<TimeAxisView> > Children;
 
   protected:
@@ -241,7 +241,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	sigc::connection name_entry_key_timeout;
 	bool name_entry_key_timed_out ();
 	guint32 last_name_entry_key_press_event;
-	
+
 	/* derived classes can override these */
 
 	virtual void name_entry_changed ();
@@ -249,7 +249,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	virtual bool name_entry_focus_out (GdkEventFocus *ev);
 
 	/** Handle mouse relaese on our LHS control name ebox.
-	 * 
+	 *
 	 *@ param ev the event
 	 */
 	virtual bool controls_ebox_button_release (GdkEventButton *ev);
@@ -281,7 +281,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
  	void popup_size_menu(guint32 when);
 
 	/** Handle the size option of our main menu.
-	 * 
+	 *
 	 * @param ev the event
 	 */
 	gint size_click(GdkEventButton *ev);
@@ -337,7 +337,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	ArdourCanvas::Group* _canvas_display;
 	double _y_position;
 	PublicEditor& _editor;
-	
+
 private:
 
 	ArdourCanvas::Group* _canvas_background;
@@ -348,7 +348,7 @@ private:
 	ArdourCanvas::Group* _ghost_group;
 
 	static int const _max_order;
-	
+
 }; /* class TimeAxisView */
 
 #endif /* __ardour_gtk_time_axis_h__ */

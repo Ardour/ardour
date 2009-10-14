@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include <list>
 #include <boost/shared_ptr.hpp>
 
-#include "pbd/stateful.h" 
+#include "pbd/stateful.h"
 
 class XMLNode;
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001 Paul Davis 
+    Copyright (C) 2001 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -94,18 +94,18 @@ Editor::export_region ()
 	if (selection->regions.empty()) {
 		return;
 	}
-	
+
 	try {
 		boost::shared_ptr<Region> r = selection->regions.front()->region();
 		AudioRegion & region (dynamic_cast<AudioRegion &> (*r));
-		
+
 		RouteTimeAxisView & rtv (dynamic_cast<RouteTimeAxisView &> (selection->regions.front()->get_time_axis_view()));
 		AudioTrack & track (dynamic_cast<AudioTrack &> (*rtv.route()));
-		
+
 		ExportRegionDialog dialog (*this, region, track);
 		dialog.set_session (session);
 		dialog.run();
-		
+
 	} catch (std::bad_cast & e) {
 		error << "Exporting Region failed!" << endmsg;
 		return;
@@ -130,7 +130,7 @@ void
 Editor::bounce_region_selection ()
 {
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-		
+
 		boost::shared_ptr<Region> region ((*i)->region());
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&(*i)->get_time_axis_view());
 		Track* track = dynamic_cast<Track*>(rtv->route().get());
@@ -167,7 +167,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 	const string sound_directory = session->session_directory().sound_path().to_string();
 
 	nchans = region->n_channels();
-	
+
 	/* don't do duplicate of the entire source if that's what is going on here */
 
 	if (region->start() == 0 && region->length() == region->source_length(0)) {
@@ -178,7 +178,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 	if (path.length() == 0) {
 
 		for (uint32_t n=0; n < nchans; ++n) {
-			
+
 			for (cnt = 0; cnt < 999999; ++cnt) {
 				if (nchans == 1) {
 					snprintf (s, sizeof(s), "%s/%s_%" PRIu32 ".wav", sound_directory.c_str(),
@@ -190,26 +190,26 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 				}
 
 				path = s;
-				
+
 				if (::access (path.c_str(), F_OK) != 0) {
 					break;
 				}
 			}
-			
+
 			if (cnt == 999999) {
 				error << "" << endmsg;
 				goto error_out;
 			}
-			
-		
-			
+
+
+
 			try {
 				fs = boost::dynamic_pointer_cast<AudioFileSource> (
 						SourceFactory::createWritable (DataType::AUDIO, *session,
 								path, true,
 								false, session->frame_rate()));
 			}
-			
+
 			catch (failed_constructor& err) {
 				goto error_out;
 			}
@@ -221,7 +221,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 		/* TODO: make filesources based on passed path */
 
 	}
-	
+
 	to_read = region->length();
 	pos = region->position();
 
@@ -231,13 +231,13 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 		this_time = min (to_read, chunk_size);
 
 		for (vector<boost::shared_ptr<AudioFileSource> >::iterator src=sources.begin(); src != sources.end(); ++src) {
-			
+
 			fs = (*src);
 
 			if (region->read_at (buf, buf, gain_buffer, pos, this_time) != this_time) {
 				break;
 			}
-			
+
 			if (fs->write (buf, this_time) != this_time) {
 				error << "" << endmsg;
 				goto error_out;
@@ -252,7 +252,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 	struct tm* now;
 	time (&tnow);
 	now = localtime (&tnow);
-	
+
 	for (vector<boost::shared_ptr<AudioFileSource> >::iterator src = sources.begin(); src != sources.end(); ++src) {
 		(*src)->update_header (0, *now, tnow);
 		(*src)->mark_immutable ();
@@ -289,7 +289,7 @@ Editor::write_audio_selection (TimeSelection& ts)
 		if (atv->is_audio_track()) {
 
 			boost::shared_ptr<AudioPlaylist> playlist = boost::dynamic_pointer_cast<AudioPlaylist>(atv->get_diskstream()->playlist());
-			
+
 			if (playlist && write_audio_range (*playlist, atv->get_diskstream()->n_channels(), ts) == 0) {
 				ret = -1;
 				break;
@@ -319,7 +319,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 	uint32_t channels = count.n_audio();
 
 	for (uint32_t n=0; n < channels; ++n) {
-		
+
 		for (cnt = 0; cnt < 999999; ++cnt) {
 			if (channels == 1) {
 				snprintf (s, sizeof(s), "%s/%s_%" PRIu32 ".wav", sound_directory.c_str(),
@@ -329,69 +329,69 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 				snprintf (s, sizeof(s), "%s/%s_%" PRIu32 "-%" PRId32 ".wav", sound_directory.c_str(),
 					  legalize_for_path(playlist.name()).c_str(), cnt, n);
 			}
-			
+
 			if (::access (s, F_OK) != 0) {
 				break;
 			}
 		}
-		
+
 		if (cnt == 999999) {
 			error << "" << endmsg;
 			goto error_out;
 		}
 
 		path = s;
-		
+
 		try {
 			fs = boost::dynamic_pointer_cast<AudioFileSource> (
 					SourceFactory::createWritable (DataType::AUDIO, *session,
 							path, true,
 							false, session->frame_rate()));
 		}
-		
+
 		catch (failed_constructor& err) {
 			goto error_out;
 		}
-		
+
 		sources.push_back (fs);
 
 	}
-	
+
 
 	for (list<AudioRange>::iterator i = range.begin(); i != range.end();) {
-	
+
 		nframes = (*i).length();
 		pos = (*i).start;
-		
+
 		while (nframes) {
 			nframes64_t this_time;
-			
+
 			this_time = min (nframes, chunk_size);
 
 			for (uint32_t n=0; n < channels; ++n) {
 
 				fs = sources[n];
-				
+
 				if (playlist.read (buf, buf, gain_buffer, pos, this_time, n) != this_time) {
 					break;
 				}
-				
+
 				if (fs->write (buf, this_time) != this_time) {
 					goto error_out;
 				}
 			}
-			
+
 			nframes -= this_time;
 			pos += this_time;
 		}
-		
+
 		list<AudioRange>::iterator tmp = i;
 		++tmp;
 
 		if (tmp != range.end()) {
-			
+
 			/* fill gaps with silence */
-			
+
 			nframes = (*tmp).start - (*i).end;
 
 			while (nframes) {
@@ -424,7 +424,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 		(*s)->mark_immutable ();
 		// do we need to ref it again?
 	}
-	
+
 	return true;
 
 error_out:

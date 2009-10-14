@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001 Steve Harris & Paul Davis 
+    Copyright (C) 2001 Steve Harris & Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,22 +41,22 @@ class LogCurve {
 	bool operator!= (const LogCurve& other) const {
 		return S != other.S || l != other.l;
 	}
-	
+
 	float value (float frac) const {
 		return (fast_log(frac + S) - a) * b;
-	} 
-	
+	}
+
 	float value (uint32_t pos) const {
 		return (fast_log(((float) pos/l) + S) - a) * b;
-	} 
+	}
 
 	float invert_value (float frac) const {
 		return (a - fast_log(frac + S)) * b;
-	} 
-	
+	}
+
 	float invert_value (uint32_t pos) const {
 		return (a - fast_log(((float) pos/l) + S)) * b;
-	} 
+	}
 
 	void fill (float *vec, uint32_t veclen, bool invert) const {
 		float dx = 1.0f/veclen;
@@ -85,10 +85,10 @@ class LogCurve {
 
 	float steepness() const { return S; }
 	uint32_t length() const { return l; }
-	
-	void set_steepness (float steepness) { 
-		S = steepness; 
-		a = log(S); 		
+
+	void set_steepness (float steepness) {
+		S = steepness;
+		a = log(S);
 		b = 1.0f / log(1.0f + (1.0f / S));
 	}
 	void set_length (uint32_t len) { l = len; }
@@ -102,25 +102,25 @@ class LogCurve {
 	uint32_t l;
 };
 
-class LogCurveIn : public LogCurve 
+class LogCurveIn : public LogCurve
 {
   public:
-	LogCurveIn (float steepness = 0.2, uint32_t len = 0) 
+	LogCurveIn (float steepness = 0.2, uint32_t len = 0)
 		: LogCurve (steepness, len) {}
 
 	float value (float frac) const {
 		return (fast_log(frac + S) - a) * b;
-	} 
-	
+	}
+
 	float value (uint32_t pos) const {
 		return (fast_log(((float) pos/l) + S) - a) * b;
-	} 
+	}
 };
 
-class LogCurveOut : public LogCurve 
+class LogCurveOut : public LogCurve
 {
   public:
-	LogCurveOut (float steepness = 0.2, uint32_t len = 0) 
+	LogCurveOut (float steepness = 0.2, uint32_t len = 0)
 		: LogCurve (steepness, len) {}
 
 };

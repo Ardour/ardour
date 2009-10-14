@@ -51,20 +51,20 @@ class ExportChannelConfiguration
 	typedef boost::shared_ptr<ExportTimespan> TimespanPtr;
 	typedef boost::shared_ptr<ExportFormatSpecification const> FormatPtr;
 	typedef boost::shared_ptr<ExportFilename> FilenamePtr;
-	
+
 	typedef std::pair<FormatPtr, FilenamePtr> FileConfig;
 	typedef std::list<FileConfig> FileConfigList;
-	
+
 	/// Struct for threading, acts like a pointer to a ExportChannelConfiguration
 	struct WriterThread {
 		WriterThread (ExportChannelConfiguration & channel_config) :
-		  channel_config (channel_config), running (false) {}
-		
+			channel_config (channel_config), running (false) {}
+
 		ExportChannelConfiguration * operator-> () { return &channel_config; }
 		ExportChannelConfiguration & operator* () { return channel_config; }
-		
+
 		ExportChannelConfiguration & channel_config;
-		
+
 		pthread_t thread;
 		bool      running;
 	};
@@ -72,46 +72,46 @@ class ExportChannelConfiguration
   private:
 	friend class ExportElementFactory;
 	ExportChannelConfiguration (Session & session);
-	
+
   public:
 	XMLNode & get_state ();
 	int set_state (const XMLNode &);
-	
+
 	typedef std::list<ExportChannelPtr> ChannelList;
-	
+
 	ChannelList const & get_channels () const { return channels; }
 	bool all_channels_have_ports () const;
-	
+
 	Glib::ustring name () const { return _name; }
 	void set_name (Glib::ustring name) { _name = name; }
 	void set_split (bool value) { split = value; }
-	
+
 	bool get_split () const { return split; }
 	uint32_t get_n_chans () const { return channels.size(); }
-	
+
 	void register_channel (ExportChannelPtr channel) { channels.push_back (channel); }
 	void register_file_config (FormatPtr format, FilenamePtr filename) { file_configs.push_back (FileConfig (format, filename)); }
-	
+
 	void clear_channels () { channels.clear (); }
-	
+
 	/// Writes all files for this channel config @return true if a new thread was spawned
 	bool write_files (boost::shared_ptr<ExportProcessor> new_processor);
 	sigc::signal<void> FilesWritten;
-	
+
 	// Tells the handler the necessary information for it to handle tempfiles
 	void register_with_timespan (TimespanPtr timespan);
-	
+
 	void unregister_all ();
-	
+
   private:
 
 	typedef boost::shared_ptr<ExportStatus> ExportStatusPtr;
 
-	 Session & session;
+	Session & session;
 
 	// processor has to be prepared before doing this.
 	void write_file ();
-	
+
 	/// The actual write files, needed for threading
 	static void *  _write_files (void *arg);
 	WriterThread    writer_thread;
@@ -123,7 +123,7 @@ class ExportChannelConfiguration
 	TimespanPtr     timespan;
 	ChannelList     channels;
 	FileConfigList  file_configs;
-	
+
 	bool            split; // Split to mono files
 	Glib::ustring  _name;
 };

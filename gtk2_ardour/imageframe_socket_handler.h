@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param ed the PublicEditor
 		 */
 		ImageFrameSocketHandler(PublicEditor& ed) ;
-		
+
 		/**
 		 * Descructor
 		 * this will shutdown the socket if open
@@ -59,7 +59,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @return the instance of the ImageFrameSocketHandler
 		 */
 		static ImageFrameSocketHandler* get_instance() ;
-		
+
 		/**
 		 * call back to handle doing the processing work
 		 * This method is added to the gdk main loop and called when there is data
@@ -67,7 +67,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 *
 		 */
 		static void image_socket_callback(void *arg, int32_t fd, GdkInputCondition cond) ;
-		
+
 		/**
 		 * Attempt to connect to the image compositor on the specified host and port
 		 *
@@ -77,19 +77,19 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 *         false otherwise
 		 */
 		bool connect(const char * hostIp, int32_t port) ;
-		
+
 		/**
 		 * Closes the connection to th Image Compositor
 		 *
 		 */
-		 void close_connection() ;		
+		 void close_connection() ;
 		/**
 		 * Returns true if this ImagFrameSocketHandler is currently connected to rthe image compositor
 		 *
 		 * @return true if connected to the image compositor
 		 */
 		bool is_connected() ;
-		
+
 		/**
 		 * Sets the tag used to describe this input within gtk
 		 * this is returned when gdk_input_add is called and is required to remove the input
@@ -97,7 +97,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param tag the gdk input tag of this input
 		 */
 		void set_gdk_input_tag(int tag) ;
-		
+
 		/**
 		 * Returns the gdk input tag of this input
 		 *
@@ -105,22 +105,22 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @see setGdkInputTag
 		 */
 		int get_gdk_input_tag() ;
-		
-		
+
+
 		/**
 		 * Returns the socket file descriptor
 		 *
 		 * @return the Sockt file descriptor
 		 */
 		int get_socket_descriptor() ;
-		
-		
+
+
 		//---------------------------------------------------------------------------------------//
 		// Handle Sending messages to the Image Compositor
-		
+
 		//----------------------------
 		// ImageFrameTimeAxis Messages
-		
+
 		/**
 		 * Sends a message stating that the named image frame time axis has been removed
 		 *
@@ -128,7 +128,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param src the identity of the object that initiated the change
 		 */
 		void send_imageframe_time_axis_removed(const std::string & track_id, void* src) ;
-		
+
 		/**
 		 * Sends a message indicating that an ImageFrameTimeAxis has been renamed
 		 *
@@ -138,10 +138,10 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param time_axis the time axis that has changed
 		 */
 		void send_imageframe_time_axis_renamed(const std::string & new_id, const std::string & old_id, void* src, ImageFrameTimeAxis* time_axis) ;
-		
+
 		//------------------------
 		// MarkerTimeAxis Messages
-		
+
 		/**
 		 * Sends a message stating that the named marker time axis has been removed
 		 *
@@ -149,7 +149,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param src the identity of the object that initiated the change
 		 */
 		void send_marker_time_axis_removed(const std::string & track_id, void* src) ;
-		
+
 		/**
 		 * Sends a message indicating that an MarkerTimeAxis has been renamed
 		 *
@@ -159,11 +159,11 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param time_axis the time axis that has changed
 		 */
 		void send_marker_time_axis_renamed(const std::string & new_id, const std::string & old_id, void* src, MarkerTimeAxis* time_axis) ;
-		
-		
+
+
 		//---------------------------------
 		// ImageFrameTimeAxisGroup Messages
-		
+
 		/**
 		 * Sends a message stating that the group has been removed
 		 *
@@ -172,7 +172,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param group the group that has changed
 		 */
 		void send_imageframe_time_axis_group_removed(const std::string & group_id, void* src, ImageFrameTimeAxisGroup* group) ;
-		
+
 		/**
 		 * Send a message indicating that an ImageFrameTimeAxisGroup has been renamed
 		 *
@@ -186,7 +186,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 
 		//---------------------------------
 		// ImageFrameView Messages
-		
+
 		/**
 		 * Send an Image Frame View Item position changed message
 		 *
@@ -195,7 +195,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param item the time axis item whos position has changed
 		 */
 		void send_imageframe_view_position_change(nframes_t pos, void* src, ImageFrameView* item) ;
-		
+
 		/**
 		 * Send a Image Frame View item duration changed message
 		 *
@@ -204,7 +204,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param item the item which has had a duration change
 		 */
 		void send_imageframe_view_duration_change(nframes_t dur, void* src, ImageFrameView* item) ;
-		
+
 		/**
 		 * Send a message indicating that an ImageFrameView has been renamed
 		 *
@@ -213,7 +213,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param item the renamed item
 		 */
 		void send_imageframe_view_renamed(const std::string & new_id, const std::string & old_id, void* src, ImageFrameView* item) ;
-		
+
 		/**
 		 * Send a message indicating that an ImageFrameView item has been removed message
 		 *
@@ -222,10 +222,10 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param item the removed item
 		 */
 		void send_imageframe_view_removed(const std::string & item_id, void* src, ImageFrameView* item) ;
-		
+
 		//---------------------------------
 		// MarkerView Messages
-		
+
 		/**
 		 * Send a Marker View Item position changed message
 		 *
@@ -234,7 +234,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param item the time axis item whos position has changed
 		 */
 		void send_marker_view_position_change(nframes_t pos, void* src, MarkerView* item) ;
-		
+
 		/**
 		 * Send a Marker View item duration changed message
 		 *
@@ -243,7 +243,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param item the time axis item whos position has changed
 		 */
 		void send_marker_view_duration_change(nframes_t dur, void* src, MarkerView* item) ;
-		
+
 		/**
 		 * Send a message indicating that a MarkerView has been renamed
 		 *
@@ -253,7 +253,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param item the MarkerView which has been renamed
 		 */
 		void send_marker_view_renamed(const std::string & new_id, const std::string & old_id, void* src, MarkerView* item) ;
-		
+
 		/**
 		 * Send a message indicating that a MarkerView  item has been removed message
 		 *
@@ -263,200 +263,200 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 */
 		void send_marker_view_removed(const std::string & item_id, void* src, MarkerView* item) ;
 
-		
+
 		//---------------------------------------------------------------------------------------//
 		// Emitted Signals
-		
+
 		/** Emitted if the socket connection is shutdown at the other end */
 		sigc::signal<void> CompositorSocketShutdown ;
-		
+
 		/** Emitted as a generic error is captured from the socket connection to the animatic compositor */
 		sigc::signal<void> CompositorSocketError ;
-		
-		
+
+
 	protected:
-		
-	
+
+
 	private:
 		/* I dont like friends :-( */
 		friend class Editor;
-			
+
 		/**
 		 * Create an new instance of the ImageFrameSocketHandler, if one does not already exist
 		 *
 		 * @param ed the Ardour PublicEditor
 		 */
 		static ImageFrameSocketHandler* create_instance(PublicEditor& ed) ;
-	
+
 		//---------------------------------------------------------------------------------------//
 		// Message breakdown ie avoid a big if...then...else
-	
+
 		/**
 	 	 * Handle insert item requests
 		 *
 		 * @param msg the received message
 		 */
 		void handle_insert_message(const char* msg) ;
-	
+
 		/**
 		 * Handle remove item requests
 		 *
 		 * @param msg the received message
 		 */
 		void handle_remove_message(const char* msg) ;
-	
+
 		/**
 		 * Handle rename item requests
 		 *
 		 * @param msg the received message
 		 */
 		void handle_rename_message(const char* msg) ;
-		
+
 		/**
 	 	 * Handle a request for session information
 	 	 *
 	 	 * @param msg the received message
 	 	 */
 		void handle_request_data(const char* msg) ;
-		
+
 		/**
 		 * Handle the update of a particular item
 		 *
 		 * @param msg the received message
 		 */
 		void handle_item_update_message(const char* msg) ;
-		
+
 		/**
 		 * Handle the selection of an Item
 		 *
 		 * @param msg the received message
 		 */
 		void handle_item_selected(const char* msg) ;
-		
+
 		/**
 		 * Handle s session action message
 		 *
 		 * @param msg the received message
 		 */
 		void handle_session_action(const char* msg) ;
-	
+
 		//---------------------------------------------------------------------------------------//
 		// handlers for specific insert procedures
-	
+
 		/**
 		 * Handle the insertion of a new ImaegFrameTimeAxis
 		 *
 		 * @param msg the received message
 		 */
 		void handle_insert_imageframe_time_axis(const char* msg) ;
-		
+
 		/**
 		 * Handle the insertion of a new MarkerTimeAxis
 		 *
 		 * @param msg the received message
 		 */
 		void handle_insert_marker_time_axis(const char* msg) ;
-		
+
 		/**
 		 * Handle the insertion of a time axis group (a scene)
 		 *
 		 * @param msg the received message
 		 */
 		void handle_insert_imageframe_group(const char* msg) ;
-		
+
 		/**
 		 * Handle the insertion of a new ImageFrameItem
 		 *
 		 * @param msg the received message
 		 */
 		void handle_insert_imageframe_view(const char* msg) ;
-		
+
 		/**
 		 * Handle the insertion of a new MarkerItem
 		 *
 		 * @param msg the received message
 		 */
 		void handle_insert_marker_view(const char* msg) ;
-	
+
 		//---------------------------------------------------------------------------------------//
 		// handlers for specific removal procedures
-	
+
 		/**
 		 * Handle the removal of an ImageTimeAxis
 		 *
 		 * @param msg the received message
 		 */
 		void handle_remove_imageframe_time_axis(const char* msg) ;
-		
+
 		/**
 		 * Handle the removal of an MarkerTimeAxis
 		 *
 		 * @param msg the received message
 		 */
 		void handle_remove_marker_time_axis(const char* msg) ;
-		
+
 		/**
 		 * Handle the removal of an ImageFrameTimeAxisGroup
 		 *
 		 * @param msg the received message
 		 */
 		void handle_remove_imageframe_time_axis_group(const char* msg) ;
-		
+
 		/**
 		 * Handle the removal of an ImageFrameItem
 		 *
 		 * @param msg the received message
 		 */
 		void handle_remove_imageframe_view(const char* msg) ;
-		
+
 		/**
 		 * Handle the removal of an MarkerItem
 		 *
 		 * @param msg the received message
 		 */
 		void handle_remove_marker_view(const char* msg) ;
-	
+
 		//---------------------------------------------------------------------------------------//
 		// handlers for the specific rename procedures
-	
+
 		/**
 		 * Handle the renaming of an ImageTimeAxis
 		 *
 		 * @param msg the received message
 		 */
 		void handle_rename_imageframe_time_axis(const char* msg) ;
-		
+
 		/**
 		 * Handle the renaming of an MarkerTimeAxis
 		 *
 		 * @param msg the received message
 		 */
 		void handle_rename_marker_time_axis(const char* msg) ;
-		
+
 		/**
 		 * Handle the renaming of an ImageFrameItem
 		 *
 		 * @param msg the received message
 		 */
 		void handle_rename_imageframe_time_axis_group(const char* msg) ;
-		
+
 		/**
 		 * Handle the renaming of an ImageFrameItem
 		 *
 		 * @param msg the received message
 		 */
 		void handle_rename_imageframe_view(const char* msg) ;
-		
+
 		/**
 		 * Handle the renaming of an Marker
 		 *
 		 * @param msg the received message
 		 */
 		void handle_rename_marker_view(const char* msg) ;
-		
+
 		//---------------------------------------------------------------------------------------//
 		// handlers for data request
-	
+
 		/**
 	 	 * Handle a request for the sessnio naem fo the current session
 		 * We return a failure state if no session is open
@@ -464,129 +464,129 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param msg the received message
 		 */
 		void handle_session_name_request(const char* msg) ;
-	
-		 
+
+
 		//---------------------------------------------------------------------------------------//
 		// handlers for specific item update changes
-	
+
 		/**
 		 * Handle ImageFrameView positional changes
 		 *
 		 * @param msg the received message
 		 */
 		void handle_imageframe_view_position_update(const char* msg) ;
-		
+
 		/**
 		 * Handle ImageFrameView Duration changes
 		 *
 		 * @param msg the received message
 		 */
 		void handle_imageframe_view_duration_update(const char* msg) ;
-		
+
 		/**
 		 * Handle ImageFrameView Position Lock Constraint changes
 		 *
 		 * @param msg the received message
 		 */
 		void handle_imageframe_position_lock_update(const char* msg) ;
-		
+
 		/**
 		 * Handle ImageFrameView Maximum Duration changes
 		 *
 		 * @param msg the received message
 		 */
 		void handle_imageframe_view_max_duration_update(const char* msg) ;
-		
+
 		/**
 		 * Handle image frame max duration enable constraint changes
 		 *
 		 * @param msg the received message
 		 */
 		void handle_imageframe_view_max_duration_enable_update(const char* msg) ;
-		
+
 		/**
 		 * Handle ImageFrameView Minimum Duration changes
 		 *
 		 * @param msg the received message
 		 */
 		void handle_imageframe_view_min_duration_update(const char* msg) ;
-		
+
 		/**
 		 * Handle image frame min duration enable constraint changes
 		 *
 		 * @param msg the received message
 		 */
 		void handle_imageframe_view_min_duration_enable_update(const char* msg) ;
-	
-	
+
+
 		/**
 		 * Handle MarkerView position changes
 		 *
 		 * @param msg the received message
 		 */
 		void handle_marker_view_position_update(const char* msg) ;
-		
+
 		/**
 		 * Handle MarkerView duration changes
 		 *
 		 * @param msg the received message
 		 */
 		void handle_marker_view_duration_update(const char* msg) ;
-		
+
 		/**
 		 * Handle MarkerView Position Lock Constraint changes
 		 *
 		 * @param msg the received message
 		 */
 		void handle_marker_view_position_lock_update(const char* msg) ;
-		
+
 		/**
 		 * Handle MarkerView maximum duration changes
 		 *
 		 * @param msg the received message
 		 */
 		void handle_marker_view_max_duration_update(const char* msg) ;
-		
+
 		/**
 		 * Handle MarkerView minimum duration changes
 		 *
 		 * @param msg the received message
 		 */
 		void handle_marker_view_min_duration_update(const char* msg) ;
-	
-	
+
+
 
 		//---------------------------------------------------------------------------------------//
 		// handlers for Session Actions
-	
+
 		/**
 		 * Handle the opening of a named audio session
 		 *
 		 * @param msg the received message
 		 */
 		void handle_open_session(const char* msg) ;
-		
+
 		/**
 		 * Handle the closing of a named audio session
 		 *
 		 * @param msg the received message
 		 */
 		void handle_closed_session(const char* msg) ;
-	
+
 		//---------------------------------------------------------------------------------------//
 		// handlers for the shutdown of the Image Compositor
-		
+
 		/**
 		 * Handle the shutdown message from the image compositor
 		 *
 		 * @param msg the received message
 		 */
 		void handle_shutdown(const char* msg) ;
-	
-	
+
+
 		//---------------------------------------------------------------------------------------//
 		// convenince methods to break up messages
-	
+
 		/**
 		 * Returns part of the received message as a std::string
 		 *
@@ -596,8 +596,8 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @return the sub std::string of the message
 		 */
 		std::string get_message_part(int start, int32_t num_chars, const char* msg) ;
-		
-		
+
+
 		/**
 		 * break up am image item description message
 		 * we break the mesage up into the parent Image Track id and size,
@@ -611,7 +611,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param item_id_size
 		 */
 		void decompose_imageframe_item_desc(const char* msg, int& position, std::string& track_id, int& track_id_size, std::string& scene_id, int& scene_id_size, std::string& item_id, int& item_id_size) ;
-	
+
 		/**
 		 * Compose a description of the specified image frame view
 		 * The description consists of the parent track name size and name,
@@ -631,8 +631,8 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @param buffer the buffer to write the description
 		 */
 		void compose_marker_item_desc(MarkerView* mv, std::ostringstream& buffer) ;
-		
-		
+
+
 		/**
 		 * Returns the ImageFrameView from the specified description
 		 * The errcode parameter is used to indicate the item which caused
@@ -650,10 +650,10 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @return the described item on success, 0 otherwise
 		 */
 		ImageFrameView* get_imageframe_view_from_desc(const std::string & track_id, const std::string & group_ud, const std::string & item_id, int& errcode, std::string& errmsg) ;
-	 
+
 		//---------------------------------------------------------------------------------------//
 		// Convenince Message Send Methods
-		
+
 		/**
 		 * Sends a message throught the socket
 		 *
@@ -661,7 +661,7 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @return the return value of the socket call
 		 */
 		int send_message(const std::string & msg) ;
-		
+
 		/**
 		 * Reads a message from the Socket
 		 *
@@ -669,32 +669,32 @@ class ImageFrameSocketHandler : public sigc::trackable
 		 * @return the return value from the socket call
 		 */
 		int read_message(std::string& msg) ;
-		
+
 		/**
 		 * Convenience method to compose and send a success messasge back to the Image Compositor
 		 *
 		 */
 		void send_return_success() ;
-		
+
 		/**
 		 * Convenience method to compose and send a failure messasge back to the Image Compositor
 		 *
 		 * @param msg the failure message
 		 */
 		void send_return_failure(const std::string& msg) ;
-	
+
 		//---------------------------------------------------------------------------------------//
 		// Memebr Data
-		
+
 		/** Our instance of the socket handler, singleton */
 		static ImageFrameSocketHandler* _instance ;
-		
+
 		/** The Ardour PublicEditor */
 		PublicEditor& thePublicEditor ;
-		
+
 		/** the socket file descriptor */
 		int theArdourToCompositorSocket ;
-		
+
 		/** This stores the 'tag' returned from gdk_input_add, which is required for removing the input */
 		int theGdkInputTag ;
 

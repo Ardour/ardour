@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2009 Paul Davis 
+    Copyright (C) 2002-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
 
 */
 
-#ifndef  __gtk_ardour_port_matrix_grid_h__ 
-#define  __gtk_ardour_port_matrix_grid_h__ 
+#ifndef  __gtk_ardour_port_matrix_grid_h__
+#define  __gtk_ardour_port_matrix_grid_h__
 
 #include <string>
 #include <vector>
@@ -53,7 +53,7 @@ public:
 	void draw_extra (cairo_t *);
 
 private:
-	
+
 	void compute_dimensions ();
 	void render (cairo_t *);
 	void render_group_pair (cairo_t *, boost::shared_ptr<const PortGroup>, boost::shared_ptr<const PortGroup>, uint32_t, uint32_t);

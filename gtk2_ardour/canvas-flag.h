@@ -36,9 +36,9 @@ public:
 		, _line(0)
 		, _rect(0)
 	{}
-			
+
 	virtual ~CanvasFlag();
-	
+
 	virtual bool on_event(GdkEvent* ev);
 
 	void set_text(const std::string& a_text);
@@ -49,10 +49,10 @@ protected:
 	guint            _outline_color_rgba;
 	guint            _fill_color_rgba;
 	MidiRegionView&  _region;
-	
+
 private:
 	void delete_allocated_objects();
-	
+
 	SimpleLine*      _line;
 	InteractiveRect* _rect;
 };

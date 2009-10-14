@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001,2007 Paul Davis 
+    Copyright (C) 2001,2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,19 +53,19 @@ int
 Automatable::old_set_automation_state (const XMLNode& node)
 {
 	const XMLProperty *prop;
-			
+
 	if ((prop = node.property ("path")) != 0) {
 		load_automation (prop->value());
 	} else {
 		warning << _("Automation node has no path property") << endmsg;
 	}
-	
+
 	if ((prop = node.property ("visible")) != 0) {
 		uint32_t what;
 		stringstream sstr;
-		
+
 		_visible_controls.clear ();
-		
+
 		sstr << prop->value();
 		while (1) {
 			sstr >> what;
@@ -75,7 +75,7 @@ Automatable::old_set_automation_state (const XMLNode& node)
 			mark_automation_visible (Evoral::Parameter(PluginAutomation, 0, what), true);
 		}
 	}
-	
+
 	_last_automation_snapshot = 0;
 
 	return 0;
@@ -103,7 +103,7 @@ Automatable::load_automation (const string& path)
 	Glib::Mutex::Lock lm (control_lock());
 	set<Evoral::Parameter> tosave;
 	controls().clear ();
-	
+
 	_last_automation_snapshot = 0;
 
 	while (in) {
@@ -114,14 +114,14 @@ Automatable::load_automation (const string& path)
 		in >> port;  if (!in) break;
 		in >> when;  if (!in) goto bad;
 		in >> value; if (!in) goto bad;
-		
+
 		Evoral::Parameter param(PluginAutomation, 0, port);
 		/* FIXME: this is legacy and only used for plugin inserts?  I think? */
 		boost::shared_ptr<Evoral::Control> c = control (param, true);
 		c->list()->add (when, value);
 		tosave.insert (param);
 	}
-	
+
 	return 0;
 
   bad:
@@ -134,7 +134,7 @@ void
 Automatable::add_control(boost::shared_ptr<Evoral::Control> ac)
 {
 	Evoral::Parameter param = ac->parameter();
-	
+
 	ControlSet::add_control(ac);
 	_can_automate_list.insert(param);
 	auto_state_changed(param); // sync everything up
@@ -145,7 +145,7 @@ Automatable::what_has_visible_data(set<Evoral::Parameter>& s) const
 {
 	Glib::Mutex::Lock lm (control_lock());
 	set<Evoral::Parameter>::const_iterator li;
-	
+
 	for (li = _visible_controls.begin(); li != _visible_controls.end(); ++li) {
 		s.insert  (*li);
 	}
@@ -201,7 +201,7 @@ Automatable::mark_automation_visible (Evoral::Parameter what, bool yn)
  */
 int
 Automatable::set_automation_state (const XMLNode& node, Evoral::Parameter legacy_param)
-{	
+{
 	Glib::Mutex::Lock lm (control_lock());
 
 	/* Don't clear controls, since some may be special derived Controllable classes */
@@ -210,7 +210,7 @@ Automatable::set_automation_state (const XMLNode& node, Evoral::Parameter legacy
 
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
-	
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		/*if (sscanf ((*niter)->name().c_str(), "parameter-%" PRIu32, &param) != 1) {
@@ -230,9 +230,9 @@ Automatable::set_automation_state (const XMLNode& node, Evoral::Parameter legacy
 				warning << "Automation has null type" << endl;
 				continue;
 			}
-			
+
 			boost::shared_ptr<AutomationList> al (new AutomationList(**niter, param));
-			
+
 			if (!id_prop) {
 				warning << "AutomationList node without automation-id property, "
 					<< "using default: " << EventTypeMap::instance().to_symbol(legacy_param) << endmsg;
@@ -262,7 +262,7 @@ Automatable::get_automation_state ()
 {
 	Glib::Mutex::Lock lm (control_lock());
 	XMLNode* node = new XMLNode (X_("Automation"));
-	
+
 	if (controls().empty()) {
 		return *node;
 	}
@@ -282,7 +282,7 @@ void
 Automatable::set_parameter_automation_state (Evoral::Parameter param, AutoState s)
 {
 	Glib::Mutex::Lock lm (control_lock());
-	
+
 	boost::shared_ptr<Evoral::Control> c = control (param, true);
 	boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(c->list());
 
@@ -305,7 +305,7 @@ Automatable::get_parameter_automation_state (Evoral::Parameter param, bool lock)
 
 	if (c)
 		result = l->automation_state();
-	
+
 	if (lock)
 		control_lock().unlock();
 
@@ -316,7 +316,7 @@ void
 Automatable::set_parameter_automation_style (Evoral::Parameter param, AutoStyle s)
 {
 	Glib::Mutex::Lock lm (control_lock());
-	
+
 	boost::shared_ptr<Evoral::Control> c = control(param, true);
 	boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(c->list());
 
@@ -379,7 +379,7 @@ Automatable::automation_snapshot (nframes_t now, bool force)
 				c->list()->rt_add (now, i->second->user_float());
 			}
 		}
-		
+
 		_last_automation_snapshot = now;
 	}
 }
@@ -388,12 +388,12 @@ void
 Automatable::transport_stopped (sframes_t now)
 {
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
-		
+
 		boost::shared_ptr<AutomationControl> c
 				= boost::dynamic_pointer_cast<AutomationControl>(li->second);
 		boost::shared_ptr<AutomationList> l
 				= boost::dynamic_pointer_cast<AutomationList>(c->list());
-		
+
 		c->list()->reposition_for_rt_add (now);
 
 		if (c->automation_state() != Off) {

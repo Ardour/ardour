@@ -174,7 +174,7 @@ Glib::PropertyProxy_ReadOnly<double> ImageFrame::property_height() const
 {
 	return Glib::PropertyProxy_ReadOnly<double> (this, "height");
 }
-Glib::PropertyProxy<Gtk::AnchorType> ImageFrame::property_anchor() 
+Glib::PropertyProxy<Gtk::AnchorType> ImageFrame::property_anchor()
 {
   return Glib::PropertyProxy<Gtk::AnchorType>(this, "anchor");
 }

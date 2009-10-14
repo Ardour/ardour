@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -82,10 +82,10 @@ AudioTrack::use_new_diskstream ()
 	} else if (_mode == NonLayered){
 		dflags = AudioDiskstream::Flag(dflags | AudioDiskstream::NonLayered);
 	}
-    
+
 
 	boost::shared_ptr<AudioDiskstream> ds (new AudioDiskstream (_session, name(), dflags));
-	
+
 	_session.add_diskstream (ds);
 
 	set_diskstream (boost::dynamic_pointer_cast<AudioDiskstream> (ds), this);
@@ -99,10 +99,10 @@ AudioTrack::set_mode (TrackMode m)
 		if (_diskstream->set_destructive (m == Destructive)) {
 			return -1;
 		}
-		
+
 		_diskstream->set_non_layered (m == NonLayered);
 		_mode = m;
-		
+
 		TrackModeChanged (); /* EMIT SIGNAL */
 	}
 
@@ -117,7 +117,7 @@ AudioTrack::can_use_mode (TrackMode m, bool& bounce_required)
 	case Normal:
 		bounce_required = false;
 		return true;
-		
+
 	case Destructive:
 	default:
 		return _diskstream->can_become_destructive (bounce_required);
@@ -146,16 +146,16 @@ AudioTrack::deprecated_use_diskstream_connections ()
 
 	if ((prop = node.property ("input-connection")) != 0) {
 		boost::shared_ptr<Bundle> c = _session.bundle_by_name (prop->value());
-		
+
 		if (c == 0) {
-		  	error << string_compose(_("Unknown bundle \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
-			
+			error << string_compose(_("Unknown bundle \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
+
 			if ((c = _session.bundle_by_name (_("in 1"))) == 0) {
-			  	error << _("No input bundles available as a replacement")
+				error << _("No input bundles available as a replacement")
 			        << endmsg;
 				return -1;
 			} else {
-			  	info << string_compose (_("Bundle %1 was not available - \"in 1\" used instead"), prop->value())
+				info << string_compose (_("Bundle %1 was not available - \"in 1\" used instead"), prop->value())
 			       << endmsg;
 			}
 		}
@@ -164,11 +164,11 @@ AudioTrack::deprecated_use_diskstream_connections ()
 
 	} else if ((prop = node.property ("inputs")) != 0) {
 		if (_input->set_ports (prop->value())) {
-		  	error << string_compose(_("improper input channel list in XML node (%1)"), prop->value()) << endmsg;
+			error << string_compose(_("improper input channel list in XML node (%1)"), prop->value()) << endmsg;
 			return -1;
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -198,9 +198,9 @@ AudioTrack::set_diskstream (boost::shared_ptr<AudioDiskstream> ds, void * /*src*
 	DiskstreamChanged (); /* EMIT SIGNAL */
 
 	return 0;
-}	
+}
 
-int 
+int
 AudioTrack::use_diskstream (string name)
 {
 	boost::shared_ptr<AudioDiskstream> dstream;
@@ -209,20 +209,20 @@ AudioTrack::use_diskstream (string name)
 		error << string_compose(_("AudioTrack: audio diskstream \"%1\" not known by session"), name) << endmsg;
 		return -1;
 	}
-	
+
 	return set_diskstream (dstream, this);
 }
 
-int 
+int
 AudioTrack::use_diskstream (const PBD::ID& id)
 {
 	boost::shared_ptr<AudioDiskstream> dstream;
 
 	if ((dstream = boost::dynamic_pointer_cast<AudioDiskstream> (_session.diskstream_by_id (id))) == 0) {
-	  	error << string_compose(_("AudioTrack: audio diskstream \"%1\" not known by session"), id) << endmsg;
+		error << string_compose(_("AudioTrack: audio diskstream \"%1\" not known by session"), id) << endmsg;
 		return -1;
 	}
-	
+
 	return set_diskstream (dstream, this);
 }
 
@@ -257,7 +257,7 @@ AudioTrack::_set_state (const XMLNode& node, bool call_base)
 	}
 
 	if ((prop = node.property ("diskstream-id")) == 0) {
-		
+
 		/* some old sessions use the diskstream name rather than the ID */
 
 		if ((prop = node.property ("diskstream")) == 0) {
@@ -271,10 +271,10 @@ AudioTrack::_set_state (const XMLNode& node, bool call_base)
 		}
 
 	} else {
-		
+
 		PBD::ID id (prop->value());
 		PBD::ID zero ("0");
-		
+
 		/* this wierd hack is used when creating tracks from a template. there isn't
 		   a particularly good time to interpose between setting the first part of
 		   the track state (notably Route::set_state() and the track mode), and the
@@ -282,7 +282,7 @@ AudioTrack::_set_state (const XMLNode& node, bool call_base)
 		   that means "you should create a new diskstream here, not look for
 		   an old one.
 		*/
-		
+
 		if (id == zero) {
 			use_new_diskstream ();
 		} else if (use_diskstream (id)) {
@@ -316,7 +316,7 @@ AudioTrack::_set_state (const XMLNode& node, bool call_base)
 	return 0;
 }
 
-XMLNode& 
+XMLNode&
 AudioTrack::state(bool full_state)
 {
 	XMLNode& root (Route::state(full_state));
@@ -335,7 +335,7 @@ AudioTrack::state(bool full_state)
 			(*i)->id.print (buf, sizeof (buf));
 			inode->add_property (X_("id"), buf);
 			inode->add_child_copy ((*i)->state);
-		
+
 			freeze_node->add_child_nocopy (*inode);
 		}
 
@@ -343,7 +343,7 @@ AudioTrack::state(bool full_state)
 	}
 
 	/* Alignment: act as a proxy for the diskstream */
-	
+
 	XMLNode* align_node = new XMLNode (X_("Alignment"));
 	AlignStyle as = _diskstream->alignment_style ();
 	align_node->add_property (X_("style"), enum_2_string (as));
@@ -383,12 +383,12 @@ AudioTrack::set_state_part_two ()
 	if ((fnode = find_named_node (*pending_state, X_("freeze-info"))) != 0) {
 
 		_freeze_record.state = Frozen;
-		
+
 		for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
 			delete *i;
 		}
 		_freeze_record.processor_info.clear ();
-		
+
 		if ((prop = fnode->property (X_("playlist"))) != 0) {
 			boost::shared_ptr<Playlist> pl = _session.playlist_by_name (prop->value());
 			if (pl) {
@@ -399,23 +399,23 @@ AudioTrack::set_state_part_two ()
 			return;
 			}
 		}
-		
+
 		if ((prop = fnode->property (X_("state"))) != 0) {
 			_freeze_record.state = FreezeState (string_2_enum (prop->value(), _freeze_record.state));
 		}
-		
+
 		XMLNodeConstIterator citer;
 		XMLNodeList clist = fnode->children();
-		
+
 		for (citer = clist.begin(); citer != clist.end(); ++citer) {
 			if ((*citer)->name() != X_("processor")) {
 				continue;
 			}
-			
+
 			if ((prop = (*citer)->property (X_("id"))) == 0) {
 				continue;
 			}
-			
+
 			FreezeRecordProcessorInfo* frii = new FreezeRecordProcessorInfo (*((*citer)->children().front()),
 										   boost::shared_ptr<Processor>());
 			frii->id = prop->value ();
@@ -446,7 +446,7 @@ AudioTrack::set_state_part_two ()
 		}
 	}
 	return;
-}	
+}
 
 int
 AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, int declick,
@@ -457,7 +457,7 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 	Sample* tmpb;
 	nframes_t transport_frame;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
-	
+
 	{
 		Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
 		if (lm.locked()) {
@@ -467,7 +467,7 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 		}
 	}
 
-	
+
 	if (n_outputs().n_total() == 0 && _processors.empty()) {
 		return 0;
 	}
@@ -486,7 +486,7 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 		   to do nothing.
 		*/
 		return diskstream->process (transport_frame, 0, can_record, rec_monitors_input);
-	} 
+	}
 
 	_silent = false;
 	_amp->apply_gain_automation(false);
@@ -497,7 +497,7 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 	}
 
 	/* special condition applies */
-	
+
 	if (_meter_point == MeterInput) {
 		_input->process_input (_meter, start_frame, end_frame, nframes);
 	}
@@ -520,7 +520,7 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 		  while in the process() tree.
 		*/
 
-		
+
 		/* copy the diskstream data to all output buffers */
 
 		size_t limit = n_process_buffers().n_audio();
@@ -536,19 +536,19 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 			   but loaded with an 8 channel file. there are only
 			   2 passthrough buffers, but n_process_buffers() will
 			   return 8.
-			   
+
 			   arbitrary decision: map all channels in the diskstream
 			   to the outputs available.
 			*/
 
 			float scaling = limit/blimit;
-			
+
 			for (i = 0, n = 1; i < blimit; ++i, ++n) {
 
-				/* first time through just copy a channel into 
+				/* first time through just copy a channel into
 				   the output buffer.
 				*/
-				
+
 				Sample* bb = bufs.get_audio (i).data();
 
 				for (nframes_t xx = 0; xx < nframes; ++xx) {
@@ -564,27 +564,27 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 			}
 
 			for (;i < limit; ++i, ++n) {
-				
+
 				/* for all remaining channels, sum with existing
-				   data in the output buffers 
+				   data in the output buffers
 				*/
-				
+
 				bufs.get_audio (i%blimit).accumulate_with_gain_from (b, nframes, 0, scaling);
-				
+
 				if (n < diskstream->n_channels().n_audio()) {
 					tmpb = diskstream->playback_buffer(n);
 					if (tmpb!=0) {
 						b = tmpb;
 					}
 				}
-				
+
 			}
 
 			limit = blimit;
 
 		} else {
 			for (i = 0, n = 1; i < limit; ++i, ++n) {
-				memcpy (bufs.get_audio (i).data(), b, sizeof (Sample) * nframes); 
+				memcpy (bufs.get_audio (i).data(), b, sizeof (Sample) * nframes);
 				if (n < diskstream->n_channels().n_audio()) {
 					tmpb = diskstream->playback_buffer(n);
 					if (tmpb!=0) {
@@ -594,7 +594,7 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 			}
 
 			/* try to leave any MIDI buffers alone */
-			
+
 			ChanCount chn;
 			chn.set_audio (limit);
 			chn.set_midi (_input->n_ports().n_midi());
@@ -606,7 +606,7 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 		if (!diskstream->record_enabled() && _session.transport_rolling()) {
 #ifdef XXX_MOVE_THIS_TO_AMP
 			Glib::Mutex::Lock am (data().control_lock(), Glib::TRY_LOCK);
-			
+
 			if (am.locked() && gain_control()->automation_playback()) {
 				_amp->apply_gain_automation(
 						gain_control()->list()->curve().rt_safe_get_vector (
@@ -616,7 +616,7 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 		}
 
 		process_output_buffers (bufs, start_frame, end_frame, nframes, (!_session.get_record_enabled() || !Config->get_do_not_record_plugins()), declick);
-		
+
 	} else {
 		/* problem with the diskstream; just be quiet for a bit */
 		silence (nframes);
@@ -632,7 +632,7 @@ AudioTrack::export_stuff (BufferSet& buffers, sframes_t start, nframes_t nframes
 	float   mix_buffer[nframes];
 	ProcessorList::iterator i;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
-	
+
 	Glib::RWLock::ReaderLock rlock (_processor_lock);
 
 	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(diskstream->playlist());
@@ -658,7 +658,7 @@ AudioTrack::export_stuff (BufferSet& buffers, sframes_t start, nframes_t nframes
 		}
 		else {
 			/* duplicate last across remaining buffers */
-			memcpy (bi->data(), b, sizeof (Sample) * nframes); 
+			memcpy (bi->data(), b, sizeof (Sample) * nframes);
 		}
 	}
 
@@ -670,14 +670,14 @@ AudioTrack::export_stuff (BufferSet& buffers, sframes_t start, nframes_t nframes
 	/* note: only run processors during export. other layers in the machinery
 	   will already have checked that there are no external port processors.
 	*/
-	
+
 	for (i = _processors.begin(); i != _processors.end(); ++i) {
 		boost::shared_ptr<Processor> processor;
 		if ((processor = boost::dynamic_pointer_cast<Processor>(*i)) != 0) {
 			processor->run (buffers, start, start+nframes, nframes);
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -704,7 +704,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 	string dir;
 	string region_name;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
-	
+
 	if ((_freeze_record.playlist = boost::dynamic_pointer_cast<AudioPlaylist>(diskstream->playlist())) == 0) {
 		return;
 	}
@@ -712,9 +712,9 @@ AudioTrack::freeze (InterThreadInfo& itt)
 	uint32_t n = 1;
 
 	while (n < (UINT_MAX-1)) {
-	 
+
 		string candidate;
-		
+
 		candidate = string_compose ("<F%2>%1", _freeze_record.playlist->name(), n);
 
 		if (_session.playlist_by_name (candidate) == 0) {
@@ -724,11 +724,11 @@ AudioTrack::freeze (InterThreadInfo& itt)
 
 		++n;
 
-	} 
+	}
 
 	if (n == (UINT_MAX-1)) {
 	  error << string_compose (X_("There are too many frozen versions of playlist \"%1\""
-	  		    " to create another one"), _freeze_record.playlist->name())
+			    " to create another one"), _freeze_record.playlist->name())
 	       << endmsg;
 		return;
 	}
@@ -743,21 +743,21 @@ AudioTrack::freeze (InterThreadInfo& itt)
 
 	{
 		Glib::RWLock::ReaderLock lm (_processor_lock);
-		
+
 		for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
-			
+
 			boost::shared_ptr<Processor> processor;
 
 			if ((processor = boost::dynamic_pointer_cast<Processor>(*r)) != 0) {
-				
+
 				FreezeRecordProcessorInfo* frii  = new FreezeRecordProcessorInfo ((*r)->get_state(), processor);
-				
+
 				frii->id = processor->id();
 
 				_freeze_record.processor_info.push_back (frii);
-				
+
 				/* now deactivate the processor */
-				
+
 				processor->deactivate ();
 				_session.set_dirty ();
 			}
@@ -775,7 +775,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 	/* create a new region from all filesources, keep it private */
 
 	boost::shared_ptr<Region> region (RegionFactory::create (srcs, 0,
-			srcs[0]->length(srcs[0]->timeline_position()), 
+			srcs[0]->length(srcs[0]->timeline_position()),
 			region_name, 0,
 			(Region::Flag) (Region::WholeFile|Region::DefaultFlags),
 			false));
@@ -789,7 +789,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 	diskstream->set_record_enabled (false);
 
 	/* reset stuff that has already been accounted for in the freeze process */
-	
+
 	set_gain (1.0, this);
 	_amp->gain_control()->set_automation_state (Off);
 	/* XXX need to use _main_outs _panner->set_automation_state (Off); */
@@ -815,7 +815,7 @@ AudioTrack::unfreeze ()
 				}
 			}
 		}
-		
+
 		_freeze_record.playlist.reset ();
 		set_gain (_freeze_record.gain, this);
 		_amp->gain_control()->set_automation_state (_freeze_record.gain_automation_state);

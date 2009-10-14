@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004 Paul Davis 
+    Copyright (C) 2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -62,15 +62,15 @@ string EqualPowerStereoPanner::name = "Equal Power Stereo";
 string Multi2dPanner::name = "Multiple (2D)";
 
 /* this is a default mapper of  control values to a pan position
-   others can be imagined. 
+   others can be imagined.
 */
 
-static pan_t direct_control_to_pan (double fract) { 
+static pan_t direct_control_to_pan (double fract) {
 	return fract;
 }
 
 
-//static double direct_pan_to_control (pan_t val) { 
+//static double direct_pan_to_control (pan_t val) {
 //	return val;
 //}
 
@@ -82,7 +82,7 @@ StreamPanner::StreamPanner (Panner& p, Evoral::Parameter param)
 	_muted = false;
 
 	_control = boost::dynamic_pointer_cast<AutomationControl>( parent.control( param, true ) );
-	
+
 	x = 0.5;
 	y = 0.5;
 	z = 0.5;
@@ -137,7 +137,7 @@ StreamPanner::set_position (float xpos, float ypos, bool link_call)
 	}
 
 	if (x != xpos || y != ypos) {
-		
+
 		x = xpos;
 		y = ypos;
 		update ();
@@ -196,7 +196,7 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 {
 	char line[128];
 	LocaleGuard lg (X_("POSIX"));
-	
+
 	_control->list()->clear ();
 
 	while (in.getline (line, sizeof (line), '\n')) {
@@ -236,55 +236,55 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 	if (_muted) {
 		return;
 	}
-	
+
 	Sample* const src = srcbuf.data();
 
 	/* LEFT */
 
 	dst = obufs.get_audio(0).data();
 
-	if (fabsf ((delta = (left - desired_left))) > 0.002) { // about 1 degree of arc 
-		
+	if (fabsf ((delta = (left - desired_left))) > 0.002) { // about 1 degree of arc
+
 		/* interpolate over 64 frames or nframes, whichever is smaller */
-		
+
 		nframes_t limit = min ((nframes_t)64, nframes);
 		nframes_t n;
 
 		delta = -(delta / (float) (limit));
-		
+
 		for (n = 0; n < limit; n++) {
 			left_interp = left_interp + delta;
 			left = left_interp + 0.9 * (left - left_interp);
 			dst[n] += src[n] * left * gain_coeff;
 		}
-		
+
 		pan = left * gain_coeff;
 
 		mix_buffers_with_gain (dst+n,src+n,nframes-n,pan);
-		
+
 	} else {
-		
+
 		left = desired_left;
 		left_interp = left;
 
 		if ((pan = (left * gain_coeff)) != 1.0f) {
-			
+
 			if (pan != 0.0f) {
-				
+
 				mix_buffers_with_gain(dst,src,nframes,pan);
 
 				/* mark that we wrote into the buffer */
 
 				// obufs[0] = 0;
 
-			} 
-			
+			}
+
 		} else {
-			
+
 			mix_buffers_no_gain(dst,src,nframes);
-			
+
 			/* mark that we wrote into the buffer */
-			
+
 			// obufs[0] = 0;
 		}
 	}
@@ -292,11 +292,11 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 	/* RIGHT */
 
 	dst = obufs.get_audio(1).data();
-	
-	if (fabsf ((delta = (right - desired_right))) > 0.002) { // about 1 degree of arc 
-		
+
+	if (fabsf ((delta = (right - desired_right))) > 0.002) { // about 1 degree of arc
+
 		/* interpolate over 64 frames or nframes, whichever is smaller */
-		
+
 		nframes_t limit = min ((nframes_t)64, nframes);
 		nframes_t n;
 
@@ -307,31 +307,31 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 			right = right_interp + 0.9 * (right - right_interp);
 			dst[n] += src[n] * right * gain_coeff;
 		}
-		
+
 		pan = right * gain_coeff;
-		
+
 		mix_buffers_with_gain(dst+n,src+n,nframes-n,pan);
-		
+
 		/* XXX it would be nice to mark the buffer as written to */
 
 	} else {
 
 		right = desired_right;
 		right_interp = right;
-		
+
 		if ((pan = (right * gain_coeff)) != 1.0f) {
-			
+
 			if (pan != 0.0f) {
-				
+
 				mix_buffers_with_gain(dst,src,nframes,pan);
-				
+
 				/* XXX it would be nice to mark the buffer as written to */
 			}
-			
+
 		} else {
-			
+
 			mix_buffers_no_gain(dst,src,nframes);
-			
+
 			/* XXX it would be nice to mark the buffer as written to */
 		}
 	}
@@ -359,7 +359,7 @@ EqualPowerStereoPanner::update ()
 {
 	/* it would be very nice to split this out into a virtual function
 	   that can be accessed from BaseStereoPanner and used in distribute_automated().
-	   
+
 	   but the place where its used in distribute_automated() is a tight inner loop,
 	   and making "nframes" virtual function calls to compute values is an absurd
 	   overhead.
@@ -374,7 +374,7 @@ EqualPowerStereoPanner::update ()
 
 	const float pan_law_attenuation = -3.0f;
 	const float scale = 2.0f - 4.0f * powf (10.0f,pan_law_attenuation/20.0f);
-	
+
 	desired_left = panL * (scale * panL + 1.0f - scale);
 	desired_right = panR * (scale * panR + 1.0f - scale);
 
@@ -383,7 +383,7 @@ EqualPowerStereoPanner::update ()
 }
 
 void
-EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& obufs, 
+EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& obufs,
 					      nframes_t start, nframes_t end, nframes_t nframes,
 					      pan_t** buffers)
 {
@@ -424,7 +424,7 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 
 		float panR = buffers[0][n];
 		float panL = 1 - panR;
-		
+
 		buffers[0][n] = panL * (scale * panL + 1.0f - scale);
 		buffers[1][n] = panR * (scale * panR + 1.0f - scale);
 	}
@@ -433,10 +433,10 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 
 	dst = obufs.get_audio(0).data();
 	pbuf = buffers[0];
-	
+
 	for (nframes_t n = 0; n < nframes; ++n) {
 		dst[n] += src[n] * pbuf[n];
-	}	
+	}
 
 	/* XXX it would be nice to mark the buffer as written to */
 
@@ -447,8 +447,8 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 
 	for (nframes_t n = 0; n < nframes; ++n) {
 		dst[n] += src[n] * pbuf[n];
-	}	
-	
+	}
+
 	/* XXX it would be nice to mark the buffer as written to */
 }
 
@@ -471,7 +471,7 @@ EqualPowerStereoPanner::state (bool /*full_state*/)
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	snprintf (buf, sizeof (buf), "%.12g", x); 
+	snprintf (buf, sizeof (buf), "%.12g", x);
 	root->add_property (X_("x"), buf);
 	root->add_property (X_("type"), EqualPowerStereoPanner::name);
 
@@ -494,7 +494,7 @@ EqualPowerStereoPanner::set_state (const XMLNode& node)
 	if ((prop = node.property (X_("x")))) {
 		pos = atof (prop->value().c_str());
 		set_position (pos, true);
-	} 
+	}
 
 	StreamPanner::set_state (node);
 
@@ -554,7 +554,7 @@ Multi2dPanner::update ()
 	fr = (float) (1.0 / sqrt((double)f));
 #else
 	fr = 1.0 / sqrtf(f);
-#endif	
+#endif
 	for (i = 0; i < nouts; ++i) {
 		parent.outputs[i].desired_pan = 1.0f - (dsq[i] * fr);
 	}
@@ -573,43 +573,43 @@ Multi2dPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 	if (_muted) {
 		return;
 	}
-	
+
 	Sample* const src = srcbuf.data();
 
 
 	for (n = 0, o = parent.outputs.begin(); o != parent.outputs.end(); ++o, ++n) {
 
 		dst = obufs.get_audio(n).data();
-	
+
 #ifdef CAN_INTERP
-		if (fabsf ((delta = (left_interp - desired_left))) > 0.002) { // about 1 degree of arc 
-			
+		if (fabsf ((delta = (left_interp - desired_left))) > 0.002) { // about 1 degree of arc
+
 			/* interpolate over 64 frames or nframes, whichever is smaller */
-			
+
 			nframes_t limit = min ((nframes_t)64, nframes);
 			nframes_t n;
-			
+
 			delta = -(delta / (float) (limit));
-		
+
 			for (n = 0; n < limit; n++) {
 				left_interp = left_interp + delta;
 				left = left_interp + 0.9 * (left - left_interp);
 				dst[n] += src[n] * left * gain_coeff;
 			}
-			
+
 			pan = left * gain_coeff;
 			mix_buffers_with_gain(dst+n,src+n,nframes-n,pan);
-			
+
 		} else {
 
-#else			
+#else
 			pan = (*o).desired_pan;
-			
+
 			if ((pan *= gain_coeff) != 1.0f) {
-				
+
 				if (pan != 0.0f) {
 					mix_buffers_with_gain(dst,src,nframes,pan);
-				} 
+				}
 			} else {
 					mix_buffers_no_gain(dst,src,nframes);
 			}
@@ -618,12 +618,12 @@ Multi2dPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 		}
 #endif
 	}
-	
+
 	return;
 }
 
 void
-Multi2dPanner::distribute_automated (AudioBuffer& /*src*/, BufferSet& /*obufs*/, 
+Multi2dPanner::distribute_automated (AudioBuffer& /*src*/, BufferSet& /*obufs*/,
 				     nframes_t /*start*/, nframes_t /*end*/, nframes_t /*nframes*/,
 				     pan_t** /*buffers*/)
 {
@@ -661,9 +661,9 @@ Multi2dPanner::state (bool /*full_state*/)
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	snprintf (buf, sizeof (buf), "%.12g", x); 
+	snprintf (buf, sizeof (buf), "%.12g", x);
 	root->add_property (X_("x"), buf);
-	snprintf (buf, sizeof (buf), "%.12g", y); 
+	snprintf (buf, sizeof (buf), "%.12g", y);
 	root->add_property (X_("y"), buf);
 	root->add_property (X_("type"), Multi2dPanner::name);
 
@@ -685,17 +685,17 @@ Multi2dPanner::set_state (const XMLNode& node)
 	if ((prop = node.property (X_("x")))) {
 		newx = atof (prop->value().c_str());
 	}
-       
+
 	if ((prop = node.property (X_("y")))) {
 		newy = atof (prop->value().c_str());
 	}
-	
+
 	if (x < 0 || y < 0) {
 		error << _("badly-formed positional data for Multi2dPanner - ignored")
 		      << endmsg;
 		return -1;
-	} 
-	
+	}
+
 	set_position (newx, newy);
 	return 0;
 }
@@ -759,7 +759,7 @@ Panner::reset_to_default ()
 	case 1:
 		return;
 	}
-	
+
 	if (outputs.size() == 2) {
 		switch (_streampanners.size()) {
 		case 1:
@@ -777,7 +777,7 @@ Panner::reset_to_default ()
 			break;
 		}
 	}
-	
+
 	vector<Output>::iterator o;
 	vector<StreamPanner*>::iterator p;
 
@@ -792,7 +792,7 @@ Panner::reset_streampanner (uint32_t which)
 	if (which >= _streampanners.size() || which >= outputs.size()) {
 		return;
 	}
-	
+
 	switch (outputs.size()) {
 	case 0:
 	case 1:
@@ -830,14 +830,14 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 	bool changed = false;
 	bool do_not_and_did_not_need_panning = ((nouts < 2) && (outputs.size() < 2));
 
-	/* if new and old config don't need panning, or if 
+	/* if new and old config don't need panning, or if
 	   the config hasn't changed, we're done.
 	*/
 
-	if (do_not_and_did_not_need_panning || 
+	if (do_not_and_did_not_need_panning ||
 	    ((nouts == outputs.size()) && (npans == _streampanners.size()))) {
 		return;
-	} 
+	}
 
 	n = _streampanners.size();
 	clear_panners ();
@@ -889,7 +889,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 			_streampanners.push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, 0, n)));
 		}
 
-		break; 
+		break;
 
 	case 4: // square
 		outputs.push_back (Output  (0, 0));
@@ -901,7 +901,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 			_streampanners.push_back (new Multi2dPanner (*this, Evoral::Parameter(PanAutomation, 0, n)));
 		}
 
-		break;	
+		break;
 
 	case 5: //square+offcenter center
 		outputs.push_back (Output  (0, 0));
@@ -933,9 +933,9 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		(*x)->update ();
 	}
 
-	/* force hard left/right panning in a common case: 2in/2out 
+	/* force hard left/right panning in a common case: 2in/2out
 	*/
-	
+
 	if (npans == 2 && outputs.size() == 2) {
 
 		/* Do this only if we changed configuration, or our configuration
@@ -949,13 +949,13 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		_streampanners.back()->get_position (right);
 
 		if (changed || ((left == 0.5) && (right == 0.5))) {
-		
+
 			_streampanners.front()->set_position (0.0);
 			_streampanners.front()->pan_control()->list()->reset_default (0.0);
-			
+
 			_streampanners.back()->set_position (1.0);
 			_streampanners.back()->pan_control()->list()->reset_default (1.0);
-			
+
 			changed = true;
 		}
 	}
@@ -999,7 +999,7 @@ Panner::set_automation_style (AutoStyle style)
 		((AutomationList*)(*i)->pan_control()->list().get())->set_automation_style (style);
 	}
 	_session.set_dirty ();
-}	
+}
 
 void
 Panner::set_automation_state (AutoState state)
@@ -1008,7 +1008,7 @@ Panner::set_automation_state (AutoState state)
 		((AutomationList*)(*i)->pan_control()->list().get())->set_automation_state (state);
 	}
 	_session.set_dirty ();
-}	
+}
 
 AutoState
 Panner::automation_state () const
@@ -1075,7 +1075,7 @@ Panner::state (bool full)
 		onode->add_property (X_("y"), buf);
 		node->add_child_nocopy (*onode);
 	}
-	
+
 	for (vector<StreamPanner*>::const_iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
 		node->add_child_nocopy ((*i)->state (full));
 	}
@@ -1111,7 +1111,7 @@ Panner::set_state (const XMLNode& node)
 	if ((prop = node.property (X_("bypassed"))) != 0) {
 		set_bypassed (string_is_affirmative (prop->value()));
 	}
-    
+
 	if ((prop = node.property (X_("link_direction"))) != 0) {
 		LinkDirection ld; /* here to provide type information */
 		set_link_direction (LinkDirection (string_2_enum (prop->value(), ld)));
@@ -1121,15 +1121,15 @@ Panner::set_state (const XMLNode& node)
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == X_("Output")) {
-			
+
 			float x, y;
-			
+
 			prop = (*niter)->property (X_("x"));
 			sscanf (prop->value().c_str(), "%g", &x);
-			
+
 			prop = (*niter)->property (X_("y"));
 			sscanf (prop->value().c_str(), "%g", &y);
-			
+
 			outputs.push_back (Output (x, y));
 		}
 	}
@@ -1137,30 +1137,30 @@ Panner::set_state (const XMLNode& node)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		if ((*niter)->name() == X_("StreamPanner")) {
-		
+
 			if ((prop = (*niter)->property (X_("type")))) {
-				
+
 				for (i = 0; pan_plugins[i].factory; ++i) {
 					if (prop->value() == pan_plugins[i].name) {
-						
-						
+
+
 						/* note that we assume that all the stream panners
 						   are of the same type. pretty good
 						   assumption, but it's still an assumption.
 						*/
-						
+
 						sp = pan_plugins[i].factory (*this, Evoral::Parameter(PanAutomation, 0, num_panners));
 						num_panners++;
-						
+
 						if (sp->set_state (**niter) == 0) {
 							_streampanners.push_back (sp);
 						}
-						
+
 						break;
 					}
 				}
-				
-				
+
+
 				if (!pan_plugins[i].factory) {
 					error << string_compose (_("Unknown panner plugin \"%1\" found in pan state - ignored"),
 							  prop->value())
@@ -1173,7 +1173,7 @@ Panner::set_state (const XMLNode& node)
 				return -1;
 			}
 
-		} 	
+		}
 	}
 
 	reset (outputs.size (), num_panners);
@@ -1182,9 +1182,9 @@ Panner::set_state (const XMLNode& node)
 	if ((prop = node.property (X_("automation")))) {
 
 		/* automation path is relative */
-		
+
 		automation_path = Glib::build_filename(_session.automation_dir(), prop->value ());
-	} 
+	}
 
 	return 0;
 }
@@ -1210,7 +1210,7 @@ Panner::set_position (float xpos, StreamPanner& orig)
 
 	orig.get_position (xnow);
 	xdelta = xpos - xnow;
-	
+
 	if (_link_direction == SameDirection) {
 
 		for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
@@ -1249,7 +1249,7 @@ Panner::set_position (float xpos, float ypos, StreamPanner& orig)
 	orig.get_position (xnow, ynow);
 	xdelta = xpos - xnow;
 	ydelta = ypos - ynow;
-	
+
 	if (_link_direction == SameDirection) {
 
 		for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
@@ -1275,7 +1275,7 @@ Panner::set_position (float xpos, float ypos, StreamPanner& orig)
 				(*i)->set_position (xpos, ypos, true);
 			} else {
 				(*i)->get_position (xnow, ynow);
-				
+
 				xnew = min (1.0f, xnow - xdelta);
 				xnew = max (0.0f, xnew);
 
@@ -1307,7 +1307,7 @@ Panner::set_position (float xpos, float ypos, float zpos, StreamPanner& orig)
 				(*i)->set_position (xpos, ypos, zpos, true);
 			} else {
 				(*i)->get_position (xnow, ynow, znow);
-				
+
 				xnew = min (1.0f, xnow + xdelta);
 				xnew = max (0.0f, xnew);
 
@@ -1357,7 +1357,7 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 	assert(!bypassed());
 	assert(!empty());
 
-	
+
 	if (outbufs.count().n_audio() == 1) {
 
 		AudioBuffer& dst = outbufs.get_audio(0);
@@ -1367,14 +1367,14 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 			/* only one output, and gain was zero, so make it silent */
 
 			dst.silence (nframes);
-			
+
 		} else if (gain_coeff == 1.0f){
 
 			/* mix all buffers into the output */
 
 			// copy the first
 			dst.read_from(inbufs.get_audio(0), nframes);
-			
+
 			// accumulate starting with the second
 			if (inbufs.count().n_audio() > 0) {
 				BufferSet::audio_iterator i = inbufs.audio_begin();
@@ -1389,7 +1389,7 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 
 			// copy the first
 			dst.read_from(inbufs.get_audio(0), nframes);
-			
+
 			// accumulate (with gain) starting with the second
 			if (inbufs.count().n_audio() > 0) {
 				BufferSet::audio_iterator i = inbufs.audio_begin();
@@ -1402,7 +1402,7 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 
 		return;
 	}
-	
+
 	/* the terrible silence ... */
 	for (BufferSet::audio_iterator i = outbufs.audio_begin(); i != outbufs.audio_end(); ++i) {
 		i->silence(nframes);
@@ -1417,7 +1417,7 @@ Panner::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, nframes
 
 void
 Panner::run (BufferSet& inbufs, BufferSet& outbufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
-{	
+{
 	if (outbufs.count().n_audio() == 0) {
 		// Failing to deliver audio we were asked to deliver is a bug
 		assert(inbufs.count().n_audio() == 0);
@@ -1443,7 +1443,7 @@ Panner::run (BufferSet& inbufs, BufferSet& outbufs, sframes_t start_frame, sfram
 	}
 
 	// Otherwise.. let the automation flow, baby
-	
+
 	if (outbufs.count().n_audio() == 1) {
 
 		AudioBuffer& dst = outbufs.get_audio(0);
@@ -1464,7 +1464,7 @@ Panner::run (BufferSet& inbufs, BufferSet& outbufs, sframes_t start_frame, sfram
 
 	// More than 1 output, we should have 1 panner for each input
 	//assert(_streampanners.size() == inbufs.count().n_audio());
-	
+
 	/* the terrible silence ... */
 	for (BufferSet::audio_iterator i = outbufs.audio_begin(); i != outbufs.audio_end(); ++i) {
 		i->silence(nframes);
@@ -1482,7 +1482,7 @@ Panner::run (BufferSet& inbufs, BufferSet& outbufs, sframes_t start_frame, sfram
 void
 Panner::set_name (string str)
 {
-	automation_path = Glib::build_filename(_session.automation_dir(), 
+	automation_path = Glib::build_filename(_session.automation_dir(),
 		_session.snap_name() + "-pan-" + legalize_for_path (str) + ".automation");
 }
 */
@@ -1499,7 +1499,7 @@ Panner::load ()
 	if (automation_path.length() == 0) {
 		return 0;
 	}
-	
+
 	if (access (automation_path.c_str(), F_OK)) {
 		return 0;
 	}
@@ -1524,7 +1524,7 @@ Panner::load ()
 					return -1;
 				}
 			} else {
-				error << string_compose(_("no version information in pan automation event file \"%1\" (first line = %2)"), 
+				error << string_compose(_("no version information in pan automation event file \"%1\" (first line = %2)"),
 						 automation_path, line) << endmsg;
 				return -1;
 			}
@@ -1537,7 +1537,7 @@ Panner::load ()
 		}
 
 		if (strcmp (line, "begin") == 0) {
-			
+
 			if (sp == _streampanners.end()) {
 				error << string_compose (_("too many panner states found in pan automation file %1"),
 						  automation_path)
@@ -1548,7 +1548,7 @@ Panner::load ()
 			if ((*sp)->load (in, automation_path, linecnt)) {
 				return -1;
 			}
-			
+
 			++sp;
 		}
 	}

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -70,10 +70,10 @@ Editor::extend_selection_to_track (TimeAxisView& view)
 		} else {
 			return false;
 		}
-	} 
+	}
 
 	/* something is already selected, so figure out which range of things to add */
-	
+
 	TrackViewList to_be_added;
 	TrackViewList sorted = track_views;
 	TrackViewByPositionSorter cmp;
@@ -103,18 +103,18 @@ Editor::extend_selection_to_track (TimeAxisView& view)
 			break;
 		}
 	}
-			
+
 	passed_clicked = false;
 
 	if (forwards) {
 
 		for (TrackViewList::iterator i = sorted.begin(); i != sorted.end(); ++i) {
-					
+
 			if ((*i) == &view) {
 				passed_clicked = true;
 				continue;
 			}
-					
+
 			if (passed_clicked) {
 				if ((*i)->hidden()) {
 					continue;
@@ -130,18 +130,18 @@ Editor::extend_selection_to_track (TimeAxisView& view)
 	} else {
 
 		for (TrackViewList::reverse_iterator r = sorted.rbegin(); r != sorted.rend(); ++r) {
-					
+
 			if ((*r) == &view) {
 				passed_clicked = true;
 				continue;
 			}
-					
+
 			if (passed_clicked) {
-						
+
 				if ((*r)->hidden()) {
 					continue;
 				}
-						
+
 				if (selection->selected (*r)) {
 					break;
 				} else if (!(*r)->hidden()) {
@@ -150,12 +150,12 @@ Editor::extend_selection_to_track (TimeAxisView& view)
 			}
 		}
 	}
-			
+
 	if (!to_be_added.empty()) {
 		selection->add (to_be_added);
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -211,7 +211,7 @@ Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no
 	case Selection::Set:
 		selection->set (&view);
 		break;
-		
+
 	case Selection::Extend:
 		extend_selection_to_track (view);
 		break;
@@ -224,7 +224,7 @@ Editor::set_selected_track_from_click (bool press, Selection::Operation op, bool
 	if (!clicked_routeview) {
 		return;
 	}
-	
+
 	if (!press) {
 		return;
 	}
@@ -278,7 +278,7 @@ Editor::get_equivalent_tracks (RouteTimeAxisView* basis, set<RouteTimeAxisView*>
 
 		/* the basis is a member of an active route group, with the appropriate
 		   properties; find other members */
-		
+
 		for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			RouteTimeAxisView* v = dynamic_cast<RouteTimeAxisView*> (*i);
 			if (v && v->route()->route_group() == group) {
@@ -319,7 +319,7 @@ Editor::mapover_tracks (slot<void, RouteTimeAxisView&, uint32_t> sl, TimeAxisVie
 	if (route_basis == 0) {
 		return;
 	}
-	
+
 	set<RouteTimeAxisView*> tracks;
 	get_equivalent_tracks (route_basis, tracks, prop);
 
@@ -363,9 +363,9 @@ void
 Editor::get_equivalent_regions (RegionView* basis, vector<RegionView*>& equivalent_regions, RouteGroup::Property prop) const
 {
 	mapover_tracks (bind (mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions), &basis->get_trackview(), prop);
-	
+
 	/* add clicked regionview since we skipped all other regions in the same track as the one it was in */
-	
+
 	equivalent_regions.push_back (basis);
 }
 
@@ -373,11 +373,11 @@ RegionSelection
 Editor::get_equivalent_regions (RegionSelection & basis, RouteGroup::Property prop) const
 {
 	RegionSelection equivalent;
-	
+
 	for (RegionSelection::const_iterator i = basis.begin(); i != basis.end(); ++i) {
 
 		vector<RegionView*> eq;
-		
+
 		mapover_tracks (
 			bind (mem_fun (*this, &Editor::mapped_get_equivalent_regions), *i, &eq),
 			&(*i)->get_trackview(), prop
@@ -392,42 +392,42 @@ Editor::get_equivalent_regions (RegionSelection & basis, RouteGroup::Property pr
 
 	return equivalent;
 }
-	
+
 
 int
 Editor::get_regionview_count_from_region_list (boost::shared_ptr<Region> region)
 {
 	int region_count = 0;
-	
+
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		
+
 		RouteTimeAxisView* tatv;
-		
+
 		if ((tatv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
-			
+
 			boost::shared_ptr<Playlist> pl;
 			vector<boost::shared_ptr<Region> > results;
 			RegionView* marv;
 			boost::shared_ptr<Diskstream> ds;
-			
+
 			if ((ds = tatv->get_diskstream()) == 0) {
 				/* bus */
 				continue;
 			}
-			
+
 			if ((pl = (ds->playlist())) != 0) {
 				pl->get_region_list_equivalent_regions (region, results);
 			}
-			
+
 			for (vector<boost::shared_ptr<Region> >::iterator ir = results.begin(); ir != results.end(); ++ir) {
 				if ((marv = tatv->view()->find_view (*ir)) != 0) {
 					region_count++;
 				}
 			}
-			
+
 		}
 	}
-	
+
 	return region_count;
 }
 
@@ -444,14 +444,14 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 	if (press) {
 		button_release_can_deselect = false;
-	} 
+	}
 
 	if (op == Selection::Toggle || op == Selection::Set) {
 
 
 		switch (op) {
 		case Selection::Toggle:
-			
+
 			if (selection->selected (clicked_regionview)) {
 				if (press) {
 
@@ -476,7 +476,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 						button_release_can_deselect = false;
 					}
-				} 
+				}
 
 			} else {
 
@@ -489,7 +489,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 					}
 
 					/* add all the equivalent regions, but only on button press */
-					
+
 
 
 					if (!all_equivalent_regions.empty()) {
@@ -497,10 +497,10 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 					}
 
 					selection->add (all_equivalent_regions);
-				} 
+				}
 			}
 			break;
-			
+
 		case Selection::Set:
 			if (!selection->selected (clicked_regionview)) {
 				get_equivalent_regions (clicked_regionview, all_equivalent_regions, RouteGroup::Select);
@@ -547,7 +547,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		if (same_track) {
 
 			/* 2. figure out the boundaries for our search for new objects */
-			
+
 			switch (clicked_regionview->region()->coverage (first_frame, last_frame)) {
 			case OverlapNone:
 				if (last_frame < clicked_regionview->region()->first_frame()) {
@@ -558,7 +558,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 					first_frame = clicked_regionview->region()->first_frame();
 				}
 				break;
-				
+
 			case OverlapExternal:
 				if (last_frame < clicked_regionview->region()->first_frame()) {
 					first_frame = last_frame;
@@ -568,7 +568,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 					first_frame = clicked_regionview->region()->first_frame();
 				}
 				break;
-				
+
 			case OverlapInternal:
 				if (last_frame < clicked_regionview->region()->first_frame()) {
 					first_frame = last_frame;
@@ -578,7 +578,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 					first_frame = clicked_regionview->region()->first_frame();
 				}
 				break;
-				
+
 			case OverlapStart:
 			case OverlapEnd:
 				/* nothing to do except add clicked region to selection, since it
@@ -593,11 +593,11 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 			   to pick out all regions that are defined by the existing selection
 			   plus this one.
 			*/
-			
-			
+
+
 			first_frame = entered_regionview->region()->position();
 			last_frame = entered_regionview->region()->last_frame();
-			
+
 			for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 				if ((*i)->region()->position() < first_frame) {
 					first_frame = (*i)->region()->position();
@@ -653,12 +653,12 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 							if (result.second) {
 								/* newly added to already_in_selection */
-							
+
 
 								int d = artv->route()->order_key ("editor");
-								
+
 								d -= key;
-								
+
 								if (abs (d) < distance) {
 									distance = abs (d);
 									closest = artv;
@@ -666,17 +666,17 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 							}
 						}
 					}
-					
+
 					if (closest) {
 
 						/* now add all tracks between that one and this one */
-						
+
 						int okey = closest->route()->order_key ("editor");
-						
+
 						if (okey > key) {
 							swap (okey, key);
 						}
-						
+
 						for (TrackViewList::iterator x = track_views.begin(); x != track_views.end(); ++x) {
 							RouteTimeAxisView* artv = dynamic_cast<RouteTimeAxisView*>(*x);
 							if (artv && artv != rtv) {
@@ -714,11 +714,11 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		for (set<RouteTimeAxisView*>::iterator t = relevant_tracks.begin(); t != relevant_tracks.end(); ++t) {
 			(*t)->get_selectables (first_frame, last_frame, -1.0, -1.0, results);
 		}
-		
+
 		/* 4. convert to a vector of regions */
 
 		vector<RegionView*> regions;
-		
+
 		for (list<Selectable*>::iterator x = results.begin(); x != results.end(); ++x) {
 			RegionView* arv;
 
@@ -750,7 +750,7 @@ Editor::set_selected_regionview_from_region_list (boost::shared_ptr<Region> regi
 	}
 
 	begin_reversible_command (_("set selected regions"));
-	
+
 	switch (op) {
 	case Selection::Toggle:
 		/* XXX this is not correct */
@@ -784,16 +784,16 @@ Editor::set_selected_regionview_from_map_event (GdkEventAny* /*ev*/, StreamView*
 		return true;
 	}
 
-	/* don't reset the selection if its something other than 
+	/* don't reset the selection if its something other than
 	   a single other region.
 	*/
 
 	if (selection->regions.size() > 1) {
 		return true;
 	}
-	
+
 	begin_reversible_command (_("set selected regions"));
-	
+
 	selection->set (rv);
 
 	commit_reversible_command () ;
@@ -883,14 +883,14 @@ Editor::region_selection_changed ()
 	editor_regions_selection_changed_connection.block(true);
 
 	_regions->unselect_all ();
-	
+
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		
+
 		(*i)->set_selected_regionviews (selection->regions);
 		_regions->set_selected (selection->regions);
-	
+
 	}
-	
+
 	sensitize_the_right_region_actions (!selection->regions.empty());
 
 	zoomed_to_region = false;
@@ -915,7 +915,7 @@ Editor::select_all_in_track (Selection::Operation op)
 	if (!clicked_routeview) {
 		return;
 	}
-	
+
 	clicked_routeview->get_selectables (0, max_frames, 0, DBL_MAX, touched);
 
 	switch (op) {
@@ -970,7 +970,7 @@ Editor::invert_selection_in_track ()
 	if (!clicked_routeview) {
 		return;
 	}
-	
+
 	clicked_routeview->get_inverted_selectables (*selection, touched);
 	selection->set (touched);
 }
@@ -979,7 +979,7 @@ void
 Editor::invert_selection ()
 {
 	list<Selectable *> touched;
-	
+
 	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
 		if ((*iter)->hidden()) {
 			continue;
@@ -1005,7 +1005,7 @@ Editor::select_all_within (nframes64_t start, nframes64_t end, double top, doubl
 		n = touched.size();
 
 		(*iter)->get_selectables (start, end, top, bot, touched);
-		
+
 		if (n != touched.size()) {
 			touched_tracks.push_back (*iter);
 		}
@@ -1048,7 +1048,7 @@ Editor::select_all_within (nframes64_t start, nframes64_t end, double top, doubl
 		/* not defined yet */
 		break;
 	}
-	
+
 	commit_reversible_command ();
 
 	return !touched.empty();
@@ -1315,7 +1315,7 @@ Editor::select_range_between ()
 {
         nframes64_t start;
 	nframes64_t end;
-	
+
 	if (!get_edit_op_range (start, end)) {
 		return;
 	}
@@ -1365,7 +1365,7 @@ Editor::get_edit_op_range (nframes64_t& start, nframes64_t& end) const
 				end = selection->markers.front()->position();
 			}
 			break;
-			
+
 		case EditAtMouse:
 			/* use mouse + selected marker */
 			if (selection->markers.empty()) {
@@ -1376,11 +1376,11 @@ Editor::get_edit_op_range (nframes64_t& start, nframes64_t& end) const
 				end = m;
 			}
 			break;
-			
+
 		case EditAtSelectedMarker:
 			/* use mouse + selected marker */
 			if (selection->markers.empty()) {
-				
+
 				MessageDialog win (_("No edit range defined"),
 						   false,
 						   MESSAGE_INFO,
@@ -1388,14 +1388,14 @@ Editor::get_edit_op_range (nframes64_t& start, nframes64_t& end) const
 
 				win.set_secondary_text (
 					_("the edit point is Selected Marker\nbut there is no selected marker."));
-				
+
 
 				win.set_default_response (RESPONSE_CLOSE);
 				win.set_position (Gtk::WIN_POS_MOUSE);
 				win.show_all();
-				
+
 				win.run ();
-				
+
 				return false; // NO RANGE
 			}
 			start = selection->markers.front()->position();

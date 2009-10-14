@@ -134,7 +134,7 @@ GType SimpleLine::get_base_type()
   return gnome_canvas_line_get_type();
 }
 
-Glib::PropertyProxy<guint> SimpleLine::property_color_rgba() 
+Glib::PropertyProxy<guint> SimpleLine::property_color_rgba()
 {
   return Glib::PropertyProxy<guint>(this, "color_rgba");
 }
@@ -144,7 +144,7 @@ Glib::PropertyProxy_ReadOnly<guint> SimpleLine::property_color_rgba() const
   return Glib::PropertyProxy_ReadOnly<guint>(this, "color_rgba");
 }
 
-Glib::PropertyProxy<double> SimpleLine::property_x1() 
+Glib::PropertyProxy<double> SimpleLine::property_x1()
 {
   return Glib::PropertyProxy<double>(this, "x1");
 }
@@ -154,7 +154,7 @@ Glib::PropertyProxy_ReadOnly<double> SimpleLine::property_x1() const
   return Glib::PropertyProxy_ReadOnly<double>(this, "x1");
 }
 
-Glib::PropertyProxy<double> SimpleLine::property_x2() 
+Glib::PropertyProxy<double> SimpleLine::property_x2()
 {
   return Glib::PropertyProxy<double>(this, "x2");
 }
@@ -164,7 +164,7 @@ Glib::PropertyProxy_ReadOnly<double> SimpleLine::property_x2() const
   return Glib::PropertyProxy_ReadOnly<double>(this, "x2");
 }
 
-Glib::PropertyProxy<double> SimpleLine::property_y1() 
+Glib::PropertyProxy<double> SimpleLine::property_y1()
 {
   return Glib::PropertyProxy<double>(this, "y1");
 }
@@ -174,7 +174,7 @@ Glib::PropertyProxy_ReadOnly<double> SimpleLine::property_y1() const
   return Glib::PropertyProxy_ReadOnly<double>(this, "y1");
 }
 
-Glib::PropertyProxy<double> SimpleLine::property_y2() 
+Glib::PropertyProxy<double> SimpleLine::property_y2()
 {
   return Glib::PropertyProxy<double>(this, "y2");
 }

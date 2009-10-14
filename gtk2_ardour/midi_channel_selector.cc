@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Paul Davis 
+    Copyright (C) 2008 Paul Davis
     Author: Hans Baier
 
     This program is free software; you can redistribute it and/or modify
@@ -31,15 +31,15 @@ using namespace ARDOUR;
 MidiChannelSelector::MidiChannelSelector(int n_rows, int n_columns, int start_row, int start_column)
 	: Table(n_rows, n_columns, true)
 	, _recursion_counter(0)
-{	
+{
 	assert(n_rows >= 4);
 	assert(n_rows >= start_row + 4);
 	assert(n_columns >=4);
 	assert(n_columns >= start_column + 4);
-	
+
 	property_column_spacing() = 0;
 	property_row_spacing() = 0;
-	
+
 	uint8_t channel_nr = 0;
 	for (int row = 0; row < 4; ++row) {
 		for (int column = 0; column < 4; ++column) {
@@ -103,10 +103,10 @@ SingleMidiChannelSelector::SingleMidiChannelSelector(uint8_t active_channel)
 
 void
 SingleMidiChannelSelector::button_toggled(ToggleButton* button, uint8_t channel)
-{	
+{
 	++_recursion_counter;
 	if (_recursion_counter == 1) {
-		// if the current button is active it must 
+		// if the current button is active it must
 		// be different from the first one
 		if (button->get_active()) {
 			if (_last_active_button) {
@@ -131,15 +131,15 @@ MidiMultipleChannelSelector::MidiMultipleChannelSelector(ChannelMode mode, uint1
 	_select_all.add(*manage(new Label(_("All"))));
 	_select_all.signal_clicked().connect(
 			bind(mem_fun(this, &MidiMultipleChannelSelector::select_all), true));
-	
+
 	_select_none.add(*manage(new Label(_("None"))));
 	_select_none.signal_clicked().connect(
 			bind(mem_fun(this, &MidiMultipleChannelSelector::select_all), false));
-	
+
 	_invert_selection.add(*manage(new Label(_("Invert"))));
 	_invert_selection.signal_clicked().connect(
 			mem_fun(this, &MidiMultipleChannelSelector::invert_selection));
-	
+
 	_force_channel.add(*manage(new Label(_("Force"))));
 	_force_channel.signal_toggled().connect(
 			mem_fun(this, &MidiMultipleChannelSelector::force_channels_button_toggled));
@@ -151,7 +151,7 @@ MidiMultipleChannelSelector::MidiMultipleChannelSelector(ChannelMode mode, uint1
 	attach(_select_none,      5, 6, 1, 2);
 	attach(_invert_selection, 5, 6, 2, 3);
 	attach(_force_channel,    5, 6, 3, 4);
-	
+
 	set_selected_channels(mask);
 }
 
@@ -181,21 +181,21 @@ MidiMultipleChannelSelector::set_channel_mode(ChannelMode mode, uint16_t mask)
 	}
 }
 
-uint16_t 
-MidiMultipleChannelSelector::get_selected_channels() const 
-{ 
+uint16_t
+MidiMultipleChannelSelector::get_selected_channels() const
+{
 	uint16_t selected_channels = 0;
 	for (uint16_t i = 0; i < 16; i++) {
 		const ToggleButton* button = &_buttons[i / 4][i % 4];
 		if (button->get_active()) {
 			selected_channels |= (1L << i);
-		} 
+		}
 	}
-	
-	return selected_channels; 
+
+	return selected_channels;
 }
 
-void 
+void
 MidiMultipleChannelSelector::set_selected_channels(uint16_t selected_channels)
 {
 	for (uint16_t i = 0; i < 16; i++) {
@@ -223,7 +223,7 @@ MidiMultipleChannelSelector::button_toggled(ToggleButton */*button*/, uint8_t ch
 	--_recursion_counter;
 }
 
-void 
+void
 MidiMultipleChannelSelector::force_channels_button_toggled()
 {
 	if (_force_channel.get_active()) {
@@ -242,13 +242,13 @@ MidiMultipleChannelSelector::force_channels_button_toggled()
 					found_first_active = true;
 					active_channel = i;
 				}
-			} 
+			}
 		}
-		
+
 		if (!found_first_active) {
 			_buttons[0][0].set_active(true);
 		}
-		
+
 		_select_all.set_sensitive(false);
 		_select_none.set_sensitive(false);
 		_invert_selection.set_sensitive(false);
@@ -262,7 +262,7 @@ MidiMultipleChannelSelector::force_channels_button_toggled()
 	}
 }
 
-void 
+void
 MidiMultipleChannelSelector::select_all(bool on)
 {
 	if (_channel_mode == ForceChannel)
@@ -277,7 +277,7 @@ MidiMultipleChannelSelector::select_all(bool on)
 	mode_changed.emit(_channel_mode, get_selected_channels());
 }
 
-void 
+void
 MidiMultipleChannelSelector::invert_selection(void)
 {
 	if (_channel_mode == ForceChannel)

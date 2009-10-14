@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2003 Paul Davis 
+    Copyright (C) 2000-2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ namespace Evoral {
 
 /** The Selection class holds lists of selected items (tracks, regions, etc. etc.). */
 
-class Selection : public sigc::trackable 
+class Selection : public sigc::trackable
 {
   public:
 	enum SelectionType {
@@ -110,7 +110,7 @@ class Selection : public sigc::trackable
 	void set (std::list<Selectable*>&);
 	void add (std::list<Selectable*>&);
 	void toggle (std::list<Selectable*>&);
-	
+
 	void set (TimeAxisView*);
 	void set (const std::list<TimeAxisView*>&);
 	void set (const MidiNoteSelection&);
@@ -168,7 +168,7 @@ class Selection : public sigc::trackable
 	void remove (Marker*);
 
 	void replace (uint32_t time_index, nframes_t start, nframes_t end);
-	
+
 	void clear_regions();
 	void clear_tracks ();
 	void clear_time();

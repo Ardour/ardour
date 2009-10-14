@@ -82,7 +82,7 @@ public:
 	/** Remove the line at coord
 	 */
 	void remove_line(double coord);
-	
+
 	/** Remove all lines in a coordinate range
 	 */
 	void remove_lines(double c1, double c2);
@@ -90,7 +90,7 @@ public:
 	/** Remove all lines with a coordinate lower than coord
 	 */
 	void remove_until(double coord);
-	
+
 	/** Remove all lines with a coordinate equal to or higher than coord.
 	 */
 	void remove_from(double coord);
@@ -127,7 +127,7 @@ public:
 
 	/* debug */
 	void print_lines();
-	
+
 protected:
 	struct Line {
 		Line(double c, double w, uint32_t color);

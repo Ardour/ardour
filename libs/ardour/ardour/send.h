@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #include <sigc++/signal.h>
 #include <string>
 
-#include "pbd/stateful.h" 
+#include "pbd/stateful.h"
 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
@@ -36,7 +36,7 @@ class Amp;
 
 class Send : public Delivery
 {
-  public:	
+  public:
 	Send (Session&, boost::shared_ptr<MuteMaster>, Delivery::Role r = Delivery::Send);
 	Send (Session&, boost::shared_ptr<MuteMaster>, const XMLNode&, Delivery::Role r = Delivery::Send);
 	virtual ~Send ();
@@ -50,7 +50,7 @@ class Send : public Delivery
 
 	bool metering() const { return _metering; }
 	void set_metering (bool yn) { _metering = yn; }
-	
+
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
 	int set_state(const XMLNode& node);
@@ -78,7 +78,7 @@ class Send : public Delivery
   private:
 	/* disallow copy construction */
 	Send (const Send&);
-	
+
 	uint32_t  _bitslot;
 };
 

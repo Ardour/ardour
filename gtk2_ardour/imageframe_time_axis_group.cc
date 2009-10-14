@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ using namespace ARDOUR ;
 
 //---------------------------------------------------------------------------------------//
 // Constructor / Desctructor
-		
+
 /**
  * Constructs a new ImageFrameTimeAxisGroup.
  *
@@ -62,25 +62,25 @@ ImageFrameTimeAxisGroup::~ImageFrameTimeAxisGroup()
 	for(ImageFrameViewList::iterator iter = imageframe_views.begin(); iter != imageframe_views.end(); ++iter)
 	{
 		ImageFrameView* ifv = *iter ;
-		
+
 		ImageFrameViewList::iterator next = iter ;
 		next++ ;
-		
+
 		imageframe_views.erase(iter) ;
 
 		delete ifv ;
 		ifv = 0 ;
-		
+
 		iter = next ;
 	}
-	
+
 	 GoingAway() ; /* EMIT_SIGNAL */
 }
 
 
 //---------------------------------------------------------------------------------------//
 // Name/Id Accessors/Mutators
-		
+
 /**
  * Set the name/Id of this group.
  *
@@ -140,10 +140,10 @@ ImageFrameTimeAxisGroup::set_item_heights(gdouble h)
 /**
  * Sets the current samples per unit.
  * this method tells each item upon the time axis of the change
- * 
+ *
  * @param spu the new samples per canvas unit value
  */
-int 
+int
 ImageFrameTimeAxisGroup::set_item_samples_per_units(gdouble spp)
 {
 	if(spp < 1.0)
@@ -155,7 +155,7 @@ ImageFrameTimeAxisGroup::set_item_samples_per_units(gdouble spp)
 	{
 		(*citer)->set_samples_per_unit(spp) ;
 	}
-	
+
 	return(0) ;
 }
 
@@ -197,7 +197,7 @@ ImageFrameView*
 ImageFrameTimeAxisGroup::add_imageframe_item(const string & frame_id, nframes_t start, nframes_t duration, unsigned char* rgb_data, uint32_t width, uint32_t height, uint32_t num_channels, void* src)
 {
 	ImageFrameView* ifv = 0 ;
-	
+
 	//check that there is not already an imageframe with that id
 	if(get_named_imageframe_item(frame_id) == 0)
 	{
@@ -215,9 +215,9 @@ ImageFrameTimeAxisGroup::add_imageframe_item(const string & frame_id, nframes_t 
 			num_channels) ;
 
 		imageframe_views.push_front(ifv) ;
-	
+
 		ifv->GoingAway.connect(bind(mem_fun(*this,&ImageFrameTimeAxisGroup::remove_imageframe_item), (void*)this)) ;
-	
+
 		 ImageFrameAdded(ifv, src) ; /* EMIT_SIGNAL */
 	}
 
@@ -235,7 +235,7 @@ ImageFrameView*
 ImageFrameTimeAxisGroup::get_named_imageframe_item(const string & frame_id)
 {
 	ImageFrameView* ifv =  0 ;
-	
+
 	for (ImageFrameViewList::const_iterator i = imageframe_views.begin(); i != imageframe_views.end(); ++i)
 	{
 		if (((ImageFrameView*)*i)->get_item_name() == frame_id)
@@ -246,7 +246,7 @@ ImageFrameTimeAxisGroup::get_named_imageframe_item(const string & frame_id)
 	}
 	return(ifv) ;
 }
-		
+
 /**
  * Removes the currently selected ImageFrameView
  *
@@ -259,20 +259,20 @@ void
 ImageFrameTimeAxisGroup::remove_selected_imageframe_item(void* src)
 {
 	std::string frame_id ;
-	
+
 	if(selected_imageframe_item)
 	{
 		ImageFrameViewList::iterator i ;
-		
+
 		if((i = find(imageframe_views.begin(), imageframe_views.end(), selected_imageframe_item)) != imageframe_views.end())
 		{
 			imageframe_views.erase(i) ;
 			frame_id = selected_imageframe_item->get_item_name() ;
-			
+
 			// note that we delete the item here
 			delete(selected_imageframe_item) ;
 			selected_imageframe_item = 0 ;
-			
+
 			std::string track_id = _view_helper.trackview().name() ;
 			 ImageFrameRemoved(track_id, _group_id, frame_id, src) ; /* EMIT_SIGNAL */
 		}
@@ -283,7 +283,7 @@ ImageFrameTimeAxisGroup::remove_selected_imageframe_item(void* src)
 	}
 }
 
-		
+
 /**
  * Removes and returns the named ImageFrameView from the list of ImageFrameViews held by this view helper
  *
@@ -295,29 +295,29 @@ ImageFrameView*
 ImageFrameTimeAxisGroup::remove_named_imageframe_item(const string & frame_id, void* src)
 {
 	ImageFrameView* removed = 0 ;
-	
+
 	for(ImageFrameViewList::iterator iter = imageframe_views.begin(); iter != imageframe_views.end(); ++iter)
 	{
 		ImageFrameView* tempItem = *iter ;
 		if(tempItem->get_item_name() == frame_id)
 		{
-			removed = tempItem ; 
+			removed = tempItem ;
 			imageframe_views.erase(iter) ;
-			
+
 			if (removed == selected_imageframe_item)
 			{
 				selected_imageframe_item = 0 ;
 			}
-			
+
 			std::string track_id = _view_helper.trackview().name() ;
 			 ImageFrameRemoved(track_id, _group_id, frame_id, src) ; /* EMIT_SIGNAL */
-			
+
 			// break from the for loop
 			break ;
 		}
 		iter++ ;
 	}
-	
+
 	return(removed) ;
 }
 
@@ -331,12 +331,12 @@ void
 ImageFrameTimeAxisGroup::remove_imageframe_item(ImageFrameView* ifv, void* src)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameTimeAxisGroup::remove_imageframe_item), ifv, src));
-	
+
 	ImageFrameViewList::iterator i;
 	if((i = find (imageframe_views.begin(), imageframe_views.end(), ifv)) != imageframe_views.end())
 	{
 		imageframe_views.erase(i) ;
-		
+
 		std::string frame_id = ifv->get_item_name() ;
 		std::string track_id = _view_helper.trackview().name() ;
 		 ImageFrameRemoved(track_id, _group_id, frame_id, src) ; /* EMIT_SIGNAL */
@@ -358,9 +358,9 @@ ImageFrameTimeAxisGroup::remove_imageframe_item(ImageFrameView* ifv, void* src)
 //	{
 //		selected_imageframe_item->set_selected(false, this) ;
 //	}
-//	
+//
 //	selected_imageframe_item = ifv ;
-//	
+//
 //	if(!ifv->get_selected())
 //	{
 //		selected_imageframe_item->set_selected(true, this) ;

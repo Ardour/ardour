@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ Gdk::Color
 AxisView::unique_random_color()
 {
   	Gdk::Color newcolor;
-	
+
 	while (1) {
 
 		/* avoid neon/glowing tones by limiting them to the
@@ -76,11 +76,11 @@ AxisView::unique_random_color()
 			used_colors.push_back (newcolor);
 			return newcolor;
 		}
-		
+
 		for (list<Gdk::Color>::iterator i = used_colors.begin(); i != used_colors.end(); ++i) {
 		  Gdk::Color c = *i;
 			float rdelta, bdelta, gdelta;
-			
+
 			rdelta = newcolor.get_red() - c.get_red();
 			bdelta = newcolor.get_blue() - c.get_blue();
 			gdelta = newcolor.get_green() - c.get_green();

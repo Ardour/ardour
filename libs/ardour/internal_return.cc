@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ InternalReturn::configure_io (ChanCount in, ChanCount out)
 	return true;
 }
 
-void 
+void
 InternalReturn::set_block_size (nframes_t nframes)
 {
 	allocate_buffers (nframes);
@@ -136,7 +136,7 @@ InternalReturn::set_state (const XMLNode& node)
 	return Return::set_state (node);
 }
 
-bool 
+bool
 InternalReturn::can_support_io_configuration (const ChanCount& in, ChanCount& out) const
 {
 	out = in;
@@ -146,5 +146,5 @@ InternalReturn::can_support_io_configuration (const ChanCount& in, ChanCount& ou
 bool
 InternalReturn::visible () const
 {
-	return false; 
+	return false;
 }

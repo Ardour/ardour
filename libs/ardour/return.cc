@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 Return::Return (Session& s, bool internal)
-	: IOProcessor (s, (internal ? false : true), false, 
+	: IOProcessor (s, (internal ? false : true), false,
 		       string_compose (_("return %1"), (_bitslot = s.next_return_id()) + 1))
 	, _metering (false)
 {
@@ -113,7 +113,7 @@ Return::set_state(const XMLNode& node)
 			// _io->set_automation_state (*(*niter), Evoral::Parameter(GainAutomation));
 		}
 	}
-	
+
 	IOProcessor::set_state (*insert_node);
 
 	return 0;
@@ -125,7 +125,7 @@ Return::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframe
 	if ((!_active && !_pending_active) || _input->n_ports() == ChanCount::ZERO) {
 		return;
 	}
-	
+
 	_input->collect_input (bufs, nframes, _configured_input);
 	bufs.set_count(_configured_output);
 
@@ -133,7 +133,7 @@ Return::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframe
 	// so that we don't overwrite the main automation data for the route amp
 	// _amp->setup_gain_automation (start_frame, end_frame, nframes);
 	_amp->run (bufs, start_frame, end_frame, nframes);
-	
+
 	if (_metering) {
 		if (_amp->gain_control()->get_value() == 0) {
 			_meter->reset();
@@ -184,7 +184,7 @@ Return::make_unique (XMLNode &state, Session &session)
 	state.property("bitslot")->set_value (buf);
 
 	std::string const name = string_compose (_("return %1"), bitslot);
-	
+
 	state.property("name")->set_value (name);
 
 	XMLNode* io = state.child ("IO");

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ class AddRouteDialog : public ArdourDialog
 	Gtk::ComboBoxText route_group_combo;
 
 	std::vector<ARDOUR::TemplateInfo> route_templates;
-	
+
 	void track_type_chosen ();
 	void refill_channel_setups ();
 	void refill_route_groups ();
@@ -79,7 +79,7 @@ class AddRouteDialog : public ArdourDialog
 	bool route_separator (const Glib::RefPtr<Gtk::TreeModel> &m, const Gtk::TreeModel::iterator &i);
 
 	void reset_template_option_visibility ();
-	
+
 	void on_show ();
 
 	struct ChannelSetup {

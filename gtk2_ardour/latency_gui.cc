@@ -36,7 +36,7 @@ LatencyBarController::get_label (int&)
 	} else {
 		s << std::fixed << std::setprecision (2) << (nframes / (_latency_gui->sample_rate / 1000.0)) << " msecs";
 	}
-	
+
 	return s.str ();
 }
 
@@ -57,7 +57,7 @@ LatencyGUI::LatencyGUI (Latent& l, nframes64_t sr, nframes64_t psz)
 		unit_strings = I18N (_unit_strings);
 	}
 
-	set_popdown_strings (units_combo, unit_strings);	
+	set_popdown_strings (units_combo, unit_strings);
 	units_combo.set_active_text (unit_strings.front());
 
 	w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
@@ -144,14 +144,14 @@ LatencyDialog::LatencyDialog (const Glib::ustring& title, Latent& l, nframes64_t
 	: ArdourDialog (title, false, true),
 	  lwidget (l, sr, psz)
 {
-	  
+
 	get_vbox()->pack_start (lwidget);
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::APPLY, RESPONSE_REJECT);
 	add_button (Stock::OK, RESPONSE_ACCEPT);
 
 	show_all ();
-	
+
 	while (true) {
 		int ret = run ();
 

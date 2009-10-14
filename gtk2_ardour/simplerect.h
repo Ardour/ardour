@@ -6,7 +6,7 @@
 
 
 /* rect.h
- * 
+ *
  * Copyright (C) 1998 EMC Capital Management Inc.
  * Developed by Havoc Pennington <hp@pobox.com>
  *

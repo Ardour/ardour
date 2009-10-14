@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -44,16 +44,16 @@ AutomationController::AutomationController(boost::shared_ptr<AutomationControl> 
 	set_name (X_("PluginSlider")); // FIXME: get yer own name!
 	set_style (BarController::LeftToRight);
 	set_use_parent (true);
-	
+
 	StartGesture.connect (mem_fun(*this, &AutomationController::start_touch));
 	StopGesture.connect (mem_fun(*this, &AutomationController::end_touch));
-	
+
 	_adjustment->signal_value_changed().connect (
 			mem_fun(*this, &AutomationController::value_adjusted));
-		
+
 	_screen_update_connection = ARDOUR_UI::RapidScreenUpdate.connect (
 			mem_fun (*this, &AutomationController::display_effective_value));
-	
+
 	ac->Changed.connect (mem_fun(*this, &AutomationController::value_changed));
 }
 
@@ -88,7 +88,7 @@ AutomationController::get_label (int&)
 	} else {
 		s << std::fixed << std::setprecision(3) << _controllable->get_value();
 	}
-	
+
 	return s.str ();
 }
 
@@ -99,9 +99,9 @@ AutomationController::display_effective_value()
 	//	return;
 
 	float value = _controllable->get_value();
-	
+
 	if (_adjustment->get_value() != value) {
-		_ignore_change = true; 
+		_ignore_change = true;
 		_adjustment->set_value (value);
 		_ignore_change = false;
 	}
@@ -133,9 +133,9 @@ AutomationController::automation_state_changed ()
 	ENSURE_GUI_THREAD(mem_fun(*this, &AutomationController::automation_state_changed));
 
 	bool x = (_controllable->automation_state() != Off);
-	
+
 	/* start watching automation so that things move */
-	
+
 	_screen_update_connection.disconnect();
 
 	if (x) {

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -65,22 +65,22 @@ class PluginManager : public boost::noncopyable {
 	void add_favorite (ARDOUR::PluginType type, std::string unique_id);
 	void remove_favorite (ARDOUR::PluginType type, std::string unique_id);
 	bool is_a_favorite_plugin (const PluginInfoPtr&);
-	
+
   private:
 	struct FavoritePlugin {
-	    ARDOUR::PluginType type;
-	    std::string unique_id;
+		ARDOUR::PluginType type;
+		std::string unique_id;
 
-	    FavoritePlugin (ARDOUR::PluginType t, std::string id) 
-	    : type (t), unique_id (id) {}
-	    
-	    bool operator==(const FavoritePlugin& other) const {
-		    return other.type == type && other.unique_id == unique_id;
-	    }
+		FavoritePlugin (ARDOUR::PluginType t, std::string id)
+			: type (t), unique_id (id) {}
 
-	    bool operator<(const FavoritePlugin& other) const {
-		    return other.type < type || other.unique_id < unique_id;
-	    }
+		bool operator==(const FavoritePlugin& other) const {
+			return other.type == type && other.unique_id == unique_id;
+		}
+
+		bool operator<(const FavoritePlugin& other) const {
+			return other.type < type || other.unique_id < unique_id;
+		}
 	};
 	typedef std::set<FavoritePlugin> FavoritePluginList;
 	FavoritePluginList favorites;
@@ -93,7 +93,7 @@ class PluginManager : public boost::noncopyable {
 #ifdef HAVE_SLV2
 	LV2World* _lv2_world;
 #endif
-	
+
 	std::map<uint32_t, std::string> rdf_type;
 
 	std::string ladspa_path;
@@ -109,7 +109,7 @@ class PluginManager : public boost::noncopyable {
 
 	int au_discover ();
 	void au_refresh ();
-	
+
 	int lv2_discover ();
 	void lv2_refresh ();
 

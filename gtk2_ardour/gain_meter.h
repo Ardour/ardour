@@ -134,20 +134,20 @@ class GainMeterBase : virtual public sigc::trackable
 	bool gain_focused (GdkEventFocus*);
 
 	float max_peak;
-	
+
 	void gain_adjusted ();
 	void gain_changed ();
-	
+
 	void meter_point_clicked ();
 	void gain_unit_changed ();
-	
+
 	virtual void hide_all_meters ();
 
 	gint meter_button_press (GdkEventButton*, uint32_t);
 
 	bool peak_button_release (GdkEventButton*);
 	bool gain_key_press (GdkEventKey*);
-	
+
 	Gtk::Menu* meter_menu;
 	void popup_meter_menu (GdkEventButton*);
 

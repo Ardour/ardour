@@ -18,7 +18,7 @@
 
 */
 
-#ifndef __ardour_midi_model_h__ 
+#ifndef __ardour_midi_model_h__
 #define __ardour_midi_model_h__
 
 #include <queue>
@@ -52,7 +52,7 @@ public:
 	typedef double TimeType;
 
 	MidiModel(MidiSource* s, size_t size=0);
-	
+
 	NoteMode note_mode() const { return (percussive() ? Percussive : Sustained); }
 	void set_note_mode(NoteMode mode) { set_percussive(mode == Percussive); };
 
@@ -66,10 +66,10 @@ public:
 		DeltaCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node);
 
 		const std::string& name() const { return _name; }
-		
+
 		void operator()();
 		void undo();
-		
+
 		int set_state (const XMLNode&);
 		XMLNode& get_state ();
 
@@ -79,12 +79,12 @@ public:
 	private:
 		XMLNode &marshal_note(const boost::shared_ptr< Evoral::Note<TimeType> > note);
 		boost::shared_ptr< Evoral::Note<TimeType> > unmarshal_note(XMLNode *xml_note);
-		
+
 		boost::shared_ptr<MidiModel> _model;
 		const std::string            _name;
-		
+
 		typedef std::list< boost::shared_ptr< Evoral::Note<TimeType> > > NoteList;
-		
+
 		NoteList _added_notes;
 		NoteList _removed_notes;
 	};
@@ -110,35 +110,35 @@ public:
 		DiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node);
 
 		const std::string& name() const { return _name; }
-		
+
 		void operator()();
 		void undo();
-		
+
 		int set_state (const XMLNode&);
 		XMLNode& get_state ();
-		
-		void change (const boost::shared_ptr<Evoral::Note<TimeType> > note, 
-			     Property prop, uint8_t new_value);
-		void change (const boost::shared_ptr<Evoral::Note<TimeType> > note, 
-			     Property prop, TimeType new_time);
-		
+
+		void change (const boost::shared_ptr<Evoral::Note<TimeType> > note,
+				Property prop, uint8_t new_value);
+		void change (const boost::shared_ptr<Evoral::Note<TimeType> > note,
+				Property prop, TimeType new_time);
+
 	private:
 		boost::shared_ptr<MidiModel> _model;
 		const std::string            _name;
 
 		struct NotePropertyChange {
-		    DiffCommand::Property property;
-		    boost::shared_ptr<Evoral::Note<TimeType> > note;
-		    union {
-			uint8_t old_value;
-			TimeType old_time;
-		    };
-		    union {
-			uint8_t new_value;
-			TimeType new_time;
-		    };
-		}; 
-		
+			DiffCommand::Property property;
+			boost::shared_ptr<Evoral::Note<TimeType> > note;
+			union {
+				uint8_t old_value;
+				TimeType old_time;
+			};
+			union {
+				uint8_t new_value;
+				TimeType new_time;
+			};
+		};
+
 		typedef std::list<NotePropertyChange> ChangeList;
 		ChangeList _changes;
 
@@ -154,22 +154,22 @@ public:
 
 
 	bool write_to(boost::shared_ptr<MidiSource> source);
-		
+
 	// MidiModel doesn't use the normal AutomationList serialisation code
 	// since controller data is stored in the .mid
 	XMLNode& get_state();
 	int set_state(const XMLNode&) { return 0; }
 
 	sigc::signal<void> ContentsChanged;
-	
+
 	const MidiSource* midi_source() const { return _midi_source; }
-	void set_midi_source(MidiSource* source) { _midi_source = source; } 
+	void set_midi_source(MidiSource* source) { _midi_source = source; }
 
 	boost::shared_ptr<Evoral::Note<TimeType> > find_note (boost::shared_ptr<Evoral::Note<TimeType> >);
-	
+
 private:
 	friend class DeltaCommand;
-	
+
 	// We cannot use a boost::shared_ptr here to avoid a retain cycle
 	MidiSource* _midi_source;
 };

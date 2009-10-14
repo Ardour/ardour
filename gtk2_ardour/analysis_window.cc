@@ -46,11 +46,11 @@ AnalysisWindow::AnalysisWindow() :
 	  source_selection_label       (_("Signal source")),
 	  source_selection_ranges_rb   (_("Selected ranges")),
 	  source_selection_regions_rb  (_("Selected regions")),
-	
+
 	  display_model_label                   (_("Display model")),
 	  display_model_composite_separate_rb   (_("Composite graphs for each track")),
 	  display_model_composite_all_tracks_rb (_("Composite graph of all tracks")),
-	  
+
 	  show_minmax_button	 (_("Show frequency power range")),
 	  show_normalized_button (_("Normalize values")),
 
@@ -60,7 +60,7 @@ AnalysisWindow::AnalysisWindow() :
 	set_title(_("FFT analysis window"));
 
 	track_list_ready = false;
-	
+
 	// Left side: track list + controls
 	tlmodel = Gtk::ListStore::create(tlcols);
 	track_list.set_model (tlmodel);
@@ -73,16 +73,16 @@ AnalysisWindow::AnalysisWindow() :
 
 	Gtk::TreeViewColumn* track_col = track_list.get_column(0);
 	Gtk::CellRendererText* renderer = dynamic_cast<Gtk::CellRendererText*>(track_list.get_column_cell_renderer (0));
-	
+
 	track_col->add_attribute(renderer->property_foreground_gdk(), tlcols.color);
 	track_col->set_expand(true);
 
 
 	tlmodel->signal_row_changed().connect (
 			mem_fun(*this, &AnalysisWindow::track_list_row_changed) );
-	
+
 	fft_graph.set_analysis_window(this);
-		
+
 	vbox.pack_start(track_list);
 
 
@@ -94,10 +94,10 @@ AnalysisWindow::AnalysisWindow() :
 		source_selection_regions_rb.set_group(group);
 
 		source_selection_ranges_rb.set_active();
-		
+
 		vbox.pack_start (source_selection_ranges_rb,  false, false);
 		vbox.pack_start (source_selection_regions_rb, false, false);
-		
+
 		// "Selected ranges" radio
 		source_selection_ranges_rb.signal_toggled().connect (
 				bind ( mem_fun(*this, &AnalysisWindow::source_selection_changed), &source_selection_ranges_rb));
@@ -106,24 +106,24 @@ AnalysisWindow::AnalysisWindow() :
 		source_selection_regions_rb.signal_toggled().connect (
 				bind ( mem_fun(*this, &AnalysisWindow::source_selection_changed), &source_selection_regions_rb));
 	}
-	
+
 	vbox.pack_start(hseparator1, false, false);
-	
+
 	// "Display model"
 	vbox.pack_start(display_model_label, false, false);
 	{
 		Gtk::RadioButtonGroup group = display_model_composite_separate_rb.get_group();
 		display_model_composite_all_tracks_rb.set_group (group);
-		
+
 		display_model_composite_separate_rb.set_active();
-		
+
 		vbox.pack_start (display_model_composite_separate_rb,   false, false);
 		vbox.pack_start (display_model_composite_all_tracks_rb, false, false);
 
 		// "Composite graphs for all tracks"
 		display_model_composite_separate_rb.signal_toggled().connect (
 				bind ( mem_fun(*this, &AnalysisWindow::display_model_changed), &display_model_composite_separate_rb));
-		
+
 		// "Composite graph of all tracks"
 		display_model_composite_all_tracks_rb.signal_toggled().connect (
 				bind ( mem_fun(*this, &AnalysisWindow::display_model_changed), &display_model_composite_all_tracks_rb));
@@ -134,7 +134,7 @@ AnalysisWindow::AnalysisWindow() :
 	refresh_button.set_name("EditorGTKButton");
 	refresh_button.set_label(_("Re-analyze data"));
 
-	refresh_button.signal_clicked().connect ( bind ( mem_fun(*this, &AnalysisWindow::analyze_data), &refresh_button)); 
+	refresh_button.signal_clicked().connect ( bind ( mem_fun(*this, &AnalysisWindow::analyze_data), &refresh_button));
 
 	vbox.pack_start(refresh_button, false, false, 10);
 
@@ -149,18 +149,18 @@ AnalysisWindow::AnalysisWindow() :
 	show_normalized_button.signal_toggled().connect( mem_fun(*this, &AnalysisWindow::show_normalized_changed));
 	vbox.pack_start(show_normalized_button, false, false);
 
-	
 
-	
-	
+
+
+
 	hbox.pack_start(vbox, Gtk::PACK_SHRINK);
-	
+
 	// Analysis window on the right
 	fft_graph.ensure_style();
 
 	hbox.add(fft_graph);
-	
-	
+
+
 
 	// And last we pack the hbox
 	add(hbox);
@@ -197,7 +197,7 @@ AnalysisWindow::set_regionmode()
 	source_selection_regions_rb.set_active(true);
 }
 
-void 
+void
 AnalysisWindow::track_list_row_changed(const Gtk::TreeModel::Path& /*path*/, const Gtk::TreeModel::iterator& /*iter*/)
 {
 	if (track_list_ready) {
@@ -211,7 +211,7 @@ AnalysisWindow::clear_tracklist()
 {
 	// Empty track list & free old graphs
 	Gtk::TreeNodeChildren children = track_list.get_model()->children();
-	
+
 	for (Gtk::TreeIter i = children.begin(); i != children.end(); i++) {
 		Gtk::TreeModel::Row row = *i;
 
@@ -221,10 +221,10 @@ AnalysisWindow::clear_tracklist()
 
 		// Make sure it's not drawn
 		row[tlcols.graph] = 0;
-		
+
 		delete delete_me;
 	}
-		
+
 	tlmodel->clear();
 }
 
@@ -243,17 +243,17 @@ AnalysisWindow::analyze_data (Gtk::Button */*button*/)
 
 		// Empty track list & free old graphs
 		clear_tracklist();
-	
+
 		// first we gather the FFTResults of all tracks
-	
+
 		Sample *buf    = (Sample *) malloc(sizeof(Sample) * fft_graph.windowSize());
 		Sample *mixbuf = (Sample *) malloc(sizeof(Sample) * fft_graph.windowSize());
 		float  *gain   = (float *)  malloc(sizeof(float) * fft_graph.windowSize());
-	
+
 		Selection s = PublicEditor::instance().get_selection();
 		TimeSelection ts = s.time;
 		RegionSelection ars = s.regions;
-	
+
 		for (TrackSelection::iterator i = s.tracks.begin(); i != s.tracks.end(); ++i) {
 			boost::shared_ptr<AudioPlaylist> pl
 				= boost::dynamic_pointer_cast<AudioPlaylist>((*i)->playlist());
@@ -269,11 +269,11 @@ AnalysisWindow::analyze_data (Gtk::Button */*button*/)
 				continue;
 
 			FFTResult *res = fft_graph.prepareResult(rui->color(), rui->route()->name());
-		
+
 			// if timeSelection
 			if (source_selection_ranges_rb.get_active()) {
 //				cerr << "Analyzing ranges on track " << *&rui->route().name() << endl;
-				
+
 				for (std::list<AudioRange>::iterator j = ts.begin(); j != ts.end(); ++j) {
 
 					int n;
@@ -305,15 +305,15 @@ AnalysisWindow::analyze_data (Gtk::Button */*button*/)
 				}
 			} else if (source_selection_regions_rb.get_active()) {
 //				cerr << "Analyzing selected regions on track " << *&rui->route().name() << endl;
-				
+
 				TimeAxisView *current_axis = (*i);
-				
+
 				for (RegionSelection::iterator j = ars.begin(); j != ars.end(); ++j) {
 					// Check that the region is actually audio (so we can analyze it)
 					AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*j);
 					if (!arv)
 						continue;
-					
+
 					// Check that the region really is selected on _this_ track/solo
 					if ( &arv->get_time_axis_view() != current_axis)
 						continue;
@@ -357,21 +357,21 @@ AnalysisWindow::analyze_data (Gtk::Button */*button*/)
 			}
 			res->finalize();
 
-				
+
 			Gtk::TreeModel::Row newrow = *(tlmodel)->append();
 			newrow[tlcols.trackname]   = rui->route()->name();
 			newrow[tlcols.visible]     = true;
 			newrow[tlcols.color]       = rui->color();
 			newrow[tlcols.graph]       = res;
-		}	
+		}
 
-	
+
 		free(buf);
 		free(mixbuf);
 
 		track_list_ready = true;
 	} /* end lock */
-	
+
 	fft_graph.redraw();
 }
 
@@ -384,13 +384,13 @@ AnalysisWindow::source_selection_changed (Gtk::RadioButton *button)
 
 	/*
 	cerr << "AnalysisWindow: signal source = ";
-	
+
 	if (button == &source_selection_ranges_rb) {
 		cerr << "selected ranges" << endl;
-		
+
 	} else if (button == &source_selection_regions_rb) {
 		cerr << "selected regions" << endl;
-		
+
 	} else {
 		cerr << "unknown?" << endl;
 	}
@@ -406,7 +406,7 @@ AnalysisWindow::display_model_changed (Gtk::RadioButton *button)
 
 	/*
 	cerr << "AnalysisWindow: display model = ";
-	
+
 	if (button == &display_model_composite_separate_rb) {
 		cerr << "separate composites of tracks" << endl;
 	} else if (button == &display_model_composite_all_tracks_rb) {
@@ -416,5 +416,5 @@ AnalysisWindow::display_model_changed (Gtk::RadioButton *button)
 	}
 	*/
 }
-	  
+
 

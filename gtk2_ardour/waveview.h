@@ -6,7 +6,7 @@
 
 
 /* waveview.h
- * 
+ *
  * Copyright (C) 1998 EMC Capital Management Inc.
  * Developed by Havoc Pennington <hp@pobox.com>
  *
@@ -80,7 +80,7 @@ private:
 protected:
   explicit WaveView(const Glib::ConstructParams& construct_params);
   explicit WaveView(GnomeCanvasWaveView* castitem);
-  
+
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 public:

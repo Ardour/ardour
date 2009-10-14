@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 
 #include "pbd/fastlog.h"
 #include "pbd/undo.h"
-#include "pbd/statefuldestructible.h" 
+#include "pbd/statefuldestructible.h"
 #include "pbd/controllable.h"
 
 #include "ardour/ardour.h"
@@ -78,7 +78,7 @@ class IO : public SessionObject, public Latent
 
 	IO (Session&, const std::string& name, Direction, DataType default_type = DataType::AUDIO);
 	IO (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
-	
+
 	virtual ~IO();
 
 	Direction direction() const { return _direction; }
@@ -88,7 +88,7 @@ class IO : public SessionObject, public Latent
 
 	bool active() const { return _active; }
 	void set_active(bool yn) { _active = yn; }
-	
+
 	bool set_name (const std::string& str);
 
 	virtual void silence  (nframes_t);
@@ -101,7 +101,7 @@ class IO : public SessionObject, public Latent
 	BundleList bundles_connected ();
 
 	boost::shared_ptr<Bundle> bundle () { return _bundle; }
-	
+
 	int add_port (std::string connection, void *src, DataType type = DataType::NIL);
 	int remove_port (Port *, void *src);
 	int connect (Port *our_port, std::string other_port, void *src);
@@ -143,7 +143,7 @@ class IO : public SessionObject, public Latent
 	static int  enable_connecting (void);
 	static int  disable_ports (void);
 	static int  enable_ports (void);
-	
+
 	static sigc::signal<void,ChanCount> PortCountChanged; // emitted when the number of ports changes
 
 	static std::string name_from_state (const XMLNode&);
@@ -156,7 +156,7 @@ class IO : public SessionObject, public Latent
 	static bool              connecting_legal;
 
 	XMLNode *pending_state_node;
-	
+
 	/* three utility functions - this just seems to be simplest place to put them */
 
 	void collect_input (BufferSet& bufs, nframes_t nframes, ChanCount offset);
@@ -175,7 +175,7 @@ class IO : public SessionObject, public Latent
 	Direction _direction;
 	DataType _default_type;
 	bool     _active;
-            
+
   private:
 
 	int connecting_became_legal ();
@@ -185,16 +185,16 @@ class IO : public SessionObject, public Latent
 
 	struct UserBundleInfo {
 		UserBundleInfo (IO*, boost::shared_ptr<UserBundle> b);
-		
+
 		boost::shared_ptr<UserBundle> bundle;
 		sigc::connection changed;
 	};
-	
+
 	std::vector<UserBundleInfo> _bundles_connected; ///< user bundles connected to our ports
 
 	static int parse_io_string (const std::string&, std::vector<std::string>& chns);
 	static int parse_gain_string (const std::string&, std::vector<std::string>& chns);
-	
+
 	int ensure_ports (ChanCount, bool clear, bool lockit, void *src);
 
 	void check_bundles_connected ();

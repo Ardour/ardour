@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -88,17 +88,17 @@ class RouteParams_UI : public ArdourDialog
 	Gtk::VBox                route_vpacker;
 
 	ProcessorBox*            insert_box;
-	
+
 	Gtk::HPaned		 list_hpane;
 
 	Gtk::HPaned		 right_hpane;
-	
+
 	Gtk::Frame 		 route_choice_frame;
 
 	Gtk::Frame 		 route_param_frame;
 
 	Gtk::VBox                choice_vpacker;
-	
+
 	Gtk::Frame               latency_frame;
 	Gtk::VBox                latency_packer;
 	Gtk::HButtonBox          latency_button_box;
@@ -110,17 +110,17 @@ class RouteParams_UI : public ArdourDialog
 	sigc::connection         latency_apply_conn;
 
 	void refresh_latency ();
-	
+
 	Gtk::ToggleButton input_button;
 	Gtk::ToggleButton output_button;
 	Gtk::Label  track_input_label;
-	
+
 	Gtk::Label  title_label;
-	
+
 	Gtk::Container * _active_view;
 	IOSelector     * _input_iosel;
 	IOSelector     * _output_iosel;
-	
+
 	PluginSelector    *_plugin_selector;
 	RouteRedirectSelection  _rr_selection;
 
@@ -131,16 +131,16 @@ class RouteParams_UI : public ArdourDialog
 	boost::shared_ptr<ARDOUR::Processor> _processor;
 	sigc::connection                    _plugin_conn;
 
-	
+
 	enum ConfigView {
 		NO_CONFIG_VIEW = 0,
 		INPUT_CONFIG_VIEW,
 		OUTPUT_CONFIG_VIEW,
-		PLUGIN_CONFIG_VIEW,		
+		PLUGIN_CONFIG_VIEW,
 		PORTINSERT_CONFIG_VIEW,
 		SEND_CONFIG_VIEW
 	};
-	
+
 	ConfigView _current_view;
 
 
@@ -158,7 +158,7 @@ class RouteParams_UI : public ArdourDialog
 	Gtk::TreeView route_display;
 	Glib::RefPtr<Gtk::ListStore> route_display_model;
 
-	
+
 	void add_routes (ARDOUR::RouteList&);
 
 	void route_name_changed (boost::shared_ptr<ARDOUR::Route> route);
@@ -173,25 +173,25 @@ class RouteParams_UI : public ArdourDialog
 	void cleanup_view(bool stopupdate = true);
 	void cleanup_latency_frame ();
 	void setup_latency_frame ();
-	
+
 	void processors_changed ();
-	
+
 	void setup_processor_boxes();
 	void cleanup_processor_boxes();
 
 	void redirect_selected (boost::shared_ptr<ARDOUR::Processor>);
-	
+
 	void plugin_going_away (ARDOUR::Placement);
 	void redirect_going_away (boost::shared_ptr<ARDOUR::Processor>);
 
 	gint edit_input_configuration (GdkEventButton *ev);
 	gint edit_output_configuration (GdkEventButton *ev);
-	
+
 	void update_routeinfo (ARDOUR::Route * route);
-	
+
 	Gtk::Menu *track_menu;
 	void show_track_menu();
-	
+
 	void update_title ();
 	//void unselect_all_redirects ();
 

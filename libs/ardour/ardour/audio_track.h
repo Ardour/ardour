@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2006 Paul Davis 
+    Copyright (C) 2002-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,17 +36,17 @@ class AudioTrack : public Track
 	AudioTrack (Session&, const XMLNode&);
 	~AudioTrack ();
 
-	int set_mode (TrackMode m); 
+	int set_mode (TrackMode m);
 	bool can_use_mode (TrackMode m, bool& bounce_required);
 
-	int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
-		  int declick, bool can_record, bool rec_monitors_input);
+	int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
+			int declick, bool can_record, bool rec_monitors_input);
 
 	boost::shared_ptr<AudioDiskstream> audio_diskstream() const;
 
 	int use_diskstream (std::string name);
 	int use_diskstream (const PBD::ID& id);
-	
+
 	int export_stuff (BufferSet& bufs, sframes_t start_frame, nframes_t nframes, bool enable_processing = true);
 
 	void freeze (InterThreadInfo&);
@@ -59,7 +59,7 @@ class AudioTrack : public Track
 
   protected:
 	XMLNode& state (bool full);
-	
+
 	int _set_state (const XMLNode&, bool call_base);
 
   private:

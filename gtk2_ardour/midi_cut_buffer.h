@@ -25,7 +25,7 @@ namespace ARDOUR {
 	class Session;
 }
 
-class MidiCutBuffer : public ARDOUR::AutomatableSequence<ARDOUR::MidiModel::TimeType> 
+class MidiCutBuffer : public ARDOUR::AutomatableSequence<ARDOUR::MidiModel::TimeType>
 {
   public:
 	typedef ARDOUR::MidiModel::TimeType TimeType;
@@ -35,7 +35,7 @@ class MidiCutBuffer : public ARDOUR::AutomatableSequence<ARDOUR::MidiModel::Time
 
 	TimeType origin() const { return _origin; }
 	void set_origin (TimeType);
-	
+
 	void set (const Evoral::Sequence<TimeType>::Notes&);
 
   private:

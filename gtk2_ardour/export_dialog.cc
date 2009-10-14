@@ -46,44 +46,44 @@ void
 ExportDialog::set_session (ARDOUR::Session* s)
 {
 	session = s;
-	
+
 	/* Init handler and profile manager */
-	
+
 	handler = session->get_export_handler ();
 	status = session->get_export_status ();
 	profile_manager.reset (new ExportProfileManager (*session));
-	
+
 	/* Possibly init stuff in derived classes */
-	
+
 	init ();
-	
+
 	/* Rest of session related initialization */
-	
+
 	preset_selector->set_manager (profile_manager);
 	file_notebook->set_session_and_manager (session, profile_manager);
-	
+
 	/* Hand on selection range to profile manager  */
-	
+
 	TimeSelection const & time (editor.get_selection().time);
 	if (!time.empty()) {
 		profile_manager->set_selection_range (time.front().start, time.front().end);
 	} else {
 		profile_manager->set_selection_range ();
 	}
-	
+
 	/* Load states */
-	
+
 	profile_manager->load_profile ();
 	sync_with_manager ();
-	
+
 	/* Warnings */
-	
+
 	preset_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::sync_with_manager));
 	timespan_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings));
 	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings));
 	file_notebook->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings));
 	status->Aborting.connect (sigc::mem_fun (*this, &ExportDialog::notify_errors));
-	
+
 	update_warnings ();
 }
 
@@ -94,38 +94,38 @@ ExportDialog::init ()
 	init_gui ();
 
 	/* warnings */
-	
+
 	warning_widget.pack_start (warn_hbox, true, true, 6);
 	warning_widget.pack_end (list_files_hbox, false, false, 0);
-	
+
 	warn_hbox.pack_start (warn_label, true, true, 16);
 	warn_label.set_use_markup (true);
-	
+
 	list_files_hbox.pack_end (list_files_button, false, false, 6);
 	list_files_hbox.pack_end (list_files_label, false, false, 6);
 	list_files_label.set_use_markup (true);
-	
+
 	list_files_button.signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::show_conflicting_files));
-	
+
 	/* Progress indicators */
-	
+
 	progress_widget.pack_start (progress_label, false, false, 6);
 	progress_widget.pack_start (progress_bar, false, false, 6);
-	
+
 	/* Buttons */
-	
+
 	cancel_button = add_button (Gtk::Stock::CANCEL, RESPONSE_CANCEL);
 	rt_export_button = add_button (_("Realtime Export"), RESPONSE_RT);
 	fast_export_button = add_button (_("Fast Export"), RESPONSE_FAST);
-	
+
 	list_files_button.set_name ("PaddedButton");
-	
+
 	cancel_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::close_dialog));
 	rt_export_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::export_rt));
 	fast_export_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::export_fw));
-	
+
 	/* Done! */
-	
+
 	show_all_children ();
 	progress_widget.hide_all();
 }
@@ -141,21 +141,21 @@ ExportDialog::init_gui ()
 	Gtk::VBox* advanced_vbox = Gtk::manage (new Gtk::VBox());
 	advanced_vbox->set_spacing (12);
 	advanced_vbox->set_border_width (12);
-	
+
 	Gtk::Alignment * timespan_align = Gtk::manage (new Gtk::Alignment());
 	timespan_label = Gtk::manage (new Gtk::Label (_("Time Span"), Gtk::ALIGN_LEFT));
 	timespan_align->add (*timespan_selector);
 	timespan_align->set_padding (0, 12, 18, 0);
 	advanced_vbox->pack_start (*timespan_label, false, false, 0);
 	advanced_vbox->pack_start (*timespan_align, false, false, 0);
-	
+
 	Gtk::Alignment * channels_align = Gtk::manage (new Gtk::Alignment());
 	channels_label = Gtk::manage (new Gtk::Label (_("Channels"), Gtk::ALIGN_LEFT));
 	channels_align->add (*channel_selector);
 	channels_align->set_padding (0, 12, 18, 0);
 	advanced_vbox->pack_start (*channels_label, false, false, 0);
 	advanced_vbox->pack_start (*channels_align, false, false, 0);
-	
+
 	get_vbox()->pack_start (*file_notebook, false, false, 0);
 	get_vbox()->pack_start (warning_widget, false, false, 0);
 	get_vbox()->pack_start (progress_widget, false, false, 0);
@@ -164,11 +164,11 @@ ExportDialog::init_gui ()
 	advanced->add (*advanced_vbox);
 
 	get_vbox()->pack_start (*advanced, false, false);
-	
+
 	Pango::AttrList bold;
 	Pango::Attribute b = Pango::Attribute::create_attr_weight (Pango::WEIGHT_BOLD);
 	bold.insert (b);
-	
+
 	timespan_label->set_attributes (bold);
 	channels_label->set_attributes (bold);
 }
@@ -198,10 +198,10 @@ ExportDialog::close_dialog ()
 	if (status->running) {
 		status->abort();
 	}
-	
+
 	hide_all ();
 	set_modal (false);
-	
+
 }
 
 void
@@ -224,7 +224,7 @@ ExportDialog::update_warnings ()
 
 	list_files_hbox.hide ();
 	list_files_string = "";
-	
+
 	fast_export_button->set_sensitive (true);
 	rt_export_button->set_sensitive (true);
 
@@ -253,15 +253,15 @@ void
 ExportDialog::show_conflicting_files ()
 {
 	ArdourDialog dialog (_("Files that will be overwritten"), true);
-	
+
 	Gtk::Label label ("", Gtk::ALIGN_LEFT);
 	label.set_use_markup (true);
 	label.set_markup (list_files_string);
-	
+
 	dialog.get_vbox()->pack_start (label);
 	dialog.add_button (Gtk::Stock::OK, 0);
 	dialog.show_all_children ();
-	
+
 	dialog.run();
 }
 
@@ -295,7 +295,7 @@ ExportDialog::show_progress ()
 	progress_widget.show ();
 	progress_widget.show_all_children ();
 	progress_connection = Glib::signal_timeout().connect (mem_fun(*this, &ExportDialog::progress_timeout), 100);
-	
+
 	gtk_main_iteration ();
 	while (status->running) {
 		if (gtk_events_pending()) {
@@ -339,13 +339,13 @@ ExportDialog::add_error (Glib::ustring const & text)
 {
 	fast_export_button->set_sensitive (false);
 	rt_export_button->set_sensitive (false);
-	
+
 	if (warn_string.empty()) {
 		warn_string = _("<span color=\"#ffa755\">Error: ") + text + "</span>";
 	} else {
 		warn_string = _("<span color=\"#ffa755\">Error: ") + text + "</span>\n" + warn_string;
 	}
-	
+
 	warn_label.set_markup (warn_string);
 }
 
@@ -357,7 +357,7 @@ ExportDialog::add_warning (Glib::ustring const & text)
 	} else {
 		warn_string = warn_string + _("\n<span color=\"#ffa755\">Warning: ") + text + "</span>";
 	}
-	
+
 	warn_label.set_markup (warn_string);
 }
 
@@ -400,7 +400,7 @@ void
 ExportRegionDialog::init_gui ()
 {
 	ExportDialog::init_gui ();
-	
+
 	channels_label->set_text (_("Source"));
 }
 

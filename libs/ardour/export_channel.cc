@@ -46,7 +46,7 @@ PortExportChannel::read (Sample * data, nframes_t frames) const
 	for (PortSet::const_iterator it = ports.begin(); it != ports.end(); ++it) {
 		if (*it != 0) {
 			Sample* port_buffer = (*it)->get_audio_buffer(frames, 0).data();
-			
+
 			for (uint32_t i = 0; i < frames; ++i) {
 				data[i] += (float) port_buffer[i];
 			}
@@ -95,11 +95,11 @@ RegionExportChannelFactory::RegionExportChannelFactory (Session * session, Audio
 		break;
 	  case Fades:
 		n_channels = region.n_channels();
-		
+
 		mixdown_buffer = new Sample [frames_per_cycle];
 		gain_buffer = new Sample [frames_per_cycle];
 		memset (gain_buffer, 1.0, sizeof (Sample) * frames_per_cycle);
-		
+
 		break;
 	  case Processed:
 		n_channels = track.n_outputs().n_audio();
@@ -107,9 +107,9 @@ RegionExportChannelFactory::RegionExportChannelFactory (Session * session, Audio
 	  default:
 		throw ExportFailed ("Unhandled type in ExportChannelFactory constructor");
 	}
-	
+
 	session->ProcessExport.connect (sigc::hide (sigc::mem_fun (*this, &RegionExportChannelFactory::new_cycle_started)));
-	
+
 	buffers.set_count (ChanCount (DataType::AUDIO, n_channels));
 	buffers.ensure_buffers (DataType::AUDIO, n_channels, frames_per_cycle);
 }
@@ -132,12 +132,12 @@ RegionExportChannelFactory::read (uint32_t channel, Sample * data, nframes_t fra
 {
 	assert (channel < n_channels);
 	assert (frames_to_read <= frames_per_cycle);
-	
+
 	if (!buffers_up_to_date) {
 		update_buffers(frames_to_read);
 		buffers_up_to_date = true;
 	}
-	
+
 	memcpy (data, buffers.get_audio (channel).data(), frames_to_read * sizeof (Sample));
 }
 
@@ -165,6 +165,6 @@ RegionExportChannelFactory::update_buffers (nframes_t frames)
 	  default:
 		throw ExportFailed ("Unhandled type in ExportChannelFactory::update_buffers");
 	}
-	
+
 	position += frames;
 }

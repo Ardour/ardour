@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,10 +32,10 @@ class AudioRegionView;
 
 struct CrossfadeView : public TimeAxisViewItem
 {
-    CrossfadeView (ArdourCanvas::Group*, 
+    CrossfadeView (ArdourCanvas::Group*,
 		   RouteTimeAxisView&,
 		   boost::shared_ptr<ARDOUR::Crossfade>,
-		   double initial_samples_per_unit, 
+		   double initial_samples_per_unit,
 		   Gdk::Color& basic_color,
 		   AudioRegionView& leftview,
 		   AudioRegionView& rightview);
@@ -59,7 +59,7 @@ struct CrossfadeView : public TimeAxisViewItem
     void fake_hide ();
     void hide ();
     void show ();
-    
+
   protected:
     void reset_width_dependent_items (double pixel_width);
 

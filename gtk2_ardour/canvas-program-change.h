@@ -30,14 +30,14 @@ public:
 		uint8_t         channel,
 		uint8_t         program
 	);
-	
+
 	virtual ~CanvasProgramChange();
-	
+
 	virtual bool on_event(GdkEvent* ev);
-	
+
 	string model_name() const { return _model_name; }
 	void set_model_name(string model_name) { _model_name = model_name; }
-	
+
 	string custom_device_mode() const { return _custom_device_mode; }
 	void set_custom_device_mode(string custom_device_mode) { _custom_device_mode = custom_device_mode; }
 
@@ -49,14 +49,14 @@ public:
 
 	uint8_t channel() const { return _channel; }
 	void set_channel(uint8_t new_channel) { _channel = new_channel; };
-	
+
 	void initialize_popup_menus();
-	
+
 	void on_patch_menu_selected(const MIDI::Name::PatchPrimaryKey& key);
 
 private:
 	string        _model_name;
-	string        _custom_device_mode;   
+	string        _custom_device_mode;
 	nframes_t     _event_time;
 	uint8_t       _channel;
 	uint8_t       _program;

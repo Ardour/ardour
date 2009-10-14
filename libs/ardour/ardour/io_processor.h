@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001 Paul Davis 
+    Copyright (C) 2001 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,12 +45,12 @@ class IOProcessor : public Processor
 {
   public:
 	IOProcessor (Session&, bool with_input, bool with_output,
-		     const std::string& proc_name, const std::string io_name="",
-		     ARDOUR::DataType default_type = DataType::AUDIO);
+			  const std::string& proc_name, const std::string io_name="",
+			  ARDOUR::DataType default_type = DataType::AUDIO);
 	IOProcessor (Session&, boost::shared_ptr<IO> input, boost::shared_ptr<IO> output,
-		     const std::string& proc_name, ARDOUR::DataType default_type = DataType::AUDIO);
+			const std::string& proc_name, ARDOUR::DataType default_type = DataType::AUDIO);
 	virtual ~IOProcessor ();
-	
+
 	bool set_name (const std::string& str);
 
 	virtual ChanCount natural_output_streams() const;
@@ -62,7 +62,7 @@ class IOProcessor : public Processor
 	boost::shared_ptr<const IO> output() const { return _output; }
 	void set_input (boost::shared_ptr<IO>);
 	void set_output (boost::shared_ptr<IO>);
-	
+
 	void silence (nframes_t nframes);
 	void disconnect ();
 
@@ -70,10 +70,10 @@ class IOProcessor : public Processor
 
 	sigc::signal<void,IOProcessor*,bool>     AutomationPlaybackChanged;
 	sigc::signal<void,IOProcessor*,uint32_t> AutomationChanged;
-	
+
 	XMLNode& state (bool full_state);
 	int set_state (const XMLNode&);
-	
+
   protected:
 	boost::shared_ptr<IO> _input;
 	boost::shared_ptr<IO> _output;

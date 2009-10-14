@@ -92,7 +92,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	void fast_update ();
 	void set_embedded (bool);
-	
+
 	ARDOUR::RouteGroup* route_group() const;
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 	void set_button_names ();
@@ -142,7 +142,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	ProcessorBox processor_box;
 	GainMeter   gpm;
 	PannerUI    panners;
-	
+
 	Gtk::Table button_table;
 	Gtk::Table middle_button_table;
 	Gtk::Table bottom_button_table;
@@ -163,10 +163,10 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Label  output_label;
 
 	sigc::connection newplug_connection;
-    
+
 	gint    mark_update_safe ();
 	guint32 mode_switch_in_progress;
-	
+
 	Gtk::Button   name_button;
 
 	ArdourDialog*  comment_window;
@@ -189,7 +189,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	Gtk::Menu output_menu;
 	void maybe_add_bundle_to_output_menu (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::BundleList const &);
-	
+
 	void bundle_input_toggled (boost::shared_ptr<ARDOUR::Bundle>);
 	void bundle_output_toggled (boost::shared_ptr<ARDOUR::Bundle>);
 
@@ -259,7 +259,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void revert_to_default_display ();
 
 	static int scrollbar_height;
-	
+
 	void update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width width, bool input_button);
 };
 

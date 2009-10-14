@@ -49,10 +49,10 @@ uint8_t
 EventTypeMap::parameter_midi_type(const Evoral::Parameter& param) const
 {
 	switch (param.type()) {
-	case MidiCCAutomation:              return MIDI_CMD_CONTROL; break; 
-	case MidiPgmChangeAutomation:       return MIDI_CMD_PGM_CHANGE; break; 
-	case MidiChannelPressureAutomation: return MIDI_CMD_CHANNEL_PRESSURE; break; 
-	case MidiPitchBenderAutomation:     return MIDI_CMD_BENDER; break; 
+	case MidiCCAutomation:              return MIDI_CMD_CONTROL; break;
+	case MidiPgmChangeAutomation:       return MIDI_CMD_PGM_CHANGE; break;
+	case MidiChannelPressureAutomation: return MIDI_CMD_CHANNEL_PRESSURE; break;
+	case MidiPitchBenderAutomation:     return MIDI_CMD_BENDER; break;
 	case MidiSystemExclusiveAutomation: return MIDI_CMD_COMMON_SYSEX; break;
 	default: return 0;
 	}
@@ -78,7 +78,7 @@ EventTypeMap::is_integer(const Evoral::Parameter& param) const
 			&& param.type() <= MidiChannelPressureAutomation);
 }
 
-Evoral::ControlList::InterpolationStyle 
+Evoral::ControlList::InterpolationStyle
 EventTypeMap::interpolation_of(const Evoral::Parameter& param)
 {
 	switch (param.type()) {
@@ -117,15 +117,15 @@ EventTypeMap::interpolation_of(const Evoral::Parameter& param)
 		case MIDI_CTL_OMNI_OFF:
 		case MIDI_CTL_OMNI_ON:
 		case MIDI_CTL_MONO:
-		case MIDI_CTL_POLY:	
+		case MIDI_CTL_POLY:
 			return Evoral::ControlList::Discrete;
 			break;
 		default: return Evoral::ControlList::Linear; break;
 		}
-		break; 
-	case MidiPgmChangeAutomation:       return Evoral::ControlList::Discrete; break; 
-	case MidiChannelPressureAutomation: return Evoral::ControlList::Linear; break; 
-	case MidiPitchBenderAutomation:     return Evoral::ControlList::Linear; break; 
+		break;
+	case MidiPgmChangeAutomation:       return Evoral::ControlList::Discrete; break;
+	case MidiChannelPressureAutomation: return Evoral::ControlList::Linear; break;
+	case MidiPitchBenderAutomation:     return Evoral::ControlList::Linear; break;
 	default: assert(false);
 	}
 	return Evoral::ControlList::Linear; // Not reached, suppress warnings
@@ -167,7 +167,7 @@ EventTypeMap::new_parameter(uint32_t type, uint8_t channel, uint32_t id) const
 	case MidiSystemExclusiveAutomation:
 		return p;
 	}
-	
+
 	p.set_range(type, min, max, normal);
 	return p;
 }

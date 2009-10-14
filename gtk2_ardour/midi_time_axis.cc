@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -89,7 +89,7 @@ using namespace PBD;
 using namespace Gtk;
 using namespace sigc;
 using namespace Editing;
-	
+
 // Minimum height at which a control is displayed
 static const uint32_t MIDI_CONTROLS_BOX_MIN_HEIGHT = 162;
 static const uint32_t KEYBOARD_MIN_HEIGHT = 140;
@@ -98,7 +98,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
 		boost::shared_ptr<Route> rt, Canvas& canvas)
 	: AxisView(sess) // virtually inherited
 	, RouteTimeAxisView(ed, sess, rt, canvas)
-	, _ignore_signals(false)  
+	, _ignore_signals(false)
 	, _range_scroomer(0)
 	, _piano_roll_header(0)
 	, _note_mode(Sustained)
@@ -122,7 +122,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
 	solo_button->set_active (false);
 
 	step_edit_insert_position = 0;
-	
+
 	if (is_midi_track()) {
 		controls_ebox.set_name ("MidiTimeAxisViewControlsBaseUnselected");
 		_note_mode = midi_track()->note_mode();
@@ -137,7 +137,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
 	ensure_xml_node ();
 
 	set_state (*xml_node);
-	
+
 	_route->processors_changed.connect (mem_fun(*this, &MidiTimeAxisView::processors_changed));
 
 	if (is_track()) {
@@ -157,21 +157,21 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
 		_view->RegionViewAdded.connect (mem_fun(*this, &MidiTimeAxisView::region_view_added));
 		_view->attach ();
 	}
-		
+
 	HBox* midi_controls_hbox = manage(new HBox());
-		
+
 	MIDI::Name::MidiPatchManager& patch_manager = MIDI::Name::MidiPatchManager::instance();
 
 	MIDI::Name::MasterDeviceNames::Models::const_iterator m = patch_manager.all_models().begin();
 	for (; m != patch_manager.all_models().end(); ++m) {
 		_model_selector.append_text(m->c_str());
 	}
-	
+
 	_model_selector.signal_changed().connect(mem_fun(*this, &MidiTimeAxisView::model_changed));
-	
+
 	_custom_device_mode_selector.signal_changed().connect(
 			mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed));
-	
+
 	// TODO: persist the choice
 	// this initializes the comboboxes and sends out the signal
 	_model_selector.set_active(0);
@@ -181,11 +181,11 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
 		_midi_controls_box.pack_start(_model_selector, true, false);
 		_midi_controls_box.pack_start(_custom_device_mode_selector, true, false);
 	}
-	
+
 	_midi_controls_box.pack_start(*midi_controls_hbox, true, true);
-	
+
 	controls_vbox.pack_start(_midi_controls_box, false, false);
-	
+
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_track()->midi_diskstream();
 
 	// restore channel selector settings
@@ -223,9 +223,9 @@ void MidiTimeAxisView::model_changed()
 {
 	std::list<std::string> device_modes = MIDI::Name::MidiPatchManager::instance()
 		.custom_device_mode_names_by_model(_model_selector.get_active_text());
-	
+
 	_custom_device_mode_selector.clear_items();
-	
+
 	for (std::list<std::string>::const_iterator i = device_modes.begin();
 			i != device_modes.end(); ++i) {
 		cerr << "found custom device mode " << *i << " thread_id: " << pthread_self() << endl;
@@ -238,7 +238,7 @@ void MidiTimeAxisView::model_changed()
 void MidiTimeAxisView::custom_device_mode_changed()
 {
 	_midi_patch_settings_changed.emit(_model_selector.get_active_text(),
-			_custom_device_mode_selector.get_active_text());	
+			_custom_device_mode_selector.get_active_text());
 }
 
 MidiStreamView*
@@ -252,7 +252,7 @@ MidiTimeAxisView::show_at (double y, int& nth, Gtk::VBox *parent)
 {
 	ensure_xml_node ();
 	xml_node->add_property ("shown-editor", "yes");
-		
+
 	guint32 ret = TimeAxisView::show_at (y, nth, parent);
 	return ret;
 }
@@ -276,7 +276,7 @@ MidiTimeAxisView::set_height (uint32_t h)
 	} else {
 		_midi_controls_box.hide();
 	}
-	
+
 	if (height >= KEYBOARD_MIN_HEIGHT) {
 		if (is_track() && _range_scroomer)
 			_range_scroomer->show();
@@ -301,11 +301,11 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 	Menu *range_menu = manage(new Menu);
 	MenuList& range_items = range_menu->items();
 	range_menu->set_name ("ArdourContextMenu");
-	
+
 	range_items.push_back (MenuElem (_("Show Full Range"), bind (
 			mem_fun(*this, &MidiTimeAxisView::set_note_range),
 			MidiStreamView::FullRange)));
-	
+
 	range_items.push_back (MenuElem (_("Fit Contents"), bind (
 			mem_fun(*this, &MidiTimeAxisView::set_note_range),
 			MidiStreamView::ContentsRange)));
@@ -322,20 +322,20 @@ Gtk::Menu*
 MidiTimeAxisView::build_def_channel_menu ()
 {
 	using namespace Menu_Helpers;
-	
+
 	if (default_channel_menu == 0) {
 		default_channel_menu = manage (new Menu ());
-	} 
-	
+	}
+
 	uint8_t defchn = midi_track()->default_channel();
 	MenuList& def_channel_items = default_channel_menu->items();
 	RadioMenuItem* item;
 	RadioMenuItem::Group dc_group;
-	
+
 	for (int i = 0; i < 16; ++i) {
 		char buf[4];
 		snprintf (buf, sizeof (buf), "%d", i+1);
-		
+
 		def_channel_items.push_back (RadioMenuElem (dc_group, buf,
 							    bind (mem_fun (*this, &MidiTimeAxisView::set_default_channel), i)));
 		item = dynamic_cast<RadioMenuItem*>(&def_channel_items.back());
@@ -372,17 +372,17 @@ MidiTimeAxisView::build_automation_action_menu ()
 	RouteTimeAxisView::build_automation_action_menu ();
 
 	MenuList& automation_items = automation_action_menu->items();
-	
+
 	automation_items.push_back (SeparatorElem());
-	automation_items.push_back (MenuElem (_("Controller..."), 
+	automation_items.push_back (MenuElem (_("Controller..."),
 			mem_fun(*this, &MidiTimeAxisView::add_cc_track)));
-	automation_items.push_back (MenuElem (_("Program Change"), 
+	automation_items.push_back (MenuElem (_("Program Change"),
 			sigc::bind(mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
-				Evoral::Parameter(MidiPgmChangeAutomation))));	
-	automation_items.push_back (MenuElem (_("Bender"), 
+				Evoral::Parameter(MidiPgmChangeAutomation))));
+	automation_items.push_back (MenuElem (_("Bender"),
 			sigc::bind(mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
 				Evoral::Parameter(MidiPitchBenderAutomation))));
-	automation_items.push_back (MenuElem (_("Pressure"), 
+	automation_items.push_back (MenuElem (_("Pressure"),
 			sigc::bind(mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
 				Evoral::Parameter(MidiChannelPressureAutomation))));
 }
@@ -429,15 +429,15 @@ MidiTimeAxisView::build_color_mode_menu()
 				bind (mem_fun (*this, &MidiTimeAxisView::set_color_mode), ChannelColors)));
 	_channel_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_channel_color_mode_item->set_active(_color_mode == ChannelColors);
-	
+
 	items.push_back (RadioMenuElem (mode_group, _("Track Color"),
 				bind (mem_fun (*this, &MidiTimeAxisView::set_color_mode), TrackColor)));
 	_channel_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_channel_color_mode_item->set_active(_color_mode == TrackColor);
-		
+
 	return mode_menu;
 }
-	
+
 void
 MidiTimeAxisView::set_note_mode(NoteMode mode)
 {
@@ -527,7 +527,7 @@ MidiTimeAxisView::add_cc_track()
 		AddMidiCCTrackDialog dialog;
 		dialog.set_transient_for (_editor);
 		response = dialog.run();
-		
+
 		if (response == Gtk::RESPONSE_ACCEPT)
 			param = dialog.parameter();
 	}
@@ -546,11 +546,11 @@ MidiTimeAxisView::add_parameter_track(const Evoral::Parameter& param)
 		error << "MidiTimeAxisView: unknown automation child "
 			<< ARDOUR::EventTypeMap::instance().to_symbol(param) << endmsg;
 		return;
-	} 
+	}
 
 	// create the parameter lane for each selected channel
 	uint16_t selected_channels = _channel_selector.get_selected_channels();
-	
+
 	for (uint8_t i = 0; i < 16; i++) {
 		if (selected_channels & (0x0001 << i)) {
 			Evoral::Parameter param_with_channel(param.type(), i, param.id());
@@ -575,7 +575,7 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 		return;
 
 	boost::shared_ptr<AutomationControl> c = _route->get_control (param);
-	
+
 	assert(c);
 
 	boost::shared_ptr<AutomationTimeAxisView> track(new AutomationTimeAxisView (_session,
@@ -585,7 +585,7 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 			true,
 			parent_canvas,
 			_route->describe_parameter(param)));
-	
+
 	add_automation_child(param, track, show);
 }
 
@@ -608,7 +608,7 @@ MidiTimeAxisView::route_active_changed ()
 	} else {
 
 		throw; // wha?
-		
+
 		if (_route->active()) {
 			controls_ebox.set_name ("BusControlsBaseUnselected");
 			controls_base_selected_name = "BusControlsBaseSelected";
@@ -660,7 +660,7 @@ MidiTimeAxisView::check_step_edit ()
 		uint32_t size;
 
 		incoming.read_prefix (&time, &type, &size);
-		
+
 		if (size > bufsize) {
 			delete [] buf;
 			bufsize = size;
@@ -668,7 +668,7 @@ MidiTimeAxisView::check_step_edit ()
 		}
 
 		incoming.read_contents (size, buf);
-		
+
 		if ((buf[0] & 0xf0) == MIDI_CMD_NOTE_ON) {
 
 			if (step_edit_region == 0) {
@@ -682,22 +682,22 @@ MidiTimeAxisView::check_step_edit ()
 					fatal << X_("programming error: no view found for new MIDI region") << endmsg;
 					/*NOTREACHED*/
 				}
-			}	
+			}
 
 			if (step_edit_region_view) {
 
 				bool success;
 				Evoral::MusicalTime beats = _editor.get_grid_type_as_beats (success, step_edit_insert_position);
-				
+
 				if (!success) {
 					continue;
 				}
-				
+
 				step_edit_region_view->add_note (buf[0] & 0xf, buf[1], buf[2], step_edit_beat_pos, beats);
 				step_edit_beat_pos += beats;
 			}
 		}
-		
+
 	}
 }
 
@@ -716,7 +716,7 @@ MidiTimeAxisView::add_region (nframes64_t pos)
 
 	real_editor->begin_reversible_command (_("create region"));
 	XMLNode &before = playlist()->get_state();
-	
+
 	nframes64_t start = pos;
 	real_editor->snap_to (start, -1);
 	const Meter& m = _session.tempo_map().meter_at(start);
@@ -725,10 +725,10 @@ MidiTimeAxisView::add_region (nframes64_t pos)
 
 	const boost::shared_ptr<MidiDiskstream> diskstream =
 		boost::dynamic_pointer_cast<MidiDiskstream>(view()->trackview().track()->diskstream());
-	
+
 	boost::shared_ptr<Source> src = _session.create_midi_source_for_session (*diskstream.get());
-	
-	boost::shared_ptr<Region> region = (RegionFactory::create (src, 0, (nframes_t) length, 
+
+	boost::shared_ptr<Region> region = (RegionFactory::create (src, 0, (nframes_t) length,
 								   PBD::basename_nosuffix(src->name())));
 
 	playlist()->add_region (region, start);
@@ -738,4 +738,4 @@ MidiTimeAxisView::add_region (nframes64_t pos)
 	real_editor->commit_reversible_command();
 
 	return region;
-}	
+}

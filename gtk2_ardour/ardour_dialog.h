@@ -37,7 +37,7 @@ class ArdourDialog : public Gtk::Dialog
 {
   public:
 	ArdourDialog (std::string title, bool modal = false, bool use_separator = false);
-	ArdourDialog (Gtk::Window& parent, std::string title, bool modal = false, bool use_separator = false);	
+	ArdourDialog (Gtk::Window& parent, std::string title, bool modal = false, bool use_separator = false);
 	~ArdourDialog();
 
 	static int close_all_current_dialogs (int response);

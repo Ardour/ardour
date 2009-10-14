@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ operator== (const Selection& a, const Selection& b)
 	return a.regions == b.regions &&
 		a.tracks == b.tracks &&
 		a.time.track == b.time.track &&
-		a.time.group == b.time.group && 
+		a.time.group == b.time.group &&
 		a.time == b.time &&
 		a.lines == b.lines &&
 		a.playlists == b.playlists &&
@@ -209,7 +209,7 @@ void
 Selection::toggle (TimeAxisView* track)
 {
 	TrackSelection::iterator i;
-	
+
 	if ((i = find (tracks.begin(), tracks.end(), track)) == tracks.end()) {
 		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
 		track->GoingAway.connect (sigc::bind (mem_fun (*this, pmf), track));
@@ -233,7 +233,7 @@ void
 Selection::toggle (MidiCutBuffer* midi)
 {
 	MidiNoteSelection::iterator i;
-	
+
 	if ((i = find (midi_notes.begin(), midi_notes.end(), midi)) == midi_notes.end()) {
 		midi_notes.push_back (midi);
 	} else {
@@ -241,7 +241,7 @@ Selection::toggle (MidiCutBuffer* midi)
 		delete *i;
 		midi_notes.erase (i);
 	}
-	
+
 	MidiNotesChanged();
 }
 
@@ -300,7 +300,7 @@ Selection::toggle (nframes_t start, nframes_t end)
 	time.push_back (AudioRange (start, end, next_time_id++));
 	time.consolidate ();
 	time.sort (cmp);
-	
+
 	TimeChanged ();
 
 	return next_time_id - 1;
@@ -328,7 +328,7 @@ Selection::add (const list<boost::shared_ptr<Playlist> >& pllist)
 			changed = true;
 		}
 	}
-	
+
 	if (changed) {
 		PlaylistsChanged ();
 	}
@@ -343,7 +343,7 @@ Selection::add (const list<TimeAxisView*>& track_list)
 		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
 		(*i)->GoingAway.connect (sigc::bind (mem_fun (*this, pmf), (*i)));
 	}
-	
+
 	if (!added.empty()) {
 		TracksChanged ();
 	}
@@ -390,7 +390,7 @@ Selection::add (vector<RegionView*>& v)
 	 */
 
 	bool changed = false;
-	
+
 	for (vector<RegionView*>::iterator i = v.begin(); i != v.end(); ++i) {
 		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
 			changed = regions.add ((*i));
@@ -412,7 +412,7 @@ Selection::add (const RegionSelection& rs)
 	 */
 
 	bool changed = false;
-	
+
 	for (RegionSelection::const_iterator i = rs.begin(); i != rs.end(); ++i) {
 		if (find (regions.begin(), regions.end(), (*i)) == regions.end()) {
 			changed = regions.add ((*i));
@@ -421,7 +421,7 @@ Selection::add (const RegionSelection& rs)
 			}
 		}
 	}
-	
+
 	if (changed) {
 		RegionsChanged ();
 	}
@@ -464,7 +464,7 @@ Selection::add (nframes_t start, nframes_t end)
 	time.push_back (AudioRange (start, end, next_time_id++));
 	time.consolidate ();
 	time.sort (cmp);
-	
+
 	TimeChanged ();
 
 	return next_time_id - 1;
@@ -560,7 +560,7 @@ void
 Selection::remove (MidiCutBuffer* midi)
 {
 	MidiNoteSelection::iterator x;
-	
+
 	if ((x = find (midi_notes.begin(), midi_notes.end(), midi)) != midi_notes.end()) {
 		/* remember that we own the MCB */
 		delete *x;
@@ -640,7 +640,7 @@ Selection::remove (uint32_t selection_id)
 	for (list<AudioRange>::iterator i = time.begin(); i != time.end(); ++i) {
 		if ((*i).id == selection_id) {
 			time.erase (i);
-						
+
 			TimeChanged ();
 			break;
 		}
@@ -706,7 +706,7 @@ Selection::set (const RegionSelection& rs)
 }
 
 void
-Selection::set (MidiRegionView* mrv) 
+Selection::set (MidiRegionView* mrv)
 {
 	clear_midi_regions ();
 	add (mrv);
@@ -798,8 +798,8 @@ Selection::empty (bool internal_selection)
 {
 	bool object_level_empty =  regions.empty () &&
 		tracks.empty () &&
-		points.empty () && 
-		playlists.empty () && 
+		points.empty () &&
+		playlists.empty () &&
 		lines.empty () &&
 		time.empty () &&
 		playlists.empty () &&
@@ -857,11 +857,11 @@ Selection::toggle (list<Selectable*>& selectables)
 
 	if (!rvs.empty()) {
 		toggle (rvs);
-	} 
+	}
 
 	if (!autos.empty()) {
 		toggle (autos);
-	} 
+	}
 }
 
 void
@@ -896,11 +896,11 @@ Selection::add (list<Selectable*>& selectables)
 
 	if (!rvs.empty()) {
 		add (rvs);
-	} 
+	}
 
 	if (!autos.empty()) {
 		add (autos);
-	} 
+	}
 }
 
 void
@@ -933,7 +933,7 @@ void
 Selection::toggle (Marker* m)
 {
 	MarkerSelection::iterator i;
-	
+
 	if ((i = find (markers.begin(), markers.end(), m)) == markers.end()) {
 		add (m);
 	} else {
@@ -958,7 +958,7 @@ Selection::add (Marker* m)
 	if (find (markers.begin(), markers.end(), m) == markers.end()) {
 
 		/* disambiguate which remove() for the compiler */
-		
+
 		void (Selection::*pmf)(Marker*) = &Selection::remove;
 
 		m->GoingAway.connect (bind (mem_fun (*this, pmf), m));
@@ -985,7 +985,7 @@ MarkerSelection::range (nframes64_t& s, nframes64_t& e)
 
 		if ((*i)->position() < s) {
 			s = (*i)->position();
-		} 
+		}
 
 		if ((*i)->position() > e) {
 			e = (*i)->position();

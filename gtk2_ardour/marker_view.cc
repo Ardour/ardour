@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,11 +35,11 @@ sigc::signal<void,MarkerView*> MarkerView::GoingAway;
 
 /**
  * Constructs a new MarkerView
- * 
+ *
  * @param parent the parent canvas item
  * @param tv the parent TimeAxisView of this item
  * @param tavi the TimeAxisViewItem that this item is to be assciated (marking) with
- * @param spu the current samples per unit 
+ * @param spu the current samples per unit
  * @param base_color
  * @param mark_type the marker type/name text, eg fade out, pan up etc.
  * @param mark_id unique name/id of this item
@@ -68,7 +68,7 @@ MarkerView::MarkerView(ArdourCanvas::Group *parent,
 	frame_handle_start->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_markerview_start_handle_event), frame_handle_start, this));
 	frame_handle_end->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_markerview_end_handle_event), frame_handle_end, this));
 	group->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_markerview_item_view_event), group, this));
-	
+
 	set_position(start, this) ;
 	set_duration(duration, this) ;
 }
@@ -86,12 +86,12 @@ MarkerView::~MarkerView()
 	}
 }
 
-	
+
 //---------------------------------------------------------------------------------------//
 // Marker Type Methods
 
 /**
- * Sets the marker Type text of this this MarkerItem, eg fade_out, pan up etc. 
+ * Sets the marker Type text of this this MarkerItem, eg fade_out, pan up etc.
  *
  * @param type_text the marker type text of this item
  */
@@ -101,9 +101,9 @@ MarkerView::set_mark_type_text(std::string type_text)
 	mark_type_text = type_text ;
 	 MarkTypeChanged(mark_type_text, this) ; /* EMIT_SIGNAL */
 }
-		
+
 /**
- * Returns the marker Type of this this MarkerItem, eg fade_out, pan up etc. 
+ * Returns the marker Type of this this MarkerItem, eg fade_out, pan up etc.
  *
  * @return the marker type text of this item
  */
@@ -122,7 +122,7 @@ MarkerView::set_marked_item(ImageFrameView* item)
 {
 	ImageFrameView* temp = marked_item ;
 	marked_item = item ;
-	
+
 	 MarkedItemChanged(marked_item, this) ; /* EMIT_SIGNAL */
 	return(temp) ;
 }

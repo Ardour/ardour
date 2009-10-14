@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 		boost::shared_ptr<Automatable> a, boost::shared_ptr<AutomationControl> c,
 		PublicEditor& e, TimeAxisView& parent, bool show_regions,
 		ArdourCanvas::Canvas& canvas, const string & nom, const string & nomparent)
-	: AxisView (s), 
+	: AxisView (s),
 	  TimeAxisView (s, e, &parent, canvas),
 	  _route (r),
 	  _control (c),
@@ -87,17 +87,17 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 
 	ignore_state_request = false;
 	first_call_to_set_height = true;
-	
+
 	_base_rect = new SimpleRect(*_canvas_display);
 	_base_rect->property_x1() = 0.0;
 	_base_rect->property_y1() = 0.0;
 	_base_rect->property_x2() = LONG_MAX - 2;
 	_base_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_AutomationTrackOutline.get();
-	
+
 	/* outline ends and bottom */
 	_base_rect->property_outline_what() = (guint32) (0x1|0x2|0x8);
 	_base_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_AutomationTrackFill.get();
-	
+
 	_base_rect->set_data ("trackview", this);
 
 	_base_rect->signal_event().connect (bind (
@@ -172,12 +172,12 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 		tipname += _name;
 		ARDOUR_UI::instance()->tooltips().set_tip(controls_ebox, tipname);
 	}
-	
+
 	/* add the buttons */
 	controls_table.attach (hide_button, 0, 1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
 	controls_table.attach (auto_button, 5, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-	
+
 	/* add bar controller */
 	controls_table.attach (*_controller.get(), 0, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
@@ -195,14 +195,14 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 
 	if (xml_node) {
 		set_state (*xml_node);
-	} 
-		
+	}
+
 	/* ask for notifications of any new RegionViews */
 	if (show_regions) {
 
 		assert(_view);
 		_view->attach ();
-	
+
 	/* no regions, just a single line for the entire track (e.g. bus gain) */
 	} else {
 		boost::shared_ptr<AutomationLine> line(new AutomationLine (
@@ -281,7 +281,7 @@ AutomationTimeAxisView::automation_state_changed ()
 	} else {
 		state = _control->alist()->automation_state ();
 	}
-	
+
 	switch (state & (Off|Play|Touch|Write)) {
 	case Off:
 		auto_button.set_label (_("Manual"));
@@ -335,9 +335,9 @@ AutomationTimeAxisView::automation_state_changed ()
 
 void
 AutomationTimeAxisView::interpolation_changed ()
-{	
+{
 	AutomationList::InterpolationStyle style = _control->list()->interpolation();
-	
+
 	if (mode_line_item && mode_discrete_item) {
 		if (style == AutomationList::Discrete) {
 			mode_discrete_item->set_active(true);
@@ -347,7 +347,7 @@ AutomationTimeAxisView::interpolation_changed ()
 			mode_discrete_item->set_active(false);
 		}
 	}
-	
+
 	if (_line) {
 		_line->set_interpolation(style);
 	}
@@ -376,7 +376,7 @@ void
 AutomationTimeAxisView::set_height (uint32_t h)
 {
 	bool changed = (height != (uint32_t) h) || first_call_to_set_height;
-	bool changed_between_small_and_normal = ( 
+	bool changed_between_small_and_normal = (
 		   (height < hNormal && h >= hNormal)
 		|| (height >= hNormal || h < hNormal) );
 
@@ -386,10 +386,10 @@ AutomationTimeAxisView::set_height (uint32_t h)
 
 	TimeAxisView::set_height (h);
 	_base_rect->property_y2() = h;
-	
+
 	if (_line)
 		_line->set_height(h);
-	
+
 	if (_view) {
 		_view->set_height(h);
 		_view->update_contents_height();
@@ -407,7 +407,7 @@ AutomationTimeAxisView::set_height (uint32_t h)
 
 		if (h >= hNormal) {
 			controls_table.remove (name_hbox);
-			
+
 			if (plugname) {
 				if (plugname_packed) {
 					controls_table.remove (*plugname);
@@ -422,7 +422,7 @@ AutomationTimeAxisView::set_height (uint32_t h)
 			hide_name_entry ();
 			show_name_label ();
 			name_hbox.show_all ();
-			
+
 			auto_button.show();
 			hide_button.show_all();
 
@@ -439,7 +439,7 @@ AutomationTimeAxisView::set_height (uint32_t h)
 			hide_name_entry ();
 			show_name_label ();
 			name_hbox.show_all ();
-			
+
 			auto_button.hide();
 			hide_button.hide();
 		}
@@ -460,20 +460,20 @@ AutomationTimeAxisView::set_samples_per_unit (double spu)
 
 	if (_line)
 		_line->reset ();
-	
+
 	if (_view)
 		_view->set_samples_per_unit (spu);
 }
- 
+
 void
 AutomationTimeAxisView::hide_clicked ()
 {
 	// LAME fix for refreshing the hide button
 	hide_button.set_sensitive(false);
-	
+
 	set_marked_for_display (false);
 	hide ();
-	
+
 	hide_button.set_sensitive(true);
 }
 
@@ -506,7 +506,7 @@ AutomationTimeAxisView::build_display_menu ()
 	Menu* auto_state_menu = manage (new Menu);
 	auto_state_menu->set_name ("ArdourContextMenu");
 	MenuList& as_items = auto_state_menu->items();
-	
+
 	as_items.push_back (CheckMenuElem (_("Manual"), bind (
 			mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
 			(AutoState) Off)));
@@ -528,17 +528,17 @@ AutomationTimeAxisView::build_display_menu ()
 	auto_touch_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
 	items.push_back (MenuElem (_("State"), *auto_state_menu));
-	
+
 	/* mode menu */
 
 	if ( EventTypeMap::instance().is_midi_parameter(_control->parameter()) ) {
-		
+
 		Menu* auto_mode_menu = manage (new Menu);
 		auto_mode_menu->set_name ("ArdourContextMenu");
 		MenuList& am_items = auto_mode_menu->items();
-	
+
 		RadioMenuItem::Group group;
-		
+
 		am_items.push_back (RadioMenuElem (group, _("Discrete"), bind (
 						mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
 						AutomationList::Discrete)));
@@ -661,7 +661,7 @@ AutomationTimeAxisView::reset_objects_one (AutomationLine& line, PointSelection&
 		if (&(*i).track != this) {
 			continue;
 		}
-		
+
 		alist->reset_range ((*i).start, (*i).end);
 	}
 }
@@ -700,7 +700,7 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 				_editor.get_cut_buffer().add (what_we_got);
 			}
 			break;
-			
+
 		case Clear:
 			if ((what_we_got = alist->cut ((*i).start, (*i).end)) != 0) {
 				_session.add_command (new MementoCommand<AutomationList>(*alist.get(), new XMLNode (before), &alist->get_state()));
@@ -736,7 +736,7 @@ AutomationTimeAxisView::paste_one (AutomationLine& line, nframes_t pos, float ti
 {
 	AutomationSelection::iterator p;
 	boost::shared_ptr<AutomationList> alist(line.the_list());
-	
+
 	for (p = selection.lines.begin(); p != selection.lines.end() && nth; ++p, --nth) {}
 
 	if (p == selection.lines.end()) {
@@ -747,7 +747,7 @@ AutomationTimeAxisView::paste_one (AutomationLine& line, nframes_t pos, float ti
 	   values from view coordinates to model coordinates, and we're
 	   not supposed to modify the points in the selection.
 	*/
-	   
+
 	AutomationList copy (**p);
 
 	for (AutomationList::iterator x = copy.begin(); x != copy.end(); ++x) {
@@ -857,7 +857,7 @@ AutomationTimeAxisView::exited ()
 }
 
 void
-AutomationTimeAxisView::color_handler () 
+AutomationTimeAxisView::color_handler ()
 {
 	if (_line) {
 		_line->set_colors();
@@ -877,7 +877,7 @@ AutomationTimeAxisView::set_state (const XMLNode& node)
 			_canvas_display->show (); /* FIXME: necessary? show_at? */
 		}
 	}
-	
+
 	if (!_marked_for_display) {
 		hide();
 	}
@@ -910,7 +910,7 @@ guint32
 AutomationTimeAxisView::show_at (double y, int& nth, Gtk::VBox *parent)
 {
 	update_extra_xml_shown (true);
-	
+
 	return TimeAxisView::show_at (y, nth, parent);
 }
 

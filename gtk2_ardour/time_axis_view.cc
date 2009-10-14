@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace Gdk;
-using namespace sigc; 
+using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
@@ -74,8 +74,8 @@ uint32_t TimeAxisView::hSmall = 0;
 bool TimeAxisView::need_size_info = true;
 int const TimeAxisView::_max_order = 512;
 
-TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/) 
-	: AxisView (sess), 
+TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
+	: AxisView (sess),
 	  controls_table (2, 8),
 	  _y_position (0),
 	  _editor (ed),
@@ -431,7 +431,7 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 		return true;
 
 	/* Shift+Tab Keys Pressed. Note that for Shift+Tab, GDK actually
-	 * generates a different ev->keyval, rather than setting 
+	 * generates a different ev->keyval, rather than setting
 	 * ev->state.
 	 */
 	case GDK_ISO_Left_Tab:
@@ -474,7 +474,7 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 		break;
 	}
 
-#ifdef TIMEOUT_NAME_EDIT	
+#ifdef TIMEOUT_NAME_EDIT
 	/* adapt the timeout to reflect the user's typing speed */
 
 	guint32 name_entry_timeout;
@@ -578,7 +578,7 @@ TimeAxisView::popup_display_menu (guint32 when)
 	}
 
 	conditionally_add_to_selection ();
-	display_menu->popup (1, when);	
+	display_menu->popup (1, when);
 }
 
 gint
@@ -871,7 +871,7 @@ TimeAxisView::get_selection_rect (uint32_t id)
 		rect->rect->signal_event().connect (bind (mem_fun (_editor, &PublicEditor::canvas_selection_rect_event), rect->rect, rect));
 		rect->start_trim->signal_event().connect (bind (mem_fun (_editor, &PublicEditor::canvas_selection_start_trim_event), rect->rect, rect));
 		rect->end_trim->signal_event().connect (bind (mem_fun (_editor, &PublicEditor::canvas_selection_end_trim_event), rect->rect, rect));
-	} 
+	}
 
 	rect = free_selection_rects.front();
 	rect->id = id;
@@ -955,11 +955,11 @@ TimeAxisView::touched (double top, double bot)
 	*/
 
 	double mybot = _y_position + current_height();
-	
-	return ((_y_position <= bot && _y_position >= top) || 
-		((mybot <= bot) && (top < mybot)) || 
+
+	return ((_y_position <= bot && _y_position >= top) ||
+		((mybot <= bot) && (top < mybot)) ||
 		(mybot >= bot && _y_position < top));
-}		
+}
 
 void
 TimeAxisView::set_parent (TimeAxisView& p)
@@ -982,7 +982,7 @@ TimeAxisView::get_parent_with_state ()
 
 	if (parent->has_state()) {
 		return parent;
-	} 
+	}
 
 	return parent->get_parent_with_state ();
 }
@@ -1031,7 +1031,7 @@ TimeAxisView::set_state (const XMLNode& node)
 	} else if ((prop = node.property ("height")) != 0) {
 
 		set_height (atoi (prop->value()));
-		
+
 	} else {
 
 		set_height (hNormal);
@@ -1049,7 +1049,7 @@ TimeAxisView::reset_height()
 		(*i)->set_height ((*i)->height);
 	}
 }
-	
+
 void
 TimeAxisView::compute_controls_size_info ()
 {
@@ -1080,7 +1080,7 @@ TimeAxisView::compute_controls_size_info ()
 	}
 
 	one_row_table.attach (*buttons[0], 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	
+
 	one_row_table.show_all ();
 	Gtk::Requisition req(one_row_table.size_request ());
 
@@ -1100,11 +1100,11 @@ TimeAxisView::compute_controls_size_info ()
 	two_row_table.show_all ();
 	req = two_row_table.size_request ();
 
-	// height required to show all normal buttons 
+	// height required to show all normal buttons
 
 	hNormal = /*req.height*/ 48 + extra_height;
 
-	// these heights are all just larger than normal. no more 
+	// these heights are all just larger than normal. no more
 	// elements are visible (yet).
 
 	hLarger = hNormal + 50;
@@ -1215,7 +1215,7 @@ TimeAxisView::covers_y_position (double y)
 				l = view()->layers() - 1;
 			}
 		}
-			
+
 		return std::make_pair (this, l);
 	}
 
@@ -1327,7 +1327,7 @@ TimeAxisView::resizer_expose (GdkEventExpose* event)
 	win->get_geometry (x, y, w, h, d);
 
 	/* handle/line #1 */
-	
+
 	win->draw_line (dark, 0, 0, w - 2, 0);
 	win->draw_point (dark, 0, 1);
 	win->draw_line (light, 1, 1, w - 1, 1);

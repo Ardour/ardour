@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ ImageFrameSocketHandler* ImageFrameSocketHandler::_instance = 0 ;
  */
 ImageFrameSocketHandler::ImageFrameSocketHandler(PublicEditor& ed) : thePublicEditor(ed), theArdourToCompositorSocket(-1)
 {
-	
+
 }
 
 /**
@@ -82,7 +82,7 @@ ImageFrameSocketHandler::~ImageFrameSocketHandler()
  *
  * @return the instance of the ImageFrameSocketHandler
  */
-ImageFrameSocketHandler* 
+ImageFrameSocketHandler*
 ImageFrameSocketHandler::get_instance()
 {
 	return(_instance) ;
@@ -125,7 +125,7 @@ ImageFrameSocketHandler::image_socket_callback(void *arg, int32_t fd, GdkInputCo
 	{
 		//end-of-file, other end closed or shutdown?
 		ARDOUR_UI::instance()->popup_error(_("Image Compositor Socket has been shutdown/closed"));
-		
+
 		// assume socket has been shutdown, tell, someone interested,
 		// and remove the socket from the event loop
 		ImageFrameSocketHandler* ifsh = ImageFrameSocketHandler::get_instance() ;
@@ -137,7 +137,7 @@ ImageFrameSocketHandler::image_socket_callback(void *arg, int32_t fd, GdkInputCo
 	{
 		//std::cout << "Received Msg [" << buf << "]\n" ;
 		ImageFrameSocketHandler* ifsh = ImageFrameSocketHandler::get_instance() ;
-		
+
 		std::string mType = ifsh->get_message_part(0,2,buf) ;
 
 		if(mType == ardourvis::INSERT_ITEM)
@@ -170,10 +170,10 @@ ImageFrameSocketHandler::image_socket_callback(void *arg, int32_t fd, GdkInputCo
 		}
 		else
 		{
-			std::string errMsg = "Unknown Message type : " ; 
+			std::string errMsg = "Unknown Message type : " ;
 			errMsg.append(mType) ;
 			ifsh->send_return_failure(errMsg) ;
-		}	
+		}
 	}
 }
 
@@ -193,29 +193,29 @@ ImageFrameSocketHandler::connect(const char * hostIp, int32_t port)
 		//already connected...
 		return(true) ;
 	}
-	
+
 	theArdourToCompositorSocket = socket(AF_INET, SOCK_STREAM, 0) ;
 	if(theArdourToCompositorSocket == -1)
 	{
 		return(false) ;
 	}
-	
+
 	int on = 1 ;
 	setsockopt(theArdourToCompositorSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&on, sizeof(on)) ;
-	
+
 	sockaddr_in m_addr ;
 	m_addr.sin_family = AF_INET ;
 	m_addr.sin_port = htons(port) ;
 	m_addr.sin_addr.s_addr = inet_addr(hostIp) ;
-	
+
 	int status = ::connect(theArdourToCompositorSocket, (sockaddr *) &m_addr, sizeof(m_addr)) ;
-	
+
 	if(status == -1)
 	{
-		theArdourToCompositorSocket = -1 ;	
+		theArdourToCompositorSocket = -1 ;
 		return(false) ;
 	}
-	
+
 	return(true) ;
 }
 
@@ -284,7 +284,7 @@ ImageFrameSocketHandler::get_socket_descriptor()
 
 //---------------------------------------------------------------------------------------//
 // Handle Sending messages to the Image Compositor
-		
+
 //----------------------------
 // ImageFrameTimeAxis Messages
 
@@ -302,25 +302,25 @@ ImageFrameSocketHandler::send_imageframe_time_axis_removed(const string & track_
 		// ie the change originated from us, then dont send any message back
 		return ;
 	}
-	
+
 	// create a message buffer
 	std::ostringstream msgBuffer ;
 	msgBuffer << std::setfill('0') ;
-	
+
 	// add the msg type
 	msgBuffer << ardourvis::REMOVE_ITEM << ardourvis::IMAGEFRAME_TIME_AXIS ;
-	
+
 	// add the id length, and the id
 	msgBuffer << std::setw(3) << track_id.length() ;
 	msgBuffer << track_id ;
-	
+
 	send_message(msgBuffer.str()) ;
 
 	// XXX should do something with the return
 	std::string retmsg ;
 	read_message(retmsg) ;
 }
-		
+
 /**
  * Sends a message indicating that an ImageFrameTimeAxis has been renamed
  *
@@ -333,28 +333,28 @@ void
 ImageFrameSocketHandler::send_imageframe_time_axis_renamed(const string & new_id, const string & old_id, void* src, ImageFrameTimeAxis* time_axis)
 {
 	// ENSURE_GUI_THREAD(SigC::bind (mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_renamed), new_id, old_id, src, time_axis));
-	
+
 	if(this == src || src == 0)
 	{
 		// ie the change originated from us, then dont send any message back
 		return ;
 	}
-	
+
 	// create a message buffer
 	std::ostringstream msgBuffer ;
 	msgBuffer << std::setfill('0') ;
-	
+
 	// add the msg type
 	msgBuffer << ardourvis::RENAME_ITEM << ardourvis::IMAGEFRAME_TIME_AXIS ;
-	
+
 	// add the old id and length
 	msgBuffer << std::setw(3) << old_id.length() ;
 	msgBuffer << old_id ;
-	
+
 	// add the new id and length
 	msgBuffer << std::setw(3) << new_id.length() ;
 	msgBuffer << new_id ;
-	
+
 	send_message(msgBuffer.str()) ;
 
 	// XXX should do something with the return
@@ -364,7 +364,7 @@ ImageFrameSocketHandler::send_imageframe_time_axis_renamed(const string & new_id
 
 //------------------------
 // MarkerTimeAxis Messages
-		
+
 /**
  * Sends a message stating that the named marker time axis has been removed
  *
@@ -379,25 +379,25 @@ ImageFrameSocketHandler::send_marker_time_axis_removed(const string & track_id, 
 		// ie the change originated from us, then dont send any message back
 		return ;
 	}
-	
+
 	// create a message buffer
 	std::ostringstream msgBuffer ;
 	msgBuffer << std::setfill('0') ;
-	
+
 	// add the msg type
 	msgBuffer << ardourvis::REMOVE_ITEM << ardourvis::MARKER_TIME_AXIS ;
-	
+
 	// add the id length, and the id
 	msgBuffer << std::setw(3) << track_id.length() ;
 	msgBuffer << track_id ;
-	
+
 	send_message(msgBuffer.str()) ;
 
 	// XXX should do something with the return
 	std::string retmsg ;
 	read_message(retmsg) ;
 }
-		
+
 /**
  * Sends a message indicating that an MarkerTimeAxis has been renamed
  *
@@ -410,30 +410,30 @@ void
 ImageFrameSocketHandler::send_marker_time_axis_renamed(const string & new_id, const string & old_id, void* src, MarkerTimeAxis* time_axis)
 {
 	// ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameSocketHandler::send_marker_time_axis_renamed), new_id, old_id, src, time_axis));
-	
+
 	if(this == src || src == 0)
 	{
 		// ie the change originated from us, then dont send any message back
 		return ;
 	}
-	
+
 	// ctreate a message buffer
 	std::ostringstream msgBuffer ;
 	msgBuffer << std::setfill('0') ;
-	
+
 	// add the msg type
 	msgBuffer << ardourvis::RENAME_ITEM << ardourvis::MARKER_TIME_AXIS ;
-	
+
 	// add the old id and length
 	msgBuffer << std::setw(3) << old_id.length() ;
 	msgBuffer << old_id ;
-	
+
 	// add the new id and length
 	msgBuffer << std::setw(3) << new_id.length() ;
 	msgBuffer << new_id ;
-	
+
 	send_message(msgBuffer.str()) ;
-	
+
 	// XXX should do something with the return
 	std::string retmsg ;
 	read_message(retmsg) ;
@@ -457,23 +457,23 @@ ImageFrameSocketHandler::send_imageframe_time_axis_group_removed(const string & 
 		// ie the change originated from us, then dont send any message back
 		return ;
 	}
-	
+
 	// create a message buffer
 	std::ostringstream msgBuffer ;
 	msgBuffer << std::setfill('0') ;
-	
+
 	// add the msg type
 	msgBuffer << ardourvis::REMOVE_ITEM << ardourvis::IMAGEFRAME_GROUP ;
-	
+
 	// add the id length, and the id of the parent image time axis
 	std::string track_id = group->get_view().trackview().name() ;
 	msgBuffer << std::setw(3) << track_id.length() ;
 	msgBuffer << track_id ;
-	
+
 	// add the group id and length
 	msgBuffer << std::setw(3) << group_id.length() ;
 	msgBuffer << group_id ;
-	
+
 	send_message(msgBuffer.str()) ;
 
 	// XXX should do something with the return
@@ -493,34 +493,34 @@ void
 ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed(const string & new_id, const string & old_id, void* src, ImageFrameTimeAxisGroup* group)
 {
 	// ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed), new_id, old_id, src, group));
-	
+
 	if(this == src || src == 0)
 	{
 		// ie the change originated from us, then dont send any message back
 		return ;
 	}
-	
+
 	// ctreate a message buffer
 	std::ostringstream msgBuffer ;
 	msgBuffer << std::setfill('0') ;
-	
+
 	// add the msg type
 	msgBuffer << ardourvis::RENAME_ITEM << ardourvis::IMAGEFRAME_GROUP ;
-	
+
 	// add the track this group is upon
 	std::string track_id = group->get_view().trackview().name() ;
-	msgBuffer << std::setw(3) << track_id.length() << track_id ; 
-	
+	msgBuffer << std::setw(3) << track_id.length() << track_id ;
+
 	// add the old id and length
 	msgBuffer << std::setw(3) << old_id.length() ;
 	msgBuffer << old_id ;
-	
+
 	// add the new id and length
 	msgBuffer << std::setw(3) << new_id.length() ;
 	msgBuffer << new_id ;
-	
+
 	send_message(msgBuffer.str()) ;
-	
+
 	// XXX should do something with the return
 	std::string retmsg ;
 	read_message(retmsg) ;
@@ -529,7 +529,7 @@ ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed(const string & 
 
 //---------------------------------
 // ImageFrameView Messages
-		
+
 /**
  * Send an Image Frame View Item position changed message
  *
@@ -541,31 +541,31 @@ void
 ImageFrameSocketHandler::send_imageframe_view_position_change(nframes_t pos, void* src, ImageFrameView* item)
 {
 	// ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_view_position_change), pos, src, item));
-	
+
 	if(this == src || src == 0)
 	{
 		return ;
 	}
-	
+
 	// create a message buffer
 	std::ostringstream msgBuffer ;
 	msgBuffer << std::setfill('0') ;
-	
+
 	// add the msg type
 	msgBuffer << ardourvis::ITEM_UPDATE << ardourvis::IMAGEFRAME_ITEM << ardourvis::POSITION_CHANGE ;
-	
+
 	// add the item description
 	this->compose_imageframe_item_desc(item, msgBuffer) ;
 
 	msgBuffer << std::setw(ardourvis::TIME_VALUE_CHARS) << pos ;
-	
+
 	send_message(msgBuffer.str()) ;
-	
+
 	// XXX should do something with the return
 	std::string retmsg ;
 	read_message(retmsg) ;
 }
-		
+
 /**
  * Send a Image Frame View item duration changed message
  *
@@ -577,30 +577,30 @@ void
 ImageFrameSocketHandler::send_imageframe_view_duration_change(nframes_t dur, void* src, ImageFrameView* item)
 {
 	// ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_view_duration_change), dur, src, item));
-	
+
 	if(this == src || src == 0)
 	{
 		return ;
 	}
-	
+
 	// create a message buffer
 	std::ostringstream msgBuffer ;
 	msgBuffer << std::setfill('0') ;
-	
+
 	// add the msg type
 	msgBuffer << ardourvis::ITEM_UPDATE << ardourvis::IMAGEFRAME_ITEM << ardourvis::DURATION_CHANGE ;
-	
+
 	this->compose_imageframe_item_desc(item, msgBuffer) ;
 
 	msgBuffer << std::setw(ardourvis::TIME_VALUE_CHARS) << dur ;
-	
+
 	send_message(msgBuffer.str()) ;
-	
+
 	// XXX should do something with the return
 	std::string retmsg ;
 	read_message(retmsg) ;
 }
-		
+
 /**
  * Send a message indicating that an ImageFrameView has been renamed
  *
@@ -616,27 +616,27 @@ ImageFrameSocketHandler::send_imageframe_view_renamed(const string & new_id, con
 		// ie the change originated from us, then dont send any message back
 		return ;
 	}
-	
+
 	// ctreate a message buffer
 	std::ostringstream msgBuffer ;
 	msgBuffer << std::setfill('0') ;
-	
+
 	// add the msg type
 	msgBuffer << ardourvis::RENAME_ITEM << ardourvis::IMAGEFRAME_ITEM ;
-	
+
 	this->compose_imageframe_item_desc(item, msgBuffer) ;
-	
+
 	// add the old id and length
 	msgBuffer << std::setw(3) << old_id.length() ;
 	msgBuffer << old_id ;
-	
+
 	send_message(msgBuffer.str()) ;
-	
+
 	// XXX should do something with the return
 	std::string retmsg ;
 	read_message(retmsg) ;
 }
-		
+
 /**
  * Send a message indicating that an ImageFrameView item has been removed message
  *
@@ -651,14 +651,14 @@ ImageFrameSocketHandler::send_imageframe_view_removed(const string & item_id, vo
 		// ie the change originated from us, then dont send any message back
 		return ;
 	}
-	
+
 	// create a message buffer
 	std::ostringstream msgBuffer ;
 	msgBuffer << std::setfill('0') ;
-	
+
 	// add the msg type
 	msgBuffer << ardourvis::REMOVE_ITEM << ardourvis::IMAGEFRAME_ITEM ;
-	
+
 	// add the id length, and the id
 	ImageFrameTimeAxisGroup* parentGroup = item->get_time_axis_group() ;
 	std::string group_id = parentGroup->get_group_name() ;
@@ -666,7 +666,7 @@ ImageFrameSocketHandler::send_imageframe_view_removed(const string & item_id, vo
 	msgBuffer << std::setw(3) << track_id.length() << track_id ;
 	msgBuffer << std::setw(3) << group_id.length() << group_id ;
 	msgBuffer << std::setw(3) << item_id.length() << item_id ;
-	
+
 	send_message(msgBuffer.str()) ;
 
 	// XXX should do something with the return
@@ -679,7 +679,7 @@ ImageFrameSocketHandler::send_imageframe_view_removed(const string & item_id, vo
 
 //---------------------------------
 // MarkerView Messages
-		
+
 /**
  * Send a Marker View Item position changed message
  *
@@ -694,26 +694,26 @@ ImageFrameSocketHandler::send_marker_view_position_change(nframes_t pos, void* s
 	{
 		return ;
 	}
-	
+
 	// create a message buffer
 	std::ostringstream msgBuffer ;
 	msgBuffer << std::setfill('0') ;
-	
+
 	// add the msg type
 	msgBuffer << ardourvis::ITEM_UPDATE << ardourvis::MARKER_ITEM << ardourvis::POSITION_CHANGE ;
-	
+
 	// add the item description
 	this->compose_marker_item_desc(item, msgBuffer) ;
 
 	msgBuffer << std::setw(ardourvis::TIME_VALUE_CHARS) << pos ;
-	
+
 	send_message(msgBuffer.str()) ;
 
 	// XXX should do something with the return
 	std::string retmsg ;
 	read_message(retmsg) ;
 }
-		
+
 /**
  * Send a Marker View item duration changed message
  *
@@ -728,26 +728,26 @@ ImageFrameSocketHandler::send_marker_view_duration_change(nframes_t dur, void* s
 	{
 		return ;
 	}
-	
+
 	// create a message buffer
 	std::ostringstream msgBuffer ;
 	msgBuffer << std::setfill('0') ;
-	
+
 	// add the msg type
 	msgBuffer << ardourvis::ITEM_UPDATE << ardourvis::MARKER_ITEM << ardourvis::DURATION_CHANGE ;
-	
+
 	this->compose_marker_item_desc(item, msgBuffer) ;
 
 	msgBuffer << std::setw(ardourvis::TIME_VALUE_CHARS) << dur ;
-	
+
 	send_message(msgBuffer.str()) ;
 
 	// XXX should do something with the return
 	std::string retmsg ;
 	read_message(retmsg) ;
-}	
+}
 
-		
+
 /**
  * Send a message indicating that a MarkerView has been renamed
  *
@@ -764,27 +764,27 @@ ImageFrameSocketHandler::send_marker_view_renamed(const string & new_id, const s
 		// ie the change originated from us, then dont send any message back
 		return ;
 	}
-	
+
 	// ctreate a message buffer
 	std::ostringstream msgBuffer ;
 	msgBuffer << std::setfill('0') ;
-	
+
 	// add the msg type
 	msgBuffer << ardourvis::RENAME_ITEM << ardourvis::MARKER_ITEM ;
-	
+
 	this->compose_marker_item_desc(item, msgBuffer) ;
-	
+
 	// add the old id and length
 	msgBuffer << std::setw(3) << old_id.length() ;
 	msgBuffer << old_id ;
-	
+
 	send_message(msgBuffer.str()) ;
-	
+
 	// XXX should do something with the return
 	std::string retmsg ;
 	read_message(retmsg) ;
 }
-		
+
 /**
  * Send a message indicating that a MarkerView  item has been removed message
  *
@@ -793,26 +793,26 @@ ImageFrameSocketHandler::send_marker_view_renamed(const string & new_id, const s
  * @param item the MarkerView which has been removed
  */
 void
-ImageFrameSocketHandler::send_marker_view_removed(const string & item_id, void* src, MarkerView* item) 
+ImageFrameSocketHandler::send_marker_view_removed(const string & item_id, void* src, MarkerView* item)
 {
 	if(this == src || src == 0)
 	{
 		// ie the change originated from us, then dont send any message back
 		return ;
 	}
-	
+
 	// create a message buffer
 	std::ostringstream msgBuffer ;
 	msgBuffer << std::setfill('0') ;
-	
+
 	// add the msg type
 	msgBuffer << ardourvis::REMOVE_ITEM << ardourvis::MARKER_ITEM ;
-	
+
 	// add the id length, and the id
 	std::string track_id = item->get_time_axis_view().name() ;
 	msgBuffer << std::setw(3) << track_id.length() << track_id ;
 	msgBuffer << std::setw(3) << item_id.length() << item_id ;
-	
+
 	send_message(msgBuffer.str()) ;
 
 	// XXX should do something with the return
@@ -834,7 +834,7 @@ ImageFrameSocketHandler::send_marker_view_removed(const string & item_id, void* 
 //---------------------------------------------------------------------------------------//
 //---------------------------------------------------------------------------------------//
 // Message breakdown ie avoid a big if...then...else
-	
+
 
 /**
  * Handle insert item requests
@@ -846,7 +846,7 @@ ImageFrameSocketHandler::handle_insert_message(const char* msg)
 {
 	// handle the insert item message
 	// determine the object type to insert based upon characters 2-3
-	
+
 	std::string oType = get_message_part(2,2,msg) ;
 
 	if(oType == ardourvis::IMAGEFRAME_TIME_AXIS)
@@ -871,7 +871,7 @@ ImageFrameSocketHandler::handle_insert_message(const char* msg)
 	}
 	else
 	{
-		std::string errMsg = "Unknown Object type during insert: " ; 
+		std::string errMsg = "Unknown Object type during insert: " ;
 		errMsg.append(oType) ;
 		send_return_failure(errMsg) ;
 	}
@@ -887,7 +887,7 @@ ImageFrameSocketHandler::handle_remove_message(const char* msg)
 {
 	// handle the removal of an item message
 	// determine the object type to remove based upon characters 2-3
-	
+
 	std::string oType = get_message_part(2,2,msg) ;
 
 	if(oType == ardourvis::IMAGEFRAME_TIME_AXIS)
@@ -908,7 +908,7 @@ ImageFrameSocketHandler::handle_remove_message(const char* msg)
 	}
 	else
 	{
-		std::string errMsg = "Unknown Object type during Remove: " ; 
+		std::string errMsg = "Unknown Object type during Remove: " ;
 		errMsg.append(oType) ;
 		send_return_failure(errMsg) ;
 	}
@@ -924,9 +924,9 @@ ImageFrameSocketHandler::handle_rename_message(const char* msg)
 {
 	// handle the renaming of an item message
 	// determine the object type to rename based upon characters 2-3
-	
+
 	std::string oType = get_message_part(2,2,msg) ;
-	
+
 	if(oType == ardourvis::IMAGEFRAME_TIME_AXIS)
 	{
 		this->handle_rename_imageframe_time_axis(msg) ;
@@ -945,7 +945,7 @@ ImageFrameSocketHandler::handle_rename_message(const char* msg)
 	}
 	else
 	{
-		std::string errMsg = "Unknown Object type during Rename: " ; 
+		std::string errMsg = "Unknown Object type during Rename: " ;
 		errMsg.append(oType) ;
 		send_return_failure(errMsg) ;
 	}
@@ -961,7 +961,7 @@ ImageFrameSocketHandler::handle_request_data(const char* msg)
 {
 	// determine the request type
 	std::string reqType = get_message_part(2,2,msg) ;
-	
+
 	if(reqType == ardourvis::SESSION_NAME)
 	{
 		handle_session_name_request(msg) ;
@@ -973,15 +973,15 @@ ImageFrameSocketHandler::handle_request_data(const char* msg)
  *
  * @param msg the received message
  */
-void 
+void
 ImageFrameSocketHandler::handle_item_update_message(const char* msg)
 {
 	// determin the object that requires updating, characters 2-3
 	std::string oType = get_message_part(2,2,msg) ;
-	
+
 	// What needs updating? chars 4-5
 	std::string  attr = get_message_part(4,2,msg) ;
-	
+
 	if(oType == ardourvis::IMAGEFRAME_ITEM)
 	{
 		if(attr == ardourvis::POSITION_CHANGE)
@@ -1014,7 +1014,7 @@ ImageFrameSocketHandler::handle_item_update_message(const char* msg)
 		}
 		else
 		{
-			std::string errMsg = "Unknown Attribute during Item Update: " ; 
+			std::string errMsg = "Unknown Attribute during Item Update: " ;
 			errMsg.append(oType) ;
 			send_return_failure(errMsg) ;
 		}
@@ -1031,14 +1031,14 @@ ImageFrameSocketHandler::handle_item_update_message(const char* msg)
 		}
 		else
 		{
-			std::string errMsg = "Unknown Attribute during Item Update: " ; 
+			std::string errMsg = "Unknown Attribute during Item Update: " ;
 			errMsg.append(oType) ;
 			send_return_failure(errMsg) ;
 		}
 	}
 	else
 	{
-		std::string errMsg = "Unknown Object type during Item Update: " ; 
+		std::string errMsg = "Unknown Object type during Item Update: " ;
 		errMsg.append(oType) ;
 		send_return_failure(errMsg) ;
 	}
@@ -1054,23 +1054,23 @@ ImageFrameSocketHandler::handle_item_selected(const char* msg)
 {
 	// determine the object that requires updating, characters 2-3
 	std::string oType = get_message_part(2,2,msg) ;
-	
+
 	if(oType == std::string(ardourvis::IMAGEFRAME_ITEM))
 	{
 		int position = 4 ; // message type chars
-	
+
 		std::string track_id ;
 		std::string scene_id ;
 		std::string item_id ;
 		int track_id_size ;
 		int scene_id_size ;
 		int item_id_size ;
-	
+
 		this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, scene_id, scene_id_size, item_id, item_id_size) ;
-		
+
 		// get the named time axis
 		ImageFrameTimeAxis* ifta = dynamic_cast<ImageFrameTimeAxis*>(thePublicEditor.get_named_time_axis(track_id)) ;
-		
+
 		if(!ifta)
 		{
 			send_return_failure(std::string("No parent Image Track found : ").append(track_id)) ;
@@ -1112,7 +1112,7 @@ void
 ImageFrameSocketHandler::handle_session_action(const char* msg)
 {
 	std::string actionType = get_message_part(2,2,msg) ;
-	
+
 	if(actionType == ardourvis::OPEN_SESSION)
 	{
 		this->handle_open_session(msg) ;
@@ -1129,7 +1129,7 @@ ImageFrameSocketHandler::handle_session_action(const char* msg)
 
 //---------------------------------------------------------------------------------------//
 // handlers for specific insert procedures
-	
+
 /**
  * Handle the insertion of a new ImaegFrameTimeAxis
  *
@@ -1139,15 +1139,15 @@ void
 ImageFrameSocketHandler::handle_insert_imageframe_time_axis(const char* msg)
 {
 	int position = 4 ; // message type chars
-	
+
 	// get the ImageFrameTrack name size
 	int track_name_size = atoi(get_message_part(position, ardourvis::TEXT_SIZE_CHARS, msg).c_str()) ;
 	position += ardourvis::TEXT_SIZE_CHARS ;
-	
+
 	// get the image frame track name
 	std::string track_name = get_message_part(position, track_name_size, msg) ;
 	position += track_name_size ;
-	
+
 	// check we dont already have an time axis with that name
 	TimeAxisView* tav = thePublicEditor.get_named_time_axis(track_name) ;
 	if(tav)
@@ -1160,19 +1160,19 @@ ImageFrameSocketHandler::handle_insert_imageframe_time_axis(const char* msg)
 	{
 		thePublicEditor.add_imageframe_time_axis(track_name, this) ;
 		TimeAxisView* new_tav = thePublicEditor.get_named_time_axis(track_name) ;
-	
+
 		if(new_tav)
 		{
 			ImageFrameTimeAxis* ifta = (ImageFrameTimeAxis*)new_tav ;
 			ifta->VisualTimeAxisRemoved.connect(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_removed)) ;
 			ifta->NameChanged.connect(sigc::bind(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_renamed), ifta)) ;
-			
+
 			send_return_success() ;
 		}
 		else
 		{
 			std::string msg("Addition Failed: ") ;
-			msg.append(track_name) ; 
+			msg.append(track_name) ;
 			send_return_failure(msg) ;
 		}
 	}
@@ -1188,20 +1188,20 @@ void
 ImageFrameSocketHandler::handle_insert_marker_time_axis(const char* msg)
 {
 	int position = 4 ; // message type chars
-	
+
 	// get the ImageFrameTrack name size
 	int track_name_size = atoi(get_message_part(position, ardourvis::TEXT_SIZE_CHARS, msg).c_str()) ;
 	position += ardourvis::TEXT_SIZE_CHARS ;
-	
+
 	// get the image frame track name
 	std::string track_name = get_message_part(position, track_name_size, msg) ;
 	position += track_name_size ;
-	
+
 	// get the size of the name of the associated track
 	int assoc_track_name_size = atoi(get_message_part(position, ardourvis::TEXT_SIZE_CHARS, msg).c_str()) ;
 	position += ardourvis::TEXT_SIZE_CHARS ;
-	
-	// get the name of the track we associate the marker track with	
+
+	// get the name of the track we associate the marker track with
 	std::string assoc_track_name = get_message_part(position, assoc_track_name_size, msg) ;
 	position += assoc_track_name_size ;
 
@@ -1221,9 +1221,9 @@ ImageFrameSocketHandler::handle_insert_marker_time_axis(const char* msg)
 		{
 			thePublicEditor.add_imageframe_marker_time_axis(track_name, assoc_tav, this) ;
 			TimeAxisView* new_tav = thePublicEditor.get_named_time_axis(track_name) ;
-			
+
 			bool added = false ;
-			
+
 			if(new_tav)
 			{
 				MarkerTimeAxis* mta = dynamic_cast<MarkerTimeAxis*>(new_tav) ;
@@ -1234,11 +1234,11 @@ ImageFrameSocketHandler::handle_insert_marker_time_axis(const char* msg)
 					mta->NameChanged.connect(sigc::bind(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_marker_time_axis_renamed), mta)) ;
 				}
 			}
-			
+
 			if(added)
 			{
 				std::string msg("Addition Failed: ") ;
-				msg.append(track_name) ; 
+				msg.append(track_name) ;
 				send_return_failure(msg) ;
 			}
 		}
@@ -1260,34 +1260,34 @@ void
 ImageFrameSocketHandler::handle_insert_imageframe_group(const char* msg)
 {
 	int position = 4 ; // message type chars
-	
+
 	// get the ImageFrameTrack name size
 	int track_name_size = atoi(get_message_part(position, ardourvis::TEXT_SIZE_CHARS, msg).c_str()) ;
 	position += ardourvis::TEXT_SIZE_CHARS ;
-	
+
 	// get the image frame track name
 	std::string track_name = get_message_part(position, track_name_size, msg) ;
 	position += track_name_size ;
-	
+
 	// get the scene id size
 	int scene_id_size = atoi(get_message_part(position, ardourvis::TEXT_SIZE_CHARS, msg).c_str()) ;
 	position += ardourvis::TEXT_SIZE_CHARS ;
-	
+
 	// get the scene id
 	std::string scene_id = get_message_part(position, scene_id_size, msg) ;
 	position += scene_id_size ;
-	
-	
+
+
 	// get the named ImageFrameTrack
 	ImageFrameTimeAxis* ifta = dynamic_cast<ImageFrameTimeAxis*>(thePublicEditor.get_named_time_axis(track_name)) ;
-	
+
 	// check we got a valid ImageFrameTimeAxis
 	if(!ifta)
 	{
 		send_return_failure(std::string("No Image Frame Time Axis Found: ").append(track_name)) ;
 		return ;
 	}
-	
+
 	ImageFrameTimeAxisGroup* iftag = ifta->get_view()->add_imageframe_group(scene_id, this) ;
 	if(!iftag)
 	{
@@ -1311,35 +1311,35 @@ void
 ImageFrameSocketHandler::handle_insert_imageframe_view(const char* msg)
 {
 	int position = 4 ; // message type chars
-	
+
 	// get the ImageFrameTrack name size
 	int track_name_size = atoi(get_message_part(position,3,msg).c_str()) ;
 	position += 3 ;
-	
+
 	// get the ImageFrameTrack Name
 	std::string imageframe_track_name = get_message_part(position,track_name_size,msg) ;
 	position += track_name_size ;
-	
+
 	// get the scene name size
 	int scene_size = atoi(get_message_part(position,3,msg).c_str()) ;
 	position += 3 ;
-	
+
 	// get the scene Name
 	std::string scene_name = get_message_part(position,scene_size,msg) ;
 	position += scene_size ;
-	
+
 	// get the image frame_id size
 	int image_id_size = atoi(get_message_part(position,3,msg).c_str()) ;
 	position += 3 ;
-	
+
 	// get the image frame_id
 	std::string image_id = get_message_part(position,image_id_size,msg) ;
 	position += image_id_size ;
-	
+
 	// get the start frame value
 	nframes_t start = strtoul((get_message_part(position,10,msg).c_str()),0,10) ;
 	position += 10 ;
-	
+
 	// get the duration value
 	nframes_t duration = strtoul((get_message_part(position,10,msg).c_str()),0,10) ;
 	position += 10 ;
@@ -1347,23 +1347,23 @@ ImageFrameSocketHandler::handle_insert_imageframe_view(const char* msg)
 	//get the named time axis view we about to add an image to
 	TimeAxisView* tav = thePublicEditor.get_named_time_axis(imageframe_track_name) ;
 	ImageFrameTimeAxis* ifta = 0 ;
-	
+
 	if(tav)
 	{
 		ifta = dynamic_cast<ImageFrameTimeAxis*>(tav) ;
 	}
-	
+
 	if(!ifta)
 	{
 		std::string errmsg("No Parent Image Track Found: ") ;
 		errmsg.append(imageframe_track_name) ;
 		send_return_failure(errmsg) ;
-		
+
 		// dont really like all these returns mid-way
 		// but this is goinf to get awfully if..then nested if not
 		return ;
 	}
-	
+
 	// check the parent group exists
 	ImageFrameTimeAxisGroup* iftag = ifta->get_view()->get_named_imageframe_group(scene_name) ;
 	if(!iftag)
@@ -1373,36 +1373,36 @@ ImageFrameSocketHandler::handle_insert_imageframe_view(const char* msg)
 		send_return_failure(errmsg) ;
 		return ;
 	}
-	
+
 	// ok, so we have the parent group and track, now we need dome image data
-	
-	
+
+
 	//
 	// request the image data from the image compositor
 	//
-	
+
 	// ctreate a message buffer
 	std::ostringstream reqBuffer ;
 	reqBuffer << std::setfill('0') ;
-	
+
 	// add the msg type
 	reqBuffer << REQUEST_DATA << IMAGE_RGB_DATA ;
-	
+
 	// add the image track and size
 	reqBuffer << std::setw(ardourvis::TEXT_SIZE_CHARS) << track_name_size ;
 	reqBuffer << imageframe_track_name ;
-	
+
 	// add the scene id and size
 	reqBuffer << std::setw(ardourvis::TEXT_SIZE_CHARS) << scene_size ;
 	reqBuffer << scene_name ;
-	
+
 	// add the image id and size
 	reqBuffer << std::setw(ardourvis::TEXT_SIZE_CHARS) << image_id_size ;
 	reqBuffer << image_id ;
-	
+
 	// add the preferred image height
 	reqBuffer << std::setw(ardourvis::TEXT_SIZE_CHARS) << ifta->get_image_display_height() ;
-	
+
 	// send the request message
 	send_message(reqBuffer.str()) ;
 
@@ -1413,13 +1413,13 @@ ImageFrameSocketHandler::handle_insert_imageframe_view(const char* msg)
 	std::string init_image_data_msg ;
 	read_message(init_image_data_msg) ;
 	int init_msg_pos = 4 ;
-	
+
 	int imgWidth    = atoi(init_image_data_msg.substr(init_msg_pos, ardourvis::IMAGE_SIZE_CHARS).c_str()) ;
 	init_msg_pos += ardourvis::IMAGE_SIZE_CHARS ;
 	int imgHeight    = atoi(init_image_data_msg.substr(init_msg_pos, ardourvis::IMAGE_SIZE_CHARS).c_str()) ;
 	init_msg_pos += ardourvis::IMAGE_SIZE_CHARS ;
 	int imgChannels    = atoi(init_image_data_msg.substr(init_msg_pos, ardourvis::IMAGE_SIZE_CHARS).c_str()) ;
-	init_msg_pos += ardourvis::IMAGE_SIZE_CHARS ; 
+	init_msg_pos += ardourvis::IMAGE_SIZE_CHARS ;
 	int imgSize = atoi(init_image_data_msg.substr(init_msg_pos, ardourvis::IMAGE_DATA_MESSAGE_SIZE_CHARS).c_str()) ;
 
 	// send a success msg
@@ -1444,7 +1444,7 @@ ImageFrameSocketHandler::handle_insert_imageframe_view(const char* msg)
 			ifv->PositionChanged.connect(sigc::bind(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_view_position_change), ifv)) ;
 			ifv->DurationChanged.connect(sigc::bind(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_view_duration_change), ifv)) ;
 			ifv->ItemRemoved.connect(sigc::bind(sigc::mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_view_removed), ifv)) ;
-		
+
 			send_return_success() ;
 		}
 		else
@@ -1465,8 +1465,8 @@ ImageFrameSocketHandler::handle_insert_imageframe_view(const char* msg)
 void
 ImageFrameSocketHandler::handle_insert_marker_view(const char* msg)
 {}
-	
-	
+
+
 //---------------------------------------------------------------------------------------//
 // handlers for specific removal procedures
 
@@ -1479,7 +1479,7 @@ ImageFrameSocketHandler::handle_insert_marker_view(const char* msg)
 void
 ImageFrameSocketHandler::handle_remove_imageframe_time_axis(const char* msg)
 {}
-		
+
 /**
  * Handle the removal of an MarkerTimeAxis
  *
@@ -1488,7 +1488,7 @@ ImageFrameSocketHandler::handle_remove_imageframe_time_axis(const char* msg)
 void
 ImageFrameSocketHandler::handle_remove_marker_time_axis(const char* msg)
 {}
-		
+
 /**
  * Handle the removal of an ImageFrameTimeAxisGroup
  *
@@ -1497,7 +1497,7 @@ ImageFrameSocketHandler::handle_remove_marker_time_axis(const char* msg)
 void
 ImageFrameSocketHandler::handle_remove_imageframe_time_axis_group(const char* msg)
 {}
-		
+
 /**
  * Handle the removal of an ImageFrameItem
  *
@@ -1506,7 +1506,7 @@ ImageFrameSocketHandler::handle_remove_imageframe_time_axis_group(const char* ms
 void
 ImageFrameSocketHandler::handle_remove_imageframe_view(const char* msg)
 {}
-		
+
 /**
  * Handle the removal of an MarkerItem
  *
@@ -1517,12 +1517,12 @@ ImageFrameSocketHandler::handle_remove_marker_view(const char* msg)
 {}
 
 
-	
-	
+
+
 
 //---------------------------------------------------------------------------------------//
-// handlers for the specific rename procedures	
-	
+// handlers for the specific rename procedures
+
 /**
  * Handle the renaming of an ImageTimeAxis
  *
@@ -1532,25 +1532,25 @@ void
 ImageFrameSocketHandler::handle_rename_imageframe_time_axis(const char* msg)
 {
 	// msg [MVIT][oldSize][oldId][newSize][newId]
-	
+
 	int position = 4 ; // message type chars
 
 	// get the old Id size
 	int old_id_size = atoi(get_message_part(position,3,msg).c_str()) ;
 	position += 3 ;
-	
+
 	// get the old id
 	std::string old_id = get_message_part(position,old_id_size,msg) ;
 	position += old_id_size ;
-	
+
 	//get the new Id size
 	int new_id_size = atoi(get_message_part(position,3,msg).c_str()) ;
 	position += 3 ;
-	
+
 	// get the new Id
 	std::string new_id = get_message_part(position,new_id_size,msg) ;
 	position += new_id_size ;
-	
+
 	// get the Named time axis
 	TimeAxisView* tav = thePublicEditor.get_named_time_axis(old_id) ;
 	if(dynamic_cast<ImageFrameTimeAxis*>(tav))
@@ -1566,7 +1566,7 @@ ImageFrameSocketHandler::handle_rename_imageframe_time_axis(const char* msg)
 		send_return_failure(msg) ;
 	}
 }
-		
+
 /**
  * Handle the renaming of an MarkerTimeAxis
  *
@@ -1575,7 +1575,7 @@ ImageFrameSocketHandler::handle_rename_imageframe_time_axis(const char* msg)
 void
 ImageFrameSocketHandler::handle_rename_marker_time_axis(const char* msg)
 {}
-		
+
 /**
  * Handle the renaming of an ImageFrameItem
  *
@@ -1584,7 +1584,7 @@ ImageFrameSocketHandler::handle_rename_marker_time_axis(const char* msg)
 void
 ImageFrameSocketHandler::handle_rename_imageframe_time_axis_group(const char* msg)
 {}
-	
+
 /**
  * Handle the renaming of an ImageFrameItem
  *
@@ -1593,7 +1593,7 @@ ImageFrameSocketHandler::handle_rename_imageframe_time_axis_group(const char* ms
 void
 ImageFrameSocketHandler::handle_rename_imageframe_view(const char* msg)
 {}
-		
+
 /**
  * Handle the renaming of an Marker
  *
@@ -1602,13 +1602,13 @@ ImageFrameSocketHandler::handle_rename_imageframe_view(const char* msg)
 void
 ImageFrameSocketHandler::handle_rename_marker_view(const char* msg)
 {}
-	
-	
 
-	
+
+
+
 //---------------------------------------------------------------------------------------//
 // handlers for data request
-	
+
 /**
  * Handle a request for the sessnio naem fo the current session
  * We return a failure state if no session is open
@@ -1619,7 +1619,7 @@ void
 ImageFrameSocketHandler::handle_session_name_request(const char* msg)
 {
 	ARDOUR::Session* currentSession = thePublicEditor.current_session() ;
-	
+
 	if(currentSession == 0)
 	{
 		// no current session, return failure
@@ -1630,14 +1630,14 @@ ImageFrameSocketHandler::handle_session_name_request(const char* msg)
 	{
 		std::string sessionName = currentSession->name() ;
 		std::string sessionPath = currentSession->path() ;
-		
+
 		if(sessionPath[sessionPath.length() -1] != '/')
 		{
 			sessionPath.append("/") ;
 		}
-		
+
 		sessionPath.append(sessionName) ;
-		
+
 		std::ostringstream msgBuf ;
 		msgBuf << ardourvis::RETURN_DATA << ardourvis::SESSION_NAME ;
 		msgBuf << std::setfill('0') ;
@@ -1646,14 +1646,14 @@ ImageFrameSocketHandler::handle_session_name_request(const char* msg)
 		send_message(msgBuf.str()) ;
 	}
 }
-	
-	
+
+
 
 
 
 //---------------------------------------------------------------------------------------//
 // handlers for specific item update changes
-	
+
 /**
  * Handle ImageFrameView positional changes
  *
@@ -1663,28 +1663,28 @@ void
 ImageFrameSocketHandler::handle_imageframe_view_position_update(const char* msg)
 {
 	int position = 6 ; // message type chars
-	
+
 	std::string track_id ;
 	std::string scene_id ;
 	std::string item_id ;
 	int track_id_size ;
 	int scene_id_size ;
 	int item_id_size ;
-	
+
 	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, scene_id, scene_id_size, item_id, item_id_size) ;
-	
+
 	nframes_t start_frame = strtoul(get_message_part(position, ardourvis::TIME_VALUE_CHARS, msg).c_str(), 0, 10) ;
 	position += ardourvis::TIME_VALUE_CHARS ;
-	
+
 	// get the named time axis
 	ImageFrameTimeAxis* ifta = dynamic_cast<ImageFrameTimeAxis*>(thePublicEditor.get_named_time_axis(track_id)) ;
-	
+
 	if(!ifta)
 	{
 		send_return_failure(std::string("No parent Image Track found: ").append(track_id)) ;
 		return ;
 	}
-	
+
 	// get the parent scene
 	ImageFrameTimeAxisGroup* iftag = ifta->get_view()->get_named_imageframe_group(scene_id) ;
 	if(!iftag)
@@ -1692,20 +1692,20 @@ ImageFrameSocketHandler::handle_imageframe_view_position_update(const char* msg)
 		send_return_failure(std::string("No parent Scene found: ").append(scene_id)) ;
 		return ;
 	}
-	
+
 	ImageFrameView* ifv = iftag->get_named_imageframe_item(item_id) ;
-	
+
 	if(!ifv)
 	{
 		send_return_failure(std::string("No Image Frame Item found: ").append(item_id)) ;
 		return ;
 	}
-	
+
 
 	ifv->set_position(start_frame, this) ;
 	send_return_success() ;
 }
-		
+
 /**
  * Handle ImageFrameView Duration changes
  *
@@ -1715,28 +1715,28 @@ void
 ImageFrameSocketHandler::handle_imageframe_view_duration_update(const char* msg)
 {
 	int position = 6 ; // message type chars
-	
+
 	std::string track_id ;
 	std::string scene_id ;
 	std::string item_id ;
 	int track_id_size ;
 	int scene_id_size ;
 	int item_id_size ;
-	
+
 	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, scene_id, scene_id_size, item_id, item_id_size) ;
-	
+
 	nframes_t duration = strtoul(get_message_part(position,ardourvis::TIME_VALUE_CHARS,msg).c_str(),0,10) ;
 	position += ardourvis::TIME_VALUE_CHARS ;
-	
+
 	// get the named time axis
 	ImageFrameTimeAxis* ifta = dynamic_cast<ImageFrameTimeAxis*>(thePublicEditor.get_named_time_axis(track_id)) ;
-	
+
 	if(!ifta)
 	{
 		send_return_failure(std::string("No parent Image Track found : ").append(track_id)) ;
 		return ;
 	}
-	
+
 	// get the parent scene
 	ImageFrameTimeAxisGroup* iftag = ifta->get_view()->get_named_imageframe_group(scene_id) ;
 	if(!iftag)
@@ -1744,15 +1744,15 @@ ImageFrameSocketHandler::handle_imageframe_view_duration_update(const char* msg)
 		send_return_failure(std::string("No parent Scene found : ").append(scene_id)) ;
 		return ;
 	}
-	
+
 	ImageFrameView* ifv = iftag->get_named_imageframe_item(item_id) ;
-	
+
 	if(!ifv)
 	{
 		send_return_failure(std::string("No Image Frame Item found : ").append(item_id)) ;
 		return ;
 	}
-	
+
 	ifv->set_duration(duration, this) ;
 	send_return_success() ;
 }
@@ -1766,19 +1766,19 @@ void
 ImageFrameSocketHandler::handle_imageframe_position_lock_update(const char* msg)
 {
 	int position = 6 ; // message type chars
-	
+
 	std::string track_id ;
 	std::string group_id ;
 	std::string item_id ;
 	int track_id_size ;
 	int group_id_size ;
 	int item_id_size ;
-	
+
 	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, group_id, group_id_size, item_id, item_id_size) ;
-	
+
 	std::string pos_lock = get_message_part(position,1,msg) ;
 	bool pos_lock_active = false ;
-	
+
 	if(pos_lock == "0")
 	{
 		pos_lock_active = false ;
@@ -1792,9 +1792,9 @@ ImageFrameSocketHandler::handle_imageframe_position_lock_update(const char* msg)
 		send_return_failure(std::string("Unknown Value used during Position Loack: ").append(pos_lock)) ;
 		return ;
 	}
-	
+
 	position += 1 ;
-	
+
 	int errcode ;
 	std::string errmsg ;
 	ImageFrameView* ifv = get_imageframe_view_from_desc(track_id, group_id, item_id, errcode, errmsg) ;
@@ -1808,7 +1808,7 @@ ImageFrameSocketHandler::handle_imageframe_position_lock_update(const char* msg)
 		send_return_failure(errmsg) ;
 	}
 }
-		
+
 /**
  * Handle ImageFrameView Maximum Duration changes
  *
@@ -1818,19 +1818,19 @@ void
 ImageFrameSocketHandler::handle_imageframe_view_max_duration_update(const char* msg)
 {
 	int position = 6 ; // message type chars
-	
+
 	std::string track_id ;
 	std::string group_id ;
 	std::string item_id ;
 	int track_id_size ;
 	int group_id_size ;
 	int item_id_size ;
-	
+
 	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, group_id, group_id_size, item_id, item_id_size) ;
-	
+
 	nframes_t max_duration = strtoul(get_message_part(position,ardourvis::TIME_VALUE_CHARS,msg).c_str(),0,10) ;
 	position += ardourvis::TIME_VALUE_CHARS ;
-	
+
 	int errcode ;
 	std::string errmsg ;
 	ImageFrameView* ifv = get_imageframe_view_from_desc(track_id, group_id, item_id, errcode, errmsg) ;
@@ -1844,7 +1844,7 @@ ImageFrameSocketHandler::handle_imageframe_view_max_duration_update(const char* 
 		send_return_failure(errmsg) ;
 	}
 }
-	
+
 /**
  * Handle image frame max duration enable constraint changes
  *
@@ -1854,19 +1854,19 @@ void
 ImageFrameSocketHandler::handle_imageframe_view_max_duration_enable_update(const char* msg)
 {
 	int position = 6 ; // message type chars
-	
+
 	std::string track_id ;
 	std::string group_id ;
 	std::string item_id ;
 	int track_id_size ;
 	int group_id_size ;
 	int item_id_size ;
-	
+
 	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, group_id, group_id_size, item_id, item_id_size) ;
-	
+
 	std::string active = get_message_part(position,1,msg) ;
 	bool max_duration_active = false ;
-	
+
 	if(active == "0")
 	{
 		max_duration_active = false ;
@@ -1880,9 +1880,9 @@ ImageFrameSocketHandler::handle_imageframe_view_max_duration_enable_update(const
 		send_return_failure(std::string("Unknown Value used during enable max duration: ").append(active)) ;
 		return ;
 	}
-	
+
 	position += 1 ;
-	
+
 	int errcode ;
 	std::string errmsg ;
 	ImageFrameView* ifv = get_imageframe_view_from_desc(track_id, group_id, item_id, errcode, errmsg) ;
@@ -1896,7 +1896,7 @@ ImageFrameSocketHandler::handle_imageframe_view_max_duration_enable_update(const
 		send_return_failure(errmsg) ;
 	}
 }
-		
+
 /**
  * Handle ImageFrameView Minimum Duration changes
  *
@@ -1906,19 +1906,19 @@ void
 ImageFrameSocketHandler::handle_imageframe_view_min_duration_update(const char* msg)
 {
 	int position = 6 ; // message type chars
-	
+
 	std::string track_id ;
 	std::string group_id ;
 	std::string item_id ;
 	int track_id_size ;
 	int group_id_size ;
 	int item_id_size ;
-	
+
 	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, group_id, group_id_size, item_id, item_id_size) ;
-	
+
 	nframes_t min_duration = strtoul(get_message_part(position,ardourvis::TIME_VALUE_CHARS,msg).c_str(),0,10) ;
 	position += ardourvis::TIME_VALUE_CHARS ;
-	
+
 	int errcode ;
 	std::string errmsg ;
 	ImageFrameView* ifv = get_imageframe_view_from_desc(track_id, group_id, item_id, errcode, errmsg) ;
@@ -1932,7 +1932,7 @@ ImageFrameSocketHandler::handle_imageframe_view_min_duration_update(const char* 
 		send_return_failure(errmsg) ;
 	}
 }
-	
+
 /**
  * Handle image frame min duration enable constraint changes
  *
@@ -1942,19 +1942,19 @@ void
 ImageFrameSocketHandler::handle_imageframe_view_min_duration_enable_update(const char* msg)
 {
 	int position = 6 ; // message type chars
-	
+
 	std::string track_id ;
 	std::string group_id ;
 	std::string item_id ;
 	int track_id_size ;
 	int group_id_size ;
 	int item_id_size ;
-	
+
 	this->decompose_imageframe_item_desc(msg, position, track_id, track_id_size, group_id, group_id_size, item_id, item_id_size) ;
-	
+
 	std::string active = get_message_part(position,1,msg) ;
 	bool min_duration_active = false ;
-	
+
 	if(active == "0")
 	{
 		min_duration_active = false ;
@@ -1968,9 +1968,9 @@ ImageFrameSocketHandler::handle_imageframe_view_min_duration_enable_update(const
 		send_return_failure(std::string("Unknown Value used during enable max duration: ").append(active)) ;
 		return ;
 	}
-	
+
 	position += 1 ;
-	
+
 	int errcode ;
 	std::string errmsg ;
 	ImageFrameView* ifv = get_imageframe_view_from_desc(track_id, group_id, item_id, errcode, errmsg) ;
@@ -1984,7 +1984,7 @@ ImageFrameSocketHandler::handle_imageframe_view_min_duration_enable_update(const
 		send_return_failure(errmsg) ;
 	}
 }
-	
+
 /**
  * Handle MarkerView position changes
  *
@@ -1993,7 +1993,7 @@ ImageFrameSocketHandler::handle_imageframe_view_min_duration_enable_update(const
 void
 ImageFrameSocketHandler::handle_marker_view_position_update(const char* msg)
 {}
-		
+
 /**
  * Handle MarkerView duration changes
  *
@@ -2012,7 +2012,7 @@ void
 ImageFrameSocketHandler::handle_marker_view_position_lock_update(const char* msg)
 {
 }
-		
+
 /**
  * Handle MarkerView maximum duration changes
  *
@@ -2021,7 +2021,7 @@ ImageFrameSocketHandler::handle_marker_view_position_lock_update(const char* msg
 void
 ImageFrameSocketHandler::handle_marker_view_max_duration_update(const char* msg)
 {}
-		
+
 /**
  * Handle MarkerView minimum duration changes
  *
@@ -2037,7 +2037,7 @@ ImageFrameSocketHandler::handle_marker_view_min_duration_update(const char* msg)
 
 //---------------------------------------------------------------------------------------//
 // handlers for Session Actions
-	
+
 /**
  * Handle the opening of a named audio session
  *
@@ -2047,19 +2047,19 @@ void
 ImageFrameSocketHandler::handle_open_session(const char* msg)
 {
 	// msg [SAOS][sessionSize][sessionPath]
-	
+
 	int position = 4 ; // message type chars
 
 	// get the session name size
 	int session_name_size = atoi(get_message_part(position,3,msg).c_str()) ;
 	position += 3 ;
-	
+
 	// get the session name
 	std::string session_name = get_message_part(position,session_name_size,msg) ;
 	position += session_name_size ;
-	
-	
-	// open the session	
+
+
+	// open the session
 	std::string path, name ;
 	bool isnew;
 
@@ -2076,7 +2076,7 @@ ImageFrameSocketHandler::handle_open_session(const char* msg)
 	}
 }
 
-		
+
 /**
  * Handle the closing of a named audio session
  *
@@ -2085,10 +2085,10 @@ ImageFrameSocketHandler::handle_open_session(const char* msg)
 void
 ImageFrameSocketHandler::handle_closed_session(const char* msg)
 {}
-	
+
 //---------------------------------------------------------------------------------------//
 // handlers for the shutdown of the Image Compositor
-		
+
 /**
  * Handle the shutdown message from the image compositor
  *
@@ -2107,11 +2107,11 @@ ImageFrameSocketHandler::handle_shutdown(const char* msg)
 
 
 
-	
-	
+
+
 //---------------------------------------------------------------------------------------//
 // convenince methods to break up messages
-	
+
 /**
  * Returns part of the received message as a std::string
  *
@@ -2127,7 +2127,7 @@ ImageFrameSocketHandler::get_message_part(int start, int32_t num_chars, const ch
 	strncpy(buf,msg+start,num_chars) ;
 	buf[num_chars] = '\0' ;
 	std::string s(buf) ;
-	
+
 	return(s) ;
 }
 
@@ -2152,23 +2152,23 @@ ImageFrameSocketHandler::decompose_imageframe_item_desc(const char* msg, int& po
 	// get the track Id size
 	track_id_size = atoi(get_message_part(position,ardourvis::TEXT_SIZE_CHARS,msg).c_str()) ;
 	position += ardourvis::TEXT_SIZE_CHARS ;
-	
+
 	// get the track id
 	track_id = get_message_part(position,track_id_size,msg) ;
 	position += track_id_size ;
-	
+
 	// get the track Id size
 	scene_id_size = atoi(get_message_part(position,ardourvis::TEXT_SIZE_CHARS,msg).c_str()) ;
 	position += ardourvis::TEXT_SIZE_CHARS ;
-	
+
 	// get the scene id
 	scene_id = get_message_part(position,scene_id_size,msg) ;
 	position += scene_id_size ;
-	
+
 	// get the item id size
 	item_id_size = atoi(get_message_part(position,ardourvis::TEXT_SIZE_CHARS,msg).c_str()) ;
 	position += ardourvis::TEXT_SIZE_CHARS ;
-	
+
 	// get the item id
 	item_id = get_message_part(position,item_id_size,msg) ;
 	position += item_id_size ;
@@ -2187,11 +2187,11 @@ ImageFrameSocketHandler::compose_imageframe_item_desc(ImageFrameView* ifv, std::
 {
 	buffer << std::setw(3) << ifv->get_time_axis_group()->get_view().trackview().name().length() ;
 	buffer << ifv->get_time_axis_group()->get_view().trackview().name() ;
-	
+
 	// add the parent scene
 	buffer << std::setw(3) << ifv->get_time_axis_group()->get_group_name().length() ;
 	buffer << ifv->get_time_axis_group()->get_group_name() ;
-	
+
 	// add the ImageFrameItem id length and Id
 	buffer << setw(3)  << ifv->get_item_name().length() ;
 	buffer << ifv->get_item_name() ;
@@ -2209,17 +2209,17 @@ void
 ImageFrameSocketHandler::compose_marker_item_desc(MarkerView* mv, std::ostringstream& buffer)
 {
 	MarkerTimeAxis* mta = dynamic_cast<MarkerTimeAxis*>(&mv->get_time_axis_view()) ;
-	
+
 	if(!mta)
 	{
 		return ;
 	}
-	
+
 	buffer << std::setw(3) << mta->name().length() ;
 	buffer << mta->name() ;
-	
+
 	buffer << std::setw(3) << mv->get_item_name().length() ;
-	buffer << mv->get_item_name() ;	
+	buffer << mv->get_item_name() ;
 }
 
 
@@ -2243,10 +2243,10 @@ ImageFrameView*
 ImageFrameSocketHandler::get_imageframe_view_from_desc(const string & track_id, const string & group_id, const string & item_id, int& errcode, std::string& errmsg)
 {
 	ImageFrameView* item = 0 ;
-	
+
 	// get the named time axis
 	ImageFrameTimeAxis* ifta = dynamic_cast<ImageFrameTimeAxis*>(thePublicEditor.get_named_time_axis(track_id)) ;
-	
+
 	if(!ifta)
 	{
 		errcode = 1 ;
@@ -2277,7 +2277,7 @@ ImageFrameSocketHandler::get_imageframe_view_from_desc(const string & track_id, 
 			}
 		}
 	}
-	
+
 	return(item) ;
 }
 
@@ -2299,10 +2299,10 @@ ImageFrameSocketHandler::send_message(const string & msg)
 {
 	//std::cout << "Sending Message [" << msg << "]\n" ;
 	int retcode = ::send(theArdourToCompositorSocket, msg.c_str(), msg.length(), MSG_NOSIGNAL) ;
-	
+
 	return(retcode) ;
 }
-		
+
 /**
  * Reads a message from the Socket
  *
@@ -2314,13 +2314,13 @@ ImageFrameSocketHandler::read_message(std::string& msg)
 {
 	char buf[ardourvis::MAX_MSG_SIZE + 1] ;
 	memset(buf, 0, (ardourvis::MAX_MSG_SIZE + 1)) ;
-	
+
 	msg = "" ;
 	int retcode = ::recv(theArdourToCompositorSocket, buf, ardourvis::MAX_MSG_SIZE, 0) ;
-	
+
 	msg = buf ;
 	//std::cout << "Received Message [" << msg << "]\n" ;
-	
+
 	return(retcode) ;
 }
 
@@ -2348,6 +2348,6 @@ ImageFrameSocketHandler::send_return_failure(const std::string& msg)
 	buf << ardourvis::RETURN_FALSE ;
 	buf << std::setw(3) << msg.length(); ;
 	buf << msg ;
-	
+
 	send_message(buf.str()) ;
 }

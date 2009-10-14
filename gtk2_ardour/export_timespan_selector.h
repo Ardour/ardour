@@ -56,11 +56,11 @@ class ExportTimespanSelector : public Gtk::VBox {
   public:
 
 	ExportTimespanSelector (ARDOUR::Session * session, ProfileManagerPtr manager);
-	
+
 	virtual ~ExportTimespanSelector ();
 
 	void sync_with_manager ();
-	
+
 	sigc::signal<void> CriticalSelectionChanged;
 
   protected:
@@ -70,12 +70,12 @@ class ExportTimespanSelector : public Gtk::VBox {
 	TimespanStatePtr  state;
 
 	virtual void fill_range_list () = 0;
-	
+
 	void add_range_to_selection (ARDOUR::Location const * loc);
 	void set_time_format_from_state ();
-	
+
 	void change_time_format ();
-	
+
 	Glib::ustring construct_label (ARDOUR::Location const * location) const;
 	Glib::ustring bbt_str (nframes_t frames) const;
 	Glib::ustring smpte_str (nframes_t frames) const;
@@ -84,28 +84,28 @@ class ExportTimespanSelector : public Gtk::VBox {
 	void update_range_name (Glib::ustring const & path, Glib::ustring const & new_text);
 
 	/*** GUI components ***/
-	
+
 	Gtk::HBox      option_hbox;
 	Gtk::Label     time_format_label;
-	
+
 	/* Time format */
-	
+
 	typedef ARDOUR::ExportProfileManager::TimeFormat TimeFormat;
-	
+
 	struct TimeFormatCols : public Gtk::TreeModelColumnRecord
 	{
 	  public:
 		Gtk::TreeModelColumn<TimeFormat>      format;
 		Gtk::TreeModelColumn<Glib::ustring>   label;
-	
+
 		TimeFormatCols () { add(format); add(label); }
 	};
 	TimeFormatCols               time_format_cols;
 	Glib::RefPtr<Gtk::ListStore> time_format_list;
 	Gtk::ComboBox                time_format_combo;
-	
+
 	/* View */
-	
+
 	struct RangeCols : public Gtk::TreeModelColumnRecord
 	{
 	  public:
@@ -113,14 +113,14 @@ class ExportTimespanSelector : public Gtk::VBox {
 		Gtk::TreeModelColumn<Glib::ustring>       label;
 		Gtk::TreeModelColumn<bool>                selected;
 		Gtk::TreeModelColumn<Glib::ustring>       name;
-	
+
 		RangeCols () { add (location); add(label); add(selected); add(name); }
 	};
 	RangeCols                    range_cols;
-	
+
 	Glib::RefPtr<Gtk::ListStore> range_list;
 	Gtk::TreeView                range_view;
-	
+
 	Gtk::ScrolledWindow          range_scroller;
 };
 
@@ -148,7 +148,7 @@ class ExportTimespanSelectorSingle : public ExportTimespanSelector
   private:
 
 	virtual void fill_range_list ();
-	
+
 	Glib::ustring range_id;
 
 };

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006-2009 Paul Davis 
+    Copyright (C) 2006-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ FileSource::init (const ustring& pathstr, bool must_exist)
 	if (_file_is_new && must_exist) {
 		return -1;
 	}
-	
+
 	return 0;
 }
 
@@ -142,10 +142,10 @@ FileSource::move_to_trash (const ustring& trash_dir_name)
 	/* don't move the file across filesystems, just stick it in the
 	   trash_dir_name directory on whichever filesystem it was already on
 	*/
-	
+
 	ustring newpath;
 	newpath = Glib::path_get_dirname (_path);
-	newpath = Glib::path_get_dirname (newpath); 
+	newpath = Glib::path_get_dirname (newpath);
 
 	newpath += string(PATH_SEP) + trash_dir_name + PATH_SEP;
 	newpath += Glib::path_get_basename (_path);
@@ -163,7 +163,7 @@ FileSource::move_to_trash (const ustring& trash_dir_name)
 			snprintf (buf, sizeof (buf), "%s.%d", newpath.c_str(), ++version);
 			newpath_v = buf;
 		}
-		
+
 		if (version == 999) {
 			PBD::error << string_compose (
 					_("there are already 1000 files with names like %1; versioning discontinued"),
@@ -185,9 +185,9 @@ FileSource::move_to_trash (const ustring& trash_dir_name)
 		rename (newpath.c_str(), _path.c_str());
 		return -1;
 	}
-	    
+
 	_path = newpath;
-	
+
 	/* file can not be removed twice, since the operation is not idempotent */
 	_flags = Flag (_flags & ~(RemoveAtDestroy|Removable|RemovableIfEmpty));
 
@@ -195,7 +195,7 @@ FileSource::move_to_trash (const ustring& trash_dir_name)
 }
 
 /** Find the actual source file based on \a filename.
- * 
+ *
  * If the source is embedded, \a filename should be a simple filename (no slashes).
  * If the source is external, \a filename should be a full path.
  * In either case, found_path is set to the complete absolute path of the source file.
@@ -230,7 +230,7 @@ FileSource::find (DataType type, const ustring& path, bool must_exist,
 		split (search_path, dirs, ':');
 
 		cnt = 0;
-		
+
 		for (vector<ustring>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
 			fullpath = *i;
 			if (fullpath[fullpath.length()-1] != '/') {
@@ -242,24 +242,24 @@ FileSource::find (DataType type, const ustring& path, bool must_exist,
 			/* i (paul) made a nasty design error by using ':' as a special character in
 			   Ardour 0.99 .. this hack tries to make things sort of work.
 			*/
-			
+
 			if ((pos = pathstr.find_last_of (':')) != ustring::npos) {
-				
+
 				if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
 
 					/* its a real file, no problem */
-					
+
 					keeppath = fullpath;
 					++cnt;
 
 				} else {
-					
+
 					if (must_exist) {
-						
+
 						/* might be an older session using file:channel syntax. see if the version
 						   without the :suffix exists
 						 */
-						
+
 						ustring shorter = pathstr.substr (0, pos);
 						fullpath = *i;
 
@@ -274,12 +274,12 @@ FileSource::find (DataType type, const ustring& path, bool must_exist,
 							pathstr = shorter;
 							keeppath = fullpath;
 							++cnt;
-						} 
-						
+						}
+
 					} else {
-						
+
 						/* new derived file (e.g. for timefx) being created in a newer session */
-						
+
 					}
 				}
 
@@ -288,7 +288,7 @@ FileSource::find (DataType type, const ustring& path, bool must_exist,
 				if (Glib::file_test (fullpath, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
 					keeppath = fullpath;
 					++cnt;
-				} 
+				}
 			}
 		}
 
@@ -322,17 +322,17 @@ FileSource::find (DataType type, const ustring& path, bool must_exist,
 		}
 
 		found_path = keeppath;
-		
+
 		ret = true;
 
 	} else {
-		
+
 		/* external files and/or very very old style sessions include full paths */
 
 		/* ugh, handle ':' situation */
 
 		if ((pos = pathstr.find_last_of (':')) != ustring::npos) {
-			
+
 			ustring shorter = pathstr.substr (0, pos);
 
 			if (Glib::file_test (shorter, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
@@ -340,38 +340,38 @@ FileSource::find (DataType type, const ustring& path, bool must_exist,
 				pathstr = shorter;
 			}
 		}
-		
+
 		found_path = pathstr;
 
 		if (!Glib::file_test (pathstr, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
 
 			/* file does not exist or we cannot read it */
-			
+
 			if (must_exist) {
 				error << string_compose(
 						_("Filesource: cannot find required file (%1): %2"),
 						path, strerror (errno)) << endmsg;
 				goto out;
 			}
-			
+
 			if (errno != ENOENT) {
 				error << string_compose(
 						_("Filesource: cannot check for existing file (%1): %2"),
 						path, strerror (errno)) << endmsg;
 				goto out;
 			}
-			
+
 			/* a new file */
 			isnew = true;
 			ret = true;
 
 		} else {
-			
+
 			/* already exists */
 			ret = true;
 		}
 	}
-	
+
 out:
 	return ret;
 }
@@ -382,13 +382,13 @@ FileSource::set_source_name (const ustring& newname, bool destructive)
 	Glib::Mutex::Lock lm (_lock);
 	ustring oldpath = _path;
 	ustring newpath = Session::change_source_path_by_name (oldpath, _name, newname, destructive);
-	
+
 	if (newpath.empty()) {
 		error << string_compose (_("programming error: %1"), "cannot generate a changed file path") << endmsg;
 		return -1;
 	}
 
-	// Test whether newpath exists, if yes notify the user but continue. 
+	// Test whether newpath exists, if yes notify the user but continue.
 	if (access(newpath.c_str(),F_OK) == 0) {
 		error << _("Programming error! Ardour tried to rename a file over another file! It's safe to continue working, but please report this to the developers.") << endmsg;
 		return -1;

@@ -7,8 +7,8 @@
  *
  * Author: Federico Mena <federico@nuclecu.unam.mx>
  */
- 
- 
+
+
 #include <string.h> /* for memcpy() */
 #include <math.h>
 #include <stdio.h>
@@ -103,7 +103,7 @@ gnome_canvas_imageframe_class_init (GnomeCanvasImageFrameClass *class)
 					 g_param_spec_pointer ("pixbuf",
 							     _("pixbuf"),
 							     _("the pixbuf"),
-							     G_PARAM_WRITABLE)); 
+							     G_PARAM_WRITABLE));
 	g_object_class_install_property (gobject_class,
 					 PROP_X,
 					 g_param_spec_double ("x",
@@ -112,8 +112,8 @@ gnome_canvas_imageframe_class_init (GnomeCanvasImageFrameClass *class)
 							      -G_MAXDOUBLE,
 							      G_MAXDOUBLE,
 							      0.0,
-							      G_PARAM_READWRITE));  
-	
+							      G_PARAM_READWRITE));
+
 	g_object_class_install_property (gobject_class,
 					 PROP_Y,
 					 g_param_spec_double ("y",
@@ -122,7 +122,7 @@ gnome_canvas_imageframe_class_init (GnomeCanvasImageFrameClass *class)
 							      -G_MAXDOUBLE,
 							      G_MAXDOUBLE,
 							      0.0,
-							      G_PARAM_READWRITE));  
+							      G_PARAM_READWRITE));
 	g_object_class_install_property (gobject_class,
 					 PROP_WIDTH,
 					 g_param_spec_double ("width",
@@ -131,8 +131,8 @@ gnome_canvas_imageframe_class_init (GnomeCanvasImageFrameClass *class)
 							      -G_MAXDOUBLE,
 							      G_MAXDOUBLE,
 							      0.0,
-							      G_PARAM_READWRITE));  
-	
+							      G_PARAM_READWRITE));
+
 	g_object_class_install_property (gobject_class,
 					 PROP_DRAWWIDTH,
 					 g_param_spec_double ("drawwidth",
@@ -141,7 +141,7 @@ gnome_canvas_imageframe_class_init (GnomeCanvasImageFrameClass *class)
 							      -G_MAXDOUBLE,
 							      G_MAXDOUBLE,
 							      0.0,
-							      G_PARAM_READWRITE));  
+							      G_PARAM_READWRITE));
 	g_object_class_install_property (gobject_class,
 					 PROP_HEIGHT,
 					 g_param_spec_double ("height",
@@ -150,7 +150,7 @@ gnome_canvas_imageframe_class_init (GnomeCanvasImageFrameClass *class)
 							      -G_MAXDOUBLE,
 							      G_MAXDOUBLE,
 							      0.0,
-							      G_PARAM_READWRITE));  
+							      G_PARAM_READWRITE));
 	g_object_class_install_property (gobject_class,
 					 PROP_ANCHOR,
 					 g_param_spec_enum ("anchor",
@@ -158,7 +158,7 @@ gnome_canvas_imageframe_class_init (GnomeCanvasImageFrameClass *class)
 							    _("the anchor"),
 							    GTK_TYPE_ANCHOR_TYPE,
 							    GTK_ANCHOR_NW,
-							    G_PARAM_READWRITE));  
+							    G_PARAM_READWRITE));
 
 	object_class->destroy = gnome_canvas_imageframe_destroy;
 
@@ -191,7 +191,7 @@ gnome_canvas_imageframe_destroy (GtkObject *object)
 	g_return_if_fail (GNOME_CANVAS_IS_CANVAS_IMAGEFRAME (object));
 
 	image = GNOME_CANVAS_IMAGEFRAME (object);
-	
+
 	image->cwidth = 0;
 	image->cheight = 0;
 
@@ -315,7 +315,7 @@ gnome_canvas_imageframe_set_property (GObject *object,
 		image->height = fabs (g_value_get_double (value));
 		update = TRUE;
 		break;
-		
+
 	case PROP_DRAWWIDTH:
 		image->drawwidth = fabs (g_value_get_double (value));
 		update = TRUE;
@@ -357,11 +357,11 @@ gnome_canvas_imageframe_get_property (GObject *object,
 	case PROP_WIDTH:
 	        g_value_set_double (value, image->width);
 		break;
-	  
+
 	case PROP_HEIGHT:
                 g_value_set_double (value, image->height);
 		break;
-		
+
 	case PROP_DRAWWIDTH:
 	        g_value_set_double (value, image->drawwidth);
 		break;

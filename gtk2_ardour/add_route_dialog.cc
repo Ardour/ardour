@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2003 Paul Davis 
+  Copyright (C) 2003 Paul Davis
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ AddRouteDialog::AddRouteDialog (Session & s)
 			}
 		}
 	}
-	
+
 	set_name ("AddRouteDialog");
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_modal (true);
@@ -108,13 +108,13 @@ AddRouteDialog::AddRouteDialog (Session & s)
 
 	HBox *type_hbox = manage (new HBox);
 	type_hbox->set_spacing (6);
-	
+
 	/* track/bus choice */
 
 	type_hbox->pack_start (*manage (new Label (_("Add:"))));
 	type_hbox->pack_start (routes_spinner);
 	type_hbox->pack_start (track_bus_combo);
-	
+
 	vbox->pack_start (*type_hbox, false, true);
 
 	VBox* options_box = manage (new VBox);
@@ -153,7 +153,7 @@ AddRouteDialog::AddRouteDialog (Session & s)
 	l = manage (new Label (_("Group:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	table2->attach (*l, 1, 2, 2, 3, Gtk::FILL, Gtk::EXPAND, 0, 0);
 	table2->attach (route_group_combo, 2, 3, 2, 3, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
-	
+
 	options_box->pack_start (*table2, false, true);
 	vbox->pack_start (*options_box, false, true);
 
@@ -197,7 +197,7 @@ ARDOUR::DataType
 AddRouteDialog::type ()
 {
 	// FIXME: ew
-	
+
 	const string str = channel_combo.get_active_text();
 	if (str == _("MIDI")) {
 		return ARDOUR::DataType::MIDI;
@@ -245,7 +245,7 @@ int
 AddRouteDialog::channels ()
 {
 	string str = channel_combo.get_active_text();
-	
+
 	for (ChannelSetups::iterator i = channel_setups.begin(); i != channel_setups.end(); ++i) {
 		if (str == (*i).name) {
 			return (*i).channels;
@@ -274,7 +274,7 @@ AddRouteDialog::on_show ()
 {
 	refill_channel_setups ();
 	refill_route_groups ();
-	
+
 	Dialog::on_show ();
 }
 
@@ -282,7 +282,7 @@ void
 AddRouteDialog::refill_channel_setups ()
 {
 	ChannelSetup chn;
-	
+
 	route_templates.clear ();
 	channel_combo_strings.clear ();
 	channel_setups.clear ();
@@ -316,10 +316,10 @@ AddRouteDialog::refill_channel_setups ()
 				chn.template_path = x->path;
 				channel_setups.push_back (chn);
 			}
-		} 
+		}
 
 		/* clear template path for the rest */
-		
+
 		chn.template_path = "";
 
 		chn.name = _("3 Channel");
@@ -386,7 +386,7 @@ AddRouteDialog::refill_route_groups ()
 	route_group_combo.append_text (_("No group"));
 
 	_session.foreach_route_group (mem_fun (*this, &AddRouteDialog::add_route_group));
-	
+
 	route_group_combo.set_active (2);
 }
 
@@ -395,7 +395,7 @@ AddRouteDialog::group_changed ()
 {
 	if (route_group_combo.get_active_text () == _("New group...")) {
 		RouteGroup* g = new RouteGroup (_session, "", RouteGroup::Active);
-	
+
 		RouteGroupDialog d (g, Gtk::Stock::NEW);
 		int const r = d.do_run ();
 

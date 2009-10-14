@@ -43,15 +43,15 @@ class SessionImportDialog : public ArdourDialog
   private:
 	typedef boost::shared_ptr<ARDOUR::ElementImportHandler> HandlerPtr;
 	typedef std::list<HandlerPtr> HandlerList;
-	
+
 	typedef boost::shared_ptr<ARDOUR::ElementImporter> ElementPtr;
 	typedef std::list<ElementPtr> ElementList;
 
   public:
 	SessionImportDialog (ARDOUR::Session & target);
-	
+
 	virtual Gtk::FileChooserAction browse_action() const { return Gtk::FILE_CHOOSER_ACTION_OPEN; }
-	
+
   private:
 
 	void load_session (const std::string& filename);
@@ -61,7 +61,7 @@ class SessionImportDialog : public ArdourDialog
 	void end_dialog ();
 	void update (std::string path);
 	void show_info(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
-	
+
 	std::pair<bool, std::string> open_rename_dialog (std::string text, std::string name);
 	bool open_prompt_dialog (std::string text);
 
@@ -75,7 +75,7 @@ class SessionImportDialog : public ArdourDialog
 	Gtk::HBox                     file_hbox;
 	Gtk::Entry                    file_entry;
 	Gtk::Button                   file_browse_button;
-	
+
 	struct SessionBrowserColumns : public Gtk::TreeModel::ColumnRecord
 	{
 	public:
@@ -86,12 +86,12 @@ class SessionImportDialog : public ArdourDialog
 
 	  SessionBrowserColumns() { add (name); add (queued); add (element); add (info); }
 	};
-	
+
 	SessionBrowserColumns         sb_cols;
 	Glib::RefPtr<Gtk::TreeStore>  session_tree;
 	Gtk::TreeView                 session_browser;
 	Gtk::ScrolledWindow           session_scroll;
-	
+
 	Gtk::Button*                  ok_button;
 	Gtk::Button*                  cancel_button;
 };

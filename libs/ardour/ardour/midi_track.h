@@ -1,17 +1,17 @@
 /*
-    Copyright (C) 2006 Paul Davis 
-	Written by Dave Robillard
- 
+    Copyright (C) 2006 Paul Davis
+    Written by Dave Robillard
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
- 
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -38,10 +38,10 @@ public:
 	MidiTrack (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
 	MidiTrack (Session&, const XMLNode&);
 	~MidiTrack ();
-	
-	int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
-		  int declick, bool can_record, bool rec_monitors_input);
-	
+
+	int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
+			int declick, bool can_record, bool rec_monitors_input);
+
 	void handle_transport_stopped (bool abort, bool did_locate, bool flush_processors);
 
 	boost::shared_ptr<MidiDiskstream> midi_diskstream() const;
@@ -57,27 +57,27 @@ public:
 	void unfreeze ();
 
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
-	boost::shared_ptr<Region>  bounce_range (nframes_t start, nframes_t end, InterThreadInfo&,
-						 bool enable_processing);
+	boost::shared_ptr<Region>  bounce_range (
+			nframes_t start, nframes_t end, InterThreadInfo&, bool enable_processing);
 
 	int set_state(const XMLNode& node);
 
 	void midi_panic(void);
 	bool write_immediate_event(size_t size, const uint8_t* buf);
-	
+
 	/** A control that will send "immediate" events to a MIDI track when twiddled */
 	struct MidiControl : public AutomationControl {
-	    MidiControl(MidiTrack* route, const Evoral::Parameter& param,
+		MidiControl(MidiTrack* route, const Evoral::Parameter& param,
 				boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>())
 			: AutomationControl (route->session(), param, al)
 			, _route (route)
 		{}
-	 
-	    void set_value (float val);
-   
+
+		void set_value (float val);
+
 		MidiTrack* _route;
 	};
-	
+
 	NoteMode note_mode() const { return _note_mode; }
 	void set_note_mode (NoteMode m);
 
@@ -90,15 +90,15 @@ public:
 
 	bool midi_thru() const { return _midi_thru; }
 	void set_midi_thru (bool yn);
-	
+
 protected:
 	XMLNode& state (bool full);
-	
+
 	int _set_state (const XMLNode&, bool call_base);
 
 private:
-	void write_out_of_band_data (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame,
-				     nframes_t nframes);
+	void write_out_of_band_data (
+			BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 
 	int set_diskstream (boost::shared_ptr<MidiDiskstream> ds);
 	void use_new_diskstream ();
@@ -114,9 +114,9 @@ private:
 	uint8_t                   _default_channel;
 	bool                      _midi_thru;
 
-	
-	int no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
-		     bool state_changing, bool can_record, bool rec_monitors_input);
+
+	int no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
+			bool state_changing, bool can_record, bool rec_monitors_input);
 	void push_midi_input_to_step_edit_ringbuffer (nframes_t nframes);
 };
 

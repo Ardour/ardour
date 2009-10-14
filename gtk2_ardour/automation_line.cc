@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2003 Paul Davis 
+    Copyright (C) 2002-2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -120,7 +120,7 @@ AutomationLine::queue_reset ()
 }
 
 void
-AutomationLine::show () 
+AutomationLine::show ()
 {
 	if (_interpolation != AutomationList::Discrete) {
 		line->show();
@@ -136,7 +136,7 @@ AutomationLine::show ()
 }
 
 void
-AutomationLine::hide () 
+AutomationLine::hide ()
 {
 	line->hide();
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
@@ -157,7 +157,7 @@ AutomationLine::control_point_box_size ()
 		return 8.0;
 	} else if (_height > (guint32) TimeAxisView::hNormal) {
 		return 6.0;
-	} 
+	}
 	return 4.0;
 }
 
@@ -262,7 +262,7 @@ AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool wi
 		/* x-coord cannot move beyond adjacent points or the start/end, and is
 		   already in frames. it needs to be converted to canvas units.
 		*/
-		
+
 		x = trackview.editor().frame_to_unit (x);
 
 		/* clamp x position using view coordinates */
@@ -280,14 +280,14 @@ AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool wi
 
 		if (!with_push) {
 			if (cp.view_index() < control_points.size() - 1) {
-		
+
 				after = nth (cp.view_index() + 1);
-		
+
 				/*if it is a "spike" leave the x alone */
- 
+
 				if (after->get_x() - before->get_x() < 2) {
 					x = cp.get_x();
-					
+
 				} else {
 					x = min (x, after->get_x()-1.0);
 				}
@@ -298,7 +298,7 @@ AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool wi
 		} else {
 
 			ControlPoint* after;
-			
+
 			/* find the first point that can't move */
 
 			for (uint32_t n = cp.view_index() + 1; (after = nth (n)) != 0; ++n) {
@@ -308,10 +308,10 @@ AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool wi
 					break;
 				}
 			}
-			
+
 			delta = x - cp.get_x();
 		}
-			
+
 	} else {
 
 		/* leave the x-coordinate alone */
@@ -328,17 +328,17 @@ AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool wi
 	} else {
 
 		uint32_t limit = min (control_points.size(), (size_t)last_movable);
-		
+
 		/* move the current point to wherever the user told it to go, subject
 		   to x_limit.
 		*/
-		
+
 		cp.move_to (min (x, x_limit), y, ControlPoint::Full);
 		reset_line_coords (cp);
-		
+
 		/* now move all subsequent control points, to reflect the motion.
 		 */
-		
+
 		for (uint32_t i = cp.view_index() + 1; i < limit; ++i) {
 			ControlPoint *p = nth (i);
 			double new_x;
@@ -354,7 +354,7 @@ AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool wi
 
 void
 AutomationLine::reset_line_coords (ControlPoint& cp)
-{	
+{
 	if (cp.view_index() < line_points.size()) {
 		line_points[cp.view_index()].set_x (cp.get_x());
 		line_points[cp.view_index()].set_y (cp.get_y());
@@ -381,7 +381,7 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 	   initial results are in canvas units. ask the
 	   line to convert them to something relevant.
 	*/
-	
+
 	mr.xval = cp.get_x();
 	mr.yval = 1.0 - (cp.get_y() / _height);
 
@@ -395,7 +395,7 @@ AutomationLine::model_representation (ControlPoint& cp, ModelRepresentation& mr)
 
 	/* convert to model units
 	*/
-	
+
 	view_to_model_coord (mr.xval, mr.yval);
 
 	/* part 2: find out where the model point is now
@@ -451,7 +451,7 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 	uint32_t this_rx = 0;
 	uint32_t prev_rx = 0;
 	uint32_t this_ry = 0;
- 	uint32_t prev_ry = 0;	
+ 	uint32_t prev_ry = 0;
 	double* slope;
 	uint32_t box_size;
 	uint32_t cpsize;
@@ -459,7 +459,7 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 	/* hide all existing points, and the line */
 
 	cpsize = 0;
-	
+
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		(*i)->hide();
 		++cpsize;
@@ -493,7 +493,7 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 
 		double tx = points[pi].x;
 		double ty = points[pi].y;
-		
+
 		if (isnan (tx) || isnan (ty)) {
 			warning << string_compose (_("Ignoring illegal points on AutomationLine \"%1\""),
 						   _name) << endmsg;
@@ -518,11 +518,11 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 			if (slope[pi] == slope[pi-1]) {
 
 				/* no reason to display this point */
-				
+
 				continue;
 			}
 		}
-		
+
 		/* need to round here. the ultimate coordinates are integer
 		   pixels, so tiny deltas in the coords will be eliminated
 		   and we end up with "colinear" line segments. since the
@@ -532,14 +532,14 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 		*/
 
 		this_rx = (uint32_t) rint (tx);
-      		this_ry = (uint32_t) rint (ty); 
- 
+      		this_ry = (uint32_t) rint (ty);
+
  		if (view_index && pi != npoints && /* not the first, not the last */
 		    (((this_rx == prev_rx) && (this_ry == prev_ry)) || /* same point */
 		     (((this_rx - prev_rx) < (box_size + 2)) &&  /* not identical, but still too close horizontally */
 		      (abs ((int)(this_ry - prev_ry)) < (int) (box_size + 2))))) { /* too close vertically */
   			continue;
-		} 
+		}
 
 		/* ok, we should display this point */
 
@@ -548,8 +548,8 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 			/* make sure we have enough control points */
 
 			ControlPoint* ncp = new ControlPoint (*this);
-			
-			ncp->set_size (box_size); 
+
+			ncp->set_size (box_size);
 
 			control_points.push_back (ncp);
 			++cpsize;
@@ -586,7 +586,7 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 		prev_ry = this_ry;
 
 		/* finally, control visibility */
-		
+
 		if (_visible && points_visible) {
 			control_points[view_index]->show ();
 			control_points[view_index]->set_visible (true);
@@ -598,7 +598,7 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 
 		view_index++;
 	}
-	
+
 	/* discard extra CP's to avoid confusing ourselves */
 
 	while (control_points.size() > view_index) {
@@ -616,7 +616,7 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 	if (view_index > 1) {
 
 		npoints = view_index;
-		
+
 		/* reset the line coordinates */
 
 		while (line_points.size() < npoints) {
@@ -631,14 +631,14 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 			line_points[view_index].set_x (control_points[view_index]->get_x());
 			line_points[view_index].set_y (control_points[view_index]->get_y());
 		}
-		
+
 		line->property_points() = line_points;
 
 		if (_visible && _interpolation != AutomationList::Discrete) {
 			line->show();
 		}
 
-	} 
+	}
 
 	set_selected_points (trackview.editor().get_selection().points);
 
@@ -697,7 +697,7 @@ AutomationLine::string_to_fraction (string const & s) const
 
 	double v;
 	sscanf (s.c_str(), "%lf", &v);
-	
+
 	if (_uses_gain_mapping) {
 		v = gain_to_slider_position (dB_to_coefficient (v));
 	} else {
@@ -722,7 +722,7 @@ AutomationLine::invalidate_point (ALPoints& p, uint32_t index)
 }
 
 void
-AutomationLine::start_drag (ControlPoint* cp, nframes_t x, float fraction) 
+AutomationLine::start_drag (ControlPoint* cp, nframes_t x, float fraction)
 {
 	if (trackview.editor().current_session() == 0) { /* how? */
 		return;
@@ -738,7 +738,7 @@ AutomationLine::start_drag (ControlPoint* cp, nframes_t x, float fraction)
 
 	trackview.editor().current_session()->begin_reversible_command (str);
 	trackview.editor().current_session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &get_state(), 0));
-	
+
 	drag_x = x;
 	drag_distance = 0;
 	first_drag_fraction = fraction;
@@ -748,7 +748,7 @@ AutomationLine::start_drag (ControlPoint* cp, nframes_t x, float fraction)
 }
 
 void
-AutomationLine::point_drag (ControlPoint& cp, nframes_t x, float fraction, bool with_push) 
+AutomationLine::point_drag (ControlPoint& cp, nframes_t x, float fraction, bool with_push)
 {
 	if (x > drag_x) {
 		drag_distance += (x - drag_x);
@@ -769,17 +769,17 @@ AutomationLine::point_drag (ControlPoint& cp, nframes_t x, float fraction, bool 
 }
 
 void
-AutomationLine::line_drag (uint32_t i1, uint32_t i2, float fraction, bool with_push) 
+AutomationLine::line_drag (uint32_t i1, uint32_t i2, float fraction, bool with_push)
 {
 	double ydelta = fraction - last_drag_fraction;
 
 	did_push = with_push;
-	
+
 	last_drag_fraction = fraction;
 
 	line_drag_cp1 = i1;
 	line_drag_cp2 = i2;
-	
+
 	//check if one of the control points on the line is in a selected range
 	bool range_found = false;
 	ControlPoint *cp;
@@ -804,7 +804,7 @@ AutomationLine::line_drag (uint32_t i1, uint32_t i2, float fraction, bool with_p
 			modify_view_point (*cp, trackview.editor().unit_to_frame (cp->get_x()), ((_height - cp->get_y()) /_height) + ydelta, with_push);
 		}
 	}
-	
+
 	if (line_points.size() > 1) {
 		line->property_points() = line_points;
 	}
@@ -813,7 +813,7 @@ AutomationLine::line_drag (uint32_t i1, uint32_t i2, float fraction, bool with_p
 }
 
 void
-AutomationLine::end_drag (ControlPoint* cp) 
+AutomationLine::end_drag (ControlPoint* cp)
 {
 	if (!drags) {
 		return;
@@ -826,7 +826,7 @@ AutomationLine::end_drag (ControlPoint* cp)
 	} else {
 		sync_model_with_view_line (line_drag_cp1, line_drag_cp2);
 	}
-	
+
 	alist->thaw ();
 
 	update_pending = false;
@@ -845,7 +845,7 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp, bool did_push, int
 
 	model_representation (cp, mr);
 
-	/* how much are we changing the central point by */ 
+	/* how much are we changing the central point by */
 
 	ydelta = mr.yval - mr.ypos;
 
@@ -858,13 +858,13 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp, bool did_push, int
 	/* change all points before the primary point */
 
 	for (AutomationList::iterator i = mr.start; i != cp.model(); ++i) {
-		
+
 		double fract = ((*i)->when - mr.xmin) / (mr.xpos - mr.xmin);
 		double y_delta = ydelta * fract;
 		double x_delta = distance * fract;
 
 		/* interpolate */
-		
+
 		if (y_delta || x_delta) {
 			alist->modify (i, (*i)->when + x_delta, mr.ymin + y_delta);
 		}
@@ -877,24 +877,24 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp, bool did_push, int
 
 
 	/* change later points */
-	
+
 	AutomationList::iterator i = cp.model();
-	
+
 	++i;
-	
+
 	while (i != mr.end) {
-		
+
 		double delta = ydelta * (mr.xmax - (*i)->when) / (mr.xmax - mr.xpos);
 
 		/* all later points move by the same distance along the x-axis as the main point */
-		
+
 		if (delta) {
 			alist->modify (i, (*i)->when + distance, (*i)->value + delta);
 		}
-		
+
 		++i;
 	}
-		
+
 	if (did_push) {
 
 		/* move all points after the range represented by the view by the same distance
@@ -906,7 +906,7 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp, bool did_push, int
 
 }
 
-bool 
+bool
 AutomationLine::control_points_adjacent (double xval, uint32_t & before, uint32_t& after)
 {
 	ControlPoint *bcp = 0;
@@ -916,13 +916,13 @@ AutomationLine::control_points_adjacent (double xval, uint32_t & before, uint32_
 	unit_xval = trackview.editor().frame_to_unit (xval);
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		
+
 		if ((*i)->get_x() <= unit_xval) {
 
 			if (!bcp || (*i)->get_x() > bcp->get_x()) {
 				bcp = *i;
 				before = bcp->view_index();
-			} 
+			}
 
 		} else if ((*i)->get_x() > unit_xval) {
 			acp = *i;
@@ -946,7 +946,7 @@ AutomationLine::is_last_point (ControlPoint& cp)
 	if (!alist->empty() && mr.end == alist->end()) {
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -962,7 +962,7 @@ AutomationLine::is_first_point (ControlPoint& cp)
 	if (!alist->empty() && mr.start == alist->begin()) {
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -997,10 +997,10 @@ AutomationLine::get_selectables (nframes_t& start, nframes_t& end,
 	bool collecting = false;
 
 	/* Curse X11 and its inverted coordinate system! */
-	
+
 	bot = (1.0 - topfrac) * _height;
 	top = (1.0 - botfrac) * _height;
-	
+
 	nstart = max_frames;
 	nend = 0;
 
@@ -1008,7 +1008,7 @@ AutomationLine::get_selectables (nframes_t& start, nframes_t& end,
 		double when = (*(*i)->model())->when;
 
 		if (when >= start && when <= end) {
-			
+
 			if ((*i)->get_y() >= bot && (*i)->get_y() <= top) {
 
 				(*i)->show();
@@ -1018,7 +1018,7 @@ AutomationLine::get_selectables (nframes_t& start, nframes_t& end,
 				nend = max (nend, when);
 
 			} else {
-				
+
 				if (collecting) {
 
 					results.push_back (new AutomationSelectable (nstart, nend, botfrac, topfrac, trackview));
@@ -1054,10 +1054,10 @@ AutomationLine::set_selected_points (PointSelection& points)
 
 	if (points.empty()) {
 		goto out;
-	} 
-	
+	}
+
 	for (PointSelection::iterator r = points.begin(); r != points.end(); ++r) {
-		
+
 		if (&(*r).track != &trackview) {
 			continue;
 		}
@@ -1068,16 +1068,16 @@ AutomationLine::set_selected_points (PointSelection& points)
 		top = (1.0 - (*r).low_fract) * _height;
 
 		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-			
+
 			double rstart, rend;
-			
+
 			rstart = trackview.editor().frame_to_unit ((*r).start);
 			rend = trackview.editor().frame_to_unit ((*r).end);
-			
+
 			if ((*i)->get_x() >= rstart && (*i)->get_x() <= rend) {
-				
+
 				if ((*i)->get_y() >= bot && (*i)->get_y() <= top) {
-					
+
 					(*i)->set_selected(true);
 				}
 			}
@@ -1105,21 +1105,21 @@ AutomationLine::show_selection ()
 	TimeSelection& time (trackview.editor().get_selection().time);
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		
+
 		(*i)->set_selected(false);
 
 		for (list<AudioRange>::iterator r = time.begin(); r != time.end(); ++r) {
 			double rstart, rend;
-			
+
 			rstart = trackview.editor().frame_to_unit ((*r).start);
 			rend = trackview.editor().frame_to_unit ((*r).end);
-			
+
 			if ((*i)->get_x() >= rstart && (*i)->get_x() <= rend) {
 				(*i)->set_selected(true);
 				break;
 			}
 		}
-		
+
 		(*i)->show_color (false, !points_visible);
 	}
 }
@@ -1154,14 +1154,14 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 	AutomationList::const_iterator ai;
 
 	for (ai = events.begin(); ai != events.end(); ++ai) {
-		
+
 		double translated_x = (*ai)->when;
 		double translated_y = (*ai)->value;
 		model_to_view_coord (translated_x, translated_y);
 
 		add_model_point (tmp_points, (*ai)->when, translated_y);
 	}
-	
+
 	determine_visible_control_points (tmp_points);
 }
 
@@ -1236,7 +1236,7 @@ AutomationLine::hide_all_but_selected_control_points ()
 		}
 	}
 }
-	
+
 void
 AutomationLine::track_entered()
 {
@@ -1260,7 +1260,7 @@ AutomationLine::get_state (void)
 	return alist->get_state();
 }
 
-int 
+int
 AutomationLine::set_state (const XMLNode &node)
 {
 	/* function as a proxy for the model */
@@ -1303,11 +1303,11 @@ AutomationLine::model_to_view_coord (double& x, double& y) const
 	} else {
 		y = y / (double)alist->parameter().max(); /* ... like this */
 	}
-	
+
 	x = _time_converter.to(x);
 }
 
-	
+
 void
 AutomationLine::set_interpolation(AutomationList::InterpolationStyle style)
 {

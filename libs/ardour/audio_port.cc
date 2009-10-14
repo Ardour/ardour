@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,8 +44,8 @@ AudioPort::cycle_start (nframes_t nframes)
 
 	/* get_buffer() must only be run on outputs here in cycle_start().
 
-	   Inputs must be done in the correct processing order, which 
-	   requires interleaving with route processing. that will 
+	   Inputs must be done in the correct processing order, which
+	   requires interleaving with route processing. that will
 	   happen when Port::get_buffer() is called.
 	*/
 
@@ -89,8 +89,8 @@ AudioPort::get_audio_buffer (nframes_t nframes, nframes_t offset)
 		*/
 
 		_buffer->set_data ((Sample *) jack_port_get_buffer (_jack_port, nframes) + offset + _port_offset, nframes);
-	} 
-	
+	}
+
 	/* output ports set their _buffer data information during ::cycle_start()
 	 */
 

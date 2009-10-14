@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ class AxisView : public virtual Selectable
 	virtual void set_marked_for_display (bool yn) {
 		_marked_for_display = yn;
 	}
-	
+
 	sigc::signal<void> Hiding;
 	sigc::signal<void> GoingAway;
 
@@ -66,7 +66,7 @@ class AxisView : public virtual Selectable
 
 	AxisView (ARDOUR::Session& sess);
 	virtual ~AxisView();
-	
+
 
 	/**
 	 * Generate a new random TrackView color, unique from those colors already used.

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2003 Paul Davis 
+    Copyright (C) 2000-2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -62,10 +62,10 @@ Region::Region (Session& s, nframes_t start, nframes_t length, const string& nam
 	: SessionObject(s, name)
 	, _type(type)
 	, _flags(Flag (flags|DoNotSendPropertyChanges))
-	, _start(start) 
-	, _length(length) 
-	, _position(0) 
-	, _last_position(0) 
+	, _start(start)
+	, _length(length)
+	, _position(0)
+	, _last_position(0)
 	, _positional_lock_style(AudioTime)
 	, _sync_position(_start)
 	, _layer(layer)
@@ -88,10 +88,10 @@ Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length
 	: SessionObject(src->session(), name)
 	, _type(type)
 	, _flags(Flag (flags|DoNotSendPropertyChanges))
-	, _start(start) 
-	, _length(length) 
-	, _position(0) 
-	, _last_position(0) 
+	, _start(start)
+	, _length(length)
+	, _position(0)
+	, _last_position(0)
 	, _positional_lock_style(AudioTime)
 	, _sync_position(_start)
 	, _layer(layer)
@@ -121,10 +121,10 @@ Region::Region (const SourceList& srcs, nframes_t start, nframes_t length, const
 	: SessionObject(srcs.front()->session(), name)
 	, _type(type)
 	, _flags(Flag (flags|DoNotSendPropertyChanges))
-	, _start(start) 
-	, _length(length) 
-	, _position(0) 
-	, _last_position(0) 
+	, _start(start)
+	, _length(length)
+	, _position(0)
+	, _last_position(0)
 	, _positional_lock_style(AudioTime)
 	, _sync_position(_start)
 	, _layer(layer)
@@ -198,15 +198,15 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t length, const s
 
 	/* sync pos is relative to start of file. our start-in-file is now zero,
 	   so set our sync position to whatever the the difference between
-	   _start and _sync_pos was in the other region. 
+	   _start and _sync_pos was in the other region.
 
-	   result is that our new sync pos points to the same point in our source(s) 
+	   result is that our new sync pos points to the same point in our source(s)
 	   as the sync in the other region did in its source(s).
 
 	   since we start at zero in our source(s), it is not possible to use a sync point that
 	   is before the start. reset it to _start if that was true in the other region.
 	*/
-	
+
 	if (other->flags() & SyncMarked) {
 		if (other->_start < other->_sync_position) {
 			/* sync pos was after the start point of the other region */
@@ -220,7 +220,7 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t length, const s
 		_flags = Flag (_flags & ~SyncMarked);
 		_sync_position = _start;
 	}
-		
+
 	if (Profile->get_sae()) {
 		/* reset sync point to start if its ended up
 		   outside region bounds.
@@ -243,10 +243,10 @@ Region::Region (boost::shared_ptr<const Region> other)
 	: SessionObject(other->session(), other->name())
 	, _type(other->data_type())
 	, _flags(Flag(other->_flags & ~(Locked|PositionLocked)))
-	, _start(other->_start) 
-	, _length(other->_length) 
-	, _position(other->_position) 
-	, _last_position(other->_last_position) 
+	, _start(other->_start)
+	, _length(other->_length)
+	, _position(other->_position)
+	, _last_position(other->_last_position)
 	, _positional_lock_style(other->_positional_lock_style)
 	, _sync_position(other->_sync_position)
 	, _layer(other->_layer)
@@ -280,10 +280,10 @@ Region::Region (const SourceList& srcs, const XMLNode& node)
 	: SessionObject(srcs.front()->session(), X_("error: XML did not reset this"))
 	, _type(DataType::NIL) // to be loaded from XML
 	, _flags(DoNotSendPropertyChanges)
-	, _start(0) 
-	, _length(0) 
-	, _position(0) 
-	, _last_position(0) 
+	, _start(0)
+	, _length(0)
+	, _position(0)
+	, _last_position(0)
 	, _positional_lock_style(AudioTime)
 	, _sync_position(_start)
 	, _layer(0)
@@ -310,10 +310,10 @@ Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 	: SessionObject(src->session(), X_("error: XML did not reset this"))
 	, _type(DataType::NIL)
 	, _flags(DoNotSendPropertyChanges)
-	, _start(0) 
-	, _length(0) 
-	, _position(0) 
-	, _last_position(0) 
+	, _start(0)
+	, _length(0)
+	, _position(0)
+	, _last_position(0)
 	, _positional_lock_style(AudioTime)
 	, _sync_position(_start)
 	, _layer(0)
@@ -331,7 +331,7 @@ Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
-	
+
 	assert(_type != DataType::NIL);
 	assert(_sources.size() > 0);
 }
@@ -348,7 +348,7 @@ Region::~Region ()
 			(*i)->remove_playlist (pl);
 		}
 	}
-	
+
 	notify_callbacks ();
 	GoingAway (); /* EMIT SIGNAL */
 }
@@ -361,17 +361,17 @@ Region::copy_stuff (boost::shared_ptr<const Region> other, nframes_t /*offset*/,
 	_read_data_count = 0;
 	_valid_transients = false;
 
-	_length = length; 
-	_last_length = length; 
+	_length = length;
+	_last_length = length;
 	_sync_position = other->_sync_position;
 	_ancestral_start = other->_ancestral_start;
-	_ancestral_length = other->_ancestral_length; 
+	_ancestral_length = other->_ancestral_length;
 	_stretch = other->_stretch;
 	_shift = other->_shift;
 	_name = name;
-	_last_position = 0; 
-	_position = 0; 
-	_layer = layer; 
+	_last_position = 0;
+	_position = 0;
+	_layer = layer;
 	_flags = Flag (flags & ~(Locked|WholeFile|Hidden));
 	_first_edit = EditChangesNothing;
 	_last_layer_op = 0;
@@ -396,11 +396,11 @@ Region::set_playlist (boost::weak_ptr<Playlist> wpl)
 	if (pl) {
 		if (old_playlist) {
 			for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-				(*i)->remove_playlist (_playlist);	
+				(*i)->remove_playlist (_playlist);
 				(*i)->add_playlist (pl);
 			}
 			for (SourceList::const_iterator i = _master_sources.begin(); i != _master_sources.end(); ++i) {
-				(*i)->remove_playlist (_playlist);	
+				(*i)->remove_playlist (_playlist);
 				(*i)->add_playlist (pl);
 			}
 		} else {
@@ -428,7 +428,7 @@ Region::set_name (const std::string& str)
 {
 	if (_name != str) {
 		SessionObject::set_name(str); // EMIT SIGNAL NameChanged()
-		assert(_name == str); 
+		assert(_name == str);
 		send_change (ARDOUR::NameChanged);
 	}
 
@@ -445,7 +445,7 @@ Region::set_length (nframes_t len, void */*src*/)
 
 	if (_length != len && len != 0) {
 
-		/* check that the current _position wouldn't make the new 
+		/* check that the current _position wouldn't make the new
 		   length impossible.
 		*/
 
@@ -456,7 +456,7 @@ Region::set_length (nframes_t len, void */*src*/)
 		if (!verify_length (len)) {
 			return;
 		}
-		
+
 
 		_last_length = _length;
 		_length = len;
@@ -503,7 +503,7 @@ Region::at_natural_position () const
 	if (!pl) {
 		return false;
 	}
-	
+
 	boost::shared_ptr<Region> whole_file_region = get_parent();
 
 	if (whole_file_region) {
@@ -523,18 +523,18 @@ Region::move_to_natural_position (void *src)
 	if (!pl) {
 		return;
 	}
-	
+
 	boost::shared_ptr<Region> whole_file_region = get_parent();
 
 	if (whole_file_region) {
 		set_position (whole_file_region->position() + _start, src);
 	}
 }
-	
+
 void
 Region::special_set_position (nframes_t pos)
 {
-	/* this is used when creating a whole file region as 
+	/* this is used when creating a whole file region as
 	   a way to store its "natural" or "captured" position.
 	*/
 
@@ -556,14 +556,14 @@ Region::set_position_lock_style (PositionLockStyle ps)
 	if (_positional_lock_style == MusicTime) {
 		pl->session().tempo_map().bbt_time (_position, _bbt_time);
 	}
-	
+
 }
 
 void
 Region::update_position_after_tempo_map_change ()
 {
 	boost::shared_ptr<Playlist> pl (playlist());
-	
+
 	if (!pl || _positional_lock_style != MusicTime) {
 		return;
 	}
@@ -591,7 +591,7 @@ Region::set_position_internal (nframes_t pos, bool allow_bbt_recompute)
 		_position = pos;
 
 		/* check that the new _position wouldn't make the current
-		   length impossible - if so, change the length. 
+		   length impossible - if so, change the length.
 
 		   XXX is this the right thing to do?
 		*/
@@ -636,7 +636,7 @@ Region::set_position_on_top (nframes_t pos, void */*src*/)
 	/* do this even if the position is the same. this helps out
 	   a GUI that has moved its representation already.
 	*/
-	
+
 	send_change (PositionChanged);
 }
 
@@ -650,7 +650,7 @@ Region::recompute_position_from_lock_style ()
 		}
 	}
 }
-		
+
 void
 Region::nudge_position (nframes64_t n, void */*src*/)
 {
@@ -661,7 +661,7 @@ Region::nudge_position (nframes64_t n, void */*src*/)
 	if (n == 0) {
 		return;
 	}
-	
+
 	_last_position = _position;
 
 	if (n > 0) {
@@ -724,7 +724,7 @@ Region::trim_start (nframes_t new_position, void */*src*/)
 	}
 	nframes_t new_start;
 	int32_t start_shift;
-	
+
 	if (new_position > _position) {
 		start_shift = new_position - _position;
 	} else {
@@ -757,7 +757,7 @@ Region::trim_start (nframes_t new_position, void */*src*/)
 	if (new_start == _start) {
 		return;
 	}
-	
+
 	_start = new_start;
 	_flags = Region::Flag (_flags & ~WholeFile);
 	first_edit ();
@@ -782,20 +782,20 @@ Region::trim_front (nframes_t new_position, void *src)
 	}
 
 	if (new_position < end) { /* can't trim it zero or negative length */
-		
+
 		nframes_t newlen;
 
 		/* can't trim it back passed where source position zero is located */
-		
+
 		new_position = max (new_position, source_zero);
-		
-		
+
+
 		if (new_position > _position) {
 			newlen = _length - (new_position - _position);
 		} else {
 			newlen = _length + (_position - new_position);
 		}
-		
+
 		trim_to_internal (new_position, newlen, src);
 		if (!_frozen) {
 			recompute_at_start ();
@@ -893,17 +893,17 @@ Region::trim_to_internal (nframes_t position, nframes_t length, void */*src*/)
 		_position = position;
 		what_changed = Change (what_changed|PositionChanged);
 	}
-	
+
 	_flags = Region::Flag (_flags & ~WholeFile);
 
 	if (what_changed & (StartChanged|LengthChanged)) {
 		first_edit ();
-	} 
+	}
 
 	if (what_changed) {
 		send_change (what_changed);
 	}
-}	
+}
 
 void
 Region::set_hidden (bool yn)
@@ -982,7 +982,7 @@ Region::set_sync_position (nframes_t absolute_pos)
 	file_pos = _start + (absolute_pos - _position);
 
 	if (file_pos != _sync_position) {
-		
+
 		_sync_position = file_pos;
 		_flags = Flag (_flags|SyncMarked);
 
@@ -1014,7 +1014,7 @@ Region::sync_offset (int& dir) const
 	if (_flags & SyncMarked) {
 		if (_sync_position > _start) {
 			dir = 1;
-			return _sync_position - _start; 
+			return _sync_position - _start;
 		} else {
 			dir = -1;
 			return _start - _sync_position;
@@ -1025,14 +1025,14 @@ Region::sync_offset (int& dir) const
 	}
 }
 
-nframes_t 
+nframes_t
 Region::adjust_to_sync (nframes_t pos) const
 {
 	int sync_dir;
 	nframes_t offset = sync_offset (sync_dir);
 
 	// cerr << "adjusting pos = " << pos << " to sync at " << _sync_position << " offset = " << offset << " with dir = " << sync_dir << endl;
-	
+
 	if (sync_dir > 0) {
 		if (pos > offset) {
 			pos -= offset;
@@ -1052,7 +1052,7 @@ nframes_t
 Region::sync_position() const
 {
 	if (_flags & SyncMarked) {
-		return _sync_position; 
+		return _sync_position;
 	} else {
 		return _start;
 	}
@@ -1100,7 +1100,7 @@ Region::set_layer (layer_t l)
 {
 	if (_layer != l) {
 		_layer = l;
-		
+
 		send_change (LayerChanged);
 	}
 }
@@ -1130,7 +1130,7 @@ Region::state (bool /*full_state*/)
 	node->add_property ("stretch", buf);
 	snprintf (buf, sizeof (buf), "%.12g", _shift);
 	node->add_property ("shift", buf);
-	
+
 	switch (_first_edit) {
 	case EditChangesNothing:
 		fe = X_("nothing");
@@ -1178,7 +1178,7 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 	const XMLProperty *prop;
 	nframes_t val;
 
-	/* this is responsible for setting those aspects of Region state 
+	/* this is responsible for setting those aspects of Region state
 	   that are mutable after construction.
 	*/
 
@@ -1188,7 +1188,7 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 	}
 
 	_name = prop->value();
-	
+
 	if ((prop = node.property ("type")) == 0) {
 		_type = DataType::AUDIO;
 	} else {
@@ -1198,7 +1198,7 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 	if ((prop = node.property ("start")) != 0) {
 		sscanf (prop->value().c_str(), "%" PRIu32, &val);
 		if (val != _start) {
-			what_changed = Change (what_changed|StartChanged);	
+			what_changed = Change (what_changed|StartChanged);
 			_start = val;
 		}
 	} else {
@@ -1258,7 +1258,7 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 				/* missing BBT info, revert to audio time locking */
 				_positional_lock_style = AudioTime;
 			} else {
-				if (sscanf (prop->value().c_str(), "%d|%d|%d", 
+				if (sscanf (prop->value().c_str(), "%d|%d|%d",
 					    &_bbt_time.bars,
 					    &_bbt_time.beats,
 					    &_bbt_time.ticks) != 3) {
@@ -1266,13 +1266,13 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 				}
 			}
 		}
-			
+
 	} else {
 		_positional_lock_style = AudioTime;
 	}
 
 	/* XXX FIRST EDIT !!! */
-	
+
 	/* these 3 properties never change as a result of any editing */
 
 	if ((prop = node.property ("ancestral-start")) != 0) {
@@ -1320,11 +1320,11 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 	_extra_xml = 0;
 
 	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		
+
 		XMLNode *child;
-		
+
 		child = (*niter);
-		
+
 		if (child->name () == "Extra") {
 			_extra_xml = new XMLNode (*child);
 			break;
@@ -1352,9 +1352,9 @@ Region::set_state (const XMLNode& node)
 	}
 
 	_id = prop->value();
-	
+
 	_first_edit = EditChangesNothing;
-	
+
 	set_live_state (node, what_changed, true);
 
 	return 0;
@@ -1393,10 +1393,10 @@ Region::thaw (const string& /*why*/)
 	if (what_changed & LengthChanged) {
 		if (what_changed & PositionChanged) {
 			recompute_at_start ();
-		} 
+		}
 		recompute_at_end ();
 	}
-		
+
 	StateChanged (what_changed);
 }
 
@@ -1408,17 +1408,17 @@ Region::send_change (Change what_changed)
 		if (_frozen) {
 			_pending_changed = Change (_pending_changed|what_changed);
 			return;
-		} 
+		}
 	}
 
 	StateChanged (what_changed);
-	
+
 	if (!(_flags & DoNotSendPropertyChanges)) {
-		
+
 		/* Try and send a shared_pointer unless this is part of the constructor.
 		   If so, do nothing.
 		*/
-		
+
 		try {
 			boost::shared_ptr<Region> rptr = shared_from_this();
 			RegionPropertyChanged (rptr);
@@ -1426,7 +1426,7 @@ Region::send_change (Change what_changed)
 			/* no shared_ptr available, relax; */
 		}
 	}
-	
+
 }
 
 void
@@ -1531,9 +1531,9 @@ Region::verify_length (nframes_t len)
 	for (uint32_t n=0; n < _sources.size(); ++n) {
 		maxlen = max (maxlen, (nframes_t)source_length(n) - _start);
 	}
-	
+
 	len = min (len, maxlen);
-	
+
 	return true;
 }
 
@@ -1593,12 +1593,12 @@ Region::get_parent() const
 	if (pl) {
 		boost::shared_ptr<Region> r;
 		boost::shared_ptr<Region const> grrr2 = boost::dynamic_pointer_cast<Region const> (shared_from_this());
-		
+
 		if (grrr2 && (r = pl->session().find_whole_file_parent (grrr2))) {
 			return boost::static_pointer_cast<Region> (r);
 		}
 	}
-	
+
 	return boost::shared_ptr<Region>();
 }
 
@@ -1621,7 +1621,7 @@ void
 Region::use_sources (SourceList const & s)
 {
 	set<boost::shared_ptr<Source> > unique_srcs;
-	
+
 	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
 		_sources.push_back (*i);
 		(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), *i));
@@ -1635,4 +1635,4 @@ Region::use_sources (SourceList const & s)
 		}
 	}
 }
-	
+

@@ -35,7 +35,7 @@ using namespace ARDOUR;
 sigc::signal <std::pair<bool, string>, string, string> ElementImporter::Rename;
 sigc::signal <bool, string> ElementImporter::Prompt;
 
-ElementImporter::ElementImporter (XMLTree const & source, ARDOUR::Session & session) : 
+ElementImporter::ElementImporter (XMLTree const & source, ARDOUR::Session & session) :
   source (source),
   session(session),
   _queued (false),
@@ -91,7 +91,7 @@ ElementImporter::smpte_to_string(SMPTE::Time & time) const
 	  time.seconds << ":" <<
 	  std::setw(2) <<
 	  time.frames;
-	
+
 	return oss.str();
 }
 
@@ -101,7 +101,7 @@ ElementImporter::rate_convert_samples (nframes_t samples) const
 	if (sample_rate == session.frame_rate()) {
 		return samples;
 	}
-	
+
 	// +0.5 for proper rounding
 	return static_cast<nframes_t> (samples * (static_cast<double> (session.nominal_frame_rate()) / sample_rate) + 0.5);
 }

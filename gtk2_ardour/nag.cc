@@ -40,13 +40,13 @@ its development with either a one-time donation or subscription. Nothing\n\
 will happen if you choose not to do so. However Ardour's continuing development\n\
 relies on a stable, sustainable income stream. Thanks for using Ardour!"));
 	}
-	
+
 	button_box.pack_start (donate_button);
 	button_box.pack_start (subscribe_button);
 	button_box.pack_start (existing_button);
 	button_box.pack_start (next_time_button);
 	button_box.pack_start (never_again_button);
-	
+
 	get_vbox()->set_spacing (12);
 	get_vbox()->pack_start (message);
 	get_vbox()->pack_start (button_box);
@@ -100,7 +100,7 @@ NagScreen::maybe_nag (std::string why)
 	}
 
 	maybe_subscribed = is_subscribed (really_subscribed);
-	
+
 	if (really_subscribed) {
 		return 0;
 	}
@@ -114,7 +114,7 @@ NagScreen::mark_never_again ()
 	Glib::ustring path;
 
 	path = Glib::build_filename (user_config_directory().to_string(), ".nevernag");
-	
+
 	ofstream nagfile (path.c_str());
 }
 
@@ -124,7 +124,7 @@ NagScreen::mark_subscriber ()
 	Glib::ustring path;
 
 	path = Glib::build_filename (user_config_directory().to_string(), ".askedaboutsub");
-	
+
 	ofstream subsfile (path.c_str());
 }
 
@@ -134,7 +134,7 @@ NagScreen::mark_affirmed_subscriber ()
 	Glib::ustring path;
 
 	path = Glib::build_filename (user_config_directory().to_string(), ".isubscribe");
-	
+
 	ofstream subsfile (path.c_str());
 }
 
@@ -145,7 +145,7 @@ NagScreen::is_subscribed (bool& really)
 
 	really = false;
 
-	/* what we'd really like here is a way to query paypal 
+	/* what we'd really like here is a way to query paypal
 	   for someone's subscription status. thats a bit complicated
 	   so for now, just see if they ever told us they were
 	   subscribed. we try to trust our users :)

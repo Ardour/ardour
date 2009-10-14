@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,8 +25,8 @@
 
 namespace ARDOUR {
 
-template<class T> void 
-RouteGroup::apply (void (Track::*func)(T, void *), T val, void */*src*/) 
+template<class T> void
+RouteGroup::apply (void (Track::*func)(T, void *), T val, void */*src*/)
 {
 	for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
 		Track *at;
@@ -35,7 +35,7 @@ RouteGroup::apply (void (Track::*func)(T, void *), T val, void */*src*/)
 		}
 	}
 }
- 
+
 } /* namespace ARDOUR */
 
 #endif /* __ardour_route_group_specialized_h__ */

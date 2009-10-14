@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,12 +25,12 @@
 #include "ardour/utils.h"
 
 static inline float
-default_compute_peak (const ARDOUR::Sample * const buf, nframes_t nsamples, float current) 
+default_compute_peak (const ARDOUR::Sample * const buf, nframes_t nsamples, float current)
 {
 	for (nframes_t i = 0; i < nsamples; ++i) {
 		current = f_max (current, fabsf (buf[i]));
 	}
 	return current;
-}	
+}
 
 #endif /* __ardour_peak_h__ */

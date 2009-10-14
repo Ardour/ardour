@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001 Paul Davis 
+    Copyright (C) 2001 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -72,14 +72,14 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	ARDOUR_UI::instance()->tooltips().set_tip (audition_button, _("audition this region"));
 
 	audition_button.unset_flags (Gtk::CAN_FOCUS);
-	
+
 	audition_button.set_events (audition_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
 	top_row_button_hbox.set_border_width (5);
 	top_row_button_hbox.set_spacing (5);
 	top_row_button_hbox.set_homogeneous (false);
 	top_row_button_hbox.pack_end (audition_button, false, false);
-	
+
 	top_row_hbox.pack_start (name_hbox, true, true);
 	top_row_hbox.pack_end (top_row_button_hbox, true, true);
 
@@ -93,7 +93,7 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	sync_label.set_text (_("SYNC POINT:"));
 	start_label.set_name ("AudioRegionEditorLabel");
 	start_label.set_text (_("FILE START:"));
-	
+
 	time_table.set_col_spacings (2);
 	time_table.set_row_spacings (5);
 	time_table.set_border_width (5);
@@ -149,9 +149,9 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	bounds_changed (Change (StartChanged|LengthChanged|PositionChanged|StartChanged|Region::SyncOffsetChanged));
 
 	_region->StateChanged.connect (mem_fun(*this, &AudioRegionEditor::region_changed));
-	
+
 	spin_arrow_grab = false;
-	
+
 	connect_editor_events ();
 }
 
@@ -171,7 +171,7 @@ AudioRegionEditor::region_changed (Change what_changed)
 	}
 }
 
-gint 
+gint
 AudioRegionEditor::bpressed (GdkEventButton* ev, Gtk::SpinButton* /*but*/, void (AudioRegionEditor::*/*pmf*/)())
 {
 	switch (ev->button) {
@@ -184,9 +184,9 @@ AudioRegionEditor::bpressed (GdkEventButton* ev, Gtk::SpinButton* /*but*/, void 
 				// if ((ev->window == but->gobj()->panel)) {
 				// spin_arrow_grab = true;
 				// (this->*pmf)();
-				// } 
-			} 
-		} 
+				// }
+			}
+		}
 		break;
 	default:
 		break;
@@ -194,7 +194,7 @@ AudioRegionEditor::bpressed (GdkEventButton* ev, Gtk::SpinButton* /*but*/, void 
 	return FALSE;
 }
 
-gint 
+gint
 AudioRegionEditor::breleased (GdkEventButton* /*ev*/, Gtk::SpinButton* /*but*/, void (AudioRegionEditor::*pmf)())
 {
 	if (spin_arrow_grab) {
@@ -240,7 +240,7 @@ AudioRegionEditor::end_clock_changed ()
 	_session.begin_reversible_command (_("change region end position"));
 
 	boost::shared_ptr<Playlist> pl = _region->playlist();
-	
+
 	if (pl) {
 		XMLNode &before = pl->get_state();
 		_region->trim_end (end_clock.current_time(), this);
@@ -257,9 +257,9 @@ void
 AudioRegionEditor::length_clock_changed ()
 {
 	nframes_t frames = length_clock.current_time();
-	
+
 	_session.begin_reversible_command (_("change region length"));
-	
+
 	boost::shared_ptr<Playlist> pl = _region->playlist();
 
 	if (pl) {
@@ -319,8 +319,8 @@ AudioRegionEditor::bounds_changed (Change what_changed)
 void
 AudioRegionEditor::activation ()
 {
-	
-}	
+
+}
 
 void
 AudioRegionEditor::name_entry_changed ()

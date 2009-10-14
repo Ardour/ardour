@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@
 #include <cmath>
 
 /*
-  A bug in OS X's cmath that causes isnan() and isinf() to be 
+  A bug in OS X's cmath that causes isnan() and isinf() to be
   "undeclared". the following works around that
 */
 
@@ -128,7 +128,7 @@ void
 IO::check_bundles (std::vector<UserBundleInfo>& list, const PortSet& ports)
 {
 	std::vector<UserBundleInfo> new_list;
-	
+
 	for (std::vector<UserBundleInfo>::iterator i = list.begin(); i != list.end(); ++i) {
 
 		uint32_t const N = i->bundle->nchannels ();
@@ -172,20 +172,20 @@ IO::disconnect (Port* our_port, string other_port, void* src)
 		return 0;
 	}
 
-	{ 
+	{
 		BLOCK_PROCESS_CALLBACK ();
-		
+
 		{
 			Glib::Mutex::Lock lm (io_lock);
-			
+
 			/* check that our_port is really one of ours */
-			
+
 			if ( ! _ports.contains(our_port)) {
 				return -1;
 			}
-			
+
 			/* disconnect it from the source */
-			
+
 			if (our_port->disconnect (other_port)) {
 				error << string_compose(_("IO: cannot disconnect port %1 from %2"), our_port->name(), other_port) << endmsg;
 				return -1;
@@ -210,16 +210,16 @@ IO::connect (Port* our_port, string other_port, void* src)
 
 	{
 		BLOCK_PROCESS_CALLBACK ();
-		
+
 		{
 			Glib::Mutex::Lock lm (io_lock);
-			
+
 			/* check that our_port is really one of ours */
-			
+
 			if ( ! _ports.contains(our_port) ) {
 				return -1;
 			}
-			
+
 			/* connect it to the source */
 
 			if (our_port->connect (other_port)) {
@@ -241,7 +241,7 @@ IO::remove_port (Port* port, void* src)
 	{
 		BLOCK_PROCESS_CALLBACK ();
 
-		
+
 		{
 			Glib::Mutex::Lock lm (io_lock);
 
@@ -250,7 +250,7 @@ IO::remove_port (Port* port, void* src)
 
 				if (port->connected()) {
 					change = IOChange (change|ConnectionsChanged);
-				} 
+				}
 
 				_session.engine().unregister_port (*port);
 				check_bundles_connected ();
@@ -291,12 +291,12 @@ IO::add_port (string destination, void* src, DataType type)
 	{
 		BLOCK_PROCESS_CALLBACK ();
 
-		
-		{ 
+
+		{
 			Glib::Mutex::Lock lm (io_lock);
-			
+
 			/* Create a new output port */
-			
+
 			string portname = build_legal_port_name (type);
 
 			if (_direction == Input) {
@@ -322,7 +322,7 @@ IO::add_port (string destination, void* src, DataType type)
 			return -1;
 		}
 	}
-	
+
 	// pan_changed (src); /* EMIT SIGNAL */
 	changed (ConfigurationChanged, src); /* EMIT SIGNAL */
 	setup_bundles ();
@@ -334,12 +334,12 @@ IO::add_port (string destination, void* src, DataType type)
 int
 IO::disconnect (void* src)
 {
-	{ 
+	{
 		BLOCK_PROCESS_CALLBACK ();
-		
+
 		{
 			Glib::Mutex::Lock lm (io_lock);
-			
+
 			for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 				i->disconnect_all ();
 			}
@@ -347,9 +347,9 @@ IO::disconnect (void* src)
 			check_bundles_connected ();
 		}
 	}
-	
+
 	changed (ConnectionsChanged, src); /* EMIT SIGNAL */
-	
+
 	return 0;
 }
 
@@ -358,15 +358,15 @@ IO::ensure_ports_locked (ChanCount count, bool clear, void* /*src*/)
 {
 	Port* port = 0;
 	bool  changed    = false;
-	
+
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		
+
 		const size_t n = count.get(*t);
-	
+
 		/* remove unused ports */
 		for (size_t i = n_ports().get(*t); i > n; --i) {
 			port = _ports.port(*t, i-1);
-			
+
 			assert(port);
 			_ports.remove(port);
 			_session.engine().unregister_port (*port);
@@ -403,13 +403,13 @@ IO::ensure_ports_locked (ChanCount count, bool clear, void* /*src*/)
 			changed = true;
 		}
 	}
-	
+
 	if (changed) {
 		check_bundles_connected ();
 		PortCountChanged (n_ports()); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
-	
+
 	if (clear) {
 		/* disconnect all existing ports so that we get a fresh start */
 		for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
@@ -483,7 +483,7 @@ IO::state (bool /*full_state*/)
 	}
 
 	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
-		
+
 		vector<string> connections;
 
 		XMLNode* pnode = new XMLNode (X_("Port"));
@@ -500,14 +500,14 @@ IO::state (bool /*full_state*/)
 				   to be re-established even when our
 				   client name is different.
 				*/
-				
+
 				XMLNode* cnode = new XMLNode (X_("Connection"));
 
 				cnode->add_property (X_("other"), _session.engine().make_port_name_relative (*ci));
 				pnode->add_child_nocopy (*cnode);
-			}	
+			}
 		}
-		
+
 		node->add_child_nocopy (*pnode);
 	}
 
@@ -529,7 +529,7 @@ IO::set_state (const XMLNode& node)
 		error << string_compose(_("incorrect XML node \"%1\" passed to IO object"), node.name()) << endmsg;
 		return -1;
 	}
-	
+
 	if ((prop = node.property ("name")) != 0) {
 		set_name (prop->value());
 	}
@@ -552,7 +552,7 @@ IO::set_state (const XMLNode& node)
 	}
 
 	if (connecting_legal) {
-		
+
 		if (make_connections (node)) {
 			return -1;
 		}
@@ -577,7 +577,7 @@ IO::connecting_became_legal ()
 	connection_legal_c.disconnect ();
 
 	ret = make_connections (*pending_state_node);
-	
+
 	delete pending_state_node;
 	pending_state_node = 0;
 
@@ -590,7 +590,7 @@ IO::find_possible_bundle (const string &desired_name)
 	static const string digits = "0123456789";
 	const string &default_name = (_direction == Input ? _("in") : _("out"));
 	const string &bundle_type_name = (_direction == Input ? _("input") : _("output"));
-	
+
 	boost::shared_ptr<Bundle> c = _session.bundle_by_name (desired_name);
 
 	if (!c) {
@@ -604,7 +604,7 @@ IO::find_possible_bundle (const string &desired_name)
 
 		// find numeric suffix of desired name
 		bundle_number = 0;
-		
+
 		last_non_digit_pos = desired_name.find_last_not_of(digits);
 
 		if (last_non_digit_pos != string::npos) {
@@ -612,7 +612,7 @@ IO::find_possible_bundle (const string &desired_name)
 			s << desired_name.substr(last_non_digit_pos);
 			s >> bundle_number;
 		}
-	
+
 		// see if it's a stereo connection e.g. "in 3+4"
 
 		if (last_non_digit_pos > 1 && desired_name[last_non_digit_pos] == '+') {
@@ -640,22 +640,22 @@ IO::find_possible_bundle (const string &desired_name)
 		// find highest set bit
 		mask = 1;
 		while ((mask <= bundle_number) && (mask <<= 1)) {}
-		
-		// "wrap" bundle number into largest possible power of 2 
+
+		// "wrap" bundle number into largest possible power of 2
 		// that works...
 
 		while (mask) {
 
 			if (bundle_number & mask) {
 				bundle_number &= ~mask;
-				
+
 				stringstream s;
 				s << default_name << " " << bundle_number + 1;
 
 				if (stereo) {
 					s << "+" << bundle_number + 2;
 				}
-				
+
 				possible_name = s.str();
 
 				if ((c = _session.bundle_by_name (possible_name)) != 0) {
@@ -696,7 +696,7 @@ IO::get_port_counts (const XMLNode& node, ChanCount& n, boost::shared_ptr<Bundle
 		}
 		return 0;
 	}
-	
+
 	for (iter = node.children().begin(); iter != node.children().end(); ++iter) {
 
 		if ((*iter)->name() == X_("Bundle")) {
@@ -722,7 +722,7 @@ IO::get_port_counts (const XMLNode& node, ChanCount& n, boost::shared_ptr<Bundle
 			}
 		}
 	}
-	
+
 	n = ChanCount::max (n, cnt);
 	return 0;
 }
@@ -732,9 +732,9 @@ IO::create_ports (const XMLNode& node)
 {
 	ChanCount n;
 	boost::shared_ptr<Bundle> c;
-	
+
 	get_port_counts (node, n, c);
-	
+
 	if (ensure_ports (n, true, true, this)) {
 		error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
 		return -1;
@@ -771,22 +771,22 @@ IO::make_connections (const XMLNode& node)
 			if (!prop) {
 				continue;
 			}
-			
+
 			Port* p = port_by_name (prop->value());
 
 			if (p) {
-				for (XMLNodeConstIterator c = (*i)->children().begin(); c != (*i)->children().end(); ++c) {	
+				for (XMLNodeConstIterator c = (*i)->children().begin(); c != (*i)->children().end(); ++c) {
 
 					XMLNode* cnode = (*c);
-					
+
 					if (cnode->name() != X_("Connection")) {
 						continue;
 					}
-					
+
 					if ((prop = cnode->property (X_("other"))) == 0) {
 						continue;
 					}
-					
+
 					if (prop) {
 						p->connect (prop->value());
 					}
@@ -794,7 +794,7 @@ IO::make_connections (const XMLNode& node)
 			}
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -805,7 +805,7 @@ IO::set_ports (const string& str)
 	int i;
 	int n;
 	uint32_t nports;
-	
+
 	if ((nports = count (str.begin(), str.end(), '{')) == 0) {
 		return 0;
 	}
@@ -834,7 +834,7 @@ IO::set_ports (const string& str)
 			error << string_compose(_("bad input string in XML node \"%1\""), str) << endmsg;
 
 			return -1;
-			
+
 		} else if (n > 0) {
 
 			for (int x = 0; x < n; ++x) {
@@ -867,7 +867,7 @@ IO::parse_io_string (const string& str, vector<string>& ports)
 		ports.push_back (str.substr (opos, pos - opos));
 		opos = pos + 1;
 	}
-	
+
 	if (opos < str.length()) {
 		ports.push_back (str.substr(opos));
 	}
@@ -888,7 +888,7 @@ IO::parse_gain_string (const string& str, vector<string>& ports)
 		ports.push_back (str.substr (opos, pos - opos));
 		opos = pos + 1;
 	}
-	
+
 	if (opos < str.length()) {
 		ports.push_back (str.substr(opos));
 	}
@@ -904,7 +904,7 @@ IO::set_name (const string& requested_name)
 	if (name == _name) {
 		return true;
 	}
-	
+
 	/* replace all colons in the name. i wish we didn't have to do this */
 
 	if (replace_all (name, ":", "-")) {
@@ -947,7 +947,7 @@ IO::latency () const
 	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		if ((latency = i->total_latency ()) > max_latency) {
 			max_latency = latency;
-		} 
+		}
 	}
 
 	return max_latency;
@@ -1002,7 +1002,7 @@ IO::disconnect_ports_from_bundle (boost::shared_ptr<Bundle> c, void* src)
 		Glib::Mutex::Lock lm2 (io_lock);
 
 		c->disconnect (_bundle, _session.engine());
-			
+
 		/* If this is a UserBundle, make a note of what we've done */
 
 		boost::shared_ptr<UserBundle> ub = boost::dynamic_pointer_cast<UserBundle> (c);
@@ -1060,7 +1060,7 @@ IO::build_legal_port_name (DataType type)
 	} else {
 		throw unknown_type();
 	}
-	
+
 	/* note that if "in" or "out" are translated it will break a session
 	   across locale switches because a port's connection list will
 	   show (old) translated names, but the current port name will
@@ -1079,9 +1079,9 @@ IO::build_legal_port_name (DataType type)
 
 	char buf1[name_size+1];
 	char buf2[name_size+1];
-	
+
 	snprintf (buf1, name_size+1, ("%.*s/%s"), limit, _name.c_str(), suffix.c_str());
-	
+
 	int port_number = find_port_hole (buf1);
 	snprintf (buf2, name_size+1, "%s %d", buf1, port_number);
 
@@ -1205,7 +1205,7 @@ IO::bundles_connected ()
 			}
 		}
 	}
-	  
+
 	return bundles;
 }
 
@@ -1222,7 +1222,7 @@ std::string
 IO::bundle_channel_name (uint32_t c, uint32_t n) const
 {
 	char buf[32];
-	
+
 	switch (n) {
 	case 1:
 		return _("mono");
@@ -1240,11 +1240,11 @@ string
 IO::name_from_state (const XMLNode& node)
 {
 	const XMLProperty* prop;
-	
+
 	if ((prop = node.property ("name")) != 0) {
 		return prop->value();
-	} 
-	
+	}
+
 	return string();
 }
 
@@ -1252,10 +1252,10 @@ void
 IO::set_name_in_state (XMLNode& node, const string& new_name)
 {
 	const XMLProperty* prop;
-	
+
 	if ((prop = node.property ("name")) != 0) {
 		node.add_property ("name", new_name);
-	} 
+	}
 }
 
 bool
@@ -1278,7 +1278,7 @@ IO::connected_to (boost::shared_ptr<const IO> other) const
 	uint32_t i, j;
 	uint32_t no = n_ports().n_total();
 	uint32_t ni = other->n_ports ().n_total();
-	
+
 	for (i = 0; i < no; ++i) {
 		for (j = 0; j < ni; ++j) {
 			if (nth(i)->connected_to (other->nth(j)->name())) {
@@ -1305,7 +1305,7 @@ void
 IO::collect_input (BufferSet& bufs, nframes_t nframes, ChanCount offset)
 {
 	assert(bufs.available() >= _ports.count());
-	
+
 	if (_ports.count() == ChanCount::ZERO) {
 		return;
 	}
@@ -1333,7 +1333,7 @@ void
 IO::copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes, nframes_t offset)
 {
 	// Copy any buffers 1:1 to outputs
-	
+
 	PortSet::iterator o = _ports.begin(type);
 	BufferSet::iterator i = bufs.begin(type);
 	BufferSet::iterator prev = i;
@@ -1345,7 +1345,7 @@ IO::copy_to_outputs (BufferSet& bufs, DataType type, nframes_t nframes, nframes_
 		++i;
 		++o;
 	}
-	
+
 	// Copy last buffer to any extra outputs
 
 	while (o != _ports.end(type)) {

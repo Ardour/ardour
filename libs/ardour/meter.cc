@@ -1,16 +1,16 @@
 /*
-    Copyright (C) 2006 Paul Davis 
-    
+    Copyright (C) 2006 Paul Davis
+
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
     Software Foundation; either version 2 of the License, or (at your option)
     any later version.
-    
+
     This program is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
-    
+
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     675 Mass Ave, Cambridge, MA 02139, USA.
@@ -53,11 +53,11 @@ Metering::disconnect (sigc::connection& c)
 /**
     Update the meters.
 
-    The meter signal lock is taken to prevent modification of the 
+    The meter signal lock is taken to prevent modification of the
     Meter signal while updating the meters, taking the meter signal
-    lock prior to taking the io_lock ensures that all IO will remain 
+    lock prior to taking the io_lock ensures that all IO will remain
     valid while metering.
-*/   
+*/
 void
 Metering::update_meters()
 {
@@ -79,9 +79,9 @@ PeakMeter::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_fram
 
 	const uint32_t n_audio = min(_configured_input.n_audio(), bufs.count().n_audio());
 	const uint32_t n_midi  = min(_configured_input.n_midi(), bufs.count().n_midi());
-	
+
 	uint32_t n = 0;
-	
+
 	// Meter MIDI in to the first n_midi peaks
 	for (uint32_t i = 0; i < n_midi; ++i, ++n) {
 		float val = 0.0f;
@@ -104,7 +104,7 @@ PeakMeter::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_fram
 
 	// Meter audio in to the rest of the peaks
 	for (uint32_t i = 0; i < n_audio; ++i, ++n) {
-		_peak_power[n] = compute_peak (bufs.get_audio(i).data(), nframes, _peak_power[n]); 
+		_peak_power[n] = compute_peak (bufs.get_audio(i).data(), nframes, _peak_power[n]);
 	}
 
 	// Zero any excess peaks
@@ -149,9 +149,9 @@ PeakMeter::configure_io (ChanCount in, ChanCount out)
 	if (out != in) { // always 1:1
 		return false;
 	}
-	
+
 	uint32_t limit = in.n_total();
-	
+
 	while (_peak_power.size() > limit) {
 		_peak_power.pop_back();
 		_visible_peak_power.pop_back();
@@ -191,7 +191,7 @@ PeakMeter::meter ()
 
 		/* grab peak since last read */
 
- 		float new_peak = _peak_power[n]; /* XXX we should use atomic exchange from here ... */
+		float new_peak = _peak_power[n]; /* XXX we should use atomic exchange from here ... */
 		_peak_power[n] = 0;              /* ... to here */
 
 		/* compute new visible value using falloff */
@@ -201,11 +201,11 @@ PeakMeter::meter ()
 		} else {
 			new_peak = minus_infinity();
 		}
-		
+
 		/* update max peak */
-		
+
 		_max_peak_power[n] = std::max (new_peak, _max_peak_power[n]);
-		
+
 		if (Config->get_meter_falloff() == 0.0f || new_peak > _visible_peak_power[n]) {
 			_visible_peak_power[n] = new_peak;
 		} else {

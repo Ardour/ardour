@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004 Paul Davis 
+    Copyright (C) 2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ namespace Gnome {
 class MidiStreamView;
 class TimeAxisView;
 
-class GhostRegion : public sigc::trackable 
+class GhostRegion : public sigc::trackable
 {
 public:
 	GhostRegion(ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
@@ -99,7 +99,7 @@ public:
 		void x_changed();
 		ArdourCanvas::Diamond* diamond;
 	};
-	
+
 	MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
 	MidiGhostRegion(MidiStreamView& msv, TimeAxisView& source_tv, double initial_unit_pos);
 	~MidiGhostRegion();

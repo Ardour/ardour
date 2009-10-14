@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004-2007 Paul Davis 
+    Copyright (C) 2004-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,8 +41,8 @@ STStretch::STStretch (Session& s, TimeFXRequest& req)
 {
 	float percentage;
 
-	/* the soundtouch code wants a *tempo* change percentage, which is 
-	   of opposite sign to the length change.  
+	/* the soundtouch code wants a *tempo* change percentage, which is
+	   of opposite sign to the length change.
 	*/
 
 	percentage = -tsr.time_fraction;
@@ -52,7 +52,7 @@ STStretch::STStretch (Session& s, TimeFXRequest& req)
 	st.setTempoChange (percentage);
 	st.setPitchSemiTones (0);
 	st.setRateChange (0);
-	
+
 	st.setSetting(SETTING_USE_QUICKSEEK, tsr.quick_seek);
 	st.setSetting(SETTING_USE_AA_FILTER, tsr.antialias);
 
@@ -79,7 +79,7 @@ STStretch::run (boost::shared_ptr<Region> a_region)
 
 	tsr.progress = 0.0f;
 	tsr.done = false;
-	
+
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(a_region);
 
 	total_frames = region->length() * region->n_channels();
@@ -88,11 +88,11 @@ STStretch::run (boost::shared_ptr<Region> a_region)
 	/* the name doesn't need to be super-precise, but allow for 2 fractional
 	   digits just to disambiguate close but not identical stretches.
 	*/
-	
+
 	snprintf (suffix, sizeof (suffix), "@%d", (int) floor (tsr.time_fraction * 100.0f));
 
 	/* create new sources */
-	
+
 	if (make_new_sources (region, nsrcs, suffix)) {
 		goto out;
 	}
@@ -115,26 +115,26 @@ STStretch::run (boost::shared_ptr<Region> a_region)
 
 			while (!tsr.cancel && pos < region->length()) {
 				nframes_t this_time;
-			
+
 				this_time = min (bufsize, region->length() - pos);
 
-				/* read from the master (original) sources for the region, 
-				   not the ones currently in use, in case it's already been 
-				   subject to timefx.  
+				/* read from the master (original) sources for the region,
+				   not the ones currently in use, in case it's already been
+				   subject to timefx.
 				*/
 
 				if ((this_read = region->master_read_at (buffer, buffer, gain_buffer, pos + region->position(), this_time)) != this_time) {
 					error << string_compose (_("tempoize: error reading data from %1"), asrc->name()) << endmsg;
 					goto out;
 				}
-			
+
 				pos += this_read;
 				done += this_read;
 
 				tsr.progress = (float) done / total_frames;
-				
+
 				st.putSamples (buffer, this_read);
-			
+
 				while ((this_read = st.receiveSamples (buffer, bufsize)) > 0 && !tsr.cancel) {
 					if (asrc->write (buffer, this_read) != this_read) {
 						error << string_compose (_("error writing tempo-adjusted data to %1"), asrc->name()) << endmsg;
@@ -142,11 +142,11 @@ STStretch::run (boost::shared_ptr<Region> a_region)
 					}
 				}
 			}
-		
+
 			if (!tsr.cancel) {
 				st.flush ();
 			}
-		
+
 			while (!tsr.cancel && (this_read = st.receiveSamples (buffer, bufsize)) > 0) {
 				if (asrc->write (buffer, this_read) != this_read) {
 					error << string_compose (_("error writing tempo-adjusted data to %1"), asrc->name()) << endmsg;
@@ -182,7 +182,7 @@ STStretch::run (boost::shared_ptr<Region> a_region)
 		nframes_t start;
 		nframes_t length;
 
-		// note: tsr.fraction is a percentage of original length. 100 = no change, 
+		// note: tsr.fraction is a percentage of original length. 100 = no change,
 		// 50 is half as long, 200 is twice as long, etc.
 
 		float stretch = (*x)->stretch() * (tsr.time_fraction/100.0);
@@ -203,7 +203,7 @@ STStretch::run (boost::shared_ptr<Region> a_region)
 			(*si)->mark_for_remove ();
 		}
 	}
-	
+
 	tsr.done = true;
 
 	return ret;

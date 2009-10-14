@@ -44,11 +44,11 @@ AudioTrackImportHandler::AudioTrackImportHandler (XMLTree const & source, Sessio
 {
 	XMLNode const * root = source.root();
 	XMLNode const * routes;
-	
+
 	if (!(routes = root->child ("Routes"))) {
 		throw failed_constructor();
 	}
-	
+
 	XMLNodeList const & route_list = routes->children();
 	for (XMLNodeList::const_iterator it = route_list.begin(); it != route_list.end(); ++it) {
 		const XMLProperty* type = (*it)->property("default-type");
@@ -86,22 +86,22 @@ AudioTrackImporter::AudioTrackImporter (XMLTree const & source,
 	if (!parse_route_xml ()) {
 		throw failed_constructor();
 	}
-	
+
 	if (!parse_io ()) {
 		throw failed_constructor();
 	}
-	
+
 	XMLNodeList const & controllables = node.children ("Controllable");
 	for (XMLNodeList::const_iterator it = controllables.begin(); it != controllables.end(); ++it) {
 		parse_controllable (**it);
 	}
-	
+
 	XMLNode * remote_control = xml_track.child ("RemoteControl");
 	if (remote_control && (prop = remote_control->property ("id"))) {
 		uint32_t control_id = session.ntracks() + session.nbusses() + 1;
 		prop->set_value (to_string (control_id, std::dec));
 	}
-	
+
 	xml_track.remove_nodes_and_delete ("Extra");
 }
 
@@ -136,12 +136,12 @@ AudioTrackImporter::parse_route_xml ()
 			std::cerr << string_compose (X_("AudioTrackImporter: did not recognise XML-property \"%1\""), prop) << endmsg;
 		}
 	}
-	
+
 	if (!ds_ok) {
 		error << X_("AudioTrackImporter: did not find necessary XML-property \"diskstream-id\"") << endmsg;
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -155,7 +155,7 @@ AudioTrackImporter::parse_io ()
 	if (!(io = xml_track.child ("IO"))) {
 		return false;
 	}
-	
+
 	XMLPropertyList const & props = io->properties();
 
 	for (XMLPropertyList::const_iterator it = props.begin(); it != props.end(); ++it) {
@@ -186,32 +186,32 @@ AudioTrackImporter::parse_io ()
 			std::cerr << string_compose (X_("AudioTrackImporter: did not recognise XML-property \"%1\""), prop) << endmsg;
 		}
 	}
-	
+
 	if (!name_ok) {
 		error << X_("AudioTrackImporter: did not find necessary XML-property \"name\"") << endmsg;
 		return false;
 	}
-	
+
 	if (!id_ok) {
 		error << X_("AudioTrackImporter: did not find necessary XML-property \"id\"") << endmsg;
 		return false;
 	}
-	
+
 	XMLNodeList const & controllables = io->children ("Controllable");
 	for (XMLNodeList::const_iterator it = controllables.begin(); it != controllables.end(); ++it) {
 		parse_controllable (**it);
 	}
-	
+
 	XMLNodeList const & processors = io->children ("Processor");
 	for (XMLNodeList::const_iterator it = processors.begin(); it != processors.end(); ++it) {
 		parse_processor (**it);
 	}
-	
+
 	XMLNodeList const & automations = io->children ("Automation");
 	for (XMLNodeList::const_iterator it = automations.begin(); it != automations.end(); ++it) {
 		parse_automation (**it);
 	}
-	
+
 	return true;
 }
 
@@ -228,7 +228,7 @@ AudioTrackImporter::_prepare_move ()
 	/* Copy dependent playlists */
 
 	pl_handler.playlists_by_diskstream (old_ds_id, playlists);
-	
+
 	for (PlaylistList::iterator it = playlists.begin(); it != playlists.end(); ++it) {
 		if (!(*it)->prepare_move ()) {
 			playlists.clear ();
@@ -236,9 +236,9 @@ AudioTrackImporter::_prepare_move ()
 		}
 		(*it)->set_diskstream (new_ds_id);
 	}
-	
+
 	/* Rename */
-	
+
 	while (session.route_by_name (name) || !track_handler.check_name (name)) {
 		std::pair<bool, string> rename_pair = Rename (_("A playlist with this name already exists, please rename it."), name);
 		if (!rename_pair.first) {
@@ -248,7 +248,7 @@ AudioTrackImporter::_prepare_move ()
 	}
 	xml_track.child ("IO")->property ("name")->set_value (name);
 	track_handler.add_name (name);
-	
+
 	return true;
 }
 
@@ -261,21 +261,21 @@ AudioTrackImporter::_cancel_move ()
 
 void
 AudioTrackImporter::_move ()
-{	
+{
 	/* Add diskstream */
-	
+
 	boost::shared_ptr<XMLSharedNodeList> ds_node_list;
 	string xpath = "/Session/DiskStreams/AudioDiskstream[@id='" + old_ds_id.to_s() + "']";
 	ds_node_list = source.root()->find (xpath);
-	
+
 	if (ds_node_list->size() != 1) {
 		error << string_compose (_("Error Importing Audio track %1"), name) << endmsg;
 		return;
 	}
-	
+
 	boost::shared_ptr<XMLNode> ds_node = ds_node_list->front();
 	ds_node->property ("id")->set_value (new_ds_id.to_s());
-	
+
 	boost::shared_ptr<Diskstream> new_ds (new AudioDiskstream (session, *ds_node));
 	new_ds->set_name (name);
 	session.add_diskstream (new_ds);
@@ -300,7 +300,7 @@ AudioTrackImporter::parse_processor (XMLNode & node)
 	if (automation) {
 		parse_automation (*automation);
 	}
-	
+
 	return true;
 }
 
@@ -308,7 +308,7 @@ bool
 AudioTrackImporter::parse_controllable (XMLNode & node)
 {
 	XMLProperty * prop;
-	
+
 	if ((prop = node.property ("id"))) {
 		PBD::ID new_id;
 		prop->set_value (new_id.to_s());
@@ -326,12 +326,12 @@ AudioTrackImporter::parse_automation (XMLNode & node)
 	XMLNodeList const & lists = node.children ("AutomationList");
 	for (XMLNodeList::const_iterator it = lists.begin(); it != lists.end(); ++it) {
 		XMLProperty * prop;
-		
+
 		if ((prop = (*it)->property ("id"))) {
 			PBD::ID id;
 			prop->set_value (id.to_s());
 		}
-		
+
 		if (!(*it)->name().compare ("events")) {
 			rate_convert_events (**it);
 		}
@@ -352,14 +352,14 @@ AudioTrackImporter::rate_convert_events (XMLNode & node)
 	if (content_node->content().empty()) {
 		return false;
 	}
-	
+
 	std::stringstream str (content_node->content());
 	std::ostringstream new_content;
-	
+
 	nframes_t x;
 	double y;
 	bool ok = true;
-	
+
 	while (str) {
 		str >> x;
 		if (!str) {
@@ -370,10 +370,10 @@ AudioTrackImporter::rate_convert_events (XMLNode & node)
 			ok = false;
 			break;
 		}
-		
+
 		new_content << rate_convert_samples (x) << ' ' << y;
 	}
-	
+
 	if (!ok) {
 		error << X_("AudioTrackImporter: error in rate converting automation events") << endmsg;
 		return false;

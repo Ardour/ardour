@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,8 +25,8 @@
 
 namespace ARDOUR {
 
-template<class T> void 
-Session::foreach_named_selection (T& obj, void (T::*func)(NamedSelection&)) 
+template<class T> void
+Session::foreach_named_selection (T& obj, void (T::*func)(NamedSelection&))
 {
 	Glib::Mutex::Lock lm (named_selection_lock);
 	for (NamedSelectionList::iterator i = named_selections.begin(); i != named_selections.end(); i++) {

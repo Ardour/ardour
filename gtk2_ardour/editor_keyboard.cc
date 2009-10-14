@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004 Paul Davis 
+    Copyright (C) 2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, b
 
 	/* any use of "keyboard mouse buttons" invalidates an existing grab
 	*/
-	
+
 	if (_drag) {
 		_drag->item()->ungrab (GDK_CURRENT_TIME);
 		delete _drag;
@@ -101,16 +101,16 @@ Editor::kbd_mute_unmute_region ()
 		commit_reversible_command ();
 
 	} else if (entered_regionview) {
-		
+
 		begin_reversible_command (_("mute region"));
 		XMLNode &before = entered_regionview->region()->playlist()->get_state();
-		
+
 		entered_regionview->region()->set_muted (!entered_regionview->region()->muted());
-		
+
 		XMLNode &after = entered_regionview->region()->playlist()->get_state();
 		session->add_command (new MementoCommand<ARDOUR::Playlist>(*(entered_regionview->region()->playlist()), &before, &after));
 		commit_reversible_command();
-		
+
 	}
 }
 

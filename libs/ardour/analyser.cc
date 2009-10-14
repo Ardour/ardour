@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Paul Davis 
+    Copyright (C) 2008 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ list<boost::weak_ptr<Source> > Analyser::analysis_queue;
 
 Analyser::Analyser ()
 {
-	
+
 }
 
 Analyser::~Analyser ()

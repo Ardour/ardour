@@ -46,20 +46,20 @@ SessionImportDialog::SessionImportDialog (ARDOUR::Session & target) :
 	file_entry.set_name ("ImportFileNameEntry");
 	file_entry.set_text ("/");
 	Gtkmm2ext::set_size_request_to_display_given_text (file_entry, X_("Kg/quite/a/reasonable/size/for/files/i/think"), 5, 8);
-	
+
 	file_browse_button.set_name ("EditorGTKButton");
 	file_browse_button.signal_clicked().connect (mem_fun(*this, &SessionImportDialog::browse));
-	
+
 	file_hbox.set_spacing (5);
 	file_hbox.set_border_width (5);
 	file_hbox.pack_start (file_entry, true, true);
 	file_hbox.pack_start (file_browse_button, false, false);
-	
+
 	file_frame.add (file_hbox);
 	file_frame.set_border_width (5);
 	file_frame.set_name ("ImportFrom");
 	file_frame.set_label (_("Import from Session"));
-	
+
 	get_vbox()->pack_start (file_frame, false, false);
 
 	// Session browser
@@ -73,28 +73,28 @@ SessionImportDialog::SessionImportDialog (ARDOUR::Session & target) :
 	session_browser.get_column(0)->set_min_width (180);
 	session_browser.get_column(1)->set_min_width (40);
 	session_browser.get_column(1)->set_sizing (Gtk::TREE_VIEW_COLUMN_AUTOSIZE);
-	
+
 	session_scroll.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	session_scroll.add (session_browser);
 	session_scroll.set_size_request (220, 400);
-	
+
 	// Connect signals
 	Gtk::CellRendererToggle *toggle = dynamic_cast<Gtk::CellRendererToggle *> (session_browser.get_column_cell_renderer (1));
 	toggle->signal_toggled().connect(mem_fun (*this, &SessionImportDialog::update));
 	session_browser.signal_row_activated().connect(mem_fun (*this, &SessionImportDialog::show_info));
-	
+
 	get_vbox()->pack_start (session_scroll, false, false);
-	
+
 	// Buttons
 	cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	cancel_button->signal_clicked().connect (mem_fun (*this, &SessionImportDialog::end_dialog));
 	ok_button = add_button (_("Import"), Gtk::RESPONSE_ACCEPT);
 	ok_button->signal_clicked().connect (mem_fun (*this, &SessionImportDialog::do_merge));
-	
+
 	// prompt signals
 	ElementImporter::Rename.connect (mem_fun (*this, &SessionImportDialog::open_rename_dialog));
 	ElementImporter::Prompt.connect (mem_fun (*this, &SessionImportDialog::open_prompt_dialog));
-	
+
 	// Finalize
 	show_all();
 }
@@ -105,16 +105,16 @@ SessionImportDialog::load_session (const string& filename)
 	tree.read (filename);
 	boost::shared_ptr<AudioRegionImportHandler> region_handler (new AudioRegionImportHandler (tree, target));
 	boost::shared_ptr<AudioPlaylistImportHandler> pl_handler (new AudioPlaylistImportHandler (tree, target, *region_handler));
-	
+
 	handlers.push_back (boost::static_pointer_cast<ElementImportHandler> (region_handler));
 	handlers.push_back (boost::static_pointer_cast<ElementImportHandler> (pl_handler));
 	handlers.push_back (HandlerPtr(new UnusedAudioPlaylistImportHandler (tree, target, *region_handler)));
 	handlers.push_back (HandlerPtr(new AudioTrackImportHandler (tree, target, *pl_handler)));
 	handlers.push_back (HandlerPtr(new LocationImportHandler (tree, target)));
 	handlers.push_back (HandlerPtr(new TempoMapImportHandler (tree, target)));
-	
+
 	fill_list();
-	
+
 	if (ElementImportHandler::dirty()) {
 		// Warn user
 		string txt = _("Some elements had errors in them. Please see the log for details");
@@ -127,7 +127,7 @@ void
 SessionImportDialog::fill_list ()
 {
 	session_tree->clear();
-	
+
 	// Loop through element types
 	for (HandlerList::iterator handler = handlers.begin(); handler != handlers.end(); ++handler) {
 		Gtk::TreeModel::iterator iter = session_tree->append();
@@ -135,7 +135,7 @@ SessionImportDialog::fill_list ()
 		row[sb_cols.name] = (*handler)->get_info();
 		row[sb_cols.queued] = false;
 		row[sb_cols.element] = ElementPtr(); // "Null" pointer
-		
+
 		// Loop through elements
 		ElementList &elements = (*handler)->elements;
 		for (ElementList::iterator element = elements.begin(); element != elements.end(); ++element) {
@@ -158,12 +158,12 @@ SessionImportDialog::browse ()
 
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
-  
+
 	int result = dialog.run();
 
 	if (result == Gtk::RESPONSE_OK) {
 		string filename = dialog.get_filename();
-	
+
 		if (filename.length()) {
 			file_entry.set_text (filename);
 			load_session (filename);
@@ -174,7 +174,7 @@ SessionImportDialog::browse ()
 void
 SessionImportDialog::do_merge ()
 {
-	
+
 	// element types
 	Gtk::TreeModel::Children types = session_browser.get_model()->children();
 	Gtk::TreeModel::Children::iterator ti;
@@ -189,9 +189,9 @@ SessionImportDialog::do_merge ()
 			}
 		}
 	}
-	
+
 	end_dialog();
-	
+
 	if (ElementImportHandler::errors()) {
 		// Warn user
 		string txt = _("Some elements had errors in them. Please see the log for details");
@@ -205,7 +205,7 @@ void
 SessionImportDialog::update (string path)
 {
 	Gtk::TreeModel::iterator cell = session_browser.get_model()->get_iter (path);
-	
+
 	// Select all elements if element type is selected
 	if (path.size() == 1) {
 		{
@@ -217,7 +217,7 @@ SessionImportDialog::update (string path)
 				return;
 			}
 		}
-		
+
 		Gtk::TreeModel::Children elements = cell->children();
 		Gtk::TreeModel::Children::iterator ei;
 		for (ei = elements.begin(); ei != elements.end(); ++ei) {
@@ -230,7 +230,7 @@ SessionImportDialog::update (string path)
 		}
 		return;
 	}
-	
+
 	ElementPtr element = (*cell)[sb_cols.element];
 	if ((*cell)[sb_cols.queued]) {
 		if (!element->prepare_move()) {
@@ -247,10 +247,10 @@ SessionImportDialog::show_info(const Gtk::TreeModel::Path& path, Gtk::TreeViewCo
 	if (path.size() == 1) {
 		return;
 	}
-	
+
 	Gtk::TreeModel::iterator cell = session_browser.get_model()->get_iter (path);
 	string info = (*cell)[sb_cols.info];
-	
+
 	Gtk::MessageDialog msg (info, false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK, true);
 	msg.run();
 }
@@ -274,7 +274,7 @@ SessionImportDialog::open_rename_dialog (string text, string name)
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 	prompter.set_prompt (text);
 	prompter.set_initial_text (name);
-	
+
 	if (prompter.run() == Gtk::RESPONSE_ACCEPT) {
 		prompter.get_result (new_name);
 		if (new_name.length()) {

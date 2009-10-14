@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 	Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@ class ChanCount {
 public:
 	ChanCount(const XMLNode& node);
 	ChanCount() { reset(); }
-	
+
 	// Convenience constructor for making single-typed streams (stereo, mono, etc)
 	ChanCount(DataType type, uint32_t channels) {
 		reset();
@@ -50,16 +50,16 @@ public:
 			_counts[*t] = 0;
 		}
 	}
-	
+
 	void     set(DataType t, uint32_t count) { assert(t != DataType::NIL); _counts[t] = count; }
 	uint32_t get(DataType t) const { assert(t != DataType::NIL); return _counts[t]; }
-	
+
 	inline uint32_t n_audio() const { return _counts[DataType::AUDIO]; }
 	inline void set_audio(uint32_t a) { _counts[DataType::AUDIO] = a; }
-	
+
 	inline uint32_t n_midi()  const { return _counts[DataType::MIDI]; }
 	inline void set_midi(uint32_t m) { _counts[DataType::MIDI] = m; }
-	
+
 	uint32_t n_total() const {
 		uint32_t ret = 0;
 		for (uint32_t i=0; i < DataType::num_types; ++i)
@@ -75,7 +75,7 @@ public:
 
 		return true;
 	}
-	
+
 	bool operator!=(const ChanCount& other) const {
 		return ! (*this == other);
 	}
@@ -92,7 +92,7 @@ public:
 	bool operator<=(const ChanCount& other) const {
 		return ( (*this < other) || (*this == other) );
 	}
-	
+
 	bool operator>(const ChanCount& other) const {
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			if (_counts[*t] < other._counts[*t]) {
@@ -105,7 +105,7 @@ public:
 	bool operator>=(const ChanCount& other) const {
 		return ( (*this > other) || (*this == other) );
 	}
-	
+
 	ChanCount operator+(const ChanCount& other) const {
 		ChanCount ret;
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
@@ -113,7 +113,7 @@ public:
 		}
 		return ret;
 	}
-	
+
 	static ChanCount min(const ChanCount& a, const ChanCount& b) {
 		ChanCount ret;
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
@@ -121,7 +121,7 @@ public:
 		}
 		return ret;
 	}
-	
+
 	static ChanCount max(const ChanCount& a, const ChanCount& b) {
 		ChanCount ret;
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
@@ -129,7 +129,7 @@ public:
 		}
 		return ret;
 	}
-	
+
 	XMLNode* state(const std::string& name) const;
 
 	static const ChanCount INFINITE;

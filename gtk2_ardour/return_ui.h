@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ class ReturnUI : public Gtk::HBox
 
 	sigc::connection screen_update_connection;
 	sigc::connection fast_screen_update_connection;
-		
+
 	void ins_changed (ARDOUR::IOChange, void*);
 };
 

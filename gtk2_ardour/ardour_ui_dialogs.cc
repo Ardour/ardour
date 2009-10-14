@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 */
 
 /* This file contains any ARDOUR_UI methods that require knowledge of
-   the various dialog boxes, and exists so that no compilation dependency 
+   the various dialog boxes, and exists so that no compilation dependency
    exists between the main ARDOUR_UI modules and their respective classes.
    This is to cut down on the compile times.  It also helps with my sanity.
 */
@@ -58,7 +58,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, true);
 	ActionManager::set_sensitive (ActionManager::write_sensitive_actions, session->writable());
-	
+
 	if (session->locations()->num_range_markers()) {
 		ActionManager::set_sensitive (ActionManager::range_sensitive_actions, true);
 	} else {
@@ -92,7 +92,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 
 	rec_button.set_sensitive (true);
 	shuttle_box.set_sensitive (true);
-	
+
 	if (location_ui) {
 		location_ui->set_session(s);
 	}
@@ -134,7 +134,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 
 	/* Clocks are on by default after we are connected to a session, so show that here.
 	*/
-	
+
 	connect_dependents_to_session (s);
 
 	/* listen to clock mode changes. don't do this earlier because otherwise as the clocks
@@ -164,7 +164,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 		case -1:
 			// cancel
 			return 1;
-			
+
 		case 1:
 			session->save_state ("");
 			break;
@@ -183,7 +183,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	point_zero_one_second_connection.disconnect();
 
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, false);
-	
+
 	rec_button.set_sensitive (false);
 	shuttle_box.set_sensitive (false);
 
@@ -214,13 +214,13 @@ ARDOUR_UI::toggle_big_clock_window ()
 	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleBigClock"));
 	if (act) {
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-	
+
 		if (tact->get_active()) {
 			big_clock_window->show_all ();
 			big_clock_window->present ();
 		} else {
 			big_clock_window->hide ();
-		} 
+		}
 	}
 }
 
@@ -231,18 +231,18 @@ ARDOUR_UI::toggle_rc_options_window ()
 		rc_option_editor = new RCOptionEditor;
 		rc_option_editor->signal_unmap().connect(sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleRCOptionsEditor")));
 		rc_option_editor->set_session (session);
-	} 
+	}
 
 	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleRCOptionsEditor"));
 	if (act) {
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-	
+
 		if (tact->get_active()) {
 			rc_option_editor->show_all ();
 			rc_option_editor->present ();
 		} else {
 			rc_option_editor->hide ();
-		} 
+		}
 	}
 }
 
@@ -252,18 +252,18 @@ ARDOUR_UI::toggle_session_options_window ()
 	if (session_option_editor == 0) {
 		session_option_editor = new SessionOptionEditor (session);
 		session_option_editor->signal_unmap().connect(sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleSessionOptionsEditor")));
-	} 
+	}
 
 	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleSessionOptionsEditor"));
 	if (act) {
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
-	
+
 		if (tact->get_active()) {
 			session_option_editor->show_all ();
 			session_option_editor->present ();
 		} else {
 			session_option_editor->hide ();
-		} 
+		}
 	}
 }
 
@@ -288,13 +288,13 @@ ARDOUR_UI::toggle_location_window ()
 	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleLocations"));
 	if (act) {
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-	
+
 		if (tact->get_active()) {
 			location_ui->show_all ();
 			location_ui->present ();
 		} else {
 			location_ui->hide ();
-		} 
+		}
 	}
 }
 
@@ -303,19 +303,19 @@ ARDOUR_UI::toggle_key_editor ()
 {
 	if (key_editor == 0) {
 		key_editor = new KeyEditor;
-		key_editor->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleKeyEditor")));	
+		key_editor->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleKeyEditor")));
 	}
 
 	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleKeyEditor"));
 	if (act) {
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-	
+
 		if (tact->get_active()) {
 			key_editor->show_all ();
 			key_editor->present ();
 		} else {
 			key_editor->hide ();
-		} 
+		}
 	}
 }
 
@@ -325,13 +325,13 @@ ARDOUR_UI::toggle_theme_manager ()
 	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleThemeManager"));
 	if (act) {
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-	
+
 		if (tact->get_active()) {
 			theme_manager->show_all ();
 			theme_manager->present ();
 		} else {
 			theme_manager->hide ();
-		} 
+		}
 	}
 }
 
@@ -348,17 +348,17 @@ void
 ARDOUR_UI::toggle_bundle_manager ()
 {
 	create_bundle_manager ();
-	
+
 	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleBundleManager"));
 	if (act) {
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
-	
+
 		if (tact->get_active()) {
 			bundle_manager->show_all ();
 			bundle_manager->present ();
 		} else {
 			bundle_manager->hide ();
-		} 
+		}
 	}
 }
 
@@ -383,13 +383,13 @@ ARDOUR_UI::toggle_route_params_window ()
 	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleInspector"));
 	if (act) {
 		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-	
+
 		if (tact->get_active()) {
 			route_params->show_all ();
 			route_params->present ();
 		} else {
 			route_params->hide ();
-		} 
+		}
 	}
 }
 
@@ -410,14 +410,14 @@ ARDOUR_UI::main_window_state_event_handler (GdkEventWindowState* ev, bool window
 {
 	if (window_was_editor) {
 
-		if ((ev->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) && 
+		if ((ev->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) &&
 		    (ev->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)) {
 			float_big_clock (editor);
 		}
 
 	} else {
 
-		if ((ev->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) && 
+		if ((ev->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) &&
 		    (ev->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)) {
 			float_big_clock (mixer);
 		}

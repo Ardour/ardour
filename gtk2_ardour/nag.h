@@ -11,7 +11,7 @@ class NagScreen : public ArdourDialog
 {
   public:
 	~NagScreen();
-	
+
 	static NagScreen* maybe_nag (std::string context);
 	void nag ();
 

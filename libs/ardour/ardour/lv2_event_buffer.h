@@ -1,17 +1,17 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
     Software Foundation; either version 2 of the License, or (at your option)
     any later version.
-    
+
     This program is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
-    
+
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     675 Mass Ave, Cambridge, MA 02139, USA.
@@ -33,9 +33,9 @@ public:
 
 	inline LV2_Event_Buffer*       data()       { return _data; }
 	inline const LV2_Event_Buffer* data() const { return _data; }
-	
+
 	inline void rewind() const { lv2_event_begin(&_iter, _data); }
-	
+
 	inline void reset() {
 		_latest_frames = 0;
 		_latest_subframes = 0;
@@ -43,7 +43,7 @@ public:
 		_data->size = 0;
 		rewind();
 	}
-	
+
 	inline size_t   event_count()      const { return _data->event_count; }
 	inline uint32_t capacity()         const { return _data->capacity; }
 	inline uint32_t size()             const { return _data->size; }

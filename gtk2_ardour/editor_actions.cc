@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ Editor::register_actions ()
 	RefPtr<Action> act;
 
 	editor_actions = ActionGroup::create (X_("Editor"));
-	
+
 	/* non-operative menu items for menu bar */
 
 	ActionManager::register_action (editor_actions, X_("AlignMenu"), _("Align"));
@@ -199,12 +199,12 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
        	act = ActionManager::register_action (editor_actions, "select-all-in-loop-range", _("Select All in Loop Range"), mem_fun(*this, &Editor::select_all_selectables_using_loop));
 	ActionManager::session_sensitive_actions.push_back (act);
-	
+
        	act = ActionManager::register_action (editor_actions, "select-next-route", _("Select Next Track/Bus"), mem_fun(*this, &Editor::select_next_route));
 	ActionManager::session_sensitive_actions.push_back (act);
        	act = ActionManager::register_action (editor_actions, "select-prev-route", _("Select Previous Track/Bus"), mem_fun(*this, &Editor::select_prev_route));
 	ActionManager::session_sensitive_actions.push_back (act);
-	
+
        	act = ActionManager::register_action (editor_actions, "track-record-enable-toggle", _("Toggle Record Enable"), mem_fun(*this, &Editor::toggle_record_enable));
 	ActionManager::session_sensitive_actions.push_back (act);
 
@@ -404,7 +404,7 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "add-range-markers-from-region", _("Add Range Marker(s)"), mem_fun(*this, &Editor::add_locations_from_audio_region));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	
+
 	act = ActionManager::register_action (editor_actions, "set-fade-in-length", _("Set Fade In Length"), bind (mem_fun(*this, &Editor::set_fade_length), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "toggle-fade-in-active", _("Toggle Fade In Active"), bind (mem_fun(*this, &Editor::toggle_fade_active), true));
@@ -553,7 +553,7 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "quantize-region", _("Quantize Region"), mem_fun(*this, &Editor::quantize_region));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	
+
 	act = ActionManager::register_action (editor_actions, "set-tempo-from-region", _("Set Tempo from Region=Bar"), mem_fun(*this, &Editor::use_region_as_bar));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
@@ -705,9 +705,9 @@ Editor::register_actions ()
 	mouse_timefx_button.set_image (*(manage (new Image (::get_icon("tool_stretch")))));
 	mouse_timefx_button.set_label ("");
 	mouse_timefx_button.set_name ("MouseModeButton");
-	
+
 	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Step Mouse Mode"), bind (mem_fun(*this, &Editor::step_mouse_mode), true));
-	
+
 	act = ActionManager::register_toggle_action (mouse_mode_actions, "toggle-internal-edit", _("Edit MIDI"), mem_fun(*this, &Editor::toggle_internal_editing));
 	act->connect_proxy (internal_edit_button);
 	internal_edit_button.set_image (*(manage (new Image (::get_icon("tool_note")))));
@@ -762,7 +762,7 @@ Editor::register_actions ()
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-boundary"), _("Snap to Region Boundary"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToRegionBoundary)));
 
 	/* RULERS */
-	
+
 	Glib::RefPtr<ActionGroup> ruler_actions = ActionGroup::create (X_("Rulers"));
 	ruler_tempo_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-tempo-ruler"), _("Tempo"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_tempo)));
 	ruler_meter_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-meter-ruler"), _("Meter"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_meter)));
@@ -797,7 +797,7 @@ Editor::register_actions ()
 	}
 	ruler_samples_action->set_active (false);
 	no_ruler_shown_update = false;
-	
+
 	/* REGION LIST */
 
 	Glib::RefPtr<ActionGroup> rl_actions = ActionGroup::create (X_("RegionList"));
@@ -820,7 +820,7 @@ Editor::register_actions ()
 			       bind (mem_fun (*_regions, &EditorRegions::reset_sort_direction), true));
 	ActionManager::register_radio_action (rl_actions, sort_order_group, X_("SortDescending"),   _("Descending"),
 					      bind (mem_fun (*_regions, &EditorRegions::reset_sort_direction), false));
-	
+
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortByRegionName"),  _("By Region Name"),
 					      bind (mem_fun (*_regions, &EditorRegions::reset_sort_type), ByName, false));
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortByRegionLength"),  _("By Region Length"),
@@ -841,7 +841,7 @@ Editor::register_actions ()
 					      bind (mem_fun (*_regions, &EditorRegions::reset_sort_type), BySourceFileCreationDate, false));
 	ActionManager::register_radio_action (rl_actions, sort_type_group, X_("SortBySourceFilesystem"),  _("By Source Filesystem"),
 					      bind (mem_fun (*_regions, &EditorRegions::reset_sort_type), BySourceFileFS, false));
-	
+
 
 	/* the next two are duplicate items with different names for use in two different contexts */
 
@@ -861,9 +861,9 @@ Editor::register_actions ()
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleSummary"), _("Show Summary"), mem_fun (*this, &Editor::set_summary));
 
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleGroupTabs"), _("Show Group Tabs"), mem_fun (*this, &Editor::set_group_tabs));
-	
+
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measures"), mem_fun (*this, &Editor::toggle_measure_visibility));
-	
+
 	/* if there is a logo in the editor canvas, its always visible at startup */
 
 	act = ActionManager::register_toggle_action (editor_actions, X_("ToggleLogoVisibility"), _("Show Logo"), mem_fun (*this, &Editor::toggle_logo_visibility));
@@ -997,7 +997,7 @@ Editor::snap_type_action (SnapType type)
 
 	const char* action = 0;
 	RefPtr<Action> act;
-	
+
 	switch (type) {
 	case Editing::SnapToCDFrame:
 		action = "snap-to-cd-frame";
@@ -1151,7 +1151,7 @@ Editor::snap_mode_action (SnapMode mode)
 {
 	const char* action = 0;
 	RefPtr<Action> act;
-	
+
 	switch (mode) {
 	case Editing::SnapOff:
 		action = X_("snap-off");
@@ -1166,13 +1166,13 @@ Editor::snap_mode_action (SnapMode mode)
 		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible snap mode type", (int) mode) << endmsg;
 		/*NOTREACHED*/
 	}
-	
+
 	act = ActionManager::get_action (X_("Editor"), action);
-	
+
 	if (act) {
 		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 		return ract;
-		
+
 	} else  {
 		error << string_compose (_("programming error: %1: %2"), "Editor::snap_mode_chosen could not find action to match mode.", action) << endmsg;
 		return RefPtr<RadioAction> ();
@@ -1215,7 +1215,7 @@ Editor::edit_point_action (EditPoint ep)
 {
 	const char* action = 0;
 	RefPtr<Action> act;
-	
+
 	switch (ep) {
 	case Editing::EditAtPlayhead:
 		action = X_("edit-at-playhead");
@@ -1230,13 +1230,13 @@ Editor::edit_point_action (EditPoint ep)
 		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible edit point type", (int) ep) << endmsg;
 		/*NOTREACHED*/
 	}
-	
+
 	act = ActionManager::get_action (X_("Editor"), action);
-	
+
 	if (act) {
 		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 		return ract;
-		
+
 	} else  {
 		error << string_compose (_("programming error: %1: %2"), "Editor::edit_point_action could not find action to match edit point.", action) << endmsg;
 		return RefPtr<RadioAction> ();
@@ -1264,7 +1264,7 @@ Editor::zoom_focus_action (ZoomFocus focus)
 {
 	const char* action = 0;
 	RefPtr<Action> act;
-	
+
 	switch (focus) {
 	case ZoomFocusLeft:
 		action = X_("zoom-focus-left");
@@ -1288,9 +1288,9 @@ Editor::zoom_focus_action (ZoomFocus focus)
 		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible focus type", (int) focus) << endmsg;
 		/*NOTREACHED*/
 	}
-	
+
 	act = ActionManager::get_action (X_("Zoom"), action);
-	
+
 	if (act) {
 		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 		return ract;
@@ -1343,7 +1343,7 @@ Editor::parameter_changed (std::string p)
 	} else if (p == "show-track-meters") {
 		toggle_meter_updating();
 	} else if (p == "show-summary") {
-		
+
 		bool const s = session->config.get_show_summary ();
  		if (s) {
  			_summary->show ();
@@ -1390,7 +1390,7 @@ Editor::reset_canvas_action_sensitivity (bool onoff)
 		onoff = true;
 	}
 
-	for (vector<Glib::RefPtr<Action> >::iterator x = ActionManager::mouse_edit_point_requires_canvas_actions.begin();  
+	for (vector<Glib::RefPtr<Action> >::iterator x = ActionManager::mouse_edit_point_requires_canvas_actions.begin();
 	     x != ActionManager::mouse_edit_point_requires_canvas_actions.end(); ++x) {
 		(*x)->set_sensitive (onoff);
 	}

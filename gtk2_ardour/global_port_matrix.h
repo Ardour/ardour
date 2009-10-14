@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ public:
 	GlobalPortMatrix (Gtk::Window*, ARDOUR::Session&, ARDOUR::DataType);
 
 	void setup_ports (int);
-	
+
 	void set_state (ARDOUR::BundleChannel c[2], bool);
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
 
@@ -43,7 +43,7 @@ public:
 	std::string channel_noun () const {
 		return _("port");
 	}
-	
+
 	bool list_is_global (int) const {
 		return true;
 	}
@@ -64,7 +64,7 @@ public:
 
 private:
 	void on_show ();
-	
+
 	GlobalPortMatrix _port_matrix;
 	Gtk::Button _rescan_button;
 	Gtk::CheckButton _show_ports_button;

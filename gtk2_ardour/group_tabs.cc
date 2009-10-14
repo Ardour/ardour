@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -91,7 +91,7 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 		if (m) {
 			m->popup (ev->button, ev->time);
 		}
-		
+
 	}
 
 	return true;
@@ -106,13 +106,13 @@ GroupTabs::on_motion_notify_event (GdkEventMotion* ev)
 	}
 
 	double const p = primary_coordinate (ev->x, ev->y);
-	
+
 	if (p != _drag_last) {
 		_drag_moved = true;
 	}
 
 	if (_drag_from) {
-		
+
 		double f = _dragging->from + p - _drag_last;
 
 		if (f < _drag_limit) {
@@ -125,11 +125,11 @@ GroupTabs::on_motion_notify_event (GdkEventMotion* ev)
 			/* limit drag in the `too small' direction */
 			f = t;
 		}
-		
+
 		_dragging->from = f;
-		
+
 	} else {
-		
+
 		double t = _dragging->to + p - _drag_last;
 
 		if (t > _drag_limit) {
@@ -142,7 +142,7 @@ GroupTabs::on_motion_notify_event (GdkEventMotion* ev)
 			/* limit drag in the `too small' direction */
 			t = f;
 		}
-		
+
 		_dragging->to = t;
 	}
 
@@ -150,7 +150,7 @@ GroupTabs::on_motion_notify_event (GdkEventMotion* ev)
 	queue_draw ();
 
 	_drag_last = p;
-	
+
 	return true;
 }
 
@@ -171,13 +171,13 @@ GroupTabs::on_button_release_event (GdkEventButton* ev)
 			d.do_run ();
 
 		} else {
-		
+
 			/* toggle active state */
 			_dragging->group->set_active (!_dragging->group->is_active (), this);
 			_dragging = 0;
-			
+
 		}
-		
+
 	} else {
 		/* finish drag */
 		_dragging = 0;
@@ -197,7 +197,7 @@ GroupTabs::render (cairo_t* cr)
 	}
 
 	/* background */
-	
+
 	cairo_set_source_rgb (cr, 0, 0, 0);
 	cairo_rectangle (cr, 0, 0, _width, _height);
 	cairo_fill (cr);
@@ -206,7 +206,7 @@ GroupTabs::render (cairo_t* cr)
 
 	for (list<Tab>::const_iterator i = _tabs.begin(); i != _tabs.end(); ++i) {
 		draw_tab (cr, *i);
-	}	
+	}
 }
 
 
@@ -216,12 +216,12 @@ GroupTabs::render (cairo_t* cr)
  *  @param next Filled in with the next tab after the click, or 0.
  *  @return Tab under the click, or 0.
  */
- 
+
 GroupTabs::Tab *
 GroupTabs::click_to_tab (double c, Tab** prev, Tab** next)
 {
 	*prev = 0;
-	
+
 	list<Tab>::iterator i = _tabs.begin ();
 	while (i != _tabs.end() && (c < i->from || c > i->to)) {
 		*prev = &(*i);

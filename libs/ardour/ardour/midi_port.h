@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ class MidiPort : public Port {
 	void cycle_end (nframes_t nframes);
 	void cycle_split ();
 	void flush_buffers (nframes_t nframes, nframes_t offset = 0);
-	
+
 	size_t raw_buffer_size(jack_nframes_t nframes) const;
 
 	Buffer& get_buffer (nframes_t nframes, nframes_t offset = 0) {
@@ -53,13 +53,13 @@ class MidiPort : public Port {
 	friend class AudioEngine;
 
 	MidiPort (const std::string& name, Flags);
-  
+
   private:
 	MidiBuffer* _buffer;
 	bool _has_been_mixed_down;
 
 };
- 
+
 } // namespace ARDOUR
 
 #endif /* __ardour_midi_port_h__ */

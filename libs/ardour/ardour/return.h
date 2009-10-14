@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
 #include <string>
 
 
-#include "pbd/stateful.h" 
+#include "pbd/stateful.h"
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
 #include "ardour/io_processor.h"
@@ -35,23 +35,23 @@ namespace ARDOUR {
 class Amp;
 class PeakMeter;
 
-class Return : public IOProcessor 
+class Return : public IOProcessor
 {
-public:	
+public:
 	Return (Session&, bool internal = false);
 	Return (Session&, const XMLNode&, bool internal = false);
 	virtual ~Return ();
-	
+
 	uint32_t bit_slot() const { return _bitslot; }
 
 	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
-	
+
 	boost::shared_ptr<Amp> amp() const { return _amp; }
 	boost::shared_ptr<PeakMeter> meter() const { return _meter; }
 
 	bool metering() const { return _metering; }
 	void set_metering (bool yn) { _metering = yn; }
-	
+
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
 	int      set_state(const XMLNode& node);
@@ -72,7 +72,7 @@ public:
 private:
 	/* disallow copy construction */
 	Return (const Return&);
-	
+
 	uint32_t  _bitslot;
 
 	void collect_input  (BufferSet& bufs, nframes_t nframes, ChanCount offset=ChanCount::ZERO);

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 
 #include "ardour/source.h"
 #include "ardour/ardour.h"
-#include "pbd/stateful.h" 
+#include "pbd/stateful.h"
 #include "pbd/xml++.h"
 
 namespace ARDOUR {
@@ -48,7 +48,7 @@ class AudioSource : virtual public Source,
 
 	nframes64_t readable_length() const { return _length; }
 	uint32_t    n_channels()      const { return 1; }
-	
+
 	sframes_t length (sframes_t pos) const;
 	void      update_length (sframes_t pos, sframes_t cnt);
 
@@ -69,15 +69,15 @@ class AudioSource : virtual public Source,
 	uint32_t read_data_count() const { return _read_data_count; }
 	uint32_t write_data_count() const { return _write_data_count; }
 
- 	int read_peaks (PeakData *peaks, nframes_t npeaks,
+	int read_peaks (PeakData *peaks, nframes_t npeaks,
 			sframes_t start, nframes_t cnt, double samples_per_visual_peak) const;
 
- 	int  build_peaks ();
+	int  build_peaks ();
 	bool peaks_ready (sigc::slot<void>, sigc::connection&) const;
 
 	mutable sigc::signal<void>  PeaksReady;
 	mutable sigc::signal<void,nframes_t,nframes_t>  PeakRangeReady;
-	
+
 	XMLNode& get_state ();
 	int set_state (const XMLNode&);
 
@@ -117,7 +117,7 @@ class AudioSource : virtual public Source,
 	int initialize_peakfile (bool newfile, Glib::ustring path);
 	int build_peaks_from_scratch ();
 	int compute_and_write_peaks (Sample* buf, sframes_t first_frame, nframes_t cnt,
-			bool force, bool intermediate_peaks_ready_signal);
+	bool force, bool intermediate_peaks_ready_signal);
 	void truncate_peakfile();
 
 	mutable off_t _peak_byte_max; // modified in compute_and_write_peak()
@@ -127,13 +127,13 @@ class AudioSource : virtual public Source,
 	virtual Glib::ustring peak_path(Glib::ustring audio_path) = 0;
 	virtual Glib::ustring find_broken_peakfile (Glib::ustring missing_peak_path,
 	                                            Glib::ustring audio_path) = 0;
-	
- 	virtual int read_peaks_with_fpp (PeakData *peaks,
-			nframes_t npeaks, sframes_t start, nframes_t cnt, 
-			double samples_per_visual_peak, nframes_t fpp) const;
+
+	virtual int read_peaks_with_fpp (PeakData *peaks,
+	nframes_t npeaks, sframes_t start, nframes_t cnt,
+	double samples_per_visual_peak, nframes_t fpp) const;
 
 	int compute_and_write_peaks (Sample* buf, sframes_t first_frame, nframes_t cnt,
-			bool force, bool intermediate_peaks_ready_signal, nframes_t frames_per_peak);	
+	bool force, bool intermediate_peaks_ready_signal, nframes_t frames_per_peak);
 
   private:
 	int       peakfile;

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,69 +42,69 @@ class CrossfadeEditor : public ArdourDialog
   public:
 	CrossfadeEditor (ARDOUR::Session&, boost::shared_ptr<ARDOUR::Crossfade>, double miny, double maxy);
 	~CrossfadeEditor ();
-	
+
 	void apply ();
-	
+
 	static const double canvas_border;
-	
+
 	/* these are public so that a caller/subclass can make them do the right thing.
 	 */
-	
+
 	Gtk::Button* cancel_button;
 	Gtk::Button* ok_button;
-	
+
 	struct PresetPoint {
 	    double x;
 	    double y;
-	    
-	    PresetPoint (double a, double b) 
+
+	    PresetPoint (double a, double b)
 		    : x (a), y (b) {}
 	};
-	
+
 	struct Preset : public std::list<PresetPoint> {
 	    const char* name;
 	    const char* image_name;
 
 	    Preset (const char* n, const char* x) : name (n), image_name (x) {}
 	};
-	
+
 	typedef std::list<Preset*> Presets;
-	
+
 	static Presets* fade_in_presets;
 	static Presets* fade_out_presets;
 
   protected:
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
-	
+
   private:
 	boost::shared_ptr<ARDOUR::Crossfade> xfade;
 	ARDOUR::Session& session;
-	
+
 	Gtk::VBox vpacker;
-	
+
 	struct Point {
 	    ~Point();
-	    
+
 	    ArdourCanvas::SimpleRect* box;
 	    ArdourCanvas::Line* curve;
 	    double x;
 	    double y;
-	    
+
 	    static const int32_t size;
-	    
+
 	    void move_to (double x, double y, double xfract, double yfract);
 	};
-	
+
 	struct PointSorter {
 	    bool operator() (const CrossfadeEditor::Point* a, const CrossfadeEditor::Point *b) {
 		    return a->x < b->x;
 	    }
 	};
-	
+
 	ArdourCanvas::SimpleRect*   toplevel;
 	ArdourCanvas::Canvas* canvas;
-	
+
 	struct Half {
 	    ArdourCanvas::Line*     line;
 	    ArdourCanvas::Polygon*  shading;
@@ -112,18 +112,18 @@ class CrossfadeEditor : public ArdourDialog
 	    ARDOUR::AutomationList  normative_curve; /* 0 - 1.0, linear */
 	    ARDOUR::AutomationList  gain_curve;      /* 0 - 2.0, gain mapping */
 	    std::vector<ArdourCanvas::WaveView*>  waves;
-	    
+
 	    Half();
 	};
-	
+
 	enum WhichFade {
 		In = 0,
 		Out = 1
 	};
-	
+
 	Half fade[2];
 	WhichFade current;
-	
+
 	bool point_grabbed;
 	std::vector<Gtk::Button*> fade_out_buttons;
 	std::vector<Gtk::Button*> fade_in_buttons;
@@ -154,7 +154,7 @@ class CrossfadeEditor : public ArdourDialog
 	void add_control_point (double x, double y);
 	Point* make_point ();
 	void redraw ();
-    
+
 	double effective_width () const { return canvas->get_allocation().get_width() - (2.0 * canvas_border); }
 	double effective_height () const { return canvas->get_allocation().get_height() - (2.0 * canvas_border); }
 
@@ -169,7 +169,7 @@ class CrossfadeEditor : public ArdourDialog
 
 	void build_presets ();
 	void apply_preset (Preset*);
-    
+
 	Gtk::RadioButton select_in_button;
 	Gtk::RadioButton select_out_button;
 	Gtk::HBox   curve_button_box;
@@ -179,25 +179,25 @@ class CrossfadeEditor : public ArdourDialog
 
 	double x_coordinate (double& xfract) const;
 	double y_coordinate (double& yfract) const;
-    
+
 	void set (const ARDOUR::AutomationList& alist, WhichFade);
 
 	sigc::connection peaks_ready_connection;
 
 	void make_waves (boost::shared_ptr<ARDOUR::AudioRegion>, WhichFade);
 	void peaks_ready (boost::shared_ptr<ARDOUR::AudioRegion> r, WhichFade);
-    
+
 	void _apply_to (boost::shared_ptr<ARDOUR::Crossfade> xf);
 	void setup (boost::shared_ptr<ARDOUR::Crossfade>);
 	void cancel_audition ();
 	void audition_state_changed (bool);
-	
+
 	enum Audition {
 		Both,
 		Left,
 		Right
 	};
-	
+
 	void audition_toggled ();
 	void audition_right_toggled ();
 	void audition_right_dry_toggled ();

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001 Paul Davis 
+    Copyright (C) 2001 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ class AudioRegionEditor : public RegionEditor
 	Gtk::ToggleButton  audition_button;
 
 	Gtk::HBox  lower_hbox;
-	
+
 	Gtk::Table time_table;
 
 	Gtk::Label position_label;

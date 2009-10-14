@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -102,7 +102,7 @@ LadspaPlugin::init (void *mod, uint32_t index, nframes_t rate)
 		error << string_compose(_("LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"), _descriptor->Name) << endmsg;
 		throw failed_constructor();
 	}
-	
+
 	_sample_rate = rate;
 
 	if (_descriptor->instantiate == 0) {
@@ -121,7 +121,7 @@ LadspaPlugin::init (void *mod, uint32_t index, nframes_t rate)
 	for (i = 0; i < port_cnt; ++i) {
 		if (LADSPA_IS_PORT_CONTROL(port_descriptor (i))) {
 			connect_port (i, &_control_data[i]);
-			
+
 			if (LADSPA_IS_PORT_OUTPUT(port_descriptor (i)) &&
 			    strcmp (port_names()[i], X_("latency")) == 0) {
 				_latency_control_port = &_control_data[i];
@@ -131,7 +131,7 @@ LadspaPlugin::init (void *mod, uint32_t index, nframes_t rate)
 			if (!LADSPA_IS_PORT_INPUT(port_descriptor (i))) {
 				continue;
 			}
-		
+
 			_shadow_data[i] = default_value (i);
 		}
 	}
@@ -145,7 +145,7 @@ LadspaPlugin::~LadspaPlugin ()
 	cleanup ();
 
 	GoingAway (); /* EMIT SIGNAL */
-	
+
 	/* XXX who should close a plugin? */
 
         // dlclose (module);
@@ -172,16 +172,16 @@ LadspaPlugin::default_value (uint32_t port)
 	bool earlier_hint = false;
 
 	/* defaults - case 1 */
-	
+
 	if (LADSPA_IS_HINT_HAS_DEFAULT(prh[port].HintDescriptor)) {
 		if (LADSPA_IS_HINT_DEFAULT_MINIMUM(prh[port].HintDescriptor)) {
 			ret = prh[port].LowerBound;
 			bounds_given = true;
 			sr_scaling = true;
 		}
-		
+
 		/* FIXME: add support for logarithmic defaults */
-		
+
 		else if (LADSPA_IS_HINT_DEFAULT_LOW(prh[port].HintDescriptor)) {
 			if (LADSPA_IS_HINT_LOGARITHMIC(prh[port].HintDescriptor)) {
 				ret = exp(log(prh[port].LowerBound) * 0.75f + log(prh[port].UpperBound) * 0.25f);
@@ -238,11 +238,11 @@ LadspaPlugin::default_value (uint32_t port)
 			ret = 0.0f;
 		}
 	}
-	
+
 	/* defaults - case 2 */
 	else if (LADSPA_IS_HINT_BOUNDED_BELOW(prh[port].HintDescriptor) &&
 		 !LADSPA_IS_HINT_BOUNDED_ABOVE(prh[port].HintDescriptor)) {
-		
+
 		if (prh[port].LowerBound < 0) {
 			ret = 0.0f;
 		} else {
@@ -252,11 +252,11 @@ LadspaPlugin::default_value (uint32_t port)
 		bounds_given = true;
 		sr_scaling = true;
 	}
-	
+
 	/* defaults - case 3 */
 	else if (!LADSPA_IS_HINT_BOUNDED_BELOW(prh[port].HintDescriptor) &&
 		 LADSPA_IS_HINT_BOUNDED_ABOVE(prh[port].HintDescriptor)) {
-		
+
 		if (prh[port].UpperBound > 0) {
 			ret = 0.0f;
 		} else {
@@ -266,11 +266,11 @@ LadspaPlugin::default_value (uint32_t port)
 		bounds_given = true;
 		sr_scaling = true;
 	}
-	
+
 	/* defaults - case 4 */
 	else if (LADSPA_IS_HINT_BOUNDED_BELOW(prh[port].HintDescriptor) &&
 		 LADSPA_IS_HINT_BOUNDED_ABOVE(prh[port].HintDescriptor)) {
-		
+
 		if (prh[port].LowerBound < 0 && prh[port].UpperBound > 0) {
 			ret = 0.0f;
 		} else if (prh[port].LowerBound < 0 && prh[port].UpperBound < 0) {
@@ -278,12 +278,12 @@ LadspaPlugin::default_value (uint32_t port)
 		} else {
 			ret = prh[port].LowerBound;
 		}
-		bounds_given = true;	
+		bounds_given = true;
 		sr_scaling = true;
 	}
-	
+
 	/* defaults - case 5 */
-		
+
 	if (LADSPA_IS_HINT_SAMPLE_RATE(prh[port].HintDescriptor) && !earlier_hint) {
 		if (bounds_given) {
 			if (sr_scaling) {
@@ -295,7 +295,7 @@ LadspaPlugin::default_value (uint32_t port)
 	}
 
 	return ret;
-}	
+}
 
 void
 LadspaPlugin::set_parameter (uint32_t which, float val)
@@ -309,7 +309,7 @@ LadspaPlugin::set_parameter (uint32_t which, float val)
 			controls[which]->Changed ();
 		}
 #endif
-		
+
 	} else {
 		warning << string_compose (_("illegal parameter number used with plugin \"%1\". This may"
 					     "indicate a change in the plugin design, and presets may be"
@@ -356,7 +356,7 @@ LadspaPlugin::get_state()
 
 	for (uint32_t i = 0; i < parameter_count(); ++i){
 
-		if (LADSPA_IS_PORT_INPUT(port_descriptor (i)) && 
+		if (LADSPA_IS_PORT_INPUT(port_descriptor (i)) &&
 		    LADSPA_IS_PORT_CONTROL(port_descriptor (i))){
 
 			child = new XMLNode("Port");
@@ -428,7 +428,7 @@ LadspaPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& des
 	LADSPA_PortRangeHint prh;
 
 	prh  = port_range_hints()[which];
-	
+
 
 	if (LADSPA_IS_HINT_BOUNDED_BELOW(prh.HintDescriptor)) {
 		desc.min_unbound = false;
@@ -441,7 +441,7 @@ LadspaPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& des
 		desc.min_unbound = true;
 		desc.lower = 0;
 	}
-	
+
 
 	if (LADSPA_IS_HINT_BOUNDED_ABOVE(prh.HintDescriptor)) {
 		desc.max_unbound = false;
@@ -454,7 +454,7 @@ LadspaPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& des
 		desc.max_unbound = true;
 		desc.upper = 4; /* completely arbitrary */
 	}
-	
+
 	if (LADSPA_IS_HINT_INTEGER (prh.HintDescriptor)) {
 		desc.step = 1.0;
 		desc.smallstep = 0.1;
@@ -465,7 +465,7 @@ LadspaPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& des
 		desc.smallstep = delta / 10000.0f;
 		desc.largestep = delta/10.0f;
 	}
-	
+
 	desc.toggled = LADSPA_IS_HINT_TOGGLED (prh.HintDescriptor);
 	desc.logarithmic = LADSPA_IS_HINT_LOGARITHMIC (prh.HintDescriptor);
 	desc.sr_dependent = LADSPA_IS_HINT_SAMPLE_RATE (prh.HintDescriptor);
@@ -506,9 +506,9 @@ LadspaPlugin::automatable () const
 	set<Evoral::Parameter> ret;
 
 	for (uint32_t i = 0; i < parameter_count(); ++i){
-		if (LADSPA_IS_PORT_INPUT(port_descriptor (i)) && 
+		if (LADSPA_IS_PORT_INPUT(port_descriptor (i)) &&
 		    LADSPA_IS_PORT_CONTROL(port_descriptor (i))){
-			
+
 			ret.insert (ret.end(), Evoral::Parameter(PluginAutomation, 0, i));
 		}
 	}
@@ -537,7 +537,7 @@ LadspaPlugin::connect_and_run (BufferSet& bufs,
 			}
 		}
 	}
-	
+
 	run_in_place (nframes);
 	now = get_cycles ();
 	set_cycles ((uint32_t) (now - then));
@@ -602,9 +602,9 @@ LadspaPlugin::latency_compute_run ()
 	/* we need to run the plugin so that it can set its latency
 	   parameter.
 	*/
-	
+
 	activate ();
-	
+
 	uint32_t port_index = 0;
 	uint32_t in_index = 0;
 	uint32_t out_index = 0;
@@ -612,13 +612,13 @@ LadspaPlugin::latency_compute_run ()
 	LADSPA_Data buffer[bufsize];
 
 	memset(buffer,0,sizeof(LADSPA_Data)*bufsize);
-		
+
 	/* Note that we've already required that plugins
 	   be able to handle in-place processing.
 	*/
-	
+
 	port_index = 0;
-	
+
 	while (port_index < parameter_count()) {
 		if (LADSPA_IS_PORT_AUDIO (port_descriptor (port_index))) {
 			if (LADSPA_IS_PORT_INPUT (port_descriptor (port_index))) {
@@ -631,7 +631,7 @@ LadspaPlugin::latency_compute_run ()
 		}
 		port_index++;
 	}
-	
+
 	run_in_place (bufsize);
 	deactivate ();
 }
@@ -656,5 +656,5 @@ LadspaPluginInfo::load (Session& session)
 
 	catch (failed_constructor &err) {
 		return PluginPtr ((Plugin*) 0);
-	}	
+	}
 }

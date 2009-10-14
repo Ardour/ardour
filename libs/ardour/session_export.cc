@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999-2008 Paul Davis 
+    Copyright (C) 1999-2008 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ Session::get_export_handler ()
 	if (!export_handler) {
 		export_handler.reset (new ExportHandler (*this));
 	}
-	
+
 	return export_handler;
 }
 
@@ -54,7 +54,7 @@ Session::get_export_status ()
 	if (!export_status) {
 		export_status.reset (new ExportStatus ());
 	}
-	
+
 	return export_status;
 }
 
@@ -88,7 +88,7 @@ Session::pre_export ()
 	post_export_position = _transport_frame;
 
 	Config->set_slave_source (None);
-	
+
 	_exporting = true;
 	export_status->running = true;
 	export_status->Aborting.connect (sigc::hide_return (sigc::mem_fun (*this, &Session::stop_audio_export)));
@@ -125,7 +125,7 @@ Session::start_audio_export (nframes_t position, bool realtime)
 	*/
 
 	_transport_frame = position;
-	
+
 	_exporting_realtime = realtime;
 	export_status->stop = false;
 
@@ -141,7 +141,7 @@ Session::start_audio_export (nframes_t position, bool realtime)
 	post_transport ();
 
 	/* we are ready to go ... */
-	
+
 	if (!_engine.connected()) {
 		return -1;
 	}
@@ -166,21 +166,21 @@ Session::process_export (nframes_t nframes)
 			stop_audio_export ();
 			return;
 		}
-	
+
 		if (!_exporting_realtime) {
 			/* make sure we've caught up with disk i/o, since
 			we're running faster than realtime c/o JACK.
 			*/
-			
+
 			wait_till_butler_finished ();
 		}
-	
+
 		/* do the usual stuff */
-	
+
 		process_without_events (nframes);
-	
+
 		/* handle export */
-	
+
 		ProcessExport (nframes);
 
 	} catch (ExportFailed e) {
@@ -191,7 +191,7 @@ Session::process_export (nframes_t nframes)
 int
 Session::process_export_fw (nframes_t nframes)
 {
-	process_export (nframes);	
+	process_export (nframes);
 	return 0;
 }
 
@@ -217,7 +217,7 @@ Session::stop_audio_export ()
 	} else {
 		finalize_audio_export ();
 	}
-	
+
 	return 0;
 
 }
@@ -234,7 +234,7 @@ Session::finalize_audio_export ()
 	}
 
 	/* Clean up */
-	
+
 	ProcessExport.clear();
 	ExportReadFinished.clear();
 	export_freewheel_connection.disconnect();

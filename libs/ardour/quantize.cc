@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004 Paul Davis 
+    Copyright (C) 2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,9 +40,9 @@ using namespace ARDOUR;
  * 0.25 = quantize to beats/4, etc.
  */
 
-Quantize::Quantize (Session& s, QuantizeType /* type */, 
+Quantize::Quantize (Session& s, QuantizeType /* type */,
 		    bool snap_start, bool snap_end,
-		    double start_grid, double end_grid, 
+		    double start_grid, double end_grid,
 		    float strength, float swing, float threshold)
 	: session (s)
 	, _snap_start (snap_start)
@@ -70,35 +70,35 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model, std::vector<Evoral::S
 		even = false;
 
 		for (Evoral::Sequence<MidiModel::TimeType>::Notes::iterator i = (*s).begin(); i != (*s).end(); ++i) {
-			
-			double new_start = round ((*i)->time() / _start_grid) * _start_grid; 
+
+			double new_start = round ((*i)->time() / _start_grid) * _start_grid;
 			double new_end = round ((*i)->end_time() / _end_grid) * _end_grid;
 			double delta;
-			
+
 			if (_swing > 0.0 && !even) {
-				
+
 				double next_grid = new_start + _start_grid;
-				
+
 				/* find a spot 2/3 (* swing factor) of the way between the grid point
 				   we would put this note at, and the nominal position of the next note.
 				*/
-				
+
 				new_start = new_start + (2.0/3.0 * _swing * (next_grid - new_start));
-				
+
 			} else if (_swing < 0.0 && !even) {
-				
+
 				double prev_grid = new_start - _start_grid;
-				
+
 				/* find a spot 2/3 (* swing factor) of the way between the grid point
 				   we would put this note at, and the nominal position of the previous note.
 				*/
-				
+
 				new_start = new_start - (2.0/3.0 * _swing * (new_start - prev_grid));
-				
+
 			}
-			
+
 			delta = new_start - (*i)->time();
-			
+
 			if (fabs (delta) >= _threshold) {
 				if (_snap_start) {
 					delta *= _strength;
@@ -106,21 +106,21 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model, std::vector<Evoral::S
 						     (*i)->time() + delta);
 				}
 			}
-			
+
 			if (_snap_end) {
 				delta = new_end - (*i)->end_time();
-				
+
 				if (fabs (delta) >= _threshold) {
 					double new_dur = new_end - new_start;
-					
+
 					if (new_dur == 0.0) {
 						new_dur = _end_grid;
 					}
-					
+
 					cmd->change ((*i), MidiModel::DiffCommand::Length, new_dur);
 				}
 			}
-			
+
 			even = !even;
 		}
 	}

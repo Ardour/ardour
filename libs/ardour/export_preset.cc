@@ -37,7 +37,7 @@ ExportPreset::ExportPreset (string filename, Session & s) :
 		if ((prop = root->property ("name"))) {
 			set_name (prop->value());
 		}
-		
+
 		XMLNode * instant_xml = get_instant_xml ();
 		if (instant_xml) {
 			XMLNode * instant_copy = new XMLNode (*instant_xml);
@@ -56,7 +56,7 @@ ExportPreset::set_name (string const & name)
 {
 	_name = name;
 
-	XMLNode * node;	
+	XMLNode * node;
 	if ((node = global.root())) {
 		node->add_property ("name", name);
 	}
@@ -84,7 +84,7 @@ ExportPreset::set_global_state (XMLNode & state)
 {
 	delete global.root ();
 	global.set_root (&state);
-	
+
 	set_id (_id.to_s());
 	set_name (_name);
 }
@@ -94,7 +94,7 @@ ExportPreset::set_local_state (XMLNode & state)
 {
 	delete local;
 	local = &state;
-	
+
 	set_id (_id.to_s());
 	set_name (_name);
 }
@@ -119,7 +119,7 @@ XMLNode *
 ExportPreset::get_instant_xml () const
 {
 	XMLNode * instant_xml;
-	
+
 	if ((instant_xml = session.instant_xml ("ExportPresets"))) {
 		XMLNodeList children = instant_xml->children ("ExportPreset");
 		for (XMLNodeList::iterator it = children.begin(); it != children.end(); ++it) {
@@ -129,7 +129,7 @@ ExportPreset::get_instant_xml () const
 			}
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -139,9 +139,9 @@ ExportPreset::save_instant_xml () const
 	if (!local) { return; }
 
 	/* First remove old, then add new */
-	
+
 	remove_instant_xml ();
-	
+
 	XMLNode * instant_xml;
 	if ((instant_xml = session.instant_xml ("ExportPresets"))) {
 		instant_xml->add_child_copy (*local);

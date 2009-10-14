@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 	Written by Dave Robillard, 2006
 
     This program is free software; you can redistribute it and/or modify
@@ -60,7 +60,7 @@ SMFSource::SMFSource (Session& s, const ustring& path, bool embedded, Source::Fl
 	if (init(_name, false)) {
 		throw failed_constructor ();
 	}
-	
+
 	if (create(path)) {
 		throw failed_constructor ();
 	}
@@ -78,11 +78,11 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 	if (set_state(node)) {
 		throw failed_constructor ();
 	}
-	
+
 	if (init(_name, true)) {
 		throw failed_constructor ();
 	}
-	
+
 	if (open(_path)) {
 		throw failed_constructor ();
 	}
@@ -113,7 +113,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t sour
 	uint8_t* ev_buffer  = 0;
 
 	size_t scratch_size = 0; // keep track of scratch to minimize reallocs
-	
+
 	BeatsFramesConverter converter(_session, source_start);
 
 	const uint64_t start_ticks = (uint64_t)(converter.from(start) * ppqn());
@@ -130,7 +130,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t sour
 			time += ev_delta_t; // accumulate delta time
 		}
 	}
-	
+
 	_smf_last_read_end = start + duration;
 
 	while (true) {
@@ -138,13 +138,13 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t sour
 		if (ret == -1) { // EOF
 			break;
 		}
-		
+
 		time += ev_delta_t; // accumulate delta time
 
 		if (ret == 0) { // meta-event (skipped, just accumulate time)
 			continue;
 		}
-		
+
 		ev_type = EventTypeMap::instance().midi_event_type(ev_buffer[0]);
 
 #if 0
@@ -159,7 +159,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t sour
 		const sframes_t ev_frame_time = converter.to(time / (double)ppqn()) + stamp_offset;
 
 #if 0
-		cerr << " frames = " << ev_frame_time 
+		cerr << " frames = " << ev_frame_time
 		     << " w/offset = " << ev_frame_time - negative_stamp_offset
 		     << endl;
 #endif
@@ -178,7 +178,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t sour
 		}
 		ev_size = scratch_size; // ensure read_event only allocates if necessary
 	}
-	
+
 	return duration;
 }
 
@@ -187,14 +187,14 @@ nframes_t
 SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, sframes_t position, nframes_t duration)
 {
 	_write_data_count = 0;
-		
+
 	nframes_t         time;
 	Evoral::EventType type;
 	uint32_t          size;
 
 	size_t   buf_capacity = 4;
 	uint8_t* buf          = (uint8_t*)malloc(buf_capacity);
-	
+
 	if (_model && ! _model->writing()) {
 		_model->start_write();
 	}
@@ -223,10 +223,10 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, sframes_t position
 			cerr << "ERROR: Read time/size but not buffer, corrupt MIDI ring buffer" << endl;
 			break;
 		}
-		
+
 		assert(time >= position);
 		time -= position;
-		
+
 		ev.set(buf, size, time);
 		ev.set_event_type(EventTypeMap::instance().midi_event_type(ev.buffer()[0]));
 		if (!(ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex())) {
@@ -234,7 +234,7 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, sframes_t position
 					<< std::hex << int(ev.buffer()[0]) << endl;
 			continue;
 		}
-		
+
 		append_event_unlocked_frames(ev, position);
 	}
 
@@ -249,7 +249,7 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, sframes_t position
 
 	return duration;
 }
-		
+
 
 /** Append an event with a timestamp in beats (double) */
 void
@@ -260,20 +260,20 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 	}
 
 	/*printf("SMFSource: %s - append_event_unlocked_beats time = %lf, size = %u, data = ",
-			name().c_str(), ev.time(), ev.size()); 
+			name().c_str(), ev.time(), ev.size());
 	for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
-	
+
 	assert(ev.time() >= 0);
 	if (ev.time() < _last_ev_time_beats) {
 		cerr << "SMFSource: Warning: Skipping event with non-monotonic time" << endl;
 		return;
 	}
-	
+
 	_length_beats = max(_length_beats, ev.time());
-	
+
 	const double delta_time_beats   = ev.time() - _last_ev_time_beats;
 	const uint32_t delta_time_ticks = (uint32_t)lrint(delta_time_beats * (double)ppqn());
-	
+
 	Evoral::SMF::append_event_delta(delta_time_ticks, ev.size(), ev.buffer());
 	_last_ev_time_beats = ev.time();
 
@@ -293,18 +293,18 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, sfr
 	}
 
 	/*printf("SMFSource: %s - append_event_unlocked_frames time = %u, size = %u, data = ",
-			name().c_str(), ev.time(), ev.size()); 
+			name().c_str(), ev.time(), ev.size());
 	for (size_t i=0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
-	
+
 	if (ev.time() < _last_ev_time_frames) {
 		cerr << "SMFSource: Warning: Skipping event with non-monotonic time" << endl;
 		return;
 	}
-	
+
 	BeatsFramesConverter converter(_session, position);
-	
+
 	_length_beats = max(_length_beats, converter.from(ev.time()));
-	
+
 	const sframes_t delta_time_frames = ev.time() - _last_ev_time_frames;
 	const double    delta_time_beats  = converter.from(delta_time_frames);
 	const uint32_t  delta_time_ticks  = (uint32_t)(lrint(delta_time_beats * (double)ppqn()));
@@ -338,7 +338,7 @@ SMFSource::set_state (const XMLNode& node)
 	if (MidiSource::set_state (node)) {
 		return -1;
 	}
-	
+
 	if (FileSource::set_state (node)) {
 		return -1;
 	}
@@ -363,7 +363,7 @@ SMFSource::mark_streaming_write_completed ()
 	if (!writable()) {
 		return;
 	}
-	
+
 	_model->set_edited(false);
 	Evoral::SMF::end_write ();
 }
@@ -380,7 +380,7 @@ SMFSource::load_model (bool lock, bool force_reload)
 	if (_writing) {
 		return;
 	}
-	
+
 	if (lock) {
 		Glib::Mutex::Lock lm (_lock);
 	}
@@ -403,9 +403,9 @@ SMFSource::load_model (bool lock, bool force_reload)
 
 	uint64_t time = 0; /* in SMF ticks */
 	Evoral::Event<double> ev;
-	
+
 	size_t scratch_size = 0; // keep track of scratch and minimize reallocs
-	
+
 	uint32_t delta_t = 0;
 	uint32_t size    = 0;
 	uint8_t* buf     = NULL;
@@ -423,12 +423,12 @@ SMFSource::load_model (bool lock, bool force_reload)
 			scratch_size = ev.size();
 		}
 		ev.size() = scratch_size; // ensure read_event only allocates if necessary
-		
+
 		_length_beats = max(_length_beats, ev.time());
 	}
 
 	set_default_controls_interpolation();
-	
+
 	_model->end_write(false);
 	_model->set_edited(false);
 

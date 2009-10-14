@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999-2002 Paul Davis 
+    Copyright (C) 1999-2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -66,11 +66,11 @@ Session::process (nframes_t nframes)
 	if (non_realtime_work_pending()) {
 		if (!transport_work_requested ()) {
 			post_transport ();
-		} 
-	} 
+		}
+	}
 
 	(this->*process_function) (nframes);
-	
+
 	// the ticker is for sending time information like MidiClock
 	nframes_t transport_frames = transport_frame();
 	BBT_Time  transport_bbt;
@@ -78,9 +78,9 @@ Session::process (nframes_t nframes)
 	SMPTE::Time transport_smpte;
 	smpte_time(transport_frames, transport_smpte);
 	tick (transport_frames, transport_bbt, transport_smpte); /* EMIT SIGNAL */
-	
+
 	SendFeedback (); /* EMIT SIGNAL */
-	
+
 	MIDI::Manager::instance()->cycle_end();
 }
 
@@ -112,14 +112,14 @@ Session::no_roll (nframes_t nframes)
 	}
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		
+
 		if ((*i)->is_hidden()) {
 			continue;
 		}
-		
+
 		(*i)->set_pending_declick (declick);
-		
-		if ((*i)->no_roll (nframes, _transport_frame, end_frame, non_realtime_work_pending(), 
+
+		if ((*i)->no_roll (nframes, _transport_frame, end_frame, non_realtime_work_pending(),
 				   actively_recording(), declick)) {
 			error << string_compose(_("Session: error in no roll for %1"), (*i)->name()) << endmsg;
 			ret = -1;
@@ -172,7 +172,7 @@ Session::process_routes (nframes_t nframes)
 
 			stop_transport ();
 			return -1;
-		} 
+		}
 	}
 
 	return 0;
@@ -190,7 +190,7 @@ Session::silent_process_routes (nframes_t nframes)
 		/* force a declick out */
 		declick = -1;
 	}
-	
+
 	const nframes_t start_frame = _transport_frame;
 	const nframes_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
 
@@ -203,7 +203,7 @@ Session::silent_process_routes (nframes_t nframes)
 		}
 
 		if ((ret = (*i)->silent_roll (nframes, start_frame, end_frame, record_active, rec_monitors)) < 0) {
-			
+
 			/* we have to do this here. Route::roll() for an AudioTrack will have called AudioDiskstream::process(),
 			   and the DS will expect AudioDiskstream::commit() to be called. but we're aborting from that
 			   call path, so make sure we release any outstanding locks here before we return failure.
@@ -216,7 +216,7 @@ Session::silent_process_routes (nframes_t nframes)
 
 			stop_transport ();
 			return -1;
-		} 
+		}
 	}
 
 	return 0;
@@ -235,7 +235,7 @@ Session::commit_diskstreams (nframes_t nframes, bool &needs_butler)
 		if ((*i)->hidden()) {
 			continue;
 		}
-		
+
 		/* force all diskstreams not handled by a Route to call do their stuff.
 		   Note: the diskstreams that were handled by a route will just return zero
 		   from this call, because they know they were processed. So in fact, this
@@ -250,7 +250,7 @@ Session::commit_diskstreams (nframes_t nframes, bool &needs_butler)
 		} else if (dret < 0) {
 			(*i)->recover();
 		}
-		
+
 		pworst = min (pworst, (*i)->playback_buffer_load());
 		cworst = min (cworst, (*i)->capture_buffer_load());
 	}
@@ -280,7 +280,7 @@ Session::process_with_events (nframes_t nframes)
 	bool           session_needs_butler = false;
 	nframes_t      stop_limit;
 	long           frames_moved;
-	
+
 	/* make sure the auditioner is silent */
 
 	if (auditioner) {
@@ -295,7 +295,7 @@ Session::process_with_events (nframes_t nframes)
 
 	/* if we are not in the middle of a state change,
 	   and there are immediate events queued up,
-	   process them. 
+	   process them.
 	*/
 
 	while (!non_realtime_work_pending() && !immediate_events.empty()) {
@@ -324,7 +324,7 @@ Session::process_with_events (nframes_t nframes)
 
 	if (_transport_speed == 1.0) {
 		frames_moved = (long) nframes;
-	} else {		
+	} else {
 		interpolation.set_target_speed (fabs(_target_transport_speed));
 		interpolation.set_speed (fabs(_transport_speed));
 		frames_moved = (long) interpolation.interpolate (0, nframes, 0, 0);
@@ -335,23 +335,23 @@ Session::process_with_events (nframes_t nframes)
 	{
 		Event* this_event;
 		Events::iterator the_next_one;
-		
+
 		if (!process_can_proceed()) {
 			_silent = true;
 			return;
 		}
-		
+
 		if (!_exporting && _slave) {
 			if (!follow_slave (nframes)) {
 				return;
 			}
-		} 
+		}
 
 		if (_transport_speed == 0) {
 			no_roll (nframes);
 			return;
 		}
-	
+
 		if (!_exporting) {
 			send_midi_time_code_for_cycle (nframes);
 		}
@@ -370,14 +370,14 @@ Session::process_with_events (nframes_t nframes)
 		if (maybe_stop (stop_limit)) {
 			no_roll (nframes);
 			return;
-		} 
+		}
 
 		this_event = *next_event;
 		the_next_one = next_event;
 		++the_next_one;
 
 		/* yes folks, here it is, the actual loop where we really truly
-		   process some audio 
+		   process some audio
 		*/
 
 		while (nframes) {
@@ -390,12 +390,12 @@ Session::process_with_events (nframes_t nframes)
 				/* this isn't quite right for reverse play */
 				frames_moved = (long) (this_event->action_frame - _transport_frame);
 				this_nframes = (nframes_t) abs( floor(frames_moved / _transport_speed) );
-			} 
+			}
 
 			if (this_nframes) {
-				
+
 				click (_transport_frame, this_nframes);
-				
+
 				/* now process frames between now and the first event in this block */
 				prepare_diskstreams ();
 
@@ -403,11 +403,11 @@ Session::process_with_events (nframes_t nframes)
 					fail_roll (nframes);
 					return;
 				}
-				
+
 				commit_diskstreams (this_nframes, session_needs_butler);
 
 				nframes -= this_nframes;
-				
+
 				if (frames_moved < 0) {
 					decrement_transport_position (-frames_moved);
 				} else {
@@ -419,9 +419,9 @@ Session::process_with_events (nframes_t nframes)
 			}
 
 			_engine.split_cycle (this_nframes);
-			
+
 			/* now handle this event and all others scheduled for the same time */
-			
+
 			while (this_event && this_event->action_frame == _transport_frame) {
 				process_event (this_event);
 
@@ -431,7 +431,7 @@ Session::process_with_events (nframes_t nframes)
 					this_event = *the_next_one;
 					++the_next_one;
 				}
-			} 
+			}
 
 			/* if an event left our state changing, do the right thing */
 
@@ -442,7 +442,7 @@ Session::process_with_events (nframes_t nframes)
 
 			/* this is necessary to handle the case of seamless looping */
 			end_frame = _transport_frame + (nframes_t) floor (nframes * _transport_speed);
-			
+
 		}
 
 		set_next_event ();
@@ -488,7 +488,7 @@ Session::follow_slave (nframes_t nframes)
 		Config->set_slave_source (None);
 		goto noroll;
 	}
-	
+
 	_slave->speed_and_position (slave_speed, slave_transport_frame);
 
 	if (!_slave->locked()) {
@@ -509,13 +509,13 @@ Session::follow_slave (nframes_t nframes)
 
 	if (_slave->is_always_synced() || config.get_timecode_source_is_synced()) {
 
-		/* if the TC source is synced, then we assume that its 
+		/* if the TC source is synced, then we assume that its
 		   speed is binary: 0.0 or 1.0
 		*/
 
 		if (slave_speed != 0.0f) {
 			slave_speed = 1.0f;
-		} 
+		}
 
 	} else {
 
@@ -526,17 +526,17 @@ Session::follow_slave (nframes_t nframes)
 
 		calculate_moving_average_of_slave_delta(dir, this_delta);
 	}
-	
+
 	track_slave_state(slave_speed, slave_transport_frame, this_delta, starting);
 
 	if (slave_state == Running && !_slave->is_always_synced() && !config.get_timecode_source_is_synced()) {
 
 		if (_transport_speed != 0.0f) {
-			
-			/* 
-			   note that average_dir is +1 or -1 
+
+			/*
+			   note that average_dir is +1 or -1
 			*/
-			
+
 			float delta;
 
 			#ifdef USE_MOVING_AVERAGE_OF_SLAVE
@@ -553,7 +553,7 @@ Session::follow_slave (nframes_t nframes)
 			#endif
 
 			float adjusted_speed = slave_speed + (delta /  float(_current_frame_rate));
-			
+
 			if (_slave->give_slave_full_control_over_transport_speed()) {
 				request_transport_speed(slave_speed);
 			} else {
@@ -567,23 +567,23 @@ Session::follow_slave (nframes_t nframes)
 					 << endl;
 				#endif
 			}
-			
+
 			if (abs(average_slave_delta) > (long) _slave->resolution()) {
 				cerr << "average slave delta greater than slave resolution, going to silent motion\n";
 				goto silent_motion;
 			}
 		}
-	} 
-	
+	}
+
 	#ifdef DEBUG_SLAVES
 	if (slave_speed != 0.0)
 	cerr << "delta = " << (int) (dir * this_delta)
-		 << " speed = " << slave_speed 
-		 << " ts = " << _transport_speed 
-		 << " M@ "<< slave_transport_frame << " S@ " << _transport_frame 
-		 << " avgdelta = " << average_slave_delta 
+		 << " speed = " << slave_speed
+		 << " ts = " << _transport_speed
+		 << " M@ "<< slave_transport_frame << " S@ " << _transport_frame
+		 << " avgdelta = " << average_slave_delta
 		 << endl;
-	#endif	
+	#endif
 
 	if (!starting && !non_realtime_work_pending()) {
 		/* speed is set, we're locked, and good to go */
@@ -591,15 +591,15 @@ Session::follow_slave (nframes_t nframes)
 	}
 
   silent_motion:
-	#ifdef DEBUG_SLAVES	
+	#ifdef DEBUG_SLAVES
 	cerr << "reached silent_motion:" <<endl;
 	#endif
-	
+
 	follow_slave_silently (nframes, slave_speed);
-	
+
   noroll:
 	/* don't move at all */
-	#ifdef DEBUG_SLAVES	
+	#ifdef DEBUG_SLAVES
 	cerr << "reached no_roll:" <<endl;
 	#endif
 	no_roll (nframes);
@@ -617,7 +617,7 @@ Session::calculate_moving_average_of_slave_delta(int dir, nframes_t this_delta)
 	if (delta_accumulator_cnt != 0 || this_delta < _current_frame_rate) {
 		delta_accumulator[delta_accumulator_cnt++] = long(dir) * long(this_delta);
 	}
-	
+
 	if (have_first_delta_accumulator) {
 		average_slave_delta = 0L;
 		for (int i = 0; i < delta_accumulator_size; ++i) {
@@ -635,8 +635,8 @@ Session::calculate_moving_average_of_slave_delta(int dir, nframes_t this_delta)
 
 void
 Session::track_slave_state(
-		float slave_speed, 
-		nframes_t slave_transport_frame, 
+		float slave_speed,
+		nframes_t slave_transport_frame,
 		nframes_t this_delta,
 		bool starting)
 {
@@ -681,7 +681,7 @@ Session::track_slave_state(
 
 		#ifdef DEBUG_SLAVES
 			cerr << "waiting at " << slave_transport_frame << endl;
-		#endif			
+		#endif
 			if (slave_transport_frame >= slave_wait_end) {
 #ifdef DEBUG_SLAVES
 				cerr << "\tstart at " << _transport_frame << endl;
@@ -692,7 +692,7 @@ Session::track_slave_state(
 				nframes_t frame_delta = slave_transport_frame - _transport_frame;
 
 				boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-				
+
 				for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 					if (!(*i)->can_internal_playback_seek (frame_delta)) {
 						ok = false;
@@ -705,7 +705,7 @@ Session::track_slave_state(
 						(*i)->internal_playback_seek (frame_delta);
 					}
 					_transport_frame += frame_delta;
-				       
+
 				} else {
 					cerr << "cannot micro-seek\n";
 					/* XXX what? */
@@ -716,14 +716,14 @@ Session::track_slave_state(
 				this_delta = 0;
 			}
 		}
-		
+
 		if (slave_state == Running && _transport_speed == 0.0f) {
-			
+
         #ifdef DEBUG_SLAVES
 			cerr << "slave starts transport\n";
         #endif
 			start_transport ();
-		} 
+		}
 
 	} else { // slave_speed is 0
 
@@ -732,15 +732,15 @@ Session::track_slave_state(
 		if (_transport_speed != 0.0f) {
 
          #ifdef DEBUG_SLAVES
-			cerr << "slave stops transport: " << slave_speed << " frame: " << slave_transport_frame 
+			cerr << "slave stops transport: " << slave_speed << " frame: " << slave_transport_frame
 			     << " tf = " << _transport_frame << endl;
          #endif
-			
+
 			stop_transport();
 		}
 
 		if (slave_transport_frame != _transport_frame) {
-        #ifdef DEBUG_SLAVES			
+        #ifdef DEBUG_SLAVES
 			cerr << "slave stopped, move to " << slave_transport_frame << endl;
         #endif
 			force_locate (slave_transport_frame, false);
@@ -760,7 +760,7 @@ Session::follow_slave_silently (nframes_t nframes, float slave_speed)
 		*/
 
 		bool need_butler;
-		
+
 		prepare_diskstreams ();
 		silent_process_routes (nframes);
 		commit_diskstreams (nframes, need_butler);
@@ -768,17 +768,17 @@ Session::follow_slave_silently (nframes_t nframes, float slave_speed)
 		if (need_butler) {
 			summon_butler ();
 		}
-		
+
 		int32_t frames_moved = (int32_t) floor (_transport_speed * nframes);
-		
+
 		if (frames_moved < 0) {
 			decrement_transport_position (-frames_moved);
 		} else {
 			increment_transport_position (frames_moved);
 		}
-		
+
 		nframes_t stop_limit;
-		
+
 		if (actively_recording()) {
 			stop_limit = max_frames;
 		} else {
@@ -809,13 +809,13 @@ Session::process_without_events (nframes_t nframes)
 		if (!follow_slave (nframes)) {
 			return;
 		}
-	} 
+	}
 
 	if (_transport_speed == 0) {
 		fail_roll (nframes);
 		return;
 	}
-		
+
 	if (!_exporting) {
 		send_midi_time_code_for_cycle (nframes);
 	}
@@ -829,11 +829,11 @@ Session::process_without_events (nframes_t nframes)
 			stop_limit = max_frames;
 		}
 	}
-		
+
 	if (maybe_stop (stop_limit)) {
 		fail_roll (nframes);
 		return;
-	} 
+	}
 
 	if (maybe_sync_start (nframes)) {
 		return;
@@ -842,10 +842,10 @@ Session::process_without_events (nframes_t nframes)
 	click (_transport_frame, nframes);
 
 	prepare_diskstreams ();
-	
+
 	if (_transport_speed == 1.0) {
 		frames_moved = (long) nframes;
-	} else {		
+	} else {
 		interpolation.set_target_speed (fabs(_target_transport_speed));
 		interpolation.set_speed (fabs(_transport_speed));
 		frames_moved = (long) interpolation.interpolate (0, nframes, 0, 0);
@@ -887,10 +887,10 @@ Session::process_audition (nframes_t nframes)
 	}
 
 	/* run the auditioner, and if it says we need butler service, ask for it */
-	
+
 	if (auditioner->play_audition (nframes) > 0) {
 		summon_butler ();
-	} 
+	}
 
 	/* handle pending events */
 
@@ -900,7 +900,7 @@ Session::process_audition (nframes_t nframes)
 
 	/* if we are not in the middle of a state change,
 	   and there are immediate events queued up,
-	   process them. 
+	   process them.
 	*/
 
 	while (!non_realtime_work_pending() && !immediate_events.empty()) {
@@ -935,15 +935,15 @@ Session::maybe_sync_start (nframes_t& nframes)
 		nframes -= sync_offset;
 		Port::increment_port_offset (sync_offset);
 		waiting_for_sync_offset = false;
-		
+
 		if (nframes == 0) {
 			return true; // done, nothing left to process
 		}
-		
+
 	} else {
 
 		/* sync offset point is not within this process()
-		   cycle, so just generate silence. and don't bother 
+		   cycle, so just generate silence. and don't bother
 		   with any fancy stuff here, just the minimal silence.
 		*/
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	double wx, wy;
 	nframes64_t xdelta;
 	int direction = ev->direction;
-	
+
 	Gnome::Canvas::Item* item = track_canvas->get_item_at(ev->x, ev->y);
 	InteractiveItem* interactive_item = dynamic_cast<InteractiveItem*>(item);
 	if (interactive_item) {
@@ -77,9 +77,9 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	case GDK_SCROLL_UP:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			//if (ev->state == GDK_CONTROL_MASK) {
-			/* XXX 
+			/* XXX
 			   the ev->x will be out of step with the canvas
-			   if we're in mid zoom, so we have to get the damn mouse 
+			   if we're in mid zoom, so we have to get the damn mouse
 			   pointer again
 			*/
 			track_canvas->get_pointer (x, y);
@@ -89,7 +89,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			event.type = GDK_BUTTON_RELEASE;
 			event.button.x = wx;
 			event.button.y = wy;
-			
+
 			nframes64_t where = event_frame (&event, 0, 0);
 			temporal_zoom_to_frame (false, where);
 			return true;
@@ -124,7 +124,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			event.type = GDK_BUTTON_RELEASE;
 			event.button.x = wx;
 			event.button.y = wy;
-			
+
 			nframes64_t where = event_frame (&event, 0, 0);
 			temporal_zoom_to_frame (true, where);
 			return true;
@@ -147,7 +147,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 			scroll_tracks_down_line ();
 			return true;
 		}
-		break;	
+		break;
 
 	case GDK_SCROLL_LEFT:
 		xdelta = (current_page_frames() / 8);
@@ -226,7 +226,7 @@ bool
 Editor::typed_event (ArdourCanvas::Item* item, GdkEvent *event, ItemType type)
 {
 	gint ret = FALSE;
-	
+
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
@@ -304,7 +304,7 @@ bool
 Editor::canvas_stream_view_event (GdkEvent *event, ArdourCanvas::Item* item, RouteTimeAxisView *tv)
 {
 	bool ret = FALSE;
-	
+
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
@@ -406,11 +406,11 @@ Editor::canvas_fade_in_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRe
 
 	default:
 		break;
-		
+
 	}
 
 	/* proxy for the regionview */
-	
+
 	return canvas_region_view_event (event, rv->get_canvas_group(), rv);
 }
 
@@ -418,7 +418,7 @@ bool
 Editor::canvas_fade_in_handle_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRegionView *rv)
 {
 	bool ret = false;
-	
+
 	if (!rv->sensitive()) {
 		return false;
 	}
@@ -485,11 +485,11 @@ Editor::canvas_fade_out_event (GdkEvent *event, ArdourCanvas::Item* item, AudioR
 
 	default:
 		break;
-		
+
 	}
 
 	/* proxy for the regionview */
-	
+
 	return canvas_region_view_event (event, rv->get_canvas_group(), rv);
 }
 
@@ -497,7 +497,7 @@ bool
 Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item, AudioRegionView *rv)
 {
 	bool ret = false;
-	
+
 	if (!rv->sensitive()) {
 		return false;
 	}
@@ -553,7 +553,7 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 		clicked_axisview = &clicked_crossfadeview->get_time_axis_view();
 		if (event->button.button == 3) {
 			return button_press_handler (item, event, CrossfadeViewItem);
-		} 
+		}
 		break;
 
 	case GDK_BUTTON_RELEASE:
@@ -565,7 +565,7 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 
 	default:
 		break;
-		
+
 	}
 
 	/* XXX do not forward double clicks */
@@ -573,13 +573,13 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 	if (event->type == GDK_2BUTTON_PRESS) {
 		return false;
 	}
-	
+
 	/* proxy for an underlying regionview */
 
 	/* XXX really need to check if we are in the name highlight,
 	   and proxy to that when required.
 	*/
-	
+
 	TimeAxisView& tv (xfv->get_time_axis_view());
 	AudioTimeAxisView* atv;
 
@@ -589,26 +589,26 @@ Editor::canvas_crossfade_view_event (GdkEvent* event, ArdourCanvas::Item* item, 
 
 			boost::shared_ptr<AudioPlaylist> pl;
 			if ((pl = boost::dynamic_pointer_cast<AudioPlaylist> (atv->get_diskstream()->playlist())) != 0) {
-				
+
 				Playlist::RegionList* rl = pl->regions_at (event_frame (event));
 				if (!rl->empty()) {
-				
+
 					if (atv->layer_display() == Overlaid) {
-						
+
 						/* we're in overlaid mode; proxy to the uppermost region view */
-						
+
 						DescendingRegionLayerSorter cmp;
 						rl->sort (cmp);
-						
+
 						RegionView* rv = atv->view()->find_view (rl->front());
-						
+
 						delete rl;
-						
+
 						/* proxy */
 						return canvas_region_view_event (event, rv->get_canvas_group(), rv);
 
 					} else {
-					
+
 						/* we're in stacked mode; proxy to the region view under the mouse */
 
 						/* XXX: FIXME: this is an evil hack; it assumes that any event for which
@@ -692,7 +692,7 @@ bool
 Editor::canvas_selection_rect_event (GdkEvent *event, ArdourCanvas::Item* item, SelectionRect* rect)
 {
 	bool ret = false;
-	
+
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
@@ -718,7 +718,7 @@ Editor::canvas_selection_rect_event (GdkEvent *event, ArdourCanvas::Item* item, 
 	default:
 		break;
 	}
-			
+
 	return ret;
 }
 
@@ -751,7 +751,7 @@ Editor::canvas_selection_start_trim_event (GdkEvent *event, ArdourCanvas::Item* 
 	default:
 		break;
 	}
-			
+
 	return ret;
 }
 
@@ -784,7 +784,7 @@ Editor::canvas_selection_end_trim_event (GdkEvent *event, ArdourCanvas::Item* it
 	default:
 		break;
 	}
-			
+
 	return ret;
 }
 
@@ -1012,7 +1012,7 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const & /*c*/, 
 		double px;
 		double py;
 		nframes64_t const pos = event_frame (&event, &px, &py);
-	
+
 		std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py);
 		if (tv.first == 0) {
 			return true;
@@ -1027,20 +1027,20 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const & /*c*/, 
 
 		boost::shared_ptr<Region> region_copy = RegionFactory::create (region);
 
-		if (boost::dynamic_pointer_cast<AudioRegion> (region_copy) != 0 && 
+		if (boost::dynamic_pointer_cast<AudioRegion> (region_copy) != 0 &&
 		    dynamic_cast<AudioTimeAxisView*> (tv.first) == 0) {
 
 			/* audio -> non-audio */
 			return true;
 		}
 
-		if (boost::dynamic_pointer_cast<MidiRegion> (region_copy) == 0 && 
+		if (boost::dynamic_pointer_cast<MidiRegion> (region_copy) == 0 &&
 		    dynamic_cast<MidiTimeAxisView*> (tv.first) != 0) {
 
 			/* MIDI -> non-MIDI */
 			return true;
 		}
-		
+
 		_drag = new RegionInsertDrag (this, region_copy, rtav, pos);
 		_drag->start_grab (&event);
 	}

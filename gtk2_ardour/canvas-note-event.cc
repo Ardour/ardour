@@ -32,9 +32,9 @@ namespace Canvas {
 
 /// dividing the hue circle in 16 parts, hand adjusted for equal look, courtesy Thorsten Wilms
 const uint32_t CanvasNoteEvent::midi_channel_colors[16] = {
-	  0xd32d2dff,  0xd36b2dff,  0xd3972dff,  0xd3d12dff,  
-	  0xa0d32dff,  0x7dd32dff,  0x2dd45eff,  0x2dd3c4ff,  
-	  0x2da5d3ff,  0x2d6fd3ff,  0x432dd3ff,  0x662dd3ff,  
+	  0xd32d2dff,  0xd36b2dff,  0xd3972dff,  0xd3d12dff,
+	  0xa0d32dff,  0x7dd32dff,  0x2dd45eff,  0x2dd3c4ff,
+	  0x2da5d3ff,  0x2d6fd3ff,  0x432dd3ff,  0x662dd3ff,
 	  0x832dd3ff,  0xa92dd3ff,  0xd32dbfff,  0xd32d67ff
 	};
 
@@ -51,13 +51,13 @@ CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item,
 {
 }
 
-CanvasNoteEvent::~CanvasNoteEvent() 
-{ 
+CanvasNoteEvent::~CanvasNoteEvent()
+{
 	if (_text) {
 		_text->hide();
 		delete _text;
 	}
-	
+
 	delete _channel_selector_widget;
 }
 
@@ -100,7 +100,7 @@ CanvasNoteEvent::hide_velocity()
 	}
 }
 
-void 
+void
 CanvasNoteEvent::on_channel_selection_change(uint16_t selection)
 {
 	// make note change its color if its channel is not marked active
@@ -116,7 +116,7 @@ CanvasNoteEvent::on_channel_selection_change(uint16_t selection)
 	_item->show();
 }
 
-void 
+void
 CanvasNoteEvent::on_channel_change(uint8_t channel)
 {
 	_region.note_selected(this, true);
@@ -134,11 +134,11 @@ CanvasNoteEvent::show_channel_selector(void)
 		_channel_selector->channel_selected.connect(
 			sigc::mem_fun(this, &CanvasNoteEvent::on_channel_change));
 
-		_channel_selector_widget = new Widget(*(_item->property_parent()), 
-				x1(), 
-				y2() + 2, 
+		_channel_selector_widget = new Widget(*(_item->property_parent()),
+				x1(),
+				y2() + 2,
 				(Gtk::Widget &) *_channel_selector);
-		
+
 		_channel_selector_widget->hide();
 		_channel_selector_widget->property_height() = 100;
 		_channel_selector_widget->property_width() = 100;
@@ -179,35 +179,35 @@ CanvasNoteEvent::selected(bool selected)
 
 #define SCALE_USHORT_TO_UINT8_T(x) ((x) / 257)
 
-uint32_t 
+uint32_t
 CanvasNoteEvent::base_color()
 {
 	using namespace ARDOUR;
-	
+
 	ColorMode mode = _region.color_mode();
-	
+
 	const uint8_t min_opacity = 15;
 	uint8_t       opacity = std::max(min_opacity, uint8_t(_note->velocity() + _note->velocity()));
-	
+
 	switch (mode) {
 	case TrackColor:
 		{
 			Gdk::Color color = _region.midi_stream_view()->get_region_color();
 			return RGBA_TO_UINT(
-					SCALE_USHORT_TO_UINT8_T(color.get_red()), 
-					SCALE_USHORT_TO_UINT8_T(color.get_green()), 
-					SCALE_USHORT_TO_UINT8_T(color.get_blue()), 
+					SCALE_USHORT_TO_UINT8_T(color.get_red()),
+					SCALE_USHORT_TO_UINT8_T(color.get_green()),
+					SCALE_USHORT_TO_UINT8_T(color.get_blue()),
 					opacity);
 		}
-		
+
 	case ChannelColors:
-		return UINT_RGBA_CHANGE_A(CanvasNoteEvent::midi_channel_colors[_note->channel()], 
+		return UINT_RGBA_CHANGE_A(CanvasNoteEvent::midi_channel_colors[_note->channel()],
 				                  opacity);
-		
+
 	default:
 		return meter_style_fill_color(_note->velocity());
 	};
-	
+
 	return 0;
 }
 

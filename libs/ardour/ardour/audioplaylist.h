@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ class AudioPlaylist : public ARDOUR::Playlist
 {
   public:
 	typedef std::list<boost::shared_ptr<Crossfade> > Crossfades;
-	
+
    public:
 	AudioPlaylist (Session&, const XMLNode&, bool hidden = false);
 	AudioPlaylist (Session&, std::string name, bool hidden = false);
@@ -52,7 +52,7 @@ class AudioPlaylist : public ARDOUR::Playlist
 
 	int set_state (const XMLNode&);
 
-	sigc::signal<void,boost::shared_ptr<Crossfade> > NewCrossfade; 
+	sigc::signal<void,boost::shared_ptr<Crossfade> > NewCrossfade;
 
 	void foreach_crossfade (sigc::slot<void, boost::shared_ptr<Crossfade> >);
 	void crossfades_at (nframes_t frame, Crossfades&);
@@ -66,7 +66,7 @@ class AudioPlaylist : public ARDOUR::Playlist
 	void flush_notifications ();
 
 	void finalize_split_region (boost::shared_ptr<Region> orig, boost::shared_ptr<Region> left, boost::shared_ptr<Region> right);
-	
+
         void refresh_dependents (boost::shared_ptr<Region> region);
         void check_dependents (boost::shared_ptr<Region> region, bool norefresh);
         void remove_dependents (boost::shared_ptr<Region> region);

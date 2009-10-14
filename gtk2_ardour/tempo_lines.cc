@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2007 Paul Davis 
+    Copyright (C) 2002-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 using namespace std;
 
 #define MAX_CACHED_LINES 128
-	
+
 TempoLines::TempoLines(ArdourCanvas::Canvas& canvas, ArdourCanvas::Group* group, double screen_height)
 	: _canvas(canvas)
 	, _group(group)
@@ -82,7 +82,7 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 	uint32_t beats = 0;
 	uint32_t bars = 0;
 	uint32_t color;
-	
+
 	const size_t needed = points.size();
 
 	_canvas.get_scroll_region (x1, y1, x2, who_cares);
@@ -106,7 +106,7 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 	const double needed_right = xpos;
 
 	i = points.begin();
-	
+
 	xpos = rint(((nframes64_t)(*i).frame) / (double)frames_per_unit);
 	const double needed_left = xpos;
 
@@ -116,7 +116,7 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 	Lines::iterator li = left;
 	if (li != _lines.end())
 		line = li->second;
-	
+
 	// Tempo map hasn't changed and we're entirely within a clean
 	// range, don't need to do anything.  Yay.
 	if (needed_left >= _clean_left && needed_right <= _clean_right) {
@@ -128,7 +128,7 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 
 	bool inserted_last_time = true;
 	bool invalidated = false;
-	
+
 	for (i = points.begin(); i != points.end(); ++i) {
 
 		switch ((*i).type) {
@@ -144,23 +144,23 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 					break; /* only draw beat lines if the gaps between beats are large. */
 				}
 			}
-			
+
 			xpos = rint(((nframes64_t)(*i).frame) / (double)frames_per_unit);
 
 			if (inserted_last_time && !_lines.empty()) {
 				li = _lines.lower_bound(xpos); // first line >= xpos
 			}
-				
+
 			line = (li != _lines.end()) ? li->second : NULL;
 			assert(!line || line->property_x1() == li->first);
-				
+
 			Lines::iterator next = li;
 			if (next != _lines.end())
 				++next;
 
 			exhausted = (next == _lines.end());
-			
-			// Hooray, line is perfect			
+
+			// Hooray, line is perfect
 			if (line && line->property_x1() == xpos) {
 				if (li != _lines.end())
 					++li;
@@ -172,7 +172,7 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 			} else if (!exhausted) {
 				Lines::iterator steal = _lines.end();
 				--steal;
-				
+
 				// Steal from the right
 				if (left->first > needed_left && li != steal && steal->first > needed_right) {
 					//cout << "*** STEALING FROM RIGHT" << endl;
@@ -240,7 +240,7 @@ TempoLines::draw (ARDOUR::TempoMap::BBTPointList& points, double frames_per_unit
 				_lines.insert(make_pair(xpos, line));
 				inserted_last_time = true; // search next time
 				invalidated = true;
-				
+
 				// Shift clean range right
 				_clean_left = max(_clean_left, steal->first);
 				_clean_right = max(_clean_right, xpos);

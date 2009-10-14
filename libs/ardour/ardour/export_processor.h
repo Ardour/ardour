@@ -43,22 +43,22 @@ class ExportProcessor
 {
   private:
 	/* Typedefs for utility processors */
-	
+
 	typedef boost::shared_ptr<SampleRateConverter> SRConverterPtr;
 	typedef boost::shared_ptr<PeakReader> PReaderPtr;
 	typedef boost::shared_ptr<Normalizer> NormalizerPtr;
 	typedef boost::shared_ptr<ExportTempFile> TempFilePtr;
-	
+
 	typedef GraphSink<float> FloatSink;
 	typedef boost::shared_ptr<FloatSink> FloatSinkPtr;
 	typedef std::vector<FloatSinkPtr> FloatSinkVect;
-	
+
 	typedef boost::shared_ptr<ExportFilename> FilenamePtr;
 	typedef boost::shared_ptr<ExportFormatSpecification const> FormatPtr;
-	
+
 	typedef boost::shared_ptr<ExportFileWriter> FileWriterPtr;
 	typedef std::list<FileWriterPtr> FileWriterList;
-	
+
   public:
 
 	ExportProcessor (Session & session);
@@ -70,27 +70,27 @@ class ExportProcessor
 	 * @return 0 on success
 	 */
 	int prepare (FormatPtr format, FilenamePtr fname, uint32_t chans, bool split = false, nframes_t start = 0);
-	
+
 	/// Process data
 	/** @param frames frames to process @return frames written **/
 	nframes_t process (float * data, nframes_t frames);
-	
+
 	/** should be called after all data is given to process **/
 	void prepare_post_processors ();
-	
+
 	void write_files ();
-	
+
 	static sigc::signal<void, Glib::ustring> WritingFile;
-	
+
   private:
-	
+
 	void reset ();
-	
+
 	Session &                       session;
 	boost::shared_ptr<ExportStatus> status;
-	
+
 	/* these are initalized in prepare() */
-	
+
 	FilenamePtr      filename;
 	NormalizerPtr    normalizer;
 	SRConverterPtr   src;
@@ -98,15 +98,15 @@ class ExportProcessor
 	TempFilePtr      temp_file;
 	FloatSinkVect    file_sinks;
 	FileWriterList   writer_list;
-	
+
 	/* general info */
-	
+
 	uint32_t         channels;
 	nframes_t        blocksize;
 	nframes_t        frame_rate;
-	
+
 	/* Processing */
-	
+
 	bool             tag;
 	bool             broadcast_info;
 	bool             split_files;
@@ -115,9 +115,9 @@ class ExportProcessor
 	bool             trim_end;
 	nframes_t        silence_beginning;
 	nframes_t        silence_end;
-	
+
 	/* Progress info */
-	
+
 	nframes_t        temp_file_position;
 	nframes_t        temp_file_length;
 };

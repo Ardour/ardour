@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ Editor::add_external_audio_action (ImportMode mode_hint)
 		msg.run ();
 		return;
 	}
-	
+
 	if (sfbrowser == 0) {
 		sfbrowser = new SoundFileOmega (*this, _("Add existing media"), session, 0, true, mode_hint);
 	} else {
@@ -101,12 +101,12 @@ Editor::external_audio_dialog ()
 		msg.run ();
 		return;
 	}
-	
+
 	track_cnt = 0;
 
 	for (TrackSelection::iterator x = selection->tracks.begin(); x != selection->tracks.end(); ++x) {
 		AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(*x);
-		
+
 		if (!atv) {
 			continue;
 		} else if (atv->is_audio_track()) {
@@ -247,7 +247,7 @@ Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
 			dialog.add_button("Import", 1);
 			dialog.add_button("Cancel", 2);
 		}
-		
+
 		//dialog.add_button("Skip all", 4); // All or rest?
 
 		dialog.show();
@@ -265,60 +265,60 @@ Editor::get_nth_selected_audio_track (int nth) const
 {
 	AudioTimeAxisView* atv;
 	TrackSelection::iterator x;
-	
+
 	for (x = selection->tracks.begin(); nth > 0 && x != selection->tracks.end(); ++x) {
 
 		atv = dynamic_cast<AudioTimeAxisView*>(*x);
-		
+
 		if (!atv) {
 			continue;
 		} else if (atv->is_audio_track()) {
 			--nth;
 		}
 	}
-	
+
 	if (x == selection->tracks.end()) {
 		atv = dynamic_cast<AudioTimeAxisView*>(selection->tracks.back());
 	} else {
 		atv = dynamic_cast<AudioTimeAxisView*>(*x);
 	}
-	
+
 	if (!atv || !atv->is_audio_track()) {
 		return boost::shared_ptr<AudioTrack>();
 	}
-	
+
 	return atv->audio_track();
-}	
+}
 
 boost::shared_ptr<MidiTrack>
 Editor::get_nth_selected_midi_track (int nth) const
 {
 	MidiTimeAxisView* mtv;
 	TrackSelection::iterator x;
-	
+
 	for (x = selection->tracks.begin(); nth > 0 && x != selection->tracks.end(); ++x) {
 
 		mtv = dynamic_cast<MidiTimeAxisView*>(*x);
-		
+
 		if (!mtv) {
 			continue;
 		} else if (mtv->is_midi_track()) {
 			--nth;
 		}
 	}
-	
+
 	if (x == selection->tracks.end()) {
 		mtv = dynamic_cast<MidiTimeAxisView*>(selection->tracks.back());
 	} else {
 		mtv = dynamic_cast<MidiTimeAxisView*>(*x);
 	}
-	
+
 	if (!mtv || !mtv->is_midi_track()) {
 		return boost::shared_ptr<MidiTrack>();
 	}
-	
+
 	return mtv->midi_track();
-}	
+}
 
 void
 Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mode, SrcQuality quality, nframes64_t& pos)
@@ -360,23 +360,23 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 				to_import.push_back (*a);
 			}
 		}
-		
+
 		bool ok = true;
 
 		switch (chns) {
 		case Editing::ImportDistinctFiles:
-			
+
 			if (mode == Editing::ImportToTrack) {
 				track = get_nth_selected_audio_track (nth++);
 			}
-				
+
 			ok = (import_sndfiles (to_import, mode, quality, pos, 1, -1, track, false, to_import.size()) == 0);
 			break;
-				
+
 		case Editing::ImportDistinctChannels:
 			ok = (import_sndfiles (to_import, mode, quality, pos, -1, -1, track, false, to_import.size()) == 0);
 			break;
-				
+
 		case Editing::ImportSerializeFiles:
 			ok = (import_sndfiles (to_import, mode, quality, pos, 1, 1, track, false, to_import.size()) == 0);
 			break;
@@ -416,7 +416,7 @@ Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode
 			}
 		}
 		break;
-		
+
 	case Editing::ImportDistinctChannels:
 		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
 
@@ -449,15 +449,15 @@ Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode
 	}
 
 	ok = true;
-	
-  out:	
+
+  out:
 	if (ok) {
 		session->save_state ("");
 	}
 }
 
 int
-Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality quality, nframes64_t& pos, 
+Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality quality, nframes64_t& pos,
 			 int target_regions, int target_tracks, boost::shared_ptr<Track> track, bool replace, uint32_t total)
 {
 	WindowTitle title = string_compose (_("importing %1"), paths.front());
@@ -483,9 +483,9 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 	import_status.target_regions = target_regions;
 	import_status.track = track;
 	import_status.replace = replace;
-	interthread_progress_connection = Glib::signal_timeout().connect 
+	interthread_progress_connection = Glib::signal_timeout().connect
 		(bind (mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 500);
-	
+
 	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 	gdk_flush ();
 
@@ -496,7 +496,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 
 	pthread_create_and_store ("import", &import_status.thread, 0, _import_thread, this);
 	pthread_detach (import_status.thread);
-	
+
 	while (!import_status.done && !import_status.cancel) {
 		gtk_main_iteration ();
 	}
@@ -504,20 +504,20 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 	interthread_progress_window->hide ();
 	import_status.done = true;
 	interthread_progress_connection.disconnect ();
-	
+
 	if (!import_status.cancel && !import_status.sources.empty()) {
-		if (add_sources (import_status.paths, 
-				 import_status.sources, 
-				 import_status.pos, 
-				 import_status.mode, 
-				 import_status.target_regions, 
-				 import_status.target_tracks, 
+		if (add_sources (import_status.paths,
+				 import_status.sources,
+				 import_status.pos,
+				 import_status.mode,
+				 import_status.target_regions,
+				 import_status.target_tracks,
 				 import_status.track, false) == 0) {
 			session->save_state ("");
 		}
-		
+
 		/* update position from results */
-		
+
 		pos = import_status.pos;
 	}
 
@@ -546,12 +546,12 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 		ustring path = *p;
 
 		/* lets see if we can link it into the session */
-		
+
 		sys::path tmp = session->session_directory().sound_path() / Glib::path_get_basename(path);
 		linked_path = tmp.to_string();
 
 		path_to_use = linked_path;
-		
+
 		if (link (path.c_str(), linked_path.c_str()) == 0) {
 
 			/* there are many reasons why link(2) might have failed.
@@ -559,7 +559,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 			   session sound dir that will protect against
 			   unlinking of the original path. nice.
 			*/
-			
+
 			path = linked_path;
 			path_to_use = Glib::path_get_basename (path);
 
@@ -578,31 +578,31 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 				}
 			}
 		}
-		
+
 		/* note that we temporarily truncated _id at the colon */
-		
+
 		string error_msg;
 
 		if (!AudioFileSource::get_soundfile_info (path, finfo, error_msg)) {
 			error << string_compose(_("Editor: cannot open file \"%1\", (%2)"), path, error_msg ) << endmsg;
 			goto out;
 		}
-		
+
 		if (check_sample_rate  && (finfo.samplerate != (int) session->frame_rate())) {
 			vector<string> choices;
-			
+
 			if (multifile) {
 				choices.push_back (_("Cancel entire import"));
 				choices.push_back (_("Don't embed it"));
 				choices.push_back (_("Embed all without questions"));
-			
+
 				Gtkmm2ext::Choice rate_choice (
-					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), 
+					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"),
 							short_path (path, 40)),
 					choices, false);
-				
+
 				int resx = rate_choice.run ();
-				
+
 				switch (resx) {
 				case 0: /* stop a multi-file import */
 					ret = -2;
@@ -622,13 +622,13 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 			} else {
 				choices.push_back (_("Cancel"));
 				choices.push_back (_("Embed it anyway"));
-			
+
 				Gtkmm2ext::Choice rate_choice (
 					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
 					choices, false);
-				
+
 				int resx = rate_choice.run ();
-				
+
 				switch (resx) {
 				case 0: /* don't import */
 					ret = -1;
@@ -641,7 +641,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 				}
 			}
 		}
-		
+
 		track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 
 		for (int n = 0; n < finfo.channels; ++n) {
@@ -665,13 +665,13 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 				}
 
 				sources.push_back(source);
-			} 
-			
+			}
+
 			catch (failed_constructor& err) {
 				error << string_compose(_("could not open %1"), path) << endmsg;
 				goto out;
 			}
-			
+
 			ARDOUR_UI::instance()->flush_pending ();
 		}
 	}
@@ -688,7 +688,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 }
 
 int
-Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64_t& pos, ImportMode mode, 
+Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64_t& pos, ImportMode mode,
 		     int target_regions, int target_tracks, boost::shared_ptr<Track>& track, bool /*add_channel_suffix*/)
 {
 	vector<boost::shared_ptr<Region> > regions;
@@ -696,7 +696,7 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 	uint32_t input_chan = 0;
 	uint32_t output_chan = 0;
 	bool use_timestamp;
-	
+
 	use_timestamp = (pos == -1);
 
 	if (use_timestamp) {
@@ -716,17 +716,17 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 		/* take all the sources we have and package them up as a region */
 
 		region_name = region_name_from_path (paths.front(), (sources.size() > 1), false);
-		
+
 		boost::shared_ptr<Region> r = RegionFactory::create (sources, 0, sources[0]->length(pos), region_name, 0,
 								     Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External));
 
 		if (use_timestamp && boost::dynamic_pointer_cast<AudioRegion>(r)) {
 			boost::dynamic_pointer_cast<AudioRegion>(r)->special_set_position(sources[0]->natural_position());
      		}
- 
+
 		regions.push_back (r);
 
-		
+
 	} else if (target_regions == -1 || target_regions > 1) {
 
 		/* take each source and create a region for each one */
@@ -739,16 +739,16 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 
 			just_one.clear ();
 			just_one.push_back (*x);
-			
+
 			region_name = region_name_from_path ((*x)->path(), false, false, sources.size(), n);
 
 			boost::shared_ptr<Region> r = RegionFactory::create (just_one, 0, (*x)->length(pos), region_name, 0,
 									     Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External));
-			
+
 			if (use_timestamp && boost::dynamic_pointer_cast<AudioRegion>(r)) {
 				boost::dynamic_pointer_cast<AudioRegion>(r)->special_set_position((*x)->natural_position());
 			}
-			
+
 			regions.push_back (r);
 		}
 	}
@@ -779,7 +779,7 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 			track.reset ();
 		} else {
 			pos += (*r)->length();
-		} 
+		}
 	}
 
 	/* setup peak file building in another thread */
@@ -790,9 +790,9 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 
 	return 0;
 }
-	
+
 int
-Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t in_chans, uint32_t out_chans, nframes64_t& pos, 
+Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t in_chans, uint32_t out_chans, nframes64_t& pos,
 				  ImportMode mode, boost::shared_ptr<Track>& existing_track)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(region);
@@ -802,7 +802,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 	case ImportAsRegion:
 		/* relax, its been done */
 		break;
-		
+
 	case ImportToTrack:
 	{
 		if (!existing_track) {
@@ -829,7 +829,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 	}
 
 	case ImportAsTrack:
-	{ 
+	{
 		if (!existing_track) {
 			if (ar) {
 				list<boost::shared_ptr<AudioTrack> > at (session->new_audio_track (in_chans, out_chans, Normal, 0, 1));
@@ -923,9 +923,9 @@ Editor::import_progress_timeout (void */*arg*/)
 	if (reset) {
 
 		/* the window is now visible, speed up the updates */
-		
+
 		interthread_progress_connection.disconnect ();
-		interthread_progress_connection = Glib::signal_timeout().connect 
+		interthread_progress_connection = Glib::signal_timeout().connect
 			(bind (mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 100);
 		return false;
 	} else {

@@ -21,7 +21,7 @@
  * Modified by the GTK+ Team and others 1997-1999.  See the AUTHORS
  * file for a list of people on the GTK+ Team.  See the ChangeLog
  * files for a list of changes.  These files are distributed with
- * GTK+ at ftp://ftp.gtk.org/pub/gtk/. 
+ * GTK+ at ftp://ftp.gtk.org/pub/gtk/.
  */
 
 /* modified by andreas meyer <hexx3000@gmx.de> */
@@ -47,7 +47,7 @@ static void gtk_custom_hruler_draw_pos (GtkCustomRuler * ruler);
 GType gtk_custom_hruler_get_type (void)
 {
 	static GType hruler_type = 0;
-	
+
 	if (!hruler_type) {
 		static const GTypeInfo hruler_info =
 			{
@@ -62,11 +62,11 @@ GType gtk_custom_hruler_get_type (void)
 				(GInstanceInitFunc) gtk_custom_hruler_init,
 				NULL /* value_table */
 			};
-		
+
 		hruler_type = g_type_register_static (gtk_custom_ruler_get_type(), "GtkCustomHRuler",
 						      &hruler_info, 0);
 	}
-	
+
 	return hruler_type;
 }
 
@@ -153,7 +153,7 @@ gtk_custom_hruler_draw_ticks (GtkCustomRuler * ruler)
 
 	gc = widget->style->fg_gc[GTK_STATE_NORMAL];
 	bg_gc = widget->style->bg_gc[GTK_STATE_NORMAL];
-	
+
 	layout = gtk_widget_create_pango_layout (widget, "012456789");
 	pango_layout_get_extents (layout, &ink_rect, &logical_rect);
 
@@ -166,13 +166,13 @@ gtk_custom_hruler_draw_ticks (GtkCustomRuler * ruler)
 		       GTK_STATE_NORMAL, GTK_SHADOW_NONE,
 		       NULL, widget, "custom_hruler", 0, 0, widget->allocation.width, widget->allocation.height);
 
-	gdk_draw_line (ruler->backing_store, gc, 0, widget->allocation.height - 1, 
+	gdk_draw_line (ruler->backing_store, gc, 0, widget->allocation.height - 1,
 		       widget->allocation.width, widget->allocation.height - 1);
 
 	if ((ruler->upper - ruler->lower) == 0) {
 		return;
 	}
-	
+
 	/* we have to assume a fixed width font here */
 
 	max_chars = widget->allocation.width / 12; // XXX FIX ME: pixel with of the char `8'
@@ -197,10 +197,10 @@ gtk_custom_hruler_draw_ticks (GtkCustomRuler * ruler)
 			gdk_draw_line (ruler->backing_store, gc, pos, height, pos, height - 3);
 			break;
 		}
-		
+
 		pango_layout_set_text (layout, marks[i].label, -1);
 		pango_layout_get_extents (layout, &logical_rect, NULL);
-		
+
 		gtk_paint_layout (widget->style,
 				  ruler->backing_store,
 				  GTK_WIDGET_STATE (widget),
@@ -210,14 +210,14 @@ gtk_custom_hruler_draw_ticks (GtkCustomRuler * ruler)
 				  "hruler",
 				  pos + 2, ythickness + PANGO_PIXELS (logical_rect.y - digit_offset),
 				  layout);
-		
+
 		g_free (marks[i].label);
 	}
-	
+
 	if (nmarks) {
 		g_free (marks);
 	}
-	
+
 	g_object_unref (layout);
 }
 
@@ -254,7 +254,7 @@ gtk_custom_hruler_draw_pos (GtkCustomRuler * ruler)
 				gdk_draw_pixmap (ruler->widget.window,
 						 ruler->non_gr_exp_gc,
 						 ruler->backing_store, ruler->xsrc, ruler->ysrc, ruler->xsrc, ruler->ysrc, bs_width, bs_height);
-			
+
 			increment = (gfloat) width / (ruler->upper - ruler->lower);
 			x = ROUND ((ruler->position - ruler->lower) * increment) + (xthickness - bs_width) / 2 - 1;
 			y = (height + bs_height) / 2 + ythickness;

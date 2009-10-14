@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 
 #include "marker.h"
 
-struct MarkerSelection : public std::list<Marker*> 
+struct MarkerSelection : public std::list<Marker*>
 {
     void range (nframes64_t& start, nframes64_t& end);
 };

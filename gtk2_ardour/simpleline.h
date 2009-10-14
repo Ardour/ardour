@@ -6,7 +6,7 @@
 
 
 /* line.h
- * 
+ *
  * Copyright (C) 1998 EMC Capital Management Inc.
  * Developed by Havoc Pennington <hp@pobox.com>
  *
@@ -109,7 +109,7 @@ public:
   explicit SimpleLine(Group& parent);
   SimpleLine(Group& parent, double x1, double y1, double x2, double y2);
 
-  /** 
+  /**
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -117,7 +117,7 @@ public:
    */
   Glib::PropertyProxy<double> property_x1() ;
 
-/** 
+/**
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -125,7 +125,7 @@ public:
    */
   Glib::PropertyProxy_ReadOnly<double> property_x1() const;
 
-  /** 
+  /**
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -133,7 +133,7 @@ public:
    */
   Glib::PropertyProxy<double> property_x2() ;
 
-/** 
+/**
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -142,7 +142,7 @@ public:
   Glib::PropertyProxy_ReadOnly<double> property_x2() const;
 
 
-  /** 
+  /**
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -150,7 +150,7 @@ public:
    */
   Glib::PropertyProxy<double> property_y1() ;
 
-/** 
+/**
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -158,7 +158,7 @@ public:
    */
   Glib::PropertyProxy_ReadOnly<double> property_y1() const;
 
-  /** 
+  /**
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -166,7 +166,7 @@ public:
    */
   Glib::PropertyProxy<double> property_y2() ;
 
-/** 
+/**
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -174,7 +174,7 @@ public:
    */
   Glib::PropertyProxy_ReadOnly<double> property_y2() const;
 
-  /** 
+  /**
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when
@@ -182,7 +182,7 @@ public:
    */
   Glib::PropertyProxy<guint> property_color_rgba() ;
 
-/** 
+/**
    *
    * You rarely need to use properties because there are get_ and set_ methods for almost all of them.
    * @return A PropertyProxy that allows you to get or set the property of the value, or receive notification when

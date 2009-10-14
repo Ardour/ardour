@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class TimeAxisView;
 /** Abstract base class for dragging of things within the editor */
 class Drag
 {
-	
+
 public:
 	Drag (Editor *, ArdourCanvas::Item *);
 	virtual ~Drag () {}
@@ -116,7 +116,7 @@ public:
 
 protected:
 	nframes64_t adjusted_current_frame (GdkEvent *) const;
-	
+
 	Editor* _editor; ///< our editor
 	ArdourCanvas::Item* _item; ///< our item
 	nframes64_t _pointer_frame_offset; ///< offset from the mouse's position for the drag
@@ -138,7 +138,7 @@ protected:
 	bool _was_rolling; ///< true if the session was rolling before the drag started, otherwise false
 
 private:
-	
+
 	bool _ending; ///< true if end_grab is in progress, otherwise false
 	bool _had_movement; ///< true if movement has occurred, otherwise false
 	bool _move_threshold_passed; ///< true if the move threshold has been passed, otherwise false
@@ -153,7 +153,7 @@ public:
 	virtual ~RegionDrag () {}
 
 protected:
-	
+
 	RegionView* _primary; ///< the view that was clicked on (or whatever) to start the drag
 	std::list<RegionView*> _views; ///< all views that are being dragged
 
@@ -166,7 +166,7 @@ private:
 class RegionMotionDrag : public RegionDrag
 {
 public:
-	
+
 	RegionMotionDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, bool);
 	virtual ~RegionMotionDrag () {}
 
@@ -177,13 +177,13 @@ public:
 protected:
 	struct TimeAxisViewSummary {
 		TimeAxisViewSummary () : height_list(512) {}
-		
+
 		std::bitset<512> tracks;
 		std::vector<int32_t> height_list;
 		int visible_y_low;
 		int visible_y_high;
 	};
-	
+
 	void copy_regions (GdkEvent *);
 	bool y_movement_disallowed (int, int, int, TimeAxisViewSummary const &) const;
 	std::map<RegionView*, std::pair<RouteTimeAxisView*, int> > find_time_axis_views_and_layers ();
@@ -195,7 +195,7 @@ protected:
 
 	TimeAxisViewSummary get_time_axis_view_summary ();
 	virtual bool x_move_allowed () const = 0;
-	
+
 	TimeAxisView* _dest_trackview;
 	ARDOUR::layer_t _dest_layer;
 	bool check_possible (RouteTimeAxisView **, ARDOUR::layer_t *);
@@ -215,7 +215,7 @@ public:
 	virtual void start_grab (GdkEvent *, Gdk::Cursor *);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
-	
+
 	bool apply_move_threshold () const {
 		return true;
 	}
@@ -233,7 +233,7 @@ public:
 	RegionInsertDrag (Editor *, boost::shared_ptr<ARDOUR::Region>, RouteTimeAxisView*, nframes64_t);
 
 	void finished (GdkEvent *, bool);
-	
+
 private:
 	bool x_move_allowed () const;
 };
@@ -281,7 +281,7 @@ private:
 
 class NoteDrag : public Drag
 {
-  public:	
+  public:
 	NoteDrag (Editor*, ArdourCanvas::Item*);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
@@ -383,7 +383,7 @@ public:
 private:
 	EditorCursor* _cursor; ///< cursor being dragged
 	bool _stop; ///< true to stop the transport on starting the drag, otherwise false
-	
+
 };
 
 /** Region fade-in drag */
@@ -421,7 +421,7 @@ public:
 
 private:
 	void update_item (ARDOUR::Location *);
-	
+
 	Marker* _marker; ///< marker being dragged
 	std::list<ARDOUR::Location*> _copied_locations;
 	ArdourCanvas::Line* _line;
@@ -441,7 +441,7 @@ public:
 	bool active (Editing::MouseMode m);
 
 private:
-	
+
 	ControlPoint* _point;
 	double _cumulative_x_drag;
 	double _cumulative_y_drag;
@@ -457,7 +457,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
-	
+
 	bool active (Editing::MouseMode) {
 		return true;
 	}
@@ -497,7 +497,7 @@ class ScrubDrag : public Drag
 {
 public:
 	ScrubDrag (Editor *e, ArdourCanvas::Item *i) : Drag (e, i) {}
-	
+
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);

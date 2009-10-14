@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004 Paul Davis 
+    Copyright (C) 2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,8 +63,8 @@ JACK_Slave::ok() const
 	return true;
 }
 
-bool 
-JACK_Slave::speed_and_position (double& sp, nframes_t& position) 
+bool
+JACK_Slave::speed_and_position (double& sp, nframes_t& position)
 {
 	jack_position_t pos;
 	jack_transport_state_t state;

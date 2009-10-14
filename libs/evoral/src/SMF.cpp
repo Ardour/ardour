@@ -2,16 +2,16 @@
  * Copyright (C) 2008 Dave Robillard <http://drobilla.net>
  * Copyright (C) 2000-2008 Paul Davis
  * Author: Hans Baier
- * 
+ *
  * Evoral is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation; either version 2 of the License, or (at your option) any later
  * version.
- * 
+ *
  * Evoral is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
@@ -32,12 +32,12 @@ using namespace std;
 namespace Evoral {
 
 SMF::~SMF()
-{	
+{
 	if (_smf) {
 		smf_delete(_smf);
 		_smf = 0;
 		_smf_track = 0;
-	} 
+	}
 }
 
 uint16_t
@@ -77,10 +77,10 @@ int
 SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 {
 	assert(track >= 1);
-	if (_smf) { 
+	if (_smf) {
 		smf_delete(_smf);
 	}
-	
+
 	_file_path = path;
 	_smf = smf_load(_file_path.c_str());
 	if (_smf == NULL) {
@@ -99,7 +99,7 @@ SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 		_smf_track->next_event_number = 1;
 		_empty = false;
 	}
-	
+
 	return 0;
 }
 
@@ -114,21 +114,21 @@ int
 SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 {
 	assert(track >= 1);
-	if (_smf) { 
+	if (_smf) {
 		smf_delete(_smf);
 	}
-	
+
 	_file_path = path;
 
 	_smf = smf_new();
 	if (smf_set_ppqn(_smf, ppqn) != 0) {
 		throw FileError();
 	}
-	
+
 	if (_smf == NULL) {
 		return -1;
 	}
-	
+
 	for (int i = 0; i < track; ++i) {
 		_smf_track = smf_track_new();
 		assert(_smf_track);
@@ -141,7 +141,7 @@ SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 
 	_smf_track->next_event_number = 0;
 	_empty = true;
-	
+
 	return 0;
 }
 
@@ -182,34 +182,34 @@ int
 SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 {
 	smf_event_t* event;
-	
+
 	assert(delta_t);
 	assert(size);
 	assert(buf);
-	
+
     if ((event = smf_track_get_next_event(_smf_track)) != NULL) {
     	if (smf_event_is_metadata(event)) {
     		return 0;
     	}
     	*delta_t = event->delta_time_pulses;
-    	
+
     	int event_size = event->midi_buffer_length;
     	assert(event_size > 0);
-    		
+
     	// Make sure we have enough scratch buffer
     	if (*size < (unsigned)event_size) {
     		*buf = (uint8_t*)realloc(*buf, event_size);
     	}
     	memcpy(*buf, event->midi_buffer, size_t(event_size));
     	*size = event_size;
-	
+
 		assert(midi_event_is_valid(*buf, *size));
 
 		/* printf("SMF::read_event @ %u: ", *delta_t);
 		for (size_t i = 0; i < *size; ++i) {
 			printf("%X ", (*buf)[i]);
 		} printf("\n") */
-    	
+
     	return event_size;
     } else {
     	return -1;
@@ -222,7 +222,7 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf)
 	if (size == 0) {
 		return;
 	}
-	
+
 	/* printf("SMF::append_event_delta @ %u:", delta_t);
 	for (size_t i = 0; i < size; ++i) {
 		printf("%X ", buf[i]);
@@ -237,7 +237,7 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf)
 
 	event = smf_event_new_from_pointer(buf, size);
 	assert(event != NULL);
-	
+
 	assert(_smf_track);
 	smf_track_add_event_delta_pulses(_smf_track, event, delta_t);
 	_empty = false;
@@ -248,10 +248,10 @@ SMF::begin_write()
 {
 	assert(_smf_track);
 	smf_track_delete(_smf_track);
-	
+
 	_smf_track = smf_track_new();
 	assert(_smf_track);
-	
+
 	smf_add_track(_smf, _smf_track);
 	assert(_smf->number_of_tracks == 1);
 }

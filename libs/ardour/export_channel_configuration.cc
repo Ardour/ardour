@@ -57,21 +57,21 @@ ExportChannelConfiguration::get_state ()
 {
 	XMLNode * root = new XMLNode ("ExportChannelConfiguration");
 	XMLNode * channel;
-	
+
 	root->add_property ("split", get_split() ? "true" : "false");
 	root->add_property ("channels", to_string (get_n_chans(), std::dec));
-	
+
 	uint32_t i = 1;
 	for (ExportChannelConfiguration::ChannelList::const_iterator c_it = channels.begin(); c_it != channels.end(); ++c_it) {
 		channel = root->add_child ("Channel");
 		if (!channel) { continue; }
-		
+
 		channel->add_property ("number", to_string (i, std::dec));
 		(*c_it)->get_state (channel);
-		
+
 		++i;
 	}
-	
+
 	return *root;
 }
 
@@ -79,7 +79,7 @@ int
 ExportChannelConfiguration::set_state (const XMLNode & root)
 {
 	XMLProperty const * prop;
-	
+
 	if ((prop = root.property ("split"))) {
 		set_split (!prop->value().compare ("true"));
 	}
@@ -100,7 +100,7 @@ ExportChannelConfiguration::all_channels_have_ports () const
 	for (ChannelList::const_iterator it = channels.begin(); it != channels.end(); ++it) {
 		if ((*it)->empty ()) { return false; }
 	}
-	
+
 	return true;
 }
 
@@ -110,23 +110,23 @@ ExportChannelConfiguration::write_files (boost::shared_ptr<ExportProcessor> new_
 	if (files_written || writer_thread.running) {
 		return false;
 	}
-	
+
 	files_written = true;
 
 	if (!timespan) {
 		throw ExportFailed (X_("Programming error: No timespan registered to channel configuration when requesting files to be written"));
 	}
-	
+
 	/* Take a local copy of the processor to be used in the thread that is created below */
-	
+
 	processor.reset (new_processor->copy());
-	
+
 	/* Create new thread for post processing */
-	
+
 	pthread_create (&writer_thread.thread, 0, _write_files, &writer_thread);
 	writer_thread.running = true;
 	pthread_detach (writer_thread.thread);
-	
+
 	return true;
 }
 
@@ -139,36 +139,36 @@ ExportChannelConfiguration::write_file ()
 
 	nframes_t frames = 2048; // TODO good block size ?
 	nframes_t frames_read = 0;
-	
+
 	float * channel_buffer = new float [frames];
 	float * file_buffer = new float [channels.size() * frames];
 	uint32_t channel_count = channels.size();
 	uint32_t channel;
-	
+
 	do {
 		if (status->aborted()) { break; }
-	
+
 		channel = 0;
 		for (ChannelList::iterator it = channels.begin(); it != channels.end(); ++it) {
-			
+
 			/* Get channel data */
-			
+
 			frames_read = timespan->get_data (channel_buffer, frames, *it);
-			
+
 			/* Interleave into file buffer */
-			
+
 			for (uint32_t i = 0; i < frames_read; ++i) {
 				file_buffer[channel + (channel_count * i)] = channel_buffer[i];
 			}
-			
+
 			++channel;
 		}
-		
+
 		progress += frames_read;
 		status->progress = (float) progress / timespan_length;
-		
+
 	} while (processor->process (file_buffer, frames_read) > 0);
-	
+
 	delete [] channel_buffer;
 	delete [] file_buffer;
 }
@@ -177,10 +177,10 @@ void *
 ExportChannelConfiguration::_write_files (void *arg)
 {
 	notify_gui_about_thread_creation (pthread_self(), "Export post-processing");
-	
+
 	// cc can be trated like 'this'
 	WriterThread & cc (*((WriterThread *) arg));
-	
+
 	try {
 		for (FileConfigList::iterator it = cc->file_configs.begin(); it != cc->file_configs.end(); ++it) {
 			if (cc->status->aborted()) {
@@ -194,11 +194,11 @@ ExportChannelConfiguration::_write_files (void *arg)
 	} catch (ExportFailed & e) {
 		cc->status->abort (true);
 	}
-	
+
 	cc.running = false;
 	cc->files_written = true;
 	cc->FilesWritten();
-	
+
 	return 0; // avoid compiler warnings
 }
 
@@ -206,7 +206,7 @@ void
 ExportChannelConfiguration::register_with_timespan (TimespanPtr new_timespan)
 {
 	timespan = new_timespan;
-	
+
 	for (ChannelList::iterator it = channels.begin(); it != channels.end(); ++it) {
 		timespan->register_channel (*it);
 	}

@@ -44,11 +44,11 @@ AudiofileTagger::tag_file (string const & filename, SessionMetadata const & meta
 {
 	TagLib::FileRef file (filename.c_str());
 	TagLib::Tag & tag (*file.tag());
-	
+
 	tag_generic (tag, metadata);
-	
+
 	/* FLAC */
-	
+
 	TagLib::FLAC::File * flac_file;
 	if ((flac_file = dynamic_cast<TagLib::FLAC::File *> (file.file()))) {
 		TagLib::Ogg::XiphComment * vorbis_tag;
@@ -58,9 +58,9 @@ AudiofileTagger::tag_file (string const & filename, SessionMetadata const & meta
 			std::cerr << "Could not get Xiph comment for FLAC file!" << std::endl;
 		}
 	}
-	
+
 	/* Ogg */
-	
+
 	TagLib::Ogg::File * ogg_file;
 	if ((ogg_file = dynamic_cast<TagLib::Ogg::File *> (file.file()))) {
 		TagLib::Ogg::XiphComment * vorbis_tag;
@@ -70,7 +70,7 @@ AudiofileTagger::tag_file (string const & filename, SessionMetadata const & meta
 			std::cerr << "Could not get Xiph comment for Ogg file!" << std::endl;
 		}
 	}
-	
+
 	file.save();
 	return true;
 }
@@ -85,7 +85,7 @@ AudiofileTagger::tag_generic (TagLib::Tag & tag, SessionMetadata const & metadat
 	tag.setGenre (TL_STR(metadata.genre()));
 	tag.setYear (metadata.year());
 	tag.setTrack (metadata.track_number());
-	
+
 	return true;
 }
 
@@ -109,7 +109,7 @@ AudiofileTagger::tag_vorbis_comment (TagLib::Ogg::XiphComment & tag, SessionMeta
 	tag.addField ("COMPILATION", TL_STR(metadata.compilation()));
 	tag.addField ("DISCSUBTITLE", TL_STR(metadata.disc_subtitle()));
 	tag.addField ("DISCNUMBER", to_string (metadata.disc_number(), std::dec));
-	
+
 	// No field for total discs or tracks
 
 	return true;

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session& se)
 
 	_hbox.pack_start (_gpm, true, true);
 	set_name ("SendUIFrame");
-	
+
 	_vbox.set_spacing (5);
 	_vbox.set_border_width (5);
 
@@ -52,7 +52,7 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session& se)
 	_vbox.pack_start (_panners, false,false);
 
 	io = manage (new IOSelector (parent, se, s->output()));
-	
+
 	pack_start (_vbox, false, false);
 
 	pack_start (*io, true, true);
@@ -63,7 +63,7 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session& se)
 
 	_send->input()->changed.connect (mem_fun (*this, &SendUI::ins_changed));
 	_send->output()->changed.connect (mem_fun (*this, &SendUI::outs_changed));
-	
+
 	_panners.set_width (Wide);
 	_panners.setup_pan ();
 
@@ -117,7 +117,7 @@ SendUI::fast_update ()
 		_gpm.update_meters ();
 	}
 }
-	
+
 SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session& ss)
 	: ArdourDialog (string("Ardour: send ") + s->name())
 {
@@ -129,7 +129,7 @@ SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session& ss)
 	get_vbox()->pack_start (hpacker);
 
 	set_name ("SendUIWindow");
-	
+
 	going_away_connection = s->GoingAway.connect (
 			mem_fun (*this, &SendUIWindow::send_going_away));
 

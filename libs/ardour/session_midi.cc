@@ -330,7 +330,7 @@ Session::set_trace_midi_input (bool yn, MIDI::Port* port)
 	MIDI::Parser* input_parser;
 
 	cerr << "enabling tracing: " << yn << " for input port " << port->name() << endl;
-	
+
 	if (port) {
 		if ((input_parser = port->input()) != 0) {
 			input_parser->trace (yn, &cout, "input: ");
@@ -354,10 +354,10 @@ Session::set_trace_midi_input (bool yn, MIDI::Port* port)
 				input_parser->trace (yn, &cout, "input: ");
 			}
 		}
-		
-		if (_midi_clock_port 
-			&& _midi_clock_port != _mmc_port 
-			&& _midi_clock_port != _mtc_port 
+
+		if (_midi_clock_port
+			&& _midi_clock_port != _mmc_port
+			&& _midi_clock_port != _mtc_port
 			&& _midi_clock_port != _midi_port) {
 			if ((input_parser = _midi_clock_port->input()) != 0) {
 				input_parser->trace (yn, &cout, "input: ");

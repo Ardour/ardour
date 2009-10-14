@@ -104,7 +104,7 @@ gnome_canvas_simpleline_class_init (GnomeCanvasSimpleLineClass *class)
 
 	gobject_class->set_property = gnome_canvas_simpleline_set_property;
 	gobject_class->get_property = gnome_canvas_simpleline_get_property;
-	
+
 	g_object_class_install_property (gobject_class,
 					 PROP_X1,
 					 g_param_spec_double ("x1",
@@ -113,8 +113,8 @@ gnome_canvas_simpleline_class_init (GnomeCanvasSimpleLineClass *class)
 							      -G_MAXDOUBLE,
 							      G_MAXDOUBLE,
 							      0.0,
-							      G_PARAM_READWRITE));  
-	
+							      G_PARAM_READWRITE));
+
 	g_object_class_install_property (gobject_class,
 					 PROP_Y1,
 					 g_param_spec_double ("y1",
@@ -123,8 +123,8 @@ gnome_canvas_simpleline_class_init (GnomeCanvasSimpleLineClass *class)
 							      -G_MAXDOUBLE,
 							      G_MAXDOUBLE,
 							      0.0,
-							      G_PARAM_READWRITE));  
-	
+							      G_PARAM_READWRITE));
+
 
 	g_object_class_install_property (gobject_class,
 					 PROP_X2,
@@ -134,8 +134,8 @@ gnome_canvas_simpleline_class_init (GnomeCanvasSimpleLineClass *class)
 							      -G_MAXDOUBLE,
 							      G_MAXDOUBLE,
 							      0.0,
-							      G_PARAM_READWRITE));  
-	
+							      G_PARAM_READWRITE));
+
 	g_object_class_install_property (gobject_class,
 					 PROP_Y2,
 					 g_param_spec_double ("y2",
@@ -144,7 +144,7 @@ gnome_canvas_simpleline_class_init (GnomeCanvasSimpleLineClass *class)
 							      -G_MAXDOUBLE,
 							      G_MAXDOUBLE,
 							      0.0,
-							      G_PARAM_READWRITE));  
+							      G_PARAM_READWRITE));
 	g_object_class_install_property (gobject_class,
 					 PROP_COLOR_RGBA,
 					 g_param_spec_uint ("color_rgba",
@@ -153,8 +153,8 @@ gnome_canvas_simpleline_class_init (GnomeCanvasSimpleLineClass *class)
 							    0,
 							    G_MAXUINT,
 							    0,
-							    G_PARAM_READWRITE));  
-	
+							    G_PARAM_READWRITE));
+
 	object_class->destroy = gnome_canvas_simpleline_destroy;
 
 	item_class->update = gnome_canvas_simpleline_update;
@@ -204,7 +204,7 @@ gnome_canvas_simpleline_bounds_world (GnomeCanvasItem *item, int* ix1, int* iy1,
 	i1.y = y1;
 	i2.x = x2;
 	i2.y = y2;
-	
+
 	gnome_canvas_item_i2w_affine (item, i2w);
 	art_affine_point (&w1, &i1, i2w);
 	art_affine_point (&w2, &i2, i2w);
@@ -225,7 +225,7 @@ gnome_canvas_simpleline_bounds_world (GnomeCanvasItem *item, int* ix1, int* iy1,
 	}
 }
 
-static void 
+static void
 gnome_canvas_simpleline_reset_bounds (GnomeCanvasItem *item)
 {
 	int Ix1, Ix2, Iy1, Iy2;
@@ -234,8 +234,8 @@ gnome_canvas_simpleline_reset_bounds (GnomeCanvasItem *item)
 	gnome_canvas_update_bbox (item, Ix1, Iy1, Ix2, Iy2);
 }
 
-/* 
- * CANVAS CALLBACKS 
+/*
+ * CANVAS CALLBACKS
  */
 
 static void
@@ -246,7 +246,7 @@ gnome_canvas_simpleline_set_property (GObject      *object,
 
 {
 	(void) pspec;
-	
+
 	GnomeCanvasSimpleLine *simpleline;
 	int update = FALSE;
 	int bounds_changed = FALSE;
@@ -284,7 +284,7 @@ gnome_canvas_simpleline_set_property (GObject      *object,
 			bounds_changed = TRUE;
 		}
 		break;
-		
+
 	case PROP_COLOR_RGBA:
 		if (simpleline->color != g_value_get_uint(value)) {
 		        simpleline->color = g_value_get_uint(value);
@@ -309,7 +309,7 @@ gnome_canvas_simpleline_get_property (GObject      *object,
 {
         g_return_if_fail (object != NULL);
         g_return_if_fail (GNOME_IS_CANVAS_SIMPLELINE (object));
-	
+
 	GnomeCanvasSimpleLine *line = GNOME_CANVAS_SIMPLELINE (object);
 
 	switch (prop_id) {
@@ -381,13 +381,13 @@ gnome_canvas_simpleline_render (GnomeCanvasItem *item,
 
 	//begin = MAX(simpleline->bbox_ulx,buf->rect.x0);
 	//end = MIN(simpleline->bbox_lrx,buf->rect.x1);
-	
+
 	begin = simpleline->bbox_ulx;
 	end = simpleline->bbox_lrx;
 
 	if (simpleline->color != 0) {
 		if (simpleline->horizontal) {
-			PAINT_HORIZA(buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a, 
+			PAINT_HORIZA(buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a,
 				     begin, end, simpleline->bbox_uly);
 		} else {
 			PAINT_VERTA(buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a,
@@ -442,10 +442,10 @@ gnome_canvas_simpleline_draw (GnomeCanvasItem *item,
 	lrx -= x;
 	lry -= y;
 
-	cairo_set_source_rgba (cr, 
-			       simpleline->r/255.0, 
-			       simpleline->g/255.0, 
-			       simpleline->b/255.0, 
+	cairo_set_source_rgba (cr,
+			       simpleline->r/255.0,
+			       simpleline->g/255.0,
+			       simpleline->b/255.0,
 			       simpleline->a/255.0);
 	cairo_set_line_width (cr, 1);
 	cairo_move_to (cr, ulx+0.5, uly+0.5);
@@ -469,7 +469,7 @@ gnome_canvas_simpleline_point (GnomeCanvasItem *item, double x, double y, int cx
 {
 	(void) cx;
 	(void) cy;
-	
+
 	GnomeCanvasSimpleLine *simpleline;
 	double x1, y1, x2, y2;
 	double dx, dy;
@@ -483,7 +483,7 @@ gnome_canvas_simpleline_point (GnomeCanvasItem *item, double x, double y, int cx
 	gnome_canvas_simpleline_bounds (item, &x1, &y1, &x2, &y2);
 
 	/* Is point inside line */
-	
+
 	if ((x >= x1) && (y >= y1) && (x <= x2) && (y <= y2)) {
 		return 0.0;
 	}

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ public:
 
 	size_t read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes_t offset=0);
 	void dump(std::ostream& dst);
-	
+
 	/** Set the channel filtering mode.
 	 * @param mask If mode is FilterChannels, each bit represents a midi channel:
 	 *     bit 0 = channel 0, bit 1 = channel 1 etc. the read and write methods will only
@@ -67,11 +67,11 @@ public:
 	ChannelMode get_channel_mode() const {
 		return static_cast<ChannelMode>((g_atomic_int_get(&_channel_mask) & 0xFFFF0000) >> 16);
 	}
-	
+
 	uint16_t get_channel_mask() const {
 		return g_atomic_int_get(&_channel_mask) & 0x0000FFFF;
 	}
-	
+
 protected:
 	inline bool is_channel_event(uint8_t event_type_byte) {
 		// mask out channel information
@@ -79,7 +79,7 @@ protected:
 		// midi channel events range from 0x80 to 0xE0
 		return (0x80 <= event_type_byte) && (event_type_byte <= 0xE0);
 	}
-	
+
 private:
 	volatile uint32_t _channel_mask; // 16 bits mode, 16 bits mask
 };

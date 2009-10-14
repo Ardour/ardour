@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 20002 Paul Davis 
+    Copyright (C) 20002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -48,11 +48,11 @@ Session::click (nframes_t start, nframes_t nframes)
 	}
 
 	Glib::RWLock::WriterLock clickm (click_lock, Glib::TRY_LOCK);
-	
+
 	if (!clickm.locked() || _transport_speed != 1.0 || !_clicking || click_data == 0) {
 		_click_io->silence (nframes);
 		return;
-	} 
+	}
 
 	const nframes_t end = start + nframes;
 
@@ -80,11 +80,11 @@ Session::click (nframes_t start, nframes_t nframes)
 		case TempoMap::Bar:
 			if (click_emphasis_data) {
 				clicks.push_back (new Click ((*i).frame, click_emphasis_length, click_emphasis_data));
-			} 
+			}
 			break;
 		}
 	}
-	
+
   run_clicks:
 	memset (buf, 0, sizeof (Sample) * nframes);
 
@@ -98,7 +98,7 @@ Session::click (nframes_t start, nframes_t nframes)
 		clk = *i;
 		next = i;
 		++next;
-	
+
 		if (clk->start < start) {
 			internal_offset = 0;
 		} else {
@@ -106,7 +106,7 @@ Session::click (nframes_t start, nframes_t nframes)
 		}
 
 		if (nframes < internal_offset) {
-		         /* we've just located or something.. 
+		         /* we've just located or something..
 			    effectively going backwards.
 			    lets get the flock out of here */
 		        break;
@@ -126,7 +126,7 @@ Session::click (nframes_t start, nframes_t nframes)
 
 		i = next;
 	}
-	
+
 	_click_io->copy_to_outputs (bufs, DataType::AUDIO, nframes, 0);
 }
 
@@ -139,7 +139,7 @@ Session::setup_click_sounds (int which)
 	clear_clicks();
 
 	if ((which == 0 || which == 1)) {
-		
+
 		if (click_data != default_click) {
 			delete [] click_data;
 			click_data = 0;
@@ -162,22 +162,22 @@ Session::setup_click_sounds (int which)
 				_clicking = false;
 				return;
 			}
-			
+
 			click_data = new Sample[info.frames];
 			click_length = info.frames;
-			
+
 			if (sf_read_float (sndfile, click_data, info.frames) != info.frames) {
-				warning << _("cannot read data from click soundfile") << endmsg;			
+				warning << _("cannot read data from click soundfile") << endmsg;
 				delete click_data;
 				click_data = 0;
 				_clicking = false;
 			}
-			
+
 			sf_close (sndfile);
 
 		}
 	}
-		
+
 	if ((which == 0 || which == -1)) {
 
 		if (click_emphasis_data != default_click_emphasis) {
@@ -198,20 +198,20 @@ Session::setup_click_sounds (int which)
 				warning << string_compose (_("cannot open click emphasis soundfile %1 (%2)"), path, errbuf) << endmsg;
 				return;
 			}
-			
+
 			click_emphasis_data = new Sample[info.frames];
 			click_emphasis_length = info.frames;
-			
+
 			if (sf_read_float (sndfile, click_emphasis_data, info.frames) != info.frames) {
-				warning << _("cannot read data from click emphasis soundfile") << endmsg;			
+				warning << _("cannot read data from click emphasis soundfile") << endmsg;
 				delete click_emphasis_data;
 				click_emphasis_data = 0;
 			}
-			
+
 			sf_close (sndfile);
 		}
 	}
-}		
+}
 
 void
 Session::clear_clicks ()

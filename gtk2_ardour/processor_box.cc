@@ -125,7 +125,7 @@ ProcessorBox::ProcessorBox (Session& sess, PluginSelector &plugsel,
 	RefPtr<TreeSelection> selection = processor_display.get_selection();
 	selection->set_mode (Gtk::SELECTION_MULTIPLE);
 	selection->signal_changed().connect (mem_fun (*this, &ProcessorBox::selection_changed));
-	
+
 	processor_display.set_data ("processorbox", this);
 	processor_display.set_model (model);
 	processor_display.append_column (X_("notshown"), columns.text);
@@ -211,7 +211,7 @@ ProcessorBox::object_drop (const list<boost::shared_ptr<Processor> >& procs, Gtk
 	if (processor_display.get_path_at_pos (x, y, path, column, cellx, celly)) {
 		if ((iter = model->get_iter (path))) {
 			p = (*iter)[columns.processor];
-		} 
+		}
 	}
 
 	for (list<boost::shared_ptr<Processor> >::const_iterator i = procs.begin(); i != procs.end(); ++i) {
@@ -221,7 +221,7 @@ ProcessorBox::object_drop (const list<boost::shared_ptr<Processor> >& procs, Gtk
 		paste_processor_state (nlist, p);
 		delete &state;
 	}
-	
+
 	/* since the treeview doesn't take care of this properly, we have to delete the originals
 	   ourselves.
 	*/
@@ -376,17 +376,17 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 		TreeViewColumn* column;
 		int cellx;
 		int celly;
-		
+
 		processor_display.get_pointer (x, y);
-		
+
 		if (processor_display.get_path_at_pos (x, y, path, column, cellx, celly)) {
 			if ((iter = model->get_iter (path))) {
 				targets.push_back ((*iter)[columns.processor]);
 			}
 		}
 	}
-	
-	
+
+
 	switch (ev->keyval) {
 	case GDK_c:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
@@ -426,7 +426,7 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 		}
 		ret = true;
 		break;
-		
+
 	default:
 		break;
 	}
@@ -516,7 +516,7 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev)
 		} else {
 			_placement = PostFader;
 		}
-		
+
 		show_processor_menu (ev->time);
 		ret = true;
 
@@ -674,7 +674,7 @@ ProcessorBox::choose_send ()
 		return;
 	}
 
-	/* let the user adjust the IO setup before creation. 
+	/* let the user adjust the IO setup before creation.
 
 	   Note: this dialog is NOT modal - we just leave it to run and it will
 	   return when its Finished signal is emitted - typically when the window
@@ -685,7 +685,7 @@ ProcessorBox::choose_send ()
 	ios->show_all ();
 
 	/* keep a reference to the send so it doesn't get deleted while
-	   the IOSelectorWindow is doing its stuff 
+	   the IOSelectorWindow is doing its stuff
 	*/
 	_processor_being_created = send;
 
@@ -843,7 +843,7 @@ ProcessorBox::processor_name (boost::weak_ptr<Processor> weak_processor)
 		name_display = " (";
 	}
 
-	if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0 && 
+	if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0 &&
 	    !boost::dynamic_pointer_cast<InternalSend>(processor)) {
 
 		name_display += '>';
@@ -853,7 +853,7 @@ ProcessorBox::processor_name (boost::weak_ptr<Processor> weak_processor)
 		string::size_type lbracket, rbracket;
 		lbracket = send->name().find ('[');
 		rbracket = send->name().find (']');
-		
+
 		switch (_width) {
 		case Wide:
 			name_display += send->name().substr (lbracket+1, lbracket-rbracket-1);
@@ -1036,7 +1036,7 @@ ProcessorBox::cut_processors (const ProcSelection& to_be_removed)
 			to_cut.push_back (*i);
 		}
 	}
-		
+
 	if (_route->remove_processors (to_cut) != 0) {
 		delete node;
 		no_processor_redisplay = false;
@@ -1123,7 +1123,7 @@ ProcessorBox::delete_dragged_processors (const list<boost::shared_ptr<Processor>
 		if (gui) {
 			static_cast<Gtk::Widget*>(gui)->hide ();
 		}
-		
+
 		_route->remove_processor(*x);
 	}
 
@@ -1216,7 +1216,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 
 		boost::shared_ptr<Processor> p;
 		try {
-			if (type->value() == "meter" || 
+			if (type->value() == "meter" ||
 			    type->value() == "main-outs" ||
 			    type->value() == "amp" ||
 			    type->value() == "intsend" || type->value() == "intreturn") {
@@ -1224,7 +1224,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				continue;
 
 			} else if (type->value() == "send") {
-				
+
 				XMLNode n (**niter);
 				Send::make_unique (n, _session);
 				p.reset (new Send (_session, _route->mute_master(), n));
@@ -1234,7 +1234,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				XMLNode n (**niter);
 				Return::make_unique (n, _session);
 				p.reset (new Return (_session, **niter));
-				
+
 			} else {
 				/* XXX its a bit limiting to assume that everything else
 				   is a plugin.
@@ -1320,7 +1320,7 @@ ProcessorBox::clear_processors ()
 
 	prompt = string_compose (_("Do you really want to remove all processors from %1?\n"
 				   "(this cannot be undone)"), _route->name());
-	
+
 	choices.push_back (_("Cancel"));
 	choices.push_back (_("Yes, remove them all"));
 
@@ -1401,7 +1401,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 			_parent_strip->panner_ui().set_panner (send->panner());
 		}
 #endif
-	
+
 	} else if ((retrn = boost::dynamic_pointer_cast<Return> (processor)) != 0) {
 
 		if (!_session.engine().connected()) {

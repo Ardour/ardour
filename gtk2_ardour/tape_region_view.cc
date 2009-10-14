@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -49,13 +49,13 @@ const TimeAxisViewItem::Visibility TapeAudioRegionView::default_tape_visibility
 		TimeAxisViewItem::HideFrameRight |
 		TimeAxisViewItem::FullWidthNameHighlight);
 
-TapeAudioRegionView::TapeAudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv, 
-					  boost::shared_ptr<AudioRegion> r, 
-					  double spu, 
+TapeAudioRegionView::TapeAudioRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv,
+					  boost::shared_ptr<AudioRegion> r,
+					  double spu,
 					  Gdk::Color const & basic_color)
 
 	: AudioRegionView (parent, tv, r, spu, basic_color, false,
-			   TimeAxisViewItem::Visibility ((r->position() != 0) ? default_tape_visibility : 
+			   TimeAxisViewItem::Visibility ((r->position() != 0) ? default_tape_visibility :
 							 TimeAxisViewItem::Visibility (default_tape_visibility|TimeAxisViewItem::HideFrameLeft)))
 {
 }
@@ -70,11 +70,11 @@ TapeAudioRegionView::init (Gdk::Color const & basic_color, bool /*wfw*/)
 	AudioRegionView::init(basic_color, false);
 
 	/* every time the wave data changes and peaks are ready, redraw */
-	
+
 	for (uint32_t n = 0; n < audio_region()->n_channels(); ++n) {
 		audio_region()->audio_source(n)->PeaksReady.connect (bind (mem_fun(*this, &TapeAudioRegionView::update), n));
 	}
-	
+
 }
 
 TapeAudioRegionView::~TapeAudioRegionView()

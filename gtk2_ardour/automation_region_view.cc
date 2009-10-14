@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -36,12 +36,12 @@ AutomationRegionView::AutomationRegionView(ArdourCanvas::Group*                 
                                            Gdk::Color const &                        basic_color)
 	: RegionView(parent, time_axis, region, spu, basic_color)
 	, _parameter(param)
-{ 
+{
 	if (list) {
 		assert(list->parameter() == param);
 		create_line(list);
 	}
-	
+
 	group->signal_event().connect (mem_fun (this, &AutomationRegionView::canvas_event), false);
 }
 
@@ -49,7 +49,7 @@ void
 AutomationRegionView::init (Gdk::Color const & basic_color, bool /*wfd*/)
 {
 	_enable_display = false;
-	
+
 	RegionView::init(basic_color, false);
 
 	compute_colors (basic_color);
@@ -149,7 +149,7 @@ void
 AutomationRegionView::reset_width_dependent_items (double pixel_width)
 {
 	RegionView::reset_width_dependent_items(pixel_width);
-	
+
 	if (_line)
 		_line->reset();
 }

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,26 +45,26 @@ class RegionSelection : public std::list<RegionView*>, public sigc::trackable
 	bool involves (const TimeAxisView&) const;
 
 	void clear_all();
-	
+
 	nframes_t start () const {
 		return _current_start;
 	}
 
 	/* "end" collides with list<>::end */
 
-	nframes_t end_frame () const { 
+	nframes_t end_frame () const {
 		return _current_end;
 	}
 
 	const std::list<RegionView *>& by_layer() const { return _bylayer; }
 	void  by_position (std::list<RegionView*>&) const;
 	void  by_track (std::list<RegionView*>&) const;
-	
+
   private:
 	void remove_it (RegionView*);
 
 	void add_to_layer (RegionView *);
-	
+
 	nframes_t _current_start; ///< start position for the selection
 	nframes_t _current_end; ///< end position for the selection
 

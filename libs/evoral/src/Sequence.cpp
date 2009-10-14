@@ -1,16 +1,16 @@
 /* This file is part of Evoral.
  * Copyright (C) 2008 Dave Robillard <http://drobilla.net>
  * Copyright (C) 2000-2008 Paul Davis
- * 
+ *
  * Evoral is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation; either version 2 of the License, or (at your option) any later
  * version.
- * 
+ *
  * Evoral is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
@@ -92,7 +92,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	, _control_iter(_control_iters.end())
 {
 	DUMP(format("Created Iterator @ %1% (is end: %2%)\n)") % t % _is_end);
-	
+
 	if (_is_end) {
 		return;
 	}
@@ -108,7 +108,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		}
 	}
 	assert(_note_iter == seq.notes().end() || (*_note_iter)->time() >= t);
-	
+
 	// Find first sysex event after t
 	for (typename Sequence<Time>::SysExes::const_iterator i = seq.sysexes().begin();
 			i != seq.sysexes().end(); ++i) {
@@ -142,7 +142,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 				<< "], event ignored" << endl;
 			continue;
 		}
-		
+
 		DUMP(format("Iterator: CC %1% added (%2%, %3%)\n") % i->first.id() % x % y);
 
 		const ControlIterator new_iter(i->second->list(), x, y);
@@ -161,7 +161,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	} else {
 		_control_iter = _control_iters.end();
 	}
-	
+
 	// Now find the earliest event overall and point to it
 	Time earliest_t = t;
 
@@ -169,7 +169,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		_type = NOTE_ON;
 		earliest_t = (*_note_iter)->time();
 	}
-	
+
 	if (_sysex_iter != seq.sysexes().end() && (*_sysex_iter)->time() < earliest_t) {
 		_type = SYSEX;
 		earliest_t = (*_sysex_iter)->time();
@@ -181,7 +181,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		_type = CONTROL;
 		earliest_t = earliest_control.x;
 	}
-	
+
 	switch (_type) {
 	case NOTE_ON:
 		DUMP(format("Starting at note on event @ %1%\n") % earliest_t);
@@ -252,10 +252,10 @@ Sequence<Time>::const_iterator::operator++()
 	if (_is_end) {
 		throw std::logic_error("Attempt to iterate past end of Sequence");
 	}
-	
+
 	DUMP("Sequence::const_iterator++\n");
 	assert(_event && _event->buffer() && _event->size() > 0);
-	
+
 	const MIDIEvent<Time>& ev = *((MIDIEvent<Time>*)_event.get());
 
 	if (!(     ev.is_note()
@@ -267,11 +267,11 @@ Sequence<Time>::const_iterator::operator++()
 		cerr << "WARNING: Unknown event (type " << _type << "): " << hex
 			<< int(ev.buffer()[0]) << int(ev.buffer()[1]) << int(ev.buffer()[2]) << endl;
 	}
-	
+
 	double x   = 0.0;
 	double y   = 0.0;
 	bool   ret = false;
-	
+
 	// Increment past current event
 	switch (_type) {
 	case NOTE_ON:
@@ -292,7 +292,7 @@ Sequence<Time>::const_iterator::operator++()
 			_control_iter->x = DBL_MAX;
 			_control_iter->y = DBL_MAX;
 		}
-	
+
 		// Find the controller with the next earliest event time
 		_control_iter = _control_iters.begin();
 		for (ControlIterators::iterator i = _control_iters.begin();
@@ -334,7 +334,7 @@ Sequence<Time>::const_iterator::operator++()
 			earliest_t = _control_iter->x;
 		}
 	}
-	
+
 	// Use the next earliest SysEx iff it's earlier than the controller
 	if (_sysex_iter != _seq->sysexes().end()) {
 		if (_type == NIL || (*_sysex_iter)->time() < earliest_t) {
@@ -413,7 +413,7 @@ Sequence<Time>::const_iterator::operator=(const const_iterator& other)
 	_note_iter     = other._note_iter;
 	_sysex_iter    = other._sysex_iter;
 	_control_iters = other._control_iters;
-	
+
 	if (other._control_iter == other._control_iters.end()) {
 		_control_iter = _control_iters.end();
 	} else {
@@ -455,12 +455,12 @@ Sequence<Time>::control_to_midi_event(
 {
 	assert(iter.list.get());
 	const uint32_t event_type = iter.list->parameter().type();
-	
+
 	// initialize the event pointer with a new event, if necessary
 	if (!ev) {
 		ev = boost::shared_ptr< Event<Time> >(new Event<Time>(event_type, 0, 3, NULL, true));
 	}
-	
+
 	uint8_t midi_type = _type_map.parameter_midi_type(iter.list->parameter());
 	ev->set_event_type(_type_map.midi_event_type(midi_type));
 	switch (midi_type) {
@@ -469,7 +469,7 @@ Sequence<Time>::control_to_midi_event(
 		assert(iter.list->parameter().channel() < 16);
 		assert(iter.list->parameter().id() <= INT8_MAX);
 		assert(iter.y <= INT8_MAX);
-		
+
 		ev->time() = iter.x;
 		ev->realloc(3);
 		ev->buffer()[0] = MIDI_CMD_CONTROL + iter.list->parameter().channel();
@@ -481,7 +481,7 @@ Sequence<Time>::control_to_midi_event(
 		assert(iter.list.get());
 		assert(iter.list->parameter().channel() < 16);
 		assert(iter.y <= INT8_MAX);
-		
+
 		ev->time() = iter.x;
 		ev->realloc(2);
 		ev->buffer()[0] = MIDI_CMD_PGM_CHANGE + iter.list->parameter().channel();
@@ -492,7 +492,7 @@ Sequence<Time>::control_to_midi_event(
 		assert(iter.list.get());
 		assert(iter.list->parameter().channel() < 16);
 		assert(iter.y < (1<<14));
-		
+
 		ev->time() = iter.x;
 		ev->realloc(3);
 		ev->buffer()[0] = MIDI_CMD_BENDER + iter.list->parameter().channel();
@@ -591,7 +591,7 @@ Sequence<Time>::end_write(bool delete_stuck)
 	for (ControlLists::const_iterator i = _dirty_controls.begin(); i != _dirty_controls.end(); ++i) {
 		(*i)->mark_dirty();
 	}
-	
+
 	_writing = false;
 	write_unlock();
 }
@@ -608,7 +608,7 @@ Sequence<Time>::append(const Event<Time>& event)
 {
 	write_lock();
 	_edited = true;
-	
+
 	const MIDIEvent<Time>& ev = (const MIDIEvent<Time>&)event;
 
 	assert(_notes.empty() || ev.time() >= _notes.back()->time());

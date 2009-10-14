@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999 Paul Davis 
+    Copyright (C) 1999 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class AudioClock : public Gtk::HBox
 		Frames,
 		Off
 	};
-	
+
 	AudioClock (std::string clock_name, bool transient, std::string widget_name, bool editable, bool is_duration = false, bool with_info = false);
 
 	Mode mode() const { return _mode; }
@@ -66,7 +66,7 @@ class AudioClock : public Gtk::HBox
 
 	static sigc::signal<void> ModeChanged;
 	static std::vector<AudioClock*> clocks;
-	
+
 	static bool has_focus() { return _has_focus; }
 
   private:
@@ -91,7 +91,7 @@ class AudioClock : public Gtk::HBox
 
 	Gtk::HBox   frames_packer_hbox;
 	Gtk::HBox   frames_packer;
-       
+
 	enum Field {
 		SMPTE_Hours,
 		SMPTE_Minutes,
@@ -101,7 +101,7 @@ class AudioClock : public Gtk::HBox
 		MS_Minutes,
 		MS_Seconds,
 		Bars,
-		Beats, 
+		Beats,
 		Ticks,
 		AudioFrames
 	};
@@ -146,7 +146,7 @@ class AudioClock : public Gtk::HBox
 
 	Gtk::Label*  smpte_upper_info_label;
 	Gtk::Label*  smpte_lower_info_label;
-	
+
 	Gtk::Label*  bbt_upper_info_label;
 	Gtk::Label*  bbt_lower_info_label;
 
@@ -178,7 +178,7 @@ class AudioClock : public Gtk::HBox
 	double drag_accum;
 
 	void on_realize ();
-	
+
 	bool field_motion_notify_event (GdkEventMotion *ev, Field);
 	bool field_button_press_event (GdkEventButton *ev, Field);
 	bool field_button_release_event (GdkEventButton *ev, Field);
@@ -195,7 +195,7 @@ class AudioClock : public Gtk::HBox
 	void set_frames (nframes_t, bool);
 
 	nframes_t get_frames (Field,nframes_t pos = 0,int dir=1);
-	
+
 	void smpte_sanitize_display();
 	nframes_t smpte_frame_from_display () const;
 	nframes_t bbt_frame_from_display (nframes_t) const;
@@ -211,7 +211,7 @@ class AudioClock : public Gtk::HBox
 
 	static const uint32_t field_length[(int)AudioFrames+1];
 	static bool _has_focus;
-	
+
 };
 
 #endif /* __audio_clock_h__ */

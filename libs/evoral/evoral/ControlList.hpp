@@ -1,16 +1,16 @@
 /* This file is part of Evoral.
  * Copyright (C) 2008 Dave Robillard <http://drobilla.net>
  * Copyright (C) 2000-2008 Paul Davis
- * 
+ *
  * Evoral is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation; either version 2 of the License, or (at your option) any later
  * version.
- * 
+ *
  * Evoral is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
@@ -38,7 +38,7 @@ struct ControlEvent {
 	    : when (w), value (v), coeff (0)
 	{}
 
-    ControlEvent (const ControlEvent& other) 
+    ControlEvent (const ControlEvent& other)
 	    : when (other.when), value (other.value), coeff (0)
 	{
 		if (other.coeff) {
@@ -49,11 +49,11 @@ struct ControlEvent {
 	}
 
 	~ControlEvent() { if (coeff) delete[] coeff; }
-	
+
 	void create_coeffs() {
 		if (!coeff)
 			coeff = new double[4];
-	    
+
 		coeff[0] = coeff[1] = coeff[2] = coeff[3] = 0.0;
 	}
 
@@ -88,12 +88,12 @@ public:
 	ControlList (const ControlList&);
 	ControlList (const ControlList&, double start, double end);
 	virtual ~ControlList();
-	
+
 	virtual boost::shared_ptr<ControlList> create(Parameter id);
-	
+
 	ControlList& operator= (const ControlList&);
 	bool operator== (const ControlList&);
-	
+
 	void freeze();
 	void thaw ();
 
@@ -133,7 +133,7 @@ public:
 	void clear (iterator, iterator);
 
 	bool paste (ControlList&, double position, float times);
-	
+
 	void set_yrange (double min, double max) {
 		_min_yval = min;
 		_max_yval = max;
@@ -180,7 +180,7 @@ public:
 		}
 	}
 
-	static inline bool time_comparator (const ControlEvent* a, const ControlEvent* b) { 
+	static inline bool time_comparator (const ControlEvent* a, const ControlEvent* b) {
 		return a->when < b->when;
 	}
 
@@ -209,7 +209,7 @@ public:
 
 	/** Called by locked entry point and various private
 	 * locations where we already hold the lock.
-	 * 
+	 *
 	 * FIXME: Should this be private?  Curve needs it..
 	 */
 	double unlocked_eval (double x) const;
@@ -222,7 +222,7 @@ public:
 
 	Curve&       curve()       { assert(_curve); return *_curve; }
 	const Curve& curve() const { assert(_curve); return *_curve; }
-	
+
 	virtual void mark_dirty () const;
 
 	enum InterpolationStyle {
@@ -237,7 +237,7 @@ public:
 protected:
 
 	/** Called by unlocked_eval() to handle cases of 3 or more control points. */
-	double multipoint_eval (double x) const; 
+	double multipoint_eval (double x) const;
 
 	void build_search_cache_if_necessary(double start, double end) const;
 
@@ -248,7 +248,7 @@ protected:
 	bool erase_range_internal (double start, double end, EventList &);
 
 	virtual void maybe_signal_changed ();
-	
+
 	void _x_scale (double factor);
 
 	mutable LookupCache _lookup_cache;

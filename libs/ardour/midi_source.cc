@@ -60,7 +60,7 @@ MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 {
 }
 
-MidiSource::MidiSource (Session& s, const XMLNode& node) 
+MidiSource::MidiSource (Session& s, const XMLNode& node)
 	: Source (s, node)
 	, _read_data_count(0)
 	, _write_data_count(0)
@@ -177,7 +177,7 @@ MidiSource::file_changed (string path)
 	struct stat stat_file;
 
 	int e1 = stat (path.c_str(), &stat_file);
-	
+
 	return !e1;
 }
 
@@ -252,7 +252,7 @@ MidiSource::session_saved()
 		// cyclic dependency here, ugly :(
 		newsrc->set_model(_model);
 		_model->set_midi_source(newsrc.get());
-		
+
 		newsrc->flush_midi();
 
 		Switched.emit(newsrc);

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001 Paul Davis 
+    Copyright (C) 2001 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ IOProcessor::IOProcessor (Session& s, bool with_input, bool with_output,
 
 /* create an IOProcessor that proxies to an existing IO object */
 
-IOProcessor::IOProcessor (Session& s, boost::shared_ptr<IO> in, boost::shared_ptr<IO> out, 
+IOProcessor::IOProcessor (Session& s, boost::shared_ptr<IO> in, boost::shared_ptr<IO> out,
 			  const string& proc_name, DataType /*dtype*/)
 	: Processor(s, proc_name)
 	, _input (in)
@@ -114,7 +114,7 @@ XMLNode&
 IOProcessor::state (bool full_state)
 {
 	XMLNode& node (Processor::state (full_state));
-	
+
 	if (_own_input) {
 		node.add_property ("own-input", "yes");
 		if (_input) {
@@ -128,7 +128,7 @@ IOProcessor::state (bool full_state)
 			node.add_property ("input", _input->name());
 		}
 	}
-	
+
 	if (_own_output) {
 		node.add_property ("own-output", "yes");
 		if (_output) {
@@ -166,7 +166,7 @@ IOProcessor::set_state (const XMLNode& node)
 
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
-	
+
 	if (_own_input) {
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			if ((*niter)->name() == "input") {
@@ -174,21 +174,21 @@ IOProcessor::set_state (const XMLNode& node)
 				break;
 			}
 		}
-		
+
 		if (io_node) {
 			_input->set_state(*io_node);
-			
+
 			// legacy sessions: use IO name
 			if ((prop = node.property ("name")) == 0) {
 				set_name (_input->name());
 			}
-			
+
 		} else {
 			/* no input */
 		}
 
 	}
-	
+
 	if (_own_output) {
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			if ((*niter)->name() == "output") {
@@ -196,10 +196,10 @@ IOProcessor::set_state (const XMLNode& node)
 				break;
 			}
 		}
-		
+
 		if (io_node) {
 			_output->set_state(*io_node);
-			
+
 			// legacy sessions: use IO name
 			if ((prop = node.property ("name")) == 0) {
 				set_name (_output->name());

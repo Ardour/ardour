@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001, 2006 Paul Davis 
+    Copyright (C) 2001, 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ public:
 
 	void region_layered (RegionView*);
 	virtual void update_contents_height ();
-	
+
 	virtual void redisplay_diskstream () = 0;
 	double child_height () const;
 	ARDOUR::layer_t layers () const { return _layers; }
@@ -107,20 +107,20 @@ public:
 	virtual RegionView* create_region_view (boost::shared_ptr<ARDOUR::Region>, bool, bool) {
 		return 0;
 	}
-	
+
 	sigc::signal<void,RegionView*> RegionViewAdded;
 	sigc::signal<void> HeightChanged;
 
 protected:
 	StreamView (RouteTimeAxisView&, ArdourCanvas::Group* group = NULL);
-	
+
 	void         transport_changed();
 	void         transport_looped();
 	void         rec_enable_changed();
 	void         sess_rec_enable_changed();
 	virtual void setup_rec_box () = 0;
 	void         update_rec_box ();
-	
+
 	virtual RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>,
 		      bool wait_for_waves, bool recording = false) = 0;
 	virtual void remove_region_view (boost::weak_ptr<ARDOUR::Region> );
@@ -129,12 +129,12 @@ protected:
 	virtual void undisplay_diskstream ();
 	void         diskstream_changed ();
 	void         layer_regions ();
-	
+
 	virtual void playlist_changed_weak (boost::weak_ptr<ARDOUR::Diskstream>);
 	virtual void playlist_changed (boost::shared_ptr<ARDOUR::Diskstream>);
 	virtual void playlist_modified_weak (boost::weak_ptr<ARDOUR::Diskstream>);
 	virtual void playlist_modified (boost::shared_ptr<ARDOUR::Diskstream>);
-	
+
 	virtual void color_handler () = 0;
 
 	RouteTimeAxisView&        _trackview;
@@ -154,7 +154,7 @@ protected:
 	bool                   rec_updating;
 	bool                   rec_active;
 	bool                   use_rec_regions;
-	
+
 	Gdk::Color region_color;      ///< Contained region color
 	uint32_t   stream_base_color; ///< Background color
 
@@ -163,7 +163,7 @@ protected:
 
 	ARDOUR::layer_t _layers;
 	LayerDisplay    _layer_display;
-	
+
 	double height;
 
 	std::list<sigc::connection> rec_data_ready_connections;

@@ -1,16 +1,16 @@
 /* This file is part of Evoral.
  * Copyright (C) 2008 Dave Robillard <http://drobilla.net>
  * Copyright (C) 2000-2008 Paul Davis
- * 
+ *
  * Evoral is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation; either version 2 of the License, or (at your option) any later
  * version.
- * 
+ *
  * Evoral is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
@@ -29,7 +29,7 @@
 
 /** If this is not defined, all methods of MidiEvent are RT safe
  * but MidiEvent will never deep copy and (depending on the scenario)
- * may not be usable in STL containers, signals, etc. 
+ * may not be usable in STL containers, signals, etc.
  */
 #define EVORAL_EVENT_ALLOC 1
 
@@ -44,15 +44,15 @@ template<typename Time>
 struct Event {
 #ifdef EVORAL_EVENT_ALLOC
 	Event(EventType type=0, Time time=0, uint32_t size=0, uint8_t* buf=NULL, bool alloc=false);
-	
+
 	/** Copy \a copy.
-	 * 
+	 *
 	 * If \a alloc is true, the buffer will be copied and this method
 	 * is NOT REALTIME SAFE.  Otherwise both events share a buffer and
 	 * memory management semantics are the caller's problem.
 	 */
 	Event(const Event& copy, bool alloc);
-	
+
 	~Event();
 
 	inline const Event& operator=(const Event& copy) {
@@ -90,7 +90,7 @@ struct Event {
 		_size = copy._size;
 		_buf  = copy._buf;
 	}
-	
+
 	inline void set(uint8_t* buf, uint32_t size, Time t) {
 		if (_owns_buf) {
 			if (_size < size) {
@@ -128,11 +128,11 @@ struct Event {
 
 		return true;
 	}
-	
+
 	inline bool operator!=(const Event& other) const { return ! operator==(other); }
 
 	inline bool owns_buffer() const { return _owns_buf; }
-	
+
 	inline void set_buffer(uint32_t size, uint8_t* buf, bool own) {
 		if (_owns_buf) {
 			free(_buf);
@@ -154,7 +154,7 @@ struct Event {
 
 		_size = size;
 	}
-	
+
 	inline void clear() {
 		_type = 0;
 		_original_time = 0;

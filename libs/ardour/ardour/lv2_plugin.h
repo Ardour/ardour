@@ -28,7 +28,7 @@
 
 #include <sigc++/signal.h>
 
-#include "pbd/stateful.h" 
+#include "pbd/stateful.h"
 
 #include <jack/types.h>
 #include <slv2/slv2.h>
@@ -48,7 +48,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	~LV2Plugin ();
 
 	/* Plugin interface */
-	
+
 	std::string unique_id() const;
 	const char* label() const           { return slv2_value_as_string(_name); }
 	const char* name() const            { return slv2_value_as_string(_name); }
@@ -69,12 +69,12 @@ class LV2Plugin : public ARDOUR::Plugin
 	SLV2Port   slv2_port(uint32_t i) { return slv2_plugin_get_port_by_index(_plugin, i); }
 
 	const char* port_symbol(uint32_t port);
-	
+
 	const LV2_Feature* const* features() { return _features; }
 
 	std::set<Evoral::Parameter> automatable() const;
 
-	void activate () { 
+	void activate () {
 		if (!_was_activated) {
 			slv2_instance_activate(_instance);
 			_was_activated = true;
@@ -96,7 +96,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	}
 
 	void set_block_size (nframes_t /*nframes*/) {}
-	
+
 	int connect_and_run (BufferSet& bufs,
 			ChanMapping in, ChanMapping out,
 			nframes_t nframes, nframes_t offset);
@@ -181,7 +181,7 @@ struct LV2World {
 
 
 class LV2PluginInfo : public PluginInfo {
-public:	
+public:
 	LV2PluginInfo (void* slv2_world, void* slv2_plugin);;
 	~LV2PluginInfo ();;
 	static PluginInfoList discover (void* slv2_world);

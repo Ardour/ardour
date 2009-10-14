@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999 Paul Davis 
+    Copyright (C) 1999 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ class RCConfiguration : public Configuration
 	int load_state ();
 	int save_state ();
 
-	/// calls Stateful::*instant_xml methods using 
+	/// calls Stateful::*instant_xml methods using
 	/// ARDOUR::user_config_directory for the directory argument
 	void add_instant_xml (XMLNode&);
 	XMLNode * instant_xml (const std::string& str);
@@ -73,12 +73,12 @@ class RCConfiguration : public Configuration
 	/* declare variables */
 
 #undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
+#undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(Type,var,name,value) ConfigVariable<Type> var;
 #define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) ConfigVariableWithMutation<Type> var;
 #include "ardour/rc_configuration_vars.h"
 #undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
+#undef  CONFIG_VARIABLE_SPECIAL
 
 	XMLNode* _control_protocol_state;
 };

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Paul Davis 
+    Copyright (C) 2008 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class AudioAnalyser : public boost::noncopyable {
 
 	AudioAnalyser (float sample_rate, AnalysisPluginKey key);
 	virtual ~AudioAnalyser();
-	
+
 	/* analysis object should provide a run method
 	   that accepts a path to write the results to (optionally empty)
 	   a Readable* to read data from
@@ -58,7 +58,7 @@ class AudioAnalyser : public boost::noncopyable {
 
 	nframes64_t bufsize;
 	nframes64_t stepsize;
-	
+
 	int initialize_plugin (AnalysisPluginKey name, float sample_rate);
 	int analyse (const std::string& path, Readable*, uint32_t channel);
 

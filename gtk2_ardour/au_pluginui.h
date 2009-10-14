@@ -33,12 +33,12 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
   public:
 	AUPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>);
 	~AUPluginUI ();
-	
+
 	gint get_preferred_height () { return prefheight; }
 	gint get_preferred_width () { return prefwidth; }
 	bool start_updating(GdkEventAny*);
 	bool stop_updating(GdkEventAny*);
-	
+
 	void activate ();
 	void deactivate ();
 
@@ -77,7 +77,7 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	NSWindow*            cocoa_parent;
 	ComponentDescription carbon_descriptor;
 	AudioUnitCarbonView  editView;
-	WindowRef            carbon_window;	
+	WindowRef            carbon_window;
  	EventHandlerRef      carbon_event_handler;
 	bool                 _activating_from_app;
 	NSView*              packView;

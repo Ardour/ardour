@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999-2002 Paul Davis 
+    Copyright (C) 1999-2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -51,9 +51,9 @@ class LocationEditRow  : public Gtk::HBox
 
 	void set_number (int);
 	void focus_name();
-	
-	sigc::signal<void,ARDOUR::Location*> remove_requested;  
-	sigc::signal<void> redraw_ranges;  
+
+	sigc::signal<void,ARDOUR::Location*> remove_requested;
+	sigc::signal<void> redraw_ranges;
 
   protected:
 
@@ -66,14 +66,14 @@ class LocationEditRow  : public Gtk::HBox
 	ARDOUR::Location *location;
 	ARDOUR::Session  *session;
 
-	
-	
+
+
 	Gtk::Table    item_table;
-	
+
 	Gtk::Entry    name_entry;
 	Gtk::Label    name_label;
 	Gtk::Label    number_label;
-	
+
 	Gtk::HBox     start_hbox;
 	Gtk::Button   start_set_button;
 	Gtk::Button   start_go_button;
@@ -105,12 +105,12 @@ class LocationEditRow  : public Gtk::HBox
 
 	guint32 i_am_the_modifier;
 	int   number;
-	
+
 	void name_entry_changed ();
 	void isrc_entry_changed ();
 	void performer_entry_changed ();
 	void composer_entry_changed ();
-	       
+
 	void set_button_pressed (LocationPart part);
 	void go_button_pressed (LocationPart part);
 
@@ -129,13 +129,13 @@ class LocationEditRow  : public Gtk::HBox
 	void name_changed (ARDOUR::Location *);
 	void location_changed (ARDOUR::Location *);
 	void flags_changed (ARDOUR::Location *, void *src);
-	
+
 	sigc::connection start_changed_connection;
 	sigc::connection end_changed_connection;
 	sigc::connection name_changed_connection;
 	sigc::connection changed_connection;
 	sigc::connection flags_changed_connection;
-	
+
 };
 
 
@@ -152,7 +152,7 @@ class LocationUI : public ArdourDialog
   private:
 	ARDOUR::LocationStack* locations;
 	ARDOUR::Location *newest_location;
-        
+
 	void session_gone();
 
 	Gtk::VBox  location_vpacker;
@@ -160,9 +160,9 @@ class LocationUI : public ArdourDialog
 
 	LocationEditRow      loop_edit_row;
 	LocationEditRow      punch_edit_row;
-	
+
 	Gtk::VPaned loc_range_panes;
-	
+
 	Gtk::Frame loc_frame;
 	Gtk::VBox  loc_frame_box;
 	Gtk::Button add_location_button;
@@ -186,12 +186,12 @@ class LocationUI : public ArdourDialog
 	void location_redraw_ranges ();
 
 	gint do_location_remove (ARDOUR::Location *);
-	
+
 	guint32 i_am_the_modifier;
 
 	void add_new_location();
 	void add_new_range();
-	
+
 	void refresh_location_list ();
 	void refresh_location_list_s (ARDOUR::Change);
 	void location_removed (ARDOUR::Location *);

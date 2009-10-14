@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2009 Paul Davis 
+    Copyright (C) 2002-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@
 
 */
 
-#ifndef  __gtk_ardour_port_group_h__ 
-#define  __gtk_ardour_port_group_h__ 
+#ifndef  __gtk_ardour_port_group_h__
+#define  __gtk_ardour_port_group_h__
 
 #include <vector>
 #include <string>
@@ -87,7 +87,7 @@ public:
 	BundleList const & bundles () const {
 		return _bundles;
 	}
-	
+
 private:
 	void bundle_changed (ARDOUR::Bundle::Change);
 
@@ -154,7 +154,7 @@ public:
 
 private:
 	void reread_component_bundles ();
-	
+
 	boost::shared_ptr<ARDOUR::Bundle> _route;
 	std::vector<boost::shared_ptr<ARDOUR::Bundle> > _processor;
 };

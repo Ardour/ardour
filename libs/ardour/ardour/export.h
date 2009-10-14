@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 #include "ardour/ardour.h"
 #include "ardour/gdither.h"
 
-namespace ARDOUR 
+namespace ARDOUR
 {
 	class Port;
 
@@ -41,59 +41,59 @@ namespace ARDOUR
 
 	struct ExportSpecification : public SF_INFO, public sigc::trackable {
 
-	    ExportSpecification();
-	    ~ExportSpecification ();
+		ExportSpecification();
+		~ExportSpecification ();
 
-	    void init ();
-	    void clear ();
+		void init ();
+		void clear ();
 
-	    int prepare (nframes_t blocksize, nframes_t frame_rate);
+		int prepare (nframes_t blocksize, nframes_t frame_rate);
 
-	    int process (nframes_t nframes);
+		int process (nframes_t nframes);
 
-	    /* set by the user */
+		/* set by the user */
 
-	    std::string    path;
-	    nframes_t      sample_rate;
+		std::string    path;
+		nframes_t      sample_rate;
 
-	    int            src_quality;
-	    SNDFILE*       out;
-	    uint32_t       channels;
-	    ExportPortMap  port_map;
-	    nframes_t      start_frame;
-	    nframes_t      end_frame;
-	    GDitherType    dither_type;
-	    bool           do_freewheel;
+		int            src_quality;
+		SNDFILE*       out;
+		uint32_t       channels;
+		ExportPortMap  port_map;
+		nframes_t      start_frame;
+		nframes_t      end_frame;
+		GDitherType    dither_type;
+		bool           do_freewheel;
 
-	    /* used exclusively during export */
+		/* used exclusively during export */
 
-	    nframes_t      frame_rate;
-	    GDither        dither;
-	    float*         dataF;
-	    float*         dataF2;
-	    float*         leftoverF;
-	    nframes_t      leftover_frames;
-	    nframes_t      max_leftover_frames;
-	    void*          output_data;
-	    nframes_t      out_samples_max;
-	    uint32_t       sample_bytes;
-	    uint32_t       data_width;
+		nframes_t      frame_rate;
+		GDither        dither;
+		float*         dataF;
+		float*         dataF2;
+		float*         leftoverF;
+		nframes_t      leftover_frames;
+		nframes_t      max_leftover_frames;
+		void*          output_data;
+		nframes_t      out_samples_max;
+		uint32_t       sample_bytes;
+		uint32_t       data_width;
 
-	    nframes_t      total_frames;
-	    SF_INFO        sfinfo;
-	    SRC_DATA       src_data;
-	    SRC_STATE*     src_state;
-	    nframes_t      pos;
+		nframes_t      total_frames;
+		SF_INFO        sfinfo;
+		SRC_DATA       src_data;
+		SRC_STATE*     src_state;
+		nframes_t      pos;
 
-	    sigc::connection freewheel_connection;
+		sigc::connection freewheel_connection;
 
-	    /* shared between UI thread and audio thread */
+		/* shared between UI thread and audio thread */
 
-	    volatile float progress;  /* audio thread sets this */
-	    volatile bool  stop;      /* UI sets this */
-	    volatile bool  running;   /* audio thread sets to false when export is done */
+		volatile float progress;  /* audio thread sets this */
+		volatile bool  stop;      /* UI sets this */
+		volatile bool  running;   /* audio thread sets to false when export is done */
 
-	    int status;
+		int status;
 	};
 
 } // namespace ARDOUR

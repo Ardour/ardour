@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001 Paul Davis 
+    Copyright (C) 2001 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -46,13 +46,13 @@ Auditioner::Auditioner (Session& s)
 	string right = _session.config.get_auditioner_output_right();
 
 	if (left == "default") {
-		left = _session.engine().get_nth_physical_output (DataType::AUDIO, 0);	
+		left = _session.engine().get_nth_physical_output (DataType::AUDIO, 0);
 	}
 
 	if (right == "default") {
 		right = _session.engine().get_nth_physical_output (DataType::AUDIO, 1);
 	}
-	
+
 	if ((left.length() == 0) && (right.length() == 0)) {
 		warning << _("no outputs available for auditioner - manual connection required") << endmsg;
 		return;
@@ -68,7 +68,7 @@ Auditioner::Auditioner (Session& s)
 		audio_diskstream()->add_channel (1);
 		_output->add_port (right, this, DataType::AUDIO);
 	}
-	
+
 	_main_outs->allow_pan_reset ();
 	_main_outs->reset_panner ();
 
@@ -216,7 +216,7 @@ Auditioner::output_changed (IOChange change, void* /*src*/)
 		} else {
 			_session.config.set_auditioner_output_left ("");
 		}
-		
+
 		connections.clear ();
 
 		if (_output->nth (1)->get_connections (connections)) {

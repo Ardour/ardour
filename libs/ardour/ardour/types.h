@@ -149,7 +149,7 @@ namespace ARDOUR {
 		FilterChannels,  ///< Ignore events on certain channels
 		ForceChannel     ///< Force all events to a certain channel
 	};
-	
+
 	enum ColorMode {
 		MeterColors = 0,
 		ChannelColors,
@@ -157,30 +157,30 @@ namespace ARDOUR {
 	};
 
 	struct BBT_Time {
-	    uint32_t bars;
-	    uint32_t beats;
-	    uint32_t ticks;
+		uint32_t bars;
+		uint32_t beats;
+		uint32_t ticks;
 
-	    BBT_Time() {
-		    bars = 1;
-		    beats = 1;
-		    ticks = 0;
-	    }
+		BBT_Time() {
+			bars = 1;
+			beats = 1;
+			ticks = 0;
+		}
 
-	    /* we can't define arithmetic operators for BBT_Time, because
-	       the results depend on a TempoMap, but we can define
-	       a useful check on the less-than condition.
-	    */
+		/* we can't define arithmetic operators for BBT_Time, because
+		   the results depend on a TempoMap, but we can define
+		   a useful check on the less-than condition.
+		   */
 
-	    bool operator< (const BBT_Time& other) const {
-		    return bars < other.bars ||
-			    (bars == other.bars && beats < other.beats) ||
-			    (bars == other.bars && beats == other.beats && ticks < other.ticks);
-	    }
+		bool operator< (const BBT_Time& other) const {
+			return bars < other.bars ||
+				(bars == other.bars && beats < other.beats) ||
+				(bars == other.bars && beats == other.beats && ticks < other.ticks);
+		}
 
-	    bool operator== (const BBT_Time& other) const {
-		    return bars == other.bars && beats == other.beats && ticks == other.ticks;
-	    }
+		bool operator== (const BBT_Time& other) const {
+			return bars == other.bars && beats == other.beats && ticks == other.ticks;
+		}
 
 	};
 	enum SmpteFormat {
@@ -197,63 +197,63 @@ namespace ARDOUR {
 	};
 
 	struct AnyTime {
-	    enum Type {
-		    SMPTE,
-		    BBT,
-		    Frames,
-		    Seconds
-	    };
+		enum Type {
+			SMPTE,
+			BBT,
+			Frames,
+			Seconds
+		};
 
-	    Type type;
+		Type type;
 
-	    SMPTE::Time    smpte;
-	    BBT_Time       bbt;
+		SMPTE::Time    smpte;
+		BBT_Time       bbt;
 
-	    union {
-		nframes_t      frames;
-		double         seconds;
-	    };
+		union {
+			nframes_t      frames;
+			double         seconds;
+		};
 
-	    AnyTime() { type = Frames; frames = 0; }
+		AnyTime() { type = Frames; frames = 0; }
 	};
 
 	struct AudioRange {
-	    nframes_t start;
-	    nframes_t end;
-	    uint32_t id;
+		nframes_t start;
+		nframes_t end;
+		uint32_t id;
 
-	    AudioRange (nframes_t s, nframes_t e, uint32_t i) : start (s), end (e) , id (i) {}
+		AudioRange (nframes_t s, nframes_t e, uint32_t i) : start (s), end (e) , id (i) {}
 
-	    nframes_t length() { return end - start + 1; }
+		nframes_t length() { return end - start + 1; }
 
-	    bool operator== (const AudioRange& other) const {
-		    return start == other.start && end == other.end && id == other.id;
-	    }
+		bool operator== (const AudioRange& other) const {
+			return start == other.start && end == other.end && id == other.id;
+		}
 
-	    bool equal (const AudioRange& other) const {
-		    return start == other.start && end == other.end;
-	    }
+		bool equal (const AudioRange& other) const {
+			return start == other.start && end == other.end;
+		}
 
-	    OverlapType coverage (nframes_t s, nframes_t e) const {
-		    return ARDOUR::coverage (start, end, s, e);
-	    }
+		OverlapType coverage (nframes_t s, nframes_t e) const {
+			return ARDOUR::coverage (start, end, s, e);
+		}
 	};
 
 	struct MusicRange {
-	    BBT_Time start;
-	    BBT_Time end;
-	    uint32_t id;
+		BBT_Time start;
+		BBT_Time end;
+		uint32_t id;
 
-	    MusicRange (BBT_Time& s, BBT_Time& e, uint32_t i)
-		    : start (s), end (e), id (i) {}
+		MusicRange (BBT_Time& s, BBT_Time& e, uint32_t i)
+			: start (s), end (e), id (i) {}
 
-	    bool operator== (const MusicRange& other) const {
-		    return start == other.start && end == other.end && id == other.id;
-	    }
+		bool operator== (const MusicRange& other) const {
+			return start == other.start && end == other.end && id == other.id;
+		}
 
-	    bool equal (const MusicRange& other) const {
-		    return start == other.start && end == other.end;
-	    }
+		bool equal (const MusicRange& other) const {
+			return start == other.start && end == other.end;
+		}
 	};
 
 	/*
@@ -285,9 +285,9 @@ namespace ARDOUR {
 	};
 
 	enum RegionPoint {
-	    Start,
-	    End,
-	    SyncPoint
+		Start,
+		End,
+		SyncPoint
 	};
 
 	enum Change {
@@ -342,10 +342,10 @@ namespace ARDOUR {
 	};
 
 	struct InterThreadInfo {
-	    volatile bool  done;
-	    volatile bool  cancel;
-	    volatile float progress;
-	    pthread_t      thread;
+		volatile bool  done;
+		volatile bool  cancel;
+		volatile float progress;
+		pthread_t      thread;
 	};
 
 	enum SampleFormat {
@@ -371,10 +371,10 @@ namespace ARDOUR {
 	};
 
 	struct PeakData {
-	    typedef Sample PeakDatum;
+		typedef Sample PeakDatum;
 
-	    PeakDatum min;
-	    PeakDatum max;
+		PeakDatum min;
+		PeakDatum max;
 	};
 
 	enum PluginType {
@@ -383,7 +383,7 @@ namespace ARDOUR {
 		LV2,
 		VST
 	};
-	
+
 	enum RunContext {
 		ButlerContext = 0,
 		TransportContext,
@@ -403,7 +403,7 @@ namespace ARDOUR {
 	};
 
 	enum ShuttleUnits {
- 		Percentage,
+		Percentage,
 		Semitones
 	};
 
@@ -418,15 +418,16 @@ namespace ARDOUR {
 	};
 
 	struct TimeFXRequest : public InterThreadInfo {
-		TimeFXRequest() : time_fraction(0), pitch_fraction(0),
+		TimeFXRequest()
+			: time_fraction(0), pitch_fraction(0),
 			quick_seek(false), antialias(false),  opts(0) {}
-	    float time_fraction;
-	    float pitch_fraction;
-	    /* SoundTouch */
-	    bool  quick_seek;
-	    bool  antialias;
-	    /* RubberBand */
-	    int   opts; // really RubberBandStretcher::Options
+		float time_fraction;
+		float pitch_fraction;
+		/* SoundTouch */
+		bool  quick_seek;
+		bool  antialias;
+		/* RubberBand */
+		int   opts; // really RubberBandStretcher::Options
 	};
 
 	typedef std::list<nframes64_t> AnalysisFeatureList;

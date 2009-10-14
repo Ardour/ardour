@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -82,7 +82,7 @@ class PlugUIBase : public virtual sigc::trackable
 	virtual gint get_preferred_width () = 0;
 	virtual bool start_updating(GdkEventAny*) = 0;
 	virtual bool stop_updating(GdkEventAny*) = 0;
-	
+
 	virtual void activate () {}
 	virtual void deactivate () {}
 
@@ -127,10 +127,10 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
   public:
 	GenericPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> plug, bool scrollable=false);
 	~GenericPluginUI ();
-	
+
 	gint get_preferred_height () { return prefheight; }
 	gint get_preferred_width () { return -1; }
-	
+
 	bool start_updating(GdkEventAny*);
 	bool stop_updating(GdkEventAny*);
 
@@ -139,7 +139,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 
 	Gtk::HBox settings_box;
 	Gtk::HBox hpacker;
-	
+
 	Gtk::Table button_table;
 	Gtk::Table output_table;
 
@@ -160,8 +160,8 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 		bool            min_unbound;
 		bool            max_unbound;
 		bool packed;
-		
-		MeterInfo (int /*i*/) { 
+
+		MeterInfo (int /*i*/) {
 			meter = 0;
 			packed = false;
 			min = 1.0e10;
@@ -170,7 +170,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 			max_unbound = false;
 		}
 	};
-	
+
 	static const int32_t initial_button_rows = 6;
 	static const int32_t initial_button_cols = 1;
 	static const int32_t initial_output_rows = 1;
@@ -182,9 +182,9 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 		boost::shared_ptr<ARDOUR::AutomationControl> control;
 
 		Evoral::Parameter parameter() { return control->parameter(); }
-	    
+
 	    /* input */
-	    
+
 	    Gtk::ComboBoxText* 	      combo;
 	    std::map<std::string, float>*  combo_map;
 	    Gtk::ToggleButton*        button;
@@ -195,7 +195,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	    bool               update_pending;
 	    char               ignore_change;
 	    Gtk::Button        automate_button;
-	    
+
 	    /* output */
 
 	    Gtk::EventBox *display;
@@ -206,13 +206,13 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	    MeterInfo  *    meterinfo;
 
 	    ControlUI ();
-	    ~ControlUI(); 
+	    ~ControlUI();
 	};
-	
+
 	std::vector<ControlUI*>   output_controls;
 	sigc::connection screen_update_connection;
 	void output_update();
-	
+
 	void build ();
 	ControlUI* build_control_ui (guint32 port_index, boost::shared_ptr<ARDOUR::AutomationControl>);
 	std::vector<std::string> setup_scale_values(guint32 port_index, ControlUI* cui);
@@ -292,7 +292,7 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 	Gtk::Socket socket;
 	Gtk::HBox   preset_box;
 	Gtk::VBox   vpacker;
-	
+
 	bool configure_handler (GdkEventConfigure*, Gtk::Socket*);
 	void save_plugin_setting ();
 };

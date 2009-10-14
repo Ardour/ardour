@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,8 +25,8 @@
 
 namespace ARDOUR {
 
-template<class T> void 
-Session::foreach_playlist (T *obj, void (T::*func)(boost::shared_ptr<Playlist>)) 
+template<class T> void
+Session::foreach_playlist (T *obj, void (T::*func)(boost::shared_ptr<Playlist>))
 {
 	Glib::Mutex::Lock lm (playlist_lock);
 	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); i++) {

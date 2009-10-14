@@ -1,16 +1,16 @@
 /*
-    Copyright (C) 2006 Paul Davis 
-    
+    Copyright (C) 2006 Paul Davis
+
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
     Software Foundation; either version 2 of the License, or (at your option)
     any later version.
-    
+
     This program is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
-    
+
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     675 Mass Ave, Cambridge, MA 02139, USA.
@@ -67,7 +67,7 @@ Amp::configure_io (ChanCount in, ChanCount out)
 	if (out != in) { // always 1:1
 		return false;
 	}
-	
+
 	return Processor::configure_io (in, out);
 }
 
@@ -87,30 +87,30 @@ Amp::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_frame*/, n
 	}
 
 	if (_apply_gain) {
-		
+
 		if (_apply_gain_automation) {
-			
+
 			gain_t* gab = _session.gain_automation_buffer ();
 
 			if (mute_gain == 0.0) {
-				
+
 				/* absolute mute */
 
 				if (_current_gain == 0.0) {
-					
+
 					/* already silent */
 
 					for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 						i->clear ();
 					}
 				} else {
-					
+
 					/* cut to silence */
 
 					Amp::apply_gain (bufs, nframes, _current_gain, 0.0);
 					_current_gain = 0.0;
 				}
-					
+
 
 			} else if (mute_gain != 1.0) {
 
@@ -138,26 +138,26 @@ Amp::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_frame*/, n
 
 				_current_gain = gab[nframes-1];
 			}
-				
-			
+
+
 		} else { /* manual (scalar) gain */
 
 			gain_t dg = _gain_control->user_float() * mute_gain;
-			
+
 			if (_current_gain != dg) {
-				
+
 				Amp::apply_gain (bufs, nframes, _current_gain, dg);
 				_current_gain = dg;
-				
+
 			} else if (_current_gain != 1.0f) {
-				
+
 				/* gain has not changed, but its non-unity
 				*/
 
 				for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
 
 					MidiBuffer& mb (*i);
-					
+
 					for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
 						Evoral::MIDIEvent<MidiBuffer::TimeType> ev = *m;
 						if (ev.is_note_on()) {
@@ -169,7 +169,7 @@ Amp::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_frame*/, n
 				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 					apply_gain_to_buffer (i->data(), nframes, _current_gain);
 				}
-			} 
+			}
 		}
 	}
 
@@ -179,9 +179,9 @@ Amp::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_frame*/, n
 void
 Amp::apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t target)
 {
-        /** Apply a (potentially) declicked gain to the audio buffers of @a bufs 
+        /** Apply a (potentially) declicked gain to the audio buffers of @a bufs
 	 */
-	
+
 	if (nframes == 0 || bufs.count().n_audio() == 0) {
 		return;
 	}
@@ -212,7 +212,7 @@ Amp::apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t targ
 
 
 		MidiBuffer& mb (*i);
-		
+
 		for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
 			Evoral::MIDIEvent<MidiBuffer::TimeType> ev = *m;
 
@@ -228,16 +228,16 @@ Amp::apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t targ
 
 	for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 		Sample* const buffer = i->data();
-		
+
 		fractional_pos = 1.0;
 
 		for (nframes_t nx = 0; nx < declick; ++nx) {
 			buffer[nx] *= polscale * (initial + (delta * (0.5 + 0.5 * cos (M_PI * fractional_pos))));
 			fractional_pos += fractional_shift;
 		}
-		
+
 		/* now ensure the rest of the buffer has the target value applied, if necessary. */
-		
+
 		if (declick != nframes) {
 
 			if (target == 0.0) {
@@ -256,7 +256,7 @@ Amp::apply_simple_gain (BufferSet& bufs, nframes_t nframes, gain_t target)
 
 		for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
 			MidiBuffer& mb (*i);
-		
+
 			for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
 				Evoral::MIDIEvent<MidiBuffer::TimeType> ev = *m;
 				if (ev.is_note_on()) {
@@ -273,7 +273,7 @@ Amp::apply_simple_gain (BufferSet& bufs, nframes_t nframes, gain_t target)
 
 		for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
 			MidiBuffer& mb (*i);
-		
+
 			for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
 				Evoral::MIDIEvent<MidiBuffer::TimeType> ev = *m;
 				if (ev.is_note_on()) {
@@ -292,7 +292,7 @@ void
 Amp::inc_gain (gain_t factor, void *src)
 {
 	float desired_gain = _gain_control->user_float();
-	
+
 	if (desired_gain == 0.0f) {
 		set_gain (0.000001f + (0.000001f * factor), src);
 	} else {
@@ -361,7 +361,7 @@ Amp::GainControl::set_value (float val)
 		val = 1.99526231f;
 
 	_amp->set_gain (val, this);
-	
+
 	AutomationControl::set_value(val);
 }
 

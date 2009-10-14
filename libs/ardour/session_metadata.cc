@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Paul Davis 
+    Copyright (C) 2008 Paul Davis
     Author: Sakari Bergen
 
     This program is free software; you can redistribute it and/or modify it
@@ -27,7 +27,7 @@ using namespace Glib;
 using namespace ARDOUR;
 
 SessionMetadata::SessionMetadata ()
-{	
+{
 	/*** General ***/
 	map.insert (Property ("comment", ""));
 	map.insert (Property ("copyright", ""));
@@ -94,11 +94,11 @@ SessionMetadata::get_xml (const ustring & name)
 	if (value.empty()) {
 		return 0;
 	}
-	
+
 	XMLNode val ("value", value);
 	XMLNode * node = new XMLNode (name);
 	node->add_child_copy (val);
-	
+
 	return node;
 }
 
@@ -111,7 +111,7 @@ SessionMetadata::get_value (const ustring & name) const
 		std::cerr << "Programming error in SessionMetadata::get_value" << std::endl;
 		return "";
 	}
-	
+
 	return it->second;
 }
 
@@ -130,7 +130,7 @@ SessionMetadata::set_value (const ustring & name, const ustring & value)
 		std::cerr << "Programming error in SessionMetadata::set_value" << std::endl;
 		return;
 	}
-	
+
 	it->second = value;
 }
 
@@ -152,13 +152,13 @@ SessionMetadata::get_state ()
 {
 	XMLNode * node = new XMLNode ("Metadata");
 	XMLNode * prop;
-	
+
 	for (PropertyMap::const_iterator it = map.begin(); it != map.end(); ++it) {
 		if ((prop = get_xml (it->first))) {
 			node->add_child_nocopy (*prop);
 		}
 	}
-	
+
 	return *node;
 }
 
@@ -169,20 +169,20 @@ SessionMetadata::set_state (const XMLNode & state)
 	ustring name;
 	ustring value;
 	XMLNode * node;
-	
+
 	for (XMLNodeConstIterator it = children.begin(); it != children.end(); it++) {
 		node = *it;
 		if (node->children().empty()) {
 			continue;
 		}
-		
+
 		name = node->name();
 		node = *node->children().begin();
 		value = node->content();
-		
+
 		set_value (name, value);
 	}
-	
+
 	return 0;
 }
 

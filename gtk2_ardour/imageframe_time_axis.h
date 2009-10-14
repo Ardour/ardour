@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 	public:
 		//---------------------------------------------------------------------------------------//
 		// Constructor / Desctructor
-		
+
 		/**
 		 * Constructs a new ImageFrameTimeAxis.
 		 *
@@ -63,13 +63,13 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 * @param canvas the parent canvas item
 		 */
 		ImageFrameTimeAxis(const std::string & track_id, PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas) ;
-		
+
 		/**
 		 * Destructor
 		 * Responsible for destroying any child image items that may have been added to thie time axis
 		 */
 		virtual ~ImageFrameTimeAxis() ;
-		
+
 		//---------------------------------------------------------------------------------------//
 		// ui methods & data
 
@@ -77,9 +77,9 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 * Sets the height of this TrackView to one of ths TrackHeghts
 		 *
 		 * @param h the number of pixels to set the height too
-		 */	
+		 */
 		virtual void set_height(uint32_t h) ;
-		
+
 		/**
 		 * Sets the number of samples per unit that are used.
 		 * This is used to determine the siezes of items upon this time axis
@@ -87,15 +87,15 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 * @param spu the number of samples per unit
 		 */
 		virtual void set_samples_per_unit(double spu) ;
-		
+
 		/**
 		 * Returns the available height for images to be drawn onto
 		 *
 		 * @return the available height for an image item to be drawn onto
 		 */
 		int get_image_display_height() ;
-		
-		
+
+
 		/**
 		 * Show the popup edit menu
 		 *
@@ -105,11 +105,11 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 * @param with_item true if an item has been selected upon the time axis, used to set context menu
 		 */
 		void popup_imageframe_edit_menu(int button, int32_t time, ImageFrameView* clicked_imageframe, bool with_item) ;
-		
-		
+
+
 		//---------------------------------------------------------------------------------------//
 		// Marker Time Axis Methods
-		
+
 		/**
 		 * Add a MarkerTimeAxis to the ilst of MarkerTimeAxis' associated with this ImageFrameTimeAxis
 		 *
@@ -119,7 +119,7 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 *         false otherwise
 		 */
 		bool add_marker_time_axis(MarkerTimeAxis* marker_track, void* src) ;
-		
+
 		/**
 		 * Returns the named MarkerTimeAxis associated with this ImageFrameTimeAxis
 		 *
@@ -127,7 +127,7 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 * @return the named markerTimeAxis, or 0 if the named MarkerTimeAxis is not associated with this ImageFrameTimeAxis
 		 */
 		MarkerTimeAxis* get_named_marker_time_axis(const std::string & track_id) ;
-		
+
 		/**
 		 * Removes the named markerTimeAxis from those associated with this ImageFrameTimeAxis
 		 *
@@ -136,7 +136,7 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 * @return the removed MarkerTimeAxis
 		 */
 		MarkerTimeAxis* remove_named_marker_time_axis(const std::string & track_id, void* src) ;
-		
+
 		/**
 		 * Removes tav from the list of MarkerTimaAxis associated with this ImageFrameTimeAxis
 		 *
@@ -145,10 +145,10 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 */
 		void remove_time_axis_view(MarkerTimeAxis* tav, void* src) ;
 
-		
+
 		//---------------------------------------------------------------------------------------//
 		// Parent/Child helper object accessors
-		
+
 		/**
 		 * Returns the view helper of this TimeAxis
 		 *
@@ -156,16 +156,16 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 */
 		ImageFrameTimeAxisView* get_view() ;
 
-		
+
 		//---------------------------------------------------------------------------------//
 		// Emitted Signals
-		
+
 		/** Emitted when a Marker Time Axis is Added, or associated with, this time axis */
 		sigc::signal<void,MarkerTimeAxis*,void*> MarkerTimeAxisAdded ;
-		
+
 		/** Emitted when a Marker Time Axis is removed, from this time axis */
 		sigc::signal<void,std::string,void*> MarkerTimeAxisRemoved ;
-		
+
 	protected:
 
 	private:
@@ -174,7 +174,7 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 *
 		 */
 		void select_track_color() ;
-	
+
 		/**
 		 * Handles the building of the popup menu
 		 */
@@ -184,14 +184,14 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 * handles the building of the ImageFrameView sub menu
 		 */
 		void create_imageframe_menu() ;
-		
+
   		/* We may have multiple marker views, but each marker view should only be associated with one timeaxisview */
 		typedef std::list<MarkerTimeAxis*> MarkerTimeAxisList ;
 		MarkerTimeAxisList marker_time_axis_list;
-	
+
 		/* the TimeAxis view helper */
 		ImageFrameTimeAxisView *view ;
-		
+
 		// popup menu widgets
 		Gtk::Menu *image_action_menu ;
 		Gtk::Menu *imageframe_menu ;

@@ -33,7 +33,7 @@ Splash::Splash ()
 	catch (...) {
 		throw failed_constructor();
 	}
-	
+
 	darea.set_size_request (pixbuf->get_width(), pixbuf->get_height());
 	set_keep_above (true);
 	set_position (WIN_POS_CENTER);
@@ -93,10 +93,10 @@ Splash::expose (GdkEventExpose* ev)
 	window->draw_pixbuf (get_style()->get_bg_gc (STATE_NORMAL), pixbuf,
 			     ev->area.x, ev->area.y,
 			     ev->area.x, ev->area.y,
-			     min ((pixbuf->get_width() - ev->area.x), ev->area.width), 
+			     min ((pixbuf->get_width() - ev->area.x), ev->area.width),
 			     min ((pixbuf->get_height() - ev->area.y), ev->area.height),
 			     Gdk::RGB_DITHER_NONE, 0, 0);
-	
+
 	Glib::RefPtr<Gtk::Style> style = darea.get_style();
 	Glib::RefPtr<Gdk::GC> white = style->get_white_gc();
 

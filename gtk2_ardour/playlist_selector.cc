@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004 Paul Davis 
+    Copyright (C) 2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ PlaylistSelector::PlaylistSelector ()
 	: ArdourDialog ("playlist selector")
 {
 	rui = 0;
-	
+
 	set_position (WIN_POS_MOUSE);
 	set_name ("PlaylistSelectorWindow");
 	set_modal(true);
@@ -116,7 +116,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 	select_connection.disconnect ();
 
 	model->clear ();
-	
+
 	session->foreach_playlist (this, &PlaylistSelector::add_playlist_to_map);
 
 	this_ds = rui->get_diskstream();
@@ -126,7 +126,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 	others[columns.text] = _("Other tracks");
 	boost::shared_ptr<Playlist> proxy = others[columns.playlist];
 	proxy.reset ();
-	
+
 	for (DSPL_Map::iterator x = dspl_map.begin(); x != dspl_map.end(); ++x) {
 
 		boost::shared_ptr<Diskstream> ds = session->diskstream_by_id (x->first);
@@ -144,7 +144,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 		} else {
 			nodename = ds->name().c_str();
 		}
-		
+
 		TreeModel::Row row;
 		TreeModel::Row* selected_row = 0;
 		TreePath this_path;
@@ -162,9 +162,9 @@ PlaylistSelector::show_for (RouteUI* ruix)
 		}
 
 		/* Now insert all the playlists for this diskstream/track in a subtree */
-		
+
 		list<boost::shared_ptr<Playlist> > *pls = x->second;
-		
+
 		for (list<boost::shared_ptr<Playlist> >::iterator p = pls->begin(); p != pls->end(); ++p) {
 
 			TreeModel::Row child_row;
@@ -175,9 +175,9 @@ PlaylistSelector::show_for (RouteUI* ruix)
 
 			if (*p == this_ds->playlist()) {
 				selected_row = &child_row;
-			} 
+			}
 		}
-		
+
 		if (selected_row != 0) {
 			tree.get_selection()->select (*selected_row);
 		}
@@ -224,7 +224,7 @@ PlaylistSelector::add_playlist_to_map (boost::shared_ptr<Playlist> pl)
 	if (pl->frozen()) {
 		return;
 	}
-	
+
 	if ((apl = boost::dynamic_pointer_cast<AudioPlaylist> (pl)) == 0) {
 		return;
 	}
@@ -234,7 +234,7 @@ PlaylistSelector::add_playlist_to_map (boost::shared_ptr<Playlist> pl)
 	if ((x = dspl_map.find (apl->get_orig_diskstream_id())) == dspl_map.end()) {
 
 		pair<PBD::ID,list<boost::shared_ptr<Playlist> >*> newp (apl->get_orig_diskstream_id(), new list<boost::shared_ptr<Playlist> >);
-		
+
 		x = dspl_map.insert (dspl_map.end(), newp);
 	}
 
@@ -273,24 +273,24 @@ PlaylistSelector::selection_changed ()
 	}
 
 	if ((playlist = ((*iter)[columns.playlist])) != 0) {
-		
+
 		boost::shared_ptr<AudioTrack> at;
 		boost::shared_ptr<AudioPlaylist> apl;
-		
+
 		if ((at = rui->audio_track()) == 0) {
 			/* eh? */
 			return;
 		}
-		
+
 		if ((apl = boost::dynamic_pointer_cast<AudioPlaylist> (playlist)) == 0) {
 			/* eh? */
 			return;
 		}
-		
+
 		at->diskstream()->use_playlist (apl);
 
 		hide ();
 	}
 
 }
-       
+

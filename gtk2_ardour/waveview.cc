@@ -139,7 +139,7 @@ Glib::PropertyProxy_ReadOnly<void*> WaveView::property_data_src() const
 {
 	return Glib::PropertyProxy_ReadOnly<void*> (this, "data_src");
 }
-Glib::PropertyProxy<uint32_t> WaveView::property_channel() 
+Glib::PropertyProxy<uint32_t> WaveView::property_channel()
 {
 	return Glib::PropertyProxy<uint32_t> (this, "channel");
 }

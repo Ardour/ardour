@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003-2004 Paul Davis 
+    Copyright (C) 2003-2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -83,14 +83,14 @@ Editor::show_editor_mixer (bool yn)
 
 		if (selection->tracks.empty()) {
 
-			if (track_views.empty()) {	
+			if (track_views.empty()) {
 				show_editor_mixer_when_tracks_arrive = true;
 				return;
-			} 
+			}
 
 			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 				RouteTimeAxisView* atv;
-				
+
 				if ((atv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 					r = atv->route();
 					break;
@@ -99,10 +99,10 @@ Editor::show_editor_mixer (bool yn)
 
 		} else {
 			sort_track_selection ();
-			
+
 			for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 				RouteTimeAxisView* atv;
-				
+
 				if ((atv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 					r = atv->route();
 					break;
@@ -126,7 +126,7 @@ Editor::show_editor_mixer (bool yn)
 				current_mixer_strip->set_width_enum (editor_mixer_strip_width, (void*) this);
 			}
 		}
-		
+
 		if (current_mixer_strip->get_parent() == 0) {
 			global_hpacker.pack_start (*current_mixer_strip, Gtk::PACK_SHRINK );
  			global_hpacker.reorder_child (*current_mixer_strip, 0);
@@ -180,7 +180,7 @@ Editor::create_editor_mixer ()
 	current_mixer_strip->WidthChanged.connect (mem_fun(*this, &Editor::ensure_all_elements_drawn));
 #endif
 	current_mixer_strip->set_embedded (true);
-}	
+}
 
 void
 Editor::set_selected_mixer_strip (TimeAxisView& view)
@@ -193,7 +193,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 	}
 
 	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
-	
+
 	if (act) {
 		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
 		if (!tact || !tact->get_active()) {
@@ -210,11 +210,11 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 	}
 
 	/* might be nothing to do */
-	
+
 	if (current_mixer_strip->route() == at->route()) {
 		return;
 	}
-	
+
 	if (created) {
 		current_mixer_strip->set_width_enum (editor_mixer_strip_width, (void*) this);
 	}
@@ -234,7 +234,7 @@ Editor::update_current_screen ()
 		   a visual glitch. */
 		return;
 	}
-	
+
 	if (session && session->engine().running()) {
 
 		nframes64_t const frame = session->audible_frame();
@@ -255,7 +255,7 @@ Editor::update_current_screen ()
 #undef CONTINUOUS_SCROLL
 #ifndef  CONTINUOUS_SCROLL
 				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
-					
+
 					if (session->transport_speed() < 0) {
 						if (frame > (current_page_frames()/2)) {
 							center_screen (frame-(current_page_frames()/2));
@@ -270,11 +270,11 @@ Editor::update_current_screen ()
 				playhead_cursor->set_position (frame);
 
 #else  // CONTINUOUS_SCROLL
-				
-				/* don't do continuous scroll till the new position is in the rightmost quarter of the 
+
+				/* don't do continuous scroll till the new position is in the rightmost quarter of the
 				   editor canvas
 				*/
-				
+
 				if (session->transport_speed()) {
 					double target = ((double)frame - (double)current_page_frames()/2.0) / frames_per_unit;
 					if (target <= 0.0) target = 0.0;
@@ -287,7 +287,7 @@ Editor::update_current_screen ()
 					current = target;
 					horizontal_adjustment.set_value ( current );
 				}
-				
+
 				playhead_cursor->set_position (frame);
 
 #endif // CONTINUOUS_SCROLL
@@ -305,7 +305,7 @@ Editor::update_current_screen ()
 		if (current_mixer_strip) {
 			current_mixer_strip->fast_update ();
 		}
-		
+
 	}
 }
 
@@ -322,9 +322,9 @@ void
 Editor::current_mixer_strip_hidden ()
 {
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		
+
 		RouteTimeAxisView* tmp;
-		
+
 		if ((tmp = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
 			if (tmp->route() == current_mixer_strip->route()) {
 				(*i)->set_selected (false);
@@ -344,7 +344,7 @@ void
 Editor::session_going_away ()
 {
 	_have_idled = false;
-	
+
 	for (vector<sigc::connection>::iterator i = session_connections.begin(); i != session_connections.end(); ++i) {
 		(*i).disconnect ();
 	}
@@ -387,7 +387,7 @@ Editor::session_going_away ()
 
 	editor_list_button.set_active(false);
 	editor_list_button.set_sensitive(false);
-	
+
 	/* clear tempo/meter rulers */
 	remove_metric_marks ();
 	hide_measures ();
@@ -395,9 +395,9 @@ Editor::session_going_away ()
 
 	delete current_bbt_points;
 	current_bbt_points = 0;
-	
+
 	/* get rid of any existing editor mixer strip */
-	
+
 	if (current_mixer_strip) {
 		if (current_mixer_strip->get_parent() != 0) {
 			global_hpacker.remove (*current_mixer_strip);

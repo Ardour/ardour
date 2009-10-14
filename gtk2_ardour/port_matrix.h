@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2009 Paul Davis 
+    Copyright (C) 2002-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ public:
 	ARDOUR::DataType type () const {
 		return _type;
 	}
-	
+
 	void disassociate_all ();
 	void setup_scrollbars ();
 	void popup_menu (
@@ -105,7 +105,7 @@ public:
 	PortGroupList const * ports (int d) const {
 		return &_ports[d];
 	}
-	
+
 	void setup ();
 	virtual void setup_ports (int) = 0;
 	void setup_all_ports ();
@@ -133,7 +133,7 @@ public:
 	virtual void rename_channel (ARDOUR::BundleChannel) {}
 	virtual std::string disassociation_verb () const = 0;
 	virtual std::string channel_noun () const { return _("channel"); }
-	
+
 	enum Result {
 		Cancelled,
 		Accepted
@@ -151,7 +151,7 @@ protected:
 	    inputs and outputs should put outputs in list 0 and inputs in list 1. */
 	PortGroupList _ports[2];
 	ARDOUR::Session& _session;
-	
+
 private:
 
 	void hscroll_changed ();

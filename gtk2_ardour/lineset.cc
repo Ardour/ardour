@@ -179,7 +179,7 @@ LineSet::add_line(double coord, double width, uint32_t color)
 	Line l(coord, width, color);
 
 	Lines::iterator it = std::lower_bound(lines.begin(), lines.end(), l, line_compare);
-	
+
 	/* overlap checking */
 	if (it != lines.end()) {
 		if (l.coord + l.width > it->coord) {
@@ -195,7 +195,7 @@ LineSet::add_line(double coord, double width, uint32_t color)
 		}
 		++it;
 	}
-	
+
 	lines.insert(it, l);
 	region_needs_update(coord, coord + width);
 }
@@ -228,13 +228,13 @@ LineSet::remove_until(double coord)
 {
 	if (!lines.empty()) {
 		double first = lines.front().coord;
-		
+
 		// code
 
 		region_needs_update(first, coord);
 	}
 }
-	
+
 void
 LineSet::remove_from(double coord)
 {
@@ -253,7 +253,7 @@ LineSet::clear()
 	if (!lines.empty()) {
 		double coord1 = lines.front().coord;
 		double coord2 = lines.back().coord + lines.back().width;
-			
+
 		lines.clear();
 		region_needs_update(coord1, coord2);
 	}
@@ -300,10 +300,10 @@ LineSet::line_at(double coord)
 		Line dummy(coord);
 
 		cached_pos = lower_bound(lines.begin(), lines.end(), dummy, line_compare);
-		
+
 		/* The iterator found should point to the element after the one we want. */
 		--cached_pos;
-		
+
 		if (cached_pos != lines.end()) {
 			if (cached_pos->coord <= coord) {
 				if (cached_pos->coord + cached_pos->width >= coord) {
@@ -356,7 +356,7 @@ LineSet::update_lines(bool need_redraw)
 		LineSet::bounds_vfunc(&redraw.x0, &redraw.y0, &redraw.x1, &redraw.y1);
 		i2w(redraw.x0, redraw.y0);
 		i2w(redraw.x1, redraw.y1);
-		
+
 		if (orientation == Vertical) {
 			redraw.x1 = redraw.x0 + update_region2;
 			redraw.x0 += update_region1;
@@ -401,7 +401,7 @@ LineSet::update_bounds()
 	item->y1 = new_b.y0;
 	item->x2 = new_b.x1;
 	item->y2 = new_b.y1;
-	
+
 	/* Update bounding box used in rendering function */
 	cv.w2c(new_b.x0, new_b.y0, bbox.x0, bbox.y0);
 	cv.w2c(new_b.x1, new_b.y1, bbox.x1, bbox.y1);
@@ -428,7 +428,7 @@ LineSet::update_bounds()
 				redraw.y1 = max(old_b.y1, new_b.y1);
 				redraw_request(redraw);
 			}
-			
+
 			if (new_b.x1 > old_b.x1) {
 				// we have a larger area ==> possibly more lines
 				request_lines(old_b.x1, new_b.x1);
@@ -470,7 +470,7 @@ LineSet::update_bounds()
 				redraw.x1 = max(old_b.x1, new_b.x1);
 				redraw_request(redraw);
 			}
-			
+
 			if (new_b.y1 > old_b.y1) {
 				// we have a larger area ==> possibly more lines
 				request_lines(old_b.y1, new_b.y1);
@@ -604,7 +604,7 @@ LineSet::render_vfunc(GnomeCanvasBuf* buf)
 
 	/**
 	 * The first and the last line in this render have to be handled separately from those in between, because those lines
-	 * may be cut off at the ends. 
+	 * may be cut off at the ends.
 	 */
 
 	if (orientation == Vertical) {
@@ -633,7 +633,7 @@ LineSet::render_vfunc(GnomeCanvasBuf* buf)
 		for (; it != end; ++it) {
 			pos0 = ((int) floor(it->coord)) + offset;
 			pos1 = pos0 + ((int) floor(it->width));
-			
+
 			if (pos1 > rect.x0) {
 				pos0 = max(pos0, rect.x0);
 				paint_vert(buf, *it, pos0, rect.y0, pos1, rect.y1);
@@ -641,7 +641,7 @@ LineSet::render_vfunc(GnomeCanvasBuf* buf)
 				break;
 			}
 		}
-		
+
 		// render what's between the first and last lines
 		for (; it != end; ++it) {
 			pos0 = ((int) floor(it->coord)) + offset;
@@ -675,7 +675,7 @@ LineSet::render_vfunc(GnomeCanvasBuf* buf)
 		for (; it != end; ++it) {
 			pos0 = ((int) floor(it->coord)) + offset;
 			pos1 = pos0 + ((int) floor(it->width));
-			
+
 			if (pos1 > rect.y0) {
 				pos0 = max(pos0, rect.y0);
 				paint_horiz(buf, *it, rect.x0, pos0, rect.x1, pos1);
@@ -683,7 +683,7 @@ LineSet::render_vfunc(GnomeCanvasBuf* buf)
 				break;
 			}
 		}
-		
+
 		// render what's between the first and last lines
 		for (; it != end; ++it) {
 			pos0 = ((int) floor(it->coord)) + offset;
@@ -775,7 +775,7 @@ LineSet::region_needs_update(double coord1, double coord2)
  * Don't know why this happens
  */
 bool LineSet::on_event(GdkEvent* /*p1*/)
-{ 
+{
 	return false;
 }
 

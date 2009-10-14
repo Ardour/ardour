@@ -74,10 +74,10 @@ class LevelMeter : public Gtk::HBox
 	struct MeterInfo {
 	    Gtkmm2ext::FastMeter *meter;
 	    gint16                width;
-		int			          length;   
+		int			          length;
 	    bool                  packed;
-	    
-	    MeterInfo() { 
+
+	    MeterInfo() {
 		    meter = 0;
 		    width = 0;
 			length = 0;
@@ -92,7 +92,7 @@ class LevelMeter : public Gtk::HBox
 	float                  max_peak;
 
 	sigc::connection _configuration_connection;
-	
+
 	void hide_all_meters ();
 	gint meter_button_release (GdkEventButton*, uint32_t);
 

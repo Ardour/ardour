@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -41,18 +41,18 @@ public:
 			boost::shared_ptr<ARDOUR::AutomationControl> ac);
 
 	~AutomationController();
-	
+
 	boost::shared_ptr<ARDOUR::AutomationControl> controllable() { return _controllable; }
 
 	Gtk::Adjustment* adjustment() { return _adjustment; }
-	
+
 	void display_effective_value();
 	void value_adjusted();
 
 private:
 	AutomationController (boost::shared_ptr<ARDOUR::AutomationControl> ac, Gtk::Adjustment* adj);
 	std::string get_label (int&);
-	
+
 	void start_touch();
 	void end_touch();
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,14 +42,14 @@ ReturnUI::ReturnUI (Gtk::Window* parent, boost::shared_ptr<Return> r, Session& s
 
 	_hbox.pack_start (_gpm, true, true);
 	set_name ("ReturnUIFrame");
-	
+
 	_vbox.set_spacing (5);
 	_vbox.set_border_width (5);
 
 	_vbox.pack_start (_hbox, false, false, false);
 
 	io = manage (new IOSelector (parent, se, r->output()));
-	
+
 	pack_start (_vbox, false, false);
 
 	pack_start (*io, true, true);
@@ -58,10 +58,10 @@ ReturnUI::ReturnUI (Gtk::Window* parent, boost::shared_ptr<Return> r, Session& s
 
 	_return->set_metering (true);
 	_return->input()->changed.connect (mem_fun (*this, &ReturnUI::ins_changed));
-	
+
 	_gpm.setup_meters ();
 	_gpm.set_fader_name ("ReturnUIFrame");
-	
+
 	// screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (mem_fun (*this, &ReturnUI::update));
 	fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun (*this, &ReturnUI::fast_update));
 }
@@ -97,7 +97,7 @@ ReturnUI::fast_update ()
 		_gpm.update_meters ();
 	}
 }
-	
+
 ReturnUIWindow::ReturnUIWindow (boost::shared_ptr<Return> s, Session& ss)
 	: ArdourDialog (string("Ardour: return ") + s->name())
 {
@@ -109,7 +109,7 @@ ReturnUIWindow::ReturnUIWindow (boost::shared_ptr<Return> s, Session& ss)
 	get_vbox()->pack_start (hpacker);
 
 	set_name ("ReturnUIWindow");
-	
+
 	going_away_connection = s->GoingAway.connect (mem_fun (*this, &ReturnUIWindow::return_going_away));
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
 }

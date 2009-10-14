@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2009 Paul Davis 
+    Copyright (C) 2002-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ PortMatrix::PortMatrix (Window* parent, Session& session, DataType type)
 
 	for (int i = 0; i < 2; ++i) {
 		_ports[i].set_type (type);
-		
+
 		/* watch for the content of _ports[] changing */
 		_ports[i].Changed.connect (mem_fun (*this, &PortMatrix::setup));
 	}
@@ -78,13 +78,13 @@ PortMatrix::PortMatrix (Window* parent, Session& session, DataType type)
 
 	/* and also ports */
 	_session.engine().PortRegisteredOrUnregistered.connect (mem_fun (*this, &PortMatrix::setup_all_ports));
-	
+
 	reconnect_to_routes ();
 
 	attach (*_body, 0, 1, 0, 1);
 	attach (_vscroll, 1, 2, 0, 1, SHRINK);
 	attach (_hscroll, 0, 1, 1, 2, FILL | EXPAND, SHRINK);
-	
+
 	show_all ();
 }
 
@@ -140,7 +140,7 @@ PortMatrix::set_type (DataType t)
 	_type = t;
 	_ports[0].set_type (_type);
 	_ports[1].set_type (_type);
-	
+
 	setup_all_ports ();
 }
 
@@ -185,7 +185,7 @@ PortMatrix::disassociate_all ()
 		for (uint32_t j = 0; j < i->bundle->nchannels(); ++j) {
 			for (PortGroup::BundleList::iterator k = b.begin(); k != b.end(); ++k) {
 				for (uint32_t l = 0; l < k->bundle->nchannels(); ++l) {
-						
+
 					BundleChannel c[2] = {
 						BundleChannel (i->bundle, j),
 						BundleChannel (k->bundle, l)
@@ -217,7 +217,7 @@ PortMatrix::select_arrangement ()
 	   maintain notional `signal flow' vaguely from left to right.  Subclasses
 	   should choose where to put ports based on signal flowing from _ports[0]
 	   to _ports[1] */
-	
+
 	if (N[0] > N[1]) {
 
 		_row_index = 0;
@@ -254,12 +254,12 @@ PortMatrix::popup_menu (
 	)
 {
 	using namespace Menu_Helpers;
-	
+
 	delete _menu;
 
 	_menu = new Menu;
 	_menu->set_name ("ArdourContextMenu");
-	
+
 	MenuList& items = _menu->items ();
 
 	boost::shared_ptr<PortGroup> pg[2];
@@ -286,8 +286,8 @@ PortMatrix::popup_menu (
 				snprintf (buf, sizeof (buf), _("Add %s"), channel_noun().c_str());
 				sub.push_back (MenuElem (buf, bind (mem_fun (*this, &PortMatrix::add_channel_proxy), w)));
 			}
-			
-			
+
+
 			if (can_rename_channels (bc[dim].bundle)) {
 				snprintf (buf, sizeof (buf), _("Rename '%s'..."), bc[dim].bundle->channel_name (bc[dim].channel).c_str());
 				sub.push_back (
@@ -299,7 +299,7 @@ PortMatrix::popup_menu (
 			}
 
 			sub.push_back (SeparatorElem ());
-			
+
 			if (can_remove_channels (bc[dim].bundle)) {
 				snprintf (buf, sizeof (buf), _("Remove '%s'"), bc[dim].bundle->channel_name (bc[dim].channel).c_str());
 				sub.push_back (
@@ -308,7 +308,7 @@ PortMatrix::popup_menu (
 						bind (mem_fun (*this, &PortMatrix::remove_channel_proxy), w, bc[dim].channel)
 						)
 					);
-			}			
+			}
 
 			if (_show_only_bundles) {
 				snprintf (buf, sizeof (buf), _("%s all"), disassociation_verb().c_str());
@@ -319,7 +319,7 @@ PortMatrix::popup_menu (
 					bc[dim].bundle->channel_name (bc[dim].channel).c_str()
 					);
 			}
-			
+
 			sub.push_back (
 				MenuElem (buf, bind (mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, bc[dim].channel, dim))
 				);
@@ -335,13 +335,13 @@ PortMatrix::popup_menu (
 	}
 
 	need_separator = false;
-	
+
 	for (int dim = 0; dim < 2; ++dim) {
 
 		if (pg[dim]) {
 
 			boost::weak_ptr<PortGroup> wp (pg[dim]);
-			
+
 			if (pg[dim]->visible()) {
 				if (dim == 0) {
 					if (pg[dim]->name.empty()) {
@@ -389,7 +389,7 @@ PortMatrix::popup_menu (
 	_inhibit_toggle_show_only_bundles = true;
 	i->set_active (!_show_only_bundles);
 	_inhibit_toggle_show_only_bundles = false;
-	
+
 	_menu->popup (1, t);
 }
 
@@ -456,7 +456,7 @@ void
 PortMatrix::setup_all_ports ()
 {
 	ENSURE_GUI_THREAD (mem_fun (*this, &PortMatrix::setup_all_ports));
-	
+
 	setup_ports (0);
 	setup_ports (1);
 }
@@ -467,7 +467,7 @@ PortMatrix::toggle_show_only_bundles ()
 	if (_inhibit_toggle_show_only_bundles) {
 		return;
 	}
-	
+
 	_show_only_bundles = !_show_only_bundles;
 	_body->setup ();
 	setup_scrollbars ();
@@ -512,7 +512,7 @@ PortMatrix::on_scroll_event (GdkEventScroll* ev)
 {
 	double const h = _hscroll.get_value ();
 	double const v = _vscroll.get_value ();
-	
+
 	switch (ev->direction) {
 	case GDK_SCROLL_UP:
 		_vscroll.set_value (v - PortMatrixComponent::grid_spacing ());

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ private:
 	bool selection_filter (Glib::RefPtr<Gtk::TreeModel> const &, Gtk::TreeModel::Path const &, bool);
 
 	struct ModelColumns : public Gtk::TreeModel::ColumnRecord {
-		ModelColumns() { 
+		ModelColumns() {
 			add (text);
 			add (visible);
 			add (rec_enabled);
@@ -92,7 +92,7 @@ private:
 	};
 
 	Gtk::ScrolledWindow _scroller;
-	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Route> > _display; 
+	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Route> > _display;
 	Glib::RefPtr<Gtk::ListStore> _model;
 	ModelColumns _columns;
 	bool _ignore_reorder;

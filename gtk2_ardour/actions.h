@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -76,35 +76,35 @@ class ActionManager
 
 	static void add_action_group (Glib::RefPtr<Gtk::ActionGroup>);
 
-	static Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, 
+	static Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
 						   const char * name, const char * label);
-	static Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, 
-						   const char * name, const char * label, sigc::slot<void> sl, 
+	static Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
+						   const char * name, const char * label, sigc::slot<void> sl,
 						   guint key, Gdk::ModifierType mods);
-	static Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, 
+	static Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
 						   const char * name, const char * label, sigc::slot<void> sl);
-	
-	static Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group&, 
-							 const char * name, const char * label, sigc::slot<void> sl, 
+
+	static Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group&,
+							 const char * name, const char * label, sigc::slot<void> sl,
 							 guint key, Gdk::ModifierType mods);
-	static Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group&, 
+	static Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group&,
 							 const char * name, const char * label, sigc::slot<void> sl);
-	
-	static Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group, 
-							  const char * name, const char * label, sigc::slot<void> sl, 
+
+	static Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
+							  const char * name, const char * label, sigc::slot<void> sl,
 							  guint key, Gdk::ModifierType mods);
-	static Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group, 
+	static Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
 							  const char * name, const char * label, sigc::slot<void> sl);
 
 	static bool lookup_entry (const Glib::ustring accel_path, Gtk::AccelKey& key);
 
-	static void get_all_actions (std::vector<std::string>& names, 
-				     std::vector<std::string>& paths, 
-				     std::vector<std::string>& keys, 
+	static void get_all_actions (std::vector<std::string>& names,
+				     std::vector<std::string>& paths,
+				     std::vector<std::string>& keys,
 				     std::vector<Gtk::AccelKey>& bindings);
 
-	static void get_all_actions (std::vector<std::string>& groups, 
-				     std::vector<std::string>& paths, 
+	static void get_all_actions (std::vector<std::string>& groups,
+				     std::vector<std::string>& paths,
 				     std::vector<Gtk::AccelKey>& bindings);
 
 	static void uncheck_toggleaction (const char * actionname);

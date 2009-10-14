@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ class TimeAxisViewItem : public Selectable
 {
    public:
 	virtual ~TimeAxisViewItem() ;
-    
+
     /**
      * Set the position of this item upon the timeline to the specified value
      *
@@ -48,14 +48,14 @@ class TimeAxisViewItem : public Selectable
      * @return true if the position change was a success, false otherwise
      */
     virtual bool set_position(nframes64_t pos, void* src, double* delta = 0) ;
-    
+
     /**
      * Return the position of this item upon the timeline
      *
      * @return the position of this item
      */
-    nframes64_t get_position() const ; 
-    
+    nframes64_t get_position() const ;
+
     /**
      * Sets the duration of this item
      *
@@ -64,13 +64,13 @@ class TimeAxisViewItem : public Selectable
      * @return true if the duration change was succesful, false otherwise
      */
     virtual bool set_duration(nframes64_t dur, void* src) ;
-    
+
     /**
      * Returns the duration of this item
      *
      */
     nframes64_t get_duration() const ;
-    
+
     /**
      * Sets the maximum duration that this item make have.
      *
@@ -78,14 +78,14 @@ class TimeAxisViewItem : public Selectable
      * @param src the identity of the object that initiated the change
      */
     virtual void set_max_duration(nframes64_t dur, void* src) ;
-    
+
     /**
      * Returns the maxmimum duration that this item may be set to
      *
      * @return the maximum duration that this item may be set to
      */
     nframes64_t get_max_duration() const ;
-    
+
     /**
      * Sets the minimu duration that this item may be set to
      *
@@ -93,14 +93,14 @@ class TimeAxisViewItem : public Selectable
      * @param src the identity of the object that initiated the change
      */
     virtual void set_min_duration(nframes64_t dur, void* src) ;
-    
+
     /**
      * Returns the minimum duration that this item mey be set to
      *
      * @return the nimum duration that this item mey be set to
      */
     nframes64_t get_min_duration() const ;
-    
+
     /**
      * Sets whether the position of this Item is locked to its current position
      * Locked items cannot be moved until the item is unlocked again.
@@ -109,7 +109,7 @@ class TimeAxisViewItem : public Selectable
      * @param src the identity of the object that initiated the change
      */
     virtual void set_position_locked(bool yn, void* src) ;
-    
+
     /**
      * Returns whether this item is locked to its current position
      *
@@ -117,7 +117,7 @@ class TimeAxisViewItem : public Selectable
      *         false otherwise
      */
     bool get_position_locked() const ;
-    
+
     /**
      * Sets whether the Maximum Duration constraint is active and should be enforced
      *
@@ -125,14 +125,14 @@ class TimeAxisViewItem : public Selectable
      * @param src the identity of the object that initiated the change
      */
     void set_max_duration_active(bool active, void* src) ;
-    
+
     /**
      * Returns whether the Maximum Duration constraint is active and should be enforced
      *
      * @return true if the maximum duration constraint is active, false otherwise
      */
     bool get_max_duration_active() const ;
-    
+
     /**
      * Sets whether the Minimum Duration constraint is active and should be enforced
      *
@@ -140,14 +140,14 @@ class TimeAxisViewItem : public Selectable
      * @param src the identity of the object that initiated the change
      */
     void set_min_duration_active(bool active, void* src) ;
-    
+
     /**
      * Returns whether the Maximum Duration constraint is active and should be enforced
      *
      * @return true if the maximum duration constraint is active, false otherwise
      */
     bool get_min_duration_active() const ;
-    
+
     /**
      * Set the name/Id of this item.
      *
@@ -155,14 +155,14 @@ class TimeAxisViewItem : public Selectable
      * @param src the identity of the object that initiated the change
      */
     void set_item_name(std::string new_name, void* src) ;
-    
+
     /**
      * Returns the name/id of this item
      *
      * @return the name/id of this item
      */
     virtual std::string get_item_name() const ;
-    
+
     /**
      * Set to true to indicate that this item is currently selected
      *
@@ -179,20 +179,20 @@ class TimeAxisViewItem : public Selectable
 
     void set_sensitive (bool yn) { _sensitive = yn; }
     bool sensitive () const { return _sensitive; }
-    
+
     //---------------------------------------------------------------------------------------//
     // Parent Component Methods
-    
+
     /**
      * Returns the TimeAxisView that this item is upon
      *
      * @return the timeAxisView that this item is placed upon
      */
     TimeAxisView& get_time_axis_view() ;
-    
+
     //---------------------------------------------------------------------------------------//
     // ui methods & data
-    
+
     /**
      * Sets the displayed item text
      * This item is the visual text name displayed on the canvas item, this can be different to the name of the item
@@ -200,7 +200,7 @@ class TimeAxisViewItem : public Selectable
      * @param new_name the new name text to display
      */
     void set_name_text(const Glib::ustring& new_name) ;
-    
+
     /**
      * Set the height of this item
      *
@@ -211,27 +211,27 @@ class TimeAxisViewItem : public Selectable
     void set_y (double);
 
     /**
-     * 
+     *
      */
     void set_color (Gdk::Color const &);
-    
+
     /**
-     * 
+     *
      */
     ArdourCanvas::Item* get_canvas_frame() ;
 
     /**
-     * 
+     *
      */
     ArdourCanvas::Group* get_canvas_group();
 
     /**
-     * 
+     *
      */
     ArdourCanvas::Item* get_name_highlight();
 
     /**
-     * 
+     *
      */
     ArdourCanvas::Pixbuf* get_name_pixbuf();
 
@@ -249,7 +249,7 @@ class TimeAxisViewItem : public Selectable
      * @param spu the new samples per unit value
      */
     virtual void set_samples_per_unit(double spu) ;
-    
+
     /**
      * Returns the current samples per unit of this item
      *
@@ -261,7 +261,7 @@ class TimeAxisViewItem : public Selectable
     virtual void raise_to_top () { return; }
     virtual void lower () { return; }
     virtual void lower_to_bottom () { return; }
-    
+
     /**
      * returns true if the name area should respond to events.
      */
@@ -290,7 +290,7 @@ class TimeAxisViewItem : public Selectable
      * @param src the identity of the object that initiated the change
      */
     virtual void remove_this_item(void* src) ;
-    
+
     /**
      * Emitted when this Group has been removed
      * This is different to the GoingAway signal in that this signal
@@ -300,25 +300,25 @@ class TimeAxisViewItem : public Selectable
      */
 
     sigc::signal<void,std::string,void*> ItemRemoved ;
-    
+
     /** Emitted when the name/Id of this item is changed */
     sigc::signal<void,std::string,std::string,void*> NameChanged ;
-    
+
     /** Emiited when the position of this item changes */
     sigc::signal<void,nframes64_t,void*> PositionChanged ;
-    
+
     /** Emitted when the position lock of this item is changed */
     sigc::signal<void,bool,void*> PositionLockChanged ;
-    
+
     /** Emitted when the duration of this item changes */
     sigc::signal<void,nframes64_t,void*> DurationChanged ;
-    
+
     /** Emitted when the maximum item duration is changed */
     sigc::signal<void,nframes64_t,void*> MaxDurationChanged ;
-    
+
     /** Emitted when the mionimum item duration is changed */
     sigc::signal<void,nframes64_t,void*> MinDurationChanged ;
-    
+
     enum Visibility {
 	    ShowFrame = 0x1,
 	    ShowNameHighlight = 0x2,
@@ -341,30 +341,30 @@ class TimeAxisViewItem : public Selectable
      * @param start the start point of this item
      * @param duration the duration of this item
      */
-    TimeAxisViewItem(const std::string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color const & base_color, 
+    TimeAxisViewItem(const std::string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color const & base_color,
 		     nframes64_t start, nframes64_t duration, bool recording = false, Visibility v = Visibility (0));
 
     TimeAxisViewItem (const TimeAxisViewItem& other);
 
     void init (const std::string& it_name, double spu, Gdk::Color const & base_color, nframes64_t start, nframes64_t duration, Visibility vis);
-    
+
     /**
      * Calculates some contrasting color for displaying various parts of this item, based upon the base color
      *
      * @param color the base color of the item
      */
     virtual void compute_colors (Gdk::Color const & color);
-    
+
     /**
      * convenience method to set the various canvas item colors
      */
     virtual void set_colors() ;
-    
+
     /**
      * Sets the frame color depending on whether this item is selected
      */
     virtual void set_frame_color() ;
-    
+
     /**
      * Sets the colors of the start and end trim handle depending on object state
      *
@@ -383,34 +383,34 @@ class TimeAxisViewItem : public Selectable
      * @param src the identity of the object that initiated the change
      */
     static gint idle_remove_this_item(TimeAxisViewItem* item, void* src) ;
-    
+
     /** The time axis that this item is upon */
     TimeAxisView& trackview ;
-    
+
     /** indicates whether this item is locked to its current position */
     bool position_locked ;
-    
+
     /** The posotion of this item on the timeline */
     nframes64_t frame_position ;
-    
+
     /** the duration of this item upon the timeline */
     nframes64_t item_duration ;
-    
+
     /** the maximum duration that we allow this item to take */
     nframes64_t max_item_duration ;
-    
+
     /** the minimu duration that we allow this item to take */
     nframes64_t min_item_duration ;
-    
+
     /** indicates whether this Max Duration constraint is active */
     bool max_duration_active ;
-    
+
     /** indicates whether this Min Duration constraint is active */
     bool min_duration_active ;
-    
+
     /** the curretn samples per canvas unit */
     double samples_per_unit ;
-    
+
     /** indicates if this item is currently selected */
     bool selected ;
 
@@ -419,13 +419,13 @@ class TimeAxisViewItem : public Selectable
 
     /** should the item respond to events */
     bool _sensitive;
-    
+
     /**
      * The unique item name of this Item
      * Each item upon a time axis must have a unique id
      */
     std::string item_name ;
-    
+
     /**
      * true if the name should respond to events
      */
@@ -446,14 +446,14 @@ class TimeAxisViewItem : public Selectable
     uint32_t selected_frame_color_g ;
     uint32_t selected_frame_color_b ;
     uint32_t label_color ;
-    
+
     uint32_t handle_color_r ;
     uint32_t handle_color_g ;
     uint32_t handle_color_b ;
     uint32_t lock_handle_color_r ;
     uint32_t lock_handle_color_g ;
     uint32_t lock_handle_color_b ;
-    
+
     ArdourCanvas::Group*      group;
     ArdourCanvas::SimpleRect* vestigial_frame;
     ArdourCanvas::SimpleRect* frame;

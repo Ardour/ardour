@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,12 +63,12 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
 	HBox* hbox = manage (new HBox);
 	hbox->set_spacing (6);
 	l = manage (new Label (_("Name:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false ));
-	
+
 	hbox->pack_start (*l, false, true);
 	hbox->pack_start (_name, true, true);
 
 	vbox->pack_start (*hbox, false, true);
- 
+
 	VBox* options_box = manage (new VBox);
 	options_box->set_spacing (6);
 
@@ -88,7 +88,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
 	_edit.set_active (_group->property (RouteGroup::Edit));
 
 	gain_toggled ();
-	
+
 	Table* table = manage (new Table (8, 3, false));
 	table->set_row_spacings	(6);
 

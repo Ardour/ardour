@@ -19,7 +19,7 @@ CanvasHit::on_event(GdkEvent* ev)
 	}
 }
 
-void 
+void
 CanvasHit::move_event(double dx, double dy)
 {
 	move_by (dx, dy);

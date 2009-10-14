@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -139,7 +139,7 @@ SndFileSource::SndFileSource (Session& s, const ustring& path, bool embedded,
 		fmt |= SF_FORMAT_PCM_16;
 		break;
 	}
-	
+
 	_info.channels = 1;
 	_info.samplerate = rate;
 	_info.format = fmt;
@@ -168,7 +168,7 @@ SndFileSource::SndFileSource (Session& s, const ustring& path, bool embedded,
 	}
 }
 
-void 
+void
 SndFileSource::init_sndfile ()
 {
 	ustring file;
@@ -194,7 +194,7 @@ SndFileSource::init_sndfile ()
 	_capture_end = false;
 	file_pos = 0;
 
-	if (destructive()) {	
+	if (destructive()) {
 		xfade_buf = new Sample[xfade_frames];
 		_timeline_position = header_position_offset;
 	}
@@ -214,7 +214,7 @@ SndFileSource::open ()
 		   so we don't want to see this message.
 		*/
 
-		error << string_compose(_("SndFileSource: cannot open file \"%1\" for %2 (%3)"), 
+		error << string_compose(_("SndFileSource: cannot open file \"%1\" for %2 (%3)"),
 					_path, (writable() ? "read+write" : "reading"), errbuf) << endmsg;
 #endif
 		return -1;
@@ -234,7 +234,7 @@ SndFileSource::open ()
 	if (!_broadcast_info) {
 		_broadcast_info = new BroadcastInfo;
 	}
-	
+
 	bool bwf_info_exists = _broadcast_info->load_from_file (sf);
 
 	set_timeline_position (bwf_info_exists ? _broadcast_info->get_time_reference() : header_position_offset);
@@ -274,7 +274,7 @@ SndFileSource::~SndFileSource ()
 }
 
 float
-SndFileSource::sample_rate () const 
+SndFileSource::sample_rate () const
 {
 	return _info.samplerate;
 }
@@ -290,22 +290,22 @@ SndFileSource::read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) const
 	if (start > _length) {
 
 		/* read starts beyond end of data, just memset to zero */
-		
+
 		file_cnt = 0;
 
 	} else if (start + cnt > _length) {
-		
+
 		/* read ends beyond end of data, read some, memset the rest */
-		
+
 		file_cnt = _length - start;
 
 	} else {
-		
+
 		/* read is entirely within data */
 
 		file_cnt = cnt;
 	}
-	
+
 	if (file_cnt != cnt) {
 		nframes_t delta = cnt - file_cnt;
 		memset (dst+file_cnt, 0, sizeof (Sample) * delta);
@@ -319,7 +319,7 @@ SndFileSource::read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) const
 			error << string_compose(_("SndFileSource: could not seek to frame %1 within %2 (%3)"), start, _name.substr (1), errbuf) << endmsg;
 			return 0;
 		}
-		
+
 		if (_info.channels == 1) {
 			nframes_t ret = sf_read_float (sf, dst, file_cnt);
 			_read_data_count = ret * sizeof(float);
@@ -335,24 +335,24 @@ SndFileSource::read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) const
 	real_cnt = cnt * _info.channels;
 
 	Sample* interleave_buf = get_interleave_buffer (real_cnt);
-	
+
 	nread = sf_read_float (sf, interleave_buf, real_cnt);
 	ptr = interleave_buf + _channel;
 	nread /= _info.channels;
-	
+
 	/* stride through the interleaved data */
-	
+
 	for (int32_t n = 0; n < nread; ++n) {
 		dst[n] = *ptr;
 		ptr += _info.channels;
 	}
 
 	_read_data_count = cnt * sizeof(float);
-		
+
 	return nread;
 }
 
-nframes_t 
+nframes_t
 SndFileSource::write_unlocked (Sample *data, nframes_t cnt)
 {
 	if (destructive()) {
@@ -362,7 +362,7 @@ SndFileSource::write_unlocked (Sample *data, nframes_t cnt)
 	}
 }
 
-nframes_t 
+nframes_t
 SndFileSource::nondestructive_write_unlocked (Sample *data, nframes_t cnt)
 {
 	if (!writable()) {
@@ -375,7 +375,7 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, nframes_t cnt)
 		/*NOTREACHED*/
 		return 0;
 	}
-	
+
 	nframes_t oldlen;
 	int32_t frame_pos = _length;
 
@@ -413,28 +413,28 @@ SndFileSource::destructive_write_unlocked (Sample* data, nframes_t cnt)
 
 		_capture_start = false;
 		_capture_end = false;
-		
+
 		/* move to the correct location place */
 		file_pos = capture_start_frame - _timeline_position;
-		
+
 		// split cnt in half
 		nframes_t subcnt = cnt / 2;
 		nframes_t ofilepos = file_pos;
-		
+
 		// fade in
 		if (crossfade (data, subcnt, 1) != subcnt) {
 			return 0;
 		}
-		
+
 		file_pos += subcnt;
 		Sample * tmpdata = data + subcnt;
-		
+
 		// fade out
 		subcnt = cnt - subcnt;
 		if (crossfade (tmpdata, subcnt, 0) != subcnt) {
 			return 0;
 		}
-		
+
 		file_pos = ofilepos; // adjusted below
 
 	} else if (_capture_start) {
@@ -445,14 +445,14 @@ SndFileSource::destructive_write_unlocked (Sample* data, nframes_t cnt)
 
 		_capture_start = false;
 		_capture_end = false;
-		
+
 		/* move to the correct location place */
 		file_pos = capture_start_frame - _timeline_position;
 
 		if (crossfade (data, cnt, 1) != cnt) {
 			return 0;
 		}
-		
+
 	} else if (_capture_end) {
 
 		/* end of capture both occur within the data we are writing,
@@ -461,7 +461,7 @@ SndFileSource::destructive_write_unlocked (Sample* data, nframes_t cnt)
 
 		_capture_start = false;
 		_capture_end = false;
-		
+
 		if (crossfade (data, cnt, 0) != cnt) {
 			return 0;
 		}
@@ -483,20 +483,20 @@ SndFileSource::destructive_write_unlocked (Sample* data, nframes_t cnt)
 	}
 
 	file_pos += cnt;
-	
+
 	return cnt;
 }
 
 int
 SndFileSource::update_header (sframes_t when, struct tm& now, time_t tnow)
-{	
+{
 	set_timeline_position (when);
 
 	if (_flags & Broadcast) {
 		if (setup_broadcast_info (when, now, tnow)) {
 			return -1;
 		}
-	} 
+	}
 
 	return flush_header ();
 }
@@ -525,9 +525,9 @@ SndFileSource::setup_broadcast_info (sframes_t /*when*/, struct tm& now, time_t 
 
 	_broadcast_info->set_originator_ref (_session);
 	_broadcast_info->set_origination_time (&now);
-	
+
 	/* now update header position taking header offset into account */
-	
+
 	set_header_timeline_position ();
 
 	if (!_broadcast_info->write_to_file (sf)) {
@@ -570,11 +570,11 @@ SndFileSource::write_float (Sample* data, sframes_t frame_pos, nframes_t cnt)
 		error << string_compose (_("%1: cannot seek to %2 (libsndfile error: %3"), _path, frame_pos, errbuf) << endmsg;
 		return 0;
 	}
-	
+
 	if (sf_writef_float (sf, data, cnt) != (ssize_t) cnt) {
 		return 0;
 	}
-	
+
 	return cnt;
 }
 
@@ -608,7 +608,7 @@ SndFileSource::clear_capture_marks ()
 {
 	_capture_start = false;
 	_capture_end = false;
-}	
+}
 
 void
 SndFileSource::mark_capture_start (sframes_t pos)
@@ -650,26 +650,26 @@ SndFileSource::crossfade (Sample* data, nframes_t cnt, int fade_in)
 	}
 
 	if (fade_position > _length) {
-		
+
 		/* read starts beyond end of data, just memset to zero */
-		
+
 		file_cnt = 0;
 
 	} else if (fade_position + xfade > _length) {
-		
+
 		/* read ends beyond end of data, read some, memset the rest */
-		
+
 		file_cnt = _length - fade_position;
 
 	} else {
-		
+
 		/* read is entirely within data */
 
 		file_cnt = xfade;
 	}
 
 	if (file_cnt) {
-		
+
 		if ((retval = read_unlocked (xfade_buf, fade_position, file_cnt)) != (ssize_t) file_cnt) {
 			if (retval >= 0 && errno == EAGAIN) {
 				/* XXX - can we really trust that errno is meaningful here?  yes POSIX, i'm talking to you.
@@ -680,13 +680,13 @@ SndFileSource::crossfade (Sample* data, nframes_t cnt, int fade_in)
 				return 0;
 			}
 		}
-	} 
+	}
 
 	if (file_cnt != xfade) {
 		nframes_t delta = xfade - file_cnt;
 		memset (xfade_buf+file_cnt, 0, sizeof (Sample) * delta);
 	}
-	
+
 	if (nofade && !fade_in) {
 		if (write_float (data, file_pos, nofade) != nofade) {
 			error << string_compose(_("SndFileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
@@ -699,11 +699,11 @@ SndFileSource::crossfade (Sample* data, nframes_t cnt, int fade_in)
 		nframes_t n;
 
 		/* use the standard xfade curve */
-		
+
 		if (fade_in) {
 
 			/* fade new material in */
-			
+
 			for (n = 0; n < xfade; ++n) {
 				xfade_buf[n] = (xfade_buf[n] * out_coefficient[n]) + (fade_data[n] * in_coefficient[n]);
 			}
@@ -712,7 +712,7 @@ SndFileSource::crossfade (Sample* data, nframes_t cnt, int fade_in)
 
 
 			/* fade new material out */
-			
+
 			for (n = 0; n < xfade; ++n) {
 				xfade_buf[n] = (xfade_buf[n] * in_coefficient[n]) + (fade_data[n] * out_coefficient[n]);
 			}
@@ -728,7 +728,7 @@ SndFileSource::crossfade (Sample* data, nframes_t cnt, int fade_in)
 		compute_equal_power_fades (xfade, in, out);
 
 		for (nframes_t n = 0; n < xfade; ++n) {
-			xfade_buf[n] = (xfade_buf[n] * out[n]) + (fade_data[n] * in[n]);		
+			xfade_buf[n] = (xfade_buf[n] * out[n]) + (fade_data[n] * in[n]);
 		}
 
 	} else if (xfade) {
@@ -743,7 +743,7 @@ SndFileSource::crossfade (Sample* data, nframes_t cnt, int fade_in)
 			return 0;
 		}
 	}
-	
+
 	if (fade_in && nofade) {
 		if (write_float (data + xfade, file_pos + xfade, nofade) != nofade) {
 			error << string_compose(_("SndFileSource: \"%1\" bad write (%2)"), _path, strerror (errno)) << endmsg;
@@ -800,12 +800,12 @@ void
 SndFileSource::set_timeline_position (int64_t pos)
 {
 	// destructive track timeline postion does not change
-	// except at instantion or when header_position_offset 
+	// except at instantion or when header_position_offset
 	// (session start) changes
 
 	if (!destructive()) {
 		AudioFileSource::set_timeline_position (pos);
-	} 
+	}
 }
 
 int
@@ -817,7 +817,7 @@ SndFileSource::get_soundfile_info (const ustring& path, SoundFileInfo& info, str
 
 	sf_info.format = 0; // libsndfile says to clear this before sf_open().
 
-	if ((sf = sf_open ((char*) path.c_str(), SFM_READ, &sf_info)) == 0) { 
+	if ((sf = sf_open ((char*) path.c_str(), SFM_READ, &sf_info)) == 0) {
 		char errbuf[256];
 		error_msg = sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 		return false;

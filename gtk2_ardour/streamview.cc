@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001, 2006 Paul Davis 
+    Copyright (C) 2001, 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 	canvas_rect->property_y2() = (double) tv.current_height();
 	canvas_rect->raise(1); // raise above tempo lines
 
-	canvas_rect->property_outline_what() = (guint32) (0x2|0x8);  // outline RHS and bottom 
+	canvas_rect->property_outline_what() = (guint32) (0x2|0x8);  // outline RHS and bottom
 
 	canvas_rect->signal_event().connect (bind (
 			mem_fun (_trackview.editor(), &PublicEditor::canvas_stream_view_event),
@@ -88,7 +88,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 				mem_fun (*this, &StreamView::rec_enable_changed));
 		_trackview.session().RecordStateChanged.connect (
 				mem_fun (*this, &StreamView::sess_rec_enable_changed));
-	} 
+	}
 
 	ColorsChanged.connect (mem_fun (*this, &StreamView::color_handler));
 }
@@ -96,9 +96,9 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 StreamView::~StreamView ()
 {
 	undisplay_diskstream ();
-	
+
 	delete canvas_rect;
-	
+
 	if (owns_canvas_group) {
 		delete canvas_group;
 	}
@@ -137,11 +137,11 @@ StreamView::set_height (double h)
 	update_contents_height ();
 
 	HeightChanged ();
-	
+
 	return 0;
 }
 
-int 
+int
 StreamView::set_samples_per_unit (gdouble spp)
 {
 	RegionViewList::iterator i;
@@ -158,7 +158,7 @@ StreamView::set_samples_per_unit (gdouble spp)
 
 	for (vector<RecBoxInfo>::iterator xi = rec_rects.begin(); xi != rec_rects.end(); ++xi) {
 		RecBoxInfo &recbox = (*xi);
-		
+
 		gdouble xstart = _trackview.editor().frame_to_pixel (recbox.start);
 		gdouble xend = _trackview.editor().frame_to_pixel (recbox.start + recbox.length);
 
@@ -175,7 +175,7 @@ void
 StreamView::add_region_view_weak (boost::weak_ptr<Region> r)
 {
 	boost::shared_ptr<Region> sp (r.lock());
-	
+
 	if (sp) {
 		add_region_view (sp);
 	}
@@ -186,9 +186,9 @@ void
 StreamView::add_region_view (boost::shared_ptr<Region> r)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::add_region_view), r));
-	
+
 	add_region_view_internal (r, true);
-	
+
 	if (_layer_display == Stacked) {
 		update_contents_height ();
 	}
@@ -299,7 +299,7 @@ void
 StreamView::playlist_modified_weak (boost::weak_ptr<Diskstream> ds)
 {
 	boost::shared_ptr<Diskstream> sp (ds.lock());
-	
+
 	if (sp) {
 		playlist_modified (sp);
 	}
@@ -344,7 +344,7 @@ StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 			i != playlist_connections.end(); ++i) {
 		(*i).disconnect();
 	}
-	
+
 	playlist_connections.clear();
 	undisplay_diskstream ();
 
@@ -354,9 +354,9 @@ StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 	update_coverage_frames ();
 
 	ds->playlist()->set_explicit_relayering (_layer_display == Stacked);
-	
+
 	/* draw it */
-	
+
 	redisplay_diskstream ();
 
 	/* catch changes */
@@ -398,7 +398,7 @@ StreamView::apply_color (Gdk::Color& color, ColorTarget target)
 			(*i)->set_color (region_color);
 		}
 		break;
-		
+
 	case StreamBaseColor:
 		stream_base_color = RGBA_TO_UINT (
 			color.get_red_p(), color.get_green_p(), color.get_blue_p(), 255);
@@ -451,28 +451,28 @@ StreamView::update_rec_box ()
 		nframes_t at = _trackview.get_diskstream()->current_capture_end();
 		double xstart;
 		double xend;
-		
+
 		switch (_trackview.track()->mode()) {
-		
+
 		case NonLayered:
 		case Normal:
 			rect.length = at - rect.start;
 			xstart = _trackview.editor().frame_to_pixel (rect.start);
 			xend = _trackview.editor().frame_to_pixel (at);
 			break;
-			
+
 		case Destructive:
 			rect.length = 2;
 			xstart = _trackview.editor().frame_to_pixel (_trackview.get_diskstream()->current_capture_start());
 			xend = _trackview.editor().frame_to_pixel (at);
 			break;
 		}
-		
+
 		rect.rectangle->property_x1() = xstart;
 		rect.rectangle->property_x2() = xend;
 	}
 }
-	
+
 RegionView*
 StreamView::find_view (boost::shared_ptr<const Region> region)
 {
@@ -484,7 +484,7 @@ StreamView::find_view (boost::shared_ptr<const Region> region)
 	}
 	return 0;
 }
-	
+
 void
 StreamView::foreach_regionview (sigc::slot<void,RegionView*> slot)
 {
@@ -499,9 +499,9 @@ StreamView::set_selected_regionviews (RegionSelection& regions)
 	bool selected;
 
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		
+
 		selected = false;
-		
+
 		for (RegionSelection::iterator ii = regions.begin(); ii != regions.end(); ++ii) {
 			if (*i == *ii) {
 				selected = true;
@@ -518,13 +518,13 @@ StreamView::get_selectables (nframes_t start, nframes_t end, double top, double 
 {
 	layer_t min_layer = 0;
 	layer_t max_layer = 0;
-	
+
 	if (_layer_display == Stacked) {
 		double const c = child_height ();
 		min_layer = _layers - ((bottom - _trackview.y_position()) / c);
 		max_layer = _layers - ((top - _trackview.y_position()) / c);
 	}
-	
+
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 
 		bool layer_ok = true;
@@ -533,7 +533,7 @@ StreamView::get_selectables (nframes_t start, nframes_t end, double top, double 
 			layer_t const l = (*i)->region()->layer ();
 			layer_ok = (min_layer <= l && l <= max_layer);
 		}
-		
+
 		if ((*i)->region()->coverage (start, end) != OverlapNone && layer_ok) {
 			results.push_back (*i);
 		}
@@ -557,7 +557,7 @@ StreamView::child_height () const
 	if (_layer_display == Stacked) {
 		return height / _layers;
 	}
-	
+
 	return height;
 }
 

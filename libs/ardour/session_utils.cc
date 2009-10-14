@@ -8,7 +8,7 @@
 
 namespace ARDOUR {
 
-using namespace std;	
+using namespace std;
 using namespace PBD;
 
 bool

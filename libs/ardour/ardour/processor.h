@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include <string>
 #include <exception>
 
-#include "pbd/statefuldestructible.h" 
+#include "pbd/statefuldestructible.h"
 
 #include <sigc++/signal.h>
 
@@ -55,7 +55,7 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	virtual ~Processor() { }
 
 	virtual std::string display_name() const { return SessionObject::name(); }
-	
+
 	virtual bool visible() const { return true; }
 	virtual void set_visible (bool) {}
 
@@ -63,19 +63,19 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 
 	bool get_next_ab_is_active () const { return _next_ab_is_active; }
 	void set_next_ab_is_active (bool yn) { _next_ab_is_active = yn; }
-	
+
 	virtual nframes_t signal_latency() const { return 0; }
-	
+
 	virtual void transport_stopped (sframes_t /*frame*/) {}
-	
+
 	virtual void set_block_size (nframes_t /*nframes*/) {}
 
 	virtual void run (BufferSet& /*bufs*/, sframes_t /*start_frame*/, sframes_t /*end_frame*/, nframes_t /*nframes*/) {}
 	virtual void silence (nframes_t /*nframes*/) {}
-	
+
 	virtual void activate ()   { _pending_active = true; ActiveChanged(); }
 	virtual void deactivate () { _pending_active = false; ActiveChanged(); }
-	
+
 	virtual bool configure_io (ChanCount in, ChanCount out);
 
 	/* Derived classes should override these, or processor appears as an in-place pass-through */
@@ -92,7 +92,7 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	virtual XMLNode& state (bool full);
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
-	
+
 	void *get_gui () const { return _gui; }
 	void  set_gui (void *p) { _gui = p; }
 

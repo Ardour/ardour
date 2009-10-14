@@ -49,7 +49,7 @@ class ExportFilename {
 		D_BE,        // big endian (no deliminator)
 		D_BEShortY   // big endian short year representation
 	};
-	
+
 	enum TimeFormat {
 		T_None,
 		T_NoDelim,
@@ -60,39 +60,39 @@ class ExportFilename {
 	friend class ExportElementFactory;
 	ExportFilename (Session & session);
 
-  public:	
+  public:
 	/* Serialization */
-	
+
 	XMLNode & get_state ();
 	int set_state (const XMLNode &);
-	
+
 	/* data access */
-	
+
 	Glib::ustring get_path (FormatPtr format) const;
 	Glib::ustring get_folder () const { return folder; }
-	
+
 	TimeFormat get_time_format () const { return time_format; }
 	DateFormat get_date_format () const { return date_format; }
 	Glib::ustring get_time_format_str (TimeFormat format) const;
 	Glib::ustring get_date_format_str (DateFormat format) const;
-	
+
 	Glib::ustring get_label () const { return label; }
 	uint32_t get_revision () const { return revision; }
-	
+
 	/* data modification */
-	
+
 	void set_time_format (TimeFormat format);
 	void set_date_format (DateFormat format);
 	void set_label (Glib::ustring value);
 	void set_revision (uint32_t value) { revision = value; }
 	void set_channel (uint32_t value) { channel = value; }
 	bool set_folder (Glib::ustring path);
-	
+
 	void set_timespan (TimespanPtr ts) { timespan = ts; }
 	void set_channel_config (ChannelConfigPtr cc) { channel_config = cc; }
-	
+
 	/* public members */
-	
+
 	bool include_label;
 	bool include_session;
 	bool include_revision;
@@ -101,7 +101,7 @@ class ExportFilename {
 	bool include_timespan;
 	bool include_time;
 	bool include_date;
-	
+
   private:
 
 	Session & session;
@@ -109,22 +109,22 @@ class ExportFilename {
 	Glib::ustring   label;
 	uint32_t  revision;
 	uint32_t  channel;
-	
+
 	Glib::ustring   folder;
-	
+
 	DateFormat date_format;
 	TimeFormat time_format;
-	
+
 	Glib::ustring get_formatted_time (Glib::ustring const & format) const;
 	struct tm * time_struct; // Due to static allocation no destructor or copy-ctor is needed because of this
-	
+
 	TimespanPtr timespan;
 	ChannelConfigPtr channel_config;
-	
+
 	/* Serialization helpers */
-	
+
 	typedef std::pair<bool, Glib::ustring> FieldPair;
-	
+
 	void add_field (XMLNode * node, Glib::ustring const & name, bool enabled, Glib::ustring const & value = "");
 	FieldPair get_field (XMLNode const & node, Glib::ustring const & name);
 	FieldPair analyse_folder ();

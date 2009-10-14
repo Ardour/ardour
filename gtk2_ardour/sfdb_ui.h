@@ -56,7 +56,7 @@ class SoundFileBox : public Gtk::VBox
   public:
 	SoundFileBox (bool persistent);
 	virtual ~SoundFileBox () {};
-	
+
 	void set_session (ARDOUR::Session* s);
 	bool setup_labels (const Glib::ustring& filename);
 
@@ -67,11 +67,11 @@ class SoundFileBox : public Gtk::VBox
   protected:
 	ARDOUR::Session* _session;
 	Glib::ustring path;
-	
+
 	ARDOUR::SoundFileInfo sf_info;
-	
+
 	Gtk::Table table;
-	
+
 	Gtk::Label length;
 	Gtk::Label format;
 	Gtk::Label channels;
@@ -80,7 +80,7 @@ class SoundFileBox : public Gtk::VBox
 
 	Gtk::Label channels_value;
 	Gtk::Label samplerate_value;
-	
+
 	Gtk::Label format_text;
 	AudioClock length_clock;
 	AudioClock timecode_clock;
@@ -89,11 +89,11 @@ class SoundFileBox : public Gtk::VBox
 	Gtk::Label preview_label;
 
 	Gtk::TextView tags_entry;
-	
+
 	Gtk::VBox main_box;
 	Gtk::VBox path_box;
 	Gtk::HBox bottom_box;
-	
+
 	Gtk::Button play_btn;
 	Gtk::Button stop_btn;
 	Gtk::CheckButton autoplay_btn;
@@ -112,10 +112,10 @@ class SoundFileBrowser : public ArdourDialog
 	{
 	  public:
 		Gtk::TreeModelColumn<Glib::ustring> pathname;
-		
+
 		FoundTagColumns() { add(pathname); }
 	};
-	
+
 	FoundTagColumns found_list_columns;
 	Glib::RefPtr<Gtk::ListStore> found_list;
 
@@ -125,10 +125,10 @@ class SoundFileBrowser : public ArdourDialog
   public:
 	SoundFileBrowser (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, bool persistent);
 	virtual ~SoundFileBrowser ();
-	
+
 	virtual void set_session (ARDOUR::Session*);
 	std::vector<Glib::ustring> get_paths ();
-	
+
 	void clear_selection ();
 
 	Gtk::FileChooserWidget chooser;
@@ -149,7 +149,7 @@ class SoundFileBrowser : public ArdourDialog
 
   protected:
 	bool resetting_ourselves;
-	
+
 	Gtk::FileFilter audio_filter;
 	Gtk::FileFilter midi_filter;
 	Gtk::FileFilter custom_filter;
@@ -178,9 +178,9 @@ class SoundFileBrowser : public ArdourDialog
 	void freesound_list_view_selected ();
 	void freesound_list_view_activated (const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn*);
 	void freesound_search_clicked ();
-	
+
 	void chooser_file_activated ();
-	
+
 	bool on_audio_filter (const Gtk::FileFilter::Info& filter_info);
 	bool on_midi_filter (const Gtk::FileFilter::Info& filter_info);
 
@@ -196,7 +196,7 @@ class SoundFileChooser : public SoundFileBrowser
   public:
 	SoundFileChooser (Gtk::Window& parent, std::string title, ARDOUR::Session* _s = 0);
 	virtual ~SoundFileChooser () {};
-	
+
 	Glib::ustring get_filename ();
 
   protected:
@@ -207,11 +207,11 @@ class SoundFileOmega : public SoundFileBrowser
 {
 
   public:
-	SoundFileOmega (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, int selected_tracks, bool persistent, 
+	SoundFileOmega (Gtk::Window& parent, std::string title, ARDOUR::Session* _s, int selected_tracks, bool persistent,
 			Editing::ImportMode mode_hint = Editing::ImportAsTrack);
-	
+
 	void reset (int selected_tracks);
-	
+
 	Gtk::ComboBoxText action_combo;
 	Gtk::ComboBoxText where_combo;
 	Gtk::ComboBoxText channel_combo;
@@ -239,7 +239,7 @@ class SoundFileOmega : public SoundFileBrowser
 	Gtk::VBox block_three;
 	Gtk::VBox block_four;
 
-	bool check_info (const std::vector<Glib::ustring>& paths, 
+	bool check_info (const std::vector<Glib::ustring>& paths,
 			 bool& same_size, bool& src_needed, bool& multichannel);
 
 	static bool check_link_status (const ARDOUR::Session&, const std::vector<Glib::ustring>& paths);

@@ -82,10 +82,10 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	void select_all_plugins ();
 	void select_all_inserts ();
 	void select_all_sends ();
-	
+
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorSelected;
 	sigc::signal<void,boost::shared_ptr<ARDOUR::Processor> > ProcessorUnselected;
-	
+
 	static void register_actions();
 
   private:
@@ -118,13 +118,13 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 
 	ModelColumns columns;
 	Glib::RefPtr<Gtk::ListStore> model;
-	
+
 	void selection_changed ();
 
 	static bool get_colors;
 	static Gdk::Color* active_processor_color;
 	static Gdk::Color* inactive_processor_color;
-	
+
 	Gtk::EventBox	       processor_eventbox;
 	Gtk::HBox              processor_hpacker;
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Processor> > processor_display;
@@ -134,7 +134,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 			  int x, int y, Glib::RefPtr<Gdk::DragContext>& context);
 
 	Width _width;
-	
+
 	Gtk::Menu *send_action_menu;
 	void build_send_action_menu ();
 
@@ -177,7 +177,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	void compute_processor_sort_keys ();
 	std::vector<sigc::connection> processor_active_connections;
 	std::vector<sigc::connection> processor_name_connections;
-	
+
 	bool processor_drag_in_progress;
 	void processor_drag_begin (GdkDragContext*);
 	void processor_drag_end (GdkDragContext*);
@@ -206,7 +206,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 
 	static Glib::RefPtr<Gtk::Action> paste_action;
 	void paste_processor_state (const XMLNodeList&, boost::shared_ptr<ARDOUR::Processor>);
-	
+
 	void activate_processor (boost::shared_ptr<ARDOUR::Processor>);
 	void deactivate_processor (boost::shared_ptr<ARDOUR::Processor>);
 	void edit_processor (boost::shared_ptr<ARDOUR::Processor>);
@@ -239,7 +239,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	static void rb_deactivate_all ();
 	static void rb_ab_plugins ();
 	static void rb_edit ();
-	
+
 	void route_name_changed ();
 	std::string generate_processor_title (boost::shared_ptr<ARDOUR::PluginInsert> pi);
 };

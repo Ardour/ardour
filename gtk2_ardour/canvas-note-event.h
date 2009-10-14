@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -74,24 +74,24 @@ public:
 	void selected(bool yn);
 
 	virtual void move_event(double dx, double dy) = 0;
-	
+
 	uint32_t base_color();
-	
+
 	void show_velocity();
 	void hide_velocity();
-	
+
 	/** Channel changed for this specific event */
 	void on_channel_change(uint8_t channel);
 
 	/** Channel selection changed */
 	void on_channel_selection_change(uint16_t selection);
-	
+
 	void show_channel_selector();
 	void hide_channel_selector();
 
 	virtual void set_outline_color(uint32_t c) = 0;
 	virtual void set_fill_color(uint32_t c) = 0;
-	
+
 	virtual double x1() = 0;
 	virtual double y1() = 0;
 	virtual double x2() = 0;
@@ -99,7 +99,7 @@ public:
 
 	const boost::shared_ptr<NoteType> note() const { return _note; }
 	MidiRegionView& region_view() const { return _region; }
-	
+
 	inline static uint32_t meter_style_fill_color(uint8_t vel) {
 		if (vel < 64) {
 			return UINT_INTERPOLATE(
@@ -113,12 +113,12 @@ public:
 					((vel-64) / (double)63.0));
 		}
 	}
-	
+
 	/// calculate outline colors from fill colors of notes
 	inline static uint32_t calculate_outline(uint32_t color) {
 		return UINT_INTERPOLATE(color, 0x000000ff, 0.5);
 	}
-	
+
 	/// hue circle divided into 16 equal-looking parts, courtesy Thorsten Wilms
 	static const uint32_t midi_channel_colors[16];
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Paul Davis 
+    Copyright (C) 2008 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,9 +41,9 @@ class Splash : public Gtk::Window
 	bool expose (GdkEventExpose*);
 	bool on_button_release_event (GdkEventButton*);
 	void on_realize ();
-	
+
 	void message (const std::string& msg);
-	
+
   private:
 	static Splash* the_splash;
 
@@ -52,6 +52,6 @@ class Splash : public Gtk::Window
 	Glib::RefPtr<Pango::Layout> layout;
 
 	void boot_message (std::string);
-};	
+};
 
 #endif /* __ardour_gtk_splash_h__ */

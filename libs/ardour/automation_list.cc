@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -70,9 +70,9 @@ AutomationList::AutomationList (const AutomationList& other)
 	_style = other._style;
 	_state = other._state;
 	_touching = other._touching;
-	
+
 	create_curve_if_necessary();
-	
+
 	assert(_parameter.type() != NullAutomation);
 	AutomationListCreated(this);
 }
@@ -83,7 +83,7 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 	_style = other._style;
 	_state = other._state;
 	_touching = other._touching;
-	
+
 	create_curve_if_necessary();
 
 	assert(_parameter.type() != NullAutomation);
@@ -99,13 +99,13 @@ AutomationList::AutomationList (const XMLNode& node, Evoral::Parameter id)
 	_touching = false;
 	_state = Off;
 	_style = Absolute;
-	
+
 	set_state (node);
 
 	if (id) {
 		_parameter = id;
 	}
-	
+
 	create_curve_if_necessary();
 
 	assert(_parameter.type() != NullAutomation);
@@ -149,18 +149,18 @@ AutomationList&
 AutomationList::operator= (const AutomationList& other)
 {
 	if (this != &other) {
-		
+
 		_events.clear ();
-		
+
 		for (const_iterator i = other._events.begin(); i != other._events.end(); ++i) {
 			_events.push_back (new Evoral::ControlEvent (**i));
 		}
-		
+
 		_min_yval = other._min_yval;
 		_max_yval = other._max_yval;
 		_max_xval = other._max_xval;
 		_default_value = other._default_value;
-		
+
 		mark_dirty ();
 		maybe_signal_changed ();
 	}
@@ -226,7 +226,7 @@ AutomationList::thaw ()
 	}
 }
 
-void 
+void
 AutomationList::mark_dirty () const
 {
 	ControlList::mark_dirty ();
@@ -317,13 +317,13 @@ AutomationList::deserialize_events (const XMLNode& node)
 
 	freeze ();
 	clear ();
-	
+
 	stringstream str (content_node->content());
-	
+
 	double x;
 	double y;
 	bool ok = true;
-	
+
 	while (str) {
 		str >> x;
 		if (!str) {
@@ -336,7 +336,7 @@ AutomationList::deserialize_events (const XMLNode& node)
 		}
 		fast_simple_add (x, y);
 	}
-	
+
 	if (!ok) {
 		clear ();
 		error << _("automation list: cannot load coordinates from XML, all points ignored") << endmsg;
@@ -363,7 +363,7 @@ AutomationList::set_state (const XMLNode& node)
 		/* partial state setting*/
 		return deserialize_events (node);
 	}
-	
+
 	if (node.name() == X_("Envelope") || node.name() == X_("FadeOut") || node.name() == X_("FadeIn")) {
 
 		if ((nsos = node.child (X_("AutomationList")))) {
@@ -378,27 +378,27 @@ AutomationList::set_state (const XMLNode& node)
 		XMLProperty* prop;
 		nframes_t x;
 		double y;
-		
+
 		freeze ();
 		clear ();
-		
+
 		for (i = elist.begin(); i != elist.end(); ++i) {
-			
+
 			if ((prop = (*i)->property ("x")) == 0) {
 				error << _("automation list: no x-coordinate stored for control point (point ignored)") << endmsg;
 				continue;
 			}
 			x = atoi (prop->value().c_str());
-			
+
 			if ((prop = (*i)->property ("y")) == 0) {
 				error << _("automation list: no y-coordinate stored for control point (point ignored)") << endmsg;
 				continue;
 			}
 			y = atof (prop->value().c_str());
-			
+
 			fast_simple_add (x, y);
 		}
-		
+
 		thaw ();
 
 		return 0;
@@ -414,20 +414,20 @@ AutomationList::set_state (const XMLNode& node)
 		/* update session AL list */
 		AutomationListCreated(this);
 	}
-	
-	if ((prop = node.property (X_("automation-id"))) != 0){ 
+
+	if ((prop = node.property (X_("automation-id"))) != 0){
 		_parameter = EventTypeMap::instance().new_parameter(prop->value());
 	} else {
 		warning << "Legacy session: automation list has no automation-id property.";
 	}
-	
+
 	if ((prop = node.property (X_("interpolation-style"))) != 0) {
 		_interpolation = (InterpolationStyle)string_2_enum(prop->value(), _interpolation);
 	} else {
 		_interpolation = Linear;
 	}
-	
-	if ((prop = node.property (X_("default"))) != 0){ 
+
+	if ((prop = node.property (X_("default"))) != 0){
 		_default_value = atof (prop->value().c_str());
 	} else {
 		_default_value = 0.0;

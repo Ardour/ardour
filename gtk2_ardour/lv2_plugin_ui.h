@@ -62,7 +62,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	boost::shared_ptr<ARDOUR::LV2Plugin> _lv2;
 	std::vector<int> _output_ports;
 	sigc::connection _screen_update_connection;
-	
+
 	Gtk::Widget*   _gui_widget;
 	SLV2UIInstance _inst;
 	float*         _values;
@@ -73,14 +73,14 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	Gtk::Window* _win_ptr;
 
 	static void on_external_ui_closed(LV2UI_Controller controller);
-	
+
 	static void lv2_ui_write(
 			LV2UI_Controller controller,
 			uint32_t         port_index,
 			uint32_t         buffer_size,
 			uint32_t         format,
 			const void*      buffer);
-	
+
 	void lv2ui_instantiate(const Glib::ustring& title);
 
 	void parameter_changed(uint32_t, float);

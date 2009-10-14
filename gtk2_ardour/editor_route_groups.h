@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2009 Paul Davis 
+    Copyright (C) 2000-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,9 +33,9 @@ public:
 	Gtk::Menu* menu (ARDOUR::RouteGroup *);
 
 	void clear ();
-	
+
 private:
-	
+
         struct Columns : public Gtk::TreeModel::ColumnRecord {
 
                 Columns () {

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2002 Paul Davis 
+    Copyright (C) 2000-2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -114,7 +114,7 @@ Plugin::get_presets()
 	uint32_t id;
 	std::string unique (unique_id());
 
-	/* XXX problem: AU plugins don't have numeric ID's. 
+	/* XXX problem: AU plugins don't have numeric ID's.
 	   Solution: they have a different method of providing presets.
 	   XXX sub-problem: implement it.
 	*/
@@ -148,7 +148,7 @@ Plugin::load_preset(const string preset_uri)
 
 	if (defs) {
 		for (uint32_t i = 0; i < (uint32_t) defs->count; ++i) {
-			// The defs->items[i].pid < defs->count check is to work around 
+			// The defs->items[i].pid < defs->count check is to work around
 			// a bug in liblrdf that saves invalid values into the presets file.
 			if (((uint32_t) defs->items[i].pid < (uint32_t) defs->count) && parameter_is_input (defs->items[i].pid)) {
 				set_parameter(defs->items[i].pid, defs->items[i].value);
@@ -168,7 +168,7 @@ Plugin::save_preset (string uri, string domain)
 	uint32_t id;
 	std::string unique (unique_id());
 
-	/* XXX problem: AU plugins don't have numeric ID's. 
+	/* XXX problem: AU plugins don't have numeric ID's.
 	   Solution: they have a different method of providing/saving presets.
 	   XXX sub-problem: implement it.
 	*/
@@ -194,7 +194,7 @@ Plugin::save_preset (string uri, string domain)
 		warning << _("Could not locate HOME.  Preset not saved.") << endmsg;
 		return false;
 	}
-	
+
 	string source(string_compose("file:%1/.%2/rdf/ardour-presets.n3", envvar, domain));
 
 	map<string,PresetRecord>::const_iterator pr = presets.find(uri);
@@ -209,13 +209,13 @@ Plugin::save_preset (string uri, string domain)
 		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
 		return false;
 	}
-	
+
 	path += "/rdf";
 	if (g_mkdir_with_parents (path.c_str(), 0775)) {
 		warning << string_compose(_("Could not create %1.  Preset not saved. (%2)"), path, strerror(errno)) << endmsg;
 		return false;
 	}
-	
+
 	if (lrdf_export_by_source(source.c_str(), source.substr(5).c_str())) {
 		warning << string_compose(_("Error saving presets file %1."), source) << endmsg;
 		return false;
@@ -234,7 +234,7 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 	case ARDOUR::LADSPA:
 		plugs = mgr->ladspa_plugin_info();
 		break;
-	
+
 #ifdef HAVE_SLV2
 	case ARDOUR::LV2:
 		plugs = mgr->lv2_plugin_info();
@@ -277,7 +277,7 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 		}
 	}
 #endif
-	
+
 	return PluginPtr ((Plugin*) 0);
 }
 

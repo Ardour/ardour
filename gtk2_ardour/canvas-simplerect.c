@@ -20,7 +20,7 @@ enum {
 	PROP_FILL_COLOR_RGBA,
 	PROP_OUTLINE_COLOR_RGBA,
 	PROP_DRAW
-	
+
 };
 
 static void   gnome_canvas_simplerect_class_init    (GnomeCanvasSimpleRectClass *class);
@@ -95,12 +95,12 @@ gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class)
 	gobject_class = (GObjectClass *) class;
 	object_class = (GtkObjectClass *) class;
 	item_class = (GnomeCanvasItemClass *) class;
-	
+
 	parent_class = g_type_class_peek_parent (class);
 
 	gobject_class->set_property = gnome_canvas_simplerect_set_property;
 	gobject_class->get_property = gnome_canvas_simplerect_get_property;
-	
+
 	g_object_class_install_property (gobject_class,
 					 PROP_X1,
 					 g_param_spec_double ("x1",
@@ -109,8 +109,8 @@ gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class)
 							      -G_MAXDOUBLE,
 							      G_MAXDOUBLE,
 							      0.0,
-							      G_PARAM_READWRITE));  
-	
+							      G_PARAM_READWRITE));
+
 	g_object_class_install_property (gobject_class,
 					 PROP_Y1,
 					 g_param_spec_double ("y1",
@@ -119,8 +119,8 @@ gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class)
 							      -G_MAXDOUBLE,
 							      G_MAXDOUBLE,
 							      0.0,
-							      G_PARAM_READWRITE));  
-	
+							      G_PARAM_READWRITE));
+
 
 	g_object_class_install_property (gobject_class,
 					 PROP_X2,
@@ -130,8 +130,8 @@ gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class)
 							      -G_MAXDOUBLE,
 							      G_MAXDOUBLE,
 							      0.0,
-							      G_PARAM_READWRITE));  
-	
+							      G_PARAM_READWRITE));
+
 	g_object_class_install_property (gobject_class,
 					 PROP_Y2,
 					 g_param_spec_double ("y2",
@@ -140,8 +140,8 @@ gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class)
 							      -G_MAXDOUBLE,
 							      G_MAXDOUBLE,
 							      0.0,
-							      G_PARAM_READWRITE));  
-	
+							      G_PARAM_READWRITE));
+
 
 	g_object_class_install_property (gobject_class,
 					 PROP_OUTLINE_PIXELS,
@@ -151,8 +151,8 @@ gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class)
 							      0,
 							      G_MAXUINT,
 							      0,
-							      G_PARAM_READWRITE));  
-	
+							      G_PARAM_READWRITE));
+
 
 	g_object_class_install_property (gobject_class,
 					 PROP_OUTLINE_WHAT,
@@ -162,8 +162,8 @@ gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class)
 							      0,
 							      G_MAXUINT,
 							      0,
-							      G_PARAM_READWRITE));  
-	
+							      G_PARAM_READWRITE));
+
 
 
 	g_object_class_install_property (gobject_class,
@@ -172,16 +172,16 @@ gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class)
 							       _("fill"),
 							       _("fill rectangle"),
 							       TRUE,
-							       G_PARAM_READWRITE));  
-	
+							       G_PARAM_READWRITE));
+
 	g_object_class_install_property (gobject_class,
 					 PROP_DRAW,
 					 g_param_spec_boolean ("draw",
 							       _("draw"),
 							       _("draw rectangle"),
 							       TRUE,
-							       G_PARAM_READWRITE));  
-	
+							       G_PARAM_READWRITE));
+
 
 	g_object_class_install_property (gobject_class,
 					 PROP_OUTLINE_COLOR_RGBA,
@@ -191,8 +191,8 @@ gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class)
 							    0,
 							    G_MAXUINT,
 							    0,
-							    G_PARAM_READWRITE));  
-	
+							    G_PARAM_READWRITE));
+
 
 	g_object_class_install_property (gobject_class,
 					 PROP_FILL_COLOR_RGBA,
@@ -202,7 +202,7 @@ gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class)
 							    0,
 							    G_MAXUINT,
 							    0,
-							    G_PARAM_READWRITE));  
+							    G_PARAM_READWRITE));
 
 	object_class->destroy = gnome_canvas_simplerect_destroy;
 
@@ -234,7 +234,7 @@ static void
 gnome_canvas_simplerect_destroy (GtkObject *object)
 {
 	GnomeCanvasSimpleRect *rect;
-	
+
 	g_return_if_fail (object != NULL);
 	g_return_if_fail (GNOME_IS_CANVAS_SIMPLERECT (object));
 
@@ -259,7 +259,7 @@ gnome_canvas_simplerect_bounds (GnomeCanvasItem *item, double *x1, double *y1, d
 }
 
 
-static void 
+static void
 gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 {
 	GnomeCanvasSimpleRect* simplerect;
@@ -271,7 +271,7 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 	old_y1 = item->y1;
 	old_x2 = item->x2;
 	old_y2 = item->y2;
-	
+
 	gnome_canvas_simplerect_bounds (item, &x1, &y1, &x2, &y2);
 	gnome_canvas_item_i2w (item, &x1, &y1);
 	gnome_canvas_item_i2w (item, &x2, &y2);
@@ -331,7 +331,7 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 		} else if (item->x2 == old_x2) {
 
 			/* end didn't change, so just draw at the start */
-			
+
 			double start_x = MIN (item->x1, old_x1);
 			double end_x = MAX (item->x1, old_x1);
 
@@ -339,7 +339,7 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 			return;
 
 		}
-	} 
+	}
 
 	new.x0 = x1;
 	new.y0 = y1;
@@ -352,15 +352,15 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 	old.y1 = old_y2;
 
 	art_drect_union (&unionrect, &old, &new);
-	gnome_canvas_request_redraw (item->canvas, 
+	gnome_canvas_request_redraw (item->canvas,
 				     unionrect.x0 - 0.5,
 				     unionrect.y0 - 0.5,
 				     unionrect.x1 + 1.5,
 				     unionrect.y1 + 1.5);
 }
 
-/* 
- * CANVAS CALLBACKS 
+/*
+ * CANVAS CALLBACKS
  */
 
 static void
@@ -371,7 +371,7 @@ gnome_canvas_simplerect_set_property (GObject      *object,
 
 {
 	(void) pspec;
-	
+
 	GnomeCanvasSimpleRect *simplerect;
 	int update = FALSE;
 	int bounds_changed = FALSE;
@@ -470,7 +470,7 @@ gnome_canvas_simplerect_get_property (GObject      *object,
 				      GParamSpec   *pspec)
 {
 	GnomeCanvasSimpleRect *rect = GNOME_CANVAS_SIMPLERECT (object);
-	
+
 	g_return_if_fail (object != NULL);
 	g_return_if_fail (GNOME_IS_CANVAS_SIMPLERECT (object));
 
@@ -505,7 +505,7 @@ gnome_canvas_simplerect_get_property (GObject      *object,
 	case PROP_DRAW:
 		g_value_set_boolean (value, rect->draw);
 		break;
-		
+
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -527,7 +527,7 @@ gnome_canvas_simplerect_update (GnomeCanvasItem *item, double *affine, ArtSVP *c
 	gnome_canvas_simplerect_reset_bounds (item);
 
 	if (simplerect->full_draw_on_update) {
-		gnome_canvas_request_redraw (item->canvas, 
+		gnome_canvas_request_redraw (item->canvas,
 					   simplerect->bbox_ulx,
 					   simplerect->bbox_uly,
 					   simplerect->bbox_lrx+0.5,
@@ -563,7 +563,7 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 	if (parent_class->render) {
 		(*parent_class->render) (item, buf);
 	}
-	
+
 	if (buf->is_bg) {
 
 #ifdef HARLEQUIN_DEBUGGING
@@ -580,7 +580,7 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 	if (!simplerect->draw) {
 		return;
 	}
-	
+
 	self.x0 = simplerect->bbox_ulx;
 	self.y0 = simplerect->bbox_uly;
 	self.x1 = simplerect->bbox_lrx;
@@ -595,7 +595,7 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 	ey = simplerect->bbox_lry-1;
 
 	if (simplerect->fill) {
-		
+
 		// this can be useful for debugging/understanding how the canvas redraws
 		// stuff.
 
@@ -605,12 +605,12 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 		randg = random() % 255;
 		randb = random() % 255;
 		PAINT_BOX(buf, randr, randg, randb, simplerect->fill_a, begin, sy, end, ey);
-#else		
-		PAINT_BOX (buf, simplerect->fill_r, simplerect->fill_g, simplerect->fill_b, simplerect->fill_a, 
+#else
+		PAINT_BOX (buf, simplerect->fill_r, simplerect->fill_g, simplerect->fill_b, simplerect->fill_a,
 			   intersection.x0, intersection.y0,
 			   intersection.x1, intersection.y1);
 #endif
-	 	
+
 	}
 
 	for (i = 0; i < simplerect->outline_pixels; ++i) {
@@ -630,7 +630,7 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 		if (simplerect->outline_what & 0x4) {
 			PAINT_HORIZ(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, begin, end, sy+i);
 		}
-	
+
 		if (simplerect->outline_what & 0x8) {
 			PAINT_HORIZ(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, begin, end + 1, ey-i);
 		}
@@ -678,14 +678,14 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 	ey = simplerect->bbox_lry-1;
 
 	if (simplerect->fill) {
-		
+
 #ifdef HARLEQUIN_DEBUGGING
 		gint randr, randg, randb;
 		randr = random() % 255;
 		randg = random() % 255;
 		randb = random() % 255;
 		PAINT_BOX(buf, randr, randg, randb, simplerect->fill_a, begin, sy, end, ey);
-#else		
+#else
 		PAINT_BOX(buf, simplerect->fill_r, simplerect->fill_g, simplerect->fill_b, simplerect->fill_a, begin, sy, end, ey);
 #endif
 	}
@@ -707,7 +707,7 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 		if (simplerect->outline_what & 0x4) {
 			PAINT_HORIZ(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, begin, end, sy+i);
 		}
-	
+
 		if (simplerect->outline_what & 0x8) {
 			PAINT_HORIZ(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, begin, end + 1, ey-i);
 		}
@@ -730,7 +730,7 @@ gnome_canvas_simplerect_draw (GnomeCanvasItem *item,
 
 	simplerect = GNOME_CANVAS_SIMPLERECT (item);
 
-	cr = gdk_cairo_create (drawable);	
+	cr = gdk_cairo_create (drawable);
 
 	if (x > simplerect->bbox_ulx) {
 		ulx = x;
@@ -765,23 +765,23 @@ gnome_canvas_simplerect_draw (GnomeCanvasItem *item,
 
 	if (simplerect->fill) {
 		cairo_set_source_rgba (cr,
-				       simplerect->fill_r/255.0, 
-				       simplerect->fill_g/255.0, 
-				       simplerect->fill_b/255.0, 
+				       simplerect->fill_r/255.0,
+				       simplerect->fill_g/255.0,
+				       simplerect->fill_b/255.0,
 				       simplerect->fill_a/255.0);
 		cairo_fill (cr);
 	}
-	
+
 	if (simplerect->outline_what && simplerect->outline_pixels) {
 
 #define x_in_range(a) (x <= (a) && (a) < x + width)
 #define y_in_range(a) (y <= (a) && (a) < y + height)
 
 		cairo_set_line_width (cr, simplerect->outline_pixels);
-		
+
 		cairo_set_source_rgb (cr,
-				      simplerect->outline_r/255.0, 
-				      simplerect->outline_g/255.0, 
+				      simplerect->outline_r/255.0,
+				      simplerect->outline_g/255.0,
 				      simplerect->outline_b/255.0);
 
 		if (simplerect->outline_what & 0x1) {
@@ -792,7 +792,7 @@ gnome_canvas_simplerect_draw (GnomeCanvasItem *item,
 				cairo_stroke (cr);
 			}
 		}
-		
+
 		if (simplerect->outline_what & 0x2) {
 			/* right edge, if visible */
 			if (x_in_range (simplerect->bbox_lrx)) {
@@ -801,7 +801,7 @@ gnome_canvas_simplerect_draw (GnomeCanvasItem *item,
 				cairo_stroke (cr);
 			}
 		}
-		
+
 		if (simplerect->outline_what & 0x4) {
 			/* top edge */
 			if (y_in_range (simplerect->bbox_uly)) {
@@ -810,7 +810,7 @@ gnome_canvas_simplerect_draw (GnomeCanvasItem *item,
 				cairo_stroke (cr);
 			}
 		}
-		
+
 		if (simplerect->outline_what & 0x8) {
 			/* bottom edge */
 			if (y_in_range (simplerect->bbox_lry)) {
@@ -829,7 +829,7 @@ gnome_canvas_simplerect_point (GnomeCanvasItem *item, double x, double y, int cx
 {
 	(void) cx;
 	(void) cy;
-		
+
 	GnomeCanvasSimpleRect *simplerect;
 	double x1, y1, x2, y2;
 	double dx, dy;
@@ -843,7 +843,7 @@ gnome_canvas_simplerect_point (GnomeCanvasItem *item, double x, double y, int cx
 	gnome_canvas_simplerect_bounds (item, &x1, &y1, &x2, &y2);
 
 	/* Is point inside rectangle */
-	
+
 	if ((x >= x1) && (y >= y1) && (x <= x2) && (y <= y2)) {
 		return 0.0;
 	}

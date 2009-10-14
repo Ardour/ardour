@@ -70,18 +70,18 @@ class AudioTrackImporter : public ElementImporter
 
 	bool parse_route_xml ();
 	bool parse_io ();
-	
+
 	bool parse_processor (XMLNode & node);
 	bool parse_controllable (XMLNode & node);
 	bool parse_automation (XMLNode & node);
 	bool rate_convert_events (XMLNode & node);
-	
+
 	AudioTrackImportHandler & track_handler;
 	XMLNode xml_track;
-	
+
 	PBD::ID old_ds_id;
 	PBD::ID new_ds_id;
-	
+
 	PlaylistList playlists;
 	AudioPlaylistImportHandler & pl_handler;
 };

@@ -15,7 +15,7 @@ class KeyEditor : public ArdourDialog
 {
   public:
 	KeyEditor ();
-	
+
   protected:
 	void on_show ();
 	void on_unmap ();

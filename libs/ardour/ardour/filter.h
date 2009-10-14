@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -42,7 +42,7 @@ class Filter {
 
 	int make_new_sources (boost::shared_ptr<ARDOUR::Region>, ARDOUR::SourceList&, std::string suffix = "");
 	int finish (boost::shared_ptr<ARDOUR::Region>, ARDOUR::SourceList&, std::string region_name = "");
-	
+
 	ARDOUR::Session& session;
 };
 

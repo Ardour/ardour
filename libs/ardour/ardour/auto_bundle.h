@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,6 +41,6 @@ class AutoBundle : public Bundle {
   private:
 };
 
-}	
-	
+}
+
 #endif /* __ardour_auto_bundle_h__ */

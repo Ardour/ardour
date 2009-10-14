@@ -39,12 +39,12 @@ class ExportFormatCompatibility : public ExportFormatBase, public ExportFormatBa
 		format_ids.insert (F_None);
 		qualities.insert (Q_None);
 	}
-	
+
 	~ExportFormatCompatibility () {};
-	
-	ExportFormatCompatibility (ExportFormatBase const & other) :
-	  ExportFormatBase (other) {}
-	
+
+	ExportFormatCompatibility (ExportFormatBase const & other)
+		: ExportFormatBase (other) {}
+
 	void add_endianness (Endianness endianness) { endiannesses.insert (endianness); }
 	void add_sample_format (SampleFormat format) { sample_formats.insert (format); }
 	void add_sample_rate (SampleRate rate) { sample_rates.insert (rate); }

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -98,21 +98,21 @@ void
 BundleEditorMatrix::add_channel (boost::shared_ptr<Bundle> b)
 {
 	if (b == _bundle) {
-		
+
 		NameChannelDialog d;
 		d.set_position (Gtk::WIN_POS_MOUSE);
-		
+
 		if (d.run () != Gtk::RESPONSE_ACCEPT) {
 			return;
 		}
-		
+
 		_bundle->add_channel (d.get_name());
 		setup_ports (OURS);
-		
+
 	} else {
-		
+
 		PortMatrix::add_channel (b);
-		
+
 	}
 }
 
@@ -185,7 +185,7 @@ BundleEditor::BundleEditor (Session& session, boost::shared_ptr<UserBundle> bund
 	t->attach (*Gtk::manage (a), 1, 2, 1, 2);
 	_input_or_output.append_text (_("Input"));
 	_input_or_output.append_text (_("Output"));
-	
+
 	if (bundle->ports_are_inputs()) {
 		_input_or_output.set_active_text (_("Input"));
 	} else {
@@ -201,10 +201,10 @@ BundleEditor::BundleEditor (Session& session, boost::shared_ptr<UserBundle> bund
 	a = new Gtk::Alignment (0, 0.5, 0, 1);
 	a->add (_type);
 	t->attach (*Gtk::manage (a), 1, 2, 2, 3);
-	
+
 	_type.append_text (_("Audio"));
 	_type.append_text (_("MIDI"));
-	
+
 	switch (bundle->type ()) {
 	case DataType::AUDIO:
 		_type.set_active_text (_("Audio"));
@@ -215,7 +215,7 @@ BundleEditor::BundleEditor (Session& session, boost::shared_ptr<UserBundle> bund
 	}
 
 	_type.signal_changed().connect (sigc::mem_fun (*this, &BundleEditor::type_changed));
-					
+
 	get_vbox()->pack_start (*Gtk::manage (t), false, false);
 	get_vbox()->pack_start (_matrix);
 	get_vbox()->set_spacing (4);
@@ -226,7 +226,7 @@ BundleEditor::BundleEditor (Session& session, boost::shared_ptr<UserBundle> bund
 	} else {
 		add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_ACCEPT);
 	}
-	
+
 	show_all ();
 }
 
@@ -248,7 +248,7 @@ void
 BundleEditor::input_or_output_changed ()
 {
 	_bundle->remove_ports_from_channels ();
-	
+
 	if (_input_or_output.get_active_text() == _("Output")) {
 		_bundle->set_ports_are_outputs ();
 	} else {
@@ -262,7 +262,7 @@ void
 BundleEditor::type_changed ()
 {
 	_bundle->remove_ports_from_channels ();
-	
+
 	DataType const t = _type.get_active_text() == _("Audio") ?
 		DataType::AUDIO : DataType::MIDI;
 
@@ -290,7 +290,7 @@ BundleManager::BundleManager (Session& session)
 	for (BundleList::iterator i = bundles->begin(); i != bundles->end(); ++i) {
 		add_bundle (*i);
 	}
-	
+
 	/* New / Edit / Delete buttons */
 	Gtk::VBox* buttons = new Gtk::VBox;
 	buttons->set_spacing (8);
@@ -304,7 +304,7 @@ BundleManager::BundleManager (Session& session)
 	delete_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::DELETE, Gtk::ICON_SIZE_BUTTON)));
 	delete_button.signal_clicked().connect (sigc::mem_fun (*this, &BundleManager::delete_clicked));
 	buttons->pack_start (delete_button, false, false);
-	
+
 	Gtk::HBox* h = new Gtk::HBox;
 	h->set_spacing (8);
 	h->set_border_width (8);
@@ -395,7 +395,7 @@ BundleManager::bundle_changed (Bundle::Change c, boost::shared_ptr<UserBundle> b
 	if ((c & Bundle::NameChanged) == 0) {
 		return;
 	}
-	
+
 	Gtk::TreeModel::iterator i = _list_model->children().begin ();
 	while (i != _list_model->children().end()) {
 		boost::shared_ptr<UserBundle> t = (*i)[_list_model_columns.bundle];
@@ -430,7 +430,7 @@ NameChannelDialog::NameChannelDialog (boost::shared_ptr<Bundle> b, uint32_t c)
 
 void
 NameChannelDialog::setup ()
-{	
+{
 	Gtk::HBox* box = Gtk::manage (new Gtk::HBox ());
 
 	box->pack_start (*Gtk::manage (new Gtk::Label (_("Name"))));

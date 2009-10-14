@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2009 Paul Davis 
+    Copyright (C) 2002-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ PortMatrixComponent::PortMatrixComponent (PortMatrix* m, PortMatrixBody* b)
 	  _render_required (true),
 	  _dimension_computation_required (true)
 {
-	
+
 }
 
 /** Destructor */
@@ -125,7 +125,7 @@ uint32_t
 PortMatrixComponent::group_size (boost::shared_ptr<const PortGroup> g) const
 {
 	uint32_t s = 0;
-	
+
 	if (g->visible()) {
 		PortGroup::BundleList const & bundles = g->bundles ();
 		if (_matrix->show_only_bundles()) {
@@ -160,7 +160,7 @@ PortMatrixComponent::channel_to_position (ARDOUR::BundleChannel bc, PortGroupLis
 			if (j->bundle == bc.bundle) {
 
 				/* found the bundle */
-				
+
 				if (_matrix->show_only_bundles() || !(*i)->visible()) {
 					return p;
 				} else {
@@ -212,13 +212,13 @@ PortMatrixComponent::position_to_group_and_channel (uint32_t p, PortGroupList co
 			for (PortGroup::BundleList::const_iterator j = bundles.begin(); j != bundles.end(); ++j) {
 
 				if (_matrix->show_only_bundles()) {
-					
+
 					if (p == 0) {
 						return make_pair (*i, ARDOUR::BundleChannel (j->bundle, 0));
 					} else {
 						p -= 1;
 					}
-					
+
 				} else {
 
 					uint32_t const s = j->bundle->nchannels ();

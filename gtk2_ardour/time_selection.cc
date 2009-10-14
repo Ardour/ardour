@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003-2004 Paul Davis 
+    Copyright (C) 2003-2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -66,9 +66,9 @@ TimeSelection::consolidate ()
 	}
 
 	return changed;
-}		
+}
 
-nframes_t 
+nframes_t
 TimeSelection::start ()
 {
 	if (empty()) {
@@ -85,7 +85,7 @@ TimeSelection::start ()
 	return first;
 }
 
-nframes_t 
+nframes_t
 TimeSelection::end_frame ()
 {
 	nframes_t last = 0;
@@ -105,4 +105,4 @@ TimeSelection::length()
 {
 	return end_frame() - start() + 1;
 }
-	
+

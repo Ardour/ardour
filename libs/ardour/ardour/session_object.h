@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #define __ardour_session_object_h__
 
 #include <string>
-#include "pbd/statefuldestructible.h" 
+#include "pbd/statefuldestructible.h"
 
 namespace ARDOUR {
 
@@ -40,10 +40,10 @@ public:
 		: _session(session)
 		, _name(name)
 	{}
-	
+
 	Session&           session() const { return _session; }
 	const std::string& name()    const { return _name; }
-	
+
 	virtual bool set_name (const std::string& str) {
 		if (_name != str) {
 			_name = str;
@@ -51,7 +51,7 @@ public:
 		}
 		return true;
 	}
-	
+
 	sigc::signal<void> NameChanged;
 
 protected:

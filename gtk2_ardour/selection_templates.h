@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2003 Paul Davis 
+    Copyright (C) 2000-2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #define __ardour_gtk_selection_templates_h__
 
 /* these inlines require knowledge of Region and Route classes,
-   and so they are in a separate header file from selection.h to 
+   and so they are in a separate header file from selection.h to
    avoid multiplying dependencies.
 */
 
@@ -56,7 +56,7 @@ Selection::foreach_midi_regionview (void (MidiRegionView::*method)(void)) {
 	}
 }
 
-template<class A> inline void 
+template<class A> inline void
 Selection::foreach_region (void (ARDOUR::Region::*method)(A), A arg) {
 	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
 		ARDOUR::Region* region = (*i)->region().get();

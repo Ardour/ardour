@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ RouteParams_UI::RouteParams_UI ()
 	: ArdourDialog ("track/bus inspector"),
 	  latency_apply_button (Stock::APPLY),
 	  track_menu(0)
-	
+
 {
 	insert_box = 0;
 	_input_iosel = 0;
@@ -103,17 +103,17 @@ RouteParams_UI::RouteParams_UI ()
 	route_select_frame.add(route_select_scroller);
 
 	list_vpacker.pack_start (route_select_frame, true, true);
-	
+
 	notebook.pages().push_back (TabElem (input_frame, _("Inputs")));
 	notebook.pages().push_back (TabElem (output_frame, _("Outputs")));
 	notebook.pages().push_back (TabElem (redir_hpane, _("Plugins, Inserts & Sends")));
 	notebook.pages().push_back (TabElem (latency_frame, _("Latency")));
 
 	notebook.set_name ("InspectorNotebook");
-	
+
 	title_label.set_name ("RouteParamsTitleLabel");
 	update_title();
-	
+
 	latency_packer.set_spacing (18);
 	latency_button_box.pack_start (latency_apply_button);
 	delay_label.set_alignment (0, 0.5);
@@ -121,32 +121,32 @@ RouteParams_UI::RouteParams_UI ()
 	// changeable area
 	route_param_frame.set_name("RouteParamsBaseFrame");
 	route_param_frame.set_shadow_type (Gtk::SHADOW_IN);
-	
-	
+
+
 	route_hpacker.pack_start (notebook, true, true);
-	
+
 	route_vpacker.pack_start (title_label, false, false);
 	route_vpacker.pack_start (route_hpacker, true, true);
 
-	
+
 	list_hpane.pack1 (list_vpacker);
 	list_hpane.add2 (route_vpacker);
 
 	list_hpane.set_position(110);
 
 	redir_hpane.set_position(110);
-	
+
 	//global_vpacker.pack_start (list_hpane, true, true);
 	//get_vbox()->pack_start (global_vpacker);
 	get_vbox()->pack_start (list_hpane);
-	
-	
+
+
 	set_name ("RouteParamsWindow");
 	set_default_size (620,370);
 	set_wmclass (X_("ardour_route_parameters"), "Ardour");
 
 	WindowTitle title(Glib::get_application_name());
-	title += _("Track/Bus Inspector"); 
+	title += _("Track/Bus Inspector");
 	set_title (title.get_string());
 
 
@@ -155,9 +155,9 @@ RouteParams_UI::RouteParams_UI ()
 	route_display.get_column(0)->signal_clicked().connect(mem_fun(*this, &RouteParams_UI::show_track_menu));
 
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_RELEASE_MASK);
-	
+
 	_plugin_selector = new PluginSelector (PluginManager::the_manager());
-	_plugin_selector->signal_delete_event().connect (bind (ptr_fun (just_hide_it), 
+	_plugin_selector->signal_delete_event().connect (bind (ptr_fun (just_hide_it),
 						     static_cast<Window *> (_plugin_selector)));
 
 
@@ -172,20 +172,20 @@ void
 RouteParams_UI::add_routes (RouteList& routes)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::add_routes), routes));
-	
+
 	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 
 		if (route->is_hidden()) {
 			return;
 		}
-		
+
 		TreeModel::Row row = *(route_display_model->append());
 		row[route_display_columns.text] = route->name();
 		row[route_display_columns.route] = route;
-		
+
 		//route_select_list.rows().back().select ();
-		
+
 		route->NameChanged.connect (bind (mem_fun(*this, &RouteParams_UI::route_name_changed), route));
 		route->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::route_removed), route));
 	}
@@ -225,7 +225,7 @@ RouteParams_UI::setup_processor_boxes()
 
 		// just in case... shouldn't need this
 		cleanup_processor_boxes();
-		
+
 		// construct new redirect boxes
  		insert_box = new ProcessorBox(*session, *_plugin_selector, _rr_selection, 0);
  		insert_box->set_route (_route);
@@ -293,7 +293,7 @@ RouteParams_UI::setup_latency_frame ()
 	latency_apply_conn = latency_apply_button.signal_clicked().connect (mem_fun (*latency_widget, &LatencyGUI::finish));
 	latency_conn = _route->signal_latency_changed.connect (mem_fun (*this, &RouteParams_UI::refresh_latency));
 	delay_conn = _route->initial_delay_changed.connect (mem_fun (*this, &RouteParams_UI::refresh_latency));
-	
+
 	latency_frame.add (latency_packer);
 	latency_frame.show_all ();
 }
@@ -302,13 +302,13 @@ void
 RouteParams_UI::setup_io_frames()
 {
 	cleanup_io_frames();
-	
+
 	// input
 	_input_iosel = new IOSelector (this, *session, _route->input());
 	_input_iosel->setup ();
 	input_frame.add (*_input_iosel);
 	input_frame.show_all();
-	
+
 	// output
 	_output_iosel = new IOSelector (this, *session, _route->output());
 	_output_iosel->setup ();
@@ -340,7 +340,7 @@ RouteParams_UI::cleanup_view (bool stopupdate)
 {
 	if (_active_view) {
 		GenericPluginUI *   plugui = 0;
-		
+
 		if (stopupdate && (plugui = dynamic_cast<GenericPluginUI*>(_active_view)) != 0) {
 			  plugui->stop_updating (0);
 		}
@@ -373,7 +373,7 @@ RouteParams_UI::route_removed (boost::shared_ptr<Route> route)
 		cleanup_io_frames();
 		cleanup_view();
 		cleanup_processor_boxes();
-		
+
 		_route.reset ((Route*) 0);
 		_processor.reset ((Processor*) 0);
 		update_title();
@@ -400,7 +400,7 @@ RouteParams_UI::set_session (Session *sess)
 	//route_select_list.thaw ();
 
 	_plugin_selector->set_session (session);
-}	
+}
 
 
 void
@@ -487,7 +487,7 @@ RouteParams_UI::processors_changed ()
 {
 	ENSURE_GUI_THREAD(mem_fun(*this, &RouteParams_UI::processors_changed));
 	cleanup_view();
-	
+
 	_processor.reset ((Processor*) 0);
 
 	//update_title();
@@ -497,12 +497,12 @@ void
 RouteParams_UI::show_track_menu()
 {
 	using namespace Menu_Helpers;
-	
+
 	if (track_menu == 0) {
 		track_menu = new Menu;
 		track_menu->set_name ("ArdourContextMenu");
-		track_menu->items().push_back 
-				(MenuElem (_("Add Track/Bus"), 
+		track_menu->items().push_back
+				(MenuElem (_("Add Track/Bus"),
 					   bind (mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::add_route), (Gtk::Window*) 0)));
 	}
 	track_menu->popup (1, gtk_get_current_event_time());
@@ -515,7 +515,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> insert)
 	boost::shared_ptr<Return> retrn;
 	boost::shared_ptr<PluginInsert> plugin_insert;
 	boost::shared_ptr<PortInsert> port_insert;
-	
+
 	if ((send = boost::dynamic_pointer_cast<Send> (insert)) != 0) {
 
 		SendUI *send_ui = new SendUI (this, send, *session);
@@ -524,7 +524,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> insert)
 		_plugin_conn = send->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_going_away),
 							      insert));
 		_active_view = send_ui;
-		
+
 		redir_hpane.add2 (*_active_view);
 		redir_hpane.show_all();
 
@@ -536,11 +536,11 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> insert)
 		_plugin_conn = retrn->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_going_away),
 							       insert));
 		_active_view = return_ui;
-		
+
 		redir_hpane.add2 (*_active_view);
 		redir_hpane.show_all();
 
-	} else if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (insert)) != 0) {				
+	} else if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (insert)) != 0) {
 
 		GenericPluginUI *plugin_ui = new GenericPluginUI (plugin_insert, true);
 
@@ -555,7 +555,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> insert)
 	} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (insert)) != 0) {
 
 		PortInsertUI *portinsert_ui = new PortInsertUI (this, *session, port_insert);
-				
+
 		cleanup_view();
 		_plugin_conn = port_insert->GoingAway.connect (bind (mem_fun(*this, &RouteParams_UI::redirect_going_away),
 								     insert));
@@ -564,18 +564,18 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> insert)
 		portinsert_ui->redisplay();
 		redir_hpane.show_all();
 	}
-				
+
 	_processor = insert;
-	
+
 	update_title();
-		
+
 }
 
 void
 RouteParams_UI::plugin_going_away (Placement place)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::plugin_going_away), place));
-	
+
 	// delete the current view without calling finish
 
 	if (place == PreFader) {
@@ -589,13 +589,13 @@ RouteParams_UI::redirect_going_away (boost::shared_ptr<ARDOUR::Processor> insert
 
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &RouteParams_UI::redirect_going_away), insert));
-	
+
 	printf ("redirect going away\n");
 	// delete the current view without calling finish
 	if (insert == _processor) {
 		cleanup_view (false);
 		_processor.reset ((Processor*) 0);
-	} 
+	}
 }
 
 void
@@ -628,13 +628,13 @@ RouteParams_UI::update_title ()
 		title_label.set_text(_("No Route Selected"));
 		title += _("No Route Selected");
 		set_title(title.get_string());
-	}	
+	}
 }
 
 void
 RouteParams_UI::start_updating ()
 {
-	update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect 
+	update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect
 		(mem_fun(*this, &RouteParams_UI::update_views));
 }
 
@@ -649,7 +649,7 @@ RouteParams_UI::update_views ()
 {
 	SendUI *sui;
 	// TODO: only do it if correct tab is showing
-	
+
 	if ((sui = dynamic_cast<SendUI*> (_active_view)) != 0) {
 		sui->update ();
 	}

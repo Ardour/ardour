@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -92,8 +92,8 @@ Processor::get_state (void)
 	return state (true);
 }
 
-/* NODE STRUCTURE 
-   
+/* NODE STRUCTURE
+
     <Automation [optionally with visible="...." ]>
        <parameter-N>
          <AutomationList id=N>
@@ -112,18 +112,18 @@ Processor::state (bool full_state)
 	XMLNode* node = new XMLNode (state_node_name);
 	stringstream sstr;
 	char buf[64];
-	
+
 	id().print (buf, sizeof (buf));
 	node->add_property("id", buf);
 	node->add_property("name", _name);
-	node->add_property("active", active() ? "yes" : "no");	
+	node->add_property("active", active() ? "yes" : "no");
 
 	if (_extra_xml){
 		node->add_child_copy (*_extra_xml);
 	}
-	
+
 	if (full_state) {
-		XMLNode& automation = Automatable::get_automation_state(); 
+		XMLNode& automation = Automatable::get_automation_state();
 		if (!automation.children().empty()
 				|| !automation.properties().empty()
 				|| !_visible_controls.empty()) {
@@ -158,7 +158,7 @@ Processor::set_state (const XMLNode& node)
 	// may not exist for legacy 3.0 sessions
 	if ((prop = node.property ("id")) != 0) {
 		_id = prop->value();
-	} 
+	}
 
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
@@ -168,7 +168,7 @@ Processor::set_state (const XMLNode& node)
 		if ((*niter)->name() == X_("Automation")) {
 
 			XMLProperty *prop;
-			
+
 			if ((prop = (*niter)->property ("path")) != 0) {
 				old_set_automation_state (*(*niter));
 			} else {
@@ -180,7 +180,7 @@ Processor::set_state (const XMLNode& node)
 				stringstream sstr;
 
 				_visible_controls.clear ();
-				
+
 				sstr << prop->value();
 				while (1) {
 					sstr >> what;
@@ -215,7 +215,7 @@ Processor::set_state (const XMLNode& node)
 	if (_active != string_is_affirmative (prop->value())) {
 		_active = !_active;
 		ActiveChanged (); /* EMIT_SIGNAL */
-	}	
+	}
 
 	return 0;
 }
@@ -225,11 +225,11 @@ Processor::configure_io (ChanCount in, ChanCount out)
 {
 	/* This class assumes 1:1 input:output.static output stream count.
 	   Derived classes must override and set _configured_output appropriately
-	   if this is not the case 
+	   if this is not the case
 	*/
 
-	_configured_input = in; 
-	_configured_output = out; 
+	_configured_input = in;
+	_configured_output = out;
 	_configured = true;
 
 	ConfigurationChanged.emit (in, out);

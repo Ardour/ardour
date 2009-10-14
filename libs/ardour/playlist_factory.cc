@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ using namespace PBD;
 
 sigc::signal<void,boost::shared_ptr<Playlist>, bool> PlaylistFactory::PlaylistCreated;
 
-boost::shared_ptr<Playlist> 
+boost::shared_ptr<Playlist>
 PlaylistFactory::create (Session& s, const XMLNode& node, bool hidden, bool unused)
 {
 	const XMLProperty* type = node.property("type");
@@ -53,8 +53,8 @@ PlaylistFactory::create (Session& s, const XMLNode& node, bool hidden, bool unus
 	return pl;
 }
 
-boost::shared_ptr<Playlist> 
-PlaylistFactory::create (DataType type, Session& s, string name, bool hidden) 
+boost::shared_ptr<Playlist>
+PlaylistFactory::create (DataType type, Session& s, string name, bool hidden)
 {
 	boost::shared_ptr<Playlist> pl;
 
@@ -70,8 +70,8 @@ PlaylistFactory::create (DataType type, Session& s, string name, bool hidden)
 	return pl;
 }
 
-boost::shared_ptr<Playlist> 
-PlaylistFactory::create (boost::shared_ptr<const Playlist> old, string name, bool hidden) 
+boost::shared_ptr<Playlist>
+PlaylistFactory::create (boost::shared_ptr<const Playlist> old, string name, bool hidden)
 {
 	boost::shared_ptr<Playlist> pl;
 	boost::shared_ptr<const AudioPlaylist> apl;
@@ -92,13 +92,13 @@ PlaylistFactory::create (boost::shared_ptr<const Playlist> old, string name, boo
 	return pl;
 }
 
-boost::shared_ptr<Playlist> 
-PlaylistFactory::create (boost::shared_ptr<const Playlist> old, nframes_t start, nframes_t cnt, string name, bool hidden) 
+boost::shared_ptr<Playlist>
+PlaylistFactory::create (boost::shared_ptr<const Playlist> old, nframes_t start, nframes_t cnt, string name, bool hidden)
 {
 	boost::shared_ptr<Playlist> pl;
 	boost::shared_ptr<const AudioPlaylist> apl;
 	boost::shared_ptr<const MidiPlaylist> mpl;
-	
+
 	if ((apl = boost::dynamic_pointer_cast<const AudioPlaylist> (old)) != 0) {
 		pl = boost::shared_ptr<Playlist> (new AudioPlaylist (apl, start, cnt, name, hidden));
 		pl->set_region_ownership ();

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ class AudioTimeAxisView : public RouteTimeAxisView
   public:
  	AudioTimeAxisView (PublicEditor&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
  	virtual ~AudioTimeAxisView ();
-	
+
 	AudioStreamView* audio_view();
 
 	void set_show_waveforms_recording (bool yn);
@@ -76,24 +76,24 @@ class AudioTimeAxisView : public RouteTimeAxisView
 	void hide_all_xfades ();
 	void hide_dependent_views (TimeAxisViewItem&);
 	void reveal_dependent_views (TimeAxisViewItem&);
-		
+
 	/* Overridden from parent to store display state */
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();
-	
+
 	void create_automation_child (const Evoral::Parameter& param, bool show);
-	
+
 	void first_idle ();
 
   private:
 	friend class AudioStreamView;
 	friend class AudioRegionView;
-	
+
 	void route_active_changed ();
 
 	void append_extra_display_menu_items ();
 	Gtk::Menu* build_mode_menu();
-	
+
 	void show_all_automation ();
 	void show_existing_automation ();
 	void hide_all_automation ();

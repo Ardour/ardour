@@ -42,11 +42,11 @@ AudioPlaylistImportHandler::AudioPlaylistImportHandler (XMLTree const & source, 
 {
 	XMLNode const * root = source.root();
 	XMLNode const * playlists;
-	
+
 	if (!(playlists = root->child (nodename))) {
 		throw failed_constructor();
 	}
-	
+
 	XMLNodeList const & pl_children = playlists->children();
 	for (XMLNodeList::const_iterator it = pl_children.begin(); it != pl_children.end(); ++it) {
 		const XMLProperty* type = (*it)->property("type");
@@ -92,7 +92,7 @@ AudioPlaylistImportHandler::playlists_by_diskstream (PBD::ID const & id, Playlis
 }
 
 /*** AudioPlaylistImporter ***/
-AudioPlaylistImporter::AudioPlaylistImporter (XMLTree const & source, Session & session, AudioPlaylistImportHandler & handler, XMLNode const & node) : 
+AudioPlaylistImporter::AudioPlaylistImporter (XMLTree const & source, Session & session, AudioPlaylistImportHandler & handler, XMLNode const & node) :
   ElementImporter (source, session),
   handler (handler),
   orig_node (node),
@@ -100,9 +100,9 @@ AudioPlaylistImporter::AudioPlaylistImporter (XMLTree const & source, Session & 
   diskstream_id ("0")
 {
 	bool ds_ok = false;
-	
+
 	populate_region_list ();
-	
+
 	// Parse XML
 	XMLPropertyList const & props = xml_playlist.properties();
 	for (XMLPropertyList::const_iterator it = props.begin(); it != props.end(); ++it) {
@@ -118,7 +118,7 @@ AudioPlaylistImporter::AudioPlaylistImporter (XMLTree const & source, Session & 
 			std::cerr << string_compose (X_("AudioPlaylistImporter did not recognise XML-property \"%1\""), prop) << endmsg;
 		}
 	}
-	
+
 	if (!ds_ok) {
 		error << string_compose (X_("AudioPlaylistImporter (%1): did not find XML-property \"orig_diskstream_id\" which is mandatory"), name) << endmsg;
 		throw failed_constructor();
@@ -137,7 +137,7 @@ AudioPlaylistImporter::AudioPlaylistImporter (AudioPlaylistImporter const & othe
 
 AudioPlaylistImporter::~AudioPlaylistImporter ()
 {
-	
+
 }
 
 string
@@ -146,21 +146,21 @@ AudioPlaylistImporter::get_info () const
 	XMLNodeList children = xml_playlist.children();
 	unsigned int regions = 0;
 	std::ostringstream oss;
-	
+
 	for (XMLNodeIterator it = children.begin(); it != children.end(); it++) {
 		if ((*it)->name() == "Region") {
 			++regions;
 		}
 	}
-	
+
 	oss << regions << " ";
-	
+
 	if (regions == 1) {
 		oss << _("region");
 	} else {
 		oss << _("regions");
 	}
-	
+
 	return oss.str();
 }
 
@@ -177,7 +177,7 @@ AudioPlaylistImporter::_prepare_move ()
 	}
 	xml_playlist.property ("name")->set_value (name);
 	handler.add_name (name);
-	
+
 	return true;
 }
 
@@ -191,10 +191,10 @@ void
 AudioPlaylistImporter::_move ()
 {
 	boost::shared_ptr<Playlist> playlist;
-	
+
 	// Update diskstream id
 	xml_playlist.property ("orig-diskstream-id")->set_value (diskstream_id.to_s());
-	
+
 	// Update region XML in playlist and prepare sources
 	xml_playlist.remove_nodes("Region");
 	for (RegionList::iterator it = regions.begin(); it != regions.end(); ++it) {
@@ -206,7 +206,7 @@ AudioPlaylistImporter::_move ()
 			return; // TODO clean up?
 		}
 	}
-	
+
 	// Update region ids in crossfades
 	XMLNodeList crossfades = xml_playlist.children("Crossfade");
 	for (XMLNodeIterator it = crossfades.begin(); it != crossfades.end(); ++it) {
@@ -215,22 +215,22 @@ AudioPlaylistImporter::_move ()
 		if (!in || !out) {
 			error << string_compose (X_("AudioPlaylistImporter (%1): did not find the \"in\" or \"out\" property from a crossfade"), name) << endmsg;
 		}
-		
+
 		handler.update_region_id (in);
 		handler.update_region_id (out);
-		
+
 		// rate convert length and position
 		XMLProperty* length = (*it)->property("length");
 		if (length) {
 			length->set_value (rate_convert_samples (length->value()));
 		}
-		
+
 		XMLProperty* position = (*it)->property("position");
 		if (position) {
 			position->set_value (rate_convert_samples (position->value()));
 		}
 	}
-	
+
 	// Create playlist
 	playlist = PlaylistFactory::create (session, xml_playlist, false, true);
 }

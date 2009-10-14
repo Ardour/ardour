@@ -56,7 +56,7 @@ class LocationImporter : public ElementImporter
 	LocationImportHandler & handler;
 	XMLNode                 xml_location;
 	Location *              location;
-	
+
 	void parse_xml ();
 };
 

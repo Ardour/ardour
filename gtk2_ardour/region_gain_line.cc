@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,13 +50,13 @@ AudioRegionGainLine::AudioRegionGainLine (const string & name, Session& s, Audio
 }
 
 void
-AudioRegionGainLine::start_drag (ControlPoint* cp, nframes_t x, float fraction) 
+AudioRegionGainLine::start_drag (ControlPoint* cp, nframes_t x, float fraction)
 {
 	AutomationLine::start_drag (cp, x, fraction);
 	if (!rv.audio_region()->envelope_active()) {
 		trackview.session().add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &rv.audio_region()->get_state(), 0));
 		rv.audio_region()->set_envelope_active(false);
-	} 
+	}
 }
 
 // This is an extended copy from AutomationList
@@ -75,8 +75,8 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
 		rv.audio_region()->set_envelope_active(true);
 		XMLNode &region_after = rv.audio_region()->get_state();
 		trackview.session().add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &region_before, &region_after));
-	} 
-	
+	}
+
 	alist->erase (mr.start, mr.end);
 
 	trackview.editor().current_session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
@@ -85,12 +85,12 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
 }
 
 void
-AudioRegionGainLine::end_drag (ControlPoint* cp) 
+AudioRegionGainLine::end_drag (ControlPoint* cp)
 {
 	if (!rv.audio_region()->envelope_active()) {
 		rv.audio_region()->set_envelope_active(true);
 		trackview.session().add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), 0, &rv.audio_region()->get_state()));
-	} 
+	}
 
 	AutomationLine::end_drag(cp);
 }

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #include <string>
 #include <stdint.h>
 #include <sigc++/signal.h>
-#include "pbd/stateful.h" 
+#include "pbd/stateful.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
@@ -51,22 +51,22 @@ public:
 		Select = 0x10,
 		Edit = 0x20
 	};
-	
+
 	RouteGroup (Session& s, const std::string &n, Flag f = Flag(0), Property p = Property(0));
-	
+
 	const std::string& name() { return _name; }
 	void set_name (std::string str);
-	
+
 	bool is_active () const { return _flags & Active; }
 	bool is_relative () const { return _flags & Relative; }
 	bool is_hidden () const { return _flags & Hidden; }
 	bool empty() const {return routes.empty();}
-	
+
 	gain_t get_max_factor(gain_t factor);
 	gain_t get_min_factor(gain_t factor);
-	
+
 	int size() { return routes.size();}
-	
+
 	void set_active (bool yn, void *src);
 	void set_relative (bool yn, void *src);
 	void set_hidden (bool yn, void *src);
@@ -74,7 +74,7 @@ public:
 	bool property (Property p) const {
 		return ((_properties & p) == p);
 	}
-	
+
 	bool active_property (Property p) const {
 		return is_active() && property (p);
 	}
@@ -85,37 +85,37 @@ public:
 			_properties = (Property) (_properties | p);
 		}
 	}
-	
+
 	int add (Route *);
-	
+
 	int remove (Route *);
-	
+
 	void apply (void (Route::*func)(void *), void *src) {
 		for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
 			((*i)->*func)(src);
 		}
 	}
-	
+
 	template<class T> void apply (void (Route::*func)(T, void *), T val, void *src) {
 		for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
 			((*i)->*func)(val, src);
 		}
 	}
-	
+
 	template<class T> void foreach_route (T *obj, void (T::*func)(Route&)) {
 		for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
 			(obj->*func)(**i);
 		}
 	}
-	
+
 	/* to use these, #include "ardour/route_group_specialized.h" */
-	
+
 	template<class T> void apply (void (Track::*func)(T, void *), T val, void *src);
-	
+
 	/* fills at_set with all members of the group that are AudioTracks */
-	
+
 	void audio_track_group (std::set<AudioTrack*>& at_set);
-	
+
 	void clear () {
 		routes.clear ();
 		changed();
@@ -123,16 +123,16 @@ public:
 
 	void make_subgroup ();
 	void destroy_subgroup ();
-	
+
 	const std::list<Route*>& route_list() { return routes; }
-	
+
 	sigc::signal<void> changed;
 	sigc::signal<void,void*> FlagsChanged;
-	
+
 	XMLNode& get_state ();
-	
+
 	int set_state (const XMLNode&);
-	
+
 private:
 	Session& _session;
 	std::list<Route *> routes;
@@ -140,10 +140,10 @@ private:
 	std::string _name;
 	Flag _flags;
 	Property _properties;
-	
+
 	void remove_when_going_away (Route*);
 };
-	
+
 } /* namespace */
 
 #endif /* __ardour_route_group_h__ */

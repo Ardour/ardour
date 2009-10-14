@@ -9,48 +9,48 @@ ExportProfileManager::register_all_configs ()
 {
 	list<TimespanNodePtr>::iterator tsl_it; // timespan list node iterator
 	for (tsl_it = graph.timespans.begin(); tsl_it != graph.timespans.end(); ++tsl_it) {
-	  list<GraphNode *>::const_iterator cc_it; // channel config node iterator
-	  for (cc_it = (*tsl_it)->get_children().begin(); cc_it != (*tsl_it)->get_children().end(); ++cc_it) {
-	    list<GraphNode *>::const_iterator f_it; // format node iterator
-	    for (f_it = (*cc_it)->get_children().begin(); f_it != (*cc_it)->get_children().end(); ++f_it) {
-	      list<GraphNode *>::const_iterator fn_it; // filename node iterator
-	      for (fn_it = (*f_it)->get_children().begin(); fn_it != (*f_it)->get_children().end(); ++fn_it) {
-	        /* Finally loop through each timespan in the timespan list */
-	
-	        TimespanNodePtr ts_node;
-	        if (!(ts_node = boost::dynamic_pointer_cast<TimespanNode> (*tsl_it))) {
-	        	throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
-	        }
-	
-	        TimespanListPtr ts_list = ts_node->data()->timespans;
-	        TimespanList::iterator ts_it;
-	        for (ts_it = ts_list->begin(); ts_it != ts_list->end(); ++ts_it) {
-			
-			TimespanPtr timespan = *ts_it;
-			
-			ChannelConfigNode * cc_node;
-			if (!(cc_node = dynamic_cast<ChannelConfigNode *> (*cc_it))) {
-				throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
+		list<GraphNode *>::const_iterator cc_it; // channel config node iterator
+		for (cc_it = (*tsl_it)->get_children().begin(); cc_it != (*tsl_it)->get_children().end(); ++cc_it) {
+			list<GraphNode *>::const_iterator f_it; // format node iterator
+			for (f_it = (*cc_it)->get_children().begin(); f_it != (*cc_it)->get_children().end(); ++f_it) {
+				list<GraphNode *>::const_iterator fn_it; // filename node iterator
+				for (fn_it = (*f_it)->get_children().begin(); fn_it != (*f_it)->get_children().end(); ++fn_it) {
+					/* Finally loop through each timespan in the timespan list */
+
+					TimespanNodePtr ts_node;
+					if (!(ts_node = boost::dynamic_pointer_cast<TimespanNode> (*tsl_it))) {
+						throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
+					}
+
+					TimespanListPtr ts_list = ts_node->data()->timespans;
+					TimespanList::iterator ts_it;
+					for (ts_it = ts_list->begin(); ts_it != ts_list->end(); ++ts_it) {
+
+						TimespanPtr timespan = *ts_it;
+
+						ChannelConfigNode * cc_node;
+						if (!(cc_node = dynamic_cast<ChannelConfigNode *> (*cc_it))) {
+							throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
+						}
+						ChannelConfigPtr channel_config = cc_node->data()->config;
+
+						FormatNode * f_node;
+						if (!(f_node = dynamic_cast<FormatNode *> (*f_it))) {
+							throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
+						}
+						FormatPtr format = f_node->data()->format;
+
+						FilenameNode * fn_node;
+						if (!(fn_node = dynamic_cast<FilenameNode *> (*fn_it))) {
+							throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
+						}
+						FilenamePtr filename = fn_node->data()->filename;
+
+						handler->add_export_config (timespan, channel_config, format, filename);
+					}
+				}
 			}
-			ChannelConfigPtr channel_config = cc_node->data()->config;
-			
-			FormatNode * f_node;
-			if (!(f_node = dynamic_cast<FormatNode *> (*f_it))) {
-				throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
-			}
-			FormatPtr format = f_node->data()->format;
-			
-			FilenameNode * fn_node;
-			if (!(fn_node = dynamic_cast<FilenameNode *> (*fn_it))) {
-				throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
-			}
-			FilenamePtr filename = fn_node->data()->filename;
-			
-			handler->add_export_config (timespan, channel_config, format, filename);
 		}
-	      }
-	    }
-	  }
 	}
 }
 
@@ -61,7 +61,7 @@ ExportProfileManager::create_empty_config ()
 	timespan->data()->timespans->push_back (handler->add_timespan());
 
 	ChannelConfigNodePtr channel_config = ChannelConfigNode::create (new ChannelConfigState(handler->add_channel_config()));
-	
+
 	FormatNodePtr format;
 	load_formats ();
 	if (!format_list.empty()) {
@@ -69,15 +69,15 @@ ExportProfileManager::create_empty_config ()
 	} else {
 		format = FormatNode::create (new FormatState (handler->add_format ()));
 	}
-	
+
 	FilenameNodePtr filename = FilenameNode::create (new FilenameState (handler->add_filename()));
-	
+
 	/* Bring everything together */
-	
+
 	timespan->add_child (channel_config.get(), 0);
 	channel_config->add_child (format.get(), 0);
 	format->add_child (filename.get(), 0);
-	
+
 	graph.timespans.push_back (timespan);
 	graph.channel_configs.push_back (channel_config);
 	graph.formats.push_back (format);
@@ -98,7 +98,7 @@ ExportProfileManager::GraphNode::~GraphNode ()
 	while (!children.empty()) {
 		remove_child (children.front());
 	}
-	
+
 	while (!parents.empty()) {
 		parents.front()->remove_child (this);
 	}
@@ -130,7 +130,7 @@ ExportProfileManager::GraphNode::add_child (GraphNode * child, GraphNode * left_
 	} else {
 		children.push_back (child);
 	}
-	
+
 	child->add_parent (this);
 }
 
@@ -142,7 +142,7 @@ ExportProfileManager::GraphNode::is_ancestor_of (GraphNode const * node) const
 			return true;
 		}
 	}
-	
+
 	return false;
 }
 
@@ -154,7 +154,7 @@ ExportProfileManager::GraphNode::is_descendant_of (GraphNode const * node) const
 			return true;
 		}
 	}
-	
+
 	return false;
 }
 
@@ -162,7 +162,7 @@ void
 ExportProfileManager::GraphNode::select (bool value)
 {
 	if (_selected == value) { return; }
-	
+
 	_selected = value;
 	SelectChanged (value);
 }
@@ -187,7 +187,7 @@ ExportProfileManager::GraphNode::remove_child (GraphNode * child)
 			break;
 		}
 	}
-	
+
 	child->remove_parent (this);
 }
 
@@ -199,19 +199,19 @@ ExportProfileManager::split_node (GraphNode * node, float position)
 		split_timespan (ts_node->self_ptr(), position);
 		return;
 	}
-	
+
 	ChannelConfigNode * cc_node;
 	if ((cc_node = dynamic_cast<ChannelConfigNode *> (node))) {
 		split_channel_config (cc_node->self_ptr(), position);
 		return;
 	}
-	
+
 	FormatNode * f_node;
 	if ((f_node = dynamic_cast<FormatNode *> (node))) {
 		split_format (f_node->self_ptr(), position);
 		return;
 	}
-	
+
 	FilenameNode * fn_node;
 	if ((fn_node = dynamic_cast<FilenameNode *> (node))) {
 		split_filename (fn_node->self_ptr(), position);
@@ -227,19 +227,19 @@ ExportProfileManager::remove_node (GraphNode * node)
 		remove_timespan (ts_node->self_ptr());
 		return;
 	}
-	
+
 	ChannelConfigNode * cc_node;
 	if ((cc_node = dynamic_cast<ChannelConfigNode *> (node))) {
 		remove_channel_config (cc_node->self_ptr());
 		return;
 	}
-	
+
 	FormatNode * f_node;
 	if ((f_node = dynamic_cast<FormatNode *> (node))) {
 		remove_format (f_node->self_ptr());
 		return;
 	}
-	
+
 	FilenameNode * fn_node;
 	if ((fn_node = dynamic_cast<FilenameNode *> (node))) {
 		remove_filename (fn_node->self_ptr());
@@ -258,7 +258,7 @@ ExportProfileManager::purge_graph ()
 			graph.timespans.erase (tmp);
 		}
 	}
-	
+
 	for (list<ChannelConfigNodePtr>::iterator it = graph.channel_configs.begin(); it != graph.channel_configs.end(); ) {
 		list<ChannelConfigNodePtr>::iterator tmp = it;
 		++it;
@@ -267,7 +267,7 @@ ExportProfileManager::purge_graph ()
 			graph.channel_configs.erase (tmp);
 		}
 	}
-	
+
 	for (list<FormatNodePtr>::iterator it = graph.formats.begin(); it != graph.formats.end(); ) {
 		list<FormatNodePtr>::iterator tmp = it;
 		++it;
@@ -276,7 +276,7 @@ ExportProfileManager::purge_graph ()
 			graph.formats.erase (tmp);
 		}
 	}
-	
+
 	for (list<FilenameNodePtr>::iterator it = graph.filenames.begin(); it != graph.filenames.end(); ) {
 		list<FilenameNodePtr>::iterator tmp = it;
 		++it;
@@ -285,7 +285,7 @@ ExportProfileManager::purge_graph ()
 			graph.filenames.erase (tmp);
 		}
 	}
-	
+
 	GraphChanged();
 }
 
@@ -300,9 +300,9 @@ ExportProfileManager::insert_after (list<T> & the_list, T const & position, T co
 			return;
 		}
 	}
-	
+
 	std::cerr << "invalid position given to ExportProfileManager::insert_after (aborting)" << std::endl;
-	
+
 	abort();
 }
 
@@ -330,12 +330,12 @@ ExportProfileManager::end_of_common_child_range (list<GraphNode *> const & the_l
 {
 	if ((*beginning)->get_children().size() != 1) { return beginning; }
 	GraphNode * child = (*beginning)->get_children().front();
-	
+
 	list<GraphNode *>::const_iterator it = beginning;
 	while (it != the_list.end() && (*it)->get_children().size() == 1 && (*it)->get_children().front() == child) {
 		++it;
 	}
-	
+
 	return --it;
 }
 
@@ -345,7 +345,7 @@ ExportProfileManager::split_node_at_position (GraphNode * old_node, GraphNode * 
 	list<GraphNode *> const & node_parents = old_node->get_parents();
 	uint32_t split_index = (int) (node_parents.size() * position + 0.5);
 	split_index = std::max ((uint32_t) 1, std::min (split_index, node_parents.size() - 1));
-	
+
 	list<GraphNode *>::const_iterator it = node_parents.begin();
 	for (uint32_t index = 1; it != node_parents.end(); ++index) {
 		if (index > split_index) {
@@ -362,14 +362,14 @@ void
 ExportProfileManager::split_timespan (TimespanNodePtr node, float)
 {
 	TimespanNodePtr new_timespan = duplicate_timespan_node (node);
-	insert_after (graph.timespans, node, new_timespan);	
-	
+	insert_after (graph.timespans, node, new_timespan);
+
 	/* Note: Since a timespan selector allows all combinations of ranges
 	 * there is no reason for a channel configuration to have two parents
 	 */
-	
+
 	duplicate_timespan_children (node->self_ptr(), new_timespan);
-	
+
 	GraphChanged();
 }
 
@@ -378,16 +378,16 @@ ExportProfileManager::split_channel_config (ChannelConfigNodePtr node, float)
 {
 	ChannelConfigNodePtr new_config = duplicate_channel_config_node (node);
 	insert_after (graph.channel_configs, node, new_config);
-	
+
 	/* Channel configs have only one parent, see above! */
 	node->get_parents().front()->add_child (new_config.get(), node.get());
-	
+
 	if (node->get_children().size() == 1) {
 		new_config->add_child (node->first_child(), 0);
 	} else {
 		duplicate_channel_config_children (node, new_config);
 	}
-	
+
 	GraphChanged();
 }
 
@@ -404,13 +404,13 @@ ExportProfileManager::split_format (FormatNodePtr node, float position)
 		node->sort_parents (graph.channel_configs);
 		split_node_at_position (node.get(), new_format.get(), position);
 	}
-	
+
 	if (node->get_children().size() == 1) {
 		new_format->add_child (node->first_child(), 0);
 	} else {
 		duplicate_format_children (node, new_format);
 	}
-	
+
 	GraphChanged();
 }
 
@@ -428,7 +428,7 @@ ExportProfileManager::split_filename (FilenameNodePtr node, float position)
 		node->sort_parents (graph.formats);
 		split_node_at_position (node.get(), new_filename.get(), position);
 	}
-	
+
 	GraphChanged();
 }
 
@@ -446,35 +446,35 @@ ExportProfileManager::duplicate_timespan_children (TimespanNodePtr source, Times
 		throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
 	}
 	node_insertion_point = node_insertion_ptr->self_ptr();
-	
+
 	/* Keep track of common children */
-	
+
 	list<GraphNode *>::const_iterator common_children_begin = source_children.begin();
 	list<GraphNode *>::const_iterator common_children_end = end_of_common_child_range (source_children, source_children.begin());
 	GraphNode * common_child = 0;
-	
+
 	for (list<GraphNode *>::const_iterator it = source_children.begin(); it != source_children.end(); ++it) {
 		/* Duplicate node */
-	
+
 		ChannelConfigNode *  node;
 		ChannelConfigNodePtr new_node;
-		
+
 		if (!(node = dynamic_cast<ChannelConfigNode *> (*it))) {
 			throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
 		}
-		
+
 		new_node = duplicate_channel_config_node (node->self_ptr());
-		
+
 		/* Insert in gaph's list and update insertion position */
-		
+
 		insert_after (graph.channel_configs, node_insertion_point, new_node);
 		node_insertion_point = new_node;
-		
+
 		/* Handle children */
-		
+
 		target->add_child (new_node.get(), child_insertion_point);
 		child_insertion_point = new_node.get();
-		
+
 		if (one_grandchild) {
 			new_node->add_child (node->first_child(), 0);
 		} else {
@@ -483,7 +483,7 @@ ExportProfileManager::duplicate_timespan_children (TimespanNodePtr source, Times
 				common_children_begin = it;
 				common_children_end = end_of_common_child_range (source_children, it);
 			}
-		
+
 			if (it == common_children_begin) { // At beginning => do duplication
 				GraphNode * grand_child_ins_pt = common_child;
 				if (!grand_child_ins_pt) {
@@ -514,33 +514,33 @@ ExportProfileManager::duplicate_channel_config_children (ChannelConfigNodePtr so
 	node_insertion_point = node_insertion_ptr->self_ptr();
 
 	/* Keep track of common children */
-	
+
 	list<GraphNode *>::const_iterator common_children_begin = source_children.begin();
 	list<GraphNode *>::const_iterator common_children_end = end_of_common_child_range (source_children, source_children.begin());
 	GraphNode * common_child = 0;
 
 	for (list<GraphNode *>::const_iterator it = source_children.begin(); it != source_children.end(); ++it) {
 		/* Duplicate node */
-	
+
 		FormatNode *  node;
 		FormatNodePtr new_node;
-		
+
 		if (!(node = dynamic_cast<FormatNode *> (*it))) {
 			throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
 		}
-		
+
 		new_node = duplicate_format_node (node->self_ptr());
-		
+
 		/* Insert in gaph's list and update insertion position */
-		
+
 		insert_after (graph.formats, node_insertion_point, new_node);
 		node_insertion_point = new_node;
-		
+
 		/* Handle children */
-		
+
 		target->add_child (new_node.get(), child_insertion_point);
 		child_insertion_point = new_node.get();
-		
+
 		if (one_grandchild) {
 			new_node->add_child (node->first_child(), 0);
 		} else {
@@ -549,7 +549,7 @@ ExportProfileManager::duplicate_channel_config_children (ChannelConfigNodePtr so
 				common_children_begin = it;
 				common_children_end = end_of_common_child_range (source_children, it);
 			}
-		
+
 			if (it == common_children_begin) { // At beginning => do duplication
 				GraphNode * grand_child_ins_pt = common_child;
 				if (!grand_child_ins_pt) {
@@ -579,23 +579,23 @@ ExportProfileManager::duplicate_format_children (FormatNodePtr source, FormatNod
 
 	for (list<GraphNode *>::const_iterator it = source->get_children().begin(); it != source->get_children().end(); ++it) {
 		/* Duplicate node */
-		
+
 		FilenameNode *  node;
 		FilenameNodePtr new_node;
-		
+
 		if (!(node = dynamic_cast<FilenameNode *> (*it))) {
 			throw ExportFailed (X_("Programming error, Invalid pointer cast in ExportProfileManager"));
 		}
-		
+
 		new_node = duplicate_filename_node (node->self_ptr());
-		
+
 		/* Insert in gaph's list and update insertion position */
-		
+
 		insert_after (graph.filenames, node_insertion_point, new_node);
 		node_insertion_point = new_node;
-		
+
 		/* Handle children */
-		
+
 		target->add_child (new_node.get(), child_insertion_point);
 		child_insertion_point = new_node.get();
 	}
@@ -607,14 +607,14 @@ ExportProfileManager::duplicate_timespan_node (TimespanNodePtr node)
 	TimespanStatePtr state = node->data();
 	TimespanStatePtr new_state (new TimespanState ());
 	TimespanNodePtr  new_node = TimespanNode::create (new_state);
-	
+
 	for (TimespanList::iterator it = state->timespans->begin(); it != state->timespans->end(); ++it) {
 		new_state->timespans->push_back (handler->add_timespan_copy (*it));
 	}
-	
+
 	new_state->time_format = state->time_format;
 	new_state->marker_format = state->marker_format;
-	
+
 	return new_node;
 }
 
@@ -624,7 +624,7 @@ ExportProfileManager::duplicate_channel_config_node (ChannelConfigNodePtr node)
 	ChannelConfigStatePtr state = node->data();
 	ChannelConfigStatePtr new_state (new ChannelConfigState (handler->add_channel_config_copy (state->config)));
 	ChannelConfigNodePtr  new_node = ChannelConfigNode::create (new_state);
-	
+
 	return new_node;
 }
 
@@ -634,7 +634,7 @@ ExportProfileManager::duplicate_format_node (FormatNodePtr node)
 	FormatStatePtr state = node->data();
 	FormatStatePtr new_state (new FormatState (handler->add_format_copy (state->format)));
 	FormatNodePtr  new_node = FormatNode::create (new_state);
-	
+
 	return new_node;
 }
 
@@ -644,7 +644,7 @@ ExportProfileManager::duplicate_filename_node (FilenameNodePtr node)
 	FilenameStatePtr state = node->data();
 	FilenameStatePtr new_state (new FilenameState (handler->add_filename_copy (state->filename)));
 	FilenameNodePtr  new_node = FilenameNode::create (new_state);
-	
+
 	return new_node;
 }
 

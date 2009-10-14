@@ -31,7 +31,7 @@ float
 CycleTimer::get_mhz()
 {
 	FILE *f;
-	
+
 	if ((f = fopen("/proc/cpuinfo", "r")) == 0) {
 		fatal << _("CycleTimer::get_mhz(): can't open /proc/cpuinfo") << endmsg;
 		/*NOTREACHED*/
@@ -68,7 +68,7 @@ CycleTimer::get_mhz()
 		}
 	}
 
-	fatal << _("cannot locate cpu MHz in /proc/cpuinfo") << endmsg; 
+	fatal << _("cannot locate cpu MHz in /proc/cpuinfo") << endmsg;
 	/*NOTREACHED*/
 	return 0.0f;
 }

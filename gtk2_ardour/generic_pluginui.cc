@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -89,7 +89,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	latency_button.add (latency_label);
 	latency_button.signal_clicked().connect (mem_fun (*this, &PlugUIBase::latency_button_clicked));
 	set_latency_label ();
-	
+
 	smaller_hbox->pack_start (latency_button, false, false, 10);
 	smaller_hbox->pack_start (preset_combo, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
@@ -97,7 +97,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	constraint_hbox->set_spacing (5);
 	constraint_hbox->set_homogeneous (false);
-	
+
 	VBox* v1_box = manage (new VBox);
 	VBox* v2_box = manage (new VBox);
 	pack_end(plugin_analysis_expander);
@@ -111,14 +111,14 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	constraint_hbox->pack_end (*v1_box, false, false);
 
 	main_contents.pack_start (*constraint_hbox, false, false);
-	
+
 	if ( is_scrollable ) {
 		scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 		scroller.set_name ("PluginEditor");
 		scroller_view.set_name("PluginEditor");
 		scroller_view.add (hpacker);
 		scroller.add (scroller_view);
-		
+
 		main_contents.pack_start (scroller, true, true);
 
 	}
@@ -128,7 +128,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	pi->ActiveChanged.connect (bind(mem_fun(*this, &GenericPluginUI::processor_active_changed),
 					boost::weak_ptr<Processor>(pi)));
-	
+
 	bypass_button.set_active (!pi->active());
 
 	build ();
@@ -198,7 +198,7 @@ GenericPluginUI::build ()
 	for (i = 0; i < plugin->parameter_count(); ++i) {
 
 		if (plugin->parameter_is_control (i)) {
-			
+
 			/* Don't show latency control ports */
 
 			if (plugin->describe_parameter (Evoral::Parameter(PluginAutomation, 0, i)) == X_("latency")) {
@@ -206,7 +206,7 @@ GenericPluginUI::build ()
 			}
 
 			ControlUI* cui;
-	
+
 			/* if we are scrollable, just use one long column */
 
 			if (!is_scrollable) {
@@ -214,7 +214,7 @@ GenericPluginUI::build ()
 					frame = manage (new Frame);
 					frame->set_name ("BaseFrame");
 					box = manage (new VBox);
-					
+
 					box->set_border_width (5);
 					box->set_spacing (1);
 
@@ -233,7 +233,7 @@ GenericPluginUI::build ()
 				error << string_compose(_("Plugin Editor: could not build control element for port %1"), i) << endmsg;
 				continue;
 			}
-				
+
 			if (cui->controller || cui->clickbox || cui->combo) {
 
 				box->pack_start (*cui, false, false);
@@ -248,25 +248,25 @@ GenericPluginUI::build ()
 					}
 				}
 
-				button_table.attach (*cui, button_col, button_col + 1, button_row, button_row+1, 
+				button_table.attach (*cui, button_col, button_col + 1, button_row, button_row+1,
 						     FILL|EXPAND, FILL);
 				button_row++;
 
 			} else if (cui->display) {
 
-				output_table.attach (*cui, output_col, output_col + 1, output_row, output_row+1, 
+				output_table.attach (*cui, output_col, output_col + 1, output_row, output_row+1,
 						     FILL|EXPAND, FILL);
-				
- 				// TODO: The meters should be divided into multiple rows 
-				
+
+ 				// TODO: The meters should be divided into multiple rows
+
 				if (++output_col == output_cols) {
 					output_cols ++;
 					output_table.resize (output_rows, output_cols);
 				}
-				
+
 				/* old code, which divides meters into
 				 * columns first, rows later. New code divides into one row
-				 
+
 				if (output_row == output_rows) {
 					output_row = 0;
 					if (++output_col == output_cols) {
@@ -274,22 +274,22 @@ GenericPluginUI::build ()
 						output_table.resize (output_rows, output_cols);
 					}
 				}
-				
-				output_table.attach (*cui, output_col, output_col + 1, output_row, output_row+1, 
+
+				output_table.attach (*cui, output_col, output_col + 1, output_row, output_row+1,
 						     FILL|EXPAND, FILL);
- 
+
 				output_row++;
 				*/
 			}
-				
+
 			/* HACK: ideally the preferred height would be queried from
 			   the complete hpacker, but I can't seem to get that
-			   information in time, so this is an estimation 
+			   information in time, so this is an estimation
 			*/
 
 			prefheight += 30;
 
-		} 
+		}
 	}
 
 	if (box->children().empty()) {
@@ -314,7 +314,7 @@ GenericPluginUI::build ()
 }
 
 GenericPluginUI::ControlUI::ControlUI ()
-	: automate_button (X_("")) // force creation of a label 
+	: automate_button (X_("")) // force creation of a label
 {
 	automate_button.set_name ("PluginAutomateButton");
 	ARDOUR_UI::instance()->tooltips().set_tip (automate_button, _("Automation control"));
@@ -333,7 +333,7 @@ GenericPluginUI::ControlUI::ControlUI ()
 	meterinfo = 0;
 }
 
-GenericPluginUI::ControlUI::~ControlUI() 
+GenericPluginUI::ControlUI::~ControlUI()
 {
 	if (meterinfo) {
 		delete meterinfo->meter;
@@ -411,13 +411,13 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		boost::shared_ptr<LV2Plugin> lv2p;
 #endif
 		if ((lp = boost::dynamic_pointer_cast<LadspaPlugin>(plugin)) != 0) {
-			
+
 			// FIXME: not all plugins have a numeric unique ID
 			uint32_t id = atol (lp->unique_id().c_str());
 			lrdf_defaults* defaults = lrdf_get_scale_values(id, port_index);
-			
+
 			if (defaults && defaults->count > 0)	{
-				
+
 				control_ui->combo = new Gtk::ComboBoxText;
 				//control_ui->combo->set_value_in_list(true, false);
 				set_popdown_strings (*control_ui->combo, setup_scale_values(port_index, control_ui));
@@ -425,9 +425,9 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 				mcontrol->Changed.connect (bind (mem_fun (*this, &GenericPluginUI::parameter_changed), control_ui));
 				control_ui->pack_start(control_ui->label, true, true);
 				control_ui->pack_start(*control_ui->combo, false, true);
-				
+
 				update_control_display(control_ui);
-				
+
 				lrdf_free_setting_values(defaults);
 				return control_ui;
 			}
@@ -446,19 +446,19 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 				mcontrol->Changed.connect (bind (mem_fun (*this, &GenericPluginUI::parameter_changed), control_ui));
 				control_ui->pack_start(control_ui->label, true, true);
 				control_ui->pack_start(*control_ui->combo, false, true);
-				
+
 				update_control_display(control_ui);
-				
+
 				slv2_scale_points_free(points);
 				return control_ui;
 			}
 #endif
 		}
-			
+
 		if (desc.toggled) {
 
 			/* Build a button */
-		
+
 			control_ui->button = manage (new ToggleButton ());
 			control_ui->button->set_name ("PluginEditorButton");
 			control_ui->button->set_size_request (20, 20);
@@ -469,11 +469,11 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 			control_ui->button->signal_clicked().connect (bind (mem_fun(*this, &GenericPluginUI::control_port_toggled), control_ui));
 			mcontrol->Changed.connect (bind (mem_fun (*this, &GenericPluginUI::toggle_parameter_changed), control_ui));
-			
+
 			if (plugin->get_parameter (port_index) > 0.5){
 				control_ui->button->set_active(true);
 			}
-			
+
 			return control_ui;
 		}
 
@@ -498,8 +498,8 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 			control_ui->controller->adjustment()->set_upper (log(control_ui->controller->adjustment()->get_upper()));
 			control_ui->controller->adjustment()->set_lower (log(control_ui->controller->adjustment()->get_lower()));
 		}*/
-		
-	
+
+
 		control_ui->controller->adjustment()->set_step_increment (desc.step);
 		control_ui->controller->adjustment()->set_page_increment (desc.largestep);
 //#endif
@@ -518,7 +518,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 			control_ui->controller->StartGesture.connect (bind (mem_fun(*this, &GenericPluginUI::start_touch), control_ui));
 			control_ui->controller->StopGesture.connect (bind (mem_fun(*this, &GenericPluginUI::stop_touch), control_ui));
-			
+
 		}
 
 		if (control_ui->logarithmic) {
@@ -545,7 +545,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		automation_state_changed (control_ui);
 
 		mcontrol->Changed.connect (bind (mem_fun (*this, &GenericPluginUI::parameter_changed), control_ui));
-		mcontrol->alist()->automation_state_changed.connect 
+		mcontrol->alist()->automation_state_changed.connect
 			(bind (mem_fun(*this, &GenericPluginUI::automation_state_changed), control_ui));
 
 	} else if (plugin->parameter_is_output (port_index)) {
@@ -567,7 +567,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 		MeterInfo * info = new MeterInfo(port_index);
  		control_ui->meterinfo = info;
-		
+
 		info->meter = new FastMeter (5, 5, FastMeter::Vertical);
 
 		info->min_unbound = desc.min_unbound;
@@ -578,25 +578,25 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 		control_ui->vbox = manage (new VBox);
 		control_ui->hbox = manage (new HBox);
-		
+
 		control_ui->label.set_angle(90);
 		control_ui->hbox->pack_start (control_ui->label, false, false);
  		control_ui->hbox->pack_start (*info->meter, false, false);
 
  		control_ui->vbox->pack_start (*control_ui->hbox, false, false);
-		
+
  		control_ui->vbox->pack_start (*control_ui->display, false, false);
 
 		control_ui->pack_start (*control_ui->vbox);
 
 		control_ui->meterinfo->meter->show_all();
 		control_ui->meterinfo->packed = true;
-		
+
 		output_controls.push_back (control_ui);
 	}
-	
+
 	mcontrol->Changed.connect (bind (mem_fun (*this, &GenericPluginUI::parameter_changed), control_ui));
-	
+
 	return control_ui;
 }
 
@@ -620,12 +620,12 @@ GenericPluginUI::astate_clicked (ControlUI* cui, uint32_t /*port*/)
 	if (automation_menu == 0) {
 		automation_menu = manage (new Menu);
 		automation_menu->set_name ("ArdourContextMenu");
-	} 
+	}
 
 	MenuList& items (automation_menu->items());
 
 	items.clear ();
-	items.push_back (MenuElem (_("Manual"), 
+	items.push_back (MenuElem (_("Manual"),
 				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Off, cui)));
 	items.push_back (MenuElem (_("Play"),
 				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Play, cui)));
@@ -647,7 +647,7 @@ void
 GenericPluginUI::toggle_parameter_changed (ControlUI* cui)
 {
 	float val = cui->control->get_value();
-	
+
 	if (!cui->ignore_change) {
 		if (val > 0.5) {
 			cui->button->set_active (true);
@@ -667,10 +667,10 @@ GenericPluginUI::parameter_changed (ControlUI* cui)
 }
 
 void
-GenericPluginUI::update_control_display (ControlUI* cui)	
+GenericPluginUI::update_control_display (ControlUI* cui)
 {
 	/* XXX how do we handle logarithmic stuff here ? */
-	
+
 	cui->update_pending = false;
 
 	float val = cui->control->get_value();
@@ -732,7 +732,7 @@ void
 GenericPluginUI::processor_active_changed (boost::weak_ptr<Processor> weak_processor)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &GenericPluginUI::processor_active_changed), weak_processor));
-	
+
 	boost::shared_ptr<Processor> processor = weak_processor.lock();
 
 	bypass_button.set_active (!processor || !processor->active());
@@ -743,7 +743,7 @@ GenericPluginUI::start_updating (GdkEventAny*)
 {
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
-		screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect 
+		screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect
 			(mem_fun(*this, &GenericPluginUI::output_update));
 	}
 	return false;
@@ -769,7 +769,7 @@ GenericPluginUI::output_update ()
 
 		/* autoscaling for the meter */
 		if ((*i)->meterinfo && (*i)->meterinfo->packed) {
-			
+
 			if (val < (*i)->meterinfo->min) {
 				if ((*i)->meterinfo->min_unbound)
 					(*i)->meterinfo->min = val;
@@ -783,7 +783,7 @@ GenericPluginUI::output_update ()
 				else
 					val = (*i)->meterinfo->max;
 			}
-			
+
 			if ((*i)->meterinfo->max > (*i)->meterinfo->min ) {
 				float lval = (val - (*i)->meterinfo->min) / ((*i)->meterinfo->max - (*i)->meterinfo->min) ;
 				(*i)->meterinfo->meter->set (lval );
@@ -792,7 +792,7 @@ GenericPluginUI::output_update ()
 	}
 }
 
-vector<string> 
+vector<string>
 GenericPluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
 {
 	vector<string> enums;
@@ -825,7 +825,7 @@ GenericPluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
 		SLV2Port port = lv2p->slv2_port(port_index);
 		SLV2ScalePoints points = slv2_port_get_scale_points(lv2p->slv2_plugin(), port);
 		cui->combo_map = new std::map<string, float>;
-	
+
 		for (unsigned i=0; i < slv2_scale_points_size(points); ++i) {
 			SLV2ScalePoint p = slv2_scale_points_get_at(points, i);
 			SLV2Value label = slv2_scale_point_get_label(p);
@@ -842,7 +842,7 @@ GenericPluginUI::setup_scale_values(guint32 port_index, ControlUI* cui)
 		slv2_scale_points_free(points);
 #endif
 	}
-	
+
 
 	return enums;
 }

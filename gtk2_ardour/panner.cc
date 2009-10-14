@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,13 +52,13 @@ PannerBar::expose (GdkEventExpose* ev)
 	GdkPoint points[3];
 
 	// left
-	
+
 	points[0].x = 0;
 	points[0].y = 0;
 
 	points[1].x = triangle_size;
 	points[1].y = 0;
-	
+
 	points[2].x = 0;
 	points[2].y = triangle_size;
 
@@ -71,11 +71,11 @@ PannerBar::expose (GdkEventExpose* ev)
 
 	points[1].x = (darea.get_width()/2 + triangle_size);
 	points[1].y = 0;
-	
+
 	points[2].x = darea.get_width()/2;
 	points[2].y = triangle_size - 1;
 
-	gdk_draw_polygon (win->gobj(), gc->gobj(), true, points, 3); 
+	gdk_draw_polygon (win->gobj(), gc->gobj(), true, points, 3);
 
 	// right
 
@@ -84,7 +84,7 @@ PannerBar::expose (GdkEventExpose* ev)
 
 	points[1].x = darea.get_width();
 	points[1].y = 0;
-	
+
 	points[2].x = darea.get_width();
 	points[2].y = triangle_size;
 
@@ -198,7 +198,7 @@ PannerBar::get_label (int& x)
 	if (ARDOUR::Panner::equivalent (value, 0.5)) {
 
 		/* centre: only display text during a drag */
-		
+
 		if (!grabbed) {
 			return "";
 		}
@@ -206,19 +206,19 @@ PannerBar::get_label (int& x)
 	} else {
 
 		/* non-centre: display text on the side of the panner which has more space */
-		
+
  		Glib::RefPtr<Pango::Context> p = get_pango_context ();
  		Glib::RefPtr<Pango::Layout> l = Pango::Layout::create (p);
  		l->set_text (value_as_string (value));
 
  		Pango::Rectangle const ext = l->get_ink_extents ();
-		
+
  		if (value < 0.5) {
  			x = (darea.get_width() - 4 - ext.get_width() / Pango::SCALE);
  		} else {
  			x = 4;
  		}
  	}
-	
+
 	return value_as_string (value);
 }

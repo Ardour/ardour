@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,12 +32,12 @@ ResampledImportableSource::ResampledImportableSource (boost::shared_ptr<Importab
 	: source (src)
 {
 	int err;
-	
+
 	source->seek (0);
-	
+
 	/* Initialize the sample rate converter. */
-	
- 	int src_type = SRC_SINC_BEST_QUALITY;
+
+	int src_type = SRC_SINC_BEST_QUALITY;
 
 	switch (srcq) {
 	case SrcBest:
@@ -56,21 +56,21 @@ ResampledImportableSource::ResampledImportableSource (boost::shared_ptr<Importab
 		src_type = SRC_LINEAR;
 		break;
 	}
-	
-	if ((src_state = src_new (src_type, source->channels(), &err)) == 0) {	
+
+	if ((src_state = src_new (src_type, source->channels(), &err)) == 0) {
 		error << string_compose(_("Import: src_new() failed : %1"), src_strerror (err)) << endmsg ;
 		throw failed_constructor ();
 	}
-	
+
 	src_data.end_of_input = 0 ; /* Set this later. */
-	
+
 	/* Start with zero to force load in while loop. */
-	
+
 	src_data.input_frames = 0 ;
 	src_data.data_in = input ;
-	
+
 	src_data.src_ratio = ((float) rate) / source->samplerate();
-	
+
 	input = new float[blocksize];
 }
 
@@ -80,14 +80,14 @@ ResampledImportableSource::~ResampledImportableSource ()
 	delete [] input;
 }
 
-nframes_t 
+nframes_t
 ResampledImportableSource::read (Sample* output, nframes_t nframes)
 {
 	int err;
 
 	/* If the input buffer is empty, refill it. */
-	
-	if (src_data.input_frames == 0) {	
+
+	if (src_data.input_frames == 0) {
 
 		src_data.input_frames = source->read (input, blocksize);
 
@@ -95,12 +95,12 @@ ResampledImportableSource::read (Sample* output, nframes_t nframes)
 
 		if ((nframes_t) src_data.input_frames < blocksize) {
 			src_data.end_of_input = true;
-		}		
+		}
 
 		src_data.input_frames /= source->channels();
 		src_data.data_in = input;
-	} 
-	
+	}
+
 	src_data.data_out = output;
 
 	if (!src_data.end_of_input) {
@@ -112,14 +112,14 @@ ResampledImportableSource::read (Sample* output, nframes_t nframes)
 	if ((err = src_process (src_state, &src_data))) {
 		error << string_compose(_("Import: %1"), src_strerror (err)) << endmsg ;
 		return 0 ;
-	} 
-	
+	}
+
 	/* Terminate if at end */
-	
+
 	if (src_data.end_of_input && src_data.output_frames_gen == 0) {
 		return 0;
 	}
-	
+
 	src_data.data_in += src_data.input_frames_used * source->channels();
 	src_data.input_frames -= src_data.input_frames_used ;
 

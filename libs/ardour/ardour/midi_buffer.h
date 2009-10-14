@@ -1,17 +1,17 @@
 /*
-    Copyright (C) 2006-2009 Paul Davis 
+    Copyright (C) 2006-2009 Paul Davis
     Author: Dave Robillard
-    
+
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
     Software Foundation; either version 2 of the License, or (at your option)
     any later version.
-    
+
     This program is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
-    
+
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     675 Mass Ave, Cambridge, MA 02139, USA.
@@ -40,7 +40,7 @@ public:
 	void silence (nframes_t nframes, nframes_t offset = 0);
 	void read_from (const Buffer& src, nframes_t nframes, nframes_t dst_offset = 0, nframes_t src_offset = 0);
 	void merge_from (const Buffer& src, nframes_t nframes, nframes_t dst_offset = 0, nframes_t src_offset = 0);
-	
+
 	void copy(const MidiBuffer& copy);
 
 	bool     push_back(const Evoral::MIDIEvent<TimeType>& event);
@@ -52,10 +52,10 @@ public:
 
 	bool merge(const MidiBuffer& a, const MidiBuffer& b);
 	bool merge_in_place(const MidiBuffer &other);
-	
+
 	template<typename BufferType, typename EventType>
 	struct iterator_base {
-	    iterator_base<BufferType, EventType>(BufferType& b, nframes_t o) : buffer(b), offset(o) {}
+		iterator_base<BufferType, EventType>(BufferType& b, nframes_t o) : buffer(b), offset(o) {}
 		inline EventType operator*() const {
 			uint8_t* ev_start = buffer._data + offset + sizeof(TimeType);
 			int event_size = Evoral::midi_event_size(ev_start);
@@ -86,7 +86,7 @@ public:
 		BufferType&     buffer;
 		size_t          offset;
 	};
-	
+
 	typedef iterator_base< MidiBuffer, Evoral::MIDIEvent<TimeType> >             iterator;
 	typedef iterator_base< const MidiBuffer, const Evoral::MIDIEvent<TimeType> > const_iterator;
 
@@ -99,7 +99,7 @@ public:
 private:
 	friend class iterator_base< MidiBuffer, Evoral::MIDIEvent<TimeType> >;
 	friend class iterator_base< const MidiBuffer, const Evoral::MIDIEvent<TimeType> >;
-	
+
 	uint8_t* _data; ///< timestamp, event, timestamp, event, ...
 };
 

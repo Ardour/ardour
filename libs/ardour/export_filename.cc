@@ -54,9 +54,9 @@ ExportFilename::ExportFilename (Session & session) :
 	time_t rawtime;
 	std::time (&rawtime);
 	time_struct = localtime (&rawtime);
-	
+
 	folder = session.session_directory().export_path().to_string();
-	
+
 	XMLNode * instant_node = session.instant_xml ("ExportFilename");
 	if (instant_node) {
 		set_state (*instant_node);
@@ -68,22 +68,22 @@ ExportFilename::get_state ()
 {
 	XMLNode * node = new XMLNode ("ExportFilename");
 	XMLNode * child;
-	
+
 	FieldPair dir = analyse_folder();
 	child = node->add_child ("Folder");
 	child->add_property ("relative", dir.first ? "true" : "false");
 	child->add_property ("path", dir.second);
-	
+
 	add_field (node, "label", include_label, label);
 	add_field (node, "session", include_session);
 	add_field (node, "revision", include_revision);
 	add_field (node, "time", include_time, enum_2_string (time_format));
 	add_field (node, "date", include_date, enum_2_string (date_format));
-	
+
 	XMLNode * instant_node = new XMLNode ("ExportRevision");
 	instant_node->add_property ("revision", to_string (revision, std::dec));
 	session.add_instant_xml (*instant_node);
-	
+
 	return *node;
 }
 
@@ -93,37 +93,37 @@ ExportFilename::set_state (const XMLNode & node)
 	XMLNode * child;
 	XMLProperty * prop;
 	FieldPair pair;
-	
+
 	child = node.child ("Folder");
 	if (!child) { return -1; }
-	
+
 	folder = "";
-	
+
 	if ((prop = child->property ("relative"))) {
 		if (!prop->value().compare ("true")) {
 			folder = session.session_directory().root_path().to_string();
 		}
 	}
-	
+
 	if ((prop = child->property ("path"))) {
 		folder += prop->value();
 	}
-	
-	
+
+
 	pair = get_field (node, "label");
 	include_label = pair.first;
 	label = pair.second;
-	
+
 	pair = get_field (node, "session");
 	include_session = pair.first;
-	
+
 	pair = get_field (node, "revision");
 	include_revision = pair.first;
-	
+
 	pair = get_field (node, "time");
 	include_time = pair.first;
 	time_format = (TimeFormat) string_2_enum (pair.second, time_format);
-	
+
 	pair = get_field (node, "date");
 	include_date = pair.first;
 	date_format = (DateFormat) string_2_enum (pair.second, date_format);
@@ -137,66 +137,66 @@ ExportFilename::set_state (const XMLNode & node)
 }
 
 ustring
-ExportFilename::get_path (FormatPtr format) const 
+ExportFilename::get_path (FormatPtr format) const
 {
 	ustring path = folder;
 	bool filename_empty = true;
-	
+
 	path += "/";
-	
+
 	if (include_session) {
 		path += filename_empty ? "" : "_";
 		path += session.name();
 		filename_empty = false;
 	}
-	
+
 	if (include_label) {
 		path += filename_empty ? "" : "_";
 		path += label;
 		filename_empty = false;
 	}
-	
+
 	if (include_revision) {
 		path += filename_empty ? "" : "_";
 		path += "r";
 		path += to_string (revision, std::dec);
 		filename_empty = false;
 	}
-	
+
 	if (include_timespan && timespan) {
 		path += filename_empty ? "" : "_";
 		path += timespan->name();
 		filename_empty = false;
 	}
-	
+
 	if (include_channel_config && channel_config) {
 		path += filename_empty ? "" : "_";
 		path += channel_config->name();
 		filename_empty = false;
 	}
-	
+
 	if (include_channel) {
 		path += filename_empty ? "" : "_";
 		path += "channel";
 		path += to_string (channel, std::dec);
 		filename_empty = false;
 	}
-	
+
 	if (include_date) {
 		path += filename_empty ? "" : "_";
 		path += get_date_format_str (date_format);
 		filename_empty = false;
 	}
-	
+
 	if (include_time) {
 		path += filename_empty ? "" : "_";
 		path += get_time_format_str (time_format);
 		filename_empty = false;
 	}
-	
+
 	path += ".";
 	path += format->extension ();
-	
+
 	return path;
 }
 
@@ -206,13 +206,13 @@ ExportFilename::get_time_format_str (TimeFormat format) const
 	switch ( format ) {
 	  case T_None:
 		return _("No Time");
-	
+
 	  case T_NoDelim:
 		return get_formatted_time ("%H%M");
-	
+
 	  case T_Delim:
 		return get_formatted_time ("%H.%M");
-	
+
 	  default:
 		return _("Invalid time format");
 	}
@@ -224,19 +224,19 @@ ExportFilename::get_date_format_str (DateFormat format) const
 	switch (format) {
 	  case D_None:
 		return _("No Date");
-	
+
 	  case D_BE:
 		return get_formatted_time ("%Y%m%d");
-	
+
 	  case D_ISO:
 		return get_formatted_time ("%Y-%m-%d");
-	
+
 	  case D_BEShortY:
 		return get_formatted_time ("%y%m%d");
-	
+
 	  case D_ISOShortY:
 		return get_formatted_time ("%y-%m-%d");
-	
+
 	  default:
 		return _("Invalid date format");
 	}
@@ -246,7 +246,7 @@ void
 ExportFilename::set_time_format (TimeFormat format)
 {
 	time_format = format;
-	
+
 	if (format == T_None) {
 		include_time = false;
 	} else {
@@ -258,7 +258,7 @@ void
 ExportFilename::set_date_format (DateFormat format)
 {
 	date_format = format;
-	
+
 	if (format == D_None) {
 		include_date = false;
 	} else {
@@ -286,7 +286,7 @@ ExportFilename::get_formatted_time (ustring const & format) const
 {
 	char buffer [80];
 	strftime (buffer, 80, format.c_str(), time_struct);
-	
+
 	ustring return_value (buffer);
 	return return_value;
 }
@@ -295,12 +295,12 @@ void
 ExportFilename::add_field (XMLNode * node, ustring const & name, bool enabled, ustring const & value)
 {
 	XMLNode * child = node->add_child ("Field");
-	
+
 	if (!child) {
 		std::cerr << "Error adding a field to ExportFilename XML-tree" << std::endl;
 		return;
 	}
-	
+
 	child->add_property ("name", name);
 	child->add_property ("enabled", enabled ? "true" : "false");
 	if (!value.empty()) {
@@ -315,27 +315,27 @@ ExportFilename::get_field (XMLNode const & node, ustring const & name)
 	pair.first = false;
 
 	XMLNodeList children = node.children();
-	
+
 	for (XMLNodeList::iterator it = children.begin(); it != children.end(); ++it) {
 		XMLProperty * prop = (*it)->property ("name");
 		if (prop && !prop->value().compare (name)) {
-			
+
 			prop = (*it)->property ("enabled");
 			if (prop && !prop->value().compare ("true")) {
 				pair.first = true;
 			} else {
 				pair.first = false;
 			}
-			
+
 			prop = (*it)->property ("value");
 			if (prop) {
 				pair.second = prop->value();
 			}
-			
+
 			return pair;
 		}
 	}
-	
+
 	return pair;
 }
 
@@ -343,12 +343,12 @@ ExportFilename::FieldPair
 ExportFilename::analyse_folder ()
 {
 	FieldPair pair;
-	
+
 	ustring session_dir = session.session_directory().root_path().to_string();
 	ustring::size_type session_dir_len = session_dir.length();
-	
+
 	ustring folder_beginning = folder.substr (0, session_dir_len);
-	
+
 	if (!folder_beginning.compare (session_dir)) {
 		pair.first = true;
 		pair.second = folder.substr (session_dir_len);
@@ -356,7 +356,7 @@ ExportFilename::analyse_folder ()
 		pair.first = false;
 		pair.second = folder;
 	}
-	
+
 	return pair;
 }
 

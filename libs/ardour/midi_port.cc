@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ MidiPort::cycle_start (nframes_t nframes)
 {
 	_buffer->clear ();
 	assert (_buffer->size () == 0);
-	
+
 	if (sends_output ()) {
 		jack_midi_clear_buffer (jack_port_get_buffer (_jack_port, nframes));
 	}
@@ -59,34 +59,34 @@ MidiPort::get_midi_buffer (nframes_t nframes, nframes_t offset)
 
 		void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
 		const nframes_t event_count = jack_midi_get_event_count(jack_buffer);
-		
+
 		assert (event_count < _buffer->capacity());
 
 		/* suck all relevant MIDI events from the JACK MIDI port buffer
 		   into our MidiBuffer
 		*/
-		
+
 		nframes_t off = offset + _port_offset;
 
 		for (nframes_t i = 0; i < event_count; ++i) {
-			
+
 			jack_midi_event_t ev;
 
 			jack_midi_event_get (&ev, jack_buffer, i);
-			
+
 			if (ev.time > off && ev.time < off+nframes) {
 				_buffer->push_back (ev);
 			}
 		}
-		
+
 		if (nframes) {
 			_has_been_mixed_down = true;
 		}
-		
+
 	} else {
 		_buffer->silence (nframes);
 	}
-	
+
 	if (nframes) {
 		_has_been_mixed_down = true;
 	}
@@ -94,7 +94,7 @@ MidiPort::get_midi_buffer (nframes_t nframes, nframes_t offset)
 	return *_buffer;
 }
 
-	
+
 void
 MidiPort::cycle_end (nframes_t /*nframes*/)
 {
@@ -111,7 +111,7 @@ void
 MidiPort::flush_buffers (nframes_t nframes, nframes_t offset)
 {
 	if (sends_output ()) {
-		
+
 		void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
 
 		for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {

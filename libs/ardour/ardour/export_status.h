@@ -40,40 +40,40 @@ struct ExportStatus : public sigc::trackable {
 
 	ExportStatus ();
 	void init ();
-	
+
 	/* Status info */
-	
+
 	volatile bool           stop;
 	volatile bool           running;
-	
+
 	sigc::signal<void>      Aborting;
 	void abort (bool error_occurred = false);
 	bool aborted () const { return _aborted; }
 	bool errors () const { return _errors; }
-	
+
 	sigc::signal<void>      Finished;
 	void finish ();
 	bool finished () const { return _finished; }
-	
+
 	/* Progress info */
-	
+
 	volatile ExportStage    stage;
 	volatile float          progress;
-	
+
 	volatile uint32_t       total_timespans;
 	volatile uint32_t       timespan;
-	
+
 	volatile uint32_t       total_channel_configs;
 	volatile uint32_t       channel_config;
-	
+
 	volatile uint32_t       total_formats;
 	volatile uint32_t       format;
-	
+
   private:
 	volatile bool          _aborted;
 	volatile bool          _errors;
 	volatile bool          _finished;
-	
+
 };
 
 } // namespace ARDOUR

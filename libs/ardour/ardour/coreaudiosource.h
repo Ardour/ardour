@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 */
 
-#ifndef __coreaudio_source_h__ 
+#ifndef __coreaudio_source_h__
 #define __coreaudio_source_h__
 
 #include <appleutility/CAAudioFile.h>

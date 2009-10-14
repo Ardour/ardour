@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 class TapeAudioRegionView : public AudioRegionView
 {
   public:
-	TapeAudioRegionView (ArdourCanvas::Group *, 
+	TapeAudioRegionView (ArdourCanvas::Group *,
 			     RouteTimeAxisView&,
 			     boost::shared_ptr<ARDOUR::AudioRegion>,
 			     double initial_samples_per_unit,

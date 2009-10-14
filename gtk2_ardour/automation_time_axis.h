@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 				const std::string & plug_name = "");
 
 	~AutomationTimeAxisView();
-	
+
 	virtual void set_height (uint32_t);
 	void set_samples_per_unit (double);
 	std::string name() const { return _name; }
@@ -84,20 +84,20 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void hide_timestretch () {}
 
 	/* editing operations */
-	
+
 	bool cut_copy_clear (Selection&, Editing::CutCopyOp);
 	bool cut_copy_clear_objects (PointSelection&, Editing::CutCopyOp);
 	bool paste (nframes_t, float times, Selection&, size_t nth);
 	void reset_objects (PointSelection&);
 
 	int  set_state (const XMLNode&);
-	
+
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();
-	
+
 	static const std::string state_node_name;
 	XMLNode* get_state_node();
-	
+
 	boost::shared_ptr<ARDOUR::AutomationControl> control()    { return _control; }
 	boost::shared_ptr<AutomationController>      controller() { return _controller; }
 
@@ -105,20 +105,20 @@ class AutomationTimeAxisView : public TimeAxisView {
 	boost::shared_ptr<ARDOUR::Route> _route; ///< Parent route
 	boost::shared_ptr<ARDOUR::AutomationControl> _control; ///< Control
 	boost::shared_ptr<ARDOUR::Automatable> _automatable; ///< Control owner, maybe = _route
-	
+
 	boost::shared_ptr<AutomationController> _controller;
-	
+
 	ArdourCanvas::SimpleRect* _base_rect;
 	boost::shared_ptr<AutomationLine> _line;
 	AutomationStreamView*             _view;
-	
+
 	std::string _name;
 	bool    ignore_toggle;
 
 	bool    first_call_to_set_height;
 
 	Gtk::Button        hide_button;
-	Gtk::Button        auto_button; 
+	Gtk::Button        auto_button;
 	Gtk::Menu*         automation_menu;
 	Gtk::Label*        plugname;
 	bool               plugname_packed;
@@ -132,7 +132,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	Gtk::CheckMenuItem* mode_line_item;
 
 	void add_line (boost::shared_ptr<AutomationLine>);
-	
+
 	void clear_clicked ();
 	void hide_clicked ();
 	void auto_clicked ();

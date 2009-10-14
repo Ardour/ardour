@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001, 2006 Paul Davis 
+    Copyright (C) 2001, 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -79,9 +79,9 @@ class AudioStreamView : public StreamView
 
   private:
 	void setup_rec_box ();
-	void rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::weak_ptr<ARDOUR::Source> src); 
+	void rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::weak_ptr<ARDOUR::Source> src);
 	void update_rec_regions ();
-	
+
 	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves, bool recording = false);
 	void remove_region_view (boost::weak_ptr<ARDOUR::Region> );
 	void remove_audio_region_view (boost::shared_ptr<ARDOUR::AudioRegion> );
@@ -105,9 +105,9 @@ class AudioStreamView : public StreamView
 	void parameter_changed (std::string const &);
 	void set_waveform_shape (ARDOUR::WaveformShape);
 	void set_waveform_scale (ARDOUR::WaveformScale);
-	
+
 	double _amplitude_above_axis;
-	
+
 	typedef std::map<boost::shared_ptr<ARDOUR::Crossfade>, CrossfadeView*> CrossfadeViewList;
 	CrossfadeViewList crossfade_views;
 	bool              crossfades_visible;

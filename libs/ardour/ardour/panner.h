@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004 Paul Davis 
+    Copyright (C) 2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #include <iostream>
 #include <sigc++/signal.h>
 
-#include "pbd/stateful.h" 
+#include "pbd/stateful.h"
 #include "pbd/controllable.h"
 
 #include "ardour/types.h"
@@ -67,16 +67,16 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 
 	virtual void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes) = 0;
 	virtual void distribute_automated (AudioBuffer& src, BufferSet& obufs,
-				     nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers) = 0;
+			nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers) = 0;
 
 	boost::shared_ptr<AutomationControl> pan_control()  { return _control; }
-	
+
 	sigc::signal<void> Changed;      /* for position */
 	sigc::signal<void> StateChanged; /* for mute */
 
 	int set_state (const XMLNode&);
 	virtual XMLNode& state (bool full_state) = 0;
-	
+
 	Panner & get_parent() { return parent; }
 
 	/* old school automation loading */
@@ -90,7 +90,7 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 	float x;
 	float y;
 	float z;
-	
+
 	/* these are for automation. they store the last value
 	   used by the most recent process() cycle.
 	*/
@@ -114,7 +114,7 @@ class BaseStereoPanner : public StreamPanner
 	~BaseStereoPanner ();
 
 	/* this class just leaves the pan law itself to be defined
-	   by the update(), distribute_automated() 
+	   by the update(), distribute_automated()
 	   methods. derived classes also need a factory method
 	   and a type name. See EqualPowerStereoPanner as an example.
 	*/
@@ -140,8 +140,8 @@ class EqualPowerStereoPanner : public BaseStereoPanner
 	EqualPowerStereoPanner (Panner&, Evoral::Parameter param);
 	~EqualPowerStereoPanner ();
 
-	void distribute_automated (AudioBuffer& src, BufferSet& obufs, 
-			     nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
+	void distribute_automated (AudioBuffer& src, BufferSet& obufs,
+			nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
 
 	void get_current_coefficients (pan_t*) const;
 	void get_desired_coefficients (pan_t*) const;
@@ -149,8 +149,8 @@ class EqualPowerStereoPanner : public BaseStereoPanner
 	static StreamPanner* factory (Panner&, Evoral::Parameter param);
 	static std::string name;
 
-	XMLNode& state (bool full_state); 
-	XMLNode& get_state (void); 
+	XMLNode& state (bool full_state);
+	XMLNode& get_state (void);
 	int      set_state (const XMLNode&);
 
   private:
@@ -165,12 +165,12 @@ class Multi2dPanner : public StreamPanner
 
 	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
 	void distribute_automated (AudioBuffer& src, BufferSet& obufs,
-				   nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
+			nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
 
 	static StreamPanner* factory (Panner&, Evoral::Parameter);
 	static std::string name;
 
-	XMLNode& state (bool full_state); 
+	XMLNode& state (bool full_state);
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&);
 
@@ -185,16 +185,16 @@ class Multi2dPanner : public StreamPanner
 
 class Panner : public SessionObject, public AutomatableControls
 {
-  public:
+public:
 	struct Output {
-	    float x;
-	    float y;
-	    pan_t current_pan;
-	    pan_t desired_pan;
+		float x;
+		float y;
+		pan_t current_pan;
+		pan_t desired_pan;
 
-	    Output (float xp, float yp) 
-		    : x (xp), y (yp), current_pan (0.0f), desired_pan (0.f) {}
-		    
+		Output (float xp, float yp)
+			: x (xp), y (yp), current_pan (0.0f), desired_pan (0.f) {}
+
 	};
 
 	//Panner (std::string name, Session&, int _num_bufs);
@@ -248,7 +248,7 @@ class Panner : public SessionObject, public AutomatableControls
 
 	LinkDirection link_direction() const { return _link_direction; }
 	void set_link_direction (LinkDirection);
-	
+
 	bool linked() const { return _linked; }
 	void set_linked (bool yn);
 
@@ -260,7 +260,7 @@ class Panner : public SessionObject, public AutomatableControls
 	sigc::signal<void> StateChanged; /* for bypass */
 
 	/* only StreamPanner should call these */
-	
+
 	void set_position (float x, StreamPanner& orig);
 	void set_position (float x, float y, StreamPanner& orig);
 	void set_position (float x, float y, float z, StreamPanner& orig);
@@ -270,31 +270,31 @@ class Panner : public SessionObject, public AutomatableControls
 	int load ();
 
 	struct PanControllable : public AutomationControl {
-	    PanControllable (Session& s, std::string name, Panner& p, Evoral::Parameter param)
+		PanControllable (Session& s, std::string name, Panner& p, Evoral::Parameter param)
 			: AutomationControl (s, param,
 					boost::shared_ptr<AutomationList>(new AutomationList(param)), name)
 			, panner (p)
 		{ assert(param.type() != NullAutomation); }
-	    
+
 		AutomationList* alist() { return (AutomationList*)_list.get(); }
-	    Panner& panner;
-	    
-	    void set_value (float);
-	    float get_value (void) const;
+		Panner& panner;
+
+		void set_value (float);
+		float get_value (void) const;
 	};
 
 	boost::shared_ptr<AutomationControl> pan_control (int id, int chan=0) {
-	    return automation_control(Evoral::Parameter (PanAutomation, chan, id));
+		return automation_control(Evoral::Parameter (PanAutomation, chan, id));
 	}
 
 	boost::shared_ptr<const AutomationControl> pan_control (int id, int chan=0) const {
-	    return automation_control(Evoral::Parameter (PanAutomation, chan, id));
+		return automation_control(Evoral::Parameter (PanAutomation, chan, id));
 	}
 
   private:
 	/* disallow copy construction */
 	Panner (Panner const &);
-	
+
 	void distribute_no_automation(BufferSet& src, BufferSet& dest, nframes_t nframes, gain_t gain_coeff);
 	std::vector<StreamPanner*> _streampanners;
 	uint32_t     current_outs;

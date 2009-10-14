@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -95,7 +95,7 @@ Track::update_total_latency ()
 {
 	nframes_t old = _output->effective_latency();
 	nframes_t own_latency = _output->user_latency();
-	
+
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->active ()) {
 			own_latency += (*i)->signal_latency ();
@@ -108,7 +108,7 @@ Track::update_total_latency ()
 #endif
 
 	_output->set_port_latency (own_latency);
-	
+
 	if (old != own_latency) {
 		_output->set_latency_delay (own_latency);
 		signal_latency_changed (); /* EMIT SIGNAL */
@@ -166,7 +166,7 @@ Track::can_record()
 
 	return will_record;
 }
-	
+
 void
 Track::set_record_enable (bool yn, void *src)
 {
@@ -187,7 +187,7 @@ Track::set_record_enable (bool yn, void *src)
 	if (!_diskstream->record_enabled()) {
 		_saved_meter_point = _meter_point;
 	}
-	
+
 	_diskstream->set_record_enabled (yn);
 
 	if (_diskstream->record_enabled()) {
@@ -215,7 +215,7 @@ Track::set_name (const string& str)
 	}
 
 	/* save state so that the statefile fully reflects any filename changes */
-	
+
 	if ((ret = Route::set_name (str)) == 0) {
 		_session.save_state ("");
 	}
@@ -238,8 +238,8 @@ Track::zero_diskstream_id_in_xml (XMLNode& node)
 	}
 }
 
-int 
-Track::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
+int
+Track::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 		bool session_state_changing, bool can_record, bool /*rec_monitors_input*/)
 {
 	if (n_outputs().n_total() == 0) {
@@ -262,7 +262,7 @@ Track::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 	diskstream()->check_record_status (start_frame, nframes, can_record);
 
 	bool send_silence;
-	
+
 	if (_have_internal_generator) {
 		/* since the instrument has no input streams,
 		   there is no reason to send any signal
@@ -271,9 +271,9 @@ Track::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 		send_silence = true;
 	} else {
 		if (!Config->get_tape_machine_mode()) {
-			/* 
-			   ADATs work in a strange way.. 
-			   they monitor input always when stopped.and auto-input is engaged. 
+			/*
+			   ADATs work in a strange way..
+			   they monitor input always when stopped.and auto-input is engaged.
 			*/
 			if ((Config->get_monitoring_model() == SoftwareMonitoring)
 					&& (_session.config.get_auto_input () || _diskstream->record_enabled())) {
@@ -282,10 +282,10 @@ Track::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 				send_silence = true;
 			}
 		} else {
-			/* 
+			/*
 			   Other machines switch to input on stop if the track is record enabled,
-			   regardless of the auto input setting (auto input only changes the 
-			   monitoring state when the transport is rolling) 
+			   regardless of the auto input setting (auto input only changes the
+			   monitoring state when the transport is rolling)
 			*/
 			if ((Config->get_monitoring_model() == SoftwareMonitoring)
 					&& _diskstream->record_enabled()) {
@@ -299,11 +299,11 @@ Track::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 	_amp->apply_gain_automation(false);
 
 	if (send_silence) {
-		
+
 		/* if we're sending silence, but we want the meters to show levels for the signal,
 		   meter right here.
 		*/
-		
+
 		if (_have_internal_generator) {
 			passthru_silence (start_frame, end_frame, nframes, 0);
 		} else {
@@ -314,8 +314,8 @@ Track::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 		}
 
 	} else {
-	
-		/* we're sending signal, but we may still want to meter the input. 
+
+		/* we're sending signal, but we may still want to meter the input.
 		 */
 
 		passthru (start_frame, end_frame, nframes, false);
@@ -327,7 +327,7 @@ Track::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 }
 
 int
-Track::silent_roll (nframes_t nframes, sframes_t /*start_frame*/, sframes_t /*end_frame*/,  
+Track::silent_roll (nframes_t nframes, sframes_t /*start_frame*/, sframes_t /*end_frame*/,
 		    bool can_record, bool rec_monitors_input)
 {
 	if (n_outputs().n_total() == 0 && _processors.empty()) {

@@ -16,9 +16,9 @@ OnsetDetector::OnsetDetector (float sr)
 	/* update the op_id */
 
 	_op_id = X_("libardourvampplugins:aubioonset");
-	
+
 	// XXX this should load the above-named plugin and get the current version
-	
+
 	_op_id += ":2";
 }
 
@@ -48,13 +48,13 @@ OnsetDetector::use_features (Plugin::FeatureSet& features, ostream* out)
 	const Plugin::FeatureList& fl (features[0]);
 
 	for (Plugin::FeatureList::const_iterator f = fl.begin(); f != fl.end(); ++f) {
-		
+
 		if ((*f).hasTimestamp) {
 
 			if (out) {
 				(*out) << (*f).timestamp.toString() << endl;
-			} 
-			
+			}
+
 			current_results->push_back (RealTime::realTime2Frame ((*f).timestamp, (nframes_t) floor(sample_rate)));
 		}
 	}
@@ -94,23 +94,23 @@ OnsetDetector::cleanup_onsets (AnalysisFeatureList& t, float sr, float gap_msecs
 	}
 
 	t.sort ();
-	
+
 	/* remove duplicates or other things that are too close */
-	
+
 	AnalysisFeatureList::iterator i = t.begin();
 	AnalysisFeatureList::iterator f, b;
 	const nframes64_t gap_frames = (nframes64_t) floor (gap_msecs * (sr / 1000.0));
-	
+
 	while (i != t.end()) {
 
 		// move front iterator to just past i, and back iterator the same place
-		
+
 		f = i;
 		++f;
 		b = f;
 
 		// move f until we find a new value that is far enough away
-		
+
 		while ((f != t.end()) && (((*f) - (*i)) < gap_frames)) {
 			++f;
 		}

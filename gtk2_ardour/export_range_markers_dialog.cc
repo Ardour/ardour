@@ -35,14 +35,14 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-ExportRangeMarkersDialog::ExportRangeMarkersDialog (PublicEditor& editor) 
+ExportRangeMarkersDialog::ExportRangeMarkersDialog (PublicEditor& editor)
 	: ExportDialog(editor)
-{ 
+{
 	set_title (_("ardour: export ranges"));
 	file_frame.set_label (_("Export to Directory"));
 
 	do_not_allow_export_cd_markers();
-	
+
 	total_duration = 0;
 	current_range_marker_index = 0;
 }
@@ -52,8 +52,8 @@ ExportRangeMarkersDialog::browse_action () const
 {
 	return Gtk::FILE_CHOOSER_ACTION_CREATE_FOLDER;
 }
-	
-void 
+
+void
 ExportRangeMarkersDialog::export_data ()
 {
 	getSession().locations()->apply(*this, &ExportRangeMarkersDialog::process_range_markers_export);
@@ -75,14 +75,14 @@ ExportRangeMarkersDialog::process_range_markers_export(Locations::LocationList& 
 				get_selected_file_name(),
 				currentLocation->name(),
 				sndfile_file_ending_from_string(get_selected_header_format()));
-			
+
 			initSpec(filepath);
-			
+
 			spec.start_frame = currentLocation->start();
 			spec.end_frame = currentLocation->end();
 
 			if (getSession().start_export(spec)){
-				// if export fails			
+				// if export fails
 				return;
 			}
 
@@ -96,13 +96,13 @@ ExportRangeMarkersDialog::process_range_markers_export(Locations::LocationList& 
 					usleep(10000);
 				}
 			}
-			
+
 			current_range_marker_index++;
-			
+
 			getSession().stop_export (spec);
 		}
 	}
-	
+
 	spec.running = false;
 }
 
@@ -117,17 +117,17 @@ ExportRangeMarkersDialog::get_target_filepath(string path, string filename, stri
 
 	string target_filepath = target_path + filename + postfix;
 	struct stat statbuf;
-	
+
 	for(int counter=1; (stat (target_filepath.c_str(), &statbuf) == 0); counter++){
-		// while file exists	
+		// while file exists
 		ostringstream scounter;
 		scounter.flush();
 		scounter << counter;
-		
-		target_filepath = 
+
+		target_filepath =
 			target_path + filename + "_" + scounter.str() + postfix;
 	}
-	
+
 	return target_filepath;
 }
 
@@ -136,7 +136,7 @@ ExportRangeMarkersDialog::is_filepath_valid(string &filepath)
 {
   	// sanity check file name first
   	struct stat statbuf;
-  
+
   	if (filepath.empty()) {
   		// warning dialog
  		string txt = _("Please enter a valid target directory.");
@@ -144,15 +144,15 @@ ExportRangeMarkersDialog::is_filepath_valid(string &filepath)
 		msg.run();
  		return false;
  	}
- 	
-	if ( (stat (filepath.c_str(), &statbuf) != 0) || 
+
+	if ( (stat (filepath.c_str(), &statbuf) != 0) ||
 		(!S_ISDIR (statbuf.st_mode)) ) {
 		string txt = _("Please select an existing target directory. Files are not allowed!");
 		MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);
 		msg.run();
 		return false;
 	}
- 	
+
  	// directory needs to exist and be writable
  	string dirpath = Glib::path_get_dirname (filepath);
  	if (::access (dirpath.c_str(), W_OK) != 0) {
@@ -161,7 +161,7 @@ ExportRangeMarkersDialog::is_filepath_valid(string &filepath)
 		msg.run();
  		return false;
   	}
-	
+
 	return true;
 }
 
@@ -170,24 +170,24 @@ ExportRangeMarkersDialog::init_progress_computing(Locations::LocationList& locat
 {
 	// flush vector
 	range_markers_durations_aggregated.resize(0);
-	
+
 	nframes_t duration_before_current_location = 0;
 	Locations::LocationList::iterator locationIter;
-		
+
 	for (locationIter = locations.begin(); locationIter != locations.end(); ++locationIter) {
 		Location *currentLocation = (*locationIter);
-		
+
 		if(currentLocation->is_range_marker()){
 			range_markers_durations_aggregated.push_back (duration_before_current_location);
-			
+
 			nframes_t duration = currentLocation->end() - currentLocation->start();
-			
+
 			range_markers_durations.push_back (duration);
-			duration_before_current_location += duration;	
+			duration_before_current_location += duration;
 		}
 	}
 
-	total_duration = duration_before_current_location;	
+	total_duration = duration_before_current_location;
 }
 
 
@@ -203,7 +203,7 @@ ExportRangeMarkersDialog::progress_timeout ()
 			    (spec.progress * (double) range_markers_durations[current_range_marker_index])) /
 			(double) total_duration;
 	}
-	
+
 	set_progress_fraction( progress );
 	return TRUE;
 }

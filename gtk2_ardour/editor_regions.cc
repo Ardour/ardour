@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2005 Paul Davis 
+    Copyright (C) 2000-2005 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -87,53 +87,53 @@ EditorRegions::EditorRegions (Editor* e)
 	_display.append_column (_("Path"), _columns.path);
 	_display.set_headers_visible (true);
 	//_display.set_grid_lines (TREE_VIEW_GRID_LINES_BOTH);
-	
+
 	CellRendererText* region_name_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
 	region_name_cell->property_editable() = true;
 	region_name_cell->signal_edited().connect (mem_fun (*this, &EditorRegions::name_edit));
 
 	_display.get_selection()->set_select_function (mem_fun (*this, &EditorRegions::selection_filter));
-	
+
 	TreeViewColumn* tv_col = _display.get_column(0);
 	CellRendererText* renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
 	tv_col->add_attribute(renderer->property_text(), _columns.name);
 	tv_col->add_attribute(renderer->property_foreground_gdk(), _columns.color_);
-	
+
 	_display.get_selection()->set_mode (SELECTION_MULTIPLE);
 	_display.add_object_drag (_columns.region.index(), "regions");
-	
+
 	/* setup DnD handling */
-	
+
 	list<TargetEntry> region_list_target_table;
-	
+
 	region_list_target_table.push_back (TargetEntry ("text/plain"));
 	region_list_target_table.push_back (TargetEntry ("text/uri-list"));
 	region_list_target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
-	
+
 	_display.add_drop_targets (region_list_target_table);
 	_display.signal_drag_data_received().connect (mem_fun(*this, &EditorRegions::drag_data_received));
 
 	_scroller.add (_display);
 	_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
-	
+
 	_display.signal_key_press_event().connect (mem_fun(*this, &EditorRegions::key_press));
 	_display.signal_key_release_event().connect (mem_fun(*this, &EditorRegions::key_release));
 	_display.signal_button_press_event().connect (mem_fun(*this, &EditorRegions::button_press), false);
 	_display.signal_button_release_event().connect (mem_fun(*this, &EditorRegions::button_release));
 	_change_connection = _display.get_selection()->signal_changed().connect (mem_fun(*this, &EditorRegions::selection_changed));
 	// _display.signal_popup_menu().connect (bind (mem_fun (*this, &Editor::show__display_context_menu), 1, 0));
-	
+
 	//ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (mem_fun(*this, &Editor::redisplay_regions));
 	ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (mem_fun(*this, &EditorRegions::update_all_rows));
 	ARDOUR::Region::RegionPropertyChanged.connect (mem_fun(*this, &EditorRegions::update_row));
-	
+
 }
 
 void
 EditorRegions::connect_to_session (ARDOUR::Session* s)
 {
 	EditorComponent::connect_to_session (s);
-	
+
 	_session_connections.push_back (_session->RegionsAdded.connect (mem_fun(*this, &EditorRegions::handle_new_regions)));
 	_session_connections.push_back (_session->RegionRemoved.connect (mem_fun(*this, &EditorRegions::handle_region_removed)));
 	_session_connections.push_back (_session->RegionHiddenChange.connect (mem_fun(*this, &EditorRegions::region_hidden)));
@@ -145,7 +145,7 @@ void
 EditorRegions::handle_region_removed (boost::weak_ptr<Region> wregion)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &EditorRegions::handle_region_removed), wregion));
-	
+
 	redisplay ();
 }
 
@@ -159,7 +159,7 @@ EditorRegions::handle_new_regions (vector<boost::weak_ptr<Region> >& v)
 void
 EditorRegions::region_hidden (boost::shared_ptr<Region> r)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &EditorRegions::region_hidden), r));	
+	ENSURE_GUI_THREAD(bind (mem_fun(*this, &EditorRegions::region_hidden), r));
 	redisplay ();
 }
 
@@ -180,7 +180,7 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 	if (!region || !_session) {
 		return;
 	}
-	
+
 	string str;
 	TreeModel::Row row;
 	Gdk::Color c;
@@ -220,31 +220,31 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 
 		for (i = rows.begin(); i != rows.end(); ++i) {
 			boost::shared_ptr<Region> rr = (*i)[_columns.region];
-			
+
 			if (rr && region->region_list_equivalent (rr)) {
 				return;
 			}
 		}
 
 		row = *(_model->append());
-		
+
 		if (missing_source) {
 			c.set_rgb(65535,0,0);     // FIXME: error color from style
-		
+
 		} else if (region->automatic()){
 			c.set_rgb(0,65535,0);     // FIXME: error color from style
-		
+
 		} else {
 			set_color(c, rgba_from_style ("RegionListWholeFile", 0xff, 0, 0, 0, "fg", Gtk::STATE_NORMAL, false ));
-		
+
 		}
-		
+
 		row[_columns.color_] = c;
 
 		if (region->source()->name()[0] == '/') { // external file
-			
+
 			if (region->whole_file()) {
-				
+
 				boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(region->source());
 				str = ".../";
 
@@ -272,23 +272,23 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 
 		row[_columns.name] = str;
 		row[_columns.region] = region;
-		
+
 		if (missing_source) {
 			row[_columns.path] = _("(MISSING) ") + region->source()->name();
-		
+
 		} else {
 			row[_columns.path] = region->source()->name();
-		
-		} 
-		
+
+		}
+
 		if (region->automatic()) {
 			return;
 		}
-			
+
 	} else {
 
 		/* find parent node, add as new child */
-		
+
 		TreeModel::iterator i;
 		TreeModel::Children rows = _model->children();
 		bool found_parent = false;
@@ -296,16 +296,16 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 		for (i = rows.begin(); i != rows.end(); ++i) {
 			boost::shared_ptr<Region> rr = (*i)[_columns.region];
 			boost::shared_ptr<AudioRegion> r = boost::dynamic_pointer_cast<AudioRegion>(rr);
-			
+
 			if (r && r->whole_file()) {
-				
+
 				if (region->source_equivalent (r)) {
 					row = *(_model->append ((*i).children()));
 					found_parent = true;
 					break;
 				}
 			}
-			
+
 			TreeModel::iterator ii;
 			TreeModel::Children subrows = (*i).children();
 
@@ -314,18 +314,18 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 
 				if (region->region_list_equivalent (rrr)) {
 					return;
-				
+
 				}
 			}
 		}
-		
+
 		if (!found_parent) {
 			row = *(_model->append());
-		}	
+		}
 	}
-	
+
 	row[_columns.region] = region;
-	
+
 	populate_row(region, (*row));
 }
 
@@ -334,13 +334,13 @@ void
 EditorRegions::region_changed (Change what_changed, boost::weak_ptr<Region> region)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &EditorRegions::region_changed), what_changed, region));
-	
+
 	boost::shared_ptr<Region> r = region.lock ();
-	
+
 	if (!r) {
 		return;
 	}
-	
+
 	if (what_changed & ARDOUR::NameChanged) {
 		/* find the region in our model and change its name */
 		TreeModel::Children rows = _model->children ();
@@ -360,7 +360,7 @@ EditorRegions::region_changed (Change what_changed, boost::weak_ptr<Region> regi
 				(*j)[_columns.name] = r->name ();
 				break;
 			}
-			
+
 			++i;
 		}
 
@@ -368,25 +368,25 @@ EditorRegions::region_changed (Change what_changed, boost::weak_ptr<Region> regi
 }
 
 void
-EditorRegions::selection_changed () 
+EditorRegions::selection_changed ()
 {
 	if (_display.get_selection()->count_selected_rows() > 0) {
-		
+
 		TreeIter iter;
 		TreeView::Selection::ListHandle_Path rows = _display.get_selection()->get_selected_rows ();
-		
+
 		_editor->deselect_all ();
-		
+
 		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
-			
+
 			if (iter = _model->get_iter (*i)) {									// they could have clicked on a row that is just a placeholder, like "Hidden"
 				boost::shared_ptr<Region> region = (*iter)[_columns.region];
-				
+
 				if (region) {
-					
+
 					if (region->automatic()) {
 						_display.get_selection()->unselect(*i);
-						
+
 					} else {
 						_change_connection.block (true);
 						//editor_regions_selection_changed_connection.block(true);
@@ -408,20 +408,20 @@ void
 EditorRegions::set_selected (RegionSelection& regions)
 {
 	for (RegionSelection::iterator iter = regions.begin(); iter != regions.end(); ++iter) {
-	
+
 		TreeModel::iterator i;
 		TreeModel::Children rows = _model->children();
 		boost::shared_ptr<Region> r ((*iter)->region());
-		
+
 		for (i = rows.begin(); i != rows.end(); ++i) {
-			
+
 			boost::shared_ptr<Region> compared_region = (*i)[_columns.region];
 
 			if (r == compared_region) {
 				_display.get_selection()->select(*i);
 				break;
 			}
-			
+
 			if (!(*i).children().empty()) {
 				if (set_selected_in_subrow(r, (*i), 2)) {
 					break;
@@ -436,16 +436,16 @@ EditorRegions::set_selected_in_subrow (boost::shared_ptr<Region> region, TreeMod
 {
 	TreeModel::iterator i;
 	TreeModel::Children subrows = (*parent_row).children();
-	
+
 	for (i = subrows.begin(); i != subrows.end(); ++i) {
-		
+
 		boost::shared_ptr<Region> compared_region = (*i)[_columns.region];
-		
+
 		if (region == compared_region) {
 			_display.get_selection()->select(*i);
 			return true;
 		}
-		
+
 		if (!(*i).children().empty()) {
 			if (set_selected_in_subrow (region, (*i), level + 1)) {
 				return true;
@@ -459,7 +459,7 @@ void
 EditorRegions::insert_into_tmp_regionlist(boost::shared_ptr<Region> region)
 {
 	/* keep all whole files at the beginning */
-	
+
 	if (region->whole_file()) {
 		tmp_region_list.push_front (region);
 	} else {
@@ -469,24 +469,24 @@ EditorRegions::insert_into_tmp_regionlist(boost::shared_ptr<Region> region)
 
 void
 EditorRegions::redisplay ()
-{	
+{
 	if (_no_redisplay || !_session) {
 		return;
 	}
-		
+
 	bool tree_expanded = false;
-	
-	if (_toggle_full_action && _toggle_full_action->get_active()) {   //If the list was expanded prior to rebuilding, 
+
+	if (_toggle_full_action && _toggle_full_action->get_active()) {   //If the list was expanded prior to rebuilding,
 		tree_expanded = true;																//expand it again afterwards
 	}
-	
+
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 	_model->clear ();
 
 	/* now add everything we have, via a temporary list used to help with
 		sorting.
 	*/
-	
+
 	tmp_region_list.clear();
 	_session->foreach_region (this, &EditorRegions::insert_into_tmp_regionlist);
 
@@ -494,9 +494,9 @@ EditorRegions::redisplay ()
 		add_region (*r);
 	}
 	tmp_region_list.clear();
-	
+
 	_display.set_model (_model);
-	
+
 	if (tree_expanded) {
 		_display.expand_all();
 	}
@@ -504,26 +504,26 @@ EditorRegions::redisplay ()
 
 void
 EditorRegions::update_row (boost::shared_ptr<Region> region)
-{	
+{
 	if (!region || !_session) {
 		return;
 	}
-	
+
 	TreeModel::iterator i;
 	TreeModel::Children rows = _model->children();
-	
+
 	for (i = rows.begin(); i != rows.end(); ++i) {
-		
+
 //		cerr << "Level 1: Compare " << region->name() << " with parent " << (*i)[_columns.name] << "\n";
-		
+
 		boost::shared_ptr<Region> compared_region = (*i)[_columns.region];
-		
+
 		if (region == compared_region) {
 //			cerr << "Matched\n";
 			populate_row(region, (*i));
 			return;
 		}
-		
+
 		if (!(*i).children().empty()) {
 			if (update_subrows(region, (*i), 2)) {
 				return;
@@ -538,19 +538,19 @@ EditorRegions::update_subrows (boost::shared_ptr<Region> region, TreeModel::Row 
 {
 	TreeModel::iterator i;
 	TreeModel::Children subrows = (*parent_row).children();
-	
+
 	for (i = subrows.begin(); i != subrows.end(); ++i) {
-		
+
 //		cerr << "Level " << level << ": Compare " << region->name() << " with child " << (*i)[_columns.name] << "\n";
-		
+
 		boost::shared_ptr<Region> compared_region = (*i)[_columns.region];
-		
+
 		if (region == compared_region) {
 			populate_row(region, (*i));
 //			cerr << "Matched\n";
 			return true;
 		}
-		
+
 		if (!(*i).children().empty()) {
 			if (update_subrows (region, (*i), level + 1)) {
 				return true;
@@ -569,16 +569,16 @@ EditorRegions::update_all_rows ()
 
 	TreeModel::iterator i;
 	TreeModel::Children rows = _model->children();
-	
+
 	for (i = rows.begin(); i != rows.end(); ++i) {
-		
+
 		boost::shared_ptr<Region> region = (*i)[_columns.region];
-	
+
 		if (!region->automatic()) {
 			cerr << "level 1 : Updating " << region->name() << "\n";
 			populate_row(region, (*i));
 		}
-		
+
 		if (!(*i).children().empty()) {
 			update_all_subrows ((*i), 2);
 		}
@@ -590,16 +590,16 @@ EditorRegions::update_all_subrows (TreeModel::Row const &parent_row, int level)
 {
 	TreeModel::iterator i;
 	TreeModel::Children subrows = (*parent_row).children();
-	
+
 	for (i = subrows.begin(); i != subrows.end(); ++i) {
-		
+
 		boost::shared_ptr<Region> region = (*i)[_columns.region];
-		
+
 		if (!region->automatic()) {
 			cerr << "level " << level << " : Updating " << region->name() << "\n";
 			populate_row(region, (*i));
 		}
-			
+
 		if (!(*i).children().empty()) {
 			update_all_subrows ((*i), level + 1);
 		}
@@ -619,11 +619,11 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 	int used;
 	BBT_Time bbt;				// FIXME Why do these have to be declared here ?
 	SMPTE::Time smpte;			// FIXME I would like them declared in the case statment where they are used.
-	
+
 	bool missing_source = boost::dynamic_pointer_cast<SilentFileSource>(region->source());
-	
+
 	boost::shared_ptr<AudioRegion> audioRegion = boost::dynamic_pointer_cast<AudioRegion>(region);
-	
+
 	bool fades_in_seconds = false;
 
 	start_str[0] = '\0';
@@ -636,7 +636,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 
 	used = _editor->get_regionview_count_from_region_list (region);
 	sprintf (used_str, "%4d" , used);
-	
+
 	switch (ARDOUR_UI::instance()->secondary_clock.mode ()) {
 	case AudioClock::SMPTE:
 	case AudioClock::Off:												/* If the secondary clock is off, default to SMPTE */
@@ -648,16 +648,16 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 		sprintf (length_str, "%02d:%02d:%02d:%02d", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
 		_session->smpte_time (region->sync_position() + region->position(), smpte);
 		sprintf (sync_str, "%02d:%02d:%02d:%02d", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
-		
-		if (audioRegion && !fades_in_seconds) {	
+
+		if (audioRegion && !fades_in_seconds) {
 			_session->smpte_time (audioRegion->fade_in()->back()->when, smpte);
 			sprintf (fadein_str, "%02d:%02d:%02d:%02d", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
 			_session->smpte_time (audioRegion->fade_out()->back()->when, smpte);
 			sprintf (fadeout_str, "%02d:%02d:%02d:%02d", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
 		}
-		
+
 		break;
-		
+
 	case AudioClock::BBT:
 		_session->tempo_map().bbt_time (region->position(), bbt);
 		sprintf (start_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
@@ -667,21 +667,21 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 		sprintf (length_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
 		_session->tempo_map().bbt_time (region->sync_position() + region->position(), bbt);
 		sprintf (sync_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
-		
+
 		if (audioRegion && !fades_in_seconds) {
 			_session->tempo_map().bbt_time (audioRegion->fade_in()->back()->when, bbt);
 			sprintf (fadein_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
 			_session->tempo_map().bbt_time (audioRegion->fade_out()->back()->when, bbt);
 			sprintf (fadeout_str, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
-		} 
+		}
 		break;
-		
+
 	case AudioClock::MinSec:
 		nframes_t left;
 		int hrs;
 		int mins;
 		float secs;
-	
+
 		left = region->position();
 		hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
 		left -= (nframes_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
@@ -689,7 +689,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 		left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
 		secs = left / (float) _session->frame_rate();
 		sprintf (start_str, "%02d:%02d:%06.3f", hrs, mins, secs);
-		
+
 		left = region->position() + region->length() - 1;
 		hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
 		left -= (nframes_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
@@ -697,7 +697,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 		left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
 		secs = left / (float) _session->frame_rate();
 		sprintf (end_str, "%02d:%02d:%06.3f", hrs, mins, secs);
-		
+
 		left = region->length();
 		hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
 		left -= (nframes_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
@@ -705,7 +705,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 		left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
 		secs = left / (float) _session->frame_rate();
 		sprintf (length_str, "%02d:%02d:%06.3f", hrs, mins, secs);
-		
+
 		left = region->sync_position() + region->position();
 		hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
 		left -= (nframes_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
@@ -713,7 +713,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 		left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
 		secs = left / (float) _session->frame_rate();
 		sprintf (sync_str, "%02d:%02d:%06.3f", hrs, mins, secs);
-		
+
 		if (audioRegion && !fades_in_seconds) {
 			left = audioRegion->fade_in()->back()->when;
 			hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
@@ -722,7 +722,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 			left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
 			secs = left / (float) _session->frame_rate();
 			sprintf (fadein_str, "%02d:%02d:%06.3f", hrs, mins, secs);
-			
+
 			left = audioRegion->fade_out()->back()->when;
 			hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
 			left -= (nframes_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
@@ -731,55 +731,55 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 			secs = left / (float) _session->frame_rate();
 			sprintf (fadeout_str, "%02d:%02d:%06.3f", hrs, mins, secs);
 		}
-		
+
 		break;
-		
+
 	case AudioClock::Frames:
 		snprintf (start_str, sizeof (start_str), "%u", region->position());
 		snprintf (end_str, sizeof (end_str), "%u", (region->position() + region->length() - 1));
 		snprintf (length_str, sizeof (length_str), "%u", region->length());
 		snprintf (sync_str, sizeof (sync_str), "%u", region->sync_position() + region->position());
-		
+
 		if (audioRegion && !fades_in_seconds) {
 			snprintf (fadein_str, sizeof (fadein_str), "%u", uint (audioRegion->fade_in()->back()->when));
 			snprintf (fadeout_str, sizeof (fadeout_str), "%u", uint (audioRegion->fade_out()->back()->when));
 		}
-		
+
 		break;
-	
+
 	default:
 		break;
 	}
-	
+
 	if (audioRegion && fades_in_seconds) {
-			
+
 		nframes_t left;
 		int mins;
 		int millisecs;
-		
+
 		left = audioRegion->fade_in()->back()->when;
 		mins = (int) floor (left / (_session->frame_rate() * 60.0f));
 		left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
 		millisecs = (int) floor ((left * 1000.0f) / _session->frame_rate());
-		
+
 		if (audioRegion->fade_in()->back()->when >= _session->frame_rate()) {
 			sprintf (fadein_str, "%01dM %01dmS", mins, millisecs);
 		} else {
 			sprintf (fadein_str, "%01dmS", millisecs);
 		}
-		
+
 		left = audioRegion->fade_out()->back()->when;
 		mins = (int) floor (left / (_session->frame_rate() * 60.0f));
 		left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
 		millisecs = (int) floor ((left * 1000.0f) / _session->frame_rate());
-		
+
 		if (audioRegion->fade_out()->back()->when >= _session->frame_rate()) {
 			sprintf (fadeout_str, "%01dM %01dmS", mins, millisecs);
 		} else {
 			sprintf (fadeout_str, "%01dmS", millisecs);
 		}
 	}
-	
+
 	if (used > 1) {
 		row[_columns.start] = _("Multiple");
 		row[_columns.end] = _("Multiple");
@@ -793,7 +793,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 	} else {
 		row[_columns.start] = start_str;
 		row[_columns.end] = end_str;
-		
+
 		if (region->sync_position() == 0) {
 			row[_columns.sync] = _("Start");
 		} else if (region->sync_position() == region->length() - 1) {
@@ -801,7 +801,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 		} else {
 			row[_columns.sync] = sync_str;
 		}
-	
+
 		if (audioRegion) {
 			if (audioRegion->fade_in_active()) {
 				row[_columns.fadein] = string_compose("%1%2%3", " ", fadein_str, " ");
@@ -821,28 +821,28 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 		} else {
 			row[_columns.fadeout] = "";
 		}
-		
+
 		row[_columns.locked] = region->locked();
-	
+
 		if (region->positional_lock_style() == Region::MusicTime) {
 			row[_columns.glued] = true;
 		} else {
 			row[_columns.glued] = false;
 		}
-		
+
 		row[_columns.muted] = region->muted();
 		row[_columns.opaque] = region->opaque();
 	}
-	
+
 	row[_columns.length] = length_str;
 	row[_columns.used] = used_str;
-	
+
 	if (missing_source) {
 		row[_columns.path] = _("MISSING ") + region->source()->name();
 	} else {
 		row[_columns.path] = region->source()->name();
 	}
-	
+
 	if (region->n_channels() > 1) {
 		row[_columns.name] = string_compose("%1  [%2]", region->name(), region->n_channels());
 	} else {
@@ -854,7 +854,7 @@ void
 EditorRegions::build_menu ()
 {
 	_menu = dynamic_cast<Menu*>(ActionManager::get_widget ("/RegionListMenu"));
-					       
+
 	/* now grab specific menu items that we need */
 
 	Glib::RefPtr<Action> act;
@@ -952,9 +952,9 @@ EditorRegions::button_press (GdkEventButton *ev)
 		}
 		return true;
 	}
-	
+
 	return false;
-}	
+}
 
 bool
 EditorRegions::button_release (GdkEventButton *ev)
@@ -1022,23 +1022,23 @@ EditorRegions::sorter (TreeModel::iterator a, TreeModel::iterator b)
 	case ByLength:
 		cmp = region1->length() - region2->length();
 		break;
-		
+
 	case ByPosition:
 		cmp = region1->position() - region2->position();
 		break;
-		
+
 	case ByTimestamp:
 		cmp = region1->source()->timestamp() - region2->source()->timestamp();
 		break;
-	
+
 	case ByStartInFile:
 		cmp = region1->start() - region2->start();
 		break;
-		
+
 	case ByEndInFile:
 		cmp = (region1->start() + region1->length()) - (region2->start() + region2->length());
 		break;
-		
+
 	case BySourceFileName:
 		cmp = strcasecmp (region1->source()->name().c_str(), region2->source()->name().c_str());
 		break;
@@ -1046,7 +1046,7 @@ EditorRegions::sorter (TreeModel::iterator a, TreeModel::iterator b)
 	case BySourceFileLength:
 		cmp = region1->source_length(0) - region2->source_length(0);
 		break;
-		
+
 	case BySourceFileCreationDate:
 		cmp = region1->source()->timestamp() - region2->source()->timestamp();
 		break;
@@ -1120,9 +1120,9 @@ EditorRegions::remove_region ()
 	selection_mapover (mem_fun (*_editor, &Editor::remove_a_region));
 }
 
-void  
+void
 EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,
-				   int x, int y, 
+				   int x, int y,
 				   const SelectionData& data,
 				   guint info, guint time)
 {
@@ -1136,7 +1136,7 @@ EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 	if (_editor->convert_drop_to_paths (paths, context, x, y, data, info, time) == 0) {
 		nframes64_t pos = 0;
 		if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
-			_editor->do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion, SrcBest, pos); 
+			_editor->do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion, SrcBest, pos);
 		} else {
 			_editor->do_embed (paths, Editing::ImportDistinctFiles, ImportAsRegion, pos);
 		}
@@ -1148,7 +1148,7 @@ bool
 EditorRegions::selection_filter (const RefPtr<TreeModel>& model, const TreeModel::Path& path, bool /*yn*/)
 {
 	/* not possible to select rows that do not represent regions, like "Hidden" */
-	
+
 	TreeModel::iterator iter = model->get_iter (path);
 
 	if (iter) {
@@ -1156,7 +1156,7 @@ EditorRegions::selection_filter (const RefPtr<TreeModel>& model, const TreeModel
 		if (!r) {
 			return false;
 		}
-	} 
+	}
 
 	return true;
 }
@@ -1166,12 +1166,12 @@ EditorRegions::name_edit (const Glib::ustring& path, const Glib::ustring& new_te
 {
 	boost::shared_ptr<Region> region;
 	TreeIter iter;
-	
+
 	if ((iter = _model->get_iter (path))) {
 		region = (*iter)[_columns.region];
 		(*iter)[_columns.name] = new_text;
 	}
-	
+
 	/* now mapover everything */
 
 	if (region) {
@@ -1209,11 +1209,11 @@ boost::shared_ptr<Region>
 EditorRegions::get_single_selection ()
 {
 	Glib::RefPtr<TreeSelection> selected = _display.get_selection();
-	
+
 	if (selected->count_selected_rows() != 1) {
 		return boost::shared_ptr<Region> ();
 	}
-	
+
 	TreeView::Selection::ListHandle_Path rows = selected->get_selected_rows ();
 
 	/* only one row selected, so rows.begin() is it */

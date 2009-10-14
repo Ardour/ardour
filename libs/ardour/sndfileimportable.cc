@@ -13,8 +13,8 @@ SndFileImportableSource::get_timecode_info (SNDFILE* sf, SF_BROADCAST_INFO* binf
 	if (sf_command (sf, SFC_GET_BROADCAST_INFO, binfo, sizeof (*binfo)) != SF_TRUE) {
 		exists = false;
 		return 0;
-	} 
-	
+	}
+
 	exists = true;
 	int64_t ret = (uint32_t) binfo->time_reference_high;
 	ret <<= 32;
@@ -27,13 +27,13 @@ SndFileImportableSource::SndFileImportableSource (const string& path)
 	memset(&sf_info, 0 , sizeof(sf_info));
 	in.reset( sf_open(path.c_str(), SFM_READ, &sf_info), sf_close);
 	if (!in) throw failed_constructor();
-	
+
 	SF_BROADCAST_INFO binfo;
 	bool timecode_exists;
 
 	memset (&binfo, 0, sizeof (binfo));
 	timecode = get_timecode_info (in.get(), &binfo, timecode_exists);
-	
+
 	if (!timecode_exists) {
 		timecode = 0;
 	}
@@ -44,7 +44,7 @@ SndFileImportableSource::~SndFileImportableSource ()
 }
 
 nframes_t
-SndFileImportableSource::read (Sample* buffer, nframes_t nframes) 
+SndFileImportableSource::read (Sample* buffer, nframes_t nframes)
 {
 	nframes_t per_channel = nframes / sf_info.channels;
 	per_channel = sf_readf_float (in.get(), buffer, per_channel);
@@ -52,13 +52,13 @@ SndFileImportableSource::read (Sample* buffer, nframes_t nframes)
 }
 
 uint
-SndFileImportableSource::channels () const 
+SndFileImportableSource::channels () const
 {
 	return sf_info.channels;
 }
 
 nframes_t
-SndFileImportableSource::length () const 
+SndFileImportableSource::length () const
 {
 	return sf_info.frames;
 }

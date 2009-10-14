@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2003 Paul Davis 
+    Copyright (C) 2000-2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -138,10 +138,10 @@ struct EditorCursor {
 	ArdourCanvas::Line    canvas_item;
 	nframes64_t           current_frame;
 	double		  length;
-	
+
 	EditorCursor (Editor&, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*));
 	~EditorCursor ();
-	
+
 	void set_position (nframes64_t);
 	void set_length (double units);
 	void set_y_axis (double position);
@@ -154,7 +154,7 @@ class Editor : public PublicEditor
   public:
 	Editor ();
 	~Editor ();
-	
+
 	void             connect_to_session (ARDOUR::Session *);
 	ARDOUR::Session* current_session() const { return session; }
 	void             first_idle ();
@@ -165,7 +165,7 @@ class Editor : public PublicEditor
 	nframes64_t current_page_frames() const {
 		return (nframes64_t) floor (_canvas_width * frames_per_unit);
 	}
-	
+
 	double canvas_height () const {
 		return _canvas_height;
 	}
@@ -215,7 +215,7 @@ class Editor : public PublicEditor
 
 	void set_show_waveforms_recording (bool yn);
 	bool show_waveforms_recording() const { return _show_waveforms_recording; }
-	
+
 	/* things that need to be public to be used in the main menubar */
 
 	void new_region_from_selection ();
@@ -232,7 +232,7 @@ class Editor : public PublicEditor
 	nframes64_t unit_to_frame (double unit) const {
 		return (nframes64_t) rint (unit * frames_per_unit);
 	}
-	
+
 	double frame_to_unit (nframes64_t frame) const {
 		return rint ((double) frame / (double) frames_per_unit);
 	}
@@ -245,11 +245,11 @@ class Editor : public PublicEditor
 	   the result of using the world->canvas affine transform on a
 	   world coordinate. These coordinates already take into
 	   account any scrolling carried out by adjusting the
-	   xscroll_adjustment.  
+	   xscroll_adjustment.
 	*/
 
 	nframes64_t pixel_to_frame (double pixel) const {
-		
+
 		/* pixel can be less than zero when motion events
 		   are processed. since we've already run the world->canvas
 		   affine, that means that the location *really* is "off
@@ -282,7 +282,7 @@ class Editor : public PublicEditor
 	void invert_selection_in_track ();
 	void invert_selection ();
 	void deselect_all ();
-	
+
 	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
 
 	/* tempo */
@@ -296,7 +296,7 @@ class Editor : public PublicEditor
 	void analyze_range_selection();
 
 	/* export */
-	
+
 	void export_audio ();
 	void export_selection ();
 	void export_range ();
@@ -346,7 +346,7 @@ class Editor : public PublicEditor
 	void nudge_backward_capture_offset ();
 
 	/* playhead/screen stuff */
-	
+
 	void set_follow_playhead (bool yn);
 	void toggle_follow_playhead ();
 	bool follow_playhead() const { return _follow_playhead; }
@@ -422,7 +422,7 @@ class Editor : public PublicEditor
 
 	void show_verbose_canvas_cursor_with (const std::string& txt);
 	void hide_verbose_canvas_cursor();
-	
+
   protected:
 	void map_transport_state ();
 	void map_position_change (nframes64_t);
@@ -432,13 +432,13 @@ class Editor : public PublicEditor
   private:
 
 	void color_handler ();
-	
+
 	ARDOUR::Session     *session; ///< The session that we are editing, or 0
 	bool                 constructed;
 
 	// to keep track of the playhead position for control_scroll
 	boost::optional<nframes64_t> _control_scroll_target;
- 
+
 	PlaylistSelector* _playlist_selector;
 
 	typedef std::pair<TimeAxisView*,XMLNode*> TAVState;
@@ -451,7 +451,7 @@ class Editor : public PublicEditor
 	    bool                zoomed_to_region;
 	    std::list<TAVState> track_states;
 	};
-	
+
 	std::list<VisualState*> undo_visual_stack;
 	std::list<VisualState*> redo_visual_stack;
 	VisualState* current_visual_state (bool with_tracks = true);
@@ -460,7 +460,7 @@ class Editor : public PublicEditor
 	void use_visual_state (VisualState&);
 	bool no_save_visual;
 	void swap_visual_state ();
-	
+
 	std::vector<VisualState*> visual_states;
 	sigc::connection visual_state_op_connection;
 	void start_visual_state_op (uint32_t n);
@@ -476,7 +476,7 @@ class Editor : public PublicEditor
 
 	Editing::MouseMode mouse_mode;
 	bool _internal_editing;
-	
+
 	int  post_maximal_editor_width;
 	int  post_maximal_pane_position;
 	int  pre_maximal_pane_position;
@@ -515,7 +515,7 @@ class Editor : public PublicEditor
 	    bool    valid;
 
 	    LocationMarkers () : start(0), end(0), valid (true) {}
-	    
+
 	    ~LocationMarkers ();
 
 	    void hide();
@@ -575,7 +575,7 @@ class Editor : public PublicEditor
 
 	void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove=false);
 	void select_all_tracks ();
-	
+
 	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
 	void set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);
 	void set_selected_track_as_side_effect (bool force = false);
@@ -584,7 +584,7 @@ class Editor : public PublicEditor
 	bool set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, boost::weak_ptr<ARDOUR::Region>);
 	void collect_new_region_view (RegionView *);
 	void collect_and_select_new_region_view (RegionView *);
-	
+
 	Gtk::Menu track_context_menu;
 	Gtk::Menu track_region_context_menu;
 	Gtk::Menu track_selection_context_menu;
@@ -626,7 +626,7 @@ class Editor : public PublicEditor
 	bool                 verbose_cursor_visible;
 
 	void parameter_changed (std::string);
-	
+
 	bool track_canvas_motion (GdkEvent*);
 
 	void set_verbose_canvas_cursor (const std::string &, double x, double y);
@@ -664,20 +664,20 @@ class Editor : public PublicEditor
 
 	/** The group containing all items that require horizontal scrolling. */
 	ArdourCanvas::Group* _background_group;
-	/* 
+	/*
 	   The _master_group is the group containing all items
 	   that require horizontal scrolling..
-	   It is primarily used to separate canvas items 
-	   that require horizontal scrolling from those that do not. 
+	   It is primarily used to separate canvas items
+	   that require horizontal scrolling from those that do not.
 	*/
 	ArdourCanvas::Group* _master_group;
 
 	/* The group containing all trackviews.  Only scrolled vertically. */
 	ArdourCanvas::Group* _trackview_group;
-	
+
 	/* The group used for region motion.  Sits on top of _trackview_group */
 	ArdourCanvas::Group* _region_motion_group;
-	
+
 	enum RulerType {
 		ruler_metric_smpte = 0,
 		ruler_metric_bbt = 1,
@@ -704,19 +704,19 @@ class Editor : public PublicEditor
 	Glib::RefPtr<Gtk::ToggleAction> ruler_loop_punch_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_cd_marker_action;
 	bool                            no_ruler_shown_update;
-	
+
 	gint ruler_button_press (GdkEventButton*);
 	gint ruler_button_release (GdkEventButton*);
 	gint ruler_mouse_motion (GdkEventMotion*);
 	bool ruler_scroll (GdkEventScroll* event);
 
 	Gtk::Widget * ruler_grabbed_widget;
-	
+
 	void initialize_rulers ();
 	void update_just_smpte ();
 	void compute_fixed_ruler_scale (); //calculates the RulerScale of the fixed rulers
 	void update_fixed_rulers ();
-	void update_tempo_based_rulers (); 
+	void update_tempo_based_rulers ();
 	void popup_ruler_menu (nframes64_t where = 0, ItemType type = RegionItem);
 	void update_ruler_visibility ();
 	void set_ruler_visible (RulerType, bool);
@@ -725,12 +725,12 @@ class Editor : public PublicEditor
 	gint ruler_label_button_release (GdkEventButton*);
 	void store_ruler_visibility ();
 	void restore_ruler_visibility ();
-	
+
 	static gint _metric_get_smpte (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	static gint _metric_get_bbt (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	static gint _metric_get_frames (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	static gint _metric_get_minsec (GtkCustomRulerMark **, gdouble, gdouble, gint);
-	
+
 	enum MinsecRulerScale {
 		minsec_show_seconds,
 		minsec_show_minutes,
@@ -801,14 +801,14 @@ class Editor : public PublicEditor
 	gdouble canvas_timebars_vsize;
 	gdouble get_canvas_timebars_vsize () const { return canvas_timebars_vsize; }
 	Gtk::Menu          *editor_ruler_menu;
-	
+
 	ArdourCanvas::SimpleRect* tempo_bar;
 	ArdourCanvas::SimpleRect* meter_bar;
 	ArdourCanvas::SimpleRect* marker_bar;
 	ArdourCanvas::SimpleRect* range_marker_bar;
 	ArdourCanvas::SimpleRect* transport_marker_bar;
 	ArdourCanvas::SimpleRect* cd_marker_bar;
-	
+
 	Gtk::Label  minsec_label;
 	Gtk::Label  bbt_label;
 	Gtk::Label  smpte_label;
@@ -824,7 +824,7 @@ class Editor : public PublicEditor
 	Gtk::HBox          time_button_hbox;
 
 	friend class EditorCursor;
-	
+
 	EditorCursor*        playhead_cursor;
 	ArdourCanvas::Group* cursor_group;
 
@@ -861,7 +861,7 @@ class Editor : public PublicEditor
 
 	Gtk::HBox           top_hbox;
 	Gtk::HBox           bottom_hbox;
-	
+
 	Gtk::Table          edit_packer;
 	Gtk::VScrollbar     edit_vscrollbar;
 
@@ -877,7 +877,7 @@ class Editor : public PublicEditor
 	bool                _dragging_hscrollbar;
 
 	void reset_hscrollbar_stepping ();
-	
+
 	bool hscrollbar_button_press (GdkEventButton*);
 	bool hscrollbar_button_release (GdkEventButton*);
 	void hscrollbar_allocate (Gtk::Allocation &alloc);
@@ -904,7 +904,7 @@ class Editor : public PublicEditor
 	sigc::connection control_scroll_connection;
 
 	gdouble get_trackview_group_vertical_offset () const { return vertical_adjustment.get_value () - canvas_timebars_vsize;}
-	
+
 	ArdourCanvas::Group* get_background_group () const { return _background_group; }
 	ArdourCanvas::Group* get_trackview_group () const { return _trackview_group; }
 	double last_trackview_group_vertical_offset;
@@ -913,19 +913,19 @@ class Editor : public PublicEditor
 	void scroll_canvas_vertically ();
 
 	struct VisualChange {
-		enum Type { 
+		enum Type {
 			TimeOrigin = 0x1,
 			ZoomLevel = 0x2,
 			YOrigin = 0x4
 		};
-		
+
 		Type pending;
 		nframes64_t time_origin;
 		double frames_per_unit;
 		double y_origin;
-		
+
 		int idle_handler_id;
-		
+
 		VisualChange() : pending ((VisualChange::Type) 0), time_origin (0), frames_per_unit (0), idle_handler_id (-1) {}
 		void add (Type t) {
 			pending = Type (pending | t);
@@ -948,7 +948,7 @@ class Editor : public PublicEditor
 	/* named selections */
 
 	struct NamedSelectionDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    NamedSelectionDisplayModelColumns() { 
+	    NamedSelectionDisplayModelColumns() {
 		    add (text);
 		    add (selection);
 	    }
@@ -1005,9 +1005,9 @@ class Editor : public PublicEditor
 	nframes64_t last_update_frame;
 	void center_screen (nframes64_t);
 	void center_screen_internal (nframes64_t, float);
-	
+
 	void update_current_screen ();
-	
+
 	void session_going_away ();
 
 	nframes64_t cut_buffer_start;
@@ -1021,7 +1021,7 @@ class Editor : public PublicEditor
 	bool motion_handler (ArdourCanvas::Item*, GdkEvent*, bool from_autoscroll = false);
 	bool enter_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool leave_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
-	
+
 	/* KEYMAP HANDLING */
 
 	void register_actions ();
@@ -1039,7 +1039,7 @@ class Editor : public PublicEditor
 	void paste_internal (nframes64_t position, float times);
 
 	/* EDITING OPERATIONS */
-	
+
 	void reset_point_selection ();
 	void toggle_region_mute ();
 	void toggle_region_lock ();
@@ -1143,7 +1143,7 @@ class Editor : public PublicEditor
 	void insert_route_list_drag (boost::shared_ptr<ARDOUR::Route>, int x, int y);
 
 	/* import & embed */
-	
+
 	void add_external_audio_action (Editing::ImportMode);
 	void external_audio_dialog ();
 	void session_import_dialog ();
@@ -1152,15 +1152,15 @@ class Editor : public PublicEditor
 	bool check_multichannel_status (const std::vector<Glib::ustring>& paths);
 
 	SoundFileOmega* sfbrowser;
-	
+
 	void bring_in_external_audio (Editing::ImportMode mode,  nframes64_t& pos);
 
 	bool  idle_drop_paths  (std::vector<Glib::ustring> paths, nframes64_t frame, double ypos);
 	void  drop_paths_part_two  (const std::vector<Glib::ustring>& paths, nframes64_t frame, double ypos);
-	
+
 	int  import_sndfiles (std::vector<Glib::ustring> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, nframes64_t& pos,
 			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>, bool, uint32_t total);
-	int  embed_sndfiles (std::vector<Glib::ustring> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode, 
+	int  embed_sndfiles (std::vector<Glib::ustring> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode,
 			     nframes64_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&);
 
 	int add_sources (std::vector<Glib::ustring> paths, ARDOUR::SourceList& sources, nframes64_t& pos, Editing::ImportMode,
@@ -1172,7 +1172,7 @@ class Editor : public PublicEditor
 	boost::shared_ptr<ARDOUR::MidiTrack> get_nth_selected_midi_track (int nth) const;
 
 	/* generic interthread progress window */
-	
+
 	ArdourDialog* interthread_progress_window;
 	Gtk::Label interthread_progress_label;
 	Gtk::VBox interthread_progress_vbox;
@@ -1304,12 +1304,12 @@ class Editor : public PublicEditor
 
 	void set_fade_in_shape (ARDOUR::AudioRegion::FadeShape);
 	void set_fade_out_shape (ARDOUR::AudioRegion::FadeShape);
-	
+
 	void set_fade_length (bool in);
 	void toggle_fade_active (bool in);
 	void set_fade_in_active (bool);
 	void set_fade_out_active (bool);
-	
+
 	std::set<boost::shared_ptr<ARDOUR::Playlist> > motion_frozen_playlists;
 	RegionSelection pre_drag_region_selection;
 
@@ -1352,7 +1352,7 @@ class Editor : public PublicEditor
 	bool canvas_fade_in_handle_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
 	bool canvas_fade_out_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
 	bool canvas_fade_out_handle_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*);
-	
+
 
 	// These variables are used to detect a feedback loop and break it to avoid a gui hang
 private:
@@ -1416,15 +1416,15 @@ public:
 	void initialize_canvas ();
 
 	/* display control */
-	
+
 	bool _show_measures;
 	/// true if the editor should follow the playhead, otherwise false
 	bool _follow_playhead;
 	/// true if waveforms should be shown while recording audio tracks, otherwise false
 	bool _show_waveforms_recording;
-	
+
 	ARDOUR::TempoMap::BBTPointList *current_bbt_points;
-	
+
 	TempoLines* tempo_lines;
 
 	ArdourCanvas::Group* time_line_group;
@@ -1442,13 +1442,13 @@ public:
 	void remove_meter_marker (ArdourCanvas::Item*);
 	gint real_remove_tempo_marker (ARDOUR::TempoSection*);
 	gint real_remove_meter_marker (ARDOUR::MeterSection*);
-	
+
 	void edit_tempo_section (ARDOUR::TempoSection*);
 	void edit_meter_section (ARDOUR::MeterSection*);
 	void edit_tempo_marker (ArdourCanvas::Item*);
 	void edit_meter_marker (ArdourCanvas::Item*);
 	void edit_control_point (ArdourCanvas::Item*);
-	
+
 	void marker_menu_edit ();
 	void marker_menu_remove ();
 	void marker_menu_rename ();
@@ -1496,7 +1496,7 @@ public:
 	void compute_current_bbt_points (nframes_t left, nframes_t right);
 	void tempo_map_changed (ARDOUR::Change);
 	void redisplay_tempo (bool immediate_redraw);
-	
+
 	void snap_to (nframes64_t& first, int32_t direction = 0, bool for_mark = false);
 	void snap_to_with_modifier (nframes64_t& first, GdkEvent const *, int32_t direction = 0, bool for_mark = false);
 	void snap_to (nframes64_t& first, nframes64_t& last, int32_t direction = 0, bool for_mark = false);
@@ -1519,12 +1519,12 @@ public:
 
 	Gtk::Button              tav_expand_button;
 	Gtk::Button              tav_shrink_button;
-	
+
 	Gtk::VBox                toolbar_clock_vbox;
-	Gtk::VBox                toolbar_selection_clock_vbox; 
+	Gtk::VBox                toolbar_selection_clock_vbox;
 	Gtk::Table               toolbar_selection_clock_table;
 	Gtk::Label               toolbar_selection_cursor_label;
-	
+
 	Gtk::HBox                mouse_mode_button_box;
 	Gtkmm2ext::TearOff*      mouse_mode_tearoff;
 	Gtk::ToggleButton         mouse_select_button;
@@ -1572,7 +1572,7 @@ public:
 	Gtk::VBox         zoom_focus_box;
 
 	std::vector<std::string> zoom_focus_strings;
-	
+
 	void zoom_focus_selection_done ();
 	void zoom_focus_chosen (Editing::ZoomFocus);
 
@@ -1585,7 +1585,7 @@ public:
 	void                zoom_adjustment_changed();
 
 	void                edit_point_clock_changed();
-	
+
 	void setup_toolbar ();
 
 	Gtkmm2ext::TearOff*      tools_tearoff;
@@ -1600,7 +1600,7 @@ public:
 	Gtk::ToggleButton        midi_sound_notes;
 	void                     midi_panic ();
 	bool                     sound_notes () const { return midi_sound_notes.get_active(); }
-	
+
 	void setup_midi_toolbar ();
 
 	/* selection process */
@@ -1647,13 +1647,13 @@ public:
 	ARDOUR::Location*  transport_punch_location();
 
 	ARDOUR::Location   *temp_location;
-	
+
 	/* object rubberband select process */
-	
+
 	bool select_all_within (nframes64_t start, nframes64_t end, gdouble topy, gdouble boty, const TrackViewList&, Selection::Operation op);
-	
+
 	ArdourCanvas::SimpleRect   *rubberband_rect;
-	
+
 	/* mouse zoom process */
 
 	ArdourCanvas::SimpleRect   *zoom_rect;
@@ -1663,7 +1663,7 @@ public:
 	EditorRoutes* _routes;
 	EditorRegions* _regions;
 	EditorSnapshots* _snapshots;
-	
+
 	/* diskstream/route display management */
 	Glib::RefPtr<Gdk::Pixbuf> rec_enabled_icon;
 	Glib::RefPtr<Gdk::Pixbuf> rec_disabled_icon;
@@ -1778,7 +1778,7 @@ public:
 	void begin_reversible_command (std::string cmd_name);
 	void commit_reversible_command ();
 
-	void update_title ();	
+	void update_title ();
 	void update_title_s (const std::string & snapshot_name);
 
 	struct State {
@@ -1795,7 +1795,7 @@ public:
 	void instant_save ();
 
 	boost::shared_ptr<ARDOUR::AudioRegion> last_audition_region;
-	
+
 	/* freeze operations */
 
 	ARDOUR::InterThreadInfo freeze_status;
@@ -1814,7 +1814,7 @@ public:
 	/* duplication */
 
 	void duplicate_dialog (bool with_dialog);
-	
+
 	nframes64_t event_frame (GdkEvent const *, double* px = 0, double* py = 0) const;
 
 	/* returns false if mouse pointer is not in track or marker canvas
@@ -1855,7 +1855,7 @@ public:
 	/* xfades */
 
 	bool _xfade_visibility;
-	
+
 #ifdef WITH_CMT
 	void handle_new_imageframe_time_axis_view(const std::string & track_name, void* src) ;
 	void handle_new_imageframe_marker_time_axis_view(const std::string & track_name, TimeAxisView* marked_track) ;
@@ -1883,7 +1883,7 @@ public:
 	void imageframe_start_handle_end_trim(ArdourCanvas::Item* item, GdkEvent* event) ;
 	void imageframe_end_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* event) ;
 	void imageframe_end_handle_end_trim(ArdourCanvas::Item* item, GdkEvent* event) ;
-	
+
 	void markerview_item_start_handle_op(ArdourCanvas::Item* item, GdkEvent* event) ;
 	void markerview_item_end_handle_op(ArdourCanvas::Item* item, GdkEvent* event) ;
 	void markerview_start_handle_trim_motion(ArdourCanvas::Item* item, GdkEvent* event) ;
@@ -1916,7 +1916,7 @@ public:
 
 	bool nudge_forward_release (GdkEventButton*);
 	bool nudge_backward_release (GdkEventButton*);
-	
+
 	/* audio filters */
 
 	void apply_filter (ARDOUR::Filter&, std::string cmd);
@@ -1989,7 +1989,7 @@ public:
 
 	void get_regions_at (RegionSelection&, nframes64_t where, const TrackSelection& ts) const;
 	void get_regions_after (RegionSelection&, nframes64_t where, const TrackSelection& ts) const;
-	
+
 	void get_regions_for_action (RegionSelection&, bool allow_entered = false, bool allow_edit_position = true);
 
 	sigc::connection fast_screen_update_connection;

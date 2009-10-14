@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2007 Paul sDavis
-    	Written by Sampo Savolainen
+    Written by Sampo Savolainen
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ x86_sse_find_peaks(const ARDOUR::Sample* buf, nframes_t nframes, float *min, flo
 
 		current_min = _mm_min_ps(current_min, work);
 		current_max = _mm_max_ps(current_max, work);
-		
+
 		buf++;
 		nframes--;
 	}
@@ -77,7 +77,7 @@ x86_sse_find_peaks(const ARDOUR::Sample* buf, nframes_t nframes, float *min, flo
 		buf+=4;
 		nframes-=4;
 	}
-	
+
 	// work through the rest < 4 samples
 	while ( nframes > 0) {
 
@@ -86,7 +86,7 @@ x86_sse_find_peaks(const ARDOUR::Sample* buf, nframes_t nframes, float *min, flo
 
 		current_min = _mm_min_ps(current_min, work);
 		current_max = _mm_max_ps(current_max, work);
-		
+
 		buf++;
 		nframes--;
 	}

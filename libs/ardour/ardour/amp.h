@@ -1,16 +1,16 @@
 /*
-    Copyright (C) 2006 Paul Davis 
-    
+    Copyright (C) 2006 Paul Davis
+
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
     Software Foundation; either version 2 of the License, or (at your option)
     any later version.
-    
+
     This program is distributed in the hope that it will be useful, but WITHOUT
     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
     for more details.
-    
+
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     675 Mass Ave, Cambridge, MA 02139, USA.
@@ -43,7 +43,7 @@ public:
 
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);
-	
+
 	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 
 	bool apply_gain() const  { return _apply_gain; }
@@ -71,15 +71,15 @@ public:
 
 	struct GainControl : public AutomationControl {
 		GainControl (std::string name, Session& session, Amp* a, const Evoral::Parameter &param,
-			     boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>() )
-			: AutomationControl (session, param, al, name )
+				boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>() )
+			: AutomationControl (session, param, al, name)
 			, _amp (a)
 		{}
-	 
-	    void set_value (float val);
-	    float get_value (void) const;
-   
-	    Amp* _amp;
+
+		void set_value (float val);
+		float get_value (void) const;
+
+		Amp* _amp;
 	};
 
 	boost::shared_ptr<GainControl> gain_control() {
@@ -96,7 +96,7 @@ private:
 	bool   _apply_gain_automation;
 	float  _current_gain;
 
-	boost::shared_ptr<GainControl> _gain_control;	
+	boost::shared_ptr<GainControl> _gain_control;
 	boost::shared_ptr<MuteMaster>  _mute_master;
 };
 

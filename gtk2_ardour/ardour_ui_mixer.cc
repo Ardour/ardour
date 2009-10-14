@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ ARDOUR_UI::create_mixer ()
 {
 	try {
 		mixer = new Mixer_UI ();
-	} 
+	}
 
 	catch (failed_constructor& err) {
 		return -1;

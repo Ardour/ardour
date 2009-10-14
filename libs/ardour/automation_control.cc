@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -54,7 +54,7 @@ AutomationControl::set_value(float value)
 {
 	bool to_list = _list && _session.transport_stopped()
 		&& ((AutomationList*)_list.get())->automation_write();
-	
+
 	Control::set_float(value, to_list, _session.transport_frame());
 
 	Changed(); /* EMIT SIGNAL */

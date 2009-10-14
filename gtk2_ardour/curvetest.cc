@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ curvetest (string filename)
 
 		in >> x;
 		in >> y;
-		
+
 		if (!in) {
 			break;
 		}
@@ -58,11 +58,11 @@ curvetest (string filename)
 		if (x < minx) {
 			minx = x;
 		}
-		
+
 		if (x > maxx) {
 			maxx = x;
 		}
-		
+
 		al.add (x, y);
 	}
 
@@ -70,10 +70,10 @@ curvetest (string filename)
 	float foo[1024];
 
 	al.curve().get_vector (minx, maxx, foo, 1024);
-	
+
 	for (int i = 0; i < 1024; ++i) {
 	        cout << minx + (((double) i / 1024.0) * (maxx - minx)) << ' ' << foo[i] << endl;
 	}
-	
+
 	return 0;
 }

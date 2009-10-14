@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,16 +54,16 @@ public:
 	/* declare variables */
 
 #undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
+#undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(Type,var,name,value) ConfigVariable<Type> var;
 #define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) ConfigVariableWithMutation<Type> var;
 #include "ardour/session_configuration_vars.h"
 #undef  CONFIG_VARIABLE
-#undef  CONFIG_VARIABLE_SPECIAL	
+#undef  CONFIG_VARIABLE_SPECIAL
 
 	int foo;
 };
 
 }
-	
+
 #endif

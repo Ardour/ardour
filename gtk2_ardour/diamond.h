@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
     Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,7 @@ namespace Gnome {
 namespace Canvas {
 
 
-class Diamond : public Polygon 
+class Diamond : public Polygon
 {
   public:
 	Diamond(Group& group, double height);

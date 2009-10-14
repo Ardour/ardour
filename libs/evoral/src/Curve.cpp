@@ -1,16 +1,16 @@
 /* This file is part of Evoral.
  * Copyright (C) 2008 Dave Robillard <http://drobilla.net>
  * Copyright (C) 2000-2008 Paul Davis
- * 
+ *
  * Evoral is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation; either version 2 of the License, or (at your option) any later
  * version.
- * 
+ *
  * Evoral is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
@@ -48,9 +48,9 @@ Curve::solve ()
 	if (!_dirty) {
 		return;
 	}
-	
+
 	if ((npoints = _list.events().size()) > 2) {
-		
+
 		/* Compute coefficients needed to efficiently compute a constrained spline
 		   curve. See "Constrained Cubic Spline Interpolation" by CJC Kruger
 		   (www.korf.co.uk/spline.pdf) for more details.
@@ -80,7 +80,7 @@ Curve::solve ()
 		double fplast = 0;
 
 		for (i = 0, xx = _list.events().begin(); xx != _list.events().end(); ++xx, ++i) {
-			
+
 			double xdelta;   /* gcc is wrong about possible uninitialized use */
 			double xdelta2;  /* ditto */
 			double ydelta;   /* ditto */
@@ -94,11 +94,11 @@ Curve::solve ()
 			}
 
 			/* compute (constrained) first derivatives */
-			
+
 			if (i == 0) {
 
 				/* first segment */
-				
+
 				fplast = ((3 * (y[1] - y[0]) / (2 * (x[1] - x[0]))) - (fpone * 0.5));
 
 				/* we don't store coefficients for i = 0 */
@@ -110,7 +110,7 @@ Curve::solve ()
 				/* last segment */
 
 				fpi = ((3 * ydelta) / (2 * xdelta)) - (fplast * 0.5);
-				
+
 			} else {
 
 				/* all other segments */
@@ -124,32 +124,32 @@ Curve::solve ()
 				} else {
 					fpi = 2 / (slope_before + slope_after);
 				}
-				
+
 			}
 
 			/* compute second derivative for either side of control point `i' */
-			
+
 			fppL = (((-2 * (fpi + (2 * fplast))) / (xdelta))) +
 				((6 * ydelta) / xdelta2);
-			
+
 			fppR = (2 * ((2 * fpi) + fplast) / xdelta) -
 				((6 * ydelta) / xdelta2);
-			
+
 			/* compute polynomial coefficients */
 
 			double b, c, d;
 
-			d = (fppR - fppL) / (6 * xdelta);   
+			d = (fppR - fppL) / (6 * xdelta);
 			c = ((x[i] * fppL) - (x[i-1] * fppR))/(2 * xdelta);
-			
+
 			double xim12, xim13;
 			double xi2, xi3;
-			
+
 			xim12 = x[i-1] * x[i-1];  /* "x[i-1] squared" */
 			xim13 = xim12 * x[i-1];   /* "x[i-1] cubed" */
 			xi2 = x[i] * x[i];        /* "x[i] squared" */
 			xi3 = xi2 * x[i];         /* "x[i] cubed" */
-			
+
 			b = (ydelta - (c * (xi2 - xim12)) - (d * (xi3 - xim13))) / xdelta;
 
 			/* store */
@@ -162,7 +162,7 @@ Curve::solve ()
 
 			fplast = fpi;
 		}
-		
+
 	}
 
 	_dirty = false;
@@ -220,13 +220,13 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 
 	if (x0 < min_x) {
 
-		/* fill some beginning section of the array with the 
-		   initial (used to be default) value 
+		/* fill some beginning section of the array with the
+		   initial (used to be default) value
 		*/
 
 		double frac = (min_x - x0) / (x1 - x0);
 		int32_t subveclen = (int32_t) floor (veclen * frac);
-		
+
 		subveclen = min (subveclen, veclen);
 
 		for (i = 0; i < subveclen; ++i) {
@@ -246,7 +246,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		int32_t subveclen = (int32_t) floor (original_veclen * frac);
 
 		float val;
-		
+
 		subveclen = min (subveclen, veclen);
 
 		val = _list.events().back()->value;
@@ -265,42 +265,42 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 	}
 
  	if (npoints == 1 ) {
- 	
+
  		for (i = 0; i < veclen; ++i) {
  			vec[i] = _list.events().front()->value;
  		}
  		return;
  	}
- 
- 
+
+
  	if (npoints == 2) {
- 
+
  		/* linear interpolation between 2 points */
- 
+
  		/* XXX I'm not sure that this is the right thing to
  		   do here. but its not a common case for the envisaged
  		   uses.
  		*/
- 	
+
  		if (veclen > 1) {
  			dx = (hx - lx) / (veclen - 1) ;
  		} else {
  			dx = 0; // not used
  		}
- 	
- 		double slope = (_list.events().back()->value - _list.events().front()->value)/  
+
+ 		double slope = (_list.events().back()->value - _list.events().front()->value)/
 			(_list.events().back()->when - _list.events().front()->when);
  		double yfrac = dx*slope;
- 
+
  		vec[0] = _list.events().front()->value + slope * (lx - _list.events().front()->when);
- 
+
  		for (i = 1; i < veclen; ++i) {
  			vec[i] = vec[i-1] + yfrac;
  		}
- 
+
  		return;
  	}
- 
+
 	if (_dirty) {
 		solve ();
 	}
@@ -331,16 +331,16 @@ Curve::unlocked_eval (double x)
 
 double
 Curve::multipoint_eval (double x)
-{	
+{
 	pair<ControlList::EventList::const_iterator,ControlList::EventList::const_iterator> range;
 
 	ControlList::LookupCache& lookup_cache = _list.lookup_cache();
 
 	if ((lookup_cache.left < 0) ||
-	    ((lookup_cache.left > x) || 
-	     (lookup_cache.range.first == _list.events().end()) || 
+	    ((lookup_cache.left > x) ||
+	     (lookup_cache.range.first == _list.events().end()) ||
 	     ((*lookup_cache.range.second)->when < x))) {
-		
+
 		ControlEvent cp (x, 0.0);
 
 		lookup_cache.range = equal_range (_list.events().begin(), _list.events().end(), &cp, ControlList::time_comparator);
@@ -348,21 +348,21 @@ Curve::multipoint_eval (double x)
 
 	range = lookup_cache.range;
 
-	/* EITHER 
-	   
+	/* EITHER
+
 	   a) x is an existing control point, so first == existing point, second == next point
 
 	   OR
 
 	   b) x is between control points, so range is empty (first == second, points to where
 	       to insert x)
-	   
+
 	*/
 
 	if (range.first == range.second) {
 
 		/* x does not exist within the list as a control point */
-		
+
 		lookup_cache.left = x;
 
 		if (range.first == _list.events().begin()) {
@@ -370,7 +370,7 @@ Curve::multipoint_eval (double x)
 			// return default_value;
 			_list.events().front()->value;
 		}
-		
+
 		if (range.second == _list.events().end()) {
 			/* we're after the last point */
 			return _list.events().back()->value;
@@ -380,7 +380,7 @@ Curve::multipoint_eval (double x)
 		ControlEvent* ev = *range.second;
 
 		return ev->coeff[0] + (ev->coeff[1] * x) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x);
-	} 
+	}
 
 	/* x is a control point in the data */
 	/* invalidate the cached range because its not usable */
@@ -392,7 +392,7 @@ Curve::multipoint_eval (double x)
 
 extern "C" {
 
-void 
+void
 curve_get_vector_from_c (void *arg, double x0, double x1, float* vec, int32_t vecsize)
 {
 	static_cast<Evoral::Curve*>(arg)->get_vector (x0, x1, vec, vecsize);

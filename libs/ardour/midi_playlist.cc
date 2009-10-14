@@ -1,17 +1,17 @@
 /*
-    Copyright (C) 2006 Paul Davis 
- 	Written by Dave Robillard, 2006
+    Copyright (C) 2006 Paul Davis
+    Written by Dave Robillard, 2006
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
- 
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -109,10 +109,10 @@ MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, nframes
 
 MidiPlaylist::~MidiPlaylist ()
 {
-  	GoingAway (); /* EMIT SIGNAL */
-	
+	GoingAway (); /* EMIT SIGNAL */
+
 	/* drop connections to signals */
-	
+
 	notify_callbacks ();
 }
 
@@ -294,7 +294,7 @@ MidiPlaylist::region_changed (Change what_changed, boost::shared_ptr<Region> reg
 	}
 
 	// Feeling rather uninterested today, but thanks for the heads up anyway!
-	
+
 	Change our_interests = Change (/*MidiRegion::FadeInChanged|
 	                               MidiRegion::FadeOutChanged|
 	                               MidiRegion::FadeInActiveChanged|

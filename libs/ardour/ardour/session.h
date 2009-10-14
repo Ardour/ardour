@@ -178,7 +178,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 		std::list<AudioRange> audio_range;
 		std::list<MusicRange> music_range;
-		
+
 		boost::shared_ptr<Region> region;
 
 		Event(Type t, Action a, nframes_t when, nframes_t where, double spd, bool yn = false)
@@ -223,15 +223,15 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	/* creating from an XML file */
 
 	Session (AudioEngine&,
-		 	const std::string& fullpath,
-		 	const std::string& snapshot_name,
-		 	std::string mix_template = "");
+			const std::string& fullpath,
+			const std::string& snapshot_name,
+			std::string mix_template = "");
 
 	/* creating a new Session */
 
 	Session (AudioEngine&,
-		 	std::string fullpath,
-		 	std::string snapshot_name,
+			std::string fullpath,
+			std::string snapshot_name,
 			AutoConnectOption input_auto_connect,
 			AutoConnectOption output_auto_connect,
 			uint32_t control_out_channels,
@@ -248,7 +248,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	std::string raid_path () const;
 
 	void set_snap_name ();
-	
+
 	bool writable() const { return _writable; }
 	void set_dirty ();
 	void set_clean ();
@@ -319,9 +319,9 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	}
 
 	struct RoutePublicOrderSorter {
-	    bool operator() (boost::shared_ptr<Route>, boost::shared_ptr<Route> b);
+		bool operator() (boost::shared_ptr<Route>, boost::shared_ptr<Route> b);
 	};
-	
+
 	void sync_order_keys (std::string const &);
 
 	template<class T> void foreach_route (T *obj, void (T::*func)(Route&));
@@ -419,7 +419,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	double frames_per_smpte_frame() const { return _frames_per_smpte_frame; }
 	nframes_t smpte_frames_per_hour() const { return _smpte_frames_per_hour; }
 
-	MIDI::byte get_mtc_smpte_bits() const { 
+	MIDI::byte get_mtc_smpte_bits() const {
 		return mtc_smpte_bits;   /* encoding of SMTPE type for MTC */
 	}
 
@@ -506,7 +506,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	std::list<boost::shared_ptr<AudioTrack> > new_audio_track (
 		int input_channels, int output_channels, TrackMode mode = Normal, RouteGroup* route_group = 0, uint32_t how_many = 1
 		);
-	
+
 	RouteList new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many);
 
 	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
@@ -582,7 +582,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	/// signals the current transport position in frames, bbt and smpte time (in that order)
 	sigc::signal<void, const nframes_t&, const BBT_Time&, const SMPTE::Time&> tick;
-	
+
 	/* region info  */
 
 	void add_regions (std::vector<boost::shared_ptr<Region> >&);
@@ -628,7 +628,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	boost::shared_ptr<ExportHandler> get_export_handler ();
 	boost::shared_ptr<ExportStatus> get_export_status ();
 
-	int  start_audio_export (nframes_t position, bool realtime);	
+	int  start_audio_export (nframes_t position, bool realtime);
 
 	sigc::signal<int, nframes_t> ProcessExport;
 	sigc::signal<void> ExportReadFinished;
@@ -717,8 +717,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	/* flattening stuff */
 
 	boost::shared_ptr<Region> write_one_track (AudioTrack&, nframes_t start, nframes_t end,
-						   bool overwrite, std::vector<boost::shared_ptr<Source> >&, InterThreadInfo& wot,
-						   bool enable_processing = true);
+			bool overwrite, std::vector<boost::shared_ptr<Source> >&, InterThreadInfo& wot,
+			bool enable_processing = true);
 	int freeze (InterThreadInfo&);
 
 	/* session-wide solo/mute/rec-enable */
@@ -846,22 +846,21 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	class GlobalRouteStateCommand : public Command
 	{
-	  public:
+	public:
 		GlobalRouteStateCommand (Session&, void*);
 		GlobalRouteStateCommand (Session&, const XMLNode& node);
 		int set_state (const XMLNode&);
 		XMLNode& get_state ();
 
-	  protected:
+	protected:
 		GlobalRouteBooleanState before, after;
 		Session& sess;
 		void* src;
-
 	};
 
 	class GlobalSoloStateCommand : public GlobalRouteStateCommand
 	{
-	  public:
+	public:
 		GlobalSoloStateCommand (Session &, void *src);
 		GlobalSoloStateCommand (Session&, const XMLNode&);
 		void operator()(); //redo
@@ -872,7 +871,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	class GlobalMuteStateCommand : public GlobalRouteStateCommand
 	{
-	  public:
+	public:
 		GlobalMuteStateCommand(Session &, void *src);
 		GlobalMuteStateCommand (Session&, const XMLNode&);
 		void operator()(); // redo
@@ -883,7 +882,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	class GlobalRecordEnableStateCommand : public GlobalRouteStateCommand
 	{
-	  public:
+	public:
 		GlobalRecordEnableStateCommand(Session &, void *src);
 		GlobalRecordEnableStateCommand (Session&, const XMLNode&);
 		void operator()(); // redo
@@ -894,7 +893,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	class GlobalMeteringStateCommand : public Command
 	{
-	  public:
+	public:
 		GlobalMeteringStateCommand(Session &, void *src);
 		GlobalMeteringStateCommand (Session&, const XMLNode&);
 		void operator()();
@@ -903,7 +902,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		int set_state (const XMLNode&);
 		void mark();
 
-	  protected:
+	protected:
 		Session& sess;
 		void* src;
 		GlobalRouteMeterState before;
@@ -939,7 +938,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	gain_t* gain_automation_buffer () const { return _gain_automation_buffer; }
 	pan_t** pan_automation_buffer () const  { return _pan_automation_buffer; }
-	
+
 	void ensure_buffer_set (BufferSet& buffers, const ChanCount& howmany);
 
 	/* VST support */
@@ -967,7 +966,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	bool exporting () const {
 		return _exporting;
 	}
-	
+
   protected:
 	friend class AudioEngine;
 	void set_block_size (nframes_t nframes);
@@ -1019,13 +1018,13 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	Location*                start_location;
 	Slave*                  _slave;
 	bool                    _silent;
-	
+
     // varispeed playback
 	volatile double             _transport_speed;
 	double                      _last_transport_speed;
 	double                      _target_transport_speed;
 	CubicInterpolation          interpolation;
-	
+
 	bool                     auto_play_legal;
 	nframes_t               _last_slave_transport_frame;
 	nframes_t                maximum_output_latency;
@@ -1085,10 +1084,10 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void reset_slave_state ();
 	bool follow_slave (nframes_t);
 	void calculate_moving_average_of_slave_delta(int dir, nframes_t this_delta);
-	void track_slave_state(float slave_speed, nframes_t slave_transport_frame, 
-			       nframes_t this_delta, bool starting);
+	void track_slave_state(float slave_speed, nframes_t slave_transport_frame,
+	                       nframes_t this_delta, bool starting);
 	void follow_slave_silently(nframes_t nframes, float slave_speed);
-	
+
 	void set_slave_source (SlaveSource);
 
 	SlaveSource post_export_slave;
@@ -1096,14 +1095,14 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	bool _exporting;
 	bool _exporting_realtime;
-	
+
 	boost::shared_ptr<ExportHandler> export_handler;
 	boost::shared_ptr<ExportStatus>  export_status;
 
 	int  pre_export ();
 	int  stop_audio_export ();
 	void finalize_audio_export ();
-	
+
 	sigc::connection export_freewheel_connection;
 
 	void prepare_diskstreams ();
@@ -1135,8 +1134,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	}
 
 	bool maybe_stop (nframes_t limit) {
-		if (   (_transport_speed > 0.0f && _transport_frame >= limit)
-		    || (_transport_speed < 0.0f && _transport_frame == 0)    ) {
+		if ( (_transport_speed > 0.0f && _transport_frame >= limit)
+				|| (_transport_speed < 0.0f && _transport_frame == 0) ) {
 			stop_transport ();
 			return true;
 		}
@@ -1644,7 +1643,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 			pool.release (ptr);
 		}
 
-	  private:
+	private:
 		static Pool pool;
 	};
 
@@ -1730,7 +1729,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void sync_order_keys ();
 
 	static bool _disable_all_loaded_plugins;
-	
+
 	SessionMetadata * _metadata;
 
 	mutable bool have_looped; ///< Used in ::audible_frame(*)

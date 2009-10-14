@@ -31,7 +31,7 @@ ARDOUR::find_session (string str, string& path, string& snapshot, bool& isnew)
 	}
 
 	str = buf;
-	
+
 	/* check to see if it exists, and what it is */
 
 	if (stat (str.c_str(), &statbuf)) {
@@ -54,9 +54,9 @@ ARDOUR::find_session (string str, string& path, string& snapshot, bool& isnew)
 		if (S_ISDIR (statbuf.st_mode)) {
 
 			string::size_type slash = str.find_last_of ('/');
-		
+
 			if (slash == string::npos) {
-				
+
 				/* a subdirectory of cwd, so statefile should be ... */
 
 				string tmp;
@@ -66,7 +66,7 @@ ARDOUR::find_session (string str, string& path, string& snapshot, bool& isnew)
 				tmp += statefile_suffix;
 
 				/* is it there ? */
-				
+
 				if (stat (tmp.c_str(), &statbuf)) {
 					error << string_compose (_("cannot check statefile %1 (%2)"), tmp, strerror (errno))
 					      << endmsg;
@@ -85,16 +85,16 @@ ARDOUR::find_session (string str, string& path, string& snapshot, bool& isnew)
 
 				path = str;
 				snapshot = str.substr (slash+1);
-					
+
 			}
 
 		} else if (S_ISREG (statbuf.st_mode)) {
-			
+
 			string::size_type slash = str.find_last_of ('/');
 			string::size_type suffix;
 
 			/* remove the suffix */
-			
+
 			if (slash != string::npos) {
 				snapshot = str.substr (slash+1);
 			} else {
@@ -102,7 +102,7 @@ ARDOUR::find_session (string str, string& path, string& snapshot, bool& isnew)
 			}
 
 			suffix = snapshot.find (statefile_suffix);
-			
+
 			if (suffix == string::npos) {
 				error << string_compose (_("%1 is not an Ardour snapshot file"), str) << endmsg;
 				return -1;
@@ -111,10 +111,10 @@ ARDOUR::find_session (string str, string& path, string& snapshot, bool& isnew)
 			/* remove suffix */
 
 			snapshot = snapshot.substr (0, suffix);
-			
+
 			if (slash == string::npos) {
-				
-				/* we must be in the directory where the 
+
+				/* we must be in the directory where the
 				   statefile lives. get it using cwd().
 				*/
 
@@ -134,7 +134,7 @@ ARDOUR::find_session (string str, string& path, string& snapshot, bool& isnew)
 
 				path = str.substr (0, slash);
 			}
-				
+
 		} else {
 
 			/* what type of file is it? */
@@ -151,14 +151,14 @@ ARDOUR::find_session (string str, string& path, string& snapshot, bool& isnew)
 		string::size_type slash = str.find_last_of ('/');
 
 		if (slash == string::npos) {
-			
+
 			/* no slash, just use the name, but clean it up */
-			
+
 			path = legalize_for_path (str);
 			snapshot = path;
-			
+
 		} else {
-			
+
 			path = str;
 			snapshot = str.substr (slash+1);
 		}

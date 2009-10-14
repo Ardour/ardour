@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 	Author: Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -38,15 +38,15 @@ class ChanMapping {
 public:
 	ChanMapping() {}
 	ChanMapping(ARDOUR::ChanCount identity);
-	
+
 	uint32_t get(DataType t, uint32_t from);
 	void     set(DataType t, uint32_t from, uint32_t to);
 	void     offset_from(DataType t, int32_t delta);
 	void     offset_to(DataType t, int32_t delta);
-	
+
 	typedef std::map<uint32_t, uint32_t>    TypeMapping;
 	typedef std::map<DataType, TypeMapping> Mappings;
-	
+
 	Mappings       mappings()       { return _mappings; }
 	const Mappings mappings() const { return _mappings; }
 

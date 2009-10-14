@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -125,7 +125,7 @@ sndfile_endian_format_from_string (string str)
 
 string
 sndfile_file_ending_from_string (string str)
-{	
+{
 	static vector<string> file_endings;
 
 	if (file_endings.empty()) {
@@ -163,7 +163,7 @@ sndfile_data_width (int format)
 	}
 }
 
-string 
+string
 sndfile_major_format(int format)
 {
 	static map<int, string> m;
@@ -174,12 +174,12 @@ sndfile_major_format(int format)
 		sf_command(0, SFC_GET_FORMAT_MAJOR_COUNT, &count, sizeof (int));
 		for (int i = 0; i < count; ++i){
 			format_info.format = i;
-			sf_command (0, SFC_GET_FORMAT_MAJOR, 
+			sf_command (0, SFC_GET_FORMAT_MAJOR,
 					&format_info, sizeof (format_info));
 			m[format_info.format & SF_FORMAT_TYPEMASK] = format_info.name;
 		}
 	}
-	
+
 	map<int, string>::iterator p = m.find(format & SF_FORMAT_TYPEMASK);
 	if(p != m.end()){
 		return m[format & SF_FORMAT_TYPEMASK];
@@ -199,12 +199,12 @@ sndfile_minor_format(int format)
 		sf_command(0, SFC_GET_FORMAT_SUBTYPE_COUNT, &count, sizeof (int));
 		for (int i = 0; i < count; ++i){
 			format_info.format = i;
-			sf_command (0, SFC_GET_FORMAT_SUBTYPE, 
+			sf_command (0, SFC_GET_FORMAT_SUBTYPE,
 					&format_info, sizeof (format_info));
 			m[format_info.format & SF_FORMAT_SUBMASK] = format_info.name;
 		}
 	}
-	
+
 	map<int, string>::iterator p = m.find(format & SF_FORMAT_SUBMASK);
 	if(p != m.end()){
 		return m[format & SF_FORMAT_SUBMASK];

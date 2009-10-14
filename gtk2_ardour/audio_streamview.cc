@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001, 2006 Paul Davis 
+    Copyright (C) 2001, 2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ AudioStreamView::~AudioStreamView ()
 {
 }
 
-int 
+int
 AudioStreamView::set_samples_per_unit (gdouble spp)
 {
 	StreamView::set_samples_per_unit(spp);
@@ -83,7 +83,7 @@ AudioStreamView::set_samples_per_unit (gdouble spp)
 	return 0;
 }
 
-int 
+int
 AudioStreamView::set_amplitude_above_axis (gdouble app)
 {
 	RegionViewList::iterator i;
@@ -114,20 +114,20 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 	}
 
 	switch (_trackview.audio_track()->mode()) {
-	
+
 	case NonLayered:
 	case Normal:
 		if (recording) {
-			region_view = new AudioRegionView (canvas_group, _trackview, region, 
+			region_view = new AudioRegionView (canvas_group, _trackview, region,
 					_samples_per_unit, region_color, recording, TimeAxisViewItem::Visibility(
 							TimeAxisViewItem::ShowFrame | TimeAxisViewItem::HideFrameRight));
 		} else {
-			region_view = new AudioRegionView (canvas_group, _trackview, region, 
+			region_view = new AudioRegionView (canvas_group, _trackview, region,
 					_samples_per_unit, region_color);
 		}
 		break;
 	case Destructive:
-		region_view = new TapeAudioRegionView (canvas_group, _trackview, region, 
+		region_view = new TapeAudioRegionView (canvas_group, _trackview, region,
 				_samples_per_unit, region_color);
 		break;
 	default:
@@ -140,8 +140,8 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 	region_view->set_amplitude_above_axis(_amplitude_above_axis);
 	region_view->set_height (child_height ());
 
-	/* if its the special single-sample length that we use for rec-regions, make it 
-	   insensitive to events 
+	/* if its the special single-sample length that we use for rec-regions, make it
+	   insensitive to events
 	*/
 
 	if (region->length() == 1) {
@@ -152,7 +152,7 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 	region_view->set_waveform_shape (Config->get_waveform_shape ());
 	region_view->set_waveform_visible (Config->get_show_waveforms ());
 
-	return region_view;	
+	return region_view;
 }
 
 RegionView*
@@ -168,7 +168,7 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 //			if ((*i)->region() == r) {
 //				cerr << "audio_streamview in add_region_view_internal region found" << endl;
 				/* great. we already have a AudioRegionView for this Region. use it again. */
-				
+
 //				(*i)->set_valid (true);
 
 				// this might not be necessary
@@ -178,7 +178,7 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 //					arv->set_waveform_scale (_waveform_scale);
 //					arv->set_waveform_shape (_waveform_shape);
 //				}
-					
+
 //				return NULL;
 //			}
 //		}
@@ -209,16 +209,16 @@ AudioStreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 
 		for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end();) {
 			CrossfadeViewList::iterator tmp;
-			
+
 			tmp = i;
 			++tmp;
-			
+
 			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(r);
 			if (ar && i->second->crossfade->involves (ar)) {
 				delete i->second;
 				crossfade_views.erase (i);
 			}
-			
+
 			i = tmp;
 		}
 	}
@@ -254,7 +254,7 @@ AudioStreamView::playlist_modified (boost::shared_ptr<Diskstream> ds)
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::playlist_modified_weak), ds));
 
 	StreamView::playlist_modified (ds);
-	
+
 	/* make sure xfades are on top and all the regionviews are stacked correctly. */
 
 	for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
@@ -306,7 +306,7 @@ AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
 	AudioRegionView* rview = 0;
 
 	/* we do not allow shared_ptr<T> to be bound to slots */
-	
+
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::add_crossfade_weak), boost::weak_ptr<Crossfade> (crossfade)));
 
 	/* first see if we already have a CrossfadeView for this Crossfade */
@@ -397,12 +397,12 @@ AudioStreamView::redisplay_diskstream ()
 		boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(
 				_trackview.get_diskstream()->playlist()
 			);
-		
+
 		if (apl) {
 			apl->foreach_crossfade (sigc::mem_fun (*this, &AudioStreamView::add_crossfade));
 		}
 	}
-	
+
 	// Remove invalid crossfade views
 	for (xi = crossfade_views.begin(); xi != crossfade_views.end();) {
 		tmpx = xi;
@@ -439,7 +439,7 @@ AudioStreamView::set_waveform_shape (WaveformShape shape)
 		if (arv)
 			arv->set_waveform_shape (shape);
 	}
-}		
+}
 
 void
 AudioStreamView::set_waveform_scale (WaveformScale scale)
@@ -450,7 +450,7 @@ AudioStreamView::set_waveform_scale (WaveformScale scale)
 			arv->set_waveform_scale (scale);
 		}
 	}
-}		
+}
 
 void
 AudioStreamView::setup_rec_box ()
@@ -461,8 +461,8 @@ AudioStreamView::setup_rec_box ()
 
 		// cerr << "\trolling\n";
 
-		if (!rec_active && 
-		    _trackview.session().record_status() == Session::Recording && 
+		if (!rec_active &&
+		    _trackview.session().record_status() == Session::Recording &&
 		    _trackview.get_diskstream()->record_enabled()) {
 			if (_trackview.audio_track()->mode() == Normal && use_rec_regions && rec_regions.size() == rec_rects.size()) {
 
@@ -474,7 +474,7 @@ AudioStreamView::setup_rec_box ()
 					(*prc).disconnect();
 				}
 				rec_data_ready_connections.clear();
-					
+
 				// FIXME
 				boost::shared_ptr<AudioDiskstream> ads = boost::dynamic_pointer_cast<AudioDiskstream>(_trackview.get_diskstream());
 				assert(ads);
@@ -483,19 +483,19 @@ AudioStreamView::setup_rec_box ()
 					boost::shared_ptr<AudioFileSource> src = boost::static_pointer_cast<AudioFileSource> (ads->write_source (n));
 					if (src) {
 						sources.push_back (src);
-						
+
 						rec_data_ready_connections.push_back (src->PeakRangeReady.connect (bind
-							(mem_fun (*this, &AudioStreamView::rec_peak_range_ready), boost::weak_ptr<Source>(src)))); 
+							(mem_fun (*this, &AudioStreamView::rec_peak_range_ready), boost::weak_ptr<Source>(src))));
 					}
 				}
 
 				// handle multi
-				
+
 				nframes_t start = 0;
 				if (rec_regions.size() > 0) {
 					start = rec_regions.back().first->start() + _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
 				}
-				
+
 				boost::shared_ptr<AudioRegion> region (boost::dynamic_pointer_cast<AudioRegion>
 								       (RegionFactory::create (sources, start, 1 , "", 0, (Region::Flag)(Region::DefaultFlags), false)));
 				assert(region);
@@ -503,7 +503,7 @@ AudioStreamView::setup_rec_box ()
 				region->set_position (_trackview.session().transport_frame(), this);
 				rec_regions.push_back (make_pair(region, (RegionView*)0));
 			}
-			
+
 			/* start a new rec box */
 
 			boost::shared_ptr<AudioTrack> at;
@@ -531,7 +531,7 @@ AudioStreamView::setup_rec_box ()
 				fill_color = UINT_RGBA_CHANGE_A (fill_color, 120);
 				break;
 			}
-			
+
 			ArdourCanvas::SimpleRect * rec_rect = new Gnome::Canvas::SimpleRect (*canvas_group);
 			rec_rect->property_x1() = xstart;
 			rec_rect->property_y1() = 1.0;
@@ -541,16 +541,16 @@ AudioStreamView::setup_rec_box ()
 			rec_rect->property_outline_what() = 0x1 | 0x2 | 0x4 | 0x8;
 			rec_rect->property_fill_color_rgba() = fill_color;
 			rec_rect->lower_to_bottom();
-			
+
 			RecBoxInfo recbox;
 			recbox.rectangle = rec_rect;
 			recbox.start = _trackview.session().transport_frame();
 			recbox.length = 0;
-			
+
 			rec_rects.push_back (recbox);
-			
+
 			screen_update_connection.disconnect();
-			screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun (*this, &AudioStreamView::update_rec_box));	
+			screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun (*this, &AudioStreamView::update_rec_box));
 			rec_updating = true;
 			rec_active = true;
 
@@ -561,7 +561,7 @@ AudioStreamView::setup_rec_box ()
 			rec_active = false;
 			rec_updating = false;
 		}
-		
+
 	} else {
 
 		// cerr << "\tNOT rolling, rec_rects = " << rec_rects.size() << " rec_regions = " << rec_regions.size() << endl;
@@ -578,7 +578,7 @@ AudioStreamView::setup_rec_box ()
 
 			rec_updating = false;
 			rec_active = false;
-			
+
 			/* remove temp regions */
 
 			for (list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); ) {
@@ -591,7 +591,7 @@ AudioStreamView::setup_rec_box ()
 
 				iter = tmp;
 			}
-				
+
 			rec_regions.clear();
 
 			// cerr << "\tclear " << rec_rects.size() << " rec rects\n";
@@ -601,9 +601,9 @@ AudioStreamView::setup_rec_box ()
 				RecBoxInfo &rect = (*iter);
 				delete rect.rectangle;
 			}
-			
+
 			rec_rects.clear();
-			
+
 		}
 	}
 }
@@ -620,21 +620,21 @@ void
 AudioStreamView::rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::weak_ptr<Source> weak_src)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun (*this, &AudioStreamView::rec_peak_range_ready), start, cnt, weak_src));
-	
+
 	boost::shared_ptr<Source> src (weak_src.lock());
 
 	if (!src) {
-		return; 
+		return;
 	}
 
 	// this is called from the peak building thread
-	
+
 	if (rec_data_ready_map.size() == 0 || start+cnt > last_rec_data_frame) {
 		last_rec_data_frame = start + cnt;
 	}
-	
+
 	rec_data_ready_map[src] = true;
-	
+
 	if (rec_data_ready_map.size() == _trackview.get_diskstream()->n_channels().n_audio()) {
 		this->update_rec_regions ();
 		rec_data_ready_map.clear();
@@ -659,7 +659,7 @@ AudioStreamView::update_rec_regions ()
 				iter = tmp;
 				continue;
 			}
-			
+
 			boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(iter->first);
 			if (!region) {
 				continue;
@@ -704,12 +704,12 @@ AudioStreamView::update_rec_regions ()
 						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);
 						region->set_length (nlen, this);
 						region->thaw ("updated");
-						
+
 						if (origlen == 1) {
 							/* our special initial length */
 							add_region_view_internal (region, false, true);
 						}
-						
+
 						/* also hide rect */
 						ArdourCanvas::Item * rect = rec_rects[n].rectangle;
 						rect->hide();
@@ -785,7 +785,7 @@ AudioStreamView::color_handler ()
 	//case cAudioTrackBase:
 	if (_trackview.is_track()) {
 		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_AudioTrackBase.get();
-	} 
+	}
 
 	//case cAudioBusBase:
 	if (!_trackview.is_track()) {
@@ -811,25 +811,25 @@ void
 AudioStreamView::update_content_height (CrossfadeView* cv)
 {
 	cv->show ();
-	
+
 	if (_layer_display == Overlaid) {
-		
+
 		cv->set_y (0);
 		cv->set_height (height);
-		
+
 	} else {
-		
+
 		layer_t const inl = cv->crossfade->in()->layer ();
 		layer_t const outl = cv->crossfade->out()->layer ();
 
 		layer_t const high = max (inl, outl);
 		layer_t const low = min (inl, outl);
-		
+
 		const double h = child_height ();
 
 		cv->set_y ((_layers - high - 1) * h);
 		cv->set_height ((high - low + 1) * h);
-		
+
 	}
 }
 

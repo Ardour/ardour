@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2001 Paul Davis 
+    Copyright (C) 2000-2001 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ class Region
 		MusicTime
 	};
 
- 	static const Flag DefaultFlags = Flag (Opaque|DefaultFadeIn|DefaultFadeOut|FadeIn|FadeOut);
+	static const Flag DefaultFlags = Flag (Opaque|DefaultFadeIn|DefaultFadeOut|FadeIn|FadeOut);
 
 	static Change FadeChanged;
 	static Change SyncOffsetChanged;
@@ -141,7 +141,7 @@ class Region
 	nframes_t sync_point () const;
 
 	nframes_t adjust_to_sync (nframes_t) const;
-	
+
 	/* first_frame() is an alias; last_frame() just hides some math */
 
 	nframes_t first_frame() const { return _position; }
@@ -172,13 +172,13 @@ class Region
 	OverlapType coverage (nframes_t start, nframes_t end) const {
 		return ARDOUR::coverage (first_frame(), last_frame(), start, end);
 	}
-	
+
 	bool equivalent (boost::shared_ptr<const Region>) const;
 	bool size_equivalent (boost::shared_ptr<const Region>) const;
 	bool overlap_equivalent (boost::shared_ptr<const Region>) const;
 	bool region_list_equivalent (boost::shared_ptr<const Region>) const;
 	bool source_equivalent (boost::shared_ptr<const Region>) const;
-	
+
 	/* EDITING OPERATIONS */
 
 	void set_length (nframes_t, void *src);
@@ -196,7 +196,7 @@ class Region
 	void trim_front (nframes_t new_position, void *src);
 	void trim_end (nframes_t new_position, void *src);
 	void trim_to (nframes_t position, nframes_t length, void *src);
-	
+
 	void set_layer (layer_t l); /* ONLY Playlist can call this */
 	void raise ();
 	void lower ();
@@ -210,7 +210,7 @@ class Region
 	void set_opaque (bool yn);
 	void set_locked (bool yn);
 	void set_position_locked (bool yn);
-	
+
 	int apply (Filter&);
 
 	virtual uint32_t read_data_count() const { return _read_data_count; }
@@ -219,7 +219,7 @@ class Region
 	virtual void set_playlist (boost::weak_ptr<ARDOUR::Playlist>);
 
 	void source_deleted (boost::shared_ptr<Source>);
-	
+
 	boost::shared_ptr<Source> source (uint32_t n=0) const { return _sources[ (n < _sources.size()) ? n : 0 ]; }
 	uint32_t                  n_channels()          const { return _sources.size(); }
 
@@ -228,24 +228,24 @@ class Region
 
 	std::vector<std::string> master_source_names();
 	void set_master_sources (const SourceList&);
-	
+
 	/* automation */
-	
+
 	virtual boost::shared_ptr<Evoral::Control>
 	control(const Evoral::Parameter& id, bool create=false) = 0;
 
 	virtual boost::shared_ptr<const Evoral::Control>
 	control(const Evoral::Parameter& id) const = 0;
-	
+
 	/* serialization */
-	
+
 	XMLNode&         get_state ();
 	virtual XMLNode& state (bool);
 	virtual int      set_state (const XMLNode&);
 	virtual int      set_live_state (const XMLNode&, Change&, bool send);
 
 	virtual boost::shared_ptr<Region> get_parent() const;
-	
+
 	uint64_t last_layer_op() const { return _last_layer_op; }
 	void set_last_layer_op (uint64_t when);
 
@@ -259,7 +259,7 @@ class Region
 		// no transients, but its OK
 		return 0;
 	}
-	
+
 	virtual int separate_by_channel (ARDOUR::Session&,
 			std::vector< boost::shared_ptr<Region> >&) const {
 		return 0;
@@ -270,7 +270,7 @@ class Region
 	void set_pending_explicit_relayer (bool p) {
 		_pending_explicit_relayer = p;
 	}
-	
+
 	bool pending_explicit_relayer () const {
 		return _pending_explicit_relayer;
 	}
@@ -278,11 +278,11 @@ class Region
   protected:
 	friend class RegionFactory;
 
-	Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length, 
+	Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length,
 		const std::string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
-	Region (const SourceList& srcs, nframes_t start, nframes_t length, 
+	Region (const SourceList& srcs, nframes_t start, nframes_t length,
 		const std::string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
-	
+
 	Region (boost::shared_ptr<const Region>, nframes_t start, nframes_t length, const std::string& name, layer_t = 0, Flag flags = DefaultFlags);
 	Region (boost::shared_ptr<const Region>, nframes_t length, const std::string& name, layer_t = 0, Flag flags = DefaultFlags);
 	Region (boost::shared_ptr<const Region>);
@@ -304,12 +304,12 @@ class Region
 	bool copied() const { return _flags & Copied; }
 	void maybe_uncopy ();
 	void first_edit ();
-	
+
 	bool verify_start (nframes_t);
 	bool verify_start_and_length (nframes_t, nframes_t&);
 	bool verify_start_mutable (nframes_t&_start);
 	bool verify_length (nframes_t);
-	
+
 	virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;
 
@@ -342,7 +342,7 @@ class Region
 
 	/** true if this region has had its layer explicitly set since the playlist last relayered */
 	bool                    _pending_explicit_relayer;
-	
+
 	boost::weak_ptr<ARDOUR::Playlist> _playlist;
 
 private:

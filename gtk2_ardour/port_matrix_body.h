@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2009 Paul Davis 
+    Copyright (C) 2002-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ public:
 	void set_yoffset (uint32_t);
 
 	void rebuild_and_draw_grid ();
-	
+
 	void set_mouseover (PortMatrixNode const &);
 	PortMatrixNode mouseover () const {
 		return _mouseover;
@@ -73,7 +73,7 @@ protected:
 	bool on_button_release_event (GdkEventButton *);
 	bool on_leave_notify_event (GdkEventCrossing *);
 	bool on_motion_notify_event (GdkEventMotion *);
-	
+
 private:
 	void compute_rectangles ();
 	void rebuild_and_draw_column_labels ();

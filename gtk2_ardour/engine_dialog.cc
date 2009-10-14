@@ -65,7 +65,7 @@ EngineControl::EngineControl ()
 	  basic_packer (8, 2),
 	  options_packer (14, 2),
 	  device_packer (6, 2)
-#endif	  
+#endif
 {
 	using namespace Notebook_Helpers;
 	Label* label;
@@ -245,7 +245,7 @@ EngineControl::EngineControl ()
 	++row;
 	options_packer.attach (verbose_output_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
-#else 
+#else
 	options_packer.attach (verbose_output_button, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 #endif
@@ -273,7 +273,7 @@ EngineControl::EngineControl ()
 	++row;
 
 #ifndef __APPLE__
-	label = manage (new Label (_("Dither")));	
+	label = manage (new Label (_("Dither")));
 	label->set_alignment (1.0, 0.5);
 	options_packer.attach (dither_mode_combo, 1, 2, row, row + 1, FILL|EXPAND, AttachOptions(0));
 	options_packer.attach (*label, 0, 1, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
@@ -286,7 +286,7 @@ EngineControl::EngineControl ()
 		fatal << _("No JACK server found anywhere on this system. Please install JACK and restart") << endmsg;
 		/*NOTREACHED*/
 	}
-	
+
 	set_popdown_strings (serverpath_combo, server_strings);
 	serverpath_combo.set_active_text (server_strings.front());
 
@@ -312,7 +312,7 @@ EngineControl::EngineControl ()
 	label = manage (new Label (_("Output device")));
 	label->set_alignment (1.0, 0.5);
 	device_packer.attach (*label, 0, 1, row, row+1, FILL|EXPAND, (AttachOptions) 0);
-	device_packer.attach (output_device_combo, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);	
+	device_packer.attach (output_device_combo, 1, 2, row, row+1, FILL|EXPAND, (AttachOptions) 0);
 	++row;
 #endif
 	label = manage (new Label (_("Input channels")));
@@ -372,7 +372,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 	/* first, path to jackd */
 
 	cmd.push_back (serverpath_combo.get_active_text ());
-	
+
 	/* now jackd arguments */
 
 	str = timeout_combo.get_active_text ();
@@ -390,7 +390,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 	if (no_memory_lock_button.get_active()) {
 		cmd.push_back ("-m"); /* no munlock */
 	}
-	
+
 	cmd.push_back ("-p"); /* port max */
 	cmd.push_back (to_string ((uint32_t) floor (ports_spinner.get_value()), std::dec));
 
@@ -407,7 +407,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 	if (verbose_output_button.get_active()) {
 		cmd.push_back ("-v");
 	}
-	
+
 	/* now add fixed arguments (not user-selectable) */
 
 	cmd.push_back ("-T"); // temporary */
@@ -451,13 +451,13 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 	if (!using_coreaudio) {
 		str = audio_mode_combo.get_active_text();
-		
+
 		if (str == _("Playback/Recording on 1 Device")) {
-			
+
 			/* relax */
-			
+
 		} else if (str == _("Playback/Recording on 2 Devices")) {
-			
+
 			string input_device = get_device_name (driver, input_device_combo.get_active_text());
 			string output_device = get_device_name (driver, output_device_combo.get_active_text());
 
@@ -485,12 +485,12 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 	cmd.push_back ("-r");
 	cmd.push_back (to_string (get_rate(), std::dec));
-	
+
 	cmd.push_back ("-p");
 	cmd.push_back (period_size_combo.get_active_text());
 
 	if (using_alsa) {
-		
+
 		if (audio_mode_combo.get_active_text() != _("Playback/Recording on 2 Devices")) {
 
 			string device = get_device_name (driver, interface_combo.get_active_text());
@@ -501,12 +501,12 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 			cmd.push_back ("-d");
 			cmd.push_back (device);
-		} 
+		}
 
 		if (hw_meter_button.get_active()) {
 			cmd.push_back ("-M");
 		}
-		
+
 		if (hw_monitor_button.get_active()) {
 			cmd.push_back ("-H");
 		}
@@ -525,7 +525,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 		if (force16bit_button.get_active()) {
 			cmd.push_back ("-S");
 		}
-		
+
 		if (soft_mode_button.get_active()) {
 			cmd.push_back ("-s");
 		}
@@ -534,7 +534,7 @@ EngineControl::build_command_line (vector<string>& cmd)
 
 #ifdef __APPLE__
 		// note: older versions of the CoreAudio JACK backend use -n instead of -d here
-		
+
 		string device = get_device_name (driver, interface_combo.get_active_text());
 		if (device.empty()) {
 			cmd.clear ();
@@ -572,7 +572,7 @@ EngineControl::setup_engine ()
 	std::string cwd = "/tmp";
 
 	build_command_line (args);
-	
+
 	if (args.empty()) {
 		return 1; // try again
 	}
@@ -613,7 +613,7 @@ EngineControl::enumerate_devices (const string& driver)
 	/* note: case matters for the map keys */
 
 	if (driver == "CoreAudio") {
-#ifdef __APPLE__		
+#ifdef __APPLE__
 		devices[driver] = enumerate_coreaudio_devices ();
 #endif
 
@@ -635,14 +635,14 @@ EngineControl::enumerate_devices (const string& driver)
 }
 
 #ifdef __APPLE__
-static OSStatus 
+static OSStatus
 getDeviceUIDFromID( AudioDeviceID id, char *name, size_t nsize)
 {
 	UInt32 size = sizeof(CFStringRef);
 	CFStringRef UI;
 	OSStatus res = AudioDeviceGetProperty(id, 0, false,
 		kAudioDevicePropertyDeviceUID, &size, &UI);
-	if (res == noErr) 
+	if (res == noErr)
 		CFStringGetCString(UI,name,nsize,CFStringGetSystemEncoding());
 	CFRelease(UI);
 	return res;
@@ -652,7 +652,7 @@ vector<string>
 EngineControl::enumerate_coreaudio_devices ()
 {
 	vector<string> devs;
-	
+
 	// Find out how many Core Audio devices are there, if any...
 	// (code snippet gently "borrowed" from St?hane Letz jackdmp;)
 	OSStatus err;
@@ -709,11 +709,11 @@ EngineControl::enumerate_coreaudio_devices ()
 
 						// this returns the unique id for the device
 						// that must be used on the commandline for jack
-						
+
 						if (getDeviceUIDFromID(coreDeviceIDs[i], drivername, sizeof (drivername)) == noErr) {
 							devs.push_back (coreDeviceName);
 							backend_devs.push_back (drivername);
-						} 
+						}
 					}
 				}
 			}
@@ -734,7 +734,7 @@ have no duplex audio device.\n\n\
 Alternatively, if you really want just playback\n\
 or recording but not both, start JACK before running\n\
 Ardour and choose the relevant device then."
-					   ), 
+					   ),
 				   true, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK);
 		msg.set_title (_("No suitable audio devices"));
 		msg.set_position (Gtk::WIN_POS_MOUSE);
@@ -857,7 +857,7 @@ EngineControl::driver_changed ()
 		error << string_compose (_("No devices found for driver \"%1\""), driver) << endmsg;
 		return;
 	}
-	
+
 	for (vector<string>::iterator i = strings.begin(); i != strings.end(); ++i, ++n) {
 		if ((*i).length() > maxlen) {
 			maxlen = (*i).length();
@@ -873,8 +873,8 @@ EngineControl::driver_changed ()
 		interface_combo.set_active_text (strings.front());
 		input_device_combo.set_active_text (strings.front());
 		output_device_combo.set_active_text (strings.front());
-	} 
-	
+	}
+
 	if (driver == "ALSA") {
 		soft_mode_button.set_sensitive (true);
 		force16bit_button.set_sensitive (true);
@@ -943,18 +943,18 @@ EngineControl::find_jack_servers (vector<string>& strings)
 	/* this magic lets us finds the path to the OSX bundle, and then
 	   we infer JACK's location from there
 	*/
-	
+
 	char execpath[MAXPATHLEN+1];
 	uint32_t pathsz = sizeof (execpath);
 
 	_NSGetExecutablePath (execpath, &pathsz);
-	
+
 	string path (Glib::path_get_dirname (execpath));
 	path += "/jackd";
 
 	if (Glib::file_test (path, FILE_TEST_EXISTS)) {
 		strings.push_back (path);
-	} 
+	}
 
 	if (getenv ("ARDOUR_WITH_JACK")) {
 		/* no other options - only use the JACK we supply */
@@ -967,7 +967,7 @@ EngineControl::find_jack_servers (vector<string>& strings)
 #else
 	string path;
 #endif
-	
+
 	PathScanner scanner;
 	vector<string *> *jack_servers;
 	std::map<string,int> un;
@@ -1003,12 +1003,12 @@ EngineControl::find_jack_servers (vector<string>& strings)
 #endif
 
 	jack_servers = scanner (path, jack_server_filter, 0, false, true);
-	
+
 	vector<string *>::iterator iter;
-	
+
 	for (iter = jack_servers->begin(); iter != jack_servers->end(); iter++) {
 		string p = **iter;
-		
+
 		if (un[p]++ == 0) {
 			strings.push_back(p);
 		}
@@ -1034,13 +1034,13 @@ EngineControl::get_device_name (const string& driver, const string& human_readab
 	if (backend_devs.empty()) {
 		return human_readable;
 	}
-	
+
 	for (i = devices[driver].begin(), n = backend_devs.begin(); i != devices[driver].end(); ++i, ++n) {
 		if (human_readable == (*i)) {
 			return (*n);
 		}
 	}
-	
+
 	if (i == devices[driver].end()) {
 		warning << string_compose (_("Audio device \"%1\" not known on this computer."), human_readable) << endmsg;
 	}
@@ -1154,7 +1154,7 @@ EngineControl::get_state ()
 	child = new XMLNode ("outputdevice");
 	child->add_property ("val", output_device_combo.get_active_text());
 	root->add_child_nocopy (*child);
-	
+
 	return *root;
 }
 
@@ -1166,17 +1166,17 @@ EngineControl::set_state (const XMLNode& root)
 	XMLNode* child;
 	XMLProperty* prop = NULL;
 	bool using_dummy = false;
-	
+
 	int val;
 	string strval;
-	
+
 	if ( (child = root.child ("driver"))){
 		prop = child->property("val");
 		if (prop && (prop->value() == "Dummy") ) {
 			using_dummy = true;
 		}
 	}
-	
+
 	clist = root.children();
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
@@ -1193,7 +1193,7 @@ EngineControl::set_state (const XMLNode& root)
 			error << string_compose (_("AudioSetup value for %1 is missing data"), child->name()) << endmsg;
 			continue;
 		}
-		
+
 		strval = prop->value();
 
 		/* adjustments/spinners */

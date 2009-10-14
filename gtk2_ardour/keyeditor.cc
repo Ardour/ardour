@@ -29,7 +29,7 @@ KeyEditor::KeyEditor ()
 	: ArdourDialog (_("Shortcut Editor"), false)
 	, unbind_button (_("Remove shortcut"))
 	, unbind_box (BUTTONBOX_END)
-	
+
 {
 	can_bind = false;
 	last_state = 0;
@@ -46,9 +46,9 @@ KeyEditor::KeyEditor ()
 	view.set_enable_search (false);
 	view.set_rules_hint (true);
 	view.set_name (X_("KeyEditorTree"));
-	
+
 	view.get_selection()->signal_changed().connect (mem_fun (*this, &KeyEditor::action_selected));
-	
+
 	scroller.add (view);
 	scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
@@ -68,7 +68,7 @@ KeyEditor::KeyEditor ()
 		get_vbox()->pack_start (unbind_box, false, false);
 		unbind_box.show ();
 		unbind_button.show ();
-		
+
 	}
 
 	get_vbox()->set_border_width (12);
@@ -83,15 +83,15 @@ void
 KeyEditor::unbind ()
 {
 	TreeModel::iterator i = view.get_selection()->get_selected();
-	
+
 	unbind_button.set_sensitive (false);
 
 	if (i != model->children().end()) {
 		string path = (*i)[columns.path];
-		
+
 		if (!(*i)[columns.bindable]) {
 			return;
-		} 
+		}
 
 		bool result = AccelMap::change_entry (path,
 						      0,
@@ -125,16 +125,16 @@ KeyEditor::action_selected ()
 	}
 
 	TreeModel::iterator i = view.get_selection()->get_selected();
-	
+
 	unbind_button.set_sensitive (false);
 
 	if (i != model->children().end()) {
 
 		string path = (*i)[columns.path];
-		
+
 		if (!(*i)[columns.bindable]) {
 			return;
-		} 
+		}
 
 		string binding = (*i)[columns.binding];
 
@@ -163,10 +163,10 @@ KeyEditor::on_key_release_event (GdkEventKey* ev)
 
 	if (i != model->children().end()) {
 		string path = (*i)[columns.path];
-		
+
 		if (!(*i)[columns.bindable]) {
 			goto out;
-		} 
+		}
 
 		possibly_translate_keyval_to_make_legal_accelerator (ev->keyval);
 
@@ -180,7 +180,7 @@ KeyEditor::on_key_release_event (GdkEventKey* ev)
 			AccelKey key;
 
 			known = ActionManager::lookup_entry (path, key);
-			
+
 			if (known) {
 				(*i)[columns.binding] = ActionManager::ui_manager->get_accel_group()->name (key.get_key(), Gdk::ModifierType (key.get_mod()));
 			} else {
@@ -204,9 +204,9 @@ KeyEditor::populate ()
 	typedef std::map<string,TreeIter> NodeMap;
 	NodeMap nodes;
 	NodeMap::iterator r;
-	
+
 	ActionManager::get_all_actions (labels, paths, keys, bindings);
-	
+
 	vector<string>::iterator k;
 	vector<string>::iterator p;
 	vector<string>::iterator l;
@@ -217,11 +217,11 @@ KeyEditor::populate ()
 
 		TreeModel::Row row;
 		vector<string> parts;
-		
+
 		parts.clear ();
 
 		split (*p, parts, '/');
-		
+
 		if (parts.empty()) {
 			continue;
 		}
@@ -241,17 +241,17 @@ KeyEditor::populate ()
 			row = *(model->append (parent.children()));
 
 		} else {
-			
+
 			row = *(model->append ((*r->second)->children()));
 
 		}
-		
+
 		/* add this action */
 
 		row[columns.action] = (*l);
 		row[columns.path] = (*p);
 		row[columns.bindable] = true;
-		
+
 		if (*k == ActionManager::unbound_string) {
 			row[columns.binding] = string();
 		} else {
@@ -261,7 +261,7 @@ KeyEditor::populate ()
 
 			/* Gtk/Quartz maps:
 			   NSAlternate/NSOption key to Mod1
-			   NSCommand key to Meta 
+			   NSCommand key to Meta
 			*/
 
 			replace_all (label, "<Meta>", _("Command-"));
@@ -269,7 +269,7 @@ KeyEditor::populate ()
 			replace_all (label, "<Shift>", _("Shift-"));
 			replace_all (label, "<Control>", _("Control-"));
 			row[columns.binding] = label;
-#else		
+#else
 			row[columns.binding] = (*k);
 #endif
 		}

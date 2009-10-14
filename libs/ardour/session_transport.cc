@@ -213,7 +213,7 @@ Session::butler_transport_work ()
 	}
 
 	if (post_transport_work & PostTransportReverse) {
-		
+
 		clear_clicks();
 		cumulative_rf_motion = 0;
 		reset_rf_scale (0);
@@ -390,7 +390,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	bool const auto_return_enabled =
 		(Config->get_slave_source() == None && config.get_auto_return());
-	
+
 	if (auto_return_enabled ||
 	    (post_transport_work & PostTransportLocate) ||
 	    (_requested_return_frame >= 0) ||
@@ -442,7 +442,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 #endif
 
-        have_looped = false; 
+        have_looped = false;
 
         send_full_time_code (0);
 	deliver_mmc (MIDI::MachineControl::cmdStop, 0);
@@ -650,7 +650,7 @@ int
 Session::micro_locate (nframes_t distance)
 {
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-	
+
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if (!(*i)->can_internal_playback_seek (distance)) {
 			return -1;
@@ -660,7 +660,7 @@ Session::micro_locate (nframes_t distance)
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		(*i)->internal_playback_seek (distance);
 	}
-	
+
 	_transport_frame += distance;
 	return 0;
 }
@@ -805,7 +805,7 @@ Session::set_transport_speed (double speed, bool abort)
 	/* 8.0 max speed is somewhat arbitrary but based on guestimates regarding disk i/o capability
 	   and user needs. We really need CD-style "skip" playback for ffwd and rewind.
 	*/
-	
+
 	if (speed > 0) {
 		speed = min (8.0, speed);
 	} else if (speed < 0) {
@@ -981,7 +981,7 @@ Session::start_transport ()
 	}
 
 	transport_sub_state |= PendingDeclickIn;
-	
+
 	_transport_speed = 1.0;
 	_target_transport_speed = 1.0;
 
@@ -1060,9 +1060,9 @@ Session::set_slave_source (SlaveSource src)
 		return;
 	}
 
-// 	if (src == JACK && Config->get_jack_time_master()) {
-// 		return;
-// 	}
+//	if (src == JACK && Config->get_jack_time_master()) {
+//		return;
+//	}
 
 	delete _slave;
 	_slave = 0;
@@ -1251,7 +1251,7 @@ Session::setup_auto_play ()
 void
 Session::request_roll_at_and_return (nframes_t start, nframes_t return_to)
 {
- 	Event *ev = new Event (Event::LocateRollLocate, Event::Add, Event::Immediate, return_to, 1.0);
+	Event *ev = new Event (Event::LocateRollLocate, Event::Add, Event::Immediate, return_to, 1.0);
 	ev->target2_frame = start;
 	queue_event (ev);
 }
@@ -1260,7 +1260,7 @@ void
 Session::request_bounded_roll (nframes_t start, nframes_t end)
 {
 	request_stop ();
- 	Event *ev = new Event (Event::StopOnce, Event::Replace, end, Event::Immediate, 0.0);
+	Event *ev = new Event (Event::StopOnce, Event::Replace, end, Event::Immediate, 0.0);
 	queue_event (ev);
 	request_locate (start, true);
 }
@@ -1338,7 +1338,7 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 			update_jack = true;
 		}
 
- 		if (!(*i)->is_hidden() && ((*i)->active())) {
+		if (!(*i)->is_hidden() && ((*i)->active())) {
 			_worst_track_latency = max (_worst_track_latency, track_latency);
 		}
 	}

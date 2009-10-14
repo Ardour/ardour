@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002 Paul Davis 
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ class CycleTimer {
 	cycles_t _entry;
 	cycles_t _exit;
 	std::string _name;
-	
+
   public:
 	CycleTimer(std::string name) : _name (name){
 		if (cycles_per_usec == 0) {

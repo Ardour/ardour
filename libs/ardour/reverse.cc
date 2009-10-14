@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004 Paul Davis 
+    Copyright (C) 2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -83,13 +83,13 @@ Reverse::run (boost::shared_ptr<Region> r)
 		for (n = 0, si = nsrcs.begin(); n < region->n_channels(); ++n, ++si) {
 
 			/* read it in directly from the source */
-			
+
 			if (region->audio_source (n)->read (buf, fpos, to_read) != to_read) {
 				goto out;
 			}
 
 			/* swap memory order */
-			
+
 			for (nframes_t i = 0; i < to_read/2; ++i) {
 				swap (buf[i],buf[to_read-1-i]);
 			}
@@ -124,6 +124,6 @@ Reverse::run (boost::shared_ptr<Region> r)
 			asrc->mark_for_remove ();
 		}
 	}
-	
+
 	return ret;
 }

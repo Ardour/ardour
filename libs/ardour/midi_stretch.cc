@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Paul Davis 
+    Copyright (C) 2008 Paul Davis
     Author:  Dave Robillard
 
     This program is free software; you can redistribute it and/or modify
@@ -54,9 +54,9 @@ MidiStretch::run (boost::shared_ptr<Region> r)
 	/* the name doesn't need to be super-precise, but allow for 2 fractional
 	   digits just to disambiguate close but not identical stretches.
 	*/
-	
+
 	snprintf (suffix, sizeof (suffix), "@%d", (int) floor (_request.time_fraction * 100.0f));
-	
+
 	string new_name = region->name();
 	string::size_type at = new_name.find ('@');
 
@@ -67,15 +67,15 @@ MidiStretch::run (boost::shared_ptr<Region> r)
 	}
 
 	new_name += suffix;
-	
+
 	/* create new sources */
-	
+
 	if (make_new_sources (region, nsrcs, suffix))
 		return -1;
 
 	// FIXME: how to make a whole file region if it isn't?
 	//assert(region->whole_file());
-	
+
 	boost::shared_ptr<MidiSource> src = region->midi_source(0);
 	src->load_model();
 
@@ -87,11 +87,11 @@ MidiStretch::run (boost::shared_ptr<Region> r)
 	new_src->load_model(true, true);
 	boost::shared_ptr<MidiModel> new_model = new_src->model();
 	new_model->start_write();
-	
+
 	for (Evoral::Sequence<MidiModel::TimeType>::const_iterator i = old_model->begin();
 			i != old_model->end(); ++i) {
 		const double new_time = i->time() * _request.time_fraction;
-		
+
 		// FIXME: double copy
 		Evoral::Event<MidiModel::TimeType> ev(*i, true);
 		ev.time() = new_time;
@@ -100,9 +100,9 @@ MidiStretch::run (boost::shared_ptr<Region> r)
 
 	new_model->end_write();
 	new_model->set_edited(true);
-	
+
 	const int ret = finish (region, nsrcs, new_name);
-	
+
 	results[0]->set_length((nframes_t) floor (r->length() * _request.time_fraction), NULL);
 
 	return ret;

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,15 +41,15 @@ class ProcessorSelection {
 	    node->add_child_nocopy (*newchild);
     }
 
-    void clear () { 
-	    if (node) { 
+    void clear () {
+	    if (node) {
 		    delete node;
 		    node = 0;
 	    }
     }
 
     bool empty () const { return node == 0 || node->children().empty(); }
-	    
+
     const XMLNode& get_node() const { return *node; }
 
   private:

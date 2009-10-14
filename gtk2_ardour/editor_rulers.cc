@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 
 */
 
-#include <cstdio> // for sprintf, grrr 
+#include <cstdio> // for sprintf, grrr
 #include <cmath>
 
 #include <string>
@@ -148,7 +148,7 @@ Editor::initialize_rulers ()
 	bbt_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
 	frames_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
 	minsec_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
-	
+
 	smpte_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 	bbt_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 	frames_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
@@ -242,7 +242,7 @@ Editor::ruler_button_press (GdkEventButton* ev)
 		if (session->is_auditioning()) {
 			session->cancel_audition ();
 		}
-		
+
 		/* playhead cursor */
 		assert (_drag == 0);
 		_drag = new CursorDrag (this, &playhead_cursor->canvas_item, false);
@@ -259,7 +259,7 @@ Editor::ruler_button_release (GdkEventButton* ev)
 	if (session == 0) {
 		return FALSE;
 	}
-	
+
 	gint x,y;
 	Gdk::ModifierType state;
 
@@ -275,7 +275,7 @@ Editor::ruler_button_release (GdkEventButton* ev)
 		time_canvas_event_box.get_window()->get_pointer (x, y, state);
 
 		stop_canvas_autoscroll();
-	
+
 		nframes64_t where = leftmost_frame + pixel_to_frame (x);
 		snap_to (where);
 		popup_ruler_menu (where);
@@ -298,7 +298,7 @@ Editor::ruler_label_button_release (GdkEventButton* ev)
 			m->popup (1, ev->time);
 		}
 	}
-	
+
 	return TRUE;
 }
 
@@ -350,13 +350,13 @@ Editor::popup_ruler_menu (nframes64_t where, ItemType t)
 	case TransportMarkerBarItem:
 
 		break;
-	
+
 	case CdMarkerBarItem:
 		// TODO
 		ruler_items.push_back (MenuElem (_("New CD track marker"), bind ( mem_fun(*this, &Editor::mouse_add_new_marker), where, true, false)));
 		break;
-		
-	
+
+
 	case TempoBarItem:
 		ruler_items.push_back (MenuElem (_("New Tempo"), bind ( mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
 		ruler_items.push_back (MenuElem (_("Clear tempo")));
@@ -445,7 +445,7 @@ Editor::store_ruler_visibility ()
 	session->set_dirty ();
 }
 
-void 
+void
 Editor::restore_ruler_visibility ()
 {
 	XMLProperty* prop;
@@ -528,7 +528,7 @@ Editor::restore_ruler_visibility ()
 
 		} else {
 			// this session doesn't yet know about the cdmarker ruler
-			// as a benefit to the user who doesn't know the feature exists, show the ruler if 
+			// as a benefit to the user who doesn't know the feature exists, show the ruler if
 			// any cd marks exist
 			ruler_cd_marker_action->set_active (false);
 			const Locations::LocationList & locs = session->locations()->list();
@@ -614,7 +614,7 @@ Editor::update_ruler_visibility ()
 		old_unit_pos = meter_bar_group->property_y();
 		if (tbgpos != old_unit_pos) {
 			meter_bar_group->move ( 0.0, tbgpos - old_unit_pos);
-		}	
+		}
 		meter_bar_group->show();
 		meter_group->show();
 		meter_label.show();
@@ -626,7 +626,7 @@ Editor::update_ruler_visibility ()
 		meter_group->hide();
 		meter_label.hide();
 	}
-	
+
 	if (ruler_tempo_action->get_active()) {
 		old_unit_pos = tempo_group->property_y();
 		if (tbpos != old_unit_pos) {
@@ -647,7 +647,7 @@ Editor::update_ruler_visibility ()
 		tempo_group->hide();
 		tempo_label.hide();
 	}
-	
+
 	if (!Profile->get_sae() && ruler_range_action->get_active()) {
 		old_unit_pos = range_marker_group->property_y();
 		if (tbpos != old_unit_pos) {
@@ -715,7 +715,7 @@ Editor::update_ruler_visibility ()
 		// make sure all cd markers show up in their respective places
 		update_cd_marker_display();
 	}
-	
+
 	if (ruler_marker_action->get_active()) {
 		old_unit_pos = marker_group->property_y();
 		if (tbpos != old_unit_pos) {
@@ -753,7 +753,7 @@ Editor::update_ruler_visibility ()
 		_background_group->move (0, 0);
 		last_trackview_group_vertical_offset = get_trackview_group_vertical_offset ();
 	}
-	
+
 	gdouble bottom_track_pos = vertical_adjustment.get_value() + _canvas_height - canvas_timebars_vsize;
 	std::pair<TimeAxisView*, int> const p = trackview_by_y_position (bottom_track_pos);
 	if (p.first) {
@@ -771,7 +771,7 @@ void
 Editor::update_just_smpte ()
 {
 	ENSURE_GUI_THREAD(mem_fun(*this, &Editor::update_just_smpte));
-	
+
 	if (session == 0) {
 		return;
 	}
@@ -794,7 +794,7 @@ Editor::compute_fixed_ruler_scale ()
 	if (ruler_timecode_action->get_active()) {
 		set_smpte_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames() );
 	}
-	
+
 	if (ruler_minsec_action->get_active()) {
 		set_minsec_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames() );
 	}
@@ -823,17 +823,17 @@ Editor::update_fixed_rulers ()
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_smpte_ruler), leftmost_frame, rightmost_frame,
 					    leftmost_frame, session->current_end_frame());
 	}
-	
+
 	if (ruler_samples_action->get_active()) {
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_frames_ruler), leftmost_frame, rightmost_frame,
 					    leftmost_frame, session->current_end_frame());
 	}
-	
+
 	if (ruler_minsec_action->get_active()) {
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_minsec_ruler), leftmost_frame, rightmost_frame,
 					    leftmost_frame, session->current_end_frame());
 	}
-}		
+}
 
 void
 Editor::update_tempo_based_rulers ()
@@ -843,7 +843,7 @@ Editor::update_tempo_based_rulers ()
 	}
 
 	ruler_metrics[ruler_metric_bbt].units_per_pixel = frames_per_unit;
-	
+
 	if (ruler_bbt_action->get_active()) {
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_bbt_ruler), leftmost_frame, leftmost_frame+current_page_frames(),
 					    leftmost_frame, session->current_end_frame());
@@ -966,14 +966,14 @@ Editor::set_smpte_ruler_scale (gdouble lower, gdouble upper)
 		smpte_mark_modulo = 1;
 		smpte_nmarks = 2 + 24;
 	} else {
-    
+
 		/* not possible if nframes64_t is a 32 bit quantity */
-    
+
 		smpte_ruler_scale = smpte_show_hours;
 		smpte_mark_modulo = 4;
 		smpte_nmarks = 2 + 24;
 	}
-  
+
 }
 
 gint
@@ -996,14 +996,14 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble /*u
 	}
 
 	pos = (nframes_t) floor (lower);
-	
-	*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * smpte_nmarks);  
+
+	*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * smpte_nmarks);
 	switch (smpte_ruler_scale) {
 	case smpte_show_bits:
 
 		// Find smpte time of this sample (pos) with subframe accuracy
 		session->sample_to_smpte(pos, smpte, true /* use_offset */, true /* use_subframes */ );
-    
+
 		for (n = 0; n < smpte_nmarks; n++) {
 			session->smpte_to_sample(smpte, pos, true /* use_offset */, true /* use_subframes */ );
 			if ((smpte.subframes % smpte_mark_modulo) == 0) {
@@ -1017,7 +1017,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble /*u
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				(*marks)[n].style = GtkCustomRulerMarkMicro;
-        
+
 			}
 			(*marks)[n].label = g_strdup (buf);
 			(*marks)[n].position = pos;
@@ -1047,7 +1047,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble /*u
 				snprintf (buf, sizeof(buf)," ");
 				(*marks)[n].style = GtkCustomRulerMarkMicro;
 				(*marks)[n].position = pos;
-        
+
 			}
 			(*marks)[n].label = g_strdup (buf);
 			SMPTE::increment_seconds( smpte, session->config.get_subframes_per_frame() );
@@ -1071,7 +1071,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble /*u
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				(*marks)[n].style = GtkCustomRulerMarkMicro;
-        
+
 			}
 			(*marks)[n].label = g_strdup (buf);
 			(*marks)[n].position = pos;
@@ -1093,7 +1093,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble /*u
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				(*marks)[n].style = GtkCustomRulerMarkMicro;
-        
+
 			}
 			(*marks)[n].label = g_strdup (buf);
 			(*marks)[n].position = pos;
@@ -1121,7 +1121,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble /*u
 				snprintf (buf, sizeof(buf)," ");
 				(*marks)[n].style = GtkCustomRulerMarkMicro;
 				(*marks)[n].position = pos;
-        
+
 			}
 			(*marks)[n].label = g_strdup (buf);
 			SMPTE::increment( smpte, session->config.get_subframes_per_frame() );
@@ -1129,7 +1129,7 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble /*u
 
 	  break;
 	}
-  
+
 	return smpte_nmarks;
 }
 
@@ -1153,7 +1153,7 @@ Editor::compute_bbt_ruler_scale (nframes64_t lower, nframes64_t upper)
         bbt_nmarks = 1;
 
 	bbt_ruler_scale =  bbt_over;
-  
+
 	switch (snap_type) {
 	case SnapToAThirdBeat:
                 bbt_beat_subdivision = 3;
@@ -1212,7 +1212,7 @@ Editor::compute_bbt_ruler_scale (nframes64_t lower, nframes64_t upper)
 	  bbt_ruler_scale =  bbt_show_ticks;
 	} else {
 	  bbt_ruler_scale =  bbt_show_ticks_detail;
-	} 
+	}
 
 	if ((bbt_ruler_scale == bbt_show_ticks_detail) && (lower_beat.beats == upper_beat.beats) && (upper_beat.ticks - lower_beat.ticks <= Meter::ticks_per_beat / 4)) {
 		bbt_ruler_scale =  bbt_show_ticks_super_detail;
@@ -1260,14 +1260,14 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 		(*marks)[0].label = g_strdup(" ");
 		(*marks)[0].position = lower;
 		(*marks)[0].style = GtkCustomRulerMarkMicro;
-		
+
 		for (n = 1,   i = current_bbt_points->begin(); n < bbt_nmarks && i != current_bbt_points->end(); ++i) {
 			if  ((*i).type != TempoMap::Beat) {
 				continue;
 			}
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
-				(*marks)[0].label = g_strdup (buf); 
+				(*marks)[0].label = g_strdup (buf);
 				helper_active = true;
 			} else {
 
@@ -1299,14 +1299,14 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 		(*marks)[0].label = g_strdup(" ");
 		(*marks)[0].position = lower;
 		(*marks)[0].style = GtkCustomRulerMarkMicro;
-		
+
 		for (n = 1,   i = current_bbt_points->begin(); n < bbt_nmarks && i != current_bbt_points->end(); ++i) {
 			if  ((*i).type != TempoMap::Beat) {
 				continue;
 			}
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
-				(*marks)[0].label = g_strdup (buf); 
+				(*marks)[0].label = g_strdup (buf);
 				helper_active = true;
 			} else {
 
@@ -1324,23 +1324,23 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 				(*marks)[n].position = (*i).frame;
 				n++;
 			}
-			
+
 			/* Add the tick marks */
 
 			/* Find the next beat */
 			next_beat.beats = (*i).beat;
 			next_beat.bars = (*i).bar;
 			next_beat.ticks = 0;
-			
+
 			if ((*i).meter->beats_per_bar() > (next_beat.beats + 1)) {
 				  next_beat.beats += 1;
 			} else {
 				  next_beat.bars += 1;
 				  next_beat.beats = 1;
 			}
-				
+
 			next_beat_pos = session->tempo_map().frame_time(next_beat);
-			
+
 			frame_skip = (nframes64_t) floor (frame_skip_error = (session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
 			frame_skip_error -= frame_skip;
 			skip = (uint32_t) (Meter::ticks_per_beat / bbt_beat_subdivision);
@@ -1349,7 +1349,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 			accumulated_error = frame_skip_error;
 
 			tick = skip;
-			
+
 			for (t = 0; (tick < Meter::ticks_per_beat) && (n < bbt_nmarks) && (pos < next_beat_pos) ; pos += frame_skip, tick += skip, ++t) {
 
 			        if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
@@ -1391,14 +1391,14 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 		(*marks)[0].label = g_strdup(" ");
 		(*marks)[0].position = lower;
 		(*marks)[0].style = GtkCustomRulerMarkMicro;
-		
+
 		for (n = 1,   i = current_bbt_points->begin(); n < bbt_nmarks && i != current_bbt_points->end(); ++i) {
 			if  ((*i).type != TempoMap::Beat) {
 				continue;
 			}
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 			        snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
-				(*marks)[0].label = g_strdup (buf); 
+				(*marks)[0].label = g_strdup (buf);
 				helper_active = true;
 			} else {
 
@@ -1416,23 +1416,23 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 				(*marks)[n].position = (*i).frame;
 				n++;
 			}
-			
+
 			/* Add the tick marks */
 
 			/* Find the next beat */
 
 			next_beat.beats = (*i).beat;
 			next_beat.bars = (*i).bar;
-			
+
 			if ((*i).meter->beats_per_bar() > (next_beat.beats + 1)) {
 				  next_beat.beats += 1;
 			} else {
 				  next_beat.bars += 1;
 				  next_beat.beats = 1;
 			}
-				
+
 			next_beat_pos = session->tempo_map().frame_time(next_beat);
-			
+
 			frame_skip = (nframes64_t) floor (frame_skip_error = (session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
 			frame_skip_error -= frame_skip;
 			skip = (uint32_t) (Meter::ticks_per_beat / bbt_beat_subdivision);
@@ -1441,7 +1441,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 			accumulated_error = frame_skip_error;
 
 			tick = skip;
-			
+
 			for (t = 0; (tick < Meter::ticks_per_beat) && (n < bbt_nmarks) && (pos < next_beat_pos) ; pos += frame_skip, tick += skip, ++t) {
 
 			        if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
@@ -1471,7 +1471,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 					(*marks)[n].style = GtkCustomRulerMarkMicro;
 				}
 				i_am_accented = false;
-				n++;	
+				n++;
 			}
 		}
 
@@ -1488,14 +1488,14 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 		(*marks)[0].label = g_strdup(" ");
 		(*marks)[0].position = lower;
 		(*marks)[0].style = GtkCustomRulerMarkMicro;
-		
+
 		for (n = 1,   i = current_bbt_points->begin(); n < bbt_nmarks && i != current_bbt_points->end(); ++i) {
 			if  ((*i).type != TempoMap::Beat) {
 				  continue;
 			}
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 				  snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
-				  (*marks)[0].label = g_strdup (buf); 
+				  (*marks)[0].label = g_strdup (buf);
 				  helper_active = true;
 			} else {
 
@@ -1513,23 +1513,23 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 				  (*marks)[n].position = (*i).frame;
 				  n++;
 			}
-			
+
 			/* Add the tick marks */
 
 			/* Find the next beat */
 
 			next_beat.beats = (*i).beat;
 			next_beat.bars = (*i).bar;
-			
+
 			if ((*i).meter->beats_per_bar() > (next_beat.beats + 1)) {
 				  next_beat.beats += 1;
 			} else {
 				  next_beat.bars += 1;
 				  next_beat.beats = 1;
 			}
-				
+
 			next_beat_pos = session->tempo_map().frame_time(next_beat);
-			
+
 			frame_skip = (nframes64_t) floor (frame_skip_error = (session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
 			frame_skip_error -= frame_skip;
 			skip = (uint32_t) (Meter::ticks_per_beat / bbt_beat_subdivision);
@@ -1538,7 +1538,7 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 			accumulated_error = frame_skip_error;
 
 			tick = skip;
-			
+
 			for (t = 0; (tick < Meter::ticks_per_beat) && (n < bbt_nmarks) && (pos < next_beat_pos) ; pos += frame_skip, tick += skip, ++t) {
 
 				  if (t % bbt_accent_modulo == (bbt_accent_modulo - 1)) {
@@ -1561,14 +1561,14 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 				  }
 
 				  (*marks)[n].position = pos;
-				  
+
 				  if ((bbt_beat_subdivision > 4) && i_am_accented) {
 					  (*marks)[n].style = GtkCustomRulerMarkMinor;
 				  } else {
 					  (*marks)[n].style = GtkCustomRulerMarkMicro;
 				  }
 				  i_am_accented = false;
-				  n++;	
+				  n++;
 			}
 		}
 
@@ -1682,12 +1682,12 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 			n++;
 			}
 		}
- 
+
 	break;
 
 	}
 
-	return n; //return the actual number of marks made, since we might have skipped some from fractional time signatures 
+	return n; //return the actual number of marks made, since we might have skipped some from fractional time signatures
 
 }
 
@@ -1720,13 +1720,13 @@ Editor::metric_get_frames (GtkCustomRulerMark **marks, gdouble lower, gdouble up
 		(*marks)[n].position = pos;
 		(*marks)[n].style = GtkCustomRulerMarkMajor;
 	}
-	
+
 	return nmarks;
 }
 
 static void
 sample_to_clock_parts ( nframes64_t sample,
-			nframes64_t sample_rate, 
+			nframes64_t sample_rate,
 			long *hrs_p,
 			long *mins_p,
 			long *secs_p,
@@ -1738,7 +1738,7 @@ sample_to_clock_parts ( nframes64_t sample,
 	long mins;
 	long secs;
 	long millisecs;
-	
+
 	left = sample;
 	hrs = left / (sample_rate * 60 * 60);
 	left -= hrs * sample_rate * 60 * 60;
@@ -1847,9 +1847,9 @@ Editor::set_minsec_ruler_scale (gdouble lower, gdouble upper)
                 minsec_ruler_scale = minsec_show_hours;
 		minsec_mark_modulo = 2;
         } else {
-                                                                                                                   
+
                 /* not possible if nframes64_t is a 32 bit quantity */
-                                                                                                                   
+
                 minsec_mark_interval = 4 * 60 * 60 * fr; /* show 4 hrs */
         }
 	minsec_nmarks = 2 + (range / minsec_mark_interval);

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,14 +50,14 @@ class MidiRegion : public Region
 	~MidiRegion();
 
 	boost::shared_ptr<MidiSource> midi_source (uint32_t n=0) const;
-	
+
 	/* Stub Readable interface */
 	virtual nframes_t read (Sample*, sframes_t /*pos*/, nframes_t /*cnt*/, int /*channel*/) const { return 0; }
 	virtual sframes_t readable_length() const { return length(); }
 
 	nframes_t read_at (MidiRingBuffer<nframes_t>& dst,
 			sframes_t position,
-			nframes_t dur, 
+			nframes_t dur,
 			uint32_t  chan_n = 0,
 			NoteMode  mode = Sustained) const;
 
@@ -71,9 +71,9 @@ class MidiRegion : public Region
 	int      set_state (const XMLNode&);
 
 	int separate_by_channel (ARDOUR::Session&, std::vector< boost::shared_ptr<Region> >&) const;
-	
+
 	/* automation */
-	
+
 	boost::shared_ptr<Evoral::Control>
 	control(const Evoral::Parameter& id, bool create=false) {
 		return model()->data().control(id, create);
@@ -85,7 +85,7 @@ class MidiRegion : public Region
 	}
 
 	/* export */
-	
+
 	int exportme (ARDOUR::Session&, ARDOUR::ExportSpecification&);
 
 	boost::shared_ptr<MidiModel> model()             { return midi_source()->model(); }
@@ -104,14 +104,14 @@ class MidiRegion : public Region
 
   private:
 	nframes_t _read_at (const SourceList&, MidiRingBuffer<nframes_t>& dst,
-			    nframes_t position,
-			    nframes_t dur, 
-			    uint32_t chan_n = 0,
-				NoteMode mode = Sustained) const;
+			nframes_t position,
+			nframes_t dur,
+			uint32_t chan_n = 0,
+			NoteMode mode = Sustained) const;
 
 	void recompute_at_start ();
 	void recompute_at_end ();
-	
+
 	void set_position_internal (nframes_t pos, bool allow_bbt_recompute);
 
 	void switch_source(boost::shared_ptr<Source> source);

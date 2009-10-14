@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis 
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ namespace ARDOUR {
 
 class InternalSend : public Send
 {
-  public:	
+  public:
 	InternalSend (Session&, boost::shared_ptr<MuteMaster>, boost::shared_ptr<Route> send_to, Delivery::Role role);
 	InternalSend (Session&, boost::shared_ptr<MuteMaster>, const XMLNode&);
 	virtual ~InternalSend ();
@@ -39,7 +39,7 @@ class InternalSend : public Send
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
 	int set_state(const XMLNode& node);
-	
+
 	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 	bool feeds (boost::shared_ptr<Route> other) const;
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;

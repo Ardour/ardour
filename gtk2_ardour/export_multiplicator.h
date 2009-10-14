@@ -42,7 +42,7 @@ class ExportMultiplicator : public Gtk::EventBox {
 
 	ExportMultiplicator ();
 	~ExportMultiplicator ();
-	
+
 	void set_manager (boost::shared_ptr<ExportProfileManager> _manager);
 
   private:
@@ -55,7 +55,7 @@ class ExportMultiplicator : public Gtk::EventBox {
 	Gtk::Table table;
 
 	void redraw ();
-	
+
 	enum GraphLevel {
 		NoLevel = 0,
 		Timespans = 1,
@@ -63,9 +63,9 @@ class ExportMultiplicator : public Gtk::EventBox {
 		Formats = 3,
 		Filenames = 4
 	};
-	
+
 	std::pair<uint32_t, uint32_t> get_bounds (ExportProfileManager::GraphNode * node, GraphLevel current_level, GraphLevel max_level) const;
-	
+
 	void draw_timespan (ExportProfileManager::TimespanNodePtr node, std::pair<uint32_t, uint32_t> bounds);
 	void draw_channel_config (ExportProfileManager::ChannelConfigNodePtr node, std::pair<uint32_t, uint32_t> bounds);
 	void draw_format (ExportProfileManager::FormatNodePtr node, std::pair<uint32_t, uint32_t> bounds);
@@ -75,42 +75,42 @@ class ExportMultiplicator : public Gtk::EventBox {
 		uint32_t left;
 		uint32_t right;
 		uint32_t row;
-		
+
 		TablePosition (uint32_t left, uint32_t right, uint32_t row) :
 		  left (left), right (right), row (row) {}
-		
+
 		bool operator== (TablePosition const & other) const { return (row == other.row && left == other.left && right == other.right); }
 		bool operator< (TablePosition const & other) const { return (row < other.row || left < other.left || right < other.right); }
 	};
-	
+
 	typedef std::map<TablePosition, boost::shared_ptr<Gtk::HBox> > WidgetMap;
 	typedef std::pair<TablePosition, boost::shared_ptr<Gtk::HBox> > WidgetPair;
-	
+
 	boost::shared_ptr<Gtk::HBox> get_hbox (TablePosition position);
 	WidgetMap widget_map;
-	
+
 	/* Button Widget */
-	
+
 	class ButtonWidget : public Gtk::EventBox {
 	  public:
 		ButtonWidget (Glib::ustring name, boost::shared_ptr<ExportProfileManager> m, ExportProfileManager::GraphNode * node);
-	
+
 	  private:
-	
+
 		Gtk::Label label;
 		Gtk::VBox  vbox;
-	
+
 		bool on_button_press_event (GdkEventButton* event);
-		
+
 		void split ();
 		void remove ();
-		
+
 		boost::shared_ptr<ExportProfileManager> manager;
 		ExportProfileManager::GraphNode * node;
 		float split_position;
-		
+
 		/* Context menu */
-	
+
 		Glib::RefPtr<Gtk::ActionGroup> menu_actions;
 		Glib::RefPtr<Gtk::UIManager>   ui_manager;
 		Gtk::Menu *                    menu;

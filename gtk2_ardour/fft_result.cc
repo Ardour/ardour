@@ -32,7 +32,7 @@ using namespace std;
 FFTResult::FFTResult(FFTGraph *graph, Gdk::Color color, string trackname)
 {
 	_graph = graph;
-	
+
 	_windowSize = _graph->windowSize();
 	_dataSize   = _windowSize / 2;
 
@@ -73,12 +73,12 @@ FFTResult::analyzeWindow(float *window)
 	_data_avg[0] += b;
 	if (b < _data_min[0]) _data_min[0] = b;
 	if (b > _data_max[0]) _data_max[0] = b;
-	
+
 	for (i=1; i < _dataSize - 1; i++) { // TODO: check with Jesse whether this is really correct
 		b = (_out[i] * _out[i]);
 
 		_data_avg[i] += b;  // + (_out[_windowSize-i] * _out[_windowSize-i]);, TODO: thanks to Stefan Kost
-		
+
 		if (_data_min[i] > b)  _data_min[i] = b;
 		if (_data_max[i] < b ) _data_max[i] = b;
 	}
@@ -99,18 +99,18 @@ FFTResult::finalize()
 	// Average & scale
 	for (int i = 0; i < _dataSize; i++) {
 		_data_avg[i] /= _averages;
-		_data_avg[i]  = 10.0f * log10f(_data_avg[i]); 
+		_data_avg[i]  = 10.0f * log10f(_data_avg[i]);
 
-		_data_min[i]  = 10.0f * log10f(_data_min[i]); 
+		_data_min[i]  = 10.0f * log10f(_data_min[i]);
 		if (_data_min[i] < -10000.0f) {
 			_data_min[i] = -10000.0f;
 		}
-		_data_max[i]  = 10.0f * log10f(_data_max[i]); 
+		_data_max[i]  = 10.0f * log10f(_data_max[i]);
 	}
 
 	// find min & max
 	_minimum = _maximum = _data_avg[0];
-	
+
 	for (int i = 1; i < _dataSize; i++) {
 		if (_data_avg[i] < _minimum        && !isinf(_data_avg[i])) {
 			_minimum = _data_avg[i];

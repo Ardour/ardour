@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Paul Davis 
+    Copyright (C) 2008 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@ MidiScroomer::on_expose_event(GdkEventExpose* ev)
 			for (int note = lnote; note < hnote + 1; ++note) {
 				double y = height - note * note2y;
 				bool draw = false;
-				
+
 				switch (note % 12) {
 				case 1:
 				case 6:
@@ -103,7 +103,7 @@ MidiScroomer::on_expose_event(GdkEventExpose* ev)
 				default:
 					break;
 				}
-				
+
 				if(draw) {
 					cc->set_line_width(1.4 * note2y);
 					cc->move_to(0, y);

@@ -58,7 +58,7 @@ namespace ARDOUR {
 
 	microseconds_t get_microseconds ();
 /*	{
-        JACK has exported this functionality for a long time now 
+        JACK has exported this functionality for a long time now
 	but inlining this causes problems
         return (microseconds_t) jack_get_time();
 	}
@@ -72,9 +72,9 @@ namespace ARDOUR {
 	extern Change BoundsChanged;
 
 	struct LocaleGuard {
-	    LocaleGuard (const char*);
-	    ~LocaleGuard ();
-	    const char* old;
+		LocaleGuard (const char*);
+		~LocaleGuard ();
+		const char* old;
 	};
 
 	static const double SHUTTLE_FRACT_SPEED1=0.48412291827; /* derived from A1,A2 */
@@ -85,7 +85,7 @@ namespace ARDOUR {
 	extern MIDI::Port* default_mtc_port;
 	extern MIDI::Port* default_midi_port;
 	extern MIDI::Port *default_midi_clock_port;
-	
+
 	int setup_midi ();
 }
 

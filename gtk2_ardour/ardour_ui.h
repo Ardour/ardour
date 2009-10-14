@@ -139,7 +139,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void set_will_create_new_session_automatically (bool yn) {
 		_will_create_new_session_automatically = yn;
 	}
-	
+
 	int get_session_parameters (bool should_be_new = false);
 	void parse_cmdline_path (const Glib::ustring& cmdline_path, Glib::ustring& session_name, Glib::ustring& session_path, bool& existing_session);
 	int  load_cmdline_session (const Glib::ustring& session_name, const Glib::ustring& session_path, bool& existing_session);
@@ -521,7 +521,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void open_session ();
 	void open_recent_session ();
 	void save_template ();
-	
+
 	void edit_metadata ();
 	void import_metadata ();
 
@@ -616,7 +616,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	Gtk::MenuItem *cleanup_item;
 
- 	void display_cleanup_results (ARDOUR::Session::cleanup_report& rep, const gchar* list_title, 
+ 	void display_cleanup_results (ARDOUR::Session::cleanup_report& rep, const gchar* list_title,
  				      const std::string& plural_msg, const std::string& singular_msg);
 	void cleanup ();
 	void flush_trash ();
@@ -633,10 +633,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	    uint32_t capture;
 	    uint32_t playback;
 
-	    DiskBufferStat (time_t w, uint32_t c, uint32_t p) 
+	    DiskBufferStat (time_t w, uint32_t c, uint32_t p)
 	    : when (w), capture (c), playback (p) {}
 	};
-	
+
 	std::list<DiskBufferStat> disk_buffer_stats;
 	void push_buffer_stats (uint32_t, uint32_t);
 	void write_buffer_stats ();

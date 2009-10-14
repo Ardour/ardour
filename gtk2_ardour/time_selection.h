@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,17 +30,17 @@ namespace ARDOUR {
 class TimeAxisView;
 
 struct TimeSelection : public std::list<ARDOUR::AudioRange> {
-    
+
     /* if (track == 0 && group == 0) then it applies to all
        tracks.
 
-       if (track != 0 && group == 0) then it applies just to 
+       if (track != 0 && group == 0) then it applies just to
        that track.
 
-       if (group != 0) then it applies to all tracks in 
+       if (group != 0) then it applies to all tracks in
        the group.
     */
-    
+
     TimeAxisView*               track;
     ARDOUR::RouteGroup*         group;
 

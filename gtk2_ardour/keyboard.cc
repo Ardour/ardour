@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001 Paul Davis 
+    Copyright (C) 2001 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,15 +63,15 @@ guint Keyboard::SecondaryModifier = GDK_MOD1_MASK; // Alt/Option
 guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK; // Shift
 guint Keyboard::Level4Modifier = GDK_CONTROL_MASK; // Control
 guint Keyboard::CopyModifier = GDK_MOD1_MASK;      // Alt/Option
-guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;   
+guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;
 guint Keyboard::button2_modifiers = Keyboard::SecondaryModifier|Keyboard::Level4Modifier;
 #else
 guint Keyboard::PrimaryModifier = GDK_CONTROL_MASK; // Control
 guint Keyboard::SecondaryModifier = GDK_MOD1_MASK;  // Alt/Option
 guint Keyboard::TertiaryModifier = GDK_SHIFT_MASK;  // Shift
 guint Keyboard::Level4Modifier = GDK_MOD4_MASK;     // Mod4/Windows
-guint Keyboard::CopyModifier = GDK_CONTROL_MASK;    
-guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;   
+guint Keyboard::CopyModifier = GDK_CONTROL_MASK;
+guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;
 guint Keyboard::button2_modifiers = 0; /* not used */
 #endif
 
@@ -92,7 +92,7 @@ map<AccelKey,pair<string,string>,Keyboard::AccelKeyLess> Keyboard::release_keys;
 GdkModifierType Keyboard::RelevantModifierKeyMask;
 
 void
-Keyboard::magic_widget_grab_focus () 
+Keyboard::magic_widget_grab_focus ()
 {
 	_some_magic_widget_has_focus = true;
 }
@@ -137,7 +137,7 @@ Keyboard::~Keyboard ()
 	gtk_key_snooper_remove (snooper_id);
 }
 
-XMLNode& 
+XMLNode&
 Keyboard::get_state (void)
 {
 	XMLNode* node = new XMLNode ("Keyboard");
@@ -157,30 +157,30 @@ Keyboard::get_state (void)
 	return *node;
 }
 
-int 
+int
 Keyboard::set_state (const XMLNode& node)
 {
 	const XMLProperty* prop;
 
 	if ((prop = node.property ("edit-button")) != 0) {
 		sscanf (prop->value().c_str(), "%d", &edit_but);
-	} 
+	}
 
 	if ((prop = node.property ("edit-modifier")) != 0) {
 		sscanf (prop->value().c_str(), "%d", &edit_mod);
-	} 
+	}
 
 	if ((prop = node.property ("delete-button")) != 0) {
 		sscanf (prop->value().c_str(), "%d", &delete_but);
-	} 
+	}
 
 	if ((prop = node.property ("delete-modifier")) != 0) {
 		sscanf (prop->value().c_str(), "%d", &delete_mod);
-	} 
+	}
 
 	if ((prop = node.property ("snap-modifier")) != 0) {
 		sscanf (prop->value().c_str(), "%d", &snap_mod);
-	} 
+	}
 
 	return 0;
 }
@@ -198,14 +198,14 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 	bool ret = false;
 
 #if 0
-	cerr << "snoop widget " << widget << " key " << event->keyval << " type: " << event->type 
+	cerr << "snoop widget " << widget << " key " << event->keyval << " type: " << event->type
 	     << " state " << std::hex << event->state << std::dec
 	     << endl;
 #endif
 
 #if KBD_DEBUG
 	if (debug_keyboard) {
-		cerr << "snoop widget " << widget << " key " << event->keyval << " type: " << event->type 
+		cerr << "snoop widget " << widget << " key " << event->keyval << " type: " << event->type
 		     << endl;
 	}
 #endif
@@ -219,7 +219,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 	} else {
 		keyval = event->keyval;
 	}
-		
+
 	if (event->type == GDK_KEY_PRESS) {
 
 		if (find (state.begin(), state.end(), keyval) == state.end()) {
@@ -235,7 +235,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 			for (map<AccelKey,two_strings,AccelKeyLess>::iterator k = release_keys.begin(); k != release_keys.end(); ++k) {
 
 				const AccelKey& ak (k->first);
-				
+
 				if (keyval == ak.get_key() && (Gdk::ModifierType)((event->state & Keyboard::RelevantModifierKeyMask) | Gdk::RELEASE_MASK) == ak.get_mod()) {
 					cerr << "Suppress auto repeat\n";
 					ret = true;
@@ -247,11 +247,11 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 	} else if (event->type == GDK_KEY_RELEASE) {
 
 		State::iterator i;
-		
+
 		if ((i = find (state.begin(), state.end(), keyval)) != state.end()) {
 			state.erase (i);
 			sort (state.begin(), state.end());
-		} 
+		}
 
 		for (map<AccelKey,two_strings,AccelKeyLess>::iterator k = release_keys.begin(); k != release_keys.end(); ++k) {
 
@@ -313,13 +313,13 @@ Keyboard::leave_window (GdkEventCrossing *ev, Gtk::Window* /*win*/)
 				cerr << "INFERIOR crossing ... out\n";
 			}
 			break;
-			
+
 		case GDK_NOTIFY_VIRTUAL:
 			if (debug_keyboard) {
 				cerr << "VIRTUAL crossing ... out\n";
 			}
 			/* fallthru */
-			
+
 		default:
 			if (debug_keyboard) {
 				cerr << "REAL CROSSING ... out\n";
@@ -382,8 +382,8 @@ Keyboard::set_snap_modifier (guint mod)
 bool
 Keyboard::is_edit_event (GdkEventButton *ev)
 {
-	return (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_BUTTON_RELEASE) && 
-		(ev->button == Keyboard::edit_button()) && 
+	return (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_BUTTON_RELEASE) &&
+		(ev->button == Keyboard::edit_button()) &&
 		((ev->state & RelevantModifierKeyMask) == Keyboard::edit_modifier());
 }
 
@@ -391,31 +391,31 @@ bool
 Keyboard::is_button2_event (GdkEventButton* ev)
 {
 #ifdef GTKOSX
-	return (ev->button == 2) || 
-		((ev->button == 1) && 
+	return (ev->button == 2) ||
+		((ev->button == 1) &&
 		 ((ev->state & Keyboard::button2_modifiers) == Keyboard::button2_modifiers));
 #else
 	return ev->button == 2;
-#endif	
+#endif
 }
 
 bool
 Keyboard::is_delete_event (GdkEventButton *ev)
 {
-	return (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_BUTTON_RELEASE) && 
-		(ev->button == Keyboard::delete_button()) && 
+	return (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_BUTTON_RELEASE) &&
+		(ev->button == Keyboard::delete_button()) &&
 		((ev->state & RelevantModifierKeyMask) == Keyboard::delete_modifier());
 }
 
 bool
 Keyboard::is_context_menu_event (GdkEventButton *ev)
 {
-	return (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_BUTTON_RELEASE) && 
-		(ev->button == 3) && 
+	return (ev->type == GDK_BUTTON_PRESS || ev->type == GDK_BUTTON_RELEASE) &&
+		(ev->button == 3) &&
 		((ev->state & RelevantModifierKeyMask) == 0);
 }
 
-bool 
+bool
 Keyboard::no_modifiers_active (guint state)
 {
 	return (state & RelevantModifierKeyMask) == 0;
@@ -448,7 +448,7 @@ Keyboard::selection_type (guint state)
 }
 
 
-static void 
+static void
 accel_map_changed (GtkAccelMap* /*map*/,
 		   gchar* /*path*/,
 		   guint /*key*/,
@@ -479,7 +479,7 @@ Keyboard::save_keybindings ()
 {
 	if (can_save_keybindings && bindings_changed_after_save_became_legal) {
 		Gtk::AccelMap::save (user_keybindings_path);
-	} 
+	}
 }
 
 void
@@ -494,7 +494,7 @@ Keyboard::setup_keybindings ()
 	ARDOUR::find_bindings_files (binding_files);
 
 	/* set up the per-user bindings path */
-	
+
 	strs.push_back (Glib::get_home_dir());
 	strs.push_back (".ardour3");
 	strs.push_back ("ardour.bindings");
@@ -513,16 +513,16 @@ Keyboard::setup_keybindings ()
 	*/
 
 	if (!keybindings_path.empty() && keybindings_path.find (".bindings") == string::npos) {
-		
+
 		// just a style name - allow user to
-		// specify the layout type. 
-		
+		// specify the layout type.
+
 		char* layout;
-		
+
 		if ((layout = getenv ("ARDOUR_KEYBOARD_LAYOUT")) != 0 && layout[0] != '\0') {
-			
+
 			/* user-specified keyboard layout */
-			
+
 			keybindings_path += '-';
 			keybindings_path += layout;
 
@@ -532,23 +532,23 @@ Keyboard::setup_keybindings ()
 
 			keybindings_path += "-us";
 		}
-		
+
 		keybindings_path += ".bindings";
-	} 
+	}
 
 	if (keybindings_path.empty()) {
 
 		/* no path or binding name given: check the user one first */
 
 		if (!Glib::file_test (user_keybindings_path, Glib::FILE_TEST_EXISTS)) {
-			
+
 			keybindings_path = "";
 
 		} else {
-			
+
 			keybindings_path = user_keybindings_path;
 		}
-	} 
+	}
 
 	/* if we still don't have a path at this point, use the default */
 
@@ -559,19 +559,19 @@ Keyboard::setup_keybindings ()
 	while (true) {
 
 		if (!Glib::path_is_absolute (keybindings_path)) {
-			
+
 			/* not absolute - look in the usual places */
 			sys::path keybindings_file;
 
 			SearchPath spath = ardour_search_path() + user_config_directory() + system_config_search_path();
 
 			if ( ! find_file_in_search_path (spath, keybindings_path, keybindings_file)) {
-				
+
 				if (keybindings_path == default_bindings) {
 					error << _("Default keybindings not found - Ardour will be hard to use!") << endmsg;
 					return;
 				} else {
-					warning << string_compose (_("Key bindings file \"%1\" not found. Default bindings used instead"), 
+					warning << string_compose (_("Key bindings file \"%1\" not found. Default bindings used instead"),
 								   keybindings_path)
 						<< endmsg;
 					keybindings_path = default_bindings;
@@ -583,11 +583,11 @@ Keyboard::setup_keybindings ()
 
 				keybindings_path = keybindings_file.to_string();
 				break;
-				
+
 			}
 
 		} else {
-			
+
 			/* path is absolute already */
 
 			if (!Glib::file_test (keybindings_path, Glib::FILE_TEST_EXISTS)) {
@@ -595,7 +595,7 @@ Keyboard::setup_keybindings ()
 					error << _("Default keybindings not found - Ardour will be hard to use!") << endmsg;
 					return;
 				} else {
-					warning << string_compose (_("Key bindings file \"%1\" not found. Default bindings used instead"), 
+					warning << string_compose (_("Key bindings file \"%1\" not found. Default bindings used instead"),
 								   keybindings_path)
 						<< endmsg;
 					keybindings_path = default_bindings;
@@ -644,9 +644,9 @@ Keyboard::load_keybindings (string path)
 	vector<string> groups;
 	vector<string> names;
 	vector<AccelKey> bindings;
-	
+
 	ActionManager::get_all_actions (groups, names, bindings);
-	
+
 	vector<string>::iterator g;
 	vector<AccelKey>::iterator b;
 	vector<string>::iterator n;
@@ -654,19 +654,19 @@ Keyboard::load_keybindings (string path)
 	release_keys.clear ();
 
 	bool show_bindings = (getenv ("ARDOUR_SHOW_BINDINGS") != 0);
-	
+
 	for (n = names.begin(), b = bindings.begin(), g = groups.begin(); n != names.end(); ++n, ++b, ++g) {
-		
+
 		if (show_bindings) {
-			
+
 			cerr << "Action: " << (*n) << " Group: " << (*g) << " binding = ";
-			
+
 			if ((*b).get_key() != GDK_VoidSymbol) {
 				cerr << (*b).get_key() << " w/mod = " << hex << (*b).get_mod() << dec << " = " << (*b).get_abbrev();
 			} else {
 				cerr << "unbound";
 			}
-			
+
 			cerr << endl;
 		}
 	}

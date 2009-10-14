@@ -47,30 +47,30 @@ class ExportTimespan : public sigc::trackable
   private:
 	friend class ExportElementFactory;
 	ExportTimespan (ExportStatusPtr status, nframes_t frame_rate);
-	
+
   public:
 	~ExportTimespan ();
-	
+
 	Glib::ustring name () const { return _name; }
 	void set_name (Glib::ustring name) { _name = name; }
-	
+
 	Glib::ustring range_id () const { return _range_id; }
 	void set_range_id (Glib::ustring range_id) { _range_id = range_id; }
-	
+
 	/// Registers a channel to be read when export starts rolling
 	void register_channel (ExportChannelPtr channel);
-	
+
 	/// "Rewinds" the tempfiles to start reading the beginnings again
 	void rewind ();
-	
+
 	/// Reads data from the tempfile belonging to channel into data
 	nframes_t get_data (float * data, nframes_t frames, ExportChannelPtr channel);
-	
+
 	/// Reads data from each channel and writes to tempfile
 	int process (nframes_t frames);
-	
+
 	sigc::connection  process_connection;
-	
+
 	void set_range (nframes_t start, nframes_t end);
 	nframes_t get_length () const { return end_frame - start_frame; }
 	nframes_t get_start () const { return start_frame; }
@@ -86,7 +86,7 @@ class ExportTimespan : public sigc::trackable
 	nframes_t      frame_rate;
 
 	TempFileMap    filemap;
-	
+
 	Glib::ustring _name;
 	Glib::ustring _range_id;
 

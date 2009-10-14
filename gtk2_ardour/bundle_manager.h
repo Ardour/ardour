@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Paul Davis 
+    Copyright (C) 2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class BundleEditorMatrix : public PortMatrix
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
 
 	bool can_add_channel (boost::shared_ptr<ARDOUR::Bundle>) const;
-	
+
 	void add_channel (boost::shared_ptr<ARDOUR::Bundle>);
 	bool can_remove_channels (boost::shared_ptr<ARDOUR::Bundle>) const;
 	void remove_channel (ARDOUR::BundleChannel);
@@ -59,7 +59,7 @@ class BundleEditorMatrix : public PortMatrix
 		OTHER = 0,
 		OURS = 1
 	};
-		
+
 	boost::shared_ptr<PortGroup> _port_group;
 	boost::shared_ptr<ARDOUR::Bundle> _bundle;
 };
@@ -77,7 +77,7 @@ class BundleEditor : public ArdourDialog
 	void input_or_output_changed ();
 	void type_changed ();
 	void on_show ();
-	
+
 	BundleEditorMatrix _matrix;
 	boost::shared_ptr<ARDOUR::UserBundle> _bundle;
 	Gtk::Entry _name;
@@ -106,11 +106,11 @@ class BundleManager : public ArdourDialog
 			add (name);
 			add (bundle);
 		}
-		
+
 		Gtk::TreeModelColumn<Glib::ustring> name;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::UserBundle> > bundle;
 	};
-	
+
 	Gtk::TreeView _tree_view;
 	Glib::RefPtr<Gtk::ListStore> _list_model;
 	ModelColumns _list_model_columns;
@@ -130,7 +130,7 @@ public:
 private:
 
 	void setup ();
-	
+
 	boost::shared_ptr<ARDOUR::Bundle> _bundle;
 	uint32_t _channel;
 	Gtk::Entry _name;

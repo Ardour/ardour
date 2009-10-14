@@ -40,24 +40,24 @@ SndfileWriterBase::SndfileWriterBase (int channels, nframes_t samplerate, int fo
   ExportFileWriter (path)
 {
 	char errbuf[256];
-	
+
 	sf_info.channels = channels;
 	sf_info.samplerate = samplerate;
 	sf_info.format = format;
-	
+
 	if (!sf_format_check (&sf_info)) {
 		throw ExportFailed (X_("Invalid format given for SndfileWriter!"));
 	}
-	
+
 	if (path.length() == 0) {
 		throw ExportFailed (X_("No output file specified for SndFileWriter"));
 	}
 
-	/* TODO add checks that the directory path exists, and also 
+	/* TODO add checks that the directory path exists, and also
 	   check if we are overwriting an existing file...
 	*/
-	
-	// Open file TODO make sure we have enough disk space for the output 
+
+	// Open file TODO make sure we have enough disk space for the output
 	if (path.compare ("temp")) {
 		if ((sndfile = sf_open (path.c_str(), SFM_WRITE, &sf_info)) == 0) {
 			sf_error_str (0, errbuf, sizeof (errbuf) - 1);
@@ -118,11 +118,11 @@ SndfileWriter<T>::write (T * data, nframes_t frames)
 		sf_error_str (sndfile, errbuf, sizeof (errbuf) - 1);
 		throw ExportFailed (string_compose(_("Could not write data to output file (%1)"), errbuf));
 	}
-	
+
 	if (GraphSink<T>::end_of_input) {
 		sf_write_sync (sndfile);
 	}
-	
+
 	return frames;
 }
 
@@ -152,9 +152,9 @@ ExportTempFile::read (float * data, nframes_t frames)
 	nframes_t frames_read = 0;
 	nframes_t to_read = 0;
 	sf_count_t read_status = 0;
-	
+
 	/* Initialize state at first read */
-	
+
 	if (!reading) {
 		if (!end_set) {
 			end = get_length();
@@ -163,25 +163,25 @@ ExportTempFile::read (float * data, nframes_t frames)
 		locate_to (start);
 		reading = true;
 	}
-	
+
 	/* Add silence to beginning */
-	
+
 	if (silence_beginning > 0) {
 		if (silence_beginning >= frames) {
 			memset (data, 0, channels * frames * sizeof (float));
 			silence_beginning -= frames;
 			return frames;
 		}
-		
+
 		memset (data, 0, channels * silence_beginning * sizeof (float));
-		
+
 		frames_read += silence_beginning;
 		data += channels * silence_beginning;
 		silence_beginning = 0;
 	}
-	
+
 	/* Read file, but don't read past end */
-	
+
 	if (get_read_position() >= end) {
 		// File already read, do nothing!
 	} else {
@@ -190,32 +190,32 @@ ExportTempFile::read (float * data, nframes_t frames)
 		} else {
 			to_read = frames - frames_read;
 		}
-		
+
 		read_status = sf_readf_float (sndfile, data, to_read);
-		
+
 		frames_read += to_read;
 		data += channels * to_read;
 	}
-	
+
 	/* Check for errors */
-	
+
 	if (read_status != to_read) {
 		throw ExportFailed (X_("Error reading temporary export file, export might not be complete!"));
 	}
-	
+
 	/* Add silence at end */
-	
+
 	if (silence_end > 0) {
 		to_read = frames - frames_read;
 		if (silence_end < to_read) {
 			to_read = silence_end;
 		}
-		
+
 		memset (data, 0, channels * to_read * sizeof (float));
 		silence_end -= to_read;
 		frames_read += to_read;
 	}
-	
+
 	return frames_read;
 }
 
@@ -230,10 +230,10 @@ ExportTempFile::trim_beginning (bool yn)
 	if (!beginning_processed) {
 		process_beginning ();
 	}
-	
+
 	start = silent_frames_beginning;
 	return start;
-	
+
 }
 
 nframes_t
@@ -249,7 +249,7 @@ ExportTempFile::trim_end (bool yn)
 	if (!end_processed) {
 		process_end ();
 	}
-	
+
 	end = silent_frames_end;
 	return end;
 }
@@ -261,10 +261,10 @@ ExportTempFile::process_beginning ()
 	nframes_t frames = 1024;
 	nframes_t frames_read;
 	float * buf = new float[channels * frames];
-	
+
 	nframes_t pos = 0;
 	locate_to (pos);
-	
+
 	while ((frames_read = _read (buf, frames)) > 0) {
 		for (nframes_t i = 0; i < frames_read; i++) {
 			for (uint32_t chn = 0; chn < channels; ++chn) {
@@ -276,12 +276,12 @@ ExportTempFile::process_beginning ()
 			++pos;
 		}
 	}
-	
+
 	out:
-	
+
 	silent_frames_beginning = pos;
 	beginning_processed = true;
-	
+
 	delete [] buf;
 }
 
@@ -291,9 +291,9 @@ ExportTempFile::process_end ()
 	nframes_t frames = 1024;
 	nframes_t frames_read;
 	float * buf = new float[channels * frames];
-	
+
 	nframes_t pos = get_length() - 1;
-	
+
 	while (pos > 0) {
 		if (pos > frames) {
 			locate_to (pos - frames);
@@ -303,7 +303,7 @@ ExportTempFile::process_end ()
 			locate_to (0);
 			frames_read = _read (buf, pos);
 		}
-		
+
 		for (nframes_t i = frames_read; i > 0; --i) {
 			for (uint32_t chn = 0; chn < channels; ++chn) {
 				if (buf[chn + (i - 1) * channels] != 0.0f) {
@@ -313,12 +313,12 @@ ExportTempFile::process_end ()
 			--pos;
 		}
 	}
-	
+
 	out:
-	
+
 	silent_frames_end = pos;
 	end_processed = true;
-	
+
 	delete [] buf;
 }
 
@@ -397,37 +397,37 @@ ExportFileFactory::create_sndfile (FormatPtr format, unsigned int channels, ustr
 	typedef boost::shared_ptr<SampleFormatConverter<short> > ShortConverterPtr;
 	typedef boost::shared_ptr<SampleFormatConverter<int> > IntConverterPtr;
 	typedef boost::shared_ptr<SampleFormatConverter<float> > FloatConverterPtr;
-	
+
 	typedef boost::shared_ptr<SndfileWriter<short> > ShortWriterPtr;
 	typedef boost::shared_ptr<SndfileWriter<int> > IntWriterPtr;
 	typedef boost::shared_ptr<SndfileWriter<float> > FloatWriterPtr;
-	
+
 	int real_format = format->format_id() | format->sample_format() | format->endianness();
 
 	uint32_t data_width = sndfile_data_width (real_format);
 
 	if (data_width == 8 || data_width == 16) {
-	
+
 		ShortConverterPtr sfc = ShortConverterPtr (new SampleFormatConverter<short> (channels, format->dither_type(), data_width));
 		ShortWriterPtr sfw = ShortWriterPtr (new SndfileWriter<short> (channels, format->sample_rate(), real_format, filename));
 		sfc->pipe_to (sfw);
-		
+
 		return std::make_pair (boost::static_pointer_cast<FloatSink> (sfc), boost::static_pointer_cast<ExportFileWriter> (sfw));
 
 	} else if (data_width == 24 || data_width == 32) {
-	
+
 		IntConverterPtr sfc = IntConverterPtr (new SampleFormatConverter<int> (channels, format->dither_type(), data_width));
 		IntWriterPtr sfw = IntWriterPtr (new SndfileWriter<int> (channels, format->sample_rate(), real_format, filename));
 		sfc->pipe_to (sfw);
-		
+
 		return std::make_pair (boost::static_pointer_cast<FloatSink> (sfc), boost::static_pointer_cast<ExportFileWriter> (sfw));
 
 	}
-	
+
 	FloatConverterPtr sfc = FloatConverterPtr (new SampleFormatConverter<float> (channels, format->dither_type(), data_width));
 	FloatWriterPtr sfw = FloatWriterPtr (new SndfileWriter<float> (channels, format->sample_rate(), real_format, filename));
 	sfc->pipe_to (sfw);
-	
+
 	return std::make_pair (boost::static_pointer_cast<FloatSink> (sfc), boost::static_pointer_cast<ExportFileWriter> (sfw));
 }
 

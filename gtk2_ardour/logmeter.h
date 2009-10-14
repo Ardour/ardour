@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ inline float
 log_meter (float db)
 {
          gfloat def = 0.0f; /* Meter deflection %age */
- 
+
          if (db < -70.0f) {
                  def = 0.0f;
          } else if (db < -60.0f) {
@@ -56,8 +56,8 @@ log_meter (float db)
          } else {
 		 def = 115.0f;
 	 }
- 
-	 /* 115 is the deflection %age that would be 
+
+	 /* 115 is the deflection %age that would be
 	    when db=6.0. this is an arbitrary
 	    endpoint for our scaling.
 	 */

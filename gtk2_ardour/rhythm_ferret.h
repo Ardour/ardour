@@ -36,7 +36,7 @@ class RhythmFerret : public ArdourDialog {
 		DefineTempoMap,
 		ConformRegion
 	};
-	
+
 	RhythmFerret (PublicEditor&);
 	~RhythmFerret ();
 
@@ -44,7 +44,7 @@ class RhythmFerret : public ArdourDialog {
 
   protected:
 	void on_hide ();
-	
+
   private:
 	PublicEditor& editor;
 

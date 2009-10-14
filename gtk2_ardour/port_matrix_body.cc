@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2009 Paul Davis 
+    Copyright (C) 2002-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ PortMatrixBody::PortMatrixBody (PortMatrix* p)
 	_column_labels = new PortMatrixColumnLabels (p, this);
 	_row_labels = new PortMatrixRowLabels (p, this);
 	_grid = new PortMatrixGrid (p, this);
-	
+
 	add_events (Gdk::LEAVE_NOTIFY_MASK | Gdk::POINTER_MOTION_MASK);
 }
 
@@ -57,7 +57,7 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 		);
 
 	bool intersects;
-	
+
 	Gdk::Rectangle r = exposure;
 	/* the get_pixmap call may cause things to be rerendered and sizes to change,
 	   so fetch the pixmap before calculating where to put it */
@@ -131,7 +131,7 @@ PortMatrixBody::on_expose_event (GdkEventExpose* event)
 	set_cairo_clip (cr, _column_labels->parent_rectangle ());
 	_column_labels->draw_extra (cr);
 	cairo_restore (cr);
-	
+
 	cairo_destroy (cr);
 
 	return true;
@@ -205,7 +205,7 @@ PortMatrixBody::compute_rectangles ()
 		grid_rect.set_width (x);
 		row_rect.set_x (x);
 		row_rect.set_width (_alloc_width - x);
-			
+
 
 	} else if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
 
@@ -224,7 +224,7 @@ PortMatrixBody::compute_rectangles ()
 		col_rect.set_width (grid_rect.get_width () + col_overhang);
 		col_rect.set_x (row_rect.get_width() + grid_rect.get_width() - col_rect.get_width());
 		col_rect.set_y (row_rect.get_height());
-		
+
 	}
 
 	_row_labels->set_parent_rectangle (row_rect);
@@ -236,21 +236,21 @@ void
 PortMatrixBody::setup ()
 {
 	/* Discard any old connections to bundles */
-	
+
 	for (list<sigc::connection>::iterator i = _bundle_connections.begin(); i != _bundle_connections.end(); ++i) {
 		i->disconnect ();
 	}
 	_bundle_connections.clear ();
 
 	/* Connect to bundles so that we find out when their names change */
-	
+
 	PortGroup::BundleList r = _matrix->rows()->bundles ();
 	for (PortGroup::BundleList::iterator i = r.begin(); i != r.end(); ++i) {
-		
+
 		_bundle_connections.push_back (
 			i->bundle->Changed.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_row_labels)))
 			);
-		
+
 	}
 
 	PortGroup::BundleList c = _matrix->columns()->bundles ();
@@ -259,7 +259,7 @@ PortMatrixBody::setup ()
 			i->bundle->Changed.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_column_labels)))
 			);
 	}
-	
+
 	_column_labels->setup ();
 	_row_labels->setup ();
 	_grid->setup ();
@@ -325,7 +325,7 @@ PortMatrixBody::on_button_press_event (GdkEventButton* ev)
 			_row_labels->parent_to_component_y (ev->y),
 			ev->button, ev->time
 			);
-	
+
 	} else if (Gdk::Region (_column_labels->parent_rectangle()).point_in (ev->x, ev->y)) {
 
 		_column_labels->button_press (
@@ -346,7 +346,7 @@ PortMatrixBody::on_button_release_event (GdkEventButton* ev)
 
 		_row_labels->clear_channel_highlights ();
 		_column_labels->clear_channel_highlights ();
-		
+
 	} else if (Gdk::Region (_grid->parent_rectangle()).point_in (ev->x, ev->y)) {
 
 		_grid->button_release (
@@ -395,14 +395,14 @@ bool
 PortMatrixBody::on_motion_notify_event (GdkEventMotion* ev)
 {
 	if (Gdk::Region (_grid->parent_rectangle()).point_in (ev->x, ev->y)) {
-		
+
 		_grid->motion (
 			_grid->parent_to_component_x (ev->x),
 			_grid->parent_to_component_y (ev->y)
 			);
-		
+
 		_mouse_over_grid = true;
-		
+
 	} else {
 		if (_mouse_over_grid) {
 			set_mouseover (PortMatrixNode ());
@@ -422,7 +422,7 @@ PortMatrixBody::set_mouseover (PortMatrixNode const & n)
 
 	PortMatrixNode old = _mouseover;
 	_mouseover = n;
-	
+
 	_grid->mouseover_changed (old);
 	_row_labels->mouseover_changed (old);
 	_column_labels->mouseover_changed (old);
@@ -480,6 +480,6 @@ PortMatrixBody::max_size () const
 	pair<uint32_t, uint32_t> const col = _column_labels->dimensions ();
 	pair<uint32_t, uint32_t> const row = _row_labels->dimensions ();
 	pair<uint32_t, uint32_t> const grid = _grid->dimensions ();
-	
+
 	return make_pair (std::max (row.first, _column_labels->overhang()) + grid.first, col.second + grid.second);
 }

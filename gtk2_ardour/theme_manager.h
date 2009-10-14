@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,20 +39,20 @@ class ThemeManager : public ArdourDialog
 	int save (std::string path);
 	void setup_theme ();
 	void reset_canvas_colors();
-	
+
 	void on_dark_theme_button_toggled ();
 	void on_light_theme_button_toggled ();
 
   private:
 	struct ColorDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    ColorDisplayModelColumns() { 
+	    ColorDisplayModelColumns() {
 		    add (name);
 		    add (color);
 		    add (gdkcolor);
 			add (pVar);
 		    add (rgba);
 	    }
-	    
+
 	    Gtk::TreeModelColumn<Glib::ustring>  name;
 	    Gtk::TreeModelColumn<Glib::ustring>  color;
 	    Gtk::TreeModelColumn<Gdk::Color>     gdkcolor;

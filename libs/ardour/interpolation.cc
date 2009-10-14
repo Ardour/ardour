@@ -11,16 +11,16 @@ LinearInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
 {
 	// index in the input buffers
 	nframes_t   i = 0;
-	
+
 	double acceleration;
 	double distance = 0.0;
-	
+
 	if (_speed != _target_speed) {
 		acceleration = _target_speed - _speed;
 	} else {
 		acceleration = 0.0;
 	}
-	
+
 	distance = phase[channel];
 	for (nframes_t outsample = 0; outsample < nframes; ++outsample) {
 		i = floor(distance);
@@ -29,19 +29,19 @@ LinearInterpolation::interpolate (int channel, nframes_t nframes, Sample *input,
 			fractional_phase_part -= 1.0;
 			i++;
 		}
-		
+
 		if (input && output) {
 		// Linearly interpolate into the output buffer
-			output[outsample] = 
+			output[outsample] =
 				input[i] * (1.0f - fractional_phase_part) +
 				input[i+1] * fractional_phase_part;
 		}
 		distance += _speed + acceleration;
 	}
-	
+
 	i = floor(distance);
 	phase[channel] = distance - floor(distance);
-	
+
 	return i;
 }
 
@@ -50,16 +50,16 @@ CubicInterpolation::interpolate (int channel, nframes_t nframes, Sample *input, 
 {
     // index in the input buffers
     nframes_t   i = 0;
-    
+
     double acceleration;
     double distance = 0.0;
-    
+
     if (_speed != _target_speed) {
         acceleration = _target_speed - _speed;
     } else {
         acceleration = 0.0;
     }
-    
+
     distance = phase[channel];
     for (nframes_t outsample = 0; outsample < nframes; ++outsample) {
         i = floor(distance);
@@ -68,16 +68,16 @@ CubicInterpolation::interpolate (int channel, nframes_t nframes, Sample *input, 
             fractional_phase_part -= 1.0;
             i++;
         }
-        
+
         if (input && output) {
             // Cubically interpolate into the output buffer
             output[outsample] = cube_interp(fractional_phase_part, input[i-1], input[i], input[i+1], input[i+2]);
         }
         distance += _speed + acceleration;
     }
-    
+
     i = floor(distance);
     phase[channel] = distance - floor(distance);
-    
+
     return i;
 }

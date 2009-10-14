@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2007 Tim Mayberry 
+    Copyright (C) 2007 Tim Mayberry
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 namespace ARDOUR {
 
 	/**
-	 * return a SearchPath containing directories in which to look for 
+	 * return a SearchPath containing directories in which to look for
 	 * control surface plugins.
 	 *
 	 * If ARDOUR_SURFACES_PATH is defined then the SearchPath returned

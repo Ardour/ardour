@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,14 +26,14 @@
 namespace ARDOUR {
 
 class RuntimeProfile {
-  public:
-    enum Element {
-	    SmallScreen,
-	    SAE,
-	    SinglePackage,
-	    LastElement
-    };
-    
+public:
+	enum Element {
+		SmallScreen,
+		SAE,
+		SinglePackage,
+		LastElement
+	};
+
     RuntimeProfile() { bits.resize (LastElement); }
     ~RuntimeProfile() {}
 
@@ -46,9 +46,9 @@ class RuntimeProfile {
     void set_single_package () { bits[SinglePackage] = true; }
     bool get_single_package () const { return bits[SinglePackage]; }
 
-  private:
+private:
     boost::dynamic_bitset<uint64_t> bits;
-    
+
 };
 
 extern RuntimeProfile* Profile;

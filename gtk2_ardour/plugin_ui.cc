@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 		case ARDOUR::AudioUnit:
 			have_gui = create_audiounit_editor (insert);
 			break;
-			
+
 		case ARDOUR::LADSPA:
 			error << _("Eh? LADSPA plugins don't have editors!") << endmsg;
 			break;
@@ -113,12 +113,12 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 			throw failed_constructor ();
 		}
 
-	} 
+	}
 
 	if (!have_gui) {
 
 		GenericPluginUI*  pu  = new GenericPluginUI (insert, scrollable);
-		
+
 		_pluginui = pu;
 		add( *pu );
 
@@ -127,7 +127,7 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 		hbox->pack_start( *pu);
 		// TODO: this should be nicer
 		hbox->pack_start( eqgui_bin );
-		
+
 		add (*manage(hbox));
 		*/
 
@@ -143,7 +143,7 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)), false);
 	death_connection = insert->GoingAway.connect (mem_fun(*this, &PluginUIWindow::plugin_going_away));
-	
+
 	gint h = _pluginui->get_preferred_height ();
 	gint w = _pluginui->get_preferred_width ();
 
@@ -156,7 +156,7 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 		}
 	}
 
-	set_default_size (w, h); 
+	set_default_size (w, h);
 }
 
 PluginUIWindow::~PluginUIWindow ()
@@ -250,7 +250,7 @@ bool
 PluginUIWindow::create_vst_editor(boost::shared_ptr<PluginInsert> insert)
 #else
 PluginUIWindow::create_vst_editor(boost::shared_ptr<PluginInsert>)
-#endif	
+#endif
 {
 #ifndef VST_SUPPORT
 	return false;
@@ -264,7 +264,7 @@ PluginUIWindow::create_vst_editor(boost::shared_ptr<PluginInsert>)
 		throw failed_constructor ();
 	} else {
 		VSTPluginUI* vpu = new VSTPluginUI (insert, vp);
-	
+
 		_pluginui = vpu;
 		add (*vpu);
 		vpu->package (*this);
@@ -280,7 +280,7 @@ bool
 PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert> insert)
 #else
 PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert>)
-#endif	
+#endif
 {
 #if !defined(HAVE_AUDIOUNITS) || !defined(GTKOSX)
 	return false;
@@ -302,7 +302,7 @@ void
 PluginUIWindow::app_activated (bool yn)
 #else
 PluginUIWindow::app_activated (bool)
-#endif	
+#endif
 {
 #if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
 	cerr << "APP activated ? " << yn << endl;
@@ -318,7 +318,7 @@ PluginUIWindow::app_activated (bool)
 			hide ();
 			_pluginui->deactivate ();
 		}
-	} 
+	}
 #endif
 }
 
@@ -330,7 +330,7 @@ PluginUIWindow::create_lv2_editor(boost::shared_ptr<PluginInsert> insert)
 #else
 
 	boost::shared_ptr<LV2Plugin> vp;
-	
+
 	if ((vp = boost::dynamic_pointer_cast<LV2Plugin> (insert->plugin())) == 0) {
 		error << _("create_lv2_editor called on non-LV2 plugin") << endmsg;
 		throw failed_constructor ();
@@ -362,7 +362,7 @@ void
 PluginUIWindow::plugin_going_away ()
 {
 	ENSURE_GUI_THREAD(mem_fun(*this, &PluginUIWindow::plugin_going_away));
-	
+
 	if (_pluginui) {
 		_pluginui->stop_updating(0);
 	}
@@ -406,7 +406,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	focus_out_image = new Image (get_icon (X_("computer_keyboard")));
 	focus_in_image = new Image (get_icon (X_("computer_keyboard_active")));
-	
+
 	focus_button.add (*focus_out_image);
 
 	ARDOUR_UI::instance()->set_tip (&focus_button, _("Click to allow the plugin to receive keyboard events that Ardour would normally use as a shortcut"), "");
@@ -547,17 +547,17 @@ PlugUIBase::focus_toggled (GdkEventButton*)
 void
 PlugUIBase::toggle_plugin_analysis()
 {
-	if (plugin_analysis_expander.get_expanded() && 
+	if (plugin_analysis_expander.get_expanded() &&
             !plugin_analysis_expander.get_child()) {
 		// Create the GUI
 		PluginEqGui *foo = new PluginEqGui(insert);
 		plugin_analysis_expander.add( *foo );
 		plugin_analysis_expander.show_all();
-	} 
-	
+	}
+
 	Gtk::Widget *gui;
 
-	if (!plugin_analysis_expander.get_expanded() && 
+	if (!plugin_analysis_expander.get_expanded() &&
             (gui = plugin_analysis_expander.get_child())) {
 		// Hide & remove
 		gui->hide();

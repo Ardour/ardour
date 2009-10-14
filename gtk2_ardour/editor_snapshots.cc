@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2009 Paul Davis 
+    Copyright (C) 2000-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -67,17 +67,17 @@ EditorSnapshots::selection_changed ()
 	if (_display.get_selection()->count_selected_rows() > 0) {
 
 		TreeModel::iterator i = _display.get_selection()->get_selected();
-		
+
 		Glib::ustring snap_name = (*i)[_columns.real_name];
 
 		if (snap_name.length() == 0) {
 			return;
 		}
-		
+
 		if (_session->snap_name() == snap_name) {
 			return;
 		}
-		
+
 		ARDOUR_UI::instance()->load_session (_session->path(), string (snap_name));
 	}
 }
@@ -138,7 +138,7 @@ EditorSnapshots::rename (Glib::ustring old_name)
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 	prompter.set_prompt (_("New name of snapshot"));
 	prompter.set_initial_text (old_name);
-	
+
 	if (prompter.run() == RESPONSE_ACCEPT) {
 		prompter.get_result (new_name);
 		if (new_name.length()) {
@@ -191,18 +191,18 @@ EditorSnapshots::redisplay ()
 	{
 		string statename = (*i);
 		TreeModel::Row row = *(_model->append());
-		
+
 		/* this lingers on in case we ever want to change the visible
 		   name of the snapshot.
 		*/
-		
+
 		string display_name;
 		display_name = statename;
 
 		if (statename == _session->snap_name()) {
 			_display.get_selection()->select(row);
-		} 
-		
+		}
+
 		row[_columns.visible_name] = display_name;
 		row[_columns.real_name] = statename;
 	}

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2007 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ using namespace Gtkmm2ext;
 using namespace Glib;
 
 struct ModelColumns : public TreeModel::ColumnRecord {
-    ModelColumns() { 
+    ModelColumns() {
 	    add (used);
 	    add (text);
 	    add (port);
@@ -60,12 +60,12 @@ fill_it (RefPtr<TreeStore> model, TreeView* display, ModelColumns* columns)
 	display->set_model (RefPtr<TreeStore>(0));
 
 	model->clear ();
-	
+
 	const char ** ports;
 	typedef map<string,vector<pair<string,string> > > PortMap;
 	PortMap portmap;
 	PortMap::iterator i;
-	
+
 	ports = jack_get_ports (jack, "", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput);
 
 	if (ports == 0) {
@@ -73,7 +73,7 @@ fill_it (RefPtr<TreeStore> model, TreeView* display, ModelColumns* columns)
 	}
 
 	/* find all the client names and group their ports into a list-by-client */
-	
+
 	for (int n = 0; ports[n]; ++n) {
 
 		pair<string,vector<pair<string,string> > > newpair;
@@ -86,10 +86,10 @@ fill_it (RefPtr<TreeStore> model, TreeView* display, ModelColumns* columns)
 
 		pos = str.find (':');
 
-		newpair.first = str.substr (0, pos); 
+		newpair.first = str.substr (0, pos);
 		portname = str.substr (pos+1);
 
-		/* this may or may not succeed at actually inserting. 
+		/* this may or may not succeed at actually inserting.
 		   we don't care, however: we just want an iterator
 		   that gives us either the inserted element or
 		   the existing one with the same name.
@@ -117,7 +117,7 @@ fill_it (RefPtr<TreeStore> model, TreeView* display, ModelColumns* columns)
 		for (vector<pair<string,string> >::iterator s = i->second.begin(); s != i->second.end(); ++s) {
 
 			/* s->first is a port name */
-			
+
 			TreeModel::Row row = *(model->append (parent.children()));
 
 			row[columns->used] = ((random()%2) == 1);
@@ -172,14 +172,14 @@ main (int argc, char* argv[])
 
 	RefPtr<TreeStore> modelA = TreeStore::create (columns);
 	RefPtr<TreeStore> modelB = TreeStore::create (columns);
-	
+
 	displayA.set_model (modelA);
 	displayA.append_column ("Use", columns.used);
 	displayA.append_column ("Source/Port", columns.text);
 	displayA.set_reorderable (true);
 	displayA.add_object_drag (columns.port.index(), "ports");
 	displayA.signal_object_drop.connect (ptr_fun (object_drop));
-	
+
 	displayA.get_selection()->set_mode (SELECTION_MULTIPLE);
 	displayA.get_selection()->set_select_function (bind (ptr_fun (selection_filter), &columns));
 	displayA.get_selection()->signal_changed().connect (bind (ptr_fun (selection_changed), modelA, &displayA, &columns));
@@ -203,14 +203,14 @@ main (int argc, char* argv[])
 
 	vpacker.pack_start (hpacker);
 	vpacker.pack_start (rescan, false, false);
-	
+
 	win.add (vpacker);
 	win.set_size_request (500, 400);
 	win.show_all ();
-	
+
 	rescan.signal_clicked().connect (bind (ptr_fun (fill_it), modelA, &displayA, &columns));
 	rescan.signal_clicked().connect (bind (ptr_fun (fill_it), modelB, &displayB, &columns));
-	
+
 	fill_it (modelA, &displayA, &columns);
 	fill_it (modelB, &displayB, &columns);
 

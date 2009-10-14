@@ -72,7 +72,7 @@ class MidiRegionView : public RegionView
 	                boost::shared_ptr<ARDOUR::MidiRegion>,
 	                double initial_samples_per_unit,
 	                Gdk::Color const & basic_color);
-	
+
 	MidiRegionView (const MidiRegionView& other);
 	MidiRegionView (const MidiRegionView& other, boost::shared_ptr<ARDOUR::MidiRegion>);
 
@@ -89,14 +89,14 @@ class MidiRegionView : public RegionView
 	inline MidiStreamView* midi_stream_view() const
 		{ return midi_view()->midi_view(); }
 
-	void add_note (uint8_t channel, uint8_t number, uint8_t velocity, 
+	void add_note (uint8_t channel, uint8_t number, uint8_t velocity,
 		       Evoral::MusicalTime pos, Evoral::MusicalTime len);
 
 	void set_height (double);
 	void apply_note_range(uint8_t lowest, uint8_t highest, bool force=false);
 
 	inline ARDOUR::ColorMode color_mode() const { return midi_view()->color_mode(); }
-	
+
 	void set_frame_color();
 
 	void redisplay_model();
@@ -110,41 +110,41 @@ class MidiRegionView : public RegionView
 	void paste (nframes64_t pos, float times, const MidiCutBuffer&);
 
 	struct PCEvent {
-		PCEvent(double a_time, uint8_t a_value, uint8_t a_channel) 
+		PCEvent(double a_time, uint8_t a_value, uint8_t a_channel)
 			: time(a_time), value(a_value), channel(a_channel) {}
 
 		double  time;
 		uint8_t value;
 		uint8_t channel;
 	};
-	
+
 	/** Add a new program change flag to the canvas.
 	 * @param program the MidiRegionView::PCEvent to add
 	 * @param the text to display in the flag
 	 */
 	void add_pgm_change(PCEvent& program, const std::string& displaytext);
-	
+
 	/** Look up the given time and channel in the 'automation' and set keys accordingly.
 	 * @param time the time of the program change event
 	 * @param channel the MIDI channel of the event
-	 * @key a reference to an instance of MIDI::Name::PatchPrimaryKey whose fields will 
+	 * @key a reference to an instance of MIDI::Name::PatchPrimaryKey whose fields will
 	 *        will be set according to the result of the lookup
 	 */
 	void get_patch_key_at(double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key);
-	
+
 	/** Change the 'automation' data of old_program to new values which correspond to new_patch.
 	 * @param old_program the program change event which is to be altered
 	 * @param new_patch the new lsb, msb and program number which are to be set
 	 */
 	void alter_program_change(PCEvent& old_program, const MIDI::Name::PatchPrimaryKey& new_patch);
-	
+
 	/** Alter a given program to the new given one.
 	 * (Called on context menu select on CanvasProgramChange)
 	 */
 	void program_selected(
-		ArdourCanvas::CanvasProgramChange& program, 
+		ArdourCanvas::CanvasProgramChange& program,
 		const MIDI::Name::PatchPrimaryKey& new_patch);
-	
+
 	/** Alter a given program to be its predecessor in the MIDNAM file.
 	 */
 	void previous_program(ArdourCanvas::CanvasProgramChange& program);
@@ -152,11 +152,11 @@ class MidiRegionView : public RegionView
 	/** Alters a given program to be its successor in the MIDNAM file.
 	 */
 	void next_program(ArdourCanvas::CanvasProgramChange& program);
-	
+
 	/** Displays all program change events in the region as flags on the canvas.
 	 */
 	void display_program_changes();
-	
+
 	/** Displays all system exclusive events in the region as flags on the canvas.
 	 */
 	void display_sysexes();
@@ -190,7 +190,7 @@ class MidiRegionView : public RegionView
 	void   note_deselected(ArdourCanvas::CanvasNoteEvent* ev);
 	void   delete_selection();
 	size_t selection_size() { return _selection.size(); }
-	
+
 	void move_selection(double dx, double dy);
 	void note_dropped(ArdourCanvas::CanvasNoteEvent* ev, double d_pixels, int8_t d_note);
 
@@ -231,7 +231,7 @@ class MidiRegionView : public RegionView
 	 * @param relative whether velocity is relative or absolute
 	 */
 	void change_velocity(ArdourCanvas::CanvasNoteEvent* ev, int8_t velocity, bool relative=false);
-	
+
 	/** Change the channel of the selection.
 	 * @param channel - the channel number of the new channel, zero-based
 	 */
@@ -251,7 +251,7 @@ class MidiRegionView : public RegionView
 		ArdourCanvas::CanvasNote  *canvas_note;
 		ArdourCanvas::SimpleRect  *resize_rect;
 	};
-	
+
 	/** Snap a region relative pixel coordinate to pixel units.
 	 * @param x a pixel coordinate relative to region start
 	 * @return the snapped pixel coordinate relative to region start
@@ -269,10 +269,10 @@ class MidiRegionView : public RegionView
 	 * @return the snapped nframes64_t coordinate relative to region start
 	 */
 	nframes64_t snap_frame_to_frame(nframes64_t x);
-	
+
 	/** Convert a timestamp in beats to frames (both relative to region start) */
 	nframes64_t beats_to_frames(double beats) const;
-	
+
 	/** Convert a timestamp in frames to beats (both relative to region start) */
 	double frames_to_beats(nframes64_t beats) const;
 
@@ -297,12 +297,12 @@ class MidiRegionView : public RegionView
 	                double samples_per_unit,
 	                Gdk::Color& basic_color,
 	                TimeAxisViewItem::Visibility);
-	
+
 	void region_resized (ARDOUR::Change);
-	
+
 	void set_flags (XMLNode *);
 	void store_flags ();
-	
+
 	void reset_width_dependent_items (double pixel_width);
 
   private:
@@ -310,7 +310,7 @@ class MidiRegionView : public RegionView
 	 * and schedule the playback of the corresponding NoteOff event.
 	 */
 	void play_midi_note(boost::shared_ptr<NoteType> note);
-	
+
 	/** Play the NoteOff-Event of the given note immediately
 	 * (scheduled by @ref play_midi_note()).
 	 */
@@ -321,10 +321,10 @@ class MidiRegionView : public RegionView
 
 	bool canvas_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);
-	
+
 	void midi_channel_mode_changed(ARDOUR::ChannelMode mode, uint16_t mask);
 	void midi_patch_settings_changed(std::string model, std::string custom_device_mode);
-	
+
 	void change_note_velocity(ArdourCanvas::CanvasNoteEvent* ev, int8_t vel, bool relative=false);
 	void change_note_note(ArdourCanvas::CanvasNoteEvent* ev, int8_t note, bool relative=false);
 	void change_note_time(ArdourCanvas::CanvasNoteEvent* ev, ARDOUR::MidiModel::TimeType, bool relative=false);
@@ -343,17 +343,17 @@ class MidiRegionView : public RegionView
 	double   _default_note_length;
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;
-	
+
 	/// MIDNAM information of the current track: Model name of MIDNAM file
 	std::string _model_name;
-	
+
 	/// MIDNAM information of the current track: CustomDeviceMode
-	std::string _custom_device_mode;   
+	std::string _custom_device_mode;
 
 	typedef std::list<ArdourCanvas::CanvasNoteEvent*> Events;
 	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasProgramChange> > PgmChanges;
 	typedef std::vector< boost::shared_ptr<ArdourCanvas::CanvasSysEx> > SysExes;
-	
+
 	boost::shared_ptr<ARDOUR::MidiModel> _model;
 	Events                               _events;
 	PgmChanges                           _pgm_changes;
@@ -378,7 +378,7 @@ class MidiRegionView : public RegionView
 	/** New notes (created in the current command) which should be selected
 	 * when they appear after the command is applied. */
 	std::set< boost::shared_ptr<NoteType> > _marked_for_selection;
-	
+
 	/** New notes (created in the current command) which should have visible velocity
 	 * when they appear after the command is applied. */
 	std::set< boost::shared_ptr<NoteType> > _marked_for_velocity;
@@ -393,8 +393,8 @@ class MidiRegionView : public RegionView
 
 	void update_note (ArdourCanvas::CanvasNote*);
 	void update_hit (ArdourCanvas::CanvasHit*);
-	
-};	
+
+};
 
 
 #endif /* __gtk_ardour_midi_region_view_h__ */

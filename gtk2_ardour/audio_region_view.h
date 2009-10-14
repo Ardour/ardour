@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2001-2006 Paul Davis 
+    Copyright (C) 2001-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -48,13 +48,13 @@ class RouteTimeAxisView;
 class AudioRegionView : public RegionView
 {
   public:
-	AudioRegionView (ArdourCanvas::Group *, 
+	AudioRegionView (ArdourCanvas::Group *,
 			 RouteTimeAxisView&,
 			 boost::shared_ptr<ARDOUR::AudioRegion>,
 			 double initial_samples_per_unit,
 			 Gdk::Color const & basic_color);
 
-	AudioRegionView (ArdourCanvas::Group *, 
+	AudioRegionView (ArdourCanvas::Group *,
 			 RouteTimeAxisView&,
 			 boost::shared_ptr<ARDOUR::AudioRegion>,
 			 double samples_per_unit,
@@ -66,43 +66,43 @@ class AudioRegionView : public RegionView
 	AudioRegionView (const AudioRegionView& other, boost::shared_ptr<ARDOUR::AudioRegion>);
 
 	~AudioRegionView ();
-	
+
 	virtual void init (Gdk::Color const & base_color, bool wait_for_data);
-	
+
 	boost::shared_ptr<ARDOUR::AudioRegion> audio_region() const;
-	
+
 	void create_waves ();
 
 	void set_height (double);
 	void set_samples_per_unit (double);
-	
+
 	void set_amplitude_above_axis (gdouble spp);
-	
+
 	void temporarily_hide_envelope (); ///< Dangerous!
 	void unhide_envelope ();           ///< Dangerous!
-	
+
 	void set_envelope_visible (bool);
 	void set_waveform_visible (bool yn);
 	void set_waveform_shape (ARDOUR::WaveformShape);
 	void set_waveform_scale (ARDOUR::WaveformScale);
-	
+
 	bool waveform_rectified() const { return _flags & WaveformRectified; }
 	bool waveform_logscaled() const { return _flags & WaveformLogScaled; }
 	bool waveform_visible()   const { return _flags & WaveformVisible; }
 	bool envelope_visible()   const { return _flags & EnvelopeVisible; }
-	
+
 	void show_region_editor ();
-	
+
 	void add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
 	void remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
-	
+
 	AudioRegionGainLine* get_gain_line() const { return gain_line; }
-	
+
 	void region_changed (ARDOUR::Change);
 	void envelope_active_changed ();
-	
+
 	GhostRegion* add_ghost (TimeAxisView&);
-	
+
 	void reset_fade_in_shape_width (nframes_t);
 	void reset_fade_out_shape_width (nframes_t);
 
@@ -111,14 +111,14 @@ class AudioRegionView : public RegionView
 
 	virtual void entered ();
 	virtual void exited ();
-	
+
   protected:
 
     /* this constructor allows derived types
        to specify their visibility requirements
        to the TimeAxisViewItem parent class
     */
-    
+
     enum Flags {
 	    EnvelopeVisible = 0x1,
 	    WaveformVisible = 0x4,
@@ -128,20 +128,20 @@ class AudioRegionView : public RegionView
 
     std::vector<ArdourCanvas::WaveView *> waves;
     std::vector<ArdourCanvas::WaveView *> tmp_waves; ///< see ::create_waves()
-    ArdourCanvas::Polygon*           sync_mark; ///< polgyon for sync position 
+    ArdourCanvas::Polygon*           sync_mark; ///< polgyon for sync position
     ArdourCanvas::SimpleLine*        zero_line;
     ArdourCanvas::Polygon*           fade_in_shape;
     ArdourCanvas::Polygon*           fade_out_shape;
     ArdourCanvas::SimpleRect*        fade_in_handle;
     ArdourCanvas::SimpleRect*        fade_out_handle;
-    
+
     AudioRegionGainLine * gain_line;
 
     double _amplitude_above_axis;
 
     uint32_t _flags;
     uint32_t fade_color;
-    
+
     void reset_fade_shapes ();
     void reset_fade_in_shape ();
     void reset_fade_out_shape ();

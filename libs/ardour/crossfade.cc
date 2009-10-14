@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003-2006 Paul Davis 
+    Copyright (C) 2003-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ Crossfade::operator== (const Crossfade& other)
 	return (_in == other._in) && (_out == other._out);
 }
 
-Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<AudioRegion> out, 
+Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<AudioRegion> out,
 		      nframes_t length,
 		      nframes_t position,
 		      AnchorPoint ap)
@@ -123,7 +123,7 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 		error << _("Crossfade: no \"in\" region in state") << endmsg;
 		throw failed_constructor();
 	}
-	
+
 	PBD::ID id (prop->value());
 
 	if ((r = playlist.find_region (id)) == 0) {
@@ -131,7 +131,7 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 		      << endmsg;
 		throw failed_constructor();
 	}
-	
+
 	if ((_in = boost::dynamic_pointer_cast<AudioRegion> (r)) == 0) {
 		throw failed_constructor();
 	}
@@ -148,7 +148,7 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 		      << endmsg;
 		throw failed_constructor();
 	}
-	
+
 	if ((_out = boost::dynamic_pointer_cast<AudioRegion> (r)) == 0) {
 		throw failed_constructor();
 	}
@@ -156,7 +156,7 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 	_length = 0;
 	initialize();
 	_active = true;
-	
+
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
@@ -172,13 +172,13 @@ Crossfade::Crossfade (boost::shared_ptr<Crossfade> orig, boost::shared_ptr<Audio
 	_anchor_point     = orig->_anchor_point;
 	_follow_overlap   = orig->_follow_overlap;
 	_fixed            = orig->_fixed;
-	
+
 	_in = newin;
 	_out = newout;
 
 	// copied from Crossfade::initialize()
 	_in_update = false;
-	
+
 	_out->suspend_fade_out ();
 	_in->suspend_fade_in ();
 
@@ -204,9 +204,9 @@ Crossfade::initialize ()
 	_sources.insert (_sources.end(), _out->sources().begin(), _out->sources().end());
 	_master_sources = _in->master_sources();
 	_master_sources.insert(_master_sources.end(), _out->master_sources().begin(), _out->master_sources().end());
-	
+
 	_in_update = false;
-	
+
 	_out->suspend_fade_out ();
 	_in->suspend_fade_in ();
 
@@ -236,7 +236,7 @@ Crossfade::initialize ()
 #endif
 
 	_fade_out.thaw ();
-	
+
 	_fade_in.freeze ();
 	_fade_in.clear ();
 
@@ -267,9 +267,9 @@ Crossfade::initialize ()
 
 	overlap_type = _in->coverage (_out->position(), _out->last_frame());
 	layer_relation = (int32_t) (_in->layer() - _out->layer());
-}	
+}
 
-nframes_t 
+nframes_t
 Crossfade::read_raw_internal (Sample* /*buf*/, sframes_t /*start*/, nframes_t cnt, int /*channel*/) const
 {
 	// FIXME: Why is this disabled?
@@ -288,8 +288,8 @@ Crossfade::read_raw_internal (Sample* /*buf*/, sframes_t /*start*/, nframes_t cn
 	return cnt;
 }
 
-nframes_t 
-Crossfade::read_at (Sample *buf, Sample *mixdown_buffer, 
+nframes_t
+Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
 		    float *gain_buffer, sframes_t start, nframes_t cnt, uint32_t chan_n,
 		    nframes_t read_frames, nframes_t skip_frames) const
 {
@@ -313,15 +313,15 @@ Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
 		} else {
 			return 0;
 		}
-		
+
 		start = _position;
 		buf += offset;
 		to_write = min (_length, cnt);
 
 	} else {
-		
+
 		to_write = min (nframes_t(_length - (start - _position)), cnt);
-		
+
 	}
 
 	offset = start - _position;
@@ -345,7 +345,7 @@ Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
 	/* note: although we have not explicitly taken into account the return values
 	   from _out->read_at() or _in->read_at(), the length() function does this
 	   implicitly. why? because it computes a value based on the in+out regions'
-	   position and length, and so we know precisely how much data they could return. 
+	   position and length, and so we know precisely how much data they could return.
 	*/
 
 	for (nframes_t n = 0; n < to_write; ++n) {
@@ -356,9 +356,9 @@ Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
 	delete [] fiv;
 
 	return to_write;
-}	
+}
 
-OverlapType 
+OverlapType
 Crossfade::coverage (nframes_t start, nframes_t end) const
 {
 	nframes_t my_end = _position + _length;
@@ -391,14 +391,14 @@ bool
 Crossfade::refresh ()
 {
 	/* crossfades must be between non-muted regions */
-	
+
 	if (_out->muted() || _in->muted()) {
 		Invalidated (shared_from_this ());
 		return false;
 	}
 
 	/* Top layer shouldn't be transparent */
-	
+
 	if (!((layer_relation > 0 ? _in : _out)->opaque())) {
 		Invalidated (shared_from_this());
 		return false;
@@ -418,7 +418,7 @@ Crossfade::refresh ()
 	if (ot == OverlapNone) {
 		Invalidated (shared_from_this ());
 		return false;
-	} 
+	}
 
 	bool send_signal;
 
@@ -428,7 +428,7 @@ Crossfade::refresh ()
 
 			try {
 				compute (_in, _out, _session.config.get_xfade_model());
-			} 
+			}
 
 			catch (NoCrossfadeHere& err) {
 				Invalidated (shared_from_this ());
@@ -460,39 +460,39 @@ bool
 Crossfade::update ()
 {
 	nframes_t newlen;
-	
+
 	if (_follow_overlap) {
 		newlen = _out->first_frame() + _out->length() - _in->first_frame();
 	} else {
 		newlen = _length;
 	}
-	
+
 	if (newlen == 0) {
 		Invalidated (shared_from_this ());
 		return false;
 	}
-	
+
 	_in_update = true;
-	
+
 	if ((_follow_overlap && newlen != _length) || (_length > newlen)) {
-		
+
 		double factor =  newlen / (double) _length;
-		
+
 		_fade_out.x_scale (factor);
 		_fade_in.x_scale (factor);
-		
+
 		_length = newlen;
-	} 
-		
+	}
+
 	switch (_anchor_point) {
 	case StartOfIn:
 		_position = _in->first_frame();
 		break;
-		
+
 	case EndOfIn:
 		_position = _in->last_frame() - _length;
 		break;
-		
+
 	case EndOfOut:
 		_position = _out->last_frame() - _length;
 	}
@@ -507,7 +507,7 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 	boost::shared_ptr<AudioRegion> bottom;
 	nframes_t short_xfade_length;
 
-	short_xfade_length = _short_xfade_length; 
+	short_xfade_length = _short_xfade_length;
 
 	if (a->layer() < b->layer()) {
 		top = b;
@@ -516,19 +516,19 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 		top = a;
 		bottom = b;
 	}
-	
+
 	/* first check for matching ends */
-	
+
 	if (top->first_frame() == bottom->first_frame()) {
 
 		/* Both regions start at the same point */
-		
+
 		if (top->last_frame() < bottom->last_frame()) {
-			
+
 			/* top ends before bottom, so put an xfade
 			   in at the end of top.
 			*/
-			
+
 			/* [-------- top ---------- ]
                          * {====== bottom =====================}
 			 */
@@ -551,24 +551,24 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 		} else {
 			/* top ends after (or same time) as bottom - no xfade
 			 */
-			
+
 			/* [-------- top ------------------------ ]
                          * {====== bottom =====================}
 			 */
 
 			throw NoCrossfadeHere();
 		}
-		
+
 	} else if (top->last_frame() == bottom->last_frame()) {
-		
+
 		/* Both regions end at the same point */
-		
+
 		if (top->first_frame() > bottom->first_frame()) {
-			
+
 			/* top starts after bottom, put an xfade in at the
 			   start of top
 			*/
-			
+
 			/*            [-------- top ---------- ]
                          * {====== bottom =====================}
 			 */
@@ -581,7 +581,7 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 			_anchor_point = StartOfIn;
 			_active = true;
 			_fixed = true;
-			
+
 		} else {
 			/* top starts before bottom - no xfade
 			 */
@@ -594,7 +594,7 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 		}
 
 	} else {
-	
+
 		/* OK, time to do more regular overlapping */
 
 		OverlapType ot = top->coverage (bottom->first_frame(), bottom->last_frame());
@@ -606,18 +606,18 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 			*/
 			throw NoCrossfadeHere();
 			break;
-			
+
 		case OverlapInternal:
 		case OverlapExternal:
 			/* should be NOTREACHED because of tests above */
 			throw NoCrossfadeHere();
 			break;
-			
+
 		case OverlapEnd: /* top covers start of bottom but ends within it */
 
-			/* [---- top ------------------------] 
-			 *                { ==== bottom ============ } 
-			 */ 
+			/* [---- top ------------------------]
+			 *                { ==== bottom ============ }
+			 */
 
 			_in = bottom;
 			_out = top;
@@ -630,17 +630,17 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 				_follow_overlap = true;
 			} else {
 				_length = min (short_xfade_length, top->length());
-				_position = top->last_frame() - _length;  // "]" - length 
+				_position = top->last_frame() - _length;  // "]" - length
 				_active = true;
 				_follow_overlap = false;
-				
+
 			}
 			break;
-			
+
 		case OverlapStart:   /* top starts within bottom but covers bottom's end */
 
-			/*                   { ==== top ============ } 
-			 *   [---- bottom -------------------] 
+			/*                   { ==== top ============ }
+			 *   [---- bottom -------------------]
 			 */
 
 			_in = top;
@@ -656,18 +656,18 @@ Crossfade::compute (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioReg
 				_length = min (short_xfade_length, top->length());
 				_active = true;
 				_follow_overlap = false;
-				
+
 			}
-			
+
 			break;
 		}
 	}
-	
+
 	return 0;
 }
 
 XMLNode&
-Crossfade::get_state () 
+Crossfade::get_state ()
 {
 	XMLNode* node = new XMLNode (X_("Crossfade"));
 	XMLNode* child;
@@ -779,11 +779,11 @@ Crossfade::set_state (const XMLNode& node)
 		}
 
 	} else {
-		
+
 		/* XXX this branch is legacy code from before
 		   the point where we stored xfade lengths.
 		*/
-		
+
 		if ((_length = overlap_length()) == 0) {
 			throw failed_constructor();
 		}
@@ -792,26 +792,26 @@ Crossfade::set_state (const XMLNode& node)
 	if ((fi = find_named_node (node, "FadeIn")) == 0) {
 		return -1;
 	}
-	
+
 	if ((fo = find_named_node (node, "FadeOut")) == 0) {
 		return -1;
 	}
 
 	/* fade in */
-	
+
 	_fade_in.freeze ();
 	_fade_in.clear ();
-	
+
 	children = fi->children();
-	
+
 	for (i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == "point") {
 			nframes_t x;
 			float y;
-			
+
 			prop = (*i)->property ("x");
 			sscanf (prop->value().c_str(), "%" PRIu32, &x);
-			
+
 			prop = (*i)->property ("y");
 			sscanf (prop->value().c_str(), "%f", &y);
 
@@ -820,14 +820,14 @@ Crossfade::set_state (const XMLNode& node)
 	}
 
 	_fade_in.thaw ();
-	
+
         /* fade out */
-	
+
 	_fade_out.freeze ();
 	_fade_out.clear ();
 
 	children = fo->children();
-	
+
 	for (i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == "point") {
 			nframes_t x;
@@ -839,7 +839,7 @@ Crossfade::set_state (const XMLNode& node)
 
 			prop = (*i)->property ("y");
 			sscanf (prop->value().c_str(), "%f", &y);
-			
+
 			_fade_out.add (x, y);
 		}
 	}
@@ -892,7 +892,7 @@ Crossfade::set_xfade_length (nframes_t len)
 	case EndOfOut:
 		limit = _out->length();
 		break;
-		
+
 	}
 
 	len = min (limit, len);
@@ -903,7 +903,7 @@ Crossfade::set_xfade_length (nframes_t len)
 	_fade_out.x_scale (factor);
 	_fade_in.x_scale (factor);
 	_in_update = false;
-	
+
 	_length = len;
 
 	StateChanged (LengthChanged);

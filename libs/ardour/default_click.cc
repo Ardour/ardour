@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 20002 Paul Davis 
+    Copyright (C) 20002 Paul Davis
     Sounds by Nick Mainsbridge.
 
     This program is free software; you can redistribute it and/or modify

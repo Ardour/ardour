@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2003 Paul Davis 
+    Copyright (C) 2003 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
  * @param start the start point of this item
  * @param duration the duration of this item
  */
-TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color const & base_color, 
+TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color const & base_color,
 				   nframes64_t start, nframes64_t duration, bool recording,
 				   Visibility vis)
 	: trackview (tv), _recregion(recording)
@@ -84,7 +84,7 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 		/* first constructed item sets up font info */
 
 		NAME_FONT = get_font_for_style (N_("TimeAxisViewItemName"));
-		
+
 		Gtk::Window win;
 		Gtk::Label foo;
 		win.add (foo);
@@ -104,7 +104,7 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 	}
 
 	group = new ArdourCanvas::Group (parent);
-	
+
 	init (it_name, spu, base_color, start, duration, vis);
 
 }
@@ -123,7 +123,7 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 	/* share the other's parent, but still create a new group */
 
 	Gnome::Canvas::Group* parent = other.group->property_parent();
-	
+
 	group = new ArdourCanvas::Group (*parent);
 
 	init (other.item_name, other.samples_per_unit, c, other.frame_position, other.item_duration, other.visibility);
@@ -179,7 +179,7 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color const & ba
 		}
 
 		frame->property_outline_what() = outline_what;
-		    
+
 	} else {
 		frame = 0;
 	}
@@ -200,12 +200,12 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color const & ba
 		name_pixbuf = new ArdourCanvas::Pixbuf(*group);
 		name_pixbuf->property_x() = NAME_X_OFFSET;
 		name_pixbuf->property_y() = trackview.current_height() - 1.0 - NAME_Y_OFFSET;
-	
+
 	} else {
 		name_pixbuf = 0;
 	}
 
-	/* create our grab handles used for trimming/duration etc */	
+	/* create our grab handles used for trimming/duration etc */
 	frame_handle_start = new ArdourCanvas::SimpleRect (*group, 0.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH, 5.0, trackview.current_height());
 	frame_handle_start->property_outline_what() = 0x0;
 
@@ -245,7 +245,7 @@ TimeAxisViewItem::set_position(nframes64_t pos, void* src, double* delta)
 	}
 
 	frame_position = pos;
-	
+
 	/*  This sucks. The GnomeCanvas version I am using
 	    doesn't correctly implement gnome_canvas_group_set_arg(),
 	    so that simply setting the "x" arg of the group
@@ -254,7 +254,7 @@ TimeAxisViewItem::set_position(nframes64_t pos, void* src, double* delta)
 	    thing. I see that in GNOME CVS, the current (Sept 2001)
 	    version of GNOME Canvas rectifies this issue cleanly.
 	*/
-	
+
 	double old_unit_pos ;
 	double new_unit_pos = pos / samples_per_unit ;
 
@@ -263,11 +263,11 @@ TimeAxisViewItem::set_position(nframes64_t pos, void* src, double* delta)
 	if (new_unit_pos != old_unit_pos) {
 		group->move (new_unit_pos - old_unit_pos, 0.0);
 	}
-	
+
 	if (delta) {
 		(*delta) = new_unit_pos - old_unit_pos;
 	}
-	
+
 	PositionChanged (frame_position, src) ; /* EMIT_SIGNAL */
 
 	return true;
@@ -305,9 +305,9 @@ TimeAxisViewItem::set_duration (nframes64_t dur, void* src)
 	}
 
 	item_duration = dur;
-	
+
 	reset_width_dependent_items (trackview.editor().frame_to_pixel (dur));
-	
+
 	DurationChanged (dur, src) ; /* EMIT_SIGNAL */
 	return true;
 }
@@ -334,7 +334,7 @@ TimeAxisViewItem::set_max_duration(nframes64_t dur, void* src)
 	max_item_duration = dur ;
 	MaxDurationChanged(max_item_duration, src) ; /* EMIT_SIGNAL */
 }
-		
+
 /**
  * Returns the maxmimum duration that this item may be set to
  *
@@ -358,7 +358,7 @@ TimeAxisViewItem::set_min_duration(nframes64_t dur, void* src)
 	min_item_duration = dur ;
 	MinDurationChanged(max_item_duration, src) ; /* EMIT_SIGNAL */
 }
-		
+
 /**
  * Returns the minimum duration that this item mey be set to
  *
@@ -408,7 +408,7 @@ TimeAxisViewItem::set_max_duration_active (bool active, void* /*src*/)
 {
 	max_duration_active = active;
 }
-		
+
 /**
  * Returns whether the Maximum Duration constraint is active and should be enforced
  *
@@ -419,7 +419,7 @@ TimeAxisViewItem::get_max_duration_active() const
 {
 	return(max_duration_active) ;
 }
-		
+
 /**
  * Sets whether the Minimum Duration constraint is active and should be enforced
  *
@@ -431,7 +431,7 @@ TimeAxisViewItem::set_min_duration_active (bool active, void* /*src*/)
 {
 	min_duration_active = active ;
 }
-		
+
 /**
  * Returns whether the Maximum Duration constraint is active and should be enforced
  *
@@ -491,7 +491,7 @@ TimeAxisViewItem::set_selected(bool yn)
 	}
 }
 
-void 
+void
 TimeAxisViewItem::set_should_show_selection (bool yn)
 {
 	if (should_show_selection != yn) {
@@ -512,7 +512,7 @@ TimeAxisView&
 TimeAxisViewItem::get_time_axis_view()
 {
 	return trackview;
-}		
+}
 //---------------------------------------------------------------------------------------//
 // ui methods & data
 
@@ -555,14 +555,14 @@ TimeAxisViewItem::set_name_text(const ustring& new_name)
 				CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 	cairo_set_font_size (cr, 10);
 	cairo_text_extents (cr, new_name.c_str(), &te);
-	
+
 	cairo_move_to (cr, 0.5,
 		       0.5 - te.height / 2 - te.y_bearing + NAME_HIGHLIGHT_SIZE / 2);
 	cairo_show_text (cr, new_name.c_str());
-	
+
 	unsigned char* src = cairo_image_surface_get_data (surface);
 	convert_bgra_to_rgba(src, buf->get_pixels(), pb_width, NAME_HIGHLIGHT_SIZE);
-	
+
 	cairo_destroy(cr);
 	name_pixbuf->property_pixbuf() = buf;
 }
@@ -571,7 +571,7 @@ TimeAxisViewItem::set_name_text(const ustring& new_name)
  * Set the height of this item
  *
  * @param h the new height
- */		
+ */
 void
 TimeAxisViewItem::set_height (double height)
 {
@@ -579,11 +579,11 @@ TimeAxisViewItem::set_height (double height)
 		if (height < NAME_HIGHLIGHT_THRESH) {
 			name_highlight->hide();
 			name_pixbuf->hide();
-			
+
 		} else {
 			name_highlight->show();
 			name_pixbuf->show();
-			
+
 		}
 
 		if (height > NAME_HIGHLIGHT_SIZE) {
@@ -611,7 +611,7 @@ TimeAxisViewItem::set_height (double height)
 }
 
 /**
- * 
+ *
  */
 void
 TimeAxisViewItem::set_color (Gdk::Color const & base_color)
@@ -621,7 +621,7 @@ TimeAxisViewItem::set_color (Gdk::Color const & base_color)
 }
 
 /**
- * 
+ *
  */
 ArdourCanvas::Item*
 TimeAxisViewItem::get_canvas_frame()
@@ -630,7 +630,7 @@ TimeAxisViewItem::get_canvas_frame()
 }
 
 /**
- * 
+ *
  */
 ArdourCanvas::Group*
 TimeAxisViewItem::get_canvas_group()
@@ -639,7 +639,7 @@ TimeAxisViewItem::get_canvas_group()
 }
 
 /**
- * 
+ *
  */
 ArdourCanvas::Item*
 TimeAxisViewItem::get_name_highlight()
@@ -648,7 +648,7 @@ TimeAxisViewItem::get_name_highlight()
 }
 
 /**
- * 
+ *
  */
 ArdourCanvas::Pixbuf*
 TimeAxisViewItem::get_name_pixbuf()
@@ -666,7 +666,7 @@ TimeAxisViewItem::compute_colors (Gdk::Color const & base_color)
 {
 	unsigned char radius ;
 	char minor_shift ;
-	
+
 	unsigned char r,g,b ;
 
 	/* FILL: this is simple */
@@ -678,7 +678,7 @@ TimeAxisViewItem::compute_colors (Gdk::Color const & base_color)
 	/*  for minor colors:
 		if the overall saturation is strong, make the minor colors light.
 		if its weak, make them dark.
-  
+
    		we do this by moving an equal distance to the other side of the
 		central circle in the color wheel from where we started.
 	*/
@@ -691,7 +691,7 @@ TimeAxisViewItem::compute_colors (Gdk::Color const & base_color)
 	r = base_color.get_red()/256;
 	g = base_color.get_green()/256;
 	b = base_color.get_blue()/256;
-  
+
 	if (r > b)
 	{
 		if (r > g)
@@ -703,7 +703,7 @@ TimeAxisViewItem::compute_colors (Gdk::Color const & base_color)
 		{
 			/* green sector => blue */
 			swap (g,b);
-		} 
+		}
 	}
 	else
 	{
@@ -722,26 +722,26 @@ TimeAxisViewItem::compute_colors (Gdk::Color const & base_color)
 	r += minor_shift;
 	b += minor_shift;
 	g += minor_shift;
-  
+
 	label_color = RGBA_TO_UINT(r,g,b,255);
 	r = (base_color.get_red()/256)   + 127 ;
 	g = (base_color.get_green()/256) + 127 ;
 	b = (base_color.get_blue()/256)  + 127 ;
-  
+
 	label_color = RGBA_TO_UINT(r,g,b,255);
 
 	/* XXX can we do better than this ? */
 	/* We're trying ;) */
 	/* NUKECOLORS */
-	
+
 	//frame_color_r = 192;
 	//frame_color_g = 192;
 	//frame_color_b = 194;
-	
+
 	//selected_frame_color_r = 182;
 	//selected_frame_color_g = 145;
 	//selected_frame_color_b = 168;
-	
+
 	//handle_color_r = 25 ;
 	//handle_color_g = 0 ;
 	//handle_color_b = 255 ;
@@ -773,7 +773,7 @@ TimeAxisViewItem::set_frame_color()
 {
 	if (frame) {
 		uint32_t r,g,b,a;
-		
+
 		if (_selected && should_show_selection) {
 			UINT_TO_RGBA(ARDOUR_UI::config()->canvasvar_SelectedFrameBase.get(), &r, &g, &b, &a);
 			frame->property_fill_color_rgba() = RGBA_TO_UINT(r, g, b, a);
@@ -850,7 +850,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 			frame_handle_start->hide();
 			frame_handle_end->hide();
 		}
-		
+
 	} else {
 		vestigial_frame->hide();
 
@@ -951,4 +951,4 @@ TimeAxisViewItem::set_y (double y)
 }
 
 
-			   
+

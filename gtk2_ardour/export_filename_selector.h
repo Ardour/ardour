@@ -30,7 +30,7 @@ namespace ARDOUR {
 	class Session;
 }
 
-/// 
+///
 class ExportFilenameSelector : public Gtk::VBox {
   public:
 	typedef boost::shared_ptr<ARDOUR::ExportFilename> FilenamePtr;
@@ -39,9 +39,9 @@ class ExportFilenameSelector : public Gtk::VBox {
 	~ExportFilenameSelector ();
 
 	void set_state (ARDOUR::ExportProfileManager::FilenameStatePtr state_, ARDOUR::Session * session_);
-	
+
 	/* Compatibility with other elements */
-	
+
 	sigc::signal<void> CriticalSelectionChanged;
 
   private:
@@ -53,11 +53,11 @@ class ExportFilenameSelector : public Gtk::VBox {
 
 	void change_date_format ();
 	void change_time_format ();
-	
+
 	void change_session_selection ();
 	void change_revision_selection ();
 	void change_revision_value ();
-	
+
 	void open_browse_dialog ();
 
 	ARDOUR::Session * session;
@@ -66,49 +66,49 @@ class ExportFilenameSelector : public Gtk::VBox {
 	Glib::RefPtr<Gtk::SizeGroup> label_sizegroup;
 
 	Gtk::Label        include_label;
-	
+
 	Gtk::HBox         include_hbox;
-	
+
 	Gtk::Label        label_label;
 	Gtk::Entry        label_entry;
-	
+
 	Gtk::CheckButton  session_checkbox;
-	
+
 	Gtk::CheckButton  revision_checkbox;
 	Gtk::SpinButton   revision_spinbutton;
-	
+
 	Gtk::HBox         path_hbox;
-	
+
 	Gtk::Label        path_label;
 	Gtk::Entry        path_entry;
 	Gtk::Button       browse_button;
-	
+
 	/* Date combo */
-	
+
 	typedef ARDOUR::ExportFilename::DateFormat DateFormat;
-	
+
 	struct DateFormatCols : public Gtk::TreeModelColumnRecord
 	{
 	  public:
 		Gtk::TreeModelColumn<DateFormat>     format;
 		Gtk::TreeModelColumn<Glib::ustring>  label;
-	
+
 		DateFormatCols () { add(format); add(label); }
 	};
 	DateFormatCols               date_format_cols;
 	Glib::RefPtr<Gtk::ListStore> date_format_list;
 	Gtk::ComboBox                date_format_combo;
-	
+
 	/* Time combo */
-	
+
 	typedef ARDOUR::ExportFilename::TimeFormat TimeFormat;
-	
+
 	struct TimeFormatCols : public Gtk::TreeModelColumnRecord
 	{
 	  public:
 		Gtk::TreeModelColumn<TimeFormat>     format;
 		Gtk::TreeModelColumn<Glib::ustring>  label;
-	
+
 		TimeFormatCols () { add(format); add(label); }
 	};
 	TimeFormatCols               time_format_cols;

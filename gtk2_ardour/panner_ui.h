@@ -128,7 +128,7 @@ class PannerUI : public Gtk::HBox
 	void build_astyle_menu ();
 
 	void panner_changed ();
-	
+
 	void hide_pans ();
 
 	void panner_moved (int which);

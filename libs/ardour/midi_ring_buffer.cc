@@ -46,7 +46,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 	while (this->read_space() >= sizeof(T) + sizeof(Evoral::EventType) + sizeof(uint32_t)) {
 
 		this->full_peek(sizeof(T), (uint8_t*)&ev_time);
-		
+
 		if (ev_time > end) {
 			// cerr << "MRB event @ " << ev_time << " past end @ " << end << endl;
 			break;
@@ -85,7 +85,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 				continue;
 			}
 		}
-		
+
 		assert(ev_time >= start);
 		ev_time -= start;
 		ev_time += offset;
@@ -96,10 +96,10 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 			// cerr << "MRB: Unable to reserve space in buffer, event skipped";
 			continue;
 		}
-		
+
 		// write MIDI buffer contents
 		success = Evoral::EventRingBuffer<T>::full_read(ev_size, write_loc);
-		
+
 #if 0
 		cerr << "wrote MidiEvent to Buffer: " << hex;
 		for (size_t i=0; i < ev_size; ++i) {
@@ -117,12 +117,12 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 			cerr << "WARNING: error reading event contents from MIDI ring" << endl;
 		}
 	}
-	
+
 	return count;
 }
 template<typename T>
 void
-MidiRingBuffer<T>::dump(ostream& str) 
+MidiRingBuffer<T>::dump(ostream& str)
 {
 	size_t rspace;
 
@@ -137,21 +137,21 @@ MidiRingBuffer<T>::dump(ostream& str)
 	size_t read_ptr = g_atomic_int_get (&this->_read_ptr);
 
 	str << "Dump @ " << read_ptr << endl;
-	
+
 	while (1) {
 		uint8_t* wp;
 		uint8_t* data;
 		size_t write_ptr;
 
 #define space(r,w) ((w > r) ? (w - r) : ((w - r + this->_size) % this->_size))
-		
+
 		write_ptr  = g_atomic_int_get (&this->_write_ptr);
 		if (space (read_ptr, write_ptr) < sizeof (T)) {
 			break;
 		}
 
 		wp = &this->_buf[read_ptr];
-		memcpy (&ev_time, wp, sizeof (T)); 
+		memcpy (&ev_time, wp, sizeof (T));
 		read_ptr = (read_ptr + sizeof (T)) % this->_size;
 		str << "time " << ev_time;
 
@@ -161,7 +161,7 @@ MidiRingBuffer<T>::dump(ostream& str)
 		}
 
 		wp = &this->_buf[read_ptr];
-		memcpy (&ev_type, wp, sizeof (ev_type)); 
+		memcpy (&ev_type, wp, sizeof (ev_type));
 		read_ptr = (read_ptr + sizeof (ev_type)) % this->_size;
 		str << " type " << ev_type;
 
@@ -172,7 +172,7 @@ MidiRingBuffer<T>::dump(ostream& str)
 		}
 
 		wp = &this->_buf[read_ptr];
-		memcpy (&ev_size, wp, sizeof (ev_size)); 
+		memcpy (&ev_size, wp, sizeof (ev_size));
 		read_ptr = (read_ptr + sizeof (ev_size)) % this->_size;
 		str << " size " << ev_size;
 
@@ -181,11 +181,11 @@ MidiRingBuffer<T>::dump(ostream& str)
 			str << "!OUT!\n";
 			break;
 		}
-		
+
 		data = new uint8_t[ev_size];
-		
+
 		wp = &this->_buf[read_ptr];
-		memcpy (data, wp, ev_size); 
+		memcpy (data, wp, ev_size);
 		read_ptr = (read_ptr + ev_size) % this->_size;
 
 		for (uint32_t i = 0; i != ev_size; ++i) {

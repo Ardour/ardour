@@ -146,7 +146,7 @@ MidiModel::DeltaCommand::operator()()
 	for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i) {
 		_model->remove_note_unlocked(*i);
 	}
-	
+
 	_model->write_unlock();
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
@@ -156,7 +156,7 @@ MidiModel::DeltaCommand::undo()
 {
 	// This could be made much faster by using a priority_queue for added and
 	// removed notes (or sort here), and doing a single iteration over _model
-	
+
 	Glib::Mutex::Lock lm (_model->_midi_source->mutex());
 	_model->_midi_source->invalidate(); // release model read lock
 	_model->write_lock();
@@ -411,7 +411,7 @@ MidiModel::DiffCommand::operator()()
 			break;
 		}
 	}
-	
+
 	_model->write_unlock();
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
@@ -452,7 +452,7 @@ XMLNode&
 MidiModel::DiffCommand::marshal_change(const NotePropertyChange& change)
 {
 	XMLNode* xml_change = new XMLNode("change");
-	
+
 	/* first, the change itself */
 
 	xml_change->add_property ("property", enum_2_string (change.property));
@@ -480,13 +480,13 @@ MidiModel::DiffCommand::marshal_change(const NotePropertyChange& change)
 	/* now the rest of the note */
 
 	const SMFSource* smf = dynamic_cast<const SMFSource*> (_model->midi_source());
-	
+
 	if (change.property != NoteNumber) {
 		ostringstream note_str;
 		note_str << int(change.note->note());
 		xml_change->add_property("note", note_str.str());
 	}
-	
+
 	if (change.property != Channel) {
 		ostringstream channel_str;
 		channel_str << int(change.note->channel());
@@ -631,7 +631,7 @@ MidiModel::DiffCommand::unmarshal_change(XMLNode *xml_change)
 	/* we must point at the instance of the note that is actually in the model.
 	   so go look for it ...
 	*/
-	
+
 	boost::shared_ptr<Evoral::Note<TimeType> > new_note (new Evoral::Note<TimeType> (channel, time, length, note, velocity));
 
 	change.note = _model->find_note (new_note);
@@ -696,13 +696,13 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 	set_percussive(false);
 
 	source->drop_model();
-	
+
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(); i != end(); ++i) {
 		source->append_event_unlocked_beats(*i);
 	}
-		
+
 	set_percussive(old_percussive);
-	
+
 	read_unlock();
 	set_edited(false);
 
@@ -717,14 +717,14 @@ MidiModel::get_state()
 }
 
 boost::shared_ptr<Evoral::Note<MidiModel::TimeType> >
-MidiModel::find_note (boost::shared_ptr<Evoral::Note<TimeType> > other) 
+MidiModel::find_note (boost::shared_ptr<Evoral::Note<TimeType> > other)
 {
 	for (Notes::iterator x = notes().begin(); x != notes().end(); ++x) {
 		if (**x == *other) {
 			return *x;
 		}
 
-		/* XXX optimize by using a stored iterator and break out 
+		/* XXX optimize by using a stored iterator and break out
 		   when passed start time.
 		*/
 	}

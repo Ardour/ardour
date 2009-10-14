@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000 Paul Davis 
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 
 namespace ARDOUR {
 
-template<class T> void 
+template<class T> void
 Session::foreach_route (T *obj, void (T::*func)(Route&))
 {
 	boost::shared_ptr<RouteList> r = routes.reader();
@@ -43,7 +43,7 @@ Session::foreach_route (T *obj, void (T::*func)(Route&))
 	}
 }
 
-template<class T> void 
+template<class T> void
 Session::foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>))
 {
 	boost::shared_ptr<RouteList> r = routes.reader();
@@ -57,7 +57,7 @@ Session::foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>))
 	}
 }
 
-template<class T, class A> void 
+template<class T, class A> void
 Session::foreach_route (T *obj, void (T::*func)(Route&, A), A arg1)
 {
 	boost::shared_ptr<RouteList> r = routes.reader();

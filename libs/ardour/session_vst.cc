@@ -54,7 +54,7 @@ long Session::vst_callback (AEffect* effect,
 	if (debug_callbacks < 0) {
 		debug_callbacks = (getenv ("ARDOUR_DEBUG_VST_CALLBACKS") != 0);
 	}
-	
+
 	if (effect && effect->user) {
 	        plug = (VSTPlugin*) (effect->user);
 		session = &plug->session();
@@ -80,22 +80,22 @@ long Session::vst_callback (AEffect* effect,
 		// vst version, currently 2 (0 for older)
 		return 2;
 
-	case audioMasterCurrentId:	
+	case audioMasterCurrentId:
 		SHOW_CALLBACK ("amc: audioMasterCurrentId\n");
 		// returns the unique id of a plug that's currently
 		// loading
 		return 0;
-		
+
 	case audioMasterIdle:
 		SHOW_CALLBACK ("amc: audioMasterIdle\n");
 		// call application idle routine (this will
-		// call effEditIdle for all open editors too) 
+		// call effEditIdle for all open editors too)
 		if (effect) {
 			effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
 		}
 		return 0;
 
-	case audioMasterPinConnected:		
+	case audioMasterPinConnected:
 		SHOW_CALLBACK ("amc: audioMasterPinConnected\n");
 		// inquire if an input or output is beeing connected;
 		// index enumerates input or output counting from zero:
@@ -120,7 +120,7 @@ long Session::vst_callback (AEffect* effect,
 			_timeInfo.samplePos = session->transport_frame();
 			_timeInfo.sampleRate = session->frame_rate();
 			_timeInfo.flags = 0;
-			
+
 			if (value & (kVstTempoValid)) {
 				const Tempo& t (session->tempo_map().tempo_at (session->transport_frame()));
 				_timeInfo.tempo = t.beats_per_minute ();
@@ -132,10 +132,10 @@ long Session::vst_callback (AEffect* effect,
 				_timeInfo.timeSigDenominator = m.note_divisor ();
 				_timeInfo.flags |= (kVstBarsValid);
 			}
-			
+
 			if (session->transport_speed() != 0.0f) {
 				_timeInfo.flags |= kVstTransportPlaying;
-			} 
+			}
 		}
 
 		return (long)&_timeInfo;
@@ -164,7 +164,7 @@ long Session::vst_callback (AEffect* effect,
 		SHOW_CALLBACK ("amc: audioMasterGetNumAutomatableParameters\n");
 		return 0;
 
-	case audioMasterGetParameterQuantization:	
+	case audioMasterGetParameterQuantization:
 		SHOW_CALLBACK ("amc: audioMasterGetParameterQuantization\n");
                // returns the integer value for +1.0 representation,
 	       // or 1 if full single float precision is maintained
@@ -234,7 +234,7 @@ long Session::vst_callback (AEffect* effect,
 		// 4: currently offline processing and thus in user thread
 		// other: not defined, but probably pre-empting user thread.
 		return 0;
-		
+
 	case audioMasterGetAutomationState:
 		SHOW_CALLBACK ("amc: audioMasterGetAutomationState\n");
 		// returns 0: not supported, 1: off, 2:read, 3:write, 4:read/write
@@ -285,42 +285,42 @@ long Session::vst_callback (AEffect* effect,
 		SHOW_CALLBACK ("amc: audioMasterGetVendorVersion\n");
 		// returns vendor-specific version
 		return 900;
-		
+
 	case audioMasterVendorSpecific:
 		SHOW_CALLBACK ("amc: audioMasterVendorSpecific\n");
 		// no definition, vendor specific handling
 		return 0;
-		
+
 	case audioMasterSetIcon:
 		SHOW_CALLBACK ("amc: audioMasterSetIcon\n");
 		// void* in <ptr>, format not defined yet
 		return 0;
-		
+
 	case audioMasterCanDo:
 		SHOW_CALLBACK ("amc: audioMasterCanDo\n");
 		// string in ptr, see below
 		return 0;
-		
+
 	case audioMasterGetLanguage:
 		SHOW_CALLBACK ("amc: audioMasterGetLanguage\n");
 		// see enum
 		return 0;
-		
+
 	case audioMasterOpenWindow:
 		SHOW_CALLBACK ("amc: audioMasterOpenWindow\n");
 		// returns platform specific ptr
 		return 0;
-		
+
 	case audioMasterCloseWindow:
 		SHOW_CALLBACK ("amc: audioMasterCloseWindow\n");
 		// close window, platform specific handle in <ptr>
 		return 0;
-		
+
 	case audioMasterGetDirectory:
 		SHOW_CALLBACK ("amc: audioMasterGetDirectory\n");
 		// get plug directory, FSSpec on MAC, else char*
 		return 0;
-		
+
 	case audioMasterUpdateDisplay:
 		SHOW_CALLBACK ("amc: audioMasterUpdateDisplay\n");
 		// something has changed, update 'multi-fx' display
@@ -328,27 +328,27 @@ long Session::vst_callback (AEffect* effect,
 			effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
 		}
 		return 0;
-		
+
 	case audioMasterBeginEdit:
 		SHOW_CALLBACK ("amc: audioMasterBeginEdit\n");
 		// begin of automation session (when mouse down), parameter index in <index>
 		return 0;
-		
+
 	case audioMasterEndEdit:
 		SHOW_CALLBACK ("amc: audioMasterEndEdit\n");
 		// end of automation session (when mouse up),     parameter index in <index>
 		return 0;
-		
+
 	case audioMasterOpenFileSelector:
 		SHOW_CALLBACK ("amc: audioMasterOpenFileSelector\n");
 		// open a fileselector window with VstFileSelect* in <ptr>
 		return 0;
-		
+
 	default:
 		SHOW_CALLBACK ("VST master dispatcher: undefed: %d\n", opcode);
 		break;
-	}	
-	
+	}
+
 	return 0;
 }
 

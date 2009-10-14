@@ -1,9 +1,9 @@
 /*
     Copyright (C) 2000 EMC Capital Management, Inc.
-  
+
     Developed by Jon Trowbridge <trow@gnu.org> and
     Havoc Pennington <hp@pobox.com>.
-    
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or

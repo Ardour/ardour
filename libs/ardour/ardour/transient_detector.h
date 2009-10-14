@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Paul Davis 
+    Copyright (C) 2008 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,11 +41,11 @@ class TransientDetector : public AudioAnalyser
 
     float get_threshold () const;
     float get_sensitivity () const;
-    
+
     int run (const std::string& path, Readable*, uint32_t channel, AnalysisFeatureList& results);
 
     static void cleanup_transients (AnalysisFeatureList&, float sr, float gap_msecs);
-    
+
   protected:
     AnalysisFeatureList* current_results;
     int use_features (Vamp::Plugin::FeatureSet&, std::ostream*);

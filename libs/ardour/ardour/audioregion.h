@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2006 Paul Davis 
+    Copyright (C) 2000-2006 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ class AudioRegion : public Region
 
 	void   set_scale_amplitude (gain_t);
 	gain_t scale_amplitude() const { return _scale_amplitude; }
-	
+
 	void normalize_to (float target_in_dB = 0.0f);
 
 	bool envelope_active () const { return _flags & Region::EnvelopeActive; }
@@ -77,9 +77,9 @@ class AudioRegion : public Region
 	boost::shared_ptr<AutomationList> envelope() { return _envelope; }
 
 	virtual nframes_t read_peaks (PeakData *buf, nframes_t npeaks,
-				      nframes_t offset, nframes_t cnt,
-				      uint32_t chan_n=0, double samples_per_unit= 1.0) const;
-	
+			nframes_t offset, nframes_t cnt,
+			uint32_t chan_n=0, double samples_per_unit= 1.0) const;
+
 	/* Readable interface */
 
 	enum ReadOps {
@@ -89,7 +89,7 @@ class AudioRegion : public Region
 		ReadOpsCount = 0x4,
 		ReadOpsFades = 0x8
 	};
-	
+
 	virtual nframes_t read (Sample*, sframes_t pos, nframes_t cnt, int channel) const;
 	virtual nframes_t read_with_ops (Sample*, sframes_t pos, nframes_t cnt, int channel, ReadOps rops) const;
 	virtual nframes64_t readable_length() const { return length(); }
@@ -100,10 +100,10 @@ class AudioRegion : public Region
 			uint32_t  chan_n      = 0,
 			nframes_t read_frames = 0,
 			nframes_t skip_frames = 0) const;
-	
+
 	virtual nframes_t master_read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
 			sframes_t position, nframes_t cnt, uint32_t chan_n=0) const;
-	
+
 	virtual nframes_t read_raw_internal (Sample*, sframes_t, nframes_t, int channel) const;
 
 	XMLNode& state (bool);
@@ -135,9 +135,9 @@ class AudioRegion : public Region
 	void set_default_envelope ();
 
 	int separate_by_channel (ARDOUR::Session&, std::vector<boost::shared_ptr<Region> >&) const;
-	
+
 	/* automation */
-	
+
 	boost::shared_ptr<Evoral::Control>
 	control(const Evoral::Parameter& id, bool create=false) {
 		return _automatable.data().control(id, create);
@@ -185,12 +185,12 @@ class AudioRegion : public Region
 	void recompute_gain_at_start ();
 
 	nframes_t _read_at (const SourceList&, nframes_t limit,
-			    Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
-				sframes_t position, nframes_t cnt, 
-			    uint32_t chan_n = 0,
-			    nframes_t read_frames = 0,
-			    nframes_t skip_frames = 0,
-			    ReadOps readops = ReadOps (~0)) const;
+			Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
+			sframes_t position, nframes_t cnt,
+			uint32_t chan_n = 0,
+			nframes_t read_frames = 0,
+			nframes_t skip_frames = 0,
+			ReadOps readops = ReadOps (~0)) const;
 
 	void recompute_at_start ();
 	void recompute_at_end ();
@@ -217,7 +217,7 @@ class AudioRegion : public Region
   protected:
 	/* default constructor for derived (compound) types */
 
-	AudioRegion (Session& s, nframes_t, nframes_t, std::string name); 
+	AudioRegion (Session& s, nframes_t, nframes_t, std::string name);
 
 	int set_live_state (const XMLNode&, Change&, bool send);
 };

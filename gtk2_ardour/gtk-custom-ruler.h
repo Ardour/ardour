@@ -21,7 +21,7 @@
  * Modified by the GTK+ Team and others 1997-1999.  See the AUTHORS
  * file for a list of people on the GTK+ Team.  See the ChangeLog
  * files for a list of changes.  These files are distributed with
- * GTK+ at ftp://ftp.gtk.org/pub/gtk/. 
+ * GTK+ at ftp://ftp.gtk.org/pub/gtk/.
  */
 
 /* modified by andreas meyer <hexx3000@gmx.de> */
@@ -56,7 +56,7 @@ struct _GtkCustomRuler {
   gint xsrc, ysrc;
   gint slider_size;
   gboolean show_position;
-    
+
   /* The upper limit of the ruler (in points) */
   gdouble lower;
   /* The lower limit of the ruler */
