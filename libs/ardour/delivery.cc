@@ -490,14 +490,26 @@ Delivery::transport_stopped (sframes_t frame)
 }
 
 void
-Delivery::flush (nframes_t nframes)
+Delivery::flush (nframes_t nframes, nframes64_t time)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
 	PortSet& ports (_output->ports());
 
 	for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-		(*i).flush_buffers (nframes, _output_offset);
+		(*i).flush_buffers (nframes, time, _output_offset);
+	}
+}
+
+void
+Delivery::transport_stopped ()
+{
+	/* turn off any notes that are on */
+
+	PortSet& ports (_output->ports());
+
+	for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
+		(*i).transport_stopped ();
 	}
 }
 

@@ -36,7 +36,7 @@ public:
 	MidiStateTracker();
 
 	void track (const MidiBuffer::iterator& from, const MidiBuffer::iterator& to, bool& looped);
-	void resolve_notes (MidiBuffer& buffer, nframes_t time);
+	void resolve_notes (MidiBuffer& buffer, nframes64_t time);
 	void dump (std::ostream&);
 	void reset ();
 

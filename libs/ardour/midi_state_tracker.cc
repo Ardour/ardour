@@ -65,7 +65,7 @@ MidiStateTracker::track (const MidiBuffer::iterator &from, const MidiBuffer::ite
 }
 
 void
-MidiStateTracker::resolve_notes (MidiBuffer &dst, nframes_t time)
+MidiStateTracker::resolve_notes (MidiBuffer &dst, nframes64_t time)
 {
 	for (int channel = 0; channel < 16; ++channel) {
 		for (int note = 0; note < 128; ++note) {
@@ -73,8 +73,8 @@ MidiStateTracker::resolve_notes (MidiBuffer &dst, nframes_t time)
 				uint8_t buffer[3] = { MIDI_CMD_NOTE_OFF | channel, note, 0 };
 				Evoral::MIDIEvent<MidiBuffer::TimeType> noteoff
 					(time, MIDI_CMD_NOTE_OFF, 3, buffer, false);
-
 				dst.push_back (noteoff);
+
 				_active_notes[channel * 128 + note]--;
 			}
 		}

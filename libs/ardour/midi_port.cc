@@ -28,6 +28,7 @@ using namespace std;
 MidiPort::MidiPort (const std::string& name, Flags flags)
 	: Port (name, DataType::MIDI, flags)
 	, _has_been_mixed_down (false)
+	, _resolve_in_process (false)
 {
 	_buffer = new MidiBuffer (raw_buffer_size(0));
 }
@@ -108,11 +109,23 @@ MidiPort::cycle_split ()
 }
 
 void
-MidiPort::flush_buffers (nframes_t nframes, nframes_t offset)
+MidiPort::flush_buffers (nframes_t nframes, nframes64_t time, nframes_t offset)
 {
 	if (sends_output ()) {
 
 		void* jack_buffer = jack_port_get_buffer (_jack_port, nframes);
+
+		// Feed the data through the MidiStateTracker
+		bool did_loop;
+
+		_midi_state_tracker.track (_buffer->begin(), _buffer->end(), did_loop);
+
+		if (did_loop || _resolve_in_process) {
+			/* add necessary note offs */
+			_midi_state_tracker.resolve_notes (*_buffer, time);
+		}
+
+		_resolve_in_process = false;
 
 		for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
 			const Evoral::Event<nframes_t>& ev = *i;
@@ -128,6 +141,12 @@ MidiPort::flush_buffers (nframes_t nframes, nframes_t offset)
 			}
 		}
 	}
+}
+
+void
+MidiPort::transport_stopped ()
+{
+	_resolve_in_process = true;
 }
 
 size_t

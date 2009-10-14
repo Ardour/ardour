@@ -45,6 +45,7 @@
 #include "automation_time_axis.h"
 
 #include "ardour/route.h"
+#include "ardour/event_type_map.h"
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
 #include "ardour/audio_track.h"

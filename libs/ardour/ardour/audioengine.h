@@ -82,26 +82,31 @@ class AudioEngine : public sigc::trackable
 	bool get_sync_offset (nframes_t& offset) const;
 
 	nframes_t frames_since_cycle_start () {
-		if (!_running || !_jack) return 0;
-		return jack_frames_since_cycle_start (_jack);
+  	        jack_client_t* _priv_jack = _jack;
+		if (!_running || !_priv_jack) return 0;
+		return jack_frames_since_cycle_start (_priv_jack);
 	}
 	nframes_t frame_time () {
-		if (!_running || !_jack) return 0;
-		return jack_frame_time (_jack);
+  	        jack_client_t* _priv_jack = _jack;
+		if (!_running || !_priv_jack) return 0;
+		return jack_frame_time (_priv_jack);
 	}
 
 	nframes_t transport_frame () const {
-		if (!_running || !_jack) return 0;
-		return jack_get_current_transport_frame (_jack);
+  	        const jack_client_t* _priv_jack = _jack;
+		if (!_running || !_priv_jack) return 0;
+		return jack_get_current_transport_frame (_priv_jack);
 	}
 
 	int request_buffer_size (nframes_t);
 
 	nframes_t set_monitor_check_interval (nframes_t);
+	nframes_t processed_frames() const { return _processed_frames; }
 
 	float get_cpu_load() {
-		if (!_running || !_jack) return 0;
-		return jack_cpu_load (_jack);
+  	        jack_client_t* _priv_jack = _jack;
+		if (!_running || !_priv_jack) return 0;
+		return jack_cpu_load (_priv_jack);
 	}
 
 	void set_session (Session *);
@@ -177,7 +182,7 @@ class AudioEngine : public sigc::trackable
 	bool freewheeling() const { return _freewheeling; }
 
 	/* this signal is sent for every process() cycle while freewheeling.
-	   the regular process() call to session->process() is not made.
+_	   the regular process() call to session->process() is not made.
 	*/
 
 	sigc::signal<int,nframes_t> Freewheel;
@@ -210,9 +215,14 @@ class AudioEngine : public sigc::trackable
 	std::string make_port_name_relative (std::string);
 	std::string make_port_name_non_relative (std::string);
 
+	static AudioEngine* instance() { return _instance; }
+	void died ();
+
   private:
+	static AudioEngine*       _instance;
+
 	ARDOUR::Session*           session;
-	jack_client_t*            _jack;
+	jack_client_t* volatile   _jack; /* could be reset to null by SIGPIPE or another thread */
 	std::string                jack_client_name;
 	Glib::Mutex               _process_lock;
 	Glib::Cond                 session_removed;
@@ -261,9 +271,9 @@ class AudioEngine : public sigc::trackable
 	int  jack_bufsize_callback (nframes_t);
 	int  jack_sample_rate_callback (nframes_t);
 
-	static void halted (void *);
-
 	int connect_to_jack (std::string client_name);
+
+	static void halted (void *);
 
 	void meter_thread ();
 	void start_metering_thread ();

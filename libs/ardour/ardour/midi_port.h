@@ -23,6 +23,7 @@
 
 #include "ardour/port.h"
 #include "ardour/midi_buffer.h"
+#include "ardour/midi_state_tracker.h"
 
 namespace ARDOUR {
 
@@ -39,7 +40,9 @@ class MidiPort : public Port {
 	void cycle_start (nframes_t nframes);
 	void cycle_end (nframes_t nframes);
 	void cycle_split ();
-	void flush_buffers (nframes_t nframes, nframes_t offset = 0);
+
+	void flush_buffers (nframes_t nframes, nframes64_t time, nframes_t offset = 0);
+	void transport_stopped ();
 
 	size_t raw_buffer_size(jack_nframes_t nframes) const;
 
@@ -57,7 +60,9 @@ class MidiPort : public Port {
   private:
 	MidiBuffer* _buffer;
 	bool _has_been_mixed_down;
+	bool _resolve_in_process;
 
+	MidiStateTracker _midi_state_tracker;
 };
 
 } // namespace ARDOUR

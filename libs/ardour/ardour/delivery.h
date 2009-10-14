@@ -68,9 +68,10 @@ public:
 
 	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 
-	/* supplemental method use with MIDI */
+	/* supplemental method used with MIDI */
 
-	void flush (nframes_t nframes);
+	void flush (nframes_t nframes, nframes64_t time);
+	void transport_stopped ();
 
 	void no_outs_cuz_we_no_monitor(bool);
 

@@ -22,7 +22,6 @@
 
 #include "ardour/track.h"
 #include "ardour/midi_ring_buffer.h"
-#include "ardour/midi_state_tracker.h"
 
 namespace ARDOUR
 {
@@ -104,8 +103,6 @@ private:
 	void use_new_diskstream ();
 	void set_state_part_two ();
 	void set_state_part_three ();
-
-	MidiStateTracker _midi_state_tracker;
 
 	MidiRingBuffer<nframes_t> _immediate_events;
 	MidiRingBuffer<nframes_t> _step_edit_ring_buffer;
