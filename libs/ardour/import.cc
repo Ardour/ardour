@@ -214,8 +214,7 @@ create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
 				 uint samplerate, vector<boost::shared_ptr<Source> >& newfiles,
 				 nframes64_t /*timeline_position*/)
 {
-	for (vector<string>::const_iterator i = new_paths.begin();
-			i != new_paths.end(); ++i)
+	for (vector<string>::const_iterator i = new_paths.begin(); i != new_paths.end(); ++i)
 	{
 		boost::shared_ptr<Source> source;
 
@@ -432,12 +431,13 @@ Session::import_audiofiles (ImportStatus& status)
 								      get_best_session_directory_for_new_source (),
 								      channels);
 		Sources newfiles;
+		nframes64_t natural_position = source ? source->natural_position() : 0;
 
 		if (status.replace_existing_source) {
 			fatal << "THIS IS NOT IMPLEMENTED YET, IT SHOULD NEVER GET CALLED!!! DYING!" << endl;
 			status.cancel = !map_existing_mono_sources (new_paths, *this, frame_rate(), newfiles, this);
 		} else {
-			status.cancel = !create_mono_sources_for_writing (new_paths, *this, frame_rate(), newfiles, source->natural_position());
+			status.cancel = !create_mono_sources_for_writing (new_paths, *this, frame_rate(), newfiles, natural_position);
 		}
 
 		// copy on cancel/failure so that any files that were created will be removed below
