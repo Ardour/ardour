@@ -675,36 +675,42 @@ Editor::register_actions ()
 	mouse_move_button.set_image (*(manage (new Image (::get_icon("tool_object")))));
 	mouse_move_button.set_label ("");
 	mouse_move_button.set_name ("MouseModeButton");
+	mouse_move_button.get_image ()->show ();
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));
 	act->connect_proxy (mouse_select_button);
-	mouse_select_button.set_image (*(manage (new Image (::get_xpm("tool_range.xpm")))));
+	mouse_select_button.set_image (*(manage (new Image (::get_icon("tool_range")))));
 	mouse_select_button.set_label ("");
 	mouse_select_button.set_name ("MouseModeButton");
+	mouse_select_button.get_image ()->show ();
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("Gain Tool"), bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseGain));
 	act->connect_proxy (mouse_gain_button);
 	mouse_gain_button.set_image (*(manage (new Image (::get_icon("tool_gain")))));
 	mouse_gain_button.set_label ("");
 	mouse_gain_button.set_name ("MouseModeButton");
+	mouse_gain_button.get_image ()->show ();
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-zoom", _("Zoom Tool"), bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseZoom));
 	act->connect_proxy (mouse_zoom_button);
 	mouse_zoom_button.set_image (*(manage (new Image (::get_icon("tool_zoom")))));
 	mouse_zoom_button.set_label ("");
 	mouse_zoom_button.set_name ("MouseModeButton");
+	mouse_zoom_button.get_image ()->show ();
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-audition", _("Audition Tool"), bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));
 	act->connect_proxy (mouse_audition_button);
 	mouse_audition_button.set_image (*(manage (new Image (::get_icon("tool_audition")))));
 	mouse_audition_button.set_label ("");
 	mouse_audition_button.set_name ("MouseModeButton");
+	mouse_audition_button.get_image ()->show ();
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Timefx Tool"), bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));
 	act->connect_proxy (mouse_timefx_button);
 	mouse_timefx_button.set_image (*(manage (new Image (::get_icon("tool_stretch")))));
 	mouse_timefx_button.set_label ("");
 	mouse_timefx_button.set_name ("MouseModeButton");
+	mouse_timefx_button.get_image ()->show ();
 
 	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Step Mouse Mode"), bind (mem_fun(*this, &Editor::step_mouse_mode), true));
 
@@ -713,6 +719,7 @@ Editor::register_actions ()
 	internal_edit_button.set_image (*(manage (new Image (::get_icon("tool_note")))));
 	internal_edit_button.set_label ("");
 	internal_edit_button.set_name ("MouseModeButton");
+	internal_edit_button.get_image ()->show ();
 
 	RadioAction::Group edit_point_group;
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-playhead"), _("Playhead"), (bind (mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
