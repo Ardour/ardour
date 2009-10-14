@@ -52,6 +52,7 @@ const int PannerUI::pan_bar_height = 30;
 PannerUI::PannerUI (Session& s)
 	: _session (s),
 	  _current_nouts (-1),
+	  _current_npans (-1),
 	  hAdjustment(0.0, 0.0, 0.0),
 	  vAdjustment(0.0, 0.0, 0.0),
 	  panning_viewport(hAdjustment, vAdjustment),
@@ -340,15 +341,15 @@ PannerUI::setup_pan ()
 		return;
 	}
 
-	uint32_t nouts = _panner->nouts();
+	uint32_t const nouts = _panner->nouts();
+	uint32_t const npans = _panner->npanners();
 
-	if (int32_t (nouts) == _current_nouts) {
+	if (int32_t (nouts) == _current_nouts && npans == _current_npans) {
 		return;
 	}
 
 	_current_nouts = nouts;
-
-	cout << "Setup pan for " << _panner->name() << endl;
+	_current_npans = npans;
 
 	if (nouts == 0 || nouts == 1) {
 
@@ -369,7 +370,6 @@ PannerUI::setup_pan ()
 	} else if (nouts == 2) {
 
 		vector<Adjustment*>::size_type asz;
-		uint32_t npans = _panner->npanners();
 
 		while (!pan_adjustments.empty()) {
 			delete pan_bars.back();
