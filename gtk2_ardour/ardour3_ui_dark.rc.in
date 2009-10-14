@@ -109,18 +109,15 @@ style "white_tree_view"
   text[INSENSITIVE] = { 0.30, 0.30, 0.40 }
   text[SELECTED] = { 0, 0, 0 }
   
-  base[ACTIVE]     = { 0.80, 0.80, 0.80 }
-  base[NORMAL]      =  { 0.80, 0.80, 0.80 }
+  base[ACTIVE]       = { 0.80, 0.80, 0.80 }
+  base[NORMAL]       = { 0.80, 0.80, 0.80 }
   base[PRELIGHT]     = { 0.90, 0.90, 0.90 }
   base[INSENSITIVE]  = "#4c5159"
   base[SELECTED]     = { 0.60, 0.60, 0.80 }
 
   engine "clearlooks" 
   {
-    menubarstyle      = 0       # 0 = flat, 1 = sunken, 2 = flat gradient
-    menuitemstyle     = 0       # 0 = flat, 1 = 3d-ish (gradient), 2 = 3d-ish (button)
-    listviewitemstyle = 0       # 0 = flat, 1 = 3d-ish (gradient)
-    progressbarstyle  = 1       # 0 = candy bar, 1 = fancy candy bar, 2 = flat
+    menubarstyle = 0 # 0 = flat, 1 = sunken, 2 = flat gradient
   }
 }
 
