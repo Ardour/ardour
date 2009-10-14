@@ -885,10 +885,9 @@ AudioEngine::n_physical_audio_inputs () const
 		return 0;
 	}
 
-	if (ports) {
-		for (i = 0; ports[i]; ++i);
-		free (ports);
-	}
+	for (i = 0; ports[i]; ++i);
+	free (ports);
+
 	return i;
 }
 
@@ -903,12 +902,11 @@ AudioEngine::get_physical_audio_inputs (vector<string>& ins)
 		return;
 	}
 
-	if (ports) {
-		for (i = 0; ports[i]; ++i) {
-			ins.push_back (ports[i]);
-		}
-		free (ports);
+	for (i = 0; ports[i]; ++i) {
+		ins.push_back (ports[i]);
 	}
+
+	free (ports);
 }
 
 void
@@ -922,12 +920,11 @@ AudioEngine::get_physical_audio_outputs (vector<string>& outs)
 		return;
 	}
 
-	if (ports) {
-		for (i = 0; ports[i]; ++i) {
-			outs.push_back (ports[i]);
-		}
-		free (ports);
+	for (i = 0; ports[i]; ++i) {
+		outs.push_back (ports[i]);
 	}
+
+	free (ports);
 }
 
 string
@@ -938,15 +935,17 @@ AudioEngine::get_nth_physical_audio (uint32_t n, int flag)
 	uint32_t i;
 	string ret;
 
-	ports = jack_get_ports (_priv_jack, NULL, JACK_DEFAULT_AUDIO_TYPE, JackPortIsPhysical|flag);
-	
+	if ((ports = jack_get_ports (_priv_jack, NULL, JACK_DEFAULT_AUDIO_TYPE, JackPortIsPhysical|flag)) == 0) {
+		return ret;
+	}
+
 	for (i = 0; i < n && ports[i]; ++i);
 
 	if (ports[i]) {
 		ret = ports[i];
 	}
 
-	free ((char *) ports);
+	free (ports);
 
 	return ret;
 }
