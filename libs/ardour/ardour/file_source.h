@@ -46,7 +46,7 @@ public:
 	bool                 is_embedded () const { return _is_embedded; }
 	uint16_t             channel()      const { return _channel; }
 
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 
 	int set_source_name (const Glib::ustring& newname, bool destructive);
 

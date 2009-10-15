@@ -80,7 +80,7 @@ class UIConfiguration : public PBD::Stateful
 	int save_state ();
 	int load_defaults ();
 
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 	XMLNode& get_state (void);
 	XMLNode& get_variables (std::string);
 	void set_variables (const XMLNode&);

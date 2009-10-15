@@ -353,6 +353,10 @@ Session::destroy ()
 
 	delete state_tree;
 
+	/* reset dynamic state version back to default */
+	
+	Stateful::loading_state_version = 0;
+
 	terminate_butler_thread ();
 	//terminate_midi_thread ();
 
@@ -547,7 +551,7 @@ Session::when_engine_running ()
 
 			/* existing state for Click */
 
-			if (_click_io->set_state (*child->children().front()) == 0) {
+			if (_click_io->set_state (*child->children().front(), Stateful::loading_state_version) == 0) {
 
 				_clicking = Config->get_clicking ();
 

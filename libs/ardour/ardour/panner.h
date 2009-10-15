@@ -73,7 +73,7 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 	sigc::signal<void> Changed;      /* for position */
 	sigc::signal<void> StateChanged; /* for mute */
 
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 	virtual XMLNode& state (bool full_state) = 0;
 
 	Panner & get_parent() { return parent; }
@@ -150,7 +150,7 @@ class EqualPowerStereoPanner : public BaseStereoPanner
 
 	XMLNode& state (bool full_state); 
 	XMLNode& get_state (void); 
-	int      set_state (const XMLNode&, int version = 3000);
+	int      set_state (const XMLNode&, int version);
 
   private:
 	void update ();
@@ -171,7 +171,7 @@ class Multi2dPanner : public StreamPanner
 
 	XMLNode& state (bool full_state);
 	XMLNode& get_state (void);
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 
 	/* old school automation loading */
 
@@ -228,7 +228,7 @@ public:
 
 	XMLNode& get_state (void);
 	XMLNode& state (bool full);
-	int      set_state (const XMLNode&, int version = 3000);
+	int      set_state (const XMLNode&, int version);
 
 	static bool equivalent (pan_t a, pan_t b) {
 		return fabsf (a - b) < 0.002; // about 1 degree of arc for a stereo panner

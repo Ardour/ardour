@@ -129,7 +129,7 @@ Keyboard::Keyboard ()
 	snooper_id = gtk_key_snooper_install (_snooper, (gpointer) this);
 
 	XMLNode* node = ARDOUR_UI::instance()->keyboard_settings();
-	set_state (*node);
+	set_state (*node, Stateful::loading_state_version);
 }
 
 Keyboard::~Keyboard ()

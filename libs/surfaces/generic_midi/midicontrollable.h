@@ -64,7 +64,7 @@ class MIDIControllable : public PBD::Stateful
 	std::string control_description() const { return _control_description; }
 
 	XMLNode& get_state (void);
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 
 	void bind_midi (MIDI::channel_t, MIDI::eventType, MIDI::byte);
 	MIDI::channel_t get_control_channel () { return control_channel; }

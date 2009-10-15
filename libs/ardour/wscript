@@ -19,6 +19,9 @@ LIBARDOUR_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 # micro increment <=> no interface changes
 LIBARDOUR_LIB_VERSION = '3.0.0'
 
+# default state file version for this build
+CURRENT_SESSION_FILE_VERSION = 3000
+
 # Variables for 'waf dist'
 APPNAME = 'libardour'
 VERSION = LIBARDOUR_VERSION
@@ -223,6 +226,8 @@ def configure(conf):
 
 	conf.define('HAVE_RUBBERBAND', 1) # controls whether we think we have it
 	conf.define('USE_RUBBERBAND', 1)  # controls whether we actually use it
+
+	conf.define('CURRENT_SESSION_FILE_VERSION', CURRENT_SESSION_FILE_VERSION)
 
 	conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H')
 	conf.check(header_name='wordexp.h', define_name='HAVE_WORDEXP')

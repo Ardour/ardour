@@ -86,7 +86,7 @@ UIConfiguration::load_defaults ()
 			return -1;
 		}
 
-		if (set_state (*tree.root())) {
+		if (set_state (*tree.root(), Stateful::loading_state_version)) {
 			error << string_compose(_("Ardour: default ui configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 			return -1;
 		}
@@ -116,7 +116,7 @@ UIConfiguration::load_state ()
 			return -1;
 		}
 
-		if (set_state (*tree.root())) {
+		if (set_state (*tree.root(), Stateful::loading_state_version)) {
 			error << string_compose(_("Ardour: default ui configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 			return -1;
 		}
@@ -139,7 +139,7 @@ UIConfiguration::load_state ()
 			return -1;
 		}
 
-		if (set_state (*tree.root())) {
+		if (set_state (*tree.root(), Stateful::loading_state_version)) {
 			error << string_compose(_("Ardour: user ui configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 			return -1;
 		}

@@ -298,7 +298,7 @@ Region::Region (const SourceList& srcs, const XMLNode& node)
 {
 	use_sources (srcs);
 
-	if (set_state (node)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
 	}
 
@@ -328,7 +328,7 @@ Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 {
 	_sources.push_back (src);
 
-	if (set_state (node)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
 	}
 
@@ -1172,7 +1172,7 @@ Region::get_state ()
 }
 
 int
-Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
+Region::set_live_state (const XMLNode& node, int version, Change& what_changed, bool send)
 {
 	const XMLNodeList& nlist = node.children();
 	const XMLProperty *prop;
@@ -1355,7 +1355,7 @@ Region::set_state (const XMLNode& node, int version)
 
 	_first_edit = EditChangesNothing;
 
-	set_live_state (node, what_changed, true);
+	set_live_state (node, version, what_changed, true);
 
 	return 0;
 }

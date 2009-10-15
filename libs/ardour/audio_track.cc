@@ -57,9 +57,9 @@ AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode 
 }
 
 AudioTrack::AudioTrack (Session& sess, const XMLNode& node, int version)
-	: Track (sess, node, version)
+	: Track (sess, node)
 {
-	_set_state (node, version, false);
+	_set_state (node, Stateful::loading_state_version, false);
 }
 
 AudioTrack::~AudioTrack ()
@@ -300,7 +300,7 @@ AudioTrack::_set_state (const XMLNode& node, int version, bool call_base)
 		child = *niter;
 
 		if (child->name() == X_("recenable")) {
-			_rec_enable_control->set_state (*child);
+			_rec_enable_control->set_state (*child, version);
 			_session.add_controllable (_rec_enable_control);
 		}
 	}
@@ -809,7 +809,7 @@ AudioTrack::unfreeze ()
 			for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 				for (vector<FreezeRecordProcessorInfo*>::iterator ii = _freeze_record.processor_info.begin(); ii != _freeze_record.processor_info.end(); ++ii) {
 					if ((*ii)->id == (*i)->id()) {
-						(*i)->set_state (((*ii)->state));
+						(*i)->set_state (((*ii)->state), Stateful::current_state_version);
 						break;
 					}
 				}

@@ -126,7 +126,7 @@ class AudioDiskstream : public Diskstream
 	/* stateful */
 
 	XMLNode& get_state(void);
-	int      set_state(const XMLNode& node, int version = 3000);
+	int      set_state(const XMLNode& node, int version);
 
 	void monitor_input (bool);
 

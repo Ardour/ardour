@@ -371,7 +371,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 				
 				if (c) {
 					MIDIControllable* mc = new MIDIControllable (*_port, *c);
-					if (mc->set_state (**niter) == 0) {
+					if (mc->set_state (**niter, version) == 0) {
 						controllables.insert (mc);
 					}
 					

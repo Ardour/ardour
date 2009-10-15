@@ -68,7 +68,7 @@ Source::Source (Session& s, const XMLNode& node)
 	_analysed = false;
 	_in_use = 0;
 
-	if (set_state (node) || _type == DataType::NIL) {
+	if (set_state (node, Stateful::loading_state_version) || _type == DataType::NIL) {
 		throw failed_constructor();
 	}
 

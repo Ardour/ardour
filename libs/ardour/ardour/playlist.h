@@ -124,7 +124,7 @@ class Playlist : public SessionObject,
 	void foreach_region (sigc::slot<void, boost::shared_ptr<Region> >);
 
 	XMLNode& get_state ();
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 	XMLNode& get_template ();
 
 	sigc::signal<void,bool> InUse;

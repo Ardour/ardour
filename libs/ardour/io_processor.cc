@@ -152,7 +152,7 @@ IOProcessor::set_state (const XMLNode& node, int version)
 	const XMLProperty *prop;
 	const XMLNode *io_node = 0;
 
-	Processor::set_state(node);
+	Processor::set_state(node, version);
 
 	if ((prop = node.property ("own-input")) != 0) {
 		_own_input = string_is_affirmative (prop->value());
@@ -176,7 +176,7 @@ IOProcessor::set_state (const XMLNode& node, int version)
 		}
 
 		if (io_node) {
-			_input->set_state(*io_node);
+			_input->set_state(*io_node, version);
 
 			// legacy sessions: use IO name
 			if ((prop = node.property ("name")) == 0) {
@@ -198,7 +198,7 @@ IOProcessor::set_state (const XMLNode& node, int version)
 		}
 
 		if (io_node) {
-			_output->set_state(*io_node);
+			_output->set_state(*io_node, version);
 
 			// legacy sessions: use IO name
 			if ((prop = node.property ("name")) == 0) {

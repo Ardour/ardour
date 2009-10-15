@@ -468,7 +468,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	static std::vector<std::string*>* possible_states (std::string path);
 
 	XMLNode& get_state();
-	int      set_state(const XMLNode& node, int version = 3000); // not idempotent
+	int      set_state(const XMLNode& node, int version); // not idempotent
 	XMLNode& get_template();
 
 	/// The instant xml file is written to the session directory
@@ -849,7 +849,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	public:
 		GlobalRouteStateCommand (Session&, void*);
 		GlobalRouteStateCommand (Session&, const XMLNode& node);
-		int set_state (const XMLNode&, int version = 3000);
+		int set_state (const XMLNode&, int version);
 		XMLNode& get_state ();
 
 	protected:
@@ -899,7 +899,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		void operator()();
 		void undo();
 		XMLNode &get_state();
-		int set_state (const XMLNode&, int version = 3000);
+		int set_state (const XMLNode&, int version);
 		void mark();
 
 	protected:
@@ -1170,8 +1170,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	std::string _current_snapshot_name;
 
-	XMLTree* state_tree;
-	bool     state_was_pending;
+	XMLTree*         state_tree;
+	bool             state_was_pending;
 	StateOfTheState _state_of_the_state;
 
 	void     auto_save();

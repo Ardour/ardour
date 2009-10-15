@@ -157,7 +157,7 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 	initialize();
 	_active = true;
 
-	if (set_state (node)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
 	}
 }

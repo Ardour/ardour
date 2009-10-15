@@ -81,12 +81,12 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
-PluginInsert::PluginInsert (Session& s, const XMLNode& node, int version)
+PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 	: Processor (s, "unnamed plugin insert"),
           _signal_analysis_collected_nframes(0),
           _signal_analysis_collect_nframes_max(0)
 {
-	if (set_state (node, version)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
 	}
 
@@ -836,7 +836,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 					data().control(Evoral::Parameter(PluginAutomation, 0, port_id), true));
 
 			if (!child->children().empty()) {
-				c->alist()->set_state (*child->children().front());
+				c->alist()->set_state (*child->children().front(), version);
 			} else {
 				if ((cprop = child->property("auto")) != 0) {
 

@@ -51,7 +51,7 @@ class Controllable : public PBD::StatefulDestructible {
 
 	sigc::signal<void> Changed;
 
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 	XMLNode& get_state ();
 
 	std::string name()      const { return _name; }

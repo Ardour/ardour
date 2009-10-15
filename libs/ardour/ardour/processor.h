@@ -91,7 +91,7 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 
 	virtual XMLNode& state (bool full);
 	XMLNode& get_state (void);
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 	
 	void *get_gui () const { return _gui; }
 	void  set_gui (void *p) { _gui = p; }

@@ -180,7 +180,7 @@ class Editor : public PublicEditor
 	void redo (uint32_t n = 1);
 
 	XMLNode& get_state ();
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 
 	void set_mouse_mode (Editing::MouseMode, bool force=true);
 	void step_mouse_mode (bool next);

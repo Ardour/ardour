@@ -67,7 +67,7 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 }
 
 MidiTrack::MidiTrack (Session& sess, const XMLNode& node, int version)
-	: Track (sess, node, version, DataType::MIDI)
+	: Track (sess, node, DataType::MIDI)
 	, _immediate_events(1024) // FIXME: size?
 	, _step_edit_ring_buffer(64) // FIXME: size?
 	, _note_mode(Sustained)
@@ -75,7 +75,7 @@ MidiTrack::MidiTrack (Session& sess, const XMLNode& node, int version)
 	, _default_channel (0)
 	, _midi_thru (true)
 {
-	_set_state (node, version, false);
+	_set_state (node, Stateful::loading_state_version, false);
 }
 
 MidiTrack::~MidiTrack ()
@@ -232,7 +232,7 @@ MidiTrack::_set_state (const XMLNode& node, int version, bool call_base)
 		child = *niter;
 
 		if (child->name() == X_("recenable")) {
-			_rec_enable_control->set_state (*child);
+			_rec_enable_control->set_state (*child, version);
 			_session.add_controllable (_rec_enable_control);
 		}
 	}

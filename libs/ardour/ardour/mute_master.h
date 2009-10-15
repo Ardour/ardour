@@ -65,7 +65,7 @@ class MuteMaster : public AutomationControl
 	sigc::signal<void> MutePointChanged;
 
 	XMLNode& get_state();
-	int set_state(const XMLNode&, int version = 3000);
+	int set_state(const XMLNode&, int version);
 
   private:
 	AutomationList* _automation;

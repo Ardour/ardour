@@ -167,7 +167,7 @@ Send::set_state (const XMLNode& node, int version)
 
 	/* XXX need to load automation state & data for amp */
 
-	Delivery::set_state (*insert_node);
+	Delivery::set_state (*insert_node, version);
 
 	return 0;
 }

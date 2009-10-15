@@ -131,7 +131,7 @@ public:
 
 	XMLNode& get_state ();
 	
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 	
 private:
 	Session& _session;

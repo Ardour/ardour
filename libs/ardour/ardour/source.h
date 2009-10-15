@@ -76,7 +76,7 @@ class Source : public SessionObject, public boost::noncopyable
 	virtual void session_saved() {}
 
 	XMLNode& get_state ();
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 	
 	bool         destructive() const       { return (_flags & Destructive); }
 	bool         writable () const         { return (_flags & Writable); }

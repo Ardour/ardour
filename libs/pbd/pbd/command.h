@@ -38,7 +38,7 @@ public:
 	virtual void redo() { (*this)(); }
 	
 	virtual XMLNode &get_state();
-	virtual int set_state(const XMLNode&, int version = 3000) { /* noop */ return 0; }
+	virtual int set_state(const XMLNode&, int version) { /* noop */ return 0; }
 
 protected:
 	Command() {}

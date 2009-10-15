@@ -49,7 +49,7 @@ InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, boost:
 InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node)
 	: Send (s, mm, node, Delivery::Aux /* will be reset in set_state() */)
 {
-	set_state (node);
+	set_state (node, Stateful::loading_state_version);
 }
 
 InternalSend::~InternalSend ()
@@ -175,7 +175,7 @@ InternalSend::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 
-	Send::set_state (node);
+	Send::set_state (node, version);
 
 	if ((prop = node.property ("target")) != 0) {
 

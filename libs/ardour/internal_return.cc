@@ -133,7 +133,7 @@ InternalReturn::get_state()
 int
 InternalReturn::set_state (const XMLNode& node, int version)
 {
-	return Return::set_state (node);
+	return Return::set_state (node, version);
 }
 
 bool

@@ -164,7 +164,7 @@ Session::GlobalRouteStateCommand::GlobalRouteStateCommand (Session& s, void* p)
 Session::GlobalRouteStateCommand::GlobalRouteStateCommand (Session& s, const XMLNode& node)
 	: sess (s), src (this)
 {
-	if (set_state (node)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
 	}
 }
@@ -389,7 +389,7 @@ Session::GlobalMeteringStateCommand::GlobalMeteringStateCommand(Session &s, void
 Session::GlobalMeteringStateCommand::GlobalMeteringStateCommand (Session& s, const XMLNode& node)
 	: sess (s), src (this)
 {
-	if (set_state (node)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
 	}
 }

@@ -112,7 +112,7 @@ MidiModel::DeltaCommand::DeltaCommand(boost::shared_ptr<MidiModel> m, const XMLN
 	: _model(m)
 {
 	assert(_model);
-	set_state(node);
+	set_state(node, Stateful::loading_state_version);
 }
 
 void
@@ -321,7 +321,7 @@ MidiModel::DiffCommand::DiffCommand(boost::shared_ptr<MidiModel> m, const XMLNod
 	: _model(m)
 {
 	assert(_model);
-	set_state(node);
+	set_state(node, Stateful::loading_state_version);
 }
 
 void

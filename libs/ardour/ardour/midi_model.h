@@ -70,7 +70,7 @@ public:
 		void operator()();
 		void undo();
 		
-		int set_state (const XMLNode&, int version = 3000);
+		int set_state (const XMLNode&, int version);
 		XMLNode& get_state ();
 
 		void add(const boost::shared_ptr< Evoral::Note<TimeType> > note);
@@ -114,7 +114,7 @@ public:
 		void operator()();
 		void undo();
 		
-		int set_state (const XMLNode&, int version = 3000);
+		int set_state (const XMLNode&, int version);
 		XMLNode& get_state ();
 
 		void change (const boost::shared_ptr<Evoral::Note<TimeType> > note,

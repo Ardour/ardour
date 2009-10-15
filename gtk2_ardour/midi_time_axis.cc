@@ -136,7 +136,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
 
 	ensure_xml_node ();
 
-	set_state (*xml_node);
+	set_state (*xml_node, Stateful::loading_state_version);
 
 	_route->processors_changed.connect (mem_fun(*this, &MidiTimeAxisView::processors_changed));
 

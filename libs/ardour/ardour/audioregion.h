@@ -107,7 +107,7 @@ class AudioRegion : public Region
 	virtual nframes_t read_raw_internal (Sample*, sframes_t, nframes_t, int channel) const;
 
 	XMLNode& state (bool);
-	int      set_state (const XMLNode&, int version = 3000);
+	int      set_state (const XMLNode&, int version);
 
 	static void set_default_fade (float steepness, nframes_t len);
 	bool fade_in_is_default () const;
@@ -219,7 +219,7 @@ class AudioRegion : public Region
 
 	AudioRegion (Session& s, nframes_t, nframes_t, std::string name);
 
-	int set_live_state (const XMLNode&, Change&, bool send);
+	int set_live_state (const XMLNode&, int version, Change&, bool send);
 };
 
 } /* namespace ARDOUR */

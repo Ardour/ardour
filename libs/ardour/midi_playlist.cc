@@ -48,7 +48,7 @@ MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 	assert(prop && DataType(prop->value()) == DataType::MIDI);
 
 	in_set_state++;
-	set_state (node);
+	set_state (node, Stateful::loading_state_version);
 	in_set_state--;
 }
 
@@ -192,7 +192,7 @@ MidiPlaylist::set_state (const XMLNode& node, int version)
 	in_set_state++;
 	freeze ();
 
-	Playlist::set_state (node);
+	Playlist::set_state (node, version);
 
 	thaw();
 	in_set_state--;

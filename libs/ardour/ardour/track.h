@@ -82,7 +82,7 @@ class Track : public Route
 
 	XMLNode&    get_state();
 	XMLNode&    get_template();
-	virtual int set_state (const XMLNode&, int version = 3000) = 0;
+	virtual int set_state (const XMLNode&, int version) = 0;
 	static void zero_diskstream_id_in_xml (XMLNode&);
 
 	boost::shared_ptr<PBD::Controllable> rec_enable_control() { return _rec_enable_control; }
@@ -96,7 +96,7 @@ class Track : public Route
 	sigc::signal<void> FreezeChange;
 
   protected:
-	Track (Session& sess, const XMLNode& node, int, DataType default_type = DataType::AUDIO);
+	Track (Session& sess, const XMLNode& node, DataType default_type = DataType::AUDIO);
 
 	virtual XMLNode& state (bool full) = 0;
 

@@ -385,7 +385,7 @@ RouteTimeAxisView::automation_click ()
 int
 RouteTimeAxisView::set_state (const XMLNode& node, int version)
 {
-	TimeAxisView::set_state (node);
+	TimeAxisView::set_state (node, version);
 
 	XMLNodeList kids = node.children();
 	XMLNodeConstIterator iter;

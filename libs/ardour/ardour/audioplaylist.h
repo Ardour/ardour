@@ -50,7 +50,7 @@ class AudioPlaylist : public ARDOUR::Playlist
 
         nframes_t read (Sample *dst, Sample *mixdown, float *gain_buffer, nframes_t start, nframes_t cnt, uint32_t chan_n=0);
 
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 
 	sigc::signal<void,boost::shared_ptr<Crossfade> > NewCrossfade;
 

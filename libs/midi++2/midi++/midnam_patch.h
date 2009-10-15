@@ -102,7 +102,7 @@ public:
 	const PatchPrimaryKey&   patch_primary_key()   const { return _id; }
 
 	XMLNode& get_state (void);
-	int      set_state (const XMLNode&, int version = 3000);
+	int      set_state (const XMLNode&, int version);
 
 private:
 	std::string        _number;
@@ -129,7 +129,7 @@ public:
 	const PatchPrimaryKey* patch_primary_key()  const { return _id; }
 
 	XMLNode& get_state (void);
-	int      set_state (const XMLNode&, int version = 3000);
+	int      set_state (const XMLNode&, int version);
 
 private:
 	std::string       _name;
@@ -203,7 +203,7 @@ public:
 	}
 
 	XMLNode& get_state (void);
-	int      set_state (const XMLNode& a_node, int version = 3000);
+	int      set_state (const XMLNode& a_node, int version);
 
 private:
 	std::string _name;
@@ -227,7 +227,7 @@ public:
 	void set_number(const std::string a_number)   { _number = a_number; }
 
 	XMLNode& get_state (void);
-	int      set_state (const XMLNode&, int version = 3000);
+	int      set_state (const XMLNode&, int version);
 
 private:
 	std::string _number;
@@ -248,7 +248,7 @@ public:
 	const Notes& notes() const { return _notes; }
 
 	XMLNode& get_state (void);
-	int      set_state (const XMLNode&, int version = 3000);
+	int      set_state (const XMLNode&, int version);
 
 private:
 	std::string _name;
@@ -266,7 +266,7 @@ public:
 
 	
 	XMLNode& get_state (void);
-	int      set_state (const XMLNode&, int version = 3000);
+	int      set_state (const XMLNode&, int version);
 	
 	std::string channel_name_set_name_by_channel(uint8_t channel) {
 		assert(channel <= 15);
@@ -317,7 +317,7 @@ public:
 	}
 	
 	XMLNode& get_state (void);
-	int      set_state (const XMLNode&, int version = 3000);
+	int      set_state (const XMLNode&, int version);
 	
 private:
 	std::string           _manufacturer;
@@ -334,8 +334,8 @@ public:
 	// Maps Model names to MasterDeviceNames
 	typedef std::map<std::string, boost::shared_ptr<MasterDeviceNames> > MasterDeviceNamesList;
 	
-	MIDINameDocument() {};
-	MIDINameDocument(const std::string &filename) : _document(XMLTree(filename)) { set_state(*_document.root()); };
+	MIDINameDocument() {}
+        MIDINameDocument(const std::string &filename);
 	virtual ~MIDINameDocument() {};
 
 	const std::string& author() const { return _author; }
@@ -346,7 +346,7 @@ public:
 	const MasterDeviceNames::Models& all_models() const { return _all_models; }
 		
 	XMLNode& get_state (void);
-	int      set_state (const XMLNode&, int version = 3000);
+	int      set_state (const XMLNode&, int version);
 
 private:
 	std::string                   _author;

@@ -90,7 +90,7 @@ AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
 	in_set_state = true;
 	init (Recordable);
 
-	if (set_state (node)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		in_set_state = false;
 		throw failed_constructor();
 	}

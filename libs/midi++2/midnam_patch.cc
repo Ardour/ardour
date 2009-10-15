@@ -144,7 +144,7 @@ NoteNameList::set_state (const XMLNode& node, int version)
 					node.find("//Note");
 	for (XMLSharedNodeList::const_iterator i = notes->begin(); i != notes->end(); ++i) {
 		boost::shared_ptr<Note> note(new Note());
-		note->set_state(*(*i));
+		note->set_state(*(*i), version);
 		_notes.push_back(note);
 	}
 	
@@ -184,7 +184,7 @@ PatchBank::set_state (const XMLNode& node, int version)
 	const XMLNodeList patches = patch_name_list->children();
 	for (XMLNodeList::const_iterator i = patches.begin(); i != patches.end(); ++i) {
 		boost::shared_ptr<Patch> patch(new Patch(this));
-		patch->set_state(*(*i));
+		patch->set_state(*(*i), version);
 		_patch_name_list.push_back(patch);
 	}
 	
@@ -251,7 +251,7 @@ ChannelNameSet::set_state (const XMLNode& node, int version)
 		if (node->name() == "PatchBank") {
 			// cerr << "got PatchBank" << endl;
 			boost::shared_ptr<PatchBank> bank(new PatchBank());
-			bank->set_state(*node);
+			bank->set_state(*node, version);
 			_patch_banks.push_back(bank);
 			const PatchBank::PatchNameList& patches = bank->patch_name_list();
 			for (PatchBank::PatchNameList::const_iterator patch = patches.begin();
@@ -336,7 +336,7 @@ MasterDeviceNames::set_state(const XMLNode& a_node, int version)
 	     i != custom_device_modes->end();
 	     ++i) {
 		boost::shared_ptr<CustomDeviceMode> custom_device_mode(new CustomDeviceMode());
-		custom_device_mode->set_state(*(*i));
+		custom_device_mode->set_state(*(*i), version);
 		
 		_custom_device_modes[custom_device_mode->name()] = custom_device_mode;
 		_custom_device_mode_names.push_back(custom_device_mode->name());
@@ -350,7 +350,7 @@ MasterDeviceNames::set_state(const XMLNode& a_node, int version)
 	     ++i) {
 		boost::shared_ptr<ChannelNameSet> channel_name_set(new ChannelNameSet());
 		// cerr << "MasterDeviceNames::set_state ChannelNameSet before set_state" << endl;
-		channel_name_set->set_state(*(*i));
+		channel_name_set->set_state(*(*i), version);
 		_channel_name_sets[channel_name_set->name()] = channel_name_set;
 	}
 
@@ -361,7 +361,7 @@ MasterDeviceNames::set_state(const XMLNode& a_node, int version)
 	     i != note_name_lists->end();
 	     ++i) {
 		boost::shared_ptr<NoteNameList> note_name_list(new NoteNameList());
-		note_name_list->set_state(*(*i));
+		note_name_list->set_state(*(*i), version);
 		_note_name_lists.push_back(note_name_list);
 	}
 
@@ -373,6 +373,12 @@ MasterDeviceNames::get_state(void)
 {
 	static XMLNode nothing("<nothing>");
 	return nothing;
+}
+
+MIDINameDocument::MIDINameDocument (const string& filename)
+	: _document(XMLTree(filename)) 
+{ 
+	set_state(*_document.root(), 0); 
 }
 
 int
@@ -391,7 +397,7 @@ MIDINameDocument::set_state(const XMLNode& a_node, int version)
 	     ++i) {
 		boost::shared_ptr<MasterDeviceNames> master_device_names(new MasterDeviceNames());
 		// cerr << "MIDINameDocument::set_state before masterdevicenames->set_state" << endl;
-		master_device_names->set_state(*(*i));
+		master_device_names->set_state(*(*i), version);
 		// cerr << "MIDINameDocument::set_state after masterdevicenames->set_state" << endl;
 		
 		for (MasterDeviceNames::Models::const_iterator model = master_device_names->models().begin();

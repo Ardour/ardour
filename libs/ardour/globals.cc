@@ -298,6 +298,12 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);
 
+	/* provide a state version for the few cases that need it and are not
+	   driven by reading state from disk (e.g. undo/redo)
+	*/
+
+	Stateful::current_state_version = CURRENT_SESSION_FILE_VERSION;
+
 	setup_enum_writer ();
 
 	// allow ardour the absolute maximum number of open files
@@ -360,7 +366,7 @@ ARDOUR::init_post_engine ()
 
 	XMLNode* node;
 	if ((node = Config->control_protocol_state()) != 0) {
-		ControlProtocolManager::instance().set_state (*node);
+		ControlProtocolManager::instance().set_state (*node, Stateful::loading_state_version);
 	}
 }
 

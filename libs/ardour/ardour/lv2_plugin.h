@@ -115,7 +115,7 @@ class LV2Plugin : public ARDOUR::Plugin
 	static uint32_t midi_event_type() { return _midi_event_type; }
 
 	XMLNode& get_state();
-	int      set_state(const XMLNode& node);
+	int      set_state(const XMLNode& node, int version);
 	bool     save_preset(std::string uri);
 	bool     load_preset(const std::string uri);
 	virtual std::vector<Plugin::PresetRecord> get_presets();

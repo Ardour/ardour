@@ -100,7 +100,7 @@ AutomationList::AutomationList (const XMLNode& node, Evoral::Parameter id)
 	_state = Off;
 	_style = Absolute;
 
-	set_state (node);
+	set_state (node, Stateful::loading_state_version);
 
 	if (id) {
 		_parameter = id;
@@ -368,7 +368,7 @@ AutomationList::set_state (const XMLNode& node, int version)
 
 		if ((nsos = node.child (X_("AutomationList")))) {
 			/* new school in old school clothing */
-			return set_state (*nsos);
+			return set_state (*nsos, version);
 		}
 
 		/* old school */

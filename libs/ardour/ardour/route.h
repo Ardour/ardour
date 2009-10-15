@@ -66,9 +66,8 @@ class Route : public SessionObject, public AutomatableControls
 		ControlOut = 0x4
 	};
 
-	Route (Session&, std::string name, Flag flags = Flag(0),
-	       DataType default_type = DataType::AUDIO);
-	Route (Session&, const XMLNode&, int, DataType default_type = DataType::AUDIO);
+	Route (Session&, std::string name, Flag flags = Flag(0), DataType default_type = DataType::AUDIO);
+	Route (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
 	virtual ~Route();
 
 	boost::shared_ptr<IO> input() const { return _input; }
@@ -251,7 +250,7 @@ class Route : public SessionObject, public AutomatableControls
 	/* stateful */
 
 	XMLNode& get_state();
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 	virtual XMLNode& get_template();
 
 	XMLNode& get_processor_state ();

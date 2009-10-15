@@ -82,7 +82,7 @@ Processor::Processor (Session& session, const XMLNode& node)
 	, _configured(false)
 	, _gui(0)
 {
-	set_state (node);
+	set_state (node, Stateful::loading_state_version);
 	_pending_active = _active;
 }
 

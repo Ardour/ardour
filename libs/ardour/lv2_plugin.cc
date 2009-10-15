@@ -354,7 +354,7 @@ LV2Plugin::has_editor() const
 }
 
 int
-LV2Plugin::set_state(const XMLNode& node)
+LV2Plugin::set_state(const XMLNode& node, int version)
 {
 	XMLNodeList nodes;
 	XMLProperty *prop;

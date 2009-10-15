@@ -496,18 +496,18 @@ EqualPowerStereoPanner::set_state (const XMLNode& node, int version)
 		set_position (pos, true);
 	}
 
-	StreamPanner::set_state (node);
+	StreamPanner::set_state (node, version);
 
 	for (XMLNodeConstIterator iter = node.children().begin(); iter != node.children().end(); ++iter) {
 
 		if ((*iter)->name() == X_("Controllable")) {
 			if ((prop = (*iter)->property("name")) != 0 && prop->value() == "panner") {
-				_control->set_state (**iter);
+				_control->set_state (**iter, version);
 			}
 
 		} else if ((*iter)->name() == X_("Automation")) {
 
-			_control->alist()->set_state (*((*iter)->children().front()));
+			_control->alist()->set_state (*((*iter)->children().front()), version);
 
 			if (_control->alist()->automation_state() != Off) {
 				set_position (_control->list()->eval (parent.session().transport_frame()));
@@ -1154,7 +1154,7 @@ Panner::set_state (const XMLNode& node, int version)
 						sp = pan_plugins[i].factory (*this, Evoral::Parameter(PanAutomation, 0, num_panners));
 						num_panners++;
 
-						if (sp->set_state (**niter) == 0) {
+						if (sp->set_state (**niter, version) == 0) {
 							_streampanners.push_back (sp);
 						}
 

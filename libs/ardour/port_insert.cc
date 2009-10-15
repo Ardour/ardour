@@ -48,12 +48,12 @@ PortInsert::PortInsert (Session& s, boost::shared_ptr<MuteMaster> mm)
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
-PortInsert::PortInsert (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node, int version)
+PortInsert::PortInsert (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node)
 	: IOProcessor (s, true, true, "unnamed port insert")
 	, _out (new Delivery (s, _output, mm, _name, Delivery::Insert))
 
 {
-	if (set_state (node, version)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
 	}
 
@@ -138,7 +138,7 @@ PortInsert::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	Processor::set_state (*insert_node);
+	Processor::set_state (*insert_node, version);
 
 	return 0;
 }

@@ -75,7 +75,7 @@ class MidiDiskstream : public Diskstream
 
 	/* stateful */
 	XMLNode& get_state(void);
-	int set_state(const XMLNode&, int version = 3000);
+	int set_state(const XMLNode&, int version);
 
 	void monitor_input (bool);
 

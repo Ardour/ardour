@@ -15,10 +15,10 @@ ARDOUR::UserBundle::UserBundle (std::string const & n)
 
 }
 
-ARDOUR::UserBundle::UserBundle (XMLNode const & x, bool i)
+ARDOUR::UserBundle::UserBundle (XMLNode const & node, bool i)
 	: Bundle (i)
 {
-	if (set_state (x)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
 	}
 }

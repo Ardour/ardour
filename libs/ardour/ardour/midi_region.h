@@ -68,7 +68,7 @@ class MidiRegion : public Region
 			NoteMode  mode = Sustained) const;
 
 	XMLNode& state (bool);
-	int      set_state (const XMLNode&, int version = 3000);
+	int      set_state (const XMLNode&, int version);
 
 	int separate_by_channel (ARDOUR::Session&, std::vector< boost::shared_ptr<Region> >&) const;
 
@@ -118,7 +118,7 @@ class MidiRegion : public Region
 
   protected:
 
-	int set_live_state (const XMLNode&, Change&, bool send);
+	int set_live_state (const XMLNode&, int version, Change&, bool send);
 };
 
 } /* namespace ARDOUR */

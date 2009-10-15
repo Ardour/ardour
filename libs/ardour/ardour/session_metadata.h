@@ -107,7 +107,7 @@ class SessionMetadata : public PBD::StatefulDestructible
 
 	/*** Serialization ***/
 	XMLNode & get_state ();
-	int set_state (const XMLNode &, int version = 3000);
+	int set_state (const XMLNode &, int version);
 
   private:
 

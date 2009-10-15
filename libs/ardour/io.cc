@@ -93,7 +93,7 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 	_active = true;
 	pending_state_node = 0;
 
-	set_state (node);
+	set_state (node, Stateful::loading_state_version);
 	setup_bundles ();
 }
 

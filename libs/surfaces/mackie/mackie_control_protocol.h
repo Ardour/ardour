@@ -78,7 +78,7 @@ class MackieControlProtocol
 	int set_active (bool yn);
 
 	XMLNode& get_state ();
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
   
 	static bool probe();
 	

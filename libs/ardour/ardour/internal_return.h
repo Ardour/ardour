@@ -38,7 +38,7 @@ class InternalReturn : public Return
 
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
-	int set_state(const XMLNode&, int version = 3000);
+	int set_state(const XMLNode&, int version);
 
 	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 	bool configure_io (ChanCount in, ChanCount out);

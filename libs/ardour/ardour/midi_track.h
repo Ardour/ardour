@@ -59,7 +59,7 @@ public:
 	boost::shared_ptr<Region>  bounce_range (
 			nframes_t start, nframes_t end, InterThreadInfo&, bool enable_processing);
 
-	int set_state(const XMLNode&, int version = 3000);
+	int set_state(const XMLNode&, int version);
 
 	void midi_panic(void);
 	bool write_immediate_event(size_t size, const uint8_t* buf);

@@ -74,7 +74,7 @@ ControlProtocolManager::set_session (Session& s)
 			(*i)->requested = false;
 
 			if ((*i)->protocol && (*i)->state) {
-				(*i)->protocol->set_state (*(*i)->state);
+				(*i)->protocol->set_state (*(*i)->state, Stateful::loading_state_version);
 			}
 		}
 	}

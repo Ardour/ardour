@@ -194,7 +194,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 			_control->parameter());
 
 	if (xml_node) {
-		set_state (*xml_node);
+		set_state (*xml_node, Stateful::loading_state_version);
 	}
 
 	/* ask for notifications of any new RegionViews */
@@ -867,7 +867,7 @@ AutomationTimeAxisView::color_handler ()
 int
 AutomationTimeAxisView::set_state (const XMLNode& node, int version)
 {
-	TimeAxisView::set_state (node);
+	TimeAxisView::set_state (node, version);
 
 	XMLProperty const * type = node.property ("automation-id");
 	if (type && type->value () == ARDOUR::EventTypeMap::instance().to_symbol (_control->parameter())) {

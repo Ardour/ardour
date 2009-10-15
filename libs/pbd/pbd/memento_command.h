@@ -54,13 +54,13 @@ public:
 
 	void operator() () {
 		if (after) {
-			obj.set_state(*after); 
+			obj.set_state(*after, Stateful::current_state_version); 
 		}
 	}
 
 	void undo() { 
 		if (before) {
-			obj.set_state(*before); 
+			obj.set_state(*before, Stateful::current_state_version); 
 		}
 	}
 

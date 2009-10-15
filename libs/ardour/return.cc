@@ -58,7 +58,7 @@ Return::Return (Session& s, const XMLNode& node, bool internal)
 	_amp.reset (new Amp (_session, boost::shared_ptr<MuteMaster>()));
 	_meter.reset (new PeakMeter (_session));
 
-	if (set_state (node)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
 	}
 
@@ -114,7 +114,7 @@ Return::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	IOProcessor::set_state (*insert_node);
+	IOProcessor::set_state (*insert_node, version);
 
 	return 0;
 }

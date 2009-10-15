@@ -6,7 +6,7 @@
   the Free Software Foundation; either version 2 of the License, or
   (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful,
+ This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
@@ -311,7 +311,7 @@ Session::second_stage_init (bool new_session)
 	// to call setup_raid_path() here.
 
 	if (state_tree) {
-		if (set_state (*state_tree->root())) {
+		if (set_state (*state_tree->root(), Stateful::loading_state_version)) {
 			return -1;
 		}
 	} else {
@@ -756,7 +756,7 @@ int
 Session::restore_state (string snapshot_name)
 {
 	if (load_state (snapshot_name) == 0) {
-		set_state (*state_tree->root());
+		set_state (*state_tree->root(), Stateful::loading_state_version);
 	}
 
 	return 0;
@@ -824,20 +824,20 @@ Session::load_state (string snapshot_name)
 	}
 
 	const XMLProperty* prop;
-	bool is_old = false; // session is _very_ old (pre-2.0)
 
 	if ((prop = root.property ("version")) == 0) {
 		/* no version implies very old version of Ardour */
-		is_old = true;
+		Stateful::loading_state_version = 1000;
 	} else {
-		int major_version;
-		major_version = atoi (prop->value().c_str()); // grab just the first number before the period
-		if (major_version < 2) {
-			is_old = true;
-		}
-	}
+		int major;
+		int minor;
+		int micro;
 
-	if (is_old) {
+		sscanf (prop->value().c_str(), "%d.%d.%d", &major, &minor, &micro);
+		Stateful::loading_state_version = (major * 1000) + minor;
+	}
+		
+	if (Stateful::loading_state_version < CURRENT_SESSION_FILE_VERSION) {
 
 		sys::path backup_path(_session_dir->root_path());
 
@@ -1212,7 +1212,7 @@ Session::set_state (const XMLNode& node, int version)
 	if (version >= 3000) {
 		if ((child = find_named_node (node, "Metadata")) == 0) {
 			warning << _("Session: XML state has no metadata section") << endmsg;
-		} else if (_metadata->set_state (*child)) {
+		} else if (_metadata->set_state (*child, version)) {
 			goto out;
 		}
 	}
@@ -1220,7 +1220,7 @@ Session::set_state (const XMLNode& node, int version)
 	if ((child = find_named_node (node, "Locations")) == 0) {
 		error << _("Session: XML state has no locations section") << endmsg;
 		goto out;
-	} else if (_locations.set_state (*child)) {
+	} else if (_locations.set_state (*child, version)) {
 		goto out;
 	}
 
@@ -1331,7 +1331,7 @@ Session::set_state (const XMLNode& node, int version)
 	if ((child = find_named_node (node, "TempoMap")) == 0) {
 		error << _("Session: XML state has no Tempo Map section") << endmsg;
 		goto out;
-	} else if (_tempo_map->set_state (*child)) {
+	} else if (_tempo_map->set_state (*child, version)) {
 		goto out;
 	}
 
@@ -1345,7 +1345,7 @@ Session::set_state (const XMLNode& node, int version)
 	if ((child = find_named_node (node, "Click")) == 0) {
 		warning << _("Session: XML state has no click section") << endmsg;
 	} else if (_click_io) {
-		_click_io->set_state (*child);
+		_click_io->set_state (*child, version);
 	}
 
 	if ((child = find_named_node (node, "ControlProtocols")) != 0) {
@@ -1419,7 +1419,7 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 			return ret;
 		}
 	} else {
-		boost::shared_ptr<Route> ret (new Route (*this, node, version));
+		boost::shared_ptr<Route> ret (new Route (*this, node));
 		return ret;
 	}
 }

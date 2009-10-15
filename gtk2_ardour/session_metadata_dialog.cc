@@ -709,6 +709,9 @@ SessionMetadataImporter::run ()
 		return;
 	}
 
+	/* XXX GET VERSION FROM TREE */
+	int version = 3000;
+
 	XMLNode * node = session_tree.root()->child ("Metadata");
 
 	if (!node) {
@@ -717,7 +720,7 @@ SessionMetadataImporter::run ()
 	}
 
 	ARDOUR::SessionMetadata data;
-	data.set_state (*node);
+	data.set_state (*node, version);
 
 	init_data ();
 	load_extra_data (data);

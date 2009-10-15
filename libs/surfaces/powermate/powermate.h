@@ -16,7 +16,7 @@ class PowermateControlProtocol : public ARDOUR::ControlProtocol
 	static bool probe ();
 
 	XMLNode& get_state ();
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 
   private:
 	

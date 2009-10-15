@@ -38,7 +38,7 @@ class Stateful {
 
 	virtual XMLNode& get_state (void) = 0;
 
-	virtual int set_state (const XMLNode&, int version = 3000) = 0;
+	virtual int set_state (const XMLNode&, int version) = 0;
 
 	/* Extra XML nodes */
 
@@ -46,6 +46,9 @@ class Stateful {
 	XMLNode *extra_xml (const std::string& str);
 
 	const PBD::ID& id() const { return _id; }
+
+	static int current_state_version;
+	static int loading_state_version;
 
   protected:
 

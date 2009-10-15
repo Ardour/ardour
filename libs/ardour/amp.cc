@@ -339,7 +339,7 @@ Amp::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 
-	Processor::set_state (node);
+	Processor::set_state (node, version);
 	prop = node.property ("gain");
 
 	if (prop) {

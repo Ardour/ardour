@@ -75,7 +75,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 	, _last_ev_time_frames(0)
 	, _smf_last_read_end (0)
 {
-	if (set_state(node)) {
+	if (set_state(node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
 	}
 
@@ -331,15 +331,15 @@ SMFSource::get_state ()
 int
 SMFSource::set_state (const XMLNode& node, int version)
 {
-	if (Source::set_state (node)) {
+	if (Source::set_state (node, version)) {
 		return -1;
 	}
 
-	if (MidiSource::set_state (node)) {
+	if (MidiSource::set_state (node, version)) {
 		return -1;
 	}
 
-	if (FileSource::set_state (node)) {
+	if (FileSource::set_state (node, version)) {
 		return -1;
 	}
 

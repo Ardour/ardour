@@ -72,7 +72,7 @@ public:
 	int setup_peakfile ();
 
 	XMLNode& get_state ();
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 
 	bool can_truncate_peaks() const { return !destructive(); }
 	bool can_be_analysed() const    { return _length > 0; }

@@ -114,7 +114,7 @@ public:
 	void remove_underlay (StreamView*);
 	void build_underlay_menu(Gtk::Menu*);
 	
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 	
 	/* This is a bit nasty to expose :/ */
 	struct RouteAutomationNode {

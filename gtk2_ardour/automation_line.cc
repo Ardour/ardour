@@ -1264,7 +1264,7 @@ int
 AutomationLine::set_state (const XMLNode &node, int version)
 {
 	/* function as a proxy for the model */
-	return alist->set_state (node);
+	return alist->set_state (node, version);
 }
 
 void

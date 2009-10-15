@@ -85,7 +85,7 @@ AudioSource::AudioSource (Session& s, const XMLNode& node)
 	peak_leftover_size = 0;
 	peak_leftovers = 0;
 
-	if (set_state (node)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
 	}
 }

@@ -236,7 +236,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 
 	init ();
 
-	if (set_state (node)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
 	}
 
@@ -255,7 +255,7 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 {
 	init ();
 
-	if (set_state (node)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
 	}
 
@@ -634,13 +634,13 @@ AudioRegion::state (bool full)
 }
 
 int
-AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool send)
+AudioRegion::set_live_state (const XMLNode& node, int version, Change& what_changed, bool send)
 {
 	const XMLNodeList& nlist = node.children();
 	const XMLProperty *prop;
 	LocaleGuard lg (X_("POSIX"));
 
-	Region::set_live_state (node, what_changed, false);
+	Region::set_live_state (node, version, what_changed, false);
 
 	uint32_t old_flags = _flags;
 
@@ -691,7 +691,7 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 
 			_envelope->clear ();
 
-			if ((prop = child->property ("default")) != 0 || _envelope->set_state (*child)) {
+			if ((prop = child->property ("default")) != 0 || _envelope->set_state (*child, version)) {
 				set_default_envelope ();
 			}
 
@@ -707,7 +707,7 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 			} else {
 				XMLNode* grandchild = child->child ("AutomationList");
 				if (grandchild) {
-					_fade_in->set_state (*grandchild);
+					_fade_in->set_state (*grandchild, version);
 				}
 			}
 
@@ -728,7 +728,7 @@ AudioRegion::set_live_state (const XMLNode& node, Change& what_changed, bool sen
 			} else {
 				XMLNode* grandchild = child->child ("AutomationList");
 				if (grandchild) {
-					_fade_out->set_state (*grandchild);
+					_fade_out->set_state (*grandchild, version);
 				}
 			}
 
@@ -758,7 +758,7 @@ AudioRegion::set_state (const XMLNode& node, int version)
 	   to handle the relevant stuff.
 	*/
 
-	return Region::set_state (node);
+	return Region::set_state (node, version);
 }
 
 void

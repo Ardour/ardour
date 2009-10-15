@@ -614,7 +614,7 @@ Editor::Editor ()
 	set_edit_point_preference (EditAtMouse, true);
 
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
-	set_state (*node);
+	set_state (*node, Stateful::loading_state_version);
 
 	_playlist_selector = new PlaylistSelector();
 	_playlist_selector->signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (_playlist_selector)));
@@ -1061,7 +1061,7 @@ Editor::connect_to_session (Session *t)
 	sensitize_the_right_region_actions (false);
 
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
-	set_state (*node);
+	set_state (*node, Stateful::loading_state_version);
 
 	/* catch up with the playhead */
 
@@ -4245,7 +4245,7 @@ Editor::use_visual_state (VisualState& vs)
 		/* check if the track still exists - it could have been deleted */
 
 		if ((t = find (track_views.begin(), track_views.end(), i->first)) != track_views.end()) {
-			(*t)->set_state (*(i->second));
+			(*t)->set_state (*(i->second), Stateful::loading_state_version);
 		}
 	}
 

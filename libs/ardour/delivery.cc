@@ -109,7 +109,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode&
 {
 	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
 
-	if (set_state (node)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
 	}
 
@@ -136,7 +136,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> out, boost::shared_ptr<Mut
 {
 	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
 
-	if (set_state (node)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
 	}
 
@@ -376,7 +376,7 @@ Delivery::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 
-	if (IOProcessor::set_state (node)) {
+	if (IOProcessor::set_state (node, version)) {
 		return -1;
 	}
 
@@ -390,7 +390,7 @@ Delivery::set_state (const XMLNode& node, int version)
 	XMLNode* pan_node = node.child (X_("Panner"));
 
 	if (pan_node) {
-		_panner->set_state (*pan_node);
+		_panner->set_state (*pan_node, version);
 	}
 
 	reset_panner ();

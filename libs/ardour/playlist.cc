@@ -1845,7 +1845,7 @@ Playlist::set_state (const XMLNode& node, int version)
 
 				Change what_changed = Change (0);
 
-				if (region->set_live_state (*child, what_changed, true)) {
+				if (region->set_live_state (*child, version, what_changed, true)) {
 					error << _("Playlist: cannot reset region state from XML") << endmsg;
 					continue;
 				}

@@ -91,7 +91,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, const XMLNode& node)
 	: Region (src, node)
 {
-	if (set_state (node)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
 	}
 
@@ -103,7 +103,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, const XMLNode& node)
 MidiRegion::MidiRegion (const SourceList& srcs, const XMLNode& node)
 	: Region (srcs, node)
 {
-	if (set_state (node)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
 	}
 
@@ -249,12 +249,12 @@ MidiRegion::state (bool full)
 }
 
 int
-MidiRegion::set_live_state (const XMLNode& node, Change& what_changed, bool send)
+MidiRegion::set_live_state (const XMLNode& node, int version, Change& what_changed, bool send)
 {
 	const XMLProperty *prop;
 	LocaleGuard lg (X_("POSIX"));
 
-	Region::set_live_state (node, what_changed, false);
+	Region::set_live_state (node, version, what_changed, false);
 
 	uint32_t old_flags = _flags;
 
@@ -292,7 +292,7 @@ MidiRegion::set_state (const XMLNode& node, int version)
 	   to handle the relevant stuff.
 	*/
 
-	return Region::set_state (node);
+	return Region::set_state (node, version);
 }
 
 void

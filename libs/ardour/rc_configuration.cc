@@ -97,7 +97,7 @@ RCConfiguration::load_state ()
 				return -1;
 			}
 
-			if (set_state (*tree.root())) {
+			if (set_state (*tree.root(), Stateful::current_state_version)) {
 				error << string_compose(_("Ardour: system configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 				return -1;
 			}
@@ -132,7 +132,7 @@ RCConfiguration::load_state ()
 				return -1;
 			}
 
-			if (set_state (*tree.root())) {
+			if (set_state (*tree.root(), Stateful::current_state_version)) {
 				error << string_compose(_("Ardour: user configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 				return -1;
 			}

@@ -44,12 +44,12 @@ class PortInsert : public IOProcessor
 {
   public:
 	PortInsert (Session&, boost::shared_ptr<MuteMaster> mm);
-	PortInsert (Session&, boost::shared_ptr<MuteMaster> mm, const XMLNode&, int version = 3000);
+	PortInsert (Session&, boost::shared_ptr<MuteMaster> mm, const XMLNode&);
 	~PortInsert ();
 
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 
 	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 

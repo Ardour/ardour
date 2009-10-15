@@ -72,7 +72,7 @@ MidiSource::MidiSource (Session& s, const XMLNode& node)
 	_read_data_count = 0;
 	_write_data_count = 0;
 
-	if (set_state (node)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
 	}
 }

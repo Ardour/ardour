@@ -137,7 +137,7 @@ class IO : public SessionObject, public Latent
 
 	virtual XMLNode& state (bool full);
 	XMLNode& get_state (void);
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 	int set_state_2X (const XMLNode&, int, bool);
 
 	static int  disable_connecting (void);

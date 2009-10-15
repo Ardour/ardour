@@ -75,7 +75,7 @@ class Crossfade : public ARDOUR::AudioRegion
 	bool operator== (const ARDOUR::Crossfade&);
 
 	XMLNode& get_state (void);
-	int set_state (const XMLNode&, int version = 3000);
+	int set_state (const XMLNode&, int version);
 
 	boost::shared_ptr<ARDOUR::AudioRegion> in() const { return _in; }
 	boost::shared_ptr<ARDOUR::AudioRegion> out() const { return _out; }

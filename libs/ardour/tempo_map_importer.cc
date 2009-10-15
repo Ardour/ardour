@@ -99,5 +99,5 @@ TempoMapImporter::_cancel_move ()
 void
 TempoMapImporter::_move ()
 {
-	session.tempo_map().set_state (xml_tempo_map);
+	session.tempo_map().set_state (xml_tempo_map, Stateful::current_state_version);
 }

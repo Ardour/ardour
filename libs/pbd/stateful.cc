@@ -31,6 +31,9 @@ using namespace std;
 
 namespace PBD {
 
+int Stateful::current_state_version = 0;
+int Stateful::loading_state_version = 0;
+
 Stateful::Stateful ()
 {
 	_extra_xml = 0;

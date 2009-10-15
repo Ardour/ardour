@@ -59,9 +59,9 @@ Location::Location (const Location& other)
 	_locked = false;
 }
 
-Location::Location (const XMLNode& node, int version)
+Location::Location (const XMLNode& node)
 {
-	if (set_state (node)) {
+	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
 	}
 }

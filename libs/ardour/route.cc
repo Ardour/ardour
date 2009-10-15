@@ -96,7 +96,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	_meter_connection = Metering::connect (mem_fun (*this, &Route::meter));
 }
 
-Route::Route (Session& sess, const XMLNode& node, int version, DataType default_type)
+Route::Route (Session& sess, const XMLNode& node, DataType default_type)
 	: SessionObject (sess, "toBeReset")
 	, AutomatableControls (sess)
 	, _solo_control (new SoloControllable (X_("solo"), *this))
@@ -105,7 +105,7 @@ Route::Route (Session& sess, const XMLNode& node, int version, DataType default_
 {
 	init ();
 
-	_set_state (node, version, false);
+	_set_state (node, Stateful::loading_state_version, false);
 
 	/* now that we have _meter, its safe to connect to this */
 
@@ -748,7 +748,7 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 			} else if (prop->value() == "meter") {
 
 				if (_meter) {
-					if (_meter->set_state (node)) {
+					if (_meter->set_state (node, Stateful::loading_state_version)) {
 						return false;
 					} else {
 						return true;
@@ -763,7 +763,7 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 				/* amp always exists */
 
 				processor = _amp;
-				if (processor->set_state (node)) {
+				if (processor->set_state (node, Stateful::loading_state_version)) {
 					return false;
 				} else {
 					/* never any reason to add it */
@@ -777,7 +777,7 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 			} else if (prop->value() == "intreturn") {
 
 				if (_intreturn) {
-					if (_intreturn->set_state (node)) {
+					if (_intreturn->set_state (node, Stateful::loading_state_version)) {
 						return false;
 					} else {
 						return true;
@@ -789,7 +789,7 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 			} else if (prop->value() == "main-outs") {
 
 				if (_main_outs) {
-					if (_main_outs->set_state (node)) {
+					if (_main_outs->set_state (node, Stateful::loading_state_version)) {
 						return false;
 					} else {
 						return true;
@@ -848,11 +848,11 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version, ProcessorLis
 				    prop->value() == "vst" ||
 				    prop->value() == "audiounit") {
 					
-					processor.reset (new PluginInsert (_session, node, version));
+					processor.reset (new PluginInsert (_session, node));
 					
 				} else {
 					
-					processor.reset (new PortInsert (_session, _mute_master, node, version));
+					processor.reset (new PortInsert (_session, _mute_master, node));
 				}
 
 			}
@@ -1710,9 +1710,9 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 			}
 
 			if (prop->value() == "Input") {
-				_input->set_state (*child);
+				_input->set_state (*child, version);
 			} else if (prop->value() == "Output") {
-				_output->set_state (*child);
+				_output->set_state (*child, version);
 			}
 		}
 
@@ -1815,7 +1815,7 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 		} else if (child->name() == X_("Controllable") && (prop = child->property("name")) != 0) {
 
 			if (prop->value() == "solo") {
-				_solo_control->set_state (*child);
+				_solo_control->set_state (*child, version);
 				_session.add_controllable (_solo_control);
 			}
 
@@ -1827,7 +1827,7 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 			}
 
 		} else if (child->name() == X_("MuteMaster")) {
-			_mute_master->set_state (*child);
+			_mute_master->set_state (*child, version);
 		}
 	}
 
@@ -1887,6 +1887,11 @@ Route::_set_state_2X (const XMLNode& node, int version)
 		child = *niter;
 
 		if (child->name() == IO::state_node_name) {
+
+			/* there is a note in IO::set_state_2X() about why we have to call
+			   this directly.
+			*/
+
 			_input->set_state_2X (*child, version, true);
 			_output->set_state_2X (*child, version, false);
 
@@ -2011,7 +2016,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 		} else if (child->name() == X_("Controllable") && (prop = child->property("name")) != 0) {
 			
 			if (prop->value() == "solo") {
-				_solo_control->set_state (*child);
+				_solo_control->set_state (*child, version);
 				_session.add_controllable (_solo_control);
 			} 
 
@@ -2144,7 +2149,7 @@ Route::set_processor_state (const XMLNode& node)
 
 			// and make it (just) so
 
-			(*i)->set_state (**niter);
+			(*i)->set_state (**niter, Stateful::current_state_version);
 		}
 	}
 
