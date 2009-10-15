@@ -550,16 +550,24 @@ Session::when_engine_running ()
 		if (state_tree && (child = find_named_node (*state_tree->root(), "Click")) != 0) {
 
 			/* existing state for Click */
+			int c;
 
-			if (_click_io->set_state (*child->children().front(), Stateful::loading_state_version) == 0) {
-
-				_clicking = Config->get_clicking ();
-
+			if (Stateful::loading_state_version < 3000) {
+				c = _click_io->set_state_2X (*child->children().front(), Stateful::loading_state_version, false);
 			} else {
+				c = _click_io->set_state (*child->children().front(), Stateful::loading_state_version);
+			}
+					
 
+			if (c == 0) {
+				_clicking = Config->get_clicking ();
+				
+			} else {
+				
 				error << _("could not setup Click I/O") << endmsg;
 				_clicking = false;
 			}
+
 
 		} else {
 

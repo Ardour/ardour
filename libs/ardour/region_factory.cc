@@ -133,9 +133,9 @@ boost::shared_ptr<Region>
 RegionFactory::create (Session& session, XMLNode& node, bool yn)
 {
 	boost::shared_ptr<Region> r = session.XMLRegionFactory (node, yn);
-	r->unlock_property_changes ();
 
 	if (r) {
+		r->unlock_property_changes ();
 		CheckNewRegion (r);
 	}
 
