@@ -187,7 +187,7 @@ MidiPlaylist::check_dependents (boost::shared_ptr<Region> /*r*/, bool /*norefres
 
 
 int
-MidiPlaylist::set_state (const XMLNode& node)
+MidiPlaylist::set_state (const XMLNode& node, int version)
 {
 	in_set_state++;
 	freeze ();

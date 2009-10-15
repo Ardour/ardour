@@ -91,7 +91,7 @@ class MidiSource : virtual public Source
 	mutable sigc::signal<void,sframes_t,nframes_t> ViewDataRangeReady;
 
 	XMLNode& get_state ();
-	int set_state (const XMLNode&);
+	int set_state (const XMLNode&, int version = 3000);
 
 	bool length_mutable() const { return true; }
 

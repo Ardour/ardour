@@ -93,7 +93,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	virtual ~TimeAxisView ();
 
 	XMLNode& get_state ();
-	int set_state (const XMLNode&);
+	int set_state (const XMLNode&, int version = 3000);
 
 	/** @return index of this TimeAxisView within its parent */
 	int order () const { return _order; }

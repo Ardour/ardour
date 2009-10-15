@@ -76,7 +76,7 @@ SessionConfiguration::get_variables ()
 
 
 int
-SessionConfiguration::set_state (XMLNode const& root)
+SessionConfiguration::set_state (XMLNode const& root, int version)
 {
 	if (root.name() != "Ardour") {
 		return -1;

@@ -212,7 +212,7 @@ class TempoMap : public PBD::StatefulDestructible
 	void set_length (nframes_t frames);
 
 	XMLNode& get_state (void);
-	int set_state (const XMLNode&);
+	int set_state (const XMLNode&, int version = 3000);
 
 	void dump (std::ostream&) const;
 	void clear ();

@@ -68,7 +68,7 @@ class Route : public SessionObject, public AutomatableControls
 
 	Route (Session&, std::string name, Flag flags = Flag(0),
 	       DataType default_type = DataType::AUDIO);
-	Route (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
+	Route (Session&, const XMLNode&, int, DataType default_type = DataType::AUDIO);
 	virtual ~Route();
 
 	boost::shared_ptr<IO> input() const { return _input; }
@@ -251,7 +251,7 @@ class Route : public SessionObject, public AutomatableControls
 	/* stateful */
 
 	XMLNode& get_state();
-	int set_state(const XMLNode& node);
+	int set_state (const XMLNode&, int version = 3000);
 	virtual XMLNode& get_template();
 
 	XMLNode& get_processor_state ();
@@ -384,8 +384,8 @@ class Route : public SessionObject, public AutomatableControls
 
 	uint32_t pans_required() const;
 	ChanCount n_process_buffers ();
-
-	virtual int  _set_state (const XMLNode&, bool call_base);
+	
+	virtual int  _set_state (const XMLNode&, int, bool call_base);
 
 	boost::shared_ptr<Amp>       _amp;
 	boost::shared_ptr<PeakMeter> _meter;
@@ -393,6 +393,8 @@ class Route : public SessionObject, public AutomatableControls
 
   private:
 	void init ();
+	int _set_state_2X (const XMLNode&, int);
+	void set_processor_state_2X (XMLNodeList const &, int);
 
 	static uint32_t order_key_cnt;
 
@@ -407,7 +409,8 @@ class Route : public SessionObject, public AutomatableControls
 	int configure_processors (ProcessorStreams*);
 	int configure_processors_unlocked (ProcessorStreams*);
 
-	bool add_processor_from_xml (const XMLNode&, ProcessorList::iterator iter);
+	bool add_processor_from_xml (const XMLNode&, ProcessorList::iterator iter);	
+	bool add_processor_from_xml_2X (const XMLNode&, int, ProcessorList::iterator iter);	
 
 	void placement_range (Placement p, ProcessorList::iterator& start, ProcessorList::iterator& end);
 };

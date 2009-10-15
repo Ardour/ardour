@@ -323,7 +323,7 @@ GenericMidiControlProtocol::get_state ()
 }
 
 int
-GenericMidiControlProtocol::set_state (const XMLNode& node)
+GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;

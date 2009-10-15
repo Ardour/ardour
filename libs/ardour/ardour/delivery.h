@@ -89,7 +89,7 @@ public:
 	static sigc::signal<void,nframes_t> CycleStart;
 
 	XMLNode& state (bool full);
-	int set_state (const XMLNode&);
+	int set_state (const XMLNode&, int version = 3000);
 
 	/* Panning */
 

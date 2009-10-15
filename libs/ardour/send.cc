@@ -46,14 +46,14 @@ Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, Role r)
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
-Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node, Role r)
+Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node, int version, Role r)
         : Delivery (s, mm, "send", r)
 	, _metering (false)
 {
 	_amp.reset (new Amp (_session, _mute_master));
 	_meter.reset (new PeakMeter (_session));
 
-	if (set_state (node)) {
+	if (set_state (node, version)) {
 		throw failed_constructor();
 	}
 
@@ -150,7 +150,7 @@ Send::state(bool full)
 }
 
 int
-Send::set_state(const XMLNode& node)
+Send::set_state (const XMLNode& node, int version)
 {
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;

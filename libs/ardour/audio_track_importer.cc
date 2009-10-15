@@ -290,7 +290,7 @@ AudioTrackImporter::_move ()
 
 	XMLNode routes ("Routes");
 	routes.add_child_copy (xml_track);
-	session.load_routes (routes);
+	session.load_routes (routes, 3000);
 }
 
 bool

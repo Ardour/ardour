@@ -30,7 +30,7 @@ public:
 	SessionConfiguration ();
 
 	void map_parameters (sigc::slot<void, std::string>);
-	int set_state (XMLNode const &);
+	int set_state (XMLNode const &, int version = 3000);
 	XMLNode& get_state ();
 	XMLNode& get_variables ();
 	void set_variables (XMLNode const &);

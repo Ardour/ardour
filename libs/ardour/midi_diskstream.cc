@@ -1381,7 +1381,7 @@ MidiDiskstream::get_state ()
 }
 
 int
-MidiDiskstream::set_state (const XMLNode& node)
+MidiDiskstream::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 	XMLNodeList nlist = node.children();

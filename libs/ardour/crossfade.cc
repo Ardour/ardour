@@ -720,7 +720,7 @@ Crossfade::get_state ()
 }
 
 int
-Crossfade::set_state (const XMLNode& node)
+Crossfade::set_state (const XMLNode& node, int version)
 {
 	XMLNodeConstIterator i;
 	XMLNodeList children;

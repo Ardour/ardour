@@ -1339,7 +1339,7 @@ Region::set_live_state (const XMLNode& node, Change& what_changed, bool send)
 }
 
 int
-Region::set_state (const XMLNode& node)
+Region::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty *prop;
 	Change what_changed = Change (0);

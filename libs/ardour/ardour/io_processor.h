@@ -72,8 +72,8 @@ class IOProcessor : public Processor
 	sigc::signal<void,IOProcessor*,uint32_t> AutomationChanged;
 
 	XMLNode& state (bool full_state);
-	int set_state (const XMLNode&);
-
+	int set_state (const XMLNode&, int version = 3000);
+	
   protected:
 	boost::shared_ptr<IO> _input;
 	boost::shared_ptr<IO> _output;

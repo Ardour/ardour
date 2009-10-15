@@ -361,7 +361,7 @@ MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*forc
 }
 
 int 
-MIDIControllable::set_state (const XMLNode& node)
+MIDIControllable::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 	int xx;

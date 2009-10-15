@@ -558,7 +558,7 @@ AudioPlaylist::crossfade_invalidated (boost::shared_ptr<Region> r)
 }
 
 int
-AudioPlaylist::set_state (const XMLNode& node)
+AudioPlaylist::set_state (const XMLNode& node, int version)
 {
 	XMLNode *child;
 	XMLNodeList nlist;

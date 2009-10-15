@@ -44,7 +44,7 @@ struct NamedSelection : public PBD::Stateful
 
     XMLNode& get_state (void);
 
-    int set_state (const XMLNode&);
+    int set_state (const XMLNode&, int version = 3000);
 
     static sigc::signal<void,NamedSelection*> NamedSelectionCreated;
 };

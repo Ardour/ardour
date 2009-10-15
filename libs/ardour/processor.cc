@@ -145,8 +145,43 @@ Processor::state (bool full_state)
 }
 
 int
-Processor::set_state (const XMLNode& node)
+Processor::set_state_2X (const XMLNode & node, int version)
 {
+	XMLProperty const * prop;
+
+	XMLNodeList children = node.children ();
+
+	for (XMLNodeIterator i = children.begin(); i != children.end(); ++i) {
+
+		if ((*i)->name() == X_("IO")) {
+
+			if ((prop = (*i)->property ("name")) != 0) {
+				set_name (prop->value ());
+			}
+
+			if ((prop = (*i)->property ("id")) != 0) {
+				_id = prop->value ();
+			}
+
+			if ((prop = (*i)->property ("active")) != 0) {
+				if (_active != string_is_affirmative (prop->value())) {
+					_active = !_active;
+					ActiveChanged (); /* EMIT_SIGNAL */
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+int
+Processor::set_state (const XMLNode& node, int version)
+{
+	if (version < 3000) {
+		return set_state_2X (node, version);
+	}
+	
 	const XMLProperty *prop;
 	const XMLProperty *legacy_active = 0;
 

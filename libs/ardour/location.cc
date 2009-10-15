@@ -59,7 +59,7 @@ Location::Location (const Location& other)
 	_locked = false;
 }
 
-Location::Location (const XMLNode& node)
+Location::Location (const XMLNode& node, int version)
 {
 	if (set_state (node)) {
 		throw failed_constructor ();
@@ -347,7 +347,7 @@ Location::get_state (void)
 }
 
 int
-Location::set_state (const XMLNode& node)
+Location::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty *prop;
 
@@ -674,7 +674,7 @@ Locations::get_state ()
 }
 
 int
-Locations::set_state (const XMLNode& node)
+Locations::set_state (const XMLNode& node, int version)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;

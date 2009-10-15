@@ -66,8 +66,8 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 	_mode = mode;
 }
 
-MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
-	: Track (sess, node, DataType::MIDI )
+MidiTrack::MidiTrack (Session& sess, const XMLNode& node, int version)
+	: Track (sess, node, version, DataType::MIDI)
 	, _immediate_events(1024) // FIXME: size?
 	, _step_edit_ring_buffer(64) // FIXME: size?
 	, _note_mode(Sustained)
@@ -75,7 +75,7 @@ MidiTrack::MidiTrack (Session& sess, const XMLNode& node)
 	, _default_channel (0)
 	, _midi_thru (true)
 {
-	_set_state(node, false);
+	_set_state (node, version, false);
 }
 
 MidiTrack::~MidiTrack ()
@@ -155,18 +155,18 @@ MidiTrack::midi_diskstream() const
 }
 
 int
-MidiTrack::set_state (const XMLNode& node)
+MidiTrack::set_state (const XMLNode& node, int version)
 {
-	return _set_state (node, true);
+	return _set_state (node, version, true);
 }
 
 int
-MidiTrack::_set_state (const XMLNode& node, bool call_base)
+MidiTrack::_set_state (const XMLNode& node, int version, bool call_base)
 {
 	const XMLProperty *prop;
 	XMLNodeConstIterator iter;
 
-	if (Route::_set_state (node, call_base)) {
+	if (Route::_set_state (node, version, call_base)) {
 		return -1;
 	}
 

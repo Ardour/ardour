@@ -58,7 +58,7 @@ public:
 	void mark_streaming_write_completed ();
 
 	XMLNode& get_state ();
-	int set_state (const XMLNode&);
+	int set_state (const XMLNode&, int version = 3000);
 
 	void load_model (bool lock=true, bool force_reload=false);
 	void destroy_model ();

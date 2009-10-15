@@ -2356,6 +2356,10 @@ ARDOUR_UI::get_session_parameters (bool should_be_new)
 		} else {
 
 			ret = load_session (session_path, session_name, template_name);
+			if (!ARDOUR_COMMAND_LINE::immediate_save.empty()) {
+				session->save_state (ARDOUR_COMMAND_LINE::immediate_save, false);
+				exit (1);
+			}
 		}
 	}
 

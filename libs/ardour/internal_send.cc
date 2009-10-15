@@ -171,7 +171,7 @@ InternalSend::get_state()
 }
 
 int
-InternalSend::set_state (const XMLNode& node)
+InternalSend::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 

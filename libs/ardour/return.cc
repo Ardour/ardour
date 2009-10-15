@@ -89,7 +89,7 @@ Return::state(bool full)
 }
 
 int
-Return::set_state(const XMLNode& node)
+Return::set_state (const XMLNode& node, int version)
 {
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;

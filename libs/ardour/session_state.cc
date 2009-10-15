@@ -1123,7 +1123,7 @@ Session::get_control_protocol_state ()
 }
 
 int
-Session::set_state (const XMLNode& node)
+Session::set_state (const XMLNode& node, int version)
 {
 	XMLNodeList nlist;
 	XMLNode* child;
@@ -1135,6 +1135,10 @@ Session::set_state (const XMLNode& node)
 	if (node.name() != X_("Session")){
 		fatal << _("programming error: Session: incorrect XML node sent to set_state()") << endmsg;
 		return -1;
+	}
+
+	if ((prop = node.property ("version")) != 0) {
+		version = atoi (prop->value ()) * 1000;
 	}
 
 	if ((prop = node.property ("name")) != 0) {
@@ -1205,10 +1209,12 @@ Session::set_state (const XMLNode& node)
 	if (use_config_midi_ports ()) {
 	}
 
-	if ((child = find_named_node (node, "Metadata")) == 0) {
-		warning << _("Session: XML state has no metadata section (2.0 session?)") << endmsg;
-	} else if (_metadata->set_state (*child)) {
-		goto out;
+	if (version >= 3000) {
+		if ((child = find_named_node (node, "Metadata")) == 0) {
+			warning << _("Session: XML state has no metadata section") << endmsg;
+		} else if (_metadata->set_state (*child)) {
+			goto out;
+		}
 	}
 
 	if ((child = find_named_node (node, "Locations")) == 0) {
@@ -1270,7 +1276,7 @@ Session::set_state (const XMLNode& node)
 	} else if (load_unused_playlists (*child)) {
 		goto out;
 	}
-
+	
 	if ((child = find_named_node (node, "NamedSelections")) != 0) {
 		if (load_named_selections (*child)) {
 			goto out;
@@ -1284,21 +1290,42 @@ Session::set_state (const XMLNode& node)
 		goto out;
 	}
 
-	if ((child = find_named_node (node, "Bundles")) == 0) {
-		warning << _("Session: XML state has no bundles section (2.0 session?)") << endmsg;
-		//goto out;
-	} else {
-		/* We can't load Bundles yet as they need to be able
-		   to convert from port names to Port objects, which can't happen until
-		   later */
-		_bundle_xml_node = new XMLNode (*child);
+	if (version >= 3000) {
+		if ((child = find_named_node (node, "Bundles")) == 0) {
+			warning << _("Session: XML state has no bundles section") << endmsg;
+			//goto out;
+		} else {
+			/* We can't load Bundles yet as they need to be able
+			   to convert from port names to Port objects, which can't happen until
+			   later */
+			_bundle_xml_node = new XMLNode (*child);
+		}
 	}
+	
+	if (version >= 3000) {
+		
+		if ((child = find_named_node (node, "RouteGroups")) == 0) {
+			error << _("Session: XML state has no route groups section") << endmsg;
+			goto out;
+		} else if (load_route_groups (*child, version)) {
+			goto out;
+		}
+		
+	} else if (version < 3000) {
+		
+		if ((child = find_named_node (node, "EditGroups")) == 0) {
+			error << _("Session: XML state has no edit groups section") << endmsg;
+			goto out;
+		} else if (load_route_groups (*child, version)) {
+			goto out;
+		}
 
-	if ((child = find_named_node (node, "RouteGroups")) == 0) {
-		error << _("Session: XML state has no route groups section") << endmsg;
-		goto out;
-	} else if (load_route_groups (*child)) {
-		goto out;
+		if ((child = find_named_node (node, "MixGroups")) == 0) {
+			error << _("Session: XML state has no mix groups section") << endmsg;
+			goto out;
+		} else if (load_route_groups (*child, version)) {
+			goto out;
+		}
 	}
 
 	if ((child = find_named_node (node, "TempoMap")) == 0) {
@@ -1311,7 +1338,7 @@ Session::set_state (const XMLNode& node)
 	if ((child = find_named_node (node, "Routes")) == 0) {
 		error << _("Session: XML state has no routes section") << endmsg;
 		goto out;
-	} else if (load_routes (*child)) {
+	} else if (load_routes (*child, version)) {
 		goto out;
 	}
 
@@ -1336,7 +1363,7 @@ Session::set_state (const XMLNode& node)
 }
 
 int
-Session::load_routes (const XMLNode& node)
+Session::load_routes (const XMLNode& node, int version)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
@@ -1348,7 +1375,7 @@ Session::load_routes (const XMLNode& node)
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
-		boost::shared_ptr<Route> route (XMLRouteFactory (**niter));
+		boost::shared_ptr<Route> route (XMLRouteFactory (**niter, version));
 
 		if (route == 0) {
 			error << _("Session: cannot create Route from XML description.") << endmsg;
@@ -1366,7 +1393,7 @@ Session::load_routes (const XMLNode& node)
 }
 
 boost::shared_ptr<Route>
-Session::XMLRouteFactory (const XMLNode& node)
+Session::XMLRouteFactory (const XMLNode& node, int version)
 {
 	if (node.name() != "Route") {
 		return boost::shared_ptr<Route> ((Route*) 0);
@@ -1385,14 +1412,14 @@ Session::XMLRouteFactory (const XMLNode& node)
 
 	if (has_diskstream) {
 		if (type == DataType::AUDIO) {
-			boost::shared_ptr<Route> ret (new AudioTrack (*this, node));
+			boost::shared_ptr<Route> ret (new AudioTrack (*this, node, version));
 			return ret;
 		} else {
-			boost::shared_ptr<Route> ret (new MidiTrack (*this, node));
+			boost::shared_ptr<Route> ret (new MidiTrack (*this, node, version));
 			return ret;
 		}
 	} else {
-		boost::shared_ptr<Route> ret (new Route (*this, node));
+		boost::shared_ptr<Route> ret (new Route (*this, node, version));
 		return ret;
 	}
 }
@@ -2053,18 +2080,31 @@ Session::load_bundles (XMLNode const & node)
 }
 
 int
-Session::load_route_groups (const XMLNode& node)
+Session::load_route_groups (const XMLNode& node, int version)
 {
 	XMLNodeList nlist = node.children();
 	XMLNodeConstIterator niter;
 
 	set_dirty ();
 
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == "RouteGroup") {
-			RouteGroup* rg = new RouteGroup (*this, "");
-			add_route_group (rg);
-			rg->set_state (**niter);
+	if (version >= 3000) {
+		
+		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+			if ((*niter)->name() == "RouteGroup") {
+				RouteGroup* rg = new RouteGroup (*this, "");
+				add_route_group (rg);
+				rg->set_state (**niter, version);
+			}
+		}
+
+	} else if (version < 3000) {
+
+		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+			if ((*niter)->name() == "EditGroup" || (*niter)->name() == "MixGroup") {
+				RouteGroup* rg = new RouteGroup (*this, "");
+				add_route_group (rg);
+				rg->set_state (**niter, version);
+			}
 		}
 	}
 

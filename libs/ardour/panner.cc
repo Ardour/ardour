@@ -162,7 +162,7 @@ StreamPanner::set_position (float xpos, float ypos, float zpos, bool link_call)
 }
 
 int
-StreamPanner::set_state (const XMLNode& node)
+StreamPanner::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 	XMLNodeConstIterator iter;
@@ -485,7 +485,7 @@ EqualPowerStereoPanner::state (bool /*full_state*/)
 }
 
 int
-EqualPowerStereoPanner::set_state (const XMLNode& node)
+EqualPowerStereoPanner::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 	float pos;
@@ -673,7 +673,7 @@ Multi2dPanner::state (bool /*full_state*/)
 }
 
 int
-Multi2dPanner::set_state (const XMLNode& node)
+Multi2dPanner::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 	float newx,newy;
@@ -829,6 +829,8 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 	uint32_t n;
 	bool changed = false;
 	bool do_not_and_did_not_need_panning = ((nouts < 2) && (outputs.size() < 2));
+
+	cout << "Reset panner for " << nouts << " " << npans << "\n";
 
 	/* if new and old config don't need panning, or if
 	   the config hasn't changed, we're done.
@@ -1085,7 +1087,7 @@ Panner::state (bool full)
 }
 
 int
-Panner::set_state (const XMLNode& node)
+Panner::set_state (const XMLNode& node, int version)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;

@@ -258,7 +258,7 @@ AudioFileSource::get_state ()
 }
 
 int
-AudioFileSource::set_state (const XMLNode& node)
+AudioFileSource::set_state (const XMLNode& node, int version)
 {
 	if (Source::set_state (node)) {
 		return -1;

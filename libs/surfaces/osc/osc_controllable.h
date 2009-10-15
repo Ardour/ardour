@@ -44,7 +44,7 @@ class OSCControllable : public PBD::Stateful
 	lo_address address() const { return addr; }
 
 	XMLNode& get_state ();
-	int set_state (const XMLNode& node);
+	int set_state (const XMLNode& node, int version = 3000);
 
   protected:
 	boost::shared_ptr<PBD::Controllable> controllable;

@@ -157,8 +157,8 @@ Keyboard::get_state (void)
 	return *node;
 }
 
-int
-Keyboard::set_state (const XMLNode& node)
+int 
+Keyboard::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 

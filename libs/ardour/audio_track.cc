@@ -56,10 +56,10 @@ AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode 
 	use_new_diskstream ();
 }
 
-AudioTrack::AudioTrack (Session& sess, const XMLNode& node)
-	: Track (sess, node)
+AudioTrack::AudioTrack (Session& sess, const XMLNode& node, int version)
+	: Track (sess, node, version)
 {
-	_set_state (node, false);
+	_set_state (node, version, false);
 }
 
 AudioTrack::~AudioTrack ()
@@ -233,19 +233,19 @@ AudioTrack::audio_diskstream() const
 }
 
 int
-AudioTrack::set_state (const XMLNode& node)
+AudioTrack::set_state (const XMLNode& node, int version)
 {
-	return _set_state (node, true);
+	return _set_state (node, version, true);
 }
 
 int
-AudioTrack::_set_state (const XMLNode& node, bool call_base)
+AudioTrack::_set_state (const XMLNode& node, int version, bool call_base)
 {
 	const XMLProperty *prop;
 	XMLNodeConstIterator iter;
 
 	if (call_base) {
-		if (Route::_set_state (node, call_base)) {
+		if (Route::_set_state (node, version, call_base)) {
 			return -1;
 		}
 	}

@@ -352,7 +352,7 @@ AutomationList::deserialize_events (const XMLNode& node)
 }
 
 int
-AutomationList::set_state (const XMLNode& node)
+AutomationList::set_state (const XMLNode& node, int version)
 {
 	XMLNodeList nlist = node.children();
 	XMLNode* nsos;

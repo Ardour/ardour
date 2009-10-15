@@ -147,7 +147,7 @@ IOProcessor::state (bool full_state)
 }
 
 int
-IOProcessor::set_state (const XMLNode& node)
+IOProcessor::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty *prop;
 	const XMLNode *io_node = 0;

@@ -154,7 +154,7 @@ PowermateControlProtocol::get_state ()
 }
 
 int
-PowermateControlProtocol::set_state (const XMLNode& /*node*/)
+PowermateControlProtocol::set_state (const XMLNode& /*node*/, int /*version*/)
 {
 	return 0;
 }

@@ -2062,8 +2062,8 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 		Track::zero_diskstream_id_in_xml (node_copy);
 
 		try {
-			shared_ptr<Route> route (XMLRouteFactory (node_copy));
-
+			shared_ptr<Route> route (XMLRouteFactory (node_copy, 3000));
+	    
 			if (route == 0) {
 				error << _("Session: cannot create track/bus from template description") << endmsg;
 				goto out;

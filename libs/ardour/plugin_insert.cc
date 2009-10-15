@@ -81,12 +81,12 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
-PluginInsert::PluginInsert (Session& s, const XMLNode& node)
+PluginInsert::PluginInsert (Session& s, const XMLNode& node, int version)
 	: Processor (s, "unnamed plugin insert"),
           _signal_analysis_collected_nframes(0),
           _signal_analysis_collect_nframes_max(0)
 {
-	if (set_state (node)) {
+	if (set_state (node, version)) {
 		throw failed_constructor();
 	}
 
@@ -716,7 +716,7 @@ PluginInsert::state (bool full)
 }
 
 int
-PluginInsert::set_state(const XMLNode& node)
+PluginInsert::set_state(const XMLNode& node, int version)
 {
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
@@ -730,6 +730,7 @@ PluginInsert::set_state(const XMLNode& node)
 	}
 
 	if (prop->value() == X_("ladspa") || prop->value() == X_("Ladspa")) { /* handle old school sessions */
+		cout << "- LADSPA\n";
 		type = ARDOUR::LADSPA;
 	} else if (prop->value() == X_("lv2")) {
 		type = ARDOUR::LV2;
@@ -743,6 +744,7 @@ PluginInsert::set_state(const XMLNode& node)
 	}
 
 	prop = node.property ("unique-id");
+	cout << "- ID " << prop->value() << "\n";
 	if (prop == 0) {
 		error << _("Plugin has no unique ID field") << endmsg;
 		return -1;
@@ -777,7 +779,7 @@ PluginInsert::set_state(const XMLNode& node)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() == plugin->state_node_name()) {
 			for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-				(*i)->set_state (**niter);
+				(*i)->set_state (**niter, version);
 			}
 			break;
 		}
@@ -792,8 +794,8 @@ PluginInsert::set_state(const XMLNode& node)
 			break;
 		}
 	}
-
-	Processor::set_state (*insert_node);
+	
+	Processor::set_state (*insert_node, version);
 
 	/* look for port automation node */
 

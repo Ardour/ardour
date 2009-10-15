@@ -79,7 +79,7 @@ class AudioSource : virtual public Source,
 	mutable sigc::signal<void,nframes_t,nframes_t>  PeakRangeReady;
 
 	XMLNode& get_state ();
-	int set_state (const XMLNode&);
+	int set_state (const XMLNode&, int version = 3000);
 
 	int rename_peakfile (Glib::ustring newpath);
 	void touch_peakfile ();

@@ -136,9 +136,13 @@ RouteGroup::get_state (void)
 	return *node;
 }
 
-int
-RouteGroup::set_state (const XMLNode& node)
+int 
+RouteGroup::set_state (const XMLNode& node, int version)
 {
+	if (version < 3000) {
+		return set_state_2X (node, version);
+	}
+
 	const XMLProperty *prop;
 
 	if ((prop = node.property ("name")) != 0) {
@@ -151,6 +155,28 @@ RouteGroup::set_state (const XMLNode& node)
 
 	if ((prop = node.property ("properties")) != 0) {
 		_properties = Property (string_2_enum (prop->value(), _properties));
+	}
+
+	return 0;
+}
+
+int
+RouteGroup::set_state_2X (const XMLNode& node, int version)
+{
+	XMLProperty const * prop;
+	
+	if ((prop = node.property ("name")) != 0) {
+		_name = prop->value();
+	}
+	
+	if ((prop = node.property ("flags")) != 0) {
+		_flags = Flag (string_2_enum (prop->value(), _flags));
+	}
+
+	if (node.name() == "MixGroup") {
+		_properties = Property (Gain | Mute | Solo | RecEnable);
+	} else if (node.name() == "EditGroup") {
+		_properties = Property (Select | Edit);
 	}
 
 	return 0;

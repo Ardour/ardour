@@ -344,7 +344,7 @@ PannerUI::setup_pan ()
 	uint32_t const nouts = _panner->nouts();
 	uint32_t const npans = _panner->npanners();
 
-	if (int32_t (nouts) == _current_nouts && npans == _current_npans) {
+	if (int32_t (nouts) == _current_nouts && int32_t (npans) == _current_npans) {
 		return;
 	}
 

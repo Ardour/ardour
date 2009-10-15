@@ -103,7 +103,7 @@ MuteMaster::get_value () const
 }
 
 int
-MuteMaster::set_state (const XMLNode& node)
+MuteMaster::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 

@@ -91,8 +91,8 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 
 	virtual XMLNode& state (bool full);
 	XMLNode& get_state (void);
-	int set_state (const XMLNode&);
-
+	int set_state (const XMLNode&, int version = 3000);
+	
 	void *get_gui () const { return _gui; }
 	void  set_gui (void *p) { _gui = p; }
 
@@ -109,6 +109,9 @@ protected:
 	ChanCount _configured_input;
 	ChanCount _configured_output;
 	void*     _gui;  /* generic, we don't know or care what this is */
+
+private:
+	int set_state_2X (const XMLNode&, int version);
 };
 
 } // namespace ARDOUR

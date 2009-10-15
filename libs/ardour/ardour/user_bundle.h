@@ -38,7 +38,7 @@ class UserBundle : public Bundle, public PBD::Stateful {
 	XMLNode& get_state ();
 
   private:
-	int set_state (XMLNode const &);
+	int set_state (XMLNode const &, int version = 3000);
 };
 
 }

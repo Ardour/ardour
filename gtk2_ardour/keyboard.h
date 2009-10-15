@@ -40,7 +40,7 @@ class Keyboard : public sigc::trackable, PBD::Stateful
 	~Keyboard ();
 
 	XMLNode& get_state (void);
-	int set_state (const XMLNode&);
+	int set_state (const XMLNode&, int version = 3000);
 
 	typedef std::vector<uint32_t> State;
 	typedef uint32_t ModifierMask;

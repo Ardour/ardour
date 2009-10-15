@@ -137,7 +137,8 @@ class IO : public SessionObject, public Latent
 
 	virtual XMLNode& state (bool full);
 	XMLNode& get_state (void);
-	int set_state (const XMLNode&);
+	int set_state (const XMLNode&, int version = 3000);
+	int set_state_2X (const XMLNode&, int, bool);
 
 	static int  disable_connecting (void);
 	static int  enable_connecting (void);
@@ -156,6 +157,8 @@ class IO : public SessionObject, public Latent
 	static bool              connecting_legal;
 
 	XMLNode *pending_state_node;
+	int pending_state_node_version;
+	bool pending_state_node_in;
 
 	/* three utility functions - this just seems to be simplest place to put them */
 
@@ -203,9 +206,11 @@ class IO : public SessionObject, public Latent
 	void bundle_changed (Bundle::Change);
 
 
-	int get_port_counts (const XMLNode& node, ChanCount& n, boost::shared_ptr<Bundle>& c);
-	int create_ports (const XMLNode&);
-	int make_connections (const XMLNode&);
+	int get_port_counts (const XMLNode& node, int version, ChanCount& n, boost::shared_ptr<Bundle>& c);
+	int get_port_counts_2X (const XMLNode& node, int version, ChanCount& n, boost::shared_ptr<Bundle>& c);
+	int create_ports (const XMLNode&, int version);
+	int make_connections (const XMLNode&, int, bool);
+	int make_connections_2X (const XMLNode &, int, bool);
 
 	boost::shared_ptr<Bundle> find_possible_bundle (const std::string &desired_name);
 

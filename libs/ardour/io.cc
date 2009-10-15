@@ -515,8 +515,14 @@ IO::state (bool /*full_state*/)
 }
 
 int
-IO::set_state (const XMLNode& node)
+IO::set_state (const XMLNode& node, int version)
 {
+	/* callers for version < 3000 need to call set_state_2X directly, as A3 IOs
+	 * are input OR output, not both, so the direction needs to be specified
+	 * by the caller.
+	 */
+	assert (version >= 3000);
+	
 	const XMLProperty* prop;
 	XMLNodeConstIterator iter;
 	LocaleGuard lg (X_("POSIX"));
@@ -547,22 +553,76 @@ IO::set_state (const XMLNode& node)
 		_direction = (Direction) string_2_enum (prop->value(), _direction);
 	}
 
-	if (create_ports (node)) {
+	if (create_ports (node, version)) {
 		return -1;
 	}
 
 	if (connecting_legal) {
 
-		if (make_connections (node)) {
+		if (make_connections (node, version, false)) {
 			return -1;
 		}
 
 	} else {
 
 		pending_state_node = new XMLNode (node);
+		pending_state_node_version = version;
+		pending_state_node_in = false;
 		connection_legal_c = ConnectingLegal.connect (mem_fun (*this, &IO::connecting_became_legal));
 	}
 
+
+	return 0;
+}
+
+int
+IO::set_state_2X (const XMLNode& node, int version, bool in)
+{
+	const XMLProperty* prop;
+	XMLNodeConstIterator iter;
+	LocaleGuard lg (X_("POSIX"));
+
+	/* force use of non-localized representation of decimal point,
+	   since we use it a lot in XML files and so forth.
+	*/
+
+	if (node.name() != state_node_name) {
+		error << string_compose(_("incorrect XML node \"%1\" passed to IO object"), node.name()) << endmsg;
+		return -1;
+	}
+	
+	if ((prop = node.property ("name")) != 0) {
+		set_name (prop->value());
+	}
+
+	if ((prop = node.property (X_("default-type"))) != 0) {
+		_default_type = DataType(prop->value());
+		assert(_default_type != DataType::NIL);
+	}
+
+	if ((prop = node.property ("id")) != 0) {
+		_id = prop->value ();
+	}
+
+	_direction = in ? Input : Output;
+
+	if (create_ports (node, version)) {
+		return -1;
+	}
+
+	if (connecting_legal) {
+		
+		if (make_connections_2X (node, version, in)) {
+			return -1;
+		}
+
+	} else {
+
+		pending_state_node = new XMLNode (node);
+		pending_state_node_version = version;
+		pending_state_node_in = in;
+		connection_legal_c = ConnectingLegal.connect (mem_fun (*this, &IO::connecting_became_legal));
+	}
 
 	return 0;
 }
@@ -576,7 +636,7 @@ IO::connecting_became_legal ()
 
 	connection_legal_c.disconnect ();
 
-	ret = make_connections (*pending_state_node);
+	ret = make_connections (*pending_state_node, pending_state_node_version, pending_state_node_in);
 
 	delete pending_state_node;
 	pending_state_node = 0;
@@ -679,8 +739,36 @@ IO::find_possible_bundle (const string &desired_name)
 }
 
 int
-IO::get_port_counts (const XMLNode& node, ChanCount& n, boost::shared_ptr<Bundle>& c)
+IO::get_port_counts_2X (XMLNode const & node, int version, ChanCount& n, boost::shared_ptr<Bundle>& c)
 {
+	XMLProperty const * prop;
+	XMLNodeList children = node.children ();
+
+	uint32_t n_audio = 0;
+	
+	for (XMLNodeIterator i = children.begin(); i != children.end(); ++i) {
+
+		if ((prop = node.property ("inputs")) != 0 && _direction == Input) {
+			n_audio = count (prop->value().begin(), prop->value().end(), '{');
+		} else if ((prop = node.property ("outputs")) != 0 && _direction == Output) {
+			n_audio = count (prop->value().begin(), prop->value().end(), '{');
+		}
+	}
+
+	ChanCount cnt;
+	cnt.set_audio (n_audio);
+	n = ChanCount::max (n, cnt);
+
+	return 0;
+}
+
+int
+IO::get_port_counts (const XMLNode& node, int version, ChanCount& n, boost::shared_ptr<Bundle>& c)
+{
+	if (version < 3000) {
+		return get_port_counts_2X (node, version, n, c);
+	}
+	
 	XMLProperty const * prop;
 	XMLNodeConstIterator iter;
 	uint32_t n_audio = 0;
@@ -728,13 +816,13 @@ IO::get_port_counts (const XMLNode& node, ChanCount& n, boost::shared_ptr<Bundle
 }
 
 int
-IO::create_ports (const XMLNode& node)
+IO::create_ports (const XMLNode& node, int version)
 {
 	ChanCount n;
 	boost::shared_ptr<Bundle> c;
-
-	get_port_counts (node, n, c);
-
+	
+	get_port_counts (node, version, n, c);
+	
 	if (ensure_ports (n, true, true, this)) {
 		error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
 		return -1;
@@ -746,8 +834,12 @@ IO::create_ports (const XMLNode& node)
 }
 
 int
-IO::make_connections (const XMLNode& node)
+IO::make_connections (const XMLNode& node, int version, bool in)
 {
+	if (version < 3000) {
+		return make_connections_2X (node, version, in);
+	}
+			
 	const XMLProperty* prop;
 
 	for (XMLNodeConstIterator i = node.children().begin(); i != node.children().end(); ++i) {
@@ -792,6 +884,101 @@ IO::make_connections (const XMLNode& node)
 					}
 				}
 			}
+		}
+	}
+
+	return 0;
+}
+
+
+int
+IO::make_connections_2X (const XMLNode& node, int version, bool in)
+{
+	const XMLProperty* prop;
+
+	/* XXX: bundles ("connections" as was) */
+	
+	if ((prop = node.property ("inputs")) != 0 && in) {
+
+		string::size_type ostart = 0;
+		string::size_type start = 0;
+		string::size_type end = 0;
+		int i = 0;
+		int n;
+		vector<string> ports;
+
+		string const str = prop->value ();
+		
+		while ((start = str.find_first_of ('{', ostart)) != string::npos) {
+			start += 1;
+			
+			if ((end = str.find_first_of ('}', start)) == string::npos) {
+				error << string_compose(_("IO: badly formed string in XML node for inputs \"%1\""), str) << endmsg;
+				return -1;
+			}
+			
+			if ((n = parse_io_string (str.substr (start, end - start), ports)) < 0) {
+				error << string_compose(_("bad input string in XML node \"%1\""), str) << endmsg;
+				
+				return -1;
+				
+			} else if (n > 0) {
+
+
+				for (int x = 0; x < n; ++x) {
+					/* XXX: this is a bit of a hack; need to check if it's always valid */
+ 					string::size_type const p = ports[x].find ("/out");
+					if (p != string::npos) {
+						ports[x].replace (p, 4, "/audio_out");
+					}
+					nth(i)->connect (ports[x]);
+				}
+			}
+			
+			ostart = end+1;
+			i++;
+		}
+
+	}
+
+	if ((prop = node.property ("outputs")) != 0 && !in) {
+
+		string::size_type ostart = 0;
+		string::size_type start = 0;
+		string::size_type end = 0;
+		int i = 0;
+		int n;
+		vector<string> ports;
+	
+		string const str = prop->value ();
+		
+		while ((start = str.find_first_of ('{', ostart)) != string::npos) {
+			start += 1;
+			
+			if ((end = str.find_first_of ('}', start)) == string::npos) {
+				error << string_compose(_("IO: badly formed string in XML node for outputs \"%1\""), str) << endmsg;
+				return -1;
+			}
+			
+			if ((n = parse_io_string (str.substr (start, end - start), ports)) < 0) {
+				error << string_compose(_("IO: bad output string in XML node \"%1\""), str) << endmsg;
+				
+				return -1;
+				
+			} else if (n > 0) {
+				
+				for (int x = 0; x < n; ++x) {
+					/* XXX: this is a bit of a hack; need to check if it's always valid */
+ 					string::size_type const p = ports[x].find ("/in");
+					if (p != string::npos) {
+						ports[x].replace (p, 3, "/audio_in");
+					}
+					nth(i)->connect (ports[x]);
+				}
+			}
+			
+			ostart = end+1;
+			i++;
 		}
 	}
 

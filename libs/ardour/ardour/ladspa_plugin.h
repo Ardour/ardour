@@ -99,7 +99,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 	bool parameter_is_toggled(uint32_t) const;
 
 	XMLNode& get_state();
-	int      set_state(const XMLNode& node);
+	int      set_state (const XMLNode&, int version = 3000);
 	bool     save_preset(std::string name);
 
 	bool has_editor() const { return false; }
@@ -133,6 +133,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 	void init (void *mod, uint32_t index, nframes_t rate);
 	void run_in_place (nframes_t nsamples);
 	void latency_compute_run ();
+	int set_state_2X (const XMLNode&, int version = 3000);
 };
 
 class LadspaPluginInfo : public PluginInfo {

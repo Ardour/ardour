@@ -1260,8 +1260,8 @@ AutomationLine::get_state (void)
 	return alist->get_state();
 }
 
-int
-AutomationLine::set_state (const XMLNode &node)
+int 
+AutomationLine::set_state (const XMLNode &node, int version)
 {
 	/* function as a proxy for the model */
 	return alist->set_state (node);

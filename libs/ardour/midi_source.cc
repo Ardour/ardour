@@ -94,7 +94,7 @@ MidiSource::get_state ()
 }
 
 int
-MidiSource::set_state (const XMLNode& node)
+MidiSource::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 

@@ -305,7 +305,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	typedef std::list<boost::shared_ptr<Diskstream> > DiskstreamList;
 
-	int load_routes (const XMLNode&);
+	int load_routes (const XMLNode&, int);
 	boost::shared_ptr<RouteList> get_routes() const {
 		return routes.reader ();
 	}
@@ -468,7 +468,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	static std::vector<std::string*>* possible_states (std::string path);
 
 	XMLNode& get_state();
-	int      set_state(const XMLNode& node); // not idempotent
+	int      set_state(const XMLNode& node, int version = 3000); // not idempotent
 	XMLNode& get_template();
 
 	/// The instant xml file is written to the session directory
@@ -849,7 +849,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	public:
 		GlobalRouteStateCommand (Session&, void*);
 		GlobalRouteStateCommand (Session&, const XMLNode& node);
-		int set_state (const XMLNode&);
+		int set_state (const XMLNode&, int version = 3000);
 		XMLNode& get_state ();
 
 	protected:
@@ -899,7 +899,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		void operator()();
 		void undo();
 		XMLNode &get_state();
-		int set_state (const XMLNode&);
+		int set_state (const XMLNode&, int version = 3000);
 		void mark();
 
 	protected:
@@ -1439,7 +1439,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	/* edit/mix groups */
 
-	int load_route_groups (const XMLNode&);
+	int load_route_groups (const XMLNode&, int);
 
 	std::list<RouteGroup *> _route_groups;
 
@@ -1458,7 +1458,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void add_routes (RouteList&, bool save);
 	uint32_t destructive_index;
 
-	boost::shared_ptr<Route> XMLRouteFactory (const XMLNode&);
+	boost::shared_ptr<Route> XMLRouteFactory (const XMLNode&, int);
 
 	/* mixer stuff */
 

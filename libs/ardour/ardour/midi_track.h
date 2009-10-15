@@ -35,7 +35,7 @@ class MidiTrack : public Track
 {
 public:
 	MidiTrack (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
-	MidiTrack (Session&, const XMLNode&);
+	MidiTrack (Session&, const XMLNode&, int);
 	~MidiTrack ();
 
 	int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
@@ -59,7 +59,7 @@ public:
 	boost::shared_ptr<Region>  bounce_range (
 			nframes_t start, nframes_t end, InterThreadInfo&, bool enable_processing);
 
-	int set_state(const XMLNode& node);
+	int set_state(const XMLNode&, int version = 3000);
 
 	void midi_panic(void);
 	bool write_immediate_event(size_t size, const uint8_t* buf);
@@ -92,8 +92,8 @@ public:
 
 protected:
 	XMLNode& state (bool full);
-
-	int _set_state (const XMLNode&, bool call_base);
+	
+	int _set_state (const XMLNode&, int, bool call_base);
 
 private:
 	void write_out_of_band_data (

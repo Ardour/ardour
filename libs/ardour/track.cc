@@ -51,8 +51,8 @@ Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, Data
 	_mode = mode;
 }
 
-Track::Track (Session& sess, const XMLNode& node, DataType default_type)
-	: Route (sess, node, default_type)
+Track::Track (Session& sess, const XMLNode& node, int version, DataType default_type)
+	: Route (sess, node, version, default_type)
 	, _rec_enable_control (new RecEnableControllable(*this))
 {
 	_freeze_record.state = NoFreeze;

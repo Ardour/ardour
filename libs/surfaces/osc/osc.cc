@@ -864,7 +864,7 @@ OSC::get_state ()
 }
 		
 int 
-OSC::set_state (const XMLNode&)
+OSC::set_state (const XMLNode&, int /*version*/)
 {
 	return 0;
 }

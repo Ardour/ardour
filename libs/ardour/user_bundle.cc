@@ -24,7 +24,7 @@ ARDOUR::UserBundle::UserBundle (XMLNode const & x, bool i)
 }
 
 int
-ARDOUR::UserBundle::set_state (XMLNode const & node)
+ARDOUR::UserBundle::set_state (XMLNode const & node, int version)
 {
 	XMLProperty const * name;
 

@@ -2226,7 +2226,7 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 }
 
 int
-Editor::set_state (const XMLNode& node)
+Editor::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 	XMLNode* geometry;

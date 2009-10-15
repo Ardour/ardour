@@ -130,8 +130,8 @@ class Diskstream : public SessionObject, public boost::noncopyable
 
 	/* Stateful */
 	virtual XMLNode& get_state(void) = 0;
-	virtual int      set_state(const XMLNode& node) = 0;
-
+	virtual int      set_state(const XMLNode&, int version = 3000) = 0;
+	
 	virtual void monitor_input (bool) {}
 
 	nframes_t    capture_offset() const { return _capture_offset; }

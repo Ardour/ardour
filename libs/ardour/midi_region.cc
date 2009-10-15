@@ -285,7 +285,7 @@ MidiRegion::set_live_state (const XMLNode& node, Change& what_changed, bool send
 }
 
 int
-MidiRegion::set_state (const XMLNode& node)
+MidiRegion::set_state (const XMLNode& node, int version)
 {
 	/* Region::set_state() calls the virtual set_live_state(),
 	   which will get us back to AudioRegion::set_live_state()

@@ -70,7 +70,7 @@ struct ControlProtocolInfo {
 
 	void set_protocol_states (const XMLNode&);
 
-	int set_state (const XMLNode&);
+	int set_state (const XMLNode&, int version = 3000);
 	XMLNode& get_state (void);
 
   private:

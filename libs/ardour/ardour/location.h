@@ -71,7 +71,7 @@ class Location : public PBD::StatefulDestructible
 	}
 
 	Location (const Location& other);
-	Location (const XMLNode&);
+	Location (const XMLNode&, int version = 3000);
 	Location* operator= (const Location& other);
 
 	bool locked() const { return _locked; }
@@ -125,7 +125,7 @@ class Location : public PBD::StatefulDestructible
 	XMLNode& cd_info_node (const std::string &, const std::string &);
 
 	XMLNode& get_state (void);
-	int set_state (const XMLNode&);
+	int set_state (const XMLNode&, int version = 3000);
 
   private:
 	std::string   _name;
@@ -155,7 +155,7 @@ class Locations : public PBD::StatefulDestructible
 	void clear_ranges ();
 
 	XMLNode& get_state (void);
-	int set_state (const XMLNode&);
+	int set_state (const XMLNode&, int version = 3000);
         Location *get_location_by_id(PBD::ID);
 
 	Location* auto_loop_location () const;

@@ -125,7 +125,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoin
 	bool is_first_point (ControlPoint &);
 
 	XMLNode& get_state (void);
-	int set_state (const XMLNode&);
+	int set_state (const XMLNode&, int version = 3000);
 	void set_colors();
 
 	void modify_point_y (ControlPoint&, double);

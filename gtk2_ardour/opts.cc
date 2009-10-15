@@ -41,6 +41,7 @@ bool ARDOUR_COMMAND_LINE::try_hw_optimization = true;
 string ARDOUR_COMMAND_LINE::keybindings_path = ""; /* empty means use builtin default */
 Glib::ustring ARDOUR_COMMAND_LINE::menus_file = "ardour.menus";
 bool ARDOUR_COMMAND_LINE::finder_invoked_ardour = false;
+string ARDOUR_COMMAND_LINE::immediate_save;
 
 using namespace ARDOUR_COMMAND_LINE;
 
@@ -51,7 +52,7 @@ print_help (const char *execname)
 	     << _("  -v, --version                    Show version information\n")
 	     << _("  -h, --help                       Print this message\n")
 	     << _("  -b, --bindings                   Print all possible keyboard binding names\n")
-	     << _("  -c, --name  name                 Use a specific jack client name, default is ardour\n")
+	     << _("  -c, --name <name>                Use a specific jack client name, default is ardour\n")
 	     << _("  -d, --disable-plugins            Disable all plugins in an existing session\n")
 	     << _("  -n, --show-splash                Show splash screen\n")
 	     << _("  -m, --menus file                 Use \"file\" for Ardour menus\n")
@@ -61,6 +62,7 @@ print_help (const char *execname)
 #ifdef VST_SUPPORT
 	     << _("  -V, --novst                      Do not use VST support\n")
 #endif
+	     << _("  -E, --save <file>                Load the specified session, save it to <file> and then quit\n")
 	     << _("  [session-name]                   Name of session to load\n")
 	     << _("  -C, --curvetest filename         Curve algorithm debugger\n")
 	     << _("  -k, --keybindings filename       Name of key bindings to load (default is ~/.ardour3/ardour.bindings)\n")
@@ -71,9 +73,8 @@ print_help (const char *execname)
 
 int
 ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
-
 {
-	const char *optstring = "U:hSbvVnOdc:C:m:N:k:p:";
+	const char *optstring = "U:hSbvVnOdc:C:m:N:k:p:E:";
 	const char *execname = strrchr (argv[0], '/');
 
 	if (getenv ("ARDOUR_SAE")) {
@@ -99,6 +100,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		{ "no-hw-optimizations", 0, 0, 'O' },
 		{ "sync", 0, 0, 'S' },
 		{ "curvetest", 1, 0, 'C' },
+		{ "save", 1, 0, 'E' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -176,6 +178,10 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 			keybindings_path = optarg;
 			break;
 
+		case 'E':
+			immediate_save = optarg;
+			break;
+
 		default:
 			return print_help(execname);
 		}
@@ -188,7 +194,6 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		}
 		session_name = argv[optind++];
 	}
-
 
 	return 0;
 }

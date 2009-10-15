@@ -105,7 +105,7 @@ Controllable::get_state ()
 }
 
 int
-Controllable::set_state (const XMLNode& node)
+Controllable::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop = node.property (X_("id"));
 

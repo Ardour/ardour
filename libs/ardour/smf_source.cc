@@ -329,7 +329,7 @@ SMFSource::get_state ()
 }
 
 int
-SMFSource::set_state (const XMLNode& node)
+SMFSource::set_state (const XMLNode& node, int version)
 {
 	if (Source::set_state (node)) {
 		return -1;

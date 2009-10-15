@@ -241,7 +241,7 @@ class Region
 
 	XMLNode&         get_state ();
 	virtual XMLNode& state (bool);
-	virtual int      set_state (const XMLNode&);
+	virtual int      set_state (const XMLNode&, int version = 3000);
 	virtual int      set_live_state (const XMLNode&, Change&, bool send);
 
 	virtual boost::shared_ptr<Region> get_parent() const;

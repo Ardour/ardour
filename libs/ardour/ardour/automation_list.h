@@ -79,8 +79,8 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 	void stop_touch ();
 	bool touching() const { return _touching; }
 
-	XMLNode& get_state(void);
-	int set_state (const XMLNode &s);
+	XMLNode& get_state (); 
+	int set_state (const XMLNode &, int version = 3000);
 	XMLNode& state (bool full);
 	XMLNode& serialize_events ();
 

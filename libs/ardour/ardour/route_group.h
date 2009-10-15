@@ -130,9 +130,9 @@ public:
 	sigc::signal<void,void*> FlagsChanged;
 
 	XMLNode& get_state ();
-
-	int set_state (const XMLNode&);
-
+	
+	int set_state (const XMLNode&, int version = 3000);
+	
 private:
 	Session& _session;
 	std::list<Route *> routes;
@@ -142,6 +142,7 @@ private:
 	Property _properties;
 
 	void remove_when_going_away (Route*);
+	int set_state_2X (const XMLNode&, int);
 };
 
 } /* namespace */

@@ -36,7 +36,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	bool get_feedback () const;
 
 	XMLNode& get_state ();
-	int set_state (const XMLNode&);
+	int set_state (const XMLNode&, int version = 3000);
 
   private:
 	MIDI::Port* _port;

@@ -1500,7 +1500,7 @@ TempoMap::get_state ()
 }
 
 int
-TempoMap::set_state (const XMLNode& node)
+TempoMap::set_state (const XMLNode& node, int version)
 {
 	{
 		Glib::RWLock::WriterLock lm (lock);

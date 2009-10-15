@@ -90,8 +90,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	bool paste (nframes_t, float times, Selection&, size_t nth);
 	void reset_objects (PointSelection&);
 
-	int  set_state (const XMLNode&);
-
+	int  set_state (const XMLNode&, int version = 3000);
 	guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	void hide ();
 

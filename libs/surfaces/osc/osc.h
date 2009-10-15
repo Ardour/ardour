@@ -49,7 +49,7 @@ class OSC : public ARDOUR::ControlProtocol
 	virtual ~OSC();
 
 	XMLNode& get_state ();
-	int set_state (const XMLNode&);
+	int set_state (const XMLNode&, int version = 3000);
 
 	int set_active (bool yn);
 	bool get_active () const;

@@ -54,7 +54,7 @@ public:
 
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
-	int      set_state(const XMLNode& node);
+	int      set_state(const XMLNode&, int version = 3000);
 
 	uint32_t pans_required() const { return _configured_input.n_audio(); }
 

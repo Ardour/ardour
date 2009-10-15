@@ -806,7 +806,7 @@ XMLNode & MackieControlProtocol::get_state()
 	return *node;
 }
 
-int MackieControlProtocol::set_state( const XMLNode & node )
+int MackieControlProtocol::set_state (const XMLNode & node, int version)
 {
 #ifdef DEBUG
 	cout << "MackieControlProtocol::set_state: active " << _active << endl;

@@ -45,14 +45,14 @@ class PluginInsert : public Processor
 {
   public:
 	PluginInsert (Session&, boost::shared_ptr<Plugin>);
-	PluginInsert (Session&, const XMLNode&);
+	PluginInsert (Session&, const XMLNode&, int version = 3000);
 	~PluginInsert ();
 
 	static const std::string port_automation_node_name;
 
 	XMLNode& state(bool);
 	XMLNode& get_state(void);
-	int set_state(const XMLNode&);
+	int set_state(const XMLNode&, int version = 3000);
 
 	void run (BufferSet& in, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 	void silence (nframes_t nframes);

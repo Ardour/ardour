@@ -38,7 +38,7 @@ class Send : public Delivery
 {
   public:
 	Send (Session&, boost::shared_ptr<MuteMaster>, Delivery::Role r = Delivery::Send);
-	Send (Session&, boost::shared_ptr<MuteMaster>, const XMLNode&, Delivery::Role r = Delivery::Send);
+	Send (Session&, boost::shared_ptr<MuteMaster>, const XMLNode&, int version = 3000, Delivery::Role r = Delivery::Send);
 	virtual ~Send ();
 
 	uint32_t bit_slot() const { return _bitslot; }
@@ -53,7 +53,7 @@ class Send : public Delivery
 
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
-	int set_state(const XMLNode& node);
+	int set_state(const XMLNode&, int version = 3000);
 
 	uint32_t pans_required() const { return _configured_input.n_audio(); }
 

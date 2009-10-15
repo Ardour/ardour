@@ -1789,7 +1789,7 @@ Playlist::mark_session_dirty ()
 }
 
 int
-Playlist::set_state (const XMLNode& node)
+Playlist::set_state (const XMLNode& node, int version)
 {
 	XMLNode *child;
 	XMLNodeList nlist;

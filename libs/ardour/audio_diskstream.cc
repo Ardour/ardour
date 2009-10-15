@@ -1909,7 +1909,7 @@ AudioDiskstream::get_state ()
 }
 
 int
-AudioDiskstream::set_state (const XMLNode& node)
+AudioDiskstream::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 	XMLNodeList nlist = node.children();

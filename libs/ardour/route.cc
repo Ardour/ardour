@@ -96,7 +96,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	_meter_connection = Metering::connect (mem_fun (*this, &Route::meter));
 }
 
-Route::Route (Session& sess, const XMLNode& node, DataType default_type)
+Route::Route (Session& sess, const XMLNode& node, int version, DataType default_type)
 	: SessionObject (sess, "toBeReset")
 	, AutomatableControls (sess)
 	, _solo_control (new SoloControllable (X_("solo"), *this))
@@ -105,7 +105,7 @@ Route::Route (Session& sess, const XMLNode& node, DataType default_type)
 {
 	init ();
 
-	_set_state (node, false);
+	_set_state (node, version, false);
 
 	/* now that we have _meter, its safe to connect to this */
 
@@ -684,7 +684,6 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 		// Set up processor list channels.  This will set processor->[input|output]_streams(),
 		// configure redirect ports properly, etc.
 
-
 		if (configure_processors_unlocked (err)) {
 			ProcessorList::iterator ploc = loc;
 			--ploc;
@@ -823,6 +822,64 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 			error << _("Processor XML node has no type property") << endmsg;
 			return false;
 		}
+	}
+
+	catch (failed_constructor &err) {
+		warning << _("processor could not be created. Ignored.") << endmsg;
+		return false;
+	}
+}
+
+
+bool
+Route::add_processor_from_xml_2X (const XMLNode& node, int version, ProcessorList::iterator iter)
+{
+	const XMLProperty *prop;
+
+	try {
+		boost::shared_ptr<Processor> processor;
+					
+		if (node.name() == "Insert") {
+
+			if ((prop = node.property ("type")) != 0) {
+				
+				if (prop->value() == "ladspa" || prop->value() == "Ladspa" || 
+				    prop->value() == "lv2" ||
+				    prop->value() == "vst" ||
+				    prop->value() == "audiounit") {
+					
+					processor.reset (new PluginInsert (_session, node, version));
+					
+				} else {
+					
+					processor.reset (new PortInsert (_session, _mute_master, node, version));
+				}
+
+			}
+				
+		} else if (node.name() == "Send") {
+			
+			processor.reset (new Send (_session, _mute_master, node, version));
+			
+		} else {
+			
+			error << string_compose(_("unknown Processor type \"%1\"; ignored"), node.name()) << endmsg;
+			return false;
+		}
+				
+		if (iter == _processors.end() && processor->visible() && !_processors.empty()) {
+			/* check for invisible processors stacked at the end and leave them there */
+			ProcessorList::iterator p;
+			p = _processors.end();
+			--p;
+			while (!(*p)->visible() && p != _processors.begin()) {
+				--p;
+			}
+			++p;
+			iter = p;
+		}
+		
+		return (add_processor (processor, iter) == 0);
 	}
 
 	catch (failed_constructor &err) {
@@ -1326,6 +1383,7 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	uint32_t index = 0;
 
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++index) {
+
 		if ((*p)->can_support_io_configuration(in, out)) {
 			configuration.push_back(make_pair(in, out));
 			in = out;
@@ -1600,15 +1658,18 @@ Route::state(bool full_state)
 }
 
 int
-Route::set_state (const XMLNode& node)
+Route::set_state (const XMLNode& node, int version)
 {
-	return _set_state (node, true);
+	return _set_state (node, version, true);
 }
 
 int
-Route::_set_state (const XMLNode& node, bool /*call_base*/)
+Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 {
-
+	if (version < 3000) {
+		return _set_state_2X (node, version);
+	}
+	
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
 	XMLNode *child;
@@ -1773,6 +1834,200 @@ Route::_set_state (const XMLNode& node, bool /*call_base*/)
 	return 0;
 }
 
+int
+Route::_set_state_2X (const XMLNode& node, int version)
+{
+	XMLNodeList nlist;
+	XMLNodeConstIterator niter;
+	XMLNode *child;
+	XMLPropertyList plist;
+	const XMLProperty *prop;
+
+	/* 2X things which still remain to be handled:
+	 * default-type 
+	 * muted
+	 * mute-affects-pre-fader
+	 * mute-affects-post-fader
+	 * mute-affects-control-outs
+	 * mute-affects-main-outs
+	 * automation
+	 * controlouts
+	 */
+
+	if (node.name() != "Route") {
+		error << string_compose(_("Bad node sent to Route::set_state() [%1]"), node.name()) << endmsg;
+		return -1;
+	}
+
+	if ((prop = node.property (X_("flags"))) != 0) {
+		_flags = Flag (string_2_enum (prop->value(), _flags));
+	} else {
+		_flags = Flag (0);
+	}
+
+	/* add standard processors */
+
+	_meter.reset (new PeakMeter (_session));
+	add_processor (_meter, PreFader);
+
+	if (_flags & ControlOut) {
+		/* where we listen to tracks */
+		_intreturn.reset (new InternalReturn (_session));
+		add_processor (_intreturn, PreFader);
+	}
+	
+	_main_outs.reset (new Delivery (_session, _output, _mute_master, _name, Delivery::Main));
+	add_processor (_main_outs, PostFader);
+
+	/* IOs */
+
+	nlist = node.children ();
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+
+		child = *niter;
+
+		if (child->name() == IO::state_node_name) {
+			_input->set_state_2X (*child, version, true);
+			_output->set_state_2X (*child, version, false);
+
+			if ((prop = child->property (X_("name"))) != 0) {
+				set_name (prop->value ());
+			}
+
+			if ((prop = child->property (X_("id"))) != 0) {
+				_id = prop->value ();
+			}
+
+			if ((prop = child->property (X_("active"))) != 0) {
+				bool yn = string_is_affirmative (prop->value());
+				_active = !yn; // force switch
+				set_active (yn);
+			}
+		}
+			
+		/* XXX: panners? */
+	}
+	
+	if ((prop = node.property (X_("phase-invert"))) != 0) {
+		set_phase_invert (string_is_affirmative (prop->value()));
+	}
+
+	if ((prop = node.property (X_("denormal-protection"))) != 0) {
+		set_denormal_protection (string_is_affirmative (prop->value()));
+	}
+
+	if ((prop = node.property (X_("soloed"))) != 0) {
+		bool yn = string_is_affirmative (prop->value());
+
+		/* XXX force reset of solo status */
+
+		set_solo (yn, this);
+	}
+
+	if ((prop = node.property (X_("meter-point"))) != 0) {
+		_meter_point = MeterPoint (string_2_enum (prop->value (), _meter_point));
+	}
+
+	/* XXX: if the route was in both a mix group and an edit group, it'll end up
+	   just in the edit group. */
+
+	if ((prop = node.property (X_("mix-group"))) != 0) {
+		RouteGroup* route_group = _session.route_group_by_name(prop->value());
+		if (route_group == 0) {
+			error << string_compose(_("Route %1: unknown route group \"%2 in saved state (ignored)"), _name, prop->value()) << endmsg;
+		} else {
+			set_route_group (route_group, this);
+		}
+	}
+	
+	if ((prop = node.property (X_("edit-group"))) != 0) {
+		RouteGroup* route_group = _session.route_group_by_name(prop->value());
+		if (route_group == 0) {
+			error << string_compose(_("Route %1: unknown route group \"%2 in saved state (ignored)"), _name, prop->value()) << endmsg;
+		} else {
+			set_route_group (route_group, this);
+		}
+	}
+
+	if ((prop = node.property (X_("order-keys"))) != 0) {
+
+		long n;
+
+		string::size_type colon, equal;
+		string remaining = prop->value();
+
+		while (remaining.length()) {
+
+			if ((equal = remaining.find_first_of ('=')) == string::npos || equal == remaining.length()) {
+				error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
+				      << endmsg;
+			} else {
+				if (sscanf (remaining.substr (equal+1).c_str(), "%ld", &n) != 1) {
+					error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
+					      << endmsg;
+				} else {
+					set_order_key (remaining.substr (0, equal), n);
+				}
+			}
+
+			colon = remaining.find_first_of (':');
+
+			if (colon != string::npos) {
+				remaining = remaining.substr (colon+1);
+			} else {
+				break;
+			}
+		}
+	}
+
+	XMLNodeList redirect_nodes;
+	
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
+		
+		child = *niter;
+		
+		if (child->name() == X_("Send") || child->name() == X_("Insert")) {
+			redirect_nodes.push_back(child);
+		}
+		
+	}
+
+	set_processor_state_2X (redirect_nodes, version);
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
+		child = *niter;
+
+		if (child->name() == X_("Comment")) {
+
+			/* XXX this is a terrible API design in libxml++ */
+
+			XMLNode *cmt = *(child->children().begin());
+			_comment = cmt->content();
+
+		} else if (child->name() == X_("Extra")) {
+
+			_extra_xml = new XMLNode (*child);
+
+		} else if (child->name() == X_("Controllable") && (prop = child->property("name")) != 0) {
+			
+			if (prop->value() == "solo") {
+				_solo_control->set_state (*child);
+				_session.add_controllable (_solo_control);
+			} 
+
+		} else if (child->name() == X_("RemoteControl")) {
+			if ((prop = child->property (X_("id"))) != 0) {
+				int32_t x;
+				sscanf (prop->value().c_str(), "%d", &x);
+				set_remote_control_id (x);
+			}
+
+		} 
+	}
+
+	return 0;
+}
+
 XMLNode&
 Route::get_processor_state ()
 {
@@ -1782,6 +2037,20 @@ Route::get_processor_state ()
 	}
 
 	return *root;
+}
+
+void
+Route::set_processor_state_2X (XMLNodeList const & nList, int version)
+{
+	/* We don't bother removing existing processors not in nList, as this
+	   method will only be called when creating a Route from scratch, not
+	   for undo purposes.  Just put processors in at the appropriate place
+	   in the list.
+	*/
+
+	for (XMLNodeConstIterator i = nList.begin(); i != nList.end(); ++i) {
+		add_processor_from_xml_2X (**i, version, _processors.begin ());
+	}
 }
 
 void

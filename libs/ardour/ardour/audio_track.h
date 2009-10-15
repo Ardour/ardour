@@ -33,7 +33,7 @@ class AudioTrack : public Track
 {
   public:
 	AudioTrack (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
-	AudioTrack (Session&, const XMLNode&);
+	AudioTrack (Session&, const XMLNode&, int);
 	~AudioTrack ();
 
 	int set_mode (TrackMode m);
@@ -55,12 +55,12 @@ class AudioTrack : public Track
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
 	boost::shared_ptr<Region> bounce_range (nframes_t start, nframes_t end, InterThreadInfo&, bool enable_processing);
 
-	int set_state(const XMLNode& node);
+	int set_state(const XMLNode&, int version = 3000);
 
   protected:
 	XMLNode& state (bool full);
-
-	int _set_state (const XMLNode&, bool call_base);
+	
+	int _set_state (const XMLNode&, int, bool call_base);
 
   private:
 	int  set_diskstream (boost::shared_ptr<AudioDiskstream>, void *);

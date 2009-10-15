@@ -113,9 +113,9 @@ public:
 	void add_underlay (StreamView*, bool update_xml = true);
 	void remove_underlay (StreamView*);
 	void build_underlay_menu(Gtk::Menu*);
-
-	int set_state (const XMLNode&);
-
+	
+	int set_state (const XMLNode&, int version = 3000);
+	
 	/* This is a bit nasty to expose :/ */
 	struct RouteAutomationNode {
 		Evoral::Parameter                         param;

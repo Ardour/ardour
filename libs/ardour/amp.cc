@@ -335,7 +335,7 @@ Amp::state (bool full_state)
 }
 
 int
-Amp::set_state (const XMLNode& node)
+Amp::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 

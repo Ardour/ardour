@@ -77,7 +77,7 @@ void initialize_primary_key_from_commands (PatchPrimaryKey& id, const XMLNode* n
 
 
 int
-Patch::set_state (const XMLNode& node)
+Patch::set_state (const XMLNode& node, int version)
 {
 	assert(node.name() == "Patch");
 	_number = node.property("Number")->value();
@@ -116,7 +116,7 @@ Note::get_state (void)
 }
 
 int
-Note::set_state (const XMLNode& node)
+Note::set_state (const XMLNode& node, int version)
 {
 	assert(node.name() == "Note");
 	_number = node.property("Number")->value();
@@ -135,7 +135,7 @@ NoteNameList::get_state (void)
 }
 
 int
-NoteNameList::set_state (const XMLNode& node)
+NoteNameList::set_state (const XMLNode& node, int version)
 {
 	assert(node.name() == "NoteNameList");
 	_name   = node.property("Name")->value();
@@ -168,7 +168,7 @@ PatchBank::get_state (void)
 }
 
 int
-PatchBank::set_state (const XMLNode& node)
+PatchBank::set_state (const XMLNode& node, int version)
 {
 	assert(node.name() == "PatchBank");
 	_name   = node.property("Name")->value();
@@ -223,7 +223,7 @@ ChannelNameSet::get_state (void)
 }
 
 int
-ChannelNameSet::set_state (const XMLNode& node)
+ChannelNameSet::set_state (const XMLNode& node, int version)
 {
 	assert(node.name() == "ChannelNameSet");
 	_name   = node.property("Name")->value();
@@ -270,7 +270,7 @@ ChannelNameSet::set_state (const XMLNode& node)
 }
 
 int
-CustomDeviceMode::set_state(const XMLNode& a_node)
+CustomDeviceMode::set_state(const XMLNode& a_node, int version)
 {
 	assert(a_node.name() == "CustomDeviceMode");
 	
@@ -307,7 +307,7 @@ CustomDeviceMode::get_state(void)
 }
 
 int
-MasterDeviceNames::set_state(const XMLNode& a_node)
+MasterDeviceNames::set_state(const XMLNode& a_node, int version)
 {
 	// cerr << "MasterDeviceNames::set_state Manufacturer" << endl;
 	// Manufacturer
@@ -376,7 +376,7 @@ MasterDeviceNames::get_state(void)
 }
 
 int
-MIDINameDocument::set_state(const XMLNode& a_node)
+MIDINameDocument::set_state(const XMLNode& a_node, int version)
 {
 	// Author
 	boost::shared_ptr<XMLSharedNodeList> author = a_node.find("//Author");
