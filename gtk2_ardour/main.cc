@@ -244,44 +244,45 @@ fixup_bundle_environment ()
 static gboolean
 tell_about_jack_death (void* /* ignored */)
 {
-  if (AudioEngine::instance()->processed_frames() == 0) {
-    /* died during startup */
-    MessageDialog msg (_("JACK exited"), false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK);
-    msg.set_position (Gtk::WIN_POS_CENTER);
-    msg.set_secondary_text (_(
-			      "JACK exited unexpectedly, and without notifying Ardour.\n\
+	if (AudioEngine::instance()->processed_frames() == 0) {
+		/* died during startup */
+		MessageDialog msg (_("JACK exited"), false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK);
+		msg.set_position (Gtk::WIN_POS_CENTER);
+		msg.set_secondary_text (_(
+"JACK exited unexpectedly, and without notifying Ardour.\n\
 \n\
 This could be due to misconfiguration or to an error inside JACK.\n\
 \n\
 Click OK to exit Ardour."));
     
-    msg.run ();
-    _exit (0);
+		msg.run ();
+		_exit (0);
+		
+	} else {
 
-  } else {
-
-    /* engine has already run, so this is a mid-session JACK death */
-
-    MessageDialog* msg = manage (new MessageDialog (_("JACK exited"), false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_NONE));
-    msg->set_secondary_text (_(
+		/* engine has already run, so this is a mid-session JACK death */
+		
+		MessageDialog* msg = manage (new MessageDialog (_("JACK exited"), false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_NONE));
+		msg->set_secondary_text (_(
 "JACK exited unexpectedly, and without notifying Ardour.\n\
 \n\
 This is probably due to an error inside JACK. You should restart JACK\n\
 and reconnect Ardour to it, or exit Ardour now. You cannot save your\n\
 session at this time, because we would lose your connection information.\n"));
-    msg->present ();
-  }
+		msg->present ();
+	}
+	return false; /* do not call again */
 }
 
 static void
 sigpipe_handler (int sig)
 {
         static bool done_the_jack_thing = false;
-
+	
 	if (!done_the_jack_thing) {
-	  AudioEngine::instance()->died ();
-	  g_idle_add (tell_about_jack_death, 0);
-	  done_the_jack_thing =  true;
+		AudioEngine::instance()->died ();
+		g_idle_add (tell_about_jack_death, 0);
+		done_the_jack_thing =  true;
 	}
 }
 
