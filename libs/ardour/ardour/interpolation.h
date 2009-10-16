@@ -39,23 +39,11 @@ class Interpolation {
 };
 
 class LinearInterpolation : public Interpolation {
- protected:
-
  public:
      nframes_t interpolate (int channel, nframes_t nframes, Sample* input, Sample* output);
 };
 
 class CubicInterpolation : public Interpolation {
- protected:
-    // shamelessly ripped from Steve Harris' swh-plugins (ladspa-util.h)
-    static inline float cube_interp(const float fr, const float inm1, const float
-                                    in, const float inp1, const float inp2)
-    {
-        return in + 0.5f * fr * (inp1 - inm1 +
-         fr * (4.0f * inp1 + 2.0f * inm1 - 5.0f * in - inp2 +
-         fr * (3.0f * (in - inp1) - inm1 + inp2)));
-    }
-
  public:
      nframes_t interpolate (int channel, nframes_t nframes, Sample* input, Sample* output);
 };
