@@ -176,9 +176,6 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual ChanCount output_streams() const;
 	virtual ChanCount input_streams() const;
 
-	PBD::Controllable *get_nth_control (uint32_t, bool do_not_create = false);
-	void make_nth_control (uint32_t, const XMLNode&);
-
 	PluginInfoPtr get_info() { return _info; }
 	void set_info (const PluginInfoPtr inf) { _info = inf; }
 

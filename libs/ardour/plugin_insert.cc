@@ -70,8 +70,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	/* the first is the master */
 
 	_plugins.push_back (plug);
-
-	init ();
+	set_automatable ();
 
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
@@ -89,11 +88,6 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
 	}
-
-	// XXX: This would dump all automation, which has already been loaded by
-	//      Processor. But this could also have been related to the Parameter change..
-	//      will look into this later.
-	//set_automatable ();
 
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
@@ -131,12 +125,6 @@ PluginInsert::set_count (uint32_t num)
 	}
 
 	return true;
-}
-
-void
-PluginInsert::init ()
-{
-	set_automatable ();
 }
 
 PluginInsert::~PluginInsert ()
@@ -695,22 +683,22 @@ PluginInsert::state (bool full)
 	node.add_child_nocopy (_plugins[0]->get_state());
 
 	/* add port automation state */
-	//XMLNode *autonode = new XMLNode(port_automation_node_name);
+	XMLNode *autonode = new XMLNode(port_automation_node_name);
 	set<Evoral::Parameter> automatable = _plugins[0]->automatable();
 
 	for (set<Evoral::Parameter>::iterator x = automatable.begin(); x != automatable.end(); ++x) {
-
+		
 		/*XMLNode* child = new XMLNode("port");
 		snprintf(buf, sizeof(buf), "%" PRIu32, *x);
 		child->add_property("number", string(buf));
-
+		
 		child->add_child_nocopy (automation_list (*x).state (full));
 		autonode->add_child_nocopy (*child);
 		*/
-		//autonode->add_child_nocopy (((AutomationList*)data().control(*x)->list().get())->state (full));
+		autonode->add_child_nocopy (((AutomationList*)data().control(*x)->list().get())->state (full));
 	}
 
-	//node.add_child_nocopy (*autonode);
+	node.add_child_nocopy (*autonode);
 
 	return node;
 }
@@ -725,7 +713,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	ARDOUR::PluginType type;
 
 	if ((prop = node.property ("type")) == 0) {
-		error << _("XML node describing insert is missing the `type' field") << endmsg;
+		error << _("XML node describing plugin is missing the `type' field") << endmsg;
 		return -1;
 	}
 
@@ -736,6 +724,8 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		type = ARDOUR::LV2;
 	} else if (prop->value() == X_("vst")) {
 		type = ARDOUR::VST;
+	} else if (prop->value() == X_("audiounit")) {
+		type = ARDOUR::AudioUnit;
 	} else {
 		error << string_compose (_("unknown plugin type %1 in plugin insert state"),
 				  prop->value())
@@ -744,11 +734,25 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	}
 
 	prop = node.property ("unique-id");
-	cout << "- ID " << prop->value() << "\n";
+
 	if (prop == 0) {
-		error << _("Plugin has no unique ID field") << endmsg;
-		return -1;
+#ifdef VST_SUPPORT
+		/* older sessions contain VST plugins with only an "id" field.
+		 */
+		
+		if (type == ARDOUR::VST) {
+			prop = node.property ("id");
+		}
+#endif		
+		/* recheck  */
+
+		if (prop == 0) {
+			error << _("Plugin has no unique ID field") << endmsg;
+			return -1;
+		}
 	}
+
+	cout << "- ID " << prop->value() << "\n";
 
 	boost::shared_ptr<Plugin> plugin;
 
@@ -762,6 +766,14 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	}
 
 	uint32_t count = 1;
+	bool need_automatables = true;
+
+	if (_plugins.empty()) {
+		/* if we are adding the first plugin, we will need to set
+		   up automatable controls.
+		*/
+		need_automatables = true;
+	}
 
 	if ((prop = node.property ("count")) != 0) {
 		sscanf (prop->value().c_str(), "%u", &count);
@@ -771,9 +783,13 @@ PluginInsert::set_state(const XMLNode& node, int version)
 
 		_plugins.push_back (plugin);
 
-		for (uint32_t n=1; n < count; ++n) {
+		for (uint32_t n = 1; n < count; ++n) {
 			_plugins.push_back (plugin_factory (plugin));
 		}
+	}
+
+	if (need_automatables) {
+		set_automatable ();
 	}
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
@@ -785,20 +801,94 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		}
 	}
 
-	const XMLNode* insert_node = &node;
-
-	// legacy sessions: search for child IOProcessor node
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == "IOProcessor") {
-			insert_node = *niter;
-			break;
+	if (version < 3000) {
+		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+			if ((*niter)->name() == "Redirect") {
+				/* XXX do we need to tackle placement? i think not (pd; oct 16 2009) */
+				Processor::set_state (**niter, version);
+				break;
+			}
 		}
+		set_parameter_state_2X (node, version);
+	} else {
+		Processor::set_state (node, version);
+		set_parameter_state (node, version);
 	}
-	
-	Processor::set_state (*insert_node, version);
+
+	// The name of the PluginInsert comes from the plugin, nothing else
+	_name = plugin->get_info()->name;
+
+	return 0;
+}
+
+void
+PluginInsert::set_parameter_state (const XMLNode& node, int version)
+{
+	XMLNodeList nlist = node.children();
+	XMLNodeIterator niter;
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		
+		if ((*niter)->name() != port_automation_node_name) {
+			continue;
+		}
+		
+		XMLNodeList cnodes;
+		XMLProperty *cprop;
+		XMLNodeConstIterator iter;
+		XMLNode *child;
+		const char *port;
+		uint32_t port_id;
+
+		cnodes = (*niter)->children ("AutomationList");
+
+		for (iter = cnodes.begin(); iter != cnodes.end(); ++iter) {
+
+			child = *iter;
+
+			/* XXX this code knows way too much about the internal details of an AutomationList state node */
+
+			if ((cprop = child->property("automation-id")) != 0) {
+				port = cprop->value().c_str();
+			} else {
+				warning << _("PluginInsert: Auto: no plugin parameter number seen") << endmsg;
+				continue;
+			}
+
+			if (sscanf (port, "parameter-%" PRIu32, &port_id) != 1) {
+				warning << _("PluginInsert: Auto: no parameter number found") << endmsg;
+				continue;
+			}
+
+			if (port_id >= _plugins[0]->parameter_count()) {
+				warning << _("PluginInsert: Auto: plugin parameter out of range") << endmsg;
+				continue;
+			}
+
+			boost::shared_ptr<AutomationControl> c = boost::dynamic_pointer_cast<AutomationControl>(
+					data().control(Evoral::Parameter(PluginAutomation, 0, port_id), true));
+
+			if (c) {
+				c->alist()->set_state (*child, version);
+			} else {
+				error << string_compose (_("PluginInsert: automatable control %1 not found - ignored"), port_id) << endmsg;
+			}
+		}
+
+		/* done */
+		
+		break;
+	}
+}
+
+void
+PluginInsert::set_parameter_state_2X (const XMLNode& node, int version)
+{
+	XMLNodeList nlist = node.children();
+	XMLNodeIterator niter;
 
 	/* look for port automation node */
-
+	
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		if ((*niter)->name() != port_automation_node_name) {
@@ -811,22 +901,22 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		XMLNode *child;
 		const char *port;
 		uint32_t port_id;
-
-		cnodes = (*niter)->children ("Port");
-
-		for (iter = cnodes.begin(); iter != cnodes.end(); ++iter) {
-
+		
+		cnodes = (*niter)->children ("port");
+		
+		for(iter = cnodes.begin(); iter != cnodes.end(); ++iter){
+			
 			child = *iter;
-
+			
 			if ((cprop = child->property("number")) != 0) {
 				port = cprop->value().c_str();
 			} else {
-				warning << _("PluginInsert: Auto: no plugin port number") << endmsg;
+				warning << _("PluginInsert: Auto: no ladspa port number") << endmsg;
 				continue;
 			}
-
+			
 			sscanf (port, "%" PRIu32, &port_id);
-
+			
 			if (port_id >= _plugins[0]->parameter_count()) {
 				warning << _("PluginInsert: Auto: port id out of range") << endmsg;
 				continue;
@@ -835,37 +925,21 @@ PluginInsert::set_state(const XMLNode& node, int version)
 			boost::shared_ptr<AutomationControl> c = boost::dynamic_pointer_cast<AutomationControl>(
 					data().control(Evoral::Parameter(PluginAutomation, 0, port_id), true));
 
-			if (!child->children().empty()) {
-				c->alist()->set_state (*child->children().front(), version);
-			} else {
-				if ((cprop = child->property("auto")) != 0) {
-
-					/* old school */
-
-					int x;
-					sscanf (cprop->value().c_str(), "0x%x", &x);
-					c->alist()->set_automation_state (AutoState (x));
-
-				} else {
-
-					/* missing */
-
-					c->alist()->set_automation_state (Off);
+			if (c) {
+				if (!child->children().empty()) {
+					c->alist()->set_state (*child->children().front(), version);
 				}
+			} else {
+				error << string_compose (_("PluginInsert: automatable control %1 not found - ignored"), port_id) << endmsg;
 			}
-
 		}
-
+		
 		/* done */
-
+		
 		break;
-	}
-
-	// The name of the PluginInsert comes from the plugin, nothing else
-	_name = plugin->get_info()->name;
-
-	return 0;
+	} 
 }
+
 
 string
 PluginInsert::describe_parameter (Evoral::Parameter param)

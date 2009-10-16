@@ -134,9 +134,10 @@ class PluginInsert : public Processor
 	void automation_run (BufferSet& bufs, nframes_t nframes);
 	void connect_and_run (BufferSet& bufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now = 0);
 
-	void init ();
 	void set_automatable ();
 	void auto_state_changed (Evoral::Parameter which);
+	void set_parameter_state (const XMLNode& node, int version);
+	void set_parameter_state_2X (const XMLNode& node, int version);
 
 	int32_t count_for_configuration (ChanCount in, ChanCount out) const;
 
