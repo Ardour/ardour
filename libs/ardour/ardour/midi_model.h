@@ -69,7 +69,7 @@ public:
 
 		void operator()();
 		void undo();
-		
+
 		int set_state (const XMLNode&, int version);
 		XMLNode& get_state ();
 
@@ -113,7 +113,7 @@ public:
 
 		void operator()();
 		void undo();
-		
+
 		int set_state (const XMLNode&, int version);
 		XMLNode& get_state ();
 
@@ -128,13 +128,13 @@ public:
 
 		struct NotePropertyChange {
 			DiffCommand::Property property;
-			boost::shared_ptr<Evoral::Note<TimeType> > note;
+			boost::shared_ptr< Evoral::Note<TimeType> > note;
 			union {
-				uint8_t old_value;
+				uint8_t  old_value;
 				TimeType old_time;
 			};
 			union {
-				uint8_t new_value;
+				uint8_t  new_value;
 				TimeType new_time;
 			};
 		};
@@ -150,8 +150,6 @@ public:
 	MidiModel::DiffCommand*  new_diff_command(const std::string name="midi edit");
 	void                     apply_command(Session& session, Command* cmd);
 	void                     apply_command_as_subcommand(Session& session, Command* cmd);
-
-
 
 	bool write_to(boost::shared_ptr<MidiSource> source);
 

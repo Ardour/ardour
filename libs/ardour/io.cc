@@ -745,7 +745,7 @@ IO::get_port_counts_2X (XMLNode const & node, int version, ChanCount& n, boost::
 	XMLNodeList children = node.children ();
 
 	uint32_t n_audio = 0;
-	
+
 	for (XMLNodeIterator i = children.begin(); i != children.end(); ++i) {
 
 		if ((prop = node.property ("inputs")) != 0 && _direction == Input) {
