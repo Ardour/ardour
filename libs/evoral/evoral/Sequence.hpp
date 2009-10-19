@@ -61,7 +61,7 @@ public:
 template<typename Time>
 class Sequence : virtual public ControlSet {
 public:
-	Sequence(const TypeMap& type_map, size_t size=0);
+	Sequence(const TypeMap& type_map);
 
 	void write_lock();
 	void write_unlock();
@@ -78,11 +78,7 @@ public:
 	bool writing() const { return _writing; }
 	void end_write(bool delete_stuck=false);
 
-	/** Resizes vector if necessary (NOT realtime safe) */
 	void append(const Event<Time>& ev);
-
-	inline const boost::shared_ptr< const Note<Time> > note_at(size_t i) const { return _notes[i]; }
-	inline const boost::shared_ptr< Note<Time> >       note_at(size_t i)       { return _notes[i]; }
 
 	inline size_t n_notes() const { return _notes.size(); }
 	inline bool   empty()   const { return _notes.size() == 0 && ControlSet::controls_empty(); }
@@ -91,6 +87,20 @@ public:
 	                                        const boost::shared_ptr< const Note<Time> >& b) {
 		return a->time() < b->time();
 	}
+
+	struct NoteNumberComparator {
+		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,
+		                       const boost::shared_ptr< const Note<Time> > b) const {
+			return a->note() < b->note();
+		}
+	};
+
+	struct EarlierNoteComparator {
+		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,
+		                       const boost::shared_ptr< const Note<Time> > b) const {
+			return a->time() < b->time();
+		}
+	};
 
 	struct LaterNoteComparator {
 		typedef const Note<Time>* value_type;
@@ -108,7 +118,7 @@ public:
 		}
 	};
 
-	typedef std::vector< boost::shared_ptr< Note<Time> > > Notes;
+	typedef std::set<boost::shared_ptr< Note<Time> >, EarlierNoteComparator> Notes;
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
 
@@ -199,7 +209,7 @@ private:
 	Notes   _notes;
 	SysExes _sysexes;
 
-	typedef std::vector<size_t> WriteNotes;
+	typedef std::set<boost::shared_ptr< Note<Time> >, NoteNumberComparator> WriteNotes;
 	WriteNotes _write_notes[16];
 	bool       _writing;
 

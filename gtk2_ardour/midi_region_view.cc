@@ -2368,16 +2368,11 @@ MidiRegionView::cut_copy_clear (Editing::CutCopyOp op)
 MidiCutBuffer*
 MidiRegionView::selection_as_cut_buffer () const
 {
-	NoteList notes;
+	Notes notes;
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		notes.push_back (boost::shared_ptr<NoteType> (new NoteType (*((*i)->note().get()))));
+		notes.insert (boost::shared_ptr<NoteType> (new NoteType (*((*i)->note().get()))));
 	}
-
-	/* sort them into time order */
-
-	Evoral::Sequence<Evoral::MusicalTime>::LaterNoteComparator cmp;
-	sort (notes.begin(), notes.end(),  cmp);
 
 	MidiCutBuffer* cb = new MidiCutBuffer (trackview.session());
 	cb->set (notes);
@@ -2399,16 +2394,16 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 	Evoral::MusicalTime duration;
 	Evoral::MusicalTime end_point;
 
-	duration = mcb.notes().back()->end_time() - mcb.notes().front()->time();
+	duration = (*mcb.notes().rbegin())->end_time() - (*mcb.notes().begin())->time();
 	paste_pos_beats = frames_to_beats (pos - _region->position());
-	beat_delta = mcb.notes().front()->time() - paste_pos_beats;
+	beat_delta = (*mcb.notes().begin())->time() - paste_pos_beats;
 	paste_pos_beats = 0;
 
 	_selection.clear ();
 
 	for (int n = 0; n < (int) times; ++n) {
 
-		for (NoteList::const_iterator i = mcb.notes().begin(); i != mcb.notes().end(); ++i) {
+		for (Notes::const_iterator i = mcb.notes().begin(); i != mcb.notes().end(); ++i) {
 
 			boost::shared_ptr<NoteType> copied_note (new NoteType (*((*i).get())));
 			copied_note->set_time (paste_pos_beats + copied_note->time() - beat_delta);
@@ -2516,13 +2511,13 @@ MidiRegionView::goto_previous_note ()
 }
 
 void
-MidiRegionView::selection_as_notelist (NoteList& selected)
+MidiRegionView::selection_as_notelist (Notes& selected)
 {
 	time_sort_events ();
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		if ((*i)->selected()) {
-			selected.push_back ((*i)->note());
+			selected.insert ((*i)->note());
 		}
 	}
 }

@@ -54,7 +54,7 @@ public:
 template<typename Time>
 class MySequence : public Sequence<Time> {
 public:
-	MySequence(DummyTypeMap&map, int size) : Sequence<Time>(map, size) {}
+	MySequence(DummyTypeMap&map) : Sequence<Time>(map) {}
 	
 	boost::shared_ptr<Control> control_factory(const Parameter& param) {
 		
@@ -107,7 +107,7 @@ class SequenceTest : public CppUnit::TestFixture
         void setUp (void) { 
         	type_map = new DummyTypeMap();
            	assert(type_map);
-           	seq = new MySequence<Time>(*type_map, 0);
+           	seq = new MySequence<Time>(*type_map);
            	assert(seq);
            	
            	for(int i = 0; i < 12; i++) {

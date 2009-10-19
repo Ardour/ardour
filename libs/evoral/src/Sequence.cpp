@@ -427,10 +427,9 @@ Sequence<Time>::const_iterator::operator=(const const_iterator& other)
 // Sequence
 
 template<typename Time>
-Sequence<Time>::Sequence(const TypeMap& type_map, size_t size)
+Sequence<Time>::Sequence(const TypeMap& type_map)
 	: _edited(false)
 	, _type_map(type_map)
-	, _notes(size)
 	, _writing(false)
 	, _end_iter(*this, DBL_MAX)
 	, _percussive(false)
@@ -569,14 +568,13 @@ Sequence<Time>::end_write(bool delete_stuck)
 
 	if (!_percussive && delete_stuck) {
 		for (typename Notes::iterator n = _notes.begin(); n != _notes.end() ;) {
+			typename Notes::iterator next = n;
+			++next;
 			if ((*n)->length() == 0) {
 				cerr << "WARNING: Stuck note lost: " << (*n)->note() << endl;
-				n = _notes.erase(n);
-				// we have to break here because erase invalidates the iterator
-				break;
-			} else {
-				++n;
+				_notes.erase(n);
 			}
+			n = next;
 		}
 	}
 
@@ -611,7 +609,7 @@ Sequence<Time>::append(const Event<Time>& event)
 
 	const MIDIEvent<Time>& ev = (const MIDIEvent<Time>&)event;
 
-	assert(_notes.empty() || ev.time() >= _notes.back()->time());
+	assert(_notes.empty() || ev.time() >= (*_notes.rbegin())->time());
 	assert(_writing);
 
 	if (!midi_event_is_valid(ev.buffer(), ev.size())) {
@@ -678,14 +676,14 @@ Sequence<Time>::append_note_on_unlocked(uint8_t chan, Time time, uint8_t note_nu
 		_highest_note = note_num;
 
 	boost::shared_ptr< Note<Time> > new_note(new Note<Time>(chan, time, 0, note_num, velocity));
-	_notes.push_back(new_note);
+	_notes.insert(new_note);
 	if (!_percussive) {
 		DUMP(format("Sustained: Appending active note on %1% channel %2%\n")
 				% (unsigned)(uint8_t)note_num % chan);
-		_write_notes[chan].push_back(_notes.size() - 1);
+		_write_notes[chan].insert(new_note);
 	} else {
-	 	DUMP("Percussive: NOT appending active note on\n");
-	 }
+		DUMP("Percussive: NOT appending active note on\n");
+	}
 }
 
 template<typename Time>
@@ -704,19 +702,15 @@ Sequence<Time>::append_note_off_unlocked(uint8_t chan, Time time, uint8_t note_n
 		return;
 	}
 
-	/* FIXME: make _write_notes fixed size (127 noted) for speed */
-
-	/* FIXME: note off velocity for that one guy out there who actually has
-	 * keys that send it */
+	// TODO: support note off velocity
 
 	bool resolved = false;
-
-	for (WriteNotes::iterator n = _write_notes[chan].begin(); n
-			!= _write_notes[chan].end(); ++n) {
-		Note<Time>& note = *_notes[*n].get();
-		if (note.note() == note_num) {
-			assert(time >= note.time());
-			note.set_length(time - note.time());
+	for (typename WriteNotes::iterator n = _write_notes[chan].begin();
+			n != _write_notes[chan].end(); ++n) {
+		boost::shared_ptr< Note<Time> > note = *n;
+		if (note->note() == note_num) {
+			assert(time >= note->time());
+			note->set_length(time - note->time());
 			_write_notes[chan].erase(n);
 			DUMP(format("resolved note, length: %1%\n") % note.length());
 			resolved = true;

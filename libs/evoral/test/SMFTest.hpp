@@ -60,7 +60,7 @@ class SMFTest : public CppUnit::TestFixture
         void setUp() { 
            type_map = new DummyTypeMap();
            assert(type_map);
-           seq = new MySequence<Time>(*type_map, 0);
+           seq = new MySequence<Time>(*type_map);
            assert(seq);
         }
         

@@ -65,7 +65,7 @@ class MidiRegionView : public RegionView
 {
   public:
 	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
-	typedef Evoral::Sequence<Evoral::MusicalTime>::Notes NoteList;
+	typedef Evoral::Sequence<Evoral::MusicalTime>::Notes Notes;
 
 	MidiRegionView (ArdourCanvas::Group *,
 	                RouteTimeAxisView&,
@@ -285,7 +285,7 @@ class MidiRegionView : public RegionView
 
 	void show_list_editor ();
 
-	void selection_as_notelist (NoteList& selected);
+	void selection_as_notelist (Notes& selected);
 
   protected:
 	/** Allows derived types to specify their visibility requirements

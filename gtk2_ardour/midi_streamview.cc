@@ -574,11 +574,10 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 
 						/* draw events */
 						MidiRegionView* mrv = (MidiRegionView*)iter->second;
-						for (size_t i=0; i < data->n_notes(); ++i) {
+						for (MidiModel::Notes::const_iterator i = data->notes().begin();
+								i != data->notes().end(); ++i) {
 
-							// FIXME: slooooooooow!
-
-							const boost::shared_ptr<MidiRegionView::NoteType> note = data->note_at(i);
+							const boost::shared_ptr<MidiRegionView::NoteType>& note = *i;
 
 							if (note->length() > 0 && note->end_time() + region->position() > start)
 								mrv->resolve_note(note->note(), note->end_time());
@@ -598,7 +597,6 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 							}
 
 							mrv->add_note (note, !update_range);
-
 						}
 
 						mrv->extend_active_notes();
