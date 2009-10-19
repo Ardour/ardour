@@ -35,6 +35,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_ring_buffer.h"
+#include "ardour/midi_state_tracker.h"
 #include "ardour/midi_source.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
@@ -126,8 +127,9 @@ MidiSource::invalidate ()
 
 nframes_t
 MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t source_start,
-		sframes_t start, nframes_t cnt,
-		sframes_t stamp_offset, sframes_t negative_stamp_offset) const
+		       sframes_t start, nframes_t cnt,
+		       sframes_t stamp_offset, sframes_t negative_stamp_offset,
+		       MidiStateTracker* tracker) const
 {
 	Glib::Mutex::Lock lm (_lock);
 
@@ -152,13 +154,21 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t source_start,
 			const sframes_t time_frames = BEATS_TO_FRAMES(i->time());
 			if (time_frames < source_start + start + cnt) {
 				dst.write(time_frames, i->event_type(), i->size(), i->buffer());
+				if (tracker) {
+					Evoral::MIDIEvent<Evoral::MusicalTime>& ev (*(Evoral::MIDIEvent<Evoral::MusicalTime>*) (&(*i)));
+					if (ev.is_note_on()) {
+						tracker->add (ev.note(), ev.channel());
+					} else if (ev.is_note_off()) {
+						tracker->remove (ev.note(), ev.channel());
+					}
+				}
 			} else {
 				break;
 			}
 		}
 		return cnt;
 	} else {
-		return read_unlocked (dst, source_start, start, cnt, stamp_offset, negative_stamp_offset);
+		return read_unlocked (dst, source_start, start, cnt, stamp_offset, negative_stamp_offset, tracker);
 	}
 }
 

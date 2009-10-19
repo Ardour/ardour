@@ -21,11 +21,11 @@
 #define __ardour_midi_state_tracker_h__
 
 #include <bitset>
-
 #include "ardour/midi_buffer.h"
 
 namespace ARDOUR {
 
+template <typename T> class MidiRingBuffer;
 
 /** Tracks played notes, so they can be resolved in potential stuck note
  * situations (e.g. looping, transport stop, etc).
@@ -36,7 +36,10 @@ public:
 	MidiStateTracker();
 
 	void track (const MidiBuffer::iterator& from, const MidiBuffer::iterator& to, bool& looped);
+	void add (uint8_t note, uint8_t chn);
+	void remove (uint8_t note, uint8_t chn);
 	void resolve_notes (MidiBuffer& buffer, nframes64_t time);
+	void resolve_notes (MidiRingBuffer<nframes_t>& buffer, nframes64_t time);
 	void dump (std::ostream&);
 	void reset ();
 

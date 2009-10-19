@@ -42,6 +42,7 @@ class Playlist;
 class Session;
 class MidiFilter;
 class MidiSource;
+class MidiStateTracker;
 template<typename T> class MidiRingBuffer;
 
 class MidiRegion : public Region
@@ -56,10 +57,11 @@ class MidiRegion : public Region
 	virtual sframes_t readable_length() const { return length(); }
 
 	nframes_t read_at (MidiRingBuffer<nframes_t>& dst,
-			sframes_t position,
-			nframes_t dur,
-			uint32_t  chan_n = 0,
-			NoteMode  mode = Sustained) const;
+			   sframes_t position,
+			   nframes_t dur,
+			   uint32_t  chan_n = 0,
+			   NoteMode  mode = Sustained,
+			   MidiStateTracker* tracker = 0) const;
 
 	nframes_t master_read_at (MidiRingBuffer<nframes_t>& dst,
 			sframes_t position,
@@ -104,10 +106,11 @@ class MidiRegion : public Region
 
   private:
 	nframes_t _read_at (const SourceList&, MidiRingBuffer<nframes_t>& dst,
-			nframes_t position,
-			nframes_t dur,
-			uint32_t chan_n = 0,
-			NoteMode mode = Sustained) const;
+			    sframes_t position,
+			    nframes_t dur,
+			    uint32_t chan_n = 0,
+			    NoteMode mode = Sustained, 
+			    MidiStateTracker* tracker = 0) const;
 
 	void recompute_at_start ();
 	void recompute_at_end ();

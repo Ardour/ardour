@@ -39,6 +39,7 @@
 #include "ardour/event_type_map.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_ring_buffer.h"
+#include "ardour/midi_state_tracker.h"
 #include "ardour/session.h"
 #include "ardour/smf_source.h"
 
@@ -98,8 +99,9 @@ SMFSource::~SMFSource ()
 /** All stamps in audio frames */
 nframes_t
 SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t source_start,
-		sframes_t start, nframes_t duration,
-		sframes_t stamp_offset, sframes_t negative_stamp_offset) const
+			  sframes_t start, nframes_t duration,
+			  sframes_t stamp_offset, sframes_t negative_stamp_offset,
+			  MidiStateTracker* tracker) const
 {
 	int      ret  = 0;
 	uint64_t time = 0; // in SMF ticks, 1 tick per _ppqn
@@ -166,11 +168,18 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t sour
 
 		if (ev_frame_time < start + duration) {
 			destination.write(ev_frame_time - negative_stamp_offset, ev_type, ev_size, ev_buffer);
+
+			if (tracker) {
+				if (ev_buffer[0] & MIDI_CMD_NOTE_ON) {
+					tracker->add (ev_buffer[1], ev_buffer[0] & 0xf);
+				} else if (ev_buffer[0] & MIDI_CMD_NOTE_OFF) {
+					tracker->remove (ev_buffer[1], ev_buffer[0] & 0xf);
+				}
+			}
 		} else {
 			break;
 		}
-
-
+		
 		_read_data_count += ev_size;
 
 		if (ev_size > scratch_size) {

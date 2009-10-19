@@ -22,6 +22,7 @@
 
 #include "ardour/track.h"
 #include "ardour/midi_ring_buffer.h"
+#include "ardour/midi_state_tracker.h"
 
 namespace ARDOUR
 {
@@ -96,8 +97,7 @@ protected:
 	int _set_state (const XMLNode&, int, bool call_base);
 
 private:
-	void write_out_of_band_data (
-			BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
+	void write_out_of_band_data (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 
 	int set_diskstream (boost::shared_ptr<MidiDiskstream> ds);
 	void use_new_diskstream ();
@@ -110,7 +110,6 @@ private:
 	bool                      _step_editing;
 	uint8_t                   _default_channel;
 	bool                      _midi_thru;
-
 
 	int no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 			bool state_changing, bool can_record, bool rec_monitors_input);

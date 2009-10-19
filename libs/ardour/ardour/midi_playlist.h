@@ -25,6 +25,7 @@
 
 #include "ardour/ardour.h"
 #include "ardour/playlist.h"
+#include "ardour/midi_state_tracker.h"
 #include "evoral/Parameter.hpp"
 
 namespace ARDOUR
@@ -74,6 +75,10 @@ private:
 	bool region_changed (Change, boost::shared_ptr<Region>);
 
 	NoteMode _note_mode;
+
+	typedef std::map<Region*,MidiStateTracker*> NoteTrackers;
+	NoteTrackers _note_trackers;
+
 };
 
 } /* namespace ARDOUR */

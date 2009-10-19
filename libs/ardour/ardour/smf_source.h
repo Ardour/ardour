@@ -71,12 +71,13 @@ public:
 
 private:
 	nframes_t read_unlocked (MidiRingBuffer<nframes_t>& dst,
-			sframes_t position,
-			sframes_t start,
-			nframes_t cnt,
-			sframes_t stamp_offset,
-			sframes_t negative_stamp_offset) const;
-
+				 sframes_t position,
+				 sframes_t start,
+				 nframes_t cnt,
+				 sframes_t stamp_offset,
+				 sframes_t negative_stamp_offset,
+				 MidiStateTracker* tracker) const;
+	
 	nframes_t write_unlocked (MidiRingBuffer<nframes_t>& src,
 			sframes_t position,
 			nframes_t cnt);

@@ -142,6 +142,16 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 		if ((*i)->coverage (start, end) != OverlapNone) {
 			regs.push_back(*i);
+		} else {
+			/* region does not cover the current read boundaries, so make
+			   sure that we silence any notes that it had turned on
+			*/
+			NoteTrackers::iterator t = _note_trackers.find ((*i).get());
+			if (t != _note_trackers.end()) {
+				t->second->resolve_notes (dst, (*i)->last_frame());
+				delete t->second;
+				_note_trackers.erase (t);
+			}
 		}
 	}
 
@@ -151,7 +161,20 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 	for (vector<boost::shared_ptr<Region> >::iterator i = regs.begin(); i != regs.end(); ++i) {
 		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*i);
 		if (mr) {
-			mr->read_at (dst, start, dur, chan_n, _note_mode);
+
+			NoteTrackers::iterator t = _note_trackers.find ((*i).get());
+			MidiStateTracker* tracker;
+			
+			if (t == _note_trackers.end()) {
+				pair<Region*,MidiStateTracker*> newpair;
+				newpair.first = (*i).get();
+				tracker = newpair.second = new MidiStateTracker;
+				_note_trackers.insert (newpair);
+			} else {
+				tracker = t->second;
+			}
+				
+			mr->read_at (dst, start, dur, chan_n, _note_mode, tracker);
 			_read_data_count += mr->read_data_count();
 		}
 	}
@@ -159,11 +182,18 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 	return dur;
 }
 
-
 void
-MidiPlaylist::remove_dependents (boost::shared_ptr<Region> /*region*/)
+MidiPlaylist::remove_dependents (boost::shared_ptr<Region> region)
 {
-	/* MIDI regions have no dependents (crossfades) */
+	/* MIDI regions have no dependents (crossfades) but we might be tracking notes */
+	NoteTrackers::iterator t = _note_trackers.find (region.get());
+
+	/* GACK! THREAD SAFETY! */
+
+	if (t != _note_trackers.end()) {
+		delete t->second;
+		_note_trackers.erase (t);
+	}
 }
 
 

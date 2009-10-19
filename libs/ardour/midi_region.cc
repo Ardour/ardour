@@ -130,19 +130,20 @@ MidiRegion::set_position_internal (nframes_t pos, bool allow_bbt_recompute)
 }
 
 nframes_t
-MidiRegion::read_at (MidiRingBuffer<nframes_t>& out, sframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
+MidiRegion::read_at (MidiRingBuffer<nframes_t>& out, sframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode, MidiStateTracker* tracker) const
 {
-	return _read_at (_sources, out, position, dur, chan_n, mode);
+	return _read_at (_sources, out, position, dur, chan_n, mode, tracker);
 }
 
 nframes_t
 MidiRegion::master_read_at (MidiRingBuffer<nframes_t>& out, sframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
 {
-	return _read_at (_master_sources, out, position, dur, chan_n, mode);
+	return _read_at (_master_sources, out, position, dur, chan_n, mode); /* no tracker */
 }
 
 nframes_t
-MidiRegion::_read_at (const SourceList& /*srcs*/, MidiRingBuffer<nframes_t>& dst, nframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
+MidiRegion::_read_at (const SourceList& /*srcs*/, MidiRingBuffer<nframes_t>& dst, sframes_t position, nframes_t dur, uint32_t chan_n, 
+		      NoteMode mode, MidiStateTracker* tracker) const
 {
 	nframes_t internal_offset = 0;
 	nframes_t src_offset      = 0;
@@ -207,8 +208,9 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, MidiRingBuffer<nframes_t>& dst
 			_start + internal_offset, // where to start reading in the source
 			to_read, // read duration in frames
 			output_buffer_position, // the offset in the output buffer
-			negative_output_buffer_position // amount to substract from note times
-		) != to_read) {
+			negative_output_buffer_position, // amount to substract from note times
+			tracker
+		    ) != to_read) {
 		return 0; /* "read nothing" */
 	}
 

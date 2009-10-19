@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include "ardour/event_type_map.h"
+#include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_state_tracker.h"
 
 using namespace std;
@@ -45,6 +46,21 @@ MidiStateTracker::track_note_onoffs (const Evoral::MIDIEvent<MidiBuffer::TimeTyp
 		if (_active_notes[event.note() + 128 * event.channel()]) {
 			_active_notes [event.note() + 128 * event.channel()]--;
 		}
+	}
+}
+void
+MidiStateTracker::add (uint8_t note, uint8_t chn)
+{
+	cerr << "Added note " << note << " chan " << chn << endl;
+	_active_notes[note + 128 * chn]++;
+}
+
+void
+MidiStateTracker::remove (uint8_t note, uint8_t chn)
+{
+	if (_active_notes[note + 128 * chn]) {
+		cerr << "Removed note " << note << " chan " << chn << endl;
+		_active_notes[note + 128 * chn]--;
 	}
 }
 
@@ -75,6 +91,23 @@ MidiStateTracker::resolve_notes (MidiBuffer &dst, nframes64_t time)
 					(time, MIDI_CMD_NOTE_OFF, 3, buffer, false);
 				dst.push_back (noteoff);
 
+				_active_notes[channel * 128 + note]--;
+			}
+		}
+	}
+}
+
+void
+MidiStateTracker::resolve_notes (MidiRingBuffer<nframes_t> &dst, nframes64_t time)
+{
+	uint8_t buf[3];
+	for (int channel = 0; channel < 16; ++channel) {
+		for (int note = 0; note < 128; ++note) {
+			while (_active_notes[channel * 128 + note]) {
+				buf[0] = MIDI_CMD_NOTE_OFF|channel;
+				buf[1] = note;
+				buf[2] = 0;
+				dst.write (time, EventTypeMap::instance().midi_event_type (buf[0]), 3, buf);
 				_active_notes[channel * 128 + note]--;
 			}
 		}
