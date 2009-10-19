@@ -49,6 +49,7 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 
 	void set_muted (bool yn);
 	bool muted() const { return _muted; }
+	void set_mono (bool);
 
 	void set_position (float x, bool link_call = false);
 	void set_position (float x, float y, bool link_call = false);
@@ -62,11 +63,22 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 	void get_effective_position (float& xpos, float& ypos) const { xpos = effective_x; ypos = effective_y; }
 	void get_effective_position (float& xpos, float& ypos, float& zpos) const { xpos = effective_x; ypos = effective_y; zpos = effective_z; }
 
+	void distribute (AudioBuffer &, BufferSet &, gain_t, nframes_t);
+	void distribute_automated (AudioBuffer &, BufferSet &, nframes_t, nframes_t, nframes_t, pan_t **);
+
 	/* the basic StreamPanner API */
 
-	virtual void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes) = 0;
-	virtual void distribute_automated (AudioBuffer& src, BufferSet& obufs,
-			nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers) = 0;
+	/**
+	 *  Pan some input samples to a number of output buffers.
+	 *
+	 *  @param src Input buffer.
+	 *  @param obufs Output buffers (one per panner output).
+	 *  @param gain_coeff Gain coefficient to apply to output samples.
+	 *  @param nframes Numbner of frames in the input.
+	 */
+	virtual void do_distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes) = 0;
+	virtual void do_distribute_automated (AudioBuffer& src, BufferSet& obufs,
+					      nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers) = 0;
 
 	boost::shared_ptr<AutomationControl> pan_control()  { return _control; }
 
@@ -99,6 +111,7 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 	float effective_z;
 
 	bool _muted;
+	bool _mono;
 
 	boost::shared_ptr<AutomationControl> _control;
 
@@ -113,12 +126,12 @@ class BaseStereoPanner : public StreamPanner
 	~BaseStereoPanner ();
 
 	/* this class just leaves the pan law itself to be defined
-	   by the update(), distribute_automated()
+	   by the update(), do_distribute_automated()
 	   methods. derived classes also need a factory method
 	   and a type name. See EqualPowerStereoPanner as an example.
 	*/
 
-	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
+	void do_distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
 
 	/* old school automation loading */
 
@@ -139,8 +152,8 @@ class EqualPowerStereoPanner : public BaseStereoPanner
 	EqualPowerStereoPanner (Panner&, Evoral::Parameter param);
 	~EqualPowerStereoPanner ();
 
-	void distribute_automated (AudioBuffer& src, BufferSet& obufs,
-			nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
+	void do_distribute_automated (AudioBuffer& src, BufferSet& obufs,
+				      nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
 
 	void get_current_coefficients (pan_t*) const;
 	void get_desired_coefficients (pan_t*) const;
@@ -162,9 +175,9 @@ class Multi2dPanner : public StreamPanner
 	Multi2dPanner (Panner& parent, Evoral::Parameter);
 	~Multi2dPanner ();
 
-	void distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
-	void distribute_automated (AudioBuffer& src, BufferSet& obufs,
-			nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
+	void do_distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes);
+	void do_distribute_automated (AudioBuffer& src, BufferSet& obufs,
+				      nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers);
 
 	static StreamPanner* factory (Panner&, Evoral::Parameter);
 	static std::string name;
@@ -181,6 +194,8 @@ class Multi2dPanner : public StreamPanner
 	void update ();
 };
 
+
+///< Class to pan from some number of inputs to some number of outputs
 
 class Panner : public SessionObject, public AutomatableControls
 {
@@ -219,6 +234,8 @@ public:
 
 	bool bypassed() const { return _bypassed; }
 	void set_bypassed (bool yn);
+	bool mono () const { return _mono; }
+	void set_mono (bool);
 
 	StreamPanner* add ();
 	void remove (uint32_t which);
@@ -295,10 +312,11 @@ public:
 	Panner (Panner const &);
 
 	void distribute_no_automation(BufferSet& src, BufferSet& dest, nframes_t nframes, gain_t gain_coeff);
-	std::vector<StreamPanner*> _streampanners;
+	std::vector<StreamPanner*> _streampanners; ///< one StreamPanner per input
 	uint32_t     current_outs;
 	bool             _linked;
 	bool             _bypassed;
+	bool             _mono;
 	LinkDirection    _link_direction;
 
 	static float current_automation_version_number;

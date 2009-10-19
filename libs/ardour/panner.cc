@@ -80,6 +80,7 @@ StreamPanner::StreamPanner (Panner& p, Evoral::Parameter param)
 	assert(param.type() != NullAutomation);
 
 	_muted = false;
+	_mono = false;
 
 	_control = boost::dynamic_pointer_cast<AutomationControl>( parent.control( param, true ) );
 
@@ -90,6 +91,15 @@ StreamPanner::StreamPanner (Panner& p, Evoral::Parameter param)
 
 StreamPanner::~StreamPanner ()
 {
+}
+
+void
+StreamPanner::set_mono (bool yn)
+{
+	if (yn != _mono) {
+		_mono = yn;
+		StateChanged ();
+	}
 }
 
 void
@@ -180,6 +190,39 @@ StreamPanner::add_state (XMLNode& node)
 	node.add_property (X_("muted"), (muted() ? "yes" : "no"));
 }
 
+void
+StreamPanner::distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes)
+{
+	if (_mono) {
+		/* we're in mono mode, so just pan the input to all outputs equally */
+		int const N = parent.nouts ();
+		for (int i = 0; i < N; ++i) {
+			mix_buffers_with_gain (obufs.get_audio(i).data(), src.data(), nframes, gain_coeff);
+		}
+	} else {
+		/* normal mode, call the `real' distribute method */
+		do_distribute (src, obufs, gain_coeff, nframes);
+	}
+}
+
+void
+StreamPanner::distribute_automated (AudioBuffer& src, BufferSet& obufs,
+				    nframes_t start, nframes_t end, nframes_t nframes, pan_t** buffers)
+{
+	if (_mono) {
+		/* we're in mono mode, so just pan the input to all outputs equally */
+		int const N = parent.nouts ();
+		for (int i = 0; i < N; ++i) {
+			mix_buffers_with_gain (obufs.get_audio(i).data(), src.data(), nframes, 1.0);
+		}
+	} else {
+		/* normal mode, call the `real' distribute method */
+		do_distribute_automated (src, obufs, start, end, nframes, buffers);
+	}
+	
+}
+
+
 /*---------------------------------------------------------------------- */
 
 BaseStereoPanner::BaseStereoPanner (Panner& p, Evoral::Parameter param)
@@ -225,7 +268,7 @@ BaseStereoPanner::load (istream& in, string path, uint32_t& linecnt)
 }
 
 void
-BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes)
+BaseStereoPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes)
 {
 	assert(obufs.count().n_audio() == 2);
 
@@ -245,9 +288,10 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 
 	if (fabsf ((delta = (left - desired_left))) > 0.002) { // about 1 degree of arc
 
-		/* interpolate over 64 frames or nframes, whichever is smaller */
+		/* we've moving the pan by an appreciable amount, so we must
+		   interpolate over 64 frames or nframes, whichever is smaller */
 
-		nframes_t limit = min ((nframes_t)64, nframes);
+		nframes_t const limit = min ((nframes_t)64, nframes);
 		nframes_t n;
 
 		delta = -(delta / (float) (limit));
@@ -257,6 +301,8 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 			left = left_interp + 0.9 * (left - left_interp);
 			dst[n] += src[n] * left * gain_coeff;
 		}
+
+		/* then pan the rest of the buffer; no need for interpolation for this bit */
 
 		pan = left * gain_coeff;
 
@@ -271,6 +317,8 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 
 			if (pan != 0.0f) {
 
+				/* pan is 1 but also not 0, so we must do it "properly" */
+
 				mix_buffers_with_gain(dst,src,nframes,pan);
 
 				/* mark that we wrote into the buffer */
@@ -280,6 +328,8 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 			}
 
 		} else {
+
+			/* pan is 1 so we can just copy the input samples straight in */
 
 			mix_buffers_no_gain(dst,src,nframes);
 
@@ -295,9 +345,10 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 
 	if (fabsf ((delta = (right - desired_right))) > 0.002) { // about 1 degree of arc
 
-		/* interpolate over 64 frames or nframes, whichever is smaller */
+		/* we're moving the pan by an appreciable amount, so we must
+		   interpolate over 64 frames or nframes, whichever is smaller */
 
-		nframes_t limit = min ((nframes_t)64, nframes);
+		nframes_t const limit = min ((nframes_t)64, nframes);
 		nframes_t n;
 
 		delta = -(delta / (float) (limit));
@@ -307,6 +358,8 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 			right = right_interp + 0.9 * (right - right_interp);
 			dst[n] += src[n] * right * gain_coeff;
 		}
+
+		/* then pan the rest of the buffer, no need for interpolation for this bit */
 
 		pan = right * gain_coeff;
 
@@ -323,6 +376,8 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 
 			if (pan != 0.0f) {
 
+				/* pan is not 1 but also not 0, so we must do it "properly" */
+				
 				mix_buffers_with_gain(dst,src,nframes,pan);
 
 				/* XXX it would be nice to mark the buffer as written to */
@@ -330,6 +385,8 @@ BaseStereoPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 
 		} else {
 
+			/* pan is 1 so we can just copy the input samples straight in */
+			
 			mix_buffers_no_gain(dst,src,nframes);
 
 			/* XXX it would be nice to mark the buffer as written to */
@@ -358,9 +415,9 @@ void
 EqualPowerStereoPanner::update ()
 {
 	/* it would be very nice to split this out into a virtual function
-	   that can be accessed from BaseStereoPanner and used in distribute_automated().
+	   that can be accessed from BaseStereoPanner and used in do_distribute_automated().
 
-	   but the place where its used in distribute_automated() is a tight inner loop,
+	   but the place where its used in do_distribute_automated() is a tight inner loop,
 	   and making "nframes" virtual function calls to compute values is an absurd
 	   overhead.
 	*/
@@ -383,9 +440,9 @@ EqualPowerStereoPanner::update ()
 }
 
 void
-EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& obufs,
-					      nframes_t start, nframes_t end, nframes_t nframes,
-					      pan_t** buffers)
+EqualPowerStereoPanner::do_distribute_automated (AudioBuffer& srcbuf, BufferSet& obufs,
+						 nframes_t start, nframes_t end, nframes_t nframes,
+						 pan_t** buffers)
 {
 	assert(obufs.count().n_audio() == 2);
 
@@ -398,7 +455,7 @@ EqualPowerStereoPanner::distribute_automated (AudioBuffer& srcbuf, BufferSet& ob
 	if (!_control->list()->curve().rt_safe_get_vector (start, end, buffers[0], nframes)) {
 		/* fallback */
 		if (!_muted) {
-			distribute (srcbuf, obufs, 1.0, nframes);
+			do_distribute (srcbuf, obufs, 1.0, nframes);
 		}
 		return;
 	}
@@ -563,7 +620,7 @@ Multi2dPanner::update ()
 }
 
 void
-Multi2dPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes)
+Multi2dPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes)
 {
 	Sample* dst;
 	pan_t pan;
@@ -623,9 +680,9 @@ Multi2dPanner::distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 }
 
 void
-Multi2dPanner::distribute_automated (AudioBuffer& /*src*/, BufferSet& /*obufs*/,
-				     nframes_t /*start*/, nframes_t /*end*/, nframes_t /*nframes*/,
-				     pan_t** /*buffers*/)
+Multi2dPanner::do_distribute_automated (AudioBuffer& /*src*/, BufferSet& /*obufs*/,
+					nframes_t /*start*/, nframes_t /*end*/, nframes_t /*nframes*/,
+					pan_t** /*buffers*/)
 {
 	if (_muted) {
 		return;
@@ -823,6 +880,12 @@ Panner::reset_streampanner (uint32_t which)
 	}
 }
 
+/**
+ *    Reset the panner with a given number of outs and panners (and hence inputs)
+ *
+ *    \param nouts Number of outputs.
+ *    \param npans Number of panners.
+ */
 void
 Panner::reset (uint32_t nouts, uint32_t npans)
 {
@@ -1556,4 +1619,17 @@ Panner::load ()
 	}
 
 	return 0;
+}
+
+void
+Panner::set_mono (bool yn)
+{
+	if (yn != _mono) {
+		_mono = yn;
+		StateChanged ();
+	}
+
+	for (vector<StreamPanner*>::iterator i = _streampanners.begin(); i != _streampanners.end(); ++i) {
+		(*i)->set_mono (yn);
+	}
 }

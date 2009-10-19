@@ -74,6 +74,8 @@ class PannerUI : public Gtk::HBox
 	void set_meter_strip_name (std::string name);
 	boost::shared_ptr<PBD::Controllable> get_controllable();
 
+	void set_mono (bool);
+
   private:
 	friend class MixerStrip;
 

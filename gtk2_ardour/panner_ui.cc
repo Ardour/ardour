@@ -708,7 +708,7 @@ PannerUI::update_pan_bars (bool only_if_aplay)
 void
 PannerUI::update_pan_sensitive ()
 {
-	bool sensitive = !(_panner->automation_state() & Play);
+	bool const sensitive = !(_panner->mono()) && !(_panner->automation_state() & Play);
 
 	switch (_panner->nouts()) {
 	case 0:
@@ -890,3 +890,12 @@ PannerUI::_astyle_string (AutoStyle style, bool shrt)
 		return (shrt ? _("Abs") : _("Abs"));
 	}
 }
+
+void
+PannerUI::set_mono (bool yn)
+{
+	_panner->set_mono (yn);
+	update_pan_sensitive ();
+}
+
+	

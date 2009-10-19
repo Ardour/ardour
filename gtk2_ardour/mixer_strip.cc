@@ -81,6 +81,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, bool in_mixer)
  	, processor_box (sess, mx.plugin_selector(), mx.selection(), this, in_mixer)
 	, gpm (sess)
 	, panners (sess)
+	, _mono_button (_("Mono"))
 	, button_table (3, 2)
 	, middle_button_table (1, 2)
  	, bottom_button_table (1, 2)
@@ -236,6 +237,7 @@ MixerStrip::init ()
 	if (!is_midi_track()) {
 		global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	}
+	global_vpacker.pack_start (_mono_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (comment_button, Gtk::PACK_SHRINK);
 
@@ -386,6 +388,9 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	} else {
 	        name_label.set_text (_route->name());
 	}
+
+	_mono_button.set_name ("MixerMonoButton");
+	_mono_button.signal_clicked().connect (mem_fun (*this, &MixerStrip::mono_button_clicked));
 
 	switch (_route->meter_point()) {
 	case MeterInput:
@@ -1781,4 +1786,10 @@ MixerStrip::on_leave_notify_event (GdkEventCrossing* ev)
 	}
 
 	return false;
+}
+
+void
+MixerStrip::mono_button_clicked ()
+{
+	panners.set_mono (_mono_button.get_active ());
 }

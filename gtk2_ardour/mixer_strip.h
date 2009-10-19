@@ -142,6 +142,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	ProcessorBox processor_box;
 	GainMeter   gpm;
 	PannerUI    panners;
+	Gtk::ToggleButton _mono_button;
 
 	Gtk::Table button_table;
 	Gtk::Table middle_button_table;
@@ -176,6 +177,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void comment_editor_done_editing();
 	void setup_comment_editor ();
 	void comment_button_clicked ();
+	void mono_button_clicked ();
 
 	Gtk::Button   group_button;
 	Gtk::Label    group_label;
