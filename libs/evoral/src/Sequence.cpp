@@ -100,13 +100,8 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	seq.read_lock();
 
 	// Find first note which begins after t
-	for (typename Sequence<Time>::Notes::const_iterator i = seq.notes().begin();
-			i != seq.notes().end(); ++i) {
-		if ((*i)->time() >= t) {
-			_note_iter = i;
-			break;
-		}
-	}
+	boost::shared_ptr< Note<Time> > search_note(new Note<Time>(0, t, 0, 0, 0));
+	_note_iter = seq.notes().lower_bound(search_note);
 	assert(_note_iter == seq.notes().end() || (*_note_iter)->time() >= t);
 
 	// Find first sysex event after t
