@@ -969,6 +969,7 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 			port = route->output()->nth (io_index);
 		}
 
+		connections.clear ();
 		port->get_connections(connections);
 		io_connection_count = 0;
 
