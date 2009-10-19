@@ -97,13 +97,14 @@ class SequenceTest : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE (SequenceTest);
 	CPPUNIT_TEST (createTest);
 	CPPUNIT_TEST (preserveEventOrderingTest);
+	CPPUNIT_TEST (iteratorSeekTest);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
 	typedef double Time;
 	typedef std::vector<boost::shared_ptr<Note<Time> > > Notes;
 
-	void setUp (void) {
+	void setUp () {
 		type_map = new DummyTypeMap();
 		assert(type_map);
 		seq = new MySequence<Time>(*type_map);
@@ -115,14 +116,15 @@ public:
 		}
 	}
 
-	void tearDown (void) {
+	void tearDown () {
 		test_notes.clear();
 		delete seq;
 		delete type_map;
 	}
 
-	void createTest (void);
-	void preserveEventOrderingTest (void);
+	void createTest ();
+	void preserveEventOrderingTest ();
+	void iteratorSeekTest ();
 
 private:
 	DummyTypeMap*       type_map;

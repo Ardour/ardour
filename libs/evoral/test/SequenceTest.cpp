@@ -6,7 +6,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(SequenceTest);
 using namespace std;
 
 void
-SequenceTest::createTest (void)
+SequenceTest::createTest ()
 {
 	CPPUNIT_ASSERT_EQUAL(size_t(0), seq->sysexes().size());
 	CPPUNIT_ASSERT_EQUAL(size_t(0), seq->notes().size());
@@ -15,7 +15,7 @@ SequenceTest::createTest (void)
 
 
 void
-SequenceTest::preserveEventOrderingTest (void)
+SequenceTest::preserveEventOrderingTest ()
 {
 	vector< boost::shared_ptr< Event<Time> > > inserted_events;
 
@@ -62,3 +62,32 @@ SequenceTest::preserveEventOrderingTest (void)
 	CPPUNIT_ASSERT_EQUAL(size_t(12), test_notes.size());
 }
 
+
+void
+SequenceTest::iteratorSeekTest ()
+{
+	size_t num_notes = 0;
+
+	seq->clear();
+
+	for (Notes::const_iterator i = test_notes.begin(); i != test_notes.end(); ++i) {
+		if ((*i)->time() >= 600) {
+			seq->notes().insert(*i);
+		}
+	}
+
+	bool on = true;
+	for (Sequence<Time>::const_iterator i = seq->begin(600); i != seq->end(); ++i) {
+		if (on) {
+			CPPUNIT_ASSERT(((MIDIEvent<Time>&)*i).is_note_on());
+			CPPUNIT_ASSERT_EQUAL(i->time(), Time((num_notes + 6) * 100));
+			++num_notes;
+			on = false;
+		} else {
+			CPPUNIT_ASSERT(((MIDIEvent<Time>&)*i).is_note_off());
+			on = true;
+		}
+	}
+
+	CPPUNIT_ASSERT_EQUAL(num_notes, size_t(6));
+}
