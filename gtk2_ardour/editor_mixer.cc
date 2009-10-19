@@ -111,20 +111,12 @@ Editor::show_editor_mixer (bool yn)
 		}
 
 		if (r) {
-			bool created;
-
 			if (current_mixer_strip == 0) {
 				create_editor_mixer ();
-				created = true;
-			} else {
-				created = false;
 			}
 
 			current_mixer_strip->set_route (r);
-
-			if (created) {
-				current_mixer_strip->set_width_enum (editor_mixer_strip_width, (void*) this);
-			}
+			current_mixer_strip->set_width_enum (editor_mixer_strip_width, (void*) this);
 		}
 
 		if (current_mixer_strip->get_parent() == 0) {
@@ -186,7 +178,6 @@ void
 Editor::set_selected_mixer_strip (TimeAxisView& view)
 {
 	RouteTimeAxisView* at;
-	bool created;
 
 	if (!session || (at = dynamic_cast<RouteTimeAxisView*>(&view)) == 0) {
 		return;
@@ -204,9 +195,6 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 
 	if (current_mixer_strip == 0) {
 		create_editor_mixer ();
-		created = true;
-	} else {
-		created = false;
 	}
 
 	/* might be nothing to do */
@@ -215,11 +203,8 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 		return;
 	}
 
-	if (created) {
-		current_mixer_strip->set_width_enum (editor_mixer_strip_width, (void*) this);
-	}
-
 	current_mixer_strip->set_route (at->route());
+	current_mixer_strip->set_width_enum (editor_mixer_strip_width, (void*) this);
 }
 
 double current = 0.0;
