@@ -11,7 +11,7 @@ int
 main()
 {
 	Glib::thread_init();
-	
+
     CppUnit::TestResult testresult;
 
     CppUnit::TestResultCollector collectedresults;
