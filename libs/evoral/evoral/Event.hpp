@@ -184,7 +184,7 @@ struct Event {
 protected:
 	EventType _type; /**< Type of event (application relative, NOT MIDI 'type') */
 	Time      _original_time; /**< Sample index (or beat time) at which event is valid */
-        Time      _nominal_time; /**< quantized version of _time, used in preference */
+	Time      _nominal_time; /**< Quantized version of _time, used in preference */
 	uint32_t  _size; /**< Number of uint8_ts of data in \a buffer */
 	uint8_t*  _buf;  /**< Raw MIDI data */
 
