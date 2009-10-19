@@ -2274,8 +2274,6 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new)
 	int ret = -1;
 	bool likely_new = false;
 
-	cout << "get_session_parameters\n";
-
 	while (ret != 0) {
 
 		if (!should_be_new && !ARDOUR_COMMAND_LINE::session_name.empty()) {
