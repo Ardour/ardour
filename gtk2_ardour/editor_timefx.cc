@@ -27,7 +27,6 @@
 #include "pbd/pthread_utils.h"
 #include "pbd/memento_command.h"
 
-#include <gtkmm2ext/window_title.h>
 #include <gtkmm2ext/utils.h>
 
 #include "audio_region_view.h"

@@ -145,10 +145,7 @@ RouteParams_UI::RouteParams_UI ()
 	set_default_size (620,370);
 	set_wmclass (X_("ardour_route_parameters"), "Ardour");
 
-	WindowTitle title(Glib::get_application_name());
-	title += _("Track/Bus Inspector");
-	set_title (title.get_string());
-
+	set_title (_("Track/Bus Inspector"));
 
 	// events
 	route_display.get_selection()->signal_changed().connect(mem_fun(*this, &RouteParams_UI::route_selected));
@@ -601,8 +598,7 @@ RouteParams_UI::redirect_going_away (boost::shared_ptr<ARDOUR::Processor> insert
 void
 RouteParams_UI::update_title ()
 {
-	WindowTitle title(Glib::get_application_name());
-	title += _("Track/Bus Inspector");
+	WindowTitle title(_("Track/Bus Inspector"));
 
 	if (_route) {
 

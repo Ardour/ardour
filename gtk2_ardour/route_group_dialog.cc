@@ -19,14 +19,12 @@
 
 #include <gtkmm/table.h>
 #include <gtkmm/stock.h>
-#include <gtkmm2ext/window_title.h>
 #include "ardour/route_group.h"
 #include "route_group_dialog.h"
 #include "i18n.h"
 #include <iostream>
 
 using namespace Gtk;
-using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace std;
 
@@ -48,9 +46,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name (N_("RouteGroupDialog"));
 
-	WindowTitle title (Glib::get_application_name());
-	title += _("Route group");
-	set_title(title.get_string());
+	set_title (_("Route Group"));
 
 	VBox* vbox = manage (new VBox);
 	Gtk::Label* l;

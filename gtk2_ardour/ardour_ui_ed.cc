@@ -152,7 +152,7 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("Export"), _("Export"));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("CleanupUnused"), _("Cleanup Unused Sources"),  mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup));
+	act = ActionManager::register_action (main_actions, X_("CleanupUnused"), _("Cleanup Unused Sources..."),  mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
@@ -217,7 +217,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::register_action (common_actions, X_("About"), _("About"),  mem_fun(*this, &ARDOUR_UI::show_about));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleThemeManager"), _("Theme Manager"), mem_fun(*this, &ARDOUR_UI::toggle_theme_manager));
-	ActionManager::register_toggle_action (common_actions, X_("ToggleKeyEditor"), _("Keybindings"), mem_fun(*this, &ARDOUR_UI::toggle_key_editor));
+	ActionManager::register_toggle_action (common_actions, X_("ToggleKeyEditor"), _("Key Bindings"), mem_fun(*this, &ARDOUR_UI::toggle_key_editor));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleBundleManager"), _("Bundle Manager"), mem_fun(*this, &ARDOUR_UI::toggle_bundle_manager));
 
 	act = ActionManager::register_action (common_actions, X_("AddAudioTrack"), _("Add Audio Track"), bind (mem_fun(*this, &ARDOUR_UI::session_add_audio_track), 1, 1, ARDOUR::Normal, (ARDOUR::RouteGroup *) 0, 1));
@@ -586,9 +586,7 @@ ARDOUR_UI::setup_clock ()
 	big_clock_window->set_border_width (0);
 	big_clock_window->add  (big_clock);
 
-	WindowTitle title(Glib::get_application_name());
-	title += _("Big Clock");
-	big_clock_window->set_title (title.get_string());
+	big_clock_window->set_title (_("Big Clock"));
 	big_clock_window->set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
 	big_clock_window->signal_realize().connect (bind (sigc::ptr_fun (set_decoration), big_clock_window,  (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
 	big_clock_window->signal_unmap().connect (bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBigClock")));

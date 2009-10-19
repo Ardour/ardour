@@ -28,7 +28,6 @@
 #include "ardour/configuration.h"
 
 #include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/window_title.h>
 
 #include "playlist_selector.h"
 #include "route_ui.h"
@@ -54,9 +53,7 @@ PlaylistSelector::PlaylistSelector ()
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 	set_size_request (300, 200);
 
-	WindowTitle title(Glib::get_application_name());
-	title += _("Playlists");
-	set_title(title.get_string());
+	set_title (_("Playlists"));
 
 	model = TreeStore::create (columns);
 	tree.set_model (model);
@@ -108,9 +105,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 
 	rui = ruix;
 
-	WindowTitle title(Glib::get_application_name());
-	title += string_compose (_("Playlist for %1"), rui->route()->name());
-	set_title (title.get_string());
+	set_title (string_compose (_("Playlist for %1"), rui->route()->name()));
 
 	clear_map ();
 	select_connection.disconnect ();

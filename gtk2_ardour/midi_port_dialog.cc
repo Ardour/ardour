@@ -4,7 +4,6 @@
 
 #include "pbd/convert.h"
 #include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/window_title.h>
 
 #include "midi_port_dialog.h"
 
@@ -28,9 +27,7 @@ MidiPortDialog::MidiPortDialog ()
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name (N_("MidiPortDialog"));
 
-	WindowTitle title(Glib::get_application_name());
-	title += _("Add MIDI port");
-	set_title(title.get_string());
+	set_title (_("Add MIDI Port"));
 
 	vector<string> str = internationalize (PACKAGE, mode_strings);
 	set_popdown_strings (port_mode_combo, str);

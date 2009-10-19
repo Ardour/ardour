@@ -22,7 +22,6 @@
 #include <sstream>
 
 #include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/window_title.h>
 
 #include "pbd/xml++.h"
 #include "ardour/session.h"
@@ -615,7 +614,7 @@ SessionMetadataDialog<DataSet>::init_people_data ()
 /* SessionMetadataEditor */
 
 SessionMetadataEditor::SessionMetadataEditor () :
-  SessionMetadataDialog<SessionMetadataSetEditable> (_("Edit session metadata"))
+  SessionMetadataDialog<SessionMetadataSetEditable> (_("Edit Session Metadata"))
 {
 
 }

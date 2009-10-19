@@ -39,7 +39,6 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/doi.h>
-#include <gtkmm2ext/window_title.h>
 
 #include "ardour/amp.h"
 #include "ardour/ardour.h"
@@ -1383,11 +1382,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 
 		if (send->get_gui() == 0) {
 			send_ui = new SendUIWindow (send, _session);
-
-			WindowTitle title(Glib::get_application_name());
-			title += send->name();
-			send_ui->set_title (title.get_string());
-
+			send_ui->set_title (send->name());
 			send->set_gui (send_ui);
 
 		} else {
@@ -1415,11 +1410,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 		if (retrn->get_gui() == 0) {
 
 			return_ui = new ReturnUIWindow (retrn, _session);
-
-			WindowTitle title(Glib::get_application_name());
-			title += retrn->name();
-			return_ui->set_title (title.get_string());
-
+			return_ui->set_title (retrn->name ());
 			send->set_gui (return_ui);
 
 		} else {
@@ -1440,11 +1431,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 		if (plugin_insert->get_gui() == 0) {
 
 			plugin_ui = new PluginUIWindow (win, plugin_insert);
-
-			WindowTitle title(Glib::get_application_name());
-			title += generate_processor_title (plugin_insert);
-			plugin_ui->set_title (title.get_string());
-
+			plugin_ui->set_title (generate_processor_title (plugin_insert));
 			plugin_insert->set_gui (plugin_ui);
 
 		} else {
@@ -1762,14 +1749,10 @@ ProcessorBox::route_name_changed ()
 
 		/* rename editor windows for sends and plugins */
 
-		WindowTitle title (Glib::get_application_name());
-
 		if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0) {
-			title += send->name();
-			static_cast<Window*>(gui)->set_title (title.get_string());
+			static_cast<Window*>(gui)->set_title (send->name ());
 		} else if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (processor)) != 0) {
-			title += generate_processor_title (plugin_insert);
-			static_cast<Window*>(gui)->set_title (title.get_string());
+			static_cast<Window*>(gui)->set_title (generate_processor_title (plugin_insert));
 		}
 	}
 }

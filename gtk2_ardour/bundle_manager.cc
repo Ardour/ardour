@@ -279,7 +279,7 @@ BundleEditor::on_map ()
 
 
 BundleManager::BundleManager (Session& session)
-	: ArdourDialog (_("Bundle manager")), _session (session), edit_button (_("Edit")), delete_button (_("Delete"))
+	: ArdourDialog (_("Bundle Manager")), _session (session), edit_button (_("Edit")), delete_button (_("Delete"))
 {
 	_list_model = Gtk::ListStore::create (_list_model_columns);
 	_tree_view.set_model (_list_model);

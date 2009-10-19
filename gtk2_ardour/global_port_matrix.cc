@@ -115,10 +115,10 @@ GlobalPortMatrixWindow::GlobalPortMatrixWindow (ARDOUR::Session& s, ARDOUR::Data
 {
 	switch (t) {
 	case ARDOUR::DataType::AUDIO:
-		set_title (_("Audio Connections Manager"));
+		set_title (_("Audio Connection Manager"));
 		break;
 	case ARDOUR::DataType::MIDI:
-		set_title (_("MIDI Connections Manager"));
+		set_title (_("MIDI Connection Manager"));
 		break;
 	}
 

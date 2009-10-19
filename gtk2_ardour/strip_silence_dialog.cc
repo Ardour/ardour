@@ -33,7 +33,7 @@
 
 /** Construct Strip silence dialog box */
 StripSilenceDialog::StripSilenceDialog (std::list<boost::shared_ptr<ARDOUR::AudioRegion> > const & regions)
-	: ArdourDialog (_("Strip silence")), _wave_width (640), _wave_height (64)
+	: ArdourDialog (_("Strip Silence")), _wave_width (640), _wave_height (64)
 {
 	for (std::list<boost::shared_ptr<ARDOUR::AudioRegion> >::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 

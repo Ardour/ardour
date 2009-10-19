@@ -29,7 +29,6 @@
 #include "ardour/tempo_map_importer.h"
 
 #include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/window_title.h>
 
 #include "prompter.h"
 #include "i18n.h"

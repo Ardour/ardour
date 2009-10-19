@@ -31,7 +31,6 @@
 #include "pbd/shortpath.h"
 
 #include <gtkmm2ext/choice.h>
-#include <gtkmm2ext/window_title.h>
 
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
@@ -82,7 +81,7 @@ Editor::add_external_audio_action (ImportMode mode_hint)
 	}
 
 	if (sfbrowser == 0) {
-		sfbrowser = new SoundFileOmega (*this, _("Add existing media"), session, 0, true, mode_hint);
+		sfbrowser = new SoundFileOmega (*this, _("Add Existing Media"), session, 0, true, mode_hint);
 	} else {
 		sfbrowser->set_mode (mode_hint);
 	}
@@ -115,7 +114,7 @@ Editor::external_audio_dialog ()
 	}
 
 	if (sfbrowser == 0) {
-		sfbrowser = new SoundFileOmega (*this, _("Add existing media"), session, track_cnt, true);
+		sfbrowser = new SoundFileOmega (*this, _("Add Existing Media"), session, track_cnt, true);
 	} else {
 		sfbrowser->reset (track_cnt);
 	}
@@ -460,9 +459,7 @@ int
 Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality quality, nframes64_t& pos,
 			 int target_regions, int target_tracks, boost::shared_ptr<Track> track, bool replace, uint32_t total)
 {
-	WindowTitle title = string_compose (_("importing %1"), paths.front());
-
-	interthread_progress_window->set_title (title.get_string());
+	interthread_progress_window->set_title (string_compose (_("Importing %1"), paths.front()));
 	interthread_progress_window->set_position (Gtk::WIN_POS_MOUSE);
 	interthread_progress_bar.set_fraction (0.0f);
 	interthread_cancel_label.set_text (_("Cancel Import"));

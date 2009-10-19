@@ -26,7 +26,7 @@ using namespace Gdk;
 using namespace PBD;
 
 KeyEditor::KeyEditor ()
-	: ArdourDialog (_("Shortcut Editor"), false)
+	: ArdourDialog (_("Key Bindings"), false)
 	, unbind_button (_("Remove shortcut"))
 	, unbind_box (BUTTONBOX_END)
 

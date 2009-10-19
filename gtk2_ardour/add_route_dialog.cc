@@ -24,7 +24,6 @@
 #include <gtkmm/stock.h>
 #include <gtkmm/separator.h>
 #include <gtkmm/table.h>
-#include <gtkmm2ext/window_title.h>
 
 #include "pbd/error.h"
 #include "pbd/convert.h"
@@ -78,9 +77,7 @@ AddRouteDialog::AddRouteDialog (Session & s)
 	set_skip_taskbar_hint (true);
 	set_resizable (false);
 
-	WindowTitle title(Glib::get_application_name());
-	title += _("Add Route");
-	set_title(title.get_string());
+	set_title (_("Add Track/Bus"));
 
 	name_template_entry.set_name (X_("AddRouteDialogNameTemplateEntry"));
 	routes_spinner.set_name (X_("AddRouteDialogSpinner"));

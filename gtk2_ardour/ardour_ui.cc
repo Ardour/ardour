@@ -1211,7 +1211,7 @@ ARDOUR_UI::open_session ()
 
 		/* ardour sessions are folders */
 
-		open_session_selector = new Gtk::FileChooserDialog (_("open session"), FILE_CHOOSER_ACTION_OPEN);
+		open_session_selector = new Gtk::FileChooserDialog (_("Open Session"), FILE_CHOOSER_ACTION_OPEN);
 		open_session_selector->add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 		open_session_selector->add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
 		open_session_selector->set_default_response(Gtk::RESPONSE_ACCEPT);
@@ -1860,6 +1860,7 @@ ARDOUR_UI::snapshot_session ()
 
 	prompter.set_name ("Prompter");
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+	prompter.set_title (_("Take Snapshot"));
 	prompter.set_prompt (_("Name of New Snapshot"));
 	prompter.set_initial_text (timebuf);
 
@@ -1971,7 +1972,6 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 
 void
 ARDOUR_UI::save_template ()
-
 {
 	ArdourPrompter prompter (true);
 	string name;
@@ -1981,6 +1981,7 @@ ARDOUR_UI::save_template ()
 	}
 
 	prompter.set_name (X_("Prompter"));
+	prompter.set_title (_("Save Mix Template"));
 	prompter.set_prompt (_("Name for mix template:"));
 	prompter.set_initial_text(session->name() + _("-template"));
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
@@ -2126,6 +2127,7 @@ ARDOUR_UI::ask_about_loading_existing_session (const Glib::ustring& session_path
 
 
 	msg.set_name (X_("CleanupDialog"));
+	msg.set_title (_("Cleanup Unused Sources"));
 	msg.set_wmclass (X_("existing_session"), "Ardour");
 	msg.set_position (Gtk::WIN_POS_MOUSE);
 	pop_back_splash ();

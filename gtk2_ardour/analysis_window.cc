@@ -57,7 +57,7 @@ AnalysisWindow::AnalysisWindow() :
 	  fft_graph (16384)
 {
 	set_name(_("FFT analysis window"));
-	set_title(_("FFT analysis window"));
+	set_title (_("Spectral Analysis"));
 
 	track_list_ready = false;
 
