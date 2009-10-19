@@ -99,6 +99,7 @@ Port::get_connections (std::vector<std::string> & c) const
 			c.push_back (jc[i]);
 			++n;
 		}
+		free (jc);
 	}
 
 	return n;
