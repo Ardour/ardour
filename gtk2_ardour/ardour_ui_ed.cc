@@ -107,7 +107,7 @@ ARDOUR_UI::install_actions ()
 
 	/* the real actions */
 
-	act = ActionManager::register_action (main_actions, X_("New"), _("New..."),  hide_return (bind (mem_fun(*this, &ARDOUR_UI::get_session_parameters), true)));
+	act = ActionManager::register_action (main_actions, X_("New"), _("New..."),  hide_return (bind (mem_fun(*this, &ARDOUR_UI::get_session_parameters), false, true)));
 
 	ActionManager::register_action (main_actions, X_("Open"), _("Open..."),  mem_fun(*this, &ARDOUR_UI::open_session));
 	ActionManager::register_action (main_actions, X_("Recent"), _("Recent..."),  mem_fun(*this, &ARDOUR_UI::open_recent_session));

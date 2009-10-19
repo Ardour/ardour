@@ -38,7 +38,7 @@ static string poor_mans_glob (string path)
 
 
 ArdourStartup::ArdourStartup ()
-	: applying (false)
+	: _applying (false)
 	, ic_new_session_button (_("Open a new session"))
 	, ic_existing_session_button (_("Open an existing session"))
 	, monitor_via_hardware_button (_("Use an external mixer or the hardware mixer of your audio interface.\n\
@@ -418,21 +418,19 @@ ArdourStartup::setup_final_page ()
 void
 ArdourStartup::on_cancel ()
 {
-	exit (1);
+	gtk_main_quit ();
 }
 
 void
 ArdourStartup::on_close ()
 {
-	if (!applying) {
-		exit (1);
-	}
+	gtk_main_quit ();
 }
 
 void
 ArdourStartup::on_apply ()
 {
-	applying = true;
+	_applying = true;
 
 	// XXX do stuff and then ....
 

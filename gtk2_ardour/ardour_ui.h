@@ -104,7 +104,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	ARDOUR_UI (int *argcp, char **argvp[]);
 	~ARDOUR_UI();
 
-	void run_startup (bool should_be_new);
+	bool run_startup (bool should_be_new);
 
 	void show ();
 	bool shown() { return shown_flag; }
@@ -140,7 +140,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 		_will_create_new_session_automatically = yn;
 	}
 
-	int get_session_parameters (bool should_be_new = false);
+	int get_session_parameters (bool quit_on_cancel, bool should_be_new = false);
 	void parse_cmdline_path (const Glib::ustring& cmdline_path, Glib::ustring& session_name, Glib::ustring& session_path, bool& existing_session);
 	int  load_cmdline_session (const Glib::ustring& session_name, const Glib::ustring& session_path, bool& existing_session);
 	int  build_session_from_nsd (const Glib::ustring& session_name, const Glib::ustring& session_path);

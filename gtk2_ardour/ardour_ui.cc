@@ -281,7 +281,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	platform_setup ();
 }
 
-void
+/** @return true if a session was chosen and `apply' clicked, otherwise false if `cancel' was clicked */
+bool
 ARDOUR_UI::run_startup (bool should_be_new)
 {
 	if (_startup == 0) {
@@ -296,6 +297,8 @@ ARDOUR_UI::run_startup (bool should_be_new)
 	/* we don't return here until the startup assistant is finished */
 
 	_startup->hide ();
+
+	return _startup->applying ();
 }
 
 int
@@ -654,7 +657,7 @@ ARDOUR_UI::startup ()
 		_startup->engine_control()->set_state (*audio_setup);
 	}
 
-	if (get_session_parameters (ARDOUR_COMMAND_LINE::new_session)) {
+	if (get_session_parameters (true, ARDOUR_COMMAND_LINE::new_session)) {
 		exit (1);
 	}
 
@@ -2261,14 +2264,17 @@ ARDOUR_UI::loading_message (const std::string& /*msg*/)
 	flush_pending ();
 }
 
+/** @param quit_on_cancel true if exit() should be called if the user clicks `cancel' in the new session dialog */
 int
-ARDOUR_UI::get_session_parameters (bool should_be_new)
+ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new)
 {
 	Glib::ustring session_name;
 	Glib::ustring session_path;
 	Glib::ustring template_name;
 	int ret = -1;
 	bool likely_new = false;
+
+	cout << "get_session_parameters\n";
 
 	while (ret != 0) {
 
@@ -2289,7 +2295,14 @@ ARDOUR_UI::get_session_parameters (bool should_be_new)
 
 		} else {
 
-			run_startup (should_be_new);
+			bool const apply = run_startup (should_be_new);
+			if (!apply) {
+				if (quit_on_cancel) {
+					exit (1);
+				} else {
+					return ret;
+				}
+			}
 
 			/* if we run the startup dialog again, offer more than just "new session" */
 
@@ -2306,7 +2319,6 @@ ARDOUR_UI::get_session_parameters (bool should_be_new)
 				template_name = _startup->session_template_name();
 				_session_is_new = true;
 			}
-
 
 			if (session_name[0] == '/' ||
 			    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
@@ -2378,7 +2390,7 @@ ARDOUR_UI::close_session()
 	unload_session (true);
 
 	ARDOUR_COMMAND_LINE::session_name = "";
-	get_session_parameters (false);
+	get_session_parameters (true, false);
 }
 
 int

@@ -54,10 +54,14 @@ class ArdourStartup : public Gtk::Assistant {
 	int output_limit_count() const;
 
 	bool connect_outs_to_master() const;
-	bool connect_outs_to_physical() const ;
+	bool connect_outs_to_physical() const;
+
+	bool applying () const {
+		return _applying;
+	}
 
   private:
-	bool applying;
+	bool _applying;
 	bool config_modified;
 	bool new_user;
 	bool new_only;
