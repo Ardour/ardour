@@ -71,9 +71,7 @@ SequenceTest::iteratorSeekTest ()
 	seq->clear();
 
 	for (Notes::const_iterator i = test_notes.begin(); i != test_notes.end(); ++i) {
-		if ((*i)->time() >= 600) {
-			seq->notes().insert(*i);
-		}
+		seq->notes().insert(*i);
 	}
 
 	bool on = true;
