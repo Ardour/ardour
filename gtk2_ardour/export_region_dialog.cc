@@ -31,7 +31,7 @@
 ExportRegionDialog::ExportRegionDialog (PublicEditor& editor, boost::shared_ptr<ARDOUR::Region> region) 
 	: ExportDialog(editor)
 {
-	set_title (_("ardour: export region"));
+	set_title (_("Export Region"));
 	file_frame.set_label (_("Export to File")),
 
 	audio_region = boost::dynamic_pointer_cast<ARDOUR::AudioRegion>(region);
