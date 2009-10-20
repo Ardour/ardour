@@ -2521,5 +2521,3 @@ MidiRegionView::selection_as_notelist (Notes& selected)
 		}
 	}
 }
-
-

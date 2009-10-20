@@ -131,19 +131,19 @@ ARDOUR::setup_midi ()
 
 		/* More than one port, so try using specific names for each port */
 
-		if (Config->get_mmc_port_name() != N_("default")) {
+		if (Config->get_mmc_port_name() != N_("control")) {
 			default_mmc_port =  MIDI::Manager::instance()->port (Config->get_mmc_port_name());
 		}
 
-		if (Config->get_mtc_port_name() != N_("default")) {
+		if (Config->get_mtc_port_name() != N_("control")) {
 			default_mtc_port =  MIDI::Manager::instance()->port (Config->get_mtc_port_name());
 		}
 
-		if (Config->get_midi_port_name() != N_("default")) {
+		if (Config->get_midi_port_name() != N_("control")) {
 			default_midi_port =  MIDI::Manager::instance()->port (Config->get_midi_port_name());
 		}
 
-		if (Config->get_midi_clock_port_name() != N_("default")) {
+		if (Config->get_midi_clock_port_name() != N_("control")) {
 			default_midi_port =  MIDI::Manager::instance()->port (Config->get_midi_clock_port_name());
 		}
 

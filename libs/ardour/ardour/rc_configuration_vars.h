@@ -25,10 +25,10 @@ CONFIG_VARIABLE (AutoConnectOption, input_auto_connect, "input-auto-connect", Au
 
 /* MIDI and MIDI related */
 
-CONFIG_VARIABLE (std::string, mtc_port_name, "mtc-port-name", "default")
-CONFIG_VARIABLE (std::string, mmc_port_name, "mmc-port-name", "default")
-CONFIG_VARIABLE (std::string, midi_port_name, "midi-port-name", "default")
-CONFIG_VARIABLE (std::string, midi_clock_port_name, "midi-clock-port-name", "default")
+CONFIG_VARIABLE (std::string, mtc_port_name, "mtc-port-name", "control")
+CONFIG_VARIABLE (std::string, mmc_port_name, "mmc-port-name", "control")
+CONFIG_VARIABLE (std::string, midi_port_name, "midi-port-name", "control")
+CONFIG_VARIABLE (std::string, midi_clock_port_name, "midi-clock-port-name", "control")
 CONFIG_VARIABLE (bool, trace_midi_input, "trace-midi-input", false)
 CONFIG_VARIABLE (bool, trace_midi_output, "trace-midi-output", false)
 CONFIG_VARIABLE (bool, send_mtc, "send-mtc", false)

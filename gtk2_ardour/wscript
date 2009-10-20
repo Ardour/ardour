@@ -246,11 +246,11 @@ def build(bld):
 	obj.cflags       = ['-DPACKAGE="gtk2_ardour"']
 	obj.cxxflags     = ['-DPACKAGE="gtk2_ardour"']
 	obj.cxxflags     += ['-DVERSIONSTRING="' + GTK2_ARDOUR_VERSION + '"']
-	obj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIRNAME']) + '"']
-	obj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIRNAME']) + '"']
-	obj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIRNAME']) + '"']
+	obj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"']
+	obj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"']
+	obj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
 	obj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
-			os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '"']
+			os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
 
 	if bld.env['HAVE_SLV2']:
 		obj.source += [ 'lv2_plugin_ui.cc' ]
@@ -400,6 +400,9 @@ def build(bld):
 	bld.install_files('${DATADIR}/ardour3/icons', 'icons/*.png')
 	bld.install_files('${DATADIR}/ardour3/pixmaps', 'pixmaps/*.xpm')
 	bld.install_files('${DATADIR}/ardour3', 'splash.png')
+
+	# Default UI configuration
+	bld.install_files('${CONFIGDIR}/ardour3', 'ardour3_ui_default.conf')
 
 	# i18n
 	if bld.env['ENABLE_NLS']:

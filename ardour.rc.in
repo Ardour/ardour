@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Ardour>
-  <MIDI-port tag="%MIDITAG%" device="ardour" type="%MIDITYPE%" mode="duplex"/>
-  <MIDI-port tag="control" device="ardour" type="%MIDITYPE%" mode="duplex"/>
-  <MIDI-port tag="mcu" device="ardour" type="%MIDITYPE%" mode="duplex"/>
+  <MIDI-port tag="@MIDITAG@" device="ardour" type="@MIDITYPE@" mode="duplex"/>
   <Config>
     <Option name="minimum-disk-io-bytes" value="262144"/>
     <Option name="track-buffer-seconds" value="5.000000"/>
@@ -10,18 +8,18 @@
     <Option name="mute-affects-post-fader" value="yes"/>
     <Option name="mute-affects-control-outs" value="yes"/>
     <Option name="mute-affects-main-outs" value="yes"/>
-	<Option name="monitoring-model" value="2"/>
+    <Option name="monitoring-model" value="2"/>
     <Option name="solo-latch" value="yes"/>
-    <Option name="mtc-port" value="%MIDITAG%"/>
-    <Option name="mmc-port" value="%MIDITAG%"/>
-    <Option name="midi-port" value="%MIDITAG%"/>
+    <Option name="mtc-port" value="@MIDITAG@"/>
+    <Option name="mmc-port" value="@MIDITAG@"/>
+    <Option name="midi-port" value="@MIDITAG@"/>
     <Option name="jack-time-master" value="yes"/>
     <Option name="trace-midi-input" value="no"/>
     <Option name="trace-midi-output" value="no"/>
     <Option name="plugins-stop-with-transport" value="no"/>
     <Option name="no-sw-monitoring" value="no"/>
     <Option name="stop-recording-on-xrun" value="no"/>
-	<Option name="create-xrun-marker" value="yes"/>
+    <Option name="create-xrun-marker" value="yes"/>
     <Option name="stop-at-session-end" value="no"/>
     <Option name="auto-xfade" value="yes"/>
     <Option name="crossfades-active" value="1"/>
@@ -29,8 +27,8 @@
     <Option name="xfade-model" value="0"/>
     <Option name="no-new-session-dialog" value="yes"/>
     <Option name="timecode-source-is-synced" value="yes"/>
-    <Option name="auditioner-left-out" value="%JACK_INPUT%1"/>
-    <Option name="auditioner-right-out" value="%JACK_INPUT%2"/>
+    <Option name="auditioner-left-out" value="@JACK_INPUT@1"/>
+    <Option name="auditioner-right-out" value="@JACK_INPUT@2"/>
     <Option name="quieten-at-speed" value="1.000000"/>
     <Option name="use-vst" value="yes"/>
     <Option name="use-tranzport" value="yes"/>
@@ -39,9 +37,9 @@
     <Option name="periodic-safety-backups" value="1"/>
     <Option name="periodic-safety-backup-interval" value="120"/>
     <Option name="show-track-meters" value="1"/>
-	<Option name="default-narrow_ms" value="0"/>
+    <Option name="default-narrow_ms" value="0"/>
     <Option name="smpte-format" value="6"/>
-	<Option name="font-scale" value="102400"/>
+    <Option name="font-scale" value="102400"/>
   </Config>
   <extra>
     <Keyboard edit-button="3" edit-modifier="4" delete-button="3" delete-modifier="1" snap-modifier="32"/>

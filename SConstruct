@@ -1065,7 +1065,7 @@ elif conf.CheckCHeader('alsa/asoundlib.h'):
     libraries['sysmidi'] = LibraryInfo ()
     libraries['sysmidi'].ParseConfig('pkg-config --cflags --libs alsa')
     env['SYSMIDI'] = 'ALSA Sequencer'
-    subst_dict['%MIDITAG%'] = "seq"
+    subst_dict['%MIDITAG%'] = "control"
     subst_dict['%MIDITYPE%'] = "alsa/sequencer"
     print "Using ALSA MIDI"
 elif conf.CheckCHeader('/System/Library/Frameworks/CoreMIDI.framework/Headers/CoreMIDI.h'):

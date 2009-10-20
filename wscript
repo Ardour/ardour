@@ -434,6 +434,18 @@ def build(bld):
 		bld.add_subdirs('libs/appleutility')
 	for i in children:
 		bld.add_subdirs(i)
+	
+	rc_subst_dict = {
+		'MIDITAG'    : 'control',
+		'MIDITYPE'   : 'jack',
+		'JACK_INPUT' : 'auditioner'
+	}
+
+	obj              = bld.new_task_gen('subst')
+	obj.source       = 'ardour.rc.in'
+	obj.target       = 'ardour_system.rc'
+	obj.dict         = rc_subst_dict
+	obj.install_path = '${CONFIGDIR}/ardour3'
 
 def i18n(bld):
 	bld.recurse (i18n_children)
