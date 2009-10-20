@@ -66,27 +66,28 @@ public:
 
 	bool empty() const { return (_count.n_total() == 0); }
 
-	// ITERATORS
-	// FIXME: possible to combine these?  templates?
-
-	class iterator {
+	template<typename PS, typename P>
+	class iterator_base {
 	public:
-		Port& operator*()  { return *_set.port(_type, _index); }
-		Port* operator->() { return _set.port(_type, _index); }
-		iterator& operator++() { ++_index; return *this; } // yes, prefix only
-		bool operator==(const iterator& other) { return (_index == other._index); }
-		bool operator!=(const iterator& other) { return (_index != other._index); }
+		P& operator*()  { return *_set.port(_type, _index); }
+		P* operator->() { return _set.port(_type, _index); }
+		iterator_base<PS,P>& operator++() { ++_index; return *this; } // yes, prefix only
+		bool operator==(const iterator_base<PS,P>& other) { return (_index == other._index); }
+		bool operator!=(const iterator_base<PS,P>& other) { return (_index != other._index); }
 
 	private:
 		friend class PortSet;
 
-		iterator(PortSet& list, DataType type, size_t index)
+		iterator_base<PS,P>(PS& list, DataType type, size_t index)
 			: _set(list), _type(type), _index(index) {}
 
-		PortSet& _set;
+		PS&      _set;
 		DataType _type; ///< Ignored if NIL (to iterator over entire set)
 		size_t   _index;
 	};
+
+	typedef iterator_base<PortSet, Port>             iterator;
+	typedef iterator_base<const PortSet, const Port> const_iterator;
 
 	iterator begin(DataType type = DataType::NIL) {
 		return iterator(*this, type, 0);
@@ -97,32 +98,19 @@ public:
 			(type == DataType::NIL) ? _count.n_total() : _count.get(type));
 	}
 
+	const_iterator begin(DataType type = DataType::NIL) const {
+		return const_iterator(*this, type, 0);
+	}
 
-	class const_iterator {
-	public:
-		const Port& operator*()  { return *_set.port(_index); }
-		const Port* operator->() { return _set.port(_index); }
-		const_iterator& operator++() { ++_index; return *this; } // yes, prefix only
-		bool operator==(const const_iterator& other) { return (_index == other._index); }
-		bool operator!=(const const_iterator& other) { return (_index != other._index); }
-
-	private:
-		friend class PortSet;
-
-		const_iterator(const PortSet& list, size_t index) : _set(list), _index(index) {}
-
-		const PortSet& _set;
-		size_t         _index;
-	};
-
-	const_iterator begin() const { return const_iterator(*this, 0); }
-	const_iterator end()   const { return const_iterator(*this, _count.n_total()); }
-
+	const_iterator end(DataType type = DataType::NIL) const {
+		return const_iterator(*this, type,
+			(type == DataType::NIL) ? _count.n_total() : _count.get(type));
+	}
 
 	class audio_iterator {
 	public:
 		AudioPort& operator*()  { return *_set.nth_audio_port(_index); }
-		AudioPort* operator->()  { return _set.nth_audio_port(_index); }
+		AudioPort* operator->() { return _set.nth_audio_port(_index); }
 		audio_iterator& operator++() { ++_index; return *this; } // yes, prefix only
 		bool operator==(const audio_iterator& other) { return (_index == other._index); }
 		bool operator!=(const audio_iterator& other) { return (_index != other._index); }
