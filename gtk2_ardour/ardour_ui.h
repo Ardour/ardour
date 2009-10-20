@@ -239,6 +239,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	bool ignore_dual_punch;
 	void toggle_punch_in ();
 	void toggle_punch_out ();
+	void show_loop_punch_ruler_and_disallow_hide ();
+	void reenable_hide_loop_punch_ruler_if_appropriate ();
 	void toggle_auto_return ();
 	void toggle_click ();
 
