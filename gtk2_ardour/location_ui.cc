@@ -22,7 +22,6 @@
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
-#include <gtkmm2ext/window_title.h>
 
 #include <ardour/utils.h>
 #include <ardour/configuration.h>
@@ -626,10 +625,8 @@ LocationUI::LocationUI ()
 {
 	i_am_the_modifier = 0;
 	
-	WindowTitle title(Glib::get_application_name());
-	title += _("Locations");
-
-	set_title(title.get_string());
+	set_title(_("Locations"));
+	
 	set_wmclass(X_("ardour_locations"), "Ardour");
 
 	set_name ("LocationWindow");

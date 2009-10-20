@@ -121,9 +121,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	auditioner_io_selector = 0;
 	session = 0;
 	
-	WindowTitle title(Glib::get_application_name());
-	title += _("Preferences");
-	set_title(title.get_string());
+	set_title(_("Preferences"));
 
 	set_default_size (300, 300);
 	set_wmclass (X_("ardour_preferences"), "Ardour");

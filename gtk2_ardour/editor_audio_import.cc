@@ -31,7 +31,6 @@
 #include <pbd/shortpath.h>
 
 #include <gtkmm2ext/choice.h>
-#include <gtkmm2ext/window_title.h>
 
 #include <ardour/session.h>
 #include <ardour/audioplaylist.h>
@@ -451,9 +450,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 			 int target_regions, int target_tracks, boost::shared_ptr<AudioTrack> track, bool replace,
 			 uint32_t total)
 {
-	WindowTitle title = string_compose (_("importing %1"), paths.front());
-
-	interthread_progress_window->set_title (title.get_string());
+	interthread_progress_window->set_title (string_compose (_("Importing %1"), paths.front()));
 	interthread_progress_window->set_position (Gtk::WIN_POS_MOUSE);
 	interthread_progress_bar.set_fraction (0.0f);
 	interthread_cancel_label.set_text (_("Cancel Import"));

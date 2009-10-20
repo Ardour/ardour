@@ -23,7 +23,6 @@
 
 #include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/window_title.h>
 
 #include <ardour/location.h>
 #include <ardour/profile.h>
@@ -1075,14 +1074,11 @@ Editor::marker_menu_rename ()
 
 	dialog.set_prompt (_("New Name:"));
 
-	WindowTitle title(Glib::get_application_name());
 	if (loc->is_mark()) {
-		title += _("Rename Mark");
+		dialog.set_title (_("Rename Mark"));
 	} else {
-		title += _("Rename Range");
+		dialog.set_title (_("Rename Range"));
 	}
-
-	dialog.set_title(title.get_string());
 
 	dialog.set_name ("MarkRenameWindow");
 	dialog.set_size_request (250, -1);

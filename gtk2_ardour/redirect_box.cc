@@ -34,7 +34,6 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/doi.h>
-#include <gtkmm2ext/window_title.h>
 
 #include <ardour/ardour.h>
 #include <ardour/session.h>
@@ -1122,9 +1121,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 			
 			send_ui = new SendUIWindow (send, _session);
 
-			WindowTitle title(Glib::get_application_name());
-			title += send->name();
-			send_ui->set_title (title.get_string());
+			send_ui->set_title (send->name());
 
 			send->set_gui (send_ui);
 			
@@ -1159,9 +1156,7 @@ RedirectBox::edit_redirect (boost::shared_ptr<Redirect> redirect)
 
 				plugin_ui = new PluginUIWindow (win, plugin_insert);
 				
-				WindowTitle title(Glib::get_application_name());
-				title += generate_redirect_title (plugin_insert);
-				plugin_ui->set_title (title.get_string());
+				plugin_ui->set_title (generate_redirect_title (plugin_insert));
 				
 				plugin_insert->set_gui (plugin_ui);
 
@@ -1443,19 +1438,15 @@ RedirectBox::route_name_changed (void* src)
 
 		/* rename editor windows for sends and plugins */
 
-		WindowTitle title (Glib::get_application_name());
-		
 		if ((insert = boost::dynamic_pointer_cast<Insert> (redirect)) == 0) {
 			boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (redirect);
-			title += send->name();
-			static_cast<Window*>(gui)->set_title (title.get_string());
+			static_cast<Window*>(gui)->set_title (send->name());
 		} else {
 			boost::shared_ptr<PluginInsert> plugin_insert;
 			
 			if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (insert)) != 0) {
-				title += generate_redirect_title (plugin_insert);
+				static_cast<Window*>(gui)->set_title (generate_redirect_title (plugin_insert));
 			}
-			static_cast<Window*>(gui)->set_title (title.get_string());
 		}
 	}
 }

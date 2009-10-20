@@ -28,7 +28,6 @@
 #include <pbd/xml++.h>
 
 #include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/window_title.h>
 
 #include <ardour/export.h>
 #include <ardour/sndfile_helpers.h>
@@ -122,10 +121,7 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	channel_count_selection_allowed = true;
 	export_cd_markers_allowed = true;
 
-	WindowTitle title(Glib::get_application_name());
-	title += _("Export");
-	
-	set_title (title.get_string());
+	set_title (_("Export"));
 	set_wmclass (X_("ardour_export"), "Ardour");
 	set_name ("ExportWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);

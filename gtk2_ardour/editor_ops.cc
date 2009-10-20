@@ -33,7 +33,6 @@
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/choice.h>
-#include <gtkmm2ext/window_title.h>
 #include <gtkmm2ext/popup.h>
 
 #include <ardour/audioengine.h>
@@ -1922,10 +1921,7 @@ Editor::choose_new_marker_name(string &name) {
 
 	dialog.set_prompt (_("New Name:"));
 
-	WindowTitle title(Glib::get_application_name());
-	title += _("Name New Location Marker");
-
-	dialog.set_title(title.get_string());
+	dialog.set_title (_("New Location Marker"));
 
 	dialog.set_name ("MarkNameWindow");
 	dialog.set_size_request (250, -1);
@@ -2563,10 +2559,7 @@ Editor::rename_region()
 		return;
 	}
 
-	WindowTitle title (Glib::get_application_name());
-	title += _("Rename Region");
-
-	ArdourDialog d (*this, title.get_string(), true, false);
+	ArdourDialog d (*this, _("Rename Region"), true, false);
 	Entry entry;
 	Label label (_("New name:"));
 	HBox hbox;
@@ -3640,9 +3633,7 @@ Editor::freeze_route ()
 		build_interthread_progress_window ();
 	}
 
-	WindowTitle title(Glib::get_application_name());
-	title += _("Freeze");
-	interthread_progress_window->set_title (title.get_string());
+	interthread_progress_window->set_title (_("Freeze"));
 	interthread_progress_window->set_position (Gtk::WIN_POS_MOUSE);
 	interthread_progress_window->show_all ();
 	interthread_progress_bar.set_fraction (0.0f);

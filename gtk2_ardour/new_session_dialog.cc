@@ -375,9 +375,7 @@ NewSessionDialog::NewSessionDialog()
 		set_icon_list (window_icons);
 	}
 
-	WindowTitle title(Glib::get_application_name());
-	title += _("Session Control");
-	set_title(title.get_string());
+	set_title(_("Session Control"));
 
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_resizable(false);

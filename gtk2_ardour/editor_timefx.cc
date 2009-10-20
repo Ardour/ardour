@@ -27,7 +27,6 @@
 #include <pbd/pthread_utils.h>
 #include <pbd/memento_command.h>
 
-#include <gtkmm2ext/window_title.h>
 #include <gtkmm2ext/utils.h>
 
 #include "editor.h"
@@ -78,13 +77,11 @@ Editor::TimeFXDialog::TimeFXDialog (Editor& e, bool pitch)
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name (N_("TimeFXDialog"));
 
-	WindowTitle title(Glib::get_application_name());
 	if (pitching) {
-		title += _("Pitch Shift");
+		set_title(_("Pitch Shift"));
 	} else {
-		title += _("Time Stretch");
+		set_title(_("Time Stretch"));
 	}
-	set_title(title.get_string());
 
 	cancel_button = add_button (_("Cancel"), Gtk::RESPONSE_CANCEL);
 

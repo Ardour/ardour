@@ -24,7 +24,6 @@
 #include <ardour/utils.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
-#include <gtkmm2ext/window_title.h>
 #include <cmath>
 
 #include "audio_region_editor.h"
@@ -138,10 +137,7 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 
 	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (this)));
 
-	WindowTitle title(string_compose (_("Region %1"), _region->name()));
-	title += Glib::get_application_name();
-
-	set_title (title.get_string());
+	set_title (string_compose (_("Region %1"), _region->name()));
 
 	show_all();
 
