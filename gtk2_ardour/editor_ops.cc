@@ -1766,18 +1766,13 @@ Editor::temporal_zoom_region (bool both_axes)
 		no_save_visual = false;
 	}
 
-	zoomed_to_region = true;
 	redo_visual_stack.push_back (current_visual_state());
 }
 
 void
-Editor::toggle_zoom_region (bool both_axes)
+Editor::zoom_to_region (bool both_axes)
 {
-	if (zoomed_to_region) {
-		swap_visual_state ();
-	} else {
-		temporal_zoom_region (both_axes);
-	}
+	temporal_zoom_region (both_axes);
 }
 
 void

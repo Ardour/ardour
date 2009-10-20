@@ -893,8 +893,6 @@ Editor::region_selection_changed ()
 
 	sensitize_the_right_region_actions (!selection->regions.empty());
 
-	zoomed_to_region = false;
-
 	_regions->block_change_connection (false);
 	editor_regions_selection_changed_connection.block(false);
 }
