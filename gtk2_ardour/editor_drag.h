@@ -194,7 +194,7 @@ protected:
 		);
 
 	TimeAxisViewSummary get_time_axis_view_summary ();
-	virtual bool x_move_allowed () const = 0;
+	bool x_move_allowed () const;
 
 	TimeAxisView* _dest_trackview;
 	ARDOUR::layer_t _dest_layer;
@@ -221,8 +221,6 @@ public:
 	}
 
 private:
-	bool x_move_allowed () const;
-
 	bool _copy;
 };
 
@@ -233,9 +231,6 @@ public:
 	RegionInsertDrag (Editor *, boost::shared_ptr<ARDOUR::Region>, RouteTimeAxisView*, nframes64_t);
 
 	void finished (GdkEvent *, bool);
-
-private:
-	bool x_move_allowed () const;
 };
 
 /** Region drag in splice mode */

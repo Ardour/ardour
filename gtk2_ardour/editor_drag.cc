@@ -759,7 +759,7 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 	   the drag.
 	*/
 
-	if (Config->get_edit_mode() == Lock && !_copy) {
+	if (Config->get_edit_mode() == Lock) {
 		_x_constrained = !_x_constrained;
 	}
 
@@ -977,24 +977,10 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 
 
 bool
-RegionMoveDrag::x_move_allowed () const
+RegionMotionDrag::x_move_allowed () const
 {
 	if (Config->get_edit_mode() == Lock) {
-		if (_copy) {
-			return !_x_constrained;
-		} else {
-			/* in locked edit mode, reverse the usual meaning of _x_constrained */
-			return _x_constrained;
-		}
-	}
-
-	return !_x_constrained;
-}
-
-bool
-RegionInsertDrag::x_move_allowed () const
-{
-	if (Config->get_edit_mode() == Lock) {
+		/* in locked edit mode, reverse the usual meaning of _x_constrained */
 		return _x_constrained;
 	}
 
