@@ -324,14 +324,39 @@ MidiBuffer::merge(const MidiBuffer& a, const MidiBuffer& b)
 	_size = 0;
 
 	if (this == &a) {
-	    merge_in_place(b);
+	    return merge_in_place(b);
+	} else if (this == &b) {
+	    return merge_in_place(a);
 	}
 
-	if (this == &b) {
-	    merge_in_place(a);
+	const_iterator ai = a.begin();
+	const_iterator bi = b.begin();
+
+	resize(a.size() + b.size());
+	while (ai != a.end() && bi != b.end()) {
+		if ((*ai).time() < (*bi).time()) {
+			memcpy(_data + _size, (*ai).buffer(), (*ai).size());
+			_size += (*ai).size();
+			++ai;
+		} else {
+			memcpy(_data + _size, (*bi).buffer(), (*bi).size());
+			_size += (*bi).size();
+			++bi;
+		}
 	}
 
-	cerr << "FIXME: MIDI BUFFER MERGE" << endl;
+	while (ai != a.end()) {
+		memcpy(_data + _size, (*ai).buffer(), (*ai).size());
+		_size += (*ai).size();
+		++ai;
+	}
+
+	while (bi != b.end()) {
+		memcpy(_data + _size, (*bi).buffer(), (*bi).size());
+		_size += (*bi).size();
+		++bi;
+	}
+
 	return true;
 }
 
