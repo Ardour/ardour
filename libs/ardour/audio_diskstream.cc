@@ -675,19 +675,19 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 void
 AudioDiskstream::process_varispeed_playback(nframes_t nframes, boost::shared_ptr<ChannelList> c)
 {
-         ChannelList::iterator chan;
+	ChannelList::iterator chan;
 
-		interpolation.set_speed (_target_speed);
+	interpolation.set_speed (_target_speed);
 
-		int channel = 0;
-		for (chan = c->begin(); chan != c->end(); ++chan, ++channel) {
-			ChannelInfo* chaninfo (*chan);
+	int channel = 0;
+	for (chan = c->begin(); chan != c->end(); ++chan, ++channel) {
+		ChannelInfo* chaninfo (*chan);
 
-			playback_distance = interpolation.interpolate (
-					channel, nframes, chaninfo->current_playback_buffer, chaninfo->speed_buffer);
+		playback_distance = interpolation.interpolate (
+				channel, nframes, chaninfo->current_playback_buffer, chaninfo->speed_buffer);
 
-			chaninfo->current_playback_buffer = chaninfo->speed_buffer;
-		}
+		chaninfo->current_playback_buffer = chaninfo->speed_buffer;
+	}
 }
 
 bool

@@ -485,7 +485,6 @@ trace_midi (ostream& o, MIDI::byte *msg, size_t len)
 int
 MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input)
 {
-	// FIXME: waay too much code to duplicate (AudioDiskstream::process)
 	int       ret = -1;
 	nframes_t rec_offset = 0;
 	nframes_t rec_nframes = 0;
@@ -575,7 +574,7 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_
 
 		/* XXXX do this for MIDI !!!
 		   can't do actual capture yet - waiting for latency effects to finish before we start
-		*/
+		   */
 
 		playback_distance = nframes;
 
