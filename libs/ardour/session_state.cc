@@ -2990,19 +2990,20 @@ Session::restore_history (string snapshot_name)
 				PBD::ID  id(n->property("midi-source")->value());
 				boost::shared_ptr<MidiSource> midi_source =
 					boost::dynamic_pointer_cast<MidiSource, Source>(source_by_id(id));
-				if(midi_source) {
+				if (midi_source) {
 					ut->add_command(new MidiModel::DeltaCommand(midi_source->model(), *n));
 				} else {
-					error << "FIXME: Failed to downcast MidiSource for DeltaCommand" << endmsg;
+					error << _("Failed to downcast MidiSource for DeltaCommand") << endmsg;
 				}
+
 			} else if (n->name() == "DiffCommand") {
 				PBD::ID  id(n->property("midi-source")->value());
 				boost::shared_ptr<MidiSource> midi_source =
 					boost::dynamic_pointer_cast<MidiSource, Source>(source_by_id(id));
-				if(midi_source) {
+				if (midi_source) {
 					ut->add_command(new MidiModel::DiffCommand(midi_source->model(), *n));
 				} else {
-					error << "FIXME: Failed to downcast MidiSource for DeltaCommand" << endmsg;
+					error << _("Failed to downcast MidiSource for DeltaCommand") << endmsg;
 				}
 
 			} else {
