@@ -30,7 +30,6 @@
 #include <gtkmm/arrow.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/table.h>
-#include <gtkmm/alignment.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/separator.h>
 #include <gtkmm/spinbutton.h>
@@ -77,18 +76,15 @@ class AudioRegionEditor : public RegionEditor
 	Gtk::Label position_label;
 	Gtk::Label end_label;
 	Gtk::Label length_label;
-	Gtk::Label sync_label;
+	Gtk::Label sync_relative_label;
+	Gtk::Label sync_absolute_label;
 	Gtk::Label start_label;
-	Gtk::Alignment position_alignment;
-	Gtk::Alignment end_alignment;
-	Gtk::Alignment length_alignment;
-	Gtk::Alignment sync_alignment;
-	Gtk::Alignment start_alignment;
 
 	AudioClock position_clock;
 	AudioClock end_clock;
 	AudioClock length_clock;
-	AudioClock sync_offset_clock;
+	AudioClock sync_offset_relative_clock; ///< sync offset relative to the start of the region
+	AudioClock sync_offset_absolute_clock; ///< sync offset relative to the start of the timeline
 	AudioClock start_clock;
 
 	Gtk::HSeparator sep3;
@@ -107,6 +103,8 @@ class AudioRegionEditor : public RegionEditor
 	void position_clock_changed ();
 	void end_clock_changed ();
 	void length_clock_changed ();
+	void sync_offset_absolute_clock_changed ();
+	void sync_offset_relative_clock_changed ();
 
 	void audition_button_toggled ();
 

@@ -44,21 +44,23 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	: RegionEditor (s),
 	  _region (r),
 	  _region_view (rv),
-	  name_label (_("NAME:")),
-	  audition_button (_("play")),
-	  time_table (5, 2),
+	  name_label (_("Name:")),
+	  audition_button (_("Play")),
+	  time_table (6, 2),
 	  position_clock (X_("regionposition"), true, X_("AudioRegionEditorClock"), true),
 	  end_clock (X_("regionend"), true, X_("AudioRegionEditorClock"), true),
 	  length_clock (X_("regionlength"), true, X_("AudioRegionEditorClock"), true, true),
-	  /* XXX cannot edit sync point or start yet */
-	  sync_offset_clock (X_("regionsyncoffset"), true, X_("AudioRegionEditorClock"), false),
+	  sync_offset_relative_clock (X_("regionsyncoffsetrelative"), true, X_("AudioRegionEditorClock"), true),
+	  sync_offset_absolute_clock (X_("regionsyncoffsetabsolute"), true, X_("AudioRegionEditorClock"), true),
+	  /* XXX cannot file start yet */
 	  start_clock (X_("regionstart"), true, X_("AudioRegionEditorClock"), false)
 
 {
 	position_clock.set_session (&_session);
 	end_clock.set_session (&_session);
 	length_clock.set_session (&_session);
-	sync_offset_clock.set_session (&_session);
+	sync_offset_relative_clock.set_session (&_session);
+	sync_offset_absolute_clock.set_session (&_session);
 	start_clock.set_session (&_session);
 
 	name_entry.set_name ("AudioRegionEditorEntry");
@@ -83,46 +85,45 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	top_row_hbox.pack_end (top_row_button_hbox, true, true);
 
 	position_label.set_name ("AudioRegionEditorLabel");
-	position_label.set_text (_("POSITION:"));
+	position_label.set_text (_("Position"));
 	end_label.set_name ("AudioRegionEditorLabel");
-	end_label.set_text (_("END:"));
+	end_label.set_text (_("End"));
 	length_label.set_name ("AudioRegionEditorLabel");
-	length_label.set_text (_("LENGTH:"));
-	sync_label.set_name ("AudioRegionEditorLabel");
-	sync_label.set_text (_("SYNC POINT:"));
+	length_label.set_text (_("Length"));
+	sync_relative_label.set_name ("AudioRegionEditorLabel");
+	sync_relative_label.set_text (_("Sync point (relative to region position)"));
+	sync_absolute_label.set_name ("AudioRegionEditorLabel");
+	sync_absolute_label.set_text (_("Sync point (absolute)"));
 	start_label.set_name ("AudioRegionEditorLabel");
-	start_label.set_text (_("FILE START:"));
+	start_label.set_text (_("File start"));
 
 	time_table.set_col_spacings (2);
 	time_table.set_row_spacings (5);
 	time_table.set_border_width (5);
 
-	position_alignment.set (1.0, 0.5);
-	end_alignment.set (1.0, 0.5);
-	length_alignment.set (1.0, 0.5);
-	sync_alignment.set (1.0, 0.5);
-	start_alignment.set (1.0, 0.5);
-
-	position_alignment.add (position_label);
-	end_alignment.add (end_label);
-	length_alignment.add (length_label);
-	sync_alignment.add (sync_label);
-	start_alignment.add (start_label);
-
-	time_table.attach (position_alignment, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
+	position_label.set_alignment (1, 0.5);
+	time_table.attach (position_label, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
 	time_table.attach (position_clock, 1, 2, 0, 1, Gtk::FILL, Gtk::FILL);
 
-	time_table.attach (end_alignment, 0, 1, 1, 2, Gtk::FILL, Gtk::FILL);
+ 	end_label.set_alignment (1, 0.5);
+ 	time_table.attach (end_label, 0, 1, 1, 2, Gtk::FILL, Gtk::FILL);
 	time_table.attach (end_clock, 1, 2, 1, 2, Gtk::FILL, Gtk::FILL);
-
-	time_table.attach (length_alignment, 0, 1, 2, 3, Gtk::FILL, Gtk::FILL);
+	
+ 	length_label.set_alignment (1, 0.5);
+ 	time_table.attach (length_label, 0, 1, 2, 3, Gtk::FILL, Gtk::FILL);
 	time_table.attach (length_clock, 1, 2, 2, 3, Gtk::FILL, Gtk::FILL);
+	
+ 	sync_relative_label.set_alignment (1, 0.5);
+ 	time_table.attach (sync_relative_label, 0, 1, 3, 4, Gtk::FILL, Gtk::FILL);
+ 	time_table.attach (sync_offset_relative_clock, 1, 2, 3, 4, Gtk::FILL, Gtk::FILL);
+ 
+ 	sync_absolute_label.set_alignment (1, 0.5);
+ 	time_table.attach (sync_absolute_label, 0, 1, 4, 5, Gtk::FILL, Gtk::FILL);
+ 	time_table.attach (sync_offset_absolute_clock, 1, 2, 4, 5, Gtk::FILL, Gtk::FILL);
 
-	time_table.attach (sync_alignment, 0, 1, 3, 4, Gtk::FILL, Gtk::FILL);
-	time_table.attach (sync_offset_clock, 1, 2, 3, 4, Gtk::FILL, Gtk::FILL);
-
-	time_table.attach (start_alignment, 0, 1, 4, 5, Gtk::FILL, Gtk::FILL);
-	time_table.attach (start_clock, 1, 2, 4, 5, Gtk::FILL, Gtk::FILL);
+ 	start_label.set_alignment (1, 0.5);
+ 	time_table.attach (start_label, 0, 1, 5, 6, Gtk::FILL, Gtk::FILL);
+ 	time_table.attach (start_clock, 1, 2, 5, 6, Gtk::FILL, Gtk::FILL);
 
 	lower_hbox.pack_start (time_table, true, true);
 	lower_hbox.pack_start (sep1, false, false);
@@ -208,6 +209,8 @@ AudioRegionEditor::connect_editor_events ()
 	position_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::position_clock_changed));
 	end_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::end_clock_changed));
 	length_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::length_clock_changed));
+	sync_offset_absolute_clock.ValueChanged.connect (mem_fun (*this, &AudioRegionEditor::sync_offset_absolute_clock_changed));
+	sync_offset_relative_clock.ValueChanged.connect (mem_fun (*this, &AudioRegionEditor::sync_offset_relative_clock_changed));
 
 	audition_button.signal_toggled().connect (mem_fun(*this, &AudioRegionEditor::audition_button_toggled));
 	_session.AuditionActive.connect (mem_fun(*this, &AudioRegionEditor::audition_state_changed));
@@ -246,7 +249,7 @@ AudioRegionEditor::end_clock_changed ()
 
 	_session.commit_reversible_command ();
 
-	end_clock.set (_region->position() + _region->length(), true);
+	end_clock.set (_region->position() + _region->length() - 1, true);
 }
 
 void
@@ -260,7 +263,7 @@ AudioRegionEditor::length_clock_changed ()
 
 	if (pl) {
 		XMLNode &before = pl->get_state();
-		_region->trim_end (_region->position() + frames, this);
+		_region->trim_end (_region->position() + frames - 1, this);
 		XMLNode &after = pl->get_state();
 		_session.add_command(new MementoCommand<Playlist>(*pl, &before, &after));
 	}
@@ -293,18 +296,28 @@ AudioRegionEditor::bounds_changed (Change what_changed)
 {
 	if ((what_changed & Change (PositionChanged|LengthChanged)) == Change (PositionChanged|LengthChanged)) {
 		position_clock.set (_region->position(), true);
-		end_clock.set (_region->position() + _region->length(), true);
+		end_clock.set (_region->position() + _region->length() - 1, true);
 		length_clock.set (_region->length(), true);
 	} else if (what_changed & Change (PositionChanged)) {
 		position_clock.set (_region->position(), true);
-		end_clock.set (_region->position() + _region->length(), true);
+		end_clock.set (_region->position() + _region->length() - 1, true);
 	} else if (what_changed & Change (LengthChanged)) {
-		end_clock.set (_region->position() + _region->length(), true);
+		end_clock.set (_region->position() + _region->length() - 1, true);
 		length_clock.set (_region->length(), true);
 	}
 
-	if (what_changed & Region::SyncOffsetChanged) {
-		sync_offset_clock.set (_region->sync_position(), true);
+	if ((what_changed & Region::SyncOffsetChanged) || (what_changed & PositionChanged)) {
+		int dir;
+		nframes_t off = _region->sync_offset (dir);
+		if (dir == -1) {
+			off = -off;
+		}
+
+		if (what_changed & Region::SyncOffsetChanged) {
+			sync_offset_relative_clock.set (off, true);
+		}
+
+		sync_offset_absolute_clock.set (off + _region->position (), true);
 	}
 
 	if (what_changed & StartChanged) {
@@ -336,3 +349,28 @@ AudioRegionEditor::audition_state_changed (bool yn)
 	}
 }
 
+void
+AudioRegionEditor::sync_offset_absolute_clock_changed ()
+{
+	_session.begin_reversible_command (_("change region sync point"));
+
+	XMLNode& before = _region->get_state ();
+	_region->set_sync_position (sync_offset_absolute_clock.current_time());
+	XMLNode& after = _region->get_state ();
+	_session.add_command (new MementoCommand<AudioRegion> (*_region.get(), &before, &after));
+	
+	_session.commit_reversible_command ();
+}
+
+void
+AudioRegionEditor::sync_offset_relative_clock_changed ()
+{
+	_session.begin_reversible_command (_("change region sync point"));
+
+	XMLNode& before = _region->get_state ();
+	_region->set_sync_position (sync_offset_relative_clock.current_time() + _region->position ());
+	XMLNode& after = _region->get_state ();
+	_session.add_command (new MementoCommand<AudioRegion> (*_region.get(), &before, &after));
+	
+	_session.commit_reversible_command ();
+}

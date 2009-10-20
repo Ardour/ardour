@@ -1706,9 +1706,9 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 
 		items.push_back (MenuElem (_("Rename"), mem_fun(*this, &Editor::rename_region)));
 		if (mr && internal_editing()) {
-			items.push_back (MenuElem (_("Popup list editor"), mem_fun(*this, &Editor::show_midi_list_editor)));
+			items.push_back (MenuElem (_("List editor..."), mem_fun(*this, &Editor::show_midi_list_editor)));
 		} else {
-			items.push_back (MenuElem (_("Popup region editor"), mem_fun(*this, &Editor::edit_region)));
+			items.push_back (MenuElem (_("Region editor"), mem_fun(*this, &Editor::edit_region)));
 		}
 	}
 
@@ -1716,6 +1716,9 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 	items.push_back (MenuElem (_("Lower to bottom layer"), mem_fun  (*this, &Editor::lower_region_to_bottom)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Define sync point"), mem_fun(*this, &Editor::set_region_sync_from_edit_point)));
+	if (_edit_point == EditAtMouse) {
+		items.back ().set_sensitive (false);
+	}
 	items.push_back (MenuElem (_("Remove sync point"), mem_fun(*this, &Editor::remove_region_sync)));
 	items.push_back (SeparatorElem());
 

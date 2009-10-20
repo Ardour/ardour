@@ -3188,7 +3188,7 @@ Editor::set_sync_point (nframes64_t where, const RegionSelection& rs)
 		}
 
 		XMLNode &before = region->playlist()->get_state();
-		region->set_sync_position (get_preferred_edit_position());
+		region->set_sync_position (where);
 		XMLNode &after = region->playlist()->get_state();
 		session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
 	}
