@@ -719,10 +719,15 @@ MidiModel::get_state()
 boost::shared_ptr<Evoral::Note<MidiModel::TimeType> >
 MidiModel::find_note (boost::shared_ptr<Evoral::Note<TimeType> > other)
 {
-	for (Notes::iterator l = notes().lower_bound(other); (*l)->time() == other->time(); ++l) {
-		if (*l == other) {
-			return *l;
+	Notes::iterator l = notes().lower_bound(other);
+
+	if (l != notes().end()) {
+		for (; (*l)->time() == other->time(); ++l) {
+			if (*l == other) {
+				return *l;
+			}
 		}
 	}
+
 	return boost::shared_ptr<Evoral::Note<TimeType> >();
 }
