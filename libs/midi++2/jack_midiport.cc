@@ -44,7 +44,7 @@ JACK_MidiPort::JACK_MidiPort(const XMLNode& node, jack_client_t* jack_client)
 
 	if (!err) {
 		_ok = true;
-	} 
+	}
 }
 
 JACK_MidiPort::~JACK_MidiPort()
@@ -92,7 +92,9 @@ JACK_MidiPort::cycle_start (nframes_t nframes)
 void
 JACK_MidiPort::cycle_end ()
 {
-	flush(jack_port_get_buffer(_jack_output_port, _nframes_this_cycle));
+	if (_jack_output_port != 0) {
+		flush(jack_port_get_buffer(_jack_output_port, _nframes_this_cycle));
+	}
 }
 
 int
