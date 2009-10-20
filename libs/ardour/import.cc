@@ -307,7 +307,6 @@ remove_file_source (boost::shared_ptr<AudioFileSource> file_source)
 void
 Session::import_audiofiles (import_status& status)
 {
-	uint32_t cnt = 1;
 	typedef vector<boost::shared_ptr<AudioFileSource> > AudioSources;
 	AudioSources all_new_sources;
 
@@ -315,8 +314,10 @@ Session::import_audiofiles (import_status& status)
 	
 	for (vector<Glib::ustring>::iterator p = status.paths.begin();
 			p != status.paths.end() && !status.cancel;
-			++p, ++cnt)
+			++p)
 	{
+		status.count++;
+
 		boost::shared_ptr<ImportableSource> source;
 		
 		try
@@ -355,7 +356,7 @@ Session::import_audiofiles (import_status& status)
 		}
 
 		status.doing_what = compose_status_message (*p, source->samplerate(),
-				frame_rate(), cnt, status.total);
+				frame_rate(), status.count, status.total);
 
 		write_audio_data_to_new_files (source.get(), status, newfiles);
 	}

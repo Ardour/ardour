@@ -606,6 +606,7 @@ class Session : public PBD::StatefulDestructible
 	    
 	    /* control info */
 	    uint32_t total;
+	    uint32_t count;
 	    SrcQuality quality;
 	    volatile bool freeze;
 	    std::vector<Glib::ustring> paths;

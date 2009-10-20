@@ -284,6 +284,9 @@ Editor::get_nth_selected_audio_track (int nth) const
 void
 Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mode, SrcQuality quality, nframes64_t& pos)
 {
+	//this is where an import "starts" so initialize the count here ... the rest gets initialized in import_sndfiles()
+	import_status.count = 0;
+
 	boost::shared_ptr<AudioTrack> track;
 	vector<ustring> to_import;
 	int nth = 0;
