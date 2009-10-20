@@ -314,6 +314,7 @@ MixerStrip::~MixerStrip ()
 
 	delete input_selector;
 	delete output_selector;
+	delete comment_window;
 }
 
 void
