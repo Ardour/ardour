@@ -85,7 +85,8 @@ public:
 
 	size_t buffer_capacity(DataType type) const;
 
-	Buffer& get(DataType type, size_t i);
+	Buffer&       get(DataType type, size_t i);
+	const Buffer& get(DataType type, size_t i) const;
 
 	AudioBuffer& get_audio(size_t i) {
 		return (AudioBuffer&)get(DataType::AUDIO, i);
@@ -105,8 +106,8 @@ public:
 	void flush_lv2_midi(bool input, size_t i);
 #endif
 
-	void read_from(BufferSet& in, nframes_t nframes);
-	void merge_from(BufferSet& in, nframes_t nframes);
+	void read_from(const BufferSet& in, nframes_t nframes);
+	void merge_from(const BufferSet& in, nframes_t nframes);
 
 	// ITERATORS
 	// FIXME: possible to combine these?  templates?
@@ -151,30 +152,36 @@ public:
 	midi_iterator midi_begin() { return midi_iterator(*this, 0); }
 	midi_iterator midi_end()   { return midi_iterator(*this, _count.n_midi()); }
 
-	class iterator {
+	template <typename BS, typename B>
+	class iterator_base {
 	public:
-		Buffer& operator*()  { return _set.get(_type, _index); }
-		Buffer* operator->() { return &_set.get(_type, _index); }
-		iterator& operator++() { ++_index; return *this; } // yes, prefix only
-		bool operator==(const iterator& other) { return (_index == other._index); }
-		bool operator!=(const iterator& other) { return (_index != other._index); }
-		iterator operator=(const iterator& other) {
+		B& operator*()  { return _set.get(_type, _index); }
+		B* operator->() { return &_set.get(_type, _index); }
+		iterator_base<BS,B>& operator++() { ++_index; return *this; } // yes, prefix only
+		bool operator==(const iterator_base<BS,B>& other) { return (_index == other._index); }
+		bool operator!=(const iterator_base<BS,B>& other) { return (_index != other._index); }
+		iterator_base<BS,B> operator=(const iterator_base<BS,B>& other) {
 			_set = other._set; _type = other._type; _index = other._index; return *this;
 		}
 
 	private:
 		friend class BufferSet;
 
-		iterator(BufferSet& list, DataType type, size_t index)
+		iterator_base(BS& list, DataType type, size_t index)
 			: _set(list), _type(type), _index(index) {}
 
-		BufferSet& _set;
-		DataType   _type;
-		size_t     _index;
+		BS&       _set;
+		DataType _type;
+		size_t   _index;
 	};
 
-	iterator begin(DataType type) { return iterator(*this, type, 0); }
-	iterator end(DataType type)   { return iterator(*this, type, _count.get(type)); }
+	typedef iterator_base<BufferSet, Buffer>             iterator;
+	typedef iterator_base<const BufferSet, const Buffer> const_iterator;
+
+	iterator       begin(DataType type)       { return iterator(*this, type, 0); }
+	iterator       end(DataType type)         { return iterator(*this, type, _count.get(type)); }
+	const_iterator begin(DataType type) const { return const_iterator(*this, type, 0); }
+	const_iterator end(DataType type)   const { return const_iterator(*this, type, _count.get(type)); }
 
 private:
 	typedef std::vector<Buffer*> BufferVec;

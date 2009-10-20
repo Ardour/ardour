@@ -243,6 +243,13 @@ BufferSet::get(DataType type, size_t i)
 	return *_buffers[type][i];
 }
 
+const Buffer&
+BufferSet::get(DataType type, size_t i) const
+{
+	assert(i < _available.get(type));
+	return *_buffers[type][i];
+}
+
 #ifdef HAVE_SLV2
 
 LV2EventBuffer&
@@ -284,16 +291,15 @@ BufferSet::flush_lv2_midi(bool input, size_t i)
 
 #endif
 
-// FIXME: make 'in' const
 void
-BufferSet::read_from (BufferSet& in, nframes_t nframes)
+BufferSet::read_from (const BufferSet& in, nframes_t nframes)
 {
 	assert(available() >= in.count());
 
 	// Copy all buffers 1:1
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		BufferSet::iterator o = begin(*t);
-		for (BufferSet::iterator i = in.begin(*t); i != in.end(*t); ++i, ++o) {
+		for (BufferSet::const_iterator i = in.begin(*t); i != in.end(*t); ++i, ++o) {
 			o->read_from (*i, nframes);
 		}
 	}
@@ -301,9 +307,8 @@ BufferSet::read_from (BufferSet& in, nframes_t nframes)
 	set_count(in.count());
 }
 
-// FIXME: make 'in' const
 void
-BufferSet::merge_from (BufferSet& in, nframes_t nframes)
+BufferSet::merge_from (const BufferSet& in, nframes_t nframes)
 {
 	/* merge all input buffers into out existing buffers.
 
@@ -314,7 +319,7 @@ BufferSet::merge_from (BufferSet& in, nframes_t nframes)
 
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		BufferSet::iterator o = begin(*t);
-		for (BufferSet::iterator i = in.begin(*t); i != in.end(*t) && o != end (*t); ++i, ++o) {
+		for (BufferSet::const_iterator i = in.begin(*t); i != in.end(*t) && o != end (*t); ++i, ++o) {
 			o->merge_from (*i, nframes);
 		}
 	}
