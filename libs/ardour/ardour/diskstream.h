@@ -131,7 +131,7 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	/* Stateful */
 	virtual XMLNode& get_state(void) = 0;
 	virtual int      set_state(const XMLNode&, int version) = 0;
-	
+
 	virtual void monitor_input (bool) {}
 
 	nframes_t    capture_offset() const { return _capture_offset; }
@@ -245,6 +245,9 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	virtual void set_align_style_from_io() {}
 	virtual void setup_destructive_playlist () {}
 	virtual void use_destructive_playlist () {}
+
+	void calculate_record_range(OverlapType ot, sframes_t transport_frame, nframes_t nframes,
+			nframes_t& rec_nframes, nframes_t& rec_offset);
 
 	static nframes_t disk_io_chunk_frames;
 	std::vector<CaptureInfo*>  capture_info;

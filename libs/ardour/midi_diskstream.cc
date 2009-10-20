@@ -528,49 +528,9 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_
 	adjust_capture_position = 0;
 
 	if (nominally_recording || (_session.get_record_enabled() && _session.config.get_punch_in())) {
-		OverlapType ot;
+		OverlapType ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
 
-		ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
-
-		switch (ot) {
-			case OverlapNone:
-				rec_nframes = 0;
-				break;
-
-			case OverlapInternal:
-				/*     ----------    recrange
-					   |---|       transrange
-					   */
-				rec_nframes = nframes;
-				rec_offset = 0;
-				break;
-
-			case OverlapStart:
-				/*    |--------|    recrange
-					  -----|          transrange
-					  */
-				rec_nframes = transport_frame + nframes - first_recordable_frame;
-				if (rec_nframes) {
-					rec_offset = first_recordable_frame - transport_frame;
-				}
-				break;
-
-			case OverlapEnd:
-				/*    |--------|    recrange
-					  |--------  transrange
-					  */
-				rec_nframes = last_recordable_frame - transport_frame;
-				rec_offset = 0;
-				break;
-
-			case OverlapExternal:
-				/*    |--------|    recrange
-					  --------------  transrange
-					  */
-				rec_nframes = last_recordable_frame - last_recordable_frame;
-				rec_offset = first_recordable_frame - transport_frame;
-				break;
-		}
+		calculate_record_range(ot, transport_frame, nframes, rec_nframes, rec_offset);
 
 		if (rec_nframes && !was_recording) {
 			capture_captured = 0;
