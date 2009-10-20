@@ -413,7 +413,9 @@ void
 XMLNode::remove_property(const string& n)
 {
 	if (_propmap.find(n) != _propmap.end()) {
-		_proplist.remove(_propmap[n]);
+		XMLProperty* p = _propmap[n];
+		_proplist.remove (p);
+		delete p;
 		_propmap.erase(n);
 	}
 }
