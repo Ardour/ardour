@@ -165,7 +165,6 @@ class MidiDiskstream : public Diskstream
 	int use_pending_capture_data (XMLNode& node);
 
 	void get_input_sources ();
-	void check_record_status (nframes_t transport_frame, nframes_t nframes, bool can_record);
 	void set_align_style_from_io();
 
 	void engage_record_enable ();

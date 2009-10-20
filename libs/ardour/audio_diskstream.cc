@@ -388,128 +388,27 @@ AudioDiskstream::use_destructive_playlist ()
 }
 
 void
-AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t /*nframes*/, bool can_record)
+AudioDiskstream::prepare_record_status(nframes_t capture_start_frame)
 {
-	int possibly_recording;
-	int rolling;
-	int change;
-	const int transport_rolling = 0x4;
-	const int track_rec_enabled = 0x2;
-	const int global_rec_enabled = 0x1;
+	if (recordable() && destructive()) {
+		boost::shared_ptr<ChannelList> c = channels.reader();
+		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 
-	/* merge together the 3 factors that affect record status, and compute
-	   what has changed.
-	*/
+			RingBufferNPT<CaptureTransition>::rw_vector transvec;
+			(*chan)->capture_transition_buf->get_write_vector(&transvec);
 
-	rolling = _session.transport_speed() != 0.0f;
-	possibly_recording = (rolling << 2) | (record_enabled() << 1) | can_record;
-	change = possibly_recording ^ last_possibly_recording;
-
-	if (possibly_recording == last_possibly_recording) {
-		return;
-	}
-
-	/* change state */
-
-	/* if per-track or global rec-enable turned on while the other was already on, we've started recording */
-
-	if (((change & track_rec_enabled) && record_enabled() && (!(change & global_rec_enabled) && can_record)) ||
-	    ((change & global_rec_enabled) && can_record && (!(change & track_rec_enabled) && record_enabled()))) {
-
-		/* starting to record: compute first+last frames */
-
-		first_recordable_frame = transport_frame + _capture_offset;
-		last_recordable_frame = max_frames;
-		capture_start_frame = transport_frame;
-
-		if (!(last_possibly_recording & transport_rolling) && (possibly_recording & transport_rolling)) {
-
-			/* was stopped, now rolling (and recording) */
-
-			if (_alignment_style == ExistingMaterial) {
-				first_recordable_frame += _session.worst_output_latency();
-			} else {
-				first_recordable_frame += _roll_delay;
+			if (transvec.len[0] > 0) {
+				transvec.buf[0]->type = CaptureStart;
+				transvec.buf[0]->capture_val = capture_start_frame;
+				(*chan)->capture_transition_buf->increment_write_ptr(1);
 			}
-
-		} else {
-
-			/* was rolling, but record state changed */
-
-			if (_alignment_style == ExistingMaterial) {
-
-				if (!_session.config.get_punch_in()) {
-
-					/* manual punch in happens at the correct transport frame
-					   because the user hit a button. but to get alignment correct
-					   we have to back up the position of the new region to the
-					   appropriate spot given the roll delay.
-					*/
-
-					capture_start_frame -= _roll_delay;
-
-					/* XXX paul notes (august 2005): i don't know why
-					   this is needed.
-					*/
-
-					first_recordable_frame += _capture_offset;
-
-				} else {
-
-					/* autopunch toggles recording at the precise
-					   transport frame, and then the DS waits
-					   to start recording for a time that depends
-					   on the output latency.
-					*/
-
-					first_recordable_frame += _session.worst_output_latency();
-				}
-
-			} else {
-
-				if (_session.config.get_punch_in()) {
-					first_recordable_frame += _roll_delay;
-				} else {
-					capture_start_frame -= _roll_delay;
-				}
+			else {
+				// bad!
+				fatal << X_("programming error: capture_transition_buf is full on rec start!  inconceivable!")
+					<< endmsg;
 			}
-
-		}
-
-		if (recordable() && destructive()) {
-			boost::shared_ptr<ChannelList> c = channels.reader();
-			for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-
-				RingBufferNPT<CaptureTransition>::rw_vector transvec;
-				(*chan)->capture_transition_buf->get_write_vector(&transvec);
-
-				if (transvec.len[0] > 0) {
-					transvec.buf[0]->type = CaptureStart;
-					transvec.buf[0]->capture_val = capture_start_frame;
-					(*chan)->capture_transition_buf->increment_write_ptr(1);
-				}
-				else {
-					// bad!
-					fatal << X_("programming error: capture_transition_buf is full on rec start!  inconceivable!")
-					      << endmsg;
-				}
-			}
-		}
-
-	} else if (!record_enabled() || !can_record) {
-
-		/* stop recording */
-
-		last_recordable_frame = transport_frame + _capture_offset;
-
-		if (_alignment_style == ExistingMaterial) {
-			last_recordable_frame += _session.worst_output_latency();
-		} else {
-			last_recordable_frame += _roll_delay;
 		}
 	}
-
-	last_possibly_recording = possibly_recording;
 }
 
 int

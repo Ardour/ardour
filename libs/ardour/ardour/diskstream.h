@@ -240,7 +240,8 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	virtual int use_pending_capture_data (XMLNode& node) = 0;
 
 	virtual void get_input_sources () = 0;
-	virtual void check_record_status (nframes_t transport_frame, nframes_t nframes, bool can_record) = 0;
+	virtual void check_record_status (nframes_t transport_frame, nframes_t nframes, bool can_record);
+	virtual void prepare_record_status (nframes_t /*capture_start_frame*/) {}
 	virtual void set_align_style_from_io() {}
 	virtual void setup_destructive_playlist () {}
 	virtual void use_destructive_playlist () {}
