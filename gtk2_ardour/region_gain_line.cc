@@ -45,6 +45,7 @@ AudioRegionGainLine::AudioRegionGainLine (const string & name, Session& s, Audio
 	assert(l->parameter().type() == EnvelopeAutomation);
 
 	group->raise_to_top ();
+	group->property_y() = 2;
 	set_uses_gain_mapping (true);
 	terminal_points_can_slide = false;
 }

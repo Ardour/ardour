@@ -494,7 +494,7 @@ AudioRegionView::set_height (gdouble height)
 				gain_line->show ();
 			}
 		}
-		gain_line->set_height ((uint32_t) rint (height - NAME_HIGHLIGHT_SIZE));
+		gain_line->set_height ((uint32_t) rint (height - NAME_HIGHLIGHT_SIZE - 2));
 	}
 
 	manage_zero_line ();
