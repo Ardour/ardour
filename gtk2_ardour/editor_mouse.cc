@@ -3727,12 +3727,7 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		bool x_move_allowed;
 		
 		if (Config->get_edit_mode() == Lock) {
-			if (drag_info.copy) {
-				x_move_allowed = !drag_info.x_constrained;
-			} else {
-				/* in locked edit mode, reverse the usual meaning of x_constrained */
-				x_move_allowed = drag_info.x_constrained;
-			}
+			x_move_allowed = drag_info.x_constrained;
 		} else {
 			x_move_allowed = !drag_info.x_constrained;
 		}
@@ -3979,7 +3974,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 	   the drag.
 	*/
 	
-	if (Config->get_edit_mode() == Lock && !drag_info.copy) {
+	if (Config->get_edit_mode() == Lock) {
 		drag_info.x_constrained = !drag_info.x_constrained;
 	}
 
