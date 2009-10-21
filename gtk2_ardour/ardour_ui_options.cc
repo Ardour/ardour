@@ -436,13 +436,85 @@ ARDOUR_UI::toggle_punch ()
 void
 ARDOUR_UI::toggle_punch_in ()
 {
-	ActionManager::toggle_config_state ("Transport", "TogglePunchIn", &Configuration::set_punch_in, &Configuration::get_punch_in);
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("TogglePunchIn"));
+	if (!act) {
+		return;
+	}
+
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	if (!tact) {
+		return;
+	}
+
+	if (tact->get_active() != Config->get_punch_in()) {
+		Config->set_punch_in (tact->get_active ());
+	}
+
+	if (tact->get_active()) {
+		/* if punch-in is turned on, make sure the loop/punch ruler is visible, and stop it being hidden,
+		   to avoid confusing the user */
+		show_loop_punch_ruler_and_disallow_hide ();
+	}
+
+	reenable_hide_loop_punch_ruler_if_appropriate ();
 }
 
 void
 ARDOUR_UI::toggle_punch_out ()
 {
-	ActionManager::toggle_config_state ("Transport", "TogglePunchOut", &Configuration::set_punch_out, &Configuration::get_punch_out);
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Transport"), X_("TogglePunchOut"));
+	if (!act) {
+		return;
+	}
+
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	if (!tact) {
+		return;
+	}
+
+	if (tact->get_active() != Config->get_punch_out()) {
+		Config->set_punch_out (tact->get_active ());
+	}
+
+	if (tact->get_active()) {
+		/* if punch-out is turned on, make sure the loop/punch ruler is visible, and stop it being hidden,
+		   to avoid confusing the user */
+		show_loop_punch_ruler_and_disallow_hide ();
+	}
+	reenable_hide_loop_punch_ruler_if_appropriate ();
+}
+
+void
+ARDOUR_UI::show_loop_punch_ruler_and_disallow_hide ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Rulers"), "toggle-loop-punch-ruler");
+	if (!act) {
+		return;
+	}
+
+	act->set_sensitive (false);
+	
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	if (!tact) {
+		return;
+	}
+	
+	if (!tact->get_active()) {
+		tact->set_active ();
+	}
+}
+
+/* This is a bit of a silly name for a method */
+void
+ARDOUR_UI::reenable_hide_loop_punch_ruler_if_appropriate ()
+{
+	if (!Config->get_punch_in() && !Config->get_punch_out()) {
+		/* if punch in/out are now both off, reallow hiding of the loop/punch ruler */
+		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Rulers"), "toggle-loop-punch-ruler");
+		if (act) {
+			act->set_sensitive (true);
+		}
+	}
 }
 
 void
