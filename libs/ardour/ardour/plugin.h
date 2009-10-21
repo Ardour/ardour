@@ -136,7 +136,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool parameter_is_input(uint32_t) const = 0;
 	virtual bool parameter_is_output(uint32_t) const = 0;
 
-	virtual bool save_preset (std::string uri) = 0;
+	virtual bool save_preset (std::string) = 0;
 	virtual bool load_preset (const std::string uri);
 
 	struct PresetRecord {
@@ -191,7 +191,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 
 	virtual void set_parameter (uint32_t which, float val) = 0;
 
-	bool save_preset (std::string uri, std::string domain /* vst, ladspa etc. */);
+	bool save_preset (std::string, std::string /* vst, ladspa etc. */);
 
 	ARDOUR::AudioEngine&     _engine;
 	ARDOUR::Session&         _session;

@@ -161,7 +161,7 @@ Plugin::load_preset(const string preset_uri)
 }
 
 bool
-Plugin::save_preset (string uri, string domain)
+Plugin::save_preset (string name, string domain)
 {
 	lrdf_portvalue portvalues[parameter_count()];
 	lrdf_defaults defaults;
@@ -197,12 +197,12 @@ Plugin::save_preset (string uri, string domain)
 
 	string source(string_compose("file:%1/.%2/rdf/ardour-presets.n3", envvar, domain));
 
-	map<string,PresetRecord>::const_iterator pr = presets.find(uri);
-	if (pr == presets.end()) {
-		warning << _("Could not find preset ") << uri << endmsg;
-		return false;
-	}
-	free(lrdf_add_preset(source.c_str(), pr->second.label.c_str(), id,  &defaults));
+	char* uri = lrdf_add_preset (source.c_str(), name.c_str(), id, &defaults);
+	
+	/* XXX: why is the uri apparently kept as the key in the `presets' map and also in the PresetRecord? */
+
+	presets.insert (make_pair (uri, PresetRecord (uri, name)));
+	free (uri);
 
 	string path = string_compose("%1/.%2", envvar, domain);
 	if (g_mkdir_with_parents (path.c_str(), 0775)) {
