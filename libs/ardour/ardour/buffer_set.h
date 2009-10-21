@@ -109,54 +109,11 @@ public:
 	void read_from(const BufferSet& in, nframes_t nframes);
 	void merge_from(const BufferSet& in, nframes_t nframes);
 
-	// ITERATORS
-	// FIXME: possible to combine these?  templates?
-
-	class audio_iterator {
-	public:
-		AudioBuffer& operator*()  { return _set.get_audio(_index); }
-		AudioBuffer* operator->() { return &_set.get_audio(_index); }
-		audio_iterator& operator++() { ++_index; return *this; } // yes, prefix only
-		bool operator==(const audio_iterator& other) { return (_index == other._index); }
-		bool operator!=(const audio_iterator& other) { return (_index != other._index); }
-
-	private:
-		friend class BufferSet;
-
-		audio_iterator(BufferSet& list, size_t index) : _set(list), _index(index) {}
-
-		BufferSet& _set;
-		size_t    _index;
-	};
-
-	audio_iterator audio_begin() { return audio_iterator(*this, 0); }
-	audio_iterator audio_end()   { return audio_iterator(*this, _count.n_audio()); }
-
-	class midi_iterator {
-	public:
-		MidiBuffer& operator*()  { return _set.get_midi(_index); }
-		MidiBuffer* operator->() { return &_set.get_midi(_index); }
-		midi_iterator& operator++() { ++_index; return *this; } // yes, prefix only
-		bool operator==(const midi_iterator& other) { return (_index == other._index); }
-		bool operator!=(const midi_iterator& other) { return (_index != other._index); }
-
-	private:
-		friend class BufferSet;
-
-		midi_iterator(BufferSet& list, size_t index) : _set(list), _index(index) {}
-
-		BufferSet& _set;
-		size_t    _index;
-	};
-
-	midi_iterator midi_begin() { return midi_iterator(*this, 0); }
-	midi_iterator midi_end()   { return midi_iterator(*this, _count.n_midi()); }
-
 	template <typename BS, typename B>
 	class iterator_base {
 	public:
-		B& operator*()  { return _set.get(_type, _index); }
-		B* operator->() { return &_set.get(_type, _index); }
+		B& operator*()  { return (B&)_set.get(_type, _index); }
+		B* operator->() { return &(B&)_set.get(_type, _index); }
 		iterator_base<BS,B>& operator++() { ++_index; return *this; } // yes, prefix only
 		bool operator==(const iterator_base<BS,B>& other) { return (_index == other._index); }
 		bool operator!=(const iterator_base<BS,B>& other) { return (_index != other._index); }
@@ -170,18 +127,26 @@ public:
 		iterator_base(BS& list, DataType type, size_t index)
 			: _set(list), _type(type), _index(index) {}
 
-		BS&       _set;
+		BS&      _set;
 		DataType _type;
 		size_t   _index;
 	};
 
-	typedef iterator_base<BufferSet, Buffer>             iterator;
-	typedef iterator_base<const BufferSet, const Buffer> const_iterator;
+	typedef iterator_base<BufferSet, Buffer> iterator;
+	iterator begin(DataType type) { return iterator(*this, type, 0); }
+	iterator end(DataType type)   { return iterator(*this, type, _count.get(type)); }
 
-	iterator       begin(DataType type)       { return iterator(*this, type, 0); }
-	iterator       end(DataType type)         { return iterator(*this, type, _count.get(type)); }
+	typedef iterator_base<const BufferSet, const Buffer> const_iterator;
 	const_iterator begin(DataType type) const { return const_iterator(*this, type, 0); }
 	const_iterator end(DataType type)   const { return const_iterator(*this, type, _count.get(type)); }
+
+	typedef iterator_base<BufferSet, AudioBuffer> audio_iterator;
+	audio_iterator audio_begin() { return audio_iterator(*this, DataType::AUDIO, 0); }
+	audio_iterator audio_end()   { return audio_iterator(*this, DataType::AUDIO, _count.n_audio()); }
+
+	typedef iterator_base<BufferSet, MidiBuffer> midi_iterator;
+	midi_iterator midi_begin() { return midi_iterator(*this, DataType::MIDI, 0); }
+	midi_iterator midi_end()   { return midi_iterator(*this, DataType::MIDI, _count.n_midi()); }
 
 private:
 	typedef std::vector<Buffer*> BufferVec;
