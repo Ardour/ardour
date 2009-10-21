@@ -44,6 +44,7 @@ AudioRegionGainLine::AudioRegionGainLine (const string & name, Session& s, Audio
 	  rv (r)
 {
 	group->raise_to_top ();
+	group->property_y() = 2;
 	set_verbose_cursor_uses_gain_mapping (true);
 	terminal_points_can_slide = false;
 }
