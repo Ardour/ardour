@@ -22,6 +22,11 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 
+#ifdef DEBUG_MIDI_CLOCK
+#include <iostream>
+using namespace std;
+#endif
+
 namespace ARDOUR
 {
 
@@ -30,7 +35,7 @@ void Ticker::set_session(Session& s)
 {
 	 _session = &s;
 
-	 if(_session) {
+	 if (_session) {
 		 _session->tick.connect(mem_fun (*this, &Ticker::tick));
 		 _session->GoingAway.connect(mem_fun (*this, &Ticker::going_away));
 	 }
@@ -40,11 +45,15 @@ void MidiClockTicker::set_session(Session& s)
 {
 	 Ticker::set_session(s);
 
-	 if(_session) {
-		 _session->MIDIClock_PortChanged.connect(mem_fun (*this, &MidiClockTicker::update_midi_clock_port));
-		 _session->TransportStateChange .connect(mem_fun (*this, &MidiClockTicker::transport_state_changed));
-		 _session->PositionChanged      .connect(mem_fun (*this, &MidiClockTicker::position_changed));
-		 _session->TransportLooped      .connect(mem_fun (*this, &MidiClockTicker::transport_looped));
+	 if (_session) {
+		 _session->MIDIClock_PortChanged.connect(
+				 mem_fun (*this, &MidiClockTicker::update_midi_clock_port));
+		 _session->TransportStateChange.connect(
+				 mem_fun (*this, &MidiClockTicker::transport_state_changed));
+		 _session->PositionChanged.connect(
+				 mem_fun (*this, &MidiClockTicker::position_changed));
+		 _session->TransportLooped.connect(
+				 mem_fun (*this, &MidiClockTicker::transport_looped));
 		 update_midi_clock_port();
 	 }
 }
@@ -61,8 +70,8 @@ void MidiClockTicker::transport_state_changed()
 		return;
 	}
 
-	float     speed     = _session->transport_speed();
-	nframes_t position  = _session->transport_frame();
+	float     speed    = _session->transport_speed();
+	nframes_t position = _session->transport_frame();
 #ifdef DEBUG_MIDI_CLOCK
 	cerr << "Transport state change, speed:" << speed << "position:" << position<< " play loop " << _session->get_play_loop() << endl;
 #endif
