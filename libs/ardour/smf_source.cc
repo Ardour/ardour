@@ -239,8 +239,8 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, sframes_t position
 		ev.set(buf, size, time);
 		ev.set_event_type(EventTypeMap::instance().midi_event_type(ev.buffer()[0]));
 		if (!(ev.is_channel_event() || ev.is_smf_meta_event() || ev.is_sysex())) {
-			cerr << "SMFSource: WARNING: caller tried to write non SMF-Event of type "
-					<< std::hex << int(ev.buffer()[0]) << endl;
+			/*cerr << "SMFSource: WARNING: caller tried to write non SMF-Event of type "
+					<< std::hex << int(ev.buffer()[0]) << endl;*/
 			continue;
 		}
 

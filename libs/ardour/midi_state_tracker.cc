@@ -48,19 +48,18 @@ MidiStateTracker::track_note_onoffs (const Evoral::MIDIEvent<MidiBuffer::TimeTyp
 		}
 	}
 }
+
 void
 MidiStateTracker::add (uint8_t note, uint8_t chn)
 {
-	cerr << "Added note " << note << " chan " << chn << endl;
-	_active_notes[note + 128 * chn]++;
+	++_active_notes[note + 128 * chn];
 }
 
 void
 MidiStateTracker::remove (uint8_t note, uint8_t chn)
 {
 	if (_active_notes[note + 128 * chn]) {
-		cerr << "Removed note " << note << " chan " << chn << endl;
-		_active_notes[note + 128 * chn]--;
+		--_active_notes[note + 128 * chn];
 	}
 }
 

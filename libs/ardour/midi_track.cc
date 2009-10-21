@@ -523,16 +523,14 @@ void
 MidiTrack::write_out_of_band_data (BufferSet& bufs, sframes_t /*start*/, sframes_t /*end*/, nframes_t nframes)
 {
 	// Append immediate events
-
 	MidiBuffer& buf (bufs.get_midi (0));
 	_immediate_events.read (buf, 0, 0, nframes - 1); // all stamps = 0
 
-	/* MIDI thru: send incoming data "through" output */
+	// MIDI thru: send incoming data "through" output
 	if (_midi_thru && _input->n_ports().n_midi()) {
 		buf.merge_in_place (_input->midi(0)->get_midi_buffer(nframes));
 	}
 }
-
 
 int
 MidiTrack::export_stuff (BufferSet& /*bufs*/, nframes_t /*nframes*/, sframes_t /*end_frame*/)
