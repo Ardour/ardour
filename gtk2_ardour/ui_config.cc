@@ -221,7 +221,7 @@ UIConfiguration::get_variables (std::string which_node)
 }
 
 int
-UIConfiguration::set_state (const XMLNode& root, int version)
+UIConfiguration::set_state (const XMLNode& root, int /*version*/)
 {
 	if (root.name() != "Ardour") {
 		return -1;

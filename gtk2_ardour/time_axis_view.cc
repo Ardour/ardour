@@ -1001,7 +1001,7 @@ TimeAxisView::get_state ()
 }
 
 int
-TimeAxisView::set_state (const XMLNode& node, int version)
+TimeAxisView::set_state (const XMLNode& node, int /*version*/)
 {
 	const XMLProperty *prop;
 

@@ -739,7 +739,7 @@ IO::find_possible_bundle (const string &desired_name)
 }
 
 int
-IO::get_port_counts_2X (XMLNode const & node, int version, ChanCount& n, boost::shared_ptr<Bundle>& c)
+IO::get_port_counts_2X (XMLNode const & node, int /*version*/, ChanCount& n, boost::shared_ptr<Bundle>& /*c*/)
 {
 	XMLProperty const * prop;
 	XMLNodeList children = node.children ();
@@ -892,7 +892,7 @@ IO::make_connections (const XMLNode& node, int version, bool in)
 
 
 int
-IO::make_connections_2X (const XMLNode& node, int version, bool in)
+IO::make_connections_2X (const XMLNode& node, int /*version*/, bool in)
 {
 	const XMLProperty* prop;
 

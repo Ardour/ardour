@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Hans Baier 
+    Copyright (C) 2008 Hans Baier
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ void initialize_primary_key_from_commands (PatchPrimaryKey& id, const XMLNode* n
 			assert(control != "");
 			string value = node->property("Value")->value();
 			assert(value != "");
-			
+
 			if (control == "0") {
 				id.msb = PBD::atoi(value);
 			} else if (control == "32") {
@@ -77,13 +77,13 @@ void initialize_primary_key_from_commands (PatchPrimaryKey& id, const XMLNode* n
 
 
 int
-Patch::set_state (const XMLNode& node, int version)
+Patch::set_state (const XMLNode& node, int /*version*/)
 {
 	assert(node.name() == "Patch");
 	_number = node.property("Number")->value();
 	_name   = node.property("Name")->value();
 	XMLNode* commands = node.child("PatchMIDICommands");
-	
+
 	if (commands) {
 		initialize_primary_key_from_commands(_id, commands);
 	} else {
@@ -101,7 +101,7 @@ Patch::set_state (const XMLNode& node, int version)
 	cerr << "deserialized Patch: name: " <<  _name << " msb: " << _id.msb << " lsb: " << _id.lsb << " program " << _id.program_number << endl;
 	// TODO: handle that more gracefully
 	assert(_id.is_sane());
-	
+
 	return 0;
 }
 
@@ -116,7 +116,7 @@ Note::get_state (void)
 }
 
 int
-Note::set_state (const XMLNode& node, int version)
+Note::set_state (const XMLNode& node, int /*version*/)
 {
 	assert(node.name() == "Note");
 	_number = node.property("Number")->value();
@@ -147,7 +147,7 @@ NoteNameList::set_state (const XMLNode& node, int version)
 		note->set_state(*(*i), version);
 		_notes.push_back(note);
 	}
-	
+
 	return 0;
 }
 
@@ -178,7 +178,7 @@ PatchBank::set_state (const XMLNode& node, int version)
 		_id = new PatchPrimaryKey();
 		initialize_primary_key_from_commands(*_id, commands);
 	}
-	
+
 	XMLNode* patch_name_list = node.child("PatchNameList");
 	assert(patch_name_list);
 	const XMLNodeList patches = patch_name_list->children();
@@ -187,7 +187,7 @@ PatchBank::set_state (const XMLNode& node, int version)
 		patch->set_state(*(*i), version);
 		_patch_name_list.push_back(patch);
 	}
-	
+
 	return 0;
 }
 
@@ -245,7 +245,7 @@ ChannelNameSet::set_state (const XMLNode& node, int version)
 				// cerr << "AvailableForChannels after insert" << endl;
 			}
 		}
-		
+
 		// cerr << "before PatchBank" << endl;
 
 		if (node->name() == "PatchBank") {
@@ -263,19 +263,19 @@ ChannelNameSet::set_state (const XMLNode& node, int version)
 			// cerr << "after PatchBank pushback" << endl;
 		}
 	}
-	
+
 	// cerr << "ChannelnameSet done" << endl;
 
 	return 0;
 }
 
 int
-CustomDeviceMode::set_state(const XMLNode& a_node, int version)
+CustomDeviceMode::set_state(const XMLNode& a_node, int /*version*/)
 {
 	assert(a_node.name() == "CustomDeviceMode");
-	
+
 	_name = a_node.property("Name")->value();
-	
+
 	boost::shared_ptr<XMLSharedNodeList> channel_name_set_assignments =
 		a_node.find("//ChannelNameSetAssign");
 	for(XMLSharedNodeList::const_iterator i = channel_name_set_assignments->begin();
@@ -294,15 +294,15 @@ CustomDeviceMode::get_state(void)
 {
 	XMLNode* custom_device_mode = new XMLNode("CustomDeviceMode");
 	custom_device_mode->add_property("Name",   _name);
-	XMLNode* channel_name_set_assignments = 
+	XMLNode* channel_name_set_assignments =
 		custom_device_mode->add_child("ChannelNameSetAssignments");
 	for (int i = 0; i < 15 && !_channel_name_set_assignments[i].empty(); i++) {
-		XMLNode* channel_name_set_assign = 
+		XMLNode* channel_name_set_assign =
 			channel_name_set_assignments->add_child("ChannelNameSetAssign");
 		channel_name_set_assign->add_property("Channel", i + 1);
 		channel_name_set_assign->add_property("NameSet", _channel_name_set_assignments[i]);
 	}
-	
+
 	return *custom_device_mode;
 }
 
@@ -337,7 +337,7 @@ MasterDeviceNames::set_state(const XMLNode& a_node, int version)
 	     ++i) {
 		boost::shared_ptr<CustomDeviceMode> custom_device_mode(new CustomDeviceMode());
 		custom_device_mode->set_state(*(*i), version);
-		
+
 		_custom_device_modes[custom_device_mode->name()] = custom_device_mode;
 		_custom_device_mode_names.push_back(custom_device_mode->name());
 	}
@@ -376,9 +376,9 @@ MasterDeviceNames::get_state(void)
 }
 
 MIDINameDocument::MIDINameDocument (const string& filename)
-	: _document(XMLTree(filename)) 
-{ 
-	set_state(*_document.root(), 0); 
+	: _document(XMLTree(filename))
+{
+	set_state(*_document.root(), 0);
 }
 
 int
@@ -388,7 +388,7 @@ MIDINameDocument::set_state(const XMLNode& a_node, int version)
 	boost::shared_ptr<XMLSharedNodeList> author = a_node.find("//Author");
 	assert(author->size() == 1);
 	_author = author->front()->content();
-	
+
 	// cerr << "MIDINameDocument::set_state befor masterdevicenames" << endl;
 	// MasterDeviceNames
 	boost::shared_ptr<XMLSharedNodeList> master_device_names_list = a_node.find("//MasterDeviceNames");
@@ -399,7 +399,7 @@ MIDINameDocument::set_state(const XMLNode& a_node, int version)
 		// cerr << "MIDINameDocument::set_state before masterdevicenames->set_state" << endl;
 		master_device_names->set_state(*(*i), version);
 		// cerr << "MIDINameDocument::set_state after masterdevicenames->set_state" << endl;
-		
+
 		for (MasterDeviceNames::Models::const_iterator model = master_device_names->models().begin();
 		     model != master_device_names->models().end();
 		     ++model) {
@@ -407,11 +407,11 @@ MIDINameDocument::set_state(const XMLNode& a_node, int version)
 				_master_device_names_list.insert(
 						std::pair<std::string, boost::shared_ptr<MasterDeviceNames> >
 						         (*model,      master_device_names));
-				
+
 				_all_models.push_back(*model);
 		}
 	}
-	
+
 	return 0;
 }
 

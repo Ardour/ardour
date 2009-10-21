@@ -172,7 +172,7 @@ StreamPanner::set_position (float xpos, float ypos, float zpos, bool link_call)
 }
 
 int
-StreamPanner::set_state (const XMLNode& node, int version)
+StreamPanner::set_state (const XMLNode& node, int /*version*/)
 {
 	const XMLProperty* prop;
 	XMLNodeConstIterator iter;
@@ -730,7 +730,7 @@ Multi2dPanner::state (bool /*full_state*/)
 }
 
 int
-Multi2dPanner::set_state (const XMLNode& node, int version)
+Multi2dPanner::set_state (const XMLNode& node, int /*version*/)
 {
 	const XMLProperty* prop;
 	float newx,newy;

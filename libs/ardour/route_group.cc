@@ -136,7 +136,7 @@ RouteGroup::get_state (void)
 	return *node;
 }
 
-int 
+int
 RouteGroup::set_state (const XMLNode& node, int version)
 {
 	if (version < 3000) {
@@ -161,14 +161,14 @@ RouteGroup::set_state (const XMLNode& node, int version)
 }
 
 int
-RouteGroup::set_state_2X (const XMLNode& node, int version)
+RouteGroup::set_state_2X (const XMLNode& node, int /*version*/)
 {
 	XMLProperty const * prop;
-	
+
 	if ((prop = node.property ("name")) != 0) {
 		_name = prop->value();
 	}
-	
+
 	if ((prop = node.property ("flags")) != 0) {
 		_flags = Flag (string_2_enum (prop->value(), _flags));
 	}

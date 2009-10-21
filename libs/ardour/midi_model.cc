@@ -260,7 +260,7 @@ MidiModel::DeltaCommand::unmarshal_note(XMLNode *xml_note)
 #define DELTA_COMMAND_ELEMENT "DeltaCommand"
 
 int
-MidiModel::DeltaCommand::set_state (const XMLNode& delta_command, int version)
+MidiModel::DeltaCommand::set_state (const XMLNode& delta_command, int /*version*/)
 {
 	if (delta_command.name() != string(DELTA_COMMAND_ELEMENT)) {
 		return 1;
@@ -646,7 +646,7 @@ MidiModel::DiffCommand::unmarshal_change(XMLNode *xml_change)
 }
 
 int
-MidiModel::DiffCommand::set_state(const XMLNode& diff_command, int version)
+MidiModel::DiffCommand::set_state(const XMLNode& diff_command, int /*version*/)
 {
 	if (diff_command.name() != string(DIFF_COMMAND_ELEMENT)) {
 		return 1;

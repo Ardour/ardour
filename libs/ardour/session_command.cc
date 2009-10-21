@@ -170,7 +170,7 @@ Session::GlobalRouteStateCommand::GlobalRouteStateCommand (Session& s, const XML
 }
 
 int
-Session::GlobalRouteStateCommand::set_state (const XMLNode& node, int version)
+Session::GlobalRouteStateCommand::set_state (const XMLNode& node, int /*version*/)
 {
 	GlobalRouteBooleanState states;
 	XMLNodeList nlist;
@@ -483,7 +483,7 @@ Session::GlobalMeteringStateCommand::get_state()
 }
 
 int
-Session::GlobalMeteringStateCommand::set_state (const XMLNode& node, int version)
+Session::GlobalMeteringStateCommand::set_state (const XMLNode& node, int /*version*/)
 {
 	GlobalRouteBooleanState states;
 	XMLNodeList nlist;

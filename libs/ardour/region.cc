@@ -1174,7 +1174,7 @@ Region::get_state ()
 }
 
 int
-Region::set_live_state (const XMLNode& node, int version, Change& what_changed, bool send)
+Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_changed, bool send)
 {
 	const XMLNodeList& nlist = node.children();
 	const XMLProperty *prop;

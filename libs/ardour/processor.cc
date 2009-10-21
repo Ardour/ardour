@@ -145,7 +145,7 @@ Processor::state (bool full_state)
 }
 
 int
-Processor::set_state_2X (const XMLNode & node, int version)
+Processor::set_state_2X (const XMLNode & node, int /*version*/)
 {
 	XMLProperty const * prop;
 

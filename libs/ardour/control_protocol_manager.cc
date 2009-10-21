@@ -288,7 +288,7 @@ ControlProtocolManager::cpi_by_name (string name)
 }
 
 int
-ControlProtocolManager::set_state (const XMLNode& node, int version)
+ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 {
 	XMLNodeList clist;
 	XMLNodeConstIterator citer;

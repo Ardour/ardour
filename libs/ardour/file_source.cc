@@ -104,7 +104,7 @@ FileSource::init (const ustring& pathstr, bool must_exist)
 }
 
 int
-FileSource::set_state (const XMLNode& node, int version)
+FileSource::set_state (const XMLNode& node, int /*version*/)
 {
 	const XMLProperty* prop;
 

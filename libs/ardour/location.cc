@@ -347,7 +347,7 @@ Location::get_state (void)
 }
 
 int
-Location::set_state (const XMLNode& node, int version)
+Location::set_state (const XMLNode& node, int /*version*/)
 {
 	const XMLProperty *prop;
 
@@ -674,7 +674,7 @@ Locations::get_state ()
 }
 
 int
-Locations::set_state (const XMLNode& node, int version)
+Locations::set_state (const XMLNode& node, int /*version*/)
 {
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;

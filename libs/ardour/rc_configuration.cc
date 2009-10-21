@@ -240,7 +240,7 @@ RCConfiguration::get_variables ()
 }
 
 int
-RCConfiguration::set_state (const XMLNode& root, int version)
+RCConfiguration::set_state (const XMLNode& root, int /*version*/)
 {
 	if (root.name() != "Ardour") {
 		return -1;

@@ -110,7 +110,7 @@ Source::get_state ()
 }
 
 int
-Source::set_state (const XMLNode& node, int version)
+Source::set_state (const XMLNode& node, int /*version*/)
 {
 	const XMLProperty* prop;
 

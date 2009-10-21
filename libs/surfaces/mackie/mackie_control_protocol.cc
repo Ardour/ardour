@@ -187,7 +187,7 @@ MackiePort & MackieControlProtocol::port_for_id( uint32_t index )
 		current_max += (*it)->strips();
 		if ( index < current_max ) return **it;
 	}
-	
+
 	// oops - no matching port
 	ostringstream os;
 	os << "No port for index " << index;
@@ -216,15 +216,15 @@ struct RouteByRemoteId
 MackieControlProtocol::Sorted MackieControlProtocol::get_sorted_routes()
 {
 	Sorted sorted;
-	
+
 	// fetch all routes
 	boost::shared_ptr<RouteList> routes = session->get_routes();
 	set<uint32_t> remote_ids;
-	
+
 	// routes with remote_id 0 should never be added
 	// TODO verify this with ardour devs
 	// remote_ids.insert( 0 );
-	
+
 	// sort in remote_id order, and exclude master, control and hidden routes
 	// and any routes that are already set.
 	for (RouteList::iterator it = routes->begin(); it != routes->end(); ++it )
@@ -255,7 +255,7 @@ void MackieControlProtocol::switch_banks( int initial )
 {
 	// DON'T prevent bank switch if initial == _current_initial_bank
 	// because then this method can't be used as a refresh
-	
+
 	// sanity checking
 	Sorted sorted = get_sorted_routes();
 	int delta = sorted.size() - route_table.size();
@@ -267,11 +267,11 @@ void MackieControlProtocol::switch_banks( int initial )
 		return;
 	}
 	_current_initial_bank = initial;
-	
+
 	// first clear the signals from old routes
 	// taken care of by the RouteSignal destructors
 	clear_route_signals();
-	
+
 	// now set the signals for new routes
 	if ( _current_initial_bank <= sorted.size() )
 	{
@@ -282,7 +282,7 @@ void MackieControlProtocol::switch_banks( int initial )
 #ifdef DEBUG
 		cout << "switch to " << _current_initial_bank << ", " << end_pos << endl;
 #endif
-		
+
 		// link routes to strips
 		uint32_t i = 0;
 		for ( ; it != end && it != sorted.end(); ++it, ++i )
@@ -298,7 +298,7 @@ void MackieControlProtocol::switch_banks( int initial )
 			// update strip from route
 			rs->notify_all();
 		}
-		
+
 		// create dead strips if there aren't enough routes to
 		// fill a bank
 		for ( ; i < route_table.size(); ++i )
@@ -309,7 +309,7 @@ void MackieControlProtocol::switch_banks( int initial )
 			port.write( builder.zero_strip( port, strip ) );
 		}
 	}
-	
+
 	// display the current start bank.
 	surface().display_bank_start( mcu_port(), builder, _current_initial_bank );
 }
@@ -317,17 +317,17 @@ void MackieControlProtocol::switch_banks( int initial )
 void MackieControlProtocol::zero_all()
 {
 	// TODO turn off SMPTE displays
-	
+
 	// zero all strips
 	for ( Surface::Strips::iterator it = surface().strips.begin(); it != surface().strips.end(); ++it )
 	{
 		MackiePort & port = port_for_id( (*it)->index() );
 		port.write( builder.zero_strip( port, **it ) );
 	}
-	
+
 	// and the master strip
 	mcu_port().write( builder.zero_strip( dynamic_cast<MackiePort&>( mcu_port() ), master_strip() ) );
-	
+
 	// turn off global buttons and leds
 	// global buttons are only ever on mcu_port, so we don't have
 	// to figure out which port.
@@ -355,29 +355,29 @@ int MackieControlProtocol::set_active( bool yn )
 			if ( yn )
 			{
 				// TODO what happens if this fails half way?
-				
+
 				// create MackiePorts
 				{
 					Glib::Mutex::Lock lock( update_mutex );
 					create_ports();
 				}
-				
+
 				// make sure the ports are being listened to
 				update_ports();
-				
+
 				// wait until poll thread is running, with ports to poll
 				// the mutex is only there because conditions require a mutex
 				{
 					Glib::Mutex::Lock lock( update_mutex );
 					while ( nfds == 0 ) update_cond.wait( update_mutex );
 				}
-				
+
 				// now initialise MackiePorts - ie exchange sysex messages
 				for( MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it )
 				{
 					(*it)->open();
 				}
-				
+
 				// wait until all ports are active
 				// TODO a more sophisticated approach would
 				// allow things to start up with only an MCU, even if
@@ -386,15 +386,15 @@ int MackieControlProtocol::set_active( bool yn )
 				{
 					(*it)->wait_for_init();
 				}
-				
+
 				// create surface object. This depends on the ports being
 				// correctly initialised
 				initialize_surface();
 				connect_session_signals();
-				
+
 				// yeehah!
 				_active = true;
-				
+
 				// send current control positions to surface
 				// must come after _active = true otherwise it won't run
 				update_surface();
@@ -450,13 +450,13 @@ bool MackieControlProtocol::handle_strip_button( Control & control, ButtonState 
 			//state = default_button_press( dynamic_cast<Button&>( control ) );
 		}
 	}
-	
+
 	if ( control.name() == "fader_touch" )
 	{
 		state = bs == press;
 		control.strip().gain().in_use( state );
 	}
-	
+
 	return state;
 }
 
@@ -541,7 +541,7 @@ void MackieControlProtocol::update_surface()
 		// do the initial bank switch to connect signals
 		// _current_initial_bank is initialised by set_state
 		switch_banks( _current_initial_bank );
-		
+
 		// create a RouteSignal for the master route
 
                boost::shared_ptr<Route> mr = master_route ();
@@ -550,10 +550,10 @@ void MackieControlProtocol::update_surface()
                        // update strip from route
                        master_route_signal->notify_all();
                }
-	       
+
 		// sometimes the jog wheel is a pot
 		surface().blank_jog_ring( mcu_port(), builder );
-		
+
 		// update global buttons and displays
 		notify_record_state_changed();
 		notify_transport_state_changed();
@@ -574,7 +574,7 @@ void MackieControlProtocol::connect_session_signals()
 	session->config.ParameterChanged.connect ( ( mem_fun (*this, &MackieControlProtocol::notify_parameter_changed) ) );
 	// receive rude solo changed
 	connections_back = session->SoloActive.connect( ( mem_fun (*this, &MackieControlProtocol::notify_solo_active_changed) ) );
-	
+
 	// make sure remote id changed signals reach here
 	// see also notify_route_added
 	Sorted sorted = get_sorted_routes();
@@ -603,7 +603,7 @@ void MackieControlProtocol::add_port( MIDI::Port & midi_port, int number )
 	{
 		MackiePort * sport = new MackiePort( *this, midi_port, number );
 		_ports.push_back( sport );
-		
+
 		connections_back = sport->init_event.connect(
 			sigc::bind (
 				mem_fun (*this, &MackieControlProtocol::handle_port_init)
@@ -624,7 +624,7 @@ void MackieControlProtocol::add_port( MIDI::Port & midi_port, int number )
 				, sport
 			)
 		);
-		
+
 		_ports_changed = true;
 	}
 }
@@ -645,7 +645,7 @@ void MackieControlProtocol::create_ports()
 		}
 		add_port( *midi_port, 0 );
 	}
-	
+
 	// open extender ports. Up to 9. Should be enough.
 	// could also use mm->get_midi_ports()
 	string ext_port_base = "mcu_xt_";
@@ -676,9 +676,9 @@ void MackieControlProtocol::initialize_surface()
 	{
 		strips += (*it)->strips();
 	}
-	
+
 	set_route_table_size( strips );
-	
+
 	// TODO same as code in mackie_port.cc
 	string emulation = ARDOUR::Config->get_mackie_emulation();
 	if ( emulation == "bcf" )
@@ -697,7 +697,7 @@ void MackieControlProtocol::initialize_surface()
 	}
 
 	_surface->init();
-	
+
 	// Connect events. Must be after route table otherwise there will be trouble
 	for( MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it )
 	{
@@ -712,10 +712,10 @@ void MackieControlProtocol::close()
 	// calls methods on objects that are deleted
 	_polling = false;
 	pthread_join( thread, 0 );
-	
+
 	// TODO disconnect port active/inactive signals
 	// Or at least put a lock here
-	
+
 	// disconnect global signals from Session
 	// TODO Since *this is a sigc::trackable, this shouldn't be necessary
 	// but it is for some reason
@@ -725,7 +725,7 @@ void MackieControlProtocol::close()
 		it->disconnect();
 	}
 #endif
-	
+
 	if ( _surface != 0 )
 	{
 		// These will fail if the port has gone away.
@@ -742,7 +742,7 @@ void MackieControlProtocol::close()
 			cout << "MackieControlProtocol::close caught exception: " << e.what() << endl;
 #endif
 		}
-		
+
 		for( MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it )
 		{
 			try
@@ -762,21 +762,21 @@ void MackieControlProtocol::close()
 #endif
 			}
 		}
-		
+
 		// disconnect routes from strips
 		clear_route_signals();
-		
+
 		delete _surface;
 		_surface = 0;
 	}
-	
+
 	// shut down MackiePorts
 	for( MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it )
 	{
 		delete *it;
 	}
 	_ports.clear();
-	
+
 	// this is done already in monitor_work. But it's here so we know.
 	delete[] pfd;
 	pfd = 0;
@@ -793,26 +793,26 @@ XMLNode & MackieControlProtocol::get_state()
 #ifdef DEBUG
 	cout << "MackieControlProtocol::get_state" << endl;
 #endif
-	
+
 	// add name of protocol
 	XMLNode* node = new XMLNode( X_("Protocol") );
 	node->add_property( X_("name"), _name );
-	
+
 	// add current bank
 	ostringstream os;
 	os << _current_initial_bank;
 	node->add_property( X_("bank"), os.str() );
-	
+
 	return *node;
 }
 
-int MackieControlProtocol::set_state (const XMLNode & node, int version)
+int MackieControlProtocol::set_state (const XMLNode & node, int /*version*/)
 {
 #ifdef DEBUG
 	cout << "MackieControlProtocol::set_state: active " << _active << endl;
 #endif
 	int retval = 0;
-	
+
 	// fetch current bank
 	if ( node.property( X_("bank") ) != 0 )
 	{
@@ -831,7 +831,7 @@ int MackieControlProtocol::set_state (const XMLNode & node, int version)
 			return -1;
 		}
 	}
-	
+
 	return retval;
 }
 
@@ -854,7 +854,7 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 				cerr << "Warning: index is " << index << " which is not in the route table, size: " << route_table.size() << endl;
 		}
 	}
-	
+
 	// This handles control element events from the surface
 	// the state of the controls on the surface is usually updated
 	// from UI events.
@@ -867,14 +867,14 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 			if ( route != 0 )
 			{
 				route->gain_control()->set_value( state.pos );
-				
+
 				// must echo bytes back to slider now, because
 				// the notifier only works if the fader is not being
 				// touched. Which it is if we're getting input.
 				port.write( builder.build_fader( (Fader&)control, state.pos ) );
 			}
 			break;
-			
+
 		case Control::type_button:
 			if ( control.group().is_strip() )
 			{
@@ -904,7 +904,7 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 				surface().handle_button( *this, state.button_state, dynamic_cast<Button&>( control ) );
 			}
 			break;
-			
+
 		// pot (jog wheel, external control)
 		case Control::type_pot:
 			if ( control.group().is_strip() )
@@ -917,14 +917,14 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 						// assume pan for now
 						float xpos;
 						route->panner()->streampanner (0).get_effective_position (xpos);
-						
+
 						// calculate new value, and trim
 						xpos += state.delta * state.sign;
 						if ( xpos > 1.0 )
 							xpos = 1.0;
 						else if ( xpos < 0.0 )
 							xpos = 0.0;
-						
+
 						route->panner()->streampanner (0).set_position( xpos );
 					}
 				}
@@ -946,7 +946,7 @@ void MackieControlProtocol::handle_control_event( SurfacePort & port, Control & 
 				}
 			}
 			break;
-			
+
 		default:
 			cout << "Control::type not handled: " << control.type() << endl;
 	}
@@ -1012,7 +1012,7 @@ void MackieControlProtocol::notify_active_changed (RouteSignal *)
 		cout << e.what() << endl;
 	}
 }
-	
+
 void MackieControlProtocol::notify_gain_changed( RouteSignal * route_signal, bool force_update )
 {
 	try
@@ -1044,7 +1044,7 @@ void MackieControlProtocol::notify_name_changed( RouteSignal * route_signal )
 		{
 			string line1;
 			string fullname = route_signal->route()->name();
-			
+
 			if ( fullname.length() <= 6 )
 			{
 				line1 = fullname;
@@ -1053,7 +1053,7 @@ void MackieControlProtocol::notify_name_changed( RouteSignal * route_signal )
 			{
 				line1 = PBD::short_version( fullname, 6 );
 			}
-			
+
 			SurfacePort & port = route_signal->port();
 			port.write( builder.strip_display( port, strip, 0, line1 ) );
 			port.write( builder.strip_display_blank( port, strip, 1 ) );
@@ -1075,7 +1075,7 @@ void MackieControlProtocol::notify_panner_changed( RouteSignal * route_signal, b
 		{
 			float pos;
 			route_signal->route()->panner()->streampanner(0).get_effective_position( pos );
-			
+
 			// cache the MidiByteArray here, because the mackie led control is much lower
 			// resolution than the panner control. So we save lots of byte
 			// sends in spite of more work on the comparison
@@ -1106,7 +1106,7 @@ void MackieControlProtocol::update_automation( RouteSignal & rs )
 	{
 		notify_gain_changed( &rs, false );
 	}
-	
+
 	if ( rs.route()->panner() ) {
 		ARDOUR::AutoState panner_state = rs.route()->panner()->automation_state();
 		if ( panner_state == Touch || panner_state == Play )
@@ -1121,14 +1121,14 @@ string MackieControlProtocol::format_bbt_timecode( nframes_t now_frame )
 {
 	BBT_Time bbt_time;
 	session->bbt_time( now_frame, bbt_time );
-	
+
 	// According to the Logic docs
 	// digits: 888/88/88/888
 	// BBT mode: Bars/Beats/Subdivisions/Ticks
 	ostringstream os;
 	os << setw(3) << setfill('0') << bbt_time.bars;
 	os << setw(2) << setfill('0') << bbt_time.beats;
-	
+
 	// figure out subdivisions per beat
 	const Meter & meter = session->tempo_map().meter_at( now_frame );
 	int subdiv = 2;
@@ -1136,13 +1136,13 @@ string MackieControlProtocol::format_bbt_timecode( nframes_t now_frame )
 	{
 		subdiv = 3;
 	}
-	
+
 	uint32_t subdivisions = bbt_time.ticks / uint32_t( Meter::ticks_per_beat / subdiv );
 	uint32_t ticks = bbt_time.ticks % uint32_t( Meter::ticks_per_beat / subdiv );
-	
+
 	os << setw(2) << setfill('0') << subdivisions + 1;
 	os << setw(3) << setfill('0') << ticks;
-	
+
 	return os.str();
 }
 
@@ -1159,7 +1159,7 @@ string MackieControlProtocol::format_smpte_timecode( nframes_t now_frame )
 	os << setw(2) << setfill('0') << smpte.minutes;
 	os << setw(2) << setfill('0') << smpte.seconds;
 	os << setw(3) << setfill('0') << smpte.frames;
-	
+
 	return os.str();
 }
 
@@ -1170,7 +1170,7 @@ void MackieControlProtocol::update_timecode_display()
 		// do assignment here so current_frame is fixed
 		nframes_t current_frame = session->transport_frame();
 		string timecode;
-		
+
 		switch ( _timecode_type )
 		{
 			case ARDOUR::AnyTime::BBT:
@@ -1183,8 +1183,8 @@ void MackieControlProtocol::update_timecode_display()
 				ostringstream os;
 				os << "Unknown timecode: " << _timecode_type;
 				throw runtime_error( os.str() );
-		}	
-		
+		}
+
 		// only write the timecode string to the MCU if it's changed
 		// since last time. This is to reduce midi bandwidth used.
 		if ( timecode != _timecode_last )
@@ -1204,15 +1204,15 @@ void MackieControlProtocol::poll_session_data()
 		{
 			update_automation( **it );
 		}
-		
+
 		// and the master strip
 		if ( master_route_signal != 0 )
 		{
 			update_automation( *master_route_signal );
 		}
-		
+
 		update_timecode_display();
-		
+
 		_automation_last.start();
 	}
 }
@@ -1225,12 +1225,12 @@ LedState MackieControlProtocol::frm_left_press (Button &)
 {
 	// can use first_mark_before/after as well
 	unsigned long elapsed = _frm_left_last.restart();
-	
+
 	Location * loc = session->locations()->first_location_before (
 		session->transport_frame()
 	);
-	
-	// allow a quick double to go past a previous mark 
+
+	// allow a quick double to go past a previous mark
 	if ( session->transport_rolling() && elapsed < 500 && loc != 0 )
 	{
 		Location * loc_two_back = session->locations()->first_location_before ( loc->start() );
@@ -1239,13 +1239,13 @@ LedState MackieControlProtocol::frm_left_press (Button &)
 			loc = loc_two_back;
 		}
 	}
-	
+
 	// move to the location, if it's valid
 	if ( loc != 0 )
 	{
 		session->request_locate( loc->start(), session->transport_rolling() );
 	}
-	
+
 	return on;
 }
 
@@ -1468,7 +1468,7 @@ void MackieControlProtocol::notify_route_added( ARDOUR::RouteList & rl )
 		refresh_current_bank();
 	}
 	// otherwise route added, but current bank needs no updating
-	
+
 	// make sure remote id changes in the new route are handled
 	typedef ARDOUR::RouteList ARS;
 	for ( ARS::iterator it = rl.begin(); it != rl.end(); ++it )
@@ -1486,7 +1486,7 @@ void MackieControlProtocol::notify_solo_active_changed( bool active )
 void MackieControlProtocol::notify_remote_id_changed()
 {
 	Sorted sorted = get_sorted_routes();
-	
+
 	// if a remote id has been moved off the end, we need to shift
 	// the current bank backwards.
 	if ( sorted.size() - _current_initial_bank < route_signals.size() )
@@ -1518,9 +1518,9 @@ void MackieControlProtocol::notify_transport_state_changed()
 	update_global_button( "play", session->transport_rolling() );
 	update_global_button( "stop", !session->transport_rolling() );
 	update_global_button( "loop", session->get_play_loop() );
-	
+
 	_transport_previously_rolling = session->transport_rolling();
-	
+
 	// rec is special because it's tristate
 	Button * rec = reinterpret_cast<Button*>( surface().controls_by_name["record"] );
 	mcu_port().write( builder.build_led( *rec, record_release( *rec ) ) );
@@ -1541,7 +1541,7 @@ LedState MackieControlProtocol::left_press (Button &)
 			session->set_dirty();
 			switch_banks( new_initial );
 		}
-		
+
 		return on;
 	}
 	else
@@ -1567,7 +1567,7 @@ LedState MackieControlProtocol::right_press (Button &)
 			session->set_dirty();
 			switch_banks( _current_initial_bank + delta );
 		}
-		
+
 		return on;
 	}
 	else

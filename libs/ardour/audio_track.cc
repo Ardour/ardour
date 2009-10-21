@@ -56,7 +56,7 @@ AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode 
 	use_new_diskstream ();
 }
 
-AudioTrack::AudioTrack (Session& sess, const XMLNode& node, int version)
+AudioTrack::AudioTrack (Session& sess, const XMLNode& node, int /*version*/)
 	: Track (sess, node)
 {
 	_set_state (node, Stateful::loading_state_version, false);

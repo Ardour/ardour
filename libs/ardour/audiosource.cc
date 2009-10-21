@@ -118,7 +118,7 @@ AudioSource::get_state ()
 }
 
 int
-AudioSource::set_state (const XMLNode& node, int version)
+AudioSource::set_state (const XMLNode& node, int /*version*/)
 {
 	const XMLProperty* prop;
 
