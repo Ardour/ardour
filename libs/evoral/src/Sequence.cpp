@@ -99,12 +99,10 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 
 	seq.read_lock();
 
-	// Find first note which begins after t
-	boost::shared_ptr< Note<Time> > search_note(new Note<Time>(0, t, 0, 0, 0));
-	_note_iter = seq.notes().lower_bound(search_note);
-	assert(_note_iter == seq.notes().end() || (*_note_iter)->time() >= t);
+	// Find first note which begins at or after t
+	_note_iter = seq.note_lower_bound(t);
 
-	// Find first sysex event after t
+	// Find first sysex event at or after t
 	for (typename Sequence<Time>::SysExes::const_iterator i = seq.sysexes().begin();
 			i != seq.sysexes().end(); ++i) {
 		if ((*i)->time() >= t) {
@@ -774,6 +772,17 @@ void
 Sequence<Time>::set_notes (const Sequence<Time>::Notes& n)
 {
 	_notes = n;
+}
+
+/** Return the earliest note with time >= t */
+template<typename Time>
+typename Sequence<Time>::Notes::const_iterator
+Sequence<Time>::note_lower_bound (Time t) const
+{
+	boost::shared_ptr< Note<Time> > search_note(new Note<Time>(0, t, 0, 0, 0));
+	typename Sequence<Time>::Notes::const_iterator i = _notes.lower_bound(search_note);
+	assert(i == _notes.end() || (*i)->time() >= t);
+	return i;
 }
 
 template class Sequence<Evoral::MusicalTime>;

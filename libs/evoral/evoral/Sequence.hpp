@@ -179,6 +179,8 @@ public:
 	const_iterator        begin(Time t=0) const { return const_iterator(*this, t); }
 	const const_iterator& end()           const { return _end_iter; }
 
+	typename Notes::const_iterator note_lower_bound (Time t) const;
+
 	bool control_to_midi_event(boost::shared_ptr< Event<Time> >& ev,
 	                           const ControlIterator&            iter) const;
 

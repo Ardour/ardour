@@ -575,12 +575,12 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 						rect->property_x2() = xend;
 
 						ARDOUR::BeatsFramesConverter tconv(_trackview.session(), region->position());
+						const MidiModel::TimeType start_beats = tconv.from(start);
 
 						/* draw events */
 						MidiRegionView* mrv = (MidiRegionView*)iter->second;
 
-						// FIXME: this is offensively slow (linear search)
-						for (MidiModel::Notes::const_iterator i = data->notes().begin();
+						for (MidiModel::Notes::const_iterator i = data->note_lower_bound(start_beats);
 								i != data->notes().end(); ++i) {
 
 							const boost::shared_ptr<MidiRegionView::NoteType>& note = *i;
