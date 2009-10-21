@@ -31,6 +31,7 @@
 #include "time_axis_view.h"
 #include "audio_time_axis.h"
 #include "audio_region_view.h"
+#include "midi_region_view.h"
 
 #include "pbd/pthread_utils.h"
 #include "ardour/types.h"
@@ -116,11 +117,16 @@ int
 Editor::write_region_selection (RegionSelection& regions)
 {
 	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
-		// FIXME
 		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv)
+		if (arv) {
 			if (write_region ("", arv->audio_region()) == false)
 				return -1;
+		}
+
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
+		if (mrv) {
+			warning << "MIDI region export not implemented" << endmsg;
+		}
 	}
 
 	return 0;

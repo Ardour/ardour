@@ -200,9 +200,9 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	setup_fade_handle_positions ();
 
- 	if (!trackview.session().config.get_show_region_fades()) {
- 		set_fade_visibility (false);
- 	}
+	if (!trackview.session().config.get_show_region_fades()) {
+		set_fade_visibility (false);
+	}
 
 	const string line_name = _region->name() + ":gain";
 
@@ -381,18 +381,18 @@ AudioRegionView::region_resized (Change what_changed)
 
 	if (what_changed & Change (StartChanged|LengthChanged)) {
 
-	 	for (uint32_t n = 0; n < waves.size(); ++n) {
- 			waves[n]->property_region_start() = _region->start();
+		for (uint32_t n = 0; n < waves.size(); ++n) {
+			waves[n]->property_region_start() = _region->start();
 		}
 
- 		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
+		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 			if((agr = dynamic_cast<AudioGhostRegion*>(*i)) != 0) {
 
 				for (vector<WaveView*>::iterator w = agr->waves.begin(); w != agr->waves.end(); ++w) {
 					(*w)->property_region_start() = _region->start();
 				}
 			}
- 		}
+		}
 	}
 }
 

@@ -3087,10 +3087,6 @@ Editor::region_fill_track ()
 
 		boost::shared_ptr<Region> region ((*i)->region());
 
-		// FIXME
-		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(region);
-		assert(ar);
-
 		boost::shared_ptr<Playlist> pl = region->playlist();
 
 		if (end <= region->last_frame()) {
@@ -3104,7 +3100,7 @@ Editor::region_fill_track ()
 		}
 
 		XMLNode &before = pl->get_state();
-		pl->add_region (RegionFactory::create (ar), ar->last_frame(), times);
+		pl->add_region (RegionFactory::create (region), region->last_frame(), times);
 		session->add_command (new MementoCommand<Playlist>(*pl, &before, &pl->get_state()));
 	}
 
@@ -3114,7 +3110,7 @@ Editor::region_fill_track ()
 void
 Editor::region_fill_selection ()
 {
- 	if (clicked_routeview == 0 || !clicked_routeview->is_audio_track()) {
+	if (clicked_routeview == 0 || !clicked_routeview->is_audio_track()) {
 		return;
 	}
 

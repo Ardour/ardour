@@ -185,16 +185,16 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 
 	    /* input */
 
-	    Gtk::ComboBoxText* 	      combo;
-	    std::map<std::string, float>*  combo_map;
-	    Gtk::ToggleButton*        button;
-	    boost::shared_ptr<AutomationController>  controller;
-	    Gtkmm2ext::ClickBox*       clickbox;
-	    Gtk::Label         label;
-	    bool               logarithmic;
-	    bool               update_pending;
-	    char               ignore_change;
-	    Gtk::Button        automate_button;
+	    Gtk::ComboBoxText*	                    combo;
+	    std::map<std::string, float>*           combo_map;
+	    Gtk::ToggleButton*                      button;
+	    boost::shared_ptr<AutomationController> controller;
+	    Gtkmm2ext::ClickBox*                    clickbox;
+	    Gtk::Label                              label;
+	    bool                                    logarithmic;
+	    bool                                    update_pending;
+	    char                                    ignore_change;
+	    Gtk::Button                             automate_button;
 
 	    /* output */
 
@@ -243,7 +243,7 @@ class PluginUIWindow : public Gtk::Window
 
 	void resize_preferred();
 	void set_parent (Gtk::Window*);
- 	void set_title(const Glib::ustring& title);
+	void set_title(const Glib::ustring& title);
 
 
 	bool on_enter_notify_event (GdkEventCrossing*);

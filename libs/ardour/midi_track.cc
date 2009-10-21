@@ -124,14 +124,11 @@ MidiTrack::use_diskstream (string name)
 {
 	boost::shared_ptr<MidiDiskstream> dstream;
 
-	cerr << "\n\n\nMIDI use diskstream\n";
-
 	if ((dstream = boost::dynamic_pointer_cast<MidiDiskstream>(_session.diskstream_by_name (name))) == 0) {
 		error << string_compose(_("MidiTrack: midi diskstream \"%1\" not known by session"), name) << endmsg;
 		return -1;
 	}
 
-	cerr << "\n\n\nMIDI found DS\n";
 	return set_diskstream (dstream);
 }
 

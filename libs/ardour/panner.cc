@@ -893,7 +893,7 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 	bool changed = false;
 	bool do_not_and_did_not_need_panning = ((nouts < 2) && (outputs.size() < 2));
 
-	cout << "Reset panner for " << nouts << " " << npans << "\n";
+	//cout << "Reset panner for " << nouts << " " << npans << "\n";
 
 	/* if new and old config don't need panning, or if
 	   the config hasn't changed, we're done.

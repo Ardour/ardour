@@ -193,14 +193,9 @@ AddRouteDialog::track ()
 ARDOUR::DataType
 AddRouteDialog::type ()
 {
-	// FIXME: ew
-
-	const string str = channel_combo.get_active_text();
-	if (str == _("MIDI")) {
-		return ARDOUR::DataType::MIDI;
-	} else {
-		return ARDOUR::DataType::AUDIO;
-	}
+	return (channel_combo.get_active_text() == _("MIDI"))
+			? ARDOUR::DataType::MIDI
+			: ARDOUR::DataType::AUDIO;
 }
 
 string

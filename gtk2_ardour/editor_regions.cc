@@ -617,8 +617,8 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 	char fadeout_str[16];
 	char used_str[8];
 	int used;
-	BBT_Time bbt;				// FIXME Why do these have to be declared here ?
-	SMPTE::Time smpte;			// FIXME I would like them declared in the case statment where they are used.
+	BBT_Time bbt;
+	SMPTE::Time smpte;
 
 	bool missing_source = boost::dynamic_pointer_cast<SilentFileSource>(region->source());
 

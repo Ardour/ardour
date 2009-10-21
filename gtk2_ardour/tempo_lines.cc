@@ -46,8 +46,8 @@ TempoLines::tempo_map_changed()
 	for (Lines::iterator i = _lines.begin(); i != _lines.end(); ++d) {
 		Lines::iterator next = i;
 		++next;
-      	i->second->property_x1() = - d;
-      	i->second->property_x2() = - d;
+		i->second->property_x1() = - d;
+		i->second->property_x2() = - d;
 		_lines.erase(i);
 		_lines.insert(make_pair(- d, i->second));
 		i = next;
@@ -58,7 +58,7 @@ void
 TempoLines::show ()
 {
 	for (Lines::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-      	i->second->show();
+		i->second->show();
 	}
 }
 
@@ -66,7 +66,7 @@ void
 TempoLines::hide ()
 {
 	for (Lines::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-      	i->second->hide();
+		i->second->hide();
 	}
 }
 
