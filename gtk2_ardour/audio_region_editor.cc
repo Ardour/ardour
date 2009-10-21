@@ -44,8 +44,8 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	: RegionEditor (s),
 	  _region (r),
 	  _region_view (rv),
-	  name_label (_("NAME:")),
-	  audition_button (_("play")),
+	  name_label (_("Name:")),
+	  audition_button (_("Audition")),
 	  time_table (5, 2),
 	  position_clock (X_("regionposition"), true, X_("AudioRegionEditorClock"), true),
 	  end_clock (X_("regionend"), true, X_("AudioRegionEditorClock"), true),
@@ -83,15 +83,15 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	top_row_hbox.pack_end (top_row_button_hbox, true, true);
 
 	position_label.set_name ("AudioRegionEditorLabel");
-	position_label.set_text (_("POSITION:"));
+	position_label.set_text (_("Position:"));
 	end_label.set_name ("AudioRegionEditorLabel");
-	end_label.set_text (_("END:"));
+	end_label.set_text (_("End:"));
 	length_label.set_name ("AudioRegionEditorLabel");
-	length_label.set_text (_("LENGTH:"));
+	length_label.set_text (_("Length:"));
 	sync_label.set_name ("AudioRegionEditorLabel");
-	sync_label.set_text (_("SYNC POINT:"));
+	sync_label.set_text (_("Sync Point:"));
 	start_label.set_name ("AudioRegionEditorLabel");
-	start_label.set_text (_("FILE START:"));
+	start_label.set_text (_("File Start:"));
 	
 	time_table.set_col_spacings (2);
 	time_table.set_row_spacings (5);
@@ -246,7 +246,7 @@ AudioRegionEditor::end_clock_changed ()
 
 	_session.commit_reversible_command ();
 
-	end_clock.set (_region->position() + _region->length(), true);
+	end_clock.set (_region->position() + _region->length()-1, true);
 }
 
 void
@@ -260,7 +260,7 @@ AudioRegionEditor::length_clock_changed ()
 
 	if (pl) {
 		XMLNode &before = pl->get_state();
-		_region->trim_end (_region->position() + frames, this);
+		_region->trim_end (_region->position() + frames -1, this);
 		XMLNode &after = pl->get_state();
 		_session.add_command(new MementoCommand<Playlist>(*pl, &before, &after));
 	}
@@ -293,13 +293,13 @@ AudioRegionEditor::bounds_changed (Change what_changed)
 {
 	if ((what_changed & Change (PositionChanged|LengthChanged)) == Change (PositionChanged|LengthChanged)) {
 		position_clock.set (_region->position(), true);
-		end_clock.set (_region->position() + _region->length(), true);
+		end_clock.set (_region->position() + _region->length() -1, true);
 		length_clock.set (_region->length(), true);
 	} else if (what_changed & Change (PositionChanged)) {
 		position_clock.set (_region->position(), true);
-		end_clock.set (_region->position() + _region->length(), true);
+		end_clock.set (_region->position() + _region->length() -1, true);
 	} else if (what_changed & Change (LengthChanged)) {
-		end_clock.set (_region->position() + _region->length(), true);
+		end_clock.set (_region->position() + _region->length() -1, true);
 		length_clock.set (_region->length(), true);
 	}
 

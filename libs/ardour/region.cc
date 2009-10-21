@@ -645,7 +645,7 @@ Region::trim_end (nframes_t new_endpoint, void *src)
 	}
 
 	if (new_endpoint > _position) {
-		trim_to_internal (_position, new_endpoint - _position, this);
+		trim_to_internal (_position, new_endpoint - _position +1, this);
 		if (!_frozen) {
 			recompute_at_end ();
 		}
@@ -798,9 +798,7 @@ Region::set_locked (bool yn)
 void
 Region::set_sync_position (nframes_t absolute_pos)
 {
-	nframes_t file_pos;
-
-	file_pos = _start + (absolute_pos - _position);
+	nframes_t const file_pos = _start + (absolute_pos - _position);
 
 	if (file_pos != _sync_position) {
 		
