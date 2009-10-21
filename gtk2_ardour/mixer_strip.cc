@@ -307,6 +307,10 @@ MixerStrip::~MixerStrip ()
 	if (output_selector) {
 		delete output_selector;
 	}
+	
+	if(comment_window) {
+		delete comment_window;
+	}
 }
 
 void
