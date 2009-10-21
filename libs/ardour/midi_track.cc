@@ -527,7 +527,7 @@ MidiTrack::write_out_of_band_data (BufferSet& bufs, sframes_t /*start*/, sframes
 	_immediate_events.read (buf, 0, 0, nframes - 1); // all stamps = 0
 
 	// MIDI thru: send incoming data "through" output
-	if (_midi_thru && _input->n_ports().n_midi()) {
+	if (_midi_thru && _session.transport_speed() != 0.0f && _input->n_ports().n_midi()) {
 		buf.merge_in_place (_input->midi(0)->get_midi_buffer(nframes));
 	}
 }

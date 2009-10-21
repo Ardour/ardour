@@ -268,16 +268,14 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 
 		Evoral::MIDIEvent<TimeType> ev_other (*them);
 		size_t sz = 0;
-		size_t src;
+		ssize_t src = -1;
 
 		/* gather up total size of events that are earlier than
 		   the event referenced by "us"
 		*/
 
-		src = 0;
-
 		while (them != other.end() && ev_other.time() < (*us).time()) {
-			if (!src) {
+			if (src == -1) {
 				src = them.offset;
 			}
 			sz += sizeof (TimeType) + ev_other.size();
@@ -285,10 +283,12 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 		}
 
 		if (sz) {
+			assert(src >= 0);
 			/* move existing */
-			memmove (_data + us.offset + sz, _data + us.offset , _size - us.offset);
+			memmove (_data + us.offset + sz, _data + us.offset, _size - us.offset);
 			/* increase _size */
 			_size += sz;
+			assert(_size <= _capacity);
 			/* insert new stuff */
 			memcpy  (_data + us.offset, other._data + src, sz);
 			/* update iterator to our own events. this is a miserable hack */
