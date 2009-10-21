@@ -58,7 +58,7 @@ class MidiStreamView : public StreamView
 	~MidiStreamView ();
 
 	void set_selected_regionviews (RegionSelection&);
-	void get_selectables (jack_nframes_t start, jack_nframes_t end, std::list<Selectable* >&);
+	void get_selectables (nframes_t start, nframes_t end, std::list<Selectable* >&);
 	void get_inverted_selectables (Selection&, std::list<Selectable* >& results);
 
 	enum VisibleNoteRange {
@@ -104,14 +104,14 @@ class MidiStreamView : public StreamView
 	void setup_rec_box ();
 
 	void rec_data_range_ready (
-			jack_nframes_t start,
-			jack_nframes_t dur,
+			nframes_t start,
+			nframes_t dur,
 			boost::weak_ptr<ARDOUR::Source> src);
 
 	void update_rec_regions (
 			boost::shared_ptr<ARDOUR::MidiModel> data,
-			jack_nframes_t start,
-			jack_nframes_t dur);
+			nframes_t start,
+			nframes_t dur);
 
 	RegionView* add_region_view_internal (
 			boost::shared_ptr<ARDOUR::Region>,

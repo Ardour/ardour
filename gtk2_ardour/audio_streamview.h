@@ -112,8 +112,6 @@ class AudioStreamView : public StreamView
 	CrossfadeViewList crossfade_views;
 	bool              crossfades_visible;
 
-	std::list<sigc::connection>                  rec_data_ready_connections;
-	nframes_t                                    last_rec_data_frame;
 	std::map<boost::shared_ptr<ARDOUR::Source>, bool> rec_data_ready_map;
 
 	bool outline_region;

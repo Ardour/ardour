@@ -65,6 +65,8 @@ SMFSource::SMFSource (Session& s, const ustring& path, bool embedded, Source::Fl
 	if (create(path)) {
 		throw failed_constructor ();
 	}
+
+	_model = boost::shared_ptr<MidiModel>(new MidiModel(this)); // FIXME
 }
 
 /** Constructor used for existing internal-to-session files. */
@@ -87,6 +89,8 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 	if (open(_path)) {
 		throw failed_constructor ();
 	}
+
+	_model = boost::shared_ptr<MidiModel>(new MidiModel(this)); // FIXME
 }
 
 SMFSource::~SMFSource ()

@@ -167,7 +167,7 @@ protected:
 	double height;
 
 	std::list<sigc::connection> rec_data_ready_connections;
-	jack_nframes_t         last_rec_data_frame;
+	nframes_t                   last_rec_data_frame;
 
 private:
 	void update_coverage_frames ();

@@ -470,22 +470,22 @@ AudioStreamView::setup_rec_box ()
 
 				SourceList sources;
 
-				for (list<sigc::connection>::iterator prc = rec_data_ready_connections.begin(); prc != rec_data_ready_connections.end(); ++prc) {
+				for (list<sigc::connection>::iterator prc = rec_data_ready_connections.begin();
+						prc != rec_data_ready_connections.end(); ++prc) {
 					(*prc).disconnect();
 				}
 				rec_data_ready_connections.clear();
 
-				// FIXME
-				boost::shared_ptr<AudioDiskstream> ads = boost::dynamic_pointer_cast<AudioDiskstream>(_trackview.get_diskstream());
-				assert(ads);
+				boost::shared_ptr<AudioDiskstream> ads = _trackview.audio_track()->audio_diskstream();
 
 				for (uint32_t n=0; n < ads->n_channels().n_audio(); ++n) {
-					boost::shared_ptr<AudioFileSource> src = boost::static_pointer_cast<AudioFileSource> (ads->write_source (n));
+					boost::shared_ptr<AudioFileSource> src = ads->write_source (n);
 					if (src) {
 						sources.push_back (src);
 
 						rec_data_ready_connections.push_back (src->PeakRangeReady.connect (bind
-							(mem_fun (*this, &AudioStreamView::rec_peak_range_ready), boost::weak_ptr<Source>(src))));
+							(mem_fun (*this, &AudioStreamView::rec_peak_range_ready),
+							 boost::weak_ptr<Source>(src))));
 					}
 				}
 
@@ -493,11 +493,12 @@ AudioStreamView::setup_rec_box ()
 
 				nframes_t start = 0;
 				if (rec_regions.size() > 0) {
-					start = rec_regions.back().first->start() + _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
+					start = rec_regions.back().first->start()
+							+ _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
 				}
 
-				boost::shared_ptr<AudioRegion> region (boost::dynamic_pointer_cast<AudioRegion>
-								       (RegionFactory::create (sources, start, 1 , "", 0, (Region::Flag)(Region::DefaultFlags), false)));
+				boost::shared_ptr<AudioRegion> region (boost::dynamic_pointer_cast<AudioRegion>(
+						RegionFactory::create (sources, start, 1, "", 0, Region::DefaultFlags, false)));
 				assert(region);
 				region->block_property_changes ();
 				region->set_position (_trackview.session().transport_frame(), this);
@@ -550,7 +551,8 @@ AudioStreamView::setup_rec_box ()
 			rec_rects.push_back (recbox);
 
 			screen_update_connection.disconnect();
-			screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun (*this, &AudioStreamView::update_rec_box));
+			screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (
+					mem_fun (*this, &AudioStreamView::update_rec_box));
 			rec_updating = true;
 			rec_active = true;
 
@@ -571,7 +573,8 @@ AudioStreamView::setup_rec_box ()
 			/* disconnect rapid update */
 			screen_update_connection.disconnect();
 
-			for (list<sigc::connection>::iterator prc = rec_data_ready_connections.begin(); prc != rec_data_ready_connections.end(); ++prc) {
+			for (list<sigc::connection>::iterator prc = rec_data_ready_connections.begin();
+					prc != rec_data_ready_connections.end(); ++prc) {
 				(*prc).disconnect();
 			}
 			rec_data_ready_connections.clear();
@@ -629,7 +632,7 @@ AudioStreamView::rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::we
 
 	// this is called from the peak building thread
 
-	if (rec_data_ready_map.size() == 0 || start+cnt > last_rec_data_frame) {
+	if (rec_data_ready_map.size() == 0 || start + cnt > last_rec_data_frame) {
 		last_rec_data_frame = start + cnt;
 	}
 
@@ -647,11 +650,10 @@ AudioStreamView::update_rec_regions ()
 	if (use_rec_regions) {
 		uint32_t n = 0;
 
-		for (list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); n++) {
+		for (list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator iter = rec_regions.begin();
+				iter != rec_regions.end(); n++) {
 
-			list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator tmp;
-
-			tmp = iter;
+			list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator tmp = iter;
 			++tmp;
 
 			if (!canvas_item_visible (rec_rects[n].rectangle)) {
@@ -662,6 +664,7 @@ AudioStreamView::update_rec_regions ()
 
 			boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(iter->first);
 			if (!region) {
+				iter = tmp;
 				continue;
 			}
 
