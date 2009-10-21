@@ -555,7 +555,11 @@ void
 Sequence<Time>::end_write(bool delete_stuck)
 {
 	write_lock();
-	assert(_writing);
+
+	if (!_writing) {
+		write_unlock();
+		return;
+	}
 
 	DUMP(format("%1% : end_write (%2% notes)\n") % this % _notes.size());
 
