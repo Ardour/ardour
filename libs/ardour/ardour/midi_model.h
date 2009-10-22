@@ -166,6 +166,21 @@ public:
 	boost::shared_ptr<Evoral::Note<TimeType> > find_note (boost::shared_ptr<Evoral::Note<TimeType> >);
 
 private:
+	struct WriteLockImpl : public AutomatableSequence<Evoral::MusicalTime>::WriteLockImpl {
+		WriteLockImpl(Glib::Mutex::Lock* source_lock, Glib::RWLock& s, Glib::Mutex& c)
+			: AutomatableSequence<Evoral::MusicalTime>::WriteLockImpl(s, c)
+			, source_lock(source_lock)
+		{}
+		~WriteLockImpl() {
+			delete source_lock;
+		}
+		Glib::Mutex::Lock* source_lock;
+	};
+
+public:
+	virtual WriteLock write_lock();
+
+private:
 	friend class DeltaCommand;
 
 	// We cannot use a boost::shared_ptr here to avoid a retain cycle

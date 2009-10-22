@@ -132,7 +132,7 @@ class MidiSource : virtual public Source
 	bool                         _writing;
 
 	mutable Evoral::Sequence<Evoral::MusicalTime>::const_iterator _model_iter;
-	mutable bool                                                  _model_iterator_valid;
+	mutable bool                                                  _model_iter_valid;
 
 	mutable double    _length_beats;
 	mutable sframes_t _last_read_end;

@@ -772,7 +772,7 @@ MidiRegionView::redisplay_model()
 		(*i)->invalidate ();
 	}
 
-	_model->read_lock();
+	MidiModel::ReadLock lock(_model->read_lock());
 
 	MidiModel::Notes& notes (_model->notes());
 	_optimization_iterator = _events.begin();
@@ -831,8 +831,6 @@ MidiRegionView::redisplay_model()
 
 	display_sysexes();
 	display_program_changes();
-
-	_model->read_unlock();
 
 	_marked_for_selection.clear ();
 	_marked_for_velocity.clear ();

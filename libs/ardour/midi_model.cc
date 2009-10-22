@@ -135,9 +135,7 @@ MidiModel::DeltaCommand::operator()()
 	// This could be made much faster by using a priority_queue for added and
 	// removed notes (or sort here), and doing a single iteration over _model
 
-	Glib::Mutex::Lock lm (_model->_midi_source->mutex());
-	_model->_midi_source->invalidate(); // release model read lock
-	_model->write_lock();
+	MidiModel::WriteLock lock(_model->write_lock());
 
 	for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
 		_model->add_note_unlocked(*i);
@@ -147,7 +145,7 @@ MidiModel::DeltaCommand::operator()()
 		_model->remove_note_unlocked(*i);
 	}
 
-	_model->write_unlock();
+	lock.reset();
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
 
@@ -157,9 +155,7 @@ MidiModel::DeltaCommand::undo()
 	// This could be made much faster by using a priority_queue for added and
 	// removed notes (or sort here), and doing a single iteration over _model
 
-	Glib::Mutex::Lock lm (_model->_midi_source->mutex());
-	_model->_midi_source->invalidate(); // release model read lock
-	_model->write_lock();
+	MidiModel::WriteLock lock(_model->write_lock());;
 
 	for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
 		_model->remove_note_unlocked(*i);
@@ -169,7 +165,7 @@ MidiModel::DeltaCommand::undo()
 		_model->add_note_unlocked(*i);
 	}
 
-	_model->write_unlock();
+	lock.reset();
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
 
@@ -387,9 +383,7 @@ MidiModel::DiffCommand::change(const boost::shared_ptr< Evoral::Note<TimeType> >
 void
 MidiModel::DiffCommand::operator()()
 {
-	Glib::Mutex::Lock lm (_model->_midi_source->mutex());
-	_model->_midi_source->invalidate(); // release model read lock
-	_model->write_lock();
+	MidiModel::WriteLock lock(_model->write_lock());
 
 	for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
 		Property prop = i->property;
@@ -412,16 +406,14 @@ MidiModel::DiffCommand::operator()()
 		}
 	}
 
-	_model->write_unlock();
+	lock.reset();
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
 
 void
 MidiModel::DiffCommand::undo()
 {
-	Glib::Mutex::Lock lm (_model->_midi_source->mutex());
-	_model->_midi_source->invalidate(); // release model read lock
-	_model->write_lock();
+	MidiModel::WriteLock lock(_model->write_lock());
 
 	for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
 		Property prop = i->property;
@@ -444,7 +436,7 @@ MidiModel::DiffCommand::undo()
 		}
 	}
 
-	_model->write_unlock();
+	lock.reset();
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
 
@@ -690,7 +682,7 @@ MidiModel::DiffCommand::get_state ()
 bool
 MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 {
-	read_lock();
+	ReadLock lock(read_lock());
 
 	const bool old_percussive = percussive();
 	set_percussive(false);
@@ -703,7 +695,6 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 
 	set_percussive(old_percussive);
 
-	read_unlock();
 	set_edited(false);
 
 	return true;
@@ -730,4 +721,12 @@ MidiModel::find_note (boost::shared_ptr<Evoral::Note<TimeType> > other)
 	}
 
 	return boost::shared_ptr<Evoral::Note<TimeType> >();
+}
+
+MidiModel::WriteLock
+MidiModel::write_lock()
+{
+	Glib::Mutex::Lock* source_lock = new Glib::Mutex::Lock(_midi_source->mutex());
+	_midi_source->invalidate(); // Release cached iterator's read lock on model
+	return WriteLock(new WriteLockImpl(source_lock, _lock, _control_lock));
 }

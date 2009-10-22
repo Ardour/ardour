@@ -55,7 +55,7 @@ MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 	, _read_data_count(0)
 	, _write_data_count(0)
 	, _writing(false)
-	, _model_iterator_valid(true)
+	, _model_iter_valid(false)
 	, _length_beats(0.0)
 	, _last_read_end(0)
 	, _last_write_end(0)
@@ -67,7 +67,7 @@ MidiSource::MidiSource (Session& s, const XMLNode& node)
 	, _read_data_count(0)
 	, _write_data_count(0)
 	, _writing(false)
-	, _model_iterator_valid(true)
+	, _model_iter_valid(false)
 	, _length_beats(0.0)
 	, _last_read_end(0)
 	, _last_write_end(0)
@@ -124,7 +124,8 @@ MidiSource::update_length (sframes_t /*pos*/, sframes_t /*cnt*/)
 void
 MidiSource::invalidate ()
 {
-	_model_iterator_valid = false;
+	_model_iter_valid = false;
+	_model_iter.invalidate();
 }
 
 nframes_t
@@ -144,13 +145,13 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t source_start,
 		Evoral::Sequence<double>::const_iterator& i = _model_iter;
 
 		// If the cached iterator is invalid, search for the first event past start
-		if (_last_read_end == 0 || start != _last_read_end || !_model_iterator_valid) {
+		if (_last_read_end == 0 || start != _last_read_end || !_model_iter_valid) {
 			for (i = _model->begin(); i != _model->end(); ++i) {
 				if (BEATS_TO_FRAMES(i->time()) >= start) {
 					break;
 				}
 			}
-			_model_iterator_valid = true;
+			_model_iter_valid = true;
 		}
 
 		_last_read_end = start + cnt;

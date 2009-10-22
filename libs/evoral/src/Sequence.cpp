@@ -46,36 +46,12 @@ using namespace std;
 
 namespace Evoral {
 
-template<typename Time>
-void Sequence<Time>::write_lock() {
-	_lock.writer_lock();
-	_control_lock.lock();
-}
-
-template<typename Time>
-void Sequence<Time>::write_unlock() {
-	_lock.writer_unlock();
-	_control_lock.unlock();
-}
-
-template<typename Time>
-void Sequence<Time>::read_lock() const {
-	_lock.reader_lock();
-}
-
-template<typename Time>
-void Sequence<Time>::read_unlock() const {
-	_lock.reader_unlock();
-}
-
-
 // Read iterator (const_iterator)
 
 template<typename Time>
 Sequence<Time>::const_iterator::const_iterator()
 	: _seq(NULL)
 	, _is_end(true)
-	, _locked(false)
 	, _control_iter(_control_iters.end())
 {
 	_event = boost::shared_ptr< Event<Time> >(new Event<Time>());
@@ -86,18 +62,19 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	: _seq(&seq)
 	, _type(NIL)
 	, _is_end((t == DBL_MAX) || seq.empty())
-	, _locked(!_is_end)
 	, _note_iter(seq.notes().end())
 	, _sysex_iter(seq.sysexes().end())
 	, _control_iter(_control_iters.end())
 {
 	DUMP(format("Created Iterator @ %1% (is end: %2%)\n)") % t % _is_end);
 
-	if (_is_end) {
+	if (!_is_end) {
+		_lock = seq.read_lock();
+	} else {
 		return;
 	}
 
-	seq.read_lock();
+	typename Sequence<Time>::ReadLock lock(seq.read_lock());
 
 	// Find first note which begins at or after t
 	_note_iter = seq.note_lower_bound(t);
@@ -199,8 +176,6 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		DUMP(format("Starting at end @ %1%\n") % t);
 		_type   = NIL;
 		_is_end = true;
-		_locked = false;
-		_seq->read_unlock();
 	} else {
 		DUMP(printf("New iterator = 0x%x : 0x%x @ %f\n",
 			    (int)_event->event_type(),
@@ -213,9 +188,6 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 template<typename Time>
 Sequence<Time>::const_iterator::~const_iterator()
 {
-	if (_locked) {
-		_seq->read_unlock();
-	}
 }
 
 template<typename Time>
@@ -232,10 +204,7 @@ Sequence<Time>::const_iterator::invalidate()
 		_sysex_iter = _seq->sysexes().end();
 	}
 	_control_iter = _control_iters.end();
-	if (_locked) {
-		_seq->read_unlock();
-		_locked = false;
-	}
+	_lock.reset();
 }
 
 template<typename Time>
@@ -386,26 +355,19 @@ template<typename Time>
 typename Sequence<Time>::const_iterator&
 Sequence<Time>::const_iterator::operator=(const const_iterator& other)
 {
-	if (_seq != other._seq) {
-		if (_locked) {
-			_seq->read_unlock();
-		}
-		if (other._locked) {
-		   other._seq->read_lock();
-		}
-	} else if (!_locked && other._locked) {
-		_seq->read_lock();
-	}
-
 	_seq           = other._seq;
 	_event         = other._event;
 	_active_notes  = other._active_notes;
 	_type          = other._type;
 	_is_end        = other._is_end;
-	_locked        = other._locked;
 	_note_iter     = other._note_iter;
 	_sysex_iter    = other._sysex_iter;
 	_control_iters = other._control_iters;
+
+	if (other._lock)
+		_lock = _seq->read_lock();
+	else
+		_lock.reset();
 
 	if (other._control_iter == other._control_iters.end()) {
 		_control_iter = _control_iters.end();
@@ -431,7 +393,7 @@ Sequence<Time>::Sequence(const TypeMap& type_map)
 {
 	DUMP(format("Sequence (size %1%) constructed: %2%\n") % size % this);
 	assert(_end_iter._is_end);
-	assert( ! _end_iter._locked);
+	assert( ! _end_iter._lock);
 }
 
 /** Write the controller event pointed to by \a iter to \a ev.
@@ -516,11 +478,10 @@ template<typename Time>
 void
 Sequence<Time>::clear()
 {
-	_lock.writer_lock();
+	WriteLock lock(write_lock());
 	_notes.clear();
 	for (Controls::iterator li = _controls.begin(); li != _controls.end(); ++li)
 		li->second->list()->clear();
-	_lock.writer_unlock();
 }
 
 /** Begin a write of events to the model.
@@ -535,13 +496,12 @@ void
 Sequence<Time>::start_write()
 {
 	DUMP(format("%1% : start_write (percussive = %2%)\n") % this % _percussive);
-	write_lock();
+	WriteLock lock(write_lock());
 	_writing = true;
 	for (int i = 0; i < 16; ++i) {
 		_write_notes[i].clear();
 	}
 	_dirty_controls.clear();
-	write_unlock();
 }
 
 /** Finish a write of events to the model.
@@ -554,10 +514,9 @@ template<typename Time>
 void
 Sequence<Time>::end_write(bool delete_stuck)
 {
-	write_lock();
+	WriteLock lock(write_lock());
 
 	if (!_writing) {
-		write_unlock();
 		return;
 	}
 
@@ -588,7 +547,6 @@ Sequence<Time>::end_write(bool delete_stuck)
 	}
 
 	_writing = false;
-	write_unlock();
 }
 
 /** Append \a ev to model.  NOT realtime safe.
@@ -601,7 +559,7 @@ template<typename Time>
 void
 Sequence<Time>::append(const Event<Time>& event)
 {
-	write_lock();
+	WriteLock lock(write_lock());
 	_edited = true;
 
 	const MIDIEvent<Time>& ev = (const MIDIEvent<Time>&)event;
@@ -611,7 +569,6 @@ Sequence<Time>::append(const Event<Time>& event)
 
 	if (!midi_event_is_valid(ev.buffer(), ev.size())) {
 		cerr << "WARNING: Sequence ignoring illegal MIDI event" << endl;
-		write_unlock();
 		return;
 	}
 
@@ -647,8 +604,6 @@ Sequence<Time>::append(const Event<Time>& event)
 	} else {
 		printf("WARNING: Sequence: Unknown MIDI event type %X\n", ev.type());
 	}
-
-	write_unlock();
 }
 
 template<typename Time>

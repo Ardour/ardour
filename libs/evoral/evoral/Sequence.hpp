@@ -63,11 +63,26 @@ class Sequence : virtual public ControlSet {
 public:
 	Sequence(const TypeMap& type_map);
 
-	void write_lock();
-	void write_unlock();
+protected:
+	struct WriteLockImpl {
+		WriteLockImpl(Glib::RWLock& s, Glib::Mutex& c)
+			: sequence_lock(new Glib::RWLock::WriterLock(s))
+			, control_lock(new Glib::Mutex::Lock(c))
+		{ }
+		~WriteLockImpl() {
+			delete sequence_lock;
+			delete control_lock;
+		}
+		Glib::RWLock::WriterLock* sequence_lock;
+		Glib::Mutex::Lock*        control_lock;
+	};
 
-	void read_lock()   const;
-	void read_unlock() const;
+public:
+	typedef boost::shared_ptr<Glib::RWLock::ReaderLock> ReadLock;
+	typedef boost::shared_ptr<WriteLockImpl>            WriteLock;
+
+	virtual ReadLock  read_lock() const { return ReadLock(new Glib::RWLock::ReaderLock(_lock)); }
+	virtual WriteLock write_lock()      { return WriteLock(new WriteLockImpl(_lock, _control_lock)); }
 
 	void clear();
 
@@ -143,7 +158,7 @@ public:
 		~const_iterator();
 
 		inline bool valid() const { return !_is_end && _event; }
-		inline bool locked() const { return _locked; }
+		//inline bool locked() const { return _locked; }
 
 		void invalidate();
 
@@ -169,7 +184,7 @@ public:
 		mutable ActiveNotes              _active_notes;
 		MIDIMessageType                  _type;
 		bool                             _is_end;
-		bool                             _locked;
+		typename Sequence::ReadLock      _lock;
 		typename Notes::const_iterator   _note_iter;
 		typename SysExes::const_iterator _sysex_iter;
 		ControlIterators                 _control_iters;
@@ -194,7 +209,8 @@ public:
 	uint8_t highest_note() const { return _highest_note; }
 
 protected:
-	bool _edited;
+	bool                 _edited;
+	mutable Glib::RWLock _lock;
 
 private:
 	friend class const_iterator;
@@ -203,8 +219,6 @@ private:
 	void append_note_off_unlocked(uint8_t chan, Time time, uint8_t note);
 	void append_control_unlocked(const Parameter& param, Time time, double value);
 	void append_sysex_unlocked(const MIDIEvent<Time>& ev);
-
-	mutable Glib::RWLock _lock;
 
 	const TypeMap& _type_map;
 
