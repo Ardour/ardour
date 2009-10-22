@@ -635,7 +635,7 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 		win.add_button (Stock::OK, RESPONSE_CLOSE);
 	} else {
 		win.add_button (Stock::QUIT, RESPONSE_CLOSE);
- 	}
+	}
 
 	win.set_default_response (RESPONSE_CLOSE);
 
@@ -3243,7 +3243,7 @@ ARDOUR_UI::record_state_changed ()
 
 	if (r == Session::Recording && h)  {
 		big_clock.set_widget_name ("BigClockRecording");
-        } else {
+	} else {
 		big_clock.set_widget_name ("BigClockNonRecording");
 	}
 }
