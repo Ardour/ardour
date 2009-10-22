@@ -1376,7 +1376,7 @@ widget "*TransportRecButton-alternate*" style:highest "transport_rec_button_alte
 widget "*TransportRecButton*" style:highest "transport_rec_button"
 widget "*RecordingXrunWarningWindow" style:highest "xrun_warn"
 widget "*RecordingXrunWarningWindow*" style:highest "xrun_warn"
-/*widget "*MainMenuBar" style:highest "menu_bar_base"*/
+#widget "*MainMenuBar" style:highest "menu_bar_base"
 widget "*ErrorMessage" style:highest "error_message"
 widget "*FatalMessage" style:highest "fatal_message"
 widget "*InfoMessage" style:highest "info_message"
@@ -1477,9 +1477,8 @@ widget "*MidiTrackControlsBaseSelected" style:highest "edit_controls_base_select
 widget "*BusControlsBaseSelected" style:highest "edit_controls_base_selected"
 widget "*AutomationTrackControlsBase" style:highest "automation_track_controls_base"
 widget "*AutomationTrackControlsBaseSelected" style:highest "edit_controls_base_selected"
-/*widget "*EditorMenuBar*" style:highest "black_mackie_menu_bar"
-widget "*MainMenuBar*" style:highest "black_mackie_menu_bar"
-*/
+#widget "*EditorMenuBar*" style:highest "black_mackie_menu_bar"
+#widget "*MainMenuBar*" style:highest "black_mackie_menu_bar"
 widget "*ZoomClickBox" style:highest "medium_bold_entry"
 widget "*PluginParameterLabel" style:highest "medium_text"
 widget "*PluginNameInfo" style:highest "plugin_name_text"
