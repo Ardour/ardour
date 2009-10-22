@@ -166,7 +166,7 @@ class AUPluginInfo : public PluginInfo {
 
 	AUPluginCachedInfo cache;
 
-	static PluginInfoList discover ();
+	static PluginInfoList* discover ();
 	static void get_names (CAComponentDescription&, std::string& name, Glib::ustring& maker);
         static std::string stringify_descriptor (const CAComponentDescription&);
 

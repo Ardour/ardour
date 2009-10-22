@@ -87,8 +87,9 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Width get_width_enum () const { return _width; }
 	void* width_owner () const { return _width_owner; }
 
-	GainMeter& gain_meter() { return gpm; }
-	PannerUI&  panner_ui()  { return panners; }
+	GainMeter&      gain_meter()      { return gpm; }
+	PannerUI&       panner_ui()       { return panners; }
+	PluginSelector& plugin_selector();
 
 	void fast_update ();
 	void set_embedded (bool);

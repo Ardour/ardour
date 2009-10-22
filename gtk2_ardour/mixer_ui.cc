@@ -62,6 +62,7 @@ using PBD::atoi;
 
 Mixer_UI::Mixer_UI ()
 	: Window (Gtk::WINDOW_TOPLEVEL)
+	, _plugin_selector (0)
 {
 	session = 0;
 	_strip_width = Config->get_default_narrow_ms() ? Narrow : Wide;
@@ -76,9 +77,9 @@ Mixer_UI::Mixer_UI ()
 
 	Route::SyncOrderKeys.connect (mem_fun (*this, &Mixer_UI::sync_order_keys));
 
- 	scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
- 	scroller_base.set_name ("MixerWindow");
- 	scroller_base.signal_button_release_event().connect (mem_fun(*this, &Mixer_UI::strip_scroller_button_release));
+	scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	scroller_base.set_name ("MixerWindow");
+	scroller_base.signal_button_release_event().connect (mem_fun(*this, &Mixer_UI::strip_scroller_button_release));
 	// add as last item of strip packer
 	strip_packer.pack_end (scroller_base, true, true);
 
@@ -219,8 +220,6 @@ Mixer_UI::Mixer_UI ()
 
 	signal_delete_event().connect (mem_fun (*this, &Mixer_UI::hide_window));
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
-
-	_plugin_selector = new PluginSelector (PluginManager::the_manager());
 
 	signal_configure_event().connect (mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 
@@ -466,7 +465,8 @@ Mixer_UI::connect_to_session (Session* sess)
 
 	route_groups_changed ();
 
-	_plugin_selector->set_session (session);
+	if (_plugin_selector)
+		_plugin_selector->set_session (session);
 
 	if (_visible) {
 	       show_window();
@@ -1487,3 +1487,12 @@ Mixer_UI::set_route_group_activation (RouteGroup* g, bool a)
 	g->set_active (a, this);
 }
 
+PluginSelector&
+Mixer_UI::plugin_selector()
+{
+	if (!_plugin_selector) {
+		_plugin_selector = new PluginSelector (PluginManager::the_manager());
+		_plugin_selector->set_session (session);
+	}
+	return *_plugin_selector;
+}

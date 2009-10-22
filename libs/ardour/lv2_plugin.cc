@@ -703,15 +703,15 @@ LV2PluginInfo::load (Session& session)
 	return PluginPtr();
 }
 
-PluginInfoList
+PluginInfoList*
 LV2PluginInfo::discover (void* lv2_world)
 {
-	PluginInfoList plugs;
+	PluginInfoList* plugs = new PluginInfoList;
 
 	LV2World* world = (LV2World*)lv2_world;
 	SLV2Plugins plugins = slv2_world_get_all_plugins(world->world);
 
-	cerr << "LV2: Discovered " << slv2_plugins_size (plugins) << " plugins\n";
+	cerr << "LV2: Discovering " << slv2_plugins_size (plugins) << " plugins" << endl;
 
 	for (unsigned i=0; i < slv2_plugins_size(plugins); ++i) {
 		SLV2Plugin p = slv2_plugins_get_at(plugins, i);
@@ -750,8 +750,10 @@ LV2PluginInfo::discover (void* lv2_world)
 		info->unique_id = slv2_value_as_uri(slv2_plugin_get_uri(p));
 		info->index = 0; // Meaningless for LV2
 
-		plugs.push_back (info);
+		plugs->push_back (info);
 	}
+
+	cerr << "Done LV2 discovery" << endl;
 
 	return plugs;
 }

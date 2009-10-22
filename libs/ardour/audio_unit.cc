@@ -1444,7 +1444,7 @@ AUPluginInfo::au_cache_path ()
 	return Glib::build_filename (ARDOUR::get_user_ardour_path(), "au_cache");
 }
 
-PluginInfoList
+PluginInfoList*
 AUPluginInfo::discover ()
 {
 	XMLTree tree;
@@ -1453,7 +1453,7 @@ AUPluginInfo::discover ()
 		ARDOUR::BootMessage (_("Discovering AudioUnit plugins (could take some time ...)"));
 	}
 
-	PluginInfoList plugs;
+	PluginInfoList* plugs = new PluginInfoList ();
 
 	discover_fx (plugs);
 	discover_music (plugs);

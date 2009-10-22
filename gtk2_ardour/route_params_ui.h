@@ -78,11 +78,11 @@ class RouteParams_UI : public ArdourDialog
 	Gtk::ScrolledWindow      route_select_scroller;
 
 	Gtk::Notebook            notebook;
-	Gtk::Frame 		 input_frame;
-	Gtk::Frame 		 output_frame;
+	Gtk::Frame		 input_frame;
+	Gtk::Frame		 output_frame;
 	Gtk::HPaned		 redir_hpane;
 
-	Gtk::Frame 		 route_select_frame;
+	Gtk::Frame		 route_select_frame;
 
 	Gtk::HBox                route_hpacker;
 	Gtk::VBox                route_vpacker;
@@ -93,9 +93,9 @@ class RouteParams_UI : public ArdourDialog
 
 	Gtk::HPaned		 right_hpane;
 
-	Gtk::Frame 		 route_choice_frame;
+	Gtk::Frame		 route_choice_frame;
 
-	Gtk::Frame 		 route_param_frame;
+	Gtk::Frame		 route_param_frame;
 
 	Gtk::VBox                choice_vpacker;
 
@@ -145,7 +145,7 @@ class RouteParams_UI : public ArdourDialog
 
 
 	/* treeview */
- 	struct RouteDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
+	struct RouteDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
 		RouteDisplayModelColumns() {
 			add(text);
 			add(route);

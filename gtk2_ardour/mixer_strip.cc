@@ -74,20 +74,19 @@ sigc::signal<void,boost::shared_ptr<Route> > MixerStrip::SwitchIO;
 int MixerStrip::scrollbar_height = 0;
 
 MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, bool in_mixer)
- 	: AxisView(sess)
+	: AxisView(sess)
 	, RouteUI (sess)
 	,_mixer(mx)
 	, _mixer_owned (in_mixer)
- 	, processor_box (sess, mx.plugin_selector(), mx.selection(), this, in_mixer)
+	, processor_box (sess, sigc::mem_fun(*this, &MixerStrip::plugin_selector), mx.selection(), this, in_mixer)
 	, gpm (sess)
 	, panners (sess)
 	, _mono_button (_("Mono"))
 	, button_table (3, 2)
 	, middle_button_table (1, 2)
- 	, bottom_button_table (1, 2)
+	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
- 	, comment_button (_("Comments"))
-
+	, comment_button (_("Comments"))
 {
 	init ();
 
@@ -101,19 +100,18 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, bool in_mixer)
 }
 
 MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt, bool in_mixer)
- 	: AxisView(sess)
+	: AxisView(sess)
 	, RouteUI (sess)
 	,_mixer(mx)
 	, _mixer_owned (in_mixer)
- 	, processor_box (sess, mx.plugin_selector(), mx.selection(), this, in_mixer)
+	, processor_box (sess, sigc::mem_fun(*this, &MixerStrip::plugin_selector), mx.selection(), this, in_mixer)
 	, gpm (sess)
 	, panners (sess)
 	, button_table (3, 2)
 	, middle_button_table (1, 2)
- 	, bottom_button_table (1, 2)
+	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
- 	, comment_button (_("Comments"))
-
+	, comment_button (_("Comments"))
 {
 	init ();
 	set_button_names ();
@@ -1794,4 +1792,10 @@ void
 MixerStrip::mono_button_clicked ()
 {
 	panners.set_mono (_mono_button.get_active ());
+}
+
+PluginSelector&
+MixerStrip::plugin_selector()
+{
+	return _mixer.plugin_selector();
 }

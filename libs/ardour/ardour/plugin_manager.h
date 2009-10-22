@@ -46,12 +46,10 @@ class PluginManager : public boost::noncopyable {
 	PluginManager ();
 	~PluginManager ();
 
-	/* realtime plugin APIs */
-
-	ARDOUR::PluginInfoList &vst_plugin_info ()    { return _vst_plugin_info; }
-	ARDOUR::PluginInfoList &ladspa_plugin_info () { return _ladspa_plugin_info; }
-	ARDOUR::PluginInfoList &lv2_plugin_info ()    { return _lv2_plugin_info; }
-	ARDOUR::PluginInfoList &au_plugin_info ()     { return _au_plugin_info; }
+	ARDOUR::PluginInfoList &vst_plugin_info ();
+	ARDOUR::PluginInfoList &ladspa_plugin_info ();
+	ARDOUR::PluginInfoList &lv2_plugin_info ();
+	ARDOUR::PluginInfoList &au_plugin_info ();
 
 	void refresh ();
 
@@ -85,10 +83,11 @@ class PluginManager : public boost::noncopyable {
 	typedef std::set<FavoritePlugin> FavoritePluginList;
 	FavoritePluginList favorites;
 
-	ARDOUR::PluginInfoList _vst_plugin_info;
-	ARDOUR::PluginInfoList _ladspa_plugin_info;
-	ARDOUR::PluginInfoList _lv2_plugin_info;
-	ARDOUR::PluginInfoList _au_plugin_info;
+	ARDOUR::PluginInfoList  _empty_plugin_info;
+	ARDOUR::PluginInfoList* _vst_plugin_info;
+	ARDOUR::PluginInfoList* _ladspa_plugin_info;
+	ARDOUR::PluginInfoList* _lv2_plugin_info;
+	ARDOUR::PluginInfoList* _au_plugin_info;
 
 #ifdef HAVE_SLV2
 	LV2World* _lv2_world;
@@ -107,10 +106,8 @@ class PluginManager : public boost::noncopyable {
 	void add_vst_presets ();
 	void add_presets (std::string domain);
 
-	int au_discover ();
 	void au_refresh ();
 
-	int lv2_discover ();
 	void lv2_refresh ();
 
 	int vst_discover_from_path (std::string path);

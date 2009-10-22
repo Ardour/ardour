@@ -64,7 +64,6 @@ RouteParams_UI::RouteParams_UI ()
 	: ArdourDialog ("track/bus inspector"),
 	  latency_apply_button (Stock::APPLY),
 	  track_menu(0)
-
 {
 	insert_box = 0;
 	_input_iosel = 0;
@@ -224,10 +223,11 @@ RouteParams_UI::setup_processor_boxes()
 		cleanup_processor_boxes();
 
 		// construct new redirect boxes
- 		insert_box = new ProcessorBox(*session, *_plugin_selector, _rr_selection, 0);
- 		insert_box->set_route (_route);
+		insert_box = new ProcessorBox(*session,
+				sigc::mem_fun(*this, &RouteParams_UI::plugin_selector), _rr_selection, 0);
+		insert_box->set_route (_route);
 
-	        redir_hpane.pack1 (*insert_box);
+		redir_hpane.pack1 (*insert_box);
 
 		insert_box->ProcessorSelected.connect (mem_fun(*this, &RouteParams_UI::redirect_selected));
 		insert_box->ProcessorUnselected.connect (mem_fun(*this, &RouteParams_UI::redirect_selected));

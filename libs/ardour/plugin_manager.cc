@@ -74,6 +74,10 @@ using namespace std;
 PluginManager* PluginManager::_manager = 0;
 
 PluginManager::PluginManager ()
+	: _vst_plugin_info(0)
+	, _ladspa_plugin_info(0)
+	, _lv2_plugin_info(0)
+	, _au_plugin_info(0)
 {
 	char* s;
 	string lrdf_path;
@@ -135,8 +139,6 @@ PluginManager::PluginManager ()
 #endif
 
 	BootMessage (_("Discovering Plugins"));
-
-	refresh ();
 }
 
 void
@@ -159,7 +161,10 @@ PluginManager::refresh ()
 void
 PluginManager::ladspa_refresh ()
 {
-	_ladspa_plugin_info.clear ();
+	if (_ladspa_plugin_info)
+		_ladspa_plugin_info->clear ();
+	else
+		_ladspa_plugin_info = new ARDOUR::PluginInfoList ();
 
 	static const char *standard_paths[] = {
 		"/usr/local/lib64/ladspa",
@@ -240,12 +245,13 @@ PluginManager::ladspa_discover_from_path (string /*path*/)
 	return ret;
 }
 
-static bool rdf_filter (const string &str, void */*arg*/)
+static bool rdf_filter (const string &str, void* /*arg*/)
 {
 	return str[0] != '.' &&
 		   ((str.find(".rdf")  == (str.length() - 4)) ||
             (str.find(".rdfs") == (str.length() - 5)) ||
-		    (str.find(".n3")   == (str.length() - 3)));
+		    (str.find(".n3")   == (str.length() - 3)) ||
+		    (str.find(".ttl")  == (str.length() - 4)));
 }
 
 void
@@ -368,22 +374,22 @@ PluginManager::ladspa_discover (string path)
 			}
 		}
 
-		if(_ladspa_plugin_info.empty()){
-			_ladspa_plugin_info.push_back (info);
+		if(_ladspa_plugin_info->empty()){
+			_ladspa_plugin_info->push_back (info);
 		}
 
 		//Ensure that the plugin is not already in the plugin list.
 
 		bool found = false;
 
-		for (PluginInfoList::const_iterator i = _ladspa_plugin_info.begin(); i != _ladspa_plugin_info.end(); ++i) {
+		for (PluginInfoList::const_iterator i = _ladspa_plugin_info->begin(); i != _ladspa_plugin_info->end(); ++i) {
 			if(0 == info->unique_id.compare((*i)->unique_id)){
 			      found = true;
 			}
 		}
 
 		if(!found){
-		    _ladspa_plugin_info.push_back (info);
+		    _ladspa_plugin_info->push_back (info);
 		}
 	}
 
@@ -433,14 +439,8 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 void
 PluginManager::lv2_refresh ()
 {
-	lv2_discover();
-}
-
-int
-PluginManager::lv2_discover ()
-{
+	delete _lv2_plugin_info;
 	_lv2_plugin_info = LV2PluginInfo::discover(_lv2_world);
-	return 0;
 }
 #endif
 
@@ -448,14 +448,8 @@ PluginManager::lv2_discover ()
 void
 PluginManager::au_refresh ()
 {
-	au_discover();
-}
-
-int
-PluginManager::au_discover ()
-{
+	delete _au_plugin_info;
 	_au_plugin_info = AUPluginInfo::discover();
-	return 0;
 }
 
 #endif
@@ -465,7 +459,10 @@ PluginManager::au_discover ()
 void
 PluginManager::vst_refresh ()
 {
-	_vst_plugin_info.clear ();
+	if (_vst_plugin_info)
+		_vst_plugin_info->clear ();
+	else
+		_vst_plugin_info = new ARDOUR::PluginInfoList();
 
 	if (vst_path.length() == 0) {
 		vst_path = "/usr/local/lib/vst:/usr/lib/vst";
@@ -552,7 +549,7 @@ PluginManager::vst_discover (string path)
 	info->n_outputs.set_audio (finfo->numOutputs);
 	info->type = ARDOUR::VST;
 
-	_vst_plugin_info.push_back (info);
+	_vst_plugin_info->push_back (info);
 	fst_free_info (finfo);
 
 	return 0;
@@ -662,4 +659,48 @@ PluginManager::remove_favorite (PluginType t, string id)
 {
 	FavoritePlugin fp (t, id);
 	favorites.erase (fp);
+}
+
+ARDOUR::PluginInfoList&
+PluginManager::vst_plugin_info ()
+{
+#ifdef VST_SUPPORT
+	if (!_vst_plugin_info)
+		vst_refresh();
+	return *_vst_plugin_info;
+#else
+	return _empty_plugin_info;
+#endif
+}
+
+ARDOUR::PluginInfoList&
+PluginManager::ladspa_plugin_info ()
+{
+	if (!_ladspa_plugin_info)
+		ladspa_refresh();
+	return *_ladspa_plugin_info;
+}
+
+ARDOUR::PluginInfoList&
+PluginManager::lv2_plugin_info ()
+{
+#ifdef HAVE_SLV2
+	if (!_lv2_plugin_info)
+		lv2_refresh();
+	return *_lv2_plugin_info;
+#else
+	return _empty_plugin_info;
+#endif
+}
+
+ARDOUR::PluginInfoList&
+PluginManager::au_plugin_info ()
+{
+#ifdef HAVE_AUDIOUNITS
+	if (!_au_plugin_info)
+		au_refresh();
+	return *_au_plugin_info;
+#else
+	return _empty_plugin_info;
+#endif
 }

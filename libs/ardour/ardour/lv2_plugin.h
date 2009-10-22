@@ -176,7 +176,7 @@ struct LV2World {
 	SLV2Value srate;
 	SLV2Value gtk_gui;
 	SLV2Value external_gui;
-        SLV2Value logarithmic;
+	SLV2Value logarithmic;
 };
 
 
@@ -184,7 +184,7 @@ class LV2PluginInfo : public PluginInfo {
 public:
 	LV2PluginInfo (void* slv2_world, void* slv2_plugin);;
 	~LV2PluginInfo ();;
-	static PluginInfoList discover (void* slv2_world);
+	static PluginInfoList* discover (void* slv2_world);
 
 	PluginPtr load (Session& session);
 
