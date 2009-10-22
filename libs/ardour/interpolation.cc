@@ -117,6 +117,7 @@ CubicInterpolation::interpolate (int channel, nframes_t nframes, Sample *input, 
 								fractional_phase_part * (3.0f * (input[i] - input[i+1]) - inm1 + input[i+2])));
 
 		    distance += _speed + acceleration;
+		    inm1 = input[i];
 	    }
 
     } else {
