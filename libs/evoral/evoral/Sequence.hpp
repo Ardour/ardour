@@ -21,8 +21,7 @@
 
 #include <vector>
 #include <queue>
-#include <deque>
-#include <map>
+#include <set>
 #include <utility>
 #include <boost/shared_ptr.hpp>
 #include <glibmm/thread.h>
@@ -133,7 +132,7 @@ public:
 		}
 	};
 
-	typedef std::set<boost::shared_ptr< Note<Time> >, EarlierNoteComparator> Notes;
+	typedef std::multiset<boost::shared_ptr< Note<Time> >, EarlierNoteComparator> Notes;
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
 
