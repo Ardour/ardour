@@ -580,7 +580,7 @@ Mixer_UI::set_all_strips_visibility (bool yn)
 void
 Mixer_UI::set_all_audio_visibility (int tracks, bool yn)
 {
-        TreeModel::Children rows = track_model->children();
+	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator i;
 
 	no_track_list_redisplay = true;

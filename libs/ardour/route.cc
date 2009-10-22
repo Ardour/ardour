@@ -838,35 +838,35 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version, ProcessorLis
 
 	try {
 		boost::shared_ptr<Processor> processor;
-					
+
 		if (node.name() == "Insert") {
 
 			if ((prop = node.property ("type")) != 0) {
-				
+
 				if (prop->value() == "ladspa" || prop->value() == "Ladspa" || 
-				    prop->value() == "lv2" ||
-				    prop->value() == "vst" ||
-				    prop->value() == "audiounit") {
-					
+						prop->value() == "lv2" ||
+						prop->value() == "vst" ||
+						prop->value() == "audiounit") {
+
 					processor.reset (new PluginInsert (_session, node));
-					
+
 				} else {
-					
+
 					processor.reset (new PortInsert (_session, _mute_master, node));
 				}
 
 			}
-				
+
 		} else if (node.name() == "Send") {
-			
+
 			processor.reset (new Send (_session, _mute_master, node, version));
-			
+
 		} else {
-			
+
 			error << string_compose(_("unknown Processor type \"%1\"; ignored"), node.name()) << endmsg;
 			return false;
 		}
-				
+
 		if (iter == _processors.end() && processor->visible() && !_processors.empty()) {
 			/* check for invisible processors stacked at the end and leave them there */
 			ProcessorList::iterator p;
@@ -878,7 +878,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version, ProcessorLis
 			++p;
 			iter = p;
 		}
-		
+
 		return (add_processor (processor, iter) == 0);
 	}
 
@@ -1669,7 +1669,7 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 	if (version < 3000) {
 		return _set_state_2X (node, version);
 	}
-	
+
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
 	XMLNode *child;
@@ -1844,7 +1844,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 	const XMLProperty *prop;
 
 	/* 2X things which still remain to be handled:
-	 * default-type 
+	 * default-type
 	 * muted
 	 * mute-affects-pre-fader
 	 * mute-affects-post-fader
@@ -1875,7 +1875,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 		_intreturn.reset (new InternalReturn (_session));
 		add_processor (_intreturn, PreFader);
 	}
-	
+
 	_main_outs.reset (new Delivery (_session, _output, _mute_master, _name, Delivery::Main));
 	add_processor (_main_outs, PostFader);
 
@@ -1890,7 +1890,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 
 			/* there is a note in IO::set_state_2X() about why we have to call
 			   this directly.
-			*/
+			   */
 
 			_input->set_state_2X (*child, version, true);
 			_output->set_state_2X (*child, version, false);
@@ -1909,10 +1909,10 @@ Route::_set_state_2X (const XMLNode& node, int version)
 				set_active (yn);
 			}
 		}
-			
+
 		/* XXX: panners? */
 	}
-	
+
 	if ((prop = node.property (X_("phase-invert"))) != 0) {
 		set_phase_invert (string_is_affirmative (prop->value()));
 	}
@@ -1944,7 +1944,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 			set_route_group (route_group, this);
 		}
 	}
-	
+
 	if ((prop = node.property (X_("edit-group"))) != 0) {
 		RouteGroup* route_group = _session.route_group_by_name(prop->value());
 		if (route_group == 0) {
@@ -1965,11 +1965,11 @@ Route::_set_state_2X (const XMLNode& node, int version)
 
 			if ((equal = remaining.find_first_of ('=')) == string::npos || equal == remaining.length()) {
 				error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
-				      << endmsg;
+					<< endmsg;
 			} else {
 				if (sscanf (remaining.substr (equal+1).c_str(), "%ld", &n) != 1) {
 					error << string_compose (_("badly formed order key string in state file! [%1] ... ignored."), remaining)
-					      << endmsg;
+						<< endmsg;
 				} else {
 					set_order_key (remaining.substr (0, equal), n);
 				}
@@ -1986,15 +1986,15 @@ Route::_set_state_2X (const XMLNode& node, int version)
 	}
 
 	XMLNodeList redirect_nodes;
-	
+
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
-		
+
 		child = *niter;
-		
+
 		if (child->name() == X_("Send") || child->name() == X_("Insert")) {
 			redirect_nodes.push_back(child);
 		}
-		
+
 	}
 
 	set_processor_state_2X (redirect_nodes, version);
@@ -2014,11 +2014,11 @@ Route::_set_state_2X (const XMLNode& node, int version)
 			_extra_xml = new XMLNode (*child);
 
 		} else if (child->name() == X_("Controllable") && (prop = child->property("name")) != 0) {
-			
+
 			if (prop->value() == "solo") {
 				_solo_control->set_state (*child, version);
 				_session.add_controllable (_solo_control);
-			} 
+			}
 
 		} else if (child->name() == X_("RemoteControl")) {
 			if ((prop = child->property (X_("id"))) != 0) {
