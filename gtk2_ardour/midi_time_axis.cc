@@ -204,7 +204,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
 
 	if ((prop = xml_node->property ("note-mode")) != 0) {
 		_note_mode = NoteMode (string_2_enum(prop->value(), _note_mode));
-		if (mode_menu) {
+		if (_percussion_mode_item) {
 			_percussion_mode_item->set_active (_note_mode == Percussive);
 		}
 	}
