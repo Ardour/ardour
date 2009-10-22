@@ -211,8 +211,6 @@ MidiTrack::_set_state (const XMLNode& node, int version, bool call_base)
 		   an old one.
 		*/
 
-		cerr << "\n\n\n\n MIDI track " << name() << " found DS id " << id << endl;
-
 		if (id == zero) {
 			use_new_diskstream ();
 		} else if (use_diskstream (id)) {
