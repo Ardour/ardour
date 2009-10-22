@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999-2005 Paul Barton-Davis 
+    Copyright (C) 1999-2005 Paul Barton-Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ BaseUI::RequestType Gtkmm2ext::AddTimeout = BaseUI::new_request_type();
 #include <pbd/abstract_ui.cc>  /* instantiate the template */
 
 
-UI::UI (string namestr, int *argc, char ***argv) 
+UI::UI (string namestr, int *argc, char ***argv)
 	: AbstractUI<UIRequest> (namestr, true)
 {
 	theMain = new Main (argc, argv);
@@ -87,7 +87,7 @@ UI::UI (string namestr, int *argc, char ***argv)
 		       this);
 
 	errors = new TextViewer (850,100);
-	errors->text().set_editable (false); 
+	errors->text().set_editable (false);
 	errors->text().set_name ("ErrorText");
 
 	Glib::set_application_name(namestr);
@@ -124,13 +124,13 @@ UI::load_rcfile (string path, bool themechange)
 	}
 
 	if (access (path.c_str(), R_OK)) {
-		error << "UI: couldn't find rc file \"" 
+		error << "UI: couldn't find rc file \""
 		      << path
 		      << '"'
 		      << endmsg;
 		return -1;
 	}
-	
+
 	RC rc (path.c_str());
 	// RC::reset_styles (Gtk::Settings::get_default());
 	gtk_rc_reset_styles (gtk_settings_get_default());
@@ -225,7 +225,7 @@ UI::run (Receiver &old_receiver)
 	Glib::signal_idle().connect (bind_return (mem_fun (old_receiver, &Receiver::hangup), false));
 
 	starting ();
-	_active = true;	
+	_active = true;
 	theMain->run ();
 	_active = false;
 	stopping ();
@@ -244,7 +244,7 @@ UI::kill ()
 {
 	if (_active) {
 		pthread_kill (gui_thread, SIGKILL);
-	} 
+	}
 }
 
 void
@@ -287,7 +287,7 @@ UI::touch_display (Touchable *display)
 	req->display = display;
 
 	send_request (req);
-}	
+}
 
 void
 UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
@@ -309,7 +309,7 @@ void
 UI::set_state (Widget *w, StateType state)
 {
 	UIRequest *req = get_request (StateChange);
-	
+
 	if (req == 0) {
 		return;
 	}
@@ -341,11 +341,11 @@ void
 UI::signal_pipe_callback (void *arg, int fd, GdkInputCondition /*cond*/)
 {
 	char buf[256];
-	
+
 	/* flush (nonblocking) pipe */
-	
+
 	while (read (fd, buf, 256) > 0) {}
-	
+
 	((UI *) arg)->handle_ui_requests ();
 }
 
@@ -395,7 +395,7 @@ UI::do_request (UIRequest* req)
 		error << "GtkUI: unknown request type "
 		      << (int) req->type
 		      << endmsg;
-	}	       
+	}
 }
 
 /*======================================================================
@@ -567,11 +567,11 @@ UI::popup_error (const char *text)
 	PopUp *pup;
 
 	if (!caller_is_ui_thread()) {
-		error << "non-UI threads can't use UI::popup_error" 
+		error << "non-UI threads can't use UI::popup_error"
 		      << endmsg;
 		return;
 	}
-	
+
 	pup = new PopUp (WIN_POS_MOUSE, 0, true);
 	pup->set_text (text);
 	pup->touch ();
@@ -588,11 +588,11 @@ UI::flush_pending ()
 {
 #ifdef GTKOSX
 	/* as of february 11th 2008, gtk/osx has a problem in that mac menu events
-	   are handled using Carbon with an "internal" event handling system that 
+	   are handled using Carbon with an "internal" event handling system that
 	   doesn't pass things back to the glib/gtk main loop. this makes
-	   gtk_main_iteration() block if we call it while in a menu event handler 
+	   gtk_main_iteration() block if we call it while in a menu event handler
 	   because glib gets confused and thinks there are two threads running
-	   g_main_poll_func(). 
+	   g_main_poll_func().
 
 	   this hack (relies on code in gtk2_ardour/sync-menu.c) works
 	   around that.
