@@ -137,7 +137,7 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 	_read_data_count = 0;
 
 	// relevent regions overlapping start <--> end
-	vector<boost::shared_ptr<Region> > regs;
+	vector< boost::shared_ptr<Region> > regs;
 
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 		if ((*i)->coverage (start, end) != OverlapNone) {
@@ -164,7 +164,7 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 
 			NoteTrackers::iterator t = _note_trackers.find ((*i).get());
 			MidiStateTracker* tracker;
-			
+
 			if (t == _note_trackers.end()) {
 				pair<Region*,MidiStateTracker*> newpair;
 				newpair.first = (*i).get();
@@ -173,7 +173,7 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 			} else {
 				tracker = t->second;
 			}
-				
+
 			mr->read_at (dst, start, dur, chan_n, _note_mode, tracker);
 			_read_data_count += mr->read_data_count();
 		}

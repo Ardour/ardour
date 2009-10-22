@@ -261,12 +261,32 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 		return false;
 	}
 
+#ifndef NDEBUG
+	size_t   test_orig_us_size   = _size;
+	size_t   test_orig_them_size = other._size;
+	TimeType test_time           = 0;
+	size_t   test_us_count       = 0;
+	size_t   test_them_count     = 0;
+	for (iterator i = begin(); i != end(); ++i) {
+		assert(Evoral::midi_event_is_valid((*i).buffer(), (*i).size()));
+		assert((*i).time() >= test_time);
+		test_time = (*i).time();
+		++test_us_count;
+	}
+	test_time = 0;
+	for (const_iterator i = other.begin(); i != other.end(); ++i) {
+		assert(Evoral::midi_event_is_valid((*i).buffer(), (*i).size()));
+		assert((*i).time() >= test_time);
+		test_time = (*i).time();
+		++test_them_count;
+	}
+#endif
+
 	const_iterator them = other.begin();
 	iterator us = begin();
 
 	while (them != other.end()) {
 
-		Evoral::MIDIEvent<TimeType> ev_other (*them);
 		size_t sz = 0;
 		ssize_t src = -1;
 
@@ -274,13 +294,18 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 		   the event referenced by "us"
 		*/
 
-		while (them != other.end() && ev_other.time() < (*us).time()) {
+		while (them != other.end() && (*them).time() <= (*us).time()) {
 			if (src == -1) {
 				src = them.offset;
 			}
-			sz += sizeof (TimeType) + ev_other.size();
+			sz += sizeof (TimeType) + (*them).size();
 			++them;
 		}
+
+		if (us != end())
+			cerr << "us @ " << (*us).time() << endl;
+		if (them != other.end())
+			cerr << "them @ " << (*them).time() << endl;
 
 		if (sz) {
 			assert(src >= 0);
@@ -299,7 +324,7 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 			   point for the next event(s) from "other"
 			*/
 
-			while (us != end() && (*us).time() < ev_other.time()) {
+			while (us != end() && (*us).time() < (*them).time()) {
 				++us;
 			}
 		}
@@ -307,9 +332,24 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 		if (!(us != end())) {
 			/* just append the rest of other */
 			memcpy (_data + us.offset, other._data + them.offset, other._size - them.offset);
+			_size += other._size - them.offset;
 			break;
 		}
 	}
+
+#ifndef NDEBUG
+	assert(_size == test_orig_us_size + test_orig_them_size);
+	size_t test_final_count = 0;
+	test_time = 0;
+	for (iterator i = begin(); i != end(); ++i) {
+		cerr << "CHECK " << test_final_count << " / " << test_us_count + test_them_count << endl;
+		assert(Evoral::midi_event_is_valid((*i).buffer(), (*i).size()));
+		assert((*i).time() >= test_time);
+		test_time = (*i).time();
+		++test_final_count;
+	}
+	assert(test_final_count = test_us_count + test_them_count);
+#endif
 
 	return true;
 }

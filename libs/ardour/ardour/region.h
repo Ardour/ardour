@@ -107,8 +107,7 @@ class Region
 
 	const DataType& data_type() const { return _type; }
 
-	/**
-	 * Thats how the region parameters play together:
+	/** How the region parameters play together:
 	 * <PRE>
 	 * |------------------------------------------------------------------- track
 	 *                    |..........[------------------].....| region
