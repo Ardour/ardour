@@ -187,21 +187,21 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 	assert(size);
 	assert(buf);
 
-    if ((event = smf_track_get_next_event(_smf_track)) != NULL) {
-    	if (smf_event_is_metadata(event)) {
-    		return 0;
-    	}
-    	*delta_t = event->delta_time_pulses;
+	if ((event = smf_track_get_next_event(_smf_track)) != NULL) {
+		if (smf_event_is_metadata(event)) {
+			return 0;
+		}
+		*delta_t = event->delta_time_pulses;
 
-    	int event_size = event->midi_buffer_length;
-    	assert(event_size > 0);
+		int event_size = event->midi_buffer_length;
+		assert(event_size > 0);
 
-    	// Make sure we have enough scratch buffer
-    	if (*size < (unsigned)event_size) {
-    		*buf = (uint8_t*)realloc(*buf, event_size);
-    	}
-    	memcpy(*buf, event->midi_buffer, size_t(event_size));
-    	*size = event_size;
+		// Make sure we have enough scratch buffer
+		if (*size < (unsigned)event_size) {
+			*buf = (uint8_t*)realloc(*buf, event_size);
+		}
+		memcpy(*buf, event->midi_buffer, size_t(event_size));
+		*size = event_size;
 
 		assert(midi_event_is_valid(*buf, *size));
 
@@ -210,10 +210,10 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 			printf("%X ", (*buf)[i]);
 		} printf("\n") */
 
-    	return event_size;
-    } else {
-    	return -1;
-    }
+		return event_size;
+	} else {
+		return -1;
+	}
 }
 
 void
@@ -226,7 +226,7 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf)
 	/* printf("SMF::append_event_delta @ %u:", delta_t);
 	for (size_t i = 0; i < size; ++i) {
 		printf("%X ", buf[i]);
-		} printf("\n"); */
+	} printf("\n"); */
 
 	if (!midi_event_is_valid(buf, size)) {
 		cerr << "WARNING: SMF ignoring illegal MIDI event" << endl;
