@@ -219,14 +219,8 @@ MidiSource::mark_streaming_midi_write_started (NoteMode mode, sframes_t start_fr
 void
 MidiSource::mark_streaming_write_started ()
 {
-	sframes_t start_frame = _session.transport_frame();
-
-	if (_model) {
-		_model->start_write();
-	}
-
-	_last_write_end = start_frame;
-	_writing = true;
+	NoteMode note_mode = _model ? _model->note_mode() : Sustained;
+	mark_streaming_midi_write_started(note_mode, _session.transport_frame());
 }
 
 void

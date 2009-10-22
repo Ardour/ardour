@@ -183,7 +183,7 @@ SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t sour
 		} else {
 			break;
 		}
-		
+
 		_read_data_count += ev_size;
 
 		if (ev_size > scratch_size) {
@@ -268,6 +268,7 @@ SMFSource::write_unlocked (MidiRingBuffer<nframes_t>& source, sframes_t position
 void
 SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 {
+	assert(_writing);
 	if (ev.size() == 0)  {
 		return;
 	}
@@ -301,6 +302,7 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 void
 SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, sframes_t position)
 {
+	assert(_writing);
 	if (ev.size() == 0)  {
 		return;
 	}

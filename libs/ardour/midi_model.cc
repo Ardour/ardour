@@ -688,12 +688,14 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 	set_percussive(false);
 
 	source->drop_model();
+	source->mark_streaming_midi_write_started(note_mode(), _midi_source->timeline_position());
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(); i != end(); ++i) {
 		source->append_event_unlocked_beats(*i);
 	}
 
 	set_percussive(old_percussive);
+	source->mark_streaming_write_completed();
 
 	set_edited(false);
 
