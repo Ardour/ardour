@@ -70,7 +70,7 @@ MidiPatchManager::refresh()
 
 	find_matching_files_in_directory(path_to_patches, pattern, result);
 
-	cerr << "Loading " << result.size() << " MIDI patches from " << path_to_patches.to_string() << endl;
+	info << "Loading " << result.size() << " MIDI patches from " << path_to_patches.to_string() << endl;
 
 	for (vector<path>::iterator i = result.begin(); i != result.end(); ++i) {
 		boost::shared_ptr<MIDINameDocument> document(new MIDINameDocument(i->to_string()));

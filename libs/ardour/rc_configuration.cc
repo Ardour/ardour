@@ -90,7 +90,7 @@ RCConfiguration::load_state ()
 		}
 
 		if (statbuf.st_size != 0) {
-			cerr << string_compose (_("Loading system configuration file %1"), rcfile) << endl;
+			info << string_compose (_("Loading system configuration file %1"), rcfile) << endl;
 
 			if (!tree.read (rcfile.c_str())) {
 				error << string_compose(_("Ardour: cannot read system configuration file \"%1\""), rcfile) << endmsg;
@@ -125,7 +125,7 @@ RCConfiguration::load_state ()
 		}
 
 		if (statbuf.st_size != 0) {
-			cerr << string_compose (_("Loading user configuration file %1"), rcfile) << endl;
+			info << string_compose (_("Loading user configuration file %1"), rcfile) << endl;
 
 			if (!tree.read (rcfile)) {
 				error << string_compose(_("Ardour: cannot read configuration file \"%1\""), rcfile) << endmsg;

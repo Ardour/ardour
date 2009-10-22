@@ -2936,7 +2936,7 @@ Session::restore_history (string snapshot_name)
 	const string xml_filename = legalize_for_path (snapshot_name) + history_suffix;
 	const sys::path xml_path = _session_dir->root_path() / xml_filename;
 
-	cerr << "Loading history from " << xml_path.to_string() << endmsg;
+	info << "Loading history from " << xml_path.to_string() << endmsg;
 
 	if (!sys::exists (xml_path)) {
 		info << string_compose (_("%1: no history file \"%2\" for this session."),

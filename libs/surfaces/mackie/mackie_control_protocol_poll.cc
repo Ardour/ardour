@@ -30,7 +30,7 @@ bool MackieControlProtocol::probe()
 {
 	if ( MIDI::Manager::instance()->port( default_port_name ) == 0 )
 	{
-		cout << "No port called " << default_port_name << ". Add it to ardour.rc." << endmsg;
+		info << "Mackie: No MIDI port called " << default_port_name << endmsg;
 		return false;
 	}
 	else
