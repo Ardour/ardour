@@ -135,7 +135,7 @@ MidiModel::DeltaCommand::operator()()
 	// This could be made much faster by using a priority_queue for added and
 	// removed notes (or sort here), and doing a single iteration over _model
 
-	MidiModel::WriteLock lock(_model->write_lock());
+	MidiModel::WriteLock lock(_model->edit_lock());
 
 	for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
 		_model->add_note_unlocked(*i);
@@ -155,7 +155,7 @@ MidiModel::DeltaCommand::undo()
 	// This could be made much faster by using a priority_queue for added and
 	// removed notes (or sort here), and doing a single iteration over _model
 
-	MidiModel::WriteLock lock(_model->write_lock());;
+	MidiModel::WriteLock lock(_model->edit_lock());;
 
 	for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
 		_model->remove_note_unlocked(*i);
@@ -383,7 +383,7 @@ MidiModel::DiffCommand::change(const boost::shared_ptr< Evoral::Note<TimeType> >
 void
 MidiModel::DiffCommand::operator()()
 {
-	MidiModel::WriteLock lock(_model->write_lock());
+	MidiModel::WriteLock lock(_model->edit_lock());
 
 	for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
 		Property prop = i->property;
@@ -413,7 +413,7 @@ MidiModel::DiffCommand::operator()()
 void
 MidiModel::DiffCommand::undo()
 {
-	MidiModel::WriteLock lock(_model->write_lock());
+	MidiModel::WriteLock lock(_model->edit_lock());
 
 	for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
 		Property prop = i->property;
@@ -723,10 +723,23 @@ MidiModel::find_note (boost::shared_ptr<Evoral::Note<TimeType> > other)
 	return boost::shared_ptr<Evoral::Note<TimeType> >();
 }
 
+/** Lock and invalidate the source.
+ * This should be used by commands and editing things
+ */
 MidiModel::WriteLock
-MidiModel::write_lock()
+MidiModel::edit_lock()
 {
 	Glib::Mutex::Lock* source_lock = new Glib::Mutex::Lock(_midi_source->mutex());
 	_midi_source->invalidate(); // Release cached iterator's read lock on model
 	return WriteLock(new WriteLockImpl(source_lock, _lock, _control_lock));
+}
+
+/** Lock just the model, the source lock must already be held.
+ * This should only be called from libardour/evoral places
+ */
+MidiModel::WriteLock
+MidiModel::write_lock()
+{
+	assert(!_midi_source->mutex().trylock());
+	return WriteLock(new WriteLockImpl(NULL, _lock, _control_lock));
 }

@@ -362,6 +362,7 @@ SMFSource::set_state (const XMLNode& node, int version)
 void
 SMFSource::mark_streaming_midi_write_started (NoteMode mode, sframes_t start_frame)
 {
+	Glib::Mutex::Lock lm (_lock);
 	MidiSource::mark_streaming_midi_write_started (mode, start_frame);
 	Evoral::SMF::begin_write ();
 	_last_ev_time_beats = 0.0;
@@ -371,6 +372,7 @@ SMFSource::mark_streaming_midi_write_started (NoteMode mode, sframes_t start_fra
 void
 SMFSource::mark_streaming_write_completed ()
 {
+	Glib::Mutex::Lock lm (_lock);
 	MidiSource::mark_streaming_write_completed();
 
 	if (!writable()) {

@@ -178,6 +178,7 @@ private:
 	};
 
 public:
+	virtual WriteLock edit_lock();
 	virtual WriteLock write_lock();
 
 private:
