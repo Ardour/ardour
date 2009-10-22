@@ -707,9 +707,7 @@ Sequence<Time>::add_note_unlocked(const boost::shared_ptr< Note<Time> > note)
 {
 	DUMP(format("%1% add note %2% @ %3%\n") % this % (int)note->note() % note->time());
 	_edited = true;
-	typename Notes::iterator i = upper_bound(_notes.begin(), _notes.end(), note,
-			note_time_comparator);
-	_notes.insert(i, note);
+	_notes.insert(note);
 }
 
 template<typename Time>
@@ -718,12 +716,13 @@ Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> >
 {
 	_edited = true;
 	DUMP(format("%1% remove note %2% @ %3%\n") % this % (int)note->note() % note->time());
-	for (typename Notes::iterator n = _notes.begin(); n != _notes.end(); ++n) {
-		if (*(*n) == *note) {
-			_notes.erase(n);
-			break;
+	for (typename Sequence<Time>::Notes::iterator i = note_lower_bound(note->time());
+			i != _notes.end() && (*i)->time() == note->time(); ++i) {
+		if (*i == note) {
+			_notes.erase(i);
 		}
 	}
+	cerr << "Unable to find note to erase" << endl;
 }
 
 template<typename Time>
