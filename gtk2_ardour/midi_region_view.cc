@@ -584,7 +584,8 @@ MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 {
 	_model = model;
 	content_connection.disconnect ();
-	content_connection = _model->ContentsChanged.connect(sigc::mem_fun(this, &MidiRegionView::redisplay_model));
+	content_connection = _model->ContentsChanged.connect(
+			sigc::mem_fun(this, &MidiRegionView::redisplay_model));
 	clear_events ();
 
 	if (_enable_display) {
@@ -2264,11 +2265,12 @@ MidiRegionView::note_entered(ArdourCanvas::CanvasNoteEvent* ev)
 		note_selected(ev, true);
 	}
 
-	PublicEditor& editor (trackview.editor());
 	char buf[4];
 	snprintf (buf, sizeof (buf), "%d", (int) ev->note()->note());
+	// This causes an infinite loop on note add sometimes
+	//PublicEditor& editor (trackview.editor());
 	//editor.show_verbose_canvas_cursor_with (Evoral::midi_note_name (ev->note()->note()));
-	editor.show_verbose_canvas_cursor_with (buf);
+	//editor.show_verbose_canvas_cursor_with (buf);
 }
 
 void
