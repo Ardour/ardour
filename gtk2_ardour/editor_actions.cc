@@ -571,6 +571,9 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "toggle-midi-connection-manager", _("MIDI Connection Manager"), bind (mem_fun (*this, &Editor::show_global_port_matrix), ARDOUR::DataType::MIDI));
 	ActionManager::session_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (editor_actions, "toggle-log-window", _("Log"),
+			mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::toggle_errors));
+	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "tab-to-transient-forwards", _("Move Forward to Transient"), bind (mem_fun(*this, &Editor::tab_to_transient), true));
 	ActionManager::session_sensitive_actions.push_back (act);

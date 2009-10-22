@@ -429,6 +429,7 @@
                <menuitem action='toggle-bundle-manager'/>
                <menuitem action='toggle-audio-connection-manager'/>
                <menuitem action='toggle-midi-connection-manager'/>
+               <menuitem action='toggle-log-window'/>
    	       <separator/>
         </menu>
 	 <menu name='Help' action='Help'>

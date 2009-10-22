@@ -90,17 +90,17 @@ ARDOUR_UI::setup_windows ()
 	editor->get_status_bar_packer().pack_start (*status_bar_packer, true, true);
 	editor->get_status_bar_packer().pack_start (menu_bar_base, false, false, 6);
 #else
- 	top_packer.pack_start (menu_bar_base, false, false);
+	top_packer.pack_start (menu_bar_base, false, false);
 #endif
 
- 	top_packer.pack_start (transport_frame, false, false);
+	top_packer.pack_start (transport_frame, false, false);
 
 	editor->add_toplevel_controls (top_packer);
 
 	return 0;
 }
 
- void
+void
 ARDOUR_UI::display_message (const char *prefix, gint prefix_len, RefPtr<TextBuffer::Tag> ptag, RefPtr<TextBuffer::Tag> mtag, const char *msg)
 {
 	ustring text;

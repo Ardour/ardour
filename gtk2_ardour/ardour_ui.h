@@ -686,7 +686,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void audioengine_setup ();
 
 	void display_message (const char *prefix, gint prefix_len,
-			      Glib::RefPtr<Gtk::TextBuffer::Tag> ptag, Glib::RefPtr<Gtk::TextBuffer::Tag> mtag, const char *msg);
+			Glib::RefPtr<Gtk::TextBuffer::Tag> ptag, Glib::RefPtr<Gtk::TextBuffer::Tag> mtag,
+			const char *msg);
 	Gtk::Label status_bar_label;
 	Gtk::ToggleButton error_log_button;
 

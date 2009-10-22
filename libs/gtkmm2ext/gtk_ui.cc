@@ -458,7 +458,7 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 #endif
 		break;
 	case Transmitter::Info:
-#if OLD_STYLE_ERRORS	
+#if OLD_STYLE_ERRORS
 		prefix = "[INFO]: ";
 		ptag = info_ptag;
 		mtag = info_mtag;
@@ -489,15 +489,15 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 		cerr << "programmer error in UI::check_error_messages (channel = " << chn << ")\n";
 		::exit (1);
 	}
-	
+
 	errors->text().get_buffer()->begin_user_action();
 
 	if (fatal_received) {
 		handle_fatal (str);
 	} else {
-		
+
 		display_message (prefix, prefix_len, ptag, mtag, str);
-		
+
 		if (!errors->is_visible()) {
 			toggle_errors();
 		}
@@ -527,7 +527,7 @@ UI::display_message (const char *prefix, gint /*prefix_len*/, RefPtr<TextBuffer:
 	buffer->insert_with_tag(buffer->end(), "\n", mtag);
 
 	errors->scroll_to_bottom ();
-}	
+}
 
 void
 UI::handle_fatal (const char *message)
@@ -538,7 +538,7 @@ UI::handle_fatal (const char *message)
 	HBox hpacker;
 
 	win.set_default_size (400, 100);
-	
+
 	string title;
 	title = name();
 	title += ": Fatal Error";
@@ -552,12 +552,12 @@ UI::handle_fatal (const char *message)
 	win.get_vbox()->pack_start (hpacker, false, false);
 
 	quit.signal_clicked().connect(mem_fun(*this,&UI::quit));
-	
+
 	win.show_all ();
 	win.set_modal (true);
 
 	theMain->run ();
-	
+
 	_exit (1);
 }
 
