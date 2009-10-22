@@ -252,7 +252,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	/* lets get this party started */
 
-    	try {
+	try {
 		if (ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization)) {
 			throw failed_constructor ();
 		}

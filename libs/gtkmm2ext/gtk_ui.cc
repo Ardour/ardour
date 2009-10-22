@@ -119,6 +119,15 @@ UI::caller_is_ui_thread ()
 int
 UI::load_rcfile (string path, bool themechange)
 {
+	/* Yes, pointers to Glib::RefPtr.  If these are not kept around,
+	 * a segfault somewhere deep in the wonderfully robust glib will result.
+	 * This does not occur if wiget.get_style is used instead of rc.get_style below,
+	 * except that doesn't actually work... */
+	static Glib::RefPtr<Style>* fatal_style   = 0;
+	static Glib::RefPtr<Style>* error_style   = 0;
+	static Glib::RefPtr<Style>* warning_style = 0;
+	static Glib::RefPtr<Style>* info_style    = 0;
+
 	if (path.length() == 0) {
 		return -1;
 	}
@@ -132,7 +141,7 @@ UI::load_rcfile (string path, bool themechange)
 	}
 
 	RC rc (path.c_str());
-	// RC::reset_styles (Gtk::Settings::get_default());
+	//RC::reset_styles (Gtk::Settings::get_default());
 	gtk_rc_reset_styles (gtk_settings_get_default());
 	theme_changed.emit();
 
@@ -143,18 +152,20 @@ UI::load_rcfile (string path, bool themechange)
 	/* have to pack widgets into a toplevel window so that styles will stick */
 
 	Window temp_window (WINDOW_TOPLEVEL);
+	temp_window.ensure_style ();
+
 	HBox box;
-	Label a_widget1;
-	Label a_widget2;
-	Label a_widget3;
-	Label a_widget4;
+	Label fatal_widget;
+	Label error_widget;
+	Label warning_widget;
+	Label info_widget;
 	RefPtr<Gtk::Style> style;
 	RefPtr<TextBuffer> buffer (errors->text().get_buffer());
 
-	box.pack_start (a_widget1);
-	box.pack_start (a_widget2);
-	box.pack_start (a_widget3);
-	box.pack_start (a_widget4);
+	box.pack_start (fatal_widget);
+	box.pack_start (error_widget);
+	box.pack_start (warning_widget);
+	box.pack_start (info_widget);
 
 	error_ptag = buffer->create_tag();
 	error_mtag = buffer->create_tag();
@@ -165,49 +176,49 @@ UI::load_rcfile (string path, bool themechange)
 	info_ptag = buffer->create_tag();
 	info_mtag = buffer->create_tag();
 
-	a_widget1.set_name ("FatalMessage");
-	a_widget1.ensure_style ();
-	style = a_widget1.get_style();
+	fatal_widget.set_name ("FatalMessage");
+	delete fatal_style;
+	fatal_style = new Glib::RefPtr<Style>(rc.get_style(fatal_widget));
 
-	fatal_ptag->property_font_desc().set_value(style->get_font());
-	fatal_ptag->property_foreground_gdk().set_value(style->get_fg(STATE_ACTIVE));
-	fatal_ptag->property_background_gdk().set_value(style->get_bg(STATE_ACTIVE));
-	fatal_mtag->property_font_desc().set_value(style->get_font());
-	fatal_mtag->property_foreground_gdk().set_value(style->get_fg(STATE_NORMAL));
-	fatal_mtag->property_background_gdk().set_value(style->get_bg(STATE_NORMAL));
+	fatal_ptag->property_font_desc().set_value((*fatal_style)->get_font());
+	fatal_ptag->property_foreground_gdk().set_value((*fatal_style)->get_fg(STATE_ACTIVE));
+	fatal_ptag->property_background_gdk().set_value((*fatal_style)->get_bg(STATE_ACTIVE));
+	fatal_mtag->property_font_desc().set_value((*fatal_style)->get_font());
+	fatal_mtag->property_foreground_gdk().set_value((*fatal_style)->get_fg(STATE_NORMAL));
+	fatal_mtag->property_background_gdk().set_value((*fatal_style)->get_bg(STATE_NORMAL));
 
-	a_widget2.set_name ("ErrorMessage");
-	a_widget2.ensure_style ();
-	style = a_widget2.get_style();
+	error_widget.set_name ("ErrorMessage");
+	delete error_style;
+	error_style = new Glib::RefPtr<Style>(rc.get_style(error_widget));
 
-	error_ptag->property_font_desc().set_value(style->get_font());
-	error_ptag->property_foreground_gdk().set_value(style->get_fg(STATE_ACTIVE));
-	error_ptag->property_background_gdk().set_value(style->get_bg(STATE_ACTIVE));
-	error_mtag->property_font_desc().set_value(style->get_font());
-	error_mtag->property_foreground_gdk().set_value(style->get_fg(STATE_NORMAL));
-	error_mtag->property_background_gdk().set_value(style->get_bg(STATE_NORMAL));
+	error_ptag->property_font_desc().set_value((*error_style)->get_font());
+	error_ptag->property_foreground_gdk().set_value((*error_style)->get_fg(STATE_ACTIVE));
+	error_ptag->property_background_gdk().set_value((*error_style)->get_bg(STATE_ACTIVE));
+	error_mtag->property_font_desc().set_value((*error_style)->get_font());
+	error_mtag->property_foreground_gdk().set_value((*error_style)->get_fg(STATE_NORMAL));
+	error_mtag->property_background_gdk().set_value((*error_style)->get_bg(STATE_NORMAL));
 
-	a_widget3.set_name ("WarningMessage");
-	a_widget3.ensure_style ();
-	style = a_widget3.get_style();
+	warning_widget.set_name ("WarningMessage");
+	delete warning_style;
+	warning_style = new Glib::RefPtr<Style>(rc.get_style(warning_widget));
 
-	warning_ptag->property_font_desc().set_value(style->get_font());
-	warning_ptag->property_foreground_gdk().set_value(style->get_fg(STATE_ACTIVE));
-	warning_ptag->property_background_gdk().set_value(style->get_bg(STATE_ACTIVE));
-	warning_mtag->property_font_desc().set_value(style->get_font());
-	warning_mtag->property_foreground_gdk().set_value(style->get_fg(STATE_NORMAL));
-	warning_mtag->property_background_gdk().set_value(style->get_bg(STATE_NORMAL));
+	warning_ptag->property_font_desc().set_value((*warning_style)->get_font());
+	warning_ptag->property_foreground_gdk().set_value((*warning_style)->get_fg(STATE_ACTIVE));
+	warning_ptag->property_background_gdk().set_value((*warning_style)->get_bg(STATE_ACTIVE));
+	warning_mtag->property_font_desc().set_value((*warning_style)->get_font());
+	warning_mtag->property_foreground_gdk().set_value((*warning_style)->get_fg(STATE_NORMAL));
+	warning_mtag->property_background_gdk().set_value((*warning_style)->get_bg(STATE_NORMAL));
 
-	a_widget4.set_name ("InfoMessage");
-	a_widget4.ensure_style ();
-	style = a_widget4.get_style();
+	info_widget.set_name ("InfoMessage");
+	delete info_style;
+	info_style = new Glib::RefPtr<Style>(rc.get_style(info_widget));
 
-	info_ptag->property_font_desc().set_value(style->get_font());
-	info_ptag->property_foreground_gdk().set_value(style->get_fg(STATE_ACTIVE));
-	info_ptag->property_background_gdk().set_value(style->get_bg(STATE_ACTIVE));
-	info_mtag->property_font_desc().set_value(style->get_font());
-	info_mtag->property_foreground_gdk().set_value(style->get_fg(STATE_NORMAL));
-	info_mtag->property_background_gdk().set_value(style->get_bg(STATE_NORMAL));
+	info_ptag->property_font_desc().set_value((*info_style)->get_font());
+	info_ptag->property_foreground_gdk().set_value((*info_style)->get_fg(STATE_ACTIVE));
+	info_ptag->property_background_gdk().set_value((*info_style)->get_bg(STATE_ACTIVE));
+	info_mtag->property_font_desc().set_value((*info_style)->get_font());
+	info_mtag->property_foreground_gdk().set_value((*info_style)->get_fg(STATE_NORMAL));
+	info_mtag->property_background_gdk().set_value((*info_style)->get_bg(STATE_NORMAL));
 
 	return 0;
 }

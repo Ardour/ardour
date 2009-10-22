@@ -566,42 +566,42 @@ style "menu_bar_base" = "default_base"
 */
 style "fatal_message" = "medium_text"
 {
-   fg[ACTIVE] = { 1.0, 0, 1.0 }
-   fg[NORMAL] = { 0.80, 0.80, 0.80 }
-   bg[ACTIVE] = { 0,0,0 }
-   bg[NORMAL] = { 0,0,0 }
-   base[ACTIVE] = { 0,0,0 }
-   base[NORMAL] = { 0,0,0 }
+   fg[ACTIVE] = { 1.0, 0.20, 0.20 }
+   fg[NORMAL] = { 1.0, 0.20, 0.20 }
+   bg[ACTIVE]   = "#1a1e24"
+   bg[NORMAL]   = "#1a1e24"
+   base[NORMAL] = "#1a1e24"
+   base[NORMAL] = "#1a1e24"
 }
 
 style "error_message" = "medium_text"
 {
-   fg[ACTIVE] = { 1.0, 0, 0 }
-   fg[NORMAL] = { 0.80, 0.80, 0.80 }
-   bg[ACTIVE] = { 0,0,0 }
-   bg[NORMAL] = { 0,0,0 }
-   base[ACTIVE] = { 0,0,0 }
-   base[NORMAL] = { 0,0,0 }
+   fg[ACTIVE] = { 1.0, 0.20, 0.20 }
+   fg[NORMAL] = { 1.0, 0.20, 0.20 }
+   bg[ACTIVE]   = "#1a1e24"
+   bg[NORMAL]   = "#1a1e24"
+   base[NORMAL] = "#1a1e24"
+   base[NORMAL] = "#1a1e24"
 }
 
 style "info_message" = "medium_text"
 {
-   fg[ACTIVE] = { 1.0, 0, 0 }
-   fg[NORMAL] = { 0.80, 0.80, 0.80 }
-   bg[ACTIVE] = { 0,0,0 }
-   bg[NORMAL] = { 0,0,0 }
-   base[ACTIVE] = { 0,0,0 }
-   base[NORMAL] = { 0,0,0 }
+   fg[ACTIVE]   = { 0.20, 0.80, 0.20 }
+   fg[NORMAL]   = { 0.20, 0.80, 0.20 }
+   bg[ACTIVE]   = "#1a1e24"
+   bg[NORMAL]   = "#1a1e24"
+   base[NORMAL] = "#1a1e24"
+   base[NORMAL] = "#1a1e24"
 }
 
 style "warning_message" = "medium_text"
 {
-   fg[ACTIVE] = { 0.30,0.30, 1.0 }
-   fg[NORMAL] = { 0.80, 0.80, 0.80 }
-   bg[ACTIVE] = { 0, 0, 0 }
-   bg[NORMAL] = { 0, 0, 0 }
-   base[ACTIVE] = { 0, 0, 0 }
-   base[NORMAL] = { 0, 0, 0 }
+   fg[ACTIVE] = { 0.80, 0.80, 0.20 }
+   fg[NORMAL] = { 0.80, 0.80, 0.20 }
+   bg[ACTIVE]   = "#1a1e24"
+   bg[NORMAL]   = "#1a1e24"
+   base[NORMAL] = "#1a1e24"
+   base[NORMAL] = "#1a1e24"
 }
 
 style "medium_entry" = "medium_text"
