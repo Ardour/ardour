@@ -51,10 +51,11 @@ using namespace PBD;
 sigc::signal<void,MidiSource *> MidiSource::MidiSourceCreated;
 
 MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
-	: Source (s, DataType::MIDI, name, flags)
+	: Source(s, DataType::MIDI, name, flags)
 	, _read_data_count(0)
 	, _write_data_count(0)
-	, _writing (false)
+	, _writing(false)
+	, _model_iterator_valid(true)
 	, _length_beats(0.0)
 	, _last_read_end(0)
 	, _last_write_end(0)
@@ -62,10 +63,11 @@ MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 }
 
 MidiSource::MidiSource (Session& s, const XMLNode& node)
-	: Source (s, node)
+	: Source(s, node)
 	, _read_data_count(0)
 	, _write_data_count(0)
-	, _writing (false)
+	, _writing(false)
+	, _model_iterator_valid(true)
 	, _length_beats(0.0)
 	, _last_read_end(0)
 	, _last_write_end(0)
@@ -122,7 +124,7 @@ MidiSource::update_length (sframes_t /*pos*/, sframes_t /*cnt*/)
 void
 MidiSource::invalidate ()
 {
-	_model_iter.invalidate();
+	_model_iterator_valid = false;
 }
 
 nframes_t
@@ -136,23 +138,29 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t source_start,
 	BeatsFramesConverter converter(_session, source_start);
 
 	if (_model) {
+		//cerr << "READ @ " << start << " * " << cnt << " (source @ " << source_start << " {" << endl;
 #define BEATS_TO_FRAMES(t) (converter.to(t) + stamp_offset - negative_stamp_offset)
 
 		Evoral::Sequence<double>::const_iterator& i = _model_iter;
 
-		if (_last_read_end == 0 || start != _last_read_end || !i.valid()) {
+		// If the cached iterator is invalid, search for the first event past start
+		if (_last_read_end == 0 || start != _last_read_end || !_model_iterator_valid) {
 			for (i = _model->begin(); i != _model->end(); ++i) {
 				if (BEATS_TO_FRAMES(i->time()) >= start) {
 					break;
 				}
 			}
+			_model_iterator_valid = true;
 		}
 
 		_last_read_end = start + cnt;
 
+		// Read events up to source_start + start + cnt
 		for (; i != _model->end(); ++i) {
 			const sframes_t time_frames = BEATS_TO_FRAMES(i->time());
+			//cerr << "Read? " << time_frames << " < " << source_start + start + cnt << endl;
 			if (time_frames < source_start + start + cnt) {
+				//cerr << "Read @ " << time_frames << endl;
 				dst.write(time_frames, i->event_type(), i->size(), i->buffer());
 				if (tracker) {
 					Evoral::MIDIEvent<Evoral::MusicalTime>& ev (*(Evoral::MIDIEvent<Evoral::MusicalTime>*) (&(*i)));
@@ -163,9 +171,11 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t source_start,
 					}
 				}
 			} else {
+				//cerr << "End" << endl;
 				break;
 			}
 		}
+		//cerr << "}" << endl;
 		return cnt;
 	} else {
 		return read_unlocked (dst, source_start, start, cnt, stamp_offset, negative_stamp_offset, tracker);
