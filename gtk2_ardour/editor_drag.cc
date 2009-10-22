@@ -2796,7 +2796,7 @@ TimeFXDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 {
 	_primary->get_time_axis_view().hide_timestretch ();
 
- 	if (!movement_occurred) {
+	if (!movement_occurred) {
 		return;
 	}
 
