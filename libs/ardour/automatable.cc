@@ -408,21 +408,39 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	boost::shared_ptr<AutomationList> list(new AutomationList(param));
 	Evoral::Control* control = NULL;
 	if (param.type() >= MidiCCAutomation && param.type() <= MidiChannelPressureAutomation) {
-		control = new MidiTrack::MidiControl((MidiTrack*)this, param);
+		MidiTrack* mt = dynamic_cast<MidiTrack*>(this);
+		if (mt) {
+			control = new MidiTrack::MidiControl(mt, param);
+		} else {
+			warning << "MidiCCAutomation for non-MidiTrack" << endl;
+		}
 	} else if (param.type() == PluginAutomation) {
-		control = new PluginInsert::PluginControl((PluginInsert*)this, param);
+		PluginInsert* pi = dynamic_cast<PluginInsert*>(this);
+		if (pi) {
+			control = new PluginInsert::PluginControl(pi, param);
+		} else {
+			warning << "PluginAutomation for non-Plugin" << endl;
+		}
 	} else if (param.type() == GainAutomation) {
-		control = new Amp::GainControl( X_("gaincontrol"), _a_session, (Amp*)this, param);
+		Amp* amp = dynamic_cast<Amp*>(this);
+		if (amp) {
+			control = new Amp::GainControl(X_("gaincontrol"), _a_session, amp, param);
+		} else {
+			warning << "GainAutomation for non-Amp" << endl;
+		}
 	} else if (param.type() == PanAutomation) {
 		Panner* me = dynamic_cast<Panner*>(this);
 		if (me) {
 			control = new Panner::PanControllable(me->session(), X_("panner"), *me, param);
 		} else {
-			cerr << "ERROR: PanAutomation for non-Panner" << endl;
+			warning << "PanAutomation for non-Panner" << endl;
 		}
-	} else {
+	}
+
+	if (!control) {
 		control = new AutomationControl(_a_session, param);
 	}
+
 	control->set_list(list);
 	return boost::shared_ptr<Evoral::Control>(control);
 }
