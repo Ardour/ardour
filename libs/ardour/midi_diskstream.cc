@@ -1367,6 +1367,7 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 	}
 
 	_write_source->set_allow_remove_if_empty (true);
+	_write_source->mark_streaming_midi_write_started (_note_mode, _session.transport_frame());
 
 	return 0;
 }
@@ -1374,7 +1375,7 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 void
 MidiDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 {
-	if (!recordable()) {
+	if (!_session.writable() || !recordable()) {
 		return;
 	}
 
@@ -1383,10 +1384,6 @@ MidiDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 	}
 
 	use_new_write_source (0);
-
-	if (record_enabled()) {
-		//_capturing_sources.push_back (_write_source);
-	}
 }
 
 int
