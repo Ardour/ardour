@@ -194,14 +194,13 @@ MidiRegion::_read_at (const SourceList& /*srcs*/,
 		negative_output_buffer_position = _start;
 	}
 
-#if 0
-	cerr << "\t\tsource read from " << _position << " - " << _start << " (" << _position - _start << ") "
-	     << " start in source " << _start << " + " << internal_offset << " (" << _start + internal_offset << ") "
-	     << " dur = " << to_read
-	     << " offset = " << output_buffer_position
-	     << " negoffset = " << negative_output_buffer_position
-	     << endl;
-#endif
+	/*cerr << "MR read @ " << position << " * " << to_read
+		<< " _position = " << _position
+	    << " _start = " << _start
+	    << " offset = " << output_buffer_position
+	    << " negoffset = " << negative_output_buffer_position
+	    << " intoffset = " << internal_offset
+	    << endl;*/
 
 	if (src->midi_read (
 			dst, // destination buffer

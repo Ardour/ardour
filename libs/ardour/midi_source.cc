@@ -139,7 +139,6 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t source_start,
 	BeatsFramesConverter converter(_session, source_start);
 
 	if (_model) {
-		//cerr << "READ @ " << start << " * " << cnt << " (source @ " << source_start << " {" << endl;
 #define BEATS_TO_FRAMES(t) (converter.to(t) + stamp_offset - negative_stamp_offset)
 
 		Evoral::Sequence<double>::const_iterator& i = _model_iter;
@@ -147,7 +146,7 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t source_start,
 		// If the cached iterator is invalid, search for the first event past start
 		if (_last_read_end == 0 || start != _last_read_end || !_model_iter_valid) {
 			for (i = _model->begin(); i != _model->end(); ++i) {
-				if (BEATS_TO_FRAMES(i->time()) >= start) {
+				if (converter.to(i->time()) >= start) {
 					break;
 				}
 			}
@@ -156,13 +155,12 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t source_start,
 
 		_last_read_end = start + cnt;
 
-		// Read events up to source_start + start + cnt
+		// Read events up to end
 		for (; i != _model->end(); ++i) {
-			const sframes_t time_frames = BEATS_TO_FRAMES(i->time());
-			//cerr << "Read? " << time_frames << " < " << source_start + start + cnt << endl;
-			if (time_frames < source_start + start + cnt) {
-				//cerr << "Read @ " << time_frames << endl;
-				dst.write(time_frames, i->event_type(), i->size(), i->buffer());
+			const sframes_t time_frames = converter.to(i->time());
+			if (time_frames < start + cnt) {
+				dst.write(time_frames + stamp_offset - negative_stamp_offset,
+						i->event_type(), i->size(), i->buffer());
 				if (tracker) {
 					Evoral::MIDIEvent<Evoral::MusicalTime>& ev (*(Evoral::MIDIEvent<Evoral::MusicalTime>*) (&(*i)));
 					if (ev.is_note_on()) {
@@ -172,11 +170,9 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t source_start,
 					}
 				}
 			} else {
-				//cerr << "End" << endl;
 				break;
 			}
 		}
-		//cerr << "}" << endl;
 		return cnt;
 	} else {
 		return read_unlocked (dst, source_start, start, cnt, stamp_offset, negative_stamp_offset, tracker);
