@@ -504,6 +504,8 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 {
 	if (_drag) {
 		_drag->item()->ungrab (event->button.time);
+		delete _drag;
+		_drag = 0;
 	}
 
 	/* single mouse clicks on any of these item types operate
@@ -1242,7 +1244,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					atv->add_automation_event (item, event, where, event->button.y);
 				}
 				return true;
-
 				break;
 
 			default:
@@ -1293,7 +1294,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			} else {
 				/* make sure we stop */
 				session->request_transport_speed (0.0);
- 			}
+			}
 			break;
 
 		default:
