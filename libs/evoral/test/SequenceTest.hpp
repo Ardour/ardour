@@ -21,7 +21,7 @@ public:
 
 	~DummyTypeMap() {}
 
-	bool type_is_midi (uint32_t /*type*/) const {return true;}
+	bool type_is_midi (uint32_t /*type*/) const { return true; }
 
 	uint8_t parameter_midi_type(const Parameter& param) const {
 		switch (param.type()) {
@@ -40,7 +40,7 @@ public:
 		};
 	}
 
-	bool is_integer (const Evoral::Parameter& /*param*/) const {return true;}
+	bool is_integer (const Evoral::Parameter& /*param*/) const { return true; }
 
 	Parameter new_parameter(uint32_t type, uint8_t channel, uint32_t id) const {
 		Parameter p(type, channel, id);
@@ -48,7 +48,7 @@ public:
 		return p;
 	}
 
-	std::string to_symbol(const Parameter& /*param*/) const {return "control";}
+	std::string to_symbol(const Parameter& /*param*/) const { return "control"; }
 };
 
 template<typename Time>
@@ -102,7 +102,7 @@ class SequenceTest : public CppUnit::TestFixture
 
 public:
 	typedef double Time;
-	typedef std::vector<boost::shared_ptr<Note<Time> > > Notes;
+	typedef std::vector< boost::shared_ptr< Note<Time> > > Notes;
 
 	void setUp () {
 		type_map = new DummyTypeMap();
