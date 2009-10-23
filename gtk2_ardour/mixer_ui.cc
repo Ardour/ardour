@@ -18,6 +18,7 @@
 */
 
 #include <algorithm>
+#include <map>
 #include <sigc++/bind.h>
 
 #include <gtkmm/accelmap.h>
@@ -374,7 +375,6 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 void
 Mixer_UI::sync_order_keys (string const & src)
 {
-	vector<int> neworder;
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator ri;
 
@@ -382,25 +382,30 @@ Mixer_UI::sync_order_keys (string const & src)
 		return;
 	}
 
-	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-		neworder.push_back (0);
-	}
+	std::map<int,int> keys;
 
 	bool changed = false;
-	unsigned int order;
 
-	for (order = 0, ri = rows.begin(); ri != rows.end(); ++ri, ++order) {
+	unsigned order = 0;
+	for (ri = rows.begin(); ri != rows.end(); ++ri, ++order) {
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
 		unsigned int old_key = order;
 		unsigned int new_key = route->order_key (N_("signal"));
 
-		assert (new_key < neworder.size());
-		neworder[new_key] = old_key;
+		keys[new_key] = old_key;
 
 		if (new_key != old_key) {
 			changed = true;
 		}
 	}
+	assert(keys.size() == rows.size());
+
+	// Remove any gaps in keys caused by automation children tracks
+	vector<int> neworder;
+	for (std::map<int,int>::const_iterator i = keys.begin(); i != keys.end(); ++i) {
+		neworder.push_back(i->second);
+	}
+	assert(neworder.size() == rows.size());
 
 	if (changed) {
 		strip_redisplay_does_not_reset_order_keys = true;
