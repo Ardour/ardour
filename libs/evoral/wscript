@@ -70,9 +70,7 @@ def build(bld):
 	libsmf.uselib       = 'GLIB'
 	libsmf.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
-	# Library
-	obj = bld.new_task_gen('cxx', 'shlib')
-	obj.source = '''
+	lib_source = '''
 		src/Control.cpp
 		src/ControlList.cpp
 		src/ControlSet.cpp
@@ -84,17 +82,36 @@ def build(bld):
 		src/SMF.cpp
 		src/Sequence.cpp
 	'''
-	obj.export_incdirs = ['.']
-	obj.includes     = ['.', './src']
-	obj.name         = 'libevoral'
-	obj.target       = 'evoral'
-	obj.uselib       = 'GLIBMM GTHREAD SMF'
-	obj.uselib_local = 'libsmf'
-	obj.vnum         = EVORAL_LIB_VERSION
-	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
-	# Unit tests
+	# Library
+	obj = bld.new_task_gen('cxx', 'shlib')
+	obj.source         = lib_source
+	obj.export_incdirs = ['.']
+	obj.includes       = ['.', './src']
+	obj.name           = 'libevoral'
+	obj.target         = 'evoral'
+	obj.uselib         = 'GLIBMM GTHREAD SMF'
+	obj.uselib_local   = 'libsmf'
+	obj.vnum           = EVORAL_LIB_VERSION
+	obj.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
+
 	if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
+		# Static library (for unit test code coverage)
+		obj = bld.new_task_gen('cxx', 'staticlib')
+		obj.source       = lib_source
+		obj.source         = lib_source
+		obj.export_incdirs = ['.']
+		obj.includes       = ['.', './src']
+		obj.name           = 'libevoral_static'
+		obj.target         = 'evoral_static'
+		obj.uselib         = 'GLIBMM GTHREAD SMF'
+		obj.uselib_local   = 'libsmf'
+		obj.vnum           = EVORAL_LIB_VERSION
+		obj.install_path   = ''
+		obj.ccflags        = [ '-fprofile-arcs',  '-ftest-coverage' ]
+		obj.cxxflags       = [ '-fprofile-arcs',  '-ftest-coverage' ]
+
+		# Unit tests
 		obj              = bld.new_task_gen('cxx', 'program')
 		obj.source       = '''
 			test/SequenceTest.cpp
@@ -102,10 +119,13 @@ def build(bld):
 			test/testrunner.cpp
 		'''
 		obj.includes     = ['.', './src']
-		obj.uselib_local = 'libevoral'
+		obj.uselib_local = 'libevoral_static'
 		obj.uselib       = 'CPPUNIT'
+		obj.libs         = 'gcov'
 		obj.target       = 'run-tests'
 		obj.install_path = ''
+		obj.ccflags      = [ '-fprofile-arcs',  '-ftest-coverage' ]
+		obj.cxxflags     = [ '-fprofile-arcs',  '-ftest-coverage' ]
 
 def shutdown():
 	autowaf.shutdown()
