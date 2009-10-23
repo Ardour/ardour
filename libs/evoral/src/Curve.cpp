@@ -264,42 +264,42 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 		return;
 	}
 
- 	if (npoints == 1 ) {
+	if (npoints == 1 ) {
 
- 		for (i = 0; i < veclen; ++i) {
- 			vec[i] = _list.events().front()->value;
- 		}
- 		return;
- 	}
+		for (i = 0; i < veclen; ++i) {
+			vec[i] = _list.events().front()->value;
+		}
+		return;
+	}
 
 
- 	if (npoints == 2) {
+	if (npoints == 2) {
 
- 		/* linear interpolation between 2 points */
+		/* linear interpolation between 2 points */
 
- 		/* XXX I'm not sure that this is the right thing to
- 		   do here. but its not a common case for the envisaged
- 		   uses.
- 		*/
+		/* XXX I'm not sure that this is the right thing to
+		   do here. but its not a common case for the envisaged
+		   uses.
+		*/
 
- 		if (veclen > 1) {
- 			dx = (hx - lx) / (veclen - 1) ;
- 		} else {
- 			dx = 0; // not used
- 		}
+		if (veclen > 1) {
+			dx = (hx - lx) / (veclen - 1) ;
+		} else {
+			dx = 0; // not used
+		}
 
- 		double slope = (_list.events().back()->value - _list.events().front()->value)/
+		double slope = (_list.events().back()->value - _list.events().front()->value)/
 			(_list.events().back()->when - _list.events().front()->when);
- 		double yfrac = dx*slope;
+		double yfrac = dx*slope;
 
- 		vec[0] = _list.events().front()->value + slope * (lx - _list.events().front()->when);
+		vec[0] = _list.events().front()->value + slope * (lx - _list.events().front()->when);
 
- 		for (i = 1; i < veclen; ++i) {
- 			vec[i] = vec[i-1] + yfrac;
- 		}
+		for (i = 1; i < veclen; ++i) {
+			vec[i] = vec[i-1] + yfrac;
+		}
 
- 		return;
- 	}
+		return;
+	}
 
 	if (_dirty) {
 		solve ();
