@@ -114,6 +114,7 @@ class Slave;
 class Source;
 class TempoMap;
 class VSTPlugin;
+class Butler;
 
 class Session : public PBD::StatefulDestructible, public boost::noncopyable
 {
@@ -1187,16 +1188,9 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	bool              pending_abort;
 	bool              pending_auto_loop;
 
-	pthread_t         butler_thread;
-	Glib::Mutex       butler_request_lock;
-	Glib::Cond        butler_paused;
-	bool              butler_should_run;
-	mutable gint      butler_should_do_transport_work;
-	int               butler_request_pipe[2];
+	Butler* butler;
 
-	inline bool transport_work_requested() const {
-		return g_atomic_int_get(&butler_should_do_transport_work);
-	}
+	bool transport_work_requested() const;
 
 	struct ButlerRequest {
 		enum Type {

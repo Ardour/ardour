@@ -202,7 +202,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	session_send_mmc = false;
 	session_send_mtc = false;
 	post_transport_work = PostTransportWork (0);
-	g_atomic_int_set (&butler_should_do_transport_work, 0);
 	g_atomic_int_set (&_playback_load, 100);
 	g_atomic_int_set (&_capture_load, 100);
 	g_atomic_int_set (&_playback_load_min, 100);
@@ -217,7 +216,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	destructive_index = 0;
 	first_file_data_format_reset = true;
 	first_file_header_format_reset = true;
-	butler_thread = (pthread_t) 0;
 	//midi_thread = (pthread_t) 0;
 
 	AudioDiskstream::allocate_working_buffers();

@@ -60,6 +60,7 @@ libardour_sources = [
 	'buffer.cc',
 	'buffer_set.cc',
 	'bundle.cc',
+	'butler.cc',
 	'chan_count.cc',
 	'chan_mapping.cc',
 	'configuration.cc',

@@ -22,15 +22,16 @@
 #include "pbd/error.h"
 #include <glibmm/thread.h>
 
-#include "ardour/session.h"
 #include "ardour/audio_diskstream.h"
 #include "ardour/audioengine.h"
+#include "ardour/butler.h"
 #include "ardour/export_failed.h"
 #include "ardour/export_file_io.h"
 #include "ardour/export_handler.h"
 #include "ardour/export_status.h"
 #include "ardour/export_utilities.h"
 #include "ardour/route.h"
+#include "ardour/session.h"
 
 #include "i18n.h"
 
@@ -137,7 +138,7 @@ Session::start_audio_export (nframes_t position, bool realtime)
 
 	set_transport_speed (1.0, false);
 	butler_transport_work ();
-	g_atomic_int_set (&butler_should_do_transport_work, 0);
+	g_atomic_int_set (&butler->should_do_transport_work, 0);
 	post_transport ();
 
 	/* we are ready to go ... */

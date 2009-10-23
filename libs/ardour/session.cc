@@ -56,6 +56,7 @@
 #include "ardour/auditioner.h"
 #include "ardour/buffer_set.h"
 #include "ardour/bundle.h"
+#include "ardour/butler.h"
 #include "ardour/click.h"
 #include "ardour/configuration.h"
 #include "ardour/crossfade.h"
@@ -129,6 +130,7 @@ Session::Session (AudioEngine &eng,
 	  _session_dir (new SessionDirectory(fullpath)),
 	  pending_events (2048),
 	  state_tree (0),
+	  butler (new Butler ()),
 	  post_transport_work((PostTransportWork)0),
 	  _send_smpte_update (false),
 	  midi_thread (pthread_t (0)),
@@ -214,6 +216,7 @@ Session::Session (AudioEngine &eng,
 	  _session_dir ( new SessionDirectory(fullpath)),
 	  pending_events (2048),
 	  state_tree (0),
+	  butler (new Butler ()),
 	  post_transport_work((PostTransportWork)0),
 	  _send_smpte_update (false),
 	  midi_thread (pthread_t (0)),
@@ -350,7 +353,7 @@ Session::destroy ()
 	delete state_tree;
 
 	/* reset dynamic state version back to default */
-	
+
 	Stateful::loading_state_version = 0;
 
 	terminate_butler_thread ();

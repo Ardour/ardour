@@ -33,6 +33,7 @@
 
 #include "ardour/audio_diskstream.h"
 #include "ardour/audioengine.h"
+#include "ardour/butler.h"
 #include "ardour/configuration.h"
 #include "ardour/crossfade.h"
 #include "ardour/io.h"
@@ -82,29 +83,29 @@ Session::start_butler_thread ()
 
 	Crossfade::set_buffer_size (audio_dstream_buffer_size);
 
-	butler_should_run = false;
+	butler->should_run = false;
 
-	if (pipe (butler_request_pipe)) {
+	if (pipe (butler->request_pipe)) {
 		error << string_compose(_("Cannot create transport request signal pipe (%1)"), strerror (errno)) << endmsg;
 		return -1;
 	}
 
-	if (fcntl (butler_request_pipe[0], F_SETFL, O_NONBLOCK)) {
+	if (fcntl (butler->request_pipe[0], F_SETFL, O_NONBLOCK)) {
 		error << string_compose(_("UI: cannot set O_NONBLOCK on butler request pipe (%1)"), strerror (errno)) << endmsg;
 		return -1;
 	}
 
-	if (fcntl (butler_request_pipe[1], F_SETFL, O_NONBLOCK)) {
+	if (fcntl (butler->request_pipe[1], F_SETFL, O_NONBLOCK)) {
 		error << string_compose(_("UI: cannot set O_NONBLOCK on butler request pipe (%1)"), strerror (errno)) << endmsg;
 		return -1;
 	}
 
-	if (pthread_create_and_store ("disk butler", &butler_thread, 0, _butler_thread_work, this)) {
+	if (pthread_create_and_store ("disk butler", &butler->thread, 0, _butler_thread_work, this)) {
 		error << _("Session: could not create butler thread") << endmsg;
 		return -1;
 	}
 
-	// pthread_detach (butler_thread);
+	// pthread_detach (butler->thread);
 
 	return 0;
 }
@@ -112,18 +113,18 @@ Session::start_butler_thread ()
 void
 Session::terminate_butler_thread ()
 {
-	if (butler_thread) {
+	if (butler->thread) {
 		void* status;
 		char c = ButlerRequest::Quit;
-		::write (butler_request_pipe[1], &c, 1);
-		pthread_join (butler_thread, &status);
+		::write (butler->request_pipe[1], &c, 1);
+		pthread_join (butler->thread, &status);
 	}
 }
 
 void
 Session::schedule_butler_transport_work ()
 {
-	g_atomic_int_inc (&butler_should_do_transport_work);
+	g_atomic_int_inc (&butler->should_do_transport_work);
 	summon_butler ();
 }
 
@@ -138,26 +139,26 @@ void
 Session::summon_butler ()
 {
 	char c = ButlerRequest::Run;
-	::write (butler_request_pipe[1], &c, 1);
+	::write (butler->request_pipe[1], &c, 1);
 	// PBD::stacktrace (cerr);
 }
 
 void
 Session::stop_butler ()
 {
-	Glib::Mutex::Lock lm (butler_request_lock);
+	Glib::Mutex::Lock lm (butler->request_lock);
 	char c = ButlerRequest::Pause;
-	::write (butler_request_pipe[1], &c, 1);
-	butler_paused.wait(butler_request_lock);
+	::write (butler->request_pipe[1], &c, 1);
+	butler->paused.wait(butler->request_lock);
 }
 
 void
 Session::wait_till_butler_finished ()
 {
-	Glib::Mutex::Lock lm (butler_request_lock);
+	Glib::Mutex::Lock lm (butler->request_lock);
 	char c = ButlerRequest::Wake;
-	::write (butler_request_pipe[1], &c, 1);
-	butler_paused.wait(butler_request_lock);
+	::write (butler->request_pipe[1], &c, 1);
+	butler->paused.wait(butler->request_lock);
 }
 
 void *
@@ -181,7 +182,7 @@ Session::butler_thread_work ()
 	DiskstreamList::iterator i;
 
 	while (true) {
-		pfd[0].fd = butler_request_pipe[0];
+		pfd[0].fd = butler->request_pipe[0];
 		pfd[0].events = POLLIN|POLLERR|POLLHUP;
 
 		if (poll (pfd, 1, (disk_work_outstanding ? 0 : -1)) < 0) {
@@ -208,7 +209,7 @@ Session::butler_thread_work ()
 			/* empty the pipe of all current requests */
 
 			while (1) {
-				size_t nread = ::read (butler_request_pipe[0], &req, sizeof (req));
+				size_t nread = ::read (butler->request_pipe[0], &req, sizeof (req));
 				if (nread == 1) {
 
 					switch ((ButlerRequest::Type) req) {
@@ -217,11 +218,11 @@ Session::butler_thread_work ()
 						break;
 
 					case ButlerRequest::Run:
-						butler_should_run = true;
+						butler->should_run = true;
 						break;
 
 					case ButlerRequest::Pause:
-						butler_should_run = false;
+						butler->should_run = false;
 						break;
 
 					case ButlerRequest::Quit:
@@ -260,7 +261,7 @@ Session::butler_thread_work ()
 //			cerr << "BEFORE " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
 //		}
 
-		for (i = dsl->begin(); !transport_work_requested() && butler_should_run && i != dsl->end(); ++i) {
+		for (i = dsl->begin(); !transport_work_requested() && butler->should_run && i != dsl->end(); ++i) {
 
 			boost::shared_ptr<Diskstream> ds = *i;
 
@@ -310,7 +311,7 @@ Session::butler_thread_work ()
 		compute_io = true;
 		begin = get_microseconds();
 
-		for (i = dsl->begin(); !transport_work_requested() && butler_should_run && i != dsl->end(); ++i) {
+		for (i = dsl->begin(); !transport_work_requested() && butler->should_run && i != dsl->end(); ++i) {
 			// cerr << "write behind for " << (*i)->name () << endl;
 
 			/* note that we still try to flush diskstreams attached to inactive routes
@@ -367,9 +368,9 @@ Session::butler_thread_work ()
 
 
 		{
-			Glib::Mutex::Lock lm (butler_request_lock);
+			Glib::Mutex::Lock lm (butler->request_lock);
 
-			if (butler_should_run && (disk_work_outstanding || transport_work_requested())) {
+			if (butler->should_run && (disk_work_outstanding || transport_work_requested())) {
 //				for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 //					cerr << "AFTER " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
 //				}
@@ -377,7 +378,7 @@ Session::butler_thread_work ()
 				continue;
 			}
 
-			butler_paused.signal();
+			butler->paused.signal();
 		}
 	}
 
@@ -467,9 +468,14 @@ Session::reset_capture_load_min ()
 	g_atomic_int_set (&_capture_load_min, 100);
 }
 
-
 void
 Session::reset_playback_load_min ()
 {
 	g_atomic_int_set (&_playback_load_min, 100);
+}
+
+bool
+Session::transport_work_requested () const
+{
+	return g_atomic_int_get(&butler->should_do_transport_work);
 }
