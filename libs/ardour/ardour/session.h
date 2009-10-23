@@ -1187,8 +1187,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	bool              pending_abort;
 	bool              pending_auto_loop;
 
-	Sample*           butler_mixdown_buffer;
-	float*            butler_gain_buffer;
 	pthread_t         butler_thread;
 	Glib::Mutex       butler_request_lock;
 	Glib::Cond        butler_paused;

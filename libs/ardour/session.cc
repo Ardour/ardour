@@ -129,8 +129,6 @@ Session::Session (AudioEngine &eng,
 	  _session_dir (new SessionDirectory(fullpath)),
 	  pending_events (2048),
 	  state_tree (0),
-	  butler_mixdown_buffer (0),
-	  butler_gain_buffer (0),
 	  post_transport_work((PostTransportWork)0),
 	  _send_smpte_update (false),
 	  midi_thread (pthread_t (0)),
@@ -216,8 +214,6 @@ Session::Session (AudioEngine &eng,
 	  _session_dir ( new SessionDirectory(fullpath)),
 	  pending_events (2048),
 	  state_tree (0),
-	  butler_mixdown_buffer (0),
-	  butler_gain_buffer (0),
 	  post_transport_work((PostTransportWork)0),
 	  _send_smpte_update (false),
 	  midi_thread (pthread_t (0)),
@@ -487,9 +483,6 @@ Session::destroy ()
 	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
 		delete *i;
 	}
-
-	delete [] butler_mixdown_buffer;
-	delete [] butler_gain_buffer;
 
 	Crossfade::set_buffer_size (0);
 
