@@ -12,7 +12,6 @@ using namespace Evoral;
 
 class DummyTypeMap : public TypeMap {
 public:
-
 	enum DummyEventType {
 		NOTE,
 		CONTROL,
@@ -92,12 +91,31 @@ private:
 	Time _last_event_time;
 };
 
+template<typename Time>
+class CCTestSink : public EventSink<Time> {
+public:
+	CCTestSink(uint32_t t) : cc_type(t) {}
+
+	virtual uint32_t write(Time time, EventType type, uint32_t size, const uint8_t* buf) {
+		if (type == cc_type) {
+			CPPUNIT_ASSERT(size == 3);
+			events.push_back(make_pair(time, buf[2]));
+		}
+		return size;
+	}
+
+	typedef std::vector< std::pair<Time, uint8_t> > Events;
+	Events events;
+	uint32_t cc_type;
+};
+
 class SequenceTest : public CppUnit::TestFixture
 {
 	CPPUNIT_TEST_SUITE (SequenceTest);
 	CPPUNIT_TEST (createTest);
 	CPPUNIT_TEST (preserveEventOrderingTest);
 	CPPUNIT_TEST (iteratorSeekTest);
+	CPPUNIT_TEST (controlInterpolationTest);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
@@ -125,6 +143,7 @@ public:
 	void createTest ();
 	void preserveEventOrderingTest ();
 	void iteratorSeekTest ();
+	void controlInterpolationTest ();
 
 private:
 	DummyTypeMap*       type_map;

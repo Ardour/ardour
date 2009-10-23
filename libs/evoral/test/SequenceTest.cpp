@@ -1,4 +1,5 @@
 #include "SequenceTest.hpp"
+#include "evoral/MIDIParameters.hpp"
 #include <cassert>
 
 CPPUNIT_TEST_SUITE_REGISTRATION(SequenceTest);
@@ -62,7 +63,6 @@ SequenceTest::preserveEventOrderingTest ()
 	CPPUNIT_ASSERT_EQUAL(size_t(12), test_notes.size());
 }
 
-
 void
 SequenceTest::iteratorSeekTest ()
 {
@@ -88,4 +88,69 @@ SequenceTest::iteratorSeekTest ()
 	}
 
 	CPPUNIT_ASSERT_EQUAL(num_notes, size_t(6));
+}
+
+void
+SequenceTest::controlInterpolationTest ()
+{
+	seq->clear();
+
+	for (Notes::const_iterator i = test_notes.begin(); i != test_notes.end(); ++i) {
+		seq->notes().insert(*i);
+	}
+
+	static const FrameTime delay   = 1000;
+	static const uint32_t  cc_type = 1;
+
+	boost::shared_ptr<Control> c = seq->control(MIDI::ContinuousController(cc_type, 1, 1), true);
+	CPPUNIT_ASSERT(c);
+
+	double min, max, normal;
+	MIDI::controller_range(min, max, normal);
+
+	// Make a ramp like /\ from min to max and back to min
+	c->set_float(min, true, 0);
+	c->set_float(max, true, delay);
+	c->set_float(min, true, 2*delay);
+
+	CCTestSink<Time> sink(cc_type);
+
+	// Test discrete (lack of) interpolation
+	c->list()->set_interpolation(ControlList::Discrete);
+	for (MySequence<Time>::const_iterator i = seq->begin(); i != seq->end(); ++i) {
+		sink.write(i->time(), i->event_type(), i->size(), i->buffer());
+	}
+	CPPUNIT_ASSERT(sink.events.size() == 3);
+	CPPUNIT_ASSERT(sink.events[0].first == 0);
+	CPPUNIT_ASSERT(sink.events[0].second == 0);
+	CPPUNIT_ASSERT(sink.events[1].first == 1000);
+	CPPUNIT_ASSERT(sink.events[1].second == 127);
+	CPPUNIT_ASSERT(sink.events[2].first == 2000);
+	CPPUNIT_ASSERT(sink.events[2].second == 0);
+	sink.events.clear();
+	CPPUNIT_ASSERT(sink.events.size() == 0);
+
+	// Test linear interpolation
+	c->list()->set_interpolation(ControlList::Linear);
+	for (MySequence<Time>::const_iterator i = seq->begin(); i != seq->end(); ++i) {
+		sink.write(i->time(), i->event_type(), i->size(), i->buffer());
+	}
+	CPPUNIT_ASSERT(sink.events.size() == 128 * 2 - 1);
+	Time    last_time  = 0;
+	int16_t last_value = -1;
+	bool    ascending  = true;
+	for (CCTestSink<Time>::Events::const_iterator i = sink.events.begin();
+			i != sink.events.end(); ++i) {
+		CPPUNIT_ASSERT(last_time == 0 || i->first > last_time);
+		if (last_value == 127) {
+			ascending = false;
+		}
+		if (ascending) {
+			CPPUNIT_ASSERT(i->second == last_value + 1);
+		} else {
+			CPPUNIT_ASSERT(i->second == last_value - 1);
+		}
+		last_time = i->first;
+		last_value = i->second;
+	}
 }

@@ -97,7 +97,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	for (Controls::const_iterator i = seq._controls.begin(); i != seq._controls.end(); ++i) {
 		DUMP(format("Iterator: control: %1%\n") % seq._type_map.to_symbol(i->first));
 		double x, y;
-		bool ret = i->second->list()->rt_safe_earliest_event_unlocked(t, DBL_MAX, x, y);
+		bool ret = i->second->list()->rt_safe_earliest_event_unlocked(t, DBL_MAX, x, y, true);
 		if (!ret) {
 			DUMP(format("Iterator: CC %1% (size %2%) has no events past %3%\n")
 					% i->first.id() % i->second->list()->size() % t);
@@ -128,6 +128,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 
 	if (found) {
 		_control_iter = _control_iters.begin() + earliest_control_index;
+		assert(_control_iter != _control_iters.end());
 	} else {
 		_control_iter = _control_iters.end();
 	}
@@ -140,14 +141,15 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		earliest_t = (*_note_iter)->time();
 	}
 
-	if (_sysex_iter != seq.sysexes().end() && (*_sysex_iter)->time() < earliest_t) {
+	if (_sysex_iter != seq.sysexes().end()
+			&& ((*_sysex_iter)->time() < earliest_t || _type == NIL)) {
 		_type = SYSEX;
 		earliest_t = (*_sysex_iter)->time();
 	}
 
 	if (_control_iter != _control_iters.end()
 			&& earliest_control.list && earliest_control.x >= t
-			&& earliest_control.x < earliest_t) {
+			&& (earliest_control.x < earliest_t || _type == NIL)) {
 		_type = CONTROL;
 		earliest_t = earliest_control.x;
 	}

@@ -75,7 +75,7 @@ public:
 	 *    f(x, y) and f(x, z) hold => !f(x, z)
 	 *
 	 *    That implies one of the following:
-	 * 	  <ol>
+	 *    <ol>
 	 *      <li> x == z which contradicts the assumption f(x, y) and f(y, x)
 	 *                 because of antisymmetry.
 	 *      </li>
