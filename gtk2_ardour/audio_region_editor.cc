@@ -22,6 +22,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/playlist.h"
 #include "ardour/utils.h"
+#include "ardour/dB.h"
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
 #include <cmath>
@@ -53,7 +54,8 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	  sync_offset_relative_clock (X_("regionsyncoffsetrelative"), true, X_("AudioRegionEditorClock"), true),
 	  sync_offset_absolute_clock (X_("regionsyncoffsetabsolute"), true, X_("AudioRegionEditorClock"), true),
 	  /* XXX cannot file start yet */
-	  start_clock (X_("regionstart"), true, X_("AudioRegionEditorClock"), false)
+	  start_clock (X_("regionstart"), true, X_("AudioRegionEditorClock"), false),
+	  gain_adjustment(accurate_coefficient_to_dB(_region->scale_amplitude()), -40.0, +40.0, 0.1, 1.0, 0)	  
 
 {
 	position_clock.set_session (&_session);
@@ -125,6 +127,13 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
  	time_table.attach (start_label, 0, 1, 5, 6, Gtk::FILL, Gtk::FILL);
  	time_table.attach (start_clock, 1, 2, 5, 6, Gtk::FILL, Gtk::FILL);
 
+	gain_label.set_name ("AudioRegionEditorLabel");
+	gain_label.set_text (_("Scale amplitude:"));
+	gain_label.set_alignment (1, 0.5);
+	gain_entry.configure (gain_adjustment, 0.0, 1);
+	time_table.attach (gain_label, 0, 1, 6, 7, Gtk::FILL, Gtk::FILL);
+	time_table.attach (gain_entry, 1, 2, 6, 7, Gtk::FILL, Gtk::FILL);
+	
 	lower_hbox.pack_start (time_table, true, true);
 	lower_hbox.pack_start (sep1, false, false);
 	lower_hbox.pack_start (sep2, false, false);
@@ -144,6 +153,7 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 
 	name_changed ();
 	bounds_changed (Change (StartChanged|LengthChanged|PositionChanged|StartChanged|Region::SyncOffsetChanged));
+	gain_changed ();
 
 	_region->StateChanged.connect (mem_fun(*this, &AudioRegionEditor::region_changed));
 
@@ -165,6 +175,10 @@ AudioRegionEditor::region_changed (Change what_changed)
 
 	if (what_changed & Change (BoundsChanged|StartChanged|Region::SyncOffsetChanged)) {
 		bounds_changed (what_changed);
+	}
+
+	if (what_changed & AudioRegion::ScaleAmplitudeChanged) {
+		gain_changed ();
 	}
 }
 
@@ -211,6 +225,7 @@ AudioRegionEditor::connect_editor_events ()
 	length_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::length_clock_changed));
 	sync_offset_absolute_clock.ValueChanged.connect (mem_fun (*this, &AudioRegionEditor::sync_offset_absolute_clock_changed));
 	sync_offset_relative_clock.ValueChanged.connect (mem_fun (*this, &AudioRegionEditor::sync_offset_relative_clock_changed));
+	gain_adjustment.signal_value_changed().connect (mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
 
 	audition_button.signal_toggled().connect (mem_fun(*this, &AudioRegionEditor::audition_button_toggled));
 	_session.AuditionActive.connect (mem_fun(*this, &AudioRegionEditor::audition_state_changed));
@@ -271,6 +286,24 @@ AudioRegionEditor::length_clock_changed ()
 	_session.commit_reversible_command ();
 
 	length_clock.set (_region->length());
+}
+
+void
+AudioRegionEditor::gain_changed ()
+{
+	float const region_gain_dB = accurate_coefficient_to_dB (_region->scale_amplitude());
+	if (region_gain_dB != gain_adjustment.get_value()) {
+		gain_adjustment.set_value(region_gain_dB);
+	}
+}
+
+void
+AudioRegionEditor::gain_adjustment_changed ()
+{
+	float const gain = dB_to_coefficient (gain_adjustment.get_value());
+	if (_region->scale_amplitude() != gain) {
+		_region->set_scale_amplitude (gain);
+	}
 }
 
 void
