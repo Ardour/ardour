@@ -391,7 +391,7 @@ Sequence<Time>::Sequence(const TypeMap& type_map)
 	, _lowest_note(127)
 	, _highest_note(0)
 {
-	DUMP(format("Sequence (size %1%) constructed: %2%\n") % size % this);
+	DUMP(format("Sequence constructed: %1%\n") % this);
 	assert(_end_iter._is_end);
 	assert( ! _end_iter._lock);
 }
@@ -664,7 +664,7 @@ Sequence<Time>::append_note_off_unlocked(uint8_t chan, Time time, uint8_t note_n
 			assert(time >= note->time());
 			note->set_length(time - note->time());
 			_write_notes[chan].erase(n);
-			DUMP(format("resolved note, length: %1%\n") % note.length());
+			DUMP(format("resolved note, length: %1%\n") % note->length());
 			resolved = true;
 			break;
 		}
