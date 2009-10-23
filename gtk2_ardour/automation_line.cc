@@ -451,7 +451,7 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 	uint32_t this_rx = 0;
 	uint32_t prev_rx = 0;
 	uint32_t this_ry = 0;
- 	uint32_t prev_ry = 0;
+	uint32_t prev_ry = 0;
 	double* slope;
 	uint32_t box_size;
 	uint32_t cpsize;
@@ -532,13 +532,13 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 		*/
 
 		this_rx = (uint32_t) rint (tx);
-      		this_ry = (uint32_t) rint (ty);
+		this_ry = (uint32_t) rint (ty);
 
- 		if (view_index && pi != npoints && /* not the first, not the last */
+		if (view_index && pi != npoints && /* not the first, not the last */
 		    (((this_rx == prev_rx) && (this_ry == prev_ry)) || /* same point */
 		     (((this_rx - prev_rx) < (box_size + 2)) &&  /* not identical, but still too close horizontally */
 		      (abs ((int)(this_ry - prev_ry)) < (int) (box_size + 2))))) { /* too close vertically */
-  			continue;
+			continue;
 		}
 
 		/* ok, we should display this point */
@@ -1260,7 +1260,7 @@ AutomationLine::get_state (void)
 	return alist->get_state();
 }
 
-int 
+int
 AutomationLine::set_state (const XMLNode &node, int version)
 {
 	/* function as a proxy for the model */
