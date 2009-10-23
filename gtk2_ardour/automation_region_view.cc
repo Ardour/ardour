@@ -43,6 +43,7 @@ AutomationRegionView::AutomationRegionView(ArdourCanvas::Group*                 
 	}
 
 	group->signal_event().connect (mem_fun (this, &AutomationRegionView::canvas_event), false);
+	group->raise_to_top();
 }
 
 void
@@ -73,9 +74,9 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 				trackview, *get_canvas_group(), list, &_time_converter));
 	_line->set_colors();
 	_line->set_interpolation(list->interpolation());
+	_line->set_height ((uint32_t)rint(trackview.current_height() - NAME_HIGHLIGHT_SIZE));
 	_line->show();
 	_line->show_all_control_points();
-	_line->set_height ((uint32_t)rint(trackview.current_height() - NAME_HIGHLIGHT_SIZE));
 }
 
 bool

@@ -104,7 +104,9 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 			mem_fun (_editor, &PublicEditor::canvas_automation_track_event),
 			_base_rect, this));
 
-	// _base_rect->lower_to_bottom();
+	if (!a) {
+		_base_rect->lower_to_bottom();
+	}
 
 	hide_button.add (*(manage (new Gtk::Image (::get_icon("hide")))));
 
@@ -151,7 +153,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 			shortened = true;
 		}
 
- 		plugname = new Label (pname);
+		plugname = new Label (pname);
 		plugname->set_name (X_("TrackPlugName"));
 		plugname->show();
 		name_label.set_name (X_("TrackParameterName"));
@@ -593,7 +595,6 @@ AutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* /*item*/, GdkE
 
 	_session.set_dirty ();
 }
-
 
 bool
 AutomationTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
