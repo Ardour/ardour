@@ -375,7 +375,7 @@ ControlList::reset_range (double start, double endt)
 	bool reset = false;
 
 	{
-        Glib::Mutex::Lock lm (_lock);
+		Glib::Mutex::Lock lm (_lock);
 		ControlEvent cp (start, 0.0f);
 		iterator s;
 		iterator e;
@@ -791,7 +791,7 @@ ControlList::unlocked_eval (double x) const
 	case 2:
 		if (x >= _events.back()->when) {
 			return _events.back()->value;
- 		} else if (x <= _events.front()->when) {
+		} else if (x <= _events.front()->when) {
 			return _events.front()->value;
 		}
 
@@ -811,7 +811,7 @@ ControlList::unlocked_eval (double x) const
 	default:
 		if (x >= _events.back()->when) {
 			return _events.back()->value;
- 		} else if (x <= _events.front()->when) {
+		} else if (x <= _events.front()->when) {
 			return _events.front()->value;
 		}
 

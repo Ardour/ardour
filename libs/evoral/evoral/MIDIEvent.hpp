@@ -69,8 +69,8 @@ struct MIDIEvent : public Event<Time> {
 	inline bool     is_channel_pressure()   const { return (type() == MIDI_CMD_CHANNEL_PRESSURE); }
 	inline uint8_t  note()                  const { return (this->_buf[1]); }
 	inline uint8_t  velocity()              const { return (this->_buf[2]); }
-        inline void     set_velocity(uint8_t value)   { this->_buf[2] = value; }
-        inline void     scale_velocity(float factor)  {
+	inline void     set_velocity(uint8_t value)   { this->_buf[2] = value; }
+	inline void     scale_velocity(float factor)  {
 		if (factor < 0) factor = 0;
 		this->_buf[2] = (uint8_t) lrintf (this->_buf[2]*factor);
 		if (this->_buf[2] > 127) this->_buf[2] = 127;
