@@ -827,7 +827,9 @@ Editor::marker_menu_range_to_next ()
 		return;
 	}
 
-	nframes_t end = session->locations()->first_mark_after (marker->position());
+	nframes64_t start;
+	nframes64_t end;
+	session->locations()->marks_either_side (marker->position(), start, end);
 
 	if (end != max_frames) {
 		string range_name = l->name();

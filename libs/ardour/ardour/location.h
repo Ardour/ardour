@@ -172,8 +172,7 @@ class Locations : public PBD::StatefulDestructible
 	Location *first_location_before (nframes64_t, bool include_special_ranges = false);
 	Location *first_location_after (nframes64_t, bool include_special_ranges = false);
 
-	nframes64_t first_mark_before (nframes64_t, bool include_special_ranges = false);
-	nframes64_t first_mark_after (nframes64_t, bool include_special_ranges = false);
+	void marks_either_side (nframes64_t const, nframes64_t &, nframes64_t &) const;
 
 	void find_all_between (nframes64_t start, nframes64_t, LocationList&, Location::Flags);
 

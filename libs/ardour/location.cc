@@ -23,6 +23,8 @@
 #include <unistd.h>
 #include <cerrno>
 #include <ctime>
+#include <list>
+
 #include <sigc++/bind.h>
 
 #include "pbd/stl_delete.h"
@@ -786,84 +788,67 @@ Locations::first_location_after (nframes64_t frame, bool include_special_ranges)
 	return 0;
 }
 
-nframes64_t
-Locations::first_mark_before (nframes64_t frame, bool include_special_ranges)
+/** Look for the `marks' (either locations which are marks, or start/end points of range markers) either
+ *  side of a frame.
+ *  @param frame Frame to look for.
+ *  @param before Filled in with the position of the last `mark' before `frame' (or max_frames if none exists)
+ *  @param after Filled in with the position of the last `mark' after `frame' (or max_frames if none exists)
+ */
+void
+Locations::marks_either_side (nframes64_t const frame, nframes64_t& before, nframes64_t& after) const
 {
+	before = after = max_frames;
+	
 	LocationList locs;
 
 	{
-        Glib::Mutex::Lock lm (lock);
+		Glib::Mutex::Lock lm (lock);
 		locs = locations;
 	}
 
-	LocationStartLaterComparison cmp;
-	locs.sort (cmp);
+	std::list<nframes64_t> positions;
 
-	/* locs is now sorted latest..earliest */
-
-	for (LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
-		if (!include_special_ranges && ((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
+	for (LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
+		if (((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
 			continue;
 		}
+
 		if (!(*i)->is_hidden()) {
-			if ((*i)->is_mark()) {
-				/* MARK: start == end */
-				if ((*i)->start() < frame) {
-					return (*i)->start();
-				}
+			if ((*i)->is_mark ()) {
+				positions.push_back ((*i)->start ());
 			} else {
-				/* RANGE: start != end, compare start and end */
-				if ((*i)->end() < frame) {
-					return (*i)->end();
-				}
-				if ((*i)->start () < frame) {
-					return (*i)->start();
-				}
+				positions.push_back ((*i)->start ());
+				positions.push_back ((*i)->end ());
 			}
 		}
 	}
 
-	return 0;
-}
-
-nframes64_t
-Locations::first_mark_after (nframes64_t frame, bool include_special_ranges)
-{
-	LocationList locs;
-
-	{
-        Glib::Mutex::Lock lm (lock);
-		locs = locations;
+	if (positions.empty ()) {
+		return;
 	}
 
-	LocationStartEarlierComparison cmp;
-	locs.sort (cmp);
+	positions.sort ();
 
-	/* locs is now sorted earliest..latest */
-
-	for (LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
-		if (!include_special_ranges && ((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
-			continue;
-		}
-		if (!(*i)->is_hidden()) {
-			if ((*i)->is_mark()) {
-				/* MARK, start == end so just compare start */
-				if ((*i)->start() > frame) {
-					return (*i)->start();
-				}
-			} else {
-				/* RANGE, start != end, compare start and end */
-				if ((*i)->start() > frame ) {
-					return (*i)->start ();
-				}
-				if ((*i)->end() > frame) {
-					return (*i)->end ();
-				}
-			}
-		}
+	std::list<nframes64_t>::iterator i = positions.begin ();
+	while (i != positions.end () && *i < frame) {
+		++i;
 	}
 
-	return max_frames;
+	if (i == positions.end ()) {
+		/* run out of marks */
+		before = positions.back ();
+		return;
+	}
+
+	after = *i;
+
+	if (i == positions.begin ()) {
+		/* none before */
+		return;
+	}
+	
+	--i;
+	before = *i;
 }
 
 Location*

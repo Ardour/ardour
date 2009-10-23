@@ -3238,14 +3238,13 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			nframes64_t start;
 			nframes64_t end;
 
-			start = _editor->session->locations()->first_mark_before (_grab_frame);
-			end = _editor->session->locations()->first_mark_after (_grab_frame);
+			_editor->session->locations()->marks_either_side (_grab_frame, start, end);
 
 			if (end == max_frames) {
 				end = _editor->session->current_end_frame ();
 			}
 
-			if (start == 0) {
+			if (start == max_frames) {
 				start = _editor->session->current_start_frame ();
 			}
 

@@ -2566,8 +2566,8 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 void
 Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 {
-	Location* before = 0;
-	Location* after = 0;
+	nframes64_t before;
+	nframes64_t after;
 
 	const nframes64_t one_second = session->frame_rate();
 	const nframes64_t one_minute = session->frame_rate() * 60;
@@ -2682,39 +2682,21 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 			return;
 		}
 
-		before = session->locations()->first_location_before (start);
-		after = session->locations()->first_location_after (start);
+		session->locations()->marks_either_side (start, before, after);
 
-		if (direction < 0) {
-			if (before) {
-				start = before->start();
+		if (before == max_frames) {
+			start = after;
+		} else if (after == max_frames) {
+			start = before;
+		} else if (before != max_frames && after != max_frames) {
+			/* have before and after */
+			if ((start - before) < (after - start)) {
+				start = before;
 			} else {
-				start = 0;
-			}
-		} else if (direction > 0) {
-			if (after) {
-				start = after->start();
-			} else {
-				start = session->current_end_frame();
-			}
-		} else {
-			if (before) {
-				if (after) {
-					/* find nearest of the two */
-					if ((start - before->start()) < (after->start() - start)) {
-						start = before->start();
-					} else {
-						start = after->start();
-					}
-				} else {
-					start = before->start();
-				}
-			} else if (after) {
-				start = after->start();
-			} else {
-				/* relax */
+				start = after;
 			}
 		}
+
 		break;
 
 	case SnapToRegionStart:
