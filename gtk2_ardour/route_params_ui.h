@@ -62,7 +62,7 @@ class RouteParams_UI : public ArdourDialog
 
 	void set_session (ARDOUR::Session *);
 	void session_gone ();
-	PluginSelector&  plugin_selector() { return *_plugin_selector; }
+	PluginSelector*  plugin_selector() { return _plugin_selector; }
 
   private:
 	Gtk::HBox                global_hpacker;

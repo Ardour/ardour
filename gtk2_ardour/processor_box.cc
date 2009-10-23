@@ -93,7 +93,7 @@ bool ProcessorBox::get_colors = true;
 Gdk::Color* ProcessorBox::active_processor_color;
 Gdk::Color* ProcessorBox::inactive_processor_color;
 
-ProcessorBox::ProcessorBox (ARDOUR::Session& sess, sigc::slot<PluginSelector&> get_plugin_selector,
+ProcessorBox::ProcessorBox (ARDOUR::Session& sess, sigc::slot<PluginSelector*> get_plugin_selector,
 			RouteRedirectSelection& rsel, MixerStrip* parent, bool owner_is_mixer)
 	: _session(sess)
 	, _parent_strip (parent)
@@ -309,7 +309,7 @@ ProcessorBox::show_processor_menu (gint arg)
 	Gtk::MenuItem* plugin_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/processormenu/newplugin"));
 
 	if (plugin_menu_item) {
-		plugin_menu_item->set_submenu (_get_plugin_selector().plugin_menu());
+		plugin_menu_item->set_submenu (_get_plugin_selector()->plugin_menu());
 	}
 
 	paste_action->set_sensitive (!_rr_selection.processors.empty());
@@ -469,7 +469,7 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev)
 	} else if (!processor && ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
 
 		choose_plugin ();
-		_get_plugin_selector().show_manager ();
+		_get_plugin_selector()->show_manager ();
 	}
 
 
@@ -572,7 +572,7 @@ ProcessorBox::deselect_all_processors ()
 void
 ProcessorBox::choose_plugin ()
 {
-	_get_plugin_selector().set_interested_object (*this);
+	_get_plugin_selector()->set_interested_object (*this);
 }
 
 void

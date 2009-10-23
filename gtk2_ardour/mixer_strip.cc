@@ -1794,7 +1794,7 @@ MixerStrip::mono_button_clicked ()
 	panners.set_mono (_mono_button.get_active ());
 }
 
-PluginSelector&
+PluginSelector*
 MixerStrip::plugin_selector()
 {
 	return _mixer.plugin_selector();

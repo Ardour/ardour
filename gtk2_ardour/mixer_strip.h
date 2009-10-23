@@ -89,7 +89,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	GainMeter&      gain_meter()      { return gpm; }
 	PannerUI&       panner_ui()       { return panners; }
-	PluginSelector& plugin_selector();
+	PluginSelector* plugin_selector();
 
 	void fast_update ();
 	void set_embedded (bool);

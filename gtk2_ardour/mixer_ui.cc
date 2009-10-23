@@ -1492,12 +1492,12 @@ Mixer_UI::set_route_group_activation (RouteGroup* g, bool a)
 	g->set_active (a, this);
 }
 
-PluginSelector&
+PluginSelector*
 Mixer_UI::plugin_selector()
 {
 	if (!_plugin_selector) {
 		_plugin_selector = new PluginSelector (PluginManager::the_manager());
 		_plugin_selector->set_session (session);
 	}
-	return *_plugin_selector;
+	return _plugin_selector;
 }

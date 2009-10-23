@@ -69,7 +69,7 @@ namespace ARDOUR {
 class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 {
   public:
-	ProcessorBox (ARDOUR::Session&, sigc::slot<PluginSelector&> get_plugin_selector,
+	ProcessorBox (ARDOUR::Session&, sigc::slot<PluginSelector*> get_plugin_selector,
 			RouteRedirectSelection&, MixerStrip* parent, bool owner_is_mixer = false);
 	~ProcessorBox ();
 
@@ -97,7 +97,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	bool                 ab_direction;
 	std::vector<sigc::connection> connections;
 
-	sigc::slot<PluginSelector&> _get_plugin_selector;
+	sigc::slot<PluginSelector*> _get_plugin_selector;
 
 	boost::shared_ptr<ARDOUR::Processor> _processor_being_created;
 

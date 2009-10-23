@@ -58,7 +58,7 @@ class Mixer_UI : public Gtk::Window
 
 	void connect_to_session (ARDOUR::Session *);
 
-	PluginSelector& plugin_selector();
+	PluginSelector* plugin_selector();
 
 	void  set_strip_width (Width);
 	Width get_strip_width () const { return _strip_width; }
