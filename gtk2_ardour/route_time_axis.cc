@@ -123,6 +123,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	playlist_menu = 0;
 	playlist_action_menu = 0;
 	automation_action_menu = 0;
+	mode_menu = 0;
 	_view = 0;
 
 	if (!_route->is_hidden()) {

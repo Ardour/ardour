@@ -18,9 +18,11 @@
 */
 
 #include <getopt.h>
+#include <string.h>
 #include <iostream>
 #include <cstdlib>
 
+#include "ardour/debug.h"
 #include "ardour/session.h"
 
 #include "opts.h"
@@ -54,6 +56,7 @@ print_help (const char *execname)
 	     << _("  -b, --bindings                   Print all possible keyboard binding names\n")
 	     << _("  -c, --name <name>                Use a specific jack client name, default is ardour\n")
 	     << _("  -d, --disable-plugins            Disable all plugins in an existing session\n")
+	     << _("  -D, --debug <options>            Set debug flags. Use \"-D list\" to see available options\n")
 	     << _("  -n, --show-splash                Show splash screen\n")
 	     << _("  -m, --menus file                 Use \"file\" for Ardour menus\n")
 	     << _("  -N, --new session-name           Create a new session from the command line\n")
@@ -71,10 +74,47 @@ print_help (const char *execname)
 
 }
 
+static void
+list_debug_options ()
+{
+	cerr << _("The following debug options are available. Their use is case-insensitive.\n\n");
+	cerr << "\tMidiSourceIO\n";
+}
+
+static int
+parse_debug_options (const char* str)
+{
+	char* p;
+	char* sp;
+	uint64_t bits = 0;
+	char* copy = strdup (str);
+
+	p = strtok_r (copy, ",", &sp);
+
+	while (p) {
+		if (strcasecmp (p, "list") == 0) {
+			list_debug_options ();
+			free (copy);
+			return 1;
+		}
+
+		if (strcasecmp (p, "midisourceio") == 0) {
+			bits |= ARDOUR::DEBUG::MidiSourceIO;
+		}
+
+		p = strtok_r (0, ",", &sp);
+	}
+	
+	free (copy);
+	ARDOUR::set_debug_bits (bits);
+	return 0;
+}
+
+
 int
 ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 {
-	const char *optstring = "U:hSbvVnOdc:C:m:N:k:p:E:";
+	const char *optstring = "bc:C:dD:hk:E:m:N:nOp:SU:vV";
 	const char *execname = strrchr (argv[0], '/');
 
 	if (getenv ("ARDOUR_SAE")) {
@@ -92,6 +132,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		{ "version", 0, 0, 'v' },
 		{ "help", 0, 0, 'h' },
 		{ "bindings", 0, 0, 'b' },
+		{ "debug", 1, 0, 'D' },
 		{ "show-splash", 0, 0, 'n' },
 		{ "menus", 1, 0, 'm' },
 		{ "name", 1, 0, 'c' },
@@ -134,6 +175,12 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 			ARDOUR::Session::set_disable_all_loaded_plugins (true);
 			break;
 
+		case 'D':
+			if (parse_debug_options (optarg)) {
+				exit (0);
+			}
+			break;
+			
 		case 'm':
 			menus_file = optarg;
 			break;
