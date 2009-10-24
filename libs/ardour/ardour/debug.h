@@ -31,12 +31,13 @@ namespace ARDOUR {
 	namespace DEBUG {
 
 		/* this namespace is so that we can write DEBUG::bit_name */
-		   
+
 		enum DebugBits {
 			MidiSourceIO = 0x1,
 			MidiPlaylistIO = 0x2
 		};
-       }
+	}
+
 }
 
 #ifndef NDEBUG

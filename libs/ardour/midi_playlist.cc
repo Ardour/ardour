@@ -44,8 +44,8 @@ using namespace sigc;
 using namespace std;
 
 MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
-		: Playlist (session, node, DataType::MIDI, hidden)
-		, _note_mode(Sustained)
+	: Playlist (session, node, DataType::MIDI, hidden)
+	, _note_mode(Sustained)
 {
 	const XMLProperty* prop = node.property("type");
 	assert(prop && DataType(prop->value()) == DataType::MIDI);
@@ -56,52 +56,13 @@ MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 }
 
 MidiPlaylist::MidiPlaylist (Session& session, string name, bool hidden)
-		: Playlist (session, name, DataType::MIDI, hidden)
+	: Playlist (session, name, DataType::MIDI, hidden)
 {
 }
 
 MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, string name, bool hidden)
-		: Playlist (other, name, hidden)
+	: Playlist (other, name, hidden)
 {
-	throw; // nope
-
-	/*
-	list<Region*>::const_iterator in_o  = other.regions.begin();
-	list<Region*>::iterator in_n = regions.begin();
-
-	while (in_o != other.regions.end()) {
-		MidiRegion *ar = dynamic_cast<MidiRegion *>( (*in_o) );
-
-		for (list<Crossfade *>::const_iterator xfades = other._crossfades.begin(); xfades != other._crossfades.end(); ++xfades) {
-			if ( &(*xfades)->in() == ar) {
-				// We found one! Now copy it!
-
-				list<Region*>::const_iterator out_o = other.regions.begin();
-				list<Region*>::const_iterator out_n = regions.begin();
-
-				while (out_o != other.regions.end()) {
-
-					MidiRegion *ar2 = dynamic_cast<MidiRegion *>( (*out_o) );
-
-					if ( &(*xfades)->out() == ar2) {
-						MidiRegion *in  = dynamic_cast<MidiRegion*>( (*in_n) );
-						MidiRegion *out = dynamic_cast<MidiRegion*>( (*out_n) );
-						Crossfade *new_fade = new Crossfade( *(*xfades), in, out);
-						add_crossfade(*new_fade);
-						break;
-					}
-
-					out_o++;
-					out_n++;
-				}
-				// cerr << "HUH!? second region in the crossfade not found!" << endl;
-			}
-		}
-
-		in_o++;
-		in_n++;
-	}
-*/
 }
 
 MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, nframes_t start, nframes_t dur, string name, bool hidden)
