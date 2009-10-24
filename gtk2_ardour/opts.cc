@@ -79,6 +79,7 @@ list_debug_options ()
 {
 	cerr << _("The following debug options are available. Their use is case-insensitive.\n\n");
 	cerr << "\tMidiSourceIO\n";
+	cerr << "\tMidiPlaylistIO\n";
 }
 
 static int
@@ -100,6 +101,9 @@ parse_debug_options (const char* str)
 
 		if (strcasecmp (p, "midisourceio") == 0) {
 			bits |= ARDOUR::DEBUG::MidiSourceIO;
+		}
+		if (strcasecmp (p, "midiplaylistio") == 0) {
+			bits |= ARDOUR::DEBUG::MidiPlaylistIO;
 		}
 
 		p = strtok_r (0, ",", &sp);
