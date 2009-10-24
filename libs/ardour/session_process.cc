@@ -27,14 +27,15 @@
 #include <glibmm/thread.h>
 
 #include "ardour/ardour.h"
-#include "ardour/session.h"
-#include "ardour/timestamps.h"
 #include "ardour/audio_diskstream.h"
 #include "ardour/audioengine.h"
-#include "ardour/slave.h"
 #include "ardour/auditioner.h"
-#include "ardour/cycles.h"
+#include "ardour/butler.h"
 #include "ardour/cycle_timer.h"
+#include "ardour/cycles.h"
+#include "ardour/session.h"
+#include "ardour/slave.h"
+#include "ardour/timestamps.h"
 
 #include "midi++/manager.h"
 
@@ -64,7 +65,7 @@ Session::process (nframes_t nframes)
 	}
 
 	if (non_realtime_work_pending()) {
-		if (!transport_work_requested ()) {
+		if (!_butler->transport_work_requested ()) {
 			post_transport ();
 		}
 	}
@@ -449,8 +450,9 @@ Session::process_with_events (nframes_t nframes)
 
 	} /* implicit release of route lock */
 
-	if (session_needs_butler)
-		summon_butler ();
+	if (session_needs_butler) {
+		_butler->summon ();
+	}
 }
 
 void
@@ -766,7 +768,7 @@ Session::follow_slave_silently (nframes_t nframes, float slave_speed)
 		commit_diskstreams (nframes, need_butler);
 
 		if (need_butler) {
-			summon_butler ();
+			_butler->summon ();
 		}
 
 		int32_t frames_moved = (int32_t) floor (_transport_speed * nframes);
@@ -867,8 +869,9 @@ Session::process_without_events (nframes_t nframes)
 	maybe_stop (stop_limit);
 	check_declick_out ();
 
-	if (session_needs_butler)
-		summon_butler ();
+	if (session_needs_butler) {
+		_butler->summon ();
+	}
 }
 
 /** Process callback used when the auditioner is active.
@@ -889,7 +892,7 @@ Session::process_audition (nframes_t nframes)
 	/* run the auditioner, and if it says we need butler service, ask for it */
 
 	if (auditioner->play_audition (nframes) > 0) {
-		summon_butler ();
+		_butler->summon ();
 	}
 
 	/* handle pending events */

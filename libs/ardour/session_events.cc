@@ -26,8 +26,9 @@
 #include <glibmm/thread.h>
 
 #include "ardour/ardour.h"
-#include "ardour/session.h"
 #include "ardour/audio_diskstream.h"
+#include "ardour/butler.h"
+#include "ardour/session.h"
 
 #include "i18n.h"
 
@@ -425,7 +426,7 @@ Session::process_event (Event* ev)
 
 	case Event::InputConfigurationChange:
 		post_transport_work = PostTransportWork (post_transport_work | PostTransportInputChange);
-		schedule_butler_transport_work ();
+		_butler->schedule_transport_work ();
 		break;
 
 	case Event::SetAudioRange:

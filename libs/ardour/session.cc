@@ -130,7 +130,7 @@ Session::Session (AudioEngine &eng,
 	  _session_dir (new SessionDirectory(fullpath)),
 	  pending_events (2048),
 	  state_tree (0),
-	  butler (new Butler ()),
+	  _butler (new Butler (this)),
 	  post_transport_work((PostTransportWork)0),
 	  _send_smpte_update (false),
 	  midi_thread (pthread_t (0)),
@@ -216,7 +216,7 @@ Session::Session (AudioEngine &eng,
 	  _session_dir ( new SessionDirectory(fullpath)),
 	  pending_events (2048),
 	  state_tree (0),
-	  butler (new Butler ()),
+	  _butler (new Butler (this)),
 	  post_transport_work((PostTransportWork)0),
 	  _send_smpte_update (false),
 	  midi_thread (pthread_t (0)),
@@ -356,7 +356,7 @@ Session::destroy ()
 
 	Stateful::loading_state_version = 0;
 
-	terminate_butler_thread ();
+	_butler->terminate_thread ();
 	//terminate_midi_thread ();
 
 	if (click_data != default_click) {
@@ -3499,7 +3499,7 @@ Session::set_audition (boost::shared_ptr<Region> r)
 {
 	pending_audition_region = r;
 	post_transport_work = PostTransportWork (post_transport_work | PostTransportAudition);
-	schedule_butler_transport_work ();
+	_butler->schedule_transport_work ();
 }
 
 void

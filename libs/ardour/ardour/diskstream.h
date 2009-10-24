@@ -163,6 +163,7 @@ class Diskstream : public SessionObject, public boost::noncopyable
 
   protected:
 	friend class Session;
+	friend class Butler;
 
 	/* the Session is the only point of access for these because they require
 	 * that the Session is "inactive" while they are called.

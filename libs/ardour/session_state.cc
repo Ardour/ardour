@@ -71,6 +71,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/auditioner.h"
 #include "ardour/buffer.h"
+#include "ardour/butler.h"
 #include "ardour/configuration.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/crossfade.h"
@@ -184,8 +185,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	pending_locate_frame = 0;
 	pending_locate_roll = false;
 	pending_locate_flush = false;
-	audio_dstream_buffer_size = 0;
-	midi_dstream_buffer_size = 0;
 	state_was_pending = false;
 	set_next_event ();
 	outbound_mtc_smpte_frame = 0;
@@ -297,7 +296,7 @@ Session::second_stage_init (bool new_session)
 		remove_empty_sounds ();
 	}
 
-	if (start_butler_thread()) {
+	if (_butler->start_thread()) {
 		return -1;
 	}
 

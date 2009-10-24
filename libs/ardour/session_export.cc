@@ -65,7 +65,7 @@ Session::pre_export ()
 {
 	get_export_status (); // Init export_status
 
-	wait_till_butler_finished ();
+	_butler->wait_until_finished ();
 
 	/* take everyone out of awrite to avoid disasters */
 
@@ -138,7 +138,7 @@ Session::start_audio_export (nframes_t position, bool realtime)
 
 	set_transport_speed (1.0, false);
 	butler_transport_work ();
-	g_atomic_int_set (&butler->should_do_transport_work, 0);
+	g_atomic_int_set (&_butler->should_do_transport_work, 0);
 	post_transport ();
 
 	/* we are ready to go ... */
@@ -173,7 +173,7 @@ Session::process_export (nframes_t nframes)
 			we're running faster than realtime c/o JACK.
 			*/
 
-			wait_till_butler_finished ();
+			_butler->wait_until_finished ();
 		}
 
 		/* do the usual stuff */
@@ -211,7 +211,7 @@ Session::stop_audio_export ()
 	*/
 
 	realtime_stop (true);
-	schedule_butler_transport_work ();
+	_butler->schedule_transport_work ();
 
 	if (!export_status->aborted()) {
 		ExportReadFinished ();

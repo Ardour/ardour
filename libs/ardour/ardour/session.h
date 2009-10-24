@@ -298,13 +298,17 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	bool have_captured() const { return _have_captured; }
 
 	void refill_all_diskstream_buffers ();
-	uint32_t audio_diskstream_buffer_size() const { return audio_dstream_buffer_size; }
-	uint32_t midi_diskstream_buffer_size() const { return midi_dstream_buffer_size; }
+	Butler* butler() { return _butler; }
+	void butler_transport_work ();
 
 	uint32_t get_next_diskstream_id() const { return n_diskstreams(); }
 	uint32_t n_diskstreams() const;
 
+	void refresh_disk_space ();
+
 	typedef std::list<boost::shared_ptr<Diskstream> > DiskstreamList;
+
+	SerializedRCUManager<DiskstreamList>& diskstream_list() { return diskstreams; }
 
 	int load_routes (const XMLNode&, int);
 	boost::shared_ptr<RouteList> get_routes() const {
@@ -924,9 +928,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void reset_playback_load_min ();
 	void reset_capture_load_min ();
 
-	float read_data_rate () const; // in usec
-	float write_data_rate () const;
-
 	/* ranges */
 
 	void set_audio_range (std::list<AudioRange>&);
@@ -975,8 +976,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
   protected:
 	friend class Diskstream;
-	void stop_butler ();
-	void wait_till_butler_finished();
 
   protected:
 	friend class Route;
@@ -1188,18 +1187,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	bool              pending_abort;
 	bool              pending_auto_loop;
 
-	Butler* butler;
-
-	bool transport_work_requested() const;
-
-	struct ButlerRequest {
-		enum Type {
-			Wake,
-			Run,
-			Pause,
-			Quit
-		};
-	};
+	Butler* _butler;
 
 	enum PostTransportWork {
 		PostTransportStop               = 0x1,
@@ -1231,13 +1219,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 				PostTransportStop);
 
 	PostTransportWork post_transport_work;
-
-	void             summon_butler ();
-	void             schedule_butler_transport_work ();
-	int              start_butler_thread ();
-	void             terminate_butler_thread ();
-	static void    *_butler_thread_work (void *arg);
-	void*            butler_thread_work ();
 
 	uint32_t    cumulative_rf_motion;
 	uint32_t    rf_scale;
@@ -1421,7 +1402,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void non_realtime_locate ();
 	void non_realtime_stop (bool abort, int entry_request_count, bool& finished);
 	void non_realtime_overwrite (int entry_request_count, bool& finished);
-	void butler_transport_work ();
 	void post_transport ();
 	void engine_halted ();
 	void xrun_recovery ();
@@ -1439,8 +1419,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	SerializedRCUManager<DiskstreamList>  diskstreams;
 
-	uint32_t audio_dstream_buffer_size;
-	uint32_t midi_dstream_buffer_size;
 	int load_diskstreams (const XMLNode&);
 
 	/* routes stuff */
@@ -1581,7 +1559,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	Glib::Mutex space_lock;
 
 	std::string get_best_session_directory_for_new_source ();
-	void refresh_disk_space ();
 
 	mutable gint _playback_load;
 	mutable gint _capture_load;

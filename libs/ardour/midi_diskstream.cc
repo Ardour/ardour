@@ -38,6 +38,7 @@
 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
+#include "ardour/butler.h"
 #include "ardour/configuration.h"
 #include "ardour/cycle_timer.h"
 #include "ardour/io.h"
@@ -123,7 +124,7 @@ MidiDiskstream::init (Diskstream::Flag f)
 	set_block_size (_session.get_block_size());
 	allocate_temporary_buffers ();
 
-	const size_t size = _session.midi_diskstream_buffer_size();
+	const size_t size = _session.butler()->midi_diskstream_buffer_size();
 	_playback_buf = new MidiRingBuffer<nframes_t>(size);
 	_capture_buf = new MidiRingBuffer<nframes_t>(size);
 

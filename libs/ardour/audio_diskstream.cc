@@ -37,24 +37,25 @@
 #include "pbd/enumwriter.h"
 #include "pbd/stacktrace.h"
 
-#include "ardour/ardour.h"
-#include "ardour/audioengine.h"
 #include "ardour/analyser.h"
-#include "ardour/audio_diskstream.h"
-#include "ardour/utils.h"
-#include "ardour/configuration.h"
-#include "ardour/audiofilesource.h"
-#include "ardour/send.h"
-#include "ardour/region_factory.h"
-#include "ardour/audioplaylist.h"
-#include "ardour/playlist_factory.h"
-#include "ardour/cycle_timer.h"
-#include "ardour/audioregion.h"
-#include "ardour/audio_port.h"
-#include "ardour/source_factory.h"
+#include "ardour/ardour.h"
 #include "ardour/audio_buffer.h"
-#include "ardour/session.h"
+#include "ardour/audio_diskstream.h"
+#include "ardour/audio_port.h"
+#include "ardour/audioengine.h"
+#include "ardour/audiofilesource.h"
+#include "ardour/audioplaylist.h"
+#include "ardour/audioregion.h"
+#include "ardour/butler.h"
+#include "ardour/configuration.h"
+#include "ardour/cycle_timer.h"
 #include "ardour/io.h"
+#include "ardour/playlist_factory.h"
+#include "ardour/region_factory.h"
+#include "ardour/send.h"
+#include "ardour/session.h"
+#include "ardour/source_factory.h"
+#include "ardour/utils.h"
 
 #include "i18n.h"
 #include <locale.h>
@@ -2065,10 +2066,9 @@ AudioDiskstream::set_align_style_from_io ()
 int
 AudioDiskstream::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_many)
 {
-
 	while (how_many--) {
-		c->push_back (new ChannelInfo(_session.audio_diskstream_buffer_size(), speed_buffer_size, wrap_buffer_size));
-		interpolation.add_channel_to (_session.audio_diskstream_buffer_size(), speed_buffer_size);
+		c->push_back (new ChannelInfo(_session.butler()->audio_diskstream_buffer_size(), speed_buffer_size, wrap_buffer_size));
+		interpolation.add_channel_to (_session.butler()->audio_diskstream_buffer_size(), speed_buffer_size);
 	}
 
 	_n_channels.set(DataType::AUDIO, c->size());

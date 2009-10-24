@@ -194,7 +194,7 @@ Session::butler_transport_work ()
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
-	int on_entry = g_atomic_int_get (&butler->should_do_transport_work);
+	int on_entry = g_atomic_int_get (&_butler->should_do_transport_work);
 	finished = true;
 
 	if (post_transport_work & PostTransportCurveRealloc) {
@@ -227,9 +227,9 @@ Session::butler_transport_work ()
 				if (!(*i)->hidden()) {
 					(*i)->non_realtime_locate (_transport_frame);
 				}
-				if (on_entry != g_atomic_int_get (&butler->should_do_transport_work)) {
+				if (on_entry != g_atomic_int_get (&_butler->should_do_transport_work)) {
 					/* new request, stop seeking, and start again */
-					g_atomic_int_dec_and_test (&butler->should_do_transport_work);
+					g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
 					goto restart;
 				}
 			}
@@ -243,7 +243,7 @@ Session::butler_transport_work ()
 	if (post_transport_work & PostTransportStop) {
 		non_realtime_stop (post_transport_work & PostTransportAbort, on_entry, finished);
 		if (!finished) {
-			g_atomic_int_dec_and_test (&butler->should_do_transport_work);
+			g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
 			goto restart;
 		}
 	}
@@ -251,7 +251,7 @@ Session::butler_transport_work ()
 	if (post_transport_work & PostTransportOverWrite) {
 		non_realtime_overwrite (on_entry, finished);
 		if (!finished) {
-			g_atomic_int_dec_and_test (&butler->should_do_transport_work);
+			g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
 			goto restart;
 		}
 	}
@@ -260,7 +260,7 @@ Session::butler_transport_work ()
 		non_realtime_set_audition ();
 	}
 
-	g_atomic_int_dec_and_test (&butler->should_do_transport_work);
+	g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
 }
 
 void
@@ -282,7 +282,7 @@ Session::non_realtime_overwrite (int on_entry, bool& finished)
 		if ((*i)->pending_overwrite) {
 			(*i)->overwrite_existing_buffers ();
 		}
-		if (on_entry != g_atomic_int_get (&butler->should_do_transport_work)) {
+		if (on_entry != g_atomic_int_get (&_butler->should_do_transport_work)) {
 			finished = false;
 			return;
 		}
@@ -432,7 +432,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 			if (!(*i)->hidden()) {
 				(*i)->non_realtime_locate (_transport_frame);
 			}
-			if (on_entry != g_atomic_int_get (&butler->should_do_transport_work)) {
+			if (on_entry != g_atomic_int_get (&_butler->should_do_transport_work)) {
 				finished = false;
 				/* we will be back */
 				return;
@@ -712,7 +712,7 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 			post_transport_work = PostTransportWork (post_transport_work | PostTransportRoll);
 		}
 
-		schedule_butler_transport_work ();
+		_butler->schedule_transport_work ();
 
 	} else {
 
@@ -906,7 +906,7 @@ Session::set_transport_speed (double speed, bool abort)
 		}
 
 		if (post_transport_work & (PostTransportSpeed|PostTransportReverse)) {
-			schedule_butler_transport_work ();
+			_butler->schedule_transport_work ();
 		}
 	}
 }
@@ -951,7 +951,7 @@ Session::stop_transport (bool abort)
 	}
 
 	realtime_stop (abort);
-	schedule_butler_transport_work ();
+	_butler->schedule_transport_work ();
 }
 
 void
@@ -1133,7 +1133,7 @@ Session::set_slave_source (SlaveSource src)
 
 	if (non_rt_required) {
 		post_transport_work = PostTransportWork (post_transport_work | PostTransportSpeed);
-		schedule_butler_transport_work ();
+		_butler->schedule_transport_work ();
 	}
 
 	set_dirty();
@@ -1143,7 +1143,7 @@ void
 Session::reverse_diskstream_buffers ()
 {
 	post_transport_work = PostTransportWork (post_transport_work | PostTransportReverse);
-	schedule_butler_transport_work ();
+	_butler->schedule_transport_work ();
 }
 
 void
@@ -1151,7 +1151,7 @@ Session::set_diskstream_speed (Diskstream* stream, double speed)
 {
 	if (stream->realtime_set_speed (speed, false)) {
 		post_transport_work = PostTransportWork (post_transport_work | PostTransportSpeed);
-		schedule_butler_transport_work ();
+		_butler->schedule_transport_work ();
 		set_dirty ();
 	}
 }
@@ -1278,9 +1278,9 @@ Session::engine_halted ()
 	   the picture.
 	*/
 
-	g_atomic_int_set (&butler->should_do_transport_work, 0);
+	g_atomic_int_set (&_butler->should_do_transport_work, 0);
 	post_transport_work = PostTransportWork (0);
-	stop_butler ();
+	_butler->stop ();
 
 	realtime_stop (false);
 	non_realtime_stop (false, 0, ignored);
