@@ -20,10 +20,12 @@
 #include <cassert>
 
 #include <algorithm>
+#include <iostream>
 
 #include <stdlib.h>
-
 #include <sigc++/bind.h>
+
+#include "evoral/EventList.hpp"
 
 #include "ardour/types.h"
 #include "ardour/configuration.h"
@@ -122,6 +124,13 @@ struct RegionSortByLayer {
     }
 };
 
+template<typename Time>
+struct EventsSortByTime {
+    bool operator() (Evoral::Event<Time>* a, Evoral::Event<Time>* b) {
+	    return a->time() < b->time();
+    }
+};
+
 /** Returns the number of frames in time duration read (eg could be large when 0 events are read) */
 nframes_t
 MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t dur, unsigned chan_n)
@@ -131,6 +140,7 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 	*/
 
 	Glib::RecMutex::Lock rm (region_lock);
+	cerr << "++++++" << start << " .. " << start + dur << " channel " << chan_n << " +++++++++++++++++++++++++++++++++++++++++++++++\n";
 
 	nframes_t end = start + dur - 1;
 
@@ -138,47 +148,167 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 
 	// relevent regions overlapping start <--> end
 	vector< boost::shared_ptr<Region> > regs;
+	typedef pair<MidiStateTracker*,nframes64_t> TrackerInfo;
+	vector<TrackerInfo> tracker_info;
+	uint32_t note_cnt = 0;
 
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 		if ((*i)->coverage (start, end) != OverlapNone) {
 			regs.push_back(*i);
 		} else {
-			/* region does not cover the current read boundaries, so make
-			   sure that we silence any notes that it had turned on
-			*/
 			NoteTrackers::iterator t = _note_trackers.find ((*i).get());
 			if (t != _note_trackers.end()) {
-				t->second->resolve_notes (dst, (*i)->last_frame());
-				delete t->second;
+
+				/* add it the set of trackers we will do note resolution
+				   on, and remove it from the list we are keeping 
+				   around, because we don't need it anymore.
+				*/
+				
+				tracker_info.push_back (TrackerInfo (t->second, (*i)->last_frame()));
+				cerr << "time to resolve & remove tracker for " << (*i)->name() << endl;
+				note_cnt += (t->second->on());
 				_note_trackers.erase (t);
 			}
 		}
 	}
 
-	RegionSortByLayer layer_cmp;
-	sort(regs.begin(), regs.end(), layer_cmp);
+	if (note_cnt == 0 && !tracker_info.empty()) {
+		/* trackers to dispose of, but they have no notes in them */
+		cerr << "Clearing " << tracker_info.size() << " empty trackers\n";
+		for (vector<TrackerInfo>::iterator t = tracker_info.begin(); t != tracker_info.end(); ++t) {
+			delete (*t).first;
+		}
+		tracker_info.clear ();
+	}
+			
+	if (regs.size() == 1 && tracker_info.empty()) {
+	
+		/* just a single region - read directly into dst */
 
-	for (vector<boost::shared_ptr<Region> >::iterator i = regs.begin(); i != regs.end(); ++i) {
-		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*i);
+		cerr << "Single region (" << regs.front()->name() << ") read, no out-of-bound region tracking info\n";
+
+		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(regs.front());
+
 		if (mr) {
 
-			NoteTrackers::iterator t = _note_trackers.find ((*i).get());
+			NoteTrackers::iterator t = _note_trackers.find (mr.get());
 			MidiStateTracker* tracker;
+			bool new_tracker = false;
 
 			if (t == _note_trackers.end()) {
-				pair<Region*,MidiStateTracker*> newpair;
-				newpair.first = (*i).get();
-				tracker = newpair.second = new MidiStateTracker;
-				_note_trackers.insert (newpair);
+				tracker = new MidiStateTracker;
+				new_tracker = true;
+				cerr << "\tBEFORE: new tracker\n";
 			} else {
 				tracker = t->second;
+				cerr << "\tBEFORE: tracker says there are " << tracker->on() << " on notes\n";
+			}
+			
+			mr->read_at (dst, start, dur, chan_n, _note_mode, tracker);
+			cerr << "\tAFTER: tracker says there are " << tracker->on() << " on notes\n";
+			
+			if (new_tracker) {
+				pair<Region*,MidiStateTracker*> newpair;
+				newpair.first = mr.get();
+				newpair.second = tracker;
+				_note_trackers.insert (newpair);
+				cerr << "\tadded tracker to trackers\n";
 			}
 
-			mr->read_at (dst, start, dur, chan_n, _note_mode, tracker);
 			_read_data_count += mr->read_data_count();
+		}
+		
+	} else {
+
+		/* multiple regions and/or note resolution: sort by layer, read into a temporary non-monotonically 
+		   sorted EventSink, sort and then insert into dst.
+		*/
+
+		cerr << regs.size() << " regions to read, plus " << tracker_info.size() << " trackers\n";
+		
+		Evoral::EventList<nframes_t> evlist;
+
+		for (vector<TrackerInfo>::iterator t = tracker_info.begin(); t != tracker_info.end(); ++t) {
+			cerr << "Resolve " << (*t).first->on() << " notes\n";
+			(*t).first->resolve_notes (evlist, (*t).second);
+			delete (*t).first;
+		}
+		
+		cerr << "After resolution we now have " << evlist.size() << " events\n";
+		for (Evoral::EventList<nframes_t>::iterator x = evlist.begin(); x != evlist.end(); ++x) {
+			cerr << '\t' << **x << endl;
+		}			
+
+		RegionSortByLayer layer_cmp;
+		sort(regs.begin(), regs.end(), layer_cmp);
+
+		cerr << "for " << start << " .. " << start+dur-1 << " We have " << regs.size() << " regions to consider\n";
+		
+		for (vector<boost::shared_ptr<Region> >::iterator i = regs.begin(); i != regs.end(); ++i) {
+			boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*i);
+			if (!mr) {
+				continue;
+			}
+
+			NoteTrackers::iterator t = _note_trackers.find (mr.get());
+			MidiStateTracker* tracker;
+			bool new_tracker = false;
+
+			cerr << "Before " << mr->name() << " (" << mr->position() << " .. " << mr->last_frame() << ") we now have " << evlist.size() << " events\n";
+
+			if (t == _note_trackers.end()) {
+				tracker = new MidiStateTracker;
+				new_tracker = true;
+				cerr << "\tBEFORE: tracker says there are " << tracker->on() << " on notes\n";
+			} else {
+				tracker = t->second;
+				cerr << "\tBEFORE: tracker says there are " << tracker->on() << " on notes\n";
+			}
+
+			mr->read_at (evlist, start, dur, chan_n, _note_mode, tracker);
+			_read_data_count += mr->read_data_count();
+
+			cerr << "After " << mr->name() << " (" << mr->position() << " .. " << mr->last_frame() << ") we now have " << evlist.size() << " events\n";
+			for (Evoral::EventList<nframes_t>::iterator x = evlist.begin(); x != evlist.end(); ++x) {
+				cerr << '\t' << **x << endl;
+			}			
+			cerr << "\tAFTER: tracker says there are " << tracker->on() << " on notes\n";
+
+			if (new_tracker) {
+				pair<Region*,MidiStateTracker*> newpair;
+				newpair.first = mr.get();
+				newpair.second = tracker;
+				_note_trackers.insert (newpair);
+				cerr << "\tadded tracker to trackers\n";
+			} 
+		}
+
+		cerr << "Final we now have " << evlist.size() << " events\n";
+		for (Evoral::EventList<nframes_t>::iterator x = evlist.begin(); x != evlist.end(); ++x) {
+			cerr << '\t' << **x << endl;
+		}			
+		
+		if (!evlist.empty()) {
+		
+			/* sort the event list */
+			EventsSortByTime<nframes_t> time_cmp;
+			evlist.sort (time_cmp);
+			
+			cerr << "Post sort: we now have " << evlist.size() << " events\n";
+			for (Evoral::EventList<nframes_t>::iterator x = evlist.begin(); x != evlist.end(); ++x) {
+				cerr << '\t' << **x << endl;
+			}			
+			
+			/* write into dst */
+			for (Evoral::EventList<nframes_t>::iterator e = evlist.begin(); e != evlist.end(); ++e) {
+				Evoral::Event<nframes_t>* ev (*e);
+				dst.write (ev->time(), ev->event_type(), ev->size(), ev->buffer());
+				delete ev;
+			}
 		}
 	}
 
+	cerr << "-------------------------------------------------------------\n";
 	return dur;
 }
 

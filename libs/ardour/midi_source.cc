@@ -33,6 +33,7 @@
 #include "pbd/basename.h"
 
 #include "ardour/audioengine.h"
+#include "ardour/debug.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_state_tracker.h"
@@ -129,7 +130,7 @@ MidiSource::invalidate ()
 }
 
 nframes_t
-MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t source_start,
+MidiSource::midi_read (Evoral::EventSink<nframes_t>& dst, sframes_t source_start,
 		       sframes_t start, nframes_t cnt,
 		       sframes_t stamp_offset, sframes_t negative_stamp_offset,
 		       MidiStateTracker* tracker) const
@@ -139,18 +140,19 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t source_start,
 	BeatsFramesConverter converter(_session, source_start);
 
 	if (_model) {
-#define BEATS_TO_FRAMES(t) (converter.to(t) + stamp_offset - negative_stamp_offset)
-
 		Evoral::Sequence<double>::const_iterator& i = _model_iter;
 
 		// If the cached iterator is invalid, search for the first event past start
 		if (_last_read_end == 0 || start != _last_read_end || !_model_iter_valid) {
+			DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("****!!!!**** search for relevant iterator for %1 / %2\n", source_start, start));
 			for (i = _model->begin(); i != _model->end(); ++i) {
 				if (converter.to(i->time()) >= start) {
 					break;
 				}
 			}
 			_model_iter_valid = true;
+		} else {
+			DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("============ use cached iterator for %1 / %2\n", source_start, start));
 		}
 
 		_last_read_end = start + cnt;
@@ -164,8 +166,10 @@ MidiSource::midi_read (MidiRingBuffer<nframes_t>& dst, sframes_t source_start,
 				if (tracker) {
 					Evoral::MIDIEvent<Evoral::MusicalTime>& ev (*(Evoral::MIDIEvent<Evoral::MusicalTime>*) (&(*i)));
 					if (ev.is_note_on()) {
+						DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("\t%1 Added note on %2 @ %3\n", _name, ev.note(), time_frames));
 						tracker->add (ev.note(), ev.channel());
 					} else if (ev.is_note_off()) {
+						DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("\t%1 Added note OFF %2 @ %3\n", _name, ev.note(), time_frames));
 						tracker->remove (ev.note(), ev.channel());
 					}
 				}

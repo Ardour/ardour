@@ -56,7 +56,7 @@ class MidiRegion : public Region
 	virtual nframes_t read (Sample*, sframes_t /*pos*/, nframes_t /*cnt*/, int /*channel*/) const { return 0; }
 	virtual sframes_t readable_length() const { return length(); }
 
-	nframes_t read_at (MidiRingBuffer<nframes_t>& dst,
+	nframes_t read_at (Evoral::EventSink<nframes_t>& dst,
 			   sframes_t position,
 			   nframes_t dur,
 			   uint32_t  chan_n = 0,
@@ -105,7 +105,7 @@ class MidiRegion : public Region
 	MidiRegion (const SourceList &, const XMLNode&);
 
   private:
-	nframes_t _read_at (const SourceList&, MidiRingBuffer<nframes_t>& dst,
+	nframes_t _read_at (const SourceList&, Evoral::EventSink<nframes_t>& dst,
 			    sframes_t position,
 			    nframes_t dur,
 			    uint32_t chan_n = 0,

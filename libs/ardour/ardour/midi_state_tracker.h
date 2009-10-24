@@ -23,9 +23,12 @@
 #include <bitset>
 #include "ardour/midi_buffer.h"
 
+namespace Evoral {
+template <typename T> class EventSink;
+}
+
 namespace ARDOUR {
 
-template <typename T> class MidiRingBuffer;
 
 /** Tracks played notes, so they can be resolved in potential stuck note
  * situations (e.g. looping, transport stop, etc).
@@ -39,14 +42,17 @@ public:
 	void add (uint8_t note, uint8_t chn);
 	void remove (uint8_t note, uint8_t chn);
 	void resolve_notes (MidiBuffer& buffer, nframes64_t time);
-	void resolve_notes (MidiRingBuffer<nframes_t>& buffer, nframes64_t time);
+	void resolve_notes (Evoral::EventSink<nframes_t>& buffer, nframes64_t time);
 	void dump (std::ostream&);
 	void reset ();
+	bool empty() const { return _on == 0; }
+	uint16_t on() const { return _on; }
 
 private:
 	void track_note_onoffs(const Evoral::MIDIEvent<MidiBuffer::TimeType>& event);
 
-	uint8_t _active_notes[128*16];
+	uint8_t  _active_notes[128*16];
+	uint16_t _on;
 };
 
 

@@ -130,7 +130,7 @@ MidiRegion::set_position_internal (nframes_t pos, bool allow_bbt_recompute)
 }
 
 nframes_t
-MidiRegion::read_at (MidiRingBuffer<nframes_t>& out, sframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode, MidiStateTracker* tracker) const
+MidiRegion::read_at (Evoral::EventSink<nframes_t>& out, sframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode, MidiStateTracker* tracker) const
 {
 	return _read_at (_sources, out, position, dur, chan_n, mode, tracker);
 }
@@ -142,9 +142,8 @@ MidiRegion::master_read_at (MidiRingBuffer<nframes_t>& out, sframes_t position, 
 }
 
 nframes_t
-MidiRegion::_read_at (const SourceList& /*srcs*/,
-		MidiRingBuffer<nframes_t>& dst, sframes_t position, nframes_t dur, uint32_t chan_n,
-		NoteMode mode, MidiStateTracker* tracker) const
+MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<nframes_t>& dst, sframes_t position, nframes_t dur, uint32_t chan_n, 
+		      NoteMode mode, MidiStateTracker* tracker) const
 {
 	nframes_t internal_offset = 0;
 	nframes_t src_offset      = 0;

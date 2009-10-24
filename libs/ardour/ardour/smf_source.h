@@ -70,7 +70,7 @@ public:
 	static bool safe_midi_file_extension (const Glib::ustring& path);
 
 private:
-	nframes_t read_unlocked (MidiRingBuffer<nframes_t>& dst,
+	nframes_t read_unlocked (Evoral::EventSink<nframes_t>& dst,
 				 sframes_t position,
 				 sframes_t start,
 				 nframes_t cnt,

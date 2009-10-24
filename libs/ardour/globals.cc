@@ -59,6 +59,7 @@
 #include "midi++/mmc.h"
 
 #include "ardour/ardour.h"
+#include "ardour/debug.h"
 #include "ardour/analyser.h"
 #include "ardour/audio_library.h"
 #include "ardour/rc_configuration.h"
@@ -89,6 +90,8 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
+uint64_t ARDOUR::debug_bits = 0x0;
+
 MIDI::Port *ARDOUR::default_mmc_port = 0;
 MIDI::Port *ARDOUR::default_mtc_port = 0;
 MIDI::Port *ARDOUR::default_midi_port = 0;
@@ -107,6 +110,18 @@ mix_buffers_with_gain_t ARDOUR::mix_buffers_with_gain = 0;
 mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain = 0;
 
 sigc::signal<void,std::string> ARDOUR::BootMessage;
+
+void
+ARDOUR::debug_print (std::string str)
+{
+	cerr << str;
+}
+
+void
+ARDOUR::set_debug_bits (uint64_t bits)
+{
+	debug_bits = bits;
+}
 
 int
 ARDOUR::setup_midi ()

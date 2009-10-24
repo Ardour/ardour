@@ -102,7 +102,7 @@ SMFSource::~SMFSource ()
 
 /** All stamps in audio frames */
 nframes_t
-SMFSource::read_unlocked (MidiRingBuffer<nframes_t>& destination, sframes_t source_start,
+SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t source_start,
 			  sframes_t start, nframes_t duration,
 			  sframes_t stamp_offset, sframes_t negative_stamp_offset,
 			  MidiStateTracker* tracker) const

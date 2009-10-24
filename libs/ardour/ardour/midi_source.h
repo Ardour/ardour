@@ -58,14 +58,14 @@ class MidiSource : virtual public Source
 	 * \param negative_stamp_offset Offset to subtract from event times written to dst
 	 * \param tracker an optional pointer to MidiStateTracker object, for note on/off tracking
 	 */
-	virtual nframes_t midi_read (MidiRingBuffer<nframes_t>& dst,
+	virtual nframes_t midi_read (Evoral::EventSink<nframes_t>& dst,
 				     sframes_t source_start,
 				     sframes_t start, nframes_t cnt,
 				     sframes_t stamp_offset, sframes_t negative_stamp_offset, MidiStateTracker*) const;
 
 	virtual nframes_t midi_write (MidiRingBuffer<nframes_t>& src,
-			sframes_t source_start,
-			nframes_t cnt);
+				      sframes_t source_start,
+				      nframes_t cnt);
 
 	virtual void append_event_unlocked_beats(const Evoral::Event<Evoral::MusicalTime>& ev) = 0;
 
@@ -114,7 +114,7 @@ class MidiSource : virtual public Source
   protected:
 	virtual void flush_midi() = 0;
 
-	virtual nframes_t read_unlocked (MidiRingBuffer<nframes_t>& dst,
+	virtual nframes_t read_unlocked (Evoral::EventSink<nframes_t>& dst,
 					 sframes_t position,
 					 sframes_t start, nframes_t cnt,
 					 sframes_t stamp_offset, sframes_t negative_stamp_offset,

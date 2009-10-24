@@ -35,17 +35,16 @@ void
 MidiStateTracker::reset ()
 {
 	memset (_active_notes, 0, sizeof (_active_notes));
+	_on = 0;
 }
 
 void
 MidiStateTracker::track_note_onoffs (const Evoral::MIDIEvent<MidiBuffer::TimeType>& event)
 {
 	if (event.is_note_on()) {
-		_active_notes [event.note() + 128 * event.channel()]++;
+		add (event.note(), event.channel());
 	} else if (event.is_note_off()){
-		if (_active_notes[event.note() + 128 * event.channel()]) {
-			_active_notes [event.note() + 128 * event.channel()]--;
-		}
+		remove (event.note(), event.channel());
 	}
 }
 
@@ -53,13 +52,23 @@ void
 MidiStateTracker::add (uint8_t note, uint8_t chn)
 {
 	++_active_notes[note + 128 * chn];
+	++_on;
 }
 
 void
 MidiStateTracker::remove (uint8_t note, uint8_t chn)
 {
-	if (_active_notes[note + 128 * chn]) {
-		--_active_notes[note + 128 * chn];
+	switch (_active_notes[note + 128 * chn]) {
+	case 0:
+		break;
+	case 1:
+		--_on;
+		_active_notes [note + 128 * chn] = 0;
+		break;
+	default:
+		--_active_notes [note + 128 * chn];
+				break;
+
 	}
 }
 
@@ -82,35 +91,45 @@ MidiStateTracker::track (const MidiBuffer::iterator &from, const MidiBuffer::ite
 void
 MidiStateTracker::resolve_notes (MidiBuffer &dst, nframes64_t time)
 {
+	if (!_on) {
+		return;
+	}
+
 	for (int channel = 0; channel < 16; ++channel) {
 		for (int note = 0; note < 128; ++note) {
-			while (_active_notes[channel * 128 + note]) {
+			while (_active_notes[note + 128 * channel]) {
 				uint8_t buffer[3] = { MIDI_CMD_NOTE_OFF | channel, note, 0 };
 				Evoral::MIDIEvent<MidiBuffer::TimeType> noteoff
 					(time, MIDI_CMD_NOTE_OFF, 3, buffer, false);
 				dst.push_back (noteoff);
-
-				_active_notes[channel * 128 + note]--;
+				_active_notes[note + 128 * channel]--;
 			}
 		}
 	}
+	_on = 0;
 }
 
 void
-MidiStateTracker::resolve_notes (MidiRingBuffer<nframes_t> &dst, nframes64_t time)
+MidiStateTracker::resolve_notes (Evoral::EventSink<nframes_t> &dst, nframes64_t time)
 {
 	uint8_t buf[3];
+
+	if (!_on) {
+		return;
+	}
+
 	for (int channel = 0; channel < 16; ++channel) {
 		for (int note = 0; note < 128; ++note) {
-			while (_active_notes[channel * 128 + note]) {
+			while (_active_notes[note + 128 * channel]) {
 				buf[0] = MIDI_CMD_NOTE_OFF|channel;
 				buf[1] = note;
 				buf[2] = 0;
 				dst.write (time, EventTypeMap::instance().midi_event_type (buf[0]), 3, buf);
-				_active_notes[channel * 128 + note]--;
+				_active_notes[note + 128 * channel]--;
 			}
 		}
 	}
+	_on = 0;
 }
 
 void
