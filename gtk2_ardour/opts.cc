@@ -77,7 +77,7 @@ print_help (const char *execname)
 static void
 list_debug_options ()
 {
-	cerr << _("The following debug options are available. Their use is case-insensitive.\n\n");
+	cerr << _("The following debug options are available. Their use is case-insensitive.") << "\n\n";
 	cerr << "\tMidiSourceIO\n";
 	cerr << "\tMidiPlaylistIO\n";
 }
