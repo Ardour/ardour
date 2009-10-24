@@ -64,8 +64,8 @@ class MidiSource : virtual public Source
 				     sframes_t stamp_offset, sframes_t negative_stamp_offset, MidiStateTracker*) const;
 
 	virtual nframes_t midi_write (MidiRingBuffer<nframes_t>& src,
-				      sframes_t source_start,
-				      nframes_t cnt);
+	                              sframes_t source_start,
+	                              nframes_t cnt);
 
 	virtual void append_event_unlocked_beats(const Evoral::Event<Evoral::MusicalTime>& ev) = 0;
 
