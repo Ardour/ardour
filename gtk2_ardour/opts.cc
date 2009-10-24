@@ -50,25 +50,25 @@ using namespace ARDOUR_COMMAND_LINE;
 int
 print_help (const char *execname)
 {
-	cout << _("Usage: ") << execname << "\n"
-	     << _("  -v, --version                    Show version information\n")
-	     << _("  -h, --help                       Print this message\n")
-	     << _("  -b, --bindings                   Print all possible keyboard binding names\n")
-	     << _("  -c, --name <name>                Use a specific jack client name, default is ardour\n")
-	     << _("  -d, --disable-plugins            Disable all plugins in an existing session\n")
-	     << _("  -D, --debug <options>            Set debug flags. Use \"-D list\" to see available options\n")
-	     << _("  -n, --show-splash                Show splash screen\n")
-	     << _("  -m, --menus file                 Use \"file\" for Ardour menus\n")
-	     << _("  -N, --new session-name           Create a new session from the command line\n")
-	     << _("  -O, --no-hw-optimizations        Disable h/w specific optimizations\n")
-	     << _("  -S, --sync	                      Draw the gui synchronously \n")
+	cout << _("Usage: ") << execname << " [OPTION]... [SESSION_NAME]\n\n"
+	     << _("  [SESSION_NAME]              Name of session to load\n")
+	     << _("  -v, --version               Show version information\n")
+	     << _("  -h, --help                  Print this message\n")
+	     << _("  -b, --bindings              Print all possible keyboard binding names\n")
+	     << _("  -c, --name <name>           Use a specific jack client name, default is ardour\n")
+	     << _("  -d, --disable-plugins       Disable all plugins in an existing session\n")
+	     << _("  -D, --debug <options>       Set debug flags. Use \"-D list\" to see available options\n")
+	     << _("  -n, --show-splash           Show splash screen\n")
+	     << _("  -m, --menus file            Use \"file\" for Ardour menus\n")
+	     << _("  -N, --new session-name      Create a new session from the command line\n")
+	     << _("  -O, --no-hw-optimizations   Disable h/w specific optimizations\n")
+	     << _("  -S, --sync                  Draw the gui synchronously \n")
 #ifdef VST_SUPPORT
-	     << _("  -V, --novst                      Do not use VST support\n")
+	     << _("  -V, --novst                 Do not use VST support\n")
 #endif
-	     << _("  -E, --save <file>                Load the specified session, save it to <file> and then quit\n")
-	     << _("  [session-name]                   Name of session to load\n")
-	     << _("  -C, --curvetest filename         Curve algorithm debugger\n")
-	     << _("  -k, --keybindings filename       Name of key bindings to load (default is ~/.ardour3/ardour.bindings)\n")
+	     << _("  -E, --save <file>           Load the specified session, save it to <file> and then quit\n")
+	     << _("  -C, --curvetest filename    Curve algorithm debugger\n")
+	     << _("  -k, --keybindings filename  Name of key bindings to load (default is ~/.ardour3/ardour.bindings)\n")
 		;
 	return 1;
 
