@@ -1,5 +1,5 @@
 /* This file is part of Evoral.
- * Copyright (C) 2008 Dave Robillard <http://drobilla.net>
+ * Copyright (C) 2009 Paul Davis
  *
  * Evoral is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
@@ -33,22 +33,16 @@ namespace Evoral {
 template<typename Time>
 class EventList : public std::list<Evoral::Event<Time> *>, public Evoral::EventSink<Time> {
 public:
-        EventList() {}
-    
-        uint32_t write(Time  time, EventType  type, uint32_t  size, const uint8_t* buf);
-};
+	EventList() {}
 
-template<typename Time>
-inline uint32_t
-EventList<Time>::write(Time time, EventType type, uint32_t size, const uint8_t* buf)
-{
-	Evoral::Event<Time>* e = new Evoral::Event<Time> (type, time, size, const_cast<uint8_t*> (buf), true); // event makes copy of buffer
-	push_back (e);
-	return size;
-}
+	uint32_t write(Time  time, EventType  type, uint32_t  size, const uint8_t* buf) {
+		push_back(new Evoral::Event<Time>(
+				type, time, size, const_cast<uint8_t*>(buf), true)); // Event copies buffer
+		return size;
+	}
+};
 
 
 } // namespace Evoral
 
 #endif // EVORAL_EVENT_LIST_HPP
-
