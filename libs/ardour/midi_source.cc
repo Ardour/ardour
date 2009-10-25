@@ -131,9 +131,9 @@ MidiSource::invalidate ()
 
 nframes_t
 MidiSource::midi_read (Evoral::EventSink<nframes_t>& dst, sframes_t source_start,
-		       sframes_t start, nframes_t cnt,
-		       sframes_t stamp_offset, sframes_t negative_stamp_offset,
-		       MidiStateTracker* tracker) const
+                       sframes_t start, nframes_t cnt,
+                       sframes_t stamp_offset, sframes_t negative_stamp_offset,
+                       MidiStateTracker* tracker) const
 {
 	Glib::Mutex::Lock lm (_lock);
 

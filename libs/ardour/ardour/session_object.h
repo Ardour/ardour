@@ -31,7 +31,6 @@ class Session;
  *
  * This is a few common things factored out of IO which weren't IO specific
  * (to fix the problem with e.g. PluginInsert being an IO which it shouldn't be).
- * collection of input and output ports with connections.
  */
 class SessionObject : public PBD::StatefulDestructible
 {
