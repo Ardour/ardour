@@ -179,7 +179,7 @@ SndFileSource::SndFileSource (Session& s, ustring path, SampleFormat sfmt, Heade
 		
 		/* coding history is added by libsndfile */
 
-		if (sf_command (sf, SFC_SET_BROADCAST_INFO, _broadcast_info, sizeof (_broadcast_info)) != SF_TRUE) {
+		if (sf_command (sf, SFC_SET_BROADCAST_INFO, _broadcast_info, sizeof (*_broadcast_info)) != SF_TRUE) {
 			char errbuf[256];
 			sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 			error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"), _path, errbuf) << endmsg;
