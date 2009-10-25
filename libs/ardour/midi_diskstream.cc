@@ -41,6 +41,7 @@
 #include "ardour/butler.h"
 #include "ardour/configuration.h"
 #include "ardour/cycle_timer.h"
+#include "ardour/debug.h"
 #include "ardour/io.h"
 #include "ardour/midi_diskstream.h"
 #include "ardour/midi_playlist.h"
@@ -1049,6 +1050,10 @@ MidiDiskstream::transport_stopped (struct tm& /*when*/, time_t /*twhen*/, bool a
 		delete *ci;
 	}
 
+	if (_playlist) {
+		midi_playlist()->clear_note_trackers ();
+	}
+
 	capture_info.clear ();
 	capture_start_frame = 0;
 }
@@ -1473,14 +1478,13 @@ MidiDiskstream::get_playback (MidiBuffer& dst, nframes_t start, nframes_t end)
 
 	// Translates stamps to be relative to start
 
-	_playback_buf->read(dst, start, end);
 
-#if 0
+#ifndef NDEBUG
 	const size_t events_read = _playback_buf->read(dst, start, end);
-	cout << _name << ": MDS events read = " << events_read
-	     << " start = " << start << " end = " << end
-	     << " readspace " << _playback_buf->read_space()
-	     << " writespace " << _playback_buf->write_space() << endl;
+	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("%1 MDS events read %2 range %3 .. %4 rspace %5 wspace %6\n", _name, events_read, start, end,
+							      _playback_buf->read_space(), _playback_buf->write_space()));
+#else
+	_playback_buf->read(dst, start, end);
 #endif
 
 	gint32 frames_read = end - start;

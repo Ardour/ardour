@@ -59,6 +59,8 @@ public:
 
 	std::set<Evoral::Parameter> contained_automation();
 
+	void clear_note_trackers ();
+
 protected:
 
 	/* playlist "callbacks" */

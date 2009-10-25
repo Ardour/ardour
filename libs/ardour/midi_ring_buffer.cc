@@ -16,13 +16,15 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "pbd/compose.h"
+
+#include "ardour/debug.h"
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/event_type_map.h"
 
 using namespace std;
-
-namespace ARDOUR {
+using namespace ARDOUR;
 
 /** Read a block of MIDI events from buffer into a MidiBuffer.
  *
@@ -48,11 +50,13 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		this->full_peek(sizeof(T), (uint8_t*)&ev_time);
 
 		if (ev_time > end) {
-			// cerr << "MRB event @ " << ev_time << " past end @ " << end << endl;
+			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 past end @ %2\n", ev_time, end));
 			break;
 		} else if (ev_time < start) {
-			// cerr << "MRB event @ " << ev_time << " before start @ " << start << endl;
+			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 before start @ %2\n", ev_time, start));
 			break;
+		} else {
+			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 in range %2 .. %3\n", ev_time, start, end));
 		}
 
 		bool success = read_prefix(&ev_time, &ev_type, &ev_size);
@@ -100,12 +104,14 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		// write MIDI buffer contents
 		success = Evoral::EventRingBuffer<T>::full_read(ev_size, write_loc);
 
-#if 0
-		cerr << "wrote MidiEvent to Buffer: " << hex;
+#ifndef NDEBUG
+		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, "wrote MidiEvent to Buffer: ");
 		for (size_t i=0; i < ev_size; ++i) {
-			cerr << (int) write_loc[i] << ' ';
+			DEBUG_STR_SET(a, hex);
+			DEBUG_STR(a) << "0x" << (int)write_loc[i] << ' ';
+			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, DEBUG_STR(a).str());
 		}
-		cerr << dec << endl;
+		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, "\n");
 #endif
 
 		if (success) {
@@ -200,6 +206,4 @@ MidiRingBuffer<T>::dump(ostream& str)
 
 
 template class MidiRingBuffer<nframes_t>;
-
-} // namespace ARDOUR
 

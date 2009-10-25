@@ -34,7 +34,8 @@ namespace ARDOUR {
 
 		enum DebugBits {
 			MidiSourceIO = 0x1,
-			MidiPlaylistIO = 0x2
+			MidiPlaylistIO = 0x2,
+			MidiDiskstreamIO = 0x4
 		};
 	}
 

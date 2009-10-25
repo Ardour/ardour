@@ -77,9 +77,10 @@ print_help (const char *execname)
 static void
 list_debug_options ()
 {
-	cerr << _("The following debug options are available. Their use is case-insensitive.") << "\n\n";
+	cerr << _("The following debug options are available. Separate multipe options with commas. Names are case-insensitive.") << "\n\n";
 	cerr << "\tMidiSourceIO\n";
 	cerr << "\tMidiPlaylistIO\n";
+	cerr << "\tMidiDiskstreamIO\n";
 }
 
 static int
@@ -99,11 +100,20 @@ parse_debug_options (const char* str)
 			return 1;
 		}
 
+		if (strcasecmp (p, "all") == 0) {
+			ARDOUR::set_debug_bits (~0ULL);
+			free (copy);
+			return 0;
+		}
+
 		if (strcasecmp (p, "midisourceio") == 0) {
 			bits |= ARDOUR::DEBUG::MidiSourceIO;
 		}
 		if (strcasecmp (p, "midiplaylistio") == 0) {
 			bits |= ARDOUR::DEBUG::MidiPlaylistIO;
+		}
+		if (strcasecmp (p, "mididiskstreamio") == 0) {
+			bits |= ARDOUR::DEBUG::MidiDiskstreamIO;
 		}
 
 		p = strtok_r (0, ",", &sp);
