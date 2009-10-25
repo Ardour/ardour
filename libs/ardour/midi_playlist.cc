@@ -80,12 +80,6 @@ MidiPlaylist::~MidiPlaylist ()
 	notify_callbacks ();
 }
 
-struct RegionSortByLayer {
-    bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
-	    return a->layer() < b->layer();
-    }
-};
-
 template<typename Time>
 struct EventsSortByTime {
     bool operator() (Evoral::Event<Time>* a, Evoral::Event<Time>* b) {
@@ -211,9 +205,6 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1\n", **x));
 		}
 #endif
-
-		RegionSortByLayer layer_cmp;
-		sort(regs.begin(), regs.end(), layer_cmp);
 
 		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("for %1 .. %2 we have %3 to consider\n", start, start+dur-1, regs.size()));
 
