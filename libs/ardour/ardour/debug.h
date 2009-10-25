@@ -20,12 +20,14 @@
 #ifndef __ardour_debug_h__
 #define __ardour_debug_h__
 
+#include <stdint.h>
+
 #include <sstream>
 
 namespace ARDOUR {
 
 	extern uint64_t debug_bits;
-	void debug_print (std::string str);
+	void debug_print (const char* prefix, std::string str);
 	void set_debug_bits (uint64_t bits);
 
 	namespace DEBUG {
@@ -42,7 +44,7 @@ namespace ARDOUR {
 }
 
 #ifndef NDEBUG
-#define DEBUG_TRACE(bits,str) if ((bits) & ARDOUR::debug_bits) { ARDOUR::debug_print (str); }
+#define DEBUG_TRACE(bits,str) if ((bits) & ARDOUR::debug_bits) { ARDOUR::debug_print (# bits, str); }
 #define DEBUG_STR_SET(id,s) std::stringstream __debug_str ## id; __debug_str ## id << s;
 #define DEBUG_STR(id) __debug_str ## id
 #else

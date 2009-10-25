@@ -153,6 +153,10 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<nframes_t>& 
 
 	assert(chan_n == 0);
 
+	if (muted()) {
+		return 0; /* read nothing */
+	}
+
 	if (position < _position) {
 		internal_offset = 0;
 		src_offset = _position - position;
@@ -167,13 +171,6 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<nframes_t>& 
 	}
 
 	if ((to_read = min (dur, _length - internal_offset)) == 0) {
-		return 0; /* read nothing */
-	}
-
-	// FIXME: non-opaque MIDI regions not yet supported
-	assert(opaque());
-
-	if (muted()) {
 		return 0; /* read nothing */
 	}
 
