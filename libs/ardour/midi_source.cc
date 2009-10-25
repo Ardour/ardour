@@ -192,16 +192,6 @@ MidiSource::midi_write (MidiRingBuffer<nframes_t>& source, sframes_t source_star
 	return ret;
 }
 
-bool
-MidiSource::file_changed (string path)
-{
-	struct stat stat_file;
-
-	int e1 = stat (path.c_str(), &stat_file);
-
-	return !e1;
-}
-
 void
 MidiSource::mark_streaming_midi_write_started (NoteMode mode, sframes_t start_frame)
 {

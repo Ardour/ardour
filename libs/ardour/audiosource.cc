@@ -900,22 +900,6 @@ AudioSource::truncate_peakfile ()
 	}
 }
 
-bool
-AudioSource::file_changed (ustring path)
-{
-	struct stat stat_file;
-	struct stat stat_peak;
-
-	int e1 = stat (path.c_str(), &stat_file);
-	int e2 = stat (peak_path(path).c_str(), &stat_peak);
-
-	if (!e1 && !e2 && stat_file.st_mtime > stat_peak.st_mtime){
-		return true;
-	} else {
-		return false;
-	}
-}
-
 nframes_t
 AudioSource::available_peaks (double zoom_factor) const
 {

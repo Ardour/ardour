@@ -137,9 +137,6 @@ class MidiSource : virtual public Source
 	mutable double    _length_beats;
 	mutable sframes_t _last_read_end;
 	sframes_t         _last_write_end;
-
-  private:
-	bool file_changed (std::string path);
 };
 
 }

@@ -141,8 +141,6 @@ class AudioSource : virtual public Source,
 	nframes_t peak_leftover_size;
 	Sample*   peak_leftovers;
 	nframes_t peak_leftover_frame;
-
-	bool file_changed (Glib::ustring path);
 };
 
 }
