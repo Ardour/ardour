@@ -19,9 +19,7 @@
     $Id: midiregion.h 733 2006-08-01 17:19:38Z drobilla $
 */
 
-#include "ardour/audioengine.h"
 #include "ardour/beats_frames_converter.h"
-#include "ardour/session.h"
 #include "ardour/tempo.h"
 
 namespace ARDOUR {
@@ -30,10 +28,10 @@ sframes_t
 BeatsFramesConverter::to(double beats) const
 {
 	// FIXME: assumes tempo never changes after origin
-	const Tempo& tempo = _session.tempo_map().tempo_at(_origin);
+	const Tempo& tempo = _tempo_map.tempo_at(_origin);
 	const double frames_per_beat = tempo.frames_per_beat(
-			_session.engine().frame_rate(),
-			_session.tempo_map().meter_at(_origin));
+			_tempo_map.frame_rate(),
+			_tempo_map.meter_at(_origin));
 
 	return lrint(beats * frames_per_beat);
 }
@@ -42,10 +40,10 @@ double
 BeatsFramesConverter::from(sframes_t frames) const
 {
 	// FIXME: assumes tempo never changes after origin
-	const Tempo& tempo = _session.tempo_map().tempo_at(_origin);
+	const Tempo& tempo = _tempo_map.tempo_at(_origin);
 	const double frames_per_beat = tempo.frames_per_beat(
-			_session.engine().frame_rate(),
-			_session.tempo_map().meter_at(_origin));
+			_tempo_map.frame_rate(),
+			_tempo_map.meter_at(_origin));
 
 	return frames / frames_per_beat;
 }

@@ -112,7 +112,7 @@ MidiSource::set_state (const XMLNode& node, int /*version*/)
 sframes_t
 MidiSource::length (sframes_t pos) const
 {
-	BeatsFramesConverter converter(_session, pos);
+	BeatsFramesConverter converter(_session.tempo_map(), pos);
 	return converter.to(_length_beats);
 }
 
@@ -137,7 +137,7 @@ MidiSource::midi_read (Evoral::EventSink<nframes_t>& dst, sframes_t source_start
 {
 	Glib::Mutex::Lock lm (_lock);
 
-	BeatsFramesConverter converter(_session, source_start);
+	BeatsFramesConverter converter(_session.tempo_map(), source_start);
 
 	if (_model) {
 		Evoral::Sequence<double>::const_iterator& i = _model_iter;

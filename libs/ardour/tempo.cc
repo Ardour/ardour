@@ -1469,7 +1469,7 @@ TempoMap::tempo_section_at (nframes_t frame)
 }
 
 const Tempo&
-TempoMap::tempo_at (nframes_t frame)
+TempoMap::tempo_at (nframes_t frame) const
 {
 	Metric m (metric_at (frame));
 	return m.tempo();
@@ -1477,7 +1477,7 @@ TempoMap::tempo_at (nframes_t frame)
 
 
 const Meter&
-TempoMap::meter_at (nframes_t frame)
+TempoMap::meter_at (nframes_t frame) const
 {
 	Metric m (metric_at (frame));
 	return m.meter();

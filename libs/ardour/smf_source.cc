@@ -120,7 +120,7 @@ SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t s
 
 	size_t scratch_size = 0; // keep track of scratch to minimize reallocs
 
-	BeatsFramesConverter converter(_session, source_start);
+	BeatsFramesConverter converter(_session.tempo_map(), source_start);
 
 	const uint64_t start_ticks = (uint64_t)(converter.from(start) * ppqn());
 
@@ -316,7 +316,7 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, sfr
 		return;
 	}
 
-	BeatsFramesConverter converter(_session, position);
+	BeatsFramesConverter converter(_session.tempo_map(), position);
 
 	_length_beats = max(_length_beats, converter.from(ev.time()));
 

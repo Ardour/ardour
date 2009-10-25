@@ -360,7 +360,7 @@ write_midi_data_to_new_files (Evoral::SMF* source, Session::ImportStatus& status
 
 		const nframes64_t pos = 0;
 		const double length_beats = ceil(t / (double)source->ppqn());
-		BeatsFramesConverter converter(smfs->session(), pos);
+		BeatsFramesConverter converter(smfs->session().tempo_map(), pos);
 		smfs->update_length(pos, converter.to(length_beats));
 		smfs->end_write();
 

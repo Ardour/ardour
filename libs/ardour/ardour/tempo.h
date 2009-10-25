@@ -184,8 +184,8 @@ class TempoMap : public PBD::StatefulDestructible
 	static const Tempo& default_tempo() { return _default_tempo; }
 	static const Meter& default_meter() { return _default_meter; }
 
-	const Tempo& tempo_at (nframes_t);
-	const Meter& meter_at (nframes_t);
+	const Tempo& tempo_at (nframes_t) const;
+	const Meter& meter_at (nframes_t) const;
 
 	const TempoSection& tempo_section_at (nframes_t);
 
@@ -252,6 +252,8 @@ class TempoMap : public PBD::StatefulDestructible
 
 	int n_tempos () const;
 	int n_meters () const;
+
+	nframes_t frame_rate () const { return _frame_rate; }
 
 	sigc::signal<void,ARDOUR::Change> StateChanged;
 

@@ -574,7 +574,7 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 						gdouble xend = _trackview.editor().frame_to_pixel (region->position() + region->length());
 						rect->property_x2() = xend;
 
-						ARDOUR::BeatsFramesConverter tconv(_trackview.session(), region->position());
+						ARDOUR::BeatsFramesConverter tconv(_trackview.session().tempo_map(), region->position());
 						const MidiModel::TimeType start_beats = tconv.from(start);
 
 						/* draw events */

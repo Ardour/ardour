@@ -27,24 +27,24 @@
 
 namespace ARDOUR {
 
-class Session;
+class TempoMap;
 
 class BeatsFramesConverter : public Evoral::TimeConverter<double,sframes_t> {
 public:
-	BeatsFramesConverter(Session& session, sframes_t origin)
-		: _session(session)
+	BeatsFramesConverter(const TempoMap& tempo_map, sframes_t origin)
+		: _tempo_map(tempo_map)
 		, _origin(origin)
 	{}
 
 	sframes_t to(double beats)       const;
 	double    from(sframes_t frames) const;
 
-	sframes_t origin() const              { return _origin; }
-	void     set_origin(sframes_t origin) { _origin = origin; }
+	sframes_t origin() const               { return _origin; }
+	void      set_origin(sframes_t origin) { _origin = origin; }
 
 private:
-	Session&  _session;
-	sframes_t _origin;
+	const TempoMap& _tempo_map;
+	sframes_t       _origin;
 };
 
 } /* namespace ARDOUR */

@@ -78,7 +78,7 @@ RegionView::RegionView (ArdourCanvas::Group*              parent,
 	, _pixel_width(1.0)
 	, in_destructor(false)
 	, wait_for_data(false)
-	, _time_converter(r->session(), r->position())
+	, _time_converter(r->session().tempo_map(), r->position())
 {
 }
 
@@ -132,7 +132,7 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 	, _pixel_width(1.0)
 	, in_destructor(false)
 	, wait_for_data(false)
-	, _time_converter(r->session(), r->position())
+	, _time_converter(r->session().tempo_map(), r->position())
 {
 }
 
