@@ -394,7 +394,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t s
 		}
 
 		if (zero_fill) {
-			memset (peaks + npeaks - zero_fill, 0, sizeof (PeakData) * zero_fill);
+			memset (&peaks[npeaks], 0, sizeof (PeakData) * zero_fill);
 		}
 
 		return 0;
@@ -505,7 +505,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t s
 		}
 
 		if (zero_fill) {
-			memset (peaks + npeaks - zero_fill, 0, sizeof (PeakData) * zero_fill);
+			memset (&peaks[npeaks], 0, sizeof (PeakData) * zero_fill);
 		}
 
 		ret = 0;
@@ -583,7 +583,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t s
 		}
 
 		if (zero_fill) {
-			memset (peaks + npeaks - zero_fill, 0, sizeof (PeakData) * zero_fill);
+			memset (&peaks[npeaks], 0, sizeof (PeakData) * zero_fill);
 		}
 
 		ret = 0;
