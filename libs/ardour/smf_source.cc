@@ -454,8 +454,6 @@ SMFSource::load_model (bool lock, bool force_reload)
 	free(buf);
 }
 
-#define LINEAR_INTERPOLATION_MODE_WORKS_PROPERLY 0
-
 void
 SMFSource::set_default_controls_interpolation ()
 {
@@ -463,12 +461,7 @@ SMFSource::set_default_controls_interpolation ()
 	Evoral::ControlSet::Controls controls = _model->controls();
 	for (Evoral::ControlSet::Controls::iterator c = controls.begin(); c != controls.end(); ++c) {
 		(*c).second->list()->set_interpolation(
-			// to be enabled when ControlList::rt_safe_earliest_event_linear_unlocked works properly
-			#if LINEAR_INTERPOLATION_MODE_WORKS_PROPERLY
 			EventTypeMap::instance().interpolation_of((*c).first));
-			#else
-			Evoral::ControlList::Discrete);
-			#endif
 	}
 }
 
