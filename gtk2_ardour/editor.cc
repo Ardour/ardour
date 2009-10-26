@@ -3046,7 +3046,9 @@ Editor::setup_toolbar ()
 	edit_point_selector.signal_changed().connect (mem_fun(*this, &Editor::edit_point_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (edit_point_selector, _("Edit point"));
 
-	snap_box.pack_start (edit_point_clock, false, false);
+	if (Profile->get_sae()) {
+		snap_box.pack_start (edit_point_clock, false, false);
+	}
 	snap_box.pack_start (snap_mode_selector, false, false);
 	snap_box.pack_start (snap_type_selector, false, false);
 	snap_box.pack_start (edit_point_selector, false, false);

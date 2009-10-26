@@ -2627,7 +2627,9 @@ Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 		abort();
 	}
 
-	edit_point_clock.set (drag_info.copied_locations.front()->start());
+	if (Profile->get_sae()) {
+		edit_point_clock.set (drag_info.copied_locations.front()->start());
+	}
 	show_verbose_time_cursor (newframe, 10);
 
 #ifdef GTKOSX

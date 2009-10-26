@@ -787,16 +787,7 @@ Mixer_UI::set_auto_rebinding( bool val )
 void 
 Mixer_UI::toggle_auto_rebinding() 
 {
-	if (auto_rebinding)
-	{
-		set_auto_rebinding( FALSE );
-	}
-	
-	else
-	{
-		set_auto_rebinding( TRUE );
-	}
-
+	set_auto_rebinding (!auto_rebinding);
 	auto_rebind_midi_controls();
 }
 

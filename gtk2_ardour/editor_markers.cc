@@ -1214,12 +1214,14 @@ Editor::marker_selection_changed ()
 		(*x)->show_line ();
 	}
 
-	edit_point_clock.set (selection->markers.front()->position());
+	if (Profile->get_sae()) {
+		edit_point_clock.set (selection->markers.front()->position());
+	}
 
 	bool ignored;
 	Location* loc = find_location_from_marker (selection->markers.front(), ignored);
 
-	if (loc) {
+	if (loc && Profile->get_sae()) {
 		edit_point_clock_connection_a = loc->changed.connect (mem_fun (*this, &Editor::selected_marker_moved));
 		edit_point_clock_connection_b = loc->start_changed.connect (mem_fun (*this, &Editor::selected_marker_moved));
 	}
