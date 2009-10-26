@@ -416,7 +416,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 			shuttle_units_button.set_label(_("ST"));
 			break;
 		}
-	} else if (p == "video-pullup" || p == "smpte-format") {
+	} else if (p == "video-pullup" || p == "timecode-format") {
 		if (session) {
 			primary_clock.set (session->audible_frame(), true);
 			secondary_clock.set (session->audible_frame(), true);

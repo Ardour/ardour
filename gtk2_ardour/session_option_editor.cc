@@ -223,22 +223,22 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	add_option (_("Sync"), spf);
 
 	ComboOption<SmpteFormat>* smf = new ComboOption<SmpteFormat> (
-		"smpte-format",
+		"timecode-format",
 		_("Timecode frames-per-second"),
-		mem_fun (*_session_config, &SessionConfiguration::get_smpte_format),
-		mem_fun (*_session_config, &SessionConfiguration::set_smpte_format)
+		mem_fun (*_session_config, &SessionConfiguration::get_timecode_format),
+		mem_fun (*_session_config, &SessionConfiguration::set_timecode_format)
 		);
 
-	smf->add (smpte_23976, _("23.976"));
-	smf->add (smpte_24, _("24"));
-	smf->add (smpte_24976, _("24.976"));
-	smf->add (smpte_25, _("25"));
-	smf->add (smpte_2997, _("29.97"));
-	smf->add (smpte_2997drop, _("29.97 drop"));
-	smf->add (smpte_30, _("30"));
-	smf->add (smpte_30drop, _("30 drop"));
-	smf->add (smpte_5994, _("59.94"));
-	smf->add (smpte_60, _("60"));
+	smf->add (timecode_23976, _("23.976"));
+	smf->add (timecode_24, _("24"));
+	smf->add (timecode_24976, _("24.976"));
+	smf->add (timecode_25, _("25"));
+	smf->add (timecode_2997, _("29.97"));
+	smf->add (timecode_2997drop, _("29.97 drop"));
+	smf->add (timecode_30, _("30"));
+	smf->add (timecode_30drop, _("30 drop"));
+	smf->add (timecode_5994, _("59.94"));
+	smf->add (timecode_60, _("60"));
 
 	add_option (_("Sync"), smf);
 

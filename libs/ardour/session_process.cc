@@ -76,9 +76,9 @@ Session::process (nframes_t nframes)
 	nframes_t transport_frames = transport_frame();
 	BBT_Time  transport_bbt;
 	bbt_time(transport_frames, transport_bbt);
-	SMPTE::Time transport_smpte;
-	smpte_time(transport_frames, transport_smpte);
-	tick (transport_frames, transport_bbt, transport_smpte); /* EMIT SIGNAL */
+	Timecode::Time transport_timecode;
+	timecode_time(transport_frames, transport_timecode);
+	tick (transport_frames, transport_bbt, transport_timecode); /* EMIT SIGNAL */
 
 	SendFeedback (); /* EMIT SIGNAL */
 
@@ -305,11 +305,11 @@ Session::process_with_events (nframes_t nframes)
 		process_event (ev);
 	}
 
-	/* Events caused a transport change, send an MTC Full Frame (SMPTE) message.
+	/* Events caused a transport change, send an MTC Full Frame (Timecode) message.
 	 * This is sent whether rolling or not, to give slaves an idea of ardour time
 	 * on locates (and allow slow slaves to position and prepare for rolling)
 	 */
-	if (_send_smpte_update) {
+	if (_send_timecode_update) {
 		send_full_time_code(nframes);
 	}
 

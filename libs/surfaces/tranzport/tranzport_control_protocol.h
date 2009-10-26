@@ -308,7 +308,7 @@ private:
 	void show_track_gain ();
 	void show_transport_time ();
 	void show_bbt (nframes_t where);	
-	void show_smpte (nframes_t where);
+	void show_timecode (nframes_t where);
 	void show_wheel_mode ();
 	void show_gain ();
 	void show_pan ();

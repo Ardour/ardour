@@ -127,7 +127,7 @@ string
 AudioRegionImporter::get_info () const
 {
 	nframes_t length, position;
-	SMPTE::Time length_time, position_time;
+	Timecode::Time length_time, position_time;
 	std::ostringstream oss;
 
 	// Get sample positions
@@ -136,15 +136,15 @@ AudioRegionImporter::get_info () const
 	std::istringstream iss_position(xml_region.property ("position")->value());
 	iss_position >> position;
 
-	// Convert to smpte
-	session.sample_to_smpte(length, length_time, true, false);
-	session.sample_to_smpte(position, position_time, true, false);
+	// Convert to timecode
+	session.sample_to_timecode(length, length_time, true, false);
+	session.sample_to_timecode(position, position_time, true, false);
 
 	// return info
 	oss << _("Length: ") <<
-	  smpte_to_string(length_time) <<
+	  timecode_to_string(length_time) <<
 	  _("\nPosition: ") <<
-	  smpte_to_string(position_time) <<
+	  timecode_to_string(position_time) <<
 	  _("\nChannels: ") <<
 	  xml_region.property ("channels")->value();
 

@@ -2000,7 +2000,7 @@ AudioDiskstream::allocate_temporary_buffers ()
 {
 	/* make sure the wrap buffer is at least large enough to deal
 	   with the speeds up to 1.2, to allow for micro-variation
-	   when slaving to MTC, SMPTE etc.
+	   when slaving to MTC, Timecode etc.
 	*/
 
 	double sp = max (fabsf (_actual_speed), 1.2f);

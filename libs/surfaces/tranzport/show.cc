@@ -353,29 +353,29 @@ TranzportControlProtocol::show_transport_time ()
 }	
 
 void
-TranzportControlProtocol::show_smpte (nframes_t where)
+TranzportControlProtocol::show_timecode (nframes_t where)
 {
 	if ((where != last_where) || lcd_isdamaged(1,9,10)) {
 
 		char buf[5];
-		SMPTE::Time smpte;
+		Timecode::Time timecode;
 
-		session->smpte_time (where, smpte);
+		session->timecode_time (where, timecode);
 
-		if (smpte.negative) {
-			sprintf (buf, "-%02" PRIu32 ":", smpte.hours);
+		if (timecode.negative) {
+			sprintf (buf, "-%02" PRIu32 ":", timecode.hours);
 		} else {
-			sprintf (buf, " %02" PRIu32 ":", smpte.hours);
+			sprintf (buf, " %02" PRIu32 ":", timecode.hours);
 		}
 		print (1, 8, buf);
 
-		sprintf (buf, "%02" PRIu32 ":", smpte.minutes);
+		sprintf (buf, "%02" PRIu32 ":", timecode.minutes);
 		print (1, 12, buf);
 
-		sprintf (buf, "%02" PRIu32 ":", smpte.seconds);
+		sprintf (buf, "%02" PRIu32 ":", timecode.seconds);
 		print (1, 15, buf);
 
-		sprintf (buf, "%02" PRIu32, smpte.frames);
+		sprintf (buf, "%02" PRIu32, timecode.frames);
 		print_noretry (1, 18, buf); 
 
 		last_where = where;

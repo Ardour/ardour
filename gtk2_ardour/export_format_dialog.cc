@@ -711,7 +711,7 @@ ExportFormatDialog::update_silence_start_selection ()
 {
 	update_time (silence_start, silence_start_clock);
 	AnyTime zero;
-	zero.type = AnyTime::SMPTE;
+	zero.type = AnyTime::Timecode;
 	manager.select_silence_beginning (silence_start_checkbox.get_active() ? silence_start : zero);
 }
 
@@ -720,7 +720,7 @@ ExportFormatDialog::update_silence_end_selection ()
 {
 	update_time (silence_end, silence_end_clock);
 	AnyTime zero;
-	zero.type = AnyTime::SMPTE;
+	zero.type = AnyTime::Timecode;
 	manager.select_silence_end (silence_end_checkbox.get_active() ? silence_end : zero);
 }
 
@@ -730,11 +730,11 @@ ExportFormatDialog::update_clock (AudioClock & clock, ARDOUR::AnyTime const & ti
 	// TODO position
 	clock.set (session->convert_to_frames_at (0, time), true);
 
-	AudioClock::Mode mode(AudioClock::SMPTE);
+	AudioClock::Mode mode(AudioClock::Timecode);
 
 	switch (time.type) {
-	  case AnyTime::SMPTE:
-		mode = AudioClock::SMPTE;
+	  case AnyTime::Timecode:
+		mode = AudioClock::Timecode;
 		break;
 	  case AnyTime::BBT:
 		mode = AudioClock::BBT;
@@ -760,9 +760,9 @@ ExportFormatDialog::update_time (AnyTime & time, AudioClock const & clock)
 	nframes_t frames = clock.current_duration();
 
 	switch (clock.mode()) {
-	  case AudioClock::SMPTE:
-		time.type = AnyTime::SMPTE;
-		session->smpte_time (frames, time.smpte);
+	  case AudioClock::Timecode:
+		time.type = AnyTime::Timecode;
+		session->timecode_time (frames, time.timecode);
 		break;
 	  case AudioClock::BBT:
 		time.type = AnyTime::BBT;

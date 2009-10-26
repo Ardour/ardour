@@ -24,7 +24,7 @@
 #include <string>
 
 #include <jack/types.h>
-#include <control_protocol/smpte.h>
+#include <control_protocol/timecode.h>
 
 namespace ARDOUR {
 	class Session;
@@ -72,11 +72,11 @@ class BasicUI {
 	void rec_enable_toggle ();
 	void toggle_all_rec_enables ();
 
-	jack_nframes_t smpte_frames_per_hour ();
+	jack_nframes_t timecode_frames_per_hour ();
 
-	void smpte_time (jack_nframes_t where, SMPTE::Time&);
-	void smpte_to_sample (SMPTE::Time& smpte, jack_nframes_t& sample, bool use_offset, bool use_subframes) const;
-	void sample_to_smpte (jack_nframes_t sample, SMPTE::Time& smpte, bool use_offset, bool use_subframes) const;
+	void timecode_time (jack_nframes_t where, Timecode::Time&);
+	void timecode_to_sample (Timecode::Time& timecode, jack_nframes_t& sample, bool use_offset, bool use_subframes) const;
+	void sample_to_timecode (jack_nframes_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
 
   protected:
 	BasicUI ();

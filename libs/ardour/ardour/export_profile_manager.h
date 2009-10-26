@@ -108,7 +108,7 @@ class ExportProfileManager
 	typedef std::list<Location *> LocationList;
 
 	enum TimeFormat {
-		SMPTE,
+		Timecode,
 		BBT,
 		MinSec,
 		Frames,
@@ -127,7 +127,7 @@ class ExportProfileManager
 		               boost::shared_ptr<Location> selection_range,
 		               boost::shared_ptr<LocationList> ranges) :
 		  timespans (new TimespanList ()),
-		  time_format (SMPTE),
+		  time_format (Timecode),
 
 		  session_range (session_range),
 		  selection_range (selection_range),

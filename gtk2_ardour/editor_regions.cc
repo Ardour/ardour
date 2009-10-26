@@ -618,7 +618,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 	char used_str[8];
 	int used;
 	BBT_Time bbt;
-	SMPTE::Time smpte;
+	Timecode::Time timecode;
 
 	bool missing_source = boost::dynamic_pointer_cast<SilentFileSource>(region->source());
 
@@ -638,22 +638,22 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 	sprintf (used_str, "%4d" , used);
 
 	switch (ARDOUR_UI::instance()->secondary_clock.mode ()) {
-	case AudioClock::SMPTE:
-	case AudioClock::Off:												/* If the secondary clock is off, default to SMPTE */
-		_session->smpte_time (region->position(), smpte);
-		sprintf (start_str, "%02d:%02d:%02d:%02d", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
-		_session->smpte_time (region->position() + region->length() - 1, smpte);
-		sprintf (end_str, "%02d:%02d:%02d:%02d", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
-		_session->smpte_time (region->length(), smpte);
-		sprintf (length_str, "%02d:%02d:%02d:%02d", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
-		_session->smpte_time (region->sync_position() + region->position(), smpte);
-		sprintf (sync_str, "%02d:%02d:%02d:%02d", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+	case AudioClock::Timecode:
+	case AudioClock::Off:												/* If the secondary clock is off, default to Timecode */
+		_session->timecode_time (region->position(), timecode);
+		sprintf (start_str, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+		_session->timecode_time (region->position() + region->length() - 1, timecode);
+		sprintf (end_str, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+		_session->timecode_time (region->length(), timecode);
+		sprintf (length_str, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+		_session->timecode_time (region->sync_position() + region->position(), timecode);
+		sprintf (sync_str, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 
 		if (audioRegion && !fades_in_seconds) {
-			_session->smpte_time (audioRegion->fade_in()->back()->when, smpte);
-			sprintf (fadein_str, "%02d:%02d:%02d:%02d", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
-			_session->smpte_time (audioRegion->fade_out()->back()->when, smpte);
-			sprintf (fadeout_str, "%02d:%02d:%02d:%02d", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+			_session->timecode_time (audioRegion->fade_in()->back()->when, timecode);
+			sprintf (fadein_str, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+			_session->timecode_time (audioRegion->fade_out()->back()->when, timecode);
+			sprintf (fadeout_str, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 		}
 
 		break;

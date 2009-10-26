@@ -129,9 +129,9 @@ const double Editor::timebar_height = 15.0;
 
 static const gchar *_snap_type_strings[] = {
 	N_("CD Frames"),
-	N_("SMPTE Frames"),
-	N_("SMPTE Seconds"),
-	N_("SMPTE Minutes"),
+	N_("Timecode Frames"),
+	N_("Timecode Seconds"),
+	N_("Timecode Minutes"),
 	N_("Seconds"),
 	N_("Minutes"),
 	N_("Beats/32"),
@@ -214,7 +214,7 @@ Editor::Editor ()
 	  /* time display buttons */
 	: minsec_label (_("Mins:Secs"))
 	, bbt_label (_("Bars:Beats"))
-	, smpte_label (_("Timecode"))
+	, timecode_label (_("Timecode"))
 	, frame_label (_("Samples"))
 	, tempo_label (_("Tempo"))
 	, meter_label (_("Meter"))
@@ -380,12 +380,12 @@ Editor::Editor ()
 	minsec_label.set_padding (5,0);
 	minsec_label.hide ();
 	minsec_label.set_no_show_all();
-	smpte_label.set_name ("EditorTimeButton");
-	smpte_label.set_size_request (-1, (int)timebar_height);
-	smpte_label.set_alignment (1.0, 0.5);
-	smpte_label.set_padding (5,0);
-	smpte_label.hide ();
-	smpte_label.set_no_show_all();
+	timecode_label.set_name ("EditorTimeButton");
+	timecode_label.set_size_request (-1, (int)timebar_height);
+	timecode_label.set_alignment (1.0, 0.5);
+	timecode_label.set_padding (5,0);
+	timecode_label.hide ();
+	timecode_label.set_no_show_all();
 	frame_label.set_name ("EditorTimeButton");
 	frame_label.set_size_request (-1, (int)timebar_height);
 	frame_label.set_alignment (1.0, 0.5);
@@ -1086,7 +1086,7 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->StateSaved.connect (mem_fun(*this, &Editor::update_title_s)));
 	session_connections.push_back (session->AskAboutPlaylistDeletion.connect (mem_fun(*this, &Editor::playlist_deletion_dialog)));
 
-	session_connections.push_back (session->SMPTEOffsetChanged.connect (mem_fun(*this, &Editor::update_just_smpte)));
+	session_connections.push_back (session->TimecodeOffsetChanged.connect (mem_fun(*this, &Editor::update_just_timecode)));
 
 	session_connections.push_back (session->tempo_map().StateChanged.connect (mem_fun(*this, &Editor::tempo_map_changed)));
 
@@ -1108,7 +1108,7 @@ Editor::connect_to_session (Session *t)
 		nudge_clock.set (pos, true, 0, AudioClock::BBT);
 
 	} else {
-		nudge_clock.set (session->frame_rate() * 5, true, 0, AudioClock::SMPTE); // default of 5 seconds
+		nudge_clock.set (session->frame_rate() * 5, true, 0, AudioClock::Timecode); // default of 5 seconds
 	}
 
 	playhead_cursor->canvas_item.show ();
@@ -2564,72 +2564,86 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 }
 
 void
+Editor::timecode_snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
+{
+	const nframes64_t one_timecode_second = (nframes64_t)(rint(session->timecode_frames_per_second()) * session->frames_per_timecode_frame());
+	nframes64_t one_timecode_minute = (nframes64_t)(rint(session->timecode_frames_per_second()) * session->frames_per_timecode_frame() * 60);
+
+	switch (snap_type) {
+	case SnapToTimecodeFrame:
+		if (((direction == 0) && (fmod((double)start, (double)session->frames_per_timecode_frame()) > (session->frames_per_timecode_frame() / 2))) || (direction > 0)) {
+			start = (nframes64_t) (ceil ((double) start / session->frames_per_timecode_frame()) * session->frames_per_timecode_frame());
+		} else {
+			start = (nframes64_t) (floor ((double) start / session->frames_per_timecode_frame()) *  session->frames_per_timecode_frame());
+		}
+		break;
+
+	case SnapToTimecodeSeconds:
+		if (session->timecode_offset_negative())
+		{
+			start += session->timecode_offset ();
+		} else {
+			start -= session->timecode_offset ();
+		}
+		if (((direction == 0) && (start % one_timecode_second > one_timecode_second / 2)) || direction > 0) {
+			start = (nframes64_t) ceil ((double) start / one_timecode_second) * one_timecode_second;
+		} else {
+			start = (nframes64_t) floor ((double) start / one_timecode_second) * one_timecode_second;
+		}
+
+		if (session->timecode_offset_negative())
+		{
+			start -= session->timecode_offset ();
+		} else {
+			start += session->timecode_offset ();
+		}
+		break;
+
+	case SnapToTimecodeMinutes:
+		if (session->timecode_offset_negative())
+		{
+			start += session->timecode_offset ();
+		} else {
+			start -= session->timecode_offset ();
+		}
+		if (((direction == 0) && (start % one_timecode_minute > one_timecode_minute / 2)) || direction > 0) {
+			start = (nframes64_t) ceil ((double) start / one_timecode_minute) * one_timecode_minute;
+		} else {
+			start = (nframes64_t) floor ((double) start / one_timecode_minute) * one_timecode_minute;
+		}
+		if (session->timecode_offset_negative())
+		{
+			start -= session->timecode_offset ();
+		} else {
+			start += session->timecode_offset ();
+		}
+		break;
+	default:
+		fatal << "Editor::smpte_snap_to_internal() called with non-timecode snap type!" << endmsg;
+		/*NOTREACHED*/
+	}
+}
+
+void
 Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 {
+	const nframes64_t one_second = session->frame_rate();
+	const nframes64_t one_minute = session->frame_rate() * 60;
+	nframes64_t presnap = start;
 	nframes64_t before;
 	nframes64_t after;
 
-	const nframes64_t one_second = session->frame_rate();
-	const nframes64_t one_minute = session->frame_rate() * 60;
-	const nframes64_t one_smpte_second = (nframes64_t)(rint(session->smpte_frames_per_second()) * session->frames_per_smpte_frame());
-	nframes64_t one_smpte_minute = (nframes64_t)(rint(session->smpte_frames_per_second()) * session->frames_per_smpte_frame() * 60);
-	nframes64_t presnap = start;
-
 	switch (snap_type) {
+	case SnapToTimecodeFrame:
+	case SnapToTimecodeSeconds:
+	case SnapToTimecodeMinutes:
+		return timecode_snap_to_internal (start, direction, for_mark);
+
 	case SnapToCDFrame:
 		if (((direction == 0) && (start % (one_second/75) > (one_second/75) / 2)) || (direction > 0)) {
 			start = (nframes64_t) ceil ((double) start / (one_second / 75)) * (one_second / 75);
 		} else {
 			start = (nframes64_t) floor ((double) start / (one_second / 75)) * (one_second / 75);
-		}
-		break;
-
-	case SnapToSMPTEFrame:
-		if (((direction == 0) && (fmod((double)start, (double)session->frames_per_smpte_frame()) > (session->frames_per_smpte_frame() / 2))) || (direction > 0)) {
-			start = (nframes64_t) (ceil ((double) start / session->frames_per_smpte_frame()) * session->frames_per_smpte_frame());
-		} else {
-			start = (nframes64_t) (floor ((double) start / session->frames_per_smpte_frame()) *  session->frames_per_smpte_frame());
-		}
-		break;
-
-	case SnapToSMPTESeconds:
-		if (session->smpte_offset_negative())
-		{
-			start += session->smpte_offset ();
-		} else {
-			start -= session->smpte_offset ();
-		}
-		if (((direction == 0) && (start % one_smpte_second > one_smpte_second / 2)) || direction > 0) {
-			start = (nframes64_t) ceil ((double) start / one_smpte_second) * one_smpte_second;
-		} else {
-			start = (nframes64_t) floor ((double) start / one_smpte_second) * one_smpte_second;
-		}
-
-		if (session->smpte_offset_negative())
-		{
-			start -= session->smpte_offset ();
-		} else {
-			start += session->smpte_offset ();
-		}
-		break;
-
-	case SnapToSMPTEMinutes:
-		if (session->smpte_offset_negative())
-		{
-			start += session->smpte_offset ();
-		} else {
-			start -= session->smpte_offset ();
-		}
-		if (((direction == 0) && (start % one_smpte_minute > one_smpte_minute / 2)) || direction > 0) {
-			start = (nframes64_t) ceil ((double) start / one_smpte_minute) * one_smpte_minute;
-		} else {
-			start = (nframes64_t) floor ((double) start / one_smpte_minute) * one_smpte_minute;
-		}
-		if (session->smpte_offset_negative())
-		{
-			start -= session->smpte_offset ();
-		} else {
-			start += session->smpte_offset ();
 		}
 		break;
 
@@ -3463,12 +3477,12 @@ Editor::snap_type_selection_done ()
 		snaptype = SnapToRegionSync;
 	} else if (choice == _("CD Frames")) {
 		snaptype = SnapToCDFrame;
-	} else if (choice == _("SMPTE Frames")) {
-		snaptype = SnapToSMPTEFrame;
-	} else if (choice == _("SMPTE Seconds")) {
-		snaptype = SnapToSMPTESeconds;
-	} else if (choice == _("SMPTE Minutes")) {
-		snaptype = SnapToSMPTEMinutes;
+	} else if (choice == _("Timecode Frames")) {
+		snaptype = SnapToTimecodeFrame;
+	} else if (choice == _("Timecode Seconds")) {
+		snaptype = SnapToTimecodeSeconds;
+	} else if (choice == _("Timecode Minutes")) {
+		snaptype = SnapToTimecodeMinutes;
 	} else if (choice == _("Seconds")) {
 		snaptype = SnapToSeconds;
 	} else if (choice == _("Minutes")) {
@@ -3853,9 +3867,9 @@ Editor::get_grid_type_as_beats (bool& success, nframes64_t position)
 		break;
 
 	case SnapToCDFrame:
-	case SnapToSMPTEFrame:
-	case SnapToSMPTESeconds:
-	case SnapToSMPTEMinutes:
+	case SnapToTimecodeFrame:
+	case SnapToTimecodeSeconds:
+	case SnapToTimecodeMinutes:
 	case SnapToSeconds:
 	case SnapToMinutes:
 	case SnapToRegionStart:

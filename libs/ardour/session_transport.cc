@@ -681,11 +681,11 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 		return;
 	}
 
-	// Update SMPTE time
+	// Update Timecode time
 	// [DR] FIXME: find out exactly where this should go below
 	_transport_frame = target_frame;
-	smpte_time(_transport_frame, transmitting_smpte_time);
-	outbound_mtc_smpte_frame = _transport_frame;
+	timecode_time(_transport_frame, transmitting_timecode_time);
+	outbound_mtc_timecode_frame = _transport_frame;
 	next_quarter_frame_to_send = 0;
 
 	if (_transport_speed && (!with_loop || loop_changing)) {
@@ -785,7 +785,7 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 
 	loop_changing = false;
 
-	_send_smpte_update = true;
+	_send_timecode_update = true;
 
 	Located (); /* EMIT SIGNAL */
 }

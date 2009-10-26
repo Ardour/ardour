@@ -15,12 +15,12 @@
     51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#ifndef __ardour_smpte_h__
-#define __ardour_smpte_h__
+#ifndef __ardour_timecode_h__
+#define __ardour_timecode_h__
 
 #include <inttypes.h>
 
-namespace SMPTE {
+namespace Timecode {
 
 enum Wrap {
 	NONE = 0,
@@ -30,7 +30,7 @@ enum Wrap {
 	HOURS
 };
 
-/** SMPTE frame rate (in frames per second).
+/** Timecode frame rate (in frames per second).
  *
  * This should be eliminated in favour of a float to support arbitrary rates.
  */
@@ -46,7 +46,7 @@ struct Time {
 	uint32_t   hours;
 	uint32_t   minutes;
 	uint32_t   seconds;
-	uint32_t   frames;       ///< SMPTE frames (not audio samples)
+	uint32_t   frames;       ///< Timecode frames (not audio samples)
 	uint32_t   subframes;    ///< Typically unused
 	FPS        rate;         ///< Frame rate of this Time
 	static FPS default_rate; ///< Rate to use for default constructor
@@ -62,18 +62,18 @@ struct Time {
 	}
 };
 
-Wrap increment( Time& smpte );
-Wrap decrement( Time& smpte );
-Wrap increment_subframes( Time& smpte );
-Wrap decrement_subframes( Time& smpte );
-Wrap increment_seconds( Time& smpte );
-Wrap increment_minutes( Time& smpte );
-Wrap increment_hours( Time& smpte );
-void frames_floor( Time& smpte );
-void seconds_floor( Time& smpte );
-void minutes_floor( Time& smpte );
-void hours_floor( Time& smpte );
+Wrap increment( Time& timecode );
+Wrap decrement( Time& timecode );
+Wrap increment_subframes( Time& timecode );
+Wrap decrement_subframes( Time& timecode );
+Wrap increment_seconds( Time& timecode );
+Wrap increment_minutes( Time& timecode );
+Wrap increment_hours( Time& timecode );
+void frames_floor( Time& timecode );
+void seconds_floor( Time& timecode );
+void minutes_floor( Time& timecode );
+void hours_floor( Time& timecode );
 
-} // namespace SMPTE
+} // namespace Timecode
 
-#endif  // __ardour_smpte_h__
+#endif  // __ardour_timecode_h__

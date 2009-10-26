@@ -166,7 +166,7 @@ SoundFileBox::SoundFileBox (bool persistent)
 	table.attach (timecode_clock, 1, 2, 5, 6, FILL, FILL);
 
 	length_clock.set_mode (ARDOUR_UI::instance()->secondary_clock.mode());
-	timecode_clock.set_mode (AudioClock::SMPTE);
+	timecode_clock.set_mode (AudioClock::Timecode);
 
 	main_box.pack_start (table, false, false);
 

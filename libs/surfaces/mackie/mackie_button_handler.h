@@ -59,8 +59,8 @@ public:
 	virtual LedState name_value_press( Button & );
 	virtual LedState name_value_release( Button & );
 
-	virtual LedState smpte_beats_press( Button & );
-	virtual LedState smpte_beats_release( Button & );
+	virtual LedState timecode_beats_press( Button & );
+	virtual LedState timecode_beats_release( Button & );
 
 	virtual LedState F1_press( Button & );
 	virtual LedState F1_release( Button & );

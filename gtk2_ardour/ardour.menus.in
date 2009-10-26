@@ -316,9 +316,9 @@
 	       </menu>
                <menu name='SnapTo' action='SnapTo'>
 		   <menuitem action='snap-to-cd-frame'/>
-		   <menuitem action='snap-to-smpte-frame'/>
-		   <menuitem action='snap-to-smpte-seconds'/>
-		   <menuitem action='snap-to-smpte-minutes'/>
+		   <menuitem action='snap-to-timecode-frame'/>
+		   <menuitem action='snap-to-timecode-seconds'/>
+		   <menuitem action='snap-to-timecode-minutes'/>
 		   <menuitem action='snap-to-seconds'/>
 		   <menuitem action='snap-to-minutes'/>
 		   <menuitem action='snap-to-thirtyseconds'/>

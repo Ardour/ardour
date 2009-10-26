@@ -40,7 +40,7 @@ public:
 	virtual void tick(
 		const nframes_t& transport_frames,
 		const BBT_Time& transport_bbt,
-		const SMPTE::Time& transport_smpte) = 0;
+		const Timecode::Time& transport_timecode) = 0;
 
 	virtual void set_session(Session& s);
 	virtual void going_away() { _session = 0; }
@@ -68,7 +68,7 @@ public:
 	void tick(
 		const nframes_t& transport_frames,
 		const BBT_Time& transport_bbt,
-		const SMPTE::Time& transport_smpte);
+		const Timecode::Time& transport_timecode);
 
 	void set_session(Session& s);
 	void going_away() { _midi_port = 0; Ticker::going_away(); }

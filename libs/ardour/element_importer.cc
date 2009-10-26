@@ -79,7 +79,7 @@ ElementImporter::cancel_move ()
 }
 
 string
-ElementImporter::smpte_to_string(SMPTE::Time & time) const
+ElementImporter::timecode_to_string(Timecode::Time & time) const
 {
 	std::ostringstream oss;
 	oss << std::setfill('0') << std::right <<

@@ -54,7 +54,7 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/session_configuration.h"
 #include "ardour/location.h"
-#include "ardour/smpte.h"
+#include "ardour/timecode.h"
 #include "ardour/interpolation.h"
 
 class XMLTree;
@@ -421,15 +421,15 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	nframes_t nominal_frame_rate() const   { return _nominal_frame_rate; }
 	nframes_t frames_per_hour() const { return _frames_per_hour; }
 
-	double frames_per_smpte_frame() const { return _frames_per_smpte_frame; }
-	nframes_t smpte_frames_per_hour() const { return _smpte_frames_per_hour; }
+	double frames_per_timecode_frame() const { return _frames_per_timecode_frame; }
+	nframes_t timecode_frames_per_hour() const { return _timecode_frames_per_hour; }
 
-	MIDI::byte get_mtc_smpte_bits() const {
-		return mtc_smpte_bits;   /* encoding of SMTPE type for MTC */
+	MIDI::byte get_mtc_timecode_bits() const {
+		return mtc_timecode_bits;   /* encoding of SMTPE type for MTC */
 	}
 
-	float smpte_frames_per_second() const;
-	bool smpte_drop_frames() const;
+	float timecode_frames_per_second() const;
+	bool timecode_drop_frames() const;
 
 	/* Locations */
 
@@ -551,25 +551,25 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void sync_time_vars();
 
 	void bbt_time (nframes_t when, BBT_Time&);
-	void smpte_to_sample(SMPTE::Time& smpte, nframes_t& sample, bool use_offset, bool use_subframes) const;
-	void sample_to_smpte(nframes_t sample, SMPTE::Time& smpte, bool use_offset, bool use_subframes) const;
-	void smpte_time (SMPTE::Time &);
-	void smpte_time (nframes_t when, SMPTE::Time&);
-	void smpte_time_subframes (nframes_t when, SMPTE::Time&);
+	void timecode_to_sample(Timecode::Time& timecode, nframes_t& sample, bool use_offset, bool use_subframes) const;
+	void sample_to_timecode(nframes_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
+	void timecode_time (Timecode::Time &);
+	void timecode_time (nframes_t when, Timecode::Time&);
+	void timecode_time_subframes (nframes_t when, Timecode::Time&);
 
-	void smpte_duration (nframes_t, SMPTE::Time&) const;
-	void smpte_duration_string (char *, nframes_t) const;
+	void timecode_duration (nframes_t, Timecode::Time&) const;
+	void timecode_duration_string (char *, nframes_t) const;
 
-	void           set_smpte_offset (nframes_t);
-	nframes_t      smpte_offset () const { return _smpte_offset; }
-	void           set_smpte_offset_negative (bool);
-	bool           smpte_offset_negative () const { return _smpte_offset_negative; }
+	void           set_timecode_offset (nframes_t);
+	nframes_t      timecode_offset () const { return _timecode_offset; }
+	void           set_timecode_offset_negative (bool);
+	bool           timecode_offset_negative () const { return _timecode_offset_negative; }
 
 	nframes_t convert_to_frames_at (nframes_t position, AnyTime const &);
 
 	static sigc::signal<void> StartTimeChanged;
 	static sigc::signal<void> EndTimeChanged;
-	static sigc::signal<void> SMPTEOffsetChanged;
+	static sigc::signal<void> TimecodeOffsetChanged;
 
 	void   request_slave_source (SlaveSource);
 	bool   synced_to_jack() const { return Config->get_slave_source() == JACK; }
@@ -585,8 +585,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	TempoMap& tempo_map() { return *_tempo_map; }
 
-	/// signals the current transport position in frames, bbt and smpte time (in that order)
-	sigc::signal<void, const nframes_t&, const BBT_Time&, const SMPTE::Time&> tick;
+	/// signals the current transport position in frames, bbt and timecode time (in that order)
+	sigc::signal<void, const nframes_t&, const BBT_Time&, const Timecode::Time&> tick;
 
 	/* region info  */
 
@@ -1331,25 +1331,25 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	MIDI::byte mmc_buffer[32];
 	MIDI::byte mtc_msg[16];
-	MIDI::byte mtc_smpte_bits;   /* encoding of SMTPE type for MTC */
+	MIDI::byte mtc_timecode_bits;   /* encoding of SMTPE type for MTC */
 	MIDI::byte midi_msg[16];
-	nframes_t  outbound_mtc_smpte_frame;
-	SMPTE::Time transmitting_smpte_time;
+	nframes_t  outbound_mtc_timecode_frame;
+	Timecode::Time transmitting_timecode_time;
 	int next_quarter_frame_to_send;
 
-	double _frames_per_smpte_frame; /* has to be floating point because of drop frame */
+	double _frames_per_timecode_frame; /* has to be floating point because of drop frame */
 	nframes_t _frames_per_hour;
-	nframes_t _smpte_frames_per_hour;
-	nframes_t _smpte_offset;
-	bool _smpte_offset_negative;
+	nframes_t _timecode_frames_per_hour;
+	nframes_t _timecode_offset;
+	bool _timecode_offset_negative;
 
 	/* cache the most-recently requested time conversions. This helps when we
 	 * have multiple clocks showing the same time (e.g. the transport frame) */
-	bool           last_smpte_valid;
-	nframes_t last_smpte_when;
-	SMPTE::Time    last_smpte;
+	bool           last_timecode_valid;
+	nframes_t last_timecode_when;
+	Timecode::Time    last_timecode;
 
-	bool _send_smpte_update; ///< Flag to send a full frame (SMPTE) MTC message this cycle
+	bool _send_timecode_update; ///< Flag to send a full frame (Timecode) MTC message this cycle
 
 	int send_full_time_code(nframes_t nframes);
 	int send_midi_time_code_for_cycle(nframes_t nframes);

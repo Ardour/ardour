@@ -1913,7 +1913,7 @@ void
 Editor::show_verbose_time_cursor (nframes64_t frame, double offset, double xpos, double ypos)
 {
 	char buf[128];
-	SMPTE::Time smpte;
+	Timecode::Time timecode;
 	BBT_Time bbt;
 	int hours, mins;
 	nframes64_t frame_rate;
@@ -1937,9 +1937,9 @@ Editor::show_verbose_time_cursor (nframes64_t frame, double offset, double xpos,
 		snprintf (buf, sizeof (buf), "%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32, bbt.bars, bbt.beats, bbt.ticks);
 		break;
 
-	case AudioClock::SMPTE:
-		session->smpte_time (frame, smpte);
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32, smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+	case AudioClock::Timecode:
+		session->timecode_time (frame, timecode);
+		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32, timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 		break;
 
 	case AudioClock::MinSec:
@@ -1971,7 +1971,7 @@ void
 Editor::show_verbose_duration_cursor (nframes64_t start, nframes64_t end, double offset, double xpos, double ypos)
 {
 	char buf[128];
-	SMPTE::Time smpte;
+	Timecode::Time timecode;
 	BBT_Time sbbt;
 	BBT_Time ebbt;
 	int hours, mins;
@@ -2018,9 +2018,9 @@ Editor::show_verbose_duration_cursor (nframes64_t start, nframes64_t end, double
 		snprintf (buf, sizeof (buf), "%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32, ebbt.bars, ebbt.beats, ebbt.ticks);
 		break;
 
-	case AudioClock::SMPTE:
-		session->smpte_duration (end - start, smpte);
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32, smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+	case AudioClock::Timecode:
+		session->timecode_duration (end - start, timecode);
+		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32, timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 		break;
 
 	case AudioClock::MinSec:

@@ -43,7 +43,7 @@ ExportFormatSpecification::Time &
 ExportFormatSpecification::Time::operator= (AnyTime const & other)
 {
 	type = other.type;
-	smpte = other.smpte;
+	timecode = other.timecode;
 	bbt = other.bbt;
 
 	if (type == Frames) {
@@ -73,11 +73,11 @@ ExportFormatSpecification::Time::get_state ()
 	node->add_property ("format", enum_2_string (type));
 
 	switch (type) {
-	  case SMPTE:
-		node->add_property ("hours", to_string (smpte.hours, std::dec));
-		node->add_property ("minutes", to_string (smpte.minutes, std::dec));
-		node->add_property ("seconds", to_string (smpte.seconds, std::dec));
-		node->add_property ("frames", to_string (smpte.frames, std::dec));
+	  case Timecode:
+		node->add_property ("hours", to_string (timecode.hours, std::dec));
+		node->add_property ("minutes", to_string (timecode.minutes, std::dec));
+		node->add_property ("seconds", to_string (timecode.seconds, std::dec));
+		node->add_property ("frames", to_string (timecode.frames, std::dec));
 		break;
 	  case BBT:
 		node->add_property ("bars", to_string (bbt.bars, std::dec));
@@ -107,21 +107,21 @@ ExportFormatSpecification::Time::set_state (const XMLNode & node)
 	type = (Type) string_2_enum (prop->value(), Type);
 
 	switch (type) {
-	  case SMPTE:
+	  case Timecode:
 		if ((prop = node.property ("hours"))) {
-			smpte.hours = atoi (prop->value());
+			timecode.hours = atoi (prop->value());
 		}
 
 		if ((prop = node.property ("minutes"))) {
-			smpte.minutes = atoi (prop->value());
+			timecode.minutes = atoi (prop->value());
 		}
 
 		if ((prop = node.property ("seconds"))) {
-			smpte.seconds = atoi (prop->value());
+			timecode.seconds = atoi (prop->value());
 		}
 
 		if ((prop = node.property ("frames"))) {
-			smpte.frames = atoi (prop->value());
+			timecode.frames = atoi (prop->value());
 		}
 
 		break;
@@ -191,8 +191,8 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s, XMLNode const
 	, _silence_beginning (s)
 	, _silence_end (s)
 {
-	_silence_beginning.type = Time::SMPTE;
-	_silence_end.type = Time::SMPTE;
+	_silence_beginning.type = Time::Timecode;
+	_silence_end.type = Time::Timecode;
 
 	set_state (state);
 }
@@ -396,7 +396,7 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 					_silence_beginning.set_state (*child);
 				}
 			} else {
-				_silence_beginning.type = Time::SMPTE;
+				_silence_beginning.type = Time::Timecode;
 			}
 		}
 	}
@@ -416,7 +416,7 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 					_silence_end.set_state (*child);
 				}
 			} else {
-				_silence_end.type = Time::SMPTE;
+				_silence_end.type = Time::Timecode;
 			}
 		}
 	}

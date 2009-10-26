@@ -46,7 +46,7 @@ setup_gtk_ardour_enums ()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
 #define REGISTER_CLASS_ENUM(t,e) i.push_back (t::e); s.push_back (#e)
 
-	REGISTER_CLASS_ENUM (AudioClock, SMPTE);
+	REGISTER_CLASS_ENUM (AudioClock, Timecode);
 	REGISTER_CLASS_ENUM (AudioClock, BBT);
 	REGISTER_CLASS_ENUM (AudioClock, MinSec);
 	REGISTER_CLASS_ENUM (AudioClock, Frames);

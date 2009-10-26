@@ -642,7 +642,7 @@ class Editor : public PublicEditor
 	ArdourCanvas::Group      *minsec_group;
 	ArdourCanvas::Pixbuf     *logo_item;
 	ArdourCanvas::Group      *bbt_group;
-	ArdourCanvas::Group      *smpte_group;
+	ArdourCanvas::Group      *timecode_group;
 	ArdourCanvas::Group      *frame_group;
 	ArdourCanvas::Group      *tempo_group;
 	ArdourCanvas::Group      *meter_group;
@@ -678,7 +678,7 @@ class Editor : public PublicEditor
 	ArdourCanvas::Group* _region_motion_group;
 
 	enum RulerType {
-		ruler_metric_smpte = 0,
+		ruler_metric_timecode = 0,
 		ruler_metric_bbt = 1,
 		ruler_metric_frames = 2,
 		ruler_metric_minsec = 3,
@@ -712,7 +712,7 @@ class Editor : public PublicEditor
 	Gtk::Widget * ruler_grabbed_widget;
 
 	void initialize_rulers ();
-	void update_just_smpte ();
+	void update_just_timecode ();
 	void compute_fixed_ruler_scale (); //calculates the RulerScale of the fixed rulers
 	void update_fixed_rulers ();
 	void update_tempo_based_rulers ();
@@ -725,7 +725,7 @@ class Editor : public PublicEditor
 	void store_ruler_visibility ();
 	void restore_ruler_visibility ();
 
-	static gint _metric_get_smpte (GtkCustomRulerMark **, gdouble, gdouble, gint);
+	static gint _metric_get_timecode (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	static gint _metric_get_bbt (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	static gint _metric_get_frames (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	static gint _metric_get_minsec (GtkCustomRulerMark **, gdouble, gdouble, gint);
@@ -744,20 +744,20 @@ class Editor : public PublicEditor
 	gint minsec_nmarks;
 	void set_minsec_ruler_scale (gdouble lower, gdouble upper);
 
-	enum SMPTERulerScale {
-		smpte_show_bits,
-		smpte_show_frames,
-		smpte_show_seconds,
-		smpte_show_minutes,
-		smpte_show_hours
+	enum TimecodeRulerScale {
+		timecode_show_bits,
+		timecode_show_frames,
+		timecode_show_seconds,
+		timecode_show_minutes,
+		timecode_show_hours
 	};
 
-	SMPTERulerScale smpte_ruler_scale;
+	TimecodeRulerScale timecode_ruler_scale;
 
-	nframes_t smpte_mark_interval;
-	gint smpte_mark_modulo;
-	gint smpte_nmarks;
-	void set_smpte_ruler_scale (gdouble lower, gdouble upper);
+	nframes_t timecode_mark_interval;
+	gint timecode_mark_modulo;
+	gint timecode_nmarks;
+	void set_timecode_ruler_scale (gdouble lower, gdouble upper);
 
 	enum BBTRulerScale {
 		bbt_over,
@@ -779,17 +779,17 @@ class Editor : public PublicEditor
 	uint32_t bbt_accent_modulo;
 	void compute_bbt_ruler_scale (nframes64_t lower, nframes64_t upper);
 
-	gint metric_get_smpte (GtkCustomRulerMark **, gdouble, gdouble, gint);
+	gint metric_get_timecode (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	gint metric_get_bbt (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	gint metric_get_frames (GtkCustomRulerMark **, gdouble, gdouble, gint);
 	gint metric_get_minsec (GtkCustomRulerMark **, gdouble, gdouble, gint);
 
 	Gtk::Widget        *_ruler_separator;
-	GtkWidget          *_smpte_ruler;
+	GtkWidget          *_timecode_ruler;
 	GtkWidget          *_bbt_ruler;
 	GtkWidget          *_frames_ruler;
 	GtkWidget          *_minsec_ruler;
-	Gtk::Widget        *smpte_ruler;
+	Gtk::Widget        *timecode_ruler;
 	Gtk::Widget        *bbt_ruler;
 	Gtk::Widget        *frames_ruler;
 	Gtk::Widget        *minsec_ruler;
@@ -810,7 +810,7 @@ class Editor : public PublicEditor
 
 	Gtk::Label  minsec_label;
 	Gtk::Label  bbt_label;
-	Gtk::Label  smpte_label;
+	Gtk::Label  timecode_label;
 	Gtk::Label  frame_label;
 	Gtk::Label  tempo_label;
 	Gtk::Label  meter_label;
@@ -2000,6 +2000,7 @@ public:
 	void select_prev_route ();
 
 	void snap_to_internal (nframes64_t& first, int32_t direction = 0, bool for_mark = false);
+	void timecode_snap_to_internal (nframes64_t& first, int32_t direction = 0, bool for_mark = false);
 
 	RhythmFerret* rhythm_ferret;
 	BundleManager* _bundle_manager;

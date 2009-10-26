@@ -110,8 +110,8 @@ class ElementImporter
 	/// The sample rate of the session from which we are importing
 	nframes_t sample_rate;
 
-	/// Converts smpte time to a string
-	std::string smpte_to_string (SMPTE::Time & time) const;
+	/// Converts timecode time to a string
+	std::string timecode_to_string (Timecode::Time & time) const;
 
 	/// Converts samples so that times match the sessions sample rate
 	nframes_t rate_convert_samples (nframes_t samples) const;

@@ -43,7 +43,7 @@
 #include "ardour/audio_diskstream.h"
 #include "ardour/slave.h"
 #include "ardour/cycles.h"
-#include "ardour/smpte.h"
+#include "ardour/timecode.h"
 
 #include "i18n.h"
 
@@ -469,7 +469,7 @@ Session::get_trace_midi_output(MIDI::Port *port)
 void
 Session::setup_midi_control ()
 {
-	outbound_mtc_smpte_frame = 0;
+	outbound_mtc_timecode_frame = 0;
 	next_quarter_frame_to_send = 0;
 
 	/* setup the MMC buffer */
@@ -638,7 +638,7 @@ Session::mmc_step (MIDI::MachineControl &/*mmc*/, int steps)
 	}
 
 	double diff_secs = diff.tv_sec + (diff.tv_usec / 1000000.0);
-	double cur_speed = (((steps * 0.5) * smpte_frames_per_second()) / diff_secs) / smpte_frames_per_second();
+	double cur_speed = (((steps * 0.5) * timecode_frames_per_second()) / diff_secs) / timecode_frames_per_second();
 
 	if (_transport_speed == 0 || cur_speed * _transport_speed < 0) {
 		/* change direction */
@@ -691,17 +691,17 @@ Session::mmc_locate (MIDI::MachineControl &/*mmc*/, const MIDI::byte* mmc_tc)
 	}
 
 	nframes_t target_frame;
-	SMPTE::Time smpte;
+	Timecode::Time timecode;
 
-	smpte.hours = mmc_tc[0] & 0xf;
-	smpte.minutes = mmc_tc[1];
-	smpte.seconds = mmc_tc[2];
-	smpte.frames = mmc_tc[3];
-	smpte.rate = smpte_frames_per_second();
-	smpte.drop = smpte_drop_frames();
+	timecode.hours = mmc_tc[0] & 0xf;
+	timecode.minutes = mmc_tc[1];
+	timecode.seconds = mmc_tc[2];
+	timecode.frames = mmc_tc[3];
+	timecode.rate = timecode_frames_per_second();
+	timecode.drop = timecode_drop_frames();
 
-	// Also takes smpte offset into account:
-	smpte_to_sample( smpte, target_frame, true /* use_offset */, false /* use_subframes */ );
+	// Also takes timecode offset into account:
+	timecode_to_sample( timecode, target_frame, true /* use_offset */, false /* use_subframes */ );
 
 	if (target_frame > max_frames) {
 		target_frame = max_frames;
@@ -773,7 +773,7 @@ Session::change_midi_ports ()
 	poke_midi_thread ();
 }
 
-/** Send MTC Full Frame message (complete SMPTE time) for the start of this cycle.
+/** Send MTC Full Frame message (complete Timecode time) for the start of this cycle.
  * This resets the MTC code, the next quarter frame message that is sent will be
  * the first one with the beginning of this cycle as the new start point.
  */
@@ -784,33 +784,33 @@ Session::send_full_time_code(nframes_t /*nframes*/)
 	 * that be useful?  Does ardour do sub-block accurate locating? [DR] */
 
 	MIDI::byte msg[10];
-	SMPTE::Time smpte;
+	Timecode::Time timecode;
 
-	_send_smpte_update = false;
+	_send_timecode_update = false;
 
 	if (_mtc_port == 0 || !session_send_mtc) {
 		return 0;
 	}
 
-	// Get smpte time for this transport frame
-	sample_to_smpte(_transport_frame, smpte, true /* use_offset */, false /* no subframes */);
+	// Get timecode time for this transport frame
+	sample_to_timecode(_transport_frame, timecode, true /* use_offset */, false /* no subframes */);
 
-	transmitting_smpte_time = smpte;
-	outbound_mtc_smpte_frame = _transport_frame;
+	transmitting_timecode_time = timecode;
+	outbound_mtc_timecode_frame = _transport_frame;
 
 	// I don't understand this bit yet.. [DR]
-	if (((mtc_smpte_bits >> 5) != MIDI::MTC_25_FPS) && (transmitting_smpte_time.frames % 2)) {
+	if (((mtc_timecode_bits >> 5) != MIDI::MTC_25_FPS) && (transmitting_timecode_time.frames % 2)) {
 		// start MTC quarter frame transmission on an even frame
-		SMPTE::increment( transmitting_smpte_time, config.get_subframes_per_frame() );
-		outbound_mtc_smpte_frame += (nframes_t) _frames_per_smpte_frame;
+		Timecode::increment( transmitting_timecode_time, config.get_subframes_per_frame() );
+		outbound_mtc_timecode_frame += (nframes_t) _frames_per_timecode_frame;
 	}
 
 	// Compensate for audio latency
-	outbound_mtc_smpte_frame += _worst_output_latency;
+	outbound_mtc_timecode_frame += _worst_output_latency;
 
 	next_quarter_frame_to_send = 0;
 
-	// Sync slave to the same SMPTE time as we are on
+	// Sync slave to the same Timecode time as we are on
 	msg[0] = 0xf0;
 	msg[1] = 0x7f;
 	msg[2] = 0x7f;
@@ -818,12 +818,12 @@ Session::send_full_time_code(nframes_t /*nframes*/)
 	msg[4] = 0x1;
 	msg[9] = 0xf7;
 
-	msg[5] = mtc_smpte_bits | smpte.hours;
-	msg[6] = smpte.minutes;
-	msg[7] = smpte.seconds;
-	msg[8] = smpte.frames;
+	msg[5] = mtc_timecode_bits | timecode.hours;
+	msg[6] = timecode.minutes;
+	msg[7] = timecode.seconds;
+	msg[8] = timecode.frames;
 
-	cerr << "MTC: Sending full time code at " << outbound_mtc_smpte_frame << endl;
+	cerr << "MTC: Sending full time code at " << outbound_mtc_timecode_frame << endl;
 
 	// Send message at offset 0, sent time is for the start of this cycle
 	if (_mtc_port->midimsg (msg, sizeof (msg), 0)) {
@@ -836,9 +836,9 @@ Session::send_full_time_code(nframes_t /*nframes*/)
 
 /** Send MTC (quarter-frame) messages for this cycle.
  * Must be called exactly once per cycle from the audio thread.  Realtime safe.
- * This function assumes the state of full SMPTE is sane, eg. the slave is
+ * This function assumes the state of full Timecode is sane, eg. the slave is
  * expecting quarter frame messages and has the right frame of reference (any
- * full MTC SMPTE time messages that needed to be sent should have been sent
+ * full MTC Timecode time messages that needed to be sent should have been sent
  * earlier already this cycle by send_full_time_code)
  */
 int
@@ -847,57 +847,57 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 	assert (next_quarter_frame_to_send >= 0);
 	assert (next_quarter_frame_to_send <= 7);
 
-	if (_mtc_port == 0 || !session_send_mtc || transmitting_smpte_time.negative
+	if (_mtc_port == 0 || !session_send_mtc || transmitting_timecode_time.negative
 	    /*|| (next_quarter_frame_to_send < 0)*/ ) {
 		// cerr << "(MTC) Not sending MTC\n";
 		return 0;
 	}
 
 	/* Duration of one quarter frame */
-	nframes_t quarter_frame_duration = ((long) _frames_per_smpte_frame) >> 2;
+	nframes_t quarter_frame_duration = ((long) _frames_per_timecode_frame) >> 2;
 
-	// cerr << "(MTC) TR: " << _transport_frame << " - SF: " << outbound_mtc_smpte_frame
+	// cerr << "(MTC) TR: " << _transport_frame << " - SF: " << outbound_mtc_timecode_frame
 	// << " - NQ: " << next_quarter_frame_to_send << " - FD" << quarter_frame_duration << endl;
 
 	// FIXME: this should always be true
-	//assert((outbound_mtc_smpte_frame + (next_quarter_frame_to_send * quarter_frame_duration))
+	//assert((outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration))
 	//		> _transport_frame);
 
 
 	// Send quarter frames for this cycle
-	while (_transport_frame + nframes > (outbound_mtc_smpte_frame +
+	while (_transport_frame + nframes > (outbound_mtc_timecode_frame +
 				(next_quarter_frame_to_send * quarter_frame_duration))) {
 
 		// cerr << "(MTC) Next frame to send: " << next_quarter_frame_to_send << endl;
 
 		switch (next_quarter_frame_to_send) {
 			case 0:
-				mtc_msg[1] =  0x00 | (transmitting_smpte_time.frames & 0xf);
+				mtc_msg[1] =  0x00 | (transmitting_timecode_time.frames & 0xf);
 				break;
 			case 1:
-				mtc_msg[1] =  0x10 | ((transmitting_smpte_time.frames & 0xf0) >> 4);
+				mtc_msg[1] =  0x10 | ((transmitting_timecode_time.frames & 0xf0) >> 4);
 				break;
 			case 2:
-				mtc_msg[1] =  0x20 | (transmitting_smpte_time.seconds & 0xf);
+				mtc_msg[1] =  0x20 | (transmitting_timecode_time.seconds & 0xf);
 				break;
 			case 3:
-				mtc_msg[1] =  0x30 | ((transmitting_smpte_time.seconds & 0xf0) >> 4);
+				mtc_msg[1] =  0x30 | ((transmitting_timecode_time.seconds & 0xf0) >> 4);
 				break;
 			case 4:
-				mtc_msg[1] =  0x40 | (transmitting_smpte_time.minutes & 0xf);
+				mtc_msg[1] =  0x40 | (transmitting_timecode_time.minutes & 0xf);
 				break;
 			case 5:
-				mtc_msg[1] = 0x50 | ((transmitting_smpte_time.minutes & 0xf0) >> 4);
+				mtc_msg[1] = 0x50 | ((transmitting_timecode_time.minutes & 0xf0) >> 4);
 				break;
 			case 6:
-				mtc_msg[1] = 0x60 | ((mtc_smpte_bits|transmitting_smpte_time.hours) & 0xf);
+				mtc_msg[1] = 0x60 | ((mtc_timecode_bits|transmitting_timecode_time.hours) & 0xf);
 				break;
 			case 7:
-				mtc_msg[1] = 0x70 | (((mtc_smpte_bits|transmitting_smpte_time.hours) & 0xf0) >> 4);
+				mtc_msg[1] = 0x70 | (((mtc_timecode_bits|transmitting_timecode_time.hours) & 0xf0) >> 4);
 				break;
 		}
 
-		const nframes_t msg_time = (outbound_mtc_smpte_frame
+		const nframes_t msg_time = (outbound_mtc_timecode_frame
 			+ (quarter_frame_duration * next_quarter_frame_to_send));
 
 		// This message must fall within this block or something is broken
@@ -913,10 +913,10 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 			return -1;
 		}
 
-		/*cerr << "(MTC) SMPTE: " << transmitting_smpte_time.hours
-			<< ":" << transmitting_smpte_time.minutes
-			<< ":" << transmitting_smpte_time.seconds
-			<< ":" << transmitting_smpte_time.frames
+		/*cerr << "(MTC) Timecode: " << transmitting_timecode_time.hours
+			<< ":" << transmitting_timecode_time.minutes
+			<< ":" << transmitting_timecode_time.seconds
+			<< ":" << transmitting_timecode_time.frames
 			<< ", qfm = " << next_quarter_frame_to_send
 			<< ", stamp = " << out_stamp
 			<< ", delta = " << _transport_frame + out_stamp - last_time << endl;*/
@@ -927,14 +927,14 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 		if (next_quarter_frame_to_send >= 8) {
 			// Wrap quarter frame counter
 			next_quarter_frame_to_send = 0;
-			// Increment smpte time twice
-			SMPTE::increment( transmitting_smpte_time, config.get_subframes_per_frame() );
-			SMPTE::increment( transmitting_smpte_time, config.get_subframes_per_frame() );
+			// Increment timecode time twice
+			Timecode::increment( transmitting_timecode_time, config.get_subframes_per_frame() );
+			Timecode::increment( transmitting_timecode_time, config.get_subframes_per_frame() );
 			// Re-calculate timing of first quarter frame
-			//smpte_to_sample( transmitting_smpte_time, outbound_mtc_smpte_frame, true /* use_offset */, false );
-			outbound_mtc_smpte_frame += 8 * quarter_frame_duration;
+			//timecode_to_sample( transmitting_timecode_time, outbound_mtc_timecode_frame, true /* use_offset */, false );
+			outbound_mtc_timecode_frame += 8 * quarter_frame_duration;
 			// Compensate for audio latency
-			outbound_mtc_smpte_frame += _worst_output_latency;
+			outbound_mtc_timecode_frame += _worst_output_latency;
 		}
 	}
 
@@ -950,7 +950,7 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, nframes_t where)
 {
 	using namespace MIDI;
 	int nbytes = 4;
-	SMPTE::Time smpte;
+	Timecode::Time timecode;
 
 	if (_mmc_port == 0 || !session_send_mmc) {
 		// cerr << "Not delivering MMC " << _mmc_port << " - " << session_send_mmc << endl;
@@ -963,15 +963,15 @@ Session::deliver_mmc (MIDI::MachineControl::Command cmd, nframes_t where)
 
 	switch (cmd) {
 	case MachineControl::cmdLocate:
-		smpte_time_subframes (where, smpte);
+		timecode_time_subframes (where, timecode);
 
 		mmc_buffer[nbytes++] = 0x6; // byte count
 		mmc_buffer[nbytes++] = 0x1; // "TARGET" subcommand
-		mmc_buffer[nbytes++] = smpte.hours;
-		mmc_buffer[nbytes++] = smpte.minutes;
-		mmc_buffer[nbytes++] = smpte.seconds;
-		mmc_buffer[nbytes++] = smpte.frames;
-		mmc_buffer[nbytes++] = smpte.subframes;
+		mmc_buffer[nbytes++] = timecode.hours;
+		mmc_buffer[nbytes++] = timecode.minutes;
+		mmc_buffer[nbytes++] = timecode.seconds;
+		mmc_buffer[nbytes++] = timecode.frames;
+		mmc_buffer[nbytes++] = timecode.subframes;
 		break;
 
 	case MachineControl::cmdStop:

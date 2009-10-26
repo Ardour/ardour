@@ -50,10 +50,10 @@ sigc::signal<void> AudioClock::ModeChanged;
 vector<AudioClock*> AudioClock::clocks;
 
 const uint32_t AudioClock::field_length[(int) AudioClock::AudioFrames+1] = {
-	2,   /* SMPTE_Hours */
-	2,   /* SMPTE_Minutes */
-	2,   /* SMPTE_Seconds */
-	2,   /* SMPTE_Frames */
+	2,   /* Timecode_Hours */
+	2,   /* Timecode_Minutes */
+	2,   /* Timecode_Seconds */
+	2,   /* Timecode_Frames */
 	2,   /* MS_Hours */
 	2,   /* MS_Minutes */
 	5,   /* MS_Seconds */
@@ -89,36 +89,36 @@ AudioClock::AudioClock (std::string clock_name, bool transient, std::string widg
 	if (with_info) {
 		frames_upper_info_label = manage (new Label);
 		frames_lower_info_label = manage (new Label);
-		smpte_upper_info_label = manage (new Label);
-		smpte_lower_info_label = manage (new Label);
+		timecode_upper_info_label = manage (new Label);
+		timecode_lower_info_label = manage (new Label);
 		bbt_upper_info_label = manage (new Label);
 		bbt_lower_info_label = manage (new Label);
 
 		frames_upper_info_label->set_name ("AudioClockFramesUpperInfo");
 		frames_lower_info_label->set_name ("AudioClockFramesLowerInfo");
-		smpte_upper_info_label->set_name ("AudioClockSMPTEUpperInfo");
-		smpte_lower_info_label->set_name ("AudioClockSMPTELowerInfo");
+		timecode_upper_info_label->set_name ("AudioClockTimecodeUpperInfo");
+		timecode_lower_info_label->set_name ("AudioClockTimecodeLowerInfo");
 		bbt_upper_info_label->set_name ("AudioClockBBTUpperInfo");
 		bbt_lower_info_label->set_name ("AudioClockBBTLowerInfo");
 
-		Gtkmm2ext::set_size_request_to_display_given_text(*smpte_upper_info_label, "23.98",0,0);
-		Gtkmm2ext::set_size_request_to_display_given_text(*smpte_lower_info_label, "NDF",0,0);
+		Gtkmm2ext::set_size_request_to_display_given_text(*timecode_upper_info_label, "23.98",0,0);
+		Gtkmm2ext::set_size_request_to_display_given_text(*timecode_lower_info_label, "NDF",0,0);
 
 		Gtkmm2ext::set_size_request_to_display_given_text(*bbt_upper_info_label, "88|88",0,0);
 		Gtkmm2ext::set_size_request_to_display_given_text(*bbt_lower_info_label, "888.88",0,0);
 
 		frames_info_box.pack_start (*frames_upper_info_label, true, true);
 		frames_info_box.pack_start (*frames_lower_info_label, true, true);
-		smpte_info_box.pack_start (*smpte_upper_info_label, true, true);
-		smpte_info_box.pack_start (*smpte_lower_info_label, true, true);
+		timecode_info_box.pack_start (*timecode_upper_info_label, true, true);
+		timecode_info_box.pack_start (*timecode_lower_info_label, true, true);
 		bbt_info_box.pack_start (*bbt_upper_info_label, true, true);
 		bbt_info_box.pack_start (*bbt_lower_info_label, true, true);
 
 	} else {
 		frames_upper_info_label = 0;
 		frames_lower_info_label = 0;
-		smpte_upper_info_label = 0;
-		smpte_lower_info_label = 0;
+		timecode_upper_info_label = 0;
+		timecode_lower_info_label = 0;
 		bbt_upper_info_label = 0;
 		bbt_lower_info_label = 0;
 	}
@@ -146,21 +146,21 @@ AudioClock::AudioClock (std::string clock_name, bool transient, std::string widg
 	ms_minutes_ebox.add (ms_minutes_label);
 	ms_seconds_ebox.add (ms_seconds_label);
 
-	smpte_packer.set_homogeneous (false);
-	smpte_packer.set_border_width (2);
-	smpte_packer.pack_start (hours_ebox, false, false);
-	smpte_packer.pack_start (colon1, false, false);
-	smpte_packer.pack_start (minutes_ebox, false, false);
-	smpte_packer.pack_start (colon2, false, false);
-	smpte_packer.pack_start (seconds_ebox, false, false);
-	smpte_packer.pack_start (colon3, false, false);
-	smpte_packer.pack_start (frames_ebox, false, false);
+	timecode_packer.set_homogeneous (false);
+	timecode_packer.set_border_width (2);
+	timecode_packer.pack_start (hours_ebox, false, false);
+	timecode_packer.pack_start (colon1, false, false);
+	timecode_packer.pack_start (minutes_ebox, false, false);
+	timecode_packer.pack_start (colon2, false, false);
+	timecode_packer.pack_start (seconds_ebox, false, false);
+	timecode_packer.pack_start (colon3, false, false);
+	timecode_packer.pack_start (frames_ebox, false, false);
 
 	if (with_info) {
-		smpte_packer.pack_start (smpte_info_box, false, false, 5);
+		timecode_packer.pack_start (timecode_info_box, false, false, 5);
 	}
 
-	smpte_packer_hbox.pack_start (smpte_packer, true, false);
+	timecode_packer_hbox.pack_start (timecode_packer, true, false);
 
 	bbt_packer.set_homogeneous (false);
 	bbt_packer.set_border_width (2);
@@ -194,7 +194,7 @@ AudioClock::AudioClock (std::string clock_name, bool transient, std::string widg
 	set_widget_name (widget_name);
 
 	_mode = BBT; /* lie to force mode switch */
-	set_mode (SMPTE);
+	set_mode (Timecode);
 
 	pack_start (clock_frame, true, true);
 
@@ -210,9 +210,9 @@ AudioClock::AudioClock (std::string clock_name, bool transient, std::string widg
 	*/
 
 	clock_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
-	clock_base.signal_button_release_event().connect (bind (mem_fun (*this, &AudioClock::field_button_release_event), SMPTE_Hours));
+	clock_base.signal_button_release_event().connect (bind (mem_fun (*this, &AudioClock::field_button_release_event), Timecode_Hours));
 
-	Session::SMPTEOffsetChanged.connect (mem_fun (*this, &AudioClock::smpte_offset_changed));
+	Session::TimecodeOffsetChanged.connect (mem_fun (*this, &AudioClock::timecode_offset_changed));
 
 	if (editable) {
 		setup_events ();
@@ -295,10 +295,10 @@ AudioClock::setup_events ()
 	ms_minutes_ebox.set_flags (Gtk::CAN_FOCUS);
 	ms_seconds_ebox.set_flags (Gtk::CAN_FOCUS);
 
-	hours_ebox.signal_motion_notify_event().connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), SMPTE_Hours));
-	minutes_ebox.signal_motion_notify_event().connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), SMPTE_Minutes));
-	seconds_ebox.signal_motion_notify_event().connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), SMPTE_Seconds));
-	frames_ebox.signal_motion_notify_event().connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), SMPTE_Frames));
+	hours_ebox.signal_motion_notify_event().connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), Timecode_Hours));
+	minutes_ebox.signal_motion_notify_event().connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), Timecode_Minutes));
+	seconds_ebox.signal_motion_notify_event().connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), Timecode_Seconds));
+	frames_ebox.signal_motion_notify_event().connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), Timecode_Frames));
 	audio_frames_ebox.signal_motion_notify_event().connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), AudioFrames));
 	bars_ebox.signal_motion_notify_event().connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), Bars));
 	beats_ebox.signal_motion_notify_event().connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), Beats));
@@ -307,10 +307,10 @@ AudioClock::setup_events ()
 	ms_minutes_ebox.signal_motion_notify_event().connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), MS_Minutes));
 	ms_seconds_ebox.signal_motion_notify_event().connect (bind (mem_fun(*this, &AudioClock::field_motion_notify_event), MS_Seconds));
 
-	hours_ebox.signal_button_press_event().connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), SMPTE_Hours));
-	minutes_ebox.signal_button_press_event().connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), SMPTE_Minutes));
-	seconds_ebox.signal_button_press_event().connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), SMPTE_Seconds));
-	frames_ebox.signal_button_press_event().connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), SMPTE_Frames));
+	hours_ebox.signal_button_press_event().connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), Timecode_Hours));
+	minutes_ebox.signal_button_press_event().connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), Timecode_Minutes));
+	seconds_ebox.signal_button_press_event().connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), Timecode_Seconds));
+	frames_ebox.signal_button_press_event().connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), Timecode_Frames));
 	audio_frames_ebox.signal_button_press_event().connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), AudioFrames));
 	bars_ebox.signal_button_press_event().connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), Bars));
 	beats_ebox.signal_button_press_event().connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), Beats));
@@ -319,10 +319,10 @@ AudioClock::setup_events ()
 	ms_minutes_ebox.signal_button_press_event().connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), MS_Minutes));
 	ms_seconds_ebox.signal_button_press_event().connect (bind (mem_fun(*this, &AudioClock::field_button_press_event), MS_Seconds));
 
-	hours_ebox.signal_button_release_event().connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), SMPTE_Hours));
-	minutes_ebox.signal_button_release_event().connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), SMPTE_Minutes));
-	seconds_ebox.signal_button_release_event().connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), SMPTE_Seconds));
-	frames_ebox.signal_button_release_event().connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), SMPTE_Frames));
+	hours_ebox.signal_button_release_event().connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), Timecode_Hours));
+	minutes_ebox.signal_button_release_event().connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), Timecode_Minutes));
+	seconds_ebox.signal_button_release_event().connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), Timecode_Seconds));
+	frames_ebox.signal_button_release_event().connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), Timecode_Frames));
 	audio_frames_ebox.signal_button_release_event().connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), AudioFrames));
 	bars_ebox.signal_button_release_event().connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), Bars));
 	beats_ebox.signal_button_release_event().connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), Beats));
@@ -331,10 +331,10 @@ AudioClock::setup_events ()
 	ms_minutes_ebox.signal_button_release_event().connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), MS_Minutes));
 	ms_seconds_ebox.signal_button_release_event().connect (bind (mem_fun(*this, &AudioClock::field_button_release_event), MS_Seconds));
 
-	hours_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), SMPTE_Hours));
-	minutes_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), SMPTE_Minutes));
-	seconds_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), SMPTE_Seconds));
-	frames_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), SMPTE_Frames));
+	hours_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), Timecode_Hours));
+	minutes_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), Timecode_Minutes));
+	seconds_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), Timecode_Seconds));
+	frames_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), Timecode_Frames));
 	audio_frames_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), AudioFrames));
 	bars_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), Bars));
 	beats_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), Beats));
@@ -343,10 +343,10 @@ AudioClock::setup_events ()
 	ms_minutes_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), MS_Minutes));
 	ms_seconds_ebox.signal_scroll_event().connect (bind (mem_fun(*this, &AudioClock::field_button_scroll_event), MS_Seconds));
 
-	hours_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), SMPTE_Hours));
-	minutes_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), SMPTE_Minutes));
-	seconds_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), SMPTE_Seconds));
-	frames_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), SMPTE_Frames));
+	hours_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), Timecode_Hours));
+	minutes_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), Timecode_Minutes));
+	seconds_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), Timecode_Seconds));
+	frames_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), Timecode_Frames));
 	audio_frames_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), AudioFrames));
 	bars_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), Bars));
 	beats_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), Beats));
@@ -355,10 +355,10 @@ AudioClock::setup_events ()
 	ms_minutes_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), MS_Minutes));
 	ms_seconds_ebox.signal_key_press_event().connect (bind (mem_fun(*this, &AudioClock::field_key_press_event), MS_Seconds));
 
-	hours_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), SMPTE_Hours));
-	minutes_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), SMPTE_Minutes));
-	seconds_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), SMPTE_Seconds));
-	frames_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), SMPTE_Frames));
+	hours_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), Timecode_Hours));
+	minutes_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), Timecode_Minutes));
+	seconds_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), Timecode_Seconds));
+	frames_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), Timecode_Frames));
 	audio_frames_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), AudioFrames));
 	bars_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), Bars));
 	beats_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), Beats));
@@ -367,10 +367,10 @@ AudioClock::setup_events ()
 	ms_minutes_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), MS_Minutes));
 	ms_seconds_ebox.signal_key_release_event().connect (bind (mem_fun(*this, &AudioClock::field_key_release_event), MS_Seconds));
 
-	hours_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), SMPTE_Hours));
-	minutes_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), SMPTE_Minutes));
-	seconds_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), SMPTE_Seconds));
-	frames_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), SMPTE_Frames));
+	hours_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), Timecode_Hours));
+	minutes_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), Timecode_Minutes));
+	seconds_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), Timecode_Seconds));
+	frames_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), Timecode_Frames));
 	audio_frames_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), AudioFrames));
 	bars_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), Bars));
 	beats_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), Beats));
@@ -379,10 +379,10 @@ AudioClock::setup_events ()
 	ms_minutes_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), MS_Minutes));
 	ms_seconds_ebox.signal_focus_in_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_in_event), MS_Seconds));
 
-	hours_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), SMPTE_Hours));
-	minutes_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), SMPTE_Minutes));
-	seconds_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), SMPTE_Seconds));
-	frames_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), SMPTE_Frames));
+	hours_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), Timecode_Hours));
+	minutes_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), Timecode_Minutes));
+	seconds_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), Timecode_Seconds));
+	frames_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), Timecode_Frames));
 	audio_frames_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), AudioFrames));
 	bars_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), Bars));
 	beats_ebox.signal_focus_out_event().connect (bind (mem_fun(*this, &AudioClock::field_focus_out_event), Beats));
@@ -447,8 +447,8 @@ AudioClock::set (nframes_t when, bool force, nframes_t offset, char which)
 	}
 
 	switch (_mode) {
-	case SMPTE:
-		set_smpte (when, force);
+	case Timecode:
+		set_timecode (when, force);
 		break;
 
 	case BBT:
@@ -471,12 +471,12 @@ AudioClock::set (nframes_t when, bool force, nframes_t offset, char which)
 }
 
 void
-AudioClock::smpte_offset_changed ()
+AudioClock::timecode_offset_changed ()
 {
 	nframes_t current;
 
 	switch (_mode) {
-	case SMPTE:
+	case Timecode:
 		if (is_duration) {
 			current = current_duration();
 		} else {
@@ -560,61 +560,61 @@ AudioClock::set_minsec (nframes_t when, bool force)
 }
 
 void
-AudioClock::set_smpte (nframes_t when, bool force)
+AudioClock::set_timecode (nframes_t when, bool force)
 {
 	char buf[32];
-	SMPTE::Time smpte;
+	Timecode::Time timecode;
 
 	if (is_duration) {
-		session->smpte_duration (when, smpte);
+		session->timecode_duration (when, timecode);
 	} else {
-		session->smpte_time (when, smpte);
+		session->timecode_time (when, timecode);
 	}
 
-	if (force || smpte.hours != last_hrs || smpte.negative != last_negative) {
-		if (smpte.negative) {
-			sprintf (buf, "-%02" PRIu32, smpte.hours);
+	if (force || timecode.hours != last_hrs || timecode.negative != last_negative) {
+		if (timecode.negative) {
+			sprintf (buf, "-%02" PRIu32, timecode.hours);
 		} else {
-			sprintf (buf, " %02" PRIu32, smpte.hours);
+			sprintf (buf, " %02" PRIu32, timecode.hours);
 		}
 		hours_label.set_text (buf);
-		last_hrs = smpte.hours;
-		last_negative = smpte.negative;
+		last_hrs = timecode.hours;
+		last_negative = timecode.negative;
 	}
 
-	if (force || smpte.minutes != last_mins) {
-		sprintf (buf, "%02" PRIu32, smpte.minutes);
+	if (force || timecode.minutes != last_mins) {
+		sprintf (buf, "%02" PRIu32, timecode.minutes);
 		minutes_label.set_text (buf);
-		last_mins = smpte.minutes;
+		last_mins = timecode.minutes;
 	}
 
-	if (force || smpte.seconds != last_secs) {
-		sprintf (buf, "%02" PRIu32, smpte.seconds);
+	if (force || timecode.seconds != last_secs) {
+		sprintf (buf, "%02" PRIu32, timecode.seconds);
 		seconds_label.set_text (buf);
-		last_secs = smpte.seconds;
+		last_secs = timecode.seconds;
 	}
 
-	if (force || smpte.frames != last_frames) {
-		sprintf (buf, "%02" PRIu32, smpte.frames);
+	if (force || timecode.frames != last_frames) {
+		sprintf (buf, "%02" PRIu32, timecode.frames);
 		frames_label.set_text (buf);
-		last_frames = smpte.frames;
+		last_frames = timecode.frames;
 	}
 
-	if (smpte_upper_info_label) {
-		double smpte_frames = session->smpte_frames_per_second();
+	if (timecode_upper_info_label) {
+		double timecode_frames = session->timecode_frames_per_second();
 
-		if ( fmod(smpte_frames, 1.0) == 0.0) {
-			sprintf (buf, "%u", int (smpte_frames));
+		if ( fmod(timecode_frames, 1.0) == 0.0) {
+			sprintf (buf, "%u", int (timecode_frames));
 		} else {
-			sprintf (buf, "%.2f", smpte_frames);
+			sprintf (buf, "%.2f", timecode_frames);
 		}
 
-		if (smpte_upper_info_label->get_text() != buf) {
-			smpte_upper_info_label->set_text (buf);
+		if (timecode_upper_info_label->get_text() != buf) {
+			timecode_upper_info_label->set_text (buf);
 		}
 
-		if ((fabs(smpte_frames - 29.97) < 0.0001) || smpte_frames == 30) {
-			if (session->smpte_drop_frames()) {
+		if ((fabs(timecode_frames - 29.97) < 0.0001) || timecode_frames == 30) {
+			if (session->timecode_drop_frames()) {
 				sprintf (buf, "DF");
 			} else {
 				sprintf (buf, "NDF");
@@ -624,8 +624,8 @@ AudioClock::set_smpte (nframes_t when, bool force)
 			buf[0] = '\0';
 		}
 
-		if (smpte_lower_info_label->get_text() != buf) {
-			smpte_lower_info_label->set_text (buf);
+		if (timecode_lower_info_label->get_text() != buf) {
+			timecode_lower_info_label->set_text (buf);
 		}
 	}
 }
@@ -712,7 +712,7 @@ void
 AudioClock::focus ()
 {
 	switch (_mode) {
-	case SMPTE:
+	case Timecode:
 		hours_ebox.grab_focus ();
 		break;
 
@@ -750,16 +750,16 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 	bool move_on = false;
 
 	switch (field) {
-	case SMPTE_Hours:
+	case Timecode_Hours:
 		label = &hours_label;
 		break;
-	case SMPTE_Minutes:
+	case Timecode_Minutes:
 		label = &minutes_label;
 		break;
-	case SMPTE_Seconds:
+	case Timecode_Seconds:
 		label = &seconds_label;
 		break;
-	case SMPTE_Frames:
+	case Timecode_Frames:
 		label = &frames_label;
 		break;
 
@@ -895,12 +895,12 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 		if (key_entry_state) {
 
 			switch (field) {
-			case SMPTE_Hours:
-			case SMPTE_Minutes:
-			case SMPTE_Seconds:
-			case SMPTE_Frames:
-				// Check SMPTE fields for sanity (may also adjust fields)
-				smpte_sanitize_display();
+			case Timecode_Hours:
+			case Timecode_Minutes:
+			case Timecode_Seconds:
+			case Timecode_Frames:
+				// Check Timecode fields for sanity (may also adjust fields)
+				timecode_sanitize_display();
 				break;
 			case Bars:
 			case Beats:
@@ -926,18 +926,18 @@ AudioClock::field_key_release_event (GdkEventKey *ev, Field field)
 
 		switch (field) {
 
-			/* SMPTE */
+			/* Timecode */
 
-		case SMPTE_Hours:
+		case Timecode_Hours:
 			minutes_ebox.grab_focus ();
 			break;
-		case SMPTE_Minutes:
+		case Timecode_Minutes:
 			seconds_ebox.grab_focus ();
 			break;
-		case SMPTE_Seconds:
+		case Timecode_Seconds:
 			frames_ebox.grab_focus ();
 			break;
-		case SMPTE_Frames:
+		case Timecode_Frames:
 			clock_base.grab_focus ();
 			break;
 
@@ -994,19 +994,19 @@ AudioClock::field_focus_in_event (GdkEventFocus */*ev*/, Field field)
 	Keyboard::magic_widget_grab_focus ();
 
 	switch (field) {
-	case SMPTE_Hours:
+	case Timecode_Hours:
 		hours_ebox.set_flags (Gtk::HAS_FOCUS);
 		hours_ebox.set_state (Gtk::STATE_ACTIVE);
 		break;
-	case SMPTE_Minutes:
+	case Timecode_Minutes:
 		minutes_ebox.set_flags (Gtk::HAS_FOCUS);
 		minutes_ebox.set_state (Gtk::STATE_ACTIVE);
 		break;
-	case SMPTE_Seconds:
+	case Timecode_Seconds:
 		seconds_ebox.set_flags (Gtk::HAS_FOCUS);
 		seconds_ebox.set_state (Gtk::STATE_ACTIVE);
 		break;
-	case SMPTE_Frames:
+	case Timecode_Frames:
 		frames_ebox.set_flags (Gtk::HAS_FOCUS);
 		frames_ebox.set_state (Gtk::STATE_ACTIVE);
 		break;
@@ -1050,19 +1050,19 @@ AudioClock::field_focus_out_event (GdkEventFocus */*ev*/, Field field)
 {
 	switch (field) {
 
-	case SMPTE_Hours:
+	case Timecode_Hours:
 		hours_ebox.unset_flags (Gtk::HAS_FOCUS);
 		hours_ebox.set_state (Gtk::STATE_NORMAL);
 		break;
-	case SMPTE_Minutes:
+	case Timecode_Minutes:
 		minutes_ebox.unset_flags (Gtk::HAS_FOCUS);
 		minutes_ebox.set_state (Gtk::STATE_NORMAL);
 		break;
-	case SMPTE_Seconds:
+	case Timecode_Seconds:
 		seconds_ebox.unset_flags (Gtk::HAS_FOCUS);
 		seconds_ebox.set_state (Gtk::STATE_NORMAL);
 		break;
-	case SMPTE_Frames:
+	case Timecode_Frames:
 		frames_ebox.unset_flags (Gtk::HAS_FOCUS);
 		frames_ebox.set_state (Gtk::STATE_NORMAL);
 		break;
@@ -1135,16 +1135,16 @@ AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 	switch (ev->button) {
 	case 1:
 		switch (field) {
-		case SMPTE_Hours:
+		case Timecode_Hours:
 			hours_ebox.grab_focus();
 			break;
-		case SMPTE_Minutes:
+		case Timecode_Minutes:
 			minutes_ebox.grab_focus();
 			break;
-		case SMPTE_Seconds:
+		case Timecode_Seconds:
 			seconds_ebox.grab_focus();
 			break;
-		case SMPTE_Frames:
+		case Timecode_Frames:
 			frames_ebox.grab_focus();
 			break;
 
@@ -1335,17 +1335,17 @@ AudioClock::get_frames (Field field,nframes_t pos,int dir)
 	nframes_t frames = 0;
 	BBT_Time bbt;
 	switch (field) {
-	case SMPTE_Hours:
+	case Timecode_Hours:
 		frames = (nframes_t) floor (3600.0 * session->frame_rate());
 		break;
-	case SMPTE_Minutes:
+	case Timecode_Minutes:
 		frames = (nframes_t) floor (60.0 * session->frame_rate());
 		break;
-	case SMPTE_Seconds:
+	case Timecode_Seconds:
 		frames = session->frame_rate();
 		break;
-	case SMPTE_Frames:
-		frames = (nframes_t) floor (session->frame_rate() / session->smpte_frames_per_second());
+	case Timecode_Frames:
+		frames = (nframes_t) floor (session->frame_rate() / session->timecode_frames_per_second());
 		break;
 
 	case AudioFrames:
@@ -1391,8 +1391,8 @@ AudioClock::current_time (nframes_t pos) const
 	nframes_t ret = 0;
 
 	switch (_mode) {
-	case SMPTE:
-		ret = smpte_frame_from_display ();
+	case Timecode:
+		ret = timecode_frame_from_display ();
 		break;
 	case BBT:
 		ret = bbt_frame_from_display (pos);
@@ -1419,8 +1419,8 @@ AudioClock::current_duration (nframes_t pos) const
 	nframes_t ret = 0;
 
 	switch (_mode) {
-	case SMPTE:
-		ret = smpte_frame_from_display ();
+	case Timecode:
+		ret = timecode_frame_from_display ();
 		break;
 	case BBT:
 		ret = bbt_frame_duration_from_display (pos);
@@ -1442,9 +1442,9 @@ AudioClock::current_duration (nframes_t pos) const
 }
 
 void
-AudioClock::smpte_sanitize_display()
+AudioClock::timecode_sanitize_display()
 {
-	// Check SMPTE fields for sanity, possibly adjusting values
+	// Check Timecode fields for sanity, possibly adjusting values
 	if (atoi(minutes_label.get_text()) > 59) {
 		minutes_label.set_text("59");
 	}
@@ -1453,7 +1453,7 @@ AudioClock::smpte_sanitize_display()
 		seconds_label.set_text("59");
 	}
 
-	switch ((long)rint(session->smpte_frames_per_second())) {
+	switch ((long)rint(session->timecode_frames_per_second())) {
 	case 24:
 		if (atoi(frames_label.get_text()) > 23) {
 			frames_label.set_text("23");
@@ -1473,7 +1473,7 @@ AudioClock::smpte_sanitize_display()
 		break;
 	}
 
-	if (session->smpte_drop_frames()) {
+	if (session->timecode_drop_frames()) {
 		if ((atoi(minutes_label.get_text()) % 10) && (atoi(seconds_label.get_text()) == 0) && (atoi(frames_label.get_text()) < 2)) {
 			frames_label.set_text("02");
 		}
@@ -1481,272 +1481,272 @@ AudioClock::smpte_sanitize_display()
 }
 
 nframes_t
-AudioClock::smpte_frame_from_display () const
+AudioClock::timecode_frame_from_display () const
 {
 	if (session == 0) {
 		return 0;
 	}
 
-	SMPTE::Time smpte;
+	Timecode::Time timecode;
 	nframes_t sample;
 
-	smpte.hours = atoi (hours_label.get_text());
-	smpte.minutes = atoi (minutes_label.get_text());
-	smpte.seconds = atoi (seconds_label.get_text());
-	smpte.frames = atoi (frames_label.get_text());
-	smpte.rate = session->smpte_frames_per_second();
-	smpte.drop= session->smpte_drop_frames();
+	timecode.hours = atoi (hours_label.get_text());
+	timecode.minutes = atoi (minutes_label.get_text());
+	timecode.seconds = atoi (seconds_label.get_text());
+	timecode.frames = atoi (frames_label.get_text());
+	timecode.rate = session->timecode_frames_per_second();
+	timecode.drop= session->timecode_drop_frames();
 
-	session->smpte_to_sample( smpte, sample, false /* use_offset */, false /* use_subframes */ );
+	session->timecode_to_sample( timecode, sample, false /* use_offset */, false /* use_subframes */ );
 
 
 #if 0
-#define SMPTE_SAMPLE_TEST_1
-#define SMPTE_SAMPLE_TEST_2
-#define SMPTE_SAMPLE_TEST_3
-#define SMPTE_SAMPLE_TEST_4
-#define SMPTE_SAMPLE_TEST_5
-#define SMPTE_SAMPLE_TEST_6
-#define SMPTE_SAMPLE_TEST_7
+#define Timecode_SAMPLE_TEST_1
+#define Timecode_SAMPLE_TEST_2
+#define Timecode_SAMPLE_TEST_3
+#define Timecode_SAMPLE_TEST_4
+#define Timecode_SAMPLE_TEST_5
+#define Timecode_SAMPLE_TEST_6
+#define Timecode_SAMPLE_TEST_7
 
-	// Testcode for smpte<->sample conversions (P.S.)
-	SMPTE::Time smpte1;
+	// Testcode for timecode<->sample conversions (P.S.)
+	Timecode::Time timecode1;
 	nframes_t sample1;
 	nframes_t oldsample = 0;
-	SMPTE::Time smpte2;
+	Timecode::Time timecode2;
 	nframes_t sample_increment;
 
-	sample_increment = (long)rint(session->frame_rate() / session->smpte_frames_per_second);
+	sample_increment = (long)rint(session->frame_rate() / session->timecode_frames_per_second);
 
-#ifdef SMPTE_SAMPLE_TEST_1
+#ifdef Timecode_SAMPLE_TEST_1
 	// Test 1: use_offset = false, use_subframes = false
 	cout << "use_offset = false, use_subframes = false" << endl;
 	for (int i = 0; i < 108003; i++) {
-		session->smpte_to_sample( smpte1, sample1, false /* use_offset */, false /* use_subframes */ );
-		session->sample_to_smpte( sample1, smpte2, false /* use_offset */, false /* use_subframes */ );
+		session->timecode_to_sample( timecode1, sample1, false /* use_offset */, false /* use_subframes */ );
+		session->sample_to_timecode( sample1, timecode2, false /* use_offset */, false /* use_subframes */ );
 
 		if ((i > 0) && ( ((sample1 - oldsample) != sample_increment) && ((sample1 - oldsample) != (sample_increment + 1)) && ((sample1 - oldsample) != (sample_increment - 1)))) {
 			cout << "ERROR: sample increment not right: " << (sample1 - oldsample) << " != " << sample_increment << endl;
-			cout << "smpte1: " << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+			cout << "timecode1: " << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 			cout << "sample: " << sample1 << endl;
 			cout << "sample: " << sample1 << " -> ";
-			cout << "smpte2: " << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+			cout << "timecode2: " << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 			break;
 		}
 
-		if (smpte2.hours != smpte1.hours || smpte2.minutes != smpte1.minutes || smpte2.seconds != smpte2.seconds || smpte2.frames != smpte1.frames) {
-			cout << "ERROR: smpte2 not equal smpte1" << endl;
-			cout << "smpte1: " << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+		if (timecode2.hours != timecode1.hours || timecode2.minutes != timecode1.minutes || timecode2.seconds != timecode2.seconds || timecode2.frames != timecode1.frames) {
+			cout << "ERROR: timecode2 not equal timecode1" << endl;
+			cout << "timecode1: " << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 			cout << "sample: " << sample1 << endl;
 			cout << "sample: " << sample1 << " -> ";
-			cout << "smpte2: " << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+			cout << "timecode2: " << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 			break;
 		}
 		oldsample = sample1;
-		session->smpte_increment( smpte1 );
+		session->timecode_increment( timecode1 );
 	}
 
 	cout << "sample_increment: " << sample_increment << endl;
 	cout << "sample: " << sample1 << " -> ";
-	cout << "smpte: " << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+	cout << "timecode: " << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 #endif
 
-#ifdef SMPTE_SAMPLE_TEST_2
+#ifdef Timecode_SAMPLE_TEST_2
 	// Test 2: use_offset = true, use_subframes = false
 	cout << "use_offset = true, use_subframes = false" << endl;
 
-	smpte1.hours = 0;
-	smpte1.minutes = 0;
-	smpte1.seconds = 0;
-	smpte1.frames = 0;
-	smpte1.subframes = 0;
+	timecode1.hours = 0;
+	timecode1.minutes = 0;
+	timecode1.seconds = 0;
+	timecode1.frames = 0;
+	timecode1.subframes = 0;
 	sample1 = oldsample = 0;
 
-	session->sample_to_smpte( sample1, smpte1, true /* use_offset */, false /* use_subframes */ );
+	session->sample_to_timecode( sample1, timecode1, true /* use_offset */, false /* use_subframes */ );
 	cout << "Starting at sample: " << sample1 << " -> ";
-	cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << endl;
+	cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << endl;
 
 	for (int i = 0; i < 108003; i++) {
-		session->smpte_to_sample( smpte1, sample1, true /* use_offset */, false /* use_subframes */ );
-		session->sample_to_smpte( sample1, smpte2, true /* use_offset */, false /* use_subframes */ );
+		session->timecode_to_sample( timecode1, sample1, true /* use_offset */, false /* use_subframes */ );
+		session->sample_to_timecode( sample1, timecode2, true /* use_offset */, false /* use_subframes */ );
 
-//     cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+//     cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 //     cout << "sample: " << sample1 << endl;
 //     cout << "sample: " << sample1 << " -> ";
-//     cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+//     cout << "timecode: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 
 		if ((i > 0) && ( ((sample1 - oldsample) != sample_increment) && ((sample1 - oldsample) != (sample_increment + 1)) && ((sample1 - oldsample) != (sample_increment - 1)))) {
 			cout << "ERROR: sample increment not right: " << (sample1 - oldsample) << " != " << sample_increment << endl;
-			cout << "smpte1: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+			cout << "timecode1: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 			cout << "sample: " << sample1 << endl;
 			cout << "sample: " << sample1 << " -> ";
-			cout << "smpte2: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+			cout << "timecode2: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 			break;
 		}
 
-		if (smpte2.hours != smpte1.hours || smpte2.minutes != smpte1.minutes || smpte2.seconds != smpte2.seconds || smpte2.frames != smpte1.frames) {
-			cout << "ERROR: smpte2 not equal smpte1" << endl;
-			cout << "smpte1: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+		if (timecode2.hours != timecode1.hours || timecode2.minutes != timecode1.minutes || timecode2.seconds != timecode2.seconds || timecode2.frames != timecode1.frames) {
+			cout << "ERROR: timecode2 not equal timecode1" << endl;
+			cout << "timecode1: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 			cout << "sample: " << sample1 << endl;
 			cout << "sample: " << sample1 << " -> ";
-			cout << "smpte2: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+			cout << "timecode2: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 			break;
 		}
 		oldsample = sample1;
-		session->smpte_increment( smpte1 );
+		session->timecode_increment( timecode1 );
 	}
 
 	cout << "sample_increment: " << sample_increment << endl;
 	cout << "sample: " << sample1 << " -> ";
-	cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+	cout << "timecode: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 #endif
 
-#ifdef SMPTE_SAMPLE_TEST_3
+#ifdef Timecode_SAMPLE_TEST_3
 	// Test 3: use_offset = true, use_subframes = false, decrement
 	cout << "use_offset = true, use_subframes = false, decrement" << endl;
 
-	session->sample_to_smpte( sample1, smpte1, true /* use_offset */, false /* use_subframes */ );
+	session->sample_to_timecode( sample1, timecode1, true /* use_offset */, false /* use_subframes */ );
 	cout << "Starting at sample: " << sample1 << " -> ";
-	cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << endl;
+	cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << endl;
 
 	for (int i = 0; i < 108003; i++) {
-		session->smpte_to_sample( smpte1, sample1, true /* use_offset */, false /* use_subframes */ );
-		session->sample_to_smpte( sample1, smpte2, true /* use_offset */, false /* use_subframes */ );
+		session->timecode_to_sample( timecode1, sample1, true /* use_offset */, false /* use_subframes */ );
+		session->sample_to_timecode( sample1, timecode2, true /* use_offset */, false /* use_subframes */ );
 
-//     cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+//     cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 //     cout << "sample: " << sample1 << endl;
 //     cout << "sample: " << sample1 << " -> ";
-//     cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+//     cout << "timecode: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 
 		if ((i > 0) && ( ((oldsample - sample1) != sample_increment) && ((oldsample - sample1) != (sample_increment + 1)) && ((oldsample - sample1) != (sample_increment - 1)))) {
 			cout << "ERROR: sample increment not right: " << (oldsample - sample1) << " != " << sample_increment << endl;
-			cout << "smpte1: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+			cout << "timecode1: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 			cout << "sample: " << sample1 << endl;
 			cout << "sample: " << sample1 << " -> ";
-			cout << "smpte2: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+			cout << "timecode2: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 			break;
 		}
 
-		if (smpte2.hours != smpte1.hours || smpte2.minutes != smpte1.minutes || smpte2.seconds != smpte2.seconds || smpte2.frames != smpte1.frames) {
-			cout << "ERROR: smpte2 not equal smpte1" << endl;
-			cout << "smpte1: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+		if (timecode2.hours != timecode1.hours || timecode2.minutes != timecode1.minutes || timecode2.seconds != timecode2.seconds || timecode2.frames != timecode1.frames) {
+			cout << "ERROR: timecode2 not equal timecode1" << endl;
+			cout << "timecode1: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 			cout << "sample: " << sample1 << endl;
 			cout << "sample: " << sample1 << " -> ";
-			cout << "smpte2: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+			cout << "timecode2: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 			break;
 		}
 		oldsample = sample1;
-		session->smpte_decrement( smpte1 );
+		session->timecode_decrement( timecode1 );
 	}
 
 	cout << "sample_decrement: " << sample_increment << endl;
 	cout << "sample: " << sample1 << " -> ";
-	cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+	cout << "timecode: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 #endif
 
 
-#ifdef SMPTE_SAMPLE_TEST_4
+#ifdef Timecode_SAMPLE_TEST_4
 	// Test 4: use_offset = true, use_subframes = true
 	cout << "use_offset = true, use_subframes = true" << endl;
 
 	for (long sub = 5; sub < 80; sub += 5) {
-		smpte1.hours = 0;
-		smpte1.minutes = 0;
-		smpte1.seconds = 0;
-		smpte1.frames = 0;
-		smpte1.subframes = 0;
+		timecode1.hours = 0;
+		timecode1.minutes = 0;
+		timecode1.seconds = 0;
+		timecode1.frames = 0;
+		timecode1.subframes = 0;
 		sample1 = oldsample = (sample_increment * sub) / 80;
 
-		session->sample_to_smpte( sample1, smpte1, true /* use_offset */, true /* use_subframes */ );
+		session->sample_to_timecode( sample1, timecode1, true /* use_offset */, true /* use_subframes */ );
 
 		cout << "starting at sample: " << sample1 << " -> ";
-		cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << endl;
+		cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << endl;
 
 		for (int i = 0; i < 108003; i++) {
-			session->smpte_to_sample( smpte1, sample1, true /* use_offset */, true /* use_subframes */ );
-			session->sample_to_smpte( sample1, smpte2, true /* use_offset */, true /* use_subframes */ );
+			session->timecode_to_sample( timecode1, sample1, true /* use_offset */, true /* use_subframes */ );
+			session->sample_to_timecode( sample1, timecode2, true /* use_offset */, true /* use_subframes */ );
 
 			if ((i > 0) && ( ((sample1 - oldsample) != sample_increment) && ((sample1 - oldsample) != (sample_increment + 1)) && ((sample1 - oldsample) != (sample_increment - 1)))) {
 				cout << "ERROR: sample increment not right: " << (sample1 - oldsample) << " != " << sample_increment << endl;
-				cout << "smpte1: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+				cout << "timecode1: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 				cout << "sample: " << sample1 << endl;
 				cout << "sample: " << sample1 << " -> ";
-				cout << "smpte2: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+				cout << "timecode2: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 				//break;
 			}
 
-			if (smpte2.hours != smpte1.hours || smpte2.minutes != smpte1.minutes || smpte2.seconds != smpte2.seconds || smpte2.frames != smpte1.frames || smpte2.subframes != smpte1.subframes) {
-				cout << "ERROR: smpte2 not equal smpte1" << endl;
-				cout << "smpte1: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+			if (timecode2.hours != timecode1.hours || timecode2.minutes != timecode1.minutes || timecode2.seconds != timecode2.seconds || timecode2.frames != timecode1.frames || timecode2.subframes != timecode1.subframes) {
+				cout << "ERROR: timecode2 not equal timecode1" << endl;
+				cout << "timecode1: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 				cout << "sample: " << sample1 << endl;
 				cout << "sample: " << sample1 << " -> ";
-				cout << "smpte2: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+				cout << "timecode2: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 				break;
 			}
 			oldsample = sample1;
-			session->smpte_increment( smpte1 );
+			session->timecode_increment( timecode1 );
 		}
 
 		cout << "sample_increment: " << sample_increment << endl;
 		cout << "sample: " << sample1 << " -> ";
-		cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+		cout << "timecode: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 
 		for (int i = 0; i < 108003; i++) {
-			session->smpte_to_sample( smpte1, sample1, true /* use_offset */, true /* use_subframes */ );
-			session->sample_to_smpte( sample1, smpte2, true /* use_offset */, true /* use_subframes */ );
+			session->timecode_to_sample( timecode1, sample1, true /* use_offset */, true /* use_subframes */ );
+			session->sample_to_timecode( sample1, timecode2, true /* use_offset */, true /* use_subframes */ );
 
 			if ((i > 0) && ( ((oldsample - sample1) != sample_increment) && ((oldsample - sample1) != (sample_increment + 1)) && ((oldsample - sample1) != (sample_increment - 1)))) {
 				cout << "ERROR: sample increment not right: " << (oldsample - sample1) << " != " << sample_increment << endl;
-				cout << "smpte1: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+				cout << "timecode1: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 				cout << "sample: " << sample1 << endl;
 				cout << "sample: " << sample1 << " -> ";
-				cout << "smpte2: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+				cout << "timecode2: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 				//break;
 			}
 
-			if (smpte2.hours != smpte1.hours || smpte2.minutes != smpte1.minutes || smpte2.seconds != smpte2.seconds || smpte2.frames != smpte1.frames || smpte2.subframes != smpte1.subframes) {
-				cout << "ERROR: smpte2 not equal smpte1" << endl;
-				cout << "smpte1: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+			if (timecode2.hours != timecode1.hours || timecode2.minutes != timecode1.minutes || timecode2.seconds != timecode2.seconds || timecode2.frames != timecode1.frames || timecode2.subframes != timecode1.subframes) {
+				cout << "ERROR: timecode2 not equal timecode1" << endl;
+				cout << "timecode1: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 				cout << "sample: " << sample1 << endl;
 				cout << "sample: " << sample1 << " -> ";
-				cout << "smpte2: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+				cout << "timecode2: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 				break;
 			}
 			oldsample = sample1;
-			session->smpte_decrement( smpte1 );
+			session->timecode_decrement( timecode1 );
 		}
 
 		cout << "sample_decrement: " << sample_increment << endl;
 		cout << "sample: " << sample1 << " -> ";
-		cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+		cout << "timecode: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 	}
 #endif
 
 
-#ifdef SMPTE_SAMPLE_TEST_5
+#ifdef Timecode_SAMPLE_TEST_5
 	// Test 5: use_offset = true, use_subframes = false, increment seconds
 	cout << "use_offset = true, use_subframes = false, increment seconds" << endl;
 
-	smpte1.hours = 0;
-	smpte1.minutes = 0;
-	smpte1.seconds = 0;
-	smpte1.frames = 0;
-	smpte1.subframes = 0;
+	timecode1.hours = 0;
+	timecode1.minutes = 0;
+	timecode1.seconds = 0;
+	timecode1.frames = 0;
+	timecode1.subframes = 0;
 	sample1 = oldsample = 0;
 	sample_increment = session->frame_rate();
 
-	session->sample_to_smpte( sample1, smpte1, true /* use_offset */, false /* use_subframes */ );
+	session->sample_to_timecode( sample1, timecode1, true /* use_offset */, false /* use_subframes */ );
 	cout << "Starting at sample: " << sample1 << " -> ";
-	cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << endl;
+	cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << endl;
 
 	for (int i = 0; i < 3600; i++) {
-		session->smpte_to_sample( smpte1, sample1, true /* use_offset */, false /* use_subframes */ );
-		session->sample_to_smpte( sample1, smpte2, true /* use_offset */, false /* use_subframes */ );
+		session->timecode_to_sample( timecode1, sample1, true /* use_offset */, false /* use_subframes */ );
+		session->sample_to_timecode( sample1, timecode2, true /* use_offset */, false /* use_subframes */ );
 
-//     cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+//     cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 //     cout << "sample: " << sample1 << endl;
 //     cout << "sample: " << sample1 << " -> ";
-//     cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+//     cout << "timecode: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 
 //     if ((i > 0) && ( ((sample1 - oldsample) != sample_increment) && ((sample1 - oldsample) != (sample_increment + 1)) && ((sample1 - oldsample) != (sample_increment - 1))))
 //     {
@@ -1754,48 +1754,48 @@ AudioClock::smpte_frame_from_display () const
 //       break;
 //     }
 
-		if (smpte2.hours != smpte1.hours || smpte2.minutes != smpte1.minutes || smpte2.seconds != smpte2.seconds || smpte2.frames != smpte1.frames) {
-			cout << "ERROR: smpte2 not equal smpte1" << endl;
-			cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+		if (timecode2.hours != timecode1.hours || timecode2.minutes != timecode1.minutes || timecode2.seconds != timecode2.seconds || timecode2.frames != timecode1.frames) {
+			cout << "ERROR: timecode2 not equal timecode1" << endl;
+			cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 			cout << "sample: " << sample1 << endl;
 			cout << "sample: " << sample1 << " -> ";
-			cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+			cout << "timecode: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 			break;
 		}
 		oldsample = sample1;
-		session->smpte_increment_seconds( smpte1 );
+		session->timecode_increment_seconds( timecode1 );
 	}
 
 	cout << "sample_increment: " << sample_increment << endl;
 	cout << "sample: " << sample1 << " -> ";
-	cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+	cout << "timecode: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 #endif
 
 
-#ifdef SMPTE_SAMPLE_TEST_6
+#ifdef Timecode_SAMPLE_TEST_6
 	// Test 6: use_offset = true, use_subframes = false, increment minutes
 	cout << "use_offset = true, use_subframes = false, increment minutes" << endl;
 
-	smpte1.hours = 0;
-	smpte1.minutes = 0;
-	smpte1.seconds = 0;
-	smpte1.frames = 0;
-	smpte1.subframes = 0;
+	timecode1.hours = 0;
+	timecode1.minutes = 0;
+	timecode1.seconds = 0;
+	timecode1.frames = 0;
+	timecode1.subframes = 0;
 	sample1 = oldsample = 0;
 	sample_increment = session->frame_rate() * 60;
 
-	session->sample_to_smpte( sample1, smpte1, true /* use_offset */, false /* use_subframes */ );
+	session->sample_to_timecode( sample1, timecode1, true /* use_offset */, false /* use_subframes */ );
 	cout << "Starting at sample: " << sample1 << " -> ";
-	cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << endl;
+	cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << endl;
 
 	for (int i = 0; i < 60; i++) {
-		session->smpte_to_sample( smpte1, sample1, true /* use_offset */, false /* use_subframes */ );
-		session->sample_to_smpte( sample1, smpte2, true /* use_offset */, false /* use_subframes */ );
+		session->timecode_to_sample( timecode1, sample1, true /* use_offset */, false /* use_subframes */ );
+		session->sample_to_timecode( sample1, timecode2, true /* use_offset */, false /* use_subframes */ );
 
-//     cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+//     cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 //     cout << "sample: " << sample1 << endl;
 //     cout << "sample: " << sample1 << " -> ";
-//     cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+//     cout << "timecode: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 
 //     if ((i > 0) && ( ((sample1 - oldsample) != sample_increment) && ((sample1 - oldsample) != (sample_increment + 1)) && ((sample1 - oldsample) != (sample_increment - 1))))
 //     {
@@ -1803,47 +1803,47 @@ AudioClock::smpte_frame_from_display () const
 //       break;
 //     }
 
-		if (smpte2.hours != smpte1.hours || smpte2.minutes != smpte1.minutes || smpte2.seconds != smpte2.seconds || smpte2.frames != smpte1.frames) {
-			cout << "ERROR: smpte2 not equal smpte1" << endl;
-			cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+		if (timecode2.hours != timecode1.hours || timecode2.minutes != timecode1.minutes || timecode2.seconds != timecode2.seconds || timecode2.frames != timecode1.frames) {
+			cout << "ERROR: timecode2 not equal timecode1" << endl;
+			cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 			cout << "sample: " << sample1 << endl;
 			cout << "sample: " << sample1 << " -> ";
-			cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+			cout << "timecode: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 			break;
 		}
 		oldsample = sample1;
-		session->smpte_increment_minutes( smpte1 );
+		session->timecode_increment_minutes( timecode1 );
 	}
 
 	cout << "sample_increment: " << sample_increment << endl;
 	cout << "sample: " << sample1 << " -> ";
-	cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+	cout << "timecode: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 #endif
 
-#ifdef SMPTE_SAMPLE_TEST_7
+#ifdef Timecode_SAMPLE_TEST_7
 	// Test 7: use_offset = true, use_subframes = false, increment hours
 	cout << "use_offset = true, use_subframes = false, increment hours" << endl;
 
-	smpte1.hours = 0;
-	smpte1.minutes = 0;
-	smpte1.seconds = 0;
-	smpte1.frames = 0;
-	smpte1.subframes = 0;
+	timecode1.hours = 0;
+	timecode1.minutes = 0;
+	timecode1.seconds = 0;
+	timecode1.frames = 0;
+	timecode1.subframes = 0;
 	sample1 = oldsample = 0;
 	sample_increment = session->frame_rate() * 60 * 60;
 
-	session->sample_to_smpte( sample1, smpte1, true /* use_offset */, false /* use_subframes */ );
+	session->sample_to_timecode( sample1, timecode1, true /* use_offset */, false /* use_subframes */ );
 	cout << "Starting at sample: " << sample1 << " -> ";
-	cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << endl;
+	cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << endl;
 
 	for (int i = 0; i < 10; i++) {
-		session->smpte_to_sample( smpte1, sample1, true /* use_offset */, false /* use_subframes */ );
-		session->sample_to_smpte( sample1, smpte2, true /* use_offset */, false /* use_subframes */ );
+		session->timecode_to_sample( timecode1, sample1, true /* use_offset */, false /* use_subframes */ );
+		session->sample_to_timecode( sample1, timecode2, true /* use_offset */, false /* use_subframes */ );
 
-//     cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+//     cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 //     cout << "sample: " << sample1 << endl;
 //     cout << "sample: " << sample1 << " -> ";
-//     cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+//     cout << "timecode: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 
 //     if ((i > 0) && ( ((sample1 - oldsample) != sample_increment) && ((sample1 - oldsample) != (sample_increment + 1)) && ((sample1 - oldsample) != (sample_increment - 1))))
 //     {
@@ -1851,21 +1851,21 @@ AudioClock::smpte_frame_from_display () const
 //       break;
 //     }
 
-		if (smpte2.hours != smpte1.hours || smpte2.minutes != smpte1.minutes || smpte2.seconds != smpte2.seconds || smpte2.frames != smpte1.frames) {
-			cout << "ERROR: smpte2 not equal smpte1" << endl;
-			cout << "smpte: " << (smpte1.negative ? "-" : "") << smpte1.hours << ":" << smpte1.minutes << ":" << smpte1.seconds << ":" << smpte1.frames << "::" << smpte1.subframes << " -> ";
+		if (timecode2.hours != timecode1.hours || timecode2.minutes != timecode1.minutes || timecode2.seconds != timecode2.seconds || timecode2.frames != timecode1.frames) {
+			cout << "ERROR: timecode2 not equal timecode1" << endl;
+			cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 			cout << "sample: " << sample1 << endl;
 			cout << "sample: " << sample1 << " -> ";
-			cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+			cout << "timecode: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 			break;
 		}
 		oldsample = sample1;
-		session->smpte_increment_hours( smpte1 );
+		session->timecode_increment_hours( timecode1 );
 	}
 
 	cout << "sample_increment: " << sample_increment << endl;
 	cout << "sample: " << sample1 << " -> ";
-	cout << "smpte: " << (smpte2.negative ? "-" : "") << smpte2.hours << ":" << smpte2.minutes << ":" << smpte2.seconds << ":" << smpte2.frames << "::" << smpte2.subframes << endl;
+	cout << "timecode: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 #endif
 
 #endif
@@ -1948,7 +1948,7 @@ AudioClock::build_ops_menu ()
 	ops_menu->set_name ("ArdourContextMenu");
 
 	if (!Profile->get_sae()) {
-		ops_items.push_back (MenuElem (_("Timecode"), bind (mem_fun(*this, &AudioClock::set_mode), SMPTE)));
+		ops_items.push_back (MenuElem (_("Timecode"), bind (mem_fun(*this, &AudioClock::set_mode), Timecode)));
 	}
 	ops_items.push_back (MenuElem (_("Bars:Beats"), bind (mem_fun(*this, &AudioClock::set_mode), BBT)));
 	ops_items.push_back (MenuElem (_("Minutes:Seconds"), bind (mem_fun(*this, &AudioClock::set_mode), MinSec)));
@@ -1977,8 +1977,8 @@ AudioClock::set_mode (Mode m)
 	_mode = m;
 
 	switch (_mode) {
-	case SMPTE:
-		clock_base.add (smpte_packer_hbox);
+	case Timecode:
+		clock_base.add (timecode_packer_hbox);
 		break;
 
 	case BBT:
@@ -2016,7 +2016,7 @@ AudioClock::set_size_requests ()
 	/* note that in some fonts, "88" is narrower than "00", hence the 2 pixel padding */
 
 	switch (_mode) {
-	case SMPTE:
+	case Timecode:
 		Gtkmm2ext::set_size_request_to_display_given_text (hours_label, "-00", 5, 5);
 		Gtkmm2ext::set_size_request_to_display_given_text (minutes_label, "00", 5, 5);
 		Gtkmm2ext::set_size_request_to_display_given_text (seconds_label, "00", 5, 5);

@@ -67,7 +67,7 @@ ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, Profi
 
 	iter = time_format_list->append();
 	row = *iter;
-	row[time_format_cols.format] = ExportProfileManager::SMPTE;
+	row[time_format_cols.format] = ExportProfileManager::Timecode;
 	row[time_format_cols.label] = X_("Timecode");
 
 	iter = time_format_list->append();
@@ -163,9 +163,9 @@ ExportTimespanSelector::construct_label (ARDOUR::Location const * location) cons
 		end = bbt_str (end_frame);
 		break;
 
-	  case AudioClock::SMPTE:
-		start = smpte_str (start_frame);
-		end = smpte_str (end_frame);
+	  case AudioClock::Timecode:
+		start = timecode_str (start_frame);
+		end = timecode_str (end_frame);
 		break;
 
 	  case AudioClock::MinSec:
@@ -222,16 +222,16 @@ ExportTimespanSelector::bbt_str (nframes_t frames) const
 }
 
 Glib::ustring
-ExportTimespanSelector::smpte_str (nframes_t frames) const
+ExportTimespanSelector::timecode_str (nframes_t frames) const
 {
 	if (!session) {
 		return "Error!";
 	}
 
 	std::ostringstream oss;
-	SMPTE::Time time;
+	Timecode::Time time;
 
-	session->smpte_time (frames, time);
+	session->timecode_time (frames, time);
 
 	oss << std::setfill('0') << std::right <<
 	  std::setw(2) <<

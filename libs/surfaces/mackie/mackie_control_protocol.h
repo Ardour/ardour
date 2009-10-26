@@ -121,9 +121,9 @@ class MackieControlProtocol
 	void notify_parameter_changed( std::string const & );
    void notify_solo_active_changed( bool );
 
-	/// Turn smpte on and beats off, or vice versa, depending
+	/// Turn timecode on and beats off, or vice versa, depending
 	/// on state of _timecode_type
-	void update_smpte_beats_led();
+	void update_timecode_beats_led();
   
 	/// this is called to generate the midi to send in response to a button press.
 	void update_led( Mackie::Button & button, Mackie::LedState );
@@ -197,8 +197,8 @@ class MackieControlProtocol
 	virtual Mackie::LedState save_press( Mackie::Button & );
 	virtual Mackie::LedState save_release( Mackie::Button & );
 
-	virtual Mackie::LedState smpte_beats_press( Mackie::Button & );
-	virtual Mackie::LedState smpte_beats_release( Mackie::Button & );
+	virtual Mackie::LedState timecode_beats_press( Mackie::Button & );
+	virtual Mackie::LedState timecode_beats_release( Mackie::Button & );
 
 	// jog wheel states
 	virtual Mackie::LedState zoom_press( Mackie::Button & );
@@ -295,7 +295,7 @@ class MackieControlProtocol
 	void update_timecode_display();
 
 	std::string format_bbt_timecode( nframes_t now_frame );
-	std::string format_smpte_timecode( nframes_t now_frame );
+	std::string format_timecode_timecode( nframes_t now_frame );
 	
 	/**
 		notification that the port is about to start it's init sequence.
@@ -365,7 +365,7 @@ class MackieControlProtocol
 	// last written timecode string
 	std::string _timecode_last;
 	
-	// Which timecode are we displaying? BBT or SMPTE
+	// Which timecode are we displaying? BBT or Timecode
 	ARDOUR::AnyTime::Type _timecode_type;
 };
 

@@ -16,12 +16,12 @@
 	675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __ardour_smpte_h__
-#define __ardour_smpte_h__
+#ifndef __ardour_timecode_h__
+#define __ardour_timecode_h__
 
 #include <inttypes.h>
 
-namespace SMPTE {
+namespace Timecode {
 
 enum Wrap {
 	NONE = 0,
@@ -36,11 +36,11 @@ struct Time {
 	uint32_t   hours;
 	uint32_t   minutes;
 	uint32_t   seconds;
-	uint32_t   frames;        ///< SMPTE frames (not audio samples)
+	uint32_t   frames;        ///< Timecode frames (not audio samples)
 	uint32_t   subframes;     ///< Typically unused
 	float      rate;          ///< Frame rate of this Time
 	static float default_rate;///< Rate to use for default constructor
-	bool       drop;          ///< Whether this Time uses dropframe SMPTE
+	bool       drop;          ///< Whether this Time uses dropframe Timecode
 
 	Time(float a_rate = default_rate) {
 		negative = false;
@@ -53,18 +53,18 @@ struct Time {
 	}
 };
 
-Wrap increment( Time& smpte, uint32_t );
-Wrap decrement( Time& smpte, uint32_t );
-Wrap increment_subframes( Time& smpte, uint32_t );
-Wrap decrement_subframes( Time& smpte, uint32_t );
-Wrap increment_seconds( Time& smpte, uint32_t );
-Wrap increment_minutes( Time& smpte, uint32_t );
-Wrap increment_hours( Time& smpte, uint32_t );
-void frames_floor( Time& smpte );
-void seconds_floor( Time& smpte );
-void minutes_floor( Time& smpte );
-void hours_floor( Time& smpte );
+Wrap increment( Time& timecode, uint32_t );
+Wrap decrement( Time& timecode, uint32_t );
+Wrap increment_subframes( Time& timecode, uint32_t );
+Wrap decrement_subframes( Time& timecode, uint32_t );
+Wrap increment_seconds( Time& timecode, uint32_t );
+Wrap increment_minutes( Time& timecode, uint32_t );
+Wrap increment_hours( Time& timecode, uint32_t );
+void frames_floor( Time& timecode );
+void seconds_floor( Time& timecode );
+void minutes_floor( Time& timecode );
+void hours_floor( Time& timecode );
 
-} // namespace SMPTE
+} // namespace Timecode
 
-#endif  // __ardour_smpte_h__
+#endif  // __ardour_timecode_h__

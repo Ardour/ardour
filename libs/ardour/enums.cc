@@ -311,16 +311,16 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Session, InCleanup);
 	REGISTER_BITS (_Session_StateOfTheState);
 
-	REGISTER_ENUM (smpte_23976);
-	REGISTER_ENUM (smpte_24);
-	REGISTER_ENUM (smpte_24976);
-	REGISTER_ENUM (smpte_25);
-	REGISTER_ENUM (smpte_2997);
-	REGISTER_ENUM (smpte_2997drop);
-	REGISTER_ENUM (smpte_30);
-	REGISTER_ENUM (smpte_30drop);
-	REGISTER_ENUM (smpte_5994);
-	REGISTER_ENUM (smpte_60);
+	REGISTER_ENUM (timecode_23976);
+	REGISTER_ENUM (timecode_24);
+	REGISTER_ENUM (timecode_24976);
+	REGISTER_ENUM (timecode_25);
+	REGISTER_ENUM (timecode_2997);
+	REGISTER_ENUM (timecode_2997drop);
+	REGISTER_ENUM (timecode_30);
+	REGISTER_ENUM (timecode_30drop);
+	REGISTER_ENUM (timecode_5994);
+	REGISTER_ENUM (timecode_60);
 	REGISTER (_Session_SmpteFormat);
 
 	REGISTER_CLASS_ENUM (Session, pullup_Plus4Plus1);
@@ -423,7 +423,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (AutomationList, Curved);
 	REGISTER (_AutomationList_InterpolationStyle);
 
-	REGISTER_CLASS_ENUM (AnyTime, SMPTE);
+	REGISTER_CLASS_ENUM (AnyTime, Timecode);
 	REGISTER_CLASS_ENUM (AnyTime, BBT);
 	REGISTER_CLASS_ENUM (AnyTime, Frames);
 	REGISTER_CLASS_ENUM (AnyTime, Seconds);
@@ -502,7 +502,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (ExportFormatBase, SRC_Linear);
 	REGISTER (_ExportFormatBase_SRCQuality);
 
-	REGISTER_CLASS_ENUM (ExportProfileManager, SMPTE);
+	REGISTER_CLASS_ENUM (ExportProfileManager, Timecode);
 	REGISTER_CLASS_ENUM (ExportProfileManager, BBT);
 	REGISTER_CLASS_ENUM (ExportProfileManager, MinSec);
 	REGISTER_CLASS_ENUM (ExportProfileManager, Frames);

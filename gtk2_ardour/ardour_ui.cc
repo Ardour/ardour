@@ -382,7 +382,7 @@ ARDOUR_UI::post_engine ()
 		primary_clock.set_mode (AudioClock::BBT);
 		secondary_clock.set_mode (AudioClock::MinSec);
 	}  else {
-		primary_clock.set_mode (AudioClock::SMPTE);
+		primary_clock.set_mode (AudioClock::Timecode);
 		secondary_clock.set_mode (AudioClock::BBT);
 	}
 

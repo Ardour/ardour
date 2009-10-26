@@ -19,9 +19,9 @@
 
 /* Changing this order will break the menu */
 SNAPTYPE(SnapToCDFrame)
-SNAPTYPE(SnapToSMPTEFrame)
-SNAPTYPE(SnapToSMPTESeconds)
-SNAPTYPE(SnapToSMPTEMinutes)
+SNAPTYPE(SnapToTimecodeFrame)
+SNAPTYPE(SnapToTimecodeSeconds)
+SNAPTYPE(SnapToTimecodeMinutes)
 SNAPTYPE(SnapToSeconds)
 SNAPTYPE(SnapToMinutes)
 SNAPTYPE(SnapToAThirtysecondBeat)

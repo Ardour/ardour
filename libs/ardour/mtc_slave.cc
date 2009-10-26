@@ -44,7 +44,7 @@ MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 {
 	can_notify_on_unknown_rate = true;
 
-	last_mtc_fps_byte = session.get_mtc_smpte_bits ();
+	last_mtc_fps_byte = session.get_mtc_timecode_bits ();
 
 	rebind (p);
 	reset ();
@@ -76,7 +76,7 @@ MTC_Slave::update_mtc_qtr (Parser& /*p*/)
 	nframes_t qtr;
 	static cycles_t last_qtr = 0;
 
-	qtr = (long) (session.frames_per_smpte_frame() / 4);
+	qtr = (long) (session.frames_per_timecode_frame() / 4);
 	mtc_frame += qtr;
 	last_qtr = cnow;
 
@@ -92,34 +92,34 @@ void
 MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 {
 	nframes_t now = session.engine().frame_time();
-	SMPTE::Time smpte;
+	Timecode::Time timecode;
 
-	smpte.hours = msg[3];
-	smpte.minutes = msg[2];
-	smpte.seconds = msg[1];
-	smpte.frames = msg[0];
+	timecode.hours = msg[3];
+	timecode.minutes = msg[2];
+	timecode.seconds = msg[1];
+	timecode.frames = msg[0];
 
 	last_mtc_fps_byte = msg[4];
 
 	switch (msg[4]) {
 	case MTC_24_FPS:
-		smpte.rate = 24;
-		smpte.drop = false;
+		timecode.rate = 24;
+		timecode.drop = false;
 		can_notify_on_unknown_rate = true;
 		break;
 	case MTC_25_FPS:
-		smpte.rate = 25;
-		smpte.drop = false;
+		timecode.rate = 25;
+		timecode.drop = false;
 		can_notify_on_unknown_rate = true;
 		break;
 	case MTC_30_FPS_DROP:
-		smpte.rate = 30;
-		smpte.drop = true;
+		timecode.rate = 30;
+		timecode.drop = true;
 		can_notify_on_unknown_rate = true;
 		break;
 	case MTC_30_FPS:
-		smpte.rate = 30;
-		smpte.drop = false;
+		timecode.rate = 30;
+		timecode.drop = false;
 		can_notify_on_unknown_rate = true;
 		break;
 	default:
@@ -130,11 +130,11 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 			      << endmsg;
 			can_notify_on_unknown_rate = false;
 		}
-		smpte.rate = session.smpte_frames_per_second();
-		smpte.drop = session.smpte_drop_frames();
+		timecode.rate = session.timecode_frames_per_second();
+		timecode.drop = session.timecode_drop_frames();
 	}
 
-	session.smpte_to_sample (smpte, mtc_frame, true, false);
+	session.timecode_to_sample (timecode, mtc_frame, true, false);
 
 	if (was_full) {
 
@@ -158,7 +158,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 		   Also compensate for audio latency.
 		*/
 
-		mtc_frame += (long) (1.75 * session.frames_per_smpte_frame()) + session.worst_output_latency();
+		mtc_frame += (long) (1.75 * session.frames_per_timecode_frame()) + session.worst_output_latency();
 
 		if (first_mtc_frame == 0) {
 			first_mtc_frame = mtc_frame;
@@ -338,7 +338,7 @@ MTC_Slave::speed_and_position (double& speed, nframes_t& pos)
 ARDOUR::nframes_t
 MTC_Slave::resolution() const
 {
-	return (nframes_t) session.frames_per_smpte_frame();
+	return (nframes_t) session.frames_per_timecode_frame();
 }
 
 void

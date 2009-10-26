@@ -104,7 +104,7 @@ sigc::signal<int> Session::AskAboutPendingState;
 sigc::signal<int,nframes_t,nframes_t> Session::AskAboutSampleRateMismatch;
 sigc::signal<void> Session::SendFeedback;
 
-sigc::signal<void> Session::SMPTEOffsetChanged;
+sigc::signal<void> Session::TimecodeOffsetChanged;
 sigc::signal<void> Session::StartTimeChanged;
 sigc::signal<void> Session::EndTimeChanged;
 sigc::signal<void> Session::AutoBindingOn;
@@ -132,7 +132,7 @@ Session::Session (AudioEngine &eng,
 	  state_tree (0),
 	  _butler (new Butler (this)),
 	  post_transport_work((PostTransportWork)0),
-	  _send_smpte_update (false),
+	  _send_timecode_update (false),
 	  midi_thread (pthread_t (0)),
 	  midi_requests (128), // the size of this should match the midi request pool size
 	  diskstreams (new DiskstreamList),
@@ -218,7 +218,7 @@ Session::Session (AudioEngine &eng,
 	  state_tree (0),
 	  _butler (new Butler (this)),
 	  post_transport_work((PostTransportWork)0),
-	  _send_smpte_update (false),
+	  _send_timecode_update (false),
 	  midi_thread (pthread_t (0)),
 	  midi_requests (16),
 	  diskstreams (new DiskstreamList),

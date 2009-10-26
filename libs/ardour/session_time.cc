@@ -52,102 +52,102 @@ Session::bbt_time (nframes_t when, BBT_Time& bbt)
 	_tempo_map->bbt_time (when, bbt);
 }
 
-/* SMPTE TIME */
+/* Timecode TIME */
 float
-Session::smpte_frames_per_second() const
+Session::timecode_frames_per_second() const
 {
-	switch (config.get_smpte_format()) {
-		case smpte_23976:
+	switch (config.get_timecode_format()) {
+		case timecode_23976:
 			return 23.976;
 
 			break;
-		case smpte_24:
+		case timecode_24:
 			return 24;
 
 			break;
-		case smpte_24976:
+		case timecode_24976:
 			return 24.976;
 
 			break;
-		case smpte_25:
+		case timecode_25:
 			return 25;
 
 			break;
-		case smpte_2997:
+		case timecode_2997:
 			return 29.97;
 
 			break;
-		case smpte_2997drop:
+		case timecode_2997drop:
 			return 29.97;
 
 			break;
-		case smpte_30:
+		case timecode_30:
 			return 30;
 
 			break;
-		case smpte_30drop:
+		case timecode_30drop:
 			return 30;
 
 			break;
-		case smpte_5994:
+		case timecode_5994:
 			return 59.94;
 
 			break;
-		case smpte_60:
+		case timecode_60:
 			return 60;
 
 			break;
 	        default:
-		  cerr << "Editor received unexpected smpte type" << endl;
+		  cerr << "Editor received unexpected timecode type" << endl;
 	}
 	return 30.0;
 }
 bool
-Session::smpte_drop_frames() const
+Session::timecode_drop_frames() const
 {
-	switch (config.get_smpte_format()) {
-		case smpte_23976:
+	switch (config.get_timecode_format()) {
+		case timecode_23976:
 			return false;
 
 			break;
-		case smpte_24:
+		case timecode_24:
 			return false;
 
 			break;
-		case smpte_24976:
+		case timecode_24976:
 			return false;
 
 			break;
-		case smpte_25:
+		case timecode_25:
 			return false;
 
 			break;
-		case smpte_2997:
+		case timecode_2997:
 			return false;
 
 			break;
-		case smpte_2997drop:
+		case timecode_2997drop:
 			return true;
 
 			break;
-		case smpte_30:
+		case timecode_30:
 			return false;
 
 			break;
-		case smpte_30drop:
+		case timecode_30drop:
 			return true;
 
 			break;
-		case smpte_5994:
+		case timecode_5994:
 			return false;
 
 			break;
-		case smpte_60:
+		case timecode_60:
 			return false;
 
 			break;
 	        default:
-			cerr << "Editor received unexpected smpte type" << endl;
+			cerr << "Editor received unexpected timecode type" << endl;
 	}
 	return false;
 }
@@ -155,59 +155,59 @@ void
 Session::sync_time_vars ()
 {
 	_current_frame_rate = (nframes_t) round (_base_frame_rate * (1.0 + (config.get_video_pullup()/100.0)));
-	_frames_per_smpte_frame = (double) _current_frame_rate / (double) smpte_frames_per_second();
-	if (smpte_drop_frames()) {
-	  _frames_per_hour = (long)(107892 * _frames_per_smpte_frame);
+	_frames_per_timecode_frame = (double) _current_frame_rate / (double) timecode_frames_per_second();
+	if (timecode_drop_frames()) {
+	  _frames_per_hour = (long)(107892 * _frames_per_timecode_frame);
 	} else {
-	  _frames_per_hour = (long)(3600 * rint(smpte_frames_per_second()) * _frames_per_smpte_frame);
+	  _frames_per_hour = (long)(3600 * rint(timecode_frames_per_second()) * _frames_per_timecode_frame);
 	}
-	_smpte_frames_per_hour = (nframes_t)rint(smpte_frames_per_second() * 3600.0);
+	_timecode_frames_per_hour = (nframes_t)rint(timecode_frames_per_second() * 3600.0);
 
-	last_smpte_valid = false;
-	// smpte type bits are the middle two in the upper nibble
-	switch ((int) ceil (smpte_frames_per_second())) {
+	last_timecode_valid = false;
+	// timecode type bits are the middle two in the upper nibble
+	switch ((int) ceil (timecode_frames_per_second())) {
 	case 24:
-		mtc_smpte_bits = 0;
+		mtc_timecode_bits = 0;
 		break;
 
 	case 25:
-		mtc_smpte_bits = 0x20;
+		mtc_timecode_bits = 0x20;
 		break;
 
 	case 30:
 	default:
-		if (smpte_drop_frames()) {
-			mtc_smpte_bits = 0x40;
+		if (timecode_drop_frames()) {
+			mtc_timecode_bits = 0x40;
 		} else {
-			mtc_smpte_bits =  0x60;
+			mtc_timecode_bits =  0x60;
 		}
 		break;
 	};
 }
 
 void
-Session::set_smpte_offset (nframes_t off)
+Session::set_timecode_offset (nframes_t off)
 {
-	_smpte_offset = off;
-	last_smpte_valid = false;
+	_timecode_offset = off;
+	last_timecode_valid = false;
 
-	SMPTEOffsetChanged (); /* EMIT SIGNAL */
+	TimecodeOffsetChanged (); /* EMIT SIGNAL */
 }
 
 void
-Session::set_smpte_offset_negative (bool neg)
+Session::set_timecode_offset_negative (bool neg)
 {
-	_smpte_offset_negative = neg;
-	last_smpte_valid = false;
+	_timecode_offset_negative = neg;
+	last_timecode_valid = false;
 
-	SMPTEOffsetChanged (); /* EMIT SIGNAL */
+	TimecodeOffsetChanged (); /* EMIT SIGNAL */
 }
 
 void
-Session::smpte_to_sample( SMPTE::Time& smpte, nframes_t& sample, bool use_offset, bool use_subframes ) const
+Session::timecode_to_sample( Timecode::Time& timecode, nframes_t& sample, bool use_offset, bool use_subframes ) const
 {
 
-	if (smpte.drop) {
+	if (timecode.drop) {
 		// The drop frame format was created to better approximate the 30000/1001 = 29.97002997002997....
 		// framerate of NTSC color TV. The used frame rate of drop frame is 29.97, which drifts by about
 		// 0.108 frame per hour, or about 1.3 frames per 12 hours. This is not perfect, but a lot better
@@ -222,7 +222,7 @@ Session::smpte_to_sample( SMPTE::Time& smpte, nframes_t& sample, bool use_offset
 		//
 		// In table form:
 		//
-		// SMPTE value    frames offset   subframes offset   seconds (rounded)  44100 sample (rounded)
+		// Timecode value    frames offset   subframes offset   seconds (rounded)  44100 sample (rounded)
 		//  0:00:00:00        0.0             0                     0.000                0 (accurate)
 		//  0:00:59:29        1.8           144                    60.027          2647177
 		//  0:01:00:02       -0.2           -16                    60.060          2648648
@@ -248,46 +248,46 @@ Session::smpte_to_sample( SMPTE::Time& smpte, nframes_t& sample, bool use_offset
 		//  Per Sigmond <per@sigmond.no>
 
 		// Samples inside time dividable by 10 minutes (real time accurate)
-		nframes_t base_samples = (nframes_t) (((smpte.hours * 107892) + ((smpte.minutes / 10) * 17982)) * _frames_per_smpte_frame);
+		nframes_t base_samples = (nframes_t) (((timecode.hours * 107892) + ((timecode.minutes / 10) * 17982)) * _frames_per_timecode_frame);
 
 		// Samples inside time exceeding the nearest 10 minutes (always offset, see above)
-		long exceeding_df_minutes = smpte.minutes % 10;
-		long exceeding_df_seconds = (exceeding_df_minutes * 60) + smpte.seconds;
-		long exceeding_df_frames = (30 * exceeding_df_seconds) + smpte.frames - (2 * exceeding_df_minutes);
-		nframes_t exceeding_samples = (nframes_t) rint(exceeding_df_frames * _frames_per_smpte_frame);
+		long exceeding_df_minutes = timecode.minutes % 10;
+		long exceeding_df_seconds = (exceeding_df_minutes * 60) + timecode.seconds;
+		long exceeding_df_frames = (30 * exceeding_df_seconds) + timecode.frames - (2 * exceeding_df_minutes);
+		nframes_t exceeding_samples = (nframes_t) rint(exceeding_df_frames * _frames_per_timecode_frame);
 		sample = base_samples + exceeding_samples;
 	} else {
 		/*
 		   Non drop is easy.. just note the use of
-		   rint(smpte.rate) * _frames_per_smpte_frame
-		   (frames per SMPTE second), which is larger than
-		   frame_rate() in the non-integer SMPTE rate case.
+		   rint(timecode.rate) * _frames_per_timecode_frame
+		   (frames per Timecode second), which is larger than
+		   frame_rate() in the non-integer Timecode rate case.
 		*/
 
-		sample = (nframes_t)rint((((smpte.hours * 60 * 60) + (smpte.minutes * 60) + smpte.seconds) * (rint(smpte.rate) * _frames_per_smpte_frame)) + (smpte.frames * _frames_per_smpte_frame));
+		sample = (nframes_t)rint((((timecode.hours * 60 * 60) + (timecode.minutes * 60) + timecode.seconds) * (rint(timecode.rate) * _frames_per_timecode_frame)) + (timecode.frames * _frames_per_timecode_frame));
 	}
 
 	if (use_subframes) {
-		sample += (long) (((double)smpte.subframes * _frames_per_smpte_frame) / config.get_subframes_per_frame());
+		sample += (long) (((double)timecode.subframes * _frames_per_timecode_frame) / config.get_subframes_per_frame());
 	}
 
 	if (use_offset) {
-		if (smpte_offset_negative()) {
-			if (sample >= smpte_offset()) {
-				sample -= smpte_offset();
+		if (timecode_offset_negative()) {
+			if (sample >= timecode_offset()) {
+				sample -= timecode_offset();
 			} else {
 				/* Prevent song-time from becoming negative */
 				sample = 0;
 			}
 		} else {
-			if (smpte.negative) {
-				if (sample <= smpte_offset()) {
-					sample = smpte_offset() - sample;
+			if (timecode.negative) {
+				if (sample <= timecode_offset()) {
+					sample = timecode_offset() - sample;
 				} else {
 					sample = 0;
 				}
 			} else {
-				sample += smpte_offset();
+				sample += timecode_offset();
 			}
 		}
 	}
@@ -296,152 +296,152 @@ Session::smpte_to_sample( SMPTE::Time& smpte, nframes_t& sample, bool use_offset
 
 
 void
-Session::sample_to_smpte( nframes_t sample, SMPTE::Time& smpte, bool use_offset, bool use_subframes ) const
+Session::sample_to_timecode( nframes_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes ) const
 {
 	nframes_t offset_sample;
 
 	if (!use_offset) {
 		offset_sample = sample;
-		smpte.negative = false;
+		timecode.negative = false;
 	} else {
-		if (_smpte_offset_negative) {
-			offset_sample =  sample + _smpte_offset;
-			smpte.negative = false;
+		if (_timecode_offset_negative) {
+			offset_sample =  sample + _timecode_offset;
+			timecode.negative = false;
 		} else {
-			if (sample < _smpte_offset) {
-				offset_sample = (_smpte_offset - sample);
-				smpte.negative = true;
+			if (sample < _timecode_offset) {
+				offset_sample = (_timecode_offset - sample);
+				timecode.negative = true;
 			} else {
-				offset_sample =  sample - _smpte_offset;
-				smpte.negative = false;
+				offset_sample =  sample - _timecode_offset;
+				timecode.negative = false;
 			}
 		}
 	}
 
-	double smpte_frames_left_exact;
-	double smpte_frames_fraction;
-	unsigned long smpte_frames_left;
+	double timecode_frames_left_exact;
+	double timecode_frames_fraction;
+	unsigned long timecode_frames_left;
 
 	// Extract whole hours. Do this to prevent rounding errors with
 	// high sample numbers in the calculations that follow.
-	smpte.hours = offset_sample / _frames_per_hour;
+	timecode.hours = offset_sample / _frames_per_hour;
 	offset_sample = offset_sample % _frames_per_hour;
 
-	// Calculate exact number of (exceeding) smpte frames and fractional frames
-	smpte_frames_left_exact = (double) offset_sample / _frames_per_smpte_frame;
-	smpte_frames_fraction = smpte_frames_left_exact - floor( smpte_frames_left_exact );
-	smpte.subframes = (long) rint(smpte_frames_fraction * config.get_subframes_per_frame());
+	// Calculate exact number of (exceeding) timecode frames and fractional frames
+	timecode_frames_left_exact = (double) offset_sample / _frames_per_timecode_frame;
+	timecode_frames_fraction = timecode_frames_left_exact - floor( timecode_frames_left_exact );
+	timecode.subframes = (long) rint(timecode_frames_fraction * config.get_subframes_per_frame());
 
 	// XXX Not sure if this is necessary anymore...
-	if (smpte.subframes == config.get_subframes_per_frame()) {
+	if (timecode.subframes == config.get_subframes_per_frame()) {
 		// This can happen with 24 fps (and 29.97 fps ?)
-		smpte_frames_left_exact = ceil( smpte_frames_left_exact );
-		smpte.subframes = 0;
+		timecode_frames_left_exact = ceil( timecode_frames_left_exact );
+		timecode.subframes = 0;
 	}
 
 	// Extract hour-exceeding frames for minute, second and frame calculations
-	smpte_frames_left = ((long) floor( smpte_frames_left_exact ));
+	timecode_frames_left = ((long) floor( timecode_frames_left_exact ));
 
-	if (smpte_drop_frames()) {
-		// See long explanation in smpte_to_sample()...
+	if (timecode_drop_frames()) {
+		// See long explanation in timecode_to_sample()...
 
 		// Number of 10 minute chunks
-		smpte.minutes = (smpte_frames_left / 17982) * 10; // exactly 17982 frames in 10 minutes
+		timecode.minutes = (timecode_frames_left / 17982) * 10; // exactly 17982 frames in 10 minutes
 		// frames exceeding the nearest 10 minute barrier
-		long exceeding_df_frames = smpte_frames_left % 17982;
+		long exceeding_df_frames = timecode_frames_left % 17982;
 
 		// Find minutes exceeding the nearest 10 minute barrier
 		if (exceeding_df_frames >= 1800) { // nothing to do if we are inside the first minute (0-1799)
 			exceeding_df_frames -= 1800; // take away first minute (different number of frames than the others)
 			long extra_minutes_minus_1 = exceeding_df_frames / 1798; // how many minutes after the first one
 			exceeding_df_frames -= extra_minutes_minus_1 * 1798; // take away the (extra) minutes just found
-			smpte.minutes += extra_minutes_minus_1 + 1; // update with exceeding minutes
+			timecode.minutes += extra_minutes_minus_1 + 1; // update with exceeding minutes
 		}
 
 		// Adjust frame numbering for dropped frames (frame 0 and 1 skipped at start of every minute except every 10th)
-		if (smpte.minutes % 10) {
+		if (timecode.minutes % 10) {
 			// Every minute except every 10th
 			if (exceeding_df_frames < 28) {
 				// First second, frames 0 and 1 are skipped
-				smpte.seconds = 0;
-				smpte.frames = exceeding_df_frames + 2;
+				timecode.seconds = 0;
+				timecode.frames = exceeding_df_frames + 2;
 			} else {
 				// All other seconds, all 30 frames are counted
 				exceeding_df_frames -= 28;
-				smpte.seconds = (exceeding_df_frames / 30) + 1;
-				smpte.frames = exceeding_df_frames % 30;
+				timecode.seconds = (exceeding_df_frames / 30) + 1;
+				timecode.frames = exceeding_df_frames % 30;
 			}
 		} else {
 			// Every 10th minute, all 30 frames counted in all seconds
-			smpte.seconds = exceeding_df_frames / 30;
-			smpte.frames = exceeding_df_frames % 30;
+			timecode.seconds = exceeding_df_frames / 30;
+			timecode.frames = exceeding_df_frames % 30;
 		}
 	} else {
 		// Non drop is easy
-		smpte.minutes = smpte_frames_left / ((long) rint (smpte_frames_per_second ()) * 60);
-		smpte_frames_left = smpte_frames_left % ((long) rint (smpte_frames_per_second ()) * 60);
-		smpte.seconds = smpte_frames_left / (long) rint(smpte_frames_per_second ());
-		smpte.frames = smpte_frames_left % (long) rint(smpte_frames_per_second ());
+		timecode.minutes = timecode_frames_left / ((long) rint (timecode_frames_per_second ()) * 60);
+		timecode_frames_left = timecode_frames_left % ((long) rint (timecode_frames_per_second ()) * 60);
+		timecode.seconds = timecode_frames_left / (long) rint(timecode_frames_per_second ());
+		timecode.frames = timecode_frames_left % (long) rint(timecode_frames_per_second ());
 	}
 
 	if (!use_subframes) {
-		smpte.subframes = 0;
+		timecode.subframes = 0;
 	}
 	/* set frame rate and drop frame */
-	smpte.rate = smpte_frames_per_second ();
-	smpte.drop = smpte_drop_frames();
+	timecode.rate = timecode_frames_per_second ();
+	timecode.drop = timecode_drop_frames();
 }
 
 void
-Session::smpte_time (nframes_t when, SMPTE::Time& smpte)
+Session::timecode_time (nframes_t when, Timecode::Time& timecode)
 {
-	if (last_smpte_valid && when == last_smpte_when) {
-		smpte = last_smpte;
+	if (last_timecode_valid && when == last_timecode_when) {
+		timecode = last_timecode;
 		return;
 	}
 
-	sample_to_smpte( when, smpte, true /* use_offset */, false /* use_subframes */ );
+	sample_to_timecode( when, timecode, true /* use_offset */, false /* use_subframes */ );
 
-	last_smpte_when = when;
-	last_smpte = smpte;
-	last_smpte_valid = true;
+	last_timecode_when = when;
+	last_timecode = timecode;
+	last_timecode_valid = true;
 }
 
 void
-Session::smpte_time_subframes (nframes_t when, SMPTE::Time& smpte)
+Session::timecode_time_subframes (nframes_t when, Timecode::Time& timecode)
 {
-	if (last_smpte_valid && when == last_smpte_when) {
-		smpte = last_smpte;
+	if (last_timecode_valid && when == last_timecode_when) {
+		timecode = last_timecode;
 		return;
 	}
 
-	sample_to_smpte( when, smpte, true /* use_offset */, true /* use_subframes */ );
+	sample_to_timecode( when, timecode, true /* use_offset */, true /* use_subframes */ );
 
-	last_smpte_when = when;
-	last_smpte = smpte;
-	last_smpte_valid = true;
+	last_timecode_when = when;
+	last_timecode = timecode;
+	last_timecode_valid = true;
 }
 
 void
-Session::smpte_duration (nframes_t when, SMPTE::Time& smpte) const
+Session::timecode_duration (nframes_t when, Timecode::Time& timecode) const
 {
-	sample_to_smpte( when, smpte, false /* use_offset */, true /* use_subframes */ );
+	sample_to_timecode( when, timecode, false /* use_offset */, true /* use_subframes */ );
 }
 
 void
-Session::smpte_duration_string (char* buf, nframes_t when) const
+Session::timecode_duration_string (char* buf, nframes_t when) const
 {
-	SMPTE::Time smpte;
+	Timecode::Time timecode;
 
-	smpte_duration (when, smpte);
-	snprintf (buf, sizeof (buf), "%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32, smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+	timecode_duration (when, timecode);
+	snprintf (buf, sizeof (buf), "%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32, timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 }
 
 void
-Session::smpte_time (SMPTE::Time &t)
+Session::timecode_time (Timecode::Time &t)
 
 {
-	smpte_time (_transport_frame, t);
+	timecode_time (_transport_frame, t);
 }
 
 int
@@ -520,15 +520,15 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 
 #ifdef HAVE_JACK_VIDEO_SUPPORT
 	//poke audio video ratio so Ardour can track Video Sync
-	pos->audio_frames_per_video_frame = frame_rate() / smpte_frames_per_second();
+	pos->audio_frames_per_video_frame = frame_rate() / timecode_frames_per_second();
 	pos->valid = jack_position_bits_t (pos->valid | JackAudioVideoRatio);
 #endif
 
 #if 0
-	/* SMPTE info */
+	/* Timecode info */
 
-	t.smpte_offset = _smpte_offset;
-	t.smpte_frame_rate = smpte_frames_per_second();
+	t.timecode_offset = _timecode_offset;
+	t.timecode_frame_rate = timecode_frames_per_second();
 
 	if (_transport_speed) {
 
@@ -574,19 +574,19 @@ Session::convert_to_frames_at (nframes_t /*position*/, AnyTime const & any)
 		return _tempo_map->frame_time ( any.bbt);
 		break;
 
-	case AnyTime::SMPTE:
+	case AnyTime::Timecode:
 		/* XXX need to handle negative values */
-		secs = any.smpte.hours * 60 * 60;
-		secs += any.smpte.minutes * 60;
-		secs += any.smpte.seconds;
-		secs += any.smpte.frames / smpte_frames_per_second();
-		if (_smpte_offset_negative)
+		secs = any.timecode.hours * 60 * 60;
+		secs += any.timecode.minutes * 60;
+		secs += any.timecode.seconds;
+		secs += any.timecode.frames / timecode_frames_per_second();
+		if (_timecode_offset_negative)
 		{
-			return (nframes_t) floor (secs * frame_rate()) - _smpte_offset;
+			return (nframes_t) floor (secs * frame_rate()) - _timecode_offset;
 		}
 		else
 		{
-			return (nframes_t) floor (secs * frame_rate()) + _smpte_offset;
+			return (nframes_t) floor (secs * frame_rate()) + _timecode_offset;
 		}
 		break;
 

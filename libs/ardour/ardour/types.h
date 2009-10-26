@@ -31,7 +31,7 @@
 #include <inttypes.h>
 #include <jack/types.h>
 #include <jack/midiport.h>
-#include "control_protocol/smpte.h"
+#include "control_protocol/timecode.h"
 #include "pbd/id.h"
 
 #include <map>
@@ -184,21 +184,21 @@ namespace ARDOUR {
 
 	};
 	enum SmpteFormat {
-		smpte_23976,
-		smpte_24,
-		smpte_24976,
-		smpte_25,
-		smpte_2997,
-		smpte_2997drop,
-		smpte_30,
-		smpte_30drop,
-		smpte_5994,
-		smpte_60
+		timecode_23976,
+		timecode_24,
+		timecode_24976,
+		timecode_25,
+		timecode_2997,
+		timecode_2997drop,
+		timecode_30,
+		timecode_30drop,
+		timecode_5994,
+		timecode_60
 	};
 
 	struct AnyTime {
 		enum Type {
-			SMPTE,
+			Timecode,
 			BBT,
 			Frames,
 			Seconds
@@ -206,7 +206,7 @@ namespace ARDOUR {
 
 		Type type;
 
-		SMPTE::Time    smpte;
+		Timecode::Time    timecode;
 		BBT_Time       bbt;
 
 		union {

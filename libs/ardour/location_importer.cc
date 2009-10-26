@@ -105,7 +105,7 @@ string
 LocationImporter::get_info () const
 {
 	nframes_t start, end;
-	SMPTE::Time start_time, end_time;
+	Timecode::Time start_time, end_time;
 
 	// Get sample positions
 	std::istringstream iss_start (xml_location.property ("start")->value());
@@ -113,17 +113,17 @@ LocationImporter::get_info () const
 	std::istringstream iss_end (xml_location.property ("end")->value());
 	iss_end >> end;
 
-	// Convert to smpte
-	session.sample_to_smpte (start, start_time, true, false);
-	session.sample_to_smpte (end, end_time, true, false);
+	// Convert to timecode
+	session.sample_to_timecode (start, start_time, true, false);
+	session.sample_to_timecode (end, end_time, true, false);
 
 	// return info
 	std::ostringstream oss;
 	if (start == end) {
-		oss << _("Location: ") << smpte_to_string (start_time);
+		oss << _("Location: ") << timecode_to_string (start_time);
 	} else {
-		oss << _("Range\nstart: ") << smpte_to_string (start_time) <<
-		  _("\nend: ") << smpte_to_string (end_time);
+		oss << _("Range\nstart: ") << timecode_to_string (start_time) <<
+		  _("\nend: ") << timecode_to_string (end_time);
 	}
 
 	return oss.str();

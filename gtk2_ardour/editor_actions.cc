@@ -753,9 +753,9 @@ Editor::register_actions ()
 	RadioAction::Group snap_choice_group;
 
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-cd-frame"), _("Snap to CD Frame"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToCDFrame)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-frame"), _("Snap to SMPTE frame"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToSMPTEFrame)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-seconds"), _("Snap to SMPTE seconds"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToSMPTESeconds)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-smpte-minutes"), _("Snap to SMPTE minutes"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToSMPTEMinutes)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-frame"), _("Snap to Timecode frame"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToTimecodeFrame)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-seconds"), _("Snap to Timecode seconds"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToTimecodeSeconds)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-minutes"), _("Snap to Timecode minutes"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToTimecodeMinutes)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-seconds"), _("Snap to Seconds"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToSeconds)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-minutes"), _("Snap to Minutes"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToMinutes)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirtyseconds"), _("Snap to Thirtyseconds"), (bind (mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToAThirtysecondBeat)));
@@ -782,7 +782,7 @@ Editor::register_actions ()
 	ruler_loop_punch_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-loop-punch-ruler"), _("Loop/Punch"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_time_transport_marker)));
 	ruler_bbt_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-bbt-ruler"), _("Bars & Beats"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_frames)));
 	ruler_samples_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-samples-ruler"), _("Samples"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_bbt)));
-	ruler_timecode_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-timecode-ruler"), _("Timecode"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_smpte)));
+	ruler_timecode_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-timecode-ruler"), _("Timecode"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_timecode)));
 	ruler_minsec_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-minsec-ruler"), _("Min:Sec"), bind (mem_fun(*this, &Editor::toggle_ruler_visibility), ruler_metric_minsec)));
 
 	/* set defaults here */
@@ -904,7 +904,7 @@ Editor::toggle_ruler_visibility (RulerType rt)
 	}
 
 	switch (rt) {
-	case ruler_metric_smpte:
+	case ruler_metric_timecode:
 		action = "toggle-timecode-ruler";
 		break;
 	case ruler_metric_bbt:
@@ -1012,14 +1012,14 @@ Editor::snap_type_action (SnapType type)
 	case Editing::SnapToCDFrame:
 		action = "snap-to-cd-frame";
 		break;
-	case Editing::SnapToSMPTEFrame:
-		action = "snap-to-smpte-frame";
+	case Editing::SnapToTimecodeFrame:
+		action = "snap-to-timecode-frame";
 		break;
-	case Editing::SnapToSMPTESeconds:
-		action = "snap-to-smpte-seconds";
+	case Editing::SnapToTimecodeSeconds:
+		action = "snap-to-timecode-seconds";
 		break;
-	case Editing::SnapToSMPTEMinutes:
-		action = "snap-to-smpte-minutes";
+	case Editing::SnapToTimecodeMinutes:
+		action = "snap-to-timecode-minutes";
 		break;
 	case Editing::SnapToSeconds:
 		action = "snap-to-seconds";
@@ -1085,15 +1085,15 @@ Editor::cycle_snap_choice()
 {
 	switch (snap_type) {
 	case Editing::SnapToCDFrame:
-		set_snap_to (Editing::SnapToSMPTEFrame);
+		set_snap_to (Editing::SnapToTimecodeFrame);
 		break;
-	case Editing::SnapToSMPTEFrame:
-		set_snap_to (Editing::SnapToSMPTESeconds);
+	case Editing::SnapToTimecodeFrame:
+		set_snap_to (Editing::SnapToTimecodeSeconds);
 		break;
-	case Editing::SnapToSMPTESeconds:
-		set_snap_to (Editing::SnapToSMPTEMinutes);
+	case Editing::SnapToTimecodeSeconds:
+		set_snap_to (Editing::SnapToTimecodeMinutes);
 		break;
-	case Editing::SnapToSMPTEMinutes:
+	case Editing::SnapToTimecodeMinutes:
 		set_snap_to (Editing::SnapToSeconds);
 		break;
 	case Editing::SnapToSeconds:
@@ -1340,8 +1340,8 @@ Editor::parameter_changed (std::string p)
 		update_punch_range_view (true);
 	} else if (p == "punch-out") {
 		update_punch_range_view (true);
-	} else if (p == "smpte-format") {
-		update_just_smpte ();
+	} else if (p == "timecode-format") {
+		update_just_timecode ();
 	} else if (p == "xfades-visible") {
 		update_xfade_visibility ();
 	} else if (p == "show-region-fades") {
@@ -1349,7 +1349,7 @@ Editor::parameter_changed (std::string p)
 	} else if (p == "edit-mode") {
 		edit_mode_selector.set_active_text (edit_mode_to_string (Config->get_edit_mode()));
 	} else if (p == "subframes-per-frame") {
-		update_just_smpte ();
+		update_just_timecode ();
 	} else if (p == "show-track-meters") {
 		toggle_meter_updating();
 	} else if (p == "show-summary") {

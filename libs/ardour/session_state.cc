@@ -187,7 +187,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	pending_locate_flush = false;
 	state_was_pending = false;
 	set_next_event ();
-	outbound_mtc_smpte_frame = 0;
+	outbound_mtc_timecode_frame = 0;
 	next_quarter_frame_to_send = -1;
 	current_block_size = 0;
 	solo_update_disabled = false;
@@ -244,10 +244,10 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 		waiting_for_sync_offset = false;
 	}
 
-	last_smpte_when = 0;
-	_smpte_offset = 0;
-	_smpte_offset_negative = true;
-	last_smpte_valid = false;
+	last_timecode_when = 0;
+	_timecode_offset = 0;
+	_timecode_offset_negative = true;
+	last_timecode_valid = false;
 
 	sync_time_vars ();
 
@@ -3103,7 +3103,7 @@ Session::config_changed (std::string p, bool ours)
 
 		setup_raid_path (config.get_raid_path());
 
-	} else if (p == "smpte-format") {
+	} else if (p == "timecode-format") {
 
 		sync_time_vars ();
 

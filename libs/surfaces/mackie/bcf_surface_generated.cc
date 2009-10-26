@@ -492,10 +492,10 @@ void Mackie::BcfSurface::init_controls()
 	group->add( *button );
 
 	group = groups["display"];
-	button = new Button ( 53, 1, "smpte_beats", *group );
+	button = new Button ( 53, 1, "timecode_beats", *group );
 	buttons[0x35] = button;
 	controls.push_back( button );
-	controls_by_name["smpte_beats"] = button;
+	controls_by_name["timecode_beats"] = button;
 	group->add( *button );
 
 	group = groups["none"];
@@ -903,10 +903,10 @@ void Mackie::BcfSurface::init_controls()
 	group->add( *button );
 
 	group = groups["none"];
-	led = new Led ( 113, 1, "smpte", *group );
+	led = new Led ( 113, 1, "timecode", *group );
 	leds[0x71] = led;
 	controls.push_back( led );
-	controls_by_name["smpte"] = led;
+	controls_by_name["timecode"] = led;
 	group->add( *led );
 
 	group = groups["none"];
@@ -1048,10 +1048,10 @@ void Mackie::BcfSurface::handle_button( MackieButtonHandler & mbh, ButtonState b
 			}
 			break;
 
-		case 0x9035: // smpte_beats
+		case 0x9035: // timecode_beats
 			switch ( bs ) {
-				case press: ls = mbh.smpte_beats_press( button ); break;
-				case release: ls = mbh.smpte_beats_release( button ); break;
+				case press: ls = mbh.timecode_beats_press( button ); break;
+				case release: ls = mbh.timecode_beats_release( button ); break;
 				case neither: break;
 			}
 			break;

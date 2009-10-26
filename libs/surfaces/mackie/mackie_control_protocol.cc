@@ -316,7 +316,7 @@ void MackieControlProtocol::switch_banks( int initial )
 
 void MackieControlProtocol::zero_all()
 {
-	// TODO turn off SMPTE displays
+	// TODO turn off Timecode displays
 
 	// zero all strips
 	for ( Surface::Strips::iterator it = surface().strips.begin(); it != surface().strips.end(); ++it )
@@ -484,16 +484,16 @@ void MackieControlProtocol::update_led( Mackie::Button & button, Mackie::LedStat
 	}
 }
 
-void MackieControlProtocol::update_smpte_beats_led()
+void MackieControlProtocol::update_timecode_beats_led()
 {
 	switch ( _timecode_type )
 	{
 		case ARDOUR::AnyTime::BBT:
 			update_global_led( "beats", on );
-			update_global_led( "smpte", off );
+			update_global_led( "timecode", off );
 			break;
-		case ARDOUR::AnyTime::SMPTE:
-			update_global_led( "smpte", on );
+		case ARDOUR::AnyTime::Timecode:
+			update_global_led( "timecode", on );
 			update_global_led( "beats", off );
 			break;
 		default:
@@ -557,7 +557,7 @@ void MackieControlProtocol::update_surface()
 		// update global buttons and displays
 		notify_record_state_changed();
 		notify_transport_state_changed();
-		update_smpte_beats_led();
+		update_timecode_beats_led();
 	}
 }
 
@@ -1146,19 +1146,19 @@ string MackieControlProtocol::format_bbt_timecode( nframes_t now_frame )
 	return os.str();
 }
 
-string MackieControlProtocol::format_smpte_timecode( nframes_t now_frame )
+string MackieControlProtocol::format_timecode_timecode( nframes_t now_frame )
 {
-	SMPTE::Time smpte;
-	session->smpte_time( now_frame, smpte );
+	Timecode::Time timecode;
+	session->timecode_time( now_frame, timecode );
 
 	// According to the Logic docs
 	// digits: 888/88/88/888
-	// SMPTE mode: Hours/Minutes/Seconds/Frames
+	// Timecode mode: Hours/Minutes/Seconds/Frames
 	ostringstream os;
-	os << setw(3) << setfill('0') << smpte.hours;
-	os << setw(2) << setfill('0') << smpte.minutes;
-	os << setw(2) << setfill('0') << smpte.seconds;
-	os << setw(3) << setfill('0') << smpte.frames;
+	os << setw(3) << setfill('0') << timecode.hours;
+	os << setw(2) << setfill('0') << timecode.minutes;
+	os << setw(2) << setfill('0') << timecode.seconds;
+	os << setw(3) << setfill('0') << timecode.frames;
 
 	return os.str();
 }
@@ -1176,8 +1176,8 @@ void MackieControlProtocol::update_timecode_display()
 			case ARDOUR::AnyTime::BBT:
 				timecode = format_bbt_timecode( current_frame );
 				break;
-			case ARDOUR::AnyTime::SMPTE:
-				timecode = format_smpte_timecode( current_frame );
+			case ARDOUR::AnyTime::Timecode:
+				timecode = format_timecode_timecode( current_frame );
 				break;
 			default:
 				ostringstream os;
@@ -1712,14 +1712,14 @@ LedState MackieControlProtocol::save_release (Button &)
 	return off;
 }
 
-LedState MackieControlProtocol::smpte_beats_press (Button &)
+LedState MackieControlProtocol::timecode_beats_press (Button &)
 {
 	switch ( _timecode_type )
 	{
 		case ARDOUR::AnyTime::BBT:
-			_timecode_type = ARDOUR::AnyTime::SMPTE;
+			_timecode_type = ARDOUR::AnyTime::Timecode;
 			break;
-		case ARDOUR::AnyTime::SMPTE:
+		case ARDOUR::AnyTime::Timecode:
 			_timecode_type = ARDOUR::AnyTime::BBT;
 			break;
 		default:
@@ -1727,11 +1727,11 @@ LedState MackieControlProtocol::smpte_beats_press (Button &)
 			os << "Unknown Anytime::Type " << _timecode_type;
 			throw runtime_error( os.str() );
 	}
-	update_smpte_beats_led();
+	update_timecode_beats_led();
 	return on;
 }
 
-LedState MackieControlProtocol::smpte_beats_release( Button & )
+LedState MackieControlProtocol::timecode_beats_release( Button & )
 {
 	return off;
 }

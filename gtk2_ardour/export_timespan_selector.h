@@ -78,7 +78,7 @@ class ExportTimespanSelector : public Gtk::VBox {
 
 	Glib::ustring construct_label (ARDOUR::Location const * location) const;
 	Glib::ustring bbt_str (nframes_t frames) const;
-	Glib::ustring smpte_str (nframes_t frames) const;
+	Glib::ustring timecode_str (nframes_t frames) const;
 	Glib::ustring ms_str (nframes_t frames) const;
 
 	void update_range_name (Glib::ustring const & path, Glib::ustring const & new_text);

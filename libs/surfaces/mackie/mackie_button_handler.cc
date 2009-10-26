@@ -150,12 +150,12 @@ LedState MackieButtonHandler::name_value_release( Button & button )
 	return default_button_release( button );
 }
 
-LedState MackieButtonHandler::smpte_beats_press( Button & button )
+LedState MackieButtonHandler::timecode_beats_press( Button & button )
 {
 	return default_button_press( button );
 }
 
-LedState MackieButtonHandler::smpte_beats_release( Button & button )
+LedState MackieButtonHandler::timecode_beats_release( Button & button )
 {
 	return default_button_release( button );
 }

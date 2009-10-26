@@ -49,7 +49,7 @@ Editor *Editor::ruler_editor;
 /* the order here must match the "metric" enums in editor.h */
 
 GtkCustomMetric Editor::ruler_metrics[4] = {
-	{1, Editor::_metric_get_smpte },
+	{1, Editor::_metric_get_timecode },
 	{1, Editor::_metric_get_bbt },
 	{1, Editor::_metric_get_frames },
 	{1, Editor::_metric_get_minsec }
@@ -74,14 +74,14 @@ Editor::initialize_rulers ()
 	minsec_ruler->hide ();
 	minsec_ruler->set_no_show_all();
 
-	_smpte_ruler = gtk_custom_hruler_new ();
-	smpte_ruler = Glib::wrap (_smpte_ruler);
-	smpte_ruler->set_name ("SMPTERuler");
-	smpte_ruler->set_size_request (-1, (int)timebar_height);
-	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_smpte_ruler), &ruler_metrics[ruler_metric_smpte]);
-	smpte_ruler->hide ();
-	smpte_ruler->set_no_show_all();
-	smpte_nmarks = 0;
+	_timecode_ruler = gtk_custom_hruler_new ();
+	timecode_ruler = Glib::wrap (_timecode_ruler);
+	timecode_ruler->set_name ("TimecodeRuler");
+	timecode_ruler->set_size_request (-1, (int)timebar_height);
+	gtk_custom_ruler_set_metric (GTK_CUSTOM_RULER(_timecode_ruler), &ruler_metrics[ruler_metric_timecode]);
+	timecode_ruler->hide ();
+	timecode_ruler->set_no_show_all();
+	timecode_nmarks = 0;
 
 	_bbt_ruler = gtk_custom_hruler_new ();
 	bbt_ruler = Glib::wrap (_bbt_ruler);
@@ -127,34 +127,34 @@ Editor::initialize_rulers ()
 
 	ruler_lab_children.push_back (Element(minsec_label, PACK_SHRINK, PACK_START));
 	ruler_children.insert (canvaspos, Element(*minsec_ruler, PACK_SHRINK, PACK_START));
-	ruler_lab_children.push_back (Element(smpte_label, PACK_SHRINK, PACK_START));
-	ruler_children.insert (canvaspos, Element(*smpte_ruler, PACK_SHRINK, PACK_START));
+	ruler_lab_children.push_back (Element(timecode_label, PACK_SHRINK, PACK_START));
+	ruler_children.insert (canvaspos, Element(*timecode_ruler, PACK_SHRINK, PACK_START));
 	ruler_lab_children.push_back (Element(frame_label, PACK_SHRINK, PACK_START));
 	ruler_children.insert (canvaspos, Element(*frames_ruler, PACK_SHRINK, PACK_START));
 	ruler_lab_children.push_back (Element(bbt_label, PACK_SHRINK, PACK_START));
 	ruler_children.insert (canvaspos, Element(*bbt_ruler, PACK_SHRINK, PACK_START));
 
-	smpte_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
+	timecode_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
 	bbt_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
 	frames_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
 	minsec_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
 
-	smpte_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
+	timecode_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
 	bbt_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
 	frames_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
 	minsec_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
 
-	smpte_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
+	timecode_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
 	bbt_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
 	frames_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
 	minsec_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
 
-	smpte_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	timecode_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 	bbt_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 	frames_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 	minsec_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
 
-	smpte_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
+	timecode_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
 	bbt_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
 	frames_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
 	minsec_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
@@ -221,8 +221,8 @@ Editor::ruler_button_press (GdkEventButton* ev)
 	//Gtk::Main::grab_add (*minsec_ruler);
 	Widget * grab_widget = 0;
 
-	if (smpte_ruler->is_realized() && ev->window == smpte_ruler->get_window()->gobj()) {
-		grab_widget = smpte_ruler;
+	if (timecode_ruler->is_realized() && ev->window == timecode_ruler->get_window()->gobj()) {
+		grab_widget = timecode_ruler;
 	} else if (bbt_ruler->is_realized() && ev->window == bbt_ruler->get_window()->gobj()) {
 		grab_widget = bbt_ruler;
 	} else if (frames_ruler->is_realized() && ev->window == frames_ruler->get_window()->gobj()) {
@@ -430,7 +430,7 @@ Editor::store_ruler_visibility ()
 {
 	XMLNode* node = new XMLNode(X_("RulerVisibility"));
 
-	node->add_property (X_("smpte"), ruler_timecode_action->get_active() ? "yes": "no");
+	node->add_property (X_("timecode"), ruler_timecode_action->get_active() ? "yes": "no");
 	node->add_property (X_("bbt"), ruler_bbt_action->get_active() ? "yes": "no");
 	node->add_property (X_("frames"), ruler_samples_action->get_active() ? "yes": "no");
 	node->add_property (X_("minsec"), ruler_minsec_action->get_active() ? "yes": "no");
@@ -454,7 +454,7 @@ Editor::restore_ruler_visibility ()
 	no_ruler_shown_update = true;
 
 	if (node) {
-		if ((prop = node->property ("smpte")) != 0) {
+		if ((prop = node->property ("timecode")) != 0) {
 			if (string_is_affirmative (prop->value())) {
 				ruler_timecode_action->set_active (true);
 			} else {
@@ -568,11 +568,11 @@ Editor::update_ruler_visibility ()
 
 	if (ruler_timecode_action->get_active()) {
 		visible_rulers++;
-		smpte_label.show ();
-		smpte_ruler->show ();
+		timecode_label.show ();
+		timecode_ruler->show ();
 	} else {
-		smpte_label.hide ();
-		smpte_ruler->hide ();
+		timecode_label.hide ();
+		timecode_ruler->hide ();
 	}
 
 	if (ruler_samples_action->get_active()) {
@@ -768,9 +768,9 @@ Editor::update_ruler_visibility ()
 }
 
 void
-Editor::update_just_smpte ()
+Editor::update_just_timecode ()
 {
-	ENSURE_GUI_THREAD(mem_fun(*this, &Editor::update_just_smpte));
+	ENSURE_GUI_THREAD(mem_fun(*this, &Editor::update_just_timecode));
 
 	if (session == 0) {
 		return;
@@ -779,7 +779,7 @@ Editor::update_just_smpte ()
 	nframes64_t rightmost_frame = leftmost_frame + current_page_frames();
 
 	if (ruler_timecode_action->get_active()) {
-		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_smpte_ruler), leftmost_frame, rightmost_frame,
+		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_timecode_ruler), leftmost_frame, rightmost_frame,
 					    leftmost_frame, session->current_end_frame());
 	}
 }
@@ -792,7 +792,7 @@ Editor::compute_fixed_ruler_scale ()
 	}
 
 	if (ruler_timecode_action->get_active()) {
-		set_smpte_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames() );
+		set_timecode_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames() );
 	}
 
 	if (ruler_minsec_action->get_active()) {
@@ -809,7 +809,7 @@ Editor::update_fixed_rulers ()
 		return;
 	}
 
-	ruler_metrics[ruler_metric_smpte].units_per_pixel = frames_per_unit;
+	ruler_metrics[ruler_metric_timecode].units_per_pixel = frames_per_unit;
 	ruler_metrics[ruler_metric_frames].units_per_pixel = frames_per_unit;
 	ruler_metrics[ruler_metric_minsec].units_per_pixel = frames_per_unit;
 
@@ -820,7 +820,7 @@ Editor::update_fixed_rulers ()
 	*/
 
 	if (ruler_timecode_action->get_active()) {
-		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_smpte_ruler), leftmost_frame, rightmost_frame,
+		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_timecode_ruler), leftmost_frame, rightmost_frame,
 					    leftmost_frame, session->current_end_frame());
 	}
 
@@ -853,9 +853,9 @@ Editor::update_tempo_based_rulers ()
 /* Mark generation */
 
 gint
-Editor::_metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
+Editor::_metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble upper, gint maxchars)
 {
-	return ruler_editor->metric_get_smpte (marks, lower, upper, maxchars);
+	return ruler_editor->metric_get_timecode (marks, lower, upper, maxchars);
 }
 
 gint
@@ -877,7 +877,7 @@ Editor::_metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble u
 }
 
 void
-Editor::set_smpte_ruler_scale (gdouble lower, gdouble upper)
+Editor::set_timecode_ruler_scale (gdouble lower, gdouble upper)
 {
 	nframes64_t range;
 	nframes64_t spacer;
@@ -897,91 +897,91 @@ Editor::set_smpte_ruler_scale (gdouble lower, gdouble upper)
 	upper = upper + spacer;
 	range = (nframes64_t) floor (upper - lower);
 
-	if (range < (2 * session->frames_per_smpte_frame())) { /* 0 - 2 frames */
-		smpte_ruler_scale = smpte_show_bits;
-		smpte_mark_modulo = 20;
-		smpte_nmarks = 2 + (2 * session->config.get_subframes_per_frame());
+	if (range < (2 * session->frames_per_timecode_frame())) { /* 0 - 2 frames */
+		timecode_ruler_scale = timecode_show_bits;
+		timecode_mark_modulo = 20;
+		timecode_nmarks = 2 + (2 * session->config.get_subframes_per_frame());
 	} else if (range <= (fr / 4)) { /* 2 frames - 0.250 second */
-		smpte_ruler_scale = smpte_show_frames;
-		smpte_mark_modulo = 1;
-		smpte_nmarks = 2 + (range / (nframes64_t)session->frames_per_smpte_frame());
+		timecode_ruler_scale = timecode_show_frames;
+		timecode_mark_modulo = 1;
+		timecode_nmarks = 2 + (range / (nframes64_t)session->frames_per_timecode_frame());
 	} else if (range <= (fr / 2)) { /* 0.25-0.5 second */
-		smpte_ruler_scale = smpte_show_frames;
-		smpte_mark_modulo = 2;
-		smpte_nmarks = 2 + (range / (nframes64_t)session->frames_per_smpte_frame());
+		timecode_ruler_scale = timecode_show_frames;
+		timecode_mark_modulo = 2;
+		timecode_nmarks = 2 + (range / (nframes64_t)session->frames_per_timecode_frame());
 	} else if (range <= fr) { /* 0.5-1 second */
-		smpte_ruler_scale = smpte_show_frames;
-		smpte_mark_modulo = 5;
-		smpte_nmarks = 2 + (range / (nframes64_t)session->frames_per_smpte_frame());
+		timecode_ruler_scale = timecode_show_frames;
+		timecode_mark_modulo = 5;
+		timecode_nmarks = 2 + (range / (nframes64_t)session->frames_per_timecode_frame());
 	} else if (range <= 2 * fr) { /* 1-2 seconds */
-		smpte_ruler_scale = smpte_show_frames;
-		smpte_mark_modulo = 10;
-		smpte_nmarks = 2 + (range / (nframes64_t)session->frames_per_smpte_frame());
+		timecode_ruler_scale = timecode_show_frames;
+		timecode_mark_modulo = 10;
+		timecode_nmarks = 2 + (range / (nframes64_t)session->frames_per_timecode_frame());
 	} else if (range <= 8 * fr) { /* 2-8 seconds */
-		smpte_ruler_scale = smpte_show_seconds;
-		smpte_mark_modulo = 1;
-		smpte_nmarks = 2 + (range / fr);
+		timecode_ruler_scale = timecode_show_seconds;
+		timecode_mark_modulo = 1;
+		timecode_nmarks = 2 + (range / fr);
 	} else if (range <= 16 * fr) { /* 8-16 seconds */
-		smpte_ruler_scale = smpte_show_seconds;
-		smpte_mark_modulo = 2;
-		smpte_nmarks = 2 + (range / fr);
+		timecode_ruler_scale = timecode_show_seconds;
+		timecode_mark_modulo = 2;
+		timecode_nmarks = 2 + (range / fr);
 	} else if (range <= 30 * fr) { /* 16-30 seconds */
-		smpte_ruler_scale = smpte_show_seconds;
-		smpte_mark_modulo = 5;
-		smpte_nmarks = 2 + (range / fr);
+		timecode_ruler_scale = timecode_show_seconds;
+		timecode_mark_modulo = 5;
+		timecode_nmarks = 2 + (range / fr);
 	} else if (range <= 60 * fr) { /* 30-60 seconds */
-		smpte_ruler_scale = smpte_show_seconds;
-		smpte_mark_modulo = 5;
-		smpte_nmarks = 2 + (range / fr);
+		timecode_ruler_scale = timecode_show_seconds;
+		timecode_mark_modulo = 5;
+		timecode_nmarks = 2 + (range / fr);
 	} else if (range <= 2 * 60 * fr) { /* 1-2 minutes */
-		smpte_ruler_scale = smpte_show_seconds;
-		smpte_mark_modulo = 15;
-		smpte_nmarks = 2 + (range / fr);
+		timecode_ruler_scale = timecode_show_seconds;
+		timecode_mark_modulo = 15;
+		timecode_nmarks = 2 + (range / fr);
 	} else if (range <= 4 * 60 * fr) { /* 2-4 minutes */
-		smpte_ruler_scale = smpte_show_seconds;
-		smpte_mark_modulo = 30;
-		smpte_nmarks = 2 + (range / fr);
+		timecode_ruler_scale = timecode_show_seconds;
+		timecode_mark_modulo = 30;
+		timecode_nmarks = 2 + (range / fr);
 	} else if (range <= 10 * 60 * fr) { /* 4-10 minutes */
-		smpte_ruler_scale = smpte_show_minutes;
-		smpte_mark_modulo = 2;
-		smpte_nmarks = 2 + 10;
+		timecode_ruler_scale = timecode_show_minutes;
+		timecode_mark_modulo = 2;
+		timecode_nmarks = 2 + 10;
 	} else if (range <= 30 * 60 * fr) { /* 10-30 minutes */
-		smpte_ruler_scale = smpte_show_minutes;
-		smpte_mark_modulo = 5;
-		smpte_nmarks = 2 + 30;
+		timecode_ruler_scale = timecode_show_minutes;
+		timecode_mark_modulo = 5;
+		timecode_nmarks = 2 + 30;
 	} else if (range <= 60 * 60 * fr) { /* 30 minutes - 1hr */
-		smpte_ruler_scale = smpte_show_minutes;
-		smpte_mark_modulo = 10;
-		smpte_nmarks = 2 + 60;
+		timecode_ruler_scale = timecode_show_minutes;
+		timecode_mark_modulo = 10;
+		timecode_nmarks = 2 + 60;
 	} else if (range <= 4 * 60 * 60 * fr) { /* 1 - 4 hrs*/
-		smpte_ruler_scale = smpte_show_minutes;
-		smpte_mark_modulo = 30;
-		smpte_nmarks = 2 + (60 * 4);
+		timecode_ruler_scale = timecode_show_minutes;
+		timecode_mark_modulo = 30;
+		timecode_nmarks = 2 + (60 * 4);
 	} else if (range <= 8 * 60 * 60 * fr) { /* 4 - 8 hrs*/
-		smpte_ruler_scale = smpte_show_hours;
-		smpte_mark_modulo = 1;
-		smpte_nmarks = 2 + 8;
+		timecode_ruler_scale = timecode_show_hours;
+		timecode_mark_modulo = 1;
+		timecode_nmarks = 2 + 8;
 	} else if (range <= 16 * 60 * 60 * fr) { /* 16-24 hrs*/
-		smpte_ruler_scale = smpte_show_hours;
-		smpte_mark_modulo = 1;
-		smpte_nmarks = 2 + 24;
+		timecode_ruler_scale = timecode_show_hours;
+		timecode_mark_modulo = 1;
+		timecode_nmarks = 2 + 24;
 	} else {
 
 		/* not possible if nframes64_t is a 32 bit quantity */
 
-		smpte_ruler_scale = smpte_show_hours;
-		smpte_mark_modulo = 4;
-		smpte_nmarks = 2 + 24;
+		timecode_ruler_scale = timecode_show_hours;
+		timecode_mark_modulo = 4;
+		timecode_nmarks = 2 + 24;
 	}
 
 }
 
 gint
-Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upper*/, gint /*maxchars*/)
+Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upper*/, gint /*maxchars*/)
 {
 	nframes_t pos;
 	nframes64_t spacer;
-	SMPTE::Time smpte;
+	Timecode::Time timecode;
 	gchar buf[16];
 	gint n;
 
@@ -997,22 +997,22 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble /*u
 
 	pos = (nframes_t) floor (lower);
 
-	*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * smpte_nmarks);
-	switch (smpte_ruler_scale) {
-	case smpte_show_bits:
+	*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * timecode_nmarks);
+	switch (timecode_ruler_scale) {
+	case timecode_show_bits:
 
-		// Find smpte time of this sample (pos) with subframe accuracy
-		session->sample_to_smpte(pos, smpte, true /* use_offset */, true /* use_subframes */ );
+		// Find timecode time of this sample (pos) with subframe accuracy
+		session->sample_to_timecode(pos, timecode, true /* use_offset */, true /* use_subframes */ );
 
-		for (n = 0; n < smpte_nmarks; n++) {
-			session->smpte_to_sample(smpte, pos, true /* use_offset */, true /* use_subframes */ );
-			if ((smpte.subframes % smpte_mark_modulo) == 0) {
-				if (smpte.subframes == 0) {
+		for (n = 0; n < timecode_nmarks; n++) {
+			session->timecode_to_sample(timecode, pos, true /* use_offset */, true /* use_subframes */ );
+			if ((timecode.subframes % timecode_mark_modulo) == 0) {
+				if (timecode.subframes == 0) {
 					(*marks)[n].style = GtkCustomRulerMarkMajor;
-					snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", smpte.negative ? "-" : "", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+					snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 				} else {
 					(*marks)[n].style = GtkCustomRulerMarkMinor;
-					snprintf (buf, sizeof(buf), ".%02u", smpte.subframes);
+					snprintf (buf, sizeof(buf), ".%02u", timecode.subframes);
 				}
 			} else {
 				snprintf (buf, sizeof(buf)," ");
@@ -1023,26 +1023,26 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble /*u
 			(*marks)[n].position = pos;
 
 			// Increment subframes by one
-			SMPTE::increment_subframes( smpte, session->config.get_subframes_per_frame() );
+			Timecode::increment_subframes( timecode, session->config.get_subframes_per_frame() );
 		}
 	  break;
-	case smpte_show_seconds:
-		// Find smpte time of this sample (pos)
-		session->sample_to_smpte(pos, smpte, true /* use_offset */, false /* use_subframes */ );
+	case timecode_show_seconds:
+		// Find timecode time of this sample (pos)
+		session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole second down
-		SMPTE::seconds_floor( smpte );
+		Timecode::seconds_floor( timecode );
 
-		for (n = 0; n < smpte_nmarks; n++) {
-			session->smpte_to_sample(smpte, pos, true /* use_offset */, false /* use_subframes */ );
-			if ((smpte.seconds % smpte_mark_modulo) == 0) {
-				if (smpte.seconds == 0) {
+		for (n = 0; n < timecode_nmarks; n++) {
+			session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
+			if ((timecode.seconds % timecode_mark_modulo) == 0) {
+				if (timecode.seconds == 0) {
 					(*marks)[n].style = GtkCustomRulerMarkMajor;
 					(*marks)[n].position = pos;
 				} else {
 					(*marks)[n].style = GtkCustomRulerMarkMinor;
 					(*marks)[n].position = pos;
 				}
-				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", smpte.negative ? "-" : "", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				(*marks)[n].style = GtkCustomRulerMarkMicro;
@@ -1050,24 +1050,24 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble /*u
 
 			}
 			(*marks)[n].label = g_strdup (buf);
-			SMPTE::increment_seconds( smpte, session->config.get_subframes_per_frame() );
+			Timecode::increment_seconds( timecode, session->config.get_subframes_per_frame() );
 		}
 	  break;
-	case smpte_show_minutes:
-		// Find smpte time of this sample (pos)
-		session->sample_to_smpte(pos, smpte, true /* use_offset */, false /* use_subframes */ );
+	case timecode_show_minutes:
+		// Find timecode time of this sample (pos)
+		session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole minute down
-		SMPTE::minutes_floor( smpte );
+		Timecode::minutes_floor( timecode );
 
-		for (n = 0; n < smpte_nmarks; n++) {
-			session->smpte_to_sample(smpte, pos, true /* use_offset */, false /* use_subframes */ );
-			if ((smpte.minutes % smpte_mark_modulo) == 0) {
-				if (smpte.minutes == 0) {
+		for (n = 0; n < timecode_nmarks; n++) {
+			session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
+			if ((timecode.minutes % timecode_mark_modulo) == 0) {
+				if (timecode.minutes == 0) {
 					(*marks)[n].style = GtkCustomRulerMarkMajor;
 				} else {
 					(*marks)[n].style = GtkCustomRulerMarkMinor;
 				}
-				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", smpte.negative ? "-" : "", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				(*marks)[n].style = GtkCustomRulerMarkMicro;
@@ -1075,21 +1075,21 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble /*u
 			}
 			(*marks)[n].label = g_strdup (buf);
 			(*marks)[n].position = pos;
-			SMPTE::increment_minutes( smpte, session->config.get_subframes_per_frame() );
+			Timecode::increment_minutes( timecode, session->config.get_subframes_per_frame() );
 		}
 
 	  break;
-	case smpte_show_hours:
-		// Find smpte time of this sample (pos)
-		session->sample_to_smpte(pos, smpte, true /* use_offset */, false /* use_subframes */ );
+	case timecode_show_hours:
+		// Find timecode time of this sample (pos)
+		session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole hour down
-		SMPTE::hours_floor( smpte );
+		Timecode::hours_floor( timecode );
 
-		for (n = 0; n < smpte_nmarks; n++) {
-			session->smpte_to_sample(smpte, pos, true /* use_offset */, false /* use_subframes */ );
-			if ((smpte.hours % smpte_mark_modulo) == 0) {
+		for (n = 0; n < timecode_nmarks; n++) {
+			session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
+			if ((timecode.hours % timecode_mark_modulo) == 0) {
 				(*marks)[n].style = GtkCustomRulerMarkMajor;
-				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", smpte.negative ? "-" : "", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				(*marks)[n].style = GtkCustomRulerMarkMicro;
@@ -1098,25 +1098,25 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble /*u
 			(*marks)[n].label = g_strdup (buf);
 			(*marks)[n].position = pos;
 
-			SMPTE::increment_hours( smpte, session->config.get_subframes_per_frame() );
+			Timecode::increment_hours( timecode, session->config.get_subframes_per_frame() );
 		}
 	  break;
-	case smpte_show_frames:
-		// Find smpte time of this sample (pos)
-		session->sample_to_smpte(pos, smpte, true /* use_offset */, false /* use_subframes */ );
+	case timecode_show_frames:
+		// Find timecode time of this sample (pos)
+		session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole frame down
-		SMPTE::frames_floor( smpte );
+		Timecode::frames_floor( timecode );
 
-		for (n = 0; n < smpte_nmarks; n++) {
-			session->smpte_to_sample(smpte, pos, true /* use_offset */, false /* use_subframes */ );
-			if ((smpte.frames % smpte_mark_modulo) == 0)  {
-				if (smpte.frames == 0) {
+		for (n = 0; n < timecode_nmarks; n++) {
+			session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
+			if ((timecode.frames % timecode_mark_modulo) == 0)  {
+				if (timecode.frames == 0) {
 				  (*marks)[n].style = GtkCustomRulerMarkMajor;
 				} else {
 				  (*marks)[n].style = GtkCustomRulerMarkMinor;
 				}
 				(*marks)[n].position = pos;
-				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", smpte.negative ? "-" : "", smpte.hours, smpte.minutes, smpte.seconds, smpte.frames);
+				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				(*marks)[n].style = GtkCustomRulerMarkMicro;
@@ -1124,13 +1124,13 @@ Editor::metric_get_smpte (GtkCustomRulerMark **marks, gdouble lower, gdouble /*u
 
 			}
 			(*marks)[n].label = g_strdup (buf);
-			SMPTE::increment( smpte, session->config.get_subframes_per_frame() );
+			Timecode::increment( timecode, session->config.get_subframes_per_frame() );
 		}
 
 	  break;
 	}
 
-	return smpte_nmarks;
+	return timecode_nmarks;
 }
 
 

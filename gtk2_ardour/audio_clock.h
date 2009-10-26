@@ -35,7 +35,7 @@ class AudioClock : public Gtk::HBox
 {
   public:
 	enum Mode {
-		SMPTE,
+		Timecode,
 		BBT,
 		MinSec,
 		Frames,
@@ -80,8 +80,8 @@ class AudioClock : public Gtk::HBox
 
 	Gtk::Menu  *ops_menu;
 
-	Gtk::HBox   smpte_packer_hbox;
-	Gtk::HBox   smpte_packer;
+	Gtk::HBox   timecode_packer_hbox;
+	Gtk::HBox   timecode_packer;
 
 	Gtk::HBox   minsec_packer_hbox;
 	Gtk::HBox   minsec_packer;
@@ -93,10 +93,10 @@ class AudioClock : public Gtk::HBox
 	Gtk::HBox   frames_packer;
 
 	enum Field {
-		SMPTE_Hours,
-		SMPTE_Minutes,
-		SMPTE_Seconds,
-		SMPTE_Frames,
+		Timecode_Hours,
+		Timecode_Minutes,
+		Timecode_Seconds,
+		Timecode_Frames,
 		MS_Hours,
 		MS_Minutes,
 		MS_Seconds,
@@ -144,14 +144,14 @@ class AudioClock : public Gtk::HBox
 	Gtk::Label*  frames_upper_info_label;
 	Gtk::Label*  frames_lower_info_label;
 
-	Gtk::Label*  smpte_upper_info_label;
-	Gtk::Label*  smpte_lower_info_label;
+	Gtk::Label*  timecode_upper_info_label;
+	Gtk::Label*  timecode_lower_info_label;
 
 	Gtk::Label*  bbt_upper_info_label;
 	Gtk::Label*  bbt_lower_info_label;
 
 	Gtk::VBox   frames_info_box;
-	Gtk::VBox   smpte_info_box;
+	Gtk::VBox   timecode_info_box;
 	Gtk::VBox   bbt_info_box;
 
 	Gtk::EventBox  clock_base;
@@ -189,15 +189,15 @@ class AudioClock : public Gtk::HBox
 	bool field_focus_out_event (GdkEventFocus *, Field);
 	bool drop_focus_handler (GdkEventFocus*);
 
-	void set_smpte (nframes_t, bool);
+	void set_timecode (nframes_t, bool);
 	void set_bbt (nframes_t, bool);
 	void set_minsec (nframes_t, bool);
 	void set_frames (nframes_t, bool);
 
 	nframes_t get_frames (Field,nframes_t pos = 0,int dir=1);
 
-	void smpte_sanitize_display();
-	nframes_t smpte_frame_from_display () const;
+	void timecode_sanitize_display();
+	nframes_t timecode_frame_from_display () const;
 	nframes_t bbt_frame_from_display (nframes_t) const;
 	nframes_t bbt_frame_duration_from_display (nframes_t) const;
 	nframes_t minsec_frame_from_display () const;
@@ -206,7 +206,7 @@ class AudioClock : public Gtk::HBox
 	void build_ops_menu ();
 	void setup_events ();
 
-	void smpte_offset_changed ();
+	void timecode_offset_changed ();
 	void set_size_requests ();
 
 	static const uint32_t field_length[(int)AudioFrames+1];
