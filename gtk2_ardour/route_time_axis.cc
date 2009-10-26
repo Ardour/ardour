@@ -1871,7 +1871,7 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 	ProcessorAutomationNode* pan;
 
 	if ((pan = find_processor_automation_node (processor, what)) == 0) {
-		fatal << _("programming error: ")
+		error << _("programming error: ")
 		      << string_compose (X_("processor automation curve for %1:%2 not registered with track!"),
 				  processor->name(), what)
 		      << endmsg;
