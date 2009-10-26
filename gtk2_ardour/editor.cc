@@ -605,10 +605,10 @@ Editor::Editor ()
 	setup_toolbar ();
 	setup_midi_toolbar ();
 
-	snap_type = SnapToBeat;
-	set_snap_to (snap_type);
-	snap_mode = SnapOff;
-	set_snap_mode (snap_mode);
+	_snap_type = SnapToBeat;
+	set_snap_to (_snap_type);
+	_snap_mode = SnapOff;
+	set_snap_mode (_snap_mode);
 	set_mouse_mode (MouseObject, true);
 	set_edit_point_preference (EditAtMouse, true);
 
@@ -1176,7 +1176,7 @@ Editor::connect_to_session (Session *t)
 
 	start_scrolling ();
 
-	switch (snap_type) {
+	switch (_snap_type) {
 	case SnapToRegionStart:
 	case SnapToRegionEnd:
 	case SnapToRegionSync:
@@ -2103,16 +2103,28 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Nudge"), *nudge_menu));
 }
 
+SnapType
+Editor::snap_type() const
+{
+	return _snap_type;
+}
+
+SnapMode
+Editor::snap_mode() const
+{
+	return _snap_mode;
+}
+
 void
 Editor::set_snap_to (SnapType st)
 {
 	unsigned int snap_ind = (unsigned int)st;
 
-	snap_type = st;
+	_snap_type = st;
 
 	if (snap_ind > snap_type_strings.size() - 1) {
 		snap_ind = 0;
-		snap_type = (SnapType)snap_ind;
+		_snap_type = (SnapType)snap_ind;
 	}
 
 	string str = snap_type_strings[snap_ind];
@@ -2123,7 +2135,7 @@ Editor::set_snap_to (SnapType st)
 
 	instant_save ();
 
-	switch (snap_type) {
+	switch (_snap_type) {
 	case SnapToAThirtysecondBeat:
 	case SnapToASixteenthBeat:
 	case SnapToAEighthBeat:
@@ -2149,7 +2161,7 @@ Editor::set_snap_to (SnapType st)
 void
 Editor::set_snap_mode (SnapMode mode)
 {
-	snap_mode = mode;
+	_snap_mode = mode;
 	string str = snap_mode_strings[(int)mode];
 
 	if (str != snap_mode_selector.get_active_text ()) {
@@ -2476,9 +2488,9 @@ Editor::get_state ()
 	node->add_property ("zoom-focus", buf);
 	snprintf (buf, sizeof(buf), "%f", frames_per_unit);
 	node->add_property ("zoom", buf);
-	snprintf (buf, sizeof(buf), "%d", (int) snap_type);
+	snprintf (buf, sizeof(buf), "%d", (int) _snap_type);
 	node->add_property ("snap-to", buf);
-	snprintf (buf, sizeof(buf), "%d", (int) snap_mode);
+	snprintf (buf, sizeof(buf), "%d", (int) _snap_mode);
 	node->add_property ("snap-mode", buf);
 
 	node->add_property ("edit-point", enum_2_string (_edit_point));
@@ -2543,11 +2555,11 @@ Editor::snap_to_with_modifier (nframes64_t& start, GdkEvent const * event, int32
 	}
 
 	if (Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
-		if (snap_mode == SnapOff) {
+		if (_snap_mode == SnapOff) {
 			snap_to_internal (start, direction, for_mark);
 		}
 	} else {
-		if (snap_mode != SnapOff) {
+		if (_snap_mode != SnapOff) {
 			snap_to_internal (start, direction, for_mark);
 		}
 	}
@@ -2556,7 +2568,7 @@ Editor::snap_to_with_modifier (nframes64_t& start, GdkEvent const * event, int32
 void
 Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 {
-	if (!session || snap_mode == SnapOff) {
+	if (!session || _snap_mode == SnapOff) {
 		return;
 	}
 
@@ -2569,7 +2581,7 @@ Editor::timecode_snap_to_internal (nframes64_t& start, int32_t direction, bool /
 	const nframes64_t one_timecode_second = (nframes64_t)(rint(session->timecode_frames_per_second()) * session->frames_per_timecode_frame());
 	nframes64_t one_timecode_minute = (nframes64_t)(rint(session->timecode_frames_per_second()) * session->frames_per_timecode_frame() * 60);
 
-	switch (snap_type) {
+	switch (_snap_type) {
 	case SnapToTimecodeFrame:
 		if (((direction == 0) && (fmod((double)start, (double)session->frames_per_timecode_frame()) > (session->frames_per_timecode_frame() / 2))) || (direction > 0)) {
 			start = (nframes64_t) (ceil ((double) start / session->frames_per_timecode_frame()) * session->frames_per_timecode_frame());
@@ -2633,7 +2645,7 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 	nframes64_t before;
 	nframes64_t after;
 
-	switch (snap_type) {
+	switch (_snap_type) {
 	case SnapToTimecodeFrame:
 	case SnapToTimecodeSeconds:
 	case SnapToTimecodeMinutes:
@@ -2745,7 +2757,7 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 		break;
 	}
 
-	switch (snap_mode) {
+	switch (_snap_mode) {
 	case SnapNormal:
 		return;
 
@@ -3835,7 +3847,7 @@ Editor::get_grid_type_as_beats (bool& success, nframes64_t position)
 {
 	success = true;
 
-	switch (snap_type) {
+	switch (_snap_type) {
 	case SnapToBeat:
 		return 1.0;
 		break;

@@ -1083,7 +1083,7 @@ Editor::snap_type_action (SnapType type)
 void
 Editor::cycle_snap_choice()
 {
-	switch (snap_type) {
+	switch (_snap_type) {
 	case Editing::SnapToCDFrame:
 		set_snap_to (Editing::SnapToTimecodeFrame);
 		break;
@@ -1192,7 +1192,7 @@ Editor::snap_mode_action (SnapMode mode)
 void
 Editor::cycle_snap_mode ()
 {
-	switch (snap_mode) {
+	switch (_snap_mode) {
 	case SnapOff:
 		set_snap_mode (SnapNormal);
 		break;

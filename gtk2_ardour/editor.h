@@ -176,6 +176,9 @@ class Editor : public PublicEditor
 	void set_snap_mode (Editing::SnapMode);
 	void set_snap_threshold (double pixel_distance) {snap_threshold = pixel_distance;}
 
+	Editing::SnapMode  snap_mode () const;
+	Editing::SnapType  snap_type () const;
+
 	void undo (uint32_t n = 1);
 	void redo (uint32_t n = 1);
 
@@ -1285,8 +1288,8 @@ class Editor : public PublicEditor
 	void extend_selection_to_end_of_region (bool next);
 	void extend_selection_to_start_of_region (bool previous);
 
-	Editing::SnapType snap_type;
-	Editing::SnapMode snap_mode;
+	Editing::SnapType _snap_type;
+	Editing::SnapMode _snap_mode;
 
 	/// Snap threshold in pixels
 	double snap_threshold;

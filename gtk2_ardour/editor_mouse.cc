@@ -2390,14 +2390,14 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes64_t pos)
 {
 	/* no brushing without a useful snap setting */
 
-	switch (snap_mode) {
+	switch (_snap_mode) {
 	case SnapMagnetic:
 		return; /* can't work because it allows region to be placed anywhere */
 	default:
 		break; /* OK */
 	}
 
-	switch (snap_type) {
+	switch (_snap_type) {
 	case SnapToMark:
 		return;
 

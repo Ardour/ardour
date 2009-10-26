@@ -109,6 +109,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	 */
 	virtual void set_snap_to (Editing::SnapType t) = 0;
 
+	virtual Editing::SnapType snap_type () const = 0;
+	virtual Editing::SnapMode snap_mode () const = 0;
+
 	/** Set the snap mode.
 	 * @param m Snap mode (defined in editing_syms.h)
 	 */

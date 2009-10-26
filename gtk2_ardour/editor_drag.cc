@@ -119,7 +119,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 		_was_rolling = false;
 	}
 
-	switch (_editor->snap_type) {
+	switch (_editor->snap_type()) {
 	case SnapToRegionStart:
 	case SnapToRegionEnd:
 	case SnapToRegionSync:

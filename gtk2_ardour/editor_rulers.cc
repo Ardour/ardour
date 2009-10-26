@@ -1154,7 +1154,7 @@ Editor::compute_bbt_ruler_scale (nframes64_t lower, nframes64_t upper)
 
 	bbt_ruler_scale =  bbt_over;
 
-	switch (snap_type) {
+	switch (_snap_type) {
 	case SnapToAThirdBeat:
                 bbt_beat_subdivision = 3;
 		break;

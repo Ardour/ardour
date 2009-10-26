@@ -2203,9 +2203,15 @@ MidiRegionView::nudge_notes (bool forward)
 	nframes64_t unused;
 	nframes64_t distance;
 
-	if ((distance = trackview.editor().get_nudge_distance (ref_point, unused)) == 0) {
+	if (trackview.editor().snap_mode() == Editing::SnapOff) {
+		
+		/* grid is off - use nudge distance */
 
-		/* no nudge distance set - use grid */
+		distance = trackview.editor().get_nudge_distance (ref_point, unused);
+
+	} else {
+
+		/* use grid */
 
 		nframes64_t next_pos = ref_point;
 

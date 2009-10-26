@@ -125,7 +125,7 @@ Editor::split_regions_at (nframes64_t where, RegionSelection& regions)
 	// region boundaries, don't pay attention to them
 
 	if (regions.size() == 1) {
-		switch (snap_type) {
+		switch (_snap_type) {
 		case SnapToRegionStart:
 		case SnapToRegionSync:
 		case SnapToRegionEnd:
@@ -579,7 +579,7 @@ Editor::build_region_boundary_cache ()
 		return;
 	}
 
-	switch (snap_type) {
+	switch (_snap_type) {
 	case SnapToRegionStart:
 		interesting_points.push_back (Start);
 		break;
@@ -594,7 +594,7 @@ Editor::build_region_boundary_cache ()
 		interesting_points.push_back (End);
 		break;
 	default:
-		fatal << string_compose (_("build_region_boundary_cache called with snap_type = %1"), snap_type) << endmsg;
+		fatal << string_compose (_("build_region_boundary_cache called with snap_type = %1"), _snap_type) << endmsg;
 		/*NOTREACHED*/
 		return;
 	}
