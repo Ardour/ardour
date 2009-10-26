@@ -59,7 +59,7 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	_feedback_interval = 10000; // microseconds
 	last_feedback_time = 0;
 
-	auto_binding = FALSE;
+	auto_binding = false;
 
 	Controllable::StartLearning.connect (mem_fun (*this, &GenericMidiControlProtocol::start_learning));
 	Controllable::StopLearning.connect (mem_fun (*this, &GenericMidiControlProtocol::stop_learning));
@@ -290,13 +290,13 @@ GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos,
 void
 GenericMidiControlProtocol::auto_binding_on()
 {
-	auto_binding = TRUE;
+	auto_binding = true;
 }
 
 void
 GenericMidiControlProtocol::auto_binding_off()
 {
-	auto_binding = FALSE;
+	auto_binding = false;
 }
 
 XMLNode&
