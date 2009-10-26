@@ -17,6 +17,7 @@
 
 */
 
+#include <strings.h>
 #include <map>
 #include <vector>
 
@@ -176,7 +177,16 @@ sndfile_major_format(int format)
 			format_info.format = i;
 			sf_command (0, SFC_GET_FORMAT_MAJOR, 
 					&format_info, sizeof (format_info));
-			m[format_info.format & SF_FORMAT_TYPEMASK] = format_info.name;
+
+			/* normalize a couple of names rather than use what libsndfile gives us */
+
+			if (strncasecmp (format_info.name, "OGG", 3) == 0) {
+				m[format_info.format & SF_FORMAT_TYPEMASK] = "Ogg";
+			} else if (strncasecmp (format_info.name, "WAV", 3) == 0) {
+				m[format_info.format & SF_FORMAT_TYPEMASK] = "WAV";
+			} else {
+				m[format_info.format & SF_FORMAT_TYPEMASK] = format_info.name;
+			}
 		}
 	}
 	
