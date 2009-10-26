@@ -109,6 +109,8 @@ class Playlist : public SessionObject,
 	boost::shared_ptr<Playlist> copy (std::list<AudioRange>&, bool result_is_hidden = true);
 	int                         paste (boost::shared_ptr<Playlist>, nframes_t position, float times);
 
+	const RegionList& region_list () const { return regions; }
+
 	RegionList*                regions_at (nframes_t frame);
 	RegionList*                regions_touched (nframes_t start, nframes_t end);
 	RegionList*                regions_to_read (nframes_t start, nframes_t end);

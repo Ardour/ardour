@@ -119,7 +119,7 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 				   on, and remove it from the list we are keeping
 				   around, because we don't need it anymore.
 
-				   if the end of the region (where we want to theoretically resolve notes) 
+				   if the end of the region (where we want to theoretically resolve notes)
 				   is outside the current read range, then just do it at the start
 				   of this read range.
 				*/
@@ -128,7 +128,7 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 				if (resolve_at >= end) {
 					resolve_at = start;
 				}
-				
+
 				tracker_info.push_back (TrackerInfo (t->second, resolve_at));
 				DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("time to resolve & remove tracker for %1 @ %2\n", (*i)->name(), resolve_at));
 				note_cnt += (t->second->on());

@@ -642,6 +642,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void add_source (boost::shared_ptr<Source>);
 	void remove_source (boost::weak_ptr<Source>);
 
+	uint32_t source_use_count (boost::shared_ptr<const Source> src) const;
+
 	struct cleanup_report {
 		std::vector<std::string> paths;
 		int64_t        space;

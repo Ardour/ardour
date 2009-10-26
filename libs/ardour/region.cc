@@ -338,17 +338,6 @@ Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 
 Region::~Region ()
 {
-	boost::shared_ptr<Playlist> pl (playlist());
-
-	if (pl) {
-		for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-			(*i)->remove_playlist (pl);
-		}
-		for (SourceList::const_iterator i = _master_sources.begin(); i != _master_sources.end(); ++i) {
-			(*i)->remove_playlist (pl);
-		}
-	}
-
 	notify_callbacks ();
 	GoingAway (); /* EMIT SIGNAL */
 }
@@ -383,44 +372,7 @@ Region::copy_stuff (boost::shared_ptr<const Region> other, nframes_t /*offset*/,
 void
 Region::set_playlist (boost::weak_ptr<Playlist> wpl)
 {
-	boost::shared_ptr<Playlist> old_playlist = (_playlist.lock());
-
-	boost::shared_ptr<Playlist> pl (wpl.lock());
-
-	if (old_playlist == pl) {
-		return;
-	}
-
-	_playlist = pl;
-
-	if (pl) {
-		if (old_playlist) {
-			for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-				(*i)->remove_playlist (_playlist);
-				(*i)->add_playlist (pl);
-			}
-			for (SourceList::const_iterator i = _master_sources.begin(); i != _master_sources.end(); ++i) {
-				(*i)->remove_playlist (_playlist);
-				(*i)->add_playlist (pl);
-			}
-		} else {
-			for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-				(*i)->add_playlist (pl);
-			}
-			for (SourceList::const_iterator i = _master_sources.begin(); i != _master_sources.end(); ++i) {
-				(*i)->add_playlist (pl);
-			}
-		}
-	} else {
-		if (old_playlist) {
-			for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-				(*i)->remove_playlist (old_playlist);
-			}
-			for (SourceList::const_iterator i = _master_sources.begin(); i != _master_sources.end(); ++i) {
-				(*i)->remove_playlist (old_playlist);
-			}
-		}
-	}
+	_playlist = wpl.lock();
 }
 
 bool
@@ -487,7 +439,7 @@ Region::first_edit ()
 
 	if (_first_edit != EditChangesNothing && pl) {
 
-		_name = pl->session().new_region_name (_name);
+		_name = _session.new_region_name (_name);
 		_first_edit = EditChangesNothing;
 
 		send_change (ARDOUR::NameChanged);
@@ -554,7 +506,7 @@ Region::set_position_lock_style (PositionLockStyle ps)
 	_positional_lock_style = ps;
 
 	if (_positional_lock_style == MusicTime) {
-		pl->session().tempo_map().bbt_time (_position, _bbt_time);
+		_session.tempo_map().bbt_time (_position, _bbt_time);
 	}
 
 }
@@ -568,13 +520,13 @@ Region::update_position_after_tempo_map_change ()
 		return;
 	}
 
-	TempoMap& map (pl->session().tempo_map());
+	TempoMap& map (_session.tempo_map());
 	nframes_t pos = map.frame_time (_bbt_time);
 	set_position_internal (pos, false);
 }
 
 void
-Region::set_position (nframes_t pos, void */*src*/)
+Region::set_position (nframes_t pos, void* /*src*/)
 {
 	if (!can_move()) {
 		return;
@@ -616,7 +568,7 @@ Region::set_position_internal (nframes_t pos, bool allow_bbt_recompute)
 }
 
 void
-Region::set_position_on_top (nframes_t pos, void */*src*/)
+Region::set_position_on_top (nframes_t pos, void* /*src*/)
 {
 	if (_flags & Locked) {
 		return;
@@ -644,15 +596,12 @@ void
 Region::recompute_position_from_lock_style ()
 {
 	if (_positional_lock_style == MusicTime) {
-		boost::shared_ptr<Playlist> pl (playlist());
-		if (pl) {
-			pl->session().tempo_map().bbt_time (_position, _bbt_time);
-		}
+		_session.tempo_map().bbt_time (_position, _bbt_time);
 	}
 }
 
 void
-Region::nudge_position (nframes64_t n, void */*src*/)
+Region::nudge_position (nframes64_t n, void* /*src*/)
 {
 	if (_flags & Locked) {
 		return;
@@ -691,7 +640,7 @@ Region::set_ancestral_data (nframes64_t s, nframes64_t l, float st, float sh)
 }
 
 void
-Region::set_start (nframes_t pos, void */*src*/)
+Region::set_start (nframes_t pos, void* /*src*/)
 {
 	if (_flags & (Locked|PositionLocked)) {
 		return;
@@ -1515,6 +1464,17 @@ Region::source_equivalent (boost::shared_ptr<const Region> other) const
 	return true;
 }
 
+bool
+Region::uses_source (boost::shared_ptr<const Source> source) const
+{
+	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
+		if (*i == source) {
+			return true;
+		}
+	}
+	return false;
+}
+
 sframes_t
 Region::source_length(uint32_t n) const
 {
@@ -1596,7 +1556,7 @@ Region::get_parent() const
 		boost::shared_ptr<Region> r;
 		boost::shared_ptr<Region const> grrr2 = boost::dynamic_pointer_cast<Region const> (shared_from_this());
 
-		if (grrr2 && (r = pl->session().find_whole_file_parent (grrr2))) {
+		if (grrr2 && (r = _session.find_whole_file_parent (grrr2))) {
 			return boost::static_pointer_cast<Region> (r);
 		}
 	}

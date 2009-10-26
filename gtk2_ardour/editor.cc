@@ -2564,7 +2564,7 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 }
 
 void
-Editor::timecode_snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
+Editor::timecode_snap_to_internal (nframes64_t& start, int32_t direction, bool /*for_mark*/)
 {
 	const nframes64_t one_timecode_second = (nframes64_t)(rint(session->timecode_frames_per_second()) * session->frames_per_timecode_frame());
 	nframes64_t one_timecode_minute = (nframes64_t)(rint(session->timecode_frames_per_second()) * session->frames_per_timecode_frame() * 60);

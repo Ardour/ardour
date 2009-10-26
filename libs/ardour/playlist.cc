@@ -505,7 +505,7 @@ Playlist::add_region (boost::shared_ptr<Region> region, nframes_t position, floa
 
 	nframes_t pos = position;
 
-	if(times == 1 && auto_partition){
+	if (times == 1 && auto_partition){
 		partition(pos, (nframes_t) (pos + region->length()), true);
 	}
 

@@ -2305,7 +2305,7 @@ AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 
 	assert (afirst);
 
-	if (afirst->source()->used() > 1) {
+	if (_session.source_use_count (afirst->source()) > 1) {
 		requires_bounce = true;
 		return false;
 	}

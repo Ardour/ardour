@@ -36,7 +36,6 @@
 #include "pbd/pthread_utils.h"
 #include "pbd/enumwriter.h"
 
-#include "ardour/playlist.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
 #include "ardour/transient_detector.h"
@@ -147,52 +146,6 @@ Source::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	return 0;
-}
-
-void
-Source::add_playlist (boost::shared_ptr<Playlist> pl)
-{
-	std::pair<PlaylistMap::iterator,bool> res;
-	std::pair<boost::shared_ptr<Playlist>, uint32_t> newpair (pl, 1);
-	Glib::Mutex::Lock lm (_playlist_lock);
-
-	res = _playlists.insert (newpair);
-
-	if (!res.second) {
-		/* it already existed, bump count */
-		res.first->second++;
-	}
-
-	pl->GoingAway.connect (bind (
-			mem_fun (*this, &Source::remove_playlist),
-			boost::weak_ptr<Playlist> (pl)));
-}
-
-void
-Source::remove_playlist (boost::weak_ptr<Playlist> wpl)
-{
-	boost::shared_ptr<Playlist> pl (wpl.lock());
-
-	if (!pl) {
-		return;
-	}
-
-	PlaylistMap::iterator x;
-	Glib::Mutex::Lock lm (_playlist_lock);
-
-	if ((x = _playlists.find (pl)) != _playlists.end()) {
-		if (x->second > 1) {
-			x->second--;
-		} else {
-			_playlists.erase (x);
-		}
-	}
-}
-
-uint32_t
-Source::used () const
-{
-	return _playlists.size();
 }
 
 bool

@@ -3004,6 +3004,23 @@ Session::remove_source (boost::weak_ptr<Source> src)
 	}
 }
 
+/** Return the number of playlists (not regions) that contain @a src */
+uint32_t
+Session::source_use_count (boost::shared_ptr<const Source> src) const
+{
+	uint32_t count = 0;
+	for (PlaylistList::const_iterator p = playlists.begin(); p != playlists.end(); ++p) {
+		for (Playlist::RegionList::const_iterator r = (*p)->region_list().begin();
+				r != (*p)->region_list().end(); ++r) {
+			if ((*r)->uses_source(src)) {
+				++count;
+				break;
+			}
+		}
+	}
+	return count;
+}
+
 boost::shared_ptr<Source>
 Session::source_by_id (const PBD::ID& id)
 {

@@ -35,7 +35,6 @@
 namespace ARDOUR {
 
 class Session;
-class Playlist;
 
 class Source : public SessionObject, public boost::noncopyable
 {
@@ -77,7 +76,7 @@ class Source : public SessionObject, public boost::noncopyable
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
-	
+
 	bool         destructive() const       { return (_flags & Destructive); }
 	bool         writable () const         { return (_flags & Writable); }
 	virtual bool set_destructive (bool /*yn*/) { return false; }
@@ -85,11 +84,6 @@ class Source : public SessionObject, public boost::noncopyable
 
 	void use ()    { _in_use++; }
 	void disuse () { if (_in_use) { _in_use--; } }
-
-	void add_playlist (boost::shared_ptr<ARDOUR::Playlist>);
-	void remove_playlist (boost::weak_ptr<ARDOUR::Playlist>);
-
-	uint32_t used() const;
 
 	static sigc::signal<void,Source*>             SourceCreated;
 	sigc::signal<void,boost::shared_ptr<Source> > Switched;
@@ -122,9 +116,6 @@ class Source : public SessionObject, public boost::noncopyable
 	mutable Glib::Mutex _lock;
 	mutable Glib::Mutex _analysis_lock;
 	Glib::Mutex         _playlist_lock;
-
-	typedef std::map<boost::shared_ptr<ARDOUR::Playlist>, uint32_t > PlaylistMap;
-	PlaylistMap _playlists;
 
   private:
 	uint32_t _in_use;

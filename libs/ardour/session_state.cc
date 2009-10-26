@@ -2503,7 +2503,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		   capture files.
 		*/
 
-		if (!i->second->used() && i->second->length(i->second->timeline_position()) > 0) {
+		if (!source_use_count(i->second) && i->second->length(i->second->timeline_position()) > 0) {
 			dead_sources.push_back (i->second);
 			i->second->GoingAway();
 		}
