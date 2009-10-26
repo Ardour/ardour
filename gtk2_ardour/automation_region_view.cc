@@ -83,7 +83,6 @@ bool
 AutomationRegionView::canvas_event(GdkEvent* ev)
 {
 	if (ev->type == GDK_BUTTON_RELEASE) {
-
 		const nframes_t when = trackview.editor().pixel_to_frame((nframes_t)ev->button.x)
 			- _region->position();
 		add_automation_event(ev, when, ev->button.y);
@@ -104,7 +103,7 @@ AutomationRegionView::add_automation_event (GdkEvent* /*event*/, nframes_t when,
 	}
 	assert(_line);
 
-	double x = 0;
+	double x = when;
 	AutomationTimeAxisView* const view = automation_view();
 
 	view->canvas_display()->w2i (x, y);
@@ -121,7 +120,7 @@ AutomationRegionView::add_automation_event (GdkEvent* /*event*/, nframes_t when,
 	view->session().begin_reversible_command (_("add automation event"));
 	XMLNode& before = _line->the_list()->get_state();
 
-	_line->the_list()->add (when, y);
+	_line->the_list()->add (x, y);
 
 	XMLNode& after = _line->the_list()->get_state();
 	view->session().commit_reversible_command (new MementoCommand<ARDOUR::AutomationList>(
