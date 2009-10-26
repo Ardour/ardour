@@ -204,6 +204,10 @@ PannerUI::build_astyle_menu ()
 PBD::Controllable* 
 PannerUI::get_controllable() 
 { 
+	if (pan_bars.empty()) {
+		return 0;
+	}
+
 	return pan_bars[0]->get_controllable();
 }
 
