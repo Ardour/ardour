@@ -118,9 +118,9 @@ EventTypeMap::interpolation_of(const Evoral::Parameter& param)
 		case MIDI_CTL_OMNI_ON:
 		case MIDI_CTL_MONO:
 		case MIDI_CTL_POLY:
-			return Evoral::ControlList::Discrete;
-			break;
-		default: return Evoral::ControlList::Linear; break;
+			return Evoral::ControlList::Discrete; break;
+		default:
+			return Evoral::ControlList::Linear; break;
 		}
 		break;
 	case MidiPgmChangeAutomation:       return Evoral::ControlList::Discrete; break;

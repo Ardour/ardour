@@ -535,7 +535,7 @@ AutomationTimeAxisView::build_display_menu ()
 
 	/* mode menu */
 
-	if ( EventTypeMap::instance().is_midi_parameter(_control->parameter()) ) {
+	if (EventTypeMap::instance().is_midi_parameter(_control->parameter())) {
 
 		Menu* auto_mode_menu = manage (new Menu);
 		auto_mode_menu->set_name ("ArdourContextMenu");
@@ -544,17 +544,18 @@ AutomationTimeAxisView::build_display_menu ()
 		RadioMenuItem::Group group;
 
 		am_items.push_back (RadioMenuElem (group, _("Discrete"), bind (
-						mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
-						AutomationList::Discrete)));
+				mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
+				AutomationList::Discrete)));
 		mode_discrete_item = dynamic_cast<CheckMenuItem*>(&am_items.back());
 		mode_discrete_item->set_active(_control->list()->interpolation() == AutomationList::Discrete);
 
-		// For discrete types we dont allow the linear option since it makes no sense for those Controls
+		am_items.push_back (RadioMenuElem (group, _("Linear"), bind (
+				mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
+				AutomationList::Linear)));
+		mode_line_item = dynamic_cast<CheckMenuItem*>(&am_items.back());
+
+		// Set default interpolation type to linear if this isn't a (usually) discrete controller
 		if (EventTypeMap::instance().interpolation_of(_control->parameter()) == Evoral::ControlList::Linear) {
-			am_items.push_back (RadioMenuElem (group, _("Line"), bind (
-							mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
-							AutomationList::Linear)));
-			mode_line_item = dynamic_cast<CheckMenuItem*>(&am_items.back());
 			mode_line_item->set_active(_control->list()->interpolation() == AutomationList::Linear);
 		}
 
