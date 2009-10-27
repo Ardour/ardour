@@ -312,7 +312,7 @@ int main (int argc, char *argv[])
 	fixup_bundle_environment ();
 #endif
 
-        Glib::thread_init();
+	Glib::thread_init();
 	gtk_set_locale ();
 
 #ifdef VST_SUPPORT
