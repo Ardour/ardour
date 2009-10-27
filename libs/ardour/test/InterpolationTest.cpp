@@ -1,5 +1,5 @@
 #include <sigc++/sigc++.h>
-#include "interpolation-test.h"
+#include "InterpolationTest.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( InterpolationTest );
 

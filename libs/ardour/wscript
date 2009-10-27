@@ -318,7 +318,7 @@ def build(bld):
 		testobj.source       = '''
 			interpolation.cc
 			test/BBTTest.cpp
-			test/interpolation-test.cc
+			test/InterpolationTest.cpp
 			test/testrunner.cpp
 		'''
 		testobj.includes     = obj.includes + ['../pbd/']
