@@ -20,6 +20,7 @@
 #ifndef __ardour_bbt_time_h__
 #define __ardour_bbt_time_h__
 
+#include <ostream>
 #include <stdint.h>
 
 namespace ARDOUR {
@@ -49,11 +50,15 @@ struct BBT_Time {
     bool operator== (const BBT_Time& other) const {
 	    return bars == other.bars && beats == other.beats && ticks == other.ticks;
     }
-    
-    static bool add (BBT_Time& target, const BBT_Time& other, const TempoMetric& metric);
-    static bool subtract (BBT_Time& target, const BBT_Time& other, const TempoMetric& metric);
 };
 
+}
+
+inline std::ostream&
+operator<< (std::ostream& o, const ARDOUR::BBT_Time& bbt)
+{
+	o << bbt.bars << '|' << bbt.beats << '|' << bbt.ticks;
+	return o;
 }
 
 #endif /* __ardour_bbt_time_h__ */

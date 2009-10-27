@@ -4,10 +4,15 @@
 #include <cppunit/TestResultCollector.h>
 #include <cppunit/TestRunner.h>
 #include <cppunit/BriefTestProgressListener.h>
+#include "ardour/ardour.h"
 
 int
 main()
 {
+	Glib::thread_init ();
+	PBD::ID::init ();
+	ARDOUR::init (false, false);
+
     CppUnit::TestResult testresult;
 
     CppUnit::TestResultCollector collectedresults;

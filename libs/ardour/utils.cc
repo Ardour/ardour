@@ -111,13 +111,6 @@ string bump_name_once(std::string name)
 
 }
 
-ostream&
-operator<< (ostream& o, const BBT_Time& bbt)
-{
-	o << bbt.bars << '|' << bbt.beats << '|' << bbt.ticks;
-	return o;
-}
-
 XMLNode *
 find_named_node (const XMLNode& node, string name)
 {

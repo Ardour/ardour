@@ -1616,3 +1616,17 @@ TempoMap::insert_time (nframes_t where, nframes_t amount)
 
 	StateChanged (Change (0));
 }
+
+BBT_Time
+TempoMap::bbt_add (const BBT_Time& a, const BBT_Time& b, const TempoMetric& /*metric*/)
+{
+	// FIXME: Obviously not correct!
+	return BBT_Time(a.bars + b.bars, a.beats + b.beats, a.ticks + b.ticks);
+}
+
+BBT_Time
+TempoMap::bbt_subtract (const BBT_Time& a, const BBT_Time& b)
+{
+	// FIXME: Obviously not correct!
+	return BBT_Time(a.bars - b.bars, a.beats - b.beats, a.ticks - b.ticks);
+}

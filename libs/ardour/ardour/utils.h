@@ -37,7 +37,6 @@
 class XMLNode;
 
 Glib::ustring legalize_for_path (Glib::ustring str);
-std::ostream& operator<< (std::ostream& o, const ARDOUR::BBT_Time& bbt);
 XMLNode* find_named_node (const XMLNode& node, std::string name);
 std::string bool_as_string (bool);
 bool string_is_affirmative (const std::string&);

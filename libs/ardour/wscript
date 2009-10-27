@@ -55,7 +55,6 @@ libardour_sources = [
 	'automation.cc',
 	'automation_control.cc',
 	'automation_list.cc',
-	'bbt_time.cc',
 	'beats_frames_converter.cc',
 	'broadcast_info.cc',
 	'buffer.cc',
@@ -316,16 +315,30 @@ def build(bld):
 		# Unit tests
 		testobj              = bld.new_task_gen('cxx', 'program')
 		testobj.source       = '''
-			interpolation.cc
 			test/BBTTest.cpp
 			test/InterpolationTest.cpp
 			test/testrunner.cpp
-		'''
+		'''.split()
 		testobj.includes     = obj.includes + ['../pbd/']
-		testobj.uselib       = 'CPPUNIT SIGCPP JACK GLIBMM SAMPLERATE'
+		testobj.uselib       = 'CPPUNIT SIGCPP JACK GLIBMM SAMPLERATE XML LRDF'
+		testobj.uselib_local = 'libpbd libmidipp libardour'
 		testobj.name         = 'libardour-tests'
 		testobj.target       = 'run-tests'
 		testobj.install_path = ''
+		testobj.cxxflags     = ['-DPACKAGE="libardour3test"']
+		testobj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"']
+		testobj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"']
+		testobj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
+		testobj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
+				os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
+		testobj.cxxflags     += ['-DVAMP_DIR="' + os.path.join(
+				os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"']
+		if bld.env['FPU_OPTIMIZATION']:
+			testobj.source += [ 'sse_functions_xmm.cc' ]
+			if bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686':
+				testobj.source += [ 'sse_functions.s' ]
+			elif bld.env['build_target'] == 'x86_64':
+				testobj.source += [ 'sse_functions_64bit.s' ]
 
 def shutdown():
 	autowaf.shutdown()
