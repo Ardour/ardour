@@ -3184,7 +3184,7 @@ Session::restore_history (string snapshot_name)
 
     /* read xml */
     xmlpath = _path + snapshot_name + ".history";
-    cerr << string_compose(_("Loading history from '%1'."), xmlpath) << endmsg;
+    info << string_compose(_("Loading history from '%1'."), xmlpath) << endmsg;
 
     if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 	    return 1;

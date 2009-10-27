@@ -87,7 +87,7 @@ UI::UI (string namestr, int *argc, char ***argv)
 		       UI::signal_pipe_callback,
 		       this);
 
-	errors = new TextViewer (850,100);
+	errors = new TextViewer (800,300);
 	errors->text().set_editable (false); 
 	errors->text().set_name ("ErrorText");
 
@@ -495,7 +495,7 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 		
 		display_message (prefix, prefix_len, ptag, mtag, str);
 		
-		if (_auto_display_errors) {
+		if (_auto_display_errors && chn != Transmitter::Info) {
 			show_error_log ();
 		}
 	}

@@ -302,7 +302,7 @@ Session::Session (AudioEngine &eng,
 		throw failed_constructor();
 	}
 
-	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (1)" << endl;
+	info << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (1)" << endl;
 
 	n_physical_audio_outputs = _engine.n_physical_audio_outputs();
 	n_physical_audio_inputs =  _engine.n_physical_audio_inputs();
@@ -375,7 +375,7 @@ Session::Session (AudioEngine &eng,
 		throw failed_constructor();
 	}
 
-	cerr << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (2)" << endl;
+	info << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (2)" << endl;
 
 	n_physical_audio_outputs = _engine.n_physical_audio_outputs();
 	n_physical_audio_inputs = _engine.n_physical_audio_inputs();
