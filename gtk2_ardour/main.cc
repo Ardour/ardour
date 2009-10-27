@@ -312,14 +312,16 @@ int main (int argc, char *argv[])
 	fixup_bundle_environment ();
 #endif
 
-	Glib::thread_init();
+	if (!Glib::thread_supported())
+		Glib::thread_init();
+
 	gtk_set_locale ();
 
 #ifdef VST_SUPPORT
-       /* this does some magic that is needed to make GTK and Wine's own
-          X11 client interact properly.
-       */
-       gui_init (&argc, &argv);
+	/* this does some magic that is needed to make GTK and Wine's own
+	   X11 client interact properly.
+	*/
+	gui_init (&argc, &argv);
 #endif
 
 	(void) bindtextdomain (PACKAGE, localedir);
@@ -380,7 +382,7 @@ int main (int argc, char *argv[])
 		cerr << _("Cannot install SIGPIPE error handler") << endl;
 	}
 
-        try {
+	try {
 		ui = new ARDOUR_UI (&argc, &argv);
 	} catch (failed_constructor& err) {
 		error << _("could not create ARDOUR GUI") << endmsg;

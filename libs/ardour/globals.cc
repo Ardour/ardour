@@ -308,6 +308,11 @@ lotsa_files_please ()
 int
 ARDOUR::init (bool use_vst, bool try_optimization)
 {
+	if (!Glib::thread_supported())
+		Glib::thread_init();
+
+	PBD::ID::init ();
+
 	extern void setup_enum_writer ();
 
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);

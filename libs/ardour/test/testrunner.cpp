@@ -9,8 +9,6 @@
 int
 main()
 {
-	Glib::thread_init ();
-	PBD::ID::init ();
 	ARDOUR::init (false, false);
 
     CppUnit::TestResult testresult;

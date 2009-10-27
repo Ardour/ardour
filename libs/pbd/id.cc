@@ -38,7 +38,8 @@ uint64_t ID::_counter = 0;
 void
 ID::init ()
 {
-	counter_lock = new Glib::Mutex;
+	if (!counter_lock)
+		counter_lock = new Glib::Mutex;
 }
 
 ID::ID ()
