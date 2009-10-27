@@ -2432,13 +2432,13 @@ Session::route_solo_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 
 	/* make sure master is never muted by solo */
 
-	if (route != _master_out && _master_out->solo_level() == 0 && !_master_out->soloed()) {
+	if (_master_out && route != _master_out && _master_out->solo_level() == 0 && !_master_out->soloed()) {
 		_master_out->mod_solo_level (1);
 	}
 
 	/* ditto for control outs make sure master is never muted by solo */
 
-	if (route != _control_out && _control_out && _control_out->solo_level() == 0) {
+	if (_control_out && route != _control_out && _control_out && _control_out->solo_level() == 0) {
 		_control_out->mod_solo_level (1);
 	}
 
