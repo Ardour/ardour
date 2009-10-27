@@ -1,16 +1,15 @@
-/* 
- * Copyright(C) 2000-2008 Paul Davis
+/* Copyright(C) 2000-2008 Paul Davis
  * Author: Hans Baier
- * 
+ *
  * Evoral is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation; either version 2 of the License, or(at your option) any later
  * version.
- * 
+ *
  * Evoral is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
@@ -25,38 +24,38 @@
 
 class InterpolationTest : public CppUnit::TestFixture
 {
-    CPPUNIT_TEST_SUITE(InterpolationTest);
-    CPPUNIT_TEST(cubicInterpolationTest);
-    CPPUNIT_TEST(linearInterpolationTest);
-    CPPUNIT_TEST_SUITE_END();
-    
-    #define NUM_SAMPLES 1000000
-    #define INTERVAL 100
-    
-    ARDOUR::Sample  input[NUM_SAMPLES];
-    ARDOUR::Sample output[NUM_SAMPLES];
-    
-    ARDOUR::LinearInterpolation linear;
-    ARDOUR::CubicInterpolation  cubic;
+	CPPUNIT_TEST_SUITE(InterpolationTest);
+	CPPUNIT_TEST(cubicInterpolationTest);
+	CPPUNIT_TEST(linearInterpolationTest);
+	CPPUNIT_TEST_SUITE_END();
 
-    public:
-       	
-        void setUp() {
-            for (int i = 0; i < NUM_SAMPLES; ++i) {
-                if (i % INTERVAL == 0) {
-                    input[i] = 1.0f;
-                } else {
-                    input[i] = 0.0f;
-                }
-                output[i] = 0.0f;
-            }
-            linear.add_channel_to (NUM_SAMPLES, NUM_SAMPLES);
-            cubic.add_channel_to (NUM_SAMPLES, NUM_SAMPLES);
-        }
-        
-        void tearDown() {
-        }
+#define NUM_SAMPLES 1000000
+#define INTERVAL 100
 
-        void linearInterpolationTest();
-        void cubicInterpolationTest();
+	ARDOUR::Sample input[NUM_SAMPLES];
+	ARDOUR::Sample output[NUM_SAMPLES];
+
+	ARDOUR::LinearInterpolation linear;
+	ARDOUR::CubicInterpolation  cubic;
+
+	public:
+
+	void setUp() {
+		for (int i = 0; i < NUM_SAMPLES; ++i) {
+			if (i % INTERVAL == 0) {
+				input[i] = 1.0f;
+			} else {
+				input[i] = 0.0f;
+			}
+			output[i] = 0.0f;
+		}
+		linear.add_channel_to (NUM_SAMPLES, NUM_SAMPLES);
+		cubic.add_channel_to (NUM_SAMPLES, NUM_SAMPLES);
+	}
+
+	void tearDown() {
+	}
+
+	void linearInterpolationTest();
+	void cubicInterpolationTest();
 };
