@@ -79,6 +79,7 @@ class AudioRegionEditor : public RegionEditor
 	Gtk::Label length_label;
 	Gtk::Label sync_label;
 	Gtk::Label start_label;
+	Gtk::Label gain_label;
 	Gtk::Alignment position_alignment;
 	Gtk::Alignment end_alignment;
 	Gtk::Alignment length_alignment;
@@ -90,6 +91,8 @@ class AudioRegionEditor : public RegionEditor
 	AudioClock length_clock;
 	AudioClock sync_offset_clock;
 	AudioClock start_clock;
+	Gtk::Adjustment gain_adjustment;
+	Gtk::SpinButton gain_entry;
 
 	Gtk::HSeparator sep3;
 	Gtk::VSeparator sep1;
@@ -98,6 +101,7 @@ class AudioRegionEditor : public RegionEditor
 	void region_changed (ARDOUR::Change);
 	void bounds_changed (ARDOUR::Change);
 	void name_changed ();
+	void gain_changed ();
 
 	void audition_state_changed (bool);
 
@@ -107,6 +111,7 @@ class AudioRegionEditor : public RegionEditor
 	void position_clock_changed ();
 	void end_clock_changed ();
 	void length_clock_changed ();
+	void gain_adjustment_changed ();
 
 	void audition_button_toggled ();
 

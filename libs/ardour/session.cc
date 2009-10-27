@@ -282,8 +282,6 @@ Session::Session (AudioEngine &eng,
 	  _midi_port (default_midi_port),
 	  pending_events (2048),
 	  state_tree (0),
-	  butler_mixdown_buffer (0),
-	  butler_gain_buffer (0),
 	  _send_smpte_update (false),
 	  midi_thread (pthread_t (0)),
 	  midi_requests (128), // the size of this should match the midi request pool size
@@ -354,8 +352,6 @@ Session::Session (AudioEngine &eng,
 	  _midi_port (default_midi_port),
 	  pending_events (2048),
 	  state_tree (0),
-	  butler_mixdown_buffer (0),
-	  butler_gain_buffer (0),
 	  _send_smpte_update (false),
 	  midi_thread (pthread_t (0)),
 	  midi_requests (16),
@@ -649,9 +645,6 @@ Session::destroy ()
 
 		i = tmp;
 	}
-
-	delete [] butler_mixdown_buffer;
-	delete [] butler_gain_buffer;
 
 	Crossfade::set_buffer_size (0);
 
