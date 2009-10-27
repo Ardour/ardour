@@ -55,6 +55,7 @@ libardour_sources = [
 	'automation.cc',
 	'automation_control.cc',
 	'automation_list.cc',
+	'bbt_time.cc',
 	'beats_frames_converter.cc',
 	'broadcast_info.cc',
 	'buffer.cc',

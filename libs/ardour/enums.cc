@@ -75,7 +75,7 @@ setup_enum_writer ()
 	ShuttleUnits _ShuttleUnits;
 	Session::RecordState _Session_RecordState;
 	Session::Event::Type _Session_Event_Type;
-	SmpteFormat _Session_SmpteFormat;
+	TimecodeFormat _Session_TimecodeFormat;
 	Session::PullupFormat _Session_PullupFormat;
 	AudioRegion::FadeShape _AudioRegion_FadeShape;
 	Panner::LinkDirection _Panner_LinkDirection;
@@ -321,7 +321,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (timecode_30drop);
 	REGISTER_ENUM (timecode_5994);
 	REGISTER_ENUM (timecode_60);
-	REGISTER (_Session_SmpteFormat);
+	REGISTER (_Session_TimecodeFormat);
 
 	REGISTER_CLASS_ENUM (Session, pullup_Plus4Plus1);
 	REGISTER_CLASS_ENUM (Session, pullup_Plus4);

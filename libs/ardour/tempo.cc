@@ -26,6 +26,7 @@
 
 #include <glibmm/thread.h>
 #include "pbd/xml++.h"
+#include "ardour/debug.h"
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
 
@@ -656,7 +657,7 @@ TempoMap::timestamp_metrics (bool use_bbt)
 		for (i = metrics->begin(); i != metrics->end(); ++i) {
 
 			BBT_Time bbt;
-			Metric metric (*meter, *tempo);
+			TempoMetric metric (*meter, *tempo);
 
 			if (prev) {
 				metric.set_start (prev->start());
@@ -713,10 +714,10 @@ TempoMap::timestamp_metrics (bool use_bbt)
 
 }
 
-TempoMap::Metric
+TempoMetric
 TempoMap::metric_at (nframes_t frame) const
 {
-	Metric m (first_meter(), first_tempo());
+	TempoMetric m (first_meter(), first_tempo());
 	const Meter* meter;
 	const Tempo* tempo;
 
@@ -746,10 +747,10 @@ TempoMap::metric_at (nframes_t frame) const
 	return m;
 }
 
-TempoMap::Metric
+TempoMetric
 TempoMap::metric_at (BBT_Time bbt) const
 {
-	Metric m (first_meter(), first_tempo());
+	TempoMetric m (first_meter(), first_tempo());
 	const Meter* meter;
 	const Tempo* tempo;
 
@@ -797,7 +798,7 @@ TempoMap::bbt_time_unlocked (nframes_t frame, BBT_Time& bbt) const
 }
 
 void
-TempoMap::bbt_time_with_metric (nframes_t frame, BBT_Time& bbt, const Metric& metric) const
+TempoMap::bbt_time_with_metric (nframes_t frame, BBT_Time& bbt, const TempoMetric& metric) const
 {
 	nframes_t frame_diff;
 
@@ -853,7 +854,7 @@ TempoMap::count_frames_between ( const BBT_Time& start, const BBT_Time& end) con
 	nframes_t start_frame = 0;
 	nframes_t end_frame = 0;
 
-	Metric m = metric_at (start);
+	TempoMetric m = metric_at (start);
 
 	uint32_t bar_offset = start.bars - m.start().bars;
 
@@ -965,7 +966,7 @@ TempoMap::bbt_duration_at_unlocked (const BBT_Time& when, const BBT_Time& bbt, i
 	result.beats = 1;
 	result.ticks = 0;
 
-	Metric	metric = metric_at(result);
+	TempoMetric	metric = metric_at(result);
 	beats_per_bar = metric.meter().beats_per_bar();
 
 
@@ -1192,13 +1193,15 @@ TempoMap::round_to_beat_subdivision (nframes_t fr, int sub_num, int dir)
 nframes_t
 TempoMap::round_to_type (nframes_t frame, int dir, BBTPointType type)
 {
-	Metric metric = metric_at (frame);
+	TempoMetric metric = metric_at (frame);
 	BBT_Time bbt;
 	BBT_Time start;
 	bbt_time_with_metric (frame, bbt, metric);
 
+
 	switch (type) {
 	case Bar:
+		DEBUG_TRACE(DEBUG::SnapBBT, string_compose ("round from %1 (%3) to bars in direction %2\n", frame, (dir < 0 ? "back" : "forward"), bbt));
 		if (dir < 0) {
 			if (bbt.bars > 1) {
 				bbt.bars--;
@@ -1219,10 +1222,12 @@ TempoMap::round_to_type (nframes_t frame, int dir, BBTPointType type)
 		break;
 
 	case Beat:
+		DEBUG_TRACE(DEBUG::SnapBBT, string_compose ("round from %1 (%3) to beat in direction %2\n", frame, (dir < 0 ? "back" : "forward"), bbt));
 		if (dir < 0) {
 			if (bbt.beats > 1) {
 				bbt.beats--;
-			}
+			} 
+
 		} else if (dir > 0) {
 			if (bbt.ticks > 0) {
 				bbt.beats++;
@@ -1243,12 +1248,7 @@ TempoMap::round_to_type (nframes_t frame, int dir, BBTPointType type)
 
 	}
 
-	/*
-	cerr << "for " << frame << " round to " << bbt << " using "
-	     << metric.start()
-	     << endl;
-	*/
-
+	DEBUG_TRACE(DEBUG::SnapBBT, string_compose ("\tat %1 count frames from %2 to %3 = %4\n", metric.frame(), metric.start(), bbt, count_frames_between (metric.start(), bbt)));
 	return metric.frame() + count_frames_between (metric.start(), bbt);
 }
 
@@ -1471,7 +1471,7 @@ TempoMap::tempo_section_at (nframes_t frame)
 const Tempo&
 TempoMap::tempo_at (nframes_t frame) const
 {
-	Metric m (metric_at (frame));
+	TempoMetric m (metric_at (frame));
 	return m.tempo();
 }
 
@@ -1479,7 +1479,7 @@ TempoMap::tempo_at (nframes_t frame) const
 const Meter&
 TempoMap::meter_at (nframes_t frame) const
 {
-	Metric m (metric_at (frame));
+	TempoMetric m (metric_at (frame));
 	return m.meter();
 }
 

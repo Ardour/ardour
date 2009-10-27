@@ -34,6 +34,8 @@
 #include "control_protocol/timecode.h"
 #include "pbd/id.h"
 
+#include "ardour/bbt_time.h"
+
 #include <map>
 
 #if __GNUC__ < 3
@@ -156,34 +158,7 @@ namespace ARDOUR {
 		TrackColor
 	};
 
-	struct BBT_Time {
-		uint32_t bars;
-		uint32_t beats;
-		uint32_t ticks;
-
-		BBT_Time() {
-			bars = 1;
-			beats = 1;
-			ticks = 0;
-		}
-
-		/* we can't define arithmetic operators for BBT_Time, because
-		   the results depend on a TempoMap, but we can define
-		   a useful check on the less-than condition.
-		   */
-
-		bool operator< (const BBT_Time& other) const {
-			return bars < other.bars ||
-				(bars == other.bars && beats < other.beats) ||
-				(bars == other.bars && beats == other.beats && ticks < other.ticks);
-		}
-
-		bool operator== (const BBT_Time& other) const {
-			return bars == other.bars && beats == other.beats && ticks == other.ticks;
-		}
-
-	};
-	enum SmpteFormat {
+	enum TimecodeFormat {
 		timecode_23976,
 		timecode_24,
 		timecode_24976,
@@ -467,7 +442,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::CrossfadeModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::SlaveSource& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleBehaviour& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleUnits& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::SmpteFormat& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::TimecodeFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::DenormalModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::WaveformScale& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::WaveformShape& sf);

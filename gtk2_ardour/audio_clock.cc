@@ -673,7 +673,7 @@ AudioClock::set_bbt (nframes_t when, bool force)
 			pos = bbt_reference_time;
 		}
 
-		TempoMap::Metric m (session->tempo_map().metric_at (pos));
+		TempoMetric m (session->tempo_map().metric_at (pos));
 
 		sprintf (buf, "%-5.2f", m.tempo().beats_per_minute());
 		if (bbt_lower_info_label->get_text() != buf) {

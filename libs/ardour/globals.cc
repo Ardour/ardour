@@ -637,7 +637,7 @@ std::istream& operator>>(std::istream& o, CrossfadeModel& var) { return int_to_t
 std::istream& operator>>(std::istream& o, SlaveSource& var) { return int_to_type<SlaveSource> (o, var); }
 std::istream& operator>>(std::istream& o, ShuttleBehaviour& var) { return int_to_type<ShuttleBehaviour> (o, var); }
 std::istream& operator>>(std::istream& o, ShuttleUnits& var) { return int_to_type<ShuttleUnits> (o, var); }
-std::istream& operator>>(std::istream& o, SmpteFormat& var) { return int_to_type<SmpteFormat> (o, var); }
+std::istream& operator>>(std::istream& o, TimecodeFormat& var) { return int_to_type<TimecodeFormat> (o, var); }
 std::istream& operator>>(std::istream& o, DenormalModel& var) { return int_to_type<DenormalModel> (o, var); }
 std::istream& operator>>(std::istream& o, WaveformScale& var) { return int_to_type<WaveformScale> (o, var); }
 std::istream& operator>>(std::istream& o, WaveformShape& var) { return int_to_type<WaveformShape> (o, var); }

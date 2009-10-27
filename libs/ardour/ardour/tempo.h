@@ -140,6 +140,30 @@ class TempoSection : public MetricSection, public Tempo {
 
 typedef std::list<MetricSection*> Metrics;
 
+/** Helper class that we use to be able to keep track of which
+    meter *AND* tempo are in effect at a given point in time.
+*/
+class TempoMetric {
+  public:
+	TempoMetric (const Meter& m, const Tempo& t) : _meter (&m), _tempo (&t), _frame (0) {}
+	
+	void set_tempo (const Tempo& t)    { _tempo = &t; }
+	void set_meter (const Meter& m)    { _meter = &m; }
+	void set_frame (nframes_t f)       { _frame = f; }
+	void set_start (const BBT_Time& t) { _start = t; }
+	
+	const Meter&    meter() const { return *_meter; }
+	const Tempo&    tempo() const { return *_tempo; }
+	nframes_t       frame() const { return _frame; }
+	const BBT_Time& start() const { return _start; }
+	
+  private:
+	const Meter*   _meter;
+	const Tempo*   _tempo;
+	nframes_t      _frame;
+	BBT_Time       _start;
+};
+
 class TempoMap : public PBD::StatefulDestructible
 {
   public:
@@ -217,33 +241,9 @@ class TempoMap : public PBD::StatefulDestructible
 	void dump (std::ostream&) const;
 	void clear ();
 
-	/** Helper class that we use to be able to keep track of which
-	    meter *AND* tempo are in effect at a given point in time.
-	*/
-	class Metric {
-	  public:
-		Metric (const Meter& m, const Tempo& t) : _meter (&m), _tempo (&t), _frame (0) {}
-
-		void set_tempo (const Tempo& t)    { _tempo = &t; }
-		void set_meter (const Meter& m)    { _meter = &m; }
-		void set_frame (nframes_t f)       { _frame = f; }
-		void set_start (const BBT_Time& t) { _start = t; }
-
-		const Meter&    meter() const { return *_meter; }
-		const Tempo&    tempo() const { return *_tempo; }
-		nframes_t       frame() const { return _frame; }
-		const BBT_Time& start() const { return _start; }
-
-	  private:
-		const Meter*   _meter;
-		const Tempo*   _tempo;
-		nframes_t      _frame;
-		BBT_Time       _start;
-	};
-
-	Metric metric_at (BBT_Time bbt) const;
-	Metric metric_at (nframes_t) const;
-	void bbt_time_with_metric (nframes_t, BBT_Time&, const Metric&) const;
+	TempoMetric metric_at (BBT_Time bbt) const;
+	TempoMetric metric_at (nframes_t) const;
+	void bbt_time_with_metric (nframes_t, BBT_Time&, const TempoMetric&) const;
 
 	void change_existing_tempo_at (nframes_t, double bpm, double note_type);
 	void change_initial_tempo (double bpm, double note_type);

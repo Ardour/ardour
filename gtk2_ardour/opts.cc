@@ -81,6 +81,7 @@ list_debug_options ()
 	cerr << "\tMidiSourceIO\n";
 	cerr << "\tMidiPlaylistIO\n";
 	cerr << "\tMidiDiskstreamIO\n";
+	cerr << "\tSnapBBT\n";
 }
 
 static int
@@ -108,12 +109,12 @@ parse_debug_options (const char* str)
 
 		if (strcasecmp (p, "midisourceio") == 0) {
 			bits |= ARDOUR::DEBUG::MidiSourceIO;
-		}
-		if (strcasecmp (p, "midiplaylistio") == 0) {
+		} else if (strcasecmp (p, "midiplaylistio") == 0) {
 			bits |= ARDOUR::DEBUG::MidiPlaylistIO;
-		}
-		if (strcasecmp (p, "mididiskstreamio") == 0) {
+		} else if (strcasecmp (p, "mididiskstreamio") == 0) {
 			bits |= ARDOUR::DEBUG::MidiDiskstreamIO;
+		} else if (strcasecmp (p, "snapbbt") == 0) {
+			bits |= ARDOUR::DEBUG::SnapBBT;
 		}
 
 		p = strtok_r (0, ",", &sp);

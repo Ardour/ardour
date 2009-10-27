@@ -501,7 +501,7 @@ Session::jack_timebase_callback (jack_transport_state_t /*state*/,
 
 	if (_tempo_map) {
 
-		TempoMap::Metric metric (_tempo_map->metric_at (_transport_frame));
+		TempoMetric metric (_tempo_map->metric_at (_transport_frame));
 		_tempo_map->bbt_time_with_metric (_transport_frame, bbt, metric);
 
 		pos->bar = bbt.bars;

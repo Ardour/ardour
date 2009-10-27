@@ -222,7 +222,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Sync"), spf);
 
-	ComboOption<SmpteFormat>* smf = new ComboOption<SmpteFormat> (
+	ComboOption<TimecodeFormat>* smf = new ComboOption<TimecodeFormat> (
 		"timecode-format",
 		_("Timecode frames-per-second"),
 		mem_fun (*_session_config, &SessionConfiguration::get_timecode_format),
