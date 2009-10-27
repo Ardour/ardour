@@ -312,20 +312,20 @@ def build(bld):
 			lang = os.path.basename (mo).replace ('.mo', '')
 			bld.install_as (os.path.join (bld.env['PREFIX'], 'share', 'locale', lang, 'LC_MESSAGES', APPNAME + '.mo'), mo)
 
-	if bld.env['HAVE_CPPUNIT']:
+	if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
 		# Unit tests
 		testobj              = bld.new_task_gen('cxx', 'program')
 		testobj.source       = '''
 			interpolation.cc
-			tests/interpolation-test.cc
-			tests/testrunner.cpp
+			test/BBTTest.cpp
+			test/interpolation-test.cc
+			test/testrunner.cpp
 		'''
 		testobj.includes     = obj.includes + ['../pbd/']
 		testobj.uselib       = 'CPPUNIT SIGCPP JACK GLIBMM SAMPLERATE'
 		testobj.name         = 'libardour-tests'
 		testobj.target       = 'run-tests'
 		testobj.install_path = ''
-
 
 def shutdown():
 	autowaf.shutdown()
