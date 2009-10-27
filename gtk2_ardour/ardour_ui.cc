@@ -3152,7 +3152,6 @@ ARDOUR_UI::write_buffer_stats ()
 	fout.close ();
 
 	cerr << "Ardour buffering statistics can be found in: " << path << endl;
-	free (path);
 }
 
 void
