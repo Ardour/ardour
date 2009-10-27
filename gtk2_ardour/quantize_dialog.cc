@@ -17,6 +17,7 @@
 
 */
 
+#include <gtkmm/stock.h>
 #include "gtkmm2ext/utils.h"
 
 #include "quantize_dialog.h"
@@ -147,6 +148,9 @@ QuantizeDialog::QuantizeDialog (PublicEditor& e)
 
 	snap_start_button.set_active (true);
 	snap_end_button.set_active (false);
+
+	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	add_button (Stock::OK, RESPONSE_OK);
 }
 
 QuantizeDialog::~QuantizeDialog()

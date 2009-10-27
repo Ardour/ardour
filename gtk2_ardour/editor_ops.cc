@@ -4848,15 +4848,17 @@ Editor::quantize_region ()
 	QuantizeDialog* qd = new QuantizeDialog (*this);
 
 	qd->present ();
-	qd->run ();
+	const int r = qd->run ();
 	qd->hide ();
 
-	Quantize quant (*session, Plain,
-			qd->snap_start(), qd->snap_end(),
-			qd->start_grid_size(), qd->end_grid_size(),
-			qd->strength(), qd->swing(), qd->threshold());
+	if (r == Gtk::RESPONSE_OK) {
+		Quantize quant (*session, Plain,
+				qd->snap_start(), qd->snap_end(),
+				qd->start_grid_size(), qd->end_grid_size(),
+				qd->strength(), qd->swing(), qd->threshold());
 
-	apply_midi_note_edit_op (quant);
+		apply_midi_note_edit_op (quant);
+	}
 }
 
 void
