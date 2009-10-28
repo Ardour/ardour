@@ -82,9 +82,6 @@ class Source : public SessionObject, public boost::noncopyable
 	virtual bool set_destructive (bool /*yn*/) { return false; }
 	virtual bool length_mutable() const    { return false; }
 
-	void use ()    { _in_use++; }
-	void disuse () { if (_in_use) { _in_use--; } }
-
 	static sigc::signal<void,Source*>             SourceCreated;
 	sigc::signal<void,boost::shared_ptr<Source> > Switched;
 
@@ -118,7 +115,6 @@ class Source : public SessionObject, public boost::noncopyable
 	Glib::Mutex         _playlist_lock;
 
   private:
-	uint32_t _in_use;
 	void fix_writable_flags ();
 };
 

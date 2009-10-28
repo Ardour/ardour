@@ -53,7 +53,6 @@ Source::Source (Session& s, DataType type, const string& name, Flag flags)
 {
 	_analysed = false;
 	_timestamp = 0;
-	_in_use = 0;
 	fix_writable_flags ();
 }
 
@@ -65,7 +64,6 @@ Source::Source (Session& s, const XMLNode& node)
 {
 	_timestamp = 0;
 	_analysed = false;
-	_in_use = 0;
 
 	if (set_state (node, Stateful::loading_state_version) || _type == DataType::NIL) {
 		throw failed_constructor();
