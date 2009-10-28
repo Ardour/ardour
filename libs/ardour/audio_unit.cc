@@ -1472,11 +1472,12 @@ AUPlugin::has_editor () const
 AUPluginInfo::AUPluginInfo (boost::shared_ptr<CAComponentDescription> d)
 	: descriptor (d)
 {
-
+	type = ARDOUR::AudioUnit;
 }
 
 AUPluginInfo::~AUPluginInfo ()
 {
+	type = ARDOUR::AudioUnit;
 }
 
 PluginPtr

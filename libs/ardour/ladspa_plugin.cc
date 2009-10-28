@@ -669,3 +669,9 @@ LadspaPluginInfo::load (Session& session)
 		return PluginPtr ((Plugin*) 0);
 	}	
 }
+
+
+LadspaPluginInfo::LadspaPluginInfo()
+{
+	type = ARDOUR::LADSPA;
+}

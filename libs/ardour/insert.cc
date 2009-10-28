@@ -850,38 +850,7 @@ PluginInsert::latency()
 ARDOUR::PluginType
 PluginInsert::type ()
 {
-	boost::shared_ptr<LadspaPlugin> lp;
-#ifdef VST_SUPPORT
-	boost::shared_ptr<VSTPlugin> vp;
-#endif
-#ifdef HAVE_AUDIOUNITS
-	boost::shared_ptr<AUPlugin> ap;
-#endif
-#ifdef HAVE_LV2
-	boost::shared_ptr<LV2Plugin> lv2p;
-#endif
-	
-	PluginPtr other = plugin ();
-
-	if ((lp = boost::dynamic_pointer_cast<LadspaPlugin> (other)) != 0) {
-		return ARDOUR::LADSPA;
-#ifdef VST_SUPPORT
-	} else if ((vp = boost::dynamic_pointer_cast<VSTPlugin> (other)) != 0) {
-		return ARDOUR::VST;
-#endif
-#ifdef HAVE_AUDIOUNITS
-	} else if ((ap = boost::dynamic_pointer_cast<AUPlugin> (other)) != 0) {
-		return ARDOUR::AudioUnit;
-#endif
-#ifdef HAVE_LV2
-	} else if ((lv2p = boost::dynamic_pointer_cast<LV2Plugin> (other)) != 0) {
-		return ARDOUR::LV2;
-#endif
-	} else {
-		error << "Unknown plugin type" << endmsg;
-		/* NOT REACHED */
-		return (ARDOUR::PluginType) 0;
-	}
+	return plugin()->get_info()->type;
 }
 
 /***************************************************************
