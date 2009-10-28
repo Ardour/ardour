@@ -155,9 +155,7 @@ Session::realtime_stop (bool abort)
 		   past that point to pick up delayed input.
 		*/
 
-#ifndef LEAVE_TRANSPORT_UNADJUSTED
 		decrement_transport_position (_worst_output_latency);
-#endif
 
 		/* the duration change is not guaranteed to have happened, but is likely */
 
@@ -424,23 +422,22 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 			}
 		}
 
-#ifdef LEAVE_TRANSPORT_UNADJUSTED
-		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-			if (!(*i)->hidden()) {
-				(*i)->non_realtime_locate (_transport_frame);
-			}
-			if (on_entry != g_atomic_int_get (&_butler->should_do_transport_work)) {
-				finished = false;
-				/* we will be back */
-				return;
-			}
-		}
-#endif
 	}
 
-        have_looped = false;
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+		if (!(*i)->hidden()) {
+			(*i)->non_realtime_locate (_transport_frame);
+		}
+		if (on_entry != g_atomic_int_get (&_butler->should_do_transport_work)) {
+			finished = false;
+			/* we will be back */
+			return;
+		}
+	}
 
-        send_full_time_code (0);
+	have_looped = false;
+
+	send_full_time_code (0);
 	deliver_mmc (MIDI::MachineControl::cmdStop, 0);
 	deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
 
