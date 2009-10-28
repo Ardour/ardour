@@ -17,7 +17,12 @@
 
 */
 
+#include <iostream>
+
+#include "pbd/compose.h"
+
 #include "ardour/configuration.h"
+#include "ardour/debug.h"
 
 using namespace ARDOUR;
 using namespace std;
@@ -31,13 +36,11 @@ Configuration::~Configuration ()
 {
 }
 
-bool ConfigVariableBase::show_stores = false;
-
 void
 ConfigVariableBase::add_to_node (XMLNode& node)
 {
-	std::string const v = get_as_string ();
-	show_stored_value (v);
+	const std::string v = get_as_string ();
+	DEBUG_TRACE (DEBUG::Configuration, string_compose ("Config variable %1 stored as [%2]\n", _name, v));
 	XMLNode* child = new XMLNode ("Option");
 	child->add_property ("name", _name);
 	child->add_property ("value", v);
@@ -99,21 +102,6 @@ ConfigVariableBase::set_from_node (XMLNode const & node)
 	}
 
 	return false;
-}
-
-
-void
-ConfigVariableBase::set_show_stored_values (bool yn)
-{
-	show_stores = yn;
-}
-
-void
-ConfigVariableBase::show_stored_value (const string& str)
-{
-	if (show_stores) {
-		cerr << "Config variable " << _name << " stored as " << str << endl;
-	}
 }
 
 void

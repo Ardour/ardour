@@ -3009,36 +3009,38 @@ ARDOUR_UI::push_buffer_stats (uint32_t capture, uint32_t playback)
 void
 ARDOUR_UI::write_buffer_stats ()
 {
+
+	std::ofstream fout;
 	struct tm tm;
 	char buf[64];
+	char path[PATH_MAX+1];	int fd;
 
-	char* tmplt = (char*)calloc(strlen("ardourXXXXXX"), sizeof(char));
-	int fd = mkstemp (tmplt);
-	if (fd) {
+	strcpy (path, "ardourBufferingXXXXXX");
+
+	if ((fd = mkstemp (path )) < 0) {
 		cerr << X_("cannot find temporary name for ardour buffer stats") << endl;
 		return;
 	}
+	
+	fout.open (path);
+	close (fd);
 
-	FILE* fout = fdopen (fd, "w");
 	if (!fout) {
-		cerr << string_compose (X_("cannot open file %1 for ardour buffer stats"), tmplt) << endl;
+		cerr << string_compose (X_("cannot open file %1 for ardour buffer stats"), path) << endl;
 		return;
 	}
 
 	for (list<DiskBufferStat>::iterator i = disk_buffer_stats.begin(); i != disk_buffer_stats.end(); ++i) {
-		std::ostringstream ss;
 		localtime_r (&(*i).when, &tm);
 		strftime (buf, sizeof (buf), "%T", &tm);
-		fprintf(fout, "%s %u %u\n", buf, (*i).capture, (*i).playback);
+		fout << buf << ' ' << (*i).capture << ' ' << (*i).playback << endl;
 	}
-
+	
 	disk_buffer_stats.clear ();
 
-	fclose (fout);
-	close (fd);
+	fout.close ();
 
-	cerr << "Ardour buffering statistics can be found in: " << tmplt << endl;
-	free (tmplt);
+	cerr << "Ardour buffering statistics can be found in: " << path << endl;
 }
 
 void

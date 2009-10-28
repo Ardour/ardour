@@ -38,7 +38,8 @@ namespace ARDOUR {
 			MidiSourceIO = 0x1,
 			MidiPlaylistIO = 0x2,
 			MidiDiskstreamIO = 0x4,
-			SnapBBT = 0x8
+			SnapBBT = 0x8,
+			Configuration = 0x10
 		};
 	}
 

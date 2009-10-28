@@ -60,7 +60,7 @@ Glib::ustring path_expand (Glib::ustring);
 Glib::ustring region_name_from_path (Glib::ustring path, bool strip_channels, bool add_channel_suffix = false, uint32_t total = 0, uint32_t this_one = 0);
 bool path_is_paired (Glib::ustring path, Glib::ustring& pair_base);
 
-void compute_equal_power_fades (nframes_t nframes, float* in, float* out);
+void compute_equal_power_fades (ARDOUR::nframes_t nframes, float* in, float* out);
 
 const char* slave_source_to_string (ARDOUR::SlaveSource src);
 ARDOUR::SlaveSource string_to_slave_source (std::string str);

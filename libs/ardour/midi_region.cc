@@ -47,6 +47,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 /** Basic MidiRegion constructor (one channel) */
 MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, nframes_t start, nframes_t length)

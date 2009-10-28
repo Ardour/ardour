@@ -24,6 +24,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 SessionConfiguration::SessionConfiguration ()
 	:

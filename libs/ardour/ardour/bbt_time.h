@@ -25,8 +25,6 @@
 
 namespace ARDOUR {
 
-class TempoMetric;
-
 struct BBT_Time {
     uint32_t bars;
     uint32_t beats;

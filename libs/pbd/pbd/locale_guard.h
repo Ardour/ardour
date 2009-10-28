@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis
+    Copyright (C) 2002-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,20 +17,17 @@
 
 */
 
-#ifndef __ardour_peak_h__
-#define __ardour_peak_h__
+#ifndef __pbd_locale_guard__
+#define __pbd_locale_guard__
 
-#include <cmath>
-#include "ardour/types.h"
-#include "ardour/utils.h"
+namespace PBD {
 
-static inline float
-default_compute_peak (const ARDOUR::Sample * const buf, ARDOUR::nframes_t nsamples, float current)
-{
-	for (ARDOUR::nframes_t i = 0; i < nsamples; ++i) {
-		current = f_max (current, fabsf (buf[i]));
-	}
-	return current;
+struct LocaleGuard {
+    LocaleGuard (const char*);
+    ~LocaleGuard ();
+    const char* old;
+};
+
 }
 
-#endif /* __ardour_peak_h__ */
+#endif /* __pbd_locale_guard__ */

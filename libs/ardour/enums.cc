@@ -111,6 +111,9 @@ setup_enum_writer ()
 	IO::Direction _IO_Direction;
 	MuteMaster::MutePoint _MuteMaster_MutePoint;
 	MidiModel::DiffCommand::Property _MidiModel_DiffCommand_Property;
+	WaveformScale _WaveformScale;
+	WaveformShape _WaveformShape;
+	QuantizeType _QuantizeType;
 
 #define REGISTER(e) enum_writer->register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer->register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -531,4 +534,230 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (MidiModel::DiffCommand, StartTime);
 	REGISTER_CLASS_ENUM (MidiModel::DiffCommand, Length);
 	REGISTER (_MidiModel_DiffCommand_Property);
+
+	REGISTER_ENUM(Linear);
+	REGISTER_ENUM(Logarithmic);
+	REGISTER(_WaveformScale);
+
+	REGISTER_ENUM(Traditional);
+	REGISTER_ENUM(Rectified);
+	REGISTER(_WaveformShape);
+
+	REGISTER_ENUM(Plain);
+	REGISTER_ENUM(Legato);
+	REGISTER_ENUM(Groove);
+	REGISTER(_QuantizeType);
+
+}
+
+/* deserializing types from ardour/types.h */
+
+std::istream& operator>>(std::istream& o, HeaderFormat& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (HeaderFormat) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const HeaderFormat& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
+std::istream& operator>>(std::istream& o, SampleFormat& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (SampleFormat) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const SampleFormat& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+std::istream& operator>>(std::istream& o, AutoConnectOption& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (AutoConnectOption) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const AutoConnectOption& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+std::istream& operator>>(std::istream& o, MonitorModel& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (MonitorModel) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const MonitorModel& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+std::istream& operator>>(std::istream& o, RemoteModel& var) 
+{
+	std::string s;
+	o >> s;
+	var = (RemoteModel) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const RemoteModel& var) 
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+std::istream& operator>>(std::istream& o, EditMode& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (EditMode) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const EditMode& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+std::istream& operator>>(std::istream& o, ListenPosition& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (ListenPosition) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const ListenPosition& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+std::istream& operator>>(std::istream& o, LayerModel& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (LayerModel) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const LayerModel& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+std::istream& operator>>(std::istream& o, CrossfadeModel& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (CrossfadeModel) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const CrossfadeModel& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+std::istream& operator>>(std::istream& o, SlaveSource& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (SlaveSource) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const SlaveSource& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+std::istream& operator>>(std::istream& o, ShuttleBehaviour& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (ShuttleBehaviour) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const ShuttleBehaviour& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+std::istream& operator>>(std::istream& o, ShuttleUnits& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (ShuttleUnits) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const ShuttleUnits& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+std::istream& operator>>(std::istream& o, TimecodeFormat& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (TimecodeFormat) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const TimecodeFormat& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+std::istream& operator>>(std::istream& o, DenormalModel& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (DenormalModel) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const DenormalModel& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+std::istream& operator>>(std::istream& o, WaveformScale& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (WaveformScale) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const WaveformScale& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+std::istream& operator>>(std::istream& o, WaveformShape& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (WaveformShape) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const WaveformShape& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
 }

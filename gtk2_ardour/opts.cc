@@ -77,11 +77,12 @@ print_help (const char *execname)
 static void
 list_debug_options ()
 {
-	cerr << _("The following debug options are available. Separate multipe options with commas. Names are case-insensitive.") << "\n\n";
+	cerr << _("The following debug options are available. Separate multipe options with commas.\nNames are case-insensitive and can be abbreviated.") << "\n\n";
 	cerr << "\tMidiSourceIO\n";
 	cerr << "\tMidiPlaylistIO\n";
 	cerr << "\tMidiDiskstreamIO\n";
 	cerr << "\tSnapBBT\n";
+	cerr << "\tConfiguration\n";
 }
 
 static int
@@ -107,14 +108,16 @@ parse_debug_options (const char* str)
 			return 0;
 		}
 
-		if (strcasecmp (p, "midisourceio") == 0) {
+		if (strncasecmp (p, "midisourceio", strlen (p)) == 0) {
 			bits |= ARDOUR::DEBUG::MidiSourceIO;
-		} else if (strcasecmp (p, "midiplaylistio") == 0) {
+		} else if (strncasecmp (p, "midiplaylistio", strlen (p)) == 0) {
 			bits |= ARDOUR::DEBUG::MidiPlaylistIO;
-		} else if (strcasecmp (p, "mididiskstreamio") == 0) {
+		} else if (strncasecmp (p, "mididiskstreamio", strlen (p)) == 0) {
 			bits |= ARDOUR::DEBUG::MidiDiskstreamIO;
-		} else if (strcasecmp (p, "snapbbt") == 0) {
+		} else if (strncasecmp (p, "snapbbt", strlen (p)) == 0) {
 			bits |= ARDOUR::DEBUG::SnapBBT;
+		} else if (strncasecmp (p, "configuration", strlen (p)) == 0) {
+			bits |= ARDOUR::DEBUG::Configuration;
 		}
 
 		p = strtok_r (0, ",", &sp);

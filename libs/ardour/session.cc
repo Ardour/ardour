@@ -74,6 +74,7 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/port_insert.h"
 #include "ardour/processor.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/recent_sessions.h"
 #include "ardour/region_factory.h"
 #include "ardour/return.h"

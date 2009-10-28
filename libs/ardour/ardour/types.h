@@ -39,15 +39,8 @@
 #include <map>
 
 #if __GNUC__ < 3
-
 typedef int intptr_t;
 #endif
-
-/* eventually, we'd like everything (including JACK) to
-   move to this. for now, its a dedicated type.
-*/
-
-typedef int64_t                    nframes64_t;
 
 namespace ARDOUR {
 
@@ -61,6 +54,8 @@ namespace ARDOUR {
 	typedef uint32_t                    layer_t;
 	typedef uint64_t                    microseconds_t;
 	typedef uint32_t                    nframes_t;
+	typedef int64_t                     nframes64_t;
+
 
 	/** "Session frames", frames relative to the session timeline.
 	 * Everything related to transport position etc. should be of this type.
@@ -430,6 +425,11 @@ namespace ARDOUR {
 
 } // namespace ARDOUR
 
+
+/* these cover types declared above in this header. See enums.cc
+   for the definitions.
+*/
+
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::AutoConnectOption& sf);
@@ -447,19 +447,39 @@ std::istream& operator>>(std::istream& o, ARDOUR::DenormalModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::WaveformScale& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::WaveformShape& sf);
 
+std::ostream& operator<<(std::ostream& o, const ARDOUR::SampleFormat& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::HeaderFormat& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::AutoConnectOption& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::EditMode& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::MonitorModel& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::RemoteModel& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::ListenPosition& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::LayerModel& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::CrossfadeModel& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::SlaveSource& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::ShuttleBehaviour& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::ShuttleUnits& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::TimecodeFormat& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::DenormalModel& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformScale& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformShape& sf);
+
+static inline ARDOUR::nframes64_t
+session_frame_to_track_frame (ARDOUR::nframes64_t session_frame, double speed)
+{
+	return (ARDOUR::nframes64_t)( (double)session_frame * speed );
+}
+
+static inline ARDOUR::nframes64_t
+track_frame_to_session_frame (ARDOUR::nframes64_t track_frame, double speed)
+{
+	return (ARDOUR::nframes64_t)( (double)track_frame / speed );
+}
+
+/* for now, break the rules and use "using" to make these "global" */
+
 using ARDOUR::nframes_t;
-
-static inline nframes_t
-session_frame_to_track_frame (nframes_t session_frame, double speed)
-{
-	return (nframes_t)( (double)session_frame * speed );
-}
-
-static inline nframes_t
-track_frame_to_session_frame (nframes_t track_frame, double speed)
-{
-	return (nframes_t)( (double)track_frame / speed );
-}
+using ARDOUR::nframes64_t;
 
 
 #endif /* __ardour_types_h__ */

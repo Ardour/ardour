@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999 Paul Davis
+    Copyright (C) 1999-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,10 +28,11 @@
 
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
+#include "pbd/locale_guard.h"
 
 #include "ardour/types.h"
 
-// #include <jack/jack.h> need this to inline jack_get_microseconds
+#include <jack/jack.h> 
 
 namespace MIDI {
 	class MachineControl;
@@ -56,13 +57,10 @@ namespace ARDOUR {
 
 	const layer_t max_layer = UCHAR_MAX;
 
-	microseconds_t get_microseconds ();
-/*	{
-        JACK has exported this functionality for a long time now
-	but inlining this causes problems
-        return (microseconds_t) jack_get_time();
+	static inline microseconds_t get_microseconds () {
+		return (microseconds_t) jack_get_time();
 	}
-*/
+
 	Change new_change ();
 
 	extern Change StartChanged;
@@ -70,12 +68,6 @@ namespace ARDOUR {
 	extern Change PositionChanged;
 	extern Change NameChanged;
 	extern Change BoundsChanged;
-
-	struct LocaleGuard {
-		LocaleGuard (const char*);
-		~LocaleGuard ();
-		const char* old;
-	};
 
 	static const double SHUTTLE_FRACT_SPEED1=0.48412291827; /* derived from A1,A2 */
 

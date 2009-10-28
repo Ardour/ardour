@@ -20,11 +20,11 @@
 #ifndef __ardour_configuration_variable_h__
 #define __ardour_configuration_variable_h__
 
-#include <sstream>
-#include <ostream>
 #include <iostream>
+#include <sstream>
 
 #include "pbd/xml++.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 
@@ -41,13 +41,8 @@ class ConfigVariableBase {
 	virtual std::string get_as_string () const = 0;
 	virtual void set_from_string (std::string const &) = 0;
 
-	void show_stored_value (const std::string&);
-
-	static void set_show_stored_values (bool);
-
   protected:
 	std::string _name;
-	static bool show_stores;
 
 	void notify ();
 	void miss ();
@@ -66,7 +61,7 @@ class ConfigVariable : public ConfigVariableBase
 	}
 
 	std::string get_as_string () const {
-		std::stringstream ss;
+		std::ostringstream ss;
 		ss << value;
 		return ss.str ();
 	}

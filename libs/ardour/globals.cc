@@ -28,7 +28,6 @@
 #include <sys/resource.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <locale.h>
 #include <errno.h>
 
 #ifdef VST_SUPPORT
@@ -53,6 +52,7 @@
 #include "pbd/strsplit.h"
 #include "pbd/fpu.h"
 #include "pbd/file_utils.h"
+#include "pbd/enumwriter.h"
 
 #include "midi++/port.h"
 #include "midi++/manager.h"
@@ -401,13 +401,6 @@ ARDOUR::cleanup ()
 	return 0;
 }
 
-
-microseconds_t
-ARDOUR::get_microseconds ()
-{
-	return (microseconds_t) jack_get_time ();
-}
-
 ARDOUR::Change
 ARDOUR::new_change ()
 {
@@ -466,20 +459,6 @@ bool
 ARDOUR::no_auto_connect()
 {
 	return getenv ("ARDOUR_NO_AUTOCONNECT") != 0;
-}
-
-ARDOUR::LocaleGuard::LocaleGuard (const char* str)
-{
-	old = strdup (setlocale (LC_NUMERIC, NULL));
-	if (strcmp (old, str)) {
-		setlocale (LC_NUMERIC, str);
-	}
-}
-
-ARDOUR::LocaleGuard::~LocaleGuard ()
-{
-	setlocale (LC_NUMERIC, old);
-	free ((char*)old);
 }
 
 void
@@ -619,31 +598,4 @@ ARDOUR::coverage (nframes_t sa, nframes_t ea,
 
 	return OverlapNone;
 }
-
-/* not sure where to put these */
-
-template<class T>
-std::istream& int_to_type (std::istream& o, T& hf) {
-	int val;
-	o >> val;
-	hf = (T) val;
-	return o;
-}
-
-std::istream& operator>>(std::istream& o, HeaderFormat& var) { return int_to_type<HeaderFormat> (o, var); }
-std::istream& operator>>(std::istream& o, SampleFormat& var) { return int_to_type<SampleFormat> (o, var); }
-std::istream& operator>>(std::istream& o, AutoConnectOption& var) { return int_to_type<AutoConnectOption> (o, var); }
-std::istream& operator>>(std::istream& o, MonitorModel& var) { return int_to_type<MonitorModel> (o, var); }
-std::istream& operator>>(std::istream& o, RemoteModel& var) { return int_to_type<RemoteModel> (o, var); }
-std::istream& operator>>(std::istream& o, EditMode& var) { return int_to_type<EditMode> (o, var); }
-std::istream& operator>>(std::istream& o, ListenPosition& var) { return int_to_type<ListenPosition> (o, var); }
-std::istream& operator>>(std::istream& o, LayerModel& var) { return int_to_type<LayerModel> (o, var); }
-std::istream& operator>>(std::istream& o, CrossfadeModel& var) { return int_to_type<CrossfadeModel> (o, var); }
-std::istream& operator>>(std::istream& o, SlaveSource& var) { return int_to_type<SlaveSource> (o, var); }
-std::istream& operator>>(std::istream& o, ShuttleBehaviour& var) { return int_to_type<ShuttleBehaviour> (o, var); }
-std::istream& operator>>(std::istream& o, ShuttleUnits& var) { return int_to_type<ShuttleUnits> (o, var); }
-std::istream& operator>>(std::istream& o, TimecodeFormat& var) { return int_to_type<TimecodeFormat> (o, var); }
-std::istream& operator>>(std::istream& o, DenormalModel& var) { return int_to_type<DenormalModel> (o, var); }
-std::istream& operator>>(std::istream& o, WaveformScale& var) { return int_to_type<WaveformScale> (o, var); }
-std::istream& operator>>(std::istream& o, WaveformShape& var) { return int_to_type<WaveformShape> (o, var); }
 

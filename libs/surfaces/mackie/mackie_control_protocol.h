@@ -294,8 +294,8 @@ class MackieControlProtocol
 	// also called from poll_automation to update timecode display
 	void update_timecode_display();
 
-	std::string format_bbt_timecode( nframes_t now_frame );
-	std::string format_timecode_timecode( nframes_t now_frame );
+	std::string format_bbt_timecode (ARDOUR::nframes_t now_frame );
+	std::string format_timecode_timecode (ARDOUR::nframes_t now_frame );
 	
 	/**
 		notification that the port is about to start it's init sequence.

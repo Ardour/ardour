@@ -114,12 +114,15 @@ class Mixer_UI : public Gtk::Window
 
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
+	bool on_scroll_event (GdkEventScroll*);
 
 	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
 
 	std::list<MixerStrip *> strips;
 
 	bool strip_scroller_button_release (GdkEventButton*);
+	void scroll_left ();
+	void scroll_right ();
 
 	void add_strip (ARDOUR::RouteList&);
 	void remove_strip (MixerStrip *);
