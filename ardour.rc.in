@@ -8,7 +8,7 @@
     <Option name="mute-affects-post-fader" value="1"/>
     <Option name="mute-affects-control-outs" value="1"/>
     <Option name="mute-affects-main-outs" value="1"/>
-    <Option name="monitoring-model" value="2"/>
+    <Option name="monitoring-model" value="ExternalMonitoring"/>
     <Option name="solo-latch" value="1"/>
     <Option name="mtc-port" value="@MIDITAG@"/>
     <Option name="mmc-port" value="@MIDITAG@"/>
