@@ -1478,8 +1478,66 @@ Mixer_UI::pane_allocation_handler (Allocation& alloc, Gtk::Paned* which)
 	}
 }
 
+void
+Mixer_UI::scroll_left () 
+{
+	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
+	/* stupid GTK: can't rely on clamping across versions */
+	scroller.get_hscrollbar()->set_value (max (adj->get_lower(), adj->get_value() - adj->get_step_increment()));
+}
+
+void
+Mixer_UI::scroll_right ()
+{
+	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
+	/* stupid GTK: can't rely on clamping across versions */
+	scroller.get_hscrollbar()->set_value (min (adj->get_upper(), adj->get_value() + adj->get_step_increment()));
+}
+
 bool
 Mixer_UI::on_key_press_event (GdkEventKey* ev)
 {
+	switch (ev->keyval) {
+	case GDK_Left:
+		scroll_left ();
+		return true;
+
+	case GDK_Right:
+		scroll_right ();
+		return true;
+
+	default:
+		break;
+	}
+
 	return key_press_focus_accelerator_handler (*this, ev);
+}
+
+bool
+Mixer_UI::on_scroll_event (GdkEventScroll* ev)
+{
+	switch (ev->direction) {
+	case GDK_SCROLL_LEFT:
+		scroll_left ();
+		return true;
+	case GDK_SCROLL_UP:
+		if (ev->state & Keyboard::TertiaryModifier) {
+			scroll_left ();
+			return true;
+		}
+		return false;
+
+	case GDK_SCROLL_RIGHT:
+		scroll_right ();
+		return true;
+
+	case GDK_SCROLL_DOWN:
+		if (ev->state & Keyboard::TertiaryModifier) {
+			scroll_right ();
+			return true;
+		}
+		return false;
+	}
+
+	return false;
 }
