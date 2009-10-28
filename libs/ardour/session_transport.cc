@@ -424,10 +424,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 			}
 		}
 
-#ifndef LEAVE_TRANSPORT_UNADJUSTED
-	}
-#endif
-
+#ifdef LEAVE_TRANSPORT_UNADJUSTED
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			if (!(*i)->hidden()) {
 				(*i)->non_realtime_locate (_transport_frame);
@@ -438,10 +435,8 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 				return;
 			}
 		}
-
-#ifdef LEAVE_TRANSPORT_UNADJUSTED
-	}
 #endif
+	}
 
         have_looped = false;
 
