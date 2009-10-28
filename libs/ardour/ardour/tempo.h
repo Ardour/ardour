@@ -254,6 +254,7 @@ class TempoMap : public PBD::StatefulDestructible
 	int n_meters () const;
 
 	BBT_Time bbt_add (const BBT_Time& a, const BBT_Time& b, const TempoMetric& metric);
+	BBT_Time bbt_add (const BBT_Time& a, const BBT_Time& b);
 	BBT_Time bbt_subtract (const BBT_Time& a, const BBT_Time& b);
 
 	nframes_t frame_rate () const { return _frame_rate; }
