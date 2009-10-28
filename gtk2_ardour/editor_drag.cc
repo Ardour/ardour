@@ -1947,6 +1947,7 @@ FadeInDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	boost::shared_ptr<AudioRegion> const r = a->audio_region ();
 
 	_pointer_frame_offset = _grab_frame - ((nframes64_t) r->fade_in()->back()->when + r->position());
+	_editor->show_verbose_duration_cursor (r->position(), r->position() + r->fade_in()->back()->when, 10);
 }
 
 void
@@ -2039,6 +2040,7 @@ FadeOutDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	boost::shared_ptr<AudioRegion> r = a->audio_region ();
 
 	_pointer_frame_offset = _grab_frame - (r->length() - (nframes64_t) r->fade_out()->back()->when + r->position());
+	_editor->show_verbose_duration_cursor (r->last_frame() - r->fade_out()->back()->when, r->last_frame(), 10);
 }
 
 void
