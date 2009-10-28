@@ -2542,7 +2542,7 @@ Session::get_route_templates (vector<RouteTemplateInfo>& template_names)
 		template_names.push_back (rti);
 	}
 
-	free (templates);
+	delete templates;
 }
 
 int
