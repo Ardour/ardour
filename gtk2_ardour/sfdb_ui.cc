@@ -410,6 +410,10 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		chooser.add_shortcut_folder_uri("file:///Library/Application Support/GarageBand/Instrument Library/Sampler/Sampler Files");
 	}
 	
+#ifdef GTKOSX
+	chooser.add_shortcut_folder_uri("file:///Volumes");
+#endif
+
 	//add the file chooser
 	{
 		chooser.set_border_width (12);
