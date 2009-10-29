@@ -59,6 +59,7 @@ class PluginInfo {
 		path (o.path), 
 		n_inputs(o.n_inputs), 
 		n_outputs(o.n_outputs),
+		type(o.type),
 		unique_id(o.unique_id), 
 		index(o.index) {}
 	virtual ~PluginInfo () { }
