@@ -1398,10 +1398,6 @@ ARDOUR_UI::transport_stop ()
 		return;
 	}
 	
-	if (session->get_play_loop ()) {
-		session->request_play_loop (false);
-	}
-	
 	session->request_stop ();
 }
 
@@ -1467,7 +1463,7 @@ ARDOUR_UI::transport_roll ()
 	//cerr << "ARDOUR_UI::transport_roll () called session->record_status() = " << session->record_status() << endl;
 
 	if (session->get_play_loop()) {
-		session->request_play_loop (false);
+		// session->request_play_loop (false);
 		auto_loop_button.set_visual_state (1);
 		roll_button.set_visual_state (1);
 	} else if (session->get_play_range ()) {

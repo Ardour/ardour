@@ -2408,9 +2408,6 @@ Editor::toggle_playback (bool with_abort)
 	
 	if (session->transport_rolling()) {
 		session->request_stop (with_abort);
-		if (session->get_play_loop()) {
-			session->request_play_loop (false);
-		}
 	} else {
 		session->request_transport_speed (1.0f);
 	}

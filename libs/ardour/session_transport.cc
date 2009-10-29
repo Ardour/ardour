@@ -123,7 +123,7 @@ Session::request_play_loop (bool yn)
 
 	ev = new Event (Event::SetLoop, Event::Add, Event::Immediate, 0, 0.0, yn);
 	queue_event (ev);
-
+	
 	if (!yn && Config->get_seamless_loop() && transport_rolling()) {
 		// request an immediate locate to refresh the diskstreams
 		// after disabling looping
@@ -385,6 +385,8 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		     _requested_return_frame >= 0) &&
 		    !(post_transport_work & PostTransportLocate)) {
 
+			/* no explicit locate queued */
+
 			bool do_locate = false;
 
 			if (_requested_return_frame >= 0) {
@@ -392,7 +394,18 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 				_requested_return_frame = -1;
 				do_locate = true;
 			} else {
-				_transport_frame = last_stop_frame;
+				if (play_loop && !synced_to_jack()) {
+					Location *location = _locations.auto_loop_location();
+					
+					if (location != 0) {
+						_transport_frame = location->start();
+						do_locate = true;
+					} else {
+						_transport_frame = last_stop_frame;
+					}
+				} else {
+					_transport_frame = last_stop_frame;
+				}
 				_requested_return_frame = -1;
 			}
 
@@ -481,9 +494,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	if (post_transport_work & PostTransportStop) { 
 		_play_range = false;
-
-		/* do not turn off autoloop on stop */
-		
+		play_loop = false;
 	}
 
         nframes_t tf = _transport_frame;
@@ -528,7 +539,9 @@ Session::set_play_loop (bool yn)
 {
 	/* Called from event-handling context */
 	
-	if ((actively_recording() && yn) || _locations.auto_loop_location() == 0) {
+	Location *loc;
+
+	if ((actively_recording() && yn) || (loc = _locations.auto_loop_location()) == 0) {
 		return;
 	}
 	
@@ -544,10 +557,8 @@ Session::set_play_loop (bool yn)
 	
 	if ((play_loop = yn)) {
 
-		Location *loc;
 
-		
-		if ((loc = _locations.auto_loop_location()) != 0) {
+		if (loc) {
 
 			if (Config->get_seamless_loop()) {
 				// set all diskstreams to use internal looping
@@ -568,23 +579,15 @@ Session::set_play_loop (bool yn)
 				}
 			}
 			
-			/* stick in the loop event */
+			/* put the loop event into the event list */
 			
 			Event* event = new Event (Event::AutoLoop, Event::Replace, loc->end(), loc->start(), 0.0f);
 			merge_event (event);
 
-			/* locate to start of loop and roll if current pos is outside of the loop range */
-			if (_transport_frame < loc->start() || _transport_frame > loc->end()) {
-				event = new Event (Event::LocateRoll, Event::Add, Event::Immediate, loc->start(), 0, !synced_to_jack());
-				merge_event (event);
-			}
-			else {
-				// locate to current position (+ 1 to force reload)
-				event = new Event (Event::LocateRoll, Event::Add, Event::Immediate, _transport_frame + 1, 0, !synced_to_jack());
-				merge_event (event);
-			}
+			/* locate to start of loop and roll */
+			event = new Event (Event::LocateRoll, Event::Add, Event::Immediate, loc->start(), 0, !synced_to_jack());
+			merge_event (event);
 		}
-
 
 
 	} else {
@@ -694,7 +697,7 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 	} 
 
 	if ( !with_loop || loop_changing) {
-
+		
 		post_transport_work = PostTransportWork (post_transport_work | PostTransportLocate);
 		
 		if (with_roll) {
