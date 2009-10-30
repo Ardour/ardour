@@ -321,7 +321,7 @@ Session::process_event (Event* ev)
 
 	switch (ev->type) {
 	case Event::SetLoop:
-		set_play_loop (ev->yes_or_no);
+		set_play_loop (ev->yes_or_no, (ev->speed == 1.0f));
 		break;
 
 	case Event::AutoLoop:
@@ -435,7 +435,7 @@ Session::process_event (Event* ev)
 		break;
 
 	case Event::SetPlayRange:
-		set_play_range (ev->yes_or_no);
+		set_play_range (ev->yes_or_no, (ev->speed == 1.0f));
 		break;
 
 	default:

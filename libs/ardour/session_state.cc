@@ -174,6 +174,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	auto_play_legal = false;
 	transport_sub_state = 0;
 	_transport_frame = 0;
+	_requested_return_frame = -1;
 	end_location = new Location (0, 0, _("end"), Location::Flags ((Location::IsMark|Location::IsEnd)));
 	start_location = new Location (0, 0, _("start"), Location::Flags ((Location::IsMark|Location::IsStart)));
 	g_atomic_int_set (&_record_status, Disabled);
@@ -194,7 +195,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_have_captured = false;
 	_worst_output_latency = 0;
 	_worst_input_latency = 0;
-	_worst_track_latency = 0;
+ 	_worst_track_latency = 0;
 	_state_of_the_state = StateOfTheState(CannotSave|InitialConnecting|Loading);
 
 	_slave = 0;

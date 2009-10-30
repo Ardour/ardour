@@ -229,7 +229,6 @@ class Editor : public PublicEditor
 	void separate_region_from_punch ();
 	void separate_region_from_loop ();
 	void separate_regions_using_location (ARDOUR::Location&);
-	void toggle_playback (bool with_abort);
 	void transition_to_rolling (bool forward);
 
 	/* undo related */

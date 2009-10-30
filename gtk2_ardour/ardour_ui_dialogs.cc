@@ -111,7 +111,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 	   do any GUI work, just queue it for handling by the GUI thread.
 	*/
 
-	session->TransportStateChange.connect (mem_fun(*this, &ARDOUR_UI::queue_transport_change));
+	session->TransportStateChange.connect (mem_fun(*this, &ARDOUR_UI::map_transport_state));
 
 	/* alert the user to these things happening */
 
@@ -149,7 +149,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 	start_clocking ();
 	start_blinking ();
 
-	transport_stopped ();
+	map_transport_state ();
 
 	second_connection = Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::every_second), 1000);
 	point_one_second_connection = Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::every_point_one_seconds), 100);

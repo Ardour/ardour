@@ -1462,10 +1462,6 @@ ARDOUR_UI::transport_stop ()
 		return;
 	}
 
-	if (session->get_play_loop ()) {
-		session->request_play_loop (false);
-	}
-
 	session->request_stop ();
 }
 
@@ -1517,35 +1513,91 @@ ARDOUR_UI::transport_record (bool roll)
 	//cerr << "ARDOUR_UI::transport_record () called roll = " << roll << " session->record_status() = " << session->record_status() << endl;
 }
 
-void
+void 
 ARDOUR_UI::transport_roll ()
 {
-	bool rolling;
-
 	if (!session) {
 		return;
 	}
 
-	rolling = session->transport_rolling ();
-
-	//cerr << "ARDOUR_UI::transport_roll () called session->record_status() = " << session->record_status() << endl;
-
-	if (session->get_play_loop()) {
-		session->request_play_loop (false);
-		auto_loop_button.set_visual_state (1);
-		roll_button.set_visual_state (1);
-	} else if (session->get_play_range ()) {
-		session->request_play_range (false);
-		play_selection_button.set_visual_state (0);
-	} else if (rolling) {
-		session->request_locate (session->last_transport_start(), true);
+	if (session->is_auditioning()) {
+		return;
+	}
+	
+	switch (Config->get_slave_source()) {
+	case None:
+	case JACK:
+		break;
+	default:
+		/* transport controlled by the master */
+		return;
 	}
 
-	session->request_transport_speed (1.0f);
+	bool rolling = session->transport_rolling();
+
+	if (session->get_play_loop()) {
+		session->request_play_loop (false, true);
+	} else if (session->get_play_range ()) {
+		session->request_play_range (false, true);
+	} 
+
+	if (!rolling) {
+		session->request_transport_speed (1.0f);
+	}
+
+	map_transport_state ();
 }
 
 void
-ARDOUR_UI::transport_loop()
+ARDOUR_UI::toggle_roll (bool with_abort)
+{
+	
+	if (!session) {
+		return;
+	}
+
+	if (session->is_auditioning()) {
+		session->cancel_audition ();
+		return;
+	}
+	
+	switch (Config->get_slave_source()) {
+	case None:
+	case JACK:
+		break;
+	default:
+		/* transport controlled by the master */
+		return;
+	}
+
+	bool rolling = session->transport_rolling();
+	bool affect_transport = true;
+
+	if (rolling) {
+		/* drop out of loop/range playback but leave transport rolling */
+		if (session->get_play_loop()) {
+			affect_transport = false;
+			session->request_play_loop (false, true);
+		} else if (session->get_play_range ()) {
+			affect_transport = false;
+			session->request_play_range (false, true);
+		} 
+	}
+
+	if (affect_transport) {
+
+		if (rolling) {
+			session->request_stop (with_abort);
+		} else {
+			session->request_transport_speed (1.0f);
+		}
+	}
+
+	map_transport_state ();
+}
+
+void
+ARDOUR_UI::toggle_session_auto_loop ()
 {
 	if (session) {
 		if (session->get_play_loop()) {
@@ -1554,10 +1606,14 @@ ARDOUR_UI::transport_loop()
 				if (looploc) {
 					session->request_locate (looploc->start(), true);
 				}
+			} else {
+				session->request_play_loop (false);
 			}
-		}
-		else {
-			session->request_play_loop (true);
+		} else {
+			Location * looploc = session->locations()->auto_loop_location();
+			if (looploc) {
+				session->request_play_loop (true);
+			}
 		}
 	}
 }
@@ -1567,10 +1623,6 @@ ARDOUR_UI::transport_play_selection ()
 {
 	if (!session) {
 		return;
-	}
-
-	if (!session->get_play_range()) {
-		session->request_stop ();
 	}
 
 	editor->play_selection ();
@@ -1627,6 +1679,7 @@ ARDOUR_UI::transport_forward (int option)
 			/* speed up */
 			session->request_transport_speed (current_transport_speed * 1.5f);
 		}
+
 	}
 }
 
@@ -1653,25 +1706,60 @@ ARDOUR_UI::toggle_record_enable (uint32_t dstream)
 }
 
 void
-ARDOUR_UI::queue_transport_change ()
-{
-	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &ARDOUR_UI::map_transport_state));
-}
-
-void
 ARDOUR_UI::map_transport_state ()
 {
+	ENSURE_GUI_THREAD(mem_fun (*this, &ARDOUR_UI::map_transport_state));
+
+	if (!session) {
+		auto_loop_button.set_visual_state (0);
+		play_selection_button.set_visual_state (0);
+		roll_button.set_visual_state (0);
+		stop_button.set_visual_state (1);
+		return;
+	}
+
 	float sp = session->transport_speed();
 
 	if (sp == 1.0f) {
-		transport_rolling ();
-	} else if (sp < 0.0f) {
-		transport_rewinding ();
-	} else if (sp > 0.0f) {
-		transport_forwarding ();
-	} else {
-		transport_stopped ();
+		shuttle_fract = SHUTTLE_FRACT_SPEED1;  /* speed = 1.0, believe it or not */
+		shuttle_box.queue_draw ();
+	} else if (sp == 0.0f) {
+		shuttle_fract = 0;
+		shuttle_box.queue_draw ();
+		update_disk_space ();
 	}
+
+	if (sp != 0.0) {
+
+		if (session->get_play_range()) {
+
+			play_selection_button.set_visual_state (1);
+			roll_button.set_visual_state (0);
+			auto_loop_button.set_visual_state (0);
+			
+		} else if (session->get_play_loop ()) {
+			
+			auto_loop_button.set_visual_state (1);
+			play_selection_button.set_visual_state (0);
+			roll_button.set_visual_state (0);
+
+		} else {
+			
+			roll_button.set_visual_state (1);
+			play_selection_button.set_visual_state (0);
+			auto_loop_button.set_visual_state (0);
+		}
+
+		stop_button.set_visual_state (0);
+
+	} else {
+
+		stop_button.set_visual_state (1);
+		roll_button.set_visual_state (0);
+		play_selection_button.set_visual_state (0);
+		auto_loop_button.set_visual_state (0);
+	}
+
 }
 
 void

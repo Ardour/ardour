@@ -108,22 +108,6 @@ ARDOUR_UI::toggle_click ()
 }
 
 void
-ARDOUR_UI::toggle_session_auto_loop ()
-{
-	if (session) {
-		if (session->get_play_loop()) {
-			if (session->transport_rolling()) {
-				transport_roll();
-			} else {
-				session->request_play_loop (false);
-			}
-		} else {
-			session->request_play_loop (true);
-		}
-	}
-}
-
-void
 ARDOUR_UI::unset_dual_punch ()
 {
 	Glib::RefPtr<Action> action = ActionManager::get_action ("Transport", "TogglePunch");

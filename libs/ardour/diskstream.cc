@@ -584,6 +584,8 @@ Diskstream::check_record_status (nframes_t transport_frame, nframes_t /*nframes*
 		} else {
 			last_recordable_frame += _roll_delay;
 		}
+		
+		first_recordable_frame = max_frames;
 	}
 
 	last_possibly_recording = possibly_recording;
@@ -597,7 +599,7 @@ Diskstream::route_going_away ()
 
 void
 Diskstream::calculate_record_range(OverlapType ot, sframes_t transport_frame, nframes_t nframes,
-		nframes_t& rec_nframes, nframes_t& rec_offset)
+				   nframes_t& rec_nframes, nframes_t& rec_offset)
 {
 	switch (ot) {
 	case OverlapNone:

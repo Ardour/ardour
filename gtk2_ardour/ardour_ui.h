@@ -282,7 +282,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void update_autosave();
 	sigc::connection _autosave_connection;
 
-	void queue_transport_change ();
 	void map_transport_state ();
 	int32_t do_engine_start ();
 
@@ -548,11 +547,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void transport_forward (int option);
 	void transport_rewind (int option);
 	void transport_loop ();
-
-	void transport_rolling ();
-	void transport_rewinding ();
-	void transport_forwarding ();
-	void transport_stopped ();
+	void toggle_roll (bool with_abort);
 
 	bool _session_is_new;
 	void connect_to_session (ARDOUR::Session *);

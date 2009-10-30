@@ -67,9 +67,8 @@ Session::request_slave_source (SlaveSource src)
 	if (src == JACK) {
 		/* could set_seamless_loop() be disposed of entirely?*/
 		Config->set_seamless_loop (false);
-	} else {
-		Config->set_seamless_loop (true);
 	}
+
 	ev->slave = src;
 	queue_event (ev);
 }
@@ -111,7 +110,7 @@ Session::force_locate (nframes_t target_frame, bool with_roll)
 }
 
 void
-Session::request_play_loop (bool yn)
+Session::request_play_loop (bool yn, bool leave_rolling)
 {
 	Event* ev;
 	Location *location = _locations.auto_loop_location();
@@ -122,10 +121,10 @@ Session::request_play_loop (bool yn)
 		return;
 	}
 
-	ev = new Event (Event::SetLoop, Event::Add, Event::Immediate, 0, 0.0, yn);
+	ev = new Event (Event::SetLoop, Event::Add, Event::Immediate, 0, (leave_rolling ? 1.0 : 0.0), yn);
 	queue_event (ev);
 
-	if (!yn && Config->get_seamless_loop() && transport_rolling()) {
+	if (!leave_rolling && !yn && Config->get_seamless_loop() && transport_rolling()) {
 		// request an immediate locate to refresh the diskstreams
 		// after disabling looping
 		request_locate (_transport_frame-1, false);
@@ -402,27 +401,68 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		if ((auto_return_enabled || synced_to_jack() || _requested_return_frame >= 0) &&
 		    !(post_transport_work & PostTransportLocate)) {
 
+	/* no explicit locate queued */
+
 			bool do_locate = false;
 
 			if (_requested_return_frame >= 0) {
+
+				/* explicit return request pre-queued in event list. overrides everything else */
+				
+				cerr << "explicit auto-return to " << _requested_return_frame << endl;
+
 				_transport_frame = _requested_return_frame;
-				_requested_return_frame = -1;
 				do_locate = true;
+
 			} else {
-				_transport_frame = _last_roll_location;
+				if (config.get_auto_return()) {
+
+					if (play_loop) {
+
+						/* don't try to handle loop play when synced to JACK */
+
+						if (!synced_to_jack()) {
+
+							Location *location = _locations.auto_loop_location();
+							
+							if (location != 0) {
+								_transport_frame = location->start();
+							} else {
+								_transport_frame = _last_roll_location;
+							}
+							do_locate = true;
+						}
+
+					} else if (_play_range) {
+
+						/* return to start of range */
+
+						if (!current_audio_range.empty()) {
+							_transport_frame = current_audio_range.front().start;
+							do_locate = true;
+						}
+
+					} else {
+						
+						/* regular auto-return */
+						
+						_transport_frame = _last_roll_location;
+						do_locate = true;
+					}
+				} 
 			}
 
-			if (synced_to_jack() && !play_loop) {
-				do_locate = true;
-			}
+			_requested_return_frame = -1;			
 
 			if (do_locate) {
-				// cerr << "non-realtimestop: transport locate to " << _transport_frame << endl;
 				_engine.transport_locate (_transport_frame);
 			}
-		}
+		} 
 
 	}
+
+	/* this for() block can be put inside the previous if() and has the effect of ... ??? what */
+
 
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if (!(*i)->hidden()) {
@@ -480,9 +520,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	if (post_transport_work & PostTransportStop) {
 		_play_range = false;
-
-		/* do not turn off autoloop on stop */
-
+		play_loop = false;
 	}
 
         nframes_t tf = _transport_frame;
@@ -523,11 +561,17 @@ Session::check_declick_out ()
 }
 
 void
-Session::set_play_loop (bool yn)
+Session::set_play_loop (bool yn, bool leave_rolling)
 {
 	/* Called from event-handling context */
 
-	if ((actively_recording() && yn) || _locations.auto_loop_location() == 0) {
+	Location *loc;
+
+	if (yn == play_loop) {
+		return;
+	}
+
+	if ((actively_recording() && yn) || (loc = _locations.auto_loop_location()) == 0) {
 		return;
 	}
 
@@ -543,10 +587,9 @@ Session::set_play_loop (bool yn)
 
 	if ((play_loop = yn)) {
 
-		Location *loc;
+		if (loc) {
 
-
-		if ((loc = _locations.auto_loop_location()) != 0) {
+			set_play_range (false, true);
 
 			if (Config->get_seamless_loop()) {
 				// set all diskstreams to use internal looping
@@ -572,18 +615,11 @@ Session::set_play_loop (bool yn)
 			Event* event = new Event (Event::AutoLoop, Event::Replace, loc->end(), loc->start(), 0.0f);
 			merge_event (event);
 
-			/* locate to start of loop and roll if current pos is outside of the loop range */
-			if (_transport_frame < loc->start() || _transport_frame > loc->end()) {
-				event = new Event (Event::LocateRoll, Event::Add, Event::Immediate, loc->start(), 0, !synced_to_jack());
-				merge_event (event);
-			}
-			else {
-				// locate to current position (+ 1 to force reload)
-				event = new Event (Event::LocateRoll, Event::Add, Event::Immediate, _transport_frame + 1, 0, !synced_to_jack());
-				merge_event (event);
-			}
+			
+			// locate to start of loop and roll
+			event = new Event (Event::LocateRoll, Event::Add, Event::Immediate, loc->start(), 0, !synced_to_jack());
+			merge_event (event);
 		}
-
 
 
 	} else {
@@ -598,6 +634,7 @@ Session::set_play_loop (bool yn)
 		}
 
 	}
+	TransportStateChange (); /* EMIT SIGNAL */
 }
 
 void
@@ -755,7 +792,7 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 
 		if (al && (_transport_frame < al->start() || _transport_frame > al->end())) {
 			// cancel looping directly, this is called from event handling context
-			set_play_loop (false);
+			set_play_loop (false, false);
 		}
 		else if (al && _transport_frame == al->start()) {
 			if (with_loop) {
@@ -1157,27 +1194,32 @@ Session::set_audio_range (list<AudioRange>& range)
 }
 
 void
-Session::request_play_range (bool yn)
+Session::request_play_range (bool yn, bool leave_rolling)
 {
-	Event* ev = new Event (Event::SetPlayRange, Event::Add, Event::Immediate, 0, 0.0f, yn);
+	Event* ev = new Event (Event::SetPlayRange, Event::Add, Event::Immediate, 0, (leave_rolling ? 1.0f : 0.0f), yn);
 	queue_event (ev);
 }
 
 void
-Session::set_play_range (bool yn)
+Session::set_play_range (bool yn, bool leave_rolling)
 {
 	/* Called from event-processing context */
 
-	if (_play_range != yn) {
-		_play_range = yn;
-		setup_auto_play ();
-
-		if (!_play_range) {
-			/* stop transport */
-			Event* ev = new Event (Event::SetTransportSpeed, Event::Add, Event::Immediate, 0, 0.0f, false);
-			merge_event (ev);
-		}
+	if (yn) {
+		/* cancel loop play */
+		set_play_range (false, true);
 	}
+
+	_play_range = yn;
+	setup_auto_play ();
+
+
+	if (!_play_range && !leave_rolling) {
+		/* stop transport */
+		Event* ev = new Event (Event::SetTransportSpeed, Event::Add, Event::Immediate, 0, 0.0f, false);
+		merge_event (ev);
+	}
+	TransportStateChange (); /* EMIT SIGNAL */
 }
 
 void
@@ -1252,7 +1294,6 @@ Session::request_roll_at_and_return (nframes_t start, nframes_t return_to)
 void
 Session::request_bounded_roll (nframes_t start, nframes_t end)
 {
-	request_stop ();
 	Event *ev = new Event (Event::StopOnce, Event::Replace, end, Event::Immediate, 0.0);
 	queue_event (ev);
 	request_locate (start, true);
@@ -1374,4 +1415,18 @@ Session::reset_jack_connection (jack_client_t* jack)
 	if (_slave && ((js = dynamic_cast<JACK_Slave*> (_slave)) != 0)) {
 		js->reset_client (jack);
 	}
+}
+
+bool
+Session::maybe_stop (nframes_t limit)
+{
+       if ((_transport_speed > 0.0f && _transport_frame >= limit) || (_transport_speed < 0.0f && _transport_frame == 0)) {
+               if (synced_to_jack () && Config->get_jack_time_master ()) {
+                       _engine.transport_stop ();
+               } else if (!synced_to_jack ()) {
+                       stop_transport ();
+               }
+               return true;
+       }
+       return false;
 }
