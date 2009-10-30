@@ -1177,10 +1177,6 @@ EngineControl::set_state (const XMLNode& root)
 
 	for (citer = clist.begin(); citer != clist.end(); ++citer) {
 
-		if (prop && (prop->value() == "FFADO" )) {
-			continue;
-		}
-
 		child = *citer;
 
 		prop = child->property ("val");
