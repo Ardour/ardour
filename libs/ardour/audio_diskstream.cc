@@ -503,6 +503,8 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 		} else {
 			last_recordable_frame += _roll_delay;
 		}
+
+      first_recordable_frame = max_frames;
 	}
 
 	last_possibly_recording = possibly_recording;
