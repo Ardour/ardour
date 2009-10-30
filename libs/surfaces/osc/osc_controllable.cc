@@ -19,10 +19,10 @@
 
 #include <cstdio> /* for sprintf, sigh */
 #include <climits>
-#include <pbd/error.h>
-#include <pbd/xml++.h>
+#include "pbd/error.h"
+#include "pbd/xml++.h"
 
-#include <ardour/route.h>
+#include "ardour/route.h"
 
 #include "osc_controllable.h"
 

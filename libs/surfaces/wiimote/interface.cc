@@ -1,9 +1,9 @@
 #include <pbd/failed_constructor.h>
 
-#include <control_protocol/control_protocol.h>
+#include "control_protocol/control_protocol.h"
 #include "wiimote.h"
 
-#include <ardour/session.h>
+#include "ardour/session.h"
 
 using namespace ARDOUR;
 

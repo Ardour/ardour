@@ -27,11 +27,11 @@
 #include <float.h>
 #include <sys/time.h>
 #include <errno.h>
-#include <ardour/route.h>
-#include <ardour/audio_track.h>
-#include <ardour/session.h>
-#include <ardour/location.h>
-#include <ardour/dB.h>
+#include "ardour/route.h"
+#include "ardour/audio_track.h"
+#include "ardour/session.h"
+#include "ardour/location.h"
+#include "ardour/dB.h"
 
 using namespace ARDOUR;
 using namespace std;
@@ -40,14 +40,14 @@ using namespace PBD;
 
 #include "i18n.h"
 
-#include <pbd/abstract_ui.cc>
+#include "pbd/abstract_ui.cc"
 
 BaseUI::RequestType LEDChange = BaseUI::new_request_type ();
 BaseUI::RequestType Print = BaseUI::new_request_type ();
 BaseUI::RequestType SetCurrentTrack = BaseUI::new_request_type ();
 
 
-#include <tranzport_control_protocol.h>
+#include "tranzport_control_protocol.h"
 
 void
 TranzportControlProtocol::datawheel ()

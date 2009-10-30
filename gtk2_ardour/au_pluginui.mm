@@ -1,9 +1,9 @@
 #undef  Marker
 #define Marker FuckYouAppleAndYourLackOfNameSpaces
 
-#include <pbd/error.h>
-#include <ardour/audio_unit.h>
-#include <ardour/insert.h>
+#include "pbd/error.h"
+#include "ardour/audio_unit.h"
+#include "ardour/insert.h"
 
 #undef check // stupid gtk, stupid apple
 

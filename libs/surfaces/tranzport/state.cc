@@ -27,11 +27,11 @@
 #include <float.h>
 #include <sys/time.h>
 #include <errno.h>
-#include <ardour/route.h>
-#include <ardour/audio_track.h>
-#include <ardour/session.h>
-#include <ardour/location.h>
-#include <ardour/dB.h>
+#include "ardour/route.h"
+#include "ardour/audio_track.h"
+#include "ardour/session.h"
+#include "ardour/location.h"
+#include "ardour/dB.h"
 
 using namespace ARDOUR;
 using namespace std;
@@ -40,7 +40,7 @@ using namespace PBD;
 
 #include "i18n.h"
 
-#include <pbd/abstract_ui.cc>
+#include "pbd/abstract_ui.cc"
 
 #include "tranzport_control_protocol.h"
 

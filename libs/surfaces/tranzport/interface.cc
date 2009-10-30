@@ -18,7 +18,7 @@
  *  
  *   */
 
-#include <control_protocol/control_protocol.h>
+#include "control_protocol/control_protocol.h"
 #include "tranzport_control_protocol.h"
 
 using namespace ARDOUR;

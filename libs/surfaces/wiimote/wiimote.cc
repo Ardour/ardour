@@ -3,8 +3,8 @@
 #include <iostream>
 #include <sigc++/bind.h>
 
-#include <pbd/xml++.h>
-#include <ardour/session.h>
+#include "pbd/xml++.h"
+#include "ardour/session.h"
 
 #include "i18n.h"
 

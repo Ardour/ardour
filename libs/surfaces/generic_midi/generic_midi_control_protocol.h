@@ -3,9 +3,9 @@
 
 #include <set>
 #include <glibmm/thread.h>
-#include <ardour/types.h>
+#include "ardour/types.h"
 
-#include <control_protocol/control_protocol.h>
+#include "control_protocol/control_protocol.h"
 
 namespace MIDI {
 	class Port;

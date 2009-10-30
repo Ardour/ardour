@@ -25,7 +25,7 @@
 #include <string.h>
 #include <limits.h>
 
-#include <ardour/dB.h>
+#include "ardour/dB.h"
 
 #include "logmeter.h"
 #include "canvas-waveview.h"

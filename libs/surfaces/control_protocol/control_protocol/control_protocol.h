@@ -27,7 +27,7 @@
 #include <boost/shared_ptr.hpp>
 #include <sigc++/sigc++.h>
 #include <pbd/stateful.h>
-#include <control_protocol/basic_ui.h>
+#include "control_protocol/basic_ui.h"
 
 namespace ARDOUR {
 

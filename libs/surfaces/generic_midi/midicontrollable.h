@@ -24,10 +24,10 @@
 
 #include <sigc++/sigc++.h>
 
-#include <midi++/types.h>
-#include <pbd/controllable.h>
-#include <pbd/stateful.h>
-#include <ardour/types.h>
+#include "midi++/types.h"
+#include "pbd/controllable.h"
+#include "pbd/stateful.h"
+#include "ardour/types.h"
 
 namespace MIDI {
 

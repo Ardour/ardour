@@ -22,14 +22,14 @@
 
 #include <algorithm>
 
-#include <pbd/error.h>
-#include <pbd/failed_constructor.h>
+#include "pbd/error.h"
+#include "pbd/failed_constructor.h"
 
-#include <midi++/port.h>
-#include <midi++/manager.h>
+#include "midi++/port.h"
+#include "midi++/manager.h"
 
-#include <ardour/route.h>
-#include <ardour/session.h>
+#include "ardour/route.h"
+#include "ardour/session.h"
 
 #include "generic_midi_control_protocol.h"
 #include "midicontrollable.h"

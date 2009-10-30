@@ -32,7 +32,7 @@
 #include <sigc++/signal.h>
 #include <gtkmm/widget.h>
 
-#include <ardour_dialog.h>
+#include "ardour_dialog.h"
 #include "ardour/types.h"
 #include "plugin_ui.h"
 

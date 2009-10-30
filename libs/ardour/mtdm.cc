@@ -16,7 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <ardour/mtdm.h>
+#include "ardour/mtdm.h"
 
 MTDM::MTDM (void)
 	: _cnt (0)

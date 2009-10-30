@@ -25,9 +25,9 @@
 #include <sigc++/sigc++.h>
 #include <lo/lo.h>
 
-#include <pbd/controllable.h>
-#include <pbd/stateful.h>
-#include <ardour/types.h>
+#include "pbd/controllable.h"
+#include "pbd/stateful.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 

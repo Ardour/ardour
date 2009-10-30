@@ -32,21 +32,21 @@
 
 #include <boost/shared_array.hpp>
 
-#include <midi++/types.h>
-#include <midi++/port.h>
-#include <midi++/manager.h>
-#include <pbd/pthread_utils.h>
-#include <pbd/error.h>
-#include <pbd/memento_command.h>
-#include <pbd/convert.h>
+#include "midi++/types.h"
+#include "midi++/port.h"
+#include "midi++/manager.h"
+#include "pbd/pthread_utils.h"
+#include "pbd/error.h"
+#include "pbd/memento_command.h"
+#include "pbd/convert.h"
 
-#include <ardour/route.h>
-#include <ardour/session.h>
-#include <ardour/location.h>
-#include <ardour/dB.h>
-#include <ardour/panner.h>
-#include <ardour/tempo.h>
-#include <ardour/types.h>
+#include "ardour/route.h"
+#include "ardour/session.h"
+#include "ardour/location.h"
+#include "ardour/dB.h"
+#include "ardour/panner.h"
+#include "ardour/tempo.h"
+#include "ardour/types.h"
 
 #include "mackie_control_protocol.h"
 

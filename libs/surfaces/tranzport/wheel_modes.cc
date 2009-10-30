@@ -33,16 +33,16 @@
 #include <poll.h>
 #endif
 
-#include <pbd/pthread_utils.h>
+#include "pbd/pthread_utils.h"
 
-#include <ardour/route.h>
-#include <ardour/audio_track.h>
-#include <ardour/session.h>
-#include <ardour/tempo.h>
-#include <ardour/location.h>
-#include <ardour/dB.h>
+#include "ardour/route.h"
+#include "ardour/audio_track.h"
+#include "ardour/session.h"
+#include "ardour/tempo.h"
+#include "ardour/location.h"
+#include "ardour/dB.h"
 
-#include <tranzport_control_protocol.h>
+#include "tranzport_control_protocol.h"
 
 using namespace ARDOUR;
 using namespace std;

@@ -32,13 +32,13 @@
 #include <sys/time.h>
 #include <errno.h>
 
-#include <pbd/pthread_utils.h>
+#include "pbd/pthread_utils.h"
 
-#include <ardour/route.h>
-#include <ardour/audio_track.h>
-#include <ardour/session.h>
-#include <ardour/tempo.h>
-#include <ardour/location.h>
-#include <ardour/dB.h>
+#include "ardour/route.h"
+#include "ardour/audio_track.h"
+#include "ardour/session.h"
+#include "ardour/tempo.h"
+#include "ardour/location.h"
+#include "ardour/dB.h"
 
 #endif /* ardour_tranzport_common */

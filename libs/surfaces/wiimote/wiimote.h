@@ -1,12 +1,12 @@
 #ifndef ardour_wiimote_control_protocol_h
 #define ardour_wiimote_control_protocol_h
 
-#include <ardour/types.h>
-#include <control_protocol/control_protocol.h>
+#include "ardour/types.h"
+#include "control_protocol/control_protocol.h"
 
 #include <glibmm/thread.h>
 
-#include <pbd/abstract_ui.h>
+#include "pbd/abstract_ui.h"
 
 #include <cwiid.h>
 

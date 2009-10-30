@@ -1,6 +1,6 @@
 #include <pbd/failed_constructor.h>
 
-#include <control_protocol/control_protocol.h>
+#include "control_protocol/control_protocol.h"
 #include "generic_midi_control_protocol.h"
 
 using namespace ARDOUR;

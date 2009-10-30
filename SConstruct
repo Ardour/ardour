@@ -293,7 +293,7 @@ def create_stored_revision (target = None, source = None, env = None):
             sys.exit (-1)
 
     try:
-	text  = "#include <ardour/svn_revision.h>\n"
+	text  = "#include \"ardour/svn_revision.h\"\n"
 	text += "namespace ARDOUR {\n";
 	text += "extern const char* svn_revision = \"" + rev + "\";\n";
 	text += "}\n";

@@ -25,11 +25,12 @@
 
 #include <glibmm/main.h>
 
-#include <midi++/types.h>
-#include <midi++/port.h>
-#include <sigc++/sigc++.h>
 #include <boost/shared_array.hpp>
-#include <ardour/configuration.h>
+
+#include "midi++/types.h"
+#include "midi++/port.h"
+#include "sigc++/sigc++.h"
+#include "ardour/configuration.h"
 
 #include "i18n.h"
 

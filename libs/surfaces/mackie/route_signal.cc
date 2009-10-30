@@ -17,9 +17,9 @@
 */
 #include "route_signal.h"
 
-#include <ardour/route.h>
-#include <ardour/track.h>
-#include <ardour/panner.h>
+#include "ardour/route.h"
+#include "ardour/track.h"
+#include "ardour/panner.h"
 
 #include "mackie_control_protocol.h"
 

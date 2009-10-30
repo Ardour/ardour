@@ -52,14 +52,14 @@
 #include <sys/time.h>
 #include <errno.h>
 
-#include <pbd/pthread_utils.h>
+#include "pbd/pthread_utils.h"
 
-#include <ardour/route.h>
-#include <ardour/audio_track.h>
-#include <ardour/session.h>
-#include <ardour/tempo.h>
-#include <ardour/location.h>
-#include <ardour/dB.h>
+#include "ardour/route.h"
+#include "ardour/audio_track.h"
+#include "ardour/session.h"
+#include "ardour/tempo.h"
+#include "ardour/location.h"
+#include "ardour/dB.h"
 
 #include "tranzport_control_protocol.h"
 
@@ -70,7 +70,7 @@ using namespace PBD;
 
 #include "i18n.h"
 
-#include <pbd/abstract_ui.cc>
+#include "pbd/abstract_ui.cc"
 
 BaseUI::RequestType LEDChange = BaseUI::new_request_type ();
 BaseUI::RequestType Print = BaseUI::new_request_type ();

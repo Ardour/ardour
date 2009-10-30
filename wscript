@@ -81,7 +81,7 @@ def create_stored_revision():
 		sys.exit(-1)
 
 	try:
-		text =  '#include <ardour/svn_revision.h>\n'
+		text =  '#include "ardour/svn_revision.h"\n'
 		text += 'namespace ARDOUR { extern const char* svn_revision = \"' + rev + '\"; }\n'
 		print 'Writing svn revision info to libs/ardour/svn_revision.cc'
 		o = file('libs/ardour/svn_revision.cc', 'w')

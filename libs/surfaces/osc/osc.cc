@@ -35,12 +35,12 @@
 #include <pbd/filesystem.h>
 #include <pbd/failed_constructor.h>
 
-#include <ardour/session.h>
-#include <ardour/route.h>
-#include <ardour/audio_track.h>
-#include <ardour/midi_track.h>
-#include <ardour/dB.h>
-#include <ardour/filesystem_paths.h>
+#include "ardour/session.h"
+#include "ardour/route.h"
+#include "ardour/audio_track.h"
+#include "ardour/midi_track.h"
+#include "ardour/dB.h"
+#include "ardour/filesystem_paths.h"
 
 #include "osc.h"
 #include "osc_controllable.h"

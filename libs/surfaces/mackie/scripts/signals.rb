@@ -111,8 +111,8 @@ erb.run
 impl_def = <<EOF
 #include "route_signal.h"
 
-#include <ardour/route.h>
-#include <ardour/panner.h>
+#include "ardour/route.h"
+#include "ardour/panner.h"
 
 #include "mackie_control_protocol.h"
 

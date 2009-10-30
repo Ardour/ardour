@@ -19,11 +19,11 @@
 
 #include <cstdio> /* for sprintf, sigh */
 #include <climits>
-#include <pbd/error.h>
-#include <pbd/xml++.h>
-#include <midi++/port.h>
-#include <midi++/channel.h>
-#include <ardour/automation_control.h>
+#include "pbd/error.h"
+#include "pbd/xml++.h"
+#include "midi++/port.h"
+#include "midi++/channel.h"
+#include "ardour/automation_control.h"
 
 #include "midicontrollable.h"
 

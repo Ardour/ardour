@@ -18,12 +18,12 @@
 
 */
 
-#include <pbd/pthread_utils.h>
+#include "pbd/pthread_utils.h"
 
-#include <ardour/session.h>
-#include <ardour/location.h>
+#include "ardour/session.h"
+#include "ardour/location.h"
 
-#include <control_protocol/basic_ui.h>
+#include "control_protocol/basic_ui.h"
 
 #include "i18n.h"
 

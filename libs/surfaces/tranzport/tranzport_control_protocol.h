@@ -34,9 +34,9 @@
 #endif
 
 #include <glibmm/thread.h>
-#include <ardour/types.h>
+#include "ardour/types.h"
 
-#include <control_protocol/control_protocol.h>
+#include "control_protocol/control_protocol.h"
 
 class TranzportControlProtocol : public ARDOUR::ControlProtocol
 {

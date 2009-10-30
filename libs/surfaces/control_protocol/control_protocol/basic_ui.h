@@ -24,7 +24,7 @@
 #include <string>
 
 #include <jack/types.h>
-#include <control_protocol/timecode.h>
+#include "control_protocol/timecode.h"
 
 namespace ARDOUR {
 	class Session;
