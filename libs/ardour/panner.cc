@@ -224,8 +224,11 @@ BaseStereoPanner::set_automation_state (AutoState state)
 	if (state != _automation.automation_state()) {
 
 		_automation.set_automation_state (state);
-		
-		if (state != Off) {
+
+		/* don't reset pan if we're moving to Off or Write mode;
+		   if we're moving to Write, the user may have manually set up pans
+		   that they don't want to lose */		
+		if (state != Off && state != Write) {
 			set_position (_automation.eval (parent.session().transport_frame()));
 		}
 	}

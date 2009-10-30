@@ -166,7 +166,10 @@ PluginInsert::auto_state_changed (uint32_t which)
 {
 	AutomationList& alist (automation_list (which));
 
-	if (alist.automation_state() != Off) {
+	/* don't reset automation if we're moving to Off or Write mode;
+	   if we're moving to Write, the user may have manually set up automation
+	   that they don't want to lose */		
+	if (alist.automation_state() != Off && alist.automation_state() != Write) {
 		_plugins[0]->set_parameter (which, alist.eval (_session.transport_frame()));
 	}
 }
