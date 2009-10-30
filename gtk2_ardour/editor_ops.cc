@@ -2386,34 +2386,6 @@ Editor::transition_to_rolling (bool fwd)
 }
 
 void
-Editor::toggle_playback (bool with_abort)
-{
-	if (!session) {
-		return;
-	}
-
-	switch (Config->get_slave_source()) {
-	case None:
-	case JACK:
-		break;
-	default:
-		/* transport controlled by the master */
-		return;
-	}
-
-	if (session->is_auditioning()) {
-		session->cancel_audition ();
-		return;
-	}
-	
-	if (session->transport_rolling()) {
-		session->request_stop (with_abort);
-	} else {
-		session->request_transport_speed (1.0f);
-	}
-}
-
-void
 Editor::play_from_start ()
 {
 	session->request_locate (session->current_start_frame(), true);

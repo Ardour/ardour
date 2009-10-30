@@ -549,6 +549,7 @@
 				   </menu>
 		   </menu>
 	       <menu action='MiscOptions'>
+               	     <menuitem action='toggle-seamless-loop'/>
                	     <menuitem action='UseOSC'/>
                	     <menuitem action='NewPluginsActive'/>
                	     <menuitem action='LatchedRecordEnable'/>

@@ -155,8 +155,8 @@ class Session : public PBD::StatefulDestructible
 
 	    Type           type;
 	    Action         action;
-	    nframes_t action_frame;
-	    nframes_t target_frame;
+	    nframes_t      action_frame;
+	    nframes_t      target_frame;
 	    float          speed;
 
 	    union {
@@ -374,7 +374,7 @@ class Session : public PBD::StatefulDestructible
 	void request_stop (bool abort = false);
 	void request_locate (nframes_t frame, bool with_roll = false);
 
-	void request_play_loop (bool yn);
+	void request_play_loop (bool yn, bool leave_rolling = false);
 	bool get_play_loop () const { return play_loop; }
 
 	nframes_t  last_transport_start() const { return _last_roll_location; }
@@ -926,7 +926,7 @@ class Session : public PBD::StatefulDestructible
 	void set_audio_range (list<AudioRange>&);
 	void set_music_range (list<MusicRange>&);
 
-	void request_play_range (bool yn);
+	void request_play_range (bool yn, bool leave_rolling = false);
 	bool get_play_range () const { return _play_range; }
 
 	/* favorite dirs */
@@ -1453,7 +1453,7 @@ class Session : public PBD::StatefulDestructible
 	void          change_midi_ports ();
 	int           use_config_midi_ports ();
 
-	void set_play_loop (bool yn);
+	void set_play_loop (bool yn, bool leave_rolling);
 	void overwrite_some_buffers (Diskstream*);
 	void flush_all_redirects ();
 	int  micro_locate (nframes_t distance);
@@ -1735,7 +1735,7 @@ class Session : public PBD::StatefulDestructible
 
 	list<AudioRange> current_audio_range;
 	bool _play_range;
-	void set_play_range (bool yn);
+	void set_play_range (bool yn, bool leave_rolling);
 	void setup_auto_play ();
 
 	/* main outs */

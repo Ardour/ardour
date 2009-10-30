@@ -109,7 +109,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual bool show_waveforms_recording() const = 0;
 	virtual void new_region_from_selection () = 0;
 	virtual void separate_region_from_selection () = 0;
-	virtual void toggle_playback (bool with_abort) = 0;
 	virtual void transition_to_rolling (bool fwd) = 0;
 	virtual nframes64_t unit_to_frame (double unit) const = 0;
 	// XXX remove me when libardour goes nframes64_t

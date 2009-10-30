@@ -126,66 +126,6 @@ ARDOUR_UI::display_message (const char *prefix, gint prefix_len, RefPtr<TextBuff
 }
 
 void
-ARDOUR_UI::transport_stopped ()
-{
-	stop_button.set_visual_state (1);
-	
-	roll_button.set_visual_state (0);
-	play_selection_button.set_visual_state (0);
-	auto_loop_button.set_visual_state (0);
-
-	shuttle_fract = 0;
-	shuttle_box.queue_draw ();
-
-	update_disk_space ();
-}
-
-void
-ARDOUR_UI::transport_rolling ()
-{
-	stop_button.set_visual_state (0);
-	if (session->get_play_range()) {
-		play_selection_button.set_visual_state (1);
-		roll_button.set_visual_state (0);
-		auto_loop_button.set_visual_state (0);
-
-	} else if (session->get_play_loop ()) {
-		auto_loop_button.set_visual_state (1);
-		play_selection_button.set_visual_state (0);
-		roll_button.set_visual_state (0);
-
-	} else {
-
-		roll_button.set_visual_state (1);
-		play_selection_button.set_visual_state (0);
-		auto_loop_button.set_visual_state (0);
-	}
-
-	/* reset shuttle controller */
-
-	shuttle_fract = SHUTTLE_FRACT_SPEED1;  /* speed = 1.0, believe it or not */
-	shuttle_box.queue_draw ();
-}
-
-void
-ARDOUR_UI::transport_rewinding ()
-{
-	stop_button.set_visual_state (0);
-	roll_button.set_visual_state (1);
-	play_selection_button.set_visual_state (0);
-	auto_loop_button.set_visual_state (0);
-}
-
-void
-ARDOUR_UI::transport_forwarding ()
-{
-	stop_button.set_visual_state (0);
-	roll_button.set_visual_state (1);
-	play_selection_button.set_visual_state (0);
-	auto_loop_button.set_visual_state (0);
-}
-
-void
 ARDOUR_UI::setup_transport ()
 {
 	transport_tearoff = manage (new TearOff (transport_tearoff_hbox));

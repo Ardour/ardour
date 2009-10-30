@@ -71,6 +71,12 @@ ARDOUR_UI::toggle_use_osc ()
 }
 
 void
+ARDOUR_UI::toggle_seamless_loop ()
+{
+	ActionManager::toggle_config_state ("options", "toggle-seamless-loop", &Configuration::set_seamless_loop, &Configuration::get_seamless_loop);
+}
+
+void
 ARDOUR_UI::toggle_send_midi_feedback ()
 {
 	ActionManager::toggle_config_state ("options", "SendMIDIfeedback", &Configuration::set_midi_feedback, &Configuration::get_midi_feedback);
@@ -369,22 +375,6 @@ void
 ARDOUR_UI::toggle_click ()
 {
 	ActionManager::toggle_config_state ("Transport", "ToggleClick", &Configuration::set_clicking, &Configuration::get_clicking);
-}
-
-void
-ARDOUR_UI::toggle_session_auto_loop ()
-{
-	if (session) {
-		if (session->get_play_loop()) {
-			if (session->transport_rolling()) {
-				transport_roll();
-			} else {
-				session->request_play_loop (false);
-			}
-		} else {
-			session->request_play_loop (true);
-		}
-	}
 }
 
 void
@@ -1170,6 +1160,9 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 
 		ActionManager::map_some_state ("options", "UseOSC", &Configuration::get_use_osc);
 		
+	} else if (PARAM_IS ("seamless-loop")) {
+		ActionManager::map_some_state ("options", "toggle-seamless-loop", &Configuration::get_seamless_loop);
+
 	} else if (PARAM_IS ("mmc-control")) {
 		ActionManager::map_some_state ("options", "UseMMC", &Configuration::get_mmc_control);
 

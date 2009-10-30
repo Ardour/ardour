@@ -249,10 +249,10 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	ActionManager::register_action (transport_actions, X_("ToggleRoll"), _("Start/Stop"), bind (mem_fun (*editor, &PublicEditor::toggle_playback), false));
+	ActionManager::register_action (transport_actions, X_("ToggleRoll"), _("Start/Stop"), bind (mem_fun (*this, &ARDOUR_UI::toggle_roll), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	ActionManager::register_action (transport_actions, X_("ToggleRollForgetCapture"), _("Stop + Forget Capture"), bind (mem_fun(*editor, &PublicEditor::toggle_playback), true));
+	ActionManager::register_action (transport_actions, X_("ToggleRollForgetCapture"), _("Stop + Forget Capture"), bind (mem_fun(*this, &ARDOUR_UI::toggle_roll), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
@@ -444,6 +444,8 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (option_actions, X_("SendMIDIfeedback"), _("Send MIDI feedback"), mem_fun (*this, &ARDOUR_UI::toggle_send_midi_feedback));
 	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_toggle_action (option_actions, X_("toggle-seamless-loop"), _("Seamless Looping"), mem_fun (*this, &ARDOUR_UI::toggle_seamless_loop));
 
 	act = ActionManager::register_toggle_action (option_actions, X_("UseOSC"), _("Use OSC"), mem_fun (*this, &ARDOUR_UI::toggle_use_osc));
 #ifndef HAVE_LIBLO

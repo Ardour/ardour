@@ -2720,7 +2720,7 @@ IO::build_legal_port_name (bool in)
 {
 	const int name_size = jack_port_name_size();
 	int limit;
-	char* suffix;
+	const char* suffix;
 	int maxports;
 
 	/* note that if "in" or "out" are translated it will break a session

@@ -578,11 +578,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void transport_forward (int option);
 	void transport_rewind (int option);
 	void transport_loop ();
-
-	void transport_rolling ();
-	void transport_rewinding ();
-	void transport_forwarding ();
-	void transport_stopped ();
+	void toggle_roll (bool with_abort);
 
 	bool _session_is_new;
 	void connect_to_session (ARDOUR::Session *);
@@ -714,6 +710,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void set_remote_model (ARDOUR::RemoteModel);
 	void set_denormal_model (ARDOUR::DenormalModel);
 
+	void toggle_seamless_loop ();
 	void toggle_sync_order_keys ();
 	void toggle_new_plugins_active();
 	void toggle_StopPluginsWithTransport();
