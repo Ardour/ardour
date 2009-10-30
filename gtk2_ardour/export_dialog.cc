@@ -129,6 +129,7 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	spec.running = false;
 
 	file_entry.set_name ("ExportFileNameEntry");
+	file_entry.set_activates_default (true);
 
 	master_list = ListStore::create (exp_cols);
 	master_selector.set_model (master_list);
@@ -369,6 +370,7 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	cancel_button = add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	cancel_button->signal_clicked().connect (mem_fun(*this, &ExportDialog::end_dialog));
 	ok_button = add_button (_("Export"), RESPONSE_ACCEPT);
+	set_default_response (RESPONSE_ACCEPT);
 	ok_button->signal_clicked().connect (mem_fun(*this, &ExportDialog::do_export));
 	
 	file_browse_button.set_name ("EditorGTKButton");
