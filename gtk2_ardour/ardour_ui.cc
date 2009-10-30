@@ -2244,14 +2244,16 @@ ARDOUR_UI::build_session_from_nsd (const Glib::ustring& session_path, const Glib
 		}
 		
 		/// @todo some minor tweaks.
+
+		oconnect = AutoConnectOption (0);
 		
-		if (new_session_dialog->connect_outs_to_master()) {
-			oconnect = AutoConnectMaster;
-		} else if (new_session_dialog->connect_outs_to_physical()) {
-			oconnect = AutoConnectPhysical;
-		} else {
-			oconnect = AutoConnectOption (0);
-		} 
+		if (new_session_dialog->connect_outputs()) {
+			if (new_session_dialog->connect_outs_to_master()) {
+				oconnect = AutoConnectMaster;
+			} else if (new_session_dialog->connect_outs_to_physical()) {
+				oconnect = AutoConnectPhysical;
+			}
+		}
 		
 		nphysin = (uint32_t) new_session_dialog->input_limit_count();
 		nphysout = (uint32_t) new_session_dialog->output_limit_count();
