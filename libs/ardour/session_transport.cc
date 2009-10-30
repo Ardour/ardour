@@ -1421,7 +1421,7 @@ bool
 Session::maybe_stop (nframes_t limit)
 {
        if ((_transport_speed > 0.0f && _transport_frame >= limit) || (_transport_speed < 0.0f && _transport_frame == 0)) {
-               if (synced_to_jack () && Config->get_jack_time_master ()) {
+               if (synced_to_jack () && config.get_jack_time_master ()) {
                        _engine.transport_stop ();
                } else if (!synced_to_jack ()) {
                        stop_transport ();
