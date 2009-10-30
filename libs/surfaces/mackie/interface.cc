@@ -18,7 +18,9 @@
 #include "control_protocol/control_protocol.h"
 #include "mackie_control_protocol.h"
 
-#include <pbd/error.h>
+#include "ardour/rc_configuration.h"
+
+#include "pbd/error.h"
 
 #include <stdexcept>
 

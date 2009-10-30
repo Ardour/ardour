@@ -46,7 +46,7 @@
 #include <gtkmm2ext/dndtreeview.h>
 
 #include "pbd/stateful.h"
-#include "ardour/session.h"
+#include "ardour/import_status.h"
 #include "ardour/tempo.h"
 #include "ardour/location.h"
 #include "ardour/audioregion.h"
@@ -83,6 +83,8 @@ namespace ARDOUR {
 	class Crossfade;
 	class ChanCount;
 	class MidiOperator;
+	class MidiTrack;
+	class AudioTrack;
 }
 
 namespace LADSPA {
@@ -1189,7 +1191,7 @@ class Editor : public PublicEditor
 
 	/* import specific info */
 
-	struct EditorImportStatus : public ARDOUR::Session::ImportStatus {
+	struct EditorImportStatus : public ARDOUR::ImportStatus {
 	    Editing::ImportMode mode;
 	    nframes64_t pos;
 	    int target_tracks;

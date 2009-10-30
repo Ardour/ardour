@@ -23,7 +23,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "ardour/export_handler.h"
 #include "ardour/export_profile_manager.h"
 
 #include "public_editor.h"
@@ -39,6 +38,7 @@
 
 namespace ARDOUR {
 	class ExportStatus;
+	class ExportHandler;
 }
 
 class ExportTimespanSelector;

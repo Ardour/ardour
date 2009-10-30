@@ -32,7 +32,6 @@
 #include <sigc++/sigc++.h>
 
 #include "ardour/types.h"
-#include "ardour/session.h"
 #include "control_protocol/control_protocol.h"
 
 class OSCControllable;

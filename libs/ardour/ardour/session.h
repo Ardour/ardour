@@ -86,12 +86,14 @@ class AutomationList;
 class AuxInput;
 class BufferSet;
 class Bundle;
+class Butler;
 class ControlProtocolInfo;
 class Diskstream;
 class ExportHandler;
 class ExportStatus;
 class IO;
 class IOProcessor;
+class ImportStatus;
 class MidiDiskstream;
 class MidiRegion;
 class MidiSource;
@@ -114,7 +116,6 @@ class Slave;
 class Source;
 class TempoMap;
 class VSTPlugin;
-class Butler;
 
 class Session : public PBD::StatefulDestructible, public boost::noncopyable
 {
@@ -612,20 +613,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	/* source management */
 
-	struct ImportStatus : public InterThreadInfo {
-		std::string doing_what;
-
-		/* control info */
-		uint32_t total;
-		SrcQuality quality;
-		volatile bool freeze;
-		std::vector<Glib::ustring> paths;
-		bool replace_existing_source;
-
-		/* result */
-		SourceList sources;
-	};
-
 	void import_audiofiles (ImportStatus&);
 	bool sample_rate_convert (ImportStatus&, std::string infile, std::string& outfile);
 	std::string build_tmp_convert_name (std::string file);
@@ -644,13 +631,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	uint32_t source_use_count (boost::shared_ptr<const Source> src) const;
 
-	struct cleanup_report {
-		std::vector<std::string> paths;
-		int64_t        space;
-	};
-
-	int  cleanup_sources (cleanup_report&);
-	int  cleanup_trash_sources (cleanup_report&);
+	int  cleanup_sources (CleanupReport&);
+	int  cleanup_trash_sources (CleanupReport&);
 
 	int destroy_region (boost::shared_ptr<Region>);
 	int destroy_regions (std::list<boost::shared_ptr<Region> >);

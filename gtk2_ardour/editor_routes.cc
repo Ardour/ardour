@@ -25,6 +25,7 @@
 #include <cassert>
 
 #include "ardour/diskstream.h"
+#include "ardour/session.h"
 
 #include "editor.h"
 #include "keyboard.h"

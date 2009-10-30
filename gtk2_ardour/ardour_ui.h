@@ -59,40 +59,42 @@
 #include <gtkmm2ext/stateful_button.h>
 #include <gtkmm2ext/bindable_button.h>
 #include "ardour/ardour.h"
-#include "ardour/session.h"
 #include "ardour/types.h"
+#include "ardour/utils.h"
 
 #include "audio_clock.h"
 #include "ardour_dialog.h"
 #include "editing.h"
 #include "ui_config.h"
 
-class AudioClock;
-class PublicEditor;
-class Keyboard;
-class RCOptionEditor;
-class SessionOptionEditor;
-class KeyEditor;
-class Mixer_UI;
-class ConnectionEditor;
-class RouteParams_UI;
 class About;
-class Splash;
 class AddRouteDialog;
-class LocationUI;
-class ThemeManager;
-class BundleManager;
 class ArdourStartup;
+class AudioClock;
+class BundleManager;
+class ConnectionEditor;
+class KeyEditor;
+class Keyboard;
+class LocationUI;
+class Mixer_UI;
+class PublicEditor;
+class RCOptionEditor;
+class RouteParams_UI;
+class SessionOptionEditor;
+class Splash;
+class ThemeManager;
 
 namespace Gtkmm2ext {
 	class TearOff;
 }
 
 namespace ARDOUR {
-	class Route;
-	class Port;
-	class IO;
 	class ControlProtocolInfo;
+	class IO;
+	class Port;
+	class Route;
+	class RouteGroup;
+	class Location;
 }
 
 extern sigc::signal<void>  ColorsChanged;
@@ -618,8 +620,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	Gtk::MenuItem *cleanup_item;
 
- 	void display_cleanup_results (ARDOUR::Session::cleanup_report& rep, const gchar* list_title,
- 				      const std::string& plural_msg, const std::string& singular_msg);
+	void display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* list_title,
+				      const std::string& plural_msg, const std::string& singular_msg);
 	void cleanup ();
 	void flush_trash ();
 

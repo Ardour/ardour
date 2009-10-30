@@ -19,6 +19,7 @@
 
 #include "ardour/audioregion.h"
 #include "ardour/playlist.h"
+#include "ardour/session.h"
 #include "ardour/location.h"
 
 #include "pbd/memento_command.h"

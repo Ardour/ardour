@@ -36,7 +36,7 @@
 
 #include <gtkmm2ext/utils.h>
 #include "ardour/configuration.h"
-#include "ardour/configuration.h"
+#include "ardour/rc_configuration.h"
 
 #include "ardour/filesystem_paths.h"
 

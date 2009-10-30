@@ -2610,7 +2610,7 @@ ARDOUR_UI::hide_splash ()
 }
 
 void
-ARDOUR_UI::display_cleanup_results (Session::cleanup_report& rep, const gchar* list_title,
+ARDOUR_UI::display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* list_title,
 				    const string& plural_msg, const string& singular_msg)
 {
 	size_t removed;
@@ -2765,7 +2765,7 @@ After cleanup, unused audio files will be moved to a \
 		return;
 	}
 
-	Session::cleanup_report rep;
+	ARDOUR::CleanupReport rep;
 
 	editor->prepare_for_cleanup ();
 
@@ -2812,7 +2812,7 @@ ARDOUR_UI::flush_trash ()
 		return;
 	}
 
-	Session::cleanup_report rep;
+	ARDOUR::CleanupReport rep;
 
 	if (session->cleanup_trash_sources (rep)) {
 		return;

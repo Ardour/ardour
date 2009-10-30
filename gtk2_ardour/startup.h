@@ -20,6 +20,8 @@
 #include <gtkmm/liststore.h>
 #include <gtkmm/combobox.h>
 
+#include "ardour/utils.h"
+
 class EngineControl;
 
 class ArdourStartup : public Gtk::Assistant {

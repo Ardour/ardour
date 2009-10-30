@@ -26,6 +26,7 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/data_type.h"
 #include "ardour/chan_mapping.h"
+#include "ardour/session.h"
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>

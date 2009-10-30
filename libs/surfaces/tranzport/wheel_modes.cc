@@ -37,7 +37,6 @@
 
 #include "ardour/route.h"
 #include "ardour/audio_track.h"
-#include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/location.h"
 #include "ardour/dB.h"

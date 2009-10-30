@@ -423,6 +423,11 @@ namespace ARDOUR {
 		Groove
 	};
 
+	struct CleanupReport {
+		std::vector<std::string> paths;
+		int64_t                  space;
+	};
+
 } // namespace ARDOUR
 
 

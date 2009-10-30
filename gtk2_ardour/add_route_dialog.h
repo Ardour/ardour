@@ -34,7 +34,6 @@
 
 #include "ardour/types.h"
 #include "ardour/template_utils.h"
-#include "ardour/session.h"
 
 #include "ardour_dialog.h"
 

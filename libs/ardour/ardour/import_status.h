@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis
+    Copyright (C) 2000 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -15,25 +15,35 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-*/
+ */
 
-#ifndef __ardour_session_region_h__
-#define __ardour_session_region_h__
+#ifndef __ardour_import_status_h__
+#define __ardour_import_status_h__
 
-#include "ardour/session.h"
-#include "ardour/audioregion.h"
+#include <string>
+#include <vector>
+
+#include <stdint.h>
+#include <sigc++/signal.h>
+
+#include "ardour/types.h"
 
 namespace ARDOUR {
 
-template<class T> void
-Session::foreach_region (T *obj, void (T::*func)(boost::shared_ptr<Region>))
-{
-	Glib::Mutex::Lock lm (region_lock);
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); i++) {
-		(obj->*func) (i->second);
-	}
-}
+struct ImportStatus : public InterThreadInfo {
+	std::string doing_what;
+
+	/* control info */
+	uint32_t                   total;
+	SrcQuality                 quality;
+	volatile bool              freeze;
+	std::vector<Glib::ustring> paths;
+	bool                       replace_existing_source;
+
+	/* result */
+	SourceList sources;
+};
 
 } // namespace ARDOUR
 
-#endif /* __ardour_session_region_h__ */
+#endif /* __ardour_import_status_h__ */

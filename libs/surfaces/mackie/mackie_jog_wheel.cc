@@ -1,5 +1,7 @@
 #include <cmath>
 
+#include <ardour/session.h>
+
 #include "mackie_jog_wheel.h"
 
 #include "mackie_control_protocol.h"
@@ -24,7 +26,7 @@ JogWheel::State JogWheel::jog_wheel_state() const
 {
 	if ( !_jog_wheel_states.empty() )
 		return _jog_wheel_states.top();
-	else 
+	else
 		return scroll;
 }
 

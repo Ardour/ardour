@@ -32,6 +32,8 @@
 #include "ardour/source.h"
 #include "ardour/region_factory.h"
 #include "ardour/profile.h"
+#include "ardour/rc_configuration.h"
+#include "ardour/session.h"
 
 #include "audio_streamview.h"
 #include "audio_region_view.h"

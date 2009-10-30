@@ -25,6 +25,8 @@
 
 #include "pbd/error.h"
 
+#include "ardour/session.h"
+
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "mixer_ui.h"

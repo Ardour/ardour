@@ -31,6 +31,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/region_factory.h"
 #include "ardour/smf_source.h"
+#include "ardour/session.h"
 
 #include "ardour_ui.h"
 #include "canvas-simplerect.h"

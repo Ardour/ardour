@@ -37,6 +37,7 @@
 #include "editor_route_groups.h"
 
 #include "ardour/route.h"
+#include "ardour/session.h"
 
 #include "i18n.h"
 

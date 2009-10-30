@@ -45,20 +45,21 @@
 
 #include "evoral/SMF.hpp"
 
+#include "ardour/analyser.h"
 #include "ardour/ardour.h"
-#include "ardour/session.h"
-#include "ardour/session_directory.h"
 #include "ardour/audio_diskstream.h"
 #include "ardour/audioengine.h"
-#include "ardour/sndfilesource.h"
-#include "ardour/sndfile_helpers.h"
 #include "ardour/audioregion.h"
+#include "ardour/import_status.h"
 #include "ardour/region_factory.h"
-#include "ardour/source_factory.h"
 #include "ardour/resampled_source.h"
-#include "ardour/sndfileimportable.h"
-#include "ardour/analyser.h"
+#include "ardour/session.h"
+#include "ardour/session_directory.h"
 #include "ardour/smf_source.h"
+#include "ardour/sndfile_helpers.h"
+#include "ardour/sndfileimportable.h"
+#include "ardour/sndfilesource.h"
+#include "ardour/source_factory.h"
 #include "ardour/tempo.h"
 
 #ifdef HAVE_COREAUDIO
@@ -260,7 +261,7 @@ compose_status_message (const string& path,
 }
 
 static void
-write_audio_data_to_new_files (ImportableSource* source, Session::ImportStatus& status,
+write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 			       vector<boost::shared_ptr<Source> >& newfiles)
 {
 	const nframes_t nframes = ResampledImportableSource::blocksize;
@@ -312,7 +313,7 @@ write_audio_data_to_new_files (ImportableSource* source, Session::ImportStatus& 
 }
 
 static void
-write_midi_data_to_new_files (Evoral::SMF* source, Session::ImportStatus& status,
+write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 		vector<boost::shared_ptr<Source> >& newfiles)
 {
 	uint32_t buf_size = 4;

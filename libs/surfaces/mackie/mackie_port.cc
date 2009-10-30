@@ -30,7 +30,7 @@
 #include "midi++/types.h"
 #include "midi++/port.h"
 #include "sigc++/sigc++.h"
-#include "ardour/configuration.h"
+#include "ardour/rc_configuration.h"
 
 #include "i18n.h"
 

@@ -32,6 +32,7 @@
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/tearoff.h>
 
+#include "ardour/session.h"
 #include "ardour/audioengine.h"
 #include "ardour/ardour.h"
 #include "ardour/profile.h"

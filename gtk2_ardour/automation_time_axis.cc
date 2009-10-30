@@ -23,6 +23,7 @@
 #include "ardour/automation_control.h"
 #include "ardour/event_type_map.h"
 #include "ardour/route.h"
+#include "ardour/session.h"
 
 #include "ardour_ui.h"
 #include "automation_time_axis.h"

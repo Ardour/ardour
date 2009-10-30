@@ -28,8 +28,8 @@
 #include "midi++/port.h"
 #include "midi++/manager.h"
 
-#include "ardour/route.h"
 #include "ardour/session.h"
+#include "ardour/route.h"
 
 #include "generic_midi_control_protocol.h"
 #include "midicontrollable.h"

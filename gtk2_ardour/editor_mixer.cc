@@ -24,6 +24,7 @@
 #include "pbd/enumwriter.h"
 
 #include "ardour/audioengine.h"
+#include "ardour/session.h"
 
 #include "editor.h"
 #include "mixer_strip.h"

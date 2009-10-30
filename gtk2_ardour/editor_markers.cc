@@ -24,6 +24,7 @@
 #include <libgnomecanvas/libgnomecanvas.h>
 #include <gtkmm2ext/gtk_ui.h>
 
+#include "ardour/session.h"
 #include "ardour/location.h"
 #include "ardour/profile.h"
 #include "pbd/memento_command.h"

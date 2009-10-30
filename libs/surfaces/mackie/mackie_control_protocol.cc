@@ -40,8 +40,8 @@
 #include "pbd/memento_command.h"
 #include "pbd/convert.h"
 
-#include "ardour/route.h"
 #include "ardour/session.h"
+#include "ardour/route.h"
 #include "ardour/location.h"
 #include "ardour/dB.h"
 #include "ardour/panner.h"

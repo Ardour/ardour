@@ -19,6 +19,7 @@
 
 #include <gtkmm/liststore.h>
 #include "gtkmm2ext/choice.h"
+#include "ardour/session.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/session_directory.h"
 #include "editor_snapshots.h"

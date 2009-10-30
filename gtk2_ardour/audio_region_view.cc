@@ -29,6 +29,7 @@
 #include "ardour/audiosource.h"
 #include "ardour/audio_diskstream.h"
 #include "ardour/profile.h"
+#include "ardour/session.h"
 
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"

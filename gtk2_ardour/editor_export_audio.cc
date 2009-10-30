@@ -19,6 +19,8 @@
 
 /* Note: public Editor methods are documented in public_editor.h */
 
+#define __STDC_FORMAT_MACROS 1
+#include <inttypes.h>
 #include <unistd.h>
 #include <climits>
 
@@ -44,6 +46,7 @@
 #include "ardour/session_directory.h"
 #include "ardour/source_factory.h"
 #include "ardour/audiofilesource.h"
+#include "ardour/session.h"
 
 #include "i18n.h"
 

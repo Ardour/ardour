@@ -27,6 +27,7 @@
 #include "ardour/source.h"
 #include "ardour/diskstream.h"
 #include "ardour/track.h"
+#include "ardour/session.h"
 
 #include "streamview.h"
 #include "region_view.h"

@@ -67,6 +67,7 @@
 #include "ardour/utils.h"
 #include "ardour/region_factory.h"
 #include "ardour/source_factory.h"
+#include "ardour/session.h"
 
 #include <bitset>
 

@@ -22,6 +22,7 @@
 #include "ardour/amp.h"
 #include "ardour/io.h"
 #include "ardour/return.h"
+#include "ardour/rc_configuration.h"
 
 #include "utils.h"
 #include "return_ui.h"

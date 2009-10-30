@@ -27,10 +27,12 @@
 #include <sigc++/signal.h>
 
 #include "ardour/types.h"
-#include "ardour/session.h"
 
 class XMLTree;
 namespace ARDOUR {
+
+class Session;
+class ImportStatus;
 
 /// Virtual interface class for element importers
 class ElementImporter
@@ -51,7 +53,7 @@ class ElementImporter
 	virtual std::string get_info () const = 0;
 
 	/** Gets import status, if applicable. */
-	virtual Session::ImportStatus * get_import_status () { return 0; }
+	virtual ImportStatus * get_import_status () { return 0; }
 
 	/** Prepares to move element
 	 *

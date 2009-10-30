@@ -41,6 +41,7 @@
 
 #include "midi++/manager.h"
 
+#include "ardour/session.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/ladspa_plugin.h"

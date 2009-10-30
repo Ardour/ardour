@@ -17,6 +17,7 @@
  *  
  *   */
 
+#include "ardour/rc_configuration.h"
 #include "control_protocol/control_protocol.h"
 #include "osc.h"
 

@@ -2436,7 +2436,7 @@ struct RegionCounter {
 };
 
 int
-Session::cleanup_sources (Session::cleanup_report& rep)
+Session::cleanup_sources (CleanupReport& rep)
 {
 	// FIXME: needs adaptation to midi
 
@@ -2699,7 +2699,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 }
 
 int
-Session::cleanup_trash_sources (Session::cleanup_report& rep)
+Session::cleanup_trash_sources (CleanupReport& rep)
 {
 	// FIXME: needs adaptation for MIDI
 

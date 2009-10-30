@@ -33,6 +33,7 @@
 #include "ardour/types.h"
 #include "ardour/element_importer.h"
 #include "ardour/element_import_handler.h"
+#include "ardour/import_status.h"
 
 namespace ARDOUR {
 
@@ -76,7 +77,7 @@ class AudioRegionImporter : public ElementImporter
 
 	// Interface implementation
 	std::string get_info () const;
-	Session::ImportStatus * get_import_status () { return &status; }
+	ImportStatus * get_import_status () { return &status; }
 
 	// other stuff
 	void add_sources_to_session ();
@@ -94,7 +95,7 @@ class AudioRegionImporter : public ElementImporter
 	PBD::ID old_id;
 	PBD::ID id;
 	std::list<std::string> filenames;
-	Session::ImportStatus status;
+	ImportStatus status;
 
 	bool parse_xml_region ();
 	bool parse_source_xml ();

@@ -17,13 +17,16 @@
 
 */
 
+#define __STDC_FORMAT_MACROS 1
 #include <cstdio> // for sprintf, grrr
 #include <cmath>
+#include <inttypes.h>
 
 #include <string>
 
 #include <gtk/gtkaction.h>
 
+#include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/profile.h"
 #include <gtkmm2ext/gtk_ui.h>

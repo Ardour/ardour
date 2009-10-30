@@ -25,9 +25,7 @@
 #include <jack/jack.h>
 
 #include <sigc++/signal.h>
-#include "ardour/ardour.h"
-#include "ardour/session.h"
-#include "ardour/audioengine.h"
+#include "ardour/types.h"
 #include "midi++/parser.h"
 #include "midi++/types.h"
 
@@ -36,6 +34,10 @@ namespace MIDI {
 }
 
 namespace ARDOUR {
+
+class TempoMap;
+class Session;
+
 /**
  * @class Slave
  *
@@ -177,16 +179,17 @@ class SlaveSessionProxy : public ISlaveSessionProxy {
 	Session&    session;
 
   public:
-	SlaveSessionProxy(Session &s) : session(s) {};
-	TempoMap& tempo_map()                 const   { return session.tempo_map();                         }
-	nframes_t frame_rate()                const   { return session.frame_rate();                        }
-	nframes_t audible_frame ()            const   { return session.audible_frame();                     }
-	nframes_t transport_frame ()          const   { return session.transport_frame();                   }
-	nframes_t frames_since_cycle_start () const   { return session.engine().frames_since_cycle_start(); }
-	nframes_t frame_time ()               const   { return session.engine().frame_time();               }
+	SlaveSessionProxy(Session &s) : session(s) {}
 
-	void request_locate (nframes_t frame, bool with_roll = false) { session.request_locate(frame, with_roll); }
-	void request_transport_speed (double speed)                   { session.request_transport_speed(speed);   }
+	TempoMap& tempo_map()                 const;
+	nframes_t frame_rate()                const;
+	nframes_t audible_frame ()            const;
+	nframes_t transport_frame ()          const;
+	nframes_t frames_since_cycle_start () const;
+	nframes_t frame_time ()               const;
+
+	void request_locate (nframes_t frame, bool with_roll = false);
+	void request_transport_speed (double speed);
 };
 
 struct SafeTime {

@@ -26,7 +26,6 @@
 #include <glibmm/thread.h>
 
 #include "ardour/types.h"
-#include "ardour/session.h"
 #include "midi++/types.h"
 
 #include "control_protocol/control_protocol.h"

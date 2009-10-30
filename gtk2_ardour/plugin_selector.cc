@@ -38,6 +38,7 @@
 #include "ardour/plugin_manager.h"
 #include "ardour/plugin.h"
 #include "ardour/configuration.h"
+#include "ardour/session.h"
 
 #include "ardour_ui.h"
 #include "plugin_selector.h"

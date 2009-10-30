@@ -20,6 +20,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/basename.h"
 #include "ardour/diskstream.h"
+#include "ardour/session.h"
 #include "ardour/dB.h"
 #include "ardour/region_factory.h"
 #include "ardour/midi_diskstream.h"

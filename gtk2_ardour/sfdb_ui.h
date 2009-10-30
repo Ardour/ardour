@@ -38,7 +38,6 @@
 #include <gtkmm/label.h>
 #include <gtkmm/textview.h>
 
-#include "ardour/session.h"
 #include "ardour/audiofilesource.h"
 
 #include "ardour_dialog.h"

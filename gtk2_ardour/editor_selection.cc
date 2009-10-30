@@ -22,6 +22,7 @@
 
 #include "pbd/stacktrace.h"
 
+#include "ardour/session.h"
 #include "ardour/diskstream.h"
 #include "ardour/playlist.h"
 #include "ardour/route_group.h"

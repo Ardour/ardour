@@ -22,6 +22,7 @@
 #include "ardour/amp.h"
 #include "ardour/io.h"
 #include "ardour/send.h"
+#include "ardour/rc_configuration.h"
 
 #include "utils.h"
 #include "send_ui.h"

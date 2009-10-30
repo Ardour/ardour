@@ -23,6 +23,7 @@
 #include <gtkmm2ext/utils.h>
 
 #include "ardour/profile.h"
+#include "ardour/rc_configuration.h"
 
 #include "ardour_ui.h"
 #include "editor.h"
