@@ -54,7 +54,7 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	  /* XXX cannot edit sync point or start yet */
 	  sync_offset_clock (X_("regionsyncoffset"), true, X_("AudioRegionEditorClock"), false),
 	  start_clock (X_("regionstart"), true, X_("AudioRegionEditorClock"), false),
-	gain_adjustment(accurate_coefficient_to_dB(_region->scale_amplitude()), -40.0, +40.0, 0.1, 1.0, 0)
+	  gain_adjustment(accurate_coefficient_to_dB(_region->scale_amplitude()), -40.0, +40.0, 0.1, 1.0, 0)
 {
 	position_clock.set_session (&_session);
 	end_clock.set_session (&_session);
@@ -125,13 +125,6 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	time_table.attach (start_alignment, 0, 1, 4, 5, Gtk::FILL, Gtk::FILL);
 	time_table.attach (start_clock, 1, 2, 4, 5, Gtk::FILL, Gtk::FILL);
 
-	gain_label.set_name ("AudioRegionEditorLabel");
-	gain_label.set_text (_("Scale amplitude:"));
-	gain_label.set_alignment (1, 0.5);
-	gain_entry.configure (gain_adjustment, 0.0, 1);
-	time_table.attach (gain_label, 0, 1, 6, 7, Gtk::FILL, Gtk::FILL);
-	time_table.attach (gain_entry, 1, 2, 6, 7, Gtk::FILL, Gtk::FILL);
-		
 	gain_label.set_name ("AudioRegionEditorLabel");
 	gain_label.set_text (_("Scale amplitude:"));
 	gain_label.set_alignment (1, 0.5);
