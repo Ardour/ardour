@@ -1244,9 +1244,9 @@ Session::request_roll_at_and_return (nframes_t start, nframes_t return_to)
 void
 Session::request_bounded_roll (nframes_t start, nframes_t end)
 {
-	request_stop ();
  	Event *ev = new Event (Event::StopOnce, Event::Replace, end, Event::Immediate, 0.0);
 	queue_event (ev);
+
 	request_locate (start, true);
 }
 

@@ -2620,7 +2620,6 @@ Editor::play_selected_region ()
 		}
 	}
 
-	session->request_stop ();
 	session->request_bounded_roll (start, end);
 }
 
