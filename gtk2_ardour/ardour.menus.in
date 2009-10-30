@@ -41,6 +41,7 @@
   	       </menu>
                <menuitem action='record-roll'/>
                <menuitem action='Record'/>
+               <menuitem action='ToggleRollMaybe'/>
                <menuitem action='ToggleRollForgetCapture'/>
 	       <menu action="SetLoopMenu">
 	       	       <menuitem action='set-loop-from-edit-range'/>

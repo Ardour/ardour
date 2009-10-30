@@ -16,6 +16,7 @@
 (gtk_accel_path "<Actions>/Editor/extend-range-to-start-of-region" "leftanglebracket")
 
 (gtk_accel_path "<Actions>/Transport/ToggleRoll" "space")
+(gtk_accel_path "<Actions>/Transport/ToggleRollMaybe" "<%PRIMARY%><%SECONDARY%>space")
 (gtk_accel_path "<Actions>/Editor/play-edit-range" "<%SECONDARY%>space")
 (gtk_accel_path "<Actions>/Editor/play-from-edit-point-and-return" "<%PRIMARY%><%TERTIARY%>space")
 (gtk_accel_path "<Actions>/Transport/ToggleRollForgetCapture" "<%PRIMARY%>space")

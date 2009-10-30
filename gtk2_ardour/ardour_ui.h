@@ -578,7 +578,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void transport_forward (int option);
 	void transport_rewind (int option);
 	void transport_loop ();
-	void toggle_roll (bool with_abort);
+	void toggle_roll (bool with_abort, bool roll_out_of_bounded_mode);
 
 	bool _session_is_new;
 	void connect_to_session (ARDOUR::Session *);

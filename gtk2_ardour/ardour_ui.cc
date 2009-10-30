@@ -1485,7 +1485,7 @@ ARDOUR_UI::transport_roll ()
 }
 
 void
-ARDOUR_UI::toggle_roll (bool with_abort)
+ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 {
 	
 	if (!session) {
@@ -1509,10 +1509,19 @@ ARDOUR_UI::toggle_roll (bool with_abort)
 	bool rolling = session->transport_rolling();
 	bool affect_transport = true;
 
-	if (rolling) {
+	if (rolling && roll_out_of_bounded_mode) {
 		/* drop out of loop/range playback but leave transport rolling */
 		if (session->get_play_loop()) {
-			affect_transport = false;
+			if (Config->get_seamless_loop()) {
+				/* the disk buffers contain copies of the loop - we can't 
+				   just keep playing, so stop the transport. the user
+				   can restart as they wish.
+				*/
+				affect_transport = true;
+			} else {
+				/* disk buffers are normal, so we can keep playing */
+				affect_transport = false;
+			}
 			session->request_play_loop (false, true);
 		} else if (session->get_play_range ()) {
 			affect_transport = false;
