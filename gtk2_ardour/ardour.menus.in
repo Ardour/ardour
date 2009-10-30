@@ -35,6 +35,7 @@
 	       <menu action="PlayMenu">
 	       	     <menuitem action='play-selected-regions'/>
 		     <menuitem action='play-edit-range'/>
+		     <menuitem action='PlaySelection'/>
                      <menuitem action='play-from-edit-point-and-return'/>
 		     <menuitem action='Loop'/>
   	       </menu>
