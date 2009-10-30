@@ -389,63 +389,77 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 			bool do_locate = false;
 
 			if (_requested_return_frame >= 0) {
+
+				/* explicit return request pre-queued in event list. overrides everything else */
+				
+				cerr << "explicit auto-return to " << _requested_return_frame << endl;
+
 				_transport_frame = _requested_return_frame;
-				_requested_return_frame = -1;
 				do_locate = true;
+
 			} else {
-				if (play_loop && !synced_to_jack()) {
-					Location *location = _locations.auto_loop_location();
-					
-					if (location != 0) {
-						_transport_frame = location->start();
-						do_locate = true;
+				if (Config->get_auto_return()) {
+
+					if (play_loop) {
+
+						/* don't try to handle loop play when synced to JACK */
+
+						if (!synced_to_jack()) {
+
+							Location *location = _locations.auto_loop_location();
+							
+							if (location != 0) {
+								_transport_frame = location->start();
+							} else {
+								_transport_frame = _last_roll_location;
+							}
+							do_locate = true;
+						}
+
+					} else if (_play_range) {
+
+						/* return to start of range */
+
+						if (!current_audio_range.empty()) {
+							_transport_frame = current_audio_range.front().start;
+							do_locate = true;
+						}
+
 					} else {
-						_transport_frame = last_stop_frame;
+						
+						/* regular auto-return */
+						
+						_transport_frame = _last_roll_location;
+						do_locate = true;
 					}
-				} else {
-					_transport_frame = last_stop_frame;
-				}
-				_requested_return_frame = -1;
+				} 
 			}
 
-			if (synced_to_jack() && !play_loop) {
-				do_locate = true;
-			}
-			
+			_requested_return_frame = -1;			
+
 			if (do_locate) {
-				// cerr << "non-realtimestop: transport locate to " << _transport_frame << endl;
 				_engine.transport_locate (_transport_frame);
 			}
 		} 
 
-#ifndef LEAVE_TRANSPORT_UNADJUSTED
 	}
-#endif
 
-		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-			if (!(*i)->hidden()) {
-				if ((*i)->speed() != 1.0f || (*i)->speed() != -1.0f) {
-					(*i)->seek ((nframes_t) (_transport_frame * (double) (*i)->speed()));
-				}
-				else {
-					(*i)->seek (_transport_frame);
-				}
+	/* this for() block can be put inside the previous if() and has the effect of ... ??? what */
+
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+		if (!(*i)->hidden()) {
+			if ((*i)->speed() != 1.0f || (*i)->speed() != -1.0f) {
+				(*i)->seek ((nframes_t) (_transport_frame * (double) (*i)->speed()));
 			}
-			if (on_entry != g_atomic_int_get (&butler_should_do_transport_work)) {
-				finished = false;
-				/* we will be back */
-				return;
+			else {
+				(*i)->seek (_transport_frame);
 			}
 		}
-#ifdef LEAVE_TRANSPORT_UNADJUSTED
-	}
-#endif
-
-        if (_requested_return_frame < 0) {
-		last_stop_frame = _transport_frame;
-	} else {
-		last_stop_frame = _requested_return_frame;
-		_requested_return_frame = -1;
+		if (on_entry != g_atomic_int_get (&butler_should_do_transport_work)) {
+			finished = false;
+			/* we will be back */
+			return;
+		}
 	}
 
         have_looped = false; 

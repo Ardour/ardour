@@ -1470,21 +1470,14 @@ ARDOUR_UI::transport_roll ()
 	}
 
 	bool rolling = session->transport_rolling();
-	bool relocate = true;
 
 	if (session->get_play_loop()) {
 		session->request_play_loop (false, true);
-		relocate = false;
 	} else if (session->get_play_range ()) {
 		session->request_play_range (false, true);
-		relocate = false;
 	} 
 
-	if (rolling) {
-		if (relocate) {
-			session->request_locate (session->last_transport_start(), true);
-		}
-	} else {
+	if (!rolling) {
 		session->request_transport_speed (1.0f);
 	}
 
@@ -1529,10 +1522,6 @@ ARDOUR_UI::toggle_roll (bool with_abort)
 
 	if (affect_transport) {
 
-		if (rolling) {
-			session->request_locate (session->last_transport_start(), true);
-		}
-		
 		if (rolling) {
 			session->request_stop (with_abort);
 		} else {

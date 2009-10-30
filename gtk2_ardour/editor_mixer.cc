@@ -216,7 +216,8 @@ Editor::update_current_screen ()
 
 		nframes64_t frame;
 
-		frame = session->audible_frame();
+		//frame = session->audible_frame();
+		frame = session->transport_frame ();
 
 		if (_dragging_playhead) {
 			goto almost_done;

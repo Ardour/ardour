@@ -1108,9 +1108,9 @@ Session::auto_loop_changed (Location* location)
 
 	if (transport_rolling() && play_loop) {
 
-		//if (_transport_frame < location->start() || _transport_frame > location->end()) {
+		// if (_transport_frame > location->end()) {
 
-		if (_transport_frame > location->end()) {
+		if (_transport_frame < location->start() || _transport_frame > location->end()) {
 			// relocate to beginning of loop
 			clear_events (Event::LocateRoll);
 			
