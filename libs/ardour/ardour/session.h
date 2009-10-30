@@ -1134,13 +1134,7 @@ class Session : public PBD::StatefulDestructible
 		}
 	}
 
-	bool maybe_stop (nframes_t limit) {
-		if ((_transport_speed > 0.0f && _transport_frame >= limit) || (_transport_speed < 0.0f && _transport_frame == 0)) {
-			stop_transport ();
-			return true;
-		}
-		return false;
-	}
+	bool maybe_stop (nframes_t limit);
 
 	bool maybe_sync_start (nframes_t&);
 

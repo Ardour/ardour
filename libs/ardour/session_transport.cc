@@ -1377,3 +1377,17 @@ Session::reset_jack_connection (jack_client_t* jack)
 		js->reset_client (jack);
 	}
 }
+
+bool
+Session::maybe_stop (nframes_t limit)
+{
+	if ((_transport_speed > 0.0f && _transport_frame >= limit) || (_transport_speed < 0.0f && _transport_frame == 0)) {
+		if (synced_to_jack () && Config->get_jack_time_master ()) {
+			_engine.transport_stop ();
+		} else if (!synced_to_jack ()) {
+			stop_transport ();
+		}
+		return true;
+	}
+	return false;
+}
