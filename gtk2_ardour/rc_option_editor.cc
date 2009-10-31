@@ -479,12 +479,13 @@ static const struct {
     guint modifier;
 } modifiers[] = {
 
+	{ "Unmodified", 0 },
+
 #ifdef GTKOSX
 
 	/* Command = Meta
 	   Option/Alt = Mod1
 	*/
-
 	{ "Shift", GDK_SHIFT_MASK },
 	{ "Command", GDK_META_MASK },
 	{ "Control", GDK_CONTROL_MASK },
@@ -515,7 +516,7 @@ class KeyboardOptions : public OptionEditorBox
 {
 public:
 	KeyboardOptions () :
-		  _delete_button_adjustment (3, 1, 5),
+		  _delete_button_adjustment (3, 1, 12),
 		  _delete_button_spin (_delete_button_adjustment),
 		  _edit_button_adjustment (3, 1, 5),
 		  _edit_button_spin (_edit_button_adjustment)
