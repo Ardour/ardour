@@ -53,7 +53,7 @@ class RCUManager
 
 	virtual ~RCUManager() { delete x.m_rcu_value; }
 
-        boost::shared_ptr<T> reader () const { return *((boost::shared_ptr<T> *) g_atomic_pointer_get (&x.gptr)); }
+	boost::shared_ptr<T> reader () const { return *((boost::shared_ptr<T> *) g_atomic_pointer_get (&x.gptr)); }
 
 	/* this is an abstract base class - how these are implemented depends on the assumptions
 	   that one can make about the users of the RCUManager. See SerializedRCUManager below
@@ -192,7 +192,7 @@ public:
 	}
 
 private:
-	Glib::Mutex			 m_lock;
+	Glib::Mutex                      m_lock;
 	boost::shared_ptr<T>*            current_write_old;
 	std::list<boost::shared_ptr<T> > m_dead_wood;
 };
