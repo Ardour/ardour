@@ -96,7 +96,7 @@ class RCUManager
    The class maintains a lock-protected "dead wood" list of old value of
    *m_rcu_value (i.e. shared_ptr<T>). The list is cleaned up every time we call
    write_copy(). If the list is the last instance of a shared_ptr<T> that
-   references the object (determined by inspecting its use_count()) then we
+   references the object (determined by shared_ptr::unique()) then we
    erase it from the list, thus deleting the object it points to.  This is lazy
    destruction - the SerializedRCUManager assumes that there will sufficient
    calls to write_copy() to ensure that we do not inadvertently leave objects
@@ -127,7 +127,7 @@ public:
 		typename std::list<boost::shared_ptr<T> >::iterator i;
 
 		for (i = m_dead_wood.begin(); i != m_dead_wood.end(); ) {
-			if ((*i).use_count() == 1) {
+			if ((*i).unique()) {
 				i = m_dead_wood.erase (i);
 			} else {
 				++i;
@@ -222,7 +222,7 @@ public:
 	}
 
 	~RCUWriter() {
-		if (m_copy.use_count() == 1) {
+		if (m_copy.unique()) {
 			/* As intended, our copy is the only reference
 			   to the object pointed to by m_copy. Update
 			   the manager with the (presumed) modified
