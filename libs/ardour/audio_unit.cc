@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+    Copyright (C) 2006-2009 Paul Davis 
 	
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -71,8 +71,57 @@ _render_callback(void *userData,
 		 UInt32       inNumberFrames,
 		 AudioBufferList*       ioData)
 {
-	return ((AUPlugin*)userData)->render_callback (ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
+	if (userData) {
+		return ((AUPlugin*)userData)->render_callback (ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
+	}
+	return paramErr;
 }
+
+static OSStatus 
+_get_beat_and_tempo_callback (void*                userData,
+			      Float64*             outCurrentBeat, 
+			      Float64*             outCurrentTempo)
+{
+	if (userData) {
+		return ((AUPlugin*)userData)->get_beat_and_tempo_callback (outCurrentBeat, outCurrentTempo);
+	}
+    
+	return paramErr;
+}
+
+static OSStatus 
+_get_musical_time_location_callback (void *     userData,
+				     UInt32 *   outDeltaSampleOffsetToNextBeat,
+				     Float32 *  outTimeSig_Numerator,
+				     UInt32 *   outTimeSig_Denominator,
+				     Float64 *  outCurrentMeasureDownBeat)
+{
+	if (userData) {
+		return ((AUPlugin*)userData)->get_musical_time_location_callback (outDeltaSampleOffsetToNextBeat,
+										  outTimeSig_Numerator,
+										  outTimeSig_Denominator,
+										  outCurrentMeasureDownBeat);
+	}
+	return paramErr;
+}
+
+static OSStatus 
+_get_transport_state_callback (void*     userData,
+			       Boolean*  outIsPlaying,
+			       Boolean*  outTransportStateChanged,
+			       Float64*  outCurrentSampleInTimeLine,
+			       Boolean*  outIsCycling,
+			       Float64*  outCycleStartBeat,
+			       Float64*  outCycleEndBeat)
+{
+	if (userData) {
+		return ((AUPlugin*)userData)->get_transport_state_callback (outIsPlaying, outTransportStateChanged,
+									    outCurrentSampleInTimeLine, outIsCycling,
+									    outCycleStartBeat, outCycleEndBeat);
+	}
+	return paramErr;
+}
+
 
 static int 
 save_property_list (CFPropertyListRef propertyList, Glib::ustring path)
@@ -385,6 +434,22 @@ AUPlugin::init ()
 		cerr << "cannot install render callback (err = " << err << ')' << endl;
 		throw failed_constructor();
 	}
+
+	/* tell the plugin about tempo/meter/transport callbacks in case it wants them */
+
+	HostCallbackInfo info;
+	memset (&info, 0, sizeof (HostCallbackInfo));
+	info.hostUserData = this;
+	info.beatAndTempoProc = _get_beat_and_tempo_callback;
+	info.musicalTimeLocationProc = _get_musical_time_location_callback;
+	info.transportStateProc = _get_transport_state_callback;
+	
+        //ignore result of this - don't care if the property isn't supported
+	unit->SetProperty (kAudioUnitProperty_HostCallbacks, 
+			   kAudioUnitScope_Global, 
+			   0, //elementID 
+			   &info,
+			   sizeof (HostCallbackInfo));
 
 	unit->GetElementCount (kAudioUnitScope_Global, global_elements);
 	unit->GetElementCount (kAudioUnitScope_Input, input_elements);
@@ -969,6 +1034,33 @@ AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, 
 	}
 
 	return -1;
+}
+
+OSStatus 
+AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat, 
+				       Float64* outCurrentTempo)
+{
+	return kAudioUnitErr_CannotDoInCurrentContext;
+}
+
+OSStatus 
+AUPlugin::get_musical_time_location_callback (UInt32*  outDeltaSampleOffsetToNextBeat,
+					     Float32*  outTimeSig_Numerator,
+					     UInt32*   outTimeSig_Denominator,
+					     Float64*  outCurrentMeasureDownBeat)
+{
+	return kAudioUnitErr_CannotDoInCurrentContext;
+}
+
+OSStatus 
+AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
+					Boolean*  outTransportStateChanged,
+					Float64*  outCurrentSampleInTimeLine,
+					Boolean*  outIsCycling,
+					Float64*  outCycleStartBeat,
+					Float64*  outCycleEndBeat)
+{
+	return kAudioUnitErr_CannotDoInCurrentContext;
 }
 
 set<uint32_t>

@@ -115,6 +115,24 @@ class AUPlugin : public ARDOUR::Plugin
 				 UInt32       inBusNumber,
 				 UInt32       inNumberFrames,
 				 AudioBufferList*       ioData);
+
+	/* "host" callbacks */
+
+	OSStatus get_beat_and_tempo_callback (Float64* outCurrentBeat, 
+					      Float64* outCurrentTempo);
+
+	OSStatus get_musical_time_location_callback (UInt32*  outDeltaSampleOffsetToNextBeat,
+						     Float32*  outTimeSig_Numerator,
+						     UInt32*   outTimeSig_Denominator,
+						     Float64*  outCurrentMeasureDownBeat);
+
+	OSStatus get_transport_state_callback (Boolean*  outIsPlaying,
+					       Boolean*  outTransportStateChanged,
+					       Float64*  outCurrentSampleInTimeLine,
+					       Boolean*  outIsCycling,
+					       Float64*  outCycleStartBeat,
+					       Float64*  outCycleEndBeat);
+
   private:
         boost::shared_ptr<CAComponent> comp;
         boost::shared_ptr<CAAudioUnit> unit;
@@ -197,7 +215,7 @@ class AUPluginInfo : public PluginInfo {
 	
 	static bool cached_io_configuration (const std::string&, UInt32, CAComponent&, AUPluginCachedInfo&, const std::string& name);
 	static void add_cached_info (const std::string&, AUPluginCachedInfo&);
-	static void save_cached_info ();
+	static void save_cached_info ();	
 };
 
 typedef boost::shared_ptr<AUPluginInfo> AUPluginInfoPtr;
