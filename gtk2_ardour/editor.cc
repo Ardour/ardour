@@ -1669,7 +1669,7 @@ Editor::build_track_region_context_menu (nframes64_t frame)
  				boost::shared_ptr<Region> dummy_region; // = NULL		
  				add_region_context_items (atv->audio_view(), dummy_region, edit_items);			
  			} else {
- 				for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
+ 				for (Playlist::RegionList::reverse_iterator i = regions->rbegin(); i != regions->rend(); ++i) {
  					add_region_context_items (atv->audio_view(), (*i), edit_items);
  				}
 			}
@@ -1717,7 +1717,7 @@ Editor::build_track_crossfade_context_menu (nframes64_t frame)
 				boost::shared_ptr<Region> dummy_region; // = NULL		
 				add_region_context_items (atv->audio_view(), dummy_region, edit_items);			
 			} else {
-				for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
+ 				for (Playlist::RegionList::reverse_iterator i = regions->rbegin(); i != regions->rend(); ++i) {
 					add_region_context_items (atv->audio_view(), (*i), edit_items);
 				}
 			}
