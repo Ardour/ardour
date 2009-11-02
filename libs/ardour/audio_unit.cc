@@ -20,6 +20,7 @@
 #include <sstream>
 #include <errno.h>
 #include <string.h>
+#include <math.h>
 
 #include <pbd/transmitter.h>
 #include <pbd/xml++.h>
@@ -1040,16 +1041,90 @@ OSStatus
 AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat, 
 				       Float64* outCurrentTempo)
 {
-	return kAudioUnitErr_CannotDoInCurrentContext;
+	TempoMap& tmap (_session.tempo_map());
+
+	/* more than 1 meter or more than 1 tempo means that a simplistic computation 
+	   (and interpretation) of a beat position will be incorrect. So refuse to 
+	   offer the value.
+	*/
+
+	if (tmap.n_tempos() > 1 || tmap.n_meters() > 1) {
+		return kAudioUnitErr_CannotDoInCurrentContext;
+	}
+
+	BBT_Time bbt;
+	Metric metric;
+
+	tmap.bbt_time_with_metric (_session.transport_frame() + current_offset, bbt, metric);
+
+	if (outCurrentBeat) {
+		float beat;
+		beat = metric.meter().beats_per_bar * bbt.bars;
+		beat += bbt.beats;
+		beat += bbt.ticks / Meter::ticks_per_beat;
+		*outCurrentBeat = *beat;
+	}
+
+	if (outCurrentTempo) {
+		*outCurrentTempo = floor (metric.tempo().beats_per_minute());
+	}
+
+	return noErr;
+
 }
 
 OSStatus 
-AUPlugin::get_musical_time_location_callback (UInt32*  outDeltaSampleOffsetToNextBeat,
-					     Float32*  outTimeSig_Numerator,
-					     UInt32*   outTimeSig_Denominator,
-					     Float64*  outCurrentMeasureDownBeat)
+AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNextBeat,
+					      Float32*  outTimeSig_Numerator,
+					      UInt32*   outTimeSig_Denominator,
+					      Float64*  outCurrentMeasureDownBeat)
 {
-	return kAudioUnitErr_CannotDoInCurrentContext;
+	TempoMap& tmap (_session.tempo_map());
+
+	/* more than 1 meter or more than 1 tempo means that a simplistic computation 
+	   (and interpretation) of a beat position will be incorrect. So refuse to 
+	   offer the value.
+	*/
+
+	if (tmap.n_tempos() > 1 || tmap.n_meters() > 1) {
+		return kAudioUnitErr_CannotDoInCurrentContext;
+	}
+
+	BBT_Time bbt;
+	Metric metric;
+
+	tmap.bbt_time_with_metric (_session.transport_frame() + current_offset, bbt, metric);
+
+	if (*outDeltaSampleOffsetToNextBeat) {
+		if (bbt.ticks == 0) {
+			/* on the beat */
+			*outDeltaSampleOffsetToNextBeat = 0;
+		} else {
+			*outDeltaSampleOffsetToNextBeat = (UInt32) floor (((Meter::ticks_per_beat - bbt.ticks)/Meter::ticks_per_beat) * // fraction of a beat to next beat
+									  metric.tempo().frames_per_beat(_session.frame_rate(), metric.meter())); // frames per beat
+		}
+	}
+	
+	if (*outTimeSig_Numerator) {
+		*outTimeSig_Numerator = (UInt32) lrintf (metric.meter().beats_per_bar());
+	}
+	if (*outTimeSig_Denominator) {
+		*outTimeSig_Denominator = (UInt32) lrintf (metric.meter().note_divisor());
+	}
+
+	if (*outCurrentMeasureDownBeat) {
+
+		/* beat for the start of the bar. 
+		   1|1|0 -> 1
+		   2|1|0 -> 1 + beats_per_bar
+		   3|1|0 -> 1 + (2 * beats_per_bar)
+		   etc. 
+		*/
+
+		*outCurrentMeasureDownBeat = 1 + metric.meter().beats_per_bar * (bbt.bars - 1);
+	}
+
+	return noErr;
 }
 
 OSStatus 
@@ -1060,7 +1135,68 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 					Float64*  outCycleStartBeat,
 					Float64*  outCycleEndBeat)
 {
-	return kAudioUnitErr_CannotDoInCurrentContext;
+	if (outIsPlaying) {
+		*outIsPlaying = _session.transport_rolling();
+	}
+
+	if (outTransportStateChanged) {
+		*outTransportStateChanged = false;
+	}
+
+	if (outCurrentSampleInTimeLine) {
+		*outCurrentSampleInTimeLine = _session.transport_frame();
+	}
+
+	if (outIsCycling) {
+		Location* loc = _session.locations()->auto_loop_location();
+
+		*outIsCycling = (loc && _session.transport_rolling() && _session.get_play_loop());
+
+		if (*outIsCycling) {
+
+			if (outCycleStartBeat || outCycleEndBeat) {
+
+				TempoMap& tmap (_session.tempo_map());
+
+				/* more than 1 meter means that a simplistic computation (and interpretation) of 
+				   a beat position will be incorrect. so refuse to offer the value.
+				*/
+
+				if (tmap.n_meters() > 1) {
+					return kAudioUnitErr_CannotDoInCurrentContext;
+				}
+				
+				BBT_Time bbt;
+				TempoMap::Metric metric;
+
+				if (outCycleStartBeat) {
+					TempoMap::Metric metric;
+					_session.tempo_map().bbt_time (loc->start(), bbt, metric);
+					
+					
+					float beat;
+					beat = metric.meter().beats_per_bar * bbt.bars;
+					beat += bbt.beats;
+					beat += bbt.ticks / Meter::ticks_per_beat;
+					
+					*outCycleStartBeat = beat;
+				}
+
+				if (outCycleEndBeat) {
+					_session.tempo_map().bbt_time (loc->start(), bbt, metric);
+					
+					float beat;
+					beat = metric.meter().beats_per_bar * bbt.bars;
+					beat += bbt.beats;
+					beat += bbt.ticks / Meter::ticks_per_beat;
+					
+					*outCycleEndBeat = beat;
+				}
+			}
+		}
+	}
+		
+	return noErr;
 }
 
 set<uint32_t>
