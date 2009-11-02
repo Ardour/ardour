@@ -181,7 +181,6 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t 
 	_fade_in_disabled = 0;
 	_fade_out_disabled = 0;
 
-
 	if (_flags & LeftOfSplit) {
 		if (_fade_in.back()->when >= _length) {
 			set_default_fade_in ();
@@ -1141,14 +1140,17 @@ AudioRegion::recompute_at_end ()
 	_envelope.set_max_xval (_length);
 	_envelope.thaw ();
 
+	if (_flags & LeftOfSplit) {
+		set_default_fade_out ();
+		_flags = Flag (_flags & ~Region::LeftOfSplit);
+	} else if (_fade_out.back()->when > _length) {
+		_fade_out.extend_to (_length);
+		send_change (FadeOutChanged);
+	}
+
 	if (_fade_in.back()->when > _length) {
 		_fade_in.extend_to (_length);
 		send_change (FadeInChanged);
-	}
-
-	if (_fade_out.back()->when > _length) {
-		_fade_out.extend_to (_length);
-		send_change (FadeOutChanged);
 	}
 }	
 
@@ -1159,7 +1161,10 @@ AudioRegion::recompute_at_start ()
 
 	_envelope.truncate_start (_length);
 
-	if (_fade_in.back()->when > _length) {
+	if (_flags & RightOfSplit) {
+		set_default_fade_in ();
+		_flags = Flag (_flags & ~Region::RightOfSplit);
+	} else if (_fade_in.back()->when > _length) {
 		_fade_in.extend_to (_length);
 		send_change (FadeInChanged);
 	}

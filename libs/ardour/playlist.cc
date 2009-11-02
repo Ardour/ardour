@@ -791,11 +791,11 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 				new_regions.push_back (region);
 				
 				/* "front" ***** */
-				
+			
 				current->freeze ();
 				thawlist.push_back (current);
-				current->trim_end (pos2, this);
-				
+				current->cut_end (pos2, this);
+
 			} else if (overlap == OverlapEnd) {
 				
 				/*
@@ -823,7 +823,7 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 				
 				current->freeze ();
 				thawlist.push_back (current);
-				current->trim_end (pos2, this);
+				current->cut_end (pos2, this);
 				
 			} else if (overlap == OverlapStart) {
 				

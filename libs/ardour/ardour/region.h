@@ -169,6 +169,9 @@ class Region : public PBD::StatefulDestructible, public Readable, public boost::
 	void trim_front (nframes_t new_position, void *src);
 	void trim_end (nframes_t new_position, void *src);
 	void trim_to (nframes_t position, nframes_t length, void *src);
+
+	void cut_front (nframes_t new_position, void *src);
+	void cut_end (nframes_t new_position, void *src);
 	
 	void set_layer (layer_t l); /* ONLY Playlist can call this */
 	void raise ();
