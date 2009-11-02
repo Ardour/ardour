@@ -229,6 +229,8 @@ class Region : public PBD::StatefulDestructible, public Readable, public boost::
 
 	void trim_to_internal (nframes_t position, nframes_t length, void *src);
 	void set_position_internal (nframes_t pos, bool allow_bbt_recompute);
+	void modify_front (nframes_t new_position, bool reset_fade, void* src);
+	void modify_end (nframes_t new_position, bool reset_fade, void* src);
 
 	bool copied() const { return _flags & Copied; }
 	void maybe_uncopy ();

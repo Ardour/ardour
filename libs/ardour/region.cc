@@ -602,43 +602,17 @@ Region::trim_start (nframes_t new_position, void *src)
 void
 Region::trim_front (nframes_t new_position, void *src)
 {
-	if (_flags & Locked) {
-		return;
-	}
-
-	nframes_t end = last_frame();
-	nframes_t source_zero;
-
-	if (_position > _start) {
-		source_zero = _position - _start;
-	} else {
-		source_zero = 0; // its actually negative, but this will work for us
-	}
-
-	if (new_position < end) { /* can't trim it zero or negative length */
-		
-		nframes_t newlen;
-
-		/* can't trim it back passed where source position zero is located */
-		
-		new_position = max (new_position, source_zero);
-		
-		
-		if (new_position > _position) {
-			newlen = _length - (new_position - _position);
-		} else {
-			newlen = _length + (_position - new_position);
-		}
-		
-		trim_to_internal (new_position, newlen, src);
-		if (!_frozen) {
-			recompute_at_start ();
-		}
-	}
+	modify_front (new_position, false, src);
 }
 
 void
 Region::cut_front (nframes_t new_position, void *src)
+{
+	modify_front (new_position, true, src);
+}
+
+void
+Region::modify_front (nframes_t new_position, bool reset_fade, void *src)
 {
 	if (_flags & Locked) {
 		return;
@@ -669,7 +643,9 @@ Region::cut_front (nframes_t new_position, void *src)
 		}
 		
 		trim_to_internal (new_position, newlen, src);
-		_flags = Flag (_flags | RightOfSplit); /* force reset of fade in */
+		if (reset_fade) {
+			_flags = Flag (_flags | RightOfSplit); /* force reset of fade in */
+		}
 		if (!_frozen) {
 			recompute_at_start ();
 		}
@@ -679,20 +655,17 @@ Region::cut_front (nframes_t new_position, void *src)
 void
 Region::trim_end (nframes_t new_endpoint, void *src)
 {
-	if (_flags & Locked) {
-		return;
-	}
-
-	if (new_endpoint > _position) {
-		trim_to_internal (_position, new_endpoint - _position +1, this);
-		if (!_frozen) {
-			recompute_at_end ();
-		}
-	}
+	modify_end (new_endpoint, false, src);
 }
 
 void
 Region::cut_end (nframes_t new_endpoint, void *src)
+{
+	modify_end (new_endpoint, true, src);
+}
+
+void
+Region::modify_end (nframes_t new_endpoint, bool reset_fade, void *src)
 {
 	if (_flags & Locked) {
 		return;
@@ -700,7 +673,9 @@ Region::cut_end (nframes_t new_endpoint, void *src)
 
 	if (new_endpoint > _position) {
 		trim_to_internal (_position, new_endpoint - _position +1, this);
-		_flags = Flag (_flags | LeftOfSplit); /* force reset of fade out */
+		if (reset_fade) {
+			_flags = Flag (_flags | LeftOfSplit); /* force reset of fade out */
+		}
 		if (!_frozen) {
 			recompute_at_end ();
 		}
