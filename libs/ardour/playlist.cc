@@ -2017,22 +2017,44 @@ void
 Playlist::raise_region_to_top (boost::shared_ptr<Region> region)
 {
 	/* does nothing useful if layering mode is later=higher */
-	if ((Config->get_layer_model() == MoveAddHigher) ||
-	    (Config->get_layer_model() == AddHigher)) {
-		timestamp_layer_op (region);
-		relayer ();
+	switch (Config->get_layer_model()) {
+	case LaterHigher:
+		return;
 	}
+
+	RegionList::size_type sz = regions.size();
+
+	if (region->layer() >= (sz - 1)) {
+		/* already on the top */
+		return;
+	}
+
+	move_region_to_layer (sz, region, 1);
+	/* mark the region's last_layer_op as now, so that it remains on top when
+	   doing future relayers (until something else takes over)
+	 */
+	timestamp_layer_op (region);
 }
 
 void
 Playlist::lower_region_to_bottom (boost::shared_ptr<Region> region)
 {
 	/* does nothing useful if layering mode is later=higher */
-	if ((Config->get_layer_model() == MoveAddHigher) ||
-	    (Config->get_layer_model() == AddHigher)) {
-		region->set_last_layer_op (0);
-		relayer ();
+	switch (Config->get_layer_model()) {
+	case LaterHigher:
+		return;
 	}
+
+	if (region->layer() == 0) {
+		/* already on the bottom */
+		return;
+	}
+
+	move_region_to_layer (0, region, -1);
+	/* force region's last layer op to zero so that it stays at the bottom
+	   when doing future relayers
+	*/
+	region->set_last_layer_op (0);
 }
 
 int
@@ -2213,8 +2235,6 @@ Playlist::set_frozen (bool yn)
 void
 Playlist::timestamp_layer_op (boost::shared_ptr<Region> region)
 {
-//	struct timeval tv;
-//	gettimeofday (&tv, 0);
 	region->set_last_layer_op (++layer_op_counter);
 }
 
