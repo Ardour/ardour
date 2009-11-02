@@ -36,6 +36,7 @@
 #include <ardour/io.h>
 #include <ardour/audio_unit.h>
 #include <ardour/session.h>
+#include <ardour/tempo.h>
 #include <ardour/utils.h>
 
 #include <appleutility/CAAudioUnit.h>
@@ -1053,16 +1054,15 @@ AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 	}
 
 	BBT_Time bbt;
-	Metric metric;
-
+	TempoMap::Metric metric = tmap.metric_at (_session.transport_frame() + current_offset);
 	tmap.bbt_time_with_metric (_session.transport_frame() + current_offset, bbt, metric);
 
 	if (outCurrentBeat) {
 		float beat;
-		beat = metric.meter().beats_per_bar * bbt.bars;
+		beat = metric.meter().beats_per_bar() * bbt.bars;
 		beat += bbt.beats;
 		beat += bbt.ticks / Meter::ticks_per_beat;
-		*outCurrentBeat = *beat;
+		*outCurrentBeat = beat;
 	}
 
 	if (outCurrentTempo) {
@@ -1091,8 +1091,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 	}
 
 	BBT_Time bbt;
-	Metric metric;
-
+	TempoMap::Metric metric = tmap.metric_at (_session.transport_frame() + current_offset);
 	tmap.bbt_time_with_metric (_session.transport_frame() + current_offset, bbt, metric);
 
 	if (*outDeltaSampleOffsetToNextBeat) {
@@ -1121,7 +1120,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 		   etc. 
 		*/
 
-		*outCurrentMeasureDownBeat = 1 + metric.meter().beats_per_bar * (bbt.bars - 1);
+		*outCurrentMeasureDownBeat = 1 + metric.meter().beats_per_bar() * (bbt.bars - 1);
 	}
 
 	return noErr;
@@ -1167,15 +1166,13 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 				}
 				
 				BBT_Time bbt;
-				TempoMap::Metric metric;
 
 				if (outCycleStartBeat) {
-					TempoMap::Metric metric;
-					_session.tempo_map().bbt_time (loc->start(), bbt, metric);
-					
-					
+					TempoMap::Metric metric = tmap.metric_at (loc->start() + current_offset);
+					_session.tempo_map().bbt_time_with_metric (loc->start(), bbt, metric);
+
 					float beat;
-					beat = metric.meter().beats_per_bar * bbt.bars;
+					beat = metric.meter().beats_per_bar() * bbt.bars;
 					beat += bbt.beats;
 					beat += bbt.ticks / Meter::ticks_per_beat;
 					
@@ -1183,10 +1180,11 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 				}
 
 				if (outCycleEndBeat) {
-					_session.tempo_map().bbt_time (loc->start(), bbt, metric);
+					TempoMap::Metric metric = tmap.metric_at (loc->end() + current_offset);
+					_session.tempo_map().bbt_time_with_metric (loc->end(), bbt, metric);
 					
 					float beat;
-					beat = metric.meter().beats_per_bar * bbt.bars;
+					beat = metric.meter().beats_per_bar() * bbt.bars;
 					beat += bbt.beats;
 					beat += bbt.ticks / Meter::ticks_per_beat;
 					
@@ -1983,7 +1981,7 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 	   follow Apple "guidelines".
 	 */
 
-	snprintf (buf, sizeof (buf), "%u", version);
+	snprintf (buf, sizeof (buf), "%u", (uint32_t) version);
 	id = unique_id;
 	id += '/';
 	id += buf;
