@@ -49,32 +49,31 @@ namespace Mackie {
 }
 
 /**
-	This handles the plugin duties, and the midi encoding and decoding,
-	and the signal callbacks, mostly from ARDOUR::Route.
+   This handles the plugin duties, and the midi encoding and decoding,
+   and the signal callbacks, mostly from ARDOUR::Route.
 
-	The model of the control surface is handled by classes in controls.h
-
-	What happens is that each strip on the control surface has
-	a corresponding route in ControlProtocol::route_table. When
-	an incoming midi message is signaled, the correct route
-	is looked up, and the relevant changes made to it.
-
-	For each route currently in route_table, there's a RouteSignal object
-	which encapsulates the signals that indicate that there are changes
-	to be sent to the surface. The signals are handled by this class.
-
-	Calls to signal handlers pass a Route object which is used to look
-	up the relevant Strip in Surface. Then the state is retrieved from
-	the Route and encoded as the correct midi message.
+   The model of the control surface is handled by classes in controls.h
+   
+   What happens is that each strip on the control surface has
+   a corresponding route in ControlProtocol::route_table. When
+   an incoming midi message is signaled, the correct route
+   is looked up, and the relevant changes made to it.
+   
+   For each route currently in route_table, there's a RouteSignal object
+   which encapsulates the signals that indicate that there are changes
+   to be sent to the surface. The signals are handled by this class.
+   
+   Calls to signal handlers pass a Route object which is used to look
+   up the relevant Strip in Surface. Then the state is retrieved from
+   the Route and encoded as the correct midi message.
 */
-class MackieControlProtocol
-: public ARDOUR::ControlProtocol
-, public Mackie::MackieButtonHandler
+
+class MackieControlProtocol : public ARDOUR::ControlProtocol , public Mackie::MackieButtonHandler
 {
   public:
 	MackieControlProtocol( ARDOUR::Session & );
 	virtual ~MackieControlProtocol();
-
+	
 	int set_active (bool yn);
 
 	XMLNode& get_state ();
@@ -84,10 +83,10 @@ class MackieControlProtocol
 	
 	Mackie::Surface & surface();
 
-   // control events
-   void handle_control_event( Mackie::SurfacePort & port, Mackie::Control & control, const Mackie::ControlState & state );
-
-  // strip/route related stuff
+	// control events
+	void handle_control_event( Mackie::SurfacePort & port, Mackie::Control & control, const Mackie::ControlState & state );
+	
+	// strip/route related stuff
   public:	
 	/// Signal handler for Route::solo
 	void notify_solo_changed( Mackie::RouteSignal * );
@@ -109,35 +108,35 @@ class MackieControlProtocol
 	void notify_remote_id_changed();
 
 	/// rebuild the current bank. Called on route added/removed and
-   /// remote id changed.
+	/// remote id changed.
 	void refresh_current_bank();
-
-  // global buttons (ie button not part of strips)
+	
+	// global buttons (ie button not part of strips)
   public:
-   // button-related signals
+	// button-related signals
 	void notify_record_state_changed();
-   void notify_transport_state_changed();
-   // mainly to pick up punch-in and punch-out
+	void notify_transport_state_changed();
+	// mainly to pick up punch-in and punch-out
 	void notify_parameter_changed( const char * );
-   void notify_solo_active_changed( bool );
-
+	void notify_solo_active_changed( bool );
+	
 	/// Turn smpte on and beats off, or vice versa, depending
 	/// on state of _timecode_type
 	void update_smpte_beats_led();
-  
+	
 	/// this is called to generate the midi to send in response to a button press.
 	void update_led( Mackie::Button & button, Mackie::LedState );
-  
+	
 	void update_global_button( const std::string & name, Mackie::LedState );
 	void update_global_led( const std::string & name, Mackie::LedState );
-  
-   // transport button handler methods from MackieButtonHandler
+	
+	// transport button handler methods from MackieButtonHandler
 	virtual Mackie::LedState frm_left_press( Mackie::Button & );
 	virtual Mackie::LedState frm_left_release( Mackie::Button & );
-
+	
 	virtual Mackie::LedState frm_right_press( Mackie::Button & );
 	virtual Mackie::LedState frm_right_release( Mackie::Button & );
-
+	
 	virtual Mackie::LedState stop_press( Mackie::Button & );
 	virtual Mackie::LedState stop_release( Mackie::Button & );
 
@@ -207,7 +206,7 @@ class MackieControlProtocol
 	virtual Mackie::LedState scrub_press( Mackie::Button & );
 	virtual Mackie::LedState scrub_release( Mackie::Button & );
 	
-   /// This is the main MCU port, ie not an extender port
+	/// This is the main MCU port, ie not an extender port
 	/// Only for use by JogWheel
 	const Mackie::SurfacePort & mcu_port() const;
 	Mackie::SurfacePort & mcu_port();
@@ -226,44 +225,52 @@ class MackieControlProtocol
 	void initialize_surface();
   
 	// This sets up the notifications and sets the
-   // controls to the correct values
+	// controls to the correct values
 	void update_surface();
-  
-   // connects global (not strip) signals from the Session to here
-   // so the surface can be notified of changes from the other UIs.
-   void connect_session_signals();
-  
-   // set all controls to their zero position
+	
+	// connects global (not strip) signals from the Session to here
+	// so the surface can be notified of changes from the other UIs.
+	void connect_session_signals();
+
+	// disconnect all connections made in connect_session_signals ()
+	std::vector<sigc::connection> session_connections;
+	void disconnect_session_signals ();
+
+	// handle deletion of a route
+	std::vector<sigc::connection> route_connections;
+	void route_deleted ();
+
+	// set all controls to their zero position
 	void zero_all();
 	
 	/**
-		Fetch the set of routes to be considered for control by the
-		surface. Excluding master, hidden and control routes, and inactive routes
+	   Fetch the set of routes to be considered for control by the
+	   surface. Excluding master, hidden and control routes, and inactive routes
 	*/
 	typedef std::vector<boost::shared_ptr<ARDOUR::Route> > Sorted;
 	Sorted get_sorted_routes();
-  
-   // bank switching
-   void switch_banks( int initial );
-   void prev_track();
-   void next_track();
-  
-   // delete all RouteSignal objects connecting Routes to Strips
-   void clear_route_signals();
 	
-	typedef std::vector<Mackie::RouteSignal*> RouteSignals;
+	// bank switching
+	void switch_banks( int initial );
+	void prev_track();
+	void next_track();
+	
+	// delete all RouteSignal objects connecting Routes to Strips
+	void clear_route_signals();
+	
+	typedef std::list<Mackie::RouteSignal*> RouteSignals;
 	RouteSignals route_signals;
 	
-   // return which of the ports a particular route_table
-   // index belongs to
+	// return which of the ports a particular route_table
+	// index belongs to
 	Mackie::MackiePort & port_for_id( uint32_t index );
-
+	
 	/**
-		Handle a button press for the control and return whether
-		the corresponding light should be on or off.
+	   Handle a button press for the control and return whether
+	   the corresponding light should be on or off.
 	*/
 	bool handle_strip_button( Mackie::Control &, Mackie::ButtonState, boost::shared_ptr<ARDOUR::Route> );
-
+	
 	/// thread started. Calls monitor_work.
 	static void* _monitor_work (void* arg);
 	
@@ -282,9 +289,9 @@ class MackieControlProtocol
 	void add_port( MIDI::Port &, int number );
 
 	/**
-		Read session data and send to surface. Includes
-		automation from the currently active routes and
-		timecode displays.
+	   Read session data and send to surface. Includes
+	   automation from the currently active routes and
+	   timecode displays.
 	*/
 	void poll_session_data();
 	
@@ -298,9 +305,9 @@ class MackieControlProtocol
 	std::string format_smpte_timecode( nframes_t now_frame );
 	
 	/**
-		notification that the port is about to start it's init sequence.
-		We must make sure that before this exits, the port is being polled
-		for new data.
+	   notification that the port is about to start it's init sequence.
+	   We must make sure that before this exits, the port is being polled
+	   for new data.
 	*/
 	void handle_port_init( Mackie::SurfacePort * );
 
@@ -316,7 +323,7 @@ class MackieControlProtocol
   private:
 	boost::shared_ptr<Mackie::RouteSignal> master_route_signal;
   
-   static const char * default_port_name;
+	static const char * default_port_name;
   
 	/// The Midi port(s) connected to the units
 	typedef vector<Mackie::MackiePort*> MackiePorts;
@@ -325,23 +332,20 @@ class MackieControlProtocol
 	/// Sometimes the real port goes away, and we want to contain the breakage
 	Mackie::DummyPort _dummy_port;
   
-   // the thread that polls the ports for incoming midi data
+	// the thread that polls the ports for incoming midi data
 	pthread_t thread;
   
 	/// The initial remote_id of the currently switched in bank.
-   uint32_t _current_initial_bank;
+	uint32_t _current_initial_bank;
 	
-   /// protects the port list, and polling structures
+	/// protects the port list, and polling structures
 	Glib::Mutex update_mutex;
   
 	/// Protects set_active, and allows waiting on the poll thread
 	Glib::Cond update_cond;
 
-	// because sigc::trackable doesn't seem to be working
-	std::vector<sigc::connection> _connections;
-	std::back_insert_iterator<std::vector<sigc::connection> > connections_back;
 
-   /// The representation of the physical controls on the surface.
+	/// The representation of the physical controls on the surface.
   	Mackie::Surface * _surface;
 	
 	/// If a port is opened or closed, this will be
