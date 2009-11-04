@@ -2020,6 +2020,8 @@ Playlist::raise_region_to_top (boost::shared_ptr<Region> region)
 	switch (Config->get_layer_model()) {
 	case LaterHigher:
 		return;
+	default:
+		break;
 	}
 
 	RegionList::size_type sz = regions.size();
@@ -2043,6 +2045,8 @@ Playlist::lower_region_to_bottom (boost::shared_ptr<Region> region)
 	switch (Config->get_layer_model()) {
 	case LaterHigher:
 		return;
+	default:
+		break;
 	}
 
 	if (region->layer() == 0) {

@@ -317,7 +317,7 @@ Session::process_event (Event* ev)
 
 	switch (ev->type) {
 	case Event::SetLoop:
-		set_play_loop (ev->yes_or_no, (ev->speed == 1.0f));
+		set_play_loop (ev->yes_or_no);
 		break;
 
 	case Event::AutoLoop:

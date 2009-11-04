@@ -1447,7 +1447,8 @@ class Session : public PBD::StatefulDestructible
 	void          change_midi_ports ();
 	int           use_config_midi_ports ();
 
-	void set_play_loop (bool yn, bool leave_rolling);
+	void set_play_loop (bool yn);
+	void unset_play_loop ();
 	void overwrite_some_buffers (Diskstream*);
 	void flush_all_redirects ();
 	int  micro_locate (nframes_t distance);

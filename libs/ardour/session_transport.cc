@@ -444,7 +444,17 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	}
 
+	/* unconditionally reset these flags. if play_loop is still true then Diskstream::seek() will do
+	   the wrong thing in seamless loop mode.
+	*/
+
+	if (post_transport_work & PostTransportStop) { 
+		_play_range = false;
+		unset_play_loop ();
+	}
+
 	/* this for() block can be put inside the previous if() and has the effect of ... ??? what */
+
 
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if (!(*i)->hidden()) {
@@ -505,11 +515,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		DurationChanged (); /* EMIT SIGNAL */
 	}
 
-	if (post_transport_work & PostTransportStop) { 
-		_play_range = false;
-		play_loop = false;
-	}
-
         nframes_t tf = _transport_frame;
 
         PositionChanged (tf); /* EMIT SIGNAL */
@@ -548,7 +553,22 @@ Session::check_declick_out ()
 }
 
 void
-Session::set_play_loop (bool yn, bool leave_rolling)
+Session::unset_play_loop ()
+{
+	play_loop = false;
+	clear_events (Event::AutoLoop);
+	
+	// set all diskstreams to NOT use internal looping
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+		if (!(*i)->hidden()) {
+			(*i)->set_loop (0);
+		}
+	}
+}
+
+void
+Session::set_play_loop (bool yn)
 {
 	/* Called from event-handling context */
 
@@ -571,7 +591,9 @@ Session::set_play_loop (bool yn, bool leave_rolling)
 		return;
 	}
 	
-	if ((play_loop = yn)) {
+	if (yn) {
+
+		play_loop = true;
 
 		if (loc) {
 
@@ -608,16 +630,7 @@ Session::set_play_loop (bool yn, bool leave_rolling)
 
 
 	} else {
-		clear_events (Event::AutoLoop);
-
-		// set all diskstreams to NOT use internal looping
-		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-			if (!(*i)->hidden()) {
-				(*i)->set_loop (0);
-			}
-		}
-		
+		unset_play_loop ();
 	}
 
 	TransportStateChange ();
@@ -774,7 +787,7 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 		
 		if (al && (_transport_frame < al->start() || _transport_frame > al->end())) {
 			// cancel looping directly, this is called from event handling context
-			set_play_loop (false, false);
+			set_play_loop (false);
 		}
 		else if (al && _transport_frame == al->start()) {
 			if (with_loop) {
@@ -1156,7 +1169,7 @@ Session::set_play_range (bool yn, bool leave_rolling)
 
 	if (yn) {
 		/* cancel loop play */
-		set_play_loop (false, true);
+		set_play_loop (false);
 	}
 
 	_play_range = yn;
