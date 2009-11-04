@@ -985,7 +985,7 @@ AudioDiskstream::seek (nframes_t frame, bool complete_refill)
 		(*chan)->playback_buf->reset ();
 		(*chan)->capture_buf->reset ();
 	}
-	
+
 	/* can't rec-enable in destructive mode if transport is before start */
 	
 	if (destructive() && record_enabled() && frame < _session.current_start_frame()) {
@@ -994,7 +994,7 @@ AudioDiskstream::seek (nframes_t frame, bool complete_refill)
 	
 	playback_sample = frame;
 	file_frame = frame;
-	
+
 	if (complete_refill) {
 		while ((ret = do_refill_with_alloc ()) > 0) ;
 	} else {

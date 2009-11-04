@@ -322,7 +322,7 @@ Session::process_event (Event* ev)
 
 	case Event::AutoLoop:
 		if (play_loop) {
-			start_locate (ev->target_frame, true, false, Config->get_seamless_loop());
+			start_locate (ev->target_frame, true, false, true);
 		}
 		remove = false;
 		del = false;

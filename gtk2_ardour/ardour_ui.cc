@@ -1472,7 +1472,14 @@ ARDOUR_UI::transport_roll ()
 	bool rolling = session->transport_rolling();
 
 	if (session->get_play_loop()) {
-		session->request_play_loop (false, true);
+		/* XXX it is not possible to just leave seamless loop and keep
+		   playing at present (nov 4th 2009
+		*/
+		if (!Config->get_seamless_loop()) {
+			session->request_play_loop (false, true);
+		} else {
+			return;
+		}
 	} else if (session->get_play_range ()) {
 		session->request_play_range (false, true);
 	} 

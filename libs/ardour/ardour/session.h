@@ -1452,8 +1452,8 @@ class Session : public PBD::StatefulDestructible
 	void overwrite_some_buffers (Diskstream*);
 	void flush_all_redirects ();
 	int  micro_locate (nframes_t distance);
-	void locate (nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
-	void start_locate (nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
+	void locate (nframes_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
+	void start_locate (nframes_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
 	void force_locate (nframes_t frame, bool with_roll = false);
 	void set_diskstream_speed (Diskstream*, float speed);
 	void set_transport_speed (float speed, bool abort = false);

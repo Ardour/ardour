@@ -392,8 +392,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 				/* explicit return request pre-queued in event list. overrides everything else */
 				
-				cerr << "explicit auto-return to " << _requested_return_frame << endl;
-
 				_transport_frame = _requested_return_frame;
 				do_locate = true;
 
@@ -454,7 +452,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	/* this for() block can be put inside the previous if() and has the effect of ... ??? what */
-
 
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if (!(*i)->hidden()) {
@@ -623,13 +620,15 @@ Session::set_play_loop (bool yn)
 			Event* event = new Event (Event::AutoLoop, Event::Replace, loc->end(), loc->start(), 0.0f);
 			merge_event (event);
 
-			/* locate to start of loop and roll */
-			event = new Event (Event::LocateRoll, Event::Add, Event::Immediate, loc->start(), 0, !synced_to_jack());
-			merge_event (event);
+			/* locate to start of loop and roll. If doing seamless loop, force a 
+			   locate+buffer refill even if we are positioned there already.
+			*/
+
+			start_locate (loc->start(), true, true, false, Config->get_seamless_loop());
 		}
 
-
 	} else {
+
 		unset_play_loop ();
 	}
 
@@ -647,7 +646,7 @@ Session::flush_all_redirects ()
 }
 
 void
-Session::start_locate (nframes_t target_frame, bool with_roll, bool with_flush, bool with_loop)
+Session::start_locate (nframes_t target_frame, bool with_roll, bool with_flush, bool with_loop, bool force)
 {
 	if (synced_to_jack()) {
 
@@ -672,7 +671,7 @@ Session::start_locate (nframes_t target_frame, bool with_roll, bool with_flush, 
 
 	} else {
 
-		locate (target_frame, with_roll, with_flush, with_loop);
+		locate (target_frame, with_roll, with_flush, with_loop, force);
 	}
 }
 
@@ -696,13 +695,13 @@ Session::micro_locate (nframes_t distance)
 }
 
 void
-Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool with_loop)
+Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool with_loop, bool force)
 {
 	if (actively_recording() && !with_loop) {
 		return;
 	}
 
-	if (_transport_frame == target_frame && !loop_changing && !with_loop) {
+	if (!force && _transport_frame == target_frame && !loop_changing && !with_loop) {
 		if (with_roll) {
 			set_transport_speed (1.0, false);
 		}
@@ -724,12 +723,16 @@ Session::locate (nframes_t target_frame, bool with_roll, bool with_flush, bool w
 		} 
 	}
 
+	/* stop if we are rolling and we're not doing autoplay and we don't plan to roll when done and we not looping while synced to
+	   jack
+	*/
+
 	if (transport_rolling() && (!auto_play_legal || !Config->get_auto_play()) && !with_roll && !(synced_to_jack() && play_loop)) {
 		realtime_stop (false);
 	} 
 
-	if ( !with_loop || loop_changing) {
-		
+	if (force || !with_loop || loop_changing) {
+
 		post_transport_work = PostTransportWork (post_transport_work | PostTransportLocate);
 		
 		if (with_roll) {
