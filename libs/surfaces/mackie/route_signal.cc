@@ -28,6 +28,7 @@
 using namespace ARDOUR;
 using namespace Mackie;
 using namespace std;
+using namespace sigc;
 
 void RouteSignal::connect()
 {

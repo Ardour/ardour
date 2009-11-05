@@ -170,12 +170,13 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	current_block_size = 0;
 	solo_update_disabled = false;
 	currently_soloing = false;
+	_was_seamless = Config->get_seamless_loop ();
 	_have_captured = false;
 	_worst_output_latency = 0;
 	_worst_input_latency = 0;
 	_worst_track_latency = 0;
 	_state_of_the_state = StateOfTheState(CannotSave|InitialConnecting|Loading);
-
+	
 	_slave = 0;
 	_silent = false;
 	session_send_mmc = false;

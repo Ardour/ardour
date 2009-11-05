@@ -1060,6 +1060,7 @@ class Session : public PBD::StatefulDestructible
 	float                   _meter_hold;
 	float                   _meter_falloff;
 	bool                    _end_location_is_free;
+	bool                    _was_seamless;
 
 	void set_worst_io_latencies ();
 	void set_worst_io_latencies_x (IOChange asifwecare, void *ignored) {

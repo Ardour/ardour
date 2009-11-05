@@ -62,11 +62,20 @@ void
 Session::request_slave_source (SlaveSource src)
 {
 	Event* ev = new Event (Event::SetSlaveSource, Event::Add, Event::Immediate, 0, 0.0);
+	bool seamless;
+
+	seamless = Config->get_seamless_loop ();
 
 	if (src == JACK) {
-		/* could set_seamless_loop() be disposed of entirely?*/
+		/* JACK cannot support seamless looping at present */
 		Config->set_seamless_loop (false);
-	} 
+	} else {
+		/* reset to whatever the value was before we last switched slaves */
+		Config->set_seamless_loop (_was_seamless);
+	}
+
+	/* save value of seamless from before the switch */
+	_was_seamless = seamless;
 
 	ev->slave = src;
 	queue_event (ev);
