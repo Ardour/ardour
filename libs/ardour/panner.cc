@@ -769,6 +769,7 @@ Panner::Panner (string name, Session& s)
 	_linked = false;
 	_link_direction = SameDirection;
 	_bypassed = false;
+	_mono = false;
 }
 
 Panner::~Panner ()
