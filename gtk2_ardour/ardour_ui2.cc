@@ -83,7 +83,7 @@ ARDOUR_UI::setup_windows ()
 	EventBox* status_bar_event_box = manage (new EventBox);
 
 	status_bar_event_box->add (status_bar_label);
-	status_bar_label->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+	status_bar_event_box->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	status_bar_label.set_size_request (300, -1);
 	status_bar_packer->pack_start (*status_bar_event_box, true, true, 6);
 	status_bar_packer->pack_start (error_log_button, false, false);
@@ -108,18 +108,22 @@ ARDOUR_UI::setup_windows ()
 	return 0;
 }
 
-void
+bool
 ARDOUR_UI::status_bar_button_press (GdkEventButton* ev)
 {
+	bool handled = false;
+
 	switch (ev->button) {
 	case 1:
 		status_bar_label.set_text ("");
+		handled = true;
 		break;
 	default:
 		break;
 	}
+
+	return handled;
 }
-  
 
 void
 ARDOUR_UI::display_message (const char *prefix, gint prefix_len, RefPtr<TextBuffer::Tag> ptag, RefPtr<TextBuffer::Tag> mtag, const char *msg)
