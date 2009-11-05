@@ -587,7 +587,7 @@ AudioRegion::state (bool full)
 			child->add_child_nocopy (_fade_in->get_state ());
 		}
 
-		child->add_property (X_("active"), _fade_in_disabled ? X_("no") : X_("yes"));
+		child->add_property (X_("active"), fade_in_active () ? X_("yes") : X_("no"));
 
 		child = node.add_child (X_("FadeOut"));
 
@@ -597,7 +597,7 @@ AudioRegion::state (bool full)
 			child->add_child_nocopy (_fade_out->get_state ());
 		}
 
-		child->add_property (X_("active"), _fade_out_disabled ? X_("no") : X_("yes"));
+		child->add_property (X_("active"), fade_out_active () ? X_("yes") : X_("no"));
 	}
 
 	child = node.add_child ("Envelope");
@@ -715,7 +715,7 @@ AudioRegion::set_live_state (const XMLNode& node, int version, Change& what_chan
 				if (string_is_affirmative (prop->value())) {
 					set_fade_in_active (true);
 				} else {
-					set_fade_in_active (true);
+					set_fade_in_active (false);
 				}
 			}
 
