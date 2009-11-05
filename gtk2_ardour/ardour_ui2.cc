@@ -80,12 +80,21 @@ ARDOUR_UI::setup_windows ()
 
 #ifdef TOP_MENUBAR
 	HBox* status_bar_packer = manage (new HBox);
-	
+	EventBox* status_bar_event_box = manage (new EventBox);
+
+	status_bar_event_box->add (status_bar_label);
+	status_bar_label->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	status_bar_label.set_size_request (300, -1);
-	status_bar_packer->pack_start (status_bar_label, true, true, 6);
+	status_bar_packer->pack_start (*status_bar_event_box, true, true, 6);
 	status_bar_packer->pack_start (error_log_button, false, false);
-	
+
+	status_bar_label.show ();
+	status_bar_event_box->show ();
+	status_bar_packer->show ();
+	error_log_button.show ();
+
 	error_log_button.signal_clicked().connect (mem_fun (*this, &UI::toggle_errors));
+	status_bar_event_box->signal_button_press_event().connect (mem_fun (*this, &ARDOUR_UI::status_bar_button_press));
 
 	editor->get_status_bar_packer().pack_start (*status_bar_packer, true, true);
 	editor->get_status_bar_packer().pack_start (menu_bar_base, false, false, 6);
@@ -98,6 +107,19 @@ ARDOUR_UI::setup_windows ()
 
 	return 0;
 }
+
+void
+ARDOUR_UI::status_bar_button_press (GdkEventButton* ev)
+{
+	switch (ev->button) {
+	case 1:
+		status_bar_label.set_text ("");
+		break;
+	default:
+		break;
+	}
+}
+  
 
 void
 ARDOUR_UI::display_message (const char *prefix, gint prefix_len, RefPtr<TextBuffer::Tag> ptag, RefPtr<TextBuffer::Tag> mtag, const char *msg)

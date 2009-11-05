@@ -768,6 +768,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void display_message (const char *prefix, gint prefix_len, 
 			      Glib::RefPtr<Gtk::TextBuffer::Tag> ptag, Glib::RefPtr<Gtk::TextBuffer::Tag> mtag, const char *msg);
 	Gtk::Label status_bar_label;
+	void status_bar_button_press (GdkEventButton*);
 	Gtk::ToggleButton error_log_button;
 	
 	void loading_message (const std::string& msg);
