@@ -160,24 +160,29 @@ class Session : public PBD::StatefulDestructible
 	    float          speed;
 
 	    union {
-			void*                ptr;
-			bool                 yes_or_no;
-		        nframes_t            target2_frame;
-			SlaveSource slave;
+		void*                ptr;
+		bool                 yes_or_no;
+		nframes_t            target2_frame;
+		SlaveSource slave;
 	    };
 
+	    union {
+		bool second_yes_or_no;
+	    };
+	    
 	    boost::shared_ptr<Region>     region;
 
 	    list<AudioRange>     audio_range;
 	    list<MusicRange>     music_range;
 
-	    Event(Type t, Action a, nframes_t when, nframes_t where, float spd, bool yn = false)
-		    : type (t), 
-		      action (a),
-		      action_frame (when),
-		      target_frame (where),
-		      speed (spd),
-		      yes_or_no (yn) {}
+	Event(Type t, Action a, nframes_t when, nframes_t where, float spd, bool yn = false, bool yn2 = false)
+		    : type (t)
+		    , action (a)
+		    , action_frame (when)
+		    , target_frame (where)
+		    , speed (spd)
+		    , yes_or_no (yn)
+		    , second_yes_or_no (yn2) {}
 
 	    void set_ptr (void* p) { 
 		    ptr = p;
@@ -371,9 +376,9 @@ class Session : public PBD::StatefulDestructible
 
 	void request_roll_at_and_return (nframes_t start, nframes_t return_to);
 	void request_bounded_roll (nframes_t start, nframes_t end);
-	void request_stop (bool abort = false);
+	void request_stop (bool clear_state = true, bool abort = false);
 	void request_locate (nframes_t frame, bool with_roll = false);
-
+	void request_transport_speed (float speed);
 	void request_play_loop (bool yn, bool leave_rolling = false);
 	bool get_play_loop () const { return play_loop; }
 
@@ -384,7 +389,6 @@ class Session : public PBD::StatefulDestructible
 	void set_session_end (nframes_t end) { end_location->set_start(end); _end_location_is_free = false; }
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
-	void request_transport_speed (float speed);
 	void request_overwrite_buffer (Diskstream*);
 	void request_diskstream_speed (Diskstream&, float speed);
 	void request_input_change_handling ();
@@ -1179,6 +1183,7 @@ class Session : public PBD::StatefulDestructible
 
 	bool              pending_locate_flush;
 	bool              pending_abort;
+	bool              pending_clear_substate;
 	bool              pending_auto_loop;
 	
 	pthread_t         butler_thread;
@@ -1214,7 +1219,8 @@ class Session : public PBD::StatefulDestructible
 		PostTransportScrub              = 0x8000,
 		PostTransportReverse            = 0x10000,
 		PostTransportInputChange        = 0x20000,
-		PostTransportCurveRealloc       = 0x40000
+		PostTransportCurveRealloc       = 0x40000,
+		PostTransportClearSubstate      = 0x80000
 	};
 	
 	static const PostTransportWork ProcessCannotProceedMask = 
@@ -1225,7 +1231,8 @@ class Session : public PBD::StatefulDestructible
 				   PostTransportScrub|
 				   PostTransportAudition|
 				   PostTransportLocate|
-				   PostTransportStop);
+				   PostTransportStop|
+				   PostTransportClearSubstate);
 	
 	PostTransportWork post_transport_work;
 
@@ -1457,10 +1464,10 @@ class Session : public PBD::StatefulDestructible
 	void start_locate (nframes_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
 	void force_locate (nframes_t frame, bool with_roll = false);
 	void set_diskstream_speed (Diskstream*, float speed);
-	void set_transport_speed (float speed, bool abort = false);
-	void stop_transport (bool abort = false);
+	void set_transport_speed (float speed, bool abort = false, bool clear_state = false);
+	void stop_transport (bool abort = false, bool clear_state = false);
 	void start_transport ();
-	void realtime_stop (bool abort);
+	void realtime_stop (bool abort, bool clear_state);
 	void non_realtime_start_scrub ();
 	void non_realtime_set_speed ();
 	void non_realtime_stop (bool abort, int entry_request_count, bool& finished);

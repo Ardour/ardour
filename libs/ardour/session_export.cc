@@ -677,7 +677,7 @@ Session::finalize_audio_export ()
 	   stuff that stop_transport() implements.
 	*/
 
-	realtime_stop (true);
+	realtime_stop (true, true);
 	schedule_butler_transport_work ();
 
 	/* restart slaving */

@@ -142,6 +142,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_tempo_map->StateChanged.connect (mem_fun (*this, &Session::tempo_map_changed));
 
 	g_atomic_int_set (&processing_prohibited, 0);
+	post_transport_work = PostTransportWork (0);
 	insert_cnt = 0;
 	_transport_speed = 0;
 	_last_transport_speed = 0;
@@ -194,6 +195,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_pan_automation_buffer = 0;
 	_npan_buffers = 0;
 	pending_abort = false;
+	pending_clear_substate = false;
 	destructive_index = 0;
 	current_trans = 0;
 	first_file_data_format_reset = true;

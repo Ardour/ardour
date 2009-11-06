@@ -1191,7 +1191,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				}
 			} else {
 				/* make sure we stop */
-				session->request_transport_speed (0.0);
+				session->request_stop ();
 			}
 			break;
 
@@ -2247,7 +2247,7 @@ Editor::start_cursor_grab (ArdourCanvas::Item* item, GdkEvent* event)
 		_dragging_playhead = true;
 		
 		if (session && drag_info.was_rolling) {
-			session->request_stop ();
+			session->request_stop (false, true);
 		}
 
 		if (session && session->is_auditioning()) {

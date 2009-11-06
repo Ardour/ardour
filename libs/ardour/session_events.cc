@@ -359,7 +359,7 @@ Session::process_event (Event* ev)
 
 
 	case Event::SetTransportSpeed:
-		set_transport_speed (ev->speed, ev->yes_or_no);
+		set_transport_speed (ev->speed, ev->yes_or_no, ev->second_yes_or_no);
 		break;
 		
 	case Event::PunchIn:
@@ -382,7 +382,7 @@ Session::process_event (Event* ev)
 
 	case Event::StopOnce:
 		if (!non_realtime_work_pending()) {
-			stop_transport (ev->yes_or_no);
+			set_transport_speed (0.0, ev->yes_or_no, ev->second_yes_or_no);
 			_clear_event_type (Event::StopOnce);
 		}
 		remove = false;

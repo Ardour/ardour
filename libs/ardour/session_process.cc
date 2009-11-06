@@ -550,7 +550,8 @@ Session::follow_slave (nframes_t nframes)
 				Location* al = _locations.auto_loop_location();
 
 				if (al && play_loop && (slave_transport_frame < al->start() || slave_transport_frame > al->end())) {
-					// cancel looping
+					// master has moved outside the loop: stop looping
+					cerr << "Stop looping - master out of range\n";
 					request_play_loop(false);
 				}
 

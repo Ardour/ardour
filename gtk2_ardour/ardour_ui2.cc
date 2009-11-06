@@ -637,7 +637,7 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 				roll_button.set_visual_state (1);
 			} else {
 				shuttle_fract = 0;
-				session->request_transport_speed (0.0);
+				session->request_stop ();
 			}
 			shuttle_box.queue_draw ();
 		}

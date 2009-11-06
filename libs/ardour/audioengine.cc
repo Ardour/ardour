@@ -962,6 +962,7 @@ void
 AudioEngine::transport_stop ()
 {
         GET_PRIVATE_JACK_POINTER (_jack);
+	// cerr << "tell jack to stop\n";
 	jack_transport_stop (_priv_jack);
 }
 
@@ -969,6 +970,7 @@ void
 AudioEngine::transport_start ()
 {
         GET_PRIVATE_JACK_POINTER (_jack);
+	// cerr << "tell jack to roll\n";
 	jack_transport_start (_priv_jack);
 }
 

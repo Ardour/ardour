@@ -143,7 +143,9 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 		current.guard2++; 	 
 		
 		session.request_locate (mtc_frame, false); 	 
-		session.request_transport_speed (0);
+                // don't ask for "clear state on stop" because its not revelant when slaved to MTC - we can't
+		// be in looping/range play states anyway.
+		session.request_stop (); 
 		update_mtc_status (MIDI::Parser::MTC_Stopped); 	 
 
  		reset ();
@@ -279,7 +281,9 @@ MTC_Slave::speed_and_position (float& speed, nframes_t& pos)
 		mtc_speed = 0;
 		pos = last.position;
 		session.request_locate (pos, false);
-		session.request_transport_speed (0);
+                // don't ask for "clear state on stop" because its not revelant when slaved to MTC - we can't
+		// be in looping/range play states anyway.
+		session.request_stop (); 
 		update_mtc_status (MIDI::Parser::MTC_Stopped);
 		reset();
 		return false;

@@ -729,9 +729,11 @@ ARDOUR_UI::finish()
 {
 	if (session) {
 
-		if (session->transport_rolling()) {
-			session->request_stop ();
-			usleep (2500000);
+		int tries = 0;
+
+		while (session->transport_rolling() && (++tries < 8)) {
+			session->request_stop (true, false);
+			usleep (10000);
 		}
 
 		if (session->dirty()) {
@@ -1398,14 +1400,14 @@ ARDOUR_UI::transport_stop ()
 		return;
 	}
 	
-	session->request_stop ();
+	session->request_stop (false, true);
 }
 
 void
 ARDOUR_UI::transport_stop_and_forget_capture ()
 {
 	if (session) {
-		session->request_stop (true);
+		session->request_stop (true, true);
 	}
 }
 
@@ -1473,9 +1475,10 @@ ARDOUR_UI::transport_roll ()
 
 	if (session->get_play_loop()) {
 		/* XXX it is not possible to just leave seamless loop and keep
-		   playing at present (nov 4th 2009
+		   playing at present (nov 4th 2009)
 		*/
 		if (!Config->get_seamless_loop()) {
+			/* off, and stop */
 			session->request_play_loop (false, true);
 		} else {
 			return;
@@ -1534,12 +1537,11 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 			affect_transport = false;
 			session->request_play_range (false, true);
 		} 
-	}
+	} 
 
 	if (affect_transport) {
-
 		if (rolling) {
-			session->request_stop (with_abort);
+			session->request_stop (with_abort, true);
 		} else {
 			session->request_transport_speed (1.0f);
 		}
