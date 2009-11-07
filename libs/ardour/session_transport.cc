@@ -1198,7 +1198,7 @@ Session::set_play_range (bool yn, bool leave_rolling)
 
 	if (yn) {
 		/* cancel loop play */
-		set_play_loop (false);
+		unset_play_loop ();
 	}
 
 	_play_range = yn;
@@ -1212,6 +1212,16 @@ Session::set_play_range (bool yn, bool leave_rolling)
 	}
 
 	TransportStateChange ();
+}
+
+void
+Session::request_bounded_roll (nframes_t start, nframes_t end)
+{
+	AudioRange ar (start, end, 0);
+	list<AudioRange> lar;
+	lar.push_back (ar);
+	set_audio_range (lar);
+	request_play_range (true, true);
 }
 
 void
@@ -1270,7 +1280,7 @@ Session::setup_auto_play ()
 	} 
 
 	/* now start rolling at the right place */
-	
+
 	ev = new Event (Event::LocateRoll, Event::Add, Event::Immediate, current_audio_range.front().start, 0.0f, false);
 	merge_event (ev);
 }
@@ -1281,15 +1291,6 @@ Session::request_roll_at_and_return (nframes_t start, nframes_t return_to)
  	Event *ev = new Event (Event::LocateRollLocate, Event::Add, Event::Immediate, return_to, 1.0);
 	ev->target2_frame = start;
 	queue_event (ev);
-}
-
-void
-Session::request_bounded_roll (nframes_t start, nframes_t end)
-{
- 	Event *ev = new Event (Event::StopOnce, Event::Replace, end, Event::Immediate, 0.0);
-	queue_event (ev);
-
-	request_locate (start, true);
 }
 
 void
