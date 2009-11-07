@@ -140,10 +140,14 @@ Session::request_play_loop (bool yn, bool leave_rolling)
 }
 
 void
-Session::request_play_range (list<AudioRange>& range, bool yn, bool leave_rolling)
+Session::request_play_range (list<AudioRange>* range, bool leave_rolling)
 {
-	Event* ev = new Event (Event::SetPlayAudioRange, Event::Add, Event::Immediate, 0, (leave_rolling ? 1.0 : 0.0), yn);
-	ev->audio_range = range;
+	Event* ev = new Event (Event::SetPlayAudioRange, Event::Add, Event::Immediate, 0, (leave_rolling ? 1.0 : 0.0));
+	if (range) {
+		ev->audio_range = *range;
+	} else {
+		ev->audio_range.clear ();
+	}
 	queue_event (ev);
 }
 
@@ -617,8 +621,7 @@ Session::set_play_loop (bool yn)
 
 		if (loc) {
 
-			list<AudioRange> empty;
-			set_play_range (empty, false, true);
+			unset_play_range ();
 
 			if (Config->get_seamless_loop()) {
 				// set all diskstreams to use internal looping
@@ -1186,55 +1189,37 @@ Session::set_diskstream_speed (Diskstream* stream, float speed)
 }
 
 void
-Session::set_play_range (list<AudioRange>& range, bool yn, bool leave_rolling)
+Session::unset_play_range ()
 {
-	/* Called from event-processing context */
-
-	if (yn) {
-		if (range.empty()) {
-			/* make it a no-op */
-			return;
-		}
-		/* cancel loop play */
-		unset_play_loop ();
-	}
-
-	_play_range = yn;
-
-	setup_auto_play (range);
-	
-	if (!_play_range && !leave_rolling) {
-		/* stop transport */
-		Event* ev = new Event (Event::SetTransportSpeed, Event::Add, Event::Immediate, 0, 0.0f, false);
-		merge_event (ev);
-	}
-
-	TransportStateChange ();
-}
-
-void
-Session::request_bounded_roll (nframes_t start, nframes_t end)
-{
-	AudioRange ar (start, end, 0);
-	list<AudioRange> lar;
-
-	lar.push_back (ar);
-	request_play_range (lar, true, true);
-}
-
-void
-Session::setup_auto_play (list<AudioRange>& range)
-{
-	/* Called from event-processing context */
-
-	Event* ev;
-	
+	_play_range = false;
 	_clear_event_type (Event::RangeStop);
 	_clear_event_type (Event::RangeLocate);
+}
 
-	if (!_play_range) {
+void
+Session::set_play_range (list<AudioRange>& range, bool leave_rolling)
+{
+	Event* ev;
+
+	/* Called from event-processing context */
+
+	unset_play_range ();
+	
+	if (range.empty()) {
+		/* _play_range set to false in unset_play_range()
+		 */
+		if (!leave_rolling) {
+			/* stop transport */
+			Event* ev = new Event (Event::SetTransportSpeed, Event::Add, Event::Immediate, 0, 0.0f, false);
+			merge_event (ev);
+		}
 		return;
 	}
+
+	_play_range = true;
+
+	/* cancel loop play */
+	unset_play_loop ();
 
 	list<AudioRange>::size_type sz = range.size();
 	
@@ -1285,6 +1270,18 @@ Session::setup_auto_play (list<AudioRange>& range)
 
 	ev = new Event (Event::LocateRoll, Event::Add, Event::Immediate, range.front().start, 0.0f, false);
 	merge_event (ev);
+	
+	TransportStateChange ();
+}
+
+void
+Session::request_bounded_roll (nframes_t start, nframes_t end)
+{
+	AudioRange ar (start, end, 0);
+	list<AudioRange> lar;
+
+	lar.push_back (ar);
+	request_play_range (&lar, true);
 }
 
 void

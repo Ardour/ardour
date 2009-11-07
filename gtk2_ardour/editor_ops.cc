@@ -2428,7 +2428,7 @@ Editor::play_selection ()
 		return;
 	}
 
-	session->request_play_range (selection->time, true);
+	session->request_play_range (&selection->time, true);
 }
 
 void

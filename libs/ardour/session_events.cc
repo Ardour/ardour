@@ -427,7 +427,7 @@ Session::process_event (Event* ev)
 		break;
 
 	case Event::SetPlayAudioRange:
-		set_play_range (ev->audio_range, ev->yes_or_no, (ev->speed == 1.0f));
+		set_play_range (ev->audio_range, (ev->speed == 1.0f));
 		break;
 
 	default:

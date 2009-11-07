@@ -926,14 +926,13 @@ class Session : public PBD::StatefulDestructible
 
 	/* ranges */
 
-	void request_play_range (list<AudioRange>&, bool yn, bool leave_rolling = false);
+	void request_play_range (list<AudioRange>*, bool leave_rolling = false);
 	bool get_play_range () const { return _play_range; }
 
 	/* favorite dirs */
 	typedef vector<string> FavoriteDirs;
 
 	static int read_favorite_dirs (FavoriteDirs&);
-
 	static int write_favorite_dirs (FavoriteDirs&);
 	
 	/* file suffixes */
@@ -1734,8 +1733,8 @@ class Session : public PBD::StatefulDestructible
 
 	list<AudioRange> current_audio_range;
 	bool _play_range;
-	void set_play_range (list<AudioRange>&, bool yn, bool leave_rolling);
-	void setup_auto_play (list<AudioRange>&);
+	void set_play_range (list<AudioRange>&, bool leave_rolling);
+	void unset_play_range ();
 
 	/* main outs */
 	uint32_t main_outs;
