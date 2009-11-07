@@ -127,12 +127,14 @@ class PortGroupList : public sigc::trackable
 	}
 
 	sigc::signal<void> Changed;
+	sigc::signal<void, ARDOUR::Bundle::Change> BundleChanged;
 
   private:
 	bool port_has_prefix (std::string const &, std::string const &) const;
 	std::string common_prefix (std::vector<std::string> const &) const;
 	std::string common_prefix_before (std::vector<std::string> const &, std::string const &) const;
 	void emit_changed ();
+	void emit_bundle_changed (ARDOUR::Bundle::Change);
 	boost::shared_ptr<ARDOUR::Bundle> make_bundle_from_ports (std::vector<std::string> const &, bool) const;
 	void maybe_add_processor_to_bundle (boost::weak_ptr<ARDOUR::Processor>, boost::shared_ptr<RouteBundle>, bool, std::set<boost::shared_ptr<ARDOUR::IO> > &);
 
@@ -142,6 +144,7 @@ class PortGroupList : public sigc::trackable
 	std::vector<sigc::connection> _bundle_changed_connections;
 	bool _signals_suspended;
 	bool _pending_change;
+	ARDOUR::Bundle::Change _pending_bundle_change;
 };
 
 

@@ -169,6 +169,7 @@ private:
 	void toggle_show_only_bundles ();
 	bool on_scroll_event (GdkEventScroll *);
 	boost::shared_ptr<ARDOUR::IO> io_from_bundle (boost::shared_ptr<ARDOUR::Bundle>) const;
+	void bundle_changed (ARDOUR::Bundle::Change);
 
 	Gtk::Window* _parent;
 

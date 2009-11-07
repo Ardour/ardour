@@ -75,6 +75,10 @@ PortMatrixNode::State
 BundleEditorMatrix::get_state (BundleChannel c[2]) const
 {
 	Bundle::PortList const& pl = c[OTHER].bundle->channel_ports (c[OTHER].channel);
+	if (pl.empty ()) {
+		return PortMatrixNode::NOT_ASSOCIATED;
+	}
+	
 	for (Bundle::PortList::const_iterator i = pl.begin(); i != pl.end(); ++i) {
 		if (!c[OURS].bundle->port_attached_to_channel (c[OURS].channel, *i)) {
 			return PortMatrixNode::NOT_ASSOCIATED;
@@ -162,7 +166,7 @@ BundleEditorMatrix::list_is_global (int dim) const
 	return (dim == OTHER);
 }
 
-BundleEditor::BundleEditor (Session& session, boost::shared_ptr<UserBundle> bundle, bool add)
+BundleEditor::BundleEditor (Session& session, boost::shared_ptr<UserBundle> bundle)
 	: ArdourDialog (_("Edit Bundle")), _matrix (this, session, bundle), _bundle (bundle)
 {
 	Gtk::Table* t = new Gtk::Table (3, 2);
@@ -220,13 +224,7 @@ BundleEditor::BundleEditor (Session& session, boost::shared_ptr<UserBundle> bund
 	get_vbox()->pack_start (_matrix);
 	get_vbox()->set_spacing (4);
 
-	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	if (add) {
-		add_button (Gtk::Stock::ADD, Gtk::RESPONSE_ACCEPT);
-	} else {
-		add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_ACCEPT);
-	}
-
+	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_ACCEPT);
 	show_all ();
 }
 
@@ -320,6 +318,10 @@ BundleManager::BundleManager (Session& session)
 		sigc::mem_fun (*this, &BundleManager::set_button_sensitivity)
 		);
 
+	_tree_view.signal_row_activated().connect (
+		sigc::mem_fun (*this, &BundleManager::row_activated)
+		);
+
 	set_button_sensitivity ();
 
 	show_all ();
@@ -342,12 +344,11 @@ BundleManager::new_clicked ()
 	/* Start off with a single channel */
 	b->add_channel ("1");
 
-	BundleEditor e (_session, b, true);
+	_session.add_bundle (b);
+	add_bundle (b);
 
-	if (e.run () == Gtk::RESPONSE_ACCEPT) {
-		_session.add_bundle (b);
-		add_bundle (b);
-	}
+	BundleEditor e (_session, b);
+	e.run ();
 }
 
 void
@@ -356,10 +357,8 @@ BundleManager::edit_clicked ()
 	Gtk::TreeModel::iterator i = _tree_view.get_selection()->get_selected();
 	if (i) {
 		boost::shared_ptr<UserBundle> b = (*i)[_list_model_columns.bundle];
-		BundleEditor e (_session, b, false);
-		if (e.run () == Gtk::RESPONSE_ACCEPT) {
-			_session.set_dirty ();
-		}
+		BundleEditor e (_session, b);
+		e.run ();
 	}
 }
 
@@ -410,6 +409,19 @@ BundleManager::bundle_changed (Bundle::Change c, boost::shared_ptr<UserBundle> b
 	}
 }
 
+void
+BundleManager::row_activated (Gtk::TreeModel::Path const & p, Gtk::TreeViewColumn* c)
+{
+	Gtk::TreeModel::iterator i = _list_model->get_iter (p);
+	if (!i) {
+		return;
+	}
+	
+	boost::shared_ptr<UserBundle> b = (*i)[_list_model_columns.bundle];
+	BundleEditor e (_session, b);
+	e.run ();
+}
+
 NameChannelDialog::NameChannelDialog ()
 	: ArdourDialog (_("Add channel")),
 	  _adding (true)
@@ -435,6 +447,7 @@ NameChannelDialog::setup ()
 
 	box->pack_start (*Gtk::manage (new Gtk::Label (_("Name"))));
 	box->pack_start (_name);
+	_name.set_activates_default (true);
 
 	get_vbox ()->pack_end (*box);
 	box->show_all ();

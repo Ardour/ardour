@@ -184,7 +184,7 @@ PortGroup::io_from_bundle (boost::shared_ptr<ARDOUR::Bundle> b) const
 /** PortGroupList constructor.
  */
 PortGroupList::PortGroupList ()
-	: _type (DataType::AUDIO), _signals_suspended (false), _pending_change (false)
+	: _type (DataType::AUDIO), _signals_suspended (false), _pending_change (false), _pending_bundle_change ((Bundle::Change) 0)
 {
 
 }
@@ -281,17 +281,12 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 		}
 	}
 
-	/* Bundles owned by the session.  We only add the mono ones and the User ones
-	   otherwise there is duplication of the same ports within the matrix */
+	/* Bundles owned by the session */
 
 	boost::shared_ptr<BundleList> b = session.bundles ();
 	for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 		if ((*i)->ports_are_inputs() == inputs && (*i)->type() == _type) {
-
-			if ((*i)->nchannels() == 1 || boost::dynamic_pointer_cast<UserBundle> (*i)) {
-				system->add_bundle (*i);
-			}
-
+			system->add_bundle (*i);
 		}
 	}
 
@@ -474,7 +469,7 @@ PortGroupList::add_group (boost::shared_ptr<PortGroup> g)
 	g->Changed.connect (sigc::mem_fun (*this, &PortGroupList::emit_changed));
 
 	_bundle_changed_connections.push_back (
-		g->BundleChanged.connect (sigc::hide (sigc::mem_fun (*this, &PortGroupList::emit_changed)))
+		g->BundleChanged.connect (sigc::mem_fun (*this, &PortGroupList::emit_bundle_changed))
 		);
 
 	emit_changed ();
@@ -501,6 +496,15 @@ PortGroupList::emit_changed ()
 }
 
 void
+PortGroupList::emit_bundle_changed (Bundle::Change c)
+{
+	if (_signals_suspended) {
+		_pending_bundle_change = c;
+	} else {
+		BundleChanged (c);
+	}
+}
+void
 PortGroupList::suspend_signals ()
 {
 	_signals_suspended = true;
@@ -512,6 +516,11 @@ PortGroupList::resume_signals ()
 	if (_pending_change) {
 		Changed ();
 		_pending_change = false;
+	}
+
+	if (_pending_bundle_change != 0) {
+		BundleChanged (_pending_bundle_change);
+		_pending_bundle_change = (ARDOUR::Bundle::Change) 0;
 	}
 
 	_signals_suspended = false;

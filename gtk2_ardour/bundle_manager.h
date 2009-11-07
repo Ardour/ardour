@@ -67,7 +67,7 @@ class BundleEditorMatrix : public PortMatrix
 class BundleEditor : public ArdourDialog
 {
   public:
-	BundleEditor (ARDOUR::Session &, boost::shared_ptr<ARDOUR::UserBundle>, bool);
+	BundleEditor (ARDOUR::Session &, boost::shared_ptr<ARDOUR::UserBundle>);
 
   protected:
 	void on_map ();
@@ -98,6 +98,7 @@ class BundleManager : public ArdourDialog
 	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>);
 	void bundle_changed (ARDOUR::Bundle::Change, boost::shared_ptr<ARDOUR::UserBundle>);
 	void set_button_sensitivity ();
+	void row_activated (Gtk::TreeModel::Path const & p, Gtk::TreeViewColumn* c);
 
 	class ModelColumns : public Gtk::TreeModelColumnRecord
 	{

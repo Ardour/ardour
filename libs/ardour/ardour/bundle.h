@@ -90,27 +90,18 @@ class Bundle : public sigc::trackable
 	void disconnect (boost::shared_ptr<Bundle>, AudioEngine &);
 	bool connected_to (boost::shared_ptr<Bundle>, AudioEngine &);
 
-	/** Set the name.
-	 *  @param n New name.
-	 */
-	void set_name (std::string const & n) {
-		_name = n;
-		Changed (NameChanged);
-	}
+	void set_name (std::string const &);
 
 	/** @return Bundle name */
 	std::string name () const { return _name; }
 
-	/** Set the type of the ports in this Bundle.
-	 *  @param t New type.
-	 */
-	void set_type (DataType t) { _type = t; }
+	void set_type (DataType);
 
 	/** @return Type of the ports in this Bundle. */
 	DataType type () const { return _type; }
 
-	void set_ports_are_inputs () { _ports_are_inputs = true; }
-	void set_ports_are_outputs () { _ports_are_inputs = false; }
+	void set_ports_are_inputs ();
+	void set_ports_are_outputs ();
 	bool ports_are_inputs () const { return _ports_are_inputs; }
 	bool ports_are_outputs () const { return !_ports_are_inputs; }
 
@@ -121,7 +112,9 @@ class Bundle : public sigc::trackable
 	enum Change {
 		NameChanged = 0x1, ///< the bundle name or a channel name has changed
 		ConfigurationChanged = 0x2, ///< the number of channels has changed
-		PortsChanged = 0x4 ///< the port list associated with one of our channels has changed
+		PortsChanged = 0x4, ///< the port list associated with one of our channels has changed
+		TypeChanged = 0x8, ///< the data type has changed
+		DirectionChanged = 0x10 ///< the direction (whether ports are inputs or outputs) has changed
 	};
 
 	sigc::signal<void, Change> Changed;

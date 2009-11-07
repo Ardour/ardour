@@ -65,6 +65,9 @@ PortMatrix::PortMatrix (Window* parent, Session& session, DataType type)
 
 		/* watch for the content of _ports[] changing */
 		_ports[i].Changed.connect (mem_fun (*this, &PortMatrix::setup));
+
+		/* and for bundles in _ports[] changing */
+		_ports[i].BundleChanged.connect (mem_fun (*this, &PortMatrix::bundle_changed));
 	}
 
 	_hscroll.signal_value_changed().connect (mem_fun (*this, &PortMatrix::hscroll_changed));
@@ -586,4 +589,14 @@ PortMatrix::add_channel_proxy (boost::weak_ptr<Bundle> w)
 	}
 
 	add_channel (b);
+}
+
+void
+PortMatrix::bundle_changed (ARDOUR::Bundle::Change c)
+{
+	if (c & (Bundle::DirectionChanged | Bundle::TypeChanged)) {
+		setup_all_ports ();
+	}
+	
+	setup ();
 }

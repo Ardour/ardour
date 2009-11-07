@@ -432,3 +432,37 @@ Bundle::connected_to (boost::shared_ptr<Bundle> other, AudioEngine & engine)
 
 	return true;
 }
+
+/** Set the type of the ports in this Bundle.
+ *  @param t New type.
+ */
+void
+Bundle::set_type (DataType t)
+{
+	_type = t;
+	emit_changed (TypeChanged);
+}
+
+void
+Bundle::set_ports_are_inputs ()
+{
+	_ports_are_inputs = true;
+	emit_changed (DirectionChanged);
+}
+
+void
+Bundle::set_ports_are_outputs ()
+{
+	_ports_are_inputs = false;
+	emit_changed (DirectionChanged);
+}
+
+/** Set the name.
+ *  @param n New name.
+ */
+void
+Bundle::set_name (string const & n)
+{
+	_name = n;
+	emit_changed (NameChanged);
+}
