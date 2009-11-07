@@ -426,13 +426,8 @@ Session::process_event (Event* ev)
 		schedule_butler_transport_work ();
 		break;
 
-	case Event::SetAudioRange:
-		current_audio_range = ev->audio_range;
-		setup_auto_play ();
-		break;
-
-	case Event::SetPlayRange:
-		set_play_range (ev->yes_or_no, (ev->speed == 1.0f));
+	case Event::SetPlayAudioRange:
+		set_play_range (ev->audio_range, ev->yes_or_no, (ev->speed == 1.0f));
 		break;
 
 	default:

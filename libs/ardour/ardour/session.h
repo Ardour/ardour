@@ -135,8 +135,7 @@ class Session : public PBD::StatefulDestructible
 		    SetSlaveSource,
 		    Audition,
 		    InputConfigurationChange,
-		    SetAudioRange,
-		    SetPlayRange,
+		    SetPlayAudioRange,
 		    
 		    /* only one of each of these events
 		       can be queued at any one time
@@ -927,10 +926,7 @@ class Session : public PBD::StatefulDestructible
 
 	/* ranges */
 
-	void set_audio_range (list<AudioRange>&);
-	void set_music_range (list<MusicRange>&);
-
-	void request_play_range (bool yn, bool leave_rolling = false);
+	void request_play_range (list<AudioRange>&, bool yn, bool leave_rolling = false);
 	bool get_play_range () const { return _play_range; }
 
 	/* favorite dirs */
@@ -1738,8 +1734,8 @@ class Session : public PBD::StatefulDestructible
 
 	list<AudioRange> current_audio_range;
 	bool _play_range;
-	void set_play_range (bool yn, bool leave_rolling);
-	void setup_auto_play ();
+	void set_play_range (list<AudioRange>&, bool yn, bool leave_rolling);
+	void setup_auto_play (list<AudioRange>&);
 
 	/* main outs */
 	uint32_t main_outs;

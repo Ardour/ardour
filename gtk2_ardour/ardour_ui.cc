@@ -1484,7 +1484,8 @@ ARDOUR_UI::transport_roll ()
 			return;
 		}
 	} else if (session->get_play_range ()) {
-		session->request_play_range (false, true);
+		list<AudioRange> empty;
+		session->request_play_range (empty, false, true);
 	} 
 
 	if (!rolling) {
@@ -1535,7 +1536,8 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 			session->request_play_loop (false, true);
 		} else if (session->get_play_range ()) {
 			affect_transport = false;
-			session->request_play_range (false, true);
+			list<AudioRange> empty;
+			session->request_play_range (empty, false, true);
 		} 
 	} 
 

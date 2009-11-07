@@ -122,7 +122,8 @@ BasicUI::transport_play (bool from_last_start)
 	} 
 
 	if (session->get_play_range ()) {
-		session->request_play_range (false);
+		list<AudioRange> empty;
+		session->request_play_range (empty, false);
 	}
 	
 	if (from_last_start && rolling) {

@@ -4657,8 +4657,6 @@ Editor::end_selection_op (ArdourCanvas::Item* item, GdkEvent* event)
 		} 
 	}
 
-	/* XXX what happens if its a music selection? */
-	session->set_audio_range (selection->time);
 	stop_canvas_autoscroll ();
 }
 
