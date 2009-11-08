@@ -131,6 +131,7 @@ static const char* authors[] = {
 	N_("Colin Fletcher"),
 	N_("Hans Fugal"),
 	N_("Christopher George"),
+	N_("J. Abelardo Gutierrez"),
 	N_("Jeremy Hall"),
 	N_("Audun Halland"),
 	N_("Steve Harris"),
