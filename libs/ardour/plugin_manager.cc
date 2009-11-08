@@ -70,7 +70,7 @@ PluginManager::PluginManager ()
 	char* s;
 	string lrdf_path;
 
-	load_favorites ();
+	load_statuses ();
 
 #ifdef GTKOSX
 	ProcessSerialNumber psn = { 0, kCurrentProcess }; 
@@ -400,7 +400,7 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 	lrdf_statement* matches1 = lrdf_matches (&pattern);
 
 	if (!matches1) {
-		return "";
+		return "Unknown";
 	}
 
 	pattern.subject = matches1->object;
@@ -412,7 +412,7 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 	lrdf_free_statements(matches1);
 
 	if (!matches2) {
-		return ("");
+		return ("Unknown");
 	}
 
 	string label = matches2->object;
@@ -553,17 +553,22 @@ PluginManager::vst_discover (string path)
 
 #endif // VST_SUPPORT
 
-bool
-PluginManager::is_a_favorite_plugin (const PluginInfoPtr& pi)
+PluginManager::PluginStatusType
+PluginManager::get_status (const PluginInfoPtr& pi)
 {
-	FavoritePlugin fp (pi->type, pi->unique_id);
-	return find (favorites.begin(), favorites.end(), fp) !=  favorites.end();
+	PluginStatus ps (pi->type, pi->unique_id);
+	PluginStatusList::const_iterator i =  find (statuses.begin(), statuses.end(), ps);
+	if (i ==  statuses.end() ) {
+		return Normal;
+	} else {
+		return i->status;
+	}
 }
 
 void
-PluginManager::save_favorites ()
+PluginManager::save_statuses ()
 {
-	Glib::ustring path = Glib::build_filename (get_user_ardour_path (), "favorite_plugins");
+	Glib::ustring path = Glib::build_filename (get_user_ardour_path (), "plugin_statuses");
 	ofstream ofs;
 
 	ofs.open (path.c_str(), ios_base::openmode (ios::out|ios::trunc));
@@ -572,7 +577,7 @@ PluginManager::save_favorites ()
 		return;
 	}
 
-	for (FavoritePluginList::iterator i = favorites.begin(); i != favorites.end(); ++i) {
+	for (PluginStatusList::iterator i = statuses.begin(); i != statuses.end(); ++i) {
 		switch ((*i).type) {
 		case LADSPA:
 			ofs << "LADSPA";
@@ -588,16 +593,30 @@ PluginManager::save_favorites ()
 			break;
 		}
 		
-		ofs << ' ' << (*i).unique_id << endl;
+		ofs << ' ' << (*i).unique_id << ' ';
+
+		switch ((*i).status) {
+		case Normal:
+			ofs << "Normal";
+			break;
+		case Favorite:
+			ofs << "Favorite";
+			break;
+		case Hidden:
+			ofs << "Hidden";
+			break;
+		}
+
+		ofs << endl;
 	}
 
 	ofs.close ();
 }
 
 void
-PluginManager::load_favorites ()
+PluginManager::load_statuses ()
 {
-	Glib::ustring path = Glib::build_filename (get_user_ardour_path (),"favorite_plugins");
+	Glib::ustring path = Glib::build_filename (get_user_ardour_path (),"plugin_statuses");
 
 	ifstream ifs (path.c_str());
 
@@ -607,7 +626,9 @@ PluginManager::load_favorites ()
 	
 	std::string stype;
 	std::string id;
+	std::string sstatus;
 	PluginType type;
+	PluginStatusType status;
 
 	while (ifs) {
 
@@ -621,6 +642,12 @@ PluginManager::load_favorites ()
 			break;
 		}
 
+		ifs >> sstatus;
+		if (!ifs) {
+			break;
+
+		}
+
 		if (stype == "LADSPA") {
 			type = LADSPA;
 		} else if (stype == "AudioUnit") {
@@ -630,28 +657,39 @@ PluginManager::load_favorites ()
 		} else if (stype == "VST") {
 			type = VST;
 		} else {
-			error << string_compose (_("unknown favorite plugin type \"%1\" - ignored"), stype)
+			error << string_compose (_("unknown plugin type \"%1\" - ignored"), stype)
 			      << endmsg;
 			continue;
 		}
 		
-		add_favorite (type, id);
+		if (sstatus == "Normal") {
+			status = Normal;
+		} else if (sstatus == "Favorite") {
+			status = Favorite;
+		} else if (sstatus == "Hidden") {
+			status = Hidden;
+		} else {
+			error << string_compose (_("unknown plugin status type \"%1\" - ignored"), sstatus)
+				  << endmsg;
+			continue;
+		}
+
+		set_status (type, id, status);
 	}
 	
 	ifs.close ();
 }
 
 void
-PluginManager::add_favorite (PluginType t, string id)
+PluginManager::set_status (PluginType t, string id, PluginStatusType status)
 {
-	FavoritePlugin fp (t, id);
-	pair<FavoritePluginList::iterator,bool> res = favorites.insert (fp);
-	//cerr << "Added " << t << " " << id << " success ? " << res.second << endl;
-}
+	PluginStatus ps (t, id, status);
+	statuses.erase (ps);
 
-void
-PluginManager::remove_favorite (PluginType t, string id)
-{
-	FavoritePlugin fp (t, id);
-	favorites.erase (fp);
+	if (status == Normal) {
+		return;
+	}
+
+	pair<PluginStatusList::iterator, bool> res = statuses.insert (ps);
+	//cerr << "Added " << t << " " << id << " " << status << " success ? " << res.second << endl;
 }

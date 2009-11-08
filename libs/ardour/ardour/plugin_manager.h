@@ -55,30 +55,36 @@ class PluginManager {
 
 	static PluginManager* the_manager() { return _manager; }
 
-	void load_favorites ();
-	void save_favorites ();
-	void add_favorite (ARDOUR::PluginType type, std::string unique_id);
-	void remove_favorite (ARDOUR::PluginType type, std::string unique_id);
-	bool is_a_favorite_plugin (const PluginInfoPtr&);
-	
+	enum PluginStatusType {
+		Normal = 0,
+		Favorite,
+		Hidden
+	};
+
+	void load_statuses ();
+	void save_statuses ();
+	void set_status (ARDOUR::PluginType type, std::string unique_id, PluginStatusType status);
+	PluginStatusType get_status (const PluginInfoPtr&);
+
   private:
-	struct FavoritePlugin {
+	struct PluginStatus {
 	    ARDOUR::PluginType type;
 	    std::string unique_id;
+	    PluginStatusType status;
 
-	    FavoritePlugin (ARDOUR::PluginType t, std::string id) 
-	    : type (t), unique_id (id) {}
+	    PluginStatus (ARDOUR::PluginType t, std::string id, PluginStatusType s = Normal)
+	    : type (t), unique_id (id), status (s) {}
 	    
-	    bool operator==(const FavoritePlugin& other) const {
+	    bool operator==(const PluginStatus& other) const {
 		    return other.type == type && other.unique_id == unique_id;
 	    }
 
-	    bool operator<(const FavoritePlugin& other) const {
+	    bool operator<(const PluginStatus& other) const {
 		    return other.type < type || other.unique_id < unique_id;
 	    }
 	};
-	typedef std::set<FavoritePlugin> FavoritePluginList;
-	FavoritePluginList favorites;
+	typedef std::set<PluginStatus> PluginStatusList;
+	PluginStatusList statuses;
 
 	ARDOUR::PluginInfoList _vst_plugin_info;
 	ARDOUR::PluginInfoList _ladspa_plugin_info;
