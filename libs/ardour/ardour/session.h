@@ -1733,7 +1733,7 @@ class Session : public PBD::StatefulDestructible
 
 	list<AudioRange> current_audio_range;
 	bool _play_range;
-	void set_play_range (list<AudioRange>&, bool leave_rolling);
+	void set_play_range (std::list<AudioRange>&, bool leave_rolling);
 	void unset_play_range ();
 
 	/* main outs */

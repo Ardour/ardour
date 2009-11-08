@@ -249,11 +249,13 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	ActionManager::register_action (transport_actions, X_("ToggleRoll"), _("Start/Stop"), bind (mem_fun (*this, &ARDOUR_UI::toggle_roll), false, false));
-	ActionManager::register_action (transport_actions, X_("ToggleRollMaybe"), _("Start/Continue/Stop"), bind (mem_fun (*this, &ARDOUR_UI::toggle_roll), false, true));
+	act = ActionManager::register_action (transport_actions, X_("ToggleRoll"), _("Start/Stop"), bind (mem_fun (*this, &ARDOUR_UI::toggle_roll), false, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	ActionManager::register_action (transport_actions, X_("ToggleRollForgetCapture"), _("Stop + Forget Capture"), bind (mem_fun(*this, &ARDOUR_UI::toggle_roll), true, false));
+	act = ActionManager::register_action (transport_actions, X_("ToggleRollMaybe"), _("Start/Continue/Stop"), bind (mem_fun (*this, &ARDOUR_UI::toggle_roll), false, true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("ToggleRollForgetCapture"), _("Stop + Forget Capture"), bind (mem_fun(*this, &ARDOUR_UI::toggle_roll), true, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
@@ -262,12 +264,12 @@ ARDOUR_UI::install_actions ()
 	   - if transport speed != 1.0 or != -1.0, change speed to 1.0 or -1.0 (respectively)
 	   - otherwise do nothing
 	*/
-
-	ActionManager::register_action (transport_actions, X_("TransitionToRoll"), _("Transition To Roll"), bind (mem_fun (*editor, &PublicEditor::transition_to_rolling), true));
+	
+	act =  ActionManager::register_action (transport_actions, X_("TransitionToRoll"), _("Transition To Roll"), bind (mem_fun (*editor, &PublicEditor::transition_to_rolling), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	ActionManager::register_action (transport_actions, X_("TransitionToReverse"), _("Transition To Reverse"), bind (mem_fun (*editor, &PublicEditor::transition_to_rolling), false));
+	act = ActionManager::register_action (transport_actions, X_("TransitionToReverse"), _("Transition To Reverse"), bind (mem_fun (*editor, &PublicEditor::transition_to_rolling), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
 

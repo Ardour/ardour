@@ -23,6 +23,7 @@
 #include <ardour/timestamps.h>
 
 #include <pbd/error.h>
+#include <pbd/enumwriter.h>
 #include <glibmm/thread.h>
 
 #include <ardour/ardour.h>
@@ -35,28 +36,6 @@ using namespace ARDOUR;
 using namespace PBD;
 
 MultiAllocSingleReleasePool Session::Event::pool ("event", sizeof (Session::Event), 512);
-
-static const char* event_names[] = {
-	"SetTransportSpeed",
-	"SetDiskstreamSpeed",
-	"Locate",
-	"LocateRoll",
-	"LocateRollLocate",
-	"SetLoop",
-	"PunchIn",
-	"PunchOut",
-	"RangeStop",
-	"RangeLocate",
-	"Overwrite",
-	"SetSlaveSource",
-	"Audition",
-	"InputConfigurationChange",
-	"SetAudioRange",
-	"SetMusicRange",
-	"SetPlayRange",
-	"StopOnce",
-	"AutoLoop"
-};
 
 void
 Session::add_event (nframes_t frame, Event::Type type, nframes_t target_frame)
@@ -158,8 +137,8 @@ Session::merge_event (Event* ev)
 	default:
 		for (Events::iterator i = events.begin(); i != events.end(); ++i) {
 			if ((*i)->type == ev->type && (*i)->action_frame == ev->action_frame) {
-			  error << string_compose(_("Session: cannot have two events of type %1 at the same frame (%2)."), 
-						 event_names[ev->type], ev->action_frame) << endmsg;
+				error << string_compose(_("Session: cannot have two events of type %1 at the same frame (%2)."), 
+							enum_2_string (ev->type), ev->action_frame) << endmsg;
 				return;
 			}
 		}
