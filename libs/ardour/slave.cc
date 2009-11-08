@@ -35,13 +35,13 @@ SlaveSessionProxy::frame_rate() const
 	return session.frame_rate();
 }
 
-nframes_t
+nframes64_t
 SlaveSessionProxy::audible_frame() const
 {
 	return session.audible_frame();
 }
 
-nframes_t
+nframes64_t
 SlaveSessionProxy::transport_frame() const
 {
 	return session.transport_frame();
@@ -53,14 +53,14 @@ SlaveSessionProxy::frames_since_cycle_start() const
 	return session.engine().frames_since_cycle_start();
 }
 
-nframes_t
+nframes64_t
 SlaveSessionProxy::frame_time() const
 {
 	return session.engine().frame_time();
 }
 
 void
-SlaveSessionProxy::request_locate(nframes_t frame, bool with_roll)
+SlaveSessionProxy::request_locate(nframes64_t frame, bool with_roll)
 {
 	session.request_locate(frame, with_roll);
 }

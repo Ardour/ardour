@@ -136,6 +136,7 @@ protected:
 	bool _x_constrained; ///< true if x motion is constrained, otherwise false
 	bool _y_constrained; ///< true if y motion is constrained, otherwise false
 	bool _was_rolling; ///< true if the session was rolling before the drag started, otherwise false
+	bool _have_transaction; ///< true if a transaction has been started, false otherwise. Must be set true by derived class.
 
 private:
 

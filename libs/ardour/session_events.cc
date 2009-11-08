@@ -23,6 +23,7 @@
 #include "ardour/timestamps.h"
 
 #include "pbd/error.h"
+#include "pbd/enumwriter.h"
 #include <glibmm/thread.h>
 
 #include "ardour/ardour.h"
@@ -37,28 +38,6 @@ using namespace ARDOUR;
 using namespace PBD;
 
 MultiAllocSingleReleasePool Session::Event::pool ("event", sizeof (Session::Event), 512);
-
-static const char* event_names[] = {
-	"SetTransportSpeed",
-	"SetDiskstreamSpeed",
-	"Locate",
-	"LocateRoll",
-	"LocateRollLocate",
-	"SetLoop",
-	"PunchIn",
-	"PunchOut",
-	"RangeStop",
-	"RangeLocate",
-	"Overwrite",
-	"SetSlaveSource",
-	"Audition",
-	"InputConfigurationChange",
-	"SetAudioRange",
-	"SetMusicRange",
-	"SetPlayRange",
-	"StopOnce",
-	"AutoLoop"
-};
 
 void
 Session::add_event (nframes_t frame, Event::Type type, nframes_t target_frame)
@@ -161,7 +140,7 @@ Session::merge_event (Event* ev)
 		for (Events::iterator i = events.begin(); i != events.end(); ++i) {
 			if ((*i)->type == ev->type && (*i)->action_frame == ev->action_frame) {
 			  error << string_compose(_("Session: cannot have two events of type %1 at the same frame (%2)."),
-						 event_names[ev->type], ev->action_frame) << endmsg;
+						  enum_2_string (ev->type), ev->action_frame) << endmsg;
 				return;
 			}
 		}
@@ -321,7 +300,7 @@ Session::process_event (Event* ev)
 
 	switch (ev->type) {
 	case Event::SetLoop:
-		set_play_loop (ev->yes_or_no, (ev->speed == 1.0f));
+		set_play_loop (ev->yes_or_no);
 		break;
 
 	case Event::AutoLoop:
@@ -362,7 +341,7 @@ Session::process_event (Event* ev)
 
 
 	case Event::SetTransportSpeed:
-		set_transport_speed (ev->speed, ev->yes_or_no);
+		set_transport_speed (ev->speed, ev->yes_or_no, ev->second_yes_or_no);
 		break;
 
 	case Event::PunchIn:
@@ -425,17 +404,12 @@ Session::process_event (Event* ev)
 		break;
 
 	case Event::InputConfigurationChange:
-		post_transport_work = PostTransportWork (post_transport_work | PostTransportInputChange);
+		add_post_transport_work (PostTransportInputChange);
 		_butler->schedule_transport_work ();
 		break;
 
-	case Event::SetAudioRange:
-		current_audio_range = ev->audio_range;
-		setup_auto_play ();
-		break;
-
-	case Event::SetPlayRange:
-		set_play_range (ev->yes_or_no, (ev->speed == 1.0f));
+	case Event::SetPlayAudioRange:
+		set_play_range (ev->audio_range, (ev->speed == 1.0f));
 		break;
 
 	default:

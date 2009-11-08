@@ -132,8 +132,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		Recording = 2
 	};
 
-	struct Event {
-		enum Type {
+        struct Event {
+	        enum Type {
 			SetTransportSpeed,
 			SetDiskstreamSpeed,
 			Locate,
@@ -148,78 +148,82 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 			SetSlaveSource,
 			Audition,
 			InputConfigurationChange,
-			SetAudioRange,
-			SetPlayRange,
-
+			SetPlayAudioRange,
+			
 			/* only one of each of these events can be queued at any one time */
-
+			
 			StopOnce,
 			AutoLoop
 		};
+	    
+	         enum Action {
+			 Add,
+			 Remove,
+			 Replace,
+			 Clear
+		 };
+	    
+	    Type             type;
+	    Action           action;
+	    nframes64_t      action_frame;
+	    nframes64_t      target_frame;
+	    double           speed;
+	    
+	    union {
+		void*        ptr;
+		bool         yes_or_no;
+		nframes64_t  target2_frame;
+		SlaveSource  slave;
+		Route*       route;
+	    };
 
-		enum Action {
-			Add,
-			Remove,
-			Replace,
-			Clear
-		};
-
-		Type             type;
-		Action           action;
-		nframes_t        action_frame;
-		nframes_t        target_frame;
-		double           speed;
-
-		union {
-			void*        ptr;
-			bool         yes_or_no;
-			nframes_t    target2_frame;
-			SlaveSource  slave;
-			Route*       route;
-		};
-
-		std::list<AudioRange> audio_range;
-		std::list<MusicRange> music_range;
-
-		boost::shared_ptr<Region> region;
-
-		Event(Type t, Action a, nframes_t when, nframes_t where, double spd, bool yn = false)
+	    union {
+		bool second_yes_or_no;
+	    };
+	    
+	    std::list<AudioRange> audio_range;
+	    std::list<MusicRange> music_range;
+	    
+	    boost::shared_ptr<Region> region;
+	    
+	    Event(Type t, Action a, nframes_t when, nframes_t where, double spd, bool yn = false, bool yn2 = false)
 			: type (t)
 			, action (a)
 			, action_frame (when)
 			, target_frame (where)
 			, speed (spd)
 			, yes_or_no (yn)
+			, second_yes_or_no (yn2)
 		{}
 
-		void set_ptr (void* p) {
-			ptr = p;
-		}
-
-		bool before (const Event& other) const {
-			return action_frame < other.action_frame;
-		}
-
-		bool after (const Event& other) const {
-			return action_frame > other.action_frame;
-		}
-
-		static bool compare (const Event *e1, const Event *e2) {
-			return e1->before (*e2);
-		}
-
-		void *operator new (size_t) {
-			return pool.alloc ();
-		}
-
-		void operator delete (void *ptr, size_t /*size*/) {
-			pool.release (ptr);
-		}
-
-		static const nframes_t Immediate = 0;
-
-		private:
-		static MultiAllocSingleReleasePool pool;
+	    void set_ptr (void* p) {
+		    ptr = p;
+	    }
+	    
+	    bool before (const Event& other) const {
+		    return action_frame < other.action_frame;
+	    }
+	    
+	    bool after (const Event& other) const {
+		    return action_frame > other.action_frame;
+	    }
+	    
+	    static bool compare (const Event *e1, const Event *e2) {
+		    return e1->before (*e2);
+	    }
+	    
+	    void *operator new (size_t) {
+		    return pool.alloc ();
+	    }
+	    
+	    void operator delete (void *ptr, size_t /*size*/) {
+		    pool.release (ptr);
+	    }
+	    
+	    static const nframes_t Immediate = 0;
+	    
+	private:
+	    static MultiAllocSingleReleasePool pool;
 	};
 
 	/* creating from an XML file */
@@ -375,9 +379,9 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	/* Transport mechanism signals */
 
 	sigc::signal<void> TransportStateChange; /* generic */
-	sigc::signal<void,nframes_t> PositionChanged; /* sent after any non-sequential motion */
+	sigc::signal<void,nframes64_t> PositionChanged; /* sent after any non-sequential motion */
 	sigc::signal<void> DurationChanged;
-	sigc::signal<void,nframes_t> Xrun;
+	sigc::signal<void,nframes64_t> Xrun;
 	sigc::signal<void> TransportLooped;
 
 	/** emitted when a locate has occurred */
@@ -388,7 +392,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	void request_roll_at_and_return (nframes_t start, nframes_t return_to);
 	void request_bounded_roll (nframes_t start, nframes_t end);
-	void request_stop (bool abort = false);
+	void request_stop (bool abort = false, bool clear_state = false);
 	void request_locate (nframes_t frame, bool with_roll = false);
 
 	void request_play_loop (bool yn, bool leave_rolling = false);
@@ -406,7 +410,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void request_diskstream_speed (Diskstream&, double speed);
 	void request_input_change_handling ();
 
-	bool locate_pending() const { return static_cast<bool>(post_transport_work&PostTransportLocate); }
+	bool locate_pending() const { return static_cast<bool>(post_transport_work()&PostTransportLocate); }
 	bool transport_locked () const;
 
 	int wipe ();
@@ -533,8 +537,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	/* Time */
 
-	nframes_t transport_frame () const {return _transport_frame; }
-	nframes_t audible_frame () const;
+        nframes64_t transport_frame () const {return _transport_frame; }
+	nframes64_t audible_frame () const;
 	nframes64_t requested_return_frame() const { return _requested_return_frame; }
 
 	enum PullupFormat {
@@ -914,10 +918,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	/* ranges */
 
-	void set_audio_range (std::list<AudioRange>&);
-	void set_music_range (std::list<MusicRange>&);
-
-	void request_play_range (bool yn, bool leave_rolling = false);
+	void request_play_range (std::list<AudioRange>*, bool leave_rolling = false);
 	bool get_play_range () const { return _play_range; }
 
 	/* buffers for gain and pan */
@@ -997,7 +998,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	nframes_t               _nominal_frame_rate;  //ignores audioengine setting, "native" SR
 	int                      transport_sub_state;
 	mutable gint            _record_status;
-	volatile nframes_t      _transport_frame;
+	volatile nframes64_t    _transport_frame;
 	Location*                end_location;
 	Location*                start_location;
 	Slave*                  _slave;
@@ -1010,7 +1011,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	CubicInterpolation          interpolation;
 
 	bool                     auto_play_legal;
-	nframes_t               _last_slave_transport_frame;
+	nframes64_t             _last_slave_transport_frame;
 	nframes_t                maximum_output_latency;
 	volatile nframes64_t    _requested_return_frame;
 	BufferSet*              _scratch_buffers;
@@ -1026,6 +1027,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	bool                    _non_soloed_outs_muted;
 	uint32_t                _listen_cnt;
 	bool                    _writable;
+	bool                    _was_seamless;
 
 	void set_worst_io_latencies ();
 	void set_worst_io_latencies_x (IOChange, void *) {
@@ -1180,7 +1182,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		PostTransportScrub              = 0x8000,
 		PostTransportReverse            = 0x10000,
 		PostTransportInputChange        = 0x20000,
-		PostTransportCurveRealloc       = 0x40000
+		PostTransportCurveRealloc       = 0x40000,
+		PostTransportClearSubstate      = 0x80000
 	};
 
 	static const PostTransportWork ProcessCannotProceedMask =
@@ -1192,9 +1195,13 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 				PostTransportScrub|
 				PostTransportAudition|
 				PostTransportLocate|
-				PostTransportStop);
+				PostTransportStop|
+				PostTransportClearSubstate);
 
-	PostTransportWork post_transport_work;
+	gint _post_transport_work; /* accessed only atomic ops */
+	PostTransportWork post_transport_work() const        { return (PostTransportWork) g_atomic_int_get (&_post_transport_work); }
+	void set_post_transport_work (PostTransportWork ptw) { g_atomic_int_set (&_post_transport_work, (gint) ptw); }
+	void add_post_transport_work (PostTransportWork ptw);
 
 	uint32_t    cumulative_rf_motion;
 	uint32_t    rf_scale;
@@ -1337,8 +1344,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	int no_roll (nframes_t nframes);
 	int fail_roll (nframes_t nframes);
 
-	bool non_realtime_work_pending() const { return static_cast<bool>(post_transport_work); }
-	bool process_can_proceed() const { return !(post_transport_work & ProcessCannotProceedMask); }
+	bool non_realtime_work_pending() const { return static_cast<bool>(post_transport_work()); }
+	bool process_can_proceed() const { return !(post_transport_work() & ProcessCannotProceedMask); }
 
 	struct MIDIRequest {
 		enum Type {
@@ -1361,18 +1368,19 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void          change_midi_ports ();
 	int           use_config_midi_ports ();
 
-	void set_play_loop (bool yn, bool leave_rolling);
+	void set_play_loop (bool yn);
+	void unset_play_loop ();
 	void overwrite_some_buffers (Diskstream*);
 	void flush_all_inserts ();
 	int  micro_locate (nframes_t distance);
-	void locate (nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
-	void start_locate (nframes_t, bool with_roll, bool with_flush, bool with_loop=false);
-	void force_locate (nframes_t frame, bool with_roll = false);
+        void locate (nframes64_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
+        void start_locate (nframes64_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
+	void force_locate (nframes64_t frame, bool with_roll = false);
 	void set_diskstream_speed (Diskstream*, double speed);
-	void set_transport_speed (double speed, bool abort = false);
-	void stop_transport (bool abort = false);
+        void set_transport_speed (double speed, bool abort = false, bool clear_state = false);
+	void stop_transport (bool abort = false, bool clear_state = false);
 	void start_transport ();
-	void realtime_stop (bool abort);
+	void realtime_stop (bool abort, bool clear_state);
 	void non_realtime_start_scrub ();
 	void non_realtime_set_speed ();
 	void non_realtime_locate ();
@@ -1619,8 +1627,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	std::list<AudioRange> current_audio_range;
 	bool _play_range;
-	void set_play_range (bool yn, bool leave_rolling);
-	void setup_auto_play ();
+	void set_play_range (std::list<AudioRange>&, bool leave_rolling);
+	void unset_play_range ();
 
 	/* main outs */
 	uint32_t main_outs;

@@ -210,7 +210,7 @@ Session::stop_audio_export ()
 	   stuff that stop_transport() implements.
 	*/
 
-	realtime_stop (true);
+	realtime_stop (true, true);
 	_butler->schedule_transport_work ();
 
 	if (!export_status->aborted()) {

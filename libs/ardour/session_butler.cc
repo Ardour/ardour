@@ -68,7 +68,7 @@ static inline uint32_t next_power_of_two (uint32_t n)
 void
 Session::schedule_curve_reallocation ()
 {
-	post_transport_work = PostTransportWork (post_transport_work | PostTransportCurveRealloc);
+	add_post_transport_work (PostTransportCurveRealloc);
 	_butler->schedule_transport_work ();
 }
 
@@ -100,7 +100,7 @@ Session::overwrite_some_buffers (Diskstream* ds)
 		}
 	}
 
-	post_transport_work = PostTransportWork (post_transport_work | PostTransportOverWrite);
+	add_post_transport_work (PostTransportOverWrite);
 	_butler->schedule_transport_work ();
 }
 

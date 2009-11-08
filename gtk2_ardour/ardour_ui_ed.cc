@@ -251,10 +251,13 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	ActionManager::register_action (transport_actions, X_("ToggleRoll"), _("Start/Stop"), bind (mem_fun (*this, &ARDOUR_UI::toggle_roll), false));
+	act = ActionManager::register_action (transport_actions, X_("ToggleRoll"), _("Start/Stop"), bind (mem_fun (*this, &ARDOUR_UI::toggle_roll), false, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	ActionManager::register_action (transport_actions, X_("ToggleRollForgetCapture"), _("Stop and Forget Capture"), bind (mem_fun(*this, &ARDOUR_UI::toggle_roll), true));
+	act = ActionManager::register_action (transport_actions, X_("ToggleRollMaybe"), _("Start/Continue/Stop"), bind (mem_fun (*this, &ARDOUR_UI::toggle_roll), false, true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = ActionManager::register_action (transport_actions, X_("ToggleRollForgetCapture"), _("Stop + Forget Capture"), bind (mem_fun(*this, &ARDOUR_UI::toggle_roll), true, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 

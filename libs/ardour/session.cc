@@ -132,7 +132,6 @@ Session::Session (AudioEngine &eng,
 	  pending_events (2048),
 	  state_tree (0),
 	  _butler (new Butler (this)),
-	  post_transport_work((PostTransportWork)0),
 	  _send_timecode_update (false),
 	  midi_thread (pthread_t (0)),
 	  midi_requests (128), // the size of this should match the midi request pool size
@@ -218,7 +217,6 @@ Session::Session (AudioEngine &eng,
 	  pending_events (2048),
 	  state_tree (0),
 	  _butler (new Butler (this)),
-	  post_transport_work((PostTransportWork)0),
 	  _send_timecode_update (false),
 	  midi_thread (pthread_t (0)),
 	  midi_requests (16),
@@ -1229,12 +1227,12 @@ Session::maybe_enable_record ()
 	set_dirty();
 }
 
-nframes_t
+nframes64_t
 Session::audible_frame () const
 {
-	nframes_t ret;
+	nframes64_t ret;
+	nframes64_t tf;
 	nframes_t offset;
-	nframes_t tf;
 
 	/* the first of these two possible settings for "offset"
 	   mean that the audible frame is stationary until
@@ -3517,7 +3515,7 @@ void
 Session::set_audition (boost::shared_ptr<Region> r)
 {
 	pending_audition_region = r;
-	post_transport_work = PostTransportWork (post_transport_work | PostTransportAudition);
+	add_post_transport_work (PostTransportAudition);
 	_butler->schedule_transport_work ();
 }
 

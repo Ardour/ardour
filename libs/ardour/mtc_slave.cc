@@ -72,7 +72,7 @@ void
 MTC_Slave::update_mtc_qtr (Parser& /*p*/)
 {
 	cycles_t cnow = get_cycles ();
-	nframes_t now = session.engine().frame_time();
+	nframes64_t now = session.engine().frame_time();
 	nframes_t qtr;
 	static cycles_t last_qtr = 0;
 
@@ -91,7 +91,7 @@ MTC_Slave::update_mtc_qtr (Parser& /*p*/)
 void
 MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 {
-	nframes_t now = session.engine().frame_time();
+	nframes64_t now = session.engine().frame_time();
 	Timecode::Time timecode;
 
 	timecode.hours = msg[3];
@@ -258,9 +258,9 @@ MTC_Slave::ok() const
 }
 
 bool
-MTC_Slave::speed_and_position (double& speed, nframes_t& pos)
+MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 {
-	nframes_t now = session.engine().frame_time();
+	nframes64_t now = session.engine().frame_time();
 	SafeTime last;
 	nframes_t frame_rate;
 	nframes_t elapsed;

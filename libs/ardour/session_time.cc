@@ -452,7 +452,7 @@ Session::jack_sync_callback (jack_transport_state_t state,
 
 	switch (state) {
 	case JackTransportStopped:
-		if (slave && _transport_frame != pos->frame && post_transport_work == 0) {
+		if (slave && _transport_frame != pos->frame && post_transport_work() == 0) {
 			request_locate (pos->frame, false);
 			// cerr << "SYNC: stopped, locate to " << pos->frame << " from " << _transport_frame << endl;
 			return false;
@@ -461,9 +461,9 @@ Session::jack_sync_callback (jack_transport_state_t state,
 		}
 
 	case JackTransportStarting:
-		// cerr << "SYNC: starting @ " << pos->frame << " a@ " << _transport_frame << " our work = " <<  post_transport_work << " pos matches ? " << (_transport_frame == pos->frame) << endl;
+		// cerr << "SYNC: starting @ " << pos->frame << " a@ " << _transport_frame << " our work = " <<  post_transport_work() << " pos matches ? " << (_transport_frame == pos->frame) << endl;
 		if (slave) {
-			return _transport_frame == pos->frame && post_transport_work == 0;
+			return _transport_frame == pos->frame && post_transport_work() == 0;
 		} else {
 			return true;
 		}

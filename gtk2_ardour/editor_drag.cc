@@ -50,15 +50,16 @@ using namespace ArdourCanvas;
 
 double const ControlPointDrag::_zero_gain_fraction = gain_to_slider_position (dB_to_coefficient (0.0));
 
-Drag::Drag (Editor* e, ArdourCanvas::Item* i) :
-	_editor (e),
-	_item (i),
-	_pointer_frame_offset (0),
-	_grab_frame (0),
-	_last_pointer_frame (0),
-	_current_pointer_frame (0),
-	_had_movement (false),
-	_move_threshold_passed (false)
+Drag::Drag (Editor* e, ArdourCanvas::Item* i) 
+	: _editor (e)
+	, _item (i)
+	, _pointer_frame_offset (0)
+	, _grab_frame (0)
+	, _last_pointer_frame (0)
+	, _current_pointer_frame (0)
+	, _had_movement (false)
+	, _have_transaction (false)
+	, _move_threshold_passed (false)
 {
 
 }
@@ -777,6 +778,8 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			_editor->begin_reversible_command (_("region drag"));
 		}
 	}
+
+	_have_transaction = true;
 
 	changed_position = (_last_frame_position != (nframes64_t) (_primary->region()->position()));
 	changed_tracks = (_dest_trackview != &_primary->get_time_axis_view());
@@ -1551,6 +1554,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		}
 
 		_editor->begin_reversible_command (trim_type);
+		_have_transaction = true;
 
 		for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 			(*i)->fake_set_opaque(false);
@@ -1575,6 +1579,9 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	if (_current_pointer_frame == _last_pointer_frame) {
 		return;
 	}
+
+	/* XXX i hope to god that we can really conclude this ... */
+	_have_transaction = true;
 
 	if (left_direction) {
 		frame_delta = (_last_pointer_frame - _current_pointer_frame);
@@ -1658,15 +1665,19 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 				(*i)->fake_set_opaque (true);
 			}
 		}
-
 		for (set<boost::shared_ptr<Playlist> >::iterator p = _editor->motion_frozen_playlists.begin(); p != _editor->motion_frozen_playlists.end(); ++p) {
 			(*p)->thaw ();
-			_editor->session->add_command (new MementoCommand<Playlist>(*(*p).get(), 0, &(*p)->get_state()));
+			if (_have_transaction) {
+				_editor->session->add_command (new MementoCommand<Playlist>(*(*p).get(), 0, &(*p)->get_state()));
+			}
 		}
 
 		_editor->motion_frozen_playlists.clear ();
 
-		_editor->commit_reversible_command();
+		if (_have_transaction) {
+			_editor->commit_reversible_command();
+		}
+
 	} else {
 		/* no mouse movement */
 		_editor->point_trim (event);
@@ -2853,9 +2864,9 @@ ScrubDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 }
 
 SelectionDrag::SelectionDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
-	: Drag (e, i),
-	  _operation (o),
-	  _copy (false)
+	: Drag (e, i)
+	, _operation (o)
+	, _copy (false)
 {
 
 }
@@ -2924,6 +2935,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 	nframes64_t end = 0;
 	nframes64_t length;
 
+
 	nframes64_t const pending_position = adjusted_current_frame (event);
 
 	/* only alter selection if the current frame is
@@ -2956,6 +2968,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		if (first_move) {
 
 			_editor->begin_reversible_command (_("range selection"));
+			_have_transaction = true;
 
 			if (_copy) {
 				/* adding to the selection */
@@ -2972,8 +2985,9 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
 		if (first_move) {
 			_editor->begin_reversible_command (_("trim selection start"));
+			_have_transaction = true;
 		}
-
+		
 		start = _editor->selection->time[_editor->clicked_selection].start;
 		end = _editor->selection->time[_editor->clicked_selection].end;
 
@@ -2988,6 +3002,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
 		if (first_move) {
 			_editor->begin_reversible_command (_("trim selection end"));
+			_have_transaction = true;
 		}
 
 		start = _editor->selection->time[_editor->clicked_selection].start;
@@ -3005,6 +3020,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
 		if (first_move) {
 			_editor->begin_reversible_command (_("move selection"));
+			_have_transaction = true;
 		}
 
 		start = _editor->selection->time[_editor->clicked_selection].start;
@@ -3040,13 +3056,25 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 void
 SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 {
+	Session* s = _editor->session;
+
 	if (movement_occurred) {
 		motion (event, false);
 		/* XXX this is not object-oriented programming at all. ick */
 		if (_editor->selection->time.consolidate()) {
 			_editor->selection->TimeChanged ();
 		}
-		_editor->commit_reversible_command ();
+
+		if (_have_transaction) {
+			_editor->commit_reversible_command ();
+		}
+
+		/* XXX what if its a music time selection? */
+		if (s && (s->config.get_auto_play() || (s->get_play_range() && s->transport_rolling()))) {
+			s->request_play_range (&_editor->selection->time, true);
+		}
+
+
 	} else {
 		/* just a click, no pointer movement.*/
 
@@ -3055,10 +3083,13 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 			_editor->selection->clear_time();
 
 		}
+		
+		if (s && s->get_play_range () && s->transport_rolling()) {
+			s->request_stop (false, false);
+		}
+
 	}
 
-	/* XXX what happens if its a music selection? */
-	_editor->session->set_audio_range (_editor->selection->time);
 	_editor->stop_canvas_autoscroll ();
 }
 

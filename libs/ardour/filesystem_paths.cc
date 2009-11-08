@@ -16,6 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#include <cstdlib>
 
 #include "pbd/error.h"
 #include "pbd/filesystem_paths.h"
@@ -36,18 +37,30 @@ using std::string;
 sys::path
 user_config_directory ()
 {
-	const string home_dir = Glib::get_home_dir ();
+	const char* c = 0;
+	sys::path p;
 
-	if (home_dir.empty ()) {
-		const string error_msg = "Unable to determine home directory";
+	/* adopt freedesktop standards, and put .ardour3 into $XDG_CONFIG_HOME or ~/.config
+	 */
 
-		// log the error
-		error << error_msg << endmsg;
+	if ((c = getenv ("XDG_CONFIG_HOME")) != 0) {
+		p = c;
+	} else {
+		const string home_dir = Glib::get_home_dir();
+	
+		if (home_dir.empty ()) {
+			const string error_msg = "Unable to determine home directory";
+			
+			// log the error
+			error << error_msg << endmsg;
+			
+			throw sys::filesystem_error(error_msg);
+		}
 
-		throw sys::filesystem_error(error_msg);
+		p = home_dir;
+		p /= ".config";
 	}
-
-	sys::path p(home_dir);
+	
 	p /= user_config_dir_name;
 
 	return p;

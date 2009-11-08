@@ -1223,7 +1223,7 @@ MidiDiskstream::get_state ()
 		if (_session.config.get_punch_in() && ((pi = _session.locations()->auto_punch_location()) != 0)) {
 			snprintf (buf, sizeof (buf), "%" PRId64, pi->start());
 		} else {
-			snprintf (buf, sizeof (buf), "%" PRIu32, _session.transport_frame());
+			snprintf (buf, sizeof (buf), "%" PRId64, _session.transport_frame());
 		}
 
 		cs_child->add_property (X_("at"), buf);

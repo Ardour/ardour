@@ -36,7 +36,7 @@ JACK_Slave::JACK_Slave (jack_client_t* j)
 	: jack (j)
 {
 	double x;
-	nframes_t p;
+	nframes64_t p;
 	/* call this to initialize things */
 	speed_and_position (x, p);
 }
@@ -64,10 +64,11 @@ JACK_Slave::ok() const
 }
 
 bool
-JACK_Slave::speed_and_position (double& sp, nframes_t& position)
+JACK_Slave::speed_and_position (double& sp, nframes64_t& position)
 {
 	jack_position_t pos;
 	jack_transport_state_t state;
+
 	state = jack_transport_query (jack, &pos);
 
 	switch (state) {

@@ -197,11 +197,10 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_worst_input_latency = 0;
  	_worst_track_latency = 0;
 	_state_of_the_state = StateOfTheState(CannotSave|InitialConnecting|Loading);
-
+	_was_seamless = Config->get_seamless_loop ();
 	_slave = 0;
 	session_send_mmc = false;
 	session_send_mtc = false;
-	post_transport_work = PostTransportWork (0);
 	g_atomic_int_set (&_playback_load, 100);
 	g_atomic_int_set (&_capture_load, 100);
 	g_atomic_int_set (&_playback_load_min, 100);

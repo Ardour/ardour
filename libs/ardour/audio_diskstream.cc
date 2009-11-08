@@ -626,6 +626,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 				nframes_t total = chaninfo->playback_vector.len[0] + chaninfo->playback_vector.len[1];
 
 				if (necessary_samples > total) {
+					cerr << _name << " Need " << necessary_samples << " total = " << total << endl;
 					cerr << "underrun for " << _name << endl;
 					DiskUnderrun ();
 					goto out;
@@ -1754,7 +1755,7 @@ AudioDiskstream::get_state ()
 		if (_session.config.get_punch_in() && ((pi = _session.locations()->auto_punch_location()) != 0)) {
 			snprintf (buf, sizeof (buf), "%" PRId64, pi->start());
 		} else {
-			snprintf (buf, sizeof (buf), "%" PRIu32, _session.transport_frame());
+			snprintf (buf, sizeof (buf), "%" PRId64, _session.transport_frame());
 		}
 
 		cs_child->add_property (X_("at"), buf);
