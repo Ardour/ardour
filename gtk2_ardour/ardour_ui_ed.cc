@@ -267,11 +267,11 @@ ARDOUR_UI::install_actions ()
 	
 	act =  ActionManager::register_action (transport_actions, X_("TransitionToRoll"), _("Transition To Roll"), bind (mem_fun (*editor, &PublicEditor::transition_to_rolling), true));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (transport_actions, X_("TransitionToReverse"), _("Transition To Reverse"), bind (mem_fun (*editor, &PublicEditor::transition_to_rolling), false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
 
 
 	act = ActionManager::register_action (transport_actions, X_("Loop"), _("Play Loop Range"), mem_fun(*this, &ARDOUR_UI::toggle_session_auto_loop));
