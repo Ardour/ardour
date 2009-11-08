@@ -57,8 +57,8 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i)
 	, _grab_frame (0)
 	, _last_pointer_frame (0)
 	, _current_pointer_frame (0)
-	, _had_movement (false)
 	, _have_transaction (false)
+	, _had_movement (false)
 	, _move_threshold_passed (false)
 {
 
