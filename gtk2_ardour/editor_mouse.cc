@@ -4647,6 +4647,13 @@ Editor::end_selection_op (ArdourCanvas::Item* item, GdkEvent* event)
 			selection->TimeChanged ();
 		}
 		commit_reversible_command ();
+
+
+		/* XXX what if its a music time selection? */
+		if (Config->get_auto_play() || (session->get_play_range() && session->transport_rolling())) {
+			session->request_play_range (&selection->time, true);
+		}
+
 	} else {
 		/* just a click, no pointer movement.*/
 
@@ -4655,11 +4662,10 @@ Editor::end_selection_op (ArdourCanvas::Item* item, GdkEvent* event)
 			selection->clear_time();
 
 		} 
-	}
 
-	/* XXX what if its a music time selection? */
-	if (Config->get_auto_play() || (session->get_play_range() && session->transport_rolling())) {
-		session->request_play_range (&selection->time, true);
+		if (session->get_play_range () && session->transport_rolling()) {
+			session->request_stop (false, false);
+		}
 	}
 
 	stop_canvas_autoscroll ();

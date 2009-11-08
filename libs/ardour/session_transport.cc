@@ -505,23 +505,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	deliver_mmc (MIDI::MachineControl::cmdStop, 0);
 	deliver_mmc (MIDI::MachineControl::cmdLocate, _transport_frame);
 
-	if (did_record) {
-
-		/* XXX its a little odd that we're doing this here
-		   when realtime_stop(), which has already executed,
-		   will have done this.
-		   JLC - so let's not because it seems unnecessary and breaks loop record
-		*/
-#if 0
-		if (!Config->get_latched_record_enable()) {
-			g_atomic_int_set (&_record_status, Disabled);
-		} else {
-			g_atomic_int_set (&_record_status, Enabled);
-		}
-		RecordStateChanged (); /* emit signal */
-#endif
-	}
-	
 	if ((post_transport_work & PostTransportLocate) && get_record_enabled()) {
 		/* capture start has been changed, so save pending state */
 		save_state ("", true);
