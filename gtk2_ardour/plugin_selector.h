@@ -66,6 +66,7 @@ class PluginSelector : public ArdourDialog
 	struct PluginColumns : public Gtk::TreeModel::ColumnRecord {
 		PluginColumns () {
 			add (favorite);
+			add (hidden);
 			add (name);
 			add (type_name);
 			add (category);
@@ -77,6 +78,7 @@ class PluginSelector : public ArdourDialog
 			add (plugin);
 		}
 		Gtk::TreeModelColumn<bool> favorite;
+		Gtk::TreeModelColumn<bool> hidden;
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> type_name;
 		Gtk::TreeModelColumn<std::string> category;
@@ -126,10 +128,15 @@ class PluginSelector : public ArdourDialog
 	void setup_filter_string (std::string&);
 
 	void favorite_changed (const Glib::ustring& path);
+	void hidden_changed (const Glib::ustring& path);
 	bool in_row_change;
 
 	void plugin_chosen_from_menu (const ARDOUR::PluginInfoPtr&);
 	Gtk::Menu* _menu;
+
+	Gtk::Menu* create_favs_menu (ARDOUR::PluginInfoList&);
+	Gtk::Menu* create_by_creator_menu (ARDOUR::PluginInfoList&);
+	Gtk::Menu* create_by_category_menu (ARDOUR::PluginInfoList&);
 };
 
 #endif // __ardour_plugin_selector_h__

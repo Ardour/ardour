@@ -58,6 +58,7 @@ static const char* _filter_mode_strings[] = {
 	N_("Author contains"),
 	N_("Library contains"),
 	N_("Favorites only"),
+	N_("Hidden only"),
 	0
 };
 
@@ -77,9 +78,11 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	plugin_model = Gtk::ListStore::create (plugin_columns);
 	plugin_display.set_model (plugin_model);
 	/* XXX translators: try to convert "Fav" into a short term
-	   related to "favorite"
+	   related to "favorite" and "Hid" into a short term
+	   related to "hidden"
 	*/
 	plugin_display.append_column (_("Fav"), plugin_columns.favorite);
+	plugin_display.append_column (_("Hid"), plugin_columns.hidden);
 	plugin_display.append_column (_("Available Plugins"), plugin_columns.name);
 	plugin_display.append_column (_("Type"), plugin_columns.type_name);
 	plugin_display.append_column (_("Category"), plugin_columns.category);
@@ -95,8 +98,13 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	CellRendererToggle* fav_cell = dynamic_cast<CellRendererToggle*>(plugin_display.get_column_cell_renderer (0));
 	fav_cell->property_activatable() = true;
-	fav_cell->property_radio() = false;
+	fav_cell->property_radio() = true;
 	fav_cell->signal_toggled().connect (mem_fun (*this, &PluginSelector::favorite_changed));
+
+	CellRendererToggle* hidden_cell = dynamic_cast<CellRendererToggle*>(plugin_display.get_column_cell_renderer (1));
+	hidden_cell->property_activatable() = true;
+	hidden_cell->property_radio() = true;
+	hidden_cell->signal_toggled().connect (mem_fun (*this, &PluginSelector::hidden_changed));
 
 	scroller.set_border_width(10);
 	scroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -108,7 +116,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	added_list.set_headers_visible (true);
 	added_list.set_reorderable (false);
 
-	for (int i = 0; i <=7; i++) {
+	for (int i = 0; i <=8; i++) {
 		Gtk::TreeView::Column* column = plugin_display.get_column(i);
 		column->set_sort_column(i);
 	}
@@ -159,7 +167,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	table->attach(ascroller, 0, 7, 8, 10);
 
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	add_button (Stock::CLOSE, RESPONSE_CLOSE);
 	add_button (_("Insert Plugin(s)"), RESPONSE_APPLY);
 	set_default_response (RESPONSE_APPLY);
 	set_response_sensitive (RESPONSE_APPLY, false);
@@ -208,7 +216,11 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 	std::string mode = filter_mode.get_active_text ();
 
 	if (mode == _("Favorites only")) {
-		return manager->is_a_favorite_plugin (info);
+		return manager->get_status (info) == PluginManager::Favorite;
+	}
+
+	if (mode == _("Hidden only")) {
+		return manager->get_status (info) == PluginManager::Hidden;
 	}
 
 	if (!filterstr.empty()) {
@@ -292,7 +304,8 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& filte
 		if (show_this_plugin (*i, filterstr)) {
 
 			TreeModel::Row newrow = *(plugin_model->append());
-			newrow[plugin_columns.favorite] = manager->is_a_favorite_plugin (*i);
+			newrow[plugin_columns.favorite] = (manager->get_status (*i) == PluginManager::Favorite);
+			newrow[plugin_columns.hidden] = (manager->get_status (*i) == PluginManager::Hidden);
 			newrow[plugin_columns.name] = (*i)->name;
 			newrow[plugin_columns.type_name] = type;
 			newrow[plugin_columns.category] = (*i)->category;
@@ -480,7 +493,7 @@ PluginSelector::filter_mode_changed ()
 {
 	std::string mode = filter_mode.get_active_text ();
 
-	if (mode == _("Favorites only")) {
+	if (mode == _("Favorites only") || mode == _("Hidden only")) {
 		filter_entry.set_sensitive (false);
 	} else {
 		filter_entry.set_sensitive (true);
@@ -496,7 +509,7 @@ PluginSelector::on_show ()
 	filter_entry.grab_focus ();
 }
 
-struct PluginMenuCompare {
+struct PluginMenuCompareByCreator {
     bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
 	    int cmp;
 
@@ -514,28 +527,45 @@ struct PluginMenuCompare {
     }
 };
 
+struct PluginMenuCompareByName {
+    bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
+	    int cmp;
+
+	    cmp = strcasecmp (a->name.c_str(), b->name.c_str());
+
+	    if (cmp < 0) {
+		    return true;
+	    } else if (cmp == 0) {
+		    /* same name ... compare type */
+		    if (a->type < b->type) {
+			    return true;
+		    }
+	    }
+	    return false;
+    }
+};
+
+struct PluginMenuCompareByCategory {
+    bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
+	    int cmp;
+
+	    cmp = strcasecmp (a->category.c_str(), b->category.c_str());
+
+	    if (cmp < 0) {
+		    return true;
+	    } else if (cmp == 0) {
+		    /* same category ... compare names */
+		    if (strcasecmp (a->name.c_str(), b->name.c_str()) < 0) {
+			    return true;
+		    }
+	    }
+	    return false;
+    }
+};
+
 Gtk::Menu&
 PluginSelector::plugin_menu()
 {
-	using namespace Menu_Helpers;
-
-	typedef std::map<Glib::ustring,Gtk::Menu*> SubmenuMap;
-	SubmenuMap submenu_map;
-
-	if (!_menu) {
-		_menu = new Menu();
-		_menu->set_name("ArdourContextMenu");
-	}
-
-	MenuList& items = _menu->items();
-	Menu* favs = new Menu();
-	favs->set_name("ArdourContextMenu");
-
-	items.clear ();
-	items.push_back (MenuElem (_("Favorites"), *favs));
-	items.push_back (MenuElem (_("Plugin Manager"), mem_fun (*this, &PluginSelector::show_manager)));
-	items.push_back (SeparatorElem ());
-
 	PluginInfoList all_plugs;
 
 	all_plugs.insert (all_plugs.end(), manager->ladspa_plugin_info().begin(), manager->ladspa_plugin_info().end());
@@ -549,38 +579,125 @@ PluginSelector::plugin_menu()
 	all_plugs.insert (all_plugs.end(), manager->lv2_plugin_info().begin(), manager->lv2_plugin_info().end());
 #endif
 
-	PluginMenuCompare cmp;
-	all_plugs.sort (cmp);
+	using namespace Menu_Helpers;
+
+	if (!_menu) {
+		_menu = new Menu();
+		_menu->set_name("ArdourContextMenu");
+	}
+
+	MenuList& items = _menu->items();
+	items.clear ();
+
+	Gtk::Menu* favs = create_favs_menu(all_plugs);
+	items.push_back (MenuElem (_("Favorites"), *favs));
+
+	items.push_back (MenuElem (_("Plugin Manager"), mem_fun (*this, &PluginSelector::show_manager)));
+	items.push_back (SeparatorElem ());
+
+	Menu* by_creator = create_by_creator_menu(all_plugs);
+	items.push_back (MenuElem (_("By Creator"), *by_creator));
+
+	Menu* by_category = create_by_category_menu(all_plugs);
+	items.push_back (MenuElem (_("By Category"), *by_category));
+
+	return *_menu;
+}
+
+Gtk::Menu*
+PluginSelector::create_favs_menu (PluginInfoList& all_plugs)
+{
+	using namespace Menu_Helpers;
+
+	Menu* favs = new Menu();
+	favs->set_name("ArdourContextMenu");
+
+	PluginMenuCompareByName cmp_by_name;
+	all_plugs.sort (cmp_by_name);
 
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
-		SubmenuMap::iterator x;
-		Gtk::Menu* submenu;
-
-		string creator = (*i)->creator;
-		string::size_type pos = 0;
-
-		if (manager->is_a_favorite_plugin (*i)) {
+		if (manager->get_status (*i) == PluginManager::Favorite) {
 			favs->items().push_back (MenuElem ((*i)->name, (bind (mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
 		}
+	}
+	return favs;
+}
+
+Gtk::Menu*
+PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
+{
+	using namespace Menu_Helpers;
+
+	typedef std::map<Glib::ustring,Gtk::Menu*> SubmenuMap;
+	SubmenuMap creator_submenu_map;
+
+	Menu* by_creator = new Menu();
+	by_creator->set_name("ArdourContextMenu");
+
+	MenuList& by_creator_items = by_creator->items();
+	PluginMenuCompareByCreator cmp_by_creator;
+	all_plugs.sort (cmp_by_creator);
+
+	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
+
+		if (manager->get_status (*i) == PluginManager::Hidden) continue;
+
+		string creator = (*i)->creator;
 
 		/* stupid LADSPA creator strings */
-
+		string::size_type pos = 0;
 		while (pos < creator.length() && (isalnum (creator[pos]) || isspace (creator[pos]))) ++pos;
 		creator = creator.substr (0, pos);
 
-		if ((x = submenu_map.find (creator)) != submenu_map.end()) {
+		SubmenuMap::iterator x;
+		Gtk::Menu* submenu;
+		if ((x = creator_submenu_map.find (creator)) != creator_submenu_map.end()) {
 			submenu = x->second;
 		} else {
 			submenu = new Gtk::Menu;
-			items.push_back (MenuElem (creator, *submenu));
-			submenu_map.insert (pair<Glib::ustring,Menu*> (creator, submenu));
+			by_creator_items.push_back (MenuElem (creator, *submenu));
+			creator_submenu_map.insert (pair<Glib::ustring,Menu*> (creator, submenu));
 			submenu->set_name("ArdourContextMenu");
 		}
-
 		submenu->items().push_back (MenuElem ((*i)->name, (bind (mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
 	}
+	return by_creator;
+}
 
-	return *_menu;
+Gtk::Menu*
+PluginSelector::create_by_category_menu (ARDOUR::PluginInfoList& all_plugs)
+{
+	using namespace Menu_Helpers;
+
+	typedef std::map<Glib::ustring,Gtk::Menu*> SubmenuMap;
+	SubmenuMap category_submenu_map;
+
+	Menu* by_category = new Menu();
+	by_category->set_name("ArdourContextMenu");
+
+	MenuList& by_category_items = by_category->items();
+	PluginMenuCompareByCategory cmp_by_category;
+	all_plugs.sort (cmp_by_category);
+
+	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
+
+		if (manager->get_status (*i) == PluginManager::Hidden) continue;
+
+		string category = (*i)->category;
+
+		SubmenuMap::iterator x;
+		Gtk::Menu* submenu;
+		if ((x = category_submenu_map.find (category)) != category_submenu_map.end()) {
+			submenu = x->second;
+		} else {
+			submenu = new Gtk::Menu;
+			by_category_items.push_back (MenuElem (category, *submenu));
+			category_submenu_map.insert (pair<Glib::ustring,Menu*> (category, submenu));
+			submenu->set_name("ArdourContextMenu");
+		}
+		submenu->items().push_back (MenuElem ((*i)->name, (bind (mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
+	}
+	return by_category;
 }
 
 void
@@ -617,18 +734,50 @@ PluginSelector::favorite_changed (const Glib::ustring& path)
 		/* change state */
 
 		(*iter)[plugin_columns.favorite] = favorite;
+		(*iter)[plugin_columns.hidden] = false;
+		PluginManager::PluginStatusType status = (favorite ? PluginManager::Favorite : PluginManager::Normal);
 
-		/* save new favorites list */
+		/* save new statuses list */
 
 		pi = (*iter)[plugin_columns.plugin];
 
-		if (favorite) {
-			manager->add_favorite (pi->type, pi->unique_id);
-		} else {
-			manager->remove_favorite (pi->type, pi->unique_id);
-		}
+		manager->set_status (pi->type, pi->unique_id, status);
 
-		manager->save_favorites ();
+		manager->save_statuses ();
+	}
+	in_row_change = false;
+}
+
+void
+PluginSelector::hidden_changed (const Glib::ustring& path)
+{
+	PluginInfoPtr pi;
+
+	if (in_row_change) {
+		return;
+	}
+
+	in_row_change = true;
+
+	TreeModel::iterator iter = plugin_model->get_iter (path);
+
+	if (iter) {
+
+		bool hidden = !(*iter)[plugin_columns.hidden];
+
+		/* change state */
+
+		(*iter)[plugin_columns.favorite] = false;
+		(*iter)[plugin_columns.hidden] = hidden;
+		PluginManager::PluginStatusType status = (hidden ? PluginManager::Hidden : PluginManager::Normal);
+
+		/* save new statuses list */
+
+		pi = (*iter)[plugin_columns.plugin];
+
+		manager->set_status (pi->type, pi->unique_id, status);
+
+		manager->save_statuses ();
 	}
 	in_row_change = false;
 }
