@@ -4658,7 +4658,7 @@ Editor::end_selection_op (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 
 	/* XXX what if its a music time selection? */
-	if (session->get_play_range() && session->transport_rolling()) {
+	if (Config->get_auto_play() || (session->get_play_range() && session->transport_rolling())) {
 		session->request_play_range (&selection->time, true);
 	}
 
