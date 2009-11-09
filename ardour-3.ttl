@@ -13,7 +13,7 @@
     doap:license <http://usefulinc.com/doap/licenses/gpl> ;
     doap:developer [
         a foaf:Person ;
-        foaf:name "Paul Davis"
+        foaf:name "Paul Davis" ;
         foaf:homepage <http://equalarea.com/paul/> ;
     ] ;
     doap:programming-language "C", "C++" ;
