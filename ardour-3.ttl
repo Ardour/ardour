@@ -1,0 +1,34 @@
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix hi:   <http://lv2plug.in/ns/dev/host-info#> .
+
+<http://ardour.org/software/ardour3> a doap:Project, hi:Host ;
+    doap:name "Ardour" ;
+	doap:revision "3.0" ;
+    doap:shortdesc "A Digital Audio Workstation (DAW)." ;
+    doap:homepage <http://ardour.org/> ;
+    doap:bug-database <http://tracker.ardour.org/> ;
+    doap:license <http://usefulinc.com/doap/licenses/gpl> ;
+    doap:developer [
+        a foaf:Person ;
+        foaf:name "Paul Davis"
+        foaf:homepage <http://equalarea.com/paul/> ;
+    ] ;
+    doap:programming-language "C", "C++" ;
+    doap:repository [
+        a doap:SVNRepository ;
+        doap:location <http://subversion.ardour.org/svn/ardour2/branches/3.0/>
+    ] ;
+	hi:supportsExtension [
+		hi:extension <http://lv2plug.in/ns/extensions/ui> ;
+	] , [
+		hi:extension <http://lv2plug.in/ns/dev/presets> ;
+	] ;
+    doap:description """
+Ardour is a hard disk recorder and Digital Audio Workstation (DAW) application.
+Ardour can record and play back an unlimited number of tracks of audio and/or
+MIDI data, with a comprehensive set of features expected in professional a
+quality DAW.
+""" .

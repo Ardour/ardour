@@ -1057,9 +1057,12 @@ Session::set_auto_loop_location (Location* location)
 	auto_loop_end_changed_connection.disconnect();
 	auto_loop_changed_connection.disconnect();
 
-	auto_loop_start_changed_connection = location->start_changed.connect (mem_fun (this, &Session::auto_loop_changed));
-	auto_loop_end_changed_connection = location->end_changed.connect (mem_fun (this, &Session::auto_loop_changed));
-	auto_loop_changed_connection = location->changed.connect (mem_fun (this, &Session::auto_loop_changed));
+	auto_loop_start_changed_connection = location->start_changed.connect (
+			mem_fun (this, &Session::auto_loop_changed));
+	auto_loop_end_changed_connection = location->end_changed.connect (
+			mem_fun (this, &Session::auto_loop_changed));
+	auto_loop_changed_connection = location->changed.connect (
+			mem_fun (this, &Session::auto_loop_changed));
 
 	location->set_auto_loop (true, this);
 
