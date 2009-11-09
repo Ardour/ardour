@@ -4954,7 +4954,13 @@ Editor::remove_route (TimeAxisView *tv)
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::remove_route), tv));
 
 	TrackViewList::iterator i;
+
 	boost::shared_ptr<Route> route;
+	RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (tv);
+	if (rtav) {
+		route = rtav->route ();
+	}
+		
 	TimeAxisView* next_tv = 0;
 
 	if (tv == entered_track) {
