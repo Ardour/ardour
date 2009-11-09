@@ -17,6 +17,8 @@
 
 */
 
+#include "libpbd-config.h"
+
 #include "pbd/stacktrace.h"
 #include <cstdio>
 #include <iostream>
