@@ -393,8 +393,8 @@ Session::process_event (Event* ev)
 		set_diskstream_speed (static_cast<Diskstream*> (ev->ptr), ev->speed);
 		break;
 
-	case Event::SetSlaveSource:
-		set_slave_source (ev->slave);
+	case Event::SetSyncSource:
+		use_sync_source (ev->sync_source);
 		break;
 
 	case Event::Audition:

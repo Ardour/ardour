@@ -385,9 +385,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	BindableButton play_selection_button;
 	BindableButton rec_button;
 
-	Gtk::ComboBoxText sync_option_combo;
+	Gtk::ToggleButton sync_button;
 
-	void sync_option_changed ();
+	void sync_button_clicked ();
 	void toggle_time_master ();
 	void toggle_video_sync ();
 
@@ -434,6 +434,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtk::VBox alert_box;
 
 	void solo_blink (bool);
+	void sync_blink (bool);
 	void audition_blink (bool);
 
 	void soloing_changed (bool);
@@ -671,7 +672,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void toggle_use_osc ();
 
-	void mtc_port_changed ();
 	void parameter_changed (std::string);
 
 	bool first_idle ();

@@ -203,6 +203,8 @@ RCConfiguration::get_state ()
 	MIDI::Manager::PortMap::const_iterator i;
 	const MIDI::Manager::PortMap& ports = MIDI::Manager::instance()->get_midi_ports();
 
+	cerr << "Saving " << ports.size() << " MIDI ports\n";
+
 	for (i = ports.begin(); i != ports.end(); ++i) {
 		root->add_child_nocopy(i->second->get_state());
 	}
@@ -260,8 +262,11 @@ RCConfiguration::set_state (const XMLNode& root, int /*version*/)
 
 				MIDI::Port::Descriptor desc (*node);
 				map<string,XMLNode>::iterator x;
+				
 				if ((x = midi_ports.find (desc.tag)) != midi_ports.end()) {
-					midi_ports.erase (x);
+					warning << string_compose (_("Duplicate MIDI port definition found (tag=\"%1\") - ignored"),
+								   desc.tag) << endmsg;
+					continue;
 				}
 				midi_ports.insert (pair<string,XMLNode>(desc.tag,*node));
 			}

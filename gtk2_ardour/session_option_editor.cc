@@ -138,8 +138,8 @@ private:
 };
 
 SessionOptionEditor::SessionOptionEditor (Session* s)
-	: OptionEditor (&(s->config), _("Session Preferences")),
-	  _session_config (&(s->config))
+	: OptionEditor (&(s->config), _("Session Preferences"))
+	, _session_config (&(s->config))
 {
 	/* FADES */
 
@@ -221,6 +221,19 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	spf->add (100, _("100"));
 
 	add_option (_("Sync"), spf);
+
+	ComboOption<SyncSource>* ssrc = new ComboOption<SyncSource> (
+		"sync-source",
+		_("External sync source"),
+		mem_fun (*_session_config, &SessionConfiguration::get_sync_source),
+		mem_fun (*_session_config, &SessionConfiguration::set_sync_source)
+		);
+	
+	s->MTC_PortChanged.connect (bind (mem_fun (*this, &SessionOptionEditor::populate_sync_options), s, ssrc));
+	s->MIDIClock_PortChanged.connect (bind (mem_fun (*this, &SessionOptionEditor::populate_sync_options), s, ssrc));
+	populate_sync_options (s, ssrc);
+
+	add_option (_("Sync"), ssrc);
 
 	ComboOption<TimecodeFormat>* smf = new ComboOption<TimecodeFormat> (
 		"timecode-format",
@@ -332,3 +345,18 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Connections"), new ConnectionOptions (this, s));
 }
+
+void
+SessionOptionEditor::populate_sync_options (Session* s, Option* opt)
+{
+	ComboOption<SyncSource>* sync_opt = dynamic_cast<ComboOption<SyncSource>* > (opt);
+
+	vector<SyncSource> sync_opts = s->get_available_sync_options ();
+
+	sync_opt->clear ();
+
+	for (vector<SyncSource>::iterator i = sync_opts.begin(); i != sync_opts.end(); ++i) {
+		sync_opt->add (*i, sync_source_to_string (*i));
+	}
+}
+

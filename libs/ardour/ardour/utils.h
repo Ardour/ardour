@@ -62,8 +62,8 @@ bool path_is_paired (Glib::ustring path, Glib::ustring& pair_base);
 
 void compute_equal_power_fades (ARDOUR::nframes_t nframes, float* in, float* out);
 
-const char* slave_source_to_string (ARDOUR::SlaveSource src);
-ARDOUR::SlaveSource string_to_slave_source (std::string str);
+const char* sync_source_to_string (ARDOUR::SyncSource src);
+ARDOUR::SyncSource string_to_sync_source (std::string str);
 
 const char* edit_mode_to_string (ARDOUR::EditMode);
 ARDOUR::EditMode string_to_edit_mode (std::string);

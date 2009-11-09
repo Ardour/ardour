@@ -141,6 +141,8 @@ Session::set_mtc_port (string port_tag)
 		ms->rebind (*port);
 	}
 
+	cerr << "!!SPT to " << port_tag << endl;
+
 	Config->set_mtc_port_name (port_tag);
 
   out:
@@ -494,7 +496,7 @@ Session::setup_midi_control ()
 void
 Session::spp_start (Parser &, nframes_t /*timestamp*/)
 {
-	if (Config->get_mmc_control() && (Config->get_slave_source() != MTC)) {
+	if (Config->get_mmc_control() && (config.get_external_sync() && config.get_sync_source() != MTC)) {
 		request_transport_speed (1.0);
 	}
 }
@@ -516,7 +518,7 @@ Session::spp_stop (Parser&, nframes_t /*timestamp*/)
 void
 Session::midi_clock_start (Parser& ignored, nframes_t timestamp)
 {
-	if (Config->get_slave_source() == MIDIClock) {
+        if (config.get_external_sync() && (config.get_sync_source() == MIDIClock)) {
 		request_transport_speed (1.0);
 	}
 }
@@ -530,7 +532,7 @@ Session::midi_clock_continue (Parser& parser, nframes_t timestamp)
 void
 Session::midi_clock_stop (Parser& ignored, nframes_t timestamp)
 {
-	if (Config->get_slave_source() == MIDIClock) {
+	if (config.get_external_sync() && (config.get_slave_source() == MIDIClock)) {
 		request_stop ();
 	}
 }
@@ -539,7 +541,7 @@ Session::midi_clock_stop (Parser& ignored, nframes_t timestamp)
 void
 Session::mmc_deferred_play (MIDI::MachineControl &/*mmc*/)
 {
-	if (Config->get_mmc_control() && (Config->get_slave_source() != MTC)) {
+	if (Config->get_mmc_control() && (config.get_external_sync() && (config.get_sync_source() != MTC))) {
 		request_transport_speed (1.0);
 	}
 }

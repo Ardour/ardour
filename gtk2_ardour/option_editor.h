@@ -231,6 +231,11 @@ public:
 		_combo->append_text (o);
 	}
 
+	void clear () {
+		_combo->clear_items();
+		_options.clear ();
+	}
+
 	void changed () {
 		uint32_t const r = _combo->get_active_row_number ();
 		if (r < _options.size()) {

@@ -70,12 +70,6 @@ Manager::add_port (const XMLNode& node)
 	PortMap::iterator existing;
 	pair<string, Port *> newpair;
 
-	/* do not allow multiple ports with the same tag. if attempted, just return the existing
-	   port with the same tag. XXX this is really caused by the mess of setup_midi() being
-	   called twice in Ardour, once in the global init() function and once after the user RC file
-	   has been loaded (there may be extra ports in it). 
-	 */
-
 	if ((existing = ports_by_tag.find (desc.tag)) != ports_by_tag.end()) {
 
 		port = (*existing).second;
@@ -150,6 +144,7 @@ Manager::add_port (const XMLNode& node)
 	}
 	
 	port = factory.create_port (node, api_data);
+
 	
 	if (port == 0) {
 		return 0;

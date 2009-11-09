@@ -79,9 +79,9 @@ Session::request_input_change_handling ()
 }
 
 void
-Session::request_slave_source (SlaveSource src)
+Session::request_sync_source (SyncSource src)
 {
-	Event* ev = new Event (Event::SetSlaveSource, Event::Add, Event::Immediate, 0, 0.0);
+	Event* ev = new Event (Event::SetSyncSource, Event::Add, Event::Immediate, 0, 0.0);
 	bool seamless;
 
 	seamless = Config->get_seamless_loop ();
@@ -97,7 +97,7 @@ Session::request_slave_source (SlaveSource src)
 	/* save value of seamless from before the switch */
 	_was_seamless = seamless;
 
-	ev->slave = src;
+	ev->sync_source = src;
 	queue_event (ev);
 }
 
@@ -230,7 +230,7 @@ Session::realtime_stop (bool abort, bool clear_state)
 		waiting_for_sync_offset = true;
 	}
 
-	transport_sub_state = ((Config->get_slave_source() == None && config.get_auto_return()) ? AutoReturning : 0);
+	transport_sub_state = ((!config.get_external_sync()&& config.get_auto_return()) ? AutoReturning : 0);
 }
 
 void
@@ -439,7 +439,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	bool const auto_return_enabled =
-		(Config->get_slave_source() == None && config.get_auto_return());
+		(!config.get_external_sync() && config.get_auto_return());
 
 	if (auto_return_enabled ||
 	    (ptw & PostTransportLocate) ||
@@ -571,7 +571,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	/* and start it up again if relevant */
 
-	if ((ptw & PostTransportLocate) && Config->get_slave_source() == None && pending_locate_roll) {
+	if ((ptw & PostTransportLocate) && !config.get_external_sync() && pending_locate_roll) {
 		request_transport_speed (1.0);
 		pending_locate_roll = false;
 	}
@@ -1106,7 +1106,7 @@ Session::post_transport ()
 
 	if (ptw & PostTransportLocate) {
 
-		if (((Config->get_slave_source() == None && (auto_play_legal && config.get_auto_play())) && !_exporting) || (ptw & PostTransportRoll)) {
+		if (((!config.get_external_sync() && (auto_play_legal && config.get_auto_play())) && !_exporting) || (ptw & PostTransportRoll)) {
 			start_transport ();
 
 		} else {
@@ -1142,7 +1142,38 @@ Session::reset_rf_scale (nframes_t motion)
 }
 
 void
-Session::set_slave_source (SlaveSource src)
+Session::drop_sync_source ()
+{
+	bool non_rt_required = false;
+
+	if (_transport_speed) {
+		error << _("please stop the transport before adjusting slave settings") << endmsg;
+		return;
+	}
+
+	delete _slave;
+	_slave = 0;
+
+	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+		if (!(*i)->hidden()) {
+			if ((*i)->realtime_set_speed ((*i)->speed(), true)) {
+				non_rt_required = true;
+			}
+			(*i)->set_slaved (0);
+		}
+	}
+
+	if (non_rt_required) {
+		add_post_transport_work (PostTransportSpeed);
+		_butler->schedule_transport_work ();
+	}
+
+	set_dirty();
+}
+
+void
+Session::use_sync_source (SyncSource src)
 {
 	bool reverse = false;
 	bool non_rt_required = false;
@@ -1152,22 +1183,10 @@ Session::set_slave_source (SlaveSource src)
 		return;
 	}
 
-//	if (src == JACK && Config->get_jack_time_master()) {
-//		return;
-//	}
-
 	delete _slave;
 	_slave = 0;
 
-	if (_transport_speed < 0.0) {
-		reverse = true;
-	}
-
 	switch (src) {
-	case None:
-		stop_transport ();
-		break;
-
 	case MTC:
 		if (_mtc_port) {
 			try {
@@ -1205,8 +1224,6 @@ Session::set_slave_source (SlaveSource src)
 		break;
 
 	};
-
-	Config->set_slave_source (src);
 
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {

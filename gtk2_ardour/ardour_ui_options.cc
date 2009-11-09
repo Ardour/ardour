@@ -263,70 +263,51 @@ ARDOUR_UI::toggle_editing_space()
 }
 
 void
-ARDOUR_UI::mtc_port_changed ()
-{
-	bool have_mtc;
-	bool have_midi_clock;
-
-	if (session) {
-		if (session->mtc_port()) {
-			have_mtc = true;
-		} else {
-			have_mtc = false;
-		}
-		if (session->midi_clock_port()) {
-			have_midi_clock = true;
-		} else {
-			have_midi_clock = false;
-		}
-	} else {
-		have_mtc = false;
-		have_midi_clock = false;
-	}
-
-	positional_sync_strings.clear ();
-	positional_sync_strings.push_back (slave_source_to_string (None));
-	if (have_mtc) {
-		positional_sync_strings.push_back (slave_source_to_string (MTC));
-	}
-	if (have_midi_clock) {
-		positional_sync_strings.push_back (slave_source_to_string (MIDIClock));
-	}
-	positional_sync_strings.push_back (slave_source_to_string (JACK));
-
-	set_popdown_strings (sync_option_combo, positional_sync_strings);
-}
-
-void
 ARDOUR_UI::setup_session_options ()
 {
-	mtc_port_changed ();
-
-	Config->ParameterChanged.connect (mem_fun (*this, &ARDOUR_UI::parameter_changed));
+	session->config.ParameterChanged.connect (mem_fun (*this, &ARDOUR_UI::parameter_changed));
+	session->config.map_parameters (mem_fun (*this, &ARDOUR_UI::parameter_changed));
 }
+
+#if 0
+void
+ARDOUR_UI::handle_sync_change ()
+{
+	if (!session) {
+		return;
+	}
+	if (!session->config.get_external_sync()) {
+		sync_button.set_label (_("Internal"));
+		ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (true);
+		ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (true);
+	} else {
+		sync_button.set_label (_("External"));
+		/* XXX need to make auto-play is off as well as insensitive */
+		ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
+		ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
+	}
+
+}
+#endif
 
 void
 ARDOUR_UI::parameter_changed (std::string p)
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &ARDOUR_UI::parameter_changed), p));
 
-	if (p == "slave-source") {
-
-		sync_option_combo.set_active_text (slave_source_to_string (Config->get_slave_source()));
-
-		switch (Config->get_slave_source()) {
-		case None:
+	if (p == "external-sync") {
+		
+		if (!session->config.get_external_sync()) {
+			sync_button.set_label (_("Internal"));
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (true);
-			break;
-
-		default:
+		} else {
+			sync_button.set_label (sync_source_to_string (session->config.get_sync_source()));
 			/* XXX need to make auto-play is off as well as insensitive */
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
-			break;
 		}
-
+	
 	} else if (p == "send-mtc") {
 
 		ActionManager::map_some_state ("options", "SendMTC", &RCConfiguration::get_send_mtc);

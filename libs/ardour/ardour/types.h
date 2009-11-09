@@ -360,10 +360,9 @@ namespace ARDOUR {
 		ExportContext
 	};
 
-	enum SlaveSource {
-		None = 0,
-		MTC,
+	enum SyncSource {
 		JACK,
+		MTC,
 		MIDIClock
 	};
 
@@ -444,7 +443,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::RemoteModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ListenPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::LayerModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::CrossfadeModel& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::SlaveSource& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::SyncSource& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleBehaviour& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleUnits& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::TimecodeFormat& sf);
@@ -461,7 +460,7 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::RemoteModel& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ListenPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::LayerModel& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::CrossfadeModel& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::SlaveSource& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::SyncSource& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ShuttleBehaviour& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ShuttleUnits& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::TimecodeFormat& sf);

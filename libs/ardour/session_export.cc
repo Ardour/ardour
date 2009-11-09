@@ -85,10 +85,10 @@ Session::pre_export ()
 
 	/* no slaving */
 
-	post_export_slave = Config->get_slave_source ();
+	post_export_sync = config.get_external_sync ();
 	post_export_position = _transport_frame;
 
-	Config->set_slave_source (None);
+	config.set_external_sync (false);
 
 	_exporting = true;
 	export_status->running = true;
@@ -244,8 +244,8 @@ Session::finalize_audio_export ()
 
 	/* restart slaving */
 
-	if (post_export_slave != None) {
-		Config->set_slave_source (post_export_slave);
+	if (post_export_sync) {
+		config.set_external_sync (true);
 	} else {
 		locate (post_export_position, false, false, false);
 	}

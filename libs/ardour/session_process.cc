@@ -469,7 +469,7 @@ Session::transport_locked () const
 {
 	Slave* sl = _slave;
 
-	if (!locate_pending() && ((Config->get_slave_source() == None) || (sl && sl->ok() && sl->locked()))) {
+	if (!locate_pending() && (!config.get_external_sync() || (sl && sl->ok() && sl->locked()))) {
 		return true;
 	}
 
@@ -487,7 +487,7 @@ Session::follow_slave (nframes_t nframes)
 
 	if (!_slave->ok()) {
 		stop_transport ();
-		Config->set_slave_source (None);
+		config.set_external_sync (false);
 		goto noroll;
 	}
 

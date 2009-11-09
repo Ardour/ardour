@@ -338,7 +338,7 @@ ARDOUR_UI::post_engine ()
 
 	MIDI::Manager::instance()->set_api_data (engine->jack());
 	setup_midi ();
-
+	
 	ARDOUR::init_post_engine ();
 
 	ActionManager::init ();
@@ -347,7 +347,7 @@ ARDOUR_UI::post_engine ()
 	if (setup_windows ()) {
 		throw failed_constructor ();
 	}
-
+	
 	check_memory_locking();
 
 	/* this is the first point at which all the keybindings are available */
@@ -397,6 +397,9 @@ ARDOUR_UI::post_engine ()
 	update_disk_space ();
 	update_cpu_load ();
 	update_sample_rate (engine->frame_rate());
+
+	Config->ParameterChanged.connect (mem_fun (*this, &ARDOUR_UI::parameter_changed));
+	Config->map_parameters (mem_fun (*this, &ARDOUR_UI::parameter_changed));
 
 	/* now start and maybe save state */
 
@@ -1524,13 +1527,14 @@ ARDOUR_UI::transport_roll ()
 		return;
 	}
 	
-	switch (Config->get_slave_source()) {
-	case None:
-	case JACK:
-		break;
-	default:
-		/* transport controlled by the master */
-		return;
+	if (session->config.get_external_sync()) {
+		switch (session->config.get_sync_source()) {
+		case JACK:
+			break;
+		default:
+			/* transport controlled by the master */
+			return;
+		}
 	}
 
 	bool rolling = session->transport_rolling();
@@ -1561,13 +1565,14 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		return;
 	}
 	
-	switch (Config->get_slave_source()) {
-	case None:
-	case JACK:
-		break;
-	default:
-		/* transport controlled by the master */
-		return;
+	if (session->config.get_external_sync()) {
+		switch (session->config.get_sync_source()) {
+		case JACK:
+			break;
+		default:
+			/* transport controlled by the master */
+			return;
+		}
 	}
 
 	bool rolling = session->transport_rolling();

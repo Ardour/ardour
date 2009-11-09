@@ -529,12 +529,23 @@ def build(bld):
 		bld.add_subdirs('libs/appleutility')
 	for i in children:
 		bld.add_subdirs(i)
+
+	# ideally, we'd like to use the OS-provided MIDI API
+	# for default ports. that doesn't work on at least
+	# Fedora (Nov 9th, 2009) so use JACK MIDI on linux.
 	
-	rc_subst_dict = {
-		'MIDITAG'    : 'control',
-		'MIDITYPE'   : 'jack',
-		'JACK_INPUT' : 'auditioner'
-	}
+	if sys.platform == 'darwin':
+		rc_subst_dict = {
+			'MIDITAG'    : 'control',
+			'MIDITYPE'   : 'coremidi',
+			'JACK_INPUT' : 'auditioner'
+			}
+	else:
+		rc_subst_dict = {
+			'MIDITAG'    : 'control',
+			'MIDITYPE'   : 'jack',
+			'JACK_INPUT' : 'auditioner'
+			}
 
 	obj              = bld.new_task_gen('subst')
 	obj.source       = 'ardour.rc.in'

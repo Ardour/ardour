@@ -145,7 +145,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 			RangeStop,
 			RangeLocate,
 			Overwrite,
-			SetSlaveSource,
+			SetSyncSource,
 			Audition,
 			InputConfigurationChange,
 			SetPlayAudioRange,
@@ -173,7 +173,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		void*        ptr;
 		bool         yes_or_no;
 		nframes64_t  target2_frame;
-		SlaveSource  slave;
+		SyncSource   sync_source;
 		Route*       route;
 	    };
 
@@ -576,8 +576,9 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	static sigc::signal<void> EndTimeChanged;
 	static sigc::signal<void> TimecodeOffsetChanged;
 
-	void   request_slave_source (SlaveSource);
-	bool   synced_to_jack() const { return Config->get_slave_source() == JACK; }
+        std::vector<SyncSource> get_available_sync_options() const;
+	void   request_sync_source (SyncSource);
+        bool   synced_to_jack() const { return config.get_external_sync() && config.get_sync_source() == JACK; }
 
 	double transport_speed() const { return _transport_speed; }
 	bool   transport_stopped() const { return _transport_speed == 0.0f; }
@@ -1074,9 +1075,10 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	                       nframes_t this_delta, bool starting);
 	void follow_slave_silently(nframes_t nframes, float slave_speed);
 
-	void set_slave_source (SlaveSource);
+        void use_sync_source (SyncSource);
+        void drop_sync_source ();
 
-	SlaveSource post_export_slave;
+        bool post_export_sync;
 	nframes_t post_export_position;
 
 	bool _exporting;

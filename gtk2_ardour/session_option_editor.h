@@ -12,4 +12,5 @@ public:
 
 private:
 	ARDOUR::SessionConfiguration* _session_config;
+	void populate_sync_options (ARDOUR::Session*, Option*);
 };

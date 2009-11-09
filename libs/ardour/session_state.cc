@@ -215,6 +215,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	destructive_index = 0;
 	first_file_data_format_reset = true;
 	first_file_header_format_reset = true;
+	post_export_sync = false;
 	//midi_thread = (pthread_t) 0;
 
 	AudioDiskstream::allocate_working_buffers();
@@ -869,15 +870,7 @@ int
 Session::load_options (const XMLNode& node)
 {
 	LocaleGuard lg (X_("POSIX"));
-
 	config.set_variables (node);
-
-	/* now reset MIDI ports because the session can have its own
-	   MIDI configuration.
-	*/
-
-	setup_midi ();
-
 	return 0;
 }
 
@@ -3200,8 +3193,12 @@ Session::config_changed (std::string p, bool ours)
 
 		first_file_data_format_reset = false;
 
-	} else if (p == "slave-source") {
-				set_slave_source (Config->get_slave_source());
+	} else if (p == "external-sync") {
+		if (!config.get_external_sync()) {
+			drop_sync_source ();
+		} else {
+			use_sync_source (config.get_sync_source());
+		}
 	} else if (p == "remote-model") {
 		set_remote_control_ids ();
 	}  else if (p == "denormal-model") {

@@ -70,7 +70,7 @@ setup_enum_writer ()
 	CDMarkerFormat _CDMarkerFormat;
 	HeaderFormat _HeaderFormat;
 	PluginType _PluginType;
-	SlaveSource _SlaveSource;
+	SyncSource _SyncSource;
 	ShuttleBehaviour _ShuttleBehaviour;
 	ShuttleUnits _ShuttleUnits;
 	Session::RecordState _Session_RecordState;
@@ -266,11 +266,10 @@ setup_enum_writer ()
 	REGISTER_ENUM (VST);
 	REGISTER (_PluginType);
 
-	REGISTER_ENUM (None);
 	REGISTER_ENUM (MTC);
 	REGISTER_ENUM (JACK);
 	REGISTER_ENUM (MIDIClock);
-	REGISTER (_SlaveSource);
+	REGISTER (_SyncSource);
 
 	REGISTER_ENUM (Sprung);
 	REGISTER_ENUM (Wheel);
@@ -296,7 +295,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Session::Event, RangeStop);
 	REGISTER_CLASS_ENUM (Session::Event, RangeLocate);
 	REGISTER_CLASS_ENUM (Session::Event, Overwrite);
-	REGISTER_CLASS_ENUM (Session::Event, SetSlaveSource);
+	REGISTER_CLASS_ENUM (Session::Event, SetSyncSource);
 	REGISTER_CLASS_ENUM (Session::Event, Audition);
 	REGISTER_CLASS_ENUM (Session::Event, InputConfigurationChange);
 	REGISTER_CLASS_ENUM (Session::Event, SetPlayAudioRange);
@@ -669,15 +668,15 @@ std::ostream& operator<<(std::ostream& o, const CrossfadeModel& var)
 	std::string s = enum_2_string (var);
 	return o << s;
 }
-std::istream& operator>>(std::istream& o, SlaveSource& var) 
+std::istream& operator>>(std::istream& o, SyncSource& var) 
 { 
 	std::string s;
 	o >> s;
-	var = (SlaveSource) string_2_enum (s, var);
+	var = (SyncSource) string_2_enum (s, var);
 	return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const SlaveSource& var) 
+std::ostream& operator<<(std::ostream& o, const SyncSource& var) 
 { 
 	std::string s = enum_2_string (var);
 	return o << s;

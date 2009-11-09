@@ -105,6 +105,7 @@ ARDOUR_UI::connect_to_session (Session *s)
 
 	Blink.connect (mem_fun(*this, &ARDOUR_UI::transport_rec_enable_blink));
 	Blink.connect (mem_fun(*this, &ARDOUR_UI::solo_blink));
+	Blink.connect (mem_fun(*this, &ARDOUR_UI::sync_blink));
 	Blink.connect (mem_fun(*this, &ARDOUR_UI::audition_blink));
 
 	/* these are all need to be handled in an RT-safe and MT way, so don't

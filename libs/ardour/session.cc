@@ -4444,3 +4444,21 @@ Session::route_group_changed ()
 {
 	RouteGroupChanged (); /* EMIT SIGNAL */
 }
+
+vector<SyncSource>
+Session::get_available_sync_options () const
+{
+	vector<SyncSource> ret;
+	
+	ret.push_back (JACK);
+
+	if (mtc_port()) {
+		ret.push_back (MTC);
+	} 
+
+	if (midi_clock_port()) {
+		ret.push_back (MIDIClock);
+	} 
+
+	return ret;
+}

@@ -2350,13 +2350,14 @@ Editor::transition_to_rolling (bool fwd)
 		return;
 	}
 
-	switch (Config->get_slave_source()) {
-	case None:
-	case JACK:
-		break;
-	default:
-		/* transport controlled by the master */
-		return;
+	if (session->config.get_external_sync()) {
+		switch (session->config.get_sync_source()) {
+		case JACK:
+			break;
+		default:
+			/* transport controlled by the master */
+			return;
+		}
 	}
 
 	if (session->is_auditioning()) {

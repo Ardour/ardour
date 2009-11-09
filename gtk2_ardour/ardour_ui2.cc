@@ -239,7 +239,7 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::instance()->tooltips().set_tip (punch_in_button, _("Start recording at auto-punch start"));
 	ARDOUR_UI::instance()->tooltips().set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 	ARDOUR_UI::instance()->tooltips().set_tip (click_button, _("Enable/Disable audio click"));
-	ARDOUR_UI::instance()->tooltips().set_tip (sync_option_combo, _("Positional sync source"));
+	ARDOUR_UI::instance()->tooltips().set_tip (sync_button, _("Positional sync source"));
 	ARDOUR_UI::instance()->tooltips().set_tip (time_master_button, _("Does Ardour control the time?"));
 	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_box, _("Shuttle speed control"));
 	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_units_button, _("Select semitones or %%-age for speed display"));
@@ -331,11 +331,10 @@ ARDOUR_UI::setup_transport ()
 	sdframe->set_shadow_type (SHADOW_IN);
 	sdframe->add (speed_display_box);
 
-	mtc_port_changed ();
-	sync_option_combo.signal_changed().connect (mem_fun (*this, &ARDOUR_UI::sync_option_changed));
-	// XXX HOW TO USE set_popdown_strings() and combo_fudge with this when we don't know
-	// the real strings till later?
-	set_size_request_to_display_given_text (sync_option_combo, X_("Igternal"), 4+COMBO_FUDGE, 10);
+	sync_button.set_name ("TransportSyncAlert");
+	sync_button.signal_clicked().connect (mem_fun (*this, &ARDOUR_UI::sync_button_clicked));
+	// XXX HOW TO USE set_popdown_strings() with this when we don't know the real strings till later?
+	set_size_request_to_display_given_text (sync_button, X_("Egternal"), 4, 10);
 
 	shbox->pack_start (*sdframe, false, false);
 	shbox->pack_start (shuttle_units_button, true, true);
@@ -362,7 +361,7 @@ ARDOUR_UI::setup_transport ()
 
 	if (!Profile->get_sae()) {
 		VBox* time_controls_box = manage (new VBox);
-		time_controls_box->pack_start (sync_option_combo, false, false);
+		time_controls_box->pack_start (sync_button, false, false);
 		time_controls_box->pack_start (time_master_button, false, false);
 		clock_box->pack_start (*time_controls_box, false, false, 1);
 	}
@@ -482,6 +481,24 @@ ARDOUR_UI::solo_blink (bool onoff)
 	} else {
 		solo_alert_button.set_active (false);
 		solo_alert_button.set_state (STATE_NORMAL);
+	}
+}
+
+void
+ARDOUR_UI::sync_blink (bool onoff)
+{
+	if (session == 0 || !session->config.get_external_sync()) {
+		return;
+	}
+
+	if (!session->transport_locked()) {
+		if (onoff) {
+			sync_button.set_state (STATE_ACTIVE);
+		} else {
+			sync_button.set_state (STATE_NORMAL);
+		}
+	} else {
+		sync_button.set_state (STATE_NORMAL);
 	}
 }
 
@@ -846,13 +863,10 @@ ARDOUR_UI::editor_realized ()
 }
 
 void
-ARDOUR_UI::sync_option_changed ()
+ARDOUR_UI::sync_button_clicked ()
 {
 	if (session) {
-		ustring txt = sync_option_combo.get_active_text ();
-		if (txt.length()) {
-			session->request_slave_source (string_to_slave_source (txt));
-		}
+		session->config.set_external_sync (sync_button.get_active());
 	}
 }
 

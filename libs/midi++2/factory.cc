@@ -110,6 +110,12 @@ PortFactory::ignore_duplicate_devices (Port::Type type)
 		break;
 #endif // WITH_ALSA
 
+#ifdef WITH_JACK_MIDI
+	case Port::JACK_Midi:
+		ret = true;
+		break;
+#endif // WITH_JACK_MIDI
+
 #if WITH_COREMIDI
 	case Port::CoreMidi_MidiPort:
 		ret = true;

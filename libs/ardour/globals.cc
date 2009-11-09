@@ -126,7 +126,6 @@ int
 ARDOUR::setup_midi ()
 {
 	if (Config->midi_ports.size() == 0) {
-		//warning << _("no MIDI ports specified: no MMC or MTC control possible") << endmsg;
 		return 0;
 	}
 
@@ -139,27 +138,17 @@ ARDOUR::setup_midi ()
 	MIDI::Port* first;
 	const MIDI::Manager::PortMap& ports = MIDI::Manager::instance()->get_midi_ports();
 
+
 	if (ports.size() > 1) {
 
 		first = ports.begin()->second;
 
 		/* More than one port, so try using specific names for each port */
 
-		if (Config->get_mmc_port_name() != N_("control")) {
-			default_mmc_port =  MIDI::Manager::instance()->port (Config->get_mmc_port_name());
-		}
-
-		if (Config->get_mtc_port_name() != N_("control")) {
-			default_mtc_port =  MIDI::Manager::instance()->port (Config->get_mtc_port_name());
-		}
-
-		if (Config->get_midi_port_name() != N_("control")) {
-			default_midi_port =  MIDI::Manager::instance()->port (Config->get_midi_port_name());
-		}
-
-		if (Config->get_midi_clock_port_name() != N_("control")) {
-			default_midi_port =  MIDI::Manager::instance()->port (Config->get_midi_clock_port_name());
-		}
+		default_mmc_port =  MIDI::Manager::instance()->port (Config->get_mmc_port_name());
+		default_mtc_port =  MIDI::Manager::instance()->port (Config->get_mtc_port_name());
+		default_midi_port =  MIDI::Manager::instance()->port (Config->get_midi_port_name());
+		default_midi_clock_port =  MIDI::Manager::instance()->port (Config->get_midi_clock_port_name());
 
 		/* If that didn't work, just use the first listed port */
 
@@ -194,7 +183,6 @@ ARDOUR::setup_midi ()
 	if (default_mmc_port == 0) {
 		warning << string_compose (_("No MMC control (MIDI port \"%1\" not available)"), Config->get_mmc_port_name())
 			<< endmsg;
-		return 0;
 	}
 
 
@@ -339,7 +327,10 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 		return -1;
 	}
 
+	
 	Config->set_use_vst (use_vst);
+
+	cerr << "After config loaded, MTC port name = " << Config->get_mtc_port_name() << endl;
 
 	Profile = new RuntimeProfile;
 

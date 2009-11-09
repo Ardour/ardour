@@ -331,14 +331,10 @@ edit_mode_to_string (EditMode mode)
 	}
 }
 
-SlaveSource
-string_to_slave_source (string str)
+SyncSource
+string_to_sync_source (string str)
 {
-	if (str == _("Internal")) {
-		return None;
-	}
-
-	if (str == _("MTC")) {
+	if (str == _("MIDI Timecode")) {
 		return MTC;
 	}
 
@@ -350,29 +346,26 @@ string_to_slave_source (string str)
 		return JACK;
 	}
 
-	fatal << string_compose (_("programming error: unknown slave source string \"%1\""), str) << endmsg;
+	fatal << string_compose (_("programming error: unknown sync source string \"%1\""), str) << endmsg;
 	/*NOTREACHED*/
-	return None;
+	return JACK;
 }
 
 const char*
-slave_source_to_string (SlaveSource src)
+sync_source_to_string (SyncSource src)
 {
 	switch (src) {
 	case JACK:
 		return _("JACK");
 
 	case MTC:
-		return _("MTC");
+		return _("MIDI Timecode");
 
 	case MIDIClock:
 		return _("MIDI Clock");
-
-	default:
-	case None:
-		return _("Internal");
-
 	}
+	/* GRRRR .... stupid, stupid gcc - you can't get here from there, all enum values are handled */
+	return _("JACK");
 }
 
 float
