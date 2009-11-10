@@ -326,7 +326,9 @@ class Session : public PBD::StatefulDestructible
 	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>));
 	template<class T, class A> void foreach_route (T *obj, void (T::*func)(Route&, A), A arg);
 
-	boost::shared_ptr<Route> route_by_name (string);
+	bool io_name_is_legal (const std::string&);
+
+	boost::shared_ptr<Route> route_by_name (const std::string&);
 	boost::shared_ptr<Route> route_by_id (PBD::ID);
 	boost::shared_ptr<Route> route_by_remote_id (uint32_t id);
 

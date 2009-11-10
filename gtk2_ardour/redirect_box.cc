@@ -925,12 +925,24 @@ RedirectBox::rename_redirect (boost::shared_ptr<Redirect> redirect)
 	case Gtk::RESPONSE_ACCEPT:
 		name_prompter.get_result (result);
 		if (result.length()) {
-			if (_session.route_by_name (result)) {
-				ARDOUR_UI::instance()->popup_error (_("A track already exists with that name"));
-				return;
+			int tries = 0;
+			string test = result;
+
+			while (tries < 100) {
+				if (_session.io_name_is_legal (test)) {
+					result = test;
+					break;
+				}
+				tries++;
+				test = string_compose ("%1-%2", result, tries);
 			}
-			
-			redirect->set_name (result, this);
+
+			if (tries < 100) {
+				redirect->set_name (result, this);
+			} else {
+				ARDOUR_UI::instance()->popup_error 
+					(string_compose (_("At least 100 IO objects exist with a name like %1 - name not changed"), result));
+			}
 		}	
 		break;
 	}

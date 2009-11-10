@@ -570,7 +570,7 @@ UI::handle_fatal (const char *message)
 }
 
 void
-UI::popup_error (const char *text)
+UI::popup_error (const std::string& text)
 {
 	if (!caller_is_ui_thread()) {
 		error << "non-UI threads can't use UI::popup_error" 

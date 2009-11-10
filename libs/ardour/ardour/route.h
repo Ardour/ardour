@@ -167,6 +167,8 @@ class Route : public IO
 			return *i;
 		}
 	}
+
+	bool has_io_redirect_named (const std::string&);
 	
 	uint32_t max_redirect_outs () const { return redirect_max_outs; }
 		

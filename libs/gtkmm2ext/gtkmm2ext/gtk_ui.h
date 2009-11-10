@@ -113,7 +113,7 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 	void run (Receiver &old_receiver);
 
 	void set_state (Gtk::Widget *w, Gtk::StateType state);
-	void popup_error (const char *text);
+	void popup_error (const std::string&);
 	void flush_pending ();
 	void toggle_errors ();
 	void touch_display (Touchable *);

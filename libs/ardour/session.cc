@@ -2531,8 +2531,26 @@ Session::catch_up_on_solo_mute_override ()
 	}
 }	
 
+bool
+Session::io_name_is_legal (const std::string& name)
+{
+	shared_ptr<RouteList> r = routes.reader ();
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if ((*i)->name() == name) {
+			return false;
+		}
+
+		if ((*i)->has_io_redirect_named (name)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 shared_ptr<Route>
-Session::route_by_name (string name)
+Session::route_by_name (const std::string& name)
 {
 	shared_ptr<RouteList> r = routes.reader ();
 

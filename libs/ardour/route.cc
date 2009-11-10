@@ -2712,3 +2712,21 @@ Route::set_name (string str, void* src)
 	}
 	return ret;
 }
+
+bool
+Route::has_io_redirect_named (const string& name)
+{
+	Glib::RWLock::ReaderLock lm (redirect_lock);
+	RedirectList::iterator i;
+
+	for (i = _redirects.begin(); i != _redirects.end(); ++i) {
+		if (boost::dynamic_pointer_cast<Send> (*i) ||
+		    boost::dynamic_pointer_cast<PortInsert> (*i)) {
+			if ((*i)->name() == name) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
