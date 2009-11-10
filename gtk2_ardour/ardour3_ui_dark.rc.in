@@ -1112,6 +1112,24 @@ style "green_flashing_alert" = "very_small_text"
 	bg[ACTIVE] = { 0.52, 1.0, 0}
 }
 
+style "sync_alert"
+{
+	#
+	# this is used when the sync button is indicating that sync is
+	# active, and alternates with another style if sync is active
+	# but we are not locked
+	#
+	bg[ACTIVE] = { 0.52, 1.0, 0}
+	bg[PRELIGHT] = { 0.52, 1.0, 0}
+	bg[SELECTED] = { 0.52, 1.0, 0}
+	bg[NORMAL] = { 0.52, 1.0, 0}
+	
+	fg[NORMAL] = { 0, 0, 0 }
+	fg[PRELIGHT] = { 0, 0, 0 }
+	fg[SELECTED] = { 0, 0, 0 }
+	fg[ACTIVE] = { 0, 0, 0 }
+}
+
 style "selected_io_selector_port_list" = "medium_bold_text"
 {
 
@@ -1362,6 +1380,10 @@ widget "*EditGroupButton" style:highest "very_small_button"
 widget "*EditGroupButtonLabel" style:highest "very_small_button"
 widget "*TransportButton" style:highest "transport_rec_button"
 widget "*TransportButton-active" style:highest "transport_button_active"
+widget "*TransportSyncButton" style:highest "transport_button"
+widget "*TransportSyncButton*" style:highest "transport_button"
+widget "*TransportSyncButton-active" style:highest "sync_alert"
+widget "*TransportSyncButton-active*" style:highest "sync_alert"
 widget "*ShuttleButton" style:highest "transport_button"
 widget "*ShuttleButton*" style:highest "transport_button"
 widget "*ShuttleDisplay" style:highest "transport_button"
@@ -1528,8 +1550,6 @@ widget "*BypassButton" style:highest "red_when_active"
 widget "*BypassButton*" style:highest "red_when_active"
 widget "*TransportSoloAlert" style:highest "flashing_alert"
 widget "*TransportSoloAlert.*" style:highest "flashing_alert"
-widget "*TransportSyncAlert" style:highest "flashing_alert"
-widget "*TransportSyncAlert.*" style:highest "flashing_alert"
 widget "*SendAlert" style:highest "green_flashing_alert"
 widget "*SendAlert.*" style:highest "green_flashing_alert"
 widget "*TransportAuditioningAlert" style:highest "flashing_alert"

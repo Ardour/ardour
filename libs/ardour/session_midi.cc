@@ -141,8 +141,6 @@ Session::set_mtc_port (string port_tag)
 		ms->rebind (*port);
 	}
 
-	cerr << "!!SPT to " << port_tag << endl;
-
 	Config->set_mtc_port_name (port_tag);
 
   out:

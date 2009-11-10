@@ -243,6 +243,10 @@ public:
 		}
 	}
 
+	void set_sensitive (bool yn) {
+		_combo->set_sensitive (yn);
+	}
+
 private:
 
 	sigc::slot<T> _get;

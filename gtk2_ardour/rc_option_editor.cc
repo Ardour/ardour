@@ -55,25 +55,25 @@ public:
 		t->set_spacings (12);
 
 		int n = 0;
-		Label* l = manage (new Label (_("MTC:")));
+		Label* l = manage (new Label (_("Receive MTC via:")));
 		l->set_alignment (1, 0.5);
 		t->attach (*l, 0, 1, n, n + 1, EXPAND | FILL, FILL);
 		t->attach (_mtc_combo, 1, 2, n, n + 1, EXPAND | FILL, EXPAND | FILL);
 		++n;
 
-		l = manage (new Label (_("MIDI clock:")));
+		l = manage (new Label (_("Receive MIDI clock via:")));
 		l->set_alignment (1, 0.5);
 		t->attach (*l, 0, 1, n, n + 1, FILL, FILL);
 		t->attach (_midi_clock_combo, 1, 2, n, n + 1, FILL, FILL);
 		++n;
 
-		l = manage (new Label (_("MMC:")));
+		l = manage (new Label (_("Receive MMC via:")));
 		l->set_alignment (1, 0.5);
 		t->attach (*l, 0, 1, n, n + 1, FILL, FILL);
 		t->attach (_mmc_combo, 1, 2, n, n + 1, FILL, FILL);
 		++n;
 
-		l = manage (new Label (_("MIDI parameter control:")));
+		l = manage (new Label (_("Receive MIDI parameter control via:")));
 		l->set_alignment (1, 0.5);
 		t->attach (*l, 0, 1, n, n + 1, FILL, FILL);
 		t->attach (_mpc_combo, 1, 2, n, n + 1, FILL, FILL);

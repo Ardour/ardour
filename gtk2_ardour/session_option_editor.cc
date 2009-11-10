@@ -141,6 +141,82 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	: OptionEditor (&(s->config), _("Session Preferences"))
 	, _session_config (&(s->config))
 {
+	/* SYNC */
+
+	ComboOption<uint32_t>* spf = new ComboOption<uint32_t> (
+		"subframes-per-frame",
+		_("Subframes per frame"),
+		mem_fun (*_session_config, &SessionConfiguration::get_subframes_per_frame),
+		mem_fun (*_session_config, &SessionConfiguration::set_subframes_per_frame)
+		);
+
+	spf->add (80, _("80"));
+	spf->add (100, _("100"));
+
+	add_option (_("Sync"), spf);
+
+	ComboOption<SyncSource>* ssrc = new ComboOption<SyncSource> (
+		"sync-source",
+		_("External sync source"),
+		mem_fun (*_session_config, &SessionConfiguration::get_sync_source),
+		mem_fun (*_session_config, &SessionConfiguration::set_sync_source)
+		);
+	
+	s->MTC_PortChanged.connect (bind (mem_fun (*this, &SessionOptionEditor::populate_sync_options), s, ssrc));
+	s->MIDIClock_PortChanged.connect (bind (mem_fun (*this, &SessionOptionEditor::populate_sync_options), s, ssrc));
+	s->config.ParameterChanged.connect (bind (mem_fun (*this, &SessionOptionEditor::follow_sync_state), s, ssrc));
+
+	populate_sync_options (s, ssrc);
+	follow_sync_state (string ("external-sync"), s, ssrc);
+
+	add_option (_("Sync"), ssrc);
+
+	ComboOption<TimecodeFormat>* smf = new ComboOption<TimecodeFormat> (
+		"timecode-format",
+		_("Timecode frames-per-second"),
+		mem_fun (*_session_config, &SessionConfiguration::get_timecode_format),
+		mem_fun (*_session_config, &SessionConfiguration::set_timecode_format)
+		);
+
+	smf->add (timecode_23976, _("23.976"));
+	smf->add (timecode_24, _("24"));
+	smf->add (timecode_24976, _("24.976"));
+	smf->add (timecode_25, _("25"));
+	smf->add (timecode_2997, _("29.97"));
+	smf->add (timecode_2997drop, _("29.97 drop"));
+	smf->add (timecode_30, _("30"));
+	smf->add (timecode_30drop, _("30 drop"));
+	smf->add (timecode_5994, _("59.94"));
+	smf->add (timecode_60, _("60"));
+
+	add_option (_("Sync"), smf);
+
+	add_option (_("Sync"), new BoolOption (
+			    "timecode-source-is-synced",
+			    _("Timecode source is synced"),
+			    mem_fun (*_session_config, &SessionConfiguration::get_timecode_source_is_synced),
+			    mem_fun (*_session_config, &SessionConfiguration::set_timecode_source_is_synced)
+			    ));
+
+	ComboOption<float>* vpu = new ComboOption<float> (
+		"video-pullup",
+		_("Pull-up / pull-down"),
+		mem_fun (*_session_config, &SessionConfiguration::get_video_pullup),
+		mem_fun (*_session_config, &SessionConfiguration::set_video_pullup)
+		);
+
+	vpu->add (4.1667 + 0.1, _("4.1667 + 0.1%"));
+	vpu->add (4.1667, _("4.1667"));
+	vpu->add (4.1667 - 0.1, _("4.1667 - 0.1%"));
+	vpu->add (0.1, _("0.1"));
+	vpu->add (0, _("none"));
+	vpu->add (-0.1, _("-0.1"));
+	vpu->add (-4.1667 + 0.1, _("-4.1667 + 0.1%"));
+	vpu->add (-4.1667, _("-4.1667"));
+	vpu->add (-4.1667 - 0.1, _("-4.1667 - 0.1%"));
+
+	add_option (_("Sync"), vpu);
+
 	/* FADES */
 
 	ComboOption<CrossfadeModel>* cfm = new ComboOption<CrossfadeModel> (
@@ -207,79 +283,6 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    mem_fun (*_session_config, &SessionConfiguration::get_show_region_fades),
 			    mem_fun (*_session_config, &SessionConfiguration::set_show_region_fades)
 			    ));
-
-	/* SYNC */
-
-	ComboOption<uint32_t>* spf = new ComboOption<uint32_t> (
-		"subframes-per-frame",
-		_("Subframes per frame"),
-		mem_fun (*_session_config, &SessionConfiguration::get_subframes_per_frame),
-		mem_fun (*_session_config, &SessionConfiguration::set_subframes_per_frame)
-		);
-
-	spf->add (80, _("80"));
-	spf->add (100, _("100"));
-
-	add_option (_("Sync"), spf);
-
-	ComboOption<SyncSource>* ssrc = new ComboOption<SyncSource> (
-		"sync-source",
-		_("External sync source"),
-		mem_fun (*_session_config, &SessionConfiguration::get_sync_source),
-		mem_fun (*_session_config, &SessionConfiguration::set_sync_source)
-		);
-	
-	s->MTC_PortChanged.connect (bind (mem_fun (*this, &SessionOptionEditor::populate_sync_options), s, ssrc));
-	s->MIDIClock_PortChanged.connect (bind (mem_fun (*this, &SessionOptionEditor::populate_sync_options), s, ssrc));
-	populate_sync_options (s, ssrc);
-
-	add_option (_("Sync"), ssrc);
-
-	ComboOption<TimecodeFormat>* smf = new ComboOption<TimecodeFormat> (
-		"timecode-format",
-		_("Timecode frames-per-second"),
-		mem_fun (*_session_config, &SessionConfiguration::get_timecode_format),
-		mem_fun (*_session_config, &SessionConfiguration::set_timecode_format)
-		);
-
-	smf->add (timecode_23976, _("23.976"));
-	smf->add (timecode_24, _("24"));
-	smf->add (timecode_24976, _("24.976"));
-	smf->add (timecode_25, _("25"));
-	smf->add (timecode_2997, _("29.97"));
-	smf->add (timecode_2997drop, _("29.97 drop"));
-	smf->add (timecode_30, _("30"));
-	smf->add (timecode_30drop, _("30 drop"));
-	smf->add (timecode_5994, _("59.94"));
-	smf->add (timecode_60, _("60"));
-
-	add_option (_("Sync"), smf);
-
-	add_option (_("Sync"), new BoolOption (
-			    "timecode-source-is-synced",
-			    _("Timecode source is synced"),
-			    mem_fun (*_session_config, &SessionConfiguration::get_timecode_source_is_synced),
-			    mem_fun (*_session_config, &SessionConfiguration::set_timecode_source_is_synced)
-			    ));
-
-	ComboOption<float>* vpu = new ComboOption<float> (
-		"video-pullup",
-		_("Pull-up / pull-down"),
-		mem_fun (*_session_config, &SessionConfiguration::get_video_pullup),
-		mem_fun (*_session_config, &SessionConfiguration::set_video_pullup)
-		);
-
-	vpu->add (4.1667 + 0.1, _("4.1667 + 0.1%"));
-	vpu->add (4.1667, _("4.1667"));
-	vpu->add (4.1667 - 0.1, _("4.1667 - 0.1%"));
-	vpu->add (0.1, _("0.1"));
-	vpu->add (0, _("none"));
-	vpu->add (-0.1, _("-0.1"));
-	vpu->add (-4.1667 + 0.1, _("-4.1667 + 0.1%"));
-	vpu->add (-4.1667, _("-4.1667"));
-	vpu->add (-4.1667 - 0.1, _("-4.1667 - 0.1%"));
-
-	add_option (_("Sync"), vpu);
 
 	/* MISC */
 
@@ -360,3 +363,15 @@ SessionOptionEditor::populate_sync_options (Session* s, Option* opt)
 	}
 }
 
+void
+SessionOptionEditor::follow_sync_state (std::string p, Session* s, Option* opt)
+{
+	ComboOption<SyncSource>* sync_opt = dynamic_cast<ComboOption<SyncSource>* > (opt);
+	if (p == "external-sync") {
+		if (s->config.get_external_sync()) {
+			sync_opt->set_sensitive (false);
+		} else {
+			sync_opt->set_sensitive (true);
+		}
+	}
+}

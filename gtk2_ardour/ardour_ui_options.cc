@@ -48,6 +48,12 @@ using namespace PBD;
 using namespace sigc;
 
 void
+ARDOUR_UI::toggle_external_sync()
+{
+	ActionManager::toggle_config_state_foo ("Transport", "ToggleExternalSync", mem_fun (session->config, &SessionConfiguration::set_external_sync), mem_fun (session->config, &SessionConfiguration::get_external_sync));
+}
+
+void
 ARDOUR_UI::toggle_time_master ()
 {
 	ActionManager::toggle_config_state_foo ("Transport", "ToggleTimeMaster", mem_fun (session->config, &SessionConfiguration::set_jack_time_master), mem_fun (session->config, &SessionConfiguration::get_jack_time_master));
@@ -296,7 +302,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &ARDOUR_UI::parameter_changed), p));
 
 	if (p == "external-sync") {
-		
+
+		ActionManager::map_some_state ("Transport", "ToggleExternalSync", mem_fun (session->config, &SessionConfiguration::get_external_sync));
+
 		if (!session->config.get_external_sync()) {
 			sync_button.set_label (_("Internal"));
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (true);

@@ -127,6 +127,19 @@ ARDOUR_UI::display_message (const char *prefix, gint prefix_len, RefPtr<TextBuff
 #endif
 }
 
+static bool
+null_crossing (GdkEventCrossing* /* ignored */)
+{
+	return true;
+}
+
+static void
+block_prelight (Gtk::Widget& w)
+{
+	w.signal_enter_notify_event().connect (sigc::ptr_fun (null_crossing), false);
+	w.signal_leave_notify_event().connect (sigc::ptr_fun (null_crossing), false);
+}
+
 void
 ARDOUR_UI::setup_transport ()
 {
@@ -172,6 +185,7 @@ ARDOUR_UI::setup_transport ()
 	punch_out_button.set_name ("TransportButton");
 	click_button.set_name ("TransportButton");
 	time_master_button.set_name ("TransportButton");
+	sync_button.set_name ("TransportSyncButton");
 
 	stop_button.set_size_request(29, -1);
 	roll_button.set_size_request(29, -1);
@@ -225,6 +239,8 @@ ARDOUR_UI::setup_transport ()
 	act->connect_proxy (play_selection_button);
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleTimeMaster"));
 	act->connect_proxy (time_master_button);
+	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
+	act->connect_proxy (sync_button);
 
 	ARDOUR_UI::instance()->tooltips().set_tip (roll_button, _("Play from playhead"));
 	ARDOUR_UI::instance()->tooltips().set_tip (stop_button, _("Stop playback"));
@@ -239,11 +255,12 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::instance()->tooltips().set_tip (punch_in_button, _("Start recording at auto-punch start"));
 	ARDOUR_UI::instance()->tooltips().set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 	ARDOUR_UI::instance()->tooltips().set_tip (click_button, _("Enable/Disable audio click"));
-	ARDOUR_UI::instance()->tooltips().set_tip (sync_button, _("Positional sync source"));
+	ARDOUR_UI::instance()->tooltips().set_tip (sync_button, _("Enable/Disable external positional sync"));
 	ARDOUR_UI::instance()->tooltips().set_tip (time_master_button, _("Does Ardour control the time?"));
 	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_box, _("Shuttle speed control"));
 	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_units_button, _("Select semitones or %%-age for speed display"));
 	ARDOUR_UI::instance()->tooltips().set_tip (speed_display_box, _("Current transport speed"));
+
 
 	shuttle_box.set_flags (CAN_FOCUS);
 	shuttle_box.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
@@ -331,9 +348,7 @@ ARDOUR_UI::setup_transport ()
 	sdframe->set_shadow_type (SHADOW_IN);
 	sdframe->add (speed_display_box);
 
-	sync_button.set_name ("TransportSyncAlert");
-	sync_button.signal_clicked().connect (mem_fun (*this, &ARDOUR_UI::sync_button_clicked));
-	// XXX HOW TO USE set_popdown_strings() with this when we don't know the real strings till later?
+	/* translators: Egternal is "External" with a descender character */
 	set_size_request_to_display_given_text (sync_button, X_("Egternal"), 4, 10);
 
 	shbox->pack_start (*sdframe, false, false);
@@ -488,17 +503,22 @@ void
 ARDOUR_UI::sync_blink (bool onoff)
 {
 	if (session == 0 || !session->config.get_external_sync()) {
+		/* internal sync */
+		sync_button.set_visual_state (0);
 		return;
 	}
 
 	if (!session->transport_locked()) {
+		/* not locked, so blink on and off according to the onoff argument */
+
 		if (onoff) {
-			sync_button.set_state (STATE_ACTIVE);
+			sync_button.set_visual_state (1); // "-active"
 		} else {
-			sync_button.set_state (STATE_NORMAL);
+			sync_button.set_visual_state (0); // normal
 		}
 	} else {
-		sync_button.set_state (STATE_NORMAL);
+		/* locked */
+		sync_button.set_visual_state (1); // "-active"
 	}
 }
 
@@ -860,14 +880,6 @@ ARDOUR_UI::editor_realized ()
 
 	set_size_request_to_display_given_text (speed_display_box, _("-0.55"), 2, 2);
 	reset_dpi ();
-}
-
-void
-ARDOUR_UI::sync_button_clicked ()
-{
-	if (session) {
-		session->config.set_external_sync (sync_button.get_active());
-	}
 }
 
 void

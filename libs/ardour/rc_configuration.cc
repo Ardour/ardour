@@ -203,8 +203,6 @@ RCConfiguration::get_state ()
 	MIDI::Manager::PortMap::const_iterator i;
 	const MIDI::Manager::PortMap& ports = MIDI::Manager::instance()->get_midi_ports();
 
-	cerr << "Saving " << ports.size() << " MIDI ports\n";
-
 	for (i = ports.begin(); i != ports.end(); ++i) {
 		root->add_child_nocopy(i->second->get_state());
 	}

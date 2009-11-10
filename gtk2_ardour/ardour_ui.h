@@ -385,9 +385,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	BindableButton play_selection_button;
 	BindableButton rec_button;
 
-	Gtk::ToggleButton sync_button;
-
-	void sync_button_clicked ();
+	void toggle_external_sync ();
 	void toggle_time_master ();
 	void toggle_video_sync ();
 
@@ -427,6 +425,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	Gtkmm2ext::StatefulToggleButton auto_input_button;
 	Gtkmm2ext::StatefulToggleButton click_button;
 	Gtkmm2ext::StatefulToggleButton time_master_button;
+	Gtkmm2ext::StatefulToggleButton sync_button;
 
 	Gtk::ToggleButton auditioning_alert_button;
 	Gtk::ToggleButton solo_alert_button;
