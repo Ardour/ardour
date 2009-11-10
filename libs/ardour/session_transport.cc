@@ -196,7 +196,9 @@ Session::realtime_stop (bool abort, bool clear_state)
 	_clear_event_type (Event::RangeStop);
 	_clear_event_type (Event::RangeLocate);
 
-	disable_record (true);
+	/* if we're going to clear loop state, then force disabling record BUT only if we're not doing latched rec-enable */
+
+	disable_record (true, (!Config->get_latched_record_enable() && clear_state));
 
 	reset_slave_state ();
 		
