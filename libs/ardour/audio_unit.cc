@@ -629,6 +629,11 @@ AUPlugin::set_parameter (uint32_t which, float val)
 	if (which < descriptors.size()) {
 		const AUParameterDescriptor& d (descriptors[which]);
 		unit->SetParameter (d.id, d.scope, d.element, val);
+
+		/* tell the world what we did */
+
+		const AudioUnitParameter inParameter = { unit, d.id, d.scope, d.element };
+		AUParameterListenerNotify (0, 0, &inParameter);
 	}
 }
 
