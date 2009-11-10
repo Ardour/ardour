@@ -203,15 +203,13 @@ string
 Route::ensure_track_or_route_name(string name, Session &session)
 {
 	string newname = name;
-
-	while (session.route_by_name (newname)!=NULL)
-	{
+	
+	while (!session.io_name_is_legal (newname)) {
 		newname = bump_name_once (newname);
 	}
 
 	return newname;
 }
-
 
 void
 Route::inc_gain (gain_t fraction, void *src)
