@@ -132,6 +132,7 @@ Session::Session (AudioEngine &eng,
 	  pending_events (2048),
 	  state_tree (0),
 	  _butler (new Butler (this)),
+	  _post_transport_work (0),
 	  _send_timecode_update (false),
 	  midi_thread (pthread_t (0)),
 	  midi_requests (128), // the size of this should match the midi request pool size
@@ -217,6 +218,7 @@ Session::Session (AudioEngine &eng,
 	  pending_events (2048),
 	  state_tree (0),
 	  _butler (new Butler (this)),
+	  _post_transport_work (0),
 	  _send_timecode_update (false),
 	  midi_thread (pthread_t (0)),
 	  midi_requests (16),
@@ -869,8 +871,13 @@ Session::playlist_length_changed ()
 }
 
 void
-Session::diskstream_playlist_changed (boost::shared_ptr<Diskstream> dstream)
+Session::diskstream_playlist_changed (boost::weak_ptr<Diskstream> wp)
 {
+	boost::shared_ptr<Diskstream> dstream = wp.lock ();
+	if (!dstream) {
+		return;
+	}
+	
 	boost::shared_ptr<Playlist> playlist;
 
 	if ((playlist = dstream->playlist()) != 0) {
@@ -2284,9 +2291,9 @@ Session::add_diskstream (boost::shared_ptr<Diskstream> dstream)
 		/* writer goes out of scope, copies ds back to main */
 	}
 
-	dstream->PlaylistChanged.connect (sigc::bind (mem_fun (*this, &Session::diskstream_playlist_changed), dstream));
+	dstream->PlaylistChanged.connect (sigc::bind (mem_fun (*this, &Session::diskstream_playlist_changed), boost::weak_ptr<Diskstream> (dstream)));
 	/* this will connect to future changes, and check the current length */
-	diskstream_playlist_changed (dstream);
+	diskstream_playlist_changed (boost::weak_ptr<Diskstream> (dstream));
 
 	dstream->RecordEnableChanged.connect (mem_fun (*this, &Session::update_have_rec_enabled_diskstream));
 

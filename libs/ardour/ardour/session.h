@@ -1477,7 +1477,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	boost::shared_ptr<Playlist> XMLPlaylistFactory (const XMLNode&);
 
 	void playlist_length_changed ();
-	void diskstream_playlist_changed (boost::shared_ptr<Diskstream>);
+	void diskstream_playlist_changed (boost::weak_ptr<Diskstream>);
 
 	/* NAMED SELECTIONS */
 
