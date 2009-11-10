@@ -158,6 +158,26 @@ def CheckJackClientOpen(context):
         return result
 
 #
+# See if JACK supports jack_on_info_shutdown()
+#
+
+jack_test_source_file = """
+#include <jack/jack.h>
+void callback (int code, const char* reason, void* arg) { return; }
+int main(int argc, char **argv)
+{
+    jack_client_t* c;
+    jack_on_info_shutdown (c, callback, (void*) 0);
+    return 0;
+}
+"""
+def CheckJackOnInfoShutdown(context):
+        context.Message('Checking for jack_on_info_shutdown()...')
+        result = context.TryLink(jack_test_source_file, '.c')
+        context.Result(result)
+        return result
+
+#
 # See if JACK supports jack_recompute_total_latencies()
 #
 
@@ -214,6 +234,7 @@ def CheckJackEnsureMonitorInput(context):
 
 conf = Configure(ardour, custom_tests = {
 	'CheckJackClientOpen' : CheckJackClientOpen,
+	'CheckJackOnInfoShutdown' : CheckJackOnInfoShutdown,
 	'CheckJackRecomputeLatencies' : CheckJackRecomputeLatencies,
 	'CheckJackVideoFrameOffset' : CheckJackVideoFrameOffset,
 	'CheckJackEnsureMonitorInput' : CheckJackEnsureMonitorInput
@@ -221,6 +242,9 @@ conf = Configure(ardour, custom_tests = {
 
 if conf.CheckJackClientOpen():
 	ardour.Append(CXXFLAGS="-DHAVE_JACK_CLIENT_OPEN")
+
+if conf.CheckJackOnInfoShutdown():
+	ardour.Append(CXXFLAGS="-DHAVE_JACK_ON_INFO_SHUTDOWN")
 
 if conf.CheckJackRecomputeLatencies():
     ardour.Append(CXXFLAGS="-DHAVE_JACK_RECOMPUTE_LATENCIES")
