@@ -53,7 +53,7 @@ PortGroup::PortGroup (std::string const & n)
 void
 PortGroup::add_bundle (boost::shared_ptr<Bundle> b)
 {
-	add_bundle (b, boost::shared_ptr<IO> ());
+	add_bundle_internal (b, boost::shared_ptr<IO> (), false, Gdk::Color ());
 }
 
 /** Add a bundle to a group.
@@ -62,38 +62,45 @@ PortGroup::add_bundle (boost::shared_ptr<Bundle> b)
 void
 PortGroup::add_bundle (boost::shared_ptr<Bundle> b, boost::shared_ptr<IO> io)
 {
-	assert (b.get());
-
-	BundleRecord r;
-	r.bundle = b;
-	r.io = io;
-	r.has_colour = false;
-	r.changed_connection = b->Changed.connect (sigc::mem_fun (*this, &PortGroup::bundle_changed));
-
-	_bundles.push_back (r);
-
-	Changed ();
+	add_bundle_internal (b, io, false, Gdk::Color ());
 }
 
 /** Add a bundle to a group.
  *  @param b Bundle.
- *  @param c Colour to represent the group with.
+ *  @param c Colour to represent the bundle with.
  */
 void
 PortGroup::add_bundle (boost::shared_ptr<Bundle> b, boost::shared_ptr<IO> io, Gdk::Color c)
 {
+	add_bundle_internal (b, io, true, c);
+}
+
+void
+PortGroup::add_bundle_internal (boost::shared_ptr<Bundle> b, boost::shared_ptr<IO> io, bool has_colour, Gdk::Color colour)
+{
 	assert (b.get());
+
+	/* don't add this bundle if we already have one with the same ports */
+
+	BundleList::iterator i = _bundles.begin ();
+	while (i != _bundles.end() && b->has_same_ports (i->bundle) == false) {
+		++i;
+	}
+
+	if (i != _bundles.end ()) {
+		return;
+	}
 
 	BundleRecord r;
 	r.bundle = b;
 	r.io = io;
-	r.colour = c;
-	r.has_colour = true;
+	r.colour = colour;
+	r.has_colour = has_colour;
 	r.changed_connection = b->Changed.connect (sigc::mem_fun (*this, &PortGroup::bundle_changed));
 
 	_bundles.push_back (r);
 
-	Changed ();
+	Changed ();	
 }
 
 void
@@ -281,15 +288,24 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 		}
 	}
 
-	/* Bundles owned by the session */
+	/* Bundles owned by the session; add user bundles first, then normal ones, so
+	   that UserBundles that offer the same ports as a normal bundle get priority
+	*/
 
 	boost::shared_ptr<BundleList> b = session.bundles ();
+
 	for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-		if ((*i)->ports_are_inputs() == inputs && (*i)->type() == _type) {
+		if (boost::dynamic_pointer_cast<UserBundle> (*i) && (*i)->ports_are_inputs() == inputs && (*i)->type() == _type) {
 			system->add_bundle (*i);
 		}
 	}
 
+	for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
+		if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0 && (*i)->ports_are_inputs() == inputs && (*i)->type() == _type) {
+			system->add_bundle (*i);
+		}
+	}
+	
 	/* Ardour stuff */
 
 	if (!inputs && _type == DataType::AUDIO) {

@@ -466,3 +466,26 @@ Bundle::set_name (string const & n)
 	_name = n;
 	emit_changed (NameChanged);
 }
+
+/** @param b Other bundle.
+ *  @return true if b has the same number of channels as this bundle, and those channels have corresponding ports.
+ */
+bool
+Bundle::has_same_ports (boost::shared_ptr<Bundle> b) const
+{
+	uint32_t const N = nchannels ();
+
+	if (b->nchannels() != N) {
+		return false;
+	}
+
+	/* XXX: probably should sort channel port lists before comparing them */
+
+	for (uint32_t i = 0; i < N; ++i) {
+		if (channel_ports (i) != b->channel_ports (i)) {
+			return false;
+		}
+	}
+
+	return true;
+}

@@ -89,6 +89,7 @@ class Bundle : public sigc::trackable
 	void connect (boost::shared_ptr<Bundle>, AudioEngine &);
 	void disconnect (boost::shared_ptr<Bundle>, AudioEngine &);
 	bool connected_to (boost::shared_ptr<Bundle>, AudioEngine &);
+	bool has_same_ports (boost::shared_ptr<Bundle>) const;
 
 	void set_name (std::string const &);
 

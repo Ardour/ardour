@@ -90,6 +90,7 @@ public:
 
 private:
 	void bundle_changed (ARDOUR::Bundle::Change);
+	void add_bundle_internal (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::IO>, bool, Gdk::Color);
 
 	BundleList _bundles;
 	bool _visible; ///< true if the group is visible in the UI

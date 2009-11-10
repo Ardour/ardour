@@ -187,10 +187,12 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	gint input_press (GdkEventButton *);
 	gint output_press (GdkEventButton *);
 
-	Gtk::Menu  input_menu;
+	Gtk::Menu input_menu;
+	std::list<boost::shared_ptr<ARDOUR::Bundle> > input_menu_bundles;
 	void maybe_add_bundle_to_input_menu (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::BundleList const &);
 
 	Gtk::Menu output_menu;
+	std::list<boost::shared_ptr<ARDOUR::Bundle> > output_menu_bundles;
 	void maybe_add_bundle_to_output_menu (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::BundleList const &);
 
 	void bundle_input_toggled (boost::shared_ptr<ARDOUR::Bundle>);

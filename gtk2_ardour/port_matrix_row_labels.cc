@@ -291,13 +291,6 @@ PortMatrixRowLabels::render_bundle_name (
 
 	double const off = grid_spacing() / 2;
 
-// 	if ((*i)->nchannels () > 0 && !_matrix->show_only_bundles()) {
-// 		/* use the extent of our first channel name so that the bundle name is vertically aligned with it */
-// 		cairo_text_extents_t ext;
-// 		cairo_text_extents (cr, (*i)->channel_name(0).c_str(), &ext);
-// 		off = (grid_spacing() - ext.height) / 2;
-// 	}
-
  	set_source_rgb (cr, text_colour());
  	cairo_move_to (cr, xoff + x + name_pad(), yoff + name_pad() + off);
  	cairo_show_text (cr, b->name().c_str());
@@ -319,9 +312,15 @@ PortMatrixRowLabels::render_channel_name (
 	cairo_text_extents (cr, bc.bundle->channel_name(bc.channel).c_str(), &ext);
 	double const off = (grid_spacing() - ext.height) / 2;
 
-	set_source_rgb (cr, text_colour());
-	cairo_move_to (cr, port_name_x() + xoff + name_pad(), yoff + name_pad() + off);
-	cairo_show_text (cr, bc.bundle->channel_name(bc.channel).c_str());
+	if (bc.bundle->nchannels() > 1) {
+
+		/* only plot the name if the bundle has more than one channel;
+		   the name of a single channel is assumed to be redundant */
+		
+		set_source_rgb (cr, text_colour());
+		cairo_move_to (cr, port_name_x() + xoff + name_pad(), yoff + name_pad() + off);
+		cairo_show_text (cr, bc.bundle->channel_name(bc.channel).c_str());
+	}
 }
 
 double

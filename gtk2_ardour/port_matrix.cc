@@ -594,7 +594,7 @@ PortMatrix::add_channel_proxy (boost::weak_ptr<Bundle> w)
 void
 PortMatrix::bundle_changed (ARDOUR::Bundle::Change c)
 {
-	if (c & (Bundle::DirectionChanged | Bundle::TypeChanged)) {
+	if (c != Bundle::NameChanged) {
 		setup_all_ports ();
 	}
 	

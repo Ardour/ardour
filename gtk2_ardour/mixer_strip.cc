@@ -646,7 +646,8 @@ MixerStrip::output_press (GdkEventButton *ev)
 	case 3:
 	{
 		output_menu.set_name ("ArdourContextMenu");
-		citems.clear();
+		citems.clear ();
+		output_menu_bundles.clear ();
 
 		citems.push_back (MenuElem (_("Disconnect"), mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_output)));
 		citems.push_back (SeparatorElem());
@@ -654,10 +655,21 @@ MixerStrip::output_press (GdkEventButton *ev)
 		ARDOUR::BundleList current = _route->output()->bundles_connected ();
 
 		boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
+
+		/* give user bundles first chance at being in the menu */
+		
 		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-			maybe_add_bundle_to_output_menu (*i, current);
+			if (boost::dynamic_pointer_cast<UserBundle> (*i)) {
+				maybe_add_bundle_to_output_menu (*i, current);
+			}
 		}
 
+		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
+			if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0) {
+				maybe_add_bundle_to_output_menu (*i, current);
+			}
+		}
+		
 		boost::shared_ptr<ARDOUR::RouteList> routes = _session.get_routes ();
 		for (ARDOUR::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 			maybe_add_bundle_to_output_menu ((*i)->input()->bundle(), current);
@@ -731,14 +743,26 @@ MixerStrip::input_press (GdkEventButton *ev)
 	{
 		citems.push_back (MenuElem (_("Disconnect"), mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_input)));
 		citems.push_back (SeparatorElem());
+		input_menu_bundles.clear ();
 
 		ARDOUR::BundleList current = _route->input()->bundles_connected ();
 
 		boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
+
+		/* give user bundles first chance at being in the menu */
+		
 		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-			maybe_add_bundle_to_input_menu (*i, current);
+			if (boost::dynamic_pointer_cast<UserBundle> (*i)) {
+				maybe_add_bundle_to_input_menu (*i, current);
+			}
 		}
 
+		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
+			if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0) {
+				maybe_add_bundle_to_input_menu (*i, current);
+			}
+		}
+		
 		boost::shared_ptr<ARDOUR::RouteList> routes = _session.get_routes ();
 		for (ARDOUR::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 			maybe_add_bundle_to_input_menu ((*i)->output()->bundle(), current);
@@ -802,6 +826,17 @@ MixerStrip::maybe_add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, ARDOUR:
  		return;
  	}
 
+	list<boost::shared_ptr<Bundle> >::iterator i = input_menu_bundles.begin ();
+	while (i != input_menu_bundles.end() && b->has_same_ports (*i) == false) {
+		++i;
+	}
+
+	if (i != input_menu_bundles.end()) {
+		return;
+	}
+
+	input_menu_bundles.push_back (b);
+
 	MenuList& citems = input_menu.items();
 
 	std::string n = b->name ();
@@ -828,6 +863,17 @@ MixerStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR
  		return;
  	}
 
+	list<boost::shared_ptr<Bundle> >::iterator i = output_menu_bundles.begin ();
+	while (i != output_menu_bundles.end() && b->has_same_ports (*i) == false) {
+		++i;
+	}
+
+	if (i != output_menu_bundles.end()) {
+		return;
+	}
+
+	output_menu_bundles.push_back (b);
+	
 	MenuList& citems = output_menu.items();
 
 	std::string n = b->name ();
