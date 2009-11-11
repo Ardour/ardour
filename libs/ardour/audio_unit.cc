@@ -1,6 +1,7 @@
 /*
     Copyright (C) 2006-2009 Paul Davis 
-	
+    Some portions Copyright (C) Sophia Poirier.
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -45,6 +46,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <CoreServices/CoreServices.h>
 #include <AudioUnit/AudioUnit.h>
+#include <AudioToolbox/AudioUnitUtilities.h>
 
 #include "i18n.h"
 
@@ -632,8 +634,15 @@ AUPlugin::set_parameter (uint32_t which, float val)
 
 		/* tell the world what we did */
 
-		const AudioUnitParameter inParameter = { unit, d.id, d.scope, d.element };
-		AUParameterListenerNotify (0, 0, &inParameter);
+		AudioUnitEvent theEvent;
+		
+		theEvent.mEventType = kAudioUnitEvent_ParameterValueChange;
+		theEvent.mArgument.mParameter.mAudioUnit = unit->AU();
+		theEvent.mArgument.mParameter.mParameterID = d.id;
+		theEvent.mArgument.mParameter.mScope = d.scope;
+		theEvent.mArgument.mParameter.mElement = d.element;
+		
+		AUEventListenerNotify (NULL, NULL, &theEvent);
 	}
 }
 
@@ -1337,6 +1346,13 @@ AUPlugin::set_state(const XMLNode& node)
 	if (propertyList) {
 		if (unit->SetAUPreset (propertyList) == noErr) {
 			ret = 0;
+			
+			/* tell the world */
+
+			AudioUnitParameter changedUnit;
+			changedUnit.mAudioUnit = unit->AU();
+			changedUnit.mParameterID = kAUParameterListener_AnyParameter;
+			AUParameterListenerNotify (NULL, NULL, &changedUnit);
 		} 
 		CFRelease (propertyList);
 	}
@@ -1383,10 +1399,16 @@ AUPlugin::load_preset (const string preset_label)
 
 		if (unit->SetPresentPreset (preset) == 0) {
 			ret = true;
+
+			/* tell the world */
+
+			AudioUnitParameter changedUnit;
+			changedUnit.mAudioUnit = unit->AU();
+			changedUnit.mParameterID = kAUParameterListener_AnyParameter;
+			AUParameterListenerNotify (NULL, NULL, &changedUnit);
 		}
 	}
-
-	
+		
 	return ret;
 #else
 	if (!seen_loading_message) {
