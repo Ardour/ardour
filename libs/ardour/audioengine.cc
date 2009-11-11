@@ -857,7 +857,7 @@ AudioEngine::halted_info (jack_status_t code, const char* reason, void *arg)
 			ae->Halted(""); /* EMIT SIGNAL */
 		}
 #else
-			ae->Halted(""); /* EMIT SIGNAL */
+		ae->Halted(""); /* EMIT SIGNAL */
 #endif
 	}
 }

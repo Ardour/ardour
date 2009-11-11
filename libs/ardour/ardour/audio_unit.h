@@ -177,6 +177,9 @@ class AUPlugin : public ARDOUR::Plugin
 	void init ();
 
 	void discover_factory_presets ();
+
+	bool      last_transport_rolling;
+	float     last_transport_speed;
 };
 	
 typedef boost::shared_ptr<AUPlugin> AUPluginPtr;

@@ -66,6 +66,7 @@ AUPluginInfo::CachedInfoMap AUPluginInfo::cached_info;
 static string preset_search_path = "/Library/Audio/Presets:/Network/Library/Audio/Presets";
 static string preset_suffix = ".aupreset";
 static bool preset_search_path_initialized = false;
+static bool debug_io_config = true;
 
 static OSStatus 
 _render_callback(void *userData,
@@ -335,14 +336,16 @@ Boolean ComponentAndDescriptionMatch_Loosely(Component inComponent, const Compon
 
 AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAComponent> _comp)
 	: Plugin (engine, session),
-	  comp (_comp),
-	  unit (new CAAudioUnit),
-	  initialized (false),
-	  buffers (0),
-	  current_maxbuf (0),
-	  current_offset (0),
-	  current_buffers (0),
-	frames_processed (0)
+	, comp (_comp)
+	, unit (new CAAudioUnit)
+	, initialized (false)
+	, buffers (0)
+	, current_maxbuf (0)
+	, current_offset (0)
+	, current_buffers (0)
+	, frames_processed (0)
+	, last_transport_rolling (false)
+	, last_transport_speed (0.0)
 {			
 	if (!preset_search_path_initialized) {
 		Glib::ustring p = Glib::get_home_dir();
@@ -781,10 +784,18 @@ AUPlugin::can_do (int32_t in, int32_t& out)
 
 	vector<pair<int,int> >& io_configs = pinfo->cache.io_configs;
 
+	if (debug_io_config) {
+		cerr << name() << " has " << io_configs.size() << " IO Configurations\n";
+	}
+
 	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
 
 		int32_t possible_in = i->first;
 		int32_t possible_out = i->second;
+
+		if (debug_io_config) {
+			cerr << "\tin " << possible_in << " out " << possible_out << endl;
+		}
 
 		if (possible_out == 0) {
 			warning << string_compose (_("AU %1 has zero outputs - configuration ignored"), name()) << endmsg;
@@ -914,6 +925,14 @@ AUPlugin::can_do (int32_t in, int32_t& out)
 			break;
 		}
 
+	}
+
+	if (debug_io_config) {
+		if (plugcnt > 0) {
+			cerr << "\tCHOSEN: in " << in << " out " << out << " plugcnt will be " << plugcnt << endl;
+		} else {
+			cerr << "\tFAIL: no configs match requested in " << in << endl;
+		}
 	}
 
 	return plugcnt;
@@ -1148,16 +1167,31 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 					Float64*  outCycleStartBeat,
 					Float64*  outCycleEndBeat)
 {
+	bool rolling;
+	float speed;
+
+	rolling = _session->transport_rolling();
+	speed = _session->transport_speed ();
+
 	if (outIsPlaying) {
 		*outIsPlaying = _session.transport_rolling();
 	}
 
 	if (outTransportStateChanged) {
-		*outTransportStateChanged = false;
+		if (rolling != last_transport_rolling) {
+			*outTransportStateChanged = true;
+		} else if (speed != last_transport_speed) {
+			*outTransportStateChanged = true;
+		} else {
+			*outTransportStateChanged = false;
+		}
 	}
 
 	if (outCurrentSampleInTimeLine) {
-		*outCurrentSampleInTimeLine = _session.transport_frame();
+		/* this assumes that the AU can only call this host callback from render context,
+		   where current_offset is valid.
+		*/
+		*outCurrentSampleInTimeLine = _session.transport_frame() + current_offset;
 	}
 
 	if (outIsCycling) {
@@ -1207,7 +1241,10 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 			}
 		}
 	}
-		
+
+	last_transport_rolling = rolling;
+	last_transport_speed = speed;
+
 	return noErr;
 }
 
