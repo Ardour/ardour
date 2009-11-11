@@ -1384,6 +1384,13 @@ AUPlugin::load_preset (const string preset_label)
 		if ((propertyList = load_property_list (ux->second)) != 0) {
 			if (unit->SetAUPreset (propertyList) == noErr) {
 				ret = true;
+
+				/* tell the world */
+				
+				AudioUnitParameter changedUnit;
+				changedUnit.mAudioUnit = unit->AU();
+				changedUnit.mParameterID = kAUParameterListener_AnyParameter;
+				AUParameterListenerNotify (NULL, NULL, &changedUnit);
 			}
 			CFRelease(propertyList);
 		}
