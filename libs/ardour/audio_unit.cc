@@ -335,7 +335,7 @@ Boolean ComponentAndDescriptionMatch_Loosely(Component inComponent, const Compon
 
 
 AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAComponent> _comp)
-	: Plugin (engine, session),
+	: Plugin (engine, session)
 	, comp (_comp)
 	, unit (new CAAudioUnit)
 	, initialized (false)
@@ -1170,8 +1170,8 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 	bool rolling;
 	float speed;
 
-	rolling = _session->transport_rolling();
-	speed = _session->transport_speed ();
+	rolling = _session.transport_rolling();
+	speed = _session.transport_speed ();
 
 	if (outIsPlaying) {
 		*outIsPlaying = _session.transport_rolling();
