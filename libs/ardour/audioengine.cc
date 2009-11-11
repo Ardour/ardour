@@ -141,7 +141,11 @@ AudioEngine::start ()
 		_processed_frames = 0;
 		last_monitor_check = 0;
 
+#ifdef HAVE_JACK_ON_INFO_SHUTDOWN
+		jack_on_info_shutdown (_priv_jack, halted_info, this);
+#else
 		jack_on_shutdown (_priv_jack, halted, this);
+#endif
 		jack_set_graph_order_callback (_priv_jack, _graph_order_callback, this);
 		jack_set_thread_init_callback (_priv_jack, _thread_init_callback, this);
 		jack_set_process_callback (_priv_jack, _process_callback, this);
@@ -824,7 +828,33 @@ AudioEngine::halted (void *arg)
 	ae->_jack = 0;
 
 	if (was_running) {
-		ae->Halted(); /* EMIT SIGNAL */
+		ae->Halted(""); /* EMIT SIGNAL */
+	}
+}
+
+void
+AudioEngine::halted_info (jack_status_t code, const char* reason, void *arg)
+{
+        /* called from jack shutdown handler  */
+
+	AudioEngine* ae = static_cast<AudioEngine *> (arg);
+	bool was_running = ae->_running;
+
+	ae->stop_metering_thread ();
+
+	ae->_running = false;
+	ae->_buffer_size = 0;
+	ae->_frame_rate = 0;
+	ae->_jack = 0;
+
+	if (was_running) {
+		switch (code) {
+		case JackBackendError:
+			ae->Halted(reason); /* EMIT SIGNAL */
+			break;
+		default:
+			ae->Halted(""); /* EMIT SIGNAL */
+		}
 	}
 }
 

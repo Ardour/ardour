@@ -1278,7 +1278,7 @@ Session::request_roll_at_and_return (nframes_t start, nframes_t return_to)
 }
 
 void
-Session::engine_halted ()
+Session::engine_halted (const char* /* reason */)
 {
 	bool ignored;
 
@@ -1317,7 +1317,7 @@ Session::xrun_recovery ()
 		   to handle things in the same way.
 		*/
 
-		engine_halted();
+		engine_halted ("");
 	} 
 }
 

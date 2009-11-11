@@ -315,7 +315,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void map_transport_state ();
 	int32_t do_engine_start ();
 	
-	void engine_halted ();
+	void engine_halted (const char* reason, bool free_reason);
 	void engine_stopped ();
 	void engine_running ();
 

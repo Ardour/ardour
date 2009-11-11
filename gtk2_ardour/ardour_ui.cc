@@ -26,6 +26,7 @@
 #include <cerrno>
 #include <fstream>
 #include <stdlib.h>
+#include <cstring>
 
 #include <iostream>
 
@@ -295,7 +296,7 @@ ARDOUR_UI::create_engine ()
 
 	engine->Stopped.connect (mem_fun(*this, &ARDOUR_UI::engine_stopped));
 	engine->Running.connect (mem_fun(*this, &ARDOUR_UI::engine_running));
-	engine->Halted.connect (mem_fun(*this, &ARDOUR_UI::engine_halted));
+	engine->Halted.connect (bind (mem_fun(*this, &ARDOUR_UI::engine_halted), false));
 	engine->SampleRateChanged.connect (mem_fun(*this, &ARDOUR_UI::update_sample_rate));
 
 	post_engine ();
@@ -1786,23 +1787,46 @@ ARDOUR_UI::engine_running ()
 }
 
 void
-ARDOUR_UI::engine_halted ()
+ARDOUR_UI::engine_halted (const char* reason, bool free_reason)
 {
-	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::engine_halted));
+	if (!Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {
+		/* we can't rely on the original string continuing to exist when we are called
+		   again in the GUI thread, so make a copy and note that we need to
+		   free it later.
+		*/
+		char *copy = strdup (reason);
+		Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun (*this, &ARDOUR_UI::engine_halted), copy, true));
+		return;
+	} 
 
 	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, true);
 
 	update_sample_rate (0);
 
-	MessageDialog msg (*editor, 
-			   _("\
+	string msgstr;
+
+	/* if the reason is a non-empty string, it means that the backend was shutdown
+	   rather than just Ardour.
+	*/
+
+	if (strlen (reason)) {
+		msgstr = string_compose (_("The audio backend (JACK) was shutdown because:\n\n%1"), reason);
+	} else {
+		msgstr = _("\
 JACK has either been shutdown or it\n\
 disconnected Ardour because Ardour\n\
 was not fast enough. Try to restart\n\
-JACK, reconnect and save the session."));
+JACK, reconnect and save the session.");
+	}
+
+	MessageDialog msg (*editor, msgstr);
 	pop_back_splash ();
 	msg.run ();
+
+	if (free_reason) {
+		free ((char *) reason);
+	}
 }
 
 int32_t

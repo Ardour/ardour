@@ -1471,7 +1471,7 @@ class Session : public PBD::StatefulDestructible
 	void non_realtime_overwrite (int entry_request_count, bool& finished);
 	void butler_transport_work ();
 	void post_transport ();
-	void engine_halted ();
+	void engine_halted (const char*);
 	void xrun_recovery ();
 
 	TempoMap    *_tempo_map;
