@@ -848,6 +848,7 @@ AudioEngine::halted_info (jack_status_t code, const char* reason, void *arg)
 	ae->_jack = 0;
 
 	if (was_running) {
+#ifdef HAVE_JACK_ON_INFO_SHUTDOWN
 		switch (code) {
 		case JackBackendError:
 			ae->Halted(reason); /* EMIT SIGNAL */
@@ -855,6 +856,9 @@ AudioEngine::halted_info (jack_status_t code, const char* reason, void *arg)
 		default:
 			ae->Halted(""); /* EMIT SIGNAL */
 		}
+#else
+			ae->Halted(""); /* EMIT SIGNAL */
+#endif
 	}
 }
 
