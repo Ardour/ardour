@@ -371,7 +371,7 @@ msgstr ""
 "har ej sparats.\n"
 "\n"
 "Ändringar du gjort kommer\n"
-"att förloras ifall du inte sparar.\n"
+"att förloras om du inte sparar.\n"
 "\n"
 "Vad vill du göra?"
 
@@ -564,7 +564,7 @@ msgid ""
 msgstr ""
 "Att rensa är en destruktiv funktion.\n"
 "ALL ångra-/gör om-information kommer att gå förlorad om du rensar.\n"
-"Oanvända filer kommer att flyttas till en \"döda ljud\"-plats."
+"Oanvända filer kommer att flyttas till \"dead_sounds\" i sessionens mapp."
 
 #: ../ardour_ui.cc:2041
 msgid "Clean Up"
@@ -3156,7 +3156,7 @@ msgstr "Exportera session"
 
 #: ../editor_actions.cc:210
 msgid "Export Range"
-msgstr "Exportea omfång"
+msgstr "Exportera omfång"
 
 #. Note: for now, editor-delete does the exact same thing as editor-cut
 #: ../editor_actions.cc:216
@@ -3538,10 +3538,6 @@ msgstr "Avaktivera alla"
 msgid "Add group"
 msgstr "Lägg till grupp"
 
-#: ../editor_edit_groups.cc:228 ../mixer_ui.cc:969
-msgid "unnamed"
-msgstr "namnlös"
-
 #: ../editor_edit_groups.cc:257 ../mixer_ui.cc:833
 msgid "-all-"
 msgstr "-alla-"
@@ -3625,11 +3621,11 @@ msgstr "Ta bort markör"
 
 #: ../editor_markers.cc:478 ../editor_markers.cc:534
 msgid "Locate to Range Mark"
-msgstr "Flytta startmarköer till omfångsmarkör"
+msgstr "Flytta startmarkörer till omfångsmarkör"
 
 #: ../editor_markers.cc:479 ../editor_markers.cc:535
 msgid "Play from Range Mark"
-msgstr "Spela från omfångmarkör"
+msgstr "Spela från omfångsmarkör"
 
 #: ../editor_markers.cc:480
 msgid "Loop Range"
@@ -7628,7 +7624,7 @@ msgstr "Kategori"
 
 #: gtk2_ardour/plugin_selector.cc:81
 msgid "Creator"
-msgstr "Upphovsperson"
+msgstr "Upphovsman"
 
 #: gtk2_ardour/plugin_selector.cc:51 gtk2_ardour/plugin_selector.cc:209
 msgid "Name contains"
@@ -7785,3 +7781,167 @@ msgstr "Stega musläge"
 #: gtk2_ardour/ardour_ui.cc:658
 msgid "Ardour is ready for use"
 msgstr "Ardour är redo att användas"
+
+#: gtk2_ardour/ardour_ui_ed.cc:255
+msgid "Start/Continue/Stop"
+msgstr "Start/Fortsätt/Stopp"
+
+#: gtk2_ardour/ardour_ui_ed.cc:98
+msgid "Editing Modes"
+msgstr "Redigeringslägen"
+
+#: gtk2_ardour/editor_actions.cc:677
+msgid "Next Edit Mode"
+msgstr "Nästa redigeringsläge"
+
+#: gtk2_ardour/editor_actions.cc:679
+msgid "Mouse Mode"
+msgstr "Musläge"
+
+#: gtk2_ardour/editor_actions.cc:680
+msgid "Next Mouse Mode"
+msgstr "Nästa musläge"
+
+#: gtk2_ardour/editor_actions.cc:467
+msgid "Insert Region from List"
+msgstr "Infoga region från lista"
+
+#: gtk2_ardour/editor_actions.cc:812
+msgid "Set Selected Tracks to Linear Waveforms"
+msgstr "Valda spår till linjär vågform"
+
+#: gtk2_ardour/editor_actions.cc:814
+msgid "Set Selected Tracks to Logarithmic Waveforms"
+msgstr "Valda spår till logaritmisk vågform"
+
+#: gtk2_ardour/editor_actions.cc:217
+msgid "Toggle Record Enable"
+msgstr "Växla tillåt inspelning"
+
+#: gtk2_ardour/editor_actions.cc:807
+msgid "Show Waveforms Rectified"
+msgstr "Visa korrigerade vågformer"
+
+#: gtk2_ardour/editor_actions.cc:808
+msgid "Show Waveforms while Recording"
+msgstr "Visa vågformer under inspelning"
+
+
+#: gtk2_ardour/editor_actions.cc:66
+msgid "Performance"
+msgstr "Prestanda"
+
+#: gtk2_ardour/ardour_ui_ed.cc:521
+msgid "Do Not Run Plugins while Recording"
+msgstr "Använd ej insticksprogram under inspelning"
+
+#: gtk2_ardour/editor_actions.cc:121
+msgid "Use Region Fades"
+msgstr "Använd regiontoningar"
+
+#: gtk2_ardour/ardour_ui_ed.cc:451
+msgid "Seamless Looping"
+msgstr "Loopa sömlöst"
+
+#: gtk2_ardour/editor.cc:1871
+msgid "Region Editor"
+msgstr "Regionsredigerare"
+
+#: gtk2_ardour/keyboard.cc:502
+msgid "your own"
+msgstr "egen"
+
+#: gtk2_ardour/plugin_selector.cc:588
+msgid "By Creator"
+msgstr "Upphovsman"
+
+
+#: gtk2_ardour/plugin_selector.cc:591
+msgid "By Category"
+msgstr "Kategori"
+
+#: gtk2_ardour/plugin_selector.cc:81
+msgid "Hid"
+msgstr "Dölj"
+
+#: gtk2_ardour/plugin_selector.cc:53 gtk2_ardour/plugin_selector.cc:224
+msgid "Category contains"
+msgstr "Kategori innehåller"
+
+msgid "Hidden only"
+msgstr "Endast dolda"
+
+#: gtk2_ardour/audio_region_editor.cc:93
+msgid "Sync Point:"
+msgstr "Synk.-punkt:"
+
+#: gtk2_ardour/audio_region_editor.cc:48
+msgid "Name:"
+msgstr "Namn:"
+
+
+#: gtk2_ardour/audio_region_editor.cc:95
+msgid "File Start:"
+msgstr "Filstart:"
+
+#: gtk2_ardour/audio_region_editor.cc:129
+msgid "Scale amplitude:"
+msgstr "Skala amplitud:"
+
+#: gtk2_ardour/editor_edit_groups.cc:260 gtk2_ardour/mixer_ui.cc:1257
+msgid "unnamed"
+msgstr "namnlös"
+
+
+#: gtk2_ardour/editor_markers.cc:627
+msgid "Play Range"
+msgstr "Spela omfång"
+
+#: gtk2_ardour/editor_markers.cc:593
+msgid "Locate to here"
+msgstr "Placera startmarkören här"
+
+#: gtk2_ardour/editor_markers.cc:594
+msgid "Play from here"
+msgstr "Spela härifrån"
+
+#: gtk2_ardour/editor_markers.cc:595
+msgid "Move Mark to Playhead"
+msgstr "Flytta markör till startmarkören"
+
+#: gtk2_ardour/editor_markers.cc:599
+msgid "Create range to next marker"
+msgstr "Skapa omfång till nästa markör"
+
+#: gtk2_ardour/tempo_dialog.cc:325
+msgid "Note Value:"
+msgstr "Notvärde"
+
+#: gtk2_ardour/tempo_dialog.cc:326
+msgid "Beats Per Bar:"
+msgstr "Slag per takt:"
+
+#: gtk2_ardour/tempo_dialog.cc:344
+msgid "Meter Begins at Bar:"
+msgstr "Taktart börjar vid takt:"
+
+#: gtk2_ardour/tempo_dialog.cc:104
+msgid "Beats Per Minute:"
+msgstr "Slag per minut:"
+
+#: gtk2_ardour/tempo_dialog.cc:144
+msgid "Tempo Begins at:"
+msgstr "Tempo börjar vid:"
+
+#: gtk2_ardour/tempo_dialog.cc:36
+msgid "edit tempo"
+msgstr "ändra tempo"
+
+
+#: gtk2_ardour/editor_rulers.cc:429
+msgid "New CD track marker"
+msgstr "Ny CD-spårsmarkör"
+
+#: gtk2_ardour/engine_dialog.cc:157
+msgid "Buffer size"
+msgstr "Buffertstorlek"

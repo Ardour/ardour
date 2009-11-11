@@ -8,8 +8,12 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: italian\n"
+"X-Poedit-Country: ITALY\n"
+"X-Poedit-SourceCharset: utf-8\n"
 
 #: gtk2_ardour/about.cc:123
+#, fuzzy
 msgid "Brian Ahr"
 msgstr ""
 
@@ -200,7 +204,6 @@ msgstr ""
 msgid ""
 "Italian:\n"
 "\tEmanuele Costantini <sound@ecciproduzioni.com>\n"
-"\tAlessio Leonarduzzi <alessio.leonarduzzi@gmail.com>\n"
 msgstr ""
 
 #: gtk2_ardour/about.cc:174
@@ -457,7 +460,7 @@ msgstr "% "
 #: gtk2_ardour/ardour_ui.cc:154
 #: gtk2_ardour/ardour_ui_ed.cc:336
 msgid "Punch In"
-msgstr "Imposta l'intervallo di Punch In"
+msgstr "Punch In"
 
 #: gtk2_ardour/ardour_ui.cc:155
 #: gtk2_ardour/ardour_ui_ed.cc:339
@@ -467,17 +470,17 @@ msgstr "Punch Out"
 #: gtk2_ardour/ardour_ui.cc:156
 #: gtk2_ardour/ardour_ui_ed.cc:354
 msgid "Auto Return"
-msgstr "Ritorna automaticamente"
+msgstr "Auto Ritorno"
 
 #: gtk2_ardour/ardour_ui.cc:157
 #: gtk2_ardour/ardour_ui_ed.cc:351
 msgid "Auto Play"
-msgstr "Riproduci automaticamente"
+msgstr "Auto Riproduci"
 
 #: gtk2_ardour/ardour_ui.cc:158
 #: gtk2_ardour/ardour_ui_ed.cc:348
 msgid "Auto Input"
-msgstr "Ingresso automatico"
+msgstr "Auto In"
 
 #: gtk2_ardour/ardour_ui.cc:159
 #: gtk2_ardour/ardour_ui_ed.cc:345
@@ -490,8 +493,8 @@ msgid ""
 "time\n"
 "master"
 msgstr ""
-"tempo\n"
-"master"
+"gestore\n"
+"tempo"
 
 #: gtk2_ardour/ardour_ui.cc:162
 msgid "AUDITION"
@@ -507,7 +510,7 @@ msgstr "Errori"
 
 #: gtk2_ardour/ardour_ui.cc:267
 msgid "could not initialize Ardour."
-msgstr "non posso avviare Ardour"
+msgstr "non posso avviare Ardour."
 
 #: gtk2_ardour/ardour_ui.cc:293
 msgid "Starting audio engine"
@@ -515,12 +518,12 @@ msgstr "Sto lanciando il motore audio"
 
 #: gtk2_ardour/ardour_ui.cc:586
 msgid "Ardour could not start JACK"
-msgstr "Ardou non può lanciare JACK"
+msgstr "Ardour non può lanciare JACK"
 
 #: gtk2_ardour/ardour_ui.cc:588
 #: gtk2_ardour/main.cc:69
 msgid "Ardour could not connect to JACK."
-msgstr "Ardour non si puo' connettere a JACK."
+msgstr "Ardour non si può connettere a JACK."
 
 #: gtk2_ardour/ardour_ui.cc:597
 msgid ""
@@ -601,7 +604,7 @@ msgstr "Non %1"
 
 #: gtk2_ardour/ardour_ui.cc:778
 msgid "Just %1"
-msgstr "Soltanto %1"
+msgstr "%1"
 
 #: gtk2_ardour/ardour_ui.cc:780
 msgid "Save and %1"
@@ -780,7 +783,7 @@ msgstr "nessuno"
 #: gtk2_ardour/ardour_ui.cc:1850
 #: gtk2_ardour/ardour_ui.cc:1865
 msgid "off"
-msgstr "Spento"
+msgstr "spento"
 
 #: gtk2_ardour/ardour_ui.cc:1889
 msgid "Name of New Snapshot"
@@ -788,7 +791,7 @@ msgstr "Nome della nuova istantanea"
 
 #: gtk2_ardour/ardour_ui.cc:1991
 msgid "Name for mix template:"
-msgstr "Nome per il modello di mixaggio:"
+msgstr "Nome per il modello del mixaggio:"
 
 #: gtk2_ardour/ardour_ui.cc:1992
 msgid "-template"
@@ -806,7 +809,7 @@ msgid ""
 msgstr ""
 "Benvenuto in Ardour.\n"
 "\n"
-"Il programma avrà  bisogno di un po' di tempo per partire\n"
+"Il programma avrà bisogno di un po' di tempo per partire\n"
 "mentre le font di sistema verranno controllatte.\n"
 "\n"
 "Questo verrà fatto solo una volta\n"
@@ -1079,7 +1082,7 @@ msgstr "Vai alla fine della sessione"
 
 #: gtk2_ardour/ardour_ui2.cc:292
 msgid "Play loop range"
-msgstr "Riproduci l'intervallo ciclico"
+msgstr "Riproduci intervallo ciclo"
 
 #: gtk2_ardour/ardour_ui2.cc:294
 msgid "Return to last playback start when stopped"
@@ -1124,7 +1127,7 @@ msgstr "Seleziona semitoni o percentuale per la velocità  di visualizzazione"
 
 #: gtk2_ardour/ardour_ui2.cc:304
 msgid "Current transport speed"
-msgstr "Velocita' del trascinamento"
+msgstr "Velocità del trascinamento"
 
 #: gtk2_ardour/ardour_ui2.cc:325
 msgid "Primary clock"
@@ -1155,13 +1158,13 @@ msgstr ""
 #: gtk2_ardour/ardour_ui2.cc:883
 #: gtk2_ardour/ardour_ui_options.cc:1193
 msgid "sprung"
-msgstr "saltato"
+msgstr "elastico"
 
 #: gtk2_ardour/ardour_ui2.cc:382
 #: gtk2_ardour/ardour_ui2.cc:829
 #: gtk2_ardour/ardour_ui_options.cc:1204
 msgid "wheel"
-msgstr "manopola"
+msgstr "spinta"
 
 #: gtk2_ardour/ardour_ui2.cc:601
 msgid "Maximum speed"
@@ -1170,7 +1173,7 @@ msgstr "Velocità  massima"
 #: gtk2_ardour/ardour_ui2.cc:839
 #: gtk2_ardour/ardour_ui2.cc:862
 msgid "stop"
-msgstr "ferma"
+msgstr "stop"
 
 #: gtk2_ardour/ardour_ui2.cc:881
 msgid "-0.55"
@@ -1369,7 +1372,7 @@ msgstr "Mostra il mixer"
 
 #: gtk2_ardour/ardour_ui_ed.cc:204
 msgid "Toggle Editor Mixer on Top"
-msgstr "Mostra/Nascondi il mixer della finestra di lavoro"
+msgstr "Finestra di Lavoro o Mixer in primo piano"
 
 #: gtk2_ardour/ardour_ui_ed.cc:205
 #: gtk2_ardour/option_editor.cc:125
@@ -1399,7 +1402,7 @@ msgstr "Tachimetro grande"
 
 #: gtk2_ardour/ardour_ui_ed.cc:214
 msgid "About"
-msgstr "Riguardo a"
+msgstr "Informazioni"
 
 #: gtk2_ardour/ardour_ui_ed.cc:215
 #: gtk2_ardour/theme_manager.cc:58
@@ -1444,7 +1447,7 @@ msgstr "Trascinamento"
 #: gtk2_ardour/engine_dialog.cc:59
 #: gtk2_ardour/sfdb_ui.cc:189
 msgid "Stop"
-msgstr "Ferma"
+msgstr "Stop"
 
 #: gtk2_ardour/ardour_ui_ed.cc:245
 msgid "Roll"
@@ -1452,11 +1455,11 @@ msgstr "Gira"
 
 #: gtk2_ardour/ardour_ui_ed.cc:249
 msgid "Start/Stop"
-msgstr "Inizia/Ferma"
+msgstr "Avvia/Ferma"
 
 #: gtk2_ardour/ardour_ui_ed.cc:252
 msgid "Stop and Forget Capture"
-msgstr "Ferma e dimentica la registrazione"
+msgstr "Ferma e scorda la ripresa"
 
 #: gtk2_ardour/ardour_ui_ed.cc:262
 msgid "Transition To Roll"
@@ -1468,19 +1471,19 @@ msgstr "Transizione al Contrario"
 
 #: gtk2_ardour/ardour_ui_ed.cc:271
 msgid "Play Loop Range"
-msgstr "Riproduci l'intervallo ciclico"
+msgstr "Riproduci Intervallo Ciclo"
 
 #: gtk2_ardour/ardour_ui_ed.cc:274
 msgid "Play Selection"
-msgstr "Riproduci la selezione"
+msgstr "Riproduci Selezione"
 
 #: gtk2_ardour/ardour_ui_ed.cc:278
 msgid "Enable Record"
-msgstr "Abilita la registrazione"
+msgstr "Abilita Registrazione"
 
 #: gtk2_ardour/ardour_ui_ed.cc:280
 msgid "Start Recording"
-msgstr "Comincia a registrare"
+msgstr "Comincia a Registrare"
 
 #: gtk2_ardour/ardour_ui_ed.cc:283
 msgid "Rewind"
@@ -1727,7 +1730,7 @@ msgstr "Modalità  Registratore (Tape Machine)"
 
 #: gtk2_ardour/ardour_ui_ed.cc:447
 msgid "Sync Editor and Mixer Track Order"
-msgstr "Sicronizza l'ordine delle tracce tra il mixer e la finestra di lavoro"
+msgstr "Sicronizza Ordine Tracce tra Mixer e Finestra di Lavoro"
 
 #: gtk2_ardour/ardour_ui_ed.cc:448
 msgid "Stop Plugins with Transport"
@@ -1915,19 +1918,19 @@ msgstr "Connetti automaticamente gli ingressi agli ingressi fisici"
 
 #: gtk2_ardour/ardour_ui_ed.cc:581
 msgid "Manually Connect Inputs"
-msgstr "Connetti manualmente gli ingressi"
+msgstr "Connetti manualmente gli Ingressi"
 
 #: gtk2_ardour/ardour_ui_ed.cc:586
 msgid "Auto-connect Outputs to Physical Outputs"
-msgstr "Connetti automaticamente le uscite alle uscite fisiche"
+msgstr "Connetti automaticamente le Uscite alle Uscite Fisiche"
 
 #: gtk2_ardour/ardour_ui_ed.cc:588
 msgid "Auto-connect Outputs to Master Bus"
-msgstr "Connetti automaticamente le uscite all'uscita principale"
+msgstr "Connetti automaticamente le Uscite all'Uscita Principale"
 
 #: gtk2_ardour/ardour_ui_ed.cc:590
 msgid "Manually Connect Outputs"
-msgstr "Connetti manualmente le uscite"
+msgstr "Connetti Mnualmente le Uscite"
 
 #: gtk2_ardour/ardour_ui_ed.cc:595
 msgid "Remote ID Assigned by User"
@@ -2377,9 +2380,8 @@ msgid "width in pixels of outline"
 msgstr "larghezza in pixel del fuori linea"
 
 #: gtk2_ardour/canvas-simplerect.c:160
-#, fuzzy
 msgid "outline what"
-msgstr "fuoriliea cosa"
+msgstr "fuorilinea cosa"
 
 #: gtk2_ardour/canvas-simplerect.c:161
 #, fuzzy
@@ -2415,9 +2417,8 @@ msgid "fill color rgba"
 msgstr "riempi il colore rgba"
 
 #: gtk2_ardour/canvas-simplerect.c:201
-#, fuzzy
 msgid "color of fill"
-msgstr "colore o riempimento"
+msgstr "colore del riempimento"
 
 #: gtk2_ardour/control_point_dialog.cc:33
 msgid "Control point"
@@ -2660,7 +2661,7 @@ msgstr "Percussione non intonata con le note stabili"
 #: gtk2_ardour/editor.cc:168
 #, fuzzy
 msgid "Crisp monophonic instrumental"
-msgstr "Strumentista monofonico frizzante"
+msgstr "Monofonico incisivo strumentale"
 
 #: gtk2_ardour/editor.cc:169
 msgid "Unpitched solo percussion"
@@ -2808,7 +2809,7 @@ msgstr "Finestra di lavoro"
 #: gtk2_ardour/editor.cc:4939
 #: gtk2_ardour/editor_actions.cc:84
 msgid "Loop"
-msgstr "intervallo ciclico"
+msgstr "ciclo"
 
 #: gtk2_ardour/editor.cc:1327
 #: gtk2_ardour/editor.cc:1335
@@ -2972,16 +2973,16 @@ msgstr "Inverti"
 
 #: gtk2_ardour/editor.cc:2053
 msgid "Add Single Range"
-msgstr "Aggiungi un singolo Intervallo"
+msgstr "Aggiungi Singolo Intervallo"
 
 #: gtk2_ardour/editor.cc:2054
 #: gtk2_ardour/editor.cc:2165
 msgid "Add Range Markers"
-msgstr "Aggiungi Indici di Intervallo"
+msgstr "Aggiungi Indici Intervallo"
 
 #: gtk2_ardour/editor.cc:2059
 msgid "Set Range Selection"
-msgstr "Imposta le selezione dell'intervallo"
+msgstr "Imposta Selezione Intervallo"
 
 #: gtk2_ardour/editor.cc:2068
 msgid "Nudge fwd"
@@ -3016,11 +3017,11 @@ msgstr "Cursore di lavoro alla fine"
 
 #: gtk2_ardour/editor.cc:2090
 msgid "Trim To Loop"
-msgstr "Ritaglia sull'intervallo ciclico"
+msgstr "Ritaglia Sul Ciclo"
 
 #: gtk2_ardour/editor.cc:2091
 msgid "Trim To Punch"
-msgstr "Ritaglia sull'intervallo di Puch"
+msgstr "Ritaglia Sul Punch"
 
 #: gtk2_ardour/editor.cc:2093
 #: gtk2_ardour/editor_actions.cc:94
@@ -3068,21 +3069,21 @@ msgstr "Rimuovi"
 
 #: gtk2_ardour/editor.cc:2143
 msgid "Play range"
-msgstr "Riproduci l'intervallo"
+msgstr "Riproduci intervallo"
 
 #: gtk2_ardour/editor.cc:2144
 msgid "Loop range"
-msgstr "Intervallo ciclico"
+msgstr "Intervallo ciclo"
 
 #: gtk2_ardour/editor.cc:2150
 #: gtk2_ardour/editor_actions.cc:593
 msgid "Extend Range to End of Region"
-msgstr "Estendi l'intervallo alla fine della ragione"
+msgstr "Estendi Intervallo alla Fine della Regione"
 
 #: gtk2_ardour/editor.cc:2151
 #: gtk2_ardour/editor_actions.cc:595
 msgid "Extend Range to Start of Region"
-msgstr "Intervallo esteso all'inizio di regione"
+msgstr "Estendi Intervallo all'Inizio della Regione"
 
 #: gtk2_ardour/editor.cc:2154
 msgid "Convert to region in-place"
@@ -3098,11 +3099,11 @@ msgstr "Seleziona tutto nell'intervallo"
 
 #: gtk2_ardour/editor.cc:2161
 msgid "Set loop from selection"
-msgstr "Imposta l'intervallo ciclico dalla selezione"
+msgstr "Imposta ciclo dalla selezione"
 
 #: gtk2_ardour/editor.cc:2162
 msgid "Set punch from selection"
-msgstr "Imposta l'intervallo di Punch dalla selezione"
+msgstr "Imposta Punch dalla selezione"
 
 #: gtk2_ardour/editor.cc:2167
 msgid "Crop region to range"
@@ -3154,14 +3155,14 @@ msgstr "Regione in ciclo"
 #: gtk2_ardour/editor.cc:2203
 #: gtk2_ardour/editor.cc:2286
 msgid "Select All in track"
-msgstr "Seleziona tutto nella traccia"
+msgstr "Seleziona Tutto nella traccia"
 
 #: gtk2_ardour/editor.cc:2204
 #: gtk2_ardour/editor.cc:2287
 #: gtk2_ardour/editor_actions.cc:184
 #: gtk2_ardour/processor_box.cc:1230
 msgid "Select All"
-msgstr "Seleziona tutto"
+msgstr "Seleziona Tutto"
 
 #: gtk2_ardour/editor.cc:2205
 #: gtk2_ardour/editor.cc:2288
@@ -3175,41 +3176,41 @@ msgstr "Inverti selezione"
 
 #: gtk2_ardour/editor.cc:2208
 msgid "Set range to loop range"
-msgstr "Imposta l'intervallo come intervallo ciclico"
+msgstr "Imposta l'intervallo per il ciclo"
 
 #: gtk2_ardour/editor.cc:2209
 msgid "Set range to punch range"
-msgstr "Imposta intervallo come intervallo di punch"
+msgstr "Imposta intervallo per intervallo di punch"
 
 #: gtk2_ardour/editor.cc:2211
 #: gtk2_ardour/editor_actions.cc:190
 msgid "Select All After Edit Point"
-msgstr "Seleziona tutto dopo il Cursore di Lavoro"
+msgstr "Seleziona Tutto dopo il Cursore di Lavoro"
 
 #: gtk2_ardour/editor.cc:2212
 #: gtk2_ardour/editor_actions.cc:192
 msgid "Select All Before Edit Point"
-msgstr "Seleziona tutto prima del Cursore di Lavoro"
+msgstr "Seleziona Tutto Prima del Cursore di Lavoro"
 
 #: gtk2_ardour/editor.cc:2213
 msgid "Select All After Playhead"
-msgstr "Seleziona tutto dopo la Testina"
+msgstr "Seleziona Tutto Dopo la Testina"
 
 #: gtk2_ardour/editor.cc:2214
 msgid "Select All Before Playhead"
-msgstr "Seleziona tutto prima della Testina"
+msgstr "Seleziona Tutto Prima della Testina"
 
 #: gtk2_ardour/editor.cc:2215
 msgid "Select All Between Playhead & Edit Point"
-msgstr "Seleziona tutto tra la Testina e il Cursore di Lavoro"
+msgstr "Seleziona Tutto Tra la Testina e il Cursore di Lavoro"
 
 #: gtk2_ardour/editor.cc:2216
 msgid "Select All Within Playhead & Edit Point"
-msgstr "Seleziona tra la Testina e il Cursore di Lavoro"
+msgstr "Seleziona Tutto Tra la Testina e il Cursore di Lavoro"
 
 #: gtk2_ardour/editor.cc:2217
 msgid "Select Range Between Playhead & Edit Point"
-msgstr "Seleziona l'intervallo tra la Testina e il Cursore di Lavoro"
+msgstr "Seleziona l'Intervallo tra la Testina e il Cursore di Lavoro"
 
 #: gtk2_ardour/editor.cc:2221
 #: gtk2_ardour/editor.cc:2296
@@ -3254,7 +3255,7 @@ msgstr "Inserisci lo Spezzone"
 
 #: gtk2_ardour/editor.cc:2247
 msgid "Insert Selected Region"
-msgstr "Inserisci la regione selezionata"
+msgstr "Inserisci la Regione Selezionata"
 
 #: gtk2_ardour/editor.cc:2248
 msgid "Insert Existing Media"
@@ -3352,7 +3353,7 @@ msgstr "Allineamento Magnetico"
 
 #: gtk2_ardour/editor.cc:3185
 msgid "Snap/Grid Mode"
-msgstr "Modalita' di Allineamento alla griglia"
+msgstr "Modalità di Allineamento alla griglia"
 
 #: gtk2_ardour/editor.cc:3191
 msgid "Edit point"
@@ -3409,9 +3410,8 @@ msgid "Splice Edit"
 msgstr "Unisci il taglio"
 
 #: gtk2_ardour/editor.cc:3767
-#, fuzzy
 msgid "Slide Edit"
-msgstr "taglio allungato"
+msgstr "Taglio a Scivolo"
 
 #: gtk2_ardour/editor.cc:3769
 msgid "Lock Edit"
@@ -3502,15 +3502,15 @@ msgstr "Dissolvenze incrociate"
 
 #: gtk2_ardour/editor_actions.cc:52
 msgid "Move Selected Marker"
-msgstr "Rimuovi l'indice selezionato"
+msgstr "Rimuovi Indice Selezionato"
 
 #: gtk2_ardour/editor_actions.cc:53
 msgid "Select Range Operations"
-msgstr "Seleziona l'intevallo delle operzioni"
+msgstr "Seleziona l'Intervallo delle Operazioni"
 
 #: gtk2_ardour/editor_actions.cc:54
 msgid "Select Regions"
-msgstr "Seleziona le regioni"
+msgstr "Seleziona Regioni"
 
 #: gtk2_ardour/editor_actions.cc:55
 msgid "Edit Point"
@@ -3526,7 +3526,7 @@ msgstr "Livelli"
 
 #: gtk2_ardour/editor_actions.cc:59
 msgid "Link"
-msgstr "Collegamento"
+msgstr "Collega"
 
 #: gtk2_ardour/editor_actions.cc:60
 #: gtk2_ardour/editor_actions.cc:97
@@ -3768,7 +3768,7 @@ msgstr "Testina sulla fine intevallo"
 #: gtk2_ardour/editor_actions.cc:186
 #: gtk2_ardour/processor_box.cc:1231
 msgid "Deselect All"
-msgstr "Deseleziona tutto"
+msgstr "Deseleziona Tutto"
 
 #: gtk2_ardour/editor_actions.cc:188
 msgid "Invert Selection"
@@ -3776,31 +3776,31 @@ msgstr "Inverti la selezione"
 
 #: gtk2_ardour/editor_actions.cc:195
 msgid "Select All Overlapping Edit Range"
-msgstr "Seleziona tutto l'intevallo di lavoro sovrapposto"
+msgstr "Seleziona Tutto l'Intevallo di Lavoro Sovrapposto"
 
 #: gtk2_ardour/editor_actions.cc:197
 msgid "Select All Inside Edit Range"
-msgstr "Seleziona tutto all'interno dell'intevallo di lavoro"
+msgstr "Seleziona Tutto Dentro l'Iintevallo di Lavoro"
 
 #: gtk2_ardour/editor_actions.cc:200
 msgid "Select Edit Range"
-msgstr "Seleziona l'intervallo di lavoro"
+msgstr "Seleziona Intervallo di Lavoro"
 
 #: gtk2_ardour/editor_actions.cc:203
 msgid "Select All in Punch Range"
-msgstr "Seleziona tutto nell'intervallo di Punch"
+msgstr "Seleziona Tutto nell'Intervallo di Punch"
 
 #: gtk2_ardour/editor_actions.cc:205
 msgid "Select All in Loop Range"
-msgstr "Seleziona tutto nell'intevallo ciclico"
+msgstr "Seleziona Tutto nell'Intevallo Ciclo"
 
 #: gtk2_ardour/editor_actions.cc:208
 msgid "Select Next Track/Bus"
-msgstr "Seleziona seguente Traccia/Bus"
+msgstr "Seleziona la Seguente Traccia/Bus"
 
 #: gtk2_ardour/editor_actions.cc:210
 msgid "Select Previous Track/Bus"
-msgstr "Seleziona la precedente Traccia/Bus"
+msgstr "Seleziona la Precedente Traccia/Bus"
 
 #: gtk2_ardour/editor_actions.cc:213
 msgid "Toggle Record Enable"
@@ -3992,11 +3992,11 @@ msgstr "Ingrandisci la regione (largo e alto)"
 
 #: gtk2_ardour/editor_actions.cc:322
 msgid "Toggle Zoom State"
-msgstr "Alterna lo stato di ingrandimento"
+msgstr "Alterna Stato di Ingrandimento"
 
 #: gtk2_ardour/editor_actions.cc:325
 msgid "Move Selected Tracks Up"
-msgstr "Sposta le tracce selezionate in alto"
+msgstr "Sposta Tracce Selezionate in Alto"
 
 #: gtk2_ardour/editor_actions.cc:327
 msgid "Move Selected Tracks Down"
@@ -4072,7 +4072,7 @@ msgstr "Cursore di Lavoro alla Fine"
 
 #: gtk2_ardour/editor_actions.cc:373
 msgid "Trim to Loop"
-msgstr "Taglia sull'Intervallo Ciclico"
+msgstr "Taglia per Ciclo"
 
 #: gtk2_ardour/editor_actions.cc:376
 msgid "Trim to Punch"
@@ -4080,19 +4080,19 @@ msgstr "Taglia sul Punch"
 
 #: gtk2_ardour/editor_actions.cc:380
 msgid "Set Loop from Edit Range"
-msgstr "Imposta l'Intervallo Ciclico dall'Intervallo di Lavoro"
+msgstr "Imposta Ciclo dall'Intervallo di Lavoro"
 
 #: gtk2_ardour/editor_actions.cc:382
 msgid "Set Loop from Region"
-msgstr "Imposta l'Intervallo Ciclico dalla Regione"
+msgstr "Imposta Ciclo dalla Regione"
 
 #: gtk2_ardour/editor_actions.cc:388
 msgid "Set Punch from Edit Range"
-msgstr "Imposta l'Intervallo di Punch dall'Intervallo di Lavoro"
+msgstr "Imposta Punch dall'Intervallo di Lavoro"
 
 #: gtk2_ardour/editor_actions.cc:390
 msgid "Set Punch From Region"
-msgstr "Imposta l'Intervallo di Punch dalla Regione"
+msgstr "Imposta Punch dalla Regione"
 
 #: gtk2_ardour/editor_actions.cc:393
 msgid "Transpose"
@@ -4167,9 +4167,8 @@ msgid "Play Selected Region(s)"
 msgstr "Riproduci le Regioni Selezionate"
 
 #: gtk2_ardour/editor_actions.cc:444
-#, fuzzy
 msgid "Brush at Mouse"
-msgstr "utilizza le uscite master"
+msgstr "Spazzola sul mouse"
 
 #: gtk2_ardour/editor_actions.cc:447
 msgid "Playhead to Mouse"
@@ -4268,7 +4267,7 @@ msgstr "Separa Usando l'Intervallo di Punch"
 
 #: gtk2_ardour/editor_actions.cc:535
 msgid "Separate Using Loop Range"
-msgstr "Separa Usando l'Intervallo Ciclico"
+msgstr "Separa Usando l'Intervallo del Ciclo"
 
 #: gtk2_ardour/editor_actions.cc:538
 #: gtk2_ardour/editor_actions.cc:578
@@ -4322,7 +4321,7 @@ msgstr "Dividi sul Cursore di Lavoro"
 
 #: gtk2_ardour/editor_actions.cc:586
 msgid "Start Range"
-msgstr "Inizio Intervallo"
+msgstr "Inizia Intervallo"
 
 #: gtk2_ardour/editor_actions.cc:588
 msgid "Finish Range"
@@ -4417,7 +4416,7 @@ msgstr "Strumento Zoom"
 
 #: gtk2_ardour/editor_actions.cc:663
 msgid "Timefx Tool"
-msgstr "Strumento EffettoTempo"
+msgstr "Strumento TimeFX"
 
 #: gtk2_ardour/editor_actions.cc:664
 msgid "Note Tool"
@@ -4544,7 +4543,7 @@ msgstr "Intervalli"
 
 #: gtk2_ardour/editor_actions.cc:723
 msgid "Loop/Punch"
-msgstr "Intervallo Ciclico/Punch"
+msgstr "Ciclo/Punch"
 
 #: gtk2_ardour/editor_actions.cc:727
 msgid "Min:Sec"
@@ -4938,7 +4937,7 @@ msgstr "Riproduci dall'Indice dell'Intervallo"
 
 #: gtk2_ardour/editor_markers.cc:626
 msgid "Loop Range"
-msgstr "Intervallo Ciclico"
+msgstr "Intervallo del Ciclo"
 
 #: gtk2_ardour/editor_markers.cc:628
 msgid "Set Range Mark from Playhead"
@@ -4971,11 +4970,11 @@ msgstr "Seleziona Tutto nell'Intervallo"
 
 #: gtk2_ardour/editor_markers.cc:648
 msgid "Select Range"
-msgstr "Seleziona l'Intervallo"
+msgstr "Seleziona Intervallo"
 
 #: gtk2_ardour/editor_markers.cc:674
 msgid "Set Loop Range"
-msgstr "Imposta Intervallo Ciclico"
+msgstr "Imposta Intervallo Ciclo"
 
 #: gtk2_ardour/editor_markers.cc:675
 msgid "Set Punch Range"
@@ -4996,7 +4995,7 @@ msgstr "rinomina l'indice"
 
 #: gtk2_ardour/editor_markers.cc:1099
 msgid "set loop range"
-msgstr "imposta intervallo ciclico"
+msgstr "imposta intervallo ciclo"
 
 #: gtk2_ardour/editor_markers.cc:1105
 msgid "set punch range"
@@ -5272,7 +5271,7 @@ msgstr "allinea regione"
 
 #: gtk2_ardour/editor_ops.cc:3487
 msgid "trim to loop"
-msgstr "rifinitura per l'intervallo ciclico"
+msgstr "ritaglia per ciclo"
 
 #: gtk2_ardour/editor_ops.cc:3497
 msgid "trim to punch"
@@ -5404,15 +5403,15 @@ msgstr "ritaglia la parte dietro"
 
 #: gtk2_ardour/editor_ops.cc:5377
 msgid "set loop range from selection"
-msgstr "imposta l'intervallo ciclico dalla selezione"
+msgstr "imposta l'intervallo del ciclo dalla selezione"
 
 #: gtk2_ardour/editor_ops.cc:5399
 msgid "set loop range from edit range"
-msgstr "imposta l'intervallo ciclico dall'intervallo di lavoro"
+msgstr "imposta l'intervallo del ciclo dall'intervallo di lavoro"
 
 #: gtk2_ardour/editor_ops.cc:5430
 msgid "set loop range from region"
-msgstr "imposta l'intervallo ciclico dalla regione"
+msgstr "imposta l'intervallo del ciclo dalla regione"
 
 #: gtk2_ardour/editor_ops.cc:5448
 msgid "set punch range from selection"
@@ -5666,19 +5665,19 @@ msgstr "imposta la selezione dall'intervallo"
 
 #: gtk2_ardour/editor_selection.cc:1109
 msgid "select all from range"
-msgstr "seleziona tutto dal''intervallo"
+msgstr "seleziona tutto dall'intervallo"
 
 #: gtk2_ardour/editor_selection.cc:1140
 msgid "select all from punch"
-msgstr "seleziona tutto dal Punch"
+msgstr "seleziona tutto dal punch"
 
 #: gtk2_ardour/editor_selection.cc:1171
 msgid "select all from loop"
-msgstr "seleziona tutto dal intervallo ciclico"
+msgstr "seleziona tutto dal ciclo"
 
 #: gtk2_ardour/editor_selection.cc:1185
 msgid "select all after cursor"
-msgstr "seleziona tutto dopo in cursore"
+msgstr "seleziona tutto dopo il cursore"
 
 #: gtk2_ardour/editor_selection.cc:1190
 msgid "select all before cursor"
@@ -5903,7 +5902,6 @@ msgstr "Rettangolare"
 
 #: gtk2_ardour/engine_dialog.cc:104
 #: gtk2_ardour/engine_dialog.cc:515
-#, fuzzy
 msgid "Shaped"
 msgstr "Modellato"
 
@@ -6233,9 +6231,8 @@ msgid "Location"
 msgstr "Posizione"
 
 #: gtk2_ardour/export_format_dialog.cc:31
-#, fuzzy
 msgid "New export format profile"
-msgstr "Nuova esportazione del profile del formato"
+msgstr "Nuovo profilo del formato di esportazione"
 
 #: gtk2_ardour/export_format_dialog.cc:31
 msgid "Edit export format profile"
@@ -6759,7 +6756,7 @@ msgstr "note immesse"
 
 #: gtk2_ardour/midi_time_axis.cc:284
 msgid "Show Full Range"
-msgstr "Mostra tutto l'intervallo"
+msgstr "Mostra Intervallo Completo"
 
 #: gtk2_ardour/midi_time_axis.cc:288
 msgid "Fit Contents"
@@ -6828,7 +6825,7 @@ msgstr "Commenti"
 
 #: gtk2_ardour/mixer_strip.cc:157
 msgid "Button 1 to choose inputs from a port matrix, button 3 to select inputs from a menu"
-msgstr "Bottone 1 per scegliere gli ingressi da un aporta della matrice, bottone 3 per selezionare gli ingressi da un menu"
+msgstr "Bottone 1 per scegliere gli ingressi da una porta della matrice, bottone 3 per selezionare gli ingressi da un menu"
 
 #: gtk2_ardour/mixer_strip.cc:163
 msgid "Button 1 to choose outputs from a port matrix, button 3 to select inputs from a menu"
@@ -6929,7 +6926,6 @@ msgid "Invert Polarity"
 msgstr "Inverti la fase"
 
 #: gtk2_ardour/mixer_strip.cc:1132
-#, fuzzy
 msgid "Protect against denormals"
 msgstr "Proteggi contro i denormals"
 
@@ -7126,7 +7122,7 @@ msgstr "Impostazioni Audio"
 
 #: gtk2_ardour/new_session_dialog.cc:509
 msgid "New Session"
-msgstr "Nouva Sessione"
+msgstr "Nuova Sessione"
 
 #: gtk2_ardour/new_session_dialog.cc:514
 msgid "Open Session"
@@ -7183,7 +7179,7 @@ msgstr "interno"
 #: gtk2_ardour/option_editor.cc:281
 #, fuzzy
 msgid "Font scaling"
-msgstr "Metti in fila i Font"
+msgstr "Riordina i font"
 
 #: gtk2_ardour/option_editor.cc:295
 msgid "Short crossfade length (msecs)"
@@ -7408,11 +7404,11 @@ msgstr "Gestore del Panorama sonoro"
 #: gtk2_ardour/panner_ui.cc:57
 #: gtk2_ardour/panner_ui.cc:281
 msgid "link"
-msgstr "collegamento"
+msgstr "collega"
 
 #: gtk2_ardour/panner_ui.cc:70
 msgid "Pan automation mode"
-msgstr "Modalita' automazione del Pan"
+msgstr "Modalità automazione del Pan"
 
 #: gtk2_ardour/panner_ui.cc:71
 msgid "Pan automation type"
@@ -7552,7 +7548,7 @@ msgstr "Favoriti"
 
 #: gtk2_ardour/plugin_selector.cc:511
 msgid "Plugin Manager"
-msgstr "Gastore dei plugin"
+msgstr "Gestore dei plugin"
 
 #: gtk2_ardour/plugin_ui.cc:91
 msgid "Eh? LADSPA plugins don't have editors!"
@@ -7566,12 +7562,11 @@ msgstr "tipo di plugin fornito sconosciuto (nota: nessun supporto VST in questa 
 #: gtk2_ardour/plugin_ui.cc:103
 #, fuzzy
 msgid "unknown type of editor-supplying plugin"
-msgstr "Errata digitazione del plugin fornito dalla finestra di lavoro"
+msgstr "fornitore dell finestra di lavoro del plugin di tipo sconosciuto"
 
 #: gtk2_ardour/plugin_ui.cc:297
-#, fuzzy
 msgid "create_lv2_editor called on non-LV2 plugin"
-msgstr "crea un afinestra di lavoro _lv2_ rivolta a un plugin non-LV2"
+msgstr "crea una finestra di lavoro _lv2_ richiamata su un plugin non-LV2"
 
 #: gtk2_ardour/plugin_ui.cc:374
 #: gtk2_ardour/plugin_ui.cc:448
@@ -7642,7 +7637,6 @@ msgid "ardour: weird plugin dialog"
 msgstr "ardour: strano dialogo col plugin"
 
 #: gtk2_ardour/processor_box.cc:429
-#, fuzzy
 msgid ""
 "You attempted to add a plugin (%1).\n"
 "The plugin has %2 inputs\n"
@@ -7681,7 +7675,6 @@ msgstr ""
 "supporterà  questo tipo di configurazione."
 
 #: gtk2_ardour/processor_box.cc:454
-#, fuzzy
 msgid ""
 "You attempted to add a plugin (%1).\n"
 "\n"
@@ -7701,7 +7694,7 @@ msgstr ""
 "La traccia bus ha %4 ingressi e %5 uscite.\n"
 "Il punto di processamento ha %6 segnali attivi.\n"
 "\n"
-"Ardour non capisce cosa fare in questa situazion.\n"
+"Ardour non capisce cosa fare in questa situazione.\n"
 
 #: gtk2_ardour/processor_box.cc:511
 msgid "Cannot set up new send: %1"
@@ -7709,11 +7702,11 @@ msgstr "Non posso impostare una nuova mandata: %1"
 
 #: gtk2_ardour/processor_box.cc:580
 msgid "Pre-fader inserts, sends & plugins:"
-msgstr "Instert, mandate e plugins in Pre-fader:"
+msgstr "Insert, mandate e plugins in Pre-fader:"
 
 #: gtk2_ardour/processor_box.cc:583
 msgid "Post-fader inserts, sends & plugins:"
-msgstr "Instert, mandate e plugins in Post-fader:"
+msgstr "Insert, mandate e plugins in Post-fader:"
 
 #: gtk2_ardour/processor_box.cc:748
 msgid ""
@@ -7798,7 +7791,6 @@ msgid "Deactivate all"
 msgstr "Disattiva tutto"
 
 #: gtk2_ardour/processor_box.cc:1432
-#, fuzzy
 msgid "%1: %2 (by %3)"
 msgstr "%1: %2 (da %3)"
 
@@ -7891,7 +7883,6 @@ msgid "Trigger gap (msecs)"
 msgstr ""
 
 #: gtk2_ardour/rhythm_ferret.cc:392
-#, fuzzy
 msgid "split regions (rhythm ferret)"
 msgstr "dividi le regioni (rhythm ferret)"
 
@@ -8047,7 +8038,7 @@ msgstr "Modo Colore"
 
 #: gtk2_ardour/route_time_axis.cc:959
 msgid "Name for playlist"
-msgstr "Nome per l' Elenco Scelte"
+msgstr "Nome per l'Elenco Scelte"
 
 #: gtk2_ardour/route_time_axis.cc:1042
 #: gtk2_ardour/route_time_axis.cc:1092
@@ -8079,7 +8070,6 @@ msgid "Select from all ..."
 msgstr "Seleziona da tutto ..."
 
 #: gtk2_ardour/route_time_axis.cc:2262
-#, fuzzy
 msgid "Underlays"
 msgstr "Sottostrati"
 
@@ -8317,7 +8307,6 @@ msgid "Producer"
 msgstr "Produttore"
 
 #: gtk2_ardour/session_metadata_dialog.cc:601
-#, fuzzy
 msgid "DJ Mixer"
 msgstr "DJ"
 
@@ -8486,7 +8475,7 @@ msgstr "Sto cancellando..."
 #: gtk2_ardour/sfdb_ui.cc:1264
 #: gtk2_ardour/sfdb_ui.cc:1306
 msgid "one track per file"
-msgstr "una tracci aper file"
+msgstr "una traccia per file"
 
 #: gtk2_ardour/sfdb_ui.cc:978
 #: gtk2_ardour/sfdb_ui.cc:1307
@@ -8696,7 +8685,6 @@ msgid "gTortnam"
 msgstr ""
 
 #: gtk2_ardour/time_axis_view.cc:1030
-#, fuzzy
 msgid "unknown track height name \"%1\" in XML GUI information"
 msgstr "Nome sconosciuto dell'altezza della traccia \"%1\" nell'informazione GUI XML"
 
@@ -8715,7 +8703,7 @@ msgstr "errore di programmazione: request for non-existent audio range (%1)!"
 #: gtk2_ardour/ui_config.cc:82
 #: gtk2_ardour/ui_config.cc:112
 msgid "loading default ui configuration file %1"
-msgstr "Sto caricando il file predefinito di configurazione ui %1"
+msgstr "sto caricando il file predefinito di configurazione ui %1"
 
 #: gtk2_ardour/ui_config.cc:85
 #: gtk2_ardour/ui_config.cc:115
@@ -8729,7 +8717,7 @@ msgstr "Ardour: il file di configurazione ui \"%1\" predefinito non è stato con
 
 #: gtk2_ardour/ui_config.cc:135
 msgid "loading user ui configuration file %1"
-msgstr "Sto caricando il file di configurazione ui %1"
+msgstr "sto caricando il file di configurazione ui %1"
 
 #: gtk2_ardour/ui_config.cc:138
 msgid "Ardour: cannot read ui configuration file \"%1\""
@@ -8746,29 +8734,29 @@ msgstr "Il file di configurazione %1 non è stato salvato"
 #: gtk2_ardour/utils.cc:142
 #: gtk2_ardour/utils.cc:185
 msgid "bad XPM header %1"
-msgstr "Cattiva intestazione XPM %1"
+msgstr "cattiva intestazione XPM %1"
 
 #: gtk2_ardour/utils.cc:324
 msgid "missing RGBA style for \"%1\""
-msgstr "Manca lo stile RGBA per \"%1\""
+msgstr "manca lo stile RGBA per \"%1\""
 
 #: gtk2_ardour/utils.cc:347
 #: gtk2_ardour/utils.cc:397
 msgid "no style found for %1, using red"
-msgstr "Nessuno stile trovato per %1, usando il rosso"
+msgstr "nessuno stile trovato per %1, usando il rosso"
 
 #: gtk2_ardour/utils.cc:383
 #: gtk2_ardour/utils.cc:435
 msgid "unknown style attribute %1 requested for color; using \"red\""
-msgstr "Attributo di stile sconosciuto %1 richiesto per il colore; usando \"red\""
+msgstr "attributo di stile sconosciuto %1 richiesto per il colore; usando \"red\""
 
 #: gtk2_ardour/utils.cc:644
 msgid "cannot find XPM file for %1"
-msgstr "Non posso trovare il file XPM di %1"
+msgstr "non posso trovare il file XPM di %1"
 
 #: gtk2_ardour/utils.cc:672
 msgid "cannot find icon image for %1"
-msgstr "Non posso trovare l'mmagine dell'icona di %1"
+msgstr "non posso trovare l'mmagine dell'icona di %1"
 
 #: gtk2_ardour/connection_editor.cc:50
 msgid "ardour: connections"
