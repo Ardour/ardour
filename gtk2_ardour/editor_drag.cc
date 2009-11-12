@@ -2378,13 +2378,11 @@ MarkerDrag::motion (GdkEvent* event, bool)
 
 	assert (!_copied_locations.empty());
 
-	_editor->edit_point_clock.set (_copied_locations.front()->start());
 	_editor->show_verbose_time_cursor (newframe, 10);
 
 #ifdef GTKOSX
 	_editor->update_canvas_now ();
 #endif
-	_editor->edit_point_clock.set (copy_location->start());
 }
 
 void

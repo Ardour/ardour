@@ -360,10 +360,6 @@ Editor::session_going_away ()
 	_routes->clear ();
 	_route_groups->clear ();
 
-	edit_point_clock_connection_a.disconnect();
-	edit_point_clock_connection_b.disconnect();
-
-	edit_point_clock.set_session (0);
 	zoom_range_clock.set_session (0);
 	nudge_clock.set_session (0);
 

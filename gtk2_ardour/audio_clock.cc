@@ -1108,6 +1108,7 @@ bool
 AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 {
 	if (dragging) {
+		cerr << "button event on clock but we are dragging\n";
 		gdk_pointer_ungrab (GDK_CURRENT_TIME);
 		dragging = false;
 		if (ev->y > drag_start_y+1 || ev->y < drag_start_y-1 || Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)){
@@ -1125,6 +1126,7 @@ AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 	}
 
 	if (Keyboard::is_context_menu_event (ev)) {
+		cerr << "Context menu event on clock\n";
 		if (ops_menu == 0) {
 			build_ops_menu ();
 		}
@@ -1954,6 +1956,32 @@ AudioClock::build_ops_menu ()
 	ops_items.push_back (MenuElem (_("Minutes:Seconds"), bind (mem_fun(*this, &AudioClock::set_mode), MinSec)));
 	ops_items.push_back (MenuElem (_("Samples"), bind (mem_fun(*this, &AudioClock::set_mode), Frames)));
 	ops_items.push_back (MenuElem (_("Off"), bind (mem_fun(*this, &AudioClock::set_mode), Off)));
+
+	if (editable && !is_duration) {
+		ops_items.push_back (SeparatorElem());
+		ops_items.push_back (MenuElem (_("Set From Playhead"), mem_fun(*this, &AudioClock::set_from_playhead)));
+		ops_items.push_back (MenuElem (_("Locate to this time"), mem_fun(*this, &AudioClock::locate)));
+	}
+}
+
+void
+AudioClock::set_from_playhead ()
+{
+	if (!session) {
+		return;
+	}
+	
+	set (session->transport_frame());
+}
+
+void
+AudioClock::locate ()
+{
+	if (!session || is_duration) {
+		return;
+	}
+	
+	session->request_locate (current_time(), false);
 }
 
 void

@@ -102,6 +102,11 @@ void convert_bgra_to_rgba (guint8 const* src,
 			   int           width,
 			   int           height);
 
+Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_ustring (const Glib::ustring& name,
+					       Pango::FontDescription* font,
+					       int clip_width,
+					       int clip_height);
+
 void resize_window_to_proportion_of_monitor (Gtk::Window*, int, int);
 
 #endif /* __ardour_gtk_utils_h__ */

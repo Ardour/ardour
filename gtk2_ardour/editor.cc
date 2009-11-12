@@ -234,7 +234,6 @@ Editor::Editor ()
 
 	  /* tool bar related */
 
-	, edit_point_clock (X_("editpoint"), false, X_("EditPointClock"), true)
 	, zoom_range_clock (X_("zoomrange"), false, X_("ZoomRangeClock"), true, true)
 
 	, toolbar_selection_clock_table (2,3)
@@ -471,8 +470,6 @@ Editor::Editor ()
 
 	build_cursors ();
 
- 	edit_point_clock.ValueChanged.connect (mem_fun(*this, &Editor::edit_point_clock_changed));
-
 	ArdourCanvas::Canvas* time_pad = manage(new ArdourCanvas::Canvas());
 	ArdourCanvas::SimpleLine* pad_line_1 = manage(new ArdourCanvas::SimpleLine(*time_pad->root(),
 			0.0, 1.0, 100.0, 1.0));
@@ -547,10 +544,10 @@ Editor::Editor ()
 
 	the_notebook.set_show_tabs (true);
 	the_notebook.set_scrollable (true);
-	the_notebook.popup_enable ();
+	the_notebook.popup_disable ();
 	the_notebook.set_tab_pos (Gtk::POS_RIGHT);
 	the_notebook.show_all ();
-
+	
 	post_maximal_editor_width = 0;
 	post_maximal_pane_position = 0;
 
@@ -783,27 +780,6 @@ Editor::instant_save ()
 	} else {
 		Config->add_instant_xml(get_state());
 	}
-}
-
-void
-Editor::edit_point_clock_changed()
-{
-	if (_dragging_edit_point) {
-		return;
-	}
-
-	if (selection->markers.empty()) {
-		return;
-	}
-
-	bool ignored;
-	Location* loc = find_location_from_marker (selection->markers.front(), ignored);
-
-	if (!loc) {
-		return;
-	}
-
-	loc->move_to (edit_point_clock.current_time());
 }
 
 void
@@ -1074,8 +1050,6 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->Located.connect (mem_fun (*this, &Editor::located)));
 	session_connections.push_back (session->config.ParameterChanged.connect (mem_fun (*this, &Editor::parameter_changed)));
 
-	edit_point_clock.set_mode(AudioClock::BBT);
-	edit_point_clock.set_session (session);
 	zoom_range_clock.set_session (session);
 	_playlist_selector->set_session (session);
 	nudge_clock.set_session (session);
@@ -2852,17 +2826,17 @@ Editor::setup_toolbar ()
 	zoom_box.set_border_width (0);
 
 	zoom_in_button.set_name ("EditorTimeButton");
-	zoom_in_button.add (*(manage (new Image (::get_icon("zoom_in")))));
+	zoom_in_button.set_image (*(manage (new Image (Stock::ZOOM_IN, Gtk::ICON_SIZE_BUTTON))));
 	zoom_in_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), false));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_in_button, _("Zoom In"));
 
 	zoom_out_button.set_name ("EditorTimeButton");
-	zoom_out_button.add (*(manage (new Image (::get_icon("zoom_out")))));
+	zoom_out_button.set_image (*(manage (new Image (Stock::ZOOM_OUT, Gtk::ICON_SIZE_BUTTON))));
 	zoom_out_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), true));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_button, _("Zoom Out"));
 
 	zoom_out_full_button.set_name ("EditorTimeButton");
-	zoom_out_full_button.add (*(manage (new Image (::get_icon("zoom_full")))));
+	zoom_out_full_button.set_image (*(manage (new Image (Stock::ZOOM_100, Gtk::ICON_SIZE_BUTTON))));
 	zoom_out_full_button.signal_clicked().connect (mem_fun(*this, &Editor::temporal_zoom_session));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to Session"));
 
@@ -2918,7 +2892,6 @@ Editor::setup_toolbar ()
 	edit_point_selector.signal_changed().connect (mem_fun(*this, &Editor::edit_point_selection_done));
 	ARDOUR_UI::instance()->tooltips().set_tip (edit_point_selector, _("Edit point"));
 
-	snap_box.pack_start (edit_point_clock, false, false);
 	snap_box.pack_start (snap_mode_selector, false, false);
 	snap_box.pack_start (snap_type_selector, false, false);
 	snap_box.pack_start (edit_point_selector, false, false);

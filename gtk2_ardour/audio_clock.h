@@ -49,6 +49,8 @@ class AudioClock : public Gtk::HBox
 	void focus ();
 
 	void set (nframes_t, bool force = false, nframes_t offset = 0, char which = 0);
+	void set_from_playhead ();
+	void locate ();
 	void set_mode (Mode);
 	void set_bbt_reference (nframes64_t);
 

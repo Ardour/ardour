@@ -77,12 +77,10 @@ class LocationEditRow  : public Gtk::HBox
 	Gtk::Label    number_label;
 
 	Gtk::HBox     start_hbox;
-	Gtk::Button   start_set_button;
 	Gtk::Button   start_go_button;
 	AudioClock    start_clock;
 
 	Gtk::HBox     end_hbox;
-	Gtk::Button   end_set_button;
 	Gtk::Button   end_go_button;
 	AudioClock    end_clock;
 

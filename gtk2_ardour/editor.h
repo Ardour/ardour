@@ -1484,7 +1484,6 @@ public:
 	void editor_mixer_button_toggled ();
 	void editor_list_button_toggled ();
 
-	AudioClock               edit_point_clock;
 	AudioClock               zoom_range_clock;
 	Gtk::Button              zoom_in_button;
 	Gtk::Button              zoom_out_button;
@@ -1557,8 +1556,6 @@ public:
 	Gtk::VBox           zoom_vbox;
 
 	void                zoom_adjustment_changed();
-
-	void                edit_point_clock_changed();
 
 	void setup_toolbar ();
 
@@ -1957,8 +1954,6 @@ public:
 	std::vector<std::string> edit_point_strings;
 
 	void selected_marker_moved (ARDOUR::Location*);
-	sigc::connection edit_point_clock_connection_a;
-	sigc::connection edit_point_clock_connection_b;
 
 	bool get_edit_op_range (nframes64_t& start, nframes64_t& end) const;
 

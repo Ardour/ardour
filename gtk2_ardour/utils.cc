@@ -936,3 +936,40 @@ resize_window_to_proportion_of_monitor (Gtk::Window* window, int max_width, int 
 
 	window->resize (w, h);
 }
+
+Glib::RefPtr<Gdk::Pixbuf>
+pixbuf_from_ustring(const ustring& name, Pango::FontDescription* font, int clip_width, int clip_height)
+{
+	static Glib::RefPtr<Gdk::Pixbuf>* empty_pixbuf = 0;
+
+	if (name.empty()) {
+		if (empty_pixbuf == 0) {
+			empty_pixbuf = new Glib::RefPtr<Gdk::Pixbuf>;
+			*empty_pixbuf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, clip_width, clip_height);
+		}
+		cerr << "\n\nUSE EMPTY PIXBUF\n";
+		return *empty_pixbuf;
+	}
+
+	Glib::RefPtr<Gdk::Pixbuf> buf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, clip_width, clip_height);
+
+	cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, clip_width, clip_height);
+	cairo_t* cr = cairo_create (surface);
+	cairo_text_extents_t te;
+	
+	cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1.0);
+	cairo_select_font_face (cr, font->get_family().c_str(),
+				CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+	cairo_set_font_size (cr,  font->get_size() / Pango::SCALE);
+	cairo_text_extents (cr, name.c_str(), &te);
+	
+	cairo_move_to (cr, 0.5, 0.5 - te.height / 2 - te.y_bearing + clip_height / 2);
+	cairo_show_text (cr, name.c_str());
+	
+	convert_bgra_to_rgba(cairo_image_surface_get_data (surface), buf->get_pixels(), clip_width, clip_height);
+
+	cairo_destroy(cr);
+	cairo_surface_destroy(surface);
+
+	return buf;
+}
