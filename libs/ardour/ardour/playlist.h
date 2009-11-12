@@ -103,6 +103,7 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	boost::shared_ptr<Playlist> copy (list<AudioRange>&, bool result_is_hidden = true);
 	int                         paste (boost::shared_ptr<Playlist>, nframes_t position, float times);
 
+	uint32_t                   count_regions_at (nframes_t frame);
 	RegionList*                regions_at (nframes_t frame);
 	RegionList*                regions_touched (nframes_t start, nframes_t end);
 	RegionList*                regions_to_read (nframes_t start, nframes_t end);

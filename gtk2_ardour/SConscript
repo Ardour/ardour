@@ -208,6 +208,7 @@ redirect_automation_line.cc
 redirect_automation_time_axis.cc
 redirect_box.cc
 region_gain_line.cc
+region_layering_order_editor.cc
 region_selection.cc
 region_view.cc
 rhythm_ferret.cc

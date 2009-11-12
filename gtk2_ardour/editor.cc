@@ -82,6 +82,7 @@
 #include "sfdb_ui.h"
 #include "rhythm_ferret.h"
 #include "actions.h"
+#include "region_layering_order_editor.h"
 
 #ifdef FFT_ANALYSIS
 #include "analysis_window.h"
@@ -367,6 +368,7 @@ Editor::Editor ()
 	_dragging_hscrollbar = false;
 	select_new_marker = false;
 	rhythm_ferret = 0;
+	layering_order_editor = 0;
 	allow_vertical_scroll = false;
 	no_save_visual = false;
 	need_resize_line = false;
@@ -1660,21 +1662,21 @@ Editor::build_track_region_context_menu (nframes64_t frame)
 		boost::shared_ptr<Playlist> pl;
 		
 		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
-			Playlist::RegionList* regions = pl->regions_at ((nframes64_t) floor ( (double)frame * ds->speed()));
+
+			nframes64_t frame_pos = (nframes64_t) floor ((double)frame * ds->speed());
+			uint32_t regions_at = pl->count_regions_at (frame_pos);
 
  			if (selection->regions.size() > 1) {
  				// there's already a multiple selection: just add a 
  				// single region context menu that will act on all 
  				// selected regions
  				boost::shared_ptr<Region> dummy_region; // = NULL		
- 				add_region_context_items (atv->audio_view(), dummy_region, edit_items);			
+ 				add_region_context_items (atv->audio_view(), dummy_region, edit_items, frame_pos, regions_at > 1);
  			} else {
- 				for (Playlist::RegionList::reverse_iterator i = regions->rbegin(); i != regions->rend(); ++i) {
- 					add_region_context_items (atv->audio_view(), (*i), edit_items);
- 				}
+ 				// Find the topmost region and make the context menu for it
+ 				boost::shared_ptr<Region> top_region = pl->top_region_at (frame_pos);
+				add_region_context_items (atv->audio_view(), top_region, edit_items, frame_pos, regions_at > 1);
 			}
-
-			delete regions;
 		}
 	}
 
@@ -1699,7 +1701,6 @@ Editor::build_track_crossfade_context_menu (nframes64_t frame)
 
 		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()) != 0) && ((apl = boost::dynamic_pointer_cast<AudioPlaylist> (pl)) != 0)) {
 
-			Playlist::RegionList* regions = pl->regions_at (frame);
 			AudioPlaylist::Crossfades xfades;
 
 			apl->crossfades_at (frame, xfades);
@@ -1710,18 +1711,20 @@ Editor::build_track_crossfade_context_menu (nframes64_t frame)
 				add_crossfade_context_items (atv->audio_view(), (*i), edit_items, many);
 			}
 
-			if (selection->regions.size() > 1) {
-				// there's already a multiple selection: just add a 
-				// single region context menu that will act on all 
-				// selected regions
-				boost::shared_ptr<Region> dummy_region; // = NULL		
-				add_region_context_items (atv->audio_view(), dummy_region, edit_items);			
-			} else {
- 				for (Playlist::RegionList::reverse_iterator i = regions->rbegin(); i != regions->rend(); ++i) {
-					add_region_context_items (atv->audio_view(), (*i), edit_items);
-				}
+			nframes64_t frame_pos = (nframes64_t) floor ((double)frame * ds->speed());
+			uint32_t regions_at = pl->count_regions_at (frame_pos);
+
+ 			if (selection->regions.size() > 1) {
+ 				// there's already a multiple selection: just add a
+ 				// single region context menu that will act on all
+ 				// selected regions
+ 				boost::shared_ptr<Region> dummy_region; // = NULL
+ 				add_region_context_items (atv->audio_view(), dummy_region, edit_items, frame_pos, regions_at > 1); // OR frame ???
+ 			} else {
+ 				// Find the topmost region and make the context menu for it
+ 				boost::shared_ptr<Region> top_region = pl->top_region_at (frame_pos);
+				add_region_context_items (atv->audio_view(), top_region, edit_items, frame_pos, regions_at > 1);  // OR frame ???
 			}
-			delete regions;
 		}
 	}
 
@@ -1842,7 +1845,8 @@ Editor::xfade_edit_right_region ()
 }
 
 void
-Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region> region, Menu_Helpers::MenuList& edit_items)
+Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region> region, Menu_Helpers::MenuList& edit_items, 
+				  nframes64_t position, bool multiple_region_at_position)
 {
 	using namespace Menu_Helpers;
 	Gtk::MenuItem* foo_item;
@@ -2068,6 +2072,9 @@ Editor::add_region_context_items (AudioStreamView* sv, boost::shared_ptr<Region>
 	}
 	
 	edit_items.push_back (MenuElem (menu_item_name, *region_menu));
+	if (multiple_region_at_position && (layering_order_editor == 0 || !layering_order_editor->is_visible ())) {
+		edit_items.push_back (MenuElem (_("Choose top region"), (bind (mem_fun(*this, &Editor::change_region_layering_order), position))));
+	}
 	edit_items.push_back (SeparatorElem());
 }
 
@@ -5107,4 +5114,38 @@ Editor::idle_resize ()
 	//flush_canvas ();
 	resize_idle_id = -1;
 	return false;
+}
+
+void
+Editor::change_region_layering_order (nframes64_t position)
+{
+	if (clicked_regionview == 0) {
+		return;
+	}
+
+	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_trackview);
+
+	if (atv == 0) {
+		return;
+	}
+
+	boost::shared_ptr<Diskstream> ds;
+	boost::shared_ptr<Playlist> pl;
+
+	if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()))) {
+		
+		if (layering_order_editor == 0) {
+			layering_order_editor = new RegionLayeringOrderEditor(*this);
+		}
+		layering_order_editor->set_context (atv->name(), session, pl, position);
+		layering_order_editor->maybe_present ();
+	}
+}
+
+void
+Editor::update_region_layering_order_editor (nframes64_t frame)
+{
+	if (layering_order_editor && layering_order_editor->is_visible ()) {
+		change_region_layering_order (frame);
+	}
 }

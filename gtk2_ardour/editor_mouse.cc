@@ -922,6 +922,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	}
 	
 	button_selection (item, event, item_type);
+	update_region_layering_order_editor (where);
 
 	/* edit events get handled here */
 

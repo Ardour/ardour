@@ -31,6 +31,7 @@
 #include <pbd/stl_delete.h>
 #include <pbd/xml++.h>
 #include <pbd/stacktrace.h>
+#include <pbd/memento_command.h>
 
 #include <ardour/playlist.h>
 #include <ardour/session.h>
@@ -1371,6 +1372,21 @@ Playlist::regions_at (nframes_t frame)
 	return find_regions_at (frame);
 }	
 
+uint32_t
+Playlist::count_regions_at (nframes_t frame)
+{
+	RegionLock rlock (this);
+	uint32_t cnt = 0;
+
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+		if ((*i)->covers (frame)) {
+			cnt++;
+		}
+	}
+
+	return cnt;
+}	
+
 boost::shared_ptr<Region>
 Playlist::top_region_at (nframes_t frame)
 
@@ -1989,10 +2005,10 @@ Playlist::relayer ()
 void
 Playlist::raise_region (boost::shared_ptr<Region> region)
 {
-	uint32_t rsz = regions.size();
+	layer_t top = regions.size() - 1;
 	layer_t target = region->layer() + 1U;
 
-	if (target >= rsz) {
+	if (target >= top) {
 		/* its already at the effective top */
 		return;
 	}
@@ -2024,14 +2040,14 @@ Playlist::raise_region_to_top (boost::shared_ptr<Region> region)
 		break;
 	}
 
-	RegionList::size_type sz = regions.size();
+	layer_t top = regions.size() - 1;
 
-	if (region->layer() >= (sz - 1)) {
+	if (region->layer() >= top) {
 		/* already on the top */
 		return;
 	}
 
-	move_region_to_layer (sz, region, 1);
+	move_region_to_layer (top, region, 1);
 	/* mark the region's last_layer_op as now, so that it remains on top when
 	   doing future relayers (until something else takes over)
 	 */
@@ -2068,6 +2084,10 @@ Playlist::move_region_to_layer (layer_t target_layer, boost::shared_ptr<Region> 
 	typedef pair<boost::shared_ptr<Region>,layer_t> LayerInfo;
 	list<LayerInfo> layerinfo;
 	layer_t dest;
+
+	_session.begin_reversible_command (_("change region layer"));
+
+	XMLNode& before (get_state());
 
 	{
 		RegionLock rlock (const_cast<Playlist *> (this));
@@ -2130,7 +2150,13 @@ Playlist::move_region_to_layer (layer_t target_layer, boost::shared_ptr<Region> 
 	
 	check_dependents (region, false);
 #endif
-	
+
+	XMLNode& after (get_state());
+
+	_session.add_command (new MementoCommand<Playlist>(*this, &before, &after));
+
+	_session.commit_reversible_command ();
+
 	return 0;
 }
 

@@ -108,6 +108,7 @@ class AudioStreamView;
 class ControlPoint;
 class SoundFileOmega;
 class RhythmFerret;
+class RegionLayeringOrderEditor;
 #ifdef FFT_ANALYSIS
 class AnalysisWindow;
 #endif
@@ -577,7 +578,7 @@ class Editor : public PublicEditor
 	Gtk::Menu* build_track_selection_context_menu (nframes64_t);
 	void add_dstream_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_bus_context_items (Gtk::Menu_Helpers::MenuList&);
-	void add_region_context_items (AudioStreamView*, boost::shared_ptr<ARDOUR::Region>, Gtk::Menu_Helpers::MenuList&);
+	void add_region_context_items (AudioStreamView*, boost::shared_ptr<ARDOUR::Region>, Gtk::Menu_Helpers::MenuList&, nframes64_t position, bool multiple_regions_at_position);
 	void add_crossfade_context_items (AudioStreamView*, boost::shared_ptr<ARDOUR::Crossfade>, Gtk::Menu_Helpers::MenuList&, bool many);
 	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
 
@@ -1069,6 +1070,7 @@ class Editor : public PublicEditor
 	void set_region_lock_style (ARDOUR::Region::PositionLockStyle);
 	void raise_region ();
 	void raise_region_to_top ();
+	void change_region_layering_order (nframes64_t);
 	void lower_region ();
 	void lower_region_to_bottom ();
 	void split_region ();
@@ -2238,6 +2240,10 @@ public:
 	bool idle_resize();
 	friend gboolean _idle_resize (gpointer);
 	std::vector<TimeAxisView*> pending_resizes;
+
+	RegionLayeringOrderEditor* layering_order_editor;
+
+	void update_region_layering_order_editor (nframes64_t frame);
 };
 
 #endif /* __ardour_editor_h__ */
