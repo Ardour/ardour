@@ -127,6 +127,7 @@ ARDOUR_UI::display_message (const char *prefix, gint prefix_len, RefPtr<TextBuff
 #endif
 }
 
+#if 0
 static bool
 null_crossing (GdkEventCrossing* /* ignored */)
 {
@@ -139,6 +140,7 @@ block_prelight (Gtk::Widget& w)
 	w.signal_enter_notify_event().connect (sigc::ptr_fun (null_crossing), false);
 	w.signal_leave_notify_event().connect (sigc::ptr_fun (null_crossing), false);
 }
+#endif
 
 void
 ARDOUR_UI::setup_transport ()

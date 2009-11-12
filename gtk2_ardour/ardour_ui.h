@@ -75,7 +75,7 @@ class BundleManager;
 class ConnectionEditor;
 class KeyEditor;
 class Keyboard;
-class LocationUI;
+class LocationUIWindow;
 class Mixer_UI;
 class PublicEditor;
 class RCOptionEditor;
@@ -572,9 +572,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	BundleManager *bundle_manager;
 	void create_bundle_manager ();
 
-	LocationUI *location_ui;
-	int         create_location_ui ();
-	void        handle_locations_change (ARDOUR::Location*);
+	LocationUIWindow *location_ui;
+	int               create_location_ui ();
+	void              handle_locations_change (ARDOUR::Location*);
 
 	static UIConfiguration *ui_config;
 	ThemeManager *theme_manager;

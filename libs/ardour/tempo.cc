@@ -1684,11 +1684,14 @@ TempoMap::bbt_add (const BBT_Time& start, const BBT_Time& other) const
 	return bbt_add (start, other, metric);
 }
 
+/**
+ * add the BBT interval @param increment to  @param start and return the result
+ */
 BBT_Time
-TempoMap::bbt_add (const BBT_Time& start, const BBT_Time& other, const TempoMetric& metric) const
+TempoMap::bbt_add (const BBT_Time& start, const BBT_Time& increment, const TempoMetric& metric) const
 {
 	BBT_Time result = start;
-	BBT_Time op = other;
+	BBT_Time op = increment; /* argument is const, but we need to modify it */
 	uint32_t ticks = result.ticks + op.ticks;
 
 	if (ticks >= Meter::ticks_per_beat) {
@@ -1780,11 +1783,14 @@ TempoMap::bbt_add (const BBT_Time& start, const BBT_Time& other, const TempoMetr
 	return result;
 }
 
+/**
+ * subtract the BBT interval @param decrement from @param start and return the result
+ */
 BBT_Time
-TempoMap::bbt_subtract (const BBT_Time& start, const BBT_Time& other) const
+TempoMap::bbt_subtract (const BBT_Time& start, const BBT_Time& decrement) const
 {
 	BBT_Time result = start;
-	BBT_Time op = other;
+	BBT_Time op = decrement; /* argument is const, but we need to modify it */
 
 	if (op.ticks > result.ticks) {
 		/* subtract an extra beat later; meanwhile set ticks to the right "carry" value */

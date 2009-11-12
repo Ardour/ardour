@@ -103,6 +103,7 @@
 #include "mixer_strip.h"
 #include "editor_route_groups.h"
 #include "editor_regions.h"
+#include "editor_locations.h"
 #include "editor_snapshots.h"
 
 #include "i18n.h"
@@ -524,22 +525,7 @@ Editor::Editor ()
 	_routes = new EditorRoutes (this);
 	_regions = new EditorRegions (this);
 	_snapshots = new EditorSnapshots (this);
-
-	named_selection_scroller.add (named_selection_display);
-	named_selection_scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
-
-	named_selection_model = TreeStore::create (named_selection_columns);
-	named_selection_display.set_model (named_selection_model);
-	named_selection_display.append_column (_("Chunks"), named_selection_columns.text);
-	named_selection_display.set_headers_visible (false);
-	named_selection_display.set_size_request (100, -1);
-	named_selection_display.set_name ("NamedSelectionDisplay");
-
-	named_selection_display.get_selection()->set_mode (SELECTION_SINGLE);
-	named_selection_display.set_size_request (100, -1);
-	named_selection_display.signal_button_release_event().connect (mem_fun(*this, &Editor::named_selection_display_button_release), false);
-	named_selection_display.signal_key_release_event().connect (mem_fun(*this, &Editor::named_selection_display_key_release), false);
-	named_selection_display.get_selection()->signal_changed().connect (mem_fun (*this, &Editor::named_selection_display_selection_changed));
+	_locations = new EditorLocations (this);
 
 	Gtk::Label* nlabel;
 
@@ -555,12 +541,9 @@ Editor::Editor ()
 	nlabel = manage (new Label (_("Route Groups")));
 	nlabel->set_angle (-90);
 	the_notebook.append_page (_route_groups->widget (), *nlabel);
-
-	if (!Profile->get_sae()) {
-		nlabel = manage (new Label (_("Chunks")));
-		nlabel->set_angle (-90);
-		the_notebook.append_page (named_selection_scroller, *nlabel);
-	}
+	nlabel = manage (new Label (_("Ranges & Marks")));
+	nlabel->set_angle (-90);
+	the_notebook.append_page (_locations->widget (), *nlabel);
 
 	the_notebook.set_show_tabs (true);
 	the_notebook.set_scrollable (true);
@@ -1080,8 +1063,6 @@ Editor::connect_to_session (Session *t)
 	session_connections.push_back (session->PositionChanged.connect (mem_fun(*this, &Editor::map_position_change)));
 	session_connections.push_back (session->RouteAdded.connect (mem_fun(*this, &Editor::handle_new_route)));
 	session_connections.push_back (session->DurationChanged.connect (mem_fun(*this, &Editor::handle_new_duration)));
-	session_connections.push_back (session->NamedSelectionAdded.connect (mem_fun(*this, &Editor::handle_new_named_selection)));
-	session_connections.push_back (session->NamedSelectionRemoved.connect (mem_fun(*this, &Editor::handle_new_named_selection)));
 	session_connections.push_back (session->DirtyChanged.connect (mem_fun(*this, &Editor::update_title)));
 	session_connections.push_back (session->StateSaved.connect (mem_fun(*this, &Editor::update_title_s)));
 	session_connections.push_back (session->AskAboutPlaylistDeletion.connect (mem_fun(*this, &Editor::playlist_deletion_dialog)));
@@ -1164,8 +1145,6 @@ Editor::connect_to_session (Session *t)
 
 	handle_new_duration ();
 
-	redisplay_named_selections ();
-
 	restore_ruler_visibility ();
 	//tempo_map_changed (Change (0));
 	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
@@ -1197,6 +1176,7 @@ Editor::connect_to_session (Session *t)
 	_regions->connect_to_session (session);
 	_snapshots->connect_to_session (session);
 	_routes->connect_to_session (session);
+	_locations->connect_to_session (session);
 
 	start_updating ();
 }
@@ -1951,7 +1931,6 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Crop Region to Range"), mem_fun(*this, &Editor::crop_region_to_selection)));
 	edit_items.push_back (MenuElem (_("Fill Range with Region"), mem_fun(*this, &Editor::region_fill_selection)));
 	edit_items.push_back (MenuElem (_("Duplicate Range"), bind (mem_fun(*this, &Editor::duplicate_dialog), false)));
-	edit_items.push_back (MenuElem (_("Create Chunk from Range"), mem_fun(*this, &Editor::create_named_selection)));
 
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Consolidate Range"), bind (mem_fun(*this, &Editor::bounce_range_selection), true, false)));
@@ -2021,8 +2000,6 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	cutnpaste_items.push_back (MenuElem (_("Align Relative"), bind (mem_fun(*this, &Editor::align_relative), ARDOUR::SyncPoint)));
 
 	cutnpaste_items.push_back (SeparatorElem());
-
-	cutnpaste_items.push_back (MenuElem (_("Insert chunk"), bind (mem_fun(*this, &Editor::paste_named_selection), 1.0f)));
 
 	edit_items.push_back (MenuElem (_("Edit"), *cutnpaste_menu));
 

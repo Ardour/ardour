@@ -122,6 +122,7 @@ class EditorGroupTabs;
 class EditorRoutes;
 class EditorRouteGroups;
 class EditorRegions;
+class EditorLocations;
 class EditorSnapshots;
 
 /* <CMT Additions> */
@@ -948,35 +949,6 @@ class Editor : public PublicEditor
 
 	void end_location_changed (ARDOUR::Location*);
 
-	/* named selections */
-
-	struct NamedSelectionDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    NamedSelectionDisplayModelColumns() {
-		    add (text);
-		    add (selection);
-	    }
-	    Gtk::TreeModelColumn<Glib::ustring>  text;
-	    Gtk::TreeModelColumn<ARDOUR::NamedSelection*>    selection;
-	};
-
-	NamedSelectionDisplayModelColumns named_selection_columns;
-	Glib::RefPtr<Gtk::TreeStore>     named_selection_model;
-
-	Gtkmm2ext::DnDTreeView<ARDOUR::NamedSelection*> named_selection_display;
-	Gtk::ScrolledWindow    named_selection_scroller;
-
-	void create_named_selection ();
-	void paste_named_selection (float times);
-	void remove_selected_named_selections ();
-
-	void handle_new_named_selection ();
-	void add_named_selection_to_named_selection_display (ARDOUR::NamedSelection&);
-	void redisplay_named_selections ();
-
-	bool named_selection_display_button_release (GdkEventButton *ev);
-	bool named_selection_display_key_release (GdkEventKey *ev);
-	void named_selection_display_selection_changed ();
-
 	/* track views */
 	TrackViewList track_views;
 	std::pair<TimeAxisView*, ARDOUR::layer_t> trackview_by_y_position (double);
@@ -1665,6 +1637,7 @@ public:
 	EditorRoutes* _routes;
 	EditorRegions* _regions;
 	EditorSnapshots* _snapshots;
+	EditorLocations* _locations;
 
 	/* diskstream/route display management */
 	Glib::RefPtr<Gdk::Pixbuf> rec_enabled_icon;

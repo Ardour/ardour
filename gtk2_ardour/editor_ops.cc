@@ -44,7 +44,6 @@
 #include "ardour/audio_diskstream.h"
 #include "ardour/utils.h"
 #include "ardour/location.h"
-#include "ardour/named_selection.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/region_factory.h"
@@ -4342,62 +4341,6 @@ Editor::paste_internal (nframes64_t position, float times)
 	if (commit) {
 		commit_reversible_command ();
 	}
-}
-
-void
-Editor::paste_named_selection (float times)
-{
-	TrackSelection::iterator t;
-
-	Glib::RefPtr<TreeSelection> selected = named_selection_display.get_selection();
-
-	if (selected->count_selected_rows() != 1 || selection->tracks.empty()) {
-		return;
-	}
-
-	TreeModel::iterator i = selected->get_selected();
-	NamedSelection* ns = (*i)[named_selection_columns.selection];
-
-	list<boost::shared_ptr<Playlist> >::iterator chunk;
-	list<boost::shared_ptr<Playlist> >::iterator tmp;
-
-	chunk = ns->playlists.begin();
-
-	begin_reversible_command (_("paste chunk"));
-
-	sort_track_selection ();
-
-	for (t = selection->tracks.begin(); t != selection->tracks.end(); ++t) {
-
-		RouteTimeAxisView* rtv;
-		boost::shared_ptr<Playlist> pl;
-		boost::shared_ptr<AudioPlaylist> apl;
-
-		if ((rtv = dynamic_cast<RouteTimeAxisView*> (*t)) == 0) {
-			continue;
-		}
-
-		if ((pl = rtv->playlist()) == 0) {
-			continue;
-		}
-
-		if ((apl = boost::dynamic_pointer_cast<AudioPlaylist> (pl)) == 0) {
-			continue;
-		}
-
-		tmp = chunk;
-		++tmp;
-
-		XMLNode &before = apl->get_state();
-		apl->paste (*chunk, get_preferred_edit_position(), times);
-		session->add_command(new MementoCommand<AudioPlaylist>(*apl, &before, &apl->get_state()));
-
-		if (tmp != ns->playlists.end()) {
-			chunk = tmp;
-		}
-	}
-
-	commit_reversible_command();
 }
 
 void

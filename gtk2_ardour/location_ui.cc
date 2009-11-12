@@ -620,21 +620,14 @@ LocationEditRow::focus_name() {
 
 
 LocationUI::LocationUI ()
-	: ArdourDialog ("locations dialog"),
-	  add_location_button (_("Add New Location")),
-	  add_range_button (_("Add New Range"))
+	: session (0)
+	, add_location_button (_("Add New Location"))
+	, add_range_button (_("Add New Range"))
 {
 	i_am_the_modifier = 0;
 
-	set_title (_("Locations"));
-	set_wmclass(X_("ardour_locations"), "Ardour");
-
-	set_name ("LocationWindow");
-
-	get_vbox()->pack_start (location_hpacker);
-
 	location_vpacker.set_spacing (5);
-
+	
 	location_vpacker.pack_start (loop_edit_row, false, false);
 	location_vpacker.pack_start (punch_edit_row, false, false);
 
@@ -681,28 +674,20 @@ LocationUI::LocationUI ()
 	loc_range_panes.pack2(range_frame, true, false);
 	location_vpacker.pack_start (loc_range_panes, true, true);
 
-	location_hpacker.pack_start (location_vpacker, true, true);
+	pack_start (location_vpacker, true, true);
 
 	add_location_button.signal_clicked().connect (mem_fun(*this, &LocationUI::add_new_location));
 	add_range_button.signal_clicked().connect (mem_fun(*this, &LocationUI::add_new_range));
-
-	//add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_RELEASE_MASK);
-
-
+	
+	show_all ();
 }
 
 LocationUI::~LocationUI()
 {
 }
 
-void LocationUI::on_show()
-{
-	ArdourDialog::on_show();
-	refresh_location_list();
-}
-
-
-gint LocationUI::do_location_remove (ARDOUR::Location *loc)
+gint 
+LocationUI::do_location_remove (ARDOUR::Location *loc)
 {
 	/* this is handled internally by Locations, but there's
 	   no point saving state etc. when we know the marker
@@ -723,23 +708,22 @@ gint LocationUI::do_location_remove (ARDOUR::Location *loc)
 	return FALSE;
 }
 
-void LocationUI::location_remove_requested (ARDOUR::Location *loc)
+void 
+LocationUI::location_remove_requested (ARDOUR::Location *loc)
 {
 	// must do this to prevent problems when destroying
 	// the effective sender of this event
 
-  Glib::signal_idle().connect (bind (mem_fun(*this, &LocationUI::do_location_remove), loc));
+	Glib::signal_idle().connect (bind (mem_fun(*this, &LocationUI::do_location_remove), loc));
 }
 
 
-void LocationUI::location_redraw_ranges ()
+void 
+LocationUI::location_redraw_ranges ()
 {
-
 	range_rows.hide();
 	range_rows.show();
-
 }
-
 
 void
 LocationUI::location_added (Location* location)
@@ -896,6 +880,8 @@ LocationUI::refresh_location_list ()
 	loc_children.clear();
 	range_children.clear();
 
+	cerr << "about to map locations with session = " << session << endl;
+
 	if (session) {
 		session->locations()->apply (*this, &LocationUI::map_locations);
 	}
@@ -903,9 +889,9 @@ LocationUI::refresh_location_list ()
 }
 
 void
-LocationUI::set_session(ARDOUR::Session* sess)
+LocationUI::set_session(ARDOUR::Session* s)
 {
-	ArdourDialog::set_session (sess);
+	session = s;
 
 	if (session) {
 		session->locations()->changed.connect (mem_fun(*this, &LocationUI::refresh_location_list));
@@ -922,8 +908,6 @@ LocationUI::session_gone()
 {
 	ENSURE_GUI_THREAD(mem_fun(*this, &LocationUI::session_gone));
 
-	hide_all();
-
 	using namespace Box_Helpers;
 	BoxList & loc_children = location_rows.children();
 	BoxList & range_children = range_rows.children();
@@ -936,13 +920,53 @@ LocationUI::session_gone()
 
 	punch_edit_row.set_session (0);
 	punch_edit_row.set_location (0);
+}
 
-	ArdourDialog::session_gone ();
+/*------------------------*/
+
+LocationUIWindow::LocationUIWindow ()
+	: ArdourDialog ("locations dialog")
+{
+	set_title (_("Locations"));
+	set_wmclass(X_("ardour_locations"), "Ardour");
+	set_name ("LocationWindow");
+
+	get_vbox()->pack_start (_ui);
+}
+
+LocationUIWindow::~LocationUIWindow()
+{
+}
+
+void 
+LocationUIWindow::on_show()
+{
+	cerr << "Show loc list\n";
+	_ui.refresh_location_list();
+	ArdourDialog::on_show();
 }
 
 bool
-LocationUI::on_delete_event (GdkEventAny*)
+LocationUIWindow::on_delete_event (GdkEventAny*)
 {
 	hide ();
 	return true;
+}
+
+void
+LocationUIWindow::set_session (Session *s)
+{
+	cerr << "Setting session in LUW, with s = " << s << "\n";
+
+	ArdourDialog::set_session (s);
+	_ui.set_session (s);
+
+	s->GoingAway.connect (mem_fun (*this, &LocationUIWindow::session_gone));
+}
+
+void
+LocationUIWindow::session_gone ()
+{
+	hide_all();
+	ArdourDialog::session_gone ();
 }

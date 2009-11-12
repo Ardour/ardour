@@ -26,10 +26,13 @@
 #include <gtkmm/table.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/label.h>
+#include <gtkmm/paned.h>
+#include <gtkmm/scrolledwindow.h>
 
 #include "ardour/location.h"
 
 #include "ardour_dialog.h"
+#include "audio_clock.h"
 
 namespace ARDOUR {
 	class LocationStack;
@@ -137,25 +140,28 @@ class LocationEditRow  : public Gtk::HBox
 
 };
 
-
-class LocationUI : public ArdourDialog
+class LocationUI : public Gtk::HBox
 {
   public:
 	LocationUI ();
 	~LocationUI ();
+	
+	virtual void set_session (ARDOUR::Session *);
 
-	void set_session (ARDOUR::Session *);
+	void add_new_location();
+	void add_new_range();
 
-	void on_show();
+	void refresh_location_list ();
+	void refresh_location_list_s (ARDOUR::Change);
 
   private:
+	ARDOUR::Session* session;
 	ARDOUR::LocationStack* locations;
 	ARDOUR::Location *newest_location;
 
 	void session_gone();
 
 	Gtk::VBox  location_vpacker;
-	Gtk::HBox  location_hpacker;
 
 	LocationEditRow      loop_edit_row;
 	LocationEditRow      punch_edit_row;
@@ -174,7 +180,6 @@ class LocationUI : public ArdourDialog
 	Gtk::ScrolledWindow  range_rows_scroller;
 	Gtk::VBox            range_rows;
 
-
 	/* When any location changes it start
 	   or end points, it sends a signal that is caught
 	   by one of these functions
@@ -188,17 +193,26 @@ class LocationUI : public ArdourDialog
 
 	guint32 i_am_the_modifier;
 
-	void add_new_location();
-	void add_new_range();
-
-	void refresh_location_list ();
-	void refresh_location_list_s (ARDOUR::Change);
 	void location_removed (ARDOUR::Location *);
 	void location_added (ARDOUR::Location *);
 	void map_locations (ARDOUR::Locations::LocationList&);
+};
+
+class LocationUIWindow : public ArdourDialog
+{
+  public:
+	LocationUIWindow ();
+	~LocationUIWindow ();
+
+	void on_show();
+	void set_session (ARDOUR::Session *);
+
+	LocationUI& ui() { return _ui; }
 
   protected:
+	LocationUI _ui;
 	bool on_delete_event (GdkEventAny*);
+	void session_gone();
 };
 
 #endif // __ardour_location_ui_h__

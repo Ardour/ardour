@@ -16,6 +16,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#ifndef __gtk_ardour_editor_regions_h__
+#define __gtk_ardour_editor_regions_h__
 
 #include "editor_component.h"
 
@@ -148,4 +150,4 @@ private:
 	std::list<boost::shared_ptr<ARDOUR::Region> > tmp_region_list;
 };
 
-
+#endif /* __gtk_ardour_editor_regions_h__ */

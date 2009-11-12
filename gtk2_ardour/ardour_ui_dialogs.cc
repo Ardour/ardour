@@ -272,7 +272,7 @@ int
 ARDOUR_UI::create_location_ui ()
 {
 	if (location_ui == 0) {
-		location_ui = new LocationUI ();
+		location_ui = new LocationUIWindow ();
 		location_ui->set_session (session);
 		location_ui->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleLocations")));
 	}

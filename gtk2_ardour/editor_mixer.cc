@@ -360,10 +360,6 @@ Editor::session_going_away ()
 	_routes->clear ();
 	_route_groups->clear ();
 
-	named_selection_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
-	named_selection_model->clear ();
-	named_selection_display.set_model (named_selection_model);
-
 	edit_point_clock_connection_a.disconnect();
 	edit_point_clock_connection_b.disconnect();
 
