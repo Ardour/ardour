@@ -289,7 +289,9 @@ PortMatrixRowLabels::render_bundle_name (
 	cairo_set_line_width (cr, label_border_width ());
 	cairo_stroke (cr);
 
-	double const off = grid_spacing() / 2;
+	cairo_text_extents_t ext;
+	cairo_text_extents (cr, b->name().c_str(), &ext);
+	double const off = (grid_spacing() - ext.height) / 2;
 
  	set_source_rgb (cr, text_colour());
  	cairo_move_to (cr, xoff + x + name_pad(), yoff + name_pad() + off);

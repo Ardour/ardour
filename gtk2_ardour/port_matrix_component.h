@@ -74,7 +74,7 @@ public:
 
 	/** @return grid spacing */
 	static uint32_t grid_spacing () {
-		return 32;
+		return 24;
 	}
 
 protected:
@@ -101,7 +101,7 @@ protected:
 
 	/** @return space around the connection indicator */
 	static uint32_t connection_indicator_pad () {
-		return 8;
+		return 6;
 	}
 
 	static uint32_t mouseover_line_width () {

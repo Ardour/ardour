@@ -374,7 +374,7 @@ PortMatrixColumnLabels::render_bundle_name (
 
 		cairo_move_to (
 			cr,
-			xoff + basic_text_x_pos (0),
+			xoff + basic_text_x_pos (0) + name_pad() * cos (angle ()),
 			yoff + slanted_height() - name_pad() * sin (angle())
 			);
 	}
