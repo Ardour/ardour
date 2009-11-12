@@ -70,8 +70,6 @@ RegionLayeringOrderEditor::~RegionLayeringOrderEditor ()
 void
 RegionLayeringOrderEditor::row_activated (const TreeModel::Path& path, TreeViewColumn* column)
 {
-	cerr << "Row activated\n";
-
 	if (in_row_change) {
 		return;
 	}
@@ -127,6 +125,10 @@ RegionLayeringOrderEditor::refill ()
 		TreeModel::Row newrow = *(layering_order_model->append());
 		newrow[layering_order_columns.name] = (*i)->name();
 		newrow[layering_order_columns.region] = *i;
+
+               if (i == region_list->begin()) {
+                       layering_order_display.get_selection()->select(newrow);
+               }
 	}
 
 	in_row_change = false;
@@ -152,15 +154,12 @@ bool
 RegionLayeringOrderEditor::on_key_press_event (GdkEventKey* ev)
 {
 	if (ev->keyval == GDK_Return) {
-		cerr << "grab magic key\n";
 		Keyboard::magic_widget_grab_focus ();		
 	}
 
-	bool result = key_press_focus_accelerator_handler (the_editor, ev);
-	cerr << "event handled: " << result << endl;
+	bool result = key_press_focus_accelerator_handler (*this, ev);
 
 	if (ev->keyval == GDK_Return) {
-		cerr << "drop magic focus\n";
 		Keyboard::magic_widget_drop_focus ();		
 	}
 

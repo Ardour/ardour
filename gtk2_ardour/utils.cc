@@ -54,6 +54,10 @@ sigc::signal<void>  DPIReset;
 int
 pixel_width (const ustring& str, Pango::FontDescription& font)
 {
+	if (str.empty()) {
+		return 0;
+	}
+
 	Label foo;
 	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout ("");
 
@@ -429,6 +433,9 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 		if (GTK_IS_ENTRY(focus) || Keyboard::some_magic_widget_has_focus()) {
 			special_handling_of_unmodified_accelerators = true;
 		} 
+#ifdef DEBUG_ACCELERATOR_HANDLING
+		cerr << "Focus widget name " << gtk_widget_get_name(focus) << endl;
+#endif
 	} 
 
 #ifdef GTKOSX
