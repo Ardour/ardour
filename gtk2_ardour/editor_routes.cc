@@ -90,11 +90,16 @@ EditorRoutes::EditorRoutes (Editor* e)
 
 	_display.set_headers_visible (true);
 	_display.set_name ("TrackListDisplay");
-	_display.get_selection()->set_mode (SELECTION_NONE);
+	_display.get_selection()->set_mode (SELECTION_SINGLE);
 	_display.set_reorderable (true);
 	_display.set_rules_hint (true);
 	_display.set_size_request (100, -1);
 	_display.add_object_drag (_columns.route.index(), "routes");
+
+	CellRendererText* name_cell = dynamic_cast<CellRendererText*> (_display.get_column_cell_renderer (2));
+	assert (name_cell);
+	name_cell->property_editable() = true;
+	name_cell->signal_edited().connect (mem_fun (*this, &EditorRoutes::name_edit));
 
 	CellRendererToggle* visible_cell = dynamic_cast<CellRendererToggle*>(_display.get_column_cell_renderer (1));
 
@@ -846,4 +851,19 @@ EditorRoutes::clear ()
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore> (0));
 	_model->clear ();
 	_display.set_model (_model);
+}
+
+void
+EditorRoutes::name_edit (Glib::ustring const & path, Glib::ustring const & new_text)
+{
+	TreeIter iter = _model->get_iter (path);
+	if (!iter) {
+		return;
+	}
+
+	boost::shared_ptr<Route> route = (*iter)[_columns.route];
+
+	if (route) {
+		route->set_name (new_text);
+	}
 }

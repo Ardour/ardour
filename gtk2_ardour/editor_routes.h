@@ -73,6 +73,7 @@ private:
 		);
 	void track_list_reorder (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const & iter, int* new_order);
 	bool selection_filter (Glib::RefPtr<Gtk::TreeModel> const &, Gtk::TreeModel::Path const &, bool);
+	void name_edit (Glib::ustring const &, Glib::ustring const &);
 
 	struct ModelColumns : public Gtk::TreeModel::ColumnRecord {
 		ModelColumns() {
