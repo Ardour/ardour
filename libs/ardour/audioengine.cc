@@ -48,6 +48,19 @@ AudioEngine* AudioEngine::_instance = 0;
 #define GET_PRIVATE_JACK_POINTER(j)  jack_client_t* _priv_jack = (jack_client_t*) (j); if (!_priv_jack) { return; }
 #define GET_PRIVATE_JACK_POINTER_RET(j,r) jack_client_t* _priv_jack = (jack_client_t*) (j); if (!_priv_jack) { return r; }
 
+typedef void (*_JackInfoShutdownCallback)(jack_status_t code, const char* reason, void *arg);
+
+static void (*on_info_shutdown)(jack_client_t*, _JackInfoShutdownCallback, void *);
+extern void jack_on_info_shutdown (jack_client_t*, _JackInfoShutdownCallback, void *) __attribute__((weak_import));
+
+static void check_jack_symbols () __attribute__((constructor));
+
+void check_jack_symbols ()
+{
+	/* use weak linking to see if we really have various late-model JACK function */
+	on_info_shutdown = jack_on_info_shutdown;
+}
+
 static void 
 ardour_jack_error (const char* msg) 
 {
@@ -141,11 +154,12 @@ AudioEngine::start ()
 		_processed_frames = 0;
 		last_monitor_check = 0;
 
-#ifdef HAVE_JACK_ON_INFO_SHUTDOWN
-		jack_on_info_shutdown (_priv_jack, halted_info, this);
-#else
-		jack_on_shutdown (_priv_jack, halted, this);
-#endif
+		if (on_info_shutdown) {
+			on_info_shutdown (_priv_jack, halted_info, this);
+		} else {
+			jack_on_shutdown (_priv_jack, halted, this);
+		}
+
 		jack_set_graph_order_callback (_priv_jack, _graph_order_callback, this);
 		jack_set_thread_init_callback (_priv_jack, _thread_init_callback, this);
 		jack_set_process_callback (_priv_jack, _process_callback, this);
