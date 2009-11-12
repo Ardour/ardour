@@ -359,6 +359,10 @@ Marker::set_name (const string& new_name)
 	uint32_t pb_width;
 	double font_size;
 
+	if (new_name.empty()) {
+		return;
+	}
+
 	font_size = name_font->get_size() / Pango::SCALE;
 	pb_width = new_name.length() * font_size;
 
@@ -386,7 +390,6 @@ Marker::set_name (const string& new_name)
 	if (_type == End || _type == LoopEnd || _type == PunchOut) {
 		name_pixbuf->property_x() = -(te.width);
         }
-
 }
 
 void
