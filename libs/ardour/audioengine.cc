@@ -51,7 +51,7 @@ AudioEngine* AudioEngine::_instance = 0;
 typedef void (*_JackInfoShutdownCallback)(jack_status_t code, const char* reason, void *arg);
 
 static void (*on_info_shutdown)(jack_client_t*, _JackInfoShutdownCallback, void *);
-extern void jack_on_info_shutdown (jack_client_t*, _JackInfoShutdownCallback, void *) __attribute__((weak_import));
+extern void jack_on_info_shutdown (jack_client_t*, _JackInfoShutdownCallback, void *) __attribute__((weak));
 
 static void check_jack_symbols () __attribute__((constructor));
 
