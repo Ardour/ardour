@@ -2875,19 +2875,16 @@ Editor::setup_toolbar ()
 	zoom_box.set_border_width (0);
 
 	zoom_in_button.set_name ("EditorTimeButton");
-	zoom_in_button.set_size_request(-1,16);
 	zoom_in_button.add (*(manage (new Image (::get_icon("zoom_in")))));
 	zoom_in_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), false));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_in_button, _("Zoom In"));
 
 	zoom_out_button.set_name ("EditorTimeButton");
-	zoom_out_button.set_size_request(-1,16);
 	zoom_out_button.add (*(manage (new Image (::get_icon("zoom_out")))));
 	zoom_out_button.signal_clicked().connect (bind (mem_fun(*this, &Editor::temporal_zoom_step), true));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_button, _("Zoom Out"));
 
 	zoom_out_full_button.set_name ("EditorTimeButton");
-	zoom_out_full_button.set_size_request(-1,16);
 	zoom_out_full_button.add (*(manage (new Image (::get_icon("zoom_full")))));
 	zoom_out_full_button.signal_clicked().connect (mem_fun(*this, &Editor::temporal_zoom_session));
 	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to Session"));
@@ -3030,6 +3027,7 @@ Editor::setup_midi_toolbar ()
 
 	act = ActionManager::get_action (X_("MIDI"), X_("panic"));
 	midi_panic_button.set_name("MidiPanicButton");
+	ARDOUR_UI::instance()->tooltips().set_tip (midi_panic_button, _("Send note off and reset controller messages on all MIDI channels"));
 	act->connect_proxy (midi_panic_button);
 
 	panic_box.pack_start (midi_sound_notes , true, true);
