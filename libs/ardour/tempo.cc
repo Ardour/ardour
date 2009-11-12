@@ -1688,7 +1688,7 @@ BBT_Time
 TempoMap::bbt_add (const BBT_Time& start, const BBT_Time& other, const TempoMetric& metric) const
 {
 	BBT_Time result = start;
-	BBT_Time op = op;
+	BBT_Time op = other;
 	uint32_t ticks = result.ticks + op.ticks;
 
 	if (ticks >= Meter::ticks_per_beat) {
