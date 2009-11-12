@@ -54,7 +54,7 @@ class RegionLayeringOrderEditor : public ArdourDialog
 	Gtk::ScrolledWindow scroller;   // Available layers
 	PublicEditor& the_editor;
 
-	void row_clicked();
+	void row_activated (const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
 	void refill ();
 	void playlist_modified ();
 };

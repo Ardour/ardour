@@ -2,9 +2,10 @@
 #include <gtkmm/stock.h>
 #include <ardour/region.h>
 
-#include "region_layering_order_editor.h"
 #include "i18n.h"
+#include "keyboard.h"
 #include "public_editor.h"
+#include "region_layering_order_editor.h"
 #include "utils.h"
 
 using namespace Gtk;
@@ -54,7 +55,7 @@ RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
 	table->set_name ("RegionLayeringOrderTable");
 	layering_order_display.set_name ("RegionLayeringOrderDisplay");
 
-	layering_order_display.get_selection ()->signal_changed ().connect (mem_fun (*this, &RegionLayeringOrderEditor::row_clicked));
+	layering_order_display.signal_row_activated ().connect (mem_fun (*this, &RegionLayeringOrderEditor::row_activated));
 
 	layering_order_display.grab_focus ();
 
@@ -67,13 +68,15 @@ RegionLayeringOrderEditor::~RegionLayeringOrderEditor ()
 }
 
 void
-RegionLayeringOrderEditor::row_clicked ()
+RegionLayeringOrderEditor::row_activated (const TreeModel::Path& path, TreeViewColumn* column)
 {
+	cerr << "Row activated\n";
+
 	if (in_row_change) {
 		return;
 	}
 
-	TreeModel::iterator iter = layering_order_display.get_selection()->get_selected();
+	TreeModel::iterator iter = layering_order_model->get_iter (path);
 
 	if (iter) {
 		TreeModel::Row row = *iter;
@@ -148,7 +151,19 @@ RegionLayeringOrderEditor::set_context (const string& a_name, Session* s, const 
 bool
 RegionLayeringOrderEditor::on_key_press_event (GdkEventKey* ev)
 {
+	if (ev->keyval == GDK_Return) {
+		cerr << "grab magic key\n";
+		Keyboard::magic_widget_grab_focus ();		
+	}
+
 	bool result = key_press_focus_accelerator_handler (the_editor, ev);
+	cerr << "event handled: " << result << endl;
+
+	if (ev->keyval == GDK_Return) {
+		cerr << "drop magic focus\n";
+		Keyboard::magic_widget_drop_focus ();		
+	}
+
 	if (!result) {
 		result = ArdourDialog::on_key_press_event (ev);
 	}
