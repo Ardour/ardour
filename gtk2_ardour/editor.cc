@@ -5120,6 +5120,9 @@ void
 Editor::change_region_layering_order (nframes64_t position)
 {
 	if (clicked_regionview == 0) {
+                if (layering_order_editor) {
+                        layering_order_editor->hide ();
+                }
 		return;
 	}
 

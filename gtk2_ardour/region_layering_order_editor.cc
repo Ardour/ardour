@@ -1,5 +1,6 @@
 #include <gtkmm/table.h>
 #include <gtkmm/stock.h>
+#include <gtkmm/alignment.h>
 #include <ardour/region.h>
 
 #include "i18n.h"
@@ -12,7 +13,7 @@ using namespace Gtk;
 using namespace ARDOUR;
 
 RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
-: ArdourDialog (pe, _("RegionLayeringOrderEditor"), false, false)
+	: ArdourDialog (pe, _("RegionLayeringOrderEditor"), false, false)
 	, playlist ()
 	, position ()
 	, in_row_change (false)
@@ -20,9 +21,9 @@ RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
 	, layering_order_columns ()
 	, layering_order_model (Gtk::ListStore::create (layering_order_columns))
 	, layering_order_display ()
-        , clock ("layer dialog", true, "TransportClock", false, false, false)
+        , clock ("layer dialog", true, "RegionLayeringOrderEditorClock", false, false, false)
 	, scroller ()
-	, the_editor(pe)
+	, editor (pe)
 {
 	set_name ("RegionLayeringOrderEditorWindow");
 
@@ -30,7 +31,6 @@ RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
 
 	layering_order_display.append_column (_("Region Name"), layering_order_columns.name);
 	layering_order_display.set_headers_visible (true);
-	layering_order_display.set_headers_clickable (true);
 	layering_order_display.set_reorderable (false);
 	layering_order_display.set_rules_hint (true);
 
@@ -38,21 +38,51 @@ RegionLayeringOrderEditor::RegionLayeringOrderEditor (PublicEditor& pe)
 	scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	scroller.add (layering_order_display);
 
-	Gtk::Table* table = manage (new Gtk::Table (7, 11));
-	table->set_size_request (300, 250);
-	table->attach (scroller, 0, 7, 0, 5);
-
 	clock.set_mode (AudioClock::BBT);
 
-	HBox* hbox = manage (new HBox);
-	hbox->pack_start (clock, true, false);
 
-	get_vbox()->set_spacing (6);
-	get_vbox()->pack_start (label, false, false);
-	get_vbox()->pack_start (*hbox, false, false);
-	get_vbox()->pack_start (*table);
+        Gtk::Table* scroller_table = manage (new Gtk::Table);
+        scroller_table->set_size_request (300, 250);
+        scroller_table->attach (scroller, 0, 1, 0, 1);
+        scroller_table->set_col_spacings (5);
+        scroller_table->set_row_spacings (5);
+        scroller_table->set_border_width (5);
+  
+        track_label.set_name ("RegionLayeringOrderEditorLabel");
+        track_label.set_text (_("Track:"));
+        clock_label.set_name ("RegionLayeringOrderEditorLabel");
+        clock_label.set_text (_("Position:"));
+        track_name_label.set_name ("RegionLayeringOrderEditorNameLabel");
+        clock.set_mode (AudioClock::BBT);
+  
+        Gtk::Alignment* track_alignment = manage (new Gtk::Alignment);
+        track_alignment->set (1.0, 0.5);
+        track_alignment->add (track_label);
+  
+        Gtk::Alignment* clock_alignment = manage (new Gtk::Alignment);
+        clock_alignment->set (1.0, 0.5);
+        clock_alignment->add (clock_label);
+  
+        Gtk::Table* info_table = manage (new Gtk::Table (2, 2));
+        info_table->set_col_spacings (5);
+        info_table->set_row_spacings (5);
+        info_table->set_border_width (5);
+        info_table->attach (*track_alignment, 0, 1, 0, 1, FILL, FILL);
+        info_table->attach (track_name_label, 1, 2, 0, 1, FILL, FILL);
+        info_table->attach (*clock_alignment, 0, 1, 1, 2, FILL, FILL);
+        info_table->attach (clock, 1, 2, 1, 2, FILL, FILL);
+ 
+        HBox* info_hbox = manage (new HBox);
+ 
+        info_hbox->pack_start (*info_table, true, false);
+ 
+        get_vbox()->set_spacing (5);
+        get_vbox()->pack_start (*info_hbox, false, false);
+        get_vbox()->pack_start (*scroller_table, true, true);
+ 
+        info_table->set_name ("RegionLayeringOrderTable");
+        scroller_table->set_name ("RegionLayeringOrderTable");
 
-	table->set_name ("RegionLayeringOrderTable");
 	layering_order_display.set_name ("RegionLayeringOrderDisplay");
 
 	layering_order_display.signal_row_activated ().connect (mem_fun (*this, &RegionLayeringOrderEditor::row_activated));
@@ -137,7 +167,7 @@ RegionLayeringOrderEditor::refill ()
 void
 RegionLayeringOrderEditor::set_context (const string& a_name, Session* s, const boost::shared_ptr<Playlist>  & pl, nframes64_t pos)
 {
-	label.set_text (a_name);
+        track_name_label.set_text (a_name);
 
 	clock.set_session (s);
 	clock.set (pos, true, 0, 0);
@@ -153,22 +183,32 @@ RegionLayeringOrderEditor::set_context (const string& a_name, Session* s, const 
 bool
 RegionLayeringOrderEditor::on_key_press_event (GdkEventKey* ev)
 {
+	bool handled = false;
+
+	/* in general, we want shortcuts working while in this
+	   dialog. However, we'd like to treat "return" specially
+	   since it is used for row activation. So ..
+
+	   for return: try normal handling first
+	   then try the editor (to get accelerators/shortcuts)
+	   then try normal handling (for keys other than return)
+	*/
+
 	if (ev->keyval == GDK_Return) {
-		Keyboard::magic_widget_grab_focus ();		
+		handled = ArdourDialog::on_key_press_event (ev);
+	}
+	
+	if (!handled) {
+		handled = key_press_focus_accelerator_handler (editor, ev);
 	}
 
-	bool result = key_press_focus_accelerator_handler (*this, ev);
-
-	if (ev->keyval == GDK_Return) {
-		Keyboard::magic_widget_drop_focus ();		
+	if (!handled) {
+		handled = ArdourDialog::on_key_press_event (ev);
 	}
-
-	if (!result) {
-		result = ArdourDialog::on_key_press_event (ev);
-	}
-	return result;
+	
+	return handled;
 }
-
+	
 void
 RegionLayeringOrderEditor::maybe_present ()
 {

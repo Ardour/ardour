@@ -35,7 +35,7 @@ class RegionLayeringOrderEditor : public ArdourDialog
 	nframes64_t position;
 	bool in_row_change;
 	uint32_t regions_at_position;
-
+	
 	sigc::connection playlist_modified_connection;
 
 	struct LayeringOrderColumns : public Gtk::TreeModel::ColumnRecord {
@@ -50,9 +50,11 @@ class RegionLayeringOrderEditor : public ArdourDialog
 	Glib::RefPtr<Gtk::ListStore> layering_order_model;
 	Gtk::TreeView layering_order_display;
 	AudioClock clock;
-	Gtk::Label label;
+	Gtk::Label track_label;
+	Gtk::Label track_name_label;
+	Gtk::Label clock_label;
 	Gtk::ScrolledWindow scroller;   // Available layers
-	PublicEditor& the_editor;
+	PublicEditor& editor;
 
 	void row_activated (const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
 	void refill ();
