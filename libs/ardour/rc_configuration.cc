@@ -200,11 +200,10 @@ RCConfiguration::get_state ()
 
 	root = new XMLNode("Ardour");
 
-	MIDI::Manager::PortMap::const_iterator i;
-	const MIDI::Manager::PortMap& ports = MIDI::Manager::instance()->get_midi_ports();
+	const MIDI::Manager::PortList& ports = MIDI::Manager::instance()->get_midi_ports();
 
-	for (i = ports.begin(); i != ports.end(); ++i) {
-		root->add_child_nocopy(i->second->get_state());
+	for (MIDI::Manager::PortList::const_iterator i = ports.begin(); i != ports.end(); ++i) {
+		root->add_child_nocopy((*i)->get_state());
 	}
 
 	root->add_child_nocopy (get_variables ());

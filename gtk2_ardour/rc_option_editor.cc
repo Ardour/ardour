@@ -170,36 +170,36 @@ private:
 	void setup_ports_combo (ComboBoxText& c)
 	{
 		c.clear_items ();
-		MIDI::Manager::PortMap const & ports = MIDI::Manager::instance()->get_midi_ports ();
-		for (MIDI::Manager::PortMap::const_iterator i = ports.begin(); i != ports.end(); ++i) {
-			c.append_text (i->first);
+		MIDI::Manager::PortList const & ports = MIDI::Manager::instance()->get_midi_ports ();
+		for (MIDI::Manager::PortList::const_iterator i = ports.begin(); i != ports.end(); ++i) {
+			c.append_text ((*i)->name());
 		}
 	}
 
 	void ports_changed ()
 	{
 		/* XXX: why is this coming from here? */
-		MIDI::Manager::PortMap const & ports = MIDI::Manager::instance()->get_midi_ports ();
+		MIDI::Manager::PortList const & ports = MIDI::Manager::instance()->get_midi_ports ();
 
 		_store->clear ();
 
-		for (MIDI::Manager::PortMap::const_iterator i = ports.begin(); i != ports.end(); ++i) {
+		for (MIDI::Manager::PortList::const_iterator i = ports.begin(); i != ports.end(); ++i) {
 
 			TreeModel::Row r = *_store->append ();
 
-			r[_model.name] = i->first;
+			r[_model.name] = (*i)->name();
 
-			if (i->second->input()) {
-				r[_model.online] = !i->second->input()->offline();
-				i->second->input()->OfflineStatusChanged.connect (bind (mem_fun (*this, &MIDIPorts::port_offline_changed), i->second));
-				r[_model.trace_input] = i->second->input()->tracing();
+			if ((*i)->input()) {
+				r[_model.online] = !(*i)->input()->offline();
+				(*i)->input()->OfflineStatusChanged.connect (bind (mem_fun (*this, &MIDIPorts::port_offline_changed), (*i)));
+				r[_model.trace_input] = (*i)->input()->tracing();
 			}
 
-			if (i->second->output()) {
-				r[_model.trace_output] = i->second->output()->tracing();
+			if ((*i)->output()) {
+				r[_model.trace_output] = (*i)->output()->tracing();
 			}
 
-			r[_model.port] = i->second;
+			r[_model.port] = (*i);
 		}
 
 		setup_ports_combo (_mtc_combo);

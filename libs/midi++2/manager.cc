@@ -47,14 +47,9 @@ Manager::Manager ()
 
 Manager::~Manager ()
 {
-	PortMap::iterator i;
-
-	for (i = ports_by_device.begin(); i != ports_by_device.end(); i++) {
-		delete (*i).second;
+	for (PortList::iterator p = _ports.begin(); p != _ports.end(); ++p) {
+		delete *p;
 	}
-
-	ports_by_device.erase (ports_by_device.begin(), ports_by_device.end());
-	ports_by_tag.erase (ports_by_tag.begin(), ports_by_tag.end());
 
 	if (theManager == this) {
 		theManager = 0;
@@ -67,84 +62,35 @@ Manager::add_port (const XMLNode& node)
 	Port::Descriptor desc (node);
 	PortFactory factory;
 	Port *port;
-	PortMap::iterator existing;
-	pair<string, Port *> newpair;
+	PortList::iterator p;
 
-	if ((existing = ports_by_tag.find (desc.tag)) != ports_by_tag.end()) {
+	for (p = _ports.begin(); p != _ports.end(); ++p) {
 
-		port = (*existing).second;
-		
-		if (port->mode() == desc.mode) {
-			
-			/* Same mode - reuse the port, and just
-			   create a new tag entry.
-			*/
-			
-			newpair.first = desc.tag;
-			newpair.second = port;
-			
-			ports_by_tag.insert (newpair);
-			return port;
+		if (desc.tag == (*p)->name()) {
+			break;
+		} 
+
+		if (!PortFactory::ignore_duplicate_devices (desc.type)) {
+			if (desc.device == (*p)->device()) {
+				/* If the existing is duplex, and this request
+				   is not, then fail, because most drivers won't
+				   allow opening twice with duplex and non-duplex
+				   operation.
+				*/
+
+				if ((desc.mode == O_RDWR && port->mode() != O_RDWR) ||
+				    (desc.mode != O_RDWR && port->mode() == O_RDWR)) {
+					break;
+				}
+			}
 		}
-		
-		/* If the existing is duplex, and this request
-		   is not, then fail, because most drivers won't
-		   allow opening twice with duplex and non-duplex
-		   operation.
-		*/
-		
-		if ((desc.mode == O_RDWR && port->mode() != O_RDWR) ||
-		    (desc.mode != O_RDWR && port->mode() == O_RDWR)) {
-			error << "MIDIManager: port tagged \""
-			      << desc.tag
-			      << "\" cannot be opened duplex and non-duplex"
-			      << endmsg;
-			return 0;
-		}
-		
-		/* modes must be different or complementary */
 	}
 
-	if (!PortFactory::ignore_duplicate_devices (desc.type)) {
-
-		if ((existing = ports_by_device.find (desc.device)) != ports_by_device.end()) {
-			
-			port = (*existing).second;
-			
-			if (port->mode() == desc.mode) {
-				
-				/* Same mode - reuse the port, and just
-				   create a new tag entry.
-				*/
-				
-				newpair.first = desc.tag;
-				newpair.second = port;
-				
-				ports_by_tag.insert (newpair);
-				return port;
-			}
-			
-			/* If the existing is duplex, and this request
-			   is not, then fail, because most drivers won't
-			   allow opening twice with duplex and non-duplex
-			   operation.
-			*/
-			
-			if ((desc.mode == O_RDWR && port->mode() != O_RDWR) ||
-			    (desc.mode != O_RDWR && port->mode() == O_RDWR)) {
-				error << "MIDIManager: port tagged \""
-				      << desc.tag
-				      << "\" cannot be opened duplex and non-duplex"
-				      << endmsg;
-				return 0;
-			}
-			
-			/* modes must be different or complementary */
-		}
+	if (p != _ports.end()) {
+		return 0;
 	}
 	
 	port = factory.create_port (node, api_data);
-
 	
 	if (port == 0) {
 		return 0;
@@ -155,13 +101,7 @@ Manager::add_port (const XMLNode& node)
 		return 0;
 	}
 
-	newpair.first = port->name();
-	newpair.second = port;
-	ports_by_tag.insert (newpair);
-
-	newpair.first = port->device();
-	newpair.second = port;
-	ports_by_device.insert (newpair);
+	_ports.push_back (port);
 
 	/* first port added becomes the default input
 	   port.
@@ -181,71 +121,43 @@ Manager::add_port (const XMLNode& node)
 int 
 Manager::remove_port (Port* port)
 {
-	PortMap::iterator res;
-
-	for (res = ports_by_device.begin(); res != ports_by_device.end(); ) {
-		PortMap::iterator tmp;
-		tmp = res;
-		++tmp;
-		if (res->second == port) {
-			ports_by_device.erase (res);
-		} 
-		res = tmp;
+	if (inputPort == port) {
+		inputPort = 0;
 	}
-
-
-	for (res = ports_by_tag.begin(); res != ports_by_tag.end(); ) {
-		PortMap::iterator tmp;
-		tmp = res;
-		++tmp;
-		if (res->second == port) {
-			ports_by_tag.erase (res);
-		} 
-		res = tmp;
+	if (outputPort == port) {
+		outputPort = 0;
 	}
-	
+	_ports.remove (port);
 	delete port;
-
 	return 0;
 }
 
 int
 Manager::set_input_port (string tag)
 {
-	PortMap::iterator res;
-	bool found = false;
-
-	for (res = ports_by_tag.begin(); res != ports_by_tag.end(); res++) {
-		if (tag == (*res).first) {
-			found = true;
-			break;
+	for (PortList::iterator p = _ports.begin(); p != _ports.end(); ++p) {
+		if ((*p)->name() == tag) {
+			inputPort = (*p);
+			return 0;
 		}
 	}
-	
-	if (!found) {
-		return -1;
-	}
 
-	inputPort = (*res).second;
-
-	return 0;
+	return -1;
 }
 
 int
 Manager::set_output_port (string tag)
-
 {
-	PortMap::iterator res;
-	bool found = false;
+	PortList::iterator p;
 
-	for (res = ports_by_tag.begin(); res != ports_by_tag.end(); res++) {
-		if (tag == (*res).first) {
-			found = true;
+	for (p = _ports.begin(); p != _ports.end(); ++p) {
+		if ((*p)->name() == tag) {
+			inputPort = (*p);
 			break;
 		}
 	}
-	
-	if (!found) {
+
+	if (p == _ports.end()) {
 		return -1;
 	}
 
@@ -256,7 +168,8 @@ Manager::set_output_port (string tag)
 			outputPort->channel (chan)->all_notes_off (0);
 		}
 	}
-	outputPort = (*res).second;
+	
+	outputPort = (*p);
 
 	// XXX send a signal to say we've changed output ports
 
@@ -266,11 +179,9 @@ Manager::set_output_port (string tag)
 Port *
 Manager::port (string name)
 {
-	PortMap::iterator res;
-
-	for (res = ports_by_tag.begin(); res != ports_by_tag.end(); res++) {
-		if (name == (*res).first) {
-			return (*res).second;
+	for (PortList::iterator p = _ports.begin(); p != _ports.end(); ++p) {
+		if (name == (*p)->name()) {
+			return (*p);
 		}
 	}
 
@@ -281,14 +192,12 @@ int
 Manager::foreach_port (int (*func)(const Port &, size_t, void *),
 			   void *arg)
 {
-	PortMap::const_iterator i;
-	int retval;
-	int n;
+	int n = 0;
 		
-	for (n = 0, i = ports_by_device.begin(); 
-	            i != ports_by_device.end(); i++, n++) {
+	for (PortList::const_iterator p = _ports.begin(); p != _ports.end(); ++p, ++n) {
+		int retval;
 
-		if ((retval = func (*((*i).second), n, arg)) != 0) {
+		if ((retval = func (**p, n, arg)) != 0) {
 			return retval;
 		}
 	}
@@ -299,16 +208,16 @@ Manager::foreach_port (int (*func)(const Port &, size_t, void *),
 void
 Manager::cycle_start(nframes_t nframes)
 {
-	for (PortMap::iterator i = ports_by_device.begin(); i != ports_by_device.end(); i++) {
-		(*i).second->cycle_start (nframes);
+	for (PortList::iterator p = _ports.begin(); p != _ports.end(); ++p) {
+		(*p)->cycle_start (nframes);
 	}
 }
 
 void
 Manager::cycle_end()
 {
-	for (PortMap::iterator i = ports_by_device.begin(); i != ports_by_device.end(); i++) {
-		(*i).second->cycle_end ();
+	for (PortList::iterator p = _ports.begin(); p != _ports.end(); ++p) {
+		(*p)->cycle_end ();
 	}
 }
 

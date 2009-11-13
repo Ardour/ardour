@@ -20,7 +20,7 @@
 #ifndef __midi_manager_h__
 #define __midi_manager_h__
 
-#include <map>
+#include <list>
 #include <vector>
 
 #include <string>
@@ -54,7 +54,7 @@ class Manager {
 
 	Port *port (std::string name);
 
-	size_t    nports () { return ports_by_device.size(); }
+	size_t nports () const { return _ports.size(); }
 
 	/* defaults for clients who are not picky */
 	
@@ -68,12 +68,11 @@ class Manager {
 	int set_input_channel (channel_t);
 	int set_output_channel (channel_t);
 
-	int foreach_port (int (*func)(const Port &, size_t n, void *), 
-			  void *arg);
+	int foreach_port (int (*func)(const Port &, size_t n, void *), void *arg);
 
-	typedef std::map<std::string, Port *> PortMap;
+	typedef std::list<Port *> PortList;
 
-	const PortMap& get_midi_ports() const { return ports_by_tag; } 
+	const PortList& get_midi_ports() const { return _ports; } 
 
 	static Manager *instance () {
 		if (theManager == 0) {
@@ -90,8 +89,7 @@ class Manager {
 	Manager ();
 
 	static Manager *theManager;
-	PortMap         ports_by_device; /* canonical */
-	PortMap         ports_by_tag;    /* may contain duplicate Ports */
+	std::list<Port*> _ports;
 
 	void* api_data;
 

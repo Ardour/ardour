@@ -136,12 +136,11 @@ ARDOUR::setup_midi ()
 	}
 
 	MIDI::Port* first;
-	const MIDI::Manager::PortMap& ports = MIDI::Manager::instance()->get_midi_ports();
-
+	const MIDI::Manager::PortList& ports = MIDI::Manager::instance()->get_midi_ports();
 
 	if (ports.size() > 1) {
 
-		first = ports.begin()->second;
+		first = ports.front();
 
 		/* More than one port, so try using specific names for each port */
 
@@ -170,7 +169,7 @@ ARDOUR::setup_midi ()
 
 	} else if (ports.size() == 1) {
 
-		first = ports.begin()->second;
+		first = ports.front();
 
 		/* Only one port described, so use it for both MTC and MMC */
 
