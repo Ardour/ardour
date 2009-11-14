@@ -285,9 +285,12 @@ PortMatrix::popup_menu (
 
 			boost::weak_ptr<Bundle> w (bc[dim].bundle);
 
+			bool can_add_or_rename = false;
+
 			if (can_add_channel (bc[dim].bundle)) {
 				snprintf (buf, sizeof (buf), _("Add %s"), channel_noun().c_str());
 				sub.push_back (MenuElem (buf, bind (mem_fun (*this, &PortMatrix::add_channel_proxy), w)));
+				can_add_or_rename = true;
 			}
 
 
@@ -299,9 +302,12 @@ PortMatrix::popup_menu (
 						bind (mem_fun (*this, &PortMatrix::rename_channel_proxy), w, bc[dim].channel)
 						)
 					);
+				can_add_or_rename = true;
 			}
 
-			sub.push_back (SeparatorElem ());
+			if (can_add_or_rename) {
+				sub.push_back (SeparatorElem ());
+			}
 
 			if (can_remove_channels (bc[dim].bundle)) {
 				snprintf (buf, sizeof (buf), _("Remove '%s'"), bc[dim].bundle->channel_name (bc[dim].channel).c_str());
@@ -313,7 +319,7 @@ PortMatrix::popup_menu (
 					);
 			}
 
-			if (_show_only_bundles) {
+			if (_show_only_bundles || bc[dim].bundle->nchannels() <= 1) {
 				snprintf (buf, sizeof (buf), _("%s all"), disassociation_verb().c_str());
 			} else {
 				snprintf (
