@@ -126,64 +126,9 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 	cairo_rectangle (cr, 0, 0, _width, _height);
 	cairo_fill (cr);
 
-	/* PORT GROUP NAME */
-
-	double x = 0;
-	double y = 0;
-
-	if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
-		x = slanted_height() / tan (angle());
-		y = _highest_group_name + name_pad();
-	} else {
-		x = 0;
-		y = _height - name_pad();
-	}
-
-	int g = 0;
-	for (PortGroupList::List::const_iterator i = _matrix->columns()->begin(); i != _matrix->columns()->end(); ++i) {
-
-		/* compute width of this group */
-		uint32_t w = 0;
-		if (!(*i)->visible()) {
-			w = grid_spacing ();
-		} else {
-			if (_matrix->show_only_bundles()) {
-				w = (*i)->bundles().size() * grid_spacing();
-			} else {
-				w = (*i)->total_channels() * grid_spacing();
-			}
-		}
-
-		if (w == 0) {
-			continue;
-		}
-
-		/* rectangle */
-		set_source_rgb (cr, get_a_group_colour (g));
-		double const rh = _highest_group_name + 2 * name_pad();
-		if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
-			cairo_rectangle (cr, x, 0, w, rh);
-		} else {
-			cairo_rectangle (cr, x, _height - rh, w, rh);
-		}
-		cairo_fill (cr);
-
-		string const upper = Glib::ustring ((*i)->name).uppercase ();
-		pair<string, double> const display = fit_to_pixels (cr, upper, w);
-
-		/* plot it */
-		set_source_rgb (cr, text_colour());
-		cairo_move_to (cr, x + (w - display.second) / 2, y);
-		cairo_show_text (cr, display.first.c_str());
-
-		x += w;
-		++g;
-
-	}
-
         /* BUNDLE PARALLELOGRAM-TYPE-THING AND NAME */
 
-	x = 0;
+	double x = 0;
 	int N = 0;
 
 	for (PortGroupList::List::const_iterator i = _matrix->columns()->begin(); i != _matrix->columns()->end(); ++i) {
@@ -258,12 +203,14 @@ PortMatrixColumnLabels::parent_to_component_x (double x) const
 double
 PortMatrixColumnLabels::component_to_parent_y (double y) const
 {
+	/* Column labels don't scroll vertically, so y conversion does not depend on yoffset */
 	return y + _parent_rectangle.get_y();
 }
 
 double
 PortMatrixColumnLabels::parent_to_component_y (double y) const
 {
+	/* Column labels don't scroll vertically, so y conversion does not depend on yoffset */
 	return y - _parent_rectangle.get_y();
 }
 
@@ -543,3 +490,68 @@ PortMatrixColumnLabels::button_press (double x, double y, int b, uint32_t t)
 	}
 }
 
+void
+PortMatrixColumnLabels::draw_extra (cairo_t* cr)
+{
+	PortMatrixLabels::draw_extra (cr);
+
+	/* PORT GROUP NAME */
+	
+	double x = 0;
+	double y = 0;
+
+	if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
+		x = component_to_parent_x (slanted_height() / tan (angle()));
+		y = component_to_parent_y ( _highest_group_name + name_pad());
+	} else {
+		x = component_to_parent_x (0);
+		y = component_to_parent_y (_height - name_pad());
+	}
+
+	int g = 0;
+	for (PortGroupList::List::const_iterator i = _matrix->columns()->begin(); i != _matrix->columns()->end(); ++i) {
+
+		/* compute width of this group */
+		uint32_t w = 0;
+		if (!(*i)->visible()) {
+			w = grid_spacing ();
+		} else {
+			if (_matrix->show_only_bundles()) {
+				w = (*i)->bundles().size() * grid_spacing();
+			} else {
+				w = (*i)->total_channels() * grid_spacing();
+			}
+		}
+
+		if (w == 0) {
+			continue;
+		}
+
+		/* rectangle */
+		set_source_rgb (cr, get_a_group_colour (g));
+		double const rh = _highest_group_name + 2 * name_pad();
+		if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
+			cairo_rectangle (cr, x, component_to_parent_y (0), w, rh);
+		} else {
+			cairo_rectangle (cr, x, component_to_parent_y (_height - rh), w, rh);
+		}
+		cairo_fill (cr);
+
+		/* x area available to draw the label in (trying to keep it visible) */
+		double const lx = max (x, double (_parent_rectangle.get_x ()));
+		double const rx = min (x + w, double (_parent_rectangle.get_width()));
+
+		/* hence what abbreviation (or not) we need for the group name */
+		string const upper = Glib::ustring ((*i)->name).uppercase ();
+		pair<string, double> const display = fit_to_pixels (cr, upper, rx - lx);
+
+		/* plot it */
+		set_source_rgb (cr, text_colour());
+		cairo_move_to (cr, (lx + rx - display.second) / 2, y);
+		cairo_show_text (cr, display.first.c_str());
+
+		x += w;
+		++g;
+
+	}
+}

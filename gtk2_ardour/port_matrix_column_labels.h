@@ -43,6 +43,7 @@ public:
 	double component_to_parent_y (double y) const;
 	double parent_to_component_y (double y) const;
 	void mouseover_changed (PortMatrixNode const &);
+	void draw_extra (cairo_t *);
 
 	uint32_t overhang () const {
 		return _overhang;

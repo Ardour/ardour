@@ -50,6 +50,7 @@ public:
 	double component_to_parent_y (double y) const;
 	double parent_to_component_y (double y) const;
 	void mouseover_changed (PortMatrixNode const &);
+	void draw_extra (cairo_t *);
 
 private:
 	void render_channel_name (cairo_t *, Gdk::Color, Gdk::Color, double, double, ARDOUR::BundleChannel const &);

@@ -99,60 +99,9 @@ PortMatrixRowLabels::render (cairo_t* cr)
 	cairo_rectangle (cr, 0, 0, _width, _height);
 	cairo_fill (cr);
 
-	/* PORT GROUP NAMES */
-
-	double x = 0;
-	if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
-		x = 0;
-	} else {
-		x = _width - _highest_group_name - 2 * name_pad();
-	}
-
-	double y = 0;
-	int g = 0;
-	for (PortGroupList::List::const_iterator i = _matrix->rows()->begin(); i != _matrix->rows()->end(); ++i) {
-
-		/* compute height of this group */
-		double h = 0;
-		if (!(*i)->visible()) {
-			h = grid_spacing ();
-		} else {
-			if (_matrix->show_only_bundles()) {
-				h = (*i)->bundles().size() * grid_spacing();
-			} else {
-				h = (*i)->total_channels () * grid_spacing();
-			}
-		}
-
-		if (h == 0) {
-			continue;
-		}
-
-		/* rectangle */
-		set_source_rgb (cr, get_a_group_colour (g));
-		double const rw = _highest_group_name + 2 * name_pad();
-		cairo_rectangle (cr, x, y, rw, h);
-		cairo_fill (cr);
-
-		/* hence what abbreviation (or not) we need for the group name */
-		string const upper = Glib::ustring ((*i)->name).uppercase ();
-		pair<string, double> display = fit_to_pixels (cr, upper, h);
-
-		/* plot it */
-		set_source_rgb (cr, text_colour());
-		cairo_move_to (cr, x + rw - name_pad(), y + (h + display.second) / 2);
-		cairo_save (cr);
-		cairo_rotate (cr, - M_PI / 2);
-		cairo_show_text (cr, display.first.c_str());
-		cairo_restore (cr);
-
-		y += h;
-		++g;
-	}
-
 	/* BUNDLE AND PORT NAMES */
 
-	y = 0;
+	double y = 0;
 	int N = 0;
 	int M = 0;
 	for (PortGroupList::List::const_iterator i = _matrix->rows()->begin(); i != _matrix->rows()->end(); ++i) {
@@ -222,12 +171,14 @@ PortMatrixRowLabels::button_press (double x, double y, int b, uint32_t t)
 double
 PortMatrixRowLabels::component_to_parent_x (double x) const
 {
+	/* Row labels don't scroll horizontally, so x conversion does not depend on xoffset */
 	return x + _parent_rectangle.get_x();
 }
 
 double
 PortMatrixRowLabels::parent_to_component_x (double x) const
 {
+	/* Row labels don't scroll horizontally, so x conversion does not depend on xoffset */
 	return x - _parent_rectangle.get_x();
 }
 
@@ -367,5 +318,66 @@ PortMatrixRowLabels::mouseover_changed (PortMatrixNode const &)
 	clear_channel_highlights ();
 	if (_body->mouseover().column.bundle && _body->mouseover().row.bundle) {
 		add_channel_highlight (_body->mouseover().row);
+	}
+}
+
+void
+PortMatrixRowLabels::draw_extra (cairo_t* cr)
+{
+	PortMatrixLabels::draw_extra (cr);
+	
+	/* PORT GROUP NAMES */
+
+	double x = 0;
+	if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
+		x = component_to_parent_x (0);
+	} else {
+		x = component_to_parent_x (_width - _highest_group_name - 2 * name_pad());
+	}
+
+	double y = component_to_parent_y (0);
+	int g = 0;
+	for (PortGroupList::List::const_iterator i = _matrix->rows()->begin(); i != _matrix->rows()->end(); ++i) {
+
+		/* compute height of this group */
+		double h = 0;
+		if (!(*i)->visible()) {
+			h = grid_spacing ();
+		} else {
+			if (_matrix->show_only_bundles()) {
+				h = (*i)->bundles().size() * grid_spacing();
+			} else {
+				h = (*i)->total_channels () * grid_spacing();
+			}
+		}
+
+		if (h == 0) {
+			continue;
+		}
+
+		/* rectangle */
+		set_source_rgb (cr, get_a_group_colour (g));
+		double const rw = _highest_group_name + 2 * name_pad();
+		cairo_rectangle (cr, x, y, rw, h);
+		cairo_fill (cr);
+
+		/* y area available to draw the label in (trying to keep it visible) */
+		double const ty = max (y, 0.0);
+		double const by = min (y + h, double (_body->alloc_scroll_height ()));
+
+		/* hence what abbreviation (or not) we need for the group name */
+		string const upper = Glib::ustring ((*i)->name).uppercase ();
+		pair<string, double> display = fit_to_pixels (cr, upper, by - ty);
+
+		/* plot it */
+		set_source_rgb (cr, text_colour());
+		cairo_move_to (cr, x + rw - name_pad(), (by + ty + display.second) / 2);
+		cairo_save (cr);
+		cairo_rotate (cr, - M_PI / 2);
+		cairo_show_text (cr, display.first.c_str());
+		cairo_restore (cr);
+
+		y += h;
+		++g;
 	}
 }
