@@ -49,7 +49,7 @@ class PortGroup : public sigc::trackable
 public:
 	PortGroup (std::string const & n);
 
-	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>);
+	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>, bool allow_dups = false);
 	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::IO> io);
 	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::IO>, Gdk::Color);
 	void remove_bundle (boost::shared_ptr<ARDOUR::Bundle>);
@@ -76,7 +76,9 @@ public:
 
 	struct BundleRecord {
 		boost::shared_ptr<ARDOUR::Bundle> bundle;
-		boost::shared_ptr<ARDOUR::IO> io;
+		/** IO whose ports are in the bundle, or 0.  This is so that we can do things like adding
+		    ports to the IO from matrix editor menus. */
+		boost::shared_ptr<ARDOUR::IO> io; 
 		Gdk::Color colour;
 		bool has_colour;
 		sigc::connection changed_connection;
@@ -90,7 +92,7 @@ public:
 
 private:
 	void bundle_changed (ARDOUR::Bundle::Change);
-	void add_bundle_internal (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::IO>, bool, Gdk::Color);
+	void add_bundle_internal (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::IO>, bool, Gdk::Color, bool);
 
 	BundleList _bundles;
 	bool _visible; ///< true if the group is visible in the UI
@@ -106,7 +108,7 @@ class PortGroupList : public sigc::trackable
 
 	void add_group (boost::shared_ptr<PortGroup>);
 	void set_type (ARDOUR::DataType);
-	void gather (ARDOUR::Session &, bool);
+	void gather (ARDOUR::Session &, bool, bool);
 	PortGroup::BundleList const & bundles () const;
 	void clear ();
 	void remove_bundle (boost::shared_ptr<ARDOUR::Bundle>);

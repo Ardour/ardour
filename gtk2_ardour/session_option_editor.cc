@@ -32,7 +32,7 @@ public:
 			_port_group->add_bundle (_session.click_io()->bundle());
 			_port_group->add_bundle (_session.the_auditioner()->output()->bundle());
 		} else {
-			_ports[OTHER].gather (_session, true);
+			_ports[OTHER].gather (_session, true, false);
 		}
 	}
 

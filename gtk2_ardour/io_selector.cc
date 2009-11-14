@@ -70,7 +70,7 @@ IOSelector::setup_ports (int dim)
 
 	if (dim == _other) {
 
-		_ports[_other].gather (_session, _find_inputs_for_io_outputs);
+		_ports[_other].gather (_session, _find_inputs_for_io_outputs, false);
 
 	} else {
 

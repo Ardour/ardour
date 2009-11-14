@@ -50,19 +50,24 @@ PortGroup::PortGroup (std::string const & n)
 
 }
 
+/** Add a bundle to a group.
+ *  @param b Bundle.
+ *  @param allow_dups true to allow the group to contain more than one bundle with the same port, otherwise false.
+ */
 void
-PortGroup::add_bundle (boost::shared_ptr<Bundle> b)
+PortGroup::add_bundle (boost::shared_ptr<Bundle> b, bool allow_dups)
 {
-	add_bundle_internal (b, boost::shared_ptr<IO> (), false, Gdk::Color ());
+	add_bundle_internal (b, boost::shared_ptr<IO> (), false, Gdk::Color (), allow_dups);
 }
 
 /** Add a bundle to a group.
  *  @param b Bundle.
+ *  @param io IO whose ports are in the bundle.
  */
 void
 PortGroup::add_bundle (boost::shared_ptr<Bundle> b, boost::shared_ptr<IO> io)
 {
-	add_bundle_internal (b, io, false, Gdk::Color ());
+	add_bundle_internal (b, io, false, Gdk::Color (), false);
 }
 
 /** Add a bundle to a group.
@@ -72,23 +77,26 @@ PortGroup::add_bundle (boost::shared_ptr<Bundle> b, boost::shared_ptr<IO> io)
 void
 PortGroup::add_bundle (boost::shared_ptr<Bundle> b, boost::shared_ptr<IO> io, Gdk::Color c)
 {
-	add_bundle_internal (b, io, true, c);
+	add_bundle_internal (b, io, true, c, false);
 }
 
 void
-PortGroup::add_bundle_internal (boost::shared_ptr<Bundle> b, boost::shared_ptr<IO> io, bool has_colour, Gdk::Color colour)
+PortGroup::add_bundle_internal (boost::shared_ptr<Bundle> b, boost::shared_ptr<IO> io, bool has_colour, Gdk::Color colour, bool allow_dups)
 {
 	assert (b.get());
 
-	/* don't add this bundle if we already have one with the same ports */
-
-	BundleList::iterator i = _bundles.begin ();
-	while (i != _bundles.end() && b->has_same_ports (i->bundle) == false) {
-		++i;
-	}
-
-	if (i != _bundles.end ()) {
-		return;
+	if (!allow_dups) {
+		
+		/* don't add this bundle if we already have one with the same ports */
+		
+		BundleList::iterator i = _bundles.begin ();
+		while (i != _bundles.end() && b->has_same_ports (i->bundle) == false) {
+			++i;
+		}
+		
+		if (i != _bundles.end ()) {
+			return;
+		}
 	}
 
 	BundleRecord r;
@@ -228,7 +236,7 @@ PortGroupList::maybe_add_processor_to_bundle (boost::weak_ptr<Processor> wp, boo
 
 /** Gather bundles from around the system and put them in this PortGroupList */
 void
-PortGroupList::gather (ARDOUR::Session& session, bool inputs)
+PortGroupList::gather (ARDOUR::Session& session, bool inputs, bool allow_dups)
 {
 	clear ();
 
@@ -296,13 +304,13 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs)
 
 	for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 		if (boost::dynamic_pointer_cast<UserBundle> (*i) && (*i)->ports_are_inputs() == inputs && (*i)->type() == _type) {
-			system->add_bundle (*i);
+			system->add_bundle (*i, allow_dups);
 		}
 	}
 
 	for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 		if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0 && (*i)->ports_are_inputs() == inputs && (*i)->type() == _type) {
-			system->add_bundle (*i);
+			system->add_bundle (*i, allow_dups);
 		}
 	}
 	

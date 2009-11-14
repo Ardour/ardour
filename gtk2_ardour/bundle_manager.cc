@@ -52,7 +52,12 @@ BundleEditorMatrix::setup_ports (int dim)
 		_ports[OURS].add_group (_port_group);
 	} else {
 		_ports[OTHER].suspend_signals ();
-		_ports[OTHER].gather (_session, _bundle->ports_are_inputs());
+
+		/* when we gather, allow the matrix to contain bundles with duplicate port sets,
+		   otherwise in some cases the basic system IO ports may be hidden, making
+		   the bundle editor useless */
+		
+		_ports[OTHER].gather (_session, _bundle->ports_are_inputs(), true);
 		_ports[OTHER].remove_bundle (_bundle);
 		_ports[OTHER].resume_signals ();
 	}
