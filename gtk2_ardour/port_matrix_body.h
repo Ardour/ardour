@@ -96,6 +96,7 @@ private:
 
 	PortMatrixNode _mouseover;
 	bool _mouse_over_grid;
+	bool _ignore_component_size_changed;
 
 	std::list<sigc::connection> _bundle_connections;
 };

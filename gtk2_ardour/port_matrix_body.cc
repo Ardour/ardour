@@ -30,9 +30,12 @@ using namespace std;
 
 PortMatrixBody::PortMatrixBody (PortMatrix* p)
 	: _matrix (p),
+	  _alloc_width (0),
+	  _alloc_height (0),
 	  _xoffset (0),
 	  _yoffset (0),
-	  _mouse_over_grid (false)
+	  _mouse_over_grid (false),
+	  _ignore_component_size_changed (false)
 {
 	_column_labels = new PortMatrixColumnLabels (p, this);
 	_row_labels = new PortMatrixRowLabels (p, this);
@@ -265,7 +268,10 @@ PortMatrixBody::setup ()
 	_grid->setup ();
 
 	set_mouseover (PortMatrixNode ());
+	
+	_ignore_component_size_changed = true;
 	compute_rectangles ();
+	_ignore_component_size_changed = false;
 }
 
 uint32_t
@@ -470,6 +476,10 @@ PortMatrixBody::set_cairo_clip (cairo_t* cr, Gdk::Rectangle const & r) const
 void
 PortMatrixBody::component_size_changed ()
 {
+	if (_ignore_component_size_changed) {
+		return;
+	}
+	
 	compute_rectangles ();
 	_matrix->setup_scrollbars ();
 }
