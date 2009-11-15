@@ -72,7 +72,6 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	manager = mgr;
 	session = 0;
-	_menu = 0;
 	in_row_change = false;
 
 	plugin_model = Gtk::ListStore::create (plugin_columns);
@@ -563,7 +562,8 @@ struct PluginMenuCompareByCategory {
     }
 };
 
-Gtk::Menu&
+/** @return a Gtk::manage()d menu */
+Gtk::Menu*
 PluginSelector::plugin_menu()
 {
 	PluginInfoList all_plugs;
@@ -581,27 +581,25 @@ PluginSelector::plugin_menu()
 
 	using namespace Menu_Helpers;
 
-	if (!_menu) {
-		_menu = new Menu();
-		_menu->set_name("ArdourContextMenu");
-	}
+	Menu* menu = manage (new Menu());
+	menu->set_name("ArdourContextMenu");
 
-	MenuList& items = _menu->items();
+	MenuList& items = menu->items();
 	items.clear ();
 
 	Gtk::Menu* favs = create_favs_menu(all_plugs);
-	items.push_back (MenuElem (_("Favorites"), *favs));
+	items.push_back (MenuElem (_("Favorites"), *manage (favs)));
 
 	items.push_back (MenuElem (_("Plugin Manager"), mem_fun (*this, &PluginSelector::show_manager)));
 	items.push_back (SeparatorElem ());
 
 	Menu* by_creator = create_by_creator_menu(all_plugs);
-	items.push_back (MenuElem (_("By Creator"), *by_creator));
+	items.push_back (MenuElem (_("By Creator"), *manage (by_creator)));
 
 	Menu* by_category = create_by_category_menu(all_plugs);
-	items.push_back (MenuElem (_("By Category"), *by_category));
+	items.push_back (MenuElem (_("By Category"), *manage (by_category)));
 
-	return *_menu;
+	return menu;
 }
 
 Gtk::Menu*
@@ -655,7 +653,7 @@ PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 			submenu = x->second;
 		} else {
 			submenu = new Gtk::Menu;
-			by_creator_items.push_back (MenuElem (creator, *submenu));
+			by_creator_items.push_back (MenuElem (creator, *manage (submenu)));
 			creator_submenu_map.insert (pair<Glib::ustring,Menu*> (creator, submenu));
 			submenu->set_name("ArdourContextMenu");
 		}
@@ -691,7 +689,7 @@ PluginSelector::create_by_category_menu (ARDOUR::PluginInfoList& all_plugs)
 			submenu = x->second;
 		} else {
 			submenu = new Gtk::Menu;
-			by_category_items.push_back (MenuElem (category, *submenu));
+			by_category_items.push_back (MenuElem (category, *manage (submenu)));
 			category_submenu_map.insert (pair<Glib::ustring,Menu*> (category, submenu));
 			submenu->set_name("ArdourContextMenu");
 		}

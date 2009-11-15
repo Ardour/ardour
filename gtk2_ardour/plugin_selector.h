@@ -45,7 +45,7 @@ class PluginSelector : public ArdourDialog
 	void set_session (ARDOUR::Session*);
 	void on_show ();
 
-	Gtk::Menu& plugin_menu ();
+	Gtk::Menu* plugin_menu ();
 	void show_manager ();
 
   private:
@@ -132,7 +132,6 @@ class PluginSelector : public ArdourDialog
 	bool in_row_change;
 
 	void plugin_chosen_from_menu (const ARDOUR::PluginInfoPtr&);
-	Gtk::Menu* _menu;
 
 	Gtk::Menu* create_favs_menu (ARDOUR::PluginInfoList&);
 	Gtk::Menu* create_by_creator_menu (ARDOUR::PluginInfoList&);

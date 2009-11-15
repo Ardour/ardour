@@ -309,7 +309,7 @@ ProcessorBox::show_processor_menu (gint arg)
 	Gtk::MenuItem* plugin_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/processormenu/newplugin"));
 
 	if (plugin_menu_item) {
-		plugin_menu_item->set_submenu (_get_plugin_selector()->plugin_menu());
+		plugin_menu_item->set_submenu (*_get_plugin_selector()->plugin_menu());
 	}
 
 	paste_action->set_sensitive (!_rr_selection.processors.empty());
