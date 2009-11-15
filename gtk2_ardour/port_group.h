@@ -122,12 +122,14 @@ class PortGroupList : public sigc::trackable
 	void resume_signals ();
 
 	List::const_iterator begin () const {
-		return _groups.begin();
+		return _groups.begin ();
 	}
 
 	List::const_iterator end () const {
-		return _groups.end();
+		return _groups.end ();
 	}
+
+	bool empty () const;
 
 	sigc::signal<void> Changed;
 	sigc::signal<void, ARDOUR::Bundle::Change> BundleChanged;

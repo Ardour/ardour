@@ -565,6 +565,17 @@ PortGroupList::io_from_bundle (boost::shared_ptr<ARDOUR::Bundle> b) const
 	return boost::shared_ptr<IO> ();
 }
 
+bool
+PortGroupList::empty () const
+{
+	List::const_iterator i = _groups.begin ();
+	while (i != _groups.end() && (*i)->total_channels() == 0) {
+		++i;
+	}
+
+	return (i == _groups.end());
+}
+
 
 RouteBundle::RouteBundle (boost::shared_ptr<Bundle> r)
 	: _route (r)

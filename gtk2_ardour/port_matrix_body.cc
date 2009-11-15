@@ -55,6 +55,31 @@ PortMatrixBody::~PortMatrixBody ()
 bool
 PortMatrixBody::on_expose_event (GdkEventExpose* event)
 {
+	if (_matrix->columns()->empty() || _matrix->rows()->empty()) {
+
+		/* nothing to connect */
+
+		cairo_t* cr = gdk_cairo_create (get_window()->gobj());
+
+		cairo_set_source_rgb (cr, 0, 0, 0);
+		cairo_rectangle (cr, 0, 0, _alloc_width, _alloc_height);
+		cairo_fill (cr);
+
+		stringstream t;
+		t << _("There are no ") << (_matrix->type() == ARDOUR::DataType::AUDIO ? _("audio") : _("MIDI")) << _(" ports to connect.");
+
+		cairo_text_extents_t ext;
+		cairo_text_extents (cr, t.str().c_str(), &ext);
+
+		cairo_set_source_rgb (cr, 1, 1, 1);
+		cairo_move_to (cr, (_alloc_width - ext.width) / 2, (_alloc_height + ext.height) / 2);
+		cairo_show_text (cr, t.str().c_str ());
+
+		cairo_destroy (cr);
+
+		return true;
+	}
+
 	Gdk::Rectangle const exposure (
 		event->area.x, event->area.y, event->area.width, event->area.height
 		);
@@ -146,6 +171,13 @@ PortMatrixBody::on_size_request (Gtk::Requisition *req)
 	pair<int, int> const col = _column_labels->dimensions ();
 	pair<int, int> const row = _row_labels->dimensions ();
 	pair<int, int> const grid = _grid->dimensions ();
+
+	if (grid.first == 0 && grid.second == 0) {
+		/* nothing to display */
+		req->width = 256;
+		req->height = 64;
+		return;
+	}
 
 	/* don't ask for the maximum size of our contents, otherwise GTK won't
 	   let the containing window shrink below this size */
