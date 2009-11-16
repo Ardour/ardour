@@ -63,7 +63,6 @@ using PBD::atoi;
 
 Mixer_UI::Mixer_UI ()
 	: Window (Gtk::WINDOW_TOPLEVEL)
-	, _plugin_selector (0)
 {
 	session = 0;
 	_strip_width = Config->get_default_narrow_ms() ? Narrow : Wide;
@@ -252,6 +251,8 @@ Mixer_UI::Mixer_UI ()
 	group_display.show();
 
 	auto_rebinding = FALSE;
+
+	_plugin_selector = new PluginSelector (PluginManager::the_manager ());
 }
 
 Mixer_UI::~Mixer_UI ()
@@ -1554,9 +1555,5 @@ Mixer_UI::set_route_group_activation (RouteGroup* g, bool a)
 PluginSelector*
 Mixer_UI::plugin_selector()
 {
-	if (!_plugin_selector) {
-		_plugin_selector = new PluginSelector (PluginManager::the_manager());
-		_plugin_selector->set_session (session);
-	}
 	return _plugin_selector;
 }

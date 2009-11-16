@@ -70,9 +70,13 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	set_name ("PluginSelectorWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
+	_plugin_menu = 0;
 	manager = mgr;
 	session = 0;
 	in_row_change = false;
+
+	manager->PluginListChanged.connect (mem_fun (*this, &PluginSelector::build_plugin_menu));
+	build_plugin_menu ();
 
 	plugin_model = Gtk::ListStore::create (plugin_columns);
 	plugin_display.set_model (plugin_model);
@@ -187,6 +191,11 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	added_list.get_selection()->signal_changed().connect (mem_fun(*this, &PluginSelector::added_list_selection_changed));
 
 	refill ();
+}
+
+PluginSelector::~PluginSelector ()
+{
+	delete _plugin_menu;
 }
 
 void
@@ -562,9 +571,15 @@ struct PluginMenuCompareByCategory {
     }
 };
 
-/** @return a Gtk::manage()d menu */
+/** @return Plugin menu. The caller should not delete it */
 Gtk::Menu*
 PluginSelector::plugin_menu()
+{
+	return _plugin_menu;
+}
+
+void
+PluginSelector::build_plugin_menu ()
 {
 	PluginInfoList all_plugs;
 
@@ -581,10 +596,12 @@ PluginSelector::plugin_menu()
 
 	using namespace Menu_Helpers;
 
-	Menu* menu = manage (new Menu());
-	menu->set_name("ArdourContextMenu");
-
-	MenuList& items = menu->items();
+	delete _plugin_menu;
+	
+	_plugin_menu = new Menu;
+	_plugin_menu->set_name("ArdourContextMenu");
+	
+	MenuList& items = _plugin_menu->items();
 	items.clear ();
 
 	Gtk::Menu* favs = create_favs_menu(all_plugs);
@@ -598,8 +615,6 @@ PluginSelector::plugin_menu()
 
 	Menu* by_category = create_by_category_menu(all_plugs);
 	items.push_back (MenuElem (_("By Category"), *manage (by_category)));
-
-	return menu;
 }
 
 Gtk::Menu*
@@ -742,6 +757,8 @@ PluginSelector::favorite_changed (const Glib::ustring& path)
 		manager->set_status (pi->type, pi->unique_id, status);
 
 		manager->save_statuses ();
+
+		build_plugin_menu ();
 	}
 	in_row_change = false;
 }

@@ -156,6 +156,8 @@ PluginManager::refresh ()
 #ifdef HAVE_AUDIOUNITS
 	au_refresh ();
 #endif
+
+	PluginListChanged (); /* EMIT SIGNAL */
 }
 
 void

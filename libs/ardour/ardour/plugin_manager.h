@@ -69,6 +69,9 @@ class PluginManager : public boost::noncopyable {
 	void set_status (ARDOUR::PluginType type, std::string unique_id, PluginStatusType status);
 	PluginStatusType get_status (const PluginInfoPtr&);
 
+	/** plugins were added to or removed from one of the PluginInfoLists */
+	sigc::signal<void> PluginListChanged;
+
   private:
 	struct PluginStatus {
 	    ARDOUR::PluginType type;

@@ -37,6 +37,7 @@ class PluginSelector : public ArdourDialog
 {
   public:
 	PluginSelector (ARDOUR::PluginManager *);
+	~PluginSelector ();
 
 	void set_interested_object (PluginInterestedObject&);
 
@@ -114,6 +115,7 @@ class PluginSelector : public ArdourDialog
 	void vst_refiller (const std::string&);
 	void au_refiller (const std::string&);
 
+	Gtk::Menu* _plugin_menu;
 	ARDOUR::PluginManager *manager;
 
 	void row_clicked(GdkEventButton *);
@@ -136,6 +138,7 @@ class PluginSelector : public ArdourDialog
 	Gtk::Menu* create_favs_menu (ARDOUR::PluginInfoList&);
 	Gtk::Menu* create_by_creator_menu (ARDOUR::PluginInfoList&);
 	Gtk::Menu* create_by_category_menu (ARDOUR::PluginInfoList&);
+	void build_plugin_menu ();
 };
 
 #endif // __ardour_plugin_selector_h__
