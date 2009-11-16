@@ -166,9 +166,6 @@ PortMatrixGrid::render_group_pair (cairo_t* cr, boost::shared_ptr<const PortGrou
 										   ARDOUR::BundleChannel (j->bundle, 0)
 										   ));
 				switch (s) {
-				case PortMatrixNode::UNKNOWN:
-					draw_unknown_indicator (cr, bx, by);
-					break;
 				case PortMatrixNode::ASSOCIATED:
 					draw_association_indicator (cr, bx, by);
 					break;
@@ -208,10 +205,6 @@ PortMatrixGrid::render_group_pair (cairo_t* cr, boost::shared_ptr<const PortGrou
 						switch (s) {
 						case PortMatrixNode::ASSOCIATED:
 							draw_association_indicator (cr, tx, ty);
-							break;
-
-						case PortMatrixNode::UNKNOWN:
-							draw_unknown_indicator (cr, tx, ty);
 							break;
 
 						case PortMatrixNode::NOT_ASSOCIATED:
@@ -256,20 +249,6 @@ void
 PortMatrixGrid::draw_empty_square (cairo_t* cr, uint32_t x, uint32_t y)
 {
 	set_source_rgb (cr, background_colour());
-	cairo_rectangle (
-		cr,
-		x + thick_grid_line_width(),
-		y + thick_grid_line_width(),
-		grid_spacing() - 2 * thick_grid_line_width(),
-		grid_spacing() - 2 * thick_grid_line_width()
-		);
-	cairo_fill (cr);
-}
-
-void
-PortMatrixGrid::draw_unknown_indicator (cairo_t* cr, uint32_t x, uint32_t y)
-{
-	set_source_rgba (cr, unknown_colour(), 0.5);
 	cairo_rectangle (
 		cr,
 		x + thick_grid_line_width(),
@@ -340,10 +319,6 @@ PortMatrixGrid::get_association (PortMatrixNode node) const
 					}
 					break;
 
-				case PortMatrixNode::UNKNOWN:
-					have_unknown = true;
-					break;
-
 				case PortMatrixNode::NOT_ASSOCIATED:
 					if (i == j) {
 						have_diagonal_not_association = true;
@@ -356,9 +331,7 @@ PortMatrixGrid::get_association (PortMatrixNode node) const
 			}
 		}
 
-		if (have_unknown) {
-			return PortMatrixNode::UNKNOWN;
-		} else if (have_diagonal_association && !have_off_diagonal_association && !have_diagonal_not_association) {
+		if (have_diagonal_association && !have_off_diagonal_association && !have_diagonal_not_association) {
 			return PortMatrixNode::ASSOCIATED;
 		} else if (!have_diagonal_association && !have_off_diagonal_association) {
 			return PortMatrixNode::NOT_ASSOCIATED;
@@ -375,7 +348,8 @@ PortMatrixGrid::get_association (PortMatrixNode node) const
 
 	}
 
-	return PortMatrixNode::UNKNOWN;
+	/* NOTREACHED */
+	return PortMatrixNode::NOT_ASSOCIATED;
 }
 
 void

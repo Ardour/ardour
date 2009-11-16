@@ -40,7 +40,6 @@ struct PortMatrixNode
 	enum State {
 		ASSOCIATED,     ///< the ports are associated
 		NOT_ASSOCIATED, ///< the ports are not associated
-		UNKNOWN,        ///< we don't know anything about these two ports' relationship
 		PARTIAL         ///< used when we are examining bundles; the bundles are partially associated
 	};
 };

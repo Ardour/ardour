@@ -113,7 +113,7 @@ IOSelector::get_state (ARDOUR::BundleChannel c[2]) const
 	if (our_ports.empty() || other_ports.empty()) {
 		/* we're looking at a bundle with no parts associated with this channel,
 		   so nothing to connect */
-		return PortMatrixNode::UNKNOWN;
+		return PortMatrixNode::NOT_ASSOCIATED;
 	}
 
 	for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {

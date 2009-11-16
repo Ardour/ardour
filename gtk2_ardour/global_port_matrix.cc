@@ -69,9 +69,14 @@ GlobalPortMatrix::set_state (ARDOUR::BundleChannel c[2], bool s)
 				} else {
 					q->disconnect (*i);
 				}
+			} else {
+				/* two non-Ardour ports */
+				if (s) {
+					jack_connect (_session.engine().jack (), j->c_str(), i->c_str());
+				} else {
+					jack_disconnect (_session.engine().jack (), j->c_str(), i->c_str());
+				}
 			}
-
-			/* we don't handle connections between two non-Ardour ports */
 		}
 	}
 }
@@ -84,7 +89,7 @@ GlobalPortMatrix::get_state (ARDOUR::BundleChannel c[2]) const
 	if (in_ports.empty() || out_ports.empty()) {
 		/* we're looking at a bundle with no parts associated with this channel,
 		   so nothing to connect */
-		return PortMatrixNode::UNKNOWN;
+		return PortMatrixNode::NOT_ASSOCIATED;
 	}
 
 	for (ARDOUR::Bundle::PortList::const_iterator i = in_ports.begin(); i != in_ports.end(); ++i) {
@@ -93,9 +98,31 @@ GlobalPortMatrix::get_state (ARDOUR::BundleChannel c[2]) const
 			ARDOUR::Port* p = _session.engine().get_port_by_name (*i);
 			ARDOUR::Port* q = _session.engine().get_port_by_name (*j);
 
-			/* we don't know the state of connections between two non-Ardour ports */
 			if (!p && !q) {
-				return PortMatrixNode::UNKNOWN;
+				/* two non-Ardour ports; things are slightly more involved */
+				/* XXX: is this the easiest way to do this? */
+				/* XXX: isn't this very inefficient? */
+
+				jack_client_t* jack = _session.engine().jack ();
+				jack_port_t* jp = jack_port_by_name (jack, i->c_str());
+				if (jp == 0) {
+					return PortMatrixNode::NOT_ASSOCIATED;
+				}
+				
+				char const ** c = jack_port_get_all_connections (jack, jp);
+
+				char const ** p = c;
+				
+				while (p && *p != 0) {
+					if (strcmp (*p, j->c_str()) == 0) {
+						free (c);
+						return PortMatrixNode::ASSOCIATED;
+					}
+					++p;
+				}
+
+				free (c);
+				return PortMatrixNode::NOT_ASSOCIATED;
 			}
 
 			if (p && p->connected_to (*j) == false) {
