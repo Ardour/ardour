@@ -30,13 +30,16 @@ public:
 
 	void move_selected_tracks (bool);
 	void show_track_in_display (TimeAxisView &);
+	
 	void suspend_redisplay () {
 		_no_redisplay = true;
 	}
+	
 	void resume_redisplay () {
 		_no_redisplay = false;
 		redisplay ();
 	}
+	
 	void redisplay ();
 	void update_visibility ();
 	void routes_added (std::list<RouteTimeAxisView*> routes);
@@ -50,6 +53,8 @@ private:
 
 	void initial_display ();
 	void on_tv_rec_enable_toggled (Glib::ustring const &);
+	void on_tv_mute_enable_toggled (Glib::ustring const &);
+	void on_tv_solo_enable_toggled (Glib::ustring const &);
 	void build_menu ();
 	void show_menu ();
 	void route_deleted (Gtk::TreeModel::Path const &);
@@ -60,6 +65,8 @@ private:
 	void route_removed (TimeAxisView *);
 	void handle_gui_changes (std::string const &, void *);
 	void update_rec_display ();
+	void update_mute_display (void* /*src*/);
+	void update_solo_display (void* /*src*/);
 	void set_all_tracks_visibility (bool);
 	void set_all_audio_visibility (int, bool);
 	void show_all_routes ();
@@ -68,9 +75,11 @@ private:
 	void hide_all_audiotracks ();
 	void show_all_audiobus ();
 	void hide_all_audiobus ();
+	
 	void display_drag_data_received (
 		Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint
 		);
+	
 	void track_list_reorder (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const & iter, int* new_order);
 	bool selection_filter (Glib::RefPtr<Gtk::TreeModel> const &, Gtk::TreeModel::Path const &, bool);
 	void name_edit (Glib::ustring const &, Glib::ustring const &);
@@ -80,13 +89,18 @@ private:
 			add (text);
 			add (visible);
 			add (rec_enabled);
+			add (mute_enabled);
+			add (solo_enabled);
 			add (is_track);
 			add (tv);
 			add (route);
 		}
+		
 		Gtk::TreeModelColumn<Glib::ustring>  text;
 		Gtk::TreeModelColumn<bool>           visible;
 		Gtk::TreeModelColumn<bool>           rec_enabled;
+		Gtk::TreeModelColumn<bool>           mute_enabled;
+		Gtk::TreeModelColumn<bool>           solo_enabled;
 		Gtk::TreeModelColumn<bool>           is_track;
 		Gtk::TreeModelColumn<TimeAxisView*>  tv;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> >  route;
@@ -96,9 +110,11 @@ private:
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Route> > _display;
 	Glib::RefPtr<Gtk::ListStore> _model;
 	ModelColumns _columns;
+	
 	bool _ignore_reorder;
 	bool _no_redisplay;
 	bool _redisplay_does_not_sync_order_keys;
 	bool _redisplay_does_not_reset_order_keys;
+	
 	Gtk::Menu* _menu;
 };
