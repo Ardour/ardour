@@ -523,7 +523,7 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 
 		/* copy the diskstream data to all output buffers */
 
-		size_t limit = n_process_buffers().n_audio();
+		size_t limit = _input->n_ports().n_audio();
 		BufferSet& bufs = _session.get_scratch_buffers ();
 		const size_t blimit = bufs.count().n_audio();
 

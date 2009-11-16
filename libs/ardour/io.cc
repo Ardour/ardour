@@ -41,7 +41,6 @@
 #include "ardour/midi_port.h"
 #include "ardour/session.h"
 #include "ardour/cycle_timer.h"
-#include "ardour/panner.h"
 #include "ardour/buffer_set.h"
 #include "ardour/meter.h"
 #include "ardour/amp.h"

@@ -1376,6 +1376,7 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 
 	_in_configure_processors = true;
 
+
 	// Check each processor in order to see if we can configure as requested
 	ChanCount in = _input->n_ports ();
 	ChanCount out;
@@ -1404,11 +1405,6 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 		processor_max_streams = ChanCount::max(processor_max_streams, c->first);
 		processor_max_streams = ChanCount::max(processor_max_streams, c->second);
 		out = c->second;
-	}
-
-	// Ensure route outputs match last processor's outputs
-	if (out != _output->n_ports ()) {
-		_output->ensure_io (out, false, this);
 	}
 
 	_in_configure_processors = false;
