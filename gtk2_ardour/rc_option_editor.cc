@@ -27,9 +27,10 @@ using namespace ARDOUR;
 class MIDIPorts : public OptionEditorBox
 {
 public:
-	MIDIPorts (RCConfiguration* c)
+	MIDIPorts (RCConfiguration* c, list<ComboOption<string>* > const & o)
 		: _rc_config (c),
-		  _add_port_button (Stock::ADD)
+		  _add_port_button (Stock::ADD),
+		  _port_combos (o)
 	{
 		_store = ListStore::create (_model);
 		_view.set_model (_store);
@@ -51,87 +52,15 @@ public:
 
 		_box->pack_start (*h);
 
-		Table* t = manage (new Table (2, 4));
-		t->set_spacings (12);
-
-		int n = 0;
-		Label* l = manage (new Label (_("Receive MTC via:")));
-		l->set_alignment (1, 0.5);
-		t->attach (*l, 0, 1, n, n + 1, EXPAND | FILL, FILL);
-		t->attach (_mtc_combo, 1, 2, n, n + 1, EXPAND | FILL, EXPAND | FILL);
-		++n;
-
-		l = manage (new Label (_("Receive MIDI clock via:")));
-		l->set_alignment (1, 0.5);
-		t->attach (*l, 0, 1, n, n + 1, FILL, FILL);
-		t->attach (_midi_clock_combo, 1, 2, n, n + 1, FILL, FILL);
-		++n;
-
-		l = manage (new Label (_("Receive MMC via:")));
-		l->set_alignment (1, 0.5);
-		t->attach (*l, 0, 1, n, n + 1, FILL, FILL);
-		t->attach (_mmc_combo, 1, 2, n, n + 1, FILL, FILL);
-		++n;
-
-		l = manage (new Label (_("Receive MIDI parameter control via:")));
-		l->set_alignment (1, 0.5);
-		t->attach (*l, 0, 1, n, n + 1, FILL, FILL);
-		t->attach (_mpc_combo, 1, 2, n, n + 1, FILL, FILL);
-		++n;
-
-		_box->pack_start (*t, true, true);
-
 		ports_changed ();
 
 		_store->signal_row_changed().connect (mem_fun (*this, &MIDIPorts::model_changed));
 
 		_add_port_button.signal_clicked().connect (mem_fun (*this, &MIDIPorts::add_port_clicked));
-		_mtc_combo.signal_changed().connect (mem_fun (*this, &MIDIPorts::mtc_combo_changed));
-		_mmc_combo.signal_changed().connect (mem_fun (*this, &MIDIPorts::mmc_combo_changed));
-		_mpc_combo.signal_changed().connect (mem_fun (*this, &MIDIPorts::mpc_combo_changed));
-		_midi_clock_combo.signal_changed().connect (mem_fun (*this, &MIDIPorts::midi_clock_combo_changed));
 	}
 
-	void parameter_changed (string const & p)
-	{
-		if (p == "mtc-port-name") {
-			_mtc_combo.set_active_text (_rc_config->get_mtc_port_name());
-		} else if (p == "mmc-port-name") {
-			_mmc_combo.set_active_text (_rc_config->get_mmc_port_name());
-		} else if (p == "midi-port-name") {
-			_mpc_combo.set_active_text (_rc_config->get_midi_port_name());
-		} else if (p == "midi-clock-port-name") {
-			_midi_clock_combo.set_active_text (_rc_config->get_midi_clock_port_name());
-		}
-	}
-
-	void set_state_from_config ()
-	{
-		parameter_changed ("mtc-port-name");
-		parameter_changed ("mmc-port-name");
-		parameter_changed ("midi-port-name");
-		parameter_changed ("midi-clock-port-name");
-	}
-
-	void mtc_combo_changed ()
-	{
-		_rc_config->set_mtc_port_name (_mtc_combo.get_active_text());
-	}
-
-	void mmc_combo_changed ()
-	{
-		_rc_config->set_mmc_port_name (_mmc_combo.get_active_text());
-	}
-
-	void mpc_combo_changed ()
-	{
-		_rc_config->set_midi_port_name (_mpc_combo.get_active_text());
-	}
-
-	void midi_clock_combo_changed ()
-	{
-		_rc_config->set_midi_clock_port_name (_midi_clock_combo.get_active_text());
-	}
+	void parameter_changed (string const &) {}
+	void set_state_from_config () {}
 
 private:
 
@@ -162,19 +91,16 @@ private:
 			}
 
 		}
-
-
-
 	}
 
-	void setup_ports_combo (ComboBoxText& c)
+	void setup_ports_combo (ComboOption<string>* c)
 	{
-		c.clear_items ();
+		c->clear ();
 		MIDI::Manager::PortList const & ports = MIDI::Manager::instance()->get_midi_ports ();
 		for (MIDI::Manager::PortList::const_iterator i = ports.begin(); i != ports.end(); ++i) {
-			c.append_text ((*i)->name());
+			c->add ((*i)->name(), (*i)->name());
 		}
-	}
+	}	
 
 	void ports_changed ()
 	{
@@ -202,10 +128,9 @@ private:
 			r[_model.port] = (*i);
 		}
 
-		setup_ports_combo (_mtc_combo);
-		setup_ports_combo (_midi_clock_combo);
-		setup_ports_combo (_mmc_combo);
-		setup_ports_combo (_mpc_combo);
+		for (list<ComboOption<string>* >::iterator i = _port_combos.begin(); i != _port_combos.end(); ++i) {
+			setup_ports_combo (*i);
+		}
 	}
 
 	void port_offline_changed (MIDI::Port* p)
@@ -290,6 +215,7 @@ private:
 	ComboBoxText _midi_clock_combo;
 	ComboBoxText _mmc_combo;
 	ComboBoxText _mpc_combo;
+	list<ComboOption<string>* > _port_combos;
 };
 
 
@@ -304,7 +230,7 @@ public:
 		t->set_spacings (4);
 
 		Label* l = manage (new Label (_("Click audio file:")));
-		l->set_alignment (1, 0.5);
+		l->set_alignment (0, 0.5);
 		t->attach (*l, 0, 1, 0, 1, FILL);
 		t->attach (_click_path_entry, 1, 2, 0, 1, FILL);
 		Button* b = manage (new Button (_("Browse...")));
@@ -312,7 +238,7 @@ public:
 		t->attach (*b, 2, 3, 0, 1, FILL);
 
 		l = manage (new Label (_("Click emphasis audio file:")));
-		l->set_alignment (1, 0.5);
+		l->set_alignment (0, 0.5);
 		t->attach (*l, 0, 1, 1, 2, FILL);
 		t->attach (_click_emphasis_path_entry, 1, 2, 1, 2, FILL);
 		b = manage (new Button (_("Browse...")));
@@ -544,7 +470,7 @@ public:
 
 		Label* l = manage (new Label (_("Edit using:")));
 		l->set_name ("OptionsLabel");
-		l->set_alignment (1.0, 0.5);
+		l->set_alignment (0, 0.5);
 
 		t->attach (*l, 0, 1, 0, 1, FILL | EXPAND, FILL);
 		t->attach (_edit_modifier_combo, 1, 2, 0, 1, FILL | EXPAND, FILL);
@@ -571,7 +497,7 @@ public:
 
 		l = manage (new Label (_("Delete using:")));
 		l->set_name ("OptionsLabel");
-		l->set_alignment (1.0, 0.5);
+		l->set_alignment (0, 0.5);
 
 		t->attach (*l, 0, 1, 1, 2, FILL | EXPAND, FILL);
 		t->attach (_delete_modifier_combo, 1, 2, 1, 2, FILL | EXPAND, FILL);
@@ -598,7 +524,7 @@ public:
 
 		l = manage (new Label (_("Toggle snap using:")));
 		l->set_name ("OptionsLabel");
-		l->set_alignment (1.0, 0.5);
+		l->set_alignment (0, 0.5);
 
 		t->attach (*l, 0, 1, 2, 3, FILL | EXPAND, FILL);
 		t->attach (_snap_modifier_combo, 1, 2, 2, 3, FILL | EXPAND, FILL);
@@ -615,7 +541,7 @@ public:
 
 		l = manage (new Label (_("Keyboard layout:")));
 		l->set_name ("OptionsLabel");
-		l->set_alignment (1.0, 0.5);
+		l->set_alignment (0, 0.5);
 
 		t->attach (*l, 0, 1, 3, 4, FILL | EXPAND, FILL);
 		t->attach (_keyboard_layout_selector, 1, 2, 3, 4, FILL | EXPAND, FILL);
@@ -1334,7 +1260,41 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* MIDI CONTROL */
 
-	add_option (_("MIDI control"), new MIDIPorts (_rc_config));
+	list<ComboOption<string>* > midi_combos;
+
+	midi_combos.push_back (new ComboOption<string> (
+				       "mtc-port-name",
+				       _("Receive MTC via"),
+				       mem_fun (*_rc_config, &RCConfiguration::get_mtc_port_name),
+				       mem_fun (*_rc_config, &RCConfiguration::set_mtc_port_name)
+				       ));
+
+	midi_combos.push_back (new ComboOption<string> (
+				       "midi-clock-port-name",
+				       _("Receive MIDI clock via"),
+				       mem_fun (*_rc_config, &RCConfiguration::get_midi_clock_port_name),
+				       mem_fun (*_rc_config, &RCConfiguration::set_midi_clock_port_name)
+				       ));
+
+	midi_combos.push_back (new ComboOption<string> (
+				       "mmc-port-name",
+				       _("Receive MMC via"),
+				       mem_fun (*_rc_config, &RCConfiguration::get_mmc_port_name),
+				       mem_fun (*_rc_config, &RCConfiguration::set_mmc_port_name)
+				       ));
+
+	midi_combos.push_back (new ComboOption<string> (
+				       "midi-port-name",
+				       _("Receive MIDI parameter control via"),
+				       mem_fun (*_rc_config, &RCConfiguration::get_midi_port_name),
+				       mem_fun (*_rc_config, &RCConfiguration::set_midi_port_name)
+				       ));
+	
+	add_option (_("MIDI control"), new MIDIPorts (_rc_config, midi_combos));
+
+	for (list<ComboOption<string>* >::iterator i = midi_combos.begin(); i != midi_combos.end(); ++i) {
+		add_option (_("MIDI control"), *i);
+	}
 
 	add_option (_("MIDI control"),
 	     new SpinOption<uint8_t> (

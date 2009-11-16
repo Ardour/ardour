@@ -42,7 +42,7 @@ OptionEditorComponent::add_widgets_to_page (OptionEditorPage* p, Gtk::Widget* wa
 {
 	int const n = p->table.property_n_rows();
 	p->table.resize (n + 1, 3);
-	p->table.attach (*wa, 1, 2, n, n + 1, FILL | EXPAND);
+	p->table.attach (*wa, 1, 2, n, n + 1, FILL);
 	p->table.attach (*wb, 2, 3, n, n + 1, FILL | EXPAND);
 }
 

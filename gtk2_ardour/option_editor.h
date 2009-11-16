@@ -201,7 +201,7 @@ public:
 		  _set (s)
 	{
 		_label = manage (new Gtk::Label (n + ":"));
-		_label->set_alignment (1, 0.5);
+		_label->set_alignment (0, 0.5);
 		_combo = manage (new Gtk::ComboBoxText);
 		_combo->signal_changed().connect (sigc::mem_fun (*this, &ComboOption::changed));
 	}
@@ -292,7 +292,7 @@ public:
 		  _scale (scale)
 	{
 		_label = manage (new Gtk::Label (n + ":"));
-		_label->set_alignment (1, 0.5);
+		_label->set_alignment (0, 0.5);
 
 		_spin = manage (new Gtk::SpinButton);
 		_spin->set_range (min, max);
