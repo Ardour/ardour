@@ -24,6 +24,7 @@
 #include <gtkmm/accelmap.h>
 
 #include "pbd/convert.h"
+#include "pbd/stacktrace.h"
 #include <glibmm/thread.h>
 
 #include <gtkmm2ext/gtk_ui.h>
@@ -402,6 +403,10 @@ Mixer_UI::sync_order_keys (string const & src)
 		if (new_key != old_key) {
 			changed = true;
 		}
+	}
+
+	if (keys.size() != rows.size()) {
+		PBD::stacktrace (cerr, 20);
 	}
 	assert(keys.size() == rows.size());
 
