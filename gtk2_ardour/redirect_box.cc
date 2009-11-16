@@ -258,7 +258,7 @@ RedirectBox::show_redirect_menu (gint arg)
 	Gtk::MenuItem* plugin_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/redirectmenu/newplugin"));
 
 	if (plugin_menu_item) {
-		plugin_menu_item->set_submenu (_plugin_selector.plugin_menu());
+		plugin_menu_item->set_submenu (*_plugin_selector.plugin_menu());
 	}
 
 	cut_action->set_sensitive (can_cut_redirects ());
