@@ -2433,10 +2433,13 @@ Session::route_solo_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 
 	solo_update_disabled = true;
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		bool via_sends_only;
 
-		if ((*i)->feeds (route) && !(*i)->is_hidden() && !(*i)->is_master() && !(*i)->is_control()) {
-			/* do it */
-			(*i)->mod_solo_level (delta);
+		if ((*i)->feeds (route, &via_sends_only) && !(*i)->is_hidden() && !(*i)->is_master() && !(*i)->is_control()) {
+			//if (!via_sends_only) {
+				/* do it */
+				(*i)->mod_solo_level (delta);
+				//}
 		}
 	}
 

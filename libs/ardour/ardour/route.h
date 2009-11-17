@@ -263,7 +263,7 @@ class Route : public SessionObject, public AutomatableControls
 	int listen_via (boost::shared_ptr<Route>, Placement p, bool active, bool aux);
 	void drop_listen (boost::shared_ptr<Route>);
 
-	bool feeds (boost::shared_ptr<Route>);
+	bool feeds (boost::shared_ptr<Route>, bool* via_send_only = 0);
 	std::set<boost::shared_ptr<Route> > fed_by;
 
 	/* Controls (not all directly owned by the Route */

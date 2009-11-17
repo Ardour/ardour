@@ -25,7 +25,6 @@
 #include <sigc++/bind.h>
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
-#include "pbd/stacktrace.h"
 #include "pbd/memento_command.h"
 
 #include "evoral/Curve.hpp"
@@ -2364,15 +2363,21 @@ Route::set_comment (string cmt, void *src)
 }
 
 bool
-Route::feeds (boost::shared_ptr<Route> other)
+Route::feeds (boost::shared_ptr<Route> other, bool* only_send)
 {
 	// cerr << _name << endl;
 
 	if (_output->connected_to (other->input())) {
 		// cerr << "\tdirect FEEDS " << other->name() << endl;
+
+		if (only_send) {
+			*only_send = false;
+		}
+
 		return true;
 	}
 
+	
 	for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); r++) {
 
 		boost::shared_ptr<IOProcessor> iop;
@@ -2380,6 +2385,9 @@ Route::feeds (boost::shared_ptr<Route> other)
 		if ((iop = boost::dynamic_pointer_cast<IOProcessor>(*r)) != 0) {
 			if (iop->feeds (other)) {
 				// cerr << "\tIOP " << iop->name() << " feeds " << other->name() << endl;
+				if (only_send) {
+					*only_send = true;
+				}
 				return true;
 			} else {
 				// cerr << "\tIOP " << iop->name() << " does NOT feeds " << other->name() << endl;
