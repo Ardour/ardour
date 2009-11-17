@@ -457,7 +457,7 @@ PannerUI::setup_pan ()
 		update_pan_sensitive ();
 		panner->reset (npans);
  		if (big_window) {
- 			big_window->reset (_panner->npanners());
+ 			big_window->reset (npans);
  		}
 		panner->set_size_request (-1, 61);
 
