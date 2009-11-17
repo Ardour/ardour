@@ -57,6 +57,7 @@
 #include "editing.h"
 #include "enums.h"
 #include "editor_items.h"
+#include "canvas-noevent-text.h"
 #include "region_selection.h"
 #include "canvas.h"
 #include "time_axis_view.h"
@@ -599,7 +600,7 @@ class Editor : public PublicEditor
 	Gdk::Cursor* which_grabber_cursor ();
 
 	ArdourCanvas::Canvas* track_canvas;
-	ArdourCanvas::Text* verbose_canvas_cursor;
+	ArdourCanvas::NoEventText* verbose_canvas_cursor;
 	bool                 verbose_cursor_visible;
 
 	void parameter_changed (const char *);
