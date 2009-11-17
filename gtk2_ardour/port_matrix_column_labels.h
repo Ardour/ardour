@@ -42,8 +42,9 @@ public:
 	double parent_to_component_x (double x) const;
 	double component_to_parent_y (double y) const;
 	double parent_to_component_y (double y) const;
-	void mouseover_changed (PortMatrixNode const &);
+	void mouseover_changed (std::list<PortMatrixNode> const &);
 	void draw_extra (cairo_t *);
+	void motion (double, double);
 
 	uint32_t overhang () const {
 		return _overhang;
@@ -55,6 +56,7 @@ private:
 	double channel_x (ARDOUR::BundleChannel const &) const;
 	double channel_y (ARDOUR::BundleChannel const &) const;
 	void queue_draw_for (ARDOUR::BundleChannel const &);
+	std::pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> position_to_group_and_channel (double, double, PortGroupList const *) const;
 
 	void render (cairo_t *);
 	void compute_dimensions ();

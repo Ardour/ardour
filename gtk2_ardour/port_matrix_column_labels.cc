@@ -215,11 +215,19 @@ PortMatrixColumnLabels::parent_to_component_y (double y) const
 }
 
 void
-PortMatrixColumnLabels::mouseover_changed (PortMatrixNode const &)
+PortMatrixColumnLabels::mouseover_changed (list<PortMatrixNode> const &)
 {
-	clear_channel_highlights ();
-	if (_body->mouseover().column.bundle && _body->mouseover().row.bundle) {
-		add_channel_highlight (_body->mouseover().column);
+	list<PortMatrixNode> const m = _body->mouseover ();
+	for (list<PortMatrixNode>::const_iterator i = m.begin(); i != m.end(); ++i) {
+
+		ARDOUR::BundleChannel c = i->column;
+		ARDOUR::BundleChannel r = i->row;
+		
+		if (c.bundle && r.bundle) {
+			add_channel_highlight (c);
+		} else if (c.bundle) {
+			_body->highlight_associated_channels (_matrix->column_index(), c);
+		}
 	}
 }
 
@@ -447,46 +455,49 @@ PortMatrixColumnLabels::queue_draw_for (ARDOUR::BundleChannel const & bc)
 	}
 }
 
-void
-PortMatrixColumnLabels::button_press (double x, double y, int b, uint32_t t)
+pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel>
+PortMatrixColumnLabels::position_to_group_and_channel (double p, double o, PortGroupList const * groups) const
 {
 	uint32_t cx = 0;
 	uint32_t const gh = _highest_group_name + 2 * name_pad();
 
 	bool group_name = false;
 	if (_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM) {
-		if (y > (_height - gh)) {
+		if (o > (_height - gh)) {
 			group_name = true;
-			cx = x;
+			cx = p;
 		} else {
-			cx = x - (_height - gh - y) * tan (angle ());
+			cx = p - (_height - gh - o) * tan (angle ());
 		}
 	} else {
-		if (y < gh) {
+		if (o < gh) {
 			group_name = true;
-			cx = x - _overhang;
+			cx = p - _overhang;
 		} else {
-			cx = x - (_height - y) * tan (angle ());
+			cx = p - (_height - o) * tan (angle ());
 		}
 	}
 
-	pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> gc = position_to_group_and_channel (cx / grid_spacing(), _matrix->columns());
+	pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> w = PortMatrixComponent::position_to_group_and_channel (cx, o, groups);
 
-	if (b == 1) {
+	if (group_name) {
+		w.second.bundle.reset ();
+	}
 
-		if (group_name && gc.first) {
-			gc.first->set_visible (!gc.first->visible ());
-		} else if (gc.second.bundle) {
-			_body->highlight_associated_channels (_matrix->column_index(), gc.second);
-		}
+	return w;
+}
 
-	} else if (b == 3) {
+void
+PortMatrixColumnLabels::button_press (double x, double y, int b, uint32_t t)
+{
+	pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> gc = position_to_group_and_channel (x, y, _matrix->columns());
 
-			_matrix->popup_menu (
-				gc,
-				make_pair (boost::shared_ptr<PortGroup> (), ARDOUR::BundleChannel ()),
-				t
-				);
+	if (b == 3) {
+		_matrix->popup_menu (
+			gc,
+			make_pair (boost::shared_ptr<PortGroup> (), ARDOUR::BundleChannel ()),
+			t
+			);
 	}
 }
 
@@ -555,3 +566,37 @@ PortMatrixColumnLabels::draw_extra (cairo_t* cr)
 
 	}
 }
+
+void
+PortMatrixColumnLabels::motion (double x, double y)
+{
+	pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> const w = position_to_group_and_channel (x, y, _matrix->columns());
+
+	if (w.second.bundle == 0) {
+		_body->set_mouseover (PortMatrixNode ());
+		return;
+	}
+
+	uint32_t const bh = _highest_group_name + _longest_channel_name * sin (angle ()) + _highest_text / cos (angle ());
+
+	if (
+		(_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM && y > bh) ||
+		(_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT && y < (_height - bh))
+		) {
+
+		/* if the mouse is over a bundle name, highlight all channels in the bundle */
+		
+		list<PortMatrixNode> n;
+
+		for (uint32_t i = 0; i < w.second.bundle->nchannels(); ++i) {
+			ARDOUR::BundleChannel const bc (w.second.bundle, i);
+			n.push_back (PortMatrixNode (ARDOUR::BundleChannel (), bc));
+		}
+
+		_body->set_mouseover (n);
+
+	} else {
+	
+		_body->set_mouseover (PortMatrixNode (ARDOUR::BundleChannel (), w.second));
+	}
+}	

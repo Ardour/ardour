@@ -192,8 +192,10 @@ PortMatrixComponent::channel_to_position (ARDOUR::BundleChannel bc, PortGroupLis
 
 
 pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel>
-PortMatrixComponent::position_to_group_and_channel (uint32_t p, PortGroupList const * groups) const
+PortMatrixComponent::position_to_group_and_channel (double p, double, PortGroupList const * groups) const
 {
+	p /= grid_spacing ();
+	
 	PortGroupList::List::const_iterator i = groups->begin ();
 
 	while (i != groups->end()) {

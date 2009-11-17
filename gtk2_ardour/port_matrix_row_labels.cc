@@ -133,32 +133,30 @@ PortMatrixRowLabels::render (cairo_t* cr)
 	}
 }
 
-void
-PortMatrixRowLabels::button_press (double x, double y, int b, uint32_t t)
+pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel>
+PortMatrixRowLabels::position_to_group_and_channel (double p, double o, PortGroupList const * groups) const
 {
+	pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> w = PortMatrixComponent::position_to_group_and_channel (p, o, _matrix->rows());
+
 	uint32_t const gw = (_highest_group_name + 2 * name_pad());
 
-	pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> w = position_to_group_and_channel (y / grid_spacing (), _matrix->rows());
-
 	if (
-		(_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM && x < gw) ||
-		(_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT && x > (_width - gw))
+		(_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM && o < gw) ||
+		(_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT && o > (_width - gw))
 		) {
 
 		w.second.bundle.reset ();
 	}
 
-	if (b == 1) {
+	return w;
+}
 
-		if (w.second.bundle) {
-			_body->highlight_associated_channels (_matrix->row_index(), w.second);
-		} else {
-			if (w.first) {
-				w.first->set_visible (!w.first->visible());
-			}
-		}
+void
+PortMatrixRowLabels::button_press (double x, double y, int b, uint32_t t)
+{
+	pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> w = position_to_group_and_channel (y, x, _matrix->rows());
 
-	} else if (b == 3) {
+	if (b == 3) {
 
 		_matrix->popup_menu (
 			make_pair (boost::shared_ptr<PortGroup> (), ARDOUR::BundleChannel ()),
@@ -313,11 +311,19 @@ PortMatrixRowLabels::queue_draw_for (ARDOUR::BundleChannel const & bc)
 }
 
 void
-PortMatrixRowLabels::mouseover_changed (PortMatrixNode const &)
+PortMatrixRowLabels::mouseover_changed (list<PortMatrixNode> const &)
 {
-	clear_channel_highlights ();
-	if (_body->mouseover().column.bundle && _body->mouseover().row.bundle) {
-		add_channel_highlight (_body->mouseover().row);
+	list<PortMatrixNode> const m = _body->mouseover ();
+	for (list<PortMatrixNode>::const_iterator i = m.begin(); i != m.end(); ++i) {
+		
+		ARDOUR::BundleChannel c = i->column;
+		ARDOUR::BundleChannel r = i->row;
+		
+		if (c.bundle && r.bundle) {
+			add_channel_highlight (r);
+		} else if (r.bundle) {
+			_body->highlight_associated_channels (_matrix->row_index(), r);
+		}
 	}
 }
 
@@ -379,5 +385,42 @@ PortMatrixRowLabels::draw_extra (cairo_t* cr)
 
 		y += h;
 		++g;
+	}
+}
+
+void
+PortMatrixRowLabels::motion (double x, double y)
+{
+	pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> const w = position_to_group_and_channel (y, x, _matrix->rows());
+
+	if (w.second.bundle == 0) {
+		/* not over any bundle */
+		_body->set_mouseover (PortMatrixNode ());
+		return;
+	}
+
+	uint32_t const bw = _highest_group_name + 2 * name_pad() + _longest_bundle_name + 2 * name_pad();
+
+	if (
+		(_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM && x < bw) ||
+		(_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT && x > (_width - bw))
+		 
+			) {
+
+		/* if the mouse is over a bundle name, highlight all channels in the bundle */
+		
+		list<PortMatrixNode> n;
+
+		for (uint32_t i = 0; i < w.second.bundle->nchannels(); ++i) {
+			ARDOUR::BundleChannel const bc (w.second.bundle, i);
+			n.push_back (PortMatrixNode (bc, ARDOUR::BundleChannel ()));
+		}
+
+		_body->set_mouseover (n);
+
+	} else {
+	
+		_body->set_mouseover (PortMatrixNode (w.second, ARDOUR::BundleChannel ()));
+
 	}
 }

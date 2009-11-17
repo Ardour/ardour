@@ -28,6 +28,7 @@ class PortMatrix;
 class PortMatrixColumnLabels;
 class PortMatrixRowLabels;
 class PortMatrixGrid;
+class PortMatrixComponent;
 
 /** The main body of the port matrix.  It is made up of three parts:
  *  column labels, grid and row labels, each drawn using cairo.
@@ -57,7 +58,8 @@ public:
 	void rebuild_and_draw_grid ();
 
 	void set_mouseover (PortMatrixNode const &);
-	PortMatrixNode mouseover () const {
+	void set_mouseover (std::list<PortMatrixNode> const &);
+	std::list<PortMatrixNode> mouseover () const {
 		return _mouseover;
 	}
 
@@ -85,6 +87,7 @@ private:
 	PortMatrixColumnLabels* _column_labels;
 	PortMatrixRowLabels* _row_labels;
 	PortMatrixGrid* _grid;
+	std::list<PortMatrixComponent*> _components;
 
 	uint32_t _alloc_width; ///< allocated width
 	uint32_t _alloc_height; ///< allocated height
@@ -94,8 +97,7 @@ private:
 	uint32_t _xoffset;
 	uint32_t _yoffset;
 
-	PortMatrixNode _mouseover;
-	bool _mouse_over_grid;
+	std::list<PortMatrixNode> _mouseover;
 	bool _ignore_component_size_changed;
 
 	std::list<sigc::connection> _bundle_connections;

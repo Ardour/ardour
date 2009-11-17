@@ -47,8 +47,10 @@ public:
 	virtual double parent_to_component_x (double x) const = 0;
 	virtual double component_to_parent_y (double y) const = 0;
 	virtual double parent_to_component_y (double y) const = 0;
-	virtual void mouseover_changed (PortMatrixNode const &) = 0;
+	virtual void mouseover_changed (std::list<PortMatrixNode> const &) = 0;
 	virtual void draw_extra (cairo_t *) = 0;
+	virtual void button_press (double, double, int, uint32_t) {}
+	virtual void motion (double, double) {}
 
 	void set_show_ports (bool);
 	void setup ();
@@ -170,7 +172,7 @@ protected:
 	void set_source_rgba (cairo_t *, Gdk::Color const &, double);
 	uint32_t group_size (boost::shared_ptr<const PortGroup>) const;
 	uint32_t channel_to_position (ARDOUR::BundleChannel, PortGroupList const *) const;
-	std::pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> position_to_group_and_channel (uint32_t, PortGroupList const *) const;
+	virtual std::pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> position_to_group_and_channel (double, double, PortGroupList const *) const;
 
 	/** Render the complete component to a cairo context. */
 	virtual void render (cairo_t *) = 0;

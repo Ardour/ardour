@@ -49,7 +49,7 @@ public:
 	double parent_to_component_x (double x) const;
 	double component_to_parent_y (double y) const;
 	double parent_to_component_y (double y) const;
-	void mouseover_changed (PortMatrixNode const &);
+	void mouseover_changed (std::list<PortMatrixNode> const &);
 	void draw_extra (cairo_t *);
 
 private:
@@ -58,8 +58,8 @@ private:
 	void render (cairo_t *);
 	void render_group_pair (cairo_t *, boost::shared_ptr<const PortGroup>, boost::shared_ptr<const PortGroup>, uint32_t, uint32_t);
 
-	PortMatrixNode position_to_node (uint32_t, uint32_t) const;
-	void queue_draw_for (PortMatrixNode const &);
+	PortMatrixNode position_to_node (double, double) const;
+	void queue_draw_for (std::list<PortMatrixNode> const &);
 	void draw_association_indicator (cairo_t *, uint32_t, uint32_t, double p = 1);
 	void draw_empty_square (cairo_t *, uint32_t, uint32_t);
 	std::list<PortMatrixNode> nodes_on_line (int, int, int, int) const;
