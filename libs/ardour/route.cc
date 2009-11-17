@@ -1376,7 +1376,6 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 
 	_in_configure_processors = true;
 
-
 	// Check each processor in order to see if we can configure as requested
 	ChanCount in = _input->n_ports ();
 	ChanCount out;
@@ -1398,6 +1397,15 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 		}
 	}
 
+	/* Take the process lock so that if we add a processor which increases the required
+	   number of scratch buffers, we create those scratch buffers before the process
+	   thread has a chance to ask for them.
+	   XXX: in an ideal world we'd perhaps use some RCU magic to avoid having to take
+	   the lock here.
+	*/
+	
+	Glib::Mutex::Lock pl (_session.engine().process_lock ());
+	
 	// We can, so configure everything
 	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
@@ -1406,6 +1414,12 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 		processor_max_streams = ChanCount::max(processor_max_streams, c->second);
 		out = c->second;
 	}
+
+	/* make sure we have sufficient scratch buffers to cope with the new processor
+	   configuration */
+	_session.ensure_buffers (n_process_buffers ());
+
+	_session.ensure_buffers (n_process_buffers ());
 
 	_in_configure_processors = false;
 	return 0;
@@ -2741,7 +2755,8 @@ Route::set_block_size (nframes_t nframes)
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->set_block_size (nframes);
 	}
-	_session.ensure_buffers(processor_max_streams);
+	
+	_session.ensure_buffers (n_process_buffers ());
 }
 
 void
