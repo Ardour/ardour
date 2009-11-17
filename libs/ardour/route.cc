@@ -1419,8 +1419,6 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	   configuration */
 	_session.ensure_buffers (n_process_buffers ());
 
-	_session.ensure_buffers (n_process_buffers ());
-
 	_in_configure_processors = false;
 	return 0;
 }
