@@ -36,6 +36,7 @@
 #include "simpleline_p.h"
 #include "imageframe_p.h"
 #include "canvas_impl.h"
+#include "canvas-noevent-text.h"
 #include "editing.h"
 #include "rgb_macros.h"
 #include "utils.h"

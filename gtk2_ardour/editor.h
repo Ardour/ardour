@@ -61,10 +61,13 @@
 #include "editing.h"
 #include "enums.h"
 #include "editor_items.h"
-#include "canvas-noevent-text.h"
 #include "region_selection.h"
 #include "canvas.h"
 #include "editor_summary.h"
+
+namespace Gnome { namespace Canvas {
+	class NoEventText;
+} }
 
 namespace Gtkmm2ext {
 	class TearOff;

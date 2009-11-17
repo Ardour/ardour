@@ -81,6 +81,7 @@
 #include "audio_time_axis.h"
 #include "utils.h"
 #include "crossfade_view.h"
+#include "canvas-noevent-text.h"
 #include "editing.h"
 #include "public_editor.h"
 #include "crossfade_edit.h"

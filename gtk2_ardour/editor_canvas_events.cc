@@ -35,6 +35,7 @@
 #include "public_editor.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
+#include "canvas-noevent-text.h"
 #include "crossfade_view.h"
 #include "audio_time_axis.h"
 #include "region_gain_line.h"
