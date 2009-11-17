@@ -879,6 +879,14 @@ possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval)
 		fakekey = GDK_leftarrow;
 		break;
 
+	case GDK_Return:
+		fakekey = GDK_3270_Enter;
+		break;
+
+	case GDK_KP_Enter:
+		fakekey = GDK_F35;
+		break;
+
 	default:
 		break;
 	}
@@ -890,6 +898,42 @@ possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval)
 
 	return false;
 }
+
+uint32_t
+possibly_translate_legal_accelerator_to_real_key (uint32_t keyval)
+{
+	switch (keyval) {
+	case GDK_nabla:
+		return GDK_Tab;
+		break;
+
+	case GDK_uparrow:
+		return GDK_Up;
+		break;
+
+	case GDK_downarrow:
+		return GDK_Down;
+		break;
+
+	case GDK_rightarrow:
+		return GDK_Right;
+		break;
+
+	case GDK_leftarrow:
+		return GDK_Left;
+		break;
+
+	case GDK_3270_Enter:
+		return GDK_Return;
+
+	case GDK_F35:
+		return GDK_KP_Enter;
+		break;
+	}
+
+	return keyval;
+}
+
 
 
 inline guint8

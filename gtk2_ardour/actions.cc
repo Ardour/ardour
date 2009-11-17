@@ -36,6 +36,7 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/rc_configuration.h"
 
+#include "utils.h"
 #include "actions.h"
 #include "i18n.h"
 
@@ -248,14 +249,7 @@ ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, ve
 			paths.push_back (accel_path);
 
 			AccelKey key;
-			bool known = lookup_entry (accel_path, key);
-
-			if (known) {
-				keys.push_back (ui_manager->get_accel_group()->name (key.get_key(), Gdk::ModifierType (key.get_mod())));
-			} else {
-				keys.push_back (unbound_string);
-			}
-
+			keys.push_back (get_key_representation (accel_path, key));
 			bindings.push_back (AccelKey (key.get_key(), Gdk::ModifierType (key.get_mod())));
 		}
 	}
@@ -441,4 +435,18 @@ ActionManager::map_some_state (const char* group, const char* action, sigc::slot
 			}
 		}
 	}
+}
+
+string
+ActionManager::get_key_representation (const string& accel_path, AccelKey& key)
+{
+	bool known = lookup_entry (accel_path, key);
+	
+	if (known) {
+		uint32_t k = possibly_translate_legal_accelerator_to_real_key (key.get_key());
+		key = AccelKey (k, Gdk::ModifierType (key.get_mod()));
+		return ui_manager->get_accel_group()->name (key.get_key(), Gdk::ModifierType (key.get_mod()));
+	} 
+	
+	return unbound_string;
 }

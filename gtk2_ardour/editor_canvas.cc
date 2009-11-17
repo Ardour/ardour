@@ -116,7 +116,7 @@ Editor::initialize_canvas ()
 
 	Pango::FontDescription* font = get_font_for_style (N_("VerboseCanvasCursor"));
 
-	verbose_canvas_cursor = new ArdourCanvas::Text (*track_canvas->root());
+	verbose_canvas_cursor = new ArdourCanvas::NoEventText (*track_canvas->root());
 	verbose_canvas_cursor->property_font_desc() = *font;
 	verbose_canvas_cursor->property_anchor() = ANCHOR_NW;
 

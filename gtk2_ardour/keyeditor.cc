@@ -86,6 +86,8 @@ KeyEditor::unbind ()
 
 	unbind_button.set_sensitive (false);
 
+	cerr << "trying to unbind\n";
+
 	if (i != model->children().end()) {
 		string path = (*i)[columns.path];
 
@@ -168,24 +170,21 @@ KeyEditor::on_key_release_event (GdkEventKey* ev)
 			goto out;
 		}
 
+		cerr << "real lkeyval: " << ev->keyval << endl;
 		possibly_translate_keyval_to_make_legal_accelerator (ev->keyval);
+		cerr << "using keyval = " << ev->keyval << endl;
+
 
 		bool result = AccelMap::change_entry (path,
 						      ev->keyval,
 						      ModifierType (Keyboard::RelevantModifierKeyMask & ev->state),
 						      true);
 
+		cerr << "New binding to " << ev->keyval << " worked: " << result << endl;
+
 		if (result) {
-			bool known;
 			AccelKey key;
-
-			known = ActionManager::lookup_entry (path, key);
-
-			if (known) {
-				(*i)[columns.binding] = ActionManager::ui_manager->get_accel_group()->name (key.get_key(), Gdk::ModifierType (key.get_mod()));
-			} else {
-				(*i)[columns.binding] = string();
-			}
+			(*i)[columns.binding] = ActionManager::get_key_representation (path, key);
 		}
 	}
 

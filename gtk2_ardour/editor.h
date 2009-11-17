@@ -61,6 +61,7 @@
 #include "editing.h"
 #include "enums.h"
 #include "editor_items.h"
+#include "canvas-noevent-text.h"
 #include "region_selection.h"
 #include "canvas.h"
 #include "editor_summary.h"
@@ -626,7 +627,7 @@ class Editor : public PublicEditor
 
 	ArdourCanvas::Canvas* track_canvas;
 
-	ArdourCanvas::Text* verbose_canvas_cursor;
+	ArdourCanvas::NoEventText* verbose_canvas_cursor;
 	bool                 verbose_cursor_visible;
 
 	void parameter_changed (std::string);

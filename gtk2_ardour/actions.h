@@ -67,6 +67,8 @@ class ActionManager
 
 	static void set_sensitive (std::vector<Glib::RefPtr<Gtk::Action> >& actions, bool);
 
+	static std::string get_key_representation (const std::string& accel_path, Gtk::AccelKey& key);
+
 	static std::string unbound_string;  /* the key string returned if an action is not bound */
 	static Glib::RefPtr<Gtk::UIManager> ui_manager;
 
