@@ -10,6 +10,7 @@ gtk2_ardour/ardour.sh
 gtk2_ardour/version.*
 gtk2_ardour/ardev_common.sh
 gtk2_ardour/ardour-2.8.3
+gtk2_ardour/ardour-2.8.4
 gtk2_ardour/ardour.menus
 gtk2_ardour/*.rc
 templates/*.template
