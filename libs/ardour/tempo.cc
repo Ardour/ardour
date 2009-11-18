@@ -1235,25 +1235,25 @@ TempoMap::round_to_type (nframes64_t frame, int dir, BBTPointType type)
 
 			/* "true" rounding */
 
-			/* round to nearest beat */
-			if (bbt.ticks >= (Meter::ticks_per_beat/2)) {
-				try {
-					bbt = bbt_add (bbt, one_beat, metric);
-				}
-				catch (...) {
-					return frame;
-				}
-			} 
+			float midbar_beats;
+			float midbar_ticks;
 
-			/* round to nearest bar */
-			if (bbt.beats >= metric.meter().beats_per_bar()/2) {
-				try {
-					bbt = bbt_add (bbt, one_bar, metric);
-				}
-				catch (...) {
-					return frame;
-				}
-			} 
+			midbar_beats = metric.meter().beats_per_bar() / 2;
+			midbar_ticks = Meter::ticks_per_beat * fmod (midbar_beats, 1.0f);
+			midbar_beats = floor (midbar_beats);
+			
+			BBT_Time midbar (bbt.bars, lrintf (midbar_beats), lrintf (midbar_ticks));
+
+			if (bbt < midbar) {
+				/* round down */
+				bbt.beats = 1;
+				bbt.ticks = 0;
+			} else {
+				/* round up */
+				bbt.bars++;
+				bbt.beats = 1;
+				bbt.ticks = 0;
+			}
 		}
 		/* force beats & ticks to their values at the start of a bar */
 		bbt.beats = 1;
