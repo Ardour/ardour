@@ -430,7 +430,7 @@ PortMatrixColumnLabels::position_to_channel (double p, double o, boost::shared_p
 }
 
 void
-PortMatrixColumnLabels::button_press (double x, double y, int b, uint32_t t)
+PortMatrixColumnLabels::button_press (double x, double y, int b, uint32_t t, guint)
 {
 	ARDOUR::BundleChannel const gc = position_to_channel (x, y, _matrix->visible_columns());
 

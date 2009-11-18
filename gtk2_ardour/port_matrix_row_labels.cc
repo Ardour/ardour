@@ -122,7 +122,7 @@ PortMatrixRowLabels::render (cairo_t* cr)
 }
 
 void
-PortMatrixRowLabels::button_press (double x, double y, int b, uint32_t t)
+PortMatrixRowLabels::button_press (double x, double y, int b, uint32_t t, guint)
 {
 	ARDOUR::BundleChannel const w = position_to_channel (y, x, _matrix->visible_rows());
 

@@ -24,6 +24,7 @@
 #include "port_matrix_grid.h"
 #include "port_matrix.h"
 #include "port_matrix_body.h"
+#include "keyboard.h"
 
 using namespace std;
 
@@ -245,16 +246,16 @@ PortMatrixGrid::position_to_node (double x, double y) const
 }
 
 void
-PortMatrixGrid::button_press (double x, double y, int b, uint32_t t)
+PortMatrixGrid::button_press (double x, double y, int b, uint32_t t, guint)
 {
 	ARDOUR::BundleChannel const px = position_to_channel (x, y, _matrix->visible_columns());
 	ARDOUR::BundleChannel const py = position_to_channel (y, x, _matrix->visible_rows());
 
 	if (b == 1) {
-
+		
 		_dragging = true;
 		_drag_valid = (px.bundle && py.bundle);
-
+		
 		_moved = false;
 		_drag_start_x = x / grid_spacing ();
 		_drag_start_y = y / grid_spacing ();
@@ -355,7 +356,7 @@ PortMatrixGrid::set_association (PortMatrixNode node, bool s)
 }
 
 void
-PortMatrixGrid::button_release (double x, double y, int b, uint32_t /*t*/)
+PortMatrixGrid::button_release (double x, double y, int b, uint32_t /*t*/, guint s)
 {
 	if (b == 1) {
 
@@ -376,10 +377,30 @@ PortMatrixGrid::button_release (double x, double y, int b, uint32_t /*t*/)
 				
 			} else {
 				
-				PortMatrixNode const n = position_to_node (x, y);
-				if (n.row.bundle && n.column.bundle) {
-					PortMatrixNode::State const s = get_association (n);
-					set_association (n, toggle_state (s));
+				if (Keyboard::modifier_state_equals (s, Keyboard::PrimaryModifier)) {
+					/* associate/disassociate things diagonally down and right until we run out */
+					PortMatrixNode::State s = (PortMatrixNode::State) 0;
+					while (1) {
+						PortMatrixNode const n = position_to_node (x, y);
+						if (n.row.bundle && n.column.bundle) {
+							if (s == (PortMatrixNode::State) 0) {
+								s = get_association (n);
+							}
+							set_association (n, toggle_state (s));
+						} else {
+							break;
+						}
+						x += grid_spacing ();
+						y += grid_spacing ();
+					}
+					
+				} else {
+					
+					PortMatrixNode const n = position_to_node (x, y);
+					if (n.row.bundle && n.column.bundle) {
+						PortMatrixNode::State const s = get_association (n);
+						set_association (n, toggle_state (s));
+					}
 				}
 			}
 

@@ -317,7 +317,7 @@ PortMatrixBody::on_button_press_event (GdkEventButton* ev)
 			(*i)->button_press (
 				(*i)->parent_to_component_x (ev->x),
 				(*i)->parent_to_component_y (ev->y),
-				ev->button, ev->time
+				ev->button, ev->time, ev->state
 				);
 		}
 	}
@@ -333,12 +333,12 @@ PortMatrixBody::on_button_release_event (GdkEventButton* ev)
 			(*i)->button_release (
 				(*i)->parent_to_component_x (ev->x),
 				(*i)->parent_to_component_y (ev->y),
-				ev->button, ev->time
+				ev->button, ev->time, ev->state
 				);
 		} else {
 			(*i)->button_release (
 				-1, -1,
-				ev->button, ev->time
+				ev->button, ev->time, ev->state
 				);
 		}
 	}
