@@ -39,7 +39,6 @@ namespace ARDOUR {
 /** Create a new, empty BufferSet */
 BufferSet::BufferSet()
 	: _is_mirror(false)
-	, _is_silent(false)
 {
 	for (size_t i=0; i < DataType::num_types; ++i) {
 		_buffers.push_back(BufferVec());

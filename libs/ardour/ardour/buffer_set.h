@@ -167,9 +167,6 @@ private:
 
 	/// False if we 'own' the contained buffers, if true we mirror a PortSet)
 	bool _is_mirror;
-
-	/// Whether the buffer set should be considered silent
-	bool _is_silent;
 };
 
 
