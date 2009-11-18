@@ -42,6 +42,9 @@ BundleEditorMatrix::BundleEditorMatrix (
 {
 	_port_group = boost::shared_ptr<PortGroup> (new PortGroup (""));
 	_port_group->add_bundle (_bundle);
+
+	setup_all_ports ();
+	init ();
 }
 
 void

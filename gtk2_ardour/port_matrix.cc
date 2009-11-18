@@ -46,7 +46,7 @@ using namespace ARDOUR;
  *  @param type Port type that we are handling.
  */
 PortMatrix::PortMatrix (Window* parent, Session& session, DataType type)
-	: Table (2, 2),
+	: Table (4, 4),
 	  _session (session),
 	  _parent (parent),
 	  _type (type),
@@ -56,13 +56,56 @@ PortMatrix::PortMatrix (Window* parent, Session& session, DataType type)
 	  _column_index (1),
 	  _min_height_divisor (1),
 	  _show_only_bundles (false),
-	  _inhibit_toggle_show_only_bundles (false)
+	  _inhibit_toggle_show_only_bundles (false),
+	  _in_setup_notebooks (false)
 {
 	_body = new PortMatrixBody (this);
 
+	attach (*_body, 2, 3, 2, 3);
+	attach (_vscroll, 3, 4, 2, 3, SHRINK);
+	attach (_hscroll, 2, 3, 3, 4, FILL | EXPAND, SHRINK);
+	attach (_vlabel, 0, 1, 2, 3, SHRINK);
+	attach (_hlabel, 2, 3, 0, 1, FILL | EXPAND, SHRINK);
+	attach (_vnotebook, 1, 2, 2, 3, SHRINK);
+	attach (_hnotebook, 2, 3, 1, 2, FILL | EXPAND, SHRINK);
+
+	_vnotebook.signal_switch_page().connect (mem_fun (*this, &PortMatrix::v_page_selected));
+	_hnotebook.signal_switch_page().connect (mem_fun (*this, &PortMatrix::h_page_selected));
+
 	for (int i = 0; i < 2; ++i) {
 		_ports[i].set_type (type);
+	}
 
+	_vlabel.set_angle (90);
+	_hlabel.set_use_markup ();
+	_vlabel.set_use_markup ();
+	_hlabel.set_alignment (0, 0.5);
+	_vlabel.set_alignment (0.5, 0);
+
+	show_all ();
+}
+
+PortMatrix::~PortMatrix ()
+{
+	delete _body;
+	delete _menu;
+}
+
+void
+PortMatrix::init ()
+{
+	select_arrangement ();
+	setup_notebooks ();
+
+	if (!_ports[0].empty()) {
+		_visible_ports[0] = *_ports[0].begin();
+	}
+	
+	if (!_ports[1].empty()) {
+		_visible_ports[1] = *_ports[1].begin();
+	}
+
+	for (int i = 0; i < 2; ++i) {
 		/* watch for the content of _ports[] changing */
 		_ports[i].Changed.connect (mem_fun (*this, &PortMatrix::setup));
 
@@ -83,18 +126,8 @@ PortMatrix::PortMatrix (Window* parent, Session& session, DataType type)
 	_session.engine().PortRegisteredOrUnregistered.connect (mem_fun (*this, &PortMatrix::setup_all_ports));
 
 	reconnect_to_routes ();
-
-	attach (*_body, 0, 1, 0, 1);
-	attach (_vscroll, 1, 2, 0, 1, SHRINK);
-	attach (_hscroll, 0, 1, 1, 2, FILL | EXPAND, SHRINK);
-
-	show_all ();
-}
-
-PortMatrix::~PortMatrix ()
-{
-	delete _body;
-	delete _menu;
+	
+	setup ();
 }
 
 /** Disconnect from and reconnect to routes' signals that we need to watch for things that affect the matrix */
@@ -126,12 +159,9 @@ PortMatrix::routes_changed ()
 void
 PortMatrix::setup ()
 {
-	if ((get_flags () & Gtk::REALIZED) == 0) {
-		select_arrangement ();
-	}
-
 	_body->setup ();
 	setup_scrollbars ();
+	setup_notebooks ();
 	queue_draw ();
 
 	show_all ();
@@ -211,8 +241,8 @@ void
 PortMatrix::select_arrangement ()
 {
 	uint32_t const N[2] = {
-		_ports[0].total_visible_channels (),
-		_ports[1].total_visible_channels ()
+		_ports[0].total_channels (),
+		_ports[1].total_channels ()
 	};
 
 	/* The list with the most channels goes on left or right, so that the most channel
@@ -226,12 +256,16 @@ PortMatrix::select_arrangement ()
 		_row_index = 0;
 		_column_index = 1;
 		_arrangement = LEFT_TO_BOTTOM;
+		_vlabel.set_label (_("<b>Sources</b>"));
+		_hlabel.set_label (_("<b>Destinations</b>"));
 
 	} else {
 
 		_row_index = 1;
 		_column_index = 0;
 		_arrangement = TOP_TO_RIGHT;
+		_hlabel.set_label (_("<b>Sources</b>"));
+		_vlabel.set_label (_("<b>Destinations</b>"));
 	}
 }
 
@@ -242,6 +276,12 @@ PortMatrix::columns () const
 	return &_ports[_column_index];
 }
 
+boost::shared_ptr<PortGroup>
+PortMatrix::visible_columns () const
+{
+	return _visible_ports[_column_index];
+}
+
 /* @return rows list */
 PortGroupList const *
 PortMatrix::rows () const
@@ -249,12 +289,14 @@ PortMatrix::rows () const
 	return &_ports[_row_index];
 }
 
+boost::shared_ptr<PortGroup>
+PortMatrix::visible_rows () const
+{
+	return _visible_ports[_row_index];
+}
+
 void
-PortMatrix::popup_menu (
-	pair<boost::shared_ptr<PortGroup>, BundleChannel> column,
-	pair<boost::shared_ptr<PortGroup>, BundleChannel> row,
-	uint32_t t
-	)
+PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 {
 	using namespace Menu_Helpers;
 
@@ -265,13 +307,9 @@ PortMatrix::popup_menu (
 
 	MenuList& items = _menu->items ();
 
-	boost::shared_ptr<PortGroup> pg[2];
-	pg[_column_index] = column.first;
-	pg[_row_index] = row.first;
-
 	BundleChannel bc[2];
-	bc[_column_index] = column.second;
-	bc[_row_index] = row.second;
+	bc[_column_index] = column;
+	bc[_row_index] = row;
 
 	char buf [64];
 	bool need_separator = false;
@@ -337,55 +375,6 @@ PortMatrix::popup_menu (
 			need_separator = true;
 		}
 
-	}
-
-	if (need_separator) {
-		items.push_back (SeparatorElem ());
-	}
-
-	need_separator = false;
-
-	for (int dim = 0; dim < 2; ++dim) {
-
-		if (pg[dim]) {
-
-			boost::weak_ptr<PortGroup> wp (pg[dim]);
-
-			if (pg[dim]->visible()) {
-				if (dim == 0) {
-					if (pg[dim]->name.empty()) {
-						snprintf (buf, sizeof (buf), _("Hide sources"));
-					} else {
-						snprintf (buf, sizeof (buf), _("Hide '%s' sources"), pg[dim]->name.c_str());
-					}
-				} else {
-					if (pg[dim]->name.empty()) {
-						snprintf (buf, sizeof (buf), _("Hide destinations"));
-					} else {
-						snprintf (buf, sizeof (buf), _("Hide '%s' destinations"), pg[dim]->name.c_str());
-					}
-				}
-
-				items.push_back (MenuElem (buf, bind (mem_fun (*this, &PortMatrix::hide_group), wp)));
-			} else {
-				if (dim == 0) {
-					if (pg[dim]->name.empty()) {
-						snprintf (buf, sizeof (buf), _("Show sources"));
-					} else {
-						snprintf (buf, sizeof (buf), _("Show '%s' sources"), pg[dim]->name.c_str());
-					}
-				} else {
-					if (pg[dim]->name.empty()) {
-						snprintf (buf, sizeof (buf), _("Show destinations"));
-					} else {
-						snprintf (buf, sizeof (buf), _("Show '%s' destinations"), pg[dim]->name.c_str());
-					}
-				}
-				items.push_back (MenuElem (buf, bind (mem_fun (*this, &PortMatrix::show_group), wp)));
-			}
-
-			need_separator = true;
-		}
 	}
 
 	if (need_separator) {
@@ -481,28 +470,6 @@ PortMatrix::toggle_show_only_bundles ()
 	_body->setup ();
 	setup_scrollbars ();
 	queue_draw ();
-}
-
-void
-PortMatrix::hide_group (boost::weak_ptr<PortGroup> w)
-{
-	boost::shared_ptr<PortGroup> g = w.lock ();
-	if (!g) {
-		return;
-	}
-
-	g->set_visible (false);
-}
-
-void
-PortMatrix::show_group (boost::weak_ptr<PortGroup> w)
-{
-	boost::shared_ptr<PortGroup> g = w.lock ();
-	if (!g) {
-		return;
-	}
-
-	g->set_visible (true);
 }
 
 pair<uint32_t, uint32_t>
@@ -605,4 +572,92 @@ PortMatrix::bundle_changed (ARDOUR::Bundle::Change c)
 	}
 	
 	setup ();
+}
+
+void
+PortMatrix::setup_notebooks ()
+{
+	_in_setup_notebooks = true;
+	
+	remove_notebook_pages (_hnotebook);
+	remove_notebook_pages (_vnotebook);
+
+	for (PortGroupList::List::const_iterator i = _ports[_row_index].begin(); i != _ports[_row_index].end(); ++i) {
+		HBox* dummy = manage (new HBox);
+		dummy->show ();
+		Label* label = manage (new Label ((*i)->name));
+		label->set_angle (90);
+		_vnotebook.prepend_page (*dummy, *label);
+	}
+
+	for (PortGroupList::List::const_iterator i = _ports[_column_index].begin(); i != _ports[_column_index].end(); ++i) {
+		HBox* dummy = manage (new HBox);
+		dummy->show ();
+		_hnotebook.append_page (*dummy, (*i)->name);
+	}
+
+	_vnotebook.set_tab_pos (POS_LEFT);
+	_hnotebook.set_tab_pos (POS_TOP);
+
+	_in_setup_notebooks = false;
+}
+
+void
+PortMatrix::remove_notebook_pages (Notebook& n)
+{
+	int const N = n.get_n_pages ();
+	
+	for (int i = 0; i < N; ++i) {
+		n.remove_page ();
+	}
+}
+
+void
+PortMatrix::v_page_selected (GtkNotebookPage *, guint n)
+{
+	if (_in_setup_notebooks) {
+		return;
+	}
+
+	PortGroupList& p = _ports[_row_index];
+
+	n = p.size() - n - 1;
+
+	int i = 0;
+	PortGroupList::List::const_iterator j = p.begin();
+	while (i != int (n) && j != p.end()) {
+		++i;
+		++j;
+	}
+
+	if (j != p.end()) {
+		_visible_ports[_row_index] = *j;
+		_body->setup ();
+		setup_scrollbars ();
+		queue_draw ();
+	}
+}
+
+void
+PortMatrix::h_page_selected (GtkNotebookPage *, guint n)
+{
+	if (_in_setup_notebooks) {
+		return;
+	}
+
+	PortGroupList& p = _ports[_column_index];
+	
+	int i = 0;
+	PortGroupList::List::const_iterator j = p.begin();
+	while (i != int (n) && j != p.end()) {
+		++i;
+		++j;
+	}
+
+	if (j != p.end()) {
+		_visible_ports[_column_index] = *j;
+		_body->setup ();
+		setup_scrollbars ();
+		queue_draw ();
+	}
 }

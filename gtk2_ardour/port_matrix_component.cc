@@ -126,17 +126,13 @@ PortMatrixComponent::group_size (boost::shared_ptr<const PortGroup> g) const
 {
 	uint32_t s = 0;
 
-	if (g->visible()) {
-		PortGroup::BundleList const & bundles = g->bundles ();
-		if (_matrix->show_only_bundles()) {
-			s = bundles.size();
-		} else {
-			for (PortGroup::BundleList::const_iterator i = bundles.begin(); i != bundles.end(); ++i) {
-				s += i->bundle->nchannels();
-			}
-		}
+	PortGroup::BundleList const & bundles = g->bundles ();
+	if (_matrix->show_only_bundles()) {
+		s = bundles.size();
 	} else {
-		s = 1;
+		for (PortGroup::BundleList::const_iterator i = bundles.begin(); i != bundles.end(); ++i) {
+			s += i->bundle->nchannels();
+		}
 	}
 
 	return s;
@@ -144,46 +140,35 @@ PortMatrixComponent::group_size (boost::shared_ptr<const PortGroup> g) const
 
 /** @param bc Channel.
  *  @param groups List of groups.
- *  @return Position of bc in groups in grid units, taking visibility and show_only_bundles into account.
+ *  @return Position of bc in groups in grid units, taking show_only_bundles into account.
  */
 uint32_t
-PortMatrixComponent::channel_to_position (ARDOUR::BundleChannel bc, PortGroupList const * groups) const
+PortMatrixComponent::channel_to_position (ARDOUR::BundleChannel bc, boost::shared_ptr<const PortGroup> group) const
 {
 	uint32_t p = 0;
 
-	for (PortGroupList::List::const_iterator i = groups->begin(); i != groups->end(); ++i) {
+	PortGroup::BundleList const & bundles = group->bundles ();
 
-		PortGroup::BundleList const & bundles = (*i)->bundles ();
+	for (PortGroup::BundleList::const_iterator i = bundles.begin(); i != bundles.end(); ++i) {
 
-		for (PortGroup::BundleList::const_iterator j = bundles.begin(); j != bundles.end(); ++j) {
+		if (i->bundle == bc.bundle) {
 
-			if (j->bundle == bc.bundle) {
-
-				/* found the bundle */
-
-				if (_matrix->show_only_bundles() || !(*i)->visible()) {
-					return p;
-				} else {
-					return p + bc.channel;
-				}
-
+			/* found the bundle */
+			
+			if (_matrix->show_only_bundles()) {
+				return p;
+			} else {
+				return p + bc.channel;
 			}
-
-			if ((*i)->visible()) {
-
-				/* move past this bundle */
-
-				if (_matrix->show_only_bundles()) {
-					p += 1;
-				} else {
-					p += j->bundle->nchannels ();
-				}
-			}
+			
 		}
 
-		if (!(*i)->visible()) {
-			/* if this group isn't visible we won't have updated p, so do it now */
+		/* move past this bundle */
+		
+		if (_matrix->show_only_bundles()) {
 			p += 1;
+		} else {
+			p += i->bundle->nchannels ();
 		}
 	}
 
@@ -191,57 +176,34 @@ PortMatrixComponent::channel_to_position (ARDOUR::BundleChannel bc, PortGroupLis
 }
 
 
-pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel>
-PortMatrixComponent::position_to_group_and_channel (double p, double, PortGroupList const * groups) const
+ARDOUR::BundleChannel
+PortMatrixComponent::position_to_channel (double p, double, boost::shared_ptr<const PortGroup> group) const
 {
 	p /= grid_spacing ();
 	
-	PortGroupList::List::const_iterator i = groups->begin ();
+	PortGroup::BundleList const & bundles = group->bundles ();
+	for (PortGroup::BundleList::const_iterator j = bundles.begin(); j != bundles.end(); ++j) {
 
-	while (i != groups->end()) {
-
-		uint32_t const gs = group_size (*i);
-
-		if (p < gs) {
-
-			/* it's in this group */
-
-			if (!(*i)->visible()) {
-				return make_pair (*i, ARDOUR::BundleChannel (boost::shared_ptr<ARDOUR::Bundle> (), 0));
+		if (_matrix->show_only_bundles()) {
+			
+			if (p == 0) {
+				return ARDOUR::BundleChannel (j->bundle, 0);
+			} else {
+				p -= 1;
 			}
-
-			PortGroup::BundleList const & bundles = (*i)->bundles ();
-			for (PortGroup::BundleList::const_iterator j = bundles.begin(); j != bundles.end(); ++j) {
-
-				if (_matrix->show_only_bundles()) {
-
-					if (p == 0) {
-						return make_pair (*i, ARDOUR::BundleChannel (j->bundle, 0));
-					} else {
-						p -= 1;
-					}
-
-				} else {
-
-					uint32_t const s = j->bundle->nchannels ();
-					if (p < s) {
-						return make_pair (*i, ARDOUR::BundleChannel (j->bundle, p));
-					} else {
-					        p -= s;
-					}
-
-				}
-
-			}
-
+			
 		} else {
-
-			p -= gs;
-
+			
+			uint32_t const s = j->bundle->nchannels ();
+			if (p < s) {
+				return ARDOUR::BundleChannel (j->bundle, p);
+			} else {
+				p -= s;
+			}
+			
 		}
-
-		++i;
+		
 	}
-
-	return make_pair (boost::shared_ptr<PortGroup> (), ARDOUR::BundleChannel (boost::shared_ptr<ARDOUR::Bundle> (), 0));
+	
+	return ARDOUR::BundleChannel (boost::shared_ptr<ARDOUR::Bundle> (), 0);
 }

@@ -32,7 +32,7 @@ public:
 	PortMatrixLabels (PortMatrix* m, PortMatrixBody* b) : PortMatrixComponent (m, b) {}
 	virtual ~PortMatrixLabels () {}
 
-	virtual void draw_extra (cairo_t *);
+	void draw_extra (cairo_t *);
 
 	void clear_channel_highlights ();
 	void add_channel_highlight (ARDOUR::BundleChannel const &);

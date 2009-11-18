@@ -35,6 +35,7 @@ GlobalPortMatrix::GlobalPortMatrix (Gtk::Window* p, ARDOUR::Session& s, ARDOUR::
 	: PortMatrix (p, s, t)
 {
 	setup_all_ports ();
+	init ();
 }
 
 void

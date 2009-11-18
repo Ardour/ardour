@@ -171,8 +171,8 @@ protected:
 	void set_source_rgb (cairo_t *, Gdk::Color const &);
 	void set_source_rgba (cairo_t *, Gdk::Color const &, double);
 	uint32_t group_size (boost::shared_ptr<const PortGroup>) const;
-	uint32_t channel_to_position (ARDOUR::BundleChannel, PortGroupList const *) const;
-	virtual std::pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> position_to_group_and_channel (double, double, PortGroupList const *) const;
+	uint32_t channel_to_position (ARDOUR::BundleChannel, boost::shared_ptr<const PortGroup>) const;
+	virtual ARDOUR::BundleChannel position_to_channel (double, double, boost::shared_ptr<const PortGroup>) const;
 
 	/** Render the complete component to a cairo context. */
 	virtual void render (cairo_t *) = 0;

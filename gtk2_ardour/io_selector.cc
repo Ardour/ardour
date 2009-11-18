@@ -57,10 +57,11 @@ IOSelector::IOSelector (Gtk::Window* p, ARDOUR::Session& session, boost::shared_
 		_ours = 1;
 	}
 
-	_port_group.reset (new PortGroup (""));
+	_port_group.reset (new PortGroup (io->name()));
 	_ports[_ours].add_group (_port_group);
 
 	setup_all_ports ();
+	init ();
 }
 
 void

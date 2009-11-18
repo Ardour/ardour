@@ -58,7 +58,7 @@ PortMatrixBody::~PortMatrixBody ()
 bool
 PortMatrixBody::on_expose_event (GdkEventExpose* event)
 {
-	if (_matrix->columns()->empty() || _matrix->rows()->empty()) {
+	if (_matrix->visible_columns()->bundles().empty() || _matrix->visible_rows()->bundles().empty()) {
 
 		/* nothing to connect */
 
@@ -446,7 +446,7 @@ PortMatrixBody::highlight_associated_channels (int dim, ARDOUR::BundleChannel h)
 		_row_labels->add_channel_highlight (bc[dim]);
 	}
 
-	PortGroup::BundleList const b = _matrix->ports(1 - dim)->bundles ();
+	PortGroup::BundleList const b = _matrix->visible_ports(1 - dim)->bundles ();
 
 	for (PortGroup::BundleList::const_iterator i = b.begin(); i != b.end(); ++i) {
 	        for (uint32_t j = 0; j < i->bundle->nchannels(); ++j) {

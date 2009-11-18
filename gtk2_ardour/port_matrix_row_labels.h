@@ -50,7 +50,6 @@ public:
 	double component_to_parent_y (double y) const;
 	double parent_to_component_y (double y) const;
 	void mouseover_changed (std::list<PortMatrixNode> const &);
-	void draw_extra (cairo_t *);
 	void motion (double, double);
 
 private:
@@ -58,7 +57,6 @@ private:
 	void render_bundle_name (cairo_t *, Gdk::Color, Gdk::Color, double, double, boost::shared_ptr<ARDOUR::Bundle>);
 	double channel_x (ARDOUR::BundleChannel const &) const;
 	double channel_y (ARDOUR::BundleChannel const &) const;
-	virtual std::pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel> position_to_group_and_channel (double, double, PortGroupList const *) const;
 
 	void render (cairo_t *);
 	void compute_dimensions ();
@@ -70,7 +68,6 @@ private:
 
 	double _longest_port_name;
 	double _longest_bundle_name;
-	double _highest_group_name;
 };
 
 #endif

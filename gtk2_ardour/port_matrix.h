@@ -26,6 +26,7 @@
 #include <gtkmm/table.h>
 #include <gtkmm/label.h>
 #include <gtkmm/checkbutton.h>
+#include <gtkmm/notebook.h>
 #include <boost/shared_ptr.hpp>
 #include "ardour/bundle.h"
 #include "port_group.h"
@@ -61,11 +62,7 @@ public:
 
 	void disassociate_all ();
 	void setup_scrollbars ();
-	void popup_menu (
-		std::pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel>,
-		std::pair<boost::shared_ptr<PortGroup>, ARDOUR::BundleChannel>,
-		uint32_t
-		);
+	void popup_menu (ARDOUR::BundleChannel, ARDOUR::BundleChannel, uint32_t);
 
 	int min_height_divisor () const {
 		return _min_height_divisor;
@@ -79,6 +76,7 @@ public:
 		LEFT_TO_BOTTOM ///< row labels to the left, column labels on the bottom
 	};
 
+	
 	/** @return Arrangement in use */
 	Arrangement arrangement () const {
 		return _arrangement;
@@ -89,6 +87,7 @@ public:
 	}
 
 	PortGroupList const * columns () const;
+	boost::shared_ptr<PortGroup> visible_columns () const;
 
 	/** @return index into the _ports array for the list which is displayed as columns */
 	int column_index () const {
@@ -96,6 +95,7 @@ public:
 	}
 
 	PortGroupList const * rows () const;
+	boost::shared_ptr<PortGroup> visible_rows () const;
 
 	/** @return index into the _ports array for the list which is displayed as rows */
 	int row_index () const {
@@ -106,6 +106,11 @@ public:
 		return &_ports[d];
 	}
 
+	boost::shared_ptr<const PortGroup> visible_ports (int d) const {
+		return _visible_ports[d];
+	}
+	
+	void init ();
 	void setup ();
 	virtual void setup_ports (int) = 0;
 	void setup_all_ports ();
@@ -150,6 +155,7 @@ protected:
 	    from left to right as you go from list 0 to list 1.  Hence subclasses which deal with
 	    inputs and outputs should put outputs in list 0 and inputs in list 1. */
 	PortGroupList _ports[2];
+	boost::shared_ptr<PortGroup> _visible_ports[2];
 	ARDOUR::Session& _session;
 
 private:
@@ -164,12 +170,14 @@ private:
 	void rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
 	void disassociate_all_on_channel (boost::weak_ptr<ARDOUR::Bundle>, uint32_t, int);
 	void setup_global_ports ();
-	void hide_group (boost::weak_ptr<PortGroup>);
-	void show_group (boost::weak_ptr<PortGroup>);
 	void toggle_show_only_bundles ();
 	bool on_scroll_event (GdkEventScroll *);
 	boost::shared_ptr<ARDOUR::IO> io_from_bundle (boost::shared_ptr<ARDOUR::Bundle>) const;
 	void bundle_changed (ARDOUR::Bundle::Change);
+	void setup_notebooks ();
+	void remove_notebook_pages (Gtk::Notebook &);
+	void v_page_selected (GtkNotebookPage *, guint);
+	void h_page_selected (GtkNotebookPage *, guint);
 
 	Gtk::Window* _parent;
 
@@ -180,6 +188,10 @@ private:
 	PortMatrixBody* _body;
 	Gtk::HScrollbar _hscroll;
 	Gtk::VScrollbar _vscroll;
+	Gtk::Notebook _vnotebook;
+	Gtk::Notebook _hnotebook;
+	Gtk::Label _vlabel;
+	Gtk::Label _hlabel;
 	Gtk::Menu* _menu;
 	Arrangement _arrangement;
 	int _row_index;
@@ -187,7 +199,7 @@ private:
 	int _min_height_divisor;
 	bool _show_only_bundles;
 	bool _inhibit_toggle_show_only_bundles;
-	bool _realized;
+	bool _in_setup_notebooks;
 };
 
 #endif

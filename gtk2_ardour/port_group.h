@@ -60,15 +60,6 @@ public:
 
 	std::string name; ///< name for the group
 
-	bool visible () const {
-		return _visible;
-	}
-
-	void set_visible (bool v) {
-		_visible = v;
-		Changed ();
-	}
-
 	bool has_port (std::string const &) const;
 
 	sigc::signal<void> Changed;
@@ -95,7 +86,6 @@ private:
 	void add_bundle_internal (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::IO>, bool, Gdk::Color, bool);
 
 	BundleList _bundles;
-	bool _visible; ///< true if the group is visible in the UI
 };
 
 /// A list of PortGroups
@@ -107,12 +97,13 @@ class PortGroupList : public sigc::trackable
 	typedef std::vector<boost::shared_ptr<PortGroup> > List;
 
 	void add_group (boost::shared_ptr<PortGroup>);
+	void add_group_if_not_empty (boost::shared_ptr<PortGroup>);
 	void set_type (ARDOUR::DataType);
 	void gather (ARDOUR::Session &, bool, bool);
 	PortGroup::BundleList const & bundles () const;
 	void clear ();
 	void remove_bundle (boost::shared_ptr<ARDOUR::Bundle>);
-	uint32_t total_visible_channels () const;
+	uint32_t total_channels () const;
 	uint32_t size () const {
 		return _groups.size();
 	}
