@@ -241,8 +241,10 @@ Send::set_name (const std::string& new_name)
 }
 
 bool
-Send::visible () const
+Send::display_to_user () const
 {
+	/* we ignore Deliver::_display_to_user */
+
 	if (_role == Listen) {
 		return false;
 	}

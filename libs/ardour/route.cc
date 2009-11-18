@@ -80,6 +80,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	/* add standard processors other than amp (added by ::init()) */
 
 	_meter.reset (new PeakMeter (_session));
+	_meter->set_display_to_user (_meter_point == MeterCustom);
 	add_processor (_meter, PreFader);
 
 	if (_flags & ControlOut) {
@@ -774,6 +775,7 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 				}
 
 				_meter.reset (new PeakMeter (_session, node));
+				_meter->set_display_to_user (_meter_point == MeterCustom);
 				processor = _meter;
 
 			} else if (prop->value() == "amp") {
@@ -822,12 +824,12 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 				return false;
 			}
 
-			if (iter == _processors.end() && processor->visible() && !_processors.empty()) {
+			if (iter == _processors.end() && processor->display_to_user() && !_processors.empty()) {
 				/* check for invisible processors stacked at the end and leave them there */
 				ProcessorList::iterator p;
 				p = _processors.end();
 				--p;
-				while (!(*p)->visible() && p != _processors.begin()) {
+				while (!(*p)->display_to_user() && p != _processors.begin()) {
 					--p;
 				}
 				++p;
@@ -885,12 +887,12 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version, ProcessorLis
 			return false;
 		}
 
-		if (iter == _processors.end() && processor->visible() && !_processors.empty()) {
+		if (iter == _processors.end() && processor->display_to_user() && !_processors.empty()) {
 			/* check for invisible processors stacked at the end and leave them there */
 			ProcessorList::iterator p;
 			p = _processors.end();
 			--p;
-			while (!(*p)->visible() && p != _processors.begin()) {
+			while (!(*p)->display_to_user() && p != _processors.begin()) {
 				--p;
 			}
 			++p;
@@ -1404,7 +1406,7 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 #ifndef NDEBUG
 	DEBUG_TRACE (DEBUG::Processors, "{\n");
 	for (list<boost::shared_ptr<Processor> >::const_iterator p = _processors.begin(); p != _processors.end(); ++p) {
-		DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1 ID = %2", (*p)->name(), (*p)->id()));
+		DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1 ID = %2\n", (*p)->name(), (*p)->id()));
 	}
 	DEBUG_TRACE (DEBUG::Processors, "}\n");
 #endif
@@ -1535,7 +1537,7 @@ int
 Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err)
 {
 	/* "new_order" is an ordered list of processors to be positioned according to "placement".
-	   NOTE: all processors in "new_order" MUST be marked as visible. There maybe additional
+	   NOTE: all processors in "new_order" MUST be marked as display_to_user(). There maybe additional
 	   processors in the current actual processor list that are hidden. Any visible processors
 	   in the current list but not in "new_order" will be assumed to be deleted.
 	*/
@@ -1574,7 +1576,7 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 
 			} else {
 
-				if (!(*oiter)->visible()) {
+				if (!(*oiter)->display_to_user()) {
 
 					as_it_will_be.push_back (*oiter);
 
@@ -1792,6 +1794,9 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 
 	if ((prop = node.property (X_("meter-point"))) != 0) {
 		_meter_point = MeterPoint (string_2_enum (prop->value (), _meter_point));
+		if (_meter) {
+			_meter->set_display_to_user (_meter_point == MeterCustom);
+		}
 	}
 
 	if ((prop = node.property (X_("route-group"))) != 0) {
@@ -2634,28 +2639,40 @@ Route::set_meter_point (MeterPoint p, void *src)
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
 		ProcessorList as_it_was (_processors);
-		
-		// Move meter in the processors list
-		ProcessorList::iterator loc = find(_processors.begin(), _processors.end(), _meter);
-		_processors.erase(loc);
-		switch (p) {
-		case MeterInput:
-			loc = _processors.begin();
+
+		if (p != MeterCustom) {
+			// Move meter in the processors list to reflect the new position
+			ProcessorList::iterator loc = find(_processors.begin(), _processors.end(), _meter);
+			_processors.erase(loc);
+			switch (p) {
+			case MeterInput:
+				loc = _processors.begin();
+				break;
+			case MeterPreFader:
+				loc = find(_processors.begin(), _processors.end(), _amp);
+				break;
+			case MeterPostFader:
+				loc = _processors.end();
+				break;
+			default:
 			break;
-		case MeterPreFader:
-			loc = find(_processors.begin(), _processors.end(), _amp);
-			break;
-		case MeterPostFader:
-			loc = _processors.end();
-			break;
-		}
-		
-		_processors.insert(loc, _meter);
-		
-		if (configure_processors_unlocked (0)) {
-			_processors = as_it_was;
-			configure_processors_unlocked (0); // it worked before we tried to add it ...
-			return;
+			}
+
+			_processors.insert(loc, _meter);
+			
+			if (configure_processors_unlocked (0)) {
+				_processors = as_it_was;
+				configure_processors_unlocked (0); // it worked before we tried to add it ...
+				return;
+			}
+
+			_meter->set_display_to_user (false);
+
+		} else {
+
+			// just make it visible and let the user move it
+
+			_meter->set_display_to_user (true);
 		}
 		
 	}

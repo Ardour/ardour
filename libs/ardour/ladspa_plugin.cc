@@ -393,9 +393,6 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 	uint32_t port_id;
 	LocaleGuard lg (X_("POSIX"));
 
-	cout << "LADSPA Plugin set state " << version << "\n";
-	cout << "- node " << node.name() << "\n";
-
 	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to LadspaPlugin::set_state") << endmsg;
 		return -1;
@@ -440,9 +437,6 @@ LadspaPlugin::set_state_2X (const XMLNode& node, int version)
 	const char *data;
 	uint32_t port_id;
 	LocaleGuard lg (X_("POSIX"));
-
-	cout << "LADSPA Plugin set state " << version << "\n";
-	cout << "- node " << node.name() << "\n";
 
 	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to LadspaPlugin::set_state") << endmsg;

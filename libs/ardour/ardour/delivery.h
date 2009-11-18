@@ -61,7 +61,6 @@ public:
 	bool set_name (const std::string& name);
 	std::string display_name() const;
 
-	bool visible() const;
 	Role role() const { return _role; }
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);

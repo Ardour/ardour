@@ -56,8 +56,8 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 
 	virtual std::string display_name() const { return SessionObject::name(); }
 
-	virtual bool visible() const { return true; }
-	virtual void set_visible (bool) {}
+	virtual bool display_to_user() const { return _display_to_user; }
+	virtual void set_display_to_user (bool);
 
 	bool active () const { return _pending_active; }
 
@@ -109,6 +109,7 @@ protected:
 	ChanCount _configured_input;
 	ChanCount _configured_output;
 	void*     _gui;  /* generic, we don't know or care what this is */
+	bool        _display_to_user;
 
 private:
 	int set_state_2X (const XMLNode&, int version);

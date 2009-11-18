@@ -160,6 +160,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (MeterInput);
 	REGISTER_ENUM (MeterPreFader);
 	REGISTER_ENUM (MeterPostFader);
+	REGISTER_ENUM (MeterCustom);
 	REGISTER (_MeterPoint);
 
 	REGISTER_ENUM (Normal);

@@ -43,7 +43,7 @@ class Send : public Delivery
 
 	uint32_t bit_slot() const { return _bitslot; }
 
-	bool visible() const;
+	bool display_to_user() const;
 
 	boost::shared_ptr<Amp> amp() const { return _amp; }
 	boost::shared_ptr<PeakMeter> meter() const { return _meter; }

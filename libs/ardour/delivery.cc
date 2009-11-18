@@ -59,9 +59,9 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Mute
 	, _solo_isolated (false)
 	, _mute_master (mm)
 	, no_panner_reset (false)
-
 {
 	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
+	_display_to_user = false;
 
 	if (_output) {
 		_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
@@ -85,6 +85,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const string& 
 	, no_panner_reset (false)
 {
 	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
+	_display_to_user = false;
 
 	if (_output) {
 		_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
@@ -108,6 +109,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode&
 	, no_panner_reset (false)
 {
 	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
+	_display_to_user = false;
 
 	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
@@ -135,6 +137,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> out, boost::shared_ptr<Mut
 	, no_panner_reset (false)
 {
 	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
+	_display_to_user = false;
 
 	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
@@ -175,12 +178,6 @@ void
 Delivery::increment_output_offset (nframes_t n)
 {
 	_output_offset += n;
-}
-
-bool
-Delivery::visible () const
-{
-	return true;
 }
 
 bool

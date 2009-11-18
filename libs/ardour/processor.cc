@@ -70,6 +70,7 @@ Processor::Processor(Session& session, const string& name)
 	, _next_ab_is_active(false)
 	, _configured(false)
 	, _gui(0)
+	, _display_to_user (true)
 {
 }
 
@@ -81,6 +82,7 @@ Processor::Processor (Session& session, const XMLNode& node)
 	, _next_ab_is_active(false)
 	, _configured(false)
 	, _gui(0)
+	, _display_to_user (true)
 {
 	set_state (node, Stateful::loading_state_version);
 	_pending_active = _active;
@@ -271,3 +273,10 @@ Processor::configure_io (ChanCount in, ChanCount out)
 
 	return true;
 }
+
+void
+Processor::set_display_to_user (bool yn) 
+{
+	_display_to_user = yn;
+}
+

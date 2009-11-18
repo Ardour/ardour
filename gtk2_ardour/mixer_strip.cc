@@ -403,6 +403,10 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	case MeterPostFader:
 		meter_point_label.set_text (_("post"));
 		break;
+
+	case MeterCustom:
+		meter_point_label.set_text (_("custom"));
+		break;
 	}
 
 	delete route_ops_menu;
@@ -1602,6 +1606,10 @@ MixerStrip::meter_changed (void *src)
 
 	case MeterPostFader:
 		meter_point_label.set_text (_("post"));
+		break;
+
+	case MeterCustom:
+		meter_point_label.set_text (_("custom"));
 		break;
 	}
 

@@ -127,7 +127,8 @@ namespace ARDOUR {
 	enum MeterPoint {
 		MeterInput,
 		MeterPreFader,
-		MeterPostFader
+		MeterPostFader,
+		MeterCustom
 	};
 
 	enum TrackMode {

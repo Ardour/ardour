@@ -469,9 +469,14 @@ next_meter_point (MeterPoint mp)
 		break;
 
 	case MeterPostFader:
-		return MeterInput;
+		return MeterCustom;
+		break;
+
+	case MeterCustom:
+		return MeterInput;		
 		break;
 	}
+
 	/*NOTREACHED*/
 	return MeterInput;
 }

@@ -804,11 +804,8 @@ void
 ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 {
 	boost::shared_ptr<Processor> processor (p.lock ());
-	if (!processor) {
-		return;
-	}
 
-	if (!processor->visible()) {
+	if (!processor || !processor->display_to_user()) {
 		return;
 	}
 

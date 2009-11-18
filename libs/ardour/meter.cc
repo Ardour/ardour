@@ -225,8 +225,3 @@ PeakMeter::state (bool full_state)
 }
 
 
-bool
-PeakMeter::visible() const
-{
-	return true;
-}
