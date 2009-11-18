@@ -36,6 +36,7 @@
 #include "ardour/buffer_set.h"
 #include "ardour/configuration.h"
 #include "ardour/cycle_timer.h"
+#include "ardour/debug.h"
 #include "ardour/delivery.h"
 #include "ardour/dB.h"
 #include "ardour/internal_send.h"
@@ -621,7 +622,7 @@ Route::muted() const
 	return _mute_master->muted ();
 }
 
-#if 1
+#if 0
 static void
 dump_processors(const string& name, const list<boost::shared_ptr<Processor> >& procs)
 {
@@ -1399,13 +1400,19 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	list< pair<ChanCount,ChanCount> > configuration;
 	uint32_t index = 0;
 
-	cerr << _name << " CONFIGURE PROCESSORS\n";
-	dump_processors (_name, _processors);
+	DEBUG_TRACE (DEBUG::Processors, string_compose ("%1: configure processors\n", _name));
+#ifndef NDEBUG
+	DEBUG_TRACE (DEBUG::Processors, "{\n");
+	for (list<boost::shared_ptr<Processor> >::const_iterator p = _processors.begin(); p != _processors.end(); ++p) {
+		DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1 ID = %2", (*p)->name(), (*p)->id()));
+	}
+	DEBUG_TRACE (DEBUG::Processors, "}\n");
+#endif
 
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++index) {
 
 		if ((*p)->can_support_io_configuration(in, out)) {
-			cerr << "\t" << (*p)->name() << " in = " << in << " out = " << out << endl;
+			DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1in = %2 out = %3\n",(*p)->name(), in, out));
 			configuration.push_back(make_pair(in, out));
 			in = out;
 		} else {
@@ -2712,10 +2719,7 @@ Route::update_total_latency ()
 		}
 	}
 
-#undef DEBUG_LATENCY
-#ifdef DEBUG_LATENCY
-	cerr << _name << ": internal redirect latency = " << own_latency << endl;
-#endif
+	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: internal redirect latency = %2\n", _name, own_latency));
 
 	_output->set_port_latency (own_latency);
 
@@ -2736,10 +2740,7 @@ Route::update_total_latency ()
 		signal_latency_changed (); /* EMIT SIGNAL */
 	}
 
-#ifdef DEBUG_LATENCY
-	cerr << _name << ": input latency = " << _input->signal_latency() << " total = "
-	     << own_latency << endl;
-#endif
+	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: input latency = %2 total = %3\n", _name, _input->signal_latency(), own_latency));
 
 	return _output->effective_latency ();
 }

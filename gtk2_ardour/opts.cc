@@ -83,6 +83,7 @@ list_debug_options ()
 	cerr << "\tMidiDiskstreamIO\n";
 	cerr << "\tSnapBBT\n";
 	cerr << "\tConfiguration\n";
+	cerr << "\tLatency\n";
 }
 
 static int
@@ -118,6 +119,10 @@ parse_debug_options (const char* str)
 			bits |= ARDOUR::DEBUG::SnapBBT;
 		} else if (strncasecmp (p, "configuration", strlen (p)) == 0) {
 			bits |= ARDOUR::DEBUG::Configuration;
+		} else if (strncasecmp (p, "latency", strlen (p)) == 0) {
+			bits |= ARDOUR::DEBUG::Latency;
+		} else if (strncasecmp (p, "processors", strlen (p)) == 0) {
+			bits |= ARDOUR::DEBUG::Processors;
 		}
 
 		p = strtok_r (0, ",", &sp);
