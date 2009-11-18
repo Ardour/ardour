@@ -50,6 +50,7 @@ public:
 	virtual void mouseover_changed (std::list<PortMatrixNode> const &) = 0;
 	virtual void draw_extra (cairo_t *) = 0;
 	virtual void button_press (double, double, int, uint32_t) {}
+	virtual void button_release (double, double, int, uint32_t) {}
 	virtual void motion (double, double) {}
 
 	void set_show_ports (bool);

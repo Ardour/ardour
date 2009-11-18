@@ -359,29 +359,33 @@ PortMatrixGrid::button_release (double x, double y, int b, uint32_t /*t*/)
 {
 	if (b == 1) {
 
-		if (_dragging && _moved) {
-
-			if (_drag_valid) {
-				list<PortMatrixNode> const p = nodes_on_line (_drag_start_x, _drag_start_y, _drag_x, _drag_y);
-
-				if (!p.empty()) {
-					PortMatrixNode::State const s = get_association (p.front());
-					for (list<PortMatrixNode>::const_iterator i = p.begin(); i != p.end(); ++i) {
-						set_association (*i, toggle_state (s));
+		if (x != -1) {
+			
+			if (_dragging && _moved) {
+				
+				if (_drag_valid) {
+					list<PortMatrixNode> const p = nodes_on_line (_drag_start_x, _drag_start_y, _drag_x, _drag_y);
+					
+					if (!p.empty()) {
+						PortMatrixNode::State const s = get_association (p.front());
+						for (list<PortMatrixNode>::const_iterator i = p.begin(); i != p.end(); ++i) {
+							set_association (*i, toggle_state (s));
+						}
 					}
+				}
+				
+			} else {
+				
+				PortMatrixNode const n = position_to_node (x, y);
+				if (n.row.bundle && n.column.bundle) {
+					PortMatrixNode::State const s = get_association (n);
+					set_association (n, toggle_state (s));
 				}
 			}
 
-		} else {
-
-			PortMatrixNode const n = position_to_node (x, y);
-			if (n.row.bundle && n.column.bundle) {
-				PortMatrixNode::State const s = get_association (n);
-				set_association (n, toggle_state (s));
-			}
+			require_render ();
 		}
-
-		require_render ();
+		
 		_body->queue_draw ();
 	}
 

@@ -328,14 +328,19 @@ PortMatrixBody::on_button_press_event (GdkEventButton* ev)
 bool
 PortMatrixBody::on_button_release_event (GdkEventButton* ev)
 {
-	if (Gdk::Region (_grid->parent_rectangle()).point_in (ev->x, ev->y)) {
-
-		_grid->button_release (
-			_grid->parent_to_component_x (ev->x),
-			_grid->parent_to_component_y (ev->y),
-			ev->button, ev->time
-			);
-
+	for (list<PortMatrixComponent*>::iterator i = _components.begin(); i != _components.end(); ++i) {
+		if (Gdk::Region ((*i)->parent_rectangle()).point_in (ev->x, ev->y)) {
+			(*i)->button_release (
+				(*i)->parent_to_component_x (ev->x),
+				(*i)->parent_to_component_y (ev->y),
+				ev->button, ev->time
+				);
+		} else {
+			(*i)->button_release (
+				-1, -1,
+				ev->button, ev->time
+				);
+		}
 	}
 
 	return true;
