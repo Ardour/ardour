@@ -33,29 +33,22 @@
 
 #include "evoral/types.hpp"
 
-#include "pbd/fastlog.h"
-#include "pbd/ringbufferNPT.h"
-#include "pbd/stateful.h"
-#include "pbd/statefuldestructible.h"
-
 #include "ardour/ardour.h"
+#include "ardour/chan_count.h"
 #include "ardour/location.h"
 #include "ardour/session_object.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
-#include "ardour/chan_count.h"
 
 struct tm;
 
 namespace ARDOUR {
 
-class AudioEngine;
 class IO;
 class Playlist;
 class Processor;
 class Region;
 class Route;
-class Send;
 class Session;
 
 class Diskstream : public SessionObject, public boost::noncopyable
