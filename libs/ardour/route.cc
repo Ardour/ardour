@@ -130,6 +130,7 @@ Route::init ()
 	_pending_declick = true;
 	_remote_control_id = 0;
 	_in_configure_processors = false;
+	_mute_points = MuteMaster::AllPoints;
 
 	_route_group = 0;
 
@@ -584,6 +585,18 @@ Route::solo_isolated () const
 }
 
 void
+Route::set_mute_points (MuteMaster::MutePoint mp)
+{
+	_mute_points = mp;
+	mute_points_changed (); /* EMIT SIGNAL */
+
+	if (_mute_master->muted()) {
+		_mute_master->mute_at (_mute_points);
+		mute_changed (this); /* EMIT SIGNAL */
+	}
+}
+
+void
 Route::set_mute (bool yn, void *src)
 {
 	if (_route_group && src != _route_group && _route_group->active_property (RouteGroup::Mute)) {
@@ -592,8 +605,13 @@ Route::set_mute (bool yn, void *src)
 	}
 
 	if (muted() != yn) {
-		_mute_master->mute (yn);
-		mute_changed (src);
+		if (yn) {
+			_mute_master->mute_at (_mute_points);
+		} else {
+			_mute_master->clear_mute ();
+		}
+
+		mute_changed (src); /* EMIT SIGNAL */
 	}
 }
 

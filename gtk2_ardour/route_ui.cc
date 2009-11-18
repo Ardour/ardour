@@ -31,6 +31,7 @@
 #include "pbd/stacktrace.h"
 #include "pbd/shiva.h"
 #include "pbd/controllable.h"
+#include "pbd/enumwriter.h"
 
 #include "ardour_ui.h"
 #include "editor.h"
@@ -96,6 +97,10 @@ RouteUI::init ()
 	mute_menu = 0;
 	solo_menu = 0;
 	sends_menu = 0;
+	pre_fader_mute_check = 0;
+	post_fader_mute_check = 0;
+	listen_mute_check = 0;
+	main_mute_check = 0;
 	ignore_toggle = false;
 	wait_for_release = false;
 	route_active_menu_item = 0;
@@ -806,52 +811,85 @@ RouteUI::build_mute_menu(void)
 	mute_menu = new Menu;
 	mute_menu->set_name ("ArdourContextMenu");
 
-#if FIX_ME_IN_3_0
 	MenuList& items = mute_menu->items();
-	CheckMenuItem* check;
 
-	check = new CheckMenuItem(_("Pre Fader"));
-	init_mute_menu(PRE_FADER, check);
-	check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), PRE_FADER, check));
-	_route->pre_fader_changed.connect(bind (mem_fun (*this, &RouteUI::pre_fader_toggle), check));
-	items.push_back (CheckMenuElem(*check));
-	check->show_all();
+	pre_fader_mute_check = manage (new CheckMenuItem(_("Pre Fader")));
+	init_mute_menu(MuteMaster::PreFader, pre_fader_mute_check);
+	pre_fader_mute_check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::PreFader, pre_fader_mute_check));
+	items.push_back (CheckMenuElem(*pre_fader_mute_check));
+	pre_fader_mute_check->show_all();
 
-	check = new CheckMenuItem(_("Post Fader"));
-	init_mute_menu(POST_FADER, check);
-	check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), POST_FADER, check));
-	_route->post_fader_changed.connect(bind (mem_fun (*this, &RouteUI::post_fader_toggle), check));
-	items.push_back (CheckMenuElem(*check));
-	check->show_all();
+	post_fader_mute_check = manage (new CheckMenuItem(_("Post Fader")));
+	init_mute_menu(MuteMaster::PostFader, post_fader_mute_check);
+	post_fader_mute_check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::PostFader, post_fader_mute_check));
+	items.push_back (CheckMenuElem(*post_fader_mute_check));
+	post_fader_mute_check->show_all();
 
-	check = new CheckMenuItem(_("Control Outs"));
-	init_mute_menu(CONTROL_OUTS, check);
-	check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), CONTROL_OUTS, check));
-	_route->control_outs_changed.connect(bind (mem_fun (*this, &RouteUI::control_outs_toggle), check));
-	items.push_back (CheckMenuElem(*check));
-	check->show_all();
+	listen_mute_check = manage (new CheckMenuItem(_("Control Outs")));
+	init_mute_menu(MuteMaster::Listen, listen_mute_check);
+	listen_mute_check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::Listen, listen_mute_check));
+	items.push_back (CheckMenuElem(*listen_mute_check));
+	listen_mute_check->show_all();
 
-	check = new CheckMenuItem(_("Main Outs"));
-	init_mute_menu(MAIN_OUTS, check);
-	check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), MAIN_OUTS, check));
-	_route->main_outs_changed.connect(bind (mem_fun (*this, &RouteUI::main_outs_toggle), check));
-	items.push_back (CheckMenuElem(*check));
-	check->show_all();
-#endif
+	main_mute_check = manage (new CheckMenuItem(_("Main Outs")));
+	init_mute_menu(MuteMaster::Main, main_mute_check);
+	main_mute_check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::Main, main_mute_check));
+	items.push_back (CheckMenuElem(*main_mute_check));
+	main_mute_check->show_all();
+
 	//items.push_back (SeparatorElem());
 	// items.push_back (MenuElem (_("MIDI Bind"), mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
+
+	_route->mute_points_changed.connect (mem_fun (*this, &RouteUI::muting_change));
 }
 
 void
 RouteUI::init_mute_menu(MuteMaster::MutePoint mp, CheckMenuItem* check)
 {
-	check->set_active (_route->mute_master()->muted_at (mp));
+	check->set_active (_route->mute_points() & mp);
 }
 
 void
-RouteUI::toggle_mute_menu(MuteMaster::MutePoint /*mp*/, Gtk::CheckMenuItem* /*check*/)
+RouteUI::toggle_mute_menu(MuteMaster::MutePoint mp, Gtk::CheckMenuItem* check)
 {
-	// _route->set_mute_config(type, check->get_active(), this);
+	if (check->get_active()) {
+		_route->set_mute_points (MuteMaster::MutePoint (_route->mute_points() | mp));
+	} else {
+		_route->set_mute_points (MuteMaster::MutePoint (_route->mute_points() & ~mp));
+	}
+}
+
+void
+RouteUI::muting_change ()
+{
+	ENSURE_GUI_THREAD(mem_fun (*this, &RouteUI::muting_change));
+
+	bool yn;
+	MuteMaster::MutePoint current = _route->mute_points ();
+
+	yn = (current & MuteMaster::PreFader);
+
+	if (pre_fader_mute_check->get_active() != yn) {
+		pre_fader_mute_check->set_active (yn);
+	}
+
+	yn = (current & MuteMaster::PostFader);
+
+	if (post_fader_mute_check->get_active() != yn) {
+		post_fader_mute_check->set_active (yn);
+	}
+
+	yn = (current & MuteMaster::Listen);
+
+	if (listen_mute_check->get_active() != yn) {
+		listen_mute_check->set_active (yn);
+	}
+
+	yn = (current & MuteMaster::Main);
+
+	if (main_mute_check->get_active() != yn) {
+		main_mute_check->set_active (yn);
+	}
 }
 
 void
@@ -1163,52 +1201,6 @@ RouteUI::solo_isolated_toggle(void* /*src*/, Gtk::CheckMenuItem* check)
 		check->set_active (yn);
 	}
 }
-
-#ifdef FIX_THIS_FOR_3_0
-void
-RouteUI::pre_fader_toggle(void* src, Gtk::CheckMenuItem* check)
-{
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RouteUI::pre_fader_toggle), src, check));
-
-	bool yn = _route->get_mute_config(PRE_FADER);
-	if (check->get_active() != yn) {
-		check->set_active (yn);
-	}
-}
-
-void
-RouteUI::post_fader_toggle(void* src, Gtk::CheckMenuItem* check)
-{
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RouteUI::post_fader_toggle), src, check));
-
-	bool yn = _route->get_mute_config(POST_FADER);
-	if (check->get_active() != yn) {
-		check->set_active (yn);
-	}
-}
-
-void
-RouteUI::control_outs_toggle(void* src, Gtk::CheckMenuItem* check)
-{
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RouteUI::control_outs_toggle), src, check));
-
-	bool yn = _route->get_mute_config(CONTROL_OUTS);
-	if (check->get_active() != yn) {
-		check->set_active (yn);
-	}
-}
-
-void
-RouteUI::main_outs_toggle(void* src, Gtk::CheckMenuItem* check)
-{
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &RouteUI::main_outs_toggle), src, check));
-
-	bool yn = _route->get_mute_config(MAIN_OUTS);
-	if (check->get_active() != yn) {
-		check->set_active (yn);
-	}
-}
-#endif
 
 void
 RouteUI::disconnect_input ()

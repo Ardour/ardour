@@ -2439,7 +2439,7 @@ Session::route_solo_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 			if (!via_sends_only) {
 				/* do it */
 				(*i)->mod_solo_level (delta);
-			}
+			} 
 		}
 	}
 

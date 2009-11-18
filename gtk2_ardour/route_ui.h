@@ -99,6 +99,7 @@ class RouteUI : public virtual AxisView
 	Gtk::Menu* solo_menu;
 	Gtk::Menu* sends_menu;
 
+
 	XMLNode *xml_node;
 	void ensure_xml_node ();
 
@@ -137,12 +138,13 @@ class RouteUI : public virtual AxisView
 	void solo_isolated_toggle (void*, Gtk::CheckMenuItem*);
 	void toggle_solo_isolated (Gtk::CheckMenuItem*);
 
-	void toggle_mute_menu(ARDOUR::MuteMaster::MutePoint, Gtk::CheckMenuItem*);
-	void pre_fader_toggle(void*, Gtk::CheckMenuItem*);
-	void post_fader_toggle(void*, Gtk::CheckMenuItem*);
-	void control_outs_toggle(void*, Gtk::CheckMenuItem*);
-	void main_outs_toggle(void*, Gtk::CheckMenuItem*);
+	Gtk::CheckMenuItem* pre_fader_mute_check;
+	Gtk::CheckMenuItem* post_fader_mute_check;
+	Gtk::CheckMenuItem* listen_mute_check;
+	Gtk::CheckMenuItem* main_mute_check;
 
+	void toggle_mute_menu(ARDOUR::MuteMaster::MutePoint, Gtk::CheckMenuItem*);
+	void muting_change ();
 	void build_mute_menu(void);
 	void init_mute_menu(ARDOUR::MuteMaster::MutePoint, Gtk::CheckMenuItem*);
 

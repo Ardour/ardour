@@ -27,6 +27,11 @@
 
 using namespace ARDOUR;
 
+const MuteMaster::MutePoint MuteMaster::AllPoints = MutePoint (MuteMaster::PreFader|
+							       MuteMaster::PostFader|
+							       MuteMaster::Listen|
+							       MuteMaster::Main);
+
 MuteMaster::MuteMaster (Session& s, const std::string& name)
 	: AutomationControl (s, Evoral::Parameter (MuteAutomation), boost::shared_ptr<AutomationList>(), name)
 	, _mute_point (MutePoint (0))

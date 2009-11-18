@@ -83,7 +83,7 @@ CONFIG_VARIABLE (bool, solo_control_is_listen_control, "solo-control-is-listen-c
 CONFIG_VARIABLE (bool, solo_latched, "solo-latched", true)
 CONFIG_VARIABLE (bool, latched_record_enable, "latched-record-enable", false)
 CONFIG_VARIABLE (bool, all_safe, "all-safe", false)
-CONFIG_VARIABLE (bool, show_solo_mutes, "show-solo-mutes", false)
+CONFIG_VARIABLE (bool, show_solo_mutes, "show-solo-mutes", true)
 CONFIG_VARIABLE (bool, solo_mute_override, "solo-mute-override", false)
 CONFIG_VARIABLE (bool, tape_machine_mode, "tape-machine-mode", false)
 CONFIG_VARIABLE (gain_t, solo_mute_gain, "solo-mute-gain", 0.0)

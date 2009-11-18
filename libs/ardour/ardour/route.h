@@ -120,9 +120,10 @@ class Route : public SessionObject, public AutomatableControls
 	void set_gain (gain_t val, void *src);
 	void inc_gain (gain_t delta, void *src);
 
+	void set_mute_points (MuteMaster::MutePoint);
+	MuteMaster::MutePoint mute_points() const { return _mute_points; }
 	void set_mute (bool yn, void* src);
 	bool muted () const;
-
 
 	/* controls use set_solo() to modify this route's solo state
 	 */
@@ -232,10 +233,7 @@ class Route : public SessionObject, public AutomatableControls
 	sigc::signal<void,void*> solo_isolated_changed;
 	sigc::signal<void,void*> comment_changed;
 	sigc::signal<void,void*> mute_changed;
-	sigc::signal<void,void*> pre_fader_changed;
-	sigc::signal<void,void*> post_fader_changed;
-	sigc::signal<void,void*> control_outs_changed;
-	sigc::signal<void,void*> main_outs_changed;
+	sigc::signal<void>       mute_points_changed;
 	sigc::signal<void>       processors_changed;
 	sigc::signal<void,void*> record_enable_changed;
 	sigc::signal<void,void*> route_group_changed;
@@ -360,6 +358,7 @@ class Route : public SessionObject, public AutomatableControls
 
 	boost::shared_ptr<SoloControllable> _solo_control;
 	boost::shared_ptr<MuteMaster> _mute_master;
+	MuteMaster::MutePoint _mute_points;
 
 	RouteGroup*    _route_group;
 	std::string    _comment;

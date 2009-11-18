@@ -38,6 +38,8 @@ class MuteMaster : public AutomationControl
 		Main      = 0x8
 	};
 
+	static const MutePoint AllPoints;
+
 	MuteMaster (Session& s, const std::string& name);
 	~MuteMaster() {}
 
