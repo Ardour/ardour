@@ -621,7 +621,7 @@ Route::muted() const
 	return _mute_master->muted ();
 }
 
-#if 0
+#if 1
 static void
 dump_processors(const string& name, const list<boost::shared_ptr<Processor> >& procs)
 {
@@ -1399,9 +1399,13 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	list< pair<ChanCount,ChanCount> > configuration;
 	uint32_t index = 0;
 
+	cerr << _name << " CONFIGURE PROCESSORS\n";
+	dump_processors (_name, _processors);
+
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++index) {
 
 		if ((*p)->can_support_io_configuration(in, out)) {
+			cerr << "\t" << (*p)->name() << " in = " << in << " out = " << out << endl;
 			configuration.push_back(make_pair(in, out));
 			in = out;
 		} else {
@@ -2616,9 +2620,14 @@ Route::flush_processors ()
 void
 Route::set_meter_point (MeterPoint p, void *src)
 {
-	if (_meter_point != p) {
-		_meter_point = p;
+	if (_meter_point == p) {
+		return;
+	}
 
+	{
+		Glib::RWLock::WriterLock lm (_processor_lock);
+		ProcessorList as_it_was (_processors);
+		
 		// Move meter in the processors list
 		ProcessorList::iterator loc = find(_processors.begin(), _processors.end(), _meter);
 		_processors.erase(loc);
@@ -2633,13 +2642,23 @@ Route::set_meter_point (MeterPoint p, void *src)
 			loc = _processors.end();
 			break;
 		}
+		
 		_processors.insert(loc, _meter);
-
-		 meter_change (src); /* EMIT SIGNAL */
-		processors_changed (); /* EMIT SIGNAL */
-		_session.set_dirty ();
+		
+		if (configure_processors_unlocked (0)) {
+			_processors = as_it_was;
+			configure_processors_unlocked (0); // it worked before we tried to add it ...
+			return;
+		}
+		
 	}
+	
+	_meter_point = p;
+	meter_change (src); /* EMIT SIGNAL */
+	processors_changed (); /* EMIT SIGNAL */
+	_session.set_dirty ();
 }
+
 void
 Route::put_control_outs_at (Placement p)
 {
@@ -2647,25 +2666,35 @@ Route::put_control_outs_at (Placement p)
 		return;
 	}
 
-	// Move meter in the processors list
-	ProcessorList::iterator loc = find(_processors.begin(), _processors.end(), _control_outs);
-	_processors.erase(loc);
-
-	switch (p) {
-	case PreFader:
-		loc = find(_processors.begin(), _processors.end(), _amp);
-		if (loc != _processors.begin()) {
-			--loc;
+	{
+		Glib::RWLock::WriterLock lm (_processor_lock);
+		ProcessorList as_it_was (_processors);
+		// Move meter in the processors list
+		ProcessorList::iterator loc = find(_processors.begin(), _processors.end(), _control_outs);
+		_processors.erase(loc);
+		
+		switch (p) {
+		case PreFader:
+			loc = find(_processors.begin(), _processors.end(), _amp);
+			if (loc != _processors.begin()) {
+				--loc;
+			}
+			break;
+		case PostFader:
+			loc = find(_processors.begin(), _processors.end(), _amp);
+			assert (loc != _processors.end());
+			loc++;
+			break;
 		}
-		break;
-	case PostFader:
-		loc = find(_processors.begin(), _processors.end(), _amp);
-		assert (loc != _processors.end());
-		loc++;
-		break;
-	}
+		
+		_processors.insert(loc, _control_outs);
 
-	_processors.insert(loc, _control_outs);
+		if (configure_processors_unlocked (0)) {
+			_processors = as_it_was;
+			configure_processors_unlocked (0); // it worked before we tried to add it ...
+			return;
+		}
+	}
 
 	processors_changed (); /* EMIT SIGNAL */
 	_session.set_dirty ();
