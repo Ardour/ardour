@@ -192,6 +192,8 @@ private:
 	Gtk::Notebook _hnotebook;
 	Gtk::Label _vlabel;
 	Gtk::Label _hlabel;
+	Gtk::VBox _vbox;
+	Gtk::HBox _hbox;
 	Gtk::Menu* _menu;
 	Arrangement _arrangement;
 	int _row_index;

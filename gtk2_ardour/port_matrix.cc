@@ -46,7 +46,7 @@ using namespace ARDOUR;
  *  @param type Port type that we are handling.
  */
 PortMatrix::PortMatrix (Window* parent, Session& session, DataType type)
-	: Table (4, 4),
+	: Table (3, 3),
 	  _session (session),
 	  _parent (parent),
 	  _type (type),
@@ -61,13 +61,16 @@ PortMatrix::PortMatrix (Window* parent, Session& session, DataType type)
 {
 	_body = new PortMatrixBody (this);
 
-	attach (*_body, 2, 3, 2, 3);
-	attach (_vscroll, 3, 4, 2, 3, SHRINK);
-	attach (_hscroll, 2, 3, 3, 4, FILL | EXPAND, SHRINK);
-	attach (_vlabel, 0, 1, 2, 3, SHRINK);
-	attach (_hlabel, 2, 3, 0, 1, FILL | EXPAND, SHRINK);
-	attach (_vnotebook, 1, 2, 2, 3, SHRINK);
-	attach (_hnotebook, 2, 3, 1, 2, FILL | EXPAND, SHRINK);
+	_vbox.pack_start (_vnotebook);
+	_vbox.pack_start (_vlabel);
+	_hbox.pack_start (_hnotebook);
+	_hbox.pack_start (_hlabel);
+
+	attach (*_body, 1, 2, 1, 2);
+	attach (_vscroll, 2, 3, 1, 2, SHRINK);
+	attach (_hscroll, 1, 2, 2, 3, FILL | EXPAND, SHRINK);
+	attach (_vbox, 0, 1, 1, 2, SHRINK);
+	attach (_hbox, 1, 2, 0, 1, FILL | EXPAND, SHRINK);
 
 	_vnotebook.signal_switch_page().connect (mem_fun (*this, &PortMatrix::v_page_selected));
 	_hnotebook.signal_switch_page().connect (mem_fun (*this, &PortMatrix::h_page_selected));
