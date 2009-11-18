@@ -61,6 +61,7 @@ public:
 	DataType type() const { return _type; }
 
 	bool silent() const { return _silent; }
+	void is_silent(bool yn) { _silent = yn; }
 
 	/** Reallocate the buffer used internally to handle at least @a size_t units of data.
 	 *
