@@ -109,7 +109,6 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 		Amp::apply_simple_gain (mixbufs, nframes, tgain);
 	}
 
-
 	// Can't automate gain for sends or returns yet because we need different buffers
 	// so that we don't overwrite the main automation data for the route amp
 	// _amp->setup_gain_automation (start_frame, end_frame, nframes);
@@ -153,7 +152,7 @@ InternalSend::state (bool full)
 {
 	XMLNode& node (Send::state (full));
 
-	/* this replaces any existing property */
+	/* this replaces any existing "type" property */
 
 	node.add_property ("type", "intsend");
 

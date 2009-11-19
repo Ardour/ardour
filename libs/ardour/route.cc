@@ -2399,11 +2399,10 @@ Route::set_comment (string cmt, void *src)
 bool
 Route::feeds (boost::shared_ptr<Route> other, bool* only_send)
 {
-	// cerr << _name << endl;
+	DEBUG_TRACE (DEBUG::Graph, string_compose ("Feeds? %1\n", _name));
 
 	if (_output->connected_to (other->input())) {
-		// cerr << "\tdirect FEEDS " << other->name() << endl;
-
+		DEBUG_TRACE (DEBUG::Graph, string_compose ("\tdirect FEEDS %2\n", other->name()));
 		if (only_send) {
 			*only_send = false;
 		}
@@ -2418,18 +2417,21 @@ Route::feeds (boost::shared_ptr<Route> other, bool* only_send)
 
 		if ((iop = boost::dynamic_pointer_cast<IOProcessor>(*r)) != 0) {
 			if (iop->feeds (other)) {
-				// cerr << "\tIOP " << iop->name() << " feeds " << other->name() << endl;
+				DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tIOP %1 does feed %2\n", iop->name(), other->name()));
 				if (only_send) {
 					*only_send = true;
 				}
 				return true;
 			} else {
-				// cerr << "\tIOP " << iop->name() << " does NOT feeds " << other->name() << endl;
+				DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tIOP %1 does NOT feed %2\n", iop->name(), other->name()));
 			}
+		} else {
+			DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tPROC %1 is not an IOP\n", (*r)->name()));
 		}
+			
 	}
 
-	// cerr << "\tdoes NOT FEED " << other->name() << endl;
+	DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tdoes NOT feed %1\n", other->name()));
 	return false;
 }
 

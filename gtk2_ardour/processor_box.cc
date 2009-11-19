@@ -825,7 +825,10 @@ ProcessorBox::choose_aux (boost::weak_ptr<Route> wr)
 		return;
 	}
 
-	_route->listen_via (target, PreFader, true, true);
+	boost::shared_ptr<RouteList> rlist (new RouteList);
+	rlist->push_back (_route);
+
+	_session.add_internal_sends (target, PreFader, rlist);
 }
 
 void

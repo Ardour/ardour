@@ -84,6 +84,7 @@ list_debug_options ()
 	cerr << "\tSnapBBT\n";
 	cerr << "\tConfiguration\n";
 	cerr << "\tLatency\n";
+	cerr << "\tGraph\n";
 }
 
 static int
@@ -123,6 +124,8 @@ parse_debug_options (const char* str)
 			bits |= ARDOUR::DEBUG::Latency;
 		} else if (strncasecmp (p, "processors", strlen (p)) == 0) {
 			bits |= ARDOUR::DEBUG::Processors;
+		} else if (strncasecmp (p, "graph", strlen (p)) == 0) {
+			bits |= ARDOUR::DEBUG::Graph;
 		}
 
 		p = strtok_r (0, ",", &sp);

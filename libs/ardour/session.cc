@@ -2258,7 +2258,6 @@ Session::globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p
 	add_internal_sends (dest, p, t);
 }
 
-
 void
 Session::add_internal_sends (boost::shared_ptr<Route> dest, Placement p, boost::shared_ptr<RouteList> senders)
 {
@@ -2278,6 +2277,8 @@ Session::add_internal_sends (boost::shared_ptr<Route> dest, Placement p, boost::
 
 		(*i)->listen_via (dest, p, true, true);
 	}
+
+	graph_reordered ();
 }
 
 void

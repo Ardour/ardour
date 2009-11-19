@@ -41,7 +41,8 @@ namespace ARDOUR {
 			SnapBBT = 0x8,
 			Configuration = 0x10,
 			Latency = 0x20,
-			Processors = 0x40
+			Processors = 0x40,
+			Graph = 0x80
 		};
 	}
 

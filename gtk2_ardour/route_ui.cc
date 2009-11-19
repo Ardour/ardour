@@ -44,6 +44,7 @@
 #include "latency_gui.h"
 #include "mixer_strip.h"
 #include "automation_time_axis.h"
+#include "route_time_axis.h"
 
 #include "ardour/route.h"
 #include "ardour/event_type_map.h"
@@ -534,6 +535,8 @@ RouteUI::build_sends_menu ()
 
 	items.push_back (MenuElem(_("Assign all tracks (prefader)"), bind (mem_fun (*this, &RouteUI::create_sends), PreFader)));
 	items.push_back (MenuElem(_("Assign all tracks (postfader)"), bind (mem_fun (*this, &RouteUI::create_sends), PostFader)));
+	items.push_back (MenuElem(_("Assign selected tracks (prefader)"), bind (mem_fun (*this, &RouteUI::create_selected_sends), PreFader)));
+	items.push_back (MenuElem(_("Assign selected tracks (postfader)"), bind (mem_fun (*this, &RouteUI::create_selected_sends), PostFader)));
 	items.push_back (MenuElem(_("Copy track gains to sends"), mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
 	items.push_back (MenuElem(_("Set sends gain to -inf"), mem_fun (*this, &RouteUI::set_sends_gain_to_zero)));
 	items.push_back (MenuElem(_("Set sends gain to 0dB"), mem_fun (*this, &RouteUI::set_sends_gain_to_unity)));
@@ -544,6 +547,27 @@ void
 RouteUI::create_sends (Placement p)
 {
 	_session.globally_add_internal_sends (_route, p);
+}
+
+void
+RouteUI::create_selected_sends (Placement p)
+{
+	boost::shared_ptr<RouteList> rlist (new RouteList);
+	TrackSelection& selected_tracks (ARDOUR_UI::instance()->the_editor().get_selection().tracks);
+
+	for (TrackSelection::iterator i = selected_tracks.begin(); i != selected_tracks.end(); ++i) {
+		RouteTimeAxisView* rtv;
+		RouteUI* rui;
+		if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
+			if ((rui = dynamic_cast<RouteUI*>(rtv)) != 0) {
+				if (boost::dynamic_pointer_cast<AudioTrack>(rui->route())) {
+					rlist->push_back (rui->route());
+				}
+			}
+		}
+	}
+	
+	_session.add_internal_sends (_route, p, rlist);
 }
 
 void
