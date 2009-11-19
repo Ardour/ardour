@@ -17,6 +17,7 @@
 
 */
 
+#include <iostream>
 #include <algorithm>
 
 #include "pbd/xml++.h"
@@ -35,6 +36,7 @@
 
 using namespace ARDOUR;
 using namespace PBD;
+using namespace std;
 
 Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, Role r)
 	: Delivery (s, mm, string_compose (_("send %1"), (_bitslot = s.next_send_id()) + 1), r)
@@ -212,7 +214,7 @@ Send::make_unique (XMLNode &state, Session &session)
 	snprintf (buf, sizeof (buf), "%" PRIu32, bitslot);
 	state.property("bitslot")->set_value (buf);
 
-	std::string const name = string_compose (_("send %1"), bitslot);
+	string const name = string_compose (_("send %1"), bitslot);
 
 	state.property("name")->set_value (name);
 
@@ -224,15 +226,27 @@ Send::make_unique (XMLNode &state, Session &session)
 }
 
 bool
-Send::set_name (const std::string& new_name)
+Send::set_name (const string& new_name)
 {
-	std::string unique_name;
+	string unique_name;
 
 	if (_role == Delivery::Send) {
 		char buf[32];
-		snprintf (buf, sizeof (buf), "%u", _bitslot);
-		unique_name = new_name;
+
+		/* rip any existing numeric part of the name, and append the bitslot
+		 */
+
+		string::size_type last_letter = new_name.find_last_not_of ("0123456789");
+
+		if (last_letter != string::npos) {
+			unique_name = new_name.substr (0, last_letter + 1);
+		} else {
+			unique_name = new_name;
+		}
+
+		snprintf (buf, sizeof (buf), "%u", (_bitslot + 1));
 		unique_name += buf;
+
 	} else {
 		unique_name = new_name;
 	}
