@@ -293,6 +293,7 @@ Gtk::Menu*
 ProcessorBox::build_possible_aux_menu ()
 {
 	boost::shared_ptr<RouteList> rl = _session.get_routes_with_internal_returns();
+
 	if (rl->empty()) {
 		return 0;
 	}
@@ -300,7 +301,6 @@ ProcessorBox::build_possible_aux_menu ()
 	using namespace Menu_Helpers;
 	Menu* menu = manage (new Menu);
 	MenuList& items = menu->items();
-
 
 	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
 		if (!(*r)->internal_send_for (*r)) {
@@ -341,7 +341,8 @@ ProcessorBox::show_processor_menu (gint arg)
 		if (m) {
 			aux_menu_item->set_submenu (*m);
 		} else {
-			/* XXX WHAT?*/
+			/* stupid gtkmm: we need to pass a null reference here */
+			aux_menu_item->set_submenu (*((Gtk::Menu *)0));
 		}
 	}
 
