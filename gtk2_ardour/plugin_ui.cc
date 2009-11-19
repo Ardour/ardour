@@ -386,6 +386,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	preset_combo.set_size_request (100, -1);
 	preset_combo.set_active_text ("");
 	preset_combo.signal_changed().connect(mem_fun(*this, &PlugUIBase::setting_selected));
+	no_load_preset = false;
 
 	save_button.set_name ("PluginSaveButton");
 	save_button.signal_clicked().connect(mem_fun(*this, &PlugUIBase::save_plugin_setting));
@@ -474,6 +475,10 @@ PlugUIBase::processor_active_changed (boost::weak_ptr<Processor> weak_p)
 void
 PlugUIBase::setting_selected()
 {
+	if (no_load_preset) {
+		return;
+	}
+
 	if (preset_combo.get_active_text().length() > 0) {
 		const Plugin::PresetRecord* pr = plugin->preset_by_label(preset_combo.get_active_text());
 		if (pr) {
@@ -504,7 +509,9 @@ PlugUIBase::save_plugin_setting ()
 		if (name.length()) {
 			if (plugin->save_preset(name)) {
 				update_presets();
+				no_load_preset = true;
 				preset_combo.set_active_text (name);
+				no_load_preset = false;
 			}
 		}
 		break;
@@ -589,9 +596,14 @@ PlugUIBase::update_presets ()
 {
 	vector<string> preset_labels;
 	vector<ARDOUR::Plugin::PresetRecord> presets = plugin->get_presets();
-	for (vector<ARDOUR::Plugin::PresetRecord>::const_iterator i = presets.begin();
-		   i != presets.end(); ++i) {
+
+	no_load_preset = true;
+
+	for (vector<ARDOUR::Plugin::PresetRecord>::const_iterator i = presets.begin(); i != presets.end(); ++i) {
 		preset_labels.push_back(i->label);
 	}
+
 	set_popdown_strings (preset_combo, preset_labels);
+	
+	no_load_preset = false;
 }

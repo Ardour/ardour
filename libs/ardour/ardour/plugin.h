@@ -137,6 +137,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	};
 
 	virtual std::vector<PresetRecord> get_presets();
+	virtual std::string current_preset() const { return std::string(); }
 
 	const PresetRecord* preset_by_label(const std::string& label);
 	const PresetRecord* preset_by_uri(const std::string& uri);
