@@ -267,7 +267,7 @@ RouteGroup::make_subgroup ()
 
 	try {
 		/* use master bus etc. to determine default nouts */
-		rl = _session.new_audio_route (nin, 2, 0, 1);
+		rl = _session.new_audio_route (false, nin, 2, 0, 1);
 	} catch (...) {
 		return;
 	}

@@ -289,6 +289,28 @@ ProcessorBox::build_send_action_menu ()
 	items.push_back (MenuElem (_("Show send controls"), mem_fun(*this, &ProcessorBox::show_send_controls)));
 }
 
+Gtk::Menu*
+ProcessorBox::build_possible_aux_menu ()
+{
+	boost::shared_ptr<RouteList> rl = _session.get_routes_with_internal_returns();
+	if (rl->empty()) {
+		return 0;
+	}
+
+	using namespace Menu_Helpers;
+	Menu* menu = manage (new Menu);
+	MenuList& items = menu->items();
+
+
+	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
+		if (!(*r)->internal_send_for (*r)) {
+			items.push_back (MenuElem ((*r)->name(), bind (sigc::ptr_fun (ProcessorBox::rb_choose_aux), boost::weak_ptr<Route>(*r))));
+		}
+	}
+
+	return menu;
+}
+
 void
 ProcessorBox::show_send_controls ()
 {
@@ -310,6 +332,17 @@ ProcessorBox::show_processor_menu (gint arg)
 
 	if (plugin_menu_item) {
 		plugin_menu_item->set_submenu (*_get_plugin_selector()->plugin_menu());
+	}
+
+	Gtk::MenuItem* aux_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/processormenu/newaux"));
+
+	if (aux_menu_item) {
+		Menu* m = build_possible_aux_menu();
+		if (m) {
+			aux_menu_item->set_submenu (*m);
+		} else {
+			/* XXX WHAT?*/
+		}
 	}
 
 	paste_action->set_sensitive (!_rr_selection.processors.empty());
@@ -777,6 +810,22 @@ ProcessorBox::return_io_finished (IOSelector::Result r, boost::weak_ptr<Processo
 	}
 
 	delete_when_idle (ios);
+}
+
+void
+ProcessorBox::choose_aux (boost::weak_ptr<Route> wr)
+{
+	if (!_route) {
+		return;
+	}
+
+	boost::shared_ptr<Route> target = wr.lock();
+
+	if (!target) {
+		return;
+	}
+
+	_route->listen_via (target, PreFader, true, true);
 }
 
 void
@@ -1485,9 +1534,10 @@ ProcessorBox::register_actions ()
 	act = ActionManager::register_action (popup_act_grp, X_("newsend"), _("New Send ..."),
 			sigc::ptr_fun (ProcessorBox::rb_choose_send));
 	ActionManager::jack_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (popup_act_grp, X_("newreturn"), _("New Return ..."),
-			sigc::ptr_fun (ProcessorBox::rb_choose_return));
-	ActionManager::jack_sensitive_actions.push_back (act);
+
+	ActionManager::register_action (popup_act_grp, X_("newaux"), _("New Aux Send ..."));
+	ActionManager::register_action (popup_act_grp, X_("newreturn"), _("New Return ..."),
+					sigc::ptr_fun (ProcessorBox::rb_choose_return));
 
 	ActionManager::register_action (popup_act_grp, X_("clear"), _("Clear (all)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear));
@@ -1572,6 +1622,16 @@ ProcessorBox::rb_choose_return ()
 		return;
 	}
 	_current_processor_box->choose_return ();
+}
+
+void
+ProcessorBox::rb_choose_aux (boost::weak_ptr<Route> wr)
+{
+	if (_current_processor_box == 0) {
+		return;
+	}
+
+	_current_processor_box->choose_aux (wr);
 }
 
 void

@@ -48,6 +48,7 @@ class AddRouteDialog : public ArdourDialog
 	bool track ();
 	int channels ();
 	int count ();
+	bool aux ();
 
 	std::string name_template ();
 	std::string track_template ();
@@ -63,8 +64,8 @@ class AddRouteDialog : public ArdourDialog
 	Gtk::Adjustment routes_adjustment;
 	Gtk::SpinButton routes_spinner;
 	Gtk::ComboBoxText channel_combo;
-	Gtk::Label track_mode_label;
-	Gtk::ComboBoxText track_mode_combo;
+	Gtk::Label mode_label;
+	Gtk::ComboBoxText mode_combo;
 	Gtk::ComboBoxText route_group_combo;
 
 	std::vector<ARDOUR::TemplateInfo> route_templates;
@@ -90,8 +91,9 @@ class AddRouteDialog : public ArdourDialog
 	typedef std::vector<ChannelSetup> ChannelSetups;
 	ChannelSetups channel_setups;
 
-	std::vector<std::string> channel_combo_strings;
-	std::vector<std::string> track_mode_strings;
+	static std::vector<std::string> channel_combo_strings;
+	static std::vector<std::string> track_mode_strings;
+	static std::vector<std::string> bus_mode_strings;
 };
 
 #endif /* __gtk_ardour_add_route_dialog_h__ */

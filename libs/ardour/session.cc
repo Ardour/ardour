@@ -1904,7 +1904,7 @@ Session::set_remote_control_ids ()
 
 
 RouteList
-Session::new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many)
+Session::new_audio_route (bool aux, int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many)
 {
 	char bus_name[32];
 	uint32_t bus_id = 1;
@@ -2006,6 +2006,10 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 			bus->set_route_group (route_group, 0);
 			bus->set_remote_control_id (control_id);
 			++control_id;
+
+			if (aux) {
+				bus->add_internal_return ();
+			}
 
 			ret.push_back (bus);
 		}
@@ -2483,6 +2487,20 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 		_non_soloed_outs_muted = something_soloed;
 		SoloActive (_non_soloed_outs_muted); /* EMIT SIGNAL */
 	}
+}
+
+boost::shared_ptr<RouteList> 
+Session::get_routes_with_internal_returns() const
+{
+	shared_ptr<RouteList> r = routes.reader ();
+	boost::shared_ptr<RouteList> rl (new RouteList);
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if ((*i)->internal_return ()) {
+			rl->push_back (*i);
+		}
+	}
+	return rl;
 }
 
 shared_ptr<Route>

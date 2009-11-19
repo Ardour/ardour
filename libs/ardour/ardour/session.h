@@ -320,6 +320,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		return routes.reader ();
 	}
 
+	boost::shared_ptr<RouteList> get_routes_with_internal_returns() const;
+
 	uint32_t nroutes() const { return routes.reader()->size(); }
 	uint32_t ntracks () const;
 	uint32_t nbusses () const;
@@ -517,7 +519,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		int input_channels, int output_channels, TrackMode mode = Normal, RouteGroup* route_group = 0, uint32_t how_many = 1
 		);
 
-	RouteList new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many);
+	RouteList new_audio_route (bool aux, int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many);
 
 	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
 		TrackMode mode = Normal, RouteGroup* route_group = 0, uint32_t how_many = 1

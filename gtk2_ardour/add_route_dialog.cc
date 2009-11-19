@@ -52,12 +52,22 @@ static const char* track_mode_names[] = {
 	0
 };
 
+static const char* bus_mode_names[] = {
+	N_("Aux"),
+	N_("Direct"),
+	0
+};
+
+std::vector<std::string> AddRouteDialog::channel_combo_strings;
+std::vector<std::string> AddRouteDialog::track_mode_strings;
+std::vector<std::string> AddRouteDialog::bus_mode_strings;
+
 AddRouteDialog::AddRouteDialog (Session & s)
 	: ArdourDialog (X_("add route dialog"))
 	, _session (s)
 	, routes_adjustment (1, 1, 128, 1, 4)
 	, routes_spinner (routes_adjustment)
-	, track_mode_label (_("Track mode:"))
+	, mode_label (_("Track mode:"))
 {
 	if (track_mode_strings.empty()) {
 		track_mode_strings = I18N (track_mode_names);
@@ -71,6 +81,10 @@ AddRouteDialog::AddRouteDialog (Session & s)
 		}
 	}
 
+	if (bus_mode_strings.empty()) {
+		bus_mode_strings = I18N (bus_mode_names);
+	}
+
 	set_name ("AddRouteDialog");
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_modal (true);
@@ -82,14 +96,14 @@ AddRouteDialog::AddRouteDialog (Session & s)
 	name_template_entry.set_name (X_("AddRouteDialogNameTemplateEntry"));
 	routes_spinner.set_name (X_("AddRouteDialogSpinner"));
 	channel_combo.set_name (X_("ChannelCountSelector"));
-	track_mode_combo.set_name (X_("ChannelCountSelector"));
+	mode_combo.set_name (X_("ChannelCountSelector"));
 
 	refill_channel_setups ();
 	refill_route_groups ();
-	set_popdown_strings (track_mode_combo, track_mode_strings, true);
+	set_popdown_strings (mode_combo, track_mode_strings, true);
 
 	channel_combo.set_active_text (channel_combo_strings.front());
-	track_mode_combo.set_active_text (track_mode_strings.front());
+	mode_combo.set_active_text (track_mode_strings.front());
 
 	track_bus_combo.append_text (_("tracks"));
 	track_bus_combo.append_text (_("busses"));
@@ -139,9 +153,9 @@ AddRouteDialog::AddRouteDialog (Session & s)
 
 		/* Track mode */
 
-		track_mode_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
-		table2->attach (track_mode_label, 1, 2, 1, 2, Gtk::FILL, Gtk::EXPAND, 0, 0);
-		table2->attach (track_mode_combo, 2, 3, 1, 2, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
+		mode_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
+		table2->attach (mode_label, 1, 2, 1, 2, Gtk::FILL, Gtk::EXPAND, 0, 0);
+		table2->attach (mode_combo, 2, 3, 1, 2, Gtk::FILL, Gtk::EXPAND & Gtk::FILL, 0, 0);
 
 	}
 
@@ -180,14 +194,28 @@ AddRouteDialog::~AddRouteDialog ()
 void
 AddRouteDialog::track_type_chosen ()
 {
-	track_mode_label.set_sensitive (track ());
-	track_mode_combo.set_sensitive (track ());
+	if (track()) {
+		mode_label.set_text (_("Track mode:"));
+		set_popdown_strings (mode_combo, track_mode_strings);
+		mode_combo.set_active_text (track_mode_strings.front());
+	} else {
+		mode_label.set_text (_("Bus type:"));
+		set_popdown_strings (mode_combo, bus_mode_strings);
+		mode_combo.set_active_text (bus_mode_strings.front());
+	}
+
 }
 
 bool
 AddRouteDialog::track ()
 {
 	return track_bus_combo.get_active_row_number () == 0;
+}
+
+bool
+AddRouteDialog::aux ()
+{
+	return !track() && mode_combo.get_active_row_number () == 0;
 }
 
 ARDOUR::DataType
@@ -217,7 +245,7 @@ AddRouteDialog::mode ()
 		return ARDOUR::Normal;
 	}
 
-	Glib::ustring str = track_mode_combo.get_active_text();
+	Glib::ustring str = mode_combo.get_active_text();
 	if (str == _("Normal")) {
 		return ARDOUR::Normal;
 	} else if (str == _("Non Layered")){

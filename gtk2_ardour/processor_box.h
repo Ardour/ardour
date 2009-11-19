@@ -148,7 +148,9 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	Gtk::Menu * build_processor_menu ();
 	void build_processor_tooltip (Gtk::EventBox&, std::string);
 	void show_processor_menu (gint arg);
+	Gtk::Menu* build_possible_aux_menu();
 
+	void choose_aux (boost::weak_ptr<ARDOUR::Route>);
 	void choose_send ();
 	void send_io_finished (IOSelector::Result, boost::weak_ptr<ARDOUR::Processor>, IOSelectorWindow*);
 	void choose_return ();
@@ -221,6 +223,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 
 	static ProcessorBox* _current_processor_box;
 
+	static void rb_choose_aux (boost::weak_ptr<ARDOUR::Route>);
 	static void rb_choose_plugin ();
 	static void rb_choose_insert ();
 	static void rb_choose_send ();

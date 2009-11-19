@@ -457,6 +457,7 @@
 	 <menuitem action='newplugin'/>
 	 <menuitem action='newinsert'/>
 	 <menuitem action='newsend'/>
+         <menuitem action='newaux'/>
 	 <menuitem action='newreturn'/>
 	  <separator/>
 	 <menuitem action='clear'/>
@@ -511,28 +512,5 @@
          </menu>
          <separator/>
          <menuitem action='addExternalAudioToRegionList'/>	       
-     </popup>
-     <popup name='processormenu'>
-         <menuitem action='newplugin'/>
-         <menuitem action='newinsert'/>
-         <menuitem action='newsend'/>
-         <menuitem action='newreturn'/>
-         <separator/>
-         <menuitem action='clear'/>
-         <separator/>
-         <menuitem action='cut'/>
-         <menuitem action='copy'/>
-         <menuitem action='paste'/>
-         <menuitem action='delete'/>
-         <separator/>
-         <menuitem action='rename'/>
-         <separator/>
-         <menuitem action='selectall'/>
-         <menuitem action='deselectall'/>
-         <separator/>
-         <menuitem action='activate_all'/>
-         <menuitem action='deactivate_all'/>
-         <separator/>
-         <menuitem action='edit'/>
      </popup>
 </ui>

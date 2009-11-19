@@ -83,6 +83,7 @@ ActionManager::init ()
 
 	try {
 		ui_manager->add_ui_from_file (ui_file.to_string());
+		info << string_compose (_("Loading menus from %1"), ui_file.to_string()) << endmsg;
 		loaded = true;
 	} catch (Glib::MarkupError& err) {
 		error << string_compose (_("badly formatted UI definition file: %1"), err.what()) << endmsg;

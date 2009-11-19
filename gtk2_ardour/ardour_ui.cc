@@ -1295,7 +1295,7 @@ restart JACK with more ports."));
 
 
 void
-ARDOUR_UI::session_add_audio_route (bool track, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode, RouteGroup* route_group, uint32_t how_many)
+ARDOUR_UI::session_add_audio_route (bool track, bool aux, int32_t input_channels, int32_t output_channels, ARDOUR::TrackMode mode, RouteGroup* route_group, uint32_t how_many)
 {
 	list<boost::shared_ptr<AudioTrack> > tracks;
 	RouteList routes;
@@ -1320,7 +1320,7 @@ ARDOUR_UI::session_add_audio_route (bool track, int32_t input_channels, int32_t 
 
 		} else {
 
-			routes = session->new_audio_route (input_channels, output_channels, route_group, how_many);
+			routes = session->new_audio_route (aux, input_channels, output_channels, route_group, how_many);
 
 			if (routes.size() != how_many) {
 				if (how_many == 1) {
@@ -2977,6 +2977,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	uint32_t output_chan;
 	string name_template = add_route_dialog->name_template ();
 	bool track = add_route_dialog->track ();
+	bool aux = !track && add_route_dialog->aux();
 	RouteGroup* route_group = add_route_dialog->route_group ();
 
 	AutoConnectOption oac = Config->get_output_auto_connect();
@@ -3002,7 +3003,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 		if (track) {
 			session_add_audio_track (input_chan, output_chan, add_route_dialog->mode(), route_group, count);
 		} else {
-			session_add_audio_bus (input_chan, output_chan, route_group, count);
+			session_add_audio_bus (aux, input_chan, output_chan, route_group, count);
 		}
 	}
 }
