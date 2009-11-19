@@ -437,8 +437,8 @@ PlugUIBase::save_plugin_setting ()
 				   to the list.
 				*/
 
-				set_popdown_strings (preset_combo, plugin->get_presets());
 				no_load_preset = true;
+				set_popdown_strings (preset_combo, plugin->get_presets());
 				preset_combo.set_active_text (name);
 				no_load_preset = false;
 			}
@@ -481,6 +481,8 @@ void
 PlugUIBase::update_presets ()
 {
 	vector<string> presets = plugin->get_presets();
+	no_load_preset = true;
+
 	set_popdown_strings (preset_combo, plugin->get_presets());
 
 	string current_preset = plugin->current_preset();
@@ -492,4 +494,6 @@ PlugUIBase::update_presets ()
 			}
 		}
 	}
+
+	no_load_preset = false;
 }
