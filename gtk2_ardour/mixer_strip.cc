@@ -334,16 +334,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	delete output_selector;
 	output_selector = 0;
 
-	boost::shared_ptr<Send> send;
+	revert_to_default_display ();
 
-	if (_current_delivery && (send = boost::dynamic_pointer_cast<Send>(_current_delivery))) {
-		send->set_metering (false);
-	}
-
-	_current_delivery = _route->main_outs ();
-
-	panners.set_panner (rt->main_outs()->panner());
-	gpm.set_controls (rt, rt->shared_peak_meter(), rt->amp());
 	processor_box.set_route (rt);
 
 	if (set_color_from_route()) {
@@ -1640,45 +1632,53 @@ MixerStrip::switch_io (boost::shared_ptr<Route> target)
 		return;
 	}
 
-	boost::shared_ptr<Send> send;
+	boost::shared_ptr<Send> send = _route->internal_send_for (target);
 
-	if (_current_delivery && (send = boost::dynamic_pointer_cast<Send>(_current_delivery))) {
-		send->set_metering (false);
-	}
-
-	_current_delivery = _route->internal_send_for (target);
-
-	cerr << "internal send from " << _route->name() << " to " << target->name() << " = "
-	     << _current_delivery << endl;
-
-	if (_current_delivery) {
-		send = boost::dynamic_pointer_cast<Send>(_current_delivery);
-		send->set_metering (true);
-		_current_delivery->GoingAway.connect (mem_fun (*this, &MixerStrip::revert_to_default_display));
-		gain_meter().set_controls (_route, send->meter(), send->amp());
-		panner_ui().set_panner (_current_delivery->panner());
-
+	if (send) {
+		show_send (send);
 	} else {
-		_current_delivery = _route->main_outs ();
-		gain_meter().set_controls (_route, _route->shared_peak_meter(), _route->amp());
-		panner_ui().set_panner (_route->main_outs()->panner());
+		revert_to_default_display ();
 	}
-
-	gain_meter().setup_meters ();
-	panner_ui().setup_pan ();
 }
 
+void
+MixerStrip::drop_send ()
+{
+	boost::shared_ptr<Send> current_send;
+
+	if (_current_delivery && (current_send = boost::dynamic_pointer_cast<Send>(_current_delivery))) {
+		current_send->set_metering (false);
+	}
+
+	send_gone_connection.disconnect ();
+	
+}
+
+void
+MixerStrip::show_send (boost::shared_ptr<Send> send)
+{
+	assert (send != 0);
+	drop_send ();
+
+	_current_delivery = send;
+	send->set_metering (true);
+	send_gone_connection = _current_delivery->GoingAway.connect (mem_fun (*this, &MixerStrip::revert_to_default_display));
+
+	gain_meter().set_controls (_route, send->meter(), send->amp());
+	gain_meter().setup_meters ();
+
+	panner_ui().set_panner (_current_delivery->panner());
+	panner_ui().setup_pan ();
+}
 
 void
 MixerStrip::revert_to_default_display ()
 {
-	show_sends_button->set_active (false);
-
-	boost::shared_ptr<Send> send;
-
-	if (_current_delivery && (send = boost::dynamic_pointer_cast<Send>(_current_delivery))) {
-		send->set_metering (false);
+	if (show_sends_button) {
+		show_sends_button->set_active (false);
 	}
+
+	drop_send ();
 
 	_current_delivery = _route->main_outs();
 

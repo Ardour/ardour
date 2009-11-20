@@ -362,8 +362,6 @@ Delivery::state (bool full_state)
 		node.add_property("type", "delivery");
 	}
 
-	std::cerr << "delivery " << _name << " storing role " << _role << " as " << enum_2_string (_role) << std::endl;
-
 	node.add_property("role", enum_2_string(_role));
 	node.add_child_nocopy (_panner->state (full_state));
 

@@ -252,35 +252,7 @@ EditorRouteGroups::new_route_group ()
 }
 
 void
-EditorRouteGroups::new_from_selection ()
-{
-	RouteGroup* g = new RouteGroup (
-		*_session,
-		"",
-		RouteGroup::Active,
-		(RouteGroup::Property) (RouteGroup::Mute | RouteGroup::Solo | RouteGroup::Edit | RouteGroup::Select)
-		);
-
-	RouteGroupDialog d (g, Gtk::Stock::NEW);
-	int const r = d.do_run ();
-
-	if (r == Gtk::RESPONSE_OK) {
-		_session->add_route_group (g);
-
-		for (TrackSelection::iterator i = _editor->get_selection().tracks.begin(); i != _editor->get_selection().tracks.end(); ++i) {
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
-			if (rtv) {
-				rtv->route()->set_route_group (g, this);
-			}
-		}
-
-	} else {
-		delete g;
-	}
-}
-
-void
-EditorRouteGroups::new_from_rec_enabled ()
+EditorRouteGroups::run_new_group_dialog (const RouteList& rl)
 {
 	RouteGroup* g = new RouteGroup (
 		*_session,
@@ -292,47 +264,78 @@ EditorRouteGroups::new_from_rec_enabled ()
 	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();
 
-	if (r == Gtk::RESPONSE_OK) {
+	switch (r) {
+	case Gtk::RESPONSE_OK:
+	case Gtk::RESPONSE_ACCEPT:
 		_session->add_route_group (g);
-
-		for (Editor::TrackViewList::const_iterator i = _editor->get_track_views().begin(); i != _editor->get_track_views().end(); ++i) {
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
-			if (rtv && rtv->route()->record_enabled()) {
-				rtv->route()->set_route_group (g, this);
-			}
+		for (RouteList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
+			(*i)->set_route_group (g, this);
 		}
-
-	} else {
+		break;
+	default:
 		delete g;
 	}
 }
 
 void
+EditorRouteGroups::new_from_selection ()
+{
+	if (_editor->get_selection().tracks.empty()) {
+		return;
+	}
+
+	RouteList rl;
+
+	for (TrackSelection::iterator i = _editor->get_selection().tracks.begin(); i != _editor->get_selection().tracks.end(); ++i) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+		if (rtv) {
+			rl.push_back (rtv->route());
+		}
+	}
+
+	if (rl.empty()) {
+		return;
+	}
+
+	run_new_group_dialog (rl);
+}
+
+void
+EditorRouteGroups::new_from_rec_enabled ()
+{
+	RouteList rl;
+
+	for (Editor::TrackViewList::const_iterator i = _editor->get_track_views().begin(); i != _editor->get_track_views().end(); ++i) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+		if (rtv && rtv->route()->record_enabled()) {
+			rl.push_back (rtv->route());
+		}
+	}
+
+	if (rl.empty()) {
+		return;
+	}
+
+	run_new_group_dialog (rl);
+}
+
+void
 EditorRouteGroups::new_from_soloed ()
 {
-	RouteGroup* g = new RouteGroup (
-		*_session,
-		"",
-		RouteGroup::Active,
-		(RouteGroup::Property) (RouteGroup::Mute | RouteGroup::Solo | RouteGroup::Edit)
-		);
+	RouteList rl;
 
-	RouteGroupDialog d (g, Gtk::Stock::NEW);
-	int const r = d.do_run ();
-
-	if (r == Gtk::RESPONSE_OK) {
-		_session->add_route_group (g);
-
-		for (Editor::TrackViewList::const_iterator i = _editor->get_track_views().begin(); i != _editor->get_track_views().end(); ++i) {
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
-			if (rtv && !rtv->route()->is_master() && rtv->route()->soloed()) {
-				rtv->route()->set_route_group (g, this);
-			}
+	for (Editor::TrackViewList::const_iterator i = _editor->get_track_views().begin(); i != _editor->get_track_views().end(); ++i) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+		if (rtv && !rtv->route()->is_master() && rtv->route()->soloed()) {
+			rl.push_back (rtv->route());
 		}
-
-	} else {
-		delete g;
 	}
+
+	if (rl.empty()) {
+		return;
+	}
+
+	run_new_group_dialog (rl);
 }
 
 void

@@ -75,6 +75,8 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
 	_name.set_text (_group->name ());
 	_active.set_active (_group->is_active ());
 
+	_name.signal_activate ().connect (sigc::bind (mem_fun (*this, &Dialog::response), RESPONSE_ACCEPT));
+
 	_gain.set_active (_group->property (RouteGroup::Gain));
 	_relative.set_active (_group->is_relative());
 	_mute.set_active (_group->property (RouteGroup::Mute));
@@ -124,7 +126,7 @@ RouteGroupDialog::do_run ()
 {
 	int const r = run ();
 
-	if (r == Gtk::RESPONSE_OK) {
+	if (r == Gtk::RESPONSE_OK || r == Gtk::RESPONSE_ACCEPT) {
 		_group->set_property (RouteGroup::Gain, _gain.get_active ());
 		_group->set_property (RouteGroup::Mute, _mute.get_active ());
 		_group->set_property (RouteGroup::Solo, _solo.get_active ());

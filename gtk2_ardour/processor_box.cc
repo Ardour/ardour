@@ -342,7 +342,7 @@ ProcessorBox::show_processor_menu (gint arg)
 			aux_menu_item->set_submenu (*m);
 		} else {
 			/* stupid gtkmm: we need to pass a null reference here */
-			aux_menu_item->set_submenu (*((Gtk::Menu *)0));
+			gtk_menu_item_set_submenu (aux_menu_item->gobj(), 0);
 		}
 	}
 
@@ -1442,8 +1442,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 		gidget = send_ui;
 #else
 		if (_parent_strip) {
-			_parent_strip->gain_meter().set_controls (_route, send->meter(), send->amp());
-			_parent_strip->panner_ui().set_panner (send->panner());
+			_parent_strip->show_send (send);
 		}
 #endif
 

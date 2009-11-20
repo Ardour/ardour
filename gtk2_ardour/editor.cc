@@ -452,6 +452,8 @@ Editor::Editor ()
 	h->pack_start (edit_controls_vbox);
 	controls_layout.add (*h);
 
+	ARDOUR_UI::instance()->tooltips().set_tip (*_group_tabs, _("Groups: context-click for possible operations"));
+
 	controls_layout.set_name ("EditControlsBase");
 	controls_layout.add_events (Gdk::SCROLL_MASK);
 	controls_layout.signal_scroll_event().connect (mem_fun(*this, &Editor::control_layout_scroll), false);
@@ -554,7 +556,13 @@ Editor::Editor ()
 
 	VPaned *editor_summary_pane = manage(new VPaned());
 	editor_summary_pane->pack1(edit_packer);
-	editor_summary_pane->pack2(*_summary);
+
+	Frame* summary_frame = manage (new Frame);
+	summary_frame->set_shadow_type (Gtk::SHADOW_ETCHED_IN);
+	summary_frame->add (*_summary);
+	summary_frame->show ();
+
+	editor_summary_pane->pack2(*summary_frame);
 
 	edit_pane.pack1 (*editor_summary_pane, true, true);
 	edit_pane.pack2 (the_notebook, false, true);

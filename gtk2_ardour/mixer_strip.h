@@ -97,6 +97,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	ARDOUR::RouteGroup* route_group() const;
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
 	void set_button_names ();
+	void show_send (boost::shared_ptr<ARDOUR::Send>);
 
 	sigc::signal<void>      WidthChanged;
 
@@ -262,6 +263,9 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void switch_io (boost::shared_ptr<ARDOUR::Route>);
 	boost::shared_ptr<ARDOUR::Delivery> _current_delivery;
 	void revert_to_default_display ();
+
+	void drop_send ();
+	sigc::connection send_gone_connection;
 
 	static int scrollbar_height;
 

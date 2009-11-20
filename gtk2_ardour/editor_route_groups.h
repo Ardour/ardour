@@ -84,6 +84,7 @@ private:
 	void flags_changed (void*, ARDOUR::RouteGroup*);
 	void set_activation (ARDOUR::RouteGroup *, bool);
 	void remove_selected ();
+	void run_new_group_dialog (const ARDOUR::RouteList&);
 
 	Gtk::Menu* _menu;
 	Glib::RefPtr<Gtk::ListStore> _model;

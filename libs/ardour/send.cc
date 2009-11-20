@@ -81,7 +81,8 @@ Send::deactivate ()
 {
 	_amp->deactivate ();
 	_meter->deactivate ();
-
+	_meter->reset ();
+	
 	Processor::deactivate ();
 }
 
