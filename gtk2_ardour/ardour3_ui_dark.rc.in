@@ -762,6 +762,17 @@ style "audio_bus_base"
   bg[NORMAL] = "#363c45"
 }
 
+style "send_strip_base" = "default_base"
+{
+  font_name = "@FONT_SMALLER@"
+  fg[NORMAL] = { 0.77, 0.77, 0.72 }	
+  bg[NORMAL] = { 0.19, 0.97, 0.69 }	
+  bg[ACTIVE] = { 0.19, 0.97, 0.69 }	
+  bg[PRELIGHT] = { 0.19, 0.97, 0.69 }	
+  bg[INSENSITIVE] = { 0.19, 0.97, 0.69 }	
+  bg[SELECTED] = { 0.19, 0.97, 0.69 }	
+}
+
 style "audio_track_base" = "default_base"
 {
   font_name = "@FONT_SMALLER@"
@@ -1446,6 +1457,7 @@ widget "*FramesRuler" style:highest "editor_time_ruler"
 widget "*MinSecRuler" style:highest "editor_time_ruler"
 widget "*BaseFrame" style:highest "base_frame"
 
+widget "*SendStripBase" style:highest "send_strip_base"
 widget "*AudioTrackStripBase" style:highest "audio_track_base"
 widget "*AudioBusStripBase" style:highest "audio_bus_base"
 widget "*MidiTrackStripBase" style:highest "midi_track_base"

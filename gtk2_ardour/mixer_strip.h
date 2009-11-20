@@ -267,6 +267,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void drop_send ();
 	sigc::connection send_gone_connection;
 
+	void reset_strip_style ();
+
 	static int scrollbar_height;
 
 	void update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width width, bool input_button);

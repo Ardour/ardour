@@ -1533,36 +1533,48 @@ void
 MixerStrip::route_active_changed ()
 {
 	RouteUI::route_active_changed ();
+	reset_strip_style ();
+}
 
-	if (is_midi_track()) {
-		if (_route->active()) {
-			set_name ("MidiTrackStripBase");
-			gpm.set_meter_strip_name ("MidiTrackStripBase");
-		} else {
-			set_name ("MidiTrackStripBaseInactive");
-			gpm.set_meter_strip_name ("MidiTrackStripBaseInactive");
-		}
-		gpm.set_fader_name ("MidiTrackFader");
-	} else if (is_audio_track()) {
-		if (_route->active()) {
-			set_name ("AudioTrackStripBase");
-			gpm.set_meter_strip_name ("AudioTrackMetrics");
-		} else {
-			set_name ("AudioTrackStripBaseInactive");
-			gpm.set_meter_strip_name ("AudioTrackMetricsInactive");
-		}
-		gpm.set_fader_name ("AudioTrackFader");
+void
+MixerStrip::reset_strip_style ()
+{
+	if (_current_delivery && boost::dynamic_pointer_cast<Send>(_current_delivery)) {
+
+		gpm.set_fader_name ("SendStripBase");
+
 	} else {
-		if (_route->active()) {
-			set_name ("AudioBusStripBase");
-			gpm.set_meter_strip_name ("AudioBusMetrics");
+		
+		if (is_midi_track()) {
+			if (_route->active()) {
+				set_name ("MidiTrackStripBase");
+				gpm.set_meter_strip_name ("MidiTrackStripBase");
+			} else {
+				set_name ("MidiTrackStripBaseInactive");
+				gpm.set_meter_strip_name ("MidiTrackStripBaseInactive");
+			}
+			gpm.set_fader_name ("MidiTrackFader");
+		} else if (is_audio_track()) {
+			if (_route->active()) {
+				set_name ("AudioTrackStripBase");
+				gpm.set_meter_strip_name ("AudioTrackMetrics");
+			} else {
+				set_name ("AudioTrackStripBaseInactive");
+				gpm.set_meter_strip_name ("AudioTrackMetricsInactive");
+			}
+			gpm.set_fader_name ("AudioTrackFader");
 		} else {
-			set_name ("AudioBusStripBaseInactive");
-			gpm.set_meter_strip_name ("AudioBusMetricsInactive");
+			if (_route->active()) {
+				set_name ("AudioBusStripBase");
+				gpm.set_meter_strip_name ("AudioBusMetrics");
+			} else {
+				set_name ("AudioBusStripBaseInactive");
+				gpm.set_meter_strip_name ("AudioBusMetricsInactive");
+			}
+			gpm.set_fader_name ("AudioBusFader");
+			
+			/* (no MIDI busses yet) */
 		}
-		gpm.set_fader_name ("AudioBusFader");
-
-		/* (no MIDI busses yet) */
 	}
 }
 
@@ -1614,6 +1626,12 @@ MixerStrip::meter_changed (void *src)
 void
 MixerStrip::switch_io (boost::shared_ptr<Route> target)
 {
+	/* don't respond to switch IO signal outside of the mixer window */
+
+	if (!_mixer_owned) {
+		return;
+	}
+
 	if (_route == target || _route->is_master()) {
 		/* don't change the display for the target or the master bus */
 		return;
@@ -1658,9 +1676,11 @@ void
 MixerStrip::show_send (boost::shared_ptr<Send> send)
 {
 	assert (send != 0);
+
 	drop_send ();
 
 	_current_delivery = send;
+
 	send->set_metering (true);
 	send_gone_connection = _current_delivery->GoingAway.connect (mem_fun (*this, &MixerStrip::revert_to_default_display));
 
@@ -1669,6 +1689,8 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 
 	panner_ui().set_panner (_current_delivery->panner());
 	panner_ui().setup_pan ();
+
+	reset_strip_style ();
 }
 
 void
@@ -1684,8 +1706,11 @@ MixerStrip::revert_to_default_display ()
 
 	gain_meter().set_controls (_route, _route->shared_peak_meter(), _route->amp());
 	gain_meter().setup_meters ();
+
 	panner_ui().set_panner (_route->main_outs()->panner());
 	panner_ui().setup_pan ();
+
+	reset_strip_style ();
 }
 
 void
