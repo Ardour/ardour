@@ -563,6 +563,7 @@ Delivery::target_gain ()
 		} else {
 			desired_gain = _mute_master->mute_gain_at (mp);
 		}
+
 	}
 
 	return desired_gain;

@@ -37,6 +37,7 @@
 #include "ardour/amp.h"
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
+#include "ardour/internal_send.h"
 #include "ardour/route.h"
 #include "ardour/route_group.h"
 #include "ardour/audio_track.h"
@@ -690,7 +691,21 @@ void
 MixerStrip::edit_output_configuration ()
 {
 	if (output_selector == 0) {
-		output_selector = new IOSelectorWindow (_session, _route->output());
+		
+		boost::shared_ptr<Send> send;
+		boost::shared_ptr<IO> output;
+
+		if ((send = boost::dynamic_pointer_cast<Send>(_current_delivery)) != 0) {
+			if (!boost::dynamic_pointer_cast<InternalSend>(send)) {
+				output = send->output();
+			} else {
+				output = _route->output ();
+			} 
+		} else {
+			output = _route->output ();
+		}
+		
+		output_selector = new IOSelectorWindow (_session, output);
 	}
 
 	if (output_selector->is_visible()) {
@@ -1669,7 +1684,8 @@ MixerStrip::drop_send ()
 	}
 
 	send_gone_connection.disconnect ();
-	
+	input_button.set_sensitive (true);
+	output_button.set_sensitive (true);
 }
 
 void
@@ -1689,6 +1705,12 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 
 	panner_ui().set_panner (_current_delivery->panner());
 	panner_ui().setup_pan ();
+
+	input_button.set_sensitive (false);
+
+	if (boost::dynamic_pointer_cast<InternalSend>(send)) {
+		output_button.set_sensitive (false);
+	}
 
 	reset_strip_style ();
 }

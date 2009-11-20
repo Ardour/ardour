@@ -552,11 +552,22 @@ Route::mod_solo_level (int32_t delta)
 		_solo_level += delta;
 	}
 
-	/* tell main outs what the solo situation is
-	 */
+	{ 
+		/* tell all delivery processors what the solo situation is, so that they keep
+		   delivering even though Session::soloing() is true and they were not
+		   explicitly soloed.
+		 */
+		
+		Glib::RWLock::ReaderLock rm (_processor_lock);
+		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+			boost::shared_ptr<Delivery> d;
 
-	_main_outs->set_solo_level (_solo_level);
-	_main_outs->set_solo_isolated (_solo_isolated);
+			if ((d = boost::dynamic_pointer_cast<Delivery> (*i)) != 0) {
+				d->set_solo_level (_solo_level);
+				d->set_solo_isolated (_solo_isolated);
+			}
+		}
+	}
 }
 
 void
