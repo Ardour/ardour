@@ -1127,7 +1127,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 	TempoMap::Metric metric = tmap.metric_at (_session.transport_frame() + current_offset);
 	tmap.bbt_time_with_metric (_session.transport_frame() + current_offset, bbt, metric);
 
-	if (*outDeltaSampleOffsetToNextBeat) {
+	if (outDeltaSampleOffsetToNextBeat) {
 		if (bbt.ticks == 0) {
 			/* on the beat */
 			*outDeltaSampleOffsetToNextBeat = 0;
@@ -1137,14 +1137,14 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 		}
 	}
 	
-	if (*outTimeSig_Numerator) {
+	if (outTimeSig_Numerator) {
 		*outTimeSig_Numerator = (UInt32) lrintf (metric.meter().beats_per_bar());
 	}
-	if (*outTimeSig_Denominator) {
+	if (outTimeSig_Denominator) {
 		*outTimeSig_Denominator = (UInt32) lrintf (metric.meter().note_divisor());
 	}
 
-	if (*outCurrentMeasureDownBeat) {
+	if (outCurrentMeasureDownBeat) {
 
 		/* beat for the start of the bar. 
 		   1|1|0 -> 1
