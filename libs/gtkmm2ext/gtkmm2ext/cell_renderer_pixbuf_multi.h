@@ -28,6 +28,7 @@
 #endif
 
 #include <map>
+#include <stdint.h>
 
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/adjustment.h>
