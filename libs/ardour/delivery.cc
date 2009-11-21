@@ -529,6 +529,7 @@ Delivery::target_gain ()
 
 	gain_t desired_gain;
 
+
 	if (_solo_level) {
 		desired_gain = 1.0;
 	} else {
@@ -549,18 +550,12 @@ Delivery::target_gain ()
 			mp = MuteMaster::PreFader;
 			break;
 		}
-
-		if (_solo_isolated) {
-
-			/* ... but we are isolated from all that nonsense */
-
-			desired_gain = _mute_master->mute_gain_at (mp);
-
-		} else if (_session.soloing()) {
-
+		
+		if (!_solo_isolated && _session.soloing()) {
 			desired_gain = min (Config->get_solo_mute_gain(), _mute_master->mute_gain_at (mp));
 
 		} else {
+
 			desired_gain = _mute_master->mute_gain_at (mp);
 		}
 

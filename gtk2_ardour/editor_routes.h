@@ -89,8 +89,8 @@ private:
 			add (text);
 			add (visible);
 			add (rec_enabled);
-			add (mute_enabled);
-			add (solo_enabled);
+			add (mute_state);
+			add (solo_state);
 			add (is_track);
 			add (tv);
 			add (route);
@@ -99,8 +99,8 @@ private:
 		Gtk::TreeModelColumn<Glib::ustring>  text;
 		Gtk::TreeModelColumn<bool>           visible;
 		Gtk::TreeModelColumn<bool>           rec_enabled;
-		Gtk::TreeModelColumn<bool>           mute_enabled;
-		Gtk::TreeModelColumn<bool>           solo_enabled;
+		Gtk::TreeModelColumn<uint32_t>       mute_state;
+		Gtk::TreeModelColumn<uint32_t>       solo_state;
 		Gtk::TreeModelColumn<bool>           is_track;
 		Gtk::TreeModelColumn<TimeAxisView*>  tv;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> >  route;

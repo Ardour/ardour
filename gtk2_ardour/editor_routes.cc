@@ -43,6 +43,7 @@
 
 #include "ardour/route.h"
 
+#include "gtkmm2ext/cell_renderer_pixbuf_multi.h"
 #include "gtkmm2ext/cell_renderer_pixbuf_toggle.h"
 
 #include "i18n.h"
@@ -82,27 +83,27 @@ EditorRoutes::EditorRoutes (Editor* e)
 	rec_state_column->add_attribute(rec_col_renderer->property_visible(), _columns.is_track);
 
 	// Mute enable toggle
-	CellRendererPixbufToggle* mute_col_renderer = manage (new CellRendererPixbufToggle());
+	CellRendererPixbufMulti* mute_col_renderer = manage (new CellRendererPixbufMulti());
 
-	mute_col_renderer->set_active_pixbuf (::get_icon("mute-enabled"));
-	mute_col_renderer->set_inactive_pixbuf (::get_icon("act-disabled"));
-	mute_col_renderer->signal_toggled().connect (mem_fun (*this, &EditorRoutes::on_tv_mute_enable_toggled));
+	mute_col_renderer->set_pixbuf (0, ::get_icon("act-disabled"));
+	mute_col_renderer->set_pixbuf (1, ::get_icon("mute-enabled"));
+	mute_col_renderer->signal_changed().connect (mem_fun (*this, &EditorRoutes::on_tv_mute_enable_toggled));
 
 	Gtk::TreeViewColumn* mute_state_column = manage (new TreeViewColumn("M", *mute_col_renderer));
 
-	mute_state_column->add_attribute(mute_col_renderer->property_active(), _columns.mute_enabled);
+	mute_state_column->add_attribute(mute_col_renderer->property_state(), _columns.mute_state);
 	mute_state_column->add_attribute(mute_col_renderer->property_visible(), _columns.is_track);
 
 	// Solo enable toggle
-	CellRendererPixbufToggle* solo_col_renderer = manage (new CellRendererPixbufToggle());
+	CellRendererPixbufMulti* solo_col_renderer = manage (new CellRendererPixbufMulti());
 
-	solo_col_renderer->set_active_pixbuf (::get_icon("solo-enabled"));
-	solo_col_renderer->set_inactive_pixbuf (::get_icon("act-disabled"));
-	solo_col_renderer->signal_toggled().connect (mem_fun (*this, &EditorRoutes::on_tv_solo_enable_toggled));
+	solo_col_renderer->set_pixbuf (0, ::get_icon("act-disabled"));
+	solo_col_renderer->set_pixbuf (1, ::get_icon("solo-enabled"));
+	solo_col_renderer->signal_changed().connect (mem_fun (*this, &EditorRoutes::on_tv_solo_enable_toggled));
 
 	Gtk::TreeViewColumn* solo_state_column = manage (new TreeViewColumn("S", *solo_col_renderer));
 
-	solo_state_column->add_attribute(solo_col_renderer->property_active(), _columns.solo_enabled);
+	solo_state_column->add_attribute(solo_col_renderer->property_state(), _columns.solo_state);
 	solo_state_column->add_attribute(solo_col_renderer->property_visible(), _columns.is_track);
 
 	
@@ -167,7 +168,6 @@ EditorRoutes::on_tv_rec_enable_toggled (Glib::ustring const & path_string)
 	}
 }
 
-
 void
 EditorRoutes::on_tv_mute_enable_toggled (Glib::ustring const & path_string)
 {
@@ -182,8 +182,6 @@ EditorRoutes::on_tv_mute_enable_toggled (Glib::ustring const & path_string)
 	}
 }
 
-
-
 void
 EditorRoutes::on_tv_solo_enable_toggled (Glib::ustring const & path_string)
 {
@@ -197,7 +195,6 @@ EditorRoutes::on_tv_solo_enable_toggled (Glib::ustring const & path_string)
 		atv->reversibly_apply_track_boolean ("solo-enable change", &Track::set_solo, !atv->track()->soloed(), this);
 	}
 }
-
 
 void
 EditorRoutes::build_menu ()
@@ -914,9 +911,9 @@ EditorRoutes::update_mute_display (void* /*src*/)
 		if (boost::dynamic_pointer_cast<Track>(route)) {
 
 			if (route->muted()){
-				(*i)[_columns.mute_enabled] = true;
+				(*i)[_columns.mute_state] = 1;
 			} else {
-				(*i)[_columns.mute_enabled] = false;
+				(*i)[_columns.mute_state] = 0;
 			}
 		}
 	}
@@ -934,9 +931,9 @@ EditorRoutes::update_solo_display (void* /*src*/)
 		if (boost::dynamic_pointer_cast<Track>(route)) {
 
 			if (route->soloed()){
-				(*i)[_columns.solo_enabled] = true;
+				(*i)[_columns.solo_state] = 1;
 			} else {
-				(*i)[_columns.solo_enabled] = false;
+				(*i)[_columns.solo_state] = 0;
 			}
 		}
 	}

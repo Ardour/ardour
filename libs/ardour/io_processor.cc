@@ -133,7 +133,6 @@ IOProcessor::state (bool full_state)
 		node.add_property ("own-output", "yes");
 		if (_output) {
 			XMLNode& o (_output->state (full_state));
-			// o.name() = X_("output");
 			node.add_child_nocopy (o);
 		}
 	} else {
@@ -166,12 +165,21 @@ IOProcessor::set_state (const XMLNode& node, int version)
 
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
+	const string instr = enum_2_string (IO::Input);
+	const string outstr = enum_2_string (IO::Output);
 
 	if (_own_input) {
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-			if ((*niter)->name() == "input") {
-				io_node = (*niter);
-				break;
+			const XMLProperty* prop;
+			if ((prop = (*niter)->property ("name")) != 0) {
+				if (prop->value() == _name) {
+					if ((prop = (*niter)->property ("direction")) != 0) {
+						if (prop->value() == instr) {
+							io_node = (*niter);
+							break;
+						}
+					}
+				}
 			}
 		}
 
@@ -184,16 +192,25 @@ IOProcessor::set_state (const XMLNode& node, int version)
 			}
 
 		} else {
-			/* no input */
+			/* no input, which is OK */
 		}
 
 	}
 
 	if (_own_output) {
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-			if ((*niter)->name() == "output") {
-				io_node = (*niter);
-				break;
+			if ((*niter)->name() == "IO") {
+				const XMLProperty* prop;
+				if ((prop = (*niter)->property ("name")) != 0) {
+					if (prop->value() == _name) {
+						if ((prop = (*niter)->property ("direction")) != 0) {
+							if (prop->value() == outstr) {
+								io_node = (*niter);
+								break;
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -205,7 +222,7 @@ IOProcessor::set_state (const XMLNode& node, int version)
 				set_name (_output->name());
 			}
 		} else {
-			/* no output */
+			/* no output, which is OK */
 		}
 	}
 

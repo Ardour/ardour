@@ -2426,7 +2426,7 @@ Session::route_solo_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 	shared_ptr<RouteList> r = routes.reader ();
 	int32_t delta;
 
-	if (route->soloed()) {
+	if (route->self_soloed()) {
 		delta = 1;
 	} else {
 		delta = -1;
@@ -2437,27 +2437,30 @@ Session::route_solo_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 	*/
 
 	solo_update_disabled = true;
+
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		bool via_sends_only;
 
-		if ((*i)->feeds (route, &via_sends_only) && !(*i)->is_hidden() && !(*i)->is_master() && !(*i)->is_control()) {
+
+		if ((*i) == route || !(*i)->solo_isolated() || !(*i)->is_master() || !(*i)->is_control() || (*i)->is_hidden()) {
+			continue;
+		} else if ((*i)->feeds (route, &via_sends_only)) {
 			if (!via_sends_only) {
-				/* do it */
-				(*i)->mod_solo_level (delta);
-			} 
-		}
+				(*i)->mod_solo_by_others (delta);
+			}
+		} 
 	}
 
 	/* make sure master is never muted by solo */
 
-	if (_master_out && route != _master_out && _master_out->solo_level() == 0 && !_master_out->soloed()) {
-		_master_out->mod_solo_level (1);
-	}
-
+	if (_master_out && route != _master_out && _master_out->soloed_by_others() == 0 && !_master_out->soloed()) {
+		_master_out->mod_solo_by_others (1);
+ 	}
+ 
 	/* ditto for control outs make sure master is never muted by solo */
 
-	if (_control_out && route != _control_out && _control_out && _control_out->solo_level() == 0) {
-		_control_out->mod_solo_level (1);
+	if (_control_out && route != _control_out && _control_out && _control_out->soloed_by_others() == 0) {
+		_control_out->mod_solo_by_others (1);
 	}
 
 	solo_update_disabled = false;
@@ -2478,7 +2481,7 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 	}
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->is_master() && !(*i)->is_control() && !(*i)->is_hidden() && (*i)->soloed()) {
+		if (!(*i)->is_master() && !(*i)->is_control() && !(*i)->is_hidden() && (*i)->self_soloed()) {
 			something_soloed = true;
 			break;
 		}

@@ -22,6 +22,7 @@ gtkmm2ext_sources = [
 	'auto_spin.cc',
 	'barcontroller.cc',
 	'binding_proxy.cc',
+	'cell_renderer_pixbuf_multi.cc',
 	'cell_renderer_pixbuf_toggle.cc',
 	'choice.cc',
 	'click_box.cc',

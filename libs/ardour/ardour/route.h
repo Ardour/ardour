@@ -129,8 +129,11 @@ class Route : public SessionObject, public AutomatableControls
 	 */
 
 	void set_solo (bool yn, void *src);
-	bool soloed () const { return (bool) _solo_level; }
 
+	bool soloed_by_others () const { return !_solo_isolated && _soloed_by_others; }
+	bool self_soloed () const { return _self_solo; }
+	bool soloed () const {return self_soloed () || soloed_by_others (); }
+	
 	void set_solo_isolated (bool yn, void *src);
 	bool solo_isolated() const;
 
@@ -310,8 +313,7 @@ class Route : public SessionObject, public AutomatableControls
 	friend class Session;
 
 	void catch_up_on_solo_mute_override ();
-	void mod_solo_level (int32_t);
-	uint32_t solo_level () const { return _solo_level; }
+	void mod_solo_by_others (int32_t);
 	void set_block_size (nframes_t nframes);
 	bool has_external_redirects() const;
 	void curve_reallocate ();
@@ -347,7 +349,8 @@ class Route : public SessionObject, public AutomatableControls
 	int            _pending_declick;
 	MeterPoint     _meter_point;
 	uint32_t       _phase_invert;
-	uint32_t       _solo_level;
+	bool           _self_solo;
+	uint32_t       _soloed_by_others;
 	bool           _solo_isolated;
 
 	bool           _denormal_protection;
@@ -411,6 +414,9 @@ class Route : public SessionObject, public AutomatableControls
 	bool add_processor_from_xml_2X (const XMLNode&, int, ProcessorList::iterator iter);	
 
 	void placement_range (Placement p, ProcessorList::iterator& start, ProcessorList::iterator& end);
+
+	void set_self_solo (bool yn);
+	void set_delivery_solo ();
 };
 
 } // namespace ARDOUR

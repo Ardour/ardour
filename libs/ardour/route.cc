@@ -116,11 +116,12 @@ Route::Route (Session& sess, const XMLNode& node, DataType default_type)
 void
 Route::init ()
 {
-	_solo_level = 0;
+	_self_solo = false;
+	_soloed_by_others = 0;
 	_solo_isolated = false;
+	_solo_safe = false;
 	_active = true;
 	processor_max_streams.reset();
-	_solo_safe = false;
 	_recordable = true;
 	order_keys[N_("signal")] = order_key_cnt++;
 	_silent = false;
@@ -523,7 +524,7 @@ Route::listening () const
 void
 Route::set_solo (bool yn, void *src)
 {
-	if (_solo_safe || _solo_isolated) {
+	if (_solo_safe) {
 		return;
 	}
 
@@ -532,40 +533,51 @@ Route::set_solo (bool yn, void *src)
 		return;
 	}
 
-	if (soloed() != yn) {
-		mod_solo_level (yn ? 1 : -1);
+	if (self_soloed() != yn) {
+		set_self_solo (yn);
+		set_delivery_solo ();
 		solo_changed (src); /* EMIT SIGNAL */
 		_solo_control->Changed (); /* EMIT SIGNAL */
 	}
 }
 
 void
-Route::mod_solo_level (int32_t delta)
+Route::set_self_solo (bool yn)
+{
+	_self_solo = yn;
+}
+
+void
+Route::mod_solo_by_others (int32_t delta)
 {
 	if (delta < 0) {
-		if (_solo_level >= (uint32_t) delta) {
-			_solo_level += delta;
+		if (_soloed_by_others >= (uint32_t) delta) {
+			_soloed_by_others += delta;
 		} else {
-			_solo_level = 0;
+			_soloed_by_others = 0;
 		}
 	} else {
-		_solo_level += delta;
+		_soloed_by_others += delta;
 	}
 
-	{ 
-		/* tell all delivery processors what the solo situation is, so that they keep
-		   delivering even though Session::soloing() is true and they were not
-		   explicitly soloed.
-		 */
-		
-		Glib::RWLock::ReaderLock rm (_processor_lock);
-		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			boost::shared_ptr<Delivery> d;
+	set_delivery_solo ();
+}
 
-			if ((d = boost::dynamic_pointer_cast<Delivery> (*i)) != 0) {
-				d->set_solo_level (_solo_level);
-				d->set_solo_isolated (_solo_isolated);
-			}
+void
+Route::set_delivery_solo ()
+{
+	/* tell all delivery processors what the solo situation is, so that they keep
+	   delivering even though Session::soloing() is true and they were not
+	   explicitly soloed.
+	*/
+
+	Glib::RWLock::ReaderLock rm (_processor_lock);
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		boost::shared_ptr<Delivery> d;
+		
+		if ((d = boost::dynamic_pointer_cast<Delivery> (*i)) != 0) {
+			d->set_solo_level (soloed ());
+			d->set_solo_isolated (solo_isolated());
 		}
 	}
 }
@@ -580,13 +592,7 @@ Route::set_solo_isolated (bool yn, void *src)
 
 	if (yn != _solo_isolated) {
 		_solo_isolated = yn;
-
-		/* tell main outs what the solo situation is
-		 */
-
-		_main_outs->set_solo_level (_solo_level);
-		_main_outs->set_solo_isolated (_solo_isolated);
-
+		set_delivery_solo ();
 		solo_isolated_changed (src);
 	}
 }
@@ -1679,6 +1685,9 @@ Route::state(bool full_state)
 		order_string += ':';
 	}
 	node->add_property ("order-keys", order_string);
+	node->add_property ("self-solo", (_self_solo ? "yes" : "no"));
+	snprintf (buf, sizeof (buf), "%d", _soloed_by_others);
+	node->add_property ("soloed-by-others", buf);
 
 	node->add_child_nocopy (_input->state (full_state));
 	node->add_child_nocopy (_output->state (full_state));
@@ -1772,9 +1781,13 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 
 	set_processor_state (processor_state);
 
-	if ((prop = node.property ("solo_level")) != 0) {
-		_solo_level = 0; // needed for mod_solo_level() to work
-		mod_solo_level (atoi (prop->value()));
+	if ((prop = node.property ("self-solo")) != 0) {
+		set_self_solo (string_is_affirmative (prop->value()));
+	}
+
+	if ((prop = node.property ("soloed-by-others")) != 0) {
+		_soloed_by_others = 0; // needed for mod_solo_by_others () to work
+		mod_solo_by_others (atoi (prop->value()));
 	}
 
 	if ((prop = node.property ("solo-isolated")) != 0) {
@@ -1793,14 +1806,6 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 		bool yn = string_is_affirmative (prop->value());
 		_active = !yn; // force switch
 		set_active (yn);
-	}
-
-	if ((prop = node.property (X_("soloed"))) != 0) {
-		bool yn = string_is_affirmative (prop->value());
-
-		/* XXX force reset of solo status */
-
-		set_solo (yn, this);
 	}
 
 	if ((prop = node.property (X_("meter-point"))) != 0) {
@@ -2830,7 +2835,7 @@ Route::SoloControllable::set_value (float val)
 float
 Route::SoloControllable::get_value (void) const
 {
-	return route.soloed() ? 1.0f : 0.0f;
+	return route.self_soloed() ? 1.0f : 0.0f;
 }
 
 void

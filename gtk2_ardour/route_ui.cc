@@ -737,16 +737,21 @@ RouteUI::update_mute_display ()
 
 	if (Config->get_show_solo_mutes()) {
 		if (_route->muted()) {
+			/* full mute */
 			mute_button->set_visual_state (2);
-		} else if (!_route->soloed() && _session.soloing()) {
+		} else if (_session.soloing() && !_route->soloed() && !_route->solo_isolated()) {
+			/* mute-because-not-soloed */
 			mute_button->set_visual_state (1);
 		} else {
+			/* no mute at all */
 			mute_button->set_visual_state (0);
 		}
 	} else {
 		if (_route->muted()) {
+			/* full mute */
 			mute_button->set_visual_state (2);
 		} else {
+			/* no mute at all */
 			mute_button->set_visual_state (0);
 		}
 	}
