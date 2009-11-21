@@ -522,6 +522,21 @@ Route::listening () const
 }
 
 void
+Route::set_solo_safe (bool yn, void *src)
+{
+	if (_solo_safe != yn) {
+		_solo_safe = yn;
+		solo_safe_changed (src);
+	} 
+}
+
+bool
+Route::solo_safe() const
+{
+	return _solo_safe;
+}
+
+void
 Route::set_solo (bool yn, void *src)
 {
 	if (_solo_safe) {

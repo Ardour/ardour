@@ -139,6 +139,9 @@ class RouteUI : public virtual AxisView
 	void solo_isolated_toggle (void*, Gtk::CheckMenuItem*);
 	void toggle_solo_isolated (Gtk::CheckMenuItem*);
 
+	void solo_safe_toggle (void*, Gtk::CheckMenuItem*);
+	void toggle_solo_safe (Gtk::CheckMenuItem*);
+
 	Gtk::CheckMenuItem* pre_fader_mute_check;
 	Gtk::CheckMenuItem* post_fader_mute_check;
 	Gtk::CheckMenuItem* listen_mute_check;

@@ -398,19 +398,10 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 					} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 
-						// shift-click: set this route to solo safe
+						// shift-click: toggle solo isolated status
 
-						if (Profile->get_sae() && ev->button == 1) {
-							// button 1 and shift-click: disables solo_latched for this click
-							if (!Config->get_solo_latched ()) {
-								Config->set_solo_latched (true);
-								reversibly_apply_route_boolean ("solo change", &Route::set_solo, !_route->soloed(), this);
-								Config->set_solo_latched (false);
-							}
-						} else {
-							_route->set_solo_isolated (!_route->solo_isolated(), this);
-							wait_for_release = false;
-						}
+						_route->set_solo_isolated (!_route->solo_isolated(), this);
+						wait_for_release = false;
 
 					} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -827,6 +818,13 @@ RouteUI::build_solo_menu (void)
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
+	check = new CheckMenuItem(_("Solo Safe"));
+	check->set_active (_route->solo_safe());
+	check->signal_toggled().connect (bind (mem_fun (*this, &RouteUI::toggle_solo_safe), check));
+	_route->solo_safe_changed.connect(bind (mem_fun (*this, &RouteUI::solo_safe_toggle), check));
+	items.push_back (CheckMenuElem(*check));
+	check->show_all();
+
 	//items.push_back (SeparatorElem());
 	// items.push_back (MenuElem (_("MIDI Bind"), mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
 
@@ -925,6 +923,12 @@ void
 RouteUI::toggle_solo_isolated (Gtk::CheckMenuItem* check)
 {
 	_route->set_solo_isolated (check->get_active(), this);
+}
+
+void
+RouteUI::toggle_solo_safe (Gtk::CheckMenuItem* check)
+{
+	_route->set_solo_safe (check->get_active(), this);
 }
 
 void
@@ -1225,6 +1229,17 @@ void
 RouteUI::solo_isolated_toggle(void* /*src*/, Gtk::CheckMenuItem* check)
 {
 	bool yn = _route->solo_isolated ();
+
+	if (check->get_active() != yn) {
+		check->set_active (yn);
+	}
+}
+
+
+void
+RouteUI::solo_safe_toggle(void* /*src*/, Gtk::CheckMenuItem* check)
+{
+	bool yn = _route->solo_safe ();
 
 	if (check->get_active() != yn) {
 		check->set_active (yn);
