@@ -303,7 +303,7 @@ ProcessorBox::build_possible_aux_menu ()
 	MenuList& items = menu->items();
 
 	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
-		if (!(*r)->internal_send_for (*r)) {
+		if (!_route->internal_send_for (*r) && *r != _route) {
 			items.push_back (MenuElem ((*r)->name(), bind (sigc::ptr_fun (ProcessorBox::rb_choose_aux), boost::weak_ptr<Route>(*r))));
 		}
 	}
@@ -338,11 +338,13 @@ ProcessorBox::show_processor_menu (gint arg)
 
 	if (aux_menu_item) {
 		Menu* m = build_possible_aux_menu();
-		if (m) {
+		if (m && !m->items().empty()) {
 			aux_menu_item->set_submenu (*m);
+			aux_menu_item->set_sensitive (true);
 		} else {
 			/* stupid gtkmm: we need to pass a null reference here */
 			gtk_menu_item_set_submenu (aux_menu_item->gobj(), 0);
+			aux_menu_item->set_sensitive (false);
 		}
 	}
 
