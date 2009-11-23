@@ -53,6 +53,7 @@ def build(bld):
 	obj.source = '''
 		basename.cc
 		base_ui.cc
+                boost_debug.cc
 		command.cc
 		convert.cc
 		controllable.cc
