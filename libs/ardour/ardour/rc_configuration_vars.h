@@ -119,7 +119,7 @@ CONFIG_VARIABLE (bool, disable_disarm_during_roll, "disable-disarm-during-roll",
 /* metering */
 
 CONFIG_VARIABLE (float, meter_hold, "meter-hold", 100.0f)
-CONFIG_VARIABLE (float, meter_falloff, "meter-falloff", 27.0f)
+CONFIG_VARIABLE (float, meter_falloff, "meter-falloff", 32.0f)
 
 /* miscellany */
 
