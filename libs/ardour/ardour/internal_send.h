@@ -57,6 +57,7 @@ class InternalSend : public Send
 
 	void send_to_going_away ();
 	int  connect_when_legal ();
+	int  set_our_state (XMLNode const &, int);
 };
 
 } // namespace ARDOUR
