@@ -2230,8 +2230,8 @@ ARDOUR_UI::ask_about_loading_existing_session (const Glib::ustring& session_path
 			   true);
 
 
-	msg.set_name (X_("CleanupDialog"));
-	msg.set_title (_("Cleanup Unused Sources"));
+	msg.set_name (X_("OpenExistingDialog"));
+	msg.set_title (_("Open Existing Session"));
 	msg.set_wmclass (X_("existing_session"), "Ardour");
 	msg.set_position (Gtk::WIN_POS_MOUSE);
 	pop_back_splash ();
