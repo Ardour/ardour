@@ -21,6 +21,7 @@ public:
 		_ports[OURS].add_group (_port_group);
 
 		setup_all_ports ();
+		init ();
 	}
 
 	void setup_ports (int dim)
