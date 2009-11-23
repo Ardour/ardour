@@ -464,7 +464,11 @@ MachineControl::do_masked_write (byte *msg, size_t len)
 	
 	switch (msg[2]) {
 	case 0x4f:  /* Track Record Ready Status */
-		write_track_record_ready (&msg[3], len - 3);
+		write_track_status (&msg[3], len - 3, msg[2]);
+		break;
+
+	case 0x62: /* track mute */
+		write_track_status (&msg[3], len - 3, msg[2]);
 		break;
 
 	default:
@@ -478,8 +482,7 @@ MachineControl::do_masked_write (byte *msg, size_t len)
 }
 
 void
-MachineControl::write_track_record_ready (byte *msg, size_t /*len*/)
-
+MachineControl::write_track_status (byte *msg, size_t /*len*/, byte reg)
 {
 	size_t n;
 	ssize_t base_track;
@@ -549,14 +552,18 @@ MachineControl::write_track_record_ready (byte *msg, size_t /*len*/)
 			   bit set.
 			*/
 
-			if (msg[2] & (1<<n)) {
-				trackRecordStatus[base_track+n] = true;
-				TrackRecordStatusChange (*this, base_track+n,
-							 true);
-			} else {
-				trackRecordStatus[base_track+n] = false;
-				TrackRecordStatusChange (*this, base_track+n,
-							 false);
+			bool val = (msg[2] & (1<<n));
+			
+			switch (reg) {
+			case 0x4f:
+				trackRecordStatus[base_track+n] = val;
+				TrackRecordStatusChange (*this, base_track+n, val);
+				break;
+				
+			case 0x62:
+				trackMute[base_track+n] = val;
+				TrackMuteChange (*this, base_track+n, val);
+				break;
 			}
 		} 
 

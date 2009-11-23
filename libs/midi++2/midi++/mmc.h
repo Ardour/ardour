@@ -154,6 +154,13 @@ class MachineControl : public sigc::trackable
 	sigc::signal<void,MachineControl &,size_t,bool> 
 		                             TrackRecordStatusChange;
 	
+	/* The second argument specifies the desired track record enabled
+	   status.
+	*/
+
+	sigc::signal<void,MachineControl &,size_t,bool> 
+		                             TrackMuteChange;
+	
 	/* The second argument points to a byte array containing
 	   the locate target value in MMC Standard Time Code
 	   format (5 bytes, roughly: hrs/mins/secs/frames/subframes)
@@ -196,7 +203,7 @@ class MachineControl : public sigc::trackable
 	byte fixedSpeed;
 	byte lifterDefeat;
 	byte controlDisable;
-	byte trackMute;
+	byte trackMute[MMC_NTRACKS];
 	byte failure;
 	byte selectedTimeCode;
 	byte shortSelectedTimeCode;
@@ -256,8 +263,8 @@ class MachineControl : public sigc::trackable
 	int  do_locate (byte *, size_t len);
 	int  do_step (byte *, size_t len);
 	int  do_shuttle (byte *, size_t len);
-
-	void write_track_record_ready (byte *, size_t len);
+	
+	void write_track_status (byte *, size_t len, byte reg);
 };
 
 } // namespace MIDI
