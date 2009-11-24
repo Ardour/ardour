@@ -163,6 +163,8 @@ class LocationUI : public Gtk::HBox
 
 	LocationEditRow      loop_edit_row;
 	LocationEditRow      punch_edit_row;
+	Gtk::VBox loop_punch_box;
+	Gtk::ScrolledWindow loop_punch_scroller;
 
 	Gtk::VPaned loc_range_panes;
 

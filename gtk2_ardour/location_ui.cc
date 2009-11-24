@@ -595,9 +595,15 @@ LocationUI::LocationUI ()
 	
 	add_location_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::ADD, Gtk::ICON_SIZE_BUTTON)));
 	add_range_button.set_image (*Gtk::manage (new Gtk::Image (Gtk::Stock::ADD, Gtk::ICON_SIZE_BUTTON)));
+
+	loop_punch_box.pack_start (loop_edit_row, false, false);
+	loop_punch_box.pack_start (punch_edit_row, false, false);
 	
-	location_vpacker.pack_start (loop_edit_row, false, false);
-	location_vpacker.pack_start (punch_edit_row, false, false);
+	loop_punch_scroller.add (loop_punch_box);
+	loop_punch_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
+	loop_punch_scroller.set_shadow_type (Gtk::SHADOW_NONE);
+	
+	location_vpacker.pack_start (loop_punch_scroller, false, false);
 
 	location_rows.set_name("LocationLocRows");
 	location_rows_scroller.add (location_rows);
