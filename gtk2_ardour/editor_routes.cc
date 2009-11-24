@@ -128,8 +128,13 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.add_object_drag (_columns.route.index(), "routes");
 
 	CellRendererText* name_cell = dynamic_cast<CellRendererText*> (_display.get_column_cell_renderer (4));
-	
 	assert (name_cell);
+
+	Gtk::TreeViewColumn* name_column = _display.get_column (4);
+	assert (name_column);
+
+	name_column->add_attribute (name_cell->property_editable(), _columns.name_editable);
+	
 	name_cell->property_editable() = true;
 	name_cell->signal_edited().connect (mem_fun (*this, &EditorRoutes::name_edit));
 
@@ -160,6 +165,8 @@ EditorRoutes::on_tv_rec_enable_toggled (Glib::ustring const & path_string)
 	// Get the model row that has been toggled.
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 
+	row[_columns.name_editable] = !row[_columns.rec_enabled];
+	
 	TimeAxisView *tv = row[_columns.tv];
 	AudioTimeAxisView *atv = dynamic_cast<AudioTimeAxisView*> (tv);
 
@@ -352,6 +359,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		}
 	}
 
+	update_rec_display ();
 	resume_redisplay ();
 	_redisplay_does_not_sync_order_keys = false;
 }
@@ -889,12 +897,8 @@ EditorRoutes::update_rec_display ()
 		boost::shared_ptr<Route> route = (*i)[_columns.route];
 
 		if (boost::dynamic_pointer_cast<Track>(route)) {
-
-			if (route->record_enabled()){
-				(*i)[_columns.rec_enabled] = true;
-			} else {
-				(*i)[_columns.rec_enabled] = false;
-			}
+			(*i)[_columns.rec_enabled] = route->record_enabled ();
+			(*i)[_columns.name_editable] = !route->record_enabled ();
 		}
 	}
 }
@@ -968,7 +972,7 @@ EditorRoutes::name_edit (Glib::ustring const & path, Glib::ustring const & new_t
 
 	boost::shared_ptr<Route> route = (*iter)[_columns.route];
 
-	if (route) {
+	if (route && route->name() != new_text) {
 		route->set_name (new_text);
 	}
 }

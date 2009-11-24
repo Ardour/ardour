@@ -94,6 +94,7 @@ private:
 			add (is_track);
 			add (tv);
 			add (route);
+			add (name_editable);
 		}
 		
 		Gtk::TreeModelColumn<Glib::ustring>  text;
@@ -104,6 +105,7 @@ private:
 		Gtk::TreeModelColumn<bool>           is_track;
 		Gtk::TreeModelColumn<TimeAxisView*>  tv;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> >  route;
+		Gtk::TreeModelColumn<bool>           name_editable;
 	};
 
 	Gtk::ScrolledWindow _scroller;
