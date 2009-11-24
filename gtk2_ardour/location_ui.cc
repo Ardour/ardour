@@ -95,6 +95,8 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	composer_entry.set_size_request (100, -1);
 	composer_entry.set_editable (true);
 
+	name_label.set_alignment (0, 0.5);
+
 	cd_track_details_hbox.pack_start (isrc_label, false, false);
 	cd_track_details_hbox.pack_start (isrc_entry, false, false);
 	cd_track_details_hbox.pack_start (scms_check_button, false, false);
@@ -586,7 +588,7 @@ LocationEditRow::focus_name() {
 
 LocationUI::LocationUI ()
 	: session (0)
-	, add_location_button (_("New Location"))
+	, add_location_button (_("New Marker"))
 	, add_range_button (_("New Range"))
 {
 	i_am_the_modifier = 0;
