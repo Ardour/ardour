@@ -449,7 +449,10 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 			} else {
 				if (i != allviews->begin()) {
 					do {
-						if (--i == allviews->begin()) { return true; }
+						if (i == allviews->begin()) {
+							return true;
+						}
+						--i;
 					} while ((*i)->hidden());
 				}
 			}
