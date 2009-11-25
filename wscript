@@ -314,6 +314,8 @@ def set_options(opt):
 			help='Architecture-specific compiler flags')
 	opt.add_option('--aubio', action='store_true', default=True, dest='aubio',
 			help="Use Paul Brossier's aubio library for feature detection (if available)")
+	opt.add_option('--boost-sp-debug', action='store_true', default=False, dest='boost_sp_debug',
+			help='Compile with Boost shared pointer debugging')
 	opt.add_option('--audiounits', action='store_true', default=False, dest='audiounits',
 			help='Compile with Apple\'s AudioUnit library (experimental)')
 	opt.add_option('--coreaudio', action='store_true', default=False, dest='coreaudio',
@@ -401,7 +403,9 @@ def configure(conf):
 		#
 		conf.env.append_value('CXXFLAGS_OSX', "-F/System/Library/Frameworks")
 		conf.env.append_value('CCFLAGS_OSX', "-F/System/Library/Frameworks")
-
+		
+	if Options.options.boost_sp_debug:
+		conf.env.append_value('CXXFLAGS', '-DBOOST_SP_ENABLE_DEBUG_HOOKS')
 
 	if Options.options.gtkosx:
 		#

@@ -85,6 +85,7 @@ list_debug_options ()
 	cerr << "\tConfiguration\n";
 	cerr << "\tLatency\n";
 	cerr << "\tGraph\n";
+	cerr << "\tDestruction\n";
 }
 
 static int
@@ -126,6 +127,8 @@ parse_debug_options (const char* str)
 			bits |= ARDOUR::DEBUG::Processors;
 		} else if (strncasecmp (p, "graph", strlen (p)) == 0) {
 			bits |= ARDOUR::DEBUG::Graph;
+		} else if (strncasecmp (p, "destruction", strlen (p)) == 0) {
+			bits |= ARDOUR::DEBUG::Destruction;
 		}
 
 		p = strtok_r (0, ",", &sp);
