@@ -460,7 +460,7 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 
 			/* resize to show editable name display */
 
-			if ((*i)->current_height() >= hSmall && (*i)->current_height() < hNormal) {
+			if ((*i)->current_height() <= hSmaller) {
 				(*i)->set_height (hSmaller);
 			}
 
