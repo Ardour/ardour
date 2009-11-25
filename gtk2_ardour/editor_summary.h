@@ -50,10 +50,16 @@ private:
 
 	void centre_on_click (GdkEventButton *);
 	void render (cairo_t *);
-	void render_region (RegionView*, cairo_t*, nframes_t, double) const;
+	void render_region (RegionView*, cairo_t*, double) const;
 	void get_editor (std::pair<double, double> *, std::pair<double, double> *) const;
 	void set_editor (std::pair<double, double> const &, std::pair<double, double> const &);
 	void playhead_position_changed (nframes64_t);
+
+	nframes_t _start; ///< start frame of the overview
+	nframes_t _end; ///< end frame of the overview
+
+	/** fraction of the session length by which the overview size should extend past the start and end markers */
+	double _overhang_fraction;
 
 	double _x_scale; ///< pixels per frame for the x axis of the pixmap
 	double _y_scale;

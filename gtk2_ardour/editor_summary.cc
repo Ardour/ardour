@@ -36,6 +36,9 @@ using namespace ARDOUR;
  */
 EditorSummary::EditorSummary (Editor* e)
 	: EditorComponent (e),
+	  _start (0),
+	  _end (1),
+	  _overhang_fraction (0.1),
 	  _x_scale (1),
 	  _y_scale (1),
 	  _last_playhead (-1),
@@ -58,8 +61,8 @@ EditorSummary::connect_to_session (Session* s)
 	Region::RegionPropertyChanged.connect (sigc::hide (mem_fun (*this, &EditorSummary::set_dirty)));
 
 	_session_connections.push_back (_session->RegionRemoved.connect (sigc::hide (mem_fun (*this, &EditorSummary::set_dirty))));
-	_session_connections.push_back (_session->EndTimeChanged.connect (mem_fun (*this, &EditorSummary::set_dirty)));
 	_session_connections.push_back (_session->StartTimeChanged.connect (mem_fun (*this, &EditorSummary::set_dirty)));
+	_session_connections.push_back (_session->EndTimeChanged.connect (mem_fun (*this, &EditorSummary::set_dirty)));
 	_editor->playhead_cursor->PositionChanged.connect (mem_fun (*this, &EditorSummary::playhead_position_changed));
 
 	set_dirty ();
@@ -102,7 +105,7 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 	/* XXX: colour should be set from configuration file */
 	cairo_set_source_rgba (cr, 1, 0, 0, 1);
 
-	double const p = (_editor->playhead_cursor->current_frame - _session->current_start_frame()) * _x_scale;
+	double const p = (_editor->playhead_cursor->current_frame - _start) * _x_scale;
 	cairo_move_to (cr, p, 0);
 	cairo_line_to (cr, p, _height);
 	cairo_stroke (cr);
@@ -129,6 +132,13 @@ EditorSummary::render (cairo_t* cr)
 		return;
 	}
 
+	/* compute start and end points for the summary */
+	
+	nframes_t const session_length = _session->current_end_frame() - _session->current_start_frame ();
+	double const theoretical_start = _session->current_start_frame() - session_length * _overhang_fraction;
+	_start = theoretical_start > 0 ? theoretical_start : 0;
+	_end = _session->current_end_frame() + session_length * _overhang_fraction;
+
 	/* compute total height of all tracks */
 
 	int h = 0;
@@ -139,8 +149,7 @@ EditorSummary::render (cairo_t* cr)
 		max_height = max (max_height, t);
 	}
 
-	nframes_t const start = _session->current_start_frame ();
-	_x_scale = static_cast<double> (_width) / (_session->current_end_frame() - start);
+	_x_scale = static_cast<double> (_width) / (_end - _start);
 	_y_scale = static_cast<double> (_height) / h;
 
 	/* tallest a region should ever be in the summary, in pixels */
@@ -164,29 +173,51 @@ EditorSummary::render (cairo_t* cr)
 			s->foreach_regionview (bind (
 						       mem_fun (*this, &EditorSummary::render_region),
 						       cr,
-						       start,
 						       y + h / 2
 						       ));
 			y += h;
 		}
 	}
 
+	/* start and end markers */
+
+	cairo_set_line_width (cr, 1);
+	cairo_set_source_rgb (cr, 1, 1, 0);
+
+	double const p = (_session->current_start_frame() - _start) * _x_scale;
+	cairo_move_to (cr, p, 0);
+	cairo_line_to (cr, p, _height);
+	cairo_stroke (cr);
+
+	double const q = (_session->current_end_frame() - _start) * _x_scale;
+	cairo_move_to (cr, q, 0);
+	cairo_line_to (cr, q, _height);
+	cairo_stroke (cr);
 }
 
 /** Render a region for the summary.
  *  @param r Region view.
  *  @param cr Cairo context.
- *  @param start Frame offset that the summary starts at.
  *  @param y y coordinate to render at.
  */
 void
-EditorSummary::render_region (RegionView* r, cairo_t* cr, nframes_t start, double y) const
+EditorSummary::render_region (RegionView* r, cairo_t* cr, double y) const
 {
 	uint32_t const c = r->get_fill_color ();
 	cairo_set_source_rgb (cr, UINT_RGBA_R (c) / 255.0, UINT_RGBA_G (c) / 255.0, UINT_RGBA_B (c) / 255.0);
 
-	cairo_move_to (cr, (r->region()->position() - start) * _x_scale, y);
-	cairo_line_to (cr, ((r->region()->position() - start + r->region()->length())) * _x_scale, y);
+	if (r->region()->position() > _start) {
+		cairo_move_to (cr, (r->region()->position() - _start) * _x_scale, y);
+	} else {
+		cairo_move_to (cr, 0, y);
+	}
+
+	if ((r->region()->position() + r->region()->length()) > _start) {
+		cairo_line_to (cr, ((r->region()->position() - _start + r->region()->length())) * _x_scale, y);
+	} else {
+		cairo_line_to (cr, 0, y);
+	}
+
 	cairo_stroke (cr);
 }
 
@@ -287,7 +318,7 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 
 			/* secondary-modifier-click: locate playhead */
 			if (_session) {
-				_session->request_locate (ev->x / _x_scale + _session->current_start_frame());
+				_session->request_locate (ev->x / _x_scale + _start);
 			}
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
@@ -310,11 +341,11 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 void
 EditorSummary::get_editor (pair<double, double>* x, pair<double, double>* y) const
 {
-	x->first = (_editor->leftmost_position () - _session->current_start_frame ()) * _x_scale;
+	x->first = (_editor->leftmost_position () - _start) * _x_scale;
 	x->second = x->first + _editor->current_page_frames() * _x_scale;
 
 	y->first = _editor->vertical_adjustment.get_value() * _y_scale;
-	y->second = y->first + _editor->canvas_height () * _y_scale;
+	y->second = y->first + (_editor->canvas_height () - _editor->get_canvas_timebars_vsize()) * _y_scale;
 }
 
 bool
@@ -331,6 +362,16 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 		xr.second += ev->x - _start_mouse_x;
 		yr.first += ev->y - _start_mouse_y;
 		yr.second += ev->y - _start_mouse_y;
+
+		if (xr.first < 0) {
+			xr.second -= xr.first;
+			xr.first = 0;
+		}
+
+		if (yr.first < 0) {
+			yr.second -= yr.first;
+			yr.first = 0;
+		}
 
 		set_editor (xr, yr);
 
@@ -412,7 +453,7 @@ EditorSummary::set_editor (pair<double,double> const & x, pair<double, double> c
 		   is merely pending but not executing.  But c'est la vie.
 		*/
 
-		_editor->reset_x_origin (x.first / _x_scale + _session->current_start_frame ());
+		_editor->reset_x_origin (x.first / _x_scale + _start);
 		_editor->reset_y_origin (y.first / _y_scale);
 
 		double const nx = (
