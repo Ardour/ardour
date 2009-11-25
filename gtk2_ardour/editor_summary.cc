@@ -102,7 +102,7 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 	/* XXX: colour should be set from configuration file */
 	cairo_set_source_rgba (cr, 1, 0, 0, 1);
 
-	double const p = _editor->playhead_cursor->current_frame * _x_scale;
+	double const p = (_editor->playhead_cursor->current_frame - _session->current_start_frame()) * _x_scale;
 	cairo_move_to (cr, p, 0);
 	cairo_line_to (cr, p, _height);
 	cairo_stroke (cr);
@@ -412,7 +412,7 @@ EditorSummary::set_editor (pair<double,double> const & x, pair<double, double> c
 		   is merely pending but not executing.  But c'est la vie.
 		*/
 
-		_editor->reset_x_origin (x.first / _x_scale);
+		_editor->reset_x_origin (x.first / _x_scale + _session->current_start_frame ());
 		_editor->reset_y_origin (y.first / _y_scale);
 
 		double const nx = (
