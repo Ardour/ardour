@@ -380,7 +380,7 @@ Mixer_UI::sync_order_keys (string const & src)
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator ri;
 
-	if (src == N_("signal") || !session || (session->state_of_the_state() & Session::Loading) || rows.empty()) {
+	if (src == N_("signal") || !session || (session->state_of_the_state() & (Session::Loading|Session::Deletion)) || rows.empty()) {
 		return;
 	}
 
