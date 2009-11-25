@@ -36,6 +36,7 @@
 #include "pbd/pthread_utils.h"
 #include "pbd/enumwriter.h"
 
+#include "ardour/debug.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
 #include "ardour/transient_detector.h"
@@ -75,6 +76,7 @@ Source::Source (Session& s, const XMLNode& node)
 Source::~Source ()
 {
 	notify_callbacks ();
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("Source %1 deleted\n", _name));
 }
 
 

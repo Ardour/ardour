@@ -77,8 +77,8 @@ bool
 FileSource::removable () const
 {
 	return (_flags & Removable)
-		&& (   (_flags & RemoveAtDestroy)
-			|| ((_flags & RemovableIfEmpty) && length(timeline_position()) == 0));
+		&& ((_flags & RemoveAtDestroy) || 
+		    ((_flags & RemovableIfEmpty) && length(timeline_position()) == 0));
 }
 
 int

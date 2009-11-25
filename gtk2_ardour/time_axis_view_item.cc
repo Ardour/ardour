@@ -535,7 +535,7 @@ TimeAxisViewItem::set_name_text(const ustring& new_name)
 
 	last_item_width = trackview.editor().frame_to_pixel(item_duration);
 	name_pixbuf_width = pixel_width (new_name, *NAME_FONT) + 2;
-	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(new_name, NAME_FONT, name_pixbuf_width, NAME_HEIGHT);
+	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(new_name, NAME_FONT, name_pixbuf_width, NAME_HEIGHT, Gdk::Color ("#000000"));
 }
 
 
@@ -902,7 +902,7 @@ TimeAxisViewItem::reset_name_width (double /*pixel_width*/)
 		name_pixbuf->show();
 	}
 
-	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(item_name, NAME_FONT, pb_width, NAME_HEIGHT);
+	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(item_name, NAME_FONT, pb_width, NAME_HEIGHT, Gdk::Color ("#000000"));
 }
 
 

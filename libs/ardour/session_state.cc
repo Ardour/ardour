@@ -57,6 +57,7 @@
 #include "midi++/mmc.h"
 #include "midi++/port.h"
 
+#include "pbd/boost_debug.h"
 #include "pbd/error.h"
 #include "pbd/pathscanner.h"
 #include "pbd/pthread_utils.h"
@@ -567,7 +568,8 @@ Session::load_diskstreams (const XMLNode& node)
 		try {
 			/* diskstreams added automatically by DiskstreamCreated handler */
 			if ((*citer)->name() == "AudioDiskstream" || (*citer)->name() == "DiskStream") {
-				boost::shared_ptr<AudioDiskstream> dstream (new AudioDiskstream (*this, **citer));
+				AudioDiskstream* dsp (new AudioDiskstream (*this, **citer));
+				boost::shared_ptr<AudioDiskstream> dstream (dsp);
 				add_diskstream (dstream);
 			} else if ((*citer)->name() == "MidiDiskstream") {
 				boost::shared_ptr<MidiDiskstream> dstream (new MidiDiskstream (*this, **citer));
@@ -1402,7 +1404,9 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 
 	if (has_diskstream) {
 		if (type == DataType::AUDIO) {
-			boost::shared_ptr<Route> ret (new AudioTrack (*this, node, version));
+			AudioTrack* at = new AudioTrack (*this, node, version);
+			boost_debug_shared_ptr_mark_interesting (at, typeid (at).name());
+			boost::shared_ptr<Route> ret (at);
 			return ret;
 		} else {
 			boost::shared_ptr<Route> ret (new MidiTrack (*this, node, version));

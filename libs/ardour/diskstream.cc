@@ -41,6 +41,7 @@
 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
+#include "ardour/debug.h"
 #include "ardour/diskstream.h"
 #include "ardour/utils.h"
 #include "ardour/configuration.h"
@@ -130,6 +131,7 @@ Diskstream::~Diskstream ()
 {
 	if (_playlist)
 		_playlist->release ();
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("Diskstream %1 deleted\n", _name));
 }
 
 void

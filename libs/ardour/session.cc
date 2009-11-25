@@ -37,6 +37,7 @@
 
 #include "pbd/error.h"
 #include <glibmm/thread.h>
+#include "pbd/boost_debug.h"
 #include "pbd/pathscanner.h"
 #include "pbd/stl_delete.h"
 #include "pbd/basename.h"
@@ -62,6 +63,7 @@
 #include "ardour/crossfade.h"
 #include "ardour/cycle_timer.h"
 #include "ardour/data_type.h"
+#include "ardour/debug.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/internal_send.h"
 #include "ardour/io_processor.h"
@@ -329,6 +331,8 @@ Session::~Session ()
 void
 Session::destroy ()
 {
+	vector<void*> debug_pointers;
+
 	/* if we got to here, leaving pending capture state around
 	   is a mistake.
 	*/
@@ -378,10 +382,7 @@ Session::destroy ()
 
 	Route::SyncOrderKeys.clear();
 
-#undef TRACK_DESTRUCTION
-#ifdef TRACK_DESTRUCTION
-	cerr << "delete named selections\n";
-#endif /* TRACK_DESTRUCTION */
+	DEBUG_TRACE (DEBUG::Destruction, "delete named selections\n");
 	for (NamedSelectionList::iterator i = named_selections.begin(); i != named_selections.end(); ) {
 		NamedSelectionList::iterator tmp;
 
@@ -392,16 +393,16 @@ Session::destroy ()
 		i = tmp;
 	}
 
-#ifdef TRACK_DESTRUCTION
-	cerr << "delete playlists\n";
-#endif /* TRACK_DESTRUCTION */
+	DEBUG_TRACE (DEBUG::Destruction, "delete playlists\n");
 	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ) {
 		PlaylistList::iterator tmp;
 
 		tmp = i;
 		++tmp;
 
+		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for used playlist %1 ; pre-ref = %2\n", (*i)->name(), (*i).use_count()));
 		(*i)->drop_references ();
+		DEBUG_TRACE(DEBUG::Destruction, string_compose ("post-ref = %1\n", (*i).use_count()));
 
 		i = tmp;
 	}
@@ -412,7 +413,9 @@ Session::destroy ()
 		tmp = i;
 		++tmp;
 
+		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for unused playlist %1 ; pre-ref = %2\n", (*i)->name(), (*i).use_count()));
 		(*i)->drop_references ();
+		DEBUG_TRACE(DEBUG::Destruction, string_compose ("post-ref = %2\n", (*i).use_count()));
 
 		i = tmp;
 	}
@@ -420,70 +423,68 @@ Session::destroy ()
 	playlists.clear ();
 	unused_playlists.clear ();
 
-#ifdef TRACK_DESTRUCTION
-	cerr << "delete regions\n";
-#endif /* TRACK_DESTRUCTION */
-
+	DEBUG_TRACE (DEBUG::Destruction, "delete regions\n");
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ) {
 		RegionList::iterator tmp;
 
 		tmp = i;
 		++tmp;
-
+		
+		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for region %1 ; pre-ref = %2\n", i->second->name(), i->second.use_count()));
 		i->second->drop_references ();
+		DEBUG_TRACE(DEBUG::Destruction, string_compose ("\tpost-ref%2\n", i->second.use_count()));
 
 		i = tmp;
 	}
 
 	regions.clear ();
 
-#ifdef TRACK_DESTRUCTION
-	cerr << "delete routes\n";
-#endif /* TRACK_DESTRUCTION */
+	DEBUG_TRACE (DEBUG::Destruction, "delete routes\n");
 	{
 		RCUWriter<RouteList> writer (routes);
 		boost::shared_ptr<RouteList> r = writer.get_copy ();
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for route %1 ; pre-ref = %2\n", (*i)->name(), (*i).use_count()));
 			(*i)->drop_references ();
+			DEBUG_TRACE(DEBUG::Destruction, string_compose ("post-ref = %1\n", (*i).use_count()));
+			debug_pointers.push_back ((*i).get());
 		}
 		r->clear ();
 		/* writer goes out of scope and updates master */
 	}
-
 	routes.flush ();
 
-#ifdef TRACK_DESTRUCTION
-	cerr << "delete diskstreams\n";
-#endif /* TRACK_DESTRUCTION */
-       {
-	       RCUWriter<DiskstreamList> dwriter (diskstreams);
-	       boost::shared_ptr<DiskstreamList> dsl = dwriter.get_copy();
-	       for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		       (*i)->drop_references ();
-	       }
-	       dsl->clear ();
-       }
-       diskstreams.flush ();
+	DEBUG_TRACE (DEBUG::Destruction, "delete diskstreams\n");
+	{
+		RCUWriter<DiskstreamList> dwriter (diskstreams);
+		boost::shared_ptr<DiskstreamList> dsl = dwriter.get_copy();
+		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+			DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for diskstream %1 ; pre-ref = %2\n", (*i)->name(), (*i).use_count()));
+			(*i)->drop_references ();
+			DEBUG_TRACE(DEBUG::Destruction, string_compose ("post-ref = %1\n", (*i).use_count()));
+		}
+		dsl->clear ();
+	}
+	diskstreams.flush ();
 
-#ifdef TRACK_DESTRUCTION
-	cerr << "delete audio sources\n";
-#endif /* TRACK_DESTRUCTION */
+	DEBUG_TRACE (DEBUG::Destruction, "delete sources\n");
 	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ) {
 		SourceMap::iterator tmp;
 
 		tmp = i;
 		++tmp;
 
+		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for source %1 ; pre-ref = %2\n", i->second->path(), i->second.use_count()));
 		i->second->drop_references ();
+		DEBUG_TRACE(DEBUG::Destruction, string_compose ("\tpost-ref%1\n", i->second.use_count()));
 
 		i = tmp;
 	}
+	cerr << "Pre source clear, we have " << sources.size() << endl;
 	sources.clear ();
+	cerr << "Post source clear, we have " << sources.size() << endl;
 
-
-#ifdef TRACK_DESTRUCTION
-	cerr << "delete route groups\n";
-#endif /* TRACK_DESTRUCTION */
+	DEBUG_TRACE (DEBUG::Destruction, "delete route groups\n");
 	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
 		delete *i;
 	}
@@ -491,6 +492,10 @@ Session::destroy ()
 	Crossfade::set_buffer_size (0);
 
 	delete mmc;
+
+	for (vector<void*>::iterator x = debug_pointers.begin(); x != debug_pointers.end(); ++x) {
+		boost_debug_shared_ptr_show (cerr, *x);	
+	}
 }
 
 void
@@ -1769,7 +1774,9 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 		shared_ptr<AudioTrack> track;
 
 		try {
-			track = boost::shared_ptr<AudioTrack>((new AudioTrack (*this, track_name, Route::Flag (0), mode)));
+			AudioTrack* at = new AudioTrack (*this, track_name, Route::Flag (0), mode);
+			boost_debug_shared_ptr_mark_interesting (at, typeid (at).name());
+			track = boost::shared_ptr<AudioTrack>(at);
 
 			if (track->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
 				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
@@ -3330,9 +3337,9 @@ Session::create_audio_source_for_session (AudioDiskstream& ds, uint32_t chan, bo
 	const size_t n_chans = ds.n_channels().n_audio();
 	const string name    = new_audio_source_name (ds.name(), n_chans, chan, destructive);
 	const string path    = new_source_path_from_name(DataType::AUDIO, name);
+
 	return boost::dynamic_pointer_cast<AudioFileSource> (
-			SourceFactory::createWritable (
-					DataType::AUDIO, *this, path, true, destructive, frame_rate()));
+		SourceFactory::createWritable (DataType::AUDIO, *this, path, true, destructive, frame_rate()));
 }
 
 /** Return a unique name based on \a base for a new internal MIDI source */

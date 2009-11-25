@@ -89,9 +89,182 @@ using namespace Gtkmm2ext;
 
 ProcessorBox* ProcessorBox::_current_processor_box = 0;
 RefPtr<Action> ProcessorBox::paste_action;
-bool ProcessorBox::get_colors = true;
-Gdk::Color* ProcessorBox::active_processor_color;
-Gdk::Color* ProcessorBox::inactive_processor_color;
+Glib::RefPtr<Gdk::Pixbuf> SendProcessorEntry::_slider;
+
+ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
+	: _processor (p), _width (w)
+{
+	_hbox.pack_start (_active, false, false);
+	_event_box.add (_name);
+	_hbox.pack_start (_event_box, true, true);
+	_vbox.pack_start (_hbox);
+
+	_name.set_alignment (0, 0.5);
+	_name.set_text (name ());
+	_name.set_padding (2, 2);
+	
+	_active.set_active (_processor->active ());
+	_active.signal_toggled().connect (mem_fun (*this, &ProcessorEntry::active_toggled));
+	
+	_processor->ActiveChanged.connect (mem_fun (*this, &ProcessorEntry::processor_active_changed));
+	_processor->NameChanged.connect (mem_fun (*this, &ProcessorEntry::processor_name_changed));
+}
+
+EventBox&
+ProcessorEntry::action_widget ()
+{
+	return _event_box;
+}
+
+Gtk::Widget&
+ProcessorEntry::widget ()
+{
+	return _vbox;
+}
+
+string
+ProcessorEntry::drag_text () const
+{
+	return name ();
+}
+
+boost::shared_ptr<Processor>
+ProcessorEntry::processor () const
+{
+	return _processor;
+}
+
+void
+ProcessorEntry::set_width (Width w)
+{
+	_width = w;
+}
+
+void
+ProcessorEntry::active_toggled ()
+{
+	if (_active.get_active ()) {
+		if (!_processor->active ()) {
+			_processor->activate ();
+		}
+	} else {
+		if (_processor->active ()) {
+			_processor->deactivate ();
+		}
+	}
+}
+
+void
+ProcessorEntry::processor_active_changed ()
+{
+	if (_active.get_active () != _processor->active ()) {
+		_active.set_active (_processor->active ());
+	}
+}
+
+void
+ProcessorEntry::processor_name_changed ()
+{
+	_name.set_text (name ());
+}
+
+string
+ProcessorEntry::name () const
+{
+	boost::shared_ptr<Send> send;
+	string name_display;
+	
+	if (!_processor->active()) {
+		name_display = " (";
+	}
+	
+	if ((send = boost::dynamic_pointer_cast<Send> (_processor)) != 0 &&
+	    !boost::dynamic_pointer_cast<InternalSend>(_processor)) {
+		
+		name_display += '>';
+		
+		/* grab the send name out of its overall name */
+		
+		string::size_type lbracket, rbracket;
+		lbracket = send->name().find ('[');
+		rbracket = send->name().find (']');
+		
+		switch (_width) {
+		case Wide:
+			name_display += send->name().substr (lbracket+1, lbracket-rbracket-1);
+			break;
+		case Narrow:
+			name_display += PBD::short_version (send->name().substr (lbracket+1, lbracket-rbracket-1), 4);
+			break;
+		}
+		
+	} else {
+		
+		switch (_width) {
+		case Wide:
+			name_display += _processor->display_name();
+			break;
+		case Narrow:
+			name_display += PBD::short_version (_processor->display_name(), 5);
+			break;
+		}
+		
+	}
+	
+	if (!_processor->active()) {
+		name_display += ')';
+	}
+	
+	return name_display;
+}
+
+SendProcessorEntry::SendProcessorEntry (boost::shared_ptr<Send> s, Width w)
+	: ProcessorEntry (s, w),
+	  _send (s),
+	  _adjustment (0, 0, 1, 0.01, 0.1),
+	  _fader (_slider, &_adjustment, false),
+	  _ignore_gain_change (false)
+{
+	_fader.set_controllable (_send->amp()->gain_control ());
+	_vbox.pack_start (_fader);
+
+	_adjustment.signal_value_changed().connect (mem_fun (*this, &SendProcessorEntry::gain_adjusted));
+	_send->amp()->gain_control()->Changed.connect (mem_fun (*this, &SendProcessorEntry::show_gain));
+	show_gain ();
+}
+
+void
+SendProcessorEntry::setup_slider_pix ()
+{
+	_slider = ::get_icon ("fader_belt_h_thin");
+	assert (_slider);
+}
+
+void
+SendProcessorEntry::show_gain ()
+{
+	ENSURE_GUI_THREAD (mem_fun (*this, &SendProcessorEntry::show_gain));
+	
+	float const value = gain_to_slider_position (_send->amp()->gain ());
+
+	if (_adjustment.get_value() != value) {
+		_ignore_gain_change = true;
+		_adjustment.set_value (value);
+		_ignore_gain_change = false;
+	}
+}
+
+void
+SendProcessorEntry::gain_adjusted ()
+{
+	if (_ignore_gain_change) {
+		return;
+	}
+
+	_send->amp()->set_gain (slider_position_to_gain (_adjustment.get_value()), this);
+}
+
+
 
 ProcessorBox::ProcessorBox (ARDOUR::Session& sess, sigc::slot<PluginSelector*> get_plugin_selector,
 			RouteRedirectSelection& rsel, MixerStrip* parent, bool owner_is_mixer)
@@ -102,57 +275,19 @@ ProcessorBox::ProcessorBox (ARDOUR::Session& sess, sigc::slot<PluginSelector*> g
 	, _placement(PreFader)
 	, _rr_selection(rsel)
 {
-	if (get_colors) {
-		active_processor_color = new Gdk::Color;
-		inactive_processor_color = new Gdk::Color;
-		set_color (*active_processor_color, rgba_from_style (
-				"ProcessorSelector", 0xff, 0, 0, 0, "fg", Gtk::STATE_ACTIVE, false ));
-		set_color (*inactive_processor_color, rgba_from_style (
-				"ProcessorSelector", 0xff, 0, 0, 0, "fg", Gtk::STATE_NORMAL, false ));
-		get_colors = false;
-	}
-
 	_width = Wide;
 	processor_menu = 0;
 	send_action_menu = 0;
-	processor_drag_in_progress = false;
 	no_processor_redisplay = false;
-	ignore_delete = false;
-
-	model = ListStore::create(columns);
-
-	RefPtr<TreeSelection> selection = processor_display.get_selection();
-	selection->set_mode (Gtk::SELECTION_MULTIPLE);
-	selection->signal_changed().connect (mem_fun (*this, &ProcessorBox::selection_changed));
-
-	processor_display.set_data ("processorbox", this);
-	processor_display.set_model (model);
-	processor_display.append_column (X_("notshown"), columns.text);
-	processor_display.set_name ("ProcessorSelector");
-	processor_display.set_headers_visible (false);
-	processor_display.set_reorderable (true);
-	processor_display.set_size_request (-1, 40);
-	processor_display.get_column(0)->set_sizing(TREE_VIEW_COLUMN_FIXED);
-	processor_display.get_column(0)->set_fixed_width(48);
-	processor_display.add_object_drag (columns.processor.index(), "processors");
-	processor_display.set_enable_search (false);
-	processor_display.signal_drop.connect (mem_fun (*this, &ProcessorBox::object_drop));
-
-	TreeViewColumn* name_col = processor_display.get_column(0);
-	CellRendererText* renderer = dynamic_cast<CellRendererText*>(
-			processor_display.get_column_cell_renderer (0));
-	name_col->add_attribute(renderer->property_foreground_gdk(), columns.color);
 
 	processor_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-
-	model->signal_row_deleted().connect (mem_fun (*this, &ProcessorBox::row_deleted));
-
 	processor_scroller.add (processor_display);
-	processor_eventbox.add (processor_scroller);
+	pack_start (processor_scroller, true, true);
 
-	processor_scroller.set_size_request (-1, 40);
-
-	pack_start (processor_eventbox, true, true);
+	// processor_display.set_can_focus ();
+	processor_display.set_name ("ProcessorSelector");
+	processor_display.set_size_request (48, 40);
+	processor_display.set_data ("processorbox", this);
 
 	processor_display.signal_enter_notify_event().connect (mem_fun(*this, &ProcessorBox::enter_notify), false);
 	processor_display.signal_leave_notify_event().connect (mem_fun(*this, &ProcessorBox::leave_notify), false);
@@ -160,10 +295,12 @@ ProcessorBox::ProcessorBox (ARDOUR::Session& sess, sigc::slot<PluginSelector*> g
 	processor_display.signal_key_press_event().connect (mem_fun(*this, &ProcessorBox::processor_key_press_event));
 	processor_display.signal_key_release_event().connect (mem_fun(*this, &ProcessorBox::processor_key_release_event));
 
-	processor_display.signal_button_press_event().connect (
-		mem_fun(*this, &ProcessorBox::processor_button_press_event), false);
-	processor_display.signal_button_release_event().connect (
-		mem_fun(*this, &ProcessorBox::processor_button_release_event));
+	processor_display.ButtonPress.connect (mem_fun (*this, &ProcessorBox::processor_button_press_event));
+	processor_display.ButtonRelease.connect (mem_fun (*this, &ProcessorBox::processor_button_release_event));
+
+	processor_display.Reordered.connect (mem_fun (*this, &ProcessorBox::reordered));
+	processor_display.DropFromAnotherBox.connect (mem_fun (*this, &ProcessorBox::object_drop));
+	processor_display.SelectionChanged.connect (mem_fun (*this, &ProcessorBox::selection_changed));
 }
 
 ProcessorBox::~ProcessorBox ()
@@ -196,21 +333,18 @@ ProcessorBox::route_going_away ()
 	no_processor_redisplay = true;
 }
 
-
 void
-ProcessorBox::object_drop (const list<boost::shared_ptr<Processor> >& procs, Gtk::TreeView* source, int x, int y, Glib::RefPtr<Gdk::DragContext>& context)
+ProcessorBox::object_drop(DnDVBox<ProcessorEntry>* source, ProcessorEntry* position, Glib::RefPtr<Gdk::DragContext> const & context)
 {
-	TreeIter iter;
-	TreeModel::Path path;
-	TreeViewColumn* column;
-	int cellx;
-	int celly;
 	boost::shared_ptr<Processor> p;
+	if (position) {
+		p = position->processor ();
+	}
 
-	if (processor_display.get_path_at_pos (x, y, path, column, cellx, celly)) {
-		if ((iter = model->get_iter (path))) {
-			p = (*iter)[columns.processor];
-		}
+	list<ProcessorEntry*> children = source->selection ();
+	list<boost::shared_ptr<Processor> > procs;
+	for (list<ProcessorEntry*>::const_iterator i = children.begin(); i != children.end(); ++i) {
+		procs.push_back ((*i)->processor ());
 	}
 
 	for (list<boost::shared_ptr<Processor> >::const_iterator i = procs.begin(); i != procs.end(); ++i) {
@@ -221,7 +355,7 @@ ProcessorBox::object_drop (const list<boost::shared_ptr<Processor> >& procs, Gtk
 		delete &state;
 	}
 
-	/* since the treeview doesn't take care of this properly, we have to delete the originals
+	/* since the dndvbox doesn't take care of this properly, we have to delete the originals
 	   ourselves.
 	*/
 
@@ -232,8 +366,6 @@ ProcessorBox::object_drop (const list<boost::shared_ptr<Processor> >& procs, Gtk
 			other->delete_dragged_processors (procs);
 		}
 	}
-
-	context->drag_finish (true, (context->get_suggested_action() == Gdk::ACTION_MOVE), 0);
 }
 
 void
@@ -242,14 +374,19 @@ ProcessorBox::update()
 	redisplay_processors ();
 }
 
-
 void
 ProcessorBox::set_width (Width w)
 {
 	if (_width == w) {
 		return;
 	}
+	
 	_width = w;
+
+	list<ProcessorEntry*> children = processor_display.children ();
+	for (list<ProcessorEntry*>::iterator i = children.begin(); i != children.end(); ++i) {
+		(*i)->set_width (w);
+	}
 
 	redisplay_processors ();
 }
@@ -353,18 +490,6 @@ ProcessorBox::show_processor_menu (gint arg)
 	processor_menu->popup (1, arg);
 }
 
-void
-ProcessorBox::processor_drag_begin (GdkDragContext *)
-{
-	processor_drag_in_progress = true;
-}
-
-void
-ProcessorBox::processor_drag_end (GdkDragContext *)
-{
-	processor_drag_in_progress = false;
-}
-
 bool
 ProcessorBox::enter_notify (GdkEventCrossing*)
 {
@@ -406,18 +531,12 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 	if (targets.empty()) {
 
 		int x, y;
-		TreeIter iter;
-		TreeModel::Path path;
-		TreeViewColumn* column;
-		int cellx;
-		int celly;
-
 		processor_display.get_pointer (x, y);
 
-		if (processor_display.get_path_at_pos (x, y, path, column, cellx, celly)) {
-			if ((iter = model->get_iter (path))) {
-				targets.push_back ((*iter)[columns.processor]);
-			}
+		pair<ProcessorEntry *, int> const pointer = processor_display.get_child_at_position (x, y);
+
+		if (pointer.first) {
+			targets.push_back (pointer.first->processor ());
 		}
 	}
 
@@ -470,24 +589,15 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 }
 
 bool
-ProcessorBox::processor_button_press_event (GdkEventButton *ev)
+ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* child)
 {
-	TreeIter iter;
-	TreeModel::Path path;
-	TreeViewColumn* column;
-	int cellx;
-	int celly;
 	boost::shared_ptr<Processor> processor;
-	int ret = false;
-	bool selected = false;
-
-	if (processor_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
-		if ((iter = model->get_iter (path))) {
-			processor = (*iter)[columns.processor];
-			selected = processor_display.get_selection()->is_selected (iter);
-		}
-
+	if (child) {
+		processor = child->processor ();
 	}
+	
+	int ret = false;
+	bool selected = processor_display.selected (child);
 
 	if (processor && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS))) {
 
@@ -508,26 +618,18 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev)
 		_get_plugin_selector()->show_manager ();
 	}
 
-
 	return ret;
 }
 
 bool
-ProcessorBox::processor_button_release_event (GdkEventButton *ev)
+ProcessorBox::processor_button_release_event (GdkEventButton *ev, ProcessorEntry* child)
 {
-	TreeIter iter;
-	TreeModel::Path path;
-	TreeViewColumn* column;
-	int cellx;
-	int celly;
 	boost::shared_ptr<Processor> processor;
-	int ret = false;
-
-	if (processor_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
-		if ((iter = model->get_iter (path))) {
-			processor = (*iter)[columns.processor];
-		}
+	if (child) {
+		processor = child->processor ();
 	}
+	
+	int ret = false;
 
 	if (processor && Keyboard::is_delete_event (ev)) {
 
@@ -572,7 +674,7 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev)
 
 	}
 
-	return ret;
+	return false;
 }
 
 Menu *
@@ -589,20 +691,20 @@ ProcessorBox::build_processor_menu ()
 void
 ProcessorBox::selection_changed ()
 {
-	bool sensitive = (processor_display.get_selection()->count_selected_rows()) ? true : false;
+	bool sensitive = (processor_display.selection().empty()) ? false : true;
 	ActionManager::set_sensitive (ActionManager::plugin_selection_sensitive_actions, sensitive);
 }
 
 void
 ProcessorBox::select_all_processors ()
 {
-	processor_display.get_selection()->select_all();
+	processor_display.select_all ();
 }
 
 void
 ProcessorBox::deselect_all_processors ()
 {
-	processor_display.get_selection()->unselect_all();
+	processor_display.select_none ();
 }
 
 void
@@ -632,9 +734,6 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 			if (Profile->get_sae()) {
 				processor->activate ();
 			}
-			processor->ActiveChanged.connect (bind (
-					mem_fun (*this, &ProcessorBox::show_processor_active),
-					boost::weak_ptr<Processor>(processor)));
 		}
 	}
 }
@@ -685,9 +784,6 @@ void
 ProcessorBox::choose_insert ()
 {
 	boost::shared_ptr<Processor> processor (new PortInsert (_session, _route->mute_master()));
-	processor->ActiveChanged.connect (bind (mem_fun(*this, &ProcessorBox::show_processor_active),
-						boost::weak_ptr<Processor>(processor)));
-
 	_route->add_processor (processor, _placement);
 }
 
@@ -843,12 +939,7 @@ ProcessorBox::redisplay_processors ()
 		return;
 	}
 
-	ignore_delete = true;
-	model->clear ();
-	ignore_delete = false;
-
-	processor_active_connections.clear ();
-	processor_name_connections.clear ();
+	processor_display.clear ();
 
 	_route->foreach_processor (mem_fun (*this, &ProcessorBox::add_processor_to_display));
 
@@ -864,147 +955,43 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 		return;
 	}
 
-	Gtk::TreeModel::Row row = *(model->append());
-	row[columns.text] = processor_name (processor);
-	row[columns.processor] = processor;
-
-	show_processor_active (processor);
-
-	processor_active_connections.push_back (processor->ActiveChanged.connect (bind (
-			mem_fun(*this, &ProcessorBox::show_processor_active),
-			boost::weak_ptr<Processor>(processor))));
-	processor_name_connections.push_back (processor->NameChanged.connect (bind (
-			mem_fun(*this, &ProcessorBox::show_processor_name),
-			boost::weak_ptr<Processor>(processor))));
-}
-
-string
-ProcessorBox::processor_name (boost::weak_ptr<Processor> weak_processor)
-{
-	boost::shared_ptr<Processor> processor (weak_processor.lock());
-
-	if (!processor) {
-		return string();
-	}
-
-	boost::shared_ptr<Send> send;
-	string name_display;
-
-	if (!processor->active()) {
-		name_display = " (";
-	}
-
-	if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0 &&
-	    !boost::dynamic_pointer_cast<InternalSend>(processor)) {
-
-		name_display += '>';
-
-		/* grab the send name out of its overall name */
-
-		string::size_type lbracket, rbracket;
-		lbracket = send->name().find ('[');
-		rbracket = send->name().find (']');
-
-		switch (_width) {
-		case Wide:
-			name_display += send->name().substr (lbracket+1, lbracket-rbracket-1);
-			break;
-		case Narrow:
-			name_display += PBD::short_version (send->name().substr (lbracket+1, lbracket-rbracket-1), 4);
-			break;
-		}
-
+	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
+	if (send) {
+		processor_display.add_child (new SendProcessorEntry (send, _width));
 	} else {
-
-		switch (_width) {
-		case Wide:
-			name_display += processor->display_name();
-			break;
-		case Narrow:
-			name_display += PBD::short_version (processor->display_name(), 5);
-			break;
-		}
-
+		processor_display.add_child (new ProcessorEntry (processor, _width));
 	}
-
-	if (!processor->active()) {
-		name_display += ')';
-	}
-
-	return name_display;
 }
+
 
 void
 ProcessorBox::build_processor_tooltip (EventBox& box, string start)
 {
 	string tip(start);
 
-	Gtk::TreeModel::Children children = model->children();
-	for(Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
-  		Gtk::TreeModel::Row row = *iter;
+	list<ProcessorEntry*> children = processor_display.children ();
+	for (list<ProcessorEntry*>::iterator i = children.begin(); i != children.end(); ++i) {
 		tip += '\n';
-  		tip += row[columns.text];
+  		tip += (*i)->processor()->name();
 	}
+	
 	ARDOUR_UI::instance()->tooltips().set_tip (box, tip);
 }
 
 void
-ProcessorBox::show_processor_name (boost::weak_ptr<Processor> processor)
+ProcessorBox::reordered ()
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &ProcessorBox::show_processor_name), processor));
-	show_processor_active (processor);
-}
-
-void
-ProcessorBox::show_processor_active (boost::weak_ptr<Processor> weak_processor)
-{
-	boost::shared_ptr<Processor> processor (weak_processor.lock());
-
-	if (!processor) {
-		return;
-	}
-
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &ProcessorBox::show_processor_active), weak_processor));
-
-	Gtk::TreeModel::Children children = model->children();
-	Gtk::TreeModel::Children::iterator iter = children.begin();
-
-	while (iter != children.end()) {
-
-		boost::shared_ptr<Processor> r = (*iter)[columns.processor];
-
-		if (r == processor) {
-			(*iter)[columns.text] = processor_name (r);
-
-			if (processor->active()) {
-				(*iter)[columns.color] = *active_processor_color;
-			} else {
-				(*iter)[columns.color] = *inactive_processor_color;
-			}
-			break;
-		}
-
-		iter++;
-	}
-}
-
-void
-ProcessorBox::row_deleted (const Gtk::TreeModel::Path &)
-{
-	if (!ignore_delete) {
-		compute_processor_sort_keys ();
-	}
+	compute_processor_sort_keys ();
 }
 
 void
 ProcessorBox::compute_processor_sort_keys ()
 {
-	Gtk::TreeModel::Children children = model->children();
+	list<ProcessorEntry*> children = processor_display.children ();
 	Route::ProcessorList our_processors;
 
-	for (Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
-		boost::shared_ptr<Processor> p = (*iter)[columns.processor];
-		our_processors.push_back ((*iter)[columns.processor]);
+	for (list<ProcessorEntry*>::iterator iter = children.begin(); iter != children.end(); ++iter) {
+		our_processors.push_back ((*iter)->processor ());
 	}
 
 	if (_route->reorder_processors (our_processors)) {
@@ -1332,21 +1319,18 @@ ProcessorBox::deactivate_processor (boost::shared_ptr<Processor> r)
 void
 ProcessorBox::get_selected_processors (ProcSelection& processors)
 {
-    vector<Gtk::TreeModel::Path> pathlist = processor_display.get_selection()->get_selected_rows();
-
-    for (vector<Gtk::TreeModel::Path>::iterator iter = pathlist.begin(); iter != pathlist.end(); ++iter) {
-	    processors.push_back ((*(model->get_iter(*iter)))[columns.processor]);
-    }
+	list<ProcessorEntry*> selection = processor_display.selection ();
+	for (list<ProcessorEntry*>::iterator i = selection.begin(); i != selection.end(); ++i) {
+		processors.push_back ((*i)->processor ());
+	}
 }
 
 void
 ProcessorBox::for_selected_processors (void (ProcessorBox::*method)(boost::shared_ptr<Processor>))
 {
-    vector<Gtk::TreeModel::Path> pathlist = processor_display.get_selection()->get_selected_rows();
-
-	for (vector<Gtk::TreeModel::Path>::iterator iter = pathlist.begin(); iter != pathlist.end(); ++iter) {
-		boost::shared_ptr<Processor> processor = (*(model->get_iter(*iter)))[columns.processor];
-		(this->*method)(processor);
+	list<ProcessorEntry*> selection = processor_display.selection ();
+	for (list<ProcessorEntry*>::iterator i = selection.begin(); i != selection.end(); ++i) {
+		(this->*method) ((*i)->processor ());
 	}
 }
 
@@ -1575,11 +1559,6 @@ ProcessorBox::register_actions ()
 			sigc::ptr_fun (ProcessorBox::rb_deselect_all));
 
 	/* activation */
-	act = ActionManager::register_action (popup_act_grp, X_("activate"), _("Activate"),
-			sigc::ptr_fun (ProcessorBox::rb_activate));
-	ActionManager::plugin_selection_sensitive_actions.push_back(act);
-	act = ActionManager::register_action (popup_act_grp, X_("deactivate"), _("Deactivate"),
-			sigc::ptr_fun (ProcessorBox::rb_deactivate));
 	ActionManager::plugin_selection_sensitive_actions.push_back(act);
 	ActionManager::register_action (popup_act_grp, X_("activate_all"), _("Activate all"),
 			sigc::ptr_fun (ProcessorBox::rb_activate_all));
@@ -1741,25 +1720,6 @@ ProcessorBox::rb_deselect_all ()
 }
 
 void
-ProcessorBox::rb_activate ()
-{
-	if (_current_processor_box == 0) {
-		return;
-	}
-
-	_current_processor_box->for_selected_processors (&ProcessorBox::activate_processor);
-}
-
-void
-ProcessorBox::rb_deactivate ()
-{
-	if (_current_processor_box == 0) {
-		return;
-	}
-	_current_processor_box->for_selected_processors (&ProcessorBox::deactivate_processor);
-}
-
-void
 ProcessorBox::rb_activate_all ()
 {
 	if (_current_processor_box == 0) {
@@ -1797,12 +1757,11 @@ ProcessorBox::route_name_changed ()
 	boost::shared_ptr<PluginInsert> plugin_insert;
 	boost::shared_ptr<Send> send;
 
-	Gtk::TreeModel::Children children = model->children();
+	list<ProcessorEntry*> children = processor_display.children();
 
-	for (Gtk::TreeModel::Children::iterator iter = children.begin(); iter != children.end(); ++iter) {
-  		Gtk::TreeModel::Row row = *iter;
+	for (list<ProcessorEntry*>::iterator iter = children.begin(); iter != children.end(); ++iter) {
 
-  		processor= row[columns.processor];
+  		processor = (*iter)->processor ();
 
 		void* gui = processor->get_gui();
 

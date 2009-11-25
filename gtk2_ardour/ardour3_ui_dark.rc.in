@@ -1030,30 +1030,30 @@ style "inspector_track_list_display" = "track_list_display"
  	base[SELECTED] = { 0.3, 0.3, 0.4 }
 }
 
-style "redirect_list_display"
+style "processor_list_display"
 {
-	GtkTreeView::horizontal-separator = 0
-	GtkTreeView::vertical-separator = 0
+	# font_name = "@FONT_SMALL@"
+	# text[NORMAL] = { 0.80, 0.80, 0.80 }
+ 	# text[ACTIVE] = { 0.70, 0.70, 0.70 }
+ 	# text[INSENSITIVE] = { 0, 0, 0 }
+ 	# text[SELECTED] = { 0.9, 0.3, 0.3 }
+
+	# base[NORMAL] = { 0, 0, 0 }
+ 	# base[ACTIVE] = { 0, 0, 0 }
+ 	# base[INSENSITIVE] = { 0, 0, 0 }
+ 	# base[SELECTED] = { 0, 0, 0 }
+
+	# # these two are explicitly used by the cell renderer for the
+        # # text
+
+	# fg[NORMAL] = { 0.5, 0.5, 0.5 }  # used for inactive
+	# fg[ACTIVE] = { 1.0, 1.0, 1.0 }  # used for active
 
 	font_name = "@FONT_SMALL@"
-	text[NORMAL] = { 0.80, 0.80, 0.80 }
- 	text[ACTIVE] = { 0.70, 0.70, 0.70 }
- 	text[INSENSITIVE] = { 0, 0, 0 }
- 	text[SELECTED] = { 0.9, 0.3, 0.3 }
-
-	base[NORMAL] = { 0, 0, 0 }
- 	base[ACTIVE] = { 0, 0, 0 }
- 	base[INSENSITIVE] = { 0, 0, 0 }
- 	base[SELECTED] = { 0, 0, 0 }
-
-	# these two are explicitly used by the cell renderer for the
-        # text
-
-	fg[NORMAL] = { 0.5, 0.5, 0.5 }  # used for inactive
-	fg[ACTIVE] = { 1.0, 1.0, 1.0 }  # used for active
+	bg[NORMAL] = { 0, 0, 0 }
 }
 
-style "inspector_redirect_list_display" = "redirect_list_display"
+style "inspector_processor_list_display" = "processor_list_display"
 {
  	base[SELECTED] = { 0.3, 0.3, 0.3 }
 }
@@ -1523,8 +1523,6 @@ widget "*ParameterValueDisplay" style:highest "medium_bold_entry"
 widget "*PluginUIClickBox" style:highest "medium_bold_entry"
 widget "*PluginUIClickBox*" style:highest "medium_bold_entry"
 widget "*PluginSlider" style:highest "plugin_slider"
-widget "*RedirectSelector" style:highest "redirect_list_display"
-widget "*RedirectSelector.*" style:highest "redirect_list_display"
 widget "*EditGroupDisplay" style:highest "treeview_display"
 widget "*TrackListDisplay" style:highest "treeview_display"
 widget "*RegionListDisplay" style:highest "treeview_display"
@@ -1588,8 +1586,8 @@ widget "*ConnectionEditorNotebook" style:highest "io_selector_notebook"
 widget "*ConnectionEditorNotebookTab" style:highest "io_selector_notebook"
 widget "*ConnectionEditorFrame" style:highest "base_frame"
 widget "*RouteParamsListDisplay" style:highest "inspector_track_list_display"
-widget "*RouteParamsPreListDisplay" style:highest "inspector_redirect_list_display"
-widget "*RouteParamsPostListDisplay" style:highest "inspector_redirect_list_display"
+widget "*RouteParamsPreListDisplay" style:highest "inspector_processor_list_display"
+widget "*RouteParamsPostListDisplay" style:highest "inspector_processor_list_display"
 widget "*TearOffArrow" style:highest "tearoff_arrow"
 widget "*RouteParamsTitleButton" style:highest "medium_text"
 widget "*RouteParamsTitleLabel" style:highest "medium_text"
@@ -1668,3 +1666,4 @@ widget "*EditorHScrollbar" style:highest "editor_hscrollbar"
 widget "*OddPortGroups" style:highest "odd_port_groups"
 widget "*EvenPortGroups" style:highest "even_port_groups"
 widget "*MidiListView*" style:highest "white_tree_view"
+widget "*ProcessorSelector*" style:highest "processor_list_display"

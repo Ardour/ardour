@@ -22,6 +22,7 @@
 #include "libardour-config.h"
 #endif
 
+#include "pbd/boost_debug.h"
 #include "pbd/error.h"
 #include "pbd/convert.h"
 #include "pbd/pthread_utils.h"
@@ -122,7 +123,9 @@ SourceFactory::setup_peakfile (boost::shared_ptr<Source> s, bool async)
 boost::shared_ptr<Source>
 SourceFactory::createSilent (Session& s, const XMLNode& node, nframes_t nframes, float sr)
 {
-	boost::shared_ptr<Source> ret (new SilentFileSource (s, node, nframes, sr));
+	Source* src = new SilentFileSource (s, node, nframes, sr);
+	// boost_debug_shared_ptr_mark_interesting (src, typeid(src).name());
+	boost::shared_ptr<Source> ret (src);
 	// no analysis data - the file is non-existent
 	SourceCreated (ret);
 	return ret;
@@ -142,7 +145,9 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 
 		try {
 
-			boost::shared_ptr<Source> ret (new SndFileSource (s, node));
+			Source* src = new SndFileSource (s, node);
+			// boost_debug_shared_ptr_mark_interesting (src, typeid(src).name());
+			boost::shared_ptr<Source> ret (src);
 			if (setup_peakfile (ret, defer_peaks)) {
 				return boost::shared_ptr<Source>();
 			}
@@ -157,7 +162,9 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 
 			/* this is allowed to throw */
 
-			boost::shared_ptr<Source> ret (new CoreAudioSource (s, node));
+			Source *s = new CoreAudioSource (s, node);
+			// boost_debug_shared_ptr_mark_interesting (src, typeid(src).name());
+			boost::shared_ptr<Source> ret (src);
 
 			if (setup_peakfile (ret, defer_peaks)) {
 				return boost::shared_ptr<Source>();
@@ -172,7 +179,9 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 		}
 
 	} else if (type == DataType::MIDI) {
-		boost::shared_ptr<Source> ret (new SMFSource (s, node));
+		Source* src = new SMFSource (s, node);
+		// boost_debug_shared_ptr_mark_interesting (src, typeid(src).name());
+		boost::shared_ptr<Source> ret (src);
 		ret->check_for_analysis_data_on_disk ();
 		SourceCreated (ret);
 		return ret;
@@ -191,8 +200,10 @@ SourceFactory::createReadable (DataType type, Session& s, const string& path, bo
 
 			try {
 
-				boost::shared_ptr<Source> ret (new SndFileSource (s, path, embedded, chn, flags));
-
+				Source* src = new SndFileSource (s, path, embedded, chn, flags);
+				// boost_debug_shared_ptr_mark_interesting (src, typeid(src).name());
+				boost::shared_ptr<Source> ret (src);
+				
 				if (setup_peakfile (ret, defer_peaks)) {
 					return boost::shared_ptr<Source>();
 				}
@@ -207,7 +218,9 @@ SourceFactory::createReadable (DataType type, Session& s, const string& path, bo
 			catch (failed_constructor& err) {
 #ifdef USE_COREAUDIO_FOR_FILES
 
-				boost::shared_ptr<Source> ret (new CoreAudioSource (s, path, embedded, chn, flags));
+				Source* src = new CoreAudioSource (s, path, embedded, chn, flags);
+				// boost_debug_shared_ptr_mark_interesting (src, typeid(src).name());
+				boost::shared_ptr<Source> ret (src);
 				if (setup_peakfile (ret, defer_peaks)) {
 					return boost::shared_ptr<Source>();
 				}
@@ -227,8 +240,10 @@ SourceFactory::createReadable (DataType type, Session& s, const string& path, bo
 		}
 
 	} else if (type == DataType::MIDI) {
-
-		boost::shared_ptr<Source> ret (new SMFSource (s, path, embedded, SMFSource::Flag(0)));
+		
+		Source* src = new SMFSource (s, path, embedded, SMFSource::Flag(0));
+		// boost_debug_shared_ptr_mark_interesting (src, typeid(src).name());
+		boost::shared_ptr<Source> ret (src);
 
 		if (announce) {
 			SourceCreated (ret);
@@ -248,13 +263,15 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 	/* this might throw failed_constructor(), which is OK */
 
 	if (type == DataType::AUDIO) {
-		boost::shared_ptr<Source> ret (new SndFileSource (s, path, embedded,
+		Source* src = new SndFileSource (s, path, embedded,
 				s.config.get_native_file_data_format(),
 				s.config.get_native_file_header_format(),
 				rate,
 				(destructive
 					? Source::Flag (SndFileSource::default_writable_flags | Source::Destructive)
-					: SndFileSource::default_writable_flags)));
+				 : SndFileSource::default_writable_flags));
+		// boost_debug_shared_ptr_mark_interesting (src, typeid(src).name());
+		boost::shared_ptr<Source> ret (src);
 
 		if (setup_peakfile (ret, defer_peaks)) {
 			return boost::shared_ptr<Source>();
@@ -269,7 +286,9 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 
 	} else if (type == DataType::MIDI) {
 
-		boost::shared_ptr<Source> ret (new SMFSource (s, path, embedded, Source::Flag(0)));
+		Source* src = new SMFSource (s, path, embedded, Source::Flag(0));
+		// boost_debug_shared_ptr_mark_interesting (src, typeid(src).name());
+		boost::shared_ptr<Source> ret (src);
 
 		// no analysis data - this is a new file
 

@@ -163,6 +163,7 @@ Send::set_state (const XMLNode& node, int version)
 		_bitslot = _session.next_send_id();
 	} else {
 		sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
+		cerr << this << " scanned " << prop->value() << " to get " << _bitslot << endl;
 		_session.mark_send_id (_bitslot);
 	}
 

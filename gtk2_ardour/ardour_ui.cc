@@ -95,6 +95,7 @@ typedef uint64_t microseconds_t;
 #include "route_time_axis.h"
 #include "startup.h"
 #include "engine_dialog.h"
+#include "processor_box.h"
 
 #include "i18n.h"
 
@@ -262,6 +263,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 		GainMeter::setup_slider_pix ();
 		RouteTimeAxisView::setup_slider_pix ();
+		SendProcessorEntry::setup_slider_pix ();
 
 	} catch (failed_constructor& err) {
 		error << _("could not initialize Ardour.") << endmsg;
@@ -773,7 +775,8 @@ If you still wish to quit, please use the\n\n\
 			}
 		}
 
-		session->set_deletion_in_progress ();
+		// session->set_deletion_in_progress ();
+		delete session;
 	}
 
 	ArdourDialog::close_all_dialogs ();

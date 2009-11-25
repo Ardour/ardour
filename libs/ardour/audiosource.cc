@@ -276,6 +276,8 @@ nframes_t
 AudioSource::write (Sample *dst, nframes_t cnt)
 {
 	Glib::Mutex::Lock lm (_lock);
+	/* any write makes the fill not removable */
+	_flags = Flag (_flags & ~Removable);
 	return write_unlocked (dst, cnt);
 }
 

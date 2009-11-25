@@ -122,6 +122,8 @@ AudioDiskstream::init (Diskstream::Flag f)
 
 AudioDiskstream::~AudioDiskstream ()
 {
+	cerr << "AD going away\n";
+
 	notify_callbacks ();
 
 	{
@@ -1915,6 +1917,11 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 	/* do not remove destructive files even if they are empty */
 
 	chan->write_source->set_allow_remove_if_empty (!destructive());
+	
+	/* until we write, this file is considered removable */
+
+	chan->write_source->mark_for_remove ();
+	cerr << "New write source " << chan->write_source->path() << " flags " << enum_2_string (chan->write_source->flags()) << endl;
 
 	return 0;
 }

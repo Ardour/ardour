@@ -31,6 +31,7 @@
 #include "pbd/stacktrace.h"
 #include "pbd/enumwriter.h"
 
+#include "ardour/debug.h"
 #include "ardour/region.h"
 #include "ardour/playlist.h"
 #include "ardour/session.h"
@@ -340,6 +341,7 @@ Region::~Region ()
 {
 	notify_callbacks ();
 	GoingAway (); /* EMIT SIGNAL */
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("Region %1 deleted\n", _name));
 }
 
 void

@@ -23,6 +23,7 @@
 
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
+#include "pbd/boost_debug.h"
 
 #include "evoral/Curve.hpp"
 
@@ -83,8 +84,8 @@ AudioTrack::use_new_diskstream ()
 		dflags = AudioDiskstream::Flag(dflags | AudioDiskstream::NonLayered);
 	}
 
-
-	boost::shared_ptr<AudioDiskstream> ds (new AudioDiskstream (_session, name(), dflags));
+	AudioDiskstream* dsp (new AudioDiskstream (_session, name(), dflags));
+	boost::shared_ptr<AudioDiskstream> ds (dsp);
 
 	_session.add_diskstream (ds);
 

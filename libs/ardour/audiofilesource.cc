@@ -99,6 +99,7 @@ AudioFileSource::AudioFileSource (Session& s, const ustring& path, bool embedded
 	if (init (path, true)) {
 		throw failed_constructor ();
 	}
+	cerr << "AFS1 created, " << path << endl;
 }
 
 /** Constructor used for new internal-to-session files. */
@@ -113,6 +114,7 @@ AudioFileSource::AudioFileSource (Session& s, const ustring& path, bool embedded
 	if (init (path, false)) {
 		throw failed_constructor ();
 	}
+	cerr << "AFS2 created, " << path << endl;
 }
 
 /** Constructor used for existing internal-to-session files.  File must exist. */
@@ -128,11 +130,14 @@ AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exi
 	if (init (_name, must_exist)) {
 		throw failed_constructor ();
 	}
+	cerr << "AFS3 created, " << path() << endl;
 }
 
 AudioFileSource::~AudioFileSource ()
 {
+	cerr << "AFS " << _name << "  destructor, path = " << path() << endl;
 	if (removable()) {
+		cerr << "\tremoving file\n";
 		unlink (_path.c_str());
 		unlink (peakpath.c_str());
 	}

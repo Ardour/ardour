@@ -30,7 +30,8 @@
 #include <gtkmm2ext/dndtreeview.h>
 #include <gtkmm2ext/auto_spin.h>
 #include <gtkmm2ext/click_box.h>
-#include <gtkmm2ext/dndtreeview.h>
+#include <gtkmm2ext/dndvbox.h>
+#include <gtkmm2ext/pixfader.h>
 
 #include "pbd/stateful.h"
 
@@ -65,6 +66,55 @@ namespace ARDOUR {
 	class Send;
 	class Session;
 }
+
+class ProcessorEntry : public Gtkmm2ext::DnDVBoxChild, public sigc::trackable
+{
+public:
+	ProcessorEntry (boost::shared_ptr<ARDOUR::Processor>, Width);
+
+	Gtk::EventBox& action_widget ();
+	Gtk::Widget& widget ();
+	std::string drag_text () const;
+	boost::shared_ptr<ARDOUR::Processor> processor () const;
+	void set_width (Width);
+
+protected:
+	
+	Gtk::VBox _vbox;
+	
+private:
+
+	void active_toggled ();
+	void processor_active_changed ();
+	void processor_name_changed ();
+	std::string name () const;
+	
+	Gtk::EventBox _event_box;
+	Gtk::Label _name;
+	Gtk::HBox _hbox;
+	Gtk::CheckButton _active;
+	boost::shared_ptr<ARDOUR::Processor> _processor;
+	Width _width;
+};
+
+class SendProcessorEntry : public ProcessorEntry
+{
+public:
+	SendProcessorEntry (boost::shared_ptr<ARDOUR::Send>, Width);
+
+	static void setup_slider_pix ();
+
+private:
+	void show_gain ();
+	void gain_adjusted ();
+	
+	boost::shared_ptr<ARDOUR::Send> _send;
+	Gtk::Adjustment _adjustment;
+	Gtkmm2ext::HSliderController _fader;
+	bool _ignore_gain_change;
+	
+	static Glib::RefPtr<Gdk::Pixbuf> _slider;
+};
 
 class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 {
@@ -107,33 +157,14 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 
 	void route_going_away ();
 
-	struct ModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    ModelColumns () {
-		    add (text);
-		    add (processor);
-		    add (color);
-	    }
-	    Gtk::TreeModelColumn<std::string>       text;
-	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Processor> > processor;
-	    Gtk::TreeModelColumn<Gdk::Color>        color;
-	};
-
-	ModelColumns columns;
-	Glib::RefPtr<Gtk::ListStore> model;
-
 	void selection_changed ();
-
-	static bool get_colors;
-	static Gdk::Color* active_processor_color;
-	static Gdk::Color* inactive_processor_color;
 
 	Gtk::EventBox	       processor_eventbox;
 	Gtk::HBox              processor_hpacker;
-	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Processor> > processor_display;
+	Gtkmm2ext::DnDVBox<ProcessorEntry> processor_display;
 	Gtk::ScrolledWindow    processor_scroller;
 
-	void object_drop (const std::list<boost::shared_ptr<ARDOUR::Processor> >&, Gtk::TreeView*,
-			  int x, int y, Glib::RefPtr<Gdk::DragContext>& context);
+	void object_drop (Gtkmm2ext::DnDVBox<ProcessorEntry> *, ProcessorEntry *, Glib::RefPtr<Gdk::DragContext> const &);
 
 	Width _width;
 
@@ -160,31 +191,22 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	void use_plugins (const SelectedPlugins&);
 
 	bool no_processor_redisplay;
-	bool ignore_delete;
 
 	bool enter_notify (GdkEventCrossing *ev);
 	bool leave_notify (GdkEventCrossing *ev);
 	bool processor_key_press_event (GdkEventKey *);
 	bool processor_key_release_event (GdkEventKey *);
-	bool processor_button_press_event (GdkEventButton *);
-	bool processor_button_release_event (GdkEventButton *);
+	bool processor_button_press_event (GdkEventButton *, ProcessorEntry *);
+	bool processor_button_release_event (GdkEventButton *, ProcessorEntry *);
 	void redisplay_processors ();
 	void add_processor_to_display (boost::weak_ptr<ARDOUR::Processor>);
-	void row_deleted (const Gtk::TreeModel::Path& path);
-	void show_processor_active (boost::weak_ptr<ARDOUR::Processor>);
-	void show_processor_name (boost::weak_ptr<ARDOUR::Processor>);
-	std::string processor_name (boost::weak_ptr<ARDOUR::Processor>);
+	void reordered ();
 
 	void remove_processor_gui (boost::shared_ptr<ARDOUR::Processor>);
 
 	void processors_reordered (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&, int*);
 	void compute_processor_sort_keys ();
-	std::vector<sigc::connection> processor_active_connections;
-	std::vector<sigc::connection> processor_name_connections;
 
-	bool processor_drag_in_progress;
-	void processor_drag_begin (GdkDragContext*);
-	void processor_drag_end (GdkDragContext*);
 	void all_processors_active(bool state);
 	void all_plugins_active(bool state);
 	void ab_plugins ();
@@ -238,8 +260,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	static void rb_rename ();
 	static void rb_select_all ();
 	static void rb_deselect_all ();
-	static void rb_activate ();
-	static void rb_deactivate ();
 	static void rb_activate_all ();
 	static void rb_deactivate_all ();
 	static void rb_ab_plugins ();
