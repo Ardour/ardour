@@ -132,7 +132,9 @@ class PortGroupList : public sigc::trackable
 	void emit_changed ();
 	void emit_bundle_changed (ARDOUR::Bundle::Change);
 	boost::shared_ptr<ARDOUR::Bundle> make_bundle_from_ports (std::vector<std::string> const &, bool) const;
-	void maybe_add_processor_to_bundle (boost::weak_ptr<ARDOUR::Processor>, boost::shared_ptr<RouteBundle>, bool, std::set<boost::shared_ptr<ARDOUR::IO> > &);
+	void maybe_add_processor_to_list (
+		boost::weak_ptr<ARDOUR::Processor>, std::list<boost::shared_ptr<ARDOUR::Bundle> > *, bool, std::set<boost::shared_ptr<ARDOUR::IO> > &
+		);
 
 	ARDOUR::DataType _type;
 	mutable PortGroup::BundleList _bundles;
@@ -141,21 +143,6 @@ class PortGroupList : public sigc::trackable
 	bool _signals_suspended;
 	bool _pending_change;
 	ARDOUR::Bundle::Change _pending_bundle_change;
-};
-
-
-class RouteBundle : public ARDOUR::Bundle
-{
-public:
-	RouteBundle (boost::shared_ptr<ARDOUR::Bundle>);
-
-	void add_processor_bundle (boost::shared_ptr<ARDOUR::Bundle>);
-
-private:
-	void reread_component_bundles ();
-
-	boost::shared_ptr<ARDOUR::Bundle> _route;
-	std::vector<boost::shared_ptr<ARDOUR::Bundle> > _processor;
 };
 
 #endif /* __gtk_ardour_port_group_h__ */

@@ -205,7 +205,6 @@ class IO : public SessionObject, public Latent
 
 	void bundle_changed (Bundle::Change);
 
-
 	int get_port_counts (const XMLNode& node, int version, ChanCount& n, boost::shared_ptr<Bundle>& c);
 	int get_port_counts_2X (const XMLNode& node, int version, ChanCount& n, boost::shared_ptr<Bundle>& c);
 	int create_ports (const XMLNode&, int version);
@@ -219,7 +218,7 @@ class IO : public SessionObject, public Latent
 	std::string build_legal_port_name (DataType type);
 	int32_t find_port_hole (const char* base);
 
-	void setup_bundles ();
+	void setup_bundle ();
 	std::string bundle_channel_name (uint32_t, uint32_t) const;
 };
 

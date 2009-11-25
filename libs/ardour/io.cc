@@ -81,7 +81,7 @@ IO::IO (Session& s, const string& name, Direction dir, DataType default_type)
 {
 	_active = true;
 	pending_state_node = 0;
-	setup_bundles ();
+	setup_bundle ();
 }
 
 IO::IO (Session& s, const XMLNode& node, DataType dt)
@@ -93,7 +93,7 @@ IO::IO (Session& s, const XMLNode& node, DataType dt)
 	pending_state_node = 0;
 
 	set_state (node, Stateful::loading_state_version);
-	setup_bundles ();
+	setup_bundle ();
 }
 
 IO::~IO ()
@@ -260,7 +260,7 @@ IO::remove_port (Port* port, void* src)
 	}
 
 	if (change & ConfigurationChanged) {
-		setup_bundles ();
+		setup_bundle ();
 	}
 
 	if (change != NoChange) {
@@ -324,7 +324,7 @@ IO::add_port (string destination, void* src, DataType type)
 
 	// pan_changed (src); /* EMIT SIGNAL */
 	changed (ConfigurationChanged, src); /* EMIT SIGNAL */
-	setup_bundles ();
+	setup_bundle ();
 	_session.set_dirty ();
 
 	return 0;
@@ -439,7 +439,7 @@ IO::ensure_ports (ChanCount count, bool clear, bool lockit, void* src)
 
 	if (changed) {
 		this->changed (ConfigurationChanged, src); /* EMIT SIGNAL */
-		setup_bundles ();
+		setup_bundle ();
 		_session.set_dirty ();
 	}
 
@@ -1105,7 +1105,7 @@ IO::set_name (const string& requested_name)
 
 	bool const r = SessionObject::set_name (name);
 
-	setup_bundles ();
+	setup_bundle ();
 
 	return r;
 }
@@ -1322,11 +1322,11 @@ IO::midi(uint32_t n) const
 }
 
 /**
- *  Setup bundles that describe our inputs and outputs. Also creates bundles if necessary.
+ *  Setup a bundle that describe our inputs or outputs. Also creates the bundle if necessary.
  */
 
 void
-IO::setup_bundles ()
+IO::setup_bundle ()
 {
         char buf[32];
 

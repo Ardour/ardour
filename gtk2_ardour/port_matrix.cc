@@ -66,24 +66,21 @@ PortMatrix::PortMatrix (Window* parent, Session& session, DataType type)
 	_hbox.pack_start (_hnotebook);
 	_hbox.pack_start (_hlabel);
 
-	attach (*_body, 1, 2, 1, 2);
-	attach (_vscroll, 2, 3, 1, 2, SHRINK);
-	attach (_hscroll, 1, 2, 2, 3, FILL | EXPAND, SHRINK);
-	attach (_vbox, 0, 1, 1, 2, SHRINK);
-	attach (_hbox, 1, 2, 0, 1, FILL | EXPAND, SHRINK);
-
 	_vnotebook.signal_switch_page().connect (mem_fun (*this, &PortMatrix::v_page_selected));
+	_vnotebook.property_tab_border() = 4;
 	_hnotebook.signal_switch_page().connect (mem_fun (*this, &PortMatrix::h_page_selected));
+	_hnotebook.property_tab_border() = 4;
 
 	for (int i = 0; i < 2; ++i) {
 		_ports[i].set_type (type);
 	}
 
-	_vlabel.set_angle (90);
-	_hlabel.set_use_markup ();
 	_vlabel.set_use_markup ();
-	_hlabel.set_alignment (0, 0.5);
 	_vlabel.set_alignment (0.5, 0);
+	_vlabel.set_padding (4, 16);
+	_hlabel.set_use_markup ();
+	_hlabel.set_alignment (0, 0.5);
+	_hlabel.set_padding (16, 4);
 
 	show_all ();
 }
@@ -261,7 +258,17 @@ PortMatrix::select_arrangement ()
 		_arrangement = LEFT_TO_BOTTOM;
 		_vlabel.set_label (_("<b>Sources</b>"));
 		_hlabel.set_label (_("<b>Destinations</b>"));
+		_vlabel.set_angle (90);
 
+		attach (*_body, 1, 2, 0, 1);
+		attach (_vscroll, 2, 3, 0, 1, SHRINK);
+		attach (_hscroll, 1, 2, 2, 3, FILL | EXPAND, SHRINK);
+		attach (_vbox, 0, 1, 0, 1, SHRINK);
+		attach (_hbox, 1, 2, 1, 2, FILL | EXPAND, SHRINK);
+
+		set_col_spacing (0, 4);
+		set_row_spacing (0, 4);
+		
 	} else {
 
 		_row_index = 1;
@@ -269,6 +276,16 @@ PortMatrix::select_arrangement ()
 		_arrangement = TOP_TO_RIGHT;
 		_hlabel.set_label (_("<b>Sources</b>"));
 		_vlabel.set_label (_("<b>Destinations</b>"));
+		_vlabel.set_angle (-90);
+
+		attach (*_body, 0, 1, 1, 2);
+		attach (_vscroll, 2, 3, 1, 2, SHRINK);
+		attach (_hscroll, 0, 1, 2, 3, FILL | EXPAND, SHRINK);
+		attach (_vbox, 1, 2, 1, 2, SHRINK);
+		attach (_hbox, 0, 1, 0, 1, FILL | EXPAND, SHRINK);
+
+		set_col_spacing (1, 4);
+		set_row_spacing (1, 4);
 	}
 }
 
@@ -581,6 +598,9 @@ void
 PortMatrix::setup_notebooks ()
 {
 	_in_setup_notebooks = true;
+
+	int const h_current_page = _hnotebook.get_current_page ();
+	int const v_current_page = _vnotebook.get_current_page ();
 	
 	remove_notebook_pages (_hnotebook);
 	remove_notebook_pages (_vnotebook);
@@ -589,7 +609,7 @@ PortMatrix::setup_notebooks ()
 		HBox* dummy = manage (new HBox);
 		dummy->show ();
 		Label* label = manage (new Label ((*i)->name));
-		label->set_angle (90);
+		label->set_angle (_arrangement == LEFT_TO_BOTTOM ? 90 : -90);
 		_vnotebook.prepend_page (*dummy, *label);
 	}
 
@@ -602,6 +622,14 @@ PortMatrix::setup_notebooks ()
 	_vnotebook.set_tab_pos (POS_LEFT);
 	_hnotebook.set_tab_pos (POS_TOP);
 
+	if (h_current_page != -1 && _hnotebook.get_n_pages() > h_current_page) {
+		_hnotebook.set_current_page (h_current_page);
+	}
+
+	if (v_current_page != -1 && _vnotebook.get_n_pages() > v_current_page) {
+		_vnotebook.set_current_page (v_current_page);
+	}
+	
 	_in_setup_notebooks = false;
 }
 

@@ -212,7 +212,9 @@ PortGroupList::set_type (DataType t)
 }
 
 void
-PortGroupList::maybe_add_processor_to_bundle (boost::weak_ptr<Processor> wp, boost::shared_ptr<RouteBundle> rb, bool inputs, set<boost::shared_ptr<IO> >& used_io)
+PortGroupList::maybe_add_processor_to_list (
+	boost::weak_ptr<Processor> wp, list<boost::shared_ptr<Bundle> >* route_bundles, bool inputs, set<boost::shared_ptr<IO> >& used_io
+	)
 {
 	boost::shared_ptr<Processor> p (wp.lock());
 
@@ -227,7 +229,7 @@ PortGroupList::maybe_add_processor_to_bundle (boost::weak_ptr<Processor> wp, boo
 		boost::shared_ptr<IO> io = inputs ? iop->input() : iop->output();
 
 		if (io && used_io.find (io) == used_io.end()) {
-			rb->add_processor_bundle (io->bundle ());
+			route_bundles->push_back (io->bundle ());
 			used_io.insert (io);
 		}
 	}
@@ -256,18 +258,21 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs, bool allow_dups)
 
 	for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 
-		/* keep track of IOs that we have taken bundles from, so that maybe_add_processor... below
-		   can avoid taking the same IO from both Route::output() and the main_outs Delivery */
+		list<boost::shared_ptr<Bundle> > route_bundles;
+
+		/* keep track of IOs that we have taken bundles from,
+		   so that we can avoid taking the same IO from both
+		   Route::output() and the main_outs Delivery */
 
 		set<boost::shared_ptr<IO> > used_io;
 		boost::shared_ptr<IO> io = inputs ? (*i)->input() : (*i)->output();
 		used_io.insert (io);
 
-		boost::shared_ptr<RouteBundle> rb (new RouteBundle (io->bundle()));
+		route_bundles.push_back (io->bundle ());
 
-		(*i)->foreach_processor (bind (mem_fun (*this, &PortGroupList::maybe_add_processor_to_bundle), rb, inputs, used_io));
+		(*i)->foreach_processor (bind (mem_fun (*this, &PortGroupList::maybe_add_processor_to_list), &route_bundles, inputs, used_io));
 
-		/* Work out which group to put this bundle in */
+		/* Work out which group to put these bundles in */
 		boost::shared_ptr<PortGroup> g;
 		if (_type == DataType::AUDIO) {
 
@@ -290,10 +295,12 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs, bool allow_dups)
 		if (g) {
 
 			TimeAxisView* tv = PublicEditor::instance().axis_view_from_route (i->get());
-			if (tv) {
-				g->add_bundle (rb, io, tv->color ());
-			} else {
-				g->add_bundle (rb, io);
+			for (list<boost::shared_ptr<Bundle> >::iterator i = route_bundles.begin(); i != route_bundles.end(); ++i) {
+				if (tv) {
+					g->add_bundle (*i, io, tv->color ());
+				} else {
+					g->add_bundle (*i, io);
+				}
 			}
 		}
 	}
@@ -608,46 +615,5 @@ PortGroupList::empty () const
 	}
 
 	return (i == _groups.end());
-}
-
-
-RouteBundle::RouteBundle (boost::shared_ptr<Bundle> r)
-	: _route (r)
-{
-	_route->Changed.connect (sigc::hide (sigc::mem_fun (*this, &RouteBundle::reread_component_bundles)));
-	reread_component_bundles ();
-}
-
-void
-RouteBundle::reread_component_bundles ()
-{
-	suspend_signals ();
-
-	remove_channels ();
-
-	set_name (_route->name());
-
-	for (uint32_t i = 0; i < _route->nchannels(); ++i) {
-		add_channel (_route->channel_name (i));
-		PortList const & pl = _route->channel_ports (i);
-		for (uint32_t j = 0; j < pl.size(); ++j) {
-			add_port_to_channel (i, pl[j]);
-		}
-	}
-
-	for (std::vector<boost::shared_ptr<Bundle> >::iterator i = _processor.begin(); i != _processor.end(); ++i) {
-		add_channels_from_bundle (*i);
-	}
-
-	resume_signals ();
-}
-
-void
-RouteBundle::add_processor_bundle (boost::shared_ptr<Bundle> p)
-{
-	p->Changed.connect (sigc::hide (sigc::mem_fun (*this, &RouteBundle::reread_component_bundles)));
-	_processor.push_back (p);
-
-	reread_component_bundles ();
 }
 
