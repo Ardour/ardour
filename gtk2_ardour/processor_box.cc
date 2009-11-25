@@ -284,7 +284,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session& sess, sigc::slot<PluginSelector*> g
 	processor_scroller.add (processor_display);
 	pack_start (processor_scroller, true, true);
 
-	// processor_display.set_can_focus ();
+	processor_display.set_can_focus ();
 	processor_display.set_name ("ProcessorSelector");
 	processor_display.set_size_request (48, 40);
 	processor_display.set_data ("processorbox", this);
