@@ -861,7 +861,7 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 	gain_display_box.pack_end (peak_display, true, true);
 	hbox.pack_end (*level_meter, true, true);
 
-	if (!r->is_hidden()) {
+	if (r && !r->is_hidden()) {
 		fader_vbox->pack_start (gain_automation_state_button, false, false, 0);
 	}
 
