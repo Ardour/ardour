@@ -54,7 +54,7 @@ class PluginInsert : public Processor
 	XMLNode& get_state(void);
 	int set_state(const XMLNode&, int version);
 
-	void run (BufferSet& in, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
+	void run (BufferSet& in, sframes_t start_frame, sframes_t end_frame, nframes_t nframes, bool);
 	void silence (nframes_t nframes);
 
 	void activate ();

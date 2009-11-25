@@ -71,7 +71,7 @@ InternalSend::send_to_going_away ()
 }
 
 void
-InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
+InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes, bool)
 {
 	if ((!_active && !_pending_active) || !target || !_send_to) {
 		_meter->reset ();
@@ -114,7 +114,7 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 	// so that we don't overwrite the main automation data for the route amp
 	// _amp->setup_gain_automation (start_frame, end_frame, nframes);
 
-	_amp->run (mixbufs, start_frame, end_frame, nframes);
+	_amp->run (mixbufs, start_frame, end_frame, nframes, true);
 
 	/* XXX NEED TO PAN */
 
@@ -124,7 +124,7 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 		if (_amp->gain_control()->get_value() == 0) {
 			_meter->reset();
 		} else {
-			_meter->run (mixbufs, start_frame, end_frame, nframes);
+			_meter->run (mixbufs, start_frame, end_frame, nframes, true);
 		}
 	}
 

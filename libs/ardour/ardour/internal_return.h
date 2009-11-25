@@ -40,7 +40,7 @@ class InternalReturn : public Return
 	XMLNode& get_state(void);
 	int set_state(const XMLNode&, int version);
 
-	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
+	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes, bool);
 	bool configure_io (ChanCount in, ChanCount out);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	void set_block_size (nframes_t);

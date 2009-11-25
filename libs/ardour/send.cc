@@ -87,7 +87,7 @@ Send::deactivate ()
 }
 
 void
-Send::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
+Send::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes, bool)
 {
 	if (_output->n_ports() == ChanCount::ZERO) {
 		_meter->reset ();
@@ -114,11 +114,11 @@ Send::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_
 	// Can't automate gain for sends or returns yet because we need different buffers
 	// so that we don't overwrite the main automation data for the route amp
 	// _amp->setup_gain_automation (start_frame, end_frame, nframes);
-	_amp->run (sendbufs, start_frame, end_frame, nframes);
+	_amp->run (sendbufs, start_frame, end_frame, nframes, true);
 
 	/* deliver to outputs */
 
-	Delivery::run (sendbufs, start_frame, end_frame, nframes);
+	Delivery::run (sendbufs, start_frame, end_frame, nframes, true);
 
 	/* consider metering */
 
@@ -126,7 +126,7 @@ Send::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_
 		if (_amp->gain_control()->get_value() == 0) {
 			_meter->reset();
 		} else {
-			_meter->run (*_output_buffers, start_frame, end_frame, nframes);
+			_meter->run (*_output_buffers, start_frame, end_frame, nframes, true);
 		}
 	}
 

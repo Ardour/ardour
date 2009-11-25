@@ -61,7 +61,7 @@ public:
 	bool configure_io (ChanCount in, ChanCount out);
 
 	/** Compute peaks */
-	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
+	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes, bool);
 
 	float peak_power (uint32_t n) {
 		if (n < _visible_peak_power.size()) {

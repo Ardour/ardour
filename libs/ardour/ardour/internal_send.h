@@ -40,7 +40,7 @@ class InternalSend : public Send
 	XMLNode& get_state(void);
 	int set_state(const XMLNode& node, int version);
 	
-	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
+	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes, bool);
 	bool feeds (boost::shared_ptr<Route> other) const;
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);

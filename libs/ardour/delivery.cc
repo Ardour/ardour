@@ -275,7 +275,7 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
+Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes, bool result_required)
 {
 	assert (_output);
 
@@ -318,7 +318,9 @@ Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nfra
 		*/
 
 		_output->silence (nframes);
-		Amp::apply_simple_gain (bufs, nframes, 0.0);
+		if (result_required) {
+			Amp::apply_simple_gain (bufs, nframes, 0.0);
+		}
 		goto out;
 
 	} else if (tgain != 1.0) {
@@ -332,6 +334,10 @@ Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nfra
 		// Use the panner to distribute audio to output port buffers
 
 		_panner->run (bufs, output_buffers(), start_frame, end_frame, nframes);
+
+		if (result_required) {
+			bufs.read_from (output_buffers (), nframes);
+		}
 
 	} else {
 		// Do a 1:1 copy of data to output ports

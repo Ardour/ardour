@@ -423,13 +423,15 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	if (rm.locked()) {
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+
 			if (bufs.count() != (*i)->input_streams()) {
 				cerr << _name << " bufs = " << bufs.count()
 				     << " input for " << (*i)->name() << " = " << (*i)->input_streams()
 				     << endl;
 			}
 			assert (bufs.count() == (*i)->input_streams());
-			(*i)->run (bufs, start_frame, end_frame, nframes);
+
+			(*i)->run (bufs, start_frame, end_frame, nframes, *i != _processors.back());
 			bufs.set_count (ChanCount::max(bufs.count(), (*i)->output_streams()));
 		}
 
