@@ -92,7 +92,6 @@ EditorRoutes::EditorRoutes (Editor* e)
 	Gtk::TreeViewColumn* mute_state_column = manage (new TreeViewColumn("M", *mute_col_renderer));
 
 	mute_state_column->add_attribute(mute_col_renderer->property_state(), _columns.mute_state);
-	mute_state_column->add_attribute(mute_col_renderer->property_visible(), _columns.is_track);
 
 	// Solo enable toggle
 	CellRendererPixbufMulti* solo_col_renderer = manage (new CellRendererPixbufMulti());
@@ -104,8 +103,6 @@ EditorRoutes::EditorRoutes (Editor* e)
 	Gtk::TreeViewColumn* solo_state_column = manage (new TreeViewColumn("S", *solo_col_renderer));
 
 	solo_state_column->add_attribute(solo_col_renderer->property_state(), _columns.solo_state);
-	solo_state_column->add_attribute(solo_col_renderer->property_visible(), _columns.is_track);
-
 	
 	_display.append_column (*rec_state_column);
 	_display.append_column (*mute_state_column);
@@ -157,6 +154,8 @@ EditorRoutes::connect_to_session (Session* s)
 	EditorComponent::connect_to_session (s);
 
 	initial_display ();
+
+	_session->SoloChanged.connect (mem_fun (*this, &EditorRoutes::solo_changed_so_update_mute));
 }
 
 void
@@ -184,8 +183,8 @@ EditorRoutes::on_tv_mute_enable_toggled (Glib::ustring const & path_string)
 	TimeAxisView *tv = row[_columns.tv];
 	AudioTimeAxisView *atv = dynamic_cast<AudioTimeAxisView*> (tv);
 
-	if (atv != 0 && atv->is_audio_track()){
-		atv->reversibly_apply_track_boolean ("mute-enable change", &Track::set_mute, !atv->track()->muted(), this);
+	if (atv != 0) {
+		atv->reversibly_apply_route_boolean ("mute-enable change", &Route::set_mute, !atv->route()->muted(), this);
 	}
 }
 
@@ -198,8 +197,8 @@ EditorRoutes::on_tv_solo_enable_toggled (Glib::ustring const & path_string)
 	TimeAxisView *tv = row[_columns.tv];
 	AudioTimeAxisView *atv = dynamic_cast<AudioTimeAxisView*> (tv);
 
-	if (atv != 0 && atv->is_audio_track()){
-		atv->reversibly_apply_track_boolean ("solo-enable change", &Track::set_solo, !atv->track()->soloed(), this);
+	if (atv != 0) {
+		atv->reversibly_apply_route_boolean ("solo-enable change", &Route::set_solo, !atv->route()->soloed(), this);
 	}
 }
 
@@ -354,9 +353,10 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		if ((*x)->is_track()) {
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> ((*x)->route());
 			t->diskstream()->RecordEnableChanged.connect (mem_fun (*this, &EditorRoutes::update_rec_display));
-			t->mute_changed.connect (mem_fun (*this, &EditorRoutes::update_mute_display));
-			t->solo_changed.connect (mem_fun (*this, &EditorRoutes::update_solo_display));
 		}
+
+		(*x)->route()->mute_changed.connect (mem_fun (*this, &EditorRoutes::update_mute_display));
+		(*x)->route()->solo_changed.connect (mem_fun (*this, &EditorRoutes::update_solo_display));
 	}
 
 	update_rec_display ();
@@ -911,15 +911,7 @@ EditorRoutes::update_mute_display (void* /*src*/)
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		boost::shared_ptr<Route> route = (*i)[_columns.route];
-
-		if (boost::dynamic_pointer_cast<Track>(route)) {
-
-			if (route->muted()){
-				(*i)[_columns.mute_state] = 1;
-			} else {
-				(*i)[_columns.mute_state] = 0;
-			}
-		}
+		(*i)[_columns.mute_state] = RouteUI::mute_visual_state (*_session, route) > 0 ? 1 : 0;
 	}
 }
 
@@ -931,15 +923,7 @@ EditorRoutes::update_solo_display (void* /*src*/)
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		boost::shared_ptr<Route> route = (*i)[_columns.route];
-
-		if (boost::dynamic_pointer_cast<Track>(route)) {
-
-			if (route->soloed()){
-				(*i)[_columns.solo_state] = 1;
-			} else {
-				(*i)[_columns.solo_state] = 0;
-			}
-		}
+		(*i)[_columns.solo_state] = RouteUI::solo_visual_state (route) > 0 ? 1 : 0;
 	}
 }
 
@@ -975,4 +959,12 @@ EditorRoutes::name_edit (Glib::ustring const & path, Glib::ustring const & new_t
 	if (route && route->name() != new_text) {
 		route->set_name (new_text);
 	}
+}
+
+void
+EditorRoutes::solo_changed_so_update_mute ()
+{
+	ENSURE_GUI_THREAD (mem_fun (*this, &EditorRoutes::solo_changed_so_update_mute));
+
+	update_mute_display (this);
 }

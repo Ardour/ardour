@@ -195,6 +195,9 @@ class RouteUI : public virtual AxisView
 	void save_as_template ();
 	void open_remote_control_id_dialog ();
 
+	static int solo_visual_state (boost::shared_ptr<ARDOUR::Route>);
+	static int mute_visual_state (ARDOUR::Session &, boost::shared_ptr<ARDOUR::Route>);
+
    protected:
  	std::vector<sigc::connection> connections;
 	bool self_destruct;

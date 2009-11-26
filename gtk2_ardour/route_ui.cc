@@ -658,11 +658,36 @@ RouteUI::listen_changed(void* /*src*/)
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_solo_display));
 }
 
+int
+RouteUI::solo_visual_state (boost::shared_ptr<Route> r)
+{
+	if (Config->get_solo_control_is_listen_control()) {
+
+		if (r->listening()) {
+			return 1;
+		} else {
+			return 0;
+		}
+
+	} else {
+
+		if (r->solo_isolated()) {
+			return 2;
+		} else if (r->soloed()) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+
+	return 0;
+}
+
 void
 RouteUI::update_solo_display ()
 {
 	bool x;
-
+	
 	if (Config->get_solo_control_is_listen_control()) {
 
 		if (solo_button->get_active() != (x = _route->listening())) {
@@ -671,29 +696,17 @@ RouteUI::update_solo_display ()
 			ignore_toggle = false;
 		}
 
-		if (x) {
-			solo_button->set_visual_state (1);
-		} else {
-			solo_button->set_visual_state (0);
-		}
-
-
 	} else {
 
-		if (solo_button->get_active() != (x = _route->soloed())){
+		if (solo_button->get_active() != (x = _route->soloed())) {
 			ignore_toggle = true;
 			solo_button->set_active (x);
 			ignore_toggle = false;
 		}
 
-		if (_route->solo_isolated()) {
-			solo_button->set_visual_state (2);
-		} else if (x) {
-			solo_button->set_visual_state (1);
-		} else {
-			solo_button->set_visual_state (0);
-		}
 	}
+
+	solo_button->set_visual_state (solo_visual_state (_route));
 }
 
 void
@@ -706,6 +719,36 @@ void
 RouteUI::mute_changed(void* /*src*/)
 {
 	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_mute_display));
+}
+
+int
+RouteUI::mute_visual_state (Session& s, boost::shared_ptr<Route> r)
+{
+	if (Config->get_show_solo_mutes()) {
+		
+		if (r->muted ()) {
+			/* full mute */
+			return 2;
+		} else if (s.soloing() && !r->soloed() && !r->solo_isolated()) {
+			/* mute-because-not-soloed */
+			return 1;
+		} else {
+			/* no mute at all */
+			return 0;
+		}
+
+	} else {
+
+		if (r->muted()) {
+			/* full mute */
+			return 2;
+		} else {
+			/* no mute at all */
+			return 0;
+		}
+	}
+
+	return 0;
 }
 
 void
@@ -724,29 +767,7 @@ RouteUI::update_mute_display ()
 		ignore_toggle = false;
 	}
 
-	/* now attend to visual state */
-
-	if (Config->get_show_solo_mutes()) {
-		if (_route->muted()) {
-			/* full mute */
-			mute_button->set_visual_state (2);
-		} else if (_session.soloing() && !_route->soloed() && !_route->solo_isolated()) {
-			/* mute-because-not-soloed */
-			mute_button->set_visual_state (1);
-		} else {
-			/* no mute at all */
-			mute_button->set_visual_state (0);
-		}
-	} else {
-		if (_route->muted()) {
-			/* full mute */
-			mute_button->set_visual_state (2);
-		} else {
-			/* no mute at all */
-			mute_button->set_visual_state (0);
-		}
-	}
-
+	mute_button->set_visual_state (mute_visual_state (_session, _route));
 }
 
 void
