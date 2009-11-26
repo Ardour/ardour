@@ -44,6 +44,7 @@ InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, boost:
 	set_name (sendto->name());
 
 	_send_to->GoingAway.connect (mem_fun (*this, &InternalSend::send_to_going_away));
+	_send_to->NameChanged.connect (mem_fun (*this, &InternalSend::send_to_name_changed));
 }
 
 InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node)
@@ -264,4 +265,10 @@ InternalSend::visible () const
 	}
 
 	return false;
+}
+
+void
+InternalSend::send_to_name_changed ()
+{
+	set_name (_send_to->name ());
 }

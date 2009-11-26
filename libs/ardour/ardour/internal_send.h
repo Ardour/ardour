@@ -56,6 +56,7 @@ class InternalSend : public Send
 	sigc::connection connect_c;
 
 	void send_to_going_away ();
+	void send_to_name_changed ();
 	int  connect_when_legal ();
 	int  set_our_state (XMLNode const &, int);
 };
