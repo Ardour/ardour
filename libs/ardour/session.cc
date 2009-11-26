@@ -3785,7 +3785,7 @@ Session::remove_processor (Processor* processor)
 	} else if ((send = dynamic_cast<Send *> (processor)) != 0) {
 		send_bitset[send->bit_slot()] = false;
 	} else if ((retrn = dynamic_cast<Return *> (processor)) != 0) {
-		return_bitset[send->bit_slot()] = false;
+		return_bitset[retrn->bit_slot()] = false;
 	}
 
 	set_dirty();
