@@ -1049,7 +1049,7 @@ style "processor_list_display"
 	# fg[NORMAL] = { 0.5, 0.5, 0.5 }  # used for inactive
 	# fg[ACTIVE] = { 1.0, 1.0, 1.0 }  # used for active
 
-	font_name = "@FONT_SMALL@"
+	font_name = "@FONT_SMALLER@"
 	bg[NORMAL] = { 0, 0, 0 }
 }
 

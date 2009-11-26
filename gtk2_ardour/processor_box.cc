@@ -286,7 +286,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session& sess, sigc::slot<PluginSelector*> g
 
 	processor_display.set_can_focus ();
 	processor_display.set_name ("ProcessorSelector");
-	processor_display.set_size_request (48, 40);
+	processor_display.set_size_request (48, -1);
 	processor_display.set_data ("processorbox", this);
 
 	processor_display.signal_enter_notify_event().connect (mem_fun(*this, &ProcessorBox::enter_notify), false);
