@@ -50,12 +50,6 @@ using namespace ARDOUR;
 void
 ARDOUR_UI::shutdown ()
 {
-	if (session) {
-		/* we're exiting cleanly, so remove any auto-save data */
-		session->remove_pending_capture_state ();
-		session = 0;
-	}
-
 	ui_config->save_state();
 }
 
@@ -124,6 +118,7 @@ ARDOUR_UI::toggle_editor_mixer_on_top ()
 	}
 }
 
+/** The main editor window has been closed */
 gint
 ARDOUR_UI::exit_on_main_window_close (GdkEventAny * /*ev*/)
 {

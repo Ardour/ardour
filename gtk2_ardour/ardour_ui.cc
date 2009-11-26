@@ -775,8 +775,15 @@ If you still wish to quit, please use the\n\n\
 			}
 		}
 
+		second_connection.disconnect ();
+		point_one_second_connection.disconnect ();
+		point_oh_five_second_connection.disconnect ();
+		point_zero_one_second_connection.disconnect();
+		
 		// session->set_deletion_in_progress ();
+		session->remove_pending_capture_state ();
 		delete session;
+		session = 0;
 	}
 
 	ArdourDialog::close_all_dialogs ();

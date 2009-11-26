@@ -163,8 +163,14 @@ Route::~Route ()
 {
 	Metering::disconnect (_meter_connection);
 
-	clear_processors (PreFader);
-	clear_processors (PostFader);
+	/* don't use clear_processors here, as it depends on the session which may
+	   be half-destroyed by now */
+
+	Glib::RWLock::WriterLock lm (_processor_lock);
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		(*i)->drop_references ();
+	}
+	_processors.clear ();
 }
 
 void
