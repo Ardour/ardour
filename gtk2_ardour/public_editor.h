@@ -351,6 +351,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual void show_verbose_canvas_cursor_with (const std::string& txt) = 0;
 	virtual void hide_verbose_canvas_cursor() = 0;
 
+	virtual void center_screen (nframes64_t) = 0;
+
 	/// Singleton instance, set up by Editor::Editor()
 
 	static PublicEditor* _instance;

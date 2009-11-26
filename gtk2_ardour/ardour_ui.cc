@@ -1383,13 +1383,12 @@ ARDOUR_UI::transport_goto_start ()
 	if (session) {
 		session->goto_start();
 
-
 		/* force displayed area in editor to start no matter
 		   what "follow playhead" setting is.
 		*/
 
 		if (editor) {
-			editor->reset_x_origin (session->current_start_frame());
+			editor->center_screen (session->current_start_frame ());
 		}
 	}
 }
@@ -1434,7 +1433,7 @@ ARDOUR_UI::transport_goto_wallclock ()
 		*/
 
 		if (editor) {
-			editor->reset_x_origin (frames - (editor->current_page_frames()/2));
+			editor->center_screen (frames);
 		}
 	}
 }
@@ -1443,7 +1442,7 @@ void
 ARDOUR_UI::transport_goto_end ()
 {
 	if (session) {
-		nframes_t frame = session->current_end_frame();
+		nframes_t const frame = session->current_end_frame();
 		session->request_locate (frame);
 
 		/* force displayed area in editor to start no matter
@@ -1451,7 +1450,7 @@ ARDOUR_UI::transport_goto_end ()
 		*/
 
 		if (editor) {
-			editor->reset_x_origin (frame);
+			editor->center_screen (frame);
 		}
 	}
 }

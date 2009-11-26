@@ -432,6 +432,8 @@ class Editor : public PublicEditor
 	void show_verbose_canvas_cursor_with (const std::string& txt);
 	void hide_verbose_canvas_cursor();
 
+	void center_screen (nframes64_t);
+
   protected:
 	void map_transport_state ();
 	void map_position_change (nframes64_t);
@@ -982,7 +984,6 @@ class Editor : public PublicEditor
 
 	sigc::connection scroll_connection;
 	nframes64_t last_update_frame;
-	void center_screen (nframes64_t);
 	void center_screen_internal (nframes64_t, float);
 
 	void update_current_screen ();
