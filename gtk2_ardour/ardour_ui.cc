@@ -117,10 +117,10 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	: Gtkmm2ext::UI (X_("Ardour"), argcp, argvp),
 
-	  primary_clock (X_("primary"), false, X_("TransportClockDisplay"), true, false, true),
-	  secondary_clock (X_("secondary"), false, X_("SecondaryClockDisplay"), true, false, true),
-	  preroll_clock (X_("preroll"), false, X_("PreRollClock"), true, true),
-	  postroll_clock (X_("postroll"), false, X_("PostRollClock"), true, true),
+	  primary_clock (X_("primary"), false, X_("TransportClockDisplay"), true, true, false, true),
+	  secondary_clock (X_("secondary"), false, X_("SecondaryClockDisplay"), true, true, false, true),
+	  preroll_clock (X_("preroll"), false, X_("PreRollClock"), true, false, true),
+	  postroll_clock (X_("postroll"), false, X_("PostRollClock"), true, false, true),
 
 	  /* preroll stuff */
 
@@ -129,7 +129,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	  /* big clock */
 
-	  big_clock (X_("bigclock"), false, "BigClockNonRecording", true, false, true),
+	  big_clock (X_("bigclock"), false, "BigClockNonRecording", true, true, false, true),
 
 	  /* transport */
 

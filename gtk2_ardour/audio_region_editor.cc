@@ -49,13 +49,13 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	  name_label (_("Name:")),
 	  audition_button (_("Play")),
 	  time_table (6, 2),
-	  position_clock (X_("regionposition"), true, X_("AudioRegionEditorClock"), true),
-	  end_clock (X_("regionend"), true, X_("AudioRegionEditorClock"), true),
-	  length_clock (X_("regionlength"), true, X_("AudioRegionEditorClock"), true, true),
-	  sync_offset_relative_clock (X_("regionsyncoffsetrelative"), true, X_("AudioRegionEditorClock"), true),
-	  sync_offset_absolute_clock (X_("regionsyncoffsetabsolute"), true, X_("AudioRegionEditorClock"), true),
+	  position_clock (X_("regionposition"), true, X_("AudioRegionEditorClock"), true, false),
+	  end_clock (X_("regionend"), true, X_("AudioRegionEditorClock"), true, false),
+	  length_clock (X_("regionlength"), true, X_("AudioRegionEditorClock"), true, false, true),
+	  sync_offset_relative_clock (X_("regionsyncoffsetrelative"), true, X_("AudioRegionEditorClock"), true, false),
+	  sync_offset_absolute_clock (X_("regionsyncoffsetabsolute"), true, X_("AudioRegionEditorClock"), true, false),
 	  /* XXX cannot file start yet */
-	  start_clock (X_("regionstart"), true, X_("AudioRegionEditorClock"), false),
+	  start_clock (X_("regionstart"), true, X_("AudioRegionEditorClock"), false, false),
 	  gain_adjustment(accurate_coefficient_to_dB(_region->scale_amplitude()), -40.0, +40.0, 0.1, 1.0, 0)	  
 
 {

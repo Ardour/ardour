@@ -63,11 +63,14 @@ const uint32_t AudioClock::field_length[(int) AudioClock::AudioFrames+1] = {
 	10   /* Audio Frame */
 };
 
-AudioClock::AudioClock (std::string clock_name, bool transient, std::string widget_name, bool allow_edit, bool duration, bool with_info)
+AudioClock::AudioClock (
+	std::string clock_name, bool transient, std::string widget_name, bool allow_edit, bool follows_playhead, bool duration, bool with_info
+	)
 	: _name (clock_name),
 	  is_transient (transient),
 	  is_duration (duration),
 	  editable (allow_edit),
+	  _follows_playhead (follows_playhead),
 	  colon1 (":"),
 	  colon2 (":"),
 	  colon3 (":"),
@@ -1957,7 +1960,7 @@ AudioClock::build_ops_menu ()
 	ops_items.push_back (MenuElem (_("Samples"), bind (mem_fun(*this, &AudioClock::set_mode), Frames)));
 	ops_items.push_back (MenuElem (_("Off"), bind (mem_fun(*this, &AudioClock::set_mode), Off)));
 
-	if (editable && !is_duration) {
+	if (editable && !is_duration && !_follows_playhead) {
 		ops_items.push_back (SeparatorElem());
 		ops_items.push_back (MenuElem (_("Set From Playhead"), mem_fun(*this, &AudioClock::set_from_playhead)));
 		ops_items.push_back (MenuElem (_("Locate to this time"), mem_fun(*this, &AudioClock::locate)));

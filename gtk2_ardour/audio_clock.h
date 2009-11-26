@@ -42,7 +42,7 @@ class AudioClock : public Gtk::HBox
 		Off
 	};
 
-	AudioClock (std::string clock_name, bool transient, std::string widget_name, bool editable, bool is_duration = false, bool with_info = false);
+	AudioClock (std::string, bool, std::string, bool, bool, bool duration = false, bool with_info = false);
 
 	Mode mode() const { return _mode; }
 
@@ -79,6 +79,8 @@ class AudioClock : public Gtk::HBox
 	bool              is_transient;
 	bool              is_duration;
 	bool              editable;
+	/** true if this clock follows the playhead, meaning that certain operations are redundant */
+	bool             _follows_playhead;
 
 	Gtk::Menu  *ops_menu;
 

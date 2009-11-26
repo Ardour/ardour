@@ -46,9 +46,9 @@ using namespace Gtkmm2ext;
 LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	: location(0), session(0),
 	  item_table (1, 6, false),
-	  start_clock (X_("locationstart"), true, X_("LocationEditRowClock"), true),
-	  end_clock (X_("locationend"), true, X_("LocationEditRowClock"), true),
-	  length_clock (X_("locationlength"), true, X_("LocationEditRowClock"), true, true),
+	  start_clock (X_("locationstart"), true, X_("LocationEditRowClock"), true, false),
+	  end_clock (X_("locationend"), true, X_("LocationEditRowClock"), true, false),
+	  length_clock (X_("locationlength"), true, X_("LocationEditRowClock"), true, false, true),
 	  cd_check_button (_("CD")),
 	  hide_check_button (_("Hide")),
 	  scms_check_button (_("SCMS")),

@@ -6245,7 +6245,7 @@ Editor::do_insert_time ()
 	Label time_label (_("Time to insert:"));
 	time_label.set_alignment (1, 0.5);
 	table.attach (time_label, 0, 1, 0, 1, FILL | EXPAND);
-	AudioClock clock ("insertTimeClock", true, X_("InsertTimeClock"), true, true, true);
+	AudioClock clock ("insertTimeClock", true, X_("InsertTimeClock"), true, false, true, true);
 	clock.set (0);
 	clock.set_session (session);
 	clock.set_bbt_reference (pos);

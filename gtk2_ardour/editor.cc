@@ -235,7 +235,7 @@ Editor::Editor ()
 
 	  /* tool bar related */
 
-	, zoom_range_clock (X_("zoomrange"), false, X_("ZoomRangeClock"), true, true)
+	, zoom_range_clock (X_("zoomrange"), false, X_("ZoomRangeClock"), true, false, true)
 
 	, toolbar_selection_clock_table (2,3)
 
@@ -250,7 +250,7 @@ Editor::Editor ()
 
 	  /* nudge */
 
-	, nudge_clock (X_("nudge"), false, X_("NudgeClock"), true, true)
+	, nudge_clock (X_("nudge"), false, X_("NudgeClock"), true, false, true)
 	, meters_running(false)
 	, _pending_locate_request (false)
 
