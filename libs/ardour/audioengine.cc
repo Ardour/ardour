@@ -1115,6 +1115,10 @@ AudioEngine::remove_all_ports ()
 
 		ps->clear ();
 	}
+
+	/* clear dead wood list too */
+
+	ports.flush ();
 }
 
 static void

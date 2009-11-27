@@ -99,6 +99,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using boost::shared_ptr;
+using boost::weak_ptr;
 
 bool Session::_disable_all_loaded_plugins = false;
 
@@ -378,6 +379,12 @@ Session::destroy ()
 	delete _silent_buffers;
 	delete _mix_buffers;
 
+	/* clear out any pending dead wood from RCU managed objects */
+
+	routes.flush ();
+	diskstreams.flush ();
+	_bundles.flush ();
+	
 	AudioDiskstream::free_working_buffers();
 
 	Route::SyncOrderKeys.clear();
@@ -493,9 +500,7 @@ Session::destroy ()
 
 	delete mmc;
 
-	for (vector<void*>::iterator x = debug_pointers.begin(); x != debug_pointers.end(); ++x) {
-		boost_debug_shared_ptr_show (cerr, *x);	
-	}
+	boost_debug_list_ptrs ();
 }
 
 void
@@ -1449,15 +1454,18 @@ trace_terminal (shared_ptr<Route> r1, shared_ptr<Route> rbase)
 
 	/* make a copy of the existing list of routes that feed r1 */
 
-	set<shared_ptr<Route> > existing = r1->fed_by;
+	set<weak_ptr<Route> > existing = r1->fed_by;
 
 	/* for each route that feeds r1, recurse, marking it as feeding
 	   rbase as well.
 	*/
 
-	for (set<shared_ptr<Route> >::iterator i = existing.begin(); i != existing.end(); ++i) {
-		r2 =* i;
-
+	for (set<weak_ptr<Route> >::iterator i = existing.begin(); i != existing.end(); ++i) {
+		if (!(r2 = (*i).lock ())) {
+			/* (*i) went away, ignore it */
+			continue;
+		}
+		
 		/* r2 is a route that feeds r1 which somehow feeds base. mark
 		   base as being fed by r2
 		*/
@@ -1468,7 +1476,7 @@ trace_terminal (shared_ptr<Route> r1, shared_ptr<Route> rbase)
 
 			/* 2nd level feedback loop detection. if r1 feeds or is fed by r2,
 			   stop here.
-			 */
+			*/
 
 			if ((r1->fed_by.find (r2) != r1->fed_by.end()) && (r2->fed_by.find (r1) != r2->fed_by.end())) {
 				continue;
@@ -1511,6 +1519,8 @@ Session::resort_routes_using (shared_ptr<RouteList> r)
 	RouteList::iterator i, j;
 
 	for (i = r->begin(); i != r->end(); ++i) {
+
+		cerr << "\n\n\n CLEAR FED BY for " << (*i)->name() << endl;
 
 		(*i)->fed_by.clear ();
 
