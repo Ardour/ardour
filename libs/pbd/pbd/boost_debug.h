@@ -24,6 +24,6 @@
 #include <ostream>
 
 void boost_debug_shared_ptr_mark_interesting (void* ptr, const char* type);
-void boost_debug_shared_ptr_show (std::ostream& str, void* ptr);
+void boost_debug_list_ptrs ();
 
 #endif /* __pbd_boost_debug_h__ */
