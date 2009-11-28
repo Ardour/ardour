@@ -202,21 +202,39 @@ void
 Port::recompute_total_latency () const
 {
 #ifdef HAVE_JACK_RECOMPUTE_LATENCY
-	jack_recompute_total_latency (_engine->jack (), _jack_port);
+	jack_client_t* jack = _engine->jack();
+
+	if (!jack) {
+		return;
+	}
+
+	jack_recompute_total_latency (jack, _jack_port);
 #endif
 }
 
 nframes_t
 Port::total_latency () const
 {
-	return jack_port_get_total_latency (_engine->jack (), _jack_port);
+	jack_client_t* jack = _engine->jack();
+
+	if (!jack) {
+		return 0;
+	}
+
+	return jack_port_get_total_latency (jack, _jack_port);
 }
 
 int
 Port::reestablish ()
 {
+	jack_client_t* jack = _engine->jack();
+
+	if (!jack) {
+		return -1;
+	}
+
 	cerr << "RE-REGISTER: " << _name.c_str() << endl;
-	_jack_port = jack_port_register (_engine->jack(), _name.c_str(), type().to_jack_type(), _flags, 0);
+	_jack_port = jack_port_register (jack, _name.c_str(), type().to_jack_type(), _flags, 0);
 
 	if (_jack_port == 0) {
 		PBD::error << string_compose (_("could not reregister %1"), _name) << endmsg;
