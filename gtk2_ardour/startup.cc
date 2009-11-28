@@ -418,12 +418,14 @@ ArdourStartup::setup_final_page ()
 void
 ArdourStartup::on_cancel ()
 {
+	_applying = false;
 	gtk_main_quit ();
 }
 
 void
 ArdourStartup::on_close ()
 {
+	_applying = false;
 	gtk_main_quit ();
 }
 
