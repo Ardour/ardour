@@ -494,7 +494,7 @@ Session::setup_midi_control ()
 void
 Session::spp_start (Parser &, nframes_t /*timestamp*/)
 {
-	if (Config->get_mmc_control() && (config.get_external_sync() && config.get_sync_source() != MTC)) {
+	if (Config->get_mmc_control() && (!config.get_external_sync() || config.get_sync_source() != JACK)) {
 		request_transport_speed (1.0);
 	}
 }
@@ -539,7 +539,7 @@ Session::midi_clock_stop (Parser& ignored, nframes_t timestamp)
 void
 Session::mmc_deferred_play (MIDI::MachineControl &/*mmc*/)
 {
-	if (Config->get_mmc_control() && (config.get_external_sync() && (config.get_sync_source() != MTC))) {
+	if (Config->get_mmc_control() && (!config.get_external_sync() || (config.get_sync_source() != JACK))) {
 		request_transport_speed (1.0);
 	}
 }

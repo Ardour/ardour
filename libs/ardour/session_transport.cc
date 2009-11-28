@@ -946,7 +946,9 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 
 	} else {
 
-		if (!get_record_enabled() && Config->get_stop_at_session_end() && _transport_frame >= current_end_frame()) {
+		/* if not recording, don't roll forward past end if told to stop there */
+
+		if (!get_record_enabled() && (speed > 0.0 && Config->get_stop_at_session_end() && _transport_frame >= current_end_frame())) {
 			return;
 		}
 
