@@ -77,8 +77,6 @@ PannerUI::PannerUI (Session& s)
 	//set_size_request_to_display_given_text (pan_automation_state_button, X_("O"), 2, 2);
 	//set_size_request_to_display_given_text (pan_automation_style_button, X_("0"), 2, 2);
 
-	pan_bar_packer.set_size_request (-1, 61);
-	panning_viewport.set_size_request (-1, 61);
 	panning_viewport.set_name (X_("BaseFrame"));
 
 	ARDOUR_UI::instance()->tooltips().set_tip (panning_link_button,
