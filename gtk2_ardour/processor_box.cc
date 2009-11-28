@@ -542,6 +542,12 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 
 
 	switch (ev->keyval) {
+	case GDK_a:
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+			processor_display.select_all ();
+		} 
+		break;
+
 	case GDK_c:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			copy_processors (targets);
