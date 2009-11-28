@@ -1560,12 +1560,6 @@ ProcessorBox::register_actions ()
 
 	/* activation */
 
-	act = ActionManager::register_action (popup_act_grp, X_("activate"), _("Activate"),
-			sigc::ptr_fun (ProcessorBox::rb_activate));
-	ActionManager::plugin_selection_sensitive_actions.push_back(act);
-	act = ActionManager::register_action (popup_act_grp, X_("deactivate"), _("Deactivate"),
-			sigc::ptr_fun (ProcessorBox::rb_deactivate));
-
 	ActionManager::plugin_selection_sensitive_actions.push_back(act);
 	ActionManager::register_action (popup_act_grp, X_("activate_all"), _("Activate all"),
 			sigc::ptr_fun (ProcessorBox::rb_activate_all));
@@ -1725,28 +1719,6 @@ ProcessorBox::rb_deselect_all ()
 
 	_current_processor_box->deselect_all_processors ();
 }
-
-
-void
-ProcessorBox::rb_activate ()
-{
-	if (_current_processor_box == 0) {
-		return;
-	}
-
-	_current_processor_box->for_selected_processors (&ProcessorBox::activate_processor);
-}
-
-void
-ProcessorBox::rb_deactivate ()
-{
-	if (_current_processor_box == 0) {
-		return;
-	}
-	_current_processor_box->for_selected_processors (&ProcessorBox::deactivate_processor);
-}
-
-
 
 void
 ProcessorBox::rb_activate_all ()

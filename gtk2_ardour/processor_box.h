@@ -261,8 +261,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	static void rb_select_all ();
 	static void rb_deselect_all ();
 	static void rb_activate_all ();
-	static void rb_deactivate ();
-	static void rb_activate ();
 	static void rb_deactivate_all ();
 	static void rb_ab_plugins ();
 	static void rb_edit ();
