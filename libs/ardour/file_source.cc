@@ -70,7 +70,7 @@ FileSource::FileSource (Session& session, const XMLNode& node, bool /*must_exist
 	, _file_is_new (false)
 {
 	_path = _name;
-	_is_embedded = (_path.find(PATH_SEP) != string::npos);
+	set_embedded_from_name();
 }
 
 bool
@@ -103,6 +103,12 @@ FileSource::init (const ustring& pathstr, bool must_exist)
 	return 0;
 }
 
+void
+FileSource::set_embedded_from_name ()
+{
+	_is_embedded = (_name.find(PATH_SEP) != string::npos);
+}
+
 int
 FileSource::set_state (const XMLNode& node, int /*version*/)
 {
@@ -114,7 +120,7 @@ FileSource::set_state (const XMLNode& node, int /*version*/)
 		_channel = 0;
 	}
 
-	_is_embedded = (_name.find(PATH_SEP) == string::npos);
+	set_embedded_from_name();
 
 	return 0;
 }

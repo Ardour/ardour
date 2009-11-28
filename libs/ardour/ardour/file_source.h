@@ -67,6 +67,8 @@ protected:
 
 	virtual int move_dependents_to_trash() { return 0; }
 
+	void set_embedded_from_name();
+
 	bool removable () const;
 
 	Glib::ustring _path;
