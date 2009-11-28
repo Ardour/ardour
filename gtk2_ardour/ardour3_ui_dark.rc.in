@@ -1051,6 +1051,8 @@ style "processor_list_display"
 
 	font_name = "@FONT_SMALLER@"
 	bg[NORMAL] = { 0, 0, 0 }
+	GtkCheckButton::indicator-size = 10
+	GtkCheckButton::indicator-spacing = 0
 }
 
 style "inspector_processor_list_display" = "processor_list_display"
