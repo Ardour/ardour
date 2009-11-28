@@ -339,9 +339,9 @@ Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 
 Region::~Region ()
 {
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("Region %1 destructor @ %2\n", _name, this));
 	notify_callbacks ();
 	GoingAway (); /* EMIT SIGNAL */
-	DEBUG_TRACE (DEBUG::Destruction, string_compose ("Region %1 deleted\n", _name));
 }
 
 void

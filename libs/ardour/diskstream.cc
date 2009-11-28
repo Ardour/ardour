@@ -129,9 +129,11 @@ Diskstream::init (Flag f)
 
 Diskstream::~Diskstream ()
 {
-	if (_playlist)
-		_playlist->release ();
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("Diskstream %1 deleted\n", _name));
+
+	if (_playlist) {
+		_playlist->release ();
+	}
 }
 
 void

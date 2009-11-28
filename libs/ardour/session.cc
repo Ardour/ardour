@@ -400,7 +400,7 @@ Session::destroy ()
 		i = tmp;
 	}
 
-	DEBUG_TRACE (DEBUG::Destruction, "delete playlists\n");
+	DEBUG_TRACE (DEBUG::Destruction, "delete used playlists\n");
 	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ) {
 		PlaylistList::iterator tmp;
 
@@ -409,11 +409,12 @@ Session::destroy ()
 
 		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for used playlist %1 ; pre-ref = %2\n", (*i)->name(), (*i).use_count()));
 		(*i)->drop_references ();
-		DEBUG_TRACE(DEBUG::Destruction, string_compose ("post-ref = %1\n", (*i).use_count()));
+		
 
 		i = tmp;
 	}
 
+	DEBUG_TRACE (DEBUG::Destruction, "delete unused playlists\n");
 	for (PlaylistList::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ) {
 		PlaylistList::iterator tmp;
 
@@ -422,7 +423,6 @@ Session::destroy ()
 
 		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for unused playlist %1 ; pre-ref = %2\n", (*i)->name(), (*i).use_count()));
 		(*i)->drop_references ();
-		DEBUG_TRACE(DEBUG::Destruction, string_compose ("post-ref = %2\n", (*i).use_count()));
 
 		i = tmp;
 	}
@@ -437,24 +437,28 @@ Session::destroy ()
 		tmp = i;
 		++tmp;
 		
-		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for region %1 ; pre-ref = %2\n", i->second->name(), i->second.use_count()));
+		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for region %1 (%2); pre-ref = %2\n", i->second->name(), i->second.get(), i->second.use_count()));
 		i->second->drop_references ();
-		DEBUG_TRACE(DEBUG::Destruction, string_compose ("\tpost-ref%2\n", i->second.use_count()));
-
+		DEBUG_TRACE(DEBUG::Destruction, string_compose ("region post ref = %1\n", i->second.use_count()));
 		i = tmp;
 	}
 
 	regions.clear ();
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete routes\n");
+	
+	/* reset these three references to special routes before we do the usual route delete thing */
+
+	auditioner.reset ();
+	_master_out.reset ();
+	_control_out.reset ();
+
 	{
 		RCUWriter<RouteList> writer (routes);
 		boost::shared_ptr<RouteList> r = writer.get_copy ();
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for route %1 ; pre-ref = %2\n", (*i)->name(), (*i).use_count()));
 			(*i)->drop_references ();
-			DEBUG_TRACE(DEBUG::Destruction, string_compose ("post-ref = %1\n", (*i).use_count()));
-			debug_pointers.push_back ((*i).get());
 		}
 		r->clear ();
 		/* writer goes out of scope and updates master */
@@ -468,7 +472,6 @@ Session::destroy ()
 		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 			DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for diskstream %1 ; pre-ref = %2\n", (*i)->name(), (*i).use_count()));
 			(*i)->drop_references ();
-			DEBUG_TRACE(DEBUG::Destruction, string_compose ("post-ref = %1\n", (*i).use_count()));
 		}
 		dsl->clear ();
 	}
@@ -483,13 +486,12 @@ Session::destroy ()
 
 		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for source %1 ; pre-ref = %2\n", i->second->path(), i->second.use_count()));
 		i->second->drop_references ();
-		DEBUG_TRACE(DEBUG::Destruction, string_compose ("\tpost-ref%1\n", i->second.use_count()));
 
 		i = tmp;
 	}
-	cerr << "Pre source clear, we have " << sources.size() << endl;
+
 	sources.clear ();
-	cerr << "Post source clear, we have " << sources.size() << endl;
+
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete route groups\n");
 	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
@@ -501,6 +503,8 @@ Session::destroy ()
 	delete mmc;
 
 	boost_debug_list_ptrs ();
+
+	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
 }
 
 void
@@ -1520,8 +1524,6 @@ Session::resort_routes_using (shared_ptr<RouteList> r)
 
 	for (i = r->begin(); i != r->end(); ++i) {
 
-		cerr << "\n\n\n CLEAR FED BY for " << (*i)->name() << endl;
-
 		(*i)->fed_by.clear ();
 
 		for (j = r->begin(); j != r->end(); ++j) {
@@ -1785,7 +1787,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 		try {
 			AudioTrack* at = new AudioTrack (*this, track_name, Route::Flag (0), mode);
-			boost_debug_shared_ptr_mark_interesting (at, typeid (at).name());
+			// boost_debug_shared_ptr_mark_interesting (at, typeid (at).name());
 			track = boost::shared_ptr<AudioTrack>(at);
 
 			if (track->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
@@ -3722,10 +3724,10 @@ void
 Session::graph_reordered ()
 {
 	/* don't do this stuff if we are setting up connections
-	   from a set_state() call or creating new tracks.
+	   from a set_state() call or creating new tracks. Ditto for deletion.
 	*/
 
-	if (_state_of_the_state & InitialConnecting) {
+	if (_state_of_the_state & (InitialConnecting|Deletion)) {
 		return;
 	}
 

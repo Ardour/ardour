@@ -32,6 +32,7 @@
 #include "pbd/xml++.h"
 #include "pbd/stacktrace.h"
 
+#include "ardour/debug.h"
 #include "ardour/playlist.h"
 #include "ardour/session.h"
 #include "ardour/region.h"
@@ -270,6 +271,7 @@ Playlist::init (bool hide)
 
 Playlist::~Playlist ()
 {
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("Playlist %1 destructor\n", _name));
 	{
 		RegionLock rl (this);
 

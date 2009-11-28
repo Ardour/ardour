@@ -142,6 +142,7 @@ boost_debug_shared_ptr_mark_interesting (void* ptr, const char* type)
 	Glib::Mutex::Lock guard (the_lock);
  	pair<void*,const char*> newpair (ptr, type);
 	interesting_pointers.insert (newpair);
+	// cerr << "Interesting object @ " << ptr << " of type " << type << endl;
 }
 
 void
@@ -168,12 +169,13 @@ boost_debug_shared_ptr_destructor (void const *sp, void const *obj, int use_coun
 
 	if (x != sptrs.end()) {
 		sptrs.erase (x);
+		// cerr << "Removed sp for " << obj << " @ " << sp << endl;
 	}
 }
+
 void
 boost_debug_shared_ptr_constructor (void const *sp, void const *obj, int use_count)
 {
-
 	if (is_interesting_object (obj)) {
 		Glib::Mutex::Lock guard (the_lock);
 		pair<void const*, SPDebug*> newpair;
@@ -182,6 +184,7 @@ boost_debug_shared_ptr_constructor (void const *sp, void const *obj, int use_cou
 		newpair.second = new SPDebug (new Backtrace());
 
 		sptrs.insert (newpair);
+		// cerr << "Stored constructor for " << obj << " @ " << sp << endl;
 	}
 }
 
@@ -189,10 +192,15 @@ void
 boost_debug_list_ptrs ()
 {
 	Glib::Mutex::Lock guard (the_lock);
-	for (PointerMap::iterator x = sptrs.begin(); x != sptrs.end(); ++x) {
-		cerr << "Shared ptr @ " << x->first << " history: "
-		     << *x->second
-		     << endl;
+
+	if (sptrs.empty()) {
+		cerr << "There are no dangling shared ptrs\n";
+	} else {
+		for (PointerMap::iterator x = sptrs.begin(); x != sptrs.end(); ++x) {
+			cerr << "Shared ptr @ " << x->first << " history: "
+			     << *x->second
+			     << endl;
+		}
 	}
 }
 

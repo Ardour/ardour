@@ -49,6 +49,7 @@
 #include "ardour/butler.h"
 #include "ardour/configuration.h"
 #include "ardour/cycle_timer.h"
+#include "ardour/debug.h"
 #include "ardour/io.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/region_factory.h"
@@ -122,7 +123,7 @@ AudioDiskstream::init (Diskstream::Flag f)
 
 AudioDiskstream::~AudioDiskstream ()
 {
-	cerr << "AD going away\n";
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("Audio Diskstream %1 destructor\n", _name));
 
 	notify_callbacks ();
 

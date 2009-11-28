@@ -24,6 +24,7 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
+#include "ardour/debug.h"
 #include "ardour/delivery.h"
 #include "ardour/diskstream.h"
 #include "ardour/io_processor.h"
@@ -62,6 +63,7 @@ Track::Track (Session& sess, const XMLNode& node, DataType default_type)
 
 Track::~Track ()
 {
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("track %1 destructor\n", _name));
 }
 
 void

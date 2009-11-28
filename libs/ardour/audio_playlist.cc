@@ -351,7 +351,7 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 	boost::shared_ptr<AudioRegion> top;
 	boost::shared_ptr<AudioRegion> bottom;
 	boost::shared_ptr<Crossfade>   xfade;
-	RegionList*  touched_regions;
+	RegionList*  touched_regions = 0;
 
 	if (in_set_state || in_partition) {
 		return;
@@ -400,6 +400,8 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 		}
 
 		OverlapType c = top->coverage (bottom->position(), bottom->last_frame());
+
+		delete touched_regions;
 
 		try {
 			switch (c) {
@@ -509,6 +511,8 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 		}
 
 	}
+
+	delete touched_regions;
 }
 
 void

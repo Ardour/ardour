@@ -161,6 +161,7 @@ Route::init ()
 
 Route::~Route ()
 {
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("route %1 destructor\n", _name));
 	Metering::disconnect (_meter_connection);
 
 	/* don't use clear_processors here, as it depends on the session which may
@@ -170,6 +171,7 @@ Route::~Route ()
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->drop_references ();
 	}
+
 	_processors.clear ();
 }
 
