@@ -258,8 +258,17 @@ private:
 					add_to_selection (child);
 				}
 				SelectionChanged (); /* EMIT SIGNAL */
+			} else {
+				/* XXX THIS NEEDS GENERALIZING FOR OS X */
+				if (ev->button == 1 && (ev->state & Gdk::CONTROL_MASK)) {
+					if (child && selected (child)) {
+						remove_from_selection (child);
+						SelectionChanged (); /* EMIT SIGNAL */
+					}
+				}
 			}
 		}
+
 
 		return ButtonPress (ev, child); /* EMIT SIGNAL */
 	}
@@ -290,6 +299,16 @@ private:
 	{
 		child->action_widget().set_state (Gtk::STATE_SELECTED);
 		_selection.push_back (child);
+	}
+		
+	
+	void remove_from_selection (T* child)
+	{
+		typename std::list<T*>::iterator x = find (_selection.begin(), _selection.end(), child);
+		if (x != _selection.end()) {
+			child->action_widget().set_state (Gtk::STATE_NORMAL);
+			_selection.erase (x);
+		}
 	}
 		
 	T* child_from_widget (Gtk::Widget const * w) const
