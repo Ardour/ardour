@@ -1014,6 +1014,10 @@ Route::add_processors (const ProcessorList& others, ProcessorList::iterator iter
 
 			_processors.insert (iter, *i);
 
+			if ((*i)->active()) {
+				(*i)->activate ();
+			}
+
 			if (configure_processors_unlocked (err)) {
 				++existing_end;
 				_processors.erase (existing_end, _processors.end());

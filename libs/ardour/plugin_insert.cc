@@ -89,6 +89,8 @@ PluginInsert::PluginInsert (Session& s, const XMLNode& node)
 		throw failed_constructor();
 	}
 
+	_pending_active = _active;
+
 	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
 		IO::PortCountChanged (max(input_streams(), output_streams()));
@@ -718,7 +720,6 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	}
 
 	if (prop->value() == X_("ladspa") || prop->value() == X_("Ladspa")) { /* handle old school sessions */
-		cout << "- LADSPA\n";
 		type = ARDOUR::LADSPA;
 	} else if (prop->value() == X_("lv2")) {
 		type = ARDOUR::LV2;
@@ -751,8 +752,6 @@ PluginInsert::set_state(const XMLNode& node, int version)
 			return -1;
 		}
 	}
-
-	cout << "- ID " << prop->value() << "\n";
 
 	boost::shared_ptr<Plugin> plugin;
 
