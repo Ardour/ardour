@@ -2271,16 +2271,8 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		playhead_cursor->set_position (pos);
 	} else {
 		playhead_cursor->set_position (0);
-
-		/* reset_x_origin() doesn't work right here, since the old
-		   position may be zero already, and it does nothing in such
-		   circumstances.
-		*/
-
-		leftmost_frame = 0;
-		horizontal_adjustment.set_value (0);
 	}
-
+	
 	if ((prop = node.property ("mixer-width"))) {
 		editor_mixer_strip_width = Width (string_2_enum (prop->value(), editor_mixer_strip_width));
 	}
@@ -2308,6 +2300,15 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	} else {
 		mouse_mode = MouseGain; /* lie, to force the mode switch */
 		set_mouse_mode (MouseObject, true);
+	}
+
+	if ((prop = node.property ("left-frame")) != 0){
+		nframes64_t pos;
+		if (sscanf (prop->value().c_str(), "%" PRId64, &pos) == 1) {
+			reset_x_origin (pos);
+			/* this hack prevents the initial call to update_current_screen() from doing re-centering on the playhead */
+			last_update_frame = pos;
+		}
 	}
 
 	if ((prop = node.property ("internal-edit"))) {
@@ -2457,6 +2458,8 @@ Editor::get_state ()
 
 	snprintf (buf, sizeof (buf), "%" PRIi64, playhead_cursor->current_frame);
 	node->add_property ("playhead", buf);
+	snprintf (buf, sizeof (buf), "%" PRIi64, leftmost_frame);
+	node->add_property ("left-frame", buf);
 
 	node->add_property ("show-waveforms-recording", _show_waveforms_recording ? "yes" : "no");
 	node->add_property ("show-measures", _show_measures ? "yes" : "no");
@@ -4305,7 +4308,7 @@ Editor::queue_visual_change (nframes64_t where)
 	   can reach.
 	*/
 
-	if (where > session->current_end_frame()) {
+	if (session && (where > session->current_end_frame())) {
 		horizontal_adjustment.set_upper ((where + current_page_frames()) / frames_per_unit);
 	}
 
@@ -4321,7 +4324,6 @@ Editor::queue_visual_change (double fpu)
 	pending_visual_change.frames_per_unit = fpu;
 
 	ensure_visual_change_idle_handler ();
-
 }
 
 void
@@ -4353,9 +4355,7 @@ Editor::idle_visual_changer ()
 	VisualChange::Type p = pending_visual_change.pending;
 	pending_visual_change.pending = (VisualChange::Type) 0;
 
-#ifdef FIX_THIS_FOR_V3
 	double last_time_origin = horizontal_adjustment.get_value();
-#endif
 
 	if (p & VisualChange::ZoomLevel) {
 		set_frames_per_unit (pending_visual_change.frames_per_unit);
@@ -4382,13 +4382,12 @@ Editor::idle_visual_changer ()
 
 	/* if we seek beyond the current end of the canvas, move the end */
 
-#ifdef FIX_THIS_FOR_V3
+
 	if (last_time_origin == horizontal_adjustment.get_value() ) {
 		/* changed signal not emitted */
 		update_fixed_rulers ();
 		redisplay_tempo (true);
 	}
-#endif
 
 	if (current_time_origin != pending_visual_change.time_origin) {
 		cef += current_page_frames() / 10; // Add a little extra so we can see the end marker
@@ -4401,7 +4400,7 @@ Editor::idle_visual_changer ()
 
 	_summary->set_overlays_dirty ();
 
-	//cerr << "Editor::idle_visual_changer () called ha v:l:u:ps:fpu = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << frames_per_unit << endl;//DEBUG
+	// cerr << "Editor::idle_visual_changer () called ha v:l:u:ps:fpu = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << frames_per_unit << endl;//DEBUG
 	pending_visual_change.idle_handler_id = -1;
 	return 0; /* this is always a one-shot call */
 }
