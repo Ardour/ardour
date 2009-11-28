@@ -126,6 +126,7 @@ private:
 	void add_region (boost::shared_ptr<ARDOUR::Region>);
 	void add_regions (std::vector<boost::weak_ptr<ARDOUR::Region> > & );
 	void region_hidden (boost::shared_ptr<ARDOUR::Region>);
+	void region_hidden_weak (boost::weak_ptr<ARDOUR::Region>);
 	void populate_row (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &);
 	void update_row (boost::shared_ptr<ARDOUR::Region>);
 	bool update_subrows (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &, int);

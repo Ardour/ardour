@@ -186,7 +186,7 @@ StreamView::add_region_view_weak (boost::weak_ptr<Region> r)
 void
 StreamView::add_region_view (boost::shared_ptr<Region> r)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::add_region_view), r));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::add_region_view_weak), boost::weak_ptr<Region>(r)));
 
 	add_region_view_internal (r, true);
 

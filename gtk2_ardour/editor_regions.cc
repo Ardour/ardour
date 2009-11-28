@@ -157,11 +157,22 @@ EditorRegions::handle_new_regions (vector<boost::weak_ptr<Region> >& v)
 }
 
 void
+EditorRegions::region_hidden_weak (boost::weak_ptr<Region> wr)
+{
+	boost::shared_ptr<Region> r (wr.lock());
+
+	if (r) {
+		region_hidden (r);
+	}
+}
+
+void
 EditorRegions::region_hidden (boost::shared_ptr<Region> r)
 {
 	ENSURE_GUI_THREAD(bind (mem_fun(*this, &EditorRegions::region_hidden), r));
 	redisplay ();
 }
+
 
 void
 EditorRegions::add_regions (vector<boost::weak_ptr<Region> >& regions)
