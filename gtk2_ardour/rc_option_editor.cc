@@ -1264,28 +1264,28 @@ RCOptionEditor::RCOptionEditor ()
 
 	midi_combos.push_back (new ComboOption<string> (
 				       "mtc-port-name",
-				       _("Receive MTC via"),
+				       _("Send/Receive MTC via"),
 				       mem_fun (*_rc_config, &RCConfiguration::get_mtc_port_name),
 				       mem_fun (*_rc_config, &RCConfiguration::set_mtc_port_name)
 				       ));
 
 	midi_combos.push_back (new ComboOption<string> (
 				       "midi-clock-port-name",
-				       _("Receive MIDI clock via"),
+				       _("Send/Receive MIDI clock via"),
 				       mem_fun (*_rc_config, &RCConfiguration::get_midi_clock_port_name),
 				       mem_fun (*_rc_config, &RCConfiguration::set_midi_clock_port_name)
 				       ));
 
 	midi_combos.push_back (new ComboOption<string> (
 				       "mmc-port-name",
-				       _("Receive MMC via"),
+				       _("Send/Receive MMC via"),
 				       mem_fun (*_rc_config, &RCConfiguration::get_mmc_port_name),
 				       mem_fun (*_rc_config, &RCConfiguration::set_mmc_port_name)
 				       ));
 
 	midi_combos.push_back (new ComboOption<string> (
 				       "midi-port-name",
-				       _("Receive MIDI parameter control via"),
+				       _("Send/Receive MIDI parameter control via"),
 				       mem_fun (*_rc_config, &RCConfiguration::get_midi_port_name),
 				       mem_fun (*_rc_config, &RCConfiguration::set_midi_port_name)
 				       ));
@@ -1295,6 +1295,31 @@ RCOptionEditor::RCOptionEditor ()
 	for (list<ComboOption<string>* >::iterator i = midi_combos.begin(); i != midi_combos.end(); ++i) {
 		add_option (_("MIDI control"), *i);
 	}
+
+	add_option (_("MIDI control"),
+		    new BoolOption (
+			    "mmc-control",
+			    _("Obey MIDI Machine Control commands"),
+			    mem_fun (*_rc_config, &RCConfiguration::get_mmc_control),
+			    mem_fun (*_rc_config, &RCConfiguration::set_mmc_control)
+			    ));
+
+
+	add_option (_("MIDI control"),
+		    new BoolOption (
+			    "send-mmc",
+			    _("Send MIDI Machine Control commands"),
+			    mem_fun (*_rc_config, &RCConfiguration::get_send_mmc),
+			    mem_fun (*_rc_config, &RCConfiguration::set_send_mmc)
+			    ));
+
+	add_option (_("MIDI control"),
+		    new BoolOption (
+			    "midi-feedback",
+			    _("Send MIDI control feedback"),
+			    mem_fun (*_rc_config, &RCConfiguration::get_midi_feedback),
+			    mem_fun (*_rc_config, &RCConfiguration::set_midi_feedback)
+			    ));
 
 	add_option (_("MIDI control"),
 	     new SpinOption<uint8_t> (
