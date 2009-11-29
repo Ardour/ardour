@@ -26,6 +26,7 @@
 #include "pbd/pthread_utils.h"
 
 #include "midi++/port.h"
+#include "ardour/debug.h"
 #include "ardour/slave.h"
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
@@ -135,6 +136,8 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 	}
 
 	session.timecode_to_sample (timecode, mtc_frame, true, false);
+
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC time now %1 = frame %2 (from full message ? %3)\n", timecode, mtc_frame, was_full));
 
 	if (was_full) {
 

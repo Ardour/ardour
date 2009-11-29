@@ -129,6 +129,8 @@ parse_debug_options (const char* str)
 			bits |= ARDOUR::DEBUG::Graph;
 		} else if (strncasecmp (p, "destruction", strlen (p)) == 0) {
 			bits |= ARDOUR::DEBUG::Destruction;
+		} else if (strncasecmp (p, "mtc", strlen (p)) == 0) {
+			bits |= ARDOUR::DEBUG::MTC;
 		}
 
 		p = strtok_r (0, ",", &sp);

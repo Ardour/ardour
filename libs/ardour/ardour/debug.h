@@ -43,7 +43,8 @@ namespace ARDOUR {
 			Latency = 0x20,
 			Processors = 0x40,
 			Graph = 0x80,
-			Destruction = 0x100
+			Destruction = 0x100,
+			MTC = 0x200
 		};
 	}
 
