@@ -19,6 +19,7 @@
 #ifndef __ardour_timecode_h__
 #define __ardour_timecode_h__
 
+#include <ostream>
 #include <inttypes.h>
 
 namespace Timecode {
@@ -51,6 +52,15 @@ struct Time {
 		subframes = 0;
 		rate = a_rate;
 	}
+
+        std::ostream& print (std::ostream& ostr) const {
+		if (negative) {
+			ostr << '-';
+		}
+		ostr << hours << ':' << minutes << ':' << seconds << ':' << frames << '.' << subframes << " @" << rate << (drop ? " drop" : " nondrop");
+		return ostr;
+	}
+
 };
 
 Wrap increment( Time& timecode, uint32_t );
@@ -66,5 +76,7 @@ void minutes_floor( Time& timecode );
 void hours_floor( Time& timecode );
 
 } // namespace Timecode
+
+std::ostream& operator<<(std::ostream& ostr, const Timecode::Time& t);
 
 #endif  // __ardour_timecode_h__

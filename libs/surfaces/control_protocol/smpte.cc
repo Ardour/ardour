@@ -426,3 +426,9 @@ hours_floor( Time& timecode )
 
 
 } // namespace Timecode
+
+std::ostream& 
+operator<<(std::ostream& ostr, const Timecode::Time& t) 
+{
+	return t.print (ostr);
+}
