@@ -219,7 +219,7 @@ EditorRoutes::build_menu ()
 	items.push_back (MenuElem (_("Hide All Audio Tracks"), mem_fun (*this, &EditorRoutes::hide_all_audiotracks)));
 	items.push_back (MenuElem (_("Show All Audio Busses"), mem_fun (*this, &EditorRoutes::show_all_audiobus)));
 	items.push_back (MenuElem (_("Hide All Audio Busses"), mem_fun (*this, &EditorRoutes::hide_all_audiobus)));
-
+	items.push_back (MenuElem (_("Show Tracks With Regions Under Playhead"), mem_fun (*this, &EditorRoutes::show_tracks_with_regions_at_playhead)));
 }
 
 void
@@ -967,4 +967,30 @@ EditorRoutes::solo_changed_so_update_mute ()
 	ENSURE_GUI_THREAD (mem_fun (*this, &EditorRoutes::solo_changed_so_update_mute));
 
 	update_mute_display (this);
+}
+
+void
+EditorRoutes::show_tracks_with_regions_at_playhead ()
+{
+	boost::shared_ptr<RouteList> const r = _session->get_routes_with_regions_at (_session->transport_frame ());
+
+	set<TimeAxisView*> show;
+	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
+		cout << "show " << (*i)->name() << "\n";
+		TimeAxisView* tav = _editor->axis_view_from_route (i->get ());
+		if (tav) {
+			show.insert (tav);
+		}
+	}
+
+	suspend_redisplay ();
+	
+	TreeModel::Children rows = _model->children ();
+	for (TreeModel::Children::iterator i = rows.begin(); i != rows.end(); ++i) {
+		TimeAxisView* tv = (*i)[_columns.tv];
+		(*i)[_columns.visible] = (show.find (tv) != show.end());
+	}
+
+	resume_redisplay ();
+	
 }

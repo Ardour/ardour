@@ -75,6 +75,7 @@ private:
 	void hide_all_audiotracks ();
 	void show_all_audiobus ();
 	void hide_all_audiobus ();
+	void show_tracks_with_regions_at_playhead ();
 	
 	void display_drag_data_received (
 		Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint

@@ -120,6 +120,8 @@ class Playlist : public SessionObject,
 	boost::shared_ptr<Region>  find_next_region (nframes_t frame, RegionPoint point, int dir);
 	nframes64_t                find_next_region_boundary (nframes64_t frame, int dir);
 	bool                       region_is_shuffle_constrained (boost::shared_ptr<Region>);
+	bool                       has_region_at (nframes64_t const) const;
+
 
 	nframes64_t find_next_transient (nframes64_t position, int dir);
 

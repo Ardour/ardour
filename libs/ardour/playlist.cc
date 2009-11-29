@@ -2521,3 +2521,17 @@ Playlist::set_explicit_relayering (bool e)
 
 	_explicit_relayering = e;
 }
+
+
+bool
+Playlist::has_region_at (nframes64_t const p) const
+{
+	RegionLock (const_cast<Playlist *> (this));
+	
+	RegionList::const_iterator i = regions.begin ();
+	while (i != regions.end() && !(*i)->covers (p)) {
+		++i;
+	}
+
+	return (i != regions.end());
+}
