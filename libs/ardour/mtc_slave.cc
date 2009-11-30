@@ -274,6 +274,7 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 	if (first_mtc_time == 0) {
 		speed = 0;
 		pos = last.position;
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("first call to MTC_Slave::speed_and_position, pos = %1\n", last.position));
 		return true;
 	}
 
