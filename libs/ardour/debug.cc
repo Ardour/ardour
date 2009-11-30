@@ -84,6 +84,10 @@ ARDOUR::parse_debug_options (const char* str)
 			bits |= ARDOUR::DEBUG::MTC;
 		} else if (strncasecmp (p, "transport", strlen (p)) == 0) {
 			bits |= ARDOUR::DEBUG::Transport;
+		} else if (strncasecmp (p, "slave", strlen (p)) == 0) {
+			bits |= ARDOUR::DEBUG::Transport;
+		} else if (strncasecmp (p, "sessionevents", strlen (p)) == 0) {
+			bits |= ARDOUR::DEBUG::SessionEvents;
 		}
 
 		p = strtok_r (0, ",", &sp);
@@ -109,4 +113,6 @@ ARDOUR::list_debug_options ()
 	cerr << "\tDestruction" << endl;
 	cerr << "\tMTC" << endl;
 	cerr << "\tTransport" << endl;
+	cerr << "\tSlave" << endl;
+	cerr << "\tSessionEvents" << endl;
 }

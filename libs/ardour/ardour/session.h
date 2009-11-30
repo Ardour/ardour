@@ -117,6 +117,8 @@ class Source;
 class TempoMap;
 class VSTPlugin;
 
+extern void setup_enum_writer ();
+
 class Session : public PBD::StatefulDestructible, public boost::noncopyable
 {
   private:
@@ -960,13 +962,35 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		return _exporting;
 	}
 
+	/* this is a private enum, but setup_enum_writer() needs it,
+	   and i can't find a way to give that function
+	   friend access. sigh.
+	*/
+
+	enum PostTransportWork {
+		PostTransportStop               = 0x1,
+		PostTransportDisableRecord      = 0x2,
+		PostTransportPosition           = 0x8,
+		PostTransportDidRecord          = 0x20,
+		PostTransportDuration           = 0x40,
+		PostTransportLocate             = 0x80,
+		PostTransportRoll               = 0x200,
+		PostTransportAbort              = 0x800,
+		PostTransportOverWrite          = 0x1000,
+		PostTransportSpeed              = 0x2000,
+		PostTransportAudition           = 0x4000,
+		PostTransportScrub              = 0x8000,
+		PostTransportReverse            = 0x10000,
+		PostTransportInputChange        = 0x20000,
+		PostTransportCurveRealloc       = 0x40000,
+		PostTransportClearSubstate      = 0x80000
+	};
+
+
   protected:
 	friend class AudioEngine;
 	void set_block_size (nframes_t nframes);
 	void set_frame_rate (nframes_t nframes);
-
-  protected:
-	friend class Diskstream;
 
   protected:
 	friend class Route;
@@ -1174,6 +1198,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	Butler* _butler;
 
+#if 0 // these should be here, see comments in their other location above
 	enum PostTransportWork {
 		PostTransportStop               = 0x1,
 		PostTransportDisableRecord      = 0x2,
@@ -1192,7 +1217,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		PostTransportCurveRealloc       = 0x40000,
 		PostTransportClearSubstate      = 0x80000
 	};
-
+#endif
 	static const PostTransportWork ProcessCannotProceedMask =
 		PostTransportWork (
 				PostTransportInputChange|

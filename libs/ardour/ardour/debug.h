@@ -47,7 +47,9 @@ namespace ARDOUR {
 			Graph = 0x80,
 			Destruction = 0x100,
 			MTC = 0x200,
-			Transport = 0x400
+			Transport = 0x400,
+			Slave = 0x800,
+			SessionEvents = 0x800,
 		};
 	}
 

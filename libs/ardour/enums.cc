@@ -114,7 +114,8 @@ setup_enum_writer ()
 	WaveformScale _WaveformScale;
 	WaveformShape _WaveformShape;
 	QuantizeType _QuantizeType;
-
+	Session::PostTransportWork _Session_PostTransportWork;
+		
 #define REGISTER(e) enum_writer->register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer->register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
@@ -303,6 +304,24 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Session::Event, StopOnce);
 	REGISTER_CLASS_ENUM (Session::Event, AutoLoop);
 	REGISTER (_Session_Event_Type);
+
+	REGISTER_CLASS_ENUM (Session, PostTransportStop);
+	REGISTER_CLASS_ENUM (Session, PostTransportDisableRecord);
+	REGISTER_CLASS_ENUM (Session, PostTransportPosition);
+	REGISTER_CLASS_ENUM (Session, PostTransportDidRecord);
+	REGISTER_CLASS_ENUM (Session, PostTransportDuration);
+	REGISTER_CLASS_ENUM (Session, PostTransportLocate);
+	REGISTER_CLASS_ENUM (Session, PostTransportRoll);
+	REGISTER_CLASS_ENUM (Session, PostTransportAbort);
+	REGISTER_CLASS_ENUM (Session, PostTransportOverWrite);
+	REGISTER_CLASS_ENUM (Session, PostTransportSpeed);
+	REGISTER_CLASS_ENUM (Session, PostTransportAudition);
+	REGISTER_CLASS_ENUM (Session, PostTransportScrub);
+	REGISTER_CLASS_ENUM (Session, PostTransportReverse);
+	REGISTER_CLASS_ENUM (Session, PostTransportInputChange);
+	REGISTER_CLASS_ENUM (Session, PostTransportCurveRealloc);
+	REGISTER_CLASS_ENUM (Session, PostTransportClearSubstate);
+	REGISTER_BITS (_Session_PostTransportWork);
 
 	REGISTER_CLASS_ENUM (Session, Clean);
 	REGISTER_CLASS_ENUM (Session, Dirty);

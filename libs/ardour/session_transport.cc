@@ -26,10 +26,9 @@
 
 #include "pbd/undo.h"
 #include "pbd/error.h"
-#include <glibmm/thread.h>
+#include "pbd/enumwriter.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/memento_command.h"
-#include "pbd/stacktrace.h"
 
 #include "midi++/mmc.h"
 #include "midi++/port.h"
@@ -39,6 +38,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/auditioner.h"
 #include "ardour/butler.h"
+#include "ardour/debug.h"
 #include "ardour/location.h"
 #include "ardour/session.h"
 #include "ardour/slave.h"
@@ -105,6 +105,7 @@ void
 Session::request_transport_speed (double speed)
 {
 	Event* ev = new Event (Event::SetTransportSpeed, Event::Add, Event::Immediate, 0, speed);
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport speed = %1\n", speed));
 	queue_event (ev);
 }
 
@@ -120,6 +121,7 @@ void
 Session::request_stop (bool abort, bool clear_state)
 {
 	Event* ev = new Event (Event::SetTransportSpeed, Event::Add, Event::Immediate, 0, 0.0, abort, clear_state);
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport stop, abort = %1, clear state = %2\n", abort, clear_state));
 	queue_event (ev);
 }
 
@@ -127,6 +129,7 @@ void
 Session::request_locate (nframes_t target_frame, bool with_roll)
 {
 	Event *ev = new Event (with_roll ? Event::LocateRoll : Event::Locate, Event::Add, Event::Immediate, target_frame, 0, false);
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request locate to %1\n", target_frame));
 	queue_event (ev);
 }
 
@@ -134,6 +137,7 @@ void
 Session::force_locate (nframes64_t target_frame, bool with_roll)
 {
 	Event *ev = new Event (with_roll ? Event::LocateRoll : Event::Locate, Event::Add, Event::Immediate, target_frame, 0, true);
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request forced locate to %1\n", target_frame));
 	queue_event (ev);
 }
 
@@ -150,6 +154,7 @@ Session::request_play_loop (bool yn, bool leave_rolling)
 	}
 
 	ev = new Event (Event::SetLoop, Event::Add, Event::Immediate, 0, (leave_rolling ? 1.0 : 0.0), yn);
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request set loop = %1, leave rolling ? %2\n", yn, leave_rolling));
 	queue_event (ev);
 
 	if (!leave_rolling && !yn && Config->get_seamless_loop() && transport_rolling()) {
@@ -168,12 +173,14 @@ Session::request_play_range (list<AudioRange>* range, bool leave_rolling)
 	} else {
 		ev->audio_range.clear ();
 	}
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request play range, leave rolling ? %1\n", leave_rolling));
 	queue_event (ev);
 }
 
 void
 Session::realtime_stop (bool abort, bool clear_state)
 {
+	DEBUG_TRACE (DEBUG::Transport, "realtime stop\n");
 	PostTransportWork todo = PostTransportWork (0);
 
 	/* assume that when we start, we'll be moving forwards */
@@ -245,6 +252,9 @@ Session::butler_transport_work ()
 	int on_entry = g_atomic_int_get (&_butler->should_do_transport_work);
 	finished = true;
 	ptw = post_transport_work();
+
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler transport work, todo = %1\n", enum_2_string (ptw)));
+		     
 	if (ptw & PostTransportCurveRealloc) {
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->curve_reallocate();
@@ -873,6 +883,8 @@ Session::locate (nframes64_t target_frame, bool with_roll, bool with_flush, bool
 void
 Session::set_transport_speed (double speed, bool abort, bool clear_state)
 {
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Set transport speed to %1, abort = %2 clear_state = %3, current = %4\n", speed, abort, clear_state, _transport_speed));
+
 	if (_transport_speed == speed) {
 		return;
 	}

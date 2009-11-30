@@ -31,8 +31,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/auditioner.h"
 #include "ardour/butler.h"
-#include "ardour/cycle_timer.h"
-#include "ardour/cycles.h"
+#include "ardour/debug.h"
 #include "ardour/session.h"
 #include "ardour/slave.h"
 #include "ardour/timestamps.h"
@@ -494,6 +493,8 @@ Session::follow_slave (nframes_t nframes)
 
 	_slave->speed_and_position (slave_speed, slave_transport_frame);
 
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("Slave @ %1 speed %2\n", slave_speed, slave_transport_frame));
+
 	if (!_slave->locked()) {
 		goto noroll;
 	}
@@ -561,14 +562,9 @@ Session::follow_slave (nframes_t nframes)
 				request_transport_speed(slave_speed);
 			} else {
 				request_transport_speed(adjusted_speed);
-				#ifdef DEBUG_SLAVES
-				cerr << "adjust using " << delta
-					 << " towards " << adjusted_speed
-					 << " ratio = " << adjusted_speed / slave_speed
-					 << " current = " << _transport_speed
-					 << " slave @ " << slave_speed
-					 << endl;
-				#endif
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("adjust using %1 towards %2 ratio %3 current %4 slave @ %5\n",
+									   delta, adjusted_speed, adjusted_speed/slave_speed, _transport_speed,
+									   slave_speed));
 			}
 
 			if (abs(average_slave_delta) > (long) _slave->resolution()) {
@@ -578,15 +574,17 @@ Session::follow_slave (nframes_t nframes)
 		}
 	}
 
-	#ifdef DEBUG_SLAVES
-	if (slave_speed != 0.0)
-	cerr << "delta = " << (int) (dir * this_delta)
-		 << " speed = " << slave_speed
-		 << " ts = " << _transport_speed
-		 << " M@ "<< slave_transport_frame << " S@ " << _transport_frame
-		 << " avgdelta = " << average_slave_delta
-		 << endl;
-	#endif
+#ifndef NDEBUG
+	if (slave_speed != 0.0) {
+		DEBUG_TRACE (DEBUG::Slave, string_compose ("delta = %1 speed = %2 ts = %3 M@%4 S@%5 avgdelta %6\n",
+							   (int) (dir * this_delta),
+							   slave_speed,
+							   _transport_speed,
+							   slave_transport_frame, 
+							   _transport_frame,
+							   average_slave_delta));
+	}
+#endif
 
 	if (!starting && !non_realtime_work_pending()) {
 		/* speed is set, we're locked, and good to go */
@@ -594,17 +592,12 @@ Session::follow_slave (nframes_t nframes)
 	}
 
   silent_motion:
-	#ifdef DEBUG_SLAVES
-	cerr << "reached silent_motion:" <<endl;
-	#endif
-
+	DEBUG_TRACE (DEBUG::Slave, "silent motion\n")
 	follow_slave_silently (nframes, slave_speed);
 
   noroll:
 	/* don't move at all */
-	#ifdef DEBUG_SLAVES
-	cerr << "reached no_roll:" <<endl;
-	#endif
+	DEBUG_TRACE (DEBUG::Slave, "no roll\n")
 	no_roll (nframes);
 	return false;
 }
@@ -721,10 +714,7 @@ Session::track_slave_state(
 		}
 
 		if (slave_state == Running && _transport_speed == 0.0f) {
-
-        #ifdef DEBUG_SLAVES
-			cerr << "slave starts transport\n";
-        #endif
+			DEBUG_TRACE (DEBUG::Slave, "slave starts transport\n");
 			start_transport ();
 		}
 
@@ -733,19 +723,12 @@ Session::track_slave_state(
 		/* slave has stopped */
 
 		if (_transport_speed != 0.0f) {
-
-         #ifdef DEBUG_SLAVES
-			cerr << "slave stops transport: " << slave_speed << " frame: " << slave_transport_frame
-			     << " tf = " << _transport_frame << endl;
-         #endif
-
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stops transport: %1 frame %2 tf %3\n", slave_speed, slave_transport_frame, _transport_frame));
 			stop_transport();
 		}
 
 		if (slave_transport_frame != _transport_frame) {
-        #ifdef DEBUG_SLAVES
-			cerr << "slave stopped, move to " << slave_transport_frame << endl;
-        #endif
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stopped, move to %1\n", slave_transport_frame));
 			force_locate (slave_transport_frame, false);
 		}
 

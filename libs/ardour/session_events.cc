@@ -29,6 +29,7 @@
 #include "ardour/ardour.h"
 #include "ardour/audio_diskstream.h"
 #include "ardour/butler.h"
+#include "ardour/debug.h"
 #include "ardour/session.h"
 
 #include "i18n.h"
@@ -296,7 +297,7 @@ Session::process_event (Event* ev)
 		}
 	}
 
-	//printf("Processing event: %s\n", event_names[ev->type]);
+	DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("Processing event: %1 @ %2\n", enum_2_string (ev->type), _transport_frame));
 
 	switch (ev->type) {
 	case Event::SetLoop:
