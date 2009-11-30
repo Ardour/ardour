@@ -74,74 +74,6 @@ print_help (const char *execname)
 
 }
 
-static void
-list_debug_options ()
-{
-	cerr << _("The following debug options are available. Separate multipe options with commas.\nNames are case-insensitive and can be abbreviated.") << "\n\n";
-	cerr << "\tMidiSourceIO\n";
-	cerr << "\tMidiPlaylistIO\n";
-	cerr << "\tMidiDiskstreamIO\n";
-	cerr << "\tSnapBBT\n";
-	cerr << "\tConfiguration\n";
-	cerr << "\tLatency\n";
-	cerr << "\tGraph\n";
-	cerr << "\tDestruction\n";
-}
-
-static int
-parse_debug_options (const char* str)
-{
-	char* p;
-	char* sp;
-	uint64_t bits = 0;
-	char* copy = strdup (str);
-
-	p = strtok_r (copy, ",", &sp);
-
-	while (p) {
-		if (strcasecmp (p, "list") == 0) {
-			list_debug_options ();
-			free (copy);
-			return 1;
-		}
-
-		if (strcasecmp (p, "all") == 0) {
-			ARDOUR::set_debug_bits (~0ULL);
-			free (copy);
-			return 0;
-		}
-
-		if (strncasecmp (p, "midisourceio", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::MidiSourceIO;
-		} else if (strncasecmp (p, "midiplaylistio", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::MidiPlaylistIO;
-		} else if (strncasecmp (p, "mididiskstreamio", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::MidiDiskstreamIO;
-		} else if (strncasecmp (p, "snapbbt", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::SnapBBT;
-		} else if (strncasecmp (p, "configuration", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::Configuration;
-		} else if (strncasecmp (p, "latency", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::Latency;
-		} else if (strncasecmp (p, "processors", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::Processors;
-		} else if (strncasecmp (p, "graph", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::Graph;
-		} else if (strncasecmp (p, "destruction", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::Destruction;
-		} else if (strncasecmp (p, "mtc", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::MTC;
-		}
-
-		p = strtok_r (0, ",", &sp);
-	}
-	
-	free (copy);
-	ARDOUR::set_debug_bits (bits);
-	return 0;
-}
-
-
 int
 ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 {
@@ -207,7 +139,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 			break;
 
 		case 'D':
-			if (parse_debug_options (optarg)) {
+			if (ARDOUR::parse_debug_options (optarg)) {
 				exit (0);
 			}
 			break;

@@ -110,18 +110,6 @@ mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain = 0;
 
 sigc::signal<void,std::string> ARDOUR::BootMessage;
 
-void
-ARDOUR::debug_print (const char* prefix, std::string str)
-{
-	cerr << prefix << ": " << str;
-}
-
-void
-ARDOUR::set_debug_bits (uint64_t bits)
-{
-	debug_bits = bits;
-}
-
 int
 ARDOUR::setup_midi ()
 {

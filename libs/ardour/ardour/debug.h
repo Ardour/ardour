@@ -29,6 +29,8 @@ namespace ARDOUR {
 	extern uint64_t debug_bits;
 	void debug_print (const char* prefix, std::string str);
 	void set_debug_bits (uint64_t bits);
+	int parse_debug_options (const char* str);
+	void list_debug_options ();
 
 	namespace DEBUG {
 
@@ -44,7 +46,8 @@ namespace ARDOUR {
 			Processors = 0x40,
 			Graph = 0x80,
 			Destruction = 0x100,
-			MTC = 0x200
+			MTC = 0x200,
+			Transport = 0x400
 		};
 	}
 

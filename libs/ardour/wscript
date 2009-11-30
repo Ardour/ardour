@@ -69,6 +69,7 @@ libardour_sources = [
 	'crossfade.cc',
 	'cycle_timer.cc',
 	'default_click.cc',
+	'debug.cc',
 	'delivery.cc',
 	'directory_names.cc',
 	'diskstream.cc',
