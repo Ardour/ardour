@@ -458,7 +458,6 @@
 	 <menuitem action='newinsert'/>
 	 <menuitem action='newsend'/>
          <menuitem action='newaux'/>
-	 <menuitem action='newreturn'/>
 	  <separator/>
 	 <menuitem action='clear'/>
 	 <menuitem action='clear_pre'/>
@@ -476,6 +475,7 @@
 	  <separator/>
 	 <menuitem action='activate_all'/>
 	 <menuitem action='deactivate_all'/>
+	 <menuitem action='ab_plugins'/>
 	  <separator/>
 	 <menuitem action='edit'/>
       </popup>
