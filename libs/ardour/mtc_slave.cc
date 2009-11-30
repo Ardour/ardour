@@ -286,12 +286,17 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 		session.request_transport_speed (0);
 		update_mtc_status (MIDI::Parser::MTC_Stopped);
 		reset();
+		DEBUG_TRACE (DEBUG::MTC, "MTC not seen for 1/4 second - reset\n");
 		return false;
 	}
 
 	frame_rate = session.frame_rate();
 
 	speed_now = (double) ((last.position - first_mtc_frame) / (double) (now - first_mtc_time));
+
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("apparent speed = %1 from last %2 now %3 first %4\n",
+						 speed_now, last.position, now, first_mtc_time));
+
 
 	accumulator[accumulator_index++] = speed_now;
 
