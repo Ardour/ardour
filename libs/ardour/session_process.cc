@@ -493,7 +493,7 @@ Session::follow_slave (nframes_t nframes)
 
 	_slave->speed_and_position (slave_speed, slave_transport_frame);
 
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("Slave @ %1 speed %2\n", slave_speed, slave_transport_frame));
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("Slave @ %2 speed %1\n", slave_speed, slave_transport_frame));
 
 	if (!_slave->locked()) {
 		goto noroll;
@@ -543,30 +543,36 @@ Session::follow_slave (nframes_t nframes)
 
 			float delta;
 
-			#ifdef USE_MOVING_AVERAGE_OF_SLAVE
-				if (average_slave_delta == 0) {
-					delta = this_delta;
-					delta *= dir;
-				} else {
-					delta = average_slave_delta;
-					delta *= average_dir;
-				}
-			#else
+#ifdef USE_MOVING_AVERAGE_OF_SLAVE
+			if (average_slave_delta == 0) {
 				delta = this_delta;
 				delta *= dir;
-			#endif
-
-			float adjusted_speed = slave_speed + (delta /  float(_current_frame_rate));
-
-			if (_slave->give_slave_full_control_over_transport_speed()) {
-				request_transport_speed(slave_speed);
 			} else {
-				request_transport_speed(adjusted_speed);
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("adjust using %1 towards %2 ratio %3 current %4 slave @ %5\n",
-									   delta, adjusted_speed, adjusted_speed/slave_speed, _transport_speed,
-									   slave_speed));
+				delta = average_slave_delta;
+				delta *= average_dir;
 			}
+#else
+			delta = this_delta;
+			delta *= dir;
+#endif
 
+			if (fabs(delta) > frames_per_cycle()) {
+				/* too far off, so locate and keep rolling */
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave delta is too big, locate to %1\n", slave_transport_frame));
+				request_locate (slave_transport_frame, true);
+			} else {
+				float adjusted_speed = slave_speed + (delta /  float(_current_frame_rate));
+				
+				if (_slave->give_slave_full_control_over_transport_speed()) {
+					request_transport_speed(slave_speed);
+				} else {
+					request_transport_speed(adjusted_speed);
+					DEBUG_TRACE (DEBUG::Slave, string_compose ("adjust using %1 towards %2 ratio %3 current %4 slave @ %5\n",
+										   delta, adjusted_speed, adjusted_speed/slave_speed, _transport_speed,
+										   slave_speed));
+				}
+			}
+			
 			if (abs(average_slave_delta) > (long) _slave->resolution()) {
 				cerr << "average slave delta greater than slave resolution, going to silent motion\n";
 				goto silent_motion;
