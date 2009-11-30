@@ -480,9 +480,9 @@ RouteParams_UI::route_selected()
 }
 
 void
-RouteParams_UI::processors_changed ()
+RouteParams_UI::processors_changed (RouteProcessorChange c)
 {
-	ENSURE_GUI_THREAD(mem_fun(*this, &RouteParams_UI::processors_changed));
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &RouteParams_UI::processors_changed), c));
 	cleanup_view();
 
 	_processor.reset ((Processor*) 0);

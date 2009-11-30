@@ -2174,7 +2174,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 		(*x)->solo_changed.connect (sigc::bind (mem_fun (*this, &Session::route_solo_changed), wpr));
 		(*x)->mute_changed.connect (mem_fun (*this, &Session::route_mute_changed));
 		(*x)->output()->changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
-		(*x)->processors_changed.connect (bind (mem_fun (*this, &Session::update_latency_compensation), false, false));
+		(*x)->processors_changed.connect (mem_fun (*this, &Session::route_processors_changed));
 		(*x)->route_group_changed.connect (hide (mem_fun (*this, &Session::route_group_changed)));
 
 		if ((*x)->is_master()) {

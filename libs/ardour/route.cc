@@ -772,7 +772,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 		_output->set_user_latency (0);
 	}
 
-	processors_changed (); /* EMIT SIGNAL */
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 
 	return 0;
 }
@@ -1031,7 +1031,7 @@ Route::add_processors (const ProcessorList& others, ProcessorList::iterator iter
 		_output->set_user_latency (0);
 	}
 
-	processors_changed (); /* EMIT SIGNAL */
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 
 	return 0;
 }
@@ -1231,7 +1231,7 @@ Route::clear_processors (Placement p)
 
 	processor_max_streams.reset();
 	_have_internal_generator = false;
-	processors_changed (); /* EMIT SIGNAL */
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 
 	if (!already_deleting) {
 		_session.clear_deletion_in_progress();
@@ -1322,7 +1322,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 	}
 
 	processor->drop_references ();
-	processors_changed (); /* EMIT SIGNAL */
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 
 	return 0;
 }
@@ -1414,7 +1414,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 		(*i)->drop_references ();
 	}
 
-	processors_changed (); /* EMIT SIGNAL */
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 
 	return 0;
 }
@@ -1654,7 +1654,7 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 		}
 	}
 
-	processors_changed (); /* EMIT SIGNAL */
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 
 	return 0;
 }
@@ -2243,7 +2243,7 @@ Route::set_processor_state (const XMLNode& node)
 	   the XML state represents a working signal route.
 	*/
 
-	processors_changed ();
+	processors_changed (RouteProcessorChange ());
 }
 
 void
@@ -2683,6 +2683,8 @@ Route::set_meter_point (MeterPoint p, void *src)
 		return;
 	}
 
+	bool meter_was_visible_to_user = _meter->display_to_user ();
+
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
 		ProcessorList as_it_was (_processors);
@@ -2723,10 +2725,15 @@ Route::set_meter_point (MeterPoint p, void *src)
 		}
 		
 	}
-	
+
 	_meter_point = p;
 	meter_change (src); /* EMIT SIGNAL */
-	processors_changed (); /* EMIT SIGNAL */
+
+	/* the meter has visibly changed if it is not visible to the user, or if it was and now isn't */
+	bool const meter_visibly_changed = _meter->display_to_user() || meter_was_visible_to_user;
+	
+	processors_changed (RouteProcessorChange (RouteProcessorChange::MeterPointChange, meter_visibly_changed)); /* EMIT SIGNAL */
+		
 	_session.set_dirty ();
 }
 
@@ -2767,7 +2774,7 @@ Route::put_control_outs_at (Placement p)
 		}
 	}
 
-	processors_changed (); /* EMIT SIGNAL */
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	_session.set_dirty ();
 }
 

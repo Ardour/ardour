@@ -132,7 +132,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
 
 	/* map current state of the route */
 
-	processors_changed ();
+	processors_changed (RouteProcessorChange ());
 
 	ensure_xml_node ();
 

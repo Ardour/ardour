@@ -428,6 +428,36 @@ namespace ARDOUR {
 		int64_t                  space;
 	};
 
+	/** A struct used to describe changes to processors in a route.
+	 *  This is useful because objects that respond to a change in processors
+	 *  can optimise what work they do based on details of what has changed.
+	*/
+	struct RouteProcessorChange {
+		enum Type {
+			GeneralChange = 0x0,
+			MeterPointChange = 0x1
+		};
+
+		RouteProcessorChange () {
+			type = GeneralChange;
+		}
+
+		RouteProcessorChange (Type t) {
+			type = t;
+			meter_visibly_changed = true;
+		}
+
+		RouteProcessorChange (Type t, bool m) {
+			type = t;
+			meter_visibly_changed = m;
+		}
+
+		/** type of change; "GeneralChange" means anything could have changed */
+		Type type;
+		/** true if, when a MeterPointChange has occurred, the change is visible to the user */
+		bool meter_visibly_changed;
+	};
+
 } // namespace ARDOUR
 
 

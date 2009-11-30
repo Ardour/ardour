@@ -174,7 +174,7 @@ class RouteParams_UI : public ArdourDialog
 	void cleanup_latency_frame ();
 	void setup_latency_frame ();
 
-	void processors_changed ();
+	void processors_changed (ARDOUR::RouteProcessorChange);
 
 	void setup_processor_boxes();
 	void cleanup_processor_boxes();

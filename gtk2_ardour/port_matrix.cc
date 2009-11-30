@@ -142,9 +142,20 @@ PortMatrix::reconnect_to_routes ()
 	boost::shared_ptr<RouteList> routes = _session.get_routes ();
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 		_route_connections.push_back (
-			(*i)->processors_changed.connect (mem_fun (*this, &PortMatrix::setup_global_ports))
+			(*i)->processors_changed.connect (mem_fun (*this, &PortMatrix::route_processors_changed))
 			);
 	}
+}
+
+void
+PortMatrix::route_processors_changed (RouteProcessorChange c)
+{
+	if (c.type == RouteProcessorChange::MeterPointChange) {
+		/* this change has no impact on the port matrix */
+		return;
+	}
+
+	setup_global_ports ();
 }
 
 /** A route has been added to or removed from the session */

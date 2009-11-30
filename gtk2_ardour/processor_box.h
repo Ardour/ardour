@@ -200,6 +200,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	void redisplay_processors ();
 	void add_processor_to_display (boost::weak_ptr<ARDOUR::Processor>);
 	void reordered ();
+	void route_processors_changed (ARDOUR::RouteProcessorChange);
 
 	void remove_processor_gui (boost::shared_ptr<ARDOUR::Processor>);
 

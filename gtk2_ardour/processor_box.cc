@@ -318,8 +318,7 @@ ProcessorBox::set_route (boost::shared_ptr<Route> r)
 	no_processor_redisplay = false;
 	_route = r;
 
-	connections.push_back (_route->processors_changed.connect (
-			mem_fun(*this, &ProcessorBox::redisplay_processors)));
+	connections.push_back (_route->processors_changed.connect (mem_fun (*this, &ProcessorBox::route_processors_changed)));
 	connections.push_back (_route->GoingAway.connect (
 			mem_fun (*this, &ProcessorBox::route_going_away)));
 	connections.push_back (_route->NameChanged.connect (
@@ -922,6 +921,17 @@ ProcessorBox::choose_aux (boost::weak_ptr<Route> wr)
 	rlist->push_back (_route);
 
 	_session.add_internal_sends (target, PreFader, rlist);
+}
+
+void
+ProcessorBox::route_processors_changed (RouteProcessorChange c)
+{
+	if (c.type == RouteProcessorChange::MeterPointChange && c.meter_visibly_changed == false) {
+		/* the meter has moved, but it was and still is invisible to the user, so nothing to do */
+		return;
+	}
+
+	redisplay_processors ();
 }
 
 void

@@ -1421,6 +1421,16 @@ Session::xrun_recovery ()
 }
 
 void
+Session::route_processors_changed (RouteProcessorChange c)
+{
+	if (c.type == RouteProcessorChange::MeterPointChange) {
+		return;
+	}
+
+	update_latency_compensation (false, false);
+}
+
+void
 Session::update_latency_compensation (bool with_stop, bool abort)
 {
 	bool update_jack = false;

@@ -1446,6 +1446,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	boost::shared_ptr<Route> XMLRouteFactory (const XMLNode&, int);
 
+	void route_processors_changed (RouteProcessorChange);
+
 	/* mixer stuff */
 
 	bool solo_update_disabled;

@@ -240,10 +240,13 @@ class Route : public SessionObject, public AutomatableControls
 	sigc::signal<void,void*> comment_changed;
 	sigc::signal<void,void*> mute_changed;
 	sigc::signal<void>       mute_points_changed;
-	sigc::signal<void>       processors_changed;
+
+	/** the processors have changed; the parameter indicates what changed */
+	sigc::signal<void, RouteProcessorChange> processors_changed;
 	sigc::signal<void,void*> record_enable_changed;
 	sigc::signal<void,void*> route_group_changed;
-	sigc::signal<void,void*> meter_change;
+	/** the metering point has changed */
+	sigc::signal<void,void*> meter_change; 
 	sigc::signal<void>       signal_latency_changed;
 	sigc::signal<void>       initial_delay_changed;
 

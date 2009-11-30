@@ -1609,6 +1609,7 @@ MixerStrip::engine_running ()
 {
 }
 
+/** Called when the metering point has changed */
 void
 MixerStrip::meter_changed (void *src)
 {
@@ -1635,7 +1636,6 @@ MixerStrip::meter_changed (void *src)
 	gpm.setup_meters ();
 	// reset peak when meter point changes
 	gpm.reset_peak_display();
-	set_width_enum (_width, this);
 }
 
 void

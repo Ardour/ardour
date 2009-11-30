@@ -29,6 +29,7 @@
 #include <gtkmm/notebook.h>
 #include <boost/shared_ptr.hpp>
 #include "ardour/bundle.h"
+#include "ardour/types.h"
 #include "port_group.h"
 #include "port_matrix_types.h"
 #include "i18n.h"
@@ -178,6 +179,7 @@ private:
 	void remove_notebook_pages (Gtk::Notebook &);
 	void v_page_selected (GtkNotebookPage *, guint);
 	void h_page_selected (GtkNotebookPage *, guint);
+	void route_processors_changed (ARDOUR::RouteProcessorChange);
 
 	Gtk::Window* _parent;
 

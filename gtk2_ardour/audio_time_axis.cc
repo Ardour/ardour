@@ -115,7 +115,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	/* map current state of the route */
 
-	processors_changed ();
+	processors_changed (RouteProcessorChange ());
 	reset_processor_automation_curves ();
 	ensure_pan_views (false);
 	update_control_names ();

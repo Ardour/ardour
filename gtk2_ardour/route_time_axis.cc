@@ -55,6 +55,7 @@
 #include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "ardour/session_playlist.h"
+#include "ardour/debug.h"
 #include "ardour/utils.h"
 #include "evoral/Parameter.hpp"
 
@@ -2118,8 +2119,13 @@ RouteTimeAxisView::processor_menu_item_toggled (RouteTimeAxisView::ProcessorAuto
 }
 
 void
-RouteTimeAxisView::processors_changed ()
+RouteTimeAxisView::processors_changed (RouteProcessorChange c)
 {
+	if (c.type == RouteProcessorChange::MeterPointChange) {
+		/* nothing to do if only the meter point has changed */
+		return;
+	}
+
 	using namespace Menu_Helpers;
 
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
