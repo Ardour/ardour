@@ -191,8 +191,8 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 }
 
 boost::shared_ptr<Source>
-SourceFactory::createReadable (DataType type, Session& s, const string& path, bool embedded,
-		int chn, Source::Flag flags, bool announce, bool defer_peaks)
+SourceFactory::createReadable (DataType type, Session& s, const string& path,
+			       int chn, Source::Flag flags, bool announce, bool defer_peaks)
 {
 	if (type == DataType::AUDIO) {
 
@@ -200,7 +200,7 @@ SourceFactory::createReadable (DataType type, Session& s, const string& path, bo
 
 			try {
 
-				Source* src = new SndFileSource (s, path, embedded, chn, flags);
+				Source* src = new SndFileSource (s, path, chn, flags);
 				// boost_debug_shared_ptr_mark_interesting (src, typeid(src).name());
 				boost::shared_ptr<Source> ret (src);
 				
@@ -218,7 +218,7 @@ SourceFactory::createReadable (DataType type, Session& s, const string& path, bo
 			catch (failed_constructor& err) {
 #ifdef USE_COREAUDIO_FOR_FILES
 
-				Source* src = new CoreAudioSource (s, path, embedded, chn, flags);
+				Source* src = new CoreAudioSource (s, path, chn, flags);
 				// boost_debug_shared_ptr_mark_interesting (src, typeid(src).name());
 				boost::shared_ptr<Source> ret (src);
 				if (setup_peakfile (ret, defer_peaks)) {
@@ -241,7 +241,7 @@ SourceFactory::createReadable (DataType type, Session& s, const string& path, bo
 
 	} else if (type == DataType::MIDI) {
 		
-		Source* src = new SMFSource (s, path, embedded, SMFSource::Flag(0));
+		Source* src = new SMFSource (s, path, SMFSource::Flag(0));
 		// boost_debug_shared_ptr_mark_interesting (src, typeid(src).name());
 		boost::shared_ptr<Source> ret (src);
 
@@ -257,13 +257,13 @@ SourceFactory::createReadable (DataType type, Session& s, const string& path, bo
 }
 
 boost::shared_ptr<Source>
-SourceFactory::createWritable (DataType type, Session& s, const std::string& path, bool embedded,
-		bool destructive, nframes_t rate, bool announce, bool defer_peaks)
+SourceFactory::createWritable (DataType type, Session& s, const std::string& path, 
+			       bool destructive, nframes_t rate, bool announce, bool defer_peaks)
 {
 	/* this might throw failed_constructor(), which is OK */
 
 	if (type == DataType::AUDIO) {
-		Source* src = new SndFileSource (s, path, embedded,
+		Source* src = new SndFileSource (s, path, 
 				s.config.get_native_file_data_format(),
 				s.config.get_native_file_header_format(),
 				rate,
@@ -286,7 +286,7 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 
 	} else if (type == DataType::MIDI) {
 
-		Source* src = new SMFSource (s, path, embedded, Source::Flag(0));
+		Source* src = new SMFSource (s, path, Source::Flag(0));
 		// boost_debug_shared_ptr_mark_interesting (src, typeid(src).name());
 		boost::shared_ptr<Source> ret (src);
 

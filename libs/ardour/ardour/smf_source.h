@@ -37,7 +37,7 @@ template<typename T> class MidiRingBuffer;
 class SMFSource : public MidiSource, public FileSource, public Evoral::SMF {
 public:
 	/** Constructor for existing external-to-session files */
-	SMFSource (Session& session, const Glib::ustring& path, bool embedded,
+	SMFSource (Session& session, const Glib::ustring& path, 
 			Source::Flag flags = Source::Flag(0));
 
 	/** Constructor for existing in-session files */

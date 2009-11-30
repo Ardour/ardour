@@ -42,9 +42,9 @@ public:
 	void mark_take (const Glib::ustring& id);
 	void mark_immutable ();
 
-	const Glib::ustring& take_id ()     const { return _take_id; }
-	bool                 is_embedded () const { return _is_embedded; }
-	uint16_t             channel()      const { return _channel; }
+	const Glib::ustring& take_id ()        const { return _take_id; }
+	bool                 within_session () const { return _within_session; }
+	uint16_t             channel()         const { return _channel; }
 
 	int set_state (const XMLNode&, int version);
 
@@ -58,7 +58,7 @@ public:
 
 protected:
 	FileSource (Session& session, DataType type,
-			const Glib::ustring& path, bool embedded,
+			const Glib::ustring& path, 
 			Source::Flag flags = Source::Flag(0));
 
 	FileSource (Session& session, const XMLNode& node, bool must_exist);
@@ -66,8 +66,7 @@ protected:
 	virtual int init (const Glib::ustring& idstr, bool must_exist);
 
 	virtual int move_dependents_to_trash() { return 0; }
-
-	void set_embedded_from_name();
+	void set_within_session_from_path (const std::string&);
 
 	bool removable () const;
 
@@ -75,7 +74,7 @@ protected:
 	Glib::ustring _take_id;
 	bool          _file_is_new;
 	uint16_t      _channel;
-	bool          _is_embedded;
+	bool          _within_session;
 
 	static std::map<DataType, Glib::ustring> search_paths;
 };

@@ -3221,7 +3221,7 @@ Session::change_source_path_by_name (string path, string oldname, string newname
 	return path;
 }
 
-/** Return the full path (in some session directory) for a new embedded source.
+/** Return the full path (in some session directory) for a new within-session source.
  * \a name must be a session-unique name that does not contain slashes
  *         (e.g. as returned by new_*_source_name)
  */
@@ -3342,7 +3342,7 @@ Session::new_audio_source_name (const string& base, uint32_t nchan, uint32_t cha
 	return Glib::path_get_basename(buf);
 }
 
-/** Create a new embedded audio source */
+/** Create a new within-session audio source */
 boost::shared_ptr<AudioFileSource>
 Session::create_audio_source_for_session (AudioDiskstream& ds, uint32_t chan, bool destructive)
 {
@@ -3351,7 +3351,7 @@ Session::create_audio_source_for_session (AudioDiskstream& ds, uint32_t chan, bo
 	const string path    = new_source_path_from_name(DataType::AUDIO, name);
 
 	return boost::dynamic_pointer_cast<AudioFileSource> (
-		SourceFactory::createWritable (DataType::AUDIO, *this, path, true, destructive, frame_rate()));
+		SourceFactory::createWritable (DataType::AUDIO, *this, path, destructive, frame_rate()));
 }
 
 /** Return a unique name based on \a base for a new internal MIDI source */
@@ -3403,7 +3403,7 @@ Session::new_midi_source_name (const string& base)
 }
 
 
-/** Create a new embedded MIDI source */
+/** Create a new within-session MIDI source */
 boost::shared_ptr<MidiSource>
 Session::create_midi_source_for_session (MidiDiskstream& ds)
 {
@@ -3412,7 +3412,7 @@ Session::create_midi_source_for_session (MidiDiskstream& ds)
 
 	return boost::dynamic_pointer_cast<SMFSource> (
 			SourceFactory::createWritable (
-					DataType::MIDI, *this, path, true, false, frame_rate()));
+					DataType::MIDI, *this, path, false, frame_rate()));
 }
 
 
@@ -4233,7 +4233,7 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 
 		try {
 			fsource = boost::dynamic_pointer_cast<AudioFileSource> (
-				SourceFactory::createWritable (DataType::AUDIO, *this, buf, true, false, frame_rate()));
+				SourceFactory::createWritable (DataType::AUDIO, *this, buf, false, frame_rate()));
 		}
 
 		catch (failed_constructor& err) {

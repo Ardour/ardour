@@ -330,7 +330,7 @@ SoundFileBox::audition ()
 		try {
 			afs = boost::dynamic_pointer_cast<AudioFileSource> (
 					SourceFactory::createReadable (DataType::AUDIO, *_session,
-							path, false, n, Source::Flag (0), false));
+							path, n, Source::Flag (0), false));
 
 			srclist.push_back(afs);
 

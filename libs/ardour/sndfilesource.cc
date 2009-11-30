@@ -67,10 +67,9 @@ SndFileSource::SndFileSource (Session& s, const XMLNode& node)
 }
 
 /** Files created this way are never writable or removable */
-SndFileSource::SndFileSource (Session& s, const ustring& path, bool embedded, int chn, Flag flags)
+SndFileSource::SndFileSource (Session& s, const ustring& path, int chn, Flag flags)
 	: Source(s, DataType::AUDIO, path, flags)
-	, AudioFileSource (s, path, embedded,
-			Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
+	, AudioFileSource (s, path, Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 {
 	_channel = chn;
 
@@ -82,10 +81,10 @@ SndFileSource::SndFileSource (Session& s, const ustring& path, bool embedded, in
 }
 
 /** This constructor is used to construct new files, not open existing ones. */
-SndFileSource::SndFileSource (Session& s, const ustring& path, bool embedded,
+SndFileSource::SndFileSource (Session& s, const ustring& path, 
 		SampleFormat sfmt, HeaderFormat hf, nframes_t rate, Flag flags)
 	: Source(s, DataType::AUDIO, path, flags)
-	, AudioFileSource (s, path, embedded, flags, sfmt, hf)
+	, AudioFileSource (s, path, flags, sfmt, hf)
 {
 	int fmt = 0;
 
@@ -177,12 +176,6 @@ SndFileSource::init_sndfile ()
 	xfade_buf = 0;
 	sf = 0;
 	_broadcast_info = 0;
-
-	if (is_embedded()) {
-		_name = _path;
-	} else {
-		_name = Glib::path_get_basename (_path);
-	}
 
 	/* although libsndfile says we don't need to set this,
 	   valgrind and source code shows us that we do.

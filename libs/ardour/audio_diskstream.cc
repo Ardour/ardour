@@ -1922,7 +1922,6 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 	/* until we write, this file is considered removable */
 
 	chan->write_source->mark_for_remove ();
-	cerr << "New write source " << chan->write_source->path() << " flags " << enum_2_string (chan->write_source->flags()) << endl;
 
 	return 0;
 }
@@ -2172,8 +2171,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 			try {
 				fs = boost::dynamic_pointer_cast<AudioFileSource> (
 						SourceFactory::createWritable (DataType::AUDIO, _session,
-								prop->value(), true,
-								false, _session.frame_rate()));
+								prop->value(), false, _session.frame_rate()));
 			}
 
 			catch (failed_constructor& err) {

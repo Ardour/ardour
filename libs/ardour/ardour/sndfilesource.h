@@ -30,10 +30,10 @@ namespace ARDOUR {
 class SndFileSource : public AudioFileSource {
   public:
 	/** Constructor to be called for existing external-to-session files */
-	SndFileSource (Session&, const Glib::ustring& path, bool embedded, int chn, Flag flags);
+	SndFileSource (Session&, const Glib::ustring& path, int chn, Flag flags);
 
 	/* Constructor to be called for new in-session files */
-	SndFileSource (Session&, const Glib::ustring& path, bool embedded,
+	SndFileSource (Session&, const Glib::ustring& path, 
 			SampleFormat samp_format, HeaderFormat hdr_format, nframes_t rate,
 			Flag flags = SndFileSource::default_writable_flags);
 

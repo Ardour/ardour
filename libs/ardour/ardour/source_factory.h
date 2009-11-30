@@ -45,11 +45,11 @@ class SourceFactory {
 			nframes_t nframes, float sample_rate);
 
 	static boost::shared_ptr<Source> createReadable (DataType type, Session&,
-			const std::string& path, bool embedded,
+			const std::string& path, 
 			int chn, Source::Flag flags, bool announce = true, bool async = false);
 
 	static boost::shared_ptr<Source> createWritable (DataType type, Session&,
-			const std::string& path, bool embedded,
+			const std::string& path, 
 			bool destructive, nframes_t rate, bool announce = true, bool async = false);
 
 	static Glib::Cond*                               PeaksToBuild;

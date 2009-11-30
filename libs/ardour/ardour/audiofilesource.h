@@ -88,10 +88,10 @@ public:
 
 protected:
 	/** Constructor to be called for existing external-to-session files */
-	AudioFileSource (Session&, const Glib::ustring& path, bool embedded, Source::Flag flags);
+	AudioFileSource (Session&, const Glib::ustring& path, Source::Flag flags);
 
 	/** Constructor to be called for new in-session files */
-	AudioFileSource (Session&, const Glib::ustring& path, bool embedded, Source::Flag flags,
+	AudioFileSource (Session&, const Glib::ustring& path, Source::Flag flags,
 			SampleFormat samp_format, HeaderFormat hdr_format);
 
 	/** Constructor to be called for existing in-session files */

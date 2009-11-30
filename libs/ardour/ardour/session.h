@@ -252,6 +252,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	std::string name() const { return _name; }
 	std::string snap_name() const { return _current_snapshot_name; }
 	std::string raid_path () const;
+	bool path_is_within_session (const std::string&);
 
 	void set_snap_name ();
 

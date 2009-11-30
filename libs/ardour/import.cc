@@ -224,8 +224,9 @@ create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
 			const DataType type = ((*i).rfind(".mid") != string::npos)
 				? DataType::MIDI : DataType::AUDIO;
 
+
 			source = SourceFactory::createWritable (type, sess,
-					i->c_str(), true,
+					i->c_str(),
 					false, // destructive
 					samplerate);
 		}
@@ -435,7 +436,7 @@ Session::import_audiofiles (ImportStatus& status)
 		nframes64_t natural_position = source ? source->natural_position() : 0;
 
 		if (status.replace_existing_source) {
-			fatal << "THIS IS NOT IMPLEMENTED YET, IT SHOULD NEVER GET CALLED!!! DYING!" << endl;
+			fatal << "THIS IS NOT IMPLEMENTED YET, IT SHOULD NEVER GET CALLED!!! DYING!" << endmsg;
 			status.cancel = !map_existing_mono_sources (new_paths, *this, frame_rate(), newfiles, this);
 		} else {
 			status.cancel = !create_mono_sources_for_writing (new_paths, *this, frame_rate(), newfiles, natural_position);

@@ -92,31 +92,30 @@ struct SizedSampleBuffer {
 Glib::StaticPrivate<SizedSampleBuffer> thread_interleave_buffer = GLIBMM_STATIC_PRIVATE_INIT;
 
 /** Constructor used for existing internal-to-session files. */
-AudioFileSource::AudioFileSource (Session& s, const ustring& path, bool embedded, Source::Flag flags)
+AudioFileSource::AudioFileSource (Session& s, const ustring& path, Source::Flag flags)
 	: Source (s, DataType::AUDIO, path, flags)
 	, AudioSource (s, path)
-	, FileSource (s, DataType::AUDIO, path, embedded, flags)
+	, FileSource (s, DataType::AUDIO, path, flags)
 {
-	if (init (path, true)) {
+	if (init (_path, true)) {
 		throw failed_constructor ();
 	}
+
 }
 
 /** Constructor used for new internal-to-session files. */
-AudioFileSource::AudioFileSource (Session& s, const ustring& path, bool embedded, Source::Flag flags,
+AudioFileSource::AudioFileSource (Session& s, const ustring& path, Source::Flag flags,
 				  SampleFormat /*samp_format*/, HeaderFormat /*hdr_format*/)
 	: Source (s, DataType::AUDIO, path, flags)
 	, AudioSource (s, path)
-	, FileSource (s, DataType::AUDIO, path, embedded, flags)
+	, FileSource (s, DataType::AUDIO, path, flags)
 {
-	_is_embedded = false;
-
-	if (init (path, false)) {
+	if (init (_path, false)) {
 		throw failed_constructor ();
 	}
 }
 
-/** Constructor used for existing internal-to-session files.  File must exist. */
+/** Constructor used for existing internal-to-session files via XML.  File must exist. */
 AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exist)
 	: Source (s, node)
 	, AudioSource (s, node)
@@ -125,8 +124,8 @@ AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exi
 	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
 	}
-
-	if (init (_name, must_exist)) {
+	
+	if (init (_path, must_exist)) {
 		throw failed_constructor ();
 	}
 }
@@ -170,7 +169,7 @@ AudioFileSource::find_broken_peakfile (ustring peak_path, ustring audio_path)
 
 	if (Glib::file_test (str, Glib::FILE_TEST_EXISTS)) {
 
-		if (is_embedded()) {
+		if (!within_session()) {
 
 			/* it would be nice to rename it but the nature of
 			   the bug means that we can't reliably use it.

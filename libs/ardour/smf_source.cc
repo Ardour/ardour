@@ -49,16 +49,16 @@ using namespace ARDOUR;
 using namespace Glib;
 
 /** Constructor used for new internal-to-session files.  File cannot exist. */
-SMFSource::SMFSource (Session& s, const ustring& path, bool embedded, Source::Flag flags)
+SMFSource::SMFSource (Session& s, const ustring& path, Source::Flag flags)
 	: Source(s, DataType::MIDI, path, flags)
 	, MidiSource(s, path)
-	, FileSource(s, DataType::MIDI, path, embedded, flags)
+	, FileSource(s, DataType::MIDI, path, flags)
 	, Evoral::SMF()
 	, _last_ev_time_beats(0.0)
 	, _last_ev_time_frames(0)
 	, _smf_last_read_end (0)
 {
-	if (init(_name, false)) {
+	if (init(_path, false)) {
 		throw failed_constructor ();
 	}
 
@@ -82,7 +82,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 		throw failed_constructor ();
 	}
 
-	if (init(_name, true)) {
+	if (init(_path, true)) {
 		throw failed_constructor ();
 	}
 

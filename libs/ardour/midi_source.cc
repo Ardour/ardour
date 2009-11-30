@@ -249,7 +249,7 @@ MidiSource::session_saved()
 
 		boost::shared_ptr<MidiSource> newsrc = boost::dynamic_pointer_cast<MidiSource>(
 				SourceFactory::createWritable(DataType::MIDI, _session,
-						newpath, true, false, _session.frame_rate()));
+						newpath, false, _session.frame_rate()));
 
 		newsrc->set_timeline_position(_timeline_position);
 		_model->write_to(newsrc);

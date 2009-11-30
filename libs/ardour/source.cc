@@ -239,10 +239,12 @@ Source::check_for_analysis_data_on_disk ()
 void
 Source::mark_for_remove ()
 {
-	// This operation is not allowed for sources for destructive tracks or embedded files.
-	// Fortunately mark_for_remove() is never called for embedded files. This function
-	// must be fixed if that ever happens.
-	if (_flags & Destructive) {
+	// This operation is not allowed for sources for destructive tracks or out-of-session files.
+
+	/* XXX need a way to detect _within_session() condition here - move it from FileSource? 
+	 */
+
+	if ((_flags & Destructive)) { 
 		return;
 	}
 

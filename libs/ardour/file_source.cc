@@ -55,22 +55,26 @@ static const std::string PATH_SEP = "/"; // I don't do windows
 
 map<DataType, ustring> FileSource::search_paths;
 
-FileSource::FileSource (Session& session, DataType type,
-		const ustring& path, bool embedded, Source::Flag flag)
+FileSource::FileSource (Session& session, DataType type, const ustring& path, Source::Flag flag)
 	: Source(session, type, path, flag)
 	, _path(path)
 	, _file_is_new(true)
 	, _channel (0)
-	, _is_embedded(embedded)
 {
+	set_within_session_from_path (path);
 }
 
 FileSource::FileSource (Session& session, const XMLNode& node, bool /*must_exist*/)
 	: Source(session, node)
 	, _file_is_new (false)
 {
+	/* this setting of _path is temporary - we expect derived classes
+	   to call ::init() which will actually locate the file
+	   and reset _path and _within_session correctly.
+	*/
+
 	_path = _name;
-	set_embedded_from_name();
+	_within_session = true;
 }
 
 bool
@@ -90,9 +94,9 @@ FileSource::init (const ustring& pathstr, bool must_exist)
 		throw MissingSource ();
 	}
 
-	/* XXX is this necessary? or even wise? */
+	set_within_session_from_path (pathstr);
 
-	if (_is_embedded) {
+	if (_within_session) {
 		_name = Glib::path_get_basename (_name);
 	}
 
@@ -101,12 +105,6 @@ FileSource::init (const ustring& pathstr, bool must_exist)
 	}
 
 	return 0;
-}
-
-void
-FileSource::set_embedded_from_name ()
-{
-	_is_embedded = (_name.find(PATH_SEP) != string::npos);
 }
 
 int
@@ -119,8 +117,6 @@ FileSource::set_state (const XMLNode& node, int /*version*/)
 	} else {
 		_channel = 0;
 	}
-
-	set_embedded_from_name();
 
 	return 0;
 }
@@ -136,12 +132,7 @@ FileSource::mark_take (const ustring& id)
 int
 FileSource::move_to_trash (const ustring& trash_dir_name)
 {
-	if (is_embedded()) {
-		cerr << "tried to move an embedded region to trash" << endl;
-		return -1;
-	}
-
-	if (!writable()) {
+	if (!within_session() || !writable()) {
 		return -1;
 	}
 
@@ -202,7 +193,7 @@ FileSource::move_to_trash (const ustring& trash_dir_name)
 
 /** Find the actual source file based on \a filename.
  *
- * If the source is embedded, \a filename should be a simple filename (no slashes).
+ * If the source is within the session tree, \a filename should be a simple filename (no slashes).
  * If the source is external, \a filename should be a full path.
  * In either case, found_path is set to the complete absolute path of the source file.
  * \return true iff the file was found.
@@ -426,3 +417,8 @@ FileSource::mark_immutable ()
 	}
 }
 
+void
+FileSource::set_within_session_from_path (const std::string& path)
+{
+	_within_session = _session.path_is_within_session (path);
+}

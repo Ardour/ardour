@@ -50,7 +50,7 @@ class CoreAudioSource : public AudioFileSource {
 	mutable CAAudioFile af;
 	uint16_t n_channels;
 
-	void init ();
+	void init_cafile ();
 	int safe_read (Sample*, nframes_t start, nframes_t cnt, AudioBufferList&) const;
 };
 

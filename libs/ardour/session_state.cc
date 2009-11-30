@@ -435,6 +435,17 @@ Session::setup_raid_path (string path)
 	last_rr_session_dir = session_dirs.begin();
 }
 
+bool
+Session::path_is_within_session (const std::string& path)
+{
+	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+		if (path.find ((*i).path) == 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
 int
 Session::ensure_subdirs ()
 {

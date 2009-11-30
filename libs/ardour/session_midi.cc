@@ -512,29 +512,6 @@ Session::spp_stop (Parser&, nframes_t /*timestamp*/)
 		request_stop ();
 	}
 }
-/*
-void
-Session::midi_clock_start (Parser& ignored, nframes_t timestamp)
-{
-        if (config.get_external_sync() && (config.get_sync_source() == MIDIClock)) {
-		request_transport_speed (1.0);
-	}
-}
-
-void
-Session::midi_clock_continue (Parser& parser, nframes_t timestamp)
-{
-	midi_clock_start (parser, 0);
-}
-
-void
-Session::midi_clock_stop (Parser& ignored, nframes_t timestamp)
-{
-	if (config.get_external_sync() && (config.get_slave_source() == MIDIClock)) {
-		request_stop ();
-	}
-}
-*/
 
 void
 Session::mmc_deferred_play (MIDI::MachineControl &/*mmc*/)

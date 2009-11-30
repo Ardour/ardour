@@ -41,7 +41,7 @@ CoreAudioSource::CoreAudioSource (Session& s, const XMLNode& node)
 	: Source (s, node)
 	, AudioFileSource (s, node)
 {
-	init ();
+	init_cafile ();
 }
 
 CoreAudioSource::CoreAudioSource (Session& s, const string& path, bool, int chn, Flag flags)
@@ -51,11 +51,11 @@ CoreAudioSource::CoreAudioSource (Session& s, const string& path, bool, int chn,
 			Source::Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 {
 	_channel = chn;
-	init ();
+	init_cafile ();
 }
 
 void
-CoreAudioSource::init ()
+CoreAudioSource::init_cafile ()
 {
 	/* note that we temporarily truncated _id at the colon */
 	try {
