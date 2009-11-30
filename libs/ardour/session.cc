@@ -2382,6 +2382,18 @@ Session::remove_route (shared_ptr<Route> route)
 	route->input()->disconnect (0);
 	route->output()->disconnect (0);
 
+	/* if the route had internal sends sending to it, remove them */
+	if (route->internal_return()) {
+
+		boost::shared_ptr<RouteList> r = routes.reader ();
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			boost::shared_ptr<Send> s = (*i)->internal_send_for (route);
+			if (s) {
+				(*i)->remove_processor (s);
+			}
+		}
+	}	
+
 	update_latency_compensation (false, false);
 	set_dirty();
 
