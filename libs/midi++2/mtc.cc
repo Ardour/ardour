@@ -90,7 +90,8 @@ Parser::process_mtc_quarter_frame (byte *msg)
 	   depending on the direction of the MTC generator ...
 	*/
 
-#if 0
+#define DEBUG_MTC
+#ifdef DEBUG_MTC
 	 cerr << "MTC: (state = " << _mtc_running << ") " 
 	      << which_quarter_frame << " vs. " << expected_mtc_quarter_frame_code
 	      << " consecutive ? " << consecutive_qtr_frame_cnt
@@ -110,16 +111,16 @@ Parser::process_mtc_quarter_frame (byte *msg)
 				last_qtr_frame = which_quarter_frame;
 				consecutive_qtr_frame_cnt++;
 			}
-
-			// cerr << "first seen qframe = " << (int) last_qtr_frame << endl;
+			
+			cerr << "first seen qframe = " << (int) last_qtr_frame << endl;
 
 			return;
 
 		} else if (consecutive_qtr_frame_cnt == 1) {
 
 			/* third quarter frame */
-
-			// cerr << "second seen qframe = " << (int) which_quarter_frame << endl;
+			
+			cerr << "second seen qframe = " << (int) which_quarter_frame << endl;
 
 			if (last_qtr_frame < which_quarter_frame) {
 				_mtc_running = MTC_Forward;
@@ -224,6 +225,8 @@ Parser::process_mtc_quarter_frame (byte *msg)
 	}
 
 	/* time code is looking good */
+
+	cerr << "for quarter frame " << which_quarter_frame << " byte = " << hex << (int) msg[1] << dec << endl;
 
 	switch (which_quarter_frame) {
 	case 0: // frames LS nibble
