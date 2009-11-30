@@ -556,7 +556,19 @@ Session::follow_slave (nframes_t nframes)
 			delta *= dir;
 #endif
 
-			if (fabs(delta) > _slave->resolution() * 2) {
+#ifndef NDEBUG
+	if (slave_speed != 0.0) {
+		DEBUG_TRACE (DEBUG::Slave, string_compose ("delta = %1 speed = %2 ts = %3 M@%4 S@%5 avgdelta %6\n",
+							   (int) (dir * this_delta),
+							   slave_speed,
+							   _transport_speed,
+							   _transport_frame,
+							   slave_transport_frame, 
+							   _transport_frame,
+							   average_slave_delta));
+	}
+#endif
+			if (fabs(delta) > 2048) {
 				/* too far off, so locate and keep rolling */
 				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave delta %1 is too big, locate to %2\n", delta, slave_transport_frame));
 				request_locate (slave_transport_frame, true);
@@ -581,18 +593,6 @@ Session::follow_slave (nframes_t nframes)
 		}
 	}
 
-#ifndef NDEBUG
-	if (slave_speed != 0.0) {
-		DEBUG_TRACE (DEBUG::Slave, string_compose ("delta = %1 speed = %2 ts = %3 M@%4 S@%5 avgdelta %6\n",
-							   (int) (dir * this_delta),
-							   slave_speed,
-							   _transport_speed,
-							   _transport_frame,
-							   slave_transport_frame, 
-							   _transport_frame,
-							   average_slave_delta));
-	}
-#endif
 
 	if (!starting && !non_realtime_work_pending()) {
 		/* speed is set, we're locked, and good to go */
