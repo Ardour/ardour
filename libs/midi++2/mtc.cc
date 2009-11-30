@@ -286,6 +286,11 @@ Parser::process_mtc_quarter_frame (byte *msg)
 			*/
 			
 			if (consecutive_qtr_frame_cnt >= 8) {
+				cerr << hex;
+				for (size_t xx = 0; xx < sizeof (_qtr_mtc_time); ++xx) {
+					cerr << (int) _qtr_mtc_time[xx] << ' ';
+				} 
+				cerr << dec << endl;
 				memcpy (_mtc_time, _qtr_mtc_time, sizeof (_mtc_time));
 				memset (_qtr_mtc_time, 0, sizeof (_qtr_mtc_time));
 				if (!_mtc_locked) {
