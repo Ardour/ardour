@@ -85,7 +85,7 @@ ARDOUR::parse_debug_options (const char* str)
 		} else if (strncasecmp (p, "transport", strlen (p)) == 0) {
 			bits |= ARDOUR::DEBUG::Transport;
 		} else if (strncasecmp (p, "slave", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::Transport;
+			bits |= ARDOUR::DEBUG::Slave;
 		} else if (strncasecmp (p, "sessionevents", strlen (p)) == 0) {
 			bits |= ARDOUR::DEBUG::SessionEvents;
 		}
