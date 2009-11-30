@@ -531,7 +531,7 @@ Session::follow_slave (nframes_t nframes)
 		calculate_moving_average_of_slave_delta(dir, this_delta);
 	}
 
-	track_slave_state(slave_speed, slave_transport_frame, this_delta, starting);
+	track_slave_state (slave_speed, slave_transport_frame, this_delta, starting);
 
 	if (slave_state == Running && !_slave->is_always_synced() && !config.get_timecode_source_is_synced()) {
 
@@ -560,13 +560,14 @@ Session::follow_slave (nframes_t nframes)
 				/* too far off, so locate and keep rolling */
 				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave delta is too big, locate to %1\n", slave_transport_frame));
 				request_locate (slave_transport_frame, true);
+				return false;
 			} else {
 				float adjusted_speed = slave_speed + (delta /  float(_current_frame_rate));
 				
 				if (_slave->give_slave_full_control_over_transport_speed()) {
-					request_transport_speed(slave_speed);
+					request_transport_speed (slave_speed);
 				} else {
-					request_transport_speed(adjusted_speed);
+					request_transport_speed (adjusted_speed);
 					DEBUG_TRACE (DEBUG::Slave, string_compose ("adjust using %1 towards %2 ratio %3 current %4 slave @ %5\n",
 										   delta, adjusted_speed, adjusted_speed/slave_speed, _transport_speed,
 										   slave_speed));
@@ -586,6 +587,7 @@ Session::follow_slave (nframes_t nframes)
 							   (int) (dir * this_delta),
 							   slave_speed,
 							   _transport_speed,
+							   _transport_frame,
 							   slave_transport_frame, 
 							   _transport_frame,
 							   average_slave_delta));
