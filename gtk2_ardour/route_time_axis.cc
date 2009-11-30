@@ -2131,6 +2131,8 @@ RouteTimeAxisView::processors_changed ()
 	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
 	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
 
+	bool deleted_processor_automation = false;
+
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ) {
 
 		list<ProcessorAutomationInfo*>::iterator tmp;
@@ -2142,15 +2144,16 @@ RouteTimeAxisView::processors_changed ()
 
 			delete *i;
 			processor_automation.erase (i);
+			deleted_processor_automation = true;
 
 		}
 
 		i = tmp;
 	}
 
-	/* change in visibility was possible */
-
-	_route->gui_changed ("visible_tracks", this);
+	if (deleted_processor_automation) {
+		_route->gui_changed ("visible_tracks", this);
+	}
 }
 
 boost::shared_ptr<AutomationLine>

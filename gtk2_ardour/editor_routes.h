@@ -58,7 +58,7 @@ private:
 	void build_menu ();
 	void show_menu ();
 	void route_deleted (Gtk::TreeModel::Path const &);
-	void changed (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const &);
+	void visible_changed (Glib::ustring const &);
 	void reordered (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const &, int *);
 	bool button_press (GdkEventButton *);
 	void route_name_changed (boost::weak_ptr<ARDOUR::Route>);

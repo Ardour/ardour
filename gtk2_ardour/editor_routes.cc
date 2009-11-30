@@ -77,7 +77,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	rec_col_renderer->set_inactive_pixbuf (::get_icon("act-disabled"));
 	rec_col_renderer->signal_toggled().connect (mem_fun (*this, &EditorRoutes::on_tv_rec_enable_toggled));
 
-	Gtk::TreeViewColumn* rec_state_column = manage (new TreeViewColumn("R", *rec_col_renderer));
+	TreeViewColumn* rec_state_column = manage (new TreeViewColumn("R", *rec_col_renderer));
 
 	rec_state_column->add_attribute(rec_col_renderer->property_active(), _columns.rec_enabled);
 	rec_state_column->add_attribute(rec_col_renderer->property_visible(), _columns.is_track);
@@ -89,7 +89,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	mute_col_renderer->set_pixbuf (1, ::get_icon("mute-enabled"));
 	mute_col_renderer->signal_changed().connect (mem_fun (*this, &EditorRoutes::on_tv_mute_enable_toggled));
 
-	Gtk::TreeViewColumn* mute_state_column = manage (new TreeViewColumn("M", *mute_col_renderer));
+	TreeViewColumn* mute_state_column = manage (new TreeViewColumn("M", *mute_col_renderer));
 
 	mute_state_column->add_attribute(mute_col_renderer->property_state(), _columns.mute_state);
 
@@ -100,10 +100,10 @@ EditorRoutes::EditorRoutes (Editor* e)
 	solo_col_renderer->set_pixbuf (1, ::get_icon("solo-enabled"));
 	solo_col_renderer->signal_changed().connect (mem_fun (*this, &EditorRoutes::on_tv_solo_enable_toggled));
 
-	Gtk::TreeViewColumn* solo_state_column = manage (new TreeViewColumn("S", *solo_col_renderer));
+	TreeViewColumn* solo_state_column = manage (new TreeViewColumn("S", *solo_col_renderer));
 
 	solo_state_column->add_attribute(solo_col_renderer->property_state(), _columns.solo_state);
-	
+
 	_display.append_column (*rec_state_column);
 	_display.append_column (*mute_state_column);
 	_display.append_column (*solo_state_column);
@@ -127,21 +127,20 @@ EditorRoutes::EditorRoutes (Editor* e)
 	CellRendererText* name_cell = dynamic_cast<CellRendererText*> (_display.get_column_cell_renderer (4));
 	assert (name_cell);
 
-	Gtk::TreeViewColumn* name_column = _display.get_column (4);
+	TreeViewColumn* name_column = _display.get_column (4);
 	assert (name_column);
 
 	name_column->add_attribute (name_cell->property_editable(), _columns.name_editable);
-	
 	name_cell->property_editable() = true;
 	name_cell->signal_edited().connect (mem_fun (*this, &EditorRoutes::name_edit));
 
-	CellRendererToggle* visible_cell = dynamic_cast<CellRendererToggle*>(_display.get_column_cell_renderer (3));
+	CellRendererToggle* visible_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (3));
 
 	visible_cell->property_activatable() = true;
 	visible_cell->property_radio() = false;
+	visible_cell->signal_toggled().connect (mem_fun (*this, &EditorRoutes::visible_changed));
 
 	_model->signal_row_deleted().connect (mem_fun (*this, &EditorRoutes::route_deleted));
-	_model->signal_row_changed().connect (mem_fun (*this, &EditorRoutes::changed));
 	_model->signal_rows_reordered().connect (mem_fun (*this, &EditorRoutes::reordered));
 	_display.signal_button_press_event().connect (mem_fun (*this, &EditorRoutes::button_press), false);
 
@@ -309,9 +308,18 @@ EditorRoutes::route_deleted (Gtk::TreeModel::Path const &)
 
 
 void
-EditorRoutes::changed (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const &)
+EditorRoutes::visible_changed (Glib::ustring const & path)
 {
-	/* never reset order keys because of a property change */
+	TreeIter iter;
+
+	if ((iter = _model->get_iter (path))) {
+		TimeAxisView* tv = (*iter)[_columns.tv];
+		if (tv) {
+			bool visible = (*iter)[_columns.visible];
+			(*iter)[_columns.visible] = !visible;
+		}
+	}
+
 	_redisplay_does_not_reset_order_keys = true;
 	_session->set_remote_control_ids();
 	redisplay ();
@@ -656,45 +664,6 @@ EditorRoutes::button_press (GdkEventButton* ev)
 		return true;
 	}
 
-	TreeIter iter;
-	TreeModel::Path path;
-	TreeViewColumn* column;
-	int cellx;
-	int celly;
-
-	if (!_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
-		return false;
-	}
-
-	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
-
-	case 0:
-		/* allow normal processing to occur */
-		return false;
-	case 1:
-		/* allow normal processing to occur */
-		return false;
-	case 2:
-		/* allow normal processing to occur */
-		return false;		
-	case 3:
-		if ((iter = _model->get_iter (path))) {
-			TimeAxisView* tv = (*iter)[_columns.tv];
-			if (tv) {
-				bool visible = (*iter)[_columns.visible];
-				(*iter)[_columns.visible] = !visible;
-			}
-		}
-		return true;
-
-	case 4:
-		/* allow normal processing to occur */
-		return false;
-
-	default:
-		break;
-	}
-
 	return false;
 }
 
@@ -976,7 +945,6 @@ EditorRoutes::show_tracks_with_regions_at_playhead ()
 
 	set<TimeAxisView*> show;
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-		cout << "show " << (*i)->name() << "\n";
 		TimeAxisView* tav = _editor->axis_view_from_route (i->get ());
 		if (tav) {
 			show.insert (tav);
