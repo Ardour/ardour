@@ -542,35 +542,38 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 
 		ustring path = *p;
 
-		/* lets see if we can link it into the session */
+		if (Config->get_try_link_for_embed()) {
 
-		sys::path tmp = session->session_directory().sound_path() / Glib::path_get_basename(path);
-		linked_path = tmp.to_string();
+			/* lets see if we can link it into the session */
+			
+			sys::path tmp = session->session_directory().sound_path() / Glib::path_get_basename(path);
+			linked_path = tmp.to_string();
+			
+			path_to_use = linked_path;
+			
+			if (link (path.c_str(), linked_path.c_str()) == 0) {
+				
+				/* there are many reasons why link(2) might have failed.
+				   but if it succeeds, we now have a link in the
+				   session sound dir that will protect against
+				   unlinking of the original path. nice.
+				*/
+				
+				path = linked_path;
+				path_to_use = Glib::path_get_basename (path);
+				
+			} else {
 
-		path_to_use = linked_path;
-
-		if (link (path.c_str(), linked_path.c_str()) == 0) {
-
-			/* there are many reasons why link(2) might have failed.
-			   but if it succeeds, we now have a link in the
-			   session sound dir that will protect against
-			   unlinking of the original path. nice.
-			*/
-
-			path = linked_path;
-			path_to_use = Glib::path_get_basename (path);
-
-		} else {
-
-			/* one possible reason is that its already linked */
-
-			if (errno == EEXIST) {
-				struct stat sb;
-
-				if (stat (linked_path.c_str(), &sb) == 0) {
-					if (sb.st_nlink > 1) { // its a hard link, assume its the one we want
-						path = linked_path;
-						path_to_use = Glib::path_get_basename (path);
+				/* one possible reason is that its already linked */
+				
+				if (errno == EEXIST) {
+					struct stat sb;
+					
+					if (stat (linked_path.c_str(), &sb) == 0) {
+						if (sb.st_nlink > 1) { // its a hard link, assume its the one we want
+							path = linked_path;
+							path_to_use = Glib::path_get_basename (path);
+						}
 					}
 				}
 			}
@@ -651,9 +654,9 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 				if ((s = session->source_by_path_and_channel (path, n)) == 0) {
 
 					source = boost::dynamic_pointer_cast<AudioFileSource> (
-							SourceFactory::createReadable (DataType::AUDIO, *session,
-									path_to_use, false, n,
-									(mode == ImportAsTapeTrack
+						SourceFactory::createReadable (DataType::AUDIO, *session,
+									       path_to_use, n,
+									       (mode == ImportAsTapeTrack
 										? Source::Destructive
 										: Source::Flag (0)),
 									true, true));

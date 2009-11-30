@@ -55,6 +55,7 @@ CONFIG_VARIABLE (float, audio_track_buffer_seconds, "track-buffer-seconds", 5.0)
 CONFIG_VARIABLE (float, midi_track_buffer_seconds, "midi-track-buffer-seconds", 1.0)
 CONFIG_VARIABLE (uint32_t, disk_choice_space_threshold,  "disk-choice-space-threshold", 57600000)
 CONFIG_VARIABLE (bool, auto_analyse_audio, "auto-analyse-audio", false)
+CONFIG_VARIABLE (bool, try_link_for_embed, "try-link-for-embed", true)
 
 /* OSC */
 
