@@ -556,7 +556,7 @@ Session::follow_slave (nframes_t nframes)
 			delta *= dir;
 #endif
 
-			if (fabs(delta) > frames_per_cycle()) {
+			if (fabs(delta) > engine().frames_per_cycle()) {
 				/* too far off, so locate and keep rolling */
 				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave delta is too big, locate to %1\n", slave_transport_frame));
 				request_locate (slave_transport_frame, true);
