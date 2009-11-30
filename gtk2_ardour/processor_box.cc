@@ -92,7 +92,8 @@ RefPtr<Action> ProcessorBox::paste_action;
 Glib::RefPtr<Gdk::Pixbuf> SendProcessorEntry::_slider;
 
 ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
-	: _processor (p), _width (w)
+	: _processor (p)
+	, _width (w)
 {
 	_hbox.pack_start (_active, false, false);
 	_event_box.add (_name);
@@ -271,6 +272,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session& sess, sigc::slot<PluginSelector*> g
 	: _session(sess)
 	, _parent_strip (parent)
 	, _owner_is_mixer (owner_is_mixer)
+	, ab_direction (true)
 	, _get_plugin_selector (get_plugin_selector)
 	, _placement(PreFader)
 	, _rr_selection(rsel)
@@ -545,18 +547,21 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 	case GDK_a:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			processor_display.select_all ();
+			ret = true;
 		} 
 		break;
 
 	case GDK_c:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			copy_processors (targets);
+			ret = true;
 		}
 		break;
 
 	case GDK_x:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			cut_processors (targets);
+			ret = true;
 		}
 		break;
 
@@ -567,7 +572,14 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 			} else {
 				paste_processors (targets.front());
 			}
+			ret = true;
 		}
+		break;
+
+	case GDK_Up:
+		break;
+
+	case GDK_Down:
 		break;
 
 	case GDK_Delete:
@@ -576,7 +588,7 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 		ret = true;
 		break;
 
-	case GDK_slash:
+	case GDK_Return:
 		for (ProcSelection::iterator i = targets.begin(); i != targets.end(); ++i) {
 			if ((*i)->active()) {
 				(*i)->deactivate ();
@@ -584,6 +596,11 @@ ProcessorBox::processor_key_release_event (GdkEventKey *ev)
 				(*i)->activate ();
 			}
 		}
+		ret = true;
+		break;
+
+	case GDK_slash:
+		ab_plugins ();
 		ret = true;
 		break;
 
@@ -858,35 +875,6 @@ ProcessorBox::send_io_finished (IOSelector::Result r, boost::weak_ptr<Processor>
 	}
 
 	delete_when_idle (ios);
-}
-
-void
-ProcessorBox::choose_return ()
-{
-	boost::shared_ptr<Return> retrn (new Return (_session));
-
-	/* assume user just wants a single audio input (sidechain) by default */
-	ChanCount ins(DataType::AUDIO, 1);
-
-	/* XXX need processor lock on route */
-	try {
-		retrn->input()->ensure_io (ins, false, this);
-	} catch (AudioEngine::PortRegistrationFailure& err) {
-		error << string_compose (_("Cannot set up new return: %1"), err.what()) << endmsg;
-		return;
-	}
-
-	/* let the user adjust the IO setup before creation */
-	IOSelectorWindow *ios = new IOSelectorWindow (_session, retrn->input(), true);
-	ios->show_all ();
-
-	/* keep a reference to the return so it doesn't get deleted while
-	   the IOSelectorWindow is doing its stuff */
-	_processor_being_created = retrn;
-
-	ios->selector().Finished.connect (bind (
-			mem_fun(*this, &ProcessorBox::return_io_finished),
-			boost::weak_ptr<Processor>(retrn), ios));
 }
 
 void
@@ -1532,8 +1520,6 @@ ProcessorBox::register_actions ()
 	ActionManager::jack_sensitive_actions.push_back (act);
 
 	ActionManager::register_action (popup_act_grp, X_("newaux"), _("New Aux Send ..."));
-	ActionManager::register_action (popup_act_grp, X_("newreturn"), _("New Return ..."),
-					sigc::ptr_fun (ProcessorBox::rb_choose_return));
 
 	ActionManager::register_action (popup_act_grp, X_("clear"), _("Clear (all)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear));
@@ -1564,20 +1550,31 @@ ProcessorBox::register_actions ()
 	ActionManager::register_action (popup_act_grp, X_("deselectall"), _("Deselect All"),
 			sigc::ptr_fun (ProcessorBox::rb_deselect_all));
 
-	/* activation */
+	/* activation etc. */
 
-	ActionManager::plugin_selection_sensitive_actions.push_back(act);
 	ActionManager::register_action (popup_act_grp, X_("activate_all"), _("Activate all"),
-			sigc::ptr_fun (ProcessorBox::rb_activate_all));
+					sigc::ptr_fun (ProcessorBox::rb_activate_all));
 	ActionManager::register_action (popup_act_grp, X_("deactivate_all"), _("Deactivate all"),
-			sigc::ptr_fun (ProcessorBox::rb_deactivate_all));
+					sigc::ptr_fun (ProcessorBox::rb_deactivate_all));
+	ActionManager::register_action (popup_act_grp, X_("ab_plugins"), _("A/B Plugins"),
+					sigc::ptr_fun (ProcessorBox::rb_ab_plugins));
 
 	/* show editors */
 	act = ActionManager::register_action (popup_act_grp, X_("edit"), _("Edit"),
-			sigc::ptr_fun (ProcessorBox::rb_edit));
+					      sigc::ptr_fun (ProcessorBox::rb_edit));
 	ActionManager::plugin_selection_sensitive_actions.push_back(act);
 
 	ActionManager::add_action_group (popup_act_grp);
+}
+
+void
+ProcessorBox::rb_ab_plugins ()
+{
+	if (_current_processor_box == 0) {
+		return;
+	}
+
+	_current_processor_box->ab_plugins ();
 }
 
 void
@@ -1605,15 +1602,6 @@ ProcessorBox::rb_choose_send ()
 		return;
 	}
 	_current_processor_box->choose_send ();
-}
-
-void
-ProcessorBox::rb_choose_return ()
-{
-	if (_current_processor_box == 0) {
-		return;
-	}
-	_current_processor_box->choose_return ();
 }
 
 void
