@@ -58,19 +58,19 @@ class ArdourStartup : public Gtk::Assistant {
 	bool connect_outs_to_master() const;
 	bool connect_outs_to_physical() const;
 
-	bool applying () const {
-		return _applying;
+	gint response () const { 
+		return  _response;
 	}
 
   private:
-	bool _applying;
+	gint _response;
 	bool config_modified;
 	bool new_user;
 	bool new_only;
 
 	void on_apply ();
 	void on_cancel ();
-	void on_close ();
+	bool on_delete_event (GdkEventAny*);
 	void on_prepare (Gtk::Widget*);
 
 	static ArdourStartup *the_startup;
@@ -95,7 +95,8 @@ class ArdourStartup : public Gtk::Assistant {
 	Gtk::VBox ic_vbox;
 	Gtk::RadioButton ic_new_session_button;
 	Gtk::RadioButton ic_existing_session_button;
-	bool initial_choice_activated(GdkEventButton *);
+	bool initial_button_press(GdkEventButton *);
+	void initial_button_activated();
 
 	/* monitoring choices */
 
@@ -134,7 +135,7 @@ class ArdourStartup : public Gtk::Assistant {
 	Gtk::TreeView                recent_session_display;
 	Glib::RefPtr<Gtk::TreeStore> recent_session_model;
 	Gtk::ScrolledWindow          recent_scroller;
-	void redisplay_recent_sessions ();
+	int redisplay_recent_sessions ();
 	void recent_session_row_selected ();
 	void recent_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col);
 

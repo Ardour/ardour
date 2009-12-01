@@ -296,11 +296,14 @@ ARDOUR_UI::run_startup (bool should_be_new)
 
 	main().run();
 
-	/* we don't return here until the startup assistant is finished */
-
 	_startup->hide ();
 
-	return _startup->applying ();
+	switch (_startup->response()) {
+	case RESPONSE_OK:
+		return true;
+	default:
+		return false;
+	}
 }
 
 int

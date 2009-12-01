@@ -38,7 +38,7 @@ static string poor_mans_glob (string path)
 
 
 ArdourStartup::ArdourStartup ()
-	: _applying (false)
+	: _response (RESPONSE_OK)
 	, ic_new_session_button (_("Open a new session"))
 	, ic_existing_session_button (_("Open an existing session"))
 	, monitor_via_hardware_button (_("Use an external mixer or the hardware mixer of your audio interface.\n\
@@ -359,8 +359,12 @@ ArdourStartup::setup_initial_choice_page ()
 
 	centering_vbox->pack_start (ic_new_session_button, false, true);
 	centering_vbox->pack_start (ic_existing_session_button, false, true);
-	ic_new_session_button.signal_button_press_event().connect(mem_fun(*this, &ArdourStartup::initial_choice_activated), false);
-	ic_existing_session_button.signal_button_press_event().connect(mem_fun(*this, &ArdourStartup::initial_choice_activated), false);
+
+	ic_new_session_button.signal_button_press_event().connect(mem_fun(*this, &ArdourStartup::initial_button_press), false);
+	ic_new_session_button.signal_activate().connect(mem_fun(*this, &ArdourStartup::initial_button_activated), false);
+
+	ic_existing_session_button.signal_button_press_event().connect(mem_fun(*this, &ArdourStartup::initial_button_press), false);
+	ic_existing_session_button.signal_activate().connect(mem_fun(*this, &ArdourStartup::initial_button_activated), false);
 
 	centering_hbox->pack_start (*centering_vbox, true, true);
 
@@ -380,15 +384,21 @@ ArdourStartup::setup_initial_choice_page ()
 }
 
 bool
-ArdourStartup::initial_choice_activated(GdkEventButton *event)
+ArdourStartup::initial_button_press (GdkEventButton *event)
 {
-  if (event && event->type == GDK_2BUTTON_PRESS && session_page_index != -1)
-    {
-      set_current_page(session_page_index);
-      return true;
-    }
-  else
-    return false;
+	if (event && event->type == GDK_2BUTTON_PRESS && session_page_index != -1)
+	{
+		set_current_page(session_page_index);
+		return true;
+	} else {
+		return false;
+	}
+}
+
+void
+ArdourStartup::initial_button_activated ()
+{
+	set_current_page(session_page_index);
 }
 
 void
@@ -418,24 +428,21 @@ ArdourStartup::setup_final_page ()
 void
 ArdourStartup::on_cancel ()
 {
-	_applying = false;
+	_response = RESPONSE_CANCEL;
 	gtk_main_quit ();
 }
 
-void
-ArdourStartup::on_close ()
+bool
+ArdourStartup::on_delete_event (GdkEventAny*)
 {
-	_applying = false;
+	_response = RESPONSE_CLOSE;
 	gtk_main_quit ();
+	return true;
 }
 
 void
 ArdourStartup::on_apply ()
 {
-	_applying = true;
-
-	// XXX do stuff and then ....
-
 	if (engine_dialog) {
 		engine_dialog->setup_engine ();
 	}
@@ -455,6 +462,7 @@ ArdourStartup::on_apply ()
 		Config->save_state ();
 	}
 
+	_response = RESPONSE_OK;
 	gtk_main_quit ();
 }
 
@@ -655,7 +663,7 @@ ArdourStartup::new_name_changed ()
 	}
 }
 
-void
+int
 ArdourStartup::redisplay_recent_sessions ()
 {
 	std::vector<sys::path> session_directories;
@@ -669,7 +677,7 @@ ArdourStartup::redisplay_recent_sessions ()
 
 	if (rs.empty()) {
 		recent_session_display.set_model (recent_session_model);
-		return;
+		return 0;
 	}
 	//
 	// sort them alphabetically
@@ -734,6 +742,7 @@ ArdourStartup::redisplay_recent_sessions ()
 	}
 
 	recent_session_display.set_model (recent_session_model);
+	return rs.size();
 }
 
 void
@@ -771,8 +780,12 @@ ArdourStartup::setup_existing_session_page ()
 	}
 
 	recent_scroller.show();
-	redisplay_recent_sessions ();
+	int cnt = redisplay_recent_sessions ();
 	recent_session_display.signal_row_activated().connect (mem_fun (*this, &ArdourStartup::recent_row_activated));
+
+	if (cnt > 4) {
+		recent_scroller.set_size_request (-1, 300);
+	}
 
 	session_hbox.pack_start (recent_scroller, true, true);
 	set_page_title (session_vbox, _("Select a session"));

@@ -198,6 +198,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	void store_clock_modes ();
 	void restore_clock_modes ();
+	void reset_main_clocks ();
 
 	void add_route (Gtk::Window* float_window);
 
