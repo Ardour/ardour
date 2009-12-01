@@ -394,10 +394,6 @@ Mixer_UI::sync_order_keys (string const & src)
 		unsigned int old_key = order;
 		unsigned int new_key = route->order_key (N_("signal"));
 
-		cerr << route->name() << " old was " << order << " new is " << new_key << " exists ?"
-		     << (keys.find (new_key) != keys.end())
-		     << endl;
-
 		keys[new_key] = old_key;
 
 		if (new_key != old_key) {
