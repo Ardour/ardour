@@ -4348,6 +4348,9 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 	RegionSelection sel = regions; // clear (below) may  clear the argument list if its the current region selection
 	RegionSelection foo;
 
+	nframes_t const start_frame = regions.start ();
+	nframes_t const end_frame = regions.end_frame ();
+
 	begin_reversible_command (_("duplicate region"));
 
 	selection->clear_regions ();
@@ -4363,7 +4366,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 
  		playlist = (*i)->region()->playlist();
                 XMLNode &before = playlist->get_state();
-		playlist->duplicate (r, r->last_frame(), times);
+		playlist->duplicate (r, end_frame + (r->first_frame() - start_frame) + 1, times);
 		session->add_command(new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 
 		c.disconnect ();
