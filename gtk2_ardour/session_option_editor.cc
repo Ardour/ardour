@@ -194,7 +194,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Sync"), new BoolOption (
 			    "timecode-source-is-synced",
-			    _("Timecode source is synced"),
+			    _("Timecode source shares sample clock with audio interface"),
 			    mem_fun (*_session_config, &SessionConfiguration::get_timecode_source_is_synced),
 			    mem_fun (*_session_config, &SessionConfiguration::set_timecode_source_is_synced)
 			    ));
