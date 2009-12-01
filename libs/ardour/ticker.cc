@@ -181,6 +181,10 @@ double MidiClockTicker::one_ppqn_in_frames(nframes_t transport_position)
 
 void MidiClockTicker::send_midi_clock_event(nframes_t offset)
 {
+	if (!_midi_port) {
+		return;
+	}
+
 #ifdef WITH_JACK_MIDI
 	assert (MIDI::JACK_MidiPort::is_process_thread());
 #endif // WITH_JACK_MIDI
@@ -193,18 +197,30 @@ void MidiClockTicker::send_midi_clock_event(nframes_t offset)
 
 void MidiClockTicker::send_start_event(nframes_t offset)
 {
+	if (!_midi_port) {
+		return;
+	}
+	
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_START };
 	_midi_port->write(_midi_clock_tick, 1, offset);
 }
 
 void MidiClockTicker::send_continue_event(nframes_t offset)
 {
+	if (!_midi_port) {
+		return;
+	}
+	
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_CONTINUE };
 	_midi_port->write(_midi_clock_tick, 1, offset);
 }
 
 void MidiClockTicker::send_stop_event(nframes_t offset)
 {
+	if (!_midi_port) {
+		return;
+	}
+	
 	static uint8_t _midi_clock_tick[1] = { MIDI_CMD_COMMON_STOP };
 	_midi_port->write(_midi_clock_tick, 1, offset);
 }
