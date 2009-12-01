@@ -1173,6 +1173,9 @@ Session::midi_thread_work ()
 
 			break;
 		}
+
+		nframes64_t now = engine().frame_time();
+
 		DEBUG_TRACE (DEBUG::MidiIO, "MIDI thread awake\n");
 
 		fds_ready = 0;
@@ -1260,7 +1263,7 @@ Session::midi_thread_work ()
 			if (pfd[p].revents & POLLIN) {
 				DEBUG_TRACE (DEBUG::MidiIO, string_compose ("MIDI fd # %1 has data ready\n", p));
 				fds_ready++;
-				ports[p]->parse ();
+				ports[p]->parse (now);
 			}
 		}
 

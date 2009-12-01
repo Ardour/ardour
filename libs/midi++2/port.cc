@@ -91,13 +91,18 @@ Port::~Port ()
 }
 
 void
-Port::parse ()
+Port::parse (nframes_t timestamp)
 {
 	byte buf[512];
 
-	/* parsing is done (if at all) by initiating a read from 
-	   the port.
+	/* NOTE: parsing is done (if at all) by initiating a read from 
+	   the port. Each port implementation calls on the parser
+	   once it has data ready.
 	*/
+	
+	if (input_parser) {
+		input_parser->set_timestamp (timestamp);
+	}
 
 	while (1) {
 		

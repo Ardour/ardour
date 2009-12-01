@@ -74,7 +74,7 @@ class Port : public sigc::trackable {
 	 */
 	virtual int read (byte *buf, size_t bufsize) = 0;
 
-	void parse ();
+	void parse (nframes_t timestamp);
 	
 	/** Write a message to port.
 	 * @return true on success.

@@ -82,6 +82,7 @@ JACK_MidiPort::cycle_start (nframes_t nframes)
 		const nframes_t event_count = jack_midi_get_event_count(jack_buffer);
 
 		jack_midi_event_t ev;
+		nframes_t cycle_start_frame = jack_last_frame_time (_jack_client);
 
 		for (nframes_t i=0; i < event_count; ++i) {
 
@@ -89,7 +90,7 @@ JACK_MidiPort::cycle_start (nframes_t nframes)
 
 			if (input_parser) {
 				for (size_t i = 0; i < ev.size; i++) {
-					input_parser->set_timestamp (ev.time + jack_last_frame_time(_jack_client));
+					input_parser->set_timestamp (cycle_start_frame + ev.time);
 					input_parser->scanner (ev.buffer[i]);
 				}	
 			}
@@ -101,7 +102,7 @@ void
 JACK_MidiPort::cycle_end ()
 {
 	if (_jack_output_port != 0) {
-		flush(jack_port_get_buffer(_jack_output_port, _nframes_this_cycle));
+		flush (jack_port_get_buffer (_jack_output_port, _nframes_this_cycle));
 	}
 }
 

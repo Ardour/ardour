@@ -496,6 +496,7 @@ Session::follow_slave (nframes_t nframes)
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("Slave @ %2 speed %1\n", slave_speed, slave_transport_frame));
 
 	if (!_slave->locked()) {
+		DEBUG_TRACE (DEBUG::Slave, "slave not locked\n");
 		goto noroll;
 	}
 
@@ -532,6 +533,10 @@ Session::follow_slave (nframes_t nframes)
 	}
 
 	track_slave_state (slave_speed, slave_transport_frame, this_delta, starting);
+
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("slave state %1 @ %2 speed %3 cur delta %4 starting %5\n",
+						   slave_state, slave_transport_frame, slave_speed, this_delta, starting));
+		     
 
 	if (slave_state == Running && !_slave->is_always_synced() && !config.get_timecode_source_is_synced()) {
 
