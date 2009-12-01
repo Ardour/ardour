@@ -645,11 +645,7 @@ Session::calculate_moving_average_of_slave_delta(int dir, nframes_t this_delta)
 }
 
 void
-Session::track_slave_state(
-		float slave_speed,
-		nframes_t slave_transport_frame,
-		nframes_t this_delta,
-		bool starting)
+Session::track_slave_state (float slave_speed, nframes_t slave_transport_frame, nframes_t this_delta, bool starting)
 {
 	if (slave_speed != 0.0f) {
 
@@ -659,6 +655,7 @@ Session::track_slave_state(
 		case Stopped:
 			if (_slave->requires_seekahead()) {
 				slave_wait_end = slave_transport_frame + _current_frame_rate;
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stopped, but running, requires seekahead to %1\n", slave_wait_end));
 				locate (slave_wait_end, false, false);
 				slave_state = Waiting;
 				starting = true;
@@ -681,22 +678,12 @@ Session::track_slave_state(
 			break;
 
 		case Waiting:
-			break;
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave waiting at %1\n", slave_transport_frame));
 
-		default:
-			break;
-
-		}
-
-		if (slave_state == Waiting) {
-
-		#ifdef DEBUG_SLAVES
-			cerr << "waiting at " << slave_transport_frame << endl;
-		#endif
 			if (slave_transport_frame >= slave_wait_end) {
-#ifdef DEBUG_SLAVES
-				cerr << "\tstart at " << _transport_frame << endl;
-#endif
+
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave start at %1 vs %2\n", slave_transport_frame, _transport_frame));
+
 				slave_state = Running;
 
 				bool ok = true;
@@ -726,6 +713,10 @@ Session::track_slave_state(
 				average_slave_delta = 0L;
 				this_delta = 0;
 			}
+			break;
+
+		default:
+			break;
 		}
 
 		if (slave_state == Running && _transport_speed == 0.0f) {
