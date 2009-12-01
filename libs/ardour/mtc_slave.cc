@@ -156,18 +156,18 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 		   frames.
 		   Also compensate for audio latency.
 		*/
-
+#if 0		
 		mtc_frame += (long) (1.75 * session.frames_per_timecode_frame()) + session.worst_output_latency();
-		
-		double speed = compute_apparent_speed (now);
 
+		/* leave speed alone here. compute it only as we receive qtr frame messages */
+		
 		current.guard1++;
 		current.position = mtc_frame;
 		current.timestamp = now;
-		current.speed = speed;
 		current.guard2++;
 
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("stored TC frame = %1 @ %2, sp = %3\n", mtc_frame, now, speed));
+#endif
 	}
 
 	last_inbound_frame = now;
