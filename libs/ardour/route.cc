@@ -985,8 +985,6 @@ Route::add_processors (const ProcessorList& others, ProcessorList::iterator iter
 
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
-		ProcessorList::iterator existing_end = _processors.end();
-		--existing_end;
 
 		ChanCount potential_max_streams = ChanCount::max (_input->n_ports(), _output->n_ports());
 
@@ -1012,15 +1010,14 @@ Route::add_processors (const ProcessorList& others, ProcessorList::iterator iter
 				}
 			}
 
-			_processors.insert (iter, *i);
+			ProcessorList::iterator inserted = _processors.insert (iter, *i);
 
 			if ((*i)->active()) {
 				(*i)->activate ();
 			}
 
 			if (configure_processors_unlocked (err)) {
-				++existing_end;
-				_processors.erase (existing_end, _processors.end());
+				_processors.erase (inserted);
 				configure_processors_unlocked (0); // it worked before we tried to add it ...
 				return -1;
 			}
@@ -1473,15 +1470,6 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 		}
 	}
 
-	/* Take the process lock so that if we add a processor which increases the required
-	   number of scratch buffers, we create those scratch buffers before the process
-	   thread has a chance to ask for them.
-	   XXX: in an ideal world we'd perhaps use some RCU magic to avoid having to take
-	   the lock here.
-	*/
-	
-	Glib::Mutex::Lock pl (_session.engine().process_lock ());
-	
 	// We can, so configure everything
 	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
