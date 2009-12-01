@@ -390,14 +390,22 @@ ARDOUR_UI::parameter_changed (std::string p)
 			break;
 		}
 	} else if (p == "video-pullup" || p == "timecode-format") {
-		if (session) {
-			primary_clock.set (session->audible_frame(), true);
-			secondary_clock.set (session->audible_frame(), true);
-		} else {
-			primary_clock.set (0, true);
-			secondary_clock.set (0, true);
-		}
+		reset_main_clocks ();
 	} else if (p == "show-track-meters") {
 		editor->toggle_meter_updating();
+	}
+}
+
+void
+ARDOUR_UI::reset_main_clocks ()
+{
+	ENSURE_GUI_THREAD (mem_fun (*this, &ARDOUR_UI::reset_main_clocks));
+
+	if (session) {
+		primary_clock.set (session->audible_frame(), true);
+		secondary_clock.set (session->audible_frame(), true);
+	} else {
+		primary_clock.set (0, true);
+		secondary_clock.set (0, true);
 	}
 }
