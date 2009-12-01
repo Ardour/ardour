@@ -88,6 +88,8 @@ ARDOUR::parse_debug_options (const char* str)
 			bits |= ARDOUR::DEBUG::Slave;
 		} else if (strncasecmp (p, "sessionevents", strlen (p)) == 0) {
 			bits |= ARDOUR::DEBUG::SessionEvents;
+		} else if (strncasecmp (p, "midiio", strlen (p)) == 0) {
+			bits |= ARDOUR::DEBUG::MidiIO;
 		}
 
 		p = strtok_r (0, ",", &sp);
@@ -115,4 +117,5 @@ ARDOUR::list_debug_options ()
 	cerr << "\tTransport" << endl;
 	cerr << "\tSlave" << endl;
 	cerr << "\tSessionEvents" << endl;
+	cerr << "\tMidiIO" << endl;
 }

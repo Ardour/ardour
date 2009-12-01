@@ -28,11 +28,11 @@
 
 #include <boost/shared_ptr.hpp>
 
+
 #include "midi++/mmc.h"
 #include "midi++/port.h"
 #include "midi++/manager.h"
 #include "pbd/error.h"
-#include <glibmm/thread.h>
 #include "pbd/pthread_utils.h"
 
 #include "ardour/configuration.h"
@@ -1118,7 +1118,7 @@ Session::midi_thread_work ()
 			pfd[nfds].fd = _mmc_port->selectable();
 			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 			ports[nfds] = _mmc_port;
-			//cerr << "MIDI port " << nfds << " = MMC @ " << _mmc_port << endl;
+			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("set up port #%1 for mmc @ %2\n", nfds, _mmc_port));
 			nfds++;
 		}
 
@@ -1131,7 +1131,7 @@ Session::midi_thread_work ()
 			pfd[nfds].fd = _mtc_port->selectable();
 			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 			ports[nfds] = _mtc_port;
-			//cerr << "MIDI port " << nfds << " = MTC @ " << _mtc_port << endl;
+			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("set up port #%1 for mtc @ %2\n", nfds, _mtc_port));
 			nfds++;
 		}
 
@@ -1139,6 +1139,7 @@ Session::midi_thread_work ()
 			pfd[nfds].fd = _midi_clock_port->selectable();
 			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 			ports[nfds] = _midi_clock_port;
+			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("set up port #%1 for midi clock @ %2\n", nfds, _midi_clock_port));
 			nfds++;
 		}
 
@@ -1150,7 +1151,7 @@ Session::midi_thread_work ()
 			pfd[nfds].fd = _midi_port->selectable();
 			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
 			ports[nfds] = _midi_port;
-			// cerr << "MIDI port " << nfds << " = MIDI @ " << _midi_port << endl;
+			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("set up port #%1 for midi @ %2\n", nfds, _midi_port));
 			nfds++;
 		}
 
@@ -1161,7 +1162,7 @@ Session::midi_thread_work ()
 		}
 
 	  again:
-		// cerr << "MIDI poll on " << nfds << " for " << timeout << endl;
+		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("MIDI poll on %1 fds for %2\n", nfds, timeout));
 		if (poll (pfd, nfds, timeout) < 0) {
 			if (errno == EINTR) {
 				/* gdb at work, perhaps */
@@ -1172,7 +1173,7 @@ Session::midi_thread_work ()
 
 			break;
 		}
-		// cerr << "MIDI thread wakes at " << get_cycles () << endl;
+		DEBUG_TRACE (DEBUG::MidiIO, "MIDI thread awake\n");
 
 		fds_ready = 0;
 
@@ -1186,8 +1187,8 @@ Session::midi_thread_work ()
 		if (pfd[0].revents & POLLIN) {
 
 			char foo[16];
-
-			// cerr << "MIDI request FIFO ready\n";
+			
+			DEBUG_TRACE (DEBUG::MidiIO, "MIDI request FIFO ready\n");
 			fds_ready++;
 
 			/* empty the pipe of all current requests */
@@ -1216,12 +1217,13 @@ Session::midi_thread_work ()
 				switch (request->type) {
 				case MIDIRequest::PortChange:
 					/* restart poll with new ports */
-					// cerr << "rebind\n";
+					DEBUG_TRACE (DEBUG::MidiIO, "rebind\n");
 					restart = true;
 					break;
 
 				case MIDIRequest::Quit:
 					delete request;
+					DEBUG_TRACE (DEBUG::MidiIO, "thread quit\n");
 					pthread_exit_pbd (0);
 					/*NOTREACHED*/
 					break;
@@ -1237,18 +1239,26 @@ Session::midi_thread_work ()
 		}
 
 		if (restart) {
+			DEBUG_TRACE (DEBUG::MidiIO, "ports changed, restart poll\n");
+			restart = false;
 			continue;
 		}
 
 		/* now read the rest of the ports */
 
 		for (int p = 1; p < nfds; ++p) {
+
+			DEBUG_STR_SET(foo, "port #%1 revents = ");
+			DEBUG_STR(foo) << hex << pfd[p].revents << dec << endl;
+			DEBUG_TRACE (DEBUG::MidiIO, string_compose (DEBUG_STR(foo).str(), p));
+
 			if ((pfd[p].revents & ~POLLIN)) {
 				// error << string_compose(_("Transport: error polling MIDI port %1 (revents =%2%3%4"), p, &hex, pfd[p].revents, &dec) << endmsg;
 				break;
 			}
 
 			if (pfd[p].revents & POLLIN) {
+				DEBUG_TRACE (DEBUG::MidiIO, string_compose ("MIDI fd # %1 has data ready\n", p));
 				fds_ready++;
 				ports[p]->parse ();
 			}
@@ -1258,6 +1268,7 @@ Session::midi_thread_work ()
 
 		if (fds_ready < 2 && timeout != -1) {
 
+			DEBUG_TRACE (DEBUG::MidiIO, "Check timeouts\n");
 			for (MidiTimeoutList::iterator i = midi_timeouts.begin(); i != midi_timeouts.end(); ) {
 
 				MidiTimeoutList::iterator tmp;

@@ -50,6 +50,7 @@ namespace ARDOUR {
 			Transport = 0x400,
 			Slave = 0x800,
 			SessionEvents = 0x800,
+			MidiIO = 0x1000
 		};
 	}
 
