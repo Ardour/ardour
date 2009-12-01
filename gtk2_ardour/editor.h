@@ -872,7 +872,6 @@ class Editor : public PublicEditor
 	Gtk::HBox           bottom_hbox;
 
 	Gtk::Table          edit_packer;
-	Gtk::VScrollbar     edit_vscrollbar;
 
 	Gtk::Adjustment     vertical_adjustment;
 	Gtk::Adjustment     horizontal_adjustment;

@@ -1495,21 +1495,19 @@ Editor::scroll_tracks_up ()
 void
 Editor::scroll_tracks_down_line ()
 {
+	double vert_value = vertical_adjustment.get_value() + 60;
 
-        Gtk::Adjustment* adj = edit_vscrollbar.get_adjustment();
-	double vert_value = adj->get_value() + 60;
-
-	if (vert_value>adj->get_upper() - _canvas_height) {
-		vert_value = adj->get_upper() - _canvas_height;
+	if (vert_value > vertical_adjustment.get_upper() - _canvas_height) {
+		vert_value = vertical_adjustment.get_upper() - _canvas_height;
 	}
-	adj->set_value (vert_value);
+	
+	vertical_adjustment.set_value (vert_value);
 }
 
 void
 Editor::scroll_tracks_up_line ()
 {
-        Gtk::Adjustment* adj = edit_vscrollbar.get_adjustment();
-	adj->set_value (adj->get_value() - 60);
+	reset_y_origin (vertical_adjustment.get_value() - 60);
 }
 
 /* ZOOM */
