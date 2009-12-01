@@ -48,7 +48,8 @@ InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, boost:
 }
 
 InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node)
-	: Send (s, mm, node, Stateful::loading_state_version, Delivery::Aux /* will be reset in set_state() */)
+	: Send (s, mm, node, Stateful::loading_state_version, Delivery::Aux /* will be reset in set_state() */),
+	  target (0)
 {
 	/* Send constructor will set its state, so here we just need to set up our own */
 	set_our_state (node, Stateful::loading_state_version);
