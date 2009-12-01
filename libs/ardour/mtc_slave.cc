@@ -74,10 +74,8 @@ MTC_Slave::rebind (MIDI::Port& p)
 }
 
 void
-MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr)
+MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, nframes_t now)
 {
-	nframes64_t now = session.engine().frame_time();
-
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr frame %1 at %2, valid-for-time? %3\n", which_qtr, now, qtr_frame_messages_valid_for_time));
 
 	if (qtr_frame_messages_valid_for_time) {
@@ -109,9 +107,12 @@ MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr)
 }
 
 void
-MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
+MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 {
-	nframes64_t now = session.engine().frame_time();
+	/* "now" can be zero if this is called from a context where we do not have or do not want
+	   to use a timestamp indicating when this MTC time was received.
+	*/
+
 	Timecode::Time timecode;
 	TimecodeFormat tc_format;
 	bool reset_tc = true;
@@ -201,17 +202,21 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 		*/
 		
 		mtc_frame += (long) (1.75 * session.frames_per_timecode_frame()) + session.worst_output_latency();
-		
-		double speed = compute_apparent_speed (now);
-		
-		current.guard1++;
-		current.position = mtc_frame;
-		current.timestamp = now;
-		current.speed = speed;
-		current.guard2++;
+
+		if (now) {
+			double speed = compute_apparent_speed (now);
+			
+			current.guard1++;
+			current.position = mtc_frame;
+			current.timestamp = now;
+			current.speed = speed;
+			current.guard2++;
+		}
 	}
 
-	last_inbound_frame = now;
+	if (now) {
+		last_inbound_frame = now;
+	}
 }
 
 double
@@ -262,7 +267,7 @@ MTC_Slave::handle_locate (const MIDI::byte* mmc_tc)
 	mtc[1] = mmc_tc[2];
 	mtc[0] = mmc_tc[3];
 
-	update_mtc_time (mtc, true);
+	update_mtc_time (mtc, true, 0);
 }
 
 void

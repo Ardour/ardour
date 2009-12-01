@@ -569,9 +569,11 @@ Session::follow_slave (nframes_t nframes)
 	}
 #endif
 			if (fabs(delta) > 2048) {
+				nframes64_t jump_to = slave_transport_frame + lrintf (_current_frame_rate/5.0f);
 				/* too far off, so locate and keep rolling */
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave delta %1 is too big, locate to %2\n", delta, slave_transport_frame));
-				request_locate (slave_transport_frame, true);
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave delta %1 is too big, locate to %2\n", 
+									   delta, jump_to));
+				request_locate (jump_to, true);
 				return false;
 			} else {
 				float adjusted_speed = slave_speed + (delta /  float(_current_frame_rate));

@@ -245,8 +245,8 @@ class MTC_Slave : public Slave, public sigc::trackable {
 	bool    have_first_accumulated_speed;
 
 	void reset ();
-	void update_mtc_qtr (MIDI::Parser&, int);
-	void update_mtc_time (const MIDI::byte *, bool);
+	void update_mtc_qtr (MIDI::Parser&, int, nframes_t);
+	void update_mtc_time (const MIDI::byte *, bool, nframes_t);
 	void update_mtc_status (MIDI::Parser::MTC_Status);
 	void read_current (SafeTime *) const;
 	double compute_apparent_speed (nframes64_t);
