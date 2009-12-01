@@ -147,8 +147,9 @@ Session::timecode_drop_frames() const
 
 			break;
 	        default:
-			cerr << "Editor received unexpected timecode type" << endl;
+			error << "Editor received unexpected timecode type" << endmsg;
 	}
+
 	return false;
 }
 void

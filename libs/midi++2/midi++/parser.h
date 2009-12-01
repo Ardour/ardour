@@ -74,8 +74,8 @@ class Parser : public sigc::trackable {
 	Signal                position;
 	Signal                song;
 
-	Signal                       mtc;
-	sigc::signal<void,Parser&>   mtc_qtr;
+	Signal                           mtc;
+	sigc::signal<void,Parser&,int>   mtc_qtr;
 
 	sigc::signal<void, Parser &>                     all_notes_off;
 	sigc::signal<void, Parser &>                     tune;

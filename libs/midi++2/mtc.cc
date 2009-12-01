@@ -226,7 +226,9 @@ Parser::process_mtc_quarter_frame (byte *msg)
 
 	/* time code is looking good */
 
+#ifdef DEBUG_MTC
 	cerr << "for quarter frame " << which_quarter_frame << " byte = " << hex << (int) msg[1] << dec << endl;
+#endif
 
 	switch (which_quarter_frame) {
 	case 0: // frames LS nibble
@@ -275,7 +277,7 @@ Parser::process_mtc_quarter_frame (byte *msg)
 
 	} 
 	
-	mtc_qtr (*this); /* EMIT_SIGNAL */
+	mtc_qtr (*this, which_quarter_frame); /* EMIT_SIGNAL */
 
 	// mtc (*this, &msg[1], msglen - 1);
 

@@ -44,7 +44,8 @@ MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 	: session (s)
 {
 	can_notify_on_unknown_rate = true;
-
+	did_reset_tc_format = false;
+	
 	last_mtc_fps_byte = session.get_mtc_timecode_bits ();
 
 	rebind (p);
@@ -53,6 +54,9 @@ MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 
 MTC_Slave::~MTC_Slave()
 {
+	if (did_reset_tc_format) {
+		session.config.set_timecode_format (saved_tc_format);
+	}
 }
 
 void
@@ -70,23 +74,36 @@ MTC_Slave::rebind (MIDI::Port& p)
 }
 
 void
-MTC_Slave::update_mtc_qtr (Parser& /*p*/)
+MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr)
 {
-	nframes64_t now = session.engine().frame_time();
-	nframes_t qtr;
+	if (qtr_frame_messages_valid_for_time) {
+		
+		nframes64_t now = session.engine().frame_time();
 
-	qtr = (long) (session.frames_per_timecode_frame() / 4);
-	mtc_frame += qtr;
-	
-	double speed = compute_apparent_speed (now);
+		if (which_qtr != 7) {
 
-	current.guard1++;
-	current.position = mtc_frame;
-	current.timestamp = now;
-	current.speed = speed;
-	current.guard2++;
+			/* leave position and speed updates for the last
+			   qtr frame message of the 8 to be taken
+			   care of in update_mtc_time(), invoked
+			   by the Parser right after this.
+			*/
 
-	last_inbound_frame = now;
+			nframes_t qtr;
+			
+			qtr = (long) (session.frames_per_timecode_frame() / 4);
+			mtc_frame += qtr;
+			
+			double speed = compute_apparent_speed (now);
+			
+			current.guard1++;
+			current.position = mtc_frame;
+			current.timestamp = now;
+			current.speed = speed;
+			current.guard2++;
+		}
+
+		last_inbound_frame = now;
+	}
 }
 
 void
@@ -94,6 +111,8 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 {
 	nframes64_t now = session.engine().frame_time();
 	Timecode::Time timecode;
+	TimecodeFormat tc_format;
+	bool reset_tc = true;
 
 	timecode.hours = msg[3];
 	timecode.minutes = msg[2];
@@ -106,22 +125,26 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 	case MTC_24_FPS:
 		timecode.rate = 24;
 		timecode.drop = false;
+		tc_format = timecode_24;
 		can_notify_on_unknown_rate = true;
 		break;
 	case MTC_25_FPS:
 		timecode.rate = 25;
 		timecode.drop = false;
+		tc_format = timecode_25;
 		can_notify_on_unknown_rate = true;
 		break;
 	case MTC_30_FPS_DROP:
 		timecode.rate = 30;
 		timecode.drop = true;
+		tc_format = timecode_30drop;
 		can_notify_on_unknown_rate = true;
 		break;
 	case MTC_30_FPS:
 		timecode.rate = 30;
 		timecode.drop = false;
 		can_notify_on_unknown_rate = true;
+		tc_format = timecode_30;
 		break;
 	default:
 		/* throttle error messages about unknown MTC rates */
@@ -133,41 +156,55 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 		}
 		timecode.rate = session.timecode_frames_per_second();
 		timecode.drop = session.timecode_drop_frames();
+		reset_tc = false;
 	}
 
-	session.timecode_to_sample (timecode, mtc_frame, true, false);
+	if (reset_tc) {
+		if (!did_reset_tc_format) {
+			saved_tc_format = session.config.get_timecode_format();
+			did_reset_tc_format = true;
+		}
+		session.config.set_timecode_format (tc_format);
+	}
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC time timestamp = %1 TC %2 = frame %3 (from full message ? %4)\n", 
 						 now, timecode, mtc_frame, was_full));
 
 	if (was_full) {
 
+		session.timecode_to_sample (timecode, mtc_frame, true, false);
 		session.request_locate (mtc_frame, false);
 		session.request_transport_speed (0);
 		update_mtc_status (MIDI::Parser::MTC_Stopped);
+
 		reset ();
 
 	} else {
 
-
+			
+		/* we've had the first set of 8 qtr frame messages, determine position
+			   and allow continuing qtr frame messages to provide position
+			   and speed information.
+		*/
+		
+		qtr_frame_messages_valid_for_time = true;
+		session.timecode_to_sample (timecode, mtc_frame, true, false);
+		
 		/* We received the last quarter frame 7 quarter frames (1.75 mtc
 		   frames) after the instance when the contents of the mtc quarter
 		   frames were decided. Add time to compensate for the elapsed 1.75
-		   frames.
-		   Also compensate for audio latency.
+		   frames. Also compensate for audio latency.
 		*/
-#if 0		
+		
 		mtc_frame += (long) (1.75 * session.frames_per_timecode_frame()) + session.worst_output_latency();
-
-		/* leave speed alone here. compute it only as we receive qtr frame messages */
+		
+		double speed = compute_apparent_speed (now);
 		
 		current.guard1++;
 		current.position = mtc_frame;
 		current.timestamp = now;
+		current.speed = speed;
 		current.guard2++;
-
-		DEBUG_TRACE (DEBUG::MTC, string_compose ("stored TC frame = %1 @ %2, sp = %3\n", mtc_frame, now, speed));
-#endif
 	}
 
 	last_inbound_frame = now;
@@ -182,6 +219,8 @@ MTC_Slave::compute_apparent_speed (nframes64_t now)
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("instantaneous speed = %1 from %2 - %3 / %4 - %5\n",
 							 speed, mtc_frame, current.position, now, current.timestamp));
 		
+		/* crude low pass filter/smoother for speed */
+
 		accumulator[accumulator_index++] = speed;
 		
 		if (accumulator_index >= accumulator_size) {
@@ -374,4 +413,5 @@ MTC_Slave::reset ()
 	current.guard2++;
 	accumulator_index = 0;
 	have_first_accumulated_speed = false;
+	qtr_frame_messages_valid_for_time = false;
 }

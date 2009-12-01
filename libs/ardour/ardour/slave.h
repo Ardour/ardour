@@ -234,6 +234,10 @@ class MTC_Slave : public Slave, public sigc::trackable {
 	nframes_t   mtc_frame;               /* current time */
 	nframes_t   last_inbound_frame;      /* when we got it; audio clocked */
 	MIDI::byte  last_mtc_fps_byte;
+	bool        qtr_frame_messages_valid_for_time;
+
+	bool           did_reset_tc_format;
+	TimecodeFormat saved_tc_format;
 
 	static const int32_t accumulator_size = 128;
 	double   accumulator[accumulator_size];
@@ -241,11 +245,12 @@ class MTC_Slave : public Slave, public sigc::trackable {
 	bool    have_first_accumulated_speed;
 
 	void reset ();
-	void update_mtc_qtr (MIDI::Parser&);
+	void update_mtc_qtr (MIDI::Parser&, int);
 	void update_mtc_time (const MIDI::byte *, bool);
 	void update_mtc_status (MIDI::Parser::MTC_Status);
 	void read_current (SafeTime *) const;
 	double compute_apparent_speed (nframes64_t);
+
 };
 
 class MIDIClock_Slave : public Slave, public sigc::trackable {
