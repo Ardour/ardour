@@ -221,7 +221,7 @@ BufferSet::ensure_buffers(const ChanCount& chns, size_t buffer_capacity)
 		assert(bufs[0]->capacity() >= buffer_capacity);
 	}
 
-	assert (available() == chns);
+	assert (available() >= chns);
 }
 
 /** Get the capacity (size) of the available buffers of the given type.
