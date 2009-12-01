@@ -304,8 +304,8 @@
                    <menuitem action='zoom-focus-right'/>
                    <menuitem action='zoom-focus-center'/>
                    <menuitem action='zoom-focus-playhead'/>
-                   <menuitem action='zoom-focus-edit'/>
                    <menuitem action='zoom-focus-mouse'/>
+                   <menuitem action='zoom-focus-edit'/>
                </menu>
 	       <menu name='SnapMode' action='SnapMode'>
 		   <menuitem action='snap-off'/>

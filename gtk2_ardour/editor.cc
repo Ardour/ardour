@@ -171,7 +171,7 @@ static const gchar *_zoom_focus_strings[] = {
 	N_("Center"),
 	N_("Playhead"),
  	N_("Mouse"),
- 	N_("Active Mark"),
+ 	N_("Edit point"),
 	0
 };
 
@@ -2162,26 +2162,6 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 		return;
 	}
 
-	switch (zoom_focus) {
-	case ZoomFocusMouse:
-	case ZoomFocusPlayhead:
-	case ZoomFocusEdit:
-		switch (_edit_point) {
-		case EditAtMouse:
-			set_zoom_focus (ZoomFocusMouse);
-			break;
-		case EditAtPlayhead:
-			set_zoom_focus (ZoomFocusPlayhead);
-			break;
-		case EditAtSelectedMarker:
-			set_zoom_focus (ZoomFocusEdit);
-			break;
-		}
-		break;
-	default:
-		break;
-	}
-
 	const char* action=NULL;
 
 	switch (_edit_point) {
@@ -3548,16 +3528,12 @@ Editor::zoom_focus_selection_done ()
 		focus_type = ZoomFocusRight;
 	} else if (choice == _("Center")) {
 		focus_type = ZoomFocusCenter;
-	} else if (choice == _("Play")) {
+	} else if (choice == _("Playhead")) {
 		focus_type = ZoomFocusPlayhead;
-	} else if (choice == _("Edit")) {
-		focus_type = ZoomFocusEdit;
-	} else if (choice == _("Active Mark")) {
-		focus_type = ZoomFocusEdit;
-	} else if (choice == _("Active Mark")) {
-		focus_type = ZoomFocusEdit;
-	} else {
+	} else if (choice == _("Mouse")) {
 		focus_type = ZoomFocusMouse;
+	} else if (choice == _("Edit point")) {
+		focus_type = ZoomFocusEdit;
 	}
 
 	RefPtr<RadioAction> ract = zoom_focus_action (focus_type);
