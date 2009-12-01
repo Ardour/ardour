@@ -41,12 +41,12 @@ public:
 protected:
 
 	struct Tab {
-		double from; ///< start coordinate
-		double to; ///< end coordinate
+		Tab () : group (0) {}
+		
+		double from;
+		double to;
 		Gdk::Color colour; ///< colour
 		ARDOUR::RouteGroup* group; ///< route group
-		double first_ui_size; ///< GUI size of the first route in the group
-		double last_ui_size; ///< GUI size of the last route in the group
 	};
 
 private:
@@ -67,10 +67,7 @@ private:
 	 */
 	virtual double primary_coordinate (double, double) const = 0;
 
-	/** Take a list of tabs and alter the route groups to reflect the tabs.
-	 *  @param tabs.
-	 */
-	virtual void reflect_tabs (std::list<Tab> const & tabs) = 0;
+	virtual ARDOUR::RouteList routes_for_tab (Tab const * t) const = 0;
 
 	/** @return Size of the widget along the primary axis */
 	virtual double extent () const = 0;
@@ -80,18 +77,24 @@ private:
 	 */
 	virtual Gtk::Menu* get_menu (ARDOUR::RouteGroup* g) = 0;
 
+	virtual ARDOUR::RouteGroup* new_route_group () const = 0;
+
 	void render (cairo_t *);
 	void on_size_request (Gtk::Requisition *);
 	bool on_button_press_event (GdkEventButton *);
 	bool on_motion_notify_event (GdkEventMotion *);
 	bool on_button_release_event (GdkEventButton *);
 
-	Tab * click_to_tab (double, Tab**, Tab**);
+	Tab * click_to_tab (double, std::list<Tab>::iterator *, std::list<Tab>::iterator *);
 
 	std::list<Tab> _tabs; ///< current list of tabs
 	Tab* _dragging; ///< tab being dragged, or 0
+	bool _dragging_new_tab; ///< true if we're dragging a new tab
 	bool _drag_moved; ///< true if there has been movement during any current drag
-	bool _drag_from; ///< true if the drag is of the `from' end of the tab, otherwise it's the `to' end
-	double _drag_last; ///< last mouse pointer position during drag
-	double _drag_limit; ///< limit of the current drag
+	double _drag_fixed; ///< the position of the fixed end of the tab being dragged
+	double _drag_moving; ///< the position of the moving end of the tab being dragged
+	double _drag_offset; ///< offset from the mouse to the end of the tab being dragged
+	double _drag_min; ///< minimum position for drag
+	double _drag_max; ///< maximum position for drag
+	double _drag_first; ///< first mouse pointer position during drag
 };

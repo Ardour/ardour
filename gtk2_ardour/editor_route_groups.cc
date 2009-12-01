@@ -154,7 +154,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	w->show();
 	remove_button->add (*w);
 
-	add_button->signal_clicked().connect (mem_fun (*this, &EditorRouteGroups::new_route_group));
+	add_button->signal_clicked().connect (hide_return (mem_fun (*this, &EditorRouteGroups::new_route_group)));
 	remove_button->signal_clicked().connect (mem_fun (*this, &EditorRouteGroups::remove_selected));
 
 	button_box->pack_start (*add_button);
@@ -182,7 +182,7 @@ EditorRouteGroups::menu (RouteGroup* g)
 	_menu->set_name ("ArdourContextMenu");
 	MenuList& items = _menu->items();
 
-	items.push_back (MenuElem (_("New..."), mem_fun(*this, &EditorRouteGroups::new_route_group)));
+	items.push_back (MenuElem (_("New..."), hide_return (mem_fun(*this, &EditorRouteGroups::new_route_group))));
 	items.push_back (MenuElem (_("New From"), *new_from));
 	if (g) {
 		items.push_back (MenuElem (_("Edit..."), bind (mem_fun (*this, &EditorRouteGroups::edit), g)));
@@ -231,8 +231,8 @@ EditorRouteGroups::set_activation (RouteGroup* g, bool a)
 	g->set_active (a, this);
 }
 
-void
-EditorRouteGroups::new_route_group ()
+ARDOUR::RouteGroup *
+EditorRouteGroups::new_route_group () const
 {
 	RouteGroup* g = new RouteGroup (
 		*_session,
@@ -244,13 +244,14 @@ EditorRouteGroups::new_route_group ()
 	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();
 
-	if (r == Gtk::RESPONSE_OK) {
-		_session->add_route_group (g);
-	} else {
+	if (r != Gtk::RESPONSE_OK) {
 		delete g;
+		return 0;
 	}
+	
+	_session->add_route_group (g);
+	return g;
 }
-
 void
 EditorRouteGroups::run_new_group_dialog (const RouteList& rl)
 {

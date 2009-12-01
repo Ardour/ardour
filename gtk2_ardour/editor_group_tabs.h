@@ -31,9 +31,10 @@ private:
 	std::list<Tab> compute_tabs () const;
 	void draw_tab (cairo_t *, Tab const &) const;
 	double primary_coordinate (double, double) const;
-	void reflect_tabs (std::list<Tab> const &);
+	ARDOUR::RouteList routes_for_tab (Tab const *) const;
 	double extent () const {
 		return _height;
 	}
 	Gtk::Menu* get_menu (ARDOUR::RouteGroup* g);
+	ARDOUR::RouteGroup* new_route_group () const;
 };

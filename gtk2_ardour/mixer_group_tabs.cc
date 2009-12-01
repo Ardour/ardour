@@ -63,14 +63,12 @@ MixerGroupTabs::compute_tabs () const
 		if (g != tab.group) {
 			if (tab.group) {
 				tab.to = x;
-				tab.last_ui_size = s->get_width ();
 				tabs.push_back (tab);
 			}
 
 			tab.from = x;
 			tab.group = g;
 			tab.colour = s->color ();
-			tab.first_ui_size = s->get_width ();
 		}
 
 		x += s->get_width ();
@@ -89,7 +87,7 @@ MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 {
 	double const arc_radius = _height;
 
-	if (tab.group->is_active()) {
+	if (tab.group && tab.group->is_active()) {
 		cairo_set_source_rgba (cr, tab.colour.get_red_p (), tab.colour.get_green_p (), tab.colour.get_blue_p (), 1);
 	} else {
 		cairo_set_source_rgba (cr, 1, 1, 1, 0.2);
@@ -101,16 +99,18 @@ MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 	cairo_line_to (cr, tab.from, _height);
 	cairo_fill (cr);
 
-	pair<string, double> const f = fit_to_pixels (cr, tab.group->name(), tab.to - tab.from - arc_radius * 2);
-
-	cairo_text_extents_t ext;
-	cairo_text_extents (cr, tab.group->name().c_str(), &ext);
-
-	cairo_set_source_rgb (cr, 1, 1, 1);
-	cairo_move_to (cr, tab.from + (tab.to - tab.from - f.second) / 2, _height - ext.height / 2);
-	cairo_save (cr);
-	cairo_show_text (cr, f.first.c_str());
-	cairo_restore (cr);
+	if (tab.group) {
+		pair<string, double> const f = fit_to_pixels (cr, tab.group->name(), tab.to - tab.from - arc_radius * 2);
+		
+		cairo_text_extents_t ext;
+		cairo_text_extents (cr, tab.group->name().c_str(), &ext);
+		
+		cairo_set_source_rgb (cr, 1, 1, 1);
+		cairo_move_to (cr, tab.from + (tab.to - tab.from - f.second) / 2, _height - ext.height / 2);
+		cairo_save (cr);
+		cairo_show_text (cr, f.first.c_str());
+		cairo_restore (cr);
+	}
 }
 
 double
@@ -119,45 +119,36 @@ MixerGroupTabs::primary_coordinate (double x, double) const
 	return x;
 }
 
-void
-MixerGroupTabs::reflect_tabs (list<Tab> const & tabs)
+RouteList
+MixerGroupTabs::routes_for_tab (Tab const * t) const
 {
-	list<Tab>::const_iterator j = tabs.begin ();
-
+	RouteList routes;
 	int32_t x = 0;
+
 	TreeModel::Children rows = _mixer->track_model->children ();
 	for (TreeModel::Children::iterator i = rows.begin(); i != rows.end(); ++i) {
 
 		MixerStrip* s = (*i)[_mixer->track_columns.strip];
 
-		if (s->route()->is_master() || s->route()->is_control() || !s->marked_for_display()) {
-			continue;
+	 	if (s->route()->is_master() || s->route()->is_control() || !s->marked_for_display()) {
+	 		continue;
+	 	}
+
+		if (x >= t->to) {
+			/* tab finishes before this track starts */
+			break;
 		}
 
-		if (j == tabs.end()) {
+		double const h = x + s->get_width() / 2;
 
-			/* already run out of tabs, so no edit group */
-			s->route()->set_route_group (0, this);
-
-		} else {
-
-			if (x >= j->to) {
-				/* this tab finishes before this track starts, so onto the next tab */
-				++j;
-			}
-
-			double const h = x + s->get_width() / 2;
-
-			if (j->from < h && j->to > h) {
-				s->route()->set_route_group (j->group, this);
-			} else {
-				s->route()->set_route_group (0, this);
-			}
-
+		if (t->from < h && t->to > h) {
+			routes.push_back (s->route ());
 		}
 
 		x += s->get_width ();
 	}
+
+	return routes;
 }
 
 Gtk::Menu*
@@ -204,4 +195,26 @@ void
 MixerGroupTabs::destroy_subgroup (RouteGroup* g)
 {
 	g->destroy_subgroup ();
+}
+
+ARDOUR::RouteGroup *
+MixerGroupTabs::new_route_group () const
+{
+	RouteGroup* g = new RouteGroup (
+		*_session,
+		"",
+		RouteGroup::Active,
+		(RouteGroup::Property) (RouteGroup::Gain | RouteGroup::Mute | RouteGroup::Solo | RouteGroup::RecEnable)
+		);
+
+	RouteGroupDialog d (g, Gtk::Stock::NEW);
+	int const r = d.do_run ();
+
+	if (r != Gtk::RESPONSE_OK) {
+		delete g;
+		return 0;
+	}
+	
+	_session->add_route_group (g);
+	return g;
 }

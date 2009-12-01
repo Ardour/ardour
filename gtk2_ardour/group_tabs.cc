@@ -20,6 +20,7 @@
 #include <gtkmm/stock.h>
 #include "ardour/session.h"
 #include "ardour/route_group.h"
+#include "ardour/route.h"
 #include "route_group_dialog.h"
 #include "group_tabs.h"
 #include "keyboard.h"
@@ -31,7 +32,8 @@ using namespace ARDOUR;
 
 GroupTabs::GroupTabs (Editor* e)
 	: EditorComponent (e),
-	  _dragging (0)
+	  _dragging (0),
+	  _dragging_new_tab (0)
 {
 
 }
@@ -63,25 +65,45 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 
 	double const p = primary_coordinate (ev->x, ev->y);
 
-	Tab* prev;
-	Tab* next;
+	list<Tab>::iterator prev;
+	list<Tab>::iterator next;
 	Tab* t = click_to_tab (p, &prev, &next);
 
-	if (ev->button == 1 && t) {
+	_drag_min = prev != _tabs.end() ? prev->to : 0;
+	_drag_max = next != _tabs.end() ? next->from : extent ();
+
+	if (ev->button == 1) {
+
+		if (t == 0) {
+			Tab n;
+			n.from = n.to = p;
+			_dragging_new_tab = true;
+
+			if (next == _tabs.end()) {
+				_tabs.push_back (n);
+				t = &_tabs.back ();
+			} else {
+				list<Tab>::iterator j = _tabs.insert (next, n);
+				t = &(*j);
+			}
+			
+		} else {
+			_dragging_new_tab = false;
+		}
 
 		_dragging = t;
 		_drag_moved = false;
-		_drag_last = p;
+		_drag_first = p;
 
 		double const h = (t->from + t->to) / 2;
-		_drag_from = p < h;
-
-		if (_drag_from) {
-			/* limit is the end of the previous tab */
-			_drag_limit = prev ? prev->to : 0;
+		if (p < h) {
+			_drag_moving = t->from;
+			_drag_fixed = t->to;
+			_drag_offset = p - t->from;
 		} else {
-			/* limit is the start of the next tab */
-			_drag_limit = next ? next->from : extent ();
+			_drag_moving = t->to;
+			_drag_fixed = t->from;
+			_drag_offset = p - t->to;
 		}
 
 	} else if (ev->button == 3) {
@@ -107,49 +129,20 @@ GroupTabs::on_motion_notify_event (GdkEventMotion* ev)
 
 	double const p = primary_coordinate (ev->x, ev->y);
 
-	if (p != _drag_last) {
+	if (p != _drag_first) {
 		_drag_moved = true;
 	}
 
-	if (_drag_from) {
+	_drag_moving = p - _drag_offset;
 
-		double f = _dragging->from + p - _drag_last;
+	_dragging->from = min (_drag_moving, _drag_fixed);
+	_dragging->to = max (_drag_moving, _drag_fixed);
 
-		if (f < _drag_limit) {
-			/* limit drag in the `too big' direction */
-			f = _drag_limit;
-		}
-
-		double const t = _dragging->to - _dragging->last_ui_size;
-		if (f > t) {
-			/* limit drag in the `too small' direction */
-			f = t;
-		}
-
-		_dragging->from = f;
-
-	} else {
-
-		double t = _dragging->to + p - _drag_last;
-
-		if (t > _drag_limit) {
-			/* limit drag in the `too big' direction */
-			t = _drag_limit;
-		}
-
-		double const f = _dragging->from + _dragging->first_ui_size;
-		if (t < f) {
-			/* limit drag in the `too small' direction */
-			t = f;
-		}
-
-		_dragging->to = t;
-	}
+	_dragging->from = max (_dragging->from, _drag_min);
+	_dragging->to = min (_dragging->to, _drag_max);
 
 	set_dirty ();
 	queue_draw ();
-
-	_drag_last = p;
 
 	return true;
 }
@@ -164,27 +157,55 @@ GroupTabs::on_button_release_event (GdkEventButton* ev)
 
 	if (!_drag_moved) {
 
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-
-			/* edit */
-			RouteGroupDialog d (_dragging->group, Gtk::Stock::APPLY);
-			d.do_run ();
-
-		} else {
-
-			/* toggle active state */
-			_dragging->group->set_active (!_dragging->group->is_active (), this);
-			_dragging = 0;
-
+		if (_dragging->group) {
+			
+			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+				
+				/* edit */
+				RouteGroupDialog d (_dragging->group, Gtk::Stock::APPLY);
+				d.do_run ();
+				
+			} else {
+				
+				/* toggle active state */
+				_dragging->group->set_active (!_dragging->group->is_active (), this);
+				
+			}
 		}
 
 	} else {
 		/* finish drag */
-		_dragging = 0;
-		reflect_tabs (_tabs);
+		RouteList routes = routes_for_tab (_dragging);
+
+		if (!routes.empty()) {
+			if (_dragging_new_tab) {
+				RouteGroup* g = new_route_group ();
+				if (g) {
+					for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+						(*i)->set_route_group (g, this);
+					}
+				}
+			} else {
+				boost::shared_ptr<RouteList> r = _session->get_routes ();
+				for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+
+					if (find (routes.begin(), routes.end(), *i) == routes.end()) {
+						/* this route is not on the list of those that should be in _dragging's group */
+						if ((*i)->route_group() == _dragging->group) {
+							(*i)->drop_route_group (this);
+						}
+					} else {
+						(*i)->set_route_group (_dragging->group, this);
+					}
+				}
+			}
+		}
+
 		set_dirty ();
 		queue_draw ();
 	}
+
+	_dragging = 0;
 
 	return true;
 }
@@ -218,29 +239,39 @@ GroupTabs::render (cairo_t* cr)
  */
 
 GroupTabs::Tab *
-GroupTabs::click_to_tab (double c, Tab** prev, Tab** next)
+GroupTabs::click_to_tab (double c, list<Tab>::iterator* prev, list<Tab>::iterator* next)
 {
-	*prev = 0;
+	*prev = *next = _tabs.end ();
+	Tab* under = 0;
 
 	list<Tab>::iterator i = _tabs.begin ();
-	while (i != _tabs.end() && (c < i->from || c > i->to)) {
-		*prev = &(*i);
+	while (i != _tabs.end()) {
+
+		if (i->from > c) {
+			break;
+		}
+
+		if (i->to < c) {
+			*prev = i;
+			++i;
+			continue;
+		}
+
+		if (i->from <= c && c < i->to) {
+			under = &(*i);
+		}
+
 		++i;
 	}
 
-	if (i == _tabs.end()) {
-		*next = 0;
-		return 0;
+	if (i != _tabs.end()) {
+		*next = i;
+
+		if (under) {
+			*next++;
+		}
 	}
 
-	list<Tab>::iterator j = i;
-	++j;
-	if (j == _tabs.end()) {
-		*next = 0;
-	} else {
-		*next = &(*j);
-	}
-
-	return &(*i);
+	return under;
 }
 

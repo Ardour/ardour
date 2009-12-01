@@ -33,6 +33,7 @@ public:
 	Gtk::Menu* menu (ARDOUR::RouteGroup *);
 
 	void clear ();
+	ARDOUR::RouteGroup* new_route_group () const;
 
 private:
 
@@ -71,7 +72,6 @@ private:
 
 	void row_change (const Gtk::TreeModel::Path&,const Gtk::TreeModel::iterator&);
 	void name_edit (const Glib::ustring&, const Glib::ustring&);
-	void new_route_group ();
 	void new_from_selection ();
 	void new_from_rec_enabled ();
 	void new_from_soloed ();

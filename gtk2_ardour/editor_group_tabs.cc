@@ -54,14 +54,12 @@ EditorGroupTabs::compute_tabs () const
 		if (g != tab.group) {
 			if (tab.group) {
 				tab.to = y;
-				tab.last_ui_size = (*i)->effective_height ();
 				tabs.push_back (tab);
 			}
 
 			tab.from = y;
 			tab.group = g;
 			tab.colour = (*i)->color ();
-			tab.first_ui_size = (*i)->effective_height ();
 		}
 
 		y += (*i)->effective_height ();
@@ -80,12 +78,12 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 {
 	double const arc_radius = _width;
 
-	if (tab.group->is_active()) {
+	if (tab.group && tab.group->is_active()) {
 		cairo_set_source_rgba (cr, tab.colour.get_red_p (), tab.colour.get_green_p (), tab.colour.get_blue_p (), 1);
 	} else {
 		cairo_set_source_rgba (cr, 1, 1, 1, 0.2);
 	}
-
+	
 	cairo_move_to (cr, 0, tab.from + arc_radius);
 	cairo_arc (cr, _width, tab.from + arc_radius, arc_radius, M_PI, 3 * M_PI / 2);
 	cairo_line_to (cr, _width, tab.to);
@@ -93,17 +91,19 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 	cairo_line_to (cr, 0, tab.from + arc_radius);
 	cairo_fill (cr);
 
-	pair<string, double> const f = fit_to_pixels (cr, tab.group->name(), tab.to - tab.from - arc_radius * 2);
-
-	cairo_text_extents_t ext;
-	cairo_text_extents (cr, tab.group->name().c_str(), &ext);
-
-	cairo_set_source_rgb (cr, 1, 1, 1);
-	cairo_move_to (cr, _width - ext.height / 2, tab.from + (f.second + tab.to - tab.from) / 2);
-	cairo_save (cr);
-	cairo_rotate (cr, - M_PI / 2);
-	cairo_show_text (cr, f.first.c_str());
-	cairo_restore (cr);
+	if (tab.group) {
+		pair<string, double> const f = fit_to_pixels (cr, tab.group->name(), tab.to - tab.from - arc_radius * 2);
+		
+		cairo_text_extents_t ext;
+		cairo_text_extents (cr, tab.group->name().c_str(), &ext);
+		
+		cairo_set_source_rgb (cr, 1, 1, 1);
+		cairo_move_to (cr, _width - ext.height / 2, tab.from + (f.second + tab.to - tab.from) / 2);
+		cairo_save (cr);
+		cairo_rotate (cr, - M_PI / 2);
+		cairo_show_text (cr, f.first.c_str());
+		cairo_restore (cr);
+	}
 }
 
 double
@@ -112,12 +112,12 @@ EditorGroupTabs::primary_coordinate (double, double y) const
 	return y;
 }
 
-void
-EditorGroupTabs::reflect_tabs (list<Tab> const & tabs)
+RouteList
+EditorGroupTabs::routes_for_tab (Tab const * t) const
 {
-	list<Tab>::const_iterator j = tabs.begin ();
-
+	RouteList routes;
 	int32_t y = 0;
+	
 	for (Editor::TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
 
 		if ((*i)->marked_for_display() == false) {
@@ -127,31 +127,22 @@ EditorGroupTabs::reflect_tabs (list<Tab> const & tabs)
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
 		if (rtv) {
 
-			if (j == tabs.end()) {
+			if (y >= t->to) {
+				/* tab finishes before this track starts */
+				break;
+			}
 
-				/* already run out of tabs, so no edit group */
-				rtv->route()->set_route_group (0, this);
+			double const h = y + (*i)->effective_height() / 2;
 
-			} else {
-
-				if (y >= j->to) {
-					/* this tab finishes before this track starts, so onto the next tab */
-					++j;
-				}
-
-				double const h = y + (*i)->effective_height() / 2;
-
-				if (j->from < h && j->to > h) {
-					rtv->route()->set_route_group (j->group, this);
-				} else {
-					rtv->route()->set_route_group (0, this);
-				}
-
+			if (t->from < h && t->to > h) {
+				routes.push_back (rtv->route ());
 			}
 		}
 
 		y += (*i)->effective_height ();
 	}
+
+	return routes;
 }
 
 
@@ -159,4 +150,10 @@ Gtk::Menu*
 EditorGroupTabs::get_menu (RouteGroup *g)
 {
 	return _editor->_route_groups->menu (g);
+}
+
+ARDOUR::RouteGroup *
+EditorGroupTabs::new_route_group () const
+{
+	return _editor->_route_groups->new_route_group ();
 }
