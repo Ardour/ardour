@@ -116,6 +116,8 @@ class AudioRegionEditor : public RegionEditor
 	gint bpressed (GdkEventButton* ev, Gtk::SpinButton* but, void (AudioRegionEditor::*pmf)());
 	gint breleased (GdkEventButton* ev, Gtk::SpinButton* but, void (AudioRegionEditor::*pmf)());
 
+	bool on_delete_event (GdkEventAny *);
+
 	bool spin_arrow_grab;
 };
 

@@ -153,7 +153,7 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	show_all();
 
 	name_changed ();
-	bounds_changed (Change (StartChanged|LengthChanged|PositionChanged|StartChanged|Region::SyncOffsetChanged));
+	bounds_changed (Change (StartChanged|LengthChanged|PositionChanged|Region::SyncOffsetChanged));
 	gain_changed ();
 
 	_region->StateChanged.connect (mem_fun(*this, &AudioRegionEditor::region_changed));
@@ -407,4 +407,11 @@ AudioRegionEditor::sync_offset_relative_clock_changed ()
 	_session.add_command (new MementoCommand<AudioRegion> (*_region.get(), &before, &after));
 	
 	_session.commit_reversible_command ();
+}
+
+bool
+AudioRegionEditor::on_delete_event (GdkEventAny* ev)
+{
+	bounds_changed (Change (StartChanged|LengthChanged|PositionChanged|Region::SyncOffsetChanged));
+	return RegionEditor::on_delete_event (ev);
 }
