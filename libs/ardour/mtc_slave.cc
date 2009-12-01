@@ -374,8 +374,8 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 
 		if (last.timestamp && (now > last.timestamp)) {
 			elapsed = (nframes_t) floor (last.speed * (now - last.timestamp));
-			DEBUG_TRACE (DEBUG_MTC, string_compose ("last timecode received @ %1, now = %2, elapsed frames = %3 w/speed= %4\n",
-								last.timestamp, now, elapsed, speed);
+			DEBUG_TRACE (DEBUG::MTC, string_compose ("last timecode received @ %1, now = %2, elapsed frames = %3 w/speed= %4\n",
+								 last.timestamp, now, elapsed, speed));
 		} else {
 			elapsed = 0; /* XXX is this right? */
 		}
