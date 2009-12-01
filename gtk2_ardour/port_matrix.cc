@@ -484,6 +484,10 @@ PortMatrix::setup_global_ports ()
 void
 PortMatrix::setup_all_ports ()
 {
+	if (_session.deletion_in_progress()) {
+		return;
+	}
+
 	ENSURE_GUI_THREAD (mem_fun (*this, &PortMatrix::setup_all_ports));
 
 	setup_ports (0);
