@@ -134,20 +134,14 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 
 	session.timecode_to_sample (timecode, mtc_frame, true, false);
 
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC time now %1 = frame %2 (from full message ? %3)\n", timecode, mtc_frame, was_full));
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC time timestamp = %1 TC %2 = frame %3 (from full message ? %4)\n", 
+						 now, timecode, mtc_frame, was_full));
 
 	if (was_full) {
-
-		current.guard1++;
-		current.position = mtc_frame;
-		current.timestamp = 0;
-		current.speed = 0;
-		current.guard2++;
 
 		session.request_locate (mtc_frame, false);
 		session.request_transport_speed (0);
 		update_mtc_status (MIDI::Parser::MTC_Stopped);
-
 		reset ();
 
 	} else {
@@ -197,6 +191,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 		current.timestamp = now;
 		current.speed = speed;
 		current.guard2++;
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("stored TC frame = %1 @ %2, sp = %3\n", mtc_frame, now, speed));
 	}
 
 	last_inbound_frame = now;
@@ -263,13 +258,13 @@ void
 MTC_Slave::read_current (SafeTime *st) const
 {
 	int tries = 0;
+
 	do {
 		if (tries == 10) {
 			error << _("MTC Slave: atomic read of current time failed, sleeping!") << endmsg;
 			usleep (20);
 			tries = 0;
 		}
-
 		*st = current;
 		tries++;
 
