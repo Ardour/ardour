@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <cerrno>
 #include <cassert>
+#include <cstdlib>
 
 #include "pbd/error.h"
 
@@ -49,7 +50,15 @@ JACK_MidiPort::JACK_MidiPort(const XMLNode& node, jack_client_t* jack_client)
 
 JACK_MidiPort::~JACK_MidiPort()
 {
-	// FIXME: remove port
+	if (_jack_input_port) {
+		jack_port_unregister (_jack_client, _jack_input_port);
+		_jack_input_port = 0;
+	}
+
+	if (_jack_output_port) {
+		jack_port_unregister (_jack_client, _jack_input_port);
+		_jack_input_port = 0;
+	}
 }
 
 void
@@ -80,8 +89,7 @@ JACK_MidiPort::cycle_start (nframes_t nframes)
 
 			if (input_parser) {
 				for (size_t i = 0; i < ev.size; i++) {
-					// the midi events here are used for MIDI clock only
-					input_parser->set_midi_clock_timestamp(ev.time + jack_last_frame_time(_jack_client));
+					input_parser->set_timestamp (ev.time + jack_last_frame_time(_jack_client));
 					input_parser->scanner (ev.buffer[i]);
 				}	
 			}
@@ -203,35 +211,8 @@ JACK_MidiPort::flush (void* jack_port_buffer)
 int
 JACK_MidiPort::read(byte * buf, size_t bufsize)
 {
-	assert(_currently_in_cycle);
-	assert(_jack_input_port);
-	
-	jack_midi_event_t ev;
-
-	cerr << "JACK_MidiPort::read called" << endl;
-	
-	int err = jack_midi_event_get (&ev,
-				       jack_port_get_buffer(_jack_input_port, _nframes_this_cycle),
-				       _last_read_index++);
-	
-	// XXX this doesn't handle ev.size > max
-
-	if (!err) {
-		size_t limit = min (bufsize, ev.size);
-		memcpy(buf, ev.buffer, limit);
-
-		if (input_parser) {
-			input_parser->raw_preparse (*input_parser, buf, limit);
-			for (size_t i = 0; i < limit; i++) {
-				input_parser->scanner (buf[i]);
-			}	
-			input_parser->raw_postparse (*input_parser, buf, limit);
-		}
-
-		return limit;
-	} else {
-		return 0;
-	}
+	cerr << "This program is improperly written. JACK_MidiPort::read() should never be called\n";
+	abort ();
 }
 
 int

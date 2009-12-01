@@ -61,7 +61,7 @@ Parser::possible_mtc (byte *sysex_buf, size_t msglen)
 	/* emit signals */
 
 	mtc (*this, &sysex_buf[1], msglen - 1);
-	mtc_time (fake_mtc_time, true);
+	mtc_time (fake_mtc_time, true, _timestamp);
 	mtc_status (MTC_Stopped);
 
 	return true;
@@ -276,7 +276,7 @@ Parser::process_mtc_quarter_frame (byte *msg)
 
 	} 
 	
-	mtc_qtr (*this, which_quarter_frame); /* EMIT_SIGNAL */
+	mtc_qtr (*this, which_quarter_frame, _timestamp); /* EMIT_SIGNAL */
 
 	// mtc (*this, &msg[1], msglen - 1);
 
@@ -296,7 +296,7 @@ Parser::process_mtc_quarter_frame (byte *msg)
 					_mtc_locked = true;
 				}
 
-				mtc_time (_mtc_time, false);
+				mtc_time (_mtc_time, false, _timestamp);
 			}
 			expected_mtc_quarter_frame_code = 0;
 			
@@ -319,7 +319,7 @@ Parser::process_mtc_quarter_frame (byte *msg)
 				if (!_mtc_locked) {
 					_mtc_locked = true;
 				}
-				mtc_time (_mtc_time, false);
+				mtc_time (_mtc_time, false, _timestamp);
 			}
 
 			expected_mtc_quarter_frame_code = 7;

@@ -41,7 +41,15 @@ class Parser : public sigc::trackable {
  public:
 	Parser (Port &p);
 	~Parser ();
+
+	/* sets the time that will be reported for any MTC or MIDI Clock
+	   message the next time ::scanner() parses such a message. It should
+	   therefore be set before every byte passed into ::scanner().
+	*/
 	
+	nframes_t get_timestamp() const { return _timestamp; }
+	void set_timestamp (const nframes_t timestamp) { _timestamp = timestamp; } 
+
 	/* signals that anyone can connect to */
 	
 	OneByteSignal         bank_change;
@@ -64,8 +72,8 @@ class Parser : public sigc::trackable {
 	sigc::signal<void, Parser &>          channel_active_preparse[16];
 	sigc::signal<void, Parser &>          channel_active_postparse[16];
 
-	OneByteSignal         mtc_quarter_frame;
-
+	OneByteSignal         mtc_quarter_frame; /* see below for more useful signals */
+	Signal                mtc;
 	Signal                raw_preparse;
 	Signal                raw_postparse;
 	Signal                any;
@@ -73,9 +81,6 @@ class Parser : public sigc::trackable {
 	Signal                mmc;
 	Signal                position;
 	Signal                song;
-
-	Signal                           mtc;
-	sigc::signal<void,Parser&,int>   mtc_qtr;
 
 	sigc::signal<void, Parser &>                     all_notes_off;
 	sigc::signal<void, Parser &>                     tune;
@@ -122,12 +127,10 @@ class Parser : public sigc::trackable {
 	const byte *mtc_current() const { return _mtc_time; }
 	bool        mtc_locked() const  { return _mtc_locked; }
 	
-	nframes_t get_midi_clock_timestamp() const { return _midi_clock_timestamp; }
-	void set_midi_clock_timestamp(const nframes_t timestamp) { _midi_clock_timestamp = timestamp; } 
-
-	sigc::signal<void,MTC_Status> mtc_status;
-	sigc::signal<bool>            mtc_skipped;
-	sigc::signal<void,const byte*,bool> mtc_time;
+	sigc::signal<void,Parser&,int,nframes_t>      mtc_qtr;
+	sigc::signal<void,const byte*,bool,nframes_t> mtc_time;
+	sigc::signal<void,MTC_Status>                 mtc_status;
+	sigc::signal<bool>                            mtc_skipped;
 
 	void set_mtc_forwarding (bool yn) {
 		_mtc_forward = yn;
@@ -172,7 +175,7 @@ class Parser : public sigc::trackable {
 	bool       _mtc_locked;
 	byte last_qtr_frame;
 	
-	nframes_t _midi_clock_timestamp;
+	nframes_t _timestamp;
 
 	ParseState pre_variable_state;
 	MIDI::eventType pre_variable_msgtype;
