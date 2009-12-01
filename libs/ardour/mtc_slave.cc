@@ -216,8 +216,8 @@ MTC_Slave::compute_apparent_speed (nframes64_t now)
 	if (current.timestamp != 0) {
 		
 		double speed = (double) ((mtc_frame - current.position) / (double) (now - current.timestamp));
-		DEBUG_TRACE (DEBUG::MTC, string_compose ("instantaneous speed = %1 from %2 - %3 / %4 - %5\n",
-							 speed, mtc_frame, current.position, now, current.timestamp));
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("instantaneous speed = %1 from %2 / %3\n",
+							 speed, mtc_frame - current.position, now - current.timestamp));
 		
 		/* crude low pass filter/smoother for speed */
 

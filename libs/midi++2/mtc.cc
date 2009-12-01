@@ -90,7 +90,6 @@ Parser::process_mtc_quarter_frame (byte *msg)
 	   depending on the direction of the MTC generator ...
 	*/
 
-#define DEBUG_MTC
 #ifdef DEBUG_MTC
 	 cerr << "MTC: (state = " << _mtc_running << ") " 
 	      << which_quarter_frame << " vs. " << expected_mtc_quarter_frame_code
@@ -112,7 +111,7 @@ Parser::process_mtc_quarter_frame (byte *msg)
 				consecutive_qtr_frame_cnt++;
 			}
 			
-			cerr << "first seen qframe = " << (int) last_qtr_frame << endl;
+			// cerr << "first seen qframe = " << (int) last_qtr_frame << endl;
 
 			return;
 
@@ -120,7 +119,7 @@ Parser::process_mtc_quarter_frame (byte *msg)
 
 			/* third quarter frame */
 			
-			cerr << "second seen qframe = " << (int) which_quarter_frame << endl;
+			// cerr << "second seen qframe = " << (int) which_quarter_frame << endl;
 
 			if (last_qtr_frame < which_quarter_frame) {
 				_mtc_running = MTC_Forward;
@@ -291,11 +290,6 @@ Parser::process_mtc_quarter_frame (byte *msg)
 			*/
 			
 			if (consecutive_qtr_frame_cnt >= 8) {
-				cerr << hex;
-				for (size_t xx = 0; xx < sizeof (_qtr_mtc_time); ++xx) {
-					cerr << (int) _qtr_mtc_time[xx] << ' ';
-				} 
-				cerr << dec << endl;
 				memcpy (_mtc_time, _qtr_mtc_time, sizeof (_mtc_time));
 				memset (_qtr_mtc_time, 0, sizeof (_qtr_mtc_time));
 				if (!_mtc_locked) {
