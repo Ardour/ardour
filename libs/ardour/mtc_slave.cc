@@ -76,9 +76,11 @@ MTC_Slave::rebind (MIDI::Port& p)
 void
 MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr)
 {
+	nframes64_t now = session.engine().frame_time();
+
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr frame %1 at %2, valid-for-time? %3\n", which_qtr, now, qtr_frame_messages_valid_for_time));
+
 	if (qtr_frame_messages_valid_for_time) {
-		
-		nframes64_t now = session.engine().frame_time();
 
 		if (which_qtr != 7) {
 
@@ -113,7 +115,9 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 	Timecode::Time timecode;
 	TimecodeFormat tc_format;
 	bool reset_tc = true;
-
+	
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("full mtc time known at %1, full ? %2\n", now, was_full));
+	
 	timecode.hours = msg[3];
 	timecode.minutes = msg[2];
 	timecode.seconds = msg[1];
