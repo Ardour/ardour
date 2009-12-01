@@ -1004,7 +1004,7 @@ pixbuf_from_ustring(const ustring& name, Pango::FontDescription* font, int clip_
 	cairo_set_source_rgba (cr, fg.get_red_p(), fg.get_green_p(), fg.get_blue_p(), 1.0);
 	cairo_select_font_face (cr, font->get_family().c_str(),
 				CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-	cairo_set_font_size (cr,  font->get_size());// / Pango::SCALE);
+	cairo_set_font_size (cr,  font->get_size() / Pango::SCALE);
 	cairo_text_extents (cr, name.c_str(), &te);
 	
 	cairo_move_to (cr, 0.5, 0.5 - te.height / 2 - te.y_bearing + clip_height / 2);
