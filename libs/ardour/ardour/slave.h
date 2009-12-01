@@ -245,6 +245,7 @@ class MTC_Slave : public Slave, public sigc::trackable {
 	void update_mtc_time (const MIDI::byte *, bool);
 	void update_mtc_status (MIDI::Parser::MTC_Status);
 	void read_current (SafeTime *) const;
+	double compute_apparent_speed (nframes64_t);
 };
 
 class MIDIClock_Slave : public Slave, public sigc::trackable {

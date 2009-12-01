@@ -77,10 +77,13 @@ MTC_Slave::update_mtc_qtr (Parser& /*p*/)
 
 	qtr = (long) (session.frames_per_timecode_frame() / 4);
 	mtc_frame += qtr;
+	
+	double speed = compute_apparent_speed (now);
 
 	current.guard1++;
 	current.position = mtc_frame;
 	current.timestamp = now;
+	current.speed = speed;
 	current.guard2++;
 
 	last_inbound_frame = now;
@@ -146,7 +149,6 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 
 	} else {
 
-		double speed;
 
 		/* We received the last quarter frame 7 quarter frames (1.75 mtc
 		   frames) after the instance when the contents of the mtc quarter
@@ -156,45 +158,54 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 		*/
 
 		mtc_frame += (long) (1.75 * session.frames_per_timecode_frame()) + session.worst_output_latency();
-
-		if (current.timestamp != 0) {
-
-			speed = (double) ((mtc_frame - current.position) / (double) (now - current.timestamp));
-			DEBUG_TRACE (DEBUG::MTC, string_compose ("instantaneous speed = %1 from %2 - %3 / %4 - %5\n",
-								 speed, mtc_frame, current.position, now, current.timestamp));
-
-			accumulator[accumulator_index++] = speed;
-
-			if (accumulator_index >= accumulator_size) {
-				have_first_accumulated_speed = true;
-				accumulator_index = 0;
-			}
-			
-			if (have_first_accumulated_speed) {
-				double total = 0;
-				
-				for (int32_t i = 0; i < accumulator_size; ++i) {
-					total += accumulator[i];
-				}
-				
-				speed = total / accumulator_size;
-				DEBUG_TRACE (DEBUG::MTC, string_compose ("speed smoothed to %1\n", speed));
-			} 
-				     
-		} else {
-
-			speed = 0;
-		}
+		
+		double speed = compute_apparent_speed (now);
 
 		current.guard1++;
 		current.position = mtc_frame;
 		current.timestamp = now;
 		current.speed = speed;
 		current.guard2++;
+
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("stored TC frame = %1 @ %2, sp = %3\n", mtc_frame, now, speed));
 	}
 
 	last_inbound_frame = now;
+}
+
+double
+MTC_Slave::compute_apparent_speed (nframes64_t now)
+{
+	if (current.timestamp != 0) {
+		
+		double speed = (double) ((mtc_frame - current.position) / (double) (now - current.timestamp));
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("instantaneous speed = %1 from %2 - %3 / %4 - %5\n",
+							 speed, mtc_frame, current.position, now, current.timestamp));
+		
+		accumulator[accumulator_index++] = speed;
+		
+		if (accumulator_index >= accumulator_size) {
+			have_first_accumulated_speed = true;
+			accumulator_index = 0;
+		}
+		
+		if (have_first_accumulated_speed) {
+			double total = 0;
+			
+			for (int32_t i = 0; i < accumulator_size; ++i) {
+				total += accumulator[i];
+			}
+			
+			speed = total / accumulator_size;
+			DEBUG_TRACE (DEBUG::MTC, string_compose ("speed smoothed to %1\n", speed));
+		} 
+
+		return speed;
+		
+	} else {
+		
+		return 0;
+	}
 }
 
 void
