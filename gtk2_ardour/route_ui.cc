@@ -797,9 +797,6 @@ RouteUI::update_rec_display ()
 		rec_enable_button->set_active (model);
 		ignore_toggle = false;
 	}
-	else {
-		return;
-	}
 
 	/* now make sure its color state is correct */
 
