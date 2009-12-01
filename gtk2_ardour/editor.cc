@@ -337,7 +337,6 @@ Editor::Editor ()
 	button_release_can_deselect = true;
 	_dragging_playhead = false;
 	_dragging_edit_point = false;
-	_dragging_hscrollbar = false;
 	select_new_marker = false;
 	rhythm_ferret = 0;
 	_bundle_manager = 0;
@@ -363,7 +362,6 @@ Editor::Editor ()
 	current_canvas_cursor = 0;
 
 	frames_per_unit = 2048; /* too early to use reset_zoom () */
-	reset_hscrollbar_stepping ();
 
 	zoom_focus = ZoomFocusLeft;
 	set_zoom_focus (ZoomFocusLeft);
@@ -462,15 +460,6 @@ Editor::Editor ()
 	controls_layout.signal_button_release_event().connect (mem_fun(*this, &Editor::edit_controls_button_release));
 	controls_layout_size_request_connection = controls_layout.signal_size_request().connect (mem_fun (*this, &Editor::controls_layout_size_request));
 
-	edit_vscrollbar.set_adjustment (vertical_adjustment);
-	edit_hscrollbar.set_adjustment (horizontal_adjustment);
-
- 	edit_hscrollbar.signal_button_press_event().connect (mem_fun(*this, &Editor::hscrollbar_button_press), false);
- 	edit_hscrollbar.signal_button_release_event().connect (mem_fun(*this, &Editor::hscrollbar_button_release), false);
- 	edit_hscrollbar.signal_size_allocate().connect (mem_fun(*this, &Editor::hscrollbar_allocate));
-
-	edit_hscrollbar.set_name ("EditorHScrollbar");
-
 	build_cursors ();
 
 	ArdourCanvas::Canvas* time_pad = manage(new ArdourCanvas::Canvas());
@@ -557,12 +546,37 @@ Editor::Editor ()
 	VPaned *editor_summary_pane = manage(new VPaned());
 	editor_summary_pane->pack1(edit_packer);
 
+	Button* summary_arrows_left_left = manage (new Button);
+	summary_arrows_left_left->add (*manage (new Arrow (ARROW_LEFT, SHADOW_NONE)));
+	summary_arrows_left_left->signal_clicked().connect (mem_fun (*this, &Editor::horizontal_scroll_left));
+	Button* summary_arrows_left_right = manage (new Button);
+	summary_arrows_left_right->add (*manage (new Arrow (ARROW_RIGHT, SHADOW_NONE)));
+	summary_arrows_left_right->signal_clicked().connect (mem_fun (*this, &Editor::horizontal_scroll_right));
+	VBox* summary_arrows_left = manage (new VBox);
+	summary_arrows_left->pack_start (*summary_arrows_left_left);
+	summary_arrows_left->pack_start (*summary_arrows_left_right);
+
+	Button* summary_arrows_right_left = manage (new Button);
+	summary_arrows_right_left->add (*manage (new Arrow (ARROW_LEFT, SHADOW_NONE)));
+	summary_arrows_right_left->signal_clicked().connect (mem_fun (*this, &Editor::horizontal_scroll_left));
+	Button* summary_arrows_right_right = manage (new Button);
+	summary_arrows_right_right->add (*manage (new Arrow (ARROW_RIGHT, SHADOW_NONE)));
+	summary_arrows_right_right->signal_clicked().connect (mem_fun (*this, &Editor::horizontal_scroll_right));
+	VBox* summary_arrows_right = manage (new VBox);
+	summary_arrows_right->pack_start (*summary_arrows_right_left);
+	summary_arrows_right->pack_start (*summary_arrows_right_right);
+
 	Frame* summary_frame = manage (new Frame);
 	summary_frame->set_shadow_type (Gtk::SHADOW_ETCHED_IN);
 	summary_frame->add (*_summary);
 	summary_frame->show ();
 
-	editor_summary_pane->pack2(*summary_frame);
+	HBox* summary_hbox = manage (new HBox);
+	summary_hbox->pack_start (*summary_arrows_left, false, false);
+	summary_hbox->pack_start (*summary_frame, true, true);
+	summary_hbox->pack_start (*summary_arrows_right, false, false);
+	
+	editor_summary_pane->pack2(*summary_hbox);
 
 	edit_pane.pack1 (*editor_summary_pane, true, true);
 	edit_pane.pack2 (the_notebook, false, true);
@@ -4280,8 +4294,6 @@ Editor::post_zoom ()
 
 	ZoomChanged (); /* EMIT_SIGNAL */
 
-	reset_hscrollbar_stepping ();
-
 	if (session) {
 		cef = session->current_end_frame() + (current_page_frames() / 10);// Add a little extra so we can see the end marker
 	}
@@ -5057,4 +5069,21 @@ Editor::check_step_edit ()
 	}
 
 	return true; // do it again, till we stop
+}
+
+void
+Editor::horizontal_scroll_left ()
+{
+	double x = leftmost_position() - current_page_frames() / 5;
+	if (x < 0) {
+		x = 0;
+	}
+	
+	reset_x_origin (x);
+}
+
+void
+Editor::horizontal_scroll_right ()
+{
+	reset_x_origin (leftmost_position() + current_page_frames() / 5);
 }

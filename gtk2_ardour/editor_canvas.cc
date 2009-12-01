@@ -363,7 +363,6 @@ Editor::track_canvas_size_allocated ()
 	}
 
 	handle_new_duration ();
-	reset_hscrollbar_stepping ();
 	update_fixed_rulers();
 	redisplay_tempo (false);
 	_summary->set_overlays_dirty ();
