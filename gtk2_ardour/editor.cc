@@ -4689,16 +4689,6 @@ Editor::show_rhythm_ferret ()
 }
 
 void
-Editor::show_bundle_manager ()
-{
-	if (_bundle_manager == 0) {
-		_bundle_manager = new BundleManager (*session);
-	}
-
-	_bundle_manager->show ();
-}
-
-void
 Editor::show_global_port_matrix (ARDOUR::DataType t)
 {
 	if (_global_port_matrix[t] == 0) {

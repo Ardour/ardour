@@ -412,7 +412,6 @@ class Editor : public PublicEditor
 	void toggle_meter_updating();
 
 	void show_rhythm_ferret();
-	void show_bundle_manager ();
 	void show_global_port_matrix (ARDOUR::DataType);
 
 	void goto_visual_state (uint32_t);
