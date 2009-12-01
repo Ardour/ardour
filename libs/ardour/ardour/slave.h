@@ -193,16 +193,19 @@ class SlaveSessionProxy : public ISlaveSessionProxy {
 };
 
 struct SafeTime {
-    int guard1;
-    nframes_t   position;
-    nframes_t   timestamp;
-    int guard2;
-
-	SafeTime() {
-		guard1 = 0;
-		guard2 = 0;
-		timestamp = 0;
-	}
+    volatile int guard1;
+    nframes64_t  position;
+    nframes64_t  timestamp;
+    double       speed;
+    volatile int guard2;
+    
+    SafeTime() {
+	    guard1 = 0;
+	    position = 0;
+	    timestamp = 0;
+	    speed = 0;
+	    guard2 = 0;
+    }
 };
 
 class MTC_Slave : public Slave, public sigc::trackable {
@@ -225,15 +228,12 @@ class MTC_Slave : public Slave, public sigc::trackable {
 	MIDI::Port* port;
 	std::vector<sigc::connection> connections;
 	bool        can_notify_on_unknown_rate;
-
+	
 	SafeTime    current;
+	double      instantaneous_speed;
 	nframes_t   mtc_frame;               /* current time */
 	nframes_t   last_inbound_frame;      /* when we got it; audio clocked */
 	MIDI::byte  last_mtc_fps_byte;
-
-	double      mtc_speed;
-	nframes_t   first_mtc_frame;
-	nframes_t   first_mtc_time;
 
 	static const int32_t accumulator_size = 128;
 	double   accumulator[accumulator_size];

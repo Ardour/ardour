@@ -36,6 +36,7 @@
 #include "pbd/pthread_utils.h"
 
 #include "ardour/configuration.h"
+#include "ardour/debug.h"
 #include "ardour/audioengine.h"
 #include "ardour/session.h"
 #include "ardour/audio_track.h"
@@ -833,8 +834,8 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 	/* Duration of one quarter frame */
 	nframes_t quarter_frame_duration = ((long) _frames_per_timecode_frame) >> 2;
 
-	// cerr << "(MTC) TR: " << _transport_frame << " - SF: " << outbound_mtc_timecode_frame
-	// << " - NQ: " << next_quarter_frame_to_send << " - FD" << quarter_frame_duration << endl;
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("TF %1 SF %2 NQ %3 FD %\4n",  _transport_frame, outbound_mtc_timecode_frame,
+						 next_quarter_frame_to_send, quarter_frame_duration));
 
 	// FIXME: this should always be true
 	//assert((outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration))
@@ -845,7 +846,7 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 	while (_transport_frame + nframes > (outbound_mtc_timecode_frame +
 				(next_quarter_frame_to_send * quarter_frame_duration))) {
 
-		// cerr << "(MTC) Next frame to send: " << next_quarter_frame_to_send << endl;
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("next frame to send: %1\n", next_quarter_frame_to_send));
 
 		switch (next_quarter_frame_to_send) {
 			case 0:
@@ -890,13 +891,10 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 			return -1;
 		}
 
-		/*cerr << "(MTC) Timecode: " << transmitting_timecode_time.hours
-			<< ":" << transmitting_timecode_time.minutes
-			<< ":" << transmitting_timecode_time.seconds
-			<< ":" << transmitting_timecode_time.frames
-			<< ", qfm = " << next_quarter_frame_to_send
-			<< ", stamp = " << out_stamp
-			<< ", delta = " << _transport_frame + out_stamp - last_time << endl;*/
+		DEBUG_STR_SET(foo,"sending ");
+		DEBUG_STR(foo) << transmitting_timecode_time;
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("%1 qfm = %2, stamp = %3\n", DEBUG_STR(foo).str(), next_quarter_frame_to_send,
+							 out_stamp));
 
 		// Increment quarter frame counter
 		next_quarter_frame_to_send++;

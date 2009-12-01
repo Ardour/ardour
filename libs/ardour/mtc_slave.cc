@@ -72,14 +72,11 @@ MTC_Slave::rebind (MIDI::Port& p)
 void
 MTC_Slave::update_mtc_qtr (Parser& /*p*/)
 {
-	cycles_t cnow = get_cycles ();
 	nframes64_t now = session.engine().frame_time();
 	nframes_t qtr;
-	static cycles_t last_qtr = 0;
 
 	qtr = (long) (session.frames_per_timecode_frame() / 4);
 	mtc_frame += qtr;
-	last_qtr = cnow;
 
 	current.guard1++;
 	current.position = mtc_frame;
@@ -144,6 +141,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 		current.guard1++;
 		current.position = mtc_frame;
 		current.timestamp = 0;
+		current.speed = 0;
 		current.guard2++;
 
 		session.request_locate (mtc_frame, false);
@@ -154,6 +152,8 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 
 	} else {
 
+		double speed;
+
 		/* We received the last quarter frame 7 quarter frames (1.75 mtc
 		   frames) after the instance when the contents of the mtc quarter
 		   frames were decided. Add time to compensate for the elapsed 1.75
@@ -163,14 +163,39 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full)
 
 		mtc_frame += (long) (1.75 * session.frames_per_timecode_frame()) + session.worst_output_latency();
 
-		if (first_mtc_frame == 0) {
-			first_mtc_frame = mtc_frame;
-			first_mtc_time = now;
+		if (current.timestamp != 0) {
+
+			speed = (double) ((mtc_frame - current.position) / (double) (now - current.timestamp));
+			DEBUG_TRACE (DEBUG::MTC, string_compose ("instantaneous speed = %1 from %2 - %3 / %4 - %5\n",
+								 speed, mtc_frame, current.position, now, current.timestamp));
+
+			accumulator[accumulator_index++] = speed;
+
+			if (accumulator_index >= accumulator_size) {
+				have_first_accumulated_speed = true;
+				accumulator_index = 0;
+			}
+			
+			if (have_first_accumulated_speed) {
+				double total = 0;
+				
+				for (int32_t i = 0; i < accumulator_size; ++i) {
+					total += accumulator[i];
+				}
+				
+				speed = total / accumulator_size;
+				DEBUG_TRACE (DEBUG::MTC, string_compose ("speed smoothed to %1\n", speed));
+			} 
+				     
+		} else {
+
+			speed = 0;
 		}
 
 		current.guard1++;
 		current.position = mtc_frame;
 		current.timestamp = now;
+		current.speed = speed;
 		current.guard2++;
 	}
 
@@ -194,37 +219,40 @@ MTC_Slave::handle_locate (const MIDI::byte* mmc_tc)
 void
 MTC_Slave::update_mtc_status (MIDI::Parser::MTC_Status status)
 {
+	/* XXX !!! thread safety ... called from MIDI I/O context
+	   and process() context (via ::speed_and_position())
+	*/
 
 	switch (status) {
 	case MTC_Stopped:
-		mtc_speed = 0.0f;
 		mtc_frame = 0;
 
 		current.guard1++;
 		current.position = mtc_frame;
 		current.timestamp = 0;
+		current.speed = 0;
 		current.guard2++;
 
 		break;
 
 	case MTC_Forward:
-		mtc_speed = 0.0f;
 		mtc_frame = 0;
 
 		current.guard1++;
 		current.position = mtc_frame;
 		current.timestamp = 0;
+		current.speed = 0;
 		current.guard2++;
 
 		break;
 
 	case MTC_Backward:
-		mtc_speed = 0.0f;
 		mtc_frame = 0;
 
 		current.guard1++;
 		current.position = mtc_frame;
 		current.timestamp = 0;
+		current.speed = 0;
 		current.guard2++;
 
 		break;
@@ -265,13 +293,11 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 {
 	nframes64_t now = session.engine().frame_time();
 	SafeTime last;
-	nframes_t frame_rate;
 	nframes_t elapsed;
-	double speed_now;
 
 	read_current (&last);
 
-	if (first_mtc_time == 0) {
+	if (last.timestamp == 0) {
 		speed = 0;
 		pos = last.position;
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("first call to MTC_Slave::speed_and_position, pos = %1\n", last.position));
@@ -281,7 +307,7 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 	/* no timecode for 1/4 second ? conclude that its stopped */
 
 	if (last_inbound_frame && now > last_inbound_frame && now - last_inbound_frame > session.frame_rate() / 4) {
-		mtc_speed = 0;
+		speed = 0;
 		pos = last.position;
 		session.request_locate (pos, false);
 		session.request_transport_speed (0);
@@ -291,37 +317,9 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 		return false;
 	}
 
-	frame_rate = session.frame_rate();
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::speed_and_position %1 %2\n", last.speed, last.position));
 
-	speed_now = (double) ((last.position - first_mtc_frame) / (double) (now - first_mtc_time));
-
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("apparent speed = %1 from last %2 now %3 first %4\n",
-						 speed_now, last.position, now, first_mtc_time));
-
-
-	accumulator[accumulator_index++] = speed_now;
-
-	if (accumulator_index >= accumulator_size) {
-		have_first_accumulated_speed = true;
-		accumulator_index = 0;
-	}
-
-	if (have_first_accumulated_speed) {
-		double total = 0;
-
-		for (int32_t i = 0; i < accumulator_size; ++i) {
-			total += accumulator[i];
-		}
-
-		mtc_speed = total / accumulator_size;
-
-	} else {
-
-		mtc_speed = speed_now;
-
-	}
-
-	if (mtc_speed == 0.0f) {
+	if (last.speed == 0.0f) {
 
 		elapsed = 0;
 
@@ -330,7 +328,7 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 		/* scale elapsed time by the current MTC speed */
 
 		if (last.timestamp && (now > last.timestamp)) {
-			elapsed = (nframes_t) floor (mtc_speed * (now - last.timestamp));
+			elapsed = (nframes_t) floor (speed * (now - last.timestamp));
 		} else {
 			elapsed = 0; /* XXX is this right? */
 		}
@@ -339,8 +337,10 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 	/* now add the most recent timecode value plus the estimated elapsed interval */
 
 	pos =  elapsed + last.position;
+	speed = last.speed;
 
-	speed = mtc_speed;
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::speed_and_position FINAL %1 %2\n", last.speed, pos));
+
 	return true;
 }
 
@@ -364,11 +364,8 @@ MTC_Slave::reset ()
 	current.guard1++;
 	current.position = 0;
 	current.timestamp = 0;
+	current.speed = 0;
 	current.guard2++;
-	first_mtc_frame = 0;
-	first_mtc_time = 0;
-
 	accumulator_index = 0;
 	have_first_accumulated_speed = false;
-	mtc_speed = 0;
 }
