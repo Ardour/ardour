@@ -453,8 +453,26 @@ EditorSummary::set_editor (pair<double,double> const & x, pair<double, double> c
 		   is merely pending but not executing.  But c'est la vie.
 		*/
 
+		/* proposed bottom of the editor with the requested position */
+		double const pb = y.second / _y_scale;
+
+		/* bottom of the canvas */
+		double const ch = _editor->full_canvas_height - _editor->canvas_timebars_vsize;
+
+		/* requested y position */
+		double ly = y.first / _y_scale;
+
+		/* clamp y position so as not to go off the bottom */
+		if (pb > ch) {
+			ly -= (pb - ch);
+		}
+
+		if (ly < 0) {
+			ly = 0;
+		}
+
 		_editor->reset_x_origin (x.first / _x_scale + _start);
-		_editor->reset_y_origin (y.first / _y_scale);
+		_editor->reset_y_origin (ly);
 
 		double const nx = (
 			((x.second - x.first) / _x_scale) /
