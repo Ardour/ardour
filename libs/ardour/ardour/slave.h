@@ -29,6 +29,8 @@
 #include "midi++/parser.h"
 #include "midi++/types.h"
 
+class PIController;
+
 namespace MIDI {
 	class Port;
 }
@@ -140,10 +142,17 @@ class Slave {
 	virtual nframes_t resolution() const = 0;
 
 	/**
-	 * @return - when returning true, ARDOUR will wait for one second before transport
+	 * @return - when returning true, ARDOUR will wait for seekahead_distance() before transport
 	 * starts rolling
 	 */
 	virtual bool requires_seekahead () const = 0;
+
+	/**
+	 * @return the number of frames that this slave wants to seek ahead. Relevant
+	 * only if @func requires_seekahead() returns true.
+	 */
+
+	virtual nframes64_t seekahead_distance() const { return 0; }
 
 	/**
 	 * @return - when returning true, ARDOUR will use transport speed 1.0 no matter what
@@ -222,35 +231,40 @@ class MTC_Slave : public Slave, public sigc::trackable {
 
 	nframes_t resolution() const;
 	bool requires_seekahead () const { return true; }
+	nframes64_t seekahead_distance() const;
+	bool give_slave_full_control_over_transport_speed() const;
 
   private:
 	Session&    session;
 	MIDI::Port* port;
 	std::vector<sigc::connection> connections;
 	bool        can_notify_on_unknown_rate;
-	
+	PIController* pic;
+
 	SafeTime    current;
-	double      instantaneous_speed;
 	nframes_t   mtc_frame;               /* current time */
 	nframes_t   last_inbound_frame;      /* when we got it; audio clocked */
 	MIDI::byte  last_mtc_fps_byte;
-	bool        qtr_frame_messages_valid_for_time;
-
+	nframes64_t window_begin;
+	nframes64_t window_end;
+	nframes64_t    last_mtc_timestamp;
+	nframes64_t    last_mtc_frame;
 	bool           did_reset_tc_format;
 	TimecodeFormat saved_tc_format;
-
-	static const int32_t accumulator_size = 128;
-	double   accumulator[accumulator_size];
-	int32_t accumulator_index;
-	bool    have_first_accumulated_speed;
+	size_t         speed_accumulator_size;
+	double*        speed_accumulator;
+	size_t         speed_accumulator_cnt;
+	bool           have_first_speed_accumulator;
+	double         average_speed;
 
 	void reset ();
 	void update_mtc_qtr (MIDI::Parser&, int, nframes_t);
 	void update_mtc_time (const MIDI::byte *, bool, nframes_t);
-	void update_mtc_status (MIDI::Parser::MTC_Status);
+	void update_mtc_status (MIDI::MTC_Status);
 	void read_current (SafeTime *) const;
-	double compute_apparent_speed (nframes64_t);
-
+	void reset_window (nframes64_t);
+	bool outside_window (nframes64_t) const;
+	void process_apparent_speed (double);
 };
 
 class MIDIClock_Slave : public Slave, public sigc::trackable {
@@ -335,24 +349,6 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
 	/// is true if the MIDI Start message has just been received until
 	/// the first MIDI Clock Event
 	bool _starting;
-};
-
-class ADAT_Slave : public Slave
-{
-  public:
-	ADAT_Slave () {}
-	~ADAT_Slave () {}
-
-	bool speed_and_position (double& speed, nframes64_t& pos) {
-		speed = 0;
-		pos = 0;
-		return false;
-	}
-
-	bool locked() const { return false; }
-	bool ok() const { return false; }
-	nframes_t resolution() const { return 1; }
-	bool requires_seekahead () const { return true; }
 };
 
 class JACK_Slave : public Slave

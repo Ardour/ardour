@@ -986,6 +986,13 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		PostTransportClearSubstate      = 0x80000
 	};
 
+	enum SlaveState {
+		Stopped,
+		Waiting,
+		Running
+	};
+	
+	SlaveState slave_state() const { return _slave_state; }
 
   protected:
 	friend class AudioEngine;
@@ -1088,20 +1095,13 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	int  average_dir;
 	bool have_first_delta_accumulator;
 
-	enum SlaveState {
-		Stopped,
-		Waiting,
-		Running
-	};
-
-	SlaveState slave_state;
+	SlaveState _slave_state;
 	nframes_t slave_wait_end;
 
 	void reset_slave_state ();
 	bool follow_slave (nframes_t);
 	void calculate_moving_average_of_slave_delta(int dir, nframes_t this_delta);
-	void track_slave_state(float slave_speed, nframes_t slave_transport_frame,
-	                       nframes_t this_delta, bool starting);
+	void track_slave_state(float slave_speed, nframes_t slave_transport_frame, nframes_t this_delta);
 	void follow_slave_silently(nframes_t nframes, float slave_speed);
 
         void use_sync_source (SyncSource);

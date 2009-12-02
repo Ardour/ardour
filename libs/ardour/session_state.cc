@@ -263,7 +263,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	average_slave_delta = 1800; // !!! why 1800 ????
 	have_first_delta_accumulator = false;
 	delta_accumulator_cnt = 0;
-	slave_state = Stopped;
+	_slave_state = Stopped;
 
 	_engine.GraphReordered.connect (mem_fun (*this, &Session::graph_reordered));
 

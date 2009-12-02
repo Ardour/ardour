@@ -1261,7 +1261,7 @@ Session::midi_thread_work ()
 			}
 
 			if (pfd[p].revents & POLLIN) {
-				DEBUG_TRACE (DEBUG::MidiIO, string_compose ("MIDI fd # %1 has data ready\n", p));
+				DEBUG_TRACE (DEBUG::MidiIO, string_compose ("MIDI fd # %1 has data ready @ %2\n", p, now));
 				fds_ready++;
 				ports[p]->parse (now);
 			}

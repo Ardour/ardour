@@ -461,7 +461,7 @@ Session::reset_slave_state ()
 	average_slave_delta = 1800;
 	delta_accumulator_cnt = 0;
 	have_first_delta_accumulator = false;
-	slave_state = Stopped;
+	_slave_state = Stopped;
 }
 
 bool
@@ -483,7 +483,6 @@ Session::follow_slave (nframes_t nframes)
 	nframes64_t slave_transport_frame;
 	nframes_t this_delta;
 	int dir;
-	bool starting;
 
 	if (!_slave->ok()) {
 		stop_transport ();
@@ -493,7 +492,7 @@ Session::follow_slave (nframes_t nframes)
 
 	_slave->speed_and_position (slave_speed, slave_transport_frame);
 
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("Slave @ %2 speed %1\n", slave_speed, slave_transport_frame));
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("Slave position %1 speed %2\n", slave_transport_frame, slave_speed));
 
 	if (!_slave->locked()) {
 		DEBUG_TRACE (DEBUG::Slave, "slave not locked\n");
@@ -508,7 +507,7 @@ Session::follow_slave (nframes_t nframes)
 		dir = -1;
 	}
 
-	if ((starting = _slave->starting())) {
+	if (_slave->starting()) {
 		slave_speed = 0.0f;
 	}
 
@@ -524,21 +523,23 @@ Session::follow_slave (nframes_t nframes)
 
 	} else {
 
-		/* TC source is able to drift relative to us (slave)
-		   so we need to keep track of the drift and adjust
-		   our speed to remain locked.
+		/* if we are chasing and the average delta between us and the
+		   master gets too big, we want to switch to silent
+		   motion. so keep track of that here.
 		*/
 
-		calculate_moving_average_of_slave_delta(dir, this_delta);
+		if (_slave_state == Running) {
+			calculate_moving_average_of_slave_delta(dir, this_delta);
+		}
 	}
 
-	track_slave_state (slave_speed, slave_transport_frame, this_delta, starting);
+	track_slave_state (slave_speed, slave_transport_frame, this_delta);
 
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("slave state %1 @ %2 speed %3 cur delta %4 starting %5\n",
-						   slave_state, slave_transport_frame, slave_speed, this_delta, starting));
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("slave state %1 @ %2 speed %3 cur delta %4 avg delta %5\n",
+						   _slave_state, slave_transport_frame, slave_speed, this_delta, average_slave_delta));
 		     
 
-	if (slave_state == Running && !_slave->is_always_synced() && !config.get_timecode_source_is_synced()) {
+	if (_slave_state == Running && !_slave->is_always_synced() && !config.get_timecode_source_is_synced()) {
 
 		if (_transport_speed != 0.0f) {
 
@@ -548,7 +549,6 @@ Session::follow_slave (nframes_t nframes)
 
 			float delta;
 
-#ifdef USE_MOVING_AVERAGE_OF_SLAVE
 			if (average_slave_delta == 0) {
 				delta = this_delta;
 				delta *= dir;
@@ -556,52 +556,38 @@ Session::follow_slave (nframes_t nframes)
 				delta = average_slave_delta;
 				delta *= average_dir;
 			}
-#else
-			delta = this_delta;
-			delta *= dir;
-#endif
 
 #ifndef NDEBUG
-	if (slave_speed != 0.0) {
-		DEBUG_TRACE (DEBUG::Slave, string_compose ("delta = %1 speed = %2 ts = %3 M@%4 S@%5 avgdelta %6\n",
-							   (int) (dir * this_delta),
-							   slave_speed,
-							   _transport_speed,
-							   _transport_frame,
-							   slave_transport_frame, 
-							   _transport_frame,
-							   average_slave_delta));
-	}
+			if (slave_speed != 0.0) {
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("delta = %1 speed = %2 ts = %3 M@%4 S@%5 avgdelta %6\n",
+									   (int) (dir * this_delta),
+									   slave_speed,
+									   _transport_speed,
+									   _transport_frame,
+									   slave_transport_frame, 
+									   average_slave_delta));
+			}
 #endif
-			if (fabs(delta) > 2048) {
-				nframes64_t jump_to = slave_transport_frame + lrintf (_current_frame_rate/5.0f);
-				/* too far off, so locate and keep rolling */
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave delta %1 is too big, locate to %2\n", 
-									   delta, jump_to));
-				request_locate (jump_to, true);
-				return false;
+			
+			if (_slave->give_slave_full_control_over_transport_speed()) {
+				set_transport_speed (slave_speed, false, false);
 			} else {
 				float adjusted_speed = slave_speed + (delta /  float(_current_frame_rate));
-				
-				if (_slave->give_slave_full_control_over_transport_speed()) {
-					request_transport_speed (slave_speed);
-				} else {
-					request_transport_speed (adjusted_speed);
-					DEBUG_TRACE (DEBUG::Slave, string_compose ("adjust using %1 towards %2 ratio %3 current %4 slave @ %5\n",
-										   delta, adjusted_speed, adjusted_speed/slave_speed, _transport_speed,
-										   slave_speed));
-				}
+				request_transport_speed (adjusted_speed);
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("adjust using %1 towards %2 ratio %3 current %4 slave @ %5\n",
+									   delta, adjusted_speed, adjusted_speed/slave_speed, _transport_speed,
+									   slave_speed));
 			}
 			
-			if (abs(average_slave_delta) > (long) _slave->resolution()) {
-				cerr << "average slave delta greater than slave resolution, going to silent motion\n";
+			if (abs(average_slave_delta) > _slave->resolution()) {
+				cerr << "average slave delta greater than slave resolution (" << _slave->resolution() << "), going to silent motion\n";
 				goto silent_motion;
 			}
 		}
 	}
 
 
-	if (!starting && !non_realtime_work_pending()) {
+	if (_slave_state == Running && !non_realtime_work_pending()) {
 		/* speed is set, we're locked, and good to go */
 		return true;
 	}
@@ -645,24 +631,24 @@ Session::calculate_moving_average_of_slave_delta(int dir, nframes_t this_delta)
 }
 
 void
-Session::track_slave_state (float slave_speed, nframes_t slave_transport_frame, nframes_t this_delta, bool starting)
+Session::track_slave_state (float slave_speed, nframes_t slave_transport_frame, nframes_t this_delta)
 {
 	if (slave_speed != 0.0f) {
 
 		/* slave is running */
 
-		switch (slave_state) {
+		switch (_slave_state) {
 		case Stopped:
 			if (_slave->requires_seekahead()) {
-				slave_wait_end = slave_transport_frame + _current_frame_rate;
+				slave_wait_end = slave_transport_frame + _slave->seekahead_distance ();
 				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stopped, but running, requires seekahead to %1\n", slave_wait_end));
+				/* we can call locate() here because we are in process context */
 				locate (slave_wait_end, false, false);
-				slave_state = Waiting;
-				starting = true;
+				_slave_state = Waiting;
 
 			} else {
 
-				slave_state = Running;
+				_slave_state = Running;
 
 				Location* al = _locations.auto_loop_location();
 
@@ -678,13 +664,24 @@ Session::track_slave_state (float slave_speed, nframes_t slave_transport_frame, 
 			break;
 
 		case Waiting:
+		default:
+			break;
+		}
+
+		if (_slave_state == Waiting) {
+
 			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave waiting at %1\n", slave_transport_frame));
 
 			if (slave_transport_frame >= slave_wait_end) {
 
 				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave start at %1 vs %2\n", slave_transport_frame, _transport_frame));
 
-				slave_state = Running;
+				_slave_state = Running;
+
+				/* now perform a "micro-seek" within the disk buffers to realign ourselves
+				   precisely with the master.
+				*/
+
 
 				bool ok = true;
 				nframes_t frame_delta = slave_transport_frame - _transport_frame;
@@ -713,13 +710,9 @@ Session::track_slave_state (float slave_speed, nframes_t slave_transport_frame, 
 				average_slave_delta = 0L;
 				this_delta = 0;
 			}
-			break;
-
-		default:
-			break;
 		}
 
-		if (slave_state == Running && _transport_speed == 0.0f) {
+		if (_slave_state == Running && _transport_speed == 0.0f) {
 			DEBUG_TRACE (DEBUG::Slave, "slave starts transport\n");
 			start_transport ();
 		}
@@ -738,7 +731,7 @@ Session::track_slave_state (float slave_speed, nframes_t slave_transport_frame, 
 			force_locate (slave_transport_frame, false);
 		}
 
-		slave_state = Stopped;
+		_slave_state = Stopped;
 	}
 }
 

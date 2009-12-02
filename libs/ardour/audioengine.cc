@@ -136,9 +136,13 @@ _thread_init_callback (void * /*arg*/)
 	*/
 
 	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Audioengine"), 4096);
-#ifdef WITH_JACK_MIDI
 	MIDI::JACK_MidiPort::set_process_thread (pthread_self());
-#endif // WITH_JACK_MIDI
+}
+
+static void
+ardour_jack_error (const char* msg)
+{
+	error << "JACK: " << msg << endmsg;
 }
 
 int
@@ -187,6 +191,8 @@ AudioEngine::start ()
 		if (session && session->config.get_jack_time_master()) {
 			jack_set_timebase_callback (_priv_jack, 0, _jack_timebase_callback, this);
 		}
+
+		jack_set_error_function (ardour_jack_error);
 
 		if (jack_activate (_priv_jack) == 0) {
 			_running = true;
@@ -1121,12 +1127,6 @@ AudioEngine::remove_all_ports ()
 	ports.flush ();
 }
 
-static void
-ardour_jack_error (const char* msg)
-{
-	error << "JACK: " << msg << endmsg;
-}
-
 int
 AudioEngine::connect_to_jack (string client_name)
 {
@@ -1147,8 +1147,6 @@ AudioEngine::connect_to_jack (string client_name)
 	if (status & JackNameNotUnique) {
 		jack_client_name = jack_get_client_name (_priv_jack);
 	}
-
-	jack_set_error_function (ardour_jack_error);
 
 	return 0;
 }

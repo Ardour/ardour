@@ -18,6 +18,7 @@
 */
 
 #include "pbd/enumwriter.h"
+#include "midi++/types.h"
 
 #include "ardour/audiofilesource.h"
 #include "ardour/audioregion.h"
@@ -40,6 +41,7 @@
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace MIDI;
 
 void
 setup_enum_writer ()
@@ -115,7 +117,9 @@ setup_enum_writer ()
 	WaveformShape _WaveformShape;
 	QuantizeType _QuantizeType;
 	Session::PostTransportWork _Session_PostTransportWork;
-		
+	Session::SlaveState _Session_SlaveState;
+	MTC_Status _MIDI_MTC_Status;
+
 #define REGISTER(e) enum_writer->register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer->register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
@@ -304,6 +308,16 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Session::Event, StopOnce);
 	REGISTER_CLASS_ENUM (Session::Event, AutoLoop);
 	REGISTER (_Session_Event_Type);
+
+	REGISTER_CLASS_ENUM (Session, Stopped);
+	REGISTER_CLASS_ENUM (Session, Waiting);
+	REGISTER_CLASS_ENUM (Session, Running);
+	REGISTER (_Session_SlaveState);
+
+	REGISTER_ENUM (MTC_Stopped);
+	REGISTER_ENUM (MTC_Forward);
+	REGISTER_ENUM (MTC_Backward);
+	REGISTER (_MIDI_MTC_Status);
 
 	REGISTER_CLASS_ENUM (Session, PostTransportStop);
 	REGISTER_CLASS_ENUM (Session, PostTransportDisableRecord);

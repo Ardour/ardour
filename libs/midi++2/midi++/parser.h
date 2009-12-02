@@ -116,12 +116,6 @@ class Parser : public sigc::trackable {
 
 	/* MTC */
 
-	enum MTC_Status {
-		MTC_Stopped = 0,
-		MTC_Forward,
-		MTC_Backward
-	};
-
 	MTC_FPS mtc_fps() const { return _mtc_fps; }
 	MTC_Status  mtc_running() const { return _mtc_running; }
 	const byte *mtc_current() const { return _mtc_time; }

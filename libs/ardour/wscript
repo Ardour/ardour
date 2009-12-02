@@ -132,6 +132,7 @@ libardour_sources = [
 	'onset_detector.cc',
 	'panner.cc',
 	'pcm_utils.cc',
+	'pi_controller.cc',
 	'playlist.cc',
 	'playlist_factory.cc',
 	'plugin.cc',

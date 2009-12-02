@@ -28,7 +28,7 @@ def configure(conf):
 	
 def build(bld):
 	obj              = bld.new_task_gen('cxx', 'shlib',
-										uselib = 'COREAUDIO CORESERVICES COREFOUNDATION AUDIOTOOLBOX AUDIOUNITS OSX GTKOSX')
+                                            uselib = 'COREAUDIO CORESERVICES COREFOUNDATION AUDIOTOOLBOX AUDIOUNITS OSX GTKOSX')
 	obj.source       = libappleutility_sources
 	obj.export_incdirs = ['.']
 	obj.includes     = ['.']
