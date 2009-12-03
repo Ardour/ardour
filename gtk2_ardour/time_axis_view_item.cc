@@ -210,7 +210,7 @@ TimeAxisViewItem::init (
 	if (visibility & ShowNameText) {
 		name_pixbuf = new ArdourCanvas::Pixbuf(*group);
 		name_pixbuf->property_x() = NAME_X_OFFSET;
-		name_pixbuf->property_y() = trackview.current_height() - 1.0 - NAME_Y_OFFSET;
+		name_pixbuf->property_y() = trackview.current_height() + 1 - NAME_Y_OFFSET;
 
 	} else {
 		name_pixbuf = 0;
@@ -576,7 +576,7 @@ TimeAxisViewItem::set_height (double height)
 	}
 
 	if (visibility & ShowNameText) {
-		name_pixbuf->property_y() =  height - 1 - NAME_Y_OFFSET;
+		name_pixbuf->property_y() =  height + 1 - NAME_Y_OFFSET;
 	}
 
 	if (frame) {
