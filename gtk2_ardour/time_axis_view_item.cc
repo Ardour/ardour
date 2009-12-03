@@ -107,7 +107,7 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 
 	group = new ArdourCanvas::Group (parent);
 
-	init (it_name, spu, base_color, start, duration, vis);
+	init (it_name, spu, base_color, start, duration, vis, true);
 
 }
 
@@ -128,11 +128,11 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 
 	group = new ArdourCanvas::Group (*parent);
 
-	init (other.item_name, other.samples_per_unit, c, other.frame_position, other.item_duration, other.visibility);
+	init (other.item_name, other.samples_per_unit, c, other.frame_position, other.item_duration, other.visibility, other.wide_enough_for_name);
 }
 
 void
-TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color const & base_color, nframes64_t start, nframes64_t duration, Visibility vis)
+TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color const & base_color, nframes64_t start, nframes64_t duration, Visibility vis, bool wide)
 {
 	item_name = it_name ;
 	samples_per_unit = spu ;
@@ -149,6 +149,7 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color const & ba
 	_sensitive = true;
 	name_pixbuf_width = 0;
 	last_item_width = 0;
+	wide_enough_for_name = wide;
 
 	if (duration == 0) {
 		warning << "Time Axis Item Duration == 0" << endl ;
@@ -554,7 +555,9 @@ TimeAxisViewItem::set_height (double height)
 
 		} else {
 			name_highlight->show();
-			name_pixbuf->show();
+			if (wide_enough_for_name) {
+				name_pixbuf->show();
+			}
 
 		}
 
@@ -896,9 +899,11 @@ TimeAxisViewItem::reset_name_width (double /*pixel_width*/)
 	}
 	
 	if (pb_width <= 0 || it_width <= NAME_X_OFFSET) {
+		wide_enough_for_name = false;
 		name_pixbuf->hide();
 		return;
 	} else {
+		wide_enough_for_name = true;
 		name_pixbuf->show();
 	}
 

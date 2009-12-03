@@ -347,7 +347,7 @@ class TimeAxisViewItem : public Selectable
 
     TimeAxisViewItem (const TimeAxisViewItem& other);
 
-    void init (const std::string& it_name, double spu, Gdk::Color const & base_color, nframes64_t start, nframes64_t duration, Visibility vis);
+    void init (const std::string& it_name, double spu, Gdk::Color const & base_color, nframes64_t start, nframes64_t duration, Visibility vis, bool);
 
     /**
      * Calculates some contrasting color for displaying various parts of this item, based upon the base color
@@ -456,6 +456,7 @@ class TimeAxisViewItem : public Selectable
     uint32_t lock_handle_color_b ;
     uint32_t last_item_width;
     int name_pixbuf_width;
+    bool wide_enough_for_name;
 
     ArdourCanvas::Group*      group;
     ArdourCanvas::SimpleRect* vestigial_frame;

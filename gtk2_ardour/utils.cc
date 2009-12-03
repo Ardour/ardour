@@ -991,7 +991,6 @@ pixbuf_from_ustring(const ustring& name, Pango::FontDescription* font, int clip_
 			empty_pixbuf = new Glib::RefPtr<Gdk::Pixbuf>;
 			*empty_pixbuf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, clip_width, clip_height);
 		}
-		cerr << "\n\nUSE EMPTY PIXBUF\n";
 		return *empty_pixbuf;
 	}
 
