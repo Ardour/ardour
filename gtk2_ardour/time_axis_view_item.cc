@@ -107,7 +107,7 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 
 	group = new ArdourCanvas::Group (parent);
 
-	init (it_name, spu, base_color, start, duration, vis, true);
+	init (it_name, spu, base_color, start, duration, vis, true, true);
 
 }
 
@@ -128,11 +128,16 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 
 	group = new ArdourCanvas::Group (*parent);
 
-	init (other.item_name, other.samples_per_unit, c, other.frame_position, other.item_duration, other.visibility, other.wide_enough_for_name);
+	init (
+		other.item_name, other.samples_per_unit, c, other.frame_position,
+		other.item_duration, other.visibility, other.wide_enough_for_name, other.high_enough_for_name
+		);
 }
 
 void
-TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color const & base_color, nframes64_t start, nframes64_t duration, Visibility vis, bool wide)
+TimeAxisViewItem::init (
+	const string& it_name, double spu, Gdk::Color const & base_color, nframes64_t start, nframes64_t duration, Visibility vis, bool wide, bool high
+	)
 {
 	item_name = it_name ;
 	samples_per_unit = spu ;
@@ -150,6 +155,7 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color const & ba
 	name_pixbuf_width = 0;
 	last_item_width = 0;
 	wide_enough_for_name = wide;
+	high_enough_for_name = high;
 
 	if (duration == 0) {
 		warning << "Time Axis Item Duration == 0" << endl ;
@@ -550,15 +556,12 @@ TimeAxisViewItem::set_height (double height)
 {
 	if (name_highlight) {
 		if (height < NAME_HIGHLIGHT_THRESH) {
-			name_highlight->hide();
-			name_pixbuf->hide();
+			name_highlight->hide ();
+			high_enough_for_name = false;
 
 		} else {
 			name_highlight->show();
-			if (wide_enough_for_name) {
-				name_pixbuf->show();
-			}
-
+			high_enough_for_name = true;
 		}
 
 		if (height > NAME_HIGHLIGHT_SIZE) {
@@ -583,6 +586,8 @@ TimeAxisViewItem::set_height (double height)
 	}
 
 	vestigial_frame->property_y2() = height - 1;
+
+	update_name_pixbuf_visibility ();
 }
 
 /**
@@ -814,7 +819,6 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 
 		if (name_highlight) {
 			name_highlight->hide();
-			name_pixbuf->hide();
 		}
 
 		if (frame) {
@@ -826,6 +830,8 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 			frame_handle_end->hide();
 		}
 
+		wide_enough_for_name = false;
+
 	} else {
 		vestigial_frame->hide();
 
@@ -835,12 +841,13 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 
 			if (height < NAME_HIGHLIGHT_THRESH) {
 				name_highlight->hide();
-				name_pixbuf->hide();
+				high_enough_for_name = false;
 			} else {
 				name_highlight->show();
 				if (!get_item_name().empty()) {
 					reset_name_width (pixel_width);
 				}
+				high_enough_for_name = true;
 			}
 
 			if (visibility & FullWidthNameHighlight) {
@@ -898,16 +905,16 @@ TimeAxisViewItem::reset_name_width (double /*pixel_width*/)
 		pb_width = it_width - NAME_X_OFFSET;
 	}
 	
-	if (pb_width <= 0 || it_width <= NAME_X_OFFSET) {
+	if (it_width <= NAME_X_OFFSET) {
 		wide_enough_for_name = false;
-		name_pixbuf->hide();
-		return;
 	} else {
 		wide_enough_for_name = true;
-		name_pixbuf->show();
 	}
 
-	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(item_name, NAME_FONT, pb_width, NAME_HEIGHT, Gdk::Color ("#000000"));
+	update_name_pixbuf_visibility ();
+	if (pb_width > 0) {
+		name_pixbuf->property_pixbuf() = pixbuf_from_ustring(item_name, NAME_FONT, pb_width, NAME_HEIGHT, Gdk::Color ("#000000"));
+	}
 }
 
 
@@ -960,5 +967,13 @@ TimeAxisViewItem::set_y (double y)
 	}
 }
 
-
+void
+TimeAxisViewItem::update_name_pixbuf_visibility ()
+{
+	if (wide_enough_for_name && high_enough_for_name) {
+		name_pixbuf->show ();
+	} else {
+		name_pixbuf->hide ();
+	}
+}
 

@@ -347,7 +347,7 @@ class TimeAxisViewItem : public Selectable
 
     TimeAxisViewItem (const TimeAxisViewItem& other);
 
-    void init (const std::string& it_name, double spu, Gdk::Color const & base_color, nframes64_t start, nframes64_t duration, Visibility vis, bool);
+    void init (const std::string& it_name, double spu, Gdk::Color const & base_color, nframes64_t start, nframes64_t duration, Visibility vis, bool, bool);
 
     /**
      * Calculates some contrasting color for displaying various parts of this item, based upon the base color
@@ -374,6 +374,7 @@ class TimeAxisViewItem : public Selectable
 
     virtual void reset_width_dependent_items (double pixel_width);
     void reset_name_width (double pixel_width);
+    void update_name_pixbuf_visibility ();
 
     /**
      * Callback used to remove this item during the gtk idle loop
@@ -457,6 +458,7 @@ class TimeAxisViewItem : public Selectable
     uint32_t last_item_width;
     int name_pixbuf_width;
     bool wide_enough_for_name;
+    bool high_enough_for_name;
 
     ArdourCanvas::Group*      group;
     ArdourCanvas::SimpleRect* vestigial_frame;
@@ -468,7 +470,6 @@ class TimeAxisViewItem : public Selectable
 
     Visibility visibility;
     bool _recregion;
-
 
 }; /* class TimeAxisViewItem */
 
