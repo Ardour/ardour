@@ -99,7 +99,7 @@ Session::memento_command_factory(XMLNode *n)
     } else if (obj_T == typeid (TempoMap).name()) {
 	    return new MementoCommand<TempoMap>(*_tempo_map, before, after);
     } else if (obj_T == typeid (Playlist).name() || obj_T == typeid (AudioPlaylist).name() || obj_T == typeid (MidiPlaylist).name()) {
-	    if (boost::shared_ptr<Playlist> pl = playlist_by_name(child->property("name")->value())) {
+	    if (boost::shared_ptr<Playlist> pl = playlists.by_name(child->property("name")->value())) {
 		    return new MementoCommand<Playlist>(*(pl.get()), before, after);
 	    }
     } else if (obj_T == typeid (Route).name() || obj_T == typeid (AudioTrack).name() || obj_T == typeid(MidiTrack).name()) {

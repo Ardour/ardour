@@ -22,19 +22,20 @@
 
 #include "ardour/session.h"
 #include "ardour/playlist.h"
+#include "ardour/session_playlists.h"
 
 namespace ARDOUR {
 
 template<class T> void
-Session::foreach_playlist (T *obj, void (T::*func)(boost::shared_ptr<Playlist>))
+SessionPlaylists::foreach (T *obj, void (T::*func)(boost::shared_ptr<Playlist>))
 {
-	Glib::Mutex::Lock lm (playlist_lock);
-	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); i++) {
+	Glib::Mutex::Lock lm (lock);
+	for (List::iterator i = playlists.begin(); i != playlists.end(); i++) {
 		if (!(*i)->hidden()) {
 			(obj->*func) (*i);
 		}
 	}
-	for (PlaylistList::iterator i = unused_playlists.begin(); i != unused_playlists.end(); i++) {
+	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); i++) {
 		if (!(*i)->hidden()) {
 			(obj->*func) (*i);
 		}

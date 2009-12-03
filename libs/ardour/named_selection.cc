@@ -82,7 +82,7 @@ NamedSelection::NamedSelection (Session& session, const XMLNode& node)
 		plnode = *niter;
 
 		if ((property = plnode->property ("name")) != 0) {
-			if ((playlist = session.playlist_by_name (property->value())) != 0) {
+			if ((playlist = session.playlists.by_name (property->value())) != 0) {
 				playlist->use();
 				playlists.push_back (playlist);
 			} else {

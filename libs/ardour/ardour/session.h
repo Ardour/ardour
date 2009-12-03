@@ -56,6 +56,7 @@
 #include "ardour/location.h"
 #include "ardour/timecode.h"
 #include "ardour/interpolation.h"
+#include "ardour/session_playlists.h"
 
 class XMLTree;
 class XMLNode;
@@ -615,8 +616,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	boost::shared_ptr<Region> find_whole_file_parent (boost::shared_ptr<Region const>);
 
-	void find_equivalent_playlist_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >& result);
-
 	boost::shared_ptr<Region>      XMLRegionFactory (const XMLNode&, bool full);
 	boost::shared_ptr<AudioRegion> XMLAudioRegionFactory (const XMLNode&, bool full);
 	boost::shared_ptr<MidiRegion>  XMLMidiRegionFactory (const XMLNode&, bool full);
@@ -641,8 +640,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void add_source (boost::shared_ptr<Source>);
 	void remove_source (boost::weak_ptr<Source>);
 
-	uint32_t source_use_count (boost::shared_ptr<const Source> src) const;
-
 	int  cleanup_sources (CleanupReport&);
 	int  cleanup_trash_sources (CleanupReport&);
 
@@ -655,7 +652,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	    0 for "yes, delete this playlist",
 	    1 for "no, don't delete this playlist".
 	*/
-	sigc::signal<int,boost::shared_ptr<ARDOUR::Playlist> > AskAboutPlaylistDeletion;
+	sigc::signal<int,boost::shared_ptr<Playlist> > AskAboutPlaylistDeletion;
 
 	/** handlers should return 0 for "ignore the rate mismatch",
 	    !0 for "do not use this session"
@@ -673,18 +670,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	boost::shared_ptr<Source> source_by_id (const PBD::ID&);
 	boost::shared_ptr<Source> source_by_path_and_channel (const Glib::ustring&, uint16_t);
 
-	/* playlist management */
-
-	boost::shared_ptr<Playlist> playlist_by_name (std::string name);
-	void unassigned_playlists (std::list<boost::shared_ptr<Playlist> > & list);
 	void add_playlist (boost::shared_ptr<Playlist>, bool unused = false);
-	sigc::signal<void,boost::shared_ptr<Playlist> > PlaylistAdded;
-	sigc::signal<void,boost::shared_ptr<Playlist> > PlaylistRemoved;
-
-	uint32_t n_playlists() const;
-
-	template<class T> void foreach_playlist (T *obj, void (T::*func)(boost::shared_ptr<Playlist>));
-	void get_playlists (std::vector<boost::shared_ptr<Playlist> >&);
 
 	/* named selections */
 
@@ -993,6 +979,8 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	};
 	
 	SlaveState slave_state() const { return _slave_state; }
+
+	SessionPlaylists playlists;
 
   protected:
 	friend class AudioEngine;
@@ -1496,19 +1484,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	/* PLAYLISTS */
 
-	mutable Glib::Mutex playlist_lock;
-	typedef std::set<boost::shared_ptr<Playlist> > PlaylistList;
-	PlaylistList playlists;
-	PlaylistList unused_playlists;
-
-	int load_playlists (const XMLNode&);
-	int load_unused_playlists (const XMLNode&);
 	void remove_playlist (boost::weak_ptr<Playlist>);
-	void track_playlist (bool, boost::weak_ptr<Playlist>);
-
-	boost::shared_ptr<Playlist> playlist_factory (std::string name);
-	boost::shared_ptr<Playlist> XMLPlaylistFactory (const XMLNode&);
-
 	void playlist_length_changed ();
 	void diskstream_playlist_changed (boost::weak_ptr<Diskstream>);
 

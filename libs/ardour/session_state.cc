@@ -89,7 +89,6 @@
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
 #include "ardour/named_selection.h"
-#include "ardour/playlist_factory.h"
 #include "ardour/processor.h"
 #include "ardour/region_factory.h"
 #include "ardour/route_group.h"
@@ -98,6 +97,7 @@
 #include "ardour/session_directory.h"
 #include "ardour/session_metadata.h"
 #include "ardour/session_state_utils.h"
+#include "ardour/session_playlists.h"
 #include "ardour/session_utils.h"
 #include "ardour/silentfilesource.h"
 #include "ardour/slave.h"
@@ -112,6 +112,7 @@
 #include "ardour/utils.h"
 #include "ardour/utils.h"
 #include "ardour/version.h"
+#include "ardour/playlist_factory.h"
 
 #include "control_protocol/control_protocol.h"
 
@@ -1061,38 +1062,12 @@ Session::state(bool full_state)
 		}
 	}
 
+	playlists.add_state (node, full_state);
 
 	child = node->add_child ("RouteGroups");
 	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
 		child->add_child_nocopy ((*i)->get_state());
 	}
-
-	child = node->add_child ("Playlists");
-	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
-		if (!(*i)->hidden()) {
-			if (!(*i)->empty()) {
-				if (full_state) {
-					child->add_child_nocopy ((*i)->get_state());
-				} else {
-					child->add_child_nocopy ((*i)->get_template());
-				}
-			}
-		}
-	}
-
-	child = node->add_child ("UnusedPlaylists");
-	for (PlaylistList::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
-		if (!(*i)->hidden()) {
-			if (!(*i)->empty()) {
-				if (full_state) {
-					child->add_child_nocopy ((*i)->get_state());
-				} else {
-					child->add_child_nocopy ((*i)->get_template());
-				}
-			}
-		}
-	}
-
 
 	if (_click_io) {
 		child = node->add_child ("Click");
@@ -1271,13 +1246,13 @@ Session::set_state (const XMLNode& node, int version)
 	if ((child = find_named_node (node, "Playlists")) == 0) {
 		error << _("Session: XML state has no playlists section") << endmsg;
 		goto out;
-	} else if (load_playlists (*child)) {
+	} else if (playlists.load (*this, *child)) {
 		goto out;
 	}
 
 	if ((child = find_named_node (node, "UnusedPlaylists")) == 0) {
 		// this is OK
-	} else if (load_unused_playlists (*child)) {
+	} else if (playlists.load_unused (*this, *child)) {
 		goto out;
 	}
 	
@@ -1960,65 +1935,6 @@ Session::get_best_session_directory_for_new_source ()
 }
 
 int
-Session::load_playlists (const XMLNode& node)
-{
-	XMLNodeList nlist;
-	XMLNodeConstIterator niter;
-	boost::shared_ptr<Playlist> playlist;
-
-	nlist = node.children();
-
-	set_dirty();
-
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
-		if ((playlist = XMLPlaylistFactory (**niter)) == 0) {
-			error << _("Session: cannot create Playlist from XML description.") << endmsg;
-		}
-	}
-
-	return 0;
-}
-
-int
-Session::load_unused_playlists (const XMLNode& node)
-{
-	XMLNodeList nlist;
-	XMLNodeConstIterator niter;
-	boost::shared_ptr<Playlist> playlist;
-
-	nlist = node.children();
-
-	set_dirty();
-
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
-		if ((playlist = XMLPlaylistFactory (**niter)) == 0) {
-			error << _("Session: cannot create Playlist from XML description.") << endmsg;
-			continue;
-		}
-
-		// now manually untrack it
-
-		track_playlist (false, boost::weak_ptr<Playlist> (playlist));
-	}
-
-	return 0;
-}
-
-boost::shared_ptr<Playlist>
-Session::XMLPlaylistFactory (const XMLNode& node)
-{
-	try {
-		return PlaylistFactory::create (*this, node);
-	}
-
-	catch (failed_constructor& err) {
-		return boost::shared_ptr<Playlist>();
-	}
-}
-
-int
 Session::load_named_selections (const XMLNode& node)
 {
 	XMLNodeList nlist;
@@ -2450,7 +2366,6 @@ Session::cleanup_sources (CleanupReport& rep)
 	// FIXME: needs adaptation to midi
 
 	vector<boost::shared_ptr<Source> > dead_sources;
-	vector<boost::shared_ptr<Playlist> > playlists_tbd;
 	PathScanner scanner;
 	string sound_path;
 	vector<space_and_path>::iterator i;
@@ -2464,37 +2379,12 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	_state_of_the_state = (StateOfTheState) (_state_of_the_state | InCleanup);
 
-
 	/* step 1: consider deleting all unused playlists */
-
-	for (PlaylistList::iterator x = unused_playlists.begin(); x != unused_playlists.end(); ++x) {
-		int status;
-
-		status = AskAboutPlaylistDeletion (*x);
-
-		switch (status) {
-		case -1:
-			ret = 0;
-			goto out;
-			break;
-
-		case 0:
-			playlists_tbd.push_back (*x);
-			break;
-
-		default:
-			/* leave it alone */
-			break;
-		}
+	
+	if (playlists.maybe_delete_unused (AskAboutPlaylistDeletion)) {
+		ret = 0;
+		goto out;
 	}
-
-	/* now delete any that were marked for deletion */
-
-	for (vector<boost::shared_ptr<Playlist> >::iterator x = playlists_tbd.begin(); x != playlists_tbd.end(); ++x) {
-		(*x)->drop_references ();
-	}
-
-	playlists_tbd.clear ();
 
 	/* step 2: find all un-used sources */
 
@@ -2512,7 +2402,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		   capture files.
 		*/
 
-		if (!source_use_count(i->second) && i->second->length(i->second->timeline_position()) > 0) {
+		if (!playlists.source_use_count(i->second) && i->second->length(i->second->timeline_position()) > 0) {
 			dead_sources.push_back (i->second);
 			i->second->GoingAway();
 		}
@@ -3078,9 +2968,9 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "edit-mode") {
 
-		Glib::Mutex::Lock lm (playlist_lock);
+		Glib::Mutex::Lock lm (playlists.lock);
 
-		for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		for (SessionPlaylists::List::iterator i = playlists.playlists.begin(); i != playlists.playlists.end(); ++i) {
 			(*i)->set_edit_mode (Config->get_edit_mode ());
 		}
 

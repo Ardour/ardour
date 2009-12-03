@@ -1967,7 +1967,7 @@ Playlist::bump_name (string name, Session &session)
 
 	do {
 		newname = bump_name_once (newname);
-	} while (session.playlist_by_name (newname)!=NULL);
+	} while (session.playlists.by_name (newname)!=NULL);
 
 	return newname;
 }

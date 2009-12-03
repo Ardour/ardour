@@ -86,6 +86,7 @@
 #include "ardour/session_directory.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_metadata.h"
+#include "ardour/session_playlists.h"
 #include "ardour/slave.h"
 #include "ardour/smf_source.h"
 #include "ardour/source_factory.h"
@@ -399,36 +400,6 @@ Session::destroy ()
 		delete *i;
 		i = tmp;
 	}
-
-	DEBUG_TRACE (DEBUG::Destruction, "delete used playlists\n");
-	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ) {
-		PlaylistList::iterator tmp;
-
-		tmp = i;
-		++tmp;
-
-		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for used playlist %1 ; pre-ref = %2\n", (*i)->name(), (*i).use_count()));
-		(*i)->drop_references ();
-		
-
-		i = tmp;
-	}
-
-	DEBUG_TRACE (DEBUG::Destruction, "delete unused playlists\n");
-	for (PlaylistList::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ) {
-		PlaylistList::iterator tmp;
-
-		tmp = i;
-		++tmp;
-
-		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for unused playlist %1 ; pre-ref = %2\n", (*i)->name(), (*i).use_count()));
-		(*i)->drop_references ();
-
-		i = tmp;
-	}
-
-	playlists.clear ();
-	unused_playlists.clear ();
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete regions\n");
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ) {
@@ -2939,13 +2910,6 @@ Session::find_whole_file_parent (boost::shared_ptr<Region const> child)
 	return boost::shared_ptr<Region> ();
 }
 
-void
-Session::find_equivalent_playlist_regions (boost::shared_ptr<Region> region, vector<boost::shared_ptr<Region> >& result)
-{
-	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i)
-		(*i)->get_region_list_equivalent_regions (region, result);
-}
-
 int
 Session::destroy_region (boost::shared_ptr<Region> region)
 {
@@ -3069,23 +3033,6 @@ Session::remove_source (boost::weak_ptr<Source> src)
 
 		save_state (_current_snapshot_name);
 	}
-}
-
-/** Return the number of playlists (not regions) that contain @a src */
-uint32_t
-Session::source_use_count (boost::shared_ptr<const Source> src) const
-{
-	uint32_t count = 0;
-	for (PlaylistList::const_iterator p = playlists.begin(); p != playlists.end(); ++p) {
-		for (Playlist::RegionList::const_iterator r = (*p)->region_list().begin();
-				r != (*p)->region_list().end(); ++r) {
-			if ((*r)->uses_source(src)) {
-				++count;
-				break;
-			}
-		}
-	}
-	return count;
 }
 
 boost::shared_ptr<Source>
@@ -3429,42 +3376,6 @@ Session::create_midi_source_for_session (MidiDiskstream& ds)
 }
 
 
-/* Playlist management */
-
-boost::shared_ptr<Playlist>
-Session::playlist_by_name (string name)
-{
-	Glib::Mutex::Lock lm (playlist_lock);
-	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
-		if ((*i)->name() == name) {
-			return* i;
-		}
-	}
-	for (PlaylistList::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
-		if ((*i)->name() == name) {
-			return* i;
-		}
-	}
-
-	return boost::shared_ptr<Playlist>();
-}
-
-void
-Session::unassigned_playlists (std::list<boost::shared_ptr<Playlist> > & list)
-{
-	Glib::Mutex::Lock lm (playlist_lock);
-	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
-		if (!(*i)->get_orig_diskstream_id().to_s().compare ("0")) {
-			list.push_back (*i);
-		}
-	}
-	for (PlaylistList::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
-		if (!(*i)->get_orig_diskstream_id().to_s().compare ("0")) {
-			list.push_back (*i);
-		}
-	}
-}
-
 void
 Session::add_playlist (boost::shared_ptr<Playlist> playlist, bool unused)
 {
@@ -3472,13 +3383,9 @@ Session::add_playlist (boost::shared_ptr<Playlist> playlist, bool unused)
 		return;
 	}
 
-	{
-		Glib::Mutex::Lock lm (playlist_lock);
-		if (find (playlists.begin(), playlists.end(), playlist) == playlists.end()) {
-			playlists.insert (playlists.begin(), playlist);
-			playlist->InUse.connect (sigc::bind (mem_fun (*this, &Session::track_playlist), boost::weak_ptr<Playlist>(playlist)));
-			playlist->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_playlist), boost::weak_ptr<Playlist>(playlist)));
-		}
+	bool existing = playlists.add (playlist);
+	if (!existing) {
+		playlist->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_playlist), boost::weak_ptr<Playlist>(playlist)));
 	}
 
 	if (unused) {
@@ -3486,61 +3393,6 @@ Session::add_playlist (boost::shared_ptr<Playlist> playlist, bool unused)
 	}
 
 	set_dirty();
-
-	PlaylistAdded (playlist); /* EMIT SIGNAL */
-}
-
-void
-Session::get_playlists (vector<boost::shared_ptr<Playlist> >& s)
-{
-	{
-		Glib::Mutex::Lock lm (playlist_lock);
-		for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
-			s.push_back (*i);
-		}
-		for (PlaylistList::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
-			s.push_back (*i);
-		}
-	}
-}
-
-void
-Session::track_playlist (bool inuse, boost::weak_ptr<Playlist> wpl)
-{
-	boost::shared_ptr<Playlist> pl(wpl.lock());
-
-	if (!pl) {
-		return;
-	}
-
-	PlaylistList::iterator x;
-
-	if (pl->hidden()) {
-		/* its not supposed to be visible */
-		return;
-	}
-
-	{
-		Glib::Mutex::Lock lm (playlist_lock);
-
-		if (!inuse) {
-
-			unused_playlists.insert (pl);
-
-			if ((x = playlists.find (pl)) != playlists.end()) {
-				playlists.erase (x);
-			}
-
-
-		} else {
-
-			playlists.insert (pl);
-
-			if ((x = unused_playlists.find (pl)) != unused_playlists.end()) {
-				unused_playlists.erase (x);
-			}
-		}
-	}
 }
 
 void
@@ -3556,26 +3408,9 @@ Session::remove_playlist (boost::weak_ptr<Playlist> weak_playlist)
 		return;
 	}
 
-	{
-		Glib::Mutex::Lock lm (playlist_lock);
-
-		PlaylistList::iterator i;
-
-		i = find (playlists.begin(), playlists.end(), playlist);
-		if (i != playlists.end()) {
-			playlists.erase (i);
-		}
-
-		i = find (unused_playlists.begin(), unused_playlists.end(), playlist);
-		if (i != unused_playlists.end()) {
-			unused_playlists.erase (i);
-		}
-
-	}
+	playlists.remove (playlist);
 
 	set_dirty();
-
-	PlaylistRemoved (playlist); /* EMIT SIGNAL */
 }
 
 void
@@ -3907,13 +3742,7 @@ Session::tempo_map_changed (Change)
 {
 	clear_clicks ();
 
-	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
-		(*i)->update_after_tempo_map_change ();
-	}
-
-	for (PlaylistList::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
-		(*i)->update_after_tempo_map_change ();
-	}
+	playlists.update_after_tempo_map_change ();
 
 	set_dirty ();
 }
@@ -4132,13 +3961,6 @@ Session::route_name_internal (string n) const
 	}
 
 	return false;
-}
-
-uint32_t
-Session::n_playlists () const
-{
-	Glib::Mutex::Lock lm (playlist_lock);
-	return playlists.size();
 }
 
 void
@@ -4556,5 +4378,3 @@ Session::get_routes_with_regions_at (nframes64_t const p) const
 
 	return rl;
 }
-
-	

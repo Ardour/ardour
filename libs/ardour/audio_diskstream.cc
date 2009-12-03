@@ -257,7 +257,7 @@ AudioDiskstream::find_and_use_playlist (const string& name)
 {
 	boost::shared_ptr<AudioPlaylist> playlist;
 
-	if ((playlist = boost::dynamic_pointer_cast<AudioPlaylist> (_session.playlist_by_name (name))) == 0) {
+	if ((playlist = boost::dynamic_pointer_cast<AudioPlaylist> (_session.playlists.by_name (name))) == 0) {
 		playlist = boost::dynamic_pointer_cast<AudioPlaylist> (PlaylistFactory::create (DataType::AUDIO, _session, name));
 	}
 
@@ -2312,7 +2312,7 @@ AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 
 	assert (afirst);
 
-	if (_session.source_use_count (afirst->source()) > 1) {
+	if (_session.playlists.source_use_count (afirst->source()) > 1) {
 		requires_bounce = true;
 		return false;
 	}

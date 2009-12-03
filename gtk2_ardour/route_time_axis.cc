@@ -1037,7 +1037,7 @@ RouteTimeAxisView::use_copy_playlist (bool prompt, vector<boost::shared_ptr<Play
 		name = resolve_new_group_playlist_name(name, playlists_before_op);
 	}
 
-	while (_session.playlist_by_name(name)) {
+	while (_session.playlists.by_name(name)) {
 		name = Playlist::bump_name (name, _session);
 	}
 
@@ -1089,7 +1089,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 		name = resolve_new_group_playlist_name(name,playlists_before_op);
 	}
 
-	while (_session.playlist_by_name(name)) {
+	while (_session.playlists.by_name(name)) {
 		name = Playlist::bump_name (name, _session);
 	}
 
@@ -1497,7 +1497,7 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	boost::shared_ptr<Diskstream> ds = get_diskstream();
 	RadioMenuItem::Group playlist_group;
 
-	_session.get_playlists (playlists);
+	_session.playlists.get (playlists);
 
 	for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 
@@ -1585,7 +1585,7 @@ RouteTimeAxisView::use_playlist (boost::weak_ptr<Playlist> wpl)
 					continue;
 				}
 
-				boost::shared_ptr<Playlist> ipl = session().playlist_by_name(playlist_name);
+				boost::shared_ptr<Playlist> ipl = session().playlists.by_name(playlist_name);
 				if (!ipl) {
 					// No playlist for this track for this take yet, make it
 					track->diskstream()->use_new_playlist();
