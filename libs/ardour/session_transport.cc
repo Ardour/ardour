@@ -79,14 +79,14 @@ Session::request_input_change_handling ()
 }
 
 void
-Session::request_sync_source (SyncSource src)
+Session::request_sync_source (Slave* new_slave)
 {
 	Event* ev = new Event (Event::SetSyncSource, Event::Add, Event::Immediate, 0, 0.0);
 	bool seamless;
 
 	seamless = Config->get_seamless_loop ();
 
-	if (src == JACK) {
+	if (dynamic_cast<JACK_Slave*>(new_slave)) {
 		/* JACK cannot support seamless looping at present */
 		Config->set_seamless_loop (false);
 	} else {
@@ -97,7 +97,7 @@ Session::request_sync_source (SyncSource src)
 	/* save value of seamless from before the switch */
 	_was_seamless = seamless;
 
-	ev->sync_source = src;
+	ev->slave = new_slave;
 	queue_event (ev);
 }
 
@@ -1156,17 +1156,16 @@ Session::reset_rf_scale (nframes_t motion)
 }
 
 void
-Session::drop_sync_source ()
+Session::use_sync_source (Slave* new_slave)
 {
+	/* Runs in process() context */
+
 	bool non_rt_required = false;
 
-	if (_transport_speed) {
-		error << _("please stop the transport before adjusting slave settings") << endmsg;
-		return;
-	}
+	/* XXX this deletion is problematic because we're in RT context */
 
 	delete _slave;
-	_slave = 0;
+	_slave = new_slave;
 
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
@@ -1174,7 +1173,7 @@ Session::drop_sync_source ()
 			if ((*i)->realtime_set_speed ((*i)->speed(), true)) {
 				non_rt_required = true;
 			}
-			(*i)->set_slaved (0);
+			(*i)->set_slaved (_slave != 0);
 		}
 	}
 
@@ -1187,24 +1186,27 @@ Session::drop_sync_source ()
 }
 
 void
-Session::use_sync_source (SyncSource src)
+Session::drop_sync_source ()
 {
-	bool reverse = false;
-	bool non_rt_required = false;
+	request_sync_source (0);
+}
 
-	if (_transport_speed) {
-		error << _("please stop the transport before adjusting slave settings") << endmsg;
-		return;
-	}
+void
+Session::switch_to_sync_source (SyncSource src)
+{
+	Slave* new_slave;
 
-	delete _slave;
-	_slave = 0;
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("Setting up sync source %1\n", enum_2_string (src)));
 
 	switch (src) {
 	case MTC:
+		if (_slave && dynamic_cast<MTC_Slave*>(_slave)) {
+			return;
+		}
+
 		if (_mtc_port) {
 			try {
-				_slave = new MTC_Slave (*this, *_mtc_port);
+				new_slave = new MTC_Slave (*this, *_mtc_port);
 			}
 
 			catch (failed_constructor& err) {
@@ -1218,9 +1220,13 @@ Session::use_sync_source (SyncSource src)
 		break;
 
 	case MIDIClock:
+		if (_slave && dynamic_cast<MIDIClock_Slave*>(_slave)) {
+			return;
+		}
+
 		if (_midi_clock_port) {
 			try {
-				_slave = new MIDIClock_Slave (*this, *_midi_clock_port, 24);
+				new_slave = new MIDIClock_Slave (*this, *_midi_clock_port, 24);
 			}
 
 			catch (failed_constructor& err) {
@@ -1234,31 +1240,19 @@ Session::use_sync_source (SyncSource src)
 		break;
 
 	case JACK:
-		_slave = new JACK_Slave (_engine.jack());
-		break;
+		if (_slave && dynamic_cast<JACK_Slave*>(_slave)) {
+			return;
+		}
 
+		new_slave = new JACK_Slave (_engine.jack());
+		break;
+		
+	default:
+		new_slave = 0;
+		break;
 	};
 
-	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		if (!(*i)->hidden()) {
-			if ((*i)->realtime_set_speed ((*i)->speed(), true)) {
-				non_rt_required = true;
-			}
-			(*i)->set_slaved (_slave);
-		}
-	}
-
-	if (reverse) {
-		reverse_diskstream_buffers ();
-	}
-
-	if (non_rt_required) {
-		add_post_transport_work (PostTransportSpeed);
-		_butler->schedule_transport_work ();
-	}
-
-	set_dirty();
+	request_sync_source (new_slave);
 }
 
 void

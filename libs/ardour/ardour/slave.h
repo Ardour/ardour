@@ -22,6 +22,8 @@
 
 #include <vector>
 
+#include <glibmm/thread.h>
+
 #include <jack/jack.h>
 
 #include <sigc++/signal.h>
@@ -241,12 +243,14 @@ class MTC_Slave : public Slave, public sigc::trackable {
 	bool        can_notify_on_unknown_rate;
 	PIController* pic;
 
-	SafeTime    current;
-	nframes_t   mtc_frame;               /* current time */
-	nframes_t   last_inbound_frame;      /* when we got it; audio clocked */
-	MIDI::byte  last_mtc_fps_byte;
-	nframes64_t window_begin;
-	nframes64_t window_end;
+	static const int frame_tolerance;
+
+	SafeTime       current;
+	nframes_t      mtc_frame;               /* current time */
+	nframes_t      last_inbound_frame;      /* when we got it; audio clocked */
+	MIDI::byte     last_mtc_fps_byte;
+	nframes64_t    window_begin;
+	nframes64_t    window_end;
 	nframes64_t    last_mtc_timestamp;
 	nframes64_t    last_mtc_frame;
 	bool           did_reset_tc_format;
@@ -256,8 +260,13 @@ class MTC_Slave : public Slave, public sigc::trackable {
 	size_t         speed_accumulator_cnt;
 	bool           have_first_speed_accumulator;
 	double         average_speed;
+	Glib::Mutex    reset_lock;
+	bool           reset_pending;
 
 	void reset ();
+	void queue_reset ();
+	void maybe_reset ();
+
 	void update_mtc_qtr (MIDI::Parser&, int, nframes_t);
 	void update_mtc_time (const MIDI::byte *, bool, nframes_t);
 	void update_mtc_status (MIDI::MTC_Status);

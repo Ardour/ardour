@@ -70,6 +70,8 @@ Parser::possible_mtc (byte *sysex_buf, size_t msglen)
 void
 Parser::reset_mtc_state ()
 {
+	/* MUST REMAIN RT-SAFE */
+
 	_mtc_forward = false;
 	_mtc_running = MTC_Stopped;
 	_mtc_locked = false;

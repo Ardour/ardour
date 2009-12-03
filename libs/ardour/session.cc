@@ -538,6 +538,7 @@ Session::when_engine_running ()
 	BootMessage (_("Using configuration"));
 
 	Config->map_parameters (bind (mem_fun (*this, &Session::config_changed), false));
+	config.map_parameters (bind (mem_fun (*this, &Session::config_changed), true));
 
 	/* every time we reconnect, recompute worst case output latencies */
 

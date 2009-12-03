@@ -572,7 +572,7 @@ Session::follow_slave (nframes_t nframes)
 			if (_slave->give_slave_full_control_over_transport_speed()) {
 				set_transport_speed (slave_speed, false, false);
 			} else {
-				float adjusted_speed = slave_speed + (delta /  float(_current_frame_rate));
+				float adjusted_speed = slave_speed + (1.5 * (delta /  float(_current_frame_rate)));
 				request_transport_speed (adjusted_speed);
 				DEBUG_TRACE (DEBUG::Slave, string_compose ("adjust using %1 towards %2 ratio %3 current %4 slave @ %5\n",
 									   delta, adjusted_speed, adjusted_speed/slave_speed, _transport_speed,

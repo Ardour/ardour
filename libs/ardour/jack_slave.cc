@@ -18,8 +18,8 @@
 */
 
 #include <iostream>
+#include <cerrno>
 
-#include <errno.h>
 #include <jack/jack.h>
 #include <jack/transport.h>
 

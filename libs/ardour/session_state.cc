@@ -58,6 +58,7 @@
 #include "midi++/port.h"
 
 #include "pbd/boost_debug.h"
+#include "pbd/enumwriter.h"
 #include "pbd/error.h"
 #include "pbd/pathscanner.h"
 #include "pbd/pthread_utils.h"
@@ -3212,7 +3213,7 @@ Session::config_changed (std::string p, bool ours)
 		if (!config.get_external_sync()) {
 			drop_sync_source ();
 		} else {
-			use_sync_source (config.get_sync_source());
+			switch_to_sync_source (config.get_sync_source());
 		}
 	} else if (p == "remote-model") {
 		set_remote_control_ids ();

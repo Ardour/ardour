@@ -395,7 +395,7 @@ Session::process_event (Event* ev)
 		break;
 
 	case Event::SetSyncSource:
-		use_sync_source (ev->sync_source);
+		use_sync_source (ev->slave);
 		break;
 
 	case Event::Audition:

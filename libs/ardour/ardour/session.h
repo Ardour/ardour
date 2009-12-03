@@ -175,7 +175,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		void*        ptr;
 		bool         yes_or_no;
 		nframes64_t  target2_frame;
-		SyncSource   sync_source;
+		Slave*       slave;
 		Route*       route;
 	    };
 
@@ -584,7 +584,7 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	static sigc::signal<void> TimecodeOffsetChanged;
 
         std::vector<SyncSource> get_available_sync_options() const;
-	void   request_sync_source (SyncSource);
+	void   request_sync_source (Slave*);
         bool   synced_to_jack() const { return config.get_external_sync() && config.get_sync_source() == JACK; }
 
 	double transport_speed() const { return _transport_speed; }
@@ -1104,8 +1104,9 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	void track_slave_state(float slave_speed, nframes_t slave_transport_frame, nframes_t this_delta);
 	void follow_slave_silently(nframes_t nframes, float slave_speed);
 
-        void use_sync_source (SyncSource);
-        void drop_sync_source ();
+        void switch_to_sync_source (SyncSource); /* !RT context */
+        void drop_sync_source ();  /* !RT context */
+        void use_sync_source (Slave*); /* RT context */
 
         bool post_export_sync;
 	nframes_t post_export_position;

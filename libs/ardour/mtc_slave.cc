@@ -41,6 +41,16 @@ using namespace sigc;
 using namespace MIDI;
 using namespace PBD;
 
+/* length (in timecode frames) of the "window" that we consider legal given receipt of
+   a given timecode position. Ardour will try to chase within this window, and will
+   stop+locate+wait+chase if timecode arrives outside of it. The window extends entirely
+   in the current direction of motion, so if any timecode arrives that is before the most
+   recently received position (and without the direction of timecode reversing too), we
+   will stop+locate+wait+chase.
+*/
+
+const int MTC_Slave::frame_tolerance = 2;
+
 MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 	: session (s)
 {
@@ -71,8 +81,8 @@ MTC_Slave::~MTC_Slave()
 bool 
 MTC_Slave::give_slave_full_control_over_transport_speed() const
 {
-	return true; // for PiC control */
-	// return false; // for Session-level computed varispeed
+	// return true; // for PiC control */
+	return false; // for Session-level computed varispeed
 }
 
 void
@@ -84,8 +94,6 @@ MTC_Slave::rebind (MIDI::Port& p)
 
 	port = &p;
 
-	cerr << "Bind to port MTC messages\n";
-
 	connections.push_back (port->input()->mtc_time.connect (mem_fun (*this, &MTC_Slave::update_mtc_time)));
 	connections.push_back (port->input()->mtc_qtr.connect (mem_fun (*this, &MTC_Slave::update_mtc_qtr)));
 	connections.push_back (port->input()->mtc_status.connect (mem_fun (*this, &MTC_Slave::update_mtc_status)));
@@ -94,6 +102,8 @@ MTC_Slave::rebind (MIDI::Port& p)
 void
 MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, nframes_t now)
 {
+	maybe_reset ();
+
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr frame %1 at %2\n", which_qtr, now));
 	last_inbound_frame = now;
 }
@@ -102,8 +112,13 @@ void
 MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 {
 	/* "now" can be zero if this is called from a context where we do not have or do not want
-	   to use a timestamp indicating when this MTC time was received.
+	   to use a timestamp indicating when this MTC time was received. example: when we received
+	   a locate command via MMC.
 	*/
+
+	if (now) {
+		maybe_reset ();
+	}
 
 	Timecode::Time timecode;
 	TimecodeFormat tc_format;
@@ -174,8 +189,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 		session.request_locate (mtc_frame, false);
 		session.request_transport_speed (0);
 		update_mtc_status (MIDI::MTC_Stopped);
-		window_root = mtc_frame;
-		
+		reset_window (mtc_frame);
 		reset ();
 
 	} else {
@@ -264,6 +278,12 @@ void
 MTC_Slave::process_apparent_speed (double this_speed)
 {
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("speed cnt %1 sz %2 have %3\n", speed_accumulator_cnt, speed_accumulator_size, have_first_speed_accumulator));
+
+	/* clamp to an expected range */
+
+	if (this_speed > 4.0 || this_speed < -4.0) {
+		this_speed = average_speed;
+	}
 
 	if (speed_accumulator_cnt >= speed_accumulator_size) {
 		have_first_speed_accumulator = true;
@@ -385,9 +405,8 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 		pos = last.position;
 		session.request_locate (pos, false);
 		session.request_transport_speed (0);
-		update_mtc_status (MIDI::MTC_Stopped);
-		reset();
-		DEBUG_TRACE (DEBUG::MTC, "MTC not seen for 1/4 second - reset\n");
+		queue_reset ();
+		DEBUG_TRACE (DEBUG::MTC, "MTC not seen for 1/4 second - reset pending\n");
 		return false;
 	}
 
@@ -427,13 +446,28 @@ MTC_Slave::resolution() const
 }
 
 void
+MTC_Slave::queue_reset ()
+{
+	Glib::Mutex::Lock lm (reset_lock);
+	reset_pending++;
+}
+
+void
+MTC_Slave::maybe_reset ()
+{
+	reset_lock.lock ();
+
+	if (reset_pending) {
+		reset ();
+		reset_pending = 0;
+	} 
+
+	reset_lock.unlock ();
+}
+
+void
 MTC_Slave::reset ()
 {
-	/* XXX massive thread safety issue here. MTC could
-	   be being updated as we call this. but this
-	   supposed to be a realtime-safe call.
-	*/
-
 	port->input()->reset_mtc_state ();
 
 	last_inbound_frame = 0;
@@ -458,15 +492,48 @@ MTC_Slave::reset ()
 void
 MTC_Slave::reset_window (nframes64_t root)
 {
-	window_begin = root;
+	
+	/* if we're waiting for the master to catch us after seeking ahead, keep the window
+	   of acceptable MTC frames wide open. otherwise, shrink it down to just 2 video frames
+	   ahead of the window root (taking direction into account).
+	*/
 
-	if (session.slave_state() == Session::Running) {
-		window_end = root + (session.frames_per_timecode_frame() * 2);
-	} else {
-		window_end = root + seekahead_distance ();
+	switch (port->input()->mtc_running()) {
+	case MTC_Forward:
+		window_begin = root;
+		if (session.slave_state() == Session::Running) {
+			window_end = root + (session.frames_per_timecode_frame() * frame_tolerance);
+		} else {
+			window_end = root + seekahead_distance ();
+		}
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("legal MTC window now %1 .. %2\n", window_begin, window_end));
+		break;
+
+	case MTC_Backward:
+		if (session.slave_state() == Session::Running) {
+			nframes_t d = session.frames_per_timecode_frame() * frame_tolerance;
+			if (root > d) {
+				window_begin = root - d;
+				window_end = root;
+			} else {
+				window_begin = 0;
+			}
+		} else {
+			nframes_t d = seekahead_distance ();
+			if (root > d) {
+				window_begin = root - d;
+			} else {
+				window_begin = 0;
+			}
+		}
+		window_end = root;
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("legal MTC window now %1 .. %2\n", window_begin, window_end));
+		break;
+		
+	default:
+		/* do nothing */
+		break;
 	}
-
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("legal MTC window now %1 .. %2\n", window_begin, window_end));
 }
 
 nframes64_t
