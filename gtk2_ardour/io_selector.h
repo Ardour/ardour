@@ -89,7 +89,7 @@ class IOSelectorWindow : public Gtk::Window
 };
 
 
-class PortInsertUI : public Gtk::VBox
+class PortInsertUI : public Gtk::HBox
 {
   public:
 	PortInsertUI (Gtk::Window*, ARDOUR::Session&, boost::shared_ptr<ARDOUR::PortInsert>);
