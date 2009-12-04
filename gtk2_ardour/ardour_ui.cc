@@ -44,13 +44,13 @@
 #include "pbd/memento_command.h"
 #include "pbd/file_utils.h"
 
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/click_box.h>
-#include <gtkmm2ext/fastmeter.h>
-#include <gtkmm2ext/stop_signal.h>
-#include <gtkmm2ext/popup.h>
-#include <gtkmm2ext/window_title.h>
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/click_box.h"
+#include "gtkmm2ext/fastmeter.h"
+#include "gtkmm2ext/stop_signal.h"
+#include "gtkmm2ext/popup.h"
+#include "gtkmm2ext/window_title.h"
 
 #include "midi++/manager.h"
 

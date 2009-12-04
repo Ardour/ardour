@@ -148,7 +148,6 @@ SingleAllocMultiReleasePool::release (void* ptr)
 static void 
 free_per_thread_pool (void* ptr)
 {
-	cerr << "Deleting a per thread pool @ " << ptr << endl;
 	Pool* pptr = static_cast<Pool*>(ptr);
 	delete pptr;
 }
