@@ -296,34 +296,42 @@ PortMatrixRowLabels::motion (double x, double y)
 {
 	ARDOUR::BundleChannel const w = position_to_channel (y, x, _matrix->visible_rows());
 
-	if (w.bundle == 0) {
+	uint32_t const bw = _longest_bundle_name + 2 * name_pad();
+
+	bool done = false;
+
+	if (w.bundle) {
+		
+		if (
+			(_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM && x < bw) ||
+			(_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT && x > (_width - bw) && x < _width)
+			
+			) {
+
+			/* if the mouse is over a bundle name, highlight all channels in the bundle */
+			
+			list<PortMatrixNode> n;
+			
+			for (uint32_t i = 0; i < w.bundle->nchannels(); ++i) {
+				ARDOUR::BundleChannel const bc (w.bundle, i);
+				n.push_back (PortMatrixNode (bc, ARDOUR::BundleChannel ()));
+			}
+			
+			_body->set_mouseover (n);
+			done = true;
+			
+		} else if (x < _width) {
+			
+			_body->set_mouseover (PortMatrixNode (w, ARDOUR::BundleChannel ()));
+			done = true;
+			
+		}
+
+	}
+
+	if (!done) {
 		/* not over any bundle */
 		_body->set_mouseover (PortMatrixNode ());
 		return;
-	}
-
-	uint32_t const bw = _longest_bundle_name + 2 * name_pad();
-
-	if (
-		(_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM && x < bw) ||
-		(_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT && x > (_width - bw))
-		 
-			) {
-
-		/* if the mouse is over a bundle name, highlight all channels in the bundle */
-		
-		list<PortMatrixNode> n;
-
-		for (uint32_t i = 0; i < w.bundle->nchannels(); ++i) {
-			ARDOUR::BundleChannel const bc (w.bundle, i);
-			n.push_back (PortMatrixNode (bc, ARDOUR::BundleChannel ()));
-		}
-
-		_body->set_mouseover (n);
-
-	} else {
-	
-		_body->set_mouseover (PortMatrixNode (w, ARDOUR::BundleChannel ()));
-
 	}
 }
