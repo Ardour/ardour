@@ -465,6 +465,7 @@ def configure(conf):
 					  define_name = 'HAVE_AUDIOUNITS', linkflags = [ '-framework', 'AudioUnit' ])
 
 	autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
+	autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.2')
 	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
 	if sys.platform == 'darwin':
 		sub_config_and_use(conf, 'libs/appleutility')

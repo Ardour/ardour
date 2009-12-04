@@ -43,6 +43,8 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace MIDI;
 
+namespace ARDOUR {
+
 void
 setup_enum_writer ()
 {
@@ -584,6 +586,8 @@ setup_enum_writer ()
 
 }
 
+} /* namespace ARDOUR */
+
 /* deserializing types from ardour/types.h */
 
 std::istream& operator>>(std::istream& o, HeaderFormat& var) 
@@ -795,3 +799,5 @@ std::ostream& operator<<(std::ostream& o, const WaveformShape& var)
 	std::string s = enum_2_string (var);
 	return o << s;
 }
+
+

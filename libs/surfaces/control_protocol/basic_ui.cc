@@ -50,7 +50,11 @@ BasicUI::~BasicUI ()
 void
 BasicUI::register_thread (std::string name)
 {
+	std::string pool_name = name;
+	pool_name += " events";
+
 	PBD::notify_gui_about_thread_creation (pthread_self(), name);
+	SessionEvent::create_per_thread_pool (pool_name, 64);
 }
 
 void

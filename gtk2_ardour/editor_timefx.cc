@@ -338,6 +338,7 @@ void*
 Editor::timefx_thread (void *arg)
 {
 	PBD::notify_gui_about_thread_creation (pthread_self(), X_("TimeFX"));
+	SessionEvent::create_per_thread_pool ("timefx events", 64);
 
 	TimeFXDialog* tsd = static_cast<TimeFXDialog*>(arg);
 

@@ -38,9 +38,11 @@ class Pool
 	
 	std::string name() const { return _name; }
 
-  private:
-	RingBuffer<void*>* free_list;
+  protected:
+	RingBuffer<void*> free_list;
 	std::string _name;
+
+  private:
 	void *block;
 };
 
@@ -69,6 +71,35 @@ class MultiAllocSingleReleasePool : public Pool
 
   private:
     Glib::Mutex* m_lock;
+};
+
+class CrossThreadPool : public Pool
+{
+  public:
+	CrossThreadPool (std::string n, unsigned long isize, unsigned long nitems);
+
+	void* alloc ();
+	void push (void *);
+	
+  private:
+	RingBuffer<void*> pending;
+};
+
+class PerThreadPool
+{
+  public:
+	PerThreadPool ();
+
+	GPrivate* key() const { return _key; }
+
+	void  create_per_thread_pool (std::string name, unsigned long item_size, unsigned long nitems);
+	CrossThreadPool* per_thread_pool ();
+	
+  private:
+	GPrivate* _key;
+	std::string _name;
+	unsigned long _item_size;
+	unsigned long _nitems;
 };
 
 #endif // __qm_pool_h__

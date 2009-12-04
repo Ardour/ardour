@@ -72,6 +72,7 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/runtime_functions.h"
 #include "ardour/session.h"
+#include "ardour/session_event.h"
 #include "ardour/source_factory.h"
 #include "ardour/utils.h"
 
@@ -109,6 +110,8 @@ mix_buffers_with_gain_t ARDOUR::mix_buffers_with_gain = 0;
 mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain = 0;
 
 sigc::signal<void,std::string> ARDOUR::BootMessage;
+
+void ARDOUR::setup_enum_writer ();
 
 int
 ARDOUR::setup_midi ()
@@ -283,14 +286,15 @@ lotsa_files_please ()
 int
 ARDOUR::init (bool use_vst, bool try_optimization)
 {
-	if (!Glib::thread_supported())
+	if (!Glib::thread_supported()) {
 		Glib::thread_init();
-
-	PBD::ID::init ();
-
-	extern void setup_enum_writer ();
+	}
 
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);
+
+	PBD::ID::init ();
+	SessionEvent::init_event_pool ();
+
 
 	/* provide a state version for the few cases that need it and are not
 	   driven by reading state from disk (e.g. undo/redo)

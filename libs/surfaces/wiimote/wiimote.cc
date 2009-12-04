@@ -35,9 +35,9 @@ WiimoteControlProtocol::~WiimoteControlProtocol()
 	if (wiimote_handle) {
 		cwiid_close(wiimote_handle);
 	}
+
 	std::cerr << "Wiimote: closed" << std::endl;
 }
-
 
 bool 
 WiimoteControlProtocol::probe()
@@ -166,11 +166,12 @@ WiimoteControlProtocol::update_led_state()
 }
 
 void
-WiimoteControlProtocol::wiimote_main()
+WiimoteControlProtocol::_wiimote_main ()
 {
 	bdaddr_t bdaddr;
 	unsigned char rpt_mode = 0;
-	register_thread("Wiimote Discovery and Callback Thread");
+
+	register_thread ("Wiimote");
 
 wiimote_discovery:
 
@@ -261,6 +262,7 @@ wiimote_discovery:
 
 
 	std::cerr << "Wiimote: main thread stopped" << std::endl;
+	return 0;
 }
 
 

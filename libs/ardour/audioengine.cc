@@ -136,6 +136,8 @@ _thread_init_callback (void * /*arg*/)
 	*/
 
 	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Audioengine"), 4096);
+	SessionEvent::create_per_thread_pool (X_("Audioengine"), 512);
+
 	MIDI::JACK_MidiPort::set_process_thread (pthread_self());
 }
 

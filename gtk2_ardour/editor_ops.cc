@@ -3653,6 +3653,8 @@ void*
 Editor::_freeze_thread (void* arg)
 {
 	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Freeze"));
+	SessionEvent::create_per_thread_pool ("freeze events", 64);
+
 	return static_cast<Editor*>(arg)->freeze_thread ();
 }
 

@@ -880,6 +880,7 @@ void *
 Editor::_import_thread (void *arg)
 {
 	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Import"));
+	SessionEvent::create_per_thread_pool ("import events", 64);
 
 	Editor *ed = (Editor *) arg;
 	return ed->import_thread ();

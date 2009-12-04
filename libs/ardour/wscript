@@ -263,7 +263,7 @@ def build(bld):
 	obj.includes     = ['.', '../surfaces/control_protocol', '..']
 	obj.name         = 'libardour'
 	obj.target       = 'ardour'
-	obj.uselib       = 'GLIBMM AUBIO SIGCPP XML UUID JACK SNDFILE SAMPLERATE LRDF OSX'
+	obj.uselib       = 'GLIBMM GTHREAD AUBIO SIGCPP XML UUID JACK SNDFILE SAMPLERATE LRDF OSX'
 	obj.uselib_local = 'libpbd libmidipp libevoral libvamphost libvampplugin libtaglib librubberband'
 	obj.vnum         = LIBARDOUR_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
@@ -324,7 +324,7 @@ def build(bld):
 			test/testrunner.cpp
 		'''.split()
 		testobj.includes     = obj.includes + ['../pbd/']
-		testobj.uselib       = 'CPPUNIT SIGCPP JACK GLIBMM SAMPLERATE XML LRDF'
+		testobj.uselib       = 'CPPUNIT SIGCPP JACK GLIBMM GTHREAD SAMPLERATE XML LRDF'
 		testobj.uselib_local = 'libpbd libmidipp libardour'
 		testobj.name         = 'libardour-tests'
 		testobj.target       = 'run-tests'

@@ -98,18 +98,17 @@ struct SessionEvent {
 	    return e1->before (*e2);
     }
     
-    void *operator new (size_t) {
-	    return pool.alloc ();
-    }
-    
-    void operator delete (void *ptr, size_t /*size*/) {
-	    pool.release (ptr);
-    }
+    void* operator new (size_t);
+    void  operator delete (void *ptr, size_t /*size*/);
     
     static const nframes_t Immediate = 0;
     
+    static void create_per_thread_pool (const std::string& n, unsigned long nitems);
+    static void init_event_pool ();
+
 private:
-    static MultiAllocSingleReleasePool pool;
+    static PerThreadPool* pool;
+    CrossThreadPool* own_pool;
 };
 
 class SessionEventManager {
@@ -120,8 +119,8 @@ class SessionEventManager {
 	void add_event (nframes64_t action_frame, SessionEvent::Type type, nframes64_t target_frame = 0);
 	void remove_event (nframes64_t frame, SessionEvent::Type type);
 	void clear_events (SessionEvent::Type type);
-
-
+    
+        
   protected:
         RingBuffer<SessionEvent*> pending_events;
 	typedef std::list<SessionEvent *> Events;

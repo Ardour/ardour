@@ -734,6 +734,7 @@ void*
 freesound_search_thread_entry (void* arg)
 {
 	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Freesound Search"));
+	SessionEvent::create_per_thread_pool ("freesound events", 64);
 
 	static_cast<SoundFileBrowser*>(arg)->freesound_search_thread ();
 
@@ -763,6 +764,10 @@ SoundFileBrowser::freesound_search_clicked ()
 void
 SoundFileBrowser::freesound_search_thread()
 {
+#if 0
+
+	THIS IS ALL TOTALLY THREAD-ILLEGAL ... YOU CANNOT DO GTK STUFF IN THIS THREAD
+
 #ifdef FREESOUND
 	freesound_list->clear();
 
@@ -810,6 +815,8 @@ SoundFileBrowser::freesound_search_thread()
 	canceling = false;
 	freesound_search_btn.set_label(_("Start Downloading"));
 #endif
+#endif
+
 }
 
 vector<ustring>

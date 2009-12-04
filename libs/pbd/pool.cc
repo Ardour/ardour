@@ -30,10 +30,10 @@ using namespace std;
 using namespace PBD;
 
 Pool::Pool (string n, unsigned long item_size, unsigned long nitems)
+	: free_list (nitems)
+	, _name (n)
 {
 	_name = n;
-
-	free_list = new RingBuffer<void*> (nitems);
 
 	/* since some overloaded ::operator new() might use this,
 	   its important that we use a "lower level" allocator to
@@ -48,8 +48,7 @@ Pool::Pool (string n, unsigned long item_size, unsigned long nitems)
 		ptrlist[i] = static_cast<void *> (static_cast<char*>(block) + (i * item_size));
 	}
 
-	free_list->write (ptrlist, nitems);
-
+	free_list.write (ptrlist, nitems);
 	free (ptrlist);
 }
 
@@ -65,7 +64,7 @@ Pool::alloc ()
 
 //	cerr << _name << " pool " << " alloc, thread = " << pthread_name() << " space = " << free_list->read_space() << endl;
 
-	if (free_list->read (&ptr, 1) < 1) {
+	if (free_list.read (&ptr, 1) < 1) {
 		fatal << "CRITICAL: " << _name << " POOL OUT OF MEMORY - RECOMPILE WITH LARGER SIZE!!" << endmsg;
 		/*NOTREACHED*/
 		return 0;
@@ -77,7 +76,7 @@ Pool::alloc ()
 void		
 Pool::release (void *ptr)
 {
-	free_list->write (&ptr, 1);
+	free_list.write (&ptr, 1);
 //	cerr << _name << ": release, now has " << free_list->read_space() << endl;
 }
 
@@ -144,3 +143,64 @@ SingleAllocMultiReleasePool::release (void* ptr)
 	Pool::release (ptr);
 }
 
+/*-------------------------------------------------------*/
+
+static void 
+free_per_thread_pool (void* ptr)
+{
+	cerr << "Deleting a per thread pool @ " << ptr << endl;
+	Pool* pptr = static_cast<Pool*>(ptr);
+	delete pptr;
+}
+ 
+PerThreadPool::PerThreadPool ()
+{
+	{
+		/* for some reason this appears necessary to get glib's thread private stuff to work */
+		GPrivate* key;
+		key = g_private_new (NULL);
+	}
+
+	_key = g_private_new (free_per_thread_pool);
+}
+
+void
+PerThreadPool::create_per_thread_pool (string n, unsigned long isize, unsigned long nitems)
+{
+	Pool* p = new CrossThreadPool (n, isize, nitems);
+	g_private_set (_key, p);
+}
+
+CrossThreadPool*
+PerThreadPool::per_thread_pool ()
+{
+	CrossThreadPool* p = static_cast<CrossThreadPool*> (g_private_get (_key));
+	if (!p) {
+		fatal << "programming error: no per-thread pool \"" << _name << "\" for thread " << pthread_self() << endmsg;
+		/*NOTREACHED*/
+	}
+	return p;
+}
+
+CrossThreadPool::CrossThreadPool  (string n, unsigned long isize, unsigned long nitems)
+	: Pool (n, isize, nitems)
+	, pending (nitems)
+{
+	
+}
+
+void*
+CrossThreadPool::alloc () 
+{
+	void* ptr;
+	while (pending.read (&ptr, 1) == 1) {
+		free_list.write (&ptr, 1);
+	}
+	return Pool::alloc ();
+}
+
+void
+CrossThreadPool::push (void* t) 
+{
+	pending.write (&t, 1);
+}

@@ -114,6 +114,7 @@ void *
 Butler::_thread_work (void* arg)
 {
 	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Butler"));
+	SessionEvent::create_per_thread_pool ("butler events", 64);
 	return ((Butler *) arg)->thread_work ();
 }
 

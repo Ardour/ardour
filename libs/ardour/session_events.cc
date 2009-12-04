@@ -37,7 +37,45 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-MultiAllocSingleReleasePool SessionEvent::pool ("event", sizeof (SessionEvent), 512);
+PerThreadPool* SessionEvent::pool;
+
+void
+SessionEvent::init_event_pool ()
+{
+	pool = new PerThreadPool;
+}
+
+void
+SessionEvent::create_per_thread_pool (const std::string& name, unsigned long nitems)
+{
+	/* this is a per-thread call that simply creates a thread-private ptr to
+	   a CrossThreadPool for use by this thread whenever events are allocated/released
+	   from SessionEvent::pool()
+	*/
+	pool->create_per_thread_pool (name, sizeof (SessionEvent), nitems);
+}
+
+void *
+SessionEvent::operator new (size_t) 
+{
+	CrossThreadPool* p = pool->per_thread_pool ();
+	SessionEvent* ev = static_cast<SessionEvent*> (p->alloc ());
+	ev->own_pool = p;
+	return ev;
+}
+    
+void 
+SessionEvent::operator delete (void *ptr, size_t /*size*/) 
+{
+	Pool* p = pool->per_thread_pool ();
+	SessionEvent* ev = static_cast<SessionEvent*> (ptr);
+	
+	if (p == ev->own_pool) {
+		p->release (ptr);
+	} else {
+		ev->own_pool->push (ev);
+	}
+}
 
 void
 SessionEventManager::add_event (nframes64_t frame, SessionEvent::Type type, nframes64_t target_frame)

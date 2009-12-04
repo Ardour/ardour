@@ -19,6 +19,7 @@
 
 #include "ardour/analyser.h"
 #include "ardour/audiofilesource.h"
+#include "ardour/session_event.h"
 #include "ardour/transient_detector.h"
 
 #include "pbd/pthread_utils.h"
@@ -76,6 +77,7 @@ void
 Analyser::work ()
 {
 	PBD::notify_gui_about_thread_creation (pthread_self(), string ("analyser-") + to_string (pthread_self(), std::dec));
+	SessionEvent::create_per_thread_pool ("Analyser", 64);
 
 	while (true) {
 		analysis_queue_lock.lock ();

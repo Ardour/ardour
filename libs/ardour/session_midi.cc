@@ -1094,6 +1094,7 @@ Session::midi_thread_work ()
 	vector<MIDI::Port*> ports;
 
 	PBD::notify_gui_about_thread_creation (pthread_self(), X_("MIDI"), 2048);
+	SessionEvent::create_per_thread_pool (X_("MIDI I/O"), 128);
 
 	memset (&rtparam, 0, sizeof (rtparam));
 	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */

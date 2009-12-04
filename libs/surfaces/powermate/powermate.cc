@@ -12,12 +12,14 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include <i18n.h>
-#include <pbd/xml++.h>
-#include <pbd/error.h>
 #include <glibmm.h>
 
+#include "pbd/pthread_utils.h"
+#include "pbd/xml++.h"
+#include "pbd/error.h"
+
 #include "powermate.h"
+#include "i18n.h"
 
 using namespace ARDOUR;
 using namespace std;
@@ -72,17 +74,18 @@ int open_powermate (const char *dev, int mode)
 
 int find_powermate(int mode)
 {
-  char devname[256];
-  int i, r;
-
-  for(i=0; i<NUM_EVENT_DEVICES; i++){
-    sprintf(devname, "/dev/input/event%d", i);
-    r = open_powermate(devname, mode);
-    if(r >= 0)
-      return r;
-  }
-
-  return -1;
+	char devname[256];
+	int i, r;
+	
+	for (i = 0; i < NUM_EVENT_DEVICES; i++) {
+		sprintf (devname, "/dev/input/event%d", i);
+		r = open_powermate (devname, mode);
+		if (r >= 0) {
+			return r;
+		}
+	}
+	
+	return -1;
 }
 
 PowermateControlProtocol::PowermateControlProtocol (Session& s)
@@ -126,7 +129,7 @@ PowermateControlProtocol::set_active (bool inActivate)
 				return -1;
 			}
 			
-			if (pthread_create (&mThread, 0, SerialThreadEntry, this) == 0) {
+			if (pthread_create_and_store ("Powermate", &mThread, 0, SerialThreadEntry, this) == 0) {
 				_active = true;
 			} else {
 				return -1;
@@ -163,6 +166,7 @@ PowermateControlProtocol::set_state (const XMLNode& /*node*/, int /*version*/)
 void*
 PowermateControlProtocol::SerialThreadEntry (void* arg)
 {
+	static_cast<PowermateControlProtocol*>(arg)->register_thread ("Powermate");
 	return static_cast<PowermateControlProtocol*>(arg)->SerialThread ();
 }
 

@@ -374,9 +374,8 @@ OSC::get_unix_server_url()
 void *
 OSC::_osc_receiver(void * arg)
 {
-	PBD::notify_gui_about_thread_creation (pthread_self(), X_("OSC"));
-
-	static_cast<OSC*> (arg)->osc_receiver();
+	static_cast<OSC*>(arg)->register_thread (X_("OSC"));
+	static_cast<OSC*>(arg)->osc_receiver();
 	return 0;
 }
 

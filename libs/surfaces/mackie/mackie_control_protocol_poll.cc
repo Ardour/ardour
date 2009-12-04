@@ -42,7 +42,7 @@ bool MackieControlProtocol::probe()
 
 void * MackieControlProtocol::monitor_work()
 {
-	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Mackie"));
+	register_thread (X_("MCU"));
 
 	pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, 0);
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
