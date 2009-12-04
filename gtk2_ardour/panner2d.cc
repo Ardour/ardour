@@ -39,6 +39,7 @@ using namespace Gtk;
 using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
+using Gtkmm2ext::Keyboard;
 
 Panner2d::Target::Target (float xa, float ya, const char *txt)
 	: x (xa, 0.0, 1.0, 0.01, 0.1)

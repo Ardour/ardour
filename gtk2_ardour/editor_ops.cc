@@ -88,6 +88,7 @@ using namespace sigc;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace Editing;
+using Gtkmm2ext::Keyboard;
 
 /***********************************************************************
   Editor operations

@@ -43,6 +43,8 @@ using namespace sigc;
 using namespace Gtk;
 using namespace std;
 
+using Gtkmm2ext::Keyboard;
+
 using PBD::atoi;
 using PBD::atof;
 

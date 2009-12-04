@@ -59,6 +59,8 @@ using namespace PBD;
 using namespace Gtk;
 using namespace ArdourCanvas;
 
+using Gtkmm2ext::Keyboard;
+
 bool
 Editor::track_canvas_scroll (GdkEventScroll* ev)
 {

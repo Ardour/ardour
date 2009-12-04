@@ -33,6 +33,7 @@ gtkmm2ext_sources = [
 	'grouped_buttons.cc',
 	'gtk_ui.cc',
 	'idle_adjustment.cc',
+	'keyboard.cc',
 	'pixfader.cc',
 	'pixscroller.cc',
 	'popup.cc',

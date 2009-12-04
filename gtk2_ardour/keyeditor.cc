@@ -25,6 +25,8 @@ using namespace Gtk;
 using namespace Gdk;
 using namespace PBD;
 
+using Gtkmm2ext::Keyboard;
+
 KeyEditor::KeyEditor ()
 	: ArdourDialog (_("Key Bindings"), false)
 	, unbind_button (_("Remove shortcut"))

@@ -48,6 +48,8 @@ using namespace Gtk;
 using namespace Editing;
 using namespace ArdourCanvas;
 
+using Gtkmm2ext::Keyboard;
+
 double const ControlPointDrag::_zero_gain_fraction = gain_to_slider_position (dB_to_coefficient (0.0));
 
 Drag::Drag (Editor* e, ArdourCanvas::Item* i) 
@@ -2181,7 +2183,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		_editor->show_verbose_time_cursor (location->end(), 10);
 	}
 
-	Selection::Operation op = Keyboard::selection_type (event->button.state);
+	Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
 
 	switch (op) {
 	case Selection::Toggle:
@@ -2394,7 +2396,7 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		   off the selection process
 		*/
 
-		Selection::Operation op = Keyboard::selection_type (event->button.state);
+		Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
 
 		switch (op) {
 		case Selection::Set:
@@ -2748,7 +2750,7 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 
 
-		Selection::Operation op = Keyboard::selection_type (event->button.state);
+		Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
 		bool committed;
 
 		_editor->begin_reversible_command (_("rubberband selection"));

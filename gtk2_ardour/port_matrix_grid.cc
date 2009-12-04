@@ -27,6 +27,7 @@
 #include "keyboard.h"
 
 using namespace std;
+using Gtkmm2ext::Keyboard;
 
 PortMatrixGrid::PortMatrixGrid (PortMatrix* m, PortMatrixBody* b)
 	: PortMatrixComponent (m, b),

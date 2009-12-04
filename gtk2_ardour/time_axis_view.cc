@@ -62,6 +62,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
 using namespace ArdourCanvas;
+using Gtkmm2ext::Keyboard;
 
 const double trim_handle_size = 6.0; /* pixels */
 
@@ -338,7 +339,7 @@ TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 void
 TimeAxisView::selection_click (GdkEventButton* ev)
 {
-	Selection::Operation op = Keyboard::selection_type (ev->state);
+	Selection::Operation op = ArdourKeyboard::selection_type (ev->state);
 	_editor.set_selected_track (*this, op, false);
 }
 

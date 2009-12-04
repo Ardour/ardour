@@ -21,6 +21,7 @@
 #define __libgtkmm2ext_actions_h__
 
 #include <vector>
+
 #include <gtkmm/action.h>
 #include <gtkmm/radioaction.h>
 #include <gtkmm/toggleaction.h>

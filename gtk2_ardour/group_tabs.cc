@@ -29,6 +29,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace ARDOUR;
+using Gtkmm2ext::Keyboard;
 
 GroupTabs::GroupTabs (Editor* e)
 	: EditorComponent (e),

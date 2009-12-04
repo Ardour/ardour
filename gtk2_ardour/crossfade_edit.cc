@@ -57,6 +57,8 @@ using namespace Gtk;
 using namespace sigc;
 using namespace Editing;
 
+using Gtkmm2ext::Keyboard;
+
 #include "i18n.h"
 
 const int32_t CrossfadeEditor::Point::size = 7;

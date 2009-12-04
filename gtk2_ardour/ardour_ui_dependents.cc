@@ -58,9 +58,7 @@ ARDOUR_UI::we_have_dependents ()
 {
 	install_actions ();
 	ProcessorBox::register_actions ();
-
-	Keyboard::setup_keybindings ();
-
+	keyboard->setup_keybindings ();
 	editor->UpdateAllTransportClocks.connect (mem_fun (*this, &ARDOUR_UI::update_transport_clocks));
 }
 

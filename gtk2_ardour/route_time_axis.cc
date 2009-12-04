@@ -1171,7 +1171,7 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 
 	PublicEditor::TrackViewList* tracks = _editor.get_valid_views (this, _route->route_group());
 
-	switch (Keyboard::selection_type (ev->state)) {
+	switch (ArdourKeyboard::selection_type (ev->state)) {
 	case Selection::Toggle:
 		_editor.get_selection().toggle (*tracks);
 		break;

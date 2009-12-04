@@ -30,6 +30,7 @@
 using namespace std;
 using namespace sigc;
 using namespace ARDOUR;
+using Gtkmm2ext::Keyboard;
 
 /** Construct an EditorSummary.
  *  @param e Editor to represent.

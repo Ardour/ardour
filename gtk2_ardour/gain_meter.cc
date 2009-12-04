@@ -58,6 +58,7 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace sigc;
 using namespace std;
+using Gtkmm2ext::Keyboard;
 
 sigc::signal<void> GainMeterBase::ResetAllPeakDisplays;
 sigc::signal<void,RouteGroup*> GainMeterBase::ResetGroupPeakDisplays;

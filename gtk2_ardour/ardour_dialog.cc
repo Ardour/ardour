@@ -32,6 +32,7 @@
 using namespace std;
 using namespace sigc;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 
 sigc::signal<void> ArdourDialog::CloseAllDialogs;
 

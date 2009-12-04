@@ -274,7 +274,12 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	/* we like keyboards */
 
-	keyboard = new Keyboard;
+	keyboard = new ArdourKeyboard;
+
+	XMLNode* node = ARDOUR_UI::instance()->keyboard_settings();
+	if (node) {
+		keyboard->set_state (*node, Stateful::loading_state_version);
+	}
 
 	reset_dpi();
 

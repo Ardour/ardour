@@ -55,6 +55,7 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace Glib;
+using Gtkmm2ext::Keyboard;
 
 EditorRoutes::EditorRoutes (Editor* e)
 	: EditorComponent (e),

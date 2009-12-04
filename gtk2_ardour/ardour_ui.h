@@ -70,11 +70,11 @@
 class About;
 class AddRouteDialog;
 class ArdourStartup;
+class ArdourKeyboard;
 class AudioClock;
 class BundleManager;
 class ConnectionEditor;
 class KeyEditor;
-class Keyboard;
 class LocationUIWindow;
 class Mixer_UI;
 class PublicEditor;
@@ -596,8 +596,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 
 	/* Keyboard Handling */
 
-	Keyboard* keyboard;
-
+	ArdourKeyboard* keyboard;
+	
 	/* Keymap handling */
 
 	void install_actions ();

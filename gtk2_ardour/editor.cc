@@ -125,6 +125,7 @@ using namespace Editing;
 
 using PBD::internationalize;
 using PBD::atoi;
+using Gtkmm2ext::Keyboard;
 
 const double Editor::timebar_height = 15.0;
 

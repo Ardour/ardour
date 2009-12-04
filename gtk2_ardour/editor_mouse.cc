@@ -79,6 +79,7 @@ using namespace PBD;
 using namespace sigc;
 using namespace Gtk;
 using namespace Editing;
+using Gtkmm2ext::Keyboard;
 
 bool
 Editor::mouse_frame (nframes64_t& where, bool& in_track_canvas) const
@@ -440,7 +441,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		}
 	}
 
-	Selection::Operation op = Keyboard::selection_type (event->button.state);
+	Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
 	bool press = (event->type == GDK_BUTTON_PRESS);
 
 	// begin_reversible_command (_("select on click"));

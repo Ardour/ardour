@@ -52,6 +52,7 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Glib;
 using namespace Editing;
+using Gtkmm2ext::Keyboard;
 
 EditorRegions::EditorRegions (Editor* e)
 	: EditorComponent (e),

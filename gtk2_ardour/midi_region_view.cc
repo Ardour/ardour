@@ -70,6 +70,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
 using namespace ArdourCanvas;
+using Gtkmm2ext::Keyboard;
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv,
 		boost::shared_ptr<MidiRegion> r, double spu, Gdk::Color const & basic_color)
