@@ -82,7 +82,11 @@ PortMatrix::PortMatrix (Window* parent, Session& session, DataType type)
 	_hlabel.set_alignment (0, 0.5);
 	_hlabel.set_padding (16, 4);
 
-	show_all ();
+	_body->show ();
+	_vbox.show ();
+	_hbox.show ();
+	_vlabel.show ();
+	_hlabel.show ();
 }
 
 PortMatrix::~PortMatrix ()
@@ -174,8 +178,6 @@ PortMatrix::setup ()
 	setup_scrollbars ();
 	setup_notebooks ();
 	queue_draw ();
-
-	show_all ();
 }
 
 void
@@ -643,6 +645,18 @@ PortMatrix::setup_notebooks ()
 
 	if (v_current_page != -1 && _vnotebook.get_n_pages() > v_current_page) {
 		_vnotebook.set_current_page (v_current_page);
+	}
+
+	if (_hnotebook.get_n_pages() <= 1) {
+		_hnotebook.hide ();
+	} else {
+		_hnotebook.show ();
+	}
+
+	if (_vnotebook.get_n_pages() <= 1) {
+		_vnotebook.hide ();
+	} else {
+		_vnotebook.show ();
 	}
 	
 	_in_setup_notebooks = false;
