@@ -970,6 +970,10 @@ TimeAxisViewItem::set_y (double y)
 void
 TimeAxisViewItem::update_name_pixbuf_visibility ()
 {
+	if (!name_pixbuf) {
+		return;
+	}
+	
 	if (wide_enough_for_name && high_enough_for_name) {
 		name_pixbuf->show ();
 	} else {
