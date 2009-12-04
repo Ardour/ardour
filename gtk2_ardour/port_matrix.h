@@ -203,7 +203,7 @@ private:
 	int _min_height_divisor;
 	bool _show_only_bundles;
 	bool _inhibit_toggle_show_only_bundles;
-	bool _in_setup_notebooks;
+	bool _ignore_notebook_page_selected;
 };
 
 #endif

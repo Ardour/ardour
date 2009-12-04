@@ -57,7 +57,7 @@ PortMatrix::PortMatrix (Window* parent, Session& session, DataType type)
 	  _min_height_divisor (1),
 	  _show_only_bundles (false),
 	  _inhibit_toggle_show_only_bundles (false),
-	  _in_setup_notebooks (false)
+	  _ignore_notebook_page_selected (false)
 {
 	_body = new PortMatrixBody (this);
 
@@ -614,14 +614,17 @@ PortMatrix::bundle_changed (ARDOUR::Bundle::Change c)
 void
 PortMatrix::setup_notebooks ()
 {
-	_in_setup_notebooks = true;
-
 	int const h_current_page = _hnotebook.get_current_page ();
 	int const v_current_page = _vnotebook.get_current_page ();
 	
 	remove_notebook_pages (_hnotebook);
 	remove_notebook_pages (_vnotebook);
 
+	/* for some reason best known to GTK, erroneous switch_page signals seem to be generated
+	   when adding pages to notebooks, so ignore them */
+	
+	_ignore_notebook_page_selected = true;
+	
 	for (PortGroupList::List::const_iterator i = _ports[_row_index].begin(); i != _ports[_row_index].end(); ++i) {
 		HBox* dummy = manage (new HBox);
 		dummy->show ();
@@ -636,15 +639,21 @@ PortMatrix::setup_notebooks ()
 		_hnotebook.append_page (*dummy, (*i)->name);
 	}
 
+	_ignore_notebook_page_selected = false;
+
 	_vnotebook.set_tab_pos (POS_LEFT);
 	_hnotebook.set_tab_pos (POS_TOP);
 
 	if (h_current_page != -1 && _hnotebook.get_n_pages() > h_current_page) {
 		_hnotebook.set_current_page (h_current_page);
+	} else {
+		_hnotebook.set_current_page (0);
 	}
 
 	if (v_current_page != -1 && _vnotebook.get_n_pages() > v_current_page) {
 		_vnotebook.set_current_page (v_current_page);
+	} else {
+		_vnotebook.set_current_page (0);
 	}
 
 	if (_hnotebook.get_n_pages() <= 1) {
@@ -658,8 +667,6 @@ PortMatrix::setup_notebooks ()
 	} else {
 		_vnotebook.show ();
 	}
-	
-	_in_setup_notebooks = false;
 }
 
 void
@@ -675,10 +682,10 @@ PortMatrix::remove_notebook_pages (Notebook& n)
 void
 PortMatrix::v_page_selected (GtkNotebookPage *, guint n)
 {
-	if (_in_setup_notebooks) {
+	if (_ignore_notebook_page_selected) {
 		return;
 	}
-
+	
 	PortGroupList& p = _ports[_row_index];
 
 	n = p.size() - n - 1;
@@ -701,7 +708,7 @@ PortMatrix::v_page_selected (GtkNotebookPage *, guint n)
 void
 PortMatrix::h_page_selected (GtkNotebookPage *, guint n)
 {
-	if (_in_setup_notebooks) {
+	if (_ignore_notebook_page_selected) {
 		return;
 	}
 
