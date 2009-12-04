@@ -443,7 +443,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	/* now force an update of all the various elements */
 
-	processor_box.update();
 	mute_changed (0);
 	solo_changed (0);
 	name_changed ();

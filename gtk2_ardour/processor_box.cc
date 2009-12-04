@@ -316,6 +316,10 @@ ProcessorBox::~ProcessorBox ()
 void
 ProcessorBox::set_route (boost::shared_ptr<Route> r)
 {
+	if (_route == r) {
+		return;
+	}
+	
 	connections.clear ();
 
 	/* new route: any existing block on processor redisplay must be meaningless */
