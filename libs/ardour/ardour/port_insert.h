@@ -60,6 +60,9 @@ class PortInsert : public IOProcessor
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);
 
+	void activate ();
+	void deactivate ();
+
 	uint32_t bit_slot() const { return bitslot; }
 
   private:

@@ -188,3 +188,19 @@ PortInsert::set_name (const std::string& name)
 
 	return ret;
 }
+
+void
+PortInsert::activate ()
+{
+	IOProcessor::activate ();
+
+	_out->activate ();
+}
+
+void
+PortInsert::deactivate ()
+{
+	IOProcessor::deactivate ();
+
+	_out->deactivate ();
+}
