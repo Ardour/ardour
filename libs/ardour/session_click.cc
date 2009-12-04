@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 20002 Paul Davis
+    Copyright (C) 2002 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-Pool Session::Click::pool ("click", sizeof (Click), 128);
+Pool Click::pool ("click", sizeof (Click), 128);
 
 void
 Session::click (nframes_t start, nframes_t nframes)

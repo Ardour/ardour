@@ -141,6 +141,10 @@ Diskstream::set_route (Route& r)
 {
 	_route = &r;
 	_io = _route->input();
+
+	ic_connection.disconnect();
+	ic_connection = _io->changed.connect (mem_fun (*this, &Diskstream::handle_input_change));
+
 	input_change_pending = ConfigurationChanged;
 	non_realtime_input_change ();
 	set_align_style_from_io ();

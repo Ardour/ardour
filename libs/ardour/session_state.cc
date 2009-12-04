@@ -2947,9 +2947,9 @@ Session::config_changed (std::string p, bool ours)
 		if ((location = _locations.auto_punch_location()) != 0) {
 
 			if (config.get_punch_in ()) {
-				replace_event (Event::PunchIn, location->start());
+				replace_event (SessionEvent::PunchIn, location->start());
 			} else {
-				remove_event (location->start(), Event::PunchIn);
+				remove_event (location->start(), SessionEvent::PunchIn);
 			}
 		}
 
@@ -2960,9 +2960,9 @@ Session::config_changed (std::string p, bool ours)
 		if ((location = _locations.auto_punch_location()) != 0) {
 
 			if (config.get_punch_out()) {
-				replace_event (Event::PunchOut, location->end());
+				replace_event (SessionEvent::PunchOut, location->end());
 			} else {
-				clear_events (Event::PunchOut);
+				clear_events (SessionEvent::PunchOut);
 			}
 		}
 

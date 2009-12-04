@@ -38,7 +38,6 @@
 #include <glibmm/thread.h>
 
 #include "pbd/error.h"
-#include "pbd/pool.h"
 #include "pbd/rcu.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/undo.h"
@@ -50,9 +49,11 @@
 #include "pbd/stateful.h"
 
 #include "ardour/ardour.h"
+#include "ardour/click.h"
 #include "ardour/chan_count.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session_configuration.h"
+#include "ardour/session_event.h"
 #include "ardour/location.h"
 #include "ardour/timecode.h"
 #include "ardour/interpolation.h"
@@ -120,7 +121,7 @@ class VSTPlugin;
 
 extern void setup_enum_writer ();
 
-class Session : public PBD::StatefulDestructible, public boost::noncopyable
+class Session : public PBD::StatefulDestructible, public SessionEventManager, public boost::noncopyable
 {
   private:
 	typedef std::pair<boost::weak_ptr<Route>,bool> RouteBooleanState;
@@ -133,100 +134,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 		Disabled = 0,
 		Enabled = 1,
 		Recording = 2
-	};
-
-        struct Event {
-	        enum Type {
-			SetTransportSpeed,
-			SetDiskstreamSpeed,
-			Locate,
-			LocateRoll,
-			LocateRollLocate,
-			SetLoop,
-			PunchIn,
-			PunchOut,
-			RangeStop,
-			RangeLocate,
-			Overwrite,
-			SetSyncSource,
-			Audition,
-			InputConfigurationChange,
-			SetPlayAudioRange,
-			
-			/* only one of each of these events can be queued at any one time */
-			
-			StopOnce,
-			AutoLoop
-		};
-	    
-	         enum Action {
-			 Add,
-			 Remove,
-			 Replace,
-			 Clear
-		 };
-	    
-	    Type             type;
-	    Action           action;
-	    nframes64_t      action_frame;
-	    nframes64_t      target_frame;
-	    double           speed;
-	    
-	    union {
-		void*        ptr;
-		bool         yes_or_no;
-		nframes64_t  target2_frame;
-		Slave*       slave;
-		Route*       route;
-	    };
-
-	    union {
-		bool second_yes_or_no;
-	    };
-	    
-	    std::list<AudioRange> audio_range;
-	    std::list<MusicRange> music_range;
-	    
-	    boost::shared_ptr<Region> region;
-	    
-	    Event(Type t, Action a, nframes_t when, nframes_t where, double spd, bool yn = false, bool yn2 = false)
-			: type (t)
-			, action (a)
-			, action_frame (when)
-			, target_frame (where)
-			, speed (spd)
-			, yes_or_no (yn)
-			, second_yes_or_no (yn2)
-		{}
-
-	    void set_ptr (void* p) {
-		    ptr = p;
-	    }
-	    
-	    bool before (const Event& other) const {
-		    return action_frame < other.action_frame;
-	    }
-	    
-	    bool after (const Event& other) const {
-		    return action_frame > other.action_frame;
-	    }
-	    
-	    static bool compare (const Event *e1, const Event *e2) {
-		    return e1->before (*e2);
-	    }
-	    
-	    void *operator new (size_t) {
-		    return pool.alloc ();
-	    }
-	    
-	    void operator delete (void *ptr, size_t /*size*/) {
-		    pool.release (ptr);
-	    }
-	    
-	    static const nframes_t Immediate = 0;
-	    
-	private:
-	    static MultiAllocSingleReleasePool pool;
 	};
 
 	/* creating from an XML file */
@@ -457,10 +364,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	int location_name(std::string& result, std::string base = std::string(""));
 
 	void reset_input_monitor_state ();
-
-	void add_event (nframes_t action_frame, Event::Type type, nframes_t target_frame = 0);
-	void remove_event (nframes_t frame, Event::Type type);
-	void clear_events (Event::Type type);
 
 	nframes_t get_block_size()        const { return current_block_size; }
 	nframes_t worst_output_latency () const { return _worst_output_latency; }
@@ -1160,8 +1063,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	boost::scoped_ptr<SessionDirectory> _session_dir;
 
-	RingBuffer<Event*> pending_events;
-
 	void hookup_io ();
 	void when_engine_running ();
 	void graph_reordered ();
@@ -1247,27 +1148,6 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	sigc::connection auto_loop_changed_connection;
 	void             auto_loop_changed (Location *);
 
-	typedef std::list<Event *> Events;
-	Events           events;
-	Events           immediate_events;
-	Events::iterator next_event;
-
-	/* there can only ever be one of each of these */
-
-	Event *auto_loop_event;
-	Event *punch_out_event;
-	Event *punch_in_event;
-
-	/* events */
-
-	void dump_events () const;
-	void queue_event (Event *ev);
-	void merge_event (Event*);
-	void replace_event (Event::Type, nframes_t action_frame, nframes_t target = 0);
-	bool _replace_event (Event*);
-	bool _remove_event (Event *);
-	void _clear_event_type (Event::Type);
-
 	void first_stage_init (std::string path, std::string snapshot_name);
 	int  second_stage_init (bool new_tracks);
 	void find_current_end ();
@@ -1299,8 +1179,12 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 
 	void *do_work();
 
+	/* SessionEventManager interface */
+
+	void queue_event (SessionEvent*);
+	void process_event (SessionEvent*);
 	void set_next_event ();
-	void process_event (Event *ev);
+	void cleanup_event (SessionEvent*,int);
 
 	/* MIDI Machine Control */
 
@@ -1585,33 +1469,11 @@ class Session : public PBD::StatefulDestructible, public boost::noncopyable
 	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
 	void reset_jack_connection (jack_client_t* jack);
 	void record_enable_change_all (bool yn);
+	void do_record_enable_change_all (RouteList*, bool);
 
 	XMLNode& state(bool);
 
 	/* click track */
-
-	struct Click {
-		nframes_t start;
-		nframes_t duration;
-		nframes_t offset;
-		const Sample *data;
-
-		Click (nframes_t s, nframes_t d, const Sample *b)
-			: start (s), duration (d), data (b) { offset = 0; }
-
-		void *operator new (size_t) {
-			return pool.alloc ();
-		};
-
-		void operator delete(void *ptr, size_t /*size*/) {
-			pool.release (ptr);
-		}
-
-	private:
-		static Pool pool;
-	};
-
-	typedef std::list<Click*> Clicks;
 
 	Clicks                 clicks;
 	bool                  _clicking;

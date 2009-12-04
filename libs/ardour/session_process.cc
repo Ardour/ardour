@@ -23,6 +23,7 @@
 #include <unistd.h>
 
 #include "pbd/error.h"
+#include "pbd/enumwriter.h"
 
 #include <glibmm/thread.h>
 
@@ -274,7 +275,7 @@ Session::commit_diskstreams (nframes_t nframes, bool &needs_butler)
 void
 Session::process_with_events (nframes_t nframes)
 {
-	Event*         ev;
+	SessionEvent*         ev;
 	nframes_t      this_nframes;
 	nframes_t      end_frame;
 	bool           session_needs_butler = false;
@@ -299,7 +300,7 @@ Session::process_with_events (nframes_t nframes)
 	*/
 
 	while (!non_realtime_work_pending() && !immediate_events.empty()) {
-		Event *ev = immediate_events.front ();
+		SessionEvent *ev = immediate_events.front ();
 		immediate_events.pop_front ();
 		process_event (ev);
 	}
@@ -334,7 +335,7 @@ Session::process_with_events (nframes_t nframes)
 	end_frame = _transport_frame + (nframes_t)frames_moved;
 
 	{
-		Event* this_event;
+		SessionEvent* this_event;
 		Events::iterator the_next_one;
 
 		if (!process_can_proceed()) {
@@ -863,7 +864,7 @@ Session::process_without_events (nframes_t nframes)
 void
 Session::process_audition (nframes_t nframes)
 {
-	Event* ev;
+	SessionEvent* ev;
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -890,7 +891,7 @@ Session::process_audition (nframes_t nframes)
 	*/
 
 	while (!non_realtime_work_pending() && !immediate_events.empty()) {
-		Event *ev = immediate_events.front ();
+		SessionEvent *ev = immediate_events.front ();
 		immediate_events.pop_front ();
 		process_event (ev);
 	}
@@ -947,3 +948,209 @@ Session::maybe_sync_start (nframes_t& nframes)
 	return false;
 }
 
+void
+Session::queue_event (SessionEvent* ev)
+{
+	if (_state_of_the_state & Deletion) {
+		return;
+	} else if (_state_of_the_state & Loading) {
+		merge_event (ev);
+	} else {
+		pending_events.write (&ev, 1);
+	}
+}
+
+void
+Session::set_next_event ()
+{
+	if (events.empty()) {
+		next_event = events.end();
+		return;
+	}
+
+	if (next_event == events.end()) {
+		next_event = events.begin();
+	}
+
+	if ((*next_event)->action_frame > _transport_frame) {
+		next_event = events.begin();
+	}
+
+	for (; next_event != events.end(); ++next_event) {
+		if ((*next_event)->action_frame >= _transport_frame) {
+			break;
+		}
+	}
+}
+
+void
+Session::cleanup_event (SessionEvent* ev, int status)
+{
+	switch (ev->type) {
+	case SessionEvent::SetRecordEnable:
+		delete ev->routes;
+		break;
+	default:
+		break;
+	}
+}
+
+void
+Session::process_event (SessionEvent* ev)
+{
+	bool remove = true;
+	bool del = true;
+
+	/* if we're in the middle of a state change (i.e. waiting
+	   for the butler thread to complete the non-realtime
+	   part of the change), we'll just have to queue this
+	   event for a time when the change is complete.
+	*/
+
+	if (non_realtime_work_pending()) {
+
+		/* except locates, which we have the capability to handle */
+
+		if (ev->type != SessionEvent::Locate) {
+			immediate_events.insert (immediate_events.end(), ev);
+			_remove_event (ev);
+			return;
+		}
+	}
+
+	DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("Processing event: %1 @ %2\n", enum_2_string (ev->type), _transport_frame));
+
+	switch (ev->type) {
+	case SessionEvent::SetLoop:
+		set_play_loop (ev->yes_or_no);
+		break;
+
+	case SessionEvent::AutoLoop:
+		if (play_loop) {
+			start_locate (ev->target_frame, true, false, Config->get_seamless_loop());
+		}
+		remove = false;
+		del = false;
+		break;
+
+	case SessionEvent::Locate:
+		if (ev->yes_or_no) {
+			// cerr << "forced locate to " << ev->target_frame << endl;
+			locate (ev->target_frame, false, true, false);
+		} else {
+			// cerr << "soft locate to " << ev->target_frame << endl;
+			start_locate (ev->target_frame, false, true, false);
+		}
+		_send_timecode_update = true;
+		break;
+
+	case SessionEvent::LocateRoll:
+		if (ev->yes_or_no) {
+			// cerr << "forced locate to+roll " << ev->target_frame << endl;
+			locate (ev->target_frame, true, true, false);
+		} else {
+			// cerr << "soft locate to+roll " << ev->target_frame << endl;
+			start_locate (ev->target_frame, true, true, false);
+		}
+		_send_timecode_update = true;
+		break;
+
+	case SessionEvent::LocateRollLocate:
+		// locate is handled by ::request_roll_at_and_return()
+		_requested_return_frame = ev->target_frame;
+		request_locate (ev->target2_frame, true);
+		break;
+
+
+	case SessionEvent::SetTransportSpeed:
+		set_transport_speed (ev->speed, ev->yes_or_no, ev->second_yes_or_no);
+		break;
+
+	case SessionEvent::PunchIn:
+		// cerr << "PunchIN at " << transport_frame() << endl;
+		if (config.get_punch_in() && record_status() == Enabled) {
+			enable_record ();
+		}
+		remove = false;
+		del = false;
+		break;
+
+	case SessionEvent::PunchOut:
+		// cerr << "PunchOUT at " << transport_frame() << endl;
+		if (config.get_punch_out()) {
+			step_back_from_record ();
+		}
+		remove = false;
+		del = false;
+		break;
+
+	case SessionEvent::StopOnce:
+		if (!non_realtime_work_pending()) {
+			stop_transport (ev->yes_or_no);
+			_clear_event_type (SessionEvent::StopOnce);
+		}
+		remove = false;
+		del = false;
+		break;
+
+	case SessionEvent::RangeStop:
+		if (!non_realtime_work_pending()) {
+			stop_transport (ev->yes_or_no);
+		}
+		remove = false;
+		del = false;
+		break;
+
+	case SessionEvent::RangeLocate:
+		start_locate (ev->target_frame, true, true, false);
+		remove = false;
+		del = false;
+		break;
+
+	case SessionEvent::Overwrite:
+		overwrite_some_buffers (static_cast<Diskstream*>(ev->ptr));
+		break;
+
+	case SessionEvent::SetDiskstreamSpeed:
+		set_diskstream_speed (static_cast<Diskstream*> (ev->ptr), ev->speed);
+		break;
+
+	case SessionEvent::SetSyncSource:
+		use_sync_source (ev->slave);
+		break;
+
+	case SessionEvent::Audition:
+		set_audition (ev->region);
+		// drop reference to region
+		ev->region.reset ();
+		break;
+
+	case SessionEvent::InputConfigurationChange:
+		add_post_transport_work (PostTransportInputChange);
+		_butler->schedule_transport_work ();
+		break;
+
+	case SessionEvent::SetPlayAudioRange:
+		set_play_range (ev->audio_range, (ev->speed == 1.0f));
+		break;
+
+	case SessionEvent::SetRecordEnable:
+		do_record_enable_change_all (ev->routes, ev->yes_or_no);
+		break;
+
+	default:
+	  fatal << string_compose(_("Programming error: illegal event type in process_event (%1)"), ev->type) << endmsg;
+		/*NOTREACHED*/
+		break;
+	};
+
+	if (remove) {
+		del = del && !_remove_event (ev);
+	}
+
+	ev->Complete (ev, 0); /* EMIT SIGNAL */
+
+	if (del) {
+		delete ev;
+	}
+}

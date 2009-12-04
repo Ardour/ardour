@@ -73,7 +73,7 @@ void
 Session::request_input_change_handling ()
 {
 	if (!(_state_of_the_state & (InitialConnecting|Deletion))) {
-		Event* ev = new Event (Event::InputConfigurationChange, Event::Add, Event::Immediate, 0, 0.0);
+		SessionEvent* ev = new SessionEvent (SessionEvent::InputConfigurationChange, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 		queue_event (ev);
 	}
 }
@@ -81,7 +81,7 @@ Session::request_input_change_handling ()
 void
 Session::request_sync_source (Slave* new_slave)
 {
-	Event* ev = new Event (Event::SetSyncSource, Event::Add, Event::Immediate, 0, 0.0);
+	SessionEvent* ev = new SessionEvent (SessionEvent::SetSyncSource, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 	bool seamless;
 
 	seamless = Config->get_seamless_loop ();
@@ -104,7 +104,7 @@ Session::request_sync_source (Slave* new_slave)
 void
 Session::request_transport_speed (double speed)
 {
-	Event* ev = new Event (Event::SetTransportSpeed, Event::Add, Event::Immediate, 0, speed);
+	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport speed = %1\n", speed));
 	queue_event (ev);
 }
@@ -112,7 +112,7 @@ Session::request_transport_speed (double speed)
 void
 Session::request_diskstream_speed (Diskstream& ds, double speed)
 {
-	Event* ev = new Event (Event::SetDiskstreamSpeed, Event::Add, Event::Immediate, 0, speed);
+	SessionEvent* ev = new SessionEvent (SessionEvent::SetDiskstreamSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
 	ev->set_ptr (&ds);
 	queue_event (ev);
 }
@@ -120,7 +120,7 @@ Session::request_diskstream_speed (Diskstream& ds, double speed)
 void
 Session::request_stop (bool abort, bool clear_state)
 {
-	Event* ev = new Event (Event::SetTransportSpeed, Event::Add, Event::Immediate, 0, 0.0, abort, clear_state);
+	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0, abort, clear_state);
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport stop, abort = %1, clear state = %2\n", abort, clear_state));
 	queue_event (ev);
 }
@@ -128,7 +128,7 @@ Session::request_stop (bool abort, bool clear_state)
 void
 Session::request_locate (nframes_t target_frame, bool with_roll)
 {
-	Event *ev = new Event (with_roll ? Event::LocateRoll : Event::Locate, Event::Add, Event::Immediate, target_frame, 0, false);
+	SessionEvent *ev = new SessionEvent (with_roll ? SessionEvent::LocateRoll : SessionEvent::Locate, SessionEvent::Add, SessionEvent::Immediate, target_frame, 0, false);
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request locate to %1\n", target_frame));
 	queue_event (ev);
 }
@@ -136,7 +136,7 @@ Session::request_locate (nframes_t target_frame, bool with_roll)
 void
 Session::force_locate (nframes64_t target_frame, bool with_roll)
 {
-	Event *ev = new Event (with_roll ? Event::LocateRoll : Event::Locate, Event::Add, Event::Immediate, target_frame, 0, true);
+	SessionEvent *ev = new SessionEvent (with_roll ? SessionEvent::LocateRoll : SessionEvent::Locate, SessionEvent::Add, SessionEvent::Immediate, target_frame, 0, true);
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request forced locate to %1\n", target_frame));
 	queue_event (ev);
 }
@@ -144,7 +144,7 @@ Session::force_locate (nframes64_t target_frame, bool with_roll)
 void
 Session::request_play_loop (bool yn, bool leave_rolling)
 {
-	Event* ev;
+	SessionEvent* ev;
 	Location *location = _locations.auto_loop_location();
 
 	if (location == 0 && yn) {
@@ -153,7 +153,7 @@ Session::request_play_loop (bool yn, bool leave_rolling)
 		return;
 	}
 
-	ev = new Event (Event::SetLoop, Event::Add, Event::Immediate, 0, (leave_rolling ? 1.0 : 0.0), yn);
+	ev = new SessionEvent (SessionEvent::SetLoop, SessionEvent::Add, SessionEvent::Immediate, 0, (leave_rolling ? 1.0 : 0.0), yn);
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request set loop = %1, leave rolling ? %2\n", yn, leave_rolling));
 	queue_event (ev);
 
@@ -167,7 +167,7 @@ Session::request_play_loop (bool yn, bool leave_rolling)
 void
 Session::request_play_range (list<AudioRange>* range, bool leave_rolling)
 {
-	Event* ev = new Event (Event::SetPlayAudioRange, Event::Add, Event::Immediate, 0, (leave_rolling ? 1.0 : 0.0));
+	SessionEvent* ev = new SessionEvent (SessionEvent::SetPlayAudioRange, SessionEvent::Add, SessionEvent::Immediate, 0, (leave_rolling ? 1.0 : 0.0));
 	if (range) {
 		ev->audio_range = *range;
 	} else {
@@ -222,9 +222,9 @@ Session::realtime_stop (bool abort, bool clear_state)
 		add_post_transport_work (todo);
 	}
 
-	_clear_event_type (Event::StopOnce);
-	_clear_event_type (Event::RangeStop);
-	_clear_event_type (Event::RangeLocate);
+	_clear_event_type (SessionEvent::StopOnce);
+	_clear_event_type (SessionEvent::RangeStop);
+	_clear_event_type (SessionEvent::RangeLocate);
 
 	disable_record (true);
 
@@ -615,7 +615,7 @@ void
 Session::unset_play_loop ()
 {
 	play_loop = false;
-	clear_events (Event::AutoLoop);
+	clear_events (SessionEvent::AutoLoop);
 	
 	// set all diskstreams to NOT use internal looping
 	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
@@ -676,7 +676,7 @@ Session::set_play_loop (bool yn)
 			
 			/* put the loop event into the event list */
 			
-			Event* event = new Event (Event::AutoLoop, Event::Replace, loc->end(), loc->start(), 0.0f);
+			SessionEvent* event = new SessionEvent (SessionEvent::AutoLoop, SessionEvent::Replace, loc->end(), loc->start(), 0.0f);
 			merge_event (event);
 
 			/* locate to start of loop and roll. If doing seamless loop, force a 
@@ -1033,7 +1033,7 @@ Session::stop_transport (bool abort, bool clear_state)
 		   and then we'll really be stopped.
 		*/
 
-		Event *ev = new Event (Event::StopOnce, Event::Replace,
+		SessionEvent *ev = new SessionEvent (SessionEvent::StopOnce, SessionEvent::Replace,
 				       _transport_frame + _worst_output_latency - current_block_size,
 				       0, 0, abort);
 
@@ -1276,14 +1276,14 @@ void
 Session::unset_play_range ()
 {
 	_play_range = false;
-	_clear_event_type (Event::RangeStop);
-	_clear_event_type (Event::RangeLocate);
+	_clear_event_type (SessionEvent::RangeStop);
+	_clear_event_type (SessionEvent::RangeLocate);
 }
 
 void
 Session::set_play_range (list<AudioRange>& range, bool leave_rolling)
 {
-	Event* ev;
+	SessionEvent* ev;
 
 	/* Called from event-processing context */
 
@@ -1294,7 +1294,7 @@ Session::set_play_range (list<AudioRange>& range, bool leave_rolling)
 		 */
 		if (!leave_rolling) {
 			/* stop transport */
-			Event* ev = new Event (Event::SetTransportSpeed, Event::Add, Event::Immediate, 0, 0.0f, false);
+			SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0f, false);
 			merge_event (ev);
 		}
 		return;
@@ -1329,9 +1329,9 @@ Session::set_play_range (list<AudioRange>& range, bool leave_rolling)
 			}
 			
 			if (next == range.end()) {
-				ev = new Event (Event::RangeStop, Event::Add, requested_frame, 0, 0.0f);
+				ev = new SessionEvent (SessionEvent::RangeStop, SessionEvent::Add, requested_frame, 0, 0.0f);
 			} else {
-				ev = new Event (Event::RangeLocate, Event::Add, requested_frame, (*next).start, 0.0f);
+				ev = new SessionEvent (SessionEvent::RangeLocate, SessionEvent::Add, requested_frame, (*next).start, 0.0f);
 			}
 			
 			merge_event (ev);
@@ -1341,7 +1341,7 @@ Session::set_play_range (list<AudioRange>& range, bool leave_rolling)
 		
 	} else if (sz == 1) {
 
-		ev = new Event (Event::RangeStop, Event::Add, range.front().end, 0, 0.0f);
+		ev = new SessionEvent (SessionEvent::RangeStop, SessionEvent::Add, range.front().end, 0, 0.0f);
 		merge_event (ev);
 		
 	} 
@@ -1352,7 +1352,7 @@ Session::set_play_range (list<AudioRange>& range, bool leave_rolling)
 
 	/* now start rolling at the right place */
 
-	ev = new Event (Event::LocateRoll, Event::Add, Event::Immediate, range.front().start, 0.0f, false);
+	ev = new SessionEvent (SessionEvent::LocateRoll, SessionEvent::Add, SessionEvent::Immediate, range.front().start, 0.0f, false);
 	merge_event (ev);
 	
 	TransportStateChange ();
@@ -1370,7 +1370,7 @@ Session::request_bounded_roll (nframes_t start, nframes_t end)
 void
 Session::request_roll_at_and_return (nframes_t start, nframes_t return_to)
 {
-	Event *ev = new Event (Event::LocateRollLocate, Event::Add, Event::Immediate, return_to, 1.0);
+	SessionEvent *ev = new SessionEvent (SessionEvent::LocateRollLocate, SessionEvent::Add, SessionEvent::Immediate, return_to, 1.0);
 	ev->target2_frame = start;
 	queue_event (ev);
 }

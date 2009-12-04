@@ -75,7 +75,7 @@ Session::schedule_curve_reallocation ()
 void
 Session::request_overwrite_buffer (Diskstream* stream)
 {
-	Event *ev = new Event (Event::Overwrite, Event::Add, Event::Immediate, 0, 0, 0.0);
+	SessionEvent *ev = new SessionEvent (SessionEvent::Overwrite, SessionEvent::Add, SessionEvent::Immediate, 0, 0, 0.0);
 	ev->set_ptr (stream);
 	queue_event (ev);
 }

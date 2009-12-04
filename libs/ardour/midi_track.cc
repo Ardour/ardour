@@ -111,9 +111,6 @@ MidiTrack::set_diskstream (boost::shared_ptr<MidiDiskstream> ds)
 	_diskstream->set_record_enabled (false);
 	//_diskstream->monitor_input (false);
 
-	ic_connection.disconnect();
-	ic_connection = _input->changed.connect (mem_fun (*_diskstream, &MidiDiskstream::handle_input_change));
-
 	DiskstreamChanged (); /* EMIT SIGNAL */
 
 	return 0;

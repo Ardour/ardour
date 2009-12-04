@@ -192,13 +192,17 @@ Track::set_record_enable (bool yn, void *src)
 
 	_diskstream->set_record_enabled (yn);
 
+#if 0
 	if (_diskstream->record_enabled()) {
 		set_meter_point (MeterInput, this);
 	} else {
 		set_meter_point (_saved_meter_point, this);
 	}
+#endif
 
+	cerr << "4\n";
 	_rec_enable_control->Changed ();
+	cerr << "5\n";
 }
 
 

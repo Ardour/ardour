@@ -133,7 +133,6 @@ Session::Session (AudioEngine &eng,
 	  _midi_port (default_midi_port),
 	  _midi_clock_port (default_midi_clock_port),
 	  _session_dir (new SessionDirectory(fullpath)),
-	  pending_events (2048),
 	  state_tree (0),
 	  _butler (new Butler (this)),
 	  _post_transport_work (0),
@@ -219,7 +218,6 @@ Session::Session (AudioEngine &eng,
 	  _midi_port (default_midi_port),
 	  _midi_clock_port (default_midi_clock_port),
 	  _session_dir ( new SessionDirectory(fullpath)),
-	  pending_events (2048),
 	  state_tree (0),
 	  _butler (new Butler (this)),
 	  _post_transport_work (0),
@@ -916,7 +914,7 @@ Session::reset_input_monitor_state ()
 void
 Session::auto_punch_start_changed (Location* location)
 {
-	replace_event (Event::PunchIn, location->start());
+	replace_event (SessionEvent::PunchIn, location->start());
 
 	if (get_record_enabled() && config.get_punch_in()) {
 		/* capture start has been changed, so save new pending state */
@@ -929,7 +927,7 @@ Session::auto_punch_end_changed (Location* location)
 {
 	nframes_t when_to_stop = location->end();
 	// when_to_stop += _worst_output_latency + _worst_input_latency;
-	replace_event (Event::PunchOut, when_to_stop);
+	replace_event (SessionEvent::PunchOut, when_to_stop);
 }
 
 void
@@ -937,15 +935,15 @@ Session::auto_punch_changed (Location* location)
 {
 	nframes_t when_to_stop = location->end();
 
-	replace_event (Event::PunchIn, location->start());
+	replace_event (SessionEvent::PunchIn, location->start());
 	//when_to_stop += _worst_output_latency + _worst_input_latency;
-	replace_event (Event::PunchOut, when_to_stop);
+	replace_event (SessionEvent::PunchOut, when_to_stop);
 }
 
 void
 Session::auto_loop_changed (Location* location)
 {
-	replace_event (Event::AutoLoop, location->end(), location->start());
+	replace_event (SessionEvent::AutoLoop, location->end(), location->start());
 
 	if (transport_rolling() && play_loop) {
 
@@ -954,7 +952,7 @@ Session::auto_loop_changed (Location* location)
 
 		if (_transport_frame < location->start() || _transport_frame > location->end()) {
 			// relocate to beginning of loop
-			clear_events (Event::LocateRoll);
+			clear_events (SessionEvent::LocateRoll);
 
 			request_locate (location->start(), true);
 
@@ -966,8 +964,8 @@ Session::auto_loop_changed (Location* location)
 			loop_changing = true;
 
 			if (location->end() > last_loopend) {
-				clear_events (Event::LocateRoll);
-				Event *ev = new Event (Event::LocateRoll, Event::Add, last_loopend, last_loopend, 0, true);
+				clear_events (SessionEvent::LocateRoll);
+				SessionEvent *ev = new SessionEvent (SessionEvent::LocateRoll, SessionEvent::Add, last_loopend, last_loopend, 0, true);
 				queue_event (ev);
 			}
 
@@ -987,8 +985,8 @@ Session::set_auto_punch_location (Location* location)
 		auto_punch_end_changed_connection.disconnect();
 		auto_punch_changed_connection.disconnect();
 		existing->set_auto_punch (false, this);
-		remove_event (existing->start(), Event::PunchIn);
-		clear_events (Event::PunchOut);
+		remove_event (existing->start(), SessionEvent::PunchIn);
+		clear_events (SessionEvent::PunchOut);
 		auto_punch_location_changed (0);
 	}
 
@@ -1029,7 +1027,7 @@ Session::set_auto_loop_location (Location* location)
 		auto_loop_end_changed_connection.disconnect();
 		auto_loop_changed_connection.disconnect();
 		existing->set_auto_loop (false, this);
-		remove_event (existing->end(), Event::AutoLoop);
+		remove_event (existing->end(), SessionEvent::AutoLoop);
 		auto_loop_location_changed (0);
 	}
 
@@ -3424,7 +3422,7 @@ Session::set_audition (boost::shared_ptr<Region> r)
 void
 Session::audition_playlist ()
 {
-	Event* ev = new Event (Event::Audition, Event::Add, Event::Immediate, 0, 0.0);
+	SessionEvent* ev = new SessionEvent (SessionEvent::Audition, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 	ev->region.reset ();
 	queue_event (ev);
 }
@@ -3444,7 +3442,7 @@ Session::non_realtime_set_audition ()
 void
 Session::audition_region (boost::shared_ptr<Region> r)
 {
-	Event* ev = new Event (Event::Audition, Event::Add, Event::Immediate, 0, 0.0);
+	SessionEvent* ev = new SessionEvent (SessionEvent::Audition, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 	ev->region = r;
 	queue_event (ev);
 }
@@ -3601,12 +3599,20 @@ Session::graph_reordered ()
 void
 Session::record_disenable_all ()
 {
+	if (!writable()) {
+		return;
+	}
+
 	record_enable_change_all (false);
 }
 
 void
 Session::record_enable_all ()
 {
+	if (!writable()) {
+		return;
+	}
+
 	record_enable_change_all (true);
 }
 
@@ -3614,16 +3620,33 @@ void
 Session::record_enable_change_all (bool yn)
 {
 	shared_ptr<RouteList> r = routes.reader ();
+	RouteList* tracks = new RouteList;
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		boost::shared_ptr<Track> t;
+
+		if (boost::dynamic_pointer_cast<Track>(*i) != 0) {
+			tracks->push_back (*i);
+		}
+	}
+
+	SessionEvent* ev = new SessionEvent (SessionEvent::SetRecordEnable, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0, yn);
+
+	ev->routes = tracks;
+	ev->Complete.connect (mem_fun (*this, &Session::cleanup_event));
+	queue_event (ev);
+}
+
+void
+Session::do_record_enable_change_all (RouteList* rl, bool yn)
+{
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> t;
 
 		if ((t = boost::dynamic_pointer_cast<Track>(*i)) != 0) {
 			t->set_record_enable (yn, this);
 		}
 	}
-
-	/* since we don't keep rec-enable state, don't mark session dirty */
 }
 
 void

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2004 Paul Davis
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,17 +20,43 @@
 #ifndef __ardour_click_h__
 #define __ardour_click_h__
 
+#include <list>
+
+#include "pbd/pool.h"
+#include "ardour/types.h"
 #include "ardour/io.h"
 
 namespace ARDOUR {
 
+struct Click {
+    nframes_t start;
+    nframes_t duration;
+    nframes_t offset;
+    const Sample *data;
+
+    Click (nframes_t s, nframes_t d, const Sample *b) : start (s), duration (d), offset (0), data (b) {}
+    
+    void *operator new (size_t) {
+	    return pool.alloc ();
+    };
+    
+    void operator delete(void *ptr, size_t /*size*/) {
+	    pool.release (ptr);
+    }
+    
+private:
+    static Pool pool;
+};
+
+typedef std::list<Click*> Clicks;
+
 class ClickIO : public IO
 {
-public:
+  public:
 	ClickIO (Session& s, const std::string& name) : IO (s, name, IO::Output) {}
 	~ClickIO() {}
-
-protected:
+	
+  protected:
 	uint32_t pans_required () const { return 1; }
 };
 

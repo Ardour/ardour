@@ -1128,15 +1128,6 @@ MidiDiskstream::set_record_enabled (bool yn)
 
 	assert(!destructive());
 
-	if (yn && _source_port == 0) {
-
-		/* pick up connections not initiated *from* the IO object
-		   we're associated with.
-		*/
-
-		get_input_sources ();
-	}
-
 	/* yes, i know that this not proof against race conditions, but its
 	   good enough. i think.
 	*/

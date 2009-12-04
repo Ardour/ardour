@@ -24,13 +24,12 @@
 
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
-#include <glibmm/thread.h>
 
 #include "ardour/ardour.h"
 #include "ardour/audio_diskstream.h"
 #include "ardour/butler.h"
 #include "ardour/debug.h"
-#include "ardour/session.h"
+#include "ardour/session_event.h"
 
 #include "i18n.h"
 
@@ -38,39 +37,39 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-MultiAllocSingleReleasePool Session::Event::pool ("event", sizeof (Session::Event), 512);
+MultiAllocSingleReleasePool SessionEvent::pool ("event", sizeof (SessionEvent), 512);
 
 void
-Session::add_event (nframes_t frame, Event::Type type, nframes_t target_frame)
+SessionEventManager::add_event (nframes64_t frame, SessionEvent::Type type, nframes64_t target_frame)
 {
-	Event* ev = new Event (type, Event::Add, frame, target_frame, 0);
+	SessionEvent* ev = new SessionEvent (type, SessionEvent::Add, frame, target_frame, 0);
 	queue_event (ev);
 }
 
 void
-Session::remove_event (nframes_t frame, Event::Type type)
+SessionEventManager::remove_event (nframes64_t frame, SessionEvent::Type type)
 {
-	Event* ev = new Event (type, Event::Remove, frame, 0, 0);
+	SessionEvent* ev = new SessionEvent (type, SessionEvent::Remove, frame, 0, 0);
 	queue_event (ev);
 }
 
 void
-Session::replace_event (Event::Type type, nframes_t frame, nframes_t target)
+SessionEventManager::replace_event (SessionEvent::Type type, nframes64_t frame, nframes64_t target)
 {
-	Event* ev = new Event (type, Event::Replace, frame, target, 0);
+	SessionEvent* ev = new SessionEvent (type, SessionEvent::Replace, frame, target, 0);
 	queue_event (ev);
 }
 
 void
-Session::clear_events (Event::Type type)
+SessionEventManager::clear_events (SessionEvent::Type type)
 {
-	Event* ev = new Event (type, Event::Clear, 0, 0, 0);
+	SessionEvent* ev = new SessionEvent (type, SessionEvent::Clear, 0, 0, 0);
 	queue_event (ev);
 }
 
 
 void
-Session::dump_events () const
+SessionEventManager::dump_events () const
 {
 	cerr << "EVENT DUMP" << endl;
 	for (Events::const_iterator i = events.begin(); i != events.end(); ++i) {
@@ -93,34 +92,24 @@ Session::dump_events () const
 }
 
 void
-Session::queue_event (Event* ev)
-{
-	if (_state_of_the_state & Loading) {
-		merge_event (ev);
-	} else {
-		pending_events.write (&ev, 1);
-	}
-}
-
-void
-Session::merge_event (Event* ev)
+SessionEventManager::merge_event (SessionEvent* ev)
 {
 	switch (ev->action) {
-	case Event::Remove:
+	case SessionEvent::Remove:
 		_remove_event (ev);
 		delete ev;
 		return;
 
-	case Event::Replace:
+	case SessionEvent::Replace:
 		_replace_event (ev);
 		return;
 
-	case Event::Clear:
+	case SessionEvent::Clear:
 		_clear_event_type (ev->type);
 		delete ev;
 		return;
 
-	case Event::Add:
+	case SessionEvent::Add:
 		break;
 	}
 
@@ -132,8 +121,8 @@ Session::merge_event (Event* ev)
 	}
 
 	switch (ev->type) {
-	case Event::AutoLoop:
-	case Event::StopOnce:
+	case SessionEvent::AutoLoop:
+	case SessionEvent::StopOnce:
 		_clear_event_type (ev->type);
 		break;
 
@@ -148,14 +137,14 @@ Session::merge_event (Event* ev)
 	}
 
 	events.insert (events.begin(), ev);
-	events.sort (Event::compare);
+	events.sort (SessionEvent::compare);
 	next_event = events.begin();
 	set_next_event ();
 }
 
 /** @return true when @a ev is deleted. */
 bool
-Session::_replace_event (Event* ev)
+SessionEventManager::_replace_event (SessionEvent* ev)
 {
 	bool ret = false;
 	Events::iterator i;
@@ -178,7 +167,7 @@ Session::_replace_event (Event* ev)
 		events.insert (events.begin(), ev);
 	}
 
-	events.sort (Event::compare);
+	events.sort (SessionEvent::compare);
 	next_event = events.end();
 	set_next_event ();
 
@@ -187,7 +176,7 @@ Session::_replace_event (Event* ev)
 
 /** @return true when @a ev is deleted. */
 bool
-Session::_remove_event (Session::Event* ev)
+SessionEventManager::_remove_event (SessionEvent* ev)
 {
 	bool ret = false;
 	Events::iterator i;
@@ -215,7 +204,7 @@ Session::_remove_event (Session::Event* ev)
 }
 
 void
-Session::_clear_event_type (Event::Type type)
+SessionEventManager::_clear_event_type (SessionEvent::Type type)
 {
 	Events::iterator i, tmp;
 
@@ -251,179 +240,3 @@ Session::_clear_event_type (Event::Type type)
 	set_next_event ();
 }
 
-void
-Session::set_next_event ()
-{
-	if (events.empty()) {
-		next_event = events.end();
-		return;
-	}
-
-	if (next_event == events.end()) {
-		next_event = events.begin();
-	}
-
-	if ((*next_event)->action_frame > _transport_frame) {
-		next_event = events.begin();
-	}
-
-	for (; next_event != events.end(); ++next_event) {
-		if ((*next_event)->action_frame >= _transport_frame) {
-			break;
-		}
-	}
-}
-
-void
-Session::process_event (Event* ev)
-{
-	bool remove = true;
-	bool del = true;
-
-	/* if we're in the middle of a state change (i.e. waiting
-	   for the butler thread to complete the non-realtime
-	   part of the change), we'll just have to queue this
-	   event for a time when the change is complete.
-	*/
-
-	if (non_realtime_work_pending()) {
-
-		/* except locates, which we have the capability to handle */
-
-		if (ev->type != Event::Locate) {
-			immediate_events.insert (immediate_events.end(), ev);
-			_remove_event (ev);
-			return;
-		}
-	}
-
-	DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("Processing event: %1 @ %2\n", enum_2_string (ev->type), _transport_frame));
-
-	switch (ev->type) {
-	case Event::SetLoop:
-		set_play_loop (ev->yes_or_no);
-		break;
-
-	case Event::AutoLoop:
-		if (play_loop) {
-			start_locate (ev->target_frame, true, false, Config->get_seamless_loop());
-		}
-		remove = false;
-		del = false;
-		break;
-
-	case Event::Locate:
-		if (ev->yes_or_no) {
-			// cerr << "forced locate to " << ev->target_frame << endl;
-			locate (ev->target_frame, false, true, false);
-		} else {
-			// cerr << "soft locate to " << ev->target_frame << endl;
-			start_locate (ev->target_frame, false, true, false);
-		}
-		_send_timecode_update = true;
-		break;
-
-	case Event::LocateRoll:
-		if (ev->yes_or_no) {
-			// cerr << "forced locate to+roll " << ev->target_frame << endl;
-			locate (ev->target_frame, true, true, false);
-		} else {
-			// cerr << "soft locate to+roll " << ev->target_frame << endl;
-			start_locate (ev->target_frame, true, true, false);
-		}
-		_send_timecode_update = true;
-		break;
-
-	case Event::LocateRollLocate:
-		// locate is handled by ::request_roll_at_and_return()
-		_requested_return_frame = ev->target_frame;
-		request_locate (ev->target2_frame, true);
-		break;
-
-
-	case Event::SetTransportSpeed:
-		set_transport_speed (ev->speed, ev->yes_or_no, ev->second_yes_or_no);
-		break;
-
-	case Event::PunchIn:
-		// cerr << "PunchIN at " << transport_frame() << endl;
-		if (config.get_punch_in() && record_status() == Enabled) {
-			enable_record ();
-		}
-		remove = false;
-		del = false;
-		break;
-
-	case Event::PunchOut:
-		// cerr << "PunchOUT at " << transport_frame() << endl;
-		if (config.get_punch_out()) {
-			step_back_from_record ();
-		}
-		remove = false;
-		del = false;
-		break;
-
-	case Event::StopOnce:
-		if (!non_realtime_work_pending()) {
-			stop_transport (ev->yes_or_no);
-			_clear_event_type (Event::StopOnce);
-		}
-		remove = false;
-		del = false;
-		break;
-
-	case Event::RangeStop:
-		if (!non_realtime_work_pending()) {
-			stop_transport (ev->yes_or_no);
-		}
-		remove = false;
-		del = false;
-		break;
-
-	case Event::RangeLocate:
-		start_locate (ev->target_frame, true, true, false);
-		remove = false;
-		del = false;
-		break;
-
-	case Event::Overwrite:
-		overwrite_some_buffers (static_cast<Diskstream*>(ev->ptr));
-		break;
-
-	case Event::SetDiskstreamSpeed:
-		set_diskstream_speed (static_cast<Diskstream*> (ev->ptr), ev->speed);
-		break;
-
-	case Event::SetSyncSource:
-		use_sync_source (ev->slave);
-		break;
-
-	case Event::Audition:
-		set_audition (ev->region);
-		// drop reference to region
-		ev->region.reset ();
-		break;
-
-	case Event::InputConfigurationChange:
-		add_post_transport_work (PostTransportInputChange);
-		_butler->schedule_transport_work ();
-		break;
-
-	case Event::SetPlayAudioRange:
-		set_play_range (ev->audio_range, (ev->speed == 1.0f));
-		break;
-
-	default:
-	  fatal << string_compose(_("Programming error: illegal event type in process_event (%1)"), ev->type) << endmsg;
-		/*NOTREACHED*/
-		break;
-	};
-
-	if (remove) {
-		del = del && !_remove_event (ev);
-	}
-
-	if (del) {
-		delete ev;
-	}
-}

@@ -85,6 +85,7 @@ class Diskstream : public SessionObject, public boost::noncopyable
 
 	bool         record_enabled() const { return g_atomic_int_get (&_record_enabled); }
 	virtual void set_record_enabled (bool yn) = 0;
+	virtual void get_input_sources () = 0;
 
 	bool destructive() const { return _flags & Destructive; }
 	virtual int set_destructive (bool /*yn*/) { return -1; }
@@ -233,7 +234,6 @@ class Diskstream : public SessionObject, public boost::noncopyable
 
 	virtual int use_pending_capture_data (XMLNode& node) = 0;
 
-	virtual void get_input_sources () = 0;
 	virtual void check_record_status (nframes_t transport_frame, nframes_t nframes, bool can_record);
 	virtual void prepare_record_status (nframes_t /*capture_start_frame*/) {}
 	virtual void set_align_style_from_io() {}
@@ -310,6 +310,7 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	sigc::connection plmod_connection;
 	sigc::connection plgone_connection;
 	sigc::connection plregion_connection;
+	sigc::connection ic_connection;
 
 	Flag _flags;
 

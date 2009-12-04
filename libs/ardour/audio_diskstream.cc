@@ -1651,15 +1651,6 @@ AudioDiskstream::set_record_enabled (bool yn)
 		return;
 	}
 
-	if (yn && channels.reader()->front()->source == 0) {
-
-		/* pick up connections not initiated *from* the IO object
-		   we're associated with.
-		*/
-
-		get_input_sources ();
-	}
-
 	/* yes, i know that this not proof against race conditions, but its
 	   good enough. i think.
 	*/

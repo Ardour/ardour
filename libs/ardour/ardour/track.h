@@ -144,7 +144,6 @@ class Track : public Route
 	FreezeRecord          _freeze_record;
 	XMLNode*              pending_state;
 	sigc::connection      recenable_connection;
-	sigc::connection      ic_connection;
 	bool                  _destructive;
 
 	boost::shared_ptr<RecEnableControllable> _rec_enable_control;

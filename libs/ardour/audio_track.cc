@@ -193,9 +193,6 @@ AudioTrack::set_diskstream (boost::shared_ptr<AudioDiskstream> ds, void * /*src*
 	_diskstream->set_record_enabled (false);
 	_diskstream->monitor_input (false);
 
-	ic_connection.disconnect();
-	ic_connection = _input->changed.connect (mem_fun (*_diskstream, &Diskstream::handle_input_change));
-
 	DiskstreamChanged (); /* EMIT SIGNAL */
 
 	return 0;
