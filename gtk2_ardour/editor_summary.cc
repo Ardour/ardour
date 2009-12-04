@@ -409,14 +409,22 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 	pair<double, double> yr;
 	get_editor (&xr, &yr);
 
-	double const amount = 8;
+	double amount = 8;
+
+	if (Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier)) {
+		amount = 64;
+	} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
+		amount = 1;
+	}
 
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+
+		/* primary-wheel == left-right scrolling */
 
 		if (ev->direction == GDK_SCROLL_UP) {
 			xr.first += amount;
 			xr.second += amount;
-		} else {
+		} else if (ev->direction == GDK_SCROLL_DOWN) {
 			xr.first -= amount;
 			xr.second -= amount;
 		}
@@ -426,11 +434,16 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 		if (ev->direction == GDK_SCROLL_DOWN) {
 			yr.first += amount;
 			yr.second += amount;
-		} else {
+		} else if (ev->direction == GDK_SCROLL_UP) {
 			yr.first -= amount;
 			yr.second -= amount;
+		} else if (ev->direction == GDK_SCROLL_LEFT) {
+			xr.first -= amount;
+			xr.second -= amount;
+		} else if (ev->direction == GDK_SCROLL_RIGHT) {
+			xr.first += amount;
+			xr.second += amount;
 		}
-
 	}
 
 	set_editor (xr, yr);
