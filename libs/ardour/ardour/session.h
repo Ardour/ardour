@@ -57,7 +57,6 @@
 #include "ardour/location.h"
 #include "ardour/timecode.h"
 #include "ardour/interpolation.h"
-#include "ardour/session_playlists.h"
 
 class XMLTree;
 class XMLNode;
@@ -114,6 +113,7 @@ class SMFSource;
 class Send;
 class SessionDirectory;
 class SessionMetadata;
+class SessionPlaylists;
 class Slave;
 class Source;
 class TempoMap;
@@ -883,7 +883,7 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	
 	SlaveState slave_state() const { return _slave_state; }
 
-	SessionPlaylists playlists;
+	boost::shared_ptr<SessionPlaylists> playlists;
 
   protected:
 	friend class AudioEngine;

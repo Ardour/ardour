@@ -41,6 +41,7 @@
 #include "ardour/processor.h"
 #include "ardour/route_group_specialized.h"
 #include "ardour/session.h"
+#include "ardour/session_playlists.h"
 #include "ardour/utils.h"
 
 #include "i18n.h"
@@ -320,7 +321,7 @@ MidiTrack::set_state_part_two ()
 		_freeze_record.processor_info.clear ();
 
 		if ((prop = fnode->property (X_("playlist"))) != 0) {
-			boost::shared_ptr<Playlist> pl = _session.playlists.by_name (prop->value());
+			boost::shared_ptr<Playlist> pl = _session.playlists->by_name (prop->value());
 			if (pl) {
 				_freeze_record.playlist = boost::dynamic_pointer_cast<MidiPlaylist> (pl);
 			} else {

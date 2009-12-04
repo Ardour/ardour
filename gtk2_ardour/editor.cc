@@ -65,6 +65,7 @@
 #include "ardour/session_state_utils.h"
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
+#include "ardour/session_playlists.h"
 
 #include "control_protocol/control_protocol.h"
 
@@ -4026,7 +4027,7 @@ Editor::new_playlists (TimeAxisView* v)
 {
 	begin_reversible_command (_("new playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
-	session->playlists.get (playlists);
+	session->playlists->get (playlists);
 	mapover_tracks (bind (mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), v, RouteGroup::Edit);
 	commit_reversible_command ();
 }
@@ -4042,7 +4043,7 @@ Editor::copy_playlists (TimeAxisView* v)
 {
 	begin_reversible_command (_("copy playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
-	session->playlists.get (playlists);
+	session->playlists->get (playlists);
 	mapover_tracks (bind (mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), v, RouteGroup::Edit);
 	commit_reversible_command ();
 }
@@ -4057,7 +4058,7 @@ Editor::clear_playlists (TimeAxisView* v)
 {
 	begin_reversible_command (_("clear playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
-	session->playlists.get (playlists);
+	session->playlists->get (playlists);
 	mapover_tracks (mem_fun (*this, &Editor::mapped_clear_playlist), v, RouteGroup::Edit);
 	commit_reversible_command ();
 }

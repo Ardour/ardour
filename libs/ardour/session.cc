@@ -152,6 +152,8 @@ Session::Session (AudioEngine &eng,
 	  _have_rec_enabled_diskstream (false)
 
 {
+	playlists.reset (new SessionPlaylists);
+	
 	bool new_session;
 
 	interpolation.add_channel_to (0, 0);
@@ -236,6 +238,8 @@ Session::Session (AudioEngine &eng,
 	  _metadata (new SessionMetadata()),
 	  _have_rec_enabled_diskstream (false)
 {
+	playlists.reset (new SessionPlaylists);
+
 	bool new_session;
 
 	interpolation.add_channel_to (0, 0);
@@ -470,6 +474,9 @@ Session::destroy ()
 	Crossfade::set_buffer_size (0);
 
 	delete mmc;
+
+	/* not strictly necessary, but doing it here allows the shared_ptr debugging to work */
+	playlists.reset ();
 
 	boost_debug_list_ptrs ();
 
@@ -3381,7 +3388,7 @@ Session::add_playlist (boost::shared_ptr<Playlist> playlist, bool unused)
 		return;
 	}
 
-	bool existing = playlists.add (playlist);
+	bool existing = playlists->add (playlist);
 	if (!existing) {
 		playlist->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_playlist), boost::weak_ptr<Playlist>(playlist)));
 	}
@@ -3406,7 +3413,7 @@ Session::remove_playlist (boost::weak_ptr<Playlist> weak_playlist)
 		return;
 	}
 
-	playlists.remove (playlist);
+	playlists->remove (playlist);
 
 	set_dirty();
 }
@@ -3765,7 +3772,7 @@ Session::tempo_map_changed (Change)
 {
 	clear_clicks ();
 
-	playlists.update_after_tempo_map_change ();
+	playlists->update_after_tempo_map_change ();
 
 	set_dirty ();
 }

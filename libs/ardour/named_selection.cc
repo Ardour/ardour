@@ -24,6 +24,7 @@
 #include "ardour/utils.h"
 #include "ardour/playlist.h"
 #include "ardour/named_selection.h"
+#include "ardour/session_playlists.h"
 
 #include "i18n.h"
 
@@ -82,7 +83,7 @@ NamedSelection::NamedSelection (Session& session, const XMLNode& node)
 		plnode = *niter;
 
 		if ((property = plnode->property ("name")) != 0) {
-			if ((playlist = session.playlists.by_name (property->value())) != 0) {
+			if ((playlist = session.playlists->by_name (property->value())) != 0) {
 				playlist->use();
 				playlists.push_back (playlist);
 			} else {

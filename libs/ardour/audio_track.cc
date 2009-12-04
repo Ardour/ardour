@@ -45,6 +45,7 @@
 #include "ardour/route_group_specialized.h"
 #include "ardour/session.h"
 #include "ardour/utils.h"
+#include "ardour/session_playlists.h"
 #include "i18n.h"
 
 using namespace std;
@@ -388,7 +389,7 @@ AudioTrack::set_state_part_two ()
 		_freeze_record.processor_info.clear ();
 
 		if ((prop = fnode->property (X_("playlist"))) != 0) {
-			boost::shared_ptr<Playlist> pl = _session.playlists.by_name (prop->value());
+			boost::shared_ptr<Playlist> pl = _session.playlists->by_name (prop->value());
 			if (pl) {
 				_freeze_record.playlist = boost::dynamic_pointer_cast<AudioPlaylist> (pl);
 			} else {
@@ -715,7 +716,7 @@ AudioTrack::freeze (InterThreadInfo& itt)
 
 		candidate = string_compose ("<F%2>%1", _freeze_record.playlist->name(), n);
 
-		if (_session.playlists.by_name (candidate) == 0) {
+		if (_session.playlists->by_name (candidate) == 0) {
 			new_playlist_name = candidate;
 			break;
 		}

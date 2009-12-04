@@ -53,6 +53,7 @@
 #include "ardour/session.h"
 #include "ardour/smf_source.h"
 #include "ardour/utils.h"
+#include "ardour/session_playlists.h"
 
 #include "midi++/types.h"
 
@@ -220,7 +221,7 @@ MidiDiskstream::find_and_use_playlist (const string& name)
 {
 	boost::shared_ptr<MidiPlaylist> playlist;
 
-	if ((playlist = boost::dynamic_pointer_cast<MidiPlaylist> (_session.playlists.by_name (name))) == 0) {
+	if ((playlist = boost::dynamic_pointer_cast<MidiPlaylist> (_session.playlists->by_name (name))) == 0) {
 		playlist = boost::dynamic_pointer_cast<MidiPlaylist> (PlaylistFactory::create (DataType::MIDI, _session, name));
 	}
 

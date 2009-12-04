@@ -1062,7 +1062,7 @@ Session::state(bool full_state)
 		}
 	}
 
-	playlists.add_state (node, full_state);
+	playlists->add_state (node, full_state);
 
 	child = node->add_child ("RouteGroups");
 	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
@@ -1246,13 +1246,13 @@ Session::set_state (const XMLNode& node, int version)
 	if ((child = find_named_node (node, "Playlists")) == 0) {
 		error << _("Session: XML state has no playlists section") << endmsg;
 		goto out;
-	} else if (playlists.load (*this, *child)) {
+	} else if (playlists->load (*this, *child)) {
 		goto out;
 	}
 
 	if ((child = find_named_node (node, "UnusedPlaylists")) == 0) {
 		// this is OK
-	} else if (playlists.load_unused (*this, *child)) {
+	} else if (playlists->load_unused (*this, *child)) {
 		goto out;
 	}
 	
@@ -2381,7 +2381,7 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	/* step 1: consider deleting all unused playlists */
 	
-	if (playlists.maybe_delete_unused (AskAboutPlaylistDeletion)) {
+	if (playlists->maybe_delete_unused (AskAboutPlaylistDeletion)) {
 		ret = 0;
 		goto out;
 	}
@@ -2402,7 +2402,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		   capture files.
 		*/
 
-		if (!playlists.source_use_count(i->second) && i->second->length(i->second->timeline_position()) > 0) {
+		if (!playlists->source_use_count(i->second) && i->second->length(i->second->timeline_position()) > 0) {
 			dead_sources.push_back (i->second);
 			i->second->GoingAway();
 		}
@@ -2968,9 +2968,9 @@ Session::config_changed (std::string p, bool ours)
 
 	} else if (p == "edit-mode") {
 
-		Glib::Mutex::Lock lm (playlists.lock);
+		Glib::Mutex::Lock lm (playlists->lock);
 
-		for (SessionPlaylists::List::iterator i = playlists.playlists.begin(); i != playlists.playlists.end(); ++i) {
+		for (SessionPlaylists::List::iterator i = playlists->playlists.begin(); i != playlists->playlists.end(); ++i) {
 			(*i)->set_edit_mode (Config->get_edit_mode ());
 		}
 
