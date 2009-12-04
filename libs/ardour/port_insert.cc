@@ -184,7 +184,7 @@ PortInsert::set_name (const std::string& name)
 {
 	bool ret = Processor::set_name (name);
 
-	ret = (_input->set_name (name) || _output->set_name (name));
+	ret = (ret && _input->set_name (name) && _output->set_name (name));
 
 	return ret;
 }
