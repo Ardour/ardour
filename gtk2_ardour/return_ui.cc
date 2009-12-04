@@ -37,7 +37,7 @@ using namespace PBD;
 ReturnUI::ReturnUI (Gtk::Window* parent, boost::shared_ptr<Return> r, Session& se)
 	: _return (r)
 	, _session (se)
-	, _gpm (se)
+	, _gpm (se, 250)
 {
  	_gpm.set_controls (boost::shared_ptr<Route>(), r->meter(), r->amp());
 

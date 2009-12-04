@@ -165,6 +165,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Button output_button;
 	Gtk::Label  output_label;
 
+	std::string longest_label;
+
 	sigc::connection newplug_connection;
 
 	gint    mark_update_safe ();

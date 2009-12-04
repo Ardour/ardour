@@ -76,7 +76,8 @@ GainMeter::setup_slider_pix ()
 
 GainMeterBase::GainMeterBase (Session& s,
 			      const Glib::RefPtr<Gdk::Pixbuf>& pix,
-			      bool horizontal)
+			      bool horizontal,
+			      int fader_length)
 	: _session (s)
 	  // 0.781787 is the value needed for gain to be set to 0.
 	, gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1)
@@ -95,12 +96,14 @@ GainMeterBase::GainMeterBase (Session& s,
 	_width = Wide;
 
 	if (horizontal) {
-		gain_slider = manage (new HSliderController (pix,
+		gain_slider = manage (new HSliderController (pix,	
 							     &gain_adjustment,
+							     fader_length,
 							     false));
 	} else {
 		gain_slider = manage (new VSliderController (pix,
 							     &gain_adjustment,
+							     fader_length,
 							     false));
 	}
 
@@ -794,8 +797,8 @@ GainMeterBase::on_theme_changed()
 	style_changed = true;
 }
 
-GainMeter::GainMeter (Session& s)
-	: GainMeterBase (s, slider, false)
+GainMeter::GainMeter (Session& s, int fader_length)
+	: GainMeterBase (s, slider, false, fader_length)
 {
 	gain_display_box.set_homogeneous (true);
 	gain_display_box.set_spacing (2);

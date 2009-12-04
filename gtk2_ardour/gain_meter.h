@@ -62,7 +62,7 @@ class GainMeterBase : virtual public sigc::trackable
 {
   public:
 	GainMeterBase (ARDOUR::Session&, const Glib::RefPtr<Gdk::Pixbuf>& pix,
-		       bool horizontal);
+		       bool horizontal, int);
 	virtual ~GainMeterBase ();
 
 	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
@@ -180,7 +180,7 @@ class GainMeterBase : virtual public sigc::trackable
 class GainMeter : public GainMeterBase, public Gtk::VBox
 {
   public:
-	GainMeter (ARDOUR::Session&);
+	GainMeter (ARDOUR::Session&, int);
 	~GainMeter () {}
 
 	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,

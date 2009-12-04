@@ -80,7 +80,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, bool in_mixer)
 	,_mixer(mx)
 	, _mixer_owned (in_mixer)
 	, processor_box (sess, sigc::mem_fun(*this, &MixerStrip::plugin_selector), mx.selection(), this, in_mixer)
-	, gpm (sess)
+	, gpm (sess, 250)
 	, panners (sess)
 	, _mono_button (_("Mono"))
 	, button_table (3, 2)
@@ -106,7 +106,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt
 	,_mixer(mx)
 	, _mixer_owned (in_mixer)
 	, processor_box (sess, sigc::mem_fun(*this, &MixerStrip::plugin_selector), mx.selection(), this, in_mixer)
-	, gpm (sess)
+	, gpm (sess, 250)
 	, panners (sess)
 	, button_table (3, 2)
 	, middle_button_table (1, 2)
@@ -134,6 +134,9 @@ MixerStrip::init ()
 	_width_owner = 0;
 	spacer = 0;
 
+	/* the length of this string determines the width of the mixer strip when it is set to `wide' */
+	longest_label = "longest label";
+
 	Gtk::Image* img;
 
 	img = manage (new Gtk::Image (::get_icon("strip_width")));
@@ -151,14 +154,15 @@ MixerStrip::init ()
 	input_button.add (input_label);
 	input_button.set_name ("MixerIOButton");
 	input_label.set_name ("MixerIOButtonLabel");
-	Gtkmm2ext::set_size_request_to_display_given_text (input_button, "longest label", 4, 4);
+
+	Gtkmm2ext::set_size_request_to_display_given_text (input_button, longest_label.c_str(), 4, 4);
 
 	output_label.set_text (_("Output"));
 	ARDOUR_UI::instance()->set_tip (&output_button, _("Button 1 to choose outputs from a port matrix, button 3 to select inputs from a menu"), "");
 	output_button.add (output_label);
 	output_button.set_name ("MixerIOButton");
 	output_label.set_name ("MixerIOButtonLabel");
-	Gtkmm2ext::set_size_request_to_display_given_text (output_button, "longest label", 4, 4);
+	Gtkmm2ext::set_size_request_to_display_given_text (output_button, longest_label.c_str(), 4, 4);
 
 	ARDOUR_UI::instance()->set_tip (&meter_point_button, _("Select metering point"), "");
 	meter_point_button.add (meter_point_label);
@@ -197,7 +201,7 @@ MixerStrip::init ()
 
 	name_button.add (name_label);
 	name_button.set_name ("MixerNameButton");
-	Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);
+	Gtkmm2ext::set_size_request_to_display_given_text (name_button, longest_label.c_str(), 2, 2);
 
 	name_label.set_name ("MixerNameButtonLabel");
 	ARDOUR_UI::instance()->set_tip (&group_button, _("Mix group"), "");
@@ -526,7 +530,6 @@ MixerStrip::set_width_enum (Width w, void* owner)
 
 	gpm.set_width (w);
 	panners.set_width (w);
-	processor_box.set_width (w);
 
 	boost::shared_ptr<AutomationList> gain_automation = _route->gain_control()->alist();
 
@@ -597,10 +600,13 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			panners.short_astate_string(_route->panner()->automation_state()));
 		}
 
-		Gtkmm2ext::set_size_request_to_display_given_text (name_button, "longest label", 2, 2);
+		Gtkmm2ext::set_size_request_to_display_given_text (name_button, longest_label.c_str(), 2, 2);
 		set_size_request (max (50, gpm.get_gm_width()), -1);
 		break;
 	}
+
+	processor_box.set_width (w);
+	
 	update_input_display ();
 	update_output_display ();
 	route_group_changed (0);

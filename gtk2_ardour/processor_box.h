@@ -76,7 +76,8 @@ public:
 	Gtk::Widget& widget ();
 	std::string drag_text () const;
 	boost::shared_ptr<ARDOUR::Processor> processor () const;
-	void set_width (Width);
+	void set_enum_width (Width);
+	virtual void set_pixel_width (int) {}
 
 protected:
 	
@@ -103,6 +104,9 @@ public:
 	SendProcessorEntry (boost::shared_ptr<ARDOUR::Send>, Width);
 
 	static void setup_slider_pix ();
+
+	void set_enum_width (Width, int);
+	void set_pixel_width (int);
 
 private:
 	void show_gain ();
@@ -242,6 +246,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 	gint idle_delete_processor (boost::weak_ptr<ARDOUR::Processor>);
 
 	void weird_plugin_dialog (ARDOUR::Plugin& p, ARDOUR::Route::ProcessorStreams streams);
+	void on_size_allocate (Gtk::Allocation &);
 
 	static ProcessorBox* _current_processor_box;
 

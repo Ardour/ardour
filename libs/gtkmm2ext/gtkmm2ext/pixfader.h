@@ -28,10 +28,13 @@
 
 namespace Gtkmm2ext {
 
-class PixFader : public Gtk::DrawingArea {
+class PixFader : public Gtk::DrawingArea
+{
   public:
-	PixFader (Glib::RefPtr<Gdk::Pixbuf> belt_image, Gtk::Adjustment& adjustment, int orientation);
+	PixFader (Glib::RefPtr<Gdk::Pixbuf> belt_image, Gtk::Adjustment& adjustment, int orientation, int);
 	virtual ~PixFader ();
+
+	void set_fader_length (int);
 	
   protected:
 	Gtk::Adjustment& adjustment;

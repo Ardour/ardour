@@ -35,7 +35,7 @@ int PixFader::fine_scale_modifier = GDK_CONTROL_MASK;
 
 int PixFader::extra_fine_scale_modifier = GDK_MOD1_MASK;
 
-PixFader::PixFader (Glib::RefPtr<Pixbuf> belt, Gtk::Adjustment& adj, int orientation)
+PixFader::PixFader (Glib::RefPtr<Pixbuf> belt, Gtk::Adjustment& adj, int orientation, int fader_length)
 
 	: adjustment (adj),
 	  pixbuf (belt),
@@ -50,13 +50,11 @@ PixFader::PixFader (Glib::RefPtr<Pixbuf> belt, Gtk::Adjustment& adj, int orienta
 
 	if (orientation == VERT) {
 		view.width = girth = pixbuf->get_width();
-		view.height = span = pixbuf->get_height() / 2;
-		unity_loc = (int) rint (view.height - (default_value * view.height)) - 1;
 	} else {
-		view.width = span = pixbuf->get_width () / 2;
 		view.height = girth = pixbuf->get_height();
-		unity_loc = (int) rint (default_value * view.width) - 1;
-	}	
+	}
+
+	set_fader_length (fader_length);
 
 	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 
@@ -72,8 +70,19 @@ bool
 PixFader::on_expose_event (GdkEventExpose* ev)
 {
 	GdkRectangle intersection;
-	int srcx, srcy, ds = display_span ();
+	int srcx, srcy;
+
+	int const ds = display_span ();
+
 	int offset_into_pixbuf = (int) floor (span / ((float) span / ds));
+
+	/* account for fader lengths that are shorter than the fader pixbuf */
+	if (_orien == VERT) {
+		offset_into_pixbuf += pixbuf->get_height() / 2 - view.height;
+	} else {
+		offset_into_pixbuf += pixbuf->get_width() / 2 - view.width;
+	}
+	
 	Glib::RefPtr<Gdk::GC> fg_gc (get_style()->get_fg_gc(get_state()));
 
 	if (gdk_rectangle_intersect (&view, &ev->area, &intersection)) {
@@ -308,6 +317,7 @@ PixFader::adjustment_changed ()
 	}
 }
 
+/** @return pixel offset of the current value from the right or bottom of the fader */
 int
 PixFader::display_span ()
 {
@@ -315,3 +325,16 @@ PixFader::display_span ()
 	return (_orien == VERT) ? (int)floor (span * (1.0 - fract)) : (int)floor (span * fract);
 }
 
+void
+PixFader::set_fader_length (int l)
+{
+	if (_orien == VERT) {
+		view.height = span = l;
+		unity_loc = (int) rint (view.height - (default_value * view.height)) - 1;
+	} else {
+		view.width = span = l;
+		unity_loc = (int) rint (default_value * view.width) - 1;
+	}
+
+	queue_draw ();
+}

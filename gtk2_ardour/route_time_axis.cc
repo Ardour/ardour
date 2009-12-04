@@ -112,7 +112,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	, size_button (_("h"))
 	, automation_button (_("a"))
 	, visual_button (_("v"))
-	, gm (sess, slider, true)
+	, gm (sess, slider, true, 115)
 {
 	set_button_names ();
 

@@ -37,7 +37,7 @@ using namespace PBD;
 SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session& se)
 	: _send (s)
 	, _session (se)
-	, _gpm (se)
+	, _gpm (se, 250)
 	, _panners (se)
 {
  	_panners.set_panner (s->panner());
@@ -50,7 +50,7 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session& se)
 	_vbox.set_border_width (5);
 
 	_vbox.pack_start (_hbox, false, false, false);
-	_vbox.pack_start (_panners, false,false);
+	_vbox.pack_start (_panners, false, false);
 
 	io = manage (new IOSelector (parent, se, s->output()));
 

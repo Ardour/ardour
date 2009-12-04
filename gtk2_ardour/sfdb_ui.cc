@@ -594,7 +594,7 @@ SoundFileBrowser::add_gain_meter ()
 {
 	delete gm;
 
-	gm = new GainMeter (*session);
+	gm = new GainMeter (*session, 250);
 
 	boost::shared_ptr<Route> r = session->the_auditioner ();
 

@@ -136,7 +136,7 @@ ProcessorEntry::processor () const
 }
 
 void
-ProcessorEntry::set_width (Width w)
+ProcessorEntry::set_enum_width (Width w)
 {
 	_width = w;
 }
@@ -223,7 +223,7 @@ SendProcessorEntry::SendProcessorEntry (boost::shared_ptr<Send> s, Width w)
 	: ProcessorEntry (s, w),
 	  _send (s),
 	  _adjustment (0, 0, 1, 0.01, 0.1),
-	  _fader (_slider, &_adjustment, false),
+	  _fader (_slider, &_adjustment, 0, false),
 	  _ignore_gain_change (false)
 {
 	_fader.set_controllable (_send->amp()->gain_control ());
@@ -265,7 +265,11 @@ SendProcessorEntry::gain_adjusted ()
 	_send->amp()->set_gain (slider_position_to_gain (_adjustment.get_value()), this);
 }
 
-
+void
+SendProcessorEntry::set_pixel_width (int p)
+{
+	_fader.set_fader_length (p);
+}
 
 ProcessorBox::ProcessorBox (ARDOUR::Session& sess, sigc::slot<PluginSelector*> get_plugin_selector,
 			RouteRedirectSelection& rsel, MixerStrip* parent, bool owner_is_mixer)
@@ -386,7 +390,7 @@ ProcessorBox::set_width (Width w)
 
 	list<ProcessorEntry*> children = processor_display.children ();
 	for (list<ProcessorEntry*>::iterator i = children.begin(); i != children.end(); ++i) {
-		(*i)->set_width (w);
+		(*i)->set_enum_width (w);
 	}
 
 	redisplay_processors ();
@@ -960,11 +964,14 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 	}
 
 	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
+	ProcessorEntry* e = 0;
 	if (send) {
-		processor_display.add_child (new SendProcessorEntry (send, _width));
+		e = new SendProcessorEntry (send, _width);
 	} else {
-		processor_display.add_child (new ProcessorEntry (processor, _width));
+		e = new ProcessorEntry (processor, _width);
 	}
+	e->set_pixel_width (get_allocation().get_width());
+	processor_display.add_child (e);
 }
 
 
@@ -1802,3 +1809,13 @@ ProcessorBox::generate_processor_title (boost::shared_ptr<PluginInsert> pi)
 	return string_compose(_("%1: %2 (by %3)"), _route->name(), pi->name(), maker);
 }
 
+void
+ProcessorBox::on_size_allocate (Allocation& a)
+{
+	HBox::on_size_allocate (a);
+
+	list<ProcessorEntry*> children = processor_display.children ();
+	for (list<ProcessorEntry*>::const_iterator i = children.begin(); i != children.end(); ++i) {
+		(*i)->set_pixel_width (a.get_width ());
+	}
+}
