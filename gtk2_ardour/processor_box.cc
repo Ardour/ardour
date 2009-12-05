@@ -842,7 +842,7 @@ ProcessorBox::choose_send ()
 	   is closed.
 	 */
 
-	IOSelectorWindow *ios = new IOSelectorWindow (_session, send->output(), true);
+	IOSelectorWindow *ios = new IOSelectorWindow (&_session, send->output(), true);
 	ios->show_all ();
 
 	/* keep a reference to the send so it doesn't get deleted while
@@ -1503,7 +1503,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 		PortInsertWindow *io_selector;
 
 		if (port_insert->get_gui() == 0) {
-			io_selector = new PortInsertWindow (_session, port_insert);
+			io_selector = new PortInsertWindow (&_session, port_insert);
 			port_insert->set_gui (io_selector);
 
 		} else {

@@ -52,7 +52,7 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session& se)
 	_vbox.pack_start (_hbox, false, false, false);
 	_vbox.pack_start (_panners, false, false);
 
-	io = manage (new IOSelector (parent, se, s->output()));
+	io = manage (new IOSelector (parent, &se, s->output()));
 
 	pack_start (_vbox, false, false);
 

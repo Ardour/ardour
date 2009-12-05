@@ -4682,7 +4682,7 @@ void
 Editor::show_global_port_matrix (ARDOUR::DataType t)
 {
 	if (_global_port_matrix[t] == 0) {
-		_global_port_matrix[t] = new GlobalPortMatrixWindow (*session, t);
+		_global_port_matrix[t] = new GlobalPortMatrixWindow (session, t);
 	}
 
 	_global_port_matrix[t]->show ();

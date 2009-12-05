@@ -29,7 +29,7 @@
 class GlobalPortMatrix : public PortMatrix
 {
 public:
-	GlobalPortMatrix (Gtk::Window*, ARDOUR::Session&, ARDOUR::DataType);
+	GlobalPortMatrix (Gtk::Window*, ARDOUR::Session*, ARDOUR::DataType);
 
 	void setup_ports (int);
 
@@ -60,7 +60,7 @@ private:
 class GlobalPortMatrixWindow : public Gtk::Window
 {
 public:
-	GlobalPortMatrixWindow (ARDOUR::Session&, ARDOUR::DataType);
+	GlobalPortMatrixWindow (ARDOUR::Session *, ARDOUR::DataType);
 
 private:
 	void on_show ();

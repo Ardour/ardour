@@ -45,7 +45,7 @@ using namespace ARDOUR;
  *  @param session Our session.
  *  @param type Port type that we are handling.
  */
-PortMatrix::PortMatrix (Window* parent, Session& session, DataType type)
+PortMatrix::PortMatrix (Window* parent, Session* session, DataType type)
 	: Table (3, 3),
 	  _session (session),
 	  _parent (parent),
@@ -95,6 +95,13 @@ PortMatrix::~PortMatrix ()
 	delete _menu;
 }
 
+/** Perform initial and once-only setup.  This must be called by
+ *  subclasses after they have set up _ports[] to at least some
+ *  reasonable extent.  Two-part initialisation is necessary because
+ *  setting up _ports is largely done by virtual functions in
+ *  subclasses.
+ */
+
 void
 PortMatrix::init ()
 {
@@ -109,25 +116,44 @@ PortMatrix::init ()
 		_visible_ports[1] = *_ports[1].begin();
 	}
 
+	/* Signal handling is kind of split into two parts:
+	 *
+	 * 1.  When _ports[] changes, we call setup().  This essentially sorts out our visual
+	 *     representation of the information in _ports[].
+	 *
+	 * 2.  When certain other things change, we need to get our subclass to clear and
+	 *     re-fill _ports[], which in turn causes appropriate signals to be raised to
+	 *     hook into part (1).
+	 */
+
+
+	/* Part 1: the basic _ports[] change -> reset visuals */
+
 	for (int i = 0; i < 2; ++i) {
 		/* watch for the content of _ports[] changing */
 		_ports[i].Changed.connect (mem_fun (*this, &PortMatrix::setup));
 
 		/* and for bundles in _ports[] changing */
-		_ports[i].BundleChanged.connect (mem_fun (*this, &PortMatrix::bundle_changed));
+		_ports[i].BundleChanged.connect (sigc::hide (mem_fun (*this, &PortMatrix::setup)));
 	}
 
+	/* scrolling stuff */
 	_hscroll.signal_value_changed().connect (mem_fun (*this, &PortMatrix::hscroll_changed));
 	_vscroll.signal_value_changed().connect (mem_fun (*this, &PortMatrix::vscroll_changed));
 
+
+	/* Part 2: notice when things have changed that require our subclass to clear and refill _ports[] */
+	
 	/* watch for routes being added or removed */
-	_session.RouteAdded.connect (sigc::hide (mem_fun (*this, &PortMatrix::routes_changed)));
+	_session->RouteAdded.connect (sigc::hide (mem_fun (*this, &PortMatrix::routes_changed)));
 
 	/* and also bundles */
-	_session.BundleAdded.connect (sigc::hide (mem_fun (*this, &PortMatrix::setup_global_ports)));
+	_session->BundleAdded.connect (sigc::hide (mem_fun (*this, &PortMatrix::setup_global_ports)));
 
 	/* and also ports */
-	_session.engine().PortRegisteredOrUnregistered.connect (mem_fun (*this, &PortMatrix::setup_all_ports));
+	_session->engine().PortRegisteredOrUnregistered.connect (mem_fun (*this, &PortMatrix::setup_global_ports));
+
+	_session->GoingAway.connect (mem_fun (*this, &PortMatrix::session_going_away));
 
 	reconnect_to_routes ();
 	
@@ -143,7 +169,7 @@ PortMatrix::reconnect_to_routes ()
 	}
 	_route_connections.clear ();
 
-	boost::shared_ptr<RouteList> routes = _session.get_routes ();
+	boost::shared_ptr<RouteList> routes = _session->get_routes ();
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 		_route_connections.push_back (
 			(*i)->processors_changed.connect (mem_fun (*this, &PortMatrix::route_processors_changed))
@@ -476,6 +502,8 @@ PortMatrix::disassociate_all_on_channel (boost::weak_ptr<Bundle> bundle, uint32_
 void
 PortMatrix::setup_global_ports ()
 {
+	ENSURE_GUI_THREAD (mem_fun (*this, &PortMatrix::setup_global_ports));
+	
 	for (int i = 0; i < 2; ++i) {
 		if (list_is_global (i)) {
 			setup_ports (i);
@@ -486,7 +514,7 @@ PortMatrix::setup_global_ports ()
 void
 PortMatrix::setup_all_ports ()
 {
-	if (_session.deletion_in_progress()) {
+	if (_session->deletion_in_progress()) {
 		return;
 	}
 
@@ -504,9 +532,8 @@ PortMatrix::toggle_show_only_bundles ()
 	}
 
 	_show_only_bundles = !_show_only_bundles;
-	_body->setup ();
-	setup_scrollbars ();
-	queue_draw ();
+	
+	setup ();
 }
 
 pair<uint32_t, uint32_t>
@@ -602,29 +629,19 @@ PortMatrix::add_channel_proxy (boost::weak_ptr<Bundle> w)
 }
 
 void
-PortMatrix::bundle_changed (ARDOUR::Bundle::Change c)
-{
-	if (c != Bundle::NameChanged) {
-		setup_all_ports ();
-	}
-	
-	setup ();
-}
-
-void
 PortMatrix::setup_notebooks ()
 {
 	int const h_current_page = _hnotebook.get_current_page ();
 	int const v_current_page = _vnotebook.get_current_page ();
 	
-	remove_notebook_pages (_hnotebook);
-	remove_notebook_pages (_vnotebook);
-
 	/* for some reason best known to GTK, erroneous switch_page signals seem to be generated
-	   when adding pages to notebooks, so ignore them */
+	   when adding or removing pages to or from notebooks, so ignore them */
 	
 	_ignore_notebook_page_selected = true;
 	
+	remove_notebook_pages (_hnotebook);
+	remove_notebook_pages (_vnotebook);
+
 	for (PortGroupList::List::const_iterator i = _ports[_row_index].begin(); i != _ports[_row_index].end(); ++i) {
 		HBox* dummy = manage (new HBox);
 		dummy->show ();
@@ -727,4 +744,10 @@ PortMatrix::h_page_selected (GtkNotebookPage *, guint n)
 		setup_scrollbars ();
 		queue_draw ();
 	}
+}
+
+void
+PortMatrix::session_going_away ()
+{
+	_session = 0;
 }

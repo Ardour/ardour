@@ -238,10 +238,14 @@ PortGroupList::maybe_add_processor_to_list (
 
 /** Gather bundles from around the system and put them in this PortGroupList */
 void
-PortGroupList::gather (ARDOUR::Session& session, bool inputs, bool allow_dups)
+PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 {
 	clear ();
 
+	if (session == 0) {
+		return;
+	}
+	
 	boost::shared_ptr<PortGroup> bus (new PortGroup (_("Bus")));
 	boost::shared_ptr<PortGroup> track (new PortGroup (_("Track")));
 	boost::shared_ptr<PortGroup> system_mono (new PortGroup (_("System (mono)")));
@@ -254,7 +258,7 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs, bool allow_dups)
 	   the route's input/output and processor bundles together so that they
 	   are presented as one bundle in the matrix. */
 
-	boost::shared_ptr<RouteList> routes = session.get_routes ();
+	boost::shared_ptr<RouteList> routes = session->get_routes ();
 
 	for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 
@@ -309,7 +313,7 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs, bool allow_dups)
 	   that UserBundles that offer the same ports as a normal bundle get priority
 	*/
 
-	boost::shared_ptr<BundleList> b = session.bundles ();
+	boost::shared_ptr<BundleList> b = session->bundles ();
 
 	for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 		if (boost::dynamic_pointer_cast<UserBundle> (*i) && (*i)->ports_are_inputs() == inputs && (*i)->type() == _type) {
@@ -338,8 +342,8 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs, bool allow_dups)
 	/* Ardour stuff */
 
 	if (!inputs && _type == DataType::AUDIO) {
-		ardour->add_bundle (session.the_auditioner()->output()->bundle());
-		ardour->add_bundle (session.click_io()->bundle());
+		ardour->add_bundle (session->the_auditioner()->output()->bundle());
+		ardour->add_bundle (session->click_io()->bundle());
 	}
 
 	/* Now find all other ports that we haven't thought of yet */
@@ -347,14 +351,14 @@ PortGroupList::gather (ARDOUR::Session& session, bool inputs, bool allow_dups)
 	std::vector<std::string> extra_system;
 	std::vector<std::string> extra_other;
 
- 	const char **ports = session.engine().get_ports ("", _type.to_jack_type(), inputs ?
+ 	const char **ports = session->engine().get_ports ("", _type.to_jack_type(), inputs ?
 							 JackPortIsInput : JackPortIsOutput);
  	if (ports) {
 
 		int n = 0;
 		string client_matching_string;
 
-		client_matching_string = session.engine().client_name();
+		client_matching_string = session->engine().client_name();
 		client_matching_string += ':';
 
 		while (ports[n]) {

@@ -52,7 +52,7 @@ class PortMatrixBody;
 class PortMatrix : public Gtk::Table
 {
 public:
-	PortMatrix (Gtk::Window*, ARDOUR::Session&, ARDOUR::DataType);
+	PortMatrix (Gtk::Window*, ARDOUR::Session *, ARDOUR::DataType);
 	~PortMatrix ();
 
 	void set_type (ARDOUR::DataType);
@@ -157,7 +157,7 @@ protected:
 	    inputs and outputs should put outputs in list 0 and inputs in list 1. */
 	PortGroupList _ports[2];
 	boost::shared_ptr<PortGroup> _visible_ports[2];
-	ARDOUR::Session& _session;
+	ARDOUR::Session* _session;
 
 private:
 
@@ -174,12 +174,12 @@ private:
 	void toggle_show_only_bundles ();
 	bool on_scroll_event (GdkEventScroll *);
 	boost::shared_ptr<ARDOUR::IO> io_from_bundle (boost::shared_ptr<ARDOUR::Bundle>) const;
-	void bundle_changed (ARDOUR::Bundle::Change);
 	void setup_notebooks ();
 	void remove_notebook_pages (Gtk::Notebook &);
 	void v_page_selected (GtkNotebookPage *, guint);
 	void h_page_selected (GtkNotebookPage *, guint);
 	void route_processors_changed (ARDOUR::RouteProcessorChange);
+	void session_going_away ();
 
 	Gtk::Window* _parent;
 

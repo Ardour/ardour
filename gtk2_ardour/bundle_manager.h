@@ -35,7 +35,7 @@ namespace ARDOUR {
 class BundleEditorMatrix : public PortMatrix
 {
   public:
-	BundleEditorMatrix (Gtk::Window *, ARDOUR::Session &, boost::shared_ptr<ARDOUR::Bundle>);
+	BundleEditorMatrix (Gtk::Window *, ARDOUR::Session *, boost::shared_ptr<ARDOUR::Bundle>);
 
 	void set_state (ARDOUR::BundleChannel c[2], bool s);
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
@@ -67,7 +67,7 @@ class BundleEditorMatrix : public PortMatrix
 class BundleEditor : public ArdourDialog
 {
   public:
-	BundleEditor (ARDOUR::Session &, boost::shared_ptr<ARDOUR::UserBundle>);
+	BundleEditor (ARDOUR::Session *, boost::shared_ptr<ARDOUR::UserBundle>);
 
   protected:
 	void on_map ();
@@ -88,7 +88,7 @@ class BundleEditor : public ArdourDialog
 class BundleManager : public ArdourDialog
 {
   public:
-	BundleManager (ARDOUR::Session &);
+	BundleManager (ARDOUR::Session *);
 
   private:
 
@@ -115,7 +115,7 @@ class BundleManager : public ArdourDialog
 	Gtk::TreeView _tree_view;
 	Glib::RefPtr<Gtk::ListStore> _list_model;
 	ModelColumns _list_model_columns;
-	ARDOUR::Session& _session;
+	ARDOUR::Session* _session;
 	Gtk::Button edit_button;
 	Gtk::Button delete_button;
 };

@@ -14,7 +14,7 @@ using namespace ARDOUR;
 class OptionsPortMatrix : public PortMatrix
 {
 public:
-	OptionsPortMatrix (Gtk::Window* parent, ARDOUR::Session& session)
+	OptionsPortMatrix (Gtk::Window* parent, ARDOUR::Session* session)
 		: PortMatrix (parent, session, DataType::AUDIO)
 	{
 		_port_group.reset (new PortGroup (""));
@@ -26,12 +26,10 @@ public:
 
 	void setup_ports (int dim)
 	{
-		cerr << _session.the_auditioner()->output()->n_ports() << "\n";
-
 		if (dim == OURS) {
 			_port_group->clear ();
-			_port_group->add_bundle (_session.click_io()->bundle());
-			_port_group->add_bundle (_session.the_auditioner()->output()->bundle());
+			_port_group->add_bundle (_session->click_io()->bundle());
+			_port_group->add_bundle (_session->the_auditioner()->output()->bundle());
 		} else {
 			_ports[OTHER].gather (_session, true, false);
 		}
@@ -42,18 +40,18 @@ public:
 		Bundle::PortList const & our_ports = c[OURS].bundle->channel_ports (c[OURS].channel);
 		Bundle::PortList const & other_ports = c[OTHER].bundle->channel_ports (c[OTHER].channel);
 
-		if (c[OURS].bundle == _session.click_io()->bundle()) {
+		if (c[OURS].bundle == _session->click_io()->bundle()) {
 
 			for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
 				for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
 
-					Port* f = _session.engine().get_port_by_name (*i);
+					Port* f = _session->engine().get_port_by_name (*i);
 					assert (f);
 
 					if (s) {
-						_session.click_io()->connect (f, *j, 0);
+						_session->click_io()->connect (f, *j, 0);
 					} else {
-						_session.click_io()->disconnect (f, *j, 0);
+						_session->click_io()->disconnect (f, *j, 0);
 					}
 				}
 			}
@@ -65,11 +63,11 @@ public:
 		Bundle::PortList const & our_ports = c[OURS].bundle->channel_ports (c[OURS].channel);
 		Bundle::PortList const & other_ports = c[OTHER].bundle->channel_ports (c[OTHER].channel);
 
-		if (c[OURS].bundle == _session.click_io()->bundle()) {
+		if (c[OURS].bundle == _session->click_io()->bundle()) {
 
 			for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
 				for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
-					Port* f = _session.engine().get_port_by_name (*i);
+					Port* f = _session->engine().get_port_by_name (*i);
 					assert (f);
 
 					if (f->connected_to (*j)) {
@@ -119,7 +117,7 @@ class ConnectionOptions : public OptionEditorBox
 {
 public:
 	ConnectionOptions (Gtk::Window* parent, ARDOUR::Session* s)
-		: _port_matrix (parent, *s)
+		: _port_matrix (parent, s)
 	{
 		_box->pack_start (_port_matrix);
 	}

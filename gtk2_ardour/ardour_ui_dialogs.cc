@@ -340,7 +340,7 @@ void
 ARDOUR_UI::create_bundle_manager ()
 {
 	if (bundle_manager == 0) {
-		bundle_manager = new BundleManager (*session);
+		bundle_manager = new BundleManager (session);
 		bundle_manager->signal_unmap().connect (sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBundleManager")));
 	}
 }

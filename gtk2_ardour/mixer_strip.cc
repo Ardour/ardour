@@ -710,7 +710,7 @@ MixerStrip::edit_output_configuration ()
 			output = _route->output ();
 		}
 		
-		output_selector = new IOSelectorWindow (_session, output);
+		output_selector = new IOSelectorWindow (&_session, output);
 	}
 
 	if (output_selector->is_visible()) {
@@ -724,7 +724,7 @@ void
 MixerStrip::edit_input_configuration ()
 {
 	if (input_selector == 0) {
-		input_selector = new IOSelectorWindow (_session, _route->input());
+		input_selector = new IOSelectorWindow (&_session, _route->input());
 	}
 
 	if (input_selector->is_visible()) {

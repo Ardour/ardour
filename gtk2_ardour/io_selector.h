@@ -31,7 +31,7 @@ namespace ARDOUR {
 class IOSelector : public PortMatrix
 {
   public:
-	IOSelector (Gtk::Window*, ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>);
+	IOSelector (Gtk::Window*, ARDOUR::Session *, boost::shared_ptr<ARDOUR::IO>);
 
 	void set_state (ARDOUR::BundleChannel c[2], bool);
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
@@ -73,7 +73,7 @@ class IOSelector : public PortMatrix
 class IOSelectorWindow : public Gtk::Window
 {
   public:
-	IOSelectorWindow (ARDOUR::Session&, boost::shared_ptr<ARDOUR::IO>, bool can_cancel = false);
+	IOSelectorWindow (ARDOUR::Session *, boost::shared_ptr<ARDOUR::IO>, bool can_cancel = false);
 
 	IOSelector& selector() { return _selector; }
 
@@ -92,7 +92,7 @@ class IOSelectorWindow : public Gtk::Window
 class PortInsertUI : public Gtk::HBox
 {
   public:
-	PortInsertUI (Gtk::Window*, ARDOUR::Session&, boost::shared_ptr<ARDOUR::PortInsert>);
+	PortInsertUI (Gtk::Window*, ARDOUR::Session *, boost::shared_ptr<ARDOUR::PortInsert>);
 
 	void redisplay ();
 	void finished (IOSelector::Result);
@@ -105,7 +105,7 @@ class PortInsertUI : public Gtk::HBox
 class PortInsertWindow : public ArdourDialog
 {
   public:
-	PortInsertWindow (ARDOUR::Session&, boost::shared_ptr<ARDOUR::PortInsert>, bool can_cancel = false);
+	PortInsertWindow (ARDOUR::Session *, boost::shared_ptr<ARDOUR::PortInsert>, bool can_cancel = false);
 
   protected:
 	void on_map ();

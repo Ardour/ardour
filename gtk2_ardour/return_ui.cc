@@ -49,7 +49,7 @@ ReturnUI::ReturnUI (Gtk::Window* parent, boost::shared_ptr<Return> r, Session& s
 
 	_vbox.pack_start (_hbox, false, false, false);
 
-	io = manage (new IOSelector (parent, se, r->output()));
+	io = manage (new IOSelector (parent, &se, r->output()));
 
 	pack_start (_vbox, false, false);
 

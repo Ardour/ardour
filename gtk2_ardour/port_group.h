@@ -40,9 +40,8 @@ class PortMatrix;
 class RouteBundle;
 class PublicEditor;
 
-/** A list of bundles and ports, grouped by some aspect of their
- *  type e.g. busses, tracks, system.  Each group has 0 or more bundles
- *  and 0 or more ports, where the ports are not in the bundles.
+/** A list of bundles grouped by some aspect of their type e.g. busses, tracks, system.
+ *  A group has 0 or more bundles.
  */
 class PortGroup : public sigc::trackable
 {
@@ -62,7 +61,10 @@ public:
 
 	bool has_port (std::string const &) const;
 
+	/** The bundle list has changed in some way; a bundle has been added or removed, or the list cleared etc. */
 	sigc::signal<void> Changed;
+
+	/** An individual bundle on our list has changed in some way */
 	sigc::signal<void, ARDOUR::Bundle::Change> BundleChanged;
 
 	struct BundleRecord {
@@ -99,7 +101,7 @@ class PortGroupList : public sigc::trackable
 	void add_group (boost::shared_ptr<PortGroup>);
 	void add_group_if_not_empty (boost::shared_ptr<PortGroup>);
 	void set_type (ARDOUR::DataType);
-	void gather (ARDOUR::Session &, bool, bool);
+	void gather (ARDOUR::Session *, bool, bool);
 	PortGroup::BundleList const & bundles () const;
 	void clear ();
 	void remove_bundle (boost::shared_ptr<ARDOUR::Bundle>);
@@ -122,7 +124,10 @@ class PortGroupList : public sigc::trackable
 
 	bool empty () const;
 
+	/** The group list has changed in some way; a group has been added or removed, or the list cleared etc. */
 	sigc::signal<void> Changed;
+
+	/** A bundle in one of our groups has changed */
 	sigc::signal<void, ARDOUR::Bundle::Change> BundleChanged;
 
   private:

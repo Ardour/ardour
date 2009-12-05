@@ -35,7 +35,7 @@ using namespace std;
 using namespace ARDOUR;
 
 BundleEditorMatrix::BundleEditorMatrix (
-	Gtk::Window* parent, Session& session, boost::shared_ptr<Bundle> bundle
+	Gtk::Window* parent, Session* session, boost::shared_ptr<Bundle> bundle
 	)
 	: PortMatrix (parent, session, bundle->type()),
 	  _bundle (bundle)
@@ -174,7 +174,7 @@ BundleEditorMatrix::list_is_global (int dim) const
 	return (dim == OTHER);
 }
 
-BundleEditor::BundleEditor (Session& session, boost::shared_ptr<UserBundle> bundle)
+BundleEditor::BundleEditor (Session* session, boost::shared_ptr<UserBundle> bundle)
 	: ArdourDialog (_("Edit Bundle")), _matrix (this, session, bundle), _bundle (bundle)
 {
 	Gtk::Table* t = new Gtk::Table (3, 2);
@@ -284,7 +284,7 @@ BundleEditor::on_map ()
 }
 
 
-BundleManager::BundleManager (Session& session)
+BundleManager::BundleManager (Session* session)
 	: ArdourDialog (_("Bundle Manager")), _session (session), edit_button (_("Edit")), delete_button (_("Delete"))
 {
 	_list_model = Gtk::ListStore::create (_list_model_columns);
@@ -292,7 +292,7 @@ BundleManager::BundleManager (Session& session)
 	_tree_view.append_column (_("Name"), _list_model_columns.name);
 	_tree_view.set_headers_visible (false);
 
-	boost::shared_ptr<BundleList> bundles = _session.bundles ();
+	boost::shared_ptr<BundleList> bundles = _session->bundles ();
 	for (BundleList::iterator i = bundles->begin(); i != bundles->end(); ++i) {
 		add_bundle (*i);
 	}
@@ -352,7 +352,7 @@ BundleManager::new_clicked ()
 	/* Start off with a single channel */
 	b->add_channel ("1");
 
-	_session.add_bundle (b);
+	_session->add_bundle (b);
 	add_bundle (b);
 
 	BundleEditor e (_session, b);
@@ -376,7 +376,7 @@ BundleManager::delete_clicked ()
 	Gtk::TreeModel::iterator i = _tree_view.get_selection()->get_selected();
 	if (i) {
 		boost::shared_ptr<UserBundle> b = (*i)[_list_model_columns.bundle];
-		_session.remove_bundle (b);
+		_session->remove_bundle (b);
 		_list_model->erase (i);
 	}
 }

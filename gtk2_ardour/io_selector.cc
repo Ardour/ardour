@@ -41,7 +41,7 @@
 using namespace ARDOUR;
 using namespace Gtk;
 
-IOSelector::IOSelector (Gtk::Window* p, ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io)
+IOSelector::IOSelector (Gtk::Window* p, ARDOUR::Session* session, boost::shared_ptr<ARDOUR::IO> io)
 	: PortMatrix (p, session, io->default_type())
 	, _io (io)
 {
@@ -67,6 +67,10 @@ IOSelector::IOSelector (Gtk::Window* p, ARDOUR::Session& session, boost::shared_
 void
 IOSelector::setup_ports (int dim)
 {
+	if (!_session) {
+		return;
+	}
+	
 	_ports[dim].suspend_signals ();
 
 	if (dim == _other) {
@@ -91,7 +95,7 @@ IOSelector::set_state (ARDOUR::BundleChannel c[2], bool s)
 	for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
 		for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
 
-			Port* f = _session.engine().get_port_by_name (*i);
+			Port* f = _session->engine().get_port_by_name (*i);
 			if (!f) {
 				return;
 			}
@@ -120,7 +124,7 @@ IOSelector::get_state (ARDOUR::BundleChannel c[2]) const
 	for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
 		for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
 
-			Port* f = _session.engine().get_port_by_name (*i);
+			Port* f = _session->engine().get_port_by_name (*i);
 
 			/* since we are talking about an IO, our ports should all have an associated Port *,
 			   so the above call should never fail */
@@ -152,7 +156,7 @@ IOSelector::list_is_global (int dim) const
 	return (dim == _other);
 }
 
-IOSelectorWindow::IOSelectorWindow (ARDOUR::Session& session, boost::shared_ptr<ARDOUR::IO> io, bool /*can_cancel*/)
+IOSelectorWindow::IOSelectorWindow (ARDOUR::Session* session, boost::shared_ptr<ARDOUR::IO> io, bool /*can_cancel*/)
 	: _selector (this, session, io)
 {
 	set_name ("IOSelectorWindow2");
@@ -209,7 +213,7 @@ IOSelectorWindow::io_name_changed (void* src)
 	set_title (title);
 }
 
-PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session& sess, boost::shared_ptr<ARDOUR::PortInsert> pi)
+PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session* sess, boost::shared_ptr<ARDOUR::PortInsert> pi)
 	: input_selector (parent, sess, pi->input())
 	, output_selector (parent, sess, pi->output())
 {
@@ -235,7 +239,7 @@ PortInsertUI::finished (IOSelector::Result r)
 }
 
 
-PortInsertWindow::PortInsertWindow (ARDOUR::Session& sess, boost::shared_ptr<ARDOUR::PortInsert> pi, bool can_cancel)
+PortInsertWindow::PortInsertWindow (ARDOUR::Session* sess, boost::shared_ptr<ARDOUR::PortInsert> pi, bool can_cancel)
 	: ArdourDialog ("port insert dialog"),
 	  _portinsertui (this, sess, pi),
 	  ok_button (can_cancel ? _("OK"): _("Close")),

@@ -31,7 +31,7 @@
 
 using namespace std;
 
-GlobalPortMatrix::GlobalPortMatrix (Gtk::Window* p, ARDOUR::Session& s, ARDOUR::DataType t)
+GlobalPortMatrix::GlobalPortMatrix (Gtk::Window* p, ARDOUR::Session* s, ARDOUR::DataType t)
 	: PortMatrix (p, s, t)
 {
 	setup_all_ports ();
@@ -55,8 +55,8 @@ GlobalPortMatrix::set_state (ARDOUR::BundleChannel c[2], bool s)
 	for (ARDOUR::Bundle::PortList::const_iterator i = in_ports.begin(); i != in_ports.end(); ++i) {
 		for (ARDOUR::Bundle::PortList::const_iterator j = out_ports.begin(); j != out_ports.end(); ++j) {
 
-			ARDOUR::Port* p = _session.engine().get_port_by_name (*i);
-			ARDOUR::Port* q = _session.engine().get_port_by_name (*j);
+			ARDOUR::Port* p = _session->engine().get_port_by_name (*i);
+			ARDOUR::Port* q = _session->engine().get_port_by_name (*j);
 
 			if (p) {
 				if (s) {
@@ -73,9 +73,9 @@ GlobalPortMatrix::set_state (ARDOUR::BundleChannel c[2], bool s)
 			} else {
 				/* two non-Ardour ports */
 				if (s) {
-					jack_connect (_session.engine().jack (), j->c_str(), i->c_str());
+					jack_connect (_session->engine().jack (), j->c_str(), i->c_str());
 				} else {
-					jack_disconnect (_session.engine().jack (), j->c_str(), i->c_str());
+					jack_disconnect (_session->engine().jack (), j->c_str(), i->c_str());
 				}
 			}
 		}
@@ -85,6 +85,10 @@ GlobalPortMatrix::set_state (ARDOUR::BundleChannel c[2], bool s)
 PortMatrixNode::State
 GlobalPortMatrix::get_state (ARDOUR::BundleChannel c[2]) const
 {
+	if (_session == 0) {
+		return PortMatrixNode::NOT_ASSOCIATED;
+	}
+	
 	ARDOUR::Bundle::PortList const & in_ports = c[IN].bundle->channel_ports (c[IN].channel);
 	ARDOUR::Bundle::PortList const & out_ports = c[OUT].bundle->channel_ports (c[OUT].channel);
 	if (in_ports.empty() || out_ports.empty()) {
@@ -96,15 +100,15 @@ GlobalPortMatrix::get_state (ARDOUR::BundleChannel c[2]) const
 	for (ARDOUR::Bundle::PortList::const_iterator i = in_ports.begin(); i != in_ports.end(); ++i) {
 		for (ARDOUR::Bundle::PortList::const_iterator j = out_ports.begin(); j != out_ports.end(); ++j) {
 
-			ARDOUR::Port* p = _session.engine().get_port_by_name (*i);
-			ARDOUR::Port* q = _session.engine().get_port_by_name (*j);
+			ARDOUR::Port* p = _session->engine().get_port_by_name (*i);
+			ARDOUR::Port* q = _session->engine().get_port_by_name (*j);
 
 			if (!p && !q) {
 				/* two non-Ardour ports; things are slightly more involved */
 				/* XXX: is this the easiest way to do this? */
 				/* XXX: isn't this very inefficient? */
 
-				jack_client_t* jack = _session.engine().jack ();
+				jack_client_t* jack = _session->engine().jack ();
 				jack_port_t* jp = jack_port_by_name (jack, i->c_str());
 				if (jp == 0) {
 					return PortMatrixNode::NOT_ASSOCIATED;
@@ -138,7 +142,7 @@ GlobalPortMatrix::get_state (ARDOUR::BundleChannel c[2]) const
 	return PortMatrixNode::ASSOCIATED;
 }
 
-GlobalPortMatrixWindow::GlobalPortMatrixWindow (ARDOUR::Session& s, ARDOUR::DataType t)
+GlobalPortMatrixWindow::GlobalPortMatrixWindow (ARDOUR::Session* s, ARDOUR::DataType t)
 	: _port_matrix (this, s, t)
 {
 	switch (t) {
