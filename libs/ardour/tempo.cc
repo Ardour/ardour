@@ -1823,7 +1823,8 @@ TempoMap::bbt_subtract (const BBT_Time& start, const BBT_Time& decrement) const
 	*/
 	
 	const MeterSection* meter = 0;
-	list<const MeterSection*>::const_reverse_iterator next_meter;
+	list<const MeterSection*>::reverse_iterator next_meter; // older versions of GCC don't 
+	                                                        // support const_reverse_iterator::operator!=()
 	
 	for (next_meter = meter_sections.rbegin(); next_meter != meter_sections.rend(); ++next_meter) {
 		

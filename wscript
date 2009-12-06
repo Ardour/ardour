@@ -96,7 +96,7 @@ def set_compiler_flags (conf,opt):
 	# Compiler flags and other system-dependent stuff
 	#
 
-	build_host_supports_sse = 0
+	build_host_supports_sse = False
 	optimization_flags = []
 	if opt.gprofile:
 		debug_flags = [ '-pg' ]
@@ -121,7 +121,7 @@ def set_compiler_flags (conf,opt):
 			# The [.] matches to the dot after the major version, "." would match any character
 			if re.search ("darwin[0-7][.]", config[config_kernel]) != None:
 				conf.define ('build_target', 'panther')
-			if re.search ("darwin8[.]", config[config_kernel]) != None:
+			elif re.search ("darwin8[.]", config[config_kernel]) != None:
 				conf.define ('build_target', 'tiger')
 			else:
 				conf.define ('build_target', 'leopard')
@@ -181,14 +181,14 @@ def set_compiler_flags (conf,opt):
 				if "mmx" in x86_flags:
 					optimization_flags.append ("-mmmx")
 				if "sse" in x86_flags:
-					build_host_supports_sse = 1
+					build_host_supports_sse = True
 				if "3dnow" in x86_flags:
 					optimization_flags.append ("-m3dnow")
             
-		if config[config_cpu] == "i586":
-			optimization_flags.append ("-march=i586")
-		elif config[config_cpu] == "i686":
-			optimization_flags.append ("-march=i686")
+			if config[config_cpu] == "i586":
+				optimization_flags.append ("-march=i586")
+			elif config[config_cpu] == "i686":
+				optimization_flags.append ("-march=i686")
     
 		if ((conf.env['build_target'] == 'i686') or (conf.env['build_target'] == 'x86_64')) and build_host_supports_sse:
 			optimization_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
@@ -205,13 +205,15 @@ def set_compiler_flags (conf,opt):
 		elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
 			optimization_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
 			debug_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
-		if conf.env['build_target'] == 'x86_64':
+		elif conf.env['build_target'] == 'x86_64':
 			optimization_flags.append ("-DUSE_X86_64_ASM")
 			debug_flags.append ("-DUSE_X86_64_ASM")
-		if build_host_supports_sse != 1:
+		if not build_host_supports_sse:
 			print "\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)"
-		if conf.check_cc(function_name='posix_memalign', header_name='stdlib.h', ccflags='-D_XOPEN_SOURCE=600') == False:
-			optimization_flags.append("-DNO_POSIX_MEMALIGN")
+	
+	# check this even if we aren't using FPU optimization
+	if conf.check_cc(function_name='posix_memalign', header_name='stdlib.h', ccflags='-D_XOPEN_SOURCE=600') == False:
+		optimization_flags.append("-DNO_POSIX_MEMALIGN")
 
 	# end optimization section
 			
@@ -288,9 +290,9 @@ def set_compiler_flags (conf,opt):
 	conf.env.append_value('CXXFLAGS', [ '-Wall', '-Woverloaded-virtual'])
 
 	if opt.extra_warn:
-		conf.env.append_value('CCFLAGS', [ '-Wextra', '-pedantic', '-ansi' ])
-		conf.env.append_value('CXXFLAGS', [ '-Wextra', '-pedantic', '-ansi' ])
-		#conf.env.append_value('CFLAGS', "-iso")
+		flags = [ '-Wextra' ]
+		conf.env.append_value('CCFLAGS', flags )
+		conf.env.append_value('CXXFLAGS', flags )
 
 
 	#
@@ -312,8 +314,6 @@ def set_options(opt):
 	autowaf.set_options(opt)
 	opt.add_option('--arch', type='string', action='store', dest='arch',
 			help='Architecture-specific compiler flags')
-	opt.add_option('--aubio', action='store_true', default=True, dest='aubio',
-			help="Use Paul Brossier's aubio library for feature detection (if available)")
 	opt.add_option('--boost-sp-debug', action='store_true', default=False, dest='boost_sp_debug',
 			help='Compile with Boost shared pointer debugging')
 	opt.add_option('--audiounits', action='store_true', default=False, dest='audiounits',
@@ -325,7 +325,8 @@ def set_options(opt):
 	opt.add_option('--extra-warn', action='store_true', default=False, dest='extra_warn',
 			help='Build with even more compiler warning flags')
 	opt.add_option('--fpu-optimization', action='store_true', default=True, dest='fpu_optimization',
-			help='Build runtime checked assembler code')
+			help='Build runtime checked assembler code (default)')
+	opt.add_option('--no-fpu-optimization', action='store_false', dest='fpu_optimization')
 	opt.add_option('--freedesktop', action='store_true', default=False, dest='freedesktop',
 			help='Install MIME type, icons and .desktop file as per freedesktop.org standards')
 	opt.add_option('--freesound', action='store_true', default=False, dest='freesound',
@@ -337,11 +338,10 @@ def set_options(opt):
 	opt.add_option('--lv2', action='store_true', default=False, dest='lv2',
 			help='Compile with support for LV2 (if slv2 is available)')
 	opt.add_option('--nls', action='store_true', default=True, dest='nls',
-			help='Enable i18n (native language support)')
+			help='Enable i18n (native language support) (default)')
+	opt.add_option('--no-nls', action='store_false', dest='nls')
 	opt.add_option('--stl-debug', action='store_true', default=False, dest='stl_debug',
 			help='Build with debugging for the STL')
-	opt.add_option('--syslibs', action='store_true', default=True, dest='syslibs',
-			help='Use existing system versions of various libraries instead of internal ones')
 	opt.add_option('--tranzport', action='store_true', default=False, dest='tranzport',
 			help='Compile with support for Frontier Designs Tranzport (if libusb is available)')
 	opt.add_option('--universal', action='store_true', default=False, dest='universal',
@@ -379,7 +379,7 @@ def configure(conf):
 		conf.env.append_value('CCFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
 		conf.env.append_value('LINKFLAGS_OSX', "-mmacosx-version-min=10.4")
 		conf.env.append_value('LINKFLAGS_OSX', "-isysroot /Developer/SDKs/MacOSX10.4u.sdk")
-		
+
 		conf.env.append_value('LINKFLAGS_OSX', "-sysroot /Developer/SDKs/MacOSX10.4u.sdk")
 		conf.env.append_value('LINKFLAGS_OSX', "-F/System/Library/Frameworks")
 
@@ -392,7 +392,25 @@ def configure(conf):
 		#	off processor type.  Need to add in a check
 		#	for that.
 		#
-		
+
+		conf.env.append_value('CPPPATH_OSX', "/System/Library/Frameworks/")
+		conf.env.append_value('CPPPATH_OSX', "/usr/include/")
+		conf.env.append_value('CPPPATH_OSX', "/usr/include/c++/4.0.0")
+		conf.env.append_value('CPPPATH_OSX', "/usr/include/c++/4.0.0/i686-apple-darwin8/")
+		#
+		#	TODO: Fix the above include path, it needs to be
+		#	defined based off what is read in the configuration
+		#	stage about the machine(PPC, X86, X86_64, etc.)
+		#
+		conf.env.append_value('CPPPATH_OSX', "/usr/lib/gcc/i686-apple-darwin9/4.0.1/include/")
+		#
+		#	TODO: Likewise this needs to be defined not only
+		#	based off the machine characteristics, but also
+		#	based off the version of GCC being used.
+		#
+
+		conf.env.append_value('FRAMEWORK_OSX', ['CoreFoundation'])
+
 		conf.env.append_value('LINKFLAGS_OSX', ['-undefined', 'suppress'])
 		conf.env.append_value('LINKFLAGS_OSX', "-flat_namespace")
 		#
@@ -403,67 +421,39 @@ def configure(conf):
 		#
 		conf.env.append_value('CXXFLAGS_OSX', "-F/System/Library/Frameworks")
 		conf.env.append_value('CCFLAGS_OSX', "-F/System/Library/Frameworks")
-		
+
+		# GTKOSX only builds on darwin anyways
+		if Options.options.gtkosx:
+			#
+			#	Define Include Paths for GTKOSX
+			#
+			conf.env.append_value('CXXFLAGS_GTKOSX', '-DTOP_MENUBAR')
+			conf.env.append_value('CXXFLAGS_GTKOSX', '-DGTKOSX')
+			conf.env.append_value('LINKFLAGS_GTKOSX', "-framework AppKit")
+			conf.env.append_value('LINKFLAGS_GTKOSX', "-Xlinker -headerpad")
+			conf.env.append_value('LINKFLAGS_GTKOSX', "-Xlinker 2048")
+			conf.env.append_value('CPPPATH_GTKOSX', "/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Headers/")
+	
+		if Options.options.coreaudio:
+			conf.check_cc (header_name = '/System/Library/Frameworks/CoreAudio.framework/Headers/CoreAudio.h',
+			               define_name = 'HAVE_COREAUDIO', linkflags = ['-framework CoreAudio'],
+			               uselib_store="COREAUDIO")
+			conf.check_cxx (header_name = '/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h',
+			                linkflags = [ '-framework AudioToolbox' ], uselib_store="COREAUDIO")
+			conf.check_cc (header_name = '/System/Library/Frameworks/CoreServices.framework/Headers/CoreServices.h',
+			               linkflags = ['-framework CoreServices'], uselib_store="COREAUDIO")
+
+		if Options.options.audiounits:
+			#conf.env.append_value('CXXFLAGS_AUDIOUNIT', "-DHAVE_AUDIOUNITS")
+			conf.env.append_value('FRAMEWORK_AUDIOUNIT', ['AudioToolbox'])
+			conf.env.append_value('FRAMEWORK_AUDIOUNIT', ['CoreServices'])
+			conf.check_cc (header_name = '/System/Library/Frameworks/AudioUnit.framework/Headers/AudioUnit.h',
+			               define_name = 'HAVE_AUDIOUNITS', linkflags = [ '-framework AudioUnit' ],
+			               uselib_store="AUDIOUNIT")
+
 	if Options.options.boost_sp_debug:
 		conf.env.append_value('CXXFLAGS', '-DBOOST_SP_ENABLE_DEBUG_HOOKS')
-
-	if Options.options.gtkosx:
-		#
-		#	Define Include Paths for GTKOSX
-		#
-		conf.env.append_value('CPPPATH_GTKOSX', "/usr/include/")
-		conf.env.append_value('CPPPATH_GTKOSX', "/usr/include/c++/4.0.0")
-		conf.env.append_value('CPPPATH_GTKOSX', "/usr/include/c++/4.0.0/i686-apple-darwin8/")
-		#
-		#	TODO: Fix the above include path, it needs to be
-		#	defined based off what is read in the configuration
-		#	stage about the machine(PPC, X86, X86_64, etc.)
-		#
-		conf.env.append_value('CPPPATH_GTKOSX', "/usr/lib/gcc/i686-apple-darwin9/4.0.1/include/")
-		#
-		#	TODO: Likewise this needs to be defined not only
-		#	based off the machine characteristics, but also
-		#	based off the version of GCC being used.
-		#
-		conf.env.append_value('CPPPATH_GTKOSX', "/System/Library/Frameworks/")
-		conf.env.append_value('CXXFLAGS_GTKOSX', '-DTOP_MENUBAR')
-		conf.env.append_value('CXXFLAGS_GTKOSX', '-DGTKOSX')
-		conf.env.append_value('LINKFLAGS_GTKOSX', "-framework AppKit")
-		conf.env.append_value('LINKFLAGS_GTKOSX', "-Xlinker -headerpad")
-		conf.env.append_value('LINKFLAGS_GTKOSX', "-Xlinker 2048")
-		conf.env.append_value('CPPPATH_GTKOSX', "/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Headers/")
-		#
-		#	I had a note the previous was for MacTypes.h
-		#
 	
-	if Options.options.coreaudio:
-	   #conf.env.append_value('LINKFLAGS_COREAUDIO', "-framework CoreAudioKit")
-	   #conf.env.append_value('LINKFLAGS_COREAUDIO', "-framework AudioToolbox")
-	   #conf.env.append_value('LINKFLAGS_COREAUDIO', "-framework CoreServices")
-	   conf.check_cc (header_name = '/System/Library/Frameworks/CoreAudio.framework/Headers/CoreAudio.h',
-					  define_name = 'HAVE_COREAUDIO', linkflags = ['-framework', 'CoreAudio'])
-	   conf.check_cxx (header_name = '/System/Library/Frameworks/AudioToolbox.framework/Headers/ExtendedAudioFile.h',
-					  linkflags = [ '-framework', 'AudioToolbox' ])
-	   conf.check_cc (header_name = '/System/Library/Frameworks/CoreFoundation.framework/Headers/CoreFoundation.h',
-					  linkflags = ['-framework', 'CoreFoundation'])
-	   conf.check_cc (header_name = '/System/Library/Frameworks/CoreServices.framework/Headers/CoreServices.h',
-					  linkflags = ['-framework', 'CoreServices'])
-	   #
-	   #	TODO: For some reason the above doesn't seem to be correctly adding the
-	   #	the link flags, so we will add them manually.
-	   #
-	   conf.env.append_value('LINKFLAGS_COREAUDIO', ['-framework', 'CoreServices'])
-	   conf.env.append_value('LINKFLAGS_COREAUDIO', ['-framework', 'CoreFoundation'])
-	   conf.env.append_value('LINKFLAGS_COREAUDIO', ['-framework', 'AudioToolbox'])
-	   conf.env.append_value('LINKFLAGS_COREAUDIO', ['-framework', 'CoreAudio'])
-
-	if Options.options.audiounits:
-	   #conf.env.append_value('CXXFLAGS_AUDIOUNITS', "-DHAVE_AUDIOUNITS")
-	   conf.env.append_value('LINKFLAGS_AUDIOUNITS', "-framework AudioToolbox")
-	   conf.env.append_value('LINKFLAGS_AUDIOUNITS', "-framework CoreServices")
-	   conf.check_cc (header_name = '/System/Library/Frameworks/AudioUnit.framework/Headers/AudioUnit.h',
-					  define_name = 'HAVE_AUDIOUNITS', linkflags = [ '-framework', 'AudioUnit' ])
-
 	autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
 	autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.2')
 	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
@@ -487,6 +477,9 @@ def configure(conf):
 	autowaf.display_msg(conf, 'Architecture flags', opts.arch)
 	autowaf.display_msg(conf, 'Aubio', bool(conf.env['HAVE_AUBIO']))
 	autowaf.display_msg(conf, 'AudioUnits', opts.audiounits)
+	autowaf.display_msg(conf, 'CoreAudio', bool(conf.env['HAVE_COREAUDIO']))
+	if bool(conf.env['HAVE_COREAUDIO']):
+		conf.define ('COREAUDIO', 1)
 	if opts.audiounits:
 		conf.define('AUDIOUNITS',1)
 	autowaf.display_msg(conf, 'FPU Optimization', opts.fpu_optimization)
@@ -499,8 +492,6 @@ def configure(conf):
 	autowaf.display_msg(conf, 'GtkOSX', opts.gtkosx)
 	if opts.gtkosx:
 		conf.define ('GTKOSX', 1)
-	if opts.coreaudio:
-		conf.define ('COREAUDIO', 1)
 	autowaf.display_msg(conf, 'LV2 Support', bool(conf.env['HAVE_SLV2']))
 	autowaf.display_msg(conf, 'Rubberband', bool(conf.env['HAVE_RUBBERBAND']))
 	autowaf.display_msg(conf, 'Samplerate', bool(conf.env['HAVE_SAMPLERATE']))
@@ -508,7 +499,6 @@ def configure(conf):
 	autowaf.display_msg(conf, 'Translation', opts.nls)
 	if opts.nls:
 		conf.define ('ENABLE_NLS', 1)
-	autowaf.display_msg(conf, 'System Libraries', opts.syslibs)
 	autowaf.display_msg(conf, 'Tranzport', opts.tranzport)
 	if opts.tranzport:
 		conf.define('TRANZPORT', 1)

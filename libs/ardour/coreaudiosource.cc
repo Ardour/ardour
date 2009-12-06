@@ -44,7 +44,7 @@ CoreAudioSource::CoreAudioSource (Session& s, const XMLNode& node)
 	init_cafile ();
 }
 
-CoreAudioSource::CoreAudioSource (Session& s, const string& path, bool, int chn, Flag flags)
+CoreAudioSource::CoreAudioSource (Session& s, const string& path, int chn, Flag flags)
 	/* files created this way are never writable or removable */
 	: Source (s, DataType::AUDIO, path, Source::Flag (flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy))),
 		AudioFileSource (s, path,

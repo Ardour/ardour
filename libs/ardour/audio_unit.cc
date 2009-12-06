@@ -364,8 +364,8 @@ AUPlugin::init ()
 	   not potential set ups.
 	*/
 
-	input_channels = -1;
-	output_channels = -1;
+	input_channels = ChanCount::ZERO;
+	output_channels = ChanCount::ZERO;
 
 	if (_set_block_size (_session.get_block_size())) {
 		error << _("AUPlugin: cannot set processing block size") << endmsg;
@@ -848,15 +848,15 @@ AUPlugin::set_stream_format (int scope, uint32_t cnt, AudioStreamBasicDescriptio
 	}
 
 	if (scope == kAudioUnitScope_Input) {
-		input_channels = fmt.mChannelsPerFrame;
+		input_channels.setAudio( fmt.mChannelsPerFrame );
 	} else {
-		output_channels = fmt.mChannelsPerFrame;
+		output_channels.setAudio( fmt.mChannelsPerFrame );
 	}
 
 	return 0;
 }
 
-uint32_t
+ChanCount
 AUPlugin::input_streams() const
 {
 	if (input_channels < 0) {
@@ -867,7 +867,7 @@ AUPlugin::input_streams() const
 }
 
 
-uint32_t
+ChanCount
 AUPlugin::output_streams() const
 {
 	if (output_channels < 0) {

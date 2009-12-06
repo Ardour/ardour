@@ -33,8 +33,6 @@
 #include <boost/weak_ptr.hpp>
 #include <boost/utility.hpp>
 
-#include <sndfile.h>
-
 #include <glibmm/thread.h>
 
 #include "pbd/error.h"

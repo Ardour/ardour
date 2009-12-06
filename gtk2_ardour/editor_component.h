@@ -33,6 +33,7 @@ class EditorComponent
 {
 public:
 	EditorComponent (Editor *);
+	virtual ~EditorComponent() {}
 
 	virtual void connect_to_session (ARDOUR::Session *);
 

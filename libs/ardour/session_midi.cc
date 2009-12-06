@@ -891,10 +891,12 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 			return -1;
 		}
 
+#ifndef NDEBUG
 		DEBUG_STR_SET(foo,"sending ");
 		DEBUG_STR(foo) << transmitting_timecode_time;
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("%1 qfm = %2, stamp = %3\n", DEBUG_STR(foo).str(), next_quarter_frame_to_send,
 							 out_stamp));
+#endif
 
 		// Increment quarter frame counter
 		next_quarter_frame_to_send++;
@@ -1252,9 +1254,11 @@ Session::midi_thread_work ()
 
 		for (int p = 1; p < nfds; ++p) {
 
+#ifndef NDEBUG
 			DEBUG_STR_SET(foo, "port #%1 revents = ");
 			DEBUG_STR(foo) << hex << pfd[p].revents << dec << endl;
 			DEBUG_TRACE (DEBUG::MidiIO, string_compose (DEBUG_STR(foo).str(), p));
+#endif
 
 			if ((pfd[p].revents & ~POLLIN)) {
 				// error << string_compose(_("Transport: error polling MIDI port %1 (revents =%2%3%4"), p, &hex, pfd[p].revents, &dec) << endmsg;

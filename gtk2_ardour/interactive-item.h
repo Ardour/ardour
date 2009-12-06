@@ -34,6 +34,8 @@ namespace Canvas {
  */
 class InteractiveItem {
 public:
+	virtual ~InteractiveItem() {}
+
 	virtual bool on_event(GdkEvent* ev) = 0;
 };
 

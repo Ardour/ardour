@@ -28,6 +28,13 @@
 #include <algorithm>
 #include <map>
 
+#include "ardour_ui.h"
+/*
+ * ardour_ui.h include was moved to the top of the list
+ * due to a conflicting definition of 'Style' between
+ * Apple's MacTypes.h and BarController.
+ */
+
 #include <boost/none.hpp>
 
 #include <sigc++/bind.h>
@@ -69,7 +76,6 @@
 
 #include "control_protocol/control_protocol.h"
 
-#include "ardour_ui.h"
 #include "editor.h"
 #include "keyboard.h"
 #include "marker.h"

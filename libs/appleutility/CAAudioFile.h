@@ -114,7 +114,6 @@ public:
 				// or the file's sample rate is 0 (unknown)
 
 #if CAAF_USE_EXTAUDIOFILE
-#warning HERE WE ARE
 public:
 	CAAudioFile() : mExtAF(NULL) { std::cerr << "Constructing CAAudioFile\n"; }
 	virtual ~CAAudioFile() { std::cerr << "Destroying CAAudiofile @ " << this << std::endl; if (mExtAF) Close(); }

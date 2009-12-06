@@ -41,7 +41,7 @@ class Metering {
 
   private:
 	/* this object is not meant to be instantiated */
-	virtual void foo() = 0;
+	Metering();
 
 	static Glib::StaticMutex    m_meter_signal_lock;
 };

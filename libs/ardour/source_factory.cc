@@ -163,7 +163,7 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 
 			/* this is allowed to throw */
 
-			Source *s = new CoreAudioSource (s, node);
+			Source *src = new CoreAudioSource (s, node);
 			// boost_debug_shared_ptr_mark_interesting (src, typeid(src).name());
 			boost::shared_ptr<Source> ret (src);
 

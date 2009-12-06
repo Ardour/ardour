@@ -53,6 +53,8 @@ class OptionEditorPage;
 class OptionEditorComponent
 {
 public:
+	virtual ~OptionEditorComponent() {}
+
 	/** Called when a configuration parameter's value has changed.
 	 *  @param p parameter name
 	 */

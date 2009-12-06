@@ -61,11 +61,11 @@ def build(bld):
 	# everybody loves JACK
 	obj.source += ' jack_midiport.cc '
 	obj.cxxflags = [ '-DWITH_JACK_MIDI' ]
-	if sys.platform == 'darwin':
+	if bld.env['HAVE_COREAUDIO'] and bld.env['COREAUDIO']:
 		# OS X
 		obj.source += ' coremidi_midiport.cc '
 		obj.cxxflags += [ '-DWITH_COREMIDI' ]
-	else :
+	elif sys.platform == 'linux':
 		# linux
 		obj.source += ' alsa_sequencer_midiport.cc '
 		obj.cxxflags += [ '-DWITH_ALSA' ]
@@ -73,7 +73,7 @@ def build(bld):
 	obj.includes     = ['.']
 	obj.name         = 'libmidipp'
 	obj.target       = 'midipp'
-	obj.uselib       = 'GLIBMM SIGCPP XML JACK'
+	obj.uselib       = 'GLIBMM SIGCPP XML JACK OSX COREAUDIO'
 	obj.uselib_local = 'libpbd libevoral'
 	obj.vnum         = LIBMIDIPP_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')

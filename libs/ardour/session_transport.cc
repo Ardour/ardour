@@ -576,7 +576,9 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		play_loop = false;
 	}
 
-        PositionChanged ((nframes64_t) _transport_frame); /* EMIT SIGNAL */
+	// can't cast away volatile so copy and emit that
+	nframes64_t tframe = _transport_frame;
+	PositionChanged (tframe); /* EMIT SIGNAL */
 	TransportStateChange (); /* EMIT SIGNAL */
 
 	/* and start it up again if relevant */
@@ -1402,7 +1404,9 @@ Session::engine_halted ()
 void
 Session::xrun_recovery ()
 {
-	Xrun ((nframes64_t)_transport_frame); //EMIT SIGNAL
+	// can't cast away volatile so copy and emit that
+	nframes64_t tframe = _transport_frame;
+	Xrun (tframe); //EMIT SIGNAL
 
 	if (Config->get_stop_recording_on_xrun() && actively_recording()) {
 

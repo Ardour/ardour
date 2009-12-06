@@ -65,7 +65,7 @@ class AUPlugin : public ARDOUR::Plugin
 	AUPlugin (const AUPlugin& other);
 	virtual ~AUPlugin ();
 
-        std::string unique_id () const;
+	std::string unique_id () const;
 	const char * label () const;
 	const char * name () const { return _info->name.c_str(); }
 	const char * maker () const { return _info->creator.c_str(); }
@@ -81,10 +81,10 @@ class AUPlugin : public ARDOUR::Plugin
 	void deactivate ();
 	void set_block_size (nframes_t nframes);
 
-	int connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, nframes_t nframes, nframes_t offset);
+	int connect_and_run (std::vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, nframes_t nframes, nframes_t offset);
 	std::set<uint32_t> automatable() const;
-	string describe_parameter (uint32_t);
-	string state_node_name () const { return "audiounit"; }
+	std::string describe_parameter (uint32_t);
+	std::string state_node_name () const { return "audiounit"; }
 	void print_parameter (uint32_t, char*, uint32_t len) const;
 
 	bool parameter_is_audio (uint32_t) const;
@@ -95,16 +95,16 @@ class AUPlugin : public ARDOUR::Plugin
 	XMLNode& get_state();
 	int set_state(const XMLNode& node);
 
-	bool save_preset (string name);
-	bool load_preset (const string preset_label);
+	bool save_preset (std::string name);
+	bool load_preset (const std::string preset_label);
 	std::vector<std::string> get_presets ();
 	std::string current_preset() const;
 
 	bool has_editor () const;
 
 	int32_t can_do (int32_t in, int32_t& out);
-	uint32_t output_streams() const;
-	uint32_t input_streams() const;
+	ChanCount output_streams() const;
+	ChanCount input_streams() const;
 	int32_t configure_io (int32_t in, int32_t out);
 
 	boost::shared_ptr<CAAudioUnit> get_au () { return unit; }
@@ -120,8 +120,8 @@ class AUPlugin : public ARDOUR::Plugin
 	boost::shared_ptr<CAAudioUnit> unit;
 
 	bool initialized;
-	int32_t input_channels;
-	int32_t output_channels;
+	ChanCount input_channels;
+	ChanCount output_channels;
 	std::vector<std::pair<int,int> > io_configs;
 	AudioBufferList* buffers;
 
@@ -144,7 +144,7 @@ class AUPlugin : public ARDOUR::Plugin
 	uint32_t current_maxbuf;
 	nframes_t current_offset;
 	nframes_t cb_offset;
-	vector<Sample*>* current_buffers;
+	std::vector<Sample*>* current_buffers;
 	nframes_t frames_processed;
 
 	std::vector<AUParameterDescriptor> descriptors;

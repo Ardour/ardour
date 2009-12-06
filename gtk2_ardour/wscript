@@ -371,7 +371,7 @@ def build(bld):
 	# Menus
 	menus_argv = []
 	if bld.env['GTKOSX']:
-		menus_argv = [ '-E', '-P', '-DGTKOSX', '-DTOP_MENUBAR' ]
+		menus_argv = [ '-E', '-P', '-DGTKOSX' ]
 	else:
 		menus_argv = [ '-E', '-P' ]
 	obj = bld.new_task_gen('command-output')

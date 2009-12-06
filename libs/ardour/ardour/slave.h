@@ -171,6 +171,7 @@ class Slave {
 /// We need this wrapper for testability, it's just too hard to mock up a session class
 class ISlaveSessionProxy {
   public:
+	virtual ~ISlaveSessionProxy() {}
 	virtual TempoMap& tempo_map()                 const   { return *((TempoMap *) 0); }
 	virtual nframes_t   frame_rate()                const   { return 0; }
 	virtual nframes64_t audible_frame ()            const   { return 0; }

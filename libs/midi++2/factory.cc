@@ -81,7 +81,7 @@ PortFactory::create_port (const XMLNode& node, void* data)
 		break;
 #endif // WITH_ALSA
 
-#if WITH_COREMIDI
+#ifdef WITH_COREMIDI
 	case Port::CoreMidi_MidiPort:
 		port = new CoreMidi_MidiPort (node);
 		break;
@@ -116,7 +116,7 @@ PortFactory::ignore_duplicate_devices (Port::Type type)
 		break;
 #endif // WITH_JACK_MIDI
 
-#if WITH_COREMIDI
+#ifdef WITH_COREMIDI
 	case Port::CoreMidi_MidiPort:
 		ret = true;
 		break;
@@ -141,7 +141,7 @@ PortFactory::get_known_ports (vector<PortSet>&)
 	n += ALSA_SequencerMidiPort::discover (ports);
 #endif // WITH_ALSA
 
-#if WITH_COREMIDI
+#ifdef WITH_COREMIDI
 	n += CoreMidi_MidiPort::discover (ports);
 #endif // WITH_COREMIDI
 	
