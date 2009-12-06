@@ -78,8 +78,8 @@ Manager::add_port (const XMLNode& node)
 				   operation.
 				*/
 
-				if ((desc.mode == O_RDWR && port->mode() != O_RDWR) ||
-				    (desc.mode != O_RDWR && port->mode() == O_RDWR)) {
+				if ((desc.mode == O_RDWR && (*p)->mode() != O_RDWR) ||
+				    (desc.mode != O_RDWR && (*p)->mode() == O_RDWR)) {
 					break;
 				}
 			}
