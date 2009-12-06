@@ -354,6 +354,7 @@ RBEffect::run (boost::shared_ptr<Region> r)
 					  stretch,
 					  shift);
 		(*x)->set_master_sources (region->master_sources());
+		(*x)->set_length( (*x)->length() * stretch, this);
 	}
 
   out:

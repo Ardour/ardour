@@ -2837,8 +2837,8 @@ TimeFXDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 	RegionSelection rs;
 	rs.add (_primary);
 
-	if (_editor->time_stretch (rs, percentage) == 0) {
-		_editor->session->commit_reversible_command ();
+	if (!_editor->time_stretch (rs, percentage) == 0) {
+		error << _("An error occurred while executing time stretch operation") << endmsg;
 	}
 }
 
