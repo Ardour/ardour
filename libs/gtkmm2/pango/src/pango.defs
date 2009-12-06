@@ -1,5 +1,0 @@
-(include pango_methods.defs)
-(include pango_vfuncs.defs)
-(include pango_enums.defs)
-
-

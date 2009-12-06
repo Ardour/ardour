@@ -1,7 +1,0 @@
-(include gdk_methods.defs)
-(include gdk_pixbuf.defs)
-(include gdk_pixbuf_enums.defs)
-(include gdk_signals.defs)
-(include gdk_extra.defs)
-(include gdk_enums.defs)
-

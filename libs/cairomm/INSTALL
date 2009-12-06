@@ -1,9 +1,0 @@
-Simple install procedure
-========================
-
-  % tar zxvf cairomm-<version>.tar.gz	# unpack the sources
-  % cd cairomm-<version>		# change to toplevel directory
-  % ./configure				# run the `configure' script
-  % make				# build cairomm
-  % make install			# install cairomm
-

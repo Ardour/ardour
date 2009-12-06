@@ -1,11 +1,3 @@
-all: scons
-
-scons:
-	scons
-
-sconsi:
-	scons --implicit-deps-unchanged
-
 cscope: cscope.out
 
 cscope.out: cscope.files
