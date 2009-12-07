@@ -155,7 +155,7 @@ GlobalPortMatrixWindow::GlobalPortMatrixWindow (ARDOUR::Session* s, ARDOUR::Data
 	}
 
 	add (_port_matrix);
-	show_all ();
+	_port_matrix.show ();
 }
 
 void

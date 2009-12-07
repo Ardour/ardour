@@ -245,7 +245,7 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 	if (session == 0) {
 		return;
 	}
-	
+
 	boost::shared_ptr<PortGroup> bus (new PortGroup (_("Bus")));
 	boost::shared_ptr<PortGroup> track (new PortGroup (_("Track")));
 	boost::shared_ptr<PortGroup> system (new PortGroup (_("System")));
@@ -350,6 +350,8 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 		while (ports[n]) {
 
 			std::string const p = ports[n];
+
+			cout << p << "\n";
 
 			if (!system->has_port(p) &&
 			    !bus->has_port(p) &&

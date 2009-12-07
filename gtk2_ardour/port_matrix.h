@@ -88,7 +88,7 @@ public:
 	}
 
 	PortGroupList const * columns () const;
-	boost::shared_ptr<PortGroup> visible_columns () const;
+	boost::shared_ptr<const PortGroup> visible_columns () const;
 
 	/** @return index into the _ports array for the list which is displayed as columns */
 	int column_index () const {
@@ -96,7 +96,7 @@ public:
 	}
 
 	PortGroupList const * rows () const;
-	boost::shared_ptr<PortGroup> visible_rows () const;
+	boost::shared_ptr<const PortGroup> visible_rows () const;
 
 	/** @return index into the _ports array for the list which is displayed as rows */
 	int row_index () const {
@@ -107,9 +107,7 @@ public:
 		return &_ports[d];
 	}
 
-	boost::shared_ptr<const PortGroup> visible_ports (int d) const {
-		return _visible_ports[d];
-	}
+	boost::shared_ptr<const PortGroup> visible_ports (int d) const;
 	
 	void init ();
 	void setup ();
@@ -156,7 +154,6 @@ protected:
 	    from left to right as you go from list 0 to list 1.  Hence subclasses which deal with
 	    inputs and outputs should put outputs in list 0 and inputs in list 1. */
 	PortGroupList _ports[2];
-	boost::shared_ptr<PortGroup> _visible_ports[2];
 	ARDOUR::Session* _session;
 
 private:
@@ -176,8 +173,7 @@ private:
 	boost::shared_ptr<ARDOUR::IO> io_from_bundle (boost::shared_ptr<ARDOUR::Bundle>) const;
 	void setup_notebooks ();
 	void remove_notebook_pages (Gtk::Notebook &);
-	void v_page_selected (GtkNotebookPage *, guint);
-	void h_page_selected (GtkNotebookPage *, guint);
+	void notebook_page_selected (GtkNotebookPage *, guint);
 	void route_processors_changed (ARDOUR::RouteProcessorChange);
 	void body_dimensions_changed ();
 	void session_going_away ();

@@ -253,22 +253,26 @@ PortMatrixBody::setup ()
 
 	/* Connect to bundles so that we find out when their names change */
 
-	PortGroup::BundleList r = _matrix->visible_rows()->bundles ();
-	for (PortGroup::BundleList::iterator i = r.begin(); i != r.end(); ++i) {
-
-		_bundle_connections.push_back (
-			i->bundle->Changed.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_row_labels)))
-			);
-
+	if (_matrix->visible_rows()) {
+		PortGroup::BundleList r = _matrix->visible_rows()->bundles ();
+		for (PortGroup::BundleList::iterator i = r.begin(); i != r.end(); ++i) {
+			
+			_bundle_connections.push_back (
+				i->bundle->Changed.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_row_labels)))
+				);
+			
+		}
 	}
-
-	PortGroup::BundleList c = _matrix->visible_columns()->bundles ();
-	for (PortGroup::BundleList::iterator i = c.begin(); i != c.end(); ++i) {
-		_bundle_connections.push_back (
-			i->bundle->Changed.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_column_labels)))
-			);
+	
+	if (_matrix->visible_columns()) {
+		PortGroup::BundleList c = _matrix->visible_columns()->bundles ();
+		for (PortGroup::BundleList::iterator i = c.begin(); i != c.end(); ++i) {
+			_bundle_connections.push_back (
+				i->bundle->Changed.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_column_labels)))
+				);
+		}
 	}
-
+		
 	for (list<PortMatrixComponent*>::iterator i = _components.begin(); i != _components.end(); ++i) {
 		(*i)->setup ();
 	}

@@ -69,10 +69,10 @@ PortMatrix::PortMatrix (Window* parent, Session* session, DataType type)
 	_hbox.pack_start (_hnotebook, false, false);
 	_hbox.pack_start (_hlabel, true, true);
 
-	_vnotebook.signal_switch_page().connect (mem_fun (*this, &PortMatrix::v_page_selected));
+	_vnotebook.signal_switch_page().connect (mem_fun (*this, &PortMatrix::notebook_page_selected));
 	_vnotebook.property_tab_border() = 4;
 	_vnotebook.set_name (X_("PortMatrixLabel"));
-	_hnotebook.signal_switch_page().connect (mem_fun (*this, &PortMatrix::h_page_selected));
+	_hnotebook.signal_switch_page().connect (mem_fun (*this, &PortMatrix::notebook_page_selected));
 	_hnotebook.property_tab_border() = 4;
 	_hnotebook.set_name (X_("PortMatrixLabel"));
 
@@ -92,9 +92,12 @@ PortMatrix::PortMatrix (Window* parent, Session* session, DataType type)
 	_body->show ();
 	_vbox.show ();
 	_hbox.show ();
+	_vscroll.show ();
+	_hscroll.show ();
 	_vlabel.show ();
 	_hlabel.show ();
 	_hspacer.show ();
+	_vspacer.show ();
 }
 
 PortMatrix::~PortMatrix ()
@@ -114,14 +117,6 @@ void
 PortMatrix::init ()
 {
 	select_arrangement ();
-
-	if (!_ports[0].empty()) {
-		_visible_ports[0] = *_ports[0].begin();
-	}
-	
-	if (!_ports[1].empty()) {
-		_visible_ports[1] = *_ports[1].begin();
-	}
 
 	/* Signal handling is kind of split into two parts:
 	 *
@@ -207,9 +202,13 @@ PortMatrix::routes_changed ()
 void
 PortMatrix::setup ()
 {
+	/* this needs to be done first, as the visible_ports() method uses the
+	   notebook state to decide which ports are being shown */
+	
+	setup_notebooks ();
+	
 	_body->setup ();
 	setup_scrollbars ();
-	setup_notebooks ();
 	queue_draw ();
 }
 
@@ -342,10 +341,10 @@ PortMatrix::columns () const
 	return &_ports[_column_index];
 }
 
-boost::shared_ptr<PortGroup>
+boost::shared_ptr<const PortGroup>
 PortMatrix::visible_columns () const
 {
-	return _visible_ports[_column_index];
+	return visible_ports (_column_index);
 }
 
 /* @return rows list */
@@ -355,10 +354,10 @@ PortMatrix::rows () const
 	return &_ports[_row_index];
 }
 
-boost::shared_ptr<PortGroup>
+boost::shared_ptr<const PortGroup>
 PortMatrix::visible_rows () const
 {
-	return _visible_ports[_row_index];
+	return visible_ports (_row_index);
 }
 
 void
@@ -510,7 +509,7 @@ void
 PortMatrix::setup_global_ports ()
 {
 	ENSURE_GUI_THREAD (mem_fun (*this, &PortMatrix::setup_global_ports));
-	
+
 	for (int i = 0; i < 2; ++i) {
 		if (list_is_global (i)) {
 			setup_ports (i);
@@ -683,7 +682,7 @@ PortMatrix::setup_notebooks ()
 	if (_hnotebook.get_n_pages() <= 1) {
 		_hbox.hide ();
 	} else {
-		_vbox.show ();
+		_hbox.show ();
 	}
 
 	if (_vnotebook.get_n_pages() <= 1) {
@@ -704,53 +703,15 @@ PortMatrix::remove_notebook_pages (Notebook& n)
 }
 
 void
-PortMatrix::v_page_selected (GtkNotebookPage *, guint n)
-{
-	if (_ignore_notebook_page_selected) {
-		return;
-	}
-	
-	PortGroupList& p = _ports[_row_index];
-
-	n = p.size() - n - 1;
-
-	int i = 0;
-	PortGroupList::List::const_iterator j = p.begin();
-	while (i != int (n) && j != p.end()) {
-		++i;
-		++j;
-	}
-
-	if (j != p.end()) {
-		_visible_ports[_row_index] = *j;
-		_body->setup ();
-		setup_scrollbars ();
-		queue_draw ();
-	}
-}
-
-void
-PortMatrix::h_page_selected (GtkNotebookPage *, guint n)
+PortMatrix::notebook_page_selected (GtkNotebookPage *, guint)
 {
 	if (_ignore_notebook_page_selected) {
 		return;
 	}
 
-	PortGroupList& p = _ports[_column_index];
-	
-	int i = 0;
-	PortGroupList::List::const_iterator j = p.begin();
-	while (i != int (n) && j != p.end()) {
-		++i;
-		++j;
-	}
-
-	if (j != p.end()) {
-		_visible_ports[_column_index] = *j;
-		_body->setup ();
-		setup_scrollbars ();
-		queue_draw ();
-	}
+	_body->setup ();
+	setup_scrollbars ();
+	queue_draw ();
 }
 
 void
@@ -770,4 +731,31 @@ PortMatrix::body_dimensions_changed ()
 		_vspacer.hide ();
 	}
 
+}
+
+
+boost::shared_ptr<const PortGroup>
+PortMatrix::visible_ports (int d) const
+{
+	PortGroupList const & p = _ports[d];
+	PortGroupList::List::const_iterator j = p.begin ();
+
+	int n = 0;
+	if (d == _row_index) {
+		n = p.size() - _vnotebook.get_current_page () - 1;
+	} else {
+		n = _hnotebook.get_current_page ();
+	}
+
+	int i = 0;
+	while (i != int (n) && j != p.end ()) {
+		++i;
+		++j;
+	}
+		
+	if (j == p.end()) {
+		return boost::shared_ptr<const PortGroup> ();
+	}
+
+	return *j;
 }
