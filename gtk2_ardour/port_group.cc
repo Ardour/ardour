@@ -248,9 +248,7 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 	
 	boost::shared_ptr<PortGroup> bus (new PortGroup (_("Bus")));
 	boost::shared_ptr<PortGroup> track (new PortGroup (_("Track")));
-	boost::shared_ptr<PortGroup> system_mono (new PortGroup (_("System (mono)")));
-	boost::shared_ptr<PortGroup> system_stereo (new PortGroup (_("System (stereo)")));
-	boost::shared_ptr<PortGroup> system_other (new PortGroup (_("System (other)")));
+	boost::shared_ptr<PortGroup> system (new PortGroup (_("System")));
 	boost::shared_ptr<PortGroup> ardour (new PortGroup (_("Ardour")));
 	boost::shared_ptr<PortGroup> other (new PortGroup (_("Other")));
 
@@ -317,25 +315,13 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 
 	for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 		if (boost::dynamic_pointer_cast<UserBundle> (*i) && (*i)->ports_are_inputs() == inputs && (*i)->type() == _type) {
-			if ((*i)->nchannels() == 1) {
-				system_mono->add_bundle (*i, allow_dups);
-			} else if ((*i)->nchannels() == 2) {
-				system_stereo->add_bundle (*i, allow_dups);
-			} else {
-				system_other->add_bundle (*i, allow_dups);
-			}
+			system->add_bundle (*i, allow_dups);
 		}
 	}
 
 	for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 		if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0 && (*i)->ports_are_inputs() == inputs && (*i)->type() == _type) {
-			if ((*i)->nchannels() == 1) {
-				system_mono->add_bundle (*i, allow_dups);
-			} else if ((*i)->nchannels() == 2) {
-				system_stereo->add_bundle (*i, allow_dups);
-			} else {
-				system_other->add_bundle (*i, allow_dups);
-			}
+			system->add_bundle (*i, allow_dups);
 		}
 	}
 	
@@ -365,9 +351,7 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 
 			std::string const p = ports[n];
 
-			if (!system_mono->has_port(p) &&
-			    !system_stereo->has_port(p) &&
-			    !system_other->has_port(p) &&
+			if (!system->has_port(p) &&
 			    !bus->has_port(p) &&
 			    !track->has_port(p) &&
 			    !ardour->has_port(p) &&
@@ -390,22 +374,14 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 
 	if (!extra_system.empty()) {
 		boost::shared_ptr<Bundle> b = make_bundle_from_ports (extra_system, inputs);
-		if (b->nchannels() == 1) {
-			system_mono->add_bundle (b);
-		} else if (b->nchannels() == 2) {
-			system_stereo->add_bundle (b);
-		} else {
-			system_other->add_bundle (b);
-		}
+		system->add_bundle (b);
 	}
 
 	if (!extra_other.empty()) {
 		other->add_bundle (make_bundle_from_ports (extra_other, inputs));
 	}
 
-	add_group_if_not_empty (system_mono);
-	add_group_if_not_empty (system_stereo);
-	add_group_if_not_empty (system_other);
+	add_group_if_not_empty (system);
 	add_group_if_not_empty (bus);
 	add_group_if_not_empty (track);
 	add_group_if_not_empty (ardour);

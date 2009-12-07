@@ -186,7 +186,7 @@ PortMatrixComponent::position_to_channel (double p, double, boost::shared_ptr<co
 
 		if (_matrix->show_only_bundles()) {
 			
-			if (p == 0) {
+			if (p < 1) {
 				return ARDOUR::BundleChannel (j->bundle, 0);
 			} else {
 				p -= 1;
