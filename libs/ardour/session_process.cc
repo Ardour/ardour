@@ -984,18 +984,6 @@ Session::set_next_event ()
 }
 
 void
-Session::cleanup_event (SessionEvent* ev, int status)
-{
-	switch (ev->type) {
-	case SessionEvent::SetRecordEnable:
-		delete ev->routes;
-		break;
-	default:
-		break;
-	}
-}
-
-void
 Session::process_event (SessionEvent* ev)
 {
 	bool remove = true;
@@ -1134,10 +1122,6 @@ Session::process_event (SessionEvent* ev)
 		set_play_range (ev->audio_range, (ev->speed == 1.0f));
 		break;
 
-	case SessionEvent::SetRecordEnable:
-		do_record_enable_change_all (ev->routes, ev->yes_or_no);
-		break;
-
 	case SessionEvent::RealTimeOperation:
 		process_rtop (ev);
 		del = false; // other side of RT request needs to clean up
@@ -1156,16 +1140,6 @@ Session::process_event (SessionEvent* ev)
 	if (del) {
 		delete ev;
 	}
-}
-
-
-void
-Session::request_real_time_operation (sigc::slot<void> rt_op, sigc::slot<void,SessionEvent*> callback)
-{
-	SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
-	ev->rt_slot =   rt_op;
-	ev->rt_return = callback;
-	queue_event (ev);
 }
 
 void

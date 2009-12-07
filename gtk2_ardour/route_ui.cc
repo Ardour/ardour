@@ -457,7 +457,6 @@ RouteUI::post_rec_cleanup (SessionEvent* ev, UndoTransaction* undo, Session::Glo
 {
 	ENSURE_GUI_THREAD (bind (mem_fun (*this, &RouteUI::post_rec_cleanup), ev, undo, cmd));
 
-	delete ev->routes;
 	delete ev;
 
 	check_rec_enable_sensitivity ();
@@ -493,13 +492,11 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 			UndoTransaction* undo = _session.start_reversible_command (_("rec-enable change"));
                         Session::GlobalRecordEnableStateCommand *cmd = new Session::GlobalRecordEnableStateCommand(_session, this);
 
-			sigc::slot<void,SessionEvent*> callback = bind (sigc::mem_fun (*this, &RouteUI::post_rec_cleanup), undo, cmd);
+			SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
+			ev->rt_slot =   bind (sigc::mem_fun (_session, &Session::set_all_record_enable), _session.get_routes(), !rec_enable_button->get_active());
+			ev->rt_return = bind (sigc::mem_fun (*this, &RouteUI::post_rec_cleanup), undo, cmd);
 
-			if (rec_enable_button->get_active()) {
-				_session.record_disenable_all (callback);
-			} else {
-				_session.record_enable_all (callback);
-			}
+			_session.queue_event (ev);
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 

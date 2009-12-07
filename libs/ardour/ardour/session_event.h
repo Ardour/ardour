@@ -32,7 +32,6 @@ struct SessionEvent {
 	    Audition,
 	    InputConfigurationChange,
 	    SetPlayAudioRange,
-	    SetRecordEnable,
 	    RealTimeOperation,
 
 	    /* only one of each of these events can be queued at any one time */
@@ -64,9 +63,9 @@ struct SessionEvent {
     
     union {
 	bool second_yes_or_no;
-	RouteList* routes;
     };
 
+    boost::shared_ptr<RouteList>   routes;
     sigc::slot<void>               rt_slot;    /* what to call in RT context */
     sigc::slot<void,SessionEvent*> rt_return;  /* called after rt_slot, with this event as an argument */
 
@@ -118,10 +117,8 @@ class SessionEventManager {
         SessionEventManager () : pending_events (2048){}
         virtual ~SessionEventManager() {}
 
-	void add_event (nframes64_t action_frame, SessionEvent::Type type, nframes64_t target_frame = 0);
-	void remove_event (nframes64_t frame, SessionEvent::Type type);
+        virtual void queue_event (SessionEvent *ev) = 0; 
 	void clear_events (SessionEvent::Type type);
-    
         
   protected:
         RingBuffer<SessionEvent*> pending_events;
@@ -143,8 +140,10 @@ class SessionEventManager {
 	bool _remove_event (SessionEvent *);
 	void _clear_event_type (SessionEvent::Type);
 
+	void add_event (nframes64_t action_frame, SessionEvent::Type type, nframes64_t target_frame = 0);
+	void remove_event (nframes64_t frame, SessionEvent::Type type);
+
         virtual void process_event(SessionEvent*) = 0;
-        virtual void queue_event (SessionEvent *ev) = 0; 
         virtual void set_next_event () = 0;
 };
 

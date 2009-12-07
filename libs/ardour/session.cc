@@ -3605,53 +3605,12 @@ Session::graph_reordered ()
 }
 
 void
-Session::record_disenable_all (sigc::slot<void,SessionEvent*> callback)
+Session::set_all_record_enable (boost::shared_ptr<RouteList> rl, bool yn)
 {
 	if (!writable()) {
 		return;
 	}
 
-	record_enable_change_all (false, callback);
-}
-
-void
-Session::record_enable_all (sigc::slot<void,SessionEvent*> callback)
-{
-	if (!writable()) {
-		return;
-	}
-
-	record_enable_change_all (true, callback);
-}
-
-void
-Session::record_enable_change_all (bool yn, sigc::slot<void,SessionEvent*> callback)
-{
-	shared_ptr<RouteList> r = routes.reader ();
-	RouteList* tracks = new RouteList;
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		boost::shared_ptr<Track> t;
-
-		if (boost::dynamic_pointer_cast<Track>(*i) != 0) {
-			tracks->push_back (*i);
-		}
-	}
-	
-	sigc::slot<void> rt_op = bind (sigc::mem_fun (*this, &Session::do_record_enable_change_all), tracks, yn);
-
-	SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
-
-	ev->routes = tracks; // set here so that callback can delete it
-	ev->rt_slot =   rt_op;
-	ev->rt_return = callback;
-
-	queue_event (ev);
-}
-
-void
-Session::do_record_enable_change_all (RouteList* rl, bool yn)
-{
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ) {
 		boost::shared_ptr<Track> t;
 
@@ -3663,7 +3622,9 @@ Session::do_record_enable_change_all (RouteList* rl, bool yn)
 			} else {
 				++i;
 			}
-		} 
+		} else {
+			++i;
+		}
 	}
 
 	set_dirty ();

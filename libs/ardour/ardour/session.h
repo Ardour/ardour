@@ -303,6 +303,8 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	sigc::signal<void,RouteList&> RouteAdded;
 	sigc::signal<void> RouteGroupChanged;
 
+	void queue_event (SessionEvent*);
+
 	void request_roll_at_and_return (nframes_t start, nframes_t return_to);
 	void request_bounded_roll (nframes_t start, nframes_t end);
 	void request_stop (bool abort = false, bool clear_state = false);
@@ -329,12 +331,6 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	int wipe ();
 
 	int remove_region_from_region_list (boost::shared_ptr<Region>);
-
-	/* ask the session to do realtime things, in RT context, then get back to us via a callback (which must be
-	   cross-thread or RT safe, since it too is called from RT context)
-	*/
-
-	void request_real_time_operation (sigc::slot<void> rt_op, sigc::slot<void,SessionEvent*> callback);
 
 	nframes_t get_maximum_extent () const;
 	nframes_t current_end_frame() const { return end_location->start(); }
@@ -626,9 +622,8 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 
 	sigc::signal<void,bool> SoloActive;
 	sigc::signal<void> SoloChanged;
-
-	void record_disenable_all (sigc::slot<void,SessionEvent*>);
-	void record_enable_all (sigc::slot<void,SessionEvent*>);
+	
+	void set_all_record_enable (boost::shared_ptr<RouteList>, bool);
 
 	/* control/master out */
 
@@ -1188,7 +1183,6 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 
 	/* SessionEventManager interface */
 
-	void queue_event (SessionEvent*);
 	void process_event (SessionEvent*);
 	void set_next_event ();
 	void cleanup_event (SessionEvent*,int);
@@ -1475,8 +1469,6 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	void jack_timebase_callback (jack_transport_state_t, nframes_t, jack_position_t*, int);
 	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
 	void reset_jack_connection (jack_client_t* jack);
-	void record_enable_change_all (bool yn, sigc::slot<void,SessionEvent*>);
-	void do_record_enable_change_all (RouteList*, bool);
 	void process_rtop (SessionEvent*);
 
 	XMLNode& state(bool);

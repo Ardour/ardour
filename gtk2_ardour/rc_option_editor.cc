@@ -1003,7 +1003,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Transport"),
 	     new BoolOption (
 		     "disable-disarm-during-roll",
-		     _("Disable record disarm when transport is rolling"),
+		     _("Disable per-track record disarm while rolling"),
 		     mem_fun (*_rc_config, &RCConfiguration::get_disable_disarm_during_roll),
 		     mem_fun (*_rc_config, &RCConfiguration::set_disable_disarm_during_roll)
 		     ));

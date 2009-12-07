@@ -307,7 +307,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (SessionEvent, Audition);
 	REGISTER_CLASS_ENUM (SessionEvent, InputConfigurationChange);
 	REGISTER_CLASS_ENUM (SessionEvent, SetPlayAudioRange);
-	REGISTER_CLASS_ENUM (SessionEvent, SetRecordEnable);
 	REGISTER_CLASS_ENUM (SessionEvent, StopOnce);
 	REGISTER_CLASS_ENUM (SessionEvent, AutoLoop);
 	REGISTER (_SessionEvent_Type);
