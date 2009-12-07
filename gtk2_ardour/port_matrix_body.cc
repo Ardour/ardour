@@ -34,6 +34,8 @@ PortMatrixBody::PortMatrixBody (PortMatrix* p)
 	  _alloc_height (0),
 	  _xoffset (0),
 	  _yoffset (0),
+	  _column_labels_border_x (0),
+	  _column_labels_height (0),
 	  _ignore_component_size_changed (false)
 {
 	_column_labels = new PortMatrixColumnLabels (p, this);
@@ -58,7 +60,10 @@ PortMatrixBody::~PortMatrixBody ()
 bool
 PortMatrixBody::on_expose_event (GdkEventExpose* event)
 {
-	if (_matrix->visible_columns()->bundles().empty() || _matrix->visible_rows()->bundles().empty()) {
+	if (
+		_matrix->visible_columns() == 0 || _matrix->visible_rows() == 0 ||
+		_matrix->visible_columns()->bundles().empty() || _matrix->visible_rows()->bundles().empty()
+		) {
 
 		/* nothing to connect */
 
@@ -171,7 +176,7 @@ PortMatrixBody::compute_rectangles ()
 {
 	/* full sizes of components */
 	pair<uint32_t, uint32_t> const col = _column_labels->dimensions ();
-	uint32_t col_overhang = _column_labels->overhang ();
+	uint32_t const col_overhang = _column_labels->overhang ();
 	pair<uint32_t, uint32_t> const row = _row_labels->dimensions ();
 	pair<uint32_t, uint32_t> const grid = _grid->dimensions ();
 
@@ -182,6 +187,7 @@ PortMatrixBody::compute_rectangles ()
 	if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
 
 		col_rect.set_x (0);
+		_column_labels_border_x = col_overhang;
 		col_rect.set_y (0);
 		grid_rect.set_x (0);
 
@@ -222,13 +228,17 @@ PortMatrixBody::compute_rectangles ()
 
 		col_rect.set_width (grid_rect.get_width () + col_overhang);
 		col_rect.set_x (row_rect.get_width() + grid_rect.get_width() - col_rect.get_width());
+		_column_labels_border_x = col_rect.get_x () >= 0 ? col_rect.get_x () : 0;
 		col_rect.set_y (row_rect.get_height());
-
 	}
+
+	_column_labels_height = col_rect.get_height ();
 
 	_row_labels->set_parent_rectangle (row_rect);
 	_column_labels->set_parent_rectangle (col_rect);
 	_grid->set_parent_rectangle (grid_rect);
+
+	DimensionsChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -243,7 +253,7 @@ PortMatrixBody::setup ()
 
 	/* Connect to bundles so that we find out when their names change */
 
-	PortGroup::BundleList r = _matrix->rows()->bundles ();
+	PortGroup::BundleList r = _matrix->visible_rows()->bundles ();
 	for (PortGroup::BundleList::iterator i = r.begin(); i != r.end(); ++i) {
 
 		_bundle_connections.push_back (
@@ -252,7 +262,7 @@ PortMatrixBody::setup ()
 
 	}
 
-	PortGroup::BundleList c = _matrix->columns()->bundles ();
+	PortGroup::BundleList c = _matrix->visible_columns()->bundles ();
 	for (PortGroup::BundleList::iterator i = c.begin(); i != c.end(); ++i) {
 		_bundle_connections.push_back (
 			i->bundle->Changed.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_column_labels)))
@@ -295,6 +305,7 @@ PortMatrixBody::alloc_scroll_height ()
 	return _grid->parent_rectangle().get_height();
 }
 
+/** Set x offset (for scrolling) */
 void
 PortMatrixBody::set_xoffset (uint32_t xo)
 {
@@ -302,6 +313,7 @@ PortMatrixBody::set_xoffset (uint32_t xo)
 	queue_draw ();
 }
 
+/** Set y offset (for scrolling) */
 void
 PortMatrixBody::set_yoffset (uint32_t yo)
 {
@@ -493,4 +505,17 @@ PortMatrixBody::max_size () const
 	pair<uint32_t, uint32_t> const grid = _grid->dimensions ();
 
 	return make_pair (std::max (row.first, _column_labels->overhang()) + grid.first, col.second + grid.second);
+}
+
+/** @return x position at which the column labels meet the border of the matrix */
+uint32_t
+PortMatrixBody::column_labels_border_x () const
+{
+	return _column_labels_border_x;
+}
+
+uint32_t
+PortMatrixBody::column_labels_height () const
+{
+	return _column_labels_height;
 }

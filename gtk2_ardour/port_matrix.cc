@@ -60,33 +60,41 @@ PortMatrix::PortMatrix (Window* parent, Session* session, DataType type)
 	  _ignore_notebook_page_selected (false)
 {
 	_body = new PortMatrixBody (this);
+	_body->DimensionsChanged.connect (mem_fun (*this, &PortMatrix::body_dimensions_changed));
 
-	_vbox.pack_start (_vnotebook);
-	_vbox.pack_start (_vlabel);
-	_hbox.pack_start (_hnotebook);
-	_hbox.pack_start (_hlabel);
+	_vbox.pack_start (_vspacer, false, false);
+	_vbox.pack_start (_vnotebook, false, false);
+	_vbox.pack_start (_vlabel, true, true);
+	_hbox.pack_start (_hspacer, false, false);
+	_hbox.pack_start (_hnotebook, false, false);
+	_hbox.pack_start (_hlabel, true, true);
 
 	_vnotebook.signal_switch_page().connect (mem_fun (*this, &PortMatrix::v_page_selected));
 	_vnotebook.property_tab_border() = 4;
+	_vnotebook.set_name (X_("PortMatrixLabel"));
 	_hnotebook.signal_switch_page().connect (mem_fun (*this, &PortMatrix::h_page_selected));
 	_hnotebook.property_tab_border() = 4;
+	_hnotebook.set_name (X_("PortMatrixLabel"));
 
 	for (int i = 0; i < 2; ++i) {
 		_ports[i].set_type (type);
 	}
 
 	_vlabel.set_use_markup ();
-	_vlabel.set_alignment (0.5, 0);
+	_vlabel.set_alignment (1, 1);
 	_vlabel.set_padding (4, 16);
+	_vlabel.set_name (X_("PortMatrixLabel"));
 	_hlabel.set_use_markup ();
-	_hlabel.set_alignment (0, 0.5);
+	_hlabel.set_alignment (1, 0.5);
 	_hlabel.set_padding (16, 4);
+	_hlabel.set_name (X_("PortMatrixLabel"));
 
 	_body->show ();
 	_vbox.show ();
 	_hbox.show ();
 	_vlabel.show ();
 	_hlabel.show ();
+	_hspacer.show ();
 }
 
 PortMatrix::~PortMatrix ()
@@ -106,7 +114,6 @@ void
 PortMatrix::init ()
 {
 	select_arrangement ();
-	setup_notebooks ();
 
 	if (!_ports[0].empty()) {
 		_visible_ports[0] = *_ports[0].begin();
@@ -674,15 +681,15 @@ PortMatrix::setup_notebooks ()
 	}
 
 	if (_hnotebook.get_n_pages() <= 1) {
-		_hnotebook.hide ();
+		_hbox.hide ();
 	} else {
-		_hnotebook.show ();
+		_vbox.show ();
 	}
 
 	if (_vnotebook.get_n_pages() <= 1) {
-		_vnotebook.hide ();
+		_vbox.hide ();
 	} else {
-		_vnotebook.show ();
+		_vbox.show ();
 	}
 }
 
@@ -750,4 +757,17 @@ void
 PortMatrix::session_going_away ()
 {
 	_session = 0;
+}
+
+void
+PortMatrix::body_dimensions_changed ()
+{
+	_hspacer.set_size_request (_body->column_labels_border_x (), -1);
+	if (_arrangement == TOP_TO_RIGHT) {
+		_vspacer.set_size_request (-1, _body->column_labels_height ());
+		_vspacer.show ();
+	} else {
+		_vspacer.hide ();
+	}
+
 }

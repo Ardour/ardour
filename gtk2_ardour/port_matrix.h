@@ -179,6 +179,7 @@ private:
 	void v_page_selected (GtkNotebookPage *, guint);
 	void h_page_selected (GtkNotebookPage *, guint);
 	void route_processors_changed (ARDOUR::RouteProcessorChange);
+	void body_dimensions_changed ();
 	void session_going_away ();
 
 	Gtk::Window* _parent;
@@ -196,6 +197,8 @@ private:
 	Gtk::Label _hlabel;
 	Gtk::VBox _vbox;
 	Gtk::HBox _hbox;
+	Gtk::Label _hspacer;
+	Gtk::Label _vspacer;
 	Gtk::Menu* _menu;
 	Arrangement _arrangement;
 	int _row_index;

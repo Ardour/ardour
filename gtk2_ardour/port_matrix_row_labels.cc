@@ -44,7 +44,6 @@ PortMatrixRowLabels::compute_dimensions ()
 
 	_longest_port_name = 0;
 	_longest_bundle_name = 0;
-	_height = 0;
 
 	/* Compute maximum dimensions using all port groups, so that we allow for the largest and hence
 	   we can change between visible groups without the size of the labels jumping around.
@@ -71,8 +70,12 @@ PortMatrixRowLabels::compute_dimensions ()
 		}
 	}
 
-	
-	_height += group_size (_matrix->visible_rows()) * grid_spacing ();
+
+	if (_matrix->visible_rows()) {
+		_height = group_size (_matrix->visible_rows()) * grid_spacing ();
+	} else {
+		_height = 0;
+	}
 
 	cairo_destroy (cr);
 	gdk_pixmap_unref (pm);

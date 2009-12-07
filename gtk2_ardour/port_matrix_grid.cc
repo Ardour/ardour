@@ -41,16 +41,16 @@ PortMatrixGrid::PortMatrixGrid (PortMatrix* m, PortMatrixBody* b)
 void
 PortMatrixGrid::compute_dimensions ()
 {
-	if (_matrix->visible_columns() == 0) {
-		_width = 0;
-	} else {
+	if (_matrix->visible_columns()) {
 		_width = group_size (_matrix->visible_columns()) * grid_spacing ();
+	} else {
+		_width = 0;
 	}
 
-	if (_matrix->visible_rows() == 0) {
-		_height = 0;
-	} else {
+	if (_matrix->visible_rows()) {
 		_height = group_size (_matrix->visible_rows()) * grid_spacing ();
+	} else {
+		_height = 0;
 	}
 }
 

@@ -64,7 +64,8 @@ private:
 
 	double _longest_bundle_name;
 	double _longest_channel_name;
-	double _highest_text;
+	double _text_height;
+	double _descender_height;
 	uint32_t _overhang;
 };
 

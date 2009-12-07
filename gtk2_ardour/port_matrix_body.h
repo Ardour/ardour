@@ -67,6 +67,11 @@ public:
 	void component_size_changed ();
 	std::pair<uint32_t, uint32_t> max_size () const;
 
+	uint32_t column_labels_border_x () const;
+	uint32_t column_labels_height () const;
+
+	sigc::signal<void> DimensionsChanged;
+
 protected:
 	bool on_expose_event (GdkEventExpose *);
 	void on_size_request (Gtk::Requisition *);
@@ -91,11 +96,10 @@ private:
 
 	uint32_t _alloc_width; ///< allocated width
 	uint32_t _alloc_height; ///< allocated height
-	Gdk::Rectangle _column_labels_rect;
-	Gdk::Rectangle _row_labels_rect;
-	Gdk::Rectangle _grid_rect;
 	uint32_t _xoffset;
 	uint32_t _yoffset;
+	uint32_t _column_labels_border_x;
+	uint32_t _column_labels_height;
 
 	std::list<PortMatrixNode> _mouseover;
 	bool _ignore_component_size_changed;

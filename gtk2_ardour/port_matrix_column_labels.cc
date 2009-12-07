@@ -45,10 +45,6 @@ PortMatrixColumnLabels::compute_dimensions ()
 	_longest_bundle_name = 0;
 	/* width of the longest channel name */
 	_longest_channel_name = 0;
-	/* height of highest bit of text (apart from group names) */
-	_highest_text = 0;
-	/* width of the whole thing */
-	_width = 0;
 
 	/* Compute dimensions using all port groups, so that we allow for the largest and hence
 	   we can change between visible groups without the size of the labels jumping around.
@@ -64,10 +60,6 @@ PortMatrixColumnLabels::compute_dimensions ()
 				_longest_bundle_name = ext.width;
 			}
 
-			if (ext.height > _highest_text) {
-				_highest_text = ext.height;
-			}
-
 			for (uint32_t k = 0; k < j->bundle->nchannels (); ++k) {
 
 				cairo_text_extents (
@@ -79,14 +71,21 @@ PortMatrixColumnLabels::compute_dimensions ()
 				if (ext.width > _longest_channel_name) {
 					_longest_channel_name = ext.width;
 				}
-
-				if (ext.height > _highest_text) {
-					_highest_text = ext.height;
-				}
 			}
 		}
+	}
 
-		_width += group_size (*i) * grid_spacing ();
+	/* height metrics */
+	cairo_text_extents_t ext;
+	cairo_text_extents (cr, X_("AQRjpy"), &ext);
+	_text_height = ext.height;
+	_descender_height = ext.height + ext.y_bearing;
+
+	/* width of the whole thing */
+	if (_matrix->visible_columns()) {
+		_width = group_size (_matrix->visible_columns()) * grid_spacing ();
+	} else {
+		_width = 0;
 	}
 
 	cairo_destroy (cr);
@@ -99,7 +98,7 @@ PortMatrixColumnLabels::compute_dimensions ()
 		a += _longest_channel_name;
 	}
 
-	_height =  a * sin (angle()) + _highest_text * cos (angle());
+	_height =  a * sin (angle()) + _text_height * cos (angle());
 	_overhang = _height / tan (angle ());
 	_width += _overhang;
 }
@@ -108,7 +107,7 @@ double
 PortMatrixColumnLabels::basic_text_x_pos (int) const
 {
 	return grid_spacing() / 2 +
-		_highest_text / (2 * sin (angle ()));
+		_text_height / (2 * sin (angle ()));
 }
 
 void
@@ -278,6 +277,8 @@ PortMatrixColumnLabels::render_bundle_name (
 
 	set_source_rgb (cr, text_colour());
 
+	double const q = ((grid_spacing() * sin (angle())) - _text_height) / 2 + _descender_height;
+
 	if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
 
 		double rl = 0;
@@ -288,16 +289,16 @@ PortMatrixColumnLabels::render_bundle_name (
 		}
 		cairo_move_to (
 			cr,
-			xoff + basic_text_x_pos (0) + rl * cos (angle()),
-			yoff + _height - rl * sin (angle())
+			xoff + grid_spacing() - q * sin (angle ()) + rl * cos (angle()),
+			yoff + _height - q * cos (angle ()) - rl * sin (angle())
 			);
 
 	} else {
 
 		cairo_move_to (
 			cr,
-			xoff + basic_text_x_pos (0) + name_pad() * cos (angle ()),
-			yoff + _height - name_pad() * sin (angle())
+			xoff + grid_spacing() - q * sin (angle ()),
+			yoff + _height - q * cos (angle ())
 			);
 	}
 
@@ -328,21 +329,24 @@ PortMatrixColumnLabels::render_channel_name (
 
 	set_source_rgb (cr, text_colour());
 
+	double const q = ((grid_spacing() * sin (angle())) - _text_height) / 2 + _descender_height;
+
 	if (_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT) {
 
 		cairo_move_to (
 			cr,
-			xoff + basic_text_x_pos(bc.channel),
-			yoff + _height - name_pad() * sin (angle())
+			xoff + grid_spacing() - q * sin (angle ()),
+			yoff + _height - q * cos (angle ())
 			);
+				
 
 	} else {
 
 		double const rl = 3 * name_pad() + _longest_bundle_name;
 		cairo_move_to (
 			cr,
-			xoff + basic_text_x_pos(bc.channel) + rl * cos (angle ()),
-			yoff + _height - rl * sin (angle())
+			xoff + grid_spacing() - q * sin (angle ()) + rl * cos (angle ()),
+			yoff + _height - q * cos (angle ()) - rl * sin (angle())
 			);
 	}
 
@@ -453,7 +457,7 @@ PortMatrixColumnLabels::motion (double x, double y)
 		return;
 	}
 
-	uint32_t const bh = _longest_channel_name * sin (angle ()) + _highest_text / cos (angle ());
+	uint32_t const bh = _longest_channel_name * sin (angle ()) + _text_height / cos (angle ());
 
 	if (
 		(_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM && y > bh) ||
