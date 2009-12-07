@@ -278,10 +278,3 @@ SessionEventManager::_clear_event_type (SessionEvent::Type type)
 	set_next_event ();
 }
 
-#if 0
-void
-Session::process_rtop (SessionEvent* ev)
-{
-	ev->rt_return (ev->rt_slot ());
-}
-#endif

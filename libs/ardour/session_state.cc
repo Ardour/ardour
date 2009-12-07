@@ -2125,6 +2125,23 @@ Session::route_group_by_name (string name)
 	return 0;
 }
 
+UndoTransaction*
+Session::start_reversible_command (const string& name)
+{
+	UndoTransaction* trans = new UndoTransaction();
+	trans->set_name(name);
+	return trans;
+}
+
+void
+Session::finish_reversible_command (UndoTransaction& ut)
+{
+	struct timeval now;
+	gettimeofday(&now, 0);
+	ut.set_timestamp(now);
+	_history.add (&ut);
+}
+
 void
 Session::begin_reversible_command(const string& name)
 {

@@ -330,6 +330,12 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 
 	int remove_region_from_region_list (boost::shared_ptr<Region>);
 
+	/* ask the session to do realtime things, in RT context, then get back to us via a callback (which must be
+	   cross-thread or RT safe, since it too is called from RT context)
+	*/
+
+	void request_real_time_operation (sigc::slot<void> rt_op, sigc::slot<void,SessionEvent*> callback);
+
 	nframes_t get_maximum_extent () const;
 	nframes_t current_end_frame() const { return end_location->start(); }
 	nframes_t current_start_frame() const { return start_location->start(); }
@@ -621,8 +627,8 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	sigc::signal<void,bool> SoloActive;
 	sigc::signal<void> SoloChanged;
 
-	void record_disenable_all ();
-	void record_enable_all ();
+	void record_disenable_all (sigc::slot<void,SessionEvent*>);
+	void record_enable_all (sigc::slot<void,SessionEvent*>);
 
 	/* control/master out */
 
@@ -718,6 +724,9 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 
 	void begin_reversible_command (const std::string& cmd_name);
 	void commit_reversible_command (Command* cmd = 0);
+
+	UndoTransaction* start_reversible_command (const std::string& cmd_name);
+	void finish_reversible_command (UndoTransaction&);
 
 	void add_command (Command *const cmd) {
 		assert(!_current_trans.empty ());
@@ -1466,8 +1475,9 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	void jack_timebase_callback (jack_transport_state_t, nframes_t, jack_position_t*, int);
 	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
 	void reset_jack_connection (jack_client_t* jack);
-	void record_enable_change_all (bool yn);
+	void record_enable_change_all (bool yn, sigc::slot<void,SessionEvent*>);
 	void do_record_enable_change_all (RouteList*, bool);
+	void process_rtop (SessionEvent*);
 
 	XMLNode& state(bool);
 

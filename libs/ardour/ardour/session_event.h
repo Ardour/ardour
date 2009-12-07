@@ -33,6 +33,7 @@ struct SessionEvent {
 	    InputConfigurationChange,
 	    SetPlayAudioRange,
 	    SetRecordEnable,
+	    RealTimeOperation,
 
 	    /* only one of each of these events can be queued at any one time */
 	    
@@ -66,13 +67,14 @@ struct SessionEvent {
 	RouteList* routes;
     };
 
+    sigc::slot<void>               rt_slot;    /* what to call in RT context */
+    sigc::slot<void,SessionEvent*> rt_return;  /* called after rt_slot, with this event as an argument */
+
     std::list<AudioRange> audio_range;
     std::list<MusicRange> music_range;
     
     boost::shared_ptr<Region> region;
 
-    sigc::signal<void,SessionEvent*,int> Complete;
-    
     SessionEvent (Type t, Action a, nframes_t when, nframes_t where, double spd, bool yn = false, bool yn2 = false)
 	    : type (t)
 	    , action (a)

@@ -452,6 +452,22 @@ RouteUI::solo_release(GdkEventButton*)
 	return true;
 }
 
+void
+RouteUI::post_rec_cleanup (SessionEvent* ev, UndoTransaction* undo, Session::GlobalRecordEnableStateCommand* cmd)
+{
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &RouteUI::post_rec_cleanup), ev, undo, cmd));
+
+	delete ev->routes;
+	delete ev;
+
+	check_rec_enable_sensitivity ();
+
+	cmd->mark();
+	undo->add_command(cmd);
+
+	_session.finish_reversible_command (*undo);
+}
+
 bool
 RouteUI::rec_enable_press(GdkEventButton* ev)
 {
@@ -474,19 +490,16 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-			_session.begin_reversible_command (_("rec-enable change"));
+			UndoTransaction* undo = _session.start_reversible_command (_("rec-enable change"));
                         Session::GlobalRecordEnableStateCommand *cmd = new Session::GlobalRecordEnableStateCommand(_session, this);
 
-			if (rec_enable_button->get_active()) {
-				_session.record_disenable_all ();
-			} else {
-				_session.record_enable_all ();
-				check_rec_enable_sensitivity ();
-			}
+			sigc::slot<void,SessionEvent*> callback = bind (sigc::mem_fun (*this, &RouteUI::post_rec_cleanup), undo, cmd);
 
-                        cmd->mark();
-			_session.add_command(cmd);
-			_session.commit_reversible_command ();
+			if (rec_enable_button->get_active()) {
+				_session.record_disenable_all (callback);
+			} else {
+				_session.record_enable_all (callback);
+			}
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 

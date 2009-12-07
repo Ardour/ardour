@@ -25,6 +25,8 @@
 #include "pbd/xml++.h"
 #include "ardour/ardour.h"
 #include "ardour/mute_master.h"
+#include "ardour/session_event.h"
+#include "ardour/session.h"
 #include "ardour/route.h"
 #include "ardour/track.h"
 
@@ -209,6 +211,8 @@ class RouteUI : public virtual AxisView
 	void check_rec_enable_sensitivity ();
 	void parameter_changed (std::string const &);
 	void relabel_solo_button ();
+
+	void post_rec_cleanup (ARDOUR::SessionEvent* ev, UndoTransaction* undo, ARDOUR::Session::GlobalRecordEnableStateCommand*);
 };
 
 #endif /* __ardour_route_ui__ */

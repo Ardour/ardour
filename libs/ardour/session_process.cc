@@ -1138,6 +1138,11 @@ Session::process_event (SessionEvent* ev)
 		do_record_enable_change_all (ev->routes, ev->yes_or_no);
 		break;
 
+	case SessionEvent::RealTimeOperation:
+		process_rtop (ev);
+		del = false; // other side of RT request needs to clean up
+		break;
+
 	default:
 	  fatal << string_compose(_("Programming error: illegal event type in process_event (%1)"), ev->type) << endmsg;
 		/*NOTREACHED*/
@@ -1148,9 +1153,24 @@ Session::process_event (SessionEvent* ev)
 		del = del && !_remove_event (ev);
 	}
 
-	ev->Complete (ev, 0); /* EMIT SIGNAL */
-
 	if (del) {
 		delete ev;
 	}
+}
+
+
+void
+Session::request_real_time_operation (sigc::slot<void> rt_op, sigc::slot<void,SessionEvent*> callback)
+{
+	SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
+	ev->rt_slot =   rt_op;
+	ev->rt_return = callback;
+	queue_event (ev);
+}
+
+void
+Session::process_rtop (SessionEvent* ev)
+{
+	ev->rt_slot ();
+	ev->rt_return (ev);
 }
