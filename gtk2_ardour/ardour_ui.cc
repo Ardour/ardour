@@ -1969,23 +1969,27 @@ ARDOUR_UI::name_io_setup (AudioEngine& engine,
 /** Ask the user for the name of a new shapshot and then take it.
  */
 void
-ARDOUR_UI::snapshot_session ()
+ARDOUR_UI::snapshot_session (bool switch_to_it)
 {
 	ArdourPrompter prompter (true);
 	string snapname;
-	char timebuf[128];
-	time_t n;
-	struct tm local_time;
-
-	time (&n);
-	localtime_r (&n, &local_time);
-	strftime (timebuf, sizeof(timebuf), "%FT%T", &local_time);
 
 	prompter.set_name ("Prompter");
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 	prompter.set_title (_("Take Snapshot"));
 	prompter.set_prompt (_("Name of New Snapshot"));
-	prompter.set_initial_text (timebuf);
+
+	if (!switch_to_it) {
+		char timebuf[128];
+		time_t n;
+		struct tm local_time;
+		
+		time (&n);
+		localtime_r (&n, &local_time);
+		strftime (timebuf, sizeof(timebuf), "%FT%T", &local_time);
+		
+		prompter.set_initial_text (timebuf);
+	}
 
   again:
 	switch (prompter.run()) {
@@ -2004,7 +2008,7 @@ ARDOUR_UI::snapshot_session ()
 				msg.run ();
 				goto again;
 			}
-			save_state (snapname);
+			save_state (snapname, switch_to_it);
 		}
 		break;
 
@@ -2014,13 +2018,13 @@ ARDOUR_UI::snapshot_session ()
 }
 
 void
-ARDOUR_UI::save_state (const string & name)
+ARDOUR_UI::save_state (const string & name, bool switch_to_it)
 {
 	(void) save_state_canfail (name);
 }
 		
 int
-ARDOUR_UI::save_state_canfail (string name)
+ARDOUR_UI::save_state_canfail (string name, bool switch_to_it)
 {
 	if (session) {
 		int ret;
@@ -2029,7 +2033,7 @@ ARDOUR_UI::save_state_canfail (string name)
 			name = session->snap_name();
 		}
 
-		if ((ret = session->save_state (name)) != 0) {
+		if ((ret = session->save_state (name, false, switch_to_it)) != 0) {
 			return ret;
 		}
 	}

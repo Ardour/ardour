@@ -443,7 +443,7 @@ class Session : public PBD::StatefulDestructible
 	nframes_t worst_input_latency () const { return _worst_input_latency; }
 	nframes_t worst_track_latency () const { return _worst_track_latency; }
 
-	int save_state (string snapshot_name, bool pending = false);
+	int save_state (string snapshot_name, bool pending = false, bool switch_to_snapshot = false);
 	int restore_state (string snapshot_name);
 	int save_template (string template_name);
         int save_history (string snapshot_name = "");

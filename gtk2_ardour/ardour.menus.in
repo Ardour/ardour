@@ -8,6 +8,7 @@
            <menuitem action='Close'/>
            <separator/>
            <menuitem action='Save'/>
+           <menuitem action='Save As'/>
            <menuitem action='Snapshot'/>
            <menuitem action='SaveTemplate'/>
            <separator/>

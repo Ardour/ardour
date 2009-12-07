@@ -151,8 +151,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	int  unload_session (bool hide_stuff = false);
 	void close_session(); 
 
-	int  save_state_canfail (string state_name = "");
-	void save_state (const string & state_name = "");
+	int  save_state_canfail (string state_name = "", bool switch_to_it = false);
+	void save_state (const string & state_name = "", bool switch_to_it = false);
 
 	static double gain_to_slider_position (ARDOUR::gain_t g);
         static ARDOUR::gain_t slider_position_to_gain (double pos);
@@ -589,7 +589,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	
 	guint32  last_key_press_time;
 
-	void snapshot_session ();
+	void snapshot_session (bool switch_to_it);
 
 	Mixer_UI   *mixer;
 	int         create_mixer ();
