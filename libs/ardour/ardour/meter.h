@@ -59,6 +59,19 @@ public:
 
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out) const;
 	bool configure_io (ChanCount in, ChanCount out);
+	
+	/* special method for meter, to ensure that it can always handle the maximum
+	   number of streams in the route, no matter where we put it.
+	*/
+
+	void reset_max_channels (const ChanCount&);
+
+	/* tell the meter than no matter how many channels it can handle,
+	   `in' is the number it is actually going be handling from
+	   now on.
+	*/
+
+	void reflect_inputs (const ChanCount& in);
 
 	/** Compute peaks */
 	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes, bool);
@@ -80,10 +93,12 @@ public:
 	}
 
 	XMLNode& state (bool full);
-
+	
 private:
 	friend class IO;
-
+	
+	uint32_t current_meters;
+	
 	std::vector<float> _peak_power;
 	std::vector<float> _visible_peak_power;
 	std::vector<float> _max_peak_power;

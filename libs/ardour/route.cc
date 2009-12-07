@@ -80,8 +80,8 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	/* add standard processors other than amp (added by ::init()) */
 
 	_meter.reset (new PeakMeter (_session));
-	_meter->set_display_to_user (_meter_point == MeterCustom);
-	add_processor (_meter, PreFader);
+	_meter->set_display_to_user (false);
+	add_processor (_meter, PostFader);
 
 	if (_flags & ControlOut) {
 		/* where we listen to tracks */
@@ -1479,6 +1479,10 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 		out = c->second;
 	}
 
+	if (_meter) {
+		_meter->reset_max_channels (processor_max_streams);
+	}
+
 	/* make sure we have sufficient scratch buffers to cope with the new processor
 	   configuration */
 	_session.ensure_buffers (n_process_buffers ());
@@ -2667,6 +2671,8 @@ Route::flush_processors ()
 void
 Route::set_meter_point (MeterPoint p, void *src)
 {
+	/* CAN BE CALLED FROM PROCESS CONTEXT */
+
 	if (_meter_point == p) {
 		return;
 	}
@@ -2675,54 +2681,61 @@ Route::set_meter_point (MeterPoint p, void *src)
 
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
-		ProcessorList as_it_was (_processors);
-
+	
 		if (p != MeterCustom) {
 			// Move meter in the processors list to reflect the new position
-			ProcessorList::iterator loc = find(_processors.begin(), _processors.end(), _meter);
+			ProcessorList::iterator loc = find (_processors.begin(), _processors.end(), _meter);
 			_processors.erase(loc);
 			switch (p) {
 			case MeterInput:
 				loc = _processors.begin();
 				break;
 			case MeterPreFader:
-				loc = find(_processors.begin(), _processors.end(), _amp);
+				loc = find (_processors.begin(), _processors.end(), _amp);
 				break;
 			case MeterPostFader:
 				loc = _processors.end();
 				break;
 			default:
-			break;
+				break;
 			}
-
-			_processors.insert(loc, _meter);
 			
-			if (configure_processors_unlocked (0)) {
-				_processors = as_it_was;
-				configure_processors_unlocked (0); // it worked before we tried to add it ...
-				return;
+			ChanCount m_in;
+			
+			if (loc == _processors.begin()) {
+				m_in = _input->n_ports();
+			} else {
+				ProcessorList::iterator before = loc;
+				--before;
+				m_in = (*before)->output_streams ();
 			}
-
+			
+			_meter->reflect_inputs (m_in);
+			
+			_processors.insert (loc, _meter);
+			
+			/* we do not need to reconfigure the processors, because the meter
+			   (a) is always ready to handle processor_max_streams
+			   (b) is always an N-in/N-out processor, and thus moving
+			   it doesn't require any changes to the other processors.
+			*/
+			
 			_meter->set_display_to_user (false);
-
+			
 		} else {
-
+			
 			// just make it visible and let the user move it
-
+			
 			_meter->set_display_to_user (true);
 		}
-		
 	}
 
 	_meter_point = p;
 	meter_change (src); /* EMIT SIGNAL */
 
-	/* the meter has visibly changed if it is not visible to the user, or if it was and now isn't */
-	bool const meter_visibly_changed = _meter->display_to_user() || meter_was_visible_to_user;
+	bool const meter_visibly_changed = (_meter->display_to_user() != meter_was_visible_to_user);
 	
 	processors_changed (RouteProcessorChange (RouteProcessorChange::MeterPointChange, meter_visibly_changed)); /* EMIT SIGNAL */
-		
-	_session.set_dirty ();
 }
 
 void

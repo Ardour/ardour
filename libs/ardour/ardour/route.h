@@ -153,7 +153,7 @@ class Route : public SessionObject, public AutomatableControls
 	void       drop_route_group (void *);
 	RouteGroup *route_group () const { return _route_group; }
 
-	virtual void set_meter_point (MeterPoint, void *src);
+	void         set_meter_point (MeterPoint, void *src);
 	MeterPoint   meter_point() const { return _meter_point; }
 	void         meter ();
 

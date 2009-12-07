@@ -69,7 +69,7 @@ SessionEvent::operator delete (void *ptr, size_t /*size*/)
 {
 	Pool* p = pool->per_thread_pool ();
 	SessionEvent* ev = static_cast<SessionEvent*> (ptr);
-	
+
 	if (p == ev->own_pool) {
 		p->release (ptr);
 	} else {
@@ -278,3 +278,10 @@ SessionEventManager::_clear_event_type (SessionEvent::Type type)
 	set_next_event ();
 }
 
+#if 0
+void
+Session::process_rtop (SessionEvent* ev)
+{
+	ev->rt_return (ev->rt_slot ());
+}
+#endif

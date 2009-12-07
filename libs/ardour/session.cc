@@ -1164,8 +1164,9 @@ Session::disable_record (bool rt_context, bool force)
 		// FIXME: timestamp correct? [DR]
 		// FIXME FIXME FIXME: rt_context?  this must be called in the process thread.
 		// does this /need/ to be sent in all cases?
-		if (rt_context)
+		if (rt_context) {
 			deliver_mmc (MIDI::MachineControl::cmdRecordExit, _transport_frame);
+		}
 
 		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
@@ -3647,13 +3648,21 @@ Session::record_enable_change_all (bool yn)
 void
 Session::do_record_enable_change_all (RouteList* rl, bool yn)
 {
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ) {
 		boost::shared_ptr<Track> t;
 
 		if ((t = boost::dynamic_pointer_cast<Track>(*i)) != 0) {
 			t->set_record_enable (yn, this);
-		}
+			if (t->meter_point() == MeterCustom) {
+				/* don't change metering for this track */
+				i = rl->erase (i);
+			} else {
+				++i;
+			}
+		} 
 	}
+
+	set_dirty ();
 }
 
 void

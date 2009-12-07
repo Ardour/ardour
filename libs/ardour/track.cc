@@ -66,12 +66,6 @@ Track::~Track ()
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("track %1 destructor\n", _name));
 }
 
-void
-Track::set_meter_point (MeterPoint p, void *src)
-{
-	Route::set_meter_point (p, src);
-}
-
 XMLNode&
 Track::get_state ()
 {
@@ -192,17 +186,15 @@ Track::set_record_enable (bool yn, void *src)
 
 	_diskstream->set_record_enabled (yn);
 
-#if 0
 	if (_diskstream->record_enabled()) {
-		set_meter_point (MeterInput, this);
+		if (_meter_point != MeterCustom) {
+			set_meter_point (MeterInput, this);
+		}
 	} else {
 		set_meter_point (_saved_meter_point, this);
 	}
-#endif
 
-	cerr << "4\n";
 	_rec_enable_control->Changed ();
-	cerr << "5\n";
 }
 
 

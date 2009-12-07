@@ -65,6 +65,12 @@ Metering::update_meters()
 	Meter(); /* EMIT SIGNAL */
 }
 
+PeakMeter::PeakMeter (Session& s, const XMLNode& node)
+	: Processor (s, node)
+{
+	current_meters = 0;
+}
+
 /** Get peaks from @a bufs
  * Input acceptance is lenient - the first n buffers from @a bufs will
  * be metered, where n was set by the last call to setup(), excess meters will
@@ -115,11 +121,6 @@ PeakMeter::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_fram
 	_active = _pending_active;
 }
 
-PeakMeter::PeakMeter (Session& s, const XMLNode& node)
-	: Processor (s, node)
-{
-}
-
 void
 PeakMeter::reset ()
 {
@@ -150,7 +151,21 @@ PeakMeter::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 
-	uint32_t limit = in.n_total();
+	current_meters = in.n_total ();
+
+	return Processor::configure_io (in, out);
+}
+
+void
+PeakMeter::reflect_inputs (const ChanCount& in)
+{
+	current_meters = in.n_total ();
+}
+
+void
+PeakMeter::reset_max_channels (const ChanCount& chn)
+{
+	uint32_t limit = chn.n_total();
 
 	while (_peak_power.size() > limit) {
 		_peak_power.pop_back();
@@ -167,8 +182,6 @@ PeakMeter::configure_io (ChanCount in, ChanCount out)
 	assert(_peak_power.size() == limit);
 	assert(_visible_peak_power.size() == limit);
 	assert(_max_peak_power.size() == limit);
-
-	return Processor::configure_io (in, out);
 }
 
 /** To be driven by the Meter signal from IO.
@@ -185,7 +198,7 @@ PeakMeter::meter ()
 
 	assert(_visible_peak_power.size() == _peak_power.size());
 
-	const size_t limit = _peak_power.size();
+	const size_t limit = min (_peak_power.size(), (size_t) current_meters);
 
 	for (size_t n = 0; n < limit; ++n) {
 

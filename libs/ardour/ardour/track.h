@@ -90,8 +90,6 @@ class Track : public Route
 	bool record_enabled() const;
 	void set_record_enable (bool yn, void *src);
 
-	void set_meter_point (MeterPoint, void* src);
-
 	sigc::signal<void> DiskstreamChanged;
 	sigc::signal<void> FreezeChange;
 
