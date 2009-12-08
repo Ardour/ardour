@@ -28,6 +28,7 @@
 #include "ardour/session_event.h"
 #include "ardour/session.h"
 #include "ardour/route.h"
+#include "ardour/route_group.h"
 #include "ardour/track.h"
 
 #include "axis_view.h"
@@ -207,12 +208,15 @@ class RouteUI : public virtual AxisView
  	void init ();
  	void reset ();
 
+	void queue_route_group_op (ARDOUR::RouteGroup::Property prop, void (ARDOUR::Session::*session_method)(boost::shared_ptr<ARDOUR::RouteList>, bool), bool yn);
+
   private:
 	void check_rec_enable_sensitivity ();
 	void parameter_changed (std::string const &);
 	void relabel_solo_button ();
 
-	void post_rec_cleanup (ARDOUR::SessionEvent* ev, UndoTransaction* undo, ARDOUR::Session::GlobalRecordEnableStateCommand*);
+	void post_rtop_cleanup (ARDOUR::SessionEvent* ev);
+	void post_group_rtop_cleanup (ARDOUR::SessionEvent* ev, ARDOUR::RouteGroup*, ARDOUR::RouteGroup::Property);
 };
 
 #endif /* __ardour_route_ui__ */

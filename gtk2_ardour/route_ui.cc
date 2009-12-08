@@ -453,18 +453,49 @@ RouteUI::solo_release(GdkEventButton*)
 }
 
 void
-RouteUI::post_rec_cleanup (SessionEvent* ev, UndoTransaction* undo, Session::GlobalRecordEnableStateCommand* cmd)
+RouteUI::post_rtop_cleanup (SessionEvent* ev)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &RouteUI::post_rec_cleanup), ev, undo, cmd));
-
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &RouteUI::post_rtop_cleanup), ev));
 	delete ev;
+}
 
-	check_rec_enable_sensitivity ();
+void
+RouteUI::post_group_rtop_cleanup (SessionEvent* ev, RouteGroup* rg, RouteGroup::Property prop)
+{
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &RouteUI::post_group_rtop_cleanup), ev, rg, prop));
+	delete ev;
+	rg->set_property (prop, false);
+}
 
-	cmd->mark();
-	undo->add_command(cmd);
+void
+RouteUI::queue_route_group_op (RouteGroup::Property prop, void (Session::*session_method)(boost::shared_ptr<RouteList>, bool), bool yn)
+{
+	RouteGroup* rg = _route->route_group();
+	bool prop_was_active;
 
-	_session.finish_reversible_command (*undo);
+	if (rg) {
+		prop_was_active = rg->active_property (prop);
+		rg->set_property (prop, true);
+	} else {
+		prop_was_active = false;
+	}
+
+	/* we will queue the op for just this route, but because its route group now has the relevant property marked active,
+	   the operation will apply to the whole group (if there is a group)
+	*/
+	
+	boost::shared_ptr<RouteList> rl (new RouteList);
+	rl->push_back (route());
+	
+	SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
+	ev->rt_slot =   bind (sigc::mem_fun (_session, session_method), rl, yn);
+	if (rg && !prop_was_active) {
+		ev->rt_return = bind (sigc::mem_fun (*this, &RouteUI::post_group_rtop_cleanup), rg, prop);
+	} else {
+		ev->rt_return = sigc::mem_fun (*this, &RouteUI::post_rtop_cleanup);
+	}
+	
+	_session.queue_event (ev);
 }
 
 bool
@@ -489,30 +520,35 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-			UndoTransaction* undo = _session.start_reversible_command (_("rec-enable change"));
-                        Session::GlobalRecordEnableStateCommand *cmd = new Session::GlobalRecordEnableStateCommand(_session, this);
-
 			SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 			ev->rt_slot =   bind (sigc::mem_fun (_session, &Session::set_all_record_enable), _session.get_routes(), !rec_enable_button->get_active());
-			ev->rt_return = bind (sigc::mem_fun (*this, &RouteUI::post_rec_cleanup), undo, cmd);
-
+			ev->rt_return = sigc::mem_fun (*this, &RouteUI::post_rtop_cleanup);
+			
 			_session.queue_event (ev);
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
-			/* Primary-button1 applies change to the mix group.
+			/* Primary-button1 applies change to the route group (even if it is not active)
 			   NOTE: Primary-button2 is MIDI learn.
 			*/
-
-			set_route_group_rec_enable (_route, !_route->record_enabled());
+			
+			if (ev->button == 1) {
+				queue_route_group_op (RouteGroup::RecEnable, &Session::set_all_record_enable, !rec_enable_button->get_active());
+			}
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
 
 			/* do this on release */
 
 		} else {
-			reversibly_apply_track_boolean ("rec-enable change", &Track::set_record_enable, !track()->record_enabled(), this);
-			check_rec_enable_sensitivity ();
+			boost::shared_ptr<RouteList> rl (new RouteList);
+			rl->push_back (route());
+
+			SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
+			ev->rt_slot =   bind (sigc::mem_fun (_session, &Session::set_all_record_enable), rl, !rec_enable_button->get_active());
+			ev->rt_return = sigc::mem_fun (*this, &RouteUI::post_rtop_cleanup);
+
+			_session.queue_event (ev);
 		}
 	}
 
@@ -827,6 +863,8 @@ RouteUI::update_rec_display ()
 	} else {
 		rec_enable_button->set_visual_state (0);
 	}
+
+	check_rec_enable_sensitivity ();
 }
 
 void
