@@ -312,6 +312,8 @@ class Session : public PBD::StatefulDestructible
 		return routes.reader ();
 	}
 
+	boost::shared_ptr<RouteList> get_routes_with_regions_at (nframes64_t const) const;
+
 	uint32_t nroutes() const { return routes.reader()->size(); }
 	uint32_t ntracks () const;
 	uint32_t nbusses () const;

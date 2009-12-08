@@ -1001,6 +1001,36 @@ Session::hookup_io ()
 	catch_up_on_solo();
 }
 
+boost::shared_ptr<Session::RouteList>
+Session::get_routes_with_regions_at (nframes64_t const p) const
+{
+	shared_ptr<RouteList> r = routes.reader ();
+	shared_ptr<RouteList> rl (new RouteList);
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (!tr) {
+			continue;
+		}
+		
+		boost::shared_ptr<Diskstream> ds = tr->diskstream ();
+		if (!ds) {
+			continue;
+		}
+
+		boost::shared_ptr<Playlist> pl = ds->playlist ();
+		if (!pl) {
+			continue;
+		}
+		
+		if (pl->has_region_at (p)) {
+			rl->push_back (*i);
+		}
+	}
+
+	return rl;
+}
+
 void
 Session::playlist_length_changed ()
 {
@@ -1673,6 +1703,7 @@ Session::resort_routes ()
 	}
 
 }
+
 void
 Session::resort_routes_using (shared_ptr<RouteList> r)
 {

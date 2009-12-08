@@ -112,7 +112,8 @@ class Playlist : public PBD::StatefulDestructible, public boost::enable_shared_f
 	boost::shared_ptr<Region>  find_next_region (nframes_t frame, RegionPoint point, int dir);
 	nframes64_t                find_next_region_boundary (nframes64_t frame, int dir);
 	bool                       region_is_shuffle_constrained (boost::shared_ptr<Region>);
-
+	bool                       has_region_at (nframes64_t const) const;
+	
 	nframes64_t find_next_transient (nframes64_t position, int dir);
 
 	template<class T> void foreach_region (T *t, void (T::*func)(boost::shared_ptr<Region>, void *), void *arg);

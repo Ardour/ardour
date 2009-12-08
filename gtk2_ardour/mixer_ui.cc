@@ -639,10 +639,34 @@ Mixer_UI::show_all_audiotracks()
 {
 	set_all_audio_visibility (1, true);
 }
+
 void
 Mixer_UI::hide_all_audiotracks ()
 {
 	set_all_audio_visibility (1, false);
+}
+
+void
+Mixer_UI::show_tracks_with_regions_at_playhead ()
+{
+	boost::shared_ptr<Session::RouteList> const regions = session->get_routes_with_regions_at (session->transport_frame ());
+	
+	TreeModel::Children rows = track_model->children ();
+	for (TreeModel::Children::iterator i = rows.begin(); i != rows.end(); ++i) {
+		boost::shared_ptr<Route> route = (*i)[track_columns.route];
+
+		bool found = false;
+		for (Session::RouteList::iterator x = (*regions).begin(); x != (*regions).end(); ++x) {
+			if ((*x) == route)
+				found = true;
+		}
+				
+		(*i)[track_columns.visible] = found;
+	}
+
+	strip_redisplay_does_not_sync_order_keys = true;
+	redisplay_track_list ();
+	strip_redisplay_does_not_sync_order_keys = false;
 }
 
 void
@@ -944,7 +968,8 @@ Mixer_UI::build_track_menu ()
 	items.push_back (MenuElem (_("Hide All Audio Tracks"), mem_fun(*this, &Mixer_UI::hide_all_audiotracks)));
 	items.push_back (MenuElem (_("Show All Audio Busses"), mem_fun(*this, &Mixer_UI::show_all_audiobus)));
 	items.push_back (MenuElem (_("Hide All Audio Busses"), mem_fun(*this, &Mixer_UI::hide_all_audiobus)));
-
+	items.push_back (MenuElem (_("Hide All Audio Busses"), mem_fun(*this, &Mixer_UI::hide_all_audiobus)));
+	items.push_back (MenuElem (_("Show Tracks With Regions Under Playhead"), mem_fun (*this, &Mixer_UI::show_tracks_with_regions_at_playhead)));
 }
 
 void

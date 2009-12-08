@@ -422,7 +422,7 @@ Editor::build_route_list_menu ()
 	items.push_back (MenuElem (_("Hide All Audio Tracks"), mem_fun(*this, &Editor::hide_all_audiotracks)));
 	items.push_back (MenuElem (_("Show All Audio Busses"), mem_fun(*this, &Editor::show_all_audiobus)));
 	items.push_back (MenuElem (_("Hide All Audio Busses"), mem_fun(*this, &Editor::hide_all_audiobus)));
-
+	items.push_back (MenuElem (_("Show Tracks With Regions Under Playhead"), mem_fun (*this, &Editor::show_tracks_with_regions_at_playhead)));
 }
 
 void
@@ -523,6 +523,32 @@ void
 Editor::hide_all_audiotracks ()
 {
 	set_all_audio_visibility (1, false);
+}
+
+void
+Editor::show_tracks_with_regions_at_playhead ()
+{
+	boost::shared_ptr<Session::RouteList> const regions = session->get_routes_with_regions_at (session->transport_frame ());
+
+	//suspend_redisplay ();
+	
+	TreeModel::Children rows = route_display_model->children ();
+	for (TreeModel::Children::iterator i = rows.begin(); i != rows.end(); ++i) {
+		boost::shared_ptr<Route> route = (*i)[route_display_columns.route];
+
+		bool found = false;
+		for (Session::RouteList::iterator x = (*regions).begin(); x != (*regions).end(); ++x) {
+			if ((*x) == route)
+				found = true;
+		}
+				
+		(*i)[route_display_columns.visible] = found;
+	}
+
+	no_route_list_redisplay = false;
+	redisplay_route_list ();
+
+	//resume_redisplay ();
 }
 
 bool

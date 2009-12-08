@@ -175,6 +175,7 @@ class Mixer_UI : public Gtk::Window
 	void hide_all_audiobus ();
 	void show_all_audiotracks();
 	void hide_all_audiotracks ();
+	void show_tracks_with_regions_at_playhead ();
 
 	Gtk::Menu* mix_group_context_menu;
 	bool in_group_row_change;

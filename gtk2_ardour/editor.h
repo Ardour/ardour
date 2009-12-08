@@ -1789,6 +1789,7 @@ public:
 	void hide_all_routes ();
 	void show_all_audiotracks ();
 	void hide_all_audiotracks ();
+	void show_tracks_with_regions_at_playhead ();
 	void show_all_audiobus ();
 	void hide_all_audiobus ();
 

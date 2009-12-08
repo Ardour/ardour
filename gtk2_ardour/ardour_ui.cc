@@ -2020,7 +2020,7 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 void
 ARDOUR_UI::save_state (const string & name, bool switch_to_it)
 {
-	(void) save_state_canfail (name);
+	(void) save_state_canfail (name, switch_to_it);
 }
 		
 int
