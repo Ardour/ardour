@@ -2165,11 +2165,9 @@ Editor::single_start_trim (RegionView& rv, nframes64_t frame_delta, bool left_di
 		if (region_left != 0 &&
 			(region_left->last_frame() > region->first_frame() || regions_touching))
 		{
-			region_left->trim_end(region->first_frame(), this);
+			region_left->trim_end(region->first_frame() - 1, this);
 		}
 	}
-
-
 
 	rv.region_changed (Change (LengthChanged|PositionChanged|StartChanged));
 }
