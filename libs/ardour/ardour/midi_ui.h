@@ -38,7 +38,7 @@ class MidiControlUI : public AbstractUI<MidiUIRequest>
 	void do_request (MidiUIRequest*);
 	
   private:
-	typedef std::list<Glib::RefPtr<Glib::IOSource> > PortSources;
+	typedef std::list<GSource*> PortSources;
 	PortSources port_sources;
 	ARDOUR::Session& _session;
 	

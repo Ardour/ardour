@@ -50,7 +50,6 @@ using std::map;
 UI       *UI::theGtkUI = 0;
 
 BaseUI::RequestType Gtkmm2ext::ErrorMessage = BaseUI::new_request_type();
-BaseUI::RequestType Gtkmm2ext::Quit = BaseUI::new_request_type();
 BaseUI::RequestType Gtkmm2ext::TouchDisplay = BaseUI::new_request_type();
 BaseUI::RequestType Gtkmm2ext::StateChange = BaseUI::new_request_type();
 BaseUI::RequestType Gtkmm2ext::SetTip = BaseUI::new_request_type();

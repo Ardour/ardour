@@ -49,7 +49,10 @@
 using namespace ARDOUR;
 using namespace sigc;
 using namespace std;
+using namespace Glib;
 
+
+#include "pbd/abstract_ui.cc" // instantiate template
 
 #ifdef DEBUG
 static void error_callback(int num, const char *m, const char *path)
@@ -65,30 +68,40 @@ static void error_callback(int, const char *, const char *)
 
 OSC::OSC (Session& s, uint32_t port)
 	: ControlProtocol (s, "OSC")
+	, AbstractUI<OSCUIRequest> ("osc")
 	, _port(port)
 {
 	_shutdown = false;
 	_osc_server = 0;
 	_osc_unix_server = 0;
-	_osc_thread = 0;
 	_namespace_root = "/ardour";
 	_send_route_changes = true;
 
+	/* glibmm hack */
+	local_server = 0;
+	remote_server = 0;
+
 	// "Application Hooks"
 	session_loaded (s);
-	session->Exported.connect( mem_fun( *this, &OSC::session_exported ) );
-
-	/* catch up with existing routes */
-
-	boost::shared_ptr<RouteList> rl = session->get_routes ();
-	route_added (*(rl.get()));
-
-	// session->RouteAdded.connect (mem_fun (*this, &OSC::route_added));
+	session->Exported.connect (mem_fun (*this, &OSC::session_exported));
 }
 
 OSC::~OSC()
 {
 	stop ();
+}
+
+void
+OSC::do_request (OSCUIRequest* req)
+{
+	if (req->type == CallSlot) {
+
+		call_slot (req->the_slot);
+
+	} else if (req->type == Quit) {
+
+		stop ();
+	}
 }
 
 int
@@ -187,35 +200,79 @@ OSC::start ()
 	register_callbacks();
 	
 	// lo_server_thread_add_method(_sthread, NULL, NULL, OSC::_dummy_handler, this);
-		
-	if (!init_osc_thread()) {
-		return -1;
-	}
+
+	/* startup the event loop thread */
+
+	BaseUI::run ();
+
 	return 0;
+}
+
+void
+OSC::thread_init ()
+{
+	if (_osc_unix_server) {
+		Glib::RefPtr<IOSource> src = IOSource::create (lo_server_get_socket_fd (_osc_unix_server), IO_IN|IO_HUP|IO_ERR);
+		src->connect (bind (sigc::mem_fun (*this, &OSC::osc_input_handler), _osc_unix_server));
+		src->attach (_main_loop->get_context());
+		local_server = src->gobj();
+		g_source_ref (local_server);
+	}
+
+	if (_osc_server) {
+		Glib::RefPtr<IOSource> src  = IOSource::create (lo_server_get_socket_fd (_osc_server), IO_IN|IO_HUP|IO_ERR);
+		src->connect (bind (sigc::mem_fun (*this, &OSC::osc_input_handler), _osc_server));
+		src->attach (_main_loop->get_context());
+		remote_server = src->gobj();
+		g_source_ref (remote_server);
+	}
 }
 
 int
 OSC::stop ()
 {	
-	if (_osc_server == 0) {
-		/* already stopped */
-		return 0;
+	/* stop main loop */
+
+	if (local_server) {
+		g_source_destroy (local_server);
+		g_source_unref (local_server);
+		local_server = 0;
 	}
 
-	// stop server thread
-	terminate_osc_thread();
+	if (remote_server) {
+		g_source_destroy (remote_server);
+		g_source_unref (remote_server);
+		remote_server = 0;
+	}
 
-	lo_server_free (_osc_server);
-	_osc_server = 0;
+	BaseUI::quit ();
+
+	if (_osc_server) {
+		int fd = lo_server_get_socket_fd(_osc_server);
+		if (fd >=0) {
+			close(fd);
+		}
+		lo_server_free (_osc_server);
+		_osc_server = 0;
+	}
+
+	if (_osc_unix_server) {
+		int fd = lo_server_get_socket_fd(_osc_unix_server);
+		if (fd >=0) {
+			close(fd);
+		}
+		lo_server_free (_osc_unix_server);
+		_osc_unix_server = 0;
+	}
 	
 	if (!_osc_unix_socket_path.empty()) {
-		// unlink it
-		unlink(_osc_unix_socket_path.c_str());
+		unlink (_osc_unix_socket_path.c_str());
 	}
 	
-	if (!  _osc_url_file.empty() ) {
-		unlink(_osc_url_file.c_str() );
+	if (!_osc_url_file.empty() ) {
+		unlink (_osc_url_file.c_str() );
 	}
+
 	return 0;
 }
 
@@ -268,7 +325,9 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/routes/gainabs", "if", route_set_gain_abs);
 		REGISTER_CALLBACK (serv, "/ardour/routes/gaindB", "if", route_set_gain_dB);
 
+		
 #if 0
+		/* still not-really-standardized query interface */
 		REGISTER_CALLBACK (serv, "/ardour/*/#current_value", "", current_value);
 		REGISTER_CALLBACK (serv, "/ardour/set", "", set);
 #endif
@@ -284,54 +343,17 @@ OSC::register_callbacks()
 }
 
 bool
-OSC::init_osc_thread ()
+OSC::osc_input_handler (IOCondition ioc, lo_server srv)
 {
-	// create new thread to run server
-	if (pipe (_request_pipe)) {
-		cerr << "Cannot create osc request signal pipe" <<  strerror (errno) << endl;
+	if (ioc & ~IO_IN) {
 		return false;
 	}
 
-	if (fcntl (_request_pipe[0], F_SETFL, O_NONBLOCK)) {
-		cerr << "osc: cannot set O_NONBLOCK on signal read pipe " << strerror (errno) << endl;
-		return false;
+	if (ioc & IO_IN) {
+		lo_server_recv (srv);
 	}
 
-	if (fcntl (_request_pipe[1], F_SETFL, O_NONBLOCK)) {
-		cerr << "osc: cannot set O_NONBLOCK on signal write pipe " << strerror (errno) << endl;
-		return false;
-	}
-	
-	pthread_create_and_store (X_("OSC"), &_osc_thread, &OSC::_osc_receiver, this);
-
-	if (!_osc_thread) {
-		return false;
-	}
-
-	//pthread_detach (_osc_thread);
 	return true;
-}
-
-void
-OSC::terminate_osc_thread ()
-{
-	void* status;
-
-	_shutdown = true;
-	
-	poke_osc_thread ();
-
-	pthread_join (_osc_thread, &status);
-}
-
-void
-OSC::poke_osc_thread ()
-{
-	char c;
-
-	if (write (_request_pipe[1], &c, 1) != 1) {
-		cerr << "cannot send signal to osc thread! " <<  strerror (errno) << endl;
-	}
 }
 
 std::string
@@ -364,107 +386,6 @@ OSC::get_unix_server_url()
 	return url;
 }
 
-
-/* server thread */
-
-void *
-OSC::_osc_receiver(void * arg)
-{
-	static_cast<OSC*>(arg)->register_thread (X_("OSC"));
-	static_cast<OSC*>(arg)->osc_receiver();
-	return 0;
-}
-
-void
-OSC::osc_receiver()
-{
-	struct pollfd pfd[3];
-	int fds[3];
-	lo_server srvs[3];
-	int nfds = 0;
-	int timeout = -1;
-	int ret;
-	
-	fds[0] = _request_pipe[0];
-	nfds++;
-	
-	if (_osc_server && lo_server_get_socket_fd(_osc_server) >= 0) {
-		fds[nfds] = lo_server_get_socket_fd(_osc_server);
-		srvs[nfds] = _osc_server;
-		nfds++;
-	}
-
-	if (_osc_unix_server && lo_server_get_socket_fd(_osc_unix_server) >= 0) {
-		fds[nfds] = lo_server_get_socket_fd(_osc_unix_server);
-		srvs[nfds] = _osc_unix_server;
-		nfds++;
-	}
-	
-	
-	while (!_shutdown) {
-
-		for (int i=0; i < nfds; ++i) {
-			pfd[i].fd = fds[i];
-			pfd[i].events = POLLIN|POLLPRI|POLLHUP|POLLERR;
-			pfd[i].revents = 0;
-		}
-		
-	again:
-		//cerr << "poll on " << nfds << " for " << timeout << endl;
-		if ((ret = poll (pfd, nfds, timeout)) < 0) {
-			if (errno == EINTR) {
-				/* gdb at work, perhaps */
-				goto again;
-			}
-			
-			cerr << "OSC thread poll failed: " <<  strerror (errno) << endl;
-			
-			break;
-		}
-
-		//cerr << "poll returned " << ret << "  pfd[0].revents = " << pfd[0].revents << "  pfd[1].revents = " << pfd[1].revents << endl;
-		
-		if (_shutdown) {
-			break;
-		}
-		
-		if ((pfd[0].revents & ~POLLIN)) {
-			cerr << "OSC: error polling extra port" << endl;
-			break;
-		}
-		
-		for (int i=1; i < nfds; ++i) {
-			if (pfd[i].revents & POLLIN)
-			{
-				// this invokes callbacks
-				// cerr << "invoking recv on " << pfd[i].fd << endl;
-				lo_server_recv(srvs[i]);
-			}
-		}
-
-	}
-
-	//cerr << "SL engine shutdown" << endl;
-	
-	if (_osc_server) {
-		int fd = lo_server_get_socket_fd(_osc_server);
-		if (fd >=0) {
-			// hack around
-			close(fd);
-		}
-		lo_server_free (_osc_server);
-		_osc_server = 0;
-	}
-
-	if (_osc_unix_server) {
-		cerr << "freeing unix server" << endl;
-		lo_server_free (_osc_unix_server);
-		_osc_unix_server = 0;
-	}
-	
-	close(_request_pipe[0]);
-	close(_request_pipe[1]);
-}
 
 void
 OSC::current_value_query (const char* path, size_t len, lo_arg **argv, int argc, lo_message msg)
@@ -598,11 +519,6 @@ OSC::catchall (const char *path, const char *types, lo_arg **argv, int argc, lo_
 	}
 
 	return ret;
-}
-
-void
-OSC::route_added (RouteList&)
-{
 }
 
 void

@@ -393,7 +393,7 @@ int main (int argc, char *argv[])
 	ui = 0;
 
 	ARDOUR::cleanup ();
-	// pthread_cancel ();
+	pthread_cancel_all ();
 
 #ifdef HAVE_LV2
 	close_external_ui_windows();

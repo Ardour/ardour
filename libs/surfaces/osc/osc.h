@@ -29,7 +29,11 @@
 
 #include <lo/lo.h>
 
+#include <glibmm/main.h>
+
 #include <sigc++/sigc++.h>
+
+#include "pbd/abstract_ui.h"
 
 #include "ardour/types.h"
 #include "control_protocol/control_protocol.h"
@@ -41,7 +45,18 @@ class Session;
 class Route;
 }
 	
-class OSC : public ARDOUR::ControlProtocol
+/* this is mostly a placeholder because I suspect that at some
+   point we will want to add more members to accomodate
+   certain types of requests to the MIDI UI
+*/
+
+struct OSCUIRequest : public BaseUI::BaseRequestObject {
+  public:
+	OSCUIRequest () {}
+	~OSCUIRequest() {}
+};
+
+class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 {
   public:
 	OSC (ARDOUR::Session&, uint32_t port);
@@ -60,6 +75,15 @@ class OSC : public ARDOUR::ControlProtocol
 	int start ();
 	int stop ();
 
+  protected:
+        void thread_init ();
+	void do_request (OSCUIRequest*);
+
+	GSource* local_server;
+	GSource* remote_server;
+	
+	bool osc_input_handler (Glib::IOCondition, lo_server);
+
   private:
 	uint32_t _port;
 	volatile bool _ok;
@@ -70,16 +94,6 @@ class OSC : public ARDOUR::ControlProtocol
 	std::string _osc_url_file;
 	std::string _namespace_root;
 	bool _send_route_changes;
-	pthread_t _osc_thread;
-	int _request_pipe[2];
-
-	static void * _osc_receiver(void * arg);
-	void osc_receiver();
-	void send(); // This should accept an OSC payload
-
-	bool init_osc_thread ();
-	void terminate_osc_thread ();
-	void poke_osc_thread ();
 
 	void register_callbacks ();
 

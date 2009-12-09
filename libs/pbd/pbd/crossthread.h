@@ -33,11 +33,21 @@ class CrossThreadChannel {
 	void drain ();
 	static void drain (int fd);
 
+	/* glibmm 2.22 and earlier has a terrifying bug that will
+	   cause crashes whenever a Source is removed from
+	   a MainContext (including the destruction of the MainContext),
+	   because the Source is destroyed "out from under the nose of" 
+	   the RefPtr. I (Paul) have fixed this (https://bugzilla.gnome.org/show_bug.cgi?id=561885)
+	   but in the meantime, we need a hack to get around the issue.
+	*/
+
 	Glib::RefPtr<Glib::IOSource> ios();
+	void drop_ios ();
+
 	bool ok() const { return fds[0] >= 0 && fds[1] >= 0; }
 
   private:
-	Glib::RefPtr<Glib::IOSource> _ios; // lazily constructed
+	Glib::RefPtr<Glib::IOSource>* _ios; // lazily constructed
 	int fds[2];
 };
 

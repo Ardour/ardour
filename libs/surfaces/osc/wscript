@@ -32,7 +32,7 @@ def build(bld):
 	obj.name         = 'libardour_osc'
 	obj.target       = 'osc'
 	obj.uselib       = ' LO '
-	obj.uselib_local = 'libardour libardour_cp'
+	obj.uselib_local = 'libardour libardour_cp libpbd'
 	obj.vnum         = LIBARDOUR_OSC_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'surfaces')
 

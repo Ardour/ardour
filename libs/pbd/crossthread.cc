@@ -32,6 +32,7 @@ using namespace Glib;
 
 CrossThreadChannel::CrossThreadChannel ()
 {
+	_ios = 0;
 	fds[0] = -1;
 	fds[1] = -1;
 
@@ -49,12 +50,12 @@ CrossThreadChannel::CrossThreadChannel ()
 		error << "cannot set non-blocking mode for x-thread pipe (write) (%2)" << ::strerror (errno) << ')' << endmsg;
 		return;
 	}
-
 }
 
 CrossThreadChannel::~CrossThreadChannel ()
 {
-	_ios->destroy ();
+	/* glibmm hack */
+	drop_ios ();
 
 	if (fds[0] >= 0) {
 		close (fds[0]);
@@ -78,11 +79,18 @@ RefPtr<IOSource>
 CrossThreadChannel::ios () 
 {
 	if (!_ios) {
-		_ios = IOSource::create (fds[0], IOCondition(IO_IN|IO_PRI|IO_ERR|IO_HUP|IO_NVAL));
+		_ios = new RefPtr<IOSource> (IOSource::create (fds[0], IOCondition(IO_IN|IO_PRI|IO_ERR|IO_HUP|IO_NVAL)));
 	}
-	return _ios;
+	return *_ios;
 }
-	
+
+void
+CrossThreadChannel::drop_ios ()
+{
+	delete _ios;
+	_ios = 0;
+}
+
 void
 CrossThreadChannel::drain ()
 {

@@ -64,6 +64,10 @@ MidiControlUI::do_request (MidiUIRequest* req)
 	} else if (req->type == CallSlot) {
 
 		req->the_slot ();
+
+	} else if (req->type == Quit) {
+
+		BaseUI::quit ();
 	}
 }
 
@@ -102,8 +106,8 @@ void
 MidiControlUI::clear_ports ()
 {
 	for (PortSources::iterator i = port_sources.begin(); i != port_sources.end(); ++i) {
-		/* remove existing sources from the event loop */
-		(*i)->destroy ();
+		g_source_destroy (*i);
+		g_source_unref (*i);
 	}
 
 	port_sources.clear ();
@@ -120,13 +124,15 @@ MidiControlUI::reset_ports ()
 		int fd;
 		if ((fd = (*i)->selectable ()) >= 0) {
 			Glib::RefPtr<IOSource> psrc = IOSource::create (fd, IO_IN|IO_HUP|IO_ERR);
-			psrc->connect (bind (mem_fun (*this, &MidiControlUI::midi_input_handler), (*i)));
-			port_sources.push_back (psrc);
-		} 
-	}
 
-	for (PortSources::iterator i = port_sources.begin(); i != port_sources.end(); ++i) {
-		(*i)->attach (_main_loop->get_context());
+			psrc->connect (bind (mem_fun (*this, &MidiControlUI::midi_input_handler), (*i)));
+			psrc->attach (_main_loop->get_context());
+
+			// glibmm hack: for now, store only the GSource*
+
+			port_sources.push_back (psrc->gobj());
+			g_source_ref (psrc->gobj());
+		} 
 	}
 }
 

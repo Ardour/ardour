@@ -29,6 +29,7 @@
 
 int  pthread_create_and_store (std::string name, pthread_t  *thread, void * (*start_routine)(void *), void * arg);
 void pthread_cancel_one (pthread_t thread);
+void pthread_cancel_all ();
 void pthread_kill_all (int signum);
 void pthread_exit_pbd (void* status);
 std::string pthread_name ();

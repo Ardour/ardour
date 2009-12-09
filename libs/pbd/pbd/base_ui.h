@@ -57,6 +57,7 @@ class BaseUI : virtual public sigc::trackable {
 
 	static RequestType new_request_type();
 	static RequestType CallSlot;
+	static RequestType Quit;
 
 	void run ();
 	void quit ();

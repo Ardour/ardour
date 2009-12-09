@@ -37,11 +37,14 @@ using namespace Glib;
 	
 uint64_t BaseUI::rt_bit = 1;
 BaseUI::RequestType BaseUI::CallSlot = BaseUI::new_request_type();
+BaseUI::RequestType BaseUI::Quit = BaseUI::new_request_type();
 
 BaseUI::BaseUI (const string& str)
 	: run_loop_thread (0)
 	, _name (str)
 {
+	cerr << "New BUI called " << _name << " @ " << this << endl;
+
 	base_ui_instance = this;
 
 	request_channel.ios()->connect (sigc::mem_fun (*this, &BaseUI::request_handler));
@@ -77,19 +80,24 @@ void
 BaseUI::run ()
 {
 	/* to be called by UI's that need/want their own distinct, self-created event loop thread.
-	   Derived classes should have set up a handler for IO on request_channel.ios()
 	*/
 
 	_main_loop = MainLoop::create (MainContext::create());
 	request_channel.ios()->attach (_main_loop->get_context());
+
+	/* glibmm hack - drop the refptr to the IOSource now before it can hurt */
+	request_channel.drop_ios ();
+
 	run_loop_thread = Thread::create (mem_fun (*this, &BaseUI::main_thread), true);
 }
 
 void
 BaseUI::quit ()
 {
-	_main_loop->quit ();
-	run_loop_thread->join ();
+	if (_main_loop->is_running()) {
+		_main_loop->quit ();
+		run_loop_thread->join ();
+	}
 }
 
 bool

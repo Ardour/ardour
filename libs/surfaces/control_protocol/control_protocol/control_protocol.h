@@ -34,7 +34,7 @@ namespace ARDOUR {
 class Route;
 class Session;
 
-class ControlProtocol : public sigc::trackable, public PBD::Stateful, public BasicUI {
+class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, public BasicUI {
   public:
 	ControlProtocol (Session&, std::string name);
 	virtual ~ControlProtocol();

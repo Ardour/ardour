@@ -124,6 +124,19 @@ pthread_kill_all (int signum)
 }
 
 void
+pthread_cancel_all () 
+{	
+	pthread_mutex_lock (&thread_map_lock);
+	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
+		if (i->second != pthread_self()) {
+			pthread_cancel (i->second);
+		}
+	}
+	all_threads.clear();
+	pthread_mutex_unlock (&thread_map_lock);
+}
+
+void
 pthread_cancel_one (pthread_t thread) 
 {	
 	pthread_mutex_lock (&thread_map_lock);

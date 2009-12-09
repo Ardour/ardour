@@ -17,7 +17,7 @@ AbstractUI<RequestObject>::AbstractUI (const string& name)
 }
 
 template <typename RequestObject> void
-AbstractUI<RequestObject>::register_thread (string target_gui, pthread_t thread_id, string /*thread_name*/, uint32_t num_requests)
+AbstractUI<RequestObject>::register_thread (string target_gui, pthread_t thread_id, string thread_name, uint32_t num_requests)
 {
 	if (target_gui != name()) {
 		return;
