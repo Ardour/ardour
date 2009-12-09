@@ -26,6 +26,9 @@
 #include <stdint.h>
 #include <setjmp.h>
 #include <pthread.h>
+
+#include <glibmm/thread.h>
+
 #include <gtkmm/widget.h>
 #include <gtkmm/style.h>
 #ifndef GTK_NEW_TOOLTIP_API
@@ -72,7 +75,6 @@ struct UIRequest : public BaseUI::BaseRequestObject {
     Transmitter::Channel chn;
     void *arg;
     const char *msg2;
-    sigc::slot<void> slot;
     
     ~UIRequest () { 
 	    if (type == ErrorMessage && msg) {
@@ -80,7 +82,7 @@ struct UIRequest : public BaseUI::BaseRequestObject {
 		    free ((char *)msg);
 	    }
     }
- };
+};
 
 class UI : public Receiver, public AbstractUI<UIRequest>
 {
@@ -98,13 +100,12 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 
 	bool caller_is_ui_thread ();
 
-	static pthread_t thread_id() { return gui_thread; }
+	static Glib::Thread* thread_id() { return gui_thread; }
 
 	/* Gtk-UI specific interfaces */
 
 	bool running ();
 	void quit    ();
-	void kill    ();
 	int  load_rcfile (std::string, bool themechange = false);
 	void run (Receiver &old_receiver);
 
@@ -136,7 +137,7 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 
 	static bool just_hide_it (GdkEventAny *, Gtk::Window *);
 
-	static pthread_t the_gui_thread() { return gui_thread; }
+	static Glib::Thread* the_gui_thread() { return gui_thread; }
 
   protected:
 	virtual void handle_fatal (const char *);
@@ -146,7 +147,7 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 
   private:
 	static UI *theGtkUI;
-	static pthread_t gui_thread;
+	static Glib::Thread* gui_thread;
 	bool _active;
 	Gtk::Main *theMain;
 #ifndef GTK_NEW_TOOLTIP_API

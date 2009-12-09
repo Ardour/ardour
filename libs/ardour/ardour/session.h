@@ -97,6 +97,7 @@ class MidiDiskstream;
 class MidiRegion;
 class MidiSource;
 class MidiTrack;
+class MidiControlUI;
 class NamedSelection;
 class Playlist;
 class PluginInsert;
@@ -616,14 +617,14 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	bool soloing() const { return _non_soloed_outs_muted; }
 	bool listening() const { return _listen_cnt > 0; }
 
-	void set_all_solo (bool);
-	void set_all_mute (bool);
-	void set_all_listen (bool);
+	void set_solo (boost::shared_ptr<RouteList>, bool);
+	void set_mute (boost::shared_ptr<RouteList>, bool);
+	void set_listen (boost::shared_ptr<RouteList>, bool);
 
 	sigc::signal<void,bool> SoloActive;
 	sigc::signal<void> SoloChanged;
 	
-	void set_all_record_enable (boost::shared_ptr<RouteList>, bool);
+	void set_record_enable (boost::shared_ptr<RouteList>, bool);
 
 	/* control/master out */
 
@@ -1253,25 +1254,11 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	bool non_realtime_work_pending() const { return static_cast<bool>(post_transport_work()); }
 	bool process_can_proceed() const { return !(post_transport_work() & ProcessCannotProceedMask); }
 
-	struct MIDIRequest {
-		enum Type {
-			PortChange,
-			Quit
-		};
-		Type type;
-	};
-
-	Glib::Mutex  midi_lock;
-	pthread_t    midi_thread;
-	int          midi_request_pipe[2];
-	RingBuffer<MIDIRequest*> midi_requests;
+	MidiControlUI* midi_control_ui;
 
 	int           start_midi_thread ();
 	void          terminate_midi_thread ();
-	void          poke_midi_thread ();
-	static void *_midi_thread_work (void *arg);
-	void          midi_thread_work ();
-	void          change_midi_ports ();
+
 	int           use_config_midi_ports ();
 
 	void set_play_loop (bool yn);

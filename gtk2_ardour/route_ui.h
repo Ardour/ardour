@@ -217,6 +217,7 @@ class RouteUI : public virtual AxisView
 
 	void post_rtop_cleanup (ARDOUR::SessionEvent* ev);
 	void post_group_rtop_cleanup (ARDOUR::SessionEvent* ev, ARDOUR::RouteGroup*, ARDOUR::RouteGroup::Property);
+	void post_solo_cleanup (ARDOUR::SessionEvent* ev, bool was_not_latched);
 };
 
 #endif /* __ardour_route_ui__ */

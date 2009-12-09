@@ -87,7 +87,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	cout << "MackieControlProtocol::MackieControlProtocol" << endl;
 #endif
 	// will start reading from ports, as soon as there are some
-	pthread_create_and_store (X_("mackie monitor"), &thread, 0, _monitor_work, this);
+	pthread_create_and_store (X_("mackie monitor"), &thread, _monitor_work, this);
 }
 
 MackieControlProtocol::~MackieControlProtocol()
@@ -1423,7 +1423,7 @@ LedState MackieControlProtocol::clicking_release (Button &)
 LedState MackieControlProtocol::global_solo_press (Button &)
 {
 	bool state = !session->soloing();
-	session->set_all_solo ( state );
+	session->set_solo (session->get_routes(), state);
 	return state;
 }
 

@@ -491,7 +491,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 	   (the GUI) to direct additional steps after that.
 	*/
 
-	pthread_create_and_store ("import", &import_status.thread, 0, _import_thread, this);
+	pthread_create_and_store ("import", &import_status.thread, _import_thread, this);
 	pthread_detach (import_status.thread);
 
 	while (!import_status.done && !import_status.cancel) {
@@ -879,7 +879,6 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 void *
 Editor::_import_thread (void *arg)
 {
-	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Import"));
 	SessionEvent::create_per_thread_pool ("import events", 64);
 
 	Editor *ed = (Editor *) arg;

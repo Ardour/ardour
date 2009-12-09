@@ -176,7 +176,6 @@ ExportChannelConfiguration::write_file ()
 void *
 ExportChannelConfiguration::_write_files (void *arg)
 {
-	notify_gui_about_thread_creation (pthread_self(), "Export post-processing");
 	SessionEvent::create_per_thread_pool ("exporter events", 64);
 
 	// cc can be trated like 'this'

@@ -86,16 +86,16 @@ TranzportControlProtocol::set_active (bool yn)
 				return -1;
 			}
 
-			if (pthread_create_and_store (X_("tranzport monitor"), &thread, 0, _monitor_work, this) == 0) {
+			if (pthread_create_and_store (X_("tranzport monitor"), &thread, _monitor_work, this) == 0) {
 				_active = true;
 #if TRANZPORT_THREADS                      
-			if (pthread_create_and_store (X_("tranzport read"), &thread_read, 0, _read_work, this) == 0) {
+			if (pthread_create_and_store (X_("tranzport read"), &thread_read, _read_work, this) == 0) {
 				_active_read = true;
-			if (pthread_create_and_store (X_("tranzport write"), &thread_write, 0, _write_work, this) == 0) {
+			if (pthread_create_and_store (X_("tranzport write"), &thread_write, _write_work, this) == 0) {
 				_active_write = true;
-			if (pthread_create_and_store (X_("tranzport process"), &thread_process, 0, _process_work, this) == 0) {
+			if (pthread_create_and_store (X_("tranzport process"), &thread_process, _process_work, this) == 0) {
 				_active_process = true;
-			if (pthread_create_and_store (X_("tranzport timer"), &thread_timer, 0, _process_timer, this) == 0) {
+			if (pthread_create_and_store (X_("tranzport timer"), &thread_timer, _process_timer, this) == 0) {
 				_active_process = true;
 #endif
 			} else {

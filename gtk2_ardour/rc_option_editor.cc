@@ -183,6 +183,7 @@ private:
 		node.add_property ("mode", smod);
 
 		if (MIDI::Manager::instance()->add_port (node) != 0) {
+			cerr << " there are now " << MIDI::Manager::instance()->nports() << endl;
 			ports_changed ();
 		}
 	}

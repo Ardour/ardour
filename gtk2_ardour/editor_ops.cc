@@ -3653,7 +3653,6 @@ Editor::unfreeze_route ()
 void*
 Editor::_freeze_thread (void* arg)
 {
-	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Freeze"));
 	SessionEvent::create_per_thread_pool ("freeze events", 64);
 
 	return static_cast<Editor*>(arg)->freeze_thread ();
@@ -3702,13 +3701,7 @@ Editor::freeze_route ()
 	itt.cancel = false;
 	itt.progress = 0.0f;
 
-	pthread_attr_t attr;
-	pthread_attr_init(&attr);
-	pthread_attr_setstacksize(&attr, 500000);
-
-	pthread_create_and_store (X_("freezer"), &itt.thread, &attr, _freeze_thread, this);
-
-	pthread_attr_destroy(&attr);
+	pthread_create_and_store (X_("freezer"), &itt.thread, _freeze_thread, this);
 
 	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 

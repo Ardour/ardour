@@ -30,9 +30,13 @@
 
 #include <glibmm/thread.h>
 
-#include "pbd/ringbuffer.h"
 #include <jack/jack.h>
 #include <jack/midiport.h>
+
+#include "pbd/ringbuffer.h"
+#include "pbd/crossthread.h"
+#include "evoral/EventRingBuffer.hpp"
+
 #include "midi++/port.h"
 #include "midi++/event.h"
 
@@ -49,16 +53,16 @@ public:
 	int write(byte *msg, size_t msglen, timestamp_t timestamp);
 	int read(byte *buf, size_t max);
 
-	/* No select(2)/poll(2)-based I/O */
-	virtual int selectable() const { return -1; }
+	int selectable() const { return xthread.selectable(); }
+	bool must_drain_selectable() const { return true; }
 	
-	virtual void cycle_start(nframes_t nframes);
-	virtual void cycle_end();
+	void cycle_start(nframes_t nframes);
+	void cycle_end();
 
 	static std::string typestring;
 
-	virtual XMLNode& get_state () const;
-	virtual void set_state (const XMLNode&);
+	XMLNode& get_state () const;
+	void set_state (const XMLNode&);
 
 	static void set_process_thread (pthread_t);
 	static pthread_t get_process_thread () { return _process_thread; }
@@ -79,13 +83,16 @@ private:
 	jack_port_t*   _jack_output_port;
 	nframes_t      _last_read_index;
 	timestamp_t    _last_write_timestamp;
+	CrossThreadChannel xthread;
 
 	void flush (void* jack_port_buffer);
 
 	static pthread_t _process_thread;
 
-	RingBuffer< Evoral::Event<double> > non_process_thread_fifo;
-	Glib::Mutex non_process_thread_fifo_lock;
+	RingBuffer< Evoral::Event<double> > output_fifo;
+	Evoral::EventRingBuffer<timestamp_t> input_fifo;
+
+	Glib::Mutex output_fifo_lock;
 };
 
 

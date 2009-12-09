@@ -733,7 +733,6 @@ SoundFileBrowser::found_search_clicked ()
 void*
 freesound_search_thread_entry (void* arg)
 {
-	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Freesound Search"));
 	SessionEvent::create_per_thread_pool ("freesound events", 64);
 
 	static_cast<SoundFileBrowser*>(arg)->freesound_search_thread ();
@@ -757,7 +756,7 @@ SoundFileBrowser::freesound_search_clicked ()
 		searching = true;
 		freesound_search_btn.set_label(_("Cancel"));
 		pthread_t freesound_thr;
-		pthread_create_and_store ("freesound_search", &freesound_thr, 0, freesound_search_thread_entry, this);
+		pthread_create_and_store ("freesound_search", &freesound_thr, freesound_search_thread_entry, this);
 	}
 }
 

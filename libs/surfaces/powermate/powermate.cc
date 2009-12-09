@@ -129,7 +129,7 @@ PowermateControlProtocol::set_active (bool inActivate)
 				return -1;
 			}
 			
-			if (pthread_create_and_store ("Powermate", &mThread, 0, SerialThreadEntry, this) == 0) {
+			if (pthread_create_and_store ("Powermate", &mThread, SerialThreadEntry, this) == 0) {
 				_active = true;
 			} else {
 				return -1;

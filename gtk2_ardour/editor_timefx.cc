@@ -225,7 +225,7 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 	current_timefx->first_delete = current_timefx->signal_delete_event().connect
 		(mem_fun (current_timefx, &TimeFXDialog::delete_in_progress));
 
-	if (pthread_create_and_store ("timefx", &current_timefx->request.thread, 0, timefx_thread, current_timefx)) {
+	if (pthread_create_and_store ("timefx", &current_timefx->request.thread, timefx_thread, current_timefx)) {
 		current_timefx->hide ();
 		error << _("timefx cannot be started - thread creation error") << endmsg;
 		return -1;
@@ -337,7 +337,6 @@ Editor::do_timefx (TimeFXDialog& dialog)
 void*
 Editor::timefx_thread (void *arg)
 {
-	PBD::notify_gui_about_thread_creation (pthread_self(), X_("TimeFX"));
 	SessionEvent::create_per_thread_pool ("timefx events", 64);
 
 	TimeFXDialog* tsd = static_cast<TimeFXDialog*>(arg);

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1998-99 Paul Barton-Davis 
+    Copyright (C) 1998-2009 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,38 +34,29 @@
 
 class Touchable;
 
-template <class RequestObject>
+template<typename RequestObject>
 class AbstractUI : public BaseUI
 {
   public:
-	AbstractUI (std::string name, bool with_signal_pipe);
+	AbstractUI (const std::string& name);
 	virtual ~AbstractUI() {}
 
-	virtual bool caller_is_ui_thread() = 0;
-
-	void call_slot (sigc::slot<void> el_slot) {
-		RequestObject *req = get_request (BaseUI::CallSlot);
-		
-		if (req == 0) {
-			return;
-		}
-		
-		req->slot = el_slot;
-		send_request (req);
-	}	
-
-	void register_thread (pthread_t, std::string);
-	void register_thread_with_request_count (pthread_t, std::string, uint32_t num_requests);
+	void register_thread (std::string, pthread_t, std::string, uint32_t num_requests);
+	void call_slot (sigc::slot<void> el_slot);
 
   protected:
 	typedef RingBufferNPT<RequestObject> RequestBuffer;
 	typedef typename RequestBuffer::rw_vector RequestBufferVector;
 	typedef typename std::map<pthread_t,RequestBuffer*>::iterator RequestBufferMapIterator;
-
-    Glib::Mutex request_buffer_map_lock;
 	typedef std::map<pthread_t,RequestBuffer*> RequestBufferMap;
+
+	Glib::Mutex request_buffer_map_lock;
 	RequestBufferMap request_buffers;
-	pthread_key_t thread_request_buffer_key;
+	Glib::Private<RequestBuffer> per_thread_request_buffer;
+
+	Glib::Mutex               request_list_lock;
+	std::list<RequestObject*> request_list;
+	
 	RequestObject* get_request (RequestType);
 	void handle_ui_requests ();
 	void send_request (RequestObject *);

@@ -1,5 +1,6 @@
 #include <unistd.h>
 
+#include "pbd/stacktrace.h"
 #include "pbd/abstract_ui.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/failed_constructor.h"
@@ -9,80 +10,64 @@
 using namespace std;
 
 template <typename RequestObject>
-AbstractUI<RequestObject>::AbstractUI (string name, bool with_signal_pipes)
-	: BaseUI (name, with_signal_pipes)
+AbstractUI<RequestObject>::AbstractUI (const string& name)
+	: BaseUI (name)
 {
-	if (pthread_key_create (&thread_request_buffer_key, 0)) {
-		cerr << _("cannot create thread request buffer key") << endl;
-		throw failed_constructor();
+	PBD::ThreadCreatedWithRequestSize.connect (mem_fun (*this, &AbstractUI<RequestObject>::register_thread));
+}
+
+template <typename RequestObject> void
+AbstractUI<RequestObject>::register_thread (string target_gui, pthread_t thread_id, string /*thread_name*/, uint32_t num_requests)
+{
+	if (target_gui != name()) {
+		return;
 	}
 
-	PBD::ThreadCreatedWithRequestSize.connect (mem_fun (*this, &AbstractUI<RequestObject>::register_thread_with_request_count));
-}
-
-template <typename RequestObject> void
-AbstractUI<RequestObject>::register_thread (pthread_t thread_id, string name)
-{
-	register_thread_with_request_count (thread_id, name, 256);
-}
-
-template <typename RequestObject> void
-AbstractUI<RequestObject>::register_thread_with_request_count (pthread_t thread_id, string /*thread_name*/, uint32_t num_requests)
-{
 	RequestBuffer* b = new RequestBuffer (num_requests);
 
 	{
-        Glib::Mutex::Lock lm (request_buffer_map_lock);
+		Glib::Mutex::Lock lm (request_buffer_map_lock);
 		request_buffers[thread_id] = b;
 	}
 
-	pthread_setspecific (thread_request_buffer_key, b);
+	per_thread_request_buffer.set (b);
 }
 
 template <typename RequestObject> RequestObject*
 AbstractUI<RequestObject>::get_request (RequestType rt)
 {
-	RequestBuffer* rbuf = static_cast<RequestBuffer*>(pthread_getspecific (thread_request_buffer_key));
-	
-	if (rbuf == 0) {
-		/* Cannot happen, but if it does we can't use the error reporting mechanism */
-		cerr << _("programming error: ")
-		     << string_compose ("no %1-UI request buffer found for thread %2", name(), pthread_name())
-		     << endl;
-		abort ();
-	}
-	
+	RequestBuffer* rbuf = per_thread_request_buffer.get ();
 	RequestBufferVector vec;
-	vec.buf[0] = 0;
-	vec.buf[1] = 0;
-	
-	rbuf->get_write_vector (&vec);
 
-	if (vec.len[0] == 0) {
-		if (vec.len[1] == 0) {
-			cerr << string_compose ("no space in %1-UI request buffer for thread %2", name(), pthread_name())
-			     << endl;
+	if (rbuf != 0) {
+		/* we have a per-thread FIFO, use it */
+
+		rbuf->get_write_vector (&vec);
+
+		if (vec.len[0] == 0) {
 			return 0;
-		} else {
-			vec.buf[1]->type = rt;
-			return vec.buf[1];
 		}
-	} else {
+
 		vec.buf[0]->type = rt;
 		return vec.buf[0];
 	}
+
+	RequestObject* req = new RequestObject;
+	req->type = rt;
+	return req;
 }
 
 template <typename RequestObject> void
 AbstractUI<RequestObject>::handle_ui_requests ()
 {
 	RequestBufferMapIterator i;
+	RequestBufferVector vec;
+
+	/* per-thread buffers first */
 
 	request_buffer_map_lock.lock ();
 
 	for (i = request_buffers.begin(); i != request_buffers.end(); ++i) {
-
-		RequestBufferVector vec;
 
 		while (true) {
 
@@ -110,6 +95,22 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 	}
 
 	request_buffer_map_lock.unlock ();
+
+	/* and now, the generic request buffer. same rules as above apply */
+
+	Glib::Mutex::Lock lm (request_list_lock);
+
+	while (!request_list.empty()) {
+		RequestObject* req = request_list.front ();
+		request_list.pop_front ();
+		lm.release ();
+
+		do_request (req);
+
+		delete req;
+
+		lm.acquire();
+	}
 }
 
 template <typename RequestObject> void
@@ -118,31 +119,41 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 	if (base_instance() == 0) {
 		return; /* XXX is this the right thing to do ? */
 	}
-	
-	if (caller_is_ui_thread()) {
-		// cerr << "GUI thread sent request " << req << " type = " << req->type << endl;
+
+	if (caller_is_self ()) {
 		do_request (req);
 	} else {	
-		RequestBuffer* rbuf = static_cast<RequestBuffer*> (pthread_getspecific (thread_request_buffer_key));
+		RequestBuffer* rbuf = per_thread_request_buffer.get ();
 
-		if (rbuf == 0) {
-			/* can't use the error system to report this, because this
-			   thread isn't registered!
+		if (rbuf != 0) {
+			rbuf->increment_write_ptr (1);
+		} else {
+			/* no per-thread buffer, so just use a list with a lock so that it remains
+			   single-reader/single-writer semantics
 			*/
-			cerr << _("programming error: ")
-			     << string_compose ("AbstractUI::send_request() called from %1 (%2), but no request buffer exists for that thread", name(), pthread_name())
-			     << endl;
-			abort ();
+			Glib::Mutex::Lock lm (request_list_lock);
+			request_list.push_back (req);
 		}
-		
-		// cerr << "thread " << pthread_self() << " sent request " << req << " type = " << req->type << endl;
 
-		rbuf->increment_write_ptr (1);
-
-		if (signal_pipe[1] >= 0) {
-			const char c = 0;
-			write (signal_pipe[1], &c, 1);
-		}
+		request_channel.wakeup ();
 	}
 }
+
+template<typename RequestObject> void
+AbstractUI<RequestObject>::call_slot (sigc::slot<void> elSlot)
+{
+	if (caller_is_self()) {
+		elSlot ();
+		return;
+	}
+
+	RequestObject *req = get_request (BaseUI::CallSlot);
+	
+	if (req == 0) {
+		return;
+	}
+
+	req->the_slot = elSlot;
+	send_request (req);
+}	
 

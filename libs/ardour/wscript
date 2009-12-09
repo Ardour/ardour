@@ -124,6 +124,7 @@ libardour_sources = [
 	'midi_state_tracker.cc',
 	'midi_stretch.cc',
 	'midi_track.cc',
+	'midi_ui.cc',
 	'mix.cc',
 	'mtc_slave.cc',
 	'mtdm.cc',

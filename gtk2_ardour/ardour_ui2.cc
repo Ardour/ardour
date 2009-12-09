@@ -478,7 +478,7 @@ void
 ARDOUR_UI::solo_alert_toggle ()
 {
 	if (session) {
-		session->set_all_solo (!session->soloing());
+		session->set_solo (session->get_routes(), !session->soloing());
 	}
 }
 

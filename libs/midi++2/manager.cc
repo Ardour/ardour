@@ -115,6 +115,8 @@ Manager::add_port (const XMLNode& node)
 		outputPort = port;
 	}
 
+	PortsChanged (); /* EMIT SIGNAL */
+
 	return port;
 }
 
@@ -124,11 +126,16 @@ Manager::remove_port (Port* port)
 	if (inputPort == port) {
 		inputPort = 0;
 	}
+
 	if (outputPort == port) {
 		outputPort = 0;
 	}
+
 	_ports.remove (port);
 	delete port;
+
+	PortsChanged (); /* EMIT SIGNAL */
+
 	return 0;
 }
 

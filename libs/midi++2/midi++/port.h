@@ -112,6 +112,7 @@ class Port : public sigc::trackable {
 	 * @return File descriptor, or -1 if not selectable. 
 	 */
 	virtual int selectable() const = 0;
+	virtual bool must_drain_selectable() const { return false; }
 
 	static void gtk_read_callback (void *ptr, int fd, int cond);
 	static void write_callback (byte *msg, unsigned int len, void *);

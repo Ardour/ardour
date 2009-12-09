@@ -28,6 +28,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <glibmm/main.h>
 
 #include "midi++/mmc.h"
 #include "midi++/port.h"
@@ -41,6 +42,7 @@
 #include "ardour/session.h"
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
+#include "ardour/midi_ui.h"
 #include "ardour/audio_diskstream.h"
 #include "ardour/slave.h"
 #include "ardour/cycles.h"
@@ -52,6 +54,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace MIDI;
+using namespace Glib;
 
 MachineControl::CommandSignature MMC_CommandSignature;
 MachineControl::ResponseSignature MMC_ResponseSignature;
@@ -146,7 +149,6 @@ Session::set_mtc_port (string port_tag)
 
   out:
 	MTC_PortChanged(); /* EMIT SIGNAL */
-	change_midi_ports ();
 	set_dirty();
 	return 0;
 }
@@ -244,7 +246,6 @@ Session::set_mmc_port (string port_tag)
 
   out:
 	MMC_PortChanged(); /* EMIT SIGNAL */
-	change_midi_ports ();
 	set_dirty();
 	return 0;
 }
@@ -278,7 +279,6 @@ Session::set_midi_port (string /*port_tag*/)
   out:
 #endif
 	MIDI_PortChanged(); /* EMIT SIGNAL */
-	change_midi_ports ();
 	set_dirty();
 	return 0;
 }
@@ -320,7 +320,6 @@ Session::set_midi_clock_port (string port_tag)
 
   out:
 	MIDIClock_PortChanged(); /* EMIT SIGNAL */
-	change_midi_ports ();
 	set_dirty();
 	return 0;
 }
@@ -640,8 +639,12 @@ Session::mmc_step (MIDI::MachineControl &/*mmc*/, int steps)
 	last_mmc_step = now;
 
 	if (!step_queued) {
-		midi_timeouts.push_back (mem_fun (*this, &Session::mmc_step_timeout));
-		step_queued = true;
+		if (midi_control_ui) {
+			RefPtr<TimeoutSource> tsrc = TimeoutSource::create (100);
+			tsrc->connect (mem_fun (*this, &Session::mmc_step_timeout));
+			tsrc->attach (midi_control_ui->main_loop()->get_context());
+			step_queued = true;
+		}
 	}
 }
 
@@ -739,16 +742,6 @@ Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
 			}
 		}
 	}
-}
-
-void
-Session::change_midi_ports ()
-{
-	MIDIRequest* request = new MIDIRequest;
-
-	request->type = MIDIRequest::PortChange;
-	midi_requests.write (&request, 1);
-	poke_midi_thread ();
 }
 
 /** Send MTC Full Frame message (complete Timecode time) for the start of this cycle.
@@ -1022,495 +1015,17 @@ Session::mmc_step_timeout ()
 int
 Session::start_midi_thread ()
 {
-	if (pipe (midi_request_pipe)) {
-		error << string_compose(_("Cannot create transport request signal pipe (%1)"), strerror (errno)) << endmsg;
-		return -1;
-	}
-
-	if (fcntl (midi_request_pipe[0], F_SETFL, O_NONBLOCK)) {
-		error << string_compose(_("UI: cannot set O_NONBLOCK on "    "signal read pipe (%1)"), strerror (errno)) << endmsg;
-		return -1;
-	}
-
-	if (fcntl (midi_request_pipe[1], F_SETFL, O_NONBLOCK)) {
-		error << string_compose(_("UI: cannot set O_NONBLOCK on "    "signal write pipe (%1)"), strerror (errno)) << endmsg;
-		return -1;
-	}
-
-	if (pthread_create_and_store ("transport", &midi_thread, 0, _midi_thread_work, this)) {
-		error << _("Session: could not create transport thread") << endmsg;
-		return -1;
-	}
-
+	midi_control_ui = new MidiControlUI (*this);
+	midi_control_ui->run ();
 	return 0;
 }
 
 void
 Session::terminate_midi_thread ()
 {
-	if (midi_thread) {
-
-		MIDIRequest* request = new MIDIRequest;
-		void* status;
-
-		request->type = MIDIRequest::Quit;
-
-		midi_requests.write (&request, 1);
-		poke_midi_thread ();
-
-		pthread_join (midi_thread, &status);
+	if (midi_control_ui) {
+		midi_control_ui->quit ();
 	}
 }
 
-void
-Session::poke_midi_thread ()
-{
-	static char c = 0;
-
-	if (write (midi_request_pipe[1], &c, 1) != 1) {
-		error << string_compose(_("cannot send signal to midi thread! (%1)"), strerror (errno)) << endmsg;
-	}
-}
-
-void *
-Session::_midi_thread_work (void* arg)
-{
-	pthread_setcancelstate (PTHREAD_CANCEL_ENABLE, 0);
-	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
-
-	((Session *) arg)->midi_thread_work ();
-	return 0;
-}
-
-#if 0
-void
-Session::midi_thread_work ()
-{
-	MIDIRequest* request;
-	GPollFD pfd[4];
-	int nfds = 0;
-	int timeout;
-	int fds_ready;
-	struct sched_param rtparam;
-	int x;
-	bool restart;
-	vector<MIDI::Port*> ports;
-
-	PBD::notify_gui_about_thread_creation (pthread_self(), X_("MIDI"), 2048);
-	SessionEvent::create_per_thread_pool (X_("MIDI I/O"), 128);
-
-	memset (&rtparam, 0, sizeof (rtparam));
-	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */
-
-	if ((x = pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam)) != 0) {
-		// do we care? not particularly.
-	}
-
-	/* set up the port vector; 5 is the largest possible size for now */
-
-	ports.assign (5, (MIDI::Port*) 0);
-
-	GMainContext* main_context = g_main_context_new ();
-
-	while (1) {
-
-		nfds = 0;
-
-		gpfd[nfds].fd = midi_request_pipe[0];
-		gpfd[nfds].events = POLLIN|POLLHUP|POLLERR;
-		nfds++;
-
-		if (Config->get_mmc_control() && _mmc_port && _mmc_port->selectable() >= 0) {
-			gpfd[nfds].fd = _mmc_port->selectable();
-			gpfd[nfds].events = POLLIN|POLLHUP|POLLERR;
-			ports[nfds] = _mmc_port;
-			g_main_context_add_poll (&gpfd[nfds]);
-			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("set up port #%1 for mmc @ %2\n", nfds, _mmc_port));
-			nfds++;
-		}
-
-		/* if MTC is being handled on a different port from MMC
-		   or we are not handling MMC at all, poll
-		   the relevant port.
-		*/
-
-		if (_mtc_port && (_mtc_port != _mmc_port || !Config->get_mmc_control()) && _mtc_port->selectable() >= 0) {
-			gpfd[nfds].fd = _mtc_port->selectable();
-			gpfd[nfds].events = POLLIN|POLLHUP|POLLERR;
-			ports[nfds] = _mtc_port;
-			g_main_context_add_poll (&gpfd[nfds]);
-			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("set up port #%1 for mtc @ %2\n", nfds, _mtc_port));
-			nfds++;
-		}
-
-		if (_midi_clock_port && (_midi_clock_port != _mmc_port || !Config->get_mmc_control()) && _midi_clock_port->selectable() >= 0) {
-			gpfd[nfds].fd = _midi_clock_port->selectable();
-			gpfd[nfds].events = POLLIN|POLLHUP|POLLERR;
-			ports[nfds] = _midi_clock_port;
-			g_main_context_add_poll (&gpfd[nfds]);
-			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("set up port #%1 for midi clock @ %2\n", nfds, _midi_clock_port));
-			nfds++;
-		}
-
-		/* if we are using MMC control, we obviously have to listen
-		   the relevant port.
-		*/
-
-		if (_midi_port && (_midi_port != _mmc_port || !Config->get_mmc_control()) && (_midi_port != _mtc_port) && _midi_port->selectable() >= 0) {
-			gpfd[nfds].fd = _midi_port->selectable();
-			gpfd[nfds].events = POLLIN|POLLHUP|POLLERR;
-			ports[nfds] = _midi_port;
-			g_main_context_add_poll (&gpfd[nfds]);
-			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("set up port #%1 for midi @ %2\n", nfds, _midi_port));
-			nfds++;
-		}
-
-		if (!midi_timeouts.empty()) {
-			timeout = 100; /* 10msecs */
-		} else {
-			timeout = -1; /* if there is no data, we don't care */
-		}
-
-	  again:
-
-		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("MIDI poll on %1 fds for %2\n", nfds, timeout));
-		if (g_poll (gpfd, nfds, timeout) < 0) {
-			if (errno == EINTR) {
-				/* gdb at work, perhaps */
-				goto again;
-			}
-
-			error << string_compose(_("MIDI thread poll failed (%1)"), strerror (errno)) << endmsg;
-
-			break;
-		}
-
-		nframes64_t now = engine().frame_time();
-
-		DEBUG_TRACE (DEBUG::MidiIO, "MIDI thread awake\n");
-
-		fds_ready = 0;
-
-		/* check the transport request pipe */
-
-		if (gpfd[0].revents & ~POLLIN) {
-			error << _("Error on transport thread request pipe") << endmsg;
-			break;
-		}
-
-		if (gpfd[0].revents & POLLIN) {
-
-			char foo[16];
-			
-			DEBUG_TRACE (DEBUG::MidiIO, "MIDI request FIFO ready\n");
-			fds_ready++;
-
-			/* empty the pipe of all current requests */
-
-			while (1) {
-				size_t nread = read (midi_request_pipe[0], &foo, sizeof (foo));
-
-				if (nread > 0) {
-					if ((size_t) nread < sizeof (foo)) {
-						break;
-					} else {
-						continue;
-					}
-				} else if (nread == 0) {
-					break;
-				} else if (errno == EAGAIN) {
-					break;
-				} else {
-					fatal << _("Error reading from transport request pipe") << endmsg;
-					/*NOTREACHED*/
-				}
-			}
-
-			while (midi_requests.read (&request, 1) == 1) {
-
-				switch (request->type) {
-				case MIDIRequest::PortChange:
-					/* restart poll with new ports */
-					DEBUG_TRACE (DEBUG::MidiIO, "rebind\n");
-					restart = true;
-					break;
-
-				case MIDIRequest::Quit:
-					delete request;
-					DEBUG_TRACE (DEBUG::MidiIO, "thread quit\n");
-					pthread_exit_pbd (0);
-					/*NOTREACHED*/
-					break;
-
-				default:
-					break;
-				}
-
-
-				delete request;
-			}
-
-		}
-
-		if (restart) {
-			DEBUG_TRACE (DEBUG::MidiIO, "ports changed, restart poll\n");
-			restart = false;
-			continue;
-		}
-
-		/* now read the rest of the ports */
-
-		for (int p = 1; p < nfds; ++p) {
-
-			DEBUG_STR_SET(foo, "port #%1 revents = ");
-			DEBUG_STR(foo) << hex << pfd[p].revents << dec << endl;
-			DEBUG_TRACE (DEBUG::MidiIO, string_compose (DEBUG_STR(foo).str(), p));
-
-			if ((pfd[p].revents & ~POLLIN)) {
-				// error << string_compose(_("Transport: error polling MIDI port %1 (revents =%2%3%4"), p, &hex, pfd[p].revents, &dec) << endmsg;
-				break;
-			}
-
-			if (pfd[p].revents & POLLIN) {
-				DEBUG_TRACE (DEBUG::MidiIO, string_compose ("MIDI fd # %1 has data ready @ %2\n", p, now));
-				fds_ready++;
-				ports[p]->parse (now);
-			}
-
-			g_main_context_remove_poll (&gpfd[p]);
-		}
-
-		/* timeout driven */
-
-		if (fds_ready < 2 && timeout != -1) {
-
-			DEBUG_TRACE (DEBUG::MidiIO, "Check timeouts\n");
-			for (MidiTimeoutList::iterator i = midi_timeouts.begin(); i != midi_timeouts.end(); ) {
-
-				MidiTimeoutList::iterator tmp;
-				tmp = i;
-				++tmp;
-
-				if (!(*i)()) {
-					midi_timeouts.erase (i);
-				}
-
-				i = tmp;
-			}
-		}
-	}
-
-}
-#endif
-
-void
-Session::midi_thread_work ()
-{
-	MIDIRequest* request;
-	struct pollfd pfd[4];
-	int nfds = 0;
-	int timeout;
-	int fds_ready;
-	struct sched_param rtparam;
-	int x;
-	bool restart;
-	vector<MIDI::Port*> ports;
-
-	PBD::notify_gui_about_thread_creation (pthread_self(), X_("MIDI"), 2048);
-	SessionEvent::create_per_thread_pool (X_("MIDI I/O"), 128);
-
-	memset (&rtparam, 0, sizeof (rtparam));
-	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */
-
-	if ((x = pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam)) != 0) {
-		// do we care? not particularly.
-	}
-
-	/* set up the port vector; 5 is the largest possible size for now */
-
-	ports.assign (5, (MIDI::Port*) 0);
-
-	while (1) {
-
-		nfds = 0;
-
-		pfd[nfds].fd = midi_request_pipe[0];
-		pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
-		nfds++;
-
-		if (Config->get_mmc_control() && _mmc_port && _mmc_port->selectable() >= 0) {
-			pfd[nfds].fd = _mmc_port->selectable();
-			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
-			ports[nfds] = _mmc_port;
-			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("set up port #%1 for mmc @ %2\n", nfds, _mmc_port));
-			nfds++;
-		}
-
-		/* if MTC is being handled on a different port from MMC
-		   or we are not handling MMC at all, poll
-		   the relevant port.
-		*/
-
-		if (_mtc_port && (_mtc_port != _mmc_port || !Config->get_mmc_control()) && _mtc_port->selectable() >= 0) {
-			pfd[nfds].fd = _mtc_port->selectable();
-			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
-			ports[nfds] = _mtc_port;
-			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("set up port #%1 for mtc @ %2\n", nfds, _mtc_port));
-			nfds++;
-		}
-
-		if (_midi_clock_port && (_midi_clock_port != _mmc_port || !Config->get_mmc_control()) && _midi_clock_port->selectable() >= 0) {
-			pfd[nfds].fd = _midi_clock_port->selectable();
-			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
-			ports[nfds] = _midi_clock_port;
-			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("set up port #%1 for midi clock @ %2\n", nfds, _midi_clock_port));
-			nfds++;
-		}
-
-		/* if we are using MMC control, we obviously have to listen
-		   the relevant port.
-		*/
-
-		if (_midi_port && (_midi_port != _mmc_port || !Config->get_mmc_control()) && (_midi_port != _mtc_port) && _midi_port->selectable() >= 0) {
-			pfd[nfds].fd = _midi_port->selectable();
-			pfd[nfds].events = POLLIN|POLLHUP|POLLERR;
-			ports[nfds] = _midi_port;
-			DEBUG_TRACE (DEBUG::MidiIO, string_compose ("set up port #%1 for midi @ %2\n", nfds, _midi_port));
-			nfds++;
-		}
-
-		if (!midi_timeouts.empty()) {
-			timeout = 100; /* 10msecs */
-		} else {
-			timeout = -1; /* if there is no data, we don't care */
-		}
-
-	  again:
-		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("MIDI poll on %1 fds for %2\n", nfds, timeout));
-		if (poll (pfd, nfds, timeout) < 0) {
-			if (errno == EINTR) {
-				/* gdb at work, perhaps */
-				goto again;
-			}
-
-			error << string_compose(_("MIDI thread poll failed (%1)"), strerror (errno)) << endmsg;
-
-			break;
-		}
-
-		nframes64_t now = engine().frame_time();
-
-		DEBUG_TRACE (DEBUG::MidiIO, "MIDI thread awake\n");
-
-		fds_ready = 0;
-
-		/* check the transport request pipe */
-
-		if (pfd[0].revents & ~POLLIN) {
-			error << _("Error on transport thread request pipe") << endmsg;
-			break;
-		}
-
-		if (pfd[0].revents & POLLIN) {
-
-			char foo[16];
-			
-			DEBUG_TRACE (DEBUG::MidiIO, "MIDI request FIFO ready\n");
-			fds_ready++;
-
-			/* empty the pipe of all current requests */
-
-			while (1) {
-				size_t nread = read (midi_request_pipe[0], &foo, sizeof (foo));
-
-				if (nread > 0) {
-					if ((size_t) nread < sizeof (foo)) {
-						break;
-					} else {
-						continue;
-					}
-				} else if (nread == 0) {
-					break;
-				} else if (errno == EAGAIN) {
-					break;
-				} else {
-					fatal << _("Error reading from transport request pipe") << endmsg;
-					/*NOTREACHED*/
-				}
-			}
-
-			while (midi_requests.read (&request, 1) == 1) {
-
-				switch (request->type) {
-				case MIDIRequest::PortChange:
-					/* restart poll with new ports */
-					DEBUG_TRACE (DEBUG::MidiIO, "rebind\n");
-					restart = true;
-					break;
-
-				case MIDIRequest::Quit:
-					delete request;
-					DEBUG_TRACE (DEBUG::MidiIO, "thread quit\n");
-					pthread_exit_pbd (0);
-					/*NOTREACHED*/
-					break;
-
-				default:
-					break;
-				}
-
-
-				delete request;
-			}
-
-		}
-
-		if (restart) {
-			DEBUG_TRACE (DEBUG::MidiIO, "ports changed, restart poll\n");
-			restart = false;
-			continue;
-		}
-
-		/* now read the rest of the ports */
-
-		for (int p = 1; p < nfds; ++p) {
-
-#ifndef NDEBUG
-			DEBUG_STR_SET(foo, "port #%1 revents = ");
-			DEBUG_STR(foo) << hex << pfd[p].revents << dec << endl;
-			DEBUG_TRACE (DEBUG::MidiIO, string_compose (DEBUG_STR(foo).str(), p));
-#endif
-
-			if ((pfd[p].revents & ~POLLIN)) {
-				// error << string_compose(_("Transport: error polling MIDI port %1 (revents =%2%3%4"), p, &hex, pfd[p].revents, &dec) << endmsg;
-				break;
-			}
-
-			if (pfd[p].revents & POLLIN) {
-				DEBUG_TRACE (DEBUG::MidiIO, string_compose ("MIDI fd # %1 has data ready @ %2\n", p, now));
-				fds_ready++;
-				ports[p]->parse (now);
-			}
-		}
-
-		/* timeout driven */
-
-		if (fds_ready < 2 && timeout != -1) {
-
-			DEBUG_TRACE (DEBUG::MidiIO, "Check timeouts\n");
-			for (MidiTimeoutList::iterator i = midi_timeouts.begin(); i != midi_timeouts.end(); ) {
-
-				MidiTimeoutList::iterator tmp;
-				tmp = i;
-				++tmp;
-
-				if (!(*i)()) {
-					midi_timeouts.erase (i);
-				}
-
-				i = tmp;
-			}
-		}
-	}
-}
 

@@ -135,7 +135,9 @@ _thread_init_callback (void * /*arg*/)
 	   knows about it.
 	*/
 
-	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Audioengine"), 4096);
+	PBD::notify_gui_about_thread_creation ("gui", pthread_self(), X_("Audioengine"), 4096);
+	PBD::notify_gui_about_thread_creation ("midiui", pthread_self(), X_("Audioengine"), 128);
+
 	SessionEvent::create_per_thread_pool (X_("Audioengine"), 512);
 
 	MIDI::JACK_MidiPort::set_process_thread (pthread_self());

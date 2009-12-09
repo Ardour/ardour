@@ -115,7 +115,7 @@ sigc::signal<void,nframes_t, bool, nframes_t> ARDOUR_UI::Clock;
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
-	: Gtkmm2ext::UI (X_("Ardour"), argcp, argvp),
+	: Gtkmm2ext::UI (X_("gui"), argcp, argvp),
 
 	  primary_clock (X_("primary"), false, X_("TransportClockDisplay"), true, true, false, true),
 	  secondary_clock (X_("secondary"), false, X_("SecondaryClockDisplay"), true, true, false, true),

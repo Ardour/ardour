@@ -122,22 +122,29 @@ void CoreMidi_MidiPort::read_proc (const MIDIPacketList *pktlist, void *refCon, 
 
     if (driver->firstrecv) {
 	    driver->firstrecv = false;
-	    PBD::notify_gui_about_thread_creation (pthread_self(), "COREMIDI");
+	    PBD::notify_gui_about_thread_creation ("gui", pthread_self(), "COREMIDI", 256);
     }
 
     for (unsigned int i = 0; i < pktlist->numPackets; ++i) {
-    
-        driver->bytes_read += packet->length;
-		
+	    
+	    driver->bytes_read += packet->length;
+	    
 	    if (driver->input_parser) {
-			driver->input_parser->raw_preparse (*driver->input_parser, packet->data, packet->length);
-			for (int i = 0; i < packet->length; i++) {
-				driver->input_parser->scanner (packet->data[i]);
-			}	
-			driver->input_parser->raw_postparse (*driver->input_parser, packet->data, packet->length);
-		}
-                 
-        packet = MIDIPacketNext(packet);
+		    //driver->input_parser->raw_preparse (*driver->input_parser, packet->data, packet->length);
+		    
+		    /* XXX This is technically the wrong timebase, since it is based on
+		       host time.
+		    */
+		    driver->input_parser->set_timestamp (packet->timestamp);
+		    
+		    for (int i = 0; i < packet->length; i++) {
+			    driver->input_parser->scanner (packet->data[i]);
+		    }	
+		    
+		    //driver->input_parser->raw_postparse (*driver->input_parser, packet->data, packet->length);
+	    }
+	    
+	    packet = MIDIPacketNext(packet);
     }
 }
 

@@ -27,19 +27,18 @@
 
 #include <sigc++/sigc++.h>
 
-int  pthread_create_and_store (std::string name, pthread_t  *thread, pthread_attr_t *attr, void * (*start_routine)(void *), void * arg);
+int  pthread_create_and_store (std::string name, pthread_t  *thread, void * (*start_routine)(void *), void * arg);
 void pthread_cancel_one (pthread_t thread);
 void pthread_kill_all (int signum);
-void pthread_cancel_all ();
 void pthread_exit_pbd (void* status);
 std::string pthread_name ();
 
 namespace PBD {
-	extern void notify_gui_about_thread_creation (pthread_t, std::string, int requests = 256);
+	extern void notify_gui_about_thread_creation (std::string, pthread_t, std::string, int requests = 256);
 	extern void notify_gui_about_thread_exit (pthread_t);
 
-	extern sigc::signal<void,pthread_t>             ThreadLeaving;
-	extern sigc::signal<void,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
+	extern sigc::signal<void,pthread_t>                                  ThreadLeaving;
+	extern sigc::signal<void,std::string,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
 }
 
 #endif /* __pbd_pthread_utils__ */

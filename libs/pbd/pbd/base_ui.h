@@ -26,12 +26,21 @@
 #include <sigc++/slot.h>
 #include <sigc++/trackable.h>
 
+#include <glibmm/thread.h>
+#include <glibmm/main.h>
+
+#include "pbd/crossthread.h"
+
 class BaseUI : virtual public sigc::trackable {
   public:
-	BaseUI (std::string name, bool with_signal_pipes);
+	BaseUI (const std::string& name);
 	virtual ~BaseUI();
 
 	BaseUI* base_instance() { return base_ui_instance; }
+
+	Glib::RefPtr<Glib::MainLoop> main_loop() const { return _main_loop; }
+	Glib::Thread* event_loop_thread() const { return run_loop_thread; }
+	bool caller_is_self () const { return Glib::Thread::self() == run_loop_thread; }
 
 	std::string name() const { return _name; }
 
@@ -49,17 +58,31 @@ class BaseUI : virtual public sigc::trackable {
 	static RequestType new_request_type();
 	static RequestType CallSlot;
 
+	void run ();
+	void quit ();
+
+	virtual void call_slot (sigc::slot<void> theSlot) = 0;
+
   protected:
-	int signal_pipe[2];
+	CrossThreadChannel request_channel;
 	bool _ok; 
+
+	Glib::RefPtr<Glib::MainLoop> _main_loop;
+	Glib::Thread*                 run_loop_thread;
+
+	virtual void thread_init () {};
+	bool request_handler (Glib::IOCondition);
+
+	virtual void handle_ui_requests () = 0;
 
   private:
 	std::string _name; 
 	BaseUI* base_ui_instance;
+	
+	static uint64_t rt_bit;
 
-	static uint32_t rt_bit;
-
-	int setup_signal_pipe ();
+	int setup_request_pipe ();
+	void main_thread ();
 };
 
 #endif /* __pbd_base_ui_h__ */

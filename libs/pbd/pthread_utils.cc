@@ -36,8 +36,8 @@ static pthread_mutex_t thread_map_lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t gui_notify_lock = PTHREAD_MUTEX_INITIALIZER;
 
 namespace PBD {
-   sigc::signal<void,pthread_t>             ThreadLeaving;
-   sigc::signal<void,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
+	sigc::signal<void,pthread_t>             ThreadLeaving;
+	sigc::signal<void,std::string, pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
 }
 
 using namespace PBD;
@@ -52,10 +52,10 @@ static int thread_creator (pthread_t* thread_id, const pthread_attr_t* attr, voi
 }
 
 void
-PBD::notify_gui_about_thread_creation (pthread_t thread, std::string str, int request_count)
+PBD::notify_gui_about_thread_creation (std::string target_gui, pthread_t thread, std::string str, int request_count)
 {
 	pthread_mutex_lock (&gui_notify_lock);
-	ThreadCreatedWithRequestSize (thread, str, request_count);
+	ThreadCreatedWithRequestSize (target_gui, thread, str, request_count);
 	pthread_mutex_unlock (&gui_notify_lock);
 }
 
@@ -68,35 +68,27 @@ PBD::notify_gui_about_thread_exit (pthread_t thread)
 }
 
 int  
-pthread_create_and_store (string name, pthread_t  *thread, pthread_attr_t *attr, void * (*start_routine)(void *), void * arg)
+pthread_create_and_store (string name, pthread_t  *thread, void * (*start_routine)(void *), void * arg)
 {
-	int ret;
-
 	pthread_attr_t default_attr;
-	bool use_default_attr = (attr == NULL);
+	int ret;
 	
-	if (use_default_attr) {
-		// set default stack size to sensible default for memlocking
-		pthread_attr_init(&default_attr);
-		pthread_attr_setstacksize(&default_attr, 500000);
-		attr = &default_attr;
-	}
+	// set default stack size to sensible default for memlocking
+	pthread_attr_init(&default_attr);
+	pthread_attr_setstacksize(&default_attr, 500000);
 
-	if ((ret = thread_creator (thread, attr, start_routine, arg)) == 0) {
+	if ((ret = thread_creator (thread, &default_attr, start_routine, arg)) == 0) {
 		std::pair<string,pthread_t> newpair;
 		newpair.first = name;
 		newpair.second = *thread;
 
 		pthread_mutex_lock (&thread_map_lock);
 		all_threads.insert (newpair);
-
 		pthread_mutex_unlock (&thread_map_lock);
 	}
 
-	if (use_default_attr) {
-		pthread_attr_destroy(&default_attr);
-	}
-	
+	pthread_attr_destroy(&default_attr);
+
 	return ret;
 }
 
@@ -125,19 +117,6 @@ pthread_kill_all (int signum)
 	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
 		if (i->second != pthread_self()) {
 			pthread_kill (i->second, signum);
-		}
-	}
-	all_threads.clear();
-	pthread_mutex_unlock (&thread_map_lock);
-}
-
-void
-pthread_cancel_all () 
-{	
-	pthread_mutex_lock (&thread_map_lock);
-	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
-		if (i->second != pthread_self()) {
-			pthread_cancel (i->second);
 		}
 	}
 	all_threads.clear();

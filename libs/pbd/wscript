@@ -57,6 +57,7 @@ def build(bld):
 		command.cc
 		convert.cc
 		controllable.cc
+                crossthread.cc
 		enumwriter.cc
 		dmalloc.cc
 		error.cc

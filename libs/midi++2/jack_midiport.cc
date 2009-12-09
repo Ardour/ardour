@@ -20,9 +20,11 @@
 #include <fcntl.h>
 #include <cerrno>
 #include <cassert>
+#include <cstring>
 #include <cstdlib>
 
 #include "pbd/error.h"
+#include "pbd/compose.h"
 
 #include "midi++/types.h"
 #include "midi++/jack.h"
@@ -39,11 +41,10 @@ JACK_MidiPort::JACK_MidiPort(const XMLNode& node, jack_client_t* jack_client)
 	, _jack_input_port(NULL)
 	, _jack_output_port(NULL)
 	, _last_read_index(0)
-	, non_process_thread_fifo (512)
+	, output_fifo (512)
+	, input_fifo (1024)
 {
-	int err = create_ports (node);
-
-	if (!err) {
+	if (!create_ports (node)) {
 		_ok = true;
 	}
 }
@@ -82,19 +83,16 @@ JACK_MidiPort::cycle_start (nframes_t nframes)
 		const nframes_t event_count = jack_midi_get_event_count(jack_buffer);
 
 		jack_midi_event_t ev;
-		nframes_t cycle_start_frame = jack_last_frame_time (_jack_client);
+		timestamp_t cycle_start_frame = jack_last_frame_time (_jack_client);
 
-		for (nframes_t i=0; i < event_count; ++i) {
-
+		for (nframes_t i = 0; i < event_count; ++i) {
 			jack_midi_event_get (&ev, jack_buffer, i);
-
-			if (input_parser) {
-				for (size_t i = 0; i < ev.size; i++) {
-					input_parser->set_timestamp (cycle_start_frame + ev.time);
-					input_parser->scanner (ev.buffer[i]);
-				}	
-			}
+			input_fifo.write (cycle_start_frame + ev.time, (Evoral::EventType) 0, ev.size, ev.buffer);
 		}	
+		
+		if (event_count) {
+			xthread.wakeup ();
+		}
 	}
 }
 
@@ -104,6 +102,8 @@ JACK_MidiPort::cycle_end ()
 	if (_jack_output_port != 0) {
 		flush (jack_port_get_buffer (_jack_output_port, _nframes_this_cycle));
 	}
+
+	Port::cycle_end();
 }
 
 int
@@ -113,10 +113,10 @@ JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 
 	if (!is_process_thread()) {
 
-		Glib::Mutex::Lock lm (non_process_thread_fifo_lock);
+		Glib::Mutex::Lock lm (output_fifo_lock);
 		RingBuffer< Evoral::Event<double> >::rw_vector vec;
 		
-		non_process_thread_fifo.get_write_vector (&vec);
+		output_fifo.get_write_vector (&vec);
 
 		if (vec.len[0] + vec.len[1] < 1) {
 			error << "no space in FIFO for non-process thread MIDI write" << endmsg;
@@ -129,10 +129,10 @@ JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 			vec.buf[1]->set (msg, msglen, timestamp);
 		}
 
-		non_process_thread_fifo.increment_write_idx (1);
+		output_fifo.increment_write_idx (1);
 		
 		ret = msglen;
-				
+
 	} else {
 
 		assert(_jack_output_port);
@@ -164,11 +164,13 @@ JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 	}
 
 	if (ret > 0 && output_parser) {
-		output_parser->raw_preparse (*output_parser, msg, ret);
+		// ardour doesn't care about this and neither should your app, probably
+		// output_parser->raw_preparse (*output_parser, msg, ret);
 		for (int i = 0; i < ret; i++) {
 			output_parser->scanner (msg[i]);
 		}
-		output_parser->raw_postparse (*output_parser, msg, ret);
+		// ardour doesn't care about this and neither should your app, probably
+		// output_parser->raw_postparse (*output_parser, msg, ret);
 	}	
 
 	return ret;
@@ -180,7 +182,7 @@ JACK_MidiPort::flush (void* jack_port_buffer)
 	RingBuffer< Evoral::Event<double> >::rw_vector vec;
 	size_t written;
 
-	non_process_thread_fifo.get_read_vector (&vec);
+	output_fifo.get_read_vector (&vec);
 
 	if (vec.len[0] + vec.len[1]) {
 		// cerr << "Flush " << vec.len[0] + vec.len[1] << " events from non-process FIFO\n";
@@ -205,15 +207,28 @@ JACK_MidiPort::flush (void* jack_port_buffer)
 	}
 	
 	if ((written = vec.len[0] + vec.len[1]) != 0) {
-		non_process_thread_fifo.increment_read_idx (written);
+		output_fifo.increment_read_idx (written);
 	}
 }
 
 int
-JACK_MidiPort::read(byte * buf, size_t bufsize)
+JACK_MidiPort::read (byte * buf, size_t bufsize)
 {
-	cerr << "This program is improperly written. JACK_MidiPort::read() should never be called\n";
-	abort ();
+	timestamp_t time;
+	Evoral::EventType type;
+	uint32_t size;
+	byte buffer[input_fifo.capacity()];
+
+	while (input_fifo.read (&time, &type, &size, buffer)) {
+		if (input_parser) {
+			input_parser->set_timestamp (time);
+			for (uint32_t i = 0; i < size; ++i) {
+				input_parser->scanner (buffer[i]);
+			}
+		}
+	}
+
+	return 0;
 }
 
 int

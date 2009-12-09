@@ -47,7 +47,6 @@ using namespace Glib;
 using namespace PBD;
 using std::map;
 
-pthread_t UI::gui_thread;
 UI       *UI::theGtkUI = 0;
 
 BaseUI::RequestType Gtkmm2ext::ErrorMessage = BaseUI::new_request_type();
@@ -58,11 +57,10 @@ BaseUI::RequestType Gtkmm2ext::SetTip = BaseUI::new_request_type();
 BaseUI::RequestType Gtkmm2ext::AddIdle = BaseUI::new_request_type();
 BaseUI::RequestType Gtkmm2ext::AddTimeout = BaseUI::new_request_type();
 
-#include <pbd/abstract_ui.cc>  /* instantiate the template */
-
+#include "pbd/abstract_ui.cc"  /* instantiate the template */
 
 UI::UI (string namestr, int *argc, char ***argv)
-	: AbstractUI<UIRequest> (namestr, true)
+	: AbstractUI<UIRequest> (namestr)
 {
 	theMain = new Main (argc, argv);
 #ifndef GTK_NEW_TOOLTIP_API
@@ -73,18 +71,20 @@ UI::UI (string namestr, int *argc, char ***argv)
 
 	if (!theGtkUI) {
 		theGtkUI = this;
-		gui_thread = pthread_self ();
 	} else {
 		fatal << "duplicate UI requested" << endmsg;
 		/* NOTREACHED */
 	}
 
-	/* add the pipe to the select/poll loop that GDK does */
+	/* the GUI event loop runs in the main thread of the app,
+	   which is assumed to have called this.
+	*/
 
-	gdk_input_add (signal_pipe[0],
-		       GDK_INPUT_READ,
-		       UI::signal_pipe_callback,
-		       this);
+	run_loop_thread = Thread::self();
+
+	/* attach our request source to the default main context */
+
+	request_channel.ios()->attach (MainContext::get_default());
 
 	errors = new TextViewer (800,600);
 	errors->text().set_editable (false);
@@ -100,8 +100,6 @@ UI::UI (string namestr, int *argc, char ***argv)
 	errors->signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), (Window *) errors));
 	errors->set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
 
-	register_thread (pthread_self(), X_("GUI"));
-
 	//load_rcfile (rcfile);
 }
 
@@ -113,7 +111,7 @@ UI::~UI ()
 bool
 UI::caller_is_ui_thread ()
 {
-	return pthread_equal (gui_thread, pthread_self());
+	return Thread::self() == run_loop_thread;
 }
 
 int
@@ -122,7 +120,9 @@ UI::load_rcfile (string path, bool themechange)
 	/* Yes, pointers to Glib::RefPtr.  If these are not kept around,
 	 * a segfault somewhere deep in the wonderfully robust glib will result.
 	 * This does not occur if wiget.get_style is used instead of rc.get_style below,
-	 * except that doesn't actually work... */
+	 * except that doesn't actually work... 
+	 */
+
 	static Glib::RefPtr<Style>* fatal_style   = 0;
 	static Glib::RefPtr<Style>* error_style   = 0;
 	static Glib::RefPtr<Style>* warning_style = 0;
@@ -251,14 +251,6 @@ UI::running ()
 }
 
 void
-UI::kill ()
-{
-	if (_active) {
-		pthread_kill (gui_thread, SIGKILL);
-	}
-}
-
-void
 UI::quit ()
 {
 	UIRequest *req = get_request (Quit);
@@ -349,18 +341,6 @@ UI::idle_add (int (*func)(void *), void *arg)
 /* END abstract_ui interfaces */
 
 void
-UI::signal_pipe_callback (void *arg, int fd, GdkInputCondition /*cond*/)
-{
-	char buf[256];
-
-	/* flush (nonblocking) pipe */
-
-	while (read (fd, buf, 256) > 0) {}
-
-	((UI *) arg)->handle_ui_requests ();
-}
-
-void
 UI::do_request (UIRequest* req)
 {
 	if (req->type == ErrorMessage) {
@@ -375,7 +355,7 @@ UI::do_request (UIRequest* req)
 
 	} else if (req->type == CallSlot) {
 
-		req->slot ();
+		req->the_slot ();
 
 	} else if (req->type == TouchDisplay) {
 
@@ -550,10 +530,9 @@ UI::handle_fatal (const char *message)
 
 	win.set_default_size (400, 100);
 
-	string title;
-	title = name();
+	WindowTitle title(Glib::get_application_name());
 	title += ": Fatal Error";
-	win.set_title (title);
+	win.set_title (title.get_string());
 
 	win.set_position (WIN_POS_MOUSE);
 	win.set_border_width (12);

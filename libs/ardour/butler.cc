@@ -89,7 +89,7 @@ Butler::start_thread()
 		return -1;
 	}
 
-	if (pthread_create_and_store ("disk butler", &thread, 0, _thread_work, this)) {
+	if (pthread_create_and_store ("disk butler", &thread, _thread_work, this)) {
 		error << _("Session: could not create butler thread") << endmsg;
 		return -1;
 	}
@@ -113,7 +113,6 @@ Butler::terminate_thread ()
 void *
 Butler::_thread_work (void* arg)
 {
-	PBD::notify_gui_about_thread_creation (pthread_self(), X_("Butler"));
 	SessionEvent::create_per_thread_pool ("butler events", 64);
 	return ((Butler *) arg)->thread_work ();
 }

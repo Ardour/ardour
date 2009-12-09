@@ -262,18 +262,21 @@ RouteUI::mute_press(GdkEventButton* ev)
 
 				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
+#if 0
 					/* Primary-Tertiary-click applies change to all routes */
 
 					_session.begin_reversible_command (_("mute change"));
                                         Session::GlobalMuteStateCommand *cmd = new Session::GlobalMuteStateCommand(_session, this);
-					_session.set_all_mute (!_route->muted());
+					_session.set_mute (!_route->muted());
                                         cmd->mark();
 					_session.add_command(cmd);
 					_session.commit_reversible_command ();
 					multiple_mute_change = true;
+#endif
 
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
+#if 0
 					/* Primary-button1 applies change to the mix group.
 					   NOTE: Primary-button2 is MIDI learn.
 					*/
@@ -281,15 +284,18 @@ RouteUI::mute_press(GdkEventButton* ev)
 					if (ev->button == 1) {
 						set_route_group_mute (_route, !_route->muted());
 					}
+#endif
 
 				} else {
 
+#if 0
 					/* plain click applies change to this route */
 					if (wait_for_release) {
 						_route->set_mute (!_route->muted(), this);
 					} else {
 						reversibly_apply_route_boolean ("mute change", &Route::set_mute, !_route->muted(), this);
 					}
+#endif
 				}
 			}
 		}
@@ -317,6 +323,18 @@ RouteUI::mute_release(GdkEventButton*)
 	}
 	return true;
 }
+
+void
+RouteUI::post_solo_cleanup (SessionEvent* ev, bool was_not_latched)
+{
+	ENSURE_GUI_THREAD (bind (mem_fun (*this, &RouteUI::post_solo_cleanup), ev, was_not_latched));
+
+	delete ev;
+	
+	if (was_not_latched) {
+		Config->set_solo_latched (false);
+	}
+}	
 
 bool
 RouteUI::solo_press(GdkEventButton* ev)
@@ -364,6 +382,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 						/* Primary-Tertiary-click applies change to all routes */
 						bool was_not_latched = false;
+
 						if (!Config->get_solo_latched ()) {
 							was_not_latched = true;
 							/*
@@ -373,28 +392,25 @@ RouteUI::solo_press(GdkEventButton* ev)
 							*/
 							Config->set_solo_latched (true);
 						}
-						_session.begin_reversible_command (_("solo change"));
-						Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand(_session, this);
-						_session.set_all_solo (!_route->soloed());
-						cmd->mark();
-						_session.add_command (cmd);
-						_session.commit_reversible_command ();
-						multiple_solo_change = true;
-						if (was_not_latched) {
-							Config->set_solo_latched (false);
-						}
+
+						SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
+						ev->rt_slot =   bind (sigc::mem_fun (_session, &Session::set_solo), _session.get_routes(), !_route->soloed());
+						ev->rt_return = bind (sigc::mem_fun (*this, &RouteUI::post_solo_cleanup), was_not_latched);
+						
+						_session.queue_event (ev);
 
 					} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
 
 						// Primary-Secondary-click: exclusively solo this track, not a toggle */
+						
+						//boost::shared_ptr<RouteList> rl (new RouteList);
+						//rl->push_back (route());
 
-						_session.begin_reversible_command (_("solo change"));
-						Session::GlobalSoloStateCommand *cmd = new Session::GlobalSoloStateCommand (_session, this);
-						_session.set_all_solo (false);
-						_route->set_solo (true, this);
-						cmd->mark();
-						_session.add_command(cmd);
-						_session.commit_reversible_command ();
+						//SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
+						// ev->rt_slot =  bind (sigc::mem_fun (_session, &Session::set_just_one_solo), rl, true);
+						//ev->rt_return = sigc::mem_fun (*this, &RouteUI::post_rtop_cleanup);
+						
+						//_session.queue_event (ev);
 
 					} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 
@@ -405,22 +421,29 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 					} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
+#if 0
 						/* Primary-button1: solo mix group.
 						   NOTE: Primary-button2 is MIDI learn.
 						*/
 
 						if (ev->button == 1) {
-							set_route_group_solo (_route, !_route->soloed());
+							queue_route_group_op (RouteGroup::Solo, &Session::set_all_solo, !_route->soloed());
 						}
+#endif
+
 
 					} else {
 
 						/* click: solo this route */
-						if (wait_for_release) {
-							_route->set_solo (!_route->soloed(), this);
-						} else {
-							reversibly_apply_route_boolean ("solo change", &Route::set_solo, !_route->soloed(), this);
-						}
+
+						boost::shared_ptr<RouteList> rl (new RouteList);
+						rl->push_back (route());
+						
+						SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
+						ev->rt_slot =   bind (sigc::mem_fun (_session, &Session::set_solo), rl, !rec_enable_button->get_active());
+						ev->rt_return = sigc::mem_fun (*this, &RouteUI::post_rtop_cleanup);
+						
+						_session.queue_event (ev);
 					}
 				}
 			}
@@ -521,7 +544,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
 			SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
-			ev->rt_slot =   bind (sigc::mem_fun (_session, &Session::set_all_record_enable), _session.get_routes(), !rec_enable_button->get_active());
+			ev->rt_slot =   bind (sigc::mem_fun (_session, &Session::set_record_enable), _session.get_routes(), !rec_enable_button->get_active());
 			ev->rt_return = sigc::mem_fun (*this, &RouteUI::post_rtop_cleanup);
 			
 			_session.queue_event (ev);
@@ -533,7 +556,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 			*/
 			
 			if (ev->button == 1) {
-				queue_route_group_op (RouteGroup::RecEnable, &Session::set_all_record_enable, !rec_enable_button->get_active());
+				queue_route_group_op (RouteGroup::RecEnable, &Session::set_record_enable, !rec_enable_button->get_active());
 			}
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
@@ -543,9 +566,9 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 		} else {
 			boost::shared_ptr<RouteList> rl (new RouteList);
 			rl->push_back (route());
-
+			
 			SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
-			ev->rt_slot =   bind (sigc::mem_fun (_session, &Session::set_all_record_enable), rl, !rec_enable_button->get_active());
+			ev->rt_slot =   bind (sigc::mem_fun (_session, &Session::set_record_enable), rl, !rec_enable_button->get_active());
 			ev->rt_return = sigc::mem_fun (*this, &RouteUI::post_rtop_cleanup);
 
 			_session.queue_event (ev);

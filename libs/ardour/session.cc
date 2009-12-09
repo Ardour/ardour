@@ -71,6 +71,7 @@
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_track.h"
+#include "ardour/midi_ui.h"
 #include "ardour/named_selection.h"
 #include "ardour/playlist.h"
 #include "ardour/plugin_insert.h"
@@ -137,8 +138,6 @@ Session::Session (AudioEngine &eng,
 	  _butler (new Butler (this)),
 	  _post_transport_work (0),
 	  _send_timecode_update (false),
-	  midi_thread (pthread_t (0)),
-	  midi_requests (128), // the size of this should match the midi request pool size
 	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
 	  _total_free_4k_blocks (0),
@@ -224,8 +223,6 @@ Session::Session (AudioEngine &eng,
 	  _butler (new Butler (this)),
 	  _post_transport_work (0),
 	  _send_timecode_update (false),
-	  midi_thread (pthread_t (0)),
-	  midi_requests (16),
 	  diskstreams (new DiskstreamList),
 	  routes (new RouteList),
 	  _total_free_4k_blocks (0),
@@ -366,7 +363,8 @@ Session::destroy ()
 	Stateful::loading_state_version = 0;
 
 	_butler->terminate_thread ();
-	//terminate_midi_thread ();
+	
+	delete midi_control_ui;
 
 	if (click_data != default_click) {
 		delete [] click_data;
@@ -3518,10 +3516,8 @@ Session::is_auditioning () const
 }
 
 void
-Session::set_all_solo (bool yn)
+Session::set_solo (boost::shared_ptr<RouteList> r, bool yn)
 {
-	shared_ptr<RouteList> r = routes.reader ();
-
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->is_hidden()) {
 			(*i)->set_solo (yn, this);
@@ -3532,10 +3528,8 @@ Session::set_all_solo (bool yn)
 }
 
 void
-Session::set_all_listen (bool yn)
+Session::set_listen (boost::shared_ptr<RouteList> r, bool yn)
 {
-	shared_ptr<RouteList> r = routes.reader ();
-
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->is_hidden()) {
 			(*i)->set_listen (yn, this);
@@ -3546,10 +3540,8 @@ Session::set_all_listen (bool yn)
 }
 
 void
-Session::set_all_mute (bool yn)
+Session::set_mute (boost::shared_ptr<RouteList> r, bool yn)
 {
-	shared_ptr<RouteList> r = routes.reader ();
-
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->is_hidden()) {
 			(*i)->set_mute (yn, this);
@@ -3605,7 +3597,7 @@ Session::graph_reordered ()
 }
 
 void
-Session::set_all_record_enable (boost::shared_ptr<RouteList> rl, bool yn)
+Session::set_record_enable (boost::shared_ptr<RouteList> rl, bool yn)
 {
 	if (!writable()) {
 		return;
@@ -4037,8 +4029,7 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 		return result;
 	}
 
-	// any bigger than this seems to cause stack overflows in called functions
-	const nframes_t chunk_size = (128 * 1024)/4;
+	const nframes_t chunk_size = (256 * 1024)/4;
 
 	// block all process callback handling
 
@@ -4323,9 +4314,9 @@ Session::solo_control_mode_changed ()
 	/* cancel all solo or all listen when solo control mode changes */
 
 	if (Config->get_solo_control_is_listen_control()) {
-		set_all_solo (false);
+		set_solo (routes.reader(), false);
 	} else {
-		set_all_listen (false);
+		set_listen (routes.reader(), false);
 	}
 }
 
