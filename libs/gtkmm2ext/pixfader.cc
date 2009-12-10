@@ -226,12 +226,10 @@ PixFader::on_scroll_event (GdkEventScroll* ev)
 		switch (ev->direction) {
 
 		case GDK_SCROLL_UP:
-			/* wheel up */
 			adjustment.set_value (adjustment.get_value() + (adjustment.get_page_increment() * scale));
 			ret = true;
 			break;
 		case GDK_SCROLL_DOWN:
-			/* wheel down */
 			adjustment.set_value (adjustment.get_value() - (adjustment.get_page_increment() * scale));
 			ret = true;
 			break;
@@ -248,13 +246,11 @@ PixFader::on_scroll_event (GdkEventScroll* ev)
 
 		case GDK_SCROLL_RIGHT:
 		case GDK_SCROLL_UP:
-			/* wheel right */
 			adjustment.set_value (adjustment.get_value() + (adjustment.get_page_increment() * scale));
 			ret = true;
 			break;
 		case GDK_SCROLL_LEFT:
 		case GDK_SCROLL_DOWN:
-			/* wheel left */
 			adjustment.set_value (adjustment.get_value() - (adjustment.get_page_increment() * scale));
 			ret = true;
 			break;
