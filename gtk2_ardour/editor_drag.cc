@@ -527,7 +527,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	    PREPARE TO MOVE
 	************************************************************/
 
-	if (x_delta == 0 && pointer_order_span == 0 && pointer_layer_span == 0) {
+	if (x_delta == 0 && pointer_order_span == 0 && pointer_layer_span == 0 && !first_move) {
 		/* haven't reached next snap point, and we're not switching
 		   trackviews nor layers. nothing to do.
 		*/
@@ -962,8 +962,13 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			copies.push_back (rv);
 		}
 	}
-
-	_editor->selection->add (new_views);
+	/*
+	   if we've created new regions either by copying or moving 
+	   to a new track, we want to replace the old selection with the new ones 
+	*/
+	if (new_views.size() > 0) {
+		_editor->selection->set (new_views);
+	}
 
 	for (set<boost::shared_ptr<Playlist> >::iterator p = frozen_playlists.begin(); p != frozen_playlists.end(); ++p) {
 		(*p)->thaw();
@@ -1024,6 +1029,12 @@ RegionMotionDrag::copy_regions (GdkEvent* event)
 
 		nrv->get_canvas_group()->show ();
 		new_regionviews.push_back (nrv);
+
+		/* swap _primary to the copy */
+
+		if (rv == _primary) {
+			_primary = nrv;
+		}
 	}
 
 	if (new_regionviews.empty()) {
@@ -1032,7 +1043,6 @@ RegionMotionDrag::copy_regions (GdkEvent* event)
 
 	/* reflect the fact that we are dragging the copies */
 
-	_primary = new_regionviews.front();
 	_views = new_regionviews;
 
 	swap_grab (new_regionviews.front()->get_canvas_group (), 0, event ? event->motion.time : 0);
