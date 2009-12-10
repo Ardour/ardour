@@ -118,7 +118,7 @@ Route::init ()
 {
 	_self_solo = false;
 	_soloed_by_others = 0;
-	_solo_isolated = false;
+	_solo_isolated = 0;
 	_solo_safe = false;
 	_active = true;
 	processor_max_streams.reset();
@@ -608,13 +608,46 @@ Route::set_delivery_solo ()
 void
 Route::set_solo_isolated (bool yn, void *src)
 {
+	if (is_master() || is_control() || is_hidden()) {
+		return;
+	}
+
 	if (_route_group && src != _route_group && _route_group->active_property (RouteGroup::Solo)) {
 		_route_group->apply (&Route::set_solo_isolated, yn, _route_group);
 		return;
 	}
+	
+	/* forward propagate solo-isolate status to everything fed by this route, but not those via sends only */
 
-	if (yn != _solo_isolated) {
-		_solo_isolated = yn;
+	boost::shared_ptr<RouteList> routes = _session.get_routes ();
+	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+		bool sends_only;
+		bool does_feed = feeds (*i, &sends_only);
+		
+		if (does_feed && !sends_only) {
+			(*i)->set_solo_isolated (yn, (*i)->route_group());
+		}
+	}
+
+	bool changed = false;
+
+	cerr << _name << " Solo isolated was " << _solo_isolated << endl;
+
+	if (yn) {
+		if (_solo_isolated == 0) {
+			changed = true;
+		}
+		_solo_isolated++;
+	} else {
+		changed = (_solo_isolated == 1);
+		if (_solo_isolated > 0) {
+			_solo_isolated--;
+		}
+	}
+
+	cerr << "\tnow " << _solo_isolated << endl;
+
+	if (changed) {
 		set_delivery_solo ();
 		solo_isolated_changed (src);
 	}
@@ -623,7 +656,7 @@ Route::set_solo_isolated (bool yn, void *src)
 bool
 Route::solo_isolated () const
 {
-	return _solo_isolated;
+	return _solo_isolated > 0;
 }
 
 void

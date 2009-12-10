@@ -353,7 +353,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	uint32_t       _phase_invert;
 	bool           _self_solo;
 	uint32_t       _soloed_by_others;
-	bool           _solo_isolated;
+	uint32_t       _solo_isolated;
 
 	bool           _denormal_protection;
 
