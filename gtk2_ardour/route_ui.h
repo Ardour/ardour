@@ -155,10 +155,6 @@ class RouteUI : public virtual AxisView
 	void build_mute_menu(void);
 	void init_mute_menu(ARDOUR::MuteMaster::MutePoint, Gtk::CheckMenuItem*);
 
-	void set_route_group_solo (boost::shared_ptr<ARDOUR::Route>, bool);
-	void set_route_group_mute (boost::shared_ptr<ARDOUR::Route>, bool);
-	void set_route_group_rec_enable (boost::shared_ptr<ARDOUR::Route>, bool);
-
 	int  set_color_from_route ();
 
 	void remove_this_route ();
@@ -191,9 +187,6 @@ class RouteUI : public virtual AxisView
 
 	virtual void map_frozen ();
 
-	void reversibly_apply_route_boolean (std::string name, void (ARDOUR::Route::*func)(bool, void*), bool, void *);
-	void reversibly_apply_track_boolean (std::string name, void (ARDOUR::Track::*func)(bool, void*), bool, void *);
-
 	void adjust_latency ();
 	void save_as_template ();
 	void open_remote_control_id_dialog ();
@@ -215,9 +208,21 @@ class RouteUI : public virtual AxisView
 	void parameter_changed (std::string const &);
 	void relabel_solo_button ();
 
-	void post_rtop_cleanup (ARDOUR::SessionEvent* ev);
-	void post_group_rtop_cleanup (ARDOUR::SessionEvent* ev, ARDOUR::RouteGroup*, ARDOUR::RouteGroup::Property);
-	void post_solo_cleanup (ARDOUR::SessionEvent* ev, bool was_not_latched);
+	struct SoloMuteRelease {
+	    SoloMuteRelease (bool was_active) 
+	    : active (was_active)
+	    , exclusive (false) {}
+	    
+	    boost::shared_ptr<ARDOUR::RouteList> routes;
+	    boost::shared_ptr<ARDOUR::RouteList> routes_on;
+	    boost::shared_ptr<ARDOUR::RouteList> routes_off;
+	    boost::shared_ptr<ARDOUR::Route> route;
+	    bool active;
+	    bool exclusive;
+	};
+
+	SoloMuteRelease* _solo_release;
+	SoloMuteRelease* _mute_release;
 };
 
 #endif /* __ardour_route_ui__ */

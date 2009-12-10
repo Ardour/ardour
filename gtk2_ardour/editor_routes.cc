@@ -170,7 +170,9 @@ EditorRoutes::on_tv_rec_enable_toggled (Glib::ustring const & path_string)
 	AudioTimeAxisView *atv = dynamic_cast<AudioTimeAxisView*> (tv);
 
 	if (atv != 0 && atv->is_audio_track()){
-		atv->reversibly_apply_track_boolean ("rec-enable change", &Track::set_record_enable, !atv->track()->record_enabled(), this);
+		boost::shared_ptr<RouteList> rl (new RouteList);
+		rl->push_back (atv->route());
+		_session->set_record_enable (rl, !atv->track()->record_enabled(), Session::rt_cleanup);
 	}
 }
 
@@ -184,7 +186,9 @@ EditorRoutes::on_tv_mute_enable_toggled (Glib::ustring const & path_string)
 	AudioTimeAxisView *atv = dynamic_cast<AudioTimeAxisView*> (tv);
 
 	if (atv != 0) {
-		atv->reversibly_apply_route_boolean ("mute-enable change", &Route::set_mute, !atv->route()->muted(), this);
+		boost::shared_ptr<RouteList> rl (new RouteList);
+		rl->push_back (atv->route());
+		_session->set_mute (rl, !atv->route()->muted(), Session::rt_cleanup);
 	}
 }
 
@@ -198,7 +202,9 @@ EditorRoutes::on_tv_solo_enable_toggled (Glib::ustring const & path_string)
 	AudioTimeAxisView *atv = dynamic_cast<AudioTimeAxisView*> (tv);
 
 	if (atv != 0) {
-		atv->reversibly_apply_route_boolean ("solo-enable change", &Route::set_solo, !atv->route()->soloed(), this);
+		boost::shared_ptr<RouteList> rl (new RouteList);
+		rl->push_back (atv->route());
+		_session->set_solo (rl, !atv->route()->soloed(), Session::rt_cleanup);
 	}
 }
 

@@ -519,12 +519,7 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 
 					/* Primary+Tertiary-click applies change to all routes */
 
-					_session.begin_reversible_command (_("meter point change"));
-                                        Session::GlobalMeteringStateCommand *cmd = new Session::GlobalMeteringStateCommand (_session, this);
 					_session.foreach_route (this, &GainMeterBase::set_meter_point, next_meter_point (_route->meter_point()));
-                                        cmd->mark();
-					_session.add_command (cmd);
-					_session.commit_reversible_command ();
 
 
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
@@ -534,12 +529,7 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 					*/
 
 					if (ev->button == 1) {
-						_session.begin_reversible_command (_("meter point change"));
-						Session::GlobalMeteringStateCommand *cmd = new Session::GlobalMeteringStateCommand (_session, this);
 						set_mix_group_meter_point (*_route, next_meter_point (_route->meter_point()));
-						cmd->mark();
-						_session.add_command (cmd);
-						_session.commit_reversible_command ();
 					}
 
 				} else {

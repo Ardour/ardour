@@ -2176,92 +2176,6 @@ Session::commit_reversible_command(Command *cmd)
 	_current_trans.pop();
 }
 
-Session::GlobalRouteBooleanState
-Session::get_global_route_boolean (bool (Route::*method)(void) const)
-{
-	GlobalRouteBooleanState s;
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->is_hidden()) {
-			RouteBooleanState v;
-
-			v.first =* i;
-			Route* r = (*i).get();
-			v.second = (r->*method)();
-
-			s.push_back (v);
-		}
-	}
-
-	return s;
-}
-
-Session::GlobalRouteMeterState
-Session::get_global_route_metering ()
-{
-	GlobalRouteMeterState s;
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->is_hidden()) {
-			RouteMeterState v;
-
-			v.first =* i;
-			v.second = (*i)->meter_point();
-
-			s.push_back (v);
-		}
-	}
-
-	return s;
-}
-
-void
-Session::set_global_route_metering (GlobalRouteMeterState s, void* arg)
-{
-	for (GlobalRouteMeterState::iterator i = s.begin(); i != s.end(); ++i) {
-
-		boost::shared_ptr<Route> r = (i->first.lock());
-
-		if (r) {
-			r->set_meter_point (i->second, arg);
-		}
-	}
-}
-
-void
-Session::set_global_route_boolean (GlobalRouteBooleanState s, void (Route::*method)(bool, void*), void* arg)
-{
-	for (GlobalRouteBooleanState::iterator i = s.begin(); i != s.end(); ++i) {
-
-		boost::shared_ptr<Route> r = (i->first.lock());
-
-		if (r) {
-			Route* rp = r.get();
-			(rp->*method) (i->second, arg);
-		}
-	}
-}
-
-void
-Session::set_global_mute (GlobalRouteBooleanState s, void* src)
-{
-	set_global_route_boolean (s, &Route::set_mute, src);
-}
-
-void
-Session::set_global_solo (GlobalRouteBooleanState s, void* src)
-{
-	set_global_route_boolean (s, &Route::set_solo, src);
-}
-
-void
-Session::set_global_record_enable (GlobalRouteBooleanState s, void* src)
-{
-	set_global_route_boolean (s, &Route::set_record_enable, src);
-}
-
 static bool
 accept_all_non_peak_files (const string& path, void */*arg*/)
 {
@@ -2890,12 +2804,6 @@ Session::restore_history (string snapshot_name)
 
 				if ((c = memento_command_factory(n))) {
 					ut->add_command(c);
-				}
-
-			} else if (n->name() == X_("GlobalRouteStateCommand")) {
-
-				if ((c = global_state_command_factory (*n))) {
-					ut->add_command (c);
 				}
 
 			} else if (n->name() == "DeltaCommand") {

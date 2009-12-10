@@ -113,6 +113,16 @@ sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
 sigc::signal<void,nframes_t, bool, nframes_t> ARDOUR_UI::Clock;
 
+void gui_rt_cleanup (SessionEvent* ev) 
+{
+	/* a little helper function that makes sure we delete queued SessionEvents in the correct thread */
+	ENSURE_GUI_THREAD (bind (sigc::ptr_fun (&gui_rt_cleanup), ev));
+	delete ev;
+}
+
+/* wrap the above as a slot so that we can pass it to the session when queuing RT events */
+const sigc::slot<void,SessionEvent*> gui_rt_cleanup_slot (sigc::ptr_fun (&gui_rt_cleanup));
+
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	: Gtkmm2ext::UI (X_("gui"), argcp, argvp),

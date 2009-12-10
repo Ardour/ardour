@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis 
+    Copyright (C) 2000-2009 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,8 +30,10 @@
 #include <glibmm/main.h>
 
 #include "pbd/crossthread.h"
+#include "pbd/ui_callback.h"
 
-class BaseUI : virtual public sigc::trackable {
+class BaseUI : virtual public sigc::trackable, public PBD::UICallback 
+{
   public:
 	BaseUI (const std::string& name);
 	virtual ~BaseUI();
@@ -45,7 +47,7 @@ class BaseUI : virtual public sigc::trackable {
 	std::string name() const { return _name; }
 
 	bool ok() const { return _ok; }
-
+	
 	enum RequestType {
 		range_guarantee = ~0
 	};
@@ -61,8 +63,6 @@ class BaseUI : virtual public sigc::trackable {
 
 	void run ();
 	void quit ();
-
-	virtual void call_slot (sigc::slot<void> theSlot) = 0;
 
   protected:
 	CrossThreadChannel request_channel;

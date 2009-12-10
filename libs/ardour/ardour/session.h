@@ -122,12 +122,6 @@ extern void setup_enum_writer ();
 
 class Session : public PBD::StatefulDestructible, public SessionEventManager, public boost::noncopyable
 {
-  private:
-	typedef std::pair<boost::weak_ptr<Route>,bool> RouteBooleanState;
-	typedef std::vector<RouteBooleanState> GlobalRouteBooleanState;
-	typedef std::pair<boost::weak_ptr<Route>,MeterPoint> RouteMeterState;
-	typedef std::vector<RouteMeterState> GlobalRouteMeterState;
-
   public:
 	enum RecordState {
 		Disabled = 0,
@@ -617,14 +611,17 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	bool soloing() const { return _non_soloed_outs_muted; }
 	bool listening() const { return _listen_cnt > 0; }
 
-	void set_solo (boost::shared_ptr<RouteList>, bool);
-	void set_mute (boost::shared_ptr<RouteList>, bool);
-	void set_listen (boost::shared_ptr<RouteList>, bool);
+	static const sigc::slot<void,SessionEvent*> rt_cleanup;
+
+	void set_solo (boost::shared_ptr<RouteList>, bool, sigc::slot<void,SessionEvent*> after = rt_cleanup, bool group_override = false);
+	void set_just_one_solo (boost::shared_ptr<Route>, bool, sigc::slot<void,SessionEvent*> after = rt_cleanup);
+	void set_mute (boost::shared_ptr<RouteList>, bool, sigc::slot<void,SessionEvent*> after = rt_cleanup, bool group_override = false);
+	void set_listen (boost::shared_ptr<RouteList>, bool, sigc::slot<void,SessionEvent*> after = rt_cleanup, bool group_override = false);
+	void set_record_enable (boost::shared_ptr<RouteList>, bool, sigc::slot<void,SessionEvent*> after = rt_cleanup, bool group_override = false);
 
 	sigc::signal<void,bool> SoloActive;
 	sigc::signal<void> SoloChanged;
 	
-	void set_record_enable (boost::shared_ptr<RouteList>, bool);
 
 	/* control/master out */
 
@@ -734,73 +731,6 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	// these commands are implemented in libs/ardour/session_command.cc
 	Command* memento_command_factory(XMLNode* n);
 	void register_with_memento_command_factory(PBD::ID, PBD::StatefulThingWithGoingAway*);
-
-	Command* global_state_command_factory (const XMLNode& n);
-
-	class GlobalRouteStateCommand : public Command
-	{
-	public:
-		GlobalRouteStateCommand (Session&, void*);
-		GlobalRouteStateCommand (Session&, const XMLNode& node);
-		int set_state (const XMLNode&, int version);
-		XMLNode& get_state ();
-
-	protected:
-		GlobalRouteBooleanState before, after;
-		Session& sess;
-		void* src;
-	};
-
-	class GlobalSoloStateCommand : public GlobalRouteStateCommand
-	{
-	public:
-		GlobalSoloStateCommand (Session &, void *src);
-		GlobalSoloStateCommand (Session&, const XMLNode&);
-		void operator()(); //redo
-		void undo();
-		XMLNode &get_state();
-		void mark();
-	};
-
-	class GlobalMuteStateCommand : public GlobalRouteStateCommand
-	{
-	public:
-		GlobalMuteStateCommand(Session &, void *src);
-		GlobalMuteStateCommand (Session&, const XMLNode&);
-		void operator()(); // redo
-		void undo();
-		XMLNode &get_state();
-		void mark();
-	};
-
-	class GlobalRecordEnableStateCommand : public GlobalRouteStateCommand
-	{
-	public:
-		GlobalRecordEnableStateCommand(Session &, void *src);
-		GlobalRecordEnableStateCommand (Session&, const XMLNode&);
-		void operator()(); // redo
-		void undo();
-		XMLNode &get_state();
-		void mark();
-	};
-
-	class GlobalMeteringStateCommand : public Command
-	{
-	public:
-		GlobalMeteringStateCommand(Session &, void *src);
-		GlobalMeteringStateCommand (Session&, const XMLNode&);
-		void operator()();
-		void undo();
-		XMLNode &get_state();
-		int set_state (const XMLNode&, int version);
-		void mark();
-
-	protected:
-		Session& sess;
-		void* src;
-		GlobalRouteMeterState before;
-		GlobalRouteMeterState after;
-	};
 
 	/* clicking */
 
@@ -1443,16 +1373,6 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	UndoHistory                  _history;
 	std::stack<UndoTransaction*> _current_trans;
 
-	GlobalRouteBooleanState get_global_route_boolean (bool (Route::*method)(void) const);
-	GlobalRouteMeterState get_global_route_metering ();
-
-	void set_global_route_boolean (GlobalRouteBooleanState s, void (Route::*method)(bool, void*), void *arg);
-	void set_global_route_metering (GlobalRouteMeterState s, void *arg);
-
-	void set_global_mute (GlobalRouteBooleanState s, void *src);
-	void set_global_solo (GlobalRouteBooleanState s, void *src);
-	void set_global_record_enable (GlobalRouteBooleanState s, void *src);
-
 	void jack_timebase_callback (jack_transport_state_t, nframes_t, jack_position_t*, int);
 	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
 	void reset_jack_connection (jack_client_t* jack);
@@ -1549,6 +1469,16 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 
 	void update_have_rec_enabled_diskstream ();
 	gint _have_rec_enabled_diskstream;
+
+	/* realtime "apply to set of routes" operations */
+	SessionEvent* get_rt_event (boost::shared_ptr<RouteList> rl, bool yn, sigc::slot<void,SessionEvent*> after, bool group_override, 
+				    void (Session::*method) (boost::shared_ptr<RouteList>, bool, bool));
+
+	void rt_set_solo (boost::shared_ptr<RouteList>, bool yn, bool group_override);
+	void rt_set_just_one_solo (boost::shared_ptr<RouteList>, bool yn, bool /* ignored*/ );
+	void rt_set_mute (boost::shared_ptr<RouteList>, bool yn, bool group_override);
+	void rt_set_listen (boost::shared_ptr<RouteList>, bool yn, bool group_override);
+	void rt_set_record_enable (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 };
 
 } // namespace ARDOUR

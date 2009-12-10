@@ -43,8 +43,6 @@ BaseUI::BaseUI (const string& str)
 	: run_loop_thread (0)
 	, _name (str)
 {
-	cerr << "New BUI called " << _name << " @ " << this << endl;
-
 	base_ui_instance = this;
 
 	request_channel.ios()->connect (sigc::mem_fun (*this, &BaseUI::request_handler));
@@ -72,6 +70,7 @@ BaseUI::new_request_type ()
 void
 BaseUI::main_thread ()
 {
+	set_ui_for_thread (this);
 	thread_init ();
 	_main_loop->run ();
 }

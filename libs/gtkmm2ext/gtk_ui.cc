@@ -80,6 +80,12 @@ UI::UI (string namestr, int *argc, char ***argv)
 	*/
 
 	run_loop_thread = Thread::self();
+	
+	/* store "this" as the UI-for-thread of this thread, same argument
+	   as for previous line.
+	*/
+
+	set_ui_for_thread (this);
 
 	/* attach our request source to the default main context */
 

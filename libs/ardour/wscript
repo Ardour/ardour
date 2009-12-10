@@ -168,6 +168,7 @@ libardour_sources = [
 	'session_midi.cc',
 	'session_playlists.cc',
 	'session_process.cc',
+	'session_rtevents.cc',
 	'session_state.cc',
 	'session_state_utils.cc',
 	'session_time.cc',

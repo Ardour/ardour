@@ -577,7 +577,7 @@ Session::follow_slave (nframes_t nframes)
 									   slave_speed));
 			}
 			
-#if 0
+#if 1
 			if (abs(average_slave_delta) > _slave->resolution()) {
 				cerr << "average slave delta greater than slave resolution (" << _slave->resolution() << "), going to silent motion\n";
 				goto silent_motion;
@@ -1141,9 +1141,3 @@ Session::process_event (SessionEvent* ev)
 	}
 }
 
-void
-Session::process_rtop (SessionEvent* ev)
-{
-	ev->rt_slot ();
-	ev->rt_return (ev);
-}

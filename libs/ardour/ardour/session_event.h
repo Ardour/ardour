@@ -7,6 +7,7 @@
 
 #include "pbd/pool.h"
 #include "pbd/ringbuffer.h"
+#include "pbd/ui_callback.h"
 
 #include "ardour/types.h"
 
@@ -68,6 +69,7 @@ struct SessionEvent {
     boost::shared_ptr<RouteList>   routes;
     sigc::slot<void>               rt_slot;    /* what to call in RT context */
     sigc::slot<void,SessionEvent*> rt_return;  /* called after rt_slot, with this event as an argument */
+    PBD::UICallback*               ui;
 
     std::list<AudioRange> audio_range;
     std::list<MusicRange> music_range;
@@ -81,7 +83,8 @@ struct SessionEvent {
 	    , target_frame (where)
 	    , speed (spd)
 	    , yes_or_no (yn)
-	    , second_yes_or_no (yn2) {}
+	    , second_yes_or_no (yn2)
+	    , ui (0) {}
 
     void set_ptr (void* p) {
 	    ptr = p;

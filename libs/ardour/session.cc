@@ -117,6 +117,9 @@ sigc::signal<void> Session::AutoBindingOn;
 sigc::signal<void> Session::AutoBindingOff;
 sigc::signal<void, std::string, std::string> Session::Exported;
 
+static void clean_up_session_event (SessionEvent* ev) { delete ev; }
+const sigc::slot<void,SessionEvent*> Session::rt_cleanup (sigc::ptr_fun (&clean_up_session_event));
+
 Session::Session (AudioEngine &eng,
 		  const string& fullpath,
 		  const string& snapshot_name,
@@ -3515,42 +3518,6 @@ Session::is_auditioning () const
 	}
 }
 
-void
-Session::set_solo (boost::shared_ptr<RouteList> r, bool yn)
-{
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->is_hidden()) {
-			(*i)->set_solo (yn, this);
-		}
-	}
-
-	set_dirty();
-}
-
-void
-Session::set_listen (boost::shared_ptr<RouteList> r, bool yn)
-{
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->is_hidden()) {
-			(*i)->set_listen (yn, this);
-		}
-	}
-
-	set_dirty();
-}
-
-void
-Session::set_mute (boost::shared_ptr<RouteList> r, bool yn)
-{
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->is_hidden()) {
-			(*i)->set_mute (yn, this);
-		}
-	}
-
-	set_dirty();
-}
-
 uint32_t
 Session::n_diskstreams () const
 {
@@ -3594,32 +3561,6 @@ Session::graph_reordered ()
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		(*i)->set_capture_offset ();
 	}
-}
-
-void
-Session::set_record_enable (boost::shared_ptr<RouteList> rl, bool yn)
-{
-	if (!writable()) {
-		return;
-	}
-
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ) {
-		boost::shared_ptr<Track> t;
-
-		if ((t = boost::dynamic_pointer_cast<Track>(*i)) != 0) {
-			t->set_record_enable (yn, this);
-			if (t->meter_point() == MeterCustom) {
-				/* don't change metering for this track */
-				i = rl->erase (i);
-			} else {
-				++i;
-			}
-		} else {
-			++i;
-		}
-	}
-
-	set_dirty ();
 }
 
 void
