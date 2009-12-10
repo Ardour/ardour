@@ -18,8 +18,9 @@
     $Id$
 */
 
-#include <gtkmm2ext/auto_spin.h>
 #include <cmath>
+#include "gtkmm2ext/auto_spin.h"
+#include "gtkmm2ext/keyboard.h"
 
 using namespace Gtkmm2ext;
 using namespace std;
@@ -73,13 +74,13 @@ AutoSpin::button_press (GdkEventButton *ev)
 
 	stop_spinning (0);
 
-	if (ev->state & GDK_SHIFT_MASK) {
+	if (ev->state & Keyboard::TertiaryModifier) {
 		/* use page shift */
 
 		shifted = true;
 	}
 
-	if (ev->state & GDK_CONTROL_MASK) {
+	if (ev->state & Keyboard::PrimaryModifier) {
 		/* go to upper/lower bound on button1/button2 */
 
 		control = true;

@@ -46,6 +46,8 @@ class PixFader : public Gtk::DrawingArea
 	bool on_button_release_event (GdkEventButton*);
 	bool on_motion_notify_event (GdkEventMotion*);
 	bool on_scroll_event (GdkEventScroll* ev);
+	bool on_enter_notify_event (GdkEventCrossing* ev);
+	bool on_leave_notify_event (GdkEventCrossing* ev);
 
 	enum Orientation {
 		VERT=1,

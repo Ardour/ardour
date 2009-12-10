@@ -26,9 +26,10 @@
 
 #include <pbd/controllable.h>
 
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/barcontroller.h>
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/barcontroller.h"
 
 #include "i18n.h"
 
@@ -146,14 +147,14 @@ BarController::button_release (GdkEventButton* ev)
 			return true;
 		}
 
-		if ((ev->state & (GDK_SHIFT_MASK|GDK_CONTROL_MASK)) == GDK_SHIFT_MASK) {
+		if ((ev->state & (Keyboard::TertiaryModifier|Keyboard::PrimaryModifier)) == Keyboard::TertiaryModifier) {
 			adjustment.set_value (initial_value);
 		} else {
 			double scale;
 
-			if ((ev->state & (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) == (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) {
+			if ((ev->state & (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) == (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) {
 				scale = 0.01;
-			} else if (ev->state & GDK_CONTROL_MASK) {
+			} else if (ev->state & Keyboard::PrimaryModifier) {
 				scale = 0.1;
 			} else {
 				scale = 1.0;
@@ -181,9 +182,9 @@ BarController::scroll (GdkEventScroll* ev)
 {
 	double scale;
 
-	if ((ev->state & (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) == (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) {
+	if ((ev->state & (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) == (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) {
 		scale = 0.01;
-	} else if (ev->state & GDK_CONTROL_MASK) {
+	} else if (ev->state & Keyboard::PrimaryModifier) {
 		scale = 0.1;
 	} else {
 		scale = 1.0;
@@ -213,13 +214,13 @@ BarController::motion (GdkEventMotion* ev)
 		return true;
 	}
 
-	if ((ev->state & (GDK_SHIFT_MASK|GDK_CONTROL_MASK)) == GDK_SHIFT_MASK) {
+	if ((ev->state & (Keyboard::TertiaryModifier|Keyboard::PrimaryModifier)) == Keyboard::TertiaryModifier) {
 		return TRUE;
 	}
 
-	if ((ev->state & (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) == (GDK_CONTROL_MASK|GDK_SHIFT_MASK)) {
+	if ((ev->state & (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) == (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) {
 		scale = 0.01;
-	} else if (ev->state & GDK_CONTROL_MASK) {
+	} else if (ev->state & Keyboard::PrimaryModifier) {
 		scale = 0.1;
 	} else {
 		scale = 1.0;

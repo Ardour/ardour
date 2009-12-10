@@ -23,7 +23,8 @@
 
 #include <gtkmm.h>
 
-#include <gtkmm2ext/pixscroller.h>
+#include "gtkmm2ext/pixscroller.h"
+#include "gtkmm2ext/keyboard.h"
 
 using namespace std;
 using namespace Gtk;
@@ -116,7 +117,7 @@ PixScroller::on_button_press_event (GdkEventButton* ev)
 {
 	switch (ev->button) {
 	case 1:
-		if (!(ev->state & Gdk::SHIFT_MASK)) {
+		if (!(ev->state & Keyboard::TertiaryModifier)) {
 			add_modal_grab();
 			grab_y = ev->y;
 			grab_start = ev->y;
@@ -137,8 +138,8 @@ PixScroller::on_button_release_event (GdkEventButton* ev)
 {
 	double scale;
 	
-	if (ev->state & GDK_CONTROL_MASK) {
-		if (ev->state & GDK_MOD1_MASK) {
+	if (ev->state & Keyboard::PrimaryModifier) {
+		if (ev->state & Keyboard::SecondaryModifier) {
 			scale = 0.05;
 		} else {
 			scale = 0.1;
@@ -170,7 +171,7 @@ PixScroller::on_button_release_event (GdkEventButton* ev)
 				adj.set_value (scale * fract * (adj.get_upper() - adj.get_lower()));
 			}
 		} else {
-			if (ev->state & Gdk::SHIFT_MASK) {
+			if (ev->state & Keyboard::TertiaryModifier) {
 				adj.set_value (default_value);
 				cerr << "default value = " << default_value << endl;
 			}
@@ -187,8 +188,8 @@ PixScroller::on_scroll_event (GdkEventScroll* ev)
 {
 	double scale;
 	
-	if (ev->state & GDK_CONTROL_MASK) {
-		if (ev->state & GDK_MOD1_MASK) {
+	if (ev->state & Keyboard::PrimaryModifier) {
+		if (ev->state & Keyboard::SecondaryModifier) {
 			scale = 0.05;
 		} else {
 			scale = 0.1;
@@ -227,8 +228,8 @@ PixScroller::on_motion_notify_event (GdkEventMotion* ev)
 			return true;
 		}
 		
-		if (ev->state & GDK_CONTROL_MASK) {
-			if (ev->state & GDK_MOD1_MASK) {
+		if (ev->state & Keyboard::PrimaryModifier) {
+			if (ev->state & Keyboard::SecondaryModifier) {
 				scale = 0.05;
 			} else {
 				scale = 0.1;

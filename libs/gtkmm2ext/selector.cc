@@ -22,9 +22,11 @@
 #include <vector>
 #include <string>
 
-#include <gtkmm2ext/selector.h>
-#include <gtkmm2ext/utils.h>
-#include <pbd/pathscanner.h>
+#include "pbd/pathscanner.h"
+
+#include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/selector.h"
+#include "gtkmm2ext/utils.h"
 
 using namespace std;
 using namespace Gtkmm2ext;
@@ -219,9 +221,9 @@ TreeView_Selector::on_button_press_event(GdkEventButton* ev)
 	bool return_value = TreeView::on_button_press_event(ev);
 
 	if (ev && (ev->type == GDK_BUTTON_RELEASE || ev->type == GDK_2BUTTON_PRESS)) {
-		if (ev->state & Gdk::CONTROL_MASK) {
+		if (ev->state & Keyboard::PrimaryModifier) {
 			g_idle_add (Selector::_control_clicked, this);
-		} else if (ev->state & Gdk::SHIFT_MASK) {
+		} else if (ev->state & Keyboard::TertiaryModifier) {
 			g_idle_add (Selector::_shift_clicked, this);
 		} else if (ev->type == GDK_2BUTTON_PRESS) {
 			g_idle_add (Selector::_accept, this);

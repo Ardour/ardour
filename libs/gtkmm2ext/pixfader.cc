@@ -20,20 +20,17 @@
 
 
 #include <iostream>
-#include <gtkmm2ext/pixfader.h>
+#include "gtkmm2ext/pixfader.h"
+#include "gtkmm2ext/keyboard.h"
 
 using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace Gdk;
 using namespace std;
 
-#ifdef GTKOSX
-int PixFader::fine_scale_modifier = GDK_META_MASK;
-#else
-int PixFader::fine_scale_modifier = GDK_CONTROL_MASK;
-#endif
 
-int PixFader::extra_fine_scale_modifier = GDK_MOD1_MASK;
+int PixFader::fine_scale_modifier = Keyboard::PrimaryModifier;
+int PixFader::extra_fine_scale_modifier = Keyboard::SecondaryModifier;
 
 PixFader::PixFader (Glib::RefPtr<Pixbuf> belt, Gtk::Adjustment& adj, int orientation, int fader_length)
 
@@ -56,7 +53,7 @@ PixFader::PixFader (Glib::RefPtr<Pixbuf> belt, Gtk::Adjustment& adj, int orienta
 
 	set_fader_length (fader_length);
 
-	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
+	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 
 	adjustment.signal_value_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
 	adjustment.signal_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
@@ -159,23 +156,15 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 
 				/* no motion - just a click */
 
-				if (ev->state & Gdk::SHIFT_MASK) {
-					cerr << "SV A\n";
+				if (ev->state & Keyboard::TertiaryModifier) {
 					adjustment.set_value (default_value);
-					cerr << "SV A OUT\n";
 				} else if (ev->state & fine_scale_modifier) {
-					cerr << "SV B\n";
 					adjustment.set_value (adjustment.get_lower());
-					cerr << "SV B OUT\n";
 				} else if ((_orien == VERT && ev_pos < span - display_span()) || (_orien == HORIZ && ev_pos > span - display_span())) {
 					/* above the current display height, remember X Window coords */
-					cerr << "SV C\n";
 					adjustment.set_value (adjustment.get_value() + adjustment.get_step_increment());
-					cerr << "SV C OUT\n";
 				} else {
-					cerr << "SV D\n";
 					adjustment.set_value (adjustment.get_value() - adjustment.get_step_increment());
-					cerr << "SV D OUT\n";
 				}
 			}
 
@@ -333,4 +322,18 @@ PixFader::set_fader_length (int l)
 	}
 
 	queue_draw ();
+}
+
+bool
+PixFader::on_enter_notify_event (GdkEventCrossing*)
+{
+	Keyboard::magic_widget_grab_focus ();
+	return false;
+}
+
+bool
+PixFader::on_leave_notify_event (GdkEventCrossing*)
+{
+	Keyboard::magic_widget_drop_focus();
+	return false;
 }

@@ -18,7 +18,9 @@
 */
 
 #include <iostream>
-#include <gtkmm2ext/scroomer.h>
+
+#include "gtkmm2ext/scroomer.h"
+#include "gtkmm2ext/keyboard.h"
 
 using namespace Gtkmm2ext;
 using namespace Gtk;
@@ -74,8 +76,8 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev)
 
 	grab_y = ev->y;
 
-	if (ev->state & GDK_CONTROL_MASK) {
-		if (ev->state & GDK_MOD1_MASK) {
+	if (ev->state & Keyboard::PrimaryModifier) {
+		if (ev->state & Keyboard::SecondaryModifier) {
 			scale = 0.05;
 		} else {
 			scale = 0.1;
