@@ -543,35 +543,33 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-			SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
-			ev->rt_slot =   bind (sigc::mem_fun (_session, &Session::set_record_enable), _session.get_routes(), !rec_enable_button->get_active());
-			ev->rt_return = sigc::mem_fun (*this, &RouteUI::post_rtop_cleanup);
-			
-			_session.queue_event (ev);
+#if 0			
+			_session.set_record_enable (_session.get_route(), !rec_enable_button->get_active(), sigc::mem_fun (*this, &RouteUI::post_rtop_cleanup));
+#endif
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
 			/* Primary-button1 applies change to the route group (even if it is not active)
 			   NOTE: Primary-button2 is MIDI learn.
 			*/
-			
-			if (ev->button == 1) {
-				queue_route_group_op (RouteGroup::RecEnable, &Session::set_record_enable, !rec_enable_button->get_active());
+#if 0			
+			if (ev->button == 1 && _route->route_group()) {
+				_session.set_record_enable (_route->route_group(), !rec_enable_button->get_active(),
+				queue_route_group_op (RouteGroup::RecEnable, &Session::set_record_enable, 
 			}
+#endif
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
 
 			/* do this on release */
 
 		} else {
+
+#if 0
 			boost::shared_ptr<RouteList> rl (new RouteList);
 			rl->push_back (route());
-			
-			SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
-			ev->rt_slot =   bind (sigc::mem_fun (_session, &Session::set_record_enable), rl, !rec_enable_button->get_active());
-			ev->rt_return = sigc::mem_fun (*this, &RouteUI::post_rtop_cleanup);
-
-			_session.queue_event (ev);
+			_session.set_record_enable (rl, !rec_enable_button->get_active(), sigc::mem_fun (*this, &RouteUI::post_rtop_cleanup));
+#endif
 		}
 	}
 

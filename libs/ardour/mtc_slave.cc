@@ -57,7 +57,7 @@ MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 	can_notify_on_unknown_rate = true;
 	did_reset_tc_format = false;
 
-	pic = new PIController (1.0, 8);
+	pic = new PIChaser();
 	
 	last_mtc_fps_byte = session.get_mtc_timecode_bits ();
 	mtc_frame = 0;
@@ -229,8 +229,18 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 					 * 
 					 * its not the average, but we will assign it to current.speed below
 					 */
+
+				    static nframes64_t last_seen_timestamp = 0; 
+				    static nframes64_t last_seen_position = 0; 
+
+				    if ((now - last_seen_timestamp) < 300) {
+					mtc_frame = (mtc_frame + last_seen_position)/2;
+				    }
+
+				    last_seen_timestamp = now;
+				    last_seen_position = mtc_frame;
+
 					
-					average_speed = pic->get_ratio (session.audible_frame() - mtc_frame);
 					
 				} else {
 
@@ -412,6 +422,24 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::speed_and_position %1 %2\n", last.speed, last.position));
 
+	if (give_slave_full_control_over_transport_speed()) {
+	    bool in_control = (session.slave_state() == Session::Running);
+	    nframes64_t pic_want_locate = 0; 
+	    //nframes64_t slave_pos = session.audible_frame();
+	    nframes64_t slave_pos = session.transport_frame();
+	    static double average_speed = 0;
+
+	    average_speed = pic->get_ratio (last.timestamp, last.position, slave_pos, in_control );
+	    pic_want_locate = pic->want_locate();
+
+	    if (in_control && pic_want_locate) {
+		last.speed = average_speed + (double) (pic_want_locate - session.transport_frame()) / (double)session.get_block_size();
+		std::cout << "locate req " << pic_want_locate << " speed: " << average_speed << "\n"; 
+	    } else {
+		last.speed = average_speed;
+	    }
+	}
+
 	if (last.speed == 0.0f) {
 
 		elapsed = 0;
@@ -431,7 +459,7 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 
 	/* now add the most recent timecode value plus the estimated elapsed interval */
 
-	pos =  elapsed + last.position;
+	pos = last.position + elapsed; 
 	speed = last.speed;
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::speed_and_position FINAL %1 %2\n", last.speed, pos));
@@ -486,7 +514,7 @@ MTC_Slave::reset ()
 	have_first_speed_accumulator = false;
 	speed_accumulator_cnt = 0;
 
-	pic->out_of_bounds();
+	pic->reset();
 }
 
 void

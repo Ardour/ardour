@@ -42,6 +42,7 @@
 #include "ardour/io.h"
 #include "ardour/types.h"
 #include "ardour/mute_master.h"
+#include "ardour/route_group_member.h"
 
 namespace ARDOUR {
 
@@ -54,7 +55,7 @@ class RouteGroup;
 class Send;
 class InternalReturn;
 
-class Route : public SessionObject, public AutomatableControls
+class Route : public SessionObject, public AutomatableControls, public RouteGroupMember
 {
   public:
 
@@ -149,10 +150,6 @@ class Route : public SessionObject, public AutomatableControls
 	void set_denormal_protection (bool yn);
 	bool denormal_protection() const;
 
-	void       set_route_group (RouteGroup *, void *);
-	void       drop_route_group (void *);
-	RouteGroup *route_group () const { return _route_group; }
-
 	void         set_meter_point (MeterPoint, void *src);
 	MeterPoint   meter_point() const { return _meter_point; }
 	void         meter ();
@@ -244,7 +241,6 @@ class Route : public SessionObject, public AutomatableControls
 	/** the processors have changed; the parameter indicates what changed */
 	sigc::signal<void, RouteProcessorChange> processors_changed;
 	sigc::signal<void,void*> record_enable_changed;
-	sigc::signal<void,void*> route_group_changed;
 	/** the metering point has changed */
 	sigc::signal<void,void*> meter_change; 
 	sigc::signal<void>       signal_latency_changed;
@@ -369,7 +365,6 @@ class Route : public SessionObject, public AutomatableControls
 	boost::shared_ptr<MuteMaster> _mute_master;
 	MuteMaster::MutePoint _mute_points;
 
-	RouteGroup*    _route_group;
 	std::string    _comment;
 	bool           _have_internal_generator;
 	bool           _solo_safe;

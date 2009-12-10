@@ -73,7 +73,6 @@ RouteGroupMenu::set_group (RouteGroup* g)
 	GroupSelected (g);
 }
 
-
 void
 RouteGroupMenu::new_group ()
 {

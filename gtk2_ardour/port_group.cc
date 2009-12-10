@@ -296,7 +296,7 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 
 		if (g) {
 
-			TimeAxisView* tv = PublicEditor::instance().axis_view_from_route (i->get());
+			TimeAxisView* tv = PublicEditor::instance().axis_view_from_route (*i);
 			for (list<boost::shared_ptr<Bundle> >::iterator i = route_bundles.begin(); i != route_bundles.end(); ++i) {
 				if (tv) {
 					g->add_bundle (*i, io, tv->color ());

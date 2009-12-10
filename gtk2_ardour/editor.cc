@@ -4805,12 +4805,12 @@ Editor::streamview_height_changed ()
 }
 
 TimeAxisView*
-Editor::axis_view_from_route (Route* r) const
+Editor::axis_view_from_route (boost::shared_ptr<Route> r) const
 {
 	TrackViewList::const_iterator j = track_views.begin ();
 	while (j != track_views.end()) {
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*j);
-		if (rtv && rtv->route().get() == r) {
+		if (rtv && rtv->route() == r) {
 			return rtv;
 		}
 		++j;
@@ -4821,11 +4821,11 @@ Editor::axis_view_from_route (Route* r) const
 
 
 TrackSelection
-Editor::axis_views_from_routes (list<Route*> r) const
+Editor::axis_views_from_routes (boost::shared_ptr<RouteList> r) const
 {
 	TrackSelection t;
 
-	for (list<Route*>::const_iterator i = r.begin(); i != r.end(); ++i) {
+	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
 		TimeAxisView* tv = axis_view_from_route (*i);
 		if (tv) {
 			t.push_back (tv);

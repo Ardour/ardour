@@ -31,7 +31,7 @@
 #include "midi++/parser.h"
 #include "midi++/types.h"
 
-class PIController;
+class PIChaser;
 
 namespace MIDI {
 	class Port;
@@ -242,7 +242,7 @@ class MTC_Slave : public Slave, public sigc::trackable {
 	MIDI::Port* port;
 	std::vector<sigc::connection> connections;
 	bool        can_notify_on_unknown_rate;
-	PIController* pic;
+	PIChaser* pic;
 
 	static const int frame_tolerance;
 

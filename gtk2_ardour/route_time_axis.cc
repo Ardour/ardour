@@ -311,20 +311,28 @@ gint
 RouteTimeAxisView::edit_click (GdkEventButton *ev)
 {
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-	        _route->set_route_group (0, this);
-		return FALSE;
+		if (_route->route_group()) {
+			_route->route_group()->remove (_route);
+		}
+		return false;
 	}
 
 	route_group_menu->rebuild (_route->route_group ());
 	route_group_menu->popup (ev->button, ev->time);
 
-	return FALSE;
+	return false;
 }
 
 void
 RouteTimeAxisView::set_route_group_from_menu (RouteGroup *eg)
 {
-	_route->set_route_group (eg, this);
+	if (eg) {
+		eg->add (_route);
+	} else {
+		if (_route->route_group()) {
+			_route->route_group()->remove (_route);
+		}
+	}
 }
 
 void
@@ -1572,14 +1580,16 @@ RouteTimeAxisView::use_playlist (boost::weak_ptr<Playlist> wpl)
 
 			take_name = take_name.substr(idx + group_string.length()); // find the bit containing the take number / name
 
-			for (list<Route*>::const_iterator i = route_group()->route_list().begin(); i != route_group()->route_list().end(); ++i) {
-				if ( (*i) == this->route().get()) {
+			boost::shared_ptr<RouteList> rl (route_group()->route_list());
+
+			for (RouteList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
+				if ( (*i) == this->route()) {
 					continue;
 				}
 
 				std::string playlist_name = (*i)->name()+group_string+take_name;
 
-				Track *track = dynamic_cast<Track *>(*i);
+				boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track>(*i);
 				if (!track) {
 					std::cerr << "route " << (*i)->name() << " is not a Track" << std::endl;
 					continue;
@@ -1593,8 +1603,6 @@ RouteTimeAxisView::use_playlist (boost::weak_ptr<Playlist> wpl)
 				} else {
 					track->diskstream()->use_playlist(ipl);
 				}
-
-				//(*i)->get_dis
 			}
 		}
 	}

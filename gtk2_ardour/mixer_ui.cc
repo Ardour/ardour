@@ -1152,7 +1152,7 @@ Mixer_UI::group_flags_changed (void* src, RouteGroup* group)
 
 	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
 		if ((*i)->route_group() == group) {
-			(*i)->route_group_changed(0);
+			(*i)->route_group_changed();
 		}
 	}
 

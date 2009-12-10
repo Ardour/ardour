@@ -950,8 +950,8 @@ class Editor : public PublicEditor
 	/* track views */
 	TrackViewList track_views;
 	std::pair<TimeAxisView*, ARDOUR::layer_t> trackview_by_y_position (double);
-	TimeAxisView* axis_view_from_route (ARDOUR::Route *) const;
-	TrackSelection axis_views_from_routes (std::list<ARDOUR::Route *>) const;
+	TimeAxisView* axis_view_from_route (boost::shared_ptr<ARDOUR::Route>) const;
+	TrackSelection axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const;
 
 	TrackSelection get_tracks_for_range_action () const;
 

@@ -25,6 +25,7 @@
 #include <string>
 #include <stdint.h>
 #include <sigc++/signal.h>
+
 #include "pbd/stateful.h"
 #include "ardour/types.h"
 
@@ -53,6 +54,7 @@ public:
 	};
 
 	RouteGroup (Session& s, const std::string &n, Flag f = Flag(0), Property p = Property(0));
+	~RouteGroup ();
 
 	const std::string& name() { return _name; }
 	void set_name (std::string str);
@@ -60,12 +62,11 @@ public:
 	bool is_active () const { return _flags & Active; }
 	bool is_relative () const { return _flags & Relative; }
 	bool is_hidden () const { return _flags & Hidden; }
-	bool empty() const {return routes.empty();}
+	bool empty() const {return routes->empty();}
+	size_t size() const { return routes->size();}
 
 	gain_t get_max_factor(gain_t factor);
 	gain_t get_min_factor(gain_t factor);
-
-	int size() { return routes.size();}
 
 	void set_active (bool yn, void *src);
 	void set_relative (bool yn, void *src);
@@ -86,24 +87,23 @@ public:
 		}
 	}
 
-	int add (Route *);
-
-	int remove (Route *);
+	int add (boost::shared_ptr<Route>);
+	int remove (boost::shared_ptr<Route>);
 
 	void apply (void (Route::*func)(void *), void *src) {
-		for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
-			((*i)->*func)(src);
+		for (RouteList::iterator i = routes->begin(); i != routes->end(); i++) {
+			((*i).get()->*func)(src);
 		}
 	}
 
 	template<class T> void apply (void (Route::*func)(T, void *), T val, void *src) {
-		for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
-			((*i)->*func)(val, src);
+		for (RouteList::iterator i = routes->begin(); i != routes->end(); i++) {
+			((*i).get()->*func)(val, src);
 		}
 	}
 
 	template<class T> void foreach_route (T *obj, void (T::*func)(Route&)) {
-		for (std::list<Route *>::iterator i = routes.begin(); i != routes.end(); i++) {
+		for (RouteList::iterator i = routes->begin(); i != routes->end(); i++) {
 			(obj->*func)(**i);
 		}
 	}
@@ -114,17 +114,18 @@ public:
 
 	/* fills at_set with all members of the group that are AudioTracks */
 
-	void audio_track_group (std::set<AudioTrack*>& at_set);
+	void audio_track_group (std::set<boost::shared_ptr<AudioTrack> >& at_set);
 
 	void clear () {
-		routes.clear ();
+		routes->clear ();
 		changed();
 	}
 
 	void make_subgroup ();
 	void destroy_subgroup ();
 
-	const std::list<Route*>& route_list() { return routes; }
+	boost::shared_ptr<RouteList> route_list() { return routes; }
+	boost::shared_ptr<RouteList> route_list (Property forProperty);
 
 	sigc::signal<void> changed;
 	sigc::signal<void,void*> FlagsChanged;
@@ -135,13 +136,13 @@ public:
 	
 private:
 	Session& _session;
-	std::list<Route *> routes;
+	boost::shared_ptr<RouteList> routes;
 	boost::shared_ptr<Route> subgroup_bus;
 	std::string _name;
 	Flag _flags;
 	Property _properties;
 
-	void remove_when_going_away (Route*);
+	void remove_when_going_away (boost::weak_ptr<Route>);
 	int set_state_2X (const XMLNode&, int);
 };
 

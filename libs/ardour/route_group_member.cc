@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis
+    Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,27 +17,27 @@
 
 */
 
-#ifndef __ardour_route_group_specialized_h__
-#define __ardour_route_group_specialized_h__
 
 #include "ardour/route_group.h"
-#include "ardour/track.h"
+#include "ardour/route_group_member.h"
 
-namespace ARDOUR {
+using namespace ARDOUR;
 
-template<class T> void
-RouteGroup::apply (void (Track::*func)(T, void *), T val, void* /*src*/)
+void
+RouteGroupMember::join_route_group (RouteGroup *rg)
 {
-	for (RouteList::iterator i = routes->begin(); i != routes->end(); i++) {
-		boost::shared_ptr<Track> at;
-
-		if ((at = boost::dynamic_pointer_cast<Track>(*i)) != 0) {
-			(at.get()->*func)(val, this);
-		}
+	if (rg == _route_group) {
+		return;
 	}
+
+	_route_group = rg;
+	route_group_changed (); /* EMIT SIGNAL */
 }
 
-} /* namespace ARDOUR */
-
-#endif /* __ardour_route_group_specialized_h__ */
+void
+RouteGroupMember::leave_route_group ()
+{
+	_route_group = 0;
+	route_group_changed (); /* EMIT SIGNAL */
+}
 

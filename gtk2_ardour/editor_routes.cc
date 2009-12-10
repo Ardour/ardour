@@ -946,7 +946,7 @@ EditorRoutes::show_tracks_with_regions_at_playhead ()
 
 	set<TimeAxisView*> show;
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-		TimeAxisView* tav = _editor->axis_view_from_route (i->get ());
+		TimeAxisView* tav = _editor->axis_view_from_route (*i);
 		if (tav) {
 			show.insert (tav);
 		}

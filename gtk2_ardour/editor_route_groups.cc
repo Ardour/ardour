@@ -271,7 +271,7 @@ EditorRouteGroups::run_new_group_dialog (const RouteList& rl)
 	case Gtk::RESPONSE_ACCEPT:
 		_session->add_route_group (g);
 		for (RouteList::const_iterator i = rl.begin(); i != rl.end(); ++i) {
-			(*i)->set_route_group (g, this);
+			g->add (*i);
 		}
 		break;
 	default:
@@ -673,7 +673,7 @@ EditorRouteGroups::connect_to_session (Session* s)
 }
 
 struct CollectSorter {
-	bool operator () (Route* a, Route* b) {
+    bool operator () (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
 		return a->order_key (N_ ("editor")) < b->order_key (N_ ("editor"));
 	}
 };
@@ -684,16 +684,16 @@ struct CollectSorter {
 void
 EditorRouteGroups::collect (RouteGroup* g)
 {
-	list<Route*> routes = g->route_list ();
-	routes.sort (CollectSorter ());
-	int const N = routes.size ();
+	boost::shared_ptr<RouteList> routes = g->route_list ();
+	routes->sort (CollectSorter ());
+	int const N = routes->size ();
 
-	list<Route*>::iterator i = routes.begin ();
+	RouteList::iterator i = routes->begin ();
 	Editor::TrackViewList::const_iterator j = _editor->get_track_views().begin();
 
 	int diff = 0;
 	int coll = -1;
-	while (i != routes.end() && j != _editor->get_track_views().end()) {
+	while (i != routes->end() && j != _editor->get_track_views().end()) {
 
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*j);
 		if (rtv) {
@@ -701,7 +701,7 @@ EditorRouteGroups::collect (RouteGroup* g)
 			boost::shared_ptr<Route> r = rtv->route ();
 			int const k = r->order_key (N_ ("editor"));
 
-			if (*i == r.get()) {
+			if (*i == r) {
 
 				if (coll == -1) {
 					coll = k;

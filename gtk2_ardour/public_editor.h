@@ -346,7 +346,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual ArdourCanvas::Group* get_background_group () const = 0;
 	virtual ArdourCanvas::Group* get_trackview_group () const = 0;
 
-	virtual TimeAxisView* axis_view_from_route (ARDOUR::Route *) const = 0;
+	virtual TimeAxisView* axis_view_from_route (boost::shared_ptr<ARDOUR::Route>) const = 0;
 
 	virtual void show_verbose_canvas_cursor_with (const std::string& txt) = 0;
 	virtual void hide_verbose_canvas_cursor() = 0;

@@ -183,7 +183,7 @@ GroupTabs::on_button_release_event (GdkEventButton* ev)
 				RouteGroup* g = new_route_group ();
 				if (g) {
 					for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
-						(*i)->set_route_group (g, this);
+						g->add (*i);
 					}
 				}
 			} else {
@@ -193,10 +193,10 @@ GroupTabs::on_button_release_event (GdkEventButton* ev)
 					if (find (routes.begin(), routes.end(), *i) == routes.end()) {
 						/* this route is not on the list of those that should be in _dragging's group */
 						if ((*i)->route_group() == _dragging->group) {
-							(*i)->drop_route_group (this);
+							_dragging->group->remove (*i);
 						}
 					} else {
-						(*i)->set_route_group (_dragging->group, this);
+						_dragging->group->add (*i);
 					}
 				}
 			}

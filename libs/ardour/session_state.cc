@@ -1281,6 +1281,20 @@ Session::set_state (const XMLNode& node, int version)
 		}
 	}
 	
+	if ((child = find_named_node (node, "TempoMap")) == 0) {
+		error << _("Session: XML state has no Tempo Map section") << endmsg;
+		goto out;
+	} else if (_tempo_map->set_state (*child, version)) {
+		goto out;
+	}
+
+	if ((child = find_named_node (node, "Routes")) == 0) {
+		error << _("Session: XML state has no routes section") << endmsg;
+		goto out;
+	} else if (load_routes (*child, version)) {
+		goto out;
+	}
+
 	if (version >= 3000) {
 		
 		if ((child = find_named_node (node, "RouteGroups")) == 0) {
@@ -1305,20 +1319,6 @@ Session::set_state (const XMLNode& node, int version)
 		} else if (load_route_groups (*child, version)) {
 			goto out;
 		}
-	}
-
-	if ((child = find_named_node (node, "TempoMap")) == 0) {
-		error << _("Session: XML state has no Tempo Map section") << endmsg;
-		goto out;
-	} else if (_tempo_map->set_state (*child, version)) {
-		goto out;
-	}
-
-	if ((child = find_named_node (node, "Routes")) == 0) {
-		error << _("Session: XML state has no routes section") << endmsg;
-		goto out;
-	} else if (load_routes (*child, version)) {
-		goto out;
 	}
 
 	if ((child = find_named_node (node, "Click")) == 0) {
@@ -2103,14 +2103,13 @@ Session::remove_route_group (RouteGroup& rg)
 	list<RouteGroup*>::iterator i;
 
 	if ((i = find (_route_groups.begin(), _route_groups.end(), &rg)) != _route_groups.end()) {
-		(*i)->apply (&Route::drop_route_group, this);
 		_route_groups.erase (i);
+		delete &rg;
+
 		route_group_removed (); /* EMIT SIGNAL */
 	}
 
-	delete &rg;
 }
-
 
 RouteGroup *
 Session::route_group_by_name (string name)

@@ -447,7 +447,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	solo_changed (0);
 	name_changed ();
 	comment_changed (0);
-	route_group_changed (0);
+	route_group_changed ();
 
 	connect_to_pan ();
 
@@ -608,7 +608,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 	
 	update_input_display ();
 	update_output_display ();
-	route_group_changed (0);
+	route_group_changed ();
 	name_changed ();
 	WidthChanged ();
 }
@@ -1303,7 +1303,7 @@ MixerStrip::comment_changed (void *src)
 void
 MixerStrip::set_route_group (RouteGroup *rg)
 {
-	_route->set_route_group (rg, this);
+	rg->add (_route);
 }
 
 bool
@@ -1330,9 +1330,9 @@ MixerStrip::select_route_group (GdkEventButton *ev)
 }
 
 void
-MixerStrip::route_group_changed (void *ignored)
+MixerStrip::route_group_changed ()
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &MixerStrip::route_group_changed), ignored));
+	ENSURE_GUI_THREAD (mem_fun(*this, &MixerStrip::route_group_changed));
 
 	RouteGroup *rg = _route->route_group();
 

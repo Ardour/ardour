@@ -135,8 +135,6 @@ Route::init ()
 	_in_configure_processors = false;
 	_mute_points = MuteMaster::AllPoints;
 
-	_route_group = 0;
-
 	_phase_invert = 0;
 	_denormal_protection = false;
 
@@ -1836,15 +1834,6 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 		}
 	}
 
-	if ((prop = node.property (X_("route-group"))) != 0) {
-		RouteGroup* route_group = _session.route_group_by_name(prop->value());
-		if (route_group == 0) {
-			error << string_compose(_("Route %1: unknown route group \"%2 in saved state (ignored)"), _name, prop->value()) << endmsg;
-		} else {
-			set_route_group (route_group, this);
-		}
-	}
-
 	if ((prop = node.property (X_("order-keys"))) != 0) {
 
 		long n;
@@ -2011,26 +2000,9 @@ Route::_set_state_2X (const XMLNode& node, int version)
 		_meter_point = MeterPoint (string_2_enum (prop->value (), _meter_point));
 	}
 
-	/* XXX: if the route was in both a mix group and an edit group, it'll end up
-	   just in the edit group. */
-
-	if ((prop = node.property (X_("mix-group"))) != 0) {
-		RouteGroup* route_group = _session.route_group_by_name(prop->value());
-		if (route_group == 0) {
-			error << string_compose(_("Route %1: unknown route group \"%2 in saved state (ignored)"), _name, prop->value()) << endmsg;
-		} else {
-			set_route_group (route_group, this);
-		}
-	}
-
-	if ((prop = node.property (X_("edit-group"))) != 0) {
-		RouteGroup* route_group = _session.route_group_by_name(prop->value());
-		if (route_group == 0) {
-			error << string_compose(_("Route %1: unknown route group \"%2 in saved state (ignored)"), _name, prop->value()) << endmsg;
-		} else {
-			set_route_group (route_group, this);
-		}
-	}
+	/* do not carry over edit/mix groups from 2.X because (a) its hard (b) they
+	   don't mean the same thing.
+	*/
 
 	if ((prop = node.property (X_("order-keys"))) != 0) {
 
@@ -2396,33 +2368,6 @@ Route::drop_listen (boost::shared_ptr<Route> route)
 	if (route == _session.control_out()) {
 		_control_outs.reset ();
 	}
-}
-
-void
-Route::set_route_group (RouteGroup *rg, void *src)
-{
-	if (rg == _route_group) {
-		return;
-	}
-
-	if (_route_group) {
-		_route_group->remove (this);
-	}
-
-	if ((_route_group = rg) != 0) {
-		_route_group->add (this);
-	}
-
-	_session.set_dirty ();
-	route_group_changed (src); /* EMIT SIGNAL */
-}
-
-void
-Route::drop_route_group (void *src)
-{
-	_route_group = 0;
-	_session.set_dirty ();
-	route_group_changed (src); /* EMIT SIGNAL */
 }
 
 void

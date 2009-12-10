@@ -19,6 +19,8 @@
 #ifndef __libardour_pi_controller__
 #define __libardour_pi_controller__
 
+#include "ardour/types.h"
+
 class PIController {
 
   public:
@@ -48,6 +50,35 @@ class PIController {
     int     smooth_size;
     double  smooth_offset;
     double  current_resample_factor;
+    bool    fir_empty;
 };
+
+#define ESTIMATOR_SIZE 16
+
+class PIChaser {
+  public:
+    PIChaser();
+    ~PIChaser();
+
+    double get_ratio( nframes64_t realtime, nframes64_t chasetime, nframes64_t slavetime, bool in_control );
+    void reset();
+    nframes64_t want_locate() { return want_locate_val; }
+
+  private:
+    PIController *pic;
+    nframes64_t realtime_stamps[ESTIMATOR_SIZE];
+    nframes64_t chasetime_stamps[ESTIMATOR_SIZE];
+    int array_index;
+    nframes64_t want_locate_val;
+
+    void feed_estimator( nframes64_t realtime, nframes64_t chasetime );
+    double get_estimate();
+
+    double speed;
+
+    double speed_threshold;
+    nframes64_t pos_threshold;
+};
+
 
 #endif /* __libardour_pi_controller__ */

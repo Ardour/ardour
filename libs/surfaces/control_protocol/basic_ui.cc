@@ -295,3 +295,4 @@ BasicUI::sample_to_timecode (nframes_t sample, Timecode::Time& timecode, bool us
 {
 	session->sample_to_timecode (sample, *((Timecode::Time*)&timecode), use_offset, use_subframes);
 }
+

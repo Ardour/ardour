@@ -153,6 +153,7 @@ libardour_sources = [
 	'reverse.cc',
 	'route.cc',
 	'route_group.cc',
+	'route_group_member.cc',
 	'rb_effect.cc',
 	'send.cc',
 	'session.cc',

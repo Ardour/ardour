@@ -568,6 +568,7 @@ Session::follow_slave (nframes_t nframes)
 			
 			if (_slave->give_slave_full_control_over_transport_speed()) {
 				set_transport_speed (slave_speed, false, false);
+				//std::cout << "set speed = " << slave_speed << "\n";
 			} else {
 				float adjusted_speed = slave_speed + (1.5 * (delta /  float(_current_frame_rate)));
 				request_transport_speed (adjusted_speed);
@@ -576,10 +577,12 @@ Session::follow_slave (nframes_t nframes)
 									   slave_speed));
 			}
 			
+#if 0
 			if (abs(average_slave_delta) > _slave->resolution()) {
 				cerr << "average slave delta greater than slave resolution (" << _slave->resolution() << "), going to silent motion\n";
 				goto silent_motion;
 			}
+#endif
 		}
 	}
 

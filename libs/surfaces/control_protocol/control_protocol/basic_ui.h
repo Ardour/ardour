@@ -30,6 +30,7 @@
 
 namespace ARDOUR {
 	class Session;
+	class SessionEvent;
 }
 
 class BasicUI {

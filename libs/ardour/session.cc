@@ -1648,7 +1648,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 			*/
 
 			track->midi_diskstream()->non_realtime_input_change();
-			track->set_route_group (route_group, 0);
+			route_group->add (track);
 
 			track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
 			//track->set_remote_control_id (control_id);
@@ -1819,7 +1819,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 			channels_used += track->n_inputs ().n_audio();
 
-			track->set_route_group (route_group, 0);
+			route_group->add (track);
 
 			track->audio_diskstream()->non_realtime_input_change();
 
@@ -1998,7 +1998,7 @@ Session::new_audio_route (bool aux, int input_channels, int output_channels, Rou
 
 			channels_used += bus->n_inputs ().n_audio();
 
-			bus->set_route_group (route_group, 0);
+			route_group->add (bus);
 			bus->set_remote_control_id (control_id);
 			++control_id;
 
@@ -2151,7 +2151,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 		(*x)->mute_changed.connect (mem_fun (*this, &Session::route_mute_changed));
 		(*x)->output()->changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
 		(*x)->processors_changed.connect (mem_fun (*this, &Session::route_processors_changed));
-		(*x)->route_group_changed.connect (hide (mem_fun (*this, &Session::route_group_changed)));
+		(*x)->route_group_changed.connect (mem_fun (*this, &Session::route_group_changed));
 
 		if ((*x)->is_master()) {
 			_master_out = (*x);
