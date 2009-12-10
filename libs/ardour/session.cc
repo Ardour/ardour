@@ -1651,7 +1651,9 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 			*/
 
 			track->midi_diskstream()->non_realtime_input_change();
-			route_group->add (track);
+			if (route_group) {
+				route_group->add (track);
+			}
 
 			track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
 			//track->set_remote_control_id (control_id);
@@ -1822,7 +1824,9 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 			channels_used += track->n_inputs ().n_audio();
 
-			route_group->add (track);
+			if (route_group) {
+				route_group->add (track);
+			}
 
 			track->audio_diskstream()->non_realtime_input_change();
 
@@ -2001,7 +2005,9 @@ Session::new_audio_route (bool aux, int input_channels, int output_channels, Rou
 
 			channels_used += bus->n_inputs ().n_audio();
 
-			route_group->add (bus);
+			if (route_group) {
+				route_group->add (bus);
+			}
 			bus->set_remote_control_id (control_id);
 			++control_id;
 
