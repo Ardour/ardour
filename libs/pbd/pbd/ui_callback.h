@@ -34,8 +34,8 @@ class UICallback
 
 	virtual void call_slot (sigc::slot<void> theSlot) = 0;
 
-	static UICallback* get_ui_for_thread() { return thread_ui.get(); }
-	static void set_ui_for_thread (UICallback* ui) { return thread_ui.set (ui); }
+	static UICallback* get_ui_for_thread();
+	static void set_ui_for_thread (UICallback* ui);
 
   private:
 	static Glib::StaticPrivate<UICallback> thread_ui;
