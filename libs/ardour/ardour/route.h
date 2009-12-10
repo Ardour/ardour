@@ -130,7 +130,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	 */
 
 	void set_solo (bool yn, void *src);
-	bool soloed () const {return self_soloed () || soloed_by_others (); }
+	bool soloed () const { return self_soloed () || soloed_by_others (); }
 
 	bool soloed_by_others () const { return !_solo_isolated && _soloed_by_others; }
 	bool self_soloed () const { return _self_solo; }

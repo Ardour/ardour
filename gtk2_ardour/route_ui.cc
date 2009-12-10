@@ -668,6 +668,10 @@ RouteUI::listen_changed(void* /*src*/)
 int
 RouteUI::solo_visual_state (boost::shared_ptr<Route> r)
 {
+	if (r->is_master() || r->is_control()) {
+		return 0;
+	}
+	
 	if (Config->get_solo_control_is_listen_control()) {
 
 		if (r->listening()) {
@@ -676,25 +680,60 @@ RouteUI::solo_visual_state (boost::shared_ptr<Route> r)
 			return 0;
 		}
 
+	} 
+	
+	if (r->soloed()) {
+		return 1;
 	} else {
+		return 0;
+	}
+}
 
-		if (r->solo_isolated()) {
-			return 2;
-		} else if (r->soloed()) {
+int
+RouteUI::solo_visual_state_with_isolate (boost::shared_ptr<Route> r)
+{
+	if (r->is_master() || r->is_control()) {
+		return 0;
+	}
+	
+	if (Config->get_solo_control_is_listen_control()) {
+
+		if (r->listening()) {
 			return 1;
 		} else {
 			return 0;
 		}
-	}
 
-	return 0;
+	} 
+	
+	if (r->solo_isolated()) {
+		return 2;
+	} else if (r->soloed()) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+int
+RouteUI::solo_isolate_visual_state (boost::shared_ptr<Route> r)
+{
+	if (r->is_master() || r->is_control()) {
+		return 0;
+	}
+	
+	if (r->solo_isolated()) {
+			return 1;
+	} else {
+		return 0;
+	}
 }
 
 void
 RouteUI::update_solo_display ()
 {
 	bool x;
-	
+
 	if (Config->get_solo_control_is_listen_control()) {
 
 		if (solo_button->get_active() != (x = _route->listening())) {
@@ -713,7 +752,7 @@ RouteUI::update_solo_display ()
 
 	}
 
-	solo_button->set_visual_state (solo_visual_state (_route));
+	solo_button->set_visual_state (solo_visual_state_with_isolate (_route));
 }
 
 void
@@ -731,6 +770,10 @@ RouteUI::mute_changed(void* /*src*/)
 int
 RouteUI::mute_visual_state (Session& s, boost::shared_ptr<Route> r)
 {
+	if (r->is_master() || r->is_control()) {
+		return 0;
+	}
+	
 	if (Config->get_show_solo_mutes()) {
 		
 		if (r->muted ()) {

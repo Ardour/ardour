@@ -631,8 +631,6 @@ Route::set_solo_isolated (bool yn, void *src)
 
 	bool changed = false;
 
-	cerr << _name << " Solo isolated was " << _solo_isolated << endl;
-
 	if (yn) {
 		if (_solo_isolated == 0) {
 			changed = true;
@@ -644,8 +642,6 @@ Route::set_solo_isolated (bool yn, void *src)
 			_solo_isolated--;
 		}
 	}
-
-	cerr << "\tnow " << _solo_isolated << endl;
 
 	if (changed) {
 		set_delivery_solo ();

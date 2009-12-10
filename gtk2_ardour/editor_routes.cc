@@ -105,17 +105,23 @@ EditorRoutes::EditorRoutes (Editor* e)
 
 	solo_state_column->add_attribute(solo_col_renderer->property_state(), _columns.solo_state);
 
+	// Solo isolate toggle
+	CellRendererPixbufMulti* solo_iso_renderer = manage (new CellRendererPixbufMulti());
+
+	solo_iso_renderer->set_pixbuf (0, ::get_icon("act-disabled"));
+	solo_iso_renderer->set_pixbuf (1, ::get_icon("solo-isolated"));
+	solo_iso_renderer->signal_changed().connect (mem_fun (*this, &EditorRoutes::on_tv_solo_isolate_toggled));
+
+	TreeViewColumn* solo_isolate_state_column = manage (new TreeViewColumn("I", *solo_iso_renderer));
+
+	solo_isolate_state_column->add_attribute(solo_iso_renderer->property_state(), _columns.solo_isolate_state);
+
 	_display.append_column (*rec_state_column);
 	_display.append_column (*mute_state_column);
 	_display.append_column (*solo_state_column);
+	_display.append_column (*solo_isolate_state_column);
 	_display.append_column (_("Show"), _columns.visible);
 	_display.append_column (_("Name"), _columns.text);
-
-	_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
-	_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
-	_display.get_column (2)->set_data (X_("colnum"), GUINT_TO_POINTER(2));
-	_display.get_column (3)->set_data (X_("colnum"), GUINT_TO_POINTER(3));
-	_display.get_column (4)->set_data (X_("colnum"), GUINT_TO_POINTER(4));
 
 	_display.set_headers_visible (true);
 	_display.set_name ("TrackListDisplay");
@@ -125,17 +131,17 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.set_size_request (100, -1);
 	_display.add_object_drag (_columns.route.index(), "routes");
 
-	CellRendererText* name_cell = dynamic_cast<CellRendererText*> (_display.get_column_cell_renderer (4));
+	CellRendererText* name_cell = dynamic_cast<CellRendererText*> (_display.get_column_cell_renderer (5));
 	assert (name_cell);
 
-	TreeViewColumn* name_column = _display.get_column (4);
+	TreeViewColumn* name_column = _display.get_column (5);
 	assert (name_column);
 
 	name_column->add_attribute (name_cell->property_editable(), _columns.name_editable);
 	name_cell->property_editable() = true;
 	name_cell->signal_edited().connect (mem_fun (*this, &EditorRoutes::name_edit));
 
-	CellRendererToggle* visible_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (3));
+	CellRendererToggle* visible_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (4));
 
 	visible_cell->property_activatable() = true;
 	visible_cell->property_radio() = false;
@@ -205,6 +211,20 @@ EditorRoutes::on_tv_solo_enable_toggled (Glib::ustring const & path_string)
 		boost::shared_ptr<RouteList> rl (new RouteList);
 		rl->push_back (atv->route());
 		_session->set_solo (rl, !atv->route()->soloed(), Session::rt_cleanup);
+	}
+}
+
+void
+EditorRoutes::on_tv_solo_isolate_toggled (Glib::ustring const & path_string)
+{
+	// Get the model row that has been toggled.
+	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
+
+	TimeAxisView *tv = row[_columns.tv];
+	AudioTimeAxisView *atv = dynamic_cast<AudioTimeAxisView*> (tv);
+
+	if (atv != 0) {
+		atv->route()->set_solo_isolated (!atv->route()->solo_isolated(), this);
 	}
 }
 
@@ -372,6 +392,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 
 		(*x)->route()->mute_changed.connect (mem_fun (*this, &EditorRoutes::update_mute_display));
 		(*x)->route()->solo_changed.connect (mem_fun (*this, &EditorRoutes::update_solo_display));
+		(*x)->route()->solo_isolated_changed.connect (mem_fun (*this, &EditorRoutes::update_solo_isolate_display));
 	}
 
 	update_rec_display ();
@@ -900,6 +921,18 @@ EditorRoutes::update_solo_display (void* /*src*/)
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		boost::shared_ptr<Route> route = (*i)[_columns.route];
 		(*i)[_columns.solo_state] = RouteUI::solo_visual_state (route) > 0 ? 1 : 0;
+	}
+}
+
+void
+EditorRoutes::update_solo_isolate_display (void* /*src*/)
+{
+	TreeModel::Children rows = _model->children();
+	TreeModel::Children::iterator i;
+
+	for (i = rows.begin(); i != rows.end(); ++i) {
+		boost::shared_ptr<Route> route = (*i)[_columns.route];
+		(*i)[_columns.solo_isolate_state] = RouteUI::solo_isolate_visual_state (route) > 0 ? 1 : 0;
 	}
 }
 

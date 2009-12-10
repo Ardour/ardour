@@ -167,6 +167,19 @@ Port::get_state () const
 	node->add_property ("mode", PortFactory::mode_to_string (_mode));
 	node->add_property ("type", get_typestring());
 
+#if 0
+	byte device_inquiry[6];
+
+	device_inquiry[0] = 0xf0;
+	device_inquiry[0] = 0x7e;
+	device_inquiry[0] = 0x7f;
+	device_inquiry[0] = 0x06;
+	device_inquiry[0] = 0x02;
+	device_inquiry[0] = 0xf7;
+	
+	write (device_inquiry, sizeof (device_inquiry), 0);
+#endif
+
 	return *node;
 }
 
