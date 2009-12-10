@@ -291,6 +291,10 @@ TimeAxisView::clip_to_viewport ()
 bool
 TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 {
+	if (Keyboard::some_magic_widget_has_focus()) {
+		return false;
+	}
+
 	switch (ev->direction) {
 	case GDK_SCROLL_UP:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
