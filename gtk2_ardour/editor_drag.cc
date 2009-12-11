@@ -185,16 +185,6 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 		bool const yp = (::llabs ((nframes64_t) (_current_pointer_y - _grab_y)) > 4LL);
 
 		_move_threshold_passed = (xp || yp);
-
-		if (apply_move_threshold() && _move_threshold_passed) {
-
-			_grab_frame = _current_pointer_frame;
-			_grab_x = _current_pointer_x;
-			_grab_y = _current_pointer_y;
-			_last_pointer_frame = _grab_frame;
-			_pointer_frame_offset = _grab_frame - _last_frame_position;
-
-		}
 	}
 
 	bool old_had_movement = _had_movement;
@@ -207,7 +197,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 		_had_movement = false;
 	}
 
-	if (active (_editor->mouse_mode)) {
+	if (active (_editor->mouse_mode) && _had_movement) {
 
 		if (event->motion.state & Gdk::BUTTON1_MASK || event->motion.state & Gdk::BUTTON2_MASK) {
 			if (!from_autoscroll) {
@@ -742,11 +732,6 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 		return;
 	}
 
-	if (Config->get_edit_mode() == Splice && !_editor->pre_drag_region_selection.empty()) {
-		_editor->selection->set (_editor->pre_drag_region_selection);
-		_editor->pre_drag_region_selection.clear ();
-	}
-
 	if (_brushing) {
 		/* all changes were made during motion event handlers */
 
@@ -1035,6 +1020,10 @@ RegionMotionDrag::copy_regions (GdkEvent* event)
 		if (rv == _primary) {
 			_primary = nrv;
 		}
+
+		/* ..and deselect the one we copied */
+
+		rv->set_selected (false);
 	}
 
 	if (new_regionviews.empty()) {

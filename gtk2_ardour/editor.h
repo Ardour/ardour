@@ -1282,7 +1282,6 @@ class Editor : public PublicEditor
 	void set_fade_out_active (bool);
 
 	std::set<boost::shared_ptr<ARDOUR::Playlist> > motion_frozen_playlists;
-	RegionSelection pre_drag_region_selection;
 
 	bool _dragging_playhead;
 	bool _dragging_edit_point;

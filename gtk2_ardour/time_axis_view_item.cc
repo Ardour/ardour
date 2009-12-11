@@ -128,6 +128,8 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 
 	group = new ArdourCanvas::Group (*parent);
 
+	_selected = other._selected;
+
 	init (
 		other.item_name, other.samples_per_unit, c, other.frame_position,
 		other.item_duration, other.visibility, other.wide_enough_for_name, other.high_enough_for_name
