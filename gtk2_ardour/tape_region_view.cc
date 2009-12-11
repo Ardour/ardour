@@ -72,7 +72,7 @@ TapeAudioRegionView::init (Gdk::Color const & basic_color, bool /*wfw*/)
 	/* every time the wave data changes and peaks are ready, redraw */
 
 	for (uint32_t n = 0; n < audio_region()->n_channels(); ++n) {
-		audio_region()->audio_source(n)->PeaksReady.connect (bind (mem_fun(*this, &TapeAudioRegionView::update), n));
+		audio_region()->audio_source(n)->PeaksReady.connect (sigc::bind (sigc::mem_fun(*this, &TapeAudioRegionView::update), n));
 	}
 
 }
@@ -90,7 +90,7 @@ TapeAudioRegionView::update (uint32_t n)
 		return;
 	}
 
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &TapeAudioRegionView::update), n));
+	ENSURE_GUI_THREAD (*this, &TapeAudioRegionView::update, n)
 
 	/* this triggers a cache invalidation and redraw in the waveview */
 

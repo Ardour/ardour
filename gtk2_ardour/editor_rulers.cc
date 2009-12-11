@@ -142,25 +142,25 @@ Editor::initialize_rulers ()
 	frames_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
 	minsec_ruler->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
 
-	timecode_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
-	bbt_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
-	frames_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
-	minsec_ruler->signal_button_release_event().connect (mem_fun(*this, &Editor::ruler_button_release));
+	timecode_ruler->signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_release));
+	bbt_ruler->signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_release));
+	frames_ruler->signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_release));
+	minsec_ruler->signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_release));
 
-	timecode_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
-	bbt_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
-	frames_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
-	minsec_ruler->signal_button_press_event().connect (mem_fun(*this, &Editor::ruler_button_press));
+	timecode_ruler->signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_press));
+	bbt_ruler->signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_press));
+	frames_ruler->signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_press));
+	minsec_ruler->signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::ruler_button_press));
 
-	timecode_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	bbt_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	frames_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
-	minsec_ruler->signal_motion_notify_event().connect (mem_fun(*this, &Editor::ruler_mouse_motion));
+	timecode_ruler->signal_motion_notify_event().connect (sigc::mem_fun(*this, &Editor::ruler_mouse_motion));
+	bbt_ruler->signal_motion_notify_event().connect (sigc::mem_fun(*this, &Editor::ruler_mouse_motion));
+	frames_ruler->signal_motion_notify_event().connect (sigc::mem_fun(*this, &Editor::ruler_mouse_motion));
+	minsec_ruler->signal_motion_notify_event().connect (sigc::mem_fun(*this, &Editor::ruler_mouse_motion));
 
-	timecode_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
-	bbt_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
-	frames_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
-	minsec_ruler->signal_scroll_event().connect (mem_fun(*this, &Editor::ruler_scroll));
+	timecode_ruler->signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::ruler_scroll));
+	bbt_ruler->signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::ruler_scroll));
+	frames_ruler->signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::ruler_scroll));
+	minsec_ruler->signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::ruler_scroll));
 
 	visible_timebars = 0; /*this will be changed below */
 	canvas_timebars_vsize = 0;
@@ -338,15 +338,15 @@ Editor::popup_ruler_menu (nframes64_t where, ItemType t)
 
 	switch (t) {
 	case MarkerBarItem:
-		ruler_items.push_back (MenuElem (_("New location marker"), bind ( mem_fun(*this, &Editor::mouse_add_new_marker), where, false, false)));
-		ruler_items.push_back (MenuElem (_("Clear all locations"), mem_fun(*this, &Editor::clear_markers)));
-		ruler_items.push_back (MenuElem (_("Unhide locations"), mem_fun(*this, &Editor::unhide_markers)));
+		ruler_items.push_back (MenuElem (_("New location marker"), sigc::bind ( sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, false, false)));
+		ruler_items.push_back (MenuElem (_("Clear all locations"), sigc::mem_fun(*this, &Editor::clear_markers)));
+		ruler_items.push_back (MenuElem (_("Unhide locations"), sigc::mem_fun(*this, &Editor::unhide_markers)));
 		ruler_items.push_back (SeparatorElem ());
 		break;
 	case RangeMarkerBarItem:
 		//ruler_items.push_back (MenuElem (_("New Range")));
-		ruler_items.push_back (MenuElem (_("Clear all ranges"), mem_fun(*this, &Editor::clear_ranges)));
-		ruler_items.push_back (MenuElem (_("Unhide ranges"), mem_fun(*this, &Editor::unhide_ranges)));
+		ruler_items.push_back (MenuElem (_("Clear all ranges"), sigc::mem_fun(*this, &Editor::clear_ranges)));
+		ruler_items.push_back (MenuElem (_("Unhide ranges"), sigc::mem_fun(*this, &Editor::unhide_ranges)));
 		ruler_items.push_back (SeparatorElem ());
 
 		break;
@@ -356,18 +356,18 @@ Editor::popup_ruler_menu (nframes64_t where, ItemType t)
 
 	case CdMarkerBarItem:
 		// TODO
-		ruler_items.push_back (MenuElem (_("New CD track marker"), bind ( mem_fun(*this, &Editor::mouse_add_new_marker), where, true, false)));
+		ruler_items.push_back (MenuElem (_("New CD track marker"), sigc::bind ( sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, true, false)));
 		break;
 
 
 	case TempoBarItem:
-		ruler_items.push_back (MenuElem (_("New Tempo"), bind ( mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
+		ruler_items.push_back (MenuElem (_("New Tempo"), sigc::bind ( sigc::mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
 		ruler_items.push_back (MenuElem (_("Clear tempo")));
 		ruler_items.push_back (SeparatorElem ());
 		break;
 
 	case MeterBarItem:
-		ruler_items.push_back (MenuElem (_("New Meter"), bind ( mem_fun(*this, &Editor::mouse_add_new_meter_event), where)));
+		ruler_items.push_back (MenuElem (_("New Meter"), sigc::bind ( sigc::mem_fun(*this, &Editor::mouse_add_new_meter_event), where)));
 		ruler_items.push_back (MenuElem (_("Clear meter")));
 		ruler_items.push_back (SeparatorElem ());
 		break;
@@ -773,7 +773,7 @@ Editor::update_ruler_visibility ()
 void
 Editor::update_just_timecode ()
 {
-	ENSURE_GUI_THREAD(mem_fun(*this, &Editor::update_just_timecode));
+	ENSURE_GUI_THREAD (*this, &Editor::update_just_timecode)
 
 	if (session == 0) {
 		return;

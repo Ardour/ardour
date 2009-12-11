@@ -42,17 +42,17 @@ RouteGroupMenu::rebuild (RouteGroup* curr)
 
 	items().clear ();
 
-	items().push_back (MenuElem (_("New group..."), mem_fun (*this, &RouteGroupMenu::new_group)));
+	items().push_back (MenuElem (_("New group..."), sigc::mem_fun (*this, &RouteGroupMenu::new_group)));
 	items().push_back (SeparatorElem ());
 
 	RadioMenuItem::Group group;
-	items().push_back (RadioMenuElem (group, _("No group"), bind (mem_fun (*this, &RouteGroupMenu::set_group), (RouteGroup *) 0)));
+	items().push_back (RadioMenuElem (group, _("No group"), sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::set_group), (RouteGroup *) 0)));
 
 	if (curr == 0) {
 		static_cast<RadioMenuItem*> (&items().back())->set_active ();
 	}
 
-	_session.foreach_route_group (bind (mem_fun (*this, &RouteGroupMenu::add_item), curr, &group));
+	_session.foreach_route_group (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::add_item), curr, &group));
 }
 
 void
@@ -60,7 +60,7 @@ RouteGroupMenu::add_item (RouteGroup* rg, RouteGroup* curr, RadioMenuItem::Group
 {
 	using namespace Menu_Helpers;
 
-	items().push_back (RadioMenuElem (*group, rg->name(), bind (mem_fun(*this, &RouteGroupMenu::set_group), rg)));
+	items().push_back (RadioMenuElem (*group, rg->name(), sigc::bind (sigc::mem_fun(*this, &RouteGroupMenu::set_group), rg)));
 
 	if (rg == curr) {
 		static_cast<RadioMenuItem*> (&items().back())->set_active ();

@@ -51,8 +51,8 @@ ARDOUR_UI::connect_to_session (Session *s)
 {
 	session = s;
 
-	session->Xrun.connect (mem_fun(*this, &ARDOUR_UI::xrun_handler));
-	session->RecordStateChanged.connect (mem_fun (*this, &ARDOUR_UI::record_state_changed));
+	session->Xrun.connect (sigc::mem_fun(*this, &ARDOUR_UI::xrun_handler));
+	session->RecordStateChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::record_state_changed));
 
 	/* sensitize menu bar options that are now valid */
 
@@ -87,8 +87,8 @@ ARDOUR_UI::connect_to_session (Session *s)
 	ActionManager::set_sensitive (ActionManager::point_selection_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::playlist_selection_sensitive_actions, false);
 
-	session->locations()->added.connect (mem_fun (*this, &ARDOUR_UI::handle_locations_change));
-	session->locations()->removed.connect (mem_fun (*this, &ARDOUR_UI::handle_locations_change));
+	session->locations()->added.connect (sigc::mem_fun (*this, &ARDOUR_UI::handle_locations_change));
+	session->locations()->removed.connect (sigc::mem_fun (*this, &ARDOUR_UI::handle_locations_change));
 
 	rec_button.set_sensitive (true);
 	shuttle_box.set_sensitive (true);
@@ -103,27 +103,27 @@ ARDOUR_UI::connect_to_session (Session *s)
 
 	setup_session_options ();
 
-	Blink.connect (mem_fun(*this, &ARDOUR_UI::transport_rec_enable_blink));
-	Blink.connect (mem_fun(*this, &ARDOUR_UI::solo_blink));
-	Blink.connect (mem_fun(*this, &ARDOUR_UI::sync_blink));
-	Blink.connect (mem_fun(*this, &ARDOUR_UI::audition_blink));
+	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::transport_rec_enable_blink));
+	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::solo_blink));
+	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::sync_blink));
+	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::audition_blink));
 
 	/* these are all need to be handled in an RT-safe and MT way, so don't
 	   do any GUI work, just queue it for handling by the GUI thread.
 	*/
 
-	session->TransportStateChange.connect (mem_fun(*this, &ARDOUR_UI::map_transport_state));
+	session->TransportStateChange.connect (sigc::mem_fun(*this, &ARDOUR_UI::map_transport_state));
 
 	/* alert the user to these things happening */
 
-	session->AuditionActive.connect (mem_fun(*this, &ARDOUR_UI::auditioning_changed));
-	session->SoloActive.connect (mem_fun(*this, &ARDOUR_UI::soloing_changed));
+	session->AuditionActive.connect (sigc::mem_fun(*this, &ARDOUR_UI::auditioning_changed));
+	session->SoloActive.connect (sigc::mem_fun(*this, &ARDOUR_UI::soloing_changed));
 
 	solo_alert_button.set_active (session->soloing());
 
 	/* update autochange callback on dirty state changing */
 
-	session->DirtyChanged.connect (mem_fun(*this, &ARDOUR_UI::update_autosave));
+	session->DirtyChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::update_autosave));
 
 	/* can't be auditioning here */
 
@@ -143,18 +143,18 @@ ARDOUR_UI::connect_to_session (Session *s)
 	   back to the session XML ("Extra") state.
 	 */
 
-	AudioClock::ModeChanged.connect (mem_fun (*this, &ARDOUR_UI::store_clock_modes));
+	AudioClock::ModeChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::store_clock_modes));
 
-	Glib::signal_idle().connect (mem_fun (*this, &ARDOUR_UI::first_idle));
+	Glib::signal_idle().connect (sigc::mem_fun (*this, &ARDOUR_UI::first_idle));
 
 	start_clocking ();
 	start_blinking ();
 
 	map_transport_state ();
 
-	second_connection = Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::every_second), 1000);
-	point_one_second_connection = Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::every_point_one_seconds), 100);
-	point_zero_one_second_connection = Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::every_point_zero_one_seconds), 40);
+	second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_second), 1000);
+	point_one_second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_one_seconds), 100);
+	point_zero_one_second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_zero_one_seconds), 40);
 }
 
 int

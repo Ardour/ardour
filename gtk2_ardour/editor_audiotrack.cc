@@ -64,7 +64,7 @@ Editor::start_updating ()
 	}
 
 	if (!meters_running) {
-		fast_screen_update_connection = ARDOUR_UI::SuperRapidScreenUpdate.connect (mem_fun(*this, &Editor::fast_update_strips));
+		fast_screen_update_connection = ARDOUR_UI::SuperRapidScreenUpdate.connect (sigc::mem_fun(*this, &Editor::fast_update_strips));
 		meters_running = true;
 	}
     return 0;

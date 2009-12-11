@@ -77,7 +77,7 @@ PianoRollHeader::PianoRollHeader(MidiStreamView& v)
 		_active_notes[i] = false;
 	}
 
-	_view.NoteRangeChanged.connect (mem_fun (*this, &PianoRollHeader::note_range_changed));
+	_view.NoteRangeChanged.connect (sigc::mem_fun (*this, &PianoRollHeader::note_range_changed));
 }
 
 inline void

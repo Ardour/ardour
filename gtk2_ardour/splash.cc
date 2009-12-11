@@ -49,14 +49,14 @@ Splash::Splash ()
 	layout->set_markup (str);
 
 	darea.show ();
-	darea.signal_expose_event().connect (mem_fun (*this, &Splash::expose));
+	darea.signal_expose_event().connect (sigc::mem_fun (*this, &Splash::expose));
 
 	add (darea);
 
 	set_default_size (pixbuf->get_width(), pixbuf->get_height());
 	the_splash = this;
 
-	ARDOUR::BootMessage.connect (mem_fun (*this, &Splash::boot_message));
+	ARDOUR::BootMessage.connect (sigc::mem_fun (*this, &Splash::boot_message));
 }
 
 void

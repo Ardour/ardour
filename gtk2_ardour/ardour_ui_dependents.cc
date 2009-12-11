@@ -59,7 +59,7 @@ ARDOUR_UI::we_have_dependents ()
 	install_actions ();
 	ProcessorBox::register_actions ();
 	keyboard->setup_keybindings ();
-	editor->UpdateAllTransportClocks.connect (mem_fun (*this, &ARDOUR_UI::update_transport_clocks));
+	editor->UpdateAllTransportClocks.connect (sigc::mem_fun (*this, &ARDOUR_UI::update_transport_clocks));
 }
 
 void
@@ -88,7 +88,7 @@ ARDOUR_UI::goto_editor_window ()
 {
 	if (splash && splash->is_visible()) {
 		// in 2 seconds, hide the splash screen
-		Glib::signal_timeout().connect (bind (sigc::ptr_fun (_hide_splash), this), 2000);
+		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 2000);
 	}
 
 	editor->show_window ();

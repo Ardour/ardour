@@ -89,7 +89,7 @@ StripSilenceDialog::StripSilenceDialog (std::list<boost::shared_ptr<ARDOUR::Audi
 
 	Gtk::VBox* v = Gtk::manage (new Gtk::VBox);
 	Gtk::Button* b = Gtk::manage (new Gtk::Button (_("Update display")));
-	b->signal_clicked().connect (mem_fun (*this, &StripSilenceDialog::update_silence_rects));
+	b->signal_clicked().connect (sigc::mem_fun (*this, &StripSilenceDialog::update_silence_rects));
 	v->pack_start (*b, false, false);
 	hbox->pack_start (*v, false, false);
 
@@ -99,7 +99,7 @@ StripSilenceDialog::StripSilenceDialog (std::list<boost::shared_ptr<ARDOUR::Audi
 	add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_OK);
 
 	_canvas = new ArdourCanvas::CanvasAA ();
-	_canvas->signal_size_allocate().connect (mem_fun (*this, &StripSilenceDialog::canvas_allocation));
+	_canvas->signal_size_allocate().connect (sigc::mem_fun (*this, &StripSilenceDialog::canvas_allocation));
 	_canvas->set_size_request (_wave_width, _wave_height * _waves.size ());
 
 	get_vbox()->pack_start (*_canvas, true, true);
@@ -129,7 +129,7 @@ StripSilenceDialog::create_waves ()
 	int n = 0;
 
 	for (std::list<Wave>::iterator i = _waves.begin(); i != _waves.end(); ++i) {
-		if (i->region->audio_source(0)->peaks_ready (mem_fun (*this, &StripSilenceDialog::peaks_ready), _peaks_ready_connection)) {
+		if (i->region->audio_source(0)->peaks_ready (sigc::mem_fun (*this, &StripSilenceDialog::peaks_ready), _peaks_ready_connection)) {
 			i->view = new WaveView (*(_canvas->root()));
 			i->view->property_data_src() = static_cast<gpointer>(i->region.get());
 			i->view->property_cache() = WaveView::create_cache ();

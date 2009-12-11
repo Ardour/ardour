@@ -124,6 +124,6 @@ Editor::kbd_do_brush (GdkEvent *ev)
 void
 Editor::kbd_brush ()
 {
-	kbd_driver (mem_fun(*this, &Editor::kbd_do_brush), true, true, false);
+	kbd_driver (sigc::mem_fun(*this, &Editor::kbd_do_brush), true, true, false);
 }
 

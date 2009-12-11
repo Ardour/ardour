@@ -145,8 +145,8 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	ComboOption<uint32_t>* spf = new ComboOption<uint32_t> (
 		"subframes-per-frame",
 		_("Subframes per frame"),
-		mem_fun (*_session_config, &SessionConfiguration::get_subframes_per_frame),
-		mem_fun (*_session_config, &SessionConfiguration::set_subframes_per_frame)
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_subframes_per_frame),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_subframes_per_frame)
 		);
 
 	spf->add (80, _("80"));
@@ -157,13 +157,13 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	ComboOption<SyncSource>* ssrc = new ComboOption<SyncSource> (
 		"sync-source",
 		_("External sync source"),
-		mem_fun (*_session_config, &SessionConfiguration::get_sync_source),
-		mem_fun (*_session_config, &SessionConfiguration::set_sync_source)
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_sync_source),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_sync_source)
 		);
 	
-	s->MTC_PortChanged.connect (bind (mem_fun (*this, &SessionOptionEditor::populate_sync_options), s, ssrc));
-	s->MIDIClock_PortChanged.connect (bind (mem_fun (*this, &SessionOptionEditor::populate_sync_options), s, ssrc));
-	s->config.ParameterChanged.connect (bind (mem_fun (*this, &SessionOptionEditor::follow_sync_state), s, ssrc));
+	s->MTC_PortChanged.connect (sigc::bind (sigc::mem_fun (*this, &SessionOptionEditor::populate_sync_options), s, ssrc));
+	s->MIDIClock_PortChanged.connect (sigc::bind (sigc::mem_fun (*this, &SessionOptionEditor::populate_sync_options), s, ssrc));
+	s->config.ParameterChanged.connect (sigc::bind (sigc::mem_fun (*this, &SessionOptionEditor::follow_sync_state), s, ssrc));
 
 	populate_sync_options (s, ssrc);
 	follow_sync_state (string ("external-sync"), s, ssrc);
@@ -173,8 +173,8 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	ComboOption<TimecodeFormat>* smf = new ComboOption<TimecodeFormat> (
 		"timecode-format",
 		_("Timecode frames-per-second"),
-		mem_fun (*_session_config, &SessionConfiguration::get_timecode_format),
-		mem_fun (*_session_config, &SessionConfiguration::set_timecode_format)
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_timecode_format),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_timecode_format)
 		);
 
 	smf->add (timecode_23976, _("23.976"));
@@ -193,15 +193,15 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	add_option (_("Sync"), new BoolOption (
 			    "timecode-source-is-synced",
 			    _("Timecode source shares sample clock with audio interface"),
-			    mem_fun (*_session_config, &SessionConfiguration::get_timecode_source_is_synced),
-			    mem_fun (*_session_config, &SessionConfiguration::set_timecode_source_is_synced)
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_timecode_source_is_synced),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_timecode_source_is_synced)
 			    ));
 
 	ComboOption<float>* vpu = new ComboOption<float> (
 		"video-pullup",
 		_("Pull-up / pull-down"),
-		mem_fun (*_session_config, &SessionConfiguration::get_video_pullup),
-		mem_fun (*_session_config, &SessionConfiguration::set_video_pullup)
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_video_pullup),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_video_pullup)
 		);
 
 	vpu->add (4.1667 + 0.1, _("4.1667 + 0.1%"));
@@ -221,8 +221,8 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	ComboOption<CrossfadeModel>* cfm = new ComboOption<CrossfadeModel> (
 		"xfade-model",
 		_("Crossfades are created"),
-		mem_fun (*_session_config, &SessionConfiguration::get_xfade_model),
-		mem_fun (*_session_config, &SessionConfiguration::set_xfade_model)
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_xfade_model),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_xfade_model)
 		);
 
 	cfm->add (FullCrossfade, _("to span entire overlap"));
@@ -233,8 +233,8 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	add_option (_("Fades"), new SpinOption<float> (
 		_("short-xfade-seconds"),
 		_("Short crossfade length"),
-		mem_fun (*_session_config, &SessionConfiguration::get_short_xfade_seconds),
-		mem_fun (*_session_config, &SessionConfiguration::set_short_xfade_seconds),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_short_xfade_seconds),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_short_xfade_seconds),
 		0, 1000, 1, 10,
 		_("ms"), 0.001
 			    ));
@@ -242,8 +242,8 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	add_option (_("Fades"), new SpinOption<float> (
 		_("destructive-xfade-seconds"),
 		_("Destructive crossfade length"),
-		mem_fun (*_session_config, &SessionConfiguration::get_destructive_xfade_msecs),
-		mem_fun (*_session_config, &SessionConfiguration::set_destructive_xfade_msecs),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_destructive_xfade_msecs),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_destructive_xfade_msecs),
 		0, 1000, 1, 10,
 		_("ms")
 			    ));
@@ -251,36 +251,36 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	add_option (_("Fades"), new BoolOption (
 			    "auto-xfade",
 			    _("Create crossfades automatically"),
-			    mem_fun (*_session_config, &SessionConfiguration::get_auto_xfade),
-			    mem_fun (*_session_config, &SessionConfiguration::set_auto_xfade)
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_auto_xfade),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_auto_xfade)
 			    ));
 
         add_option (_("Fades"), new BoolOption (
 			    "xfades-active",
 			    _("Crossfades active"),
-			    mem_fun (*_session_config, &SessionConfiguration::get_xfades_active),
-			    mem_fun (*_session_config, &SessionConfiguration::set_xfades_active)
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_xfades_active),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_xfades_active)
 			    ));
 
 	add_option (_("Fades"), new BoolOption (
 			    "xfades-visible",
 			    _("Crossfades visible"),
-			    mem_fun (*_session_config, &SessionConfiguration::get_xfades_visible),
-			    mem_fun (*_session_config, &SessionConfiguration::set_xfades_visible)
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_xfades_visible),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_xfades_visible)
 			    ));
 
 	add_option (_("Fades"), new BoolOption (
 			    "use-region-fades",
 			    _("Region fades active"),
-			    mem_fun (*_session_config, &SessionConfiguration::get_use_region_fades),
-			    mem_fun (*_session_config, &SessionConfiguration::set_use_region_fades)
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_use_region_fades),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_use_region_fades)
 			    ));
 
 	add_option (_("Fades"), new BoolOption (
 			    "show-region-fades",
 			    _("Region fades visible"),
-			    mem_fun (*_session_config, &SessionConfiguration::get_show_region_fades),
-			    mem_fun (*_session_config, &SessionConfiguration::set_show_region_fades)
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_region_fades),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_region_fades)
 			    ));
 
 	/* MISC */
@@ -290,8 +290,8 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	ComboOption<SampleFormat>* sf = new ComboOption<SampleFormat> (
 		"native-file-data-format",
 		_("Sample format"),
-		mem_fun (*_session_config, &SessionConfiguration::get_native_file_data_format),
-		mem_fun (*_session_config, &SessionConfiguration::set_native_file_data_format)
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_native_file_data_format),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_native_file_data_format)
 		);
 
 	sf->add (FormatFloat, _("32-bit floating point"));
@@ -303,8 +303,8 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	ComboOption<HeaderFormat>* hf = new ComboOption<HeaderFormat> (
 		"native-file-header-format",
 		_("File type"),
-		mem_fun (*_session_config, &SessionConfiguration::get_native_file_header_format),
-		mem_fun (*_session_config, &SessionConfiguration::set_native_file_header_format)
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_native_file_header_format),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_native_file_header_format)
 		);
 
 	hf->add (BWF, _("Broadcast WAVE"));
@@ -319,8 +319,8 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	ComboOption<LayerModel>* lm = new ComboOption<LayerModel> (
 		"layer-model",
 		_("Layering model in overlaid mode"),
-		mem_fun (*_session_config, &SessionConfiguration::get_layer_model),
-		mem_fun (*_session_config, &SessionConfiguration::set_layer_model)
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_layer_model),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_layer_model)
 		);
 
 	lm->add (LaterHigher, _("later is higher"));
@@ -334,15 +334,15 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	add_option (_("Misc"), new EntryOption (
 			    "bwf-country-code",
 			    _("Country code"),
-			    mem_fun (*_session_config, &SessionConfiguration::get_bwf_country_code),
-			    mem_fun (*_session_config, &SessionConfiguration::set_bwf_country_code)
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_bwf_country_code),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_bwf_country_code)
 			    ));
 
 	add_option (_("Misc"), new EntryOption (
 			    "bwf-organization-code",
 			    _("Organization code"),
-			    mem_fun (*_session_config, &SessionConfiguration::get_bwf_organization_code),
-			    mem_fun (*_session_config, &SessionConfiguration::set_bwf_organization_code)
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_bwf_organization_code),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_bwf_organization_code)
 			    ));
 
 	add_option (_("Connections"), new ConnectionOptions (this, s));

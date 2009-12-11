@@ -60,7 +60,7 @@ Editor::clear_marker_display ()
 void
 Editor::add_new_location (Location *location)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &Editor::add_new_location), location));
+	ENSURE_GUI_THREAD (*this, &Editor::add_new_location, location)
 
 	LocationMarkers *lam = new LocationMarkers;
 	uint32_t color;
@@ -124,11 +124,11 @@ Editor::add_new_location (Location *location)
 		lam->show ();
 	}
 
-	location->start_changed.connect (mem_fun(*this, &Editor::location_changed));
-	location->end_changed.connect (mem_fun(*this, &Editor::location_changed));
-	location->changed.connect (mem_fun(*this, &Editor::location_changed));
-	location->name_changed.connect (mem_fun(*this, &Editor::location_changed));
-	location->FlagsChanged.connect (mem_fun(*this, &Editor::location_flags_changed));
+	location->start_changed.connect (sigc::mem_fun(*this, &Editor::location_changed));
+	location->end_changed.connect (sigc::mem_fun(*this, &Editor::location_changed));
+	location->changed.connect (sigc::mem_fun(*this, &Editor::location_changed));
+	location->name_changed.connect (sigc::mem_fun(*this, &Editor::location_changed));
+	location->FlagsChanged.connect (sigc::mem_fun(*this, &Editor::location_flags_changed));
 
 	pair<Location*,LocationMarkers*> newpair;
 
@@ -146,7 +146,7 @@ Editor::add_new_location (Location *location)
 void
 Editor::location_changed (Location *location)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &Editor::location_changed), location));
+	ENSURE_GUI_THREAD (*this, &Editor::location_changed, location)
 
 	LocationMarkers *lam = find_location_markers (location);
 
@@ -168,7 +168,7 @@ Editor::location_changed (Location *location)
 void
 Editor::location_flags_changed (Location *location, void *src)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::location_flags_changed), location, src));
+	ENSURE_GUI_THREAD (*this, &Editor::location_flags_changed, location, src)
 
 	LocationMarkers *lam = find_location_markers (location);
 
@@ -331,7 +331,7 @@ Editor::refresh_location_display_internal (Locations::LocationList& locations)
 void
 Editor::refresh_location_display ()
 {
-	ENSURE_GUI_THREAD(mem_fun(*this, &Editor::refresh_location_display));
+	ENSURE_GUI_THREAD (*this, &Editor::refresh_location_display)
 
 	if (session) {
 		session->locations()->apply (*this, &Editor::refresh_location_display_internal);
@@ -341,7 +341,7 @@ Editor::refresh_location_display ()
 void
 Editor::refresh_location_display_s (Change ignored)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::refresh_location_display_s), ignored));
+	ENSURE_GUI_THREAD (*this, &Editor::refresh_location_display_s, ignored)
 
 	if (session) {
 		session->locations()->apply (*this, &Editor::refresh_location_display_internal);
@@ -438,7 +438,7 @@ Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent*)
 	Location* loc = find_location_from_marker (marker, is_start);
 
 	if (session && loc) {
-	  	Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::really_remove_marker), loc));
+	  	Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc));
 	}
 }
 
@@ -457,7 +457,7 @@ Editor::really_remove_marker (Location* loc)
 void
 Editor::location_gone (Location *location)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Editor::location_gone), location));
+	ENSURE_GUI_THREAD (*this, &Editor::location_gone, location)
 
 	LocationMarkerMap::iterator i;
 
@@ -586,23 +586,23 @@ Editor::build_marker_menu (bool start_or_end)
 	MenuList& items = markerMenu->items();
 	markerMenu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Locate to here"), mem_fun(*this, &Editor::marker_menu_set_playhead)));
-	items.push_back (MenuElem (_("Play from here"), mem_fun(*this, &Editor::marker_menu_play_from)));
-	items.push_back (MenuElem (_("Move Mark to Playhead"), mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
+	items.push_back (MenuElem (_("Locate to here"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
+	items.push_back (MenuElem (_("Play from here"), sigc::mem_fun(*this, &Editor::marker_menu_play_from)));
+	items.push_back (MenuElem (_("Move Mark to Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
 
 	items.push_back (SeparatorElem());
 
-	items.push_back (MenuElem (_("Create range to next marker"), mem_fun(*this, &Editor::marker_menu_range_to_next)));
+	items.push_back (MenuElem (_("Create range to next marker"), sigc::mem_fun(*this, &Editor::marker_menu_range_to_next)));
 
-	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &Editor::marker_menu_hide)));
+	items.push_back (MenuElem (_("Hide"), sigc::mem_fun(*this, &Editor::marker_menu_hide)));
 	if (start_or_end) return;
-	items.push_back (MenuElem (_("Rename"), mem_fun(*this, &Editor::marker_menu_rename)));
-	items.push_back (MenuElem (_("Lock"), bind (mem_fun(*this, &Editor::marker_menu_lock), true)));
-	items.push_back (MenuElem (_("Unlock"), bind (mem_fun(*this, &Editor::marker_menu_lock), false)));
+	items.push_back (MenuElem (_("Rename"), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
+	items.push_back (MenuElem (_("Lock"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_menu_lock), true)));
+	items.push_back (MenuElem (_("Unlock"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_menu_lock), false)));
 
 	items.push_back (SeparatorElem());
 
-	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::marker_menu_remove)));
+	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
 }
 
 void
@@ -619,32 +619,32 @@ Editor::build_range_marker_menu (bool loop_or_punch)
 	MenuList& items = markerMenu->items();
 	markerMenu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Play Range"), mem_fun(*this, &Editor::marker_menu_play_range)));
-	items.push_back (MenuElem (_("Locate to Range Mark"), mem_fun(*this, &Editor::marker_menu_set_playhead)));
-	items.push_back (MenuElem (_("Play from Range Mark"), mem_fun(*this, &Editor::marker_menu_play_from)));
+	items.push_back (MenuElem (_("Play Range"), sigc::mem_fun(*this, &Editor::marker_menu_play_range)));
+	items.push_back (MenuElem (_("Locate to Range Mark"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
+	items.push_back (MenuElem (_("Play from Range Mark"), sigc::mem_fun(*this, &Editor::marker_menu_play_from)));
 	if (! loop_or_punch) {
-		items.push_back (MenuElem (_("Loop Range"), mem_fun(*this, &Editor::marker_menu_loop_range)));
+		items.push_back (MenuElem (_("Loop Range"), sigc::mem_fun(*this, &Editor::marker_menu_loop_range)));
 	}
-	items.push_back (MenuElem (_("Set Range Mark from Playhead"), mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
+	items.push_back (MenuElem (_("Set Range Mark from Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
 	if (!Profile->get_sae()) {
-		items.push_back (MenuElem (_("Set Range from Range Selection"), mem_fun(*this, &Editor::marker_menu_set_from_selection)));
+		items.push_back (MenuElem (_("Set Range from Range Selection"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_selection)));
 	}
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Export Range"), mem_fun(*this, &Editor::export_range)));
+	items.push_back (MenuElem (_("Export Range"), sigc::mem_fun(*this, &Editor::export_range)));
 	items.push_back (SeparatorElem());
 
 	if (!loop_or_punch) {
-		items.push_back (MenuElem (_("Hide Range"), mem_fun(*this, &Editor::marker_menu_hide)));
-		items.push_back (MenuElem (_("Rename Range"), mem_fun(*this, &Editor::marker_menu_rename)));
-		items.push_back (MenuElem (_("Remove Range"), mem_fun(*this, &Editor::marker_menu_remove)));
+		items.push_back (MenuElem (_("Hide Range"), sigc::mem_fun(*this, &Editor::marker_menu_hide)));
+		items.push_back (MenuElem (_("Rename Range"), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
+		items.push_back (MenuElem (_("Remove Range"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
 		items.push_back (SeparatorElem());
 	}
 
-	items.push_back (MenuElem (_("Separate Regions in Range"), mem_fun(*this, &Editor::marker_menu_separate_regions_using_location)));
-	items.push_back (MenuElem (_("Select All in Range"), mem_fun(*this, &Editor::marker_menu_select_all_selectables_using_range)));
+	items.push_back (MenuElem (_("Separate Regions in Range"), sigc::mem_fun(*this, &Editor::marker_menu_separate_regions_using_location)));
+	items.push_back (MenuElem (_("Select All in Range"), sigc::mem_fun(*this, &Editor::marker_menu_select_all_selectables_using_range)));
 	if (!Profile->get_sae()) {
-		items.push_back (MenuElem (_("Select Range"), mem_fun(*this, &Editor::marker_menu_select_using_range)));
+		items.push_back (MenuElem (_("Select Range"), sigc::mem_fun(*this, &Editor::marker_menu_select_using_range)));
 	}
 }
 
@@ -657,8 +657,8 @@ Editor::build_tm_marker_menu ()
 	MenuList& items = tm_marker_menu->items();
 	tm_marker_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Edit"), mem_fun(*this, &Editor::marker_menu_edit)));
-	items.push_back (MenuElem (_("Remove"), mem_fun(*this, &Editor::marker_menu_remove)));
+	items.push_back (MenuElem (_("Edit"), sigc::mem_fun(*this, &Editor::marker_menu_edit)));
+	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
 }
 
 void
@@ -670,10 +670,10 @@ Editor::build_new_transport_marker_menu ()
 	MenuList& items = new_transport_marker_menu->items();
 	new_transport_marker_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Set Loop Range"), mem_fun(*this, &Editor::new_transport_marker_menu_set_loop)));
-	items.push_back (MenuElem (_("Set Punch Range"), mem_fun(*this, &Editor::new_transport_marker_menu_set_punch)));
+	items.push_back (MenuElem (_("Set Loop Range"), sigc::mem_fun(*this, &Editor::new_transport_marker_menu_set_loop)));
+	items.push_back (MenuElem (_("Set Punch Range"), sigc::mem_fun(*this, &Editor::new_transport_marker_menu_set_punch)));
 
-	new_transport_marker_menu->signal_unmap().connect ( mem_fun(*this, &Editor::new_transport_marker_menu_popdown));
+	new_transport_marker_menu->signal_unmap().connect ( sigc::mem_fun(*this, &Editor::new_transport_marker_menu_popdown));
 }
 
 void

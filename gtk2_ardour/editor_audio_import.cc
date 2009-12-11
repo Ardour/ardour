@@ -481,7 +481,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 	import_status.track = track;
 	import_status.replace = replace;
 	interthread_progress_connection = Glib::signal_timeout().connect
-		(bind (mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 500);
+		(sigc::bind (sigc::mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 500);
 
 	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 	gdk_flush ();
@@ -926,7 +926,7 @@ Editor::import_progress_timeout (void */*arg*/)
 
 		interthread_progress_connection.disconnect ();
 		interthread_progress_connection = Glib::signal_timeout().connect
-			(bind (mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 100);
+			(sigc::bind (sigc::mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 100);
 		return false;
 	} else {
 		return !(import_status.done || import_status.cancel);

@@ -216,7 +216,7 @@ ImageFrameTimeAxisGroup::add_imageframe_item(const string & frame_id, nframes_t 
 
 		imageframe_views.push_front(ifv) ;
 
-		ifv->GoingAway.connect(bind(mem_fun(*this,&ImageFrameTimeAxisGroup::remove_imageframe_item), (void*)this)) ;
+		ifv->GoingAway.connect(sigc::bind(sigc::mem_fun(*this,&ImageFrameTimeAxisGroup::remove_imageframe_item), (void*)this)) ;
 
 		 ImageFrameAdded(ifv, src) ; /* EMIT_SIGNAL */
 	}
@@ -330,7 +330,7 @@ ImageFrameTimeAxisGroup::remove_named_imageframe_item(const string & frame_id, v
 void
 ImageFrameTimeAxisGroup::remove_imageframe_item(ImageFrameView* ifv, void* src)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameTimeAxisGroup::remove_imageframe_item), ifv, src));
+	ENSURE_GUI_THREAD (*this, &ImageFrameTimeAxisGroup::remove_imageframe_item, ifv, src)
 
 	ImageFrameViewList::iterator i;
 	if((i = find (imageframe_views.begin(), imageframe_views.end(), ifv)) != imageframe_views.end())
@@ -438,7 +438,7 @@ ImageFrameTimeAxisGroup::remove_this_group(void* src)
 	   defer to idle loop, otherwise we'll delete this object
 	   while we're still inside this function ...
 	*/
-  	Glib::signal_idle().connect(bind(ptr_fun(&ImageFrameTimeAxisGroup::idle_remove_this_group), this, src));
+  	Glib::signal_idle().connect(sigc::bind(ptr_fun(&ImageFrameTimeAxisGroup::idle_remove_this_group), this, src));
 }
 
 /**

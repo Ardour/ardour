@@ -68,7 +68,7 @@ PlaylistSelector::PlaylistSelector ()
 	get_vbox()->pack_start (scroller);
 
 	Button* b = add_button (_("close"), RESPONSE_CANCEL);
-	b->signal_clicked().connect (mem_fun(*this, &PlaylistSelector::close_button_click));
+	b->signal_clicked().connect (sigc::mem_fun(*this, &PlaylistSelector::close_button_click));
 
 }
 
@@ -208,7 +208,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 	}
 
 	show_all ();
-	select_connection = tree.get_selection()->signal_changed().connect (mem_fun(*this, &PlaylistSelector::selection_changed));
+	select_connection = tree.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PlaylistSelector::selection_changed));
 }
 
 void
@@ -239,12 +239,12 @@ PlaylistSelector::add_playlist_to_map (boost::shared_ptr<Playlist> pl)
 void
 PlaylistSelector::set_session (Session* s)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PlaylistSelector::set_session), s));
+	ENSURE_GUI_THREAD (*this, &PlaylistSelector::set_session, s)
 
 	session = s;
 
 	if (session) {
-		session->GoingAway.connect (bind (mem_fun(*this, &PlaylistSelector::set_session), static_cast<Session*> (0)));
+		session->GoingAway.connect (sigc::bind (sigc::mem_fun(*this, &PlaylistSelector::set_session), static_cast<Session*> (0)));
 	}
 }
 

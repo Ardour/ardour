@@ -76,11 +76,11 @@ Mixer_UI::Mixer_UI ()
 	strip_redisplay_does_not_sync_order_keys = false;
 	ignore_sync = false;
 
-	Route::SyncOrderKeys.connect (mem_fun (*this, &Mixer_UI::sync_order_keys));
+	Route::SyncOrderKeys.connect (sigc::mem_fun (*this, &Mixer_UI::sync_order_keys));
 
 	scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	scroller_base.set_name ("MixerWindow");
-	scroller_base.signal_button_release_event().connect (mem_fun(*this, &Mixer_UI::strip_scroller_button_release));
+	scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_release));
 	// add as last item of strip packer
 	strip_packer.pack_end (scroller_base, true, true);
 
@@ -106,15 +106,15 @@ Mixer_UI::Mixer_UI ()
 	track_display.set_reorderable (true);
 	track_display.set_headers_visible (true);
 
-	track_model->signal_row_deleted().connect (mem_fun (*this, &Mixer_UI::track_list_delete));
-	track_model->signal_row_changed().connect (mem_fun (*this, &Mixer_UI::track_list_change));
-	track_model->signal_rows_reordered().connect (mem_fun (*this, &Mixer_UI::track_list_reorder));
+	track_model->signal_row_deleted().connect (sigc::mem_fun (*this, &Mixer_UI::track_list_delete));
+	track_model->signal_row_changed().connect (sigc::mem_fun (*this, &Mixer_UI::track_list_change));
+	track_model->signal_rows_reordered().connect (sigc::mem_fun (*this, &Mixer_UI::track_list_reorder));
 
 	CellRendererToggle* track_list_visible_cell = dynamic_cast<CellRendererToggle*>(track_display.get_column_cell_renderer (1));
 	track_list_visible_cell->property_activatable() = true;
 	track_list_visible_cell->property_radio() = false;
 
-	track_display.signal_button_press_event().connect (mem_fun (*this, &Mixer_UI::track_display_button_press), false);
+	track_display.signal_button_press_event().connect (sigc::mem_fun (*this, &Mixer_UI::track_display_button_press), false);
 
 	track_display_scroller.add (track_display);
 	track_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -137,7 +137,7 @@ Mixer_UI::Mixer_UI ()
 
 	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(group_display.get_column_cell_renderer (0));
 	name_cell->property_editable() = true;
-	name_cell->signal_edited().connect (mem_fun (*this, &Mixer_UI::route_group_name_edit));
+	name_cell->signal_edited().connect (sigc::mem_fun (*this, &Mixer_UI::route_group_name_edit));
 
 	/* use checkbox for the active column */
 
@@ -145,9 +145,9 @@ Mixer_UI::Mixer_UI ()
 	active_cell->property_activatable() = true;
 	active_cell->property_radio() = false;
 
-	group_model->signal_row_changed().connect (mem_fun (*this, &Mixer_UI::route_group_row_change));
+	group_model->signal_row_changed().connect (sigc::mem_fun (*this, &Mixer_UI::route_group_row_change));
 
-	group_display.signal_button_press_event().connect (mem_fun (*this, &Mixer_UI::group_display_button_press), false);
+	group_display.signal_button_press_event().connect (sigc::mem_fun (*this, &Mixer_UI::group_display_button_press), false);
 
 	group_display_scroller.add (group_display);
 	group_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -169,8 +169,8 @@ Mixer_UI::Mixer_UI ()
 
 	route_group_display_button_box->set_homogeneous (true);
 
-	route_group_add_button->signal_clicked().connect (mem_fun (*this, &Mixer_UI::new_route_group));
-	route_group_remove_button->signal_clicked().connect (mem_fun (*this, &Mixer_UI::remove_selected_route_group));
+	route_group_add_button->signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_route_group));
+	route_group_remove_button->signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::remove_selected_route_group));
 
 	route_group_display_button_box->add (*route_group_remove_button);
 	route_group_display_button_box->add (*route_group_add_button);
@@ -201,9 +201,9 @@ Mixer_UI::Mixer_UI ()
 	list_hpane.add1(list_vpacker);
 	list_hpane.add2(global_hpacker);
 
-	rhs_pane1.signal_size_allocate().connect (bind (mem_fun(*this, &Mixer_UI::pane_allocation_handler),
+	rhs_pane1.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::pane_allocation_handler),
 							static_cast<Gtk::Paned*> (&rhs_pane1)));
-	list_hpane.signal_size_allocate().connect (bind (mem_fun(*this, &Mixer_UI::pane_allocation_handler),
+	list_hpane.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::pane_allocation_handler),
 							 static_cast<Gtk::Paned*> (&list_hpane)));
 
 	global_vpacker.pack_start (list_hpane, true, true);
@@ -219,12 +219,12 @@ Mixer_UI::Mixer_UI ()
 
 	add_accel_group (ActionManager::ui_manager->get_accel_group());
 
-	signal_delete_event().connect (mem_fun (*this, &Mixer_UI::hide_window));
+	signal_delete_event().connect (sigc::mem_fun (*this, &Mixer_UI::hide_window));
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
-	signal_configure_event().connect (mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
+	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 
-	_selection.RoutesChanged.connect (mem_fun(*this, &Mixer_UI::follow_strip_selection));
+	_selection.RoutesChanged.connect (sigc::mem_fun(*this, &Mixer_UI::follow_strip_selection));
 
 	route_group_display_button_box->show();
 	route_group_add_button->show();
@@ -300,7 +300,7 @@ Mixer_UI::hide_window (GdkEventAny *ev)
 void
 Mixer_UI::add_strip (RouteList& routes)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::add_strip), routes));
+	ENSURE_GUI_THREAD (*this, &Mixer_UI::add_strip, routes)
 
 	MixerStrip* strip;
 
@@ -335,11 +335,11 @@ Mixer_UI::add_strip (RouteList& routes)
 			route->set_order_key (N_("signal"), track_model->children().size()-1);
 		}
 
-		route->NameChanged.connect (bind (mem_fun(*this, &Mixer_UI::strip_name_changed), strip));
+		route->NameChanged.connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_name_changed), strip));
 
-		strip->GoingAway.connect (bind (mem_fun(*this, &Mixer_UI::remove_strip), strip));
-		strip->WidthChanged.connect (mem_fun(*this, &Mixer_UI::strip_width_changed));
-		strip->signal_button_release_event().connect (bind (mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
+		strip->GoingAway.connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::remove_strip), strip));
+		strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
+		strip->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 	}
 
 	no_track_list_redisplay = false;
@@ -352,7 +352,7 @@ Mixer_UI::add_strip (RouteList& routes)
 void
 Mixer_UI::remove_strip (MixerStrip* strip)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::remove_strip), strip));
+	ENSURE_GUI_THREAD (*this, &Mixer_UI::remove_strip, strip)
 
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator ri;
@@ -468,11 +468,11 @@ Mixer_UI::connect_to_session (Session* sess)
 
 	initial_track_display ();
 
-	session->GoingAway.connect (mem_fun(*this, &Mixer_UI::disconnect_from_session));
-	session->RouteAdded.connect (mem_fun(*this, &Mixer_UI::add_strip));
-	session->route_group_added.connect (mem_fun(*this, &Mixer_UI::add_route_group));
-	session->route_group_removed.connect (mem_fun(*this, &Mixer_UI::route_groups_changed));
-	session->config.ParameterChanged.connect (mem_fun (*this, &Mixer_UI::parameter_changed));
+	session->GoingAway.connect (sigc::mem_fun(*this, &Mixer_UI::disconnect_from_session));
+	session->RouteAdded.connect (sigc::mem_fun(*this, &Mixer_UI::add_strip));
+	session->route_group_added.connect (sigc::mem_fun(*this, &Mixer_UI::add_route_group));
+	session->route_group_removed.connect (sigc::mem_fun(*this, &Mixer_UI::route_groups_changed));
+	session->config.ParameterChanged.connect (sigc::mem_fun (*this, &Mixer_UI::parameter_changed));
 
 	route_groups_changed ();
 
@@ -491,7 +491,7 @@ Mixer_UI::connect_to_session (Session* sess)
 void
 Mixer_UI::disconnect_from_session ()
 {
-	ENSURE_GUI_THREAD(mem_fun(*this, &Mixer_UI::disconnect_from_session));
+	ENSURE_GUI_THREAD (*this, &Mixer_UI::disconnect_from_session)
 
 	group_model->clear ();
 	_selection.clear ();
@@ -538,7 +538,7 @@ Mixer_UI::hide_strip (MixerStrip* ms)
 gint
 Mixer_UI::start_updating ()
 {
-    fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun(*this, &Mixer_UI::fast_update_strips));
+    fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (sigc::mem_fun(*this, &Mixer_UI::fast_update_strips));
     return 0;
 }
 
@@ -761,7 +761,7 @@ Mixer_UI::redisplay_track_list ()
 		session->sync_order_keys (N_("signal"));
 	}
 
-	// Rebind all of the midi controls automatically
+	// Resigc::bind all of the midi controls automatically
 
 	if (auto_rebinding)
 		auto_rebind_midi_controls ();
@@ -973,19 +973,19 @@ Mixer_UI::build_track_menu ()
 	track_menu->set_name ("ArdourContextMenu");
 	MenuList& items = track_menu->items();
 
-	items.push_back (MenuElem (_("Show All"), mem_fun(*this, &Mixer_UI::show_all_routes)));
-	items.push_back (MenuElem (_("Hide All"), mem_fun(*this, &Mixer_UI::hide_all_routes)));
-	items.push_back (MenuElem (_("Show All Audio Tracks"), mem_fun(*this, &Mixer_UI::show_all_audiotracks)));
-	items.push_back (MenuElem (_("Hide All Audio Tracks"), mem_fun(*this, &Mixer_UI::hide_all_audiotracks)));
-	items.push_back (MenuElem (_("Show All Audio Busses"), mem_fun(*this, &Mixer_UI::show_all_audiobus)));
-	items.push_back (MenuElem (_("Hide All Audio Busses"), mem_fun(*this, &Mixer_UI::hide_all_audiobus)));
+	items.push_back (MenuElem (_("Show All"), sigc::mem_fun(*this, &Mixer_UI::show_all_routes)));
+	items.push_back (MenuElem (_("Hide All"), sigc::mem_fun(*this, &Mixer_UI::hide_all_routes)));
+	items.push_back (MenuElem (_("Show All Audio Tracks"), sigc::mem_fun(*this, &Mixer_UI::show_all_audiotracks)));
+	items.push_back (MenuElem (_("Hide All Audio Tracks"), sigc::mem_fun(*this, &Mixer_UI::hide_all_audiotracks)));
+	items.push_back (MenuElem (_("Show All Audio Busses"), sigc::mem_fun(*this, &Mixer_UI::show_all_audiobus)));
+	items.push_back (MenuElem (_("Hide All Audio Busses"), sigc::mem_fun(*this, &Mixer_UI::hide_all_audiobus)));
 
 }
 
 void
 Mixer_UI::strip_name_changed (MixerStrip* mx)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::strip_name_changed), mx));
+	ENSURE_GUI_THREAD (*this, &Mixer_UI::strip_name_changed, mx)
 
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator i;
@@ -1010,10 +1010,10 @@ Mixer_UI::build_route_group_context_menu ()
 	route_group_context_menu->set_name ("ArdourContextMenu");
 	MenuList& items = route_group_context_menu->items();
 
-	items.push_back (MenuElem (_("Activate All"), mem_fun(*this, &Mixer_UI::activate_all_route_groups)));
-	items.push_back (MenuElem (_("Disable All"), mem_fun(*this, &Mixer_UI::disable_all_route_groups)));
+	items.push_back (MenuElem (_("Activate All"), sigc::mem_fun(*this, &Mixer_UI::activate_all_route_groups)));
+	items.push_back (MenuElem (_("Disable All"), sigc::mem_fun(*this, &Mixer_UI::disable_all_route_groups)));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Add group"), mem_fun(*this, &Mixer_UI::new_route_group)));
+	items.push_back (MenuElem (_("Add group"), sigc::mem_fun(*this, &Mixer_UI::new_route_group)));
 
 }
 
@@ -1077,19 +1077,19 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 void
 Mixer_UI::activate_all_route_groups ()
 {
-	session->foreach_route_group (bind (mem_fun (*this, &Mixer_UI::set_route_group_activation), true));
+	session->foreach_route_group (sigc::bind (sigc::mem_fun (*this, &Mixer_UI::set_route_group_activation), true));
 }
 
 void
 Mixer_UI::disable_all_route_groups ()
 {
-	session->foreach_route_group (bind (mem_fun (*this, &Mixer_UI::set_route_group_activation), false));
+	session->foreach_route_group (sigc::bind (sigc::mem_fun (*this, &Mixer_UI::set_route_group_activation), false));
 }
 
 void
 Mixer_UI::route_groups_changed ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &Mixer_UI::route_groups_changed));
+	ENSURE_GUI_THREAD (*this, &Mixer_UI::route_groups_changed)
 
 	/* just rebuild the while thing */
 
@@ -1103,7 +1103,7 @@ Mixer_UI::route_groups_changed ()
 		row[group_columns.group] = 0;
 	}
 
-	session->foreach_route_group (mem_fun (*this, &Mixer_UI::add_route_group));
+	session->foreach_route_group (sigc::mem_fun (*this, &Mixer_UI::add_route_group));
 }
 
 void
@@ -1144,7 +1144,7 @@ Mixer_UI::group_flags_changed (void* src, RouteGroup* group)
 		return;
 	}
 
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::group_flags_changed), src, group));
+	ENSURE_GUI_THREAD (*this, &Mixer_UI::group_flags_changed, src, group)
 
 	/* force an update of any mixer strips that are using this group,
 	   otherwise mix group names don't change in mixer strips
@@ -1231,7 +1231,7 @@ Mixer_UI::route_group_row_change (const Gtk::TreeModel::Path&, const Gtk::TreeMo
 void
 Mixer_UI::add_route_group (RouteGroup* group)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &Mixer_UI::add_route_group), group));
+	ENSURE_GUI_THREAD (*this, &Mixer_UI::add_route_group, group)
 	bool focus = false;
 
 	in_group_row_change = true;
@@ -1246,7 +1246,7 @@ Mixer_UI::add_route_group (RouteGroup* group)
 		focus = true;
 	}
 
-	group->FlagsChanged.connect (bind (mem_fun(*this, &Mixer_UI::group_flags_changed), group));
+	group->FlagsChanged.connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::group_flags_changed), group));
 
 	if (focus) {
 		TreeViewColumn* col = group_display.get_column (0);

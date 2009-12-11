@@ -1658,7 +1658,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* /*event*/, ItemType i
 		if (is_drawable()) {
 			track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 			clear_entered_track = true;
-			Glib::signal_idle().connect (mem_fun(*this, &Editor::left_automation_track));
+			Glib::signal_idle().connect (sigc::mem_fun(*this, &Editor::left_automation_track));
 		}
 		break;
 
@@ -2526,7 +2526,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 	*/
 
 	latest_regionviews.clear();
-	sigc::connection c = clicked_routeview->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
+	sigc::connection c = clicked_routeview->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
 	/* A selection grab currently creates two undo/redo operations, one for
 	   creating the new region and another for moving it.

@@ -171,7 +171,7 @@ SoundFileBox::SoundFileBox (bool persistent)
 	main_box.pack_start (table, false, false);
 
 	tags_entry.set_editable (true);
-	tags_entry.signal_focus_out_event().connect (mem_fun (*this, &SoundFileBox::tags_entry_left));
+	tags_entry.signal_focus_out_event().connect (sigc::mem_fun (*this, &SoundFileBox::tags_entry_left));
 
 	Label* label = manage (new Label (_("Tags:")));
 	label->set_alignment (0.0f, 0.5f);
@@ -192,8 +192,8 @@ SoundFileBox::SoundFileBox (bool persistent)
 	bottom_box.pack_start(stop_btn, true, true);
 	bottom_box.pack_start(autoplay_btn, false, false);
 
-	play_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::audition));
-	stop_btn.signal_clicked().connect (mem_fun (*this, &SoundFileBox::stop_audition));
+	play_btn.signal_clicked().connect (sigc::mem_fun (*this, &SoundFileBox::audition));
+	stop_btn.signal_clicked().connect (sigc::mem_fun (*this, &SoundFileBox::stop_audition));
 
 	channels_value.set_alignment (0.0f, 0.5f);
 	samplerate_value.set_alignment (0.0f, 0.5f);
@@ -424,10 +424,10 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	{
 		chooser.set_border_width (12);
 
-		audio_filter.add_custom (FILE_FILTER_FILENAME, mem_fun(*this, &SoundFileBrowser::on_audio_filter));
+		audio_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun(*this, &SoundFileBrowser::on_audio_filter));
 		audio_filter.set_name (_("Audio files"));
 
-		midi_filter.add_custom (FILE_FILTER_FILENAME, mem_fun(*this, &SoundFileBrowser::on_midi_filter));
+		midi_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun(*this, &SoundFileBrowser::on_midi_filter));
 		midi_filter.set_name (_("MIDI files"));
 
 		matchall_filter.add_pattern ("*.*");
@@ -437,8 +437,8 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		chooser.add_filter (midi_filter);
 		chooser.add_filter (matchall_filter);
 		chooser.set_select_multiple (true);
-		chooser.signal_update_preview().connect(mem_fun(*this, &SoundFileBrowser::update_preview));
-		chooser.signal_file_activated().connect (mem_fun (*this, &SoundFileBrowser::chooser_file_activated));
+		chooser.signal_update_preview().connect(sigc::mem_fun(*this, &SoundFileBrowser::update_preview));
+		chooser.signal_file_activated().connect (sigc::mem_fun (*this, &SoundFileBrowser::chooser_file_activated));
 
 		if (!persistent_folder.empty()) {
 			chooser.set_current_folder (persistent_folder);
@@ -472,12 +472,12 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 
 		found_list_view.append_column(_("Paths"), found_list_columns.pathname);
 
-		found_list_view.get_selection()->signal_changed().connect(mem_fun(*this, &SoundFileBrowser::found_list_view_selected));
+		found_list_view.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SoundFileBrowser::found_list_view_selected));
 
-		found_list_view.signal_row_activated().connect (mem_fun (*this, &SoundFileBrowser::found_list_view_activated));
+		found_list_view.signal_row_activated().connect (sigc::mem_fun (*this, &SoundFileBrowser::found_list_view_activated));
 
-		found_search_btn.signal_clicked().connect(mem_fun(*this, &SoundFileBrowser::found_search_clicked));
-		found_entry.signal_activate().connect(mem_fun(*this, &SoundFileBrowser::found_search_clicked));
+		found_search_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::found_search_clicked));
+		found_entry.signal_activate().connect(sigc::mem_fun(*this, &SoundFileBrowser::found_search_clicked));
 
 		notebook.append_page (*vbox, _("Search Tags"));
 	}
@@ -518,12 +518,12 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 		//vbox->pack_start (freesound_list_view);
 
 		freesound_list_view.append_column(_("Paths"), freesound_list_columns.pathname);
-		freesound_list_view.get_selection()->signal_changed().connect(mem_fun(*this, &SoundFileBrowser::freesound_list_view_selected));
+		freesound_list_view.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_list_view_selected));
 
 		//freesound_list_view.get_selection()->set_mode (SELECTION_MULTIPLE);
-		freesound_list_view.signal_row_activated().connect (mem_fun (*this, &SoundFileBrowser::freesound_list_view_activated));
-		freesound_search_btn.signal_clicked().connect(mem_fun(*this, &SoundFileBrowser::freesound_search_clicked));
-		freesound_entry.signal_activate().connect(mem_fun(*this, &SoundFileBrowser::freesound_search_clicked));
+		freesound_list_view.signal_row_activated().connect (sigc::mem_fun (*this, &SoundFileBrowser::freesound_list_view_activated));
+		freesound_search_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_search_clicked));
+		freesound_entry.signal_activate().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_search_clicked));
 		notebook.append_page (*vbox, _("Search Freesound"));
 	}
 #endif
@@ -621,7 +621,7 @@ SoundFileBrowser::remove_gain_meter ()
 void
 SoundFileBrowser::start_metering ()
 {
-	metering_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun(*this, &SoundFileBrowser::meter));
+	metering_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (sigc::mem_fun(*this, &SoundFileBrowser::meter));
 }
 
 void
@@ -655,7 +655,7 @@ SoundFileBrowser::update_preview ()
 {
 	if (preview.setup_labels (chooser.get_filename())) {
 		if (preview.autoplay()) {
-			Glib::signal_idle().connect (mem_fun (preview, &SoundFileBox::audition_oneshot));
+			Glib::signal_idle().connect (sigc::mem_fun (preview, &SoundFileBox::audition_oneshot));
 		}
 	}
 }
@@ -910,7 +910,7 @@ SoundFileOmega::reset_options ()
 	ImportMode mode;
 
 	if (check_info (paths, same_size, src_needed, selection_includes_multichannel)) {
-		Glib::signal_idle().connect (mem_fun (*this, &SoundFileOmega::bad_file_message));
+		Glib::signal_idle().connect (sigc::mem_fun (*this, &SoundFileOmega::bad_file_message));
 		return false;
 	}
 
@@ -1301,7 +1301,7 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 
 	reset_options ();
 
-	action_combo.signal_changed().connect (mem_fun (*this, &SoundFileOmega::reset_options_noret));
+	action_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::reset_options_noret));
 
 	copy_files_btn.set_active (true);
 
@@ -1322,7 +1322,7 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 	disposition_map.insert (pair<ustring,ImportDisposition>(_("one region per channel"), ImportDistinctChannels));
 	disposition_map.insert (pair<ustring,ImportDisposition>(_("all files in one region"), ImportMergeFiles));
 
-	chooser.signal_selection_changed().connect (mem_fun (*this, &SoundFileOmega::file_selection_changed));
+	chooser.signal_selection_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::file_selection_changed));
 
 	/* set size requests for a couple of combos to allow them to display the longest text
 	   they will ever be asked to display.  This prevents them being resized when the user

@@ -221,9 +221,9 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 	current_timefx->first_delete.disconnect();
 
 	current_timefx->first_cancel = current_timefx->cancel_button->signal_clicked().connect
-		(mem_fun (current_timefx, &TimeFXDialog::cancel_in_progress));
+		(sigc::mem_fun (current_timefx, &TimeFXDialog::cancel_in_progress));
 	current_timefx->first_delete = current_timefx->signal_delete_event().connect
-		(mem_fun (current_timefx, &TimeFXDialog::delete_in_progress));
+		(sigc::mem_fun (current_timefx, &TimeFXDialog::delete_in_progress));
 
 	if (pthread_create_and_store ("timefx", &current_timefx->request.thread, timefx_thread, current_timefx)) {
 		current_timefx->hide ();
@@ -233,7 +233,7 @@ Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 
 	pthread_detach (current_timefx->request.thread);
 
-	sigc::connection c = Glib::signal_timeout().connect (mem_fun (current_timefx, &TimeFXDialog::update_progress), 100);
+	sigc::connection c = Glib::signal_timeout().connect (sigc::mem_fun (current_timefx, &TimeFXDialog::update_progress), 100);
 
 	while (!current_timefx->request.done && !current_timefx->request.cancel) {
 		gtk_main_iteration ();

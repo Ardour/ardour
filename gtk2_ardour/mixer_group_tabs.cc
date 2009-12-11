@@ -164,10 +164,10 @@ MixerGroupTabs::get_menu (RouteGroup* g)
 	_menu = new Menu;
 
 	MenuList& items = _menu->items ();
-	items.push_back (MenuElem (_("Edit..."), bind (mem_fun (*this, &MixerGroupTabs::edit_group), g)));
-	items.push_back (MenuElem (_("Subgroup"), bind (mem_fun (*this, &MixerGroupTabs::make_subgroup), g)));
+	items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &MixerGroupTabs::edit_group), g)));
+	items.push_back (MenuElem (_("Subgroup"), sigc::bind (sigc::mem_fun (*this, &MixerGroupTabs::make_subgroup), g)));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Remove"), bind (mem_fun (*this, &MixerGroupTabs::remove_group), g)));
+	items.push_back (MenuElem (_("Remove"), sigc::bind (sigc::mem_fun (*this, &MixerGroupTabs::remove_group), g)));
 
 	return _menu;
 }

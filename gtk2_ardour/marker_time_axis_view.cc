@@ -62,11 +62,11 @@ MarkerTimeAxisView::MarkerTimeAxisView(MarkerTimeAxis& tv)
 	canvas_rect->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_MarkerTrack.get();
 	canvas_rect->property_fill_color_rgba() = stream_base_color;
 
-	canvas_rect->signal_event().connect (bind (mem_fun (_trackview.editor, &PublicEditor::canvas_marker_time_axis_view_event), canvas_rect, &_trackview));
+	canvas_rect->signal_event().connect (sigc::bind (sigc::mem_fun (_trackview.editor, &PublicEditor::canvas_marker_time_axis_view_event), canvas_rect, &_trackview));
 
 	_samples_per_unit = _trackview.editor.get_current_zoom() ;
 
-	_trackview.editor.ZoomChanged.connect (mem_fun(*this, &MarkerTimeAxisView::reset_samples_per_unit));
+	_trackview.editor.ZoomChanged.connect (sigc::mem_fun(*this, &MarkerTimeAxisView::reset_samples_per_unit));
 }
 
 /**
@@ -211,7 +211,7 @@ MarkerTimeAxisView::add_marker_view(ImageFrameView* ifv, std::string mark_type, 
 	ifv->add_marker_view_item(mv, src) ;
 	marker_view_list.push_front(mv) ;
 
-	mv->GoingAway.connect(bind (mem_fun(*this,&MarkerTimeAxisView::remove_marker_view), (void*)this)) ;
+	mv->GoingAway.connect(sigc::bind (sigc::mem_fun(*this,&MarkerTimeAxisView::remove_marker_view), (void*)this)) ;
 
 	 MarkerViewAdded(mv,src) ; /* EMIT_SIGNAL */
 
@@ -313,7 +313,7 @@ MarkerTimeAxisView::remove_named_marker_view(std::string item_id, void* src)
 void
 MarkerTimeAxisView::remove_marker_view(MarkerView* mv, void* src)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &MarkerTimeAxisView::remove_marker_view), mv, src));
+	ENSURE_GUI_THREAD (*this, &MarkerTimeAxisView::remove_marker_view, mv, src)
 
 	MarkerViewList::iterator i;
 

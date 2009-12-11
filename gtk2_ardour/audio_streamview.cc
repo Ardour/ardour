@@ -189,7 +189,8 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 	region_views.push_front (region_view);
 
 	/* catch regionview going away */
-	r->GoingAway.connect (bind (mem_fun (*this, &AudioStreamView::remove_region_view), boost::weak_ptr<Region> (r)));
+	cerr << this << " connected to region " << r << endl;
+	r->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &AudioStreamView::remove_region_view), boost::weak_ptr<Region> (r)));
 
 	RegionViewAdded (region_view);
 
@@ -199,13 +200,17 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 void
 AudioStreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::remove_region_view), weak_r));
+	cerr << this << " RRV entry\n";
+
+	ENSURE_GUI_THREAD (*this, &AudioStreamView::remove_region_view, weak_r)
 
 	boost::shared_ptr<Region> r (weak_r.lock());
 
 	if (!r) {
 		return;
 	}
+
+	cerr << this << " RRV action for  " << r << endl;
 
 	if (!_trackview.session().deletion_in_progress()) {
 
@@ -253,7 +258,7 @@ void
 AudioStreamView::playlist_modified (boost::shared_ptr<Diskstream> ds)
 {
 	/* we do not allow shared_ptr<T> to be bound to slots */
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::playlist_modified_weak), ds));
+	ENSURE_GUI_THREAD (*this, &AudioStreamView::playlist_modified_weak, ds)
 
 	StreamView::playlist_modified (ds);
 
@@ -276,16 +281,14 @@ AudioStreamView::playlist_changed_weak (boost::weak_ptr<Diskstream> ds)
 void
 AudioStreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 {
-	ENSURE_GUI_THREAD (bind (
-			mem_fun (*this, &AudioStreamView::playlist_changed_weak),
-			boost::weak_ptr<Diskstream> (ds)));
+	ENSURE_GUI_THREAD (*this, &AudioStreamView::playlist_changed_weak, boost::weak_ptr<Diskstream> (ds));
 
 	StreamView::playlist_changed(ds);
 
 	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(ds->playlist());
 	if (apl) {
 		playlist_connections.push_back (apl->NewCrossfade.connect (
-				mem_fun (*this, &AudioStreamView::add_crossfade)));
+				sigc::mem_fun (*this, &AudioStreamView::add_crossfade)));
 	}
 }
 
@@ -309,7 +312,7 @@ AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
 
 	/* we do not allow shared_ptr<T> to be bound to slots */
 
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::add_crossfade_weak), boost::weak_ptr<Crossfade> (crossfade)));
+	ENSURE_GUI_THREAD (*this, &AudioStreamView::add_crossfade_weak, boost::weak_ptr<Crossfade> (crossfade));
 
 	/* first see if we already have a CrossfadeView for this Crossfade */
 
@@ -344,7 +347,7 @@ AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
 					       region_color,
 					       *lview, *rview);
 	cv->set_valid (true);
-	crossfade->Invalidated.connect (mem_fun (*this, &AudioStreamView::remove_crossfade));
+	crossfade->Invalidated.connect (sigc::mem_fun (*this, &AudioStreamView::remove_crossfade));
 	crossfade_views[cv->crossfade] = cv;
 	if (!_trackview.session().config.get_xfades_visible() || !crossfades_visible) {
 		cv->hide ();
@@ -356,7 +359,7 @@ AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
 void
 AudioStreamView::remove_crossfade (boost::shared_ptr<Region> r)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &AudioStreamView::remove_crossfade), r));
+	ENSURE_GUI_THREAD (*this, &AudioStreamView::remove_crossfade, r)
 
 	boost::shared_ptr<Crossfade> xfade = boost::dynamic_pointer_cast<Crossfade> (r);
 
@@ -485,8 +488,8 @@ AudioStreamView::setup_rec_box ()
 					if (src) {
 						sources.push_back (src);
 
-						rec_data_ready_connections.push_back (src->PeakRangeReady.connect (bind
-							(mem_fun (*this, &AudioStreamView::rec_peak_range_ready),
+						rec_data_ready_connections.push_back (src->PeakRangeReady.connect (sigc::bind
+							(sigc::mem_fun (*this, &AudioStreamView::rec_peak_range_ready),
 							 boost::weak_ptr<Source>(src))));
 					}
 				}
@@ -554,7 +557,7 @@ AudioStreamView::setup_rec_box ()
 
 			screen_update_connection.disconnect();
 			screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (
-					mem_fun (*this, &AudioStreamView::update_rec_box));
+					sigc::mem_fun (*this, &AudioStreamView::update_rec_box));
 			rec_updating = true;
 			rec_active = true;
 
@@ -624,7 +627,7 @@ AudioStreamView::foreach_crossfadeview (void (CrossfadeView::*pmf)(void))
 void
 AudioStreamView::rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::weak_ptr<Source> weak_src)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &AudioStreamView::rec_peak_range_ready), start, cnt, weak_src));
+	ENSURE_GUI_THREAD (*this, &AudioStreamView::rec_peak_range_ready, start, cnt, weak_src)
 
 	boost::shared_ptr<Source> src (weak_src.lock());
 

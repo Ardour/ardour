@@ -74,7 +74,7 @@ Editor::add_imageframe_time_axis(const string & track_name, void* src)
 	}
 	else
 	{
-		Gtkmm2ext::UI::instance()->call_slot(bind(mem_fun(*this, &Editor::handle_new_imageframe_time_axis_view),track_name, src)) ;
+		Gtkmm2ext::UI::instance()->call_slot(sigc::bind(sigc::mem_fun(*this, &Editor::handle_new_imageframe_time_axis_view),track_name, src)) ;
 	}
 }
 
@@ -129,10 +129,10 @@ Editor::scroll_timeaxis_to_imageframe_item(const TimeAxisViewItem* item)
 void
 Editor::add_imageframe_marker_time_axis(const string & track_name, TimeAxisView* marked_track, void* src)
 {
-	// Can we only bind 2 data Items?
-	// @todo we really want to bind the src attribute too, for the moment tracks can only be added remotely,
+	// Can we only sigc::bind 2 data Items?
+	// @todo we really want to sigc::bind the src attribute too, for the moment tracks can only be added remotely,
 	//       so this is not too much of an issue, however will need to be looked at again
-	Gtkmm2ext::UI::instance()->call_slot(sigc::bind(mem_fun(*this, &Editor::handle_new_imageframe_marker_time_axis_view),track_name, marked_track)) ;
+	Gtkmm2ext::UI::instance()->call_slot(sigc::bind(sigc::mem_fun(*this, &Editor::handle_new_imageframe_marker_time_axis_view),track_name, marked_track)) ;
 }
 
 void
@@ -1092,8 +1092,8 @@ Editor::handle_new_imageframe_time_axis_view(const string & track_name, void* sr
 	row[route_display_columns.tv] = iftav;
 	route_list_display.get_selection()->select (row);
 
-	iftav->GoingAway.connect(bind(mem_fun(*this, &Editor::remove_route), (TimeAxisView*)iftav)) ;
-	iftav->gui_changed.connect(mem_fun(*this, &Editor::handle_gui_changes)) ;
+	iftav->GoingAway.connect(sigc::bind(sigc::mem_fun(*this, &Editor::remove_route), (TimeAxisView*)iftav)) ;
+	iftav->gui_changed.connect(sigc::mem_fun(*this, &Editor::handle_gui_changes)) ;
 }
 
 void
@@ -1109,7 +1109,7 @@ Editor::handle_new_imageframe_marker_time_axis_view(const string & track_name, T
 	row[route_display_columns.tv] = mta;
 	route_list_display.get_selection()->select (row);
 
-	mta->GoingAway.connect(bind(mem_fun(*this, &Editor::remove_route), (TimeAxisView*)mta)) ;
+	mta->GoingAway.connect(sigc::bind(sigc::mem_fun(*this, &Editor::remove_route), (TimeAxisView*)mta)) ;
  }
 
 

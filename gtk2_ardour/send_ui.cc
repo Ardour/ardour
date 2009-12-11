@@ -62,8 +62,8 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session& se)
 
 	_send->set_metering (true);
 
-	_send->input()->changed.connect (mem_fun (*this, &SendUI::ins_changed));
-	_send->output()->changed.connect (mem_fun (*this, &SendUI::outs_changed));
+	_send->input()->changed.connect (sigc::mem_fun (*this, &SendUI::ins_changed));
+	_send->output()->changed.connect (sigc::mem_fun (*this, &SendUI::outs_changed));
 
 	_panners.set_width (Wide);
 	_panners.setup_pan ();
@@ -72,9 +72,9 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session& se)
 	_gpm.set_fader_name ("SendUIFrame");
 
 	// screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (
-	//		mem_fun (*this, &SendUI::update));
+	//		sigc::mem_fun (*this, &SendUI::update));
 	fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (
-			mem_fun (*this, &SendUI::fast_update));
+			sigc::mem_fun (*this, &SendUI::fast_update));
 }
 
 SendUI::~SendUI ()
@@ -90,7 +90,7 @@ SendUI::~SendUI ()
 void
 SendUI::ins_changed (IOChange change, void* ignored)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &SendUI::ins_changed), change, ignored));
+	ENSURE_GUI_THREAD (*this, &SendUI::ins_changed, change, ignored)
 	if (change & ConfigurationChanged) {
 		_panners.setup_pan ();
 	}
@@ -99,7 +99,7 @@ SendUI::ins_changed (IOChange change, void* ignored)
 void
 SendUI::outs_changed (IOChange change, void* ignored)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &SendUI::outs_changed), change, ignored));
+	ENSURE_GUI_THREAD (*this, &SendUI::outs_changed, change, ignored)
 	if (change & ConfigurationChanged) {
 		_panners.setup_pan ();
 		_gpm.setup_meters ();
@@ -132,9 +132,9 @@ SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session& ss)
 	set_name ("SendUIWindow");
 
 	going_away_connection = s->GoingAway.connect (
-			mem_fun (*this, &SendUIWindow::send_going_away));
+			sigc::mem_fun (*this, &SendUIWindow::send_going_away));
 
-	signal_delete_event().connect (bind (
+	signal_delete_event().connect (sigc::bind (
 					       sigc::ptr_fun (just_hide_it),
 					       reinterpret_cast<Window *> (this)));
 }
@@ -147,7 +147,7 @@ SendUIWindow::~SendUIWindow ()
 void
 SendUIWindow::send_going_away ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &SendUIWindow::send_going_away));
+	ENSURE_GUI_THREAD (*this, &SendUIWindow::send_going_away)
 	delete_when_idle (this);
 	going_away_connection.disconnect ();
 }

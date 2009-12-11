@@ -110,16 +110,16 @@ GainMeterBase::GainMeterBase (Session& s,
 
 	level_meter = new LevelMeter(_session);
 
-	gain_slider->signal_button_press_event().connect (mem_fun(*this, &GainMeter::start_gain_touch));
-	gain_slider->signal_button_release_event().connect (mem_fun(*this, &GainMeter::end_gain_touch));
+	gain_slider->signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeter::start_gain_touch));
+	gain_slider->signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeter::end_gain_touch));
 	gain_slider->set_name ("GainFader");
 
 	gain_display.set_name ("MixerStripGainDisplay");
 	gain_display.set_has_frame (false);
 	set_size_request_to_display_given_text (gain_display, "-80.g", 2, 6); /* note the descender */
-	gain_display.signal_activate().connect (mem_fun (*this, &GainMeter::gain_activated));
-	gain_display.signal_focus_in_event().connect (mem_fun (*this, &GainMeter::gain_focused), false);
-	gain_display.signal_focus_out_event().connect (mem_fun (*this, &GainMeter::gain_focused), false);
+	gain_display.signal_activate().connect (sigc::mem_fun (*this, &GainMeter::gain_activated));
+	gain_display.signal_focus_in_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
+	gain_display.signal_focus_out_event().connect (sigc::mem_fun (*this, &GainMeter::gain_focused), false);
 
 	peak_display.set_name ("MixerStripPeakDisplay");
 //	peak_display.set_has_frame (false);
@@ -147,16 +147,16 @@ GainMeterBase::GainMeterBase (Session& s,
 	gain_astate_menu.set_name ("ArdourContextMenu");
 	gain_astyle_menu.set_name ("ArdourContextMenu");
 
-	gain_adjustment.signal_value_changed().connect (mem_fun(*this, &GainMeterBase::gain_adjusted));
-	peak_display.signal_button_release_event().connect (mem_fun(*this, &GainMeterBase::peak_button_release), false);
-	gain_display.signal_key_press_event().connect (mem_fun(*this, &GainMeterBase::gain_key_press), false);
+	gain_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &GainMeterBase::gain_adjusted));
+	peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeterBase::peak_button_release), false);
+	gain_display.signal_key_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_key_press), false);
 
-	ResetAllPeakDisplays.connect (mem_fun(*this, &GainMeterBase::reset_peak_display));
-	ResetGroupPeakDisplays.connect (mem_fun(*this, &GainMeterBase::reset_group_peak_display));
+	ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &GainMeterBase::reset_peak_display));
+	ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &GainMeterBase::reset_group_peak_display));
 
-	UI::instance()->theme_changed.connect (mem_fun(*this, &GainMeterBase::on_theme_changed));
-	ColorsChanged.connect (bind(mem_fun (*this, &GainMeterBase::color_handler), false));
-	DPIReset.connect (bind(mem_fun (*this, &GainMeterBase::color_handler), true));
+	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &GainMeterBase::on_theme_changed));
+	ColorsChanged.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), false));
+	DPIReset.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), true));
 }
 
 GainMeterBase::~GainMeterBase ()
@@ -209,30 +209,30 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 		gain_astate_menu.items().clear ();
 
 		gain_astate_menu.items().push_back (MenuElem (_("Manual"),
-							      bind (mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
+							      sigc::bind (sigc::mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
 								    Evoral::Parameter(GainAutomation), (AutoState) Off)));
 		gain_astate_menu.items().push_back (MenuElem (_("Play"),
-							      bind (mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
+							      sigc::bind (sigc::mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
 								    Evoral::Parameter(GainAutomation), (AutoState) Play)));
 		gain_astate_menu.items().push_back (MenuElem (_("Write"),
-							      bind (mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
+							      sigc::bind (sigc::mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
 								    Evoral::Parameter(GainAutomation), (AutoState) Write)));
 		gain_astate_menu.items().push_back (MenuElem (_("Touch"),
-							      bind (mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
+							      sigc::bind (sigc::mem_fun (*(amp.get()), &Automatable::set_parameter_automation_state),
 								    Evoral::Parameter(GainAutomation), (AutoState) Touch)));
 
-		connections.push_back (gain_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &GainMeterBase::gain_automation_style_button_event), false));
-		connections.push_back (gain_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false));
+		connections.push_back (gain_automation_style_button.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_automation_style_button_event), false));
+		connections.push_back (gain_automation_state_button.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false));
 
 		boost::shared_ptr<AutomationControl> gc = amp->gain_control();
 
-		connections.push_back (gc->alist()->automation_state_changed.connect (mem_fun(*this, &GainMeter::gain_automation_state_changed)));
-		connections.push_back (gc->alist()->automation_style_changed.connect (mem_fun(*this, &GainMeter::gain_automation_style_changed)));
+		connections.push_back (gc->alist()->automation_state_changed.connect (sigc::mem_fun(*this, &GainMeter::gain_automation_state_changed)));
+		connections.push_back (gc->alist()->automation_style_changed.connect (sigc::mem_fun(*this, &GainMeter::gain_automation_style_changed)));
 
 		gain_automation_state_changed ();
 	}
 
-	connections.push_back (amp->gain_control()->Changed.connect (mem_fun (*this, &GainMeterBase::gain_changed)));
+	connections.push_back (amp->gain_control()->Changed.connect (sigc::mem_fun (*this, &GainMeterBase::gain_changed)));
 
 	gain_changed ();
 	show_gain ();
@@ -438,7 +438,7 @@ GainMeterBase::effective_gain_display ()
 void
 GainMeterBase::gain_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &GainMeterBase::effective_gain_display));
+	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun(*this, &GainMeterBase::effective_gain_display));
 }
 
 void
@@ -714,7 +714,7 @@ GainMeterBase::gain_automation_style_changed ()
 void
 GainMeterBase::gain_automation_state_changed ()
 {
-	ENSURE_GUI_THREAD(mem_fun(*this, &GainMeterBase::gain_automation_state_changed));
+	ENSURE_GUI_THREAD (*this, &GainMeterBase::gain_automation_state_changed)
 
 	bool x;
 
@@ -742,7 +742,7 @@ GainMeterBase::gain_automation_state_changed ()
 	gain_watching.disconnect();
 
 	if (x) {
-		gain_watching = ARDOUR_UI::RapidScreenUpdate.connect (mem_fun (*this, &GainMeterBase::effective_gain_display));
+		gain_watching = ARDOUR_UI::RapidScreenUpdate.connect (sigc::mem_fun (*this, &GainMeterBase::effective_gain_display));
 	}
 }
 
@@ -825,7 +825,7 @@ GainMeter::GainMeter (Session& s, int fader_length)
 	pack_start (gain_display_box, Gtk::PACK_SHRINK);
 	pack_start (hbox, Gtk::PACK_SHRINK);
 
-	meter_metric_area.signal_expose_event().connect (mem_fun(*this, &GainMeter::meter_metrics_expose));
+	meter_metric_area.signal_expose_event().connect (sigc::mem_fun(*this, &GainMeter::meter_metrics_expose));
 }
 
 void

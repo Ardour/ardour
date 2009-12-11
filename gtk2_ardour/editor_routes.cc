@@ -76,7 +76,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 
 	rec_col_renderer->set_active_pixbuf (::get_icon("rec-enabled"));
 	rec_col_renderer->set_inactive_pixbuf (::get_icon("act-disabled"));
-	rec_col_renderer->signal_toggled().connect (mem_fun (*this, &EditorRoutes::on_tv_rec_enable_toggled));
+	rec_col_renderer->signal_toggled().connect (sigc::mem_fun (*this, &EditorRoutes::on_tv_rec_enable_toggled));
 
 	TreeViewColumn* rec_state_column = manage (new TreeViewColumn("R", *rec_col_renderer));
 
@@ -88,7 +88,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 
 	mute_col_renderer->set_pixbuf (0, ::get_icon("act-disabled"));
 	mute_col_renderer->set_pixbuf (1, ::get_icon("mute-enabled"));
-	mute_col_renderer->signal_changed().connect (mem_fun (*this, &EditorRoutes::on_tv_mute_enable_toggled));
+	mute_col_renderer->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::on_tv_mute_enable_toggled));
 
 	TreeViewColumn* mute_state_column = manage (new TreeViewColumn("M", *mute_col_renderer));
 
@@ -99,7 +99,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 
 	solo_col_renderer->set_pixbuf (0, ::get_icon("act-disabled"));
 	solo_col_renderer->set_pixbuf (1, ::get_icon("solo-enabled"));
-	solo_col_renderer->signal_changed().connect (mem_fun (*this, &EditorRoutes::on_tv_solo_enable_toggled));
+	solo_col_renderer->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::on_tv_solo_enable_toggled));
 
 	TreeViewColumn* solo_state_column = manage (new TreeViewColumn("S", *solo_col_renderer));
 
@@ -110,7 +110,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 
 	solo_iso_renderer->set_pixbuf (0, ::get_icon("act-disabled"));
 	solo_iso_renderer->set_pixbuf (1, ::get_icon("solo-isolated"));
-	solo_iso_renderer->signal_changed().connect (mem_fun (*this, &EditorRoutes::on_tv_solo_isolate_toggled));
+	solo_iso_renderer->signal_changed().connect (sigc::mem_fun (*this, &EditorRoutes::on_tv_solo_isolate_toggled));
 
 	TreeViewColumn* solo_isolate_state_column = manage (new TreeViewColumn("I", *solo_iso_renderer));
 
@@ -139,19 +139,19 @@ EditorRoutes::EditorRoutes (Editor* e)
 
 	name_column->add_attribute (name_cell->property_editable(), _columns.name_editable);
 	name_cell->property_editable() = true;
-	name_cell->signal_edited().connect (mem_fun (*this, &EditorRoutes::name_edit));
+	name_cell->signal_edited().connect (sigc::mem_fun (*this, &EditorRoutes::name_edit));
 
 	CellRendererToggle* visible_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (4));
 
 	visible_cell->property_activatable() = true;
 	visible_cell->property_radio() = false;
-	visible_cell->signal_toggled().connect (mem_fun (*this, &EditorRoutes::visible_changed));
+	visible_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRoutes::visible_changed));
 
-	_model->signal_row_deleted().connect (mem_fun (*this, &EditorRoutes::route_deleted));
-	_model->signal_rows_reordered().connect (mem_fun (*this, &EditorRoutes::reordered));
-	_display.signal_button_press_event().connect (mem_fun (*this, &EditorRoutes::button_press), false);
+	_model->signal_row_deleted().connect (sigc::mem_fun (*this, &EditorRoutes::route_deleted));
+	_model->signal_rows_reordered().connect (sigc::mem_fun (*this, &EditorRoutes::reordered));
+	_display.signal_button_press_event().connect (sigc::mem_fun (*this, &EditorRoutes::button_press), false);
 
-	Route::SyncOrderKeys.connect (mem_fun (*this, &EditorRoutes::sync_order_keys));
+	Route::SyncOrderKeys.connect (sigc::mem_fun (*this, &EditorRoutes::sync_order_keys));
 }
 
 void
@@ -161,7 +161,7 @@ EditorRoutes::connect_to_session (Session* s)
 
 	initial_display ();
 
-	_session->SoloChanged.connect (mem_fun (*this, &EditorRoutes::solo_changed_so_update_mute));
+	_session->SoloChanged.connect (sigc::mem_fun (*this, &EditorRoutes::solo_changed_so_update_mute));
 }
 
 void
@@ -239,13 +239,13 @@ EditorRoutes::build_menu ()
 	MenuList& items = _menu->items();
 	_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Show All"), mem_fun (*this, &EditorRoutes::show_all_routes)));
-	items.push_back (MenuElem (_("Hide All"), mem_fun (*this, &EditorRoutes::hide_all_routes)));
-	items.push_back (MenuElem (_("Show All Audio Tracks"), mem_fun (*this, &EditorRoutes::show_all_audiotracks)));
-	items.push_back (MenuElem (_("Hide All Audio Tracks"), mem_fun (*this, &EditorRoutes::hide_all_audiotracks)));
-	items.push_back (MenuElem (_("Show All Audio Busses"), mem_fun (*this, &EditorRoutes::show_all_audiobus)));
-	items.push_back (MenuElem (_("Hide All Audio Busses"), mem_fun (*this, &EditorRoutes::hide_all_audiobus)));
-	items.push_back (MenuElem (_("Show Tracks With Regions Under Playhead"), mem_fun (*this, &EditorRoutes::show_tracks_with_regions_at_playhead)));
+	items.push_back (MenuElem (_("Show All"), sigc::mem_fun (*this, &EditorRoutes::show_all_routes)));
+	items.push_back (MenuElem (_("Hide All"), sigc::mem_fun (*this, &EditorRoutes::hide_all_routes)));
+	items.push_back (MenuElem (_("Show All Audio Tracks"), sigc::mem_fun (*this, &EditorRoutes::show_all_audiotracks)));
+	items.push_back (MenuElem (_("Hide All Audio Tracks"), sigc::mem_fun (*this, &EditorRoutes::hide_all_audiotracks)));
+	items.push_back (MenuElem (_("Show All Audio Busses"), sigc::mem_fun (*this, &EditorRoutes::show_all_audiobus)));
+	items.push_back (MenuElem (_("Hide All Audio Busses"), sigc::mem_fun (*this, &EditorRoutes::hide_all_audiobus)));
+	items.push_back (MenuElem (_("Show Tracks With Regions Under Playhead"), sigc::mem_fun (*this, &EditorRoutes::show_tracks_with_regions_at_playhead)));
 }
 
 void
@@ -305,7 +305,7 @@ EditorRoutes::redisplay ()
 	   we can't do this here, because we could mess up something that is traversing
 	   the track order and has caused a redisplay of the list.
 	*/
-	Glib::signal_idle().connect (mem_fun (*_editor, &Editor::sync_track_view_list_and_routes));
+	Glib::signal_idle().connect (sigc::mem_fun (*_editor, &Editor::sync_track_view_list_and_routes));
 
 	_editor->full_canvas_height = position + _editor->canvas_timebars_vsize;
 	_editor->vertical_adjustment.set_upper (_editor->full_canvas_height);
@@ -381,18 +381,18 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		_ignore_reorder = false;
 
 		boost::weak_ptr<Route> wr ((*x)->route());
-		(*x)->route()->gui_changed.connect (mem_fun (*this, &EditorRoutes::handle_gui_changes));
-		(*x)->route()->NameChanged.connect (bind (mem_fun (*this, &EditorRoutes::route_name_changed), wr));
-		(*x)->GoingAway.connect (bind (mem_fun (*this, &EditorRoutes::route_removed), *x));
+		(*x)->route()->gui_changed.connect (sigc::mem_fun (*this, &EditorRoutes::handle_gui_changes));
+		(*x)->route()->NameChanged.connect (sigc::bind (sigc::mem_fun (*this, &EditorRoutes::route_name_changed), wr));
+		(*x)->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &EditorRoutes::route_removed), *x));
 
 		if ((*x)->is_track()) {
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> ((*x)->route());
-			t->diskstream()->RecordEnableChanged.connect (mem_fun (*this, &EditorRoutes::update_rec_display));
+			t->diskstream()->RecordEnableChanged.connect (sigc::mem_fun (*this, &EditorRoutes::update_rec_display));
 		}
 
-		(*x)->route()->mute_changed.connect (mem_fun (*this, &EditorRoutes::update_mute_display));
-		(*x)->route()->solo_changed.connect (mem_fun (*this, &EditorRoutes::update_solo_display));
-		(*x)->route()->solo_isolated_changed.connect (mem_fun (*this, &EditorRoutes::update_solo_isolate_display));
+		(*x)->route()->mute_changed.connect (sigc::mem_fun (*this, &EditorRoutes::update_mute_display));
+		(*x)->route()->solo_changed.connect (sigc::mem_fun (*this, &EditorRoutes::update_solo_display));
+		(*x)->route()->solo_isolated_changed.connect (sigc::mem_fun (*this, &EditorRoutes::update_solo_isolate_display));
 	}
 
 	update_rec_display ();
@@ -403,7 +403,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 void
 EditorRoutes::handle_gui_changes (string const & what, void *src)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &EditorRoutes::handle_gui_changes), what, src));
+	ENSURE_GUI_THREAD (*this, &EditorRoutes::handle_gui_changes, what, src)
 
 	if (what == "track_height") {
 		/* Optional :make tracks change height while it happens, instead
@@ -421,7 +421,7 @@ EditorRoutes::handle_gui_changes (string const & what, void *src)
 void
 EditorRoutes::route_removed (TimeAxisView *tv)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &EditorRoutes::route_removed), tv));
+	ENSURE_GUI_THREAD (*this, &EditorRoutes::route_removed, tv)
 
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator ri;
@@ -445,7 +445,7 @@ EditorRoutes::route_removed (TimeAxisView *tv)
 void
 EditorRoutes::route_name_changed (boost::weak_ptr<Route> r)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &EditorRoutes::route_name_changed), r));
+	ENSURE_GUI_THREAD (*this, &EditorRoutes::route_name_changed, r)
 
 	boost::shared_ptr<Route> route = r.lock ();
 	if (!route) {
@@ -973,7 +973,7 @@ EditorRoutes::name_edit (Glib::ustring const & path, Glib::ustring const & new_t
 void
 EditorRoutes::solo_changed_so_update_mute ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &EditorRoutes::solo_changed_so_update_mute));
+	ENSURE_GUI_THREAD (*this, &EditorRoutes::solo_changed_so_update_mute)
 
 	update_mute_display (this);
 }

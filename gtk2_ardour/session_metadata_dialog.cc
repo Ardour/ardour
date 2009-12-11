@@ -416,9 +416,9 @@ SessionMetadataDialog<DataSet>::SessionMetadataDialog (ustring const & name) :
   ArdourDialog (name, true)
 {
 	cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	cancel_button->signal_clicked().connect (mem_fun(*this, &SessionMetadataDialog::end_dialog));
+	cancel_button->signal_clicked().connect (sigc::mem_fun(*this, &SessionMetadataDialog::end_dialog));
 	save_button = add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
-	save_button->signal_clicked().connect (mem_fun(*this, &SessionMetadataDialog::save_and_close));
+	save_button->signal_clicked().connect (sigc::mem_fun(*this, &SessionMetadataDialog::save_and_close));
 }
 
 template <typename DataSet>

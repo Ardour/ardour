@@ -212,7 +212,7 @@ Selection::toggle (TimeAxisView* track)
 
 	if ((i = find (tracks.begin(), tracks.end(), track)) == tracks.end()) {
 		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
-		track->GoingAway.connect (sigc::bind (mem_fun (*this, pmf), track));
+		track->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, pmf), track));
 		tracks.push_back (track);
 	} else {
 		tracks.erase (i);
@@ -341,7 +341,7 @@ Selection::add (const list<TimeAxisView*>& track_list)
 
 	for (list<TimeAxisView*>::const_iterator i = added.begin(); i != added.end(); ++i) {
 		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
-		(*i)->GoingAway.connect (sigc::bind (mem_fun (*this, pmf), (*i)));
+		(*i)->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, pmf), (*i)));
 	}
 
 	if (!added.empty()) {
@@ -354,7 +354,7 @@ Selection::add (TimeAxisView* track)
 {
 	if (find (tracks.begin(), tracks.end(), track) == tracks.end()) {
 		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
-		track->GoingAway.connect (sigc::bind (mem_fun (*this, pmf), track));
+		track->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, pmf), track));
 		tracks.push_back (track);
 		TracksChanged();
 	}
@@ -961,7 +961,7 @@ Selection::add (Marker* m)
 
 		void (Selection::*pmf)(Marker*) = &Selection::remove;
 
-		m->GoingAway.connect (bind (mem_fun (*this, pmf), m));
+		m->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, pmf), m));
 
 		markers.push_back (m);
 		MarkersChanged();

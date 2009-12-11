@@ -48,7 +48,7 @@ using namespace Gtkmm2ext;
 void
 Editor::handle_new_named_selection ()
 {
-	ARDOUR_UI::instance()->call_slot (mem_fun(*this, &Editor::redisplay_named_selections));
+	ARDOUR_UI::instance()->call_slot (sigc::mem_fun(*this, &Editor::redisplay_named_selections));
 }
 
 void

@@ -78,7 +78,7 @@ BoolOption::BoolOption (string const & i, string const & n, slot<bool> g, slot<b
 {
 	_button = manage (new CheckButton (n));
 	_button->set_active (_get ());
-	_button->signal_toggled().connect (mem_fun (*this, &BoolOption::toggled));
+	_button->signal_toggled().connect (sigc::mem_fun (*this, &BoolOption::toggled));
 }
 
 void
@@ -107,7 +107,7 @@ EntryOption::EntryOption (string const & i, string const & n, slot<string> g, sl
 	_label = manage (new Label (n + ":"));
 	_label->set_alignment (1, 0.5);
 	_entry = manage (new Entry);
-	_entry->signal_activate().connect (mem_fun (*this, &EntryOption::activated));
+	_entry->signal_activate().connect (sigc::mem_fun (*this, &EntryOption::activated));
 }
 
 void
@@ -165,7 +165,7 @@ OptionEditor::OptionEditor (Configuration* c, std::string const & t)
 	show_all_children();
 
 	/* Watch out for changes to parameters */
-	_config->ParameterChanged.connect (mem_fun (*this, &OptionEditor::parameter_changed));
+	_config->ParameterChanged.connect (sigc::mem_fun (*this, &OptionEditor::parameter_changed));
 }
 
 OptionEditor::~OptionEditor ()
@@ -184,7 +184,7 @@ OptionEditor::~OptionEditor ()
 void
 OptionEditor::parameter_changed (std::string const & p)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &OptionEditor::parameter_changed), p));
+	ENSURE_GUI_THREAD (*this, &OptionEditor::parameter_changed, p)
 
 	for (std::map<std::string, OptionEditorPage*>::iterator i = _pages.begin(); i != _pages.end(); ++i) {
 		for (std::list<OptionEditorComponent*>::iterator j = i->second->components.begin(); j != i->second->components.end(); ++j) {

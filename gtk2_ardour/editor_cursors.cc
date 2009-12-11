@@ -47,7 +47,7 @@ EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,Ardour
 	canvas_item.property_arrow_shape_c() = 9.0;
 
 	canvas_item.set_data ("cursor", this);
-	canvas_item.signal_event().connect (bind (mem_fun (ed, callbck), &canvas_item));
+	canvas_item.signal_event().connect (sigc::bind (sigc::mem_fun (ed, callbck), &canvas_item));
 	current_frame = 1; /* force redraw at 0 */
 }
 

@@ -76,11 +76,11 @@ LatencyGUI::LatencyGUI (Latent& l, nframes64_t sr, nframes64_t psz)
 	hbox2.pack_start (plus_button);
 	hbox2.pack_start (units_combo, true, true);
 
-	minus_button.signal_clicked().connect (bind (mem_fun (*this, &LatencyGUI::change_latency_from_button), -1));
-	plus_button.signal_clicked().connect (bind (mem_fun (*this, &LatencyGUI::change_latency_from_button), 1));
-	reset_button.signal_clicked().connect (mem_fun (*this, &LatencyGUI::reset));
+	minus_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LatencyGUI::change_latency_from_button), -1));
+	plus_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &LatencyGUI::change_latency_from_button), 1));
+	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &LatencyGUI::reset));
 
-	adjustment.signal_value_changed().connect (mem_fun (*this, &LatencyGUI::finish));
+	adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &LatencyGUI::finish));
 
 	bc.set_size_request (-1, 25);
 	bc.set_style (BarController::LeftToRight);

@@ -50,7 +50,7 @@ ControlPoint::ControlPoint (AutomationLine& al)
 	_item->property_outline_color_rgba() = ARDOUR_UI::config()->canvasvar_ControlPointOutline.get();
 	_item->property_outline_pixels() = 1;
 	_item->set_data ("control_point", this);
-	_item->signal_event().connect (mem_fun (this, &ControlPoint::event_handler));
+	_item->signal_event().connect (sigc::mem_fun (this, &ControlPoint::event_handler));
 
 	hide ();
 	set_visible (false);

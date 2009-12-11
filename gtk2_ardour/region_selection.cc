@@ -33,7 +33,7 @@ using namespace sigc;
  */
 RegionSelection::RegionSelection ()
 {
-	RegionView::RegionViewGoingAway.connect (mem_fun(*this, &RegionSelection::remove_it));
+	RegionView::RegionViewGoingAway.connect (sigc::mem_fun(*this, &RegionSelection::remove_it));
 
 	_current_start = 0;
 	_current_end = 0;
@@ -46,7 +46,7 @@ RegionSelection::RegionSelection (const RegionSelection& other)
 	: std::list<RegionView*>()
 	, sigc::trackable(other)
 {
-	RegionView::RegionViewGoingAway.connect (mem_fun(*this, &RegionSelection::remove_it));
+	RegionView::RegionViewGoingAway.connect (sigc::mem_fun(*this, &RegionSelection::remove_it));
 
 	_current_start = other._current_start;
 	_current_end = other._current_end;

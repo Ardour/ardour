@@ -238,7 +238,7 @@ RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Re
 	  _primary (p),
 	  _views (v)
 {
-	RegionView::RegionViewGoingAway.connect (mem_fun (*this, &RegionDrag::region_going_away));
+	RegionView::RegionViewGoingAway.connect (sigc::mem_fun (*this, &RegionDrag::region_going_away));
 }
 
 void
@@ -824,7 +824,7 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 
 			_editor->latest_regionviews.clear ();
 
-			sigc::connection c = dest_rtv->view()->RegionViewAdded.connect (mem_fun(*_editor, &Editor::collect_new_region_view));
+			sigc::connection c = dest_rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*_editor, &Editor::collect_new_region_view));
 
 			insert_result = modified_playlists.insert (to_playlist);
 

@@ -170,7 +170,7 @@ IOSelectorWindow::IOSelectorWindow (ARDOUR::Session* session, boost::shared_ptr<
 
 	show_all ();
 
-	signal_delete_event().connect (mem_fun (*this, &IOSelectorWindow::wm_delete));
+	signal_delete_event().connect (sigc::mem_fun (*this, &IOSelectorWindow::wm_delete));
 }
 
 bool
@@ -200,7 +200,7 @@ IOSelectorWindow::on_show ()
 void
 IOSelectorWindow::io_name_changed (void* src)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &IOSelectorWindow::io_name_changed), src));
+	ENSURE_GUI_THREAD (*this, &IOSelectorWindow::io_name_changed, src)
 
 	string title;
 
@@ -267,12 +267,12 @@ PortInsertWindow::PortInsertWindow (ARDOUR::Session* sess, boost::shared_ptr<ARD
 
 	get_vbox()->pack_start (_portinsertui);
 
-	ok_button.signal_clicked().connect (mem_fun (*this, &PortInsertWindow::accept));
-	cancel_button.signal_clicked().connect (mem_fun (*this, &PortInsertWindow::cancel));
+	ok_button.signal_clicked().connect (sigc::mem_fun (*this, &PortInsertWindow::accept));
+	cancel_button.signal_clicked().connect (sigc::mem_fun (*this, &PortInsertWindow::cancel));
 
-	signal_delete_event().connect (mem_fun (*this, &PortInsertWindow::wm_delete), false);
+	signal_delete_event().connect (sigc::mem_fun (*this, &PortInsertWindow::wm_delete), false);
 
-	going_away_connection = pi->GoingAway.connect (mem_fun (*this, &PortInsertWindow::plugin_going_away));
+	going_away_connection = pi->GoingAway.connect (sigc::mem_fun (*this, &PortInsertWindow::plugin_going_away));
 }
 
 bool
@@ -285,7 +285,7 @@ PortInsertWindow::wm_delete (GdkEventAny* /*event*/)
 void
 PortInsertWindow::plugin_going_away ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &PortInsertWindow::plugin_going_away));
+	ENSURE_GUI_THREAD (*this, &PortInsertWindow::plugin_going_away)
 
 	going_away_connection.disconnect ();
 	delete_when_idle (this);

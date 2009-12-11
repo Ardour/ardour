@@ -50,13 +50,13 @@ using namespace sigc;
 void
 ARDOUR_UI::toggle_external_sync()
 {
-	ActionManager::toggle_config_state_foo ("Transport", "ToggleExternalSync", mem_fun (session->config, &SessionConfiguration::set_external_sync), mem_fun (session->config, &SessionConfiguration::get_external_sync));
+	ActionManager::toggle_config_state_foo ("Transport", "ToggleExternalSync", sigc::mem_fun (session->config, &SessionConfiguration::set_external_sync), sigc::mem_fun (session->config, &SessionConfiguration::get_external_sync));
 }
 
 void
 ARDOUR_UI::toggle_time_master ()
 {
-	ActionManager::toggle_config_state_foo ("Transport", "ToggleTimeMaster", mem_fun (session->config, &SessionConfiguration::set_jack_time_master), mem_fun (session->config, &SessionConfiguration::get_jack_time_master));
+	ActionManager::toggle_config_state_foo ("Transport", "ToggleTimeMaster", sigc::mem_fun (session->config, &SessionConfiguration::set_jack_time_master), sigc::mem_fun (session->config, &SessionConfiguration::get_jack_time_master));
 }
 
 void
@@ -92,19 +92,19 @@ ARDOUR_UI::toggle_send_midi_feedback ()
 void
 ARDOUR_UI::toggle_auto_input ()
 {
-	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoInput", mem_fun (session->config, &SessionConfiguration::set_auto_input), mem_fun (session->config, &SessionConfiguration::get_auto_input));
+	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoInput", sigc::mem_fun (session->config, &SessionConfiguration::set_auto_input), sigc::mem_fun (session->config, &SessionConfiguration::get_auto_input));
 }
 
 void
 ARDOUR_UI::toggle_auto_play ()
 {
-	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoPlay", mem_fun (session->config, &SessionConfiguration::set_auto_play), mem_fun (session->config, &SessionConfiguration::get_auto_play));
+	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoPlay", sigc::mem_fun (session->config, &SessionConfiguration::set_auto_play), sigc::mem_fun (session->config, &SessionConfiguration::get_auto_play));
 }
 
 void
 ARDOUR_UI::toggle_auto_return ()
 {
-	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoReturn", mem_fun (session->config, &SessionConfiguration::set_auto_return), mem_fun (session->config, &SessionConfiguration::get_auto_return));
+	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoReturn", sigc::mem_fun (session->config, &SessionConfiguration::set_auto_return), sigc::mem_fun (session->config, &SessionConfiguration::get_auto_return));
 }
 
 void
@@ -271,8 +271,8 @@ ARDOUR_UI::toggle_editing_space()
 void
 ARDOUR_UI::setup_session_options ()
 {
-	session->config.ParameterChanged.connect (mem_fun (*this, &ARDOUR_UI::parameter_changed));
-	session->config.map_parameters (mem_fun (*this, &ARDOUR_UI::parameter_changed));
+	session->config.ParameterChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
+	session->config.map_parameters (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
 }
 
 #if 0
@@ -299,11 +299,11 @@ ARDOUR_UI::handle_sync_change ()
 void
 ARDOUR_UI::parameter_changed (std::string p)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &ARDOUR_UI::parameter_changed), p));
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::parameter_changed, p)
 
 	if (p == "external-sync") {
 
-		ActionManager::map_some_state ("Transport", "ToggleExternalSync", mem_fun (session->config, &SessionConfiguration::get_external_sync));
+		ActionManager::map_some_state ("Transport", "ToggleExternalSync", sigc::mem_fun (session->config, &SessionConfiguration::get_external_sync));
 
 		if (!session->config.get_external_sync()) {
 			sync_button.set_label (_("Internal"));
@@ -339,27 +339,27 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "midi-feedback") {
 		ActionManager::map_some_state ("options", "SendMIDIfeedback", &RCConfiguration::get_midi_feedback);
 	} else if (p == "auto-play") {
-		ActionManager::map_some_state ("Transport", "ToggleAutoPlay", mem_fun (session->config, &SessionConfiguration::get_auto_play));
+		ActionManager::map_some_state ("Transport", "ToggleAutoPlay", sigc::mem_fun (session->config, &SessionConfiguration::get_auto_play));
 	} else if (p == "auto-return") {
-		ActionManager::map_some_state ("Transport", "ToggleAutoReturn", mem_fun (session->config, &SessionConfiguration::get_auto_return));
+		ActionManager::map_some_state ("Transport", "ToggleAutoReturn", sigc::mem_fun (session->config, &SessionConfiguration::get_auto_return));
 	} else if (p == "auto-input") {
-		ActionManager::map_some_state ("Transport", "ToggleAutoInput", mem_fun (session->config, &SessionConfiguration::get_auto_input));
+		ActionManager::map_some_state ("Transport", "ToggleAutoInput", sigc::mem_fun (session->config, &SessionConfiguration::get_auto_input));
 	} else if (p == "punch-out") {
-		ActionManager::map_some_state ("Transport", "TogglePunchOut", mem_fun (session->config, &SessionConfiguration::get_punch_out));
+		ActionManager::map_some_state ("Transport", "TogglePunchOut", sigc::mem_fun (session->config, &SessionConfiguration::get_punch_out));
 		if (!session->config.get_punch_out()) {
 			unset_dual_punch ();
 		}
 	} else if (p == "punch-in") {
-		ActionManager::map_some_state ("Transport", "TogglePunchIn", mem_fun (session->config, &SessionConfiguration::get_punch_in));
+		ActionManager::map_some_state ("Transport", "TogglePunchIn", sigc::mem_fun (session->config, &SessionConfiguration::get_punch_in));
 		if (!session->config.get_punch_in()) {
 			unset_dual_punch ();
 		}
 	} else if (p == "clicking") {
 		ActionManager::map_some_state ("Transport", "ToggleClick", &RCConfiguration::get_clicking);
 	} else if (p == "jack-time-master") {
-		ActionManager::map_some_state ("Transport",  "ToggleTimeMaster", mem_fun (session->config, &SessionConfiguration::get_jack_time_master));
+		ActionManager::map_some_state ("Transport",  "ToggleTimeMaster", sigc::mem_fun (session->config, &SessionConfiguration::get_jack_time_master));
 	} else if (p == "use-video-sync") {
-		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", mem_fun (session->config, &SessionConfiguration::get_use_video_sync));
+		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", sigc::mem_fun (session->config, &SessionConfiguration::get_use_video_sync));
 	} else if (p == "shuttle-behaviour") {
 
 		switch (Config->get_shuttle_behaviour ()) {
@@ -399,7 +399,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 void
 ARDOUR_UI::reset_main_clocks ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &ARDOUR_UI::reset_main_clocks));
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::reset_main_clocks)
 
 	if (session) {
 		primary_clock.set (session->audible_frame(), true);

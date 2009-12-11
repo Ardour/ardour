@@ -189,7 +189,7 @@ PortExportChannelSelector::ChannelTreeView::ChannelTreeView (uint32_t max_channe
 	column->add_attribute (text_renderer->property_text(), route_cols.name);
 
 	Gtk::CellRendererToggle *toggle = dynamic_cast<Gtk::CellRendererToggle *>(get_column_cell_renderer (0));
-	toggle->signal_toggled().connect (mem_fun (*this, &PortExportChannelSelector::ChannelTreeView::update_toggle_selection));
+	toggle->signal_toggled().connect (sigc::mem_fun (*this, &PortExportChannelSelector::ChannelTreeView::update_toggle_selection));
 
 	static_columns = get_columns().size();
 }

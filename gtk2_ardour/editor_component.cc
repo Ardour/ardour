@@ -36,7 +36,7 @@ EditorComponent::connect_to_session (Session* s)
 {
 	_session = s;
 
-	_session_connections.push_back (_session->GoingAway.connect (mem_fun (*this, &EditorComponent::session_going_away)));
+	_session_connections.push_back (_session->GoingAway.connect (sigc::mem_fun (*this, &EditorComponent::session_going_away)));
 }
 
 void

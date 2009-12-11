@@ -134,16 +134,16 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 
 		set_wmclass (X_("ardour_plugin_editor"), "Ardour");
 
-		signal_map_event().connect (mem_fun (*pu, &GenericPluginUI::start_updating));
-		signal_unmap_event().connect (mem_fun (*pu, &GenericPluginUI::stop_updating));
+		signal_map_event().connect (sigc::mem_fun (*pu, &GenericPluginUI::start_updating));
+		signal_unmap_event().connect (sigc::mem_fun (*pu, &GenericPluginUI::stop_updating));
 	}
 
 	// set_position (Gtk::WIN_POS_MOUSE);
 	set_name ("PluginEditor");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
-	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)), false);
-	death_connection = insert->GoingAway.connect (mem_fun(*this, &PluginUIWindow::plugin_going_away));
+	signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)), false);
+	death_connection = insert->GoingAway.connect (sigc::mem_fun(*this, &PluginUIWindow::plugin_going_away));
 
 	gint h = _pluginui->get_preferred_height ();
 	gint w = _pluginui->get_preferred_width ();
@@ -292,7 +292,7 @@ PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert>)
 	non_gtk_gui = true;
 
 	extern sigc::signal<void,bool> ApplicationActivationChanged;
-	ApplicationActivationChanged.connect (mem_fun (*this, &PluginUIWindow::app_activated));
+	ApplicationActivationChanged.connect (sigc::mem_fun (*this, &PluginUIWindow::app_activated));
 
 	return true;
 #endif
@@ -362,7 +362,7 @@ PluginUIWindow::on_key_release_event (GdkEventKey *)
 void
 PluginUIWindow::plugin_going_away ()
 {
-	ENSURE_GUI_THREAD(mem_fun(*this, &PluginUIWindow::plugin_going_away));
+	ENSURE_GUI_THREAD (*this, &PluginUIWindow::plugin_going_away)
 
 	if (_pluginui) {
 		_pluginui->stop_updating(0);
@@ -385,23 +385,23 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	update_presets();
 	preset_combo.set_size_request (100, -1);
 	preset_combo.set_active_text ("");
-	preset_combo.signal_changed().connect(mem_fun(*this, &PlugUIBase::setting_selected));
+	preset_combo.signal_changed().connect(sigc::mem_fun(*this, &PlugUIBase::setting_selected));
 	no_load_preset = false;
 
 	save_button.set_name ("PluginSaveButton");
-	save_button.signal_clicked().connect(mem_fun(*this, &PlugUIBase::save_plugin_setting));
+	save_button.signal_clicked().connect(sigc::mem_fun(*this, &PlugUIBase::save_plugin_setting));
 
-	insert->ActiveChanged.connect (bind(
-			mem_fun(*this, &PlugUIBase::processor_active_changed),
+	insert->ActiveChanged.connect (sigc::bind(
+			sigc::mem_fun(*this, &PlugUIBase::processor_active_changed),
 			boost::weak_ptr<Processor>(insert)));
 
 	bypass_button.set_active (!pi->active());
 
 	bypass_button.set_name ("PluginBypassButton");
-	bypass_button.signal_toggled().connect (mem_fun(*this, &PlugUIBase::bypass_toggled));
+	bypass_button.signal_toggled().connect (sigc::mem_fun(*this, &PlugUIBase::bypass_toggled));
 	focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 
-	focus_button.signal_button_release_event().connect (mem_fun(*this, &PlugUIBase::focus_toggled));
+	focus_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::focus_toggled));
 	focus_button.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 
 	/* these images are not managed, so that we can remove them at will */
@@ -414,10 +414,10 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	ARDOUR_UI::instance()->set_tip (&focus_button, _("Click to allow the plugin to receive keyboard events that Ardour would normally use as a shortcut"), "");
 	ARDOUR_UI::instance()->set_tip (&bypass_button, _("Click to enable/disable this plugin"), "");
 
-	plugin_analysis_expander.property_expanded().signal_changed().connect( mem_fun(*this, &PlugUIBase::toggle_plugin_analysis));
+	plugin_analysis_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &PlugUIBase::toggle_plugin_analysis));
 	plugin_analysis_expander.set_expanded(false);
 
-	insert->GoingAway.connect (mem_fun (*this, &PlugUIBase::plugin_going_away));
+	insert->GoingAway.connect (sigc::mem_fun (*this, &PlugUIBase::plugin_going_away));
 }
 
 PlugUIBase::~PlugUIBase()
@@ -456,7 +456,7 @@ PlugUIBase::latency_button_clicked ()
 		latency_gui = new LatencyGUI (*(insert.get()), insert->session().frame_rate(), insert->session().get_block_size());
 		latency_dialog = new ArdourDialog ("Edit Latency", false, false);
 		latency_dialog->get_vbox()->pack_start (*latency_gui);
-		latency_dialog->signal_hide().connect (mem_fun (*this, &PlugUIBase::set_latency_label));
+		latency_dialog->signal_hide().connect (sigc::mem_fun (*this, &PlugUIBase::set_latency_label));
 	}
 
 	latency_dialog->show_all ();
@@ -465,7 +465,7 @@ PlugUIBase::latency_button_clicked ()
 void
 PlugUIBase::processor_active_changed (boost::weak_ptr<Processor> weak_p)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PlugUIBase::processor_active_changed), weak_p));
+	ENSURE_GUI_THREAD (*this, &PlugUIBase::processor_active_changed, weak_p)
 	boost::shared_ptr<Processor> p (weak_p);
 	if (p) {
 		bypass_button.set_active (!p->active());

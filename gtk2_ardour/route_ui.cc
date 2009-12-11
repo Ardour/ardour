@@ -138,10 +138,10 @@ RouteUI::init ()
 	show_sends_button->set_self_managed (true);
 	UI::instance()->set_tip (show_sends_button, _("make mixer strips show sends to this bus"), "");
 
-	_session.SoloChanged.connect (mem_fun(*this, &RouteUI::solo_changed_so_update_mute));
-	_session.TransportStateChange.connect (mem_fun (*this, &RouteUI::check_rec_enable_sensitivity));
+	_session.SoloChanged.connect (sigc::mem_fun(*this, &RouteUI::solo_changed_so_update_mute));
+	_session.TransportStateChange.connect (sigc::mem_fun (*this, &RouteUI::check_rec_enable_sensitivity));
 
-	Config->ParameterChanged.connect (mem_fun (*this, &RouteUI::parameter_changed));
+	Config->ParameterChanged.connect (sigc::mem_fun (*this, &RouteUI::parameter_changed));
 }
 
 void
@@ -192,17 +192,17 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	mute_button->set_controllable (_route->mute_control());
 	solo_button->set_controllable (_route->solo_control());
 
-	connections.push_back (_route->active_changed.connect (mem_fun (*this, &RouteUI::route_active_changed)));
-	connections.push_back (_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed)));
-	connections.push_back (_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed)));
-	connections.push_back (_route->listen_changed.connect (mem_fun(*this, &RouteUI::listen_changed)));
-	connections.push_back (_route->solo_isolated_changed.connect (mem_fun(*this, &RouteUI::solo_changed)));
+	connections.push_back (_route->active_changed.connect (sigc::mem_fun (*this, &RouteUI::route_active_changed)));
+	connections.push_back (_route->mute_changed.connect (sigc::mem_fun(*this, &RouteUI::mute_changed)));
+	connections.push_back (_route->solo_changed.connect (sigc::mem_fun(*this, &RouteUI::solo_changed)));
+	connections.push_back (_route->listen_changed.connect (sigc::mem_fun(*this, &RouteUI::listen_changed)));
+	connections.push_back (_route->solo_isolated_changed.connect (sigc::mem_fun(*this, &RouteUI::solo_changed)));
 
 	if (_session.writable() && is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
-		connections.push_back (t->diskstream()->RecordEnableChanged.connect (mem_fun (*this, &RouteUI::route_rec_enable_changed)));
-		connections.push_back (_session.RecordStateChanged.connect (mem_fun (*this, &RouteUI::session_rec_enable_changed)));
+		connections.push_back (t->diskstream()->RecordEnableChanged.connect (sigc::mem_fun (*this, &RouteUI::route_rec_enable_changed)));
+		connections.push_back (_session.RecordStateChanged.connect (sigc::mem_fun (*this, &RouteUI::session_rec_enable_changed)));
 
 		rec_enable_button->show();
  		rec_enable_button->set_controllable (t->rec_enable_control());
@@ -485,7 +485,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 		if (Keyboard::is_button2_event (ev) && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
-			// do nothing on midi bind event
+			// do nothing on midi sigc::bind event
 			return false;
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
@@ -531,13 +531,13 @@ RouteUI::build_sends_menu ()
 	sends_menu->set_name ("ArdourContextMenu");
 	MenuList& items = sends_menu->items();
 
-	items.push_back (MenuElem(_("Assign all tracks (prefader)"), bind (mem_fun (*this, &RouteUI::create_sends), PreFader)));
-	items.push_back (MenuElem(_("Assign all tracks (postfader)"), bind (mem_fun (*this, &RouteUI::create_sends), PostFader)));
-	items.push_back (MenuElem(_("Assign selected tracks (prefader)"), bind (mem_fun (*this, &RouteUI::create_selected_sends), PreFader)));
-	items.push_back (MenuElem(_("Assign selected tracks (postfader)"), bind (mem_fun (*this, &RouteUI::create_selected_sends), PostFader)));
-	items.push_back (MenuElem(_("Copy track gains to sends"), mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
-	items.push_back (MenuElem(_("Set sends gain to -inf"), mem_fun (*this, &RouteUI::set_sends_gain_to_zero)));
-	items.push_back (MenuElem(_("Set sends gain to 0dB"), mem_fun (*this, &RouteUI::set_sends_gain_to_unity)));
+	items.push_back (MenuElem(_("Assign all tracks (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PreFader)));
+	items.push_back (MenuElem(_("Assign all tracks (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_sends), PostFader)));
+	items.push_back (MenuElem(_("Assign selected tracks (prefader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PreFader)));
+	items.push_back (MenuElem(_("Assign selected tracks (postfader)"), sigc::bind (sigc::mem_fun (*this, &RouteUI::create_selected_sends), PostFader)));
+	items.push_back (MenuElem(_("Copy track gains to sends"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_from_track)));
+	items.push_back (MenuElem(_("Set sends gain to -inf"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_zero)));
+	items.push_back (MenuElem(_("Set sends gain to 0dB"), sigc::mem_fun (*this, &RouteUI::set_sends_gain_to_unity)));
 
 }
 
@@ -597,7 +597,7 @@ RouteUI::show_sends_press(GdkEventButton* ev)
 
 		if (Keyboard::is_button2_event (ev) && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
-			// do nothing on midi bind event
+			// do nothing on midi sigc::bind event
 			return false;
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
@@ -619,7 +619,7 @@ RouteUI::show_sends_press(GdkEventButton* ev)
 			if (show_sends_button->get_active()) {
 				/* show sends to this bus */
 				MixerStrip::SwitchIO (_route);
-				send_blink_connection = ARDOUR_UI::instance()->Blink.connect (mem_fun(*this, &RouteUI::send_blink));
+				send_blink_connection = ARDOUR_UI::instance()->Blink.connect (sigc::mem_fun(*this, &RouteUI::send_blink));
 			} else {
 				/* everybody back to normal */
 				send_blink_connection.disconnect ();
@@ -655,14 +655,14 @@ RouteUI::send_blink (bool onoff)
 void
 RouteUI::solo_changed(void* /*src*/)
 {
-	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_solo_display));
+	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &RouteUI::update_solo_display));
 }
 
 
 void
 RouteUI::listen_changed(void* /*src*/)
 {
-	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_solo_display));
+	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &RouteUI::update_solo_display));
 }
 
 int
@@ -758,13 +758,13 @@ RouteUI::update_solo_display ()
 void
 RouteUI::solo_changed_so_update_mute ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_mute_display));
+	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &RouteUI::update_mute_display));
 }
 
 void
 RouteUI::mute_changed(void* /*src*/)
 {
-	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_mute_display));
+	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &RouteUI::update_mute_display));
 }
 
 int
@@ -823,13 +823,13 @@ RouteUI::update_mute_display ()
 void
 RouteUI::route_rec_enable_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_rec_display));
+	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &RouteUI::update_rec_display));
 }
 
 void
 RouteUI::session_rec_enable_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &RouteUI::update_rec_display));
+	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &RouteUI::update_rec_display));
 }
 
 void
@@ -883,20 +883,20 @@ RouteUI::build_solo_menu (void)
 
 	check = new CheckMenuItem(_("Solo Isolate"));
 	check->set_active (_route->solo_isolated());
-	check->signal_toggled().connect (bind (mem_fun (*this, &RouteUI::toggle_solo_isolated), check));
-	_route->solo_isolated_changed.connect(bind (mem_fun (*this, &RouteUI::solo_isolated_toggle), check));
+	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_isolated), check));
+	_route->solo_isolated_changed.connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::solo_isolated_toggle), check));
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
 	check = new CheckMenuItem(_("Solo Safe"));
 	check->set_active (_route->solo_safe());
-	check->signal_toggled().connect (bind (mem_fun (*this, &RouteUI::toggle_solo_safe), check));
-	_route->solo_safe_changed.connect(bind (mem_fun (*this, &RouteUI::solo_safe_toggle), check));
+	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_safe), check));
+	_route->solo_safe_changed.connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::solo_safe_toggle), check));
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
 	//items.push_back (SeparatorElem());
-	// items.push_back (MenuElem (_("MIDI Bind"), mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
+	// items.push_back (MenuElem (_("MIDI Bind"), sigc::mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
 
 }
 
@@ -912,32 +912,32 @@ RouteUI::build_mute_menu(void)
 
 	pre_fader_mute_check = manage (new CheckMenuItem(_("Pre Fader")));
 	init_mute_menu(MuteMaster::PreFader, pre_fader_mute_check);
-	pre_fader_mute_check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::PreFader, pre_fader_mute_check));
+	pre_fader_mute_check->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::PreFader, pre_fader_mute_check));
 	items.push_back (CheckMenuElem(*pre_fader_mute_check));
 	pre_fader_mute_check->show_all();
 
 	post_fader_mute_check = manage (new CheckMenuItem(_("Post Fader")));
 	init_mute_menu(MuteMaster::PostFader, post_fader_mute_check);
-	post_fader_mute_check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::PostFader, post_fader_mute_check));
+	post_fader_mute_check->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::PostFader, post_fader_mute_check));
 	items.push_back (CheckMenuElem(*post_fader_mute_check));
 	post_fader_mute_check->show_all();
 
 	listen_mute_check = manage (new CheckMenuItem(_("Control Outs")));
 	init_mute_menu(MuteMaster::Listen, listen_mute_check);
-	listen_mute_check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::Listen, listen_mute_check));
+	listen_mute_check->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::Listen, listen_mute_check));
 	items.push_back (CheckMenuElem(*listen_mute_check));
 	listen_mute_check->show_all();
 
 	main_mute_check = manage (new CheckMenuItem(_("Main Outs")));
 	init_mute_menu(MuteMaster::Main, main_mute_check);
-	main_mute_check->signal_toggled().connect(bind (mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::Main, main_mute_check));
+	main_mute_check->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::Main, main_mute_check));
 	items.push_back (CheckMenuElem(*main_mute_check));
 	main_mute_check->show_all();
 
 	//items.push_back (SeparatorElem());
-	// items.push_back (MenuElem (_("MIDI Bind"), mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
+	// items.push_back (MenuElem (_("MIDI Bind"), sigc::mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
 
-	_route->mute_points_changed.connect (mem_fun (*this, &RouteUI::muting_change));
+	_route->mute_points_changed.connect (sigc::mem_fun (*this, &RouteUI::muting_change));
 }
 
 void
@@ -959,7 +959,7 @@ RouteUI::toggle_mute_menu(MuteMaster::MutePoint mp, Gtk::CheckMenuItem* check)
 void
 RouteUI::muting_change ()
 {
-	ENSURE_GUI_THREAD(mem_fun (*this, &RouteUI::muting_change));
+	ENSURE_GUI_THREAD (*this, &RouteUI::muting_change)
 
 	bool yn;
 	MuteMaster::MutePoint current = _route->mute_points ();
@@ -1104,7 +1104,7 @@ RouteUI::remove_this_route ()
 	Choice prompter (prompt, choices);
 
 	if (prompter.run () == 1) {
-		Glib::signal_idle().connect (bind (sigc::ptr_fun (&RouteUI::idle_remove_this_route), this));
+		Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (&RouteUI::idle_remove_this_route), this));
 	}
 }
 
@@ -1143,7 +1143,7 @@ RouteUI::route_rename ()
 void
 RouteUI::name_changed ()
 {
-	ENSURE_GUI_THREAD(sigc::mem_fun(*this, &RouteUI::name_changed));
+	ENSURE_GUI_THREAD (*this, &RouteUI::name_changed);
 
 	name_label.set_text (_route->name());
 }
@@ -1164,7 +1164,7 @@ void
 RouteUI::route_active_changed ()
 {
 	if (route_active_menu_item) {
-		Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun (*route_active_menu_item, &CheckMenuItem::set_active), _route->active()));
+		Gtkmm2ext::UI::instance()->call_slot (sigc::bind (sigc::mem_fun (*route_active_menu_item, &CheckMenuItem::set_active), _route->active()));
 	}
 }
 
@@ -1175,7 +1175,7 @@ RouteUI::toggle_polarity ()
 
 		bool x;
 
-		ENSURE_GUI_THREAD(mem_fun (*this, &RouteUI::toggle_polarity));
+		ENSURE_GUI_THREAD (*this, &RouteUI::toggle_polarity)
 
 		if ((x = polarity_menu_item->get_active()) != _route->phase_invert()) {
 			_route->set_phase_invert (x);
@@ -1205,7 +1205,7 @@ RouteUI::toggle_denormal_protection ()
 
 		bool x;
 
-		ENSURE_GUI_THREAD(mem_fun (*this, &RouteUI::toggle_denormal_protection));
+		ENSURE_GUI_THREAD (*this, &RouteUI::toggle_denormal_protection)
 
 		if ((x = denormal_menu_item->get_active()) != _route->denormal_protection()) {
 			_route->set_denormal_protection (x);
@@ -1311,7 +1311,7 @@ RouteUI::name() const
 void
 RouteUI::map_frozen ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &RouteUI::map_frozen));
+	ENSURE_GUI_THREAD (*this, &RouteUI::map_frozen)
 
  	AudioTrack* at = dynamic_cast<AudioTrack*>(_route.get());
 
@@ -1381,7 +1381,7 @@ RouteUI::check_rec_enable_sensitivity ()
 void
 RouteUI::parameter_changed (string const & p)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &RouteUI::parameter_changed), p));
+	ENSURE_GUI_THREAD (*this, &RouteUI::parameter_changed, p)
 
 	if (p == "disable-disarm-during-roll") {
 		check_rec_enable_sensitivity ();

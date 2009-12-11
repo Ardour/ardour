@@ -80,12 +80,12 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 	vestigial_frame->hide();
 	show_vestigial = false;
 
-	group->signal_event().connect (bind (mem_fun (tv.editor(), &PublicEditor::canvas_crossfade_view_event), group, this));
+	group->signal_event().connect (sigc::bind (sigc::mem_fun (tv.editor(), &PublicEditor::canvas_crossfade_view_event), group, this));
 
 	crossfade_changed (Change (~0));
 
-	crossfade->StateChanged.connect (mem_fun(*this, &CrossfadeView::crossfade_changed));
-	ColorsChanged.connect (mem_fun (*this, &CrossfadeView::color_handler));
+	crossfade->StateChanged.connect (sigc::mem_fun(*this, &CrossfadeView::crossfade_changed));
+	ColorsChanged.connect (sigc::mem_fun (*this, &CrossfadeView::color_handler));
 }
 
 CrossfadeView::~CrossfadeView ()

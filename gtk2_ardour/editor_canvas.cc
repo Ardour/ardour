@@ -260,7 +260,7 @@ Editor::initialize_canvas ()
 	zoom_rect->property_outline_pixels() = 1;
 	zoom_rect->hide();
 
-	zoom_rect->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_zoom_rect_event), (ArdourCanvas::Item*) 0));
+	zoom_rect->signal_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_zoom_rect_event), (ArdourCanvas::Item*) 0));
 
 	// used as rubberband rect
 	rubberband_rect = new ArdourCanvas::SimpleRect (*_trackview_group, 0.0, 0.0, 0.0, 0.0);
@@ -268,12 +268,12 @@ Editor::initialize_canvas ()
 	rubberband_rect->property_outline_pixels() = 1;
 	rubberband_rect->hide();
 
-	tempo_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_tempo_bar_event), tempo_bar));
-	meter_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_meter_bar_event), meter_bar));
-	marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_marker_bar_event), marker_bar));
-	cd_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_cd_marker_bar_event), cd_marker_bar));
-	range_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
-	transport_marker_bar->signal_event().connect (bind (mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
+	tempo_bar->signal_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_tempo_bar_event), tempo_bar));
+	meter_bar->signal_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_meter_bar_event), meter_bar));
+	marker_bar->signal_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_marker_bar_event), marker_bar));
+	cd_marker_bar->signal_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_cd_marker_bar_event), cd_marker_bar));
+	range_marker_bar->signal_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_range_marker_bar_event), range_marker_bar));
+	transport_marker_bar->signal_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_transport_marker_bar_event), transport_marker_bar));
 
 	playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event);
 
@@ -282,16 +282,16 @@ Editor::initialize_canvas ()
 	}
 	/* need to handle 4 specific types of events as catch-alls */
 
-	track_canvas->signal_scroll_event().connect (mem_fun (*this, &Editor::track_canvas_scroll_event));
-	track_canvas->signal_motion_notify_event().connect (mem_fun (*this, &Editor::track_canvas_motion_notify_event));
-	track_canvas->signal_button_press_event().connect (mem_fun (*this, &Editor::track_canvas_button_press_event));
-	track_canvas->signal_button_release_event().connect (mem_fun (*this, &Editor::track_canvas_button_release_event));
-	track_canvas->signal_drag_motion().connect (mem_fun (*this, &Editor::track_canvas_drag_motion));
+	track_canvas->signal_scroll_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_scroll_event));
+	track_canvas->signal_motion_notify_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_motion_notify_event));
+	track_canvas->signal_button_press_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_button_press_event));
+	track_canvas->signal_button_release_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_button_release_event));
+	track_canvas->signal_drag_motion().connect (sigc::mem_fun (*this, &Editor::track_canvas_drag_motion));
 
 	track_canvas->set_name ("EditorMainCanvas");
 	track_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK|Gdk::SCROLL_MASK);
-	track_canvas->signal_leave_notify_event().connect (mem_fun(*this, &Editor::left_track_canvas));
-	track_canvas->signal_enter_notify_event().connect (mem_fun(*this, &Editor::entered_track_canvas));
+	track_canvas->signal_leave_notify_event().connect (sigc::mem_fun(*this, &Editor::left_track_canvas));
+	track_canvas->signal_enter_notify_event().connect (sigc::mem_fun(*this, &Editor::entered_track_canvas));
 	track_canvas->set_flags (CAN_FOCUS);
 
 	/* set up drag-n-drop */
@@ -306,11 +306,11 @@ Editor::initialize_canvas ()
 	target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
 
 	track_canvas->drag_dest_set (target_table);
-	track_canvas->signal_drag_data_received().connect (mem_fun(*this, &Editor::track_canvas_drag_data_received));
+	track_canvas->signal_drag_data_received().connect (sigc::mem_fun(*this, &Editor::track_canvas_drag_data_received));
 
-	track_canvas->signal_size_allocate().connect (mem_fun(*this, &Editor::track_canvas_allocate));
+	track_canvas->signal_size_allocate().connect (sigc::mem_fun(*this, &Editor::track_canvas_allocate));
 
-	ColorsChanged.connect (mem_fun (*this, &Editor::color_handler));
+	ColorsChanged.connect (sigc::mem_fun (*this, &Editor::color_handler));
 	color_handler();
 
 }
@@ -425,7 +425,7 @@ Editor::controls_layout_size_request (Requisition* req)
 	}
 
 	if (changed) {
-		controls_layout_size_request_connection = controls_layout.signal_size_request().connect (mem_fun (*this, &Editor::controls_layout_size_request));
+		controls_layout_size_request_connection = controls_layout.signal_size_request().connect (sigc::mem_fun (*this, &Editor::controls_layout_size_request));
 	}
 	//cerr << "sizes = " << req->width << " " << edit_controls_vbox.get_width() << " " << controls_layout.get_width() << " " << zoom_box.get_width() << " " << time_button_frame.get_width() << endl;//DEBUG
 }
@@ -527,7 +527,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 		   the main event loop with GTK/Quartz. Since import/embed wants
 		   to push up a progress dialog, defer all this till we go idle.
 		*/
-		Glib::signal_idle().connect (bind (mem_fun (*this, &Editor::idle_drop_paths), paths, frame, cy));
+		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &Editor::idle_drop_paths), paths, frame, cy));
 #else
 		drop_paths_part_two (paths, frame, cy);
 #endif

@@ -75,18 +75,18 @@ VisualTimeAxis::VisualTimeAxis(const string & name, PublicEditor& ed, ARDOUR::Se
 	time_axis_name = name ;
 	_color = unique_random_color() ;
 
-	name_entry.signal_activate().connect(mem_fun(*this, &VisualTimeAxis::name_entry_changed)) ;
-	name_entry.signal_button_press_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_button_press_handler)) ;
-	name_entry.signal_button_release_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_button_release_handler)) ;
-	name_entry.signal_key_release_event().connect(mem_fun(*this, &VisualTimeAxis::name_entry_key_release_handler)) ;
+	name_entry.signal_activate().connect(sigc::mem_fun(*this, &VisualTimeAxis::name_entry_changed)) ;
+	name_entry.signal_button_press_event().connect(sigc::mem_fun(*this, &VisualTimeAxis::name_entry_button_press_handler)) ;
+	name_entry.signal_button_release_event().connect(sigc::mem_fun(*this, &VisualTimeAxis::name_entry_button_release_handler)) ;
+	name_entry.signal_key_release_event().connect(sigc::mem_fun(*this, &VisualTimeAxis::name_entry_key_release_handler)) ;
 
 	size_button.set_name("TrackSizeButton") ;
 	visual_button.set_name("TrackVisualButton") ;
 	hide_button.set_name("TrackRemoveButton") ;
 	hide_button.add(*(Gtk::manage(new Gtk::Image(get_xpm("small_x.xpm")))));
-	size_button.signal_button_release_event().connect (mem_fun (*this, &VisualTimeAxis::size_click)) ;
-	visual_button.signal_clicked().connect (mem_fun (*this, &VisualTimeAxis::visual_click)) ;
-	hide_button.signal_clicked().connect (mem_fun (*this, &VisualTimeAxis::hide_click)) ;
+	size_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VisualTimeAxis::size_click)) ;
+	visual_button.signal_clicked().connect (sigc::mem_fun (*this, &VisualTimeAxis::visual_click)) ;
+	hide_button.signal_clicked().connect (sigc::mem_fun (*this, &VisualTimeAxis::hide_click)) ;
 	ARDOUR_UI::instance()->tooltips().set_tip(size_button,_("Display Height")) ;
 	ARDOUR_UI::instance()->tooltips().set_tip(visual_button, _("Visual options")) ;
 	ARDOUR_UI::instance()->tooltips().set_tip(hide_button, _("Hide this track")) ;
@@ -274,7 +274,7 @@ VisualTimeAxis::remove_this_time_axis(void* src)
 		  defer to idle loop, otherwise we'll delete this object
 		  while we're still inside this function ...
 		*/
-		Glib::signal_idle().connect(bind(sigc::ptr_fun(&VisualTimeAxis::idle_remove_this_time_axis), this, src));
+		Glib::signal_idle().connect(sigc::bind(sigc::ptr_fun(&VisualTimeAxis::idle_remove_this_time_axis), this, src));
 	}
 }
 

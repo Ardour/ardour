@@ -154,13 +154,13 @@ RegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	if (name_highlight) {
 		name_highlight->set_data ("regionview", this);
-		name_highlight->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_highlight_event), name_highlight, this));
+		name_highlight->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_highlight_event), name_highlight, this));
 
 		frame_handle_start->set_data ("regionview", this);
-		frame_handle_start->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_frame_handle_event), frame_handle_start, this));
+		frame_handle_start->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_frame_handle_event), frame_handle_start, this));
 
 		frame_handle_end->set_data ("regionview", this);
-		frame_handle_end->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_frame_handle_event), frame_handle_end, this));
+		frame_handle_end->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_frame_handle_event), frame_handle_end, this));
 
 		frame_handle_start->raise_to_top();
 		frame_handle_end->raise_to_top();
@@ -175,13 +175,13 @@ RegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	set_height (trackview.current_height());
 
-	_region->StateChanged.connect (mem_fun(*this, &RegionView::region_changed));
+	_region->StateChanged.connect (sigc::mem_fun(*this, &RegionView::region_changed));
 
-	group->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_event), group, this));
+	group->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_event), group, this));
 
 	set_colors ();
 
-	ColorsChanged.connect (mem_fun (*this, &RegionView::color_handler));
+	ColorsChanged.connect (sigc::mem_fun (*this, &RegionView::color_handler));
 
 	/* XXX sync mark drag? */
 }
@@ -224,7 +224,7 @@ RegionView::lock_toggle ()
 void
 RegionView::region_changed (Change what_changed)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &RegionView::region_changed), what_changed));
+	ENSURE_GUI_THREAD (*this, &RegionView::region_changed, what_changed)
 
 	if (what_changed & BoundsChanged) {
 		region_resized (what_changed);

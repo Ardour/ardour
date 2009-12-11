@@ -233,10 +233,10 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	reset_width_dependent_items (_pixel_width);
 
-	fade_in_shape->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_event), fade_in_shape, this));
-	fade_in_handle->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_handle_event), fade_in_handle, this));
-	fade_out_shape->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_out_event), fade_out_shape, this));
-	fade_out_handle->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_out_handle_event), fade_out_handle, this));
+	fade_in_shape->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_event), fade_in_shape, this));
+	fade_in_handle->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_in_handle_event), fade_in_handle, this));
+	fade_out_shape->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_out_event), fade_out_shape, this));
+	fade_out_handle->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_fade_out_handle_event), fade_out_handle, this));
 
 	set_colors ();
 
@@ -268,7 +268,7 @@ AudioRegionView::audio_region() const
 void
 AudioRegionView::region_changed (Change what_changed)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &AudioRegionView::region_changed), what_changed));
+	ENSURE_GUI_THREAD (*this, &AudioRegionView::region_changed, what_changed)
 	//cerr << "AudioRegionView::region_changed() called" << endl;
 
 	RegionView::region_changed(what_changed);
@@ -348,7 +348,7 @@ AudioRegionView::fade_out_active_changed ()
 void
 AudioRegionView::region_scale_amplitude_changed ()
 {
-	ENSURE_GUI_THREAD (mem_fun(*this, &AudioRegionView::region_scale_amplitude_changed));
+	ENSURE_GUI_THREAD (*this, &AudioRegionView::region_scale_amplitude_changed)
 
 	for (uint32_t n = 0; n < waves.size(); ++n) {
 		// force a reload of the cache
@@ -870,7 +870,7 @@ AudioRegionView::create_waves ()
 		// cerr << "\tchannel " << n << endl;
 
 		if (wait_for_data) {
-			if (audio_region()->audio_source(n)->peaks_ready (bind (mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
+			if (audio_region()->audio_source(n)->peaks_ready (sigc::bind (sigc::mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
 				// cerr << "\tData is ready\n";
 				create_one_wave (n, true);
 			} else {
@@ -983,7 +983,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 void
 AudioRegionView::peaks_ready_handler (uint32_t which)
 {
-	Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &AudioRegionView::create_one_wave), which, false));
+	Gtkmm2ext::UI::instance()->call_slot (sigc::bind (sigc::mem_fun(*this, &AudioRegionView::create_one_wave), which, false));
 	// cerr << "AudioRegionView::peaks_ready_handler() called on " << which << " this: " << this << endl;
 }
 
@@ -1188,7 +1188,7 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 	ghost->set_colors();
 	ghosts.push_back (ghost);
 
-	ghost->GoingAway.connect (mem_fun(*this, &AudioRegionView::remove_ghost));
+	ghost->GoingAway.connect (sigc::mem_fun(*this, &AudioRegionView::remove_ghost));
 
 	return ghost;
 }

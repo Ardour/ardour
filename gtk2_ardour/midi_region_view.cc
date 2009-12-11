@@ -201,13 +201,13 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 	}
 
 	group->raise_to_top();
-	group->signal_event().connect (mem_fun (this, &MidiRegionView::canvas_event), false);
+	group->signal_event().connect (sigc::mem_fun (this, &MidiRegionView::canvas_event), false);
 
 	midi_view()->signal_channel_mode_changed().connect(
-			mem_fun(this, &MidiRegionView::midi_channel_mode_changed));
+			sigc::mem_fun(this, &MidiRegionView::midi_channel_mode_changed));
 
 	midi_view()->signal_midi_patch_settings_changed().connect(
-			mem_fun(this, &MidiRegionView::midi_patch_settings_changed));
+			sigc::mem_fun(this, &MidiRegionView::midi_patch_settings_changed));
 }
 
 bool
@@ -1072,7 +1072,7 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 		}
 	}
 
-	ghost->GoingAway.connect (mem_fun(*this, &MidiRegionView::remove_ghost));
+	ghost->GoingAway.connect (sigc::mem_fun(*this, &MidiRegionView::remove_ghost));
 
 	return ghost;
 }
@@ -1153,7 +1153,7 @@ MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
 	const double note_length_beats = (note->off_event().time() - note->on_event().time());
 	nframes_t note_length_ms = beats_to_frames(note_length_beats)
 			* (1000 / (double)route_ui->session().nominal_frame_rate());
-	Glib::signal_timeout().connect(bind(mem_fun(this, &MidiRegionView::play_midi_note_off), note),
+	Glib::signal_timeout().connect(sigc::bind(sigc::mem_fun(this, &MidiRegionView::play_midi_note_off), note),
 			note_length_ms, G_PRIORITY_DEFAULT);
 }
 

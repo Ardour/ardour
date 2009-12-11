@@ -287,7 +287,7 @@ Where would you like new Ardour sessions to be stored by default?\n\n\
 	vbox->pack_start (*hbox, false, true);
 
 	default_dir_chooser->set_current_folder (poor_mans_glob (Config->get_default_session_parent_dir()));
-	default_dir_chooser->signal_current_folder_changed().connect (mem_fun (*this, &ArdourStartup::default_dir_changed));
+	default_dir_chooser->signal_current_folder_changed().connect (sigc::mem_fun (*this, &ArdourStartup::default_dir_changed));
 	default_dir_chooser->show ();
 
 	vbox->show_all ();
@@ -360,11 +360,11 @@ ArdourStartup::setup_initial_choice_page ()
 	centering_vbox->pack_start (ic_new_session_button, false, true);
 	centering_vbox->pack_start (ic_existing_session_button, false, true);
 
-	ic_new_session_button.signal_button_press_event().connect(mem_fun(*this, &ArdourStartup::initial_button_press), false);
-	ic_new_session_button.signal_activate().connect(mem_fun(*this, &ArdourStartup::initial_button_activated), false);
+	ic_new_session_button.signal_button_press_event().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_press), false);
+	ic_new_session_button.signal_activate().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_activated), false);
 
-	ic_existing_session_button.signal_button_press_event().connect(mem_fun(*this, &ArdourStartup::initial_button_press), false);
-	ic_existing_session_button.signal_activate().connect(mem_fun(*this, &ArdourStartup::initial_button_activated), false);
+	ic_existing_session_button.signal_button_press_event().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_press), false);
+	ic_existing_session_button.signal_activate().connect(sigc::mem_fun(*this, &ArdourStartup::initial_button_activated), false);
 
 	centering_hbox->pack_start (*centering_vbox, true, true);
 
@@ -529,8 +529,8 @@ ArdourStartup::setup_new_session_page ()
 			set_page_complete (session_vbox, true);
 		}
 
-		new_name_entry.signal_changed().connect (mem_fun (*this, &ArdourStartup::new_name_changed));
-		new_name_entry.signal_activate().connect (mem_fun (*this, &ArdourStartup::move_along_now));
+		new_name_entry.signal_changed().connect (sigc::mem_fun (*this, &ArdourStartup::new_name_changed));
+		new_name_entry.signal_activate().connect (sigc::mem_fun (*this, &ArdourStartup::move_along_now));
 
 		vbox1->pack_start (*hbox1, true, true);
 
@@ -634,7 +634,7 @@ ArdourStartup::setup_new_session_page ()
 		hbox5->pack_start (more_new_session_options_button, false, false);
 
 		more_new_session_options_button.show ();
-		more_new_session_options_button.signal_clicked().connect (mem_fun (*this, &ArdourStartup::more_new_session_options_button_clicked));
+		more_new_session_options_button.signal_clicked().connect (sigc::mem_fun (*this, &ArdourStartup::more_new_session_options_button_clicked));
 
 		vbox3->pack_start (*hbox5, false, false);
 		hbox3->pack_start (*vbox3, true, true, 8);
@@ -770,7 +770,7 @@ ArdourStartup::setup_existing_session_page ()
 		recent_session_display.set_headers_visible (false);
 		recent_session_display.get_selection()->set_mode (SELECTION_BROWSE);
 
-		recent_session_display.get_selection()->signal_changed().connect (mem_fun (*this, &ArdourStartup::recent_session_row_selected));
+		recent_session_display.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &ArdourStartup::recent_session_row_selected));
 
 		recent_scroller.add (recent_session_display);
 		recent_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -781,7 +781,7 @@ ArdourStartup::setup_existing_session_page ()
 
 	recent_scroller.show();
 	int cnt = redisplay_recent_sessions ();
-	recent_session_display.signal_row_activated().connect (mem_fun (*this, &ArdourStartup::recent_row_activated));
+	recent_session_display.signal_row_activated().connect (sigc::mem_fun (*this, &ArdourStartup::recent_row_activated));
 
 	if (cnt > 4) {
 		recent_scroller.set_size_request (-1, 300);
@@ -1002,12 +1002,12 @@ ArdourStartup::setup_more_options_page ()
 
 	/* signals */
 
-	_connect_inputs.signal_clicked().connect (mem_fun (*this, &ArdourStartup::connect_inputs_clicked));
-	_connect_outputs.signal_clicked().connect (mem_fun (*this, &ArdourStartup::connect_outputs_clicked));
-	_limit_input_ports.signal_clicked().connect (mem_fun (*this, &ArdourStartup::limit_inputs_clicked));
-	_limit_output_ports.signal_clicked().connect (mem_fun (*this, &ArdourStartup::limit_outputs_clicked));
-	_create_master_bus.signal_clicked().connect (mem_fun (*this, &ArdourStartup::master_bus_button_clicked));
-	_create_control_bus.signal_clicked().connect (mem_fun (*this, &ArdourStartup::monitor_bus_button_clicked));
+	_connect_inputs.signal_clicked().connect (sigc::mem_fun (*this, &ArdourStartup::connect_inputs_clicked));
+	_connect_outputs.signal_clicked().connect (sigc::mem_fun (*this, &ArdourStartup::connect_outputs_clicked));
+	_limit_input_ports.signal_clicked().connect (sigc::mem_fun (*this, &ArdourStartup::limit_inputs_clicked));
+	_limit_output_ports.signal_clicked().connect (sigc::mem_fun (*this, &ArdourStartup::limit_outputs_clicked));
+	_create_master_bus.signal_clicked().connect (sigc::mem_fun (*this, &ArdourStartup::master_bus_button_clicked));
+	_create_control_bus.signal_clicked().connect (sigc::mem_fun (*this, &ArdourStartup::monitor_bus_button_clicked));
 
 	/* note that more_options_vbox is NOT visible by
 	 * default. this is entirely by design - this page

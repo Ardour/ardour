@@ -58,13 +58,13 @@ ReturnUI::ReturnUI (Gtk::Window* parent, boost::shared_ptr<Return> r, Session& s
 	show_all ();
 
 	_return->set_metering (true);
-	_return->input()->changed.connect (mem_fun (*this, &ReturnUI::ins_changed));
+	_return->input()->changed.connect (sigc::mem_fun (*this, &ReturnUI::ins_changed));
 
 	_gpm.setup_meters ();
 	_gpm.set_fader_name ("ReturnUIFrame");
 
-	// screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (mem_fun (*this, &ReturnUI::update));
-	fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (mem_fun (*this, &ReturnUI::fast_update));
+	// screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (sigc::mem_fun (*this, &ReturnUI::update));
+	fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (sigc::mem_fun (*this, &ReturnUI::fast_update));
 }
 
 ReturnUI::~ReturnUI ()
@@ -80,7 +80,7 @@ ReturnUI::~ReturnUI ()
 void
 ReturnUI::ins_changed (IOChange change, void* ignored)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &ReturnUI::ins_changed), change, ignored));
+	ENSURE_GUI_THREAD (*this, &ReturnUI::ins_changed, change, ignored)
 	if (change & ConfigurationChanged) {
 		_gpm.setup_meters ();
 	}
@@ -111,8 +111,8 @@ ReturnUIWindow::ReturnUIWindow (boost::shared_ptr<Return> s, Session& ss)
 
 	set_name ("ReturnUIWindow");
 
-	going_away_connection = s->GoingAway.connect (mem_fun (*this, &ReturnUIWindow::return_going_away));
-	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
+	going_away_connection = s->GoingAway.connect (sigc::mem_fun (*this, &ReturnUIWindow::return_going_away));
+	signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
 }
 
 ReturnUIWindow::~ReturnUIWindow ()
@@ -123,7 +123,7 @@ ReturnUIWindow::~ReturnUIWindow ()
 void
 ReturnUIWindow::return_going_away ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &ReturnUIWindow::return_going_away));
+	ENSURE_GUI_THREAD (*this, &ReturnUIWindow::return_going_away)
 	delete_when_idle (this);
 	going_away_connection.disconnect ();
 }

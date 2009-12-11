@@ -1516,7 +1516,7 @@ Editor::scroll_tracks_up_line ()
 void
 Editor::tav_zoom_step (bool coarser)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::temporal_zoom_step), coarser));
+	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_step, coarser)
 
 	_routes->suspend_redisplay ();
 
@@ -1531,7 +1531,7 @@ Editor::tav_zoom_step (bool coarser)
 void
 Editor::temporal_zoom_step (bool coarser)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &Editor::temporal_zoom_step), coarser));
+	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_step, coarser)
 
 	double nfpu;
 
@@ -1791,7 +1791,7 @@ Editor::temporal_zoom_selection ()
 void
 Editor::temporal_zoom_session ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &Editor::temporal_zoom_session));
+	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_session)
 
 	if (session) {
 		temporal_zoom_by_frame (session->current_start_frame(), session->current_end_frame(), "zoom to session");
@@ -1851,8 +1851,8 @@ Editor::temporal_zoom_to_frame (bool coarser, nframes64_t frame)
 		new_leftmost = 0;
 	}
 //	begin_reversible_command (_("zoom to frame"));
-//	session->add_undo (bind (mem_fun(*this, &Editor::reposition_and_zoom), leftmost_frame, frames_per_unit));
-//	session->add_redo (bind (mem_fun(*this, &Editor::reposition_and_zoom), new_leftmost, new_fpu));
+//	session->add_undo (sigc::bind (sigc::mem_fun(*this, &Editor::reposition_and_zoom), leftmost_frame, frames_per_unit));
+//	session->add_redo (sigc::bind (sigc::mem_fun(*this, &Editor::reposition_and_zoom), new_leftmost, new_fpu));
 //	commit_reversible_command ();
 
 	reposition_and_zoom (new_leftmost, new_fpu);
@@ -2534,7 +2534,7 @@ Editor::rename_region()
 	entry.set_text (rs.front()->region()->name());
 	entry.select_region (0, -1);
 
-	entry.signal_activate().connect (bind (mem_fun (d, &Dialog::response), RESPONSE_OK));
+	entry.signal_activate().connect (sigc::bind (sigc::mem_fun (d, &Dialog::response), RESPONSE_OK));
 
 	d.show_all ();
 
@@ -2633,7 +2633,7 @@ Editor::build_interthread_progress_window ()
 	// GTK2FIX: this button needs a modifiable label
 
 	Button* b = interthread_progress_window->add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	b->signal_clicked().connect (mem_fun(*this, &Editor::interthread_cancel_clicked));
+	b->signal_clicked().connect (sigc::mem_fun(*this, &Editor::interthread_cancel_clicked));
 
 	interthread_cancel_button.add (interthread_cancel_label);
 
@@ -2835,7 +2835,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 					for (list<AudioRange>::const_iterator t = ts.begin(); t != ts.end(); ++t) {
 
 						sigc::connection c = rtv->view()->RegionViewAdded.connect (
-								mem_fun(*this, &Editor::collect_new_region_view));
+								sigc::mem_fun(*this, &Editor::collect_new_region_view));
 						latest_regionviews.clear ();
 
 						playlist->partition ((nframes64_t)((*t).start * speed),
@@ -2847,7 +2847,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 
 							got_some = true;
 
-							rtv->view()->foreach_regionview (bind (
+							rtv->view()->foreach_regionview (sigc::bind (
 										sigc::ptr_fun (add_if_covered),
 										&(*t), &new_selection));
 
@@ -3695,7 +3695,7 @@ Editor::freeze_route ()
 	current_interthread_info = &itt;
 
 	interthread_progress_connection =
-	  Glib::signal_timeout().connect (bind (mem_fun(*this, &Editor::freeze_progress_timeout), (gpointer) 0), 100);
+	  Glib::signal_timeout().connect (sigc::bind (sigc::mem_fun(*this, &Editor::freeze_progress_timeout), (gpointer) 0), 100);
 
 	itt.done = false;
 	itt.cancel = false;
@@ -3854,7 +3854,7 @@ Editor::cut_copy (CutCopyOp op)
 		Location* loc = find_location_from_marker (entered_marker, ignored);
 
 		if (session && loc) {
-			Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::really_remove_marker), loc));
+			Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc));
 		}
 
 		break_drag ();
@@ -4358,7 +4358,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		TimeAxisView& tv = (*i)->get_time_axis_view();
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&tv);
 		latest_regionviews.clear ();
-		sigc::connection c = rtv->view()->RegionViewAdded.connect (mem_fun(*this, &Editor::collect_new_region_view));
+		sigc::connection c = rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
  		playlist = (*i)->region()->playlist();
                 XMLNode &before = playlist->get_state();
@@ -6483,7 +6483,7 @@ void
 Editor::start_visual_state_op (uint32_t n)
 {
 	if (visual_state_op_connection.empty()) {
-		visual_state_op_connection = Glib::signal_timeout().connect (bind (mem_fun (*this, &Editor::end_visual_state_op), n), 1000);
+		visual_state_op_connection = Glib::signal_timeout().connect (sigc::bind (sigc::mem_fun (*this, &Editor::end_visual_state_op), n), 1000);
 	}
 }
 

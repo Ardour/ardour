@@ -45,7 +45,7 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<PluginInsert> pi, boost::shared_ptr<
 	preset_box.pack_end (save_button, false, false);
 	preset_box.pack_end (vst_preset_combo, false, false);
 
-	vst_preset_combo.signal_changed().connect (mem_fun (*this, &VSTPluginUI::preset_chosen));
+	vst_preset_combo.signal_changed().connect (sigc::mem_fun (*this, &VSTPluginUI::preset_chosen));
 
 	bypass_button.set_active (!insert->active());
 
@@ -85,7 +85,7 @@ VSTPluginUI::package (Gtk::Window& win)
 {
 	/* forward configure events to plugin window */
 
-	win.signal_configure_event().connect (bind (mem_fun (*this, &VSTPluginUI::configure_handler), &socket), false);
+	win.signal_configure_event().connect (sigc::bind (sigc::mem_fun (*this, &VSTPluginUI::configure_handler), &socket), false);
 
 	/*
 	   this assumes that the window's owner understands the XEmbed protocol.

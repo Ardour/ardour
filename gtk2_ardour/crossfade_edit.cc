@@ -124,7 +124,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 	toplevel = 0;
 
 	canvas = new ArdourCanvas::CanvasAA ();
-	canvas->signal_size_allocate().connect (mem_fun(*this, &CrossfadeEditor::canvas_allocation));
+	canvas->signal_size_allocate().connect (sigc::mem_fun(*this, &CrossfadeEditor::canvas_allocation));
 	canvas->set_size_request (425, 200);
 
 	toplevel = new ArdourCanvas::SimpleRect (*(canvas->root()));
@@ -135,7 +135,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 	toplevel->property_fill() =  true;
 	toplevel->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorBase.get();
 	toplevel->property_outline_pixels() =  0;
-	toplevel->signal_event().connect (mem_fun (*this, &CrossfadeEditor::canvas_event));
+	toplevel->signal_event().connect (sigc::mem_fun (*this, &CrossfadeEditor::canvas_event));
 
 	fade[Out].line = new ArdourCanvas::Line (*(canvas->root()));
 	fade[Out].line->property_width_pixels() = 1;
@@ -151,16 +151,16 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 	fade[In].shading = new ArdourCanvas::Polygon (*(canvas->root()));
 	fade[In].shading->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_CrossfadeEditorLineShading.get();
 
-	fade[In].shading->signal_event().connect (mem_fun (*this, &CrossfadeEditor::canvas_event));
-	fade[In].line->signal_event().connect (mem_fun (*this, &CrossfadeEditor::curve_event));
-	fade[Out].shading->signal_event().connect (mem_fun (*this, &CrossfadeEditor::canvas_event));
-	fade[Out].line->signal_event().connect (mem_fun (*this, &CrossfadeEditor::curve_event));
+	fade[In].shading->signal_event().connect (sigc::mem_fun (*this, &CrossfadeEditor::canvas_event));
+	fade[In].line->signal_event().connect (sigc::mem_fun (*this, &CrossfadeEditor::curve_event));
+	fade[Out].shading->signal_event().connect (sigc::mem_fun (*this, &CrossfadeEditor::canvas_event));
+	fade[Out].line->signal_event().connect (sigc::mem_fun (*this, &CrossfadeEditor::curve_event));
 
 	select_in_button.set_name (X_("CrossfadeEditCurveButton"));
 	select_out_button.set_name (X_("CrossfadeEditCurveButton"));
 
-	select_in_button.signal_clicked().connect (bind (mem_fun (*this, &CrossfadeEditor::curve_select_clicked), In));
-	select_out_button.signal_clicked().connect (bind (mem_fun (*this, &CrossfadeEditor::curve_select_clicked), Out));
+	select_in_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &CrossfadeEditor::curve_select_clicked), In));
+	select_out_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &CrossfadeEditor::curve_select_clicked), Out));
 
 	HBox* acbox = manage (new HBox);
 
@@ -201,7 +201,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 		pbutton = manage (new Button);
 		pbutton->add (*pxmap);
 		pbutton->set_name ("CrossfadeEditButton");
-		pbutton->signal_clicked().connect (bind (mem_fun(*this, &CrossfadeEditor::apply_preset), *i));
+		pbutton->signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &CrossfadeEditor::apply_preset), *i));
 		ARDOUR_UI::instance()->set_tip (pbutton, (*i)->name, "");
 		fade_in_table.attach (*pbutton, col, col+1, row, row+1);
 		fade_in_buttons.push_back (pbutton);
@@ -223,7 +223,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 		pbutton = manage (new Button);
 		pbutton->add (*pxmap);
 		pbutton->set_name ("CrossfadeEditButton");
-		pbutton->signal_clicked().connect (bind (mem_fun(*this, &CrossfadeEditor::apply_preset), *i));
+		pbutton->signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &CrossfadeEditor::apply_preset), *i));
 		ARDOUR_UI::instance()->set_tip (pbutton, (*i)->name, "");
 		fade_out_table.attach (*pbutton, col, col+1, row, row+1);
 		fade_out_buttons.push_back (pbutton);
@@ -248,13 +248,13 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 	audition_right_dry_button.set_name ("CrossfadeEditAuditionButton");
 	audition_right_button.set_name ("CrossfadeEditAuditionButton");
 
-	clear_button.signal_clicked().connect (mem_fun(*this, &CrossfadeEditor::clear));
-	revert_button.signal_clicked().connect (mem_fun(*this, &CrossfadeEditor::reset));
-	audition_both_button.signal_toggled().connect (mem_fun(*this, &CrossfadeEditor::audition_toggled));
-	audition_right_button.signal_toggled().connect (mem_fun(*this, &CrossfadeEditor::audition_right_toggled));
-	audition_right_dry_button.signal_toggled().connect (mem_fun(*this, &CrossfadeEditor::audition_right_dry_toggled));
-	audition_left_button.signal_toggled().connect (mem_fun(*this, &CrossfadeEditor::audition_left_toggled));
-	audition_left_dry_button.signal_toggled().connect (mem_fun(*this, &CrossfadeEditor::audition_left_dry_toggled));
+	clear_button.signal_clicked().connect (sigc::mem_fun(*this, &CrossfadeEditor::clear));
+	revert_button.signal_clicked().connect (sigc::mem_fun(*this, &CrossfadeEditor::reset));
+	audition_both_button.signal_toggled().connect (sigc::mem_fun(*this, &CrossfadeEditor::audition_toggled));
+	audition_right_button.signal_toggled().connect (sigc::mem_fun(*this, &CrossfadeEditor::audition_right_toggled));
+	audition_right_dry_button.signal_toggled().connect (sigc::mem_fun(*this, &CrossfadeEditor::audition_right_dry_toggled));
+	audition_left_button.signal_toggled().connect (sigc::mem_fun(*this, &CrossfadeEditor::audition_left_toggled));
+	audition_left_dry_button.signal_toggled().connect (sigc::mem_fun(*this, &CrossfadeEditor::audition_left_dry_toggled));
 
 	roll_box.pack_start (preroll_button, false, false);
 	roll_box.pack_start (postroll_button, false, false);
@@ -280,7 +280,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 	/* button to allow hackers to check the actual curve values */
 
 //	Button* foobut = manage (new Button ("dump"));
-//	foobut-.signal_clicked().connect (mem_fun(*this, &CrossfadeEditor::dump));
+//	foobut-.signal_clicked().connect (sigc::mem_fun(*this, &CrossfadeEditor::dump));
 //	vpacker.pack_start (*foobut, false, false);
 
 	current = In;
@@ -291,9 +291,9 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 
 	curve_select_clicked (In);
 
-	xfade->StateChanged.connect (mem_fun(*this, &CrossfadeEditor::xfade_changed));
+	xfade->StateChanged.connect (sigc::mem_fun(*this, &CrossfadeEditor::xfade_changed));
 
-	session.AuditionActive.connect (mem_fun(*this, &CrossfadeEditor::audition_state_changed));
+	session.AuditionActive.connect (sigc::mem_fun(*this, &CrossfadeEditor::audition_state_changed));
 	show_all_children();
 }
 
@@ -321,7 +321,7 @@ CrossfadeEditor::dump ()
 void
 CrossfadeEditor::audition_state_changed (bool yn)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &CrossfadeEditor::audition_state_changed), yn));
+	ENSURE_GUI_THREAD (*this, &CrossfadeEditor::audition_state_changed, yn)
 
 	if (!yn) {
 		audition_both_button.set_active (false);
@@ -466,7 +466,7 @@ CrossfadeEditor::make_point ()
 
 	p->curve = fade[current].line;
 
-	p->box->signal_event().connect (bind (mem_fun (*this, &CrossfadeEditor::point_event), p));
+	p->box->signal_event().connect (sigc::bind (sigc::mem_fun (*this, &CrossfadeEditor::point_event), p));
 
 	return p;
 }
@@ -1130,7 +1130,7 @@ CrossfadeEditor::make_waves (boost::shared_ptr<AudioRegion> region, WhichFade wh
 
 		gdouble yoff = n * ht;
 
-		if (region->audio_source(n)->peaks_ready (bind (mem_fun(*this, &CrossfadeEditor::peaks_ready), region, which), peaks_ready_connection)) {
+		if (region->audio_source(n)->peaks_ready (sigc::bind (sigc::mem_fun(*this, &CrossfadeEditor::peaks_ready), region, which), peaks_ready_connection)) {
 			WaveView* waveview = new WaveView (*(canvas->root()));
 
 			waveview->property_data_src() = region.get();

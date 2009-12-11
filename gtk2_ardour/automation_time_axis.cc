@@ -101,8 +101,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 
 	_base_rect->set_data ("trackview", this);
 
-	_base_rect->signal_event().connect (bind (
-			mem_fun (_editor, &PublicEditor::canvas_automation_track_event),
+	_base_rect->signal_event().connect (sigc::bind (
+			sigc::mem_fun (_editor, &PublicEditor::canvas_automation_track_event),
 			_base_rect, this));
 
 	if (!a) {
@@ -186,8 +186,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 
 	controls_table.show_all ();
 
-	hide_button.signal_clicked().connect (mem_fun(*this, &AutomationTimeAxisView::hide_clicked));
-	auto_button.signal_clicked().connect (mem_fun(*this, &AutomationTimeAxisView::auto_clicked));
+	hide_button.signal_clicked().connect (sigc::mem_fun(*this, &AutomationTimeAxisView::hide_clicked));
+	auto_button.signal_clicked().connect (sigc::mem_fun(*this, &AutomationTimeAxisView::auto_clicked));
 
 	controls_base_selected_name = X_("AutomationTrackControlsBaseSelected");
 	controls_base_unselected_name = X_("AutomationTrackControlsBase");
@@ -222,7 +222,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Ro
 	/* make sure labels etc. are correct */
 
 	automation_state_changed ();
-	ColorsChanged.connect (mem_fun (*this, &AutomationTimeAxisView::color_handler));
+	ColorsChanged.connect (sigc::mem_fun (*this, &AutomationTimeAxisView::color_handler));
 }
 
 AutomationTimeAxisView::~AutomationTimeAxisView ()
@@ -239,13 +239,13 @@ AutomationTimeAxisView::auto_clicked ()
 		automation_menu->set_name ("ArdourContextMenu");
 		MenuList& items (automation_menu->items());
 
-		items.push_back (MenuElem (_("Manual"), bind (mem_fun(*this,
+		items.push_back (MenuElem (_("Manual"), sigc::bind (sigc::mem_fun(*this,
 				&AutomationTimeAxisView::set_automation_state), (AutoState) Off)));
-		items.push_back (MenuElem (_("Play"), bind (mem_fun(*this,
+		items.push_back (MenuElem (_("Play"), sigc::bind (sigc::mem_fun(*this,
 				&AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
-		items.push_back (MenuElem (_("Write"), bind (mem_fun(*this,
+		items.push_back (MenuElem (_("Write"), sigc::bind (sigc::mem_fun(*this,
 				&AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
-		items.push_back (MenuElem (_("Touch"), bind (mem_fun(*this,
+		items.push_back (MenuElem (_("Touch"), sigc::bind (sigc::mem_fun(*this,
 				&AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
 	}
 
@@ -501,9 +501,9 @@ AutomationTimeAxisView::build_display_menu ()
 
 	items.push_back (MenuElem (_("Height"), *size_menu));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &AutomationTimeAxisView::hide_clicked)));
+	items.push_back (MenuElem (_("Hide"), sigc::mem_fun(*this, &AutomationTimeAxisView::hide_clicked)));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Clear"), mem_fun(*this, &AutomationTimeAxisView::clear_clicked)));
+	items.push_back (MenuElem (_("Clear"), sigc::mem_fun(*this, &AutomationTimeAxisView::clear_clicked)));
 	items.push_back (SeparatorElem());
 
 	/* state menu */
@@ -512,23 +512,23 @@ AutomationTimeAxisView::build_display_menu ()
 	auto_state_menu->set_name ("ArdourContextMenu");
 	MenuList& as_items = auto_state_menu->items();
 
-	as_items.push_back (CheckMenuElem (_("Manual"), bind (
-			mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
+	as_items.push_back (CheckMenuElem (_("Manual"), sigc::bind (
+			sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
 			(AutoState) Off)));
 	auto_off_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
-	as_items.push_back (CheckMenuElem (_("Play"), bind (
-			mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
+	as_items.push_back (CheckMenuElem (_("Play"), sigc::bind (
+			sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
 			(AutoState) Play)));
 	auto_play_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
-	as_items.push_back (CheckMenuElem (_("Write"), bind (
-			mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
+	as_items.push_back (CheckMenuElem (_("Write"), sigc::bind (
+			sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
 			(AutoState) Write)));
 	auto_write_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
-	as_items.push_back (CheckMenuElem (_("Touch"), bind (
-			mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
+	as_items.push_back (CheckMenuElem (_("Touch"), sigc::bind (
+			sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
 			(AutoState) Touch)));
 	auto_touch_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
@@ -544,14 +544,14 @@ AutomationTimeAxisView::build_display_menu ()
 
 		RadioMenuItem::Group group;
 
-		am_items.push_back (RadioMenuElem (group, _("Discrete"), bind (
-				mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
+		am_items.push_back (RadioMenuElem (group, _("Discrete"), sigc::bind (
+				sigc::mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
 				AutomationList::Discrete)));
 		mode_discrete_item = dynamic_cast<CheckMenuItem*>(&am_items.back());
 		mode_discrete_item->set_active(_control->list()->interpolation() == AutomationList::Discrete);
 
-		am_items.push_back (RadioMenuElem (group, _("Linear"), bind (
-				mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
+		am_items.push_back (RadioMenuElem (group, _("Linear"), sigc::bind (
+				sigc::mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
 				AutomationList::Linear)));
 		mode_line_item = dynamic_cast<CheckMenuItem*>(&am_items.back());
 
@@ -834,7 +834,7 @@ AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 	assert(line->the_list() == _control->list());
 
 	automation_connection = _control->alist()->automation_state_changed.connect
-		(mem_fun(*this, &AutomationTimeAxisView::automation_state_changed));
+		(sigc::mem_fun(*this, &AutomationTimeAxisView::automation_state_changed));
 
 	_line = line;
 	//_controller = AutomationController::create(_session, line->the_list(), _control);

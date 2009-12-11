@@ -272,7 +272,7 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 
 		route_bundles.push_back (io->bundle ());
 
-		(*i)->foreach_processor (bind (mem_fun (*this, &PortGroupList::maybe_add_processor_to_list), &route_bundles, inputs, used_io));
+		(*i)->foreach_processor (sigc::bind (sigc::mem_fun (*this, &PortGroupList::maybe_add_processor_to_list), &route_bundles, inputs, used_io));
 
 		/* Work out which group to put these bundles in */
 		boost::shared_ptr<PortGroup> g;

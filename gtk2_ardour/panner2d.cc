@@ -73,8 +73,8 @@ Panner2d::Panner2d (boost::shared_ptr<Panner> p, int32_t h)
 	allow_y = false;
 	allow_target = false;
 
-	panner->StateChanged.connect (mem_fun(*this, &Panner2d::handle_state_change));
-	panner->Changed.connect (mem_fun(*this, &Panner2d::handle_position_change));
+	panner->StateChanged.connect (sigc::mem_fun(*this, &Panner2d::handle_state_change));
+	panner->Changed.connect (sigc::mem_fun(*this, &Panner2d::handle_position_change));
 
 	drag_target = 0;
 	set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
@@ -263,7 +263,7 @@ Panner2d::remove_target (int which)
 void
 Panner2d::handle_state_change ()
 {
-	ENSURE_GUI_THREAD(mem_fun(*this, &Panner2d::handle_state_change));
+	ENSURE_GUI_THREAD (*this, &Panner2d::handle_state_change)
 
 	queue_draw ();
 }
@@ -272,7 +272,7 @@ void
 Panner2d::handle_position_change ()
 {
 	uint32_t n;
-	ENSURE_GUI_THREAD(mem_fun(*this, &Panner2d::handle_position_change));
+	ENSURE_GUI_THREAD (*this, &Panner2d::handle_position_change)
 
 	for (n = 0; n < pucks.size(); ++n) {
 		float x, y;

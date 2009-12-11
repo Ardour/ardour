@@ -98,7 +98,7 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 	analysis_mode_strings = I18N (_analysis_mode_strings);
 	Gtkmm2ext::set_popdown_strings (analysis_mode_selector, analysis_mode_strings);
 	analysis_mode_selector.set_active_text (analysis_mode_strings.front());
-	analysis_mode_selector.signal_changed().connect (mem_fun (*this, &RhythmFerret::analysis_mode_changed));
+	analysis_mode_selector.signal_changed().connect (sigc::mem_fun (*this, &RhythmFerret::analysis_mode_changed));
 
 	onset_function_strings = I18N (_onset_function_strings);
 	Gtkmm2ext::set_popdown_strings (onset_detection_function_selector, onset_function_strings);
@@ -123,7 +123,7 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 
 	ferret_packer.pack_start (analyze_button, false, false);
 
-	analyze_button.signal_clicked().connect (mem_fun (*this, &RhythmFerret::run_analysis));
+	analyze_button.signal_clicked().connect (sigc::mem_fun (*this, &RhythmFerret::run_analysis));
 
 	box = manage (new HBox);
 	box->set_spacing (6);
@@ -170,7 +170,7 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 	lower_hpacker.set_border_width (6);
 	lower_hpacker.set_spacing (6);
 
-	action_button.signal_clicked().connect (mem_fun (*this, &RhythmFerret::do_action));
+	action_button.signal_clicked().connect (sigc::mem_fun (*this, &RhythmFerret::do_action));
 
 	get_vbox()->set_border_width (6);
 	get_vbox()->set_spacing (6);

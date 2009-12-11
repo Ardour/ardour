@@ -42,7 +42,7 @@ AutomationRegionView::AutomationRegionView(ArdourCanvas::Group*                 
 		create_line(list);
 	}
 
-	group->signal_event().connect (mem_fun (this, &AutomationRegionView::canvas_event), false);
+	group->signal_event().connect (sigc::mem_fun (this, &AutomationRegionView::canvas_event), false);
 	group->raise_to_top();
 }
 
@@ -59,7 +59,7 @@ AutomationRegionView::init (Gdk::Color const & basic_color, bool /*wfd*/)
 
 	set_height (trackview.current_height());
 
-	_region->StateChanged.connect (mem_fun(*this, &AutomationRegionView::region_changed));
+	_region->StateChanged.connect (sigc::mem_fun(*this, &AutomationRegionView::region_changed));
 
 	set_colors ();
 

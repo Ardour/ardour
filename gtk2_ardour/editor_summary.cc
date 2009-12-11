@@ -59,12 +59,12 @@ EditorSummary::connect_to_session (Session* s)
 {
 	EditorComponent::connect_to_session (s);
 
-	Region::RegionPropertyChanged.connect (sigc::hide (mem_fun (*this, &EditorSummary::set_dirty)));
+	Region::RegionPropertyChanged.connect (sigc::hide (sigc::mem_fun (*this, &EditorSummary::set_dirty)));
 
-	_session_connections.push_back (_session->RegionRemoved.connect (sigc::hide (mem_fun (*this, &EditorSummary::set_dirty))));
-	_session_connections.push_back (_session->StartTimeChanged.connect (mem_fun (*this, &EditorSummary::set_dirty)));
-	_session_connections.push_back (_session->EndTimeChanged.connect (mem_fun (*this, &EditorSummary::set_dirty)));
-	_editor->playhead_cursor->PositionChanged.connect (mem_fun (*this, &EditorSummary::playhead_position_changed));
+	_session_connections.push_back (_session->RegionRemoved.connect (sigc::hide (sigc::mem_fun (*this, &EditorSummary::set_dirty))));
+	_session_connections.push_back (_session->StartTimeChanged.connect (sigc::mem_fun (*this, &EditorSummary::set_dirty)));
+	_session_connections.push_back (_session->EndTimeChanged.connect (sigc::mem_fun (*this, &EditorSummary::set_dirty)));
+	_editor->playhead_cursor->PositionChanged.connect (sigc::mem_fun (*this, &EditorSummary::playhead_position_changed));
 
 	set_dirty ();
 }
@@ -171,8 +171,8 @@ EditorSummary::render (cairo_t* cr)
 			double const h = (*i)->effective_height () * _y_scale;
 			cairo_set_line_width (cr, h);
 
-			s->foreach_regionview (bind (
-						       mem_fun (*this, &EditorSummary::render_region),
+			s->foreach_regionview (sigc::bind (
+						       sigc::mem_fun (*this, &EditorSummary::render_region),
 						       cr,
 						       y + h / 2
 						       ));
@@ -226,7 +226,7 @@ EditorSummary::render_region (RegionView* r, cairo_t* cr, double y) const
 void
 EditorSummary::set_overlays_dirty ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &EditorSummary::set_overlays_dirty));
+	ENSURE_GUI_THREAD (*this, &EditorSummary::set_overlays_dirty)
 	queue_draw ();
 }
 

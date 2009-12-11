@@ -92,7 +92,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 
 	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
 	name_cell->property_editable() = true;
-	name_cell->signal_edited().connect (mem_fun (*this, &EditorRouteGroups::name_edit));
+	name_cell->signal_edited().connect (sigc::mem_fun (*this, &EditorRouteGroups::name_edit));
 
 	/* use checkbox for the active + visible columns */
 
@@ -124,7 +124,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	active_cell->property_activatable() = true;
 	active_cell->property_radio() = false;
 
-	_model->signal_row_changed().connect (mem_fun (*this, &EditorRouteGroups::row_change));
+	_model->signal_row_changed().connect (sigc::mem_fun (*this, &EditorRouteGroups::row_change));
 
 	_display.set_name ("EditGroupList");
 	_display.get_selection()->set_mode (SELECTION_SINGLE);
@@ -136,7 +136,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	_scroller.add (_display);
 	_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
-	_display.signal_button_press_event().connect (mem_fun(*this, &EditorRouteGroups::button_press_event), false);
+	_display.signal_button_press_event().connect (sigc::mem_fun(*this, &EditorRouteGroups::button_press_event), false);
 
 	_display_packer = new VBox;
 	HBox* button_box = manage (new HBox());
@@ -155,8 +155,8 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	w->show();
 	remove_button->add (*w);
 
-	add_button->signal_clicked().connect (hide_return (mem_fun (*this, &EditorRouteGroups::new_route_group)));
-	remove_button->signal_clicked().connect (mem_fun (*this, &EditorRouteGroups::remove_selected));
+	add_button->signal_clicked().connect (hide_return (sigc::mem_fun (*this, &EditorRouteGroups::new_route_group)));
+	remove_button->signal_clicked().connect (sigc::mem_fun (*this, &EditorRouteGroups::remove_selected));
 
 	button_box->pack_start (*add_button);
 	button_box->pack_start (*remove_button);
@@ -175,25 +175,25 @@ EditorRouteGroups::menu (RouteGroup* g)
 
 	Menu* new_from = new Menu;
 	MenuList& f = new_from->items ();
-	f.push_back (MenuElem (_("Selection..."), mem_fun (*this, &EditorRouteGroups::new_from_selection)));
-	f.push_back (MenuElem (_("Record Enabled..."), mem_fun (*this, &EditorRouteGroups::new_from_rec_enabled)));
-	f.push_back (MenuElem (_("Soloed..."), mem_fun (*this, &EditorRouteGroups::new_from_soloed)));
+	f.push_back (MenuElem (_("Selection..."), sigc::mem_fun (*this, &EditorRouteGroups::new_from_selection)));
+	f.push_back (MenuElem (_("Record Enabled..."), sigc::mem_fun (*this, &EditorRouteGroups::new_from_rec_enabled)));
+	f.push_back (MenuElem (_("Soloed..."), sigc::mem_fun (*this, &EditorRouteGroups::new_from_soloed)));
 
 	_menu = new Menu;
 	_menu->set_name ("ArdourContextMenu");
 	MenuList& items = _menu->items();
 
-	items.push_back (MenuElem (_("New..."), hide_return (mem_fun(*this, &EditorRouteGroups::new_route_group))));
+	items.push_back (MenuElem (_("New..."), hide_return (sigc::mem_fun(*this, &EditorRouteGroups::new_route_group))));
 	items.push_back (MenuElem (_("New From"), *new_from));
 	if (g) {
-		items.push_back (MenuElem (_("Edit..."), bind (mem_fun (*this, &EditorRouteGroups::edit), g)));
-		items.push_back (MenuElem (_("Fit to Window"), bind (mem_fun (*_editor, &Editor::fit_route_group), g)));
-		items.push_back (MenuElem (_("Subgroup"), bind (mem_fun (*this, &EditorRouteGroups::subgroup), g)));
-		items.push_back (MenuElem (_("Collect"), bind (mem_fun (*this, &EditorRouteGroups::collect), g)));
+		items.push_back (MenuElem (_("Edit..."), sigc::bind (sigc::mem_fun (*this, &EditorRouteGroups::edit), g)));
+		items.push_back (MenuElem (_("Fit to Window"), sigc::bind (sigc::mem_fun (*_editor, &Editor::fit_route_group), g)));
+		items.push_back (MenuElem (_("Subgroup"), sigc::bind (sigc::mem_fun (*this, &EditorRouteGroups::subgroup), g)));
+		items.push_back (MenuElem (_("Collect"), sigc::bind (sigc::mem_fun (*this, &EditorRouteGroups::collect), g)));
 	}
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Activate All"), mem_fun(*this, &EditorRouteGroups::activate_all)));
-	items.push_back (MenuElem (_("Disable All"), mem_fun(*this, &EditorRouteGroups::disable_all)));
+	items.push_back (MenuElem (_("Activate All"), sigc::mem_fun(*this, &EditorRouteGroups::activate_all)));
+	items.push_back (MenuElem (_("Disable All"), sigc::mem_fun(*this, &EditorRouteGroups::disable_all)));
 
 	return _menu;
 }
@@ -214,7 +214,7 @@ void
 EditorRouteGroups::activate_all ()
 {
 	_session->foreach_route_group (
-		bind (mem_fun (*this, &EditorRouteGroups::set_activation), true)
+		sigc::bind (sigc::mem_fun (*this, &EditorRouteGroups::set_activation), true)
 		);
 }
 
@@ -222,7 +222,7 @@ void
 EditorRouteGroups::disable_all ()
 {
 	_session->foreach_route_group (
-		bind (mem_fun (*this, &EditorRouteGroups::set_activation), false)
+		sigc::bind (sigc::mem_fun (*this, &EditorRouteGroups::set_activation), false)
 		);
 }
 
@@ -551,7 +551,7 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 void
 EditorRouteGroups::add (RouteGroup* group)
 {
-        ENSURE_GUI_THREAD (bind (mem_fun(*this, &EditorRouteGroups::add), group));
+        ENSURE_GUI_THREAD (*this, &EditorRouteGroups::add, group)
 	bool focus = false;
 
 	TreeModel::Row row = *(_model->append());
@@ -575,7 +575,7 @@ EditorRouteGroups::add (RouteGroup* group)
 		focus = true;
 	}
 
-	group->FlagsChanged.connect (bind (mem_fun (*this, &EditorRouteGroups::flags_changed), group));
+	group->FlagsChanged.connect (sigc::bind (sigc::mem_fun (*this, &EditorRouteGroups::flags_changed), group));
 
 	if (focus) {
 		TreeViewColumn* col = _display.get_column (0);
@@ -591,7 +591,7 @@ EditorRouteGroups::add (RouteGroup* group)
 void
 EditorRouteGroups::groups_changed ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &EditorRouteGroups::groups_changed));
+	ENSURE_GUI_THREAD (*this, &EditorRouteGroups::groups_changed)
 
 	/* just rebuild the while thing */
 
@@ -605,13 +605,13 @@ EditorRouteGroups::groups_changed ()
 		row[_columns.routegroup] = 0;
 	}
 
-	_session->foreach_route_group (mem_fun (*this, &EditorRouteGroups::add));
+	_session->foreach_route_group (sigc::mem_fun (*this, &EditorRouteGroups::add));
 }
 
 void
 EditorRouteGroups::flags_changed (void* src, RouteGroup* group)
 {
-        ENSURE_GUI_THREAD (bind (mem_fun(*this, &EditorRouteGroups::flags_changed), src, group));
+        ENSURE_GUI_THREAD (*this, &EditorRouteGroups::flags_changed, src, group)
 
 	_in_row_change = true;
 
@@ -666,8 +666,8 @@ EditorRouteGroups::connect_to_session (Session* s)
 {
 	EditorComponent::connect_to_session (s);
 
-	_session_connections.push_back (_session->route_group_added.connect (mem_fun (*this, &EditorRouteGroups::add)));
-	_session_connections.push_back (_session->route_group_removed.connect (mem_fun (*this, &EditorRouteGroups::groups_changed)));
+	_session_connections.push_back (_session->route_group_added.connect (sigc::mem_fun (*this, &EditorRouteGroups::add)));
+	_session_connections.push_back (_session->route_group_removed.connect (sigc::mem_fun (*this, &EditorRouteGroups::groups_changed)));
 
 	groups_changed ();
 }

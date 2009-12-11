@@ -45,16 +45,16 @@ AutomationController::AutomationController(boost::shared_ptr<AutomationControl> 
 	set_style (BarController::LeftToRight);
 	set_use_parent (true);
 
-	StartGesture.connect (mem_fun(*this, &AutomationController::start_touch));
-	StopGesture.connect (mem_fun(*this, &AutomationController::end_touch));
+	StartGesture.connect (sigc::mem_fun(*this, &AutomationController::start_touch));
+	StopGesture.connect (sigc::mem_fun(*this, &AutomationController::end_touch));
 
 	_adjustment->signal_value_changed().connect (
-			mem_fun(*this, &AutomationController::value_adjusted));
+			sigc::mem_fun(*this, &AutomationController::value_adjusted));
 
 	_screen_update_connection = ARDOUR_UI::RapidScreenUpdate.connect (
-			mem_fun (*this, &AutomationController::display_effective_value));
+			sigc::mem_fun (*this, &AutomationController::display_effective_value));
 
-	ac->Changed.connect (mem_fun(*this, &AutomationController::value_changed));
+	ac->Changed.connect (sigc::mem_fun(*this, &AutomationController::value_changed));
 }
 
 AutomationController::~AutomationController()
@@ -130,7 +130,7 @@ AutomationController::end_touch()
 void
 AutomationController::automation_state_changed ()
 {
-	ENSURE_GUI_THREAD(mem_fun(*this, &AutomationController::automation_state_changed));
+	ENSURE_GUI_THREAD (*this, &AutomationController::automation_state_changed)
 
 	bool x = (_controllable->automation_state() != Off);
 
@@ -140,7 +140,7 @@ AutomationController::automation_state_changed ()
 
 	if (x) {
 		_screen_update_connection = ARDOUR_UI::RapidScreenUpdate.connect (
-				mem_fun (*this, &AutomationController::display_effective_value));
+				sigc::mem_fun (*this, &AutomationController::display_effective_value));
 	}
 }
 
@@ -148,6 +148,6 @@ void
 AutomationController::value_changed ()
 {
 	Gtkmm2ext::UI::instance()->call_slot (
-			mem_fun(*this, &AutomationController::display_effective_value));
+			sigc::mem_fun(*this, &AutomationController::display_effective_value));
 }
 

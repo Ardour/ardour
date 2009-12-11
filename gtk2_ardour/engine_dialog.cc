@@ -122,7 +122,7 @@ EngineControl::EngineControl ()
 	set_popdown_strings (driver_combo, strings);
 	driver_combo.set_active_text (strings.front());
 
-	driver_combo.signal_changed().connect (mem_fun (*this, &EngineControl::driver_changed));
+	driver_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::driver_changed));
 	driver_changed ();
 
 	strings.clear ();
@@ -133,7 +133,7 @@ EngineControl::EngineControl ()
 	set_popdown_strings (audio_mode_combo, strings);
 	audio_mode_combo.set_active_text (strings.front());
 
-	audio_mode_combo.signal_changed().connect (mem_fun (*this, &EngineControl::audio_mode_changed));
+	audio_mode_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::audio_mode_changed));
 	audio_mode_changed ();
 
 	row = 0;
@@ -172,9 +172,9 @@ EngineControl::EngineControl ()
 	basic_packer.attach (latency_label, 1, 2, row, row + 1, FILL|EXPAND, (AttachOptions) 0);
 	row++;
 
-	sample_rate_combo.signal_changed().connect (mem_fun (*this, &EngineControl::redisplay_latency));
-	periods_adjustment.signal_value_changed().connect (mem_fun (*this, &EngineControl::redisplay_latency));
-	period_size_combo.signal_changed().connect (mem_fun (*this, &EngineControl::redisplay_latency));
+	sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::redisplay_latency));
+	periods_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &EngineControl::redisplay_latency));
+	period_size_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::redisplay_latency));
 	redisplay_latency();
 	row++;
 	/* no audio mode with CoreAudio, its duplex or nuthin' */
@@ -198,8 +198,8 @@ EngineControl::EngineControl ()
 		stop_button.set_sensitive (false);
 	}
 
-	start_button.signal_clicked().connect (mem_fun (*this, &EngineControl::start_engine));
-	stop_button.signal_clicked().connect (mem_fun (*this, &EngineControl::start_engine));
+	start_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::start_engine));
+	stop_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::start_engine));
 	*/
 
 	button_box.pack_start (start_button, false, false);
@@ -216,7 +216,7 @@ EngineControl::EngineControl ()
 	++row;
 
 	realtime_button.set_active (true);
-	realtime_button.signal_toggled().connect (mem_fun (*this, &EngineControl::realtime_changed));
+	realtime_button.signal_toggled().connect (sigc::mem_fun (*this, &EngineControl::realtime_changed));
 	realtime_changed ();
 
 #if PROVIDE_TOO_MANY_OPTIONS

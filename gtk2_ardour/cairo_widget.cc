@@ -90,7 +90,7 @@ CairoWidget::on_expose_event (GdkEventExpose *event)
 void
 CairoWidget::set_dirty ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &CairoWidget::set_dirty));
+	ENSURE_GUI_THREAD (*this, &CairoWidget::set_dirty)
 
 	_dirty = true;
 	queue_draw ();

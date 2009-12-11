@@ -42,7 +42,7 @@ MidiPortDialog::MidiPortDialog ()
 
 	get_vbox()->pack_start (hpacker);
 
-	port_name.signal_activate().connect (mem_fun (*this, &MidiPortDialog::entry_activated));
+	port_name.signal_activate().connect (sigc::mem_fun (*this, &MidiPortDialog::entry_activated));
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::ADD, RESPONSE_ACCEPT);

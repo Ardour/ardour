@@ -167,10 +167,10 @@ Editor::create_editor_mixer ()
 	current_mixer_strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(),
 					      *session,
 					      false);
-	current_mixer_strip->Hiding.connect (mem_fun(*this, &Editor::current_mixer_strip_hidden));
-	current_mixer_strip->GoingAway.connect (mem_fun(*this, &Editor::current_mixer_strip_removed));
+	current_mixer_strip->Hiding.connect (sigc::mem_fun(*this, &Editor::current_mixer_strip_hidden));
+	current_mixer_strip->GoingAway.connect (sigc::mem_fun(*this, &Editor::current_mixer_strip_removed));
 #ifdef GTKOSX
-	current_mixer_strip->WidthChanged.connect (mem_fun(*this, &Editor::ensure_all_elements_drawn));
+	current_mixer_strip->WidthChanged.connect (sigc::mem_fun(*this, &Editor::ensure_all_elements_drawn));
 #endif
 	current_mixer_strip->set_embedded (true);
 }

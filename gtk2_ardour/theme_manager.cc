@@ -83,16 +83,16 @@ ThemeManager::ThemeManager()
 	get_vbox()->pack_start (reset_button, PACK_SHRINK);
 	get_vbox()->pack_start (scroller);
 
-	color_display.signal_button_press_event().connect (mem_fun (*this, &ThemeManager::button_press_event), false);
+	color_display.signal_button_press_event().connect (sigc::mem_fun (*this, &ThemeManager::button_press_event), false);
 
 	color_dialog.get_colorsel()->set_has_opacity_control (true);
 	color_dialog.get_colorsel()->set_has_palette (true);
 
-	color_dialog.get_ok_button()->signal_clicked().connect (bind (mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_ACCEPT));
-	color_dialog.get_cancel_button()->signal_clicked().connect (bind (mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_CANCEL));
-	dark_button.signal_toggled().connect (mem_fun (*this, &ThemeManager::on_dark_theme_button_toggled));
-	light_button.signal_toggled().connect (mem_fun (*this, &ThemeManager::on_light_theme_button_toggled));
-	reset_button.signal_clicked().connect (mem_fun (*this, &ThemeManager::reset_canvas_colors));
+	color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_ACCEPT));
+	color_dialog.get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_CANCEL));
+	dark_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_dark_theme_button_toggled));
+	light_button.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_light_theme_button_toggled));
+	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &ThemeManager::reset_canvas_colors));
 
 	set_size_request (-1, 400);
 	setup_theme ();

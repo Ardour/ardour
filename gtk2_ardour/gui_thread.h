@@ -21,10 +21,11 @@
 #define __ardour_gtk_gui_thread_h__
 
 #include <gtkmm2ext/gtk_ui.h>
+#include <boost/bind.hpp>
 
-#define ENSURE_GUI_THREAD(slot) \
+#define ENSURE_GUI_THREAD(obj,method, ...) \
      if (!Gtkmm2ext::UI::instance()->caller_is_self()) { \
-	Gtkmm2ext::UI::instance()->call_slot ((slot));\
+	     Gtkmm2ext::UI::instance()->call_slot (boost::bind ((method), &(obj), ## __VA_ARGS__)); \
         return;\
      }
 

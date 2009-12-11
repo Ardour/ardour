@@ -146,7 +146,7 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	set_name ("AudioRegionEditorWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
-	signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (this)));
+	signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (this)));
 
 	set_title (string_compose (_("Region %1"), _region->name()));
 
@@ -156,7 +156,7 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	bounds_changed (Change (StartChanged|LengthChanged|PositionChanged|Region::SyncOffsetChanged));
 	gain_changed ();
 
-	_region->StateChanged.connect (mem_fun(*this, &AudioRegionEditor::region_changed));
+	_region->StateChanged.connect (sigc::mem_fun(*this, &AudioRegionEditor::region_changed));
 
 	spin_arrow_grab = false;
 
@@ -219,17 +219,17 @@ AudioRegionEditor::breleased (GdkEventButton* /*ev*/, Gtk::SpinButton* /*but*/, 
 void
 AudioRegionEditor::connect_editor_events ()
 {
-	name_entry.signal_changed().connect (mem_fun(*this, &AudioRegionEditor::name_entry_changed));
+	name_entry.signal_changed().connect (sigc::mem_fun(*this, &AudioRegionEditor::name_entry_changed));
 
-	position_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::position_clock_changed));
-	end_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::end_clock_changed));
-	length_clock.ValueChanged.connect (mem_fun(*this, &AudioRegionEditor::length_clock_changed));
-	sync_offset_absolute_clock.ValueChanged.connect (mem_fun (*this, &AudioRegionEditor::sync_offset_absolute_clock_changed));
-	sync_offset_relative_clock.ValueChanged.connect (mem_fun (*this, &AudioRegionEditor::sync_offset_relative_clock_changed));
-	gain_adjustment.signal_value_changed().connect (mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
+	position_clock.ValueChanged.connect (sigc::mem_fun(*this, &AudioRegionEditor::position_clock_changed));
+	end_clock.ValueChanged.connect (sigc::mem_fun(*this, &AudioRegionEditor::end_clock_changed));
+	length_clock.ValueChanged.connect (sigc::mem_fun(*this, &AudioRegionEditor::length_clock_changed));
+	sync_offset_absolute_clock.ValueChanged.connect (sigc::mem_fun (*this, &AudioRegionEditor::sync_offset_absolute_clock_changed));
+	sync_offset_relative_clock.ValueChanged.connect (sigc::mem_fun (*this, &AudioRegionEditor::sync_offset_relative_clock_changed));
+	gain_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
 
-	audition_button.signal_toggled().connect (mem_fun(*this, &AudioRegionEditor::audition_button_toggled));
-	_session.AuditionActive.connect (mem_fun(*this, &AudioRegionEditor::audition_state_changed));
+	audition_button.signal_toggled().connect (sigc::mem_fun(*this, &AudioRegionEditor::audition_button_toggled));
+	_session.AuditionActive.connect (sigc::mem_fun(*this, &AudioRegionEditor::audition_state_changed));
 }
 
 void
@@ -376,7 +376,7 @@ AudioRegionEditor::name_entry_changed ()
 void
 AudioRegionEditor::audition_state_changed (bool yn)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &AudioRegionEditor::audition_state_changed), yn));
+	ENSURE_GUI_THREAD (*this, &AudioRegionEditor::audition_state_changed, yn)
 
 	if (!yn) {
 		audition_button.set_active (false);

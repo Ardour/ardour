@@ -181,8 +181,8 @@ main (int argc, char* argv[])
 	displayA.signal_object_drop.connect (ptr_fun (object_drop));
 
 	displayA.get_selection()->set_mode (SELECTION_MULTIPLE);
-	displayA.get_selection()->set_select_function (bind (ptr_fun (selection_filter), &columns));
-	displayA.get_selection()->signal_changed().connect (bind (ptr_fun (selection_changed), modelA, &displayA, &columns));
+	displayA.get_selection()->set_select_function (sigc::bind (ptr_fun (selection_filter), &columns));
+	displayA.get_selection()->signal_changed().connect (sigc::bind (ptr_fun (selection_changed), modelA, &displayA, &columns));
 
 	displayB.set_model (modelB);
 	displayB.append_column ("Use", columns.used);
@@ -192,8 +192,8 @@ main (int argc, char* argv[])
 	displayB.signal_object_drop.connect (ptr_fun (object_drop));
 
 	displayB.get_selection()->set_mode (SELECTION_MULTIPLE);
-	displayB.get_selection()->set_select_function (bind (ptr_fun (selection_filter), &columns));
-	displayB.get_selection()->signal_changed().connect (bind (ptr_fun (selection_changed), modelB, &displayB, &columns));
+	displayB.get_selection()->set_select_function (sigc::bind (ptr_fun (selection_filter), &columns));
+	displayB.get_selection()->signal_changed().connect (sigc::bind (ptr_fun (selection_changed), modelB, &displayB, &columns));
 
 	scrollerA.add (displayA);
 	scrollerB.add (displayB);
@@ -208,8 +208,8 @@ main (int argc, char* argv[])
 	win.set_size_request (500, 400);
 	win.show_all ();
 
-	rescan.signal_clicked().connect (bind (ptr_fun (fill_it), modelA, &displayA, &columns));
-	rescan.signal_clicked().connect (bind (ptr_fun (fill_it), modelB, &displayB, &columns));
+	rescan.signal_clicked().connect (sigc::bind (ptr_fun (fill_it), modelA, &displayA, &columns));
+	rescan.signal_clicked().connect (sigc::bind (ptr_fun (fill_it), modelB, &displayB, &columns));
 
 	fill_it (modelA, &displayA, &columns);
 	fill_it (modelB, &displayB, &columns);

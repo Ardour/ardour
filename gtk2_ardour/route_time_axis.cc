@@ -156,17 +156,17 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	hide_button.add (*(manage (new Image (::get_icon("hide")))));
 	hide_button.show_all ();
 
- 	route_group_button.signal_button_release_event().connect (mem_fun(*this, &RouteTimeAxisView::edit_click), false);
-	playlist_button.signal_clicked().connect (mem_fun(*this, &RouteTimeAxisView::playlist_click));
-	automation_button.signal_clicked().connect (mem_fun(*this, &RouteTimeAxisView::automation_click));
-	size_button.signal_button_release_event().connect (mem_fun(*this, &RouteTimeAxisView::size_click), false);
-	visual_button.signal_clicked().connect (mem_fun(*this, &RouteTimeAxisView::visual_click));
-	hide_button.signal_clicked().connect (mem_fun(*this, &RouteTimeAxisView::hide_click));
+ 	route_group_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::edit_click), false);
+	playlist_button.signal_clicked().connect (sigc::mem_fun(*this, &RouteTimeAxisView::playlist_click));
+	automation_button.signal_clicked().connect (sigc::mem_fun(*this, &RouteTimeAxisView::automation_click));
+	size_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::size_click), false);
+	visual_button.signal_clicked().connect (sigc::mem_fun(*this, &RouteTimeAxisView::visual_click));
+	hide_button.signal_clicked().connect (sigc::mem_fun(*this, &RouteTimeAxisView::hide_click));
 
-	solo_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::solo_press), false);
-	solo_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::solo_release), false);
-	mute_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::mute_press), false);
-	mute_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::mute_release), false);
+	solo_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::solo_press), false);
+	solo_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::solo_release), false);
+	mute_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::mute_press), false);
+	mute_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::mute_release), false);
 
 	if (is_track()) {
 
@@ -185,8 +185,8 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 		}
 		rec_enable_button->show_all ();
 
-		rec_enable_button->signal_button_press_event().connect (mem_fun(*this, &RouteUI::rec_enable_press), false);
-		rec_enable_button->signal_button_release_event().connect (mem_fun(*this, &RouteUI::rec_enable_release), false);
+		rec_enable_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_press), false);
+		rec_enable_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_release), false);
 		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 		ARDOUR_UI::instance()->tooltips().set_tip(*rec_enable_button, _("Record"));
 
@@ -194,9 +194,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	}
 
 	controls_hbox.pack_start(gm.get_level_meter(), false, false);
-	_route->meter_change.connect (mem_fun(*this, &RouteTimeAxisView::meter_changed));
-	_route->input()->changed.connect (mem_fun(*this, &RouteTimeAxisView::io_changed));
-	_route->output()->changed.connect (mem_fun(*this, &RouteTimeAxisView::io_changed));
+	_route->meter_change.connect (sigc::mem_fun(*this, &RouteTimeAxisView::meter_changed));
+	_route->input()->changed.connect (sigc::mem_fun(*this, &RouteTimeAxisView::io_changed));
+	_route->output()->changed.connect (sigc::mem_fun(*this, &RouteTimeAxisView::io_changed));
 
 	controls_table.attach (*mute_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	controls_table.attach (*solo_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
@@ -235,36 +235,36 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 	_y_position = -1;
 
-	_route->mute_changed.connect (mem_fun(*this, &RouteUI::mute_changed));
-	_route->solo_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
-	_route->processors_changed.connect (mem_fun(*this, &RouteTimeAxisView::processors_changed));
-	_route->NameChanged.connect (mem_fun(*this, &RouteTimeAxisView::route_name_changed));
-	_route->solo_isolated_changed.connect (mem_fun(*this, &RouteUI::solo_changed));
+	_route->mute_changed.connect (sigc::mem_fun(*this, &RouteUI::mute_changed));
+	_route->solo_changed.connect (sigc::mem_fun(*this, &RouteUI::solo_changed));
+	_route->processors_changed.connect (sigc::mem_fun(*this, &RouteTimeAxisView::processors_changed));
+	_route->NameChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::route_name_changed));
+	_route->solo_isolated_changed.connect (sigc::mem_fun(*this, &RouteUI::solo_changed));
 
 
 	if (is_track()) {
 
-		track()->TrackModeChanged.connect (mem_fun(*this, &RouteTimeAxisView::track_mode_changed));
-		track()->FreezeChange.connect (mem_fun(*this, &RouteTimeAxisView::map_frozen));
-		track()->DiskstreamChanged.connect (mem_fun(*this, &RouteTimeAxisView::diskstream_changed));
-		get_diskstream()->SpeedChanged.connect (mem_fun(*this, &RouteTimeAxisView::speed_changed));
+		track()->TrackModeChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::track_mode_changed));
+		track()->FreezeChange.connect (sigc::mem_fun(*this, &RouteTimeAxisView::map_frozen));
+		track()->DiskstreamChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::diskstream_changed));
+		get_diskstream()->SpeedChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::speed_changed));
 
 		/* pick up the correct freeze state */
 		map_frozen ();
 
 	}
 
-	_editor.ZoomChanged.connect (mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
-	ColorsChanged.connect (mem_fun (*this, &RouteTimeAxisView::color_handler));
+	_editor.ZoomChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
+	ColorsChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::color_handler));
 
 	route_group_menu = new RouteGroupMenu (
 		_session,
 		(RouteGroup::Property) (RouteGroup::Mute | RouteGroup::Solo | RouteGroup::Edit)
 		);
 
-	route_group_menu->GroupSelected.connect (mem_fun (*this, &RouteTimeAxisView::set_route_group_from_menu));
+	route_group_menu->GroupSelected.connect (sigc::mem_fun (*this, &RouteTimeAxisView::set_route_group_from_menu));
 
-	gm.get_gain_slider().signal_scroll_event().connect(mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
+	gm.get_gain_slider().signal_scroll_event().connect(sigc::mem_fun(*this, &RouteTimeAxisView::controls_ebox_scroll), false);
 	gm.get_gain_slider().set_name ("TrackGainFader");
 }
 
@@ -302,8 +302,8 @@ RouteTimeAxisView::post_construct ()
 	update_diskstream_display ();
 
 	subplugin_menu.items().clear ();
-	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
-	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
+	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
+	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
 	reset_processor_automation_curves ();
 }
 
@@ -431,13 +431,13 @@ RouteTimeAxisView::build_automation_action_menu ()
 	automation_action_menu->set_name ("ArdourContextMenu");
 
 	automation_items.push_back (MenuElem (_("Show all automation"),
-					      mem_fun(*this, &RouteTimeAxisView::show_all_automation)));
+					      sigc::mem_fun(*this, &RouteTimeAxisView::show_all_automation)));
 
 	automation_items.push_back (MenuElem (_("Show existing automation"),
-					      mem_fun(*this, &RouteTimeAxisView::show_existing_automation)));
+					      sigc::mem_fun(*this, &RouteTimeAxisView::show_existing_automation)));
 
 	automation_items.push_back (MenuElem (_("Hide all automation"),
-					      mem_fun(*this, &RouteTimeAxisView::hide_all_automation)));
+					      sigc::mem_fun(*this, &RouteTimeAxisView::hide_all_automation)));
 
 	if (subplugin_menu.get_attach_widget())
 		subplugin_menu.detach();
@@ -453,7 +453,7 @@ RouteTimeAxisView::build_automation_action_menu ()
 		delete i->second->menu_item;
 
 		automation_items.push_back(CheckMenuElem (_route->describe_parameter(i->second->param),
-				bind (mem_fun(*this, &RouteTimeAxisView::toggle_automation_track), i->second->param)));
+				sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::toggle_automation_track), i->second->param)));
 
 		i->second->menu_item = static_cast<Gtk::CheckMenuItem*>(&automation_items.back());
 
@@ -481,12 +481,12 @@ RouteTimeAxisView::build_display_menu ()
 	display_menu->set_name ("ArdourContextMenu");
 
 	items.push_back (MenuElem (_("Height"), *size_menu));
-	items.push_back (MenuElem (_("Color"), mem_fun(*this, &RouteTimeAxisView::select_track_color)));
+	items.push_back (MenuElem (_("Color"), sigc::mem_fun(*this, &RouteTimeAxisView::select_track_color)));
 
 	items.push_back (SeparatorElem());
 
 	if (!Profile->get_sae()) {
-		items.push_back (MenuElem (_("Remote Control ID..."), mem_fun (*this, &RouteUI::open_remote_control_id_dialog)));
+		items.push_back (MenuElem (_("Remote Control ID..."), sigc::mem_fun (*this, &RouteUI::open_remote_control_id_dialog)));
 		/* rebuild this every time */
 		build_automation_action_menu ();
 		items.push_back (MenuElem (_("Automation"), *automation_action_menu));
@@ -506,9 +506,9 @@ RouteTimeAxisView::build_display_menu ()
 		RadioMenuItem::Group layers_group;
 
 		layers_items.push_back(RadioMenuElem (layers_group, _("Overlaid"),
-				bind (mem_fun (*this, &RouteTimeAxisView::set_layer_display), Overlaid)));
+				sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_layer_display), Overlaid)));
 		layers_items.push_back(RadioMenuElem (layers_group, _("Stacked"),
-				bind (mem_fun (*this, &RouteTimeAxisView::set_layer_display), Stacked)));
+				sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_layer_display), Stacked)));
 
 		items.push_back (MenuElem (_("Layers"), *layers_menu));
 
@@ -519,13 +519,13 @@ RouteTimeAxisView::build_display_menu ()
 		RadioMenuItem::Group align_group;
 
 		alignment_items.push_back (RadioMenuElem (align_group, _("Align with existing material"),
-					bind (mem_fun(*this, &RouteTimeAxisView::set_align_style), ExistingMaterial)));
+					sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_style), ExistingMaterial)));
 		align_existing_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
 		if (get_diskstream()->alignment_style() == ExistingMaterial)
 			align_existing_item->set_active();
 
 		alignment_items.push_back (RadioMenuElem (align_group, _("Align with capture time"),
-					bind (mem_fun(*this, &RouteTimeAxisView::set_align_style), CaptureTime)));
+					sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_style), CaptureTime)));
 		align_capture_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
 		if (get_diskstream()->alignment_style() == CaptureTime)
 			align_capture_item->set_active();
@@ -533,21 +533,21 @@ RouteTimeAxisView::build_display_menu ()
 		if (!Profile->get_sae()) {
 			items.push_back (MenuElem (_("Alignment"), *alignment_menu));
 			get_diskstream()->AlignmentStyleChanged.connect (
-					mem_fun(*this, &RouteTimeAxisView::align_style_changed));
+					sigc::mem_fun(*this, &RouteTimeAxisView::align_style_changed));
 
 			RadioMenuItem::Group mode_group;
-			items.push_back (RadioMenuElem (mode_group, _("Normal mode"), bind (
-					mem_fun (*this, &RouteTimeAxisView::set_track_mode),
+			items.push_back (RadioMenuElem (mode_group, _("Normal mode"), sigc::bind (
+					sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode),
 					ARDOUR::Normal)));
 			normal_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 
-			items.push_back (RadioMenuElem (mode_group, _("Tape mode"), bind (
-					mem_fun (*this, &RouteTimeAxisView::set_track_mode),
+			items.push_back (RadioMenuElem (mode_group, _("Tape mode"), sigc::bind (
+					sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode),
 					ARDOUR::Destructive)));
 			destructive_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 
  			items.push_back (RadioMenuElem (mode_group, _("No layering mode"),
- 							bind (mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::NonLayered)));
+ 							sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::NonLayered)));
  			non_layered_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 
 
@@ -566,7 +566,7 @@ RouteTimeAxisView::build_display_menu ()
 		}
 
 		get_diskstream()->AlignmentStyleChanged.connect (
-				mem_fun(*this, &RouteTimeAxisView::align_style_changed));
+				sigc::mem_fun(*this, &RouteTimeAxisView::align_style_changed));
 
 		mode_menu = build_mode_menu();
 		if (mode_menu)
@@ -579,17 +579,17 @@ RouteTimeAxisView::build_display_menu ()
 		items.push_back (SeparatorElem());
 	}
 
-	items.push_back (CheckMenuElem (_("Active"), mem_fun(*this, &RouteUI::toggle_route_active)));
+	items.push_back (CheckMenuElem (_("Active"), sigc::mem_fun(*this, &RouteUI::toggle_route_active)));
 	route_active_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
 	route_active_menu_item->set_active (_route->active());
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Hide"), mem_fun(*this, &RouteTimeAxisView::hide_click)));
+	items.push_back (MenuElem (_("Hide"), sigc::mem_fun(*this, &RouteTimeAxisView::hide_click)));
 	if (!Profile->get_sae()) {
-		items.push_back (MenuElem (_("Remove"), mem_fun(*this, &RouteUI::remove_this_route)));
+		items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &RouteUI::remove_this_route)));
 	} else {
 		items.push_front (SeparatorElem());
-		items.push_front (MenuElem (_("Delete"), mem_fun(*this, &RouteUI::remove_this_route)));
+		items.push_front (MenuElem (_("Delete"), sigc::mem_fun(*this, &RouteUI::remove_this_route)));
 	}
 }
 
@@ -643,7 +643,7 @@ RouteTimeAxisView::_set_track_mode (Track* track, TrackMode mode, RadioMenuItem*
 
 		if (!needs_bounce) {
 			/* cannot be done */
-			Glib::signal_idle().connect (bind (sigc::ptr_fun (__reset_item), reset_item, reset_item_2));
+			Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (__reset_item), reset_item, reset_item_2));
 			return;
 		} else {
 			cerr << "would bounce this one\n";
@@ -1144,13 +1144,13 @@ RouteTimeAxisView::clear_playlist ()
 void
 RouteTimeAxisView::speed_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
+	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
 }
 
 void
 RouteTimeAxisView::diskstream_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (mem_fun(*this, &RouteTimeAxisView::update_diskstream_display));
+	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun(*this, &RouteTimeAxisView::update_diskstream_display));
 }
 
 void
@@ -1510,14 +1510,14 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 
 		if ((*i)->get_orig_diskstream_id() == ds->id()) {
-			playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name(), bind (mem_fun (*this, &RouteTimeAxisView::use_playlist),
+			playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name(), sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::use_playlist),
 												     boost::weak_ptr<Playlist> (*i))));
 
 			if (ds->playlist()->id() == (*i)->id()) {
 				static_cast<RadioMenuItem*>(&playlist_items.back())->set_active();
 			}
 		} else if (ds->playlist()->id() == (*i)->id()) {
-			playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name(), bind (mem_fun (*this, &RouteTimeAxisView::use_playlist),
+			playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name(), sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::use_playlist),
 												     boost::weak_ptr<Playlist>(*i))));
 			static_cast<RadioMenuItem*>(&playlist_items.back())->set_active();
 
@@ -1525,25 +1525,25 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	}
 
 	playlist_items.push_back (SeparatorElem());
-	playlist_items.push_back (MenuElem (_("Rename"), mem_fun(*this, &RouteTimeAxisView::rename_current_playlist)));
+	playlist_items.push_back (MenuElem (_("Rename"), sigc::mem_fun(*this, &RouteTimeAxisView::rename_current_playlist)));
 	playlist_items.push_back (SeparatorElem());
 
 	if (!route_group() || !route_group()->is_active()) {
-		playlist_items.push_back (MenuElem (_("New"), bind(mem_fun(_editor, &PublicEditor::new_playlists), this)));
-		playlist_items.push_back (MenuElem (_("New Copy"), bind(mem_fun(_editor, &PublicEditor::copy_playlists), this)));
+		playlist_items.push_back (MenuElem (_("New"), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::new_playlists), this)));
+		playlist_items.push_back (MenuElem (_("New Copy"), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::copy_playlists), this)));
 
 	} else {
 		// Use a label which tells the user what is happening
-		playlist_items.push_back (MenuElem (_("New Take"), bind(mem_fun(_editor, &PublicEditor::new_playlists), this)));
-		playlist_items.push_back (MenuElem (_("Copy Take"), bind(mem_fun(_editor, &PublicEditor::copy_playlists), this)));
+		playlist_items.push_back (MenuElem (_("New Take"), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::new_playlists), this)));
+		playlist_items.push_back (MenuElem (_("Copy Take"), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::copy_playlists), this)));
 
 	}
 
 	playlist_items.push_back (SeparatorElem());
-	playlist_items.push_back (MenuElem (_("Clear Current"), bind(mem_fun(_editor, &PublicEditor::clear_playlists), this)));
+	playlist_items.push_back (MenuElem (_("Clear Current"), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::clear_playlists), this)));
 	playlist_items.push_back (SeparatorElem());
 
-	playlist_items.push_back (MenuElem(_("Select from all ..."), mem_fun(*this, &RouteTimeAxisView::show_playlist_selector)));
+	playlist_items.push_back (MenuElem(_("Select from all ..."), sigc::mem_fun(*this, &RouteTimeAxisView::show_playlist_selector)));
 }
 
 void
@@ -1621,7 +1621,7 @@ RouteTimeAxisView::map_frozen ()
 		return;
 	}
 
-	ENSURE_GUI_THREAD (mem_fun(*this, &RouteTimeAxisView::map_frozen));
+	ENSURE_GUI_THREAD (*this, &RouteTimeAxisView::map_frozen)
 
 	switch (track()->freeze_state()) {
 	case Track::Frozen:
@@ -1908,7 +1908,7 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 			new AutomationTimeAxisView (_session, _route, processor, control,
 				_editor, *this, false, parent_canvas, name, state_name));
 
-	pan->view->Hiding.connect (bind (mem_fun(*this, &RouteTimeAxisView::processor_automation_track_hidden), pan, processor));
+	pan->view->Hiding.connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::processor_automation_track_hidden), pan, processor));
 
 	if (!pan->view->marked_for_display()) {
 		pan->view->hide ();
@@ -1919,7 +1919,7 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 	add_child (pan->view);
 
 	if (_view) {
-		_view->foreach_regionview (mem_fun(*pan->view.get(), &TimeAxisView::add_ghost));
+		_view->foreach_regionview (sigc::mem_fun(*pan->view.get(), &TimeAxisView::add_ghost));
 	}
 
 	processor->mark_automation_visible (what, true);
@@ -1970,7 +1970,7 @@ RouteTimeAxisView::add_automation_child(Evoral::Parameter param, boost::shared_p
 
 	add_child (track);
 
-	track->Hiding.connect (bind (mem_fun (*this, &RouteTimeAxisView::automation_track_hidden), param));
+	track->Hiding.connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::automation_track_hidden), param));
 
 	bool hideit = (!show);
 
@@ -2076,7 +2076,7 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 
 		}
 
-		mitem->signal_toggled().connect (bind (mem_fun(*this, &RouteTimeAxisView::processor_menu_item_toggled), rai, pan));
+		mitem->signal_toggled().connect (sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::processor_menu_item_toggled), rai, pan));
 	}
 
 	/* add the menu for this processor, because the subplugin
@@ -2142,8 +2142,8 @@ RouteTimeAxisView::processors_changed (RouteProcessorChange c)
 
 	subplugin_menu.items().clear ();
 
-	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
-	_route->foreach_processor (mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
+	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
+	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
 
 	bool deleted_processor_automation = false;
 
@@ -2271,7 +2271,7 @@ RouteTimeAxisView::clear_meter ()
 void
 RouteTimeAxisView::meter_changed (void *src)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &RouteTimeAxisView::meter_changed), src));
+	ENSURE_GUI_THREAD (*this, &RouteTimeAxisView::meter_changed, src)
 	reset_meter();
 }
 
@@ -2295,7 +2295,7 @@ RouteTimeAxisView::build_underlay_menu(Gtk::Menu* parent_menu) {
 
 		for(UnderlayList::iterator it = _underlay_streams.begin(); it != _underlay_streams.end(); ++it) {
 			gs_items.push_back(MenuElem(string_compose(_("Remove \"%1\""), (*it)->trackview().name()),
-						    bind(mem_fun(*this, &RouteTimeAxisView::remove_underlay), *it)));
+						    sigc::bind(sigc::mem_fun(*this, &RouteTimeAxisView::remove_underlay), *it)));
 		}
 	}
 }
@@ -2351,7 +2351,7 @@ RouteTimeAxisView::add_underlay(StreamView* v, bool update_xml)
 		_underlay_streams.push_back(v);
 		other._underlay_mirrors.push_back(this);
 
-		v->foreach_regionview(mem_fun(*this, &RouteTimeAxisView::add_ghost));
+		v->foreach_regionview(sigc::mem_fun(*this, &RouteTimeAxisView::add_ghost));
 
 		if(update_xml) {
 			if(!underlay_xml_node) {
@@ -2384,7 +2384,7 @@ RouteTimeAxisView::remove_underlay(StreamView* v)
 			/*NOTREACHED*/
 		}
 
-		v->foreach_regionview(mem_fun(*this, &RouteTimeAxisView::remove_ghost));
+		v->foreach_regionview(sigc::mem_fun(*this, &RouteTimeAxisView::remove_ghost));
 
 		_underlay_streams.erase(it);
 		other._underlay_mirrors.erase(gm);

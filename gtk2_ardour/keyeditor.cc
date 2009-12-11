@@ -49,7 +49,7 @@ KeyEditor::KeyEditor ()
 	view.set_rules_hint (true);
 	view.set_name (X_("KeyEditorTree"));
 
-	view.get_selection()->signal_changed().connect (mem_fun (*this, &KeyEditor::action_selected));
+	view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &KeyEditor::action_selected));
 
 	scroller.add (view);
 	scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -65,7 +65,7 @@ KeyEditor::KeyEditor ()
 		unbind_box.set_spacing (6);
 		unbind_box.pack_start (*hint, false, true);
 		unbind_box.pack_start (unbind_button, false, false);
-		unbind_button.signal_clicked().connect (mem_fun (*this, &KeyEditor::unbind));
+		unbind_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::unbind));
 
 		get_vbox()->pack_start (unbind_box, false, false);
 		unbind_box.show ();

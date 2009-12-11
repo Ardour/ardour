@@ -107,7 +107,7 @@ LV2PluginUI::start_updating(GdkEventAny*)
 	if (!_output_ports.empty()) {
 		_screen_update_connection.disconnect();
 		_screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect
-			(mem_fun(*this, &LV2PluginUI::output_update));
+			(sigc::mem_fun(*this, &LV2PluginUI::output_update));
 	}
 	return false;
 }
@@ -227,7 +227,7 @@ LV2PluginUI::lv2ui_instantiate(const Glib::ustring& title)
 		}
 	}
 
-	_lv2->ParameterChanged.connect(mem_fun(*this, &LV2PluginUI::parameter_changed));
+	_lv2->ParameterChanged.connect(sigc::mem_fun(*this, &LV2PluginUI::parameter_changed));
 }
 
 LV2PluginUI::~LV2PluginUI ()
@@ -262,9 +262,9 @@ LV2PluginUI::package (Gtk::Window& win)
 		_win_ptr = &win;
 	} else {
 		/* forward configure events to plugin window */
-		win.signal_configure_event().connect (mem_fun (*this, &LV2PluginUI::configure_handler));
-		win.signal_map_event().connect (mem_fun (*this, &LV2PluginUI::start_updating));
-		win.signal_unmap_event().connect (mem_fun (*this, &LV2PluginUI::stop_updating));
+		win.signal_configure_event().connect (sigc::mem_fun (*this, &LV2PluginUI::configure_handler));
+		win.signal_map_event().connect (sigc::mem_fun (*this, &LV2PluginUI::start_updating));
+		win.signal_unmap_event().connect (sigc::mem_fun (*this, &LV2PluginUI::stop_updating));
 	}
 	return 0;
 }
@@ -301,7 +301,7 @@ LV2PluginUI::on_window_show(const Glib::ustring& title)
 		LV2_EXTERNAL_UI_SHOW(_external_ui_ptr);
 		_screen_update_connection.disconnect();
 		_screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect
-			(mem_fun(*this, &LV2PluginUI::output_update));
+			(sigc::mem_fun(*this, &LV2PluginUI::output_update));
 		return false;
 	}
 

@@ -113,16 +113,6 @@ sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
 sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
 sigc::signal<void,nframes_t, bool, nframes_t> ARDOUR_UI::Clock;
 
-void gui_rt_cleanup (SessionEvent* ev) 
-{
-	/* a little helper function that makes sure we delete queued SessionEvents in the correct thread */
-	ENSURE_GUI_THREAD (bind (sigc::ptr_fun (&gui_rt_cleanup), ev));
-	delete ev;
-}
-
-/* wrap the above as a slot so that we can pass it to the session when queuing RT events */
-const sigc::slot<void,SessionEvent*> gui_rt_cleanup_slot (sigc::ptr_fun (&gui_rt_cleanup));
-
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	: Gtkmm2ext::UI (X_("gui"), argcp, argvp),
@@ -246,20 +236,20 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	last_shuttle_request = last_peak_grab = 0; //  get_microseconds();
 
-	ARDOUR::Diskstream::DiskOverrun.connect (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
-	ARDOUR::Diskstream::DiskUnderrun.connect (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
+	ARDOUR::Diskstream::DiskOverrun.connect (sigc::mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
+	ARDOUR::Diskstream::DiskUnderrun.connect (sigc::mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
 
 	/* handle dialog requests */
 
-	ARDOUR::Session::Dialog.connect (mem_fun(*this, &ARDOUR_UI::session_dialog));
+	ARDOUR::Session::Dialog.connect (sigc::mem_fun(*this, &ARDOUR_UI::session_dialog));
 
 	/* handle pending state with a dialog */
 
-	ARDOUR::Session::AskAboutPendingState.connect (mem_fun(*this, &ARDOUR_UI::pending_state_dialog));
+	ARDOUR::Session::AskAboutPendingState.connect (sigc::mem_fun(*this, &ARDOUR_UI::pending_state_dialog));
 
 	/* handle sr mismatch with a dialog */
 
-	ARDOUR::Session::AskAboutSampleRateMismatch.connect (mem_fun(*this, &ARDOUR_UI::sr_mismatch_dialog));
+	ARDOUR::Session::AskAboutSampleRateMismatch.connect (sigc::mem_fun(*this, &ARDOUR_UI::sr_mismatch_dialog));
 
 	/* lets get this party started */
 
@@ -293,8 +283,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	reset_dpi();
 
-	starting.connect (mem_fun(*this, &ARDOUR_UI::startup));
-	stopping.connect (mem_fun(*this, &ARDOUR_UI::shutdown));
+	starting.connect (sigc::mem_fun(*this, &ARDOUR_UI::startup));
+	stopping.connect (sigc::mem_fun(*this, &ARDOUR_UI::shutdown));
 
 	platform_setup ();
 }
@@ -341,10 +331,10 @@ ARDOUR_UI::create_engine ()
 		return -1;
 	}
 
-	engine->Stopped.connect (mem_fun(*this, &ARDOUR_UI::engine_stopped));
-	engine->Running.connect (mem_fun(*this, &ARDOUR_UI::engine_running));
-	engine->Halted.connect (mem_fun(*this, &ARDOUR_UI::engine_halted));
-	engine->SampleRateChanged.connect (mem_fun(*this, &ARDOUR_UI::update_sample_rate));
+	engine->Stopped.connect (sigc::mem_fun(*this, &ARDOUR_UI::engine_stopped));
+	engine->Running.connect (sigc::mem_fun(*this, &ARDOUR_UI::engine_running));
+	engine->Halted.connect (sigc::mem_fun(*this, &ARDOUR_UI::engine_halted));
+	engine->SampleRateChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::update_sample_rate));
 
 	post_engine ();
 
@@ -412,15 +402,15 @@ ARDOUR_UI::post_engine ()
 #ifndef GTKOSX
 	/* OS X provides an always visible wallclock, so don't be stupid */
 	update_wall_clock ();
-	Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::update_wall_clock), 60000);
+	Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::update_wall_clock), 60000);
 #endif
 
 	update_disk_space ();
 	update_cpu_load ();
 	update_sample_rate (engine->frame_rate());
 
-	Config->ParameterChanged.connect (mem_fun (*this, &ARDOUR_UI::parameter_changed));
-	Config->map_parameters (mem_fun (*this, &ARDOUR_UI::parameter_changed));
+	Config->ParameterChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
+	Config->map_parameters (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
 
 	/* now start and maybe save state */
 
@@ -479,7 +469,7 @@ ARDOUR_UI::configure_handler (GdkEventConfigure* /*conf*/)
 	if (have_configure_timeout) {
 		last_configure_time = get_microseconds();
 	} else {
-		Glib::signal_timeout().connect (mem_fun(*this, &ARDOUR_UI::configure_timeout), 100);
+		Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::configure_timeout), 100);
 		have_configure_timeout = true;
 	}
 
@@ -602,14 +592,14 @@ ARDOUR_UI::autosave_session ()
 void
 ARDOUR_UI::update_autosave ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &ARDOUR_UI::update_autosave));
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::update_autosave)
 
 	if (session && session->dirty()) {
 		if (_autosave_connection.connected()) {
 			_autosave_connection.disconnect();
 		}
 
-		_autosave_connection = Glib::signal_timeout().connect (mem_fun (*this, &ARDOUR_UI::autosave_session),
+		_autosave_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &ARDOUR_UI::autosave_session),
 				Config->get_periodic_safety_backup_interval() * 1000);
 
 	} else {
@@ -741,7 +731,7 @@ ARDOUR_UI::check_memory_locking ()
 				HBox hbox;
 				CheckButton cb (_("Do not show this window again"));
 
-				cb.signal_toggled().connect (mem_fun (*this, &ARDOUR_UI::no_memory_warning));
+				cb.signal_toggled().connect (sigc::mem_fun (*this, &ARDOUR_UI::no_memory_warning));
 
 				hbox.pack_start (cb, true, false);
 				vbox->pack_start (hbox);
@@ -913,7 +903,7 @@ ARDOUR_UI::update_sample_rate (nframes_t ignored)
 {
 	char buf[32];
 
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::update_sample_rate), ignored));
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::update_sample_rate, ignored)
 
 	if (!engine->connected()) {
 
@@ -1141,7 +1131,7 @@ ARDOUR_UI::build_session_selector ()
 	recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
 	recent_session_display.set_headers_visible (false);
 	recent_session_display.get_selection()->set_mode (SELECTION_BROWSE);
-	recent_session_display.signal_row_activated().connect (mem_fun (*this, &ARDOUR_UI::recent_session_row_activated));
+	recent_session_display.signal_row_activated().connect (sigc::mem_fun (*this, &ARDOUR_UI::recent_session_row_activated));
 
 	scroller->add (recent_session_display);
 	scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -1749,7 +1739,7 @@ ARDOUR_UI::toggle_record_enable (uint32_t dstream)
 void
 ARDOUR_UI::map_transport_state ()
 {
-	ENSURE_GUI_THREAD(mem_fun (*this, &ARDOUR_UI::map_transport_state));
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::map_transport_state)
 
 	if (!session) {
 		auto_loop_button.set_visual_state (0);
@@ -1806,7 +1796,7 @@ ARDOUR_UI::map_transport_state ()
 void
 ARDOUR_UI::engine_stopped ()
 {
-	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::engine_stopped));
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::engine_stopped)
 	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, true);
 }
@@ -1814,7 +1804,7 @@ ARDOUR_UI::engine_stopped ()
 void
 ARDOUR_UI::engine_running ()
 {
-	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::engine_running));
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::engine_running)
 	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, true);
 	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, false);
 
@@ -1865,7 +1855,7 @@ ARDOUR_UI::engine_running ()
 void
 ARDOUR_UI::engine_halted ()
 {
-	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::engine_halted));
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::engine_halted)
 
 	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, true);
@@ -1917,7 +1907,7 @@ ARDOUR_UI::update_clocks ()
 void
 ARDOUR_UI::start_clocking ()
 {
-	clock_signal_connection = RapidScreenUpdate.connect (mem_fun(*this, &ARDOUR_UI::update_clocks));
+	clock_signal_connection = RapidScreenUpdate.connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
 }
 
 void
@@ -2691,7 +2681,7 @@ ARDOUR_UI::show_about ()
 {
 	if (about == 0) {
 		about = new About;
-		about->signal_response().connect(mem_fun (*this, &ARDOUR_UI::about_signal_response) );
+		about->signal_response().connect(sigc::mem_fun (*this, &ARDOUR_UI::about_signal_response) );
 	}
 
 	about->show_all ();
@@ -3112,7 +3102,7 @@ ARDOUR_UI::xrun_handler(nframes_t where)
 		return;
 	}
 
-	ENSURE_GUI_THREAD (bind(mem_fun(*this, &ARDOUR_UI::xrun_handler), where));
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::xrun_handler, where)
 
 	if (session && Config->get_create_xrun_marker() && session->actively_recording()) {
 		create_xrun_marker(where);
@@ -3176,7 +3166,7 @@ ARDOUR_UI::write_buffer_stats ()
 void
 ARDOUR_UI::disk_overrun_handler ()
 {
-	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::disk_overrun_handler)
 
 	write_buffer_stats ();
 
@@ -3188,7 +3178,7 @@ was not able to keep up with Ardour.\n\
 \n\
 Specifically, it failed to write data to disk\n\
 quickly enough to keep up with recording.\n"));
-		msg->signal_response().connect (bind (mem_fun (*this, &ARDOUR_UI::disk_speed_dialog_gone), msg));
+		msg->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::disk_speed_dialog_gone), msg));
 		msg->show ();
 	}
 }
@@ -3196,7 +3186,7 @@ quickly enough to keep up with recording.\n"));
 void
 ARDOUR_UI::disk_underrun_handler ()
 {
-	ENSURE_GUI_THREAD (mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::disk_underrun_handler)
 
 	write_buffer_stats ();
 
@@ -3208,7 +3198,7 @@ was not able to keep up with Ardour.\n\
 \n\
 Specifically, it failed to read data from disk\n\
 quickly enough to keep up with playback.\n"));
-		msg->signal_response().connect (bind (mem_fun (*this, &ARDOUR_UI::disk_speed_dialog_gone), msg));
+		msg->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::disk_speed_dialog_gone), msg));
 		msg->show ();
 	}
 }
@@ -3223,7 +3213,7 @@ ARDOUR_UI::disk_speed_dialog_gone (int /*ignored_response*/, MessageDialog* msg)
 void
 ARDOUR_UI::session_dialog (std::string msg)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &ARDOUR_UI::session_dialog), msg));
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::session_dialog, msg)
 
 	MessageDialog* d;
 
@@ -3363,7 +3353,7 @@ ARDOUR_UI::update_transport_clocks (nframes_t pos)
 void
 ARDOUR_UI::record_state_changed ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &ARDOUR_UI::record_state_changed));
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::record_state_changed)
 
 	if (!session || !big_clock_window) {
 		/* why bother - the clock isn't visible */

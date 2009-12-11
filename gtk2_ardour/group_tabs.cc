@@ -44,7 +44,7 @@ GroupTabs::connect_to_session (Session* s)
 {
 	EditorComponent::connect_to_session (s);
 
-	_session_connections.push_back (_session->RouteGroupChanged.connect (mem_fun (*this, &GroupTabs::set_dirty)));
+	_session_connections.push_back (_session->RouteGroupChanged.connect (sigc::mem_fun (*this, &GroupTabs::set_dirty)));
 }
 
 

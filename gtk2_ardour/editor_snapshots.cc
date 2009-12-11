@@ -48,8 +48,8 @@ EditorSnapshots::EditorSnapshots (Editor* e)
 	_scroller.add (_display);
 	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	_display.get_selection()->signal_changed().connect (mem_fun(*this, &EditorSnapshots::selection_changed));
-	_display.signal_button_press_event().connect (mem_fun (*this, &EditorSnapshots::button_press), false);
+	_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &EditorSnapshots::selection_changed));
+	_display.signal_button_press_event().connect (sigc::mem_fun (*this, &EditorSnapshots::button_press), false);
 }
 
 void
@@ -121,9 +121,9 @@ EditorSnapshots::popup_context_menu (int button, int32_t time, Glib::ustring sna
 
 	const bool modification_allowed = (_session->snap_name() != snapshot_name && _session->name() != snapshot_name);
 
-	add_item_with_sensitivity (items, MenuElem (_("Remove"), bind (mem_fun (*this, &EditorSnapshots::remove), snapshot_name)), modification_allowed);
+	add_item_with_sensitivity (items, MenuElem (_("Remove"), sigc::bind (sigc::mem_fun (*this, &EditorSnapshots::remove), snapshot_name)), modification_allowed);
 
-	add_item_with_sensitivity (items, MenuElem (_("Rename"), bind (mem_fun (*this, &EditorSnapshots::rename), snapshot_name)), modification_allowed);
+	add_item_with_sensitivity (items, MenuElem (_("Rename"), sigc::bind (sigc::mem_fun (*this, &EditorSnapshots::rename), snapshot_name)), modification_allowed);
 
 	_menu.popup (button, time);
 }

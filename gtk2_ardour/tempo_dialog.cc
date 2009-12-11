@@ -139,14 +139,14 @@ TempoDialog::init (const BBT_Time& when, double bpm, double note_type, bool mova
 
 	set_name ("MetricDialog");
 
-	bpm_spinner.signal_activate().connect (bind (mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
-	bpm_spinner.signal_button_press_event().connect (mem_fun (*this, &TempoDialog::bpm_button_press), false);
-	bpm_spinner.signal_button_release_event().connect (mem_fun (*this, &TempoDialog::bpm_button_release), false);
-	when_bar_entry.signal_activate().connect (bind (mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
-	when_bar_entry.signal_key_release_event().connect (mem_fun (*this, &TempoDialog::entry_key_release), false);
-	when_beat_entry.signal_activate().connect (bind (mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
-	when_beat_entry.signal_key_release_event().connect (mem_fun (*this, &TempoDialog::entry_key_release), false);
-	note_types.signal_changed().connect (mem_fun (*this, &TempoDialog::note_types_change));
+	bpm_spinner.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
+	bpm_spinner.signal_button_press_event().connect (sigc::mem_fun (*this, &TempoDialog::bpm_button_press), false);
+	bpm_spinner.signal_button_release_event().connect (sigc::mem_fun (*this, &TempoDialog::bpm_button_release), false);
+	when_bar_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
+	when_bar_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &TempoDialog::entry_key_release), false);
+	when_beat_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
+	when_beat_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &TempoDialog::entry_key_release), false);
+	note_types.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::note_types_change));
 }
 
 bool
@@ -324,14 +324,14 @@ MeterDialog::init (const BBT_Time& when, double bpb, double note_type, bool mova
 	get_vbox()->show_all ();
 
 	set_name ("MetricDialog");
-	bpb_entry.signal_activate().connect (bind (mem_fun (*this, &MeterDialog::response), RESPONSE_ACCEPT));
-	bpb_entry.signal_key_press_event().connect (mem_fun (*this, &MeterDialog::entry_key_press), false);
-	bpb_entry.signal_key_release_event().connect (mem_fun (*this, &MeterDialog::entry_key_release));
-	when_bar_entry.signal_activate().connect (bind (mem_fun (*this, &MeterDialog::response), RESPONSE_ACCEPT));
-	when_bar_entry.signal_key_press_event().connect (mem_fun (*this, &MeterDialog::entry_key_press), false);
-	when_bar_entry.signal_key_release_event().connect (mem_fun (*this, &MeterDialog::entry_key_release));
+	bpb_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &MeterDialog::response), RESPONSE_ACCEPT));
+	bpb_entry.signal_key_press_event().connect (sigc::mem_fun (*this, &MeterDialog::entry_key_press), false);
+	bpb_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &MeterDialog::entry_key_release));
+	when_bar_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &MeterDialog::response), RESPONSE_ACCEPT));
+	when_bar_entry.signal_key_press_event().connect (sigc::mem_fun (*this, &MeterDialog::entry_key_press), false);
+	when_bar_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &MeterDialog::entry_key_release));
 
-	note_types.signal_changed().connect (mem_fun (*this, &MeterDialog::note_types_change));
+	note_types.signal_changed().connect (sigc::mem_fun (*this, &MeterDialog::note_types_change));
 }
 
 bool

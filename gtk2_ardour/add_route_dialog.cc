@@ -170,10 +170,10 @@ AddRouteDialog::AddRouteDialog (Session & s)
 
 	get_vbox()->pack_start (*vbox, false, false);
 
-	track_bus_combo.signal_changed().connect (mem_fun (*this, &AddRouteDialog::track_type_chosen));
-	channel_combo.set_row_separator_func (mem_fun (*this, &AddRouteDialog::channel_separator));
-	route_group_combo.set_row_separator_func (mem_fun (*this, &AddRouteDialog::route_separator));
-	route_group_combo.signal_changed ().connect (mem_fun (*this, &AddRouteDialog::group_changed));
+	track_bus_combo.signal_changed().connect (sigc::mem_fun (*this, &AddRouteDialog::track_type_chosen));
+	channel_combo.set_row_separator_func (sigc::mem_fun (*this, &AddRouteDialog::channel_separator));
+	route_group_combo.set_row_separator_func (sigc::mem_fun (*this, &AddRouteDialog::route_separator));
+	route_group_combo.signal_changed ().connect (sigc::mem_fun (*this, &AddRouteDialog::group_changed));
 
 	show_all_children ();
 
@@ -405,7 +405,7 @@ AddRouteDialog::refill_route_groups ()
 
 	route_group_combo.append_text (_("No group"));
 
-	_session.foreach_route_group (mem_fun (*this, &AddRouteDialog::add_route_group));
+	_session.foreach_route_group (sigc::mem_fun (*this, &AddRouteDialog::add_route_group));
 
 	route_group_combo.set_active (2);
 }

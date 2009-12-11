@@ -75,7 +75,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
 	_name.set_text (_group->name ());
 	_active.set_active (_group->is_active ());
 
-	_name.signal_activate ().connect (sigc::bind (mem_fun (*this, &Dialog::response), RESPONSE_OK));
+	_name.signal_activate ().connect (sigc::bind (sigc::mem_fun (*this, &Dialog::response), RESPONSE_OK));
 
 	_gain.set_active (_group->property (RouteGroup::Gain));
 	_relative.set_active (_group->is_relative());
@@ -113,7 +113,7 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
 
 	get_vbox()->pack_start (*vbox, false, false);
 
-	_gain.signal_toggled().connect(mem_fun (*this, &RouteGroupDialog::gain_toggled));
+	_gain.signal_toggled().connect(sigc::mem_fun (*this, &RouteGroupDialog::gain_toggled));
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (s, RESPONSE_OK);

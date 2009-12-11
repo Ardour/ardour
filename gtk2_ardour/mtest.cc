@@ -135,13 +135,13 @@ main (int argc, char* argv[])
 	RefPtr<AccelGroup> accels = hidden.get_accel_group();
 
 	make_action (actions, "TopMenu", "top");
-	make_action (actions, "Foo", "foo", accels, bind (sigc::ptr_fun (printit), "foo"), GDK_p, Gdk::ModifierType (0));
+	make_action (actions, "Foo", "foo", accels, sigc::bind (sigc::ptr_fun (printit), "foo"), GDK_p, Gdk::ModifierType (0));
 
 	make_action (other_actions, "OTopMenu", "otop");
-	make_action (other_actions, "OFoo", "foo", accels, bind (sigc::ptr_fun (printit), "o-foo"), GDK_p, Gdk::ModifierType (0));
+	make_action (other_actions, "OFoo", "foo", accels, sigc::bind (sigc::ptr_fun (printit), "o-foo"), GDK_p, Gdk::ModifierType (0));
 
-	make_action (shared_actions, "Bar", "bar", accels, bind (sigc::ptr_fun (printit), "barshared"), GDK_p, Gdk::CONTROL_MASK);
-	RefPtr<Action> act = make_action (shared_actions, "Baz", "baz", accels, bind (sigc::ptr_fun (printit), "baz-shared"), GDK_p, Gdk::SHIFT_MASK);
+	make_action (shared_actions, "Bar", "bar", accels, sigc::bind (sigc::ptr_fun (printit), "barshared"), GDK_p, Gdk::CONTROL_MASK);
+	RefPtr<Action> act = make_action (shared_actions, "Baz", "baz", accels, sigc::bind (sigc::ptr_fun (printit), "baz-shared"), GDK_p, Gdk::SHIFT_MASK);
 
 	act->connect_proxy (button);
 	act->connect_proxy (other_button);

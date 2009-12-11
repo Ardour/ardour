@@ -75,7 +75,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	session = 0;
 	in_row_change = false;
 
-	manager->PluginListChanged.connect (mem_fun (*this, &PluginSelector::build_plugin_menu));
+	manager->PluginListChanged.connect (sigc::mem_fun (*this, &PluginSelector::build_plugin_menu));
 	build_plugin_menu ();
 
 	plugin_model = Gtk::ListStore::create (plugin_columns);
@@ -102,12 +102,12 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	CellRendererToggle* fav_cell = dynamic_cast<CellRendererToggle*>(plugin_display.get_column_cell_renderer (0));
 	fav_cell->property_activatable() = true;
 	fav_cell->property_radio() = true;
-	fav_cell->signal_toggled().connect (mem_fun (*this, &PluginSelector::favorite_changed));
+	fav_cell->signal_toggled().connect (sigc::mem_fun (*this, &PluginSelector::favorite_changed));
 
 	CellRendererToggle* hidden_cell = dynamic_cast<CellRendererToggle*>(plugin_display.get_column_cell_renderer (1));
 	hidden_cell->property_activatable() = true;
 	hidden_cell->property_radio() = true;
-	hidden_cell->signal_toggled().connect (mem_fun (*this, &PluginSelector::hidden_changed));
+	hidden_cell->signal_toggled().connect (sigc::mem_fun (*this, &PluginSelector::hidden_changed));
 
 	scroller.set_border_width(10);
 	scroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -153,9 +153,9 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	filter_box->pack_start (filter_entry, true, true);
 	filter_box->pack_start (filter_button, false, false);
 
-	filter_entry.signal_changed().connect (mem_fun (*this, &PluginSelector::filter_entry_changed));
-	filter_button.signal_clicked().connect (mem_fun (*this, &PluginSelector::filter_button_clicked));
-	filter_mode.signal_changed().connect (mem_fun (*this, &PluginSelector::filter_mode_changed));
+	filter_entry.signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::filter_entry_changed));
+	filter_button.signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::filter_button_clicked));
+	filter_mode.signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::filter_mode_changed));
 
 	filter_box->show ();
 	filter_mode.show ();
@@ -181,14 +181,14 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	//plugin_display.set_name("PluginSelectorList");
 	added_list.set_name("PluginSelectorList");
 
-	plugin_display.signal_button_press_event().connect_notify (mem_fun(*this, &PluginSelector::row_clicked));
-	plugin_display.get_selection()->signal_changed().connect (mem_fun(*this, &PluginSelector::display_selection_changed));
+	plugin_display.signal_button_press_event().connect_notify (sigc::mem_fun(*this, &PluginSelector::row_clicked));
+	plugin_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PluginSelector::display_selection_changed));
 	plugin_display.grab_focus();
 
-	btn_update->signal_clicked().connect (mem_fun(*this, &PluginSelector::btn_update_clicked));
-	btn_add->signal_clicked().connect(mem_fun(*this, &PluginSelector::btn_add_clicked));
-	btn_remove->signal_clicked().connect(mem_fun(*this, &PluginSelector::btn_remove_clicked));
-	added_list.get_selection()->signal_changed().connect (mem_fun(*this, &PluginSelector::added_list_selection_changed));
+	btn_update->signal_clicked().connect (sigc::mem_fun(*this, &PluginSelector::btn_update_clicked));
+	btn_add->signal_clicked().connect(sigc::mem_fun(*this, &PluginSelector::btn_add_clicked));
+	btn_remove->signal_clicked().connect(sigc::mem_fun(*this, &PluginSelector::btn_remove_clicked));
+	added_list.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PluginSelector::added_list_selection_changed));
 
 	refill ();
 }
@@ -208,12 +208,12 @@ PluginSelector::row_clicked(GdkEventButton* event)
 void
 PluginSelector::set_session (Session* s)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &PluginSelector::set_session), s));
+	ENSURE_GUI_THREAD (*this, &PluginSelector::set_session, s)
 
 	session = s;
 
 	if (session) {
-		session->GoingAway.connect (bind (mem_fun(*this, &PluginSelector::set_session), static_cast<Session*> (0)));
+		session->GoingAway.connect (sigc::bind (sigc::mem_fun(*this, &PluginSelector::set_session), static_cast<Session*> (0)));
 	}
 }
 
@@ -607,7 +607,7 @@ PluginSelector::build_plugin_menu ()
 	Gtk::Menu* favs = create_favs_menu(all_plugs);
 	items.push_back (MenuElem (_("Favorites"), *manage (favs)));
 
-	items.push_back (MenuElem (_("Plugin Manager"), mem_fun (*this, &PluginSelector::show_manager)));
+	items.push_back (MenuElem (_("Plugin Manager"), sigc::mem_fun (*this, &PluginSelector::show_manager)));
 	items.push_back (SeparatorElem ());
 
 	Menu* by_creator = create_by_creator_menu(all_plugs);
@@ -630,7 +630,7 @@ PluginSelector::create_favs_menu (PluginInfoList& all_plugs)
 
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
 		if (manager->get_status (*i) == PluginManager::Favorite) {
-			favs->items().push_back (MenuElem ((*i)->name, (bind (mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
+			favs->items().push_back (MenuElem ((*i)->name, (sigc::bind (sigc::mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
 		}
 	}
 	return favs;
@@ -672,7 +672,7 @@ PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 			creator_submenu_map.insert (pair<Glib::ustring,Menu*> (creator, submenu));
 			submenu->set_name("ArdourContextMenu");
 		}
-		submenu->items().push_back (MenuElem ((*i)->name, (bind (mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
+		submenu->items().push_back (MenuElem ((*i)->name, (sigc::bind (sigc::mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
 	}
 	return by_creator;
 }
@@ -708,7 +708,7 @@ PluginSelector::create_by_category_menu (ARDOUR::PluginInfoList& all_plugs)
 			category_submenu_map.insert (pair<Glib::ustring,Menu*> (category, submenu));
 			submenu->set_name("ArdourContextMenu");
 		}
-		submenu->items().push_back (MenuElem ((*i)->name, (bind (mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
+		submenu->items().push_back (MenuElem ((*i)->name, (sigc::bind (sigc::mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i))));
 	}
 	return by_category;
 }

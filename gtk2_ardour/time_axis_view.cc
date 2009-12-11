@@ -116,12 +116,12 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	*/
 
 	name_entry.set_name ("EditorTrackNameDisplay");
-	name_entry.signal_button_release_event().connect (mem_fun (*this, &TimeAxisView::name_entry_button_release));
-	name_entry.signal_button_press_event().connect (mem_fun (*this, &TimeAxisView::name_entry_button_press));
-	name_entry.signal_key_release_event().connect (mem_fun (*this, &TimeAxisView::name_entry_key_release));
-	name_entry.signal_activate().connect (mem_fun(*this, &TimeAxisView::name_entry_activated));
-	name_entry.signal_focus_in_event().connect (mem_fun (*this, &TimeAxisView::name_entry_focus_in));
-	name_entry.signal_focus_out_event().connect (mem_fun (*this, &TimeAxisView::name_entry_focus_out));
+	name_entry.signal_button_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_button_release));
+	name_entry.signal_button_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_button_press));
+	name_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_release));
+	name_entry.signal_activate().connect (sigc::mem_fun(*this, &TimeAxisView::name_entry_activated));
+	name_entry.signal_focus_in_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_focus_in));
+	name_entry.signal_focus_out_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_focus_out));
 	Gtkmm2ext::set_size_request_to_display_given_text (name_entry, N_("gTortnam"), 10, 10); // just represents a short name
 
 	name_label.set_name ("TrackLabel");
@@ -146,10 +146,10 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 
 	resizer.set_size_request (10, 10);
 	resizer.set_name ("ResizeHandle");
-	resizer.signal_expose_event().connect (mem_fun (*this, &TimeAxisView::resizer_expose));
-	resizer.signal_button_press_event().connect (mem_fun (*this, &TimeAxisView::resizer_button_press));
-	resizer.signal_button_release_event().connect (mem_fun (*this, &TimeAxisView::resizer_button_release));
-	resizer.signal_motion_notify_event().connect (mem_fun (*this, &TimeAxisView::resizer_motion));
+	resizer.signal_expose_event().connect (sigc::mem_fun (*this, &TimeAxisView::resizer_expose));
+	resizer.signal_button_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::resizer_button_press));
+	resizer.signal_button_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::resizer_button_release));
+	resizer.signal_motion_notify_event().connect (sigc::mem_fun (*this, &TimeAxisView::resizer_motion));
 	resizer.set_events (Gdk::BUTTON_PRESS_MASK|
 			Gdk::BUTTON_RELEASE_MASK|
 			Gdk::POINTER_MOTION_MASK|
@@ -171,13 +171,13 @@ TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisVie
 	controls_ebox.add_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK|SCROLL_MASK);
 	controls_ebox.set_flags (CAN_FOCUS);
 
-	controls_ebox.signal_button_release_event().connect (mem_fun (*this, &TimeAxisView::controls_ebox_button_release));
-	controls_ebox.signal_scroll_event().connect (mem_fun (*this, &TimeAxisView::controls_ebox_scroll), true);
+	controls_ebox.signal_button_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_button_release));
+	controls_ebox.signal_scroll_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_scroll), true);
 
 	controls_hbox.pack_start (controls_ebox,true,true);
 	controls_hbox.show ();
 
-	ColorsChanged.connect (mem_fun (*this, &TimeAxisView::color_handler));
+	ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
 }
 
 TimeAxisView::~TimeAxisView()
@@ -500,7 +500,7 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 	/* wait 1 seconds and if no more keys are pressed, act as if they pressed enter */
 
 	name_entry_key_timeout.disconnect();
-	name_entry_key_timeout = Glib::signal_timeout().connect (mem_fun (*this, &TimeAxisView::name_entry_key_timed_out), name_entry_timeout);
+	name_entry_key_timeout = Glib::signal_timeout().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_timed_out), name_entry_timeout);
 #endif
 
 	return false;
@@ -653,12 +653,12 @@ TimeAxisView::build_size_menu ()
 	size_menu->set_name ("ArdourContextMenu");
 	MenuList& items = size_menu->items();
 
-	items.push_back (MenuElem (_("Largest"), bind (mem_fun (*this, &TimeAxisView::set_heights), hLargest)));
-	items.push_back (MenuElem (_("Large"), bind (mem_fun (*this, &TimeAxisView::set_heights), hLarge)));
-	items.push_back (MenuElem (_("Larger"), bind (mem_fun (*this, &TimeAxisView::set_heights), hLarger)));
-	items.push_back (MenuElem (_("Normal"), bind (mem_fun (*this, &TimeAxisView::set_heights), hNormal)));
-	items.push_back (MenuElem (_("Smaller"), bind (mem_fun (*this, &TimeAxisView::set_heights),hSmaller)));
-	items.push_back (MenuElem (_("Small"), bind (mem_fun (*this, &TimeAxisView::set_heights), hSmall)));
+	items.push_back (MenuElem (_("Largest"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_heights), hLargest)));
+	items.push_back (MenuElem (_("Large"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_heights), hLarge)));
+	items.push_back (MenuElem (_("Larger"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_heights), hLarger)));
+	items.push_back (MenuElem (_("Normal"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_heights), hNormal)));
+	items.push_back (MenuElem (_("Smaller"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_heights),hSmaller)));
+	items.push_back (MenuElem (_("Small"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_heights), hSmall)));
 }
 
 void
@@ -876,9 +876,9 @@ TimeAxisView::get_selection_rect (uint32_t id)
 
 		free_selection_rects.push_front (rect);
 
-		rect->rect->signal_event().connect (bind (mem_fun (_editor, &PublicEditor::canvas_selection_rect_event), rect->rect, rect));
-		rect->start_trim->signal_event().connect (bind (mem_fun (_editor, &PublicEditor::canvas_selection_start_trim_event), rect->rect, rect));
-		rect->end_trim->signal_event().connect (bind (mem_fun (_editor, &PublicEditor::canvas_selection_end_trim_event), rect->rect, rect));
+		rect->rect->signal_event().connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_selection_rect_event), rect->rect, rect));
+		rect->start_trim->signal_event().connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_selection_start_trim_event), rect->rect, rect));
+		rect->end_trim->signal_event().connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_selection_end_trim_event), rect->rect, rect));
 	}
 
 	rect = free_selection_rects.front();
@@ -930,7 +930,7 @@ TimeAxisView::add_ghost (RegionView* rv)
 
 	if(gr) {
 		ghosts.push_back(gr);
-		gr->GoingAway.connect (mem_fun(*this, &TimeAxisView::erase_ghost));
+		gr->GoingAway.connect (sigc::mem_fun(*this, &TimeAxisView::erase_ghost));
 	}
 }
 

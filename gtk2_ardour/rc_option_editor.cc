@@ -54,9 +54,9 @@ public:
 
 		ports_changed ();
 
-		_store->signal_row_changed().connect (mem_fun (*this, &MIDIPorts::model_changed));
+		_store->signal_row_changed().connect (sigc::mem_fun (*this, &MIDIPorts::model_changed));
 
-		_add_port_button.signal_clicked().connect (mem_fun (*this, &MIDIPorts::add_port_clicked));
+		_add_port_button.signal_clicked().connect (sigc::mem_fun (*this, &MIDIPorts::add_port_clicked));
 	}
 
 	void parameter_changed (string const &) {}
@@ -117,7 +117,7 @@ private:
 
 			if ((*i)->input()) {
 				r[_model.online] = !(*i)->input()->offline();
-				(*i)->input()->OfflineStatusChanged.connect (bind (mem_fun (*this, &MIDIPorts::port_offline_changed), (*i)));
+				(*i)->input()->OfflineStatusChanged.connect (sigc::bind (sigc::mem_fun (*this, &MIDIPorts::port_offline_changed), (*i)));
 				r[_model.trace_input] = (*i)->input()->tracing();
 			}
 
@@ -235,7 +235,7 @@ public:
 		t->attach (*l, 0, 1, 0, 1, FILL);
 		t->attach (_click_path_entry, 1, 2, 0, 1, FILL);
 		Button* b = manage (new Button (_("Browse...")));
-		b->signal_clicked().connect (mem_fun (*this, &ClickOptions::click_browse_clicked));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &ClickOptions::click_browse_clicked));
 		t->attach (*b, 2, 3, 0, 1, FILL);
 
 		l = manage (new Label (_("Click emphasis audio file:")));
@@ -243,7 +243,7 @@ public:
 		t->attach (*l, 0, 1, 1, 2, FILL);
 		t->attach (_click_emphasis_path_entry, 1, 2, 1, 2, FILL);
 		b = manage (new Button (_("Browse...")));
-		b->signal_clicked().connect (mem_fun (*this, &ClickOptions::click_emphasis_browse_clicked));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &ClickOptions::click_emphasis_browse_clicked));
 		t->attach (*b, 2, 3, 1, 2, FILL);
 
 		_box->pack_start (*t, false, false);
@@ -337,10 +337,10 @@ public:
 
 		_box->pack_start (*t);
 
-		_limit_undo_button.signal_toggled().connect (mem_fun (*this, &UndoOptions::limit_undo_toggled));
-		_limit_undo_spin.signal_value_changed().connect (mem_fun (*this, &UndoOptions::limit_undo_changed));
-		_save_undo_button.signal_toggled().connect (mem_fun (*this, &UndoOptions::save_undo_toggled));
-		_save_undo_spin.signal_value_changed().connect (mem_fun (*this, &UndoOptions::save_undo_changed));
+		_limit_undo_button.signal_toggled().connect (sigc::mem_fun (*this, &UndoOptions::limit_undo_toggled));
+		_limit_undo_spin.signal_value_changed().connect (sigc::mem_fun (*this, &UndoOptions::limit_undo_changed));
+		_save_undo_button.signal_toggled().connect (sigc::mem_fun (*this, &UndoOptions::save_undo_toggled));
+		_save_undo_spin.signal_value_changed().connect (sigc::mem_fun (*this, &UndoOptions::save_undo_changed));
 	}
 
 	void parameter_changed (string const & p)
@@ -457,7 +457,7 @@ public:
 		}
 
 		set_popdown_strings (_edit_modifier_combo, dumb);
-		_edit_modifier_combo.signal_changed().connect (mem_fun(*this, &KeyboardOptions::edit_modifier_chosen));
+		_edit_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::edit_modifier_chosen));
 
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == Keyboard::edit_modifier ()) {
@@ -484,10 +484,10 @@ public:
 
 		_edit_button_spin.set_name ("OptionsEntry");
 		_edit_button_adjustment.set_value (Keyboard::edit_button());
-		_edit_button_adjustment.signal_value_changed().connect (mem_fun(*this, &KeyboardOptions::edit_button_changed));
+		_edit_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::edit_button_changed));
 
 		set_popdown_strings (_delete_modifier_combo, dumb);
-		_delete_modifier_combo.signal_changed().connect (mem_fun(*this, &KeyboardOptions::delete_modifier_chosen));
+		_delete_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::delete_modifier_chosen));
 
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == Keyboard::delete_modifier ()) {
@@ -511,10 +511,10 @@ public:
 
 		_delete_button_spin.set_name ("OptionsEntry");
 		_delete_button_adjustment.set_value (Keyboard::delete_button());
-		_delete_button_adjustment.signal_value_changed().connect (mem_fun(*this, &KeyboardOptions::delete_button_changed));
+		_delete_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::delete_button_changed));
 
 		set_popdown_strings (_snap_modifier_combo, dumb);
-		_snap_modifier_combo.signal_changed().connect (mem_fun(*this, &KeyboardOptions::snap_modifier_chosen));
+		_snap_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::snap_modifier_chosen));
 
 		for (int x = 0; modifiers[x].name; ++x) {
 			if (modifiers[x].modifier == (guint) Keyboard::snap_modifier ()) {
@@ -538,7 +538,7 @@ public:
 
 		set_popdown_strings (_keyboard_layout_selector, strs);
 		_keyboard_layout_selector.set_active_text (Keyboard::current_binding_name());
-		_keyboard_layout_selector.signal_changed().connect (mem_fun (*this, &KeyboardOptions::bindings_changed));
+		_keyboard_layout_selector.signal_changed().connect (sigc::mem_fun (*this, &KeyboardOptions::bindings_changed));
 
 		l = manage (new Label (_("Keyboard layout:")));
 		l->set_name ("OptionsLabel");
@@ -654,7 +654,7 @@ public:
 
 		_box->pack_start (*h, false, false);
 
-		_dpi_adjustment.signal_value_changed().connect (mem_fun (*this, &FontScalingOptions::dpi_changed));
+		_dpi_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &FontScalingOptions::dpi_changed));
 	}
 
 	void parameter_changed (string const & p)
@@ -717,7 +717,7 @@ public:
 
 		_box->pack_start (*h, false, false);
 
-		_db_adjustment.signal_value_changed().connect (mem_fun (*this, &SoloMuteOptions::db_changed));
+		_db_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &SoloMuteOptions::db_changed));
 	}
 
 	void parameter_changed (string const & p)
@@ -774,7 +774,7 @@ public:
 
 		_box->pack_start (_view, false, false);
 
-		_store->signal_row_changed().connect (mem_fun (*this, &ControlSurfacesOptions::model_changed));
+		_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::model_changed));
 	}
 
 	void parameter_changed (std::string const &)
@@ -864,8 +864,8 @@ RCOptionEditor::RCOptionEditor ()
 	ComboOption<float>* mht = new ComboOption<float> (
 		"meter-hold",
 		_("Meter hold time"),
-		mem_fun (*_rc_config, &RCConfiguration::get_meter_hold),
-		mem_fun (*_rc_config, &RCConfiguration::set_meter_hold)
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_hold),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_hold)
 		);
 
 	mht->add (MeterHoldOff, _("off"));
@@ -878,8 +878,8 @@ RCOptionEditor::RCOptionEditor ()
 	ComboOption<float>* mfo = new ComboOption<float> (
 		"meter-falloff",
 		_("Meter fall-off"),
-		mem_fun (*_rc_config, &RCConfiguration::get_meter_falloff),
-		mem_fun (*_rc_config, &RCConfiguration::set_meter_falloff)
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_falloff),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_falloff)
 		);
 
 	mfo->add (METER_FALLOFF_OFF, _("off"));
@@ -907,48 +907,48 @@ RCOptionEditor::RCOptionEditor ()
 	     new BoolOption (
 		     "verify-remove-last-capture",
 		     _("Verify removal of last capture"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_verify_remove_last_capture),
-		     mem_fun (*_rc_config, &RCConfiguration::set_verify_remove_last_capture)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_verify_remove_last_capture),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_verify_remove_last_capture)
 		     ));
 
 	add_option (_("Misc"),
 	     new BoolOption (
 		     "periodic-safety-backups",
 		     _("Make periodic backups of the session file"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_periodic_safety_backups),
-		     mem_fun (*_rc_config, &RCConfiguration::set_periodic_safety_backups)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_periodic_safety_backups),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_periodic_safety_backups)
 		     ));
 
 	add_option (_("Misc"),
 	     new BoolOption (
 		     "sync-all-route-ordering",
 		     _("Syncronise editor and mixer track order"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_sync_all_route_ordering),
-		     mem_fun (*_rc_config, &RCConfiguration::set_sync_all_route_ordering)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_sync_all_route_ordering),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_sync_all_route_ordering)
 		     ));
 
 	add_option (_("Misc"),
 	     new BoolOption (
 		     "only-copy-imported-files",
 		     _("Always copy imported files"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_only_copy_imported_files),
-		     mem_fun (*_rc_config, &RCConfiguration::set_only_copy_imported_files)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_only_copy_imported_files),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_only_copy_imported_files)
 		     ));
 
 	add_option (_("Misc"),
 	     new BoolOption (
 		     "default-narrow_ms",
 		     _("Use narrow mixer strips"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_default_narrow_ms),
-		     mem_fun (*_rc_config, &RCConfiguration::set_default_narrow_ms)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_default_narrow_ms),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_narrow_ms)
 		     ));
 
 	add_option (_("Misc"),
 	     new BoolOption (
 		     "name-new-markers",
 		     _("Name new markers"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_name_new_markers),
-		     mem_fun (*_rc_config, &RCConfiguration::set_name_new_markers)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_name_new_markers),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_name_new_markers)
 		     ));
 
 	/* TRANSPORT */
@@ -957,56 +957,56 @@ RCOptionEditor::RCOptionEditor ()
 	     new BoolOption (
 		     "latched-record-enable",
 		     _("Keep record-enable engaged on stop"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_latched_record_enable),
-		     mem_fun (*_rc_config, &RCConfiguration::set_latched_record_enable)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_latched_record_enable),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_latched_record_enable)
 		     ));
 
 	add_option (_("Transport"),
 	     new BoolOption (
 		     "stop-recording-on-xrun",
 		     _("Stop recording when an xrun occurs"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_stop_recording_on_xrun),
-		     mem_fun (*_rc_config, &RCConfiguration::set_stop_recording_on_xrun)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_recording_on_xrun),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_recording_on_xrun)
 		     ));
 
 	add_option (_("Transport"),
 	     new BoolOption (
 		     "create-xrun-marker",
 		     _("Create markers where xruns occur"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_create_xrun_marker),
-		     mem_fun (*_rc_config, &RCConfiguration::set_create_xrun_marker)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_create_xrun_marker),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_create_xrun_marker)
 		     ));
 
 	add_option (_("Transport"),
 	     new BoolOption (
 		     "stop-at-session-end",
 		     _("Stop at the end of the session"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_stop_at_session_end),
-		     mem_fun (*_rc_config, &RCConfiguration::set_stop_at_session_end)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_at_session_end),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_at_session_end)
 		     ));
 
 	add_option (_("Transport"),
 	     new BoolOption (
 		     "primary-clock-delta-edit-cursor",
 		     _("Primary clock delta to edit cursor"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_primary_clock_delta_edit_cursor),
-		     mem_fun (*_rc_config, &RCConfiguration::set_primary_clock_delta_edit_cursor)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_primary_clock_delta_edit_cursor),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_primary_clock_delta_edit_cursor)
 		     ));
 
 	add_option (_("Transport"),
 	     new BoolOption (
 		     "secondary-clock-delta-edit-cursor",
 		     _("Secondary clock delta to edit cursor"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_secondary_clock_delta_edit_cursor),
-		     mem_fun (*_rc_config, &RCConfiguration::set_secondary_clock_delta_edit_cursor)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_secondary_clock_delta_edit_cursor),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_secondary_clock_delta_edit_cursor)
 		     ));
 
 	add_option (_("Transport"),
 	     new BoolOption (
 		     "disable-disarm-during-roll",
 		     _("Disable per-track record disarm while rolling"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_disable_disarm_during_roll),
-		     mem_fun (*_rc_config, &RCConfiguration::set_disable_disarm_during_roll)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_disable_disarm_during_roll),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_disable_disarm_during_roll)
 		     ));
 
 	/* EDITOR */
@@ -1015,55 +1015,55 @@ RCOptionEditor::RCOptionEditor ()
 	     new BoolOption (
 		     "link-region-and-track-selection",
 		     _("Link selection of regions and tracks"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_link_region_and_track_selection),
-		     mem_fun (*_rc_config, &RCConfiguration::set_link_region_and_track_selection)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_region_and_track_selection),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_region_and_track_selection)
 		     ));
 
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "automation-follows-regions",
 		     _("Move relevant automation when regions are moved"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_automation_follows_regions),
-		     mem_fun (*_rc_config, &RCConfiguration::set_automation_follows_regions)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_automation_follows_regions),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_follows_regions)
 		     ));
 
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "show-track-meters",
 		     _("Show meters on tracks in the editor"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_show_track_meters),
-		     mem_fun (*_rc_config, &RCConfiguration::set_show_track_meters)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_track_meters),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_track_meters)
 		     ));
 
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "use-overlap-equivalency",
 		     _("Use overlap equivalency for regions"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_use_overlap_equivalency),
-		     mem_fun (*_rc_config, &RCConfiguration::set_use_overlap_equivalency)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_overlap_equivalency),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_overlap_equivalency)
 		     ));
 
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "rubberbanding-snaps-to-grid",
 		     _("Make rubberband selection rectangle snap to the grid"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_rubberbanding_snaps_to_grid),
-		     mem_fun (*_rc_config, &RCConfiguration::set_rubberbanding_snaps_to_grid)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_rubberbanding_snaps_to_grid),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_rubberbanding_snaps_to_grid)
 		     ));
 
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "show-waveforms",
 		     _("Show waveforms in regions"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_show_waveforms),
-		     mem_fun (*_rc_config, &RCConfiguration::set_show_waveforms)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_waveforms),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_waveforms)
 		     ));
 
 	ComboOption<WaveformScale>* wfs = new ComboOption<WaveformScale> (
 		"waveform-scale",
 		_("Waveform scale"),
-		mem_fun (*_rc_config, &RCConfiguration::get_waveform_scale),
-		mem_fun (*_rc_config, &RCConfiguration::set_waveform_scale)
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_waveform_scale),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_waveform_scale)
 		);
 
 	wfs->add (Linear, _("linear"));
@@ -1074,8 +1074,8 @@ RCOptionEditor::RCOptionEditor ()
 	ComboOption<WaveformShape>* wfsh = new ComboOption<WaveformShape> (
 		"waveform-shape",
 		_("Waveform shape"),
-		mem_fun (*_rc_config, &RCConfiguration::get_waveform_shape),
-		mem_fun (*_rc_config, &RCConfiguration::set_waveform_shape)
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_waveform_shape),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_waveform_shape)
 		);
 
 	wfsh->add (Traditional, _("traditional"));
@@ -1092,15 +1092,15 @@ RCOptionEditor::RCOptionEditor ()
 	     new BoolOption (
 		     "solo-control-is-listen-control",
 		     _("Solo controls are Listen controls"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_solo_control_is_listen_control),
-		     mem_fun (*_rc_config, &RCConfiguration::set_solo_control_is_listen_control)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_control_is_listen_control),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_control_is_listen_control)
 		     ));
 
 	ComboOption<ListenPosition>* lp = new ComboOption<ListenPosition> (
 		"listen-position",
 		_("Listen Position"),
-		mem_fun (*_rc_config, &RCConfiguration::get_listen_position),
-		mem_fun (*_rc_config, &RCConfiguration::set_listen_position)
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_listen_position),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_listen_position)
 		);
 
 	lp->add (AfterFaderListen, _("after-fader listen"));
@@ -1113,24 +1113,24 @@ RCOptionEditor::RCOptionEditor ()
 	     new BoolOption (
 		     "solo-latched",
 		     _("Latched solo"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_solo_latched),
-		     mem_fun (*_rc_config, &RCConfiguration::set_solo_latched)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_latched),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_latched)
 		     ));
 
 	add_option (_("Audio"),
 	     new BoolOption (
 		     "show-solo-mutes",
 		     _("Show solo muting"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_show_solo_mutes),
-		     mem_fun (*_rc_config, &RCConfiguration::set_show_solo_mutes)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_solo_mutes),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_solo_mutes)
 		     ));
 
 	add_option (_("Audio"),
 	     new BoolOption (
 		     "solo-mute-override",
 		     _("Override muting"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_override),
-		     mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_override)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_override),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_override)
 		     ));
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Monitoring")));
@@ -1138,8 +1138,8 @@ RCOptionEditor::RCOptionEditor ()
 	ComboOption<MonitorModel>* mm = new ComboOption<MonitorModel> (
 		"monitoring-model",
 		_("Monitoring handled by"),
-		mem_fun (*_rc_config, &RCConfiguration::get_monitoring_model),
-		mem_fun (*_rc_config, &RCConfiguration::set_monitoring_model)
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_monitoring_model),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_monitoring_model)
 		);
 
 	mm->add (HardwareMonitoring, _("JACK"));
@@ -1152,8 +1152,8 @@ RCOptionEditor::RCOptionEditor ()
 	     new BoolOption (
 		     "tape-machine-mode",
 		     _("Tape machine mode"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_tape_machine_mode),
-		     mem_fun (*_rc_config, &RCConfiguration::set_tape_machine_mode)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_tape_machine_mode),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_tape_machine_mode)
 		     ));
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Connection of tracks and busses")));
@@ -1162,15 +1162,15 @@ RCOptionEditor::RCOptionEditor ()
 		    new BoolOption (
 			    "auto-connect-standard-busses",
 			    _("Auto-connect master/monitor busses"),
-			    mem_fun (*_rc_config, &RCConfiguration::get_auto_connect_standard_busses),
-			    mem_fun (*_rc_config, &RCConfiguration::set_auto_connect_standard_busses)
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_connect_standard_busses),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_connect_standard_busses)
 			    ));
 
 	ComboOption<AutoConnectOption>* iac = new ComboOption<AutoConnectOption> (
 		"input-auto-connect",
 		_("Connect track and bus inputs"),
-		mem_fun (*_rc_config, &RCConfiguration::get_input_auto_connect),
-		mem_fun (*_rc_config, &RCConfiguration::set_input_auto_connect)
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_input_auto_connect),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_input_auto_connect)
 		);
 
 	iac->add (AutoConnectPhysical, _("automatically to physical inputs"));
@@ -1181,8 +1181,8 @@ RCOptionEditor::RCOptionEditor ()
 	ComboOption<AutoConnectOption>* oac = new ComboOption<AutoConnectOption> (
 		"output-auto-connect",
 		_("Connect track and bus outputs"),
-		mem_fun (*_rc_config, &RCConfiguration::get_output_auto_connect),
-		mem_fun (*_rc_config, &RCConfiguration::set_output_auto_connect)
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_output_auto_connect),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_output_auto_connect)
 		);
 
 	oac->add (AutoConnectPhysical, _("automatically to physical outputs"));
@@ -1197,15 +1197,15 @@ RCOptionEditor::RCOptionEditor ()
 	     new BoolOption (
 		     "denormal-protection",
 		     _("Use DC bias to protect against denormals"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_denormal_protection),
-		     mem_fun (*_rc_config, &RCConfiguration::set_denormal_protection)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_denormal_protection),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_denormal_protection)
 		     ));
 
 	ComboOption<DenormalModel>* dm = new ComboOption<DenormalModel> (
 		"denormal-model",
 		_("Processor handling"),
-		mem_fun (*_rc_config, &RCConfiguration::get_denormal_model),
-		mem_fun (*_rc_config, &RCConfiguration::set_denormal_model)
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_denormal_model),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_denormal_model)
 		);
 
 	dm->add (DenormalNone, _("no processor handling"));
@@ -1232,32 +1232,32 @@ RCOptionEditor::RCOptionEditor ()
 	     new BoolOption (
 		     "plugins-stop-with-transport",
 		     _("Stop plugins when the transport is stopped"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_plugins_stop_with_transport),
-		     mem_fun (*_rc_config, &RCConfiguration::set_plugins_stop_with_transport)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugins_stop_with_transport),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_plugins_stop_with_transport)
 		     ));
 
 	add_option (_("Audio"),
 	     new BoolOption (
 		     "do-not-record-plugins",
 		     _("Disable plugins during recording"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_do_not_record_plugins),
-		     mem_fun (*_rc_config, &RCConfiguration::set_do_not_record_plugins)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_do_not_record_plugins),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_do_not_record_plugins)
 		     ));
 
 	add_option (_("Audio"),
 	     new BoolOption (
 		     "new-plugins-active",
 		     _("Make new plugins active"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_new_plugins_active),
-		     mem_fun (*_rc_config, &RCConfiguration::set_new_plugins_active)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_new_plugins_active),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_new_plugins_active)
 		     ));
 
 	add_option (_("Audio"),
 	     new BoolOption (
 		     "auto-analyse-audio",
 		     _("Enable automatic analysis of audio"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_auto_analyse_audio),
-		     mem_fun (*_rc_config, &RCConfiguration::set_auto_analyse_audio)
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_auto_analyse_audio),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_analyse_audio)
 		     ));
 
 	/* MIDI CONTROL */
@@ -1267,29 +1267,29 @@ RCOptionEditor::RCOptionEditor ()
 	midi_combos.push_back (new ComboOption<string> (
 				       "mtc-port-name",
 				       _("Send/Receive MTC via"),
-				       mem_fun (*_rc_config, &RCConfiguration::get_mtc_port_name),
-				       mem_fun (*_rc_config, &RCConfiguration::set_mtc_port_name)
+				       sigc::mem_fun (*_rc_config, &RCConfiguration::get_mtc_port_name),
+				       sigc::mem_fun (*_rc_config, &RCConfiguration::set_mtc_port_name)
 				       ));
 
 	midi_combos.push_back (new ComboOption<string> (
 				       "midi-clock-port-name",
 				       _("Send/Receive MIDI clock via"),
-				       mem_fun (*_rc_config, &RCConfiguration::get_midi_clock_port_name),
-				       mem_fun (*_rc_config, &RCConfiguration::set_midi_clock_port_name)
+				       sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_clock_port_name),
+				       sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_clock_port_name)
 				       ));
 
 	midi_combos.push_back (new ComboOption<string> (
 				       "mmc-port-name",
 				       _("Send/Receive MMC via"),
-				       mem_fun (*_rc_config, &RCConfiguration::get_mmc_port_name),
-				       mem_fun (*_rc_config, &RCConfiguration::set_mmc_port_name)
+				       sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_port_name),
+				       sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_port_name)
 				       ));
 
 	midi_combos.push_back (new ComboOption<string> (
 				       "midi-port-name",
 				       _("Send/Receive MIDI parameter control via"),
-				       mem_fun (*_rc_config, &RCConfiguration::get_midi_port_name),
-				       mem_fun (*_rc_config, &RCConfiguration::set_midi_port_name)
+				       sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_port_name),
+				       sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_port_name)
 				       ));
 	
 	add_option (_("MIDI control"), new MIDIPorts (_rc_config, midi_combos));
@@ -1302,8 +1302,8 @@ RCOptionEditor::RCOptionEditor ()
 		    new BoolOption (
 			    "mmc-control",
 			    _("Obey MIDI Machine Control commands"),
-			    mem_fun (*_rc_config, &RCConfiguration::get_mmc_control),
-			    mem_fun (*_rc_config, &RCConfiguration::set_mmc_control)
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_control),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_control)
 			    ));
 
 
@@ -1311,24 +1311,24 @@ RCOptionEditor::RCOptionEditor ()
 		    new BoolOption (
 			    "send-mmc",
 			    _("Send MIDI Machine Control commands"),
-			    mem_fun (*_rc_config, &RCConfiguration::get_send_mmc),
-			    mem_fun (*_rc_config, &RCConfiguration::set_send_mmc)
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_mmc),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mmc)
 			    ));
 
 	add_option (_("MIDI control"),
 		    new BoolOption (
 			    "midi-feedback",
 			    _("Send MIDI control feedback"),
-			    mem_fun (*_rc_config, &RCConfiguration::get_midi_feedback),
-			    mem_fun (*_rc_config, &RCConfiguration::set_midi_feedback)
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_feedback),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_feedback)
 			    ));
 
 	add_option (_("MIDI control"),
 	     new SpinOption<uint8_t> (
 		     "mmc-receive-device-id",
 		     _("Inbound MMC device ID"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_mmc_receive_device_id),
-		     mem_fun (*_rc_config, &RCConfiguration::set_mmc_receive_device_id),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_receive_device_id),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_receive_device_id),
 		     0, 128, 1, 10
 		     ));
 
@@ -1336,8 +1336,8 @@ RCOptionEditor::RCOptionEditor ()
 	     new SpinOption<uint8_t> (
 		     "mmc-send-device-id",
 		     _("Outbound MMC device ID"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_mmc_send_device_id),
-		     mem_fun (*_rc_config, &RCConfiguration::set_mmc_send_device_id),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_send_device_id),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_send_device_id),
 		     0, 128, 1, 10
 		     ));
 
@@ -1345,8 +1345,8 @@ RCOptionEditor::RCOptionEditor ()
 	     new SpinOption<int32_t> (
 		     "initial-program-change",
 		     _("Initial program change"),
-		     mem_fun (*_rc_config, &RCConfiguration::get_initial_program_change),
-		     mem_fun (*_rc_config, &RCConfiguration::set_initial_program_change),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_initial_program_change),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_initial_program_change),
 		     -1, 65536, 1, 10
 		     ));
 
@@ -1357,8 +1357,8 @@ RCOptionEditor::RCOptionEditor ()
 	ComboOption<RemoteModel>* rm = new ComboOption<RemoteModel> (
 		"remote-model",
 		_("Control surface remote ID"),
-		mem_fun (*_rc_config, &RCConfiguration::get_remote_model),
-		mem_fun (*_rc_config, &RCConfiguration::set_remote_model)
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_remote_model),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_remote_model)
 		);
 
 	rm->add (UserOrdered, _("assigned by user"));

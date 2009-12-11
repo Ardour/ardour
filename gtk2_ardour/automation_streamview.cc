@@ -129,7 +129,7 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 	display_region(region_view);
 
 	/* catch regionview going away */
-	region->GoingAway.connect (bind (mem_fun (*this, &AutomationStreamView::remove_region_view), region));
+	region->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &AutomationStreamView::remove_region_view), region));
 
 	RegionViewAdded (region_view);
 
@@ -191,7 +191,7 @@ AutomationStreamView::rec_data_range_ready (jack_nframes_t start, jack_nframes_t
 {
 	// this is called from the butler thread for now
 
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &AutomationStreamView::rec_data_range_ready), start, dur));
+	ENSURE_GUI_THREAD (*this, &AutomationStreamView::rec_data_range_ready, start, dur)
 
 	this->update_rec_regions (start, dur);
 }

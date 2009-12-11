@@ -282,7 +282,7 @@ PluginEqGui::timeout_callback()
 void
 PluginEqGui::signal_collect_callback(ARDOUR::BufferSet *in, ARDOUR::BufferSet *out)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &PluginEqGui::signal_collect_callback), in, out));
+	ENSURE_GUI_THREAD (*this, &PluginEqGui::signal_collect_callback, in, out)
 
 	_signal_input_fft ->reset();
 	_signal_output_fft->reset();

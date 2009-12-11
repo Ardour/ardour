@@ -47,7 +47,7 @@ SessionImportDialog::SessionImportDialog (ARDOUR::Session & target) :
 	Gtkmm2ext::set_size_request_to_display_given_text (file_entry, X_("Kg/quite/a/reasonable/size/for/files/i/think"), 5, 8);
 
 	file_browse_button.set_name ("EditorGTKButton");
-	file_browse_button.signal_clicked().connect (mem_fun(*this, &SessionImportDialog::browse));
+	file_browse_button.signal_clicked().connect (sigc::mem_fun(*this, &SessionImportDialog::browse));
 
 	file_hbox.set_spacing (5);
 	file_hbox.set_border_width (5);
@@ -79,20 +79,20 @@ SessionImportDialog::SessionImportDialog (ARDOUR::Session & target) :
 
 	// Connect signals
 	Gtk::CellRendererToggle *toggle = dynamic_cast<Gtk::CellRendererToggle *> (session_browser.get_column_cell_renderer (1));
-	toggle->signal_toggled().connect(mem_fun (*this, &SessionImportDialog::update));
-	session_browser.signal_row_activated().connect(mem_fun (*this, &SessionImportDialog::show_info));
+	toggle->signal_toggled().connect(sigc::mem_fun (*this, &SessionImportDialog::update));
+	session_browser.signal_row_activated().connect(sigc::mem_fun (*this, &SessionImportDialog::show_info));
 
 	get_vbox()->pack_start (session_scroll, false, false);
 
 	// Buttons
 	cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	cancel_button->signal_clicked().connect (mem_fun (*this, &SessionImportDialog::end_dialog));
+	cancel_button->signal_clicked().connect (sigc::mem_fun (*this, &SessionImportDialog::end_dialog));
 	ok_button = add_button (_("Import"), Gtk::RESPONSE_ACCEPT);
-	ok_button->signal_clicked().connect (mem_fun (*this, &SessionImportDialog::do_merge));
+	ok_button->signal_clicked().connect (sigc::mem_fun (*this, &SessionImportDialog::do_merge));
 
 	// prompt signals
-	ElementImporter::Rename.connect (mem_fun (*this, &SessionImportDialog::open_rename_dialog));
-	ElementImporter::Prompt.connect (mem_fun (*this, &SessionImportDialog::open_prompt_dialog));
+	ElementImporter::Rename.connect (sigc::mem_fun (*this, &SessionImportDialog::open_rename_dialog));
+	ElementImporter::Prompt.connect (sigc::mem_fun (*this, &SessionImportDialog::open_prompt_dialog));
 
 	// Finalize
 	show_all();

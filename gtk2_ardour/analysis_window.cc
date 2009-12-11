@@ -79,7 +79,7 @@ AnalysisWindow::AnalysisWindow() :
 
 
 	tlmodel->signal_row_changed().connect (
-			mem_fun(*this, &AnalysisWindow::track_list_row_changed) );
+			sigc::mem_fun(*this, &AnalysisWindow::track_list_row_changed) );
 
 	fft_graph.set_analysis_window(this);
 
@@ -100,11 +100,11 @@ AnalysisWindow::AnalysisWindow() :
 
 		// "Selected ranges" radio
 		source_selection_ranges_rb.signal_toggled().connect (
-				bind ( mem_fun(*this, &AnalysisWindow::source_selection_changed), &source_selection_ranges_rb));
+				sigc::bind ( sigc::mem_fun(*this, &AnalysisWindow::source_selection_changed), &source_selection_ranges_rb));
 
 		// "Selected regions" radio
 		source_selection_regions_rb.signal_toggled().connect (
-				bind ( mem_fun(*this, &AnalysisWindow::source_selection_changed), &source_selection_regions_rb));
+				sigc::bind ( sigc::mem_fun(*this, &AnalysisWindow::source_selection_changed), &source_selection_regions_rb));
 	}
 
 	vbox.pack_start(hseparator1, false, false);
@@ -122,11 +122,11 @@ AnalysisWindow::AnalysisWindow() :
 
 		// "Composite graphs for all tracks"
 		display_model_composite_separate_rb.signal_toggled().connect (
-				bind ( mem_fun(*this, &AnalysisWindow::display_model_changed), &display_model_composite_separate_rb));
+				sigc::bind ( sigc::mem_fun(*this, &AnalysisWindow::display_model_changed), &display_model_composite_separate_rb));
 
 		// "Composite graph of all tracks"
 		display_model_composite_all_tracks_rb.signal_toggled().connect (
-				bind ( mem_fun(*this, &AnalysisWindow::display_model_changed), &display_model_composite_all_tracks_rb));
+				sigc::bind ( sigc::mem_fun(*this, &AnalysisWindow::display_model_changed), &display_model_composite_all_tracks_rb));
 	}
 
 	// Analyze button
@@ -134,7 +134,7 @@ AnalysisWindow::AnalysisWindow() :
 	refresh_button.set_name("EditorGTKButton");
 	refresh_button.set_label(_("Re-analyze data"));
 
-	refresh_button.signal_clicked().connect ( bind ( mem_fun(*this, &AnalysisWindow::analyze_data), &refresh_button));
+	refresh_button.signal_clicked().connect ( sigc::bind ( sigc::mem_fun(*this, &AnalysisWindow::analyze_data), &refresh_button));
 
 	vbox.pack_start(refresh_button, false, false, 10);
 
@@ -142,11 +142,11 @@ AnalysisWindow::AnalysisWindow() :
 	// Feature checkboxes
 
 	// minmax
-	show_minmax_button.signal_toggled().connect( mem_fun(*this, &AnalysisWindow::show_minmax_changed));
+	show_minmax_button.signal_toggled().connect( sigc::mem_fun(*this, &AnalysisWindow::show_minmax_changed));
 	vbox.pack_start(show_minmax_button, false, false);
 
 	// normalize
-	show_normalized_button.signal_toggled().connect( mem_fun(*this, &AnalysisWindow::show_normalized_changed));
+	show_normalized_button.signal_toggled().connect( sigc::mem_fun(*this, &AnalysisWindow::show_normalized_changed));
 	vbox.pack_start(show_normalized_button, false, false);
 
 

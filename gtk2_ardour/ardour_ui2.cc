@@ -77,7 +77,7 @@ ARDOUR_UI::setup_windows ()
 	setup_transport();
 	build_menu_bar ();
 
-	theme_manager->signal_unmap().connect (bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleThemeManager")));
+	theme_manager->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleThemeManager")));
 
 #ifdef TOP_MENUBAR
 	HBox* status_bar_packer = manage (new HBox);
@@ -86,7 +86,7 @@ ARDOUR_UI::setup_windows ()
 	status_bar_packer->pack_start (status_bar_label, true, true, 6);
 	status_bar_packer->pack_start (error_log_button, false, false);
 
-	error_log_button.signal_clicked().connect (mem_fun (*this, &UI::toggle_errors));
+	error_log_button.signal_clicked().connect (sigc::mem_fun (*this, &UI::toggle_errors));
 
 	editor->get_status_bar_packer().pack_start (*status_bar_packer, true, true);
 	editor->get_status_bar_packer().pack_start (menu_bar_base, false, false, 6);
@@ -147,7 +147,7 @@ ARDOUR_UI::setup_transport ()
 {
 	transport_tearoff = manage (new TearOff (transport_tearoff_hbox));
 	transport_tearoff->set_name ("TransportBase");
-	transport_tearoff->tearoff_window().signal_key_press_event().connect (bind (sigc::ptr_fun (relay_key_press), &transport_tearoff->tearoff_window()), false);
+	transport_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), &transport_tearoff->tearoff_window()), false);
 
 	if (Profile->get_sae()) {
 		transport_tearoff->set_can_be_torn_off (false);
@@ -162,13 +162,13 @@ ARDOUR_UI::setup_transport ()
 	transport_frame.set_name ("BaseFrame");
 	transport_frame.add (transport_base);
 
-	transport_tearoff->Detach.connect (bind (mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer),
+	transport_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer),
 						 static_cast<Widget*>(&transport_frame)));
-	transport_tearoff->Attach.connect (bind (mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
+	transport_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
 						 static_cast<Widget*> (&transport_frame), 1));
-	transport_tearoff->Hidden.connect (bind (mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer),
+	transport_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer),
 						 static_cast<Widget*>(&transport_frame)));
-	transport_tearoff->Visible.connect (bind (mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
+	transport_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
 						  static_cast<Widget*> (&transport_frame), 1));
 
 	shuttle_box.set_name ("TransportButton");
@@ -268,20 +268,20 @@ ARDOUR_UI::setup_transport ()
 	shuttle_box.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 	shuttle_box.set_size_request (100, 15);
 
-	shuttle_box.signal_button_press_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_button_press));
-	shuttle_box.signal_button_release_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_button_release));
-	shuttle_box.signal_scroll_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_scroll));
-	shuttle_box.signal_motion_notify_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_motion));
-	shuttle_box.signal_expose_event().connect (mem_fun(*this, &ARDOUR_UI::shuttle_box_expose));
+	shuttle_box.signal_button_press_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::shuttle_box_button_press));
+	shuttle_box.signal_button_release_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::shuttle_box_button_release));
+	shuttle_box.signal_scroll_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::shuttle_box_scroll));
+	shuttle_box.signal_motion_notify_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::shuttle_box_motion));
+	shuttle_box.signal_expose_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::shuttle_box_expose));
 
 	/* clocks, etc. */
 
-	ARDOUR_UI::Clock.connect (bind (mem_fun (primary_clock, &AudioClock::set), 'p'));
-	ARDOUR_UI::Clock.connect (bind (mem_fun (secondary_clock, &AudioClock::set), 's'));
+	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (primary_clock, &AudioClock::set), 'p'));
+	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (secondary_clock, &AudioClock::set), 's'));
 
-	primary_clock.ValueChanged.connect (mem_fun(*this, &ARDOUR_UI::primary_clock_value_changed));
-	secondary_clock.ValueChanged.connect (mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));
-	big_clock.ValueChanged.connect (mem_fun(*this, &ARDOUR_UI::big_clock_value_changed));
+	primary_clock.ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::primary_clock_value_changed));
+	secondary_clock.ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));
+	big_clock.ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::big_clock_value_changed));
 
 	ARDOUR_UI::instance()->tooltips().set_tip (primary_clock, _("Primary clock"));
 	ARDOUR_UI::instance()->tooltips().set_tip (secondary_clock, _("secondary clock"));
@@ -303,12 +303,12 @@ ARDOUR_UI::setup_transport ()
 
 	/* alerts */
 
-	/* CANNOT bind these to clicked or toggled, must use pressed or released */
+	/* CANNOT sigc::bind these to clicked or toggled, must use pressed or released */
 
 	solo_alert_button.set_name ("TransportSoloAlert");
-	solo_alert_button.signal_pressed().connect (mem_fun(*this,&ARDOUR_UI::solo_alert_toggle));
+	solo_alert_button.signal_pressed().connect (sigc::mem_fun(*this,&ARDOUR_UI::solo_alert_toggle));
 	auditioning_alert_button.set_name ("TransportAuditioningAlert");
-	auditioning_alert_button.signal_pressed().connect (mem_fun(*this,&ARDOUR_UI::audition_alert_toggle));
+	auditioning_alert_button.signal_pressed().connect (sigc::mem_fun(*this,&ARDOUR_UI::audition_alert_toggle));
 
 	tooltips().set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
 	tooltips().set_tip (auditioning_alert_button, _("When active, auditioning is taking place\nClick to stop the audition"));
@@ -335,7 +335,7 @@ ARDOUR_UI::setup_transport ()
 	set_size_request_to_display_given_text (speed_display_label, X_("> 24.0"), 2, 2);
 
 	shuttle_units_button.set_name (X_("ShuttleButton"));
-	shuttle_units_button.signal_clicked().connect (mem_fun(*this, &ARDOUR_UI::shuttle_unit_clicked));
+	shuttle_units_button.signal_clicked().connect (sigc::mem_fun(*this, &ARDOUR_UI::shuttle_unit_clicked));
 
 	shuttle_style_button.set_name (X_("ShuttleStyleButton"));
 
@@ -343,7 +343,7 @@ ARDOUR_UI::setup_transport ()
 	shuttle_strings.push_back (_("sprung"));
 	shuttle_strings.push_back (_("wheel"));
 	set_popdown_strings (shuttle_style_button, shuttle_strings, true);
-	shuttle_style_button.signal_changed().connect (mem_fun (*this, &ARDOUR_UI::shuttle_style_changed));
+	shuttle_style_button.signal_changed().connect (sigc::mem_fun (*this, &ARDOUR_UI::shuttle_style_changed));
 
 	Frame* sdframe = manage (new Frame);
 
@@ -424,9 +424,9 @@ ARDOUR_UI::setup_transport ()
 void
 ARDOUR_UI::manage_window (Window& win)
 {
-	win.signal_delete_event().connect (bind (sigc::ptr_fun (just_hide_it), &win));
-	win.signal_enter_notify_event().connect (bind (mem_fun (Keyboard::the_keyboard(), &Keyboard::enter_window), &win));
-	win.signal_leave_notify_event().connect (bind (mem_fun (Keyboard::the_keyboard(), &Keyboard::leave_window), &win));
+	win.signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), &win));
+	win.signal_enter_notify_event().connect (sigc::bind (sigc::mem_fun (Keyboard::the_keyboard(), &Keyboard::enter_window), &win));
+	win.signal_leave_notify_event().connect (sigc::bind (sigc::mem_fun (Keyboard::the_keyboard(), &Keyboard::leave_window), &win));
 }
 
 void
@@ -463,7 +463,7 @@ ARDOUR_UI::_auditioning_changed (bool onoff)
 void
 ARDOUR_UI::auditioning_changed (bool onoff)
 {
-	UI::instance()->call_slot(bind (mem_fun(*this, &ARDOUR_UI::_auditioning_changed), onoff));
+	UI::instance()->call_slot(sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::_auditioning_changed), onoff));
 }
 
 void
@@ -556,27 +556,27 @@ ARDOUR_UI::build_shuttle_context_menu ()
 
 	RadioMenuItem::Group group;
 
-	speed_items.push_back (RadioMenuElem (group, "8", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 8.0f)));
+	speed_items.push_back (RadioMenuElem (group, "8", sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 8.0f)));
 	if (shuttle_max_speed == 8.0) {
 		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
 	}
-	speed_items.push_back (RadioMenuElem (group, "6", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 6.0f)));
+	speed_items.push_back (RadioMenuElem (group, "6", sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 6.0f)));
 	if (shuttle_max_speed == 6.0) {
 		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
 	}
-	speed_items.push_back (RadioMenuElem (group, "4", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 4.0f)));
+	speed_items.push_back (RadioMenuElem (group, "4", sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 4.0f)));
 	if (shuttle_max_speed == 4.0) {
 		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
 	}
-	speed_items.push_back (RadioMenuElem (group, "3", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 3.0f)));
+	speed_items.push_back (RadioMenuElem (group, "3", sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 3.0f)));
 	if (shuttle_max_speed == 3.0) {
 		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
 	}
-	speed_items.push_back (RadioMenuElem (group, "2", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 2.0f)));
+	speed_items.push_back (RadioMenuElem (group, "2", sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 2.0f)));
 	if (shuttle_max_speed == 2.0) {
 		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
 	}
-	speed_items.push_back (RadioMenuElem (group, "1.5", bind (mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 1.5f)));
+	speed_items.push_back (RadioMenuElem (group, "1.5", sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_shuttle_max_speed), 1.5f)));
 	if (shuttle_max_speed == 1.5) {
 		static_cast<RadioMenuItem*>(&speed_items.back())->set_active ();
 	}
@@ -878,7 +878,7 @@ ARDOUR_UI::set_transport_sensitivity (bool yn)
 void
 ARDOUR_UI::editor_realized ()
 {
-	Config->map_parameters (mem_fun (*this, &ARDOUR_UI::parameter_changed));
+	Config->map_parameters (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
 
 	set_size_request_to_display_given_text (speed_display_box, _("-0.55"), 2, 2);
 	reset_dpi ();

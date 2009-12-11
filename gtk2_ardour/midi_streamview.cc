@@ -85,19 +85,19 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	_note_lines->property_x2() = trackview().editor().frame_to_pixel (max_frames);
 	_note_lines->property_y2() = 0;
 
-	_note_lines->signal_event().connect(bind(
-			mem_fun(_trackview.editor(), &PublicEditor::canvas_stream_view_event),
+	_note_lines->signal_event().connect(sigc::bind(
+			sigc::mem_fun(_trackview.editor(), &PublicEditor::canvas_stream_view_event),
 			_note_lines, &_trackview));
 
 	_note_lines->lower_to_bottom();
 
-	ColorsChanged.connect(mem_fun(*this, &MidiStreamView::draw_note_lines));
+	ColorsChanged.connect(sigc::mem_fun(*this, &MidiStreamView::draw_note_lines));
 
 	note_range_adjustment.set_page_size(_highest_note - _lowest_note);
 	note_range_adjustment.set_value(_lowest_note);
 
 	note_range_adjustment.signal_value_changed().connect(
-			mem_fun(*this, &MidiStreamView::note_range_adjustment_changed));
+			sigc::mem_fun(*this, &MidiStreamView::note_range_adjustment_changed));
 }
 
 MidiStreamView::~MidiStreamView ()
@@ -180,7 +180,7 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd,
 	display_region (region_view, wfd);
 
 	/* catch regionview going away */
-	region->GoingAway.connect (bind (mem_fun (*this, &MidiStreamView::remove_region_view), region));
+	region->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &MidiStreamView::remove_region_view), region));
 
 	RegionViewAdded (region_view);
 
@@ -405,8 +405,8 @@ MidiStreamView::setup_rec_box ()
 
 				sources.push_back(mds->write_source());
 
-				rec_data_ready_connections.push_back (mds->write_source()->ViewDataRangeReady.connect (bind (
-						mem_fun (*this, &MidiStreamView::rec_data_range_ready),
+				rec_data_ready_connections.push_back (mds->write_source()->ViewDataRangeReady.connect (sigc::bind (
+						sigc::mem_fun (*this, &MidiStreamView::rec_data_range_ready),
 						boost::weak_ptr<Source>(mds->write_source()))));
 
 				// handle multi
@@ -462,7 +462,7 @@ MidiStreamView::setup_rec_box ()
 
 			screen_update_connection.disconnect();
 			screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (
-					mem_fun (*this, &MidiStreamView::update_rec_box));
+					sigc::mem_fun (*this, &MidiStreamView::update_rec_box));
 			rec_updating = true;
 			rec_active = true;
 
@@ -524,7 +524,7 @@ MidiStreamView::setup_rec_box ()
 void
 MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t start, nframes_t dur)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &MidiStreamView::update_rec_regions), data, start, dur));
+	ENSURE_GUI_THREAD (*this, &MidiStreamView::update_rec_regions, data, start, dur)
 
 	if (use_rec_regions) {
 
@@ -654,7 +654,7 @@ MidiStreamView::rec_data_range_ready (nframes_t start, nframes_t cnt, boost::wea
 {
 	// this is called from the butler thread for now
 
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &MidiStreamView::rec_data_range_ready), start, cnt, weak_src));
+	ENSURE_GUI_THREAD (*this, &MidiStreamView::rec_data_range_ready, start, cnt, weak_src)
 
 	boost::shared_ptr<SMFSource> src (boost::dynamic_pointer_cast<SMFSource>(weak_src.lock()));
 

@@ -332,7 +332,7 @@ ImageFrameSocketHandler::send_imageframe_time_axis_removed(const string & track_
 void
 ImageFrameSocketHandler::send_imageframe_time_axis_renamed(const string & new_id, const string & old_id, void* src, ImageFrameTimeAxis* time_axis)
 {
-	// ENSURE_GUI_THREAD(SigC::bind (mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_renamed), new_id, old_id, src, time_axis));
+	// ENSURE_GUI_THREAD(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_renamed, new_id, old_id, src, time_axis);
 
 	if(this == src || src == 0)
 	{
@@ -409,7 +409,7 @@ ImageFrameSocketHandler::send_marker_time_axis_removed(const string & track_id, 
 void
 ImageFrameSocketHandler::send_marker_time_axis_renamed(const string & new_id, const string & old_id, void* src, MarkerTimeAxis* time_axis)
 {
-	// ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameSocketHandler::send_marker_time_axis_renamed), new_id, old_id, src, time_axis));
+	// ENSURE_GUI_THREAD (*this, &ImageFrameSocketHandler::send_marker_time_axis_renamed, new_id, old_id, src, time_axis)
 
 	if(this == src || src == 0)
 	{
@@ -492,7 +492,7 @@ ImageFrameSocketHandler::send_imageframe_time_axis_group_removed(const string & 
 void
 ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed(const string & new_id, const string & old_id, void* src, ImageFrameTimeAxisGroup* group)
 {
-	// ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed), new_id, old_id, src, group));
+	// ENSURE_GUI_THREAD (*this, &ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed, new_id, old_id, src, group)
 
 	if(this == src || src == 0)
 	{
@@ -540,7 +540,7 @@ ImageFrameSocketHandler::send_imageframe_time_axis_group_renamed(const string & 
 void
 ImageFrameSocketHandler::send_imageframe_view_position_change(nframes_t pos, void* src, ImageFrameView* item)
 {
-	// ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_view_position_change), pos, src, item));
+	// ENSURE_GUI_THREAD (*this, &ImageFrameSocketHandler::send_imageframe_view_position_change, pos, src, item)
 
 	if(this == src || src == 0)
 	{
@@ -576,7 +576,7 @@ ImageFrameSocketHandler::send_imageframe_view_position_change(nframes_t pos, voi
 void
 ImageFrameSocketHandler::send_imageframe_view_duration_change(nframes_t dur, void* src, ImageFrameView* item)
 {
-	// ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameSocketHandler::send_imageframe_view_duration_change), dur, src, item));
+	// ENSURE_GUI_THREAD (*this, &ImageFrameSocketHandler::send_imageframe_view_duration_change, dur, src, item)
 
 	if(this == src || src == 0)
 	{

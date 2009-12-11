@@ -100,7 +100,7 @@ Editor::tempo_map_changed (Change ignored)
 		return;
 	}
 
-	ENSURE_GUI_THREAD(bind (mem_fun (*this, &Editor::tempo_map_changed), ignored));
+	ENSURE_GUI_THREAD (*this, &Editor::tempo_map_changed, ignored)
 
 	if (tempo_lines)
 		tempo_lines->tempo_map_changed();
@@ -126,7 +126,7 @@ Editor::redisplay_tempo (bool immediate_redraw)
 #ifdef GTKOSX
 		redraw_measures ();
 #else
-		Glib::signal_idle().connect (mem_fun (*this, &Editor::redraw_measures));
+		Glib::signal_idle().connect (sigc::mem_fun (*this, &Editor::redraw_measures));
 #endif
 	}
 	update_tempo_based_rulers (); // redraw rulers and measures
@@ -207,7 +207,7 @@ Editor::mouse_add_new_tempo_event (nframes64_t frame)
 
 	tempo_dialog.set_position (Gtk::WIN_POS_MOUSE);
 	//this causes compiz to display no border.
-	//tempo_dialog.signal_realize().connect (bind (sigc::ptr_fun (set_decoration), &tempo_dialog, Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
+	//tempo_dialog.signal_realize().connect (sigc::bind (sigc::ptr_fun (set_decoration), &tempo_dialog, Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
 
 	ensure_float (tempo_dialog);
 
@@ -251,7 +251,7 @@ Editor::mouse_add_new_meter_event (nframes64_t frame)
 	meter_dialog.set_position (Gtk::WIN_POS_MOUSE);
 
 	//this causes compiz to display no border..
-	//meter_dialog.signal_realize().connect (bind (sigc::ptr_fun (set_decoration), &meter_dialog, Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
+	//meter_dialog.signal_realize().connect (sigc::bind (sigc::ptr_fun (set_decoration), &meter_dialog, Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
 
 	ensure_float (meter_dialog);
 
@@ -296,7 +296,7 @@ Editor::remove_tempo_marker (ArdourCanvas::Item* item)
 	}
 
 	if (tempo_marker->tempo().movable()) {
-	  Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::real_remove_tempo_marker), &tempo_marker->tempo()));
+	  Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::real_remove_tempo_marker), &tempo_marker->tempo()));
 	}
 }
 
@@ -432,7 +432,7 @@ Editor::remove_meter_marker (ArdourCanvas::Item* item)
 	}
 
 	if (meter_marker->meter().movable()) {
-	  Glib::signal_idle().connect (bind (mem_fun(*this, &Editor::real_remove_meter_marker), &meter_marker->meter()));
+	  Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::real_remove_meter_marker), &meter_marker->meter()));
 	}
 }
 

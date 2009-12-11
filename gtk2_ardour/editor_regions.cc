@@ -69,7 +69,7 @@ EditorRegions::EditorRegions (Editor* e)
 	_display.set_data ("mouse-edits-require-mod1", (gpointer) 0x1);
 
 	_model = TreeStore::create (_columns);
-	_model->set_sort_func (0, mem_fun (*this, &EditorRegions::sorter));
+	_model->set_sort_func (0, sigc::mem_fun (*this, &EditorRegions::sorter));
 	_model->set_sort_column (0, SORT_ASCENDING);
 
 	_display.set_model (_model);
@@ -91,9 +91,9 @@ EditorRegions::EditorRegions (Editor* e)
 
 	CellRendererText* region_name_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
 	region_name_cell->property_editable() = true;
-	region_name_cell->signal_edited().connect (mem_fun (*this, &EditorRegions::name_edit));
+	region_name_cell->signal_edited().connect (sigc::mem_fun (*this, &EditorRegions::name_edit));
 
-	_display.get_selection()->set_select_function (mem_fun (*this, &EditorRegions::selection_filter));
+	_display.get_selection()->set_select_function (sigc::mem_fun (*this, &EditorRegions::selection_filter));
 
 	TreeViewColumn* tv_col = _display.get_column(0);
 	CellRendererText* renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
@@ -112,21 +112,21 @@ EditorRegions::EditorRegions (Editor* e)
 	region_list_target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
 
 	_display.add_drop_targets (region_list_target_table);
-	_display.signal_drag_data_received().connect (mem_fun(*this, &EditorRegions::drag_data_received));
+	_display.signal_drag_data_received().connect (sigc::mem_fun(*this, &EditorRegions::drag_data_received));
 
 	_scroller.add (_display);
 	_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
-	_display.signal_key_press_event().connect (mem_fun(*this, &EditorRegions::key_press));
-	_display.signal_key_release_event().connect (mem_fun(*this, &EditorRegions::key_release));
-	_display.signal_button_press_event().connect (mem_fun(*this, &EditorRegions::button_press), false);
-	_display.signal_button_release_event().connect (mem_fun(*this, &EditorRegions::button_release));
-	_change_connection = _display.get_selection()->signal_changed().connect (mem_fun(*this, &EditorRegions::selection_changed));
-	// _display.signal_popup_menu().connect (bind (mem_fun (*this, &Editor::show__display_context_menu), 1, 0));
+	_display.signal_key_press_event().connect (sigc::mem_fun(*this, &EditorRegions::key_press));
+	_display.signal_key_release_event().connect (sigc::mem_fun(*this, &EditorRegions::key_release));
+	_display.signal_button_press_event().connect (sigc::mem_fun(*this, &EditorRegions::button_press), false);
+	_display.signal_button_release_event().connect (sigc::mem_fun(*this, &EditorRegions::button_release));
+	_change_connection = _display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &EditorRegions::selection_changed));
+	// _display.signal_popup_menu().connect (sigc::bind (sigc::mem_fun (*this, &Editor::show__display_context_menu), 1, 0));
 
-	//ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (mem_fun(*this, &Editor::redisplay_regions));
-	ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (mem_fun(*this, &EditorRegions::update_all_rows));
-	ARDOUR::Region::RegionPropertyChanged.connect (mem_fun(*this, &EditorRegions::update_row));
+	//ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (sigc::mem_fun(*this, &Editor::redisplay_regions));
+	ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (sigc::mem_fun(*this, &EditorRegions::update_all_rows));
+	ARDOUR::Region::RegionPropertyChanged.connect (sigc::mem_fun(*this, &EditorRegions::update_row));
 
 }
 
@@ -135,9 +135,9 @@ EditorRegions::connect_to_session (ARDOUR::Session* s)
 {
 	EditorComponent::connect_to_session (s);
 
-	_session_connections.push_back (_session->RegionsAdded.connect (mem_fun(*this, &EditorRegions::handle_new_regions)));
-	_session_connections.push_back (_session->RegionRemoved.connect (mem_fun(*this, &EditorRegions::handle_region_removed)));
-	_session_connections.push_back (_session->RegionHiddenChange.connect (mem_fun(*this, &EditorRegions::region_hidden)));
+	_session_connections.push_back (_session->RegionsAdded.connect (sigc::mem_fun(*this, &EditorRegions::handle_new_regions)));
+	_session_connections.push_back (_session->RegionRemoved.connect (sigc::mem_fun(*this, &EditorRegions::handle_region_removed)));
+	_session_connections.push_back (_session->RegionHiddenChange.connect (sigc::mem_fun(*this, &EditorRegions::region_hidden)));
 
 	redisplay ();
 }
@@ -145,7 +145,7 @@ EditorRegions::connect_to_session (ARDOUR::Session* s)
 void
 EditorRegions::handle_region_removed (boost::weak_ptr<Region> wregion)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &EditorRegions::handle_region_removed), wregion));
+	ENSURE_GUI_THREAD (*this, &EditorRegions::handle_region_removed, wregion)
 
 	redisplay ();
 }
@@ -153,7 +153,7 @@ EditorRegions::handle_region_removed (boost::weak_ptr<Region> wregion)
 void
 EditorRegions::handle_new_regions (vector<boost::weak_ptr<Region> >& v)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &EditorRegions::handle_new_regions), v));
+	ENSURE_GUI_THREAD (*this, &EditorRegions::handle_new_regions, v)
 	add_regions (v);
 }
 
@@ -170,7 +170,7 @@ EditorRegions::region_hidden_weak (boost::weak_ptr<Region> wr)
 void
 EditorRegions::region_hidden (boost::shared_ptr<Region> r)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &EditorRegions::region_hidden), r));
+	ENSURE_GUI_THREAD (*this, &EditorRegions::region_hidden, r)
 	redisplay ();
 }
 
@@ -345,7 +345,7 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 void
 EditorRegions::region_changed (Change what_changed, boost::weak_ptr<Region> region)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &EditorRegions::region_changed), what_changed, region));
+	ENSURE_GUI_THREAD (*this, &EditorRegions::region_changed, what_changed, region)
 
 	boost::shared_ptr<Region> r = region.lock ();
 
@@ -1086,7 +1086,7 @@ EditorRegions::reset_sort_type (RegionListSortType type, bool force)
 {
 	if (type != _sort_type || force) {
 		_sort_type = type;
-		_model->set_sort_func (0, (mem_fun (*this, &EditorRegions::sorter)));
+		_model->set_sort_func (0, (sigc::mem_fun (*this, &EditorRegions::sorter)));
 	}
 }
 
@@ -1129,7 +1129,7 @@ EditorRegions::selection_mapover (slot<void,boost::shared_ptr<Region> > sl)
 void
 EditorRegions::remove_region ()
 {
-	selection_mapover (mem_fun (*_editor, &Editor::remove_a_region));
+	selection_mapover (sigc::mem_fun (*_editor, &Editor::remove_a_region));
 }
 
 void

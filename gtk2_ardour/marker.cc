@@ -270,12 +270,12 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 	set_name (annotation.c_str());
 
-	editor.ZoomChanged.connect (mem_fun (*this, &Marker::reposition));
+	editor.ZoomChanged.connect (sigc::mem_fun (*this, &Marker::reposition));
 
 	mark->set_data ("marker", this);
 
 	if (handle_events) {
-		group->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
+		group->signal_event().connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
 	}
 
 	line = 0;
@@ -324,7 +324,7 @@ Marker::add_line (ArdourCanvas::Group* group, double y_origin, double initial_he
 		line->property_x2() = unit_position + shift;
 		line->property_y2() = y_origin + initial_height;
 
-		line->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
+		line->signal_event().connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), mark, this));
 	}
 
 	show_line ();
@@ -413,7 +413,7 @@ TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Group& parent, gui
 	  _tempo (temp)
 {
 	set_position (_tempo.frame());
-	group->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_tempo_marker_event), mark, this));
+	group->signal_event().connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_tempo_marker_event), mark, this));
 }
 
 TempoMarker::~TempoMarker ()
@@ -428,7 +428,7 @@ MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Group& parent, gui
 	  _meter (m)
 {
 	set_position (_meter.frame());
-	group->signal_event().connect (bind (mem_fun (editor, &PublicEditor::canvas_meter_marker_event), mark, this));
+	group->signal_event().connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_meter_marker_event), mark, this));
 }
 
 MeterMarker::~MeterMarker ()

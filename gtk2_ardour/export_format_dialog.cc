@@ -123,11 +123,11 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	/* Buttons */
 
 	revert_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	revert_button->signal_clicked().connect (mem_fun(*this, &ExportFormatDialog::revert));
+	revert_button->signal_clicked().connect (sigc::mem_fun(*this, &ExportFormatDialog::revert));
 	close_button = add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_APPLY);
 	close_button->set_sensitive (false);
-	close_button->signal_clicked().connect (mem_fun (*this, &ExportFormatDialog::end_dialog));
-	manager.CompleteChanged.connect (mem_fun (*close_button, &Gtk::Button::set_sensitive));
+	close_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportFormatDialog::end_dialog));
+	manager.CompleteChanged.connect (sigc::mem_fun (*close_button, &Gtk::Button::set_sensitive));
 
 	/* Load state before hooking up the rest of the signals */
 
@@ -135,40 +135,40 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 
 	/* Name entry */
 
-	name_entry.signal_changed().connect (mem_fun (*this, &ExportFormatDialog::update_name));
+	name_entry.signal_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_name));
 
 	/* Normalize, silence and src_quality signals */
 
-	trim_start_checkbox.signal_toggled().connect (mem_fun (*this, &ExportFormatDialog::update_trim_start_selection));
-	trim_end_checkbox.signal_toggled().connect (mem_fun (*this, &ExportFormatDialog::update_trim_end_selection));
+	trim_start_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_trim_start_selection));
+	trim_end_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_trim_end_selection));
 
-	normalize_checkbox.signal_toggled().connect (mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
-	normalize_spinbutton.signal_value_changed().connect (mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
+	normalize_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
+	normalize_spinbutton.signal_value_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_normalize_selection));
 
-	silence_start_checkbox.signal_toggled().connect (mem_fun (*this, &ExportFormatDialog::update_silence_start_selection));
-	silence_start_clock.ValueChanged.connect (mem_fun (*this, &ExportFormatDialog::update_silence_start_selection));
+	silence_start_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_silence_start_selection));
+	silence_start_clock.ValueChanged.connect (sigc::mem_fun (*this, &ExportFormatDialog::update_silence_start_selection));
 
-	silence_end_checkbox.signal_toggled().connect (mem_fun (*this, &ExportFormatDialog::update_silence_end_selection));
-	silence_end_clock.ValueChanged.connect (mem_fun (*this, &ExportFormatDialog::update_silence_end_selection));
+	silence_end_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_silence_end_selection));
+	silence_end_clock.ValueChanged.connect (sigc::mem_fun (*this, &ExportFormatDialog::update_silence_end_selection));
 
-	src_quality_combo.signal_changed().connect (mem_fun (*this, &ExportFormatDialog::update_src_quality_selection));
+	src_quality_combo.signal_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_src_quality_selection));
 
 	/* Format table signals */
 
 	Gtk::CellRendererToggle *toggle = dynamic_cast<Gtk::CellRendererToggle *>(compatibility_view.get_column_cell_renderer (0));
-	toggle->signal_toggled().connect (mem_fun (*this, &ExportFormatDialog::update_compatibility_selection));
-	compatibility_select_connection = compatibility_view.get_selection()->signal_changed().connect (mem_fun (*this, &ExportFormatDialog::prohibit_compatibility_selection));
+	toggle->signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_compatibility_selection));
+	compatibility_select_connection = compatibility_view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::prohibit_compatibility_selection));
 
-	quality_view.get_selection()->signal_changed().connect (mem_fun(*this, &ExportFormatDialog::update_quality_selection));
-	format_view.get_selection()->signal_changed().connect (mem_fun(*this, &ExportFormatDialog::update_format_selection));
-	sample_rate_view.get_selection()->signal_changed().connect (mem_fun(*this, &ExportFormatDialog::update_sample_rate_selection));
+	quality_view.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &ExportFormatDialog::update_quality_selection));
+	format_view.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &ExportFormatDialog::update_format_selection));
+	sample_rate_view.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &ExportFormatDialog::update_sample_rate_selection));
 
 	/* Encoding option signals */
 
-	sample_format_view.get_selection()->signal_changed().connect (mem_fun(*this, &ExportFormatDialog::update_sample_format_selection));
-	dither_type_view.get_selection()->signal_changed().connect (mem_fun(*this, &ExportFormatDialog::update_dither_type_selection));
+	sample_format_view.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &ExportFormatDialog::update_sample_format_selection));
+	dither_type_view.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &ExportFormatDialog::update_dither_type_selection));
 
-	tag_checkbox.signal_toggled().connect (mem_fun (*this, &ExportFormatDialog::update_tagging_selection));
+	tag_checkbox.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_tagging_selection));
 
 	/* Finalize */
 

@@ -108,8 +108,8 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	}
 
 	if (_route->panner()) {
-		_route->panner()->Changed.connect (bind (
-				mem_fun(*this, &AudioTimeAxisView::ensure_pan_views),
+		_route->panner()->Changed.connect (sigc::bind (
+				sigc::mem_fun(*this, &AudioTimeAxisView::ensure_pan_views),
 				false));
 	}
 
@@ -123,7 +123,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 	if (is_audio_track()) {
 
 		/* ask for notifications of any new RegionViews */
-		_view->RegionViewAdded.connect (mem_fun(*this, &AudioTimeAxisView::region_view_added));
+		_view->RegionViewAdded.connect (sigc::mem_fun(*this, &AudioTimeAxisView::region_view_added));
 
 		if (!_editor.have_idled()) {
 			/* first idle will do what we need */
@@ -181,8 +181,8 @@ AudioTimeAxisView::append_extra_display_menu_items ()
 
 	// crossfade stuff
 	if (!Profile->get_sae()) {
-		items.push_back (MenuElem (_("Hide all crossfades"), mem_fun(*this, &AudioTimeAxisView::hide_all_xfades)));
-		items.push_back (MenuElem (_("Show all crossfades"), mem_fun(*this, &AudioTimeAxisView::show_all_xfades)));
+		items.push_back (MenuElem (_("Hide all crossfades"), sigc::mem_fun(*this, &AudioTimeAxisView::hide_all_xfades)));
+		items.push_back (MenuElem (_("Show all crossfades"), sigc::mem_fun(*this, &AudioTimeAxisView::show_all_xfades)));
 	}
 }
 
@@ -198,15 +198,15 @@ AudioTimeAxisView::build_mode_menu()
 	RadioMenuItem::Group mode_group;
 
 	items.push_back (RadioMenuElem (mode_group, _("Normal"),
-				bind (mem_fun (*this, &AudioTimeAxisView::set_track_mode), ARDOUR::Normal)));
+				sigc::bind (sigc::mem_fun (*this, &AudioTimeAxisView::set_track_mode), ARDOUR::Normal)));
 	normal_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 
 	items.push_back (RadioMenuElem (mode_group, _("Non Overlapping"),
-				bind (mem_fun (*this, &AudioTimeAxisView::set_track_mode), ARDOUR::NonLayered)));
+				sigc::bind (sigc::mem_fun (*this, &AudioTimeAxisView::set_track_mode), ARDOUR::NonLayered)));
 	non_layered_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 
 	items.push_back (RadioMenuElem (mode_group, _("Tape"),
-				bind (mem_fun (*this, &AudioTimeAxisView::set_track_mode), ARDOUR::Destructive)));
+				sigc::bind (sigc::mem_fun (*this, &AudioTimeAxisView::set_track_mode), ARDOUR::Destructive)));
 	destructive_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 
 	switch (track()->mode()) {

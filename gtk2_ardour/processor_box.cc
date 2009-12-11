@@ -105,10 +105,10 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	_name.set_padding (2, 2);
 	
 	_active.set_active (_processor->active ());
-	_active.signal_toggled().connect (mem_fun (*this, &ProcessorEntry::active_toggled));
+	_active.signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::active_toggled));
 	
-	_processor->ActiveChanged.connect (mem_fun (*this, &ProcessorEntry::processor_active_changed));
-	_processor->NameChanged.connect (mem_fun (*this, &ProcessorEntry::processor_name_changed));
+	_processor->ActiveChanged.connect (sigc::mem_fun (*this, &ProcessorEntry::processor_active_changed));
+	_processor->NameChanged.connect (sigc::mem_fun (*this, &ProcessorEntry::processor_name_changed));
 }
 
 EventBox&
@@ -229,8 +229,8 @@ SendProcessorEntry::SendProcessorEntry (boost::shared_ptr<Send> s, Width w)
 	_fader.set_controllable (_send->amp()->gain_control ());
 	_vbox.pack_start (_fader);
 
-	_adjustment.signal_value_changed().connect (mem_fun (*this, &SendProcessorEntry::gain_adjusted));
-	_send->amp()->gain_control()->Changed.connect (mem_fun (*this, &SendProcessorEntry::show_gain));
+	_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &SendProcessorEntry::gain_adjusted));
+	_send->amp()->gain_control()->Changed.connect (sigc::mem_fun (*this, &SendProcessorEntry::show_gain));
 	show_gain ();
 }
 
@@ -244,7 +244,7 @@ SendProcessorEntry::setup_slider_pix ()
 void
 SendProcessorEntry::show_gain ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &SendProcessorEntry::show_gain));
+	ENSURE_GUI_THREAD (*this, &SendProcessorEntry::show_gain)
 	
 	float const value = gain_to_slider_position (_send->amp()->gain ());
 
@@ -295,18 +295,18 @@ ProcessorBox::ProcessorBox (ARDOUR::Session& sess, sigc::slot<PluginSelector*> g
 	processor_display.set_size_request (48, -1);
 	processor_display.set_data ("processorbox", this);
 
-	processor_display.signal_enter_notify_event().connect (mem_fun(*this, &ProcessorBox::enter_notify), false);
-	processor_display.signal_leave_notify_event().connect (mem_fun(*this, &ProcessorBox::leave_notify), false);
+	processor_display.signal_enter_notify_event().connect (sigc::mem_fun(*this, &ProcessorBox::enter_notify), false);
+	processor_display.signal_leave_notify_event().connect (sigc::mem_fun(*this, &ProcessorBox::leave_notify), false);
 
-	processor_display.signal_key_press_event().connect (mem_fun(*this, &ProcessorBox::processor_key_press_event));
-	processor_display.signal_key_release_event().connect (mem_fun(*this, &ProcessorBox::processor_key_release_event));
+	processor_display.signal_key_press_event().connect (sigc::mem_fun(*this, &ProcessorBox::processor_key_press_event));
+	processor_display.signal_key_release_event().connect (sigc::mem_fun(*this, &ProcessorBox::processor_key_release_event));
 
-	processor_display.ButtonPress.connect (mem_fun (*this, &ProcessorBox::processor_button_press_event));
-	processor_display.ButtonRelease.connect (mem_fun (*this, &ProcessorBox::processor_button_release_event));
+	processor_display.ButtonPress.connect (sigc::mem_fun (*this, &ProcessorBox::processor_button_press_event));
+	processor_display.ButtonRelease.connect (sigc::mem_fun (*this, &ProcessorBox::processor_button_release_event));
 
-	processor_display.Reordered.connect (mem_fun (*this, &ProcessorBox::reordered));
-	processor_display.DropFromAnotherBox.connect (mem_fun (*this, &ProcessorBox::object_drop));
-	processor_display.SelectionChanged.connect (mem_fun (*this, &ProcessorBox::selection_changed));
+	processor_display.Reordered.connect (sigc::mem_fun (*this, &ProcessorBox::reordered));
+	processor_display.DropFromAnotherBox.connect (sigc::mem_fun (*this, &ProcessorBox::object_drop));
+	processor_display.SelectionChanged.connect (sigc::mem_fun (*this, &ProcessorBox::selection_changed));
 }
 
 ProcessorBox::~ProcessorBox ()
@@ -326,11 +326,11 @@ ProcessorBox::set_route (boost::shared_ptr<Route> r)
 	no_processor_redisplay = false;
 	_route = r;
 
-	connections.push_back (_route->processors_changed.connect (mem_fun (*this, &ProcessorBox::route_processors_changed)));
+	connections.push_back (_route->processors_changed.connect (sigc::mem_fun (*this, &ProcessorBox::route_processors_changed)));
 	connections.push_back (_route->GoingAway.connect (
-			mem_fun (*this, &ProcessorBox::route_going_away)));
+			sigc::mem_fun (*this, &ProcessorBox::route_going_away)));
 	connections.push_back (_route->NameChanged.connect (
-			mem_fun(*this, &ProcessorBox::route_name_changed)));
+			sigc::mem_fun(*this, &ProcessorBox::route_name_changed)));
 
 	redisplay_processors ();
 }
@@ -431,8 +431,8 @@ ProcessorBox::build_send_action_menu ()
 	send_action_menu->set_name ("ArdourContextMenu");
 	MenuList& items = send_action_menu->items();
 
-	items.push_back (MenuElem (_("New send"), mem_fun(*this, &ProcessorBox::new_send)));
-	items.push_back (MenuElem (_("Show send controls"), mem_fun(*this, &ProcessorBox::show_send_controls)));
+	items.push_back (MenuElem (_("New send"), sigc::mem_fun(*this, &ProcessorBox::new_send)));
+	items.push_back (MenuElem (_("Show send controls"), sigc::mem_fun(*this, &ProcessorBox::show_send_controls)));
 }
 
 Gtk::Menu*
@@ -450,7 +450,7 @@ ProcessorBox::build_possible_aux_menu ()
 
 	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
 		if (!_route->internal_send_for (*r) && *r != _route) {
-			items.push_back (MenuElem ((*r)->name(), bind (sigc::ptr_fun (ProcessorBox::rb_choose_aux), boost::weak_ptr<Route>(*r))));
+			items.push_back (MenuElem ((*r)->name(), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_choose_aux), boost::weak_ptr<Route>(*r))));
 		}
 	}
 
@@ -663,8 +663,8 @@ ProcessorBox::processor_button_release_event (GdkEventButton *ev, ProcessorEntry
 
 	if (processor && Keyboard::is_delete_event (ev)) {
 
-		Glib::signal_idle().connect (bind (
-				mem_fun(*this, &ProcessorBox::idle_delete_processor),
+		Glib::signal_idle().connect (sigc::bind (
+				sigc::mem_fun(*this, &ProcessorBox::idle_delete_processor),
 				boost::weak_ptr<Processor>(processor)));
 		ret = true;
 
@@ -850,8 +850,8 @@ ProcessorBox::choose_send ()
 	*/
 	_processor_being_created = send;
 
-	ios->selector().Finished.connect (bind (
-			mem_fun(*this, &ProcessorBox::send_io_finished),
+	ios->selector().Finished.connect (sigc::bind (
+			sigc::mem_fun(*this, &ProcessorBox::send_io_finished),
 			boost::weak_ptr<Processor>(send), ios));
 
 }
@@ -945,7 +945,7 @@ ProcessorBox::route_processors_changed (RouteProcessorChange c)
 void
 ProcessorBox::redisplay_processors ()
 {
-	ENSURE_GUI_THREAD (mem_fun(*this, &ProcessorBox::redisplay_processors));
+	ENSURE_GUI_THREAD (*this, &ProcessorBox::redisplay_processors)
 
 	if (no_processor_redisplay) {
 		return;
@@ -953,7 +953,7 @@ ProcessorBox::redisplay_processors ()
 
 	processor_display.clear ();
 
-	_route->foreach_processor (mem_fun (*this, &ProcessorBox::add_processor_to_display));
+	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::add_processor_to_display));
 
 	build_processor_tooltip (processor_eventbox, _("Inserts, sends & plugins:"));
 }
@@ -1767,7 +1767,7 @@ ProcessorBox::rb_edit ()
 void
 ProcessorBox::route_name_changed ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &ProcessorBox::route_name_changed));
+	ENSURE_GUI_THREAD (*this, &ProcessorBox::route_name_changed)
 
 	boost::shared_ptr<Processor> processor;
 	boost::shared_ptr<PluginInsert> plugin_insert;

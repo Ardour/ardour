@@ -60,7 +60,7 @@ PortMatrix::PortMatrix (Window* parent, Session* session, DataType type)
 	  _ignore_notebook_page_selected (false)
 {
 	_body = new PortMatrixBody (this);
-	_body->DimensionsChanged.connect (mem_fun (*this, &PortMatrix::body_dimensions_changed));
+	_body->DimensionsChanged.connect (sigc::mem_fun (*this, &PortMatrix::body_dimensions_changed));
 
 	_vbox.pack_start (_vspacer, false, false);
 	_vbox.pack_start (_vnotebook, false, false);
@@ -69,10 +69,10 @@ PortMatrix::PortMatrix (Window* parent, Session* session, DataType type)
 	_hbox.pack_start (_hnotebook, false, false);
 	_hbox.pack_start (_hlabel, true, true);
 
-	_vnotebook.signal_switch_page().connect (mem_fun (*this, &PortMatrix::notebook_page_selected));
+	_vnotebook.signal_switch_page().connect (sigc::mem_fun (*this, &PortMatrix::notebook_page_selected));
 	_vnotebook.property_tab_border() = 4;
 	_vnotebook.set_name (X_("PortMatrixLabel"));
-	_hnotebook.signal_switch_page().connect (mem_fun (*this, &PortMatrix::notebook_page_selected));
+	_hnotebook.signal_switch_page().connect (sigc::mem_fun (*this, &PortMatrix::notebook_page_selected));
 	_hnotebook.property_tab_border() = 4;
 	_hnotebook.set_name (X_("PortMatrixLabel"));
 
@@ -133,29 +133,29 @@ PortMatrix::init ()
 
 	for (int i = 0; i < 2; ++i) {
 		/* watch for the content of _ports[] changing */
-		_ports[i].Changed.connect (mem_fun (*this, &PortMatrix::setup));
+		_ports[i].Changed.connect (sigc::mem_fun (*this, &PortMatrix::setup));
 
 		/* and for bundles in _ports[] changing */
-		_ports[i].BundleChanged.connect (sigc::hide (mem_fun (*this, &PortMatrix::setup)));
+		_ports[i].BundleChanged.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrix::setup)));
 	}
 
 	/* scrolling stuff */
-	_hscroll.signal_value_changed().connect (mem_fun (*this, &PortMatrix::hscroll_changed));
-	_vscroll.signal_value_changed().connect (mem_fun (*this, &PortMatrix::vscroll_changed));
+	_hscroll.signal_value_changed().connect (sigc::mem_fun (*this, &PortMatrix::hscroll_changed));
+	_vscroll.signal_value_changed().connect (sigc::mem_fun (*this, &PortMatrix::vscroll_changed));
 
 
 	/* Part 2: notice when things have changed that require our subclass to clear and refill _ports[] */
 	
 	/* watch for routes being added or removed */
-	_session->RouteAdded.connect (sigc::hide (mem_fun (*this, &PortMatrix::routes_changed)));
+	_session->RouteAdded.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrix::routes_changed)));
 
 	/* and also bundles */
-	_session->BundleAdded.connect (sigc::hide (mem_fun (*this, &PortMatrix::setup_global_ports)));
+	_session->BundleAdded.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrix::setup_global_ports)));
 
 	/* and also ports */
-	_session->engine().PortRegisteredOrUnregistered.connect (mem_fun (*this, &PortMatrix::setup_global_ports));
+	_session->engine().PortRegisteredOrUnregistered.connect (sigc::mem_fun (*this, &PortMatrix::setup_global_ports));
 
-	_session->GoingAway.connect (mem_fun (*this, &PortMatrix::session_going_away));
+	_session->GoingAway.connect (sigc::mem_fun (*this, &PortMatrix::session_going_away));
 
 	reconnect_to_routes ();
 	
@@ -174,7 +174,7 @@ PortMatrix::reconnect_to_routes ()
 	boost::shared_ptr<RouteList> routes = _session->get_routes ();
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 		_route_connections.push_back (
-			(*i)->processors_changed.connect (mem_fun (*this, &PortMatrix::route_processors_changed))
+			(*i)->processors_changed.connect (sigc::mem_fun (*this, &PortMatrix::route_processors_changed))
 			);
 	}
 }
@@ -392,7 +392,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 
 			if (can_add_channel (bc[dim].bundle)) {
 				snprintf (buf, sizeof (buf), _("Add %s"), channel_noun().c_str());
-				sub.push_back (MenuElem (buf, bind (mem_fun (*this, &PortMatrix::add_channel_proxy), w)));
+				sub.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::add_channel_proxy), w)));
 				can_add_or_rename = true;
 			}
 
@@ -402,7 +402,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 				sub.push_back (
 					MenuElem (
 						buf,
-						bind (mem_fun (*this, &PortMatrix::rename_channel_proxy), w, bc[dim].channel)
+						sigc::bind (sigc::mem_fun (*this, &PortMatrix::rename_channel_proxy), w, bc[dim].channel)
 						)
 					);
 				can_add_or_rename = true;
@@ -417,7 +417,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 				sub.push_back (
 					MenuElem (
 						buf,
-						bind (mem_fun (*this, &PortMatrix::remove_channel_proxy), w, bc[dim].channel)
+						sigc::bind (sigc::mem_fun (*this, &PortMatrix::remove_channel_proxy), w, bc[dim].channel)
 						)
 					);
 			}
@@ -433,7 +433,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 			}
 
 			sub.push_back (
-				MenuElem (buf, bind (mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, bc[dim].channel, dim))
+				MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, bc[dim].channel, dim))
 				);
 
 			items.push_back (MenuElem (bc[dim].bundle->name().c_str(), *m));
@@ -446,8 +446,8 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 		items.push_back (SeparatorElem ());
 	}
 
-	items.push_back (MenuElem (_("Rescan"), mem_fun (*this, &PortMatrix::setup_all_ports)));
-	items.push_back (CheckMenuElem (_("Show individual ports"), mem_fun (*this, &PortMatrix::toggle_show_only_bundles)));
+	items.push_back (MenuElem (_("Rescan"), sigc::mem_fun (*this, &PortMatrix::setup_all_ports)));
+	items.push_back (CheckMenuElem (_("Show individual ports"), sigc::mem_fun (*this, &PortMatrix::toggle_show_only_bundles)));
 	CheckMenuItem* i = dynamic_cast<CheckMenuItem*> (&items.back());
 	_inhibit_toggle_show_only_bundles = true;
 	i->set_active (!_show_only_bundles);
@@ -508,7 +508,7 @@ PortMatrix::disassociate_all_on_channel (boost::weak_ptr<Bundle> bundle, uint32_
 void
 PortMatrix::setup_global_ports ()
 {
-	ENSURE_GUI_THREAD (mem_fun (*this, &PortMatrix::setup_global_ports));
+	ENSURE_GUI_THREAD (*this, &PortMatrix::setup_global_ports)
 
 	for (int i = 0; i < 2; ++i) {
 		if (list_is_global (i)) {
@@ -524,7 +524,7 @@ PortMatrix::setup_all_ports ()
 		return;
 	}
 
-	ENSURE_GUI_THREAD (mem_fun (*this, &PortMatrix::setup_all_ports));
+	ENSURE_GUI_THREAD (*this, &PortMatrix::setup_all_ports)
 
 	setup_ports (0);
 	setup_ports (1);

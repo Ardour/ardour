@@ -138,7 +138,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
 
 	set_state (*xml_node, Stateful::loading_state_version);
 
-	_route->processors_changed.connect (mem_fun(*this, &MidiTimeAxisView::processors_changed));
+	_route->processors_changed.connect (sigc::mem_fun(*this, &MidiTimeAxisView::processors_changed));
 
 	if (is_track()) {
 		_piano_roll_header = new PianoRollHeader(*midi_view());
@@ -151,10 +151,10 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
 		controls_base_selected_name = "MidiTrackControlsBaseSelected";
 		controls_base_unselected_name = "MidiTrackControlsBaseUnselected";
 
-		midi_view()->NoteRangeChanged.connect (mem_fun(*this, &MidiTimeAxisView::update_range));
+		midi_view()->NoteRangeChanged.connect (sigc::mem_fun(*this, &MidiTimeAxisView::update_range));
 
 		/* ask for notifications of any new RegionViews */
-		_view->RegionViewAdded.connect (mem_fun(*this, &MidiTimeAxisView::region_view_added));
+		_view->RegionViewAdded.connect (sigc::mem_fun(*this, &MidiTimeAxisView::region_view_added));
 		_view->attach ();
 	}
 
@@ -167,10 +167,10 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
 		_model_selector.append_text(m->c_str());
 	}
 
-	_model_selector.signal_changed().connect(mem_fun(*this, &MidiTimeAxisView::model_changed));
+	_model_selector.signal_changed().connect(sigc::mem_fun(*this, &MidiTimeAxisView::model_changed));
 
 	_custom_device_mode_selector.signal_changed().connect(
-			mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed));
+			sigc::mem_fun(*this, &MidiTimeAxisView::custom_device_mode_changed));
 
 	// TODO: persist the choice
 	// this initializes the comboboxes and sends out the signal
@@ -192,7 +192,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
 	_channel_selector.set_channel_mode(diskstream->get_channel_mode(),
 			diskstream->get_channel_mask());
 	_channel_selector.mode_changed.connect(
-		mem_fun(*midi_track()->midi_diskstream(), &MidiDiskstream::set_channel_mode));
+		sigc::mem_fun(*midi_track()->midi_diskstream(), &MidiDiskstream::set_channel_mode));
 
 	XMLProperty *prop;
 	if ((prop = xml_node->property ("color-mode")) != 0) {
@@ -302,19 +302,19 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 	MenuList& range_items = range_menu->items();
 	range_menu->set_name ("ArdourContextMenu");
 
-	range_items.push_back (MenuElem (_("Show Full Range"), bind (
-			mem_fun(*this, &MidiTimeAxisView::set_note_range),
+	range_items.push_back (MenuElem (_("Show Full Range"), sigc::bind (
+			sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
 			MidiStreamView::FullRange)));
 
-	range_items.push_back (MenuElem (_("Fit Contents"), bind (
-			mem_fun(*this, &MidiTimeAxisView::set_note_range),
+	range_items.push_back (MenuElem (_("Fit Contents"), sigc::bind (
+			sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
 			MidiStreamView::ContentsRange)));
 
 	items.push_back (MenuElem (_("Note range"), *range_menu));
 	items.push_back (MenuElem (_("Note mode"), *build_note_mode_menu()));
 	items.push_back (MenuElem (_("Default Channel"), *build_def_channel_menu()));
 
-	items.push_back (CheckMenuElem (_("MIDI Thru"), mem_fun(*this, &MidiTimeAxisView::toggle_midi_thru)));
+	items.push_back (CheckMenuElem (_("MIDI Thru"), sigc::mem_fun(*this, &MidiTimeAxisView::toggle_midi_thru)));
 	_midi_thru_item = dynamic_cast<CheckMenuItem*>(&items.back());
 }
 
@@ -337,7 +337,7 @@ MidiTimeAxisView::build_def_channel_menu ()
 		snprintf (buf, sizeof (buf), "%d", i+1);
 
 		def_channel_items.push_back (RadioMenuElem (dc_group, buf,
-							    bind (mem_fun (*this, &MidiTimeAxisView::set_default_channel), i)));
+							    sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_default_channel), i)));
 		item = dynamic_cast<RadioMenuItem*>(&def_channel_items.back());
 		item->set_active ((i == defchn));
 	}
@@ -375,15 +375,15 @@ MidiTimeAxisView::build_automation_action_menu ()
 
 	automation_items.push_back (SeparatorElem());
 	automation_items.push_back (MenuElem (_("Controller..."),
-			mem_fun(*this, &MidiTimeAxisView::add_cc_track)));
+			sigc::mem_fun(*this, &MidiTimeAxisView::add_cc_track)));
 	automation_items.push_back (MenuElem (_("Program Change"),
-			sigc::bind(mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
+			sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
 				Evoral::Parameter(MidiPgmChangeAutomation))));
 	automation_items.push_back (MenuElem (_("Bender"),
-			sigc::bind(mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
+			sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
 				Evoral::Parameter(MidiPitchBenderAutomation))));
 	automation_items.push_back (MenuElem (_("Pressure"),
-			sigc::bind(mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
+			sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
 				Evoral::Parameter(MidiChannelPressureAutomation))));
 }
 
@@ -398,12 +398,12 @@ MidiTimeAxisView::build_note_mode_menu()
 
 	RadioMenuItem::Group mode_group;
 	items.push_back (RadioMenuElem (mode_group, _("Sustained"),
-				bind (mem_fun (*this, &MidiTimeAxisView::set_note_mode), Sustained)));
+				sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_mode), Sustained)));
 	_note_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_note_mode_item->set_active(_note_mode == Sustained);
 
 	items.push_back (RadioMenuElem (mode_group, _("Percussive"),
-				bind (mem_fun (*this, &MidiTimeAxisView::set_note_mode), Percussive)));
+				sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_mode), Percussive)));
 	_percussion_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_percussion_mode_item->set_active(_note_mode == Percussive);
 
@@ -421,17 +421,17 @@ MidiTimeAxisView::build_color_mode_menu()
 
 	RadioMenuItem::Group mode_group;
 	items.push_back (RadioMenuElem (mode_group, _("Meter Colors"),
-				bind (mem_fun (*this, &MidiTimeAxisView::set_color_mode), MeterColors)));
+				sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode), MeterColors)));
 	_meter_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_meter_color_mode_item->set_active(_color_mode == MeterColors);
 
 	items.push_back (RadioMenuElem (mode_group, _("Channel Colors"),
-				bind (mem_fun (*this, &MidiTimeAxisView::set_color_mode), ChannelColors)));
+				sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode), ChannelColors)));
 	_channel_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_channel_color_mode_item->set_active(_color_mode == ChannelColors);
 
 	items.push_back (RadioMenuElem (mode_group, _("Track Color"),
-				bind (mem_fun (*this, &MidiTimeAxisView::set_color_mode), TrackColor)));
+				sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_color_mode), TrackColor)));
 	_channel_color_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 	_channel_color_mode_item->set_active(_color_mode == TrackColor);
 

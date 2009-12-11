@@ -95,9 +95,9 @@ ImageFrameView::ImageFrameView(const string & item_id,
 
 	imageframe = new ImageFrame (*group, pbuf, 1.0, 1.0, ANCHOR_NW, im_width, (trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE));
 
-	frame_handle_start->signal_event().connect (bind (mem_fun (trackview.editor, &PublicEditor::canvas_imageframe_start_handle_event), frame_handle_start, this));
-	frame_handle_end->signal_event().connect (bind (mem_fun (trackview.editor, &PublicEditor::canvas_imageframe_end_handle_event), frame_handle_end, this));
-	group->signal_event().connect (bind (mem_fun (trackview.editor, &PublicEditor::canvas_imageframe_item_view_event), imageframe, this));
+	frame_handle_start->signal_event().connect (sigc::bind (sigc::mem_fun (trackview.editor, &PublicEditor::canvas_imageframe_start_handle_event), frame_handle_start, this));
+	frame_handle_end->signal_event().connect (sigc::bind (sigc::mem_fun (trackview.editor, &PublicEditor::canvas_imageframe_end_handle_event), frame_handle_end, this));
+	group->signal_event().connect (sigc::bind (sigc::mem_fun (trackview.editor, &PublicEditor::canvas_imageframe_item_view_event), imageframe, this));
 
 	frame_handle_start->raise_to_top();
 	frame_handle_end->raise_to_top();
@@ -288,7 +288,7 @@ ImageFrameView::add_marker_view_item(MarkerView* item, void* src)
 {
 	marker_view_list.push_back(item) ;
 
-	item->GoingAway.connect(bind(mem_fun(*this, &ImageFrameView::remove_marker_view_item), (void*)this));
+	item->GoingAway.connect(sigc::bind(sigc::mem_fun(*this, &ImageFrameView::remove_marker_view_item), (void*)this));
 
 	 MarkerViewAdded(item, src) ; /* EMIT_SIGNAL */
 }
@@ -338,7 +338,7 @@ ImageFrameView::remove_named_marker_view_item(const string & markerId, void* src
 void
 ImageFrameView::remove_marker_view_item(MarkerView* mv, void* src)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &ImageFrameView::remove_marker_view_item), mv, src));
+	ENSURE_GUI_THREAD (*this, &ImageFrameView::remove_marker_view_item, mv, src)
 
 	MarkerViewList::iterator i ;
 

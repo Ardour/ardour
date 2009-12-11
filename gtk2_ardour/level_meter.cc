@@ -60,9 +60,9 @@ LevelMeter::LevelMeter (Session& s)
 	, meter_length (0)
 {
 	set_spacing (1);
-	Config->ParameterChanged.connect (mem_fun (*this, &LevelMeter::parameter_changed));
-	UI::instance()->theme_changed.connect (mem_fun(*this, &LevelMeter::on_theme_changed));
-	ColorsChanged.connect (mem_fun (*this, &LevelMeter::color_handler));
+	Config->ParameterChanged.connect (sigc::mem_fun (*this, &LevelMeter::parameter_changed));
+	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &LevelMeter::on_theme_changed));
+	ColorsChanged.connect (sigc::mem_fun (*this, &LevelMeter::color_handler));
 	max_peak = minus_infinity();
 }
 
@@ -86,7 +86,7 @@ LevelMeter::set_meter (PeakMeter* meter)
 	_meter = meter;
 	if (_meter) {
 		_configuration_connection = _meter->ConfigurationChanged.connect(
-			mem_fun(*this, &LevelMeter::configuration_changed));
+			sigc::mem_fun(*this, &LevelMeter::configuration_changed));
 	}
 }
 
@@ -120,7 +120,7 @@ LevelMeter::update_meters ()
 void
 LevelMeter::parameter_changed (string p)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun(*this, &LevelMeter::parameter_changed), p));
+	ENSURE_GUI_THREAD (*this, &LevelMeter::parameter_changed, p)
 
 	if (p == "meter-hold") {
 
@@ -204,7 +204,7 @@ LevelMeter::setup_meters (int len, int initial_width)
 			meters[n].width = width;
 			meters[n].length = len;
 			meters[n].meter->add_events (Gdk::BUTTON_RELEASE_MASK);
-			meters[n].meter->signal_button_release_event().connect (bind (mem_fun(*this, &LevelMeter::meter_button_release), n));
+			meters[n].meter->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &LevelMeter::meter_button_release), n));
 		}
 
 		pack_end (*meters[n].meter, false, false);

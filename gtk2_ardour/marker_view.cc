@@ -65,9 +65,9 @@ MarkerView::MarkerView(ArdourCanvas::Group *parent,
 
 	// hook up our canvas events
 
-	frame_handle_start->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_markerview_start_handle_event), frame_handle_start, this));
-	frame_handle_end->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_markerview_end_handle_event), frame_handle_end, this));
-	group->signal_event().connect (bind (mem_fun (PublicEditor::instance(), &PublicEditor::canvas_markerview_item_view_event), group, this));
+	frame_handle_start->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_markerview_start_handle_event), frame_handle_start, this));
+	frame_handle_end->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_markerview_end_handle_event), frame_handle_end, this));
+	group->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_markerview_item_view_event), group, this));
 
 	set_position(start, this) ;
 	set_duration(duration, this) ;

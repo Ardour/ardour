@@ -294,7 +294,7 @@ ExportDialog::show_progress ()
 	warning_widget.hide_all();
 	progress_widget.show ();
 	progress_widget.show_all_children ();
-	progress_connection = Glib::signal_timeout().connect (mem_fun(*this, &ExportDialog::progress_timeout), 100);
+	progress_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ExportDialog::progress_timeout), 100);
 
 	gtk_main_iteration ();
 	while (status->running) {

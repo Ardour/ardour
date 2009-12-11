@@ -74,24 +74,24 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 
 	canvas_rect->property_outline_what() = (guint32) (0x2|0x8);  // outline RHS and bottom
 
-	canvas_rect->signal_event().connect (bind (
-			mem_fun (_trackview.editor(), &PublicEditor::canvas_stream_view_event),
+	canvas_rect->signal_event().connect (sigc::bind (
+			sigc::mem_fun (_trackview.editor(), &PublicEditor::canvas_stream_view_event),
 			canvas_rect, &_trackview));
 
 	if (_trackview.is_track()) {
 		_trackview.track()->DiskstreamChanged.connect (
-				mem_fun (*this, &StreamView::diskstream_changed));
+				sigc::mem_fun (*this, &StreamView::diskstream_changed));
 		_trackview.session().TransportStateChange.connect (
-				mem_fun (*this, &StreamView::transport_changed));
+				sigc::mem_fun (*this, &StreamView::transport_changed));
 		_trackview.session().TransportLooped.connect (
-				mem_fun (*this, &StreamView::transport_looped));
+				sigc::mem_fun (*this, &StreamView::transport_looped));
 		_trackview.get_diskstream()->RecordEnableChanged.connect (
-				mem_fun (*this, &StreamView::rec_enable_changed));
+				sigc::mem_fun (*this, &StreamView::rec_enable_changed));
 		_trackview.session().RecordStateChanged.connect (
-				mem_fun (*this, &StreamView::sess_rec_enable_changed));
+				sigc::mem_fun (*this, &StreamView::sess_rec_enable_changed));
 	}
 
-	ColorsChanged.connect (mem_fun (*this, &StreamView::color_handler));
+	ColorsChanged.connect (sigc::mem_fun (*this, &StreamView::color_handler));
 }
 
 StreamView::~StreamView ()
@@ -186,7 +186,7 @@ StreamView::add_region_view_weak (boost::weak_ptr<Region> r)
 void
 StreamView::add_region_view (boost::shared_ptr<Region> r)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::add_region_view_weak), boost::weak_ptr<Region>(r)));
+	ENSURE_GUI_THREAD (*this, &StreamView::add_region_view_weak, boost::weak_ptr<Region>(r));
 
 	add_region_view_internal (r, true);
 
@@ -198,7 +198,7 @@ StreamView::add_region_view (boost::shared_ptr<Region> r)
 void
 StreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 {
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::remove_region_view), weak_r));
+	ENSURE_GUI_THREAD (*this, &StreamView::remove_region_view, weak_r)
 
 	boost::shared_ptr<Region> r (weak_r.lock());
 
@@ -234,8 +234,8 @@ StreamView::display_diskstream (boost::shared_ptr<Diskstream> ds)
 {
 	playlist_change_connection.disconnect();
 	playlist_changed (ds);
-	playlist_change_connection = ds->PlaylistChanged.connect (bind (
-			mem_fun (*this, &StreamView::playlist_changed_weak),
+	playlist_change_connection = ds->PlaylistChanged.connect (sigc::bind (
+			sigc::mem_fun (*this, &StreamView::playlist_changed_weak),
 			boost::weak_ptr<Diskstream> (ds)));
 }
 
@@ -310,7 +310,7 @@ void
 StreamView::playlist_modified (boost::shared_ptr<Diskstream> ds)
 {
 	/* we do not allow shared_ptr<T> to be bound to slots */
-	ENSURE_GUI_THREAD (bind (mem_fun (*this, &StreamView::playlist_modified_weak), ds));
+	ENSURE_GUI_THREAD (*this, &StreamView::playlist_modified_weak, ds)
 
 	/* update layers count and the y positions and heights of our regions */
 	if (ds->playlist()) {
@@ -335,9 +335,7 @@ StreamView::playlist_changed_weak (boost::weak_ptr<Diskstream> ds)
 void
 StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 {
-	ENSURE_GUI_THREAD (bind (
-			mem_fun (*this, &StreamView::playlist_changed_weak),
-			boost::weak_ptr<Diskstream> (ds)));
+	ENSURE_GUI_THREAD (*this, &StreamView::playlist_changed_weak, boost::weak_ptr<Diskstream> (ds));
 
 	/* disconnect from old playlist */
 
@@ -362,14 +360,14 @@ StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 
 	/* catch changes */
 
-	playlist_connections.push_back (ds->playlist()->Modified.connect (bind (
-	 		mem_fun (*this, &StreamView::playlist_modified_weak), ds)));
+	playlist_connections.push_back (ds->playlist()->Modified.connect (sigc::bind (
+	 		sigc::mem_fun (*this, &StreamView::playlist_modified_weak), ds)));
 
 	playlist_connections.push_back (ds->playlist()->RegionAdded.connect (
-			mem_fun (*this, &StreamView::add_region_view_weak)));
+			sigc::mem_fun (*this, &StreamView::add_region_view_weak)));
 
 	playlist_connections.push_back (ds->playlist()->RegionRemoved.connect (
-			mem_fun (*this, &StreamView::remove_region_view)));
+			sigc::mem_fun (*this, &StreamView::remove_region_view)));
 }
 
 void
@@ -378,11 +376,11 @@ StreamView::diskstream_changed ()
 	boost::shared_ptr<Track> t;
 
 	if ((t = _trackview.track()) != 0) {
-		Gtkmm2ext::UI::instance()->call_slot (bind (
-				mem_fun (*this, &StreamView::display_diskstream),
+		Gtkmm2ext::UI::instance()->call_slot (sigc::bind (
+				sigc::mem_fun (*this, &StreamView::display_diskstream),
 				t->diskstream()));
 	} else {
-		Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &StreamView::undisplay_diskstream));
+		Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &StreamView::undisplay_diskstream));
 	}
 }
 
@@ -420,19 +418,19 @@ StreamView::region_layered (RegionView* rv)
 void
 StreamView::rec_enable_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &StreamView::setup_rec_box));
+	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &StreamView::setup_rec_box));
 }
 
 void
 StreamView::sess_rec_enable_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &StreamView::setup_rec_box));
+	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &StreamView::setup_rec_box));
 }
 
 void
 StreamView::transport_changed()
 {
-	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &StreamView::setup_rec_box));
+	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &StreamView::setup_rec_box));
 }
 
 void
@@ -440,7 +438,7 @@ StreamView::transport_looped()
 {
 	// to force a new rec region
 	rec_active = false;
-	Gtkmm2ext::UI::instance()->call_slot (mem_fun (*this, &StreamView::setup_rec_box));
+	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &StreamView::setup_rec_box));
 }
 
 void

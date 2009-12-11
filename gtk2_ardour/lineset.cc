@@ -89,10 +89,10 @@ LineSet::LineSet(Group& parent, Orientation o)
 
 	item_construct(parent);
 
-	property_x1().signal_changed().connect(mem_fun(*this, &LineSet::bounds_need_update));
-	property_y1().signal_changed().connect(mem_fun(*this, &LineSet::bounds_need_update));
-	property_x2().signal_changed().connect(mem_fun(*this, &LineSet::bounds_need_update));
-	property_y2().signal_changed().connect(mem_fun(*this, &LineSet::bounds_need_update));
+	property_x1().signal_changed().connect(sigc::mem_fun(*this, &LineSet::bounds_need_update));
+	property_y1().signal_changed().connect(sigc::mem_fun(*this, &LineSet::bounds_need_update));
+	property_x2().signal_changed().connect(sigc::mem_fun(*this, &LineSet::bounds_need_update));
+	property_y2().signal_changed().connect(sigc::mem_fun(*this, &LineSet::bounds_need_update));
 }
 
 LineSet::~LineSet()

@@ -53,7 +53,7 @@ MidiListEditor::MidiListEditor (Session& s, boost::shared_ptr<MidiRegion> r)
 	for (int i = 0; i < 6; ++i) {
 		CellRendererText* renderer = dynamic_cast<CellRendererText*>(view.get_column_cell_renderer (i));
 		renderer->property_editable() = true;
-		renderer->signal_edited().connect (mem_fun (*this, &MidiListEditor::edited));
+		renderer->signal_edited().connect (sigc::mem_fun (*this, &MidiListEditor::edited));
 	}
 
 	scroller.add (view);

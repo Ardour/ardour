@@ -96,7 +96,7 @@ RouteRedirectSelection::add (boost::shared_ptr<Route> r)
 
 		// XXX SHAREDPTR FIXME
 		// void (RouteRedirectSelection::*pmf)(Route*) = &RouteRedirectSelection::remove;
-		// r->GoingAway.connect (bind (mem_fun(*this, pmf), r));
+		// r->GoingAway.connect (sigc::bind (sigc::mem_fun(*this, pmf), r));
 
 		RoutesChanged();
 	}

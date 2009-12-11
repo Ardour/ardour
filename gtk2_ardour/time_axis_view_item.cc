@@ -940,7 +940,7 @@ TimeAxisViewItem::remove_this_item(void* src)
 	   defer to idle loop, otherwise we'll delete this object
 	   while we're still inside this function ...
 	*/
-        Glib::signal_idle().connect(bind (sigc::ptr_fun (&TimeAxisViewItem::idle_remove_this_item), this, src));
+        Glib::signal_idle().connect(sigc::bind (sigc::ptr_fun (&TimeAxisViewItem::idle_remove_this_item), this, src));
 }
 
 /**

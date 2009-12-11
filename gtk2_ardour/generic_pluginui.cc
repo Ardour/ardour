@@ -87,7 +87,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	combo_label->set_use_markup (true);
 
 	latency_button.add (latency_label);
-	latency_button.signal_clicked().connect (mem_fun (*this, &PlugUIBase::latency_button_clicked));
+	latency_button.signal_clicked().connect (sigc::mem_fun (*this, &PlugUIBase::latency_button_clicked));
 	set_latency_label ();
 
 	smaller_hbox->pack_start (latency_button, false, false, 10);
@@ -126,7 +126,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 		main_contents.pack_start (hpacker, false, false);
 	}
 
-	pi->ActiveChanged.connect (bind(mem_fun(*this, &GenericPluginUI::processor_active_changed),
+	pi->ActiveChanged.connect (sigc::bind(sigc::mem_fun(*this, &GenericPluginUI::processor_active_changed),
 					boost::weak_ptr<Processor>(pi)));
 
 	bypass_button.set_active (!pi->active());
@@ -421,8 +421,8 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 				control_ui->combo = new Gtk::ComboBoxText;
 				//control_ui->combo->set_value_in_list(true, false);
 				set_popdown_strings (*control_ui->combo, setup_scale_values(port_index, control_ui));
-				control_ui->combo->signal_changed().connect (bind (mem_fun(*this, &GenericPluginUI::control_combo_changed), control_ui));
-				mcontrol->Changed.connect (bind (mem_fun (*this, &GenericPluginUI::parameter_changed), control_ui));
+				control_ui->combo->signal_changed().connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::control_combo_changed), control_ui));
+				mcontrol->Changed.connect (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::parameter_changed), control_ui));
 				control_ui->pack_start(control_ui->label, true, true);
 				control_ui->pack_start(*control_ui->combo, false, true);
 
@@ -442,8 +442,8 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 				control_ui->combo = new Gtk::ComboBoxText;
 				//control_ui->combo->set_value_in_list(true, false);
 				set_popdown_strings (*control_ui->combo, setup_scale_values(port_index, control_ui));
-				control_ui->combo->signal_changed().connect (bind (mem_fun(*this, &GenericPluginUI::control_combo_changed), control_ui));
-				mcontrol->Changed.connect (bind (mem_fun (*this, &GenericPluginUI::parameter_changed), control_ui));
+				control_ui->combo->signal_changed().connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::control_combo_changed), control_ui));
+				mcontrol->Changed.connect (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::parameter_changed), control_ui));
 				control_ui->pack_start(control_ui->label, true, true);
 				control_ui->pack_start(*control_ui->combo, false, true);
 
@@ -467,8 +467,8 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 			control_ui->pack_start (*control_ui->button, false, true);
 			// control_ui->pack_start (control_ui->automate_button, false, false);
 
-			control_ui->button->signal_clicked().connect (bind (mem_fun(*this, &GenericPluginUI::control_port_toggled), control_ui));
-			mcontrol->Changed.connect (bind (mem_fun (*this, &GenericPluginUI::toggle_parameter_changed), control_ui));
+			control_ui->button->signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::control_port_toggled), control_ui));
+			mcontrol->Changed.connect (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::toggle_parameter_changed), control_ui));
 
 			if (plugin->get_parameter (port_index) > 0.5){
 				control_ui->button->set_active(true);
@@ -509,15 +509,15 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 			Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
 			control_ui->clickbox->set_print_func (integer_printer, 0);
 		} else {
-			//sigc::slot<void,char*,uint32_t> pslot = sigc::bind (mem_fun(*this, &GenericPluginUI::print_parameter), (uint32_t) port_index);
+			//sigc::slot<void,char*,uint32_t> pslot = sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::print_parameter), (uint32_t) port_index);
 
 			control_ui->controller->set_size_request (200, req.height);
 			control_ui->controller->set_name (X_("PluginSlider"));
 			control_ui->controller->set_style (BarController::LeftToRight);
 			control_ui->controller->set_use_parent (true);
 
-			control_ui->controller->StartGesture.connect (bind (mem_fun(*this, &GenericPluginUI::start_touch), control_ui));
-			control_ui->controller->StopGesture.connect (bind (mem_fun(*this, &GenericPluginUI::stop_touch), control_ui));
+			control_ui->controller->StartGesture.connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::start_touch), control_ui));
+			control_ui->controller->StopGesture.connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::stop_touch), control_ui));
 
 		}
 
@@ -540,13 +540,13 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		}
 
 		control_ui->pack_start (control_ui->automate_button, false, false);
-		control_ui->automate_button.signal_clicked().connect (bind (mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui, (uint32_t) port_index));
+		control_ui->automate_button.signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::astate_clicked), control_ui, (uint32_t) port_index));
 
 		automation_state_changed (control_ui);
 
-		mcontrol->Changed.connect (bind (mem_fun (*this, &GenericPluginUI::parameter_changed), control_ui));
+		mcontrol->Changed.connect (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::parameter_changed), control_ui));
 		mcontrol->alist()->automation_state_changed.connect
-			(bind (mem_fun(*this, &GenericPluginUI::automation_state_changed), control_ui));
+			(sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::automation_state_changed), control_ui));
 
 	} else if (plugin->parameter_is_output (port_index)) {
 
@@ -595,7 +595,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 		output_controls.push_back (control_ui);
 	}
 
-	mcontrol->Changed.connect (bind (mem_fun (*this, &GenericPluginUI::parameter_changed), control_ui));
+	mcontrol->Changed.connect (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::parameter_changed), control_ui));
 
 	return control_ui;
 }
@@ -626,13 +626,13 @@ GenericPluginUI::astate_clicked (ControlUI* cui, uint32_t /*port*/)
 
 	items.clear ();
 	items.push_back (MenuElem (_("Manual"),
-				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Off, cui)));
+				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Off, cui)));
 	items.push_back (MenuElem (_("Play"),
-				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Play, cui)));
+				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Play, cui)));
 	items.push_back (MenuElem (_("Write"),
-				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Write, cui)));
+				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Write, cui)));
 	items.push_back (MenuElem (_("Touch"),
-				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Touch, cui)));
+				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Touch, cui)));
 
 	automation_menu->popup (1, gtk_get_current_event_time());
 }
@@ -662,7 +662,7 @@ GenericPluginUI::parameter_changed (ControlUI* cui)
 {
 	if (!cui->update_pending) {
 		cui->update_pending = true;
-		Gtkmm2ext::UI::instance()->call_slot (bind (mem_fun(*this, &GenericPluginUI::update_control_display), cui));
+		Gtkmm2ext::UI::instance()->call_slot (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::update_control_display), cui));
 	}
 }
 
@@ -731,7 +731,7 @@ GenericPluginUI::control_combo_changed (ControlUI* cui)
 void
 GenericPluginUI::processor_active_changed (boost::weak_ptr<Processor> weak_processor)
 {
-	ENSURE_GUI_THREAD(bind (mem_fun(*this, &GenericPluginUI::processor_active_changed), weak_processor));
+	ENSURE_GUI_THREAD (*this, &GenericPluginUI::processor_active_changed, weak_processor)
 
 	boost::shared_ptr<Processor> processor = weak_processor.lock();
 
@@ -744,7 +744,7 @@ GenericPluginUI::start_updating (GdkEventAny*)
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
 		screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect
-			(mem_fun(*this, &GenericPluginUI::output_update));
+			(sigc::mem_fun(*this, &GenericPluginUI::output_update));
 	}
 	return false;
 }
