@@ -139,7 +139,7 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ) {
 		tmp = i;
 		++tmp;
-		if (&(*i)->get_controllable() == c) {
+		if ((*i)->get_controllable() == c) {
 			delete (*i);
 			controllables.erase (i);
 		}
@@ -150,7 +150,7 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ) {
 		ptmp = i;
 		++ptmp;
-		if (&((*i).first)->get_controllable() == c) {
+		if (((*i).first)->get_controllable() == c) {
 			(*i).second.disconnect();
 			delete (*i).first;
 			pending_controllables.erase (i);
@@ -162,7 +162,7 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	MIDIControllable* mc = 0;
 
 	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
-		if ((*i)->get_controllable().id() == c->id()) {
+		if ((*i)->get_controllable()->id() == c->id()) {
 			mc = *i;
 			break;
 		}
@@ -221,7 +221,7 @@ GenericMidiControlProtocol::stop_learning (Controllable* c)
 	*/
 
 	for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ++i) {
-		if (&((*i).first)->get_controllable() == c) {
+		if (((*i).first)->get_controllable() == c) {
 			(*i).first->stop_learning ();
 			dptr = (*i).first;
 			(*i).second.disconnect();
@@ -243,7 +243,7 @@ GenericMidiControlProtocol::delete_binding (PBD::Controllable* control)
 		for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ++iter) {
 			MIDIControllable* existingBinding = (*iter);
 			
-			if (control == &(existingBinding->get_controllable())) {
+			if (control == (existingBinding->get_controllable())) {
 				delete existingBinding;
 				controllables.erase (iter);
 			}

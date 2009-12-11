@@ -22,9 +22,11 @@ v    it under the terms of the GNU General Public License as published by
 
 #include <string>
 #include <set>
+#include <map>
 
 #include <sigc++/trackable.h>
 #include <sigc++/signal.h>
+#include <glibmm/thread.h>
 
 #include "pbd/statefuldestructible.h"
 
@@ -34,7 +36,7 @@ namespace PBD {
 
 class Controllable : public PBD::StatefulDestructible {
   public:
-	Controllable (std::string name, const std::string& uri);
+	Controllable (const std::string& name, const std::string& uri);
 	virtual ~Controllable() { Destroyed (this); }
 
 	void set_uri (const std::string&);
@@ -88,11 +90,11 @@ class Controllable : public PBD::StatefulDestructible {
 class IgnorableControllable : public Controllable 
 {
   public: 
-    IgnorableControllable () : PBD::Controllable ("ignoreMe") {}
-    ~IgnorableControllable () {}
+	IgnorableControllable () : PBD::Controllable ("ignoreMe", std::string()) {}
+	~IgnorableControllable () {}
     
-    void set_value (float /*v*/) {}
-    float get_value () const { return 0.0; }
+	void set_value (float /*v*/) {}
+	float get_value () const { return 0.0; }
 };
 
 }

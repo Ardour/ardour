@@ -28,12 +28,13 @@
 #include "midicontrollable.h"
 
 using namespace sigc;
+using namespace std;
 using namespace MIDI;
 using namespace PBD;
 using namespace ARDOUR;
 
 MIDIControllable::MIDIControllable (Port& p, const string& c, bool is_bistate)
-	: controllable (0), _port (p), bistate (is_bistate)
+	: controllable (0), _current_uri (c), _port (p), bistate (is_bistate)
 {
 	init ();
 }
@@ -88,7 +89,11 @@ MIDIControllable::midi_forget ()
 void
 MIDIControllable::reacquire_controllable ()
 {
-	_controllable = Controllable::controllable_by_uri (current_uri);
+	if (!_current_uri.empty()) {
+		controllable = Controllable::by_uri (_current_uri);
+	} else {
+		controllable = 0;
+	}
 }
 
 void
@@ -136,7 +141,7 @@ MIDIControllable::control_to_midi(float val)
 {
 	float control_min = 0.0f;
 	float control_max = 1.0f;
-	ARDOUR::AutomationControl* ac = dynamic_cast<ARDOUR::AutomationControl*>(&controllable);
+	ARDOUR::AutomationControl* ac = dynamic_cast<ARDOUR::AutomationControl*>(controllable);
 	if (ac) {
 		control_min = ac->parameter().min();
 		control_max = ac->parameter().max();
@@ -153,7 +158,7 @@ MIDIControllable::midi_to_control(float val)
 {
 	float control_min = 0.0f;
 	float control_max = 1.0f;
-	ARDOUR::AutomationControl* ac = dynamic_cast<ARDOUR::AutomationControl*>(&controllable);
+	ARDOUR::AutomationControl* ac = dynamic_cast<ARDOUR::AutomationControl*>(controllable);
 	if (ac) {
 		control_min = ac->parameter().min();
 		control_max = ac->parameter().max();
@@ -194,7 +199,7 @@ MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool is_on)
 		*/
 
 		if (msg->note_number == control_additional) {
-			controllable.set_value (is_on ? 1 : 0);
+			controllable->set_value (is_on ? 1 : 0);
 		}
 	}
 
@@ -434,21 +439,21 @@ MIDIControllable::set_state (const XMLNode& node, int /*version*/)
 XMLNode&
 MIDIControllable::get_state ()
 {
-	if (!controllable) {
-		return XXX !what!;
+	char buf[32];
+
+	XMLNode* node = new XMLNode ("MIDIControllable");
+
+	if (controllable) {
+		node->add_property ("uri", controllable->uri());
+		snprintf (buf, sizeof(buf), "0x%x", (int) control_type);
+		node->add_property ("event", buf);
+		snprintf (buf, sizeof(buf), "%d", (int) control_channel);
+		node->add_property ("channel", buf);
+		snprintf (buf, sizeof(buf), "0x%x", (int) control_additional);
+		node->add_property ("additional", buf);
+		node->add_property ("feedback", (feedback ? "yes" : "no"));
 	}
 
-	char buf[32];
-	XMLNode& node (controllable->get_state ());
-
-	snprintf (buf, sizeof(buf), "0x%x", (int) control_type);
-	node.add_property ("event", buf);
-	snprintf (buf, sizeof(buf), "%d", (int) control_channel);
-	node.add_property ("channel", buf);
-	snprintf (buf, sizeof(buf), "0x%x", (int) control_additional);
-	node.add_property ("additional", buf);
-	node.add_property ("feedback", (feedback ? "yes" : "no"));
-
-	return node;
+	return *node;
 }
 

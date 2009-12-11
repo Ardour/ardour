@@ -91,6 +91,7 @@ class MIDIControllable : public PBD::Stateful
 	std::string     _control_description;
 	bool             feedback;
 
+	void init ();
 	void reacquire_controllable ();
 	
 	void midi_receiver (MIDI::Parser &p, MIDI::byte *, size_t);

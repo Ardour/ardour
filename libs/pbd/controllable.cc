@@ -24,6 +24,7 @@
 #include "i18n.h"
 
 using namespace PBD;
+using namespace std;
 
 sigc::signal<void,Controllable*> Controllable::Destroyed;
 sigc::signal<bool,Controllable*> Controllable::StartLearning;
@@ -35,7 +36,7 @@ Glib::StaticRWLock Controllable::registry_lock = GLIBMM_STATIC_RW_LOCK_INIT;
 Controllable::Controllables Controllable::registry;
 Controllable::ControllablesByURI Controllable::registry_by_uri;
 
-Controllable::Controllable (const std::string& name, const std::string& uri)
+Controllable::Controllable (const string& name, const string& uri)
 	: _name (name)
 	, _uri (uri)
 	, _touching (false)
@@ -46,7 +47,7 @@ Controllable::Controllable (const std::string& name, const std::string& uri)
 void
 Controllable::add ()
 {
-	Glib::RWLock::WriterLock lm (*registry_lock);
+	Glib::RWLock::WriterLock lm (registry_lock);
 	registry.insert (this);
 
 	if (!_uri.empty()) {
@@ -62,7 +63,7 @@ Controllable::add ()
 void
 Controllable::remove ()
 {
-	Glib::RWLock::WriterLock lm (*registry_lock);
+	Glib::RWLock::WriterLock lm (registry_lock);
 
 	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i) {
 		if ((*i) == this) {
@@ -71,7 +72,7 @@ Controllable::remove ()
 		}
 	}
 
-	if (_uri) {
+	if (!_uri.empty()) {
 		ControllablesByURI::iterator i = registry_by_uri.find (_uri);
 		if (i != registry_by_uri.end()) {
 			registry_by_uri.erase (i);
@@ -82,11 +83,11 @@ Controllable::remove ()
 }
 
 void
-Controllable::set_uri (const std::string& new_uri)
+Controllable::set_uri (const string& new_uri)
 {
-	Glib::RWLock::WriterLock lm (*registry_lock);
+	Glib::RWLock::WriterLock lm (registry_lock);
 
-	if (_uri) {
+	if (!_uri.empty()) {
 		ControllablesByURI::iterator i = registry_by_uri.find (_uri);
 		if (i != registry_by_uri.end()) {
 			registry_by_uri.erase (i);
@@ -106,7 +107,7 @@ Controllable::set_uri (const std::string& new_uri)
 Controllable*
 Controllable::by_id (const ID& id)
 {
-	Glib::RWLock::ReaderLock lm (*registry_lock);
+	Glib::RWLock::ReaderLock lm (registry_lock);
 
 	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i) {
 		if ((*i)->id() == id) {
@@ -119,19 +120,19 @@ Controllable::by_id (const ID& id)
 Controllable*
 Controllable::by_uri (const string& uri)
 {
-	Glib::RWLock::ReaderLock lm (*registry_lock);
+	Glib::RWLock::ReaderLock lm (registry_lock);
 	ControllablesByURI::iterator i;
 
-	if ((i = registry_by_ui.find (uri)) != registry_by_uri.end()) {
+	if ((i = registry_by_uri.find (uri)) != registry_by_uri.end()) {
 		return i->second;
 	}
 	return 0;
 }
 
 Controllable*
-Controllable::by_name (const std::string& str)
+Controllable::by_name (const string& str)
 {
-	Glib::RWLock::ReaderLock lm (*registry_lock);
+	Glib::RWLock::ReaderLock lm (registry_lock);
 
 	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i) {
 		if ((*i)->_name == str) {
