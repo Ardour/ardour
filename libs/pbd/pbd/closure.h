@@ -86,7 +86,7 @@ struct Closure {
     /* will crash if impl is unset */
     void operator() () const { (*impl)(); }
 
-private:
+ protected:
     ClosureBaseImpl* impl;
 };
 
@@ -153,6 +153,46 @@ Closure closure (T& t, void (T::*m)(A1,A2), A1 a1, A2 a2) { return Closure (new 
 
 template<typename T, typename A1, typename A2, typename A3>
 Closure closure (T& t, void (T::*m)(A1, A2, A3), A1 a1, A2 a2, A3 a3) { return Closure (new ClosureImpl3<T,A1,A2,A3>(t,m , a1, a2, a3)); }
+
+/*---------*/
+
+template<typename A>
+struct CTClosureBaseImpl : ClosureBaseImpl {
+    CTClosureBaseImpl() {}
+
+    virtual void operator() () { operator() (A()); }
+    virtual void operator() (A arg) = 0;
+
+protected:
+    virtual ~CTClosureBaseImpl() { }
+};
+
+template<typename A>
+struct CTClosure : public Closure {
+	CTClosure() {}
+	CTClosure (CTClosureBaseImpl<A>* i) : Closure (i) {}
+	CTClosure (const CTClosure& other) : Closure (other) {}
+	
+	/* will crash if impl is unset */
+	void operator() (A arg) const { (*(dynamic_cast<CTClosureBaseImpl<A>*> (impl))) (arg); }
+};
+
+template<typename T, typename A>
+struct CTClosureImpl1 : public CTClosureBaseImpl<A> 
+{
+	CTClosureImpl1 (T& obj, void (T::*m)(A))
+		: object (obj), method (m) {}
+	void operator() (A call_time_arg) { (object.*method) (call_time_arg); }
+	
+  private:
+	T& object;
+	void (T::*method)(A);
+};
+
+/* functor wraps a method that takes 1 arg provided at call-time */
+
+template<typename T, typename A>
+CTClosure<A> closure (T& t, void (T::*m)(A)) { return CTClosure<A> (new CTClosureImpl1<T,A>(t,m)); }
 
 }
 
