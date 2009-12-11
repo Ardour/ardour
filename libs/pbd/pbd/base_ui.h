@@ -54,7 +54,7 @@ class BaseUI : virtual public sigc::trackable, public PBD::UICallback
 
 	struct BaseRequestObject {
 	    RequestType type;
-	    sigc::slot<void> the_slot;
+	    boost::function<void()> the_slot;
 	};
 
 	static RequestType new_request_type();

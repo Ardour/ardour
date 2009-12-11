@@ -20,8 +20,8 @@
 #ifndef __pbd_ui_callback_h__
 #define __pbd_ui_callback_h__
 
+#include <boost/function.hpp>
 #include <glibmm/thread.h>
-#include <sigc++/slot.h>
 
 namespace PBD
 {
@@ -32,7 +32,7 @@ class UICallback
 	UICallback() {}
 	virtual ~UICallback() {}
 
-	virtual void call_slot (sigc::slot<void> theSlot) = 0;
+	virtual void call_slot (const boost::function<void()>&) = 0;
 
 	static UICallback* get_ui_for_thread();
 	static void set_ui_for_thread (UICallback* ui);

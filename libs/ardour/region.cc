@@ -1419,7 +1419,6 @@ void
 Region::source_deleted (boost::shared_ptr<Source>)
 {
 	_sources.clear ();
-	drop_references ();
 }
 
 vector<string>

@@ -16,6 +16,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <boost/bind.hpp>
+
 #include "pbd/error.h"
 #include "pbd/compose.h"
 
@@ -31,11 +33,11 @@ using namespace ARDOUR;
 using namespace Glib;
 
 SessionEvent*
-Session::get_rt_event (boost::shared_ptr<RouteList> rl, bool yn, sigc::slot<void,SessionEvent*> after, bool group_override, 
+Session::get_rt_event (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override, 
 		       void (Session::*method) (boost::shared_ptr<RouteList>, bool, bool))
 {
 	SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
-	ev->rt_slot =   bind (sigc::mem_fun (*this, method), rl, yn, group_override);
+	ev->rt_slot = boost::bind (method, this, rl, yn, group_override);
 	ev->rt_return = after;
 	ev->ui = UICallback::get_ui_for_thread ();
 
@@ -43,7 +45,7 @@ Session::get_rt_event (boost::shared_ptr<RouteList> rl, bool yn, sigc::slot<void
 }
 
 void
-Session::set_solo (boost::shared_ptr<RouteList> rl, bool yn, sigc::slot<void,SessionEvent*> after, bool group_override)
+Session::set_solo (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
 {
 	queue_event (get_rt_event (rl, yn, after, group_override, &Session::rt_set_solo));
 }
@@ -61,7 +63,7 @@ Session::rt_set_solo (boost::shared_ptr<RouteList> rl, bool yn, bool group_overr
 }
 
 void
-Session::set_just_one_solo (boost::shared_ptr<Route> r, bool yn, sigc::slot<void,SessionEvent*> after)
+Session::set_just_one_solo (boost::shared_ptr<Route> r, bool yn, SessionEvent::RTeventCallback after)
 {
 	/* its a bit silly to have to do this, but it keeps the API for this public method sane (we're 
 	   only going to solo one route) and keeps our ability to use get_rt_event() for the internal
@@ -92,7 +94,7 @@ Session::rt_set_just_one_solo (boost::shared_ptr<RouteList> just_one, bool yn, b
 }
 
 void
-Session::set_listen (boost::shared_ptr<RouteList> rl, bool yn, sigc::slot<void,SessionEvent*> after, bool group_override)
+Session::set_listen (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
 {
 	queue_event (get_rt_event (rl, yn, after, group_override, &Session::rt_set_listen));
 }
@@ -110,7 +112,7 @@ Session::rt_set_listen (boost::shared_ptr<RouteList> rl, bool yn, bool group_ove
 }
 
 void
-Session::set_mute (boost::shared_ptr<RouteList> rl, bool yn, sigc::slot<void,SessionEvent*> after, bool group_override)
+Session::set_mute (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
 {
 	queue_event (get_rt_event (rl, yn, after, group_override, &Session::rt_set_mute));
 }
@@ -128,7 +130,7 @@ Session::rt_set_mute (boost::shared_ptr<RouteList> rl, bool yn, bool group_overr
 }
 
 void
-Session::set_record_enable (boost::shared_ptr<RouteList> rl, bool yn, sigc::slot<void,SessionEvent*> after, bool group_override)
+Session::set_record_enable (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
 {
 	if (!writable()) {
 		return;
@@ -161,7 +163,7 @@ Session::process_rtop (SessionEvent* ev)
 	ev->rt_slot ();
 
 	if (ev->ui) {
-		ev->ui->call_slot (bind (ev->rt_return, ev));
+		ev->ui->call_slot (boost::bind (ev->rt_return, ev));
 	} else {
 		warning << string_compose ("programming error: %1", X_("Session RT event queued from thread without a UI - cleanup in RT thread!")) << endmsg;
 		ev->rt_return (ev);

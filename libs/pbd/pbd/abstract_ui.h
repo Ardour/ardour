@@ -42,7 +42,7 @@ class AbstractUI : public BaseUI
 	virtual ~AbstractUI() {}
 
 	void register_thread (std::string, pthread_t, std::string, uint32_t num_requests);
-	void call_slot (sigc::slot<void> el_slot);
+	void call_slot (const boost::function<void()>&);
 
   protected:
 	typedef RingBufferNPT<RequestObject> RequestBuffer;

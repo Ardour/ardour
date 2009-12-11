@@ -611,13 +611,13 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	bool soloing() const { return _non_soloed_outs_muted; }
 	bool listening() const { return _listen_cnt > 0; }
 
-	static const sigc::slot<void,SessionEvent*> rt_cleanup;
+	static const SessionEvent::RTeventCallback rt_cleanup;
 
-	void set_solo (boost::shared_ptr<RouteList>, bool, sigc::slot<void,SessionEvent*> after = rt_cleanup, bool group_override = false);
-	void set_just_one_solo (boost::shared_ptr<Route>, bool, sigc::slot<void,SessionEvent*> after = rt_cleanup);
-	void set_mute (boost::shared_ptr<RouteList>, bool, sigc::slot<void,SessionEvent*> after = rt_cleanup, bool group_override = false);
-	void set_listen (boost::shared_ptr<RouteList>, bool, sigc::slot<void,SessionEvent*> after = rt_cleanup, bool group_override = false);
-	void set_record_enable (boost::shared_ptr<RouteList>, bool, sigc::slot<void,SessionEvent*> after = rt_cleanup, bool group_override = false);
+	void set_solo (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
+	void set_just_one_solo (boost::shared_ptr<Route>, bool, SessionEvent::RTeventCallback after = rt_cleanup);
+	void set_mute (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
+	void set_listen (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
+	void set_record_enable (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 
 	sigc::signal<void,bool> SoloActive;
 	sigc::signal<void> SoloChanged;
@@ -1471,8 +1471,8 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	gint _have_rec_enabled_diskstream;
 
 	/* realtime "apply to set of routes" operations */
-	SessionEvent* get_rt_event (boost::shared_ptr<RouteList> rl, bool yn, sigc::slot<void,SessionEvent*> after, bool group_override, 
-				    void (Session::*method) (boost::shared_ptr<RouteList>, bool, bool));
+	SessionEvent* get_rt_event (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override, 
+		void (Session::*method) (boost::shared_ptr<RouteList>, bool, bool));
 
 	void rt_set_solo (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 	void rt_set_just_one_solo (boost::shared_ptr<RouteList>, bool yn, bool /* ignored*/ );

@@ -2,6 +2,7 @@
 #define __ardour_session_event_h__
 
 #include <list>
+#include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <sigc++/signal.h>
 
@@ -66,10 +67,14 @@ struct SessionEvent {
 	bool second_yes_or_no;
     };
 
-    boost::shared_ptr<RouteList>   routes;
-    sigc::slot<void>               rt_slot;    /* what to call in RT context */
-    sigc::slot<void,SessionEvent*> rt_return;  /* called after rt_slot, with this event as an argument */
-    PBD::UICallback*               ui;
+    /* 4 members to handle a multi-group event handled in RT context */
+
+    typedef boost::function<void (SessionEvent*)> RTeventCallback;
+
+    boost::shared_ptr<RouteList> routes;    /* apply to */
+    boost::function<void (void)> rt_slot;   /* what to call in RT context */
+    RTeventCallback              rt_return; /* called after rt_slot, with this event as an argument */
+    PBD::UICallback*  ui;
 
     std::list<AudioRange> audio_range;
     std::list<MusicRange> music_range;

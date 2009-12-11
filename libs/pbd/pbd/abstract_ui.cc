@@ -140,10 +140,10 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 }
 
 template<typename RequestObject> void
-AbstractUI<RequestObject>::call_slot (sigc::slot<void> elSlot)
+AbstractUI<RequestObject>::call_slot (const boost::function<void()>& f)
 {
 	if (caller_is_self()) {
-		elSlot ();
+		f ();
 		return;
 	}
 
@@ -153,7 +153,7 @@ AbstractUI<RequestObject>::call_slot (sigc::slot<void> elSlot)
 		return;
 	}
 
-	req->the_slot = elSlot;
+	req->the_slot = f;
 	send_request (req);
 }	
 

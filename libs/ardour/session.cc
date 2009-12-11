@@ -118,7 +118,7 @@ sigc::signal<void> Session::AutoBindingOff;
 sigc::signal<void, std::string, std::string> Session::Exported;
 
 static void clean_up_session_event (SessionEvent* ev) { delete ev; }
-const sigc::slot<void,SessionEvent*> Session::rt_cleanup (sigc::ptr_fun (&clean_up_session_event));
+const SessionEvent::RTeventCallback Session::rt_cleanup (clean_up_session_event);
 
 Session::Session (AudioEngine &eng,
 		  const string& fullpath,
