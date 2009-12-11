@@ -154,7 +154,7 @@ Closure closure (T& t, void (T::*m)(A1,A2), A1 a1, A2 a2) { return Closure (new 
 template<typename T, typename A1, typename A2, typename A3>
 Closure closure (T& t, void (T::*m)(A1, A2, A3), A1 a1, A2 a2, A3 a3) { return Closure (new ClosureImpl3<T,A1,A2,A3>(t,m , a1, a2, a3)); }
 
-/*---------*/
+/*--- CALL TIME CLOSURES : these accept arguments at run time */
 
 template<typename A>
 struct CTClosureBaseImpl : ClosureBaseImpl {
