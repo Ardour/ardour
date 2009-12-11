@@ -32,8 +32,25 @@ using namespace MIDI;
 using namespace PBD;
 using namespace ARDOUR;
 
+MIDIControllable::MIDIControllable (Port& p, const string& c, bool is_bistate)
+	: controllable (0), _port (p), bistate (is_bistate)
+{
+	init ();
+}
+
 MIDIControllable::MIDIControllable (Port& p, Controllable& c, bool is_bistate)
-	: controllable (c), _port (p), bistate (is_bistate)
+	: controllable (&c), _current_uri (c.uri()), _port (p), bistate (is_bistate)
+{
+	init ();
+}
+
+MIDIControllable::~MIDIControllable ()
+{
+	drop_external_control ();
+}
+
+void
+MIDIControllable::init ()
 {
 	setting = false;
 	last_value = 0; // got a better idea ?
@@ -46,11 +63,6 @@ MIDIControllable::MIDIControllable (Port& p, Controllable& c, bool is_bistate)
 	/* use channel 0 ("1") as the initial channel */
 
 	midi_rebind (0);
-}
-
-MIDIControllable::~MIDIControllable ()
-{
-	drop_external_control ();
 }
 
 void
@@ -71,6 +83,12 @@ MIDIControllable::midi_forget ()
 	connections = 0;
 	midi_learn_connection.disconnect ();
 
+}
+
+void
+MIDIControllable::reacquire_controllable ()
+{
+	_controllable = Controllable::controllable_by_uri (current_uri);
 }
 
 void
@@ -162,8 +180,12 @@ MIDIControllable::midi_sense_note_off (Parser &p, EventTwoBytes *tb)
 void
 MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool is_on)
 {
+	if (!controllable) { 
+		return;
+	}
+
 	if (!bistate) {
-		controllable.set_value (msg->note_number/127.0);
+		controllable->set_value (msg->note_number/127.0);
 	} else {
 
 		/* Note: parser handles the use of zero velocity to
@@ -176,51 +198,62 @@ MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool is_on)
 		}
 	}
 
-	last_value = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
+	last_value = (MIDI::byte) (controllable->get_value() * 127.0); // to prevent feedback fights
 }
 
 void
 MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 {
-	if (controllable.touching()) {
+	if (!controllable) { 
+		return;
+	}
+
+	if (controllable->touching()) {
 		return; // to prevent feedback fights when e.g. dragging a UI slider
 	}
 
 	if (control_additional == msg->controller_number) {
 		if (!bistate) {
-			controllable.set_value (midi_to_control(msg->value));
+			controllable->set_value (midi_to_control(msg->value));
 		} else {
 			if (msg->value > 64.0) {
-				controllable.set_value (1);
+				controllable->set_value (1);
 			} else {
-				controllable.set_value (0);
+				controllable->set_value (0);
 			}
 		}
 
-		last_value = (MIDI::byte) (control_to_midi(controllable.get_value())); // to prevent feedback fights
+		last_value = (MIDI::byte) (control_to_midi(controllable->get_value())); // to prevent feedback fights
 	}
 }
 
 void
 MIDIControllable::midi_sense_program_change (Parser &, byte msg)
 {
+	if (!controllable) { 
+		return;
+	}
 	/* XXX program change messages make no sense for bistates */
 
 	if (!bistate) {
-		controllable.set_value (msg/127.0);
-		last_value = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
+		controllable->set_value (msg/127.0);
+		last_value = (MIDI::byte) (controllable->get_value() * 127.0); // to prevent feedback fights
 	}
 }
 
 void
 MIDIControllable::midi_sense_pitchbend (Parser &, pitchbend_t pb)
 {
+	if (!controllable) { 
+		return;
+	}
+
 	/* pitchbend messages make no sense for bistates */
 
 	/* XXX gack - get rid of assumption about typeof pitchbend_t */
 
-	controllable.set_value ((pb/(float) SHRT_MAX));
-	last_value = (MIDI::byte) (controllable.get_value() * 127.0); // to prevent feedback fights
+	controllable->set_value ((pb/(float) SHRT_MAX));
+	last_value = (MIDI::byte) (controllable->get_value() * 127.0); // to prevent feedback fights
 }
 
 void
@@ -240,7 +273,7 @@ MIDIControllable::midi_receiver (Parser &, byte *msg, size_t /*len*/)
 
 	bind_midi ((channel_t) (msg[0] & 0xf), eventType (msg[0] & 0xF0), msg[1]);
 
-	controllable.LearningFinished ();
+	controllable->LearningFinished ();
 }
 
 void
@@ -336,7 +369,7 @@ MIDIControllable::send_feedback ()
 
 	msg[0] = (control_type & 0xF0) | (control_channel & 0xF);
 	msg[1] = control_additional;
-	msg[2] = (byte) (control_to_midi(controllable.get_value()));
+	msg[2] = (byte) (control_to_midi(controllable->get_value()));
 
 	_port.write (msg, 3, 0);
 }
@@ -346,7 +379,7 @@ MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*forc
 {
 	if (control_type != none && feedback && bufsize > 2) {
 
-		MIDI::byte gm = (MIDI::byte) (control_to_midi(controllable.get_value()));
+		MIDI::byte gm = (MIDI::byte) (control_to_midi(controllable->get_value()));
 
 		if (gm != last_value) {
 			*buf++ = (0xF0 & control_type) | (0xF & control_channel);
@@ -401,8 +434,12 @@ MIDIControllable::set_state (const XMLNode& node, int /*version*/)
 XMLNode&
 MIDIControllable::get_state ()
 {
+	if (!controllable) {
+		return XXX !what!;
+	}
+
 	char buf[32];
-	XMLNode& node (controllable.get_state ());
+	XMLNode& node (controllable->get_state ());
 
 	snprintf (buf, sizeof(buf), "0x%x", (int) control_type);
 	node.add_property ("event", buf);

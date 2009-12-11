@@ -31,44 +31,82 @@ sigc::signal<void,Controllable*> Controllable::StopLearning;
 sigc::signal<void,Controllable*,int,int> Controllable::CreateBinding;
 sigc::signal<void,Controllable*> Controllable::DeleteBinding;
 
-Glib::Mutex* Controllable::registry_lock = 0;
+Glib::StaticRWLock Controllable::registry_lock = GLIBMM_STATIC_RW_LOCK_INIT;
 Controllable::Controllables Controllable::registry;
+Controllable::ControllablesByURI Controllable::registry_by_uri;
 
-Controllable::Controllable (std::string name)
+Controllable::Controllable (const std::string& name, const std::string& uri)
 	: _name (name)
+	, _uri (uri)
 	, _touching (false)
 {
-	if (registry_lock == 0) {
-		registry_lock = new Glib::Mutex;
-	}
-
 	add ();
 }
 
 void
 Controllable::add ()
 {
-	Glib::Mutex::Lock lm (*registry_lock);
+	Glib::RWLock::WriterLock lm (*registry_lock);
 	registry.insert (this);
+
+	if (!_uri.empty()) {
+		pair<string,Controllable*> newpair;
+		newpair.first = _uri;
+		newpair.second = this;
+		registry_by_uri.insert (newpair);
+	}
+
 	this->GoingAway.connect (mem_fun (this, &Controllable::remove));
 }
 
 void
 Controllable::remove ()
 {
-	Glib::Mutex::Lock lm (*registry_lock);
+	Glib::RWLock::WriterLock lm (*registry_lock);
+
 	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i) {
 		if ((*i) == this) {
 			registry.erase (i);
 			break;
 		}
 	}
+
+	if (_uri) {
+		ControllablesByURI::iterator i = registry_by_uri.find (_uri);
+		if (i != registry_by_uri.end()) {
+			registry_by_uri.erase (i);
+		}
+	}
+
+
+}
+
+void
+Controllable::set_uri (const std::string& new_uri)
+{
+	Glib::RWLock::WriterLock lm (*registry_lock);
+
+	if (_uri) {
+		ControllablesByURI::iterator i = registry_by_uri.find (_uri);
+		if (i != registry_by_uri.end()) {
+			registry_by_uri.erase (i);
+		}
+	}
+
+	_uri = new_uri;
+
+	if (!_uri.empty()) {
+		pair<string,Controllable*> newpair;
+		newpair.first = _uri;
+		newpair.second = this;
+		registry_by_uri.insert (newpair);
+	}
 }
 
 Controllable*
 Controllable::by_id (const ID& id)
 {
-	Glib::Mutex::Lock lm (*registry_lock);
+	Glib::RWLock::ReaderLock lm (*registry_lock);
 
 	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i) {
 		if ((*i)->id() == id) {
@@ -78,11 +116,22 @@ Controllable::by_id (const ID& id)
 	return 0;
 }
 
+Controllable*
+Controllable::by_uri (const string& uri)
+{
+	Glib::RWLock::ReaderLock lm (*registry_lock);
+	ControllablesByURI::iterator i;
+
+	if ((i = registry_by_ui.find (uri)) != registry_by_uri.end()) {
+		return i->second;
+	}
+	return 0;
+}
 
 Controllable*
 Controllable::by_name (const std::string& str)
 {
-	Glib::Mutex::Lock lm (*registry_lock);
+	Glib::RWLock::ReaderLock lm (*registry_lock);
 
 	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i) {
 		if ((*i)->_name == str) {
@@ -101,19 +150,28 @@ Controllable::get_state ()
 	node->add_property (X_("name"), _name); // not reloaded from XML state, just there to look at
 	_id.print (buf, sizeof (buf));
 	node->add_property (X_("id"), buf);
+
+	if (!_uri.empty()) {
+		node->add_property (X_("uri"), _uri);
+	}
+		
 	return *node;
 }
 
 int
 Controllable::set_state (const XMLNode& node, int /*version*/)
 {
-	const XMLProperty* prop = node.property (X_("id"));
+	const XMLProperty* prop;
 
-	if (prop) {
+	if ((prop = node.property (X_("id"))) != 0) {
 		_id = prop->value();
 		return 0;
 	} else {
 		error << _("Controllable state node has no ID property") << endmsg;
 		return -1;
+	}
+
+	if ((prop = node.property (X_("uri"))) != 0) {
+		set_uri (prop->value());
 	}
 }

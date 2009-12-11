@@ -41,7 +41,10 @@ class MIDIControllable : public PBD::Stateful
 {
   public:
 	MIDIControllable (MIDI::Port&, PBD::Controllable&, bool bistate = false);
+	MIDIControllable (MIDI::Port&, const std::string& uri, bool bistate = false);
 	virtual ~MIDIControllable ();
+
+	bool ok() const { return !_current_uri.empty(); }
 
 	void send_feedback ();
 	MIDI::byte* write_feedback (MIDI::byte* buf, int32_t& bufsize, bool force = false);
@@ -59,7 +62,7 @@ class MIDIControllable : public PBD::Stateful
 	float midi_to_control(float val);
 
 	MIDI::Port& get_port() const { return _port; }
-	PBD::Controllable& get_controllable() const { return controllable; }
+	PBD::Controllable* get_controllable() const { return controllable; }
 
 	std::string control_description() const { return _control_description; }
 
@@ -70,8 +73,10 @@ class MIDIControllable : public PBD::Stateful
 	MIDI::channel_t get_control_channel () { return control_channel; }
 	MIDI::eventType get_control_type () { return control_type; }
 	MIDI::byte get_control_additional () { return control_additional; }
+	
   private:
-	PBD::Controllable& controllable;
+	PBD::Controllable* controllable;
+	std::string        _current_uri;
 	MIDI::Port&     _port;
 	bool             setting;
 	MIDI::byte       last_value;
@@ -85,6 +90,8 @@ class MIDIControllable : public PBD::Stateful
 	MIDI::channel_t  control_channel;
 	std::string     _control_description;
 	bool             feedback;
+
+	void reacquire_controllable ();
 	
 	void midi_receiver (MIDI::Parser &p, MIDI::byte *, size_t);
 	void midi_sense_note (MIDI::Parser &, MIDI::EventTwoBytes *, bool is_on);

@@ -2,7 +2,7 @@
     Copyright (C) 2000-2007 Paul Davis 
 
     This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
+v    it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
     (at your option) any later version.
 
@@ -34,8 +34,11 @@ namespace PBD {
 
 class Controllable : public PBD::StatefulDestructible {
   public:
-	Controllable (std::string name);
+	Controllable (std::string name, const std::string& uri);
 	virtual ~Controllable() { Destroyed (this); }
+
+	void set_uri (const std::string&);
+	const std::string& uri() const { return _uri; }
 
 	virtual void set_value (float) = 0;
 	virtual float get_value (void) const = 0;
@@ -61,17 +64,21 @@ class Controllable : public PBD::StatefulDestructible {
 
 	static Controllable* by_id (const PBD::ID&);
 	static Controllable* by_name (const std::string&);
+	static Controllable* by_uri (const std::string&);
 
   private:
 	std::string _name;
+	std::string _uri;
 	bool        _touching;
 
 	void add ();
 	void remove ();
 
 	typedef std::set<PBD::Controllable*> Controllables;
-	static Glib::Mutex* registry_lock;
+	typedef std::map<std::string,PBD::Controllable*> ControllablesByURI;
+	static Glib::StaticRWLock registry_lock;
 	static Controllables registry;
+	static ControllablesByURI registry_by_uri;
 };
 
 /* a utility class for the occasions when you need but do not have
