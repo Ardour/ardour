@@ -1,9 +1,48 @@
+/*
+    Copyright (C) 2009 Paul Davis 
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #ifndef __pbd_closure_h__
 #define __pbd_closure_h__
 
 #include <glib.h>
-#include <iostream>
-using std::cerr;
+
+/**
+ * Here we implement thread-safe but lifetime-unsafe closures (aka "functor"), which
+ * wrap an object and one of its methods, plus zero-or-more arguments, in a convenient,
+ * ready to use package. 
+ *
+ * These differ from sigc::slot<> in that they are totally non-invasive with 
+ * respect to the objects referenced by the closure. There is no requirement
+ * that the object be derived from any particular base class, and nothing
+ * will be done to the object during the creation of the closure, or its deletion,
+ * or at any time other than when the object's method is invoked via
+ * Closure::operator(). As a result, the closure can be constructed and deleted without
+ * concerns for thread safety. If the object method is thread-safe, then the closure
+ * can also be invoked in a thread safe fashion.
+ *
+ * However, this also means that the closure is not safe against lifetime
+ * management issues - if the referenced object is deleted before the closure,
+ * and then closure is invoked via operator(), the results are undefined (but 
+ * will almost certainly be bad). This class should therefore be used only
+ * where you can guarantee that the referred-to object will outlive the
+ * life of the closure.
+*/
 
 namespace PBD {
 
@@ -16,7 +55,7 @@ struct ClosureBaseImpl {
     virtual void operator() () = 0;
 
 protected:
-    virtual ~ClosureBaseImpl() { cerr << "DBI @ " << this << " destroyed\n"; }
+    virtual ~ClosureBaseImpl() { }
 
 private:
     gint _ref;
@@ -45,7 +84,7 @@ struct Closure {
     virtual ~Closure () { if (impl) { impl->unref(); } }
 
     /* will crash if impl is unset */
-    void operator() () { (*impl)(); }
+    void operator() () const { (*impl)(); }
 
 private:
     ClosureBaseImpl* impl;
