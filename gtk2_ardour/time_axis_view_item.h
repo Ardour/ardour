@@ -413,9 +413,6 @@ class TimeAxisViewItem : public Selectable
     /** the curretn samples per canvas unit */
     double samples_per_unit ;
 
-    /** indicates if this item is currently selected */
-    bool selected ;
-
     /** should the item show its selected status */
     bool should_show_selection;
 

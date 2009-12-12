@@ -290,9 +290,9 @@ StreamView::layer_regions()
 		i = tmp;
 	}
 
-	// Fix canvas layering by raising each in the sorted list order
+	// Fix canvas layering by raising each to the top in the sorted order.
 	for (RegionViewList::iterator i = copy.begin(); i != copy.end(); ++i) {
-		region_layered (*i);
+		(*i)->get_canvas_group()->raise_to_top ();
 	}
 }
 
@@ -320,7 +320,10 @@ StreamView::playlist_modified (boost::shared_ptr<Diskstream> ds)
 	if (_layer_display == Stacked) {
 		update_contents_height ();
 		update_coverage_frames ();
-	}
+	} else {
+		/* layering has probably been modified. reflect this in the canvas. */
+		layer_regions();
+	} 
 }
 
 void
