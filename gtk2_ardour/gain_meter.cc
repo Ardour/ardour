@@ -56,7 +56,6 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
-using namespace sigc;
 using namespace std;
 using Gtkmm2ext::Keyboard;
 
@@ -438,7 +437,7 @@ GainMeterBase::effective_gain_display ()
 void
 GainMeterBase::gain_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun(*this, &GainMeterBase::effective_gain_display));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&GainMeterBase::effective_gain_display, this));
 }
 
 void

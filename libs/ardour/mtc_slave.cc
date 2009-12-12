@@ -37,7 +37,6 @@
 
 using namespace std;
 using namespace ARDOUR;
-using namespace sigc;
 using namespace MIDI;
 using namespace PBD;
 
@@ -94,9 +93,9 @@ MTC_Slave::rebind (MIDI::Port& p)
 
 	port = &p;
 
-	connections.push_back (port->input()->mtc_time.connect (mem_fun (*this, &MTC_Slave::update_mtc_time)));
-	connections.push_back (port->input()->mtc_qtr.connect (mem_fun (*this, &MTC_Slave::update_mtc_qtr)));
-	connections.push_back (port->input()->mtc_status.connect (mem_fun (*this, &MTC_Slave::update_mtc_status)));
+	connections.push_back (port->input()->mtc_time.connect (sigc::mem_fun (*this, &MTC_Slave::update_mtc_time)));
+	connections.push_back (port->input()->mtc_qtr.connect (sigc::mem_fun (*this, &MTC_Slave::update_mtc_qtr)));
+	connections.push_back (port->input()->mtc_status.connect (sigc::mem_fun (*this, &MTC_Slave::update_mtc_status)));
 }
 
 void

@@ -35,7 +35,6 @@
 #include <jack/jack.h>
 
 using namespace std;
-using namespace sigc;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace Glib;

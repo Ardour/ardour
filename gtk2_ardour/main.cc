@@ -55,7 +55,6 @@ using namespace Gtk;
 using namespace ARDOUR_COMMAND_LINE;
 using namespace ARDOUR;
 using namespace PBD;
-using namespace sigc;
 
 TextReceiver text_receiver ("ardour");
 

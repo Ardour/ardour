@@ -33,7 +33,6 @@
 #include "canvas_impl.h"
 #include "ardour_ui.h"
 
-using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;

@@ -32,7 +32,6 @@
 #include "i18n.h"
 
 using namespace std;
-using namespace sigc;
 using namespace ARDOUR;
 using namespace MIDI;
 using namespace MIDI::Name;
@@ -45,7 +44,7 @@ void
 MidiPatchManager::set_session (Session& s)
 {
 	_session = &s;
-	_session->GoingAway.connect (mem_fun (*this, &MidiPatchManager::drop_session));
+	_session->GoingAway.connect (sigc::mem_fun (*this, &MidiPatchManager::drop_session));
 
 	refresh();
 }

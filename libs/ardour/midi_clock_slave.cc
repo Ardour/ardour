@@ -39,7 +39,6 @@
 
 using namespace std;
 using namespace ARDOUR;
-using namespace sigc;
 using namespace MIDI;
 using namespace PBD;
 
@@ -79,11 +78,11 @@ MIDIClock_Slave::rebind (MIDI::Port& p)
 		std::cerr << "MIDIClock_Slave: connecting to port " << port->name() << std::endl;
 	#endif
 
-	connections.push_back (port->input()->timing.connect   (mem_fun (*this, &MIDIClock_Slave::update_midi_clock)));
-	connections.push_back (port->input()->start.connect    (mem_fun (*this, &MIDIClock_Slave::start)));
-	connections.push_back (port->input()->contineu.connect (mem_fun (*this, &MIDIClock_Slave::contineu)));
-	connections.push_back (port->input()->stop.connect     (mem_fun (*this, &MIDIClock_Slave::stop)));
-	connections.push_back (port->input()->position.connect (mem_fun (*this, &MIDIClock_Slave::position)));
+	connections.push_back (port->input()->timing.connect   (sigc::mem_fun (*this, &MIDIClock_Slave::update_midi_clock)));
+	connections.push_back (port->input()->start.connect    (sigc::mem_fun (*this, &MIDIClock_Slave::start)));
+	connections.push_back (port->input()->contineu.connect (sigc::mem_fun (*this, &MIDIClock_Slave::contineu)));
+	connections.push_back (port->input()->stop.connect     (sigc::mem_fun (*this, &MIDIClock_Slave::stop)));
+	connections.push_back (port->input()->position.connect (sigc::mem_fun (*this, &MIDIClock_Slave::position)));
 }
 
 void

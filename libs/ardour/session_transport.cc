@@ -47,7 +47,6 @@
 
 using namespace std;
 using namespace ARDOUR;
-using namespace sigc;
 using namespace PBD;
 
 void

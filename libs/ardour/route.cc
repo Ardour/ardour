@@ -94,7 +94,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 
 	/* now that we have _meter, its safe to connect to this */
 
-	_meter_connection = Metering::connect (mem_fun (*this, &Route::meter));
+	_meter_connection = Metering::connect (sigc::mem_fun (*this, &Route::meter));
 }
 
 Route::Route (Session& sess, const XMLNode& node, DataType default_type)
@@ -110,7 +110,7 @@ Route::Route (Session& sess, const XMLNode& node, DataType default_type)
 
 	/* now that we have _meter, its safe to connect to this */
 
-	_meter_connection = Metering::connect (mem_fun (*this, &Route::meter));
+	_meter_connection = Metering::connect (sigc::mem_fun (*this, &Route::meter));
 }
 
 void
@@ -148,8 +148,8 @@ Route::init ()
 	_input.reset (new IO (_session, _name, IO::Input, _default_type));
 	_output.reset (new IO (_session, _name, IO::Output, _default_type));
 
-	_input->changed.connect (mem_fun (this, &Route::input_change_handler));
-	_output->changed.connect (mem_fun (this, &Route::output_change_handler));
+	_input->changed.connect (sigc::mem_fun (this, &Route::input_change_handler));
+	_output->changed.connect (sigc::mem_fun (this, &Route::output_change_handler));
 
 	/* add amp processor  */
 
@@ -794,7 +794,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 			// XXX: do we want to emit the signal here ? change call order.
 			processor->activate ();
 		}
-		processor->ActiveChanged.connect (bind (mem_fun (_session, &Session::update_latency_compensation), false, false));
+		processor->ActiveChanged.connect (sigc::bind (sigc::mem_fun (_session, &Session::update_latency_compensation), false, false));
 
 		_output->set_user_latency (0);
 	}
@@ -1049,7 +1049,7 @@ Route::add_processors (const ProcessorList& others, ProcessorList::iterator iter
 				return -1;
 			}
 
-			(*i)->ActiveChanged.connect (bind (mem_fun (_session, &Session::update_latency_compensation), false, false));
+			(*i)->ActiveChanged.connect (sigc::bind (sigc::mem_fun (_session, &Session::update_latency_compensation), false, false));
 		}
 
 		_output->set_user_latency (0);

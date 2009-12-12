@@ -36,8 +36,8 @@ void Ticker::set_session(Session& s)
 	 _session = &s;
 
 	 if (_session) {
-		 _session->tick.connect(mem_fun (*this, &Ticker::tick));
-		 _session->GoingAway.connect(mem_fun (*this, &Ticker::going_away));
+		 _session->tick.connect(sigc::mem_fun (*this, &Ticker::tick));
+		 _session->GoingAway.connect(sigc::mem_fun (*this, &Ticker::going_away));
 	 }
 }
 
@@ -47,13 +47,13 @@ void MidiClockTicker::set_session(Session& s)
 
 	 if (_session) {
 		 _session->MIDIClock_PortChanged.connect(
-				 mem_fun (*this, &MidiClockTicker::update_midi_clock_port));
+				 sigc::mem_fun (*this, &MidiClockTicker::update_midi_clock_port));
 		 _session->TransportStateChange.connect(
-				 mem_fun (*this, &MidiClockTicker::transport_state_changed));
+				 sigc::mem_fun (*this, &MidiClockTicker::transport_state_changed));
 		 _session->PositionChanged.connect(
-				 mem_fun (*this, &MidiClockTicker::position_changed));
+				 sigc::mem_fun (*this, &MidiClockTicker::position_changed));
 		 _session->TransportLooped.connect(
-				 mem_fun (*this, &MidiClockTicker::transport_looped));
+				 sigc::mem_fun (*this, &MidiClockTicker::transport_looped));
 		 update_midi_clock_port();
 	 }
 }

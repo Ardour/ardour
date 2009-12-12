@@ -13,7 +13,6 @@ using namespace std;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
-using namespace sigc;
 
 static const char* mode_strings[] = { "duplex", "output", "input",  (char*) 0 };
 

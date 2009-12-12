@@ -21,6 +21,7 @@
 #define __pbd_ui_callback_h__
 
 #include <boost/function.hpp>
+#include <boost/bind.hpp> /* we don't need this here, but anything calling call_slot() probably will, so this is convenient */
 #include <glibmm/thread.h>
 
 namespace PBD

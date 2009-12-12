@@ -54,7 +54,6 @@ using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace Glib;
-using namespace sigc;
 
 int
 ARDOUR_UI::setup_windows ()
@@ -463,7 +462,7 @@ ARDOUR_UI::_auditioning_changed (bool onoff)
 void
 ARDOUR_UI::auditioning_changed (bool onoff)
 {
-	UI::instance()->call_slot(sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::_auditioning_changed), onoff));
+	UI::instance()->call_slot (boost::bind (&ARDOUR_UI::_auditioning_changed, this, onoff));
 }
 
 void
@@ -878,7 +877,8 @@ ARDOUR_UI::set_transport_sensitivity (bool yn)
 void
 ARDOUR_UI::editor_realized ()
 {
-	Config->map_parameters (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
+	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
+	Config->map_parameters (pc);
 
 	set_size_request_to_display_given_text (speed_display_box, _("-0.55"), 2, 2);
 	reset_dpi ();

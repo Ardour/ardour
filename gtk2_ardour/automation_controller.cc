@@ -147,7 +147,6 @@ AutomationController::automation_state_changed ()
 void
 AutomationController::value_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (
-			sigc::mem_fun(*this, &AutomationController::display_effective_value));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&AutomationController::display_effective_value, this));
 }
 

@@ -38,7 +38,6 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-using namespace sigc;
 using namespace std;
 
 RouteGroup::RouteGroup (Session& s, const string &n, Flag f, Property p)
@@ -78,7 +77,7 @@ RouteGroup::add (boost::shared_ptr<Route> r)
 	routes->push_back (r);
 
 	r->join_route_group (this);
-	r->GoingAway.connect (sigc::bind (mem_fun (*this, &RouteGroup::remove_when_going_away), boost::weak_ptr<Route> (r)));
+	r->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &RouteGroup::remove_when_going_away), boost::weak_ptr<Route> (r)));
 	
 	_session.set_dirty ();
 	changed (); /* EMIT SIGNAL */

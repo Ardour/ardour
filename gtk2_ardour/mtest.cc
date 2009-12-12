@@ -26,7 +26,6 @@
 
 using namespace Gtk;
 using namespace std;
-using namespace sigc;
 using namespace Glib;
 
 void

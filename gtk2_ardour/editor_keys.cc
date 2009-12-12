@@ -37,7 +37,6 @@
 
 using namespace ARDOUR;
 using namespace PBD;
-using namespace sigc;
 
 void
 Editor::keyboard_selection_finish (bool add)

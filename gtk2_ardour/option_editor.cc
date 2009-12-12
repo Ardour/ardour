@@ -25,7 +25,6 @@
 #include "i18n.h"
 
 using namespace std;
-using namespace sigc;
 using namespace Gtk;
 using namespace ARDOUR;
 
@@ -71,7 +70,7 @@ OptionEditorBox::add_to_page (OptionEditorPage* p)
 	add_widget_to_page (p, _box);
 }
 
-BoolOption::BoolOption (string const & i, string const & n, slot<bool> g, slot<bool, bool> s)
+BoolOption::BoolOption (string const & i, string const & n, sigc::slot<bool> g, sigc::slot<bool, bool> s)
 	: Option (i, n),
 	  _get (g),
 	  _set (s)
@@ -99,7 +98,7 @@ BoolOption::toggled ()
 	_set (_button->get_active ());
 }
 
-EntryOption::EntryOption (string const & i, string const & n, slot<string> g, slot<bool, string> s)
+EntryOption::EntryOption (string const & i, string const & n, sigc::slot<string> g, sigc::slot<bool, string> s)
 	: Option (i, n),
 	  _get (g),
 	  _set (s)

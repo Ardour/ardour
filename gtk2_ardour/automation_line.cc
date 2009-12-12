@@ -50,7 +50,6 @@
 #include "i18n.h"
 
 using namespace std;
-using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
@@ -115,7 +114,7 @@ AutomationLine::queue_reset ()
 {
 	if (!update_pending) {
 		update_pending = true;
-		Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun(*this, &AutomationLine::reset));
+		Gtkmm2ext::UI::instance()->call_slot (boost::bind (&AutomationLine::reset, this));
 	}
 }
 

@@ -143,13 +143,13 @@ Diskstream::set_route (Route& r)
 	_io = _route->input();
 
 	ic_connection.disconnect();
-	ic_connection = _io->changed.connect (mem_fun (*this, &Diskstream::handle_input_change));
+	ic_connection = _io->changed.connect (sigc::mem_fun (*this, &Diskstream::handle_input_change));
 
 	input_change_pending = ConfigurationChanged;
 	non_realtime_input_change ();
 	set_align_style_from_io ();
 
-	_route->GoingAway.connect (mem_fun (*this, &Diskstream::route_going_away));
+	_route->GoingAway.connect (sigc::mem_fun (*this, &Diskstream::route_going_away));
 }
 
 void
@@ -342,9 +342,9 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 			reset_write_sources (false);
 		}
 
-		plmod_connection = _playlist->Modified.connect (mem_fun (*this, &Diskstream::playlist_modified));
-		plgone_connection = _playlist->GoingAway.connect (bind (mem_fun (*this, &Diskstream::playlist_deleted), boost::weak_ptr<Playlist>(_playlist)));
-		plregion_connection = _playlist->RangesMoved.connect (mem_fun (*this, &Diskstream::playlist_ranges_moved));
+		plmod_connection = _playlist->Modified.connect (sigc::mem_fun (*this, &Diskstream::playlist_modified));
+		plgone_connection = _playlist->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &Diskstream::playlist_deleted), boost::weak_ptr<Playlist>(_playlist)));
+		plregion_connection = _playlist->RangesMoved.connect (sigc::mem_fun (*this, &Diskstream::playlist_ranges_moved));
 	}
 
 	/* don't do this if we've already asked for it *or* if we are setting up

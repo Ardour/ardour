@@ -19,7 +19,7 @@
 
 #ifndef __ardour_configuration_h__
 #define __ardour_configuration_h__
-
+#include <boost/function.hpp>
 #include "pbd/stateful.h"
 #include "ardour/configuration_variable.h"
 
@@ -33,7 +33,7 @@ class Configuration : public PBD::Stateful
 	Configuration();
 	virtual ~Configuration();
 
-	virtual void map_parameters (sigc::slot<void, std::string> s) = 0;
+	virtual void map_parameters (boost::function<void (std::string)>&) = 0;
 	virtual int set_state (XMLNode const &, int) = 0;
 	virtual XMLNode & get_state () = 0;
 	virtual XMLNode & get_variables () = 0;

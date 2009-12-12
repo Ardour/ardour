@@ -62,7 +62,6 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
-using namespace sigc;
 
 GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrollable)
 	: PlugUIBase (pi),
@@ -662,7 +661,7 @@ GenericPluginUI::parameter_changed (ControlUI* cui)
 {
 	if (!cui->update_pending) {
 		cui->update_pending = true;
-		Gtkmm2ext::UI::instance()->call_slot (sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::update_control_display), cui));
+		Gtkmm2ext::UI::instance()->call_slot (boost::bind (&GenericPluginUI::update_control_display, this, cui));
 	}
 }
 

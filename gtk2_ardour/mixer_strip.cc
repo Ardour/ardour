@@ -63,7 +63,6 @@
 
 #include "i18n.h"
 
-using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
@@ -1182,20 +1181,20 @@ MixerStrip::fast_update ()
 void
 MixerStrip::diskstream_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun(*this, &MixerStrip::update_diskstream_display));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&MixerStrip::update_diskstream_display, this));
 }
 
 void
 MixerStrip::input_changed (IOChange /*change*/, void */*src*/)
 {
-	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun(*this, &MixerStrip::update_input_display));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&MixerStrip::update_input_display, this));
 	set_width_enum (_width, this);
 }
 
 void
 MixerStrip::output_changed (IOChange /*change*/, void */*src*/)
 {
-	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun(*this, &MixerStrip::update_output_display));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&MixerStrip::update_output_display, this));
 	set_width_enum (_width, this);
 }
 

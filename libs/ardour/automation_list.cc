@@ -34,7 +34,6 @@
 
 using namespace std;
 using namespace ARDOUR;
-using namespace sigc;
 using namespace PBD;
 
 sigc::signal<void,AutomationList *> AutomationList::AutomationListCreated;

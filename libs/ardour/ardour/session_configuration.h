@@ -29,7 +29,7 @@ class SessionConfiguration : public Configuration
 public:
 	SessionConfiguration ();
 
-	void map_parameters (sigc::slot<void, std::string>);
+	void map_parameters (boost::function<void (std::string)>&);
 	int set_state (XMLNode const &, int version);
 	XMLNode& get_state ();
 	XMLNode& get_variables ();

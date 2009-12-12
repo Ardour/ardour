@@ -38,7 +38,6 @@
 
 using namespace ARDOUR;
 using namespace PBD;
-using namespace sigc;
 using namespace std;
 using namespace Gtkmm2ext;
 

@@ -37,7 +37,6 @@
 #include "gui_thread.h"
 
 using namespace std;
-using namespace sigc;
 using namespace Gtk;
 using namespace ARDOUR;
 
@@ -166,7 +165,7 @@ PortMatrix::init ()
 void
 PortMatrix::reconnect_to_routes ()
 {
-	for (vector<connection>::iterator i = _route_connections.begin(); i != _route_connections.end(); ++i) {
+	for (vector<sigc::connection>::iterator i = _route_connections.begin(); i != _route_connections.end(); ++i) {
 		i->disconnect ();
 	}
 	_route_connections.clear ();

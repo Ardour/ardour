@@ -267,7 +267,7 @@ Playlist::init (bool hide)
 	freeze_length = 0;
 	_explicit_relayering = false;
 
-	Modified.connect (mem_fun (*this, &Playlist::mark_session_dirty));
+	Modified.connect (sigc::mem_fun (*this, &Playlist::mark_session_dirty));
 }
 
 Playlist::~Playlist ()
@@ -602,7 +602,7 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t posit
 	}
 
 	region_state_changed_connections.push_back (
-		region->StateChanged.connect (sigc::bind (mem_fun (this, &Playlist::region_changed_proxy),
+		region->StateChanged.connect (sigc::bind (sigc::mem_fun (this, &Playlist::region_changed_proxy),
 							  boost::weak_ptr<Region> (region)))
 		);
 

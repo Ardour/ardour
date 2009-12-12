@@ -60,7 +60,6 @@ using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace Glib;
-using namespace sigc;
 
 int
 ARDOUR_UI::create_editor ()

@@ -34,7 +34,6 @@
 #include "canvas_impl.h"
 #include "gui_thread.h"
 
-using namespace sigc ;
 using namespace ARDOUR ;
 using namespace Gtk;
 

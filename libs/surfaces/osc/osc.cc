@@ -47,7 +47,6 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-using namespace sigc;
 using namespace std;
 using namespace Glib;
 
@@ -83,7 +82,7 @@ OSC::OSC (Session& s, uint32_t port)
 
 	// "Application Hooks"
 	session_loaded (s);
-	session->Exported.connect (mem_fun (*this, &OSC::session_exported));
+	session->Exported.connect (sigc::mem_fun (*this, &OSC::session_exported));
 }
 
 OSC::~OSC()
@@ -213,7 +212,7 @@ OSC::thread_init ()
 {
 	if (_osc_unix_server) {
 		Glib::RefPtr<IOSource> src = IOSource::create (lo_server_get_socket_fd (_osc_unix_server), IO_IN|IO_HUP|IO_ERR);
-		src->connect (bind (sigc::mem_fun (*this, &OSC::osc_input_handler), _osc_unix_server));
+		src->connect (sigc::bind (sigc::mem_fun (*this, &OSC::osc_input_handler), _osc_unix_server));
 		src->attach (_main_loop->get_context());
 		local_server = src->gobj();
 		g_source_ref (local_server);
@@ -221,7 +220,7 @@ OSC::thread_init ()
 
 	if (_osc_server) {
 		Glib::RefPtr<IOSource> src  = IOSource::create (lo_server_get_socket_fd (_osc_server), IO_IN|IO_HUP|IO_ERR);
-		src->connect (bind (sigc::mem_fun (*this, &OSC::osc_input_handler), _osc_server));
+		src->connect (sigc::bind (sigc::mem_fun (*this, &OSC::osc_input_handler), _osc_server));
 		src->attach (_main_loop->get_context());
 		remote_server = src->gobj();
 		g_source_ref (remote_server);
@@ -573,7 +572,7 @@ OSC::listen_to_route (boost::shared_ptr<Route> route, lo_address addr)
 	*/
 	
 	if (!route_exists) {
-		route->GoingAway.connect (bind (mem_fun (*this, &OSC::drop_route), boost::weak_ptr<Route> (route)));
+		route->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &OSC::drop_route), boost::weak_ptr<Route> (route)));
 	}
 }
 

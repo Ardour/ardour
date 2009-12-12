@@ -50,7 +50,6 @@
 
 using namespace std;
 using namespace ardourvis ;
-using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
 

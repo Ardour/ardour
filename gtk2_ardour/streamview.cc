@@ -234,9 +234,9 @@ StreamView::display_diskstream (boost::shared_ptr<Diskstream> ds)
 {
 	playlist_change_connection.disconnect();
 	playlist_changed (ds);
-	playlist_change_connection = ds->PlaylistChanged.connect (sigc::bind (
-			sigc::mem_fun (*this, &StreamView::playlist_changed_weak),
-			boost::weak_ptr<Diskstream> (ds)));
+	playlist_change_connection = ds->PlaylistChanged.connect (
+		sigc::bind (sigc::mem_fun (*this, &StreamView::playlist_changed_weak),
+			    boost::weak_ptr<Diskstream> (ds)));
 }
 
 void
@@ -379,11 +379,9 @@ StreamView::diskstream_changed ()
 	boost::shared_ptr<Track> t;
 
 	if ((t = _trackview.track()) != 0) {
-		Gtkmm2ext::UI::instance()->call_slot (sigc::bind (
-				sigc::mem_fun (*this, &StreamView::display_diskstream),
-				t->diskstream()));
+		Gtkmm2ext::UI::instance()->call_slot (boost::bind (&StreamView::display_diskstream, this, t->diskstream()));
 	} else {
-		Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &StreamView::undisplay_diskstream));
+		Gtkmm2ext::UI::instance()->call_slot (boost::bind (&StreamView::undisplay_diskstream, this));
 	}
 }
 
@@ -421,19 +419,19 @@ StreamView::region_layered (RegionView* rv)
 void
 StreamView::rec_enable_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &StreamView::setup_rec_box));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&StreamView::setup_rec_box, this));
 }
 
 void
 StreamView::sess_rec_enable_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &StreamView::setup_rec_box));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&StreamView::setup_rec_box, this));
 }
 
 void
 StreamView::transport_changed()
 {
-	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &StreamView::setup_rec_box));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&StreamView::setup_rec_box, this));
 }
 
 void
@@ -441,7 +439,7 @@ StreamView::transport_looped()
 {
 	// to force a new rec region
 	rec_active = false;
-	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &StreamView::setup_rec_box));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&StreamView::setup_rec_box, this));
 }
 
 void

@@ -39,7 +39,6 @@
 #include "i18n.h"
 
 using namespace std;
-using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
@@ -48,7 +47,7 @@ using namespace Gtkmm2ext;
 void
 Editor::handle_new_named_selection ()
 {
-	ARDOUR_UI::instance()->call_slot (sigc::mem_fun(*this, &Editor::redisplay_named_selections));
+	ARDOUR_UI::instance()->call_slot (boost::bind (&Editor::redisplay_named_selections, this));
 }
 
 void

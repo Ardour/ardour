@@ -44,7 +44,6 @@
 using namespace Gtk;
 using namespace Gdk;
 using namespace std;
-using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
 

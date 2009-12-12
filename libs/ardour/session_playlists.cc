@@ -73,7 +73,7 @@ SessionPlaylists::add (boost::shared_ptr<Playlist> playlist)
 
 	if (!existing) {
 		playlists.insert (playlists.begin(), playlist);
-		playlist->InUse.connect (sigc::bind (mem_fun (*this, &SessionPlaylists::track), boost::weak_ptr<Playlist>(playlist)));
+		playlist->InUse.connect (sigc::bind (sigc::mem_fun (*this, &SessionPlaylists::track), boost::weak_ptr<Playlist>(playlist)));
 	}
 
 	return existing;

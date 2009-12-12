@@ -103,7 +103,6 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
-using namespace sigc;
 
 ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
 UIConfiguration *ARDOUR_UI::ui_config = 0;
@@ -410,7 +409,8 @@ ARDOUR_UI::post_engine ()
 	update_sample_rate (engine->frame_rate());
 
 	Config->ParameterChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
-	Config->map_parameters (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
+	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
+	Config->map_parameters (pc);
 
 	/* now start and maybe save state */
 

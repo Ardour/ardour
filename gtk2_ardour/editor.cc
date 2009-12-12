@@ -121,7 +121,6 @@
 #endif
 
 using namespace std;
-using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
@@ -1132,8 +1131,9 @@ Editor::connect_to_session (Session *t)
 		loc->set_name (_("Punch"));
 	}
 
-	Config->map_parameters (sigc::mem_fun (*this, &Editor::parameter_changed));
-	session->config.map_parameters (sigc::mem_fun (*this, &Editor::parameter_changed));
+	boost::function<void (string)> pc (boost::bind (&Editor::parameter_changed, this, _1));
+	Config->map_parameters (pc);
+	session->config.map_parameters (pc);
 
 	session->StateSaved.connect (sigc::mem_fun(*this, &Editor::session_state_saved));
 

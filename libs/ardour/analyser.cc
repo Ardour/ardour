@@ -26,7 +26,6 @@
 #include "pbd/convert.h"
 
 using namespace std;
-using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
 

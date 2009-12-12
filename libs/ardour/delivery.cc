@@ -64,10 +64,10 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Mute
 	_display_to_user = false;
 
 	if (_output) {
-		_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
+		_output->changed.connect (sigc::mem_fun (*this, &Delivery::output_changed));
 	}
 
-	CycleStart.connect (mem_fun (*this, &Delivery::cycle_start));
+	CycleStart.connect (sigc::mem_fun (*this, &Delivery::cycle_start));
 }
 
 /* deliver to a new IO object */
@@ -88,10 +88,10 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const string& 
 	_display_to_user = false;
 
 	if (_output) {
-		_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
+		_output->changed.connect (sigc::mem_fun (*this, &Delivery::output_changed));
 	}
 
-	CycleStart.connect (mem_fun (*this, &Delivery::cycle_start));
+	CycleStart.connect (sigc::mem_fun (*this, &Delivery::cycle_start));
 }
 
 /* deliver to a new IO object, reconstruct from XML */
@@ -116,10 +116,10 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode&
 	}
 
 	if (_output) {
-		_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
+		_output->changed.connect (sigc::mem_fun (*this, &Delivery::output_changed));
 	}
 
-	CycleStart.connect (mem_fun (*this, &Delivery::cycle_start));
+	CycleStart.connect (sigc::mem_fun (*this, &Delivery::cycle_start));
 }
 
 /* deliver to an existing IO object, reconstruct from XML */
@@ -144,10 +144,10 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> out, boost::shared_ptr<Mut
 	}
 
 	if (_output) {
-		_output->changed.connect (mem_fun (*this, &Delivery::output_changed));
+		_output->changed.connect (sigc::mem_fun (*this, &Delivery::output_changed));
 	}
 
-	CycleStart.connect (mem_fun (*this, &Delivery::cycle_start));
+	CycleStart.connect (sigc::mem_fun (*this, &Delivery::cycle_start));
 }
 
 std::string
@@ -419,7 +419,7 @@ Delivery::reset_panner ()
 		}
 	} else {
 		panner_legal_c.disconnect ();
-		panner_legal_c = PannersLegal.connect (mem_fun (*this, &Delivery::panners_became_legal));
+		panner_legal_c = PannersLegal.connect (sigc::mem_fun (*this, &Delivery::panners_became_legal));
 	}
 }
 

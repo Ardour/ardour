@@ -58,7 +58,6 @@
 #define MUTED_ALPHA 10
 
 using namespace std;
-using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
@@ -983,7 +982,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 void
 AudioRegionView::peaks_ready_handler (uint32_t which)
 {
-	Gtkmm2ext::UI::instance()->call_slot (sigc::bind (sigc::mem_fun(*this, &AudioRegionView::create_one_wave), which, false));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&AudioRegionView::create_one_wave, this, which, false));
 	// cerr << "AudioRegionView::peaks_ready_handler() called on " << which << " this: " << this << endl;
 }
 

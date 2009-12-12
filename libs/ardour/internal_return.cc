@@ -33,14 +33,14 @@ InternalReturn::InternalReturn (Session& s)
 	: Return (s, true)
 	, user_count (0)
 {
-	CycleStart.connect (mem_fun (*this, &InternalReturn::cycle_start));
+	CycleStart.connect (sigc::mem_fun (*this, &InternalReturn::cycle_start));
 }
 
 InternalReturn::InternalReturn (Session& s, const XMLNode& node)
 	: Return (s, node, true)
 	, user_count (0)
 {
-	CycleStart.connect (mem_fun (*this, &InternalReturn::cycle_start));
+	CycleStart.connect (sigc::mem_fun (*this, &InternalReturn::cycle_start));
 }
 
 void

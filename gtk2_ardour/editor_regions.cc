@@ -46,7 +46,6 @@
 #include "i18n.h"
 
 using namespace std;
-using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
@@ -1097,7 +1096,7 @@ EditorRegions::reset_sort_direction (bool up)
 }
 
 void
-EditorRegions::selection_mapover (slot<void,boost::shared_ptr<Region> > sl)
+EditorRegions::selection_mapover (sigc::slot<void,boost::shared_ptr<Region> > sl)
 {
 	Glib::RefPtr<TreeSelection> selection = _display.get_selection();
 	TreeView::Selection::ListHandle_Path rows = selection->get_selected_rows ();

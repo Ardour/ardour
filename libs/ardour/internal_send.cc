@@ -43,8 +43,8 @@ InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, boost:
 
 	set_name (sendto->name());
 
-	_send_to->GoingAway.connect (mem_fun (*this, &InternalSend::send_to_going_away));
-	_send_to->NameChanged.connect (mem_fun (*this, &InternalSend::send_to_name_changed));
+	_send_to->GoingAway.connect (sigc::mem_fun (*this, &InternalSend::send_to_going_away));
+	_send_to->NameChanged.connect (sigc::mem_fun (*this, &InternalSend::send_to_name_changed));
 }
 
 InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node)
@@ -187,7 +187,7 @@ InternalSend::set_our_state (const XMLNode& node, int version)
 		*/
 
 		if (!IO::connecting_legal) {
-			connect_c = IO::ConnectingLegal.connect (mem_fun (*this, &InternalSend::connect_when_legal));
+			connect_c = IO::ConnectingLegal.connect (sigc::mem_fun (*this, &InternalSend::connect_when_legal));
 		} else {
 			connect_when_legal ();
 		}

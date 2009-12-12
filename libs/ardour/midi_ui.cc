@@ -44,7 +44,7 @@ MidiControlUI::MidiControlUI (Session& s)
 	: AbstractUI<MidiUIRequest> (_("midiui"))
 	, _session (s) 
 {
-	MIDI::Manager::instance()->PortsChanged.connect (mem_fun (*this, &MidiControlUI::change_midi_ports));
+	MIDI::Manager::instance()->PortsChanged.connect (sigc::mem_fun (*this, &MidiControlUI::change_midi_ports));
 }
 
 MidiControlUI::~MidiControlUI ()
@@ -125,7 +125,7 @@ MidiControlUI::reset_ports ()
 		if ((fd = (*i)->selectable ()) >= 0) {
 			Glib::RefPtr<IOSource> psrc = IOSource::create (fd, IO_IN|IO_HUP|IO_ERR);
 
-			psrc->connect (bind (mem_fun (*this, &MidiControlUI::midi_input_handler), (*i)));
+			psrc->connect (sigc::bind (sigc::mem_fun (*this, &MidiControlUI::midi_input_handler), (*i)));
 			psrc->attach (_main_loop->get_context());
 
 			// glibmm hack: for now, store only the GSource*

@@ -45,7 +45,6 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace PBD;
-using namespace sigc;
 
 void
 ARDOUR_UI::toggle_external_sync()
@@ -272,7 +271,8 @@ void
 ARDOUR_UI::setup_session_options ()
 {
 	session->config.ParameterChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
-	session->config.map_parameters (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
+	boost::function<void (std::string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
+	session->config.map_parameters (pc);
 }
 
 #if 0

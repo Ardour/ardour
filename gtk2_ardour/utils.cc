@@ -50,7 +50,6 @@
 
 using namespace std;
 using namespace Gtk;
-using namespace sigc;
 using namespace Glib;
 using namespace PBD;
 using Gtkmm2ext::Keyboard;

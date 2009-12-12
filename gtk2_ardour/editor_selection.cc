@@ -40,7 +40,6 @@
 #include "i18n.h"
 
 using namespace std;
-using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
@@ -314,7 +313,7 @@ Editor::get_relevant_tracks (set<RouteTimeAxisView*>& relevant_tracks) const
  */
 
 void
-Editor::mapover_tracks (slot<void, RouteTimeAxisView&, uint32_t> sl, TimeAxisView* basis, RouteGroup::Property prop) const
+Editor::mapover_tracks (sigc::slot<void, RouteTimeAxisView&, uint32_t> sl, TimeAxisView* basis, RouteGroup::Property prop) const
 {
 	RouteTimeAxisView* route_basis = dynamic_cast<RouteTimeAxisView*> (basis);
 	if (route_basis == 0) {

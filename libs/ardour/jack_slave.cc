@@ -30,7 +30,6 @@
 
 using namespace std;
 using namespace ARDOUR;
-using namespace sigc;
 
 JACK_Slave::JACK_Slave (jack_client_t* j)
 	: jack (j)

@@ -31,7 +31,6 @@
 #include "i18n.h"
 
 using namespace Gtk;
-using namespace sigc;
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;

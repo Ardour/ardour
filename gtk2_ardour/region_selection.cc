@@ -27,7 +27,6 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
-using namespace sigc;
 
 /** Construct an empty RegionSelection.
  */

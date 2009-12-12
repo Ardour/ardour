@@ -40,7 +40,6 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-using namespace sigc;
 using namespace std;
 
 MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)

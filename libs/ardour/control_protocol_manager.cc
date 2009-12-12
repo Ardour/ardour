@@ -66,7 +66,7 @@ void
 ControlProtocolManager::set_session (Session& s)
 {
 	_session = &s;
-	_session->GoingAway.connect (mem_fun (*this, &ControlProtocolManager::drop_session));
+	_session->GoingAway.connect (sigc::mem_fun (*this, &ControlProtocolManager::drop_session));
 
 	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 		if ((*i)->requested || (*i)->mandatory) {

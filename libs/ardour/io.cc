@@ -567,7 +567,7 @@ IO::set_state (const XMLNode& node, int version)
 		pending_state_node = new XMLNode (node);
 		pending_state_node_version = version;
 		pending_state_node_in = false;
-		connection_legal_c = ConnectingLegal.connect (mem_fun (*this, &IO::connecting_became_legal));
+		connection_legal_c = ConnectingLegal.connect (sigc::mem_fun (*this, &IO::connecting_became_legal));
 	}
 
 
@@ -620,7 +620,7 @@ IO::set_state_2X (const XMLNode& node, int version, bool in)
 		pending_state_node = new XMLNode (node);
 		pending_state_node_version = version;
 		pending_state_node_in = in;
-		connection_legal_c = ConnectingLegal.connect (mem_fun (*this, &IO::connecting_became_legal));
+		connection_legal_c = ConnectingLegal.connect (sigc::mem_fun (*this, &IO::connecting_became_legal));
 	}
 
 	return 0;

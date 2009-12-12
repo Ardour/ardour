@@ -191,8 +191,8 @@ Session::Session (AudioEngine &eng,
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
 
-	Config->ParameterChanged.connect (bind (mem_fun (*this, &Session::config_changed), false));
-	config.ParameterChanged.connect (bind (mem_fun (*this, &Session::config_changed), true));
+	Config->ParameterChanged.connect (sigc::bind (sigc::mem_fun (*this, &Session::config_changed), false));
+	config.ParameterChanged.connect (sigc::bind (sigc::mem_fun (*this, &Session::config_changed), true));
 
 	if (was_dirty) {
 		DirtyChanged (); /* EMIT SIGNAL */
@@ -324,7 +324,7 @@ Session::Session (AudioEngine &eng,
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
 
-	Config->ParameterChanged.connect (bind (mem_fun (*this, &Session::config_changed), false));
+	Config->ParameterChanged.connect (sigc::bind (sigc::mem_fun (*this, &Session::config_changed), false));
 }
 
 Session::~Session ()
@@ -411,7 +411,7 @@ Session::destroy ()
 		tmp = i;
 		++tmp;
 		
-		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for region %1 (%2); pre-ref = %2\n", i->second->name(), i->second.get(), i->second.use_count()));
+		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for region %1 (%2); pre-ref = %3\n", i->second->name(), i->second.get(), i->second.use_count()));
 		i->second->drop_references ();
 		DEBUG_TRACE(DEBUG::Destruction, string_compose ("region post ref = %1\n", i->second.use_count()));
 		i = tmp;
@@ -514,12 +514,15 @@ Session::when_engine_running ()
 
 	BootMessage (_("Using configuration"));
 
-	Config->map_parameters (bind (mem_fun (*this, &Session::config_changed), false));
-	config.map_parameters (bind (mem_fun (*this, &Session::config_changed), true));
+	boost::function<void (std::string)> ff (boost::bind (&Session::config_changed, this, _1, false));
+	boost::function<void (std::string)> ft (boost::bind (&Session::config_changed, this, _1, true));
+
+	Config->map_parameters (ff);
+	config.map_parameters (ft);
 
 	/* every time we reconnect, recompute worst case output latencies */
 
-	_engine.Running.connect (mem_fun (*this, &Session::set_worst_io_latencies));
+	_engine.Running.connect (sigc::mem_fun (*this, &Session::set_worst_io_latencies));
 
 	if (synced_to_jack()) {
 		_engine.transport_stop ();
@@ -873,7 +876,7 @@ Session::diskstream_playlist_changed (boost::weak_ptr<Diskstream> wp)
 	boost::shared_ptr<Playlist> playlist;
 
 	if ((playlist = dstream->playlist()) != 0) {
-		playlist->LengthChanged.connect (mem_fun (this, &Session::playlist_length_changed));
+		playlist->LengthChanged.connect (sigc::mem_fun (this, &Session::playlist_length_changed));
 	}
 
 	/* see comment in playlist_length_changed () */
@@ -1013,9 +1016,9 @@ Session::set_auto_punch_location (Location* location)
 	auto_punch_end_changed_connection.disconnect();
 	auto_punch_changed_connection.disconnect();
 
-	auto_punch_start_changed_connection = location->start_changed.connect (mem_fun (this, &Session::auto_punch_start_changed));
-	auto_punch_end_changed_connection = location->end_changed.connect (mem_fun (this, &Session::auto_punch_end_changed));
-	auto_punch_changed_connection = location->changed.connect (mem_fun (this, &Session::auto_punch_changed));
+	auto_punch_start_changed_connection = location->start_changed.connect (sigc::mem_fun (this, &Session::auto_punch_start_changed));
+	auto_punch_end_changed_connection = location->end_changed.connect (sigc::mem_fun (this, &Session::auto_punch_end_changed));
+	auto_punch_changed_connection = location->changed.connect (sigc::mem_fun (this, &Session::auto_punch_changed));
 
 	location->set_auto_punch (true, this);
 
@@ -1057,11 +1060,11 @@ Session::set_auto_loop_location (Location* location)
 	auto_loop_changed_connection.disconnect();
 
 	auto_loop_start_changed_connection = location->start_changed.connect (
-			mem_fun (this, &Session::auto_loop_changed));
+			sigc::mem_fun (this, &Session::auto_loop_changed));
 	auto_loop_end_changed_connection = location->end_changed.connect (
-			mem_fun (this, &Session::auto_loop_changed));
+			sigc::mem_fun (this, &Session::auto_loop_changed));
 	auto_loop_changed_connection = location->changed.connect (
-			mem_fun (this, &Session::auto_loop_changed));
+			sigc::mem_fun (this, &Session::auto_loop_changed));
 
 	location->set_auto_loop (true, this);
 
@@ -1655,7 +1658,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 				route_group->add (track);
 			}
 
-			track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
+			track->DiskstreamChanged.connect (sigc::mem_fun (this, &Session::resort_routes));
 			//track->set_remote_control_id (control_id);
 
 			new_routes.push_back (track);
@@ -1830,7 +1833,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 			track->audio_diskstream()->non_realtime_input_change();
 
-			track->DiskstreamChanged.connect (mem_fun (this, &Session::resort_routes));
+			track->DiskstreamChanged.connect (sigc::mem_fun (this, &Session::resort_routes));
 			track->set_remote_control_id (control_id);
 			++control_id;
 
@@ -2155,12 +2158,12 @@ Session::add_routes (RouteList& new_routes, bool save)
 
 		boost::weak_ptr<Route> wpr (*x);
 
-		(*x)->listen_changed.connect (sigc::bind (mem_fun (*this, &Session::route_listen_changed), wpr));
-		(*x)->solo_changed.connect (sigc::bind (mem_fun (*this, &Session::route_solo_changed), wpr));
-		(*x)->mute_changed.connect (mem_fun (*this, &Session::route_mute_changed));
-		(*x)->output()->changed.connect (mem_fun (*this, &Session::set_worst_io_latencies_x));
-		(*x)->processors_changed.connect (mem_fun (*this, &Session::route_processors_changed));
-		(*x)->route_group_changed.connect (mem_fun (*this, &Session::route_group_changed));
+		(*x)->listen_changed.connect (sigc::bind (sigc::mem_fun (*this, &Session::route_listen_changed), wpr));
+		(*x)->solo_changed.connect (sigc::bind (sigc::mem_fun (*this, &Session::route_solo_changed), wpr));
+		(*x)->mute_changed.connect (sigc::mem_fun (*this, &Session::route_mute_changed));
+		(*x)->output()->changed.connect (sigc::mem_fun (*this, &Session::set_worst_io_latencies_x));
+		(*x)->processors_changed.connect (sigc::mem_fun (*this, &Session::route_processors_changed));
+		(*x)->route_group_changed.connect (sigc::mem_fun (*this, &Session::route_group_changed));
 
 		if ((*x)->is_master()) {
 			_master_out = (*x);
@@ -2300,11 +2303,11 @@ Session::add_diskstream (boost::shared_ptr<Diskstream> dstream)
 		/* writer goes out of scope, copies ds back to main */
 	}
 
-	dstream->PlaylistChanged.connect (sigc::bind (mem_fun (*this, &Session::diskstream_playlist_changed), boost::weak_ptr<Diskstream> (dstream)));
+	dstream->PlaylistChanged.connect (sigc::bind (sigc::mem_fun (*this, &Session::diskstream_playlist_changed), boost::weak_ptr<Diskstream> (dstream)));
 	/* this will connect to future changes, and check the current length */
 	diskstream_playlist_changed (boost::weak_ptr<Diskstream> (dstream));
 
-	dstream->RecordEnableChanged.connect (mem_fun (*this, &Session::update_have_rec_enabled_diskstream));
+	dstream->RecordEnableChanged.connect (sigc::mem_fun (*this, &Session::update_have_rec_enabled_diskstream));
 
 	dstream->prepare ();
 
@@ -2818,8 +2821,8 @@ Session::add_regions (vector<boost::shared_ptr<Region> >& new_regions)
 				}
 			}
 
-			region->StateChanged.connect (sigc::bind (mem_fun (*this, &Session::region_changed), boost::weak_ptr<Region>(region)));
-			region->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_region), boost::weak_ptr<Region>(region)));
+			region->StateChanged.connect (sigc::bind (sigc::mem_fun (*this, &Session::region_changed), boost::weak_ptr<Region>(region)));
+			region->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &Session::remove_region), boost::weak_ptr<Region>(region)));
 
 			update_region_name_map (region);
 		}
@@ -3007,7 +3010,7 @@ Session::add_source (boost::shared_ptr<Source> source)
 	}
 
 	if (result.second) {
-		source->GoingAway.connect (sigc::bind (mem_fun (this, &Session::remove_source), boost::weak_ptr<Source> (source)));
+		source->GoingAway.connect (sigc::bind (sigc::mem_fun (this, &Session::remove_source), boost::weak_ptr<Source> (source)));
 		set_dirty();
 	}
 
@@ -3398,7 +3401,7 @@ Session::add_playlist (boost::shared_ptr<Playlist> playlist, bool unused)
 
 	bool existing = playlists->add (playlist);
 	if (!existing) {
-		playlist->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_playlist), boost::weak_ptr<Playlist>(playlist)));
+		playlist->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &Session::remove_playlist), boost::weak_ptr<Playlist>(playlist)));
 	}
 
 	if (unused) {
@@ -3572,7 +3575,7 @@ Session::graph_reordered ()
 void
 Session::add_processor (Processor* processor)
 {
-	processor->GoingAway.connect (sigc::bind (mem_fun (*this, &Session::remove_processor), processor));
+	processor->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &Session::remove_processor), processor));
 	set_dirty();
 }
 

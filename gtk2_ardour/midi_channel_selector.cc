@@ -25,7 +25,6 @@
 
 using namespace std;
 using namespace Gtk;
-using namespace sigc;
 using namespace ARDOUR;
 
 MidiChannelSelector::MidiChannelSelector(int n_rows, int n_columns, int start_row, int start_column)

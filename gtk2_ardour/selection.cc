@@ -38,7 +38,6 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
-using namespace sigc;
 
 struct AudioRangeComparator {
     bool operator()(AudioRange a, AudioRange b) {

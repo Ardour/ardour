@@ -165,7 +165,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_base_frame_rate = _current_frame_rate;
 
 	_tempo_map = new TempoMap (_current_frame_rate);
-	_tempo_map->StateChanged.connect (mem_fun (*this, &Session::tempo_map_changed));
+	_tempo_map->StateChanged.connect (sigc::mem_fun (*this, &Session::tempo_map_changed));
 
 
 	_non_soloed_outs_muted = false;
@@ -267,20 +267,20 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	delta_accumulator_cnt = 0;
 	_slave_state = Stopped;
 
-	_engine.GraphReordered.connect (mem_fun (*this, &Session::graph_reordered));
+	_engine.GraphReordered.connect (sigc::mem_fun (*this, &Session::graph_reordered));
 
 	/* These are all static "per-class" signals */
 
-	RegionFactory::CheckNewRegion.connect (mem_fun (*this, &Session::add_region));
-	SourceFactory::SourceCreated.connect (mem_fun (*this, &Session::add_source));
-	PlaylistFactory::PlaylistCreated.connect (mem_fun (*this, &Session::add_playlist));
-	Processor::ProcessorCreated.connect (mem_fun (*this, &Session::add_processor));
-	NamedSelection::NamedSelectionCreated.connect (mem_fun (*this, &Session::add_named_selection));
-	AutomationList::AutomationListCreated.connect (mem_fun (*this, &Session::add_automation_list));
+	RegionFactory::CheckNewRegion.connect (sigc::mem_fun (*this, &Session::add_region));
+	SourceFactory::SourceCreated.connect (sigc::mem_fun (*this, &Session::add_source));
+	PlaylistFactory::PlaylistCreated.connect (sigc::mem_fun (*this, &Session::add_playlist));
+	Processor::ProcessorCreated.connect (sigc::mem_fun (*this, &Session::add_processor));
+	NamedSelection::NamedSelectionCreated.connect (sigc::mem_fun (*this, &Session::add_named_selection));
+	AutomationList::AutomationListCreated.connect (sigc::mem_fun (*this, &Session::add_automation_list));
 
-	Controllable::Destroyed.connect (mem_fun (*this, &Session::remove_controllable));
+	Controllable::Destroyed.connect (sigc::mem_fun (*this, &Session::remove_controllable));
 
-	IO::PortCountChanged.connect (mem_fun (*this, &Session::ensure_buffers));
+	IO::PortCountChanged.connect (sigc::mem_fun (*this, &Session::ensure_buffers));
 
 	/* stop IO objects from doing stuff until we're ready for them */
 
@@ -332,15 +332,15 @@ Session::second_stage_init (bool new_session)
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave|Loading);
 
 
-	_locations.changed.connect (mem_fun (this, &Session::locations_changed));
-	_locations.added.connect (mem_fun (this, &Session::locations_added));
+	_locations.changed.connect (sigc::mem_fun (this, &Session::locations_changed));
+	_locations.added.connect (sigc::mem_fun (this, &Session::locations_added));
 	setup_click_sounds (0);
 	setup_midi_control ();
 
 	/* Pay attention ... */
 
-	_engine.Halted.connect (mem_fun (*this, &Session::engine_halted));
-	_engine.Xrun.connect (mem_fun (*this, &Session::xrun_recovery));
+	_engine.Halted.connect (sigc::mem_fun (*this, &Session::engine_halted));
+	_engine.Xrun.connect (sigc::mem_fun (*this, &Session::xrun_recovery));
 
 	try {
 		when_engine_running();

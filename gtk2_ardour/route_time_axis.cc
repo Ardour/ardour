@@ -88,7 +88,6 @@ using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace Editing;
-using namespace sigc;
 using namespace std;
 
 Glib::RefPtr<Gdk::Pixbuf> RouteTimeAxisView::slider;
@@ -1144,13 +1143,13 @@ RouteTimeAxisView::clear_playlist ()
 void
 RouteTimeAxisView::speed_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun(*this, &RouteTimeAxisView::reset_samples_per_unit));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&RouteTimeAxisView::reset_samples_per_unit, this));
 }
 
 void
 RouteTimeAxisView::diskstream_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun(*this, &RouteTimeAxisView::update_diskstream_display));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&RouteTimeAxisView::update_diskstream_display, this));
 }
 
 void

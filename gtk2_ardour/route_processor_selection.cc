@@ -32,7 +32,6 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
-using namespace sigc;
 
 RouteRedirectSelection&
 RouteRedirectSelection::operator= (const RouteRedirectSelection& other)

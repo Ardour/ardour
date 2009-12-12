@@ -209,38 +209,38 @@ Session::set_mmc_port (string port_tag)
 	}
 
 	mmc->Play.connect
-		(mem_fun (*this, &Session::mmc_deferred_play));
+		(sigc::mem_fun (*this, &Session::mmc_deferred_play));
 	mmc->DeferredPlay.connect
-		(mem_fun (*this, &Session::mmc_deferred_play));
+		(sigc::mem_fun (*this, &Session::mmc_deferred_play));
 	mmc->Stop.connect
-		(mem_fun (*this, &Session::mmc_stop));
+		(sigc::mem_fun (*this, &Session::mmc_stop));
 	mmc->FastForward.connect
-		(mem_fun (*this, &Session::mmc_fast_forward));
+		(sigc::mem_fun (*this, &Session::mmc_fast_forward));
 	mmc->Rewind.connect
-		(mem_fun (*this, &Session::mmc_rewind));
+		(sigc::mem_fun (*this, &Session::mmc_rewind));
 	mmc->Pause.connect
-		(mem_fun (*this, &Session::mmc_pause));
+		(sigc::mem_fun (*this, &Session::mmc_pause));
 	mmc->RecordPause.connect
-		(mem_fun (*this, &Session::mmc_record_pause));
+		(sigc::mem_fun (*this, &Session::mmc_record_pause));
 	mmc->RecordStrobe.connect
-		(mem_fun (*this, &Session::mmc_record_strobe));
+		(sigc::mem_fun (*this, &Session::mmc_record_strobe));
 	mmc->RecordExit.connect
-		(mem_fun (*this, &Session::mmc_record_exit));
+		(sigc::mem_fun (*this, &Session::mmc_record_exit));
 	mmc->Locate.connect
-		(mem_fun (*this, &Session::mmc_locate));
+		(sigc::mem_fun (*this, &Session::mmc_locate));
 	mmc->Step.connect
-		(mem_fun (*this, &Session::mmc_step));
+		(sigc::mem_fun (*this, &Session::mmc_step));
 	mmc->Shuttle.connect
-		(mem_fun (*this, &Session::mmc_shuttle));
+		(sigc::mem_fun (*this, &Session::mmc_shuttle));
 	mmc->TrackRecordStatusChange.connect
-		(mem_fun (*this, &Session::mmc_record_enable));
+		(sigc::mem_fun (*this, &Session::mmc_record_enable));
 
 
 	/* also handle MIDI SPP because its so common */
 
-	_mmc_port->input()->start.connect (mem_fun (*this, &Session::spp_start));
-	_mmc_port->input()->contineu.connect (mem_fun (*this, &Session::spp_continue));
-	_mmc_port->input()->stop.connect (mem_fun (*this, &Session::spp_stop));
+	_mmc_port->input()->start.connect (sigc::mem_fun (*this, &Session::spp_start));
+	_mmc_port->input()->contineu.connect (sigc::mem_fun (*this, &Session::spp_continue));
+	_mmc_port->input()->stop.connect (sigc::mem_fun (*this, &Session::spp_stop));
 
 	Config->set_mmc_port_name (port_tag);
 
@@ -641,7 +641,7 @@ Session::mmc_step (MIDI::MachineControl &/*mmc*/, int steps)
 	if (!step_queued) {
 		if (midi_control_ui) {
 			RefPtr<TimeoutSource> tsrc = TimeoutSource::create (100);
-			tsrc->connect (mem_fun (*this, &Session::mmc_step_timeout));
+			tsrc->connect (sigc::mem_fun (*this, &Session::mmc_step_timeout));
 			tsrc->attach (midi_control_ui->main_loop()->get_context());
 			step_queued = true;
 		}

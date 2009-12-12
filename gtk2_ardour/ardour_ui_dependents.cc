@@ -36,7 +36,6 @@
 #include "opts.h"
 #include "i18n.h"
 
-using namespace sigc;
 using namespace Gtk;
 using namespace PBD;
 

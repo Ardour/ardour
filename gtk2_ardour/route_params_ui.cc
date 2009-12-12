@@ -58,7 +58,6 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
-using namespace sigc;
 
 RouteParams_UI::RouteParams_UI ()
 	: ArdourDialog ("track/bus inspector"),

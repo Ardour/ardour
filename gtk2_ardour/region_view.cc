@@ -51,7 +51,6 @@
 #include "i18n.h"
 
 using namespace std;
-using namespace sigc;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
@@ -81,6 +80,7 @@ RegionView::RegionView (ArdourCanvas::Group*              parent,
 	, wait_for_data(false)
 	, _time_converter(r->session().tempo_map(), r->position())
 {
+	cerr << "RV " << this << " has ref on region " << _region->name() << endl;
 }
 
 RegionView::RegionView (const RegionView& other)
@@ -95,6 +95,7 @@ RegionView::RegionView (const RegionView& other)
 	valid = false;
 	_pixel_width = other._pixel_width;
 	_height = other._height;
+	cerr << "RV " << this << " has ref on region " << _region->name() << endl;
 }
 
 RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other_region)
@@ -113,6 +114,7 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 	valid = false;
 	_pixel_width = other._pixel_width;
 	_height = other._height;
+	cerr << "RV " << this << " has ref on region " << _region->name() << endl;
 }
 
 RegionView::RegionView (ArdourCanvas::Group*         parent,
@@ -135,6 +137,7 @@ RegionView::RegionView (ArdourCanvas::Group*         parent,
 	, wait_for_data(false)
 	, _time_converter(r->session().tempo_map(), r->position())
 {
+	cerr << "RV " << this << " has ref on region " << _region->name() << endl;
 }
 
 void

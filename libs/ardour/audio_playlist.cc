@@ -35,7 +35,6 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-using namespace sigc;
 using namespace std;
 using namespace PBD;
 
@@ -532,8 +531,8 @@ AudioPlaylist::add_crossfade (boost::shared_ptr<Crossfade> xfade)
 	} else {
 		_crossfades.push_back (xfade);
 
-		xfade->Invalidated.connect (mem_fun (*this, &AudioPlaylist::crossfade_invalidated));
-		xfade->StateChanged.connect (mem_fun (*this, &AudioPlaylist::crossfade_changed));
+		xfade->Invalidated.connect (sigc::mem_fun (*this, &AudioPlaylist::crossfade_invalidated));
+		xfade->StateChanged.connect (sigc::mem_fun (*this, &AudioPlaylist::crossfade_changed));
 
 		notify_crossfade_added (xfade);
 	}
@@ -588,8 +587,8 @@ AudioPlaylist::set_state (const XMLNode& node, int version)
 		try {
 			boost::shared_ptr<Crossfade> xfade = boost::shared_ptr<Crossfade> (new Crossfade (*((const Playlist *)this), *child));
 			_crossfades.push_back (xfade);
-			xfade->Invalidated.connect (mem_fun (*this, &AudioPlaylist::crossfade_invalidated));
-			xfade->StateChanged.connect (mem_fun (*this, &AudioPlaylist::crossfade_changed));
+			xfade->Invalidated.connect (sigc::mem_fun (*this, &AudioPlaylist::crossfade_invalidated));
+			xfade->StateChanged.connect (sigc::mem_fun (*this, &AudioPlaylist::crossfade_changed));
 			NewCrossfade(xfade);
 		}
 

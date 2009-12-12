@@ -26,7 +26,6 @@
 #include "marker_view.h"
 
 using namespace ARDOUR ;
-using namespace sigc;
 
 sigc::signal<void,MarkerView*> MarkerView::GoingAway;
 

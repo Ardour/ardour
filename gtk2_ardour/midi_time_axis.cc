@@ -87,7 +87,6 @@
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
-using namespace sigc;
 using namespace Editing;
 
 // Minimum height at which a control is displayed

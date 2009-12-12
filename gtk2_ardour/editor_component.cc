@@ -21,7 +21,6 @@
 #include "editor_component.h"
 
 using namespace std;
-using namespace sigc;
 using namespace ARDOUR;
 
 EditorComponent::EditorComponent (Editor* e)
@@ -42,7 +41,7 @@ EditorComponent::connect_to_session (Session* s)
 void
 EditorComponent::session_going_away ()
 {
-	for (list<connection>::iterator i = _session_connections.begin(); i != _session_connections.end(); ++i) {
+	for (list<sigc::connection>::iterator i = _session_connections.begin(); i != _session_connections.end(); ++i) {
 		i->disconnect ();
 	}
 

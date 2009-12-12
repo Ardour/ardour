@@ -74,7 +74,7 @@ Editor::add_imageframe_time_axis(const string & track_name, void* src)
 	}
 	else
 	{
-		Gtkmm2ext::UI::instance()->call_slot(sigc::bind(sigc::mem_fun(*this, &Editor::handle_new_imageframe_time_axis_view),track_name, src)) ;
+		Gtkmm2ext::UI::instance()->call_slot (boost::bind (&Editor::handle_new_imageframe_time_axis_view, this,track_name, src));
 	}
 }
 
@@ -132,7 +132,7 @@ Editor::add_imageframe_marker_time_axis(const string & track_name, TimeAxisView*
 	// Can we only sigc::bind 2 data Items?
 	// @todo we really want to sigc::bind the src attribute too, for the moment tracks can only be added remotely,
 	//       so this is not too much of an issue, however will need to be looked at again
-	Gtkmm2ext::UI::instance()->call_slot(sigc::bind(sigc::mem_fun(*this, &Editor::handle_new_imageframe_marker_time_axis_view),track_name, marked_track)) ;
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&Editor::handle_new_imageframe_marker_time_axis_view, this, track_name, marked_track));
 }
 
 void

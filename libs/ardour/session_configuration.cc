@@ -112,12 +112,12 @@ SessionConfiguration::set_variables (const XMLNode& node)
 
 }
 void
-SessionConfiguration::map_parameters (sigc::slot<void, std::string> theSlot)
+SessionConfiguration::map_parameters (boost::function<void (std::string)>& functor)
 {
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
-#define CONFIG_VARIABLE(type,var,name,value)                 theSlot (name);
-#define CONFIG_VARIABLE_SPECIAL(type,var,name,value,mutator) theSlot (name);
+#define CONFIG_VARIABLE(type,var,name,value)                 functor (name);
+#define CONFIG_VARIABLE_SPECIAL(type,var,name,value,mutator) functor (name);
 #include "ardour/session_configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL

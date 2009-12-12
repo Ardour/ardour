@@ -111,7 +111,7 @@ Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length
 	_sources.push_back (src);
 	_master_sources.push_back (src);
 
-	src->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), src));
+	src->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &Region::source_deleted), src));
 
 	assert(_sources.size() > 0);
 	_positional_lock_style = AudioTime;
@@ -341,7 +341,7 @@ Region::~Region ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("Region %1 destructor @ %2\n", _name, this));
 	notify_callbacks ();
-	GoingAway (); /* EMIT SIGNAL */
+	drop_references ();
 }
 
 void
@@ -1419,6 +1419,7 @@ void
 Region::source_deleted (boost::shared_ptr<Source>)
 {
 	_sources.clear ();
+	drop_references ();
 }
 
 vector<string>
@@ -1587,14 +1588,14 @@ Region::use_sources (SourceList const & s)
 
 	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
 		_sources.push_back (*i);
-		(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), *i));
+		(*i)->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &Region::source_deleted), *i));
 		unique_srcs.insert (*i);
 	}
 
 	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
 		_master_sources.push_back (*i);
 		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->GoingAway.connect (bind (mem_fun (*this, &Region::source_deleted), *i));
+			(*i)->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &Region::source_deleted), *i));
 		}
 	}
 }

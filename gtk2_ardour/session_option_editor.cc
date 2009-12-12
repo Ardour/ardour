@@ -8,7 +8,6 @@
 #include "i18n.h"
 
 using namespace std;
-using namespace sigc;
 using namespace ARDOUR;
 
 class OptionsPortMatrix : public PortMatrix

@@ -60,7 +60,6 @@
 #include "ardour/profile.h"
 
 #include "i18n.h"
-using namespace sigc;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
@@ -655,14 +654,14 @@ RouteUI::send_blink (bool onoff)
 void
 RouteUI::solo_changed(void* /*src*/)
 {
-	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &RouteUI::update_solo_display));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&RouteUI::update_solo_display, this));
 }
 
 
 void
 RouteUI::listen_changed(void* /*src*/)
 {
-	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &RouteUI::update_solo_display));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&RouteUI::update_solo_display, this));
 }
 
 int
@@ -758,13 +757,13 @@ RouteUI::update_solo_display ()
 void
 RouteUI::solo_changed_so_update_mute ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &RouteUI::update_mute_display));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&RouteUI::update_mute_display, this));
 }
 
 void
 RouteUI::mute_changed(void* /*src*/)
 {
-	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &RouteUI::update_mute_display));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&RouteUI::update_mute_display, this));
 }
 
 int
@@ -823,13 +822,13 @@ RouteUI::update_mute_display ()
 void
 RouteUI::route_rec_enable_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &RouteUI::update_rec_display));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&RouteUI::update_rec_display, this));
 }
 
 void
 RouteUI::session_rec_enable_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (sigc::mem_fun (*this, &RouteUI::update_rec_display));
+	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&RouteUI::update_rec_display, this));
 }
 
 void
@@ -1164,7 +1163,7 @@ void
 RouteUI::route_active_changed ()
 {
 	if (route_active_menu_item) {
-		Gtkmm2ext::UI::instance()->call_slot (sigc::bind (sigc::mem_fun (*route_active_menu_item, &CheckMenuItem::set_active), _route->active()));
+		Gtkmm2ext::UI::instance()->call_slot (boost::bind (&CheckMenuItem::set_active, route_active_menu_item, _route->active()));
 	}
 }
 

@@ -54,7 +54,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
-using namespace sigc;
 using namespace Editing;
 
 using Gtkmm2ext::Keyboard;

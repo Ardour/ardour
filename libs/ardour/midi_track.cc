@@ -233,7 +233,7 @@ MidiTrack::_set_state (const XMLNode& node, int version, bool call_base)
 	pending_state = const_cast<XMLNode*> (&node);
 
 	if (_session.state_of_the_state() & Session::Loading) {
-		_session.StateReady.connect (mem_fun (*this, &MidiTrack::set_state_part_two));
+		_session.StateReady.connect (sigc::mem_fun (*this, &MidiTrack::set_state_part_two));
 	} else {
 		set_state_part_two ();
 	}
