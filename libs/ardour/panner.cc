@@ -921,7 +921,10 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 
 	if (nouts < 2) {
 		/* no need for panning with less than 2 outputs */
-		goto send_changed;
+		if (changed) {
+			Changed (); /* EMIT SIGNAL */
+		}
+		return;
 	}
 
 	switch (nouts) {
@@ -999,6 +1002,14 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 		(*x)->update ();
 	}
 
+	/* must emit Changed here, otherwise the changes to the pan_control below raise further
+	   signals which the GUI is not prepared for until it has seen the Changed here.
+	*/
+	
+	if (changed) {
+		Changed (); /* EMIT SIGNAL */
+	}
+
 	/* force hard left/right panning in a common case: 2in/2out
 	*/
 
@@ -1021,17 +1032,8 @@ Panner::reset (uint32_t nouts, uint32_t npans)
 
 			_streampanners.back()->set_position (1.0);
 			_streampanners.back()->pan_control()->list()->reset_default (1.0);
-
-			changed = true;
 		}
 	}
-
-  send_changed:
-	if (changed) {
-		Changed (); /* EMIT SIGNAL */
-	}
-
-	return;
 }
 
 void
