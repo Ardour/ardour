@@ -351,8 +351,6 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 
 			std::string const p = ports[n];
 
-			cout << p << "\n";
-
 			if (!system->has_port(p) &&
 			    !bus->has_port(p) &&
 			    !track->has_port(p) &&

@@ -97,6 +97,8 @@ PortMatrix::PortMatrix (Window* parent, Session* session, DataType type)
 	_hlabel.show ();
 	_hspacer.show ();
 	_vspacer.show ();
+	_vnotebook.show ();
+	_hnotebook.show ();
 }
 
 PortMatrix::~PortMatrix ()
@@ -652,6 +654,7 @@ PortMatrix::setup_notebooks ()
 		dummy->show ();
 		Label* label = manage (new Label ((*i)->name));
 		label->set_angle (_arrangement == LEFT_TO_BOTTOM ? 90 : -90);
+		label->show ();
 		_vnotebook.prepend_page (*dummy, *label);
 	}
 
