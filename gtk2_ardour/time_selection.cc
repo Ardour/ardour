@@ -105,4 +105,3 @@ TimeSelection::length()
 {
 	return end_frame() - start() + 1;
 }
-

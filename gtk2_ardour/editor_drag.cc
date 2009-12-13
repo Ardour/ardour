@@ -2933,7 +2933,6 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 	nframes64_t end = 0;
 	nframes64_t length;
 
-
 	nframes64_t const pending_position = adjusted_current_frame (event);
 
 	/* only alter selection if the current frame is
@@ -2960,7 +2959,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		}
 
 		/* first drag: Either add to the selection
-		   or create a new selection->
+		   or create a new selection
 		*/
 
 		if (first_move) {
@@ -2970,11 +2969,17 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
 			if (_copy) {
 				/* adding to the selection */
+				_editor->selection->add (_editor->clicked_axisview);
 				_editor->clicked_selection = _editor->selection->add (start, end);
 				_copy = false;
 			} else {
-				/* new selection-> */
-				_editor->clicked_selection = _editor->selection->set (_editor->clicked_axisview, start, end);
+				/* new selection */
+
+				if (!_editor->selection->selected (_editor->clicked_axisview)) {
+					_editor->selection->set (_editor->clicked_axisview);
+				}
+				
+				_editor->clicked_selection = _editor->selection->set (start, end);
 			}
 		}
 		break;
@@ -3077,9 +3082,11 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 		/* just a click, no pointer movement.*/
 
 		if (Keyboard::no_modifier_keys_pressed (&event->button)) {
-
 			_editor->selection->clear_time();
+		}
 
+		if (!_editor->selection->selected (_editor->clicked_axisview)) {
+			_editor->selection->set (_editor->clicked_axisview);
 		}
 		
 		if (s && s->get_play_range () && s->transport_rolling()) {
@@ -3288,7 +3295,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 
 			case MouseRange:
 				/* find the two markers on either side of the click and make the range out of it */
-				_editor->selection->set (0, start, end);
+				_editor->selection->set (start, end);
 				break;
 
 			default:

@@ -117,7 +117,7 @@ class Selection : public sigc::trackable
 	void set (RegionView*, bool also_clear_tracks = true);
 	void set (MidiRegionView*);
 	void set (std::vector<RegionView*>&);
-	long set (TimeAxisView*, nframes_t, nframes_t);
+	long set (nframes_t, nframes_t);
 	void set (boost::shared_ptr<Evoral::ControlList>);
 	void set (boost::shared_ptr<ARDOUR::Playlist>);
 	void set (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);

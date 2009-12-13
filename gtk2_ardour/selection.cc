@@ -64,8 +64,6 @@ operator== (const Selection& a, const Selection& b)
 {
 	return a.regions == b.regions &&
 		a.tracks == b.tracks &&
-		a.time.track == b.time.track &&
-		a.time.group == b.time.group &&
 		a.time == b.time &&
 		a.lines == b.lines &&
 		a.playlists == b.playlists &&
@@ -139,8 +137,6 @@ Selection::clear_midi_regions ()
 void
 Selection::clear_time ()
 {
-	time.track = 0;
-	time.group = 0;
 	time.clear();
 
 	TimeChanged ();
@@ -729,8 +725,11 @@ Selection::set (vector<RegionView*>& v)
 	add (v);
 }
 
+/** Set the start and end time of the time selection, without changing
+ *  the list of tracks it applies to.
+ */
 long
-Selection::set (TimeAxisView* track, nframes_t start, nframes_t end)
+Selection::set (nframes_t start, nframes_t end)
 {
 	if ((start == 0 && end == 0) || end < start) {
 		return 0;
@@ -746,14 +745,6 @@ Selection::set (TimeAxisView* track, nframes_t start, nframes_t end)
 		}
 		time.front().start = start;
 		time.front().end = end;
-	}
-
-	if (track) {
-		time.track = track;
-		time.group = track->route_group();
-	} else {
-		time.track = 0;
-		time.group = 0;
 	}
 
 	time.consolidate ();

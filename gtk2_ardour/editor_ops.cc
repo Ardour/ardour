@@ -247,14 +247,8 @@ Editor::extend_selection_to_end_of_region (bool next)
 		start = selection->time.start ();
 	}
 
-	/* Try to leave the selection with the same route if possible */
-
-	if ((tv = selection->time.track) == 0) {
-		return;
-	}
-
 	begin_reversible_command (_("extend selection"));
-	selection->set (tv, start, region->position() + region->length());
+	selection->set (start, region->position() + region->length());
 	commit_reversible_command ();
 }
 
@@ -277,12 +271,8 @@ Editor::extend_selection_to_start_of_region (bool previous)
 
 	/* Try to leave the selection with the same route if possible */
 
-	if ((tv = selection->time.track) == 0) {
-		return;
-	}
-
 	begin_reversible_command (_("extend selection"));
-	selection->set (tv, region->position(), end);
+	selection->set (region->position(), end);
 	commit_reversible_command ();
 }
 
@@ -3921,7 +3911,7 @@ Editor::cut_copy (CutCopyOp op)
 				if (!get_edit_op_range (start, end)) {
 					return;
 				}
-				selection->set ((TimeAxisView*) 0, start, end);
+				selection->set (start, end);
 			}
 
 			begin_reversible_command (opname + _(" range"));

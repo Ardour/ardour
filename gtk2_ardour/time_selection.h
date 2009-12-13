@@ -27,30 +27,16 @@ namespace ARDOUR {
 	class RouteGroup;
 }
 
-class TimeAxisView;
-
-struct TimeSelection : public std::list<ARDOUR::AudioRange> {
-
-    /* if (track == 0 && group == 0) then it applies to all
-       tracks.
-
-       if (track != 0 && group == 0) then it applies just to
-       that track.
-
-       if (group != 0) then it applies to all tracks in
-       the group.
-    */
-
-    TimeAxisView*               track;
-    ARDOUR::RouteGroup*         group;
-
-    ARDOUR::AudioRange& operator[](uint32_t);
-
-    nframes_t start();
-    nframes_t end_frame();
-    nframes_t length();
-
-    bool consolidate ();
+class TimeSelection : public std::list<ARDOUR::AudioRange>
+{
+public:
+	ARDOUR::AudioRange& operator[](uint32_t);
+	
+	nframes_t start();
+	nframes_t end_frame();
+	nframes_t length();
+	
+	bool consolidate ();
 };
 
 

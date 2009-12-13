@@ -4230,14 +4230,8 @@ Editor::post_zoom ()
 	}
 
 	if (mouse_mode == MouseRange && selection->time.start () != selection->time.end_frame ()) {
-		if (!selection->tracks.empty()) {
-			for (TrackViewList::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-				(*i)->reshow_selection (selection->time);
-			}
-		} else {
-			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-				(*i)->reshow_selection (selection->time);
-			}
+		for (TrackViewList::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+			(*i)->reshow_selection (selection->time);
 		}
 	}
 

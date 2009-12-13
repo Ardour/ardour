@@ -808,14 +808,8 @@ Editor::time_selection_changed ()
 		(*i)->hide_selection ();
 	}
 
-	if (selection->tracks.empty()) {
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			(*i)->show_selection (selection->time);
-		}
-	} else {
-		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-			(*i)->show_selection (selection->time);
-		}
+	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+		(*i)->show_selection (selection->time);
 	}
 
 	if (selection->time.empty()) {
@@ -823,7 +817,6 @@ Editor::time_selection_changed ()
 	} else {
 		ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, true);
 	}
-
 }
 
 void
@@ -1033,7 +1026,7 @@ Editor::set_selection_from_region ()
 		return;
 	}
 
-	selection->set (0, selection->regions.start(), selection->regions.end_frame());
+	selection->set (selection->regions.start(), selection->regions.end_frame());
 	if (!Profile->get_sae()) {
 		set_mouse_mode (Editing::MouseRange, false);
 	}
@@ -1066,7 +1059,7 @@ void
 Editor::set_selection_from_range (Location& loc)
 {
 	begin_reversible_command (_("set selection from range"));
-	selection->set (0, loc.start(), loc.end());
+	selection->set (loc.start(), loc.end());
 	commit_reversible_command ();
 
 	if (!Profile->get_sae()) {
@@ -1293,7 +1286,7 @@ Editor::select_range_between ()
 	}
 
 	set_mouse_mode (MouseRange);
-	selection->set ((TimeAxisView*) 0, start, end);
+	selection->set (start, end);
 }
 
 bool

@@ -331,13 +331,11 @@ Editor::mouse_mode_toggled (MouseMode m)
 	} else {
 
 		/*
-		   in range mode,show the range selection.
+		   in range mode, show the range selection.
 		*/
 
 		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-			if ((*i)->get_selected()) {
-				(*i)->show_selection (selection->time);
-			}
+			(*i)->show_selection (selection->time);
 		}
 	}
 
@@ -483,10 +481,8 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		break;
 
 	case StreamItem:
-		/* for context click or range selection, select track */
+		/* for context click, select track */
 		if (event->button.button == 3) {
-			set_selected_track_as_side_effect ();
-		} else if (event->type == GDK_BUTTON_PRESS && mouse_mode == MouseRange) {
 			set_selected_track_as_side_effect ();
 		}
 		break;

@@ -619,12 +619,6 @@ TimeAxisView::set_selected (bool yn)
 		controls_ebox.set_name (controls_base_selected_name);
 		controls_hbox.set_name (controls_base_selected_name);
 		controls_vbox.set_name (controls_base_selected_name);
-		/* propagate any existing selection, if the mode is right */
-
-		if (_editor.current_mouse_mode() == Editing::MouseRange && !_editor.get_selection().time.empty()) {
-			show_selection (_editor.get_selection().time);
-		}
-
 	} else {
 		controls_ebox.set_name (controls_base_unselected_name);
 		controls_hbox.set_name (controls_base_unselected_name);
