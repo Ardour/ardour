@@ -274,7 +274,7 @@ RegionMotionDrag::get_time_axis_view_summary ()
 
 	/* get a bitmask representing the visible tracks */
 
-	for (Editor::TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+	for (TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
 		TimeAxisView::Children children_list;
 
@@ -1516,7 +1516,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	bool obey_snap = !Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier());
 
 	/* snap modifier works differently here..
-	   its' current state has to be passed to the
+	   its current state has to be passed to the
 	   various trim functions in order to work properly
 	*/
 

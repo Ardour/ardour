@@ -125,7 +125,6 @@ public:
 	void destroy_subgroup ();
 
 	boost::shared_ptr<RouteList> route_list() { return routes; }
-	boost::shared_ptr<RouteList> route_list (Property forProperty);
 
 	sigc::signal<void> changed;
 	sigc::signal<void,void*> FlagsChanged;

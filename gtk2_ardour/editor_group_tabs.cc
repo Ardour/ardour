@@ -43,7 +43,7 @@ EditorGroupTabs::compute_tabs () const
 	tab.group = 0;
 
 	int32_t y = 0;
-	for (Editor::TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+	for (TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
 
 		if ((*i)->marked_for_display() == false) {
 			continue;
@@ -118,7 +118,7 @@ EditorGroupTabs::routes_for_tab (Tab const * t) const
 	RouteList routes;
 	int32_t y = 0;
 	
-	for (Editor::TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+	for (TrackViewList::iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
 
 		if ((*i)->marked_for_display() == false) {
 			continue;

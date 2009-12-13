@@ -121,7 +121,6 @@ class TempoLines;
 class TimeAxisView;
 class TimeFXDialog;
 class TimeSelection;
-class TrackSelection;
 class EditorGroupTabs;
 class EditorRoutes;
 class EditorRouteGroups;
@@ -330,7 +329,6 @@ class Editor : public PublicEditor
 	void copy_playlists (TimeAxisView* v);
 	void clear_playlists (TimeAxisView* v);
 
-	TrackViewList* get_valid_views (TimeAxisView*, ARDOUR::RouteGroup* grp = 0);
 	void get_onscreen_tracks (TrackViewList&);
 
 	Width editor_mixer_strip_width;
@@ -432,6 +430,8 @@ class Editor : public PublicEditor
 	void hide_verbose_canvas_cursor();
 
 	void center_screen (nframes64_t);
+
+	TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const;
 
   protected:
 	void map_transport_state ();
@@ -560,10 +560,8 @@ class Editor : public PublicEditor
 	CrossfadeView*     clicked_crossfadeview;
 	ControlPoint*      clicked_control_point;
 
-	void sort_track_selection (TrackSelection* sel = 0);
+	void sort_track_selection (TrackViewList* sel = 0);
 
-	void get_relevant_tracks (std::set<RouteTimeAxisView*>& relevant_tracks) const;
-	void get_equivalent_tracks (RouteTimeAxisView*, std::set<RouteTimeAxisView*> &, ARDOUR::RouteGroup::Property) const;
 	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*> &, ARDOUR::RouteGroup::Property) const;
 	RegionSelection get_equivalent_regions (RegionSelection &, ARDOUR::RouteGroup::Property) const;
 	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, ARDOUR::RouteGroup::Property) const;
@@ -951,9 +949,8 @@ class Editor : public PublicEditor
 	TrackViewList track_views;
 	std::pair<TimeAxisView*, ARDOUR::layer_t> trackview_by_y_position (double);
 	TimeAxisView* axis_view_from_route (boost::shared_ptr<ARDOUR::Route>) const;
-	TrackSelection axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const;
 
-	TrackSelection get_tracks_for_range_action () const;
+	TrackViewList get_tracks_for_range_action () const;
 
 	static Gdk::Cursor* cross_hair_cursor;
 	static Gdk::Cursor* trimmer_cursor;
@@ -1953,8 +1950,8 @@ public:
 
 	bool get_edit_op_range (nframes64_t& start, nframes64_t& end) const;
 
-	void get_regions_at (RegionSelection&, nframes64_t where, const TrackSelection& ts) const;
-	void get_regions_after (RegionSelection&, nframes64_t where, const TrackSelection& ts) const;
+	void get_regions_at (RegionSelection&, nframes64_t where, const TrackViewList& ts) const;
+	void get_regions_after (RegionSelection&, nframes64_t where, const TrackViewList& ts) const;
 
 	void get_regions_for_action (RegionSelection&, bool allow_entered = false, bool allow_edit_position = true);
 
@@ -1974,7 +1971,7 @@ public:
 	BundleManager* _bundle_manager;
 	GlobalPortMatrixWindow* _global_port_matrix[ARDOUR::DataType::num_types];
 
-	void fit_tracks (TrackSelection &);
+	void fit_tracks (TrackViewList &);
 	void fit_selected_tracks ();
 	void set_track_height (uint32_t h);
 

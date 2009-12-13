@@ -1176,33 +1176,23 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 		return;
 	}
 
-	PublicEditor::TrackViewList* tracks = _editor.get_valid_views (this, _route->route_group());
-
 	switch (ArdourKeyboard::selection_type (ev->state)) {
 	case Selection::Toggle:
-		_editor.get_selection().toggle (*tracks);
+		_editor.get_selection().toggle (this);
 		break;
 
 	case Selection::Set:
-		_editor.get_selection().set (*tracks);
+		_editor.get_selection().set (this);
 		break;
 
 	case Selection::Extend:
-		if (tracks->size() > 1) {
-			/* add each one, do not "extend" */
-			_editor.get_selection().add (*tracks);
-		} else {
-			/* extend to the single track */
-			_editor.extend_selection_to_track (*tracks->front());
-		}
+		_editor.extend_selection_to_track (*this);
 		break;
 
 	case Selection::Add:
-		_editor.get_selection().add (*tracks);
+		_editor.get_selection().add (this);
 		break;
 	}
-
-	delete tracks;
 }
 
 void

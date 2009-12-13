@@ -306,7 +306,7 @@ EditorRouteGroups::new_from_rec_enabled ()
 {
 	RouteList rl;
 
-	for (Editor::TrackViewList::const_iterator i = _editor->get_track_views().begin(); i != _editor->get_track_views().end(); ++i) {
+	for (TrackViewList::const_iterator i = _editor->get_track_views().begin(); i != _editor->get_track_views().end(); ++i) {
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
 		if (rtv && rtv->route()->record_enabled()) {
 			rl.push_back (rtv->route());
@@ -325,7 +325,7 @@ EditorRouteGroups::new_from_soloed ()
 {
 	RouteList rl;
 
-	for (Editor::TrackViewList::const_iterator i = _editor->get_track_views().begin(); i != _editor->get_track_views().end(); ++i) {
+	for (TrackViewList::const_iterator i = _editor->get_track_views().begin(); i != _editor->get_track_views().end(); ++i) {
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
 		if (rtv && !rtv->route()->is_master() && rtv->route()->soloed()) {
 			rl.push_back (rtv->route());
@@ -520,13 +520,13 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 	}
 
 	if ((*iter)[_columns.is_visible]) {
-		for (Editor::TrackViewList::const_iterator j = _editor->get_track_views().begin(); j != _editor->get_track_views().end(); ++j) {
+		for (TrackViewList::const_iterator j = _editor->get_track_views().begin(); j != _editor->get_track_views().end(); ++j) {
 			if ((*j)->route_group() == group) {
 				_editor->_routes->show_track_in_display (**j);
 			}
 		}
 	} else {
-		for (Editor::TrackViewList::const_iterator j = _editor->get_track_views().begin(); j != _editor->get_track_views().end(); ++j) {
+		for (TrackViewList::const_iterator j = _editor->get_track_views().begin(); j != _editor->get_track_views().end(); ++j) {
 			if ((*j)->route_group() == group) {
 				_editor->hide_track_in_display (**j);
 			}
@@ -688,7 +688,7 @@ EditorRouteGroups::collect (RouteGroup* g)
 	int const N = routes->size ();
 
 	RouteList::iterator i = routes->begin ();
-	Editor::TrackViewList::const_iterator j = _editor->get_track_views().begin();
+	TrackViewList::const_iterator j = _editor->get_track_views().begin();
 
 	int diff = 0;
 	int coll = -1;

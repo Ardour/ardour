@@ -424,8 +424,7 @@ TimeAxisView::set_height(uint32_t h)
 bool
 TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 {
-	PublicEditor::TrackViewList *allviews = 0;
-	PublicEditor::TrackViewList::iterator i;
+	TrackViewList::iterator i;
 
 	switch (ev->keyval) {
 	case GDK_Escape:
@@ -440,38 +439,40 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 	 */
 	case GDK_ISO_Left_Tab:
 	case GDK_Tab:
+	{
 		name_entry_changed ();
-		allviews = _editor.get_valid_views (0);
-		if (allviews != 0) {
-			i = find (allviews->begin(), allviews->end(), this);
-			if (ev->keyval == GDK_Tab) {
-				if (i != allviews->end()) {
-					do {
-						if (++i == allviews->end()) { return true; }
-					} while((*i)->hidden());
-				}
-			} else {
-				if (i != allviews->begin()) {
-					do {
-						if (i == allviews->begin()) {
-							return true;
-						}
-						--i;
-					} while ((*i)->hidden());
-				}
+		TrackViewList const & allviews = _editor.get_track_views ();
+		TrackViewList::const_iterator i = find (allviews.begin(), allviews.end(), this);
+		if (ev->keyval == GDK_Tab) {
+			if (i != allviews.end()) {
+				do {
+					if (++i == allviews.end()) {
+						return true;
+					}
+				} while((*i)->hidden());
 			}
-
-
-			/* resize to show editable name display */
-
-			if ((*i)->current_height() <= hSmaller) {
-				(*i)->set_height (hSmaller);
+		} else {
+			if (i != allviews.begin()) {
+				do {
+					if (i == allviews.begin()) {
+						return true;
+					}
+					--i;
+				} while ((*i)->hidden());
 			}
-
-			(*i)->name_entry.grab_focus();
 		}
-		return true;
-
+		
+		
+		/* resize to show editable name display */
+		
+		if ((*i)->current_height() <= hSmaller) {
+			(*i)->set_height (hSmaller);
+		}
+		
+		(*i)->name_entry.grab_focus();
+	}
+	return true;
+	
 	case GDK_Up:
 	case GDK_Down:
 		name_entry_changed ();

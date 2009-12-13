@@ -3572,43 +3572,6 @@ Editor::mouse_select_button_release (GdkEventButton* ev)
 	return true;
 }
 
-Editor::TrackViewList *
-Editor::get_valid_views (TimeAxisView* track, RouteGroup* group)
-{
-	TrackViewList::iterator i;
-
-	TrackViewList* v = new TrackViewList;
-
-	if (track == 0 && group == 0) {
-
-		/* all views */
-
-		for (i = track_views.begin(); i != track_views.end (); ++i) {
-			v->push_back (*i);
-		}
-
-	} else if ((track != 0 && group == 0) || (track != 0 && group != 0 && !group->active_property (RouteGroup::Select))) {
-
-		/* just the view for this track
-		 */
-
-		v->push_back (track);
-
-	} else {
-
-		/* views for all tracks in the route group */
-
-		for (i = track_views.begin(); i != track_views.end (); ++i) {
-
-			if (group == 0 || ((*i)->route_group() == group && group->active_property (RouteGroup::Select))) {
-				v->push_back (*i);
-			}
-		}
-	}
-
-	return v;
-}
-
 void
 Editor::set_zoom_focus (ZoomFocus f)
 {
@@ -4268,7 +4231,7 @@ Editor::post_zoom ()
 
 	if (mouse_mode == MouseRange && selection->time.start () != selection->time.end_frame ()) {
 		if (!selection->tracks.empty()) {
-			for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+			for (TrackViewList::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 				(*i)->reshow_selection (selection->time);
 			}
 		} else {
@@ -4412,7 +4375,7 @@ struct EditorOrderTimeAxisSorter {
 };
 
 void
-Editor::sort_track_selection (TrackSelection* sel)
+Editor::sort_track_selection (TrackViewList* sel)
 {
 	EditorOrderTimeAxisSorter cmp;
 
@@ -4532,9 +4495,9 @@ Editor::set_punch_range (nframes64_t start, nframes64_t end, string cmd)
  *  @param ts Tracks to look on; if this is empty, all tracks are examined.
  */
 void
-Editor::get_regions_at (RegionSelection& rs, nframes64_t where, const TrackSelection& ts) const
+Editor::get_regions_at (RegionSelection& rs, nframes64_t where, const TrackViewList& ts) const
 {
-	const TrackSelection* tracks;
+	const TrackViewList* tracks;
 
 	if (ts.empty()) {
 		tracks = &track_views;
@@ -4542,7 +4505,7 @@ Editor::get_regions_at (RegionSelection& rs, nframes64_t where, const TrackSelec
 		tracks = &ts;
 	}
 
-	for (TrackSelection::const_iterator t = tracks->begin(); t != tracks->end(); ++t) {
+	for (TrackViewList::const_iterator t = tracks->begin(); t != tracks->end(); ++t) {
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*t);
 		if (rtv) {
 			boost::shared_ptr<Diskstream> ds;
@@ -4567,9 +4530,9 @@ Editor::get_regions_at (RegionSelection& rs, nframes64_t where, const TrackSelec
 }
 
 void
-Editor::get_regions_after (RegionSelection& rs, nframes64_t where, const TrackSelection& ts) const
+Editor::get_regions_after (RegionSelection& rs, nframes64_t where, const TrackViewList& ts) const
 {
-	const TrackSelection* tracks;
+	const TrackViewList* tracks;
 
 	if (ts.empty()) {
 		tracks = &track_views;
@@ -4577,7 +4540,7 @@ Editor::get_regions_after (RegionSelection& rs, nframes64_t where, const TrackSe
 		tracks = &ts;
 	}
 
-	for (TrackSelection::const_iterator t = tracks->begin(); t != tracks->end(); ++t) {
+	for (TrackViewList::const_iterator t = tracks->begin(); t != tracks->end(); ++t) {
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*t);
 		if (rtv) {
 			boost::shared_ptr<Diskstream> ds;
@@ -4624,22 +4587,25 @@ Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered, bool al
 
 	if (allow_edit_position) {
 
-		TrackSelection tracks = selection->tracks;
+		TrackViewList tracks = selection->tracks;
 
 		/* tracks is currently the set of selected tracks; add any other tracks that
 		 * have regions that are in the same edit-activated route group as one of
 		 * our regions */
 		for (RegionSelection::iterator i = rs.begin (); i != rs.end(); ++i) {
 
-			RouteGroup* g = (*i)->get_time_axis_view().route_group ();
-			if (g && g->active_property (RouteGroup::Edit)) {
-				tracks.add (axis_views_from_routes (g->route_list()));
-			}
+		 	RouteGroup* g = (*i)->get_time_axis_view().route_group ();
+		 	if (g && g->active_property (RouteGroup::Edit)) {
+		 		tracks.add (axis_views_from_routes (g->route_list()));
+		 	}
+			
 		}
 
-		/* now find regions that are at the edit position on those tracks */
-		nframes64_t const where = get_preferred_edit_position ();
-		get_regions_at (rs, where, tracks);
+		if (!tracks.empty()) {
+			/* now find regions that are at the edit position on those tracks */
+			nframes64_t const where = get_preferred_edit_position ();
+			get_regions_at (rs, where, tracks);
+		}
 	}
 }
 
@@ -4750,7 +4716,7 @@ Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 	min_resulting = min (min_resulting, int32_t (_pending_resize_view->current_height()) + _pending_resize_amount);
 
 	if (selection->tracks.contains (_pending_resize_view)) {
-		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+		for (TrackViewList::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 			min_resulting = min (min_resulting, int32_t ((*i)->current_height()) + _pending_resize_amount);
 		}
 	}
@@ -4774,7 +4740,7 @@ Editor::idle_resize ()
 	if (dynamic_cast<AutomationTimeAxisView*> (_pending_resize_view) == 0 &&
 	    selection->tracks.contains (_pending_resize_view)) {
 
-		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+		for (TrackViewList::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 			if (*i != _pending_resize_view) {
 				(*i)->idle_resize ((*i)->current_height() + _pending_resize_amount);
 			}
@@ -4824,10 +4790,10 @@ Editor::axis_view_from_route (boost::shared_ptr<Route> r) const
 }
 
 
-TrackSelection
+TrackViewList
 Editor::axis_views_from_routes (boost::shared_ptr<RouteList> r) const
 {
-	TrackSelection t;
+	TrackViewList t;
 
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
 		TimeAxisView* tv = axis_view_from_route (*i);
@@ -4949,7 +4915,7 @@ Editor::hide_track_in_display (TimeAxisView& tv, bool /*temponly*/)
 bool
 Editor::sync_track_view_list_and_routes ()
 {
-	track_views = TrackSelection (_routes->views ());
+	track_views = TrackViewList (_routes->views ());
 
 	_summary->set_dirty ();
 	_group_tabs->set_dirty ();
@@ -4984,7 +4950,7 @@ Editor::get_route_view_by_id (PBD::ID& id)
 void
 Editor::fit_route_group (RouteGroup *g)
 {
-	TrackSelection ts = axis_views_from_routes (g->route_list ());
+	TrackViewList ts = axis_views_from_routes (g->route_list ());
 	fit_tracks (ts);
 }
 

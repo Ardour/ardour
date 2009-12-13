@@ -82,7 +82,7 @@ class Selection : public sigc::trackable
 	MidiRegionSelection  midi_regions;
 	MidiNoteSelection    midi_notes;
 
-	Selection (PublicEditor const * e) : editor (e), next_time_id (0) {
+	Selection (PublicEditor const * e) : tracks (e), editor (e), next_time_id (0) {
 		clear();
 	}
 
@@ -112,7 +112,7 @@ class Selection : public sigc::trackable
 	void toggle (std::list<Selectable*>&);
 
 	void set (TimeAxisView*);
-	void set (const std::list<TimeAxisView*>&);
+	void set (const TrackViewList&);
 	void set (const MidiNoteSelection&);
 	void set (RegionView*, bool also_clear_tracks = true);
 	void set (MidiRegionView*);
@@ -126,7 +126,7 @@ class Selection : public sigc::trackable
 	void set (const RegionSelection&);
 
 	void toggle (TimeAxisView*);
-	void toggle (const std::list<TimeAxisView*>&);
+	void toggle (const TrackViewList&);
 	void toggle (const MidiNoteSelection&);
 	void toggle (RegionView*);
 	void toggle (MidiRegionView*);
@@ -140,7 +140,7 @@ class Selection : public sigc::trackable
 	void toggle (Marker*);
 
 	void add (TimeAxisView*);
-	void add (const std::list<TimeAxisView*>&);
+	void add (const TrackViewList&);
 	void add (const MidiNoteSelection&);
 	void add (RegionView*);
 	void add (MidiRegionView*);
@@ -154,7 +154,7 @@ class Selection : public sigc::trackable
 	void add (const std::list<Marker*>&);
 	void add (const RegionSelection&);
 	void remove (TimeAxisView*);
-	void remove (const std::list<TimeAxisView*>&);
+	void remove (const TrackViewList&);
 	void remove (const MidiNoteSelection&);
 	void remove (RegionView*);
 	void remove (MidiRegionView*);

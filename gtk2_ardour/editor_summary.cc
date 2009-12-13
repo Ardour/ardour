@@ -143,7 +143,7 @@ EditorSummary::render (cairo_t* cr)
 
 	int h = 0;
 	int max_height = 0;
-	for (PublicEditor::TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+	for (TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
 		int const t = (*i)->effective_height ();
 		h += t;
 		max_height = max (max_height, t);
@@ -163,7 +163,7 @@ EditorSummary::render (cairo_t* cr)
 	/* render regions */
 
 	double y = 0;
-	for (PublicEditor::TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+	for (TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
 		StreamView* s = (*i)->view ();
 
 		if (s) {

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis
+    Copyright (C) 2000-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,18 +20,20 @@
 #ifndef __ardour_gtk_track_selection_h__
 #define __ardour_gtk_track_selection_h__
 
-#include <list>
+#include "track_view_list.h"
 
-class TimeAxisView;
+class PublicEditor;
 
-class TrackSelection : public std::list<TimeAxisView*>
+class TrackSelection : public TrackViewList
 {
 public:
-	TrackSelection () {}
+	TrackSelection (PublicEditor const * e) : _editor (e) {}
+	TrackSelection (PublicEditor const *, TrackViewList const &);
+	
+	TrackViewList add (TrackViewList const &);
 
-	TrackSelection (std::list<TimeAxisView*> const &);
-	std::list<TimeAxisView*> add (std::list<TimeAxisView*> const &);
-	bool contains (TimeAxisView const *) const;
+private:
+	PublicEditor const * _editor;
 };
 
 #endif /* __ardour_gtk_track_selection_h__ */

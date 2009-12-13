@@ -88,8 +88,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	PublicEditor ();
 	virtual ~PublicEditor ();
 
-	typedef TrackSelection TrackViewList;
-
 	/** @return Singleton PublicEditor instance */
 	static PublicEditor& instance () { return *_instance; }
 
@@ -244,7 +242,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual double get_physical_screen_width() const = 0;
 	virtual void ensure_float (Gtk::Window&) = 0;
 	virtual void show_window () = 0;
-	virtual TrackViewList* get_valid_views (TimeAxisView*, ARDOUR::RouteGroup* grp = 0) = 0;
 	virtual nframes64_t leftmost_position() const = 0;
 	virtual nframes64_t current_page_frames() const = 0;
 	virtual void temporal_zoom_step (bool coarser) = 0;
@@ -353,6 +350,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 
 	virtual void center_screen (nframes64_t) = 0;
 
+	virtual TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const = 0;
+	virtual TrackViewList const & get_track_views () = 0;
+	
 	/// Singleton instance, set up by Editor::Editor()
 
 	static PublicEditor* _instance;

@@ -262,48 +262,6 @@ Editor::get_onscreen_tracks (TrackViewList& tvl)
  	}
 }
 
-/** Given a track, find any other tracks that are in the same active route group with a given property.
- *  @param basis Base track.
- *  @param equivs Filled with the base track and the found tracks.
- *  @param prop Property to look for in route groups.
- */
-
-void
-Editor::get_equivalent_tracks (RouteTimeAxisView* basis, set<RouteTimeAxisView*> & equivs, RouteGroup::Property prop) const
-{
-	equivs.insert (basis);
-
-	RouteGroup* group = basis->route()->route_group();
-	if (group && group->active_property (prop)) {
-
-		/* the basis is a member of an active route group, with the appropriate
-		   properties; find other members */
-
-		for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			RouteTimeAxisView* v = dynamic_cast<RouteTimeAxisView*> (*i);
-			if (v && v->route()->route_group() == group) {
-				equivs.insert (v);
-			}
-		}
-	}
-}
-
-/** Find tracks that are selected, and also those that are in the same `selection'-enabled route
- *  group as one that is selected.
- *  @param relevant_tracks set to add tracks to.
- */
-
-void
-Editor::get_relevant_tracks (set<RouteTimeAxisView*>& relevant_tracks) const
-{
-	for (TrackSelection::iterator ti = selection->tracks.begin(); ti != selection->tracks.end(); ++ti) {
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*ti);
-		if (rtv) {
-			get_equivalent_tracks (rtv, relevant_tracks, RouteGroup::Select);
-		}
-	}
-}
-
 /** Call a slot for a given `basis' track and also for any track that is in the same
  *  active route group with a particular set of properties.
  *
@@ -321,7 +279,21 @@ Editor::mapover_tracks (sigc::slot<void, RouteTimeAxisView&, uint32_t> sl, TimeA
 	}
 
 	set<RouteTimeAxisView*> tracks;
-	get_equivalent_tracks (route_basis, tracks, prop);
+	tracks.insert (route_basis);
+
+	RouteGroup* group = route_basis->route()->route_group();
+	if (group && group->active_property (prop)) {
+
+		/* the basis is a member of an active route group, with the appropriate
+		   properties; find other members */
+
+		for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			RouteTimeAxisView* v = dynamic_cast<RouteTimeAxisView*> (*i);
+			if (v && v->route()->route_group() == group) {
+				tracks.insert (v);
+			}
+		}
+	}
 
 	/* call the slots */
 	uint32_t const sz = tracks.size ();
@@ -490,8 +462,6 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 					/* add all the equivalent regions, but only on button press */
 
-
-
 					if (!all_equivalent_regions.empty()) {
 						commit = true;
 					}
@@ -611,16 +581,23 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		/* 2. find all the tracks we should select in */
 
 		set<RouteTimeAxisView*> relevant_tracks;
-		set<RouteTimeAxisView*> already_in_selection;
 
-		get_relevant_tracks (relevant_tracks);
+		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+			RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
+			if (r) {
+				relevant_tracks.insert (r);
+			}
+		}
+		
+		set<RouteTimeAxisView*> already_in_selection;
 
 		if (relevant_tracks.empty()) {
 
-			/* no relevant tracks -> no tracks selected .. thus .. if
-			   the regionview we're in isn't selected (i.e. we're
-			   about to extend to it), then find all tracks between
-			   the this one and any selected ones.
+			/* no tracks selected .. thus .. if the
+			   regionview we're in isn't selected
+			   (i.e. we're about to extend to it), then
+			   find all tracks between the this one and
+			   any selected ones.
 			*/
 
 			if (!selection->selected (entered_regionview)) {
@@ -653,7 +630,6 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 							if (result.second) {
 								/* newly added to already_in_selection */
-
 
 								int d = artv->route()->order_key ("editor");
 
@@ -708,8 +684,6 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 		/* 3. find all selectable objects (regionviews in this case) between that one and the end of the
 			   one that was clicked.
 		*/
-
-		get_relevant_tracks (relevant_tracks);
 
 		for (set<RouteTimeAxisView*>::iterator t = relevant_tracks.begin(); t != relevant_tracks.end(); ++t) {
 			(*t)->get_selectables (first_frame, last_frame, -1.0, -1.0, results);
@@ -1116,7 +1090,7 @@ Editor::select_all_selectables_using_time_selection ()
 		return;
 	}
 
-	TrackSelection* ts;
+	TrackViewList* ts;
 
 	if (selection->tracks.empty()) {
 		ts = &track_views;
@@ -1148,7 +1122,7 @@ Editor::select_all_selectables_using_punch()
 	}
 
 
-	TrackSelection* ts;
+	TrackViewList* ts;
 
 	if (selection->tracks.empty()) {
 		ts = &track_views;
@@ -1179,7 +1153,7 @@ Editor::select_all_selectables_using_loop()
 	}
 
 
-	TrackSelection* ts;
+	TrackViewList* ts;
 
 	if (selection->tracks.empty()) {
 		ts = &track_views;
@@ -1221,7 +1195,7 @@ Editor::select_all_selectables_using_cursor (EditorCursor *cursor, bool after)
 	}
 
 
-	TrackSelection* ts;
+	TrackViewList* ts;
 
 	if (selection->tracks.empty()) {
 		ts = &track_views;
@@ -1261,7 +1235,7 @@ Editor::select_all_selectables_using_edit (bool after)
 	}
 
 
-	TrackSelection* ts;
+	TrackViewList* ts;
 
 	if (selection->tracks.empty()) {
 		ts = &track_views;
@@ -1290,7 +1264,7 @@ Editor::select_all_selectables_between (bool /*within*/)
 		return;
 	}
 
-	TrackSelection* ts;
+	TrackViewList* ts;
 
 	if (selection->tracks.empty()) {
 		ts = &track_views;

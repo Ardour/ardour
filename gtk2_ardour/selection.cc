@@ -197,9 +197,9 @@ Selection::toggle (boost::shared_ptr<Playlist> pl)
 }
 
 void
-Selection::toggle (const list<TimeAxisView*>& track_list)
+Selection::toggle (const TrackViewList& track_list)
 {
-	for (list<TimeAxisView*>::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
+	for (TrackViewList::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
 		toggle ((*i));
 	}
 }
@@ -334,9 +334,9 @@ Selection::add (const list<boost::shared_ptr<Playlist> >& pllist)
 }
 
 void
-Selection::add (const list<TimeAxisView*>& track_list)
+Selection::add (const TrackViewList& track_list)
 {
-	list<TimeAxisView*> added = tracks.add (track_list);
+	TrackViewList added = tracks.add (track_list);
 
 	for (list<TimeAxisView*>::const_iterator i = added.begin(); i != added.end(); ++i) {
 		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
@@ -351,12 +351,9 @@ Selection::add (const list<TimeAxisView*>& track_list)
 void
 Selection::add (TimeAxisView* track)
 {
-	if (find (tracks.begin(), tracks.end(), track) == tracks.end()) {
-		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
-		track->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, pmf), track));
-		tracks.push_back (track);
-		TracksChanged();
-	}
+	TrackViewList tr;
+	tr.push_back (track);
+	add (tr);
 }
 
 void
@@ -516,15 +513,14 @@ Selection::remove (TimeAxisView* track)
 }
 
 void
-Selection::remove (const list<TimeAxisView*>& track_list)
+Selection::remove (const TrackViewList& track_list)
 {
 	bool changed = false;
 
-	for (list<TimeAxisView*>::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
+	for (TrackViewList::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
 
-		list<TimeAxisView*>::iterator x;
-
-		if ((x = find (tracks.begin(), tracks.end(), (*i))) != tracks.end()) {
+		TrackViewList::iterator x = find (tracks.begin(), tracks.end(), *i);
+		if (x != tracks.end()) {
 			tracks.erase (x);
 			changed = true;
 		}
@@ -669,7 +665,7 @@ Selection::set (TimeAxisView* track)
 }
 
 void
-Selection::set (const list<TimeAxisView*>& track_list)
+Selection::set (const TrackViewList& track_list)
 {
 	clear_tracks ();
 	add (track_list);

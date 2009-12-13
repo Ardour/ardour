@@ -2661,7 +2661,7 @@ Editor::region_from_selection ()
 	nframes64_t start = selection->time[clicked_selection].start;
 	nframes64_t end = selection->time[clicked_selection].end;
 
-	TrackSelection tracks = get_tracks_for_range_action ();
+	TrackViewList tracks = get_tracks_for_range_action ();
 
 	nframes64_t selection_cnt = end - start + 1;
 
@@ -2762,10 +2762,10 @@ add_if_covered (RegionView* rv, const AudioRange* ar, RegionSelection* rs)
  *    - all tracks
  * @return tracks.
  */
-TrackSelection
+TrackViewList
 Editor::get_tracks_for_range_action () const
 {
-	TrackSelection t;
+	TrackViewList t;
 
 	if (selection->tracks.empty()) {
 
@@ -2801,7 +2801,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 	boost::shared_ptr<Playlist> playlist;
 	RegionSelection new_selection;
 
-	TrackSelection tmptracks = get_tracks_for_range_action ();
+	TrackViewList tmptracks = get_tracks_for_range_action ();
 	sort_track_selection (&tmptracks);
 
 	for (TrackSelection::iterator i = tmptracks.begin(); i != tmptracks.end(); ++i) {
@@ -2965,7 +2965,7 @@ Editor::crop_region_to (nframes64_t start, nframes64_t end)
 {
 	vector<boost::shared_ptr<Playlist> > playlists;
 	boost::shared_ptr<Playlist> playlist;
-	TrackSelection* ts;
+	TrackViewList* ts;
 
 	if (selection->tracks.empty()) {
 		ts = &track_views;
@@ -4230,8 +4230,8 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 void
 Editor::cut_copy_ranges (CutCopyOp op)
 {
-	TrackSelection* ts;
-	TrackSelection entered;
+	TrackViewList* ts;
+	TrackViewList entered;
 
 	if (selection->tracks.empty()) {
 		if (!entered_track) {
@@ -4289,8 +4289,8 @@ Editor::paste_internal (nframes64_t position, float times)
 
 	begin_reversible_command (_("paste"));
 
-	TrackSelection ts;
-	TrackSelection::iterator i;
+	TrackViewList ts;
+	TrackViewList::iterator i;
 	size_t nth;
 
 	/* get everything in the correct order */
@@ -6380,7 +6380,7 @@ Editor::fit_selected_tracks ()
 }
 
 void
-Editor::fit_tracks (TrackSelection & tracks)
+Editor::fit_tracks (TrackViewList & tracks)
 {
 	if (tracks.empty()) {
 		return;
