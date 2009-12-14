@@ -414,28 +414,30 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 			}
 
 			if (can_remove_channels (bc[dim].bundle)) {
-				snprintf (buf, sizeof (buf), _("Remove '%s'"), bc[dim].bundle->channel_name (bc[dim].channel).c_str());
-				sub.push_back (
-					MenuElem (
-						buf,
-						sigc::bind (sigc::mem_fun (*this, &PortMatrix::remove_channel_proxy), w, bc[dim].channel)
-						)
-					);
+				if (bc[dim].channel != -1) {
+					add_remove_option (sub, w, bc[dim].channel);
+				} else {
+					for (uint32_t i = 0; i < bc[dim].bundle->nchannels(); ++i) {
+						add_remove_option (sub, w, i);
+					}
+				}
 			}
 
 			if (_show_only_bundles || bc[dim].bundle->nchannels() <= 1) {
 				snprintf (buf, sizeof (buf), _("%s all"), disassociation_verb().c_str());
-			} else {
-				snprintf (
-					buf, sizeof (buf), _("%s all from '%s'"),
-					disassociation_verb().c_str(),
-					bc[dim].bundle->channel_name (bc[dim].channel).c_str()
+				sub.push_back (
+					MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, bc[dim].channel, dim))
 					);
+				
+			} else {
+				if (bc[dim].channel != -1) {
+					add_disassociate_option (sub, w, dim, bc[dim].channel);
+				} else {
+					for (uint32_t i = 0; i < bc[dim].bundle->nchannels(); ++i) {
+						add_disassociate_option (sub, w, dim, i);
+					}
+				}
 			}
-
-			sub.push_back (
-				MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, bc[dim].channel, dim))
-				);
 
 			items.push_back (MenuElem (bc[dim].bundle->name().c_str(), *m));
 			need_separator = true;
@@ -760,4 +762,34 @@ PortMatrix::visible_ports (int d) const
 	}
 
 	return *j;
+}
+
+void
+PortMatrix::add_remove_option (Menu_Helpers::MenuList& m, boost::weak_ptr<Bundle> w, int c)
+{
+	using namespace Menu_Helpers;
+
+	boost::shared_ptr<Bundle> b = w.lock ();
+	if (!b) {
+		return;
+	}
+	
+	char buf [64];
+	snprintf (buf, sizeof (buf), _("Remove '%s'"), b->channel_name (c).c_str());
+	m.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::remove_channel_proxy), w, c)));
+}
+
+void
+PortMatrix::add_disassociate_option (Menu_Helpers::MenuList& m, boost::weak_ptr<Bundle> w, int d, int c)
+{
+	using namespace Menu_Helpers;
+
+	boost::shared_ptr<Bundle> b = w.lock ();
+	if (!b) {
+		return;
+	}
+	
+	char buf [64];
+	snprintf (buf, sizeof (buf), _("%s all from '%s'"), disassociation_verb().c_str(), b->channel_name (c).c_str());
+	m.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, c, d)));
 }

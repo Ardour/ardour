@@ -47,6 +47,12 @@ namespace ARDOUR {
 	class Bundle;
 }
 
+namespace Gtk {
+	namespace Menu_Helpers {
+		class MenuList;
+	}
+}
+
 class PortMatrixBody;
 
 class PortMatrix : public Gtk::Table
@@ -177,6 +183,8 @@ private:
 	void route_processors_changed (ARDOUR::RouteProcessorChange);
 	void body_dimensions_changed ();
 	void session_going_away ();
+	void add_remove_option (Gtk::Menu_Helpers::MenuList &, boost::weak_ptr<ARDOUR::Bundle>, int);
+	void add_disassociate_option (Gtk::Menu_Helpers::MenuList &, boost::weak_ptr<ARDOUR::Bundle>, int, int);
 
 	Gtk::Window* _parent;
 

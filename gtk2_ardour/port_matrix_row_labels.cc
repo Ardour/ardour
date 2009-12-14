@@ -127,7 +127,15 @@ PortMatrixRowLabels::render (cairo_t* cr)
 void
 PortMatrixRowLabels::button_press (double x, double y, int b, uint32_t t, guint)
 {
-	ARDOUR::BundleChannel const w = position_to_channel (y, x, _matrix->visible_rows());
+	ARDOUR::BundleChannel w = position_to_channel (y, x, _matrix->visible_rows());
+
+	if (
+		(_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT && x > (_longest_port_name + name_pad() * 2)) ||
+		(_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM && x < (_longest_bundle_name + name_pad() * 2))
+		
+		) {
+			w.channel = -1;
+	}
 
 	if (b == 3) {
 

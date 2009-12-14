@@ -144,9 +144,9 @@ class Bundle : public sigc::trackable
 
 struct BundleChannel
 {
-	BundleChannel () : channel (0) {}
+	BundleChannel () : channel (-1) {}
 
-	BundleChannel (boost::shared_ptr<Bundle> b, uint32_t c)
+	BundleChannel (boost::shared_ptr<Bundle> b, int c)
 		: bundle (b), channel (c) {}
 
 	bool operator== (BundleChannel const& other) const {
@@ -158,7 +158,7 @@ struct BundleChannel
 	}
 
 	boost::shared_ptr<Bundle> bundle;
-	uint32_t channel;
+	int channel; ///< channel index, or -1 for "all"
 };
 
 }

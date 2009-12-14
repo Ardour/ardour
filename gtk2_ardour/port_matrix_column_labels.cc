@@ -436,11 +436,19 @@ PortMatrixColumnLabels::position_to_channel (double p, double o, boost::shared_p
 void
 PortMatrixColumnLabels::button_press (double x, double y, int b, uint32_t t, guint)
 {
-	ARDOUR::BundleChannel const gc = position_to_channel (x, y, _matrix->visible_columns());
+	ARDOUR::BundleChannel w = position_to_channel (x, y, _matrix->visible_columns());
+
+	if (
+		(_matrix->arrangement() == PortMatrix::LEFT_TO_BOTTOM && y > (_height - _longest_bundle_name * sin (angle ()))) ||
+		(_matrix->arrangement() == PortMatrix::TOP_TO_RIGHT && y < (_longest_bundle_name * sin (angle ())))
+		) {
+
+		w.channel = -1;
+	}
 
 	if (b == 3) {
 		_matrix->popup_menu (
-			gc,
+			w,
 			ARDOUR::BundleChannel (),
 			t
 			);
