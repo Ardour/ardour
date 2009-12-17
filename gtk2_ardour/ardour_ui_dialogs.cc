@@ -51,6 +51,10 @@ ARDOUR_UI::set_session (Session *s)
 {
 	SessionHandlePtr::set_session (s);
 
+	if (!_session) {
+		return;
+	}
+
 	if (location_ui) {
 		location_ui->set_session(s);
 	}
@@ -65,10 +69,6 @@ ARDOUR_UI::set_session (Session *s)
 	preroll_clock.set_session (s);
 	postroll_clock.set_session (s);
 	
-	if (!_session) {
-		return;
-	}
-
 	/* sensitize menu bar options that are now valid */
 
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, true);

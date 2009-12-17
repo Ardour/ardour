@@ -92,8 +92,6 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 
 StreamView::~StreamView ()
 {
-	cerr << "Streamview " << _trackview.name() << " deleted\n";
-
 	undisplay_diskstream ();
 
 	delete canvas_rect;

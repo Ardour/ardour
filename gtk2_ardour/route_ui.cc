@@ -167,6 +167,11 @@ RouteUI::reset ()
 void
 RouteUI::self_delete ()
 {
+	/* This may be called from a non-GUI thread. Keep it safe */
+
+	cerr << "\n\nExpect to see route " << _route->name() << " be deleted\n";
+	_route.reset (); /* drop reference to route, so that it can be cleaned up */
+
 	route_going_away_connection.disconnect ();
 	connections.drop_connections ();
 	delete_when_idle (this);

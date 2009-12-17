@@ -47,7 +47,8 @@ EditorSummary::EditorSummary (Editor* e)
 	  _zoom_dragging (false)
 
 {
-
+	Region::RegionPropertyChanged.connect (sigc::hide (sigc::mem_fun (*this, &EditorSummary::set_dirty)));
+	_editor->playhead_cursor->PositionChanged.connect (sigc::mem_fun (*this, &EditorSummary::playhead_position_changed));
 }
 
 /** Connect to a session.
@@ -58,17 +59,13 @@ EditorSummary::set_session (Session* s)
 {
 	EditorComponent::set_session (s);
 
-	Region::RegionPropertyChanged.connect (sigc::hide (sigc::mem_fun (*this, &EditorSummary::set_dirty)));
+	set_dirty ();
 
 	if (_session) {
 		_session_connections.add_connection (_session->RegionRemoved.connect (boost::bind (&EditorSummary::set_dirty, this)));
 		_session_connections.add_connection (_session->StartTimeChanged.connect (boost::bind (&EditorSummary::set_dirty, this)));
 		_session_connections.add_connection (_session->EndTimeChanged.connect (boost::bind (&EditorSummary::set_dirty, this)));
 	}
-
-	_editor->playhead_cursor->PositionChanged.connect (sigc::mem_fun (*this, &EditorSummary::playhead_position_changed));
-
-	set_dirty ();
 }
 
 /** Handle an expose event.
@@ -504,7 +501,7 @@ EditorSummary::set_editor (pair<double,double> const & x, pair<double, double> c
 void
 EditorSummary::playhead_position_changed (nframes64_t p)
 {
-	if (int (p * _x_scale) != int (_last_playhead)) {
+	if (_session && int (p * _x_scale) != int (_last_playhead)) {
 		set_overlays_dirty ();
 	}
 }

@@ -110,6 +110,8 @@ ControlProtocolManager::session_going_away()
 ControlProtocol*
 ControlProtocolManager::instantiate (ControlProtocolInfo& cpi)
 {
+	/* CALLER MUST HOLD LOCK */
+
 	if (_session == 0) {
 		return 0;
 	}
@@ -126,8 +128,6 @@ ControlProtocolManager::instantiate (ControlProtocolInfo& cpi)
 		return 0;
 	}
 
-
-	Glib::Mutex::Lock lm (protocols_lock);
 	control_protocols.push_back (cpi.protocol);
 
 	return cpi.protocol;
@@ -171,6 +171,8 @@ ControlProtocolManager::load_mandatory_protocols ()
 	if (_session == 0) {
 		return;
 	}
+
+	Glib::Mutex::Lock lm (protocols_lock);
 
 	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 		if ((*i)->mandatory && ((*i)->protocol == 0)) {
@@ -292,6 +294,8 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 	XMLNodeList clist;
 	XMLNodeConstIterator citer;
 	XMLProperty* prop;
+
+	Glib::Mutex::Lock lm (protocols_lock);
 
 	clist = node.children();
 

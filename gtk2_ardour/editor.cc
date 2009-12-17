@@ -436,8 +436,8 @@ Editor::Editor ()
 	transport_mark_label.set_no_show_all();
 
 	initialize_rulers ();
-	_summary = new EditorSummary (this);
 	initialize_canvas ();
+	_summary = new EditorSummary (this);
 
 	selection->TimeChanged.connect (sigc::mem_fun(*this, &Editor::time_selection_changed));
 	selection->TracksChanged.connect (sigc::mem_fun(*this, &Editor::track_selection_changed));
@@ -1033,6 +1033,10 @@ Editor::set_session (Session *t)
 {
 	SessionHandlePtr::set_session (t);
 
+	if (!_session) {
+		return;
+	}
+
 	zoom_range_clock.set_session (_session);
 	_playlist_selector->set_session (_session);
 	nudge_clock.set_session (_session);
@@ -1054,10 +1058,6 @@ Editor::set_session (Session *t)
 
 	if (sfbrowser) {
 		sfbrowser->set_session (_session);
-	}
-
-	if (!_session) {
-		return;
 	}
 
 	compute_fixed_ruler_scale ();
