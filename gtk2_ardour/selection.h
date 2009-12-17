@@ -187,7 +187,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	template<class A> void foreach_region (void (ARDOUR::Region::*method)(A), A arg);
 
   private:
-	Selection (const Selection& other) {}
+	Selection (const Selection& other) : tracks (other.tracks) {}
 	PublicEditor const * editor;
 	uint32_t next_time_id;
 	
