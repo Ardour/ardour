@@ -58,7 +58,7 @@ const string AutomationTimeAxisView::state_node_name = "AutomationChild";
  * For route child (e.g. plugin) automation, pass the child for \a.
  * For region automation (e.g. MIDI CC), pass null for \a.
  */
-AutomationTimeAxisView::AutomationTimeAxisView (Session& s, boost::shared_ptr<Route> r,
+AutomationTimeAxisView::AutomationTimeAxisView (Session* s, boost::shared_ptr<Route> r,
 		boost::shared_ptr<Automatable> a, boost::shared_ptr<AutomationControl> c,
 		PublicEditor& e, TimeAxisView& parent, bool show_regions,
 		ArdourCanvas::Canvas& canvas, const string & nom, const string & nomparent)
@@ -370,11 +370,11 @@ AutomationTimeAxisView::set_interpolation (AutomationList::InterpolationStyle st
 void
 AutomationTimeAxisView::clear_clicked ()
 {
-	_session.begin_reversible_command (_("clear automation"));
+	_session->begin_reversible_command (_("clear automation"));
 	if (_line) {
 		_line->clear ();
 	}
-	_session.commit_reversible_command ();
+	_session->commit_reversible_command ();
 }
 
 void
@@ -587,15 +587,15 @@ AutomationTimeAxisView::add_automation_event (ArdourCanvas::Item* /*item*/, GdkE
 
 	_line->view_to_model_coord (x, y);
 
-	_session.begin_reversible_command (_("add automation event"));
+	_session->begin_reversible_command (_("add automation event"));
 	XMLNode& before = _control->alist()->get_state();
 
 	_control->alist()->add (when, y);
 
 	XMLNode& after = _control->alist()->get_state();
-	_session.commit_reversible_command (new MementoCommand<ARDOUR::AutomationList>(*_control->alist(), &before, &after));
+	_session->commit_reversible_command (new MementoCommand<ARDOUR::AutomationList>(*_control->alist(), &before, &after));
 
-	_session.set_dirty ();
+	_session->set_dirty ();
 }
 
 bool
@@ -617,7 +617,7 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 	case Cut:
 		if ((what_we_got = alist->cut (selection.time.front().start, selection.time.front().end)) != 0) {
 			_editor.get_cut_buffer().add (what_we_got);
-			_session.add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+			_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 			ret = true;
 		}
 		break;
@@ -629,7 +629,7 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 
 	case Clear:
 		if ((what_we_got = alist->cut (selection.time.front().start, selection.time.front().end)) != 0) {
-			_session.add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+			_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 			ret = true;
 		}
 		break;
@@ -659,11 +659,11 @@ AutomationTimeAxisView::reset_objects_one (AutomationLine& line, PointSelection&
 {
 	boost::shared_ptr<AutomationList> alist(line.the_list());
 
-	_session.add_command (new MementoCommand<AutomationList>(*alist.get(), &alist->get_state(), 0));
+	_session->add_command (new MementoCommand<AutomationList>(*alist.get(), &alist->get_state(), 0));
 
 	for (PointSelection::iterator i = selection.begin(); i != selection.end(); ++i) {
 
-		if (&(*i).track != this) {
+		if ((*i).track != this) {
 			continue;
 		}
 
@@ -688,7 +688,7 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 
 	for (PointSelection::iterator i = selection.begin(); i != selection.end(); ++i) {
 
-		if (&(*i).track != this) {
+		if ((*i).track != this) {
 			continue;
 		}
 
@@ -696,7 +696,7 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 		case Cut:
 			if ((what_we_got = alist->cut ((*i).start, (*i).end)) != 0) {
 				_editor.get_cut_buffer().add (what_we_got);
-				_session.add_command (new MementoCommand<AutomationList>(*alist.get(), new XMLNode (before), &alist->get_state()));
+				_session->add_command (new MementoCommand<AutomationList>(*alist.get(), new XMLNode (before), &alist->get_state()));
 				ret = true;
 			}
 			break;
@@ -708,7 +708,7 @@ AutomationTimeAxisView::cut_copy_clear_objects_one (AutomationLine& line, PointS
 
 		case Clear:
 			if ((what_we_got = alist->cut ((*i).start, (*i).end)) != 0) {
-				_session.add_command (new MementoCommand<AutomationList>(*alist.get(), new XMLNode (before), &alist->get_state()));
+				_session->add_command (new MementoCommand<AutomationList>(*alist.get(), new XMLNode (before), &alist->get_state()));
 				ret = true;
 			}
 			break;
@@ -765,7 +765,7 @@ AutomationTimeAxisView::paste_one (AutomationLine& line, nframes_t pos, float ti
 
 	XMLNode &before = alist->get_state();
 	alist->paste (copy, pos, times);
-	_session.add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+	_session->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 
 	return true;
 }
@@ -834,7 +834,7 @@ AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 	assert(line->the_list() == _control->list());
 
 	automation_connection = _control->alist()->automation_state_changed.connect
-		(sigc::mem_fun(*this, &AutomationTimeAxisView::automation_state_changed));
+		(boost::bind (&AutomationTimeAxisView::automation_state_changed, this));
 
 	_line = line;
 	//_controller = AutomationController::create(_session, line->the_list(), _control);

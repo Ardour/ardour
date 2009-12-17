@@ -71,7 +71,7 @@ class RouteGroupMenu;
 class RouteTimeAxisView : public RouteUI, public TimeAxisView
 {
 public:
- 	RouteTimeAxisView (PublicEditor&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
+ 	RouteTimeAxisView (PublicEditor&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>, ArdourCanvas::Canvas& canvas);
  	virtual ~RouteTimeAxisView ();
 
 	void show_selection (TimeSelection&);

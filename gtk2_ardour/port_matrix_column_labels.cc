@@ -55,16 +55,16 @@ PortMatrixColumnLabels::compute_dimensions ()
 		for (PortGroup::BundleList::const_iterator j = c.begin (); j != c.end(); ++j) {
 
 			cairo_text_extents_t ext;
-			cairo_text_extents (cr, j->bundle->name().c_str(), &ext);
+			cairo_text_extents (cr, (*j)->bundle->name().c_str(), &ext);
 			if (ext.width > _longest_bundle_name) {
 				_longest_bundle_name = ext.width;
 			}
 
-			for (uint32_t k = 0; k < j->bundle->nchannels (); ++k) {
+			for (uint32_t k = 0; k < (*j)->bundle->nchannels (); ++k) {
 
 				cairo_text_extents (
 					cr,
-					j->bundle->channel_name (k).c_str(),
+					(*j)->bundle->channel_name (k).c_str(),
 					&ext
 					);
 
@@ -127,13 +127,13 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 	PortGroup::BundleList const & bundles = _matrix->visible_columns()->bundles ();
 	for (PortGroup::BundleList::const_iterator i = bundles.begin (); i != bundles.end(); ++i) {
 
-		Gdk::Color c = i->has_colour ? i->colour : get_a_bundle_colour (N);
-		render_bundle_name (cr, background_colour (), c, x, 0, i->bundle);
+		Gdk::Color c = (*i)->has_colour ? (*i)->colour : get_a_bundle_colour (N);
+		render_bundle_name (cr, background_colour (), c, x, 0, (*i)->bundle);
 
 		if (_matrix->show_only_bundles()) {
 			x += grid_spacing();
 		} else {
-			x += i->bundle->nchannels () * grid_spacing();
+			x += (*i)->bundle->nchannels () * grid_spacing();
 		}
 		
 		++N;
@@ -147,9 +147,9 @@ PortMatrixColumnLabels::render (cairo_t* cr)
 
 		for (PortGroup::BundleList::const_iterator i = bundles.begin (); i != bundles.end(); ++i) {
 
-			for (uint32_t j = 0; j < i->bundle->nchannels(); ++j) {
-				Gdk::Color c = i->has_colour ? i->colour : get_a_bundle_colour (N);
-				render_channel_name (cr, background_colour (), c, x, 0, ARDOUR::BundleChannel (i->bundle, j));
+			for (uint32_t j = 0; j < (*i)->bundle->nchannels(); ++j) {
+				Gdk::Color c = (*i)->has_colour ? (*i)->colour : get_a_bundle_colour (N);
+				render_channel_name (cr, background_colour (), c, x, 0, ARDOUR::BundleChannel ((*i)->bundle, j));
 				x += grid_spacing();
 			}
 			

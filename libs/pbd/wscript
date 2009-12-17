@@ -73,6 +73,7 @@ def build(bld):
 		pool.cc
 		pthread_utils.cc
 		receiver.cc
+		scoped_connections.cc
 		search_path.cc
 		shortpath.cc
 		stacktrace.cc

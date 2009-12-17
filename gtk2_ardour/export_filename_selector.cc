@@ -29,16 +29,14 @@
 using namespace ARDOUR;
 
 ExportFilenameSelector::ExportFilenameSelector () :
-  session (0),
-
-  include_label (_("Include in Filename(s):"), Gtk::ALIGN_LEFT),
-
-  label_label (_("Label:"), Gtk::ALIGN_LEFT),
-  session_checkbox (_("Session Name")),
-  revision_checkbox (_("Revision:")),
-
-  path_label (_("Folder:"), Gtk::ALIGN_LEFT),
-  browse_button (_("Browse"))
+	include_label (_("Include in Filename(s):"), Gtk::ALIGN_LEFT),
+	
+	label_label (_("Label:"), Gtk::ALIGN_LEFT),
+	session_checkbox (_("Session Name")),
+	revision_checkbox (_("Revision:")),
+	
+	path_label (_("Folder:"), Gtk::ALIGN_LEFT),
+	browse_button (_("Browse"))
 {
 	pack_start (include_label, false, false, 6);
 	pack_start (include_hbox, false, false, 0);
@@ -136,7 +134,7 @@ ExportFilenameSelector::load_state ()
 void
 ExportFilenameSelector::set_state (ARDOUR::ExportProfileManager::FilenameStatePtr state_, ARDOUR::Session * session_)
 {
-	session = session_;
+	SessionHandlePtr::set_session (session_);
 
 	filename = state_->filename;
 

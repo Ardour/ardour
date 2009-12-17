@@ -29,6 +29,7 @@
 #include <gtkmm2ext/selector.h>
 
 #include "ardour_dialog.h"
+#include "ardour/session_handle.h"
 
 namespace ARDOUR {
 	class Session;
@@ -44,7 +45,6 @@ class PlaylistSelector : public ArdourDialog
 	PlaylistSelector ();
 	~PlaylistSelector ();
 
-	void set_session (ARDOUR::Session*);
 	void show_for (RouteUI*);
 
   protected:
@@ -53,7 +53,6 @@ class PlaylistSelector : public ArdourDialog
   private:
 	typedef std::map<PBD::ID,std::list<boost::shared_ptr<ARDOUR::Playlist> >*> DSPL_Map;
 
-	ARDOUR::Session* session;
 	Gtk::ScrolledWindow scroller;
 	DSPL_Map dspl_map;
 	RouteUI* rui;

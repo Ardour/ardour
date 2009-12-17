@@ -45,19 +45,20 @@ using namespace ARDOUR;
  *  @param type Port type that we are handling.
  */
 PortMatrix::PortMatrix (Window* parent, Session* session, DataType type)
-	: Table (3, 3),
-	  _session (session),
-	  _parent (parent),
-	  _type (type),
-	  _menu (0),
-	  _arrangement (TOP_TO_RIGHT),
-	  _row_index (0),
-	  _column_index (1),
-	  _min_height_divisor (1),
-	  _show_only_bundles (false),
-	  _inhibit_toggle_show_only_bundles (false),
-	  _ignore_notebook_page_selected (false)
+	: Table (3, 3)
+	, _parent (parent)
+	, _type (type)
+	, _menu (0)
+	, _arrangement (TOP_TO_RIGHT)
+	, _row_index (0)
+	, _column_index (1)
+	, _min_height_divisor (1)
+	, _show_only_bundles (false)
+	, _inhibit_toggle_show_only_bundles (false)
+	, _ignore_notebook_page_selected (false)
 {
+	set_session (session);
+
 	_body = new PortMatrixBody (this);
 	_body->DimensionsChanged.connect (sigc::mem_fun (*this, &PortMatrix::body_dimensions_changed));
 
@@ -148,15 +149,13 @@ PortMatrix::init ()
 	/* Part 2: notice when things have changed that require our subclass to clear and refill _ports[] */
 	
 	/* watch for routes being added or removed */
-	_session->RouteAdded.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrix::routes_changed)));
+	_session_connections.add_connection (_session->RouteAdded.connect (boost::bind (&PortMatrix::routes_changed, this)));
 
 	/* and also bundles */
-	_session->BundleAdded.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrix::setup_global_ports)));
+	_session_connections.add_connection (_session->BundleAdded.connect (boost::bind (&PortMatrix::setup_global_ports, this)));
 
 	/* and also ports */
-	_session->engine().PortRegisteredOrUnregistered.connect (sigc::mem_fun (*this, &PortMatrix::setup_global_ports));
-
-	_session->GoingAway.connect (sigc::mem_fun (*this, &PortMatrix::session_going_away));
+	_session_connections.add_connection (_session->engine().PortRegisteredOrUnregistered.connect (boost::bind (&PortMatrix::setup_global_ports, this)));
 
 	reconnect_to_routes ();
 	
@@ -167,16 +166,11 @@ PortMatrix::init ()
 void
 PortMatrix::reconnect_to_routes ()
 {
-	for (vector<sigc::connection>::iterator i = _route_connections.begin(); i != _route_connections.end(); ++i) {
-		i->disconnect ();
-	}
-	_route_connections.clear ();
+	_route_connections.drop_connections ();
 
 	boost::shared_ptr<RouteList> routes = _session->get_routes ();
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		_route_connections.push_back (
-			(*i)->processors_changed.connect (sigc::mem_fun (*this, &PortMatrix::route_processors_changed))
-			);
+		_route_connections.add_connection ((*i)->processors_changed.connect (sigc::mem_fun (*this, &PortMatrix::route_processors_changed)));
 	}
 }
 
@@ -261,13 +255,13 @@ PortMatrix::disassociate_all ()
 	PortGroup::BundleList b = _ports[1].bundles ();
 
 	for (PortGroup::BundleList::iterator i = a.begin(); i != a.end(); ++i) {
-		for (uint32_t j = 0; j < i->bundle->nchannels(); ++j) {
+		for (uint32_t j = 0; j < (*i)->bundle->nchannels(); ++j) {
 			for (PortGroup::BundleList::iterator k = b.begin(); k != b.end(); ++k) {
-				for (uint32_t l = 0; l < k->bundle->nchannels(); ++l) {
+				for (uint32_t l = 0; l < (*k)->bundle->nchannels(); ++l) {
 
 					BundleChannel c[2] = {
-						BundleChannel (i->bundle, j),
-						BundleChannel (k->bundle, l)
+						BundleChannel ((*i)->bundle, j),
+						BundleChannel ((*k)->bundle, l)
 							};
 
 					if (get_state (c) == PortMatrixNode::ASSOCIATED) {
@@ -493,11 +487,11 @@ PortMatrix::disassociate_all_on_channel (boost::weak_ptr<Bundle> bundle, uint32_
 	PortGroup::BundleList a = _ports[1-dim].bundles ();
 
 	for (PortGroup::BundleList::iterator i = a.begin(); i != a.end(); ++i) {
-		for (uint32_t j = 0; j < i->bundle->nchannels(); ++j) {
+		for (uint32_t j = 0; j < (*i)->bundle->nchannels(); ++j) {
 
 			BundleChannel c[2];
 			c[dim] = BundleChannel (sb, channel);
-			c[1-dim] = BundleChannel (i->bundle, j);
+			c[1-dim] = BundleChannel ((*i)->bundle, j);
 
 			if (get_state (c) == PortMatrixNode::ASSOCIATED) {
 				set_state (c, false);

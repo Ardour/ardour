@@ -30,7 +30,6 @@
 #include <string>
 #include <cerrno>
 
-#include <sigc++/bind.h>
 
 #include <cstdio> /* snprintf(3) ... grrr */
 #include <cmath>
@@ -165,7 +164,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_base_frame_rate = _current_frame_rate;
 
 	_tempo_map = new TempoMap (_current_frame_rate);
-	_tempo_map->StateChanged.connect (sigc::mem_fun (*this, &Session::tempo_map_changed));
+	scoped_connect (_tempo_map->StateChanged, boost::bind (&Session::tempo_map_changed, this, _1));
 
 
 	_non_soloed_outs_muted = false;
@@ -267,20 +266,21 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	delta_accumulator_cnt = 0;
 	_slave_state = Stopped;
 
-	_engine.GraphReordered.connect (sigc::mem_fun (*this, &Session::graph_reordered));
+	scoped_connect (_engine.GraphReordered, boost::bind (&Session::graph_reordered, this));
 
 	/* These are all static "per-class" signals */
 
-	RegionFactory::CheckNewRegion.connect (sigc::mem_fun (*this, &Session::add_region));
-	SourceFactory::SourceCreated.connect (sigc::mem_fun (*this, &Session::add_source));
-	PlaylistFactory::PlaylistCreated.connect (sigc::mem_fun (*this, &Session::add_playlist));
-	Processor::ProcessorCreated.connect (sigc::mem_fun (*this, &Session::add_processor));
-	NamedSelection::NamedSelectionCreated.connect (sigc::mem_fun (*this, &Session::add_named_selection));
-	AutomationList::AutomationListCreated.connect (sigc::mem_fun (*this, &Session::add_automation_list));
+	scoped_connect (RegionFactory::CheckNewRegion, boost::bind (&Session::add_region, this, _1));
+	scoped_connect (SourceFactory::SourceCreated, boost::bind (&Session::add_source, this, _1));
+	scoped_connect (PlaylistFactory::PlaylistCreated, boost::bind (&Session::add_playlist, this, _1, _2));
+	scoped_connect (Processor::ProcessorCreated, boost::bind (&Session::add_processor, this, _1));
+	scoped_connect (NamedSelection::NamedSelectionCreated, boost::bind (&Session::add_named_selection, this, _1));
+	scoped_connect (AutomationList::AutomationListCreated, boost::bind (&Session::add_automation_list, this, _1));
 
-	Controllable::Destroyed.connect (sigc::mem_fun (*this, &Session::remove_controllable));
+	// BOOST SIGNALS
+	// scoped_connect (Controllable::Destroyed, boost::bind (&Session::remove_controllable, this, _1));
 
-	IO::PortCountChanged.connect (sigc::mem_fun (*this, &Session::ensure_buffers));
+	scoped_connect (IO::PortCountChanged, boost::bind (&Session::ensure_buffers, this, _1));
 
 	/* stop IO objects from doing stuff until we're ready for them */
 
@@ -332,15 +332,15 @@ Session::second_stage_init (bool new_session)
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave|Loading);
 
 
-	_locations.changed.connect (sigc::mem_fun (this, &Session::locations_changed));
-	_locations.added.connect (sigc::mem_fun (this, &Session::locations_added));
+	scoped_connect (_locations.changed, boost::bind (&Session::locations_changed, this));
+	scoped_connect (_locations.added, boost::bind (&Session::locations_added, this, _1));
 	setup_click_sounds (0);
 	setup_midi_control ();
 
 	/* Pay attention ... */
 
-	_engine.Halted.connect (sigc::mem_fun (*this, &Session::engine_halted));
-	_engine.Xrun.connect (sigc::mem_fun (*this, &Session::xrun_recovery));
+	scoped_connect (_engine.Halted, boost::bind (&Session::engine_halted, this));
+	scoped_connect (_engine.Xrun, boost::bind (&Session::xrun_recovery, this));
 
 	try {
 		when_engine_running();
@@ -364,14 +364,14 @@ Session::second_stage_init (bool new_session)
 	deliver_mmc (MIDI::MachineControl::cmdMmcReset, 0);
 	deliver_mmc (MIDI::MachineControl::cmdLocate, 0);
 
-	MidiClockTicker::instance().set_session(*this);
-	MIDI::Name::MidiPatchManager::instance().set_session(*this);
+	MidiClockTicker::instance().set_session (this);
+	MIDI::Name::MidiPatchManager::instance().set_session (this);
 
 	/* initial program change will be delivered later; see ::config_changed() */
 
 	BootMessage (_("Reset Control Protocols"));
 
-	ControlProtocolManager::instance().set_session (*this);
+	ControlProtocolManager::instance().set_session (this);
 
 	config.set_end_marker_is_free (new_session);
 
@@ -2311,11 +2311,12 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	/* step 1: consider deleting all unused playlists */
 	
-	if (playlists->maybe_delete_unused (AskAboutPlaylistDeletion)) {
+/* BOOST SIGNALS
+	if (playlists->maybe_delete_unused (boost::bind (AskAboutPlaylistDeletion, _1));
 		ret = 0;
 		goto out;
 	}
-
+*/
 	/* step 2: find all un-used sources */
 
 	rep.paths.clear ();
@@ -2334,7 +2335,7 @@ Session::cleanup_sources (CleanupReport& rep)
 
 		if (!playlists->source_use_count(i->second) && i->second->length(i->second->timeline_position()) > 0) {
 			dead_sources.push_back (i->second);
-			i->second->GoingAway();
+			i->second->drop_references ();
 		}
 
 		i = tmp;
@@ -2653,8 +2654,7 @@ Session::remove_controllable (Controllable* c)
 
 	Glib::Mutex::Lock lm (controllables_lock);
 
-	Controllables::iterator x = controllables.find(
-		 boost::shared_ptr<Controllable>(c, null_deleter()));
+	Controllables::iterator x = controllables.find (boost::shared_ptr<Controllable>(c, null_deleter()));
 
 	if (x != controllables.end()) {
 		controllables.erase (x);

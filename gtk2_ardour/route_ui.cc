@@ -29,7 +29,6 @@
 #include "ardour/dB.h"
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
-#include "pbd/shiva.h"
 #include "pbd/controllable.h"
 #include "pbd/enumwriter.h"
 
@@ -65,13 +64,13 @@ using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace PBD;
 
-RouteUI::RouteUI (ARDOUR::Session& sess)
+RouteUI::RouteUI (ARDOUR::Session* sess)
 	: AxisView(sess)
 {
 	init ();
 }
 
-RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session& sess)
+RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session* sess)
 	: AxisView(sess)
 {
 	init ();
@@ -137,8 +136,8 @@ RouteUI::init ()
 	show_sends_button->set_self_managed (true);
 	UI::instance()->set_tip (show_sends_button, _("make mixer strips show sends to this bus"), "");
 
-	_session.SoloChanged.connect (sigc::mem_fun(*this, &RouteUI::solo_changed_so_update_mute));
-	_session.TransportStateChange.connect (sigc::mem_fun (*this, &RouteUI::check_rec_enable_sensitivity));
+	_session_connections.add_connection (_session->SoloChanged.connect (sigc::mem_fun(*this, &RouteUI::solo_changed_so_update_mute)));
+	_session_connections.add_connection (_session->TransportStateChange.connect (sigc::mem_fun (*this, &RouteUI::check_rec_enable_sensitivity)));
 
 	Config->ParameterChanged.connect (sigc::mem_fun (*this, &RouteUI::parameter_changed));
 }
@@ -146,12 +145,8 @@ RouteUI::init ()
 void
 RouteUI::reset ()
 {
-	//Remove route connections associated with us.
-	for (vector<sigc::connection>::iterator it = connections.begin(); it!=connections.end(); ++it) {
-	    (*it).disconnect();
-	}
-
-	connections.clear ();
+	route_going_away_connection.disconnect();
+	connections.drop_connections ();
 
 	delete solo_menu;
 	solo_menu = 0;
@@ -170,6 +165,14 @@ RouteUI::reset ()
 }
 
 void
+RouteUI::self_delete ()
+{
+	route_going_away_connection.disconnect ();
+	connections.drop_connections ();
+	delete_when_idle (this);
+}
+
+void
 RouteUI::set_route (boost::shared_ptr<Route> rp)
 {
 	reset ();
@@ -180,28 +183,24 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		set_color (unique_random_color());
 	}
 
-	/* no, there is no memory leak here. This object cleans itself (and other stuff)
-	   up when the route is destroyed.
-	*/
-
 	if (self_destruct) {
-		new PairedShiva<Route,RouteUI> (*_route, *this);
+		route_going_away_connection = rp->GoingAway.connect (boost::bind (&RouteUI::self_delete, this));
 	}
 
 	mute_button->set_controllable (_route->mute_control());
 	solo_button->set_controllable (_route->solo_control());
 
-	connections.push_back (_route->active_changed.connect (sigc::mem_fun (*this, &RouteUI::route_active_changed)));
-	connections.push_back (_route->mute_changed.connect (sigc::mem_fun(*this, &RouteUI::mute_changed)));
-	connections.push_back (_route->solo_changed.connect (sigc::mem_fun(*this, &RouteUI::solo_changed)));
-	connections.push_back (_route->listen_changed.connect (sigc::mem_fun(*this, &RouteUI::listen_changed)));
-	connections.push_back (_route->solo_isolated_changed.connect (sigc::mem_fun(*this, &RouteUI::solo_changed)));
+	connections.add_connection (_route->active_changed.connect (sigc::mem_fun (*this, &RouteUI::route_active_changed)));
+	connections.add_connection (_route->mute_changed.connect (sigc::mem_fun(*this, &RouteUI::mute_changed)));
+	connections.add_connection (_route->solo_changed.connect (sigc::mem_fun(*this, &RouteUI::solo_changed)));
+	connections.add_connection (_route->listen_changed.connect (sigc::mem_fun(*this, &RouteUI::listen_changed)));
+	connections.add_connection (_route->solo_isolated_changed.connect (sigc::mem_fun(*this, &RouteUI::solo_changed)));
 
-	if (_session.writable() && is_track()) {
+	if (_session->writable() && is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
-		connections.push_back (t->diskstream()->RecordEnableChanged.connect (sigc::mem_fun (*this, &RouteUI::route_rec_enable_changed)));
-		connections.push_back (_session.RecordStateChanged.connect (sigc::mem_fun (*this, &RouteUI::session_rec_enable_changed)));
+		connections.add_connection (t->diskstream()->RecordEnableChanged.connect (sigc::mem_fun (*this, &RouteUI::route_rec_enable_changed)));
+		connections.add_connection (_session->RecordStateChanged.connect (sigc::mem_fun (*this, &RouteUI::session_rec_enable_changed)));
 
 		rec_enable_button->show();
  		rec_enable_button->set_controllable (t->rec_enable_control());
@@ -265,10 +264,10 @@ RouteUI::mute_press (GdkEventButton* ev)
 				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
 					if (_mute_release) {
-						_mute_release->routes = _session.get_routes ();
+						_mute_release->routes = _session->get_routes ();
 					}
 
-					_session.set_mute (_session.get_routes(), !_route->muted());
+					_session->set_mute (_session->get_routes(), !_route->muted());
 
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -278,10 +277,10 @@ RouteUI::mute_press (GdkEventButton* ev)
 
 					if (ev->button == 1 && _route->route_group()) {
 						if (_mute_release) {
-							_mute_release->routes = _session.get_routes ();
+							_mute_release->routes = _session->get_routes ();
 						}
 								
-						_session.set_mute (_session.get_routes(), !_route->muted(), Session::rt_cleanup, true);
+						_session->set_mute (_session->get_routes(), !_route->muted(), Session::rt_cleanup, true);
 					}
 
 				} else {
@@ -295,7 +294,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 						_mute_release->routes = rl;
 					}
 
-					_session.set_mute (rl, !_route->muted());
+					_session->set_mute (rl, !_route->muted());
 
 				}
 			}
@@ -311,7 +310,7 @@ RouteUI::mute_release (GdkEventButton*)
 {
 	if (!ignore_toggle) {
 		if (_mute_release){
-			_session.set_mute (_mute_release->routes, _mute_release->active, Session::rt_cleanup, true);
+			_session->set_mute (_mute_release->routes, _mute_release->active, Session::rt_cleanup, true);
 			delete _mute_release;
 			_mute_release = 0;
 		}
@@ -362,13 +361,13 @@ RouteUI::solo_press(GdkEventButton* ev)
 					/* Primary-Tertiary-click applies change to all routes */
 
 					if (_solo_release) {
-						_solo_release->routes = _session.get_routes ();
+						_solo_release->routes = _session->get_routes ();
 					}
 					
 					if (Config->get_solo_control_is_listen_control()) {
-						_session.set_listen (_session.get_routes(), !_route->listening(),  Session::rt_cleanup, true);
+						_session->set_listen (_session->get_routes(), !_route->listening(),  Session::rt_cleanup, true);
 					} else {
-						_session.set_solo (_session.get_routes(), !_route->soloed(),  Session::rt_cleanup, true);
+						_session->set_solo (_session->get_routes(), !_route->soloed(),  Session::rt_cleanup, true);
 					}
 					
 				} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
@@ -378,7 +377,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 					if (_solo_release) {
 						_solo_release->exclusive = true;
 
-						boost::shared_ptr<RouteList> routes = _session.get_routes();
+						boost::shared_ptr<RouteList> routes = _session->get_routes();
 
 						for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 							if ((*i)->soloed ()) {
@@ -392,7 +391,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 					if (Config->get_solo_control_is_listen_control()) {
 						/* ??? we need a just_one_listen() method */
 					} else {
-						_session.set_just_one_solo (_route, true);
+						_session->set_just_one_solo (_route, true);
 					}
 
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
@@ -416,9 +415,9 @@ RouteUI::solo_press(GdkEventButton* ev)
 						}
 					
 						if (Config->get_solo_control_is_listen_control()) {
-							_session.set_listen (_route->route_group()->route_list(), !_route->listening(),  Session::rt_cleanup, true);
+							_session->set_listen (_route->route_group()->route_list(), !_route->listening(),  Session::rt_cleanup, true);
 						} else {
-							_session.set_solo (_route->route_group()->route_list(), !_route->soloed(),  Session::rt_cleanup, true);
+							_session->set_solo (_route->route_group()->route_list(), !_route->soloed(),  Session::rt_cleanup, true);
 						}
 					}
 					
@@ -434,9 +433,9 @@ RouteUI::solo_press(GdkEventButton* ev)
 					}
 
 					if (Config->get_solo_control_is_listen_control()) {
-						_session.set_listen (rl, !_route->listening());
+						_session->set_listen (rl, !_route->listening());
 					} else {
-						_session.set_solo (rl, !_route->soloed());
+						_session->set_solo (rl, !_route->soloed());
 					}
 				}
 			}
@@ -456,7 +455,7 @@ RouteUI::solo_release (GdkEventButton*)
 			if (_solo_release->exclusive) {
 
 			} else {
-				_session.set_solo (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
+				_session->set_solo (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
 			}
 
 			delete _solo_release;
@@ -474,7 +473,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 		return true;
 	}
 
-	if (!_session.engine().connected()) {
+	if (!_session->engine().connected()) {
 	        MessageDialog msg (_("Not connected to JACK - cannot engage record"));
 		msg.run ();
 		return true;
@@ -489,7 +488,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-			_session.set_record_enable (_session.get_routes(), !rec_enable_button->get_active());
+			_session->set_record_enable (_session->get_routes(), !rec_enable_button->get_active());
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -497,7 +496,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 			   NOTE: Primary-button2 is MIDI learn.
 			*/
 			if (ev->button == 1 && _route->route_group()) {
-				_session.set_record_enable (_route->route_group()->route_list(), !rec_enable_button->get_active(), Session::rt_cleanup, true);
+				_session->set_record_enable (_route->route_group()->route_list(), !rec_enable_button->get_active(), Session::rt_cleanup, true);
 			}
 
 		} else if (Keyboard::is_context_menu_event (ev)) {
@@ -508,7 +507,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 			boost::shared_ptr<RouteList> rl (new RouteList);
 			rl->push_back (route());
-			_session.set_record_enable (rl, !rec_enable_button->get_active());
+			_session->set_record_enable (rl, !rec_enable_button->get_active());
 		}
 	}
 
@@ -543,7 +542,7 @@ RouteUI::build_sends_menu ()
 void
 RouteUI::create_sends (Placement p)
 {
-	_session.globally_add_internal_sends (_route, p);
+	_session->globally_add_internal_sends (_route, p);
 }
 
 void
@@ -564,25 +563,25 @@ RouteUI::create_selected_sends (Placement p)
 		}
 	}
 	
-	_session.add_internal_sends (_route, p, rlist);
+	_session->add_internal_sends (_route, p, rlist);
 }
 
 void
 RouteUI::set_sends_gain_from_track ()
 {
-	_session.globally_set_send_gains_from_track (_route);
+	_session->globally_set_send_gains_from_track (_route);
 }
 
 void
 RouteUI::set_sends_gain_to_zero ()
 {
-	_session.globally_set_send_gains_to_zero (_route);
+	_session->globally_set_send_gains_to_zero (_route);
 }
 
 void
 RouteUI::set_sends_gain_to_unity ()
 {
-	_session.globally_set_send_gains_to_unity (_route);
+	_session->globally_set_send_gains_to_unity (_route);
 }
 
 bool
@@ -767,7 +766,7 @@ RouteUI::mute_changed(void* /*src*/)
 }
 
 int
-RouteUI::mute_visual_state (Session& s, boost::shared_ptr<Route> r)
+RouteUI::mute_visual_state (Session* s, boost::shared_ptr<Route> r)
 {
 	if (r->is_master() || r->is_control()) {
 		return 0;
@@ -778,7 +777,7 @@ RouteUI::mute_visual_state (Session& s, boost::shared_ptr<Route> r)
 		if (r->muted ()) {
 			/* full mute */
 			return 2;
-		} else if (s.soloing() && !r->soloed() && !r->solo_isolated()) {
+		} else if (s->soloing() && !r->soloed() && !r->solo_isolated()) {
 			/* mute-because-not-soloed */
 			return 1;
 		} else {
@@ -851,7 +850,7 @@ RouteUI::update_rec_display ()
 
 	if (model) {
 
-		switch (_session.record_status ()) {
+		switch (_session->record_status ()) {
 		case Session::Recording:
 			rec_enable_button->set_visual_state (1);
 			break;
@@ -1110,7 +1109,7 @@ RouteUI::remove_this_route ()
 gint
 RouteUI::idle_remove_this_route (RouteUI *rui)
 {
-	rui->_session.remove_route (rui->_route);
+	rui->_session->remove_route (rui->_route);
 	return false;
 }
 
@@ -1329,7 +1328,7 @@ RouteUI::map_frozen ()
 void
 RouteUI::adjust_latency ()
 {
-	LatencyDialog dialog (_route->name() + _(" latency"), *(_route->output()), _session.frame_rate(), _session.engine().frames_per_cycle());
+	LatencyDialog dialog (_route->name() + _(" latency"), *(_route->output()), _session->frame_rate(), _session->engine().frames_per_cycle());
 }
 
 void
@@ -1370,7 +1369,7 @@ RouteUI::save_as_template ()
 void
 RouteUI::check_rec_enable_sensitivity ()
 {
-	if (_session.transport_rolling() && rec_enable_button->get_active() && Config->get_disable_disarm_during_roll()) {
+	if (_session->transport_rolling() && rec_enable_button->get_active() && Config->get_disable_disarm_during_roll()) {
 		rec_enable_button->set_sensitive (false);
 	} else {
 		rec_enable_button->set_sensitive (true);
@@ -1420,7 +1419,7 @@ RouteUI::open_remote_control_id_dialog ()
 {
 	ArdourDialog dialog (_("Remote Control ID"));
 
-	uint32_t const limit = _session.ntracks() + _session.nbusses () + 4;
+	uint32_t const limit = _session->ntracks() + _session->nbusses () + 4;
 
 	HBox* hbox = manage (new HBox);
 	hbox->set_spacing (6);

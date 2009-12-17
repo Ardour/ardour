@@ -18,7 +18,6 @@
     $Id$
 */
 
-#include <sigc++/sigc++.h>
 #include <boost/shared_ptr.hpp>
 
 #include "pbd/compose.h"
@@ -41,11 +40,9 @@ using namespace PBD::sys;
 MidiPatchManager* MidiPatchManager::_manager = 0;
 
 void
-MidiPatchManager::set_session (Session& s)
+MidiPatchManager::set_session (Session* s)
 {
-	_session = &s;
-	_session->GoingAway.connect (sigc::mem_fun (*this, &MidiPatchManager::drop_session));
-
+	SessionHandlePtr::set_session (s);
 	refresh();
 }
 
@@ -55,6 +52,10 @@ MidiPatchManager::refresh()
 	_documents.clear();
 	_master_devices_by_model.clear();
 	_all_models.clear();
+
+	if (!_session) {
+		return;
+	}
 
 	path path_to_patches = _session->session_directory().midi_patch_path();
 
@@ -93,10 +94,8 @@ MidiPatchManager::refresh()
 }
 
 void
-MidiPatchManager::drop_session ()
+MidiPatchManager::session_going_away ()
 {
-	_session = 0;
-	_documents.clear();
-	_master_devices_by_model.clear();
-	_all_models.clear();
+	SessionHandlePtr::session_going_away ();
+	refresh ();
 }

@@ -31,7 +31,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-sigc::signal<void,boost::shared_ptr<Playlist>, bool> PlaylistFactory::PlaylistCreated;
+boost::signals2::signal<void(boost::shared_ptr<Playlist>, bool)> PlaylistFactory::PlaylistCreated;
 
 boost::shared_ptr<Playlist>
 PlaylistFactory::create (Session& s, const XMLNode& node, bool hidden, bool unused)

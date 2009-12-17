@@ -21,12 +21,12 @@
 #define __ardour_gtk_route_processor_selection_h__
 
 #include <vector>
-#include <sigc++/signal.h>
+#include "pbd/scoped_connections.h"
 
 #include "processor_selection.h"
 #include "route_selection.h"
 
-class RouteRedirectSelection : public sigc::trackable
+class RouteRedirectSelection : public PBD::ScopedConnectionList, public sigc::trackable
 {
   public:
 	ProcessorSelection processors;
@@ -53,6 +53,10 @@ class RouteRedirectSelection : public sigc::trackable
 	void clear_routes ();
 
 	bool selected (boost::shared_ptr<ARDOUR::Route>);
+
+  private:
+	void removed (boost::weak_ptr<ARDOUR::Route>);
+
 };
 
 bool operator==(const RouteRedirectSelection& a, const RouteRedirectSelection& b);

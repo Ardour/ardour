@@ -109,7 +109,7 @@ apply_gain_to_buffer_t  ARDOUR::apply_gain_to_buffer = 0;
 mix_buffers_with_gain_t ARDOUR::mix_buffers_with_gain = 0;
 mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain = 0;
 
-sigc::signal<void,std::string> ARDOUR::BootMessage;
+boost::signals2::signal<void(std::string)> ARDOUR::BootMessage;
 
 void ARDOUR::setup_enum_writer ();
 

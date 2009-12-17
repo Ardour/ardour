@@ -41,13 +41,13 @@ using namespace PBD;
 void
 Editor::keyboard_selection_finish (bool add)
 {
-	if (session && have_pending_keyboard_selection) {
+	if (_session && have_pending_keyboard_selection) {
 
 		nframes64_t end;
 		bool ignored;
 
-		if (session->transport_rolling()) {
-			end = session->audible_frame();
+		if (_session->transport_rolling()) {
+			end = _session->audible_frame();
 		} else {
 			if (!mouse_frame (end, ignored)) {
 				return;
@@ -67,9 +67,9 @@ Editor::keyboard_selection_finish (bool add)
 void
 Editor::keyboard_selection_begin ()
 {
-	if (session) {
-		if (session->transport_rolling()) {
-			pending_keyboard_selection_start = session->audible_frame();
+	if (_session) {
+		if (_session->transport_rolling()) {
+			pending_keyboard_selection_start = _session->audible_frame();
 			have_pending_keyboard_selection = true;
 		} else {
 			bool ignored;

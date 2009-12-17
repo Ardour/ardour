@@ -17,33 +17,41 @@
 
 */
 
-#ifndef __ardour_configuration_h__
-#define __ardour_configuration_h__
+#ifndef __libardour_session_handle_h__
+#define __libardour_session_handle_h__
 
-#include <boost/function.hpp>
-#include <boost/signals2.hpp>
-#include "pbd/stateful.h"
-#include "ardour/configuration_variable.h"
-
-class XMLNode;
+#include "pbd/scoped_connections.h"
 
 namespace ARDOUR {
+	class Session;
 
-class Configuration : public PBD::Stateful
+class SessionHandleRef : public PBD::ScopedConnectionList
 {
   public:
-	Configuration();
-	virtual ~Configuration();
+	SessionHandleRef (ARDOUR::Session& s);
+	virtual ~SessionHandleRef () {}
 
-	virtual void map_parameters (boost::function<void (std::string)>&) = 0;
-	virtual int set_state (XMLNode const &, int) = 0;
-	virtual XMLNode & get_state () = 0;
-	virtual XMLNode & get_variables () = 0;
-	virtual void set_variables (XMLNode const &) = 0;
-
-	boost::signals2::signal<void(std::string)> ParameterChanged;
+  protected:
+	ARDOUR::Session&          _session;
+	virtual void session_going_away ();
 };
 
-} // namespace ARDOUR
+class SessionHandlePtr
+{
+  public:
+	SessionHandlePtr (ARDOUR::Session* s);
+	SessionHandlePtr () : _session (0) {}
+	virtual ~SessionHandlePtr () {}
 
-#endif /* __ardour_configuration_h__ */
+	virtual void set_session (ARDOUR::Session *);
+
+  protected:
+	ARDOUR::Session*          _session;
+	PBD::ScopedConnectionList _session_connections;
+
+	virtual void session_going_away ();
+};
+
+} /* namespace */
+
+#endif /* __libardour_session_handle_h__ */

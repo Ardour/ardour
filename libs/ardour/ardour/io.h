@@ -23,7 +23,6 @@
 #include <string>
 #include <vector>
 #include <cmath>
-#include <sigc++/signal.h>
 #include <jack/jack.h>
 
 #include <glibmm/thread.h>
@@ -133,7 +132,7 @@ class IO : public SessionObject, public Latent
 
 	const ChanCount& n_ports ()  const { return _ports.count(); }
 
-	sigc::signal<void,IOChange,void*> changed;
+	boost::signals2::signal<void(IOChange,void*)> changed;
 
 	virtual XMLNode& state (bool full);
 	XMLNode& get_state (void);
@@ -145,7 +144,7 @@ class IO : public SessionObject, public Latent
 	static int  disable_ports (void);
 	static int  enable_ports (void);
 
-	static sigc::signal<void,ChanCount> PortCountChanged; // emitted when the number of ports changes
+	static boost::signals2::signal<void(ChanCount)> PortCountChanged; // emitted when the number of ports changes
 
 	static std::string name_from_state (const XMLNode&);
 	static void set_name_in_state (XMLNode&, const std::string&);
@@ -153,7 +152,7 @@ class IO : public SessionObject, public Latent
 	/* we have to defer/order port connection. this is how we do it.
 	*/
 
-	static sigc::signal<int> ConnectingLegal;
+	static boost::signals2::signal<int()> ConnectingLegal;
 	static bool              connecting_legal;
 
 	XMLNode *pending_state_node;
@@ -180,20 +179,18 @@ class IO : public SessionObject, public Latent
 	bool     _active;
 
   private:
-
 	int connecting_became_legal ();
-	sigc::connection connection_legal_c;
+	boost::signals2::scoped_connection connection_legal_c;
 
 	boost::shared_ptr<Bundle> _bundle; ///< a bundle representing our ports
 
 	struct UserBundleInfo {
-		UserBundleInfo (IO*, boost::shared_ptr<UserBundle> b);
-
-		boost::shared_ptr<UserBundle> bundle;
-		sigc::connection changed;
+	    UserBundleInfo (IO*, boost::shared_ptr<UserBundle> b);
+	    boost::shared_ptr<UserBundle> bundle;
+	    boost::signals2::scoped_connection changed;
 	};
-
-	std::vector<UserBundleInfo> _bundles_connected; ///< user bundles connected to our ports
+	
+	std::vector<UserBundleInfo*> _bundles_connected; ///< user bundles connected to our ports
 
 	static int parse_io_string (const std::string&, std::vector<std::string>& chns);
 	static int parse_gain_string (const std::string&, std::vector<std::string>& chns);
@@ -201,7 +198,7 @@ class IO : public SessionObject, public Latent
 	int ensure_ports (ChanCount, bool clear, bool lockit, void *src);
 
 	void check_bundles_connected ();
-	void check_bundles (std::vector<UserBundleInfo>&, const PortSet&);
+	void check_bundles (std::vector<UserBundleInfo*>&, const PortSet&);
 
 	void bundle_changed (Bundle::Change);
 

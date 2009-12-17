@@ -20,7 +20,6 @@
 #ifndef __libardour_route_group_member_h__
 #define __libardour_route_group_member_h__
 
-#include <sigc++/signal.h>
 
 namespace ARDOUR  {
 
@@ -34,7 +33,7 @@ class RouteGroupMember
 
 	RouteGroup* route_group () const { return _route_group; }
 
-	sigc::signal<void> route_group_changed;
+	boost::signals2::signal<void()> route_group_changed;
 
   protected:
 	RouteGroup* _route_group;

@@ -17,7 +17,6 @@
 
 */
 
-#include <sigc++/bind.h>
 
 #include "pbd/stacktrace.h"
 
@@ -192,7 +191,6 @@ Crossfade::Crossfade (boost::shared_ptr<Crossfade> orig, boost::shared_ptr<Audio
 
 Crossfade::~Crossfade ()
 {
-	notify_callbacks ();
 }
 
 void

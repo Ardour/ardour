@@ -1024,7 +1024,7 @@ MidiDiskstream::transport_stopped (struct tm& /*when*/, time_t /*twhen*/, bool a
 				continue; /* XXX is this OK? */
 			}
 
-			region->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &Diskstream::remove_region_from_last_capture), boost::weak_ptr<Region>(region)));
+			scoped_connect (region->GoingAway, boost::bind (&Diskstream::remove_region_from_last_capture, this, boost::weak_ptr<Region>(region)));
 
 			_last_capture_regions.push_back (region);
 

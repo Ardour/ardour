@@ -117,15 +117,13 @@ class NumberMetadataField : public MetadataField {
 };
 
 /// Interface for MetadataFields
-class SessionMetadataSet {
+class SessionMetadataSet : public ARDOUR::SessionHandlePtr {
   public:
 	SessionMetadataSet (Glib::ustring const & name);
 	virtual ~SessionMetadataSet () {};
 
 	void add_data_field (MetadataPtr field);
 
-	/// Sets session, into which the data is eventually saved
-	virtual void set_session (ARDOUR::Session * s) { session = s; }
 	/// allows loading extra data into data sets (for importing etc.)
 	virtual void load_extra_data (ARDOUR::SessionMetadata const & /*data*/) { }
 	/// Saves data to session
@@ -138,7 +136,6 @@ class SessionMetadataSet {
 	typedef std::list<MetadataPtr> DataList;
 	DataList list;
 	Glib::ustring name;
-	ARDOUR::Session *session;
 };
 
 /// Contains MetadataFields for editing

@@ -36,7 +36,7 @@
 		bool selected () const { return _selected; }
 		void select (bool value);
 
-		sigc::signal<void, bool> SelectChanged;
+		boost::signals2::signal<void(bool)> SelectChanged;
 
 	  protected:
 
@@ -151,7 +151,7 @@
 	void split_node (GraphNode * node, float position);
 	void remove_node (GraphNode * node);
 
-	sigc::signal<void> GraphChanged;
+	boost::signals2::signal<void()> GraphChanged;
 
   private:
 

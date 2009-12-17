@@ -181,7 +181,7 @@ LV2Plugin::~LV2Plugin ()
 	deactivate ();
 	cleanup ();
 
-	GoingAway (); /* EMIT SIGNAL */
+	drop_references ();
 
 	slv2_instance_free(_instance);
 	slv2_value_free(_name);

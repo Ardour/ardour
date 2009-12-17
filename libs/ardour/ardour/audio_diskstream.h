@@ -19,7 +19,6 @@
 #ifndef __ardour_audio_diskstream_h__
 #define __ardour_audio_diskstream_h__
 
-#include <sigc++/signal.h>
 
 #include <cmath>
 #include <string>

@@ -21,17 +21,18 @@
 #define __ardour_butler_h__
 
 #include <glibmm/thread.h>
+
 #include "ardour/types.h"
+#include "ardour/session_handle.h"
 
 namespace ARDOUR {
 
-class Session;
-
-class Butler {
-public:
-	Butler(Session* session);
+class Butler : public SessionHandleRef
+{
+  public:
+	Butler (Session& session);
 	~Butler();
-
+	
 	int  start_thread();
 	void terminate_thread();
 	void schedule_transport_work();
@@ -58,7 +59,6 @@ public:
 		};
 	};
 
-	Session*     session;
 	pthread_t    thread;
 	Glib::Mutex  request_lock;
 	Glib::Cond   paused;

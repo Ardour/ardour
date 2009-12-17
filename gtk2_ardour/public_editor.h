@@ -83,7 +83,7 @@ class MarkerView;
  * of PublicEditor need not be recompiled if private methods or member variables
  * change.
  */
-class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway {
+class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
   public:
 	PublicEditor ();
 	virtual ~PublicEditor ();
@@ -97,10 +97,10 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	/** Attach this editor to a Session.
 	 * @param s Session to connect to.
 	 */
-	virtual void connect_to_session (ARDOUR::Session* s) = 0;
+	virtual void set_session (ARDOUR::Session* s) = 0;
 
 	/** @return The Session that we are editing, or 0 */
-	virtual ARDOUR::Session* current_session () const = 0;
+	virtual ARDOUR::Session* session () const = 0;
 
 	/** Set the snap type.
 	 * @param t Snap type (defined in editing_syms.h)

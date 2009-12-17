@@ -23,7 +23,6 @@
 #include <cmath>
 #include <sstream>
 #include <algorithm>
-#include <sigc++/bind.h>
 #include "ardour/automation_list.h"
 #include "ardour/event_type_map.h"
 #include "evoral/Curve.hpp"
@@ -36,7 +35,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-sigc::signal<void,AutomationList *> AutomationList::AutomationListCreated;
+boost::signals2::signal<void(AutomationList *)> AutomationList::AutomationListCreated;
 
 #if 0
 static void dumpit (const AutomationList& al, string prefix = "")
@@ -113,7 +112,7 @@ AutomationList::AutomationList (const XMLNode& node, Evoral::Parameter id)
 
 AutomationList::~AutomationList()
 {
-	GoingAway ();
+	drop_references ();
 }
 
 boost::shared_ptr<Evoral::ControlList>

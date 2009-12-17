@@ -23,7 +23,7 @@
 #include <string>
 #include <iostream>
 
-#include <sigc++/sigc++.h>
+#include <boost/signals2.hpp>
 
 #include "midi++/types.h"
 
@@ -32,12 +32,14 @@ namespace MIDI {
 class Port;
 class Parser;
 
-typedef sigc::signal<void, Parser &, byte>                 OneByteSignal;
-typedef sigc::signal<void, Parser &, EventTwoBytes *>      TwoByteSignal;
-typedef sigc::signal<void, Parser &, pitchbend_t>          PitchBendSignal;
-typedef sigc::signal<void, Parser &, byte *, size_t> Signal;
+typedef boost::signals2::signal<void(Parser&)>                   ZeroByteSignal;
+typedef boost::signals2::signal<void(Parser&,nframes_t)>         TimestampedSignal;
+typedef boost::signals2::signal<void(Parser&, byte)>             OneByteSignal;
+typedef boost::signals2::signal<void(Parser &, EventTwoBytes *)> TwoByteSignal;
+typedef boost::signals2::signal<void(Parser &, pitchbend_t)>     PitchBendSignal;
+typedef boost::signals2::signal<void(Parser &, byte *, size_t)>  Signal;
 
-class Parser : public sigc::trackable {
+class Parser {
  public:
 	Parser (Port &p);
 	~Parser ();
@@ -69,8 +71,8 @@ class Parser : public sigc::trackable {
 	OneByteSignal         channel_program_change[16];
 	PitchBendSignal       channel_pitchbend[16];
 	TwoByteSignal         channel_controller[16];
-	sigc::signal<void, Parser &>          channel_active_preparse[16];
-	sigc::signal<void, Parser &>          channel_active_postparse[16];
+	ZeroByteSignal        channel_active_preparse[16];
+	ZeroByteSignal        channel_active_postparse[16];
 
 	OneByteSignal         mtc_quarter_frame; /* see below for more useful signals */
 	Signal                mtc;
@@ -82,15 +84,16 @@ class Parser : public sigc::trackable {
 	Signal                position;
 	Signal                song;
 
-	sigc::signal<void, Parser &>                     all_notes_off;
-	sigc::signal<void, Parser &>                     tune;
-	sigc::signal<void, Parser &, nframes_t>          timing;
-	sigc::signal<void, Parser &, nframes_t>          start;
-	sigc::signal<void, Parser &, nframes_t>          stop;
-	sigc::signal<void, Parser &, nframes_t>          contineu;  /* note spelling */
-	sigc::signal<void, Parser &>          active_sense;
-	sigc::signal<void, Parser &>          reset;
-	sigc::signal<void, Parser &>          eox;
+	ZeroByteSignal        all_notes_off;
+	ZeroByteSignal        tune;
+	ZeroByteSignal        active_sense;
+	ZeroByteSignal        reset;
+	ZeroByteSignal        eox;
+
+	TimestampedSignal     timing;
+	TimestampedSignal     start;
+	TimestampedSignal     stop;
+	TimestampedSignal     contineu;  /* note spelling */
 
 	/* This should really be protected, but then derivatives of Port
 	   can't access it.
@@ -106,9 +109,9 @@ class Parser : public sigc::trackable {
 
 	void set_offline (bool);
 	bool offline() const { return _offline; }
-	sigc::signal<void> OfflineStatusChanged;
+	boost::signals2::signal<void()> OfflineStatusChanged;
 
-	sigc::signal<int, byte *, size_t> edit;
+	boost::signals2::signal<int(byte *, size_t)> edit;
 
 	void set_mmc_forwarding (bool yn) {
 		_mmc_forward = yn;
@@ -121,10 +124,10 @@ class Parser : public sigc::trackable {
 	const byte *mtc_current() const { return _mtc_time; }
 	bool        mtc_locked() const  { return _mtc_locked; }
 	
-	sigc::signal<void,Parser&,int,nframes_t>      mtc_qtr;
-	sigc::signal<void,const byte*,bool,nframes_t> mtc_time;
-	sigc::signal<void,MTC_Status>                 mtc_status;
-	sigc::signal<bool>                            mtc_skipped;
+	boost::signals2::signal<void(Parser&,int,nframes_t)>      mtc_qtr;
+	boost::signals2::signal<void(const byte*,bool,nframes_t)> mtc_time;
+	boost::signals2::signal<void(MTC_Status)>                 mtc_status;
+	boost::signals2::signal<bool()>                           mtc_skipped;
 
 	void set_mtc_forwarding (bool yn) {
 		_mtc_forward = yn;
@@ -139,7 +142,7 @@ class Parser : public sigc::trackable {
 	std::ostream *trace_stream;
 	std::string trace_prefix;
 	void trace_event (Parser &p, byte *msg, size_t len);
-	sigc::connection trace_connection;
+	boost::signals2::scoped_connection trace_connection;
 
 	size_t message_counter[256];
 

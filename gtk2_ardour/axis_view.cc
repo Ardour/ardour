@@ -41,10 +41,12 @@
 using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace ARDOUR;
 
 list<Gdk::Color> AxisView::used_colors;
 
-AxisView::AxisView (ARDOUR::Session& sess) : _session(sess)
+AxisView::AxisView (ARDOUR::Session* sess) 
+	: SessionHandlePtr (sess)
 {
 	_selected = false;
 	_marked_for_display = false;

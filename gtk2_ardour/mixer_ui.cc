@@ -64,7 +64,6 @@ using PBD::atoi;
 Mixer_UI::Mixer_UI ()
 	: Window (Gtk::WINDOW_TOPLEVEL)
 {
-	session = 0;
 	_strip_width = Config->get_default_narrow_ms() ? Narrow : Wide;
 	track_menu = 0;
 	route_group_context_menu = 0;
@@ -313,7 +312,7 @@ Mixer_UI::add_strip (RouteList& routes)
 			return;
 		}
 
-		strip = new MixerStrip (*this, *session, route);
+		strip = new MixerStrip (*this, _session, route);
 		strips.push_back (strip);
 
 		Config->get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
@@ -336,7 +335,7 @@ Mixer_UI::add_strip (RouteList& routes)
 
 		route->NameChanged.connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_name_changed), strip));
 
-		strip->GoingAway.connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::remove_strip), strip));
+		scoped_connect (strip->GoingAway, boost::bind (&Mixer_UI::remove_strip, this, strip));
 		strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
 		strip->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 	}
@@ -379,7 +378,7 @@ Mixer_UI::sync_order_keys (string const & src)
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator ri;
 
-	if (src == N_("signal") || !session || (session->state_of_the_state() & (Session::Loading|Session::Deletion)) || rows.empty()) {
+	if (src == N_("signal") || !_session || (_session->state_of_the_state() & (Session::Loading|Session::Deletion)) || rows.empty()) {
 		return;
 	}
 
@@ -452,14 +451,24 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 }
 
 void
-Mixer_UI::connect_to_session (Session* sess)
+Mixer_UI::set_session (Session* sess)
 {
-	session = sess;
+	SessionHandlePtr::set_session (sess);
+
+	if (_plugin_selector) {
+		_plugin_selector->set_session (_session);
+	}
+
+	_group_tabs->set_session (sess);
+
+	if (!_session) {
+		return;
+	}
 
 	XMLNode* node = ARDOUR_UI::instance()->mixer_settings();
 	set_state (*node);
 
-	WindowTitle title(session->name());
+	WindowTitle title(_session->name());
 	title += _("Mixer");
 	title += Glib::get_application_name();
 
@@ -467,30 +476,24 @@ Mixer_UI::connect_to_session (Session* sess)
 
 	initial_track_display ();
 
-	session->GoingAway.connect (sigc::mem_fun(*this, &Mixer_UI::disconnect_from_session));
-	session->RouteAdded.connect (sigc::mem_fun(*this, &Mixer_UI::add_strip));
-	session->route_group_added.connect (sigc::mem_fun(*this, &Mixer_UI::add_route_group));
-	session->route_group_removed.connect (sigc::mem_fun(*this, &Mixer_UI::route_groups_changed));
-	session->config.ParameterChanged.connect (sigc::mem_fun (*this, &Mixer_UI::parameter_changed));
+	_session_connections.add_connection (_session->RouteAdded.connect (boost::bind (&Mixer_UI::add_strip, this, _1)));
+	_session_connections.add_connection (_session->route_group_added.connect (boost::bind (&Mixer_UI::add_route_group, this, _1)));
+	_session_connections.add_connection (_session->route_group_removed.connect (boost::bind (&Mixer_UI::route_groups_changed, this)));
+	_session_connections.add_connection (_session->config.ParameterChanged.connect (boost::bind (&Mixer_UI::parameter_changed, this, _1)));
 
 	route_groups_changed ();
-
-	if (_plugin_selector)
-		_plugin_selector->set_session (session);
 
 	if (_visible) {
 	       show_window();
 	}
 
-	_group_tabs->connect_to_session (sess);
-
 	start_updating ();
 }
 
 void
-Mixer_UI::disconnect_from_session ()
+Mixer_UI::session_going_away ()
 {
-	ENSURE_GUI_THREAD (*this, &Mixer_UI::disconnect_from_session)
+	ENSURE_GUI_THREAD (*this, &Mixer_UI::session_going_away)
 
 	group_model->clear ();
 	_selection.clear ();
@@ -500,6 +503,8 @@ Mixer_UI::disconnect_from_session ()
 	set_title (title.get_string());
 
 	stop_updating ();
+
+	SessionHandlePtr::session_going_away ();
 }
 
 void
@@ -551,7 +556,7 @@ Mixer_UI::stop_updating ()
 void
 Mixer_UI::fast_update_strips ()
 {
-	if (is_mapped () && session) {
+	if (is_mapped () && _session) {
 		for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
 			(*i)->fast_update ();
 		}
@@ -670,7 +675,7 @@ void
 Mixer_UI::track_list_reorder (const TreeModel::Path&, const TreeModel::iterator&, int* /*new_order*/)
 {
 	strip_redisplay_does_not_sync_order_keys = true;
-	session->set_remote_control_ids();
+	_session->set_remote_control_ids();
 	redisplay_track_list ();
 	strip_redisplay_does_not_sync_order_keys = false;
 }
@@ -680,7 +685,7 @@ Mixer_UI::track_list_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel::
 {
 	// never reset order keys because of a property change
 	strip_redisplay_does_not_reset_order_keys = true;
-	session->set_remote_control_ids();
+	_session->set_remote_control_ids();
 	redisplay_track_list ();
 	strip_redisplay_does_not_reset_order_keys = false;
 }
@@ -689,8 +694,10 @@ void
 Mixer_UI::track_list_delete (const Gtk::TreeModel::Path&)
 {
 	/* this could require an order sync */
-	session->set_remote_control_ids();
-	redisplay_track_list ();
+	if (_session && !_session->deletion_in_progress()) {
+		_session->set_remote_control_ids();
+		redisplay_track_list ();
+	}
 }
 
 void
@@ -757,7 +764,7 @@ Mixer_UI::redisplay_track_list ()
 	}
 
 	if (!strip_redisplay_does_not_reset_order_keys && !strip_redisplay_does_not_sync_order_keys) {
-		session->sync_order_keys (N_("signal"));
+		_session->sync_order_keys (N_("signal"));
 	}
 
 	// Resigc::bind all of the midi controls automatically
@@ -887,7 +894,7 @@ struct SignalOrderRouteSorter {
 void
 Mixer_UI::initial_track_display ()
 {
-	boost::shared_ptr<RouteList> routes = session->get_routes();
+	boost::shared_ptr<RouteList> routes = _session->get_routes();
 	RouteList copy (*routes);
 	SignalOrderRouteSorter sorter;
 
@@ -1076,13 +1083,13 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 void
 Mixer_UI::activate_all_route_groups ()
 {
-	session->foreach_route_group (sigc::bind (sigc::mem_fun (*this, &Mixer_UI::set_route_group_activation), true));
+	_session->foreach_route_group (sigc::bind (sigc::mem_fun (*this, &Mixer_UI::set_route_group_activation), true));
 }
 
 void
 Mixer_UI::disable_all_route_groups ()
 {
-	session->foreach_route_group (sigc::bind (sigc::mem_fun (*this, &Mixer_UI::set_route_group_activation), false));
+	_session->foreach_route_group (sigc::bind (sigc::mem_fun (*this, &Mixer_UI::set_route_group_activation), false));
 }
 
 void
@@ -1102,13 +1109,13 @@ Mixer_UI::route_groups_changed ()
 		row[group_columns.group] = 0;
 	}
 
-	session->foreach_route_group (sigc::mem_fun (*this, &Mixer_UI::add_route_group));
+	_session->foreach_route_group (sigc::mem_fun (*this, &Mixer_UI::add_route_group));
 }
 
 void
 Mixer_UI::new_route_group ()
 {
-	session->add_route_group (new RouteGroup (*session, "", RouteGroup::Active, (RouteGroup::Property) (RouteGroup::Gain |RouteGroup::Mute | RouteGroup::Solo)));
+	_session->add_route_group (new RouteGroup (*_session, "", RouteGroup::Active, (RouteGroup::Property) (RouteGroup::Gain |RouteGroup::Mute | RouteGroup::Solo)));
 }
 
 void
@@ -1131,7 +1138,7 @@ Mixer_UI::remove_selected_route_group ()
 		RouteGroup* rg = (*iter)[group_columns.group];
 
 		if (rg) {
-			session->remove_route_group (*rg);
+			_session->remove_route_group (*rg);
 		}
 	}
 }
@@ -1541,7 +1548,7 @@ void
 Mixer_UI::parameter_changed (string const & p)
 {
 	if (p == "show-group-tabs") {
-		bool const s = session->config.get_show_group_tabs ();
+		bool const s = _session->config.get_show_group_tabs ();
 		if (s) {
 			_group_tabs->show ();
 		} else {

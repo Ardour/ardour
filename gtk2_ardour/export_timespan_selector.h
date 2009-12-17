@@ -30,19 +30,20 @@
 #include <boost/shared_ptr.hpp>
 
 #include "ardour/types.h"
+#include "ardour/session_handle.h"
 #include "ardour/export_profile_manager.h"
 
 namespace ARDOUR {
 	class Location;
 	class ExportTimespan;
 	class ExportHandler;
-	class Session;
 }
 
 using ARDOUR::CDMarkerFormat;
 
 /// Timespan Selector base
-class ExportTimespanSelector : public Gtk::VBox {
+class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
+{
   protected:
 	typedef std::list<ARDOUR::Location *> LocationList;
 	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
@@ -65,7 +66,6 @@ class ExportTimespanSelector : public Gtk::VBox {
 
   protected:
 
-	ARDOUR::Session * session;
 	ProfileManagerPtr manager;
 	TimespanStatePtr  state;
 

@@ -54,15 +54,18 @@ EditorSummary::EditorSummary (Editor* e)
  *  @param s Session.
  */
 void
-EditorSummary::connect_to_session (Session* s)
+EditorSummary::set_session (Session* s)
 {
-	EditorComponent::connect_to_session (s);
+	EditorComponent::set_session (s);
 
 	Region::RegionPropertyChanged.connect (sigc::hide (sigc::mem_fun (*this, &EditorSummary::set_dirty)));
 
-	_session_connections.push_back (_session->RegionRemoved.connect (sigc::hide (sigc::mem_fun (*this, &EditorSummary::set_dirty))));
-	_session_connections.push_back (_session->StartTimeChanged.connect (sigc::mem_fun (*this, &EditorSummary::set_dirty)));
-	_session_connections.push_back (_session->EndTimeChanged.connect (sigc::mem_fun (*this, &EditorSummary::set_dirty)));
+	if (_session) {
+		_session_connections.add_connection (_session->RegionRemoved.connect (boost::bind (&EditorSummary::set_dirty, this)));
+		_session_connections.add_connection (_session->StartTimeChanged.connect (boost::bind (&EditorSummary::set_dirty, this)));
+		_session_connections.add_connection (_session->EndTimeChanged.connect (boost::bind (&EditorSummary::set_dirty, this)));
+	}
+
 	_editor->playhead_cursor->PositionChanged.connect (sigc::mem_fun (*this, &EditorSummary::playhead_position_changed));
 
 	set_dirty ();

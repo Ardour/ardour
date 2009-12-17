@@ -163,7 +163,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	void flush_processors ();
 
-	void foreach_processor (sigc::slot<void, boost::weak_ptr<Processor> > method) {
+	void foreach_processor (boost::function<void(boost::weak_ptr<Processor>)> method) {
 		Glib::RWLock::ReaderLock lm (_processor_lock);
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			method (boost::weak_ptr<Processor> (*i));
@@ -227,28 +227,28 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	void set_user_latency (nframes_t);
 	nframes_t initial_delay() const { return _initial_delay; }
 
-	sigc::signal<void>       active_changed;
-	sigc::signal<void>       phase_invert_changed;
-	sigc::signal<void>       denormal_protection_changed;
-	sigc::signal<void,void*> listen_changed;
-	sigc::signal<void,void*> solo_changed;
-	sigc::signal<void,void*> solo_safe_changed;
-	sigc::signal<void,void*> solo_isolated_changed;
-	sigc::signal<void,void*> comment_changed;
-	sigc::signal<void,void*> mute_changed;
-	sigc::signal<void>       mute_points_changed;
+	boost::signals2::signal<void()>       active_changed;
+	boost::signals2::signal<void()>       phase_invert_changed;
+	boost::signals2::signal<void()>       denormal_protection_changed;
+	boost::signals2::signal<void(void*)> listen_changed;
+	boost::signals2::signal<void(void*)> solo_changed;
+	boost::signals2::signal<void(void*)> solo_safe_changed;
+	boost::signals2::signal<void(void*)> solo_isolated_changed;
+	boost::signals2::signal<void(void*)> comment_changed;
+	boost::signals2::signal<void(void*)> mute_changed;
+	boost::signals2::signal<void()>       mute_points_changed;
 
 	/** the processors have changed; the parameter indicates what changed */
-	sigc::signal<void, RouteProcessorChange> processors_changed;
-	sigc::signal<void,void*> record_enable_changed;
+	boost::signals2::signal<void(RouteProcessorChange)> processors_changed;
+	boost::signals2::signal<void(void*)> record_enable_changed;
 	/** the metering point has changed */
-	sigc::signal<void,void*> meter_change; 
-	sigc::signal<void>       signal_latency_changed;
-	sigc::signal<void>       initial_delay_changed;
+	boost::signals2::signal<void(void*)> meter_change; 
+	boost::signals2::signal<void()>       signal_latency_changed;
+	boost::signals2::signal<void()>       initial_delay_changed;
 
 	/* gui's call this for their own purposes. */
 
-	sigc::signal<void,std::string,void*> gui_changed;
+	boost::signals2::signal<void(std::string,void*)> gui_changed;
 
 	/* stateful */
 
@@ -261,7 +261,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	int save_as_template (const std::string& path, const std::string& name);
 
-	sigc::signal<void,void*> SelectedChanged;
+	boost::signals2::signal<void(void*)> SelectedChanged;
 
 	int listen_via (boost::shared_ptr<Route>, Placement p, bool active, bool aux);
 	void drop_listen (boost::shared_ptr<Route>);
@@ -306,10 +306,10 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	void set_remote_control_id (uint32_t id);
 	uint32_t remote_control_id () const;
-	sigc::signal<void> RemoteControlIDChanged;
+	boost::signals2::signal<void()> RemoteControlIDChanged;
 
 	void sync_order_keys (std::string const &);
-	static sigc::signal<void, std::string const &> SyncOrderKeys;
+	static boost::signals2::signal<void(std::string const &)> SyncOrderKeys;
 
   protected:
 	friend class Session;
@@ -379,8 +379,6 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	void silence (nframes_t nframes);
 
-	sigc::connection input_signal_connection;
-
 	ChanCount processor_max_streams;
 	uint32_t _remote_control_id;
 
@@ -391,7 +389,6 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	boost::shared_ptr<Amp>       _amp;
 	boost::shared_ptr<PeakMeter> _meter;
-	sigc::connection _meter_connection;
 
   private:
 	void init ();

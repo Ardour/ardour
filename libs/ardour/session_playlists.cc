@@ -16,6 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#include <vector>
 
 #include "pbd/xml++.h"
 #include "pbd/compose.h"
@@ -73,7 +74,7 @@ SessionPlaylists::add (boost::shared_ptr<Playlist> playlist)
 
 	if (!existing) {
 		playlists.insert (playlists.begin(), playlist);
-		playlist->InUse.connect (sigc::bind (sigc::mem_fun (*this, &SessionPlaylists::track), boost::weak_ptr<Playlist>(playlist)));
+		scoped_connect (playlist->InUse, boost::bind (&SessionPlaylists::track, this, _1, boost::weak_ptr<Playlist>(playlist)));
 	}
 
 	return existing;
@@ -265,7 +266,7 @@ SessionPlaylists::add_state (XMLNode* node, bool full_state)
 
 /** @return true for `stop cleanup', otherwise false */
 bool
-SessionPlaylists::maybe_delete_unused (sigc::signal<int, boost::shared_ptr<Playlist> > ask)
+SessionPlaylists::maybe_delete_unused (boost::function<int(boost::shared_ptr<Playlist>)> ask)
 {
 	vector<boost::shared_ptr<Playlist> > playlists_tbd;
 

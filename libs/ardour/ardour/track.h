@@ -43,7 +43,7 @@ class Track : public Route
 	TrackMode mode () const { return _mode; }
 	virtual int set_mode (TrackMode /*m*/) { return false; }
 	virtual bool can_use_mode (TrackMode /*m*/, bool& /*bounce_required*/) { return false; }
-	sigc::signal<void> TrackModeChanged;
+	boost::signals2::signal<void()> TrackModeChanged;
 
 	virtual int no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 			bool state_changing, bool can_record, bool rec_monitors_input);
@@ -90,8 +90,8 @@ class Track : public Route
 	bool record_enabled() const;
 	void set_record_enable (bool yn, void *src);
 
-	sigc::signal<void> DiskstreamChanged;
-	sigc::signal<void> FreezeChange;
+	boost::signals2::signal<void()> DiskstreamChanged;
+	boost::signals2::signal<void()> FreezeChange;
 
   protected:
 	Track (Session& sess, const XMLNode& node, DataType default_type = DataType::AUDIO);
@@ -141,7 +141,7 @@ class Track : public Route
 
 	FreezeRecord          _freeze_record;
 	XMLNode*              pending_state;
-	sigc::connection      recenable_connection;
+	boost::signals2::scoped_connection  recenable_connection;
 	bool                  _destructive;
 
 	boost::shared_ptr<RecEnableControllable> _rec_enable_control;

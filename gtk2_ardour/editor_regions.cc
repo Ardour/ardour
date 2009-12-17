@@ -130,13 +130,15 @@ EditorRegions::EditorRegions (Editor* e)
 }
 
 void
-EditorRegions::connect_to_session (ARDOUR::Session* s)
+EditorRegions::set_session (ARDOUR::Session* s)
 {
-	EditorComponent::connect_to_session (s);
+	EditorComponent::set_session (s);
 
-	_session_connections.push_back (_session->RegionsAdded.connect (sigc::mem_fun(*this, &EditorRegions::handle_new_regions)));
-	_session_connections.push_back (_session->RegionRemoved.connect (sigc::mem_fun(*this, &EditorRegions::handle_region_removed)));
-	_session_connections.push_back (_session->RegionHiddenChange.connect (sigc::mem_fun(*this, &EditorRegions::region_hidden)));
+	if (_session) {
+		_session_connections.add_connection (_session->RegionsAdded.connect (boost::bind (&EditorRegions::handle_new_regions, this, _1)));
+		_session_connections.add_connection (_session->RegionRemoved.connect (boost::bind (&EditorRegions::handle_region_removed, this, _1)));
+		_session_connections.add_connection (_session->RegionHiddenChange.connect (boost::bind (&EditorRegions::region_hidden, this, _1)));
+	}
 
 	redisplay ();
 }

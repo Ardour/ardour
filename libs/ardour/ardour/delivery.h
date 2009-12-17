@@ -20,6 +20,7 @@
 #define __ardour_delivery_h__
 
 #include <string>
+
 #include "ardour/types.h"
 #include "ardour/chan_count.h"
 #include "ardour/io_processor.h"
@@ -31,7 +32,8 @@ class IO;
 class MuteMaster;
 class Panner;
 
-class Delivery : public IOProcessor {
+class Delivery : public IOProcessor
+{
 public:
 	enum Role {
 		/* main outputs - delivers out-of-place to port buffers, and cannot be removed */
@@ -83,9 +85,9 @@ public:
 
 	BufferSet& output_buffers() { return *_output_buffers; }
 
-	sigc::signal<void> MuteChange;
+	boost::signals2::signal<void()> MuteChange;
 
-	static sigc::signal<void,nframes_t> CycleStart;
+	static boost::signals2::signal<void(nframes_t)> CycleStart;
 
 	XMLNode& state (bool full);
 	int set_state (const XMLNode&, int version);
@@ -118,10 +120,10 @@ public:
 	boost::shared_ptr<Panner> _panner;
 
 	static bool panners_legal;
-	static sigc::signal<int>            PannersLegal;
+	static boost::signals2::signal<int()>            PannersLegal;
 
 	int panners_became_legal ();
-	sigc::connection panner_legal_c;
+	boost::signals2::scoped_connection panner_legal_c;
 	void output_changed (IOChange, void*);
 
 	gain_t target_gain ();

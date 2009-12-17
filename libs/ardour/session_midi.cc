@@ -208,39 +208,26 @@ Session::set_mmc_port (string port_tag)
 		mmc->set_send_device_id (old_send_device_id);
 	}
 
-	mmc->Play.connect
-		(sigc::mem_fun (*this, &Session::mmc_deferred_play));
-	mmc->DeferredPlay.connect
-		(sigc::mem_fun (*this, &Session::mmc_deferred_play));
-	mmc->Stop.connect
-		(sigc::mem_fun (*this, &Session::mmc_stop));
-	mmc->FastForward.connect
-		(sigc::mem_fun (*this, &Session::mmc_fast_forward));
-	mmc->Rewind.connect
-		(sigc::mem_fun (*this, &Session::mmc_rewind));
-	mmc->Pause.connect
-		(sigc::mem_fun (*this, &Session::mmc_pause));
-	mmc->RecordPause.connect
-		(sigc::mem_fun (*this, &Session::mmc_record_pause));
-	mmc->RecordStrobe.connect
-		(sigc::mem_fun (*this, &Session::mmc_record_strobe));
-	mmc->RecordExit.connect
-		(sigc::mem_fun (*this, &Session::mmc_record_exit));
-	mmc->Locate.connect
-		(sigc::mem_fun (*this, &Session::mmc_locate));
-	mmc->Step.connect
-		(sigc::mem_fun (*this, &Session::mmc_step));
-	mmc->Shuttle.connect
-		(sigc::mem_fun (*this, &Session::mmc_shuttle));
-	mmc->TrackRecordStatusChange.connect
-		(sigc::mem_fun (*this, &Session::mmc_record_enable));
+	scoped_connect (mmc->Play, boost::bind (&Session::mmc_deferred_play, this, _1));
+	scoped_connect (mmc->DeferredPlay, boost::bind (&Session::mmc_deferred_play, this, _1));
+	scoped_connect (mmc->Stop, boost::bind (&Session::mmc_stop, this, _1));
+	scoped_connect (mmc->FastForward, boost::bind (&Session::mmc_fast_forward, this, _1));
+	scoped_connect (mmc->Rewind, boost::bind (&Session::mmc_rewind, this, _1));
+	scoped_connect (mmc->Pause, boost::bind (&Session::mmc_pause, this, _1));
+	scoped_connect (mmc->RecordPause, boost::bind (&Session::mmc_record_pause, this, _1));
+	scoped_connect (mmc->RecordStrobe, boost::bind (&Session::mmc_record_strobe, this, _1));
+	scoped_connect (mmc->RecordExit, boost::bind (&Session::mmc_record_exit, this, _1));
+	scoped_connect (mmc->Locate, boost::bind (&Session::mmc_locate, this, _1, _2));
+	scoped_connect (mmc->Step, boost::bind (&Session::mmc_step, this, _1, _2));
+	scoped_connect (mmc->Shuttle, boost::bind (&Session::mmc_shuttle, this, _1, _2, _3));
+	scoped_connect (mmc->TrackRecordStatusChange, boost::bind (&Session::mmc_record_enable, this, _1, _2, _3));
 
 
 	/* also handle MIDI SPP because its so common */
 
-	_mmc_port->input()->start.connect (sigc::mem_fun (*this, &Session::spp_start));
-	_mmc_port->input()->contineu.connect (sigc::mem_fun (*this, &Session::spp_continue));
-	_mmc_port->input()->stop.connect (sigc::mem_fun (*this, &Session::spp_stop));
+	scoped_connect (_mmc_port->input()->start, boost::bind (&Session::spp_start, this, _1, _2));
+	scoped_connect (_mmc_port->input()->contineu, boost::bind (&Session::spp_continue, this, _1, _2));
+	scoped_connect (_mmc_port->input()->stop, boost::bind (&Session::spp_stop, this, _1, _2));
 
 	Config->set_mmc_port_name (port_tag);
 

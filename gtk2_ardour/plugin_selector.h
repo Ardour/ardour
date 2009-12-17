@@ -26,6 +26,7 @@
 #include <gtkmm2ext/selector.h>
 
 #include "ardour/plugin.h"
+#include "ardour/session_handle.h"
 #include "plugin_interest.h"
 
 namespace ARDOUR {
@@ -43,7 +44,6 @@ class PluginSelector : public ArdourDialog
 
 	int run (); // XXX should we try not to overload the non-virtual Gtk::Dialog::run() ?
 
-	void set_session (ARDOUR::Session*);
 	void on_show ();
 
 	Gtk::Menu* plugin_menu ();
@@ -52,7 +52,6 @@ class PluginSelector : public ArdourDialog
   private:
 	PluginInterestedObject* interested_object;
 
-	ARDOUR::Session* session;
 	Gtk::ScrolledWindow scroller;   // Available plugins
 	Gtk::ScrolledWindow ascroller;  // Added plugins
 

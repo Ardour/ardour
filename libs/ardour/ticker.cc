@@ -27,35 +27,35 @@
 using namespace std;
 #endif
 
-namespace ARDOUR
-{
+using namespace ARDOUR;
 
-
-void Ticker::set_session(Session& s)
+void Ticker::set_session (Session* s)
 {
-	 _session = &s;
+	SessionHandlePtr::set_session (s);
+
+	if (_session) {
+		_session_connections.add_connection (_session->tick.connect (boost::bind (&Ticker::tick, this, _1, _2, _3)));
+	}
+}
+
+void MidiClockTicker::set_session (Session* s)
+{
+	 Ticker::set_session (s);
 
 	 if (_session) {
-		 _session->tick.connect(sigc::mem_fun (*this, &Ticker::tick));
-		 _session->GoingAway.connect(sigc::mem_fun (*this, &Ticker::going_away));
+		 _session_connections.add_connection (_session->MIDIClock_PortChanged.connect (boost::bind (&MidiClockTicker::update_midi_clock_port, this)));
+		 _session_connections.add_connection (_session->TransportStateChange.connect (boost::bind (&MidiClockTicker::transport_state_changed, this)));
+		 _session_connections.add_connection (_session->PositionChanged.connect (boost::bind (&MidiClockTicker::position_changed, this, _1)));
+		 _session_connections.add_connection (_session->TransportLooped.connect (boost::bind (&MidiClockTicker::transport_looped, this)));
+		 update_midi_clock_port();
 	 }
 }
 
-void MidiClockTicker::set_session(Session& s)
+void
+MidiClockTicker::session_going_away ()
 {
-	 Ticker::set_session(s);
-
-	 if (_session) {
-		 _session->MIDIClock_PortChanged.connect(
-				 sigc::mem_fun (*this, &MidiClockTicker::update_midi_clock_port));
-		 _session->TransportStateChange.connect(
-				 sigc::mem_fun (*this, &MidiClockTicker::transport_state_changed));
-		 _session->PositionChanged.connect(
-				 sigc::mem_fun (*this, &MidiClockTicker::position_changed));
-		 _session->TransportLooped.connect(
-				 sigc::mem_fun (*this, &MidiClockTicker::transport_looped));
-		 update_midi_clock_port();
-	 }
+	SessionHandlePtr::session_going_away(); 
+	_midi_port = 0; 
 }
 
 void MidiClockTicker::update_midi_clock_port()
@@ -225,5 +225,5 @@ void MidiClockTicker::send_stop_event(nframes_t offset)
 	_midi_port->write(_midi_clock_tick, 1, offset);
 }
 
-}
+
 

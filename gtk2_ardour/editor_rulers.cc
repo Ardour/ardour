@@ -215,7 +215,7 @@ Editor::ruler_scroll (GdkEventScroll* event)
 gint
 Editor::ruler_button_press (GdkEventButton* ev)
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return FALSE;
 	}
 
@@ -241,8 +241,8 @@ Editor::ruler_button_press (GdkEventButton* ev)
 	if (ev->button == 1) {
 		// Since we will locate the playhead on button release, cancel any running
 		// auditions.
-		if (session->is_auditioning()) {
-			session->cancel_audition ();
+		if (_session->is_auditioning()) {
+			_session->cancel_audition ();
 		}
 
 		/* playhead cursor */
@@ -258,7 +258,7 @@ Editor::ruler_button_press (GdkEventButton* ev)
 gint
 Editor::ruler_button_release (GdkEventButton* ev)
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return FALSE;
 	}
 
@@ -308,7 +308,7 @@ Editor::ruler_label_button_release (GdkEventButton* ev)
 gint
 Editor::ruler_mouse_motion (GdkEventMotion* ev)
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return FALSE;
 	}
 
@@ -443,15 +443,15 @@ Editor::store_ruler_visibility ()
 	node->add_property (X_("transportmarker"), ruler_loop_punch_action->get_active() ? "yes": "no");
 	node->add_property (X_("cdmarker"), ruler_cd_marker_action->get_active() ? "yes": "no");
 
-	session->add_extra_xml (*node);
-	session->set_dirty ();
+	_session->add_extra_xml (*node);
+	_session->set_dirty ();
 }
 
 void
 Editor::restore_ruler_visibility ()
 {
 	XMLProperty* prop;
-	XMLNode * node = session->extra_xml (X_("RulerVisibility"));
+	XMLNode * node = _session->extra_xml (X_("RulerVisibility"));
 
 	no_ruler_shown_update = true;
 
@@ -529,11 +529,11 @@ Editor::restore_ruler_visibility ()
 			}
 
 		} else {
-			// this session doesn't yet know about the cdmarker ruler
+			// this _session doesn't yet know about the cdmarker ruler
 			// as a benefit to the user who doesn't know the feature exists, show the ruler if
 			// any cd marks exist
 			ruler_cd_marker_action->set_active (false);
-			const Locations::LocationList & locs = session->locations()->list();
+			const Locations::LocationList & locs = _session->locations()->list();
 			for (Locations::LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
 				if ((*i)->is_cd_marker()) {
 					ruler_cd_marker_action->set_active (true);
@@ -774,7 +774,7 @@ Editor::update_just_timecode ()
 {
 	ENSURE_GUI_THREAD (*this, &Editor::update_just_timecode)
 
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 
@@ -782,14 +782,14 @@ Editor::update_just_timecode ()
 
 	if (ruler_timecode_action->get_active()) {
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_timecode_ruler), leftmost_frame, rightmost_frame,
-					    leftmost_frame, session->current_end_frame());
+					    leftmost_frame, _session->current_end_frame());
 	}
 }
 
 void
 Editor::compute_fixed_ruler_scale ()
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 
@@ -807,7 +807,7 @@ Editor::update_fixed_rulers ()
 {
 	nframes64_t rightmost_frame;
 
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 
@@ -823,24 +823,24 @@ Editor::update_fixed_rulers ()
 
 	if (ruler_timecode_action->get_active()) {
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_timecode_ruler), leftmost_frame, rightmost_frame,
-					    leftmost_frame, session->current_end_frame());
+					    leftmost_frame, _session->current_end_frame());
 	}
 
 	if (ruler_samples_action->get_active()) {
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_frames_ruler), leftmost_frame, rightmost_frame,
-					    leftmost_frame, session->current_end_frame());
+					    leftmost_frame, _session->current_end_frame());
 	}
 
 	if (ruler_minsec_action->get_active()) {
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_minsec_ruler), leftmost_frame, rightmost_frame,
-					    leftmost_frame, session->current_end_frame());
+					    leftmost_frame, _session->current_end_frame());
 	}
 }
 
 void
 Editor::update_tempo_based_rulers ()
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 
@@ -848,7 +848,7 @@ Editor::update_tempo_based_rulers ()
 
 	if (ruler_bbt_action->get_active()) {
 		gtk_custom_ruler_set_range (GTK_CUSTOM_RULER(_bbt_ruler), leftmost_frame, leftmost_frame+current_page_frames(),
-					    leftmost_frame, session->current_end_frame());
+					    leftmost_frame, _session->current_end_frame());
 	}
 }
 
@@ -885,11 +885,11 @@ Editor::set_timecode_ruler_scale (gdouble lower, gdouble upper)
 	nframes64_t spacer;
 	nframes64_t fr;
 
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 
-	fr = session->frame_rate();
+	fr = _session->frame_rate();
 
 	if (lower > (spacer = (nframes64_t)(128 * Editor::get_current_zoom ()))) {
 		lower = lower - spacer;
@@ -899,26 +899,26 @@ Editor::set_timecode_ruler_scale (gdouble lower, gdouble upper)
 	upper = upper + spacer;
 	range = (nframes64_t) floor (upper - lower);
 
-	if (range < (2 * session->frames_per_timecode_frame())) { /* 0 - 2 frames */
+	if (range < (2 * _session->frames_per_timecode_frame())) { /* 0 - 2 frames */
 		timecode_ruler_scale = timecode_show_bits;
 		timecode_mark_modulo = 20;
-		timecode_nmarks = 2 + (2 * session->config.get_subframes_per_frame());
+		timecode_nmarks = 2 + (2 * _session->config.get_subframes_per_frame());
 	} else if (range <= (fr / 4)) { /* 2 frames - 0.250 second */
 		timecode_ruler_scale = timecode_show_frames;
 		timecode_mark_modulo = 1;
-		timecode_nmarks = 2 + (range / (nframes64_t)session->frames_per_timecode_frame());
+		timecode_nmarks = 2 + (range / (nframes64_t)_session->frames_per_timecode_frame());
 	} else if (range <= (fr / 2)) { /* 0.25-0.5 second */
 		timecode_ruler_scale = timecode_show_frames;
 		timecode_mark_modulo = 2;
-		timecode_nmarks = 2 + (range / (nframes64_t)session->frames_per_timecode_frame());
+		timecode_nmarks = 2 + (range / (nframes64_t)_session->frames_per_timecode_frame());
 	} else if (range <= fr) { /* 0.5-1 second */
 		timecode_ruler_scale = timecode_show_frames;
 		timecode_mark_modulo = 5;
-		timecode_nmarks = 2 + (range / (nframes64_t)session->frames_per_timecode_frame());
+		timecode_nmarks = 2 + (range / (nframes64_t)_session->frames_per_timecode_frame());
 	} else if (range <= 2 * fr) { /* 1-2 seconds */
 		timecode_ruler_scale = timecode_show_frames;
 		timecode_mark_modulo = 10;
-		timecode_nmarks = 2 + (range / (nframes64_t)session->frames_per_timecode_frame());
+		timecode_nmarks = 2 + (range / (nframes64_t)_session->frames_per_timecode_frame());
 	} else if (range <= 8 * fr) { /* 2-8 seconds */
 		timecode_ruler_scale = timecode_show_seconds;
 		timecode_mark_modulo = 1;
@@ -987,7 +987,7 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 	gchar buf[16];
 	gint n;
 
-	if (session == 0) {
+	if (_session == 0) {
 		return 0;
 	}
 
@@ -1004,10 +1004,10 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 	case timecode_show_bits:
 
 		// Find timecode time of this sample (pos) with subframe accuracy
-		session->sample_to_timecode(pos, timecode, true /* use_offset */, true /* use_subframes */ );
+		_session->sample_to_timecode(pos, timecode, true /* use_offset */, true /* use_subframes */ );
 
 		for (n = 0; n < timecode_nmarks; n++) {
-			session->timecode_to_sample(timecode, pos, true /* use_offset */, true /* use_subframes */ );
+			_session->timecode_to_sample(timecode, pos, true /* use_offset */, true /* use_subframes */ );
 			if ((timecode.subframes % timecode_mark_modulo) == 0) {
 				if (timecode.subframes == 0) {
 					(*marks)[n].style = GtkCustomRulerMarkMajor;
@@ -1025,17 +1025,17 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 			(*marks)[n].position = pos;
 
 			// Increment subframes by one
-			Timecode::increment_subframes( timecode, session->config.get_subframes_per_frame() );
+			Timecode::increment_subframes( timecode, _session->config.get_subframes_per_frame() );
 		}
 	  break;
 	case timecode_show_seconds:
 		// Find timecode time of this sample (pos)
-		session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
+		_session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole second down
 		Timecode::seconds_floor( timecode );
 
 		for (n = 0; n < timecode_nmarks; n++) {
-			session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
+			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((timecode.seconds % timecode_mark_modulo) == 0) {
 				if (timecode.seconds == 0) {
 					(*marks)[n].style = GtkCustomRulerMarkMajor;
@@ -1052,17 +1052,17 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 
 			}
 			(*marks)[n].label = g_strdup (buf);
-			Timecode::increment_seconds( timecode, session->config.get_subframes_per_frame() );
+			Timecode::increment_seconds( timecode, _session->config.get_subframes_per_frame() );
 		}
 	  break;
 	case timecode_show_minutes:
 		// Find timecode time of this sample (pos)
-		session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
+		_session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole minute down
 		Timecode::minutes_floor( timecode );
 
 		for (n = 0; n < timecode_nmarks; n++) {
-			session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
+			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((timecode.minutes % timecode_mark_modulo) == 0) {
 				if (timecode.minutes == 0) {
 					(*marks)[n].style = GtkCustomRulerMarkMajor;
@@ -1077,18 +1077,18 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 			}
 			(*marks)[n].label = g_strdup (buf);
 			(*marks)[n].position = pos;
-			Timecode::increment_minutes( timecode, session->config.get_subframes_per_frame() );
+			Timecode::increment_minutes( timecode, _session->config.get_subframes_per_frame() );
 		}
 
 	  break;
 	case timecode_show_hours:
 		// Find timecode time of this sample (pos)
-		session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
+		_session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole hour down
 		Timecode::hours_floor( timecode );
 
 		for (n = 0; n < timecode_nmarks; n++) {
-			session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
+			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((timecode.hours % timecode_mark_modulo) == 0) {
 				(*marks)[n].style = GtkCustomRulerMarkMajor;
 				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
@@ -1100,17 +1100,17 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 			(*marks)[n].label = g_strdup (buf);
 			(*marks)[n].position = pos;
 
-			Timecode::increment_hours( timecode, session->config.get_subframes_per_frame() );
+			Timecode::increment_hours( timecode, _session->config.get_subframes_per_frame() );
 		}
 	  break;
 	case timecode_show_frames:
 		// Find timecode time of this sample (pos)
-		session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
+		_session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole frame down
 		Timecode::frames_floor( timecode );
 
 		for (n = 0; n < timecode_nmarks; n++) {
-			session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
+			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((timecode.frames % timecode_mark_modulo) == 0)  {
 				if (timecode.frames == 0) {
 				  (*marks)[n].style = GtkCustomRulerMarkMajor;
@@ -1126,7 +1126,7 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 
 			}
 			(*marks)[n].label = g_strdup (buf);
-			Timecode::increment( timecode, session->config.get_subframes_per_frame() );
+			Timecode::increment( timecode, _session->config.get_subframes_per_frame() );
 		}
 
 	  break;
@@ -1139,14 +1139,14 @@ Editor::metric_get_timecode (GtkCustomRulerMark **marks, gdouble lower, gdouble 
 void
 Editor::compute_bbt_ruler_scale (nframes64_t lower, nframes64_t upper)
 {
-        if (session == 0) {
+        if (_session == 0) {
                 return;
         }
 	TempoMap::BBTPointList::iterator i;
         BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
 
-        session->bbt_time((jack_nframes_t) lower, lower_beat);
-        session->bbt_time((jack_nframes_t) upper, upper_beat);
+        _session->bbt_time((jack_nframes_t) lower, lower_beat);
+        _session->bbt_time((jack_nframes_t) upper, upper_beat);
         uint32_t beats = 0;
 
 	bbt_accent_modulo = 1;
@@ -1224,7 +1224,7 @@ Editor::compute_bbt_ruler_scale (nframes64_t lower, nframes64_t upper)
 gint
 Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upper*/, gint /*maxchars*/)
 {
-        if (session == 0) {
+        if (_session == 0) {
                 return 0;
         }
 
@@ -1341,9 +1341,9 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 				  next_beat.beats = 1;
 			}
 
-			next_beat_pos = session->tempo_map().frame_time(next_beat);
+			next_beat_pos = _session->tempo_map().frame_time(next_beat);
 
-			frame_skip = (nframes64_t) floor (frame_skip_error = (session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
+			frame_skip = (nframes64_t) floor (frame_skip_error = (_session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
 			frame_skip_error -= frame_skip;
 			skip = (uint32_t) (Meter::ticks_per_beat / bbt_beat_subdivision);
 
@@ -1433,9 +1433,9 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 				  next_beat.beats = 1;
 			}
 
-			next_beat_pos = session->tempo_map().frame_time(next_beat);
+			next_beat_pos = _session->tempo_map().frame_time(next_beat);
 
-			frame_skip = (nframes64_t) floor (frame_skip_error = (session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
+			frame_skip = (nframes64_t) floor (frame_skip_error = (_session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
 			frame_skip_error -= frame_skip;
 			skip = (uint32_t) (Meter::ticks_per_beat / bbt_beat_subdivision);
 
@@ -1530,9 +1530,9 @@ Editor::metric_get_bbt (GtkCustomRulerMark **marks, gdouble lower, gdouble /*upp
 				  next_beat.beats = 1;
 			}
 
-			next_beat_pos = session->tempo_map().frame_time(next_beat);
+			next_beat_pos = _session->tempo_map().frame_time(next_beat);
 
-			frame_skip = (nframes64_t) floor (frame_skip_error = (session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
+			frame_skip = (nframes64_t) floor (frame_skip_error = (_session->frame_rate() *  60) / (bbt_beat_subdivision * (*i).tempo->beats_per_minute()));
 			frame_skip_error -= frame_skip;
 			skip = (uint32_t) (Meter::ticks_per_beat / bbt_beat_subdivision);
 
@@ -1704,15 +1704,15 @@ Editor::metric_get_frames (GtkCustomRulerMark **marks, gdouble lower, gdouble up
 	gint nmarks;
 	gint n;
 
-	if (session == 0) {
+	if (_session == 0) {
 		return 0;
 	}
 
 	mark_interval = (iupper - ilower) / 5;
-	if (mark_interval > session->frame_rate()) {
-		mark_interval -= mark_interval % session->frame_rate();
+	if (mark_interval > _session->frame_rate()) {
+		mark_interval -= mark_interval % _session->frame_rate();
 	} else {
-		mark_interval = session->frame_rate() / (session->frame_rate() / mark_interval ) ;
+		mark_interval = _session->frame_rate() / (_session->frame_rate() / mark_interval ) ;
 	}
 	nmarks = 5;
 	*marks = (GtkCustomRulerMark *) g_malloc (sizeof(GtkCustomRulerMark) * nmarks);
@@ -1765,11 +1765,11 @@ Editor::set_minsec_ruler_scale (gdouble lower, gdouble upper)
 	nframes64_t fr;
 	nframes64_t spacer;
 
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 
-	fr = session->frame_rate();
+	fr = _session->frame_rate();
 
 	/* to prevent 'flashing' */
 	if (lower > (spacer = (nframes64_t)(128 * Editor::get_current_zoom ()))) {
@@ -1866,7 +1866,7 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*
 	gchar buf[16];
 	gint n;
 
-	if (session == 0) {
+	if (_session == 0) {
 		return 0;
 	}
 
@@ -1882,7 +1882,7 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*
 	switch (minsec_ruler_scale) {
 	case minsec_show_seconds:
 		for (n = 0; n < minsec_nmarks; pos += minsec_mark_interval, ++n) {
-                	sample_to_clock_parts (pos, session->frame_rate(), &hrs, &mins, &secs, &millisecs);
+                	sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
               	  	if (secs % minsec_mark_modulo == 0) {
 				if (secs == 0) {
 					(*marks)[n].style = GtkCustomRulerMarkMajor;
@@ -1900,7 +1900,7 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*
 	  break;
 	case minsec_show_minutes:
 		for (n = 0; n < minsec_nmarks; pos += minsec_mark_interval, ++n) {
-                        sample_to_clock_parts (pos, session->frame_rate(), &hrs, &mins, &secs, &millisecs);
+                        sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
                         if (mins % minsec_mark_modulo == 0) {
                                 if (mins == 0) {
                                         (*marks)[n].style = GtkCustomRulerMarkMajor;
@@ -1918,7 +1918,7 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*
 	  break;
 	case minsec_show_hours:
 		 for (n = 0; n < minsec_nmarks; pos += minsec_mark_interval, ++n) {
-                        sample_to_clock_parts (pos, session->frame_rate(), &hrs, &mins, &secs, &millisecs);
+                        sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
                         if (hrs % minsec_mark_modulo == 0) {
                                 (*marks)[n].style = GtkCustomRulerMarkMajor;
                                 snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld.%03ld", hrs, mins, secs, millisecs);
@@ -1932,7 +1932,7 @@ Editor::metric_get_minsec (GtkCustomRulerMark **marks, gdouble lower, gdouble /*
 	      break;
 	case minsec_show_frames:
 		for (n = 0; n < minsec_nmarks; pos += minsec_mark_interval, ++n) {
-			sample_to_clock_parts (pos, session->frame_rate(), &hrs, &mins, &secs, &millisecs);
+			sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
 			if (millisecs % minsec_mark_modulo == 0) {
 				if (secs == 0) {
 					(*marks)[n].style = GtkCustomRulerMarkMajor;

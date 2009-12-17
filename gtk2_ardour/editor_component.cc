@@ -17,33 +17,10 @@
 
 */
 
-#include "ardour/session.h"
 #include "editor_component.h"
 
-using namespace std;
-using namespace ARDOUR;
-
 EditorComponent::EditorComponent (Editor* e)
-	: _editor (e),
-	  _session (0)
+	: _editor (e)
 {
-
 }
 
-void
-EditorComponent::connect_to_session (Session* s)
-{
-	_session = s;
-
-	_session_connections.push_back (_session->GoingAway.connect (sigc::mem_fun (*this, &EditorComponent::session_going_away)));
-}
-
-void
-EditorComponent::session_going_away ()
-{
-	for (list<sigc::connection>::iterator i = _session_connections.begin(); i != _session_connections.end(); ++i) {
-		i->disconnect ();
-	}
-
-	_session = 0;
-}

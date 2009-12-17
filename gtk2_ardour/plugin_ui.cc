@@ -415,8 +415,8 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	plugin_analysis_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &PlugUIBase::toggle_plugin_analysis));
 	plugin_analysis_expander.set_expanded(false);
-
-	insert->GoingAway.connect (sigc::mem_fun (*this, &PlugUIBase::plugin_going_away));
+	
+	death_connection = insert->GoingAway.connect (sigc::mem_fun (*this, &PlugUIBase::plugin_going_away));
 }
 
 PlugUIBase::~PlugUIBase()
@@ -430,6 +430,7 @@ PlugUIBase::plugin_going_away ()
 	/* drop references to the plugin/insert */
 	insert.reset ();
 	plugin.reset ();
+	death_connection.disconnect ();
 }
 
 void

@@ -268,7 +268,6 @@ Editor::Editor ()
 
 	PublicEditor::_instance = this;
 
-	session = 0;
 	_have_idled = false;
 
 	selection = new Selection (this);
@@ -628,7 +627,7 @@ Editor::Editor ()
 	_playlist_selector = new PlaylistSelector();
 	_playlist_selector->signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (_playlist_selector)));
 
-	RegionView::RegionViewGoingAway.connect (sigc::mem_fun(*this, &Editor::catch_vanishing_regionview));
+	scoped_connect (RegionView::RegionViewGoingAway, boost::bind (&Editor::catch_vanishing_regionview, this, _1));
 
 	/* nudge stuff */
 
@@ -805,8 +804,8 @@ Editor::instant_save ()
 		return;
 	}
 
-	if (session) {
-		session->add_instant_xml(get_state());
+	if (_session) {
+		_session->add_instant_xml(get_state());
 	} else {
 		Config->add_instant_xml(get_state());
 	}
@@ -815,7 +814,7 @@ Editor::instant_save ()
 void
 Editor::zoom_adjustment_changed ()
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 
@@ -824,8 +823,8 @@ Editor::zoom_adjustment_changed ()
 	if (fpu < 1.0) {
 		fpu = 1.0;
 		zoom_range_clock.set ((nframes64_t) floor (fpu * _canvas_width));
-	} else if (fpu > session->current_end_frame() / _canvas_width) {
-		fpu = session->current_end_frame() / _canvas_width;
+	} else if (fpu > _session->current_end_frame() / _canvas_width) {
+		fpu = _session->current_end_frame() / _canvas_width;
 		zoom_range_clock.set ((nframes64_t) floor (fpu * _canvas_width));
 	}
 
@@ -837,7 +836,7 @@ Editor::control_scroll (float fraction)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::control_scroll, fraction)
 
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
@@ -855,7 +854,7 @@ Editor::control_scroll (float fraction)
 	*/
 
 	if (!_control_scroll_target) {
-		_control_scroll_target = session->transport_frame();
+		_control_scroll_target = _session->transport_frame();
 		_dragging_playhead = true;
 	}
 
@@ -897,7 +896,7 @@ Editor::control_scroll (float fraction)
 bool
 Editor::deferred_control_scroll (nframes64_t /*target*/)
 {
-	session->request_locate (*_control_scroll_target, session->transport_rolling());
+	_session->request_locate (*_control_scroll_target, _session->transport_rolling());
 	// reset for next stream
 	_control_scroll_target = boost::none;
 	_dragging_playhead = false;
@@ -907,7 +906,7 @@ Editor::deferred_control_scroll (nframes64_t /*target*/)
 void
 Editor::access_action (std::string action_group, std::string action_item)
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
@@ -949,7 +948,7 @@ Editor::map_position_change (nframes64_t frame)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::map_position_change, frame)
 
-	if (session == 0 || !_follow_playhead) {
+	if (_session == 0 || !_follow_playhead) {
 		return;
 	}
 
@@ -987,12 +986,12 @@ Editor::center_screen_internal (nframes64_t frame, float page)
 void
 Editor::handle_new_duration ()
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
 	ENSURE_GUI_THREAD (*this, &Editor::handle_new_duration)
-	nframes64_t new_end = session->current_end_frame() + (nframes64_t) floorf (current_page_frames() * 0.10f);
+	nframes64_t new_end = _session->current_end_frame() + (nframes64_t) floorf (current_page_frames() * 0.10f);
 
 	horizontal_adjustment.set_upper (new_end / frames_per_unit);
 	horizontal_adjustment.set_page_size (current_page_frames()/frames_per_unit);
@@ -1004,27 +1003,19 @@ Editor::handle_new_duration ()
 }
 
 void
-Editor::update_title_s (const string & snap_name)
-{
-	ENSURE_GUI_THREAD (*this, &Editor::update_title_s, snap_name)
-
-	update_title ();
-}
-
-void
 Editor::update_title ()
 {
 	ENSURE_GUI_THREAD (*this, &Editor::update_title)
 
-	if (session) {
-		bool dirty = session->dirty();
+	if (_session) {
+		bool dirty = _session->dirty();
 
 		string session_name;
 
-		if (session->snap_name() != session->name()) {
-			session_name = session->snap_name();
+		if (_session->snap_name() != _session->name()) {
+			session_name = _session->snap_name();
 		} else {
-			session_name = session->name();
+			session_name = _session->name();
 		}
 
 		if (dirty) {
@@ -1038,9 +1029,36 @@ Editor::update_title ()
 }
 
 void
-Editor::connect_to_session (Session *t)
+Editor::set_session (Session *t)
 {
-	session = t;
+	SessionHandlePtr::set_session (t);
+
+	zoom_range_clock.set_session (_session);
+	_playlist_selector->set_session (_session);
+	nudge_clock.set_session (_session);
+	_summary->set_session (_session);
+	_group_tabs->set_session (_session);
+	_route_groups->set_session (_session);
+	_regions->set_session (_session);
+	_snapshots->set_session (_session);
+	_routes->set_session (_session);
+	_locations->set_session (_session);
+
+	if (rhythm_ferret) {
+		rhythm_ferret->set_session (_session);
+	}
+
+	if (analysis_window) {
+		analysis_window->set_session (_session);
+	}
+
+	if (sfbrowser) {
+		sfbrowser->set_session (_session);
+	}
+
+	if (!_session) {
+		return;
+	}
 
 	compute_fixed_ruler_scale ();
 
@@ -1053,79 +1071,65 @@ Editor::connect_to_session (Session *t)
 
 	/* catch up with the playhead */
 
-	session->request_locate (playhead_cursor->current_frame);
+	_session->request_locate (playhead_cursor->current_frame);
 
 	update_title ();
 
-	session->GoingAway.connect (sigc::mem_fun(*this, &Editor::session_going_away));
-	session->history().Changed.connect (sigc::mem_fun (*this, &Editor::history_changed));
+	_session_connections.add_connection (_session->history().Changed.connect (boost::bind (&Editor::history_changed, this)));
 
 	/* These signals can all be emitted by a non-GUI thread. Therefore the
 	   handlers for them must not attempt to directly interact with the GUI,
 	   but use Gtkmm2ext::UI::instance()->call_slot();
 	*/
 
-	session_connections.push_back (session->TransportStateChange.connect (sigc::mem_fun(*this, &Editor::map_transport_state)));
-	session_connections.push_back (session->PositionChanged.connect (sigc::mem_fun(*this, &Editor::map_position_change)));
-	session_connections.push_back (session->RouteAdded.connect (sigc::mem_fun(*this, &Editor::handle_new_route)));
-	session_connections.push_back (session->DurationChanged.connect (sigc::mem_fun(*this, &Editor::handle_new_duration)));
-	session_connections.push_back (session->DirtyChanged.connect (sigc::mem_fun(*this, &Editor::update_title)));
-	session_connections.push_back (session->StateSaved.connect (sigc::mem_fun(*this, &Editor::update_title_s)));
-	session_connections.push_back (session->AskAboutPlaylistDeletion.connect (sigc::mem_fun(*this, &Editor::playlist_deletion_dialog)));
+	_session_connections.add_connection (_session->TransportStateChange.connect (boost::bind (&Editor::map_transport_state, this)));
+	_session_connections.add_connection (_session->PositionChanged.connect (boost::bind (&Editor::map_position_change, this, _1)));
+	_session_connections.add_connection (_session->RouteAdded.connect (boost::bind (&Editor::handle_new_route, this, _1)));
+	_session_connections.add_connection (_session->DurationChanged.connect (boost::bind (&Editor::handle_new_duration, this)));
+	_session_connections.add_connection (_session->DirtyChanged.connect (boost::bind (&Editor::update_title, this)));
+	_session_connections.add_connection (_session->StateSaved.connect (boost::bind (&Editor::update_title, this)));
+	_session_connections.add_connection (_session->AskAboutPlaylistDeletion.connect (boost::bind (&Editor::playlist_deletion_dialog, this, _1)));
+	_session_connections.add_connection (_session->TimecodeOffsetChanged.connect (boost::bind (&Editor::update_just_timecode, this)));
+	_session_connections.add_connection (_session->tempo_map().StateChanged.connect (boost::bind (&Editor::tempo_map_changed, this, _1)));
+	_session_connections.add_connection (_session->Located.connect (boost::bind (&Editor::located, this)));
+	_session_connections.add_connection (_session->config.ParameterChanged.connect (boost::bind (&Editor::parameter_changed, this, _1)));
 
-	session_connections.push_back (session->TimecodeOffsetChanged.connect (sigc::mem_fun(*this, &Editor::update_just_timecode)));
-
-	session_connections.push_back (session->tempo_map().StateChanged.connect (sigc::mem_fun(*this, &Editor::tempo_map_changed)));
-
-	session_connections.push_back (session->Located.connect (sigc::mem_fun (*this, &Editor::located)));
-	session_connections.push_back (session->config.ParameterChanged.connect (sigc::mem_fun (*this, &Editor::parameter_changed)));
-
-	zoom_range_clock.set_session (session);
-	_playlist_selector->set_session (session);
-	nudge_clock.set_session (session);
 	if (Profile->get_sae()) {
 		BBT_Time bbt;
 		bbt.bars = 0;
 		bbt.beats = 0;
 		bbt.ticks = 120;
-		nframes_t pos = session->tempo_map().bbt_duration_at (0, bbt, 1);
+		nframes_t pos = _session->tempo_map().bbt_duration_at (0, bbt, 1);
 		nudge_clock.set_mode(AudioClock::BBT);
 		nudge_clock.set (pos, true, 0, AudioClock::BBT);
 
 	} else {
-		nudge_clock.set (session->frame_rate() * 5, true, 0, AudioClock::Timecode); // default of 5 seconds
+		nudge_clock.set (_session->frame_rate() * 5, true, 0, AudioClock::Timecode); // default of 5 seconds
 	}
 
 	playhead_cursor->canvas_item.show ();
 
-	if (rhythm_ferret) {
-		rhythm_ferret->set_session (session);
-	}
-
-	if (analysis_window != 0)
-		analysis_window->set_session (session);
-
-	Location* loc = session->locations()->auto_loop_location();
+	Location* loc = _session->locations()->auto_loop_location();
 	if (loc == 0) {
-		loc = new Location (0, session->current_end_frame(), _("Loop"),(Location::Flags) (Location::IsAutoLoop | Location::IsHidden));
+		loc = new Location (0, _session->current_end_frame(), _("Loop"),(Location::Flags) (Location::IsAutoLoop | Location::IsHidden));
 		if (loc->start() == loc->end()) {
 			loc->set_end (loc->start() + 1);
 		}
-		session->locations()->add (loc, false);
-		session->set_auto_loop_location (loc);
+		_session->locations()->add (loc, false);
+		_session->set_auto_loop_location (loc);
 	} else {
 		// force name
 		loc->set_name (_("Loop"));
 	}
 
-	loc = session->locations()->auto_punch_location();
+	loc = _session->locations()->auto_punch_location();
 	if (loc == 0) {
-		loc = new Location (0, session->current_end_frame(), _("Punch"), (Location::Flags) (Location::IsAutoPunch | Location::IsHidden));
+		loc = new Location (0, _session->current_end_frame(), _("Punch"), (Location::Flags) (Location::IsAutoPunch | Location::IsHidden));
 		if (loc->start() == loc->end()) {
 			loc->set_end (loc->start() + 1);
 		}
-		session->locations()->add (loc, false);
-		session->set_auto_punch_location (loc);
+		_session->locations()->add (loc, false);
+		_session->set_auto_punch_location (loc);
 	} else {
 		// force name
 		loc->set_name (_("Punch"));
@@ -1133,26 +1137,26 @@ Editor::connect_to_session (Session *t)
 
 	boost::function<void (string)> pc (boost::bind (&Editor::parameter_changed, this, _1));
 	Config->map_parameters (pc);
-	session->config.map_parameters (pc);
+	_session->config.map_parameters (pc);
 
-	session->StateSaved.connect (sigc::mem_fun(*this, &Editor::session_state_saved));
 
 	refresh_location_display ();
-	session->locations()->added.connect (sigc::mem_fun(*this, &Editor::add_new_location));
-	session->locations()->removed.connect (sigc::mem_fun(*this, &Editor::location_gone));
-	session->locations()->changed.connect (sigc::mem_fun(*this, &Editor::refresh_location_display));
-	session->locations()->StateChanged.connect (sigc::mem_fun(*this, &Editor::refresh_location_display_s));
-	session->locations()->end_location()->changed.connect (sigc::mem_fun(*this, &Editor::end_location_changed));
 
-	if (sfbrowser) {
-		sfbrowser->set_session (session);
-	}
+	/* static signal - no need to drop connection when session is deleted (XXX or we are?)*/
+
+	_session->StateSaved.connect (sigc::mem_fun(*this, &Editor::session_state_saved));
+
+	_session_connections.add_connection (_session->locations()->added.connect (sigc::mem_fun(*this, &Editor::add_new_location)));
+	_session_connections.add_connection (_session->locations()->removed.connect (sigc::mem_fun(*this, &Editor::location_gone)));
+	_session_connections.add_connection (_session->locations()->changed.connect (sigc::mem_fun(*this, &Editor::refresh_location_display)));
+	_session_connections.add_connection (_session->locations()->StateChanged.connect (sigc::mem_fun(*this, &Editor::refresh_location_display_s)));
+	_session_connections.add_connection (_session->locations()->end_location()->changed.connect (sigc::mem_fun(*this, &Editor::end_location_changed)));
 
 	handle_new_duration ();
 
 	restore_ruler_visibility ();
 	//tempo_map_changed (Change (0));
-	session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
+	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(static_cast<TimeAxisView*>(*i))->set_samples_per_unit (frames_per_unit);
@@ -1173,15 +1177,7 @@ Editor::connect_to_session (Session *t)
 	}
 
 	/* register for undo history */
-	session->register_with_memento_command_factory(_id, this);
-
-	_summary->connect_to_session (session);
-	_group_tabs->connect_to_session (session);
-	_route_groups->connect_to_session (session);
-	_regions->connect_to_session (session);
-	_snapshots->connect_to_session (session);
-	_routes->connect_to_session (session);
-	_locations->connect_to_session (session);
+	_session->register_with_memento_command_factory(_id, this);
 
 	start_updating ();
 }
@@ -1561,8 +1557,8 @@ Editor::analyze_region_selection()
 	if (analysis_window == 0) {
 		analysis_window = new AnalysisWindow();
 
-		if (session != 0)
-			analysis_window->set_session(session);
+		if (_session != 0)
+			analysis_window->set_session(_session);
 
 		analysis_window->show_all();
 	}
@@ -1579,8 +1575,8 @@ Editor::analyze_range_selection()
 	if (analysis_window == 0) {
 		analysis_window = new AnalysisWindow();
 
-		if (session != 0)
-			analysis_window->set_session(session);
+		if (_session != 0)
+			analysis_window->set_session(_session);
 
 		analysis_window->show_all();
 	}
@@ -2268,7 +2264,7 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	set_default_size (g.base_width, g.base_height);
 	move (x, y);
 
-	if (session && (prop = node.property ("playhead"))) {
+	if (_session && (prop = node.property ("playhead"))) {
 		nframes64_t pos = atol (prop->value().c_str());
 		playhead_cursor->set_position (pos);
 	} else {
@@ -2515,7 +2511,7 @@ Editor::trackview_by_y_position (double y)
 void
 Editor::snap_to_with_modifier (nframes64_t& start, GdkEvent const * event, int32_t direction, bool for_mark)
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
@@ -2533,7 +2529,7 @@ Editor::snap_to_with_modifier (nframes64_t& start, GdkEvent const * event, int32
 void
 Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 {
-	if (!session || _snap_mode == SnapOff) {
+	if (!_session || _snap_mode == SnapOff) {
 		return;
 	}
 
@@ -2543,24 +2539,24 @@ Editor::snap_to (nframes64_t& start, int32_t direction, bool for_mark)
 void
 Editor::timecode_snap_to_internal (nframes64_t& start, int32_t direction, bool /*for_mark*/)
 {
-	const nframes64_t one_timecode_second = (nframes64_t)(rint(session->timecode_frames_per_second()) * session->frames_per_timecode_frame());
-	nframes64_t one_timecode_minute = (nframes64_t)(rint(session->timecode_frames_per_second()) * session->frames_per_timecode_frame() * 60);
+	const nframes64_t one_timecode_second = (nframes64_t)(rint(_session->timecode_frames_per_second()) * _session->frames_per_timecode_frame());
+	nframes64_t one_timecode_minute = (nframes64_t)(rint(_session->timecode_frames_per_second()) * _session->frames_per_timecode_frame() * 60);
 
 	switch (_snap_type) {
 	case SnapToTimecodeFrame:
-		if (((direction == 0) && (fmod((double)start, (double)session->frames_per_timecode_frame()) > (session->frames_per_timecode_frame() / 2))) || (direction > 0)) {
-			start = (nframes64_t) (ceil ((double) start / session->frames_per_timecode_frame()) * session->frames_per_timecode_frame());
+		if (((direction == 0) && (fmod((double)start, (double)_session->frames_per_timecode_frame()) > (_session->frames_per_timecode_frame() / 2))) || (direction > 0)) {
+			start = (nframes64_t) (ceil ((double) start / _session->frames_per_timecode_frame()) * _session->frames_per_timecode_frame());
 		} else {
-			start = (nframes64_t) (floor ((double) start / session->frames_per_timecode_frame()) *  session->frames_per_timecode_frame());
+			start = (nframes64_t) (floor ((double) start / _session->frames_per_timecode_frame()) *  _session->frames_per_timecode_frame());
 		}
 		break;
 
 	case SnapToTimecodeSeconds:
-		if (session->timecode_offset_negative())
+		if (_session->timecode_offset_negative())
 		{
-			start += session->timecode_offset ();
+			start += _session->timecode_offset ();
 		} else {
-			start -= session->timecode_offset ();
+			start -= _session->timecode_offset ();
 		}
 		if (((direction == 0) && (start % one_timecode_second > one_timecode_second / 2)) || direction > 0) {
 			start = (nframes64_t) ceil ((double) start / one_timecode_second) * one_timecode_second;
@@ -2568,31 +2564,31 @@ Editor::timecode_snap_to_internal (nframes64_t& start, int32_t direction, bool /
 			start = (nframes64_t) floor ((double) start / one_timecode_second) * one_timecode_second;
 		}
 
-		if (session->timecode_offset_negative())
+		if (_session->timecode_offset_negative())
 		{
-			start -= session->timecode_offset ();
+			start -= _session->timecode_offset ();
 		} else {
-			start += session->timecode_offset ();
+			start += _session->timecode_offset ();
 		}
 		break;
 
 	case SnapToTimecodeMinutes:
-		if (session->timecode_offset_negative())
+		if (_session->timecode_offset_negative())
 		{
-			start += session->timecode_offset ();
+			start += _session->timecode_offset ();
 		} else {
-			start -= session->timecode_offset ();
+			start -= _session->timecode_offset ();
 		}
 		if (((direction == 0) && (start % one_timecode_minute > one_timecode_minute / 2)) || direction > 0) {
 			start = (nframes64_t) ceil ((double) start / one_timecode_minute) * one_timecode_minute;
 		} else {
 			start = (nframes64_t) floor ((double) start / one_timecode_minute) * one_timecode_minute;
 		}
-		if (session->timecode_offset_negative())
+		if (_session->timecode_offset_negative())
 		{
-			start -= session->timecode_offset ();
+			start -= _session->timecode_offset ();
 		} else {
-			start += session->timecode_offset ();
+			start += _session->timecode_offset ();
 		}
 		break;
 	default:
@@ -2604,8 +2600,8 @@ Editor::timecode_snap_to_internal (nframes64_t& start, int32_t direction, bool /
 void
 Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 {
-	const nframes64_t one_second = session->frame_rate();
-	const nframes64_t one_minute = session->frame_rate() * 60;
+	const nframes64_t one_second = _session->frame_rate();
+	const nframes64_t one_minute = _session->frame_rate() * 60;
 	nframes64_t presnap = start;
 	nframes64_t before;
 	nframes64_t after;
@@ -2641,31 +2637,31 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 		break;
 
 	case SnapToBar:
-		start = session->tempo_map().round_to_bar (start, direction);
+		start = _session->tempo_map().round_to_bar (start, direction);
 		break;
 
 	case SnapToBeat:
-		start = session->tempo_map().round_to_beat (start, direction);
+		start = _session->tempo_map().round_to_beat (start, direction);
 		break;
 
 	case SnapToAThirtysecondBeat:
-		start = session->tempo_map().round_to_beat_subdivision (start, 32, direction);
+		start = _session->tempo_map().round_to_beat_subdivision (start, 32, direction);
 		break;
 
 	case SnapToASixteenthBeat:
-		start = session->tempo_map().round_to_beat_subdivision (start, 16, direction);
+		start = _session->tempo_map().round_to_beat_subdivision (start, 16, direction);
 		break;
 
 	case SnapToAEighthBeat:
-		start = session->tempo_map().round_to_beat_subdivision (start, 8, direction);
+		start = _session->tempo_map().round_to_beat_subdivision (start, 8, direction);
 		break;
 
 	case SnapToAQuarterBeat:
-		start = session->tempo_map().round_to_beat_subdivision (start, 4, direction);
+		start = _session->tempo_map().round_to_beat_subdivision (start, 4, direction);
 		break;
 
 	case SnapToAThirdBeat:
-		start = session->tempo_map().round_to_beat_subdivision (start, 3, direction);
+		start = _session->tempo_map().round_to_beat_subdivision (start, 3, direction);
 		break;
 
 	case SnapToMark:
@@ -2673,7 +2669,7 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 			return;
 		}
 
-		session->locations()->marks_either_side (start, before, after);
+		_session->locations()->marks_either_side (start, before, after);
 
 		if (before == max_frames) {
 			start = after;
@@ -2971,8 +2967,8 @@ Editor::midi_panic ()
 {
 	cerr << "MIDI panic\n";
 
-	if (session) {
-		session->midi_panic();
+	if (_session) {
+		_session->midi_panic();
 	}
 }
 
@@ -3008,7 +3004,7 @@ Editor::convert_drop_to_paths (
 		guint                           /*info*/,
 		guint                           /*time*/)
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return -1;
 	}
 
@@ -3120,7 +3116,7 @@ Editor::map_transport_state ()
 {
 	ENSURE_GUI_THREAD (*this, &Editor::map_transport_state)
 
-	if (session->transport_stopped()) {
+	if (_session->transport_stopped()) {
 		have_pending_keyboard_selection = false;
 	}
 
@@ -3162,17 +3158,17 @@ Editor::restore_state (State *state)
 void
 Editor::begin_reversible_command (string name)
 {
-	if (session) {
+	if (_session) {
 		before = &get_state();
-		session->begin_reversible_command (name);
+		_session->begin_reversible_command (name);
 	}
 }
 
 void
 Editor::commit_reversible_command ()
 {
-	if (session) {
-		session->commit_reversible_command (new MementoCommand<Editor>(*this, before, &get_state()));
+	if (_session) {
+		_session->commit_reversible_command (new MementoCommand<Editor>(*this, before, &get_state()));
 	}
 }
 
@@ -3205,20 +3201,20 @@ Editor::history_changed ()
 {
 	string label;
 
-	if (undo_action && session) {
-		if (session->undo_depth() == 0) {
+	if (undo_action && _session) {
+		if (_session->undo_depth() == 0) {
 			label = _("Undo");
 		} else {
-			label = string_compose(_("Undo (%1)"), session->next_undo());
+			label = string_compose(_("Undo (%1)"), _session->next_undo());
 		}
 		undo_action->property_label() = label;
 	}
 
-	if (redo_action && session) {
-		if (session->redo_depth() == 0) {
+	if (redo_action && _session) {
+		if (_session->redo_depth() == 0) {
 			label = _("Redo");
 		} else {
-			label = string_compose(_("Redo (%1)"), session->next_redo());
+			label = string_compose(_("Redo (%1)"), _session->next_redo());
 		}
 		redo_action->property_label() = label;
 	}
@@ -3394,7 +3390,7 @@ Editor::cycle_edit_mode ()
 void
 Editor::edit_mode_selection_done ()
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 
@@ -3735,7 +3731,7 @@ Editor::edit_xfade (boost::weak_ptr<Crossfade> wxfade)
 		return;
 	}
 
-	CrossfadeEditor cew (*session, xfade, xfade->fade_in().get_min_y(), 1.0);
+	CrossfadeEditor cew (_session, xfade, xfade->fade_in().get_min_y(), 1.0);
 
 	ensure_float (cew);
 
@@ -3787,8 +3783,8 @@ Editor::get_grid_type_as_beats (bool& success, nframes64_t position)
 		break;
 
 	case SnapToBar:
-		if (session) {
-			return session->tempo_map().meter_at (position).beats_per_bar();
+		if (_session) {
+			return _session->tempo_map().meter_at (position).beats_per_bar();
 		}
 		break;
 
@@ -3899,8 +3895,8 @@ Editor::finish_cleanup ()
 Location*
 Editor::transport_loop_location()
 {
-	if (session) {
-		return session->locations()->auto_loop_location();
+	if (_session) {
+		return _session->locations()->auto_loop_location();
 	} else {
 		return 0;
 	}
@@ -3909,8 +3905,8 @@ Editor::transport_loop_location()
 Location*
 Editor::transport_punch_location()
 {
-	if (session) {
-		return session->locations()->auto_punch_location();
+	if (_session) {
+		return _session->locations()->auto_punch_location();
 	} else {
 		return 0;
 	}
@@ -4001,7 +3997,7 @@ Editor::new_playlists (TimeAxisView* v)
 {
 	begin_reversible_command (_("new playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
-	session->playlists->get (playlists);
+	_session->playlists->get (playlists);
 	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), v, RouteGroup::Edit);
 	commit_reversible_command ();
 }
@@ -4017,7 +4013,7 @@ Editor::copy_playlists (TimeAxisView* v)
 {
 	begin_reversible_command (_("copy playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
-	session->playlists->get (playlists);
+	_session->playlists->get (playlists);
 	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), v, RouteGroup::Edit);
 	commit_reversible_command ();
 }
@@ -4032,7 +4028,7 @@ Editor::clear_playlists (TimeAxisView* v)
 {
 	begin_reversible_command (_("clear playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
-	session->playlists->get (playlists);
+	_session->playlists->get (playlists);
 	mapover_tracks (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), v, RouteGroup::Edit);
 	commit_reversible_command ();
 }
@@ -4239,8 +4235,8 @@ Editor::post_zoom ()
 
 	ZoomChanged (); /* EMIT_SIGNAL */
 
-	if (session) {
-		cef = session->current_end_frame() + (current_page_frames() / 10);// Add a little extra so we can see the end marker
+	if (_session) {
+		cef = _session->current_end_frame() + (current_page_frames() / 10);// Add a little extra so we can see the end marker
 	}
 	horizontal_adjustment.set_upper (cef / frames_per_unit);
 
@@ -4265,7 +4261,7 @@ Editor::queue_visual_change (nframes64_t where)
 	   can reach.
 	*/
 
-	if (session && (where > session->current_end_frame())) {
+	if (_session && (where > _session->current_end_frame())) {
 		horizontal_adjustment.set_upper ((where + current_page_frames()) / frames_per_unit);
 	}
 
@@ -4332,9 +4328,9 @@ Editor::idle_visual_changer ()
 	nframes64_t csf=0, cef=0;
 	nframes64_t current_time_origin = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
 
-	if (session) {
-		csf = session->current_start_frame();
-		cef = session->current_end_frame();
+	if (_session) {
+		csf = _session->current_start_frame();
+		cef = _session->current_end_frame();
 	}
 
 	/* if we seek beyond the current end of the canvas, move the end */
@@ -4397,7 +4393,7 @@ Editor::get_preferred_edit_position (bool ignore_playhead)
 
 	switch (ep) {
 	case EditAtPlayhead:
-		where = session->audible_frame();
+		where = _session->audible_frame();
 		break;
 
 	case EditAtSelectedMarker:
@@ -4431,7 +4427,7 @@ Editor::get_preferred_edit_position (bool ignore_playhead)
 void
 Editor::set_loop_range (nframes64_t start, nframes64_t end, string cmd)
 {
-	if (!session) return;
+	if (!_session) return;
 
 	begin_reversible_command (cmd);
 
@@ -4439,17 +4435,17 @@ Editor::set_loop_range (nframes64_t start, nframes64_t end, string cmd)
 
 	if ((tll = transport_loop_location()) == 0) {
 		Location* loc = new Location (start, end, _("Loop"),  Location::IsAutoLoop);
-		XMLNode &before = session->locations()->get_state();
-		session->locations()->add (loc, true);
-		session->set_auto_loop_location (loc);
-		XMLNode &after = session->locations()->get_state();
-		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
+		XMLNode &before = _session->locations()->get_state();
+		_session->locations()->add (loc, true);
+		_session->set_auto_loop_location (loc);
+		XMLNode &after = _session->locations()->get_state();
+		_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
 	} else {
 		XMLNode &before = tll->get_state();
 		tll->set_hidden (false, this);
 		tll->set (start, end);
 		XMLNode &after = tll->get_state();
-		session->add_command (new MementoCommand<Location>(*tll, &before, &after));
+		_session->add_command (new MementoCommand<Location>(*tll, &before, &after));
 	}
 
 	commit_reversible_command ();
@@ -4458,7 +4454,7 @@ Editor::set_loop_range (nframes64_t start, nframes64_t end, string cmd)
 void
 Editor::set_punch_range (nframes64_t start, nframes64_t end, string cmd)
 {
-	if (!session) return;
+	if (!_session) return;
 
 	begin_reversible_command (cmd);
 
@@ -4466,18 +4462,18 @@ Editor::set_punch_range (nframes64_t start, nframes64_t end, string cmd)
 
 	if ((tpl = transport_punch_location()) == 0) {
 		Location* loc = new Location (start, end, _("Loop"),  Location::IsAutoPunch);
-		XMLNode &before = session->locations()->get_state();
-		session->locations()->add (loc, true);
-		session->set_auto_loop_location (loc);
-		XMLNode &after = session->locations()->get_state();
-		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
+		XMLNode &before = _session->locations()->get_state();
+		_session->locations()->add (loc, true);
+		_session->set_auto_loop_location (loc);
+		XMLNode &after = _session->locations()->get_state();
+		_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
 	}
 	else {
 		XMLNode &before = tpl->get_state();
 		tpl->set_hidden (false, this);
 		tpl->set (start, end);
 		XMLNode &after = tpl->get_state();
-		session->add_command (new MementoCommand<Location>(*tpl, &before, &after));
+		_session->add_command (new MementoCommand<Location>(*tpl, &before, &after));
 	}
 
 	commit_reversible_command ();
@@ -4643,7 +4639,7 @@ Editor::show_rhythm_ferret ()
 		rhythm_ferret = new RhythmFerret(*this);
 	}
 
-	rhythm_ferret->set_session (session);
+	rhythm_ferret->set_session (_session);
 	rhythm_ferret->show ();
 	rhythm_ferret->present ();
 }
@@ -4652,7 +4648,7 @@ void
 Editor::show_global_port_matrix (ARDOUR::DataType t)
 {
 	if (_global_port_matrix[t] == 0) {
-		_global_port_matrix[t] = new GlobalPortMatrixWindow (session, t);
+		_global_port_matrix[t] = new GlobalPortMatrixWindow (_session, t);
 	}
 
 	_global_port_matrix[t]->show ();
@@ -4818,9 +4814,9 @@ Editor::handle_new_route (RouteList& routes)
 		DataType dt = route->input()->default_type();
 
 		if (dt == ARDOUR::DataType::AUDIO) {
-			rtv = new AudioTimeAxisView (*this, *session, route, *track_canvas);
+			rtv = new AudioTimeAxisView (*this, _session, route, *track_canvas);
 		} else if (dt == ARDOUR::DataType::MIDI) {
-			rtv = new MidiTimeAxisView (*this, *session, route, *track_canvas);
+			rtv = new MidiTimeAxisView (*this, _session, route, *track_canvas);
 		} else {
 			throw unknown_type();
 		}
@@ -4833,7 +4829,7 @@ Editor::handle_new_route (RouteList& routes)
 		rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
 		rtv->view()->HeightChanged.connect (sigc::mem_fun (*this, &Editor::streamview_height_changed));
 
-		rtv->GoingAway.connect (sigc::bind (sigc::mem_fun(*this, &Editor::remove_route), rtv));
+		scoped_connect (rtv->GoingAway, boost::bind (&Editor::remove_route, this, rtv));
 	}
 
 	_routes->routes_added (new_views);
@@ -4954,18 +4950,18 @@ Editor::consider_auditioning (boost::shared_ptr<Region> region)
 	boost::shared_ptr<AudioRegion> r = boost::dynamic_pointer_cast<AudioRegion> (region);
 
 	if (r == 0) {
-		session->cancel_audition ();
+		_session->cancel_audition ();
 		return;
 	}
 
-	if (session->is_auditioning()) {
-		session->cancel_audition ();
+	if (_session->is_auditioning()) {
+		_session->cancel_audition ();
 		if (r == last_audition_region) {
 			return;
 		}
 	}
 
-	session->audition_region (r);
+	_session->audition_region (r);
 	last_audition_region = r;
 }
 
@@ -4979,7 +4975,7 @@ Editor::hide_a_region (boost::shared_ptr<Region> r)
 void
 Editor::remove_a_region (boost::shared_ptr<Region> r)
 {
-	session->remove_region_from_region_list (r);
+	_session->remove_region_from_region_list (r);
 }
 
 void

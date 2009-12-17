@@ -68,7 +68,7 @@ class ExportElementFactory
 	Session & session;
 };
 
-class ExportHandler : public ExportElementFactory, public sigc::trackable
+class ExportHandler : public ExportElementFactory
 {
   private:
 
@@ -118,8 +118,10 @@ class ExportHandler : public ExportElementFactory, public sigc::trackable
 
 	bool               realtime;
 
-	sigc::connection          files_written_connection;
+	boost::signals2::scoped_connection          files_written_connection;
+	boost::signals2::scoped_connection          export_read_finished_connection;
 	std::list<Glib::ustring> files_written;
+	void add_file (const Glib::ustring&);
 
 	/* CD Marker stuff */
 
@@ -175,7 +177,7 @@ class ExportHandler : public ExportElementFactory, public sigc::trackable
 	TimespanPtr          current_timespan;
 	ConfigMap::iterator  current_map_it;
 	TimespanBounds       timespan_bounds;
-	sigc::connection     channel_config_connection;
+	boost::signals2::scoped_connection     channel_config_connection;
 
 };
 

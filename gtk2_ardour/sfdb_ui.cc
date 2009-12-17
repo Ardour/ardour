@@ -113,8 +113,7 @@ importmode2string (ImportMode mode)
 }
 
 SoundFileBox::SoundFileBox (bool persistent)
-	: _session(0),
-	  table (6, 2),
+	: table (6, 2),
 	  length_clock ("sfboxLengthClock", !persistent, "EditCursorClock", false, false, true, false),
 	  timecode_clock ("sfboxTimecodeClock", !persistent, "EditCursorClock", false, false, false, false),
 	  main_box (false, 6),
@@ -202,16 +201,15 @@ SoundFileBox::SoundFileBox (bool persistent)
 void
 SoundFileBox::set_session(Session* s)
 {
-	_session = s;
+	SessionHandlePtr::set_session (s);
+
+	length_clock.set_session (s);
+	timecode_clock.set_session (s);
 
 	if (!_session) {
 		play_btn.set_sensitive (false);
 		stop_btn.set_sensitive (false);
 	}
-
-
-	length_clock.set_session (s);
-	timecode_clock.set_session (s);
 }
 
 bool
@@ -582,7 +580,8 @@ SoundFileBrowser::set_session (Session* s)
 {
 	ArdourDialog::set_session (s);
 	preview.set_session (s);
-	if (s) {
+
+	if (_session) {
 		add_gain_meter ();
 	} else {
 		remove_gain_meter ();
@@ -594,9 +593,9 @@ SoundFileBrowser::add_gain_meter ()
 {
 	delete gm;
 
-	gm = new GainMeter (*session, 250);
+	gm = new GainMeter (_session, 250);
 
-	boost::shared_ptr<Route> r = session->the_auditioner ();
+	boost::shared_ptr<Route> r = _session->the_auditioner ();
 
 	gm->set_controls (r, r->shared_peak_meter(), r->amp());
 
@@ -633,7 +632,7 @@ SoundFileBrowser::stop_metering ()
 void
 SoundFileBrowser::meter ()
 {
-	if (is_mapped () && session && gm) {
+	if (is_mapped () && _session && gm) {
 		gm->update_meters ();
 	}
 }
@@ -906,7 +905,7 @@ SoundFileOmega::reset_options ()
 	bool same_size;
 	bool src_needed;
 	bool selection_includes_multichannel;
-	bool selection_can_be_embedded_with_links = check_link_status (*session, paths);
+	bool selection_can_be_embedded_with_links = check_link_status (_session, paths);
 	ImportMode mode;
 
 	if (check_info (paths, same_size, src_needed, selection_includes_multichannel)) {
@@ -1100,7 +1099,7 @@ SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool&
 				}
 			}
 
-			if ((nframes_t) info.samplerate != session->frame_rate()) {
+			if ((nframes_t) info.samplerate != _session->frame_rate()) {
 				src_needed = true;
 			}
 
@@ -1126,9 +1125,9 @@ SoundFileOmega::check_info (const vector<ustring>& paths, bool& same_size, bool&
 
 
 bool
-SoundFileOmega::check_link_status (const Session& s, const vector<ustring>& paths)
+SoundFileOmega::check_link_status (const Session* s, const vector<ustring>& paths)
 {
-	sys::path path = s.session_directory().sound_path() / "linktest";
+	sys::path path = s->session_directory().sound_path() / "linktest";
 	string tmpdir = path.to_string();
 	bool ret = false;
 
@@ -1174,8 +1173,8 @@ SoundFileChooser::on_hide ()
 	ArdourDialog::on_hide();
 	stop_metering ();
 
-	if (session) {
-		session->cancel_audition();
+	if (_session) {
+		_session->cancel_audition();
 	}
 }
 
@@ -1360,8 +1359,8 @@ void
 SoundFileOmega::on_hide ()
 {
 	ArdourDialog::on_hide();
-	if (session) {
-		session->cancel_audition();
+	if (_session) {
+		_session->cancel_audition();
 	}
 }
 

@@ -4,7 +4,6 @@
 #include <list>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
-#include <sigc++/signal.h>
 
 #include "pbd/pool.h"
 #include "pbd/ringbuffer.h"

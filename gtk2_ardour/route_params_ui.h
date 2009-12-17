@@ -33,6 +33,7 @@
 #include <gtkmm/treeview.h>
 
 #include "pbd/stateful.h"
+#include "pbd/scoped_connections.h"
 
 #include "ardour/ardour.h"
 
@@ -54,14 +55,14 @@ namespace ARDOUR {
 
 class PluginSelector;
 
-class RouteParams_UI : public ArdourDialog
+class RouteParams_UI : public ArdourDialog, public PBD::ScopedConnectionList
 {
   public:
 	RouteParams_UI ();
 	~RouteParams_UI();
 
-	void set_session (ARDOUR::Session *);
-	void session_gone ();
+	void set_session (ARDOUR::Session*);
+	void session_going_away ();
 	PluginSelector*  plugin_selector() { return _plugin_selector; }
 
   private:
@@ -105,9 +106,9 @@ class RouteParams_UI : public ArdourDialog
 	Gtk::Button              latency_apply_button;
 	LatencyGUI*              latency_widget;
 	Gtk::Label               delay_label;
-	sigc::connection         latency_conn;
-	sigc::connection         delay_conn;
-	sigc::connection         latency_apply_conn;
+
+	PBD::ScopedConnectionList latency_connections;
+	sigc::connection          latency_click_connection;
 
 	void refresh_latency ();
 
@@ -125,11 +126,10 @@ class RouteParams_UI : public ArdourDialog
 	RouteRedirectSelection  _rr_selection;
 
 	boost::shared_ptr<ARDOUR::Route> _route;
-	sigc::connection            _route_conn;
-	sigc::connection            _route_ds_conn;
+	boost::signals2::scoped_connection _route_processors_connection;
 
 	boost::shared_ptr<ARDOUR::Processor> _processor;
-	sigc::connection                    _plugin_conn;
+	boost::signals2::scoped_connection _processor_going_away_connection;
 
 
 	enum ConfigView {
@@ -161,8 +161,8 @@ class RouteParams_UI : public ArdourDialog
 
 	void add_routes (ARDOUR::RouteList&);
 
-	void route_name_changed (boost::shared_ptr<ARDOUR::Route> route);
-	void route_removed (boost::shared_ptr<ARDOUR::Route> route);
+	void route_name_changed (boost::weak_ptr<ARDOUR::Route> route);
+	void route_removed (boost::weak_ptr<ARDOUR::Route> route);
 
 
 	void route_selected();
@@ -182,7 +182,7 @@ class RouteParams_UI : public ArdourDialog
 	void redirect_selected (boost::shared_ptr<ARDOUR::Processor>);
 
 	void plugin_going_away (ARDOUR::Placement);
-	void redirect_going_away (boost::shared_ptr<ARDOUR::Processor>);
+	void processor_going_away (boost::weak_ptr<ARDOUR::Processor>);
 
 	gint edit_input_configuration (GdkEventButton *ev);
 	gint edit_output_configuration (GdkEventButton *ev);

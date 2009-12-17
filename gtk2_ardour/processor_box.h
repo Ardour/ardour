@@ -20,9 +20,11 @@
 #ifndef __ardour_gtk_processor_box__
 #define __ardour_gtk_processor_box__
 
+#include <cmath>
 #include <vector>
 
-#include <cmath>
+#include <boost/function.hpp>
+
 #include <gtkmm/box.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/menu.h>
@@ -34,6 +36,7 @@
 #include <gtkmm2ext/pixfader.h>
 
 #include "pbd/stateful.h"
+#include "pbd/scoped_connections.h"
 
 #include "ardour/types.h"
 #include "ardour/ardour.h"
@@ -41,6 +44,7 @@
 #include "ardour/port_insert.h"
 #include "ardour/processor.h"
 #include "ardour/route.h"
+#include "ardour/session_handle.h"
 
 #include "pbd/fastlog.h"
 
@@ -120,11 +124,11 @@ private:
 	static Glib::RefPtr<Gdk::Pixbuf> _slider;
 };
 
-class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
+class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARDOUR::SessionHandlePtr
 {
   public:
-	ProcessorBox (ARDOUR::Session&, sigc::slot<PluginSelector*> get_plugin_selector,
-			RouteRedirectSelection&, MixerStrip* parent, bool owner_is_mixer = false);
+	ProcessorBox (ARDOUR::Session*, boost::function<PluginSelector*()> get_plugin_selector,
+		      RouteRedirectSelection&, MixerStrip* parent, bool owner_is_mixer = false);
 	~ProcessorBox ();
 
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
@@ -145,13 +149,12 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject
 
   private:
 	boost::shared_ptr<ARDOUR::Route>  _route;
-	ARDOUR::Session &   _session;
 	MixerStrip*         _parent_strip; // null if in RouteParamsUI
 	bool                _owner_is_mixer;
 	bool                 ab_direction;
-	std::vector<sigc::connection> connections;
+	PBD::ScopedConnectionList connections;
 
-	sigc::slot<PluginSelector*> _get_plugin_selector;
+	boost::function<PluginSelector*()> _get_plugin_selector;
 
 	boost::shared_ptr<ARDOUR::Processor> _processor_being_created;
 

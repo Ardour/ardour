@@ -52,9 +52,9 @@ EditorSnapshots::EditorSnapshots (Editor* e)
 }
 
 void
-EditorSnapshots::connect_to_session (Session* s)
+EditorSnapshots::set_session (Session* s)
 {
-	EditorComponent::connect_to_session (s);
+	EditorComponent::set_session (s);
 
 	redisplay ();
 }

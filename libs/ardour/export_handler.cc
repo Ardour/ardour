@@ -98,15 +98,15 @@ ExportElementFactory::add_filename_copy (FilenamePtr other)
 
 /*** ExportHandler ***/
 
-ExportHandler::ExportHandler (Session & session) :
-  ExportElementFactory (session),
-  session (session),
-  export_status (session.get_export_status ()),
-  realtime (false)
+ExportHandler::ExportHandler (Session & session) 
+	: ExportElementFactory (session)
+	, session (session)
+	, export_status (session.get_export_status ())
+	, realtime (false)
 {
 	processor.reset (new ExportProcessor (session));
 
-	files_written_connection = ExportProcessor::WritingFile.connect (sigc::mem_fun (files_written, &std::list<Glib::ustring>::push_back));
+	files_written_connection = ExportProcessor::WritingFile.connect (boost::bind (&ExportHandler::add_file, this, _1));
 }
 
 ExportHandler::~ExportHandler ()
@@ -119,6 +119,12 @@ ExportHandler::~ExportHandler ()
 
 	channel_config_connection.disconnect();
 	files_written_connection.disconnect();
+}
+
+void
+ExportHandler::add_file (const Glib::ustring& str)
+{
+	files_written.push_back (str);
 }
 
 bool
@@ -162,7 +168,7 @@ ExportHandler::do_export (bool rt)
 
 	realtime = rt;
 
-	session.ExportReadFinished.connect (sigc::mem_fun (*this, &ExportHandler::finish_timespan));
+	export_read_finished_connection = session.ExportReadFinished.connect (boost::bind (&ExportHandler::finish_timespan, this));
 	start_timespan ();
 }
 
@@ -499,7 +505,7 @@ ExportHandler::start_timespan ()
 
 	/* connect stuff and start export */
 
-	current_timespan->process_connection = session.ProcessExport.connect (sigc::mem_fun (*current_timespan, &ExportTimespan::process));
+	current_timespan->process_connection = session.ProcessExport.connect (boost::bind (&ExportTimespan::process, current_timespan, _1));
 	session.start_audio_export (current_timespan->get_start(), realtime);
 }
 
@@ -538,6 +544,7 @@ void
 ExportHandler::timespan_thread_finished ()
 {
 	channel_config_connection.disconnect();
+	export_read_finished_connection.disconnect ();
 
 	if (current_map_it != timespan_bounds.second) {
 
@@ -559,7 +566,7 @@ ExportHandler::timespan_thread_finished ()
 			cc = current_map_it->second.channel_config;
 		}
 
-		channel_config_connection = cc->FilesWritten.connect (sigc::mem_fun (*this, &ExportHandler::timespan_thread_finished));
+		channel_config_connection = cc->FilesWritten.connect (boost::bind (&ExportHandler::timespan_thread_finished, this));
 		++current_map_it;
 
 	} else { /* All files are written from current timespan, reset timespan and start new */

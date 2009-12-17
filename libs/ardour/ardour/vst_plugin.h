@@ -27,7 +27,6 @@
 #include <string>
 #include <dlfcn.h>
 
-#include <sigc++/signal.h>
 #include "pbd/stateful.h"
 #include <jack/types.h>
 #include "ardour/plugin.h"

@@ -23,10 +23,12 @@
 #include <vector>
 
 #include <glibmm/thread.h>
+#include <boost/signals2.hpp>
 
 #include <jack/jack.h>
 
-#include <sigc++/signal.h>
+#include "pbd/scoped_connections.h"
+
 #include "ardour/types.h"
 #include "midi++/parser.h"
 #include "midi++/types.h"
@@ -220,7 +222,7 @@ struct SafeTime {
     }
 };
 
-class MTC_Slave : public Slave, public sigc::trackable {
+class MTC_Slave : public Slave {
   public:
 	MTC_Slave (Session&, MIDI::Port&);
 	~MTC_Slave ();
@@ -240,7 +242,7 @@ class MTC_Slave : public Slave, public sigc::trackable {
   private:
 	Session&    session;
 	MIDI::Port* port;
-	std::vector<sigc::connection> connections;
+	PBD::ScopedConnectionList* port_connections;
 	bool        can_notify_on_unknown_rate;
 	PIChaser* pic;
 
@@ -277,7 +279,7 @@ class MTC_Slave : public Slave, public sigc::trackable {
 	void process_apparent_speed (double);
 };
 
-class MIDIClock_Slave : public Slave, public sigc::trackable {
+class MIDIClock_Slave : public Slave {
   public:
 	MIDIClock_Slave (Session&, MIDI::Port&, int ppqn = 24);
 
@@ -301,7 +303,7 @@ class MIDIClock_Slave : public Slave, public sigc::trackable {
   private:
 	ISlaveSessionProxy* session;
 	MIDI::Port* port;
-	std::vector<sigc::connection> connections;
+	PBD::ScopedConnectionList* port_connections;
 
 	/// pulses per quarter note for one MIDI clock frame (default 24)
 	int         ppqn;

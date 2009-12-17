@@ -126,8 +126,6 @@ AudioDiskstream::~AudioDiskstream ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("Audio Diskstream %1 destructor\n", _name));
 
-	notify_callbacks ();
-
 	{
 		RCUWriter<ChannelList> writer (channels);
 		boost::shared_ptr<ChannelList> c = writer.get_copy();
@@ -1506,7 +1504,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 				continue; /* XXX is this OK? */
 			}
 
-			region->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &Diskstream::remove_region_from_last_capture), boost::weak_ptr<Region>(region)));
+			scoped_connect (region->GoingAway, boost::bind (&Diskstream::remove_region_from_last_capture, this, boost::weak_ptr<Region>(region)));
 
 			_last_capture_regions.push_back (region);
 

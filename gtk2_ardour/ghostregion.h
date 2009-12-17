@@ -21,8 +21,8 @@
 #define __ardour_gtk_ghost_region_h__
 
 #include <vector>
-#include <sigc++/signal.h>
 #include <libgnomecanvasmm.h>
+#include <boost/signals2.hpp>
 #include "canvas.h"
 
 namespace Gnome {
@@ -37,7 +37,7 @@ namespace Gnome {
 class MidiStreamView;
 class TimeAxisView;
 
-class GhostRegion : public sigc::trackable
+class GhostRegion 
 {
 public:
 	GhostRegion(ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
@@ -52,12 +52,12 @@ public:
 	guint source_track_color(unsigned char alpha = 0xff);
 	bool is_automation_ghost();
 
-	sigc::signal<void,GhostRegion*> GoingAway;
-
 	TimeAxisView& trackview;
 	TimeAxisView& source_trackview;
 	ArdourCanvas::Group* group;
 	ArdourCanvas::SimpleRect* base_rect;
+
+	static boost::signals2::signal<void(GhostRegion*)> GoingAway;
 };
 
 class AudioGhostRegion : public GhostRegion {

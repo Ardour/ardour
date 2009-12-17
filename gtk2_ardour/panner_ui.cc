@@ -48,19 +48,20 @@ using namespace Gtk;
 
 const int PannerUI::pan_bar_height = 30;
 
-PannerUI::PannerUI (Session& s)
-	: _session (s),
-	  _current_nouts (-1),
-	  _current_npans (-1),
-	  hAdjustment(0.0, 0.0, 0.0),
-	  vAdjustment(0.0, 0.0, 0.0),
-	  panning_viewport(hAdjustment, vAdjustment),
-	  panning_up_arrow (Gtk::ARROW_UP, Gtk::SHADOW_OUT),
-	  panning_down_arrow (Gtk::ARROW_DOWN, Gtk::SHADOW_OUT),
-	  panning_link_button (_("link")),
-	  pan_automation_style_button (""),
-	  pan_automation_state_button ("")
+PannerUI::PannerUI (Session* s)
+	: _current_nouts (-1)
+	, _current_npans (-1)
+	, hAdjustment(0.0, 0.0, 0.0)
+	, vAdjustment(0.0, 0.0, 0.0)
+	, panning_viewport(hAdjustment, vAdjustment)
+	, panning_up_arrow (Gtk::ARROW_UP, Gtk::SHADOW_OUT)
+	, panning_down_arrow (Gtk::ARROW_DOWN, Gtk::SHADOW_OUT)
+	, panning_link_button (_("link"))
+	, pan_automation_style_button ("")
+	, pan_automation_state_button ("")
 {
+	set_session (s);
+
 	ignore_toggle = false;
 	pan_menu = 0;
 	pan_astate_menu = 0;
@@ -133,7 +134,7 @@ PannerUI::PannerUI (Session& s)
 void
 PannerUI::set_panner (boost::shared_ptr<Panner> p)
 {
- 	connections.clear ();
+ 	connections.drop_connections ();
 
 	delete pan_astyle_menu;
 	pan_astyle_menu = 0;
@@ -150,9 +151,9 @@ PannerUI::set_panner (boost::shared_ptr<Panner> p)
 		return;
 	}
 
- 	connections.push_back (_panner->Changed.connect (sigc::mem_fun(*this, &PannerUI::panner_changed)));
- 	connections.push_back (_panner->LinkStateChanged.connect (sigc::mem_fun(*this, &PannerUI::update_pan_linkage)));
- 	connections.push_back (_panner->StateChanged.connect (sigc::mem_fun(*this, &PannerUI::update_pan_state)));
+ 	connections.add_connection (_panner->Changed.connect (sigc::mem_fun(*this, &PannerUI::panner_changed)));
+ 	connections.add_connection (_panner->LinkStateChanged.connect (sigc::mem_fun(*this, &PannerUI::update_pan_linkage)));
+ 	connections.add_connection (_panner->StateChanged.connect (sigc::mem_fun(*this, &PannerUI::update_pan_state)));
 
 	setup_pan ();
 
@@ -644,7 +645,7 @@ PannerUI::pan_adjustment_changed (uint32_t which)
 			   the panner objects have no access to the session,
 			   so do this here. ick.
 			*/
-			_session.set_dirty();
+			_session->set_dirty();
 		}
 	}
 }

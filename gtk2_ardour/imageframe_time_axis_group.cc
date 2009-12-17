@@ -74,7 +74,7 @@ ImageFrameTimeAxisGroup::~ImageFrameTimeAxisGroup()
 		iter = next ;
 	}
 
-	 GoingAway() ; /* EMIT_SIGNAL */
+	 GoingAway ; /* EMIT_SIGNAL */
 }
 
 
@@ -216,7 +216,7 @@ ImageFrameTimeAxisGroup::add_imageframe_item(const string & frame_id, nframes_t 
 
 		imageframe_views.push_front(ifv) ;
 
-		ifv->GoingAway.connect(sigc::bind(sigc::mem_fun(*this,&ImageFrameTimeAxisGroup::remove_imageframe_item), (void*)this)) ;
+		scoped_connect (ifv->GoingAway, boost::bind (&ImageFrameTimeAxisGroup::remove_imageframe_item, this, (void*)this));
 
 		 ImageFrameAdded(ifv, src) ; /* EMIT_SIGNAL */
 	}

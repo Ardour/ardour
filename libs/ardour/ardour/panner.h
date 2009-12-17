@@ -25,7 +25,6 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include <sigc++/signal.h>
 
 #include "pbd/stateful.h"
 #include "pbd/controllable.h"
@@ -41,7 +40,7 @@ class Panner;
 class BufferSet;
 class AudioBuffer;
 
-class StreamPanner : public sigc::trackable, public PBD::Stateful
+class StreamPanner : public PBD::Stateful
 {
   public:
 	StreamPanner (Panner& p, Evoral::Parameter param);
@@ -82,8 +81,8 @@ class StreamPanner : public sigc::trackable, public PBD::Stateful
 
 	boost::shared_ptr<AutomationControl> pan_control()  { return _control; }
 
-	sigc::signal<void> Changed;      /* for position */
-	sigc::signal<void> StateChanged; /* for mute */
+	boost::signals2::signal<void()> Changed;      /* for position */
+	boost::signals2::signal<void()> StateChanged; /* for mute */
 
 	int set_state (const XMLNode&, int version);
 	virtual XMLNode& state (bool full_state) = 0;
@@ -271,9 +270,9 @@ public:
 	StreamPanner &streampanner( uint32_t n ) const { assert( n < _streampanners.size() ); return *_streampanners[n]; }
 	uint32_t npanners() const { return _streampanners.size(); }
 
-	sigc::signal<void> Changed;
-	sigc::signal<void> LinkStateChanged;
-	sigc::signal<void> StateChanged; /* for bypass */
+	boost::signals2::signal<void()> Changed;
+	boost::signals2::signal<void()> LinkStateChanged;
+	boost::signals2::signal<void()> StateChanged; /* for bypass */
 
 	/* only StreamPanner should call these */
 

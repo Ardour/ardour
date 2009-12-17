@@ -143,7 +143,7 @@ LocationImporter::_prepare_move ()
 	std::pair<bool, string> rename_pair;
 
 	if (location->is_auto_punch()) {
-		rename_pair = Rename (_("The location is the Punch range. It will be imported as a normal range.\nYou may rename the imported location:"), name);
+		rename_pair = *Rename (_("The location is the Punch range. It will be imported as a normal range.\nYou may rename the imported location:"), name);
 		if (!rename_pair.first) {
 			return false;
 		}
@@ -154,7 +154,7 @@ LocationImporter::_prepare_move ()
 	}
 
 	if (location->is_auto_loop()) {
-		rename_pair = Rename (_("The location is a Loop range. It will be imported as a normal range.\nYou may rename the imported location:"), name);
+		rename_pair = *Rename (_("The location is a Loop range. It will be imported as a normal range.\nYou may rename the imported location:"), name);
 		if (!rename_pair.first) { return false; }
 
 		location->set_auto_loop (false, this);
@@ -165,7 +165,7 @@ LocationImporter::_prepare_move ()
 	Locations::LocationList const & locations(session.locations()->list());
 	for (Locations::LocationList::const_iterator it = locations.begin(); it != locations.end(); ++it) {
 		if (!((*it)->name().compare (location->name())) || !handler.check_name (location->name())) {
-			rename_pair = Rename (_("A location with that name already exists.\nYou may rename the imported location:"), name);
+			rename_pair = *Rename (_("A location with that name already exists.\nYou may rename the imported location:"), name);
 			if (!rename_pair.first) { return false; }
 			name = rename_pair.second;
 		}

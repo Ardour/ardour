@@ -100,7 +100,7 @@ RouteTimeAxisView::setup_slider_pix ()
 	}
 }
 
-RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
+RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::shared_ptr<Route> rt, Canvas& canvas)
 	: AxisView(sess)
 	, RouteUI(rt, sess)
 	, TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas)
@@ -189,7 +189,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 		ARDOUR_UI::instance()->tooltips().set_tip(*rec_enable_button, _("Record"));
 
-		rec_enable_button->set_sensitive (_session.writable());
+		rec_enable_button->set_sensitive (_session->writable());
 	}
 
 	controls_hbox.pack_start(gm.get_level_meter(), false, false);
@@ -269,7 +269,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session& sess, boost::sh
 
 RouteTimeAxisView::~RouteTimeAxisView ()
 {
-	GoingAway (); /* EMIT_SIGNAL */
+	drop_references ();
 
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 		delete *i;
@@ -1044,8 +1044,8 @@ RouteTimeAxisView::use_copy_playlist (bool prompt, vector<boost::shared_ptr<Play
 		name = resolve_new_group_playlist_name(name, playlists_before_op);
 	}
 
-	while (_session.playlists->by_name(name)) {
-		name = Playlist::bump_name (name, _session);
+	while (_session->playlists->by_name(name)) {
+		name = Playlist::bump_name (name, *_session);
 	}
 
 	// TODO: The prompter "new" button should be de-activated if the user
@@ -1096,8 +1096,8 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 		name = resolve_new_group_playlist_name(name,playlists_before_op);
 	}
 
-	while (_session.playlists->by_name(name)) {
-		name = Playlist::bump_name (name, _session);
+	while (_session->playlists->by_name(name)) {
+		name = Playlist::bump_name (name, *_session);
 	}
 
 
@@ -1325,10 +1325,10 @@ RouteTimeAxisView::name_entry_changed ()
 		return;
 	}
 
-	if (!_session.route_name_unique (x)) {
+	if (!_session->route_name_unique (x)) {
 		ARDOUR_UI::instance()->popup_error (_("A track already exists with that name"));
 		name_entry.set_text (_route->name());
-	} else if (_session.route_name_internal (x)) {
+	} else if (_session->route_name_internal (x)) {
 		ARDOUR_UI::instance()->popup_error (_("You cannot create a track with that name as it is reserved for Ardour"));
 		name_entry.set_text (_route->name());
 	} else {
@@ -1408,7 +1408,7 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	case Cut:
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			_editor.get_cut_buffer().add (what_we_got);
-			_session.add_command( new MementoCommand<Playlist>(*playlist.get(), &before, &playlist->get_state()));
+			_session->add_command( new MementoCommand<Playlist>(*playlist.get(), &before, &playlist->get_state()));
 			ret = true;
 		}
 		break;
@@ -1420,7 +1420,7 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 
 	case Clear:
 		if ((what_we_got = playlist->cut (time)) != 0) {
-			_session.add_command( new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
+			_session->add_command( new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 			what_we_got->release ();
 			ret = true;
 		}
@@ -1452,7 +1452,7 @@ RouteTimeAxisView::paste (nframes_t pos, float times, Selection& selection, size
 
 	XMLNode &before = playlist->get_state();
 	playlist->paste (*p, pos, times);
-	_session.add_command( new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
+	_session->add_command( new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 
 	return true;
 }
@@ -1494,7 +1494,7 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	boost::shared_ptr<Diskstream> ds = get_diskstream();
 	RadioMenuItem::Group playlist_group;
 
-	_session.playlists->get (playlists);
+	_session->playlists->get (playlists);
 
 	for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 
@@ -1584,7 +1584,7 @@ RouteTimeAxisView::use_playlist (boost::weak_ptr<Playlist> wpl)
 					continue;
 				}
 
-				boost::shared_ptr<Playlist> ipl = session().playlists->by_name(playlist_name);
+				boost::shared_ptr<Playlist> ipl = session()->playlists->by_name(playlist_name);
 				if (!ipl) {
 					// No playlist for this track for this take yet, make it
 					track->diskstream()->use_new_playlist();

@@ -42,9 +42,9 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
-sigc::signal<void,nframes_t> Delivery::CycleStart;
-sigc::signal<int>            Delivery::PannersLegal;
-bool                         Delivery::panners_legal = false;
+boost::signals2::signal<void(nframes_t)> Delivery::CycleStart;
+boost::signals2::signal<int()>           Delivery::PannersLegal;
+bool                                     Delivery::panners_legal = false;
 
 /* deliver to an existing IO object */
 
@@ -64,10 +64,10 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Mute
 	_display_to_user = false;
 
 	if (_output) {
-		_output->changed.connect (sigc::mem_fun (*this, &Delivery::output_changed));
+		scoped_connect (_output->changed, boost::bind (&Delivery::output_changed, this, _1, _2));
 	}
 
-	CycleStart.connect (sigc::mem_fun (*this, &Delivery::cycle_start));
+	scoped_connect (CycleStart, boost::bind (&Delivery::cycle_start, this, _1));
 }
 
 /* deliver to a new IO object */
@@ -88,10 +88,10 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const string& 
 	_display_to_user = false;
 
 	if (_output) {
-		_output->changed.connect (sigc::mem_fun (*this, &Delivery::output_changed));
+		scoped_connect (_output->changed, boost::bind (&Delivery::output_changed, this, _1, _2));
 	}
 
-	CycleStart.connect (sigc::mem_fun (*this, &Delivery::cycle_start));
+	scoped_connect (CycleStart, boost::bind (&Delivery::cycle_start, this, _1));
 }
 
 /* deliver to a new IO object, reconstruct from XML */
@@ -116,10 +116,10 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode&
 	}
 
 	if (_output) {
-		_output->changed.connect (sigc::mem_fun (*this, &Delivery::output_changed));
+		scoped_connect (_output->changed, boost::bind (&Delivery::output_changed, this, _1, _2));
 	}
 
-	CycleStart.connect (sigc::mem_fun (*this, &Delivery::cycle_start));
+	scoped_connect (CycleStart, boost::bind (&Delivery::cycle_start, this, _1));
 }
 
 /* deliver to an existing IO object, reconstruct from XML */
@@ -144,10 +144,10 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> out, boost::shared_ptr<Mut
 	}
 
 	if (_output) {
-		_output->changed.connect (sigc::mem_fun (*this, &Delivery::output_changed));
+		scoped_connect (_output->changed, boost::bind (&Delivery::output_changed, this, _1, _2));
 	}
 
-	CycleStart.connect (sigc::mem_fun (*this, &Delivery::cycle_start));
+	scoped_connect (CycleStart, boost::bind (&Delivery::cycle_start, this, _1));
 }
 
 std::string
@@ -419,7 +419,7 @@ Delivery::reset_panner ()
 		}
 	} else {
 		panner_legal_c.disconnect ();
-		panner_legal_c = PannersLegal.connect (sigc::mem_fun (*this, &Delivery::panners_became_legal));
+		panner_legal_c = PannersLegal.connect (boost::bind (&Delivery::panners_became_legal, this));
 	}
 }
 
@@ -465,7 +465,7 @@ int
 Delivery::reset_panners ()
 {
 	panners_legal = true;
-	return PannersLegal ();
+	return *PannersLegal ();
 }
 
 

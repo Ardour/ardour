@@ -73,14 +73,14 @@ using Glib::ustring;
 void
 Editor::add_external_audio_action (ImportMode mode_hint)
 {
-	if (session == 0) {
+	if (_session == 0) {
 		MessageDialog msg (_("You can't import or embed an audiofile until you have a session loaded."));
 		msg.run ();
 		return;
 	}
-
+	
 	if (sfbrowser == 0) {
-		sfbrowser = new SoundFileOmega (*this, _("Add Existing Media"), session, 0, true, mode_hint);
+		sfbrowser = new SoundFileOmega (*this, _("Add Existing Media"), _session, 0, true, mode_hint);
 	} else {
 		sfbrowser->set_mode (mode_hint);
 	}
@@ -94,7 +94,7 @@ Editor::external_audio_dialog ()
 	vector<Glib::ustring> paths;
 	uint32_t track_cnt;
 
-	if (session == 0) {
+	if (_session == 0) {
 		MessageDialog msg (_("You can't import or embed an audiofile until you have a session loaded."));
 		msg.run ();
 		return;
@@ -113,7 +113,7 @@ Editor::external_audio_dialog ()
 	}
 
 	if (sfbrowser == 0) {
-		sfbrowser = new SoundFileOmega (*this, _("Add Existing Media"), session, track_cnt, true);
+		sfbrowser = new SoundFileOmega (*this, _("Add Existing Media"), _session, track_cnt, true);
 	} else {
 		sfbrowser->reset (track_cnt);
 	}
@@ -163,7 +163,7 @@ Editor::external_audio_dialog ()
 				where = playhead_cursor->current_frame;
 				break;
 			case ImportAtStart:
-				where = session->current_start_frame();
+				where = _session->current_start_frame();
 				break;
 		}
 
@@ -187,7 +187,7 @@ Editor::external_audio_dialog ()
 void
 Editor::session_import_dialog ()
 {
-	SessionImportDialog dialog (*session);
+	SessionImportDialog dialog (_session);
 	ensure_float (dialog);
 	dialog.run ();
 }
@@ -211,7 +211,7 @@ Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
 {
 	string wave_name (Glib::path_get_basename(path));
 
-	SourceMap all_sources = session->get_sources();
+	SourceMap all_sources = _session->get_sources();
 	bool wave_name_exists = false;
 
 	for (SourceMap::iterator i = all_sources.begin(); i != all_sources.end(); ++i) {
@@ -450,7 +450,7 @@ Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode
 
   out:
 	if (ok) {
-		session->save_state ("");
+		_session->save_state ("");
 	}
 }
 
@@ -509,7 +509,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 				 import_status.target_regions,
 				 import_status.target_tracks,
 				 import_status.track, false) == 0) {
-			session->save_state ("");
+			_session->save_state ("");
 		}
 
 		/* update position from results */
@@ -545,7 +545,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 
 			/* lets see if we can link it into the session */
 			
-			sys::path tmp = session->session_directory().sound_path() / Glib::path_get_basename(path);
+			sys::path tmp = _session->session_directory().sound_path() / Glib::path_get_basename(path);
 			linked_path = tmp.to_string();
 			
 			path_to_use = linked_path;
@@ -587,7 +587,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 			goto out;
 		}
 
-		if (check_sample_rate  && (finfo.samplerate != (int) session->frame_rate())) {
+		if (check_sample_rate  && (finfo.samplerate != (int) _session->frame_rate())) {
 			vector<string> choices;
 
 			if (multifile) {
@@ -650,10 +650,10 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 
 				boost::shared_ptr<Source> s;
 
-				if ((s = session->source_by_path_and_channel (path, n)) == 0) {
+				if ((s = _session->source_by_path_and_channel (path, n)) == 0) {
 
 					source = boost::dynamic_pointer_cast<AudioFileSource> (
-						SourceFactory::createReadable (DataType::AUDIO, *session,
+						SourceFactory::createReadable (DataType::AUDIO, *_session,
 									       path_to_use, n,
 									       (mode == ImportAsTapeTrack
 										? Source::Destructive
@@ -763,7 +763,7 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 	}
 
 	if (Config->get_output_auto_connect() & AutoConnectMaster) {
-		output_chan = (session->master_out() ? session->master_out()->n_inputs().n_audio() : input_chan);
+		output_chan = (_session->master_out() ? _session->master_out()->n_inputs().n_audio() : input_chan);
 	} else {
 		output_chan = input_chan;
 	}
@@ -822,7 +822,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 		begin_reversible_command (_("insert file"));
 		XMLNode &before = playlist->get_state();
 		playlist->add_region (copy, pos);
-		session->add_command (new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
+		_session->add_command (new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
 		commit_reversible_command ();
 		break;
 	}
@@ -831,7 +831,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 	{
 		if (!existing_track) {
 			if (ar) {
-				list<boost::shared_ptr<AudioTrack> > at (session->new_audio_track (in_chans, out_chans, Normal, 0, 1));
+				list<boost::shared_ptr<AudioTrack> > at (_session->new_audio_track (in_chans, out_chans, Normal, 0, 1));
 
 				if (at.empty()) {
 					return -1;
@@ -839,7 +839,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 
 				existing_track = at.front();
 			} else if (mr) {
-				list<boost::shared_ptr<MidiTrack> > mt (session->new_midi_track (Normal, 0, 1));
+				list<boost::shared_ptr<MidiTrack> > mt (_session->new_midi_track (Normal, 0, 1));
 
 				if (mt.empty()) {
 					return -1;
@@ -862,7 +862,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 		if (!ar)
 			return -1;
 
-		list<boost::shared_ptr<AudioTrack> > at (session->new_audio_track (in_chans, out_chans, Destructive));
+		list<boost::shared_ptr<AudioTrack> > at (_session->new_audio_track (in_chans, out_chans, Destructive));
 		if (!at.empty()) {
 			boost::shared_ptr<Region> copy (RegionFactory::create (region));
 			at.front()->set_name (basename_nosuffix (copy->name()));
@@ -887,7 +887,7 @@ Editor::_import_thread (void *arg)
 void *
 Editor::import_thread ()
 {
-	session->import_audiofiles (import_status);
+	_session->import_audiofiles (import_status);
 	pthread_exit_pbd (0);
 	/*NOTREACHED*/
 	return 0;

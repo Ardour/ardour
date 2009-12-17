@@ -21,7 +21,6 @@
 #ifndef __ardour_return_h__
 #define __ardour_return_h__
 
-#include <sigc++/signal.h>
 #include <string>
 
 

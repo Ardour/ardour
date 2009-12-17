@@ -49,7 +49,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-sigc::signal<void,MidiSource *> MidiSource::MidiSourceCreated;
+boost::signals2::signal<void(MidiSource*)> MidiSource::MidiSourceCreated;
 
 MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 	: Source(s, DataType::MIDI, name, flags)
@@ -260,7 +260,7 @@ MidiSource::session_saved()
 
 		newsrc->flush_midi();
 
-		Switched.emit(newsrc);
+		Switched (newsrc); /* EMIT SIGNAL */
 	}
 }
 

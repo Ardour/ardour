@@ -66,7 +66,6 @@ AudioEngine::AudioEngine (string client_name)
 {
 	_instance = this; /* singleton */
 
-	session = 0;
 	session_remove_pending = false;
 	_running = false;
 	_has_run = false;
@@ -158,24 +157,24 @@ AudioEngine::start ()
 
 		nframes_t blocksize = jack_get_buffer_size (_priv_jack);
 
-		if (session) {
+		if (_session) {
 			BootMessage (_("Connect session to engine"));
 
-			session->set_block_size (blocksize);
-			session->set_frame_rate (jack_get_sample_rate (_priv_jack));
+			_session->set_block_size (blocksize);
+			_session->set_frame_rate (jack_get_sample_rate (_priv_jack));
 
 			/* page in as much of the session process code as we
 			   can before we really start running.
 			*/
 
-			session->process (blocksize);
-			session->process (blocksize);
-			session->process (blocksize);
-			session->process (blocksize);
-			session->process (blocksize);
-			session->process (blocksize);
-			session->process (blocksize);
-			session->process (blocksize);
+			_session->process (blocksize);
+			_session->process (blocksize);
+			_session->process (blocksize);
+			_session->process (blocksize);
+			_session->process (blocksize);
+			_session->process (blocksize);
+			_session->process (blocksize);
+			_session->process (blocksize);
 		}
 
 		_processed_frames = 0;
@@ -192,7 +191,7 @@ AudioEngine::start ()
 		jack_set_freewheel_callback (_priv_jack, _freewheel_callback, this);
 		jack_set_port_registration_callback (_priv_jack, _registration_callback, this);
 
-		if (session && session->config.get_jack_time_master()) {
+		if (_session && _session->config.get_jack_time_master()) {
 			jack_set_timebase_callback (_priv_jack, 0, _jack_timebase_callback, this);
 		}
 
@@ -269,8 +268,8 @@ void
 AudioEngine::jack_timebase_callback (jack_transport_state_t state, nframes_t nframes,
 				     jack_position_t* pos, int new_position)
 {
-	if (_jack && session && session->synced_to_jack()) {
-		session->jack_timebase_callback (state, nframes, pos, new_position);
+	if (_jack && _session && _session->synced_to_jack()) {
+		_session->jack_timebase_callback (state, nframes, pos, new_position);
 	}
 }
 
@@ -283,8 +282,8 @@ AudioEngine::_jack_sync_callback (jack_transport_state_t state, jack_position_t*
 int
 AudioEngine::jack_sync_callback (jack_transport_state_t state, jack_position_t* pos)
 {
-	if (_jack && session) {
-		return session->jack_sync_callback (state, pos);
+	if (_jack && _session) {
+		return _session->jack_sync_callback (state, pos);
 	}
 
 	return true;
@@ -372,7 +371,7 @@ AudioEngine::process_callback (nframes_t nframes)
 		next_processed_frames = _processed_frames + nframes;
 	}
 
-	if (!tm.locked() || session == 0) {
+	if (!tm.locked() || _session == 0) {
 		/* return having done nothing */
 		_processed_frames = next_processed_frames;
 		return 0;
@@ -380,7 +379,7 @@ AudioEngine::process_callback (nframes_t nframes)
 
 	if (session_remove_pending) {
 		/* perform the actual session removal */
-		session = 0;
+		_session = 0;
 		session_remove_pending = false;
 		session_removed.signal();
 		_processed_frames = next_processed_frames;
@@ -402,14 +401,16 @@ AudioEngine::process_callback (nframes_t nframes)
 	}
 
 	if (_freewheeling) {
-		/* emit the Freewheel signal and stop freewheeling in the event of trouble */
-		if (Freewheel (nframes)) {
+		/* emit the Freewheel signal and stop freewheeling in the event of trouble 
+		 * the indirection is to pick up the return value of the signal.
+		 */
+		if (*Freewheel (nframes)) {
 			jack_set_freewheel (_priv_jack, false);
 		}
 
 	} else {
-		if (session) {
-			session->process (nframes);
+		if (_session) {
+			_session->process (nframes);
 		}
 	}
 
@@ -442,7 +443,7 @@ AudioEngine::process_callback (nframes_t nframes)
 		last_monitor_check = next_processed_frames;
 	}
 
-	if (session->silent()) {
+	if (_session->silent()) {
 
 		boost::shared_ptr<Ports> p = ports.reader();
 
@@ -483,8 +484,8 @@ AudioEngine::jack_sample_rate_callback (nframes_t nframes)
 	monitor_check_interval = nframes / 10;
 	last_monitor_check = 0;
 
-	if (session) {
-		session->set_frame_rate (nframes);
+	if (_session) {
+		_session->set_frame_rate (nframes);
 	}
 
 	SampleRateChanged (nframes); /* EMIT SIGNAL */
@@ -514,8 +515,8 @@ AudioEngine::jack_bufsize_callback (nframes_t nframes)
 		(*i)->reset();
 	}
 
-	if (session) {
-		session->set_block_size (_buffer_size);
+	if (_session) {
+		_session->set_block_size (_buffer_size);
 	}
 
 	return 0;
@@ -536,7 +537,7 @@ AudioEngine::start_metering_thread ()
 {
 	if (m_meter_thread == 0) {
 		g_atomic_int_set (&m_meter_exit, 0);
-		m_meter_thread = Glib::Thread::create (sigc::mem_fun(this, &AudioEngine::meter_thread),
+		m_meter_thread = Glib::Thread::create (boost::bind (&AudioEngine::meter_thread, this),
 						       500000, true, true, Glib::THREAD_PRIORITY_NORMAL);
 	}
 }
@@ -558,31 +559,31 @@ AudioEngine::set_session (Session *s)
 {
 	Glib::Mutex::Lock pl (_process_lock);
 
-	if (!session) {
+	SessionHandlePtr::set_session (s);
 
-		session = s;
-
+	if (_session) {
+		
 		nframes_t blocksize = jack_get_buffer_size (_jack);
-
+		
 		/* page in as much of the session process code as we
 		   can before we really start running.
 		*/
-
+		
 		boost::shared_ptr<Ports> p = ports.reader();
-
+		
 		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
 			(*i)->cycle_start (blocksize);
 		}
-
-		s->process (blocksize);
-		s->process (blocksize);
-		s->process (blocksize);
-		s->process (blocksize);
-		s->process (blocksize);
-		s->process (blocksize);
-		s->process (blocksize);
-		s->process (blocksize);
-
+		
+		_session->process (blocksize);
+		_session->process (blocksize);
+		_session->process (blocksize);
+		_session->process (blocksize);
+		_session->process (blocksize);
+		_session->process (blocksize);
+		_session->process (blocksize);
+		_session->process (blocksize);
+		
 		for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
 			(*i)->cycle_end (blocksize);
 		}
@@ -596,13 +597,13 @@ AudioEngine::remove_session ()
 
 	if (_running) {
 
-		if (session) {
+		if (_session) {
 			session_remove_pending = true;
 			session_removed.wait(_process_lock);
 		}
 
 	} else {
-		session = 0;
+		SessionHandlePtr::set_session (0);
 	}
 
 	remove_all_ports ();
@@ -1081,8 +1082,8 @@ int
 AudioEngine::reset_timebase ()
 {
         GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
-	if (session) {
-		if (session->config.get_jack_time_master()) {
+	if (_session) {
+		if (_session->config.get_jack_time_master()) {
 			return jack_set_timebase_callback (_priv_jack, 0, _jack_timebase_callback, this);
 		} else {
 			return jack_release_timebase (_jack);
@@ -1214,11 +1215,11 @@ AudioEngine::reconnect_to_jack ()
 
         GET_PRIVATE_JACK_POINTER_RET (_jack,-1);
 
-	if (session) {
-		session->reset_jack_connection (_priv_jack);
+	if (_session) {
+		_session->reset_jack_connection (_priv_jack);
 		nframes_t blocksize = jack_get_buffer_size (_priv_jack);
-		session->set_block_size (blocksize);
-		session->set_frame_rate (jack_get_sample_rate (_priv_jack));
+		_session->set_block_size (blocksize);
+		_session->set_frame_rate (jack_get_sample_rate (_priv_jack));
 
 		_raw_buffer_sizes[DataType::AUDIO] = blocksize * sizeof(float);
 		cout << "FIXME: Assuming maximum MIDI buffer size " << blocksize * 4 << "bytes" << endl;
@@ -1237,7 +1238,7 @@ AudioEngine::reconnect_to_jack ()
 	jack_set_sync_callback (_priv_jack, _jack_sync_callback, this);
 	jack_set_freewheel_callback (_priv_jack, _freewheel_callback, this);
 
-	if (session && session->config.get_jack_time_master()) {
+	if (_session && _session->config.get_jack_time_master()) {
 		jack_set_timebase_callback (_priv_jack, 0, _jack_timebase_callback, this);
 	}
 

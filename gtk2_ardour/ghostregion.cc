@@ -34,6 +34,8 @@ using namespace Editing;
 using namespace ArdourCanvas;
 using namespace ARDOUR;
 
+boost::signals2::signal<void(GhostRegion*)> GhostRegion::GoingAway;
+
 GhostRegion::GhostRegion (ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_pos)
 	: trackview (tv)
 	, source_trackview (source_tv)

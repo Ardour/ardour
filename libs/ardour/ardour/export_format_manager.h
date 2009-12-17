@@ -26,8 +26,8 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
-#include <sigc++/signal.h>
-#include <sigc++/trackable.h>
+
+#include "pbd/scoped_connections.h"
 
 #include "ardour/export_formats.h"
 
@@ -39,7 +39,7 @@ class ExportFormatCompatibility;
 class ExportFormatSpecification;
 class AnyTime;
 
-class ExportFormatManager : public sigc::trackable
+class ExportFormatManager : public PBD::ScopedConnectionList
 {
   public:
 
@@ -92,7 +92,7 @@ class ExportFormatManager : public sigc::trackable
 
 	/* Signals */
 
-	sigc::signal<void, bool> CompleteChanged;
+	boost::signals2::signal<void(bool)> CompleteChanged;
 
 	/* Access to lists */
 

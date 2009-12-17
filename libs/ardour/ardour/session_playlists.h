@@ -25,7 +25,9 @@
 #include <string>
 #include <glibmm/thread.h>
 #include <boost/shared_ptr.hpp>
-#include <sigc++/trackable.h>
+#include <boost/function.hpp>
+
+#include "pbd/scoped_connections.h"
 
 class XMLNode;
 
@@ -36,7 +38,7 @@ class Region;
 class Source;
 class Session;
 	
-class SessionPlaylists : public sigc::trackable
+class SessionPlaylists : public PBD::ScopedConnectionList
 {
 public:
 	~SessionPlaylists ();
@@ -58,7 +60,7 @@ private:
 	void find_equivalent_playlist_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >& result);
 	void update_after_tempo_map_change ();
 	void add_state (XMLNode *, bool);
-	bool maybe_delete_unused (sigc::signal<int, boost::shared_ptr<Playlist> >);
+	bool maybe_delete_unused (boost::function<int(boost::shared_ptr<Playlist>)>);
 	int load (Session &, const XMLNode&);
 	int load_unused (Session &, const XMLNode&);
 	boost::shared_ptr<Playlist> XMLPlaylistFactory (Session &, const XMLNode&);

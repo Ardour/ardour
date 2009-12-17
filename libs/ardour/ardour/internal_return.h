@@ -20,7 +20,6 @@
 #ifndef __ardour_internal_return_h__
 #define __ardour_internal_return_h__
 
-#include <sigc++/signal.h>
 
 #include "ardour/ardour.h"
 #include "ardour/return.h"
@@ -48,7 +47,7 @@ class InternalReturn : public Return
 	BufferSet* get_buffers();
 	void release_buffers();
 
-	static sigc::signal<void,nframes_t> CycleStart;
+	static boost::signals2::signal<void(nframes_t)> CycleStart;
 
   private:
 	BufferSet buffers;

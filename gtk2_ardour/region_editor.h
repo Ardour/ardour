@@ -20,6 +20,8 @@
 #ifndef __gtk_ardour_region_edit_h__
 #define __gtk_ardour_region_edit_h__
 
+#include "ardour/session_handle.h"
+
 #include "ardour_dialog.h"
 
 namespace ARDOUR { class Session; }
@@ -28,15 +30,12 @@ namespace ARDOUR { class Session; }
 class RegionEditor : public ArdourDialog
 {
   public:
-	RegionEditor(ARDOUR::Session& s)
-	: ArdourDialog ("region editor")
-	, _session(s)
-	{}
+	RegionEditor(ARDOUR::Session* s)
+		: ArdourDialog ("region editor") {
+		set_session (s);
+	}
 
 	virtual ~RegionEditor () {}
-
-  protected:
-	ARDOUR::Session&     _session;
 };
 
 #endif /* __gtk_ardour_region_edit_h__ */

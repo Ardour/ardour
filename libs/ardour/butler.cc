@@ -38,8 +38,8 @@ static float _write_data_rate;
 
 namespace ARDOUR {
 
-Butler::Butler(Session* s)
-	: session(s)
+Butler::Butler(Session& s)
+	: SessionHandleRef (s)
 	, thread(0)
 	, audio_dstream_buffer_size(0)
 	, midi_dstream_buffer_size(0)
@@ -54,7 +54,7 @@ Butler::~Butler()
 int
 Butler::start_thread()
 {
-	const float rate = (float)session->frame_rate();
+	const float rate = (float)_session.frame_rate();
 
 	/* size is in Samples, not bytes */
 	audio_dstream_buffer_size = (uint32_t) floor (Config->get_audio_track_buffer_seconds() * rate);
@@ -194,7 +194,7 @@ Butler::thread_work ()
 		}
 
 		if (transport_work_requested()) {
-			session->butler_transport_work ();
+			_session.butler_transport_work ();
 		}
 
 		disk_work_outstanding = false;
@@ -203,7 +203,7 @@ Butler::thread_work ()
 
 		begin = get_microseconds();
 
-		boost::shared_ptr<Session::DiskstreamList> dsl = session->diskstream_list().reader ();
+		boost::shared_ptr<Session::DiskstreamList> dsl = _session.diskstream_list().reader ();
 
 //		for (i = dsl->begin(); i != dsl->end(); ++i) {
 //			cerr << "BEFORE " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
@@ -285,11 +285,11 @@ Butler::thread_work ()
 			}
 		}
 
-		if (err && session->actively_recording()) {
+		if (err && _session.actively_recording()) {
 			/* stop the transport and try to catch as much possible
 			   captured state as we can.
 			*/
-			session->request_stop ();
+			_session.request_stop ();
 		}
 
 		if (i != dsl->end()) {
@@ -304,15 +304,15 @@ Butler::thread_work ()
 		if (compute_io) {
 			// there are no apparent users for this calculation?
 			end = get_microseconds();
-			if(end-begin > 0) {
-			_write_data_rate = (float) bytes / (float) (end - begin);
+			if (end - begin > 0) {
+				_write_data_rate = (float) bytes / (float) (end - begin);
 			} else {
-			_write_data_rate = 0; // Well, infinity would be better
+				_write_data_rate = 0; // Well, infinity would be better
 			}
 		}
 
 		if (!disk_work_outstanding) {
-			session->refresh_disk_space ();
+			_session.refresh_disk_space ();
 		}
 
 

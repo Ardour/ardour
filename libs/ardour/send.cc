@@ -64,7 +64,7 @@ Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node, i
 
 Send::~Send ()
 {
-	GoingAway ();
+	drop_references ();
 }
 
 void

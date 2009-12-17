@@ -200,15 +200,14 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	setup_fade_handle_positions ();
 
-	if (!trackview.session().config.get_show_region_fades()) {
+	if (!trackview.session()->config.get_show_region_fades()) {
 		set_fade_visibility (false);
 	}
 
 	const string line_name = _region->name() + ":gain";
 
 	if (!Profile->get_sae()) {
-		gain_line = new AudioRegionGainLine (line_name, trackview.session(), *this, *group,
-				audio_region()->envelope());
+		gain_line = new AudioRegionGainLine (line_name, *this, *group, audio_region()->envelope());
 	}
 
 	if (!(_flags & EnvelopeVisible)) {
@@ -360,7 +359,7 @@ AudioRegionView::region_renamed ()
 {
 	Glib::ustring str = RegionView::make_name ();
 
-	if (audio_region()->speed_mismatch (trackview.session().frame_rate())) {
+	if (audio_region()->speed_mismatch (trackview.session()->frame_rate())) {
 		str = string ("*") + str;
 	}
 
@@ -415,7 +414,7 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 				fade_in_handle->hide();
 				fade_out_handle->hide();
 			} else {
-				if (trackview.session().config.get_show_region_fades()) {
+				if (trackview.session()->config.get_show_region_fades()) {
 					fade_in_handle->show();
 					fade_out_handle->show();
 				}
@@ -575,7 +574,7 @@ AudioRegionView::reset_fade_in_shape_width (nframes_t width)
 		return;
 	}
 
-	if (trackview.session().config.get_show_region_fades()) {
+	if (trackview.session()->config.get_show_region_fades()) {
 		fade_in_shape->show();
 	}
 
@@ -666,7 +665,7 @@ AudioRegionView::reset_fade_out_shape_width (nframes_t width)
 		return;
 	}
 
-	if (trackview.session().config.get_show_region_fades()) {
+	if (trackview.session()->config.get_show_region_fades()) {
 		fade_out_shape->show();
 	}
 
@@ -869,7 +868,7 @@ AudioRegionView::create_waves ()
 		// cerr << "\tchannel " << n << endl;
 
 		if (wait_for_data) {
-			if (audio_region()->audio_source(n)->peaks_ready (sigc::bind (sigc::mem_fun(*this, &AudioRegionView::peaks_ready_handler), n), data_ready_connection)) {
+			if (audio_region()->audio_source(n)->peaks_ready (boost::bind (&AudioRegionView::peaks_ready_handler, this, n), data_ready_connection)) {
 				// cerr << "\tData is ready\n";
 				create_one_wave (n, true);
 			} else {
@@ -1018,21 +1017,21 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 
 	gain_line->view_to_model_coord (x, y);
 
-	trackview.session().begin_reversible_command (_("add gain control point"));
+	trackview.session()->begin_reversible_command (_("add gain control point"));
 	XMLNode &before = audio_region()->envelope()->get_state();
 
 	if (!audio_region()->envelope_active()) {
 		XMLNode &region_before = audio_region()->get_state();
 		audio_region()->set_envelope_active(true);
 		XMLNode &region_after = audio_region()->get_state();
-		trackview.session().add_command (new MementoCommand<AudioRegion>(*(audio_region().get()), &region_before, &region_after));
+		trackview.session()->add_command (new MementoCommand<AudioRegion>(*(audio_region().get()), &region_before, &region_after));
 	}
 
 	audio_region()->envelope()->add (fx, y);
 
 	XMLNode &after = audio_region()->envelope()->get_state();
-	trackview.session().add_command (new MementoCommand<AutomationList>(*audio_region()->envelope().get(), &before, &after));
-	trackview.session().commit_reversible_command ();
+	trackview.session()->add_command (new MementoCommand<AutomationList>(*audio_region()->envelope().get(), &before, &after));
+	trackview.session()->commit_reversible_command ();
 }
 
 void
@@ -1187,7 +1186,7 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 	ghost->set_colors();
 	ghosts.push_back (ghost);
 
-	ghost->GoingAway.connect (sigc::mem_fun(*this, &AudioRegionView::remove_ghost));
+	ghost->GoingAway.connect (boost::bind (&RegionView::remove_ghost, this, _1));
 
 	return ghost;
 }

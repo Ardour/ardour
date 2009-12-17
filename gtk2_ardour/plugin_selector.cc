@@ -72,7 +72,6 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 
 	_plugin_menu = 0;
 	manager = mgr;
-	session = 0;
 	in_row_change = false;
 
 	manager->PluginListChanged.connect (sigc::mem_fun (*this, &PluginSelector::build_plugin_menu));
@@ -203,18 +202,6 @@ PluginSelector::row_clicked(GdkEventButton* event)
 {
 	if (event->type == GDK_2BUTTON_PRESS)
 		btn_add_clicked();
-}
-
-void
-PluginSelector::set_session (Session* s)
-{
-	ENSURE_GUI_THREAD (*this, &PluginSelector::set_session, s)
-
-	session = s;
-
-	if (session) {
-		session->GoingAway.connect (sigc::bind (sigc::mem_fun(*this, &PluginSelector::set_session), static_cast<Session*> (0)));
-	}
 }
 
 bool
@@ -384,11 +371,11 @@ PluginSelector::au_refiller (const std::string&)
 PluginPtr
 PluginSelector::load_plugin (PluginInfoPtr pi)
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return PluginPtr();
 	}
 
-	return pi->load (*session);
+	return pi->load (*_session);
 }
 
 void

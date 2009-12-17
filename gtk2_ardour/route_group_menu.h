@@ -17,26 +17,28 @@
 
 */
 
+#ifndef __ardour_gtk_route_group_menu_h__
+#define __ardour_gtk_route_group_menu_h__
+
 #include "ardour/route_group.h"
+#include "ardour/session_handle.h"
 
-namespace ARDOUR {
-	class Session;
-}
 
-class RouteGroupMenu : public Gtk::Menu
+class RouteGroupMenu : public Gtk::Menu, public ARDOUR::SessionHandlePtr
 {
 public:
-	RouteGroupMenu (ARDOUR::Session &, ARDOUR::RouteGroup::Property);
+	RouteGroupMenu (ARDOUR::Session*, ARDOUR::RouteGroup::Property);
 
 	void rebuild (ARDOUR::RouteGroup *);
 
 	sigc::signal<void, ARDOUR::RouteGroup*> GroupSelected;
 
-private:
+  private:
 	void add_item (ARDOUR::RouteGroup *, ARDOUR::RouteGroup *, Gtk::RadioMenuItem::Group*);
 	void new_group ();
 	void set_group (ARDOUR::RouteGroup *);
 
-	ARDOUR::Session& _session;
 	ARDOUR::RouteGroup::Property _default_properties;
 };
+
+#endif /* __ardour_gtk_route_group_menu_h__ */

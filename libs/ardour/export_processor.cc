@@ -38,7 +38,7 @@ using namespace PBD;
 namespace ARDOUR
 {
 
-sigc::signal<void, Glib::ustring> ExportProcessor::WritingFile;
+boost::signals2::signal<void (const Glib::ustring&)> ExportProcessor::WritingFile;
 
 ExportProcessor::ExportProcessor (Session & session) :
   session (session),

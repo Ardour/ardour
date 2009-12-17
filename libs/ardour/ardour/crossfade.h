@@ -24,7 +24,6 @@
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 
-#include <sigc++/signal.h>
 
 #include "pbd/undo.h"
 #include "pbd/statefuldestructible.h"
@@ -106,8 +105,8 @@ class Crossfade : public ARDOUR::AudioRegion
 
 	nframes_t overlap_length() const;
 
-	sigc::signal<void,boost::shared_ptr<Region> > Invalidated;
-	sigc::signal<void,Change>     StateChanged;
+	boost::signals2::signal<void(boost::shared_ptr<Region>)> Invalidated;
+	boost::signals2::signal<void(Change)>     StateChanged;
 
 	bool covers (nframes_t frame) const {
 		return _position <= frame && frame < _position + _length;

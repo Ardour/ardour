@@ -20,7 +20,6 @@
 #ifndef __ardour_send_h__
 #define __ardour_send_h__
 
-#include <sigc++/signal.h>
 #include <string>
 
 #include "pbd/stateful.h"

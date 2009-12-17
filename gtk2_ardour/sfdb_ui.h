@@ -39,6 +39,7 @@
 #include <gtkmm/textview.h>
 
 #include "ardour/audiofilesource.h"
+#include "ardour/session_handle.h"
 
 #include "ardour_dialog.h"
 #include "editing.h"
@@ -50,7 +51,7 @@ namespace ARDOUR {
 
 class GainMeter;
 
-class SoundFileBox : public Gtk::VBox
+class SoundFileBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
   public:
 	SoundFileBox (bool persistent);
@@ -64,7 +65,6 @@ class SoundFileBox : public Gtk::VBox
 	bool autoplay () const;
 
   protected:
-	ARDOUR::Session* _session;
 	Glib::ustring path;
 
 	ARDOUR::SoundFileInfo sf_info;
@@ -241,7 +241,7 @@ class SoundFileOmega : public SoundFileBrowser
 	bool check_info (const std::vector<Glib::ustring>& paths,
 			 bool& same_size, bool& src_needed, bool& multichannel);
 
-	static bool check_link_status (const ARDOUR::Session&, const std::vector<Glib::ustring>& paths);
+	static bool check_link_status (const ARDOUR::Session*, const std::vector<Glib::ustring>& paths);
 
 	void file_selection_changed ();
 	bool reset_options ();

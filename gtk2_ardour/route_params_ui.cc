@@ -181,16 +181,22 @@ RouteParams_UI::add_routes (RouteList& routes)
 
 		//route_select_list.rows().back().select ();
 
-		route->NameChanged.connect (sigc::bind (sigc::mem_fun(*this, &RouteParams_UI::route_name_changed), route));
-		route->GoingAway.connect (sigc::bind (sigc::mem_fun(*this, &RouteParams_UI::route_removed), route));
+		scoped_connect (route->NameChanged, boost::bind (&RouteParams_UI::route_name_changed, this, boost::weak_ptr<Route>(route)));
+		scoped_connect (route->GoingAway, boost::bind (&RouteParams_UI::route_removed, this, boost::weak_ptr<Route>(route)));
 	}
 }
 
 
 void
-RouteParams_UI::route_name_changed (boost::shared_ptr<Route> route)
+RouteParams_UI::route_name_changed (boost::weak_ptr<Route> wr)
 {
-	ENSURE_GUI_THREAD (*this, &RouteParams_UI::route_name_changed, route)
+	boost::shared_ptr<Route> route (wr.lock());
+
+	if (!route) { 
+		return;
+	}
+
+	ENSURE_GUI_THREAD (*this, &RouteParams_UI::route_name_changed, wr)
 
 	bool found = false ;
 	TreeModel::Children rows = route_display_model->children();
@@ -216,14 +222,13 @@ RouteParams_UI::route_name_changed (boost::shared_ptr<Route> route)
 void
 RouteParams_UI::setup_processor_boxes()
 {
-	if (session && _route) {
+	if (_session && _route) {
 
 		// just in case... shouldn't need this
 		cleanup_processor_boxes();
 
 		// construct new redirect boxes
-		insert_box = new ProcessorBox(*session,
-				sigc::mem_fun(*this, &RouteParams_UI::plugin_selector), _rr_selection, 0);
+		insert_box = new ProcessorBox (_session, boost::bind (&RouteParams_UI::plugin_selector, this), _rr_selection, 0);
 		insert_box->set_route (_route);
 
 		redir_hpane.pack1 (*insert_box);
@@ -265,18 +270,19 @@ RouteParams_UI::cleanup_latency_frame ()
 		latency_packer.remove (*latency_widget);
 		latency_packer.remove (latency_button_box);
 		latency_packer.remove (delay_label);
+		latency_connections.drop_connections ();
+		latency_click_connection.disconnect ();
+
 		delete latency_widget;
 		latency_widget = 0;
-		latency_conn.disconnect ();
-		delay_conn.disconnect ();
-		latency_apply_conn.disconnect ();
+		
 	}
 }
 
 void
 RouteParams_UI::setup_latency_frame ()
 {
-	latency_widget = new LatencyGUI (*(_route->output()), session->frame_rate(), session->engine().frames_per_cycle());
+	latency_widget = new LatencyGUI (*(_route->output()), _session->frame_rate(), _session->engine().frames_per_cycle());
 
 	char buf[128];
 	snprintf (buf, sizeof (buf), _("Playback delay: %u samples"), _route->initial_delay());
@@ -286,9 +292,9 @@ RouteParams_UI::setup_latency_frame ()
 	latency_packer.pack_start (latency_button_box, false, false);
 	latency_packer.pack_start (delay_label);
 
-	latency_apply_conn = latency_apply_button.signal_clicked().connect (sigc::mem_fun (*latency_widget, &LatencyGUI::finish));
-	latency_conn = _route->signal_latency_changed.connect (sigc::mem_fun (*this, &RouteParams_UI::refresh_latency));
-	delay_conn = _route->initial_delay_changed.connect (sigc::mem_fun (*this, &RouteParams_UI::refresh_latency));
+	latency_click_connection = latency_apply_button.signal_clicked().connect (sigc::mem_fun (*latency_widget, &LatencyGUI::finish));
+	latency_connections.add_connection (_route->signal_latency_changed.connect (sigc::mem_fun (*this, &RouteParams_UI::refresh_latency)));
+	latency_connections.add_connection ( _route->initial_delay_changed.connect (sigc::mem_fun (*this, &RouteParams_UI::refresh_latency)));
 
 	latency_frame.add (latency_packer);
 	latency_frame.show_all ();
@@ -300,13 +306,13 @@ RouteParams_UI::setup_io_frames()
 	cleanup_io_frames();
 
 	// input
-	_input_iosel = new IOSelector (this, session, _route->input());
+	_input_iosel = new IOSelector (this, _session, _route->input());
 	_input_iosel->setup ();
 	input_frame.add (*_input_iosel);
 	input_frame.show_all();
 
 	// output
-	_output_iosel = new IOSelector (this, session, _route->output());
+	_output_iosel = new IOSelector (this, _session, _route->output());
 	_output_iosel->setup ();
 	output_frame.add (*_output_iosel);
 	output_frame.show_all();
@@ -341,7 +347,7 @@ RouteParams_UI::cleanup_view (bool stopupdate)
 			  plugui->stop_updating (0);
 		}
 
-		_plugin_conn.disconnect();
+		_processor_going_away_connection.disconnect ();
  		redir_hpane.remove(*_active_view);
 		delete _active_view;
 		_active_view = 0;
@@ -349,9 +355,15 @@ RouteParams_UI::cleanup_view (bool stopupdate)
 }
 
 void
-RouteParams_UI::route_removed (boost::shared_ptr<Route> route)
+RouteParams_UI::route_removed (boost::weak_ptr<Route> wr)
 {
-	ENSURE_GUI_THREAD (*this, &RouteParams_UI::route_removed, route)
+	boost::shared_ptr<Route> route (wr.lock());
+
+	if (!route) { 
+		return;
+	}
+
+	ENSURE_GUI_THREAD (*this, &RouteParams_UI::route_removed, wr)
 
 	TreeModel::Children rows = route_display_model->children();
 	TreeModel::Children::iterator ri;
@@ -380,29 +392,27 @@ void
 RouteParams_UI::set_session (Session *sess)
 {
 	ArdourDialog::set_session (sess);
-
+	
 	route_display_model->clear();
+	_plugin_selector->set_session (_session);
 
-	if (session) {
-		boost::shared_ptr<RouteList> r = session->get_routes();
+	if (_session) {
+		boost::shared_ptr<RouteList> r = _session->get_routes();
 		add_routes (*r);
-		session->GoingAway.connect (sigc::mem_fun(*this, &ArdourDialog::session_gone));
-		session->RouteAdded.connect (sigc::mem_fun(*this, &RouteParams_UI::add_routes));
+		_session_connections.add_connection (_session->RouteAdded.connect (sigc::mem_fun(*this, &RouteParams_UI::add_routes)));
 		start_updating ();
 	} else {
 		stop_updating ();
 	}
-
-	//route_select_list.thaw ();
-
-	_plugin_selector->set_session (session);
 }
 
 
 void
-RouteParams_UI::session_gone ()
+RouteParams_UI::session_going_away ()
 {
-	ENSURE_GUI_THREAD (*this, &RouteParams_UI::session_gone)
+	ENSURE_GUI_THREAD (*this, &RouteParams_UI::session_going_away);
+
+	SessionHandlePtr::session_going_away ();
 
 	route_display_model->clear();
 
@@ -414,9 +424,6 @@ RouteParams_UI::session_gone ()
 	_route.reset ((Route*) 0);
 	_processor.reset ((Processor*) 0);
 	update_title();
-
-	ArdourDialog::session_gone();
-
 }
 
 void
@@ -436,8 +443,7 @@ RouteParams_UI::route_selected()
 
 		// remove event binding from previously selected
 		if (_route) {
-			_route_conn.disconnect();
-			_route_ds_conn.disconnect();
+			_route_processors_connection.disconnect ();
 			cleanup_processor_boxes();
 			cleanup_view();
 			cleanup_io_frames();
@@ -452,9 +458,8 @@ RouteParams_UI::route_selected()
 		setup_processor_boxes();
 		setup_latency_frame ();
 
-		// sigc::bind to redirects changed event for this route
-		_route_conn = route->processors_changed.connect (sigc::mem_fun(*this, &RouteParams_UI::processors_changed));
-
+		_route_processors_connection = route->processors_changed.connect (boost::bind (&RouteParams_UI::processors_changed, this, _1));
+		
 		track_input_label.set_text (_route->name());
 
 		update_title();
@@ -462,7 +467,7 @@ RouteParams_UI::route_selected()
 	} else {
 		// no selection
 		if (_route) {
-			_route_conn.disconnect();
+			_route_processors_connection.disconnect ();
 
 			// remove from view
 			cleanup_io_frames();
@@ -505,64 +510,62 @@ RouteParams_UI::show_track_menu()
 }
 
 void
-RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> insert)
+RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
 {
 	boost::shared_ptr<Send> send;
 	boost::shared_ptr<Return> retrn;
 	boost::shared_ptr<PluginInsert> plugin_insert;
 	boost::shared_ptr<PortInsert> port_insert;
 
-	if ((send = boost::dynamic_pointer_cast<Send> (insert)) != 0) {
+	if ((send = boost::dynamic_pointer_cast<Send> (proc)) != 0) {
 
-		SendUI *send_ui = new SendUI (this, send, *session);
+		SendUI *send_ui = new SendUI (this, send, _session);
 
 		cleanup_view();
-		_plugin_conn = send->GoingAway.connect (sigc::bind (sigc::mem_fun(*this, &RouteParams_UI::redirect_going_away),
-							      insert));
+		_processor_going_away_connection = send->GoingAway.connect (boost::bind (&RouteParams_UI::processor_going_away, this, 
+											 boost::weak_ptr<Processor>(proc)));
+
 		_active_view = send_ui;
 
 		redir_hpane.add2 (*_active_view);
 		redir_hpane.show_all();
 
-	} else if ((retrn = boost::dynamic_pointer_cast<Return> (insert)) != 0) {
+	} else if ((retrn = boost::dynamic_pointer_cast<Return> (proc)) != 0) {
 
-		ReturnUI *return_ui = new ReturnUI (this, retrn, *session);
+		ReturnUI *return_ui = new ReturnUI (this, retrn, _session);
 
 		cleanup_view();
-		_plugin_conn = retrn->GoingAway.connect (sigc::bind (sigc::mem_fun(*this, &RouteParams_UI::redirect_going_away),
-							       insert));
+		_processor_going_away_connection = retrn->GoingAway.connect (boost::bind (&RouteParams_UI::processor_going_away, this,
+											  boost::weak_ptr<Processor>(proc)));
 		_active_view = return_ui;
 
 		redir_hpane.add2 (*_active_view);
 		redir_hpane.show_all();
 
-	} else if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (insert)) != 0) {
+	} else if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (proc)) != 0) {
 
 		GenericPluginUI *plugin_ui = new GenericPluginUI (plugin_insert, true);
 
 		cleanup_view();
-		_plugin_conn = plugin_insert->plugin()->GoingAway.connect (sigc::bind (sigc::mem_fun(*this, &RouteParams_UI::plugin_going_away),
-										 PreFader));
+		_processor_going_away_connection = plugin_insert->plugin()->GoingAway.connect (boost::bind (&RouteParams_UI::plugin_going_away, this, PreFader));
 		plugin_ui->start_updating (0);
 		_active_view = plugin_ui;
 		redir_hpane.pack2 (*_active_view);
 		redir_hpane.show_all();
 
-	} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (insert)) != 0) {
+	} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (proc)) != 0) {
 
-		PortInsertUI *portinsert_ui = new PortInsertUI (this, session, port_insert);
+		PortInsertUI *portinsert_ui = new PortInsertUI (this, _session, port_insert);
 
 		cleanup_view();
-		_plugin_conn = port_insert->GoingAway.connect (sigc::bind (sigc::mem_fun(*this, &RouteParams_UI::redirect_going_away),
-								     insert));
+		_processor_going_away_connection = port_insert->GoingAway.connect (boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor> (proc)));
 		_active_view = portinsert_ui;
 		redir_hpane.pack2 (*_active_view);
 		portinsert_ui->redisplay();
 		redir_hpane.show_all();
 	}
 
-	_processor = insert;
-
+	_processor = proc;
 	update_title();
 
 }
@@ -581,14 +584,19 @@ RouteParams_UI::plugin_going_away (Placement place)
 }
 
 void
-RouteParams_UI::redirect_going_away (boost::shared_ptr<ARDOUR::Processor> insert)
-
+RouteParams_UI::processor_going_away (boost::weak_ptr<ARDOUR::Processor> wproc)
 {
-	ENSURE_GUI_THREAD (*this, &RouteParams_UI::redirect_going_away, insert)
+	boost::shared_ptr<Processor> proc = (wproc.lock());
+
+	if (!proc) {
+		return;
+	}
+
+	ENSURE_GUI_THREAD (*this, &RouteParams_UI::processor_going_away, wproc)
 
 	printf ("redirect going away\n");
 	// delete the current view without calling finish
-	if (insert == _processor) {
+	if (proc == _processor) {
 		cleanup_view (false);
 		_processor.reset ((Processor*) 0);
 	}

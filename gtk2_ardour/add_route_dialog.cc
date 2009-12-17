@@ -61,13 +61,14 @@ std::vector<std::string> AddRouteDialog::channel_combo_strings;
 std::vector<std::string> AddRouteDialog::track_mode_strings;
 std::vector<std::string> AddRouteDialog::bus_mode_strings;
 
-AddRouteDialog::AddRouteDialog (Session & s)
+AddRouteDialog::AddRouteDialog (Session* s)
 	: ArdourDialog (X_("add route dialog"))
-	, _session (s)
 	, routes_adjustment (1, 1, 128, 1, 4)
 	, routes_spinner (routes_adjustment)
 	, mode_label (_("Track mode:"))
 {
+	set_session (s);
+
 	if (track_mode_strings.empty()) {
 		track_mode_strings = I18N (track_mode_names);
 
@@ -391,7 +392,7 @@ AddRouteDialog::route_group ()
 		return 0;
 	}
 
-	return _session.route_group_by_name (route_group_combo.get_active_text());
+	return _session->route_group_by_name (route_group_combo.get_active_text());
 }
 
 void
@@ -404,7 +405,7 @@ AddRouteDialog::refill_route_groups ()
 
 	route_group_combo.append_text (_("No group"));
 
-	_session.foreach_route_group (sigc::mem_fun (*this, &AddRouteDialog::add_route_group));
+	_session->foreach_route_group (sigc::mem_fun (*this, &AddRouteDialog::add_route_group));
 
 	route_group_combo.set_active (2);
 }
@@ -412,14 +413,14 @@ AddRouteDialog::refill_route_groups ()
 void
 AddRouteDialog::group_changed ()
 {
-	if (route_group_combo.get_active_text () == _("New group...")) {
-		RouteGroup* g = new RouteGroup (_session, "", RouteGroup::Active);
+	if (_session && route_group_combo.get_active_text () == _("New group...")) {
+		RouteGroup* g = new RouteGroup (*_session, "", RouteGroup::Active);
 
 		RouteGroupDialog d (g, Gtk::Stock::NEW);
 		int const r = d.do_run ();
 
 		if (r == Gtk::RESPONSE_OK) {
-			_session.add_route_group (g);
+			_session->add_route_group (g);
 			add_route_group (g);
 			route_group_combo.set_active (3);
 		} else {

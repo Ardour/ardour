@@ -26,12 +26,13 @@
 #include <sigc++/slot.h>
 #include <sigc++/bind.h>
 #include <sys/time.h>
+
+#include "pbd/scoped_connections.h"
 #include "pbd/command.h"
-#include "pbd/shiva.h"
 
 typedef sigc::slot<void> UndoAction;
 
-class UndoTransaction : public Command
+class UndoTransaction : public Command, public PBD::ScopedConnectionList
 {
   public:
 	UndoTransaction ();
@@ -61,7 +62,6 @@ class UndoTransaction : public Command
 
   private:
 	std::list<Command*>    actions;
-	std::list<PBD::ProxyShiva<Command,UndoTransaction>*> shivas;
 	struct timeval        _timestamp;
 	bool                  _clearing;
 
@@ -71,10 +71,9 @@ class UndoTransaction : public Command
 
 	~UndoTransaction ();
 	void about_to_explicitly_delete ();
-	
 };
 
-class UndoHistory : public sigc::trackable
+class UndoHistory : public PBD::ScopedConnectionList
 {
   public:
 	UndoHistory();
@@ -107,7 +106,7 @@ class UndoHistory : public sigc::trackable
 
 	void set_depth (uint32_t);
 
-	sigc::signal<void> Changed;
+	boost::signals2::signal<void()> Changed;
 	
   private:
 	bool _clearing;

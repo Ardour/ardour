@@ -131,7 +131,7 @@ PortMatrixComponent::group_size (boost::shared_ptr<const PortGroup> g) const
 		s = bundles.size();
 	} else {
 		for (PortGroup::BundleList::const_iterator i = bundles.begin(); i != bundles.end(); ++i) {
-			s += i->bundle->nchannels();
+			s += (*i)->bundle->nchannels();
 		}
 	}
 
@@ -151,7 +151,7 @@ PortMatrixComponent::channel_to_position (ARDOUR::BundleChannel bc, boost::share
 
 	for (PortGroup::BundleList::const_iterator i = bundles.begin(); i != bundles.end(); ++i) {
 
-		if (i->bundle == bc.bundle) {
+		if ((*i)->bundle == bc.bundle) {
 
 			/* found the bundle */
 			
@@ -168,7 +168,7 @@ PortMatrixComponent::channel_to_position (ARDOUR::BundleChannel bc, boost::share
 		if (_matrix->show_only_bundles()) {
 			p += 1;
 		} else {
-			p += i->bundle->nchannels ();
+			p += (*i)->bundle->nchannels ();
 		}
 	}
 
@@ -187,16 +187,16 @@ PortMatrixComponent::position_to_channel (double p, double, boost::shared_ptr<co
 		if (_matrix->show_only_bundles()) {
 			
 			if (p < 1) {
-				return ARDOUR::BundleChannel (j->bundle, -1);
+				return ARDOUR::BundleChannel ((*j)->bundle, -1);
 			} else {
 				p -= 1;
 			}
 			
 		} else {
 			
-			uint32_t const s = j->bundle->nchannels ();
+			uint32_t const s = (*j)->bundle->nchannels ();
 			if (p < s) {
-				return ARDOUR::BundleChannel (j->bundle, p);
+				return ARDOUR::BundleChannel ((*j)->bundle, p);
 			} else {
 				p -= s;
 			}

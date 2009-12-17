@@ -18,10 +18,10 @@
 #ifndef route_signal_h
 #define route_signal_h
 
-#include <sigc++/sigc++.h>
+#include <vector>
 #include <boost/shared_ptr.hpp>
 
-#include <vector>
+#include "pbd/scoped_connections.h"
 
 #include "midi_byte_array.h"
 
@@ -79,8 +79,7 @@ private:
 	Strip & _strip;
 	SurfacePort & _port;
 
-	typedef std::vector<sigc::connection> Connections;
-	Connections _connections;
+	PBD::ScopedConnectionList connections;
 
 	// Last written values for the gain and pan, to avoid overloading
 	// the midi connection to the surface

@@ -62,7 +62,7 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		 * @param sess the current session
 		 * @param canvas the parent canvas item
 		 */
-		ImageFrameTimeAxis(const std::string & track_id, PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas) ;
+		ImageFrameTimeAxis(const std::string & track_id, PublicEditor& ed, ARDOUR::Session* sess, ArdourCanvas::Canvas& canvas) ;
 
 		/**
 		 * Destructor

@@ -64,7 +64,7 @@ class MuteMaster : public AutomationControl
 	void set_value (float); /* note: float is used as a bitfield of MutePoints */
 	float get_value () const;
 
-	sigc::signal<void> MutePointChanged;
+	boost::signals2::signal<void()> MutePointChanged;
 
 	XMLNode& get_state();
 	int set_state(const XMLNode&, int version);

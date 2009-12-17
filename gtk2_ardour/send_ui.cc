@@ -34,11 +34,10 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session& se)
+SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session)
 	: _send (s)
-	, _session (se)
-	, _gpm (se, 250)
-	, _panners (se)
+	, _gpm (session, 250)
+	, _panners (session)
 {
  	_panners.set_panner (s->panner());
  	_gpm.set_controls (boost::shared_ptr<Route>(), s->meter(), s->amp());
@@ -52,7 +51,7 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session& se)
 	_vbox.pack_start (_hbox, false, false, false);
 	_vbox.pack_start (_panners, false, false);
 
-	io = manage (new IOSelector (parent, &se, s->output()));
+	io = manage (new IOSelector (parent, session, s->output()));
 
 	pack_start (_vbox, false, false);
 
@@ -119,10 +118,10 @@ SendUI::fast_update ()
 	}
 }
 
-SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session& ss)
+SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session* session)
 	: ArdourDialog (string("Ardour: send ") + s->name())
 {
-	ui = new SendUI (this, s, ss);
+	ui = new SendUI (this, s, session);
 
 	hpacker.pack_start (*ui, true, true);
 
@@ -131,8 +130,7 @@ SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session& ss)
 
 	set_name ("SendUIWindow");
 
-	going_away_connection = s->GoingAway.connect (
-			sigc::mem_fun (*this, &SendUIWindow::send_going_away));
+	going_away_connection = s->GoingAway.connect (sigc::mem_fun (*this, &SendUIWindow::send_going_away));
 
 	signal_delete_event().connect (sigc::bind (
 					       sigc::ptr_fun (just_hide_it),
@@ -148,7 +146,7 @@ void
 SendUIWindow::send_going_away ()
 {
 	ENSURE_GUI_THREAD (*this, &SendUIWindow::send_going_away)
-	delete_when_idle (this);
 	going_away_connection.disconnect ();
+	delete_when_idle (this);
 }
 

@@ -32,11 +32,14 @@
 #include <gtkmm/drawingarea.h>
 #include <gdkmm/colormap.h>
 
-#include "ardour/types.h"
+#include "pbd/scoped_connections.h"
 
-#include <gtkmm2ext/click_box.h>
-#include <gtkmm2ext/focus_entry.h>
-#include <gtkmm2ext/slider_controller.h>
+#include "ardour/types.h"
+#include "ardour/session_handle.h"
+
+#include "gtkmm2ext/click_box.h"
+#include "gtkmm2ext/focus_entry.h"
+#include "gtkmm2ext/slider_controller.h"
 
 #include "enums.h"
 #include "level_meter.h"
@@ -58,10 +61,10 @@ namespace Gtk {
 	class Menu;
 }
 
-class GainMeterBase : virtual public sigc::trackable
+class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 {
   public:
-	GainMeterBase (ARDOUR::Session&, const Glib::RefPtr<Gdk::Pixbuf>& pix,
+	GainMeterBase (ARDOUR::Session*, const Glib::RefPtr<Gdk::Pixbuf>& pix,
 		       bool horizontal, int);
 	virtual ~GainMeterBase ();
 
@@ -90,8 +93,8 @@ class GainMeterBase : virtual public sigc::trackable
 	boost::shared_ptr<ARDOUR::Route> _route;
 	boost::shared_ptr<ARDOUR::PeakMeter> _meter;
 	boost::shared_ptr<ARDOUR::Amp> _amp;
-	ARDOUR::Session& _session;
 	std::vector<sigc::connection> connections;
+	PBD::ScopedConnectionList model_connections;
 
 	bool ignore_toggle;
 	bool next_release_selects;
@@ -180,7 +183,7 @@ class GainMeterBase : virtual public sigc::trackable
 class GainMeter : public GainMeterBase, public Gtk::VBox
 {
   public:
-	GainMeter (ARDOUR::Session&, int);
+	GainMeter (ARDOUR::Session*, int);
 	~GainMeter () {}
 
 	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,

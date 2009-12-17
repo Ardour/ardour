@@ -23,7 +23,6 @@
 
 #include <string>
 
-#include <sigc++/bind.h>
 
 #include "pbd/failed_constructor.h"
 #include "pbd/xml++.h"
@@ -131,7 +130,7 @@ PluginInsert::set_count (uint32_t num)
 
 PluginInsert::~PluginInsert ()
 {
-	GoingAway (); /* EMIT SIGNAL */
+	drop_references ();
 }
 
 void

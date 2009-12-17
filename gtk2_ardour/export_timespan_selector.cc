@@ -41,10 +41,10 @@ using namespace ARDOUR;
 using namespace PBD;
 
 ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, ProfileManagerPtr manager) :
-  session (session),
-  manager (manager),
-  time_format_label (_("Show Times as:"), Gtk::ALIGN_LEFT)
+	manager (manager),
+	time_format_label (_("Show Times as:"), Gtk::ALIGN_LEFT)
 {
+	set_session (session);
 
 	option_hbox.pack_start (time_format_label, false, false, 0);
 	option_hbox.pack_start (time_format_combo, false, false, 6);
@@ -100,7 +100,7 @@ ExportTimespanSelector::~ExportTimespanSelector ()
 void
 ExportTimespanSelector::add_range_to_selection (ARDOUR::Location const * loc)
 {
-	TimespanPtr span = session->get_export_handler()->add_timespan();
+	TimespanPtr span = _session->get_export_handler()->add_timespan();
 
 	Glib::ustring id;
 	if (loc == state->session_range.get()) {
@@ -201,14 +201,14 @@ ExportTimespanSelector::construct_label (ARDOUR::Location const * location) cons
 Glib::ustring
 ExportTimespanSelector::bbt_str (nframes_t frames) const
 {
-	if (!session) {
+	if (!_session) {
 		return "Error!";
 	}
 
 	std::ostringstream oss;
 	BBT_Time time;
 
-	session->bbt_time (frames, time);
+	_session->bbt_time (frames, time);
 
 	oss << std::setfill('0') << std::right <<
 	  std::setw(3) <<
@@ -224,14 +224,14 @@ ExportTimespanSelector::bbt_str (nframes_t frames) const
 Glib::ustring
 ExportTimespanSelector::timecode_str (nframes_t frames) const
 {
-	if (!session) {
+	if (!_session) {
 		return "Error!";
 	}
 
 	std::ostringstream oss;
 	Timecode::Time time;
 
-	session->timecode_time (frames, time);
+	_session->timecode_time (frames, time);
 
 	oss << std::setfill('0') << std::right <<
 	  std::setw(2) <<
@@ -249,7 +249,7 @@ ExportTimespanSelector::timecode_str (nframes_t frames) const
 Glib::ustring
 ExportTimespanSelector::ms_str (nframes_t frames) const
 {
-	if (!session) {
+	if (!_session) {
 		return "Error!";
 	}
 
@@ -261,13 +261,13 @@ ExportTimespanSelector::ms_str (nframes_t frames) const
 	int sec_promilles;
 
 	left = frames;
-	hrs = (int) floor (left / (session->frame_rate() * 60.0f * 60.0f));
-	left -= (nframes_t) floor (hrs * session->frame_rate() * 60.0f * 60.0f);
-	mins = (int) floor (left / (session->frame_rate() * 60.0f));
-	left -= (nframes_t) floor (mins * session->frame_rate() * 60.0f);
-	secs = (int) floor (left / (float) session->frame_rate());
-	left -= (nframes_t) floor (secs * session->frame_rate());
-	sec_promilles = (int) (left * 1000 / (float) session->frame_rate() + 0.5);
+	hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
+	left -= (nframes_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
+	mins = (int) floor (left / (_session->frame_rate() * 60.0f));
+	left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
+	secs = (int) floor (left / (float) _session->frame_rate());
+	left -= (nframes_t) floor (secs * _session->frame_rate());
+	sec_promilles = (int) (left * 1000 / (float) _session->frame_rate() + 0.5);
 
 	oss << std::setfill('0') << std::right <<
 	  std::setw(2) <<
@@ -294,8 +294,8 @@ ExportTimespanSelector::update_range_name (Glib::ustring const & path, Glib::ust
 /*** ExportTimespanSelectorSingle ***/
 
 ExportTimespanSelectorSingle::ExportTimespanSelectorSingle (ARDOUR::Session * session, ProfileManagerPtr manager, Glib::ustring range_id) :
-  ExportTimespanSelector (session, manager),
-  range_id (range_id)
+	ExportTimespanSelector (session, manager),
+	range_id (range_id)
 {
 	range_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
 	range_view.append_column_editable ("", range_cols.name);

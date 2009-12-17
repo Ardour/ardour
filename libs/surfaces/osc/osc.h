@@ -31,9 +31,8 @@
 
 #include <glibmm/main.h>
 
-#include <sigc++/sigc++.h>
-
 #include "pbd/abstract_ui.h"
+#include "pbd/scoped_connections.h"
 
 #include "ardour/types.h"
 #include "control_protocol/control_protocol.h"
@@ -56,7 +55,7 @@ struct OSCUIRequest : public BaseUI::BaseRequestObject {
 	~OSCUIRequest() {}
 };
 
-class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
+class OSC : public ARDOUR::ControlProtocol, public PBD::ScopedConnectionList, public AbstractUI<OSCUIRequest>
 {
   public:
 	OSC (ARDOUR::Session&, uint32_t port);

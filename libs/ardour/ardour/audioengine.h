@@ -26,17 +26,19 @@
 #include <exception>
 #include <string>
 
-#include <sigc++/signal.h>
 
 #include <glibmm/thread.h>
 
 #include "pbd/rcu.h"
+#include "pbd/scoped_connections.h"
 
 #include "ardour/ardour.h"
 #include <jack/jack.h>
 #include <jack/transport.h>
-#include "ardour/types.h"
+
 #include "ardour/data_type.h"
+#include "ardour/session_handle.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 
@@ -45,7 +47,7 @@ class MidiPort;
 class Port;
 class Session;
 
-class AudioEngine : public sigc::trackable
+class AudioEngine : public SessionHandlePtr
 {
    public:
 	typedef std::set<Port*> Ports;
@@ -110,7 +112,7 @@ class AudioEngine : public sigc::trackable
 	}
 
 	void set_session (Session *);
-	void remove_session ();
+	void remove_session (); // not a replacement for SessionHandle::session_going_away()
 
 	class PortRegistrationFailure : public std::exception {
 	public:
@@ -185,32 +187,32 @@ class AudioEngine : public sigc::trackable
 _	   the regular process() call to session->process() is not made.
 	*/
 
-	sigc::signal<int,nframes_t> Freewheel;
+	boost::signals2::signal<int(nframes_t)> Freewheel;
 
-	sigc::signal<void> Xrun;
+	boost::signals2::signal<void()> Xrun;
 
 	/* this signal is if JACK notifies us of a graph order event */
 
-	sigc::signal<void> GraphReordered;
+	boost::signals2::signal<void()> GraphReordered;
 
 	/* this signal is emitted if the sample rate changes */
 
-	sigc::signal<void,nframes_t> SampleRateChanged;
+	boost::signals2::signal<void(nframes_t)> SampleRateChanged;
 
 	/* this signal is sent if JACK ever disconnects us */
 
-	sigc::signal<void> Halted;
+	boost::signals2::signal<void()> Halted;
 
 	/* these two are emitted when the engine itself is
 	   started and stopped
 	*/
 
-	sigc::signal<void> Running;
-	sigc::signal<void> Stopped;
+	boost::signals2::signal<void()> Running;
+	boost::signals2::signal<void()> Stopped;
 
 	/* this signal is emitted if a JACK port is registered or unregistered */
 
-	sigc::signal<void> PortRegisteredOrUnregistered;
+	boost::signals2::signal<void()> PortRegisteredOrUnregistered;
 
 	std::string make_port_name_relative (std::string);
 	std::string make_port_name_non_relative (std::string);
@@ -221,7 +223,6 @@ _	   the regular process() call to session->process() is not made.
   private:
 	static AudioEngine*       _instance;
 
-	ARDOUR::Session*           session;
 	jack_client_t* volatile   _jack; /* could be reset to null by SIGPIPE or another thread */
 	std::string                jack_client_name;
 	Glib::Mutex               _process_lock;
@@ -241,7 +242,7 @@ _	   the regular process() call to session->process() is not made.
 	bool                      _freewheeling;
 	bool                      _freewheel_pending;
 	bool                      _freewheel_thread_registered;
-	sigc::slot<int,nframes_t>  freewheel_action;
+	boost::function<int(nframes_t)>  freewheel_action;
 	bool                       reconnect_on_halt;
 	int                       _usecs_per_cycle;
 

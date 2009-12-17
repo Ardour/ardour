@@ -21,7 +21,6 @@
 #ifndef __ardour_midi_diskstream_h__
 #define __ardour_midi_diskstream_h__
 
-#include <sigc++/signal.h>
 
 #include <cmath>
 #include <cassert>

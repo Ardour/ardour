@@ -21,6 +21,7 @@
 #define __ardour_gtk_point_selection_h__
 
 #include <list>
+#include <boost/noncopyable.hpp>
 
 #include "automation_selectable.h"
 

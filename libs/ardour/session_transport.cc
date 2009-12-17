@@ -21,8 +21,6 @@
 #include <cerrno>
 #include <unistd.h>
 
-#include <sigc++/bind.h>
-#include <sigc++/retype.h>
 
 #include "pbd/undo.h"
 #include "pbd/error.h"

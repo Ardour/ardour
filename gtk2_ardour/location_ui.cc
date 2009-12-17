@@ -44,7 +44,8 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
-	: location(0), session(0),
+	: SessionHandlePtr (0), /* explicitly set below */
+	  location(0), 
 	  item_table (1, 6, false),
 	  start_clock (X_("locationstart"), true, X_("LocationEditRowClock"), true, false),
 	  end_clock (X_("locationend"), true, X_("LocationEditRowClock"), true, false),
@@ -149,24 +150,22 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 LocationEditRow::~LocationEditRow()
 {
 	if (location) {
- 		start_changed_connection.disconnect();
- 		end_changed_connection.disconnect();
- 		name_changed_connection.disconnect();
- 		changed_connection.disconnect();
- 		flags_changed_connection.disconnect();
+		connections.drop_connections ();
 	}
 }
 
 void
 LocationEditRow::set_session (Session *sess)
 {
-	session = sess;
+	SessionHandlePtr::set_session (sess);
 
-	if (!session) return;
+	if (!_session) { 
+		return;
+	}
 
-	start_clock.set_session (session);
-	end_clock.set_session (session);
-	length_clock.set_session (session);
+	start_clock.set_session (_session);
+	end_clock.set_session (_session);
+	length_clock.set_session (_session);
 
 }
 
@@ -184,11 +183,7 @@ void
 LocationEditRow::set_location (Location *loc)
 {
 	if (location) {
-		start_changed_connection.disconnect();
-		end_changed_connection.disconnect();
-		name_changed_connection.disconnect();
-		changed_connection.disconnect();
-		flags_changed_connection.disconnect();
+		connections.drop_connections ();
 	}
 
 	location = loc;
@@ -238,7 +233,7 @@ LocationEditRow::set_location (Location *loc)
 		cd_check_button.set_active (location->is_cd_marker());
 		cd_check_button.show();
 
-		if (location->start() == session->current_start_frame()) {
+		if (location->start() == _session->current_start_frame()) {
 			cd_check_button.set_sensitive (false);
 		} else {
 			cd_check_button.set_sensitive (true);
@@ -287,11 +282,11 @@ LocationEditRow::set_location (Location *loc)
 	end_clock.set_sensitive (!location->locked());
 	length_clock.set_sensitive (!location->locked());
 
-	start_changed_connection = location->start_changed.connect (sigc::mem_fun(*this, &LocationEditRow::start_changed));
-	end_changed_connection = location->end_changed.connect (sigc::mem_fun(*this, &LocationEditRow::end_changed));
-	name_changed_connection = location->name_changed.connect (sigc::mem_fun(*this, &LocationEditRow::name_changed));
-	changed_connection = location->changed.connect (sigc::mem_fun(*this, &LocationEditRow::location_changed));
-	flags_changed_connection = location->FlagsChanged.connect (sigc::mem_fun(*this, &LocationEditRow::flags_changed));
+	connections.add_connection (location->start_changed.connect (boost::bind (&LocationEditRow::start_changed, this, _1)));
+	connections.add_connection (location->end_changed.connect (boost::bind (&LocationEditRow::end_changed, this, _1)));
+	connections.add_connection (location->name_changed.connect (boost::bind (&LocationEditRow::name_changed, this, _1)));
+	connections.add_connection (location->changed.connect (boost::bind (&LocationEditRow::location_changed, this, _1)));
+	connections.add_connection (location->FlagsChanged.connect (boost::bind (&LocationEditRow::flags_changed, this, _1, _2)));
 }
 
 void
@@ -406,7 +401,7 @@ LocationEditRow::cd_toggled ()
 	//}
 
 	if (cd_check_button.get_active()) {
-		if (location->start() <= session->current_start_frame()) {
+		if (location->start() <= _session->current_start_frame()) {
 			error << _("You cannot put a CD marker at the start of the session") << endmsg;
 			cd_check_button.set_active (false);
 			return;
@@ -518,7 +513,7 @@ LocationEditRow::start_changed (ARDOUR::Location *loc)
 
 	start_clock.set (location->start());
 
-	if (location->start() == session->current_start_frame()) {
+	if (location->start() == _session->current_start_frame()) {
 		cd_check_button.set_sensitive (false);
 	} else {
 		cd_check_button.set_sensitive (true);
@@ -587,8 +582,7 @@ LocationEditRow::focus_name() {
 
 
 LocationUI::LocationUI ()
-	: session (0)
-	, add_location_button (_("New Marker"))
+	: add_location_button (_("New Marker"))
 	, add_range_button (_("New Range"))
 {
 	i_am_the_modifier = 0;
@@ -681,12 +675,12 @@ LocationUI::do_location_remove (ARDOUR::Location *loc)
 		return FALSE;
 	}
 
-	session->begin_reversible_command (_("remove marker"));
-	XMLNode &before = session->locations()->get_state();
-	session->locations()->remove (loc);
-	XMLNode &after = session->locations()->get_state();
-	session->add_command(new MementoCommand<Locations>(*(session->locations()), &before, &after));
-	session->commit_reversible_command ();
+	_session->begin_reversible_command (_("remove marker"));
+	XMLNode &before = _session->locations()->get_state();
+	_session->locations()->remove (loc);
+	XMLNode &after = _session->locations()->get_state();
+	_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+	_session->commit_reversible_command ();
 
 	return FALSE;
 }
@@ -769,7 +763,7 @@ LocationUI::map_locations (Locations::LocationList& locations)
 
 		if (location->is_mark()) {
 			mark_n++;
-			erow = manage (new LocationEditRow(session, location, mark_n));
+			erow = manage (new LocationEditRow(_session, location, mark_n));
 			erow->remove_requested.connect (sigc::mem_fun(*this, &LocationUI::location_remove_requested));
  			erow->redraw_ranges.connect (sigc::mem_fun(*this, &LocationUI::location_redraw_ranges));
 			loc_children.push_back(Box_Helpers::Element(*erow, PACK_SHRINK, 1, PACK_START));
@@ -779,17 +773,17 @@ LocationUI::map_locations (Locations::LocationList& locations)
 			}
 		}
 		else if (location->is_auto_punch()) {
-			punch_edit_row.set_session (session);
+			punch_edit_row.set_session (_session);
 			punch_edit_row.set_location (location);
 			punch_edit_row.show_all();
 		}
 		else if (location->is_auto_loop()) {
-			loop_edit_row.set_session (session);
+			loop_edit_row.set_session (_session);
 			loop_edit_row.set_location (location);
 			loop_edit_row.show_all();
 		}
 		else {
-			erow = manage (new LocationEditRow(session, location));
+			erow = manage (new LocationEditRow(_session, location));
 			erow->remove_requested.connect (sigc::mem_fun(*this, &LocationUI::location_remove_requested));
 			range_children.push_back(Box_Helpers::Element(*erow,  PACK_SHRINK, 1, PACK_START));
 		}
@@ -804,19 +798,19 @@ LocationUI::add_new_location()
 {
 	string markername;
 
-	if (session) {
-		nframes_t where = session->audible_frame();
-		session->locations()->next_available_name(markername,"mark");
+	if (_session) {
+		nframes_t where = _session->audible_frame();
+		_session->locations()->next_available_name(markername,"mark");
 		Location *location = new Location (where, where, markername, Location::IsMark);
 		if (Config->get_name_new_markers()) {
 			newest_location = location;
 		}
-		session->begin_reversible_command (_("add marker"));
-		XMLNode &before = session->locations()->get_state();
-		session->locations()->add (location, true);
-		XMLNode &after = session->locations()->get_state();
-		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
-		session->commit_reversible_command ();
+		_session->begin_reversible_command (_("add marker"));
+		XMLNode &before = _session->locations()->get_state();
+		_session->locations()->add (location, true);
+		XMLNode &after = _session->locations()->get_state();
+		_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+		_session->commit_reversible_command ();
 	}
 
 }
@@ -826,26 +820,17 @@ LocationUI::add_new_range()
 {
 	string rangename;
 
-	if (session) {
-		nframes_t where = session->audible_frame();
-		session->locations()->next_available_name(rangename,"unnamed");
+	if (_session) {
+		nframes_t where = _session->audible_frame();
+		_session->locations()->next_available_name(rangename,"unnamed");
 		Location *location = new Location (where, where, rangename, Location::IsRangeMarker);
-		session->begin_reversible_command (_("add range marker"));
-		XMLNode &before = session->locations()->get_state();
-		session->locations()->add (location, true);
-		XMLNode &after = session->locations()->get_state();
-		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
-		session->commit_reversible_command ();
+		_session->begin_reversible_command (_("add range marker"));
+		XMLNode &before = _session->locations()->get_state();
+		_session->locations()->add (location, true);
+		XMLNode &after = _session->locations()->get_state();
+		_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+		_session->commit_reversible_command ();
 	}
-}
-
-
-void
-LocationUI::refresh_location_list_s (Change ignored)
-{
-	ENSURE_GUI_THREAD (*this, &LocationUI::refresh_location_list_s, ignored)
-
-	refresh_location_list ();
 }
 
 void
@@ -863,8 +848,8 @@ LocationUI::refresh_location_list ()
 	loc_children.clear();
 	range_children.clear();
 
-	if (session) {
-		session->locations()->apply (*this, &LocationUI::map_locations);
+	if (_session) {
+		_session->locations()->apply (*this, &LocationUI::map_locations);
 	}
 
 }
@@ -872,22 +857,22 @@ LocationUI::refresh_location_list ()
 void
 LocationUI::set_session(ARDOUR::Session* s)
 {
-	session = s;
+	SessionHandlePtr::set_session (s);
 
-	if (session) {
-		session->locations()->changed.connect (sigc::mem_fun(*this, &LocationUI::refresh_location_list));
-		session->locations()->StateChanged.connect (sigc::mem_fun(*this, &LocationUI::refresh_location_list_s));
-		session->locations()->added.connect (sigc::mem_fun(*this, &LocationUI::location_added));
-		session->locations()->removed.connect (sigc::mem_fun(*this, &LocationUI::location_removed));
-		session->GoingAway.connect (sigc::mem_fun(*this, &LocationUI::session_gone));
+	if (_session) {
+		_session_connections.add_connection (_session->locations()->changed.connect (boost::bind (&LocationUI::refresh_location_list, this)));
+		_session_connections.add_connection (_session->locations()->StateChanged.connect (boost::bind (&LocationUI::refresh_location_list, this)));
+		_session_connections.add_connection (_session->locations()->added.connect (boost::bind (&LocationUI::location_added, this, _1)));
+		_session_connections.add_connection (_session->locations()->removed.connect (boost::bind (&LocationUI::location_removed, this, _1)));
 	}
+
 	refresh_location_list ();
 }
 
 void
-LocationUI::session_gone()
+LocationUI::session_going_away()
 {
-	ENSURE_GUI_THREAD (*this, &LocationUI::session_gone)
+	ENSURE_GUI_THREAD (*this, &LocationUI::session_going_away);
 
 	using namespace Box_Helpers;
 	BoxList & loc_children = location_rows.children();
@@ -901,6 +886,8 @@ LocationUI::session_gone()
 
 	punch_edit_row.set_session (0);
 	punch_edit_row.set_location (0);
+
+	SessionHandlePtr::session_going_away ();
 }
 
 /*------------------------*/
@@ -938,13 +925,11 @@ LocationUIWindow::set_session (Session *s)
 {
 	ArdourDialog::set_session (s);
 	_ui.set_session (s);
-
-	s->GoingAway.connect (sigc::mem_fun (*this, &LocationUIWindow::session_gone));
 }
 
 void
-LocationUIWindow::session_gone ()
+LocationUIWindow::session_going_away ()
 {
+	ArdourDialog::session_going_away ();
 	hide_all();
-	ArdourDialog::session_gone ();
 }

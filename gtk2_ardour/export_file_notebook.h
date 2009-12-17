@@ -25,16 +25,12 @@
 #include <gtkmm.h>
 
 #include "ardour/export_profile_manager.h"
+#include "ardour/session_handle.h"
 
 #include "export_format_selector.h"
 #include "export_filename_selector.h"
 
-namespace ARDOUR {
-	class Session;
-}
-
-
-class ExportFileNotebook : public Gtk::Notebook
+class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 {
   public:
 
@@ -55,7 +51,6 @@ class ExportFileNotebook : public Gtk::Notebook
 	class FilePage;
 
 	ManagerPtr        profile_manager;
-	ARDOUR::Session * session;
 
 	void add_new_file_page ();
 	void add_file_page (ARDOUR::ExportProfileManager::FormatStatePtr format_state, ARDOUR::ExportProfileManager::FilenameStatePtr filename_state);

@@ -193,7 +193,7 @@ SndFileSource::init_sndfile ()
 	}
 
 	AudioFileSource::HeaderPositionOffsetChanged.connect (
-			sigc::mem_fun (*this, &SndFileSource::handle_header_position_change));
+			boost::bind (&SndFileSource::handle_header_position_change, this));
 }
 
 int
@@ -247,7 +247,7 @@ SndFileSource::open ()
 
 SndFileSource::~SndFileSource ()
 {
-	GoingAway (); /* EMIT SIGNAL */
+	drop_references ();
 
 	if (sf) {
 		sf_close (sf);

@@ -67,7 +67,7 @@ Return::Return (Session& s, const XMLNode& node, bool internal)
 
 Return::~Return ()
 {
-	GoingAway ();
+	drop_references ();
 }
 
 XMLNode&

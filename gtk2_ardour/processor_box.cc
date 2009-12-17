@@ -270,16 +270,17 @@ SendProcessorEntry::set_pixel_width (int p)
 	_fader.set_fader_length (p);
 }
 
-ProcessorBox::ProcessorBox (ARDOUR::Session& sess, sigc::slot<PluginSelector*> get_plugin_selector,
-			RouteRedirectSelection& rsel, MixerStrip* parent, bool owner_is_mixer)
-	: _session(sess)
-	, _parent_strip (parent)
+ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelector*()> get_plugin_selector,
+			    RouteRedirectSelection& rsel, MixerStrip* parent, bool owner_is_mixer)
+	: _parent_strip (parent)
 	, _owner_is_mixer (owner_is_mixer)
 	, ab_direction (true)
 	, _get_plugin_selector (get_plugin_selector)
 	, _placement(PreFader)
 	, _rr_selection(rsel)
 {
+	set_session (sess);
+
 	_width = Wide;
 	processor_menu = 0;
 	send_action_menu = 0;
@@ -319,17 +320,15 @@ ProcessorBox::set_route (boost::shared_ptr<Route> r)
 		return;
 	}
 	
-	connections.clear ();
+	connections.drop_connections();
 
 	/* new route: any existing block on processor redisplay must be meaningless */
 	no_processor_redisplay = false;
 	_route = r;
 
-	connections.push_back (_route->processors_changed.connect (sigc::mem_fun (*this, &ProcessorBox::route_processors_changed)));
-	connections.push_back (_route->GoingAway.connect (
-			sigc::mem_fun (*this, &ProcessorBox::route_going_away)));
-	connections.push_back (_route->NameChanged.connect (
-			sigc::mem_fun(*this, &ProcessorBox::route_name_changed)));
+	connections.add_connection (_route->processors_changed.connect (sigc::mem_fun (*this, &ProcessorBox::route_processors_changed)));
+	connections.add_connection (_route->GoingAway.connect (sigc::mem_fun (*this, &ProcessorBox::route_going_away)));
+	connections.add_connection (_route->NameChanged.connect (sigc::mem_fun(*this, &ProcessorBox::route_name_changed)));
 
 	redisplay_processors ();
 }
@@ -437,7 +436,7 @@ ProcessorBox::build_send_action_menu ()
 Gtk::Menu*
 ProcessorBox::build_possible_aux_menu ()
 {
-	boost::shared_ptr<RouteList> rl = _session.get_routes_with_internal_returns();
+	boost::shared_ptr<RouteList> rl = _session->get_routes_with_internal_returns();
 
 	if (rl->empty()) {
 		return 0;
@@ -630,7 +629,7 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 
 	if (processor && (Keyboard::is_edit_event (ev) || (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS))) {
 
-		if (_session.engine().connected()) {
+		if (_session->engine().connected()) {
 			/* XXX giving an error message here is hard, because we may be in the midst of a button press */
 			edit_processor (processor);
 		}
@@ -747,7 +746,7 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 {
 	for (SelectedPlugins::const_iterator p = plugins.begin(); p != plugins.end(); ++p) {
 
-		boost::shared_ptr<Processor> processor (new PluginInsert (_session, *p));
+		boost::shared_ptr<Processor> processor (new PluginInsert (*_session, *p));
 
 		Route::ProcessorStreams err_streams;
 
@@ -812,18 +811,18 @@ ProcessorBox::weird_plugin_dialog (Plugin& p, Route::ProcessorStreams streams)
 void
 ProcessorBox::choose_insert ()
 {
-	boost::shared_ptr<Processor> processor (new PortInsert (_session, _route->mute_master()));
+	boost::shared_ptr<Processor> processor (new PortInsert (*_session, _route->mute_master()));
 	_route->add_processor (processor, _placement);
 }
 
 void
 ProcessorBox::choose_send ()
 {
-	boost::shared_ptr<Send> send (new Send (_session, _route->mute_master()));
+	boost::shared_ptr<Send> send (new Send (*_session, _route->mute_master()));
 
 	/* make an educated guess at the initial number of outputs for the send */
-	ChanCount outs = (_session.master_out())
-			? _session.master_out()->n_outputs()
+	ChanCount outs = (_session->master_out())
+			? _session->master_out()->n_outputs()
 			: _route->n_outputs();
 
 	/* XXX need processor lock on route */
@@ -841,7 +840,7 @@ ProcessorBox::choose_send ()
 	   is closed.
 	 */
 
-	IOSelectorWindow *ios = new IOSelectorWindow (&_session, send->output(), true);
+	IOSelectorWindow *ios = new IOSelectorWindow (_session, send->output(), true);
 	ios->show_all ();
 
 	/* keep a reference to the send so it doesn't get deleted while
@@ -927,7 +926,7 @@ ProcessorBox::choose_aux (boost::weak_ptr<Route> wr)
 	boost::shared_ptr<RouteList> rlist (new RouteList);
 	rlist->push_back (_route);
 
-	_session.add_internal_sends (target, PreFader, rlist);
+	_session->add_internal_sends (target, PreFader, rlist);
 }
 
 void
@@ -1219,7 +1218,7 @@ ProcessorBox::rename_processor (boost::shared_ptr<Processor> processor)
 	case Gtk::RESPONSE_ACCEPT:
 		name_prompter.get_result (result);
 		if (result.length()) {
-			if (_session.route_by_name (result)) {
+			if (_session->route_by_name (result)) {
 				ARDOUR_UI::instance()->popup_error (_("A track already exists with that name."));
 				return;
 			}
@@ -1279,20 +1278,20 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 			} else if (type->value() == "send") {
 
 				XMLNode n (**niter);
-				Send::make_unique (n, _session);
-				p.reset (new Send (_session, _route->mute_master(), n));
+				Send::make_unique (n, *_session);
+				p.reset (new Send (*_session, _route->mute_master(), n));
 
 			} else if (type->value() == "return") {
 
 				XMLNode n (**niter);
-				Return::make_unique (n, _session);
-				p.reset (new Return (_session, **niter));
+				Return::make_unique (n, *_session);
+				p.reset (new Return (*_session, **niter));
 
 			} else {
 				/* XXX its a bit limiting to assume that everything else
 				   is a plugin.
 				*/
-				p.reset (new PluginInsert (_session, **niter));
+				p.reset (new PluginInsert (*_session, **niter));
 			}
 
 			copies.push_back (p);
@@ -1424,7 +1423,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 
 	if ((send = boost::dynamic_pointer_cast<Send> (processor)) != 0) {
 
-		if (!_session.engine().connected()) {
+		if (!_session->engine().connected()) {
 			return;
 		}
 
@@ -1449,7 +1448,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 
 	} else if ((retrn = boost::dynamic_pointer_cast<Return> (processor)) != 0) {
 
-		if (!_session.engine().connected()) {
+		if (!_session->engine().connected()) {
 			return;
 		}
 
@@ -1493,7 +1492,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 
 	} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (processor)) != 0) {
 
-		if (!_session.engine().connected()) {
+		if (!_session->engine().connected()) {
 			MessageDialog msg ( _("Not connected to JACK - no I/O changes are possible"));
 			msg.run ();
 			return;
@@ -1502,7 +1501,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 		PortInsertWindow *io_selector;
 
 		if (port_insert->get_gui() == 0) {
-			io_selector = new PortInsertWindow (&_session, port_insert);
+			io_selector = new PortInsertWindow (_session, port_insert);
 			port_insert->set_gui (io_selector);
 
 		} else {

@@ -37,6 +37,8 @@
 
 #include <glibmm/thread.h>
 
+#include "ardour/session_handle.h"
+
 #include "fft_graph.h"
 #include "fft_result.h"
 
@@ -44,7 +46,8 @@ namespace ARDOUR {
 	class Session;
 }
 
-class AnalysisWindow : public Gtk::Window
+
+class AnalysisWindow : public Gtk::Window, public ARDOUR::SessionHandlePtr
 {
 public:
 	AnalysisWindow  ();
@@ -57,12 +60,7 @@ public:
 
 	void analyze ();
 
-	void set_session(ARDOUR::Session *session) { _session = session; };
-
 private:
-
-	ARDOUR::Session *_session;
-
 	void clear_tracklist();
 
 	void source_selection_changed (Gtk::RadioButton *);

@@ -21,6 +21,7 @@
 #define __ardour_gtk_region_gain_line_h__
 
 #include "ardour/ardour.h"
+
 #include <libgnomecanvasmm.h>
 
 #include "automation_line.h"
@@ -35,7 +36,7 @@ class AudioRegionView;
 class AudioRegionGainLine : public AutomationLine
 {
   public:
-	AudioRegionGainLine (const std::string & name, ARDOUR::Session&, AudioRegionView&, ArdourCanvas::Group& parent, boost::shared_ptr<ARDOUR::AutomationList>);
+	AudioRegionGainLine (const std::string & name, AudioRegionView&, ArdourCanvas::Group& parent, boost::shared_ptr<ARDOUR::AutomationList>);
 
 	void start_drag (ControlPoint*, nframes_t x, float fraction);
 	void end_drag (ControlPoint*);
@@ -43,7 +44,6 @@ class AudioRegionGainLine : public AutomationLine
 	void remove_point (ControlPoint&);
 
   private:
-	ARDOUR::Session& session;
 	AudioRegionView& rv;
 };
 

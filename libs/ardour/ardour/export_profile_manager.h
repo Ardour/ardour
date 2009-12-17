@@ -28,7 +28,6 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
-#include <sigc++/signal.h>
 #include <glibmm/ustring.h>
 
 #include "pbd/uuid.h"
@@ -207,7 +206,7 @@ class ExportProfileManager
 	void remove_format_profile (FormatPtr format);
 	FormatPtr get_new_format (FormatPtr original);
 
-	sigc::signal<void> FormatListChanged;
+	boost::signals2::signal<void()> FormatListChanged;
 
   private:
 

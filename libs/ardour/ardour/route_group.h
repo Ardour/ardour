@@ -24,9 +24,11 @@
 #include <set>
 #include <string>
 #include <stdint.h>
-#include <sigc++/signal.h>
+#include <boost/signals2.hpp>
 
 #include "pbd/stateful.h"
+#include "pbd/scoped_connections.h"
+
 #include "ardour/types.h"
 
 namespace ARDOUR {
@@ -36,7 +38,7 @@ class Track;
 class AudioTrack;
 class Session;
 
-class RouteGroup : public PBD::Stateful, public sigc::trackable {
+class RouteGroup : public PBD::Stateful, public PBD::ScopedConnectionList {
 public:
 	enum Flag {
 		Relative = 0x1,
@@ -126,8 +128,8 @@ public:
 
 	boost::shared_ptr<RouteList> route_list() { return routes; }
 
-	sigc::signal<void> changed;
-	sigc::signal<void,void*> FlagsChanged;
+	boost::signals2::signal<void()> changed;
+	boost::signals2::signal<void(void*)> FlagsChanged;
 
 	XMLNode& get_state ();
 	

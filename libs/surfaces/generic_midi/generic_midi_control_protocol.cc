@@ -175,11 +175,13 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	{
 		Glib::Mutex::Lock lm (pending_lock);
 
-		std::pair<MIDIControllable *, sigc::connection> element;
+#if 0 // BOOST SIGNALS
+		std::pair<MIDIControllable *, boost::signals2::scoped_connection> element;
 		element.first = mc;
 		element.second = c->LearningFinished.connect (bind (mem_fun (*this, &GenericMidiControlProtocol::learning_stopped), mc));
 
 		pending_controllables.push_back (element);
+#endif
 	}
 
 	mc->learn_about_external_control ();

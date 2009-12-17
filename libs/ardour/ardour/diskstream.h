@@ -27,8 +27,6 @@
 #include <cmath>
 #include <time.h>
 
-#include <sigc++/signal.h>
-
 #include <boost/utility.hpp>
 
 #include "evoral/types.hpp"
@@ -145,15 +143,15 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	void move_processor_automation (boost::weak_ptr<Processor>,
 			std::list< Evoral::RangeMove<nframes_t> > const &);
 
-	sigc::signal<void>            RecordEnableChanged;
-	sigc::signal<void>            SpeedChanged;
-	sigc::signal<void>            ReverseChanged;
-	sigc::signal<void>            PlaylistChanged;
-	sigc::signal<void>            AlignmentStyleChanged;
-	sigc::signal<void,Location *> LoopSet;
+	boost::signals2::signal<void()>            RecordEnableChanged;
+	boost::signals2::signal<void()>            SpeedChanged;
+	boost::signals2::signal<void()>            ReverseChanged;
+	boost::signals2::signal<void()>            PlaylistChanged;
+	boost::signals2::signal<void()>            AlignmentStyleChanged;
+	boost::signals2::signal<void(Location *)> LoopSet;
 
-	static sigc::signal<void>     DiskOverrun;
-	static sigc::signal<void>     DiskUnderrun;
+	static boost::signals2::signal<void()>     DiskOverrun;
+	static boost::signals2::signal<void()>     DiskUnderrun;
 
   protected:
 	friend class Session;
@@ -306,11 +304,9 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	nframes_t scrub_buffer_size;
 	nframes_t scrub_offset;
 
-	sigc::connection ports_created_c;
-	sigc::connection plmod_connection;
-	sigc::connection plgone_connection;
-	sigc::connection plregion_connection;
-	sigc::connection ic_connection;
+	PBD::ScopedConnectionList playlist_connections;
+
+	boost::signals2::scoped_connection ic_connection;
 
 	Flag _flags;
 

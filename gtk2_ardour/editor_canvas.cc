@@ -329,7 +329,7 @@ Editor::track_canvas_size_allocated ()
 	_canvas_width = canvas_allocation.get_width();
 	_canvas_height = canvas_allocation.get_height();
 
-	if (session) {
+	if (_session) {
 		TrackViewList::iterator i;
 		double height = 0;
 
@@ -725,7 +725,7 @@ Editor::autoscroll_canvas ()
 void
 Editor::start_canvas_autoscroll (int dx, int dy)
 {
-	if (!session || autoscroll_active) {
+	if (!_session || autoscroll_active) {
 		return;
 	}
 
@@ -896,8 +896,8 @@ Editor::color_handler()
 /*
 	redisplay_tempo (true);
 
-	if (session)
-		session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
+	if (_session)
+	      _session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers
 */
 }
 

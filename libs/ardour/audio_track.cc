@@ -17,9 +17,6 @@
 
 */
 
-#include <sigc++/retype.h>
-#include <sigc++/retype_return.h>
-#include <sigc++/bind.h>
 
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
@@ -185,7 +182,7 @@ AudioTrack::set_diskstream (boost::shared_ptr<AudioDiskstream> ds, void * /*src*
 	if (audio_diskstream()->deprecated_io_node) {
 
 		if (!IO::connecting_legal) {
-			IO::ConnectingLegal.connect (sigc::mem_fun (*this, &AudioTrack::deprecated_use_diskstream_connections));
+			scoped_connect (IO::ConnectingLegal, boost::bind (&AudioTrack::deprecated_use_diskstream_connections, this));
 		} else {
 			deprecated_use_diskstream_connections ();
 		}
@@ -307,7 +304,7 @@ AudioTrack::_set_state (const XMLNode& node, int version, bool call_base)
 	pending_state = const_cast<XMLNode*> (&node);
 
 	if (_session.state_of_the_state() & Session::Loading) {
-		_session.StateReady.connect (sigc::mem_fun (*this, &AudioTrack::set_state_part_two));
+		scoped_connect (_session.StateReady, boost::bind (&AudioTrack::set_state_part_two, this));
 	} else {
 		set_state_part_two ();
 	}

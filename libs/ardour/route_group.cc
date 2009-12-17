@@ -22,7 +22,6 @@
 
 #include <algorithm>
 
-#include <sigc++/bind.h>
 
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
@@ -77,7 +76,7 @@ RouteGroup::add (boost::shared_ptr<Route> r)
 	routes->push_back (r);
 
 	r->join_route_group (this);
-	r->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &RouteGroup::remove_when_going_away), boost::weak_ptr<Route> (r)));
+	scoped_connect (r->GoingAway, boost::bind (&RouteGroup::remove_when_going_away, this, boost::weak_ptr<Route> (r)));
 	
 	_session.set_dirty ();
 	changed (); /* EMIT SIGNAL */

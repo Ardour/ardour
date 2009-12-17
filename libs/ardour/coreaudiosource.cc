@@ -90,7 +90,7 @@ CoreAudioSource::init_cafile ()
 
 CoreAudioSource::~CoreAudioSource ()
 {
-	GoingAway (); /* EMIT SIGNAL */
+	drop_references ();
 }
 
 int

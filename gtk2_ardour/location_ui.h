@@ -29,18 +29,20 @@
 #include <gtkmm/paned.h>
 #include <gtkmm/scrolledwindow.h>
 
+#include "pbd/scoped_connections.h"
+
 #include "ardour/location.h"
+#include "ardour/session_handle.h"
 
 #include "ardour_dialog.h"
 #include "audio_clock.h"
 
 namespace ARDOUR {
 	class LocationStack;
-	class Session;
 	class Location;
 }
 
-class LocationEditRow  : public Gtk::HBox
+class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
   public:
 	LocationEditRow (ARDOUR::Session *sess=0, ARDOUR::Location *loc=0, int32_t num=-1);
@@ -66,9 +68,6 @@ class LocationEditRow  : public Gtk::HBox
 	};
 
 	ARDOUR::Location *location;
-	ARDOUR::Session  *session;
-
-
 
 	Gtk::Table    item_table;
 
@@ -102,7 +101,6 @@ class LocationEditRow  : public Gtk::HBox
 	Gtk::CheckButton   scms_check_button;
 	Gtk::CheckButton   preemph_check_button;
 
-
 	guint32 i_am_the_modifier;
 	int   number;
 
@@ -130,34 +128,27 @@ class LocationEditRow  : public Gtk::HBox
 	void location_changed (ARDOUR::Location *);
 	void flags_changed (ARDOUR::Location *, void *src);
 
-	sigc::connection start_changed_connection;
-	sigc::connection end_changed_connection;
-	sigc::connection name_changed_connection;
-	sigc::connection changed_connection;
-	sigc::connection flags_changed_connection;
-
+	PBD::ScopedConnectionList connections;
 };
 
-class LocationUI : public Gtk::HBox
+class LocationUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
   public:
 	LocationUI ();
 	~LocationUI ();
 	
-	virtual void set_session (ARDOUR::Session *);
+	void set_session (ARDOUR::Session *);
 
 	void add_new_location();
 	void add_new_range();
 
 	void refresh_location_list ();
-	void refresh_location_list_s (ARDOUR::Change);
 
   private:
-	ARDOUR::Session* session;
 	ARDOUR::LocationStack* locations;
 	ARDOUR::Location *newest_location;
 
-	void session_gone();
+	void session_going_away ();
 
 	Gtk::VBox  location_vpacker;
 
@@ -212,7 +203,7 @@ class LocationUIWindow : public ArdourDialog
   protected:
 	LocationUI _ui;
 	bool on_delete_event (GdkEventAny*);
-	void session_gone();
+	void session_going_away();
 };
 
 #endif // __ardour_location_ui_h__

@@ -31,6 +31,7 @@
 #include <gtkmm/drawingarea.h>
 
 #include "ardour/types.h"
+#include "ardour/session_handle.h"
 
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/focus_entry.h>
@@ -49,10 +50,10 @@ namespace Gtk {
 	class Menu;
 }
 
-class LevelMeter : public Gtk::HBox
+class LevelMeter : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
   public:
-	LevelMeter (ARDOUR::Session&);
+	LevelMeter (ARDOUR::Session*);
 	~LevelMeter ();
 
 	virtual void set_meter (ARDOUR::PeakMeter* meter);
@@ -66,7 +67,6 @@ class LevelMeter : public Gtk::HBox
 	void setup_meters (int len=0, int width=3);
 
   private:
-	ARDOUR::Session&   _session;
 	ARDOUR::PeakMeter* _meter;
 
 	Width _width;
@@ -91,7 +91,7 @@ class LevelMeter : public Gtk::HBox
 	std::vector<MeterInfo> meters;
 	float                  max_peak;
 
-	sigc::connection _configuration_connection;
+	boost::signals2::scoped_connection _configuration_connection;
 
 	void hide_all_meters ();
 	gint meter_button_release (GdkEventButton*, uint32_t);

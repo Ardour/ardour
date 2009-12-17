@@ -34,11 +34,9 @@
 using namespace std;
 using namespace ARDOUR;
 
-BundleEditorMatrix::BundleEditorMatrix (
-	Gtk::Window* parent, Session* session, boost::shared_ptr<Bundle> bundle
-	)
-	: PortMatrix (parent, session, bundle->type()),
-	  _bundle (bundle)
+BundleEditorMatrix::BundleEditorMatrix (Gtk::Window* parent, Session* session, boost::shared_ptr<Bundle> bundle)
+	: PortMatrix (parent, session, bundle->type())
+	, _bundle (bundle)
 {
 	_port_group = boost::shared_ptr<PortGroup> (new PortGroup (""));
 	_port_group->add_bundle (_bundle);
@@ -285,8 +283,12 @@ BundleEditor::on_map ()
 
 
 BundleManager::BundleManager (Session* session)
-	: ArdourDialog (_("Bundle Manager")), _session (session), edit_button (_("Edit")), delete_button (_("Delete"))
+	: ArdourDialog (_("Bundle Manager"))
+	, edit_button (_("Edit"))
+	, delete_button (_("Delete"))
 {
+	set_session (session);
+
 	_list_model = Gtk::ListStore::create (_list_model_columns);
 	_tree_view.set_model (_list_model);
 	_tree_view.append_column (_("Name"), _list_model_columns.name);

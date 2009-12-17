@@ -26,7 +26,7 @@ class EditorRegions : public EditorComponent
 public:
 	EditorRegions (Editor *);
 
-	void connect_to_session (ARDOUR::Session *);
+	void set_session (ARDOUR::Session *);
 
 	Gtk::Widget& widget () {
 		return _scroller;

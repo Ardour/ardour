@@ -115,7 +115,6 @@ class BundleManager : public ArdourDialog
 	Gtk::TreeView _tree_view;
 	Glib::RefPtr<Gtk::ListStore> _list_model;
 	ModelColumns _list_model_columns;
-	ARDOUR::Session* _session;
 	Gtk::Button edit_button;
 	Gtk::Button delete_button;
 };

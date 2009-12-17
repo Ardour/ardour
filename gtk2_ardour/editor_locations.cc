@@ -32,9 +32,9 @@ EditorLocations::EditorLocations (Editor* e)
 }
 
 void
-EditorLocations::connect_to_session (ARDOUR::Session* s)
+EditorLocations::set_session (ARDOUR::Session* s)
 {
-	EditorComponent::connect_to_session (s);
+	EditorComponent::set_session (s);
 	locations->set_session (s);
 }
 

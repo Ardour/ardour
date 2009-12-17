@@ -23,9 +23,12 @@
 #include <vector>
 #include <string>
 #include <set>
+#include <boost/shared_ptr.hpp>
+#include <boost/signals2.hpp>
+
 #include <gtkmm/widget.h>
 #include <gtkmm/checkbutton.h>
-#include <boost/shared_ptr.hpp>
+
 #include "ardour/data_type.h"
 #include "ardour/types.h"
 
@@ -47,6 +50,7 @@ class PortGroup : public sigc::trackable
 {
 public:
 	PortGroup (std::string const & n);
+	~PortGroup ();
 
 	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>, bool allow_dups = false);
 	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::IO> io);
@@ -65,19 +69,21 @@ public:
 	sigc::signal<void> Changed;
 
 	/** An individual bundle on our list has changed in some way */
-	sigc::signal<void, ARDOUR::Bundle::Change> BundleChanged;
+	boost::signals2::signal<void(ARDOUR::Bundle::Change)> BundleChanged;
 
 	struct BundleRecord {
-		boost::shared_ptr<ARDOUR::Bundle> bundle;
-		/** IO whose ports are in the bundle, or 0.  This is so that we can do things like adding
-		    ports to the IO from matrix editor menus. */
-		boost::shared_ptr<ARDOUR::IO> io; 
-		Gdk::Color colour;
-		bool has_colour;
-		sigc::connection changed_connection;
+	    boost::shared_ptr<ARDOUR::Bundle> bundle;
+	    /** IO whose ports are in the bundle, or 0.  This is so that we can do things like adding
+		ports to the IO from matrix editor menus. */
+	    boost::shared_ptr<ARDOUR::IO> io; 
+	    Gdk::Color colour;
+	    bool has_colour;
+	    boost::signals2::scoped_connection changed_connection;
+
+	    BundleRecord (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::IO>, Gdk::Color, bool has_colour);
 	};
 
-	typedef std::list<BundleRecord> BundleList;
+	typedef std::list<BundleRecord*> BundleList;
 
 	BundleList const & bundles () const {
 		return _bundles;
@@ -95,6 +101,7 @@ class PortGroupList : public sigc::trackable
 {
   public:
 	PortGroupList ();
+	~PortGroupList();
 
 	typedef std::vector<boost::shared_ptr<PortGroup> > List;
 
@@ -125,10 +132,10 @@ class PortGroupList : public sigc::trackable
 	bool empty () const;
 
 	/** The group list has changed in some way; a group has been added or removed, or the list cleared etc. */
-	sigc::signal<void> Changed;
+	boost::signals2::signal<void()> Changed;
 
 	/** A bundle in one of our groups has changed */
-	sigc::signal<void, ARDOUR::Bundle::Change> BundleChanged;
+	boost::signals2::signal<void(ARDOUR::Bundle::Change)> BundleChanged;
 
   private:
 	bool port_has_prefix (std::string const &, std::string const &) const;
@@ -144,7 +151,7 @@ class PortGroupList : public sigc::trackable
 	ARDOUR::DataType _type;
 	mutable PortGroup::BundleList _bundles;
 	List _groups;
-	std::vector<sigc::connection> _bundle_changed_connections;
+	PBD::ScopedConnectionList _bundle_changed_connections;
 	bool _signals_suspended;
 	bool _pending_change;
 	ARDOUR::Bundle::Change _pending_bundle_change;

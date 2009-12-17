@@ -216,7 +216,6 @@ NumberMetadataField::str_to_uint (ustring const & str) const
 SessionMetadataSet::SessionMetadataSet (ustring const & name) :
   name (name)
 {
-	session = 0;
 }
 
 void
@@ -247,9 +246,13 @@ SessionMetadataSetEditable::get_tab_widget ()
 void
 SessionMetadataSetEditable::set_session (ARDOUR::Session * s)
 {
-	session = s;
+	SessionHandlePtr::set_session (s);
 
-	ARDOUR::SessionMetadata const & data = session->metadata();
+	if (!_session) {
+		return;
+	}
+
+	ARDOUR::SessionMetadata const & data = _session->metadata();
 
 	table.resize (list.size(), 2);
 	uint32_t row = 0;
@@ -266,7 +269,7 @@ SessionMetadataSetEditable::set_session (ARDOUR::Session * s)
 void
 SessionMetadataSetEditable::save_data ()
 {
-	ARDOUR::SessionMetadata & data = session->metadata();
+	ARDOUR::SessionMetadata & data = _session->metadata();
 	for (DataList::const_iterator it = list.begin(); it != list.end(); ++it) {
 		(*it)->save_data(data);
 	}
@@ -300,8 +303,6 @@ SessionMetadataSetImportable::SessionMetadataSetImportable (ustring const & name
 	tree_view.append_column (*viewcol);
 
 	select_all_check.signal_toggled().connect (sigc::mem_fun(*this, &SessionMetadataSetImportable::select_all));
-
-	session = 0;
 }
 
 Gtk::Widget &
@@ -321,12 +322,12 @@ SessionMetadataSetImportable::get_select_all_widget ()
 void
 SessionMetadataSetImportable::load_extra_data (ARDOUR::SessionMetadata const & data)
 {
-	if (!session) {
+	if (!_session) {
 		std::cerr << "Programming error: no session set for SessionMetaDataSetImportable (in load_data)!" << std::endl;
 		return;
 	}
 
-	ARDOUR::SessionMetadata & session_data = session->metadata();
+	ARDOUR::SessionMetadata & session_data = _session->metadata();
 
 	MetadataPtr session_field;
 	MetadataPtr import_field;
@@ -369,12 +370,12 @@ SessionMetadataSetImportable::load_extra_data (ARDOUR::SessionMetadata const & d
 void
 SessionMetadataSetImportable::save_data ()
 {
-	if (!session) {
+	if (!_session) {
 		std::cerr << "Programming error: no session set for SessionMetaDataSetImportable (in import_data)!" << std::endl;
 		return;
 	}
 
-	ARDOUR::SessionMetadata & session_data = session->metadata();
+	ARDOUR::SessionMetadata & session_data = _session->metadata();
 
 	Gtk::TreeModel::Children fields = tree->children();
 	Gtk::TreeModel::Children::iterator it;
@@ -425,7 +426,7 @@ template <typename DataSet>
 void
 SessionMetadataDialog<DataSet>::init_data ()
 {
-	if (!session) {
+	if (!_session) {
 		std::cerr << "Programming error: no session set for SessionMetaDataDialog (in init_data)!" << std::endl;
 		return;
 	}
@@ -435,7 +436,7 @@ SessionMetadataDialog<DataSet>::init_data ()
 	init_people_data ();
 
 	for (DataSetList::iterator it = data_list.begin(); it != data_list.end(); ++it) {
-		(*it)->set_session (session);
+		(*it)->set_session (_session);
 
 		notebook.append_page ((*it)->get_widget(), (*it)->get_tab_widget());
 	}
@@ -659,7 +660,7 @@ SessionMetadataImporter::~SessionMetadataImporter ()
 void
 SessionMetadataImporter::run ()
 {
-	if (!session) {
+	if (!_session) {
 		std::cerr << "Programming error: no session set for SessionMetaDataImporter (in run)!" << std::endl;
 		return;
 	}

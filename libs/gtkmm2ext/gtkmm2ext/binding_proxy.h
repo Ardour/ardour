@@ -22,9 +22,9 @@
 #define __binding_proxy__
 
 #include <string>
-
 #include <gtkmm2ext/popup.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/signals2.hpp>
 
 namespace PBD {
 	class Controllable;
@@ -50,7 +50,7 @@ class BindingProxy : public sigc::trackable
 	boost::shared_ptr<PBD::Controllable> controllable;
 	guint bind_button;
 	guint bind_statemask;
-	sigc::connection learning_connection;
+	boost::signals2::scoped_connection learning_connection;
 	void learning_finished ();
 	bool prompter_hiding (GdkEventAny *);
 };

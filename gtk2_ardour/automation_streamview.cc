@@ -129,7 +129,7 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 	display_region(region_view);
 
 	/* catch regionview going away */
-	region->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &AutomationStreamView::remove_region_view), region));
+	scoped_connect (region->GoingAway, boost::bind (&AutomationStreamView::remove_region_view, this, boost::weak_ptr<Region>(region)));
 
 	RegionViewAdded (region_view);
 

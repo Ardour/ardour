@@ -46,6 +46,8 @@
 #include <gtkmm2ext/dndtreeview.h>
 
 #include "pbd/stateful.h"
+#include "pbd/scoped_connections.h"
+
 #include "ardour/import_status.h"
 #include "ardour/tempo.h"
 #include "ardour/location.h"
@@ -155,14 +157,15 @@ struct EditorCursor {
 	sigc::signal<void, nframes64_t> PositionChanged;
 };
 
-class Editor : public PublicEditor
+class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
 {
   public:
 	Editor ();
 	~Editor ();
 
-	void             connect_to_session (ARDOUR::Session *);
-	ARDOUR::Session* current_session() const { return session; }
+	void             set_session (ARDOUR::Session *);
+	ARDOUR::Session* session() const { return _session; }
+
 	void             first_idle ();
 	virtual bool     have_idled () const { return _have_idled; }
 
@@ -443,7 +446,6 @@ class Editor : public PublicEditor
 
 	void color_handler ();
 
-	ARDOUR::Session     *session; ///< The session that we are editing, or 0
 	bool                 constructed;
 
 	// to keep track of the playhead position for control_scroll
@@ -1893,7 +1895,7 @@ public:
 
 	int playlist_deletion_dialog (boost::shared_ptr<ARDOUR::Playlist>);
 
-	std::vector<sigc::connection> session_connections;
+	PBD::ScopedConnectionList session_connections;
 
 	/* tracking step changes of track height */
 

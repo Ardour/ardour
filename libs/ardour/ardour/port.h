@@ -25,7 +25,8 @@
 #include <vector>
 #include <jack/jack.h>
 #include <boost/utility.hpp>
-#include <sigc++/trackable.h>
+#include <boost/signals2.hpp>
+
 #include "ardour/data_type.h"
 #include "ardour/types.h"
 
@@ -34,7 +35,7 @@ namespace ARDOUR {
 class AudioEngine;
 class Buffer;
 
-class Port : public sigc::trackable, public boost::noncopyable
+class Port : public boost::noncopyable
 {
 public:
 	enum Flags {
@@ -117,7 +118,7 @@ public:
 
 	static void set_engine (AudioEngine *);
 
-	sigc::signal<void, bool> MonitorInputChanged;
+	boost::signals2::signal<void(bool)> MonitorInputChanged;
 
 protected:
 

@@ -21,13 +21,13 @@
 #ifndef __ardour_export_channel_h__
 #define __ardour_export_channel_h__
 
-#include "ardour/audioregion.h"
-#include "ardour/buffer_set.h"
-
 #include <set>
 
+#include <boost/signals2.hpp>
 #include <boost/shared_ptr.hpp>
-#include <sigc++/signal.h>
+
+#include "ardour/audioregion.h"
+#include "ardour/buffer_set.h"
 
 namespace ARDOUR {
 
@@ -89,7 +89,7 @@ class PortExportChannel : public ExportChannel
 };
 
 /// Handles RegionExportChannels and does actual reading from region
-class RegionExportChannelFactory : public sigc::trackable
+class RegionExportChannelFactory 
 {
   public:
 	enum Type {
@@ -106,7 +106,7 @@ class RegionExportChannelFactory : public sigc::trackable
 
   private:
 
-	int new_cycle_started () { buffers_up_to_date = false; return 0; }
+	int new_cycle_started (nframes_t) { buffers_up_to_date = false; return 0; }
 	void update_buffers (nframes_t frames);
 
 	AudioRegion const & region;
@@ -122,6 +122,8 @@ class RegionExportChannelFactory : public sigc::trackable
 
 	Sample * mixdown_buffer;
 	Sample * gain_buffer;
+
+	boost::signals2::scoped_connection export_connection;
 };
 
 /// Export channel that reads from region channel

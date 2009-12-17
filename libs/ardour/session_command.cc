@@ -43,7 +43,7 @@ using namespace ARDOUR;
 
 #include "i18n.h"
 
-void Session::register_with_memento_command_factory(PBD::ID id, PBD::StatefulThingWithGoingAway *ptr)
+void Session::register_with_memento_command_factory(PBD::ID id, PBD::StatefulDestructible *ptr)
 {
     registry[id] = ptr;
 }
@@ -114,8 +114,8 @@ Session::memento_command_factory(XMLNode *n)
 		if (i != automation_lists.end()) {
 		    return new MementoCommand<AutomationList>(*i->second, before, after);
 		}
-    } else if (registry.count(id)) { // For Editor and AutomationLine which are off-limits here
-	    return new MementoCommand<PBD::StatefulThingWithGoingAway>(*registry[id], before, after);
+    } else if (registry.count(id)) { // For Editor and AutomationLine which are off-limits herea
+	    return new MementoCommand<PBD::StatefulDestructible>(*registry[id], before, after);
     }
 
     /* we failed */

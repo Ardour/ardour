@@ -24,8 +24,7 @@ v    it under the terms of the GNU General Public License as published by
 #include <set>
 #include <map>
 
-#include <sigc++/trackable.h>
-#include <sigc++/signal.h>
+#include <boost/signals2.hpp>
 #include <glibmm/thread.h>
 
 #include "pbd/statefuldestructible.h"
@@ -45,16 +44,16 @@ class Controllable : public PBD::StatefulDestructible {
 	virtual void set_value (float) = 0;
 	virtual float get_value (void) const = 0;
 
-	sigc::signal<void> LearningFinished;
-	static sigc::signal<void,PBD::Controllable*,int,int> CreateBinding;
-	static sigc::signal<void,PBD::Controllable*> DeleteBinding;
+	boost::signals2::signal<void()> LearningFinished;
+	static boost::signals2::signal<void(PBD::Controllable*,int,int)> CreateBinding;
+	static boost::signals2::signal<void(PBD::Controllable*)> DeleteBinding;
 
-	static sigc::signal<bool,PBD::Controllable*> StartLearning;
-	static sigc::signal<void,PBD::Controllable*> StopLearning;
+	static boost::signals2::signal<bool(PBD::Controllable*)> StartLearning;
+	static boost::signals2::signal<void(PBD::Controllable*)> StopLearning;
 
-	static sigc::signal<void,Controllable*> Destroyed;
-
-	sigc::signal<void> Changed;
+	static boost::signals2::signal<void(Controllable*)> Destroyed;
+	
+	boost::signals2::signal<void()> Changed;
 
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_state ();
@@ -73,8 +72,8 @@ class Controllable : public PBD::StatefulDestructible {
 	std::string _uri;
 	bool        _touching;
 
-	void add ();
-	void remove ();
+	static void add (Controllable&);
+	static void remove (Controllable&);
 
 	typedef std::set<PBD::Controllable*> Controllables;
 	typedef std::map<std::string,PBD::Controllable*> ControllablesByURI;

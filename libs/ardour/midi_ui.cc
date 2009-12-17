@@ -18,6 +18,8 @@
 */
 #include <cstdlib>
 
+#include <sigc++/signal.h>
+
 #include "pbd/pthread_utils.h"
 
 #include "midi++/manager.h"
@@ -44,7 +46,7 @@ MidiControlUI::MidiControlUI (Session& s)
 	: AbstractUI<MidiUIRequest> (_("midiui"))
 	, _session (s) 
 {
-	MIDI::Manager::instance()->PortsChanged.connect (sigc::mem_fun (*this, &MidiControlUI::change_midi_ports));
+	rebind_connection = MIDI::Manager::instance()->PortsChanged.connect (boost::bind (&MidiControlUI::change_midi_ports, this));
 }
 
 MidiControlUI::~MidiControlUI ()
@@ -125,7 +127,7 @@ MidiControlUI::reset_ports ()
 		if ((fd = (*i)->selectable ()) >= 0) {
 			Glib::RefPtr<IOSource> psrc = IOSource::create (fd, IO_IN|IO_HUP|IO_ERR);
 
-			psrc->connect (sigc::bind (sigc::mem_fun (*this, &MidiControlUI::midi_input_handler), (*i)));
+			psrc->connect (sigc::bind (sigc::mem_fun (this, &MidiControlUI::midi_input_handler), *i));
 			psrc->attach (_main_loop->get_context());
 
 			// glibmm hack: for now, store only the GSource*

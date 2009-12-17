@@ -170,7 +170,7 @@ AudioPlaylistImporter::_prepare_move ()
 {
 	// Rename
 	while (session.playlists->by_name (name) || !handler.check_name (name)) {
-		std::pair<bool, string> rename_pair = Rename (_("A playlist with this name already exists, please rename it."), name);
+		std::pair<bool, string> rename_pair = *Rename (_("A playlist with this name already exists, please rename it."), name);
 		if (!rename_pair.first) {
 			return false;
 		}

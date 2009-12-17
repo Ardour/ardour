@@ -19,7 +19,6 @@
 
 #include <string>
 
-#include <sigc++/bind.h>
 
 #include "pbd/failed_constructor.h"
 #include "pbd/xml++.h"
@@ -62,7 +61,7 @@ PortInsert::PortInsert (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLN
 
 PortInsert::~PortInsert ()
 {
-	GoingAway ();
+	drop_references ();
 }
 
 void

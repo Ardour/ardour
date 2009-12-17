@@ -230,7 +230,7 @@ RhythmFerret::get_action () const
 void
 RhythmFerret::run_analysis ()
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
@@ -268,7 +268,7 @@ RhythmFerret::run_analysis ()
 int
 RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readable, nframes64_t offset, AnalysisFeatureList& results)
 {
-	TransientDetector t (session->frame_rate());
+	TransientDetector t (_session->frame_rate());
 
 	for (uint32_t i = 0; i < readable->n_channels(); ++i) {
 
@@ -295,7 +295,7 @@ RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readabl
 	}
 
 	if (!results.empty()) {
-		TransientDetector::cleanup_transients (results, session->frame_rate(), trigger_gap_adjustment.get_value());
+		TransientDetector::cleanup_transients (results, _session->frame_rate(), trigger_gap_adjustment.get_value());
 	}
 
 	return 0;
@@ -322,7 +322,7 @@ int
 RhythmFerret::run_note_onset_analysis (boost::shared_ptr<Readable> readable, nframes64_t offset, AnalysisFeatureList& results)
 {
 	try {
-		OnsetDetector t (session->frame_rate());
+		OnsetDetector t (_session->frame_rate());
 
 		for (uint32_t i = 0; i < readable->n_channels(); ++i) {
 
@@ -356,7 +356,7 @@ RhythmFerret::run_note_onset_analysis (boost::shared_ptr<Readable> readable, nfr
 	}
 
 	if (!results.empty()) {
-		OnsetDetector::cleanup_onsets (results, session->frame_rate(), trigger_gap_adjustment.get_value());
+		OnsetDetector::cleanup_onsets (results, _session->frame_rate(), trigger_gap_adjustment.get_value());
 	}
 
 	return 0;
@@ -365,7 +365,7 @@ RhythmFerret::run_note_onset_analysis (boost::shared_ptr<Readable> readable, nfr
 void
 RhythmFerret::do_action ()
 {
-	if (!session || current_results.empty()) {
+	if (!_session || current_results.empty()) {
 		return;
 	}
 
@@ -390,7 +390,7 @@ RhythmFerret::do_split_action ()
 		return;
 	}
 
-	session->begin_reversible_command (_("split regions (rhythm ferret)"));
+	_session->begin_reversible_command (_("split regions (rhythm ferret)"));
 
 	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ) {
 
@@ -408,7 +408,7 @@ RhythmFerret::do_split_action ()
 		i = tmp;
 	}
 
-	session->commit_reversible_command ();
+	_session->commit_reversible_command ();
 }
 
 void

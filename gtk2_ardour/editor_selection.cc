@@ -1037,7 +1037,7 @@ Editor::set_selection_from_punch()
 {
 	Location* location;
 
-	if ((location = session->locations()->auto_punch_location()) == 0)  {
+	if ((location = _session->locations()->auto_punch_location()) == 0)  {
 		return;
 	}
 
@@ -1049,7 +1049,7 @@ Editor::set_selection_from_loop()
 {
 	Location* location;
 
-	if ((location = session->locations()->auto_loop_location()) == 0)  {
+	if ((location = _session->locations()->auto_loop_location()) == 0)  {
 		return;
 	}
 	set_selection_from_range (*location);
@@ -1107,7 +1107,7 @@ Editor::select_all_selectables_using_time_selection ()
 void
 Editor::select_all_selectables_using_punch()
 {
-	Location* location = session->locations()->auto_punch_location();
+	Location* location = _session->locations()->auto_punch_location();
 	list<Selectable *> touched;
 
 	if (location == 0 || (location->end() - location->start() <= 1))  {
@@ -1138,7 +1138,7 @@ Editor::select_all_selectables_using_punch()
 void
 Editor::select_all_selectables_using_loop()
 {
-	Location* location = session->locations()->auto_loop_location();
+	Location* location = _session->locations()->auto_loop_location();
 	list<Selectable *> touched;
 
 	if (location == 0 || (location->end() - location->start() <= 1))  {
@@ -1176,7 +1176,7 @@ Editor::select_all_selectables_using_cursor (EditorCursor *cursor, bool after)
 	if (after) {
 		begin_reversible_command (_("select all after cursor"));
 		start = cursor->current_frame ;
-		end = session->current_end_frame();
+		end = _session->current_end_frame();
 	} else {
 		if (cursor->current_frame > 0) {
 			begin_reversible_command (_("select all before cursor"));
@@ -1216,7 +1216,7 @@ Editor::select_all_selectables_using_edit (bool after)
 	if (after) {
 		begin_reversible_command (_("select all after edit"));
 		start = get_preferred_edit_position();
-		end = session->current_end_frame();
+		end = _session->current_end_frame();
 	} else {
 		if ((end = get_preferred_edit_position()) > 1) {
 			begin_reversible_command (_("select all before edit"));
@@ -1314,7 +1314,7 @@ Editor::get_edit_op_range (nframes64_t& start, nframes64_t& end) const
 		}
 
 		start = selection->markers.front()->position();
-		end = session->audible_frame();
+		end = _session->audible_frame();
 
 	} else {
 
@@ -1323,10 +1323,10 @@ Editor::get_edit_op_range (nframes64_t& start, nframes64_t& end) const
 			if (selection->markers.empty()) {
 				/* use mouse + playhead */
 				start = m;
-				end = session->audible_frame();
+				end = _session->audible_frame();
 			} else {
 				/* use playhead + selected marker */
-				start = session->audible_frame();
+				start = _session->audible_frame();
 				end = selection->markers.front()->position();
 			}
 			break;
@@ -1335,7 +1335,7 @@ Editor::get_edit_op_range (nframes64_t& start, nframes64_t& end) const
 			/* use mouse + selected marker */
 			if (selection->markers.empty()) {
 				start = m;
-				end = session->audible_frame();
+				end = _session->audible_frame();
 			} else {
 				start = selection->markers.front()->position();
 				end = m;

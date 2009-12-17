@@ -24,8 +24,6 @@
 
 #include <set>
 
-#include <sigc++/bind.h>
-#include <sigc++/class_slot.h>
 
 #include <glibmm/thread.h>
 
@@ -54,7 +52,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, nframes_t start, nfra
 	: Region (src, start, length, PBD::basename_nosuffix(src->name()), DataType::MIDI, 0,  Region::Flag(Region::DefaultFlags|Region::External))
 {
 	assert(_name.find("/") == string::npos);
-	midi_source(0)->Switched.connect(sigc::mem_fun(this, &MidiRegion::switch_source));
+	scoped_connect (midi_source(0)->Switched, boost::bind (&MidiRegion::switch_source, this, _1));
 }
 
 /* Basic MidiRegion constructor (one channel) */
@@ -62,7 +60,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, nframes_t start, nfra
 	: Region (src, start, length, name, DataType::MIDI, layer, flags)
 {
 	assert(_name.find("/") == string::npos);
-	midi_source(0)->Switched.connect(sigc::mem_fun(this, &MidiRegion::switch_source));
+	scoped_connect (midi_source(0)->Switched, boost::bind (&MidiRegion::switch_source, this, _1));
 }
 
 /* Basic MidiRegion constructor (many channels) */
@@ -70,7 +68,7 @@ MidiRegion::MidiRegion (const SourceList& srcs, nframes_t start, nframes_t lengt
 	: Region (srcs, start, length, name, DataType::MIDI, layer, flags)
 {
 	assert(_name.find("/") == string::npos);
-	midi_source(0)->Switched.connect(sigc::mem_fun(this, &MidiRegion::switch_source));
+	scoped_connect (midi_source(0)->Switched, boost::bind (&MidiRegion::switch_source, this, _1));
 }
 
 
@@ -79,14 +77,14 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, nframes_t off
 	: Region (other, offset, length, name, layer, flags)
 {
 	assert(_name.find("/") == string::npos);
-	midi_source(0)->Switched.connect(sigc::mem_fun(this, &MidiRegion::switch_source));
+	scoped_connect (midi_source(0)->Switched, boost::bind (&MidiRegion::switch_source, this, _1));
 }
 
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 	: Region (other)
 {
 	assert(_name.find("/") == string::npos);
-	midi_source(0)->Switched.connect(sigc::mem_fun(this, &MidiRegion::switch_source));
+	scoped_connect (midi_source(0)->Switched, boost::bind (&MidiRegion::switch_source, this, _1));
 }
 
 MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, const XMLNode& node)
@@ -96,7 +94,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	midi_source(0)->Switched.connect(sigc::mem_fun(this, &MidiRegion::switch_source));
+	scoped_connect (midi_source(0)->Switched, boost::bind (&MidiRegion::switch_source, this, _1));
 	assert(_name.find("/") == string::npos);
 	assert(_type == DataType::MIDI);
 }
@@ -108,7 +106,7 @@ MidiRegion::MidiRegion (const SourceList& srcs, const XMLNode& node)
 		throw failed_constructor();
 	}
 
-	midi_source(0)->Switched.connect(sigc::mem_fun(this, &MidiRegion::switch_source));
+	scoped_connect (midi_source(0)->Switched, boost::bind (&MidiRegion::switch_source, this, _1));
 	assert(_name.find("/") == string::npos);
 	assert(_type == DataType::MIDI);
 }

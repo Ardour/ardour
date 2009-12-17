@@ -46,7 +46,7 @@ UndoTransaction::UndoTransaction (const UndoTransaction& rhs)
 
 UndoTransaction::~UndoTransaction ()
 {
-	GoingAway ();
+	drop_references ();
 	clear ();
 }
 
@@ -78,9 +78,11 @@ void
 UndoTransaction::add_command (Command *const action)
 {
 	/* catch death of command (e.g. caused by death of object to
-	   which it refers.
+	   which it refers. command_death() is a normal static function
+	   so there is no need to manage this connection.
 	 */
-	shivas.push_back (new PBD::ProxyShiva<Command,UndoTransaction> (*action, *this, &command_death));
+
+	scoped_connect (action->GoingAway, boost::bind (&command_death, this, action));
 	actions.push_back (action);
 }
 
@@ -88,21 +90,6 @@ void
 UndoTransaction::remove_command (Command* const action)
 {
 	actions.remove (action);
-}
-
-void
-UndoTransaction::about_to_explicitly_delete ()
-{
-	/* someone is going to call our destructor and its not Shiva,
-	   the god of destruction and chaos. This happens when an UndoHistory
-	   is pruning itself. we must remove Shivas to avoid the god
-	   striking us down a second time, unnecessarily and illegally.
-	*/
-
-	for (list<PBD::ProxyShiva<Command,UndoTransaction>*>::iterator i = shivas.begin(); i != shivas.end(); ++i) {
-		delete *i;
-	}
-	shivas.clear ();
 }
 
 bool
@@ -188,7 +175,6 @@ UndoHistory::set_depth (uint32_t d)
 		while (cnt--) {
 			ut = UndoList.front();
 			UndoList.pop_front ();
-			ut->about_to_explicitly_delete ();
 			delete ut;
 		}
 	}
@@ -199,7 +185,7 @@ UndoHistory::add (UndoTransaction* const ut)
 {
 	uint32_t current_depth = UndoList.size();
 
-	ut->GoingAway.connect (bind (mem_fun (*this, &UndoHistory::remove), ut));
+	scoped_connect (ut->GoingAway, boost::bind (&UndoHistory::remove, this, ut));
 
 	/* if the current undo history is larger than or equal to the currently
 	   requested depth, then pop off at least 1 element to make space
@@ -214,7 +200,6 @@ UndoHistory::add (UndoTransaction* const ut)
 			UndoTransaction* ut;
 			ut = UndoList.front ();
 			UndoList.pop_front ();
-			ut->about_to_explicitly_delete ();
 			delete ut;
 		}
 	}

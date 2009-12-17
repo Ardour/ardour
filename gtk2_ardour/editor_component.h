@@ -21,32 +21,19 @@
 #define __ardour_gtk_editor_component_h__
 
 #include <list>
-#include <sigc++/sigc++.h>
 
-namespace ARDOUR {
-	class Session;
-}
+#include "ardour/session_handle.h"
 
 class Editor;
 
-class EditorComponent
+class EditorComponent : public ARDOUR::SessionHandlePtr
 {
 public:
 	EditorComponent (Editor *);
 	virtual ~EditorComponent() {}
 
-	virtual void connect_to_session (ARDOUR::Session *);
-
 protected:
-
 	Editor* _editor;
-	ARDOUR::Session* _session;
-	std::list<sigc::connection> _session_connections;
-
-private:
-
-	void session_going_away ();
-
 };
 
 #endif

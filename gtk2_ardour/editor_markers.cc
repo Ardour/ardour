@@ -332,8 +332,8 @@ Editor::refresh_location_display ()
 {
 	ENSURE_GUI_THREAD (*this, &Editor::refresh_location_display)
 
-	if (session) {
-		session->locations()->apply (*this, &Editor::refresh_location_display_internal);
+	if (_session) {
+		_session->locations()->apply (*this, &Editor::refresh_location_display_internal);
 	}
 }
 
@@ -342,8 +342,8 @@ Editor::refresh_location_display_s (Change ignored)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::refresh_location_display_s, ignored)
 
-	if (session) {
-		session->locations()->apply (*this, &Editor::refresh_location_display_internal);
+	if (_session) {
+		_session->locations()->apply (*this, &Editor::refresh_location_display_internal);
 	}
 }
 
@@ -396,18 +396,18 @@ Editor::mouse_add_new_marker (nframes64_t where, bool is_cd, bool is_xrun)
 		markerprefix = "mark";
 	}
 
-	if (session) {
-		session->locations()->next_available_name(markername, markerprefix);
+	if (_session) {
+		_session->locations()->next_available_name(markername, markerprefix);
 		if (!is_xrun && !choose_new_marker_name(markername)) {
 			return;
 		}
 		Location *location = new Location (where, where, markername, (Location::Flags) flags);
-		session->begin_reversible_command (_("add marker"));
-		XMLNode &before = session->locations()->get_state();
-		session->locations()->add (location, true);
-		XMLNode &after = session->locations()->get_state();
-		session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
-		session->commit_reversible_command ();
+		_session->begin_reversible_command (_("add marker"));
+		XMLNode &before = _session->locations()->get_state();
+		_session->locations()->add (location, true);
+		XMLNode &after = _session->locations()->get_state();
+		_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+		_session->commit_reversible_command ();
 
 		/* find the marker we just added */
 
@@ -436,7 +436,7 @@ Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent*)
 
 	Location* loc = find_location_from_marker (marker, is_start);
 
-	if (session && loc) {
+	if (_session && loc) {
 	  	Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc));
 	}
 }
@@ -444,12 +444,12 @@ Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent*)
 gint
 Editor::really_remove_marker (Location* loc)
 {
-	session->begin_reversible_command (_("remove marker"));
-	XMLNode &before = session->locations()->get_state();
-	session->locations()->remove (loc);
-	XMLNode &after = session->locations()->get_state();
-	session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
-	session->commit_reversible_command ();
+	_session->begin_reversible_command (_("remove marker"));
+	XMLNode &before = _session->locations()->get_state();
+	_session->locations()->remove (loc);
+	XMLNode &after = _session->locations()->get_state();
+	_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+	_session->commit_reversible_command ();
 	return FALSE;
 }
 
@@ -765,15 +765,15 @@ Editor::marker_menu_play_from ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			session->request_locate (l->start(), true);
+			_session->request_locate (l->start(), true);
 		}
 		else {
-			//session->request_bounded_roll (l->start(), l->end());
+			//_session->request_bounded_roll (l->start(), l->end());
 
 			if (is_start) {
-				session->request_locate (l->start(), true);
+				_session->request_locate (l->start(), true);
 			} else {
-				session->request_locate (l->end(), true);
+				_session->request_locate (l->end(), true);
 			}
 		}
 	}
@@ -795,13 +795,13 @@ Editor::marker_menu_set_playhead ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			session->request_locate (l->start(), false);
+			_session->request_locate (l->start(), false);
 		}
 		else {
 			if (is_start) {
-				session->request_locate (l->start(), false);
+				_session->request_locate (l->start(), false);
 			} else {
-				session->request_locate (l->end(), false);
+				_session->request_locate (l->end(), false);
 			}
 		}
 	}
@@ -811,7 +811,7 @@ void
 Editor::marker_menu_range_to_next ()
 {
 	Marker* marker;
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
@@ -829,14 +829,14 @@ Editor::marker_menu_range_to_next ()
 
 	nframes64_t start;
 	nframes64_t end;
-	session->locations()->marks_either_side (marker->position(), start, end);
+	_session->locations()->marks_either_side (marker->position(), start, end);
 
 	if (end != max_frames) {
 		string range_name = l->name();
 		range_name += "-range";
 
 		Location* newrange = new Location (marker->position(), end, range_name, Location::IsRangeMarker);
-		session->locations()->add (newrange);
+		_session->locations()->add (newrange);
 	}
 }
 
@@ -856,13 +856,13 @@ Editor::marker_menu_set_from_playhead ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			l->set_start (session->audible_frame ());
+			l->set_start (_session->audible_frame ());
 		}
 		else {
 			if (is_start) {
-				l->set_start (session->audible_frame ());
+				l->set_start (_session->audible_frame ());
 			} else {
-				l->set_end (session->audible_frame ());
+				l->set_end (_session->audible_frame ());
 			}
 		}
 	}
@@ -923,10 +923,10 @@ Editor::marker_menu_play_range ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			session->request_locate (l->start(), true);
+			_session->request_locate (l->start(), true);
 		}
 		else {
-			session->request_bounded_roll (l->start(), l->end());
+			_session->request_bounded_roll (l->start(), l->end());
 
 		}
 	}
@@ -951,8 +951,8 @@ Editor::marker_menu_loop_range ()
 			l2->set (l->start(), l->end());
 
 			// enable looping, reposition and start rolling
-			session->request_play_loop(true);
-			session->request_locate (l2->start(), true);
+			_session->request_play_loop(true);
+			_session->request_locate (l2->start(), true);
 		}
 	}
 }
@@ -1072,13 +1072,13 @@ Editor::marker_menu_rename ()
 	}
 
 	begin_reversible_command ( _("rename marker") );
-	XMLNode &before = session->locations()->get_state();
+	XMLNode &before = _session->locations()->get_state();
 
 	dialog.get_result(txt);
 	loc->set_name (txt);
 
-	XMLNode &after = session->locations()->get_state();
-	session->add_command (new MementoCommand<Locations>(*(session->locations()), &before, &after));
+	XMLNode &after = _session->locations()->get_state();
+	_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
 	commit_reversible_command ();
 }
 
@@ -1106,13 +1106,13 @@ Editor::new_transport_marker_menu_set_punch ()
 void
 Editor::update_loop_range_view (bool visibility)
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 
 	Location* tll;
 
-	if (session->get_play_loop() && ((tll = transport_loop_location()) != 0)) {
+	if (_session->get_play_loop() && ((tll = transport_loop_location()) != 0)) {
 
 		double x1 = frame_to_pixel (tll->start());
 		double x2 = frame_to_pixel (tll->end());
@@ -1132,21 +1132,21 @@ Editor::update_loop_range_view (bool visibility)
 void
 Editor::update_punch_range_view (bool visibility)
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 
 	Location* tpl;
 
-	if ((session->config.get_punch_in() || session->config.get_punch_out()) && ((tpl = transport_punch_location()) != 0)) {
+	if ((_session->config.get_punch_in() || _session->config.get_punch_out()) && ((tpl = transport_punch_location()) != 0)) {
 		guint track_canvas_width,track_canvas_height;
 		track_canvas->get_size(track_canvas_width,track_canvas_height);
-		if (session->config.get_punch_in()) {
+		if (_session->config.get_punch_in()) {
 			transport_punch_range_rect->property_x1() = frame_to_pixel (tpl->start());
-			transport_punch_range_rect->property_x2() = (session->config.get_punch_out() ? frame_to_pixel (tpl->end()) : frame_to_pixel (JACK_MAX_FRAMES));
+			transport_punch_range_rect->property_x2() = (_session->config.get_punch_out() ? frame_to_pixel (tpl->end()) : frame_to_pixel (JACK_MAX_FRAMES));
 		} else {
 			transport_punch_range_rect->property_x1() = 0;
-			transport_punch_range_rect->property_x2() = (session->config.get_punch_out() ? frame_to_pixel (tpl->end()) : track_canvas_width);
+			transport_punch_range_rect->property_x2() = (_session->config.get_punch_out() ? frame_to_pixel (tpl->end()) : track_canvas_width);
 		}
 
 		if (visibility) {
@@ -1160,7 +1160,7 @@ Editor::update_punch_range_view (bool visibility)
 void
 Editor::marker_selection_changed ()
 {
-	if (session && session->deletion_in_progress()) {
+	if (_session && _session->deletion_in_progress()) {
 		return;
 	}
 
@@ -1191,10 +1191,10 @@ struct SortLocationsByPosition {
 void
 Editor::goto_nth_marker (int n)
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
-	const Locations::LocationList& l (session->locations()->list());
+	const Locations::LocationList& l (_session->locations()->list());
 	Locations::LocationList ordered;
 	ordered = l;
 
@@ -1204,7 +1204,7 @@ Editor::goto_nth_marker (int n)
 	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
 		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_start()) {
 			if (n == 0) {
-				session->request_locate ((*i)->start(), session->transport_rolling());
+				_session->request_locate ((*i)->start(), _session->transport_rolling());
 				break;
 			}
 			--n;

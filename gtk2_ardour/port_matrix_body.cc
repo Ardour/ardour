@@ -246,10 +246,7 @@ PortMatrixBody::setup ()
 {
 	/* Discard any old connections to bundles */
 
-	for (list<sigc::connection>::iterator i = _bundle_connections.begin(); i != _bundle_connections.end(); ++i) {
-		i->disconnect ();
-	}
-	_bundle_connections.clear ();
+	_bundle_connections.drop_connections ();
 
 	/* Connect to bundles so that we find out when their names change */
 
@@ -257,9 +254,7 @@ PortMatrixBody::setup ()
 		PortGroup::BundleList r = _matrix->visible_rows()->bundles ();
 		for (PortGroup::BundleList::iterator i = r.begin(); i != r.end(); ++i) {
 			
-			_bundle_connections.push_back (
-				i->bundle->Changed.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_row_labels)))
-				);
+			_bundle_connections.add_connection ((*i)->bundle->Changed.connect (boost::bind (&PortMatrixBody::rebuild_and_draw_row_labels, this)));
 			
 		}
 	}
@@ -267,9 +262,7 @@ PortMatrixBody::setup ()
 	if (_matrix->visible_columns()) {
 		PortGroup::BundleList c = _matrix->visible_columns()->bundles ();
 		for (PortGroup::BundleList::iterator i = c.begin(); i != c.end(); ++i) {
-			_bundle_connections.push_back (
-				i->bundle->Changed.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrixBody::rebuild_and_draw_column_labels)))
-				);
+			_bundle_connections.add_connection ((*i)->bundle->Changed.connect (boost::bind (&PortMatrixBody::rebuild_and_draw_column_labels, this)));
 		}
 	}
 		
@@ -470,8 +463,8 @@ PortMatrixBody::highlight_associated_channels (int dim, ARDOUR::BundleChannel h)
 	PortGroup::BundleList const b = _matrix->visible_ports(1 - dim)->bundles ();
 
 	for (PortGroup::BundleList::const_iterator i = b.begin(); i != b.end(); ++i) {
-	        for (uint32_t j = 0; j < i->bundle->nchannels(); ++j) {
-			bc[1 - dim] = ARDOUR::BundleChannel (i->bundle, j);
+	        for (uint32_t j = 0; j < (*i)->bundle->nchannels(); ++j) {
+			bc[1 - dim] = ARDOUR::BundleChannel ((*i)->bundle, j);
 			if (_matrix->get_state (bc) == PortMatrixNode::ASSOCIATED) {
 				if (dim == _matrix->column_index()) {
 					_row_labels->add_channel_highlight (bc[1 - dim]);

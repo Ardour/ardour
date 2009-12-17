@@ -45,22 +45,26 @@ ExportDialog::~ExportDialog ()
 void
 ExportDialog::set_session (ARDOUR::Session* s)
 {
-	session = s;
+	SessionHandlePtr::set_session (s);
+
+	if (!_session) {
+		return;
+	}
 
 	/* Init handler and profile manager */
 
-	handler = session->get_export_handler ();
-	status = session->get_export_status ();
-	profile_manager.reset (new ExportProfileManager (*session));
+	handler = _session->get_export_handler ();
+	status = _session->get_export_status ();
+	profile_manager.reset (new ExportProfileManager (*_session));
 
 	/* Possibly init stuff in derived classes */
 
 	init ();
 
-	/* Rest of session related initialization */
+	/* Rest of _session related initialization */
 
 	preset_selector->set_manager (profile_manager);
-	file_notebook->set_session_and_manager (session, profile_manager);
+	file_notebook->set_session_and_manager (_session, profile_manager);
 
 	/* Hand on selection range to profile manager  */
 
@@ -177,8 +181,8 @@ void
 ExportDialog::init_components ()
 {
 	preset_selector.reset (new ExportPresetSelector ());
-	timespan_selector.reset (new ExportTimespanSelectorMultiple (session, profile_manager));
-	channel_selector.reset (new PortExportChannelSelector (session, profile_manager));
+	timespan_selector.reset (new ExportTimespanSelectorMultiple (_session, profile_manager));
+	channel_selector.reset (new PortExportChannelSelector (_session, profile_manager));
 	file_notebook.reset (new ExportFileNotebook ());
 }
 
@@ -372,8 +376,8 @@ void
 ExportRangeDialog::init_components ()
 {
 	preset_selector.reset (new ExportPresetSelector ());
-	timespan_selector.reset (new ExportTimespanSelectorSingle (session, profile_manager, range_id));
-	channel_selector.reset (new PortExportChannelSelector (session, profile_manager));
+	timespan_selector.reset (new ExportTimespanSelectorSingle (_session, profile_manager, range_id));
+	channel_selector.reset (new PortExportChannelSelector (_session, profile_manager));
 	file_notebook.reset (new ExportFileNotebook ());
 }
 
@@ -385,8 +389,8 @@ void
 ExportSelectionDialog::init_components ()
 {
 	preset_selector.reset (new ExportPresetSelector ());
-	timespan_selector.reset (new ExportTimespanSelectorSingle (session, profile_manager, X_("selection")));
-	channel_selector.reset (new PortExportChannelSelector (session, profile_manager));
+	timespan_selector.reset (new ExportTimespanSelectorSingle (_session, profile_manager, X_("selection")));
+	channel_selector.reset (new PortExportChannelSelector (_session, profile_manager));
 	file_notebook.reset (new ExportFileNotebook ());
 }
 
@@ -410,7 +414,7 @@ ExportRegionDialog::init_components ()
 	Glib::ustring loc_id = profile_manager->set_single_range (region.position(), region.position() + region.length(), region.name());
 
 	preset_selector.reset (new ExportPresetSelector ());
-	timespan_selector.reset (new ExportTimespanSelectorSingle (session, profile_manager, loc_id));
-	channel_selector.reset (new RegionExportChannelSelector (session, profile_manager, region, track));
+	timespan_selector.reset (new ExportTimespanSelectorSingle (_session, profile_manager, loc_id));
+	channel_selector.reset (new RegionExportChannelSelector (_session, profile_manager, region, track));
 	file_notebook.reset (new ExportFileNotebook ());
 }

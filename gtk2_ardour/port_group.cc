@@ -50,6 +50,14 @@ PortGroup::PortGroup (std::string const & n)
 
 }
 
+PortGroup::~PortGroup()
+{
+	for (BundleList::iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
+		delete *i;
+	}
+	_bundles.clear ();
+}
+
 /** Add a bundle to a group.
  *  @param b Bundle.
  *  @param allow_dups true to allow the group to contain more than one bundle with the same port, otherwise false.
@@ -80,6 +88,14 @@ PortGroup::add_bundle (boost::shared_ptr<Bundle> b, boost::shared_ptr<IO> io, Gd
 	add_bundle_internal (b, io, true, c, false);
 }
 
+PortGroup::BundleRecord::BundleRecord (boost::shared_ptr<ARDOUR::Bundle> b, boost::shared_ptr<ARDOUR::IO> iop, Gdk::Color c, bool has_c)
+	: bundle (b)
+	, io (iop)
+	, colour (c)
+	, has_colour (has_c)
+{
+}
+
 void
 PortGroup::add_bundle_internal (boost::shared_ptr<Bundle> b, boost::shared_ptr<IO> io, bool has_colour, Gdk::Color colour, bool allow_dups)
 {
@@ -90,7 +106,7 @@ PortGroup::add_bundle_internal (boost::shared_ptr<Bundle> b, boost::shared_ptr<I
 		/* don't add this bundle if we already have one with the same ports */
 		
 		BundleList::iterator i = _bundles.begin ();
-		while (i != _bundles.end() && b->has_same_ports (i->bundle) == false) {
+		while (i != _bundles.end() && b->has_same_ports ((*i)->bundle) == false) {
 			++i;
 		}
 		
@@ -99,14 +115,9 @@ PortGroup::add_bundle_internal (boost::shared_ptr<Bundle> b, boost::shared_ptr<I
 		}
 	}
 
-	BundleRecord r;
-	r.bundle = b;
-	r.io = io;
-	r.colour = colour;
-	r.has_colour = has_colour;
-	r.changed_connection = b->Changed.connect (sigc::mem_fun (*this, &PortGroup::bundle_changed));
-
-	_bundles.push_back (r);
+	BundleRecord* br = new BundleRecord (b, io, colour, has_colour);
+	br->changed_connection = b->Changed.connect (boost::bind (&PortGroup::bundle_changed, this, _1));
+	_bundles.push_back (br);
 
 	Changed ();	
 }
@@ -117,7 +128,7 @@ PortGroup::remove_bundle (boost::shared_ptr<Bundle> b)
 	assert (b.get());
 
 	BundleList::iterator i = _bundles.begin ();
-	while (i != _bundles.end() && i->bundle != b) {
+	while (i != _bundles.end() && (*i)->bundle != b) {
 		++i;
 	}
 
@@ -125,7 +136,7 @@ PortGroup::remove_bundle (boost::shared_ptr<Bundle> b)
 		return;
 	}
 
-	i->changed_connection.disconnect ();
+	delete *i;
 	_bundles.erase (i);
 
 	Changed ();
@@ -142,7 +153,7 @@ void
 PortGroup::clear ()
 {
 	for (BundleList::iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
-		i->changed_connection.disconnect ();
+		delete *i;
 	}
 
 	_bundles.clear ();
@@ -153,7 +164,7 @@ bool
 PortGroup::has_port (std::string const& p) const
 {
 	for (BundleList::const_iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
-		if (i->bundle->offers_port_alone (p)) {
+		if ((*i)->bundle->offers_port_alone (p)) {
 			return true;
 		}
 	}
@@ -165,7 +176,7 @@ boost::shared_ptr<Bundle>
 PortGroup::only_bundle ()
 {
 	assert (_bundles.size() == 1);
-	return _bundles.front().bundle;
+	return _bundles.front()->bundle;
 }
 
 
@@ -174,7 +185,7 @@ PortGroup::total_channels () const
 {
 	uint32_t n = 0;
 	for (BundleList::const_iterator i = _bundles.begin(); i != _bundles.end(); ++i) {
-		n += i->bundle->nchannels ();
+		n += (*i)->bundle->nchannels ();
 	}
 
 	return n;
@@ -184,7 +195,7 @@ boost::shared_ptr<IO>
 PortGroup::io_from_bundle (boost::shared_ptr<ARDOUR::Bundle> b) const
 {
 	BundleList::const_iterator i = _bundles.begin ();
-	while (i != _bundles.end() && i->bundle != b) {
+	while (i != _bundles.end() && (*i)->bundle != b) {
 		++i;
 	}
 
@@ -192,7 +203,7 @@ PortGroup::io_from_bundle (boost::shared_ptr<ARDOUR::Bundle> b) const
 		return boost::shared_ptr<IO> ();
 	}
 
-	return i->io;
+	return (*i)->io;
 }
 
 
@@ -202,6 +213,11 @@ PortGroupList::PortGroupList ()
 	: _type (DataType::AUDIO), _signals_suspended (false), _pending_change (false), _pending_bundle_change ((Bundle::Change) 0)
 {
 
+}
+
+PortGroupList::~PortGroupList() 
+{
+	/* XXX need to clean up bundles, but ownership shared with PortGroups */
 }
 
 void
@@ -272,7 +288,7 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 
 		route_bundles.push_back (io->bundle ());
 
-		(*i)->foreach_processor (sigc::bind (sigc::mem_fun (*this, &PortGroupList::maybe_add_processor_to_list), &route_bundles, inputs, used_io));
+		(*i)->foreach_processor (boost::bind (&PortGroupList::maybe_add_processor_to_list, this, _1, &route_bundles, inputs, used_io));
 
 		/* Work out which group to put these bundles in */
 		boost::shared_ptr<PortGroup> g;
@@ -463,13 +479,7 @@ void
 PortGroupList::clear ()
 {
 	_groups.clear ();
-
-	for (std::vector<sigc::connection>::iterator i = _bundle_changed_connections.begin(); i != _bundle_changed_connections.end(); ++i) {
-		i->disconnect ();
-	}
-
-	_bundle_changed_connections.clear ();
-
+	_bundle_changed_connections.drop_connections ();
 	emit_changed ();
 }
 
@@ -513,9 +523,7 @@ PortGroupList::add_group (boost::shared_ptr<PortGroup> g)
 
 	g->Changed.connect (sigc::mem_fun (*this, &PortGroupList::emit_changed));
 
-	_bundle_changed_connections.push_back (
-		g->BundleChanged.connect (sigc::mem_fun (*this, &PortGroupList::emit_bundle_changed))
-		);
+	_bundle_changed_connections.add_connection (g->BundleChanged.connect (sigc::mem_fun (*this, &PortGroupList::emit_bundle_changed)));
 
 	emit_changed ();
 }

@@ -31,34 +31,36 @@ using namespace std;
 
 void RouteSignal::connect()
 {
-	back_insert_iterator<Connections> cins = back_inserter( _connections );
+	if (_strip.has_solo()) {
+		connections.add_connection (_route->solo_control()->Changed.connect(boost::bind (&MackieControlProtocol::notify_solo_changed, &_mcp, this)));
+	}
 
-	if ( _strip.has_solo() )
-		cins = _route->solo_control()->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_solo_changed ), this ) );
-	
-	if ( _strip.has_mute() )
-		cins = _route->mute_control()->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_mute_changed ), this ) );
-	
-	if ( _strip.has_gain() )
-		cins = _route->gain_control()->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_gain_changed ), this, true ) );
-		
-	cins = _route->NameChanged.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_name_changed ), this ) );
+	if (_strip.has_mute()) {
+		connections.add_connection (_route->mute_control()->Changed.connect(boost::bind (&MackieControlProtocol::notify_mute_changed, &_mcp, this)));
+	}
+
+	if (_strip.has_gain()) {
+		connections.add_connection (_route->gain_control()->Changed.connect(boost::bind (&MackieControlProtocol::notify_gain_changed, &_mcp, this, false)));
+	}
+
+	connections.add_connection (_route->NameChanged.connect (boost::bind (&MackieControlProtocol::notify_name_changed, &_mcp, this)));
 	
 	if (_route->panner()) {
-		cins = _route->panner()->Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this, true ) );
+		connections.add_connection (_route->panner()->Changed.connect(boost::bind (&MackieControlProtocol::notify_panner_changed, &_mcp, this, false)));
+		
 		for ( unsigned int i = 0; i < _route->panner()->npanners(); ++i ) {
-			cins = _route->panner()->streampanner (i).Changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_panner_changed ), this, true ) );
+			connections.add_connection (_route->panner()->streampanner(i).Changed.connect (boost::bind (&MackieControlProtocol::notify_panner_changed, &_mcp, this, false)));
 		}
 	}
 	
 	boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<ARDOUR::Track>(_route);
 	if (trk) {
-		cins = trk->rec_enable_control()->Changed .connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_record_enable_changed ), this));
+		connections.add_connection (trk->rec_enable_control()->Changed .connect(boost::bind (&MackieControlProtocol::notify_record_enable_changed, &_mcp, this)));
 	}
 	
 	// TODO this works when a currently-banked route is made inactive, but not
 	// when a route is activated which should be currently banked.
-	cins = _route->active_changed.connect( sigc::bind ( mem_fun ( _mcp, &MackieControlProtocol::notify_active_changed ), this ) );
+	connections.add_connection (_route->active_changed.connect (boost::bind (&MackieControlProtocol::notify_active_changed, &_mcp, this)));
 
 	// TODO
 	// SelectedChanged
@@ -67,10 +69,7 @@ void RouteSignal::connect()
 
 void RouteSignal::disconnect()
 {
-	for ( Connections::iterator it = _connections.begin(); it != _connections.end(); ++it )
-	{
-		it->disconnect();
-	}
+	connections.drop_connections ();
 }
 
 void RouteSignal::notify_all()

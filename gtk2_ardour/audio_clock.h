@@ -26,12 +26,13 @@
 #include <gtkmm/label.h>
 #include <gtkmm/frame.h>
 #include "ardour/ardour.h"
+#include "ardour/session_handle.h"
 
 namespace ARDOUR {
 	class Session;
 }
 
-class AudioClock : public Gtk::HBox
+class AudioClock : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
   public:
 	enum Mode {
@@ -72,7 +73,6 @@ class AudioClock : public Gtk::HBox
 	static bool has_focus() { return _has_focus; }
 
   private:
-	ARDOUR::Session  *session;
 	Mode             _mode;
 	uint32_t          key_entry_state;
 	std::string      _name;

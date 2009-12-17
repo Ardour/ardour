@@ -36,11 +36,12 @@
 using namespace std;
 using namespace ARDOUR;
 
-SessionImportDialog::SessionImportDialog (ARDOUR::Session & target) :
+SessionImportDialog::SessionImportDialog (ARDOUR::Session* target) :
   ArdourDialog (_("Import from session")),
-  target (target),
   file_browse_button (_("Browse"))
 {
+	set_session (target);
+
 	// File entry
 	file_entry.set_name ("ImportFileNameEntry");
 	file_entry.set_text ("/");
@@ -101,24 +102,26 @@ SessionImportDialog::SessionImportDialog (ARDOUR::Session & target) :
 void
 SessionImportDialog::load_session (const string& filename)
 {
-	tree.read (filename);
-	boost::shared_ptr<AudioRegionImportHandler> region_handler (new AudioRegionImportHandler (tree, target));
-	boost::shared_ptr<AudioPlaylistImportHandler> pl_handler (new AudioPlaylistImportHandler (tree, target, *region_handler));
-
-	handlers.push_back (boost::static_pointer_cast<ElementImportHandler> (region_handler));
-	handlers.push_back (boost::static_pointer_cast<ElementImportHandler> (pl_handler));
-	handlers.push_back (HandlerPtr(new UnusedAudioPlaylistImportHandler (tree, target, *region_handler)));
-	handlers.push_back (HandlerPtr(new AudioTrackImportHandler (tree, target, *pl_handler)));
-	handlers.push_back (HandlerPtr(new LocationImportHandler (tree, target)));
-	handlers.push_back (HandlerPtr(new TempoMapImportHandler (tree, target)));
-
-	fill_list();
-
-	if (ElementImportHandler::dirty()) {
-		// Warn user
-		string txt = _("Some elements had errors in them. Please see the log for details");
-		Gtk::MessageDialog msg (txt, false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
-		msg.run();
+	if (_session) {
+		tree.read (filename);
+		boost::shared_ptr<AudioRegionImportHandler> region_handler (new AudioRegionImportHandler (tree, *_session));
+		boost::shared_ptr<AudioPlaylistImportHandler> pl_handler (new AudioPlaylistImportHandler (tree, *_session, *region_handler));
+		
+		handlers.push_back (boost::static_pointer_cast<ElementImportHandler> (region_handler));
+		handlers.push_back (boost::static_pointer_cast<ElementImportHandler> (pl_handler));
+		handlers.push_back (HandlerPtr(new UnusedAudioPlaylistImportHandler (tree, *_session, *region_handler)));
+		handlers.push_back (HandlerPtr(new AudioTrackImportHandler (tree, *_session, *pl_handler)));
+		handlers.push_back (HandlerPtr(new LocationImportHandler (tree, *_session)));
+		handlers.push_back (HandlerPtr(new TempoMapImportHandler (tree, *_session)));
+		
+		fill_list();
+		
+		if (ElementImportHandler::dirty()) {
+			// Warn user
+			string txt = _("Some elements had errors in them. Please see the log for details");
+			Gtk::MessageDialog msg (txt, false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+			msg.run();
+		}
 	}
 }
 

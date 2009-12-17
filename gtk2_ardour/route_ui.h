@@ -23,6 +23,8 @@
 #include <list>
 
 #include "pbd/xml++.h"
+#include "pbd/scoped_connections.h"
+
 #include "ardour/ardour.h"
 #include "ardour/mute_master.h"
 #include "ardour/session_event.h"
@@ -49,8 +51,8 @@ class BindableToggleButton;
 class RouteUI : public virtual AxisView
 {
   public:
-	RouteUI(ARDOUR::Session&);
-	RouteUI(boost::shared_ptr<ARDOUR::Route>, ARDOUR::Session&);
+	RouteUI(ARDOUR::Session*);
+	RouteUI(boost::shared_ptr<ARDOUR::Route>, ARDOUR::Session*);
 
 	virtual ~RouteUI();
 
@@ -194,16 +196,18 @@ class RouteUI : public virtual AxisView
 	static int solo_visual_state (boost::shared_ptr<ARDOUR::Route>);
 	static int solo_visual_state_with_isolate (boost::shared_ptr<ARDOUR::Route>);
 	static int solo_isolate_visual_state (boost::shared_ptr<ARDOUR::Route>);
-	static int mute_visual_state (ARDOUR::Session &, boost::shared_ptr<ARDOUR::Route>);
+	static int mute_visual_state (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
 
    protected:
- 	std::vector<sigc::connection> connections;
+	PBD::ScopedConnectionList connections;
+	boost::signals2::scoped_connection route_going_away_connection;
 	bool self_destruct;
 
  	void init ();
  	void reset ();
 
 	void queue_route_group_op (ARDOUR::RouteGroup::Property prop, void (ARDOUR::Session::*session_method)(boost::shared_ptr<ARDOUR::RouteList>, bool), bool yn);
+	void self_delete ();
 
   private:
 	void check_rec_enable_sensitivity ();
@@ -225,6 +229,7 @@ class RouteUI : public virtual AxisView
 
 	SoloMuteRelease* _solo_release;
 	SoloMuteRelease* _mute_release;
+
 };
 
 #endif /* __ardour_route_ui__ */

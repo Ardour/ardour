@@ -49,7 +49,7 @@ ExportFileNotebook::ExportFileNotebook () :
 void
 ExportFileNotebook::set_session_and_manager (ARDOUR::Session * s, boost::shared_ptr<ARDOUR::ExportProfileManager> manager)
 {
-	session = s;
+	SessionHandlePtr::set_session (s);
 	profile_manager = manager;
 
 	sync_with_manager ();
@@ -110,7 +110,7 @@ ExportFileNotebook::add_new_file_page ()
 void
 ExportFileNotebook::add_file_page (ARDOUR::ExportProfileManager::FormatStatePtr format_state, ARDOUR::ExportProfileManager::FilenameStatePtr filename_state)
 {
-	FilePage * page = Gtk::manage (new FilePage (session, profile_manager, this, page_counter, format_state, filename_state));
+	FilePage * page = Gtk::manage (new FilePage (_session, profile_manager, this, page_counter, format_state, filename_state));
 	page->CriticalSelectionChanged.connect (CriticalSelectionChanged.make_slot());
 	insert_page (*page, page->get_tab_widget(), get_n_pages() - 1);
 

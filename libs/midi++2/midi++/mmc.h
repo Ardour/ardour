@@ -20,7 +20,8 @@
 #ifndef __midipp_mmc_h_h__
 #define __midipp_mmc_h_h__
 
-#include <sigc++/sigc++.h>
+#include <boost/signals2.hpp>
+
 #include "midi++/types.h"
 
 namespace MIDI {
@@ -28,10 +29,10 @@ namespace MIDI {
 class Port;
 class Parser;
 
-class MachineControl : public sigc::trackable
-
+class MachineControl 
 {
   public:
+	typedef boost::signals2::signal<void(MachineControl&)> MMCSignal;
 	typedef byte CommandSignature[60];
 	typedef byte ResponseSignature[60];
 
@@ -102,63 +103,61 @@ class MachineControl : public sigc::trackable
 	   when certain MMC commands are received.
 	*/
 			
-	sigc::signal<void,MachineControl &> Stop;
-	sigc::signal<void,MachineControl &> Play;
-	sigc::signal<void,MachineControl &> DeferredPlay;
-	sigc::signal<void,MachineControl &> FastForward;
-	sigc::signal<void,MachineControl &> Rewind;
-	sigc::signal<void,MachineControl &> RecordStrobe;
-	sigc::signal<void,MachineControl &> RecordExit;
-	sigc::signal<void,MachineControl &> RecordPause;
-	sigc::signal<void,MachineControl &> Pause;
-	sigc::signal<void,MachineControl &> Eject;
-	sigc::signal<void,MachineControl &> Chase;
-	sigc::signal<void,MachineControl &> CommandErrorReset;
-	sigc::signal<void,MachineControl &> MmcReset;
-
-	sigc::signal<void,MachineControl &> JogStart;
-	sigc::signal<void,MachineControl &> JogStop;
-
-	sigc::signal<void,MachineControl &> Write;
-	sigc::signal<void,MachineControl &> MaskedWrite;
-	sigc::signal<void,MachineControl &> Read;
-	sigc::signal<void,MachineControl &> Update;
-	sigc::signal<void,MachineControl &> VariablePlay;
-	sigc::signal<void,MachineControl &> Search;
-	sigc::signal<void,MachineControl &> AssignSystemMaster;
-	sigc::signal<void,MachineControl &> GeneratorCommand;
-	sigc::signal<void,MachineControl &> MidiTimeCodeCommand;
-	sigc::signal<void,MachineControl &> Move;
-	sigc::signal<void,MachineControl &> Add;
-	sigc::signal<void,MachineControl &> Subtract;
-	sigc::signal<void,MachineControl &> DropFrameAdjust;
-	sigc::signal<void,MachineControl &> Procedure;
-	sigc::signal<void,MachineControl &> Event;
-	sigc::signal<void,MachineControl &> Group;
-	sigc::signal<void,MachineControl &> CommandSegment;
-	sigc::signal<void,MachineControl &> DeferredVariablePlay;
-	sigc::signal<void,MachineControl &> RecordStrobeVariable;
-	sigc::signal<void,MachineControl &> Wait;
-	sigc::signal<void,MachineControl &> Resume;
+	MMCSignal Stop;
+	MMCSignal Play;
+	MMCSignal DeferredPlay;
+	MMCSignal FastForward;
+	MMCSignal Rewind;
+	MMCSignal RecordStrobe;
+	MMCSignal RecordExit;
+	MMCSignal RecordPause;
+	MMCSignal Pause;
+	MMCSignal Eject;
+	MMCSignal Chase;
+	MMCSignal CommandErrorReset;
+	MMCSignal MmcReset;
+	MMCSignal JogStart;
+	MMCSignal JogStop;
+	MMCSignal Write;
+	MMCSignal MaskedWrite;
+	MMCSignal Read;
+	MMCSignal Update;
+	MMCSignal VariablePlay;
+	MMCSignal Search;
+	MMCSignal AssignSystemMaster;
+	MMCSignal GeneratorCommand;
+	MMCSignal MidiTimeCodeCommand;
+	MMCSignal Move;
+	MMCSignal Add;
+	MMCSignal Subtract;
+	MMCSignal DropFrameAdjust;
+	MMCSignal Procedure;
+	MMCSignal Event;
+	MMCSignal Group;
+	MMCSignal CommandSegment;
+	MMCSignal DeferredVariablePlay;
+	MMCSignal RecordStrobeVariable;
+	MMCSignal Wait;
+	MMCSignal Resume;
 
 	/* The second argument is the shuttle speed, the third is
 	   true if the direction is "forwards", false for "reverse"
 	*/
 	
-	sigc::signal<void,MachineControl &,float,bool> Shuttle;
+	boost::signals2::signal<void(MachineControl&,float,bool)> Shuttle;
 
 	/* The second argument specifies the desired track record enabled
 	   status.
 	*/
 
-	sigc::signal<void,MachineControl &,size_t,bool> 
+	boost::signals2::signal<void(MachineControl &,size_t,bool)> 
 		                             TrackRecordStatusChange;
 	
 	/* The second argument specifies the desired track record enabled
 	   status.
 	*/
 
-	sigc::signal<void,MachineControl &,size_t,bool> 
+	boost::signals2::signal<void(MachineControl &,size_t,bool)> 
 		                             TrackMuteChange;
 	
 	/* The second argument points to a byte array containing
@@ -166,11 +165,11 @@ class MachineControl : public sigc::trackable
 	   format (5 bytes, roughly: hrs/mins/secs/frames/subframes)
 	*/
 
-	sigc::signal<void,MachineControl &, const byte *> Locate;
+	boost::signals2::signal<void(MachineControl &, const byte *)> Locate;
 
 	/* The second argument is the number of steps to jump */
 	
-	sigc::signal<void,MachineControl &, int> Step;
+	boost::signals2::signal<void(MachineControl &, int)> Step;
 	
   protected:
 
@@ -258,7 +257,8 @@ class MachineControl : public sigc::trackable
 	MIDI::Port &_port;
 
 	void process_mmc_message (Parser &p, byte *, size_t len);
-	
+	boost::signals2::scoped_connection mmc_connection;
+
 	int  do_masked_write (byte *, size_t len);
 	int  do_locate (byte *, size_t len);
 	int  do_step (byte *, size_t len);

@@ -90,7 +90,6 @@ ArdourDialog::on_show ()
 void
 ArdourDialog::init ()
 {
-	session = 0;
 	set_type_hint(Gdk::WINDOW_TYPE_HINT_DIALOG);
 	set_border_width (10);
 	CloseAllDialogs.connect (sigc::bind (sigc::mem_fun (*this, &ArdourDialog::response), RESPONSE_CANCEL));

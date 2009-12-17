@@ -50,7 +50,7 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
-sigc::signal<void,boost::shared_ptr<Source> > SourceFactory::SourceCreated;
+boost::signals2::signal<void(boost::shared_ptr<Source>)> SourceFactory::SourceCreated;
 Glib::Cond* SourceFactory::PeaksToBuild;
 Glib::StaticMutex SourceFactory::peak_building_lock = GLIBMM_STATIC_MUTEX_INIT;
 std::list<boost::weak_ptr<AudioSource> > SourceFactory::files_with_peaks;

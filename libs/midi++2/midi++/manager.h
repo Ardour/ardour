@@ -83,7 +83,7 @@ class Manager {
 
 	int get_known_ports (std::vector<PortSet>&);
 
-	sigc::signal<void> PortsChanged;
+	boost::signals2::signal<void()> PortsChanged;
 
   private:
 	/* This is a SINGLETON pattern */

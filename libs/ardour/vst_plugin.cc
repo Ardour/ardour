@@ -102,7 +102,7 @@ VSTPlugin::VSTPlugin (const VSTPlugin &other)
 VSTPlugin::~VSTPlugin ()
 {
 	deactivate ();
-	GoingAway (); /* EMIT SIGNAL */
+	drop_references ();
 	fst_close (_fst);
 }
 

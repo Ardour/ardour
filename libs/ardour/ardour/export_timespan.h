@@ -36,7 +36,7 @@ namespace ARDOUR
 class ExportChannel;
 class ExportTempFile;
 
-class ExportTimespan : public sigc::trackable
+class ExportTimespan
 {
   private:
 	typedef boost::shared_ptr<ExportTempFile> TempFilePtr;
@@ -69,7 +69,7 @@ class ExportTimespan : public sigc::trackable
 	/// Reads data from each channel and writes to tempfile
 	int process (nframes_t frames);
 
-	sigc::connection  process_connection;
+	boost::signals2::scoped_connection  process_connection;
 
 	void set_range (nframes_t start, nframes_t end);
 	nframes_t get_length () const { return end_frame - start_frame; }

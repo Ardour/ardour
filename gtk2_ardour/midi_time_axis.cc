@@ -93,7 +93,7 @@ using namespace Editing;
 static const uint32_t MIDI_CONTROLS_BOX_MIN_HEIGHT = 162;
 static const uint32_t KEYBOARD_MIN_HEIGHT = 140;
 
-MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session& sess,
+MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 		boost::shared_ptr<Route> rt, Canvas& canvas)
 	: AxisView(sess) // virtually inherited
 	, RouteTimeAxisView(ed, sess, rt, canvas)
@@ -718,21 +718,21 @@ MidiTimeAxisView::add_region (nframes64_t pos)
 
 	nframes64_t start = pos;
 	real_editor->snap_to (start, -1);
-	const Meter& m = _session.tempo_map().meter_at(start);
-	const Tempo& t = _session.tempo_map().tempo_at(start);
-	double length = floor (m.frames_per_bar(t, _session.frame_rate()));
+	const Meter& m = _session->tempo_map().meter_at(start);
+	const Tempo& t = _session->tempo_map().tempo_at(start);
+	double length = floor (m.frames_per_bar(t, _session->frame_rate()));
 
 	const boost::shared_ptr<MidiDiskstream> diskstream =
 		boost::dynamic_pointer_cast<MidiDiskstream>(view()->trackview().track()->diskstream());
 
-	boost::shared_ptr<Source> src = _session.create_midi_source_for_session (*diskstream.get());
+	boost::shared_ptr<Source> src = _session->create_midi_source_for_session (*diskstream.get());
 
 	boost::shared_ptr<Region> region = (RegionFactory::create (src, 0, (nframes_t) length,
 								   PBD::basename_nosuffix(src->name())));
 
 	playlist()->add_region (region, start);
 	XMLNode &after = playlist()->get_state();
-	_session.add_command (new MementoCommand<Playlist> (*playlist().get(), &before, &after));
+	_session->add_command (new MementoCommand<Playlist> (*playlist().get(), &before, &after));
 
 	real_editor->commit_reversible_command();
 

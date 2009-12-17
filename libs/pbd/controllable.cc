@@ -26,11 +26,11 @@
 using namespace PBD;
 using namespace std;
 
-sigc::signal<void,Controllable*> Controllable::Destroyed;
-sigc::signal<bool,Controllable*> Controllable::StartLearning;
-sigc::signal<void,Controllable*> Controllable::StopLearning;
-sigc::signal<void,Controllable*,int,int> Controllable::CreateBinding;
-sigc::signal<void,Controllable*> Controllable::DeleteBinding;
+boost::signals2::signal<void(Controllable*)> Controllable::Destroyed;
+boost::signals2::signal<bool(Controllable*)> Controllable::StartLearning;
+boost::signals2::signal<void(Controllable*)> Controllable::StopLearning;
+boost::signals2::signal<void(Controllable*,int,int)> Controllable::CreateBinding;
+boost::signals2::signal<void(Controllable*)> Controllable::DeleteBinding;
 
 Glib::StaticRWLock Controllable::registry_lock = GLIBMM_STATIC_RW_LOCK_INIT;
 Controllable::Controllables Controllable::registry;
@@ -41,45 +41,47 @@ Controllable::Controllable (const string& name, const string& uri)
 	, _uri (uri)
 	, _touching (false)
 {
-	add ();
+	add (*this);
 }
 
 void
-Controllable::add ()
+Controllable::add (Controllable& ctl)
 {
-	Glib::RWLock::WriterLock lm (registry_lock);
-	registry.insert (this);
+	using namespace boost;
 
-	if (!_uri.empty()) {
+	Glib::RWLock::WriterLock lm (registry_lock);
+	registry.insert (&ctl);
+
+	if (!ctl.uri().empty()) {
 		pair<string,Controllable*> newpair;
-		newpair.first = _uri;
-		newpair.second = this;
+		newpair.first = ctl.uri();
+		newpair.second = &ctl;
 		registry_by_uri.insert (newpair);
 	}
 
-	this->GoingAway.connect (mem_fun (this, &Controllable::remove));
+	/* Controllable::remove() is static - no need to manage this connection */
+
+	ctl.GoingAway.connect (boost::bind (&Controllable::remove, ref (ctl)));
 }
 
 void
-Controllable::remove ()
+Controllable::remove (Controllable& ctl)
 {
 	Glib::RWLock::WriterLock lm (registry_lock);
 
 	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i) {
-		if ((*i) == this) {
+		if ((*i) == &ctl) {
 			registry.erase (i);
 			break;
 		}
 	}
 
-	if (!_uri.empty()) {
-		ControllablesByURI::iterator i = registry_by_uri.find (_uri);
+	if (!ctl.uri().empty()) {
+		ControllablesByURI::iterator i = registry_by_uri.find (ctl.uri());
 		if (i != registry_by_uri.end()) {
 			registry_by_uri.erase (i);
 		}
 	}
-
-
 }
 
 void

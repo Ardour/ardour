@@ -88,7 +88,7 @@ BindingProxy::button_press_handler (GdkEventButton *ev)
 			}
 			prompter->set_text (prompt);
 			prompter->touch (); // shows popup
-			learning_connection = controllable->LearningFinished.connect (mem_fun (*this, &BindingProxy::learning_finished));
+			learning_connection = controllable->LearningFinished.connect (boost::bind (&BindingProxy::learning_finished, this));
 		}
 		return true;
 	}

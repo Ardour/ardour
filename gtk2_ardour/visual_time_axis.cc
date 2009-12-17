@@ -65,7 +65,7 @@ using namespace Gtk;
  * @param sess the current session
  * @param canvas the parent canvas object
  */
-VisualTimeAxis::VisualTimeAxis(const string & name, PublicEditor& ed, ARDOUR::Session& sess, Canvas& canvas)
+VisualTimeAxis::VisualTimeAxis(const string & name, PublicEditor& ed, ARDOUR::Session* sess, Canvas& canvas)
 	: AxisView(sess),
 	  TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas),
 	  visual_button (_("v")),

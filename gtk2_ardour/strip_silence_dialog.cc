@@ -129,7 +129,7 @@ StripSilenceDialog::create_waves ()
 	int n = 0;
 
 	for (std::list<Wave>::iterator i = _waves.begin(); i != _waves.end(); ++i) {
-		if (i->region->audio_source(0)->peaks_ready (sigc::mem_fun (*this, &StripSilenceDialog::peaks_ready), _peaks_ready_connection)) {
+		if (i->region->audio_source(0)->peaks_ready (boost::bind (&StripSilenceDialog::peaks_ready, this), _peaks_ready_connection)) {
 			i->view = new WaveView (*(_canvas->root()));
 			i->view->property_data_src() = static_cast<gpointer>(i->region.get());
 			i->view->property_cache() = WaveView::create_cache ();

@@ -20,9 +20,11 @@
 #ifndef __ardour_dialog_h__
 #define __ardour_dialog_h__
 
-#include "ardour/ardour.h"
 #include <gtkmm/window.h>
 #include <gtkmm/dialog.h>
+
+#include "ardour/ardour.h"
+#include "ardour/session_handle.h"
 
 namespace ARDOUR {
 	class Session;
@@ -30,10 +32,11 @@ namespace ARDOUR {
 
 /*
  * This virtual parent class is so that each dialog box uses the
- * same mechanism to declare its closing, and to have a common
- * method of connecting and disconnecting from a Session.
+ * same mechanism to declare its closing. It shares a common
+ * method of connecting and disconnecting from a Session with
+ * all other objects that have a handle on a Session.
  */
-class ArdourDialog : public Gtk::Dialog
+class ArdourDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr
 {
   public:
 	ArdourDialog (std::string title, bool modal = false, bool use_separator = false);
@@ -47,16 +50,6 @@ class ArdourDialog : public Gtk::Dialog
 	bool on_leave_notify_event (GdkEventCrossing*);
 	void on_unmap ();
 	void on_show ();
-
-	ARDOUR::Session *session;
-
-	virtual void set_session (ARDOUR::Session* s) {
-		session = s;
-	}
-
-	virtual void session_gone () {
-		set_session (0);
-	}
 
 	static void close_all_dialogs () { CloseAllDialogs(); }
 

@@ -22,24 +22,26 @@
 
 #include <string>
 #include "pbd/statefuldestructible.h"
+#include "pbd/scoped_connections.h"
+
+#include "ardour/session_handle.h"
 
 namespace ARDOUR {
 
 class Session;
 
-/** An object associated with a Session.
- *
- * This is a few common things factored out of IO which weren't IO specific
- * (to fix the problem with e.g. PluginInsert being an IO which it shouldn't be).
+/** A named object associated with a Session. Objects derived from this class are
+    expected to be destroyed before the session calls drop_references().
  */
-class SessionObject : public PBD::StatefulDestructible
+
+class SessionObject : public SessionHandleRef, public PBD::StatefulDestructible
 {
-public:
-	SessionObject(Session& session, const std::string& name)
-		: _session(session)
+  public:
+	SessionObject (Session& session, const std::string& name)
+		: SessionHandleRef (session)
 		, _name(name)
 	{}
-
+	
 	Session&           session() const { return _session; }
 	const std::string& name()    const { return _name; }
 
@@ -51,10 +53,9 @@ public:
 		return true;
 	}
 
-	sigc::signal<void> NameChanged;
+	boost::signals2::signal<void()> NameChanged;
 
-protected:
-	Session&    _session;
+  protected:
 	std::string _name;
 };
 

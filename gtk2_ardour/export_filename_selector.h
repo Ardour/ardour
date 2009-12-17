@@ -25,13 +25,11 @@
 
 #include "ardour/export_profile_manager.h"
 #include "ardour/export_filename.h"
-
-namespace ARDOUR {
-	class Session;
-}
+#include "ardour/session_handle.h"
 
 ///
-class ExportFilenameSelector : public Gtk::VBox {
+class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr 
+{
   public:
 	typedef boost::shared_ptr<ARDOUR::ExportFilename> FilenamePtr;
 
@@ -60,7 +58,6 @@ class ExportFilenameSelector : public Gtk::VBox {
 
 	void open_browse_dialog ();
 
-	ARDOUR::Session * session;
 	boost::shared_ptr<ARDOUR::ExportFilename> filename;
 
 	Glib::RefPtr<Gtk::SizeGroup> label_sizegroup;

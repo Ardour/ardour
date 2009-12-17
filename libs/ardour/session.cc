@@ -28,8 +28,6 @@
 #include <unistd.h>
 #include <limits.h>
 
-#include <sigc++/bind.h>
-#include <sigc++/retype.h>
 
 #include <glibmm/thread.h>
 #include <glibmm/miscutils.h>
@@ -105,17 +103,17 @@ using boost::weak_ptr;
 
 bool Session::_disable_all_loaded_plugins = false;
 
-sigc::signal<void,std::string> Session::Dialog;
-sigc::signal<int> Session::AskAboutPendingState;
-sigc::signal<int,nframes_t,nframes_t> Session::AskAboutSampleRateMismatch;
-sigc::signal<void> Session::SendFeedback;
+boost::signals2::signal<void(std::string)> Session::Dialog;
+boost::signals2::signal<int()> Session::AskAboutPendingState;
+boost::signals2::signal<int(nframes_t,nframes_t)> Session::AskAboutSampleRateMismatch;
+boost::signals2::signal<void()> Session::SendFeedback;
 
-sigc::signal<void> Session::TimecodeOffsetChanged;
-sigc::signal<void> Session::StartTimeChanged;
-sigc::signal<void> Session::EndTimeChanged;
-sigc::signal<void> Session::AutoBindingOn;
-sigc::signal<void> Session::AutoBindingOff;
-sigc::signal<void, std::string, std::string> Session::Exported;
+boost::signals2::signal<void()> Session::TimecodeOffsetChanged;
+boost::signals2::signal<void()> Session::StartTimeChanged;
+boost::signals2::signal<void()> Session::EndTimeChanged;
+boost::signals2::signal<void()> Session::AutoBindingOn;
+boost::signals2::signal<void()> Session::AutoBindingOff;
+boost::signals2::signal<void(std::string, std::string)> Session::Exported;
 
 static void clean_up_session_event (SessionEvent* ev) { delete ev; }
 const SessionEvent::RTeventCallback Session::rt_cleanup (clean_up_session_event);
@@ -138,7 +136,7 @@ Session::Session (AudioEngine &eng,
 	  _midi_clock_port (default_midi_clock_port),
 	  _session_dir (new SessionDirectory(fullpath)),
 	  state_tree (0),
-	  _butler (new Butler (this)),
+	  _butler (new Butler (*this)),
 	  _post_transport_work (0),
 	  _send_timecode_update (false),
 	  diskstreams (new DiskstreamList),
@@ -191,8 +189,8 @@ Session::Session (AudioEngine &eng,
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
 
-	Config->ParameterChanged.connect (sigc::bind (sigc::mem_fun (*this, &Session::config_changed), false));
-	config.ParameterChanged.connect (sigc::bind (sigc::mem_fun (*this, &Session::config_changed), true));
+	scoped_connect (Config->ParameterChanged, boost::bind (&Session::config_changed, this, _1, false));
+	scoped_connect (config.ParameterChanged, boost::bind (&Session::config_changed, this, _1, true));
 
 	if (was_dirty) {
 		DirtyChanged (); /* EMIT SIGNAL */
@@ -223,7 +221,7 @@ Session::Session (AudioEngine &eng,
 	  _midi_clock_port (default_midi_clock_port),
 	  _session_dir ( new SessionDirectory(fullpath)),
 	  state_tree (0),
-	  _butler (new Butler (this)),
+	  _butler (new Butler (*this)),
 	  _post_transport_work (0),
 	  _send_timecode_update (false),
 	  diskstreams (new DiskstreamList),
@@ -280,7 +278,9 @@ Session::Session (AudioEngine &eng,
 
 		if (master_out_channels) {
 			ChanCount count(DataType::AUDIO, master_out_channels);
-			shared_ptr<Route> r (new Route (*this, _("master"), Route::MasterOut, DataType::AUDIO));
+			Route* rt = new Route (*this, _("master"), Route::MasterOut, DataType::AUDIO);
+			boost_debug_shared_ptr_mark_interesting (rt, typeid (rt).name());
+			shared_ptr<Route> r (rt);
 			r->input()->ensure_io (count, false, this);
 			r->output()->ensure_io (count, false, this);
 			r->set_remote_control_id (control_id);
@@ -293,7 +293,9 @@ Session::Session (AudioEngine &eng,
 
 		if (control_out_channels) {
 			ChanCount count(DataType::AUDIO, control_out_channels);
-			shared_ptr<Route> r (new Route (*this, _("monitor"), Route::ControlOut, DataType::AUDIO));
+			Route* rt = new Route (*this, _("monitor"), Route::ControlOut, DataType::AUDIO);
+			boost_debug_shared_ptr_mark_interesting (rt, typeid (rt).name());
+			shared_ptr<Route> r (rt);
 			r->input()->ensure_io (count, false, this);
 			r->output()->ensure_io (count, false, this);
 			r->set_remote_control_id (control_id++);
@@ -324,7 +326,7 @@ Session::Session (AudioEngine &eng,
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
 
-	Config->ParameterChanged.connect (sigc::bind (sigc::mem_fun (*this, &Session::config_changed), false));
+	scoped_connect (Config->ParameterChanged, boost::bind (&Session::config_changed, this, _1, false));
 }
 
 Session::~Session ()
@@ -346,12 +348,6 @@ Session::destroy ()
 	_state_of_the_state = StateOfTheState (CannotSave|Deletion);
 
 	_engine.remove_session ();
-
-	GoingAway (); /* EMIT SIGNAL */
-
-	/* do this */
-
-	notify_callbacks ();
 
 	/* clear history so that no references to objects are held any more */
 
@@ -391,7 +387,7 @@ Session::destroy ()
 	
 	AudioDiskstream::free_working_buffers();
 
-	Route::SyncOrderKeys.clear();
+	// BOOST::SIGNALS: Route::SyncOrderKeys.clear();
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete named selections\n");
 	for (NamedSelectionList::iterator i = named_selections.begin(); i != named_selections.end(); ) {
@@ -410,6 +406,8 @@ Session::destroy ()
 
 		tmp = i;
 		++tmp;
+
+		boost::shared_ptr<Region> keep (i->second);
 		
 		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for region %1 (%2); pre-ref = %3\n", i->second->name(), i->second.get(), i->second.use_count()));
 		i->second->drop_references ();
@@ -479,6 +477,10 @@ Session::destroy ()
 	/* not strictly necessary, but doing it here allows the shared_ptr debugging to work */
 	playlists.reset ();
 
+	/* tell everyone who is still standing that we're about to die */
+
+	drop_references ();
+
 	boost_debug_list_ptrs ();
 
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
@@ -522,7 +524,7 @@ Session::when_engine_running ()
 
 	/* every time we reconnect, recompute worst case output latencies */
 
-	_engine.Running.connect (sigc::mem_fun (*this, &Session::set_worst_io_latencies));
+	scoped_connect (_engine.Running, boost::bind (&Session::set_worst_io_latencies, this));
 
 	if (synced_to_jack()) {
 		_engine.transport_stop ();
@@ -876,7 +878,7 @@ Session::diskstream_playlist_changed (boost::weak_ptr<Diskstream> wp)
 	boost::shared_ptr<Playlist> playlist;
 
 	if ((playlist = dstream->playlist()) != 0) {
-		playlist->LengthChanged.connect (sigc::mem_fun (this, &Session::playlist_length_changed));
+		scoped_connect (playlist->LengthChanged, boost::bind (&Session::playlist_length_changed, this));
 	}
 
 	/* see comment in playlist_length_changed () */
@@ -992,9 +994,7 @@ Session::set_auto_punch_location (Location* location)
 	Location* existing;
 
 	if ((existing = _locations.auto_punch_location()) != 0 && existing != location) {
-		auto_punch_start_changed_connection.disconnect();
-		auto_punch_end_changed_connection.disconnect();
-		auto_punch_changed_connection.disconnect();
+		punch_connections.drop_connections();
 		existing->set_auto_punch (false, this);
 		remove_event (existing->start(), SessionEvent::PunchIn);
 		clear_events (SessionEvent::PunchOut);
@@ -1012,16 +1012,13 @@ Session::set_auto_punch_location (Location* location)
 		return;
 	}
 
-	auto_punch_start_changed_connection.disconnect();
-	auto_punch_end_changed_connection.disconnect();
-	auto_punch_changed_connection.disconnect();
+	punch_connections.drop_connections ();
 
-	auto_punch_start_changed_connection = location->start_changed.connect (sigc::mem_fun (this, &Session::auto_punch_start_changed));
-	auto_punch_end_changed_connection = location->end_changed.connect (sigc::mem_fun (this, &Session::auto_punch_end_changed));
-	auto_punch_changed_connection = location->changed.connect (sigc::mem_fun (this, &Session::auto_punch_changed));
+	punch_connections.add_connection (location->start_changed.connect (boost::bind (&Session::auto_punch_start_changed, this, _1)));
+	punch_connections.add_connection (location->end_changed.connect (boost::bind (&Session::auto_punch_end_changed, this, _1)));
+	punch_connections.add_connection (location->changed.connect (boost::bind (&Session::auto_punch_changed, this, _1)));
 
 	location->set_auto_punch (true, this);
-
 
 	auto_punch_changed (location);
 
@@ -1034,9 +1031,7 @@ Session::set_auto_loop_location (Location* location)
 	Location* existing;
 
 	if ((existing = _locations.auto_loop_location()) != 0 && existing != location) {
-		auto_loop_start_changed_connection.disconnect();
-		auto_loop_end_changed_connection.disconnect();
-		auto_loop_changed_connection.disconnect();
+		loop_connections.drop_connections ();
 		existing->set_auto_loop (false, this);
 		remove_event (existing->end(), SessionEvent::AutoLoop);
 		auto_loop_location_changed (0);
@@ -1055,16 +1050,11 @@ Session::set_auto_loop_location (Location* location)
 
 	last_loopend = location->end();
 
-	auto_loop_start_changed_connection.disconnect();
-	auto_loop_end_changed_connection.disconnect();
-	auto_loop_changed_connection.disconnect();
+	loop_connections.drop_connections ();
 
-	auto_loop_start_changed_connection = location->start_changed.connect (
-			sigc::mem_fun (this, &Session::auto_loop_changed));
-	auto_loop_end_changed_connection = location->end_changed.connect (
-			sigc::mem_fun (this, &Session::auto_loop_changed));
-	auto_loop_changed_connection = location->changed.connect (
-			sigc::mem_fun (this, &Session::auto_loop_changed));
+	loop_connections.add_connection (location->start_changed.connect (boost::bind (&Session::auto_loop_changed, this, _1)));
+	loop_connections.add_connection (location->end_changed.connect (boost::bind (&Session::auto_loop_changed, this, _1)));
+	loop_connections.add_connection (location->changed.connect (boost::bind (&Session::auto_loop_changed, this, _1)));
 
 	location->set_auto_loop (true, this);
 
@@ -1658,7 +1648,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 				route_group->add (track);
 			}
 
-			track->DiskstreamChanged.connect (sigc::mem_fun (this, &Session::resort_routes));
+			scoped_connect (track->DiskstreamChanged, boost::bind (&Session::resort_routes, this));
 			//track->set_remote_control_id (control_id);
 
 			new_routes.push_back (track);
@@ -1771,7 +1761,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 		try {
 			AudioTrack* at = new AudioTrack (*this, track_name, Route::Flag (0), mode);
-			// boost_debug_shared_ptr_mark_interesting (at, typeid (at).name());
+			boost_debug_shared_ptr_mark_interesting (at, typeid (at).name());
 			track = boost::shared_ptr<AudioTrack>(at);
 
 			if (track->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
@@ -1833,7 +1823,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 			track->audio_diskstream()->non_realtime_input_change();
 
-			track->DiskstreamChanged.connect (sigc::mem_fun (this, &Session::resort_routes));
+			scoped_connect (track->DiskstreamChanged, boost::bind (&Session::resort_routes, this));
 			track->set_remote_control_id (control_id);
 			++control_id;
 
@@ -1961,7 +1951,9 @@ Session::new_audio_route (bool aux, int input_channels, int output_channels, Rou
 		} while (bus_id < (UINT_MAX-1));
 
 		try {
-			shared_ptr<Route> bus (new Route (*this, bus_name, Route::Flag(0), DataType::AUDIO));
+			Route* rt = new Route (*this, bus_name, Route::Flag(0), DataType::AUDIO);
+			boost_debug_shared_ptr_mark_interesting (rt, typeid (rt).name());
+			shared_ptr<Route> bus (rt);
 
 			if (bus->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
 				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
@@ -2158,12 +2150,12 @@ Session::add_routes (RouteList& new_routes, bool save)
 
 		boost::weak_ptr<Route> wpr (*x);
 
-		(*x)->listen_changed.connect (sigc::bind (sigc::mem_fun (*this, &Session::route_listen_changed), wpr));
-		(*x)->solo_changed.connect (sigc::bind (sigc::mem_fun (*this, &Session::route_solo_changed), wpr));
-		(*x)->mute_changed.connect (sigc::mem_fun (*this, &Session::route_mute_changed));
-		(*x)->output()->changed.connect (sigc::mem_fun (*this, &Session::set_worst_io_latencies_x));
-		(*x)->processors_changed.connect (sigc::mem_fun (*this, &Session::route_processors_changed));
-		(*x)->route_group_changed.connect (sigc::mem_fun (*this, &Session::route_group_changed));
+		scoped_connect ((*x)->listen_changed, boost::bind (&Session::route_listen_changed, this, _1, wpr));
+		scoped_connect ((*x)->solo_changed, boost::bind (&Session::route_solo_changed, this, _1, wpr));
+		scoped_connect ((*x)->mute_changed, boost::bind (&Session::route_mute_changed, this, _1));
+		scoped_connect ((*x)->output()->changed, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
+		scoped_connect ((*x)->processors_changed, boost::bind (&Session::route_processors_changed, this, _1));
+		scoped_connect ((*x)->route_group_changed, boost::bind (&Session::route_group_changed, this));
 
 		if ((*x)->is_master()) {
 			_master_out = (*x);
@@ -2303,11 +2295,11 @@ Session::add_diskstream (boost::shared_ptr<Diskstream> dstream)
 		/* writer goes out of scope, copies ds back to main */
 	}
 
-	dstream->PlaylistChanged.connect (sigc::bind (sigc::mem_fun (*this, &Session::diskstream_playlist_changed), boost::weak_ptr<Diskstream> (dstream)));
+	scoped_connect (dstream->PlaylistChanged, boost::bind (&Session::diskstream_playlist_changed, this, boost::weak_ptr<Diskstream> (dstream)));
 	/* this will connect to future changes, and check the current length */
 	diskstream_playlist_changed (boost::weak_ptr<Diskstream> (dstream));
 
-	dstream->RecordEnableChanged.connect (sigc::mem_fun (*this, &Session::update_have_rec_enabled_diskstream));
+	scoped_connect (dstream->RecordEnableChanged, boost::bind (&Session::update_have_rec_enabled_diskstream, this));
 
 	dstream->prepare ();
 
@@ -2821,8 +2813,8 @@ Session::add_regions (vector<boost::shared_ptr<Region> >& new_regions)
 				}
 			}
 
-			region->StateChanged.connect (sigc::bind (sigc::mem_fun (*this, &Session::region_changed), boost::weak_ptr<Region>(region)));
-			region->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &Session::remove_region), boost::weak_ptr<Region>(region)));
+			scoped_connect (region->StateChanged, boost::bind (&Session::region_changed, this, _1, boost::weak_ptr<Region>(region)));
+			scoped_connect (region->GoingAway, boost::bind (&Session::remove_region, this, boost::weak_ptr<Region>(region)));
 
 			update_region_name_map (region);
 		}
@@ -3010,7 +3002,7 @@ Session::add_source (boost::shared_ptr<Source> source)
 	}
 
 	if (result.second) {
-		source->GoingAway.connect (sigc::bind (sigc::mem_fun (this, &Session::remove_source), boost::weak_ptr<Source> (source)));
+		scoped_connect (source->GoingAway, boost::bind (&Session::remove_source, this, boost::weak_ptr<Source> (source)));
 		set_dirty();
 	}
 
@@ -3401,7 +3393,7 @@ Session::add_playlist (boost::shared_ptr<Playlist> playlist, bool unused)
 
 	bool existing = playlists->add (playlist);
 	if (!existing) {
-		playlist->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &Session::remove_playlist), boost::weak_ptr<Playlist>(playlist)));
+		scoped_connect (playlist->GoingAway, boost::bind (&Session::remove_playlist, this, boost::weak_ptr<Playlist>(playlist)));
 	}
 
 	if (unused) {
@@ -3492,8 +3484,8 @@ Session::remove_empty_sounds ()
 	TapeFileMatcher tape_file_matcher;
 
 	remove_if (audio_filenames.begin(), audio_filenames.end(),
-			sigc::mem_fun (tape_file_matcher, &TapeFileMatcher::matches));
-
+		   boost::bind (&TapeFileMatcher::matches, &tape_file_matcher, _1));
+	
 	for (vector<string>::iterator i = audio_filenames.begin(); i != audio_filenames.end(); ++i) {
 
 		sys::path audio_file_path (_session_dir->sound_path());
@@ -3575,7 +3567,7 @@ Session::graph_reordered ()
 void
 Session::add_processor (Processor* processor)
 {
-	processor->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &Session::remove_processor), processor));
+	scoped_connect (processor->GoingAway, boost::bind (&Session::remove_processor, this, processor));
 	set_dirty();
 }
 

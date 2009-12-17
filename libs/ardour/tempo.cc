@@ -24,7 +24,6 @@
 
 #include <cmath>
 
-#include <sigc++/bind.h>
 
 #include <glibmm/thread.h>
 #include "pbd/xml++.h"

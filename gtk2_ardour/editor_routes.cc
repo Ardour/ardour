@@ -150,17 +150,19 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_model->signal_rows_reordered().connect (sigc::mem_fun (*this, &EditorRoutes::reordered));
 	_display.signal_button_press_event().connect (sigc::mem_fun (*this, &EditorRoutes::button_press), false);
 
-	Route::SyncOrderKeys.connect (sigc::mem_fun (*this, &EditorRoutes::sync_order_keys));
+	scoped_connect (Route::SyncOrderKeys, (sigc::mem_fun (*this, &EditorRoutes::sync_order_keys)));
 }
 
 void
-EditorRoutes::connect_to_session (Session* s)
+EditorRoutes::set_session (Session* s)
 {
-	EditorComponent::connect_to_session (s);
+	EditorComponent::set_session (s);
 
 	initial_display ();
 
-	_session->SoloChanged.connect (sigc::mem_fun (*this, &EditorRoutes::solo_changed_so_update_mute));
+	if (_session) {
+		scoped_connect (_session->SoloChanged, (sigc::mem_fun (*this, &EditorRoutes::solo_changed_so_update_mute)));
+	}
 }
 
 void
@@ -260,14 +262,14 @@ EditorRoutes::show_menu ()
 void
 EditorRoutes::redisplay ()
 {
+	if (_no_redisplay || !_session) {
+		return;
+	}
+
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
 	uint32_t position;
 	int n;
-
-	if (_no_redisplay) {
-		return;
-	}
 
 	for (n = 0, position = 0, i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView *tv = (*i)[_columns.tv];
@@ -380,18 +382,19 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		_ignore_reorder = false;
 
 		boost::weak_ptr<Route> wr ((*x)->route());
-		(*x)->route()->gui_changed.connect (sigc::mem_fun (*this, &EditorRoutes::handle_gui_changes));
-		(*x)->route()->NameChanged.connect (sigc::bind (sigc::mem_fun (*this, &EditorRoutes::route_name_changed), wr));
-		(*x)->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &EditorRoutes::route_removed), *x));
+
+		scoped_connect ((*x)->route()->gui_changed, boost::bind (&EditorRoutes::handle_gui_changes, this, _1, _2));
+		scoped_connect ((*x)->route()->NameChanged, boost::bind (&EditorRoutes::route_name_changed, this, wr));
+		scoped_connect ((*x)->GoingAway, boost::bind (&EditorRoutes::route_removed, this, *x));
 
 		if ((*x)->is_track()) {
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> ((*x)->route());
-			t->diskstream()->RecordEnableChanged.connect (sigc::mem_fun (*this, &EditorRoutes::update_rec_display));
+			scoped_connect (t->diskstream()->RecordEnableChanged, boost::bind (&EditorRoutes::update_rec_display, this));
 		}
 
-		(*x)->route()->mute_changed.connect (sigc::mem_fun (*this, &EditorRoutes::update_mute_display));
-		(*x)->route()->solo_changed.connect (sigc::mem_fun (*this, &EditorRoutes::update_solo_display));
-		(*x)->route()->solo_isolated_changed.connect (sigc::mem_fun (*this, &EditorRoutes::update_solo_isolate_display));
+		scoped_connect ((*x)->route()->mute_changed, boost::bind (&EditorRoutes::update_mute_display, this));
+		scoped_connect ((*x)->route()->solo_changed, boost::bind (&EditorRoutes::update_solo_display, this));
+		scoped_connect ((*x)->route()->solo_isolated_changed, boost::bind (&EditorRoutes::update_solo_isolate_display, this));
 	}
 
 	update_rec_display ();
@@ -710,15 +713,19 @@ struct EditorOrderRouteSorter {
 void
 EditorRoutes::initial_display ()
 {
+	suspend_redisplay ();
+	_model->clear ();
+
+	if (!_session) {
+		resume_redisplay ();
+		return;
+	}
+
 	boost::shared_ptr<RouteList> routes = _session->get_routes();
 	RouteList r (*routes);
 	EditorOrderRouteSorter sorter;
 
 	r.sort (sorter);
-
-	suspend_redisplay ();
-
-	_model->clear ();
 	_editor->handle_new_route (r);
 
 	/* don't show master bus in a new session */
@@ -900,19 +907,19 @@ EditorRoutes::update_rec_display ()
 }
 
 void
-EditorRoutes::update_mute_display (void* /*src*/)
+EditorRoutes::update_mute_display ()
 {
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		boost::shared_ptr<Route> route = (*i)[_columns.route];
-		(*i)[_columns.mute_state] = RouteUI::mute_visual_state (*_session, route) > 0 ? 1 : 0;
+		(*i)[_columns.mute_state] = RouteUI::mute_visual_state (_session, route) > 0 ? 1 : 0;
 	}
 }
 
 void
-EditorRoutes::update_solo_display (void* /*src*/)
+EditorRoutes::update_solo_display ()
 {
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
@@ -924,7 +931,7 @@ EditorRoutes::update_solo_display (void* /*src*/)
 }
 
 void
-EditorRoutes::update_solo_isolate_display (void* /*src*/)
+EditorRoutes::update_solo_isolate_display ()
 {
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
@@ -973,8 +980,7 @@ void
 EditorRoutes::solo_changed_so_update_mute ()
 {
 	ENSURE_GUI_THREAD (*this, &EditorRoutes::solo_changed_so_update_mute)
-
-	update_mute_display (this);
+	update_mute_display ();
 }
 
 void

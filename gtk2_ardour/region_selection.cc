@@ -32,7 +32,7 @@ using namespace PBD;
  */
 RegionSelection::RegionSelection ()
 {
-	RegionView::RegionViewGoingAway.connect (sigc::mem_fun(*this, &RegionSelection::remove_it));
+	death_connection = RegionView::RegionViewGoingAway.connect (boost::bind (&RegionSelection::remove_it, this, _1));
 
 	_current_start = 0;
 	_current_end = 0;
@@ -43,9 +43,8 @@ RegionSelection::RegionSelection ()
  */
 RegionSelection::RegionSelection (const RegionSelection& other)
 	: std::list<RegionView*>()
-	, sigc::trackable(other)
 {
-	RegionView::RegionViewGoingAway.connect (sigc::mem_fun(*this, &RegionSelection::remove_it));
+	death_connection = RegionView::RegionViewGoingAway.connect (boost::bind (&RegionSelection::remove_it, this, _1));
 
 	_current_start = other._current_start;
 	_current_end = other._current_end;

@@ -28,9 +28,9 @@
 using namespace Gtk;
 using namespace ARDOUR;
 
-RouteGroupMenu::RouteGroupMenu (Session& s, RouteGroup::Property p)
-	: _session (s),
-	  _default_properties (p)
+RouteGroupMenu::RouteGroupMenu (Session* s, RouteGroup::Property p)
+	: SessionHandlePtr (s)
+	, _default_properties (p)
 {
 	rebuild (0);
 }
@@ -52,7 +52,9 @@ RouteGroupMenu::rebuild (RouteGroup* curr)
 		static_cast<RadioMenuItem*> (&items().back())->set_active ();
 	}
 
-	_session.foreach_route_group (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::add_item), curr, &group));
+	if (_session) {
+		_session->foreach_route_group (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::add_item), curr, &group));
+	}
 }
 
 void
@@ -76,13 +78,17 @@ RouteGroupMenu::set_group (RouteGroup* g)
 void
 RouteGroupMenu::new_group ()
 {
-	RouteGroup* g = new RouteGroup (_session, "", RouteGroup::Active, _default_properties);
+	if (!_session) {
+		return;
+	}
+
+	RouteGroup* g = new RouteGroup (*_session, "", RouteGroup::Active, _default_properties);
 
 	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();
 
 	if (r == Gtk::RESPONSE_OK) {
-		_session.add_route_group (g);
+		_session->add_route_group (g);
 		set_group (g);
 	} else {
 		delete g;

@@ -45,6 +45,7 @@ struct AudioRangeComparator {
     }
 };
 
+#if 0
 Selection&
 Selection::operator= (const Selection& other)
 {
@@ -58,6 +59,7 @@ Selection::operator= (const Selection& other)
 	}
 	return *this;
 }
+#endif
 
 bool
 operator== (const Selection& a, const Selection& b)
@@ -207,7 +209,7 @@ Selection::toggle (TimeAxisView* track)
 
 	if ((i = find (tracks.begin(), tracks.end(), track)) == tracks.end()) {
 		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
-		track->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, pmf), track));
+		track->GoingAway.connect (boost::bind (pmf, this, track));
 		tracks.push_back (track);
 	} else {
 		tracks.erase (i);
@@ -336,7 +338,7 @@ Selection::add (const TrackViewList& track_list)
 
 	for (list<TimeAxisView*>::const_iterator i = added.begin(); i != added.end(); ++i) {
 		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
-		(*i)->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, pmf), (*i)));
+		scoped_connect ((*i)->GoingAway, boost::bind (pmf, this, (*i)));
 	}
 
 	if (!added.empty()) {
@@ -947,7 +949,7 @@ Selection::add (Marker* m)
 
 		void (Selection::*pmf)(Marker*) = &Selection::remove;
 
-		m->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, pmf), m));
+		scoped_connect (m->GoingAway, boost::bind (pmf, this, m));
 
 		markers.push_back (m);
 		MarkersChanged();

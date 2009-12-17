@@ -21,8 +21,7 @@
 #include "surface_port.h"
 
 #include <midi++/types.h>
-#include <sigc++/signal.h>
-#include <sigc++/connection.h>
+#include <boost/signals2.hpp>
 
 #include <glibmm/thread.h>
 
@@ -116,8 +115,8 @@ protected:
 private:
 	MackieControlProtocol & _mcp;
 	port_type_t _port_type;
-	sigc::connection _any;
-	sigc::connection _sysex;
+	boost::signals2::scoped_connection _any;
+	boost::signals2::scoped_connection _sysex;
 	emulation_t _emulation;
 
 	bool _initialising;

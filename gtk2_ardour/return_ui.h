@@ -26,16 +26,15 @@
 
 namespace ARDOUR {
 	class Return;
-	class Session;
 	class IOProcessor;
 }
 
 class IOSelector;
 
-class ReturnUI : public Gtk::HBox
+class ReturnUI : public Gtk::HBox 
 {
   public:
-	ReturnUI (Gtk::Window *,boost::shared_ptr<ARDOUR::Return>, ARDOUR::Session&);
+	ReturnUI (Gtk::Window *,boost::shared_ptr<ARDOUR::Return>, ARDOUR::Session*);
 	~ReturnUI();
 
 	void update ();
@@ -47,7 +46,6 @@ class ReturnUI : public Gtk::HBox
 
   private:
 	boost::shared_ptr<ARDOUR::Return> _return;
-	ARDOUR::Session&                  _session;
 	GainMeter                         _gpm;
 	Gtk::VBox                         _vbox;
 	Gtk::VBox                         _hbox;
@@ -61,7 +59,7 @@ class ReturnUI : public Gtk::HBox
 class ReturnUIWindow : public ArdourDialog
 {
   public:
-	ReturnUIWindow(boost::shared_ptr<ARDOUR::Return>, ARDOUR::Session&);
+	ReturnUIWindow(boost::shared_ptr<ARDOUR::Return>, ARDOUR::Session*);
 	~ReturnUIWindow();
 
 	ReturnUI* ui;
@@ -70,7 +68,7 @@ class ReturnUIWindow : public ArdourDialog
 	Gtk::HBox hpacker;
 
 	void return_going_away ();
-	sigc::connection going_away_connection;
+	boost::signals2::scoped_connection going_away_connection;
 };
 
 #endif /* __ardour_gtk_return_ui_h__ */

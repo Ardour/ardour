@@ -121,6 +121,7 @@ class PlugUIBase : public virtual sigc::trackable
 	void toggle_plugin_analysis ();
 	void processor_active_changed (boost::weak_ptr<ARDOUR::Processor> p);
 	void plugin_going_away ();
+	boost::signals2::scoped_connection death_connection;
 };
 
 class GenericPluginUI : public PlugUIBase, public Gtk::VBox
@@ -260,7 +261,7 @@ class PluginUIWindow : public Gtk::Window
   private:
 	Glib::ustring _title;
 	PlugUIBase* _pluginui;
-	sigc::connection death_connection;
+	boost::signals2::scoped_connection death_connection;
 	Gtk::Window* parent;
 	Gtk::VBox vbox;
 	bool non_gtk_gui;

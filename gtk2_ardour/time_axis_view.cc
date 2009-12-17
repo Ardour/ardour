@@ -74,7 +74,7 @@ uint32_t TimeAxisView::hSmall = 0;
 bool TimeAxisView::need_size_info = true;
 int const TimeAxisView::_max_order = 512;
 
-TimeAxisView::TimeAxisView (ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
+TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess),
 	  controls_table (2, 8),
 	  _y_position (0),
@@ -924,7 +924,7 @@ TimeAxisView::add_ghost (RegionView* rv)
 
 	if(gr) {
 		ghosts.push_back(gr);
-		gr->GoingAway.connect (sigc::mem_fun(*this, &TimeAxisView::erase_ghost));
+		scoped_connect (gr->GoingAway, boost::bind (&TimeAxisView::erase_ghost, this, _1));
 	}
 }
 

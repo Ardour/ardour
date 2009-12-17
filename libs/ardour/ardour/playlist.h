@@ -32,7 +32,6 @@
 
 #include <glib.h>
 
-#include <sigc++/signal.h>
 
 #include "pbd/undo.h"
 #include "pbd/stateful.h"
@@ -51,9 +50,9 @@ namespace ARDOUR  {
 class Session;
 class Region;
 
-class Playlist : public SessionObject,
-                 public boost::noncopyable,
-                 public boost::enable_shared_from_this<Playlist> {
+class Playlist : public SessionObject
+	       , public boost::noncopyable
+	       , public boost::enable_shared_from_this<Playlist> {
   public:
 	typedef std::list<boost::shared_ptr<Region> >    RegionList;
 
@@ -125,19 +124,19 @@ class Playlist : public SessionObject,
 
 	nframes64_t find_next_transient (nframes64_t position, int dir);
 
-	void foreach_region (sigc::slot<void, boost::shared_ptr<Region> >);
+	void foreach_region (boost::function<void (boost::shared_ptr<Region>)>);
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_template ();
 
-	sigc::signal<void,bool> InUse;
-	sigc::signal<void>      Modified;
-	sigc::signal<void, boost::weak_ptr<Region> > RegionAdded;
-	sigc::signal<void, boost::weak_ptr<Region> > RegionRemoved;
-	sigc::signal<void>      NameChanged;
-	sigc::signal<void>      LengthChanged;
-	sigc::signal<void, std::list< Evoral::RangeMove<nframes_t> > const &> RangesMoved;
+	boost::signals2::signal<void(bool)> InUse;
+	boost::signals2::signal<void()>      Modified;
+	boost::signals2::signal<void(boost::weak_ptr<Region>)> RegionAdded;
+	boost::signals2::signal<void(boost::weak_ptr<Region>)> RegionRemoved;
+	boost::signals2::signal<void()>      NameChanged;
+	boost::signals2::signal<void()>      LengthChanged;
+	boost::signals2::signal<void(std::list< Evoral::RangeMove<nframes_t> > const &)> RangesMoved;
 
 	static std::string bump_name (std::string old_name, Session&);
 
@@ -195,7 +194,7 @@ class Playlist : public SessionObject,
 
 	RegionList       regions;  /* the current list of regions in the playlist */
 	std::set<boost::shared_ptr<Region> > all_regions; /* all regions ever added to this playlist */
-	std::list<sigc::connection> region_state_changed_connections;
+	PBD::ScopedConnectionList region_state_changed_connections;
 	DataType        _type;
 	mutable gint    block_notifications;
 	mutable gint    ignore_state_changes;

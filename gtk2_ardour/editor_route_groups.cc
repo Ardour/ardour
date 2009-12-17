@@ -604,7 +604,9 @@ EditorRouteGroups::groups_changed ()
 		row[_columns.routegroup] = 0;
 	}
 
-	_session->foreach_route_group (sigc::mem_fun (*this, &EditorRouteGroups::add));
+	if (_session) {
+		_session->foreach_route_group (sigc::mem_fun (*this, &EditorRouteGroups::add));
+	}
 }
 
 void
@@ -661,12 +663,14 @@ EditorRouteGroups::clear ()
 }
 
 void
-EditorRouteGroups::connect_to_session (Session* s)
+EditorRouteGroups::set_session (Session* s)
 {
-	EditorComponent::connect_to_session (s);
+	EditorComponent::set_session (s);
 
-	_session_connections.push_back (_session->route_group_added.connect (sigc::mem_fun (*this, &EditorRouteGroups::add)));
-	_session_connections.push_back (_session->route_group_removed.connect (sigc::mem_fun (*this, &EditorRouteGroups::groups_changed)));
+	if (_session) {
+		_session_connections.add_connection (_session->route_group_added.connect (boost::bind (&EditorRouteGroups::add, this, _1)));
+		_session_connections.add_connection (_session->route_group_removed.connect (boost::bind (&EditorRouteGroups::groups_changed, this)));
+	}
 
 	groups_changed ();
 }

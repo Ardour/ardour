@@ -87,7 +87,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 
 	alist->StateChanged.connect (sigc::mem_fun(*this, &AutomationLine::list_changed));
 
-	trackview.session().register_with_memento_command_factory(alist->id(), this);
+	trackview.session()->register_with_memento_command_factory(alist->id(), this);
 
 	if (alist->parameter().type() == GainAutomation ||
 	    alist->parameter().type() == EnvelopeAutomation) {
@@ -215,8 +215,8 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 
 	double const x = trackview.editor().frame_to_unit (_time_converter.to((*cp.model())->when));
 
-	trackview.editor().current_session()->begin_reversible_command (_("automation event move"));
-	trackview.editor().current_session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &get_state(), 0));
+	trackview.editor().session()->begin_reversible_command (_("automation event move"));
+	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &get_state(), 0));
 
 	cp.move_to (x, y, ControlPoint::Full);
 	reset_line_coords (cp);
@@ -231,9 +231,9 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 
 	update_pending = false;
 
-	trackview.editor().current_session()->add_command (new MementoCommand<AutomationList>(*alist.get(), 0, &alist->get_state()));
-	trackview.editor().current_session()->commit_reversible_command ();
-	trackview.editor().current_session()->set_dirty ();
+	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), 0, &alist->get_state()));
+	trackview.editor().session()->commit_reversible_command ();
+	trackview.editor().session()->set_dirty ();
 }
 
 
@@ -723,7 +723,7 @@ AutomationLine::invalidate_point (ALPoints& p, uint32_t index)
 void
 AutomationLine::start_drag (ControlPoint* cp, nframes_t x, float fraction)
 {
-	if (trackview.editor().current_session() == 0) { /* how? */
+	if (trackview.editor().session() == 0) { /* how? */
 		return;
 	}
 
@@ -735,8 +735,8 @@ AutomationLine::start_drag (ControlPoint* cp, nframes_t x, float fraction)
 		str = _("automation range drag");
 	}
 
-	trackview.editor().current_session()->begin_reversible_command (str);
-	trackview.editor().current_session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &get_state(), 0));
+	trackview.editor().session()->begin_reversible_command (str);
+	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &get_state(), 0));
 
 	drag_x = x;
 	drag_distance = 0;
@@ -830,9 +830,9 @@ AutomationLine::end_drag (ControlPoint* cp)
 
 	update_pending = false;
 
-	trackview.editor().current_session()->add_command (new MementoCommand<AutomationList>(*alist.get(), 0, &alist->get_state()));
-	trackview.editor().current_session()->commit_reversible_command ();
-	trackview.editor().current_session()->set_dirty ();
+	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), 0, &alist->get_state()));
+	trackview.editor().session()->commit_reversible_command ();
+	trackview.editor().session()->set_dirty ();
 }
 
 
@@ -973,15 +973,15 @@ AutomationLine::remove_point (ControlPoint& cp)
 
 	model_representation (cp, mr);
 
-	trackview.editor().current_session()->begin_reversible_command (_("remove control point"));
+	trackview.editor().session()->begin_reversible_command (_("remove control point"));
 	XMLNode &before = alist->get_state();
 
 	alist->erase (mr.start, mr.end);
 
-	trackview.editor().current_session()->add_command(new MementoCommand<AutomationList>(
+	trackview.editor().session()->add_command(new MementoCommand<AutomationList>(
 			*alist.get(), &before, &alist->get_state()));
-	trackview.editor().current_session()->commit_reversible_command ();
-	trackview.editor().current_session()->set_dirty ();
+	trackview.editor().session()->commit_reversible_command ();
+	trackview.editor().session()->set_dirty ();
 }
 
 void
@@ -1020,7 +1020,7 @@ AutomationLine::get_selectables (nframes_t& start, nframes_t& end,
 
 				if (collecting) {
 
-					results.push_back (new AutomationSelectable (nstart, nend, botfrac, topfrac, trackview));
+					results.push_back (new AutomationSelectable (nstart, nend, botfrac, topfrac, &trackview));
 					collecting = false;
 					nstart = max_frames;
 					nend = 0;
@@ -1030,7 +1030,7 @@ AutomationLine::get_selectables (nframes_t& start, nframes_t& end,
 	}
 
 	if (collecting) {
-		results.push_back (new AutomationSelectable (nstart, nend, botfrac, topfrac, trackview));
+		results.push_back (new AutomationSelectable (nstart, nend, botfrac, topfrac, &trackview));
 	}
 
 }
@@ -1057,7 +1057,7 @@ AutomationLine::set_selected_points (PointSelection& points)
 
 	for (PointSelection::iterator r = points.begin(); r != points.end(); ++r) {
 
-		if (&(*r).track != &trackview) {
+		if ((*r).track != &trackview) {
 			continue;
 		}
 
@@ -1190,10 +1190,10 @@ AutomationLine::clear ()
 	/* parent must create command */
 	XMLNode &before = get_state();
 	alist->clear();
-	trackview.editor().current_session()->add_command (
+	trackview.editor().session()->add_command (
 			new MementoCommand<AutomationLine>(*this, &before, &get_state()));
-	trackview.editor().current_session()->commit_reversible_command ();
-	trackview.editor().current_session()->set_dirty ();
+	trackview.editor().session()->commit_reversible_command ();
+	trackview.editor().session()->set_dirty ();
 }
 
 void

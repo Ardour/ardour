@@ -61,7 +61,6 @@
 
 using namespace ARDOUR;
 using namespace std;
-using namespace sigc;
 using namespace Mackie;
 using namespace PBD;
 
@@ -74,7 +73,6 @@ MackieMidiBuilder builder;
 MackieControlProtocol::MackieControlProtocol (Session& session)
 	: ControlProtocol  (session, X_("Mackie"))
 	, _current_initial_bank( 0 )
-	, connections_back( _connections )
 	, _surface( 0 )
 	, _ports_changed( false )
 	, _polling( true )
@@ -564,23 +562,23 @@ void MackieControlProtocol::update_surface()
 void MackieControlProtocol::connect_session_signals()
 {
 	// receive routes added
-	connections_back = session->RouteAdded.connect( ( mem_fun (*this, &MackieControlProtocol::notify_route_added) ) );
+	session_connections.add_connection (session->RouteAdded.connect(boost::bind (&MackieControlProtocol::notify_route_added, this, _1)));
 	// receive record state toggled
-	connections_back = session->RecordStateChanged.connect( ( mem_fun (*this, &MackieControlProtocol::notify_record_state_changed) ) );
+	session_connections.add_connection (session->RecordStateChanged.connect(boost::bind (&MackieControlProtocol::notify_record_state_changed, this)));
 	// receive transport state changed
-	connections_back = session->TransportStateChange.connect( ( mem_fun (*this, &MackieControlProtocol::notify_transport_state_changed) ) );
+	session_connections.add_connection (session->TransportStateChange.connect(boost::bind (&MackieControlProtocol::notify_transport_state_changed, this)));
 	// receive punch-in and punch-out
-	connections_back = Config->ParameterChanged.connect( ( mem_fun (*this, &MackieControlProtocol::notify_parameter_changed) ) );
-	session->config.ParameterChanged.connect ( ( mem_fun (*this, &MackieControlProtocol::notify_parameter_changed) ) );
+	session_connections.add_connection (Config->ParameterChanged.connect(boost::bind (&MackieControlProtocol::notify_parameter_changed, this, _1)));
+	session_connections.add_connection (session->config.ParameterChanged.connect (boost::bind (&MackieControlProtocol::notify_parameter_changed, this, _1)));
 	// receive rude solo changed
-	connections_back = session->SoloActive.connect( ( mem_fun (*this, &MackieControlProtocol::notify_solo_active_changed) ) );
+	session_connections.add_connection (session->SoloActive.connect(boost::bind (&MackieControlProtocol::notify_solo_active_changed, this, _1)));
 
 	// make sure remote id changed signals reach here
 	// see also notify_route_added
 	Sorted sorted = get_sorted_routes();
 	for ( Sorted::iterator it = sorted.begin(); it != sorted.end(); ++it )
 	{
-		connections_back = (*it)->RemoteControlIDChanged.connect( ( mem_fun (*this, &MackieControlProtocol::notify_remote_id_changed) ) );
+		session_connections.add_connection ((*it)->RemoteControlIDChanged.connect (boost::bind(&MackieControlProtocol::notify_remote_id_changed, this)));
 	}
 }
 
@@ -603,27 +601,10 @@ void MackieControlProtocol::add_port( MIDI::Port & midi_port, int number )
 	{
 		MackiePort * sport = new MackiePort( *this, midi_port, number );
 		_ports.push_back( sport );
-
-		connections_back = sport->init_event.connect(
-			sigc::bind (
-				mem_fun (*this, &MackieControlProtocol::handle_port_init)
-				, sport
-			)
-		);
-
-		connections_back = sport->active_event.connect(
-			sigc::bind (
-				mem_fun (*this, &MackieControlProtocol::handle_port_active)
-				, sport
-			)
-		);
-
-		connections_back = sport->inactive_event.connect(
-			sigc::bind (
-				mem_fun (*this, &MackieControlProtocol::handle_port_inactive)
-				, sport
-			)
-		);
+		
+		port_connections.add_connection (sport->init_event.connect (boost::bind (&MackieControlProtocol::handle_port_init, this, sport)));
+		port_connections.add_connection (sport->active_event.connect (boost::bind (&MackieControlProtocol::handle_port_active, this, sport)));
+		port_connections.add_connection (sport->inactive_event.connect (boost::bind (&MackieControlProtocol::handle_port_inactive, this, sport)));
 
 		_ports_changed = true;
 	}
@@ -699,9 +680,9 @@ void MackieControlProtocol::initialize_surface()
 	_surface->init();
 
 	// Connect events. Must be after route table otherwise there will be trouble
-	for( MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it )
-	{
-		connections_back = (*it)->control_event.connect( ( mem_fun (*this, &MackieControlProtocol::handle_control_event) ) );
+
+	for( MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it ) {
+		port_connections.add_connection ((*it)->control_event.connect(boost::bind (&MackieControlProtocol::handle_control_event, this, _1, _2, _3)));
 	}
 }
 
@@ -713,18 +694,9 @@ void MackieControlProtocol::close()
 	_polling = false;
 	pthread_join( thread, 0 );
 
-	// TODO disconnect port active/inactive signals
-	// Or at least put a lock here
-
-	// disconnect global signals from Session
-	// TODO Since *this is a sigc::trackable, this shouldn't be necessary
-	// but it is for some reason
-#if 0
-	for( vector<sigc::connection>::iterator it = _connections.begin(); it != _connections.end(); ++it )
-	{
-		it->disconnect();
-	}
-#endif
+	port_connections.drop_connections ();
+	session_connections.drop_connections ();
+	route_connections.drop_connections ();
 
 	if ( _surface != 0 )
 	{
@@ -1471,9 +1443,9 @@ void MackieControlProtocol::notify_route_added( ARDOUR::RouteList & rl )
 
 	// make sure remote id changes in the new route are handled
 	typedef ARDOUR::RouteList ARS;
-	for ( ARS::iterator it = rl.begin(); it != rl.end(); ++it )
-	{
-		connections_back = (*it)->RemoteControlIDChanged.connect( ( mem_fun (*this, &MackieControlProtocol::notify_remote_id_changed) ) );
+
+	for (ARS::iterator it = rl.begin(); it != rl.end(); ++it) {
+		route_connections.add_connection ((*it)->RemoteControlIDChanged.connect (boost::bind (&MackieControlProtocol::notify_remote_id_changed, this)));
 	}
 }
 

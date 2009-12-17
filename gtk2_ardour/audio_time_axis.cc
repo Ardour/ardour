@@ -76,7 +76,7 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Editing;
 
-AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session& sess, boost::shared_ptr<Route> rt, Canvas& canvas)
+AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, boost::shared_ptr<Route> rt, Canvas& canvas)
 	: AxisView(sess)
 	, RouteTimeAxisView(ed, sess, rt, canvas)
 {

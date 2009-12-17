@@ -23,7 +23,6 @@
 #include "midi++/port.h"
 #include "midi++/channel.h"
 
-using namespace sigc;
 using namespace MIDI;
 
 Channel::Channel (byte channelnum, Port &p) : _port (p)
@@ -35,44 +34,45 @@ Channel::Channel (byte channelnum, Port &p) : _port (p)
 
 void
 Channel::connect_input_signals ()
-
 {
-	_port.input()->channel_pressure[_channel_number].connect
-		(mem_fun (*this, &Channel::process_chanpress));
-	_port.input()->channel_note_on[_channel_number].connect
-		(mem_fun (*this, &Channel::process_note_on));
-	_port.input()->channel_note_off[_channel_number].connect
-		(mem_fun (*this, &Channel::process_note_off));
-	_port.input()->channel_poly_pressure[_channel_number].connect
-		(mem_fun (*this, &Channel::process_polypress));
-	_port.input()->channel_program_change[_channel_number].connect
-		(mem_fun (*this, &Channel::process_program_change));
-	_port.input()->channel_controller[_channel_number].connect
-		(mem_fun (*this, &Channel::process_controller));
-	_port.input()->channel_pitchbend[_channel_number].connect
-		(mem_fun (*this, &Channel::process_pitchbend));
-	_port.input()->reset.connect (mem_fun (*this, &Channel::process_reset));
+	add_connection (_port.input()->channel_pressure[_channel_number].connect
+			(boost::bind (&Channel::process_chanpress, this, _1, _2)));
+	add_connection (_port.input()->channel_note_on[_channel_number].connect
+			(boost::bind (&Channel::process_note_on, this, _1, _2)));
+	add_connection (_port.input()->channel_note_off[_channel_number].connect
+			(boost::bind (&Channel::process_note_off, this, _1, _2)));
+	add_connection (_port.input()->channel_poly_pressure[_channel_number].connect
+			(boost::bind (&Channel::process_polypress, this, _1, _2)));
+	add_connection (_port.input()->channel_program_change[_channel_number].connect
+			(boost::bind (&Channel::process_program_change, this, _1, _2)));
+	add_connection (_port.input()->channel_controller[_channel_number].connect
+			(boost::bind (&Channel::process_controller, this, _1, _2)));
+	add_connection (_port.input()->channel_pitchbend[_channel_number].connect
+			(boost::bind (&Channel::process_pitchbend, this, _1, _2)));
+
+	add_connection (_port.input()->reset.connect (boost::bind (&Channel::process_reset, this, _1)));
 }
 
 void
 Channel::connect_output_signals ()
 
 {
-	_port.output()->channel_pressure[_channel_number].connect
-		(mem_fun (*this, &Channel::process_chanpress));
-	_port.output()->channel_note_on[_channel_number].connect
-		(mem_fun (*this, &Channel::process_note_on));
-	_port.output()->channel_note_off[_channel_number].connect
-		(mem_fun (*this, &Channel::process_note_off));
-	_port.output()->channel_poly_pressure[_channel_number].connect
-		(mem_fun (*this, &Channel::process_polypress));
-	_port.output()->channel_program_change[_channel_number].connect
-		(mem_fun (*this, &Channel::process_program_change));
-	_port.output()->channel_controller[_channel_number].connect
-		(mem_fun (*this, &Channel::process_controller));
-	_port.output()->channel_pitchbend[_channel_number].connect
-		(mem_fun (*this, &Channel::process_pitchbend));
-	_port.output()->reset.connect (mem_fun (*this, &Channel::process_reset));
+	add_connection (_port.output()->channel_pressure[_channel_number].connect
+			(boost::bind (&Channel::process_chanpress, this, _1, _2)));
+	add_connection (_port.output()->channel_note_on[_channel_number].connect
+			(boost::bind (&Channel::process_note_on, this, _1, _2)));
+	add_connection (_port.output()->channel_note_off[_channel_number].connect
+			(boost::bind (&Channel::process_note_off, this, _1, _2)));
+	add_connection (_port.output()->channel_poly_pressure[_channel_number].connect
+			(boost::bind (&Channel::process_polypress, this, _1, _2)));
+	add_connection (_port.output()->channel_program_change[_channel_number].connect
+			(boost::bind (&Channel::process_program_change, this, _1, _2)));
+	add_connection (_port.output()->channel_controller[_channel_number].connect
+			(boost::bind (&Channel::process_controller, this, _1, _2)));
+	add_connection (_port.output()->channel_pitchbend[_channel_number].connect
+			(boost::bind (&Channel::process_pitchbend, this, _1, _2)));
+
+	add_connection (_port.output()->reset.connect (boost::bind (&Channel::process_reset, this, _1)));
 }
 
 void

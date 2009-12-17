@@ -22,7 +22,7 @@
 
 #include <string>
 
-#include <sigc++/sigc++.h>
+#include <boost/signals2.hpp>
 
 #include "midi++/types.h"
 #include "pbd/controllable.h"
@@ -82,8 +82,8 @@ class MIDIControllable : public PBD::Stateful
 	MIDI::byte       last_value;
 	bool             bistate;
 	int              midi_msg_id;      /* controller ID or note number */
-	sigc::connection midi_sense_connection[2];
-	sigc::connection midi_learn_connection;
+	boost::signals2::connection midi_sense_connection[2];
+	boost::signals2::connection midi_learn_connection;
 	size_t           connections;
 	MIDI::eventType  control_type;
 	MIDI::byte       control_additional;

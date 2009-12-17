@@ -36,7 +36,7 @@ class GroupTabs : public CairoWidget, public EditorComponent
 public:
 	GroupTabs (Editor *);
 
-	void connect_to_session (ARDOUR::Session *);
+	void set_session (ARDOUR::Session *);
 
 protected:
 

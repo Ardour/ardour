@@ -24,8 +24,6 @@
 
 #include <set>
 
-#include <sigc++/bind.h>
-#include <sigc++/class_slot.h>
 
 #include <glibmm/thread.h>
 
@@ -98,7 +96,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
-		afs->HeaderPositionOffsetChanged.connect (sigc::mem_fun (*this, &AudioRegion::source_offset_changed));
+		scoped_connect (afs->HeaderPositionOffsetChanged, boost::bind (&AudioRegion::source_offset_changed, this));
 	}
 
 	init ();
@@ -115,7 +113,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
-		afs->HeaderPositionOffsetChanged.connect (sigc::mem_fun (*this, &AudioRegion::source_offset_changed));
+		scoped_connect (afs->HeaderPositionOffsetChanged, boost::bind (&AudioRegion::source_offset_changed, this));
 	}
 
 	init ();
@@ -207,7 +205,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, const Sour
 
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> ((*i));
 		if (afs) {
-			afs->HeaderPositionOffsetChanged.connect (sigc::mem_fun (*this, &AudioRegion::source_offset_changed));
+			scoped_connect (afs->HeaderPositionOffsetChanged, boost::bind (&AudioRegion::source_offset_changed, this));
 		}
 	}
 
@@ -231,7 +229,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
-		afs->HeaderPositionOffsetChanged.connect (sigc::mem_fun (*this, &AudioRegion::source_offset_changed));
+		scoped_connect (afs->HeaderPositionOffsetChanged, boost::bind (&AudioRegion::source_offset_changed, this));
 	}
 
 	init ();
@@ -272,7 +270,7 @@ void
 AudioRegion::connect_to_analysis_changed ()
 {
 	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-		(*i)->AnalysisChanged.connect (sigc::mem_fun (*this, &AudioRegion::invalidate_transients));
+		scoped_connect ((*i)->AnalysisChanged, boost::bind (&AudioRegion::invalidate_transients, this));
 	}
 }
 
@@ -287,7 +285,7 @@ AudioRegion::connect_to_header_position_offset_changed ()
 			unique_srcs.insert (*i);
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (*i);
 			if (afs) {
-				afs->HeaderPositionOffsetChanged.connect (sigc::mem_fun (*this, &AudioRegion::source_offset_changed));
+				scoped_connect (afs->HeaderPositionOffsetChanged, boost::bind (&AudioRegion::source_offset_changed, this));
 			}
 		}
 	}
@@ -296,9 +294,9 @@ AudioRegion::connect_to_header_position_offset_changed ()
 void
 AudioRegion::listen_to_my_curves ()
 {
-	_envelope->StateChanged.connect (sigc::mem_fun (*this, &AudioRegion::envelope_changed));
-	_fade_in->StateChanged.connect (sigc::mem_fun (*this, &AudioRegion::fade_in_changed));
-	_fade_out->StateChanged.connect (sigc::mem_fun (*this, &AudioRegion::fade_out_changed));
+	scoped_connect (_envelope->StateChanged, boost::bind (&AudioRegion::envelope_changed, this));
+	scoped_connect (_fade_in->StateChanged, boost::bind (&AudioRegion::fade_in_changed, this));
+	scoped_connect (_fade_out->StateChanged, boost::bind (&AudioRegion::fade_out_changed, this));
 }
 
 void

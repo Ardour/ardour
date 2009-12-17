@@ -48,7 +48,7 @@ class SessionImportDialog : public ArdourDialog
 	typedef std::list<ElementPtr> ElementList;
 
   public:
-	SessionImportDialog (ARDOUR::Session & target);
+	SessionImportDialog (ARDOUR::Session* target);
 
 	virtual Gtk::FileChooserAction browse_action() const { return Gtk::FILE_CHOOSER_ACTION_OPEN; }
 
@@ -68,7 +68,6 @@ class SessionImportDialog : public ArdourDialog
 	// Data
 	HandlerList        handlers;
 	XMLTree            tree;
-	ARDOUR::Session   &target;
 
 	// GUI
 	Gtk::Frame                    file_frame;

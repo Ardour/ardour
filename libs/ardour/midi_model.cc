@@ -267,7 +267,7 @@ MidiModel::DeltaCommand::set_state (const XMLNode& delta_command, int /*version*
 	if (added_notes) {
 		XMLNodeList notes = added_notes->children();
 		transform(notes.begin(), notes.end(), back_inserter(_added_notes),
-			  sigc::mem_fun(*this, &DeltaCommand::unmarshal_note));
+			  boost::bind (&DeltaCommand::unmarshal_note, this, _1));
 	}
 
 	_removed_notes.clear();
@@ -275,7 +275,7 @@ MidiModel::DeltaCommand::set_state (const XMLNode& delta_command, int /*version*
 	if (removed_notes) {
 		XMLNodeList notes = removed_notes->children();
 		transform(notes.begin(), notes.end(), back_inserter(_removed_notes),
-			  sigc::mem_fun(*this, &DeltaCommand::unmarshal_note));
+			  boost::bind (&DeltaCommand::unmarshal_note, this, _1));
 	}
 
 	return 0;
@@ -288,14 +288,16 @@ MidiModel::DeltaCommand::get_state()
 	delta_command->add_property("midi-source", _model->midi_source()->id().to_s());
 
 	XMLNode* added_notes = delta_command->add_child(ADDED_NOTES_ELEMENT);
-	for_each(_added_notes.begin(), _added_notes.end(), sigc::compose(
-			sigc::mem_fun(*added_notes, &XMLNode::add_child_nocopy),
-			sigc::mem_fun(*this, &DeltaCommand::marshal_note)));
+	for_each(_added_notes.begin(), _added_notes.end(), 
+		 boost::bind(
+			 boost::bind (&XMLNode::add_child_nocopy, *added_notes, _1),
+			 boost::bind (&DeltaCommand::marshal_note, this, _1)));
 
 	XMLNode* removed_notes = delta_command->add_child(REMOVED_NOTES_ELEMENT);
-	for_each(_removed_notes.begin(), _removed_notes.end(), sigc::compose(
-			sigc::mem_fun(*removed_notes, &XMLNode::add_child_nocopy),
-			sigc::mem_fun(*this, &DeltaCommand::marshal_note)));
+	for_each(_removed_notes.begin(), _removed_notes.end(), 
+		 boost::bind (
+			 boost::bind (&XMLNode::add_child_nocopy, *removed_notes, _1),
+			 boost::bind (&DeltaCommand::marshal_note, this, _1)));
 
 	return *delta_command;
 }
@@ -650,9 +652,9 @@ MidiModel::DiffCommand::set_state(const XMLNode& diff_command, int /*version*/)
 
 	if (changed_notes) {
 		XMLNodeList notes = changed_notes->children();
-
 		transform (notes.begin(), notes.end(), back_inserter(_changes),
-			   sigc::mem_fun(*this, &DiffCommand::unmarshal_change));
+			   boost::bind (&DiffCommand::unmarshal_change, this, _1));
+
 	}
 
 	return 0;
@@ -665,9 +667,10 @@ MidiModel::DiffCommand::get_state ()
 	diff_command->add_property("midi-source", _model->midi_source()->id().to_s());
 
 	XMLNode* changes = diff_command->add_child(DIFF_NOTES_ELEMENT);
-	for_each(_changes.begin(), _changes.end(), sigc::compose(
-			 sigc::mem_fun(*changes, &XMLNode::add_child_nocopy),
-			 sigc::mem_fun(*this, &DiffCommand::marshal_change)));
+	for_each(_changes.begin(), _changes.end(), 
+		 boost::bind (
+			 boost::bind (&XMLNode::add_child_nocopy, *changes, _1),
+			 boost::bind (&DiffCommand::marshal_change, this, _1)));
 
 	return *diff_command;
 }

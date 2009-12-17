@@ -1617,7 +1617,7 @@ ImageFrameSocketHandler::handle_rename_marker_view(const char* msg)
 void
 ImageFrameSocketHandler::handle_session_name_request(const char* msg)
 {
-	ARDOUR::Session* currentSession = thePublicEditor.current_session() ;
+	ARDOUR::Session* currentSession = thePublicEditor.session() ;
 
 	if(currentSession == 0)
 	{

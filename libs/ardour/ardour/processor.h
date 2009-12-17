@@ -26,7 +26,6 @@
 
 #include "pbd/statefuldestructible.h"
 
-#include <sigc++/signal.h>
 
 #include "ardour/ardour.h"
 #include "ardour/automatable_controls.h"
@@ -99,10 +98,10 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	void *get_gui () const { return _gui; }
 	void  set_gui (void *p) { _gui = p; }
 
-	static sigc::signal<void,Processor*> ProcessorCreated;
+	static boost::signals2::signal<void(Processor*)> ProcessorCreated;
 
-	sigc::signal<void>                     ActiveChanged;
-	sigc::signal<void,ChanCount,ChanCount> ConfigurationChanged;
+	boost::signals2::signal<void()>                     ActiveChanged;
+	boost::signals2::signal<void(ChanCount,ChanCount)> ConfigurationChanged;
 
 protected:
 	int       _pending_active;

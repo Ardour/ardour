@@ -26,6 +26,7 @@
 #include <boost/utility.hpp>
 
 #include "pbd/undo.h"
+#include "pbd/scoped_connections.h"
 
 #include "ardour/ardour.h"
 #include "ardour/data_type.h"
@@ -95,8 +96,8 @@ class Region
 	static Change LayerChanged;
 	static Change HiddenChanged;
 
-	sigc::signal<void,Change> StateChanged;
-	static sigc::signal<void,boost::shared_ptr<ARDOUR::Region> > RegionPropertyChanged;
+	boost::signals2::signal<void(Change)> StateChanged;
+	static boost::signals2::signal<void(boost::shared_ptr<ARDOUR::Region>)> RegionPropertyChanged;
 	void unlock_property_changes () { _flags = Flag (_flags & ~DoNotSendPropertyChanges); }
 	void block_property_changes () { _flags = Flag (_flags | DoNotSendPropertyChanges); }
 
@@ -218,7 +219,7 @@ class Region
 	boost::shared_ptr<ARDOUR::Playlist> playlist() const { return _playlist.lock(); }
 	virtual void set_playlist (boost::weak_ptr<ARDOUR::Playlist>);
 
-	void source_deleted (boost::shared_ptr<Source>);
+	void source_deleted (boost::weak_ptr<Source>);
 
 	boost::shared_ptr<Source> source (uint32_t n=0) const { return _sources[ (n < _sources.size()) ? n : 0 ]; }
 	uint32_t                  n_channels()          const { return _sources.size(); }

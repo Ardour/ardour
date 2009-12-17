@@ -22,7 +22,6 @@
 #include <locale.h>
 #include <errno.h>
 
-#include <sigc++/bind.h>
 
 #include <glibmm.h>
 #include <glibmm/thread.h>
@@ -68,8 +67,8 @@ using namespace PBD;
 
 const string                 IO::state_node_name = "IO";
 bool                         IO::connecting_legal = false;
-sigc::signal<int>            IO::ConnectingLegal;
-sigc::signal<void,ChanCount> IO::PortCountChanged;
+boost::signals2::signal<int()>            IO::ConnectingLegal;
+boost::signals2::signal<void(ChanCount)> IO::PortCountChanged;
 
 /** @param default_type The type of port that will be created by ensure_io
  * and friends if no type is explicitly requested (to avoid breakage).
@@ -124,13 +123,13 @@ IO::check_bundles_connected ()
 }
 
 void
-IO::check_bundles (std::vector<UserBundleInfo>& list, const PortSet& ports)
+IO::check_bundles (std::vector<UserBundleInfo*>& list, const PortSet& ports)
 {
-	std::vector<UserBundleInfo> new_list;
+	std::vector<UserBundleInfo*> new_list;
 
-	for (std::vector<UserBundleInfo>::iterator i = list.begin(); i != list.end(); ++i) {
+	for (std::vector<UserBundleInfo*>::iterator i = list.begin(); i != list.end(); ++i) {
 
-		uint32_t const N = i->bundle->nchannels ();
+		uint32_t const N = (*i)->bundle->nchannels ();
 
 		if (_ports.num_ports (default_type()) < N) {
 			continue;
@@ -140,7 +139,7 @@ IO::check_bundles (std::vector<UserBundleInfo>& list, const PortSet& ports)
 
 		for (uint32_t j = 0; j < N; ++j) {
 			/* Every port on bundle channel j must be connected to our input j */
-			Bundle::PortList const pl = i->bundle->channel_ports (j);
+			Bundle::PortList const pl = (*i)->bundle->channel_ports (j);
 			for (uint32_t k = 0; k < pl.size(); ++k) {
 				if (ports.port(j)->connected_to (pl[k]) == false) {
 					ok = false;
@@ -156,7 +155,7 @@ IO::check_bundles (std::vector<UserBundleInfo>& list, const PortSet& ports)
 		if (ok) {
 			new_list.push_back (*i);
 		} else {
-			i->changed.disconnect ();
+			delete *i;
 		}
 	}
 
@@ -475,9 +474,9 @@ IO::state (bool /*full_state*/)
 	node->add_property ("direction", enum_2_string (_direction));
 	node->add_property ("default-type", _default_type.to_string());
 
-	for (std::vector<UserBundleInfo>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
+	for (std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
 		XMLNode* n = new XMLNode ("Bundle");
-		n->add_property ("name", i->bundle->name ());
+		n->add_property ("name", (*i)->bundle->name ());
 		node->add_child_nocopy (*n);
 	}
 
@@ -567,7 +566,7 @@ IO::set_state (const XMLNode& node, int version)
 		pending_state_node = new XMLNode (node);
 		pending_state_node_version = version;
 		pending_state_node_in = false;
-		connection_legal_c = ConnectingLegal.connect (sigc::mem_fun (*this, &IO::connecting_became_legal));
+		connection_legal_c = ConnectingLegal.connect (boost::bind (&IO::connecting_became_legal, this));
 	}
 
 
@@ -620,7 +619,7 @@ IO::set_state_2X (const XMLNode& node, int version, bool in)
 		pending_state_node = new XMLNode (node);
 		pending_state_node_version = version;
 		pending_state_node_in = in;
-		connection_legal_c = ConnectingLegal.connect (sigc::mem_fun (*this, &IO::connecting_became_legal));
+		connection_legal_c = ConnectingLegal.connect (boost::bind (&IO::connecting_became_legal, this));
 	}
 
 	return 0;
@@ -1164,14 +1163,14 @@ IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, void* src)
 		if (ub) {
 
 			/* See if we already know about this one */
-			std::vector<UserBundleInfo>::iterator i = _bundles_connected.begin();
-			while (i != _bundles_connected.end() && i->bundle != ub) {
+			std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin();
+			while (i != _bundles_connected.end() && (*i)->bundle != ub) {
 				++i;
 			}
 
 			if (i == _bundles_connected.end()) {
 				/* We don't, so make a note */
-				_bundles_connected.push_back (UserBundleInfo (this, ub));
+				_bundles_connected.push_back (new UserBundleInfo (this, ub));
 			}
 		}
 	}
@@ -1194,12 +1193,13 @@ IO::disconnect_ports_from_bundle (boost::shared_ptr<Bundle> c, void* src)
 		boost::shared_ptr<UserBundle> ub = boost::dynamic_pointer_cast<UserBundle> (c);
 		if (ub) {
 
-			std::vector<UserBundleInfo>::iterator i = _bundles_connected.begin();
-			while (i != _bundles_connected.end() && i->bundle != ub) {
+			std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin();
+			while (i != _bundles_connected.end() && (*i)->bundle != ub) {
 				++i;
 			}
 
 			if (i != _bundles_connected.end()) {
+				delete *i;
 				_bundles_connected.erase (i);
 			}
 		}
@@ -1221,7 +1221,7 @@ int
 IO::enable_connecting ()
 {
 	connecting_legal = true;
-	return ConnectingLegal ();
+	return *ConnectingLegal ();
 }
 
 void
@@ -1362,8 +1362,8 @@ IO::bundles_connected ()
 	BundleList bundles;
 
 	/* User bundles */
-	for (std::vector<UserBundleInfo>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
-		bundles.push_back (i->bundle);
+	for (std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
+		bundles.push_back ((*i)->bundle);
 	}
 
 	/* Session bundles */
@@ -1399,9 +1399,7 @@ IO::bundles_connected ()
 IO::UserBundleInfo::UserBundleInfo (IO* io, boost::shared_ptr<UserBundle> b)
 {
 	bundle = b;
-	changed = b->Changed.connect (
-		sigc::mem_fun (*io, &IO::bundle_changed)
-		);
+	changed = b->Changed.connect (boost::bind (&IO::bundle_changed, io, _1));
 }
 
 std::string

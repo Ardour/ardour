@@ -20,7 +20,6 @@
 #ifndef __ardour_jack_port_h__
 #define __ardour_jack_port_h__
 
-#include <sigc++/signal.h>
 #include "pbd/failed_constructor.h"
 #include "ardour/port.h"
 #include <jack/jack.h>

@@ -35,7 +35,6 @@
 #include "pbd/transmitter.h"
 
 using namespace std;
-using namespace sigc;
 using namespace MIDI;
 
 const char *
@@ -317,7 +316,7 @@ Parser::trace (bool onoff, ostream *o, const string &prefix)
 		cerr << "enabling tracing for port " << _port.name() << endl;
 		trace_stream = o;
 		trace_prefix = prefix;
-		trace_connection = any.connect (mem_fun (*this, &Parser::trace_event));
+		trace_connection = any.connect (boost::bind (&Parser::trace_event, this, _1, _2, _3));
 	} else {
 		trace_prefix = "";
 		trace_stream = 0;

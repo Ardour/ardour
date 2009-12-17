@@ -1092,14 +1092,14 @@ Editor::handle_new_imageframe_time_axis_view(const string & track_name, void* sr
 	row[route_display_columns.tv] = iftav;
 	route_list_display.get_selection()->select (row);
 
-	iftav->GoingAway.connect(sigc::bind(sigc::mem_fun(*this, &Editor::remove_route), (TimeAxisView*)iftav)) ;
+	scoped_connect (iftav->GoingAway, boost::bind (&Editor::remove_route, this, (TimeAxisView*)iftav));
 	iftav->gui_changed.connect(sigc::mem_fun(*this, &Editor::handle_gui_changes)) ;
 }
 
 void
 Editor::handle_new_imageframe_marker_time_axis_view(const string & track_name, TimeAxisView* marked_track)
 {
-	MarkerTimeAxis* mta = new MarkerTimeAxis (*this, *this->current_session(), *track_canvas, track_name, marked_track) ;
+	MarkerTimeAxis* mta = new MarkerTimeAxis (*this, *this->session(), *track_canvas, track_name, marked_track) ;
 	((ImageFrameTimeAxis*)marked_track)->add_marker_time_axis(mta, this) ;
 	track_views.push_back(mta) ;
 
@@ -1109,7 +1109,7 @@ Editor::handle_new_imageframe_marker_time_axis_view(const string & track_name, T
 	row[route_display_columns.tv] = mta;
 	route_list_display.get_selection()->select (row);
 
-	mta->GoingAway.connect(sigc::bind(sigc::mem_fun(*this, &Editor::remove_route), (TimeAxisView*)mta)) ;
+	scoped_connect (mta->GoingAway, boost::bind (&Editor::remove_route, this, (TimeAxisView*)mta));
  }
 
 

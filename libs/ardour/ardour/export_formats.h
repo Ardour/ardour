@@ -21,12 +21,14 @@
 #ifndef __ardour_export_formats_h__
 #define __ardour_export_formats_h__
 
-#include "ardour/export_format_base.h"
-#include "ardour/export_format_compatibility.h"
-
 #include <list>
 #include <boost/weak_ptr.hpp>
+
 #include "pbd/failed_constructor.h"
+#include "pbd/scoped_connections.h"
+
+#include "ardour/export_format_base.h"
+#include "ardour/export_format_compatibility.h"
 
 namespace ARDOUR
 {
@@ -84,7 +86,7 @@ class ExportFormat : public ExportFormatBase, public ExportFormatBase::Selectabl
 };
 
 /// Class to be inherited by export formats that have a selectable sample format
-class HasSampleFormat {
+class HasSampleFormat : public PBD::ScopedConnectionList {
   public:
 
 	class SampleFormatState : public ExportFormatBase::SelectableCompatible {
@@ -126,11 +128,11 @@ class HasSampleFormat {
 
 	/* Proxies for signals from sample formats and dither types */
 
-	sigc::signal<void, bool, WeakSampleFormatPtr> SampleFormatSelectChanged;
-	sigc::signal<void, bool, WeakSampleFormatPtr> SampleFormatCompatibleChanged;
+	boost::signals2::signal<void(bool, WeakSampleFormatPtr)> SampleFormatSelectChanged;
+	boost::signals2::signal<void(bool, WeakSampleFormatPtr)> SampleFormatCompatibleChanged;
 
-	sigc::signal<void, bool, WeakDitherTypePtr> DitherTypeSelectChanged;
-	sigc::signal<void, bool, WeakDitherTypePtr> DitherTypeCompatibleChanged;
+	boost::signals2::signal<void(bool, WeakDitherTypePtr)> DitherTypeSelectChanged;
+	boost::signals2::signal<void(bool, WeakDitherTypePtr)> DitherTypeCompatibleChanged;
 
 	static std::string get_sample_format_name (ExportFormatBase::SampleFormat format);
 

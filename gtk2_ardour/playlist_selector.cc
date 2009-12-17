@@ -111,7 +111,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 
 	model->clear ();
 
-	session->playlists->foreach (this, &PlaylistSelector::add_playlist_to_map);
+	_session->playlists->foreach (this, &PlaylistSelector::add_playlist_to_map);
 
 	this_ds = rui->get_diskstream();
 
@@ -123,7 +123,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 
 	for (DSPL_Map::iterator x = dspl_map.begin(); x != dspl_map.end(); ++x) {
 
-		boost::shared_ptr<Diskstream> ds = session->diskstream_by_id (x->first);
+		boost::shared_ptr<Diskstream> ds = _session->diskstream_by_id (x->first);
 
 		if (ds == 0) {
 			continue;
@@ -179,7 +179,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 
 	// Add unassigned (imported) playlists to the list
 	list<boost::shared_ptr<Playlist> > unassigned;
-	session->playlists->unassigned (unassigned);
+	_session->playlists->unassigned (unassigned);
 
 	TreeModel::Row row;
 	TreeModel::Row* selected_row = 0;
@@ -233,18 +233,6 @@ PlaylistSelector::add_playlist_to_map (boost::shared_ptr<Playlist> pl)
 	}
 
 	x->second->push_back (pl);
-}
-
-void
-PlaylistSelector::set_session (Session* s)
-{
-	ENSURE_GUI_THREAD (*this, &PlaylistSelector::set_session, s)
-
-	session = s;
-
-	if (session) {
-		session->GoingAway.connect (sigc::bind (sigc::mem_fun(*this, &PlaylistSelector::set_session), static_cast<Session*> (0)));
-	}
 }
 
 void

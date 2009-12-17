@@ -53,11 +53,11 @@ using namespace std;
 //sigc::signal<void,RouteGroup*> LevelMeter::ResetGroupPeakDisplays;
 
 
-LevelMeter::LevelMeter (Session& s)
-	: _session (s)
-	, _meter (0)
+LevelMeter::LevelMeter (Session* s)
+	: _meter (0)
 	, meter_length (0)
 {
+	set_session (s);
 	set_spacing (1);
 	Config->ParameterChanged.connect (sigc::mem_fun (*this, &LevelMeter::parameter_changed));
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &LevelMeter::on_theme_changed));
@@ -83,9 +83,9 @@ LevelMeter::set_meter (PeakMeter* meter)
 {
 	_configuration_connection.disconnect();
 	_meter = meter;
+
 	if (_meter) {
-		_configuration_connection = _meter->ConfigurationChanged.connect(
-			sigc::mem_fun(*this, &LevelMeter::configuration_changed));
+		_configuration_connection = _meter->ConfigurationChanged.connect(boost::bind (&LevelMeter::configuration_changed, this, _1, _2));
 	}
 }
 

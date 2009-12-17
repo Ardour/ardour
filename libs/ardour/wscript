@@ -164,6 +164,7 @@ libardour_sources = [
 	'session_directory.cc',
 	'session_events.cc',
 	'session_export.cc',
+	'session_handle.cc',
 	'session_metadata.cc',
 	'session_midi.cc',
 	'session_playlists.cc',

@@ -61,6 +61,7 @@
 #include "ardour/ardour.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
+#include "ardour/session_handle.h"
 
 #include "audio_clock.h"
 #include "ardour_dialog.h"
@@ -100,7 +101,7 @@ namespace ARDOUR {
 extern sigc::signal<void>  ColorsChanged;
 extern sigc::signal<void>  DPIReset;
 
-class ARDOUR_UI : public Gtkmm2ext::UI
+class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 {
   public:
 	ARDOUR_UI (int *argcp, char **argvp[]);
@@ -132,7 +133,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 			   nframes_t initial_length);
 	bool session_is_new() const { return _session_is_new; }
 
-	ARDOUR::Session* the_session() { return session; }
+	ARDOUR::Session* the_session() { return _session; }
 
 	bool will_create_new_session_automatically() const {
 		return _will_create_new_session_automatically;
@@ -255,7 +256,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI
   private:
 	ArdourStartup*      _startup;
 	ARDOUR::AudioEngine *engine;
-	ARDOUR::Session      *session;
 	Gtk::Tooltips        _tooltips;
 
 	void                goto_editor_window ();
@@ -551,7 +551,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void toggle_roll (bool with_abort, bool roll_out_of_bounded_mode);
 
 	bool _session_is_new;
-	void connect_to_session (ARDOUR::Session *);
+	void set_session (ARDOUR::Session *);
 	void connect_dependents_to_session (ARDOUR::Session *);
 	void we_have_dependents ();
 

@@ -79,16 +79,12 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 			canvas_rect, &_trackview));
 
 	if (_trackview.is_track()) {
-		_trackview.track()->DiskstreamChanged.connect (
-				sigc::mem_fun (*this, &StreamView::diskstream_changed));
-		_trackview.session().TransportStateChange.connect (
-				sigc::mem_fun (*this, &StreamView::transport_changed));
-		_trackview.session().TransportLooped.connect (
-				sigc::mem_fun (*this, &StreamView::transport_looped));
-		_trackview.get_diskstream()->RecordEnableChanged.connect (
-				sigc::mem_fun (*this, &StreamView::rec_enable_changed));
-		_trackview.session().RecordStateChanged.connect (
-				sigc::mem_fun (*this, &StreamView::sess_rec_enable_changed));
+		scoped_connect (_trackview.track()->DiskstreamChanged, boost::bind (&StreamView::diskstream_changed, this));
+		scoped_connect (_trackview.get_diskstream()->RecordEnableChanged, boost::bind (&StreamView::rec_enable_changed, this));
+
+		scoped_connect (_trackview.session()->TransportStateChange, boost::bind (&StreamView::transport_changed, this));
+		scoped_connect (_trackview.session()->TransportLooped, boost::bind (&StreamView::transport_looped, this));
+		scoped_connect (_trackview.session()->RecordStateChanged, boost::bind (&StreamView::sess_rec_enable_changed, this));
 	}
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &StreamView::color_handler));
@@ -96,6 +92,8 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 
 StreamView::~StreamView ()
 {
+	cerr << "Streamview " << _trackview.name() << " deleted\n";
+
 	undisplay_diskstream ();
 
 	delete canvas_rect;
@@ -210,6 +208,7 @@ StreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 		if (((*i)->region()) == r) {
 			RegionView* rv = *i;
 			region_views.erase (i);
+			cerr << "Deleting RV for " << r->name() << " @ " << r << endl;
 			delete rv;
 			break;
 		}
@@ -234,9 +233,7 @@ StreamView::display_diskstream (boost::shared_ptr<Diskstream> ds)
 {
 	playlist_change_connection.disconnect();
 	playlist_changed (ds);
-	playlist_change_connection = ds->PlaylistChanged.connect (
-		sigc::bind (sigc::mem_fun (*this, &StreamView::playlist_changed_weak),
-			    boost::weak_ptr<Diskstream> (ds)));
+	playlist_change_connection = ds->PlaylistChanged.connect (boost::bind (&StreamView::playlist_changed_weak, this, boost::weak_ptr<Diskstream> (ds)));
 }
 
 void
@@ -342,12 +339,7 @@ StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 
 	/* disconnect from old playlist */
 
-	for (vector<sigc::connection>::iterator i = playlist_connections.begin();
-			i != playlist_connections.end(); ++i) {
-		(*i).disconnect();
-	}
-
-	playlist_connections.clear();
+	playlist_connections.drop_connections ();
 	undisplay_diskstream ();
 
 	/* update layers count and the y positions and heights of our regions */
@@ -363,14 +355,9 @@ StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 
 	/* catch changes */
 
-	playlist_connections.push_back (ds->playlist()->Modified.connect (sigc::bind (
-	 		sigc::mem_fun (*this, &StreamView::playlist_modified_weak), ds)));
-
-	playlist_connections.push_back (ds->playlist()->RegionAdded.connect (
-			sigc::mem_fun (*this, &StreamView::add_region_view_weak)));
-
-	playlist_connections.push_back (ds->playlist()->RegionRemoved.connect (
-			sigc::mem_fun (*this, &StreamView::remove_region_view)));
+	playlist_connections.add_connection (ds->playlist()->Modified.connect (boost::bind (&StreamView::playlist_modified_weak, this, ds)));
+	playlist_connections.add_connection (ds->playlist()->RegionAdded.connect (boost::bind (&StreamView::add_region_view_weak, this, _1)));
+	playlist_connections.add_connection (ds->playlist()->RegionRemoved.connect (boost::bind (&StreamView::remove_region_view, this, _1)));
 }
 
 void

@@ -34,10 +34,9 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-ReturnUI::ReturnUI (Gtk::Window* parent, boost::shared_ptr<Return> r, Session& se)
-	: _return (r)
-	, _session (se)
-	, _gpm (se, 250)
+ReturnUI::ReturnUI (Gtk::Window* parent, boost::shared_ptr<Return> r, Session* session)
+	:_return (r)
+	, _gpm (session, 250)
 {
  	_gpm.set_controls (boost::shared_ptr<Route>(), r->meter(), r->amp());
 
@@ -49,7 +48,7 @@ ReturnUI::ReturnUI (Gtk::Window* parent, boost::shared_ptr<Return> r, Session& s
 
 	_vbox.pack_start (_hbox, false, false, false);
 
-	io = manage (new IOSelector (parent, &se, r->output()));
+	io = manage (new IOSelector (parent, session, r->output()));
 
 	pack_start (_vbox, false, false);
 
@@ -99,10 +98,10 @@ ReturnUI::fast_update ()
 	}
 }
 
-ReturnUIWindow::ReturnUIWindow (boost::shared_ptr<Return> s, Session& ss)
-	: ArdourDialog (string("Ardour: return ") + s->name())
+ReturnUIWindow::ReturnUIWindow (boost::shared_ptr<Return> r, ARDOUR::Session* s)
+	: ArdourDialog (string("Ardour: return ") + r->name())
 {
-	ui = new ReturnUI (this, s, ss);
+	ui = new ReturnUI (this, r, s);
 
 	hpacker.pack_start (*ui, true, true);
 
@@ -111,7 +110,7 @@ ReturnUIWindow::ReturnUIWindow (boost::shared_ptr<Return> s, Session& ss)
 
 	set_name ("ReturnUIWindow");
 
-	going_away_connection = s->GoingAway.connect (sigc::mem_fun (*this, &ReturnUIWindow::return_going_away));
+	going_away_connection = r->GoingAway.connect (sigc::mem_fun (*this, &ReturnUIWindow::return_going_away));
 	signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
 }
 
@@ -124,7 +123,7 @@ void
 ReturnUIWindow::return_going_away ()
 {
 	ENSURE_GUI_THREAD (*this, &ReturnUIWindow::return_going_away)
+	going_away_connection.disconnect ();	
 	delete_when_idle (this);
-	going_away_connection.disconnect ();
 }
 

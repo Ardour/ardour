@@ -41,7 +41,7 @@ using namespace PBD;
 using namespace std;
 using namespace Gtkmm2ext;
 
-AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion> r, AudioRegionView& rv)
+AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion> r, AudioRegionView& rv)
 	: RegionEditor (s),
 	  _region (r),
 	  _region_view (rv),
@@ -58,12 +58,12 @@ AudioRegionEditor::AudioRegionEditor (Session& s, boost::shared_ptr<AudioRegion>
 	  gain_adjustment(accurate_coefficient_to_dB(_region->scale_amplitude()), -40.0, +40.0, 0.1, 1.0, 0)	  
 
 {
-	position_clock.set_session (&_session);
-	end_clock.set_session (&_session);
-	length_clock.set_session (&_session);
-	sync_offset_relative_clock.set_session (&_session);
-	sync_offset_absolute_clock.set_session (&_session);
-	start_clock.set_session (&_session);
+	position_clock.set_session (_session);
+	end_clock.set_session (_session);
+	length_clock.set_session (_session);
+	sync_offset_relative_clock.set_session (_session);
+	sync_offset_absolute_clock.set_session (_session);
+	start_clock.set_session (_session);
 
 	name_entry.set_name ("AudioRegionEditorEntry");
 	name_label.set_name ("AudioRegionEditorLabel");
@@ -228,13 +228,13 @@ AudioRegionEditor::connect_editor_events ()
 	gain_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
 
 	audition_button.signal_toggled().connect (sigc::mem_fun(*this, &AudioRegionEditor::audition_button_toggled));
-	_session.AuditionActive.connect (sigc::mem_fun(*this, &AudioRegionEditor::audition_state_changed));
+	_session->AuditionActive.connect (sigc::mem_fun(*this, &AudioRegionEditor::audition_state_changed));
 }
 
 void
 AudioRegionEditor::position_clock_changed ()
 {
-	_session.begin_reversible_command (_("change region start position"));
+	_session->begin_reversible_command (_("change region start position"));
 
 	boost::shared_ptr<Playlist> pl = _region->playlist();
 
@@ -242,16 +242,16 @@ AudioRegionEditor::position_clock_changed ()
 		XMLNode &before = pl->get_state();
 		_region->set_position (position_clock.current_time(), this);
 		XMLNode &after = pl->get_state();
-		_session.add_command(new MementoCommand<Playlist>(*pl, &before, &after));
+		_session->add_command(new MementoCommand<Playlist>(*pl, &before, &after));
 	}
 
-	_session.commit_reversible_command ();
+	_session->commit_reversible_command ();
 }
 
 void
 AudioRegionEditor::end_clock_changed ()
 {
-	_session.begin_reversible_command (_("change region end position"));
+	_session->begin_reversible_command (_("change region end position"));
 
 	boost::shared_ptr<Playlist> pl = _region->playlist();
 
@@ -259,10 +259,10 @@ AudioRegionEditor::end_clock_changed ()
 		XMLNode &before = pl->get_state();
 		_region->trim_end (end_clock.current_time(), this);
 		XMLNode &after = pl->get_state();
-		_session.add_command(new MementoCommand<Playlist>(*pl, &before, &after));
+		_session->add_command(new MementoCommand<Playlist>(*pl, &before, &after));
 	}
 
-	_session.commit_reversible_command ();
+	_session->commit_reversible_command ();
 
 	end_clock.set (_region->position() + _region->length() - 1, true);
 }
@@ -272,7 +272,7 @@ AudioRegionEditor::length_clock_changed ()
 {
 	nframes_t frames = length_clock.current_time();
 
-	_session.begin_reversible_command (_("change region length"));
+	_session->begin_reversible_command (_("change region length"));
 
 	boost::shared_ptr<Playlist> pl = _region->playlist();
 
@@ -280,10 +280,10 @@ AudioRegionEditor::length_clock_changed ()
 		XMLNode &before = pl->get_state();
 		_region->trim_end (_region->position() + frames - 1, this);
 		XMLNode &after = pl->get_state();
-		_session.add_command(new MementoCommand<Playlist>(*pl, &before, &after));
+		_session->add_command(new MementoCommand<Playlist>(*pl, &before, &after));
 	}
 
-	_session.commit_reversible_command ();
+	_session->commit_reversible_command ();
 
 	length_clock.set (_region->length());
 }
@@ -310,9 +310,9 @@ void
 AudioRegionEditor::audition_button_toggled ()
 {
 	if (audition_button.get_active()) {
-		_session.audition_region (_region);
+		_session->audition_region (_region);
 	} else {
-		_session.cancel_audition ();
+		_session->cancel_audition ();
 	}
 }
 
@@ -385,27 +385,27 @@ AudioRegionEditor::audition_state_changed (bool yn)
 void
 AudioRegionEditor::sync_offset_absolute_clock_changed ()
 {
-	_session.begin_reversible_command (_("change region sync point"));
+	_session->begin_reversible_command (_("change region sync point"));
 
 	XMLNode& before = _region->get_state ();
 	_region->set_sync_position (sync_offset_absolute_clock.current_time());
 	XMLNode& after = _region->get_state ();
-	_session.add_command (new MementoCommand<AudioRegion> (*_region.get(), &before, &after));
+	_session->add_command (new MementoCommand<AudioRegion> (*_region.get(), &before, &after));
 	
-	_session.commit_reversible_command ();
+	_session->commit_reversible_command ();
 }
 
 void
 AudioRegionEditor::sync_offset_relative_clock_changed ()
 {
-	_session.begin_reversible_command (_("change region sync point"));
+	_session->begin_reversible_command (_("change region sync point"));
 
 	XMLNode& before = _region->get_state ();
 	_region->set_sync_position (sync_offset_relative_clock.current_time() + _region->position ());
 	XMLNode& after = _region->get_state ();
-	_session.add_command (new MementoCommand<AudioRegion> (*_region.get(), &before, &after));
+	_session->add_command (new MementoCommand<AudioRegion> (*_region.get(), &before, &after));
 	
-	_session.commit_reversible_command ();
+	_session->commit_reversible_command ();
 }
 
 bool

@@ -56,7 +56,7 @@ using namespace Gtk;
  * @param name the name/id of this time axis
  * @param tav the associated track view that this MarkerTimeAxis is marking up
  */
-MarkerTimeAxis::MarkerTimeAxis (PublicEditor& ed, ARDOUR::Session& sess, Canvas& canvas, const string & name, TimeAxisView* tav)
+MarkerTimeAxis::MarkerTimeAxis (PublicEditor& ed, ARDOUR::Session* sess, Canvas& canvas, const string & name, TimeAxisView* tav)
 	: AxisView(sess),
 	  VisualTimeAxis(name, ed, sess, canvas)
 {
@@ -90,7 +90,7 @@ MarkerTimeAxis::MarkerTimeAxis (PublicEditor& ed, ARDOUR::Session& sess, Canvas&
  */
 MarkerTimeAxis::~MarkerTimeAxis()
 {
-	GoingAway() ; /* EMIT_SIGNAL */
+	GoingAway ; /* EMIT_SIGNAL */
 
 	// destroy the view helper
 	// this handles removing and destroying individual marker items

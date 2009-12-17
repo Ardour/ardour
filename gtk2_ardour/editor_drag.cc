@@ -116,7 +116,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 			      *cursor,
 			      event->button.time);
 
-	if (_editor->session && _editor->session->transport_rolling()) {
+	if (_editor->session() && _editor->session()->transport_rolling()) {
 		_was_rolling = true;
 	} else {
 		_was_rolling = false;
@@ -237,7 +237,7 @@ RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Re
 	  _primary (p),
 	  _views (v)
 {
-	RegionView::RegionViewGoingAway.connect (sigc::mem_fun (*this, &RegionDrag::region_going_away));
+	death_connection = RegionView::RegionViewGoingAway.connect (sigc::mem_fun (*this, &RegionDrag::region_going_away));
 }
 
 void
@@ -828,7 +828,7 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			insert_result = modified_playlists.insert (to_playlist);
 
 			if (insert_result.second) {
-				_editor->session->add_command (new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));
+				_editor->session()->add_command (new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));
 			}
 
 			to_playlist->add_region (new_region, where);
@@ -868,7 +868,7 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			insert_result = modified_playlists.insert (playlist);
 
 			if (insert_result.second) {
-				_editor->session->add_command (new MementoCommand<Playlist>(*playlist, &playlist->get_state(), 0));
+				_editor->session()->add_command (new MementoCommand<Playlist>(*playlist, &playlist->get_state(), 0));
 			}
 			/* freeze to avoid lots of relayering in the case of a multi-region drag */
 			frozen_insert_result = frozen_playlists.insert(playlist);
@@ -910,7 +910,7 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			insert_result = modified_playlists.insert (from_playlist);
 
 			if (insert_result.second) {
-				_editor->session->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));
+				_editor->session()->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));
 			}
 
 			from_playlist->remove_region (rv->region());
@@ -960,7 +960,7 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 
   out:
 	for (set<boost::shared_ptr<Playlist> >::iterator p = modified_playlists.begin(); p != modified_playlists.end(); ++p) {
-		_editor->session->add_command (new MementoCommand<Playlist>(*(*p), 0, &(*p)->get_state()));
+		_editor->session()->add_command (new MementoCommand<Playlist>(*(*p), 0, &(*p)->get_state()));
 	}
 
 	_editor->commit_reversible_command ();
@@ -1245,7 +1245,7 @@ RegionInsertDrag::finished (GdkEvent* /*event*/, bool /*movement_occurred*/)
 	_editor->begin_reversible_command (_("insert region"));
 	XMLNode& before = playlist->get_state ();
 	playlist->add_region (_primary->region (), _last_frame_position);
-	_editor->session->add_command (new MementoCommand<Playlist> (*playlist, &before, &playlist->get_state()));
+	_editor->session()->add_command (new MementoCommand<Playlist> (*playlist, &before, &playlist->get_state()));
 	_editor->commit_reversible_command ();
 
 	delete _primary;
@@ -1570,7 +1570,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			insert_result = _editor->motion_frozen_playlists.insert (pl);
 
 			if (insert_result.second) {
-				_editor->session->add_command(new MementoCommand<Playlist>(*pl, &pl->get_state(), 0));
+				_editor->session()->add_command(new MementoCommand<Playlist>(*pl, &pl->get_state(), 0));
 				pl->freeze();
 			}
 		}
@@ -1668,7 +1668,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 		for (set<boost::shared_ptr<Playlist> >::iterator p = _editor->motion_frozen_playlists.begin(); p != _editor->motion_frozen_playlists.end(); ++p) {
 			(*p)->thaw ();
 			if (_have_transaction) {
-				_editor->session->add_command (new MementoCommand<Playlist>(*(*p).get(), 0, &(*p)->get_state()));
+				_editor->session()->add_command (new MementoCommand<Playlist>(*(*p).get(), 0, &(*p)->get_state()));
 			}
 		}
 
@@ -1750,7 +1750,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	BBT_Time when;
 
-	TempoMap& map (_editor->session->tempo_map());
+	TempoMap& map (_editor->session()->tempo_map());
 	map.bbt_time (_last_pointer_frame, when);
 
 	if (_copy == true) {
@@ -1758,7 +1758,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		XMLNode &before = map.get_state();
 		map.add_meter (_marker->meter(), when);
 		XMLNode &after = map.get_state();
-		_editor->session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
+		_editor->session()->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 		_editor->commit_reversible_command ();
 
 		// delete the dummy marker we used for visual representation of copying.
@@ -1769,7 +1769,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		XMLNode &before = map.get_state();
 		map.move_meter (_marker->meter(), when);
 		XMLNode &after = map.get_state();
-		_editor->session->add_command(new MementoCommand<TempoMap>(map, &before, &after));
+		_editor->session()->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 		_editor->commit_reversible_command ();
 	}
 }
@@ -1842,7 +1842,7 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	BBT_Time when;
 
-	TempoMap& map (_editor->session->tempo_map());
+	TempoMap& map (_editor->session()->tempo_map());
 	map.bbt_time (_last_pointer_frame, when);
 
 	if (_copy == true) {
@@ -1850,7 +1850,7 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		XMLNode &before = map.get_state();
 		map.add_tempo (_marker->tempo(), when);
 		XMLNode &after = map.get_state();
-		_editor->session->add_command (new MementoCommand<TempoMap>(map, &before, &after));
+		_editor->session()->add_command (new MementoCommand<TempoMap>(map, &before, &after));
 		_editor->commit_reversible_command ();
 
 		// delete the dummy marker we used for visual representation of copying.
@@ -1861,7 +1861,7 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		XMLNode &before = map.get_state();
 		map.move_tempo (_marker->tempo(), when);
 		XMLNode &after = map.get_state();
-		_editor->session->add_command (new MementoCommand<TempoMap>(map, &before, &after));
+		_editor->session()->add_command (new MementoCommand<TempoMap>(map, &before, &after));
 		_editor->commit_reversible_command ();
 	}
 }
@@ -1892,12 +1892,12 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 	if (_cursor == _editor->playhead_cursor) {
 		_editor->_dragging_playhead = true;
 
-		if (_editor->session && _was_rolling && _stop) {
-			_editor->session->request_stop ();
+		if (_editor->session() && _was_rolling && _stop) {
+			_editor->session()->request_stop ();
 		}
 
-		if (_editor->session && _editor->session->is_auditioning()) {
-			_editor->session->cancel_audition ();
+		if (_editor->session() && _editor->session()->is_auditioning()) {
+			_editor->session()->cancel_audition ();
 		}
 	}
 
@@ -1937,8 +1937,8 @@ CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 	motion (event, false);
 
 	if (_item == &_editor->playhead_cursor->canvas_item) {
-		if (_editor->session) {
-			_editor->session->request_locate (_editor->playhead_cursor->current_frame, _was_rolling);
+		if (_editor->session()) {
+			_editor->session()->request_locate (_editor->playhead_cursor->current_frame, _was_rolling);
 			_editor->_pending_locate_request = true;
 		}
 	}
@@ -2031,7 +2031,7 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 		tmp->audio_region()->set_fade_in_active (true);
 
 		XMLNode &after = alist->get_state();
-		_editor->session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
+		_editor->session()->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
 	}
 
 	_editor->commit_reversible_command ();
@@ -2128,7 +2128,7 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 		tmp->audio_region()->set_fade_out_active (true);
 
 		XMLNode &after = alist->get_state();
-		_editor->session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
+		_editor->session()->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
 	}
 
 	_editor->commit_reversible_command ();
@@ -2205,7 +2205,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		if (e < max_frames) {
 			++e;
 		}
-		_editor->session->locations()->find_all_between (s, e, ll, Location::Flags (0));
+		_editor->session()->locations()->find_all_between (s, e, ll, Location::Flags (0));
 		for (Locations::LocationList::iterator i = ll.begin(); i != ll.end(); ++i) {
 			Editor::LocationMarkers* lm = _editor->find_location_markers (*i);
 			if (lm) {
@@ -2415,7 +2415,7 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	_editor->_dragging_edit_point = false;
 
 	_editor->begin_reversible_command ( _("move marker") );
-	XMLNode &before = _editor->session->locations()->get_state();
+	XMLNode &before = _editor->session()->locations()->get_state();
 
 	MarkerSelection::iterator i;
 	list<Location*>::iterator x;
@@ -2441,8 +2441,8 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 	}
 
-	XMLNode &after = _editor->session->locations()->get_state();
-	_editor->session->add_command(new MementoCommand<Locations>(*(_editor->session->locations()), &before, &after));
+	XMLNode &after = _editor->session()->locations()->get_state();
+	_editor->session()->add_command(new MementoCommand<Locations>(*(_editor->session()->locations()), &before, &after));
 	_editor->commit_reversible_command ();
 
 	_line->hide();
@@ -2855,9 +2855,9 @@ ScrubDrag::motion (GdkEvent* /*event*/, bool)
 void
 ScrubDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 {
-	if (movement_occurred && _editor->session) {
+	if (movement_occurred && _editor->session()) {
 		/* make sure we stop */
-		_editor->session->request_transport_speed (0.0);
+		_editor->session()->request_transport_speed (0.0);
 	}
 }
 
@@ -2875,7 +2875,7 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	nframes64_t start = 0;
 	nframes64_t end = 0;
 
-	if (_editor->session == 0) {
+	if (_editor->session() == 0) {
 		return;
 	}
 
@@ -3059,7 +3059,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 void
 SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	Session* s = _editor->session;
+	Session* s = _editor->session();
 
 	if (movement_occurred) {
 		motion (event, false);
@@ -3113,7 +3113,7 @@ RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operat
 void
 RangeMarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
-	if (_editor->session == 0) {
+	if (_editor->session() == 0) {
 		return;
 	}
 
@@ -3246,8 +3246,8 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 		case CreateCDMarker:
 		    {
 			_editor->begin_reversible_command (_("new range marker"));
-			XMLNode &before = _editor->session->locations()->get_state();
-			_editor->session->locations()->next_available_name(rangename,"unnamed");
+			XMLNode &before = _editor->session()->locations()->get_state();
+			_editor->session()->locations()->next_available_name(rangename,"unnamed");
 			if (_operation == CreateCDMarker) {
 				flags = Location::IsRangeMarker | Location::IsCDMarker;
 				_editor->cd_marker_bar_drag_rect->hide();
@@ -3257,9 +3257,9 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 				_editor->range_bar_drag_rect->hide();
 			}
 			newloc = new Location(_editor->temp_location->start(), _editor->temp_location->end(), rangename, (Location::Flags) flags);
-			_editor->session->locations()->add (newloc, true);
-			XMLNode &after = _editor->session->locations()->get_state();
-			_editor->session->add_command(new MementoCommand<Locations>(*(_editor->session->locations()), &before, &after));
+			_editor->session()->locations()->add (newloc, true);
+			XMLNode &after = _editor->session()->locations()->get_state();
+			_editor->session()->add_command(new MementoCommand<Locations>(*(_editor->session()->locations()), &before, &after));
 			_editor->commit_reversible_command ();
 			break;
 		    }
@@ -3277,14 +3277,14 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			nframes64_t start;
 			nframes64_t end;
 
-			_editor->session->locations()->marks_either_side (_grab_frame, start, end);
+			_editor->session()->locations()->marks_either_side (_grab_frame, start, end);
 
 			if (end == max_frames) {
-				end = _editor->session->current_end_frame ();
+				end = _editor->session()->current_end_frame ();
 			}
 
 			if (start == max_frames) {
-				start = _editor->session->current_start_frame ();
+				start = _editor->session()->current_start_frame ();
 			}
 
 			switch (_editor->mouse_mode) {

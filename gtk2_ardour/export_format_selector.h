@@ -27,14 +27,16 @@
 #include <sigc++/signal.h>
 #include <boost/shared_ptr.hpp>
 
+#include "ardour/session_handle.h"
+
 namespace ARDOUR {
-	class Session;
 	class ExportFormatSpecification;
 	class ExportProfileManager;
 }
 
 ///
-class ExportFormatSelector : public Gtk::HBox {
+class ExportFormatSelector : public Gtk::HBox, public ARDOUR::SessionHandlePtr
+{
 
   private:
 
@@ -67,7 +69,6 @@ class ExportFormatSelector : public Gtk::HBox {
 	void update_format_description ();
 
 	ARDOUR::ExportProfileManager::FormatStatePtr state;
-	ARDOUR::Session * session;
 
 	/*** GUI componenets ***/
 

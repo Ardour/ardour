@@ -46,7 +46,7 @@ struct NamedSelection : public PBD::Stateful
 
     int set_state (const XMLNode&, int version);
 
-    static sigc::signal<void,NamedSelection*> NamedSelectionCreated;
+    static boost::signals2::signal<void(NamedSelection*)> NamedSelectionCreated;
 };
 
 }/* namespace ARDOUR */

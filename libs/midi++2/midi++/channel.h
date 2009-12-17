@@ -22,7 +22,8 @@
 
 #include <queue>
 
-#include <sigc++/sigc++.h>
+#include <boost/signals2.hpp>
+#include "pbd/scoped_connections.h"
 
 #include "midi++/types.h"
 #include "midi++/parser.h"
@@ -36,7 +37,7 @@ class Port;
  * This remembers various useful information about the current 'state' of a
  * MIDI channel (eg current pitch bend value).
  */
-class Channel : public sigc::trackable {
+class Channel : public PBD::ScopedConnectionList {
 
   public:
 	Channel (byte channel_number, Port &);

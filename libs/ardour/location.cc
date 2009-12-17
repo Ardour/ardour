@@ -25,7 +25,6 @@
 #include <ctime>
 #include <list>
 
-#include <sigc++/bind.h>
 
 #include "pbd/stl_delete.h"
 #include "pbd/xml++.h"

@@ -31,20 +31,20 @@ using namespace std;
 
 using namespace ARDOUR;
 
-sigc::signal<void> Metering::Meter;
+boost::signals2::signal<void()> Metering::Meter;
 Glib::StaticMutex  Metering::m_meter_signal_lock;
 
-sigc::connection
-Metering::connect (sigc::slot<void> the_slot)
+boost::signals2::connection
+Metering::connect (boost::function<void()> f)
 {
 	// SignalProcessor::Meter is emitted from another thread so the
 	// Meter signal must be protected.
 	Glib::Mutex::Lock guard (m_meter_signal_lock);
-	return Meter.connect (the_slot);
+	return Meter.connect (f);
 }
 
 void
-Metering::disconnect (sigc::connection& c)
+Metering::disconnect (boost::signals2::connection& c)
 {
 	Glib::Mutex::Lock guard (m_meter_signal_lock);
 	c.disconnect ();

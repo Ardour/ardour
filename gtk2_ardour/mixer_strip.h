@@ -79,8 +79,8 @@ class RouteGroupMenu;
 class MixerStrip : public RouteUI, public Gtk::EventBox
 {
   public:
-	MixerStrip (Mixer_UI&, ARDOUR::Session&, boost::shared_ptr<ARDOUR::Route>, bool in_mixer = true);
-	MixerStrip (Mixer_UI&, ARDOUR::Session&, bool in_mixer = true);
+	MixerStrip (Mixer_UI&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>, bool in_mixer = true);
+	MixerStrip (Mixer_UI&, ARDOUR::Session*, bool in_mixer = true);
 	~MixerStrip ();
 
 	void set_width_enum (Width, void* owner);
@@ -167,8 +167,6 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 
 	std::string longest_label;
 
-	sigc::connection newplug_connection;
-
 	gint    mark_update_safe ();
 	guint32 mode_switch_in_progress;
 
@@ -216,8 +214,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void input_changed (ARDOUR::IOChange, void *);
 	void output_changed (ARDOUR::IOChange, void *);
 
-	sigc::connection panstate_connection;
-	sigc::connection panstyle_connection;
+	boost::signals2::scoped_connection panstate_connection;
+	boost::signals2::scoped_connection panstyle_connection;
 	void connect_to_pan ();
 
 	void update_diskstream_display ();
@@ -267,7 +265,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void revert_to_default_display ();
 
 	void drop_send ();
-	sigc::connection send_gone_connection;
+	boost::signals2::scoped_connection send_gone_connection;
 
 	void reset_strip_style ();
 

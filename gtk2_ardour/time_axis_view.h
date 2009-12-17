@@ -34,6 +34,7 @@
 #include <gtkmm2ext/focus_entry.h>
 
 #include "pbd/stateful.h"
+#include "pbd/scoped_connections.h"
 
 #include "ardour/types.h"
 #include "ardour/region.h"
@@ -89,7 +90,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	static uint32_t hSmaller;
 	static uint32_t hSmall;
 
-	TimeAxisView(ARDOUR::Session& sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
+	TimeAxisView(ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
 
 	XMLNode& get_state ();

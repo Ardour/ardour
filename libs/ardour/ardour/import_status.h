@@ -24,7 +24,6 @@
 #include <vector>
 
 #include <stdint.h>
-#include <sigc++/signal.h>
 
 #include "ardour/types.h"
 

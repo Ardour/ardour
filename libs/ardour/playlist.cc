@@ -25,7 +25,6 @@
 #include <string>
 #include <climits>
 
-#include <sigc++/bind.h>
 
 #include "pbd/failed_constructor.h"
 #include "pbd/stl_delete.h"
@@ -116,7 +115,9 @@ Playlist::Playlist (Session& sess, const XMLNode& node, DataType type, bool hide
 }
 
 Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, bool hide)
-	: SessionObject(other->_session, namestr), _type(other->_type), _orig_diskstream_id(other->_orig_diskstream_id)
+	: SessionObject(other->_session, namestr)
+	, _type(other->_type)
+	, _orig_diskstream_id(other->_orig_diskstream_id)
 {
 	init (hide);
 
@@ -148,7 +149,9 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 }
 
 Playlist::Playlist (boost::shared_ptr<const Playlist> other, nframes_t start, nframes_t cnt, string str, bool hide)
-	: SessionObject(other->_session, str), _type(other->_type), _orig_diskstream_id(other->_orig_diskstream_id)
+	: SessionObject(other->_session, str)
+	, _type(other->_type)
+	, _orig_diskstream_id(other->_orig_diskstream_id)
 {
 	RegionLock rlock2 (const_cast<Playlist*> (other.get()));
 
@@ -267,12 +270,13 @@ Playlist::init (bool hide)
 	freeze_length = 0;
 	_explicit_relayering = false;
 
-	Modified.connect (sigc::mem_fun (*this, &Playlist::mark_session_dirty));
+	scoped_connect (Modified, boost::bind (&Playlist::mark_session_dirty, this));
 }
 
 Playlist::~Playlist ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("Playlist %1 destructor\n", _name));
+
 	{
 		RegionLock rl (this);
 
@@ -601,10 +605,8 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t posit
 		}
 	}
 
-	region_state_changed_connections.push_back (
-		region->StateChanged.connect (sigc::bind (sigc::mem_fun (this, &Playlist::region_changed_proxy),
-							  boost::weak_ptr<Region> (region)))
-		);
+	region_state_changed_connections.add_connection 
+		(region->StateChanged.connect (boost::bind (&Playlist::region_changed_proxy, this, _1, boost::weak_ptr<Region> (region))));
 
 	return true;
 }
@@ -1318,7 +1320,6 @@ Playlist::region_changed_proxy (Change what_changed, boost::weak_ptr<Region> wea
 		return;
 	}
 
-
 	/* this makes a virtual call to the right kind of playlist ... */
 
 	region_changed (what_changed, region);
@@ -1369,13 +1370,7 @@ Playlist::clear (bool with_signals)
 	{
 		RegionLock rl (this);
 
-		for (
-			std::list<sigc::connection>::iterator i = region_state_changed_connections.begin ();
-			i != region_state_changed_connections.end ();
-			++i
-		) {
-			i->disconnect ();
-		}
+		region_state_changed_connections.drop_connections ();
 
 		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 			pending_removes.insert (*i);
@@ -2493,7 +2488,7 @@ Playlist::update_after_tempo_map_change ()
 }
 
 void
-Playlist::foreach_region (sigc::slot<void, boost::shared_ptr<Region> > s)
+Playlist::foreach_region (boost::function<void(boost::shared_ptr<Region>)> s)
 {
 	RegionLock rl (this, false);
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {

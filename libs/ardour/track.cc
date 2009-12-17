@@ -16,9 +16,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "pbd/error.h"
-#include <sigc++/retype.h>
-#include <sigc++/retype_return.h>
-#include <sigc++/bind.h>
 
 #include "ardour/amp.h"
 #include "ardour/audioplaylist.h"

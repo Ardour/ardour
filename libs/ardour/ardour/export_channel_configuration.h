@@ -24,7 +24,6 @@
 #include <list>
 
 #include <glibmm/ustring.h>
-#include <sigc++/signal.h>
 
 #include "ardour/export_channel.h"
 #include "ardour/export_status.h"
@@ -96,7 +95,7 @@ class ExportChannelConfiguration
 
 	/// Writes all files for this channel config @return true if a new thread was spawned
 	bool write_files (boost::shared_ptr<ExportProcessor> new_processor);
-	sigc::signal<void> FilesWritten;
+	boost::signals2::signal<void()> FilesWritten;
 
 	// Tells the handler the necessary information for it to handle tempfiles
 	void register_with_timespan (TimespanPtr timespan);

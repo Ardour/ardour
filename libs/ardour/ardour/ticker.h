@@ -18,10 +18,13 @@
     $Id$
 */
 
-#include <sigc++/sigc++.h>
+
+#include "midi++/jack.h"
+#include "pbd/scoped_connections.h"
 
 #include "ardour/types.h"
-#include "midi++/jack.h"
+#include "ardour/session_handle.h"
+
 
 #ifndef TICKER_H_
 #define TICKER_H_
@@ -31,22 +34,18 @@ namespace ARDOUR
 
 class Session;
 
-class Ticker : public sigc::trackable
+class Ticker : public SessionHandlePtr
 {
 public:
-	Ticker() : _session(0) {};
-	virtual ~Ticker() {};
+	Ticker() {};
+	virtual ~Ticker() {}
 
 	virtual void tick(
 		const nframes_t& transport_frames,
 		const BBT_Time& transport_bbt,
 		const Timecode::Time& transport_timecode) = 0;
 
-	virtual void set_session(Session& s);
-	virtual void going_away() { _session = 0; }
-
-protected:
-	Session* _session;
+	void set_session (Session* s);
 };
 
 class MidiClockTicker : public Ticker
@@ -70,8 +69,8 @@ public:
 		const BBT_Time& transport_bbt,
 		const Timecode::Time& transport_timecode);
 
-	void set_session(Session& s);
-	void going_away() { _midi_port = 0; Ticker::going_away(); }
+	void set_session (Session* s);
+	void session_going_away();
 
 	/// slot for the signal session::MIDIClock_PortChanged
 	void update_midi_clock_port();

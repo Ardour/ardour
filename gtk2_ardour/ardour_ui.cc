@@ -193,7 +193,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	editor = 0;
 	mixer = 0;
-	session = 0;
 	editor = 0;
 	engine = 0;
 	_session_is_new = false;
@@ -415,11 +414,11 @@ ARDOUR_UI::post_engine ()
 	/* now start and maybe save state */
 
 	if (do_engine_start () == 0) {
-		if (session && _session_is_new) {
+		if (_session && _session_is_new) {
 			/* we need to retain initial visual
 			   settings for a new session
 			*/
-			session->save_state ("");
+			_session->save_state ("");
 		}
 	}
 }
@@ -556,9 +555,9 @@ ARDOUR_UI::save_ardour_state ()
 	XMLNode enode(static_cast<Stateful*>(editor)->get_state());
 	XMLNode mnode(mixer->get_state());
 
-	if (session) {
-		session->add_instant_xml (enode);
-		session->add_instant_xml (mnode);
+	if (_session) {
+		_session->add_instant_xml (enode);
+		_session->add_instant_xml (mnode);
 	} else {
 		Config->add_instant_xml (enode);
 		Config->add_instant_xml (mnode);
@@ -582,8 +581,8 @@ ARDOUR_UI::autosave_session ()
                 return 1;
 	}
 
-        if (session) {
-                session->maybe_write_autosave();
+        if (_session) {
+                _session->maybe_write_autosave();
         }
 
 	return 1;
@@ -594,7 +593,7 @@ ARDOUR_UI::update_autosave ()
 {
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::update_autosave)
 
-	if (session && session->dirty()) {
+	if (_session && _session->dirty()) {
 		if (_autosave_connection.connected()) {
 			_autosave_connection.disconnect();
 		}
@@ -753,14 +752,14 @@ ARDOUR_UI::check_memory_locking ()
 void
 ARDOUR_UI::finish()
 {
-	if (session) {
+	if (_session) {
 
-		if (session->transport_rolling()) {
-			session->request_stop ();
+		if (_session->transport_rolling()) {
+			_session->request_stop ();
 			usleep (250000);
 		}
 
-		if (session->dirty()) {
+		if (_session->dirty()) {
 			switch (ask_about_saving_session(_("quit"))) {
 			case -1:
 				return;
@@ -789,10 +788,10 @@ If you still wish to quit, please use the\n\n\
 		point_oh_five_second_connection.disconnect ();
 		point_zero_one_second_connection.disconnect();
 		
-		// session->set_deletion_in_progress ();
-		session->remove_pending_capture_state ();
-		delete session;
-		session = 0;
+		// _session->set_deletion_in_progress ();
+		_session->remove_pending_capture_state ();
+		delete _session;
+		_session = 0;
 	}
 
 	ArdourDialog::close_all_dialogs ();
@@ -826,13 +825,13 @@ ARDOUR_UI::ask_about_saving_session (const string & what)
 	string prompt;
 	string type;
 
-	if (session->snap_name() == session->name()) {
+	if (_session->snap_name() == _session->name()) {
 		type = _("session");
 	} else {
 		type = _("snapshot");
 	}
 	prompt = string_compose(_("The %1 \"%2\"\nhas not been saved.\n\nAny changes made this time\nwill be lost unless you save it.\n\nWhat do you want to do?"),
-			 type, session->snap_name());
+			 type, _session->snap_name());
 
 	prompt_label.set_text (prompt);
 	prompt_label.set_name (X_("PrompterLabel"));
@@ -941,14 +940,14 @@ ARDOUR_UI::update_buffer_load ()
 	char buf[64];
 	uint32_t c, p;
 
-	if (session) {
-		c = session->capture_load ();
-		p = session->playback_load ();
+	if (_session) {
+		c = _session->capture_load ();
+		p = _session->playback_load ();
 
 		push_buffer_stats (c, p);
 
 		snprintf (buf, sizeof (buf), _("Buffers p:%" PRIu32 "%% c:%" PRIu32 "%%"),
-			  session->playback_load(), session->capture_load());
+			  _session->playback_load(), _session->capture_load());
 		buffer_load_label.set_text (buf);
 	} else {
 		buffer_load_label.set_text ("");
@@ -967,19 +966,19 @@ ARDOUR_UI::count_recenabled_streams (Route& route)
 void
 ARDOUR_UI::update_disk_space()
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 
-	nframes_t frames = session->available_capture_duration();
+	nframes_t frames = _session->available_capture_duration();
 	char buf[64];
-	nframes_t fr = session->frame_rate();
+	nframes_t fr = _session->frame_rate();
 
 	if (frames == max_frames) {
 		strcpy (buf, _("Disk: 24hrs+"));
 	} else {
 		rec_enabled_streams = 0;
-		session->foreach_route (this, &ARDOUR_UI::count_recenabled_streams);
+		_session->foreach_route (this, &ARDOUR_UI::count_recenabled_streams);
 
 		if (rec_enabled_streams) {
 			frames /= rec_enabled_streams;
@@ -1154,7 +1153,7 @@ ARDOUR_UI::recent_session_row_activated (const TreePath& /*path*/, TreeViewColum
 void
 ARDOUR_UI::open_recent_session ()
 {
-	bool can_return = (session != 0);
+	bool can_return = (_session != 0);
 
 	if (session_selector_window == 0) {
 		build_session_selector ();
@@ -1278,7 +1277,7 @@ ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t 
 {
 	list<boost::shared_ptr<MidiTrack> > tracks;
 
-	if (session == 0) {
+	if (_session == 0) {
 		warning << _("You cannot add a track without a session already loaded.") << endmsg;
 		return;
 	}
@@ -1286,7 +1285,7 @@ ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t 
 	try {
 		if (disk) {
 
-			tracks = session->new_midi_track (ARDOUR::Normal, route_group, how_many);
+			tracks = _session->new_midi_track (ARDOUR::Normal, route_group, how_many);
 
 			if (tracks.size() != how_many) {
 				if (how_many == 1) {
@@ -1296,7 +1295,7 @@ ARDOUR_UI::session_add_midi_route (bool disk, RouteGroup* route_group, uint32_t 
 				}
 			}
 		} /*else {
-			if ((route = session->new_midi_route ()) == 0) {
+			if ((route = _session->new_midi_route ()) == 0) {
 				error << _("could not create new midi bus") << endmsg;
 			}
 		}*/
@@ -1319,14 +1318,14 @@ ARDOUR_UI::session_add_audio_route (bool track, bool aux, int32_t input_channels
 	list<boost::shared_ptr<AudioTrack> > tracks;
 	RouteList routes;
 
-	if (session == 0) {
+	if (_session == 0) {
 		warning << _("You cannot add a track or bus without a session already loaded.") << endmsg;
 		return;
 	}
 
 	try {
 		if (track) {
-			tracks = session->new_audio_track (input_channels, output_channels, mode, route_group, how_many);
+			tracks = _session->new_audio_track (input_channels, output_channels, mode, route_group, how_many);
 
 			if (tracks.size() != how_many) {
 				if (how_many == 1) {
@@ -1339,7 +1338,7 @@ ARDOUR_UI::session_add_audio_route (bool track, bool aux, int32_t input_channels
 
 		} else {
 
-			routes = session->new_audio_route (aux, input_channels, output_channels, route_group, how_many);
+			routes = _session->new_audio_route (aux, input_channels, output_channels, route_group, how_many);
 
 			if (routes.size() != how_many) {
 				if (how_many == 1) {
@@ -1379,9 +1378,9 @@ ARDOUR_UI::do_transport_locate (nframes_t new_position)
 {
 	nframes_t _preroll = 0;
 
-	if (session) {
+	if (_session) {
 		// XXX CONFIG_CHANGE FIX - requires AnyTime handling
-		// _preroll = session->convert_to_frames_at (new_position, Config->get_preroll());
+		// _preroll = _session->convert_to_frames_at (new_position, Config->get_preroll());
 
 		if (new_position > _preroll) {
 			new_position -= _preroll;
@@ -1389,22 +1388,22 @@ ARDOUR_UI::do_transport_locate (nframes_t new_position)
 			new_position = 0;
 		}
 
-		session->request_locate (new_position);
+		_session->request_locate (new_position);
 	}
 }
 
 void
 ARDOUR_UI::transport_goto_start ()
 {
-	if (session) {
-		session->goto_start();
+	if (_session) {
+		_session->goto_start();
 
 		/* force displayed area in editor to start no matter
 		   what "follow playhead" setting is.
 		*/
 
 		if (editor) {
-			editor->center_screen (session->current_start_frame ());
+			editor->center_screen (_session->current_start_frame ());
 		}
 	}
 }
@@ -1412,8 +1411,8 @@ ARDOUR_UI::transport_goto_start ()
 void
 ARDOUR_UI::transport_goto_zero ()
 {
-	if (session) {
-		session->request_locate (0);
+	if (_session) {
+		_session->request_locate (0);
 
 
 		/* force displayed area in editor to start no matter
@@ -1429,7 +1428,7 @@ ARDOUR_UI::transport_goto_zero ()
 void
 ARDOUR_UI::transport_goto_wallclock ()
 {
-	if (session && editor) {
+	if (_session && editor) {
 
 		time_t now;
 		struct tm tmnow;
@@ -1438,11 +1437,11 @@ ARDOUR_UI::transport_goto_wallclock ()
 		time (&now);
 		localtime_r (&now, &tmnow);
 
-		frames = tmnow.tm_hour * (60 * 60 * session->frame_rate());
-		frames += tmnow.tm_min * (60 * session->frame_rate());
-		frames += tmnow.tm_sec * session->frame_rate();
+		frames = tmnow.tm_hour * (60 * 60 * _session->frame_rate());
+		frames += tmnow.tm_min * (60 * _session->frame_rate());
+		frames += tmnow.tm_sec * _session->frame_rate();
 
-		session->request_locate (frames);
+		_session->request_locate (frames);
 
 		/* force displayed area in editor to start no matter
 		   what "follow playhead" setting is.
@@ -1457,9 +1456,9 @@ ARDOUR_UI::transport_goto_wallclock ()
 void
 ARDOUR_UI::transport_goto_end ()
 {
-	if (session) {
-		nframes_t const frame = session->current_end_frame();
-		session->request_locate (frame);
+	if (_session) {
+		nframes_t const frame = _session->current_end_frame();
+		_session->request_locate (frame);
 
 		/* force displayed area in editor to start no matter
 		   what "follow playhead" setting is.
@@ -1474,23 +1473,23 @@ ARDOUR_UI::transport_goto_end ()
 void
 ARDOUR_UI::transport_stop ()
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
-	if (session->is_auditioning()) {
-		session->cancel_audition ();
+	if (_session->is_auditioning()) {
+		_session->cancel_audition ();
 		return;
 	}
 
-	session->request_stop ();
+	_session->request_stop ();
 }
 
 void
 ARDOUR_UI::transport_stop_and_forget_capture ()
 {
-	if (session) {
-		session->request_stop (true);
+	if (_session) {
+		_session->request_stop (true);
 	}
 }
 
@@ -1506,47 +1505,47 @@ void
 ARDOUR_UI::transport_record (bool roll)
 {
 
-	if (session) {
-		switch (session->record_status()) {
+	if (_session) {
+		switch (_session->record_status()) {
 		case Session::Disabled:
-			if (session->ntracks() == 0) {
+			if (_session->ntracks() == 0) {
 				MessageDialog msg (*editor, _("Please create 1 or more track\nbefore trying to record.\nCheck the Session menu."));
 				msg.run ();
 				return;
 			}
-			session->maybe_enable_record ();
+			_session->maybe_enable_record ();
 			if (roll) {
 				transport_roll ();
 			}
 			break;
 		case Session::Recording:
 			if (roll) {
-				session->request_stop();
+				_session->request_stop();
 			} else {
-				session->disable_record (false, true);
+				_session->disable_record (false, true);
 			}
 			break;
 
 		case Session::Enabled:
-			session->disable_record (false, true);
+			_session->disable_record (false, true);
 		}
 	}
-	//cerr << "ARDOUR_UI::transport_record () called roll = " << roll << " session->record_status() = " << session->record_status() << endl;
+	//cerr << "ARDOUR_UI::transport_record () called roll = " << roll << " _session->record_status() = " << _session->record_status() << endl;
 }
 
 void 
 ARDOUR_UI::transport_roll ()
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
-	if (session->is_auditioning()) {
+	if (_session->is_auditioning()) {
 		return;
 	}
 	
-	if (session->config.get_external_sync()) {
-		switch (session->config.get_sync_source()) {
+	if (_session->config.get_external_sync()) {
+		switch (_session->config.get_sync_source()) {
 		case JACK:
 			break;
 		default:
@@ -1555,16 +1554,16 @@ ARDOUR_UI::transport_roll ()
 		}
 	}
 
-	bool rolling = session->transport_rolling();
+	bool rolling = _session->transport_rolling();
 
-	if (session->get_play_loop()) {
-		session->request_play_loop (false, true);
-	} else if (session->get_play_range ()) {
-		session->request_play_range (false, true);
+	if (_session->get_play_loop()) {
+		_session->request_play_loop (false, true);
+	} else if (_session->get_play_range ()) {
+		_session->request_play_range (false, true);
 	} 
 
 	if (!rolling) {
-		session->request_transport_speed (1.0f);
+		_session->request_transport_speed (1.0f);
 	}
 
 	map_transport_state ();
@@ -1574,17 +1573,17 @@ void
 ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 {
 	
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
-	if (session->is_auditioning()) {
-		session->cancel_audition ();
+	if (_session->is_auditioning()) {
+		_session->cancel_audition ();
 		return;
 	}
 	
-	if (session->config.get_external_sync()) {
-		switch (session->config.get_sync_source()) {
+	if (_session->config.get_external_sync()) {
+		switch (_session->config.get_sync_source()) {
 		case JACK:
 			break;
 		default:
@@ -1593,12 +1592,12 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		}
 	}
 
-	bool rolling = session->transport_rolling();
+	bool rolling = _session->transport_rolling();
 	bool affect_transport = true;
 
 	if (rolling && roll_out_of_bounded_mode) {
 		/* drop out of loop/range playback but leave transport rolling */
-		if (session->get_play_loop()) {
+		if (_session->get_play_loop()) {
 			if (Config->get_seamless_loop()) {
 				/* the disk buffers contain copies of the loop - we can't 
 				   just keep playing, so stop the transport. the user
@@ -1609,18 +1608,18 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 				/* disk buffers are normal, so we can keep playing */
 				affect_transport = false;
 			}
-			session->request_play_loop (false, true);
-		} else if (session->get_play_range ()) {
+			_session->request_play_loop (false, true);
+		} else if (_session->get_play_range ()) {
 			affect_transport = false;
-			session->request_play_range (0, true);
+			_session->request_play_range (0, true);
 		} 
 	} 
 
 	if (affect_transport) {
 		if (rolling) {
-			session->request_stop (with_abort, true);
+			_session->request_stop (with_abort, true);
 		} else {
-			session->request_transport_speed (1.0f);
+			_session->request_transport_speed (1.0f);
 		}
 	}
 
@@ -1630,20 +1629,20 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 void
 ARDOUR_UI::toggle_session_auto_loop ()
 {
-	if (session) {
-		if (session->get_play_loop()) {
-			if (session->transport_rolling()) {
-				Location * looploc = session->locations()->auto_loop_location();
+	if (_session) {
+		if (_session->get_play_loop()) {
+			if (_session->transport_rolling()) {
+				Location * looploc = _session->locations()->auto_loop_location();
 				if (looploc) {
-					session->request_locate (looploc->start(), true);
+					_session->request_locate (looploc->start(), true);
 				}
 			} else {
-				session->request_play_loop (false);
+				_session->request_play_loop (false);
 			}
 		} else {
-			Location * looploc = session->locations()->auto_loop_location();
+			Location * looploc = _session->locations()->auto_loop_location();
 			if (looploc) {
-				session->request_play_loop (true);
+				_session->request_play_loop (true);
 			}
 		}
 	}
@@ -1652,7 +1651,7 @@ ARDOUR_UI::toggle_session_auto_loop ()
 void
 ARDOUR_UI::transport_play_selection ()
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
@@ -1664,24 +1663,24 @@ ARDOUR_UI::transport_rewind (int option)
 {
 	float current_transport_speed;
 
-       	if (session) {
-		current_transport_speed = session->transport_speed();
+       	if (_session) {
+		current_transport_speed = _session->transport_speed();
 
 		if (current_transport_speed >= 0.0f) {
 			switch (option) {
 			case 0:
-				session->request_transport_speed (-1.0f);
+				_session->request_transport_speed (-1.0f);
 				break;
 			case 1:
-				session->request_transport_speed (-4.0f);
+				_session->request_transport_speed (-4.0f);
 				break;
 			case -1:
-				session->request_transport_speed (-0.5f);
+				_session->request_transport_speed (-0.5f);
 				break;
 			}
 		} else {
 			/* speed up */
-			session->request_transport_speed (current_transport_speed * 1.5f);
+			_session->request_transport_speed (current_transport_speed * 1.5f);
 		}
 	}
 }
@@ -1691,24 +1690,24 @@ ARDOUR_UI::transport_forward (int option)
 {
 	float current_transport_speed;
 
-	if (session) {
-		current_transport_speed = session->transport_speed();
+	if (_session) {
+		current_transport_speed = _session->transport_speed();
 
 		if (current_transport_speed <= 0.0f) {
 			switch (option) {
 			case 0:
-				session->request_transport_speed (1.0f);
+				_session->request_transport_speed (1.0f);
 				break;
 			case 1:
-				session->request_transport_speed (4.0f);
+				_session->request_transport_speed (4.0f);
 				break;
 			case -1:
-				session->request_transport_speed (0.5f);
+				_session->request_transport_speed (0.5f);
 				break;
 			}
 		} else {
 			/* speed up */
-			session->request_transport_speed (current_transport_speed * 1.5f);
+			_session->request_transport_speed (current_transport_speed * 1.5f);
 		}
 
 	}
@@ -1717,13 +1716,13 @@ ARDOUR_UI::transport_forward (int option)
 void
 ARDOUR_UI::toggle_record_enable (uint32_t dstream)
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 
 	boost::shared_ptr<Route> r;
 
-	if ((r = session->route_by_remote_id (dstream)) != 0) {
+	if ((r = _session->route_by_remote_id (dstream)) != 0) {
 
 		Track* t;
 
@@ -1731,7 +1730,7 @@ ARDOUR_UI::toggle_record_enable (uint32_t dstream)
 			t->diskstream()->set_record_enabled (!t->diskstream()->record_enabled());
 		}
 	}
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 }
@@ -1741,7 +1740,7 @@ ARDOUR_UI::map_transport_state ()
 {
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::map_transport_state)
 
-	if (!session) {
+	if (!_session) {
 		auto_loop_button.set_visual_state (0);
 		play_selection_button.set_visual_state (0);
 		roll_button.set_visual_state (0);
@@ -1749,7 +1748,7 @@ ARDOUR_UI::map_transport_state ()
 		return;
 	}
 
-	float sp = session->transport_speed();
+	float sp = _session->transport_speed();
 
 	if (sp == 1.0f) {
 		shuttle_fract = SHUTTLE_FRACT_SPEED1;  /* speed = 1.0, believe it or not */
@@ -1762,13 +1761,13 @@ ARDOUR_UI::map_transport_state ()
 
 	if (sp != 0.0) {
 
-		if (session->get_play_range()) {
+		if (_session->get_play_range()) {
 
 			play_selection_button.set_visual_state (1);
 			roll_button.set_visual_state (0);
 			auto_loop_button.set_visual_state (0);
 			
-		} else if (session->get_play_loop ()) {
+		} else if (_session->get_play_loop ()) {
 			
 			auto_loop_button.set_visual_state (1);
 			play_selection_button.set_visual_state (0);
@@ -1900,7 +1899,7 @@ void
 ARDOUR_UI::update_clocks ()
 {
 	if (!editor || !editor->dragging_playhead()) {
-		Clock (session->audible_frame(), false, editor->get_preferred_edit_position()); /* EMIT_SIGNAL */
+		Clock (_session->audible_frame(), false, editor->get_preferred_edit_position()); /* EMIT_SIGNAL */
 	}
 }
 
@@ -1994,7 +1993,7 @@ ARDOUR_UI::snapshot_session ()
 		bool do_save = (snapname.length() != 0);
 
 		vector<sys::path> p;
-		get_state_files_in_directory (session->session_directory().root_path(), p);
+		get_state_files_in_directory (_session->session_directory().root_path(), p);
 		vector<string> n = get_file_names_no_extension (p);
 		if (find (n.begin(), n.end(), snapname) != n.end()) {
 
@@ -2030,14 +2029,14 @@ ARDOUR_UI::save_state (const string & name)
 int
 ARDOUR_UI::save_state_canfail (string name)
 {
-	if (session) {
+	if (_session) {
 		int ret;
 
 		if (name.length() == 0) {
-			name = session->snap_name();
+			name = _session->snap_name();
 		}
 
-		if ((ret = session->save_state (name)) != 0) {
+		if ((ret = _session->save_state (name)) != 0) {
 			return ret;
 		}
 	}
@@ -2048,36 +2047,36 @@ ARDOUR_UI::save_state_canfail (string name)
 void
 ARDOUR_UI::primary_clock_value_changed ()
 {
-	if (session) {
-		session->request_locate (primary_clock.current_time ());
+	if (_session) {
+		_session->request_locate (primary_clock.current_time ());
 	}
 }
 
 void
 ARDOUR_UI::big_clock_value_changed ()
 {
-	if (session) {
-		session->request_locate (big_clock.current_time ());
+	if (_session) {
+		_session->request_locate (big_clock.current_time ());
 	}
 }
 
 void
 ARDOUR_UI::secondary_clock_value_changed ()
 {
-	if (session) {
-		session->request_locate (secondary_clock.current_time ());
+	if (_session) {
+		_session->request_locate (secondary_clock.current_time ());
 	}
 }
 
 void
 ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 
-	Session::RecordState const r = session->record_status ();
-	bool const h = session->have_rec_enabled_diskstream ();
+	Session::RecordState const r = _session->record_status ();
+	bool const h = _session->have_rec_enabled_diskstream ();
 
 	if (r == Session::Enabled || (r == Session::Recording && !h)) {
 		if (onoff) {
@@ -2105,7 +2104,7 @@ ARDOUR_UI::save_template ()
 	prompter.set_name (X_("Prompter"));
 	prompter.set_title (_("Save Mix Template"));
 	prompter.set_prompt (_("Name for mix template:"));
-	prompter.set_initial_text(session->name() + _("-template"));
+	prompter.set_initial_text(_session->name() + _("-template"));
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 
 	switch (prompter.run()) {
@@ -2113,7 +2112,7 @@ ARDOUR_UI::save_template ()
 		prompter.get_result (name);
 
 		if (name.length()) {
-			session->save_template (name);
+			_session->save_template (name);
 		}
 		break;
 
@@ -2126,7 +2125,7 @@ void
 ARDOUR_UI::edit_metadata ()
 {
 	SessionMetadataEditor dialog;
-	dialog.set_session (session);
+	dialog.set_session (_session);
 	editor->ensure_float (dialog);
 	dialog.run ();
 }
@@ -2135,7 +2134,7 @@ void
 ARDOUR_UI::import_metadata ()
 {
 	SessionMetadataImporter dialog;
-	dialog.set_session (session);
+	dialog.set_session (_session);
 	editor->ensure_float (dialog);
 	dialog.run ();
 }
@@ -2339,7 +2338,7 @@ ARDOUR_UI::build_session_from_nsd (const Glib::ustring& session_path, const Glib
 void
 ARDOUR_UI::idle_load (const Glib::ustring& path)
 {
-	if (session) {
+	if (_session) {
 		if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
 			/* /path/to/foo => /path/to/foo, foo */
 			load_session (path, basename_nosuffix (path));
@@ -2490,7 +2489,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new)
 
 			ret = load_session (session_path, session_name, template_name);
 			if (!ARDOUR_COMMAND_LINE::immediate_save.empty()) {
-				session->save_state (ARDOUR_COMMAND_LINE::immediate_save, false);
+				_session->save_state (ARDOUR_COMMAND_LINE::immediate_save, false);
 				exit (1);
 			}
 		}
@@ -2594,14 +2593,14 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 		goto out;
 	}
 
-	connect_to_session (new_session);
+	set_session (new_session);
 
 	session_loaded = true;
 
 	goto_editor_window ();
 
-	if (session) {
-		session->set_clean ();
+	if (_session) {
+		_session->set_clean ();
 	}
 
 	flush_pending ();
@@ -2653,7 +2652,7 @@ ARDOUR_UI::build_session (const Glib::ustring& path, const Glib::ustring& snap_n
 		return -1;
 	}
 
-	connect_to_session (new_session);
+	set_session (new_session);
 
 	session_loaded = true;
 
@@ -2785,7 +2784,7 @@ require some unused files to continue to exist."));
 
 	dimage->set_alignment(ALIGN_LEFT, ALIGN_TOP);
 
-	const string dead_sound_directory = session->session_directory().dead_sound_path().to_string();
+	const string dead_sound_directory = _session->session_directory().dead_sound_path().to_string();
 
 
 
@@ -2853,7 +2852,7 @@ require some unused files to continue to exist."));
 void
 ARDOUR_UI::cleanup ()
 {
-	if (session == 0) {
+	if (_session == 0) {
 		/* shouldn't happen: menu item is insensitive */
 		return;
 	}
@@ -2895,7 +2894,7 @@ After cleanup, unused audio files will be moved to a \
 		act->set_sensitive (false);
 	}
 
-	if (session->cleanup_sources (rep)) {
+	if (_session->cleanup_sources (rep)) {
 		editor->finish_cleanup ();
 		return;
 	}
@@ -2926,14 +2925,14 @@ release an additional\n\
 void
 ARDOUR_UI::flush_trash ()
 {
-	if (session == 0) {
+	if (_session == 0) {
 		/* shouldn't happen: menu item is insensitive */
 		return;
 	}
 
 	ARDOUR::CleanupReport rep;
 
-	if (session->cleanup_trash_sources (rep)) {
+	if (_session->cleanup_trash_sources (rep)) {
 		return;
 	}
 
@@ -2952,12 +2951,12 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 {
 	int count;
 
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
 	if (add_route_dialog == 0) {
-		add_route_dialog = new AddRouteDialog (*session);
+		add_route_dialog = new AddRouteDialog (_session);
 		if (float_window) {
 			add_route_dialog->set_transient_for (*float_window);
 		}
@@ -2987,7 +2986,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	string template_path = add_route_dialog->track_template();
 
 	if (!template_path.empty()) {
-		session->new_route_from_template (count, template_path);
+		_session->new_route_from_template (count, template_path);
 		return;
 	}
 
@@ -3001,7 +3000,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	AutoConnectOption oac = Config->get_output_auto_connect();
 
 	if (oac & AutoConnectMaster) {
-		output_chan = (session->master_out() ? session->master_out()->n_inputs().n_audio() : input_chan);
+		output_chan = (_session->master_out() ? _session->master_out()->n_inputs().n_audio() : input_chan);
 	} else {
 		output_chan = input_chan;
 	}
@@ -3031,8 +3030,8 @@ ARDOUR_UI::mixer_settings () const
 {
 	XMLNode* node = 0;
 
-	if (session) {
-		node = session->instant_xml(X_("Mixer"));
+	if (_session) {
+		node = _session->instant_xml(X_("Mixer"));
 	} else {
 		node = Config->instant_xml(X_("Mixer"));
 	}
@@ -3049,8 +3048,8 @@ ARDOUR_UI::editor_settings () const
 {
 	XMLNode* node = 0;
 
-	if (session) {
-		node = session->instant_xml(X_("Editor"));
+	if (_session) {
+		node = _session->instant_xml(X_("Editor"));
 	} else {
 		node = Config->instant_xml(X_("Editor"));
 	}
@@ -3098,17 +3097,17 @@ ARDOUR_UI::halt_on_xrun_message ()
 void
 ARDOUR_UI::xrun_handler(nframes_t where)
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::xrun_handler, where)
 
-	if (session && Config->get_create_xrun_marker() && session->actively_recording()) {
+	if (_session && Config->get_create_xrun_marker() && _session->actively_recording()) {
 		create_xrun_marker(where);
 	}
 
-	if (session && Config->get_stop_recording_on_xrun() && session->actively_recording()) {
+	if (_session && Config->get_stop_recording_on_xrun() && _session->actively_recording()) {
 		halt_on_xrun_message ();
 	}
 }
@@ -3353,15 +3352,15 @@ ARDOUR_UI::update_transport_clocks (nframes_t pos)
 void
 ARDOUR_UI::record_state_changed ()
 {
-	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::record_state_changed)
+	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::record_state_changed);
 
-	if (!session || !big_clock_window) {
+	if (!_session || !big_clock_window) {
 		/* why bother - the clock isn't visible */
 		return;
 	}
 
-	Session::RecordState const r = session->record_status ();
-	bool const h = session->have_rec_enabled_diskstream ();
+	Session::RecordState const r = _session->record_status ();
+	bool const h = _session->have_rec_enabled_diskstream ();
 
 	if (r == Session::Recording && h)  {
 		big_clock.set_widget_name ("BigClockRecording");
@@ -3373,8 +3372,8 @@ ARDOUR_UI::record_state_changed ()
 bool
 ARDOUR_UI::first_idle ()
 {
-	if (session) {
-		session->allow_auto_play (true);
+	if (_session) {
+		_session->allow_auto_play (true);
 	}
 
 	if (editor) {
@@ -3394,8 +3393,8 @@ ARDOUR_UI::store_clock_modes ()
 		node->add_property ((*x)->name().c_str(), enum_2_string ((*x)->mode()));
 	}
 
-	session->add_extra_xml (*node);
-	session->set_dirty ();
+	_session->add_extra_xml (*node);
+	_session->set_dirty ();
 }
 
 

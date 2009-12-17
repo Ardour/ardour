@@ -26,7 +26,6 @@
 #include "pbd/command.h"
 #include "pbd/stacktrace.h"
 #include "pbd/xml++.h"
-#include "pbd/shiva.h"
 
 #include <sigc++/slot.h>
 #include <typeinfo>
@@ -42,14 +41,18 @@ public:
 	MementoCommand(obj_T& a_object, XMLNode* a_before, XMLNode* a_after) 
 		: obj(a_object), before(a_before), after(a_after)
 	{
-		/* catch destruction of the object */
-		new PBD::PairedShiva< obj_T,MementoCommand<obj_T> > (obj, *this);
+		/* if the object dies, make sure that we die and that everyone knows about it */
+		obj_death_connection = obj.GoingAway.connect (boost::bind (&MementoCommand::object_died, this));
 	}
 
 	~MementoCommand () {
-		GoingAway(); /* EMIT SIGNAL */
+		drop_references ();
 		delete before;
 		delete after;
+	}
+
+	void object_died () {
+		delete this;
 	}
 
 	void operator() () {
@@ -94,6 +97,7 @@ protected:
 	obj_T&   obj;
 	XMLNode* before;
 	XMLNode* after;
+	boost::signals2::scoped_connection obj_death_connection;
 };
 
 #endif // __lib_pbd_memento_h__

@@ -58,7 +58,7 @@ using namespace ArdourCanvas;
 
 static const int32_t sync_mark_width = 9;
 
-sigc::signal<void,RegionView*> RegionView::RegionViewGoingAway;
+boost::signals2::signal<void(RegionView*)> RegionView::RegionViewGoingAway;
 
 RegionView::RegionView (ArdourCanvas::Group*              parent,
                         TimeAxisView&                     tv,

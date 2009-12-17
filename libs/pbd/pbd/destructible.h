@@ -20,26 +20,20 @@
 #ifndef __pbd_destructible_h__
 #define __pbd_destructible_h__
 
-#include <sigc++/signal.h>
+#include <boost/signals2.hpp>
 
 namespace PBD {
 
-/* be very very careful using this class. it does not inherit from sigc::trackable and thus
-   should only be used in multiple-inheritance situations involving another type
-   that does inherit from sigc::trackable (or sigc::trackable itself)
-*/
-
-class ThingWithGoingAway {
+class Destructible {
   public:
-	virtual ~ThingWithGoingAway () {}
-	sigc::signal<void> GoingAway;
-};
-
-class Destructible : public sigc::trackable, public ThingWithGoingAway {
-  public:
+        Destructible() : refs_dropped (false){}
 	virtual ~Destructible () {}
-	void drop_references () const { GoingAway(); }
+	
+	boost::signals2::signal<void ()> GoingAway;
+	void drop_references () { if (!refs_dropped) { GoingAway(); } refs_dropped = true; }
 
+  private:
+	bool refs_dropped;
 };
 
 }

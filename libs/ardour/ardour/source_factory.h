@@ -22,7 +22,6 @@
 
 #include <string>
 #include <stdint.h>
-#include <sigc++/sigc++.h>
 #include <boost/shared_ptr.hpp>
 
 #include "ardour/source.h"
@@ -38,7 +37,7 @@ class SourceFactory {
   public:
 	static void init ();
 
-	static sigc::signal<void,boost::shared_ptr<Source> > SourceCreated;
+	static boost::signals2::signal<void(boost::shared_ptr<Source>)> SourceCreated;
 
 	static boost::shared_ptr<Source> create (Session&, const XMLNode& node, bool async = false);
 	static boost::shared_ptr<Source> createSilent (Session&, const XMLNode& node,

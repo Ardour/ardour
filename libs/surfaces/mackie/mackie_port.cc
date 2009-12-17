@@ -29,7 +29,6 @@
 
 #include "midi++/types.h"
 #include "midi++/port.h"
-#include "sigc++/sigc++.h"
 #include "ardour/rc_configuration.h"
 
 #include "i18n.h"
@@ -95,7 +94,7 @@ void MackiePort::open()
 #ifdef PORT_DEBUG
 	cout << "MackiePort::open " << *this << endl;
 #endif
-	_sysex = port().input()->sysex.connect( ( mem_fun (*this, &MackiePort::handle_midi_sysex) ) );
+	_sysex = port().input()->sysex.connect (boost::bind (&MackiePort::handle_midi_sysex, this, _1, _2, _3));
 	
 	// make sure the device is connected
 	init();
@@ -301,7 +300,7 @@ void MackiePort::connect_any()
 #ifdef DEBUG
 		cout << "connect input parser " << port().input() << " to handle_midi_any" << endl;
 #endif
-		_any = port().input()->any.connect( mem_fun( *this, &MackiePort::handle_midi_any ) );
+		_any = port().input()->any.connect (boost::bind (&MackiePort::handle_midi_any, this, _1, _2, _3));
 #ifdef DEBUG
 		cout << "input parser any connections: " << port().input()->any.size() << endl;
 #endif
@@ -503,8 +502,9 @@ void MackiePort::handle_midi_any (MIDI::Parser &, MIDI::byte * raw_bytes, size_t
 				// first disconnect any previous timeouts
 				control.in_use_connection.disconnect();
 				
+#if 0 // BOOSTSIGNALS
 				// now connect a new timeout to call handle_control_timeout_event
-				sigc::slot<bool> timeout_slot = sigc::bind(
+				sigc::slot<bool> timeout_slot = sigc::bind (
 					mem_fun( *this, &MackiePort::handle_control_timeout_event )
 					, &control
 				);
@@ -512,7 +512,7 @@ void MackiePort::handle_midi_any (MIDI::Parser &, MIDI::byte * raw_bytes, size_t
 					timeout_slot
 					, control.in_use_timeout()
 				);
-				
+#endif				
 				// emit the control event
 				control_event( *this, control, state );
 				break;

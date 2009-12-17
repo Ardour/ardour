@@ -160,6 +160,7 @@ protected:
 
 private:
 	void region_going_away (RegionView *);
+	boost::signals2::scoped_connection death_connection;
 };
 
 

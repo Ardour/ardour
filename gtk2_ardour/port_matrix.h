@@ -28,8 +28,11 @@
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/notebook.h>
 #include <boost/shared_ptr.hpp>
+
 #include "ardour/bundle.h"
 #include "ardour/types.h"
+#include "ardour/session_handle.h"
+
 #include "port_group.h"
 #include "port_matrix_types.h"
 #include "i18n.h"
@@ -55,7 +58,7 @@ namespace Gtk {
 
 class PortMatrixBody;
 
-class PortMatrix : public Gtk::Table
+class PortMatrix : public Gtk::Table, public ARDOUR::SessionHandlePtr
 {
 public:
 	PortMatrix (Gtk::Window*, ARDOUR::Session *, ARDOUR::DataType);
@@ -160,7 +163,6 @@ protected:
 	    from left to right as you go from list 0 to list 1.  Hence subclasses which deal with
 	    inputs and outputs should put outputs in list 0 and inputs in list 1. */
 	PortGroupList _ports[2];
-	ARDOUR::Session* _session;
 
 private:
 
@@ -190,7 +192,7 @@ private:
 
 	/// port type that we are working with
 	ARDOUR::DataType _type;
-	std::vector<sigc::connection> _route_connections;
+	PBD::ScopedConnectionList _route_connections;
 
 	PortMatrixBody* _body;
 	Gtk::HScrollbar _hscroll;

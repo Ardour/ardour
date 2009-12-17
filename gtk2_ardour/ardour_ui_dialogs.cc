@@ -47,25 +47,40 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 void
-ARDOUR_UI::connect_to_session (Session *s)
+ARDOUR_UI::set_session (Session *s)
 {
-	session = s;
+	SessionHandlePtr::set_session (s);
 
-	session->Xrun.connect (sigc::mem_fun(*this, &ARDOUR_UI::xrun_handler));
-	session->RecordStateChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::record_state_changed));
+	if (location_ui) {
+		location_ui->set_session(s);
+	}
+
+	if (route_params) {
+		route_params->set_session (s);
+	}
+
+	primary_clock.set_session (s);
+	secondary_clock.set_session (s);
+	big_clock.set_session (s);
+	preroll_clock.set_session (s);
+	postroll_clock.set_session (s);
+	
+	if (!_session) {
+		return;
+	}
 
 	/* sensitize menu bar options that are now valid */
 
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, true);
-	ActionManager::set_sensitive (ActionManager::write_sensitive_actions, session->writable());
+	ActionManager::set_sensitive (ActionManager::write_sensitive_actions, _session->writable());
 
-	if (session->locations()->num_range_markers()) {
+	if (_session->locations()->num_range_markers()) {
 		ActionManager::set_sensitive (ActionManager::range_sensitive_actions, true);
 	} else {
 		ActionManager::set_sensitive (ActionManager::range_sensitive_actions, false);
 	}
 
-	if (!session->control_out()) {
+	if (!_session->control_out()) {
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("options"), X_("SoloViaBus"));
 		if (act) {
 			act->set_sensitive (false);
@@ -87,19 +102,9 @@ ARDOUR_UI::connect_to_session (Session *s)
 	ActionManager::set_sensitive (ActionManager::point_selection_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::playlist_selection_sensitive_actions, false);
 
-	session->locations()->added.connect (sigc::mem_fun (*this, &ARDOUR_UI::handle_locations_change));
-	session->locations()->removed.connect (sigc::mem_fun (*this, &ARDOUR_UI::handle_locations_change));
-
 	rec_button.set_sensitive (true);
 	shuttle_box.set_sensitive (true);
-
-	if (location_ui) {
-		location_ui->set_session(s);
-	}
-
-	if (route_params) {
-		route_params->set_session (s);
-	}
+	solo_alert_button.set_active (_session->soloing());
 
 	setup_session_options ();
 
@@ -108,30 +113,15 @@ ARDOUR_UI::connect_to_session (Session *s)
 	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::sync_blink));
 	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::audition_blink));
 
-	/* these are all need to be handled in an RT-safe and MT way, so don't
-	   do any GUI work, just queue it for handling by the GUI thread.
-	*/
+	_session_connections.add_connection (_session->Xrun.connect (sigc::mem_fun(*this, &ARDOUR_UI::xrun_handler)));
+	_session_connections.add_connection (_session->RecordStateChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::record_state_changed)));
+	_session_connections.add_connection (_session->locations()->added.connect (sigc::mem_fun (*this, &ARDOUR_UI::handle_locations_change)));
+	_session_connections.add_connection (_session->locations()->removed.connect (sigc::mem_fun (*this, &ARDOUR_UI::handle_locations_change)));
+	_session_connections.add_connection (_session->TransportStateChange.connect (sigc::mem_fun(*this, &ARDOUR_UI::map_transport_state)));
+	_session_connections.add_connection (_session->AuditionActive.connect (sigc::mem_fun(*this, &ARDOUR_UI::auditioning_changed)));
+	_session_connections.add_connection (_session->SoloActive.connect (sigc::mem_fun(*this, &ARDOUR_UI::soloing_changed)));
+	_session_connections.add_connection (_session->DirtyChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::update_autosave)));
 
-	session->TransportStateChange.connect (sigc::mem_fun(*this, &ARDOUR_UI::map_transport_state));
-
-	/* alert the user to these things happening */
-
-	session->AuditionActive.connect (sigc::mem_fun(*this, &ARDOUR_UI::auditioning_changed));
-	session->SoloActive.connect (sigc::mem_fun(*this, &ARDOUR_UI::soloing_changed));
-
-	solo_alert_button.set_active (session->soloing());
-
-	/* update autochange callback on dirty state changing */
-
-	session->DirtyChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::update_autosave));
-
-	/* can't be auditioning here */
-
-	primary_clock.set_session (s);
-	secondary_clock.set_session (s);
-	big_clock.set_session (s);
-	preroll_clock.set_session (s);
-	postroll_clock.set_session (s);
 
 	/* Clocks are on by default after we are connected to a session, so show that here.
 	*/
@@ -160,14 +150,14 @@ ARDOUR_UI::connect_to_session (Session *s)
 int
 ARDOUR_UI::unload_session (bool hide_stuff)
 {
-	if (session && session->dirty()) {
+	if (_session && _session->dirty()) {
 		switch (ask_about_saving_session (_("close"))) {
 		case -1:
 			// cancel
 			return 1;
 
 		case 1:
-			session->save_state ("");
+			_session->save_state ("");
 			break;
 		}
 	}
@@ -195,14 +185,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 
 	Blink.clear ();
 
-	primary_clock.set_session (0);
-	secondary_clock.set_session (0);
-	big_clock.set_session (0);
-	preroll_clock.set_session (0);
-	postroll_clock.set_session (0);
-
-	delete session;
-	session = 0;
+	delete _session;
 
 	update_buffer_load ();
 
@@ -231,7 +214,7 @@ ARDOUR_UI::toggle_rc_options_window ()
 	if (rc_option_editor == 0) {
 		rc_option_editor = new RCOptionEditor;
 		rc_option_editor->signal_unmap().connect(sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleRCOptionsEditor")));
-		rc_option_editor->set_session (session);
+		rc_option_editor->set_session (_session);
 	}
 
 	RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleRCOptionsEditor"));
@@ -251,7 +234,7 @@ void
 ARDOUR_UI::toggle_session_options_window ()
 {
 	if (session_option_editor == 0) {
-		session_option_editor = new SessionOptionEditor (session);
+		session_option_editor = new SessionOptionEditor (_session);
 		session_option_editor->signal_unmap().connect(sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleSessionOptionsEditor")));
 	}
 
@@ -273,7 +256,7 @@ ARDOUR_UI::create_location_ui ()
 {
 	if (location_ui == 0) {
 		location_ui = new LocationUIWindow ();
-		location_ui->set_session (session);
+		location_ui->set_session (_session);
 		location_ui->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleLocations")));
 	}
 	return 0;
@@ -340,7 +323,7 @@ void
 ARDOUR_UI::create_bundle_manager ()
 {
 	if (bundle_manager == 0) {
-		bundle_manager = new BundleManager (session);
+		bundle_manager = new BundleManager (_session);
 		bundle_manager->signal_unmap().connect (sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBundleManager")));
 	}
 }
@@ -368,7 +351,7 @@ ARDOUR_UI::create_route_params ()
 {
 	if (route_params == 0) {
 		route_params = new RouteParams_UI ();
-		route_params->set_session (session);
+		route_params->set_session (_session);
 		route_params->signal_unmap().connect (sigc::bind(sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleInspector")));
 	}
 	return 0;
@@ -397,8 +380,8 @@ ARDOUR_UI::toggle_route_params_window ()
 void
 ARDOUR_UI::handle_locations_change (Location *)
 {
-	if (session) {
-		if (session->locations()->num_range_markers()) {
+	if (_session) {
+		if (_session->locations()->num_range_markers()) {
 			ActionManager::set_sensitive (ActionManager::range_sensitive_actions, true);
 		} else {
 			ActionManager::set_sensitive (ActionManager::range_sensitive_actions, false);

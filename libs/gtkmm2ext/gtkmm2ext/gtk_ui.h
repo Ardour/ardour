@@ -123,6 +123,10 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 		Glib::signal_idle().connect (bind (slot (&UI::idle_delete<T>), obj));
 	}
 
+	template<class T> void delete_in_self (T *obj) {
+		call_slot (boost::bind (&UI::delete_in_self, this, obj));
+	}
+
 	Gdk::Color get_color (const std::string& prompt, bool& picked, const Gdk::Color *initial = 0);
 
 	/* starting is sent just before we enter the main loop,

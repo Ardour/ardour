@@ -39,7 +39,7 @@ using namespace Editing;
 using namespace Gnome;
 using namespace Canvas;
 
-sigc::signal<void,CrossfadeView*> CrossfadeView::GoingAway;
+boost::signals2::signal<void(CrossfadeView*)> CrossfadeView::GoingAway;
 
 CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 			      RouteTimeAxisView &tv,

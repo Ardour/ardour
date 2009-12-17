@@ -23,7 +23,6 @@
 
 #include <string>
 
-#include <sigc++/bind.h>
 
 #include "pbd/failed_constructor.h"
 #include "pbd/enumwriter.h"
@@ -57,7 +56,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-sigc::signal<void,Processor*> Processor::ProcessorCreated;
+boost::signals2::signal<void(Processor*)> Processor::ProcessorCreated;
 
 // Always saved as Processor, but may be IOProcessor or Send in legacy sessions
 const string Processor::state_node_name = "Processor";
@@ -269,7 +268,7 @@ Processor::configure_io (ChanCount in, ChanCount out)
 	_configured_output = out;
 	_configured = true;
 
-	ConfigurationChanged.emit (in, out);
+	ConfigurationChanged (in, out); /* EMIT SIGNAL */
 
 	return true;
 }

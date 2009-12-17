@@ -22,6 +22,8 @@
 #include <list>
 #include <cmath>
 
+#include "pbd/scoped_connections.h"
+
 #include "ardour/location.h"
 #include "enums.h"
 #include "simplerect.h"
@@ -53,7 +55,7 @@ class RegionSelection;
 class CrossfadeView;
 class Selection;
 
-class StreamView : public sigc::trackable
+class StreamView : public sigc::trackable, public PBD::ScopedConnectionList
 {
 public:
 	virtual ~StreamView ();
@@ -158,16 +160,16 @@ protected:
 	Gdk::Color region_color;      ///< Contained region color
 	uint32_t   stream_base_color; ///< Background color
 
-	std::vector<sigc::connection> playlist_connections;
-	sigc::connection         playlist_change_connection;
+	PBD::ScopedConnectionList playlist_connections;
+	boost::signals2::scoped_connection playlist_change_connection;
 
 	ARDOUR::layer_t _layers;
 	LayerDisplay    _layer_display;
 
 	double height;
 
-	std::list<sigc::connection> rec_data_ready_connections;
-	nframes_t                   last_rec_data_frame;
+	PBD::ScopedConnectionList rec_data_ready_connections;
+	nframes_t                 last_rec_data_frame;
 
 private:
 	void update_coverage_frames ();

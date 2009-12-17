@@ -53,7 +53,7 @@ class InternalSend : public Send
 	BufferSet* target;
 	boost::shared_ptr<Route> _send_to;
 	PBD::ID _send_to_id;
-	sigc::connection connect_c;
+	boost::signals2::scoped_connection connect_c;
 
 	void send_to_going_away ();
 	void send_to_name_changed ();

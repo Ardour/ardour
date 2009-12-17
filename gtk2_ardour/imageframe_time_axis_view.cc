@@ -214,7 +214,7 @@ ImageFrameTimeAxisView::add_imageframe_group(std::string group_id, void* src)
 
 		imageframe_groups.push_front(iftag) ;
 
-		iftag->GoingAway.connect(sigc::bind(sigc::mem_fun(*this,&ImageFrameTimeAxisView::remove_imageframe_group), iftag, (void*)this)) ;
+		scoped_connect (iftag->GoingAway, boost::bind (&ImageFrameTimeAxisView::remove_imageframe_group, this, iftag, (void*)this)) ;
 
 		 ImageFrameGroupAdded(iftag, src) ; /* EMIT_SIGNAL */
 	}
@@ -410,7 +410,7 @@ ImageFrameTimeAxisView::set_imageframe_duration_sec(double sec)
 {
 	if(selected_imageframe_group && selected_imageframe_view)
 	{
-		selected_imageframe_view->set_duration((nframes_t) (sec * _trackview.editor.current_session()->frame_rate()), this) ;
+		selected_imageframe_view->set_duration((nframes_t) (sec * _trackview.editor.session()->frame_rate()), this) ;
 	}
 }
 

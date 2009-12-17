@@ -74,13 +74,11 @@ GainMeter::setup_slider_pix ()
 	}
 }
 
-GainMeterBase::GainMeterBase (Session& s,
+GainMeterBase::GainMeterBase (Session* s,
 			      const Glib::RefPtr<Gdk::Pixbuf>& pix,
 			      bool horizontal,
 			      int fader_length)
-	: _session (s)
-	  // 0.781787 is the value needed for gain to be set to 0.
-	, gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1)
+	: gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1)  // 0.781787 is the value needed for gain to be set to 0.
 	, gain_automation_style_button ("")
 	, gain_automation_state_button ("")
 	, dpi_changed (false)
@@ -88,6 +86,8 @@ GainMeterBase::GainMeterBase (Session& s,
 
 {
 	using namespace Menu_Helpers;
+
+	set_session (s);
 
 	ignore_toggle = false;
 	meter_menu = 0;
@@ -170,6 +170,7 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 			     boost::shared_ptr<Amp> amp)
 {
  	connections.clear ();
+	model_connections.drop_connections ();
 
 	if (!pm && !amp) {
 		level_meter->set_meter (0);
@@ -224,14 +225,14 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 		connections.push_back (gain_automation_state_button.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false));
 
 		boost::shared_ptr<AutomationControl> gc = amp->gain_control();
-
-		connections.push_back (gc->alist()->automation_state_changed.connect (sigc::mem_fun(*this, &GainMeter::gain_automation_state_changed)));
-		connections.push_back (gc->alist()->automation_style_changed.connect (sigc::mem_fun(*this, &GainMeter::gain_automation_style_changed)));
-
+		
+		model_connections.add_connection (gc->alist()->automation_state_changed.connect (boost::bind (&GainMeter::gain_automation_state_changed, this)));
+		model_connections.add_connection (gc->alist()->automation_style_changed.connect (boost::bind (&GainMeter::gain_automation_style_changed, this)));
+		
 		gain_automation_state_changed ();
 	}
-
-	connections.push_back (amp->gain_control()->Changed.connect (sigc::mem_fun (*this, &GainMeterBase::gain_changed)));
+	
+	model_connections.add_connection (amp->gain_control()->Changed.connect (boost::bind (&GainMeterBase::gain_changed, this)));
 
 	gain_changed ();
 	show_gain ();
@@ -518,7 +519,7 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 
 					/* Primary+Tertiary-click applies change to all routes */
 
-					_session.foreach_route (this, &GainMeterBase::set_meter_point, next_meter_point (_route->meter_point()));
+					_session->foreach_route (this, &GainMeterBase::set_meter_point, next_meter_point (_route->meter_point()));
 
 
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
@@ -787,7 +788,7 @@ GainMeterBase::on_theme_changed()
 	style_changed = true;
 }
 
-GainMeter::GainMeter (Session& s, int fader_length)
+GainMeter::GainMeter (Session* s, int fader_length)
 	: GainMeterBase (s, slider, false, fader_length)
 {
 	gain_display_box.set_homogeneous (true);

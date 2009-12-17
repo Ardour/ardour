@@ -26,6 +26,7 @@
 #include "ardour/route.h"
 
 #include "route_processor_selection.h"
+#include "gui_thread.h"
 
 #include "i18n.h"
 
@@ -92,18 +93,28 @@ RouteRedirectSelection::add (boost::shared_ptr<Route> r)
 {
 	if (find (routes.begin(), routes.end(), r) == routes.end()) {
 		routes.push_back (r);
-
-		// XXX SHAREDPTR FIXME
-		// void (RouteRedirectSelection::*pmf)(Route*) = &RouteRedirectSelection::remove;
-		// r->GoingAway.connect (sigc::bind (sigc::mem_fun(*this, pmf), r));
-
+		r->GoingAway.connect (boost::bind (&RouteRedirectSelection::removed, this, boost::weak_ptr<Route>(r)));
 		RoutesChanged();
 	}
 }
 
 void
+RouteRedirectSelection::removed (boost::weak_ptr<Route> wr)
+{
+	boost::shared_ptr<Route> r (wr.lock());
+
+	if (!r) {
+		return;
+	}
+
+	remove (r);
+}
+
+void
 RouteRedirectSelection::remove (boost::shared_ptr<Route> r)
 {
+	ENSURE_GUI_THREAD (*this, &RouteRedirectSelection::remove, r);
+
 	list<boost::shared_ptr<Route> >::iterator i;
 	if ((i = find (routes.begin(), routes.end(), r)) != routes.end()) {
 		routes.erase (i);

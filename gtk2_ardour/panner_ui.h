@@ -33,6 +33,8 @@
 #include <gtkmm2ext/click_box.h>
 #include <gtkmm2ext/slider_controller.h>
 
+#include "ardour/session_handle.h"
+
 #include "enums.h"
 
 class Panner2d;
@@ -53,10 +55,10 @@ namespace Gtk {
 	class Menuitem;
 }
 
-class PannerUI : public Gtk::HBox
+class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
   public:
-	PannerUI (ARDOUR::Session&);
+	PannerUI (ARDOUR::Session*);
 	~PannerUI ();
 
 	virtual void set_panner (boost::shared_ptr<ARDOUR::Panner>);
@@ -80,8 +82,7 @@ class PannerUI : public Gtk::HBox
 	friend class MixerStrip;
 
 	boost::shared_ptr<ARDOUR::Panner> _panner;
-	ARDOUR::Session& _session;
-	std::vector<sigc::connection> connections;
+	PBD::ScopedConnectionList connections;
 
 	bool ignore_toggle;
 	bool in_pan_update;

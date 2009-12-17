@@ -54,7 +54,7 @@ class AutomationController;
 
 class AutomationTimeAxisView : public TimeAxisView {
   public:
-	AutomationTimeAxisView (ARDOUR::Session&,
+	AutomationTimeAxisView (ARDOUR::Session*,
 				boost::shared_ptr<ARDOUR::Route>,
 				boost::shared_ptr<ARDOUR::Automatable>,
 				boost::shared_ptr<ARDOUR::AutomationControl>,
@@ -151,7 +151,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void set_interpolation (ARDOUR::AutomationList::InterpolationStyle);
 	void interpolation_changed ();
 
-	sigc::connection automation_connection;
+	boost::signals2::scoped_connection automation_connection;
 
 	void update_extra_xml_shown (bool editor_shown);
 

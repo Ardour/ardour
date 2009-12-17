@@ -42,7 +42,7 @@ class Editor;
 class AddRouteDialog : public ArdourDialog
 {
   public:
-	AddRouteDialog (ARDOUR::Session &);
+	AddRouteDialog (ARDOUR::Session*);
 	~AddRouteDialog ();
 
 	bool track ();
@@ -58,7 +58,6 @@ class AddRouteDialog : public ArdourDialog
 	ARDOUR::RouteGroup* route_group ();
 
   private:
-	ARDOUR::Session& _session;
 	Gtk::Entry name_template_entry;
 	Gtk::ComboBoxText track_bus_combo;
 	Gtk::Adjustment routes_adjustment;

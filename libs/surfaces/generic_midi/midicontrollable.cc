@@ -27,7 +27,6 @@
 
 #include "midicontrollable.h"
 
-using namespace sigc;
 using namespace std;
 using namespace MIDI;
 using namespace PBD;
@@ -110,7 +109,7 @@ void
 MIDIControllable::learn_about_external_control ()
 {
 	drop_external_control ();
-	midi_learn_connection = _port.input()->any.connect (mem_fun (*this, &MIDIControllable::midi_receiver));
+	midi_learn_connection = _port.input()->any.connect (boost::bind (&MIDIControllable::midi_receiver, this, _1, _2, _3));
 }
 
 void
@@ -302,7 +301,7 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 	switch (ev) {
 	case MIDI::off:
 		midi_sense_connection[0] = p.channel_note_off[chn_i].connect
-			(mem_fun (*this, &MIDIControllable::midi_sense_note_off));
+			(boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
 
 		/* if this is a bistate, connect to noteOn as well,
 		   and we'll toggle back and forth between the two.
@@ -310,7 +309,7 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 
 		if (bistate) {
 			midi_sense_connection[1] = p.channel_note_on[chn_i].connect
-				(mem_fun (*this, &MIDIControllable::midi_sense_note_on));
+				(boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
 			connections = 2;
 		} else {
 			connections = 1;
@@ -320,20 +319,20 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 
 	case MIDI::on:
 		midi_sense_connection[0] = p.channel_note_on[chn_i].connect
-			(mem_fun (*this, &MIDIControllable::midi_sense_note_on));
+			(boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
 		if (bistate) {
 			midi_sense_connection[1] = p.channel_note_off[chn_i].connect
-				(mem_fun (*this, &MIDIControllable::midi_sense_note_off));
+				(boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
 			connections = 2;
 		} else {
 			connections = 1;
 		}
 		_control_description = "MIDI control: NoteOn";
 		break;
-
+		
 	case MIDI::controller:
 		midi_sense_connection[0] = p.channel_controller[chn_i].connect
-			(mem_fun (*this, &MIDIControllable::midi_sense_controller));
+			(boost::bind (&MIDIControllable::midi_sense_controller, this, _1, _2));
 		connections = 1;
 		snprintf (buf, sizeof (buf), "MIDI control: Controller %d", control_additional);
 		_control_description = buf;
@@ -342,8 +341,7 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 	case MIDI::program:
 		if (!bistate) {
 			midi_sense_connection[0] = p.channel_program_change[chn_i].connect
-				(mem_fun (*this,
-				       &MIDIControllable::midi_sense_program_change));
+				(boost::bind (&MIDIControllable::midi_sense_program_change, this, _1, _2));
 			connections = 1;
 			_control_description = "MIDI control: ProgramChange";
 		}
@@ -352,7 +350,7 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 	case MIDI::pitchbend:
 		if (!bistate) {
 			midi_sense_connection[0] = p.channel_pitchbend[chn_i].connect
-				(mem_fun (*this, &MIDIControllable::midi_sense_pitchbend));
+				(boost::bind (&MIDIControllable::midi_sense_pitchbend, this, _1, _2));
 			connections = 1;
 			_control_description = "MIDI control: Pitchbend";
 		}

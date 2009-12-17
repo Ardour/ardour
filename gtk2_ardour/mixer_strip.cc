@@ -73,12 +73,12 @@ sigc::signal<void,boost::shared_ptr<Route> > MixerStrip::SwitchIO;
 
 int MixerStrip::scrollbar_height = 0;
 
-MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, bool in_mixer)
+MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	: AxisView(sess)
 	, RouteUI (sess)
 	,_mixer(mx)
 	, _mixer_owned (in_mixer)
-	, processor_box (sess, sigc::mem_fun(*this, &MixerStrip::plugin_selector), mx.selection(), this, in_mixer)
+	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, in_mixer)
 	, gpm (sess, 250)
 	, panners (sess)
 	, _mono_button (_("Mono"))
@@ -99,7 +99,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, bool in_mixer)
 	}
 }
 
-MixerStrip::MixerStrip (Mixer_UI& mx, Session& sess, boost::shared_ptr<Route> rt, bool in_mixer)
+MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt, bool in_mixer)
 	: AxisView(sess)
 	, RouteUI (sess)
 	,_mixer(mx)
@@ -257,8 +257,8 @@ MixerStrip::init ()
 	_packed = false;
 	_embedded = false;
 
-	_session.engine().Stopped.connect (sigc::mem_fun(*this, &MixerStrip::engine_stopped));
-	_session.engine().Running.connect (sigc::mem_fun(*this, &MixerStrip::engine_running));
+	_session->engine().Stopped.connect (sigc::mem_fun(*this, &MixerStrip::engine_stopped));
+	_session->engine().Running.connect (sigc::mem_fun(*this, &MixerStrip::engine_running));
 
 	input_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::input_press), false);
 	output_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::output_press), false);
@@ -312,7 +312,7 @@ MixerStrip::init ()
 
 MixerStrip::~MixerStrip ()
 {
-	GoingAway(); /* EMIT_SIGNAL */
+	drop_references ();
 
 	delete input_selector;
 	delete output_selector;
@@ -363,10 +363,10 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 		boost::shared_ptr<AudioTrack> at = audio_track();
 
-		connections.push_back (at->FreezeChange.connect (sigc::mem_fun(*this, &MixerStrip::map_frozen)));
+		connections.add_connection (at->FreezeChange.connect (sigc::mem_fun(*this, &MixerStrip::map_frozen)));
 
 		button_table.attach (*rec_enable_button, 0, 2, 2, 3);
-		rec_enable_button->set_sensitive (_session.writable());
+		rec_enable_button->set_sensitive (_session->writable());
 		rec_enable_button->show();
 
 	} else if (!is_track()) {
@@ -412,31 +412,22 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 						   _("Click to Add/Edit Comments"):
 						   _route->comment());
 
-	connections.push_back (_route->meter_change.connect (
-			sigc::mem_fun(*this, &MixerStrip::meter_changed)));
-	connections.push_back (_route->input()->changed.connect (
-			sigc::mem_fun(*this, &MixerStrip::input_changed)));
-	connections.push_back (_route->output()->changed.connect (
-			sigc::mem_fun(*this, &MixerStrip::output_changed)));
-	connections.push_back (_route->route_group_changed.connect (
-			sigc::mem_fun(*this, &MixerStrip::route_group_changed)));
+	connections.add_connection (_route->meter_change.connect (sigc::mem_fun(*this, &MixerStrip::meter_changed)));
+	connections.add_connection (_route->input()->changed.connect (sigc::mem_fun(*this, &MixerStrip::input_changed)));
+	connections.add_connection (_route->output()->changed.connect (sigc::mem_fun(*this, &MixerStrip::output_changed)));
+	connections.add_connection (_route->route_group_changed.connect (sigc::mem_fun(*this, &MixerStrip::route_group_changed)));
 
 	if (_route->panner()) {
-		connections.push_back (_route->panner()->Changed.connect (
-			sigc::mem_fun(*this, &MixerStrip::connect_to_pan)));
+		connections.add_connection (_route->panner()->Changed.connect (sigc::mem_fun(*this, &MixerStrip::connect_to_pan)));
 	}
 
 	if (is_audio_track()) {
-		connections.push_back (audio_track()->DiskstreamChanged.connect (
-			sigc::mem_fun(*this, &MixerStrip::diskstream_changed)));
+		connections.add_connection (audio_track()->DiskstreamChanged.connect (sigc::mem_fun(*this, &MixerStrip::diskstream_changed)));
 	}
 
-	connections.push_back (_route->NameChanged.connect (
-			sigc::mem_fun(*this, &RouteUI::name_changed)));
-	connections.push_back (_route->comment_changed.connect (
-			sigc::mem_fun(*this, &MixerStrip::comment_changed)));
-	connections.push_back (_route->gui_changed.connect (
-			sigc::mem_fun(*this, &MixerStrip::route_gui_changed)));
+	connections.add_connection (_route->NameChanged.connect (sigc::mem_fun(*this, &RouteUI::name_changed)));
+	connections.add_connection (_route->comment_changed.connect (sigc::mem_fun(*this, &MixerStrip::comment_changed)));
+	connections.add_connection (_route->gui_changed.connect (sigc::mem_fun(*this, &MixerStrip::route_gui_changed)));
 
 	set_stuff_from_route ();
 
@@ -631,7 +622,7 @@ gint
 MixerStrip::output_press (GdkEventButton *ev)
 {
         using namespace Menu_Helpers;
-	if (!_session.engine().connected()) {
+	if (!_session->engine().connected()) {
 	        MessageDialog msg (_("Not connected to JACK - no I/O changes are possible"));
 		msg.run ();
 		return true;
@@ -655,7 +646,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 
 		ARDOUR::BundleList current = _route->output()->bundles_connected ();
 
-		boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
+		boost::shared_ptr<ARDOUR::BundleList> b = _session->bundles ();
 
 		/* give user bundles first chance at being in the menu */
 		
@@ -671,7 +662,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 			}
 		}
 		
-		boost::shared_ptr<ARDOUR::RouteList> routes = _session.get_routes ();
+		boost::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
 		for (ARDOUR::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 			maybe_add_bundle_to_output_menu ((*i)->input()->bundle(), current);
 		}
@@ -709,7 +700,7 @@ MixerStrip::edit_output_configuration ()
 			output = _route->output ();
 		}
 		
-		output_selector = new IOSelectorWindow (&_session, output);
+		output_selector = new IOSelectorWindow (_session, output);
 	}
 
 	if (output_selector->is_visible()) {
@@ -723,7 +714,7 @@ void
 MixerStrip::edit_input_configuration ()
 {
 	if (input_selector == 0) {
-		input_selector = new IOSelectorWindow (&_session, _route->input());
+		input_selector = new IOSelectorWindow (_session, _route->input());
 	}
 
 	if (input_selector->is_visible()) {
@@ -742,7 +733,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 	input_menu.set_name ("ArdourContextMenu");
 	citems.clear();
 
-	if (!_session.engine().connected()) {
+	if (!_session->engine().connected()) {
 	        MessageDialog msg (_("Not connected to JACK - no I/O changes are possible"));
 		msg.run ();
 		return true;
@@ -762,7 +753,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 
 		ARDOUR::BundleList current = _route->input()->bundles_connected ();
 
-		boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
+		boost::shared_ptr<ARDOUR::BundleList> b = _session->bundles ();
 
 		/* give user bundles first chance at being in the menu */
 		
@@ -778,7 +769,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 			}
 		}
 		
-		boost::shared_ptr<ARDOUR::RouteList> routes = _session.get_routes ();
+		boost::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
 		for (ARDOUR::RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 			maybe_add_bundle_to_input_menu ((*i)->output()->bundle(), current);
 		}
@@ -990,7 +981,7 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	uint32_t io_count;
 	uint32_t io_index;
 	Port *port;
-	vector<string> connections;
+	vector<string> port_connections;
 
 	uint32_t total_connection_count = 0;
 	uint32_t io_connection_count = 0;
@@ -1028,13 +1019,13 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 		} else {
 			port = route->output()->nth (io_index);
 		}
-
-		connections.clear ();
-		port->get_connections(connections);
+		
+		port_connections.clear ();
+		port->get_connections(port_connections);
 		io_connection_count = 0;
 
-		if (!connections.empty()) {
-			for (vector<string>::iterator i = connections.begin(); i != connections.end(); ++i) {
+		if (!port_connections.empty()) {
+			for (vector<string>::iterator i = port_connections.begin(); i != port_connections.end(); ++i) {
 				string& connection_name (*i);
 
 				if (io_connection_count == 0) {

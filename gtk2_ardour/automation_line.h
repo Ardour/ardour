@@ -52,7 +52,7 @@ namespace Gnome {
 	}
 }
 
-class AutomationLine : public sigc::trackable, public PBD::StatefulThingWithGoingAway
+class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 {
   public:
 	AutomationLine (const std::string& name, TimeAxisView&, ArdourCanvas::Group&,

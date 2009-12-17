@@ -39,7 +39,6 @@ ControlProtocolManager* ControlProtocolManager::_instance = 0;
 const string ControlProtocolManager::state_node_name = X_("ControlProtocols");
 
 ControlProtocolManager::ControlProtocolManager ()
-	: _session (0)
 {
 
 }
@@ -63,36 +62,42 @@ ControlProtocolManager::~ControlProtocolManager()
 }
 
 void
-ControlProtocolManager::set_session (Session& s)
+ControlProtocolManager::set_session (Session* s)
 {
-	_session = &s;
-	_session->GoingAway.connect (sigc::mem_fun (*this, &ControlProtocolManager::drop_session));
+	SessionHandlePtr::set_session (s);
 
-	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
-		if ((*i)->requested || (*i)->mandatory) {
-			instantiate (**i);
-			(*i)->requested = false;
+	if (_session) {
+		Glib::Mutex::Lock lm (protocols_lock);
 
-			if ((*i)->protocol && (*i)->state) {
-				(*i)->protocol->set_state (*(*i)->state, Stateful::loading_state_version);
+		for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
+			if ((*i)->requested || (*i)->mandatory) {
+				instantiate (**i);
+				(*i)->requested = false;
+				
+				if ((*i)->protocol && (*i)->state) {
+					(*i)->protocol->set_state (*(*i)->state, Stateful::loading_state_version);
+				}
 			}
 		}
 	}
 }
 
 void
-ControlProtocolManager::drop_session ()
+ControlProtocolManager::session_going_away()
 {
-	_session = 0;
+	SessionHandlePtr::session_going_away ();
 
 	{
 		Glib::Mutex::Lock lm (protocols_lock);
+
 		for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
 			delete *p;
 		}
+
 		control_protocols.clear ();
 
 		for (list<ControlProtocolInfo*>::iterator p = control_protocol_info.begin(); p != control_protocol_info.end(); ++p) {
+			// mark existing protocols as requested
 			// otherwise the ControlProtocol instances are not recreated in set_session
 			if ((*p)->protocol) {
 				(*p)->requested = true;
@@ -263,7 +268,7 @@ ControlProtocolManager::get_descriptor (string path)
 }
 
 void
-ControlProtocolManager::foreach_known_protocol (sigc::slot<void,const ControlProtocolInfo*> method)
+ControlProtocolManager::foreach_known_protocol (boost::function<void(const ControlProtocolInfo*)> method)
 {
 	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 		method (*i);

@@ -17,12 +17,18 @@
 
 */
 
-class EditorRoutes : public EditorComponent
+#ifndef __ardour_gtk_editor_route_h__
+#define __ardour_gtk_editor_route_h__
+
+#include "pbd/scoped_connections.h"
+#include "editor_component.h"
+
+class EditorRoutes : public EditorComponent, public PBD::ScopedConnectionList
 {
 public:
 	EditorRoutes (Editor *);
 
-	void connect_to_session (ARDOUR::Session *);
+	void set_session (ARDOUR::Session *);
 
 	Gtk::Widget& widget () {
 		return _scroller;
@@ -66,9 +72,9 @@ private:
 	void route_removed (TimeAxisView *);
 	void handle_gui_changes (std::string const &, void *);
 	void update_rec_display ();
-	void update_mute_display (void* /*src*/);
-	void update_solo_display (void* /*src*/);
-	void update_solo_isolate_display (void* /*src*/);
+	void update_mute_display ();
+	void update_solo_display ();
+	void update_solo_isolate_display ();
 	void set_all_tracks_visibility (bool);
 	void set_all_audio_visibility (int, bool);
 	void show_all_routes ();
@@ -126,3 +132,5 @@ private:
 	
 	Gtk::Menu* _menu;
 };
+
+#endif /* __ardour_gtk_editor_route_h__ */

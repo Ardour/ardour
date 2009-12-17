@@ -59,7 +59,7 @@ void
 Editor::export_audio ()
 {
 	ExportDialog dialog (*this);
-	dialog.set_session (session);
+	dialog.set_session (_session);
 	dialog.run();
 }
 
@@ -67,7 +67,7 @@ void
 Editor::export_selection ()
 {
 	ExportSelectionDialog dialog (*this);
-	dialog.set_session (session);
+	dialog.set_session (_session);
 	dialog.run();
 }
 
@@ -86,7 +86,7 @@ Editor::export_range ()
 
 	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
 		ExportRangeDialog dialog (*this, l->id().to_s());
-		dialog.set_session (session);
+		dialog.set_session (_session);
 		dialog.run();
 	}
 }
@@ -107,7 +107,7 @@ Editor::export_region ()
 		AudioTrack & track (dynamic_cast<AudioTrack &> (*rtv.route()));
 
 		ExportRegionDialog dialog (*this, region, track);
-		dialog.set_session (session);
+		dialog.set_session (_session);
 		dialog.run();
 
 	} catch (std::bad_cast & e) {
@@ -173,7 +173,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 	vector<boost::shared_ptr<AudioFileSource> > sources;
 	uint32_t nchans;
 
-	const string sound_directory = session->session_directory().sound_path().to_string();
+	const string sound_directory = _session->session_directory().sound_path().to_string();
 
 	nchans = region->n_channels();
 
@@ -214,9 +214,9 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 
 			try {
 				fs = boost::dynamic_pointer_cast<AudioFileSource> (
-						SourceFactory::createWritable (DataType::AUDIO, *session,
+						SourceFactory::createWritable (DataType::AUDIO, *_session,
 								path, true,
-								false, session->frame_rate()));
+								false, _session->frame_rate()));
 			}
 
 			catch (failed_constructor& err) {
@@ -323,7 +323,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 	string path;
 	vector<boost::shared_ptr<AudioFileSource> > sources;
 
-	const string sound_directory = session->session_directory().sound_path().to_string();
+	const string sound_directory = _session->session_directory().sound_path().to_string();
 
 	uint32_t channels = count.n_audio();
 
@@ -353,9 +353,9 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 
 		try {
 			fs = boost::dynamic_pointer_cast<AudioFileSource> (
-					SourceFactory::createWritable (DataType::AUDIO, *session,
+					SourceFactory::createWritable (DataType::AUDIO, *_session,
 							path, true,
-							false, session->frame_rate()));
+							false, _session->frame_rate()));
 		}
 
 		catch (failed_constructor& err) {

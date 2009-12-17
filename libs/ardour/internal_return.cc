@@ -27,20 +27,20 @@
 using namespace std;
 using namespace ARDOUR;
 
-sigc::signal<void,nframes_t> InternalReturn::CycleStart;
+boost::signals2::signal<void(nframes_t)> InternalReturn::CycleStart;
 
 InternalReturn::InternalReturn (Session& s)
 	: Return (s, true)
 	, user_count (0)
 {
-	CycleStart.connect (sigc::mem_fun (*this, &InternalReturn::cycle_start));
+	scoped_connect (CycleStart, boost::bind (&InternalReturn::cycle_start, this, _1));
 }
 
 InternalReturn::InternalReturn (Session& s, const XMLNode& node)
 	: Return (s, node, true)
 	, user_count (0)
 {
-	CycleStart.connect (sigc::mem_fun (*this, &InternalReturn::cycle_start));
+	scoped_connect (CycleStart, boost::bind (&InternalReturn::cycle_start, this, _1));
 }
 
 void

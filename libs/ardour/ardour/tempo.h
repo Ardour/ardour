@@ -30,7 +30,6 @@
 #include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
 
-#include <sigc++/signal.h>
 
 #include "ardour/ardour.h"
 
@@ -259,7 +258,7 @@ class TempoMap : public PBD::StatefulDestructible
 
 	nframes_t frame_rate () const { return _frame_rate; }
 
-	sigc::signal<void,ARDOUR::Change> StateChanged;
+	boost::signals2::signal<void(ARDOUR::Change)> StateChanged;
 
   private:
 	static Tempo    _default_tempo;

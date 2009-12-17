@@ -59,9 +59,10 @@ HasSampleFormat::add_sample_format (ExportFormatBase::SampleFormat format)
 
 	SampleFormatPtr ptr (new SampleFormatState (format, get_sample_format_name (format)));
 	sample_format_states.push_back (ptr);
-	ptr->SelectChanged.connect (sigc::bind (SampleFormatSelectChanged.make_slot(), WeakSampleFormatPtr (ptr)));
-	ptr->SelectChanged.connect (sigc::mem_fun (*this, &HasSampleFormat::update_sample_format_selection));
-	ptr->CompatibleChanged.connect (sigc::bind (SampleFormatCompatibleChanged.make_slot(), WeakSampleFormatPtr (ptr)));
+	scoped_connect (ptr->SelectChanged, boost::bind (&HasSampleFormat::update_sample_format_selection, this, _1));
+	// BOOST SIGNALS how to connect one signal to another
+	// scoped_connect (ptr->SelectChanged, boost::bind (SampleFormatSelectChanged, _1, WeakSampleFormatPtr (ptr));
+	// scoped_connect (ptr->CompatibleChanged, boost::bind (SampleFormatCompatibleChanged, _1, WeakSampleFormatPtr (ptr));
 }
 
 void
@@ -69,9 +70,10 @@ HasSampleFormat::add_dither_type (ExportFormatBase::DitherType type, Glib::ustri
 {
 	DitherTypePtr ptr (new DitherTypeState (type, name));
 	dither_type_states.push_back (ptr);
-	ptr->SelectChanged.connect (sigc::bind (DitherTypeSelectChanged.make_slot(), WeakDitherTypePtr (ptr)));
-	ptr->SelectChanged.connect (sigc::mem_fun (*this, &HasSampleFormat::update_dither_type_selection));
-	ptr->CompatibleChanged.connect (sigc::bind (DitherTypeCompatibleChanged.make_slot(), WeakDitherTypePtr (ptr)));
+	scoped_connect (ptr->SelectChanged, boost::bind (&HasSampleFormat::update_dither_type_selection, this, _1));
+	// BOOST SIGNALS how to connect one signal to another
+	// scoped_connect (ptr->SelectChanged, boost::bind (DitherTypeSelectChanged, _1, WeakDitherTypePtr (ptr));
+	// scoped_connect (ptr->CompatibleChanged, boost::bind (DitherTypeCompatibleChanged, _1, WeakDitherTypePtr (ptr));
 }
 
 HasSampleFormat::SampleFormatPtr

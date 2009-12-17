@@ -21,6 +21,7 @@
 #include <unistd.h>
 
 #include "pbd/stateful.h"
+#include "pbd/destructible.h"
 #include "pbd/filesystem.h"
 #include "pbd/xml++.h"
 #include "pbd/error.h"

@@ -31,7 +31,6 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 
-#include <sigc++/bind.h>
 
 #include "pbd/error.h"
 #include "pbd/basename.h"
@@ -69,8 +68,8 @@ using namespace PBD;
  */
 ARDOUR::nframes_t Diskstream::disk_io_chunk_frames = 1024 * 256;
 
-sigc::signal<void>                Diskstream::DiskOverrun;
-sigc::signal<void>                Diskstream::DiskUnderrun;
+boost::signals2::signal<void()>                Diskstream::DiskOverrun;
+boost::signals2::signal<void()>                Diskstream::DiskUnderrun;
 
 Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
 	: SessionObject(sess, name)
@@ -143,13 +142,13 @@ Diskstream::set_route (Route& r)
 	_io = _route->input();
 
 	ic_connection.disconnect();
-	ic_connection = _io->changed.connect (sigc::mem_fun (*this, &Diskstream::handle_input_change));
+	ic_connection = _io->changed.connect (boost::bind (&Diskstream::handle_input_change, this, _1, _2));
 
 	input_change_pending = ConfigurationChanged;
 	non_realtime_input_change ();
 	set_align_style_from_io ();
 
-	_route->GoingAway.connect (sigc::mem_fun (*this, &Diskstream::route_going_away));
+	scoped_connect (_route->GoingAway, boost::bind (&Diskstream::route_going_away, this));
 }
 
 void
@@ -327,9 +326,7 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 			return 0;
 		}
 
-		plmod_connection.disconnect ();
-		plgone_connection.disconnect ();
-		plregion_connection.disconnect ();
+		playlist_connections.drop_connections ();
 
 		if (_playlist) {
 			_playlist->release();
@@ -342,9 +339,9 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 			reset_write_sources (false);
 		}
 
-		plmod_connection = _playlist->Modified.connect (sigc::mem_fun (*this, &Diskstream::playlist_modified));
-		plgone_connection = _playlist->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &Diskstream::playlist_deleted), boost::weak_ptr<Playlist>(_playlist)));
-		plregion_connection = _playlist->RangesMoved.connect (sigc::mem_fun (*this, &Diskstream::playlist_ranges_moved));
+		playlist_connections.add_connection (_playlist->Modified.connect (boost::bind (&Diskstream::playlist_modified, this)));
+		playlist_connections.add_connection (_playlist->GoingAway.connect (boost::bind (&Diskstream::playlist_deleted, this, boost::weak_ptr<Playlist>(_playlist))));
+		playlist_connections.add_connection (_playlist->RangesMoved.connect (boost::bind (&Diskstream::playlist_ranges_moved, this, _1)));
 	}
 
 	/* don't do this if we've already asked for it *or* if we are setting up
@@ -457,12 +454,11 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<nframes_t> > const & 
 	}
 
 	/* move processor automation */
-	_route->foreach_processor (sigc::bind (sigc::mem_fun (*this, &Diskstream::move_processor_automation), movements_frames));
+	_route->foreach_processor (boost::bind (&Diskstream::move_processor_automation, this, _1, movements_frames));
 }
 
 void
-Diskstream::move_processor_automation (boost::weak_ptr<Processor> p,
-				       list< Evoral::RangeMove<nframes_t> > const & movements_frames)
+Diskstream::move_processor_automation (boost::weak_ptr<Processor> p, list< Evoral::RangeMove<nframes_t> > const & movements_frames)
 {
 	boost::shared_ptr<Processor> processor (p.lock ());
 	if (!processor) {

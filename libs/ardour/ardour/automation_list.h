@@ -24,7 +24,6 @@
 #include <list>
 #include <cmath>
 
-#include <sigc++/signal.h>
 #include <glibmm/thread.h>
 
 #include "pbd/undo.h"
@@ -57,11 +56,11 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 
 	void set_automation_state (AutoState);
 	AutoState automation_state() const { return _state; }
-	sigc::signal<void> automation_state_changed;
+	boost::signals2::signal<void()> automation_state_changed;
 
 	void set_automation_style (AutoStyle m);
 	AutoStyle automation_style() const { return _style; }
-	sigc::signal<void> automation_style_changed;
+	boost::signals2::signal<void()> automation_style_changed;
 
 	bool automation_playback() const {
 		return (_state & Play) || ((_state & Touch) && !_touching);
@@ -70,10 +69,10 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 		return (_state & Write) || ((_state & Touch) && _touching);
 	}
 
-	sigc::signal<void> StateChanged;
+	boost::signals2::signal<void()> StateChanged;
 
-	static sigc::signal<void, AutomationList*> AutomationListCreated;
-	mutable sigc::signal<void> Dirty;
+	static boost::signals2::signal<void(AutomationList*)> AutomationListCreated;
+	mutable boost::signals2::signal<void()> Dirty;
 
 	void start_touch ();
 	void stop_touch ();

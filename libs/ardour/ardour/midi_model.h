@@ -158,7 +158,7 @@ public:
 	XMLNode& get_state();
 	int set_state(const XMLNode&) { return 0; }
 
-	sigc::signal<void> ContentsChanged;
+	boost::signals2::signal<void()> ContentsChanged;
 
 	const MidiSource* midi_source() const { return _midi_source; }
 	void set_midi_source(MidiSource* source) { _midi_source = source; }

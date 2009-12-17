@@ -970,7 +970,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 	track_canvas->grab_focus();
 
-	if (session && session->actively_recording()) {
+	if (_session && _session->actively_recording()) {
 		return true;
 	}
 
@@ -1013,7 +1013,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	/* no action if we're recording */
 
-	if (session && session->actively_recording()) {
+	if (_session && _session->actively_recording()) {
 		return true;
 	}
 
@@ -1291,7 +1291,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				}
 			} else {
 				/* make sure we stop */
-				session->request_transport_speed (0.0);
+				_session->request_transport_speed (0.0);
 			}
 			break;
 
@@ -1681,8 +1681,8 @@ Editor::scrub ()
 
 	if (scrubbing_direction == 0) {
 		/* first move */
-		session->request_locate (_drag->current_pointer_frame(), false);
-		session->request_transport_speed (0.1);
+		_session->request_locate (_drag->current_pointer_frame(), false);
+		_session->request_transport_speed (0.1);
 		scrubbing_direction = 1;
 
 	} else {
@@ -1706,7 +1706,7 @@ Editor::scrub ()
 				scrub_reverse_distance = 0;
 
 				delta = 0.01 * (last_scrub_x - _drag->current_pointer_x());
-				session->request_transport_speed (session->transport_speed() - delta);
+				_session->request_transport_speed (_session->transport_speed() - delta);
 			}
 
 		} else {
@@ -1725,7 +1725,7 @@ Editor::scrub ()
 				scrub_reverse_distance = 0;
 
 				delta = 0.01 * (_drag->current_pointer_x() - last_scrub_x);
-				session->request_transport_speed (session->transport_speed() + delta);
+				_session->request_transport_speed (_session->transport_speed() + delta);
 			}
 		}
 
@@ -1737,11 +1737,11 @@ Editor::scrub ()
 
 			if (scrubbing_direction > 0) {
 				/* was forwards, go backwards */
-				session->request_transport_speed (-0.1);
+				_session->request_transport_speed (-0.1);
 				scrubbing_direction = -1;
 			} else {
 				/* was backwards, go forwards */
-				session->request_transport_speed (0.1);
+				_session->request_transport_speed (0.1);
 				scrubbing_direction = 1;
 			}
 
@@ -1777,7 +1777,7 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 		step_timeout.disconnect ();
 	}
 
-	if (session && session->actively_recording()) {
+	if (_session && _session->actively_recording()) {
 		/* Sorry. no dragging stuff around while we record */
 		return true;
 	}
@@ -1917,7 +1917,7 @@ Editor::show_verbose_time_cursor (nframes64_t frame, double offset, double xpos,
 	nframes64_t frame_rate;
 	float secs;
 
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 
@@ -1931,18 +1931,18 @@ Editor::show_verbose_time_cursor (nframes64_t frame, double offset, double xpos,
 
 	switch (m) {
 	case AudioClock::BBT:
-		session->bbt_time (frame, bbt);
+		_session->bbt_time (frame, bbt);
 		snprintf (buf, sizeof (buf), "%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32, bbt.bars, bbt.beats, bbt.ticks);
 		break;
 
 	case AudioClock::Timecode:
-		session->timecode_time (frame, timecode);
+		_session->timecode_time (frame, timecode);
 		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32, timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 		break;
 
 	case AudioClock::MinSec:
 		/* XXX this is copied from show_verbose_duration_cursor() */
-		frame_rate = session->frame_rate();
+		frame_rate = _session->frame_rate();
 		hours = frame / (frame_rate * 3600);
 		frame = frame % (frame_rate * 3600);
 		mins = frame / (frame_rate * 60);
@@ -1974,9 +1974,9 @@ Editor::show_verbose_duration_cursor (nframes64_t start, nframes64_t end, double
 	int hours, mins;
 	nframes64_t distance, frame_rate;
 	float secs;
-	Meter meter_at_start(session->tempo_map().meter_at(start));
+	Meter meter_at_start(_session->tempo_map().meter_at(start));
 
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 
@@ -1990,8 +1990,8 @@ Editor::show_verbose_duration_cursor (nframes64_t start, nframes64_t end, double
 
 	switch (m) {
 	case AudioClock::BBT:
-		session->bbt_time (start, sbbt);
-		session->bbt_time (end, ebbt);
+		_session->bbt_time (start, sbbt);
+		_session->bbt_time (end, ebbt);
 
 		/* subtract */
 		/* XXX this computation won't work well if the
@@ -2016,14 +2016,14 @@ Editor::show_verbose_duration_cursor (nframes64_t start, nframes64_t end, double
 		break;
 
 	case AudioClock::Timecode:
-		session->timecode_duration (end - start, timecode);
+		_session->timecode_duration (end - start, timecode);
 		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32, timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 		break;
 
 	case AudioClock::MinSec:
 		/* XXX this stuff should be elsewhere.. */
 		distance = end - start;
-		frame_rate = session->frame_rate();
+		frame_rate = _session->frame_rate();
 		hours = distance / (frame_rate * 3600);
 		distance = distance % (frame_rate * 3600);
 		mins = distance / (frame_rate * 60);
@@ -2255,7 +2255,7 @@ Editor::point_trim (GdkEvent* event)
 					(*i)->region()->trim_front (new_bound, this);
 
 					XMLNode &after = pl->get_state();
-					session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
+					_session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
 				}
 			}
 
@@ -2265,7 +2265,7 @@ Editor::point_trim (GdkEvent* event)
 				XMLNode &before = pl->get_state();
 				rv->region()->trim_front (new_bound, this);
 				XMLNode &after = pl->get_state();
-				session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
+				_session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
 			}
 		}
 
@@ -2284,7 +2284,7 @@ Editor::point_trim (GdkEvent* event)
 					XMLNode &before = pl->get_state();
 					(*i)->region()->trim_end (new_bound, this);
 					XMLNode &after = pl->get_state();
-					session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
+					_session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
 				}
 			}
 
@@ -2295,7 +2295,7 @@ Editor::point_trim (GdkEvent* event)
 				XMLNode &before = pl->get_state();
 				rv->region()->trim_end (new_bound, this);
 				XMLNode &after = pl->get_state();
-				session->add_command (new MementoCommand<Playlist>(*pl.get(), &before, &after));
+				_session->add_command (new MementoCommand<Playlist>(*pl.get(), &before, &after));
 			}
 		}
 
@@ -2418,7 +2418,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes64_t pos)
 	XMLNode &before = playlist->get_state();
 	playlist->add_region (RegionFactory::create (rv->region()), (nframes64_t) (pos * speed));
 	XMLNode &after = playlist->get_state();
-	session->add_command(new MementoCommand<Playlist>(*playlist.get(), &before, &after));
+	_session->add_command(new MementoCommand<Playlist>(*playlist.get(), &before, &after));
 
 	// playlist is frozen, so we have to update manually
 
@@ -2534,7 +2534,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 	XMLNode *before = &(playlist->get_state());
 	clicked_routeview->playlist()->add_region (region, selection->time[clicked_selection].start);
 	XMLNode *after = &(playlist->get_state());
-	session->add_command(new MementoCommand<Playlist>(*playlist, before, after));
+	_session->add_command(new MementoCommand<Playlist>(*playlist, before, after));
 
 	commit_reversible_command ();
 

@@ -54,16 +54,16 @@ PortMatrixRowLabels::compute_dimensions ()
 		PortGroup::BundleList const r = (*i)->bundles ();
 		for (PortGroup::BundleList::const_iterator j = r.begin(); j != r.end(); ++j) {
 
-			for (uint32_t k = 0; k < j->bundle->nchannels(); ++k) {
+			for (uint32_t k = 0; k < (*j)->bundle->nchannels(); ++k) {
 				cairo_text_extents_t ext;
-				cairo_text_extents (cr, j->bundle->channel_name(k).c_str(), &ext);
+				cairo_text_extents (cr, (*j)->bundle->channel_name(k).c_str(), &ext);
 				if (ext.width > _longest_port_name) {
 					_longest_port_name = ext.width;
 				}
 			}
 
 			cairo_text_extents_t ext;
-			cairo_text_extents (cr, j->bundle->name().c_str(), &ext);
+			cairo_text_extents (cr, (*j)->bundle->name().c_str(), &ext);
 			if (ext.width > _longest_bundle_name) {
 				_longest_bundle_name = ext.width;
 			}
@@ -107,12 +107,12 @@ PortMatrixRowLabels::render (cairo_t* cr)
 	
 	PortGroup::BundleList const & bundles = _matrix->visible_rows()->bundles ();
 	for (PortGroup::BundleList::const_iterator i = bundles.begin(); i != bundles.end(); ++i) {
-		render_bundle_name (cr, background_colour (), i->has_colour ? i->colour : get_a_bundle_colour (N), 0, y, i->bundle);
+		render_bundle_name (cr, background_colour (), (*i)->has_colour ? (*i)->colour : get_a_bundle_colour (N), 0, y, (*i)->bundle);
 
 		if (!_matrix->show_only_bundles()) {
-			for (uint32_t j = 0; j < i->bundle->nchannels(); ++j) {
-				Gdk::Color c = i->has_colour ? i->colour : get_a_bundle_colour (M);
-				render_channel_name (cr, background_colour (), c, 0, y, ARDOUR::BundleChannel (i->bundle, j));
+			for (uint32_t j = 0; j < (*i)->bundle->nchannels(); ++j) {
+				Gdk::Color c = (*i)->has_colour ? (*i)->colour : get_a_bundle_colour (M);
+				render_channel_name (cr, background_colour (), c, 0, y, ARDOUR::BundleChannel ((*i)->bundle, j));
 				y += grid_spacing();
 				++M;
 			}

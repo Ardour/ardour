@@ -18,7 +18,7 @@
 #ifndef surface_port_h
 #define surface_port_h
 
-#include <sigc++/signal.h>
+#include <boost/signals2.hpp>
 #include <glibmm/thread.h>
 
 #include "midi_byte_array.h"
@@ -34,7 +34,7 @@ namespace Mackie
 /**
 	Make a relationship between a midi port and a Mackie device.
 */
-class SurfacePort : public sigc::trackable
+class SurfacePort
 {
 public:
 	SurfacePort( MIDI::Port & port, int number );
@@ -64,19 +64,19 @@ public:
 	const MIDI::Port & port() const { return *_port; }
 	
 	// all control notofications are sent from here
-	sigc::signal<void, SurfacePort &, Control &, const ControlState &> control_event;
+	boost::signals2::signal<void(SurfacePort &, Control &, const ControlState &)> control_event;
 	
 	// emitted just before the port goes into initialisation
 	// where it tries to establish that its device is connected
-	sigc::signal<void> init_event;
+	boost::signals2::signal<void()> init_event;
 	
 	// emitted when the port completes initialisation successfully
-	sigc::signal<void> active_event;
+	boost::signals2::signal<void()> active_event;
 
 	// emitted when the port goes inactive (ie a read or write failed)
-	sigc::signal<void> inactive_event;
+	boost::signals2::signal<void()> inactive_event;
 	
-	// the port number - master is 0, extenders are 1,2,3,4
+	// the port number - master is 0(extenders are 1((,4
 	virtual int number() const { return _number; }
 	
 	// number of strips handled by this port. Usually 8.

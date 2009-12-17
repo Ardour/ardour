@@ -18,11 +18,11 @@
 #ifndef mackie_controls_h
 #define mackie_controls_h
 
-#include <sigc++/sigc++.h>
-
 #include <map>
 #include <vector>
 #include <string>
+
+#include <boost/signals2.hpp>
 
 #include "mackie_control_exception.h"
 
@@ -228,7 +228,7 @@ public:
 	virtual unsigned int in_use_timeout() { return _in_use_timeout; }
 
 	/// Keep track of the timeout so it can be updated with more incoming events
-	sigc::connection in_use_connection;
+	boost::signals2::scoped_connection in_use_connection;
 	
 private:
 	int _id;

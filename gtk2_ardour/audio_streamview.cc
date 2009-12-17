@@ -188,9 +188,9 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 
 	region_views.push_front (region_view);
 
-	/* catch regionview going away */
-	cerr << this << " connected to region " << r << endl;
-	r->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &AudioStreamView::remove_region_view), boost::weak_ptr<Region> (r)));
+	/* catch region going away */
+
+	scoped_connect (r->GoingAway, boost::bind (&AudioStreamView::remove_region_view, this, boost::weak_ptr<Region> (r)));
 
 	RegionViewAdded (region_view);
 
@@ -200,9 +200,9 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 void
 AudioStreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 {
-	cerr << this << " RRV entry\n";
+	ENSURE_GUI_THREAD (*this, &AudioStreamView::remove_region_view, weak_r);
 
-	ENSURE_GUI_THREAD (*this, &AudioStreamView::remove_region_view, weak_r)
+	cerr << "a region went way, it appears to be ours (" << this << ")\n";
 
 	boost::shared_ptr<Region> r (weak_r.lock());
 
@@ -210,9 +210,7 @@ AudioStreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 		return;
 	}
 
-	cerr << this << " RRV action for  " << r << endl;
-
-	if (!_trackview.session().deletion_in_progress()) {
+	if (!_trackview.session()->deletion_in_progress()) {
 
 		for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end();) {
 			CrossfadeViewList::iterator tmp;
@@ -286,9 +284,9 @@ AudioStreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 	StreamView::playlist_changed(ds);
 
 	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(ds->playlist());
+
 	if (apl) {
-		playlist_connections.push_back (apl->NewCrossfade.connect (
-				sigc::mem_fun (*this, &AudioStreamView::add_crossfade)));
+		playlist_connections.add_connection (apl->NewCrossfade.connect (boost::bind (&AudioStreamView::add_crossfade, this, _1)));
 	}
 }
 
@@ -349,7 +347,7 @@ AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
 	cv->set_valid (true);
 	crossfade->Invalidated.connect (sigc::mem_fun (*this, &AudioStreamView::remove_crossfade));
 	crossfade_views[cv->crossfade] = cv;
-	if (!_trackview.session().config.get_xfades_visible() || !crossfades_visible) {
+	if (!_trackview.session()->config.get_xfades_visible() || !crossfades_visible) {
 		cv->hide ();
 	}
 
@@ -462,12 +460,12 @@ AudioStreamView::setup_rec_box ()
 {
 	//cerr << _trackview.name() << " streamview SRB region_views.size() = " << region_views.size() << endl;
 
-	if (_trackview.session().transport_rolling()) {
+	if (_trackview.session()->transport_rolling()) {
 
 		// cerr << "\trolling\n";
 
 		if (!rec_active &&
-		    _trackview.session().record_status() == Session::Recording &&
+		    _trackview.session()->record_status() == Session::Recording &&
 		    _trackview.get_diskstream()->record_enabled()) {
 			if (_trackview.audio_track()->mode() == Normal && use_rec_regions && rec_regions.size() == rec_rects.size()) {
 
@@ -475,12 +473,7 @@ AudioStreamView::setup_rec_box ()
 
 				SourceList sources;
 
-				for (list<sigc::connection>::iterator prc = rec_data_ready_connections.begin();
-						prc != rec_data_ready_connections.end(); ++prc) {
-					(*prc).disconnect();
-				}
-				rec_data_ready_connections.clear();
-
+				rec_data_ready_connections.drop_connections ();
 				boost::shared_ptr<AudioDiskstream> ads = _trackview.audio_track()->audio_diskstream();
 
 				for (uint32_t n=0; n < ads->n_channels().n_audio(); ++n) {
@@ -488,9 +481,9 @@ AudioStreamView::setup_rec_box ()
 					if (src) {
 						sources.push_back (src);
 
-						rec_data_ready_connections.push_back (src->PeakRangeReady.connect (sigc::bind
-							(sigc::mem_fun (*this, &AudioStreamView::rec_peak_range_ready),
-							 boost::weak_ptr<Source>(src))));
+						rec_data_ready_connections.add_connection 
+							(src->PeakRangeReady.connect 
+							 (boost::bind (&AudioStreamView::rec_peak_range_ready, this, _1, _2, boost::weak_ptr<Source>(src))));
 					}
 				}
 
@@ -506,7 +499,7 @@ AudioStreamView::setup_rec_box ()
 						RegionFactory::create (sources, start, 1, "", 0, Region::DefaultFlags, false)));
 				assert(region);
 				region->block_property_changes ();
-				region->set_position (_trackview.session().transport_frame(), this);
+				region->set_position (_trackview.session()->transport_frame(), this);
 				rec_regions.push_back (make_pair(region, (RegionView*)0));
 			}
 
@@ -550,7 +543,7 @@ AudioStreamView::setup_rec_box ()
 
 			RecBoxInfo recbox;
 			recbox.rectangle = rec_rect;
-			recbox.start = _trackview.session().transport_frame();
+			recbox.start = _trackview.session()->transport_frame();
 			recbox.length = 0;
 
 			rec_rects.push_back (recbox);
@@ -562,7 +555,7 @@ AudioStreamView::setup_rec_box ()
 			rec_active = true;
 
 		} else if (rec_active &&
-			   (_trackview.session().record_status() != Session::Recording ||
+			   (_trackview.session()->record_status() != Session::Recording ||
 			    !_trackview.get_diskstream()->record_enabled())) {
 			screen_update_connection.disconnect();
 			rec_active = false;
@@ -577,13 +570,7 @@ AudioStreamView::setup_rec_box ()
 
 			/* disconnect rapid update */
 			screen_update_connection.disconnect();
-
-			for (list<sigc::connection>::iterator prc = rec_data_ready_connections.begin();
-					prc != rec_data_ready_connections.end(); ++prc) {
-				(*prc).disconnect();
-			}
-			rec_data_ready_connections.clear();
-
+			rec_data_ready_connections.drop_connections ();
 			rec_updating = false;
 			rec_active = false;
 

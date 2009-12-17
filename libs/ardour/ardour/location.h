@@ -26,7 +26,6 @@
 #include <map>
 
 #include <sys/types.h>
-#include <sigc++/signal.h>
 
 #include <glibmm/thread.h>
 
@@ -109,15 +108,15 @@ class Location : public PBD::StatefulDestructible
 	bool is_range_marker() const { return _flags & IsRangeMarker; }
 	bool matches (Flags f) const { return _flags & f; }
 
-	sigc::signal<void,Location*> name_changed;
-	sigc::signal<void,Location*> end_changed;
-	sigc::signal<void,Location*> start_changed;
+	boost::signals2::signal<void(Location*)> name_changed;
+	boost::signals2::signal<void(Location*)> end_changed;
+	boost::signals2::signal<void(Location*)> start_changed;
 
-	sigc::signal<void,Location*,void*> FlagsChanged;
+	boost::signals2::signal<void(Location*,void*)> FlagsChanged;
 
 	/* this is sent only when both start&end change at the same time */
 
-	sigc::signal<void,Location*> changed;
+	boost::signals2::signal<void(Location*)> changed;
 
 	/* CD Track / CD-Text info */
 
@@ -176,11 +175,11 @@ class Locations : public PBD::StatefulDestructible
 
 	void find_all_between (nframes64_t start, nframes64_t, LocationList&, Location::Flags);
 
-	sigc::signal<void,Location*> current_changed;
-	sigc::signal<void>           changed;
-	sigc::signal<void,Location*> added;
-	sigc::signal<void,Location*> removed;
-	sigc::signal<void,Change>    StateChanged;
+	boost::signals2::signal<void(Location*)> current_changed;
+	boost::signals2::signal<void()>           changed;
+	boost::signals2::signal<void(Location*)> added;
+	boost::signals2::signal<void(Location*)> removed;
+	boost::signals2::signal<void(Change)>    StateChanged;
 
 	template<class T> void apply (T& obj, void (T::*method)(LocationList&)) {
 		Glib::Mutex::Lock lm (lock);

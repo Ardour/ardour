@@ -33,8 +33,10 @@
 #include <gtkmm/treeview.h>
 
 #include "pbd/stateful.h"
+#include "pbd/scoped_connections.h"
 
 #include "ardour/ardour.h"
+#include "ardour/session_handle.h"
 
 #include "route_processor_selection.h"
 #include "enums.h"
@@ -42,7 +44,6 @@
 namespace ARDOUR {
 	class Route;
 	class RouteGroup;
-	class Session;
 	class AudioDiskstream;
 };
 
@@ -50,13 +51,13 @@ class MixerStrip;
 class PluginSelector;
 class MixerGroupTabs;
 
-class Mixer_UI : public Gtk::Window
+class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
 {
   public:
 	Mixer_UI ();
 	~Mixer_UI();
 
-	void connect_to_session (ARDOUR::Session *);
+	void set_session (ARDOUR::Session *);
 
 	PluginSelector* plugin_selector();
 
@@ -81,8 +82,6 @@ class Mixer_UI : public Gtk::Window
 	RouteRedirectSelection& selection() { return _selection; }
 
   private:
-	ARDOUR::Session         *session;
-
 	bool					_visible;
 
 	Gtk::HBox				global_hpacker;
@@ -146,7 +145,7 @@ class Mixer_UI : public Gtk::Window
 	gint start_updating ();
 	gint stop_updating ();
 
-	void disconnect_from_session ();
+	void session_going_away ();
 
 	sigc::connection fast_screen_update_connection;
 	void fast_update_strips ();

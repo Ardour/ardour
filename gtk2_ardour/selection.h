@@ -25,6 +25,8 @@
 
 #include <sigc++/signal.h>
 
+#include "pbd/scoped_connections.h"
+
 #include "time_selection.h"
 #include "region_selection.h"
 #include "track_selection.h"
@@ -57,7 +59,7 @@ namespace Evoral {
 
 /** The Selection class holds lists of selected items (tracks, regions, etc. etc.). */
 
-class Selection : public sigc::trackable
+class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 {
   public:
 	enum SelectionType {
@@ -86,7 +88,7 @@ class Selection : public sigc::trackable
 		clear();
 	}
 
-	Selection& operator= (const Selection& other);
+	// Selection& operator= (const Selection& other);
 
 	sigc::signal<void> RegionsChanged;
 	sigc::signal<void> TracksChanged;
@@ -185,9 +187,10 @@ class Selection : public sigc::trackable
 	template<class A> void foreach_region (void (ARDOUR::Region::*method)(A), A arg);
 
   private:
+	Selection (const Selection& other) {}
 	PublicEditor const * editor;
 	uint32_t next_time_id;
-
+	
 	void add (std::vector<AutomationSelectable*>&);
 };
 

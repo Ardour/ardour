@@ -24,7 +24,7 @@ class EditorRouteGroups : public EditorComponent
 public:
 	EditorRouteGroups (Editor *);
 
-	void connect_to_session (ARDOUR::Session *);
+	void set_session (ARDOUR::Session *);
 
 	Gtk::Widget& widget () {
 		return *_display_packer;

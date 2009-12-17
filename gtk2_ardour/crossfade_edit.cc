@@ -72,10 +72,9 @@ CrossfadeEditor::Half::Half ()
 {
 }
 
-CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, double my, double mxy)
+CrossfadeEditor::CrossfadeEditor (Session* s, boost::shared_ptr<Crossfade> xf, double my, double mxy)
 	: ArdourDialog (_("ardour: x-fade edit")),
 	  xfade (xf),
-	  session (s),
 	  clear_button (_("Clear")),
 	  revert_button (_("Reset")),
 	  audition_both_button (_("Fade")),
@@ -96,6 +95,8 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 	  select_in_button (_("Fade In")),
 	  select_out_button (_("Fade Out"))
 {
+	set_session (s);
+
 	set_wmclass (X_("ardour_automationedit"), "Ardour");
 	set_name ("CrossfadeEditWindow");
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -292,7 +293,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 
 	xfade->StateChanged.connect (sigc::mem_fun(*this, &CrossfadeEditor::xfade_changed));
 
-	session.AuditionActive.connect (sigc::mem_fun(*this, &CrossfadeEditor::audition_state_changed));
+	_session_connections.add_connection (_session->AuditionActive.connect (sigc::mem_fun(*this, &CrossfadeEditor::audition_state_changed)));
 	show_all_children();
 }
 
@@ -1129,7 +1130,7 @@ CrossfadeEditor::make_waves (boost::shared_ptr<AudioRegion> region, WhichFade wh
 
 		gdouble yoff = n * ht;
 
-		if (region->audio_source(n)->peaks_ready (sigc::bind (sigc::mem_fun(*this, &CrossfadeEditor::peaks_ready), region, which), peaks_ready_connection)) {
+		if (region->audio_source(n)->peaks_ready (boost::bind (&CrossfadeEditor::peaks_ready, this, boost::weak_ptr<AudioRegion>(region), which), peaks_ready_connection)) {
 			WaveView* waveview = new WaveView (*(canvas->root()));
 
 			waveview->property_data_src() = region.get();
@@ -1163,8 +1164,14 @@ CrossfadeEditor::make_waves (boost::shared_ptr<AudioRegion> region, WhichFade wh
 }
 
 void
-CrossfadeEditor::peaks_ready (boost::shared_ptr<AudioRegion> r, WhichFade which)
+CrossfadeEditor::peaks_ready (boost::weak_ptr<AudioRegion> wr, WhichFade which)
 {
+	boost::shared_ptr<AudioRegion> r (wr.lock());
+
+	if (!r) {
+		return;
+	}
+
 	/* this should never be called, because the peak files for an xfade
 	   will be ready by the time we want them. but our API forces us
 	   to provide this, so ..
@@ -1176,7 +1183,7 @@ CrossfadeEditor::peaks_ready (boost::shared_ptr<AudioRegion> r, WhichFade which)
 void
 CrossfadeEditor::audition (Audition which)
 {
-	AudioPlaylist& pl (session.the_auditioner()->prepare_playlist());
+	AudioPlaylist& pl (_session->the_auditioner()->prepare_playlist());
 	nframes_t preroll;
 	nframes_t postroll;
 	nframes_t left_start_offset;
@@ -1184,13 +1191,13 @@ CrossfadeEditor::audition (Audition which)
 	nframes_t left_length;
 
 	if (which != Right && preroll_button.get_active()) {
-		preroll = session.frame_rate() * 2;  //2 second hardcoded preroll for now
+		preroll = _session->frame_rate() * 2;  //2 second hardcoded preroll for now
 	} else {
 		preroll = 0;
 	}
 
 	if (which != Left && postroll_button.get_active()) {
-		postroll = session.frame_rate() * 2;  //2 second hardcoded postroll for now
+		postroll = _session->frame_rate() * 2;  //2 second hardcoded postroll for now
 	} else {
 		postroll = 0;
 	}
@@ -1220,9 +1227,9 @@ CrossfadeEditor::audition (Audition which)
 
 	//apply a 20ms declicking fade at the start and end of auditioning
 	left->set_fade_in_active(true);
-	left->set_fade_in_length(session.frame_rate() / 50);
+	left->set_fade_in_length(_session->frame_rate() / 50);
 	right->set_fade_out_active(true);
-	right->set_fade_out_length(session.frame_rate() / 50);
+	right->set_fade_out_length(_session->frame_rate() / 50);
 
 	pl.add_region (left, 0);
 	pl.add_region (right, 1 + preroll);
@@ -1236,7 +1243,7 @@ CrossfadeEditor::audition (Audition which)
 	/* there is only one ... */
 	pl.foreach_crossfade (sigc::mem_fun (*this, &CrossfadeEditor::setup));
 
-	session.audition_playlist ();
+	_session->audition_playlist ();
 }
 
 void
@@ -1251,7 +1258,7 @@ CrossfadeEditor::audition_left_dry ()
 	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->out(), xfade->out()->length() - xfade->length(), xfade->length(), "xfade left",
 													      0, Region::DefaultFlags, false)));
 
-	session.audition_region (left);
+	_session->audition_region (left);
 }
 
 void
@@ -1265,7 +1272,7 @@ CrossfadeEditor::audition_right_dry ()
 {
 	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->in(), 0, xfade->length(), "xfade in",
 													       0, Region::DefaultFlags, false)));
-	session.audition_region (right);
+	_session->audition_region (right);
 }
 
 void
@@ -1277,7 +1284,7 @@ CrossfadeEditor::audition_right ()
 void
 CrossfadeEditor::cancel_audition ()
 {
-	session.cancel_audition ();
+	_session->cancel_audition ();
 }
 
 void
@@ -1285,7 +1292,7 @@ CrossfadeEditor::audition_toggled ()
 {
 	bool x;
 
-	if ((x = audition_both_button.get_active ()) != session.is_auditioning()) {
+	if ((x = audition_both_button.get_active ()) != _session->is_auditioning()) {
 
 		if (x) {
 			audition_both ();
@@ -1300,7 +1307,7 @@ CrossfadeEditor::audition_right_toggled ()
 {
 	bool x;
 
-	if ((x = audition_right_button.get_active ()) != session.is_auditioning()) {
+	if ((x = audition_right_button.get_active ()) != _session->is_auditioning()) {
 
 		if (x) {
 			audition_right ();
@@ -1315,7 +1322,7 @@ CrossfadeEditor::audition_right_dry_toggled ()
 {
 	bool x;
 
-	if ((x = audition_right_dry_button.get_active ()) != session.is_auditioning()) {
+	if ((x = audition_right_dry_button.get_active ()) != _session->is_auditioning()) {
 
 		if (x) {
 			audition_right_dry ();
@@ -1330,7 +1337,7 @@ CrossfadeEditor::audition_left_toggled ()
 {
 	bool x;
 
-	if ((x = audition_left_button.get_active ()) != session.is_auditioning()) {
+	if ((x = audition_left_button.get_active ()) != _session->is_auditioning()) {
 
 		if (x) {
 			audition_left ();
@@ -1345,7 +1352,7 @@ CrossfadeEditor::audition_left_dry_toggled ()
 {
 	bool x;
 
-	if ((x = audition_left_dry_button.get_active ()) != session.is_auditioning()) {
+	if ((x = audition_left_dry_button.get_active ()) != _session->is_auditioning()) {
 
 		if (x) {
 			audition_left_dry ();
@@ -1382,7 +1389,7 @@ CrossfadeEditor::on_key_release_event (GdkEventKey* ev)
 		break;
 
 	case GDK_space:
-		if (session.is_auditioning()) {
+		if (_session->is_auditioning()) {
 			cancel_audition ();
 		} else {
 			audition_both_button.set_active (!audition_both_button.get_active());

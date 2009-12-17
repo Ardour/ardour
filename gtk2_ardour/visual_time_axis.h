@@ -145,7 +145,7 @@ class VisualTimeAxis : public TimeAxisView
 		 * @param sess the current session
 		 * @param canvas the parent canvas object
 		 */
-		VisualTimeAxis(const std::string & name, PublicEditor& ed, ARDOUR::Session& sess, ArdourCanvas::Canvas& canvas) ;
+		VisualTimeAxis(const std::string & name, PublicEditor& ed, ARDOUR::Session* sess, ArdourCanvas::Canvas& canvas) ;
 
 
 		//---------------------------------------------------------------------------------------//

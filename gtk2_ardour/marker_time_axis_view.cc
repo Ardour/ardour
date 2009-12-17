@@ -211,7 +211,7 @@ MarkerTimeAxisView::add_marker_view(ImageFrameView* ifv, std::string mark_type, 
 	ifv->add_marker_view_item(mv, src) ;
 	marker_view_list.push_front(mv) ;
 
-	mv->GoingAway.connect(sigc::bind (sigc::mem_fun(*this,&MarkerTimeAxisView::remove_marker_view), (void*)this)) ;
+	scoped_connect (mv->GoingAway, boost::bind (&MarkerTimeAxisView::remove_marker_view, this, (void*)this));
 
 	 MarkerViewAdded(mv,src) ; /* EMIT_SIGNAL */
 
@@ -337,7 +337,7 @@ MarkerTimeAxisView::set_marker_duration_sec(double sec)
 {
   if(get_selected_time_axis_item() != 0)
   {
-	  get_selected_time_axis_item()->set_duration((nframes_t) (sec * _trackview.editor.current_session()->frame_rate()), this) ;
+	  get_selected_time_axis_item()->set_duration((nframes_t) (sec * _trackview.editor.session()->frame_rate()), this) ;
   }
 }
 

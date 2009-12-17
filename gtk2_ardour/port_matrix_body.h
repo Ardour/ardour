@@ -104,7 +104,7 @@ private:
 	std::list<PortMatrixNode> _mouseover;
 	bool _ignore_component_size_changed;
 
-	std::list<sigc::connection> _bundle_connections;
+	PBD::ScopedConnectionList _bundle_connections;
 };
 
 #endif

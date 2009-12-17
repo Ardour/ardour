@@ -30,7 +30,7 @@ class MidiCutBuffer : public ARDOUR::AutomatableSequence<ARDOUR::MidiModel::Time
   public:
 	typedef ARDOUR::MidiModel::TimeType TimeType;
 
-	MidiCutBuffer (ARDOUR::Session&);
+	MidiCutBuffer (ARDOUR::Session*);
 	~MidiCutBuffer();
 
 	TimeType origin() const { return _origin; }

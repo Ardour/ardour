@@ -40,11 +40,13 @@ GroupTabs::GroupTabs (Editor* e)
 }
 
 void
-GroupTabs::connect_to_session (Session* s)
+GroupTabs::set_session (Session* s)
 {
-	EditorComponent::connect_to_session (s);
+	EditorComponent::set_session (s);
 
-	_session_connections.push_back (_session->RouteGroupChanged.connect (sigc::mem_fun (*this, &GroupTabs::set_dirty)));
+	if (_session) {
+		_session_connections.add_connection (_session->RouteGroupChanged.connect (boost::bind (&GroupTabs::set_dirty, this)));
+	}
 }
 
 

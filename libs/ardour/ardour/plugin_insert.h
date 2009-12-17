@@ -25,7 +25,6 @@
 
 #include <boost/weak_ptr.hpp>
 
-#include <sigc++/signal.h>
 #include "ardour/ardour.h"
 #include "ardour/types.h"
 #include "ardour/processor.h"
@@ -107,7 +106,7 @@ class PluginInsert : public Processor
 
 	void collect_signal_for_analysis(nframes_t nframes);
 
-	sigc::signal<void, BufferSet*, BufferSet*> AnalysisDataGathered;
+	boost::signals2::signal<void(BufferSet*, BufferSet*)> AnalysisDataGathered;
 
   private:
 	/* disallow copy construction */

@@ -43,19 +43,18 @@ namespace ARDOUR {
 
 class XMLNode;
 
-class ExportChannelSelector : public Gtk::HBox
+class ExportChannelSelector : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
   protected:
 	typedef boost::shared_ptr<ARDOUR::ExportChannelConfiguration> ChannelConfigPtr;
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ProfileManagerPtr;
 
-	ARDOUR::Session * session;
 	ProfileManagerPtr manager;
 
   public:
 	ExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager)
-	  : session (session)
-	  , manager (manager)
+		: SessionHandlePtr (session)
+		, manager (manager)
 	{}
 
 	virtual ~ExportChannelSelector () {}

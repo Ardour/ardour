@@ -250,7 +250,7 @@ AnalysisWindow::analyze_data (Gtk::Button */*button*/)
 		Sample *mixbuf = (Sample *) malloc(sizeof(Sample) * fft_graph.windowSize());
 		float  *gain   = (float *)  malloc(sizeof(float) * fft_graph.windowSize());
 
-		Selection s = PublicEditor::instance().get_selection();
+		Selection& s (PublicEditor::instance().get_selection());
 		TimeSelection ts = s.time;
 		RegionSelection ars = s.regions;
 

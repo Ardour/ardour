@@ -468,27 +468,27 @@ ARDOUR_UI::auditioning_changed (bool onoff)
 void
 ARDOUR_UI::audition_alert_toggle ()
 {
-	if (session) {
-		session->cancel_audition();
+	if (_session) {
+		_session->cancel_audition();
 	}
 }
 
 void
 ARDOUR_UI::solo_alert_toggle ()
 {
-	if (session) {
-		session->set_solo (session->get_routes(), !session->soloing());
+	if (_session) {
+		_session->set_solo (_session->get_routes(), !_session->soloing());
 	}
 }
 
 void
 ARDOUR_UI::solo_blink (bool onoff)
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 
-	if (session->soloing()) {
+	if (_session->soloing()) {
 		if (onoff) {
 			solo_alert_button.set_state (STATE_ACTIVE);
 		} else {
@@ -503,13 +503,13 @@ ARDOUR_UI::solo_blink (bool onoff)
 void
 ARDOUR_UI::sync_blink (bool onoff)
 {
-	if (session == 0 || !session->config.get_external_sync()) {
+	if (_session == 0 || !_session->config.get_external_sync()) {
 		/* internal sync */
 		sync_button.set_visual_state (0);
 		return;
 	}
 
-	if (!session->transport_locked()) {
+	if (!_session->transport_locked()) {
 		/* not locked, so blink on and off according to the onoff argument */
 
 		if (onoff) {
@@ -526,11 +526,11 @@ ARDOUR_UI::sync_blink (bool onoff)
 void
 ARDOUR_UI::audition_blink (bool onoff)
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return;
 	}
 
-	if (session->is_auditioning()) {
+	if (_session->is_auditioning()) {
 		if (onoff) {
 			auditioning_alert_button.set_state (STATE_ACTIVE);
 		} else {
@@ -602,7 +602,7 @@ ARDOUR_UI::set_shuttle_max_speed (float speed)
 gint
 ARDOUR_UI::shuttle_box_button_press (GdkEventButton* ev)
 {
-	if (!session) {
+	if (!_session) {
 		return true;
 	}
 
@@ -634,7 +634,7 @@ ARDOUR_UI::shuttle_box_button_press (GdkEventButton* ev)
 gint
 ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 {
-	if (!session) {
+	if (!_session) {
 		return true;
 	}
 
@@ -644,23 +644,23 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 		shuttle_grabbed = false;
 		shuttle_box.remove_modal_grab ();
 		if (Config->get_shuttle_behaviour() == Sprung) {
-			if (session->config.get_auto_play() || roll_button.get_visual_state()) {
+			if (_session->config.get_auto_play() || roll_button.get_visual_state()) {
 				shuttle_fract = SHUTTLE_FRACT_SPEED1;
-				session->request_transport_speed (1.0);
+				_session->request_transport_speed (1.0);
 				stop_button.set_visual_state (0);
 				roll_button.set_visual_state (1);
 			} else {
 				shuttle_fract = 0;
-				session->request_transport_speed (0.0);
+				_session->request_transport_speed (0.0);
 			}
 			shuttle_box.queue_draw ();
 		}
 		return true;
 
 	case 2:
-		if (session->transport_rolling()) {
+		if (_session->transport_rolling()) {
 			shuttle_fract = SHUTTLE_FRACT_SPEED1;
-			session->request_transport_speed (1.0);
+			_session->request_transport_speed (1.0);
 			stop_button.set_visual_state (0);
 			roll_button.set_visual_state (1);
 		} else {
@@ -683,7 +683,7 @@ ARDOUR_UI::shuttle_box_button_release (GdkEventButton* ev)
 gint
 ARDOUR_UI::shuttle_box_scroll (GdkEventScroll* ev)
 {
-	if (!session) {
+	if (!_session) {
 		return true;
 	}
 
@@ -708,7 +708,7 @@ ARDOUR_UI::shuttle_box_scroll (GdkEventScroll* ev)
 gint
 ARDOUR_UI::shuttle_box_motion (GdkEventMotion* ev)
 {
-	if (!session || !shuttle_grabbed) {
+	if (!_session || !shuttle_grabbed) {
 		return true;
 	}
 
@@ -763,7 +763,7 @@ ARDOUR_UI::use_shuttle_fract (bool force)
 		semitones = round (shuttle_fract / step);
 		speed = pow (2.0, (semitones / 12.0));
 
-		session->request_transport_speed (speed);
+		_session->request_transport_speed (speed);
 
 	} else {
 
@@ -778,7 +778,7 @@ ARDOUR_UI::use_shuttle_fract (bool force)
 			fract = -fract;
 		}
 
-		session->request_transport_speed (shuttle_max_speed * fract);
+		_session->request_transport_speed (shuttle_max_speed * fract);
 	}
 
 	shuttle_box.queue_draw ();
@@ -834,7 +834,7 @@ ARDOUR_UI::shuttle_style_changed ()
 void
 ARDOUR_UI::update_speed_display ()
 {
-	if (!session) {
+	if (!_session) {
 		if (last_speed_displayed != 0) {
 			speed_display_label.set_text (_("stop"));
 			last_speed_displayed = 0;
@@ -843,7 +843,7 @@ ARDOUR_UI::update_speed_display ()
 	}
 
 	char buf[32];
-	float x = session->transport_speed ();
+	float x = _session->transport_speed ();
 
 	if (x != last_speed_displayed) {
 

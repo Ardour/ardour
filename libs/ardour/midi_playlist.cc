@@ -23,7 +23,6 @@
 #include <iostream>
 
 #include <stdlib.h>
-#include <sigc++/bind.h>
 
 #include "evoral/EventList.hpp"
 
@@ -72,11 +71,9 @@ MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, nframes
 
 MidiPlaylist::~MidiPlaylist ()
 {
-	GoingAway (); /* EMIT SIGNAL */
+	drop_references ();
 
 	/* drop connections to signals */
-
-	notify_callbacks ();
 }
 
 template<typename Time>

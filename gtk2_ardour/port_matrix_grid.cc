@@ -81,7 +81,7 @@ PortMatrixGrid::render (cairo_t* cr)
 
 		if (!_matrix->show_only_bundles()) {
 			cairo_set_line_width (cr, thin_grid_line_width());
-			for (uint32_t j = 0; j < i->bundle->nchannels(); ++j) {
+			for (uint32_t j = 0; j < (*i)->bundle->nchannels(); ++j) {
 				x += grid_spacing ();
 				cairo_move_to (cr, x, 0);
 				cairo_line_to (cr, x, _height);
@@ -111,7 +111,7 @@ PortMatrixGrid::render (cairo_t* cr)
 
 		if (!_matrix->show_only_bundles()) {
 			cairo_set_line_width (cr, thin_grid_line_width());
-			for (uint32_t j = 0; j < i->bundle->nchannels(); ++j) {
+			for (uint32_t j = 0; j < (*i)->bundle->nchannels(); ++j) {
 				y += grid_spacing ();
 				cairo_move_to (cr, 0, y);
 				cairo_line_to (cr, _width, y);
@@ -140,8 +140,8 @@ PortMatrixGrid::render (cairo_t* cr)
 			for (PortGroup::BundleList::const_iterator j = row_bundles.begin(); j != row_bundles.end(); ++j) {
 
 				PortMatrixNode::State s = get_association (PortMatrixNode (
-										   ARDOUR::BundleChannel (i->bundle, 0),
-										   ARDOUR::BundleChannel (j->bundle, 0)
+										   ARDOUR::BundleChannel ((*i)->bundle, 0),
+										   ARDOUR::BundleChannel ((*j)->bundle, 0)
 										   ));
 				switch (s) {
 				case PortMatrixNode::ASSOCIATED:
@@ -169,14 +169,14 @@ PortMatrixGrid::render (cairo_t* cr)
 			for (PortGroup::BundleList::const_iterator j = row_bundles.begin(); j != row_bundles.end(); ++j) {
 
 				x = bx;
-				for (uint32_t k = 0; k < i->bundle->nchannels (); ++k) {
+				for (uint32_t k = 0; k < (*i)->bundle->nchannels (); ++k) {
 
 					y = by;
-					for (uint32_t l = 0; l < j->bundle->nchannels (); ++l) {
+					for (uint32_t l = 0; l < (*j)->bundle->nchannels (); ++l) {
 
 						ARDOUR::BundleChannel c[2];
-						c[_matrix->column_index()] = ARDOUR::BundleChannel (i->bundle, k);
-						c[_matrix->row_index()] = ARDOUR::BundleChannel (j->bundle, l);
+						c[_matrix->column_index()] = ARDOUR::BundleChannel ((*i)->bundle, k);
+						c[_matrix->row_index()] = ARDOUR::BundleChannel ((*j)->bundle, l);
 
 						PortMatrixNode::State const s = _matrix->get_state (c);
 
@@ -198,10 +198,10 @@ PortMatrixGrid::render (cairo_t* cr)
 					x += grid_spacing();
 				}
 
-				by += j->bundle->nchannels () * grid_spacing();
+				by += (*j)->bundle->nchannels () * grid_spacing();
 			}
 
-			bx += i->bundle->nchannels () * grid_spacing();
+			bx += (*i)->bundle->nchannels () * grid_spacing();
 		}
 	}
 }

@@ -22,6 +22,8 @@
 #define MIDI_PATCH_MANAGER_H_
 
 #include "midi++/midnam_patch.h"
+#include "pbd/scoped_connections.h"
+#include "ardour/session_handle.h"
 
 namespace ARDOUR {
 	class Session;
@@ -33,7 +35,7 @@ namespace MIDI
 namespace Name
 {
 
-class MidiPatchManager
+class MidiPatchManager : public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
 {
 	/// Singleton
 private:
@@ -55,7 +57,7 @@ public:
 		return *_manager;
 	}
 
-	void set_session (ARDOUR::Session&);
+	void set_session (ARDOUR::Session*);
 
 	boost::shared_ptr<MIDINameDocument> document_by_model(std::string model_name)
 		{ return _documents[model_name]; }
@@ -75,7 +77,6 @@ public:
 			return boost::shared_ptr<ChannelNameSet>();
 		}
 	}
-
 
 	boost::shared_ptr<Patch> find_patch(
 			std::string model,
@@ -133,10 +134,9 @@ public:
 	const MasterDeviceNames::Models& all_models() const { return _all_models; }
 
 private:
-	void drop_session();
+	void session_going_away();
 	void refresh();
 
-	ARDOUR::Session*                        _session;
 	MidiNameDocuments                       _documents;
 	MIDINameDocument::MasterDeviceNamesList _master_devices_by_model;
 	MasterDeviceNames::Models               _all_models;
@@ -145,4 +145,5 @@ private:
 } // namespace Name
 
 } // namespace MIDI
+
 #endif /* MIDI_PATCH_MANAGER_H_ */

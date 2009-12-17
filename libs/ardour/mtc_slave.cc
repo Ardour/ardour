@@ -52,6 +52,7 @@ const int MTC_Slave::frame_tolerance = 2;
 
 MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 	: session (s)
+	, port_connections (0)
 {
 	can_notify_on_unknown_rate = true;
 	did_reset_tc_format = false;
@@ -70,9 +71,12 @@ MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 
 MTC_Slave::~MTC_Slave()
 {
+	delete port_connections;
+
 	if (did_reset_tc_format) {
 		session.config.set_timecode_format (saved_tc_format);
 	}
+
 	delete pic;
 	delete [] speed_accumulator;
 }
@@ -87,15 +91,14 @@ MTC_Slave::give_slave_full_control_over_transport_speed() const
 void
 MTC_Slave::rebind (MIDI::Port& p)
 {
-	for (vector<sigc::connection>::iterator i = connections.begin(); i != connections.end(); ++i) {
-		(*i).disconnect ();
-	}
-
+	delete port_connections;
+	port_connections = new ScopedConnectionList;
+	
 	port = &p;
-
-	connections.push_back (port->input()->mtc_time.connect (sigc::mem_fun (*this, &MTC_Slave::update_mtc_time)));
-	connections.push_back (port->input()->mtc_qtr.connect (sigc::mem_fun (*this, &MTC_Slave::update_mtc_qtr)));
-	connections.push_back (port->input()->mtc_status.connect (sigc::mem_fun (*this, &MTC_Slave::update_mtc_status)));
+	
+	port_connections->add_connection (port->input()->mtc_time.connect ( boost::bind (&MTC_Slave::update_mtc_time, this, _1, _2, _3)));
+	port_connections->add_connection (port->input()->mtc_qtr.connect (boost::bind (&MTC_Slave::update_mtc_qtr, this, _1, _2, _3)));
+	port_connections->add_connection (port->input()->mtc_status.connect (boost::bind (&MTC_Slave::update_mtc_status, this, _1)));
 }
 
 void

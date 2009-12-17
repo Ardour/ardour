@@ -72,7 +72,7 @@ Auditioner::Auditioner (Session& s)
 	_main_outs->allow_pan_reset ();
 	_main_outs->reset_panner ();
 
-	_output->changed.connect (sigc::mem_fun (*this, &Auditioner::output_changed));
+	scoped_connect (_output->changed, boost::bind (&Auditioner::output_changed, this, _1, _2));
 
 	the_region.reset ((AudioRegion*) 0);
 	g_atomic_int_set (&_active, 0);

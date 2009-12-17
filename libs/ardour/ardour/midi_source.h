@@ -22,7 +22,6 @@
 
 #include <string>
 #include <time.h>
-#include <sigc++/signal.h>
 #include <glibmm/thread.h>
 #include "pbd/stateful.h"
 #include "pbd/xml++.h"
@@ -87,10 +86,10 @@ class MidiSource : virtual public Source
 	uint32_t read_data_count()  const { return _read_data_count; }
 	uint32_t write_data_count() const { return _write_data_count; }
 
-	static sigc::signal<void,MidiSource*> MidiSourceCreated;
+	static boost::signals2::signal<void(MidiSource*)> MidiSourceCreated;
 
 	// Signal a range of recorded data is available for reading from model()
-	mutable sigc::signal<void,sframes_t,nframes_t> ViewDataRangeReady;
+	mutable boost::signals2::signal<void(sframes_t,nframes_t)> ViewDataRangeReady;
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);

@@ -23,11 +23,11 @@
 #include <string>
 #include <list>
 
-#include <sigc++/sigc++.h>
 
 #include <glibmm/thread.h>
 
 #include "pbd/stateful.h"
+#include "ardour/session_handle.h"
 
 namespace ARDOUR {
 
@@ -49,16 +49,16 @@ struct ControlProtocolInfo {
     ~ControlProtocolInfo() { if (state) { delete state; } }
 };
 
- class ControlProtocolManager : public sigc::trackable, public PBD::Stateful
+class ControlProtocolManager : public PBD::Stateful, public ARDOUR::SessionHandlePtr
 {
   public:
 	~ControlProtocolManager ();
 
 	static ControlProtocolManager& instance();
 
-	void set_session (Session&);
+	void set_session (Session*);
 	void discover_control_protocols ();
-	void foreach_known_protocol (sigc::slot<void,const ControlProtocolInfo*>);
+	void foreach_known_protocol (boost::function<void(const ControlProtocolInfo*)>);
 	void load_mandatory_protocols ();
 
 	ControlProtocol* instantiate (ControlProtocolInfo&);
@@ -77,11 +77,10 @@ struct ControlProtocolInfo {
 	ControlProtocolManager ();
 	static ControlProtocolManager* _instance;
 
-	Session* _session;
 	Glib::Mutex protocols_lock;
 	std::list<ControlProtocol*>    control_protocols;
 
-	void drop_session ();
+	void session_going_away ();
 
 	int control_protocol_discover (std::string path);
 	ControlProtocolDescriptor* get_descriptor (std::string path);

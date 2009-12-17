@@ -65,9 +65,9 @@ void
 ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 {
 	BootMessage (_("Setup Editor"));
-	editor->connect_to_session (s);
+	editor->set_session (s);
 	BootMessage (_("Setup Mixer"));
-	mixer->connect_to_session (s);
+	mixer->set_session (s);
 
 	/* its safe to do this now */
 

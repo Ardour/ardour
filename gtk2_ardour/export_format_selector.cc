@@ -65,7 +65,8 @@ ExportFormatSelector::~ExportFormatSelector ()
 void
 ExportFormatSelector::set_state (ARDOUR::ExportProfileManager::FormatStatePtr const state_, ARDOUR::Session * session_)
 {
-	session = session_;
+	SessionHandlePtr::set_session (session_);
+
 	state = state_;
 
 	update_format_list ();
@@ -141,7 +142,7 @@ int
 ExportFormatSelector::open_edit_dialog (bool new_dialog)
 {
 	ExportFormatDialog dialog (state->format, new_dialog);
-	dialog.set_session (session);
+	dialog.set_session (_session);
 	Gtk::ResponseType response = (Gtk::ResponseType) dialog.run();
 	if (response == Gtk::RESPONSE_APPLY) {
 		update_format_description ();

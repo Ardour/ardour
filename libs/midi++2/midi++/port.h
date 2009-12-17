@@ -22,7 +22,7 @@
 #include <string>
 #include <iostream>
 
-#include <sigc++/sigc++.h>
+#include <boost/signals2.hpp>
 #include "pbd/xml++.h"
 
 #include "midi++/types.h"
@@ -33,7 +33,7 @@ namespace MIDI {
 class Channel;
 class PortRequest;
 
-class Port : public sigc::trackable {
+class Port {
   public:
 	enum Type {
 		Unknown,
@@ -168,7 +168,6 @@ class Port : public sigc::trackable {
 	int              _mode;
 	size_t           _number;
 	Channel          *_channel[16];
-	sigc::connection thru_connection;
 	unsigned int     bytes_written;
 	unsigned int     bytes_read;
 	Parser           *input_parser;

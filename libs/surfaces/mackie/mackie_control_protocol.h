@@ -335,12 +335,12 @@ class MackieControlProtocol
   
 	/// Protects set_active, and allows waiting on the poll thread
 	Glib::Cond update_cond;
-
-	// because sigc::trackable doesn't seem to be working
-	std::vector<sigc::connection> _connections;
-	std::back_insert_iterator<std::vector<sigc::connection> > connections_back;
-
-   /// The representation of the physical controls on the surface.
+	
+	PBD::ScopedConnectionList session_connections;
+	PBD::ScopedConnectionList port_connections;
+	PBD::ScopedConnectionList route_connections;
+	
+	/// The representation of the physical controls on the surface.
   	Mackie::Surface * _surface;
 	
 	/// If a port is opened or closed, this will be

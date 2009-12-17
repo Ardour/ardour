@@ -25,7 +25,6 @@
 #include <string>
 #include <dlfcn.h>
 
-#include <sigc++/signal.h>
 
 #include "pbd/stateful.h"
 

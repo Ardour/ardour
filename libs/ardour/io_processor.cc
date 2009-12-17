@@ -24,7 +24,6 @@
 #include <unistd.h>
 #include <sstream>
 
-#include <sigc++/bind.h>
 
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
@@ -89,7 +88,6 @@ IOProcessor::IOProcessor (Session& s, boost::shared_ptr<IO> in, boost::shared_pt
 
 IOProcessor::~IOProcessor ()
 {
-	notify_callbacks ();
 }
 
 void

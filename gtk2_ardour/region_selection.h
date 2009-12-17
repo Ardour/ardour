@@ -21,7 +21,9 @@
 
 #include <set>
 #include <list>
-#include <sigc++/signal.h>
+
+#include <boost/signals2.hpp>
+
 #include "ardour/types.h"
 
 class RegionView;
@@ -29,7 +31,7 @@ class TimeAxisView;
 
 /** Class to represent list of selected regions.
  */
-class RegionSelection : public std::list<RegionView*>, public sigc::trackable
+class RegionSelection : public std::list<RegionView*>
 {
   public:
 	RegionSelection();
@@ -69,6 +71,7 @@ class RegionSelection : public std::list<RegionView*>, public sigc::trackable
 	nframes_t _current_end; ///< end position for the selection
 
 	std::list<RegionView *> _bylayer; ///< list of regions sorted by layer
+	boost::signals2::scoped_connection death_connection;
 };
 
 #endif /* __ardour_gtk_region_selection_h__ */

@@ -22,7 +22,6 @@
 
 #include <string>
 #include <boost/shared_ptr.hpp>
-#include <sigc++/signal.h>
 
 #include <glibmm/thread.h>
 
@@ -68,8 +67,8 @@ class IOProcessor : public Processor
 
 	virtual bool feeds (boost::shared_ptr<Route> other) const;
 
-	sigc::signal<void,IOProcessor*,bool>     AutomationPlaybackChanged;
-	sigc::signal<void,IOProcessor*,uint32_t> AutomationChanged;
+	boost::signals2::signal<void(IOProcessor*,bool)>     AutomationPlaybackChanged;
+	boost::signals2::signal<void(IOProcessor*,uint32_t)> AutomationChanged;
 
 	XMLNode& state (bool full_state);
 	int set_state (const XMLNode&, int version);

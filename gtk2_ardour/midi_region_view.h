@@ -24,6 +24,9 @@
 
 #include <libgnomecanvasmm.h>
 #include <libgnomecanvasmm/polygon.h>
+
+#include <boost/signals2.hpp>
+
 #include "ardour/midi_track.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_model.h"
@@ -386,7 +389,7 @@ class MidiRegionView : public RegionView
 	std::vector<NoteResizeData *> _resize_data;
 
 	/* connection used to connect to model's ContentChanged signal */
-	sigc::connection content_connection;
+	boost::signals2::scoped_connection content_connection;
 
 	ArdourCanvas::CanvasNoteEvent* find_canvas_note (boost::shared_ptr<NoteType>);
 	Events::iterator _optimization_iterator;

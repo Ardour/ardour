@@ -22,7 +22,6 @@
 #include <cassert>
 #include <algorithm>
 
-#include <sigc++/bind.h>
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
@@ -64,7 +63,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 uint32_t Route::order_key_cnt = 0;
-sigc::signal<void, string const &> Route::SyncOrderKeys;
+boost::signals2::signal<void(string const&)> Route::SyncOrderKeys;
 
 Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	: SessionObject (sess, name)
@@ -94,7 +93,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 
 	/* now that we have _meter, its safe to connect to this */
 
-	_meter_connection = Metering::connect (sigc::mem_fun (*this, &Route::meter));
+	scoped_connect (Metering::Meter, (boost::bind (&Route::meter, this)));
 }
 
 Route::Route (Session& sess, const XMLNode& node, DataType default_type)
@@ -110,7 +109,7 @@ Route::Route (Session& sess, const XMLNode& node, DataType default_type)
 
 	/* now that we have _meter, its safe to connect to this */
 
-	_meter_connection = Metering::connect (sigc::mem_fun (*this, &Route::meter));
+	scoped_connect (Metering::Meter, (boost::bind (&Route::meter, this)));
 }
 
 void
@@ -148,8 +147,8 @@ Route::init ()
 	_input.reset (new IO (_session, _name, IO::Input, _default_type));
 	_output.reset (new IO (_session, _name, IO::Output, _default_type));
 
-	_input->changed.connect (sigc::mem_fun (this, &Route::input_change_handler));
-	_output->changed.connect (sigc::mem_fun (this, &Route::output_change_handler));
+	scoped_connect (_input->changed, boost::bind (&Route::input_change_handler, this, _1, _2));
+	scoped_connect (_output->changed, boost::bind (&Route::output_change_handler, this, _1, _2));
 
 	/* add amp processor  */
 
@@ -160,7 +159,6 @@ Route::init ()
 Route::~Route ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("route %1 destructor\n", _name));
-	Metering::disconnect (_meter_connection);
 
 	/* don't use clear_processors here, as it depends on the session which may
 	   be half-destroyed by now */
@@ -794,7 +792,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 			// XXX: do we want to emit the signal here ? change call order.
 			processor->activate ();
 		}
-		processor->ActiveChanged.connect (sigc::bind (sigc::mem_fun (_session, &Session::update_latency_compensation), false, false));
+		scoped_connect (processor->ActiveChanged, boost::bind (&Session::update_latency_compensation, &_session, false, false));
 
 		_output->set_user_latency (0);
 	}
@@ -1049,7 +1047,7 @@ Route::add_processors (const ProcessorList& others, ProcessorList::iterator iter
 				return -1;
 			}
 
-			(*i)->ActiveChanged.connect (sigc::bind (sigc::mem_fun (_session, &Session::update_latency_compensation), false, false));
+			scoped_connect ((*i)->ActiveChanged, boost::bind (&Session::update_latency_compensation, &_session, false, false));
 		}
 
 		_output->set_user_latency (0);

@@ -24,7 +24,6 @@
 #include <vector>
 #include <string>
 
-#include <sigc++/signal.h>
 
 #include <sndfile.h>
 #include <samplerate.h>
@@ -39,7 +38,7 @@ namespace ARDOUR
 	typedef std::pair<Port *, uint32_t> PortChannelPair;
 	typedef std::map<uint32_t, std::vector<PortChannelPair> > ExportPortMap;
 
-	struct ExportSpecification : public SF_INFO, public sigc::trackable {
+	struct ExportSpecification : public SF_INFO, public PBD::ScopedConnectionList {
 
 		ExportSpecification();
 		~ExportSpecification ();
@@ -85,7 +84,7 @@ namespace ARDOUR
 		SRC_STATE*     src_state;
 		nframes_t      pos;
 
-		sigc::connection freewheel_connection;
+		boost::signals2::scoped_connection freewheel_connection;
 
 		/* shared between UI thread and audio thread */
 

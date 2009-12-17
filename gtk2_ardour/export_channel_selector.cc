@@ -108,11 +108,11 @@ void
 PortExportChannelSelector::fill_route_list ()
 {
 	channel_view.clear_routes ();
-	RouteList routes = *session->get_routes();
+	RouteList routes = *_session->get_routes();
 
 	/* Add master bus and then everything else */
 
-	ARDOUR::IO* master = session->master_out()->output().get();
+	ARDOUR::IO* master = _session->master_out()->output().get();
 	channel_view.add_route (master);
 
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
@@ -435,11 +435,11 @@ PortExportChannelSelector::ChannelTreeView::update_selection_text (Glib::ustring
 	update_config ();
 }
 
-RegionExportChannelSelector::RegionExportChannelSelector (ARDOUR::Session * session,
+RegionExportChannelSelector::RegionExportChannelSelector (ARDOUR::Session * _session,
                                                           ProfileManagerPtr manager,
                                                           ARDOUR::AudioRegion const & region,
                                                           ARDOUR::AudioTrack & track) :
-  ExportChannelSelector (session, manager),
+  ExportChannelSelector (_session, manager),
   region (region),
   track (track),
   region_chans (region.n_channels()),
@@ -485,11 +485,11 @@ RegionExportChannelSelector::handle_selection ()
 	state->config->clear_channels ();
 
 	if (raw_button.get_active ()) {
-		factory.reset (new RegionExportChannelFactory (session, region, track, RegionExportChannelFactory::Raw));
+		factory.reset (new RegionExportChannelFactory (_session, region, track, RegionExportChannelFactory::Raw));
 	} else if (fades_button.get_active ()) {
-		factory.reset (new RegionExportChannelFactory (session, region, track, RegionExportChannelFactory::Fades));
+		factory.reset (new RegionExportChannelFactory (_session, region, track, RegionExportChannelFactory::Fades));
 	} else if (processed_button.get_active ()) {
-		factory.reset (new RegionExportChannelFactory(session, region, track, RegionExportChannelFactory::Processed));
+		factory.reset (new RegionExportChannelFactory(_session, region, track, RegionExportChannelFactory::Processed));
 	} else {
 		CriticalSelectionChanged ();
 		return;

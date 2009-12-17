@@ -180,7 +180,7 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd,
 	display_region (region_view, wfd);
 
 	/* catch regionview going away */
-	region->GoingAway.connect (sigc::bind (sigc::mem_fun (*this, &MidiStreamView::remove_region_view), region));
+	scoped_connect (region->GoingAway, boost::bind (&MidiStreamView::remove_region_view, this, region));
 
 	RegionViewAdded (region_view);
 
@@ -383,10 +383,10 @@ MidiStreamView::setup_rec_box ()
 {
 	// cerr << _trackview.name() << " streamview SRB\n";
 
-	if (_trackview.session().transport_rolling()) {
+	if (_trackview.session()->transport_rolling()) {
 
 		if (!rec_active &&
-		    _trackview.session().record_status() == Session::Recording &&
+		    _trackview.session()->record_status() == Session::Recording &&
 		    _trackview.get_diskstream()->record_enabled()) {
 
 			if (use_rec_regions && rec_regions.size() == rec_rects.size()) {
@@ -395,19 +395,15 @@ MidiStreamView::setup_rec_box ()
 
 				MidiRegion::SourceList sources;
 
-				for (list<sigc::connection>::iterator prc = rec_data_ready_connections.begin();
-						prc != rec_data_ready_connections.end(); ++prc) {
-					(*prc).disconnect();
-				}
-				rec_data_ready_connections.clear();
+				rec_data_ready_connections.drop_connections ();
 
 				boost::shared_ptr<MidiDiskstream> mds = _trackview.midi_track()->midi_diskstream();
 
 				sources.push_back(mds->write_source());
 
-				rec_data_ready_connections.push_back (mds->write_source()->ViewDataRangeReady.connect (sigc::bind (
-						sigc::mem_fun (*this, &MidiStreamView::rec_data_range_ready),
-						boost::weak_ptr<Source>(mds->write_source()))));
+				rec_data_ready_connections.add_connection (mds->write_source()->ViewDataRangeReady.connect 
+									   (boost::bind (&MidiStreamView::rec_data_range_ready, this,
+											 _1, _2, boost::weak_ptr<Source>(mds->write_source()))));
 
 				// handle multi
 
@@ -422,7 +418,7 @@ MidiStreamView::setup_rec_box ()
 
 				assert(region);
 				region->block_property_changes ();
-				region->set_position (_trackview.session().transport_frame(), this);
+				region->set_position (_trackview.session()->transport_frame(), this);
 				rec_regions.push_back (make_pair(region, (RegionView*)0));
 
 				// rec regions are destroyed in setup_rec_box
@@ -455,7 +451,7 @@ MidiStreamView::setup_rec_box ()
 
 			RecBoxInfo recbox;
 			recbox.rectangle = rec_rect;
-			recbox.start = _trackview.session().transport_frame();
+			recbox.start = _trackview.session()->transport_frame();
 			recbox.length = 0;
 
 			rec_rects.push_back (recbox);
@@ -467,7 +463,7 @@ MidiStreamView::setup_rec_box ()
 			rec_active = true;
 
 		} else if (rec_active &&
-			   (_trackview.session().record_status() != Session::Recording ||
+			   (_trackview.session()->record_status() != Session::Recording ||
 			    !_trackview.get_diskstream()->record_enabled())) {
 			screen_update_connection.disconnect();
 			rec_active = false;
@@ -482,12 +478,7 @@ MidiStreamView::setup_rec_box ()
 
 			/* disconnect rapid update */
 			screen_update_connection.disconnect();
-
-			for (list<sigc::connection>::iterator prc = rec_data_ready_connections.begin();
-					prc != rec_data_ready_connections.end(); ++prc) {
-				(*prc).disconnect();
-			}
-			rec_data_ready_connections.clear();
+			rec_data_ready_connections.drop_connections ();
 
 			rec_updating = false;
 			rec_active = false;
@@ -575,7 +566,7 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 						gdouble xend = _trackview.editor().frame_to_pixel (region->position() + region->length());
 						rect->property_x2() = xend;
 
-						ARDOUR::BeatsFramesConverter tconv(_trackview.session().tempo_map(), region->position());
+						ARDOUR::BeatsFramesConverter tconv(_trackview.session()->tempo_map(), region->position());
 						const MidiModel::TimeType start_beats = tconv.from(start);
 
 						/* draw events */

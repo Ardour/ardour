@@ -24,8 +24,7 @@
 #include <string>
 #include <utility>
 
-#include <sigc++/signal.h>
-
+#include <boost/signals2.hpp>
 #include "ardour/types.h"
 
 class XMLTree;
@@ -73,10 +72,10 @@ class ElementImporter
 	bool broken () { return _broken; }
 
 	/// Signal that requests for anew name
-	static sigc::signal <std::pair<bool, std::string>, std::string, std::string> Rename;
+	static boost::signals2::signal <std::pair<bool, std::string> (std::string, std::string)> Rename;
 
 	/// Signal for ok/cancel prompting
-	static sigc::signal <bool, std::string> Prompt;
+	static boost::signals2::signal <bool(std::string)> Prompt;
 
   protected:
 

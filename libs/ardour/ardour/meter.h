@@ -20,7 +20,6 @@
 #define __ardour_meter_h__
 
 #include <vector>
-#include <sigc++/slot.h>
 #include "ardour/types.h"
 #include "ardour/processor.h"
 #include "pbd/fastlog.h"
@@ -34,10 +33,10 @@ class Session;
 class Metering {
   public:
 	static void               update_meters ();
-	static sigc::signal<void> Meter;
+	static boost::signals2::signal<void()> Meter;
 
-	static sigc::connection   connect (sigc::slot<void> the_slot);
-	static void               disconnect (sigc::connection& c);
+	static boost::signals2::connection connect (boost::function<void()>);
+	static void                        disconnect (boost::signals2::connection& c);
 
   private:
 	/* this object is not meant to be instantiated */

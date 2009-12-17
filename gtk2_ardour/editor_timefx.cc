@@ -77,14 +77,14 @@ Editor::time_stretch (RegionSelection& regions, float fraction)
 
 	    ARDOUR::TimeFXRequest request;
 		request.time_fraction = fraction;
-		MidiStretch stretch(*session, request);
+		MidiStretch stretch(*_session, request);
 		begin_reversible_command ("midi stretch");
 		stretch.run(regions.front()->region());
 		XMLNode &before = playlist->get_state();
 		playlist->replace_region (regions.front()->region(), stretch.results[0],
 				regions.front()->region()->position());
 		XMLNode &after = playlist->get_state();
-		session->add_command (new MementoCommand<Playlist>(*playlist, &before, &after));
+		_session->add_command (new MementoCommand<Playlist>(*playlist, &before, &after));
 		commit_reversible_command ();
 	}
 
@@ -291,12 +291,12 @@ Editor::do_timefx (TimeFXDialog& dialog)
 		Filter* fx;
 
 		if (dialog.pitching) {
-			fx = new Pitch (*session, dialog.request);
+			fx = new Pitch (*_session, dialog.request);
 		} else {
 #ifdef USE_RUBBERBAND
-			fx = new RBStretch (*session, dialog.request);
+			fx = new RBStretch (*_session, dialog.request);
 #else
-			fx = new STStretch (*session, dialog.request);
+			fx = new STStretch (*_session, dialog.request);
 #endif
 		}
 
@@ -311,14 +311,14 @@ Editor::do_timefx (TimeFXDialog& dialog)
 			new_region = fx->results.front();
 
 			if (!in_command) {
-				session->begin_reversible_command (dialog.pitching ? _("pitch shift") : _("time stretch"));
+				_session->begin_reversible_command (dialog.pitching ? _("pitch shift") : _("time stretch"));
 				in_command = true;
 			}
 
 			XMLNode &before = playlist->get_state();
 			playlist->replace_region (region, new_region, region->position());
 			XMLNode &after = playlist->get_state();
-			session->add_command (new MementoCommand<Playlist>(*playlist, &before, &after));
+			_session->add_command (new MementoCommand<Playlist>(*playlist, &before, &after));
 		}
 
 		i = tmp;
@@ -326,7 +326,7 @@ Editor::do_timefx (TimeFXDialog& dialog)
 	}
 
 	if (in_command) {
-		session->commit_reversible_command ();
+		_session->commit_reversible_command ();
 	}
 
 	dialog.status = 0;

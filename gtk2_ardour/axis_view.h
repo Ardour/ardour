@@ -26,6 +26,10 @@
 #include <gdkmm/color.h>
 
 #include "pbd/xml++.h"
+#include "pbd/destructible.h"
+
+#include "ardour/session_handle.h"
+
 #include "prompter.h"
 #include "selectable.h"
 
@@ -37,7 +41,7 @@ namespace ARDOUR {
  * AxisView defines the abstract base class for time-axis trackviews and routes.
  *
  */
-class AxisView : public virtual Selectable
+class AxisView : public virtual Selectable, public PBD::Destructible, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
 {
   public:
 	/**
@@ -47,7 +51,7 @@ class AxisView : public virtual Selectable
 	 */
 	Gdk::Color color() const { return _color; }
 
-	ARDOUR::Session& session() const { return _session; }
+	ARDOUR::Session* session() const { return _session; }
 
 	virtual std::string name() const = 0;
 
@@ -57,16 +61,14 @@ class AxisView : public virtual Selectable
 	}
 
 	sigc::signal<void> Hiding;
-	sigc::signal<void> GoingAway;
 
 	void set_old_order_key (uint32_t ok) { _old_order_key = ok; }
 	uint32_t old_order_key() const { return _old_order_key; }
 
   protected:
 
-	AxisView (ARDOUR::Session& sess);
+	AxisView (ARDOUR::Session* sess);
 	virtual ~AxisView();
-
 
 	/**
 	 * Generate a new random TrackView color, unique from those colors already used.
@@ -76,7 +78,6 @@ class AxisView : public virtual Selectable
 	static Gdk::Color unique_random_color();
 
 
-	ARDOUR::Session& _session;
 	Gdk::Color _color;
 
 	static std::list<Gdk::Color> used_colors;

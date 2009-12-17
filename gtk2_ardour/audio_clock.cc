@@ -64,9 +64,8 @@ const uint32_t AudioClock::field_length[(int) AudioClock::AudioFrames+1] = {
 	10   /* Audio Frame */
 };
 
-AudioClock::AudioClock (
-	std::string clock_name, bool transient, std::string widget_name, bool allow_edit, bool follows_playhead, bool duration, bool with_info
-	)
+AudioClock::AudioClock (std::string clock_name, bool transient, std::string widget_name, 
+			bool allow_edit, bool follows_playhead, bool duration, bool with_info)
 	: _name (clock_name),
 	  is_transient (transient),
 	  is_duration (duration),
@@ -81,7 +80,6 @@ AudioClock::AudioClock (
 	  b2 ("|"),
 	  last_when(0)
 {
-	session = 0;
 	last_when = 0;
 	last_pdelta = 0;
 	last_sdelta = 0;
@@ -419,7 +417,7 @@ void
 AudioClock::set (nframes_t when, bool force, nframes_t offset, char which)
 {
 
- 	if ((!force && !is_visible()) || session == 0) {
+ 	if ((!force && !is_visible()) || _session == 0) {
 		return;
 	}
 
@@ -501,7 +499,7 @@ AudioClock::set_frames (nframes_t when, bool /*force*/)
 	audio_frames_label.set_text (buf);
 
 	if (frames_upper_info_label) {
-		nframes_t rate = session->frame_rate();
+		nframes_t rate = _session->frame_rate();
 
 		if (fmod (rate, 1000.0) == 0.000) {
 			sprintf (buf, "%uK", rate/1000);
@@ -513,7 +511,7 @@ AudioClock::set_frames (nframes_t when, bool /*force*/)
 			frames_upper_info_label->set_text (buf);
 		}
 
-		float vid_pullup = session->config.get_video_pullup();
+		float vid_pullup = _session->config.get_video_pullup();
 
 		if (vid_pullup == 0.0) {
 			if (frames_lower_info_label->get_text () != _("none")) {
@@ -538,11 +536,11 @@ AudioClock::set_minsec (nframes_t when, bool force)
 	float secs;
 
 	left = when;
-	hrs = (int) floor (left / (session->frame_rate() * 60.0f * 60.0f));
-	left -= (nframes_t) floor (hrs * session->frame_rate() * 60.0f * 60.0f);
-	mins = (int) floor (left / (session->frame_rate() * 60.0f));
-	left -= (nframes_t) floor (mins * session->frame_rate() * 60.0f);
-	secs = left / (float) session->frame_rate();
+	hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
+	left -= (nframes_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
+	mins = (int) floor (left / (_session->frame_rate() * 60.0f));
+	left -= (nframes_t) floor (mins * _session->frame_rate() * 60.0f);
+	secs = left / (float) _session->frame_rate();
 
 	if (force || hrs != ms_last_hrs) {
 		sprintf (buf, "%02d", hrs);
@@ -570,9 +568,9 @@ AudioClock::set_timecode (nframes_t when, bool force)
 	Timecode::Time timecode;
 
 	if (is_duration) {
-		session->timecode_duration (when, timecode);
+		_session->timecode_duration (when, timecode);
 	} else {
-		session->timecode_time (when, timecode);
+		_session->timecode_time (when, timecode);
 	}
 
 	if (force || timecode.hours != last_hrs || timecode.negative != last_negative) {
@@ -605,7 +603,7 @@ AudioClock::set_timecode (nframes_t when, bool force)
 	}
 
 	if (timecode_upper_info_label) {
-		double timecode_frames = session->timecode_frames_per_second();
+		double timecode_frames = _session->timecode_frames_per_second();
 
 		if ( fmod(timecode_frames, 1.0) == 0.0) {
 			sprintf (buf, "%u", int (timecode_frames));
@@ -618,7 +616,7 @@ AudioClock::set_timecode (nframes_t when, bool force)
 		}
 
 		if ((fabs(timecode_frames - 29.97) < 0.0001) || timecode_frames == 30) {
-			if (session->timecode_drop_frames()) {
+			if (_session->timecode_drop_frames()) {
 				sprintf (buf, "DF");
 			} else {
 				sprintf (buf, "NDF");
@@ -647,12 +645,12 @@ AudioClock::set_bbt (nframes_t when, bool force)
 			bbt.beats = 0;
 			bbt.ticks = 0;
 		} else {
-			session->tempo_map().bbt_time (when, bbt);
+			_session->tempo_map().bbt_time (when, bbt);
 			bbt.bars--;
 			bbt.beats--;
 		}
 	} else {
-		session->tempo_map().bbt_time (when, bbt);
+		_session->tempo_map().bbt_time (when, bbt);
 	}
 
 	sprintf (buf, "%03" PRIu32, bbt.bars);
@@ -677,7 +675,7 @@ AudioClock::set_bbt (nframes_t when, bool force)
 			pos = bbt_reference_time;
 		}
 
-		TempoMetric m (session->tempo_map().metric_at (pos));
+		TempoMetric m (_session->tempo_map().metric_at (pos));
 
 		sprintf (buf, "%-5.2f", m.tempo().beats_per_minute());
 		if (bbt_lower_info_label->get_text() != buf) {
@@ -693,12 +691,12 @@ AudioClock::set_bbt (nframes_t when, bool force)
 void
 AudioClock::set_session (Session *s)
 {
-	session = s;
+	SessionHandlePtr::set_session (s);
 
-	if (s) {
+	if (_session) {
 
 		XMLProperty* prop;
-		XMLNode* node = session->extra_xml (X_("ClockModes"));
+		XMLNode* node = _session->extra_xml (X_("ClockModes"));
 		AudioClock::Mode amode;
 
 		if (node) {
@@ -1190,7 +1188,7 @@ AudioClock::field_button_release_event (GdkEventButton *ev, Field field)
 bool
 AudioClock::field_button_press_event (GdkEventButton *ev, Field /*field*/)
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return false;
 	}
 
@@ -1236,7 +1234,7 @@ AudioClock::field_button_press_event (GdkEventButton *ev, Field /*field*/)
 bool
 AudioClock::field_button_scroll_event (GdkEventScroll *ev, Field field)
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return false;
 	}
 
@@ -1283,7 +1281,7 @@ AudioClock::field_button_scroll_event (GdkEventScroll *ev, Field field)
 bool
 AudioClock::field_motion_notify_event (GdkEventMotion *ev, Field field)
 {
-	if (session == 0 || !dragging) {
+	if (_session == 0 || !dragging) {
 		return false;
 	}
 
@@ -1342,16 +1340,16 @@ AudioClock::get_frames (Field field,nframes_t pos,int dir)
 	BBT_Time bbt;
 	switch (field) {
 	case Timecode_Hours:
-		frames = (nframes_t) floor (3600.0 * session->frame_rate());
+		frames = (nframes_t) floor (3600.0 * _session->frame_rate());
 		break;
 	case Timecode_Minutes:
-		frames = (nframes_t) floor (60.0 * session->frame_rate());
+		frames = (nframes_t) floor (60.0 * _session->frame_rate());
 		break;
 	case Timecode_Seconds:
-		frames = session->frame_rate();
+		frames = _session->frame_rate();
 		break;
 	case Timecode_Frames:
-		frames = (nframes_t) floor (session->frame_rate() / session->timecode_frames_per_second());
+		frames = (nframes_t) floor (_session->frame_rate() / _session->timecode_frames_per_second());
 		break;
 
 	case AudioFrames:
@@ -1359,32 +1357,32 @@ AudioClock::get_frames (Field field,nframes_t pos,int dir)
 		break;
 
 	case MS_Hours:
-		frames = (nframes_t) floor (3600.0 * session->frame_rate());
+		frames = (nframes_t) floor (3600.0 * _session->frame_rate());
 		break;
 	case MS_Minutes:
-		frames = (nframes_t) floor (60.0 * session->frame_rate());
+		frames = (nframes_t) floor (60.0 * _session->frame_rate());
 		break;
 	case MS_Seconds:
-		frames = session->frame_rate();
+		frames = _session->frame_rate();
 		break;
 
 	case Bars:
 		bbt.bars = 1;
 		bbt.beats = 0;
 		bbt.ticks = 0;
-		frames = session->tempo_map().bbt_duration_at(pos,bbt,dir);
+		frames = _session->tempo_map().bbt_duration_at(pos,bbt,dir);
 		break;
 	case Beats:
 		bbt.bars = 0;
 		bbt.beats = 1;
 		bbt.ticks = 0;
-		frames = session->tempo_map().bbt_duration_at(pos,bbt,dir);
+		frames = _session->tempo_map().bbt_duration_at(pos,bbt,dir);
 		break;
 	case Ticks:
 		bbt.bars = 0;
 		bbt.beats = 0;
 		bbt.ticks = 1;
-		frames = session->tempo_map().bbt_duration_at(pos,bbt,dir);
+		frames = _session->tempo_map().bbt_duration_at(pos,bbt,dir);
 		break;
 	}
 
@@ -1459,7 +1457,7 @@ AudioClock::timecode_sanitize_display()
 		seconds_label.set_text("59");
 	}
 
-	switch ((long)rint(session->timecode_frames_per_second())) {
+	switch ((long)rint(_session->timecode_frames_per_second())) {
 	case 24:
 		if (atoi(frames_label.get_text()) > 23) {
 			frames_label.set_text("23");
@@ -1479,7 +1477,7 @@ AudioClock::timecode_sanitize_display()
 		break;
 	}
 
-	if (session->timecode_drop_frames()) {
+	if (_session->timecode_drop_frames()) {
 		if ((atoi(minutes_label.get_text()) % 10) && (atoi(seconds_label.get_text()) == 0) && (atoi(frames_label.get_text()) < 2)) {
 			frames_label.set_text("02");
 		}
@@ -1489,7 +1487,7 @@ AudioClock::timecode_sanitize_display()
 nframes_t
 AudioClock::timecode_frame_from_display () const
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return 0;
 	}
 
@@ -1500,10 +1498,10 @@ AudioClock::timecode_frame_from_display () const
 	timecode.minutes = atoi (minutes_label.get_text());
 	timecode.seconds = atoi (seconds_label.get_text());
 	timecode.frames = atoi (frames_label.get_text());
-	timecode.rate = session->timecode_frames_per_second();
-	timecode.drop= session->timecode_drop_frames();
+	timecode.rate = _session->timecode_frames_per_second();
+	timecode.drop= _session->timecode_drop_frames();
 
-	session->timecode_to_sample( timecode, sample, false /* use_offset */, false /* use_subframes */ );
+	_session->timecode_to_sample( timecode, sample, false /* use_offset */, false /* use_subframes */ );
 
 
 #if 0
@@ -1522,14 +1520,14 @@ AudioClock::timecode_frame_from_display () const
 	Timecode::Time timecode2;
 	nframes_t sample_increment;
 
-	sample_increment = (long)rint(session->frame_rate() / session->timecode_frames_per_second);
+	sample_increment = (long)rint(_session->frame_rate() / _session->timecode_frames_per_second);
 
 #ifdef Timecode_SAMPLE_TEST_1
 	// Test 1: use_offset = false, use_subframes = false
 	cout << "use_offset = false, use_subframes = false" << endl;
 	for (int i = 0; i < 108003; i++) {
-		session->timecode_to_sample( timecode1, sample1, false /* use_offset */, false /* use_subframes */ );
-		session->sample_to_timecode( sample1, timecode2, false /* use_offset */, false /* use_subframes */ );
+		_session->timecode_to_sample( timecode1, sample1, false /* use_offset */, false /* use_subframes */ );
+		_session->sample_to_timecode( sample1, timecode2, false /* use_offset */, false /* use_subframes */ );
 
 		if ((i > 0) && ( ((sample1 - oldsample) != sample_increment) && ((sample1 - oldsample) != (sample_increment + 1)) && ((sample1 - oldsample) != (sample_increment - 1)))) {
 			cout << "ERROR: sample increment not right: " << (sample1 - oldsample) << " != " << sample_increment << endl;
@@ -1549,7 +1547,7 @@ AudioClock::timecode_frame_from_display () const
 			break;
 		}
 		oldsample = sample1;
-		session->timecode_increment( timecode1 );
+		_session->timecode_increment( timecode1 );
 	}
 
 	cout << "sample_increment: " << sample_increment << endl;
@@ -1568,13 +1566,13 @@ AudioClock::timecode_frame_from_display () const
 	timecode1.subframes = 0;
 	sample1 = oldsample = 0;
 
-	session->sample_to_timecode( sample1, timecode1, true /* use_offset */, false /* use_subframes */ );
+	_session->sample_to_timecode( sample1, timecode1, true /* use_offset */, false /* use_subframes */ );
 	cout << "Starting at sample: " << sample1 << " -> ";
 	cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << endl;
 
 	for (int i = 0; i < 108003; i++) {
-		session->timecode_to_sample( timecode1, sample1, true /* use_offset */, false /* use_subframes */ );
-		session->sample_to_timecode( sample1, timecode2, true /* use_offset */, false /* use_subframes */ );
+		_session->timecode_to_sample( timecode1, sample1, true /* use_offset */, false /* use_subframes */ );
+		_session->sample_to_timecode( sample1, timecode2, true /* use_offset */, false /* use_subframes */ );
 
 //     cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 //     cout << "sample: " << sample1 << endl;
@@ -1599,7 +1597,7 @@ AudioClock::timecode_frame_from_display () const
 			break;
 		}
 		oldsample = sample1;
-		session->timecode_increment( timecode1 );
+		_session->timecode_increment( timecode1 );
 	}
 
 	cout << "sample_increment: " << sample_increment << endl;
@@ -1611,13 +1609,13 @@ AudioClock::timecode_frame_from_display () const
 	// Test 3: use_offset = true, use_subframes = false, decrement
 	cout << "use_offset = true, use_subframes = false, decrement" << endl;
 
-	session->sample_to_timecode( sample1, timecode1, true /* use_offset */, false /* use_subframes */ );
+	_session->sample_to_timecode( sample1, timecode1, true /* use_offset */, false /* use_subframes */ );
 	cout << "Starting at sample: " << sample1 << " -> ";
 	cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << endl;
 
 	for (int i = 0; i < 108003; i++) {
-		session->timecode_to_sample( timecode1, sample1, true /* use_offset */, false /* use_subframes */ );
-		session->sample_to_timecode( sample1, timecode2, true /* use_offset */, false /* use_subframes */ );
+		_session->timecode_to_sample( timecode1, sample1, true /* use_offset */, false /* use_subframes */ );
+		_session->sample_to_timecode( sample1, timecode2, true /* use_offset */, false /* use_subframes */ );
 
 //     cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 //     cout << "sample: " << sample1 << endl;
@@ -1642,7 +1640,7 @@ AudioClock::timecode_frame_from_display () const
 			break;
 		}
 		oldsample = sample1;
-		session->timecode_decrement( timecode1 );
+		_session->timecode_decrement( timecode1 );
 	}
 
 	cout << "sample_decrement: " << sample_increment << endl;
@@ -1663,14 +1661,14 @@ AudioClock::timecode_frame_from_display () const
 		timecode1.subframes = 0;
 		sample1 = oldsample = (sample_increment * sub) / 80;
 
-		session->sample_to_timecode( sample1, timecode1, true /* use_offset */, true /* use_subframes */ );
+		_session->sample_to_timecode( sample1, timecode1, true /* use_offset */, true /* use_subframes */ );
 
 		cout << "starting at sample: " << sample1 << " -> ";
 		cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << endl;
 
 		for (int i = 0; i < 108003; i++) {
-			session->timecode_to_sample( timecode1, sample1, true /* use_offset */, true /* use_subframes */ );
-			session->sample_to_timecode( sample1, timecode2, true /* use_offset */, true /* use_subframes */ );
+			_session->timecode_to_sample( timecode1, sample1, true /* use_offset */, true /* use_subframes */ );
+			_session->sample_to_timecode( sample1, timecode2, true /* use_offset */, true /* use_subframes */ );
 
 			if ((i > 0) && ( ((sample1 - oldsample) != sample_increment) && ((sample1 - oldsample) != (sample_increment + 1)) && ((sample1 - oldsample) != (sample_increment - 1)))) {
 				cout << "ERROR: sample increment not right: " << (sample1 - oldsample) << " != " << sample_increment << endl;
@@ -1690,7 +1688,7 @@ AudioClock::timecode_frame_from_display () const
 				break;
 			}
 			oldsample = sample1;
-			session->timecode_increment( timecode1 );
+			_session->timecode_increment( timecode1 );
 		}
 
 		cout << "sample_increment: " << sample_increment << endl;
@@ -1698,8 +1696,8 @@ AudioClock::timecode_frame_from_display () const
 		cout << "timecode: " << (timecode2.negative ? "-" : "") << timecode2.hours << ":" << timecode2.minutes << ":" << timecode2.seconds << ":" << timecode2.frames << "::" << timecode2.subframes << endl;
 
 		for (int i = 0; i < 108003; i++) {
-			session->timecode_to_sample( timecode1, sample1, true /* use_offset */, true /* use_subframes */ );
-			session->sample_to_timecode( sample1, timecode2, true /* use_offset */, true /* use_subframes */ );
+			_session->timecode_to_sample( timecode1, sample1, true /* use_offset */, true /* use_subframes */ );
+			_session->sample_to_timecode( sample1, timecode2, true /* use_offset */, true /* use_subframes */ );
 
 			if ((i > 0) && ( ((oldsample - sample1) != sample_increment) && ((oldsample - sample1) != (sample_increment + 1)) && ((oldsample - sample1) != (sample_increment - 1)))) {
 				cout << "ERROR: sample increment not right: " << (oldsample - sample1) << " != " << sample_increment << endl;
@@ -1719,7 +1717,7 @@ AudioClock::timecode_frame_from_display () const
 				break;
 			}
 			oldsample = sample1;
-			session->timecode_decrement( timecode1 );
+			_session->timecode_decrement( timecode1 );
 		}
 
 		cout << "sample_decrement: " << sample_increment << endl;
@@ -1739,15 +1737,15 @@ AudioClock::timecode_frame_from_display () const
 	timecode1.frames = 0;
 	timecode1.subframes = 0;
 	sample1 = oldsample = 0;
-	sample_increment = session->frame_rate();
+	sample_increment = _session->frame_rate();
 
-	session->sample_to_timecode( sample1, timecode1, true /* use_offset */, false /* use_subframes */ );
+	_session->sample_to_timecode( sample1, timecode1, true /* use_offset */, false /* use_subframes */ );
 	cout << "Starting at sample: " << sample1 << " -> ";
 	cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << endl;
 
 	for (int i = 0; i < 3600; i++) {
-		session->timecode_to_sample( timecode1, sample1, true /* use_offset */, false /* use_subframes */ );
-		session->sample_to_timecode( sample1, timecode2, true /* use_offset */, false /* use_subframes */ );
+		_session->timecode_to_sample( timecode1, sample1, true /* use_offset */, false /* use_subframes */ );
+		_session->sample_to_timecode( sample1, timecode2, true /* use_offset */, false /* use_subframes */ );
 
 //     cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 //     cout << "sample: " << sample1 << endl;
@@ -1769,7 +1767,7 @@ AudioClock::timecode_frame_from_display () const
 			break;
 		}
 		oldsample = sample1;
-		session->timecode_increment_seconds( timecode1 );
+		_session->timecode_increment_seconds( timecode1 );
 	}
 
 	cout << "sample_increment: " << sample_increment << endl;
@@ -1788,15 +1786,15 @@ AudioClock::timecode_frame_from_display () const
 	timecode1.frames = 0;
 	timecode1.subframes = 0;
 	sample1 = oldsample = 0;
-	sample_increment = session->frame_rate() * 60;
+	sample_increment = _session->frame_rate() * 60;
 
-	session->sample_to_timecode( sample1, timecode1, true /* use_offset */, false /* use_subframes */ );
+	_session->sample_to_timecode( sample1, timecode1, true /* use_offset */, false /* use_subframes */ );
 	cout << "Starting at sample: " << sample1 << " -> ";
 	cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << endl;
 
 	for (int i = 0; i < 60; i++) {
-		session->timecode_to_sample( timecode1, sample1, true /* use_offset */, false /* use_subframes */ );
-		session->sample_to_timecode( sample1, timecode2, true /* use_offset */, false /* use_subframes */ );
+		_session->timecode_to_sample( timecode1, sample1, true /* use_offset */, false /* use_subframes */ );
+		_session->sample_to_timecode( sample1, timecode2, true /* use_offset */, false /* use_subframes */ );
 
 //     cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 //     cout << "sample: " << sample1 << endl;
@@ -1818,7 +1816,7 @@ AudioClock::timecode_frame_from_display () const
 			break;
 		}
 		oldsample = sample1;
-		session->timecode_increment_minutes( timecode1 );
+		_session->timecode_increment_minutes( timecode1 );
 	}
 
 	cout << "sample_increment: " << sample_increment << endl;
@@ -1836,15 +1834,15 @@ AudioClock::timecode_frame_from_display () const
 	timecode1.frames = 0;
 	timecode1.subframes = 0;
 	sample1 = oldsample = 0;
-	sample_increment = session->frame_rate() * 60 * 60;
+	sample_increment = _session->frame_rate() * 60 * 60;
 
-	session->sample_to_timecode( sample1, timecode1, true /* use_offset */, false /* use_subframes */ );
+	_session->sample_to_timecode( sample1, timecode1, true /* use_offset */, false /* use_subframes */ );
 	cout << "Starting at sample: " << sample1 << " -> ";
 	cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << endl;
 
 	for (int i = 0; i < 10; i++) {
-		session->timecode_to_sample( timecode1, sample1, true /* use_offset */, false /* use_subframes */ );
-		session->sample_to_timecode( sample1, timecode2, true /* use_offset */, false /* use_subframes */ );
+		_session->timecode_to_sample( timecode1, sample1, true /* use_offset */, false /* use_subframes */ );
+		_session->sample_to_timecode( sample1, timecode2, true /* use_offset */, false /* use_subframes */ );
 
 //     cout << "timecode: " << (timecode1.negative ? "-" : "") << timecode1.hours << ":" << timecode1.minutes << ":" << timecode1.seconds << ":" << timecode1.frames << "::" << timecode1.subframes << " -> ";
 //     cout << "sample: " << sample1 << endl;
@@ -1866,7 +1864,7 @@ AudioClock::timecode_frame_from_display () const
 			break;
 		}
 		oldsample = sample1;
-		session->timecode_increment_hours( timecode1 );
+		_session->timecode_increment_hours( timecode1 );
 	}
 
 	cout << "sample_increment: " << sample_increment << endl;
@@ -1882,7 +1880,7 @@ AudioClock::timecode_frame_from_display () const
 nframes_t
 AudioClock::minsec_frame_from_display () const
 {
-	if (session == 0) {
+	if (_session == 0) {
 		return 0;
 	}
 
@@ -1890,7 +1888,7 @@ AudioClock::minsec_frame_from_display () const
 	int mins = atoi (ms_minutes_label.get_text());
 	float secs = atof (ms_seconds_label.get_text());
 
-	nframes_t sr = session->frame_rate();
+	nframes_t sr = _session->frame_rate();
 
 	return (nframes_t) floor ((hrs * 60.0f * 60.0f * sr) + (mins * 60.0f * sr) + (secs * sr));
 }
@@ -1898,7 +1896,7 @@ AudioClock::minsec_frame_from_display () const
 nframes_t
 AudioClock::bbt_frame_from_display (nframes_t pos) const
 {
-	if (session == 0) {
+	if (_session == 0) {
 		error << "AudioClock::current_time() called with BBT mode but without session!" << endmsg;
 		return 0;
 	}
@@ -1915,7 +1913,7 @@ AudioClock::bbt_frame_from_display (nframes_t pos) const
                any.bbt.beats++;
        }
 
-	nframes_t ret = session->convert_to_frames_at (pos, any);
+	nframes_t ret = _session->convert_to_frames_at (pos, any);
 
 	return ret;
 }
@@ -1924,7 +1922,7 @@ AudioClock::bbt_frame_from_display (nframes_t pos) const
 nframes_t
 AudioClock::bbt_frame_duration_from_display (nframes_t pos) const
 {
-	if (session == 0) {
+	if (_session == 0) {
 		error << "AudioClock::current_time() called with BBT mode but without session!" << endmsg;
 		return 0;
 	}
@@ -1936,7 +1934,7 @@ AudioClock::bbt_frame_duration_from_display (nframes_t pos) const
 	bbt.beats = atoi (beats_label.get_text());
 	bbt.ticks = atoi (ticks_label.get_text());
 
-	return session->tempo_map().bbt_duration_at(pos,bbt,1);
+	return _session->tempo_map().bbt_duration_at(pos,bbt,1);
 }
 
 nframes_t
@@ -1971,21 +1969,21 @@ AudioClock::build_ops_menu ()
 void
 AudioClock::set_from_playhead ()
 {
-	if (!session) {
+	if (!_session) {
 		return;
 	}
 	
-	set (session->transport_frame());
+	set (_session->transport_frame());
 }
 
 void
 AudioClock::locate ()
 {
-	if (!session || is_duration) {
+	if (!_session || is_duration) {
 		return;
 	}
 	
-	session->request_locate (current_time(), false);
+	_session->request_locate (current_time(), false);
 }
 
 void

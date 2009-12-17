@@ -552,7 +552,7 @@ MidiRegionView::create_note_at(double x, double y, double length)
 
 	MidiModel::DeltaCommand* cmd = _model->new_delta_command("add note");
 	cmd->add(new_note);
-	_model->apply_command(trackview.session(), cmd);
+	_model->apply_command(*trackview.session(), cmd);
 
 	play_midi_note (new_note);
 }
@@ -585,8 +585,8 @@ MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 {
 	_model = model;
 	content_connection.disconnect ();
-	content_connection = _model->ContentsChanged.connect(
-			sigc::mem_fun(this, &MidiRegionView::redisplay_model));
+	content_connection = _model->ContentsChanged.connect (boost::bind (&MidiRegionView::redisplay_model, this));
+
 	clear_events ();
 
 	if (_enable_display) {
@@ -665,7 +665,7 @@ MidiRegionView::apply_delta()
 		_marked_for_selection.insert((*i)->note());
 	}
 
-	_model->apply_command(trackview.session(), _delta_command);
+	_model->apply_command(*trackview.session(), _delta_command);
 	_delta_command = 0;
 	midi_view()->midi_track()->diskstream()->playlist_modified();
 
@@ -680,7 +680,7 @@ MidiRegionView::apply_diff ()
 		return;
 	}
 
-	_model->apply_command(trackview.session(), _diff_command);
+	_model->apply_command(*trackview.session(), _diff_command);
 	_diff_command = 0;
 	midi_view()->midi_track()->diskstream()->playlist_modified();
 
@@ -699,7 +699,7 @@ MidiRegionView::apply_delta_as_subcommand()
 		_marked_for_selection.insert((*i)->note());
 	}
 
-	_model->apply_command_as_subcommand(trackview.session(), _delta_command);
+	_model->apply_command_as_subcommand(*trackview.session(), _delta_command);
 	_delta_command = 0;
 	midi_view()->midi_track()->diskstream()->playlist_modified();
 
@@ -719,7 +719,7 @@ MidiRegionView::apply_diff_as_subcommand()
 		_marked_for_selection.insert((*i)->note());
 	}
 
-	_model->apply_command_as_subcommand(trackview.session(), _diff_command);
+	_model->apply_command_as_subcommand(*trackview.session(), _diff_command);
 	_diff_command = 0;
 	midi_view()->midi_track()->diskstream()->playlist_modified();
 
@@ -1071,7 +1071,7 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 		}
 	}
 
-	ghost->GoingAway.connect (sigc::mem_fun(*this, &MidiRegionView::remove_ghost));
+	ghost->GoingAway.connect (boost::bind (&RegionView::remove_ghost, this, _1));
 
 	return ghost;
 }
@@ -1151,7 +1151,7 @@ MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
 
 	const double note_length_beats = (note->off_event().time() - note->on_event().time());
 	nframes_t note_length_ms = beats_to_frames(note_length_beats)
-			* (1000 / (double)route_ui->session().nominal_frame_rate());
+			* (1000 / (double)route_ui->session()->nominal_frame_rate());
 	Glib::signal_timeout().connect(sigc::bind(sigc::mem_fun(this, &MidiRegionView::play_midi_note_off), note),
 			note_length_ms, G_PRIORITY_DEFAULT);
 }
@@ -2431,11 +2431,11 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 
 	if (end_frame > region_end) {
 
-		trackview.session().begin_reversible_command (_("paste"));
+		trackview.session()->begin_reversible_command (_("paste"));
 
 		XMLNode& before (_region->get_state());
 		_region->set_length (end_frame, this);
-		trackview.session().add_command (new MementoCommand<Region>(*_region, &before, &_region->get_state()));
+		trackview.session()->add_command (new MementoCommand<Region>(*_region, &before, &_region->get_state()));
 	}
 
 	apply_delta ();

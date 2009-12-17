@@ -22,9 +22,9 @@
 #define __ardour_export_status_h__
 
 #include <list>
+#include <boost/signals2.hpp>
 
 #include <stdint.h>
-#include <sigc++/signal.h>
 
 namespace ARDOUR
 {
@@ -36,7 +36,7 @@ enum ExportStage {
 	export_Write
 };
 
-struct ExportStatus : public sigc::trackable {
+struct ExportStatus {
 
 	ExportStatus ();
 	void init ();
@@ -46,12 +46,12 @@ struct ExportStatus : public sigc::trackable {
 	volatile bool           stop;
 	volatile bool           running;
 
-	sigc::signal<void>      Aborting;
+	boost::signals2::signal<void()>      Aborting;
 	void abort (bool error_occurred = false);
 	bool aborted () const { return _aborted; }
 	bool errors () const { return _errors; }
 
-	sigc::signal<void>      Finished;
+	boost::signals2::signal<void()>      Finished;
 	void finish ();
 	bool finished () const { return _finished; }
 

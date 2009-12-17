@@ -26,7 +26,6 @@
 
 namespace ARDOUR {
 	class Send;
-	class Session;
 	class IOProcessor;
 }
 
@@ -35,7 +34,7 @@ class IOSelector;
 class SendUI : public Gtk::HBox
 {
   public:
-	SendUI (Gtk::Window *, boost::shared_ptr<ARDOUR::Send>, ARDOUR::Session&);
+	SendUI (Gtk::Window *, boost::shared_ptr<ARDOUR::Send>, ARDOUR::Session*);
 	~SendUI();
 
 	void update ();
@@ -47,7 +46,6 @@ class SendUI : public Gtk::HBox
 
   private:
 	boost::shared_ptr<ARDOUR::Send> _send;
-	ARDOUR::Session&                _session;
 	GainMeter                       _gpm;
 	PannerUI                        _panners;
 	Gtk::VBox                       _vbox;
@@ -63,7 +61,7 @@ class SendUI : public Gtk::HBox
 class SendUIWindow : public ArdourDialog
 {
   public:
-	SendUIWindow(boost::shared_ptr<ARDOUR::Send>, ARDOUR::Session&);
+	SendUIWindow(boost::shared_ptr<ARDOUR::Send>, ARDOUR::Session*);
 	~SendUIWindow();
 
 	SendUI* ui;
@@ -72,7 +70,7 @@ class SendUIWindow : public ArdourDialog
 	Gtk::HBox hpacker;
 
 	void send_going_away ();
-	sigc::connection going_away_connection;
+	boost::signals2::scoped_connection going_away_connection;
 };
 
 #endif /* __ardour_gtk_send_ui_h__ */

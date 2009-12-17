@@ -25,6 +25,8 @@
 
 #include <libgnomecanvasmm/pixbuf.h>
 
+#include "pbd/scoped_connections.h"
+
 #include "selectable.h"
 #include "simplerect.h"
 #include "canvas.h"
@@ -35,7 +37,7 @@ class TimeAxisView;
  * A base class for 'items' that may appear upon a TimeAxisView
  *
  */
-class TimeAxisViewItem : public Selectable
+class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 {
    public:
 	virtual ~TimeAxisViewItem() ;

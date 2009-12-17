@@ -76,7 +76,6 @@ Source::Source (Session& s, const XMLNode& node)
 Source::~Source ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("Source %1 destructor\n", _name));
-	notify_callbacks ();
 }
 
 

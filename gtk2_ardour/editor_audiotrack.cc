@@ -55,7 +55,7 @@ Editor::start_updating ()
 	RouteTimeAxisView* rtv;
 
 	//cerr << "Editor::start_updating () called" << endl;//DEBUG
-	if (is_mapped() && session) {
+	if (is_mapped() && _session) {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
 				rtv->reset_meter ();
@@ -78,7 +78,7 @@ Editor::stop_updating ()
 	meters_running = false;
 	fast_screen_update_connection.disconnect();
 	//cerr << "Editor::stop_updating () called" << endl;//DEBUG
-	if (is_mapped() && session) {
+	if (is_mapped() && _session) {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
 				rtv->hide_meter ();
@@ -105,7 +105,7 @@ Editor::fast_update_strips ()
 {
 	RouteTimeAxisView* rtv;
 
-	if (is_mapped() && session) {
+	if (is_mapped() && _session) {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
 				rtv->fast_update ();

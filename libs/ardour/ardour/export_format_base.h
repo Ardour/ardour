@@ -115,8 +115,8 @@ class ExportFormatBase {
 			: _selected (false), _compatible (true) { }
 		~SelectableCompatible () {}
 
-		sigc::signal<void, bool> SelectChanged;
-		sigc::signal<void, bool> CompatibleChanged;
+		boost::signals2::signal<void(bool)> SelectChanged;
+		boost::signals2::signal<void(bool)> CompatibleChanged;
 
 		bool selected () const { return _selected; }
 		bool compatible () const { return _compatible; }

@@ -26,6 +26,8 @@
 
 #include "evoral/types.hpp"
 
+#include "ardour/session_handle.h"
+
 #include "ardour_dialog.h"
 
 namespace ARDOUR {
@@ -39,7 +41,7 @@ class MidiListEditor : public ArdourDialog
   public:
 	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
 
-	MidiListEditor(ARDOUR::Session&, boost::shared_ptr<ARDOUR::MidiRegion>);
+	MidiListEditor(ARDOUR::Session*, boost::shared_ptr<ARDOUR::MidiRegion>);
 	~MidiListEditor();
 
   private:
@@ -64,7 +66,6 @@ class MidiListEditor : public ArdourDialog
 		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note;
 	};
 
-	ARDOUR::Session&             session;
 	MidiListModelColumns         columns;
 	Glib::RefPtr<Gtk::ListStore> model;
 	Gtk::TreeView                view;

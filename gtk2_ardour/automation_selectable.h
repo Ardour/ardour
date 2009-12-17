@@ -31,17 +31,17 @@ struct AutomationSelectable : public Selectable
     nframes_t end;
     double low_fract;
     double high_fract;
-    TimeAxisView& track;
+    TimeAxisView* track; // ref would be better, but ARDOUR::SessionHandlePtr is non-assignable
 
-    AutomationSelectable (nframes_t s, nframes_t e, double l, double h, TimeAxisView& atv)
+    AutomationSelectable (nframes_t s, nframes_t e, double l, double h, TimeAxisView* atv)
 	    : start (s), end (e), low_fract (l), high_fract (h), track (atv) {}
 
     bool operator== (const AutomationSelectable& other) {
 	    return start == other.start &&
-		    end == other.end &&
-		    low_fract == other.low_fract &&
-		    high_fract == other.high_fract &&
-		    &track == &other.track;
+	    end == other.end &&
+	    low_fract == other.low_fract &&
+	    high_fract == other.high_fract &&
+	    track == other.track;
     }
 };
 

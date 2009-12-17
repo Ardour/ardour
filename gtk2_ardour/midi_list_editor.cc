@@ -31,11 +31,12 @@ using namespace Gtk;
 using namespace Glib;
 using namespace ARDOUR;
 
-MidiListEditor::MidiListEditor (Session& s, boost::shared_ptr<MidiRegion> r)
+MidiListEditor::MidiListEditor (Session* s, boost::shared_ptr<MidiRegion> r)
 	: ArdourDialog (r->name(), false, false)
-	, session (s)
 	, region (r)
 {
+	set_session (s);
+
 	model = ListStore::create (columns);
 	view.set_model (model);
 
@@ -96,40 +97,43 @@ MidiListEditor::redisplay_model ()
 	view.set_model (Glib::RefPtr<Gtk::ListStore>(0));
 	model->clear ();
 
-	MidiModel::Notes notes = region->midi_source(0)->model()->notes();
-	TreeModel::Row row;
-
-	for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
-		row = *(model->append());
-		row[columns.channel] = (*i)->channel();
-		row[columns.note_name] = _("Note");
-		row[columns.note] = (*i)->note();
-		row[columns.velocity] = (*i)->velocity();
-
-		BBT_Time bbt;
-		BBT_Time dur;
-		stringstream ss;
-
-		session.tempo_map().bbt_time (region->position(), bbt);
-
-		dur.bars = 0;
-		dur.beats = floor ((*i)->time());
-		dur.ticks = 0;
-
-		session.tempo_map().bbt_duration_at (region->position(), dur, 0);
-
-		ss << bbt;
-		row[columns.start] = ss.str();
-		ss << dur;
-		row[columns.length] = ss.str();
-
-		session.tempo_map().bbt_time (region->position(), bbt);
-		/* XXX get end point */
-
-		ss << bbt;
-		row[columns.end] = ss.str();
-
-		row[columns._note] = (*i);
+	if (_session) {
+		
+		MidiModel::Notes notes = region->midi_source(0)->model()->notes();
+		TreeModel::Row row;
+		
+		for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
+			row = *(model->append());
+			row[columns.channel] = (*i)->channel();
+			row[columns.note_name] = _("Note");
+			row[columns.note] = (*i)->note();
+			row[columns.velocity] = (*i)->velocity();
+			
+			BBT_Time bbt;
+			BBT_Time dur;
+			stringstream ss;
+			
+			_session->tempo_map().bbt_time (region->position(), bbt);
+			
+			dur.bars = 0;
+			dur.beats = floor ((*i)->time());
+			dur.ticks = 0;
+			
+			_session->tempo_map().bbt_duration_at (region->position(), dur, 0);
+			
+			ss << bbt;
+			row[columns.start] = ss.str();
+			ss << dur;
+			row[columns.length] = ss.str();
+			
+			_session->tempo_map().bbt_time (region->position(), bbt);
+			/* XXX get end point */
+			
+			ss << bbt;
+			row[columns.end] = ss.str();
+			
+			row[columns._note] = (*i);
+		}
 	}
 
 	view.set_model (model);

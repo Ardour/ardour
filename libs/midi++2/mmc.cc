@@ -206,8 +206,7 @@ MachineControl::MachineControl (Port &p, float /*version*/,
 	_send_device_id = 0x7f;
 	
 	if ((parser = _port.input()) != 0) {
-		parser->mmc.connect 
-			(mem_fun (*this, &MachineControl::process_mmc_message));
+		mmc_connection = parser->mmc.connect (boost::bind (&MachineControl::process_mmc_message, this, _1, _2, _3));
 	} else {
 		warning << "MMC connected to a non-input port: useless!"
 			<< endmsg;

@@ -956,7 +956,7 @@ Editor::set_summary ()
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleSummary"));
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-		session->config.set_show_summary (tact->get_active ());
+		_session->config.set_show_summary (tact->get_active ());
 	}
 }
 
@@ -966,7 +966,7 @@ Editor::set_group_tabs ()
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleGroupTabs"));
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-		session->config.set_show_group_tabs (tact->get_active ());
+		_session->config.set_show_group_tabs (tact->get_active ());
 	}
 }
 
@@ -1350,7 +1350,7 @@ Editor::parameter_changed (std::string p)
 		toggle_meter_updating();
 	} else if (p == "show-summary") {
 
-		bool const s = session->config.get_show_summary ();
+		bool const s = _session->config.get_show_summary ();
  		if (s) {
  			_summary->show ();
  		} else {
@@ -1366,7 +1366,7 @@ Editor::parameter_changed (std::string p)
 		}
 	} else if (p == "show-group-tabs") {
 
-		bool const s = session->config.get_show_group_tabs ();
+		bool const s = _session->config.get_show_group_tabs ();
 		if (s) {
 			_group_tabs->show ();
 		} else {

@@ -75,7 +75,7 @@ Editor::show_editor_mixer (bool yn)
 
 	show_editor_mixer_when_tracks_arrive = false;
 
-	if (!session) {
+	if (!_session) {
 		show_editor_mixer_when_tracks_arrive = yn;
 		return;
 	}
@@ -165,10 +165,10 @@ void
 Editor::create_editor_mixer ()
 {
 	current_mixer_strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(),
-					      *session,
+					      _session,
 					      false);
 	current_mixer_strip->Hiding.connect (sigc::mem_fun(*this, &Editor::current_mixer_strip_hidden));
-	current_mixer_strip->GoingAway.connect (sigc::mem_fun(*this, &Editor::current_mixer_strip_removed));
+	scoped_connect (current_mixer_strip->GoingAway, boost::bind (&Editor::current_mixer_strip_removed, this));
 #ifdef GTKOSX
 	current_mixer_strip->WidthChanged.connect (sigc::mem_fun(*this, &Editor::ensure_all_elements_drawn));
 #endif
@@ -180,7 +180,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 {
 	RouteTimeAxisView* at;
 
-	if (!session || (at = dynamic_cast<RouteTimeAxisView*>(&view)) == 0) {
+	if (!_session || (at = dynamic_cast<RouteTimeAxisView*>(&view)) == 0) {
 		return;
 	}
 
@@ -221,9 +221,9 @@ Editor::update_current_screen ()
 		return;
 	}
 
-	if (session && session->engine().running()) {
+	if (_session && _session->engine().running()) {
 
-		nframes64_t const frame = session->audible_frame();
+		nframes64_t const frame = _session->audible_frame();
 
 		if (_dragging_playhead) {
 			goto almost_done;
@@ -231,7 +231,7 @@ Editor::update_current_screen ()
 
 		/* only update if the playhead is on screen or we are following it */
 
-		if (_follow_playhead && session->requested_return_frame() < 0) {
+		if (_follow_playhead && _session->requested_return_frame() < 0) {
 
 			//playhead_cursor->canvas_item.show();
 
@@ -242,7 +242,7 @@ Editor::update_current_screen ()
 #ifndef  CONTINUOUS_SCROLL
 				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
 
-					if (session->transport_speed() < 0) {
+					if (_session->transport_speed() < 0) {
 						if (frame > (current_page_frames()/2)) {
 							center_screen (frame-(current_page_frames()/2));
 						} else {
@@ -261,7 +261,7 @@ Editor::update_current_screen ()
 				   editor canvas
 				*/
 
-				if (session->transport_speed()) {
+				if (_session->transport_speed()) {
 					double target = ((double)frame - (double)current_page_frames()/2.0) / frames_per_unit;
 					if (target <= 0.0) target = 0.0;
 					if ( fabs(target - current) < current_page_frames()/frames_per_unit ) {
@@ -331,9 +331,7 @@ Editor::session_going_away ()
 {
 	_have_idled = false;
 
-	for (vector<sigc::connection>::iterator i = session_connections.begin(); i != session_connections.end(); ++i) {
-		(*i).disconnect ();
-	}
+	_session_connections.drop_connections ();
 
 	stop_scrolling ();
 	selection->clear ();
@@ -389,7 +387,7 @@ Editor::session_going_away ()
 
 	set_title (title.get_string());
 
-	session = 0;
+	SessionHandlePtr::session_going_away ();
 }
 
 void

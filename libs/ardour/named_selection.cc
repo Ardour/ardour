@@ -32,7 +32,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-sigc::signal<void,NamedSelection*> NamedSelection::NamedSelectionCreated;
+boost::signals2::signal<void(NamedSelection*)> NamedSelection::NamedSelectionCreated;
 
 typedef std::list<boost::shared_ptr<Playlist> > PlaylistList;
 
@@ -102,7 +102,7 @@ NamedSelection::~NamedSelection ()
 {
 	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		(*i)->release ();
-		(*i)->GoingAway ();
+		(*i)->drop_references ();
 	}
 }
 

@@ -17,7 +17,6 @@
 
 */
 
-#include <sigc++/bind.h>
 
 #include "pbd/error.h"
 #include <glibmm/thread.h>
@@ -92,8 +91,8 @@ Session::pre_export ()
 
 	_exporting = true;
 	export_status->running = true;
-	export_status->Aborting.connect (sigc::hide_return (sigc::mem_fun (*this, &Session::stop_audio_export)));
-	export_status->Finished.connect (sigc::hide_return (sigc::mem_fun (*this, &Session::finalize_audio_export)));
+	scoped_connect (export_status->Aborting, boost::bind (&Session::stop_audio_export, this));
+	scoped_connect (export_status->Finished, boost::bind (&Session::finalize_audio_export, this));
 
 	return 0;
 }
@@ -151,7 +150,7 @@ Session::start_audio_export (nframes_t position, bool realtime)
 		last_process_function = process_function;
 		process_function = &Session::process_export;
 	} else {
-		export_freewheel_connection = _engine.Freewheel.connect (sigc::mem_fun (*this, &Session::process_export_fw));
+		export_freewheel_connection = _engine.Freewheel.connect (boost::bind (&Session::process_export_fw, this, _1));
 		return _engine.freewheel (true);
 	}
 
@@ -180,7 +179,7 @@ Session::process_export (nframes_t nframes)
 
 		process_without_events (nframes);
 
-		/* handle export */
+		/* handle export - XXX what about error handling? */
 
 		ProcessExport (nframes);
 
@@ -236,8 +235,11 @@ Session::finalize_audio_export ()
 
 	/* Clean up */
 
-	ProcessExport.clear();
-	ExportReadFinished.clear();
+	/* BOOST SIGNAL are these necessary? 
+	   ProcessExport.clear();
+	   ExportReadFinished.clear();
+	*/
+
 	export_freewheel_connection.disconnect();
 	export_handler.reset();
 	export_status.reset();

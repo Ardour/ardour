@@ -21,7 +21,6 @@
 
 #include <cstdlib>
 
-#include <sigc++/bind.h>
 
 #include "ardour/types.h"
 #include "ardour/configuration.h"
@@ -103,11 +102,9 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, nfra
 
 AudioPlaylist::~AudioPlaylist ()
 {
-	GoingAway (); /* EMIT SIGNAL */
+	drop_references ();
 
 	/* drop connections to signals */
-
-	notify_callbacks ();
 
 	_crossfades.clear ();
 }
@@ -531,8 +528,8 @@ AudioPlaylist::add_crossfade (boost::shared_ptr<Crossfade> xfade)
 	} else {
 		_crossfades.push_back (xfade);
 
-		xfade->Invalidated.connect (sigc::mem_fun (*this, &AudioPlaylist::crossfade_invalidated));
-		xfade->StateChanged.connect (sigc::mem_fun (*this, &AudioPlaylist::crossfade_changed));
+		scoped_connect (xfade->Invalidated, boost::bind (&AudioPlaylist::crossfade_invalidated, this, _1));
+		scoped_connect (xfade->StateChanged, boost::bind (&AudioPlaylist::crossfade_changed, this, _1));
 
 		notify_crossfade_added (xfade);
 	}
@@ -587,8 +584,8 @@ AudioPlaylist::set_state (const XMLNode& node, int version)
 		try {
 			boost::shared_ptr<Crossfade> xfade = boost::shared_ptr<Crossfade> (new Crossfade (*((const Playlist *)this), *child));
 			_crossfades.push_back (xfade);
-			xfade->Invalidated.connect (sigc::mem_fun (*this, &AudioPlaylist::crossfade_invalidated));
-			xfade->StateChanged.connect (sigc::mem_fun (*this, &AudioPlaylist::crossfade_changed));
+			scoped_connect (xfade->Invalidated, boost::bind (&AudioPlaylist::crossfade_invalidated, this, _1));
+			scoped_connect (xfade->StateChanged, boost::bind (&AudioPlaylist::crossfade_changed, this, _1));
 			NewCrossfade(xfade);
 		}
 
@@ -791,7 +788,7 @@ AudioPlaylist::crossfades_at (nframes_t frame, Crossfades& clist)
 }
 
 void
-AudioPlaylist::foreach_crossfade (sigc::slot<void, boost::shared_ptr<Crossfade> > s)
+AudioPlaylist::foreach_crossfade (boost::function<void (boost::shared_ptr<Crossfade>)> s)
 {
 	RegionLock rl (this, false);
 	for (Crossfades::iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {

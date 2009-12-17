@@ -23,8 +23,10 @@
 #include <string>
 #include <vector>
 #include <glibmm/thread.h>
-#include <sigc++/signal.h>
 #include <boost/shared_ptr.hpp>
+
+#include "pbd/scoped_connections.h"
+
 #include "ardour/data_type.h"
 
 namespace ARDOUR {
@@ -37,7 +39,7 @@ class AudioEngine;
  *  `Channel' is a rather overloaded term but I can't think of a better
  *  one right now.
  */
-class Bundle : public sigc::trackable
+class Bundle : public PBD::ScopedConnectionList
 {
   public:
 
@@ -118,7 +120,7 @@ class Bundle : public sigc::trackable
 		DirectionChanged = 0x10 ///< the direction (whether ports are inputs or outputs) has changed
 	};
 
-	sigc::signal<void, Change> Changed;
+	boost::signals2::signal<void(Change)> Changed;
 
   protected:
 

@@ -27,6 +27,8 @@
 #include <gtkmm/radiobutton.h>
 
 #include "evoral/Curve.hpp"
+#include "ardour/session_handle.h"
+
 #include "ardour_dialog.h"
 #include "canvas.h"
 
@@ -40,7 +42,7 @@ namespace ARDOUR
 class CrossfadeEditor : public ArdourDialog
 {
   public:
-	CrossfadeEditor (ARDOUR::Session&, boost::shared_ptr<ARDOUR::Crossfade>, double miny, double maxy);
+	CrossfadeEditor (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Crossfade>, double miny, double maxy);
 	~CrossfadeEditor ();
 
 	void apply ();
@@ -79,7 +81,6 @@ class CrossfadeEditor : public ArdourDialog
 
   private:
 	boost::shared_ptr<ARDOUR::Crossfade> xfade;
-	ARDOUR::Session& session;
 
 	Gtk::VBox vpacker;
 
@@ -182,10 +183,10 @@ class CrossfadeEditor : public ArdourDialog
 
 	void set (const ARDOUR::AutomationList& alist, WhichFade);
 
-	sigc::connection peaks_ready_connection;
+	boost::signals2::scoped_connection peaks_ready_connection;
 
 	void make_waves (boost::shared_ptr<ARDOUR::AudioRegion>, WhichFade);
-	void peaks_ready (boost::shared_ptr<ARDOUR::AudioRegion> r, WhichFade);
+	void peaks_ready (boost::weak_ptr<ARDOUR::AudioRegion> r, WhichFade);
 
 	void _apply_to (boost::shared_ptr<ARDOUR::Crossfade> xf);
 	void setup (boost::shared_ptr<ARDOUR::Crossfade>);

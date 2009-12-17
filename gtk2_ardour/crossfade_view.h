@@ -22,7 +22,7 @@
 
 #include <vector>
 #include <libgnomecanvasmm.h>
-#include <sigc++/signal.h>
+#include <boost/signals2.hpp>
 #include "ardour/crossfade.h"
 
 #include "time_axis_view_item.h"
@@ -52,7 +52,7 @@ struct CrossfadeView : public TimeAxisViewItem
     bool visible() const { return _visible; }
     void set_valid (bool yn);
 
-    static sigc::signal<void,CrossfadeView*> GoingAway;
+    static boost::signals2::signal<void(CrossfadeView*)> GoingAway;
 
     AudioRegionView& upper_regionview () const;
 

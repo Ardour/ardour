@@ -38,13 +38,11 @@
 #include "pbd/error.h"
 #include "pbd/rcu.h"
 #include "pbd/statefuldestructible.h"
+#include "pbd/scoped_connections.h"
 #include "pbd/undo.h"
 
 #include "midi++/mmc.h"
 #include "midi++/types.h"
-
-#include "pbd/destructible.h"
-#include "pbd/stateful.h"
 
 #include "ardour/ardour.h"
 #include "ardour/click.h"
@@ -120,7 +118,7 @@ class VSTPlugin;
 
 extern void setup_enum_writer ();
 
-class Session : public PBD::StatefulDestructible, public SessionEventManager, public boost::noncopyable
+class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager, public boost::noncopyable
 {
   public:
 	enum RecordState {
@@ -166,14 +164,14 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	void set_deletion_in_progress ();
 	void clear_deletion_in_progress ();
 	bool deletion_in_progress() const { return _state_of_the_state & Deletion; }
-	sigc::signal<void> DirtyChanged;
+	boost::signals2::signal<void()> DirtyChanged;
 
 	const SessionDirectory& session_directory () const { return *(_session_dir.get()); }
 
-	static sigc::signal<void> AutoBindingOn;
-	static sigc::signal<void> AutoBindingOff;
+	static boost::signals2::signal<void()> AutoBindingOn;
+	static boost::signals2::signal<void()> AutoBindingOff;
 
-	static sigc::signal<void,std::string> Dialog;
+	static boost::signals2::signal<void(std::string)> Dialog;
 
 	std::string sound_dir (bool with_path = true) const;
 	std::string peak_dir () const;
@@ -274,29 +272,29 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 
 	/* Proxy signal for region hidden changes */
 
-	sigc::signal<void,boost::shared_ptr<Region> > RegionHiddenChange;
+	boost::signals2::signal<void(boost::shared_ptr<Region>)> RegionHiddenChange;
 
 	/* Emitted when all i/o connections are complete */
 
-	sigc::signal<void> IOConnectionsComplete;
+	boost::signals2::signal<void()> IOConnectionsComplete;
 
 	/* Record status signals */
 
-	sigc::signal<void> RecordStateChanged;
+	boost::signals2::signal<void()> RecordStateChanged;
 
 	/* Transport mechanism signals */
 
-	sigc::signal<void> TransportStateChange; /* generic */
-	sigc::signal<void,nframes64_t> PositionChanged; /* sent after any non-sequential motion */
-	sigc::signal<void> DurationChanged;
-	sigc::signal<void,nframes64_t> Xrun;
-	sigc::signal<void> TransportLooped;
+	boost::signals2::signal<void()> TransportStateChange; /* generic */
+	boost::signals2::signal<void(nframes64_t)> PositionChanged; /* sent after any non-sequential motion */
+	boost::signals2::signal<void()> DurationChanged;
+	boost::signals2::signal<void(nframes64_t)> Xrun;
+	boost::signals2::signal<void()> TransportLooped;
 
 	/** emitted when a locate has occurred */
-	sigc::signal<void> Located;
+	boost::signals2::signal<void()> Located;
 
-	sigc::signal<void,RouteList&> RouteAdded;
-	sigc::signal<void> RouteGroupChanged;
+	boost::signals2::signal<void(RouteList&)> RouteAdded;
+	boost::signals2::signal<void()> RouteGroupChanged;
 
 	void queue_event (SessionEvent*);
 
@@ -350,9 +348,9 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 
 	Locations *locations() { return &_locations; }
 
-	sigc::signal<void,Location*>    auto_loop_location_changed;
-	sigc::signal<void,Location*>    auto_punch_location_changed;
-	sigc::signal<void>              locations_modified;
+	boost::signals2::signal<void(Location*)>    auto_loop_location_changed;
+	boost::signals2::signal<void(Location*)>    auto_punch_location_changed;
+	boost::signals2::signal<void()>              locations_modified;
 
 	void set_auto_punch_location (Location *);
 	void set_auto_loop_location (Location *);
@@ -377,8 +375,8 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	static int rename_template (std::string old_name, std::string new_name);
 	static int delete_template (std::string name);
 
-	sigc::signal<void,std::string> StateSaved;
-	sigc::signal<void> StateReady;
+	boost::signals2::signal<void(std::string)> StateSaved;
+	boost::signals2::signal<void()> StateReady;
 
 	std::vector<std::string*>* possible_states() const;
 	static std::vector<std::string*>* possible_states (std::string path);
@@ -408,12 +406,12 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 
 	RouteGroup *route_group_by_name (std::string);
 
-	sigc::signal<void,RouteGroup*> route_group_added;
-	sigc::signal<void>             route_group_removed;
+	boost::signals2::signal<void(RouteGroup*)> route_group_added;
+	boost::signals2::signal<void()>             route_group_removed;
 
-	void foreach_route_group (sigc::slot<void,RouteGroup*> sl) {
+	void foreach_route_group (boost::function<void(RouteGroup*)> f) {
 		for (std::list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); i++) {
-			sl (*i);
+			f (*i);
 		}
 	}
 
@@ -478,9 +476,9 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 
 	nframes_t convert_to_frames_at (nframes_t position, AnyTime const &);
 
-	static sigc::signal<void> StartTimeChanged;
-	static sigc::signal<void> EndTimeChanged;
-	static sigc::signal<void> TimecodeOffsetChanged;
+	static boost::signals2::signal<void()> StartTimeChanged;
+	static boost::signals2::signal<void()> EndTimeChanged;
+	static boost::signals2::signal<void()> TimecodeOffsetChanged;
 
         std::vector<SyncSource> get_available_sync_options() const;
 	void   request_sync_source (Slave*);
@@ -498,15 +496,15 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	TempoMap& tempo_map() { return *_tempo_map; }
 
 	/// signals the current transport position in frames, bbt and timecode time (in that order)
-	sigc::signal<void, const nframes_t&, const BBT_Time&, const Timecode::Time&> tick;
+	boost::signals2::signal<void(const nframes_t&, const BBT_Time&, const Timecode::Time&)> tick;
 
 	/* region info  */
 
 	void add_regions (std::vector<boost::shared_ptr<Region> >&);
 
-	sigc::signal<void,boost::weak_ptr<Region> > RegionAdded;
-	sigc::signal<void,std::vector<boost::weak_ptr<Region> >& > RegionsAdded;
-	sigc::signal<void,boost::weak_ptr<Region> > RegionRemoved;
+	boost::signals2::signal<void(boost::weak_ptr<Region>)>              RegionAdded;
+	boost::signals2::signal<void(std::vector<boost::weak_ptr<Region> >&)> RegionsAdded;
+	boost::signals2::signal<void(boost::weak_ptr<Region>)>              RegionRemoved;
 
 	int region_name (std::string& result, std::string base = std::string(""), bool newlevel = false);
 	std::string new_region_name (std::string);
@@ -531,9 +529,9 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 
 	int  start_audio_export (nframes_t position, bool realtime);
 
-	sigc::signal<int, nframes_t> ProcessExport;
-	sigc::signal<void> ExportReadFinished;
-	static sigc::signal<void, std::string, std::string> Exported;
+	boost::signals2::signal<int(nframes_t)> ProcessExport;
+	boost::signals2::signal<void()> ExportReadFinished;
+	static boost::signals2::signal<void(std::string, std::string)> Exported;
 
 	void add_source (boost::shared_ptr<Source>);
 	void remove_source (boost::weak_ptr<Source>);
@@ -550,16 +548,16 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	    0 for "yes, delete this playlist",
 	    1 for "no, don't delete this playlist".
 	*/
-	sigc::signal<int,boost::shared_ptr<Playlist> > AskAboutPlaylistDeletion;
+	boost::signals2::signal<void(boost::shared_ptr<Playlist>)>  AskAboutPlaylistDeletion;
 
 	/** handlers should return 0 for "ignore the rate mismatch",
 	    !0 for "do not use this session"
 	*/
-	static sigc::signal<int,nframes_t, nframes_t> AskAboutSampleRateMismatch;
+	static boost::signals2::signal<int(nframes_t, nframes_t)> AskAboutSampleRateMismatch;
 
 	/** handlers should return !0 for use pending state, 0 for ignore it.
 	*/
-	static sigc::signal<int> AskAboutPendingState;
+	static boost::signals2::signal<int()> AskAboutPendingState;
 
 	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (ARDOUR::AudioDiskstream&, uint32_t which_channel, bool destructive);
 
@@ -577,8 +575,8 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	void remove_named_selection (NamedSelection *);
 
 	template<class T> void foreach_named_selection (T& obj, void (T::*func)(NamedSelection&));
-	sigc::signal<void> NamedSelectionAdded;
-	sigc::signal<void> NamedSelectionRemoved;
+	boost::signals2::signal<void()> NamedSelectionAdded;
+	boost::signals2::signal<void()> NamedSelectionRemoved;
 
 	/* Curves and AutomationLists (TODO when they go away) */
 	void add_automation_list(AutomationList*);
@@ -597,7 +595,7 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	void cancel_audition ();
 	bool is_auditioning () const;
 
-	sigc::signal<void,bool> AuditionActive;
+	boost::signals2::signal<void(bool)> AuditionActive;
 
 	/* flattening stuff */
 
@@ -619,8 +617,8 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	void set_listen (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_record_enable (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 
-	sigc::signal<void,bool> SoloActive;
-	sigc::signal<void> SoloChanged;
+	boost::signals2::signal<void(bool)> SoloActive;
+	boost::signals2::signal<void()> SoloChanged;
 	
 
 	/* control/master out */
@@ -658,8 +656,8 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	void remove_bundle (boost::shared_ptr<Bundle>);
 	boost::shared_ptr<Bundle> bundle_by_name (std::string) const;
 
-	sigc::signal<void,boost::shared_ptr<Bundle> > BundleAdded;
-	sigc::signal<void,boost::shared_ptr<Bundle> > BundleRemoved;
+	boost::signals2::signal<void(boost::shared_ptr<Bundle>)> BundleAdded;
+	boost::signals2::signal<void(boost::shared_ptr<Bundle>)> BundleRemoved;
 
 	/* MIDI control */
 
@@ -673,10 +671,10 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	MIDI::Port *midi_port() const { return _midi_port; }
 	MIDI::Port *midi_clock_port() const { return _midi_clock_port; }
 
-	sigc::signal<void> MTC_PortChanged;
-	sigc::signal<void> MMC_PortChanged;
-	sigc::signal<void> MIDI_PortChanged;
-	sigc::signal<void> MIDIClock_PortChanged;
+	boost::signals2::signal<void()> MTC_PortChanged;
+	boost::signals2::signal<void()> MMC_PortChanged;
+	boost::signals2::signal<void()> MIDI_PortChanged;
+	boost::signals2::signal<void()> MIDIClock_PortChanged;
 
 	void set_trace_midi_input (bool, MIDI::Port* port = 0);
 	void set_trace_midi_output (bool, MIDI::Port* port = 0);
@@ -693,7 +691,7 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	void stop_scrub ();
 	void set_scrub_speed (float);
 	nframes_t scrub_buffer_size() const;
-	sigc::signal<void> ScrubReady;
+	boost::signals2::signal<void()> ScrubReady;
 
 	/* History (for editors, mixers, UIs etc.) */
 
@@ -726,11 +724,11 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 		_current_trans.top()->add_command (cmd);
 	}
 
-	std::map<PBD::ID, PBD::StatefulThingWithGoingAway*> registry;
+	std::map<PBD::ID,PBD::StatefulDestructible*> registry;
 
 	// these commands are implemented in libs/ardour/session_command.cc
 	Command* memento_command_factory(XMLNode* n);
-	void register_with_memento_command_factory(PBD::ID, PBD::StatefulThingWithGoingAway*);
+	void register_with_memento_command_factory(PBD::ID, PBD::StatefulDestructible*);
 
 	/* clicking */
 
@@ -767,7 +765,7 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 			void* ptr,
 			float opt);
 
-	static sigc::signal<void> SendFeedback;
+	static boost::signals2::signal<void()> SendFeedback;
 
 	/* Controllables */
 
@@ -945,7 +943,7 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	int  stop_audio_export ();
 	void finalize_audio_export ();
 
-	sigc::connection export_freewheel_connection;
+	boost::signals2::scoped_connection export_freewheel_connection;
 
 	void prepare_diskstreams ();
 	void commit_diskstreams (nframes_t, bool& session_requires_butler);
@@ -1069,16 +1067,12 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	void              locations_added (Location*);
 	void              handle_locations_changed (Locations::LocationList&);
 
-	sigc::connection auto_punch_start_changed_connection;
-	sigc::connection auto_punch_end_changed_connection;
-	sigc::connection auto_punch_changed_connection;
+	PBD::ScopedConnectionList punch_connections;
 	void             auto_punch_start_changed (Location *);
 	void             auto_punch_end_changed (Location *);
 	void             auto_punch_changed (Location *);
 
-	sigc::connection auto_loop_start_changed_connection;
-	sigc::connection auto_loop_end_changed_connection;
-	sigc::connection auto_loop_changed_connection;
+	PBD::ScopedConnectionList loop_connections;
 	void             auto_loop_changed (Location *);
 
 	void first_stage_init (std::string path, std::string snapshot_name);
@@ -1143,7 +1137,7 @@ class Session : public PBD::StatefulDestructible, public SessionEventManager, pu
 	struct timeval last_mmc_step;
 	double step_speed;
 
-	typedef sigc::slot<bool> MidiTimeoutCallback;
+	typedef boost::function<bool()> MidiTimeoutCallback;
 	typedef std::list<MidiTimeoutCallback> MidiTimeoutList;
 
 	MidiTimeoutList midi_timeouts;
