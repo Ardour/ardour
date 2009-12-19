@@ -98,10 +98,10 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	void *get_gui () const { return _gui; }
 	void  set_gui (void *p) { _gui = p; }
 
-	static boost::signals2::signal<void(Processor*)> ProcessorCreated;
+	static PBD::Signal1<void,Processor*> ProcessorCreated;
 
-	boost::signals2::signal<void()>                     ActiveChanged;
-	boost::signals2::signal<void(ChanCount,ChanCount)> ConfigurationChanged;
+	PBD::Signal0<void>                     ActiveChanged;
+	PBD::Signal2<void,ChanCount,ChanCount> ConfigurationChanged;
 
 protected:
 	int       _pending_active;

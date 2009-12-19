@@ -35,7 +35,8 @@
 #include <gtkmm/spinbutton.h>
 
 #include <libgnomecanvas/libgnomecanvas.h>
-#include <sigc++/signal.h>
+
+#include "pbd/signals.h"
 
 #include "audio_clock.h"
 #include "ardour_dialog.h"
@@ -93,6 +94,9 @@ class AudioRegionEditor : public RegionEditor
 	Gtk::HSeparator sep3;
 	Gtk::VSeparator sep1;
 	Gtk::VSeparator sep2;
+
+	PBD::ScopedConnection state_connection;
+	PBD::ScopedConnection audition_connection;
 
 	void region_changed (ARDOUR::Change);
 	void bounds_changed (ARDOUR::Change);

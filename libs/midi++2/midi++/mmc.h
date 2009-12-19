@@ -20,8 +20,7 @@
 #ifndef __midipp_mmc_h_h__
 #define __midipp_mmc_h_h__
 
-#include <boost/signals2.hpp>
-
+#include "pbd/signals.h"
 #include "midi++/types.h"
 
 namespace MIDI {
@@ -32,7 +31,7 @@ class Parser;
 class MachineControl 
 {
   public:
-	typedef boost::signals2::signal<void(MachineControl&)> MMCSignal;
+	typedef PBD::Signal1<void,MachineControl&> MMCSignal;
 	typedef byte CommandSignature[60];
 	typedef byte ResponseSignature[60];
 
@@ -144,20 +143,20 @@ class MachineControl
 	   true if the direction is "forwards", false for "reverse"
 	*/
 	
-	boost::signals2::signal<void(MachineControl&,float,bool)> Shuttle;
+	PBD::Signal3<void,MachineControl&,float,bool> Shuttle;
 
 	/* The second argument specifies the desired track record enabled
 	   status.
 	*/
 
-	boost::signals2::signal<void(MachineControl &,size_t,bool)> 
+	PBD::Signal3<void,MachineControl &,size_t,bool> 
 		                             TrackRecordStatusChange;
 	
 	/* The second argument specifies the desired track record enabled
 	   status.
 	*/
 
-	boost::signals2::signal<void(MachineControl &,size_t,bool)> 
+	PBD::Signal3<void,MachineControl &,size_t,bool> 
 		                             TrackMuteChange;
 	
 	/* The second argument points to a byte array containing
@@ -165,11 +164,11 @@ class MachineControl
 	   format (5 bytes, roughly: hrs/mins/secs/frames/subframes)
 	*/
 
-	boost::signals2::signal<void(MachineControl &, const byte *)> Locate;
+	PBD::Signal2<void,MachineControl &, const byte *> Locate;
 
 	/* The second argument is the number of steps to jump */
 	
-	boost::signals2::signal<void(MachineControl &, int)> Step;
+	PBD::Signal2<void,MachineControl &, int> Step;
 	
   protected:
 
@@ -257,7 +256,7 @@ class MachineControl
 	MIDI::Port &_port;
 
 	void process_mmc_message (Parser &p, byte *, size_t len);
-	boost::signals2::scoped_connection mmc_connection;
+	PBD::ScopedConnection mmc_connection;
 
 	int  do_masked_write (byte *, size_t len);
 	int  do_locate (byte *, size_t len);

@@ -227,7 +227,7 @@ LV2PluginUI::lv2ui_instantiate(const Glib::ustring& title)
 		}
 	}
 
-	_lv2->ParameterChanged.connect(sigc::mem_fun(*this, &LV2PluginUI::parameter_changed));
+	_lv2->ParameterChanged.connect (parameter_connection, boost::bind (&LV2PluginUI::parameter_changed, this, _1, _2));
 }
 
 LV2PluginUI::~LV2PluginUI ()

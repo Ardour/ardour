@@ -56,11 +56,11 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 
 	void set_automation_state (AutoState);
 	AutoState automation_state() const { return _state; }
-	boost::signals2::signal<void()> automation_state_changed;
+	PBD::Signal0<void> automation_state_changed;
 
 	void set_automation_style (AutoStyle m);
 	AutoStyle automation_style() const { return _style; }
-	boost::signals2::signal<void()> automation_style_changed;
+	PBD::Signal0<void> automation_style_changed;
 
 	bool automation_playback() const {
 		return (_state & Play) || ((_state & Touch) && !_touching);
@@ -69,10 +69,10 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 		return (_state & Write) || ((_state & Touch) && _touching);
 	}
 
-	boost::signals2::signal<void()> StateChanged;
+	PBD::Signal0<void> StateChanged;
 
-	static boost::signals2::signal<void(AutomationList*)> AutomationListCreated;
-	mutable boost::signals2::signal<void()> Dirty;
+	static PBD::Signal1<void,AutomationList*> AutomationListCreated;
+	mutable PBD::Signal0<void> Dirty;
 
 	void start_touch ();
 	void stop_touch ();

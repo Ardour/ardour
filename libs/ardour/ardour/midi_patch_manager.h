@@ -22,7 +22,7 @@
 #define MIDI_PATCH_MANAGER_H_
 
 #include "midi++/midnam_patch.h"
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 #include "ardour/session_handle.h"
 
 namespace ARDOUR {

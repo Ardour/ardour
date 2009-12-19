@@ -70,7 +70,7 @@ using namespace Glib;
 
 ustring AudioFileSource::peak_dir = "";
 
-boost::signals2::signal<void()> AudioFileSource::HeaderPositionOffsetChanged;
+PBD::Signal0<void> AudioFileSource::HeaderPositionOffsetChanged;
 uint64_t           AudioFileSource::header_position_offset = 0;
 
 /* XXX maybe this too */

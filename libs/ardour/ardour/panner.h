@@ -81,8 +81,8 @@ class StreamPanner : public PBD::Stateful
 
 	boost::shared_ptr<AutomationControl> pan_control()  { return _control; }
 
-	boost::signals2::signal<void()> Changed;      /* for position */
-	boost::signals2::signal<void()> StateChanged; /* for mute */
+	PBD::Signal0<void> Changed;      /* for position */
+	PBD::Signal0<void> StateChanged; /* for mute */
 
 	int set_state (const XMLNode&, int version);
 	virtual XMLNode& state (bool full_state) = 0;
@@ -270,9 +270,9 @@ public:
 	StreamPanner &streampanner( uint32_t n ) const { assert( n < _streampanners.size() ); return *_streampanners[n]; }
 	uint32_t npanners() const { return _streampanners.size(); }
 
-	boost::signals2::signal<void()> Changed;
-	boost::signals2::signal<void()> LinkStateChanged;
-	boost::signals2::signal<void()> StateChanged; /* for bypass */
+	PBD::Signal0<void> Changed;
+	PBD::Signal0<void> LinkStateChanged;
+	PBD::Signal0<void> StateChanged; /* for bypass */
 
 	/* only StreamPanner should call these */
 

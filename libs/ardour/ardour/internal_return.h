@@ -47,7 +47,7 @@ class InternalReturn : public Return
 	BufferSet* get_buffers();
 	void release_buffers();
 
-	static boost::signals2::signal<void(nframes_t)> CycleStart;
+	static PBD::Signal1<void,nframes_t> CycleStart;
 
   private:
 	BufferSet buffers;

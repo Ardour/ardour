@@ -46,7 +46,7 @@ MidiControlUI::MidiControlUI (Session& s)
 	: AbstractUI<MidiUIRequest> (_("midiui"))
 	, _session (s) 
 {
-	rebind_connection = MIDI::Manager::instance()->PortsChanged.connect (boost::bind (&MidiControlUI::change_midi_ports, this));
+	MIDI::Manager::instance()->PortsChanged.connect (rebind_connection, boost::bind (&MidiControlUI::change_midi_ports, this));
 }
 
 MidiControlUI::~MidiControlUI ()

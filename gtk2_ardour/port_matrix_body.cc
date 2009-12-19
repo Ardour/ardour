@@ -254,7 +254,7 @@ PortMatrixBody::setup ()
 		PortGroup::BundleList r = _matrix->visible_rows()->bundles ();
 		for (PortGroup::BundleList::iterator i = r.begin(); i != r.end(); ++i) {
 			
-			_bundle_connections.add_connection ((*i)->bundle->Changed.connect (boost::bind (&PortMatrixBody::rebuild_and_draw_row_labels, this)));
+			(*i)->bundle->Changed.connect (_bundle_connections, boost::bind (&PortMatrixBody::rebuild_and_draw_row_labels, this));
 			
 		}
 	}
@@ -262,7 +262,7 @@ PortMatrixBody::setup ()
 	if (_matrix->visible_columns()) {
 		PortGroup::BundleList c = _matrix->visible_columns()->bundles ();
 		for (PortGroup::BundleList::iterator i = c.begin(); i != c.end(); ++i) {
-			_bundle_connections.add_connection ((*i)->bundle->Changed.connect (boost::bind (&PortMatrixBody::rebuild_and_draw_column_labels, this)));
+			(*i)->bundle->Changed.connect (_bundle_connections, boost::bind (&PortMatrixBody::rebuild_and_draw_column_labels, this));
 		}
 	}
 		

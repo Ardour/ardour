@@ -80,7 +80,7 @@ class ExportProcessor
 
 	void write_files ();
 
-	static boost::signals2::signal<void(const Glib::ustring&)> WritingFile;
+	static PBD::Signal1<void,const Glib::ustring&> WritingFile;
 
   private:
 

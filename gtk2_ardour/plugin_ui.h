@@ -121,7 +121,10 @@ class PlugUIBase : public virtual sigc::trackable
 	void toggle_plugin_analysis ();
 	void processor_active_changed (boost::weak_ptr<ARDOUR::Processor> p);
 	void plugin_going_away ();
-	boost::signals2::scoped_connection death_connection;
+
+	PBD::ScopedConnection death_connection;
+	PBD::ScopedConnection active_connection;
+	PBD::ScopedConnectionList control_connections;
 };
 
 class GenericPluginUI : public PlugUIBase, public Gtk::VBox

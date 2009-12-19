@@ -51,7 +51,6 @@ class Session;
 class Region;
 
 class Playlist : public SessionObject
-	       , public boost::noncopyable
 	       , public boost::enable_shared_from_this<Playlist> {
   public:
 	typedef std::list<boost::shared_ptr<Region> >    RegionList;
@@ -130,13 +129,13 @@ class Playlist : public SessionObject
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_template ();
 
-	boost::signals2::signal<void(bool)> InUse;
-	boost::signals2::signal<void()>      Modified;
-	boost::signals2::signal<void(boost::weak_ptr<Region>)> RegionAdded;
-	boost::signals2::signal<void(boost::weak_ptr<Region>)> RegionRemoved;
-	boost::signals2::signal<void()>      NameChanged;
-	boost::signals2::signal<void()>      LengthChanged;
-	boost::signals2::signal<void(std::list< Evoral::RangeMove<nframes_t> > const &)> RangesMoved;
+	PBD::Signal1<void,bool> InUse;
+	PBD::Signal0<void>      Modified;
+	PBD::Signal1<void,boost::weak_ptr<Region> > RegionAdded;
+	PBD::Signal1<void,boost::weak_ptr<Region> > RegionRemoved;
+	PBD::Signal0<void>      NameChanged;
+	PBD::Signal0<void>      LengthChanged;
+	PBD::Signal1<void,std::list< Evoral::RangeMove<nframes_t> > const &> RangesMoved;
 
 	static std::string bump_name (std::string old_name, Session&);
 

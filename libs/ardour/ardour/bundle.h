@@ -25,7 +25,7 @@
 #include <glibmm/thread.h>
 #include <boost/shared_ptr.hpp>
 
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "ardour/data_type.h"
 
@@ -120,7 +120,7 @@ class Bundle : public PBD::ScopedConnectionList
 		DirectionChanged = 0x10 ///< the direction (whether ports are inputs or outputs) has changed
 	};
 
-	boost::signals2::signal<void(Change)> Changed;
+	PBD::Signal1<void,Change> Changed;
 
   protected:
 

@@ -25,7 +25,7 @@
 
 #include <libgnomecanvasmm/pixbuf.h>
 
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "selectable.h"
 #include "simplerect.h"

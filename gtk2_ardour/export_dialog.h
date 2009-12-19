@@ -107,6 +107,7 @@ class ExportDialog : public ArdourDialog {
 
 	PublicEditor &  editor;
 	StatusPtr       status;
+	PBD::ScopedConnection abort_connection;
 
 	/*** GUI components ***/
 

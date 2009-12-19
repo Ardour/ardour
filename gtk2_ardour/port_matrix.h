@@ -193,6 +193,8 @@ private:
 	/// port type that we are working with
 	ARDOUR::DataType _type;
 	PBD::ScopedConnectionList _route_connections;
+	PBD::ScopedConnectionList _changed_connections;
+	PBD::ScopedConnectionList _bundle_changed_connections;
 
 	PortMatrixBody* _body;
 	Gtk::HScrollbar _hscroll;

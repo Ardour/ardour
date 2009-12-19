@@ -116,7 +116,7 @@ PortGroup::add_bundle_internal (boost::shared_ptr<Bundle> b, boost::shared_ptr<I
 	}
 
 	BundleRecord* br = new BundleRecord (b, io, colour, has_colour);
-	br->changed_connection = b->Changed.connect (boost::bind (&PortGroup::bundle_changed, this, _1));
+	b->Changed.connect (br->changed_connection, boost::bind (&PortGroup::bundle_changed, this, _1));
 	_bundles.push_back (br);
 
 	Changed ();	
@@ -521,9 +521,8 @@ PortGroupList::add_group (boost::shared_ptr<PortGroup> g)
 {
 	_groups.push_back (g);
 
-	g->Changed.connect (sigc::mem_fun (*this, &PortGroupList::emit_changed));
-
-	_bundle_changed_connections.add_connection (g->BundleChanged.connect (sigc::mem_fun (*this, &PortGroupList::emit_bundle_changed)));
+	g->Changed.connect (_changed_connections, boost::bind (&PortGroupList::emit_changed, this));
+	g->BundleChanged.connect (_bundle_changed_connections, boost::bind (&PortGroupList::emit_bundle_changed, this, _1));
 
 	emit_changed ();
 }

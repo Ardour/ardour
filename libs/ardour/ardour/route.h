@@ -227,28 +227,28 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	void set_user_latency (nframes_t);
 	nframes_t initial_delay() const { return _initial_delay; }
 
-	boost::signals2::signal<void()>       active_changed;
-	boost::signals2::signal<void()>       phase_invert_changed;
-	boost::signals2::signal<void()>       denormal_protection_changed;
-	boost::signals2::signal<void(void*)> listen_changed;
-	boost::signals2::signal<void(void*)> solo_changed;
-	boost::signals2::signal<void(void*)> solo_safe_changed;
-	boost::signals2::signal<void(void*)> solo_isolated_changed;
-	boost::signals2::signal<void(void*)> comment_changed;
-	boost::signals2::signal<void(void*)> mute_changed;
-	boost::signals2::signal<void()>       mute_points_changed;
+	PBD::Signal0<void>       active_changed;
+	PBD::Signal0<void>       phase_invert_changed;
+	PBD::Signal0<void>       denormal_protection_changed;
+	PBD::Signal1<void,void*> listen_changed;
+	PBD::Signal1<void,void*> solo_changed;
+	PBD::Signal1<void,void*> solo_safe_changed;
+	PBD::Signal1<void,void*> solo_isolated_changed;
+	PBD::Signal1<void,void*> comment_changed;
+	PBD::Signal1<void,void*> mute_changed;
+	PBD::Signal0<void>       mute_points_changed;
 
 	/** the processors have changed; the parameter indicates what changed */
-	boost::signals2::signal<void(RouteProcessorChange)> processors_changed;
-	boost::signals2::signal<void(void*)> record_enable_changed;
+	PBD::Signal1<void,RouteProcessorChange> processors_changed;
+	PBD::Signal1<void,void*> record_enable_changed;
 	/** the metering point has changed */
-	boost::signals2::signal<void(void*)> meter_change; 
-	boost::signals2::signal<void()>       signal_latency_changed;
-	boost::signals2::signal<void()>       initial_delay_changed;
+	PBD::Signal1<void,void*> meter_change; 
+	PBD::Signal0<void>       signal_latency_changed;
+	PBD::Signal0<void>       initial_delay_changed;
 
 	/* gui's call this for their own purposes. */
 
-	boost::signals2::signal<void(std::string,void*)> gui_changed;
+	PBD::Signal2<void,std::string,void*> gui_changed;
 
 	/* stateful */
 
@@ -261,7 +261,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	int save_as_template (const std::string& path, const std::string& name);
 
-	boost::signals2::signal<void(void*)> SelectedChanged;
+	PBD::Signal1<void,void*> SelectedChanged;
 
 	int listen_via (boost::shared_ptr<Route>, Placement p, bool active, bool aux);
 	void drop_listen (boost::shared_ptr<Route>);
@@ -306,10 +306,10 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	void set_remote_control_id (uint32_t id);
 	uint32_t remote_control_id () const;
-	boost::signals2::signal<void()> RemoteControlIDChanged;
+	PBD::Signal0<void> RemoteControlIDChanged;
 
 	void sync_order_keys (std::string const &);
-	static boost::signals2::signal<void(std::string const &)> SyncOrderKeys;
+	static PBD::Signal1<void,std::string const &> SyncOrderKeys;
 
   protected:
 	friend class Session;

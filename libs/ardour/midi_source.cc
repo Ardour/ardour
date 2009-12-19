@@ -49,7 +49,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-boost::signals2::signal<void(MidiSource*)> MidiSource::MidiSourceCreated;
+PBD::Signal1<void,MidiSource*> MidiSource::MidiSourceCreated;
 
 MidiSource::MidiSource (Session& s, string name, Source::Flag flags)
 	: Source(s, DataType::MIDI, name, flags)

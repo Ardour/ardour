@@ -106,8 +106,8 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	_active.set_active (_processor->active ());
 	_active.signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::active_toggled));
 	
-	_processor->ActiveChanged.connect (sigc::mem_fun (*this, &ProcessorEntry::processor_active_changed));
-	_processor->NameChanged.connect (sigc::mem_fun (*this, &ProcessorEntry::processor_name_changed));
+	_processor->ActiveChanged.connect (active_connection, boost::bind (&ProcessorEntry::processor_active_changed, this));
+	_processor->NameChanged.connect (name_connection, boost::bind (&ProcessorEntry::processor_name_changed, this));
 }
 
 EventBox&
@@ -229,7 +229,7 @@ SendProcessorEntry::SendProcessorEntry (boost::shared_ptr<Send> s, Width w)
 	_vbox.pack_start (_fader);
 
 	_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &SendProcessorEntry::gain_adjusted));
-	_send->amp()->gain_control()->Changed.connect (sigc::mem_fun (*this, &SendProcessorEntry::show_gain));
+	_send->amp()->gain_control()->Changed.connect (send_gain_connection, boost::bind (&SendProcessorEntry::show_gain, this));
 	show_gain ();
 }
 
@@ -326,9 +326,9 @@ ProcessorBox::set_route (boost::shared_ptr<Route> r)
 	no_processor_redisplay = false;
 	_route = r;
 
-	connections.add_connection (_route->processors_changed.connect (sigc::mem_fun (*this, &ProcessorBox::route_processors_changed)));
-	connections.add_connection (_route->GoingAway.connect (sigc::mem_fun (*this, &ProcessorBox::route_going_away)));
-	connections.add_connection (_route->NameChanged.connect (sigc::mem_fun(*this, &ProcessorBox::route_name_changed)));
+	_route->processors_changed.connect (connections, boost::bind (&ProcessorBox::route_processors_changed, this, _1));
+	_route->GoingAway.connect (connections, boost::bind (&ProcessorBox::route_going_away, this));
+	_route->NameChanged.connect (connections, boost::bind (&ProcessorBox::route_name_changed, this));
 
 	redisplay_processors ();
 }

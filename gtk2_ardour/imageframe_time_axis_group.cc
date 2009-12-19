@@ -216,7 +216,7 @@ ImageFrameTimeAxisGroup::add_imageframe_item(const string & frame_id, nframes_t 
 
 		imageframe_views.push_front(ifv) ;
 
-		scoped_connect (ifv->GoingAway, boost::bind (&ImageFrameTimeAxisGroup::remove_imageframe_item, this, (void*)this));
+		ifv->GoingAway.connect (*this, boost::bind (&ImageFrameTimeAxisGroup::remove_imageframe_item, this, (void*)this));
 
 		 ImageFrameAdded(ifv, src) ; /* EMIT_SIGNAL */
 	}

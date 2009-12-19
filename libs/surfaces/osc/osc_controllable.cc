@@ -35,7 +35,7 @@ OSCControllable::OSCControllable (lo_address a, const std::string& p, boost::sha
 	, addr (a)
 	, path (p)
 {
-	c->Changed.connect (mem_fun (*this, &OSCControllable::send_change));
+	c->Changed.connect (changed_connection, mem_fun (*this, &OSCControllable::send_change));
 }
 
 OSCControllable::~OSCControllable ()

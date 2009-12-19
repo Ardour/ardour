@@ -61,8 +61,8 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 
 	_send->set_metering (true);
 
-	_send->input()->changed.connect (sigc::mem_fun (*this, &SendUI::ins_changed));
-	_send->output()->changed.connect (sigc::mem_fun (*this, &SendUI::outs_changed));
+	_send->input()->changed.connect (connections, boost::bind (&SendUI::ins_changed, this, _1, _2));
+	_send->output()->changed.connect (connections, boost::bind (&SendUI::outs_changed, this, _1, _2));
 
 	_panners.set_width (Wide);
 	_panners.setup_pan ();
@@ -130,7 +130,7 @@ SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session* session)
 
 	set_name ("SendUIWindow");
 
-	going_away_connection = s->GoingAway.connect (sigc::mem_fun (*this, &SendUIWindow::send_going_away));
+	s->GoingAway.connect (going_away_connection, boost::bind (&SendUIWindow::send_going_away, this));
 
 	signal_delete_event().connect (sigc::bind (
 					       sigc::ptr_fun (just_hide_it),

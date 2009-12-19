@@ -84,7 +84,7 @@ namespace ARDOUR
 		SRC_STATE*     src_state;
 		nframes_t      pos;
 
-		boost::signals2::scoped_connection freewheel_connection;
+		PBD::ScopedConnection freewheel_connection;
 
 		/* shared between UI thread and audio thread */
 

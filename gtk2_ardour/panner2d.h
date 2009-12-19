@@ -128,6 +128,9 @@ class Panner2d : public Gtk::DrawingArea
 	void toggle_bypass ();
 	void handle_state_change ();
 	void handle_position_change ();
+
+	PBD::ScopedConnection state_connection;
+	PBD::ScopedConnection change_connection;
 };
 
 class Panner2dWindow : public Gtk::Window

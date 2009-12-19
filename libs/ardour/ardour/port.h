@@ -25,7 +25,7 @@
 #include <vector>
 #include <jack/jack.h>
 #include <boost/utility.hpp>
-#include <boost/signals2.hpp>
+#include "pbd/signals.h"
 
 #include "ardour/data_type.h"
 #include "ardour/types.h"
@@ -118,7 +118,7 @@ public:
 
 	static void set_engine (AudioEngine *);
 
-	boost::signals2::signal<void(bool)> MonitorInputChanged;
+	PBD::Signal1<void,bool> MonitorInputChanged;
 
 protected:
 

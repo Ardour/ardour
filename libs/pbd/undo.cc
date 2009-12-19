@@ -82,7 +82,7 @@ UndoTransaction::add_command (Command *const action)
 	   so there is no need to manage this connection.
 	 */
 
-	scoped_connect (action->GoingAway, boost::bind (&command_death, this, action));
+	action->GoingAway.connect (*this, boost::bind (&command_death, this, action));
 	actions.push_back (action);
 }
 
@@ -185,7 +185,7 @@ UndoHistory::add (UndoTransaction* const ut)
 {
 	uint32_t current_depth = UndoList.size();
 
-	scoped_connect (ut->GoingAway, boost::bind (&UndoHistory::remove, this, ut));
+	ut->GoingAway.connect (*this, boost::bind (&UndoHistory::remove, this, ut));
 
 	/* if the current undo history is larger than or equal to the currently
 	   requested depth, then pop off at least 1 element to make space

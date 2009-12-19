@@ -22,7 +22,7 @@
 #include <vector>
 #include <string>
 
-#include <boost/signals2.hpp>
+#include "pbd/signals.h"
 
 #include "mackie_control_exception.h"
 
@@ -228,7 +228,7 @@ public:
 	virtual unsigned int in_use_timeout() { return _in_use_timeout; }
 
 	/// Keep track of the timeout so it can be updated with more incoming events
-	boost::signals2::scoped_connection in_use_connection;
+	PBD::ScopedConnection in_use_connection;
 	
 private:
 	int _id;

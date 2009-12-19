@@ -30,7 +30,7 @@
 #include <glibmm/thread.h>
 
 #include "pbd/rcu.h"
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "ardour/ardour.h"
 #include <jack/jack.h>
@@ -187,32 +187,32 @@ class AudioEngine : public SessionHandlePtr
 _	   the regular process() call to session->process() is not made.
 	*/
 
-	boost::signals2::signal<int(nframes_t)> Freewheel;
+	PBD::Signal1<int,nframes_t> Freewheel;
 
-	boost::signals2::signal<void()> Xrun;
+	PBD::Signal0<void> Xrun;
 
 	/* this signal is if JACK notifies us of a graph order event */
 
-	boost::signals2::signal<void()> GraphReordered;
+	PBD::Signal0<void> GraphReordered;
 
 	/* this signal is emitted if the sample rate changes */
 
-	boost::signals2::signal<void(nframes_t)> SampleRateChanged;
+	PBD::Signal1<void,nframes_t> SampleRateChanged;
 
 	/* this signal is sent if JACK ever disconnects us */
 
-	boost::signals2::signal<void()> Halted;
+	PBD::Signal0<void> Halted;
 
 	/* these two are emitted when the engine itself is
 	   started and stopped
 	*/
 
-	boost::signals2::signal<void()> Running;
-	boost::signals2::signal<void()> Stopped;
+	PBD::Signal0<void> Running;
+	PBD::Signal0<void> Stopped;
 
 	/* this signal is emitted if a JACK port is registered or unregistered */
 
-	boost::signals2::signal<void()> PortRegisteredOrUnregistered;
+	PBD::Signal0<void> PortRegisteredOrUnregistered;
 
 	std::string make_port_name_relative (std::string);
 	std::string make_port_name_non_relative (std::string);

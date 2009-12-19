@@ -30,7 +30,7 @@
 using namespace ARDOUR;
 using ARDOUR::nframes_t;
 
-sigc::signal<void,std::string,std::string> BasicUI::AccessAction;
+PBD::Signal2<void,std::string,std::string> BasicUI::AccessAction;
 
 BasicUI::BasicUI (Session& s)
 	: session (&s)

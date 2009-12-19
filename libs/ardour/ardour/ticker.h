@@ -20,7 +20,7 @@
 
 
 #include "midi++/jack.h"
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "ardour/types.h"
 #include "ardour/session_handle.h"

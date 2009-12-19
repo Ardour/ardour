@@ -70,7 +70,7 @@ class PluginManager : public boost::noncopyable {
 	PluginStatusType get_status (const PluginInfoPtr&);
 
 	/** plugins were added to or removed from one of the PluginInfoLists */
-	boost::signals2::signal<void()> PluginListChanged;
+	PBD::Signal0<void> PluginListChanged;
 
   private:
 	struct PluginStatus {

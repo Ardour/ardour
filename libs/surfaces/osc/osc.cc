@@ -83,7 +83,7 @@ OSC::OSC (Session& s, uint32_t port)
 
 	// "Application Hooks"
 	session_loaded (s);
-	scoped_connect (session->Exported, boost::bind (&OSC::session_exported, this, _1, _2));
+	session->Exported.connect (*this, boost::bind (&OSC::session_exported, this, _1, _2));
 }
 
 OSC::~OSC()
@@ -573,7 +573,7 @@ OSC::listen_to_route (boost::shared_ptr<Route> route, lo_address addr)
 	*/
 	
 	if (!route_exists) {
-		scoped_connect (route->GoingAway, (boost::bind (&OSC::drop_route, this, boost::weak_ptr<Route> (route))));
+		route->GoingAway.connect (*this, boost::bind (&OSC::drop_route, this, boost::weak_ptr<Route> (route)));
 	}
 }
 

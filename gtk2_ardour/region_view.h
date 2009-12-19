@@ -89,7 +89,7 @@ class RegionView : public TimeAxisViewItem
 	void enable_display(bool yn) { _enable_display = yn; }
 	virtual void update_coverage_frames (LayerDisplay);
 
-	static boost::signals2::signal<void(RegionView*)> RegionViewGoingAway;
+	static PBD::Signal1<void,RegionView*> RegionViewGoingAway;
 
   protected:
 
@@ -139,7 +139,7 @@ class RegionView : public TimeAxisViewItem
     bool    in_destructor;
 
     bool             wait_for_data;
-    boost::signals2::scoped_connection data_ready_connection;
+    PBD::ScopedConnection data_ready_connection;
 
     std::vector<GhostRegion*> ghosts;
 

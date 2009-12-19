@@ -138,6 +138,7 @@ class PluginSelector : public ArdourDialog
 	Gtk::Menu* create_by_creator_menu (ARDOUR::PluginInfoList&);
 	Gtk::Menu* create_by_category_menu (ARDOUR::PluginInfoList&);
 	void build_plugin_menu ();
+	PBD::ScopedConnection plugin_list_changed_connection;
 };
 
 #endif // __ardour_plugin_selector_h__

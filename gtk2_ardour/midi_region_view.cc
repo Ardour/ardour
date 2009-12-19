@@ -585,7 +585,7 @@ MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 {
 	_model = model;
 	content_connection.disconnect ();
-	content_connection = _model->ContentsChanged.connect (boost::bind (&MidiRegionView::redisplay_model, this));
+	_model->ContentsChanged.connect (content_connection, boost::bind (&MidiRegionView::redisplay_model, this));
 
 	clear_events ();
 
@@ -1071,7 +1071,7 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 		}
 	}
 
-	ghost->GoingAway.connect (boost::bind (&RegionView::remove_ghost, this, _1));
+	ghost->GoingAway.connect (*this, boost::bind (&RegionView::remove_ghost, this, _1));
 
 	return ghost;
 }

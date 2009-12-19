@@ -149,6 +149,7 @@ private:
 	Editing::RegionListSortType _sort_type;
 	bool _no_redisplay;
 	std::list<boost::shared_ptr<ARDOUR::Region> > tmp_region_list;
+	PBD::ScopedConnection region_property_connection;
 };
 
 #endif /* __gtk_ardour_editor_regions_h__ */

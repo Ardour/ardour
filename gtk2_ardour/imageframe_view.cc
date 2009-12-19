@@ -287,7 +287,7 @@ ImageFrameView::add_marker_view_item(MarkerView* item, void* src)
 {
 	marker_view_list.push_back(item) ;
 
-	scoped_connect (item->GoingAway, boost::bind (&ImageFrameView::remove_marker_view_item, this, (void*)this));
+	item->GoingAway.connect (*this, boost::bind (&ImageFrameView::remove_marker_view_item, this, (void*)this));
 
 	 MarkerViewAdded(item, src) ; /* EMIT_SIGNAL */
 }

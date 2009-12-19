@@ -22,7 +22,7 @@
 
 #include <string>
 #include "pbd/statefuldestructible.h"
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "ardour/session_handle.h"
 
@@ -53,7 +53,7 @@ class SessionObject : public SessionHandleRef, public PBD::StatefulDestructible
 		return true;
 	}
 
-	boost::signals2::signal<void()> NameChanged;
+	PBD::Signal0<void> NameChanged;
 
   protected:
 	std::string _name;

@@ -59,7 +59,7 @@ AutomationRegionView::init (Gdk::Color const & basic_color, bool /*wfd*/)
 
 	set_height (trackview.current_height());
 
-	_region->StateChanged.connect (sigc::mem_fun(*this, &AutomationRegionView::region_changed));
+	_region->StateChanged.connect (*this, boost::bind (&RegionView::region_changed, this, _1));
 
 	set_colors ();
 

@@ -550,7 +550,7 @@ AudioEngine::meter_thread ()
 		if (g_atomic_int_get(&m_meter_exit)) {
 			break;
 		}
-		Metering::update_meters ();
+		Metering::Meter ();
 	}
 }
 
@@ -735,9 +735,9 @@ AudioEngine::connect (const string& source, const string& destination)
 	Port* dst = get_port_by_name_locked (d);
 
 	if (src) {
-			ret = src->connect (d);
+		ret = src->connect (d);
 	} else if (dst) {
-			ret = dst->connect (s);
+		ret = dst->connect (s);
 	} else {
 		/* neither port is known to us, and this API isn't intended for use as a general patch bay */
 		ret = -1;

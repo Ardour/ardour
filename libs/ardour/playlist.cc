@@ -270,7 +270,7 @@ Playlist::init (bool hide)
 	freeze_length = 0;
 	_explicit_relayering = false;
 
-	scoped_connect (Modified, boost::bind (&Playlist::mark_session_dirty, this));
+	Modified.connect (*this, boost::bind (&Playlist::mark_session_dirty, this));
 }
 
 Playlist::~Playlist ()
@@ -605,8 +605,7 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t posit
 		}
 	}
 
-	region_state_changed_connections.add_connection 
-		(region->StateChanged.connect (boost::bind (&Playlist::region_changed_proxy, this, _1, boost::weak_ptr<Region> (region))));
+	region->StateChanged.connect (region_state_changed_connections, boost::bind (&Playlist::region_changed_proxy, this, _1, boost::weak_ptr<Region> (region)));
 
 	return true;
 }

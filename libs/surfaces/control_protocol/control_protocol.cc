@@ -28,18 +28,18 @@
 using namespace ARDOUR;
 using namespace std;
 
-sigc::signal<void> ControlProtocol::ZoomToSession;
-sigc::signal<void> ControlProtocol::ZoomOut;
-sigc::signal<void> ControlProtocol::ZoomIn;
-sigc::signal<void> ControlProtocol::Enter;
-sigc::signal<void,float> ControlProtocol::ScrollTimeline;
+PBD::Signal0<void> ControlProtocol::ZoomToSession;
+PBD::Signal0<void> ControlProtocol::ZoomOut;
+PBD::Signal0<void> ControlProtocol::ZoomIn;
+PBD::Signal0<void> ControlProtocol::Enter;
+PBD::Signal1<void,float> ControlProtocol::ScrollTimeline;
 
 ControlProtocol::ControlProtocol (Session& s, string str)
 	: BasicUI (s),
 	  _name (str)
 {
 	_active = false;
-	session->RouteAdded.connect (mem_fun(*this, &ControlProtocol::add_strip));
+	session->RouteAdded.connect (*this, boost::bind (&ControlProtocol::add_strip, this, _1));
 }
 
 ControlProtocol::~ControlProtocol ()

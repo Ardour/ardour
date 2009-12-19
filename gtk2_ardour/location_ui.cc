@@ -282,11 +282,11 @@ LocationEditRow::set_location (Location *loc)
 	end_clock.set_sensitive (!location->locked());
 	length_clock.set_sensitive (!location->locked());
 
-	connections.add_connection (location->start_changed.connect (boost::bind (&LocationEditRow::start_changed, this, _1)));
-	connections.add_connection (location->end_changed.connect (boost::bind (&LocationEditRow::end_changed, this, _1)));
-	connections.add_connection (location->name_changed.connect (boost::bind (&LocationEditRow::name_changed, this, _1)));
-	connections.add_connection (location->changed.connect (boost::bind (&LocationEditRow::location_changed, this, _1)));
-	connections.add_connection (location->FlagsChanged.connect (boost::bind (&LocationEditRow::flags_changed, this, _1, _2)));
+	location->start_changed.connect (connections, boost::bind (&LocationEditRow::start_changed, this, _1));
+	location->end_changed.connect (connections, boost::bind (&LocationEditRow::end_changed, this, _1));
+	location->name_changed.connect (connections, boost::bind (&LocationEditRow::name_changed, this, _1));
+	location->changed.connect (connections, boost::bind (&LocationEditRow::location_changed, this, _1));
+	location->FlagsChanged.connect (connections, boost::bind (&LocationEditRow::flags_changed, this, _1, _2));
 }
 
 void
@@ -860,10 +860,10 @@ LocationUI::set_session(ARDOUR::Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
-		_session_connections.add_connection (_session->locations()->changed.connect (boost::bind (&LocationUI::refresh_location_list, this)));
-		_session_connections.add_connection (_session->locations()->StateChanged.connect (boost::bind (&LocationUI::refresh_location_list, this)));
-		_session_connections.add_connection (_session->locations()->added.connect (boost::bind (&LocationUI::location_added, this, _1)));
-		_session_connections.add_connection (_session->locations()->removed.connect (boost::bind (&LocationUI::location_removed, this, _1)));
+		_session->locations()->changed.connect (_session_connections, boost::bind (&LocationUI::refresh_location_list, this));
+		_session->locations()->StateChanged.connect (_session_connections, boost::bind (&LocationUI::refresh_location_list, this));
+		_session->locations()->added.connect (_session_connections, boost::bind (&LocationUI::location_added, this, _1));
+		_session->locations()->removed.connect (_session_connections, boost::bind (&LocationUI::location_removed, this, _1));
 	}
 
 	refresh_location_list ();

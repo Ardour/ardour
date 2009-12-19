@@ -26,6 +26,8 @@
 #include <gtkmm/label.h>
 #include <gdkmm/pixbuf.h>
 
+#include "pbd/signals.h"
+
 class ARDOUR_UI;
 
 class Splash : public Gtk::Window
@@ -52,6 +54,7 @@ class Splash : public Gtk::Window
 	Glib::RefPtr<Pango::Layout> layout;
 
 	void boot_message (std::string);
+	PBD::ScopedConnection msg_connection;
 };
 
 #endif /* __ardour_gtk_splash_h__ */

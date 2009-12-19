@@ -143,7 +143,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 
 	virtual bool has_editor() const = 0;
 
-	boost::signals2::signal<void(uint32_t,float)> ParameterChanged;
+	PBD::Signal2<void,uint32_t,float> ParameterChanged;
 
 	/* NOTE: this block of virtual methods looks like the interface
 	   to a Processor, but Plugin does not inherit from Processor.

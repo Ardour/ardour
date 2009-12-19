@@ -27,13 +27,14 @@
 #include "ardour/export_formats.h"
 
 #include "pbd/xml++.h"
+#include "pbd/signals.h"
 
 #include "ardour_dialog.h"
 #include "audio_clock.h"
 
 #include <gtkmm.h>
 
-class ExportFormatDialog : public ArdourDialog {
+class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList {
   private:
 
 	typedef ARDOUR::ExportFormatManager::WeakCompatPtr WeakCompatPtr;

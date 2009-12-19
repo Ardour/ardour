@@ -105,8 +105,8 @@ class Crossfade : public ARDOUR::AudioRegion
 
 	nframes_t overlap_length() const;
 
-	boost::signals2::signal<void(boost::shared_ptr<Region>)> Invalidated;
-	boost::signals2::signal<void(Change)>     StateChanged;
+	PBD::Signal1<void,boost::shared_ptr<Region> > Invalidated;
+	PBD::Signal1<void,Change>     StateChanged;
 
 	bool covers (nframes_t frame) const {
 		return _position <= frame && frame < _position + _length;

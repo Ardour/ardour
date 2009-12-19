@@ -574,7 +574,7 @@ EditorRouteGroups::add (RouteGroup* group)
 		focus = true;
 	}
 
-	group->FlagsChanged.connect (sigc::bind (sigc::mem_fun (*this, &EditorRouteGroups::flags_changed), group));
+	group->FlagsChanged.connect (flags_connection, boost::bind (&EditorRouteGroups::flags_changed, this, _1, group));
 
 	if (focus) {
 		TreeViewColumn* col = _display.get_column (0);
@@ -668,8 +668,8 @@ EditorRouteGroups::set_session (Session* s)
 	EditorComponent::set_session (s);
 
 	if (_session) {
-		_session_connections.add_connection (_session->route_group_added.connect (boost::bind (&EditorRouteGroups::add, this, _1)));
-		_session_connections.add_connection (_session->route_group_removed.connect (boost::bind (&EditorRouteGroups::groups_changed, this)));
+		_session->route_group_added.connect (_session_connections, boost::bind (&EditorRouteGroups::add, this, _1));
+		_session->route_group_removed.connect (_session_connections, boost::bind (&EditorRouteGroups::groups_changed, this));
 	}
 
 	groups_changed ();

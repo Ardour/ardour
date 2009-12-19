@@ -562,23 +562,23 @@ void MackieControlProtocol::update_surface()
 void MackieControlProtocol::connect_session_signals()
 {
 	// receive routes added
-	session_connections.add_connection (session->RouteAdded.connect(boost::bind (&MackieControlProtocol::notify_route_added, this, _1)));
+	session->RouteAdded.connect(session_connections, boost::bind (&MackieControlProtocol::notify_route_added, this, _1));
 	// receive record state toggled
-	session_connections.add_connection (session->RecordStateChanged.connect(boost::bind (&MackieControlProtocol::notify_record_state_changed, this)));
+	session->RecordStateChanged.connect(session_connections, boost::bind (&MackieControlProtocol::notify_record_state_changed, this));
 	// receive transport state changed
-	session_connections.add_connection (session->TransportStateChange.connect(boost::bind (&MackieControlProtocol::notify_transport_state_changed, this)));
+	session->TransportStateChange.connect(session_connections, boost::bind (&MackieControlProtocol::notify_transport_state_changed, this));
 	// receive punch-in and punch-out
-	session_connections.add_connection (Config->ParameterChanged.connect(boost::bind (&MackieControlProtocol::notify_parameter_changed, this, _1)));
-	session_connections.add_connection (session->config.ParameterChanged.connect (boost::bind (&MackieControlProtocol::notify_parameter_changed, this, _1)));
+	Config->ParameterChanged.connect(session_connections, boost::bind (&MackieControlProtocol::notify_parameter_changed, this, _1));
+	session->config.ParameterChanged.connect (session_connections, boost::bind (&MackieControlProtocol::notify_parameter_changed, this, _1));
 	// receive rude solo changed
-	session_connections.add_connection (session->SoloActive.connect(boost::bind (&MackieControlProtocol::notify_solo_active_changed, this, _1)));
+	session->SoloActive.connect(session_connections, boost::bind (&MackieControlProtocol::notify_solo_active_changed, this, _1));
 
 	// make sure remote id changed signals reach here
 	// see also notify_route_added
 	Sorted sorted = get_sorted_routes();
 	for ( Sorted::iterator it = sorted.begin(); it != sorted.end(); ++it )
 	{
-		session_connections.add_connection ((*it)->RemoteControlIDChanged.connect (boost::bind(&MackieControlProtocol::notify_remote_id_changed, this)));
+		((*it)->RemoteControlIDChanged.connect (route_connections, boost::bind(&MackieControlProtocol::notify_remote_id_changed, this)));
 	}
 }
 
@@ -602,10 +602,10 @@ void MackieControlProtocol::add_port( MIDI::Port & midi_port, int number )
 		MackiePort * sport = new MackiePort( *this, midi_port, number );
 		_ports.push_back( sport );
 		
-		port_connections.add_connection (sport->init_event.connect (boost::bind (&MackieControlProtocol::handle_port_init, this, sport)));
-		port_connections.add_connection (sport->active_event.connect (boost::bind (&MackieControlProtocol::handle_port_active, this, sport)));
-		port_connections.add_connection (sport->inactive_event.connect (boost::bind (&MackieControlProtocol::handle_port_inactive, this, sport)));
-
+		sport->init_event.connect (port_connections, boost::bind (&MackieControlProtocol::handle_port_init, this, sport));
+		sport->active_event.connect (port_connections, boost::bind (&MackieControlProtocol::handle_port_active, this, sport));
+		sport->inactive_event.connect (port_connections, boost::bind (&MackieControlProtocol::handle_port_inactive, this, sport));
+		
 		_ports_changed = true;
 	}
 }
@@ -682,7 +682,7 @@ void MackieControlProtocol::initialize_surface()
 	// Connect events. Must be after route table otherwise there will be trouble
 
 	for( MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it ) {
-		port_connections.add_connection ((*it)->control_event.connect(boost::bind (&MackieControlProtocol::handle_control_event, this, _1, _2, _3)));
+		(*it)->control_event.connect (port_connections, boost::bind (&MackieControlProtocol::handle_control_event, this, _1, _2, _3));
 	}
 }
 
@@ -1445,7 +1445,7 @@ void MackieControlProtocol::notify_route_added( ARDOUR::RouteList & rl )
 	typedef ARDOUR::RouteList ARS;
 
 	for (ARS::iterator it = rl.begin(); it != rl.end(); ++it) {
-		route_connections.add_connection ((*it)->RemoteControlIDChanged.connect (boost::bind (&MackieControlProtocol::notify_remote_id_changed, this)));
+		(*it)->RemoteControlIDChanged.connect (route_connections, boost::bind (&MackieControlProtocol::notify_remote_id_changed, this));
 	}
 }
 

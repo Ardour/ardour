@@ -108,9 +108,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	}
 
 	if (_route->panner()) {
-		_route->panner()->Changed.connect (sigc::bind (
-				sigc::mem_fun(*this, &AudioTimeAxisView::ensure_pan_views),
-				false));
+		_route->panner()->Changed.connect (*this, (boost::bind (&AudioTimeAxisView::ensure_pan_views, this, false)));
 	}
 
 	/* map current state of the route */

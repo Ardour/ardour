@@ -42,7 +42,7 @@ class MidiControlUI : public AbstractUI<MidiUIRequest>
 	typedef std::list<GSource*> PortSources;
 	PortSources port_sources;
 	ARDOUR::Session& _session;
-	boost::signals2::scoped_connection rebind_connection;
+	PBD::ScopedConnection rebind_connection;
 
 	bool midi_input_handler (Glib::IOCondition, MIDI::Port*);
 	void reset_ports ();

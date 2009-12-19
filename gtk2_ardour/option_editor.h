@@ -364,6 +364,7 @@ protected:
 private:
 
 	void parameter_changed (std::string const &);
+	PBD::ScopedConnection config_connection;
 
 	Gtk::Notebook _notebook;
 	std::map<std::string, OptionEditorPage*> _pages;

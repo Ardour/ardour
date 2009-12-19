@@ -118,8 +118,8 @@ class ExportHandler : public ExportElementFactory
 
 	bool               realtime;
 
-	boost::signals2::scoped_connection          files_written_connection;
-	boost::signals2::scoped_connection          export_read_finished_connection;
+	PBD::ScopedConnection          files_written_connection;
+	PBD::ScopedConnection          export_read_finished_connection;
 	std::list<Glib::ustring> files_written;
 	void add_file (const Glib::ustring&);
 
@@ -177,7 +177,7 @@ class ExportHandler : public ExportElementFactory
 	TimespanPtr          current_timespan;
 	ConfigMap::iterator  current_map_it;
 	TimespanBounds       timespan_bounds;
-	boost::signals2::scoped_connection     channel_config_connection;
+	PBD::ScopedConnection     channel_config_connection;
 
 };
 

@@ -74,7 +74,7 @@ SessionPlaylists::add (boost::shared_ptr<Playlist> playlist)
 
 	if (!existing) {
 		playlists.insert (playlists.begin(), playlist);
-		scoped_connect (playlist->InUse, boost::bind (&SessionPlaylists::track, this, _1, boost::weak_ptr<Playlist>(playlist)));
+		playlist->InUse.connect (*this, boost::bind (&SessionPlaylists::track, this, _1, boost::weak_ptr<Playlist>(playlist)));
 	}
 
 	return existing;

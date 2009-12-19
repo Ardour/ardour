@@ -57,7 +57,6 @@ MIDIControllable::init ()
 	control_type = none;
 	_control_description = "MIDI Control: none";
 	control_additional = (byte) -1;
-	connections = 0;
 	feedback = true; // for now
 
 	/* use channel 0 ("1") as the initial channel */
@@ -72,17 +71,20 @@ MIDIControllable::midi_forget ()
 	   our existing event + type information.
 	*/
 
-	if (connections > 0) {
-		midi_sense_connection[0].disconnect ();
-	}
+	midi_sense_connection[0].disconnect ();
+	midi_sense_connection[1].disconnect ();
+	midi_learn_connection.disconnect ();
+}
 
-	if (connections > 1) {
-		midi_sense_connection[1].disconnect ();
-	}
-
-	connections = 0;
+void
+MIDIControllable::drop_external_control ()
+{
+	midi_sense_connection[0].disconnect ();
+	midi_sense_connection[1].disconnect ();
 	midi_learn_connection.disconnect ();
 
+	control_type = none;
+	control_additional = (byte) -1;
 }
 
 void
@@ -109,30 +111,13 @@ void
 MIDIControllable::learn_about_external_control ()
 {
 	drop_external_control ();
-	midi_learn_connection = _port.input()->any.connect (boost::bind (&MIDIControllable::midi_receiver, this, _1, _2, _3));
+	_port.input()->any.connect (midi_learn_connection, boost::bind (&MIDIControllable::midi_receiver, this, _1, _2, _3));
 }
 
 void
 MIDIControllable::stop_learning ()
 {
 	midi_learn_connection.disconnect ();
-}
-
-void
-MIDIControllable::drop_external_control ()
-{
-	if (connections > 0) {
-		midi_sense_connection[0].disconnect ();
-	}
-	if (connections > 1) {
-		midi_sense_connection[1].disconnect ();
-	}
-
-	connections = 0;
-	midi_learn_connection.disconnect ();
-
-	control_type = none;
-	control_additional = (byte) -1;
 }
 
 float
@@ -300,58 +285,43 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 	int chn_i = chn;
 	switch (ev) {
 	case MIDI::off:
-		midi_sense_connection[0] = p.channel_note_off[chn_i].connect
-			(boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
+		p.channel_note_off[chn_i].connect (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
 
 		/* if this is a bistate, connect to noteOn as well,
 		   and we'll toggle back and forth between the two.
 		*/
 
 		if (bistate) {
-			midi_sense_connection[1] = p.channel_note_on[chn_i].connect
-				(boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
-			connections = 2;
-		} else {
-			connections = 1;
-		}
+			p.channel_note_on[chn_i].connect (midi_sense_connection[1], boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
+		} 
+
 		_control_description = "MIDI control: NoteOff";
 		break;
 
 	case MIDI::on:
-		midi_sense_connection[0] = p.channel_note_on[chn_i].connect
-			(boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
+		p.channel_note_on[chn_i].connect (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
 		if (bistate) {
-			midi_sense_connection[1] = p.channel_note_off[chn_i].connect
-				(boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
-			connections = 2;
-		} else {
-			connections = 1;
+			p.channel_note_off[chn_i].connect (midi_sense_connection[1], boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
 		}
 		_control_description = "MIDI control: NoteOn";
 		break;
 		
 	case MIDI::controller:
-		midi_sense_connection[0] = p.channel_controller[chn_i].connect
-			(boost::bind (&MIDIControllable::midi_sense_controller, this, _1, _2));
-		connections = 1;
+		p.channel_controller[chn_i].connect (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_controller, this, _1, _2));
 		snprintf (buf, sizeof (buf), "MIDI control: Controller %d", control_additional);
 		_control_description = buf;
 		break;
 
 	case MIDI::program:
 		if (!bistate) {
-			midi_sense_connection[0] = p.channel_program_change[chn_i].connect
-				(boost::bind (&MIDIControllable::midi_sense_program_change, this, _1, _2));
-			connections = 1;
+			p.channel_program_change[chn_i].connect (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_program_change, this, _1, _2));
 			_control_description = "MIDI control: ProgramChange";
 		}
 		break;
 
 	case MIDI::pitchbend:
 		if (!bistate) {
-			midi_sense_connection[0] = p.channel_pitchbend[chn_i].connect
-				(boost::bind (&MIDIControllable::midi_sense_pitchbend, this, _1, _2));
-			connections = 1;
+			p.channel_pitchbend[chn_i].connect (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_pitchbend, this, _1, _2));
 			_control_description = "MIDI control: Pitchbend";
 		}
 		break;

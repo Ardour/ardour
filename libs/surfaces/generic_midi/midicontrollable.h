@@ -22,11 +22,12 @@
 
 #include <string>
 
-#include <boost/signals2.hpp>
-
 #include "midi++/types.h"
+
 #include "pbd/controllable.h"
+#include "pbd/signals.h"
 #include "pbd/stateful.h"
+
 #include "ardour/types.h"
 
 namespace MIDI {
@@ -82,9 +83,8 @@ class MIDIControllable : public PBD::Stateful
 	MIDI::byte       last_value;
 	bool             bistate;
 	int              midi_msg_id;      /* controller ID or note number */
-	boost::signals2::connection midi_sense_connection[2];
-	boost::signals2::connection midi_learn_connection;
-	size_t           connections;
+	PBD::ScopedConnection midi_sense_connection[2];
+	PBD::ScopedConnection midi_learn_connection;
 	MIDI::eventType  control_type;
 	MIDI::byte       control_additional;
 	MIDI::channel_t  control_channel;

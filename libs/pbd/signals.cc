@@ -17,7 +17,7 @@
 
 */
 
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 using namespace PBD;
 
@@ -33,10 +33,10 @@ ScopedConnectionList::~ScopedConnectionList()
 }
 
 void
-ScopedConnectionList::add_connection (const boost::signals2::connection& c)
+ScopedConnectionList::add_connection (const UnscopedConnection& c)
 {
 	Glib::Mutex::Lock lm (_lock);
-	_list.push_back (new boost::signals2::scoped_connection (c));
+	_list.push_back (new ScopedConnection (c));
 }
 
 void

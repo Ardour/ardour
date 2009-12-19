@@ -97,6 +97,7 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 		Gtk::Label              format_label;
 		Gtk::Alignment          format_align;
 		ExportFormatSelector    format_selector;
+		PBD::ScopedConnection   format_connection;
 
 		Gtk::Label              filename_label;
 		Gtk::Alignment          filename_align;

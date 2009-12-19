@@ -42,7 +42,7 @@ public:
 		: obj(a_object), before(a_before), after(a_after)
 	{
 		/* if the object dies, make sure that we die and that everyone knows about it */
-		obj_death_connection = obj.GoingAway.connect (boost::bind (&MementoCommand::object_died, this));
+		obj.GoingAway.connect (obj_death_connection, boost::bind (&MementoCommand::object_died, this));
 	}
 
 	~MementoCommand () {
@@ -97,7 +97,7 @@ protected:
 	obj_T&   obj;
 	XMLNode* before;
 	XMLNode* after;
-	boost::signals2::scoped_connection obj_death_connection;
+	PBD::ScopedConnection obj_death_connection;
 };
 
 #endif // __lib_pbd_memento_h__

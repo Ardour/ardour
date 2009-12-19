@@ -45,7 +45,7 @@ GroupTabs::set_session (Session* s)
 	EditorComponent::set_session (s);
 
 	if (_session) {
-		_session_connections.add_connection (_session->RouteGroupChanged.connect (boost::bind (&GroupTabs::set_dirty, this)));
+		_session->RouteGroupChanged.connect (_session_connections, boost::bind (&GroupTabs::set_dirty, this));
 	}
 }
 

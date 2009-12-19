@@ -108,15 +108,15 @@ class Location : public PBD::StatefulDestructible
 	bool is_range_marker() const { return _flags & IsRangeMarker; }
 	bool matches (Flags f) const { return _flags & f; }
 
-	boost::signals2::signal<void(Location*)> name_changed;
-	boost::signals2::signal<void(Location*)> end_changed;
-	boost::signals2::signal<void(Location*)> start_changed;
+	PBD::Signal1<void,Location*> name_changed;
+	PBD::Signal1<void,Location*> end_changed;
+	PBD::Signal1<void,Location*> start_changed;
 
-	boost::signals2::signal<void(Location*,void*)> FlagsChanged;
+	PBD::Signal2<void,Location*,void*> FlagsChanged;
 
 	/* this is sent only when both start&end change at the same time */
 
-	boost::signals2::signal<void(Location*)> changed;
+	PBD::Signal1<void,Location*> changed;
 
 	/* CD Track / CD-Text info */
 
@@ -175,11 +175,11 @@ class Locations : public PBD::StatefulDestructible
 
 	void find_all_between (nframes64_t start, nframes64_t, LocationList&, Location::Flags);
 
-	boost::signals2::signal<void(Location*)> current_changed;
-	boost::signals2::signal<void()>           changed;
-	boost::signals2::signal<void(Location*)> added;
-	boost::signals2::signal<void(Location*)> removed;
-	boost::signals2::signal<void(Change)>    StateChanged;
+	PBD::Signal1<void,Location*> current_changed;
+	PBD::Signal0<void>           changed;
+	PBD::Signal1<void,Location*> added;
+	PBD::Signal1<void,Location*> removed;
+	PBD::Signal1<void,Change>    StateChanged;
 
 	template<class T> void apply (T& obj, void (T::*method)(LocationList&)) {
 		Glib::Mutex::Lock lm (lock);

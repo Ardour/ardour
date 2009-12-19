@@ -74,7 +74,7 @@ Mixer_UI::Mixer_UI ()
 	strip_redisplay_does_not_sync_order_keys = false;
 	ignore_sync = false;
 
-	Route::SyncOrderKeys.connect (sigc::mem_fun (*this, &Mixer_UI::sync_order_keys));
+	Route::SyncOrderKeys.connect (*this, boost::bind (&Mixer_UI::sync_order_keys, this, _1));
 
 	scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	scroller_base.set_name ("MixerWindow");
@@ -333,9 +333,9 @@ Mixer_UI::add_strip (RouteList& routes)
 			route->set_order_key (N_("signal"), track_model->children().size()-1);
 		}
 
-		route->NameChanged.connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_name_changed), strip));
+		route->NameChanged.connect (*this,  boost::bind (&Mixer_UI::strip_name_changed, this, strip));
 
-		scoped_connect (strip->GoingAway, boost::bind (&Mixer_UI::remove_strip, this, strip));
+		strip->GoingAway.connect (*this, boost::bind (&Mixer_UI::remove_strip, this, strip));
 		strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
 		strip->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 	}
@@ -476,10 +476,10 @@ Mixer_UI::set_session (Session* sess)
 
 	initial_track_display ();
 
-	_session_connections.add_connection (_session->RouteAdded.connect (boost::bind (&Mixer_UI::add_strip, this, _1)));
-	_session_connections.add_connection (_session->route_group_added.connect (boost::bind (&Mixer_UI::add_route_group, this, _1)));
-	_session_connections.add_connection (_session->route_group_removed.connect (boost::bind (&Mixer_UI::route_groups_changed, this)));
-	_session_connections.add_connection (_session->config.ParameterChanged.connect (boost::bind (&Mixer_UI::parameter_changed, this, _1)));
+	_session->RouteAdded.connect (_session_connections, boost::bind (&Mixer_UI::add_strip, this, _1));
+	_session->route_group_added.connect (_session_connections, boost::bind (&Mixer_UI::add_route_group, this, _1));
+	_session->route_group_removed.connect (_session_connections, boost::bind (&Mixer_UI::route_groups_changed, this));
+	_session->config.ParameterChanged.connect (_session_connections, boost::bind (&Mixer_UI::parameter_changed, this, _1));
 
 	route_groups_changed ();
 
@@ -1252,7 +1252,7 @@ Mixer_UI::add_route_group (RouteGroup* group)
 		focus = true;
 	}
 
-	group->FlagsChanged.connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::group_flags_changed), group));
+	group->FlagsChanged.connect (*this,  boost::bind (&Mixer_UI::group_flags_changed, this, _1, group));
 
 	if (focus) {
 		TreeViewColumn* col = group_display.get_column (0);

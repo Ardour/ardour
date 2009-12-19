@@ -22,7 +22,7 @@
 #include <list>
 #include <cmath>
 
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "ardour/location.h"
 #include "enums.h"

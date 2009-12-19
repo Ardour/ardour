@@ -211,7 +211,7 @@ MarkerTimeAxisView::add_marker_view(ImageFrameView* ifv, std::string mark_type, 
 	ifv->add_marker_view_item(mv, src) ;
 	marker_view_list.push_front(mv) ;
 
-	scoped_connect (mv->GoingAway, boost::bind (&MarkerTimeAxisView::remove_marker_view, this, (void*)this));
+	mv->GoingAway.connect (*this, boost::bind (&MarkerTimeAxisView::remove_marker_view, this, (void*)this));
 
 	 MarkerViewAdded(mv,src) ; /* EMIT_SIGNAL */
 

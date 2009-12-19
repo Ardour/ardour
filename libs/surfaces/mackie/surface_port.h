@@ -18,9 +18,9 @@
 #ifndef surface_port_h
 #define surface_port_h
 
-#include <boost/signals2.hpp>
 #include <glibmm/thread.h>
 
+#include "pbd/signals.h"
 #include "midi_byte_array.h"
 #include "types.h"
 
@@ -64,17 +64,17 @@ public:
 	const MIDI::Port & port() const { return *_port; }
 	
 	// all control notofications are sent from here
-	boost::signals2::signal<void(SurfacePort &, Control &, const ControlState &)> control_event;
+	PBD::Signal3<void,SurfacePort &, Control &, const ControlState &> control_event;
 	
 	// emitted just before the port goes into initialisation
 	// where it tries to establish that its device is connected
-	boost::signals2::signal<void()> init_event;
+	PBD::Signal0<void> init_event;
 	
 	// emitted when the port completes initialisation successfully
-	boost::signals2::signal<void()> active_event;
+	PBD::Signal0<void> active_event;
 
 	// emitted when the port goes inactive (ie a read or write failed)
-	boost::signals2::signal<void()> inactive_event;
+	PBD::Signal0<void> inactive_event;
 	
 	// the port number - master is 0(extenders are 1((,4
 	virtual int number() const { return _number; }

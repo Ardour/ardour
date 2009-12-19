@@ -79,12 +79,12 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 			canvas_rect, &_trackview));
 
 	if (_trackview.is_track()) {
-		scoped_connect (_trackview.track()->DiskstreamChanged, boost::bind (&StreamView::diskstream_changed, this));
-		scoped_connect (_trackview.get_diskstream()->RecordEnableChanged, boost::bind (&StreamView::rec_enable_changed, this));
+		_trackview.track()->DiskstreamChanged.connect (*this, boost::bind (&StreamView::diskstream_changed, this));
+		_trackview.get_diskstream()->RecordEnableChanged.connect (*this, boost::bind (&StreamView::rec_enable_changed, this));
 
-		scoped_connect (_trackview.session()->TransportStateChange, boost::bind (&StreamView::transport_changed, this));
-		scoped_connect (_trackview.session()->TransportLooped, boost::bind (&StreamView::transport_looped, this));
-		scoped_connect (_trackview.session()->RecordStateChanged, boost::bind (&StreamView::sess_rec_enable_changed, this));
+		_trackview.session()->TransportStateChange.connect (*this, boost::bind (&StreamView::transport_changed, this));
+		_trackview.session()->TransportLooped.connect (*this, boost::bind (&StreamView::transport_looped, this));
+		_trackview.session()->RecordStateChanged.connect (*this, boost::bind (&StreamView::sess_rec_enable_changed, this));
 	}
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &StreamView::color_handler));
@@ -231,7 +231,7 @@ StreamView::display_diskstream (boost::shared_ptr<Diskstream> ds)
 {
 	playlist_change_connection.disconnect();
 	playlist_changed (ds);
-	playlist_change_connection = ds->PlaylistChanged.connect (boost::bind (&StreamView::playlist_changed_weak, this, boost::weak_ptr<Diskstream> (ds)));
+	ds->PlaylistChanged.connect (playlist_change_connection, boost::bind (&StreamView::playlist_changed_weak, this, boost::weak_ptr<Diskstream> (ds)));
 }
 
 void
@@ -353,9 +353,9 @@ StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 
 	/* catch changes */
 
-	playlist_connections.add_connection (ds->playlist()->Modified.connect (boost::bind (&StreamView::playlist_modified_weak, this, ds)));
-	playlist_connections.add_connection (ds->playlist()->RegionAdded.connect (boost::bind (&StreamView::add_region_view_weak, this, _1)));
-	playlist_connections.add_connection (ds->playlist()->RegionRemoved.connect (boost::bind (&StreamView::remove_region_view, this, _1)));
+	ds->playlist()->Modified.connect (playlist_connections, boost::bind (&StreamView::playlist_modified_weak, this, ds));
+	ds->playlist()->RegionAdded.connect (playlist_connections, boost::bind (&StreamView::add_region_view_weak, this, _1));
+	ds->playlist()->RegionRemoved.connect (playlist_connections, boost::bind (&StreamView::remove_region_view, this, _1));
 }
 
 void

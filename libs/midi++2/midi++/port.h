@@ -22,7 +22,6 @@
 #include <string>
 #include <iostream>
 
-#include <boost/signals2.hpp>
 #include "pbd/xml++.h"
 
 #include "midi++/types.h"

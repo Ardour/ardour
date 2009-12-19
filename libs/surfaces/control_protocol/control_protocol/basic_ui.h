@@ -22,7 +22,7 @@
 #define __ardour_basic_ui_h__
 
 #include <string>
-
+#include "pbd/signals.h"
 
 #include <jack/types.h>
 
@@ -46,7 +46,7 @@ class BasicUI {
 
 	void loop_toggle ();
 	void access_action ( std::string action_path );
-	static sigc::signal<void,std::string,std::string> AccessAction;
+	static PBD::Signal2<void,std::string,std::string> AccessAction;
 	void goto_start ();
 	void goto_end ();
 	void rewind ();

@@ -24,7 +24,7 @@ v    it under the terms of the GNU General Public License as published by
 #include <set>
 #include <map>
 
-#include <boost/signals2.hpp>
+#include "pbd/signals.h"
 #include <glibmm/thread.h>
 
 #include "pbd/statefuldestructible.h"
@@ -44,16 +44,16 @@ class Controllable : public PBD::StatefulDestructible {
 	virtual void set_value (float) = 0;
 	virtual float get_value (void) const = 0;
 
-	boost::signals2::signal<void()> LearningFinished;
-	static boost::signals2::signal<void(PBD::Controllable*,int,int)> CreateBinding;
-	static boost::signals2::signal<void(PBD::Controllable*)> DeleteBinding;
+	PBD::Signal0<void> LearningFinished;
+	static PBD::Signal3<void,PBD::Controllable*,int,int> CreateBinding;
+	static PBD::Signal1<void,PBD::Controllable*> DeleteBinding;
 
-	static boost::signals2::signal<bool(PBD::Controllable*)> StartLearning;
-	static boost::signals2::signal<void(PBD::Controllable*)> StopLearning;
+	static PBD::Signal1<bool,PBD::Controllable*> StartLearning;
+	static PBD::Signal1<void,PBD::Controllable*> StopLearning;
 
-	static boost::signals2::signal<void(Controllable*)> Destroyed;
+	static PBD::Signal1<void,Controllable*> Destroyed;
 	
-	boost::signals2::signal<void()> Changed;
+	PBD::Signal0<void> Changed;
 
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_state ();

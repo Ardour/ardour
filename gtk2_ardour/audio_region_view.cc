@@ -1186,7 +1186,7 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 	ghost->set_colors();
 	ghosts.push_back (ghost);
 
-	ghost->GoingAway.connect (boost::bind (&RegionView::remove_ghost, this, _1));
+	ghost->GoingAway.connect (*this, boost::bind (&RegionView::remove_ghost, this, _1));
 
 	return ghost;
 }

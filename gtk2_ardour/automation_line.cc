@@ -85,7 +85,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 
 	line->signal_event().connect (sigc::mem_fun (*this, &AutomationLine::event_handler));
 
-	alist->StateChanged.connect (sigc::mem_fun(*this, &AutomationLine::list_changed));
+	alist->StateChanged.connect (_state_connection, boost::bind (&AutomationLine::list_changed, this));
 
 	trackview.session()->register_with_memento_command_factory(alist->id(), this);
 

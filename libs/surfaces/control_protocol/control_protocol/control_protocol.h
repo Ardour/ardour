@@ -25,8 +25,8 @@
 #include <vector>
 #include <list>
 #include <boost/shared_ptr.hpp>
-#include <sigc++/sigc++.h>
-#include <pbd/stateful.h>
+#include "pbd/stateful.h"
+#include "pbd/signals.h"
 #include "control_protocol/basic_ui.h"
 
 namespace ARDOUR {
@@ -34,7 +34,7 @@ namespace ARDOUR {
 class Route;
 class Session;
 
-class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, public BasicUI {
+class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI {
   public:
 	ControlProtocol (Session&, std::string name);
 	virtual ~ControlProtocol();
@@ -49,17 +49,17 @@ class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, pu
 
 	virtual void route_list_changed () {}
 
-	sigc::signal<void> ActiveChanged;
+	PBD::Signal0<void> ActiveChanged;
 
 	/* signals that a control protocol can emit and other (presumably graphical)
 	   user interfaces can respond to
 	*/
 
-	static sigc::signal<void> ZoomToSession;
-	static sigc::signal<void> ZoomIn;
-	static sigc::signal<void> ZoomOut;
-	static sigc::signal<void> Enter;
-	static sigc::signal<void,float> ScrollTimeline;
+	static PBD::Signal0<void> ZoomToSession;
+	static PBD::Signal0<void> ZoomIn;
+	static PBD::Signal0<void> ZoomOut;
+	static PBD::Signal0<void> Enter;
+	static PBD::Signal1<void,float> ScrollTimeline;
 
 	/* the model here is as follows:
 
@@ -107,6 +107,9 @@ class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, pu
 
 	void next_track (uint32_t initial_id);
 	void prev_track (uint32_t initial_id);
+
+  private:
+	ControlProtocol (const ControlProtocol&) {} /* noncopyable */
 };
 
 extern "C" {

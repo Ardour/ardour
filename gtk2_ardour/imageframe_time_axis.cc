@@ -322,7 +322,7 @@ ImageFrameTimeAxis::add_marker_time_axis(MarkerTimeAxis* marker_track, void* src
 	else
 	{
 		marker_time_axis_list.push_back(marker_track) ;
-		scoped_connect (marker_track->GoingAway, boost::bind (&ImageFrameTimeAxis::remove_time_axis_view, this, marker_track, (void*)this));
+		marker_track->GoingAway.connect (*this, boost::bind (&ImageFrameTimeAxis::remove_time_axis_view, this, marker_track, (void*)this));
 
 		 MarkerTimeAxisAdded(marker_track, src) ; /* EMIT_SIGNAL */
 		ret = true ;

@@ -54,7 +54,7 @@ Change Region::LockChanged       = ARDOUR::new_change ();
 Change Region::LayerChanged      = ARDOUR::new_change ();
 Change Region::HiddenChanged     = ARDOUR::new_change ();
 
-boost::signals2::signal<void(boost::shared_ptr<ARDOUR::Region>)> Region::RegionPropertyChanged;
+PBD::Signal1<void,boost::shared_ptr<ARDOUR::Region> > Region::RegionPropertyChanged;
 
 /* derived-from-derived constructor (no sources in constructor) */
 Region::Region (Session& s, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
@@ -109,7 +109,7 @@ Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length
 	_sources.push_back (src);
 	_master_sources.push_back (src);
 
-	scoped_connect (src->GoingAway, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(src)));
+	src->GoingAway.connect (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(src)));
 
 	assert(_sources.size() > 0);
 	_positional_lock_style = AudioTime;
@@ -1586,14 +1586,14 @@ Region::use_sources (SourceList const & s)
 
 	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
 		_sources.push_back (*i);
-		scoped_connect ((*i)->GoingAway, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
+		(*i)->GoingAway.connect (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
 		unique_srcs.insert (*i);
 	}
 
 	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
 		_master_sources.push_back (*i);
 		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			scoped_connect ((*i)->GoingAway, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
+			(*i)->GoingAway.connect (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
 		}
 	}
 }

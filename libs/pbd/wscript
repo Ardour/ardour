@@ -73,9 +73,9 @@ def build(bld):
 		pool.cc
 		pthread_utils.cc
 		receiver.cc
-		scoped_connections.cc
 		search_path.cc
 		shortpath.cc
+		signals.cc
 		stacktrace.cc
 		stateful.cc
 		strreplace.cc

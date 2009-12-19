@@ -43,8 +43,7 @@ using namespace MIDI;
 using namespace PBD;
 
 MIDIClock_Slave::MIDIClock_Slave (Session& s, MIDI::Port& p, int ppqn)
- 	: port_connections (0)
-	, ppqn (ppqn)
+	: ppqn (ppqn)
 	, bandwidth (30.0 / 60.0) // 1 BpM = 1 / 60 Hz
 {
 	session = (ISlaveSessionProxy *) new SlaveSessionProxy(s);
@@ -54,7 +53,6 @@ MIDIClock_Slave::MIDIClock_Slave (Session& s, MIDI::Port& p, int ppqn)
 
 MIDIClock_Slave::MIDIClock_Slave (ISlaveSessionProxy* session_proxy, int ppqn)
 	: session(session_proxy)
-	, port_connections (0)
 	, ppqn (ppqn)
 	, bandwidth (30.0 / 60.0) // 1 BpM = 1 / 60 Hz
 {
@@ -65,26 +63,24 @@ MIDIClock_Slave::MIDIClock_Slave (ISlaveSessionProxy* session_proxy, int ppqn)
 MIDIClock_Slave::~MIDIClock_Slave()
 {
 	delete session;
-	delete port_connections;
 }
 
 void
 MIDIClock_Slave::rebind (MIDI::Port& p)
 {
-	delete port_connections;
-	port_connections = new ScopedConnectionList;
-	
+	port_connections.drop_connections();
+
 	port = &p;
 
 #ifdef DEBUG_MIDI_CLOCK
 	std::cerr << "MIDIClock_Slave: connecting to port " << port->name() << std::endl;
 #endif
 
-	port_connections->add_connection (port->input()->timing.connect (boost::bind (&MIDIClock_Slave::update_midi_clock, this, _1, _2)));
-	port_connections->add_connection (port->input()->start.connect (boost::bind (&MIDIClock_Slave::start, this, _1, _2)));
-	port_connections->add_connection (port->input()->contineu.connect (boost::bind (&MIDIClock_Slave::contineu, this, _1, _2)));
-	port_connections->add_connection (port->input()->stop.connect (boost::bind (&MIDIClock_Slave::stop, this, _1, _2)));
-	port_connections->add_connection (port->input()->position.connect (boost::bind (&MIDIClock_Slave::position, this, _1, _2, 3)));
+	port->input()->timing.connect (port_connections, boost::bind (&MIDIClock_Slave::update_midi_clock, this, _1, _2));
+	port->input()->start.connect (port_connections, boost::bind (&MIDIClock_Slave::start, this, _1, _2));
+	port->input()->contineu.connect (port_connections, boost::bind (&MIDIClock_Slave::contineu, this, _1, _2));
+	port->input()->stop.connect (port_connections, boost::bind (&MIDIClock_Slave::stop, this, _1, _2));
+	port->input()->position.connect (port_connections, boost::bind (&MIDIClock_Slave::position, this, _1, _2, 3));
 }
 
 void

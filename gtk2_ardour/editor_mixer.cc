@@ -168,7 +168,7 @@ Editor::create_editor_mixer ()
 					      _session,
 					      false);
 	current_mixer_strip->Hiding.connect (sigc::mem_fun(*this, &Editor::current_mixer_strip_hidden));
-	scoped_connect (current_mixer_strip->GoingAway, boost::bind (&Editor::current_mixer_strip_removed, this));
+	current_mixer_strip->GoingAway.connect (*this, boost::bind (&Editor::current_mixer_strip_removed, this));
 #ifdef GTKOSX
 	current_mixer_strip->WidthChanged.connect (sigc::mem_fun(*this, &Editor::ensure_all_elements_drawn));
 #endif

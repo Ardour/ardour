@@ -26,7 +26,7 @@
 #include <boost/utility.hpp>
 
 #include "pbd/undo.h"
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "ardour/ardour.h"
 #include "ardour/data_type.h"
@@ -49,10 +49,9 @@ enum RegionEditState {
 };
 
 class Region
-		: public SessionObject
-		, public boost::noncopyable
-		, public boost::enable_shared_from_this<Region>
-		, public Readable
+	: public SessionObject
+	, public boost::enable_shared_from_this<Region>
+	, public Readable
 {
   public:
 	typedef std::vector<boost::shared_ptr<Source> > SourceList;
@@ -96,8 +95,8 @@ class Region
 	static Change LayerChanged;
 	static Change HiddenChanged;
 
-	boost::signals2::signal<void(Change)> StateChanged;
-	static boost::signals2::signal<void(boost::shared_ptr<ARDOUR::Region>)> RegionPropertyChanged;
+	PBD::Signal1<void,Change> StateChanged;
+	static PBD::Signal1<void,boost::shared_ptr<ARDOUR::Region> > RegionPropertyChanged;
 	void unlock_property_changes () { _flags = Flag (_flags & ~DoNotSendPropertyChanges); }
 	void block_property_changes () { _flags = Flag (_flags | DoNotSendPropertyChanges); }
 

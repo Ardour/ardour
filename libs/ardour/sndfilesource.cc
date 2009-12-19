@@ -192,8 +192,7 @@ SndFileSource::init_sndfile ()
 		_timeline_position = header_position_offset;
 	}
 
-	AudioFileSource::HeaderPositionOffsetChanged.connect (
-			boost::bind (&SndFileSource::handle_header_position_change, this));
+	AudioFileSource::HeaderPositionOffsetChanged.connect (header_position_connection, boost::bind (&SndFileSource::handle_header_position_change, this));
 }
 
 int

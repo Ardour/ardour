@@ -35,7 +35,7 @@ namespace ARDOUR {
 
 class Session;
 
-class Source : public SessionObject, public boost::noncopyable
+class Source : public SessionObject
 {
   public:
 	enum Flag {
@@ -81,15 +81,15 @@ class Source : public SessionObject, public boost::noncopyable
 	virtual bool set_destructive (bool /*yn*/) { return false; }
 	virtual bool length_mutable() const    { return false; }
 
-	static boost::signals2::signal<void(Source*)>             SourceCreated;
-	boost::signals2::signal<void(boost::shared_ptr<Source>)> Switched;
+	static PBD::Signal1<void,Source*>             SourceCreated;
+	PBD::Signal1<void,boost::shared_ptr<Source> > Switched;
 
 	bool has_been_analysed() const;
 	virtual bool can_be_analysed() const { return false; }
 	virtual void set_been_analysed (bool yn);
 	virtual bool check_for_analysis_data_on_disk();
 
-	boost::signals2::signal<void()> AnalysisChanged;
+	PBD::Signal0<void> AnalysisChanged;
 
 	AnalysisFeatureList transients;
 	std::string get_transients_path() const;

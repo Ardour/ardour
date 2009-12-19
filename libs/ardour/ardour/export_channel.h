@@ -123,7 +123,7 @@ class RegionExportChannelFactory
 	Sample * mixdown_buffer;
 	Sample * gain_buffer;
 
-	boost::signals2::scoped_connection export_connection;
+	PBD::ScopedConnection export_connection;
 };
 
 /// Export channel that reads from region channel

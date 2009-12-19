@@ -27,7 +27,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "ardour/export_formats.h"
 
@@ -92,7 +92,7 @@ class ExportFormatManager : public PBD::ScopedConnectionList
 
 	/* Signals */
 
-	boost::signals2::signal<void(bool)> CompleteChanged;
+	PBD::Signal1<void,bool> CompleteChanged;
 
 	/* Access to lists */
 

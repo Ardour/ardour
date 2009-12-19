@@ -54,7 +54,7 @@ AutomationController::AutomationController(boost::shared_ptr<AutomationControl> 
 	_screen_update_connection = ARDOUR_UI::RapidScreenUpdate.connect (
 			sigc::mem_fun (*this, &AutomationController::display_effective_value));
 
-	ac->Changed.connect (sigc::mem_fun(*this, &AutomationController::value_changed));
+	ac->Changed.connect (_changed_connection, sigc::mem_fun(*this, &AutomationController::value_changed));
 }
 
 AutomationController::~AutomationController()

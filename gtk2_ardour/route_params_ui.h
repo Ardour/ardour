@@ -33,7 +33,7 @@
 #include <gtkmm/treeview.h>
 
 #include "pbd/stateful.h"
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "ardour/ardour.h"
 

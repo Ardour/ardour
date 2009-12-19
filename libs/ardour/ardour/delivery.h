@@ -85,9 +85,9 @@ public:
 
 	BufferSet& output_buffers() { return *_output_buffers; }
 
-	boost::signals2::signal<void()> MuteChange;
+	PBD::Signal0<void> MuteChange;
 
-	static boost::signals2::signal<void(nframes_t)> CycleStart;
+	static PBD::Signal1<void,nframes_t> CycleStart;
 
 	XMLNode& state (bool full);
 	int set_state (const XMLNode&, int version);
@@ -120,10 +120,10 @@ public:
 	boost::shared_ptr<Panner> _panner;
 
 	static bool panners_legal;
-	static boost::signals2::signal<int()>            PannersLegal;
+	static PBD::Signal0<int>            PannersLegal;
 
 	int panners_became_legal ();
-	boost::signals2::scoped_connection panner_legal_c;
+	PBD::ScopedConnection panner_legal_c;
 	void output_changed (IOChange, void*);
 
 	gain_t target_gain ();

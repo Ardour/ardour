@@ -34,7 +34,7 @@
 #include <gtkmm2ext/focus_entry.h>
 
 #include "pbd/stateful.h"
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "ardour/types.h"
 #include "ardour/region.h"

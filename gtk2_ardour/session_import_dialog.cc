@@ -92,8 +92,8 @@ SessionImportDialog::SessionImportDialog (ARDOUR::Session* target) :
 	ok_button->signal_clicked().connect (sigc::mem_fun (*this, &SessionImportDialog::do_merge));
 
 	// prompt signals
-	ElementImporter::Rename.connect (sigc::mem_fun (*this, &SessionImportDialog::open_rename_dialog));
-	ElementImporter::Prompt.connect (sigc::mem_fun (*this, &SessionImportDialog::open_prompt_dialog));
+	ElementImporter::Rename.connect (connections, boost::bind (&SessionImportDialog::open_rename_dialog, this, _1, _2));
+	ElementImporter::Prompt.connect (connections, boost::bind (&SessionImportDialog::open_prompt_dialog, this, _1));
 
 	// Finalize
 	show_all();

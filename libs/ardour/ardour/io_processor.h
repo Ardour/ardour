@@ -67,8 +67,8 @@ class IOProcessor : public Processor
 
 	virtual bool feeds (boost::shared_ptr<Route> other) const;
 
-	boost::signals2::signal<void(IOProcessor*,bool)>     AutomationPlaybackChanged;
-	boost::signals2::signal<void(IOProcessor*,uint32_t)> AutomationChanged;
+	PBD::Signal2<void,IOProcessor*,bool>     AutomationPlaybackChanged;
+	PBD::Signal2<void,IOProcessor*,uint32_t> AutomationChanged;
 
 	XMLNode& state (bool full_state);
 	int set_state (const XMLNode&, int version);

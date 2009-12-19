@@ -72,8 +72,8 @@ Panner2d::Panner2d (boost::shared_ptr<Panner> p, int32_t h)
 	allow_y = false;
 	allow_target = false;
 
-	panner->StateChanged.connect (sigc::mem_fun(*this, &Panner2d::handle_state_change));
-	panner->Changed.connect (sigc::mem_fun(*this, &Panner2d::handle_position_change));
+	panner->StateChanged.connect (state_connection, boost::bind (&Panner2d::handle_state_change, this));
+	panner->Changed.connect (change_connection, boost::bind (&Panner2d::handle_position_change, this));
 
 	drag_target = 0;
 	set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);

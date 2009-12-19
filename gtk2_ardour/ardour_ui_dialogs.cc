@@ -113,15 +113,14 @@ ARDOUR_UI::set_session (Session *s)
 	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::sync_blink));
 	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::audition_blink));
 
-	_session_connections.add_connection (_session->Xrun.connect (sigc::mem_fun(*this, &ARDOUR_UI::xrun_handler)));
-	_session_connections.add_connection (_session->RecordStateChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::record_state_changed)));
-	_session_connections.add_connection (_session->locations()->added.connect (sigc::mem_fun (*this, &ARDOUR_UI::handle_locations_change)));
-	_session_connections.add_connection (_session->locations()->removed.connect (sigc::mem_fun (*this, &ARDOUR_UI::handle_locations_change)));
-	_session_connections.add_connection (_session->TransportStateChange.connect (sigc::mem_fun(*this, &ARDOUR_UI::map_transport_state)));
-	_session_connections.add_connection (_session->AuditionActive.connect (sigc::mem_fun(*this, &ARDOUR_UI::auditioning_changed)));
-	_session_connections.add_connection (_session->SoloActive.connect (sigc::mem_fun(*this, &ARDOUR_UI::soloing_changed)));
-	_session_connections.add_connection (_session->DirtyChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::update_autosave)));
-
+	_session->Xrun.connect (_session_connections, sigc::mem_fun(*this, &ARDOUR_UI::xrun_handler));
+	_session->RecordStateChanged.connect (_session_connections, sigc::mem_fun (*this, &ARDOUR_UI::record_state_changed));
+	_session->locations()->added.connect (_session_connections, sigc::mem_fun (*this, &ARDOUR_UI::handle_locations_change));
+	_session->locations()->removed.connect (_session_connections, sigc::mem_fun (*this, &ARDOUR_UI::handle_locations_change));
+	_session->TransportStateChange.connect (_session_connections, sigc::mem_fun(*this, &ARDOUR_UI::map_transport_state));
+	_session->AuditionActive.connect (_session_connections, sigc::mem_fun(*this, &ARDOUR_UI::auditioning_changed));
+	_session->SoloActive.connect (_session_connections, sigc::mem_fun(*this, &ARDOUR_UI::soloing_changed));
+	_session->DirtyChanged.connect (_session_connections, sigc::mem_fun(*this, &ARDOUR_UI::update_autosave));
 
 	/* Clocks are on by default after we are connected to a session, so show that here.
 	*/

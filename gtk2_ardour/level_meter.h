@@ -68,7 +68,7 @@ class LevelMeter : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
   private:
 	ARDOUR::PeakMeter* _meter;
-
+	
 	Width _width;
 
 	struct MeterInfo {
@@ -91,7 +91,8 @@ class LevelMeter : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	std::vector<MeterInfo> meters;
 	float                  max_peak;
 
-	boost::signals2::scoped_connection _configuration_connection;
+	PBD::ScopedConnection _configuration_connection;
+	PBD::ScopedConnection _parameter_connection;
 
 	void hide_all_meters ();
 	gint meter_button_release (GdkEventButton*, uint32_t);

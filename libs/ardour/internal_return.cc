@@ -27,20 +27,20 @@
 using namespace std;
 using namespace ARDOUR;
 
-boost::signals2::signal<void(nframes_t)> InternalReturn::CycleStart;
+PBD::Signal1<void,nframes_t> InternalReturn::CycleStart;
 
 InternalReturn::InternalReturn (Session& s)
 	: Return (s, true)
 	, user_count (0)
 {
-	scoped_connect (CycleStart, boost::bind (&InternalReturn::cycle_start, this, _1));
+	CycleStart.connect (*this, boost::bind (&InternalReturn::cycle_start, this, _1));
 }
 
 InternalReturn::InternalReturn (Session& s, const XMLNode& node)
 	: Return (s, node, true)
 	, user_count (0)
 {
-	scoped_connect (CycleStart, boost::bind (&InternalReturn::cycle_start, this, _1));
+	CycleStart.connect (*this, boost::bind (&InternalReturn::cycle_start, this, _1));
 }
 
 void

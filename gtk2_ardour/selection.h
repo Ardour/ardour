@@ -22,10 +22,11 @@
 
 #include <vector>
 #include <boost/shared_ptr.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <sigc++/signal.h>
 
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "time_selection.h"
 #include "region_selection.h"
@@ -187,7 +188,6 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	template<class A> void foreach_region (void (ARDOUR::Region::*method)(A), A arg);
 
   private:
-	Selection (const Selection& other) : tracks (other.tracks) {}
 	PublicEditor const * editor;
 	uint32_t next_time_id;
 	

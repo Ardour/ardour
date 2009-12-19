@@ -69,7 +69,7 @@ class ExportTimespan
 	/// Reads data from each channel and writes to tempfile
 	int process (nframes_t frames);
 
-	boost::signals2::scoped_connection  process_connection;
+	PBD::ScopedConnection  process_connection;
 
 	void set_range (nframes_t start, nframes_t end);
 	nframes_t get_length () const { return end_frame - start_frame; }

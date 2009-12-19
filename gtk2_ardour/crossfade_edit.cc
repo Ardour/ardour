@@ -291,9 +291,9 @@ CrossfadeEditor::CrossfadeEditor (Session* s, boost::shared_ptr<Crossfade> xf, d
 
 	curve_select_clicked (In);
 
-	xfade->StateChanged.connect (sigc::mem_fun(*this, &CrossfadeEditor::xfade_changed));
+	xfade->StateChanged.connect (state_connection, boost::bind (&CrossfadeEditor::xfade_changed, this, _1));
 
-	_session_connections.add_connection (_session->AuditionActive.connect (sigc::mem_fun(*this, &CrossfadeEditor::audition_state_changed)));
+	_session->AuditionActive.connect (_session_connections, sigc::mem_fun(*this, &CrossfadeEditor::audition_state_changed));
 	show_all_children();
 }
 

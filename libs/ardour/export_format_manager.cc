@@ -211,13 +211,13 @@ void
 ExportFormatManager::add_compatibility (CompatPtr ptr)
 {
 	compatibilities.push_back (ptr);
-	scoped_connect (ptr->SelectChanged, boost::bind (&ExportFormatManager::change_compatibility_selection, this, _1, WeakCompatPtr (ptr)));
+	ptr->SelectChanged.connect (*this, boost::bind (&ExportFormatManager::change_compatibility_selection, this, _1, WeakCompatPtr (ptr)));
 }
 
 void
 ExportFormatManager::add_quality (QualityPtr ptr)
 {
-	scoped_connect (ptr->SelectChanged, boost::bind (&ExportFormatManager::change_quality_selection, this, _1, WeakQualityPtr (ptr)));
+	ptr->SelectChanged.connect (*this, boost::bind (&ExportFormatManager::change_quality_selection, this, _1, WeakQualityPtr (ptr)));
 	qualities.push_back (ptr);
 }
 
@@ -225,7 +225,7 @@ void
 ExportFormatManager::add_format (FormatPtr ptr)
 {
 	formats.push_back (ptr);
-	scoped_connect (ptr->SelectChanged, boost::bind (&ExportFormatManager::change_format_selection, this, _1, WeakFormatPtr (ptr)));
+	ptr->SelectChanged.connect (*this, boost::bind (&ExportFormatManager::change_format_selection, this, _1, WeakFormatPtr (ptr)));
 	universal_set = universal_set->get_union (*ptr);
 
 	/* Encoding options */
@@ -233,15 +233,15 @@ ExportFormatManager::add_format (FormatPtr ptr)
 	boost::shared_ptr<HasSampleFormat> hsf;
 
 	if (hsf = boost::dynamic_pointer_cast<HasSampleFormat> (ptr)) {
-		scoped_connect (hsf->SampleFormatSelectChanged, boost::bind (&ExportFormatManager::change_sample_format_selection, this, _1, _2));
-		scoped_connect (hsf->DitherTypeSelectChanged, boost::bind (&ExportFormatManager::change_dither_type_selection, this, _1, _2));
+		hsf->SampleFormatSelectChanged.connect (*this, boost::bind (&ExportFormatManager::change_sample_format_selection, this, _1, _2));
+		hsf->DitherTypeSelectChanged.connect (*this, boost::bind (&ExportFormatManager::change_dither_type_selection, this, _1, _2));
 	}
 }
 
 void
 ExportFormatManager::add_sample_rate (SampleRatePtr ptr)
 {
-	scoped_connect (ptr->SelectChanged, boost::bind (&ExportFormatManager::change_sample_rate_selection, this, _1, WeakSampleRatePtr (ptr)));
+	ptr->SelectChanged.connect (*this, boost::bind (&ExportFormatManager::change_sample_rate_selection, this, _1, WeakSampleRatePtr (ptr)));
 	sample_rates.push_back (ptr);
 }
 

@@ -20,7 +20,7 @@
 #ifndef __ardour_gtk_editor_route_h__
 #define __ardour_gtk_editor_route_h__
 
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 #include "editor_component.h"
 
 class EditorRoutes : public EditorComponent, public PBD::ScopedConnectionList

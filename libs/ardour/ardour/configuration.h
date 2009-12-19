@@ -21,7 +21,7 @@
 #define __ardour_configuration_h__
 
 #include <boost/function.hpp>
-#include <boost/signals2.hpp>
+#include "pbd/signals.h"
 #include "pbd/stateful.h"
 #include "ardour/configuration_variable.h"
 
@@ -41,7 +41,7 @@ class Configuration : public PBD::Stateful
 	virtual XMLNode & get_variables () = 0;
 	virtual void set_variables (XMLNode const &) = 0;
 
-	boost::signals2::signal<void(std::string)> ParameterChanged;
+	PBD::Signal1<void,std::string> ParameterChanged;
 };
 
 } // namespace ARDOUR

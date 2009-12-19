@@ -72,10 +72,10 @@ class AudioSource : virtual public Source,
 			sframes_t start, nframes_t cnt, double samples_per_visual_peak) const;
 
 	int  build_peaks ();
-	bool peaks_ready (boost::function<void()> callWhenReady, boost::signals2::connection& connection_established_if_not_ready) const;
+	bool peaks_ready (boost::function<void()> callWhenReady, PBD::Connection& connection_created_if_not_ready) const;
 
-	mutable boost::signals2::signal<void()>  PeaksReady;
-	mutable boost::signals2::signal<void(nframes_t,nframes_t)>  PeakRangeReady;
+	mutable PBD::Signal0<void>  PeaksReady;
+	mutable PBD::Signal2<void,nframes_t,nframes_t>  PeakRangeReady;
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);

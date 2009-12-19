@@ -25,7 +25,7 @@
 #include <boost/weak_ptr.hpp>
 
 #include "pbd/failed_constructor.h"
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "ardour/export_format_base.h"
 #include "ardour/export_format_compatibility.h"
@@ -128,11 +128,11 @@ class HasSampleFormat : public PBD::ScopedConnectionList {
 
 	/* Proxies for signals from sample formats and dither types */
 
-	boost::signals2::signal<void(bool, WeakSampleFormatPtr)> SampleFormatSelectChanged;
-	boost::signals2::signal<void(bool, WeakSampleFormatPtr)> SampleFormatCompatibleChanged;
+	PBD::Signal2<void,bool, WeakSampleFormatPtr> SampleFormatSelectChanged;
+	PBD::Signal2<void,bool, WeakSampleFormatPtr> SampleFormatCompatibleChanged;
 
-	boost::signals2::signal<void(bool, WeakDitherTypePtr)> DitherTypeSelectChanged;
-	boost::signals2::signal<void(bool, WeakDitherTypePtr)> DitherTypeCompatibleChanged;
+	PBD::Signal2<void,bool, WeakDitherTypePtr> DitherTypeSelectChanged;
+	PBD::Signal2<void,bool, WeakDitherTypePtr> DitherTypeCompatibleChanged;
 
 	static std::string get_sample_format_name (ExportFormatBase::SampleFormat format);
 

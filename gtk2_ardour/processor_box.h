@@ -36,7 +36,7 @@
 #include <gtkmm2ext/pixfader.h>
 
 #include "pbd/stateful.h"
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "ardour/types.h"
 #include "ardour/ardour.h"
@@ -100,6 +100,8 @@ private:
 	Gtk::CheckButton _active;
 	boost::shared_ptr<ARDOUR::Processor> _processor;
 	Width _width;
+	PBD::ScopedConnection active_connection;
+	PBD::ScopedConnection name_connection;
 };
 
 class SendProcessorEntry : public ProcessorEntry
@@ -120,7 +122,8 @@ private:
 	Gtk::Adjustment _adjustment;
 	Gtkmm2ext::HSliderController _fader;
 	bool _ignore_gain_change;
-	
+	PBD::ScopedConnection send_gain_connection;
+
 	static Glib::RefPtr<Gdk::Pixbuf> _slider;
 };
 

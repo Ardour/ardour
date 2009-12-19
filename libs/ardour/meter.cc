@@ -31,39 +31,7 @@ using namespace std;
 
 using namespace ARDOUR;
 
-boost::signals2::signal<void()> Metering::Meter;
-Glib::StaticMutex  Metering::m_meter_signal_lock;
-
-boost::signals2::connection
-Metering::connect (boost::function<void()> f)
-{
-	// SignalProcessor::Meter is emitted from another thread so the
-	// Meter signal must be protected.
-	Glib::Mutex::Lock guard (m_meter_signal_lock);
-	return Meter.connect (f);
-}
-
-void
-Metering::disconnect (boost::signals2::connection& c)
-{
-	Glib::Mutex::Lock guard (m_meter_signal_lock);
-	c.disconnect ();
-}
-
-/**
-    Update the meters.
-
-    The meter signal lock is taken to prevent modification of the
-    Meter signal while updating the meters, taking the meter signal
-    lock prior to taking the io_lock ensures that all IO will remain
-    valid while metering.
-*/
-void
-Metering::update_meters()
-{
-	Glib::Mutex::Lock guard (m_meter_signal_lock);
-	Meter(); /* EMIT SIGNAL */
-}
+PBD::Signal0<void> Metering::Meter;
 
 PeakMeter::PeakMeter (Session& s, const XMLNode& node)
 	: Processor (s, node)

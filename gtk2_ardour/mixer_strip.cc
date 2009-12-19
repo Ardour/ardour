@@ -257,8 +257,8 @@ MixerStrip::init ()
 	_packed = false;
 	_embedded = false;
 
-	_session->engine().Stopped.connect (sigc::mem_fun(*this, &MixerStrip::engine_stopped));
-	_session->engine().Running.connect (sigc::mem_fun(*this, &MixerStrip::engine_running));
+	_session->engine().Stopped.connect (*this, boost::bind (&MixerStrip::engine_stopped, this));
+	_session->engine().Running.connect (*this, boost::bind (&MixerStrip::engine_running, this));
 
 	input_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::input_press), false);
 	output_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::output_press), false);
@@ -363,7 +363,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 		boost::shared_ptr<AudioTrack> at = audio_track();
 
-		connections.add_connection (at->FreezeChange.connect (sigc::mem_fun(*this, &MixerStrip::map_frozen)));
+		at->FreezeChange.connect (route_connections, boost::bind (&MixerStrip::map_frozen, this));
 
 		button_table.attach (*rec_enable_button, 0, 2, 2, 3);
 		rec_enable_button->set_sensitive (_session->writable());
@@ -412,22 +412,22 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 						   _("Click to Add/Edit Comments"):
 						   _route->comment());
 
-	connections.add_connection (_route->meter_change.connect (sigc::mem_fun(*this, &MixerStrip::meter_changed)));
-	connections.add_connection (_route->input()->changed.connect (sigc::mem_fun(*this, &MixerStrip::input_changed)));
-	connections.add_connection (_route->output()->changed.connect (sigc::mem_fun(*this, &MixerStrip::output_changed)));
-	connections.add_connection (_route->route_group_changed.connect (sigc::mem_fun(*this, &MixerStrip::route_group_changed)));
+	_route->meter_change.connect (route_connections, boost::bind (&MixerStrip::meter_changed, this, _1));
+	_route->input()->changed.connect (route_connections, boost::bind (&MixerStrip::input_changed, this, _1, _2));
+	_route->output()->changed.connect (route_connections, boost::bind (&MixerStrip::output_changed, this, _1, _2));
+	_route->route_group_changed.connect (route_connections, boost::bind (&MixerStrip::route_group_changed, this));
 
 	if (_route->panner()) {
-		connections.add_connection (_route->panner()->Changed.connect (sigc::mem_fun(*this, &MixerStrip::connect_to_pan)));
+		_route->panner()->Changed.connect (route_connections, boost::bind (&MixerStrip::connect_to_pan, this));
 	}
 
 	if (is_audio_track()) {
-		connections.add_connection (audio_track()->DiskstreamChanged.connect (sigc::mem_fun(*this, &MixerStrip::diskstream_changed)));
+		audio_track()->DiskstreamChanged.connect (route_connections, boost::bind (&MixerStrip::diskstream_changed, this));
 	}
 
-	connections.add_connection (_route->NameChanged.connect (sigc::mem_fun(*this, &RouteUI::name_changed)));
-	connections.add_connection (_route->comment_changed.connect (sigc::mem_fun(*this, &MixerStrip::comment_changed)));
-	connections.add_connection (_route->gui_changed.connect (sigc::mem_fun(*this, &MixerStrip::route_gui_changed)));
+	_route->NameChanged.connect (route_connections, boost::bind (&RouteUI::name_changed, this));
+	_route->comment_changed.connect (route_connections, boost::bind (&MixerStrip::comment_changed, this, _1));
+	_route->gui_changed.connect (route_connections, boost::bind (&MixerStrip::route_gui_changed, this, _1, _2));
 
 	set_stuff_from_route ();
 
@@ -928,8 +928,8 @@ MixerStrip::connect_to_pan ()
 				_route->panner()->data().control(Evoral::Parameter(PanAutomation)));
 
 	if (pan_control) {
-		panstate_connection = pan_control->alist()->automation_state_changed.connect (sigc::mem_fun(panners, &PannerUI::pan_automation_state_changed));
-		panstyle_connection = pan_control->alist()->automation_style_changed.connect (sigc::mem_fun(panners, &PannerUI::pan_automation_style_changed));
+		pan_control->alist()->automation_state_changed.connect (panstate_connection, boost::bind (&PannerUI::pan_automation_state_changed, &panners));
+		pan_control->alist()->automation_style_changed.connect (panstyle_connection, boost::bind (&PannerUI::pan_automation_style_changed, &panners));
 	}
 
 	panners.pan_changed (this);
@@ -1693,7 +1693,7 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	_current_delivery = send;
 
 	send->set_metering (true);
-	send_gone_connection = _current_delivery->GoingAway.connect (sigc::mem_fun (*this, &MixerStrip::revert_to_default_display));
+	_current_delivery->GoingAway.connect (send_gone_connection, boost::bind (&MixerStrip::revert_to_default_display, this));
 
 	gain_meter().set_controls (_route, send->meter(), send->amp());
 	gain_meter().setup_meters ();

@@ -108,7 +108,7 @@ RegionExportChannelFactory::RegionExportChannelFactory (Session * session, Audio
 		throw ExportFailed ("Unhandled type in ExportChannelFactory constructor");
 	}
 
-	export_connection = session->ProcessExport.connect (boost::bind (&RegionExportChannelFactory::new_cycle_started, this, _1));
+	session->ProcessExport.connect (export_connection, boost::bind (&RegionExportChannelFactory::new_cycle_started, this, _1));
 
 	buffers.set_count (ChanCount (DataType::AUDIO, n_channels));
 	buffers.ensure_buffers (DataType::AUDIO, n_channels, frames_per_cycle);

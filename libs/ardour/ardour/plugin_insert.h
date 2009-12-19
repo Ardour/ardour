@@ -106,7 +106,7 @@ class PluginInsert : public Processor
 
 	void collect_signal_for_analysis(nframes_t nframes);
 
-	boost::signals2::signal<void(BufferSet*, BufferSet*)> AnalysisDataGathered;
+	PBD::Signal2<void,BufferSet*, BufferSet*> AnalysisDataGathered;
 
   private:
 	/* disallow copy construction */

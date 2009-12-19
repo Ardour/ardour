@@ -23,7 +23,7 @@
 #include <list>
 
 #include "pbd/xml++.h"
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "ardour/ardour.h"
 #include "ardour/mute_master.h"
@@ -199,8 +199,7 @@ class RouteUI : public virtual AxisView
 	static int mute_visual_state (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
 
    protected:
-	PBD::ScopedConnectionList connections;
-	boost::signals2::scoped_connection route_going_away_connection;
+	PBD::ScopedConnectionList route_connections;
 	bool self_destruct;
 
  	void init ();

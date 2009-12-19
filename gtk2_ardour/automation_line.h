@@ -171,6 +171,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	void reset_callback (const Evoral::ControlList&);
 	void list_changed ();
+	PBD::ScopedConnection _state_connection;
 
 	virtual bool event_handler (GdkEvent*);
 	virtual void add_model_point (ALPoints& tmp_points, double frame, double yfract);

@@ -58,7 +58,7 @@ using namespace ArdourCanvas;
 
 static const int32_t sync_mark_width = 9;
 
-boost::signals2::signal<void(RegionView*)> RegionView::RegionViewGoingAway;
+PBD::Signal1<void,RegionView*> RegionView::RegionViewGoingAway;
 
 RegionView::RegionView (ArdourCanvas::Group*              parent,
                         TimeAxisView&                     tv,
@@ -178,8 +178,8 @@ RegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	set_height (trackview.current_height());
 
-	_region->StateChanged.connect (sigc::mem_fun(*this, &RegionView::region_changed));
-
+	_region->StateChanged.connect (*this, boost::bind (&RegionView::region_changed, this, _1));
+	
 	group->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_event), group, this));
 
 	set_colors ();

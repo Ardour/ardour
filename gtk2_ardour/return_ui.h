@@ -52,6 +52,7 @@ class ReturnUI : public Gtk::HBox
 
 	sigc::connection screen_update_connection;
 	sigc::connection fast_screen_update_connection;
+	PBD::ScopedConnection input_change_connection;
 
 	void ins_changed (ARDOUR::IOChange, void*);
 };

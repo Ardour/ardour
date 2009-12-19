@@ -43,7 +43,7 @@ class Track : public Route
 	TrackMode mode () const { return _mode; }
 	virtual int set_mode (TrackMode /*m*/) { return false; }
 	virtual bool can_use_mode (TrackMode /*m*/, bool& /*bounce_required*/) { return false; }
-	boost::signals2::signal<void()> TrackModeChanged;
+	PBD::Signal0<void> TrackModeChanged;
 
 	virtual int no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 			bool state_changing, bool can_record, bool rec_monitors_input);
@@ -90,8 +90,8 @@ class Track : public Route
 	bool record_enabled() const;
 	void set_record_enable (bool yn, void *src);
 
-	boost::signals2::signal<void()> DiskstreamChanged;
-	boost::signals2::signal<void()> FreezeChange;
+	PBD::Signal0<void> DiskstreamChanged;
+	PBD::Signal0<void> FreezeChange;
 
   protected:
 	Track (Session& sess, const XMLNode& node, DataType default_type = DataType::AUDIO);

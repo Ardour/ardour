@@ -21,7 +21,7 @@
 #define __ardour_gtk_route_processor_selection_h__
 
 #include <vector>
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "processor_selection.h"
 #include "route_selection.h"

@@ -52,7 +52,7 @@ class AudioPlaylist : public ARDOUR::Playlist
 
 	int set_state (const XMLNode&, int version);
 
-	boost::signals2::signal<void(boost::shared_ptr<Crossfade>)>  NewCrossfade;
+	PBD::Signal1<void,boost::shared_ptr<Crossfade> >  NewCrossfade;
 	
 	void foreach_crossfade (boost::function<void (boost::shared_ptr<Crossfade>)>);
 	void crossfades_at (nframes_t frame, Crossfades&);

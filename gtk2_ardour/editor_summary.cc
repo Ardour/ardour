@@ -47,8 +47,8 @@ EditorSummary::EditorSummary (Editor* e)
 	  _zoom_dragging (false)
 
 {
-	Region::RegionPropertyChanged.connect (sigc::hide (sigc::mem_fun (*this, &EditorSummary::set_dirty)));
-	_editor->playhead_cursor->PositionChanged.connect (sigc::mem_fun (*this, &EditorSummary::playhead_position_changed));
+	Region::RegionPropertyChanged.connect (region_property_connection, boost::bind (&CairoWidget::set_dirty, this));
+	_editor->playhead_cursor->PositionChanged.connect (position_connection, boost::bind (&EditorSummary::playhead_position_changed, this, _1));
 }
 
 /** Connect to a session.
@@ -62,9 +62,9 @@ EditorSummary::set_session (Session* s)
 	set_dirty ();
 
 	if (_session) {
-		_session_connections.add_connection (_session->RegionRemoved.connect (boost::bind (&EditorSummary::set_dirty, this)));
-		_session_connections.add_connection (_session->StartTimeChanged.connect (boost::bind (&EditorSummary::set_dirty, this)));
-		_session_connections.add_connection (_session->EndTimeChanged.connect (boost::bind (&EditorSummary::set_dirty, this)));
+		_session->RegionRemoved.connect (_session_connections, boost::bind (&EditorSummary::set_dirty, this));
+		_session->StartTimeChanged.connect (_session_connections, boost::bind (&EditorSummary::set_dirty, this));
+		_session->EndTimeChanged.connect (_session_connections, boost::bind (&EditorSummary::set_dirty, this));
 	}
 }
 

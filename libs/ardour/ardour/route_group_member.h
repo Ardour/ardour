@@ -33,7 +33,7 @@ class RouteGroupMember
 
 	RouteGroup* route_group () const { return _route_group; }
 
-	boost::signals2::signal<void()> route_group_changed;
+	PBD::Signal0<void> route_group_changed;
 
   protected:
 	RouteGroup* _route_group;

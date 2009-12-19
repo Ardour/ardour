@@ -94,7 +94,7 @@ void MackiePort::open()
 #ifdef PORT_DEBUG
 	cout << "MackiePort::open " << *this << endl;
 #endif
-	_sysex = port().input()->sysex.connect (boost::bind (&MackiePort::handle_midi_sysex, this, _1, _2, _3));
+	port().input()->sysex.connect (sysex_connection, boost::bind (&MackiePort::handle_midi_sysex, this, _1, _2, _3));
 	
 	// make sure the device is connected
 	init();
@@ -107,8 +107,8 @@ void MackiePort::close()
 #endif
 	
 	// disconnect signals
-	_any.disconnect();
-	_sysex.disconnect();
+	any_connection.disconnect();
+	sysex_connection.disconnect();
 	
 	// TODO emit a "closing" signal?
 #ifdef PORT_DEBUG
@@ -288,26 +288,8 @@ void MackiePort::finalise_init( bool yn )
 
 void MackiePort::connect_any()
 {
-/*
-	Doesn't work because there isn't an == operator for slots
-	MIDI::Signal::slot_list_type slots = port().input()->any.slots();
-	
-	if ( find( slots.begin(), slots.end(), mem_fun( *this, &MackiePort::handle_midi_any ) ) == slots.end() )
-*/
-	// TODO but this will break if midi tracing is turned on
-	if ( port().input()->any.empty() )
-	{
-#ifdef DEBUG
-		cout << "connect input parser " << port().input() << " to handle_midi_any" << endl;
-#endif
-		_any = port().input()->any.connect (boost::bind (&MackiePort::handle_midi_any, this, _1, _2, _3));
-#ifdef DEBUG
-		cout << "input parser any connections: " << port().input()->any.size() << endl;
-#endif
-	}
-	else
-	{
-		cout << "MackiePort::connect_any already connected" << endl;
+	if (!any_connection.connected()) {
+		port().input()->any.connect (any_connection, boost::bind (&MackiePort::handle_midi_any, this, _1, _2, _3));
 	}
 }
 

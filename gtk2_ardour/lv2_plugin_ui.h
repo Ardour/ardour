@@ -92,6 +92,8 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 
 	virtual bool on_window_show(const Glib::ustring& title);
 	virtual void on_window_hide();
+
+	PBD::ScopedConnection parameter_connection;
 };
 
 #endif // HAVE_SLV2

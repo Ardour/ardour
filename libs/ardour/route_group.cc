@@ -76,7 +76,7 @@ RouteGroup::add (boost::shared_ptr<Route> r)
 	routes->push_back (r);
 
 	r->join_route_group (this);
-	scoped_connect (r->GoingAway, boost::bind (&RouteGroup::remove_when_going_away, this, boost::weak_ptr<Route> (r)));
+	r->GoingAway.connect (*this, boost::bind (&RouteGroup::remove_when_going_away, this, boost::weak_ptr<Route> (r)));
 	
 	_session.set_dirty ();
 	changed (); /* EMIT SIGNAL */

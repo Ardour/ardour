@@ -136,17 +136,17 @@ RouteUI::init ()
 	show_sends_button->set_self_managed (true);
 	UI::instance()->set_tip (show_sends_button, _("make mixer strips show sends to this bus"), "");
 
-	_session_connections.add_connection (_session->SoloChanged.connect (sigc::mem_fun(*this, &RouteUI::solo_changed_so_update_mute)));
-	_session_connections.add_connection (_session->TransportStateChange.connect (sigc::mem_fun (*this, &RouteUI::check_rec_enable_sensitivity)));
+	_session->SoloChanged.connect (_session_connections, sigc::mem_fun(*this, &RouteUI::solo_changed_so_update_mute));
+	_session->TransportStateChange.connect (_session_connections, sigc::mem_fun (*this, &RouteUI::check_rec_enable_sensitivity));
+	_session->RecordStateChanged.connect (_session_connections, boost::bind (&RouteUI::session_rec_enable_changed, this));
 
-	Config->ParameterChanged.connect (sigc::mem_fun (*this, &RouteUI::parameter_changed));
+	Config->ParameterChanged.connect (*this, boost::bind (&RouteUI::parameter_changed, this, _1));
 }
 
 void
 RouteUI::reset ()
 {
-	route_going_away_connection.disconnect();
-	connections.drop_connections ();
+	route_connections.drop_connections ();
 
 	delete solo_menu;
 	solo_menu = 0;
@@ -172,8 +172,7 @@ RouteUI::self_delete ()
 	cerr << "\n\nExpect to see route " << _route->name() << " be deleted\n";
 	_route.reset (); /* drop reference to route, so that it can be cleaned up */
 
-	route_going_away_connection.disconnect ();
-	connections.drop_connections ();
+	route_connections.drop_connections ();
 	delete_when_idle (this);
 }
 
@@ -189,23 +188,22 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	}
 
 	if (self_destruct) {
-		route_going_away_connection = rp->GoingAway.connect (boost::bind (&RouteUI::self_delete, this));
+		rp->GoingAway.connect (route_connections, boost::bind (&RouteUI::self_delete, this));
 	}
 
 	mute_button->set_controllable (_route->mute_control());
 	solo_button->set_controllable (_route->solo_control());
 
-	connections.add_connection (_route->active_changed.connect (sigc::mem_fun (*this, &RouteUI::route_active_changed)));
-	connections.add_connection (_route->mute_changed.connect (sigc::mem_fun(*this, &RouteUI::mute_changed)));
-	connections.add_connection (_route->solo_changed.connect (sigc::mem_fun(*this, &RouteUI::solo_changed)));
-	connections.add_connection (_route->listen_changed.connect (sigc::mem_fun(*this, &RouteUI::listen_changed)));
-	connections.add_connection (_route->solo_isolated_changed.connect (sigc::mem_fun(*this, &RouteUI::solo_changed)));
+	_route->active_changed.connect (route_connections, boost::bind (&RouteUI::route_active_changed, this));
+	_route->mute_changed.connect (route_connections, boost::bind (&RouteUI::mute_changed, this, _1));
+	_route->solo_changed.connect (route_connections, boost::bind (&RouteUI::solo_changed, this, _1));
+	_route->listen_changed.connect (route_connections, boost::bind (&RouteUI::listen_changed, this, _1));
+	_route->solo_isolated_changed.connect (route_connections, boost::bind (&RouteUI::solo_changed, this, _1));
 
 	if (_session->writable() && is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
-		connections.add_connection (t->diskstream()->RecordEnableChanged.connect (sigc::mem_fun (*this, &RouteUI::route_rec_enable_changed)));
-		connections.add_connection (_session->RecordStateChanged.connect (sigc::mem_fun (*this, &RouteUI::session_rec_enable_changed)));
+		t->diskstream()->RecordEnableChanged.connect (route_connections, boost::bind (&RouteUI::route_rec_enable_changed, this));
 
 		rec_enable_button->show();
  		rec_enable_button->set_controllable (t->rec_enable_control());
@@ -832,12 +830,20 @@ RouteUI::route_rec_enable_changed ()
 void
 RouteUI::session_rec_enable_changed ()
 {
+	if (!rec_enable_button) {
+		return;
+	}
+
 	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&RouteUI::update_rec_display, this));
 }
 
 void
 RouteUI::update_rec_display ()
 {
+	if (!rec_enable_button) {
+		return;
+	}
+			
 	bool model = _route->record_enabled();
 	bool view = rec_enable_button->get_active();
 
@@ -887,14 +893,14 @@ RouteUI::build_solo_menu (void)
 	check = new CheckMenuItem(_("Solo Isolate"));
 	check->set_active (_route->solo_isolated());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_isolated), check));
-	_route->solo_isolated_changed.connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::solo_isolated_toggle), check));
+	_route->solo_isolated_changed.connect (route_connections, boost::bind (&RouteUI::solo_isolated_toggle, this, _1, check));
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
 	check = new CheckMenuItem(_("Solo Safe"));
 	check->set_active (_route->solo_safe());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_safe), check));
-	_route->solo_safe_changed.connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::solo_safe_toggle), check));
+	_route->solo_safe_changed.connect (route_connections, boost::bind (&RouteUI::solo_safe_toggle, this, _1, check));
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
@@ -940,7 +946,7 @@ RouteUI::build_mute_menu(void)
 	//items.push_back (SeparatorElem());
 	// items.push_back (MenuElem (_("MIDI Bind"), sigc::mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
 
-	_route->mute_points_changed.connect (sigc::mem_fun (*this, &RouteUI::muting_change));
+	_route->mute_points_changed.connect (route_connections, boost::bind (&RouteUI::muting_change, this));
 }
 
 void

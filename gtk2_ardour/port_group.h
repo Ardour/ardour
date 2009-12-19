@@ -24,7 +24,7 @@
 #include <string>
 #include <set>
 #include <boost/shared_ptr.hpp>
-#include <boost/signals2.hpp>
+#include "pbd/signals.h"
 
 #include <gtkmm/widget.h>
 #include <gtkmm/checkbutton.h>
@@ -66,10 +66,10 @@ public:
 	bool has_port (std::string const &) const;
 
 	/** The bundle list has changed in some way; a bundle has been added or removed, or the list cleared etc. */
-	sigc::signal<void> Changed;
+	PBD::Signal0<void> Changed;
 
 	/** An individual bundle on our list has changed in some way */
-	boost::signals2::signal<void(ARDOUR::Bundle::Change)> BundleChanged;
+	PBD::Signal1<void,ARDOUR::Bundle::Change> BundleChanged;
 
 	struct BundleRecord {
 	    boost::shared_ptr<ARDOUR::Bundle> bundle;
@@ -132,10 +132,10 @@ class PortGroupList : public sigc::trackable
 	bool empty () const;
 
 	/** The group list has changed in some way; a group has been added or removed, or the list cleared etc. */
-	boost::signals2::signal<void()> Changed;
+	PBD::Signal0<void> Changed;
 
 	/** A bundle in one of our groups has changed */
-	boost::signals2::signal<void(ARDOUR::Bundle::Change)> BundleChanged;
+	PBD::Signal1<void,ARDOUR::Bundle::Change> BundleChanged;
 
   private:
 	bool port_has_prefix (std::string const &, std::string const &) const;
@@ -152,6 +152,7 @@ class PortGroupList : public sigc::trackable
 	mutable PortGroup::BundleList _bundles;
 	List _groups;
 	PBD::ScopedConnectionList _bundle_changed_connections;
+	PBD::ScopedConnectionList _changed_connections;
 	bool _signals_suspended;
 	bool _pending_change;
 	ARDOUR::Bundle::Change _pending_bundle_change;

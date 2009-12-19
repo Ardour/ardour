@@ -32,7 +32,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-boost::signals2::signal<void(NamedSelection*)> NamedSelection::NamedSelectionCreated;
+PBD::Signal1<void,NamedSelection*> NamedSelection::NamedSelectionCreated;
 
 typedef std::list<boost::shared_ptr<Playlist> > PlaylistList;
 

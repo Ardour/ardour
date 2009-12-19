@@ -27,7 +27,7 @@
 #include <sigc++/bind.h>
 #include <sys/time.h>
 
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 #include "pbd/command.h"
 
 typedef sigc::slot<void> UndoAction;
@@ -106,7 +106,7 @@ class UndoHistory : public PBD::ScopedConnectionList
 
 	void set_depth (uint32_t);
 
-	boost::signals2::signal<void()> Changed;
+	PBD::Signal0<void> Changed;
 	
   private:
 	bool _clearing;

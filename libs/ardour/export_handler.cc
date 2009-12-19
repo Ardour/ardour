@@ -106,7 +106,7 @@ ExportHandler::ExportHandler (Session & session)
 {
 	processor.reset (new ExportProcessor (session));
 
-	files_written_connection = ExportProcessor::WritingFile.connect (boost::bind (&ExportHandler::add_file, this, _1));
+	ExportProcessor::WritingFile.connect (files_written_connection, boost::bind (&ExportHandler::add_file, this, _1));
 }
 
 ExportHandler::~ExportHandler ()
@@ -168,7 +168,7 @@ ExportHandler::do_export (bool rt)
 
 	realtime = rt;
 
-	export_read_finished_connection = session.ExportReadFinished.connect (boost::bind (&ExportHandler::finish_timespan, this));
+	session.ExportReadFinished.connect (export_read_finished_connection, boost::bind (&ExportHandler::finish_timespan, this));
 	start_timespan ();
 }
 
@@ -505,7 +505,7 @@ ExportHandler::start_timespan ()
 
 	/* connect stuff and start export */
 
-	current_timespan->process_connection = session.ProcessExport.connect (boost::bind (&ExportTimespan::process, current_timespan, _1));
+	session.ProcessExport.connect (current_timespan->process_connection, boost::bind (&ExportTimespan::process, current_timespan, _1));
 	session.start_audio_export (current_timespan->get_start(), realtime);
 }
 
@@ -566,7 +566,7 @@ ExportHandler::timespan_thread_finished ()
 			cc = current_map_it->second.channel_config;
 		}
 
-		channel_config_connection = cc->FilesWritten.connect (boost::bind (&ExportHandler::timespan_thread_finished, this));
+		cc->FilesWritten.connect (channel_config_connection, boost::bind (&ExportHandler::timespan_thread_finished, this));
 		++current_map_it;
 
 	} else { /* All files are written from current timespan, reset timespan and start new */

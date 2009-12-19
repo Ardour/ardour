@@ -132,7 +132,7 @@ class IO : public SessionObject, public Latent
 
 	const ChanCount& n_ports ()  const { return _ports.count(); }
 
-	boost::signals2::signal<void(IOChange,void*)> changed;
+	PBD::Signal2<void,IOChange,void*> changed;
 
 	virtual XMLNode& state (bool full);
 	XMLNode& get_state (void);
@@ -144,7 +144,7 @@ class IO : public SessionObject, public Latent
 	static int  disable_ports (void);
 	static int  enable_ports (void);
 
-	static boost::signals2::signal<void(ChanCount)> PortCountChanged; // emitted when the number of ports changes
+	static PBD::Signal1<void,ChanCount> PortCountChanged; // emitted when the number of ports changes
 
 	static std::string name_from_state (const XMLNode&);
 	static void set_name_in_state (XMLNode&, const std::string&);
@@ -152,7 +152,7 @@ class IO : public SessionObject, public Latent
 	/* we have to defer/order port connection. this is how we do it.
 	*/
 
-	static boost::signals2::signal<int()> ConnectingLegal;
+	static PBD::Signal0<int> ConnectingLegal;
 	static bool              connecting_legal;
 
 	XMLNode *pending_state_node;
@@ -180,14 +180,14 @@ class IO : public SessionObject, public Latent
 
   private:
 	int connecting_became_legal ();
-	boost::signals2::scoped_connection connection_legal_c;
+	PBD::ScopedConnection connection_legal_c;
 
 	boost::shared_ptr<Bundle> _bundle; ///< a bundle representing our ports
 
 	struct UserBundleInfo {
 	    UserBundleInfo (IO*, boost::shared_ptr<UserBundle> b);
 	    boost::shared_ptr<UserBundle> bundle;
-	    boost::signals2::scoped_connection changed;
+	    PBD::ScopedConnection changed;
 	};
 	
 	std::vector<UserBundleInfo*> _bundles_connected; ///< user bundles connected to our ports

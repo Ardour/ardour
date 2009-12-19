@@ -56,6 +56,7 @@ class SendUI : public Gtk::HBox
 
 	void ins_changed (ARDOUR::IOChange, void*);
 	void outs_changed (ARDOUR::IOChange, void*);
+	PBD::ScopedConnectionList connections;
 };
 
 class SendUIWindow : public ArdourDialog

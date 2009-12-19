@@ -93,6 +93,7 @@ private:
 	Gtk::ScrolledWindow _scroller;
 	Gtk::VBox* _display_packer;
 	bool _in_row_change;
+	PBD::ScopedConnection flags_connection;
 };
 
 

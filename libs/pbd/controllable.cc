@@ -26,15 +26,16 @@
 using namespace PBD;
 using namespace std;
 
-boost::signals2::signal<void(Controllable*)> Controllable::Destroyed;
-boost::signals2::signal<bool(Controllable*)> Controllable::StartLearning;
-boost::signals2::signal<void(Controllable*)> Controllable::StopLearning;
-boost::signals2::signal<void(Controllable*,int,int)> Controllable::CreateBinding;
-boost::signals2::signal<void(Controllable*)> Controllable::DeleteBinding;
+PBD::Signal1<void,Controllable*> Controllable::Destroyed;
+PBD::Signal1<bool,Controllable*> Controllable::StartLearning;
+PBD::Signal1<void,Controllable*> Controllable::StopLearning;
+PBD::Signal3<void,Controllable*,int,int> Controllable::CreateBinding;
+PBD::Signal1<void,Controllable*> Controllable::DeleteBinding;
 
 Glib::StaticRWLock Controllable::registry_lock = GLIBMM_STATIC_RW_LOCK_INIT;
 Controllable::Controllables Controllable::registry;
 Controllable::ControllablesByURI Controllable::registry_by_uri;
+PBD::ScopedConnectionList registry_connections;
 
 Controllable::Controllable (const string& name, const string& uri)
 	: _name (name)
@@ -61,7 +62,7 @@ Controllable::add (Controllable& ctl)
 
 	/* Controllable::remove() is static - no need to manage this connection */
 
-	ctl.GoingAway.connect (boost::bind (&Controllable::remove, ref (ctl)));
+	ctl.GoingAway.connect (registry_connections, boost::bind (&Controllable::remove, ref (ctl)));
 }
 
 void

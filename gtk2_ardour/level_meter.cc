@@ -59,7 +59,7 @@ LevelMeter::LevelMeter (Session* s)
 {
 	set_session (s);
 	set_spacing (1);
-	Config->ParameterChanged.connect (sigc::mem_fun (*this, &LevelMeter::parameter_changed));
+	Config->ParameterChanged.connect (_parameter_connection, boost::bind (&LevelMeter::parameter_changed, this, _1));
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &LevelMeter::on_theme_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &LevelMeter::color_handler));
 	max_peak = minus_infinity();
@@ -85,7 +85,7 @@ LevelMeter::set_meter (PeakMeter* meter)
 	_meter = meter;
 
 	if (_meter) {
-		_configuration_connection = _meter->ConfigurationChanged.connect(boost::bind (&LevelMeter::configuration_changed, this, _1, _2));
+		_meter->ConfigurationChanged.connect (_configuration_connection, boost::bind (&LevelMeter::configuration_changed, this, _1, _2));
 	}
 }
 

@@ -27,7 +27,7 @@
 
 #include <jack/jack.h>
 
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "ardour/types.h"
 #include "midi++/parser.h"
@@ -242,7 +242,7 @@ class MTC_Slave : public Slave {
   private:
 	Session&    session;
 	MIDI::Port* port;
-	PBD::ScopedConnectionList* port_connections;
+	PBD::ScopedConnectionList port_connections;
 	bool        can_notify_on_unknown_rate;
 	PIChaser* pic;
 
@@ -303,7 +303,7 @@ class MIDIClock_Slave : public Slave {
   private:
 	ISlaveSessionProxy* session;
 	MIDI::Port* port;
-	PBD::ScopedConnectionList* port_connections;
+	PBD::ScopedConnectionList port_connections;
 
 	/// pulses per quarter note for one MIDI clock frame (default 24)
 	int         ppqn;

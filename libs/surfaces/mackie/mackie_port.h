@@ -18,13 +18,12 @@
 #ifndef mackie_port_h
 #define mackie_port_h
 
-#include "surface_port.h"
-
 #include <midi++/types.h>
-#include <boost/signals2.hpp>
-
 #include <glibmm/thread.h>
 
+#include "pbd/signals.h"
+
+#include "surface_port.h"
 #include "midi_byte_array.h"
 #include "types.h"
 
@@ -115,8 +114,8 @@ protected:
 private:
 	MackieControlProtocol & _mcp;
 	port_type_t _port_type;
-	boost::signals2::scoped_connection _any;
-	boost::signals2::scoped_connection _sysex;
+	PBD::ScopedConnection any_connection;
+	PBD::ScopedConnection sysex_connection;
 	emulation_t _emulation;
 
 	bool _initialising;

@@ -20,7 +20,7 @@
 #ifndef __libardour_session_handle_h__
 #define __libardour_session_handle_h__
 
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 namespace ARDOUR {
 	class Session;

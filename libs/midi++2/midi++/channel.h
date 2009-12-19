@@ -22,8 +22,7 @@
 
 #include <queue>
 
-#include <boost/signals2.hpp>
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "midi++/types.h"
 #include "midi++/parser.h"

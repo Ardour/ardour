@@ -46,7 +46,7 @@
 #include <gtkmm2ext/dndtreeview.h>
 
 #include "pbd/stateful.h"
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "ardour/import_status.h"
 #include "ardour/tempo.h"
@@ -154,7 +154,7 @@ struct EditorCursor {
 	void set_length (double units);
 	void set_y_axis (double position);
 
-	sigc::signal<void, nframes64_t> PositionChanged;
+        PBD::Signal1<void, nframes64_t> PositionChanged;
 };
 
 class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
@@ -1755,9 +1755,6 @@ public:
 	    State (PublicEditor const * e);
 	    ~State ();
 	};
-
-	void store_state (State&) const;
-	void restore_state (State *);
 
 	void instant_save ();
 

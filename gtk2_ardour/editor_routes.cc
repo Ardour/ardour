@@ -150,7 +150,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_model->signal_rows_reordered().connect (sigc::mem_fun (*this, &EditorRoutes::reordered));
 	_display.signal_button_press_event().connect (sigc::mem_fun (*this, &EditorRoutes::button_press), false);
 
-	scoped_connect (Route::SyncOrderKeys, (sigc::mem_fun (*this, &EditorRoutes::sync_order_keys)));
+	Route::SyncOrderKeys.connect (*this, (sigc::mem_fun (*this, &EditorRoutes::sync_order_keys)));
 }
 
 void
@@ -161,7 +161,7 @@ EditorRoutes::set_session (Session* s)
 	initial_display ();
 
 	if (_session) {
-		scoped_connect (_session->SoloChanged, (sigc::mem_fun (*this, &EditorRoutes::solo_changed_so_update_mute)));
+		_session->SoloChanged.connect (*this, (sigc::mem_fun (*this, &EditorRoutes::solo_changed_so_update_mute)));
 	}
 }
 
@@ -383,18 +383,18 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 
 		boost::weak_ptr<Route> wr ((*x)->route());
 
-		scoped_connect ((*x)->route()->gui_changed, boost::bind (&EditorRoutes::handle_gui_changes, this, _1, _2));
-		scoped_connect ((*x)->route()->NameChanged, boost::bind (&EditorRoutes::route_name_changed, this, wr));
-		scoped_connect ((*x)->GoingAway, boost::bind (&EditorRoutes::route_removed, this, *x));
+		(*x)->route()->gui_changed.connect (*this, boost::bind (&EditorRoutes::handle_gui_changes, this, _1, _2));
+		(*x)->route()->NameChanged.connect (*this, boost::bind (&EditorRoutes::route_name_changed, this, wr));
+		(*x)->GoingAway.connect (*this, boost::bind (&EditorRoutes::route_removed, this, *x));
 
 		if ((*x)->is_track()) {
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> ((*x)->route());
-			scoped_connect (t->diskstream()->RecordEnableChanged, boost::bind (&EditorRoutes::update_rec_display, this));
+			t->diskstream()->RecordEnableChanged.connect (*this, boost::bind (&EditorRoutes::update_rec_display, this));
 		}
 
-		scoped_connect ((*x)->route()->mute_changed, boost::bind (&EditorRoutes::update_mute_display, this));
-		scoped_connect ((*x)->route()->solo_changed, boost::bind (&EditorRoutes::update_solo_display, this));
-		scoped_connect ((*x)->route()->solo_isolated_changed, boost::bind (&EditorRoutes::update_solo_isolate_display, this));
+		(*x)->route()->mute_changed.connect (*this, boost::bind (&EditorRoutes::update_mute_display, this));
+		(*x)->route()->solo_changed.connect (*this, boost::bind (&EditorRoutes::update_solo_display, this));
+		(*x)->route()->solo_isolated_changed.connect (*this, boost::bind (&EditorRoutes::update_solo_isolate_display, this));
 	}
 
 	update_rec_display ();

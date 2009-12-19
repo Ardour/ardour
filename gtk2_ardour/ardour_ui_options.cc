@@ -270,7 +270,7 @@ ARDOUR_UI::toggle_editing_space()
 void
 ARDOUR_UI::setup_session_options ()
 {
-	_session->config.ParameterChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
+	_session->config.ParameterChanged.connect (_session_connections, sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
 	boost::function<void (std::string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	_session->config.map_parameters (pc);
 }

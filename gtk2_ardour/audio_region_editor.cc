@@ -155,7 +155,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion>
 	bounds_changed (Change (StartChanged|LengthChanged|PositionChanged|Region::SyncOffsetChanged));
 	gain_changed ();
 
-	_region->StateChanged.connect (sigc::mem_fun(*this, &AudioRegionEditor::region_changed));
+	_region->StateChanged.connect (state_connection, sigc::mem_fun(*this, &AudioRegionEditor::region_changed));
 
 	spin_arrow_grab = false;
 
@@ -228,7 +228,7 @@ AudioRegionEditor::connect_editor_events ()
 	gain_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
 
 	audition_button.signal_toggled().connect (sigc::mem_fun(*this, &AudioRegionEditor::audition_button_toggled));
-	_session->AuditionActive.connect (sigc::mem_fun(*this, &AudioRegionEditor::audition_state_changed));
+	_session->AuditionActive.connect (audition_connection, sigc::mem_fun(*this, &AudioRegionEditor::audition_state_changed));
 }
 
 void

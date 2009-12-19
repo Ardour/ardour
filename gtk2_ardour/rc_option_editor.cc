@@ -107,6 +107,7 @@ private:
 		MIDI::Manager::PortList const & ports = MIDI::Manager::instance()->get_midi_ports ();
 
 		_store->clear ();
+		port_connections.drop_connections ();
 
 		for (MIDI::Manager::PortList::const_iterator i = ports.begin(); i != ports.end(); ++i) {
 
@@ -116,7 +117,7 @@ private:
 
 			if ((*i)->input()) {
 				r[_model.online] = !(*i)->input()->offline();
-				(*i)->input()->OfflineStatusChanged.connect (sigc::bind (sigc::mem_fun (*this, &MIDIPorts::port_offline_changed), (*i)));
+				(*i)->input()->OfflineStatusChanged.connect (port_connections, boost::bind (&MIDIPorts::port_offline_changed, this, (*i)));
 				r[_model.trace_input] = (*i)->input()->tracing();
 			}
 
@@ -216,6 +217,7 @@ private:
 	ComboBoxText _mmc_combo;
 	ComboBoxText _mpc_combo;
 	list<ComboOption<string>* > _port_combos;
+        PBD::ScopedConnectionList port_connections;
 };
 
 

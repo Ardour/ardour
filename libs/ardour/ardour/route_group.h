@@ -24,10 +24,10 @@
 #include <set>
 #include <string>
 #include <stdint.h>
-#include <boost/signals2.hpp>
+#include "pbd/signals.h"
 
 #include "pbd/stateful.h"
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "ardour/types.h"
 
@@ -128,8 +128,8 @@ public:
 
 	boost::shared_ptr<RouteList> route_list() { return routes; }
 
-	boost::signals2::signal<void()> changed;
-	boost::signals2::signal<void(void*)> FlagsChanged;
+	PBD::Signal0<void> changed;
+	PBD::Signal1<void,void*> FlagsChanged;
 
 	XMLNode& get_state ();
 	

@@ -135,10 +135,10 @@ PortMatrix::init ()
 
 	for (int i = 0; i < 2; ++i) {
 		/* watch for the content of _ports[] changing */
-		_ports[i].Changed.connect (sigc::mem_fun (*this, &PortMatrix::setup));
+		_ports[i].Changed.connect (_changed_connections, boost::bind (&PortMatrix::setup, this));
 
 		/* and for bundles in _ports[] changing */
-		_ports[i].BundleChanged.connect (sigc::hide (sigc::mem_fun (*this, &PortMatrix::setup)));
+		_ports[i].BundleChanged.connect (_bundle_changed_connections,  boost::bind (&PortMatrix::setup, this));
 	}
 
 	/* scrolling stuff */
@@ -149,13 +149,13 @@ PortMatrix::init ()
 	/* Part 2: notice when things have changed that require our subclass to clear and refill _ports[] */
 	
 	/* watch for routes being added or removed */
-	_session_connections.add_connection (_session->RouteAdded.connect (boost::bind (&PortMatrix::routes_changed, this)));
+	_session->RouteAdded.connect (_session_connections, boost::bind (&PortMatrix::routes_changed, this));
 
 	/* and also bundles */
-	_session_connections.add_connection (_session->BundleAdded.connect (boost::bind (&PortMatrix::setup_global_ports, this)));
+	_session->BundleAdded.connect (_session_connections, boost::bind (&PortMatrix::setup_global_ports, this));
 
 	/* and also ports */
-	_session_connections.add_connection (_session->engine().PortRegisteredOrUnregistered.connect (boost::bind (&PortMatrix::setup_global_ports, this)));
+	_session->engine().PortRegisteredOrUnregistered.connect (_session_connections, boost::bind (&PortMatrix::setup_global_ports, this));
 
 	reconnect_to_routes ();
 	
@@ -170,7 +170,7 @@ PortMatrix::reconnect_to_routes ()
 
 	boost::shared_ptr<RouteList> routes = _session->get_routes ();
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		_route_connections.add_connection ((*i)->processors_changed.connect (sigc::mem_fun (*this, &PortMatrix::route_processors_changed)));
+		(*i)->processors_changed.connect (_route_connections, boost::bind (&PortMatrix::route_processors_changed, this, _1));
 	}
 }
 

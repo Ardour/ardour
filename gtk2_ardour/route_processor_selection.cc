@@ -69,6 +69,7 @@ void
 RouteRedirectSelection::clear_routes ()
 {
 	routes.clear ();
+	drop_connections ();
 	RoutesChanged ();
 }
 
@@ -93,7 +94,7 @@ RouteRedirectSelection::add (boost::shared_ptr<Route> r)
 {
 	if (find (routes.begin(), routes.end(), r) == routes.end()) {
 		routes.push_back (r);
-		r->GoingAway.connect (boost::bind (&RouteRedirectSelection::removed, this, boost::weak_ptr<Route>(r)));
+		r->GoingAway.connect (*this, boost::bind (&RouteRedirectSelection::removed, this, boost::weak_ptr<Route>(r)));
 		RoutesChanged();
 	}
 }

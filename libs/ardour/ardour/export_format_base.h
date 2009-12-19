@@ -115,8 +115,8 @@ class ExportFormatBase {
 			: _selected (false), _compatible (true) { }
 		~SelectableCompatible () {}
 
-		boost::signals2::signal<void(bool)> SelectChanged;
-		boost::signals2::signal<void(bool)> CompatibleChanged;
+		PBD::Signal1<void,bool> SelectChanged;
+		PBD::Signal1<void,bool> CompatibleChanged;
 
 		bool selected () const { return _selected; }
 		bool compatible () const { return _compatible; }

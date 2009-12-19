@@ -22,6 +22,7 @@
 #include <vector>
 #include "ardour/types.h"
 #include "ardour/processor.h"
+#include "pbd/signals.h"
 #include "pbd/fastlog.h"
 
 namespace ARDOUR {
@@ -33,16 +34,11 @@ class Session;
 class Metering {
   public:
 	static void               update_meters ();
-	static boost::signals2::signal<void()> Meter;
-
-	static boost::signals2::connection connect (boost::function<void()>);
-	static void                        disconnect (boost::signals2::connection& c);
+	static PBD::Signal0<void> Meter;
 
   private:
 	/* this object is not meant to be instantiated */
 	Metering();
-
-	static Glib::StaticMutex    m_meter_signal_lock;
 };
 
 /** Meters peaks on the input and stores them for access.

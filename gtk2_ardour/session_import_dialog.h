@@ -93,6 +93,8 @@ class SessionImportDialog : public ArdourDialog
 
 	Gtk::Button*                  ok_button;
 	Gtk::Button*                  cancel_button;
+	
+	PBD::ScopedConnectionList connections;
 };
 
 #endif

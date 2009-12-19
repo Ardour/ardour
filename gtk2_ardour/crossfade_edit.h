@@ -183,7 +183,8 @@ class CrossfadeEditor : public ArdourDialog
 
 	void set (const ARDOUR::AutomationList& alist, WhichFade);
 
-	boost::signals2::scoped_connection peaks_ready_connection;
+	PBD::ScopedConnection peaks_ready_connection;
+	PBD::ScopedConnection state_connection;
 
 	void make_waves (boost::shared_ptr<ARDOUR::AudioRegion>, WhichFade);
 	void peaks_ready (boost::weak_ptr<ARDOUR::AudioRegion> r, WhichFade);

@@ -32,7 +32,7 @@ SessionHandlePtr::SessionHandlePtr (Session* s)
 	: _session (s) 
 {
 	if (_session) {
-		_session_connections.add_connection (_session->GoingAway.connect (boost::bind (&SessionHandlePtr::session_going_away, this)));
+		_session->GoingAway.connect (_session_connections, boost::bind (&SessionHandlePtr::session_going_away, this));
 	}
 }	
 
@@ -47,7 +47,7 @@ SessionHandlePtr::set_session (Session* s)
 
 	if (s) {
 		_session = s;
-		_session_connections.add_connection (_session->GoingAway.connect (boost::bind (&SessionHandlePtr::session_going_away, this)));
+		_session->GoingAway.connect (_session_connections, boost::bind (&SessionHandlePtr::session_going_away, this));
 	}
 }
 
@@ -63,7 +63,7 @@ SessionHandlePtr::session_going_away ()
 SessionHandleRef::SessionHandleRef (Session& s)
 	: _session (s) 
 {
-	scoped_connect (_session.GoingAway, boost::bind (&SessionHandleRef::session_going_away, this));
+	_session.GoingAway.connect (*this, boost::bind (&SessionHandleRef::session_going_away, this));
 }	
 
 void

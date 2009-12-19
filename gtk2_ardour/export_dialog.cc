@@ -86,7 +86,7 @@ ExportDialog::set_session (ARDOUR::Session* s)
 	timespan_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings));
 	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings));
 	file_notebook->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings));
-	status->Aborting.connect (sigc::mem_fun (*this, &ExportDialog::notify_errors));
+	status->Aborting.connect (abort_connection, sigc::mem_fun (*this, &ExportDialog::notify_errors));
 
 	update_warnings ();
 }

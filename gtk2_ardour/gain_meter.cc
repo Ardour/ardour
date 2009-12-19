@@ -226,13 +226,13 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 
 		boost::shared_ptr<AutomationControl> gc = amp->gain_control();
 		
-		model_connections.add_connection (gc->alist()->automation_state_changed.connect (boost::bind (&GainMeter::gain_automation_state_changed, this)));
-		model_connections.add_connection (gc->alist()->automation_style_changed.connect (boost::bind (&GainMeter::gain_automation_style_changed, this)));
+		gc->alist()->automation_state_changed.connect (model_connections, boost::bind (&GainMeter::gain_automation_state_changed, this));
+		gc->alist()->automation_style_changed.connect (model_connections, boost::bind (&GainMeter::gain_automation_style_changed, this));
 		
 		gain_automation_state_changed ();
 	}
 	
-	model_connections.add_connection (amp->gain_control()->Changed.connect (boost::bind (&GainMeterBase::gain_changed, this)));
+	amp->gain_control()->Changed.connect (model_connections, boost::bind (&GainMeterBase::gain_changed, this));
 
 	gain_changed ();
 	show_gain ();

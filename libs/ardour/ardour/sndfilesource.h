@@ -98,6 +98,7 @@ class SndFileSource : public AudioFileSource {
 	nframes_t destructive_write_unlocked (Sample *dst, nframes_t cnt);
 	nframes_t nondestructive_write_unlocked (Sample *dst, nframes_t cnt);
 	void handle_header_position_change ();
+	PBD::ScopedConnection header_position_connection;
 };
 
 } // namespace ARDOUR

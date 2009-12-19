@@ -258,7 +258,7 @@ class TempoMap : public PBD::StatefulDestructible
 
 	nframes_t frame_rate () const { return _frame_rate; }
 
-	boost::signals2::signal<void(ARDOUR::Change)> StateChanged;
+	PBD::Signal1<void,ARDOUR::Change> StateChanged;
 
   private:
 	static Tempo    _default_tempo;

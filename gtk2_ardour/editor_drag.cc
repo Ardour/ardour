@@ -237,7 +237,7 @@ RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Re
 	  _primary (p),
 	  _views (v)
 {
-	death_connection = RegionView::RegionViewGoingAway.connect (sigc::mem_fun (*this, &RegionDrag::region_going_away));
+	RegionView::RegionViewGoingAway.connect (death_connection, boost::bind (&RegionDrag::region_going_away, this, _1));
 }
 
 void

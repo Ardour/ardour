@@ -137,6 +137,8 @@ class PluginEqGui : public Gtk::Table
 		sigc::connection _update_connection;
 		sigc::connection _window_unmap_connection;
 		sigc::connection _window_map_connection;
+
+		PBD::ScopedConnection analysis_connection;
 };
 
 #endif

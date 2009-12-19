@@ -39,7 +39,7 @@ using namespace Editing;
 using namespace Gnome;
 using namespace Canvas;
 
-boost::signals2::signal<void(CrossfadeView*)> CrossfadeView::GoingAway;
+PBD::Signal1<void,CrossfadeView*> CrossfadeView::GoingAway;
 
 CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 			      RouteTimeAxisView &tv,
@@ -83,7 +83,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 
 	crossfade_changed (Change (~0));
 
-	crossfade->StateChanged.connect (sigc::mem_fun(*this, &CrossfadeView::crossfade_changed));
+	crossfade->StateChanged.connect (*this, sigc::mem_fun(*this, &CrossfadeView::crossfade_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &CrossfadeView::color_handler));
 }
 

@@ -23,7 +23,9 @@
 
 #include <boost/shared_ptr.hpp>
 #include <gtkmm.h>
-#include <gtkmm2ext/barcontroller.h>
+
+#include "gtkmm2ext/barcontroller.h"
+#include "pbd/signals.h"
 
 namespace ARDOUR {
 	class Session;
@@ -63,6 +65,7 @@ private:
 	boost::shared_ptr<ARDOUR::AutomationControl> _controllable;
 	Gtk::Adjustment*                             _adjustment;
 	sigc::connection                             _screen_update_connection;
+	PBD::ScopedConnection                        _changed_connection;
 };
 
 

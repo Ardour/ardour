@@ -32,8 +32,8 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
-boost::signals2::signal <std::pair<bool, string> (string, string)> ElementImporter::Rename;
-boost::signals2::signal <bool (string)> ElementImporter::Prompt;
+Signal2<std::pair<bool, string>,string, string> ElementImporter::Rename;
+Signal1 <bool,string> ElementImporter::Prompt;
 
 ElementImporter::ElementImporter (XMLTree const & source, ARDOUR::Session & session) :
   source (source),

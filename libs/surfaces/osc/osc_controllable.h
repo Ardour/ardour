@@ -48,6 +48,7 @@ class OSCControllable : public PBD::Stateful
 
   protected:
 	boost::shared_ptr<PBD::Controllable> controllable;
+	PBD::ScopedConnection changed_connection;
 	lo_address addr;
 	std::string path;
 

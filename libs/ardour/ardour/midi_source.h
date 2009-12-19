@@ -86,10 +86,10 @@ class MidiSource : virtual public Source
 	uint32_t read_data_count()  const { return _read_data_count; }
 	uint32_t write_data_count() const { return _write_data_count; }
 
-	static boost::signals2::signal<void(MidiSource*)> MidiSourceCreated;
+	static PBD::Signal1<void,MidiSource*> MidiSourceCreated;
 
 	// Signal a range of recorded data is available for reading from model()
-	mutable boost::signals2::signal<void(sframes_t,nframes_t)> ViewDataRangeReady;
+	mutable PBD::Signal2<void,sframes_t,nframes_t> ViewDataRangeReady;
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);

@@ -29,7 +29,7 @@
 #include <gtkmm/paned.h>
 #include <gtkmm/scrolledwindow.h>
 
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "ardour/location.h"
 #include "ardour/session_handle.h"

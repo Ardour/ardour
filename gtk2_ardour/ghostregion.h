@@ -22,7 +22,7 @@
 
 #include <vector>
 #include <libgnomecanvasmm.h>
-#include <boost/signals2.hpp>
+#include "pbd/signals.h"
 #include "canvas.h"
 
 namespace Gnome {
@@ -57,7 +57,7 @@ public:
 	ArdourCanvas::Group* group;
 	ArdourCanvas::SimpleRect* base_rect;
 
-	static boost::signals2::signal<void(GhostRegion*)> GoingAway;
+	static PBD::Signal1<void,GhostRegion*> GoingAway;
 };
 
 class AudioGhostRegion : public GhostRegion {

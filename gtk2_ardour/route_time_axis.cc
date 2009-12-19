@@ -193,9 +193,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	}
 
 	controls_hbox.pack_start(gm.get_level_meter(), false, false);
-	_route->meter_change.connect (sigc::mem_fun(*this, &RouteTimeAxisView::meter_changed));
-	_route->input()->changed.connect (sigc::mem_fun(*this, &RouteTimeAxisView::io_changed));
-	_route->output()->changed.connect (sigc::mem_fun(*this, &RouteTimeAxisView::io_changed));
+	_route->meter_change.connect (*this, boost::bind (&RouteTimeAxisView::meter_changed, this, _1));
+	_route->input()->changed.connect (*this, boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2));
+	_route->output()->changed.connect (*this, boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2));
 
 	controls_table.attach (*mute_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	controls_table.attach (*solo_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
@@ -234,19 +234,19 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 
 	_y_position = -1;
 
-	_route->mute_changed.connect (sigc::mem_fun(*this, &RouteUI::mute_changed));
-	_route->solo_changed.connect (sigc::mem_fun(*this, &RouteUI::solo_changed));
-	_route->processors_changed.connect (sigc::mem_fun(*this, &RouteTimeAxisView::processors_changed));
-	_route->NameChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::route_name_changed));
-	_route->solo_isolated_changed.connect (sigc::mem_fun(*this, &RouteUI::solo_changed));
+	_route->mute_changed.connect (*this, boost::bind (&RouteUI::mute_changed, this, _1));
+	_route->solo_changed.connect (*this, boost::bind (&RouteUI::solo_changed, this, _1));
+	_route->processors_changed.connect (*this, boost::bind (&RouteTimeAxisView::processors_changed, this, _1));
+	_route->NameChanged.connect (*this, boost::bind (&RouteTimeAxisView::route_name_changed, this));
+	_route->solo_isolated_changed.connect (*this, boost::bind (&RouteUI::solo_changed, this, _1));
 
 
 	if (is_track()) {
 
-		track()->TrackModeChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::track_mode_changed));
-		track()->FreezeChange.connect (sigc::mem_fun(*this, &RouteTimeAxisView::map_frozen));
-		track()->DiskstreamChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::diskstream_changed));
-		get_diskstream()->SpeedChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::speed_changed));
+		track()->TrackModeChanged.connect (*this, boost::bind (&RouteTimeAxisView::track_mode_changed, this));
+		track()->FreezeChange.connect (*this, boost::bind (&RouteTimeAxisView::map_frozen, this));
+		track()->DiskstreamChanged.connect (*this, boost::bind (&RouteTimeAxisView::diskstream_changed, this));
+		get_diskstream()->SpeedChanged.connect (*this, boost::bind (&RouteTimeAxisView::speed_changed, this));
 
 		/* pick up the correct freeze state */
 		map_frozen ();
@@ -270,6 +270,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 RouteTimeAxisView::~RouteTimeAxisView ()
 {
 	drop_references ();
+	drop_connections ();
 
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 		delete *i;
@@ -531,8 +532,7 @@ RouteTimeAxisView::build_display_menu ()
 
 		if (!Profile->get_sae()) {
 			items.push_back (MenuElem (_("Alignment"), *alignment_menu));
-			get_diskstream()->AlignmentStyleChanged.connect (
-					sigc::mem_fun(*this, &RouteTimeAxisView::align_style_changed));
+			get_diskstream()->AlignmentStyleChanged.connect (route_connections, boost::bind (&RouteTimeAxisView::align_style_changed, this));
 
 			RadioMenuItem::Group mode_group;
 			items.push_back (RadioMenuElem (mode_group, _("Normal mode"), sigc::bind (
@@ -564,8 +564,7 @@ RouteTimeAxisView::build_display_menu ()
 			}
 		}
 
-		get_diskstream()->AlignmentStyleChanged.connect (
-				sigc::mem_fun(*this, &RouteTimeAxisView::align_style_changed));
+		get_diskstream()->AlignmentStyleChanged.connect (route_connections, boost::bind (&RouteTimeAxisView::align_style_changed, this));
 
 		mode_menu = build_mode_menu();
 		if (mode_menu)

@@ -56,7 +56,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-boost::signals2::signal<void(Processor*)> Processor::ProcessorCreated;
+PBD::Signal1<void,Processor*> Processor::ProcessorCreated;
 
 // Always saved as Processor, but may be IOProcessor or Send in legacy sessions
 const string Processor::state_node_name = "Processor";

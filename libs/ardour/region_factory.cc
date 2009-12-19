@@ -34,7 +34,7 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-boost::signals2::signal<void(boost::shared_ptr<Region>)> RegionFactory::CheckNewRegion;
+PBD::Signal1<void,boost::shared_ptr<Region> > RegionFactory::CheckNewRegion;
 
 boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<Region> region, nframes_t start,

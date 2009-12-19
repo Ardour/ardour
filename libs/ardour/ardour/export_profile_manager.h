@@ -206,7 +206,7 @@ class ExportProfileManager
 	void remove_format_profile (FormatPtr format);
 	FormatPtr get_new_format (FormatPtr original);
 
-	boost::signals2::signal<void()> FormatListChanged;
+	PBD::Signal0<void> FormatListChanged;
 
   private:
 

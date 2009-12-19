@@ -20,7 +20,7 @@
 #ifndef __pbd_destructible_h__
 #define __pbd_destructible_h__
 
-#include <boost/signals2.hpp>
+#include "pbd/signals.h"
 
 namespace PBD {
 
@@ -29,7 +29,7 @@ class Destructible {
         Destructible() : refs_dropped (false){}
 	virtual ~Destructible () {}
 	
-	boost::signals2::signal<void ()> GoingAway;
+	PBD::Signal0<void> GoingAway;
 	void drop_references () { if (!refs_dropped) { GoingAway(); } refs_dropped = true; }
 
   private:

@@ -117,6 +117,7 @@ class BundleManager : public ArdourDialog
 	ModelColumns _list_model_columns;
 	Gtk::Button edit_button;
 	Gtk::Button delete_button;
+	PBD::ScopedConnectionList bundle_connections;
 };
 
 class NameChannelDialog : public ArdourDialog

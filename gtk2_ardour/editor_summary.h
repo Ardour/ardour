@@ -78,6 +78,9 @@ private:
 
 	bool _zoom_dragging;
 	bool _zoom_left;
+
+	PBD::ScopedConnectionList position_connection;
+	PBD::ScopedConnectionList region_property_connection;
 };
 
 #endif

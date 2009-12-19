@@ -26,7 +26,7 @@
 #include <limits.h>
 #include <signal.h>
 
-#include <boost/signals2.hpp>
+#include "pbd/signals.h"
 
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
@@ -46,7 +46,7 @@ namespace ARDOUR {
 	class AudioEngine;
 
 	static const nframes_t max_frames = JACK_MAX_FRAMES;
-	extern boost::signals2::signal<void(std::string)> BootMessage;
+	extern PBD::Signal1<void,std::string> BootMessage;
 
 	int init (bool with_vst, bool try_optimization);
 	void init_post_engine ();

@@ -924,7 +924,7 @@ TimeAxisView::add_ghost (RegionView* rv)
 
 	if(gr) {
 		ghosts.push_back(gr);
-		scoped_connect (gr->GoingAway, boost::bind (&TimeAxisView::erase_ghost, this, _1));
+		gr->GoingAway.connect (*this, boost::bind (&TimeAxisView::erase_ghost, this, _1));
 	}
 }
 

@@ -68,8 +68,8 @@ using namespace PBD;
  */
 ARDOUR::nframes_t Diskstream::disk_io_chunk_frames = 1024 * 256;
 
-boost::signals2::signal<void()>                Diskstream::DiskOverrun;
-boost::signals2::signal<void()>                Diskstream::DiskUnderrun;
+PBD::Signal0<void>                Diskstream::DiskOverrun;
+PBD::Signal0<void>                Diskstream::DiskUnderrun;
 
 Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
 	: SessionObject(sess, name)
@@ -142,13 +142,13 @@ Diskstream::set_route (Route& r)
 	_io = _route->input();
 
 	ic_connection.disconnect();
-	ic_connection = _io->changed.connect (boost::bind (&Diskstream::handle_input_change, this, _1, _2));
+	_io->changed.connect (ic_connection, boost::bind (&Diskstream::handle_input_change, this, _1, _2));
 
 	input_change_pending = ConfigurationChanged;
 	non_realtime_input_change ();
 	set_align_style_from_io ();
 
-	scoped_connect (_route->GoingAway, boost::bind (&Diskstream::route_going_away, this));
+	_route->GoingAway.connect (*this, boost::bind (&Diskstream::route_going_away, this));
 }
 
 void
@@ -339,9 +339,9 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 			reset_write_sources (false);
 		}
 
-		playlist_connections.add_connection (_playlist->Modified.connect (boost::bind (&Diskstream::playlist_modified, this)));
-		playlist_connections.add_connection (_playlist->GoingAway.connect (boost::bind (&Diskstream::playlist_deleted, this, boost::weak_ptr<Playlist>(_playlist))));
-		playlist_connections.add_connection (_playlist->RangesMoved.connect (boost::bind (&Diskstream::playlist_ranges_moved, this, _1)));
+		_playlist->Modified.connect (playlist_connections, boost::bind (&Diskstream::playlist_modified, this));
+		_playlist->GoingAway.connect (playlist_connections, boost::bind (&Diskstream::playlist_deleted, this, boost::weak_ptr<Playlist>(_playlist)));
+		_playlist->RangesMoved.connect (playlist_connections, boost::bind (&Diskstream::playlist_ranges_moved, this, _1));
 	}
 
 	/* don't do this if we've already asked for it *or* if we are setting up

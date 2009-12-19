@@ -37,7 +37,7 @@ class SourceFactory {
   public:
 	static void init ();
 
-	static boost::signals2::signal<void(boost::shared_ptr<Source>)> SourceCreated;
+	static PBD::Signal1<void,boost::shared_ptr<Source> > SourceCreated;
 
 	static boost::shared_ptr<Source> create (Session&, const XMLNode& node, bool async = false);
 	static boost::shared_ptr<Source> createSilent (Session&, const XMLNode& node,

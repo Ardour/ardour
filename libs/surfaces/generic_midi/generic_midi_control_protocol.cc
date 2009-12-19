@@ -61,15 +61,14 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 
 	auto_binding = FALSE;
 
-	Controllable::StartLearning.connect (mem_fun (*this, &GenericMidiControlProtocol::start_learning));
-	Controllable::StopLearning.connect (mem_fun (*this, &GenericMidiControlProtocol::stop_learning));
-	Session::SendFeedback.connect (mem_fun (*this, &GenericMidiControlProtocol::send_feedback));
-	
-	Controllable::CreateBinding.connect (mem_fun (*this, &GenericMidiControlProtocol::create_binding));
-	Controllable::DeleteBinding.connect (mem_fun (*this, &GenericMidiControlProtocol::delete_binding));
+	Controllable::StartLearning.connect (*this, boost::bind (&GenericMidiControlProtocol::start_learning, this, _1));
+	Controllable::StopLearning.connect (*this, boost::bind (&GenericMidiControlProtocol::stop_learning, this, _1));
+	Controllable::CreateBinding.connect (*this, boost::bind (&GenericMidiControlProtocol::create_binding, this, _1, _2, _3));
+	Controllable::DeleteBinding.connect (*this, boost::bind (&GenericMidiControlProtocol::delete_binding, this, _1));
 
-	Session::AutoBindingOn.connect (mem_fun (*this, &GenericMidiControlProtocol::auto_binding_on));
-	Session::AutoBindingOff.connect (mem_fun (*this, &GenericMidiControlProtocol::auto_binding_off));
+	Session::SendFeedback.connect (*this, boost::bind (&GenericMidiControlProtocol::send_feedback, this));
+	Session::AutoBindingOn.connect (*this, boost::bind (&GenericMidiControlProtocol::auto_binding_on, this));
+	Session::AutoBindingOff.connect (*this, boost::bind (&GenericMidiControlProtocol::auto_binding_off, this));
 }
 
 GenericMidiControlProtocol::~GenericMidiControlProtocol ()

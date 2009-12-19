@@ -23,7 +23,7 @@
 #include <string>
 #include <iostream>
 
-#include <boost/signals2.hpp>
+#include "pbd/signals.h"
 
 #include "midi++/types.h"
 
@@ -32,12 +32,12 @@ namespace MIDI {
 class Port;
 class Parser;
 
-typedef boost::signals2::signal<void(Parser&)>                   ZeroByteSignal;
-typedef boost::signals2::signal<void(Parser&,nframes_t)>         TimestampedSignal;
-typedef boost::signals2::signal<void(Parser&, byte)>             OneByteSignal;
-typedef boost::signals2::signal<void(Parser &, EventTwoBytes *)> TwoByteSignal;
-typedef boost::signals2::signal<void(Parser &, pitchbend_t)>     PitchBendSignal;
-typedef boost::signals2::signal<void(Parser &, byte *, size_t)>  Signal;
+typedef PBD::Signal1<void,Parser&>                   ZeroByteSignal;
+typedef PBD::Signal2<void,Parser&,nframes_t>         TimestampedSignal;
+typedef PBD::Signal2<void,Parser&, byte>             OneByteSignal;
+typedef PBD::Signal2<void,Parser &, EventTwoBytes *> TwoByteSignal;
+typedef PBD::Signal2<void,Parser &, pitchbend_t>     PitchBendSignal;
+typedef PBD::Signal3<void,Parser &, byte *, size_t>  Signal;
 
 class Parser {
  public:
@@ -109,9 +109,9 @@ class Parser {
 
 	void set_offline (bool);
 	bool offline() const { return _offline; }
-	boost::signals2::signal<void()> OfflineStatusChanged;
+	PBD::Signal0<void> OfflineStatusChanged;
 
-	boost::signals2::signal<int(byte *, size_t)> edit;
+	PBD::Signal2<int,byte *, size_t> edit;
 
 	void set_mmc_forwarding (bool yn) {
 		_mmc_forward = yn;
@@ -124,10 +124,10 @@ class Parser {
 	const byte *mtc_current() const { return _mtc_time; }
 	bool        mtc_locked() const  { return _mtc_locked; }
 	
-	boost::signals2::signal<void(Parser&,int,nframes_t)>      mtc_qtr;
-	boost::signals2::signal<void(const byte*,bool,nframes_t)> mtc_time;
-	boost::signals2::signal<void(MTC_Status)>                 mtc_status;
-	boost::signals2::signal<bool()>                           mtc_skipped;
+	PBD::Signal3<void,Parser&,int,nframes_t>      mtc_qtr;
+	PBD::Signal3<void,const byte*,bool,nframes_t> mtc_time;
+	PBD::Signal1<void,MTC_Status>                 mtc_status;
+	PBD::Signal0<bool>                           mtc_skipped;
 
 	void set_mtc_forwarding (bool yn) {
 		_mtc_forward = yn;
@@ -142,7 +142,7 @@ class Parser {
 	std::ostream *trace_stream;
 	std::string trace_prefix;
 	void trace_event (Parser &p, byte *msg, size_t len);
-	boost::signals2::scoped_connection trace_connection;
+	PBD::ScopedConnection trace_connection;
 
 	size_t message_counter[256];
 

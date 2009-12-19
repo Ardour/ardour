@@ -84,7 +84,7 @@ public:
 	static void set_bwf_serial_number (int);
 	static void set_header_position_offset (nframes_t offset );
 
-	static boost::signals2::signal<void()> HeaderPositionOffsetChanged;
+	static PBD::Signal0<void> HeaderPositionOffsetChanged;
 
 protected:
 	/** Constructor to be called for existing external-to-session files */

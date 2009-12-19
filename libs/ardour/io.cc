@@ -67,8 +67,8 @@ using namespace PBD;
 
 const string                 IO::state_node_name = "IO";
 bool                         IO::connecting_legal = false;
-boost::signals2::signal<int()>            IO::ConnectingLegal;
-boost::signals2::signal<void(ChanCount)> IO::PortCountChanged;
+PBD::Signal0<int>            IO::ConnectingLegal;
+PBD::Signal1<void,ChanCount> IO::PortCountChanged;
 
 /** @param default_type The type of port that will be created by ensure_io
  * and friends if no type is explicitly requested (to avoid breakage).
@@ -566,7 +566,7 @@ IO::set_state (const XMLNode& node, int version)
 		pending_state_node = new XMLNode (node);
 		pending_state_node_version = version;
 		pending_state_node_in = false;
-		connection_legal_c = ConnectingLegal.connect (boost::bind (&IO::connecting_became_legal, this));
+		ConnectingLegal.connect (connection_legal_c, boost::bind (&IO::connecting_became_legal, this));
 	}
 
 
@@ -619,7 +619,7 @@ IO::set_state_2X (const XMLNode& node, int version, bool in)
 		pending_state_node = new XMLNode (node);
 		pending_state_node_version = version;
 		pending_state_node_in = in;
-		connection_legal_c = ConnectingLegal.connect (boost::bind (&IO::connecting_became_legal, this));
+		ConnectingLegal.connect (connection_legal_c, boost::bind (&IO::connecting_became_legal, this));
 	}
 
 	return 0;
@@ -1399,7 +1399,7 @@ IO::bundles_connected ()
 IO::UserBundleInfo::UserBundleInfo (IO* io, boost::shared_ptr<UserBundle> b)
 {
 	bundle = b;
-	changed = b->Changed.connect (boost::bind (&IO::bundle_changed, io, _1));
+	b->Changed.connect (changed, boost::bind (&IO::bundle_changed, io, _1));
 }
 
 std::string

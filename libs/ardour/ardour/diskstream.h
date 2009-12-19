@@ -49,7 +49,7 @@ class Region;
 class Route;
 class Session;
 
-class Diskstream : public SessionObject, public boost::noncopyable
+class Diskstream : public SessionObject
 {
   public:
 	enum Flag {
@@ -143,15 +143,15 @@ class Diskstream : public SessionObject, public boost::noncopyable
 	void move_processor_automation (boost::weak_ptr<Processor>,
 			std::list< Evoral::RangeMove<nframes_t> > const &);
 
-	boost::signals2::signal<void()>            RecordEnableChanged;
-	boost::signals2::signal<void()>            SpeedChanged;
-	boost::signals2::signal<void()>            ReverseChanged;
-	boost::signals2::signal<void()>            PlaylistChanged;
-	boost::signals2::signal<void()>            AlignmentStyleChanged;
-	boost::signals2::signal<void(Location *)> LoopSet;
+	PBD::Signal0<void>            RecordEnableChanged;
+	PBD::Signal0<void>            SpeedChanged;
+	PBD::Signal0<void>            ReverseChanged;
+	PBD::Signal0<void>            PlaylistChanged;
+	PBD::Signal0<void>            AlignmentStyleChanged;
+	PBD::Signal1<void,Location *> LoopSet;
 
-	static boost::signals2::signal<void()>     DiskOverrun;
-	static boost::signals2::signal<void()>     DiskUnderrun;
+	static PBD::Signal0<void>     DiskOverrun;
+	static PBD::Signal0<void>     DiskUnderrun;
 
   protected:
 	friend class Session;
@@ -306,7 +306,7 @@ class Diskstream : public SessionObject, public boost::noncopyable
 
 	PBD::ScopedConnectionList playlist_connections;
 
-	boost::signals2::scoped_connection ic_connection;
+	PBD::ScopedConnection ic_connection;
 
 	Flag _flags;
 

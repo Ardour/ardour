@@ -627,7 +627,7 @@ Editor::Editor ()
 	_playlist_selector = new PlaylistSelector();
 	_playlist_selector->signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (_playlist_selector)));
 
-	scoped_connect (RegionView::RegionViewGoingAway, boost::bind (&Editor::catch_vanishing_regionview, this, _1));
+	RegionView::RegionViewGoingAway.connect (*this, boost::bind (&Editor::catch_vanishing_regionview, this, _1));
 
 	/* nudge stuff */
 
@@ -677,13 +677,13 @@ Editor::Editor ()
 
 	/* allow external control surfaces/protocols to do various things */
 
-	ControlProtocol::ZoomToSession.connect (sigc::mem_fun (*this, &Editor::temporal_zoom_session));
-	ControlProtocol::ZoomIn.connect (sigc::bind (sigc::mem_fun (*this, &Editor::temporal_zoom_step), false));
-	ControlProtocol::ZoomOut.connect (sigc::bind (sigc::mem_fun (*this, &Editor::temporal_zoom_step), true));
-	ControlProtocol::ScrollTimeline.connect (sigc::mem_fun (*this, &Editor::control_scroll));
-	BasicUI::AccessAction.connect (sigc::mem_fun (*this, &Editor::access_action));
+	ControlProtocol::ZoomToSession.connect (*this, boost::bind (&Editor::temporal_zoom_session, this));
+	ControlProtocol::ZoomIn.connect (*this, boost::bind (&Editor::temporal_zoom_step, this, false));
+	ControlProtocol::ZoomOut.connect (*this, boost::bind (&Editor::temporal_zoom_step, this, true));
+	ControlProtocol::ScrollTimeline.connect (*this, boost::bind (&Editor::control_scroll, this, _1));
+	BasicUI::AccessAction.connect (*this, boost::bind (&Editor::access_action, this, _1, _2));
 
-	Config->ParameterChanged.connect (sigc::mem_fun (*this, &Editor::parameter_changed));
+	Config->ParameterChanged.connect (*this, boost::bind (&Editor::parameter_changed, this, _1));
 
 	_last_normalization_value = 0;
 
@@ -1075,24 +1075,24 @@ Editor::set_session (Session *t)
 
 	update_title ();
 
-	_session_connections.add_connection (_session->history().Changed.connect (boost::bind (&Editor::history_changed, this)));
+	_session->history().Changed.connect (_session_connections, boost::bind (&Editor::history_changed, this));
 
 	/* These signals can all be emitted by a non-GUI thread. Therefore the
 	   handlers for them must not attempt to directly interact with the GUI,
 	   but use Gtkmm2ext::UI::instance()->call_slot();
 	*/
 
-	_session_connections.add_connection (_session->TransportStateChange.connect (boost::bind (&Editor::map_transport_state, this)));
-	_session_connections.add_connection (_session->PositionChanged.connect (boost::bind (&Editor::map_position_change, this, _1)));
-	_session_connections.add_connection (_session->RouteAdded.connect (boost::bind (&Editor::handle_new_route, this, _1)));
-	_session_connections.add_connection (_session->DurationChanged.connect (boost::bind (&Editor::handle_new_duration, this)));
-	_session_connections.add_connection (_session->DirtyChanged.connect (boost::bind (&Editor::update_title, this)));
-	_session_connections.add_connection (_session->StateSaved.connect (boost::bind (&Editor::update_title, this)));
-	_session_connections.add_connection (_session->AskAboutPlaylistDeletion.connect (boost::bind (&Editor::playlist_deletion_dialog, this, _1)));
-	_session_connections.add_connection (_session->TimecodeOffsetChanged.connect (boost::bind (&Editor::update_just_timecode, this)));
-	_session_connections.add_connection (_session->tempo_map().StateChanged.connect (boost::bind (&Editor::tempo_map_changed, this, _1)));
-	_session_connections.add_connection (_session->Located.connect (boost::bind (&Editor::located, this)));
-	_session_connections.add_connection (_session->config.ParameterChanged.connect (boost::bind (&Editor::parameter_changed, this, _1)));
+	_session->TransportStateChange.connect (_session_connections, boost::bind (&Editor::map_transport_state, this));
+	_session->PositionChanged.connect (_session_connections, boost::bind (&Editor::map_position_change, this, _1));
+	_session->RouteAdded.connect (_session_connections, boost::bind (&Editor::handle_new_route, this, _1));
+	_session->DurationChanged.connect (_session_connections, boost::bind (&Editor::handle_new_duration, this));
+	_session->DirtyChanged.connect (_session_connections, boost::bind (&Editor::update_title, this));
+	_session->StateSaved.connect (_session_connections, boost::bind (&Editor::update_title, this));
+	_session->AskAboutPlaylistDeletion.connect (_session_connections, boost::bind (&Editor::playlist_deletion_dialog, this, _1));
+	_session->TimecodeOffsetChanged.connect (_session_connections, boost::bind (&Editor::update_just_timecode, this));
+	_session->tempo_map().StateChanged.connect (_session_connections, boost::bind (&Editor::tempo_map_changed, this, _1));
+	_session->Located.connect (_session_connections, boost::bind (&Editor::located, this));
+	_session->config.ParameterChanged.connect (_session_connections, boost::bind (&Editor::parameter_changed, this, _1));
 
 	if (Profile->get_sae()) {
 		BBT_Time bbt;
@@ -1144,13 +1144,13 @@ Editor::set_session (Session *t)
 
 	/* static signal - no need to drop connection when session is deleted (XXX or we are?)*/
 
-	_session->StateSaved.connect (sigc::mem_fun(*this, &Editor::session_state_saved));
+	_session->StateSaved.connect (*this, boost::bind (&Editor::session_state_saved, this, _1));
 
-	_session_connections.add_connection (_session->locations()->added.connect (sigc::mem_fun(*this, &Editor::add_new_location)));
-	_session_connections.add_connection (_session->locations()->removed.connect (sigc::mem_fun(*this, &Editor::location_gone)));
-	_session_connections.add_connection (_session->locations()->changed.connect (sigc::mem_fun(*this, &Editor::refresh_location_display)));
-	_session_connections.add_connection (_session->locations()->StateChanged.connect (sigc::mem_fun(*this, &Editor::refresh_location_display_s)));
-	_session_connections.add_connection (_session->locations()->end_location()->changed.connect (sigc::mem_fun(*this, &Editor::end_location_changed)));
+	_session->locations()->added.connect (_session_connections, sigc::mem_fun(*this, &Editor::add_new_location));
+	_session->locations()->removed.connect (_session_connections, sigc::mem_fun(*this, &Editor::location_gone));
+	_session->locations()->changed.connect (_session_connections, sigc::mem_fun(*this, &Editor::refresh_location_display));
+	_session->locations()->StateChanged.connect (_session_connections, sigc::mem_fun(*this, &Editor::refresh_location_display_s));
+	_session->locations()->end_location()->changed.connect (_session_connections, sigc::mem_fun(*this, &Editor::end_location_changed));
 
 	handle_new_duration ();
 
@@ -3136,26 +3136,6 @@ Editor::State::~State ()
 }
 
 void
-Editor::store_state (State& state) const
-{
-	*state.selection = *selection;
-}
-
-void
-Editor::restore_state (State *state)
-{
-	if (*selection == *state->selection) {
-		return;
-	}
-
-	*selection = *state->selection;
-	time_selection_changed ();
-	region_selection_changed ();
-
-	/* XXX other selection change handlers? */
-}
-
-void
 Editor::begin_reversible_command (string name)
 {
 	if (_session) {
@@ -4829,7 +4809,7 @@ Editor::handle_new_route (RouteList& routes)
 		rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
 		rtv->view()->HeightChanged.connect (sigc::mem_fun (*this, &Editor::streamview_height_changed));
 
-		scoped_connect (rtv->GoingAway, boost::bind (&Editor::remove_route, this, rtv));
+		rtv->GoingAway.connect (*this, boost::bind (&Editor::remove_route, this, rtv));
 	}
 
 	_routes->routes_added (new_views);

@@ -234,20 +234,20 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	last_shuttle_request = last_peak_grab = 0; //  get_microseconds();
 
-	ARDOUR::Diskstream::DiskOverrun.connect (sigc::mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
-	ARDOUR::Diskstream::DiskUnderrun.connect (sigc::mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
+	ARDOUR::Diskstream::DiskOverrun.connect (forever_connections, sigc::mem_fun(*this, &ARDOUR_UI::disk_overrun_handler));
+	ARDOUR::Diskstream::DiskUnderrun.connect (forever_connections, sigc::mem_fun(*this, &ARDOUR_UI::disk_underrun_handler));
 
 	/* handle dialog requests */
 
-	ARDOUR::Session::Dialog.connect (sigc::mem_fun(*this, &ARDOUR_UI::session_dialog));
+	ARDOUR::Session::Dialog.connect (forever_connections, sigc::mem_fun(*this, &ARDOUR_UI::session_dialog));
 
 	/* handle pending state with a dialog */
 
-	ARDOUR::Session::AskAboutPendingState.connect (sigc::mem_fun(*this, &ARDOUR_UI::pending_state_dialog));
+	ARDOUR::Session::AskAboutPendingState.connect (forever_connections, sigc::mem_fun(*this, &ARDOUR_UI::pending_state_dialog));
 
 	/* handle sr mismatch with a dialog */
 
-	ARDOUR::Session::AskAboutSampleRateMismatch.connect (sigc::mem_fun(*this, &ARDOUR_UI::sr_mismatch_dialog));
+	ARDOUR::Session::AskAboutSampleRateMismatch.connect (forever_connections, sigc::mem_fun(*this, &ARDOUR_UI::sr_mismatch_dialog));
 
 	/* lets get this party started */
 
@@ -329,10 +329,10 @@ ARDOUR_UI::create_engine ()
 		return -1;
 	}
 
-	engine->Stopped.connect (sigc::mem_fun(*this, &ARDOUR_UI::engine_stopped));
-	engine->Running.connect (sigc::mem_fun(*this, &ARDOUR_UI::engine_running));
-	engine->Halted.connect (sigc::mem_fun(*this, &ARDOUR_UI::engine_halted));
-	engine->SampleRateChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::update_sample_rate));
+	engine->Stopped.connect (forever_connections, sigc::mem_fun(*this, &ARDOUR_UI::engine_stopped));
+	engine->Running.connect (forever_connections, sigc::mem_fun(*this, &ARDOUR_UI::engine_running));
+	engine->Halted.connect (forever_connections, sigc::mem_fun(*this, &ARDOUR_UI::engine_halted));
+	engine->SampleRateChanged.connect (forever_connections, sigc::mem_fun(*this, &ARDOUR_UI::update_sample_rate));
 
 	post_engine ();
 
@@ -407,7 +407,7 @@ ARDOUR_UI::post_engine ()
 	update_cpu_load ();
 	update_sample_rate (engine->frame_rate());
 
-	Config->ParameterChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
+	Config->ParameterChanged.connect (forever_connections, sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	Config->map_parameters (pc);
 

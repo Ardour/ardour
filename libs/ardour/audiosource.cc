@@ -149,7 +149,7 @@ AudioSource::update_length (sframes_t pos, sframes_t cnt)
  ***********************************************************************/
 
 bool
-AudioSource::peaks_ready (boost::function<void()> doThisWhenReady, boost::signals2::connection& connect_here_if_not) const
+AudioSource::peaks_ready (boost::function<void()> doThisWhenReady, Connection& connect_here_if_not) const
 {
 	bool ret;
 	Glib::Mutex::Lock lm (_peaks_ready_lock);
@@ -159,7 +159,7 @@ AudioSource::peaks_ready (boost::function<void()> doThisWhenReady, boost::signal
 	*/
 
 	if (!(ret = _peaks_built)) {
-		connect_here_if_not = PeaksReady.connect (doThisWhenReady);
+		PeaksReady.connect (connect_here_if_not, doThisWhenReady);
 	}
 
 	return ret;

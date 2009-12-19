@@ -24,7 +24,7 @@
 #include <string>
 #include <utility>
 
-#include <boost/signals2.hpp>
+#include "pbd/signals.h"
 #include "ardour/types.h"
 
 class XMLTree;
@@ -72,10 +72,10 @@ class ElementImporter
 	bool broken () { return _broken; }
 
 	/// Signal that requests for anew name
-	static boost::signals2::signal <std::pair<bool, std::string> (std::string, std::string)> Rename;
+	static PBD::Signal2<std::pair<bool, std::string>,std::string, std::string> Rename;
 
 	/// Signal for ok/cancel prompting
-	static boost::signals2::signal <bool(std::string)> Prompt;
+	static PBD::Signal1<bool,std::string> Prompt;
 
   protected:
 

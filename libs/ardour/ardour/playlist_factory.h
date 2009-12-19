@@ -31,7 +31,7 @@ class Session;
 class PlaylistFactory {
 
   public:
-	static boost::signals2::signal<void(boost::shared_ptr<Playlist>, bool)> PlaylistCreated;
+	static PBD::Signal2<void,boost::shared_ptr<Playlist>, bool> PlaylistCreated;
 
 	static boost::shared_ptr<Playlist> create (Session&, const XMLNode&, bool hidden = false, bool unused = false);
 	static boost::shared_ptr<Playlist> create (DataType type, Session&, std::string name, bool hidden = false);

@@ -22,7 +22,7 @@
 #define __ardour_export_status_h__
 
 #include <list>
-#include <boost/signals2.hpp>
+#include "pbd/signals.h"
 
 #include <stdint.h>
 
@@ -46,12 +46,12 @@ struct ExportStatus {
 	volatile bool           stop;
 	volatile bool           running;
 
-	boost::signals2::signal<void()>      Aborting;
+	PBD::Signal0<void>      Aborting;
 	void abort (bool error_occurred = false);
 	bool aborted () const { return _aborted; }
 	bool errors () const { return _errors; }
 
-	boost::signals2::signal<void()>      Finished;
+	PBD::Signal0<void>      Finished;
 	void finish ();
 	bool finished () const { return _finished; }
 

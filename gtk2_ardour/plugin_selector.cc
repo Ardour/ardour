@@ -74,7 +74,7 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	manager = mgr;
 	in_row_change = false;
 
-	manager->PluginListChanged.connect (sigc::mem_fun (*this, &PluginSelector::build_plugin_menu));
+	manager->PluginListChanged.connect (plugin_list_changed_connection, boost::bind (&PluginSelector::build_plugin_menu, this));
 	build_plugin_menu ();
 
 	plugin_model = Gtk::ListStore::create (plugin_columns);

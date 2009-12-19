@@ -21,7 +21,7 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
-#include "pbd/scoped_connections.h"
+#include "pbd/signals.h"
 
 #include "midi_byte_array.h"
 
