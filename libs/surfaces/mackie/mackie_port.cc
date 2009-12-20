@@ -29,6 +29,8 @@
 
 #include "midi++/types.h"
 #include "midi++/port.h"
+
+#include "ardour/debug.h"
 #include "ardour/rc_configuration.h"
 
 #include "i18n.h"
@@ -37,6 +39,7 @@
 
 using namespace std;
 using namespace Mackie;
+using namespace ARDOUR;
 
 // The MCU sysex header
 MidiByteArray mackie_sysex_hdr ( 5, MIDI::sysex, 0x0, 0x0, 0x66, 0x10 );
@@ -45,26 +48,20 @@ MidiByteArray mackie_sysex_hdr ( 5, MIDI::sysex, 0x0, 0x0, 0x66, 0x10 );
 MidiByteArray mackie_sysex_hdr_xt ( 5, MIDI::sysex, 0x0, 0x0, 0x66, 0x11 );
 
 MackiePort::MackiePort( MackieControlProtocol & mcp, MIDI::Port & port, int number, port_type_t port_type )
-: SurfacePort( port, number )
-, _mcp( mcp )
-, _port_type( port_type )
-, _emulation( none )
-, _initialising( true )
+  : SurfacePort( port, number )
+  , _mcp( mcp )
+  , _port_type( port_type )
+  , _emulation( none )
+  , _initialising( true )
 {
-#ifdef PORT_DEBUG
-	cout << "MackiePort::MackiePort" <<endl;
-#endif
+	DEBUG_TRACE (DEBUG::MackieControl, "MackiePort::MackiePort\n");
 }
 
 MackiePort::~MackiePort()
 {
-#ifdef PORT_DEBUG
-	cout << "~MackiePort" << endl;
-#endif
+	DEBUG_TRACE (DEBUG::MackieControl, "MackiePort::~MackiePort\n");
 	close();
-#ifdef PORT_DEBUG
-	cout << "~MackiePort finished" << endl;
-#endif
+	DEBUG_TRACE (DEBUG::MackieControl, "~MackiePort finished\n");
 }
 
 int MackiePort::strips() const
@@ -91,29 +88,23 @@ int MackiePort::strips() const
 // should really be in MackiePort
 void MackiePort::open()
 {
-#ifdef PORT_DEBUG
-	cout << "MackiePort::open " << *this << endl;
-#endif
-	port().input()->sysex.connect (sysex_connection, boost::bind (&MackiePort::handle_midi_sysex, this, _1, _2, _3));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackiePort::open %1\n", *this));
 	
+	port().input()->sysex.connect (sysex_connection, boost::bind (&MackiePort::handle_midi_sysex, this, _1, _2, _3));
+		     
 	// make sure the device is connected
 	init();
 }
 
 void MackiePort::close()
 {
-#ifdef PORT_DEBUG
-	cout << "MackiePort::close" << endl;
-#endif
+	DEBUG_TRACE (DEBUG::MackieControl, "MackiePort::close\n");
 	
 	// disconnect signals
 	any_connection.disconnect();
 	sysex_connection.disconnect();
 	
 	// TODO emit a "closing" signal?
-#ifdef PORT_DEBUG
-	cout << "MackiePort::close finished" << endl;
-#endif
 }
 
 const MidiByteArray & MackiePort::sysex_hdr() const
@@ -149,9 +140,7 @@ MidiByteArray calculate_challenge_response( MidiByteArray::iterator begin, MidiB
 MidiByteArray MackiePort::host_connection_query( MidiByteArray & bytes )
 {
 	// handle host connection query
-#ifdef PORT_DEBUG
-	cout << "host connection query: " << bytes << endl;
-#endif
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("host connection query: %1\n", bytes));
 	
 	if ( bytes.size() != 18 )
 	{
@@ -172,9 +161,7 @@ MidiByteArray MackiePort::host_connection_query( MidiByteArray & bytes )
 // not used right now
 MidiByteArray MackiePort::host_connection_confirmation( const MidiByteArray & bytes )
 {
-#ifdef PORT_DEBUG
-	cout << "host_connection_confirmation: " << bytes << endl;
-#endif
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("host_connection_confirmation: %1\n", bytes));
 	
 	// decode host connection confirmation
 	if ( bytes.size() != 14 )
@@ -213,15 +200,13 @@ void MackiePort::probe_emulation (const MidiByteArray &)
 
 void MackiePort::init()
 {
-#ifdef PORT_DEBUG
-	cout << "MackiePort::init" << endl;
-#endif
+	DEBUG_TRACE (DEBUG::MackieControl,  "MackiePort::init\n");
+
 	init_mutex.lock();
 	_initialising = true;
-	
-#ifdef PORT_DEBUG
-	cout << "MackiePort::init lock acquired" << endl;
-#endif
+
+	DEBUG_TRACE (DEBUG::MackieControl, "MackiePort::init lock acquired\n");
+
 	// emit pre-init signal
 	init_event();
 	
@@ -237,9 +222,8 @@ void MackiePort::init()
 
 void MackiePort::finalise_init( bool yn )
 {
-#ifdef PORT_DEBUG
-	cout << "MackiePort::finalise_init" << endl;
-#endif
+	DEBUG_TRACE (DEBUG::MackieControl, "MackiePort::finalise_init\n");
+
 	bool emulation_ok = false;
 	
 	// probing doesn't work very well, so just use a config variable
@@ -271,19 +255,18 @@ void MackiePort::finalise_init( bool yn )
 	
 	SurfacePort::active( yn );
 
-	if ( yn )
-	{
+	if (yn) {
 		active_event();
 		
 		// start handling messages from controls
 		connect_any();
 	}
+
 	_initialising = false;
 	init_cond.signal();
 	init_mutex.unlock();
-#ifdef PORT_DEBUG
-	cout << "MackiePort::finalise_init lock released" << endl;
-#endif
+
+	DEBUG_TRACE (DEBUG::MackieControl, "MackiePort::finalise_init lock released\n");
 }
 
 void MackiePort::connect_any()
@@ -296,44 +279,36 @@ void MackiePort::connect_any()
 bool MackiePort::wait_for_init()
 {
 	Glib::Mutex::Lock lock( init_mutex );
-	while ( _initialising )
-	{
-#ifdef PORT_DEBUG
-		cout << "MackiePort::wait_for_active waiting" << endl;
-#endif
+	while (_initialising) {
+		DEBUG_TRACE (DEBUG::MackieControl, "MackiePort::wait_for_active waiting\n");
 		init_cond.wait( init_mutex );
-#ifdef PORT_DEBUG
-		cout << "MackiePort::wait_for_active released" << endl;
-#endif
+		DEBUG_TRACE (DEBUG::MackieControl, "MackiePort::wait_for_active released\n");
 	}
-#ifdef PORT_DEBUG
-	cout << "MackiePort::wait_for_active returning" << endl;
-#endif
+	DEBUG_TRACE (DEBUG::MackieControl, "MackiePort::wait_for_active returning\n");
 	return SurfacePort::active();
 }
 
 void MackiePort::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count )
 {
 	MidiByteArray bytes( count, raw_bytes );
-#ifdef PORT_DEBUG
-	cout << "handle_midi_sysex: " << bytes << endl;
-#endif
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handle_midi_sysex: %1\n", bytes));
+
 	switch( bytes[5] )
 	{
 		case 0x01:
 			// not used right now
-			write_sysex( host_connection_query( bytes ) );
+			write_sysex (host_connection_query (bytes));
 			break;
 		case 0x03:
 			// not used right now
-			write_sysex( host_connection_confirmation( bytes ) );
+			write_sysex (host_connection_confirmation (bytes));
 			break;
 		case 0x04:
-			inactive_event();
+			inactive_event ();
 			cout << "host connection error" << bytes << endl;
 			break;
 		case 0x14:
-			probe_emulation( bytes );
+			probe_emulation (bytes);
 			break;
 		default:
 			cout << "unknown sysex: " << bytes << endl;
@@ -345,10 +320,11 @@ Control & MackiePort::lookup_control( MIDI::byte * bytes, size_t count )
 	// Don't instantiate a MidiByteArray here unless it's needed for exceptions.
 	// Reason being that this method is called for every single incoming
 	// midi event, and it needs to be as efficient as possible.
+
 	Control * control = 0;
 	MIDI::byte midi_type = bytes[0] & 0xf0; //0b11110000
-	switch( midi_type )
-	{
+
+	switch (midi_type) {
 		// fader
 		case MackieMidiBuilder::midi_fader_id:
 		{
@@ -413,18 +389,16 @@ bool MackiePort::handle_control_timeout_event ( Control * control )
 // because they have similar logic flows.
 void MackiePort::handle_midi_any (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count )
 {
-#ifdef DEBUG
 	MidiByteArray bytes( count, raw_bytes );
-	cout << "MackiePort::handle_midi_any " << bytes << endl;
-#endif
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackiePort::handle_midi_any %1\n", bytes));
+
 	try
 	{
 		// ignore sysex messages
 		if ( raw_bytes[0] == MIDI::sysex ) return;
 
 		// sanity checking
-		if ( count != 3 )
-		{
+		if (count != 3) {
 			ostringstream os;
 			MidiByteArray mba( count, raw_bytes );
 			os << "MackiePort::handle_midi_any needs 3 bytes, but received " << mba;
@@ -436,8 +410,7 @@ void MackiePort::handle_midi_any (MIDI::Parser &, MIDI::byte * raw_bytes, size_t
 		
 		// This handles incoming bytes. Outgoing bytes
 		// are sent by the signal handlers.
-		switch ( control.type() )
-		{
+		switch (control.type()) {
 			// fader
 			case Control::type_fader:
 			{
@@ -484,17 +457,15 @@ void MackiePort::handle_midi_any (MIDI::Parser &, MIDI::byte * raw_bytes, size_t
 				// first disconnect any previous timeouts
 				control.in_use_connection.disconnect();
 				
-#if 0 // BOOSTSIGNALS
 				// now connect a new timeout to call handle_control_timeout_event
-				sigc::slot<bool> timeout_slot = sigc::bind (
-					mem_fun( *this, &MackiePort::handle_control_timeout_event )
-					, &control
-				);
-				control.in_use_connection = Glib::signal_timeout().connect(
-					timeout_slot
-					, control.in_use_timeout()
-				);
-#endif				
+				// XXX should this use the GUI event loop (default) or the
+				// MIDI UI event loop ?
+
+				sigc::slot<bool> timeout_slot = sigc::bind 
+					(sigc::mem_fun( *this, &MackiePort::handle_control_timeout_event), &control);
+
+				control.in_use_connection = Glib::signal_timeout().connect (timeout_slot , control.in_use_timeout());
+
 				// emit the control event
 				control_event( *this, control, state );
 				break;
@@ -503,12 +474,11 @@ void MackiePort::handle_midi_any (MIDI::Parser &, MIDI::byte * raw_bytes, size_t
 				cerr << "Do not understand control type " << control;
 		}
 	}
-	catch( MackieControlException & e )
-	{
+
+	catch( MackieControlException & e ) {
 		MidiByteArray bytes( count, raw_bytes );
 		cout << bytes << ' ' << e.what() << endl;
 	}
-#ifdef DEBUG
-	cout << "finished MackiePort::handle_midi_any " << bytes << endl;
-#endif
+
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("finished MackiePort::handle_midi_any %1\n", bytes));
 }

@@ -228,7 +228,7 @@ public:
 	virtual unsigned int in_use_timeout() { return _in_use_timeout; }
 
 	/// Keep track of the timeout so it can be updated with more incoming events
-	PBD::ScopedConnection in_use_connection;
+	sigc::connection in_use_connection;
 	
 private:
 	int _id;
