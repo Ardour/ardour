@@ -113,6 +113,7 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 
 TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 	: sigc::trackable(other)
+	, PBD::ScopedConnectionList()
 	, trackview (other.trackview)
 {
 

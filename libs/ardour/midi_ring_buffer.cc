@@ -107,8 +107,10 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 #ifndef NDEBUG
 		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, "wrote MidiEvent to Buffer: ");
 		for (size_t i=0; i < ev_size; ++i) {
-			DEBUG_STR_SET(a, hex);
-			DEBUG_STR(a) << "0x" << (int)write_loc[i] << ' ';
+			DEBUG_STR_DECL(a);
+			DEBUG_STR_APPEND(a,hex);
+			DEBUG_STR_APPEND(a,"0x");
+			DEBUG_STR_APPEND(a,(int)write_loc[i]);
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, DEBUG_STR(a).str());
 		}
 		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, "\n");

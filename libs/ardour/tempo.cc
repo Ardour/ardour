@@ -1687,7 +1687,7 @@ TempoMap::bbt_add (const BBT_Time& start, const BBT_Time& other) const
  * add the BBT interval @param increment to  @param start and return the result
  */
 BBT_Time
-TempoMap::bbt_add (const BBT_Time& start, const BBT_Time& increment, const TempoMetric& metric) const
+TempoMap::bbt_add (const BBT_Time& start, const BBT_Time& increment, const TempoMetric& /*metric*/) const
 {
 	BBT_Time result = start;
 	BBT_Time op = increment; /* argument is const, but we need to modify it */

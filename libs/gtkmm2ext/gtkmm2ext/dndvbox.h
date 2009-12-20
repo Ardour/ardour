@@ -142,7 +142,7 @@ public:
 	 *  @param y y coordinate.
 	 *  @return Pair consisting of the child under (x, y) (or 0) and the index of the child under (x, y) (or -1)
 	 */
-	std::pair<T*, int> get_child_at_position (int x, int y) const
+	std::pair<T*, int> get_child_at_position (int /*x*/, int y) const
 	{
 		std::list<Gtk::Widget const *> children = _internal_vbox.get_children ();
 		std::list<Gtk::Widget const *>::iterator i = children.begin();
@@ -202,7 +202,7 @@ private:
 	}
 	
 	void drag_data_received (
-		Glib::RefPtr<Gdk::DragContext> const & context, int x, int y, Gtk::SelectionData const & selection_data, guint info, guint time
+		Glib::RefPtr<Gdk::DragContext> const & context, int x, int y, Gtk::SelectionData const & selection_data, guint /*info*/, guint time
 		)
 	{
 		/* work out where it was dropped */

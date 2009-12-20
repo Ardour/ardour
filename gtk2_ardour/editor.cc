@@ -682,6 +682,7 @@ Editor::Editor ()
 	ControlProtocol::ZoomOut.connect (*this, boost::bind (&Editor::temporal_zoom_step, this, true));
 	ControlProtocol::ScrollTimeline.connect (*this, boost::bind (&Editor::control_scroll, this, _1));
 	BasicUI::AccessAction.connect (*this, boost::bind (&Editor::access_action, this, _1, _2));
+	Session::AskAboutPlaylistDeletion.connect (*this, boost::bind (&Editor::playlist_deletion_dialog, this, _1));
 
 	Config->ParameterChanged.connect (*this, boost::bind (&Editor::parameter_changed, this, _1));
 
@@ -1075,8 +1076,6 @@ Editor::set_session (Session *t)
 
 	update_title ();
 
-	_session->history().Changed.connect (_session_connections, boost::bind (&Editor::history_changed, this));
-
 	/* These signals can all be emitted by a non-GUI thread. Therefore the
 	   handlers for them must not attempt to directly interact with the GUI,
 	   but use Gtkmm2ext::UI::instance()->call_slot();
@@ -1087,12 +1086,17 @@ Editor::set_session (Session *t)
 	_session->RouteAdded.connect (_session_connections, boost::bind (&Editor::handle_new_route, this, _1));
 	_session->DurationChanged.connect (_session_connections, boost::bind (&Editor::handle_new_duration, this));
 	_session->DirtyChanged.connect (_session_connections, boost::bind (&Editor::update_title, this));
-	_session->StateSaved.connect (_session_connections, boost::bind (&Editor::update_title, this));
-	_session->AskAboutPlaylistDeletion.connect (_session_connections, boost::bind (&Editor::playlist_deletion_dialog, this, _1));
 	_session->TimecodeOffsetChanged.connect (_session_connections, boost::bind (&Editor::update_just_timecode, this));
 	_session->tempo_map().StateChanged.connect (_session_connections, boost::bind (&Editor::tempo_map_changed, this, _1));
 	_session->Located.connect (_session_connections, boost::bind (&Editor::located, this));
 	_session->config.ParameterChanged.connect (_session_connections, boost::bind (&Editor::parameter_changed, this, _1));
+	_session->StateSaved.connect (_session_connections, boost::bind (&Editor::session_state_saved, this, _1));
+	_session->locations()->added.connect (_session_connections, sigc::mem_fun(*this, &Editor::add_new_location));
+	_session->locations()->removed.connect (_session_connections, sigc::mem_fun(*this, &Editor::location_gone));
+	_session->locations()->changed.connect (_session_connections, sigc::mem_fun(*this, &Editor::refresh_location_display));
+	_session->locations()->StateChanged.connect (_session_connections, sigc::mem_fun(*this, &Editor::refresh_location_display_s));
+	_session->locations()->end_location()->changed.connect (_session_connections, sigc::mem_fun(*this, &Editor::end_location_changed));
+	_session->history().Changed.connect (_session_connections, boost::bind (&Editor::history_changed, this));
 
 	if (Profile->get_sae()) {
 		BBT_Time bbt;
@@ -1139,19 +1143,7 @@ Editor::set_session (Session *t)
 	Config->map_parameters (pc);
 	_session->config.map_parameters (pc);
 
-
 	refresh_location_display ();
-
-	/* static signal - no need to drop connection when session is deleted (XXX or we are?)*/
-
-	_session->StateSaved.connect (*this, boost::bind (&Editor::session_state_saved, this, _1));
-
-	_session->locations()->added.connect (_session_connections, sigc::mem_fun(*this, &Editor::add_new_location));
-	_session->locations()->removed.connect (_session_connections, sigc::mem_fun(*this, &Editor::location_gone));
-	_session->locations()->changed.connect (_session_connections, sigc::mem_fun(*this, &Editor::refresh_location_display));
-	_session->locations()->StateChanged.connect (_session_connections, sigc::mem_fun(*this, &Editor::refresh_location_display_s));
-	_session->locations()->end_location()->changed.connect (_session_connections, sigc::mem_fun(*this, &Editor::end_location_changed));
-
 	handle_new_duration ();
 
 	restore_ruler_visibility ();
@@ -3920,8 +3912,9 @@ Editor::control_layout_scroll (GdkEventScroll* ev)
 void
 Editor::session_state_saved (string snap_name)
 {
-	ENSURE_GUI_THREAD (*this, &Editor::session_state_saved, snap_name)
-
+	ENSURE_GUI_THREAD (*this, &Editor::session_state_saved, snap_name);
+	
+	update_title ();	
 	_snapshots->redisplay ();
 }
 

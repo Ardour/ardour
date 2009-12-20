@@ -4,9 +4,10 @@
 #include <list>
 #include <boost/signals2.hpp>
 #include "pbd/abstract_ui.h"
+#include "pbd/signals.h"
 
 namespace MIDI { 
-	class port;
+	class Port;
 }
 
 namespace ARDOUR {

@@ -149,9 +149,10 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ) {
 		ptmp = i;
 		++ptmp;
-		if (((*i).first)->get_controllable() == c) {
-			(*i).second.disconnect();
-			delete (*i).first;
+		if (((*i)->first)->get_controllable() == c) {
+			(*i)->second.disconnect();
+			delete (*i)->first;
+			delete *i;
 			pending_controllables.erase (i);
 		}
 		i = ptmp;
@@ -174,13 +175,11 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	{
 		Glib::Mutex::Lock lm (pending_lock);
 
-#if 0 // BOOST SIGNALS
-		std::pair<MIDIControllable *, boost::signals2::scoped_connection> element;
-		element.first = mc;
-		element.second = c->LearningFinished.connect (bind (mem_fun (*this, &GenericMidiControlProtocol::learning_stopped), mc));
+		MIDIPendingControllable* element = new MIDIPendingControllable;
+		element->first = mc;
+		c->LearningFinished.connect (element->second, boost::bind (&GenericMidiControlProtocol::learning_stopped, this, mc));
 
 		pending_controllables.push_back (element);
-#endif
 	}
 
 	mc->learn_about_external_control ();
@@ -199,8 +198,9 @@ GenericMidiControlProtocol::learning_stopped (MIDIControllable* mc)
 		tmp = i;
 		++tmp;
 
-		if ( (*i).first == mc) {
-			(*i).second.disconnect();
+		if ( (*i)->first == mc) {
+			(*i)->second.disconnect();
+			delete *i;
 			pending_controllables.erase(i);
 		}
 
@@ -222,11 +222,12 @@ GenericMidiControlProtocol::stop_learning (Controllable* c)
 	*/
 
 	for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ++i) {
-		if (((*i).first)->get_controllable() == c) {
-			(*i).first->stop_learning ();
-			dptr = (*i).first;
-			(*i).second.disconnect();
+		if (((*i)->first)->get_controllable() == c) {
+			(*i)->first->stop_learning ();
+			dptr = (*i)->first;
+			(*i)->second.disconnect();
 
+			delete *i;
 			pending_controllables.erase (i);
 			break;
 		}
@@ -350,6 +351,9 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 		
 		{
 			Glib::Mutex::Lock lm (pending_lock);
+			for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ++i) {
+				delete *i;
+			}
 			pending_controllables.clear ();
 		}
 		

@@ -33,7 +33,7 @@ using namespace ARDOUR;
 using namespace Glib;
 
 SessionEvent*
-Session::get_rt_event (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override, 
+Session::get_rt_event (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override,  
 		       void (Session::*method) (boost::shared_ptr<RouteList>, bool, bool))
 {
 	SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
@@ -51,7 +51,7 @@ Session::set_solo (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeve
 }
 
 void
-Session::rt_set_solo (boost::shared_ptr<RouteList> rl, bool yn, bool group_override)
+Session::rt_set_solo (boost::shared_ptr<RouteList> rl, bool yn, bool /* group_override */)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if (!(*i)->is_hidden()) {
@@ -100,7 +100,7 @@ Session::set_listen (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTe
 }
 
 void
-Session::rt_set_listen (boost::shared_ptr<RouteList> rl, bool yn, bool group_override)
+Session::rt_set_listen (boost::shared_ptr<RouteList> rl, bool yn, bool /*group_override*/ )
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if (!(*i)->is_hidden()) {
@@ -118,7 +118,7 @@ Session::set_mute (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeve
 }
 
 void
-Session::rt_set_mute (boost::shared_ptr<RouteList> rl, bool yn, bool group_override)
+Session::rt_set_mute (boost::shared_ptr<RouteList> rl, bool yn, bool /*group_override*/)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if (!(*i)->is_hidden()) {

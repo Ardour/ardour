@@ -427,7 +427,7 @@ LadspaPlugin::set_state (const XMLNode& node, int version)
 }
 
 int
-LadspaPlugin::set_state_2X (const XMLNode& node, int version)
+LadspaPlugin::set_state_2X (const XMLNode& node, int /* version */)
 {
 	XMLNodeList nodes;
 	XMLProperty *prop;

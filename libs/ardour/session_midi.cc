@@ -872,8 +872,9 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 		}
 
 #ifndef NDEBUG
-		DEBUG_STR_SET(foo,"sending ");
-		DEBUG_STR(foo) << transmitting_timecode_time;
+		DEBUG_STR_DECL(foo)
+		DEBUG_STR_APPEND(foo,"sending ");
+		DEBUG_STR_APPEND(foo, transmitting_timecode_time);
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("%1 qfm = %2, stamp = %3\n", DEBUG_STR(foo).str(), next_quarter_frame_to_send,
 							 out_stamp));
 #endif

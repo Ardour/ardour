@@ -50,7 +50,8 @@ namespace ARDOUR {
 			Transport = 0x400,
 			Slave = 0x800,
 			SessionEvents = 0x800,
-			MidiIO = 0x1000
+			MidiIO = 0x1000,
+			MackieControl = 0x2000
 		};
 	}
 
@@ -58,12 +59,13 @@ namespace ARDOUR {
 
 #ifndef NDEBUG
 #define DEBUG_TRACE(bits,str) if ((bits) & ARDOUR::debug_bits) { ARDOUR::debug_print (# bits, str); }
-#define DEBUG_STR_SET(id,s) std::stringstream __debug_str ## id; __debug_str ## id << s;
+#define DEBUG_STR_DECL(id) std::stringstream __debug_str ## id;
 #define DEBUG_STR(id) __debug_str ## id
+#define DEBUG_STR_APPEND(id,s) __debug_str ## id << s;
 #else
 #define DEBUG_TRACE(bits,fmt,...) /*empty*/
-#define DEBUG_STR_SET(a,b) /* empty */
 #define DEBUG_STR(a) /* empty */
+#define DEBUG_STR_APPEND(a,b) /* empty */
 #endif
 
 #endif /* __ardour_debug_h__ */

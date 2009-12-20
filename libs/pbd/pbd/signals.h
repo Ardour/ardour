@@ -46,7 +46,7 @@ class ScopedConnectionList  : public boost::noncopyable
 
   private:
 	/* this class is not copyable */
-	ScopedConnectionList(const ScopedConnectionList&) {}
+	ScopedConnectionList(const ScopedConnectionList&);
 
 	/* this lock is shared by all instances of a ScopedConnectionList.
 	   We do not want one mutex per list, and since we only need the lock

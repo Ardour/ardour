@@ -276,10 +276,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	Processor::ProcessorCreated.connect (*this, boost::bind (&Session::add_processor, this, _1));
 	NamedSelection::NamedSelectionCreated.connect (*this, boost::bind (&Session::add_named_selection, this, _1));
 	AutomationList::AutomationListCreated.connect (*this, boost::bind (&Session::add_automation_list, this, _1));
-
-	// BOOST SIGNALS
-	// Controllable::Destroyed.connect (*this, boost::bind (&Session::remove_controllable, this, _1));
-
+	Controllable::Destroyed.connect (*this, boost::bind (&Session::remove_controllable, this, _1));
 	IO::PortCountChanged.connect (*this, boost::bind (&Session::ensure_buffers, this, _1));
 
 	/* stop IO objects from doing stuff until we're ready for them */
@@ -2291,6 +2288,12 @@ struct RegionCounter {
 };
 
 int
+Session::ask_about_playlist_deletion (boost::shared_ptr<Playlist> p)
+{
+	return *AskAboutPlaylistDeletion (p);
+}
+
+int
 Session::cleanup_sources (CleanupReport& rep)
 {
 	// FIXME: needs adaptation to midi
@@ -2311,12 +2314,11 @@ Session::cleanup_sources (CleanupReport& rep)
 
 	/* step 1: consider deleting all unused playlists */
 	
-/* BOOST SIGNALS
-	if (playlists->maybe_delete_unused (boost::bind (AskAboutPlaylistDeletion, _1));
+	if (playlists->maybe_delete_unused (boost::bind (Session::ask_about_playlist_deletion, _1))) {
 		ret = 0;
 		goto out;
 	}
-*/
+
 	/* step 2: find all un-used sources */
 
 	rep.paths.clear ();

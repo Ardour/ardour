@@ -38,6 +38,7 @@ UndoTransaction::UndoTransaction ()
 
 UndoTransaction::UndoTransaction (const UndoTransaction& rhs)
 	: Command(rhs._name)
+	, PBD::ScopedConnectionList ()
 	, _clearing(false)
 {
 	clear ();

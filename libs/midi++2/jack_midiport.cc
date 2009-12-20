@@ -212,7 +212,7 @@ JACK_MidiPort::flush (void* jack_port_buffer)
 }
 
 int
-JACK_MidiPort::read (byte * buf, size_t bufsize)
+JACK_MidiPort::read (byte *, size_t)
 {
 	timestamp_t time;
 	Evoral::EventType type;

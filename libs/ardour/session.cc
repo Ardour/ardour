@@ -114,6 +114,7 @@ PBD::Signal0<void> Session::EndTimeChanged;
 PBD::Signal0<void> Session::AutoBindingOn;
 PBD::Signal0<void> Session::AutoBindingOff;
 PBD::Signal2<void,std::string, std::string> Session::Exported;
+PBD::Signal1<int,boost::shared_ptr<Playlist> > Session::AskAboutPlaylistDeletion;
 
 static void clean_up_session_event (SessionEvent* ev) { delete ev; }
 const SessionEvent::RTeventCallback Session::rt_cleanup (clean_up_session_event);
@@ -386,8 +387,6 @@ Session::destroy ()
 	_bundles.flush ();
 	
 	AudioDiskstream::free_working_buffers();
-
-	// BOOST::SIGNALS: Route::SyncOrderKeys.clear();
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete named selections\n");
 	for (NamedSelectionList::iterator i = named_selections.begin(); i != named_selections.end(); ) {

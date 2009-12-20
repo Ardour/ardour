@@ -548,7 +548,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	    0 for "yes, delete this playlist",
 	    1 for "no, don't delete this playlist".
 	*/
-	PBD::Signal1<void,boost::shared_ptr<Playlist> >  AskAboutPlaylistDeletion;
+	static PBD::Signal1<int,boost::shared_ptr<Playlist> >  AskAboutPlaylistDeletion;
 
 	/** handlers should return 0 for "ignore the rate mismatch",
 	    !0 for "do not use this session"
@@ -1463,6 +1463,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void update_have_rec_enabled_diskstream ();
 	gint _have_rec_enabled_diskstream;
+
+	static int ask_about_playlist_deletion (boost::shared_ptr<Playlist>);
 
 	/* realtime "apply to set of routes" operations */
 	SessionEvent* get_rt_event (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override, 

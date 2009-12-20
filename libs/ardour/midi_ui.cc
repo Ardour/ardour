@@ -124,6 +124,7 @@ MidiControlUI::reset_ports ()
 
 	for (MIDI::Manager::PortList::iterator i = plist.begin(); i != plist.end(); ++i) {
 		int fd;
+
 		if ((fd = (*i)->selectable ()) >= 0) {
 			Glib::RefPtr<IOSource> psrc = IOSource::create (fd, IO_IN|IO_HUP|IO_ERR);
 

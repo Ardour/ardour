@@ -109,7 +109,7 @@ class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, pu
 	void prev_track (uint32_t initial_id);
 
   private:
-	ControlProtocol (const ControlProtocol&) {} /* noncopyable */
+	ControlProtocol (const ControlProtocol&); /* noncopyable */
 };
 
 extern "C" {
