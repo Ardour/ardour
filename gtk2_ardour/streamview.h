@@ -161,7 +161,7 @@ protected:
 	uint32_t   stream_base_color; ///< Background color
 
 	PBD::ScopedConnectionList playlist_connections;
-	boost::signals2::scoped_connection playlist_change_connection;
+	PBD::ScopedConnection playlist_change_connection;
 
 	ARDOUR::layer_t _layers;
 	LayerDisplay    _layer_display;

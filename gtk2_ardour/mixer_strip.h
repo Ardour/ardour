@@ -214,8 +214,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void input_changed (ARDOUR::IOChange, void *);
 	void output_changed (ARDOUR::IOChange, void *);
 
-	boost::signals2::scoped_connection panstate_connection;
-	boost::signals2::scoped_connection panstyle_connection;
+	PBD::ScopedConnection panstate_connection;
+	PBD::ScopedConnection panstyle_connection;
 	void connect_to_pan ();
 
 	void update_diskstream_display ();
@@ -265,7 +265,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	void revert_to_default_display ();
 
 	void drop_send ();
-	boost::signals2::scoped_connection send_gone_connection;
+	PBD::ScopedConnection send_gone_connection;
 
 	void reset_strip_style ();
 

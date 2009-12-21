@@ -28,6 +28,7 @@
 #include "ardour_ui.h"
 #include "automation_time_axis.h"
 #include "automation_streamview.h"
+#include "gui_thread.h"
 #include "route_time_axis.h"
 #include "automation_line.h"
 #include "public_editor.h"
@@ -833,7 +834,7 @@ AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 	assert(!_line);
 	assert(line->the_list() == _control->list());
 
-	_control->alist()->automation_state_changed.connect (automation_connection, boost::bind (&AutomationTimeAxisView::automation_state_changed, this));
+	_control->alist()->automation_state_changed.connect (automation_connection, boost::bind (&AutomationTimeAxisView::automation_state_changed, this), gui_context());
 
 	_line = line;
 	//_controller = AutomationController::create(_session, line->the_list(), _control);

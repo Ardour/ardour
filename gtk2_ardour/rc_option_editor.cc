@@ -10,6 +10,8 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/control_protocol_manager.h"
 #include "control_protocol/control_protocol.h"
+
+#include "gui_thread.h"
 #include "rc_option_editor.h"
 #include "utils.h"
 #include "midi_port_dialog.h"
@@ -117,7 +119,7 @@ private:
 
 			if ((*i)->input()) {
 				r[_model.online] = !(*i)->input()->offline();
-				(*i)->input()->OfflineStatusChanged.connect (port_connections, boost::bind (&MIDIPorts::port_offline_changed, this, (*i)));
+				(*i)->input()->OfflineStatusChanged.connect (port_connections, boost::bind (&MIDIPorts::port_offline_changed, this, (*i)), gui_context());
 				r[_model.trace_input] = (*i)->input()->tracing();
 			}
 

@@ -18,7 +18,6 @@
 
 */
 
-#include "export_dialog.h"
 
 #include <sigc++/signal.h>
 
@@ -26,6 +25,9 @@
 
 #include "ardour/export_status.h"
 #include "ardour/export_handler.h"
+
+#include "export_dialog.h"
+#include "gui_thread.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -86,7 +88,8 @@ ExportDialog::set_session (ARDOUR::Session* s)
 	timespan_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings));
 	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings));
 	file_notebook->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings));
-	status->Aborting.connect (abort_connection, sigc::mem_fun (*this, &ExportDialog::notify_errors));
+
+	status->Aborting.connect (abort_connection, boost::bind (&ExportDialog::notify_errors, this), gui_context());
 
 	update_warnings ();
 }

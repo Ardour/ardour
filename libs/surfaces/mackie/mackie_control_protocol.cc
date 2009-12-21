@@ -43,6 +43,7 @@
 #include "ardour/dB.h"
 #include "ardour/debug.h"
 #include "ardour/location.h"
+#include "ardour/midi_ui.h"
 #include "ardour/panner.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
@@ -71,8 +72,11 @@ using boost::shared_ptr;
 
 MackieMidiBuilder builder;
 
+#define midi_ui_context() MidiControlUI::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
+#define ui_bind(f, ...) boost::protect (boost::bind (f, __VA_ARGS__))
+
 MackieControlProtocol::MackieControlProtocol (Session& session)
-	: ControlProtocol (session, X_("Mackie"))
+	: ControlProtocol (session, X_("Mackie"), MidiControlUI::instance())
 	, _current_initial_bank (0)
 	, _surface (0)
 	, _jog_wheel (*this)
@@ -536,23 +540,23 @@ void
 MackieControlProtocol::connect_session_signals()
 {
 	// receive routes added
-	session->RouteAdded.connect(session_connections, boost::bind (&MackieControlProtocol::notify_route_added, this, _1));
+	session->RouteAdded.connect(session_connections, ui_bind (&MackieControlProtocol::notify_route_added, this, _1), midi_ui_context());
 	// receive record state toggled
-	session->RecordStateChanged.connect(session_connections, boost::bind (&MackieControlProtocol::notify_record_state_changed, this));
+	session->RecordStateChanged.connect(session_connections, ui_bind (&MackieControlProtocol::notify_record_state_changed, this), midi_ui_context());
 	// receive transport state changed
-	session->TransportStateChange.connect(session_connections, boost::bind (&MackieControlProtocol::notify_transport_state_changed, this));
+	session->TransportStateChange.connect(session_connections, ui_bind (&MackieControlProtocol::notify_transport_state_changed, this), midi_ui_context());
 	// receive punch-in and punch-out
-	Config->ParameterChanged.connect(session_connections, boost::bind (&MackieControlProtocol::notify_parameter_changed, this, _1));
-	session->config.ParameterChanged.connect (session_connections, boost::bind (&MackieControlProtocol::notify_parameter_changed, this, _1));
+	Config->ParameterChanged.connect(session_connections, ui_bind (&MackieControlProtocol::notify_parameter_changed, this, _1), midi_ui_context());
+	session->config.ParameterChanged.connect (session_connections, ui_bind (&MackieControlProtocol::notify_parameter_changed, this, _1), midi_ui_context());
 	// receive rude solo changed
-	session->SoloActive.connect(session_connections, boost::bind (&MackieControlProtocol::notify_solo_active_changed, this, _1));
+	session->SoloActive.connect(session_connections, ui_bind (&MackieControlProtocol::notify_solo_active_changed, this, _1), midi_ui_context());
 
 	// make sure remote id changed signals reach here
 	// see also notify_route_added
 	Sorted sorted = get_sorted_routes();
 
 	for (Sorted::iterator it = sorted.begin(); it != sorted.end(); ++it) {
-		((*it)->RemoteControlIDChanged.connect (route_connections, boost::bind(&MackieControlProtocol::notify_remote_id_changed, this)));
+		(*it)->RemoteControlIDChanged.connect (route_connections, ui_bind(&MackieControlProtocol::notify_remote_id_changed, this), midi_ui_context());
 	}
 }
 
@@ -569,9 +573,9 @@ MackieControlProtocol::add_port (MIDI::Port & midi_port, int number)
 		MackiePort * sport = new MackiePort (*this, midi_port, number);
 		_ports.push_back (sport);
 		
-		sport->init_event.connect (port_connections, boost::bind (&MackieControlProtocol::handle_port_init, this, sport));
-		sport->active_event.connect (port_connections, boost::bind (&MackieControlProtocol::handle_port_active, this, sport));
-		sport->inactive_event.connect (port_connections, boost::bind (&MackieControlProtocol::handle_port_inactive, this, sport));
+		sport->init_event.connect_same_thread (port_connections, boost::bind (&MackieControlProtocol::handle_port_init, this, sport));
+		sport->active_event.connect_same_thread (port_connections, boost::bind (&MackieControlProtocol::handle_port_active, this, sport));
+		sport->inactive_event.connect_same_thread (port_connections, boost::bind (&MackieControlProtocol::handle_port_inactive, this, sport));
 	}
 }
 
@@ -652,7 +656,7 @@ MackieControlProtocol::initialize_surface()
 	// Connect events. Must be after route table otherwise there will be trouble
 
 	for (MackiePorts::iterator it = _ports.begin(); it != _ports.end(); ++it) {
-		(*it)->control_event.connect (port_connections, boost::bind (&MackieControlProtocol::handle_control_event, this, _1, _2, _3));
+		(*it)->control_event.connect_same_thread (port_connections, boost::bind (&MackieControlProtocol::handle_control_event, this, _1, _2, _3));
 	}
 }
 
@@ -1409,7 +1413,7 @@ MackieControlProtocol::notify_route_added (ARDOUR::RouteList & rl)
 	typedef ARDOUR::RouteList ARS;
 
 	for (ARS::iterator it = rl.begin(); it != rl.end(); ++it) {
-		(*it)->RemoteControlIDChanged.connect (route_connections, boost::bind (&MackieControlProtocol::notify_remote_id_changed, this));
+		(*it)->RemoteControlIDChanged.connect (route_connections, ui_bind (&MackieControlProtocol::notify_remote_id_changed, this), midi_ui_context());
 	}
 }
 

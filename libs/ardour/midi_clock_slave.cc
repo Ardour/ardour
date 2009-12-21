@@ -76,11 +76,11 @@ MIDIClock_Slave::rebind (MIDI::Port& p)
 	std::cerr << "MIDIClock_Slave: connecting to port " << port->name() << std::endl;
 #endif
 
-	port->input()->timing.connect (port_connections, boost::bind (&MIDIClock_Slave::update_midi_clock, this, _1, _2));
-	port->input()->start.connect (port_connections, boost::bind (&MIDIClock_Slave::start, this, _1, _2));
-	port->input()->contineu.connect (port_connections, boost::bind (&MIDIClock_Slave::contineu, this, _1, _2));
-	port->input()->stop.connect (port_connections, boost::bind (&MIDIClock_Slave::stop, this, _1, _2));
-	port->input()->position.connect (port_connections, boost::bind (&MIDIClock_Slave::position, this, _1, _2, 3));
+	port->input()->timing.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::update_midi_clock, this, _1, _2));
+	port->input()->start.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::start, this, _1, _2));
+	port->input()->contineu.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::contineu, this, _1, _2));
+	port->input()->stop.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::stop, this, _1, _2));
+	port->input()->position.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::position, this, _1, _2, 3));
 }
 
 void

@@ -33,14 +33,14 @@ InternalReturn::InternalReturn (Session& s)
 	: Return (s, true)
 	, user_count (0)
 {
-	CycleStart.connect (*this, boost::bind (&InternalReturn::cycle_start, this, _1));
+	CycleStart.connect_same_thread (*this, boost::bind (&InternalReturn::cycle_start, this, _1));
 }
 
 InternalReturn::InternalReturn (Session& s, const XMLNode& node)
 	: Return (s, node, true)
 	, user_count (0)
 {
-	CycleStart.connect (*this, boost::bind (&InternalReturn::cycle_start, this, _1));
+	CycleStart.connect_same_thread (*this, boost::bind (&InternalReturn::cycle_start, this, _1));
 }
 
 void

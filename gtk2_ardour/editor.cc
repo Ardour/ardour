@@ -627,7 +627,7 @@ Editor::Editor ()
 	_playlist_selector = new PlaylistSelector();
 	_playlist_selector->signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (_playlist_selector)));
 
-	RegionView::RegionViewGoingAway.connect (*this, boost::bind (&Editor::catch_vanishing_regionview, this, _1));
+	RegionView::RegionViewGoingAway.connect (*this, ui_bind (&Editor::catch_vanishing_regionview, this, _1), gui_context());
 
 	/* nudge stuff */
 
@@ -677,14 +677,17 @@ Editor::Editor ()
 
 	/* allow external control surfaces/protocols to do various things */
 
-	ControlProtocol::ZoomToSession.connect (*this, boost::bind (&Editor::temporal_zoom_session, this));
-	ControlProtocol::ZoomIn.connect (*this, boost::bind (&Editor::temporal_zoom_step, this, false));
-	ControlProtocol::ZoomOut.connect (*this, boost::bind (&Editor::temporal_zoom_step, this, true));
-	ControlProtocol::ScrollTimeline.connect (*this, boost::bind (&Editor::control_scroll, this, _1));
-	BasicUI::AccessAction.connect (*this, boost::bind (&Editor::access_action, this, _1, _2));
-	Session::AskAboutPlaylistDeletion.connect (*this, boost::bind (&Editor::playlist_deletion_dialog, this, _1));
+	ControlProtocol::ZoomToSession.connect (*this, boost::bind (&Editor::temporal_zoom_session, this), gui_context());
+	ControlProtocol::ZoomIn.connect (*this, boost::bind (&Editor::temporal_zoom_step, this, false), gui_context());
+	ControlProtocol::ZoomOut.connect (*this, boost::bind (&Editor::temporal_zoom_step, this, true), gui_context());
+	ControlProtocol::ScrollTimeline.connect (*this, ui_bind (&Editor::control_scroll, this, _1), gui_context());
+	BasicUI::AccessAction.connect (*this, ui_bind (&Editor::access_action, this, _1, _2), gui_context());
+	
+	/* problematic: has to return a value and thus cannot be x-thread */
 
-	Config->ParameterChanged.connect (*this, boost::bind (&Editor::parameter_changed, this, _1));
+	Session::AskAboutPlaylistDeletion.connect_same_thread (*this, boost::bind (&Editor::playlist_deletion_dialog, this, _1));
+
+	Config->ParameterChanged.connect (*this, ui_bind (&Editor::parameter_changed, this, _1), gui_context());
 
 	_last_normalization_value = 0;
 
@@ -1081,22 +1084,22 @@ Editor::set_session (Session *t)
 	   but use Gtkmm2ext::UI::instance()->call_slot();
 	*/
 
-	_session->TransportStateChange.connect (_session_connections, boost::bind (&Editor::map_transport_state, this));
-	_session->PositionChanged.connect (_session_connections, boost::bind (&Editor::map_position_change, this, _1));
-	_session->RouteAdded.connect (_session_connections, boost::bind (&Editor::handle_new_route, this, _1));
-	_session->DurationChanged.connect (_session_connections, boost::bind (&Editor::handle_new_duration, this));
-	_session->DirtyChanged.connect (_session_connections, boost::bind (&Editor::update_title, this));
-	_session->TimecodeOffsetChanged.connect (_session_connections, boost::bind (&Editor::update_just_timecode, this));
-	_session->tempo_map().StateChanged.connect (_session_connections, boost::bind (&Editor::tempo_map_changed, this, _1));
-	_session->Located.connect (_session_connections, boost::bind (&Editor::located, this));
-	_session->config.ParameterChanged.connect (_session_connections, boost::bind (&Editor::parameter_changed, this, _1));
-	_session->StateSaved.connect (_session_connections, boost::bind (&Editor::session_state_saved, this, _1));
-	_session->locations()->added.connect (_session_connections, sigc::mem_fun(*this, &Editor::add_new_location));
-	_session->locations()->removed.connect (_session_connections, sigc::mem_fun(*this, &Editor::location_gone));
-	_session->locations()->changed.connect (_session_connections, sigc::mem_fun(*this, &Editor::refresh_location_display));
-	_session->locations()->StateChanged.connect (_session_connections, sigc::mem_fun(*this, &Editor::refresh_location_display_s));
-	_session->locations()->end_location()->changed.connect (_session_connections, sigc::mem_fun(*this, &Editor::end_location_changed));
-	_session->history().Changed.connect (_session_connections, boost::bind (&Editor::history_changed, this));
+	_session->TransportStateChange.connect (_session_connections, boost::bind (&Editor::map_transport_state, this), gui_context());
+	_session->PositionChanged.connect (_session_connections, ui_bind (&Editor::map_position_change, this, _1), gui_context());
+	_session->RouteAdded.connect (_session_connections, ui_bind (&Editor::handle_new_route, this, _1), gui_context());
+	_session->DurationChanged.connect (_session_connections, boost::bind (&Editor::handle_new_duration, this), gui_context());
+	_session->DirtyChanged.connect (_session_connections, boost::bind (&Editor::update_title, this), gui_context());
+	_session->TimecodeOffsetChanged.connect (_session_connections, boost::bind (&Editor::update_just_timecode, this), gui_context());
+	_session->tempo_map().StateChanged.connect (_session_connections, ui_bind (&Editor::tempo_map_changed, this, _1), gui_context());
+	_session->Located.connect (_session_connections, boost::bind (&Editor::located, this), gui_context());
+	_session->config.ParameterChanged.connect (_session_connections, ui_bind (&Editor::parameter_changed, this, _1), gui_context());
+	_session->StateSaved.connect (_session_connections, ui_bind (&Editor::session_state_saved, this, _1), gui_context());
+	_session->locations()->added.connect (_session_connections, ui_bind (&Editor::add_new_location, this, _1), gui_context());
+	_session->locations()->removed.connect (_session_connections, ui_bind (&Editor::location_gone, this, _1), gui_context());
+	_session->locations()->changed.connect (_session_connections, boost::bind (&Editor::refresh_location_display, this), gui_context());
+	_session->locations()->StateChanged.connect (_session_connections, ui_bind (&Editor::refresh_location_display_s, this, _1), gui_context());
+	_session->locations()->end_location()->changed.connect (_session_connections, ui_bind (&Editor::end_location_changed, this, _1), gui_context());
+	_session->history().Changed.connect (_session_connections, boost::bind (&Editor::history_changed, this), gui_context());
 
 	if (Profile->get_sae()) {
 		BBT_Time bbt;
@@ -4802,7 +4805,7 @@ Editor::handle_new_route (RouteList& routes)
 		rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
 		rtv->view()->HeightChanged.connect (sigc::mem_fun (*this, &Editor::streamview_height_changed));
 
-		rtv->GoingAway.connect (*this, boost::bind (&Editor::remove_route, this, rtv));
+		rtv->GoingAway.connect (*this, boost::bind (&Editor::remove_route, this, rtv), gui_context());
 	}
 
 	_routes->routes_added (new_views);

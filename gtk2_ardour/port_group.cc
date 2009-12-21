@@ -30,6 +30,7 @@
 #include "ardour/session.h"
 #include "ardour/auditioner.h"
 
+#include "gui_thread.h"
 #include "port_group.h"
 #include "port_matrix.h"
 #include "time_axis_view.h"
@@ -116,7 +117,7 @@ PortGroup::add_bundle_internal (boost::shared_ptr<Bundle> b, boost::shared_ptr<I
 	}
 
 	BundleRecord* br = new BundleRecord (b, io, colour, has_colour);
-	b->Changed.connect (br->changed_connection, boost::bind (&PortGroup::bundle_changed, this, _1));
+	b->Changed.connect (br->changed_connection, ui_bind (&PortGroup::bundle_changed, this, _1), gui_context());
 	_bundles.push_back (br);
 
 	Changed ();	
@@ -521,8 +522,8 @@ PortGroupList::add_group (boost::shared_ptr<PortGroup> g)
 {
 	_groups.push_back (g);
 
-	g->Changed.connect (_changed_connections, boost::bind (&PortGroupList::emit_changed, this));
-	g->BundleChanged.connect (_bundle_changed_connections, boost::bind (&PortGroupList::emit_bundle_changed, this, _1));
+	g->Changed.connect (_changed_connections, boost::bind (&PortGroupList::emit_changed, this), gui_context());
+	g->BundleChanged.connect (_bundle_changed_connections, ui_bind (&PortGroupList::emit_bundle_changed, this, _1), gui_context());
 
 	emit_changed ();
 }

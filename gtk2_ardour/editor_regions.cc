@@ -125,7 +125,7 @@ EditorRegions::EditorRegions (Editor* e)
 
 	//ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (sigc::mem_fun(*this, &Editor::redisplay_regions));
 	ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (sigc::mem_fun(*this, &EditorRegions::update_all_rows));
-	ARDOUR::Region::RegionPropertyChanged.connect (region_property_connection, sigc::mem_fun(*this, &EditorRegions::update_row));
+	ARDOUR::Region::RegionPropertyChanged.connect (region_property_connection, ui_bind (&EditorRegions::update_row, this, _1), gui_context());
 
 }
 
@@ -135,9 +135,9 @@ EditorRegions::set_session (ARDOUR::Session* s)
 	EditorComponent::set_session (s);
 
 	if (_session) {
-		_session->RegionsAdded.connect (_session_connections, boost::bind (&EditorRegions::handle_new_regions, this, _1));
-		_session->RegionRemoved.connect (_session_connections, boost::bind (&EditorRegions::handle_region_removed, this, _1));
-		_session->RegionHiddenChange.connect (_session_connections, boost::bind (&EditorRegions::region_hidden, this, _1));
+		_session->RegionsAdded.connect (_session_connections, ui_bind (&EditorRegions::handle_new_regions, this, _1), gui_context());
+		_session->RegionRemoved.connect (_session_connections, ui_bind (&EditorRegions::handle_region_removed, this, _1), gui_context());
+		_session->RegionHiddenChange.connect (_session_connections, ui_bind (&EditorRegions::region_hidden, this, _1), gui_context());
 	}
 
 	redisplay ();

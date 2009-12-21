@@ -164,7 +164,7 @@ OptionEditor::OptionEditor (Configuration* c, std::string const & t)
 	show_all_children();
 
 	/* Watch out for changes to parameters */
-	_config->ParameterChanged.connect (config_connection, boost::bind (&OptionEditor::parameter_changed, this, _1));
+	_config->ParameterChanged.connect (config_connection, ui_bind (&OptionEditor::parameter_changed, this, _1), gui_context());
 }
 
 OptionEditor::~OptionEditor ()

@@ -40,6 +40,7 @@
 #include "ardour/location.h"
 
 #include "ardour_ui.h"
+#include "gui_thread.h"
 #include "public_editor.h"
 #include "time_axis_view.h"
 #include "region_view.h"
@@ -924,7 +925,7 @@ TimeAxisView::add_ghost (RegionView* rv)
 
 	if(gr) {
 		ghosts.push_back(gr);
-		gr->GoingAway.connect (*this, boost::bind (&TimeAxisView::erase_ghost, this, _1));
+		gr->GoingAway.connect (*this, ui_bind (&TimeAxisView::erase_ghost, this, _1), gui_context());
 	}
 }
 

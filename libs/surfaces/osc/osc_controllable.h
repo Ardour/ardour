@@ -30,9 +30,7 @@
 #include "ardour/types.h"
 
 namespace ARDOUR {
-
-class Route;
-
+	class Route;
 }
 
 class OSCControllable : public PBD::Stateful

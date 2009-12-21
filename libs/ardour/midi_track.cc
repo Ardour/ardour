@@ -230,7 +230,7 @@ MidiTrack::_set_state (const XMLNode& node, int version, bool call_base)
 	pending_state = const_cast<XMLNode*> (&node);
 
 	if (_session.state_of_the_state() & Session::Loading) {
-		_session.StateReady.connect (*this, boost::bind (&MidiTrack::set_state_part_two, this));
+		_session.StateReady.connect_same_thread (*this, boost::bind (&MidiTrack::set_state_part_two, this));
 	} else {
 		set_state_part_two ();
 	}

@@ -137,7 +137,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 
 	set_state (*xml_node, Stateful::loading_state_version);
 
-	_route->processors_changed.connect (*this, boost::bind (&MidiTimeAxisView::processors_changed, this, _1));
+	_route->processors_changed.connect (*this, ui_bind (&MidiTimeAxisView::processors_changed, this, _1), gui_context());
 
 	if (is_track()) {
 		_piano_roll_header = new PianoRollHeader(*midi_view());

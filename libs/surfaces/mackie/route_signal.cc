@@ -19,6 +19,7 @@
 
 #include "ardour/route.h"
 #include "ardour/track.h"
+#include "ardour/midi_ui.h"
 #include "ardour/panner.h"
 
 #include "mackie_control_protocol.h"
@@ -29,38 +30,41 @@ using namespace ARDOUR;
 using namespace Mackie;
 using namespace std;
 
+#define midi_ui_context() MidiControlUI::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
+#define ui_bind(f, ...) boost::protect (boost::bind (f, __VA_ARGS__))
+
 void RouteSignal::connect()
 {
 	if (_strip.has_solo()) {
-		_route->solo_control()->Changed.connect(connections, boost::bind (&MackieControlProtocol::notify_solo_changed, &_mcp, this));
+		_route->solo_control()->Changed.connect(connections, ui_bind (&MackieControlProtocol::notify_solo_changed, &_mcp, this), midi_ui_context());
 	}
 
 	if (_strip.has_mute()) {
-		_route->mute_control()->Changed.connect(connections, boost::bind (&MackieControlProtocol::notify_mute_changed, &_mcp, this));
+		_route->mute_control()->Changed.connect(connections, ui_bind (&MackieControlProtocol::notify_mute_changed, &_mcp, this), midi_ui_context());
 	}
 
 	if (_strip.has_gain()) {
-		_route->gain_control()->Changed.connect(connections, boost::bind (&MackieControlProtocol::notify_gain_changed, &_mcp, this, false));
+		_route->gain_control()->Changed.connect(connections, ui_bind (&MackieControlProtocol::notify_gain_changed, &_mcp, this, false), midi_ui_context());
 	}
 
-	_route->NameChanged.connect (connections, boost::bind (&MackieControlProtocol::notify_name_changed, &_mcp, this));
+	_route->NameChanged.connect (connections, ui_bind (&MackieControlProtocol::notify_name_changed, &_mcp, this), midi_ui_context());
 	
 	if (_route->panner()) {
-		_route->panner()->Changed.connect(connections, boost::bind (&MackieControlProtocol::notify_panner_changed, &_mcp, this, false));
+		_route->panner()->Changed.connect(connections, ui_bind (&MackieControlProtocol::notify_panner_changed, &_mcp, this, false), midi_ui_context());
 		
 		for ( unsigned int i = 0; i < _route->panner()->npanners(); ++i ) {
-			_route->panner()->streampanner(i).Changed.connect (connections, boost::bind (&MackieControlProtocol::notify_panner_changed, &_mcp, this, false));
+			_route->panner()->streampanner(i).Changed.connect (connections, ui_bind (&MackieControlProtocol::notify_panner_changed, &_mcp, this, false), midi_ui_context());
 		}
 	}
 	
 	boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<ARDOUR::Track>(_route);
 	if (trk) {
-		trk->rec_enable_control()->Changed .connect(connections, boost::bind (&MackieControlProtocol::notify_record_enable_changed, &_mcp, this));
+		trk->rec_enable_control()->Changed .connect(connections, ui_bind (&MackieControlProtocol::notify_record_enable_changed, &_mcp, this), midi_ui_context());
 	}
 	
 	// TODO this works when a currently-banked route is made inactive, but not
 	// when a route is activated which should be currently banked.
-	_route->active_changed.connect (connections, boost::bind (&MackieControlProtocol::notify_active_changed, &_mcp, this));
+	_route->active_changed.connect (connections, ui_bind (&MackieControlProtocol::notify_active_changed, &_mcp, this), midi_ui_context());
 	
 	// TODO
 	// SelectedChanged

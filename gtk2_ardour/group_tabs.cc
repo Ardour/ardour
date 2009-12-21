@@ -21,6 +21,8 @@
 #include "ardour/session.h"
 #include "ardour/route_group.h"
 #include "ardour/route.h"
+
+#include "gui_thread.h"
 #include "route_group_dialog.h"
 #include "group_tabs.h"
 #include "keyboard.h"
@@ -45,7 +47,7 @@ GroupTabs::set_session (Session* s)
 	EditorComponent::set_session (s);
 
 	if (_session) {
-		_session->RouteGroupChanged.connect (_session_connections, boost::bind (&GroupTabs::set_dirty, this));
+		_session->RouteGroupChanged.connect (_session_connections, boost::bind (&GroupTabs::set_dirty, this), gui_context());
 	}
 }
 

@@ -56,6 +56,7 @@
 #include "canvas_impl.h"
 #include "crossfade_view.h"
 #include "enums.h"
+#include "gui_thread.h"
 #include "automation_time_axis.h"
 #include "keyboard.h"
 #include "playlist_selector.h"
@@ -108,7 +109,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	}
 
 	if (_route->panner()) {
-		_route->panner()->Changed.connect (*this, (boost::bind (&AudioTimeAxisView::ensure_pan_views, this, false)));
+		_route->panner()->Changed.connect (*this, boost::bind (&AudioTimeAxisView::ensure_pan_views, this, false), gui_context());
 	}
 
 	/* map current state of the route */

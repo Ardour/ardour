@@ -69,7 +69,7 @@ class ReturnUIWindow : public ArdourDialog
 	Gtk::HBox hpacker;
 
 	void return_going_away ();
-	boost::signals2::scoped_connection going_away_connection;
+	PBD::ScopedConnection going_away_connection;
 };
 
 #endif /* __ardour_gtk_return_ui_h__ */

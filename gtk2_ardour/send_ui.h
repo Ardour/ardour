@@ -71,7 +71,7 @@ class SendUIWindow : public ArdourDialog
 	Gtk::HBox hpacker;
 
 	void send_going_away ();
-	boost::signals2::scoped_connection going_away_connection;
+	PBD::ScopedConnection going_away_connection;
 };
 
 #endif /* __ardour_gtk_send_ui_h__ */

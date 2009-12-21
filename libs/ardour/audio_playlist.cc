@@ -528,8 +528,8 @@ AudioPlaylist::add_crossfade (boost::shared_ptr<Crossfade> xfade)
 	} else {
 		_crossfades.push_back (xfade);
 
-		xfade->Invalidated.connect (*this, boost::bind (&AudioPlaylist::crossfade_invalidated, this, _1));
-		xfade->StateChanged.connect (*this, boost::bind (&AudioPlaylist::crossfade_changed, this, _1));
+		xfade->Invalidated.connect_same_thread (*this, boost::bind (&AudioPlaylist::crossfade_invalidated, this, _1));
+		xfade->StateChanged.connect_same_thread (*this, boost::bind (&AudioPlaylist::crossfade_changed, this, _1));
 
 		notify_crossfade_added (xfade);
 	}
@@ -584,8 +584,8 @@ AudioPlaylist::set_state (const XMLNode& node, int version)
 		try {
 			boost::shared_ptr<Crossfade> xfade = boost::shared_ptr<Crossfade> (new Crossfade (*((const Playlist *)this), *child));
 			_crossfades.push_back (xfade);
-			xfade->Invalidated.connect (*this, boost::bind (&AudioPlaylist::crossfade_invalidated, this, _1));
-			xfade->StateChanged.connect (*this, boost::bind (&AudioPlaylist::crossfade_changed, this, _1));
+			xfade->Invalidated.connect_same_thread (*this, boost::bind (&AudioPlaylist::crossfade_invalidated, this, _1));
+			xfade->StateChanged.connect_same_thread (*this, boost::bind (&AudioPlaylist::crossfade_changed, this, _1));
 			NewCrossfade(xfade);
 		}
 

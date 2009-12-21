@@ -93,7 +93,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 
 	/* now that we have _meter, its safe to connect to this */
 
-	Metering::Meter.connect (*this, (boost::bind (&Route::meter, this)));
+	Metering::Meter.connect_same_thread (*this, (boost::bind (&Route::meter, this)));
 }
 
 Route::Route (Session& sess, const XMLNode& node, DataType default_type)
@@ -109,7 +109,7 @@ Route::Route (Session& sess, const XMLNode& node, DataType default_type)
 
 	/* now that we have _meter, its safe to connect to this */
 
-	Metering::Meter.connect (*this, (boost::bind (&Route::meter, this)));
+	Metering::Meter.connect_same_thread (*this, (boost::bind (&Route::meter, this)));
 }
 
 void
@@ -147,8 +147,8 @@ Route::init ()
 	_input.reset (new IO (_session, _name, IO::Input, _default_type));
 	_output.reset (new IO (_session, _name, IO::Output, _default_type));
 
-	_input->changed.connect (*this, boost::bind (&Route::input_change_handler, this, _1, _2));
-	_output->changed.connect (*this, boost::bind (&Route::output_change_handler, this, _1, _2));
+	_input->changed.connect_same_thread (*this, boost::bind (&Route::input_change_handler, this, _1, _2));
+	_output->changed.connect_same_thread (*this, boost::bind (&Route::output_change_handler, this, _1, _2));
 
 	/* add amp processor  */
 
@@ -792,7 +792,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 			// XXX: do we want to emit the signal here ? change call order.
 			processor->activate ();
 		}
-		processor->ActiveChanged.connect (*this, boost::bind (&Session::update_latency_compensation, &_session, false, false));
+		processor->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false, false));
 
 		_output->set_user_latency (0);
 	}
@@ -1047,7 +1047,7 @@ Route::add_processors (const ProcessorList& others, ProcessorList::iterator iter
 				return -1;
 			}
 
-			(*i)->ActiveChanged.connect (*this, boost::bind (&Session::update_latency_compensation, &_session, false, false));
+			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::update_latency_compensation, &_session, false, false));
 		}
 
 		_output->set_user_latency (0);

@@ -106,8 +106,8 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	_active.set_active (_processor->active ());
 	_active.signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::active_toggled));
 	
-	_processor->ActiveChanged.connect (active_connection, boost::bind (&ProcessorEntry::processor_active_changed, this));
-	_processor->NameChanged.connect (name_connection, boost::bind (&ProcessorEntry::processor_name_changed, this));
+	_processor->ActiveChanged.connect (active_connection, boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
+	_processor->NameChanged.connect (name_connection, boost::bind (&ProcessorEntry::processor_name_changed, this), gui_context());
 }
 
 EventBox&
@@ -229,7 +229,7 @@ SendProcessorEntry::SendProcessorEntry (boost::shared_ptr<Send> s, Width w)
 	_vbox.pack_start (_fader);
 
 	_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &SendProcessorEntry::gain_adjusted));
-	_send->amp()->gain_control()->Changed.connect (send_gain_connection, boost::bind (&SendProcessorEntry::show_gain, this));
+	_send->amp()->gain_control()->Changed.connect (send_gain_connection, boost::bind (&SendProcessorEntry::show_gain, this), gui_context());
 	show_gain ();
 }
 
@@ -326,9 +326,9 @@ ProcessorBox::set_route (boost::shared_ptr<Route> r)
 	no_processor_redisplay = false;
 	_route = r;
 
-	_route->processors_changed.connect (connections, boost::bind (&ProcessorBox::route_processors_changed, this, _1));
-	_route->GoingAway.connect (connections, boost::bind (&ProcessorBox::route_going_away, this));
-	_route->NameChanged.connect (connections, boost::bind (&ProcessorBox::route_name_changed, this));
+	_route->processors_changed.connect (connections, ui_bind (&ProcessorBox::route_processors_changed, this, _1), gui_context());
+	_route->GoingAway.connect (connections, boost::bind (&ProcessorBox::route_going_away, this), gui_context());
+	_route->NameChanged.connect (connections, boost::bind (&ProcessorBox::route_name_changed, this), gui_context());
 
 	redisplay_processors ();
 }

@@ -33,6 +33,7 @@
 #include "simplerect.h"
 #include "automation_line.h"
 #include "control_point.h"
+#include "gui_thread.h"
 #include "rgb_macros.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -85,7 +86,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 
 	line->signal_event().connect (sigc::mem_fun (*this, &AutomationLine::event_handler));
 
-	alist->StateChanged.connect (_state_connection, boost::bind (&AutomationLine::list_changed, this));
+	alist->StateChanged.connect (_state_connection, boost::bind (&AutomationLine::list_changed, this), gui_context());
 
 	trackview.session()->register_with_memento_command_factory(alist->id(), this);
 

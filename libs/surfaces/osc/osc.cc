@@ -51,8 +51,11 @@ using namespace ARDOUR;
 using namespace std;
 using namespace Glib;
 
-
 #include "pbd/abstract_ui.cc" // instantiate template
+
+#define ui_bind(f, ...) boost::protect (boost::bind (f, __VA_ARGS__))
+
+OSC* OSC::_instance = 0;
 
 #ifdef DEBUG
 static void error_callback(int num, const char *m, const char *path)
@@ -67,10 +70,11 @@ static void error_callback(int, const char *, const char *)
 #endif
 
 OSC::OSC (Session& s, uint32_t port)
-	: ControlProtocol (s, "OSC")
+	: ControlProtocol (s, "OSC", this)
 	, AbstractUI<OSCUIRequest> ("osc")
 	, _port(port)
 {
+	_instance = this;
 	_shutdown = false;
 	_osc_server = 0;
 	_osc_unix_server = 0;
@@ -83,12 +87,13 @@ OSC::OSC (Session& s, uint32_t port)
 
 	// "Application Hooks"
 	session_loaded (s);
-	session->Exported.connect (*this, boost::bind (&OSC::session_exported, this, _1, _2));
+	session->Exported.connect (*this, ui_bind (&OSC::session_exported, this, _1, _2), this);
 }
 
 OSC::~OSC()
 {
 	stop ();
+	_instance = 0;
 }
 
 void
@@ -573,7 +578,7 @@ OSC::listen_to_route (boost::shared_ptr<Route> route, lo_address addr)
 	*/
 	
 	if (!route_exists) {
-		route->GoingAway.connect (*this, boost::bind (&OSC::drop_route, this, boost::weak_ptr<Route> (route)));
+		route->GoingAway.connect (*this, boost::bind (&OSC::drop_route, this, boost::weak_ptr<Route> (route)), this);
 	}
 }
 

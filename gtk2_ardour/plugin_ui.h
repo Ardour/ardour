@@ -264,7 +264,7 @@ class PluginUIWindow : public Gtk::Window
   private:
 	Glib::ustring _title;
 	PlugUIBase* _pluginui;
-	boost::signals2::scoped_connection death_connection;
+	PBD::ScopedConnection death_connection;
 	Gtk::Window* parent;
 	Gtk::VBox vbox;
 	bool non_gtk_gui;

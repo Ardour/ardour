@@ -59,6 +59,7 @@ def build(bld):
 		controllable.cc
                 crossthread.cc
 		enumwriter.cc
+                event_loop.cc
 		dmalloc.cc
 		error.cc
 		filesystem.cc
@@ -82,7 +83,6 @@ def build(bld):
 		strsplit.cc
 		textreceiver.cc
 		transmitter.cc
-                ui_callback.cc
 		undo.cc
 		uuid.cc
 		version.cc

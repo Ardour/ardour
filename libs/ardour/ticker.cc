@@ -34,7 +34,7 @@ void Ticker::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
-		_session->tick.connect (_session_connections, boost::bind (&Ticker::tick, this, _1, _2, _3));
+		_session->tick.connect_same_thread (_session_connections, boost::bind (&Ticker::tick, this, _1, _2, _3));
 	}
 }
 
@@ -43,10 +43,10 @@ void MidiClockTicker::set_session (Session* s)
 	 Ticker::set_session (s);
 
 	 if (_session) {
-		 _session->MIDIClock_PortChanged.connect (_session_connections, boost::bind (&MidiClockTicker::update_midi_clock_port, this));
-		 _session->TransportStateChange.connect (_session_connections, boost::bind (&MidiClockTicker::transport_state_changed, this));
-		 _session->PositionChanged.connect (_session_connections, boost::bind (&MidiClockTicker::position_changed, this, _1));
-		 _session->TransportLooped.connect (_session_connections, boost::bind (&MidiClockTicker::transport_looped, this));
+		 _session->MIDIClock_PortChanged.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::update_midi_clock_port, this));
+		 _session->TransportStateChange.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::transport_state_changed, this));
+		 _session->PositionChanged.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::position_changed, this, _1));
+		 _session->TransportLooped.connect_same_thread (_session_connections, boost::bind (&MidiClockTicker::transport_looped, this));
 		 update_midi_clock_port();
 	 }
 }

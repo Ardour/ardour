@@ -85,7 +85,7 @@ UI::UI (string namestr, int *argc, char ***argv)
 	   as for previous line.
 	*/
 
-	set_ui_for_thread (this);
+	set_event_loop_for_thread (this);
 
 	/* attach our request source to the default main context */
 

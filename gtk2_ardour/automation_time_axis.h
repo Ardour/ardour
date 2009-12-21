@@ -151,7 +151,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void set_interpolation (ARDOUR::AutomationList::InterpolationStyle);
 	void interpolation_changed ();
 
-	boost::signals2::scoped_connection automation_connection;
+	PBD::ScopedConnection automation_connection;
 
 	void update_extra_xml_shown (bool editor_shown);
 

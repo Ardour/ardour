@@ -18,11 +18,11 @@
 
 */
 
-#include "export_format_dialog.h"
-
 #include "ardour/session.h"
 #include "ardour/export_format_specification.h"
 
+#include "export_format_dialog.h"
+#include "gui_thread.h"
 #include "i18n.h"
 
 using namespace ARDOUR;
@@ -127,7 +127,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	close_button = add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_APPLY);
 	close_button->set_sensitive (false);
 	close_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportFormatDialog::end_dialog));
-	manager.CompleteChanged.connect (*this, sigc::mem_fun (close_button, &Gtk::Button::set_sensitive));
+	manager.CompleteChanged.connect (*this, ui_bind (&Gtk::Button::set_sensitive, close_button, _1), gui_context());
 
 	/* Load state before hooking up the rest of the signals */
 
@@ -319,7 +319,7 @@ ExportFormatDialog::init_format_table ()
 		row[compatibility_cols.label] = (*it)->name();
 
 		WeakCompatPtr ptr (*it);
-		(*it)->SelectChanged.connect (*this, boost::bind (&ExportFormatDialog::change_compatibility_selection, this, _1, ptr));
+		(*it)->SelectChanged.connect (*this, ui_bind (&ExportFormatDialog::change_compatibility_selection, this, _1, ptr), gui_context());
 	}
 
 	compatibility_view.append_column_editable ("", compatibility_cols.selected);
@@ -347,8 +347,8 @@ ExportFormatDialog::init_format_table ()
 		row[quality_cols.label] = (*it)->name();
 
 		WeakQualityPtr ptr (*it);
-		(*it)->SelectChanged.connect (*this, boost::bind (&ExportFormatDialog::change_quality_selection, this, _1, ptr));
-		(*it)->CompatibleChanged.connect (*this, boost::bind (&ExportFormatDialog::change_quality_compatibility, this, _1, ptr));
+		(*it)->SelectChanged.connect (*this, ui_bind (&ExportFormatDialog::change_quality_selection, this, _1, ptr), gui_context());
+		(*it)->CompatibleChanged.connect (*this, ui_bind (&ExportFormatDialog::change_quality_compatibility, this, _1, ptr), gui_context());
 	}
 
 	quality_view.append_column ("", quality_cols.label);
@@ -369,19 +369,19 @@ ExportFormatDialog::init_format_table ()
 		row[format_cols.label] = (*it)->name();
 
 		WeakFormatPtr ptr (*it);
-		(*it)->SelectChanged.connect (*this, boost::bind (&ExportFormatDialog::change_format_selection, this, _1, ptr));
-		(*it)->CompatibleChanged.connect (*this, boost::bind (&ExportFormatDialog::change_format_compatibility, this, _1, ptr));
+		(*it)->SelectChanged.connect (*this, ui_bind (&ExportFormatDialog::change_format_selection, this, _1, ptr), gui_context());
+		(*it)->CompatibleChanged.connect (*this, ui_bind (&ExportFormatDialog::change_format_compatibility, this, _1, ptr), gui_context());
 
 		/* Encoding options */
 
 		boost::shared_ptr<HasSampleFormat> hsf;
 
 		if (hsf = boost::dynamic_pointer_cast<HasSampleFormat> (*it)) {
-			hsf->SampleFormatSelectChanged.connect (*this, boost::bind (&ExportFormatDialog::change_sample_format_selection, this, _1, _2));
-			hsf->SampleFormatCompatibleChanged.connect (*this, boost::bind (&ExportFormatDialog::change_sample_format_compatibility, this, _1, _2));
+			hsf->SampleFormatSelectChanged.connect (*this, ui_bind (&ExportFormatDialog::change_sample_format_selection, this, _1, _2), gui_context());
+			hsf->SampleFormatCompatibleChanged.connect (*this, ui_bind (&ExportFormatDialog::change_sample_format_compatibility, this, _1, _2), gui_context());
 
-			hsf->DitherTypeSelectChanged.connect (*this, boost::bind (&ExportFormatDialog::change_dither_type_selection, this, _1, _2));
-			hsf->DitherTypeCompatibleChanged.connect (*this, boost::bind (&ExportFormatDialog::change_dither_type_compatibility, this, _1, _2));
+			hsf->DitherTypeSelectChanged.connect (*this, ui_bind (&ExportFormatDialog::change_dither_type_selection, this, _1, _2), gui_context());
+			hsf->DitherTypeCompatibleChanged.connect (*this, ui_bind (&ExportFormatDialog::change_dither_type_compatibility, this, _1, _2), gui_context());
 		}
 	}
 
@@ -403,8 +403,8 @@ ExportFormatDialog::init_format_table ()
 		row[sample_rate_cols.label] = (*it)->name();
 		
 		WeakSampleRatePtr ptr (*it);
-		(*it)->SelectChanged.connect (*this, boost::bind (&ExportFormatDialog::change_sample_rate_selection, this, _1, ptr));
-		(*it)->CompatibleChanged.connect (*this, boost::bind (&ExportFormatDialog::change_sample_rate_compatibility, this, _1, ptr));
+		(*it)->SelectChanged.connect (*this, ui_bind (&ExportFormatDialog::change_sample_rate_selection, this, _1, ptr), gui_context());
+		(*it)->CompatibleChanged.connect (*this, ui_bind (&ExportFormatDialog::change_sample_rate_compatibility, this, _1, ptr), gui_context());
 	}
 
 	sample_rate_view.append_column ("", sample_rate_cols.label);

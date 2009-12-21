@@ -566,7 +566,7 @@ IO::set_state (const XMLNode& node, int version)
 		pending_state_node = new XMLNode (node);
 		pending_state_node_version = version;
 		pending_state_node_in = false;
-		ConnectingLegal.connect (connection_legal_c, boost::bind (&IO::connecting_became_legal, this));
+		ConnectingLegal.connect_same_thread (connection_legal_c, boost::bind (&IO::connecting_became_legal, this));
 	}
 
 
@@ -619,7 +619,7 @@ IO::set_state_2X (const XMLNode& node, int version, bool in)
 		pending_state_node = new XMLNode (node);
 		pending_state_node_version = version;
 		pending_state_node_in = in;
-		ConnectingLegal.connect (connection_legal_c, boost::bind (&IO::connecting_became_legal, this));
+		ConnectingLegal.connect_same_thread (connection_legal_c, boost::bind (&IO::connecting_became_legal, this));
 	}
 
 	return 0;
@@ -1399,7 +1399,7 @@ IO::bundles_connected ()
 IO::UserBundleInfo::UserBundleInfo (IO* io, boost::shared_ptr<UserBundle> b)
 {
 	bundle = b;
-	b->Changed.connect (changed, boost::bind (&IO::bundle_changed, io, _1));
+	b->Changed.connect_same_thread (changed, boost::bind (&IO::bundle_changed, io, _1));
 }
 
 std::string

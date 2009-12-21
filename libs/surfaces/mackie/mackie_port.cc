@@ -90,7 +90,7 @@ void MackiePort::open()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackiePort::open %1\n", *this));
 	
-	port().input()->sysex.connect (sysex_connection, boost::bind (&MackiePort::handle_midi_sysex, this, _1, _2, _3));
+	port().input()->sysex.connect_same_thread (sysex_connection, boost::bind (&MackiePort::handle_midi_sysex, this, _1, _2, _3));
 		     
 	// make sure the device is connected
 	init();
@@ -272,7 +272,7 @@ void MackiePort::finalise_init( bool yn )
 void MackiePort::connect_any()
 {
 	if (!any_connection.connected()) {
-		port().input()->any.connect (any_connection, boost::bind (&MackiePort::handle_midi_any, this, _1, _2, _3));
+		port().input()->any.connect_same_thread (any_connection, boost::bind (&MackiePort::handle_midi_any, this, _1, _2, _3));
 	}
 }
 

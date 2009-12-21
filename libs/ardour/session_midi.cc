@@ -208,26 +208,26 @@ Session::set_mmc_port (string port_tag)
 		mmc->set_send_device_id (old_send_device_id);
 	}
 
-	mmc->Play.connect (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
-	mmc->DeferredPlay.connect (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
-	mmc->Stop.connect (*this, boost::bind (&Session::mmc_stop, this, _1));
-	mmc->FastForward.connect (*this, boost::bind (&Session::mmc_fast_forward, this, _1));
-	mmc->Rewind.connect (*this, boost::bind (&Session::mmc_rewind, this, _1));
-	mmc->Pause.connect (*this, boost::bind (&Session::mmc_pause, this, _1));
-	mmc->RecordPause.connect (*this, boost::bind (&Session::mmc_record_pause, this, _1));
-	mmc->RecordStrobe.connect (*this, boost::bind (&Session::mmc_record_strobe, this, _1));
-	mmc->RecordExit.connect (*this, boost::bind (&Session::mmc_record_exit, this, _1));
-	mmc->Locate.connect (*this, boost::bind (&Session::mmc_locate, this, _1, _2));
-	mmc->Step.connect (*this, boost::bind (&Session::mmc_step, this, _1, _2));
-	mmc->Shuttle.connect (*this, boost::bind (&Session::mmc_shuttle, this, _1, _2, _3));
-	mmc->TrackRecordStatusChange.connect (*this, boost::bind (&Session::mmc_record_enable, this, _1, _2, _3));
+	mmc->Play.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
+	mmc->DeferredPlay.connect_same_thread (*this, boost::bind (&Session::mmc_deferred_play, this, _1));
+	mmc->Stop.connect_same_thread (*this, boost::bind (&Session::mmc_stop, this, _1));
+	mmc->FastForward.connect_same_thread (*this, boost::bind (&Session::mmc_fast_forward, this, _1));
+	mmc->Rewind.connect_same_thread (*this, boost::bind (&Session::mmc_rewind, this, _1));
+	mmc->Pause.connect_same_thread (*this, boost::bind (&Session::mmc_pause, this, _1));
+	mmc->RecordPause.connect_same_thread (*this, boost::bind (&Session::mmc_record_pause, this, _1));
+	mmc->RecordStrobe.connect_same_thread (*this, boost::bind (&Session::mmc_record_strobe, this, _1));
+	mmc->RecordExit.connect_same_thread (*this, boost::bind (&Session::mmc_record_exit, this, _1));
+	mmc->Locate.connect_same_thread (*this, boost::bind (&Session::mmc_locate, this, _1, _2));
+	mmc->Step.connect_same_thread (*this, boost::bind (&Session::mmc_step, this, _1, _2));
+	mmc->Shuttle.connect_same_thread (*this, boost::bind (&Session::mmc_shuttle, this, _1, _2, _3));
+	mmc->TrackRecordStatusChange.connect_same_thread (*this, boost::bind (&Session::mmc_record_enable, this, _1, _2, _3));
 
 
 	/* also handle MIDI SPP because its so common */
 
-	_mmc_port->input()->start.connect (*this, boost::bind (&Session::spp_start, this, _1, _2));
-	_mmc_port->input()->contineu.connect (*this, boost::bind (&Session::spp_continue, this, _1, _2));
-	_mmc_port->input()->stop.connect (*this, boost::bind (&Session::spp_stop, this, _1, _2));
+	_mmc_port->input()->start.connect_same_thread (*this, boost::bind (&Session::spp_start, this, _1, _2));
+	_mmc_port->input()->contineu.connect_same_thread (*this, boost::bind (&Session::spp_continue, this, _1, _2));
+	_mmc_port->input()->stop.connect_same_thread (*this, boost::bind (&Session::spp_stop, this, _1, _2));
 
 	Config->set_mmc_port_name (port_tag);
 

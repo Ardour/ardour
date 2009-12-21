@@ -22,7 +22,9 @@
 #include "ardour/event_type_map.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
+
 #include "automation_region_view.h"
+#include "gui_thread.h"
 #include "public_editor.h"
 
 #include "i18n.h"
@@ -59,7 +61,7 @@ AutomationRegionView::init (Gdk::Color const & basic_color, bool /*wfd*/)
 
 	set_height (trackview.current_height());
 
-	_region->StateChanged.connect (*this, boost::bind (&RegionView::region_changed, this, _1));
+	_region->StateChanged.connect (*this, ui_bind (&RegionView::region_changed, this, _1), gui_context());
 
 	set_colors ();
 

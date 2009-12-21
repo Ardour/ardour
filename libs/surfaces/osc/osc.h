@@ -60,6 +60,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	OSC (ARDOUR::Session&, uint32_t port);
 	virtual ~OSC();
 
+	static OSC* instance() { return _instance; }
+
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
@@ -182,8 +184,10 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void drop_route (boost::weak_ptr<ARDOUR::Route>);
 
 	typedef std::list<OSCControllable*> Controllables;
-
+	
 	Controllables controllables;
+
+	static OSC* _instance;
 };
 
 #endif // ardour_osc_h

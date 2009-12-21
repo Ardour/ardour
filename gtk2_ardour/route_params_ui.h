@@ -126,10 +126,10 @@ class RouteParams_UI : public ArdourDialog, public PBD::ScopedConnectionList
 	RouteRedirectSelection  _rr_selection;
 
 	boost::shared_ptr<ARDOUR::Route> _route;
-	boost::signals2::scoped_connection _route_processors_connection;
+	PBD::ScopedConnection _route_processors_connection;
 
 	boost::shared_ptr<ARDOUR::Processor> _processor;
-	boost::signals2::scoped_connection _processor_going_away_connection;
+	PBD::ScopedConnection _processor_going_away_connection;
 
 
 	enum ConfigView {

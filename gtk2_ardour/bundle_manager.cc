@@ -24,10 +24,12 @@
 #include <gtkmm/table.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/alignment.h>
+
 #include "ardour/session.h"
 #include "ardour/user_bundle.h"
 #include "ardour/audioengine.h"
 #include "bundle_manager.h"
+#include "gui_thread.h"
 #include "i18n.h"
 #include "utils.h"
 
@@ -395,7 +397,7 @@ BundleManager::add_bundle (boost::shared_ptr<Bundle> b)
 	(*i)[_list_model_columns.name] = u->name ();
 	(*i)[_list_model_columns.bundle] = u;
 
-	u->Changed.connect (bundle_connections, boost::bind (&BundleManager::bundle_changed, this, _1, u));
+	u->Changed.connect (bundle_connections, ui_bind (&BundleManager::bundle_changed, this, _1, u), gui_context());
 }
 
 void
@@ -420,7 +422,7 @@ BundleManager::bundle_changed (Bundle::Change c, boost::shared_ptr<UserBundle> b
 }
 
 void
-BundleManager::row_activated (Gtk::TreeModel::Path const & p, Gtk::TreeViewColumn* c)
+BundleManager::row_activated (Gtk::TreeModel::Path const & p, Gtk::TreeViewColumn*)
 {
 	Gtk::TreeModel::iterator i = _list_model->get_iter (p);
 	if (!i) {

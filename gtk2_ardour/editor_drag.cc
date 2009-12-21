@@ -30,6 +30,7 @@
 #include "audio_region_view.h"
 #include "midi_region_view.h"
 #include "ardour_ui.h"
+#include "gui_thread.h"
 #include "control_point.h"
 #include "utils.h"
 #include "region_gain_line.h"
@@ -237,7 +238,7 @@ RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Re
 	  _primary (p),
 	  _views (v)
 {
-	RegionView::RegionViewGoingAway.connect (death_connection, boost::bind (&RegionDrag::region_going_away, this, _1));
+	RegionView::RegionViewGoingAway.connect (death_connection, ui_bind (&RegionDrag::region_going_away, this, _1), gui_context());
 }
 
 void

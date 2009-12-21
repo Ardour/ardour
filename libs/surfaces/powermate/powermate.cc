@@ -89,7 +89,7 @@ int find_powermate(int mode)
 }
 
 PowermateControlProtocol::PowermateControlProtocol (Session& s)
-	: ControlProtocol  (s, "powermate")
+	: ControlProtocol  (s, "powermate", 0 /* XXX need an event loop here */)
 {
 }
 

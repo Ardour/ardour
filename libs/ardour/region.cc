@@ -109,7 +109,7 @@ Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length
 	_sources.push_back (src);
 	_master_sources.push_back (src);
 
-	src->GoingAway.connect (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(src)));
+	src->GoingAway.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(src)));
 
 	assert(_sources.size() > 0);
 	_positional_lock_style = AudioTime;
@@ -1586,14 +1586,14 @@ Region::use_sources (SourceList const & s)
 
 	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
 		_sources.push_back (*i);
-		(*i)->GoingAway.connect (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
+		(*i)->GoingAway.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
 		unique_srcs.insert (*i);
 	}
 
 	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
 		_master_sources.push_back (*i);
 		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->GoingAway.connect (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
+			(*i)->GoingAway.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
 		}
 	}
 }

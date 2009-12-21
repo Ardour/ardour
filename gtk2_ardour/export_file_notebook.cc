@@ -22,6 +22,7 @@
 
 #include "ardour/export_format_specification.h"
 
+#include "gui_thread.h"
 #include "utils.h"
 #include "i18n.h"
 
@@ -196,7 +197,7 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 
 	tab_close_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*parent, &ExportFileNotebook::remove_file_page), this));
 
-	profile_manager->FormatListChanged.connect (format_connection, boost::bind (&ExportFormatSelector::update_format_list, &format_selector));
+	profile_manager->FormatListChanged.connect (format_connection, boost::bind (&ExportFormatSelector::update_format_list, &format_selector), gui_context());
 
 	format_selector.FormatEdited.connect (sigc::mem_fun (*this, &ExportFileNotebook::FilePage::save_format_to_manager));
 	format_selector.FormatRemoved.connect (sigc::mem_fun (*profile_manager, &ExportProfileManager::remove_format_profile));

@@ -30,9 +30,9 @@
 #include <glibmm/main.h>
 
 #include "pbd/crossthread.h"
-#include "pbd/ui_callback.h"
+#include "pbd/event_loop.h"
 
-class BaseUI : virtual public sigc::trackable, public PBD::UICallback 
+class BaseUI : virtual public sigc::trackable, public PBD::EventLoop
 {
   public:
 	BaseUI (const std::string& name);

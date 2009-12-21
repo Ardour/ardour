@@ -96,7 +96,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
-		afs->HeaderPositionOffsetChanged.connect (*this, boost::bind (&AudioRegion::source_offset_changed, this));
+		afs->HeaderPositionOffsetChanged.connect_same_thread (*this, boost::bind (&AudioRegion::source_offset_changed, this));
 	}
 
 	init ();
@@ -113,7 +113,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, n
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
-		afs->HeaderPositionOffsetChanged.connect (*this, boost::bind (&AudioRegion::source_offset_changed, this));
+		afs->HeaderPositionOffsetChanged.connect_same_thread (*this, boost::bind (&AudioRegion::source_offset_changed, this));
 	}
 
 	init ();
@@ -205,7 +205,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, const Sour
 
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> ((*i));
 		if (afs) {
-			afs->HeaderPositionOffsetChanged.connect (*this, boost::bind (&AudioRegion::source_offset_changed, this));
+			afs->HeaderPositionOffsetChanged.connect_same_thread (*this, boost::bind (&AudioRegion::source_offset_changed, this));
 		}
 	}
 
@@ -229,7 +229,7 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 {
 	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 	if (afs) {
-		afs->HeaderPositionOffsetChanged.connect (*this, boost::bind (&AudioRegion::source_offset_changed, this));
+		afs->HeaderPositionOffsetChanged.connect_same_thread (*this, boost::bind (&AudioRegion::source_offset_changed, this));
 	}
 
 	init ();
@@ -270,7 +270,7 @@ void
 AudioRegion::connect_to_analysis_changed ()
 {
 	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-		(*i)->AnalysisChanged.connect (*this, boost::bind (&AudioRegion::invalidate_transients, this));
+		(*i)->AnalysisChanged.connect_same_thread (*this, boost::bind (&AudioRegion::invalidate_transients, this));
 	}
 }
 
@@ -285,7 +285,7 @@ AudioRegion::connect_to_header_position_offset_changed ()
 			unique_srcs.insert (*i);
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (*i);
 			if (afs) {
-				afs->HeaderPositionOffsetChanged.connect (*this, boost::bind (&AudioRegion::source_offset_changed, this));
+				afs->HeaderPositionOffsetChanged.connect_same_thread (*this, boost::bind (&AudioRegion::source_offset_changed, this));
 			}
 		}
 	}
@@ -294,9 +294,9 @@ AudioRegion::connect_to_header_position_offset_changed ()
 void
 AudioRegion::listen_to_my_curves ()
 {
-	_envelope->StateChanged.connect (*this, boost::bind (&AudioRegion::envelope_changed, this));
-	_fade_in->StateChanged.connect (*this, boost::bind (&AudioRegion::fade_in_changed, this));
-	_fade_out->StateChanged.connect (*this, boost::bind (&AudioRegion::fade_out_changed, this));
+	_envelope->StateChanged.connect_same_thread (*this, boost::bind (&AudioRegion::envelope_changed, this));
+	_fade_in->StateChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fade_in_changed, this));
+	_fade_out->StateChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fade_out_changed, this));
 }
 
 void

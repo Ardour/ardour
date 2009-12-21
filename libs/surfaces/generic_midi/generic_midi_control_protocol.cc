@@ -30,6 +30,7 @@
 
 #include "ardour/session.h"
 #include "ardour/route.h"
+#include "ardour/midi_ui.h"
 
 #include "generic_midi_control_protocol.h"
 #include "midicontrollable.h"
@@ -39,8 +40,11 @@ using namespace PBD;
 
 #include "i18n.h"
 
+#define midi_ui_context() MidiControlUI::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
+#define ui_bind(x) boost::protect (boost::bind ((x)))
+
 GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
-	: ControlProtocol (s, _("Generic MIDI"))
+	: ControlProtocol (s, _("Generic MIDI"), MidiControlUI::instance())
 {
 	MIDI::Manager* mm = MIDI::Manager::instance();
 
@@ -59,16 +63,14 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	_feedback_interval = 10000; // microseconds
 	last_feedback_time = 0;
 
-	auto_binding = FALSE;
+	/* XXX is it right to do all these in the same thread as whatever emits the signal? */
 
-	Controllable::StartLearning.connect (*this, boost::bind (&GenericMidiControlProtocol::start_learning, this, _1));
-	Controllable::StopLearning.connect (*this, boost::bind (&GenericMidiControlProtocol::stop_learning, this, _1));
-	Controllable::CreateBinding.connect (*this, boost::bind (&GenericMidiControlProtocol::create_binding, this, _1, _2, _3));
-	Controllable::DeleteBinding.connect (*this, boost::bind (&GenericMidiControlProtocol::delete_binding, this, _1));
+	Controllable::StartLearning.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::start_learning, this, _1));
+	Controllable::StopLearning.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::stop_learning, this, _1));
+	Controllable::CreateBinding.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::create_binding, this, _1, _2, _3));
+	Controllable::DeleteBinding.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::delete_binding, this, _1));
 
-	Session::SendFeedback.connect (*this, boost::bind (&GenericMidiControlProtocol::send_feedback, this));
-	Session::AutoBindingOn.connect (*this, boost::bind (&GenericMidiControlProtocol::auto_binding_on, this));
-	Session::AutoBindingOff.connect (*this, boost::bind (&GenericMidiControlProtocol::auto_binding_off, this));
+	Session::SendFeedback.connect (*this, boost::bind (&GenericMidiControlProtocol::send_feedback, this), midi_ui_context());;
 }
 
 GenericMidiControlProtocol::~GenericMidiControlProtocol ()
@@ -177,7 +179,7 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 
 		MIDIPendingControllable* element = new MIDIPendingControllable;
 		element->first = mc;
-		c->LearningFinished.connect (element->second, boost::bind (&GenericMidiControlProtocol::learning_stopped, this, mc));
+		c->LearningFinished.connect_same_thread (element->second, boost::bind (&GenericMidiControlProtocol::learning_stopped, this, mc));
 
 		pending_controllables.push_back (element);
 	}
@@ -289,18 +291,6 @@ GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos,
 	}
 }
 
-void
-GenericMidiControlProtocol::auto_binding_on()
-{
-	auto_binding = TRUE;
-}
-
-void
-GenericMidiControlProtocol::auto_binding_off()
-{
-	auto_binding = FALSE;
-}
-
 XMLNode&
 GenericMidiControlProtocol::get_state () 
 {
@@ -345,46 +335,43 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 		_feedback_interval = 10000;
 	}
 
-	if ( !auto_binding ) {
-		
-		boost::shared_ptr<Controllable> c;
-		
-		{
-			Glib::Mutex::Lock lm (pending_lock);
-			for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ++i) {
-				delete *i;
-			}
-			pending_controllables.clear ();
+	boost::shared_ptr<Controllable> c;
+	
+	{
+		Glib::Mutex::Lock lm (pending_lock);
+		for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ++i) {
+			delete *i;
 		}
+		pending_controllables.clear ();
+	}
+	
+	Glib::Mutex::Lock lm2 (controllables_lock);
+	controllables.clear ();
+	nlist = node.children(); // "controls"
+	
+	if (nlist.empty()) {
+		return 0;
+	}
+	
+	nlist = nlist.front()->children ();
 		
-		Glib::Mutex::Lock lm2 (controllables_lock);
-		controllables.clear ();
-		nlist = node.children(); // "controls"
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		
-		if (nlist.empty()) {
-			return 0;
-		}
-		
-		nlist = nlist.front()->children ();
-		
-		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if ((prop = (*niter)->property ("id")) != 0) {
 			
-			if ((prop = (*niter)->property ("id")) != 0) {
-
-				ID id = prop->value ();
-				c = session->controllable_by_id (id);
-				
-				if (c) {
-					MIDIControllable* mc = new MIDIControllable (*_port, *c);
-					if (mc->set_state (**niter, version) == 0) {
-						controllables.insert (mc);
-					}
-					
-				} else {
-					warning << string_compose (
-							_("Generic MIDI control: controllable %1 not found in session (ignored)"),
-							id) << endmsg;
+			ID id = prop->value ();
+			c = session->controllable_by_id (id);
+			
+			if (c) {
+				MIDIControllable* mc = new MIDIControllable (*_port, *c);
+				if (mc->set_state (**niter, version) == 0) {
+					controllables.insert (mc);
 				}
+				
+			} else {
+				warning << string_compose (
+					_("Generic MIDI control: controllable %1 not found in session (ignored)"),
+					id) << endmsg;
 			}
 		}
 	}

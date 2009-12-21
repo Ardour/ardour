@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __pbd_ui_callback_h__
-#define __pbd_ui_callback_h__
+#ifndef __pbd_event_loop_h__
+#define __pbd_event_loop_h__
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp> /* we don't need this here, but anything calling call_slot() probably will, so this is convenient */
@@ -27,22 +27,22 @@
 namespace PBD
 {
 
-class UICallback 
+class EventLoop 
 {
   public:
-	UICallback() {}
-	virtual ~UICallback() {}
+	EventLoop() {}
+	virtual ~EventLoop() {}
 
 	virtual void call_slot (const boost::function<void()>&) = 0;
 
-	static UICallback* get_ui_for_thread();
-	static void set_ui_for_thread (UICallback* ui);
+	static EventLoop* get_event_loop_for_thread();
+	static void set_event_loop_for_thread (EventLoop* ui);
 
   private:
-	static Glib::StaticPrivate<UICallback> thread_ui;
+	static Glib::StaticPrivate<EventLoop> thread_event_loop;
 
 };
 
 }
 
-#endif /* __pbd_ui_callback_h__ */
+#endif /* __pbd_event_loop_h__ */

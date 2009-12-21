@@ -30,6 +30,8 @@ class MidiControlUI : public AbstractUI<MidiUIRequest>
   public:
 	MidiControlUI (Session& s);
 	~MidiControlUI ();
+
+	static MidiControlUI* instance() { return _instance; }
 	
 	static BaseUI::RequestType PortChange;
 	
@@ -48,6 +50,8 @@ class MidiControlUI : public AbstractUI<MidiUIRequest>
 	bool midi_input_handler (Glib::IOCondition, MIDI::Port*);
 	void reset_ports ();
 	void clear_ports ();
+
+	static MidiControlUI* _instance;
 };
 
 }

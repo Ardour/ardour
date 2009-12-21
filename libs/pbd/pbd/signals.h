@@ -22,8 +22,13 @@
 
 #include <list>
 #include <glibmm/thread.h>
+
 #include <boost/signals2.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/bind.hpp>
+#include <boost/bind/protect.hpp>
+
+#include "pbd/event_loop.h"
 
 namespace PBD {
 
@@ -39,10 +44,6 @@ class ScopedConnectionList  : public boost::noncopyable
 	
 	void add_connection (const UnscopedConnection& c);
 	void drop_connections ();
-
-	template<typename S> void scoped_connect (S& sig, const typename S::slot_function_type& sf) {
-		add_connection (sig.connect (sf));
-	}
 
   private:
 	/* this class is not copyable */
@@ -76,14 +77,26 @@ public:
     Signal0 () {}
     typedef boost::signals2::signal<R()> SignalType;
 
-    void connect (ScopedConnectionList& clist, 
+    void connect_same_thread (Connection& c, 
+		  const typename SignalType::slot_function_type& slot) {
+	    c = _signal.connect (slot);
+    }
+
+    void connect_same_thread (ScopedConnectionList& clist, 
 		  const typename SignalType::slot_function_type& slot) {
 	    clist.add_connection (_signal.connect (slot));
     }
+
+    void connect (ScopedConnectionList& clist, 
+		  const typename SignalType::slot_function_type& slot,
+		  PBD::EventLoop* event_loop) {
+	    clist.add_connection (_signal.connect (boost::bind (&EventLoop::call_slot, event_loop, slot)));
+    }
     
     void connect (Connection& c, 
-		  const typename SignalType::slot_function_type& slot) {
-	    c = _signal.connect (slot);
+		  const typename SignalType::slot_function_type& slot,
+		  PBD::EventLoop* event_loop) {
+	    c = _signal.connect (boost::bind (&EventLoop::call_slot, event_loop, slot));
     }
     
     typename SignalType::result_type operator()() {
@@ -100,14 +113,31 @@ public:
     Signal1 () {}
     typedef boost::signals2::signal<R(A)> SignalType;
 
-    void connect (ScopedConnectionList& clist, 
+    void connect_same_thread (ScopedConnectionList& clist, 
 		  const typename SignalType::slot_function_type& slot) {
 	    clist.add_connection (_signal.connect (slot));
     }
 
-    void connect (Connection& c, 
-		  const typename SignalType::slot_function_type& slot) {
+    void connect_same_thread (Connection& c, 
+		     const typename SignalType::slot_function_type& slot) {
 	    c = _signal.connect (slot);
+    }
+
+    static void compositor (typename boost::function<void(A)> f, EventLoop* event_loop, A arg) {
+	    event_loop->call_slot (boost::bind (f, arg));
+    }
+
+    void connect (ScopedConnectionList& clist, 
+		  const typename SignalType::slot_function_type& slot,
+		  PBD::EventLoop* event_loop) {
+	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, _1)));
+    }
+
+    void connect (Connection& c, 
+		  const typename SignalType::slot_function_type& slot,
+		  PBD::EventLoop* event_loop) {
+	    c = _signal.connect (boost::bind (&compositor, slot, event_loop, _1));
+
     }
     
     typename SignalType::result_type operator()(A arg1) {
@@ -124,16 +154,32 @@ public:
     Signal2 () {}
     typedef boost::signals2::signal<R(A1, A2)> SignalType;
 
-    void connect (ScopedConnectionList& clist, 
+    void connect_same_thread (ScopedConnectionList& clist, 
 		  const typename SignalType::slot_function_type& slot) {
 	    clist.add_connection (_signal.connect (slot));
     }
-    
-    void connect (Connection& c, 
-		  const typename SignalType::slot_function_type& slot) {
+
+    void connect_same_thread (Connection& c, 
+		     const typename SignalType::slot_function_type& slot) {
 	    c = _signal.connect (slot);
     }
-    
+
+    static void compositor (typename boost::function<void(A1,A2)> f, PBD::EventLoop* event_loop, A1 arg1, A2 arg2) {
+	    event_loop->call_slot (boost::bind (f, arg1, arg2));
+    }
+
+    void connect (ScopedConnectionList& clist, 
+		  const typename SignalType::slot_function_type& slot,
+		  PBD::EventLoop* event_loop) {
+	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, _1, _2)));
+    }
+
+    void connect (Connection& c, 
+		  const typename SignalType::slot_function_type& slot,
+		  PBD::EventLoop* event_loop) {
+	    c = _signal.connect (boost::bind (&compositor, slot, event_loop, _1, _2));
+    }
+
     typename SignalType::result_type operator()(A1 arg1, A2 arg2) {
 	    return _signal (arg1, arg2);
     }
@@ -148,14 +194,30 @@ public:
     Signal3 () {}
     typedef boost::signals2::signal<R(A1,A2,A3)> SignalType;
 
-    void connect (ScopedConnectionList& clist, 
+    void connect_same_thread (ScopedConnectionList& clist, 
 		  const typename SignalType::slot_function_type& slot) {
 	    clist.add_connection (_signal.connect (slot));
     }
+
+    void connect_same_thread (Connection& c, 
+			      const typename SignalType::slot_function_type& slot) {
+	    c = _signal.connect (slot);
+    }
+
+    static void compositor (typename boost::function<void(A1,A2,A3)> f, PBD::EventLoop* event_loop, A1 arg1, A2 arg2, A3 arg3) {
+	    event_loop->call_slot (boost::bind (f, arg1, arg2, arg3));
+    }
+
+    void connect (ScopedConnectionList& clist, 
+		  const typename SignalType::slot_function_type& slot,
+		  PBD::EventLoop* event_loop) {
+	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, _1, _2, _3)));
+    }
     
     void connect (Connection& c, 
-		  const typename SignalType::slot_function_type& slot) {
-	    c = _signal.connect (slot);
+		  const typename SignalType::slot_function_type& slot,
+		  PBD::EventLoop* event_loop) {
+	    c = _signal.connect (_signal.connect (boost::bind (&compositor, slot, event_loop, _1, _2, _3)));
     }
     
     typename SignalType::result_type operator()(A1 arg1, A2 arg2, A3 arg3) {

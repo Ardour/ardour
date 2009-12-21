@@ -22,8 +22,10 @@
 #include <gtkmm/stock.h>
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
+
 #include "ardour/dB.h"
 #include "ardour_ui.h"
+#include "gui_thread.h"
 #include "strip_silence_dialog.h"
 #include "canvas_impl.h"
 #include "waveview.h"
@@ -129,7 +131,7 @@ StripSilenceDialog::create_waves ()
 	int n = 0;
 
 	for (std::list<Wave>::iterator i = _waves.begin(); i != _waves.end(); ++i) {
-		if (i->region->audio_source(0)->peaks_ready (boost::bind (&StripSilenceDialog::peaks_ready, this), _peaks_ready_connection)) {
+		if (i->region->audio_source(0)->peaks_ready (boost::bind (&StripSilenceDialog::peaks_ready, this), _peaks_ready_connection, gui_context())) {
 			i->view = new WaveView (*(_canvas->root()));
 			i->view->property_data_src() = static_cast<gpointer>(i->region.get());
 			i->view->property_cache() = WaveView::create_cache ();

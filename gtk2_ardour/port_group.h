@@ -78,7 +78,7 @@ public:
 	    boost::shared_ptr<ARDOUR::IO> io; 
 	    Gdk::Color colour;
 	    bool has_colour;
-	    boost::signals2::scoped_connection changed_connection;
+	    PBD::ScopedConnection changed_connection;
 
 	    BundleRecord (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::IO>, Gdk::Color, bool has_colour);
 	};

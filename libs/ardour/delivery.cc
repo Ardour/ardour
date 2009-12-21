@@ -64,10 +64,10 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Mute
 	_display_to_user = false;
 
 	if (_output) {
-		_output->changed.connect (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
+		_output->changed.connect_same_thread (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
 	}
 
-	CycleStart.connect (*this, boost::bind (&Delivery::cycle_start, this, _1));
+	CycleStart.connect_same_thread (*this, boost::bind (&Delivery::cycle_start, this, _1));
 }
 
 /* deliver to a new IO object */
@@ -88,10 +88,10 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const string& 
 	_display_to_user = false;
 
 	if (_output) {
-		_output->changed.connect (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
+		_output->changed.connect_same_thread (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
 	}
 
-	CycleStart.connect (*this, boost::bind (&Delivery::cycle_start, this, _1));
+	CycleStart.connect_same_thread (*this, boost::bind (&Delivery::cycle_start, this, _1));
 }
 
 /* deliver to a new IO object, reconstruct from XML */
@@ -116,10 +116,10 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode&
 	}
 
 	if (_output) {
-		_output->changed.connect (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
+		_output->changed.connect_same_thread (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
 	}
 
-	CycleStart.connect (*this, boost::bind (&Delivery::cycle_start, this, _1));
+	CycleStart.connect_same_thread (*this, boost::bind (&Delivery::cycle_start, this, _1));
 }
 
 /* deliver to an existing IO object, reconstruct from XML */
@@ -144,10 +144,10 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> out, boost::shared_ptr<Mut
 	}
 
 	if (_output) {
-		_output->changed.connect (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
+		_output->changed.connect_same_thread (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
 	}
 
-	CycleStart.connect (*this, boost::bind (&Delivery::cycle_start, this, _1));
+	CycleStart.connect_same_thread (*this, boost::bind (&Delivery::cycle_start, this, _1));
 }
 
 std::string
@@ -419,7 +419,7 @@ Delivery::reset_panner ()
 		}
 	} else {
 		panner_legal_c.disconnect ();
-		PannersLegal.connect (panner_legal_c, boost::bind (&Delivery::panners_became_legal, this));
+		PannersLegal.connect_same_thread (panner_legal_c, boost::bind (&Delivery::panners_became_legal, this));
 	}
 }
 

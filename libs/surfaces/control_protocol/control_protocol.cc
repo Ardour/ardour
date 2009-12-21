@@ -18,6 +18,8 @@
 
 */
 
+#include "pbd/error.h"
+
 #include "ardour/session.h"
 #include "ardour/route.h"
 #include "ardour/audio_track.h"
@@ -27,19 +29,30 @@
 
 using namespace ARDOUR;
 using namespace std;
+using namespace PBD;
 
-PBD::Signal0<void> ControlProtocol::ZoomToSession;
-PBD::Signal0<void> ControlProtocol::ZoomOut;
-PBD::Signal0<void> ControlProtocol::ZoomIn;
-PBD::Signal0<void> ControlProtocol::Enter;
-PBD::Signal1<void,float> ControlProtocol::ScrollTimeline;
+Signal0<void>       ControlProtocol::ZoomToSession;
+Signal0<void>       ControlProtocol::ZoomOut;
+Signal0<void>       ControlProtocol::ZoomIn;
+Signal0<void>       ControlProtocol::Enter;
+Signal1<void,float> ControlProtocol::ScrollTimeline;
 
-ControlProtocol::ControlProtocol (Session& s, string str)
+ControlProtocol::ControlProtocol (Session& s, string str, EventLoop* evloop)
 	: BasicUI (s),
 	  _name (str)
 {
+	if (evloop) {
+		_own_event_loop = false;
+		_event_loop = evloop;
+	} else {
+		_own_event_loop = true;
+		fatal << "programming error: cannot create control protocols without an existing event loop (yet)" << endmsg;
+		/*NOTREACHED*/
+	}
+
 	_active = false;
-	session->RouteAdded.connect (*this, boost::bind (&ControlProtocol::add_strip, this, _1));
+	
+	session->RouteAdded.connect (*this, boost::protect (boost::bind (&ControlProtocol::add_strip, this, _1)), _event_loop);
 }
 
 ControlProtocol::~ControlProtocol ()
@@ -47,7 +60,7 @@ ControlProtocol::~ControlProtocol ()
 }
 
 void
-ControlProtocol::add_strip (std::list<boost::shared_ptr<ARDOUR::Route> >)
+ControlProtocol::add_strip (ARDOUR::RouteList&)
 {
 	route_list_changed();
 }

@@ -66,7 +66,7 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 
 	use_rec_regions = tv.editor().show_waveforms_recording ();
 
-	Config->ParameterChanged.connect (*this, sigc::mem_fun (*this, &AudioStreamView::parameter_changed));
+	Config->ParameterChanged.connect (*this, ui_bind (&AudioStreamView::parameter_changed, this, _1), gui_context());
 }
 
 AudioStreamView::~AudioStreamView ()
@@ -190,7 +190,7 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 
 	/* catch region going away */
 
-	r->GoingAway.connect (*this, boost::bind (&AudioStreamView::remove_region_view, this, boost::weak_ptr<Region> (r)));
+	r->GoingAway.connect (*this, boost::bind (&AudioStreamView::remove_region_view, this, boost::weak_ptr<Region> (r)), gui_context());
 
 	RegionViewAdded (region_view);
 
@@ -288,7 +288,7 @@ AudioStreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(ds->playlist());
 
 	if (apl) {
-		apl->NewCrossfade.connect (playlist_connections, boost::bind (&AudioStreamView::add_crossfade, this, _1));
+		apl->NewCrossfade.connect (playlist_connections, ui_bind (&AudioStreamView::add_crossfade, this, _1), gui_context());
 	}
 }
 
@@ -347,7 +347,7 @@ AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
 					       region_color,
 					       *lview, *rview);
 	cv->set_valid (true);
-	crossfade->Invalidated.connect (*this, sigc::mem_fun (*this, &AudioStreamView::remove_crossfade));
+	crossfade->Invalidated.connect (*this, ui_bind (&AudioStreamView::remove_crossfade, this, _1), gui_context());
 	crossfade_views[cv->crossfade] = cv;
 	if (!_trackview.session()->config.get_xfades_visible() || !crossfades_visible) {
 		cv->hide ();
@@ -482,10 +482,9 @@ AudioStreamView::setup_rec_box ()
 					boost::shared_ptr<AudioFileSource> src = ads->write_source (n);
 					if (src) {
 						sources.push_back (src);
-
-						(src->PeakRangeReady.connect (rec_data_ready_connections,
-									      boost::bind (&AudioStreamView::rec_peak_range_ready, 
-											   this, _1, _2, boost::weak_ptr<Source>(src))));
+						src->PeakRangeReady.connect (rec_data_ready_connections,
+									     ui_bind (&AudioStreamView::rec_peak_range_ready, this, _1, _2, boost::weak_ptr<Source>(src)),
+									     gui_context());
 					}
 				}
 

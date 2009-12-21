@@ -41,6 +41,7 @@
 #include "imageframe_socket_handler.h"
 #include "ardour_image_compositor_socket.h"
 #include "public_editor.h"
+#include "gui_thread.h"
 
 using namespace Gtk;
 using namespace PBD;
@@ -1092,7 +1093,7 @@ Editor::handle_new_imageframe_time_axis_view(const string & track_name, void* sr
 	row[route_display_columns.tv] = iftav;
 	route_list_display.get_selection()->select (row);
 
-	iftav->GoingAway.connect (*this, boost::bind (&Editor::remove_route, this, (TimeAxisView*)iftav));
+	iftav->GoingAway.connect (*this, boost::bind (&Editor::remove_route, this, (TimeAxisView*)iftav), gui_context());
 	iftav->gui_changed.connect(sigc::mem_fun(*this, &Editor::handle_gui_changes)) ;
 }
 
@@ -1109,7 +1110,7 @@ Editor::handle_new_imageframe_marker_time_axis_view(const string & track_name, T
 	row[route_display_columns.tv] = mta;
 	route_list_display.get_selection()->select (row);
 
-	mta->GoingAway.connect (*this, boost::bind (&Editor::remove_route, this, (TimeAxisView*)mta));
+	mta->GoingAway.connect (*this, boost::bind (&Editor::remove_route, this, (TimeAxisView*)mta), gui_context());
  }
 
 

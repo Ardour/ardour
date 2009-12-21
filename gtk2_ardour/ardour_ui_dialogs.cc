@@ -37,6 +37,7 @@
 #include "theme_manager.h"
 #include "bundle_manager.h"
 #include "keyeditor.h"
+#include "gui_thread.h"
 
 #include "i18n.h"
 
@@ -113,14 +114,15 @@ ARDOUR_UI::set_session (Session *s)
 	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::sync_blink));
 	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::audition_blink));
 
-	_session->Xrun.connect (_session_connections, sigc::mem_fun(*this, &ARDOUR_UI::xrun_handler));
-	_session->RecordStateChanged.connect (_session_connections, sigc::mem_fun (*this, &ARDOUR_UI::record_state_changed));
-	_session->locations()->added.connect (_session_connections, sigc::mem_fun (*this, &ARDOUR_UI::handle_locations_change));
-	_session->locations()->removed.connect (_session_connections, sigc::mem_fun (*this, &ARDOUR_UI::handle_locations_change));
-	_session->TransportStateChange.connect (_session_connections, sigc::mem_fun(*this, &ARDOUR_UI::map_transport_state));
-	_session->AuditionActive.connect (_session_connections, sigc::mem_fun(*this, &ARDOUR_UI::auditioning_changed));
-	_session->SoloActive.connect (_session_connections, sigc::mem_fun(*this, &ARDOUR_UI::soloing_changed));
-	_session->DirtyChanged.connect (_session_connections, sigc::mem_fun(*this, &ARDOUR_UI::update_autosave));
+	_session->RecordStateChanged.connect (_session_connections, boost::bind (&ARDOUR_UI::record_state_changed, this), gui_context());
+	_session->TransportStateChange.connect (_session_connections, boost::bind (&ARDOUR_UI::map_transport_state, this), gui_context());
+	_session->DirtyChanged.connect (_session_connections, boost::bind (&ARDOUR_UI::update_autosave, this), gui_context());
+
+	_session->Xrun.connect (_session_connections, ui_bind (&ARDOUR_UI::xrun_handler, this, _1), gui_context());
+	_session->SoloActive.connect (_session_connections, ui_bind (&ARDOUR_UI::soloing_changed, this, _1), gui_context());
+	_session->AuditionActive.connect (_session_connections, ui_bind (&ARDOUR_UI::auditioning_changed, this, _1), gui_context());
+	_session->locations()->added.connect (_session_connections, ui_bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
+	_session->locations()->removed.connect (_session_connections, ui_bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
 
 	/* Clocks are on by default after we are connected to a session, so show that here.
 	*/

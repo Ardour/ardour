@@ -35,6 +35,7 @@
 #include "editor_routes.h"
 #include "editor_route_groups.h"
 #include "editor_regions.h"
+#include "gui_thread.h"
 
 #include "i18n.h"
 
@@ -168,7 +169,7 @@ Editor::create_editor_mixer ()
 					      _session,
 					      false);
 	current_mixer_strip->Hiding.connect (sigc::mem_fun(*this, &Editor::current_mixer_strip_hidden));
-	current_mixer_strip->GoingAway.connect (*this, boost::bind (&Editor::current_mixer_strip_removed, this));
+	current_mixer_strip->GoingAway.connect (*this, boost::bind (&Editor::current_mixer_strip_removed, this), gui_context());
 #ifdef GTKOSX
 	current_mixer_strip->WidthChanged.connect (sigc::mem_fun(*this, &Editor::ensure_all_elements_drawn));
 #endif

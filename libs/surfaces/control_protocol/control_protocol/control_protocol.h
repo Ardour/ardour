@@ -36,7 +36,7 @@ class Session;
 
 class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI {
   public:
-	ControlProtocol (Session&, std::string name);
+	ControlProtocol (Session&, std::string name, PBD::EventLoop* event_loop);
 	virtual ~ControlProtocol();
 
 	std::string name() const { return _name; }
@@ -99,11 +99,13 @@ class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, pu
 	std::string route_get_name (uint32_t table_index);
 
   protected:
+	PBD::EventLoop* _event_loop;
+	bool _own_event_loop;
 	std::vector<boost::shared_ptr<ARDOUR::Route> > route_table;
 	std::string _name;
 	bool _active;
 
-	void add_strip (std::list<boost::shared_ptr<ARDOUR::Route> >);
+	void add_strip (std::list<boost::shared_ptr<ARDOUR::Route> >&);
 
 	void next_track (uint32_t initial_id);
 	void prev_track (uint32_t initial_id);

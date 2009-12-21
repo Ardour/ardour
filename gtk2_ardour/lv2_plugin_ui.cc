@@ -22,6 +22,7 @@
 #include "ardour/lv2_plugin.h"
 
 #include "ardour_ui.h"
+#include "gui_thread.h"
 #include "lv2_plugin_ui.h"
 
 using namespace Gtk;
@@ -227,7 +228,7 @@ LV2PluginUI::lv2ui_instantiate(const Glib::ustring& title)
 		}
 	}
 
-	_lv2->ParameterChanged.connect (parameter_connection, boost::bind (&LV2PluginUI::parameter_changed, this, _1, _2));
+	_lv2->ParameterChanged.connect (parameter_connection, ui_bind (&LV2PluginUI::parameter_changed, this, _1, _2), gui_context());
 }
 
 LV2PluginUI::~LV2PluginUI ()

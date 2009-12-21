@@ -25,6 +25,7 @@
 #include "canvas-simplerect.h"
 #include "canvas-curve.h"
 #include "crossfade_view.h"
+#include "gui_thread.h"
 #include "rgb_macros.h"
 #include "audio_time_axis.h"
 #include "public_editor.h"
@@ -83,7 +84,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 
 	crossfade_changed (Change (~0));
 
-	crossfade->StateChanged.connect (*this, sigc::mem_fun(*this, &CrossfadeView::crossfade_changed));
+	crossfade->StateChanged.connect (*this, ui_bind (&CrossfadeView::crossfade_changed, this, _1), gui_context());
 	ColorsChanged.connect (sigc::mem_fun (*this, &CrossfadeView::color_handler));
 }
 

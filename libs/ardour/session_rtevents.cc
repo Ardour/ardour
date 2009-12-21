@@ -39,7 +39,7 @@ Session::get_rt_event (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::R
 	SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 	ev->rt_slot = boost::bind (method, this, rl, yn, group_override);
 	ev->rt_return = after;
-	ev->ui = UICallback::get_ui_for_thread ();
+	ev->event_loop = EventLoop::get_event_loop_for_thread ();
 
 	return ev;
 }
@@ -162,8 +162,8 @@ Session::process_rtop (SessionEvent* ev)
 {
 	ev->rt_slot ();
 
-	if (ev->ui) {
-		ev->ui->call_slot (boost::bind (ev->rt_return, ev));
+	if (ev->event_loop) {
+		ev->event_loop->call_slot (boost::bind (ev->rt_return, ev));
 	} else {
 		warning << string_compose ("programming error: %1", X_("Session RT event queued from thread without a UI - cleanup in RT thread!")) << endmsg;
 		ev->rt_return (ev);

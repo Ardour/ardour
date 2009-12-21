@@ -92,9 +92,9 @@ MTC_Slave::rebind (MIDI::Port& p)
 	
 	port = &p;
 	
-	port->input()->mtc_time.connect (port_connections,  boost::bind (&MTC_Slave::update_mtc_time, this, _1, _2, _3));
-	port->input()->mtc_qtr.connect (port_connections, boost::bind (&MTC_Slave::update_mtc_qtr, this, _1, _2, _3));
-	port->input()->mtc_status.connect (port_connections, boost::bind (&MTC_Slave::update_mtc_status, this, _1));
+	port->input()->mtc_time.connect_same_thread (port_connections,  boost::bind (&MTC_Slave::update_mtc_time, this, _1, _2, _3));
+	port->input()->mtc_qtr.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_qtr, this, _1, _2, _3));
+	port->input()->mtc_status.connect_same_thread (port_connections, boost::bind (&MTC_Slave::update_mtc_status, this, _1));
 }
 
 void

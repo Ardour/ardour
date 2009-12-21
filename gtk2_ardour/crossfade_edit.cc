@@ -291,9 +291,9 @@ CrossfadeEditor::CrossfadeEditor (Session* s, boost::shared_ptr<Crossfade> xf, d
 
 	curve_select_clicked (In);
 
-	xfade->StateChanged.connect (state_connection, boost::bind (&CrossfadeEditor::xfade_changed, this, _1));
+	xfade->StateChanged.connect (state_connection, ui_bind (&CrossfadeEditor::xfade_changed, this, _1), gui_context());
 
-	_session->AuditionActive.connect (_session_connections, sigc::mem_fun(*this, &CrossfadeEditor::audition_state_changed));
+	_session->AuditionActive.connect (_session_connections, ui_bind (&CrossfadeEditor::audition_state_changed, this, _1), gui_context());
 	show_all_children();
 }
 
@@ -1130,7 +1130,7 @@ CrossfadeEditor::make_waves (boost::shared_ptr<AudioRegion> region, WhichFade wh
 
 		gdouble yoff = n * ht;
 
-		if (region->audio_source(n)->peaks_ready (boost::bind (&CrossfadeEditor::peaks_ready, this, boost::weak_ptr<AudioRegion>(region), which), peaks_ready_connection)) {
+		if (region->audio_source(n)->peaks_ready (boost::bind (&CrossfadeEditor::peaks_ready, this, boost::weak_ptr<AudioRegion>(region), which), peaks_ready_connection, gui_context())) {
 			WaveView* waveview = new WaveView (*(canvas->root()));
 
 			waveview->property_data_src() = region.get();

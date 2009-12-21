@@ -70,7 +70,7 @@ BaseUI::new_request_type ()
 void
 BaseUI::main_thread ()
 {
-	set_ui_for_thread (this);
+	set_event_loop_for_thread (this);
 	thread_init ();
 	_main_loop->run ();
 }

@@ -151,9 +151,9 @@ PannerUI::set_panner (boost::shared_ptr<Panner> p)
 		return;
 	}
 
-	_panner->Changed.connect (connections, boost::bind (&PannerUI::panner_changed, this));
-	_panner->LinkStateChanged.connect (connections, boost::bind (&PannerUI::update_pan_linkage, this));
-	_panner->StateChanged.connect (connections, boost::bind (&PannerUI::update_pan_state, this));
+	_panner->Changed.connect (connections, boost::bind (&PannerUI::panner_changed, this), gui_context());
+	_panner->LinkStateChanged.connect (connections, boost::bind (&PannerUI::update_pan_linkage, this), gui_context());
+	_panner->StateChanged.connect (connections, boost::bind (&PannerUI::update_pan_state, this), gui_context());
 
 	setup_pan ();
 
@@ -404,7 +404,7 @@ PannerUI::setup_pan ()
 			pan_adjustments.back()->set_value(rx);
 			pan_adjustments.back()->signal_value_changed().connect (sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_adjustment_changed), (uint32_t) asz));
 
-			_panner->pan_control( asz )->Changed.connect (connections, boost::bind (&PannerUI::pan_value_changed, this, (uint32_t) asz));
+			_panner->pan_control( asz )->Changed.connect (connections, boost::bind (&PannerUI::pan_value_changed, this, (uint32_t) asz), gui_context());
 
 			bc->set_name ("PanSlider");
 			bc->set_shadow_type (Gtk::SHADOW_NONE);

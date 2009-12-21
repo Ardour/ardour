@@ -22,8 +22,7 @@
 #include <set>
 #include <list>
 
-#include <boost/signals2.hpp>
-
+#include "pbd/signals.h"
 #include "ardour/types.h"
 
 class RegionView;
@@ -71,7 +70,7 @@ class RegionSelection : public std::list<RegionView*>
 	nframes_t _current_end; ///< end position for the selection
 
 	std::list<RegionView *> _bylayer; ///< list of regions sorted by layer
-	boost::signals2::scoped_connection death_connection;
+	PBD::ScopedConnection death_connection;
 };
 
 #endif /* __ardour_gtk_region_selection_h__ */

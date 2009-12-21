@@ -190,8 +190,8 @@ Session::Session (AudioEngine &eng,
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
 
-	Config->ParameterChanged.connect (*this, boost::bind (&Session::config_changed, this, _1, false));
-	config.ParameterChanged.connect (*this, boost::bind (&Session::config_changed, this, _1, true));
+	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Session::config_changed, this, _1, false));
+	config.ParameterChanged.connect_same_thread (*this, boost::bind (&Session::config_changed, this, _1, true));
 
 	if (was_dirty) {
 		DirtyChanged (); /* EMIT SIGNAL */
@@ -327,7 +327,7 @@ Session::Session (AudioEngine &eng,
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
 
-	Config->ParameterChanged.connect (*this, boost::bind (&Session::config_changed, this, _1, false));
+	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Session::config_changed, this, _1, false));
 }
 
 Session::~Session ()
@@ -523,7 +523,7 @@ Session::when_engine_running ()
 
 	/* every time we reconnect, recompute worst case output latencies */
 
-	_engine.Running.connect (*this, boost::bind (&Session::set_worst_io_latencies, this));
+	_engine.Running.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies, this));
 
 	if (synced_to_jack()) {
 		_engine.transport_stop ();
@@ -877,7 +877,7 @@ Session::diskstream_playlist_changed (boost::weak_ptr<Diskstream> wp)
 	boost::shared_ptr<Playlist> playlist;
 
 	if ((playlist = dstream->playlist()) != 0) {
-		playlist->LengthChanged.connect (*this, boost::bind (&Session::playlist_length_changed, this));
+		playlist->LengthChanged.connect_same_thread (*this, boost::bind (&Session::playlist_length_changed, this));
 	}
 
 	/* see comment in playlist_length_changed () */
@@ -1013,9 +1013,9 @@ Session::set_auto_punch_location (Location* location)
 
 	punch_connections.drop_connections ();
 
-	location->start_changed.connect (punch_connections, boost::bind (&Session::auto_punch_start_changed, this, _1));
-	location->end_changed.connect (punch_connections, boost::bind (&Session::auto_punch_end_changed, this, _1));
-	location->changed.connect (punch_connections, boost::bind (&Session::auto_punch_changed, this, _1));
+	location->start_changed.connect_same_thread (punch_connections, boost::bind (&Session::auto_punch_start_changed, this, _1));
+	location->end_changed.connect_same_thread (punch_connections, boost::bind (&Session::auto_punch_end_changed, this, _1));
+	location->changed.connect_same_thread (punch_connections, boost::bind (&Session::auto_punch_changed, this, _1));
 
 	location->set_auto_punch (true, this);
 
@@ -1051,9 +1051,9 @@ Session::set_auto_loop_location (Location* location)
 
 	loop_connections.drop_connections ();
 
-	location->start_changed.connect (loop_connections, boost::bind (&Session::auto_loop_changed, this, _1));
-	location->end_changed.connect (loop_connections, boost::bind (&Session::auto_loop_changed, this, _1));
-	location->changed.connect (loop_connections, boost::bind (&Session::auto_loop_changed, this, _1));
+	location->start_changed.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, _1));
+	location->end_changed.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, _1));
+	location->changed.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, _1));
 
 	location->set_auto_loop (true, this);
 
@@ -1647,7 +1647,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 				route_group->add (track);
 			}
 
-			track->DiskstreamChanged.connect (*this, boost::bind (&Session::resort_routes, this));
+			track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this));
 			//track->set_remote_control_id (control_id);
 
 			new_routes.push_back (track);
@@ -1822,7 +1822,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 			track->audio_diskstream()->non_realtime_input_change();
 
-			track->DiskstreamChanged.connect (*this, boost::bind (&Session::resort_routes, this));
+			track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this));
 			track->set_remote_control_id (control_id);
 			++control_id;
 
@@ -2149,12 +2149,12 @@ Session::add_routes (RouteList& new_routes, bool save)
 
 		boost::weak_ptr<Route> wpr (*x);
 
-		(*x)->listen_changed.connect (*this, boost::bind (&Session::route_listen_changed, this, _1, wpr));
-		(*x)->solo_changed.connect (*this, boost::bind (&Session::route_solo_changed, this, _1, wpr));
-		(*x)->mute_changed.connect (*this, boost::bind (&Session::route_mute_changed, this, _1));
-		(*x)->output()->changed.connect (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
-		(*x)->processors_changed.connect (*this, boost::bind (&Session::route_processors_changed, this, _1));
-		(*x)->route_group_changed.connect (*this, boost::bind (&Session::route_group_changed, this));
+		(*x)->listen_changed.connect_same_thread (*this, boost::bind (&Session::route_listen_changed, this, _1, wpr));
+		(*x)->solo_changed.connect_same_thread (*this, boost::bind (&Session::route_solo_changed, this, _1, wpr));
+		(*x)->mute_changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this, _1));
+		(*x)->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
+		(*x)->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
+		(*x)->route_group_changed.connect_same_thread (*this, boost::bind (&Session::route_group_changed, this));
 
 		if ((*x)->is_master()) {
 			_master_out = (*x);
@@ -2294,11 +2294,11 @@ Session::add_diskstream (boost::shared_ptr<Diskstream> dstream)
 		/* writer goes out of scope, copies ds back to main */
 	}
 
-	dstream->PlaylistChanged.connect (*this, boost::bind (&Session::diskstream_playlist_changed, this, boost::weak_ptr<Diskstream> (dstream)));
+	dstream->PlaylistChanged.connect_same_thread (*this, boost::bind (&Session::diskstream_playlist_changed, this, boost::weak_ptr<Diskstream> (dstream)));
 	/* this will connect to future changes, and check the current length */
 	diskstream_playlist_changed (boost::weak_ptr<Diskstream> (dstream));
 
-	dstream->RecordEnableChanged.connect (*this, boost::bind (&Session::update_have_rec_enabled_diskstream, this));
+	dstream->RecordEnableChanged.connect_same_thread (*this, boost::bind (&Session::update_have_rec_enabled_diskstream, this));
 
 	dstream->prepare ();
 
@@ -2812,8 +2812,8 @@ Session::add_regions (vector<boost::shared_ptr<Region> >& new_regions)
 				}
 			}
 
-			region->StateChanged.connect (*this, boost::bind (&Session::region_changed, this, _1, boost::weak_ptr<Region>(region)));
-			region->GoingAway.connect (*this, boost::bind (&Session::remove_region, this, boost::weak_ptr<Region>(region)));
+			region->StateChanged.connect_same_thread (*this, boost::bind (&Session::region_changed, this, _1, boost::weak_ptr<Region>(region)));
+			region->GoingAway.connect_same_thread (*this, boost::bind (&Session::remove_region, this, boost::weak_ptr<Region>(region)));
 
 			update_region_name_map (region);
 		}
@@ -3001,7 +3001,7 @@ Session::add_source (boost::shared_ptr<Source> source)
 	}
 
 	if (result.second) {
-		source->GoingAway.connect (*this, boost::bind (&Session::remove_source, this, boost::weak_ptr<Source> (source)));
+		source->GoingAway.connect_same_thread (*this, boost::bind (&Session::remove_source, this, boost::weak_ptr<Source> (source)));
 		set_dirty();
 	}
 
@@ -3392,7 +3392,7 @@ Session::add_playlist (boost::shared_ptr<Playlist> playlist, bool unused)
 
 	bool existing = playlists->add (playlist);
 	if (!existing) {
-		playlist->GoingAway.connect (*this, boost::bind (&Session::remove_playlist, this, boost::weak_ptr<Playlist>(playlist)));
+		playlist->GoingAway.connect_same_thread (*this, boost::bind (&Session::remove_playlist, this, boost::weak_ptr<Playlist>(playlist)));
 	}
 
 	if (unused) {
@@ -3566,7 +3566,7 @@ Session::graph_reordered ()
 void
 Session::add_processor (Processor* processor)
 {
-	processor->GoingAway.connect (*this, boost::bind (&Session::remove_processor, this, processor));
+	processor->GoingAway.connect_same_thread (*this, boost::bind (&Session::remove_processor, this, processor));
 	set_dirty();
 }
 

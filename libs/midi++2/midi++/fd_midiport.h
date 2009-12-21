@@ -67,13 +67,11 @@ class FD_MidiPort : public Port
 			bytes_written += nwritten;
 			
 			if (output_parser) {
-				output_parser->raw_preparse 
-					(*output_parser, msg, nwritten);
+				output_parser->raw_preparse (*output_parser, msg, nwritten);
 				for (int i = 0; i < nwritten; i++) {
 					output_parser->scanner (msg[i]);
 				}
-				output_parser->raw_postparse 
-					(*output_parser, msg, nwritten);
+				output_parser->raw_postparse (*output_parser, msg, nwritten);
 			}
 		}
 		return nwritten;

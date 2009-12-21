@@ -19,10 +19,13 @@
 
 #include <cstdio> /* for sprintf, sigh */
 #include <climits>
+
 #include "pbd/error.h"
 #include "pbd/xml++.h"
+
 #include "midi++/port.h"
 #include "midi++/channel.h"
+
 #include "ardour/automation_control.h"
 
 #include "midicontrollable.h"
@@ -111,7 +114,7 @@ void
 MIDIControllable::learn_about_external_control ()
 {
 	drop_external_control ();
-	_port.input()->any.connect (midi_learn_connection, boost::bind (&MIDIControllable::midi_receiver, this, _1, _2, _3));
+	_port.input()->any.connect_same_thread (midi_learn_connection, boost::bind (&MIDIControllable::midi_receiver, this, _1, _2, _3));
 }
 
 void
@@ -285,43 +288,43 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 	int chn_i = chn;
 	switch (ev) {
 	case MIDI::off:
-		p.channel_note_off[chn_i].connect (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
+		p.channel_note_off[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
 
 		/* if this is a bistate, connect to noteOn as well,
 		   and we'll toggle back and forth between the two.
 		*/
 
 		if (bistate) {
-			p.channel_note_on[chn_i].connect (midi_sense_connection[1], boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
+			p.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[1], boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
 		} 
 
 		_control_description = "MIDI control: NoteOff";
 		break;
 
 	case MIDI::on:
-		p.channel_note_on[chn_i].connect (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
+		p.channel_note_on[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_note_on, this, _1, _2));
 		if (bistate) {
-			p.channel_note_off[chn_i].connect (midi_sense_connection[1], boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
+			p.channel_note_off[chn_i].connect_same_thread (midi_sense_connection[1], boost::bind (&MIDIControllable::midi_sense_note_off, this, _1, _2));
 		}
 		_control_description = "MIDI control: NoteOn";
 		break;
 		
 	case MIDI::controller:
-		p.channel_controller[chn_i].connect (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_controller, this, _1, _2));
+		p.channel_controller[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_controller, this, _1, _2));
 		snprintf (buf, sizeof (buf), "MIDI control: Controller %d", control_additional);
 		_control_description = buf;
 		break;
 
 	case MIDI::program:
 		if (!bistate) {
-			p.channel_program_change[chn_i].connect (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_program_change, this, _1, _2));
+			p.channel_program_change[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_program_change, this, _1, _2));
 			_control_description = "MIDI control: ProgramChange";
 		}
 		break;
 
 	case MIDI::pitchbend:
 		if (!bistate) {
-			p.channel_pitchbend[chn_i].connect (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_pitchbend, this, _1, _2));
+			p.channel_pitchbend[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIControllable::midi_sense_pitchbend, this, _1, _2));
 			_control_description = "MIDI control: Pitchbend";
 		}
 		break;

@@ -3,6 +3,8 @@
 #include "ardour/auditioner.h"
 #include "ardour/audioengine.h"
 #include "ardour/port.h"
+
+#include "gui_thread.h"
 #include "session_option_editor.h"
 #include "port_matrix.h"
 #include "i18n.h"
@@ -160,9 +162,9 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_sync_source)
 		);
 	
-	s->MTC_PortChanged.connect (_session_connections, boost::bind (&SessionOptionEditor::populate_sync_options, this, s, ssrc));
-	s->MIDIClock_PortChanged.connect (_session_connections, boost::bind (&SessionOptionEditor::populate_sync_options, this, s, ssrc));
-	s->config.ParameterChanged.connect (_session_connections, boost::bind (&SessionOptionEditor::follow_sync_state, this, _1, s, ssrc));
+	s->MTC_PortChanged.connect (_session_connections, boost::bind (&SessionOptionEditor::populate_sync_options, this, s, ssrc), gui_context());
+	s->MIDIClock_PortChanged.connect (_session_connections, boost::bind (&SessionOptionEditor::populate_sync_options, this, s, ssrc), gui_context());
+	s->config.ParameterChanged.connect (_session_connections, ui_bind (&SessionOptionEditor::follow_sync_state, this, _1, s, ssrc), gui_context());
 
 	populate_sync_options (s, ssrc);
 	follow_sync_state (string ("external-sync"), s, ssrc);

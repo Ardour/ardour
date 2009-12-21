@@ -30,6 +30,7 @@
 
 #include <gtkmm2ext/utils.h>
 
+#include "gui_thread.h"
 #include "prompter.h"
 #include "i18n.h"
 
@@ -91,10 +92,10 @@ SessionImportDialog::SessionImportDialog (ARDOUR::Session* target) :
 	ok_button = add_button (_("Import"), Gtk::RESPONSE_ACCEPT);
 	ok_button->signal_clicked().connect (sigc::mem_fun (*this, &SessionImportDialog::do_merge));
 
-	// prompt signals
-	ElementImporter::Rename.connect (connections, boost::bind (&SessionImportDialog::open_rename_dialog, this, _1, _2));
-	ElementImporter::Prompt.connect (connections, boost::bind (&SessionImportDialog::open_prompt_dialog, this, _1));
-
+	// prompt signals XXX: problem - handlers to be in the same thread since they return values
+	ElementImporter::Rename.connect_same_thread (connections, boost::bind (&SessionImportDialog::open_rename_dialog, this, _1, _2));
+	ElementImporter::Prompt.connect_same_thread (connections, boost::bind (&SessionImportDialog::open_prompt_dialog, this, _1));
+		
 	// Finalize
 	show_all();
 }

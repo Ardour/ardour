@@ -91,8 +91,8 @@ Session::pre_export ()
 
 	_exporting = true;
 	export_status->running = true;
-	export_status->Aborting.connect (*this, boost::bind (&Session::stop_audio_export, this));
-	export_status->Finished.connect (*this, boost::bind (&Session::finalize_audio_export, this));
+	export_status->Aborting.connect_same_thread (*this, boost::bind (&Session::stop_audio_export, this));
+	export_status->Finished.connect_same_thread (*this, boost::bind (&Session::finalize_audio_export, this));
 
 	return 0;
 }
@@ -150,7 +150,7 @@ Session::start_audio_export (nframes_t position, bool realtime)
 		last_process_function = process_function;
 		process_function = &Session::process_export;
 	} else {
-		_engine.Freewheel.connect (export_freewheel_connection, boost::bind (&Session::process_export_fw, this, _1));
+		_engine.Freewheel.connect_same_thread (export_freewheel_connection, boost::bind (&Session::process_export_fw, this, _1));
 		return _engine.freewheel (true);
 	}
 

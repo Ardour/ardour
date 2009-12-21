@@ -164,7 +164,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_base_frame_rate = _current_frame_rate;
 
 	_tempo_map = new TempoMap (_current_frame_rate);
-	_tempo_map->StateChanged.connect (*this, boost::bind (&Session::tempo_map_changed, this, _1));
+	_tempo_map->StateChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
 
 
 	_non_soloed_outs_muted = false;
@@ -266,18 +266,18 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	delta_accumulator_cnt = 0;
 	_slave_state = Stopped;
 
-	_engine.GraphReordered.connect (*this, boost::bind (&Session::graph_reordered, this));
+	_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this));
 
 	/* These are all static "per-class" signals */
 
-	RegionFactory::CheckNewRegion.connect (*this, boost::bind (&Session::add_region, this, _1));
-	SourceFactory::SourceCreated.connect (*this, boost::bind (&Session::add_source, this, _1));
-	PlaylistFactory::PlaylistCreated.connect (*this, boost::bind (&Session::add_playlist, this, _1, _2));
-	Processor::ProcessorCreated.connect (*this, boost::bind (&Session::add_processor, this, _1));
-	NamedSelection::NamedSelectionCreated.connect (*this, boost::bind (&Session::add_named_selection, this, _1));
-	AutomationList::AutomationListCreated.connect (*this, boost::bind (&Session::add_automation_list, this, _1));
-	Controllable::Destroyed.connect (*this, boost::bind (&Session::remove_controllable, this, _1));
-	IO::PortCountChanged.connect (*this, boost::bind (&Session::ensure_buffers, this, _1));
+	RegionFactory::CheckNewRegion.connect_same_thread (*this, boost::bind (&Session::add_region, this, _1));
+	SourceFactory::SourceCreated.connect_same_thread (*this, boost::bind (&Session::add_source, this, _1));
+	PlaylistFactory::PlaylistCreated.connect_same_thread (*this, boost::bind (&Session::add_playlist, this, _1, _2));
+	Processor::ProcessorCreated.connect_same_thread (*this, boost::bind (&Session::add_processor, this, _1));
+	NamedSelection::NamedSelectionCreated.connect_same_thread (*this, boost::bind (&Session::add_named_selection, this, _1));
+	AutomationList::AutomationListCreated.connect_same_thread (*this, boost::bind (&Session::add_automation_list, this, _1));
+	Controllable::Destroyed.connect_same_thread (*this, boost::bind (&Session::remove_controllable, this, _1));
+	IO::PortCountChanged.connect_same_thread (*this, boost::bind (&Session::ensure_buffers, this, _1));
 
 	/* stop IO objects from doing stuff until we're ready for them */
 
@@ -329,15 +329,15 @@ Session::second_stage_init (bool new_session)
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave|Loading);
 
 
-	_locations.changed.connect (*this, boost::bind (&Session::locations_changed, this));
-	_locations.added.connect (*this, boost::bind (&Session::locations_added, this, _1));
+	_locations.changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));
+	_locations.added.connect_same_thread (*this, boost::bind (&Session::locations_added, this, _1));
 	setup_click_sounds (0);
 	setup_midi_control ();
 
 	/* Pay attention ... */
 
-	_engine.Halted.connect (*this, boost::bind (&Session::engine_halted, this));
-	_engine.Xrun.connect (*this, boost::bind (&Session::xrun_recovery, this));
+	_engine.Halted.connect_same_thread (*this, boost::bind (&Session::engine_halted, this));
+	_engine.Xrun.connect_same_thread (*this, boost::bind (&Session::xrun_recovery, this));
 
 	try {
 		when_engine_running();

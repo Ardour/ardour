@@ -20,6 +20,8 @@
 #include <iostream>
 #include "ardour/bundle.h"
 #include "ardour/types.h"
+
+#include "gui_thread.h"
 #include "port_matrix_body.h"
 #include "port_matrix.h"
 #include "port_matrix_column_labels.h"
@@ -254,7 +256,7 @@ PortMatrixBody::setup ()
 		PortGroup::BundleList r = _matrix->visible_rows()->bundles ();
 		for (PortGroup::BundleList::iterator i = r.begin(); i != r.end(); ++i) {
 			
-			(*i)->bundle->Changed.connect (_bundle_connections, boost::bind (&PortMatrixBody::rebuild_and_draw_row_labels, this));
+			(*i)->bundle->Changed.connect (_bundle_connections, boost::bind (&PortMatrixBody::rebuild_and_draw_row_labels, this), gui_context());
 			
 		}
 	}
@@ -262,7 +264,7 @@ PortMatrixBody::setup ()
 	if (_matrix->visible_columns()) {
 		PortGroup::BundleList c = _matrix->visible_columns()->bundles ();
 		for (PortGroup::BundleList::iterator i = c.begin(); i != c.end(); ++i) {
-			(*i)->bundle->Changed.connect (_bundle_connections, boost::bind (&PortMatrixBody::rebuild_and_draw_column_labels, this));
+			(*i)->bundle->Changed.connect (_bundle_connections, boost::bind (&PortMatrixBody::rebuild_and_draw_column_labels, this), gui_context());
 		}
 	}
 		

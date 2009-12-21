@@ -181,8 +181,8 @@ RouteParams_UI::add_routes (RouteList& routes)
 
 		//route_select_list.rows().back().select ();
 
-		route->NameChanged.connect (*this, boost::bind (&RouteParams_UI::route_name_changed, this, boost::weak_ptr<Route>(route)));
-		route->GoingAway.connect (*this, boost::bind (&RouteParams_UI::route_removed, this, boost::weak_ptr<Route>(route)));
+		route->NameChanged.connect (*this, boost::bind (&RouteParams_UI::route_name_changed, this, boost::weak_ptr<Route>(route)), gui_context());
+		route->GoingAway.connect (*this, boost::bind (&RouteParams_UI::route_removed, this, boost::weak_ptr<Route>(route)), gui_context());
 	}
 }
 
@@ -293,8 +293,8 @@ RouteParams_UI::setup_latency_frame ()
 	latency_packer.pack_start (delay_label);
 
 	latency_click_connection = latency_apply_button.signal_clicked().connect (sigc::mem_fun (*latency_widget, &LatencyGUI::finish));
-	_route->signal_latency_changed.connect (latency_connections, sigc::mem_fun (*this, &RouteParams_UI::refresh_latency));
-	_route->initial_delay_changed.connect (latency_connections, sigc::mem_fun (*this, &RouteParams_UI::refresh_latency));
+	_route->signal_latency_changed.connect (latency_connections, boost::bind (&RouteParams_UI::refresh_latency, this), gui_context());
+	_route->initial_delay_changed.connect (latency_connections, boost::bind (&RouteParams_UI::refresh_latency, this), gui_context());
 
 	latency_frame.add (latency_packer);
 	latency_frame.show_all ();
@@ -399,7 +399,7 @@ RouteParams_UI::set_session (Session *sess)
 	if (_session) {
 		boost::shared_ptr<RouteList> r = _session->get_routes();
 		add_routes (*r);
-		_session->RouteAdded.connect (_session_connections, sigc::mem_fun(*this, &RouteParams_UI::add_routes));
+		_session->RouteAdded.connect (_session_connections, ui_bind (&RouteParams_UI::add_routes, this, _1), gui_context());
 		start_updating ();
 	} else {
 		stop_updating ();
@@ -458,7 +458,7 @@ RouteParams_UI::route_selected()
 		setup_processor_boxes();
 		setup_latency_frame ();
 
-		route->processors_changed.connect (_route_processors_connection, boost::bind (&RouteParams_UI::processors_changed, this, _1));
+		route->processors_changed.connect (_route_processors_connection, ui_bind (&RouteParams_UI::processors_changed, this, _1), gui_context());
 		
 		track_input_label.set_text (_route->name());
 
@@ -522,7 +522,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
 		SendUI *send_ui = new SendUI (this, send, _session);
 
 		cleanup_view();
-		send->GoingAway.connect (_processor_going_away_connection, boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor>(proc)));
+		send->GoingAway.connect (_processor_going_away_connection, boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor>(proc)), gui_context());
 		_active_view = send_ui;
 
 		redir_hpane.add2 (*_active_view);
@@ -533,7 +533,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
 		ReturnUI *return_ui = new ReturnUI (this, retrn, _session);
 
 		cleanup_view();
-		retrn->GoingAway.connect (_processor_going_away_connection, boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor>(proc)));
+		retrn->GoingAway.connect (_processor_going_away_connection, boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor>(proc)), gui_context());
 		_active_view = return_ui;
 
 		redir_hpane.add2 (*_active_view);
@@ -544,7 +544,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
 		GenericPluginUI *plugin_ui = new GenericPluginUI (plugin_insert, true);
 
 		cleanup_view();
-		plugin_insert->plugin()->GoingAway.connect (_processor_going_away_connection, boost::bind (&RouteParams_UI::plugin_going_away, this, PreFader));
+		plugin_insert->plugin()->GoingAway.connect (_processor_going_away_connection, boost::bind (&RouteParams_UI::plugin_going_away, this, PreFader), gui_context());
 		plugin_ui->start_updating (0);
 		_active_view = plugin_ui;
 
@@ -556,7 +556,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
 		PortInsertUI *portinsert_ui = new PortInsertUI (this, _session, port_insert);
 
 		cleanup_view();
-		port_insert->GoingAway.connect (_processor_going_away_connection, boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor> (proc)));
+		port_insert->GoingAway.connect (_processor_going_away_connection, boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor> (proc)), gui_context());
 		_active_view = portinsert_ui;
 
 		redir_hpane.pack2 (*_active_view);

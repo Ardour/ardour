@@ -178,7 +178,7 @@ RegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	set_height (trackview.current_height());
 
-	_region->StateChanged.connect (*this, boost::bind (&RegionView::region_changed, this, _1));
+	_region->StateChanged.connect (*this, ui_bind (&RegionView::region_changed, this, _1), gui_context());
 	
 	group->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_event), group, this));
 

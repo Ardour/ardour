@@ -868,7 +868,7 @@ AudioRegionView::create_waves ()
 		// cerr << "\tchannel " << n << endl;
 
 		if (wait_for_data) {
-			if (audio_region()->audio_source(n)->peaks_ready (boost::bind (&AudioRegionView::peaks_ready_handler, this, n), data_ready_connection)) {
+			if (audio_region()->audio_source(n)->peaks_ready (boost::bind (&AudioRegionView::peaks_ready_handler, this, n), data_ready_connection, gui_context())) {
 				// cerr << "\tData is ready\n";
 				create_one_wave (n, true);
 			} else {
@@ -1186,7 +1186,7 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 	ghost->set_colors();
 	ghosts.push_back (ghost);
 
-	ghost->GoingAway.connect (*this, boost::bind (&RegionView::remove_ghost, this, _1));
+	ghost->GoingAway.connect (*this, ui_bind (&RegionView::remove_ghost, this, _1), gui_context());
 
 	return ghost;
 }

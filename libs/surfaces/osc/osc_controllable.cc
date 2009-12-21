@@ -24,6 +24,7 @@
 
 #include "ardour/route.h"
 
+#include "osc.h"
 #include "osc_controllable.h"
 
 using namespace sigc;
@@ -35,7 +36,7 @@ OSCControllable::OSCControllable (lo_address a, const std::string& p, boost::sha
 	, addr (a)
 	, path (p)
 {
-	c->Changed.connect (changed_connection, mem_fun (*this, &OSCControllable::send_change));
+	c->Changed.connect (changed_connection, boost::bind (&OSCControllable::send_change, this), OSC::instance());
 }
 
 OSCControllable::~OSCControllable ()

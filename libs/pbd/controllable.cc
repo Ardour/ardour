@@ -62,7 +62,7 @@ Controllable::add (Controllable& ctl)
 
 	/* Controllable::remove() is static - no need to manage this connection */
 
-	ctl.GoingAway.connect (registry_connections, boost::bind (&Controllable::remove, ref (ctl)));
+	ctl.GoingAway.connect_same_thread (registry_connections, boost::bind (&Controllable::remove, ref (ctl)));
 }
 
 void

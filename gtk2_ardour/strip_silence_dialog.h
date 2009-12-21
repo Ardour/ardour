@@ -66,5 +66,5 @@ private:
 	int _wave_width;
 	int _wave_height;
 
-	boost::signals2::scoped_connection _peaks_ready_connection;
+	PBD::ScopedConnection _peaks_ready_connection;
 };

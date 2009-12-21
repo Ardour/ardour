@@ -142,13 +142,13 @@ Diskstream::set_route (Route& r)
 	_io = _route->input();
 
 	ic_connection.disconnect();
-	_io->changed.connect (ic_connection, boost::bind (&Diskstream::handle_input_change, this, _1, _2));
+	_io->changed.connect_same_thread (ic_connection, boost::bind (&Diskstream::handle_input_change, this, _1, _2));
 
 	input_change_pending = ConfigurationChanged;
 	non_realtime_input_change ();
 	set_align_style_from_io ();
 
-	_route->GoingAway.connect (*this, boost::bind (&Diskstream::route_going_away, this));
+	_route->GoingAway.connect_same_thread (*this, boost::bind (&Diskstream::route_going_away, this));
 }
 
 void
@@ -339,9 +339,9 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 			reset_write_sources (false);
 		}
 
-		_playlist->Modified.connect (playlist_connections, boost::bind (&Diskstream::playlist_modified, this));
-		_playlist->GoingAway.connect (playlist_connections, boost::bind (&Diskstream::playlist_deleted, this, boost::weak_ptr<Playlist>(_playlist)));
-		_playlist->RangesMoved.connect (playlist_connections, boost::bind (&Diskstream::playlist_ranges_moved, this, _1));
+		_playlist->Modified.connect_same_thread (playlist_connections, boost::bind (&Diskstream::playlist_modified, this));
+		_playlist->GoingAway.connect_same_thread (playlist_connections, boost::bind (&Diskstream::playlist_deleted, this, boost::weak_ptr<Playlist>(_playlist)));
+		_playlist->RangesMoved.connect_same_thread (playlist_connections, boost::bind (&Diskstream::playlist_ranges_moved, this, _1));
 	}
 
 	/* don't do this if we've already asked for it *or* if we are setting up
