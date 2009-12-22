@@ -358,6 +358,9 @@ PannerUI::setup_pan ()
 			pan_adjustments.pop_back ();
 		}
 
+		delete panner;
+		panner = 0;
+
 		/* stick something into the panning viewport so that it redraws */
 
 		EventBox* eb = manage (new EventBox());
@@ -375,6 +378,9 @@ PannerUI::setup_pan ()
 			delete pan_adjustments.back();
 			pan_adjustments.pop_back ();
 		}
+
+		delete panner;
+		panner = 0;
 
 		while ((asz = pan_adjustments.size()) < npans) {
 
@@ -447,8 +453,8 @@ PannerUI::setup_pan ()
 			panner->set_name ("MixerPanZone");
 			panner->show ();
 
- 			panner->signal_button_press_event().connect
- 				(sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_button_event), (uint32_t) 0), false);
+			panner->signal_button_press_event().connect
+				(sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_button_event), (uint32_t) 0), false);
 		}
 
 		update_pan_sensitive ();

@@ -91,7 +91,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	static const int pan_bar_height;
 
-	Panner2d*       panner;
+	Panner2d*       panner; ///< 2D panner, or 0
 	Panner2dWindow* big_window;
 
 	Gtk::VBox           pan_bar_packer;
