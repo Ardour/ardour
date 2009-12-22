@@ -2207,7 +2207,7 @@ AUPluginInfo::load_cached_info ()
 					if (((iprop = gchild->property (X_("in"))) != 0) &&
 					    ((oprop = gchild->property (X_("out"))) != 0)) {
 						in = atoi (iprop->value());
-						out = atoi (iprop->value());
+						out = atoi (oprop->value());
 						
 						cinfo.io_configs.push_back (pair<int,int> (in, out));
 					}
