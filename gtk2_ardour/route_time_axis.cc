@@ -1683,7 +1683,9 @@ RouteTimeAxisView::automation_track_hidden (Evoral::Parameter param)
 		ran->menu_item->set_active (false);
 	}
 
-	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
+	if (_route) {
+		_route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
+	}
 }
 
 
