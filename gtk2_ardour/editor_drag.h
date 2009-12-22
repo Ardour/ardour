@@ -127,12 +127,12 @@ protected:
 	nframes64_t _current_pointer_frame; ///< frame that the pointer is now at
 	double _original_x; ///< original world x of the thing being dragged
 	double _original_y; ///< original world y of the thing being dragged
-	double _grab_x; ///< item x of the grab start position
-	double _grab_y; ///< item y of the grab start position
-	double _current_pointer_x; ///< item x of the current pointer
-	double _current_pointer_y; ///< item y of the current pointer
-	double _last_pointer_x; ///< item x of the pointer last time a motion occurred
-	double _last_pointer_y; ///< item y of the pointer last time a motion occurred
+	double _grab_x; ///< trackview x of the grab start position
+	double _grab_y; ///< trackview y of the grab start position
+	double _current_pointer_x; ///< trackview x of the current pointer
+	double _current_pointer_y; ///< trackview y of the current pointer
+	double _last_pointer_x; ///< trackview x of the pointer last time a motion occurred
+	double _last_pointer_y; ///< trackview y of the pointer last time a motion occurred
 	bool _x_constrained; ///< true if x motion is constrained, otherwise false
 	bool _y_constrained; ///< true if y motion is constrained, otherwise false
 	bool _was_rolling; ///< true if the session was rolling before the drag started, otherwise false
