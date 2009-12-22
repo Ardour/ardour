@@ -221,18 +221,18 @@ PortGroup::remove_duplicates ()
 
 		for (BundleList::iterator j = _bundles.begin(); j != _bundles.end(); ++j) {
 
-			if (j->bundle->nchannels() > i->bundle->nchannels()) {
+			if ((*j)->bundle->nchannels() > (*i)->bundle->nchannels()) {
 				/* this bundle is larger */
 
 				uint32_t k = 0;
-				while (k < i->bundle->nchannels()) {
+				while (k < (*i)->bundle->nchannels()) {
 					/* see if this channel on *i has an equivalent on *j */
 					uint32_t l = 0;
-					while (l < j->bundle->nchannels() && i->bundle->channel_ports (k) != j->bundle->channel_ports (l)) {
+					while (l < (*j)->bundle->nchannels() && (*i)->bundle->channel_ports (k) != (*j)->bundle->channel_ports (l)) {
 						++l;
 					}
 
-					if (l == j->bundle->nchannels()) {
+					if (l == (*j)->bundle->nchannels()) {
 						/* it does not */
 						break;
 					}
@@ -240,7 +240,7 @@ PortGroup::remove_duplicates ()
 					++k;
 				}
 
-				if (k == i->bundle->nchannels ()) {
+				if (k == (*i)->bundle->nchannels ()) {
 					/* all channels on *i are represented by the larger bundle *j, so remove *i */
 					remove = true;
 					break;
