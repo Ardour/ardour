@@ -60,6 +60,7 @@ public:
 	void clear ();
 	uint32_t total_channels () const;
 	boost::shared_ptr<ARDOUR::IO> io_from_bundle (boost::shared_ptr<ARDOUR::Bundle>) const;
+	void remove_duplicates ();
 
 	std::string name; ///< name for the group
 

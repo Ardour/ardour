@@ -207,6 +207,55 @@ PortGroup::io_from_bundle (boost::shared_ptr<ARDOUR::Bundle> b) const
 	return (*i)->io;
 }
 
+/** Remove bundles whose channels are already represented by other, larger bundles */
+void
+PortGroup::remove_duplicates ()
+{
+	BundleList::iterator i = _bundles.begin();
+	while (i != _bundles.end()) {
+
+		BundleList::iterator tmp = i;
+		++tmp;
+
+		bool remove = false;
+
+		for (BundleList::iterator j = _bundles.begin(); j != _bundles.end(); ++j) {
+
+			if (j->bundle->nchannels() > i->bundle->nchannels()) {
+				/* this bundle is larger */
+
+				uint32_t k = 0;
+				while (k < i->bundle->nchannels()) {
+					/* see if this channel on *i has an equivalent on *j */
+					uint32_t l = 0;
+					while (l < j->bundle->nchannels() && i->bundle->channel_ports (k) != j->bundle->channel_ports (l)) {
+						++l;
+					}
+
+					if (l == j->bundle->nchannels()) {
+						/* it does not */
+						break;
+					}
+
+					++k;
+				}
+
+				if (k == i->bundle->nchannels ()) {
+					/* all channels on *i are represented by the larger bundle *j, so remove *i */
+					remove = true;
+					break;
+				}
+			}
+		}
+		
+		if (remove) {
+			_bundles.erase (i);
+		}
+		
+		i = tmp;
+	}
+}
+
 
 /** PortGroupList constructor.
  */
@@ -396,6 +445,10 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 
 	if (!extra_other.empty()) {
 		other->add_bundle (make_bundle_from_ports (extra_other, inputs));
+	}
+
+	if (!allow_dups) {
+		system->remove_duplicates ();
 	}
 
 	add_group_if_not_empty (system);

@@ -411,6 +411,12 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 				if (bc[dim].channel != -1) {
 					add_remove_option (sub, w, bc[dim].channel);
 				} else {
+
+					snprintf (buf, sizeof (buf), _("Remove all"));
+					sub.push_back (
+						MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::remove_all_channels), w))
+						);
+					
 					for (uint32_t i = 0; i < bc[dim].bundle->nchannels(); ++i) {
 						add_remove_option (sub, w, i);
 					}
@@ -424,9 +430,15 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 					);
 				
 			} else {
+				
 				if (bc[dim].channel != -1) {
 					add_disassociate_option (sub, w, dim, bc[dim].channel);
 				} else {
+					snprintf (buf, sizeof (buf), _("%s all"), disassociation_verb().c_str());
+					sub.push_back (
+						MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_bundle), w, dim))
+						);
+							
 					for (uint32_t i = 0; i < bc[dim].bundle->nchannels(); ++i) {
 						add_disassociate_option (sub, w, dim, i);
 					}
@@ -474,6 +486,19 @@ PortMatrix::rename_channel_proxy (boost::weak_ptr<Bundle> b, uint32_t c)
 	}
 
 	rename_channel (BundleChannel (sb, c));
+}
+
+void
+PortMatrix::disassociate_all_on_bundle (boost::weak_ptr<Bundle> bundle, int dim)
+{
+	boost::shared_ptr<Bundle> sb = bundle.lock ();
+	if (!sb) {
+		return;
+	}
+
+	for (uint32_t i = 0; i < sb->nchannels(); ++i) {
+		disassociate_all_on_channel (bundle, i, dim);
+	}
 }
 
 void
@@ -617,6 +642,19 @@ PortMatrix::remove_channel (ARDOUR::BundleChannel b)
 		if (p) {
 			io->remove_port (p, this);
 		}
+	}
+}
+
+void
+PortMatrix::remove_all_channels (boost::weak_ptr<Bundle> w)
+{
+	boost::shared_ptr<Bundle> b = w.lock ();
+	if (!b) {
+		return;
+	}
+
+	for (uint32_t i = 0; i < b->nchannels(); ++i) {
+		remove_channel (ARDOUR::BundleChannel (b, i));
 	}
 }
 

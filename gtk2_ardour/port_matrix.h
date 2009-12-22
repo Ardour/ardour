@@ -140,6 +140,7 @@ public:
 	virtual void add_channel (boost::shared_ptr<ARDOUR::Bundle>);
 	virtual bool can_remove_channels (boost::shared_ptr<ARDOUR::Bundle>) const;
 	virtual void remove_channel (ARDOUR::BundleChannel);
+	virtual void remove_all_channels (boost::weak_ptr<ARDOUR::Bundle>);
 	virtual bool can_rename_channels (boost::shared_ptr<ARDOUR::Bundle>) const {
 		return false;
 	}
@@ -175,6 +176,7 @@ private:
 	void remove_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
 	void rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
 	void disassociate_all_on_channel (boost::weak_ptr<ARDOUR::Bundle>, uint32_t, int);
+	void disassociate_all_on_bundle (boost::weak_ptr<ARDOUR::Bundle>, int);
 	void setup_global_ports ();
 	void toggle_show_only_bundles ();
 	bool on_scroll_event (GdkEventScroll *);
