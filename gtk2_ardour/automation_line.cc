@@ -446,23 +446,17 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 	uint32_t view_index, pi, n;
 	AutomationList::iterator model;
 	uint32_t npoints;
-	double last_control_point_x = 0.0;
-	double last_control_point_y = 0.0;
 	uint32_t this_rx = 0;
 	uint32_t prev_rx = 0;
 	uint32_t this_ry = 0;
 	uint32_t prev_ry = 0;
 	double* slope;
 	uint32_t box_size;
-	uint32_t cpsize;
 
 	/* hide all existing points, and the line */
 
-	cpsize = 0;
-
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		(*i)->hide();
-		++cpsize;
 	}
 
 	line->hide ();
@@ -543,58 +537,10 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 
 		/* ok, we should display this point */
 
-		if (view_index >= cpsize) {
-
-			/* make sure we have enough control points */
-
-			ControlPoint* ncp = new ControlPoint (*this);
-
-			ncp->set_size (box_size);
-
-			control_points.push_back (ncp);
-			++cpsize;
-		}
-
-		ControlPoint::ShapeType shape;
-
-		if (!terminal_points_can_slide) {
-			if (pi == 0) {
-				control_points[view_index]->set_can_slide(false);
-				if (tx == 0) {
-					shape = ControlPoint::Start;
-				} else {
-					shape = ControlPoint::Full;
-				}
-			} else if (pi == npoints - 1) {
-				control_points[view_index]->set_can_slide(false);
-				shape = ControlPoint::End;
-			} else {
-				control_points[view_index]->set_can_slide(true);
-				shape = ControlPoint::Full;
-			}
-		} else {
-			control_points[view_index]->set_can_slide(true);
-			shape = ControlPoint::Full;
-		}
-
-		last_control_point_x = tx;
-		last_control_point_y = ty;
-
-		control_points[view_index]->reset (tx, ty, model, view_index, shape);
-
+		add_visible_control_point (view_index, pi, tx, ty, model, npoints);
+		
 		prev_rx = this_rx;
 		prev_ry = this_ry;
-
-		/* finally, control visibility */
-
-		if (_visible && points_visible) {
-			control_points[view_index]->show ();
-			control_points[view_index]->set_visible (true);
-		} else {
-			if (!points_visible) {
-				control_points[view_index]->set_visible (false);
-			}
-		}
 
 		view_index++;
 	}
@@ -1322,3 +1268,51 @@ AutomationLine::set_interpolation(AutomationList::InterpolationStyle style)
 	}
 }
 
+void
+AutomationLine::add_visible_control_point (uint32_t view_index, uint32_t pi, double tx, double ty, AutomationList::iterator model, uint32_t npoints)
+{
+	if (view_index >= control_points.size()) {
+
+		/* make sure we have enough control points */
+
+		ControlPoint* ncp = new ControlPoint (*this);
+		ncp->set_size (control_point_box_size ());
+
+		control_points.push_back (ncp);
+	}
+
+	ControlPoint::ShapeType shape;
+
+	if (!terminal_points_can_slide) {
+		if (pi == 0) {
+			control_points[view_index]->set_can_slide(false);
+			if (tx == 0) {
+				shape = ControlPoint::Start;
+			} else {
+				shape = ControlPoint::Full;
+			}
+		} else if (pi == npoints - 1) {
+			control_points[view_index]->set_can_slide(false);
+			shape = ControlPoint::End;
+		} else {
+			control_points[view_index]->set_can_slide(true);
+			shape = ControlPoint::Full;
+		}
+	} else {
+		control_points[view_index]->set_can_slide(true);
+		shape = ControlPoint::Full;
+	}
+	
+	control_points[view_index]->reset (tx, ty, model, view_index, shape);
+
+	/* finally, control visibility */
+	
+	if (_visible && points_visible) {
+		control_points[view_index]->show ();
+		control_points[view_index]->set_visible (true);
+	} else {
+		if (!points_visible) {
+			control_points[view_index]->set_visible (false);
+		}
+	}
+}

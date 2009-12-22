@@ -190,6 +190,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
 	void modify_view_point (ControlPoint&, double, double, bool with_push);
 	void reset_line_coords (ControlPoint&);
+	void add_visible_control_point (uint32_t, uint32_t, double, double, ARDOUR::AutomationList::iterator, uint32_t);
 
 	double control_point_box_size ();
 
