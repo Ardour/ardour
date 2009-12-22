@@ -551,7 +551,7 @@ void
 Editor::maybe_autoscroll (GdkEventMotion* event, bool allow_vert)
 {
 	nframes64_t rightmost_frame = leftmost_frame + current_page_frames();
-	nframes64_t frame = _drag->current_pointer_frame();
+	nframes64_t frame = _drag->adjusted_current_frame (0);
 	bool startit = false;
 
 	autoscroll_y = 0;

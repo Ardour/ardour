@@ -56,12 +56,12 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i)
 	: _editor (e)
 	, _item (i)
 	, _pointer_frame_offset (0)
-	, _grab_frame (0)
-	, _last_pointer_frame (0)
-	, _current_pointer_frame (0)
 	, _have_transaction (false)
 	, _had_movement (false)
 	, _move_threshold_passed (false)
+	, _grab_frame (0)
+	, _last_pointer_frame (0)
+	, _current_pointer_frame (0)
 {
 
 }
@@ -159,7 +159,7 @@ Drag::end_grab (GdkEvent* event)
 }
 
 nframes64_t
-Drag::adjusted_current_frame (GdkEvent* event) const
+Drag::adjusted_current_frame (GdkEvent const * event, bool snap) const
 {
 	nframes64_t pos = 0;
 
@@ -167,7 +167,9 @@ Drag::adjusted_current_frame (GdkEvent* event) const
 		pos = _current_pointer_frame - _pointer_frame_offset;
 	}
 
-	_editor->snap_to_with_modifier (pos, event);
+	if (snap) {
+		_editor->snap_to_with_modifier (pos, event);
+	}
 
 	return pos;
 }
@@ -177,6 +179,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 {
 	_last_pointer_x = _current_pointer_x;
 	_last_pointer_y = _current_pointer_y;
+	_last_pointer_frame = adjusted_current_frame (event);
 	_current_pointer_frame = _editor->event_frame (event, &_current_pointer_x, &_current_pointer_y);
 
 	if (!from_autoscroll && !_move_threshold_passed) {
@@ -398,35 +401,29 @@ RegionMotionDrag::compute_y_delta (
 double
 RegionMotionDrag::compute_x_delta (GdkEvent const * event, nframes64_t* pending_region_position)
 {
-	*pending_region_position = 0;
-
 	/* compute the amount of pointer motion in frames, and where
 	   the region would be if we moved it by that much.
 	*/
-	if (_current_pointer_frame >= _pointer_frame_offset) {
-
-		nframes64_t sync_frame;
-		nframes64_t sync_offset;
-		int32_t sync_dir;
-
-		*pending_region_position = _current_pointer_frame - _pointer_frame_offset;
-
-		sync_offset = _primary->region()->sync_offset (sync_dir);
-
-		/* we don't handle a sync point that lies before zero.
-		 */
-		if (sync_dir >= 0 || (sync_dir < 0 && *pending_region_position >= sync_offset)) {
-
-			sync_frame = *pending_region_position + (sync_dir*sync_offset);
-
-			_editor->snap_to_with_modifier (sync_frame, event);
-
-			*pending_region_position = _primary->region()->adjust_to_sync (sync_frame);
-
-		} else {
-			*pending_region_position = _last_frame_position;
-		}
-
+	*pending_region_position = adjusted_current_frame (event);
+	
+	nframes64_t sync_frame;
+	nframes64_t sync_offset;
+	int32_t sync_dir;
+	
+	sync_offset = _primary->region()->sync_offset (sync_dir);
+	
+	/* we don't handle a sync point that lies before zero.
+	 */
+	if (sync_dir >= 0 || (sync_dir < 0 && *pending_region_position >= sync_offset)) {
+		
+		sync_frame = *pending_region_position + (sync_dir*sync_offset);
+		
+		_editor->snap_to_with_modifier (sync_frame, event);
+		
+		*pending_region_position = _primary->region()->adjust_to_sync (sync_frame);
+		
+	} else {
+		*pending_region_position = _last_frame_position;
 	}
 
 	if (*pending_region_position > max_frames - _primary->region()->length()) {
@@ -1187,7 +1184,7 @@ RegionMoveDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 {
 	RegionMotionDrag::start_grab (event, c);
 
-	_pointer_frame_offset = _grab_frame - _last_frame_position;
+	_pointer_frame_offset = grab_frame() - _last_frame_position;
 }
 
 RegionInsertDrag::RegionInsertDrag (Editor* e, boost::shared_ptr<Region> r, RouteTimeAxisView* v, nframes64_t pos)
@@ -1267,7 +1264,7 @@ struct RegionSelectionByPosition {
 };
 
 void
-RegionSpliceDrag::motion (GdkEvent* /*event*/, bool)
+RegionSpliceDrag::motion (GdkEvent* event, bool)
 {
 	RouteTimeAxisView* tv;
 	layer_t layer;
@@ -1278,7 +1275,7 @@ RegionSpliceDrag::motion (GdkEvent* /*event*/, bool)
 
 	int dir;
 
-	if (_current_pointer_x - _grab_x > 0) {
+	if ((current_pointer_x() - last_pointer_x()) > 0) {
 		dir = 1;
 	} else {
 		dir = -1;
@@ -1288,6 +1285,8 @@ RegionSpliceDrag::motion (GdkEvent* /*event*/, bool)
 
 	RegionSelectionByPosition cmp;
 	copy.sort (cmp);
+
+	nframes64_t const pf = adjusted_current_frame (event);
 
 	for (RegionSelection::iterator i = copy.begin(); i != copy.end(); ++i) {
 
@@ -1308,19 +1307,17 @@ RegionSpliceDrag::motion (GdkEvent* /*event*/, bool)
 		}
 
 		if (dir > 0) {
-			if (_current_pointer_frame < (*i)->region()->last_frame() + 1) {
+			if (pf < (*i)->region()->last_frame() + 1) {
 				continue;
 			}
 		} else {
-			if (_current_pointer_frame > (*i)->region()->first_frame()) {
+			if (pf > (*i)->region()->first_frame()) {
 				continue;
 			}
 		}
 
 
 		playlist->shuffle ((*i)->region(), dir);
-
-		_grab_x = _current_pointer_x;
 	}
 }
 
@@ -1367,7 +1364,7 @@ RegionCreateDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 
 	if (!movement_occurred) {
-		mtv->add_region (_grab_frame);
+		mtv->add_region (grab_frame ());
 	} else {
 		motion (event, false);
 		// TODO: create region-create-drag region here
@@ -1394,7 +1391,7 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 	double region_start = region->get_position_pixels();
 	double middle_point = region_start + cnote->x1() + (cnote->x2() - cnote->x1()) / 2.0L;
 
-	if (_grab_x <= middle_point) {
+	if (grab_x() <= middle_point) {
 		cursor = Gdk::Cursor(Gdk::LEFT_SIDE);
 		at_front = true;
 	} else {
@@ -1433,7 +1430,7 @@ NoteResizeDrag::motion (GdkEvent* /*event*/, bool /*first_move*/)
 {
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
-		(*r)->update_resizing (at_front, _current_pointer_x - _grab_x, relative);
+		(*r)->update_resizing (at_front, current_pointer_x() - grab_x(), relative);
 	}
 }
 
@@ -1442,7 +1439,7 @@ NoteResizeDrag::finished (GdkEvent*, bool /*movement_occurred*/)
 {
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
-		(*r)->commit_resizing (at_front, _current_pointer_x - _grab_x, relative);
+		(*r)->commit_resizing (at_front, current_pointer_x() - grab_x(), relative);
 	}
 }
 
@@ -1481,14 +1478,16 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 
 	Drag::start_grab (event, _editor->trimmer_cursor);
 
+	nframes64_t const pf = adjusted_current_frame (event);
+
 	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 		_operation = ContentsTrim;
 	} else {
 		/* These will get overridden for a point trim.*/
-		if (_current_pointer_frame < (region_start + region_length/2)) {
+		if (pf < (region_start + region_length/2)) {
 			/* closer to start */
 			_operation = StartTrim;
-		} else if (_current_pointer_frame > (region_end - region_length/2)) {
+		} else if (pf > (region_end - region_length/2)) {
 			/* closer to end */
 			_operation = EndTrim;
 		}
@@ -1502,7 +1501,7 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 		_editor->show_verbose_time_cursor (region_end, 10);
 		break;
 	case ContentsTrim:
-		_editor->show_verbose_time_cursor (_current_pointer_frame, 10);
+		_editor->show_verbose_time_cursor (pf, 10);
 		break;
 	}
 }
@@ -1530,13 +1529,13 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		speed = tv->get_diskstream()->speed();
 	}
 
-	if (_last_pointer_frame > _current_pointer_frame) {
+	nframes64_t const pf = adjusted_current_frame (event);
+
+	if (last_pointer_frame() > pf) {
 		left_direction = true;
 	} else {
 		left_direction = false;
 	}
-
-	_editor->snap_to_with_modifier (_current_pointer_frame, event);
 
 	if (first_move) {
 
@@ -1577,7 +1576,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		}
 	}
 
-	if (_current_pointer_frame == _last_pointer_frame) {
+	if (pf == last_pointer_frame()) {
 		return;
 	}
 
@@ -1585,9 +1584,9 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	_have_transaction = true;
 
 	if (left_direction) {
-		frame_delta = (_last_pointer_frame - _current_pointer_frame);
+		frame_delta = (last_pointer_frame() - pf);
 	} else {
-		frame_delta = (_current_pointer_frame - _last_pointer_frame);
+		frame_delta = (pf - last_pointer_frame());
 	}
 
 	bool non_overlap_trim = false;
@@ -1598,7 +1597,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 	switch (_operation) {
 	case StartTrim:
-		if ((left_direction == false) && (_current_pointer_frame <= rv->region()->first_frame()/speed)) {
+		if ((left_direction == false) && (pf <= rv->region()->first_frame()/speed)) {
 			break;
 		} else {
 
@@ -1609,7 +1608,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		}
 
 	case EndTrim:
-		if ((left_direction == true) && (_current_pointer_frame > (nframes64_t) (rv->region()->last_frame()/speed))) {
+		if ((left_direction == true) && (pf > (nframes64_t) (rv->region()->last_frame()/speed))) {
 			break;
 		} else {
 
@@ -1627,8 +1626,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 				swap_direction = true;
 			}
 
-			for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i)
-			{
+			for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 				_editor->single_contents_trim (**i, frame_delta, left_direction, swap_direction, obey_snap);
 			}
 		}
@@ -1643,11 +1641,9 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		_editor->show_verbose_time_cursor((nframes64_t) (rv->region()->last_frame()/speed), 10);
 		break;
 	case ContentsTrim:
-		_editor->show_verbose_time_cursor(_current_pointer_frame, 10);
+		_editor->show_verbose_time_cursor (pf, 10);
 		break;
 	}
-
-	_last_pointer_frame = _current_pointer_frame;
 }
 
 
@@ -1719,25 +1715,23 @@ MeterMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	Drag::start_grab (event, cursor);
 
-	_pointer_frame_offset = _grab_frame - _marker->meter().frame();
+	_pointer_frame_offset = grab_frame() - _marker->meter().frame();
 
-	_editor->show_verbose_time_cursor (_current_pointer_frame, 10);
+	_editor->show_verbose_time_cursor (adjusted_current_frame(event), 10);
 }
 
 void
 MeterMarkerDrag::motion (GdkEvent* event, bool)
 {
-	nframes64_t const adjusted_frame = adjusted_current_frame (event);
+	nframes64_t const pf = adjusted_current_frame (event);
 
-	if (adjusted_frame == _last_pointer_frame) {
+	if (pf == last_pointer_frame()) {
 		return;
 	}
 
-	_marker->set_position (adjusted_frame);
-
-	_last_pointer_frame = adjusted_frame;
-
-	_editor->show_verbose_time_cursor (adjusted_frame, 10);
+	_marker->set_position (pf);
+	
+	_editor->show_verbose_time_cursor (pf, 10);
 }
 
 void
@@ -1752,7 +1746,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	BBT_Time when;
 
 	TempoMap& map (_editor->session()->tempo_map());
-	map.bbt_time (_last_pointer_frame, when);
+	map.bbt_time (last_pointer_frame(), when);
 
 	if (_copy == true) {
 		_editor->begin_reversible_command (_("copy meter mark"));
@@ -1810,26 +1804,24 @@ TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	Drag::start_grab (event, cursor);
 
-	_pointer_frame_offset = _grab_frame - _marker->tempo().frame();
-	_editor->show_verbose_time_cursor (_current_pointer_frame, 10);
+	_pointer_frame_offset = grab_frame() - _marker->tempo().frame();
+	_editor->show_verbose_time_cursor (adjusted_current_frame (event), 10);
 }
 
 void
 TempoMarkerDrag::motion (GdkEvent* event, bool)
 {
-	nframes64_t const adjusted_frame = adjusted_current_frame (event);
+	nframes64_t const pf = adjusted_current_frame (event);
 
-	if (adjusted_frame == _last_pointer_frame) {
+	if (pf == last_pointer_frame()) {
 		return;
 	}
 
 	/* OK, we've moved far enough to make it worth actually move the thing. */
 
-	_marker->set_position (adjusted_frame);
+	_marker->set_position (pf);
 
-	_editor->show_verbose_time_cursor (adjusted_frame, 10);
-
-	_last_pointer_frame = adjusted_frame;
+	_editor->show_verbose_time_cursor (pf, 10);
 }
 
 void
@@ -1844,7 +1836,7 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	BBT_Time when;
 
 	TempoMap& map (_editor->session()->tempo_map());
-	map.bbt_time (_last_pointer_frame, when);
+	map.bbt_time (last_pointer_frame(), when);
 
 	if (_copy == true) {
 		_editor->begin_reversible_command (_("copy tempo mark"));
@@ -1910,7 +1902,7 @@ CursorDrag::motion (GdkEvent* event, bool)
 {
 	nframes64_t const adjusted_frame = adjusted_current_frame (event);
 
-	if (adjusted_frame == _last_pointer_frame) {
+	if (adjusted_frame == last_pointer_frame()) {
 		return;
 	}
 
@@ -1922,8 +1914,6 @@ CursorDrag::motion (GdkEvent* event, bool)
 	_editor->update_canvas_now ();
 #endif
 	_editor->UpdateAllTransportClocks (_cursor->current_frame);
-
-	_last_pointer_frame = adjusted_frame;
 }
 
 void
@@ -1959,7 +1949,7 @@ FadeInDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	AudioRegionView* a = dynamic_cast<AudioRegionView*> (_primary);
 	boost::shared_ptr<AudioRegion> const r = a->audio_region ();
 
-	_pointer_frame_offset = _grab_frame - ((nframes64_t) r->fade_in()->back()->when + r->position());
+	_pointer_frame_offset = grab_frame() - ((nframes64_t) r->fade_in()->back()->when + r->position());
 	_editor->show_verbose_duration_cursor (r->position(), r->position() + r->fade_in()->back()->when, 10);
 }
 
@@ -2052,7 +2042,7 @@ FadeOutDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	AudioRegionView* a = dynamic_cast<AudioRegionView*> (_primary);
 	boost::shared_ptr<AudioRegion> r = a->audio_region ();
 
-	_pointer_frame_offset = _grab_frame - (r->length() - (nframes64_t) r->fade_out()->back()->when + r->position());
+	_pointer_frame_offset = grab_frame() - (r->length() - (nframes64_t) r->fade_out()->back()->when + r->position());
 	_editor->show_verbose_duration_cursor (r->last_frame() - r->fade_out()->back()->when, r->last_frame(), 10);
 }
 
@@ -2169,7 +2159,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	Location *location = _editor->find_location_from_marker (_marker, is_start);
 	_editor->_dragging_edit_point = true;
 
-	_pointer_frame_offset = _grab_frame - (is_start ? location->start() : location->end());
+	_pointer_frame_offset = grab_frame() - (is_start ? location->start() : location->end());
 
 	update_item (location);
 
@@ -2250,7 +2240,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 
 	nframes64_t next = newframe;
 
-	if (_current_pointer_frame == _last_pointer_frame) {
+	if (newframe == last_pointer_frame()) {
 		return;
 	}
 
@@ -2375,8 +2365,6 @@ MarkerDrag::motion (GdkEvent* event, bool)
 		}
 	}
 
-	_last_pointer_frame = _current_pointer_frame;
-
 	assert (!_copied_locations.empty());
 
 	_editor->show_verbose_time_cursor (newframe, 10);
@@ -2476,19 +2464,19 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	// start the grab at the center of the control point so
 	// the point doesn't 'jump' to the mouse after the first drag
-	_grab_x = _point->get_x();
-	_grab_y = _point->get_y();
+	_time_axis_view_grab_x = _point->get_x();
+	_time_axis_view_grab_y = _point->get_y();
 
-	_point->line().parent_group().i2w (_grab_x, _grab_y);
-	_editor->track_canvas->w2c (_grab_x, _grab_y, _grab_x, _grab_y);
+	_point->line().parent_group().i2w (_time_axis_view_grab_x, _time_axis_view_grab_y);
+	_editor->track_canvas->w2c (_time_axis_view_grab_x, _time_axis_view_grab_y, _time_axis_view_grab_x, _time_axis_view_grab_y);
 
-	_grab_frame = _editor->pixel_to_frame (_grab_x);
+	_time_axis_view_grab_frame = _editor->pixel_to_frame (_time_axis_view_grab_x);
 
-	_point->line().start_drag (_point, _grab_frame, 0);
+	_point->line().start_drag (_point, _time_axis_view_grab_frame, 0);
 
 	float fraction = 1.0 - (_point->get_y() / _point->line().height());
 	_editor->set_verbose_canvas_cursor (_point->line().get_verbose_cursor_string (fraction),
-					    _current_pointer_x + 10, _current_pointer_y + 10);
+					    event->button.x + 10, event->button.y + 10);
 
 	_editor->show_verbose_canvas_cursor ();
 }
@@ -2496,16 +2484,16 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 void
 ControlPointDrag::motion (GdkEvent* event, bool)
 {
-	double dx = _current_pointer_x - _last_pointer_x;
-	double dy = _current_pointer_y - _last_pointer_y;
+	double dx = current_pointer_x() - last_pointer_x();
+	double dy = current_pointer_y() - last_pointer_y();
 
 	if (event->button.state & Keyboard::SecondaryModifier) {
 		dx *= 0.1;
 		dy *= 0.1;
 	}
 
-	double cx = _grab_x + _cumulative_x_drag + dx;
-	double cy = _grab_y + _cumulative_y_drag + dy;
+	double cx = _time_axis_view_grab_x + _cumulative_x_drag + dx;
+	double cy = _time_axis_view_grab_y + _cumulative_y_drag + dy;
 
 	// calculate zero crossing point. back off by .01 to stay on the
 	// positive side of zero
@@ -2520,14 +2508,14 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 	}
 
 	if (_x_constrained) {
-		cx = _grab_x;
+		cx = _time_axis_view_grab_x;
 	}
 	if (_y_constrained) {
-		cy = _grab_y;
+		cy = _time_axis_view_grab_y;
 	}
 
-	_cumulative_x_drag = cx - _grab_x;
-	_cumulative_y_drag = cy - _grab_y;
+	_cumulative_x_drag = cx - _time_axis_view_grab_x;
+	_cumulative_y_drag = cy - _time_axis_view_grab_y;
 
 	_point->line().parent_group().w2i (cx, cy);
 
@@ -2615,15 +2603,15 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	/* store grab start in parent frame */
 
-	_grab_x = cx;
-	_grab_y = cy;
+	_time_axis_view_grab_x = cx;
+	_time_axis_view_grab_y = cy;
 
 	double fraction = 1.0 - (cy / _line->height());
 
-	_line->start_drag (0, _grab_frame, fraction);
+	_line->start_drag (0, grab_frame(), fraction);
 
 	_editor->set_verbose_canvas_cursor (_line->get_verbose_cursor_string (fraction),
-					    _current_pointer_x + 10, _current_pointer_y + 10);
+					    event->button.x + 10, event->button.y + 10);
 
 	_editor->show_verbose_canvas_cursor ();
 }
@@ -2631,15 +2619,15 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 void
 LineDrag::motion (GdkEvent* event, bool)
 {
-	double dy = _current_pointer_y - _last_pointer_y;
+	double dy = current_pointer_y() - last_pointer_y();
 
 	if (event->button.state & Keyboard::SecondaryModifier) {
 		dy *= 0.1;
 	}
 
-	double cy = _grab_y + _cumulative_y_drag + dy;
+	double cy = _time_axis_view_grab_y + _cumulative_y_drag + dy;
 
-	_cumulative_y_drag = cy - _grab_y;
+	_cumulative_y_drag = cy - _time_axis_view_grab_y;
 
 	cy = max (0.0, cy);
 	cy = min ((double) _line->height(), cy);
@@ -2670,7 +2658,7 @@ void
 RubberbandSelectDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
 	Drag::start_grab (event);
-	_editor->show_verbose_time_cursor (_current_pointer_frame, 10);
+	_editor->show_verbose_time_cursor (adjusted_current_frame (event), 10);
 }
 
 void
@@ -2683,33 +2671,33 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool first_move)
 
 	/* use a bigger drag threshold than the default */
 
-	if (abs ((int) (_current_pointer_frame - _grab_frame)) < 8) {
+	nframes64_t const pf = adjusted_current_frame (event, Config->get_rubberbanding_snaps_to_grid ());
+
+	if (abs ((int) (pf - grab_frame())) < 8) {
 		return;
 	}
 
- 	if (Config->get_rubberbanding_snaps_to_grid()) {
- 		if (first_move) {
- 			_editor->snap_to_with_modifier (_grab_frame, event);
-		}
-		_editor->snap_to_with_modifier (_current_pointer_frame, event);
- 	}
+	nframes64_t grab = grab_frame ();
+	if (Config->get_rubberbanding_snaps_to_grid ()) {
+		_editor->snap_to_with_modifier (grab, event);
+	}
 
 	/* base start and end on initial click position */
 
-	if (_current_pointer_frame < _grab_frame) {
-		start = _current_pointer_frame;
-		end = _grab_frame;
+	if (pf < grab) {
+		start = pf;
+		end = grab;
 	} else {
-		end = _current_pointer_frame;
-		start = _grab_frame;
+		end = pf;
+		start = grab;
 	}
 
-	if (_current_pointer_y < _grab_y) {
-		y1 = _current_pointer_y;
-		y2 = _grab_y;
+	if (current_pointer_y() < grab_y()) {
+		y1 = current_pointer_y();
+		y2 = grab_y();
 	} else {
-		y2 = _current_pointer_y;
-		y1 = _grab_y;
+		y2 = current_pointer_y();
+		y1 = grab_y();
 	}
 
 
@@ -2726,9 +2714,7 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool first_move)
 		_editor->rubberband_rect->show();
 		_editor->rubberband_rect->raise_to_top();
 
-		_last_pointer_frame = _current_pointer_frame;
-
-		_editor->show_verbose_time_cursor (_current_pointer_frame, 10);
+		_editor->show_verbose_time_cursor (pf, 10);
 	}
 }
 
@@ -2740,12 +2726,12 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 		motion (event, false);
 
 		double y1,y2;
-		if (_current_pointer_y < _grab_y) {
-			y1 = _current_pointer_y;
-			y2 = _grab_y;
+		if (current_pointer_y() < grab_y()) {
+			y1 = current_pointer_y();
+			y2 = grab_y();
 		} else {
-			y2 = _current_pointer_y;
-			y1 = _grab_y;
+			y2 = current_pointer_y();
+			y1 = grab_y();
 		}
 
 
@@ -2754,10 +2740,10 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		_editor->begin_reversible_command (_("rubberband selection"));
 
-		if (_grab_frame < _last_pointer_frame) {
-			committed = _editor->select_all_within (_grab_frame, _last_pointer_frame - 1, y1, y2, _editor->track_views, op);
+		if (grab_frame() < last_pointer_frame()) {
+			committed = _editor->select_all_within (grab_frame(), last_pointer_frame() - 1, y1, y2, _editor->track_views, op);
 		} else {
-			committed = _editor->select_all_within (_last_pointer_frame, _grab_frame - 1, y1, y2, _editor->track_views, op);
+			committed = _editor->select_all_within (last_pointer_frame(), grab_frame() - 1, y1, y2, _editor->track_views, op);
 		}
 
 		if (!committed) {
@@ -2781,7 +2767,7 @@ TimeFXDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
 	Drag::start_grab (event);
 
-	_editor->show_verbose_time_cursor (_current_pointer_frame, 10);
+	_editor->show_verbose_time_cursor (adjusted_current_frame (event), 10);
 }
 
 void
@@ -2789,19 +2775,17 @@ TimeFXDrag::motion (GdkEvent* event, bool)
 {
 	RegionView* rv = _primary;
 
-	_editor->snap_to_with_modifier (_current_pointer_frame, event);
+	nframes64_t const pf = adjusted_current_frame (event);
 
-	if (_current_pointer_frame == _last_pointer_frame) {
+	if (pf == last_pointer_frame()) {
 		return;
 	}
 
-	if (_current_pointer_frame > rv->region()->position()) {
-		rv->get_time_axis_view().show_timestretch (rv->region()->position(), _current_pointer_frame);
+	if (pf > rv->region()->position()) {
+		rv->get_time_axis_view().show_timestretch (rv->region()->position(), pf);
 	}
 
-	_last_pointer_frame = _current_pointer_frame;
-
-	_editor->show_verbose_time_cursor (_current_pointer_frame, 10);
+	_editor->show_verbose_time_cursor (pf, 10);
 }
 
 void
@@ -2813,12 +2797,12 @@ TimeFXDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 		return;
 	}
 
-	if (_last_pointer_frame < _primary->region()->position()) {
+	if (last_pointer_frame() < _primary->region()->position()) {
 		/* backwards drag of the left edge - not usable */
 		return;
 	}
 
-	nframes64_t newlen = _last_pointer_frame - _primary->region()->position();
+	nframes64_t newlen = last_pointer_frame() - _primary->region()->position();
 
 	float percentage = (double) newlen / (double) _primary->region()->length();
 
@@ -2900,7 +2884,7 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		Drag::start_grab (event, cursor);
 		cursor = _editor->trimmer_cursor;
 		start = _editor->selection->time[_editor->clicked_selection].start;
-		_pointer_frame_offset = _grab_frame - start;
+		_pointer_frame_offset = grab_frame() - start;
 		break;
 
 	case SelectionEndTrim:
@@ -2910,20 +2894,20 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		Drag::start_grab (event, cursor);
 		cursor = _editor->trimmer_cursor;
 		end = _editor->selection->time[_editor->clicked_selection].end;
-		_pointer_frame_offset = _grab_frame - end;
+		_pointer_frame_offset = grab_frame() - end;
 		break;
 
 	case SelectionMove:
 		start = _editor->selection->time[_editor->clicked_selection].start;
 		Drag::start_grab (event, cursor);
-		_pointer_frame_offset = _grab_frame - start;
+		_pointer_frame_offset = grab_frame() - start;
 		break;
 	}
 
 	if (_operation == SelectionMove) {
 		_editor->show_verbose_time_cursor (start, 10);
 	} else {
-		_editor->show_verbose_time_cursor (_current_pointer_frame, 10);
+		_editor->show_verbose_time_cursor (adjusted_current_frame (event), 10);
 	}
 }
 
@@ -2940,23 +2924,25 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 	   different from the last frame position (adjusted)
 	 */
 
-	if (pending_position == _last_pointer_frame) {
+	if (pending_position == last_pointer_frame()) {
 		return;
 	}
 
 	switch (_operation) {
 	case CreateSelection:
+	{
+		nframes64_t grab = grab_frame ();
 
 		if (first_move) {
-			_editor->snap_to (_grab_frame);
+			_editor->snap_to (grab);
 		}
 
-		if (pending_position < _grab_frame) {
+		if (pending_position < grab_frame()) {
 			start = pending_position;
-			end = _grab_frame;
+			end = grab;
 		} else {
 			end = pending_position;
-			start = _grab_frame;
+			start = grab;
 		}
 
 		/* first drag: Either add to the selection
@@ -2984,6 +2970,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 			}
 		}
 		break;
+	}
 
 	case SelectionStartTrim:
 
@@ -3047,8 +3034,6 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 	if (start != end) {
 		_editor->selection->replace (_editor->clicked_selection, start, end);
 	}
-
-	_last_pointer_frame = pending_position;
 
 	if (_operation == SelectionMove) {
 		_editor->show_verbose_time_cursor(start, 10);
@@ -3140,7 +3125,7 @@ RangeMarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 
 	Drag::start_grab (event, cursor);
 
-	_editor->show_verbose_time_cursor (_current_pointer_frame, 10);
+	_editor->show_verbose_time_cursor (adjusted_current_frame (event), 10);
 }
 
 void
@@ -3166,30 +3151,26 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 		break;
 	}
 
-	_editor->snap_to_with_modifier (_current_pointer_frame, event);
+	nframes64_t const pf = adjusted_current_frame (event);
 
 	/* only alter selection if the current frame is
 	   different from the last frame position.
 	 */
 
-	if (_current_pointer_frame == _last_pointer_frame) {
+	if (pf == last_pointer_frame()) {
 		return;
 	}
 
-	switch (_operation) {
-	case CreateRangeMarker:
-	case CreateTransportMarker:
-	case CreateCDMarker:
-		if (first_move) {
-			_editor->snap_to (_grab_frame);
-		}
-
-		if (_current_pointer_frame < _grab_frame) {
-			start = _current_pointer_frame;
-			end = _grab_frame;
+	if (_operation == CreateRangeMarker || _operation == CreateTransportMarker || _operation == CreateCDMarker) {
+		nframes64_t grab = grab_frame ();
+		_editor->snap_to (grab);
+		
+		if (pf < grab_frame()) {
+			start = pf;
+			end = grab;
 		} else {
-			end = _current_pointer_frame;
-			start = _grab_frame;
+			end = pf;
+			start = grab;
 		}
 
 		/* first drag: Either add to the selection
@@ -3207,7 +3188,6 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 			//_drag_rect->raise_to_top();
 
 		}
-		break;
 	}
 
 	if (event->button.x >= _editor->horizontal_adjustment.get_value() + _editor->_canvas_width) {
@@ -3225,9 +3205,7 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 		update_item (_editor->temp_location);
 	}
 
-	_last_pointer_frame = _current_pointer_frame;
-
-	_editor->show_verbose_time_cursor (_current_pointer_frame, 10);
+	_editor->show_verbose_time_cursor (pf, 10);
 
 }
 
@@ -3278,7 +3256,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			nframes64_t start;
 			nframes64_t end;
 
-			_editor->session()->locations()->marks_either_side (_grab_frame, start, end);
+			_editor->session()->locations()->marks_either_side (grab_frame(), start, end);
 
 			if (end == max_frames) {
 				end = _editor->session()->current_end_frame ();
@@ -3324,7 +3302,7 @@ void
 MouseZoomDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
 	Drag::start_grab (event, _editor->zoom_cursor);
-	_editor->show_verbose_time_cursor (_current_pointer_frame, 10);
+	_editor->show_verbose_time_cursor (adjusted_current_frame (event), 10);
 }
 
 void
@@ -3333,23 +3311,22 @@ MouseZoomDrag::motion (GdkEvent* event, bool first_move)
 	nframes64_t start;
 	nframes64_t end;
 
-	_editor->snap_to_with_modifier (_current_pointer_frame, event);
+	nframes64_t const pf = adjusted_current_frame (event);
 
-	if (first_move) {
-		_editor->snap_to_with_modifier (_grab_frame, event);
-	}
-
-	if (_current_pointer_frame == _last_pointer_frame) {
+	if (pf == last_pointer_frame()) {
 		return;
 	}
 
+	nframes64_t grab = grab_frame ();
+	_editor->snap_to_with_modifier (grab, event);
+
 	/* base start and end on initial click position */
-	if (_current_pointer_frame < _grab_frame) {
-		start = _current_pointer_frame;
-		end = _grab_frame;
+	if (pf < grab) {
+		start = pf;
+		end = grab;
 	} else {
-		end = _current_pointer_frame;
-		start = _grab_frame;
+		end = pf;
+		start = grab;
 	}
 
 	if (start != end) {
@@ -3361,9 +3338,7 @@ MouseZoomDrag::motion (GdkEvent* event, bool first_move)
 
 		_editor->reposition_zoom_rect(start, end);
 
-		_last_pointer_frame = _current_pointer_frame;
-
-		_editor->show_verbose_time_cursor (_current_pointer_frame, 10);
+		_editor->show_verbose_time_cursor (pf, 10);
 	}
 }
 
@@ -3373,16 +3348,16 @@ MouseZoomDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (movement_occurred) {
 		motion (event, false);
 
-		if (_grab_frame < _last_pointer_frame) {
-			_editor->temporal_zoom_by_frame (_grab_frame, _last_pointer_frame, "mouse zoom");
+		if (grab_frame() < last_pointer_frame()) {
+			_editor->temporal_zoom_by_frame (grab_frame(), last_pointer_frame(), "mouse zoom");
 		} else {
-			_editor->temporal_zoom_by_frame (_last_pointer_frame, _grab_frame, "mouse zoom");
+			_editor->temporal_zoom_by_frame (last_pointer_frame(), grab_frame(), "mouse zoom");
 		}
 	} else {
-		_editor->temporal_zoom_to_frame (false, _grab_frame);
+		_editor->temporal_zoom_to_frame (false, grab_frame());
 		/*
 		temporal_zoom_step (false);
-		center_screen (_grab_frame);
+		center_screen (grab_frame());
 		*/
 	}
 
@@ -3407,8 +3382,8 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 	double event_x;
 	double event_y;
 
-	event_x = _current_pointer_x;
-	event_y = _current_pointer_y;
+	event_x = current_pointer_x();
+	event_y = current_pointer_y();
 
 	_item->property_parent().get_value()->w2i(event_x, event_y);
 
@@ -3445,8 +3420,8 @@ NoteDrag::motion (GdkEvent*, bool)
 	double event_x;
 	double event_y;
 
-	event_x = _current_pointer_x;
-	event_y = _current_pointer_y;
+	event_x = current_pointer_x();
+	event_y = current_pointer_y();
 
 	_item->property_parent().get_value()->w2i(event_x, event_y);
 

@@ -61,21 +61,18 @@ public:
 		return _ending;
 	}
 
-	/** @return current pointer x position in item coordinates */
+	/** @return current pointer x position in trackview coordinates */
 	double current_pointer_x () const {
 		return _current_pointer_x;
 	}
 
-	/** @return current pointer y position in item coordinates */
+	/** @return current pointer y position in trackview coordinates */
 	double current_pointer_y () const {
 		return _current_pointer_y;
 	}
 
-	/** @return current pointer frame */
-	nframes64_t current_pointer_frame () const {
-		return _current_pointer_frame;
-	}
-
+	nframes64_t adjusted_current_frame (GdkEvent const *, bool snap = true) const;
+	
 	/** Called to start a grab of an item.
 	 *  @param e Event that caused the grab to start.
 	 *  @param c Cursor to use, or 0.
@@ -115,24 +112,35 @@ public:
 	}
 
 protected:
-	nframes64_t adjusted_current_frame (GdkEvent *) const;
+
+	double grab_x () const {
+		return _grab_x;
+	}
+
+	double grab_y () const {
+		return _grab_y;
+	}
+
+	double grab_frame () const {
+		return _grab_frame;
+	}
+
+	double last_pointer_x () const {
+		return _last_pointer_x;
+	}
+
+	double last_pointer_y () const {
+		return _last_pointer_y;
+	}
+
+	double last_pointer_frame () const {
+		return _last_pointer_frame;
+	}
 
 	Editor* _editor; ///< our editor
 	ArdourCanvas::Item* _item; ///< our item
-	nframes64_t _pointer_frame_offset; ///< offset from the mouse's position for the drag
-					   ///< to the start of the thing that is being dragged
-	nframes64_t _last_frame_position; ///< last position of the thing being dragged
-	nframes64_t _grab_frame; ///< frame that the mouse was at when start_grab was called, or 0
-	nframes64_t _last_pointer_frame; ///< frame that the pointer was at last time a motion occurred
-	nframes64_t _current_pointer_frame; ///< frame that the pointer is now at
-	double _original_x; ///< original world x of the thing being dragged
-	double _original_y; ///< original world y of the thing being dragged
-	double _grab_x; ///< trackview x of the grab start position
-	double _grab_y; ///< trackview y of the grab start position
-	double _current_pointer_x; ///< trackview x of the current pointer
-	double _current_pointer_y; ///< trackview y of the current pointer
-	double _last_pointer_x; ///< trackview x of the pointer last time a motion occurred
-	double _last_pointer_y; ///< trackview y of the pointer last time a motion occurred
+	/** Offset from the mouse's position for the drag to the start of the thing that is being dragged */
+	nframes64_t _pointer_frame_offset;
 	bool _x_constrained; ///< true if x motion is constrained, otherwise false
 	bool _y_constrained; ///< true if y motion is constrained, otherwise false
 	bool _was_rolling; ///< true if the session was rolling before the drag started, otherwise false
@@ -143,6 +151,17 @@ private:
 	bool _ending; ///< true if end_grab is in progress, otherwise false
 	bool _had_movement; ///< true if movement has occurred, otherwise false
 	bool _move_threshold_passed; ///< true if the move threshold has been passed, otherwise false
+	double _original_x; ///< original world x of the thing being dragged
+	double _original_y; ///< original world y of the thing being dragged
+	double _grab_x; ///< trackview x of the grab start position
+	double _grab_y; ///< trackview y of the grab start position
+	double _current_pointer_x; ///< trackview x of the current pointer
+	double _current_pointer_y; ///< trackview y of the current pointer
+	double _last_pointer_x; ///< trackview x of the pointer last time a motion occurred
+	double _last_pointer_y; ///< trackview y of the pointer last time a motion occurred
+	nframes64_t _grab_frame; ///< frame that the mouse was at when start_grab was called, or 0
+	nframes64_t _last_pointer_frame; ///< adjusted_current_frame the last time a motion occurred
+	nframes64_t _current_pointer_frame; ///< frame that the pointer is now at
 };
 
 
@@ -202,6 +221,7 @@ protected:
 	ARDOUR::layer_t _dest_layer;
 	bool check_possible (RouteTimeAxisView **, ARDOUR::layer_t *);
 	bool _brushing;
+	nframes64_t _last_frame_position; ///< last position of the thing being dragged
 };
 
 
@@ -440,6 +460,9 @@ public:
 private:
 
 	ControlPoint* _point;
+	double _time_axis_view_grab_x;
+	double _time_axis_view_grab_y;
+	nframes64_t _time_axis_view_grab_frame;
 	double _cumulative_x_drag;
 	double _cumulative_y_drag;
 	static double const _zero_gain_fraction;
@@ -462,6 +485,8 @@ public:
 private:
 
 	AutomationLine* _line;
+	double _time_axis_view_grab_x;
+	double _time_axis_view_grab_y;
 	uint32_t _before;
 	uint32_t _after;
 	double _cumulative_y_drag;

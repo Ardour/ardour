@@ -2501,12 +2501,12 @@ Editor::trackview_by_y_position (double y)
 /** Snap a position to the grid, if appropriate, taking into account current
  *  grid settings and also the state of any snap modifier keys that may be pressed.
  *  @param start Position to snap.
- *  @param event Event to get current key modifier information from.
+ *  @param event Event to get current key modifier information from, or 0.
  */
 void
 Editor::snap_to_with_modifier (nframes64_t& start, GdkEvent const * event, int32_t direction, bool for_mark)
 {
-	if (!_session) {
+	if (!_session || !event) {
 		return;
 	}
 

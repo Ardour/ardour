@@ -1681,7 +1681,7 @@ Editor::scrub ()
 
 	if (scrubbing_direction == 0) {
 		/* first move */
-		_session->request_locate (_drag->current_pointer_frame(), false);
+		_session->request_locate (_drag->adjusted_current_frame (0), false);
 		_session->request_transport_speed (0.1);
 		scrubbing_direction = 1;
 
@@ -2231,7 +2231,7 @@ Editor::point_trim (GdkEvent* event)
 {
 	RegionView* rv = clicked_regionview;
 
-	nframes64_t new_bound = _drag->current_pointer_frame();
+	nframes64_t new_bound = _drag->adjusted_current_frame (event);
 
 	snap_to_with_modifier (new_bound, event);
 
