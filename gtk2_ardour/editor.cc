@@ -577,12 +577,11 @@ Editor::Editor ()
 	summary_frame->add (*_summary);
 	summary_frame->show ();
 
-	HBox* summary_hbox = manage (new HBox);
-	summary_hbox->pack_start (*summary_arrows_left, false, false);
-	summary_hbox->pack_start (*summary_frame, true, true);
-	summary_hbox->pack_start (*summary_arrows_right, false, false);
+	_summary_hbox.pack_start (*summary_arrows_left, false, false);
+	_summary_hbox.pack_start (*summary_frame, true, true);
+	_summary_hbox.pack_start (*summary_arrows_right, false, false);
 	
-	editor_summary_pane->pack2(*summary_hbox);
+	editor_summary_pane->pack2 (_summary_hbox);
 
 	edit_pane.pack1 (*editor_summary_pane, true, true);
 	edit_pane.pack2 (the_notebook, false, true);

@@ -1989,6 +1989,7 @@ public:
 	void located ();
 	bool _pending_locate_request;
 
+	Gtk::HBox _summary_hbox;
 	EditorSummary* _summary;
 	void region_view_added (RegionView *);
 
