@@ -25,7 +25,7 @@
 #include <string>
 #include <stdint.h>
 
-#include <sigc++/sigc++.h>
+#include <pbd/signals.h>
 
 int  pthread_create_and_store (std::string name, pthread_t  *thread, void * (*start_routine)(void *), void * arg);
 void pthread_cancel_one (pthread_t thread);
@@ -36,10 +36,7 @@ std::string pthread_name ();
 
 namespace PBD {
 	extern void notify_gui_about_thread_creation (std::string, pthread_t, std::string, int requests = 256);
-	extern void notify_gui_about_thread_exit (pthread_t);
-
-	extern sigc::signal<void,pthread_t>                                  ThreadLeaving;
-	extern sigc::signal<void,std::string,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
+	extern PBD::Signal4<void,std::string,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
 }
 
 #endif /* __pbd_pthread_utils__ */

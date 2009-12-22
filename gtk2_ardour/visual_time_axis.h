@@ -117,7 +117,7 @@ class VisualTimeAxis : public TimeAxisView
 
 		/**
 		 * Emitted when this Visual Time Axis has been removed
-		 * This is different to the GoingAway signal in that this signal
+		 * This is different to the CatchDeletion signal in that this signal
 		 * is emitted during the deletion of this Time Axis, and not during
 		 * the destructor, this allows us to capture the source of the deletion
 		 * event

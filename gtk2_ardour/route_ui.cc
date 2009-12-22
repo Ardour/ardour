@@ -79,10 +79,6 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session* sess)
 
 RouteUI::~RouteUI()
 {
-       /* derived classes should emit GoingAway so that they receive the signal
-          when the object is still a legal derived instance.
-       */
-
 	delete solo_menu;
 	delete mute_menu;
 	delete sends_menu;
@@ -171,7 +167,6 @@ RouteUI::self_delete ()
 
 	cerr << "\n\nExpect to see route " << _route->name() << " be deleted\n";
 	_route.reset (); /* drop reference to route, so that it can be cleaned up */
-
 	route_connections.drop_connections ();
 	delete_when_idle (this);
 }
@@ -188,9 +183,9 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	}
 
 	if (self_destruct) {
-		rp->GoingAway.connect (route_connections, boost::bind (&RouteUI::self_delete, this), gui_context());
+		rp->DropReferences.connect (route_connections, boost::bind (&RouteUI::self_delete, this), gui_context());
 	}
-
+	
 	mute_button->set_controllable (_route->mute_control());
 	solo_button->set_controllable (_route->solo_control());
 

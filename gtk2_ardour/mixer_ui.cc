@@ -334,8 +334,8 @@ Mixer_UI::add_strip (RouteList& routes)
 		}
 
 		route->NameChanged.connect (*this, boost::bind (&Mixer_UI::strip_name_changed, this, strip), gui_context());
+		route->DropReferences.connect (*this, boost::bind (&Mixer_UI::remove_strip, this, strip), gui_context());
 
-		strip->GoingAway.connect (*this, boost::bind (&Mixer_UI::remove_strip, this, strip), gui_context());
 		strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
 		strip->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
 	}
@@ -497,6 +497,11 @@ Mixer_UI::session_going_away ()
 
 	group_model->clear ();
 	_selection.clear ();
+	track_model->clear ();
+
+	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
+		delete (*i);
+	}
 
 	WindowTitle title(Glib::get_application_name());
 	title += _("Mixer");

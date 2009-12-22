@@ -327,7 +327,7 @@ ProcessorBox::set_route (boost::shared_ptr<Route> r)
 	_route = r;
 
 	_route->processors_changed.connect (connections, ui_bind (&ProcessorBox::route_processors_changed, this, _1), gui_context());
-	_route->GoingAway.connect (connections, boost::bind (&ProcessorBox::route_going_away, this), gui_context());
+	_route->DropReferences.connect (connections, boost::bind (&ProcessorBox::route_going_away, this), gui_context());
 	_route->NameChanged.connect (connections, boost::bind (&ProcessorBox::route_name_changed, this), gui_context());
 
 	redisplay_processors ();

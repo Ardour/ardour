@@ -71,9 +71,6 @@ MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, nframes
 
 MidiPlaylist::~MidiPlaylist ()
 {
-	drop_references ();
-
-	/* drop connections to signals */
 }
 
 template<typename Time>

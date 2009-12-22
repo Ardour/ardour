@@ -34,6 +34,7 @@ class SessionHandleRef : public PBD::ScopedConnectionList
   protected:
 	ARDOUR::Session&          _session;
 	virtual void session_going_away ();
+	virtual void insanity_check ();
 };
 
 class SessionHandlePtr

@@ -102,6 +102,8 @@ public:
     typename SignalType::result_type operator()() {
 	    return _signal ();
     }
+
+    bool empty() const { return _signal.empty(); }
     
 private:
     SignalType _signal;
@@ -144,6 +146,8 @@ public:
 	    return _signal (arg1);
     }
     
+    bool empty() const { return _signal.empty(); }
+
 private:
     SignalType _signal;
 };
@@ -184,6 +188,8 @@ public:
 	    return _signal (arg1, arg2);
     }
     
+    bool empty() const { return _signal.empty(); }
+
 private:
     SignalType _signal;
 };
@@ -224,6 +230,50 @@ public:
 	    return _signal (arg1, arg2, arg3);
     }
     
+    bool empty() const { return _signal.empty(); }
+
+private:
+    SignalType _signal;
+};
+
+template<typename R, typename A1, typename A2, typename A3, typename A4>
+class Signal4 {
+public:
+    Signal4 () {}
+    typedef boost::signals2::signal<R(A1,A2,A3,A4)> SignalType;
+
+    void connect_same_thread (ScopedConnectionList& clist, 
+		  const typename SignalType::slot_function_type& slot) {
+	    clist.add_connection (_signal.connect (slot));
+    }
+
+    void connect_same_thread (Connection& c, 
+			      const typename SignalType::slot_function_type& slot) {
+	    c = _signal.connect (slot);
+    }
+
+    static void compositor (typename boost::function<void(A1,A2,A3)> f, PBD::EventLoop* event_loop, A1 arg1, A2 arg2, A3 arg3, A4 arg4) {
+	    event_loop->call_slot (boost::bind (f, arg1, arg2, arg3, arg4));
+    }
+
+    void connect (ScopedConnectionList& clist, 
+		  const typename SignalType::slot_function_type& slot,
+		  PBD::EventLoop* event_loop) {
+	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, _1, _2, _3, _4)));
+    }
+    
+    void connect (Connection& c, 
+		  const typename SignalType::slot_function_type& slot,
+		  PBD::EventLoop* event_loop) {
+	    c = _signal.connect (_signal.connect (boost::bind (&compositor, slot, event_loop, _1, _2, _3, _4)));
+    }
+    
+    typename SignalType::result_type operator()(A1 arg1, A2 arg2, A3 arg3, A4 arg4) {
+	    return _signal (arg1, arg2, arg3, arg4);
+    }
+    
+    bool empty() const { return _signal.empty(); }
+
 private:
     SignalType _signal;
 };

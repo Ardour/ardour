@@ -26,14 +26,13 @@ namespace PBD {
 
 class Destructible {
   public:
-        Destructible() : refs_dropped (false){}
-	virtual ~Destructible () {}
+        Destructible() {}
+	virtual ~Destructible () { Destroyed(); }
 	
-	PBD::Signal0<void> GoingAway;
-	void drop_references () { if (!refs_dropped) { GoingAway(); } refs_dropped = true; }
+	PBD::Signal0<void> Destroyed;
+	PBD::Signal0<void> DropReferences;
 
-  private:
-	bool refs_dropped;
+	void drop_references () { DropReferences();  }
 };
 
 }

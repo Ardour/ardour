@@ -210,7 +210,7 @@ Selection::toggle (TimeAxisView* track)
 
 	if ((i = find (tracks.begin(), tracks.end(), track)) == tracks.end()) {
 		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
-		track->GoingAway.connect (*this, boost::bind (pmf, this, track), gui_context());
+		track->CatchDeletion.connect (*this, boost::bind (pmf, this, track), gui_context());
 		tracks.push_back (track);
 	} else {
 		tracks.erase (i);
@@ -339,7 +339,7 @@ Selection::add (const TrackViewList& track_list)
 
 	for (list<TimeAxisView*>::const_iterator i = added.begin(); i != added.end(); ++i) {
 		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
-		(*i)->GoingAway.connect (*this, boost::bind (pmf, this, (*i)), gui_context());
+		(*i)->CatchDeletion.connect (*this, boost::bind (pmf, this, (*i)), gui_context());
 	}
 
 	if (!added.empty()) {
@@ -950,7 +950,7 @@ Selection::add (Marker* m)
 
 		void (Selection::*pmf)(Marker*) = &Selection::remove;
 
-		m->GoingAway.connect (*this, boost::bind (pmf, this, m), gui_context());
+		m->CatchDeletion.connect (*this, boost::bind (pmf, this, _1), gui_context());
 
 		markers.push_back (m);
 		MarkersChanged();

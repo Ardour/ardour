@@ -165,7 +165,7 @@ Editor::location_changed (Location *location)
 }
 
 void
-Editor::location_flags_changed (Location *location, void *src)
+Editor::location_flags_changed (Location *location, void*)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::location_flags_changed, location, src)
 
@@ -338,7 +338,7 @@ Editor::refresh_location_display ()
 }
 
 void
-Editor::refresh_location_display_s (Change ignored)
+Editor::refresh_location_display_s (Change)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::refresh_location_display_s, ignored)
 

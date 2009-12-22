@@ -148,7 +148,7 @@ Diskstream::set_route (Route& r)
 	non_realtime_input_change ();
 	set_align_style_from_io ();
 
-	_route->GoingAway.connect_same_thread (*this, boost::bind (&Diskstream::route_going_away, this));
+	_route->Destroyed.connect_same_thread (*this, boost::bind (&Diskstream::route_going_away, this));
 }
 
 void
@@ -340,7 +340,7 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 		}
 
 		_playlist->Modified.connect_same_thread (playlist_connections, boost::bind (&Diskstream::playlist_modified, this));
-		_playlist->GoingAway.connect_same_thread (playlist_connections, boost::bind (&Diskstream::playlist_deleted, this, boost::weak_ptr<Playlist>(_playlist)));
+		_playlist->DropReferences.connect_same_thread (playlist_connections, boost::bind (&Diskstream::playlist_deleted, this, boost::weak_ptr<Playlist>(_playlist)));
 		_playlist->RangesMoved.connect_same_thread (playlist_connections, boost::bind (&Diskstream::playlist_ranges_moved, this, _1));
 	}
 

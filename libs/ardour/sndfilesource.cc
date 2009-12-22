@@ -246,8 +246,6 @@ SndFileSource::open ()
 
 SndFileSource::~SndFileSource ()
 {
-	drop_references ();
-
 	if (sf) {
 		sf_close (sf);
 		sf = 0;

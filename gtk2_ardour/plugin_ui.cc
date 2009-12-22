@@ -142,7 +142,7 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 
 	signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window*> (this)), false);
-	insert->GoingAway.connect (death_connection, boost::bind (&PluginUIWindow::plugin_going_away, this), gui_context());
+	insert->DropReferences.connect (death_connection, boost::bind (&PluginUIWindow::plugin_going_away, this), gui_context());
 
 	gint h = _pluginui->get_preferred_height ();
 	gint w = _pluginui->get_preferred_width ();
@@ -414,7 +414,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	plugin_analysis_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &PlugUIBase::toggle_plugin_analysis));
 	plugin_analysis_expander.set_expanded(false);
 	
-	insert->GoingAway.connect (death_connection, boost::bind (&PlugUIBase::plugin_going_away, this), gui_context());
+	insert->DropReferences.connect (death_connection, boost::bind (&PlugUIBase::plugin_going_away, this), gui_context());
 }
 
 PlugUIBase::~PlugUIBase()

@@ -43,6 +43,7 @@ SessionPlaylists::~SessionPlaylists ()
 		++tmp;
 
 		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for used playlist %1 ; pre-ref = %2\n", (*i)->name(), (*i).use_count()));
+		boost::shared_ptr<Playlist> keeper (*i);
 		(*i)->drop_references ();
 
 		i = tmp;
@@ -56,6 +57,7 @@ SessionPlaylists::~SessionPlaylists ()
 		++tmp;
 
 		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for unused playlist %1 ; pre-ref = %2\n", (*i)->name(), (*i).use_count()));
+		boost::shared_ptr<Playlist> keeper (*i);
 		(*i)->drop_references ();
 
 		i = tmp;
@@ -291,6 +293,7 @@ SessionPlaylists::maybe_delete_unused (boost::function<int(boost::shared_ptr<Pla
 	/* now delete any that were marked for deletion */
 
 	for (vector<boost::shared_ptr<Playlist> >::iterator x = playlists_tbd.begin(); x != playlists_tbd.end(); ++x) {
+		boost::shared_ptr<Playlist> keeper (*x);
 		(*x)->drop_references ();
 	}
 

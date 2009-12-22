@@ -99,10 +99,11 @@ Editor::tempo_map_changed (Change ignored)
 		return;
 	}
 
-	ENSURE_GUI_THREAD (*this, &Editor::tempo_map_changed, ignored)
+	ENSURE_GUI_THREAD (*this, &Editor::tempo_map_changed ignored);
 
-	if (tempo_lines)
+	if (tempo_lines) {
 		tempo_lines->tempo_map_changed();
+	}
 
 	compute_current_bbt_points(leftmost_frame, leftmost_frame + current_page_frames());
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks); // redraw metric markers

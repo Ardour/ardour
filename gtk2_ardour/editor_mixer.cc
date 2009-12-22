@@ -169,7 +169,7 @@ Editor::create_editor_mixer ()
 					      _session,
 					      false);
 	current_mixer_strip->Hiding.connect (sigc::mem_fun(*this, &Editor::current_mixer_strip_hidden));
-	current_mixer_strip->GoingAway.connect (*this, boost::bind (&Editor::current_mixer_strip_removed, this), gui_context());
+	current_mixer_strip->CatchDeletion.connect (*this, boost::bind (&Editor::current_mixer_strip_removed, this), gui_context());
 #ifdef GTKOSX
 	current_mixer_strip->WidthChanged.connect (sigc::mem_fun(*this, &Editor::ensure_all_elements_drawn));
 #endif
@@ -349,15 +349,16 @@ Editor::session_going_away ()
 
 	playhead_cursor->canvas_item.hide ();
 
-	/* hide all tracks */
-
-	_routes->hide_all_tracks (false);
-
 	/* rip everything out of the list displays */
 
 	_regions->clear ();
 	_routes->clear ();
 	_route_groups->clear ();
+
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		delete *i;
+	}
+	track_views.clear ();
 
 	zoom_range_clock.set_session (0);
 	nudge_clock.set_session (0);

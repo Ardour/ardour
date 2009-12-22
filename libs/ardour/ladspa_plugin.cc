@@ -144,8 +144,6 @@ LadspaPlugin::~LadspaPlugin ()
 	deactivate ();
 	cleanup ();
 
-	drop_references ();
-
 	/* XXX who should close a plugin? */
 
         // dlclose (module);

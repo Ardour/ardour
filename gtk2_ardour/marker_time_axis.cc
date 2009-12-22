@@ -90,7 +90,7 @@ MarkerTimeAxis::MarkerTimeAxis (PublicEditor& ed, ARDOUR::Session* sess, Canvas&
  */
 MarkerTimeAxis::~MarkerTimeAxis()
 {
-	GoingAway ; /* EMIT_SIGNAL */
+	CatchDeletion (this); /* EMIT_SIGNAL */
 
 	// destroy the view helper
 	// this handles removing and destroying individual marker items

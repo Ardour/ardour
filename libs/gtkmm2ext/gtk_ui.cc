@@ -359,7 +359,11 @@ UI::do_request (UIRequest* req)
 		do_quit ();
 
 	} else if (req->type == CallSlot) {
-
+#ifndef NDEBUG
+		if (getenv ("DEBUG_THREADED_SIGNALS")) {
+			cerr << "call slot for " << name() << endl;
+		}
+#endif
 		req->the_slot ();
 
 	} else if (req->type == TouchDisplay) {

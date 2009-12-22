@@ -90,7 +90,6 @@ CoreAudioSource::init_cafile ()
 
 CoreAudioSource::~CoreAudioSource ()
 {
-	drop_references ();
 }
 
 int

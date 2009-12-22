@@ -610,7 +610,7 @@ EditorRouteGroups::groups_changed ()
 }
 
 void
-EditorRouteGroups::flags_changed (void* src, RouteGroup* group)
+EditorRouteGroups::flags_changed (void*, RouteGroup* group)
 {
         ENSURE_GUI_THREAD (*this, &EditorRouteGroups::flags_changed, src, group)
 

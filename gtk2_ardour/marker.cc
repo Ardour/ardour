@@ -40,6 +40,8 @@
 using namespace std;
 using namespace ARDOUR;
 
+PBD::Signal1<void,Marker*> Marker::CatchDeletion;
+
 Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, const string& annotation,
 		Type type, nframes_t frame, bool handle_events)
 
@@ -285,7 +287,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 
 Marker::~Marker ()
 {
-	drop_references ();
+	CatchDeletion (this); /* EMIT SIGNAL */
 
 	/* destroying the parent group destroys its contents, namely any polygons etc. that we added */
 	delete name_pixbuf;

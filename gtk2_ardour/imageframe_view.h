@@ -78,7 +78,7 @@ class ImageFrameView : public TimeAxisViewItem
 		 */
 		~ImageFrameView() ;
 
-		static sigc::signal<void,ImageFrameView*> GoingAway;
+		static PBD::Signal1<void,ImageFrameView*> CatchDeletion;
 
 		//---------------------------------------------------------------------------------------//
 		// Position and duration Accessors/Mutators

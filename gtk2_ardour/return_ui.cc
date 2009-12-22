@@ -110,7 +110,7 @@ ReturnUIWindow::ReturnUIWindow (boost::shared_ptr<Return> r, ARDOUR::Session* s)
 
 	set_name ("ReturnUIWindow");
 
-	r->GoingAway.connect (going_away_connection, boost::bind (&ReturnUIWindow::return_going_away, this), gui_context());
+	r->DropReferences.connect (going_away_connection, boost::bind (&ReturnUIWindow::return_going_away, this), gui_context());
 	signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
 }
 

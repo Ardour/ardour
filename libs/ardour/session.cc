@@ -388,32 +388,19 @@ Session::destroy ()
 	
 	AudioDiskstream::free_working_buffers();
 
+	/* tell everyone who is still standing that we're about to die */
+	drop_references ();
+
+	/* tell everyone to drop references and delete objects as we go */
+
 	DEBUG_TRACE (DEBUG::Destruction, "delete named selections\n");
-	for (NamedSelectionList::iterator i = named_selections.begin(); i != named_selections.end(); ) {
-		NamedSelectionList::iterator tmp;
-
-		tmp = i;
-		++tmp;
-
-		delete *i;
-		i = tmp;
-	}
+	named_selections.clear ();
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete regions\n");
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ) {
-		RegionList::iterator tmp;
-
-		tmp = i;
-		++tmp;
-
-		boost::shared_ptr<Region> keep (i->second);
-		
-		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for region %1 (%2); pre-ref = %3\n", i->second->name(), i->second.get(), i->second.use_count()));
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for region %1 ; pre-ref = %2\n", i->second->name(), i->second.use_count()));
 		i->second->drop_references ();
-		DEBUG_TRACE(DEBUG::Destruction, string_compose ("region post ref = %1\n", i->second.use_count()));
-		i = tmp;
 	}
-
 	regions.clear ();
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete routes\n");
@@ -427,10 +414,12 @@ Session::destroy ()
 	{
 		RCUWriter<RouteList> writer (routes);
 		boost::shared_ptr<RouteList> r = writer.get_copy ();
+
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for route %1 ; pre-ref = %2\n", (*i)->name(), (*i).use_count()));
 			(*i)->drop_references ();
 		}
+
 		r->clear ();
 		/* writer goes out of scope and updates master */
 	}
@@ -444,28 +433,22 @@ Session::destroy ()
 			DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for diskstream %1 ; pre-ref = %2\n", (*i)->name(), (*i).use_count()));
 			(*i)->drop_references ();
 		}
+
 		dsl->clear ();
 	}
 	diskstreams.flush ();
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete sources\n");
-	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ) {
-		SourceMap::iterator tmp;
-
-		tmp = i;
-		++tmp;
-
+	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for source %1 ; pre-ref = %2\n", i->second->path(), i->second.use_count()));
 		i->second->drop_references ();
-
-		i = tmp;
 	}
 
 	sources.clear ();
 
-
 	DEBUG_TRACE (DEBUG::Destruction, "delete route groups\n");
 	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
+		
 		delete *i;
 	}
 
@@ -475,10 +458,6 @@ Session::destroy ()
 
 	/* not strictly necessary, but doing it here allows the shared_ptr debugging to work */
 	playlists.reset ();
-
-	/* tell everyone who is still standing that we're about to die */
-
-	drop_references ();
 
 	boost_debug_list_ptrs ();
 
@@ -2813,8 +2792,6 @@ Session::add_regions (vector<boost::shared_ptr<Region> >& new_regions)
 			}
 
 			region->StateChanged.connect_same_thread (*this, boost::bind (&Session::region_changed, this, _1, boost::weak_ptr<Region>(region)));
-			region->GoingAway.connect_same_thread (*this, boost::bind (&Session::remove_region, this, boost::weak_ptr<Region>(region)));
-
 			update_region_name_map (region);
 		}
 
@@ -3001,7 +2978,6 @@ Session::add_source (boost::shared_ptr<Source> source)
 	}
 
 	if (result.second) {
-		source->GoingAway.connect_same_thread (*this, boost::bind (&Session::remove_source, this, boost::weak_ptr<Source> (source)));
 		set_dirty();
 	}
 
@@ -3390,10 +3366,7 @@ Session::add_playlist (boost::shared_ptr<Playlist> playlist, bool unused)
 		return;
 	}
 
-	bool existing = playlists->add (playlist);
-	if (!existing) {
-		playlist->GoingAway.connect_same_thread (*this, boost::bind (&Session::remove_playlist, this, boost::weak_ptr<Playlist>(playlist)));
-	}
+	playlists->add (playlist);
 
 	if (unused) {
 		playlist->release();
@@ -3566,7 +3539,11 @@ Session::graph_reordered ()
 void
 Session::add_processor (Processor* processor)
 {
-	processor->GoingAway.connect_same_thread (*this, boost::bind (&Session::remove_processor, this, processor));
+	/* Session does not own Processors (they belong to a Route) but we do want to track
+	   the arrival and departure of port inserts, sends and returns for naming
+	   purposes.
+	*/
+	processor->DropReferences.connect_same_thread (*this, boost::bind (&Session::remove_processor, this, processor));
 	set_dirty();
 }
 
@@ -3810,28 +3787,24 @@ Session::mark_insert_id (uint32_t id)
 
 /* Named Selection management */
 
-NamedSelection *
+boost::shared_ptr<NamedSelection>
 Session::named_selection_by_name (string name)
 {
 	Glib::Mutex::Lock lm (named_selection_lock);
 	for (NamedSelectionList::iterator i = named_selections.begin(); i != named_selections.end(); ++i) {
 		if ((*i)->name == name) {
-			return* i;
+			return *i;
 		}
 	}
-	return 0;
+	return boost::shared_ptr<NamedSelection>();
 }
 
 void
-Session::add_named_selection (NamedSelection* named_selection)
+Session::add_named_selection (boost::shared_ptr<NamedSelection> named_selection)
 {
 	{
 		Glib::Mutex::Lock lm (named_selection_lock);
 		named_selections.insert (named_selections.begin(), named_selection);
-	}
-
-	for (list<boost::shared_ptr<Playlist> >::iterator i = named_selection->playlists.begin(); i != named_selection->playlists.end(); ++i) {
-		add_playlist (*i);
 	}
 
 	set_dirty();
@@ -3840,7 +3813,7 @@ Session::add_named_selection (NamedSelection* named_selection)
 }
 
 void
-Session::remove_named_selection (NamedSelection* named_selection)
+Session::remove_named_selection (boost::shared_ptr<NamedSelection> named_selection)
 {
 	bool removed = false;
 
@@ -3850,7 +3823,6 @@ Session::remove_named_selection (NamedSelection* named_selection)
 		NamedSelectionList::iterator i = find (named_selections.begin(), named_selections.end(), named_selection);
 
 		if (i != named_selections.end()) {
-			delete (*i);
 			named_selections.erase (i);
 			set_dirty();
 			removed = true;
@@ -4186,6 +4158,10 @@ Session::compute_initial_length ()
 void
 Session::sync_order_keys (std::string const & base)
 {
+	if (deletion_in_progress()) {
+		return;
+	}
+
 	if (!Config->get_sync_all_route_ordering()) {
 		/* leave order keys as they are */
 		return;

@@ -109,7 +109,7 @@ Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length
 	_sources.push_back (src);
 	_master_sources.push_back (src);
 
-	src->GoingAway.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(src)));
+	src->DropReferences.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(src)));
 
 	assert(_sources.size() > 0);
 	_positional_lock_style = AudioTime;
@@ -338,7 +338,6 @@ Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 Region::~Region ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("Region %1 destructor @ %2\n", _name, this));
-	drop_references ();
 }
 
 void
@@ -1416,7 +1415,12 @@ void
 Region::source_deleted (boost::weak_ptr<Source>)
 {
 	_sources.clear ();
-	cerr << "Send drop ref signal from region " << ' ' << this << endl;
+
+	/* this is a very special case: at least one of the region's
+	   sources has bee deleted, so invalidate all references to
+	   ourselves.
+	*/
+
 	drop_references ();
 }
 
@@ -1586,14 +1590,14 @@ Region::use_sources (SourceList const & s)
 
 	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
 		_sources.push_back (*i);
-		(*i)->GoingAway.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
+		(*i)->DropReferences.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
 		unique_srcs.insert (*i);
 	}
 
 	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
 		_master_sources.push_back (*i);
 		if (unique_srcs.find (*i) == unique_srcs.end()) {
-			(*i)->GoingAway.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
+			(*i)->DropReferences.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
 		}
 	}
 }

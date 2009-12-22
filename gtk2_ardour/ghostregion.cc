@@ -34,7 +34,7 @@ using namespace Editing;
 using namespace ArdourCanvas;
 using namespace ARDOUR;
 
-PBD::Signal1<void,GhostRegion*> GhostRegion::GoingAway;
+PBD::Signal1<void,GhostRegion*> GhostRegion::CatchDeletion;
 
 GhostRegion::GhostRegion (ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_pos)
 	: trackview (tv)
@@ -63,7 +63,7 @@ GhostRegion::GhostRegion (ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxi
 
 GhostRegion::~GhostRegion ()
 {
-	GoingAway (this);
+	CatchDeletion (this);
 	delete base_rect;
 	delete group;
 }

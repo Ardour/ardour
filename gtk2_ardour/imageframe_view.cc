@@ -111,7 +111,7 @@ ImageFrameView::ImageFrameView(const string & item_id,
  */
 ImageFrameView::~ImageFrameView()
 {
-	GoingAway (this);
+	CatchDeletion (this);
 
 	// destroy any marker items we have associated with this item
 
@@ -287,7 +287,7 @@ ImageFrameView::add_marker_view_item(MarkerView* item, void* src)
 {
 	marker_view_list.push_back(item) ;
 
-	item->GoingAway.connect (*this, boost::bind (&ImageFrameView::remove_marker_view_item, this, (void*)this), gui_context());
+	item->CatchDeletion.connect (*this, boost::bind (&ImageFrameView::remove_marker_view_item, this, (void*)this), gui_context());
 
 	 MarkerViewAdded(item, src) ; /* EMIT_SIGNAL */
 }

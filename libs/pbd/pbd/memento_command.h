@@ -42,7 +42,7 @@ public:
 		: obj(a_object), before(a_before), after(a_after)
 	{
 		/* if the object dies, make sure that we die and that everyone knows about it */
-		obj.GoingAway.connect_same_thread (obj_death_connection, boost::bind (&MementoCommand::object_died, this));
+		obj.Destroyed.connect_same_thread (obj_death_connection, boost::bind (&MementoCommand::object_died, this));
 	}
 
 	~MementoCommand () {

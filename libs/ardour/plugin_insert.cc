@@ -130,7 +130,6 @@ PluginInsert::set_count (uint32_t num)
 
 PluginInsert::~PluginInsert ()
 {
-	drop_references ();
 }
 
 void

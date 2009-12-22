@@ -570,11 +570,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* named selections */
 
-	NamedSelection* named_selection_by_name (std::string name);
-	void add_named_selection (NamedSelection *);
-	void remove_named_selection (NamedSelection *);
+	boost::shared_ptr<NamedSelection> named_selection_by_name (std::string name);
+	void add_named_selection (boost::shared_ptr<NamedSelection>);
+	void remove_named_selection (boost::shared_ptr<NamedSelection>);
 
-	template<class T> void foreach_named_selection (T& obj, void (T::*func)(NamedSelection&));
+	template<class T> void foreach_named_selection (T& obj, void (T::*func)(boost::shared_ptr<NamedSelection>));
 	PBD::Signal0<void> NamedSelectionAdded;
 	PBD::Signal0<void> NamedSelectionRemoved;
 
@@ -1287,7 +1287,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* NAMED SELECTIONS */
 
 	mutable Glib::Mutex named_selection_lock;
-	typedef std::set<NamedSelection *> NamedSelectionList;
+	typedef std::set<boost::shared_ptr<NamedSelection> > NamedSelectionList;
 	NamedSelectionList named_selections;
 
 	int load_named_selections (const XMLNode&);

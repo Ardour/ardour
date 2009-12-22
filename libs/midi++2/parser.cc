@@ -313,7 +313,6 @@ Parser::trace (bool onoff, ostream *o, const string &prefix)
 	trace_connection.disconnect ();
 
 	if (onoff) {
-		cerr << "enabling tracing for port " << _port.name() << endl;
 		trace_stream = o;
 		trace_prefix = prefix;
 		any.connect_same_thread (trace_connection, boost::bind (&Parser::trace_event, this, _1, _2, _3));
@@ -402,8 +401,9 @@ Parser::scanner (unsigned char inbyte)
 	 * an EOX.  Actually, since EOX is a status byte, this
 	 * code ALWAYS handles the end of a VARIABLELENGTH message.
 	 */
-	
+
 	if (state == VARIABLELENGTH && statusbit)  {
+
 		/* The message has ended, so process it */
 
 		/* add EOX to any sysex message */
@@ -419,7 +419,7 @@ Parser::scanner (unsigned char inbyte)
 		}
 		cerr << dec << endl;
 #endif
-		if (msgindex > 0 && edit (msgbuf, msgindex) >= 0) {
+		if (msgindex > 0 && (edit.empty() || !(*edit (msgbuf, msgindex) >= 0))) {
 			if (!possible_mmc (msgbuf, msgindex) || _mmc_forward) {
 				if (!possible_mtc (msgbuf, msgindex) || _mtc_forward) {
 					if (!_offline) {
@@ -429,7 +429,7 @@ Parser::scanner (unsigned char inbyte)
 			}
 			if (!_offline) {
 				any (*this, msgbuf, msgindex);
-			}
+			} 
 		}
 	}
 	
@@ -490,8 +490,7 @@ Parser::scanner (unsigned char inbyte)
 		
 	case NEEDONEBYTE:
 		/* We've completed a 1 or 2 byte message. */
-		
-		if (edit (msgbuf, msgindex) == 0) {
+		if (edit.empty() || !(*edit (msgbuf, msgindex) == 0)) {
 			
 			/* message not cancelled by an editor */
 			

@@ -102,7 +102,6 @@ VSTPlugin::VSTPlugin (const VSTPlugin &other)
 VSTPlugin::~VSTPlugin ()
 {
 	deactivate ();
-	drop_references ();
 	fst_close (_fst);
 }
 

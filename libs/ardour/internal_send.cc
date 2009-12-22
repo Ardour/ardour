@@ -43,7 +43,7 @@ InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, boost:
 
 	set_name (sendto->name());
 
-	_send_to->GoingAway.connect_same_thread (*this, boost::bind (&InternalSend::send_to_going_away, this));
+	_send_to->DropReferences.connect_same_thread (*this, boost::bind (&InternalSend::send_to_going_away, this));
 	_send_to->NameChanged.connect_same_thread (*this, boost::bind (&InternalSend::send_to_name_changed, this));
 }
 

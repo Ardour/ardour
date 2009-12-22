@@ -102,10 +102,6 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, nfra
 
 AudioPlaylist::~AudioPlaylist ()
 {
-	drop_references ();
-
-	/* drop connections to signals */
-
 	_crossfades.clear ();
 }
 

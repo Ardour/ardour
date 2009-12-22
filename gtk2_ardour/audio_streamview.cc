@@ -190,7 +190,7 @@ AudioStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wai
 
 	/* catch region going away */
 
-	r->GoingAway.connect (*this, boost::bind (&AudioStreamView::remove_region_view, this, boost::weak_ptr<Region> (r)), gui_context());
+	r->DropReferences.connect (*this, boost::bind (&AudioStreamView::remove_region_view, this, boost::weak_ptr<Region> (r)), gui_context());
 
 	RegionViewAdded (region_view);
 

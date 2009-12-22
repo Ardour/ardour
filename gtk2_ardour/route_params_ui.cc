@@ -182,7 +182,7 @@ RouteParams_UI::add_routes (RouteList& routes)
 		//route_select_list.rows().back().select ();
 
 		route->NameChanged.connect (*this, boost::bind (&RouteParams_UI::route_name_changed, this, boost::weak_ptr<Route>(route)), gui_context());
-		route->GoingAway.connect (*this, boost::bind (&RouteParams_UI::route_removed, this, boost::weak_ptr<Route>(route)), gui_context());
+		route->DropReferences.connect (*this, boost::bind (&RouteParams_UI::route_removed, this, boost::weak_ptr<Route>(route)), gui_context());
 	}
 }
 
@@ -522,7 +522,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
 		SendUI *send_ui = new SendUI (this, send, _session);
 
 		cleanup_view();
-		send->GoingAway.connect (_processor_going_away_connection, boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor>(proc)), gui_context());
+		send->DropReferences.connect (_processor_going_away_connection, boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor>(proc)), gui_context());
 		_active_view = send_ui;
 
 		redir_hpane.add2 (*_active_view);
@@ -533,7 +533,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
 		ReturnUI *return_ui = new ReturnUI (this, retrn, _session);
 
 		cleanup_view();
-		retrn->GoingAway.connect (_processor_going_away_connection, boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor>(proc)), gui_context());
+		retrn->DropReferences.connect (_processor_going_away_connection, boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor>(proc)), gui_context());
 		_active_view = return_ui;
 
 		redir_hpane.add2 (*_active_view);
@@ -544,7 +544,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
 		GenericPluginUI *plugin_ui = new GenericPluginUI (plugin_insert, true);
 
 		cleanup_view();
-		plugin_insert->plugin()->GoingAway.connect (_processor_going_away_connection, boost::bind (&RouteParams_UI::plugin_going_away, this, PreFader), gui_context());
+		plugin_insert->plugin()->DropReferences.connect (_processor_going_away_connection, boost::bind (&RouteParams_UI::plugin_going_away, this, PreFader), gui_context());
 		plugin_ui->start_updating (0);
 		_active_view = plugin_ui;
 
@@ -556,7 +556,7 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
 		PortInsertUI *portinsert_ui = new PortInsertUI (this, _session, port_insert);
 
 		cleanup_view();
-		port_insert->GoingAway.connect (_processor_going_away_connection, boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor> (proc)), gui_context());
+		port_insert->DropReferences.connect (_processor_going_away_connection, boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor> (proc)), gui_context());
 		_active_view = portinsert_ui;
 
 		redir_hpane.pack2 (*_active_view);

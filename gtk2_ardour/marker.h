@@ -24,9 +24,10 @@
 #include <glib.h>
 
 #include <libgnomecanvasmm/pixbuf.h>
+#include <sigc++/signal.h>
 
 #include "ardour/ardour.h"
-#include "pbd/destructible.h"
+#include "pbd/signals.h"
 
 #include "canvas.h"
 
@@ -37,7 +38,7 @@ namespace ARDOUR {
 
 class PublicEditor;
 
-class Marker : public PBD::Destructible
+class Marker : public sigc::trackable
 {
   public:
 	enum Type {
@@ -57,6 +58,8 @@ class Marker : public PBD::Destructible
 		nframes_t frame = 0, bool handle_events = true);
 
 	virtual ~Marker ();
+
+	static PBD::Signal1<void,Marker*> CatchDeletion;
 
 	ArdourCanvas::Item& the_item() const;
 

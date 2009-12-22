@@ -51,11 +51,11 @@ Editor::handle_new_named_selection ()
 }
 
 void
-Editor::add_named_selection_to_named_selection_display (NamedSelection& selection)
+Editor::add_named_selection_to_named_selection_display (boost::shared_ptr<NamedSelection> selection)
 {
         TreeModel::Row row = *(named_selection_model->append());
 	row[named_selection_columns.text] = selection.name;
-	row[named_selection_columns.selection] = &selection;
+	row[named_selection_columns.selection] = selection;
 }
 
 void
@@ -195,13 +195,14 @@ Editor::create_named_selection ()
 			return;
 		}
 
-		new NamedSelection (name, thelist); // creation will add it to the model
-
+		boost::shared_ptr<NamedSelection> ns (new NamedSelection (name, thelist));
+		
 		/* make the one we just added be selected */
 
 		TreeModel::Children::iterator added = named_selection_model->children().end();
 		--added;
 		named_selection_display.get_selection()->select (*added);
+
 	} else {
 		error << _("No selectable material found in the currently selected time range") << endmsg;
 	}

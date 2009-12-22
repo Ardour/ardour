@@ -62,23 +62,23 @@ Controllable::add (Controllable& ctl)
 
 	/* Controllable::remove() is static - no need to manage this connection */
 
-	ctl.GoingAway.connect_same_thread (registry_connections, boost::bind (&Controllable::remove, ref (ctl)));
+	ctl.DropReferences.connect_same_thread (registry_connections, boost::bind (&Controllable::remove, &ctl));
 }
 
 void
-Controllable::remove (Controllable& ctl)
+Controllable::remove (Controllable* ctl)
 {
 	Glib::RWLock::WriterLock lm (registry_lock);
 
 	for (Controllables::iterator i = registry.begin(); i != registry.end(); ++i) {
-		if ((*i) == &ctl) {
+		if ((*i) == ctl) {
 			registry.erase (i);
 			break;
 		}
 	}
 
-	if (!ctl.uri().empty()) {
-		ControllablesByURI::iterator i = registry_by_uri.find (ctl.uri());
+	if (!ctl->uri().empty()) {
+		ControllablesByURI::iterator i = registry_by_uri.find (ctl->uri());
 		if (i != registry_by_uri.end()) {
 			registry_by_uri.erase (i);
 		}

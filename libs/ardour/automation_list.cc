@@ -112,7 +112,6 @@ AutomationList::AutomationList (const XMLNode& node, Evoral::Parameter id)
 
 AutomationList::~AutomationList()
 {
-	drop_references ();
 }
 
 boost::shared_ptr<Evoral::ControlList>

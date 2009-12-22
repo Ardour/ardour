@@ -40,7 +40,7 @@ using namespace Editing;
 using namespace Gnome;
 using namespace Canvas;
 
-PBD::Signal1<void,CrossfadeView*> CrossfadeView::GoingAway;
+PBD::Signal1<void,CrossfadeView*> CrossfadeView::CatchDeletion;
 
 CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 			      RouteTimeAxisView &tv,
@@ -90,7 +90,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 
 CrossfadeView::~CrossfadeView ()
 {
-	 GoingAway (this) ; /* EMIT_SIGNAL */
+	 CatchDeletion (this) ; /* EMIT_SIGNAL */
 }
 
 void

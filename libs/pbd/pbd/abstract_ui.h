@@ -24,12 +24,11 @@
 #include <string>
 #include <pthread.h>
 
-#include <sigc++/sigc++.h>
-
 #include <glibmm/thread.h>
 
 #include "pbd/receiver.h"
 #include "pbd/ringbufferNPT.h"
+#include "pbd/signals.h"
 #include "pbd/base_ui.h"
 
 class Touchable;
@@ -52,8 +51,8 @@ class AbstractUI : public BaseUI
 
 	Glib::Mutex request_buffer_map_lock;
 	RequestBufferMap request_buffers;
-	Glib::Private<RequestBuffer> per_thread_request_buffer;
-
+	static Glib::StaticPrivate<RequestBuffer> per_thread_request_buffer;
+	
 	Glib::Mutex               request_list_lock;
 	std::list<RequestObject*> request_list;
 	
@@ -62,6 +61,7 @@ class AbstractUI : public BaseUI
 	void send_request (RequestObject *);
 
 	virtual void do_request (RequestObject *) = 0;
+	PBD::ScopedConnection new_thread_connection;
 };
 
 #endif /* __pbd_abstract_ui_h__ */

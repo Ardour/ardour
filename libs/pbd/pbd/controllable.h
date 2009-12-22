@@ -73,7 +73,7 @@ class Controllable : public PBD::StatefulDestructible {
 	bool        _touching;
 
 	static void add (Controllable&);
-	static void remove (Controllable&);
+	static void remove (Controllable*);
 
 	typedef std::set<PBD::Controllable*> Controllables;
 	typedef std::map<std::string,PBD::Controllable*> ControllablesByURI;

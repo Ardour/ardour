@@ -73,7 +73,7 @@ class MarkerView : public TimeAxisViewItem
 		 */
 		~MarkerView() ;
 
-		static sigc::signal<void,MarkerView*> GoingAway;
+		static PBD::Signal1<void,MarkerView*> CatchDeletion;
 
 		//---------------------------------------------------------------------------------------//
 		// Marker Type Methods

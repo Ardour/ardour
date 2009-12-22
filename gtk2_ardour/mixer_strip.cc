@@ -312,7 +312,7 @@ MixerStrip::init ()
 
 MixerStrip::~MixerStrip ()
 {
-	drop_references ();
+	CatchDeletion (this);
 
 	delete input_selector;
 	delete output_selector;
@@ -1693,7 +1693,7 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	_current_delivery = send;
 
 	send->set_metering (true);
-	_current_delivery->GoingAway.connect (send_gone_connection, boost::bind (&MixerStrip::revert_to_default_display, this), gui_context());
+	_current_delivery->DropReferences.connect (send_gone_connection, boost::bind (&MixerStrip::revert_to_default_display, this), gui_context());
 
 	gain_meter().set_controls (_route, send->meter(), send->amp());
 	gain_meter().setup_meters ();

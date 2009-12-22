@@ -20,15 +20,12 @@
 #ifndef __ardour_gtk_gui_thread_h__
 #define __ardour_gtk_gui_thread_h__
 
+#include <cstdlib>
 #include <gtkmm2ext/gtk_ui.h>
 #include <boost/bind.hpp>
 #include <boost/bind/protect.hpp>
 
-#define ENSURE_GUI_THREAD(obj,method, ...) \
-     if (!Gtkmm2ext::UI::instance()->caller_is_self()) { \
-	     Gtkmm2ext::UI::instance()->call_slot (boost::bind ((method), &(obj), ## __VA_ARGS__)); \
-        return;\
-     }
+#define ENSURE_GUI_THREAD(obj,method, ...) if (!Gtkmm2ext::UI::instance()->caller_is_self()) { abort (); } 
 
 #define gui_context() Gtkmm2ext::UI::instance() /* a UICallback-derived object that specifies the event loop for GUI signal handling */
 #define ui_bind(f, ...) boost::protect (boost::bind (f, __VA_ARGS__))

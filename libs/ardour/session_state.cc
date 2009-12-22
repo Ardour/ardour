@@ -274,7 +274,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	SourceFactory::SourceCreated.connect_same_thread (*this, boost::bind (&Session::add_source, this, _1));
 	PlaylistFactory::PlaylistCreated.connect_same_thread (*this, boost::bind (&Session::add_playlist, this, _1, _2));
 	Processor::ProcessorCreated.connect_same_thread (*this, boost::bind (&Session::add_processor, this, _1));
-	NamedSelection::NamedSelectionCreated.connect_same_thread (*this, boost::bind (&Session::add_named_selection, this, _1));
 	AutomationList::AutomationListCreated.connect_same_thread (*this, boost::bind (&Session::add_automation_list, this, _1));
 	Controllable::Destroyed.connect_same_thread (*this, boost::bind (&Session::remove_controllable, this, _1));
 	IO::PortCountChanged.connect_same_thread (*this, boost::bind (&Session::ensure_buffers, this, _1));
@@ -789,7 +788,7 @@ Session::load_state (string snapshot_name)
 
 		/* there is pending state from a crashed capture attempt */
 
-		if (AskAboutPendingState()) {
+		if (*AskAboutPendingState()) {
 			state_was_pending = true;
 		}
 	}
@@ -1126,7 +1125,7 @@ Session::set_state (const XMLNode& node, int version)
 		_nominal_frame_rate = atoi (prop->value());
 
 		if (_nominal_frame_rate != _current_frame_rate) {
-			if (AskAboutSampleRateMismatch (_nominal_frame_rate, _current_frame_rate)) {
+			if (*AskAboutSampleRateMismatch (_nominal_frame_rate, _current_frame_rate)) {
 				return -1;
 			}
 		}

@@ -52,8 +52,6 @@ NamedSelection::NamedSelection (string n, PlaylistList& l)
 		(*i)->set_name (new_name);
 		(*i)->use();
 	}
-
-	NamedSelectionCreated (this);
 }
 
 NamedSelection::NamedSelection (Session& session, const XMLNode& node)
@@ -101,8 +99,9 @@ NamedSelection::NamedSelection (Session& session, const XMLNode& node)
 NamedSelection::~NamedSelection ()
 {
 	for (PlaylistList::iterator i = playlists.begin(); i != playlists.end(); ++i) {
-		(*i)->release ();
+		/* XXX who really owns these? us or the session? */
 		(*i)->drop_references ();
+		(*i)->release ();
 	}
 }
 

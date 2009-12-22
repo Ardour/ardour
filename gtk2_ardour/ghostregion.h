@@ -37,7 +37,7 @@ namespace Gnome {
 class MidiStreamView;
 class TimeAxisView;
 
-class GhostRegion 
+class GhostRegion
 {
 public:
 	GhostRegion(ArdourCanvas::Group* parent, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);
@@ -57,7 +57,7 @@ public:
 	ArdourCanvas::Group* group;
 	ArdourCanvas::SimpleRect* base_rect;
 
-	static PBD::Signal1<void,GhostRegion*> GoingAway;
+	static PBD::Signal1<void,GhostRegion*> CatchDeletion;
 };
 
 class AudioGhostRegion : public GhostRegion {

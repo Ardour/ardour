@@ -578,7 +578,7 @@ OSC::listen_to_route (boost::shared_ptr<Route> route, lo_address addr)
 	*/
 	
 	if (!route_exists) {
-		route->GoingAway.connect (*this, boost::bind (&OSC::drop_route, this, boost::weak_ptr<Route> (route)), this);
+		route->DropReferences.connect (*this, boost::bind (&OSC::drop_route, this, boost::weak_ptr<Route> (route)), this);
 	}
 }
 

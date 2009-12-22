@@ -130,7 +130,7 @@ SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session* session)
 
 	set_name ("SendUIWindow");
 
-	s->GoingAway.connect (going_away_connection, boost::bind (&SendUIWindow::send_going_away, this), gui_context());
+	s->DropReferences.connect (going_away_connection, boost::bind (&SendUIWindow::send_going_away, this), gui_context());
 
 	signal_delete_event().connect (sigc::bind (
 					       sigc::ptr_fun (just_hide_it),

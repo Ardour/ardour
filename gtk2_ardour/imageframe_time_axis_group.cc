@@ -35,6 +35,8 @@
 
 using namespace ARDOUR ;
 
+PBD::Signal1<void,ImageFrameTimeAxisGroup*> ImageFrameTimeAxisGroup::CatchDeletion;
+
 //---------------------------------------------------------------------------------------//
 // Constructor / Desctructor
 
@@ -74,7 +76,7 @@ ImageFrameTimeAxisGroup::~ImageFrameTimeAxisGroup()
 		iter = next ;
 	}
 
-	 GoingAway ; /* EMIT_SIGNAL */
+	 CatchDeletion ; /* EMIT_SIGNAL */
 }
 
 
@@ -216,7 +218,7 @@ ImageFrameTimeAxisGroup::add_imageframe_item(const string & frame_id, nframes_t 
 
 		imageframe_views.push_front(ifv) ;
 
-		ifv->GoingAway.connect (*this, boost::bind (&ImageFrameTimeAxisGroup::remove_imageframe_item, this, (void*)this), gui_context());
+		ifv->CatchDeletion.connect (*this, boost::bind (&ImageFrameTimeAxisGroup::remove_imageframe_item, this, (void*)this), gui_context());
 
 		 ImageFrameAdded(ifv, src) ; /* EMIT_SIGNAL */
 	}

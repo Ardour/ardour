@@ -61,7 +61,6 @@ PortInsert::PortInsert (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLN
 
 PortInsert::~PortInsert ()
 {
-	drop_references ();
 }
 
 void

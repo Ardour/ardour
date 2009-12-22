@@ -925,7 +925,7 @@ TimeAxisView::add_ghost (RegionView* rv)
 
 	if(gr) {
 		ghosts.push_back(gr);
-		gr->GoingAway.connect (*this, ui_bind (&TimeAxisView::erase_ghost, this, _1), gui_context());
+		gr->CatchDeletion.connect (*this, ui_bind (&TimeAxisView::erase_ghost, this, _1), gui_context());
 	}
 }
 

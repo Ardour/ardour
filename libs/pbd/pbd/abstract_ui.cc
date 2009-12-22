@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <iostream>
 
 #include "pbd/stacktrace.h"
 #include "pbd/abstract_ui.h"
@@ -9,11 +10,22 @@
 
 using namespace std;
 
+static void do_not_delete_the_request_buffer (void*) { }
+
+template<typename R>
+Glib::StaticPrivate<typename AbstractUI<R>::RequestBuffer> AbstractUI<R>::per_thread_request_buffer;
+
 template <typename RequestObject>
 AbstractUI<RequestObject>::AbstractUI (const string& name)
 	: BaseUI (name)
 {
-	PBD::ThreadCreatedWithRequestSize.connect (mem_fun (*this, &AbstractUI<RequestObject>::register_thread));
+	void (AbstractUI<RequestObject>::*pmf)(string,pthread_t,string,uint32_t) = &AbstractUI<RequestObject>::register_thread;
+
+	/* better to make this connect a handler that runs in the UI event loop but the syntax seems hard, and 
+	   register_thread() is thread safe anyway.
+	*/
+
+	PBD::ThreadCreatedWithRequestSize.connect_same_thread (new_thread_connection, boost::bind (pmf, this, _1, _2, _3, _4));
 }
 
 template <typename RequestObject> void
@@ -30,7 +42,7 @@ AbstractUI<RequestObject>::register_thread (string target_gui, pthread_t thread_
 		request_buffers[thread_id] = b;
 	}
 
-	per_thread_request_buffer.set (b);
+	per_thread_request_buffer.set (b, do_not_delete_the_request_buffer);
 }
 
 template <typename RequestObject> RequestObject*
@@ -143,6 +155,11 @@ template<typename RequestObject> void
 AbstractUI<RequestObject>::call_slot (const boost::function<void()>& f)
 {
 	if (caller_is_self()) {
+#ifndef NDEBUG
+		if (getenv ("DEBUG_THREADED_SIGNALS")) {
+			std::cerr << "functor called in correct thread for " << name() << " , execute ...\n";
+		}
+#endif
 		f ();
 		return;
 	}
@@ -154,6 +171,11 @@ AbstractUI<RequestObject>::call_slot (const boost::function<void()>& f)
 	}
 
 	req->the_slot = f;
+#ifndef NDEBUG
+	if (getenv ("DEBUG_THREADED_SIGNALS")) {
+		std::cerr << "functor called in wrong thread for " << name() << " (from " << pthread_name() << ") send request ...\n";
+	}
+#endif
 	send_request (req);
 }	
 

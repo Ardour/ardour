@@ -269,8 +269,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 
 RouteTimeAxisView::~RouteTimeAxisView ()
 {
-	drop_references ();
-	drop_connections ();
+	CatchDeletion (this);
 
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 		delete *i;

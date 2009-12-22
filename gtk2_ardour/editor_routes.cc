@@ -327,17 +327,24 @@ EditorRoutes::redisplay ()
 void
 EditorRoutes::route_deleted (Gtk::TreeModel::Path const &)
 {
-	/* this could require an order reset & sync */
+	if (!_session || _session->deletion_in_progress()) {
+		return;
+	}
+		
+        /* this could require an order reset & sync */
 	_session->set_remote_control_ids();
 	_ignore_reorder = true;
 	redisplay ();
 	_ignore_reorder = false;
 }
 
-
 void
 EditorRoutes::visible_changed (Glib::ustring const & path)
 {
+	if (_session && _session->deletion_in_progress()) {
+		return;
+	}
+
 	TreeIter iter;
 
 	if ((iter = _model->get_iter (path))) {
@@ -385,7 +392,6 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 
 		(*x)->route()->gui_changed.connect (*this, ui_bind (&EditorRoutes::handle_gui_changes, this, _1, _2), gui_context());
 		(*x)->route()->NameChanged.connect (*this, boost::bind (&EditorRoutes::route_name_changed, this, wr), gui_context());
-		(*x)->GoingAway.connect (*this, boost::bind (&EditorRoutes::route_removed, this, *x), gui_context());
 
 		if ((*x)->is_track()) {
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> ((*x)->route());
@@ -403,7 +409,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 }
 
 void
-EditorRoutes::handle_gui_changes (string const & what, void *src)
+EditorRoutes::handle_gui_changes (string const & what, void*)
 {
 	ENSURE_GUI_THREAD (*this, &EditorRoutes::handle_gui_changes, what, src)
 

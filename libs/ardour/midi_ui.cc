@@ -89,6 +89,8 @@ MidiControlUI::change_midi_ports ()
 bool
 MidiControlUI::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 {
+	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("something happend on  %1\n", port->name()));
+
 	if (ioc & ~IO_IN) {
 		return false;
 	}

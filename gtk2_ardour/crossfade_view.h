@@ -52,7 +52,7 @@ struct CrossfadeView : public TimeAxisViewItem
     bool visible() const { return _visible; }
     void set_valid (bool yn);
 
-    static PBD::Signal1<void,CrossfadeView*> GoingAway;
+    static PBD::Signal1<void,CrossfadeView*> CatchDeletion;
 
     AudioRegionView& upper_regionview () const;
 

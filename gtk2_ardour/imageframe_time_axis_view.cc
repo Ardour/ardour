@@ -214,7 +214,7 @@ ImageFrameTimeAxisView::add_imageframe_group(std::string group_id, void* src)
 
 		imageframe_groups.push_front(iftag) ;
 
-		iftag->GoingAway.connect (*this, boost::bind (&ImageFrameTimeAxisView::remove_imageframe_group, this, iftag, (void*)this), gui_context());
+		iftag->CatchDeletion.connect (*this, boost::bind (&ImageFrameTimeAxisView::remove_imageframe_group, this, iftag, (void*)this), gui_context());
 
 		ImageFrameGroupAdded(iftag, src) ; /* EMIT_SIGNAL */
 	}

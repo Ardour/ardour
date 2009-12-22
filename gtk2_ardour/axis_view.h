@@ -26,7 +26,7 @@
 #include <gdkmm/color.h>
 
 #include "pbd/xml++.h"
-#include "pbd/destructible.h"
+#include "pbd/signals.h"
 
 #include "ardour/session_handle.h"
 
@@ -41,7 +41,7 @@ namespace ARDOUR {
  * AxisView defines the abstract base class for time-axis trackviews and routes.
  *
  */
-class AxisView : public virtual Selectable, public PBD::Destructible, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
+class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
 {
   public:
 	/**
@@ -59,6 +59,8 @@ class AxisView : public virtual Selectable, public PBD::Destructible, public PBD
 	virtual void set_marked_for_display (bool yn) {
 		_marked_for_display = yn;
 	}
+	
+	static PBD::Signal1<void,AxisView*> CatchDeletion;
 
 	sigc::signal<void> Hiding;
 

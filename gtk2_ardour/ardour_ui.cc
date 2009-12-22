@@ -898,7 +898,7 @@ ARDOUR_UI::every_point_zero_one_seconds ()
 }
 
 void
-ARDOUR_UI::update_sample_rate (nframes_t ignored)
+ARDOUR_UI::update_sample_rate (nframes_t)
 {
 	char buf[32];
 

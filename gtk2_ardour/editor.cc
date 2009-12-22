@@ -4804,7 +4804,7 @@ Editor::handle_new_route (RouteList& routes)
 		rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
 		rtv->view()->HeightChanged.connect (sigc::mem_fun (*this, &Editor::streamview_height_changed));
 
-		rtv->GoingAway.connect (*this, boost::bind (&Editor::remove_route, this, rtv), gui_context());
+		route->DropReferences.connect (*this, boost::bind (&Editor::remove_route, this, rtv), gui_context());
 	}
 
 	_routes->routes_added (new_views);
@@ -4832,6 +4832,8 @@ Editor::remove_route (TimeAxisView *tv)
 	}
 		
 	TimeAxisView* next_tv = 0;
+
+	_routes->route_removed (tv);
 
 	if (tv == entered_track) {
 		entered_track = 0;
@@ -4862,6 +4864,7 @@ Editor::remove_route (TimeAxisView *tv)
                        ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
                }
 	}
+
 }
 
 void

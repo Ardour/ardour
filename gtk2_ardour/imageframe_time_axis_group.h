@@ -235,11 +235,11 @@ class ImageFrameTimeAxisGroup : public sigc::trackable
 		//---------------------------------------------------------------------------------//
 		// Emitted Signals
 
-		sigc::signal<void> GoingAway ;
+		static sigc::signal<void,ImageFrameTimeAxisGroup*> CatchDeletion;
 
 		/**
 		 * Emitted when this Group has been removed
-		 * This is different to the GoingAway signal in that this signal
+		 * This is different to the CatchDeletion signal in that this signal
 		 * is emitted during the deletion of this Time Axis, and not during
 		 * the destructor, this allows us to capture the source of the deletion
 		 * event

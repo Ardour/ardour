@@ -27,7 +27,7 @@
 
 using namespace ARDOUR ;
 
-sigc::signal<void,MarkerView*> MarkerView::GoingAway;
+PBD::Signal1<void,MarkerView*> MarkerView::CatchDeletion
 
 //---------------------------------------------------------------------------------------//
 // Constructor / Desctructor
