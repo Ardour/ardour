@@ -1221,7 +1221,8 @@ int
 IO::enable_connecting ()
 {
 	connecting_legal = true;
-	return *ConnectingLegal ();
+	boost::optional<int> r = ConnectingLegal ();
+	return r.get_value_or (0);
 }
 
 void
