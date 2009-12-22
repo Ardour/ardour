@@ -60,7 +60,7 @@ MidiClockTicker::session_going_away ()
 
 void MidiClockTicker::update_midi_clock_port()
 {
-	 _midi_port = _session->midi_clock_port();
+	_midi_port = _session->midi_clock_port();
 }
 
 void MidiClockTicker::transport_state_changed()
@@ -135,7 +135,7 @@ void MidiClockTicker::transport_looped()
 
 void MidiClockTicker::tick(const nframes_t& transport_frames, const BBT_Time& /*transport_bbt*/, const Timecode::Time& /*transport_smpt*/)
 {
-	if (!Config->get_send_midi_clock() || _session == 0 || _session->transport_speed() != 1.0f)
+	if (!Config->get_send_midi_clock() || _session == 0 || _session->transport_speed() != 1.0f || _midi_port == 0)
 		return;
 
 	MIDI::JACK_MidiPort* jack_port = dynamic_cast<MIDI::JACK_MidiPort*>(_midi_port);
