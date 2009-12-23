@@ -1097,15 +1097,22 @@ RouteUI::remove_this_route ()
 	string prompt;
 
 	if (is_track()) {
-		prompt  = string_compose (_("Do you really want to remove track \"%1\" ?\n\nYou may also lose the playlist used by this track.\n(cannot be undone)"), _route->name());
+		prompt  = string_compose (_("Do you really want to remove track \"%1\" ?\n\nYou may also lose the playlist used by this track.\n(this cannot be undone)"), _route->name());
 	} else {
-		prompt  = string_compose (_("Do you really want to remove bus \"%1\" ?\n(cannot be undone)"), _route->name());
+		prompt  = string_compose (_("Do you really want to remove bus \"%1\" ?\n(this cannot be undone)"), _route->name());
 	}
 
 	choices.push_back (_("No, do nothing."));
 	choices.push_back (_("Yes, remove it."));
 
-	Choice prompter (prompt, choices);
+	string title;
+	if (is_track()) {
+		title = _("Remove track");
+	} else {
+		title = _("Remove bus");
+	}
+
+	Choice prompter (title, prompt, choices);
 
 	if (prompter.run () == 1) {
 		Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (&RouteUI::idle_remove_this_route), this));

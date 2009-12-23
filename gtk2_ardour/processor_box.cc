@@ -1373,7 +1373,7 @@ ProcessorBox::clear_processors ()
 	choices.push_back (_("Cancel"));
 	choices.push_back (_("Yes, remove them all"));
 
-	Gtkmm2ext::Choice prompter (prompt, choices);
+	Gtkmm2ext::Choice prompter (_("Remove processors"), prompt, choices);
 
 	if (prompter.run () == 1) {
 		_route->clear_processors (PreFader);
@@ -1398,7 +1398,7 @@ ProcessorBox::clear_processors (Placement p)
 	choices.push_back (_("Cancel"));
 	choices.push_back (_("Yes, remove them all"));
 
-	Gtkmm2ext::Choice prompter (prompt, choices);
+	Gtkmm2ext::Choice prompter (_("Remove processors"), prompt, choices);
 
 	if (prompter.run () == 1) {
 		_route->clear_processors (p);

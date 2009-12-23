@@ -26,7 +26,8 @@ using namespace Gtkmm2ext;
 using namespace sigc;
 using namespace Gtk;
 
-Choice::Choice (string prompt, vector<string> choices, bool center)
+Choice::Choice (string title, string prompt, vector<string> choices, bool center)
+	: Dialog (title)
 {
 	int n;
 	vector<string>::iterator i;

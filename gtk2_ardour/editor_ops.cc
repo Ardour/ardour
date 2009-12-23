@@ -4501,7 +4501,7 @@ Editor::remove_last_capture ()
 		choices.push_back (_("No, do nothing."));
 		choices.push_back (_("Yes, destroy it."));
 
-		Gtkmm2ext::Choice prompter (prompt, choices);
+		Gtkmm2ext::Choice prompter (_("Destroy last capture"), prompt, choices);
 
 		if (prompter.run () == 1) {
 			_session->remove_last_capture ();
@@ -5787,8 +5787,13 @@ Editor::define_one_bar (nframes64_t start, nframes64_t end)
 		options.push_back (_("Cancel"));
 		options.push_back (_("Add new marker"));
 		options.push_back (_("Set global tempo"));
-		Choice c (_("Do you want to set the global tempo or add new tempo marker?"),
-			  options);
+
+		Choice c (
+			_("Define one bar"),
+			_("Do you want to set the global tempo or add a new tempo marker?"),
+			options
+			);
+		
 		c.set_default_response (2);
 
 		switch (c.run()) {
@@ -6200,7 +6205,14 @@ Editor::remove_tracks ()
 		choices.push_back (_("Yes, remove it."));
 	}
 
-	Choice prompter (prompt, choices);
+	string title;
+	if (ntracks) {
+		title = string_compose (_("Remove %1"), trackstr);
+	} else {
+		title = string_compose (_("Remove %1"), busstr);
+	}
+
+	Choice prompter (title, prompt, choices);
 
 	if (prompter.run () != 1) {
 		return;

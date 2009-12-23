@@ -32,7 +32,7 @@ namespace Gtkmm2ext {
 class Choice : public Gtk::Dialog
 {
   public:
-	Choice (std::string prompt, std::vector<std::string> choices, bool center = true);
+	Choice (std::string title, std::string prompt, std::vector<std::string> choices, bool center = true);
 	virtual ~Choice ();
 
   protected:

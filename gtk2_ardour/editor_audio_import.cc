@@ -596,9 +596,11 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 				choices.push_back (_("Embed all without questions"));
 
 				Gtkmm2ext::Choice rate_choice (
+					_("Sample rate"),
 					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"),
 							short_path (path, 40)),
-					choices, false);
+					choices, false
+					);
 
 				int resx = rate_choice.run ();
 
@@ -623,8 +625,10 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 				choices.push_back (_("Embed it anyway"));
 
 				Gtkmm2ext::Choice rate_choice (
+					_("Sample rate"),
 					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
-					choices, false);
+					choices, false
+					);
 
 				int resx = rate_choice.run ();
 

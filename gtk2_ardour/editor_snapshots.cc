@@ -154,12 +154,12 @@ EditorSnapshots::remove (Glib::ustring name)
 {
 	vector<string> choices;
 
-	std::string prompt = string_compose (_("Do you really want to remove snapshot \"%1\" ?\n(cannot be undone)"), name);
+	std::string prompt = string_compose (_("Do you really want to remove snapshot \"%1\" ?\n(which cannot be undone)"), name);
 
 	choices.push_back (_("No, do nothing."));
 	choices.push_back (_("Yes, remove it."));
 
-	Gtkmm2ext::Choice prompter (prompt, choices);
+	Gtkmm2ext::Choice prompter (_("Remove snapshot"), prompt, choices);
 
 	if (prompter.run () == 1) {
 		_session->remove_state (name);
