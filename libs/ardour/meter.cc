@@ -36,7 +36,7 @@ PBD::Signal0<void> Metering::Meter;
 PeakMeter::PeakMeter (Session& s, const XMLNode& node)
 	: Processor (s, node)
 {
-	current_meters = 0;
+	
 }
 
 /** Get peaks from @a bufs
@@ -119,7 +119,7 @@ PeakMeter::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 
-	current_meters = in.n_total ();
+	current_meters = in;
 
 	return Processor::configure_io (in, out);
 }
@@ -127,7 +127,7 @@ PeakMeter::configure_io (ChanCount in, ChanCount out)
 void
 PeakMeter::reflect_inputs (const ChanCount& in)
 {
-	current_meters = in.n_total ();
+	current_meters = in;
 }
 
 void
@@ -166,7 +166,7 @@ PeakMeter::meter ()
 
 	assert(_visible_peak_power.size() == _peak_power.size());
 
-	const size_t limit = min (_peak_power.size(), (size_t) current_meters);
+	const size_t limit = min (_peak_power.size(), (size_t) current_meters.n_total ());
 
 	for (size_t n = 0; n < limit; ++n) {
 

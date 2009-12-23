@@ -71,6 +71,9 @@ public:
 	/** Compute peaks */
 	void run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes, bool);
 
+	ChanCount input_streams () const { return current_meters; }
+	ChanCount output_streams () const { return current_meters; }
+
 	float peak_power (uint32_t n) {
 		if (n < _visible_peak_power.size()) {
 			return _visible_peak_power[n];
@@ -92,7 +95,7 @@ public:
 private:
 	friend class IO;
 	
-	uint32_t current_meters;
+	ChanCount current_meters;
 	
 	std::vector<float> _peak_power;
 	std::vector<float> _visible_peak_power;
