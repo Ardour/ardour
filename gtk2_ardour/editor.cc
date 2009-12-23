@@ -4824,6 +4824,13 @@ Editor::remove_route (TimeAxisView *tv)
 	ENSURE_GUI_THREAD (*this, &Editor::remove_route, tv)
 
 	TrackViewList::iterator i;
+	if ((i = find (track_views.begin(), track_views.end(), tv)) == track_views.end()) {
+		/* this track view has already been removed by someone else; e.g. when
+		 * the session goes away, all TimeAxisViews are removed by the Editor's
+		 * session_going_away handler.
+		 */
+		return;
+	}
 
 	boost::shared_ptr<Route> route;
 	RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (tv);
@@ -4839,17 +4846,14 @@ Editor::remove_route (TimeAxisView *tv)
 		entered_track = 0;
 	}
 
-	if ((i = find (track_views.begin(), track_views.end(), tv)) != track_views.end()) {
-
-               i = track_views.erase (i);
-
-               if (track_views.empty()) {
-                       next_tv = 0;
-               } else if (i == track_views.end()) {
-                       next_tv = track_views.front();
-               } else {
-                      next_tv = (*i);
-               }
+	i = track_views.erase (i);
+	
+	if (track_views.empty()) {
+		next_tv = 0;
+	} else if (i == track_views.end()) {
+		next_tv = track_views.front();
+	} else {
+		next_tv = (*i);
 	}
 
 	if (current_mixer_strip && current_mixer_strip->route() == route) {
