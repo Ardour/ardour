@@ -388,19 +388,15 @@ void
 AUPlugin::discover_factory_presets ()
 {
 	CFArrayRef presets;
-	UInt32 dataSize = 0;
-	OSStatus err = unit->GetPropertyInfo (kAudioUnitProperty_FactoryPresets,
-					      kAudioUnitScope_Global, 0,
-					      &dataSize, NULL);
-	if (err || !dataSize) {
-		/* no presets? */
+	UInt32 dataSize = sizeof (presets);
+	OSStatus err;
+	
+	if ((err = unit->GetProperty (kAudioUnitProperty_FactoryPresets, kAudioUnitScope_Global, 0, (void*) &presets, &dataSize)) != 0) {
+		cerr << "cannot get factory preset info: " << err << endl;
 		return;
 	}
 
-	dataSize = sizeof (presets);
-
-	if ((err = unit->GetProperty (kAudioUnitProperty_FactoryPresets, kAudioUnitScope_Global, 0, (void*) &presets, &dataSize)) != 0) {
-		cerr << "cannot get factory preset info: " << err << endl;
+	if (!presets) {
 		return;
 	}
 
@@ -412,6 +408,8 @@ AUPlugin::discover_factory_presets ()
 		string name = CFStringRefToStdString (preset->presetName);
 		factory_preset_map[name] = preset->presetNumber;
 	}
+	
+	CFRelease (presets);
 }
 
 void
