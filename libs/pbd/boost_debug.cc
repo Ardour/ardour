@@ -146,18 +146,51 @@ boost_debug_shared_ptr_mark_interesting (void* ptr, const char* type)
 }
 
 void
-boost_debug_shared_ptr_operator_equals (void const *sp, void const *obj, int)
+boost_debug_shared_ptr_operator_equals (void const *sp, void const *old_obj, int old_use_count,  void const *obj, int new_use_count)
 {
-	if (is_interesting_object (obj)) {
-		cerr << "sp @ " << sp << " assigned\n";
+	if (old_obj == 0 && obj == 0) {
+		return;
 	}
+
+	Glib::Mutex::Lock guard (the_lock);
+
+	if (is_interesting_object  (old_obj) || is_interesting_object (obj)) {
+		// cerr << "ASSIGN SWAPS " << old_obj << " & " << obj << endl;
+	}
+
+	if (is_interesting_object (old_obj)) {
+		// cerr << "\tlost old sp @ " << sp << " for " << old_obj << " UC = " << old_use_count << " now for " << obj << " UC = " << new_use_count 
+		// << " (total sp's = " << sptrs.size() << ')' << endl;			
+
+		PointerMap::iterator x = sptrs.find (sp);
+		
+		if (x != sptrs.end()) {
+			sptrs.erase (x);
+			// cerr << "\tRemoved (by assigment) sp for " << old_obj << " @ " << sp << " UC = " << old_use_count << " (total sp's = " << sptrs.size() << ')' << endl;
+		}
+	}
+
+	if (is_interesting_object (obj)) {
+
+		pair<void const*, SPDebug*> newpair;
+
+		newpair.first = sp;
+		newpair.second = new SPDebug (new Backtrace());
+
+		sptrs.insert (newpair);
+		
+		// cerr << "assignment created sp for " << obj << " @ " << sp << " used to point to " << old_obj << " UC = " << old_use_count 
+		// << " UC = " << new_use_count 
+		// << " (total sp's = " << sptrs.size() << ')' << endl;			
+
+	} 
 }
 
 void
-boost_debug_shared_ptr_reset (void const *sp, void const *obj, int)
+boost_debug_shared_ptr_reset (void const *sp, void const *obj, int use_count)
 {
 	if (is_interesting_object (obj)) {
-		cerr << "sp @ " << sp << " reset\n";
+		// cerr << "reset sp to object @ " << obj << " @ " << sp << " UC was " << use_count << " (total sp's = " << sptrs.size() << ')' << endl;
 	}
 }
 
@@ -169,7 +202,7 @@ boost_debug_shared_ptr_destructor (void const *sp, void const *obj, int use_coun
 
 	if (x != sptrs.end()) {
 		sptrs.erase (x);
-		// cerr << "Removed sp for " << obj << " @ " << sp << endl;
+		// cerr << "Removed sp for " << obj << " @ " << sp << " UC = " << use_count << " (total sp's = " << sptrs.size() << ')' << endl;
 	}
 }
 
@@ -184,8 +217,15 @@ boost_debug_shared_ptr_constructor (void const *sp, void const *obj, int use_cou
 		newpair.second = new SPDebug (new Backtrace());
 
 		sptrs.insert (newpair);
-		// cerr << "Stored constructor for " << obj << " @ " << sp << endl;
+		// cerr << "Stored constructor for " << obj << " @ " << sp << " UC = " << use_count << " (total sp's = " << sptrs.size() << ')' << endl;
 	}
+}
+
+void
+boost_debug_count_ptrs ()
+{
+	Glib::Mutex::Lock guard (the_lock);
+	// cerr << "Tracking " << interesting_pointers.size() << " interesting objects with " << sptrs.size () << " shared ptrs\n";
 }
 
 void

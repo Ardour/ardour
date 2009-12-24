@@ -502,6 +502,7 @@ Mixer_UI::session_going_away ()
 	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
 		delete (*i);
 	}
+	strips.clear ();
 
 	WindowTitle title(Glib::get_application_name());
 	title += _("Mixer");

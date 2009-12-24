@@ -18,6 +18,7 @@
 */
 
 #include "pbd/error.h"
+#include "pbd/boost_debug.h"
 
 #include "ardour/session.h"
 #include "ardour/session_handle.h"
@@ -66,6 +67,10 @@ SessionHandleRef::SessionHandleRef (Session& s)
 	_session.DropReferences.connect_same_thread (*this, boost::bind (&SessionHandleRef::session_going_away, this));
 	_session.Destroyed.connect_same_thread (*this, boost::bind (&SessionHandleRef::insanity_check, this));
 }	
+
+SessionHandleRef::~SessionHandleRef ()
+{
+}
 
 void
 SessionHandleRef::session_going_away ()

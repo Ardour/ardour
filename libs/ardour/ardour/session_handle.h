@@ -29,7 +29,7 @@ class SessionHandleRef : public PBD::ScopedConnectionList
 {
   public:
 	SessionHandleRef (ARDOUR::Session& s);
-	virtual ~SessionHandleRef () {}
+	virtual ~SessionHandleRef ();
 
   protected:
 	ARDOUR::Session&          _session;

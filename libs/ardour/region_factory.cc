@@ -46,7 +46,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, nframes_t start,
 
 	if ((other_a = boost::dynamic_pointer_cast<AudioRegion>(region)) != 0) {
 		AudioRegion* ar = new AudioRegion (other_a, start, length, name, layer, flags);
-		boost_debug_shared_ptr_mark_interesting (ar, typeid (ar).name());
+		boost_debug_shared_ptr_mark_interesting (ar, "Region");
 		boost::shared_ptr<AudioRegion> arp (ar);
 		boost::shared_ptr<Region> ret (boost::static_pointer_cast<Region> (arp));
 		ret->unlock_property_changes ();
@@ -79,7 +79,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region)
 
 	if ((ar = boost::dynamic_pointer_cast<const AudioRegion>(region)) != 0) {
 		AudioRegion* arn = new AudioRegion (ar);
-		boost_debug_shared_ptr_mark_interesting (arn, typeid (arn).name());
+		boost_debug_shared_ptr_mark_interesting (arn, "Region");
 		boost::shared_ptr<Region> ret (arn);
 		ret->unlock_property_changes ();
 		/* pure copy constructor - no CheckNewRegion emitted */
@@ -118,7 +118,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 
 	if ((other = boost::dynamic_pointer_cast<AudioRegion>(region)) != 0) {
 		AudioRegion* ar = new AudioRegion (other, srcs, srcs.front()->length(srcs.front()->timeline_position()), name, layer, flags);
-		boost_debug_shared_ptr_mark_interesting (ar, typeid (ar).name());
+		boost_debug_shared_ptr_mark_interesting (ar, "Region");
 		boost::shared_ptr<AudioRegion> arp (ar);
 		boost::shared_ptr<Region> ret (boost::static_pointer_cast<Region> (arp));
 		ret->unlock_property_changes ();
@@ -157,7 +157,7 @@ RegionFactory::create (const SourceList& srcs, nframes_t start, nframes_t length
 	if (srcs[0]->type() == DataType::AUDIO) {
 
 		AudioRegion* ar = new AudioRegion (srcs, start, length, name, layer, flags);
-		boost_debug_shared_ptr_mark_interesting (ar, typeid (ar).name());
+		boost_debug_shared_ptr_mark_interesting (ar, "Region");
 		boost::shared_ptr<AudioRegion> arp (ar);
 		boost::shared_ptr<Region> ret (boost::static_pointer_cast<Region> (arp));
 		ret->unlock_property_changes ();
@@ -191,7 +191,7 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 
 	if (srcs[0]->type() == DataType::AUDIO) {
 		AudioRegion* ar = new AudioRegion (srcs, node);
-		boost_debug_shared_ptr_mark_interesting (ar, typeid (ar).name());
+		boost_debug_shared_ptr_mark_interesting (ar, "Region");
 		boost::shared_ptr<Region> ret (ar);
 		ret->unlock_property_changes ();
 		CheckNewRegion (ret);
@@ -214,7 +214,7 @@ RegionFactory::create (boost::shared_ptr<Source> src, nframes_t start, nframes_t
 
 	if ((as = boost::dynamic_pointer_cast<AudioSource>(src)) != 0) {
 		AudioRegion* ar = new AudioRegion (as, start, length, name, layer, flags);
-		boost_debug_shared_ptr_mark_interesting (ar, typeid (ar).name());
+		boost_debug_shared_ptr_mark_interesting (ar, "Region");
 		boost::shared_ptr<Region> ret (ar);
 		ret->unlock_property_changes ();
 		if (announce) {

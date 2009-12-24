@@ -280,8 +280,8 @@ Session::Session (AudioEngine &eng,
 		if (master_out_channels) {
 			ChanCount count(DataType::AUDIO, master_out_channels);
 			Route* rt = new Route (*this, _("master"), Route::MasterOut, DataType::AUDIO);
-			boost_debug_shared_ptr_mark_interesting (rt, typeid (rt).name());
-			shared_ptr<Route> r (rt);
+			boost_debug_shared_ptr_mark_interesting (rt, "Route");
+			boost::shared_ptr<Route> r (rt);
 			r->input()->ensure_io (count, false, this);
 			r->output()->ensure_io (count, false, this);
 			r->set_remote_control_id (control_id);
@@ -295,7 +295,7 @@ Session::Session (AudioEngine &eng,
 		if (control_out_channels) {
 			ChanCount count(DataType::AUDIO, control_out_channels);
 			Route* rt = new Route (*this, _("monitor"), Route::ControlOut, DataType::AUDIO);
-			boost_debug_shared_ptr_mark_interesting (rt, typeid (rt).name());
+			boost_debug_shared_ptr_mark_interesting (rt, "Route");
 			shared_ptr<Route> r (rt);
 			r->input()->ensure_io (count, false, this);
 			r->output()->ensure_io (count, false, this);
@@ -363,7 +363,8 @@ Session::destroy ()
 	Stateful::loading_state_version = 0;
 
 	_butler->terminate_thread ();
-	
+	delete _butler;
+
 	delete midi_control_ui;
 
 	if (click_data != default_click) {
@@ -424,6 +425,8 @@ Session::destroy ()
 		/* writer goes out of scope and updates master */
 	}
 	routes.flush ();
+	extern void boost_debug_count_ptrs ();
+	boost_debug_count_ptrs ();
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete diskstreams\n");
 	{
@@ -1739,7 +1742,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 		try {
 			AudioTrack* at = new AudioTrack (*this, track_name, Route::Flag (0), mode);
-			boost_debug_shared_ptr_mark_interesting (at, typeid (at).name());
+			boost_debug_shared_ptr_mark_interesting (at, "Track");
 			track = boost::shared_ptr<AudioTrack>(at);
 
 			if (track->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
@@ -1930,7 +1933,7 @@ Session::new_audio_route (bool aux, int input_channels, int output_channels, Rou
 
 		try {
 			Route* rt = new Route (*this, bus_name, Route::Flag(0), DataType::AUDIO);
-			boost_debug_shared_ptr_mark_interesting (rt, typeid (rt).name());
+			boost_debug_shared_ptr_mark_interesting (rt, "Route");
 			shared_ptr<Route> bus (rt);
 
 			if (bus->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {

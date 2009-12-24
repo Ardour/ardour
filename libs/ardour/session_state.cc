@@ -1388,16 +1388,17 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 	if (has_diskstream) {
 		if (type == DataType::AUDIO) {
 			AudioTrack* at = new AudioTrack (*this, node, version);
-			// boost_debug_shared_ptr_mark_interesting (at, typeid (at).name());
-			boost::shared_ptr<Route> ret (at);
-			return ret;
+			boost_debug_shared_ptr_mark_interesting (at, "Track");
+			return boost::shared_ptr<Route> (at);
+
 		} else {
 			boost::shared_ptr<Route> ret (new MidiTrack (*this, node, version));
 			return ret;
 		}
 	} else {
-		boost::shared_ptr<Route> ret (new Route (*this, node));
-		return ret;
+		Route* rt = new Route (*this, node);
+		boost_debug_shared_ptr_mark_interesting (rt, "Route");
+		return boost::shared_ptr<Route> (rt);
 	}
 }
 

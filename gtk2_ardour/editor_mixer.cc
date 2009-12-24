@@ -355,6 +355,20 @@ Editor::session_going_away ()
 	_routes->clear ();
 	_route_groups->clear ();
 
+	/* do this first so that deleting a track doesn't reset cms to null
+	   and thus cause a leak.
+	*/
+
+	if (current_mixer_strip) {
+		if (current_mixer_strip->get_parent() != 0) {
+			global_hpacker.remove (*current_mixer_strip);
+		}
+		delete current_mixer_strip;
+		current_mixer_strip = 0;
+	}
+
+	/* delete all trackviews */
+
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		delete *i;
 	}
@@ -375,14 +389,6 @@ Editor::session_going_away ()
 	current_bbt_points = 0;
 
 	/* get rid of any existing editor mixer strip */
-
-	if (current_mixer_strip) {
-		if (current_mixer_strip->get_parent() != 0) {
-			global_hpacker.remove (*current_mixer_strip);
-		}
-		delete current_mixer_strip;
-		current_mixer_strip = 0;
-	}
 
 	WindowTitle title(Glib::get_application_name());
 	title += _("Editor");
