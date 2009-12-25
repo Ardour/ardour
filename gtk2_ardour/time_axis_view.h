@@ -96,6 +96,8 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
+	static PBD::Signal1<void,TimeAxisView*> CatchDeletion;
+
 	/** @return index of this TimeAxisView within its parent */
 	int order () const { return _order; }
 

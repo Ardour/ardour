@@ -33,7 +33,7 @@
 
 #include "i18n.h"
 
-using namespace ARDOUR ;
+using namespace ARDOUR;
 
 PBD::Signal1<void,ImageFrameTimeAxisGroup*> ImageFrameTimeAxisGroup::CatchDeletion;
 
@@ -49,8 +49,10 @@ PBD::Signal1<void,ImageFrameTimeAxisGroup*> ImageFrameTimeAxisGroup::CatchDeleti
 ImageFrameTimeAxisGroup::ImageFrameTimeAxisGroup(ImageFrameTimeAxisView& iftav, const string & group_id)
 	: _view_helper(iftav), _group_id(group_id)
 {
-	selected_imageframe_item = 0 ;
-	is_selected = false ;
+	selected_imageframe_item = 0;
+	is_selected = false;
+
+	ImageFrameView::CatchDeletion.connect (*this, ui_bind (&ImageFrameTimeAxisGroup::remove_imageframe_item, this, _1), gui_context());
 }
 
 /**
@@ -63,20 +65,20 @@ ImageFrameTimeAxisGroup::~ImageFrameTimeAxisGroup()
 	// Destroy all the ImageFramViews that we have
 	for(ImageFrameViewList::iterator iter = imageframe_views.begin(); iter != imageframe_views.end(); ++iter)
 	{
-		ImageFrameView* ifv = *iter ;
+		ImageFrameView* ifv = *iter;
 
-		ImageFrameViewList::iterator next = iter ;
-		next++ ;
+		ImageFrameViewList::iterator next = iter;
+		next++;
 
-		imageframe_views.erase(iter) ;
+		imageframe_views.erase(iter);
 
-		delete ifv ;
-		ifv = 0 ;
+		delete ifv;
+		ifv = 0;
 
-		iter = next ;
+		iter = next;
 	}
 
-	 CatchDeletion ; /* EMIT_SIGNAL */
+	 CatchDeletion; /* EMIT_SIGNAL */
 }
 
 
@@ -94,9 +96,9 @@ ImageFrameTimeAxisGroup::set_group_name(const string & new_name, void* src)
 {
 	if(_group_id != new_name)
 	{
-		std::string temp_name = _group_id ;
-		_group_id = new_name ;
-		 NameChanged(_group_id, temp_name, src) ; /* EMIT_SIGNAL */
+		std::string temp_name = _group_id;
+		_group_id = new_name;
+		 NameChanged(_group_id, temp_name, src); /* EMIT_SIGNAL */
 	}
 }
 
@@ -109,7 +111,7 @@ ImageFrameTimeAxisGroup::set_group_name(const string & new_name, void* src)
 std::string
 ImageFrameTimeAxisGroup::get_group_name() const
 {
-	return(_group_id) ;
+	return(_group_id);
 }
 
 
@@ -127,16 +129,16 @@ ImageFrameTimeAxisGroup::set_item_heights(gdouble h)
 	/* limit the values to something sane-ish */
 	if (h < 10.0 || h > 1000.0)
 	{
-		return(-1) ;
+		return(-1);
 	}
 
 	// set the heights of all the imaeg frame views within the group
 	for(ImageFrameViewList::const_iterator citer = imageframe_views.begin(); citer != imageframe_views.end(); ++citer)
 	{
-		(*citer)->set_height(h) ;
+		(*citer)->set_height(h);
 	}
 
-	return(0) ;
+	return(0);
 }
 
 /**
@@ -150,15 +152,15 @@ ImageFrameTimeAxisGroup::set_item_samples_per_units(gdouble spp)
 {
 	if(spp < 1.0)
 	{
-		return(-1) ;
+		return(-1);
 	}
 
 	for(ImageFrameViewList::const_iterator citer = imageframe_views.begin(); citer != imageframe_views.end(); ++citer)
 	{
-		(*citer)->set_samples_per_unit(spp) ;
+		(*citer)->set_samples_per_unit(spp);
 	}
 
-	return(0) ;
+	return(0);
 }
 
 /**
@@ -169,10 +171,10 @@ ImageFrameTimeAxisGroup::set_item_samples_per_units(gdouble spp)
 void
 ImageFrameTimeAxisGroup::apply_item_color(Gdk::Color& color)
 {
-	region_color = color ;
+	region_color = color;
 	for(ImageFrameViewList::const_iterator citer = imageframe_views.begin(); citer != imageframe_views.end(); citer++)
 	{
-		(*citer)->set_color (region_color) ;
+		(*citer)->set_color (region_color);
 	}
 }
 
@@ -198,7 +200,7 @@ ImageFrameTimeAxisGroup::apply_item_color(Gdk::Color& color)
 ImageFrameView*
 ImageFrameTimeAxisGroup::add_imageframe_item(const string & frame_id, nframes_t start, nframes_t duration, unsigned char* rgb_data, uint32_t width, uint32_t height, uint32_t num_channels, void* src)
 {
-	ImageFrameView* ifv = 0 ;
+	ImageFrameView* ifv = 0;
 
 	//check that there is not already an imageframe with that id
 	if(get_named_imageframe_item(frame_id) == 0)
@@ -214,16 +216,13 @@ ImageFrameTimeAxisGroup::add_imageframe_item(const string & frame_id, nframes_t 
 			rgb_data,
 			width,
 			height,
-			num_channels) ;
+			num_channels);
 
-		imageframe_views.push_front(ifv) ;
-
-		ifv->CatchDeletion.connect (*this, boost::bind (&ImageFrameTimeAxisGroup::remove_imageframe_item, this, (void*)this), gui_context());
-
-		 ImageFrameAdded(ifv, src) ; /* EMIT_SIGNAL */
+		imageframe_views.push_front(ifv);
+		ImageFrameAdded(ifv, src); /* EMIT_SIGNAL */
 	}
 
-	return(ifv) ;
+	return(ifv);
 }
 
 
@@ -236,17 +235,17 @@ ImageFrameTimeAxisGroup::add_imageframe_item(const string & frame_id, nframes_t 
 ImageFrameView*
 ImageFrameTimeAxisGroup::get_named_imageframe_item(const string & frame_id)
 {
-	ImageFrameView* ifv =  0 ;
+	ImageFrameView* ifv =  0;
 
 	for (ImageFrameViewList::const_iterator i = imageframe_views.begin(); i != imageframe_views.end(); ++i)
 	{
 		if (((ImageFrameView*)*i)->get_item_name() == frame_id)
 		{
-			ifv = ((ImageFrameView*)*i) ;
-			break ;
+			ifv = ((ImageFrameView*)*i);
+			break;
 		}
 	}
-	return(ifv) ;
+	return(ifv);
 }
 
 /**
@@ -260,28 +259,28 @@ ImageFrameTimeAxisGroup::get_named_imageframe_item(const string & frame_id)
 void
 ImageFrameTimeAxisGroup::remove_selected_imageframe_item(void* src)
 {
-	std::string frame_id ;
+	std::string frame_id;
 
 	if(selected_imageframe_item)
 	{
-		ImageFrameViewList::iterator i ;
+		ImageFrameViewList::iterator i;
 
 		if((i = find(imageframe_views.begin(), imageframe_views.end(), selected_imageframe_item)) != imageframe_views.end())
 		{
-			imageframe_views.erase(i) ;
-			frame_id = selected_imageframe_item->get_item_name() ;
+			imageframe_views.erase(i);
+			frame_id = selected_imageframe_item->get_item_name();
 
 			// note that we delete the item here
-			delete(selected_imageframe_item) ;
-			selected_imageframe_item = 0 ;
+			delete(selected_imageframe_item);
+			selected_imageframe_item = 0;
 
-			std::string track_id = _view_helper.trackview().name() ;
-			 ImageFrameRemoved(track_id, _group_id, frame_id, src) ; /* EMIT_SIGNAL */
+			std::string track_id = _view_helper.trackview().name();
+			 ImageFrameRemoved(track_id, _group_id, frame_id, src); /* EMIT_SIGNAL */
 		}
 	}
 	else
 	{
-		//cerr << "No Selected ImageFrame" << endl ;
+		//cerr << "No Selected ImageFrame" << endl;
 	}
 }
 
@@ -296,31 +295,31 @@ ImageFrameTimeAxisGroup::remove_selected_imageframe_item(void* src)
 ImageFrameView*
 ImageFrameTimeAxisGroup::remove_named_imageframe_item(const string & frame_id, void* src)
 {
-	ImageFrameView* removed = 0 ;
+	ImageFrameView* removed = 0;
 
 	for(ImageFrameViewList::iterator iter = imageframe_views.begin(); iter != imageframe_views.end(); ++iter)
 	{
-		ImageFrameView* tempItem = *iter ;
+		ImageFrameView* tempItem = *iter;
 		if(tempItem->get_item_name() == frame_id)
 		{
-			removed = tempItem ;
-			imageframe_views.erase(iter) ;
+			removed = tempItem;
+			imageframe_views.erase(iter);
 
 			if (removed == selected_imageframe_item)
 			{
-				selected_imageframe_item = 0 ;
+				selected_imageframe_item = 0;
 			}
 
-			std::string track_id = _view_helper.trackview().name() ;
-			 ImageFrameRemoved(track_id, _group_id, frame_id, src) ; /* EMIT_SIGNAL */
+			std::string track_id = _view_helper.trackview().name();
+			 ImageFrameRemoved(track_id, _group_id, frame_id, src); /* EMIT_SIGNAL */
 
 			// break from the for loop
-			break ;
+			break;
 		}
-		iter++ ;
+		iter++;
 	}
 
-	return(removed) ;
+	return(removed);
 }
 
 /**
@@ -330,18 +329,18 @@ ImageFrameTimeAxisGroup::remove_named_imageframe_item(const string & frame_id, v
  * @param ifv the ImageFrameView to remove
  */
 void
-ImageFrameTimeAxisGroup::remove_imageframe_item(ImageFrameView* ifv, void* src)
+ImageFrameTimeAxisGroup::remove_imageframe_item (ImageFrameView* ifv)
 {
 	ENSURE_GUI_THREAD (*this, &ImageFrameTimeAxisGroup::remove_imageframe_item, ifv, src)
 
 	ImageFrameViewList::iterator i;
-	if((i = find (imageframe_views.begin(), imageframe_views.end(), ifv)) != imageframe_views.end())
-	{
-		imageframe_views.erase(i) ;
 
-		std::string frame_id = ifv->get_item_name() ;
-		std::string track_id = _view_helper.trackview().name() ;
-		 ImageFrameRemoved(track_id, _group_id, frame_id, src) ; /* EMIT_SIGNAL */
+	if((i = find (imageframe_views.begin(), imageframe_views.end(), ifv)) != imageframe_views.end()) {
+		imageframe_views.erase(i);
+
+		std::string frame_id = ifv->get_item_name();
+		std::string track_id = _view_helper.trackview().name();
+		 ImageFrameRemoved(track_id, _group_id, frame_id, src); /* EMIT_SIGNAL */
 	}
 }
 
@@ -358,14 +357,14 @@ ImageFrameTimeAxisGroup::remove_imageframe_item(ImageFrameView* ifv, void* src)
 //{
 //	if(selected_imageframe_item)
 //	{
-//		selected_imageframe_item->set_selected(false, this) ;
+//		selected_imageframe_item->set_selected(false, this);
 //	}
 //
-//	selected_imageframe_item = ifv ;
+//	selected_imageframe_item = ifv;
 //
 //	if(!ifv->get_selected())
 //	{
-//		selected_imageframe_item->set_selected(true, this) ;
+//		selected_imageframe_item->set_selected(true, this);
 //	}
 //}
 
@@ -378,7 +377,7 @@ ImageFrameTimeAxisGroup::remove_imageframe_item(ImageFrameView* ifv, void* src)
 //void
 //ImageFrameTimeAxisGroup::set_selected_imageframe_item(std::string frame_id)
 //{
-//	selected_imageframe_item = get_named_imageframe_item(frame_id) ;
+//	selected_imageframe_item = get_named_imageframe_item(frame_id);
 //}
 
 
@@ -390,7 +389,7 @@ ImageFrameTimeAxisGroup::remove_imageframe_item(ImageFrameView* ifv, void* src)
 // ImageFrameView*
 // ImageFrameTimeAxisGroup::get_selected_imageframe_item()
 // {
-	// return(selected_imageframe_item) ;
+	// return(selected_imageframe_item);
 // }
 
 
@@ -403,7 +402,7 @@ ImageFrameTimeAxisGroup::remove_imageframe_item(ImageFrameView* ifv, void* src)
 bool
 ImageFrameTimeAxisGroup::get_selected() const
 {
-	return(is_selected) ;
+	return(is_selected);
 }
 
 
@@ -415,7 +414,7 @@ ImageFrameTimeAxisGroup::get_selected() const
 void
 ImageFrameTimeAxisGroup::set_selected(bool yn)
 {
-	is_selected = yn ;
+	is_selected = yn;
 }
 
 
@@ -454,9 +453,9 @@ ImageFrameTimeAxisGroup::remove_this_group(void* src)
 gint
 ImageFrameTimeAxisGroup::idle_remove_this_group(ImageFrameTimeAxisGroup* group, void* src)
 {
-	delete group ;
-	group = 0 ;
-	 group->GroupRemoved(group->get_group_name(), src) ; /* EMIT_SIGNAL */
-	return(false) ;
+	delete group;
+	group = 0;
+	 group->GroupRemoved(group->get_group_name(), src); /* EMIT_SIGNAL */
+	return(false);
 }
 

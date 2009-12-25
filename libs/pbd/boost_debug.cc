@@ -136,13 +136,23 @@ is_interesting_object (void const* ptr)
 
 /* ------------------------------- */
 
+static bool debug_out = false;
+
+void
+boost_debug_shared_ptr_show_live_debugging (bool yn)
+{
+	debug_out = yn;
+}
+
 void
 boost_debug_shared_ptr_mark_interesting (void* ptr, const char* type)
 {
 	Glib::Mutex::Lock guard (the_lock);
  	pair<void*,const char*> newpair (ptr, type);
 	interesting_pointers.insert (newpair);
-	// cerr << "Interesting object @ " << ptr << " of type " << type << endl;
+	if (debug_out) {
+		cerr << "Interesting object @ " << ptr << " of type " << type << endl;
+	}
 }
 
 void
@@ -155,18 +165,23 @@ boost_debug_shared_ptr_operator_equals (void const *sp, void const *old_obj, int
 	Glib::Mutex::Lock guard (the_lock);
 
 	if (is_interesting_object  (old_obj) || is_interesting_object (obj)) {
-		// cerr << "ASSIGN SWAPS " << old_obj << " & " << obj << endl;
+		if (debug_out) {
+			cerr << "ASSIGN SWAPS " << old_obj << " & " << obj << endl;
+		}
 	}
 
 	if (is_interesting_object (old_obj)) {
-		// cerr << "\tlost old sp @ " << sp << " for " << old_obj << " UC = " << old_use_count << " now for " << obj << " UC = " << new_use_count 
-		// << " (total sp's = " << sptrs.size() << ')' << endl;			
-
+		if (debug_out) {
+			cerr << "\tlost old sp @ " << sp << " for " << old_obj << " UC = " << old_use_count << " now for " << obj << " UC = " << new_use_count 
+			     << " (total sp's = " << sptrs.size() << ')' << endl;			
+		}
 		PointerMap::iterator x = sptrs.find (sp);
 		
 		if (x != sptrs.end()) {
 			sptrs.erase (x);
-			// cerr << "\tRemoved (by assigment) sp for " << old_obj << " @ " << sp << " UC = " << old_use_count << " (total sp's = " << sptrs.size() << ')' << endl;
+			if (debug_out) {
+				cerr << "\tRemoved (by assigment) sp for " << old_obj << " @ " << sp << " UC = " << old_use_count << " (total sp's = " << sptrs.size() << ')' << endl;
+			}
 		}
 	}
 
@@ -179,10 +194,12 @@ boost_debug_shared_ptr_operator_equals (void const *sp, void const *old_obj, int
 
 		sptrs.insert (newpair);
 		
-		// cerr << "assignment created sp for " << obj << " @ " << sp << " used to point to " << old_obj << " UC = " << old_use_count 
-		// << " UC = " << new_use_count 
-		// << " (total sp's = " << sptrs.size() << ')' << endl;			
-
+		if (debug_out) {
+			cerr << "assignment created sp for " << obj << " @ " << sp << " used to point to " << old_obj << " UC = " << old_use_count 
+			     << " UC = " << new_use_count 
+			     << " (total sp's = " << sptrs.size() << ')' << endl;			
+			cerr << *newpair.second << endl;
+		}
 	} 
 }
 
@@ -190,7 +207,9 @@ void
 boost_debug_shared_ptr_reset (void const *sp, void const *obj, int use_count)
 {
 	if (is_interesting_object (obj)) {
-		// cerr << "reset sp to object @ " << obj << " @ " << sp << " UC was " << use_count << " (total sp's = " << sptrs.size() << ')' << endl;
+		if (debug_out) {
+			cerr << "reset sp to object @ " << obj << " @ " << sp << " UC was " << use_count << " (total sp's = " << sptrs.size() << ')' << endl;
+		}
 	}
 }
 
@@ -202,7 +221,9 @@ boost_debug_shared_ptr_destructor (void const *sp, void const *obj, int use_coun
 
 	if (x != sptrs.end()) {
 		sptrs.erase (x);
-		// cerr << "Removed sp for " << obj << " @ " << sp << " UC = " << use_count << " (total sp's = " << sptrs.size() << ')' << endl;
+		if (debug_out) {
+			cerr << "Removed sp for " << obj << " @ " << sp << " UC = " << use_count << " (total sp's = " << sptrs.size() << ')' << endl;
+		}
 	}
 }
 
@@ -217,7 +238,10 @@ boost_debug_shared_ptr_constructor (void const *sp, void const *obj, int use_cou
 		newpair.second = new SPDebug (new Backtrace());
 
 		sptrs.insert (newpair);
-		// cerr << "Stored constructor for " << obj << " @ " << sp << " UC = " << use_count << " (total sp's = " << sptrs.size() << ')' << endl;
+		if (debug_out) {
+			cerr << "Stored constructor for " << obj << " @ " << sp << " UC = " << use_count << " (total sp's = " << sptrs.size() << ')' << endl;
+			cerr << *newpair.second << endl;
+		}
 	}
 }
 

@@ -1186,8 +1186,6 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 	ghost->set_colors();
 	ghosts.push_back (ghost);
 
-	ghost->CatchDeletion.connect (*this, ui_bind (&RegionView::remove_ghost, this, _1), gui_context());
-
 	return ghost;
 }
 

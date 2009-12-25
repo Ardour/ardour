@@ -138,12 +138,12 @@ class ImageFrameTimeAxis : public VisualTimeAxis
 		MarkerTimeAxis* remove_named_marker_time_axis(const std::string & track_id, void* src) ;
 
 		/**
-		 * Removes tav from the list of MarkerTimaAxis associated with this ImageFrameTimeAxis
+		 * Potentially removes a MarkerTimeAxisView from the list of MarkerTimaAxis associated with this ImageFrameTimeAxis
 		 *
 		 * @param tav the TimeAxis to remove
 		 * @param src the identity of the object that initiated the change
 		 */
-		void remove_time_axis_view(MarkerTimeAxis* tav, void* src) ;
+		void remove_time_axis_view (TimeAxisView* av);
 
 
 		//---------------------------------------------------------------------------------------//

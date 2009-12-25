@@ -102,6 +102,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	sigc::signal<void>      WidthChanged;
 
 	static sigc::signal<void,boost::shared_ptr<ARDOUR::Route> > SwitchIO;
+	static PBD::Signal1<void,MixerStrip*> CatchDeletion;
 
   protected:
 	friend class Mixer_UI;

@@ -49,6 +49,7 @@ Butler::Butler(Session& s)
 
 Butler::~Butler()
 {
+	terminate_thread ();
 }
 
 int

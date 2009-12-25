@@ -1104,6 +1104,7 @@ Session::set_state (const XMLNode& node, int version)
 	XMLNode* child;
 	const XMLProperty* prop;
 	int ret = -1;
+	extern void boost_debug_shared_ptr_show_live_debugging (bool);
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave);
 

@@ -362,9 +362,7 @@ Session::destroy ()
 
 	Stateful::loading_state_version = 0;
 
-	_butler->terminate_thread ();
 	delete _butler;
-
 	delete midi_control_ui;
 
 	if (click_data != default_click) {
@@ -425,8 +423,9 @@ Session::destroy ()
 		/* writer goes out of scope and updates master */
 	}
 	routes.flush ();
-	extern void boost_debug_count_ptrs ();
-	boost_debug_count_ptrs ();
+
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	cerr << "\n\n\n AFTER ROUTE CLEARING, there are " << r->size() << " routes in RCU\n";
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete diskstreams\n");
 	{

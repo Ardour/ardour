@@ -250,6 +250,8 @@ Mixer_UI::Mixer_UI ()
 	group_display.show();
 
 	auto_rebinding = FALSE;
+	
+	MixerStrip::CatchDeletion.connect (*this, ui_bind (&Mixer_UI::remove_strip, this, _1), gui_context());
 
 	_plugin_selector = new PluginSelector (PluginManager::the_manager ());
 }
@@ -334,7 +336,6 @@ Mixer_UI::add_strip (RouteList& routes)
 		}
 
 		route->NameChanged.connect (*this, boost::bind (&Mixer_UI::strip_name_changed, this, strip), gui_context());
-		route->DropReferences.connect (*this, boost::bind (&Mixer_UI::remove_strip, this, strip), gui_context());
 
 		strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
 		strip->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
@@ -350,7 +351,14 @@ Mixer_UI::add_strip (RouteList& routes)
 void
 Mixer_UI::remove_strip (MixerStrip* strip)
 {
-	ENSURE_GUI_THREAD (*this, &Mixer_UI::remove_strip, strip)
+	if (_session && _session->deletion_in_progress()) {
+		/* its all being taken care of */
+		return;
+	}
+
+	ENSURE_GUI_THREAD (*this, &Mixer_UI::remove_strip, strip);
+
+	cerr << "Mixer UI removing strip for " << strip << endl;
 
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator ri;

@@ -1088,7 +1088,6 @@ Editor::handle_new_imageframe_time_axis_view(const string & track_name, void* sr
 	row[route_display_columns.tv] = iftav;
 	route_list_display.get_selection()->select (row);
 
-	iftav->CatchDeletion.connect (*this, boost::bind (&Editor::remove_route, this, (TimeAxisView*)iftav), gui_context());
 	iftav->gui_changed.connect(sigc::mem_fun(*this, &Editor::handle_gui_changes)) ;
 }
 
@@ -1104,9 +1103,7 @@ Editor::handle_new_imageframe_marker_time_axis_view(const string & track_name, T
 	row[route_display_columns.text] = mta->name();
 	row[route_display_columns.tv] = mta;
 	route_list_display.get_selection()->select (row);
-
-	mta->CatchDeletion.connect (*this, boost::bind (&Editor::remove_route, this, (TimeAxisView*)mta), gui_context());
- }
+}
 
 
 /* </CMT Additions file="editor_route_list.cc"> */

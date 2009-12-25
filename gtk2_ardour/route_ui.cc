@@ -79,6 +79,9 @@ RouteUI::RouteUI (boost::shared_ptr<ARDOUR::Route> rt, ARDOUR::Session* sess)
 
 RouteUI::~RouteUI()
 {
+	_route.reset (); /* drop reference to route, so that it can be cleaned up */
+	route_connections.drop_connections ();
+
 	delete solo_menu;
 	delete mute_menu;
 	delete sends_menu;
@@ -165,9 +168,6 @@ RouteUI::self_delete ()
 {
 	/* This may be called from a non-GUI thread. Keep it safe */
 
-	cerr << "\n\nExpect to see route " << _route->name() << " be deleted\n";
-	_route.reset (); /* drop reference to route, so that it can be cleaned up */
-	route_connections.drop_connections ();
 	delete_when_idle (this);
 }
 

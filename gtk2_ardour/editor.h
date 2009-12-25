@@ -618,8 +618,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
 
 	void handle_new_route (ARDOUR::RouteList&);
-	void remove_route (TimeAxisView *);
-	bool route_removal;
+	void timeaxisview_deleted (TimeAxisView *);
 
 	Gtk::HBox           global_hpacker;
 	Gtk::VBox           global_vpacker;
@@ -1803,9 +1802,7 @@ public:
 	bool show_editor_mixer_when_tracks_arrive;
 	Gtk::VBox current_mixer_strip_vbox;
 	void cms_new (boost::shared_ptr<ARDOUR::Route>);
-	void cms_deleted ();
 	void current_mixer_strip_hidden ();
-	void current_mixer_strip_removed ();
 
 	void detach_tearoff (Gtk::Box* b, Gtk::Window* w);
 	void reattach_tearoff (Gtk::Box* b, Gtk::Window* w, int32_t n);

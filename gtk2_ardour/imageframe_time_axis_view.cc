@@ -66,6 +66,8 @@ ImageFrameTimeAxisView::ImageFrameTimeAxisView (ImageFrameTimeAxis& tv)
 
 	selected_imageframe_group = 0 ;
 	selected_imageframe_view = 0 ;
+
+	ImageFrameTimeAxisGroup::CatchDeletion.connect (*this, ui_bind (&ImageFrameTimeAxisView::remove_imageframe_group, this, _1), gui_context());
 }
 
 /**
@@ -211,11 +213,7 @@ ImageFrameTimeAxisView::add_imageframe_group(std::string group_id, void* src)
 	else
 	{
 		iftag = new ImageFrameTimeAxisGroup(*this, group_id) ;
-
 		imageframe_groups.push_front(iftag) ;
-
-		iftag->CatchDeletion.connect (*this, boost::bind (&ImageFrameTimeAxisView::remove_imageframe_group, this, iftag, (void*)this), gui_context());
-
 		ImageFrameGroupAdded(iftag, src) ; /* EMIT_SIGNAL */
 	}
 

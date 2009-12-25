@@ -1071,7 +1071,7 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 		}
 	}
 
-	ghost->CatchDeletion.connect (*this, ui_bind (&RegionView::remove_ghost, this, _1), gui_context());
+	GhostRegion::CatchDeletion.connect (*this, ui_bind (&RegionView::remove_ghost, this, _1), gui_context());
 
 	return ghost;
 }

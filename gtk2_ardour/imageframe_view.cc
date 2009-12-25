@@ -34,7 +34,7 @@
 #include "canvas_impl.h"
 #include "gui_thread.h"
 
-using namespace ARDOUR ;
+using namespace ARDOUR;
 using namespace Gtk;
 
 sigc::signal<void,ImageFrameView*> ImageFrameView::GoingAway;
@@ -73,24 +73,24 @@ ImageFrameView::ImageFrameView(const string & item_id,
 						   TimeAxisViewItem::ShowHandles))
 
 {
-	the_parent_group = item_group ;
-	set_name_text(item_id) ;
+	the_parent_group = item_group;
+	set_name_text(item_id);
 
-	image_data_width = width ;
-	image_data_height = height ;
-	image_data_num_channels = num_channels ;
+	image_data_width = width;
+	image_data_height = height;
+	image_data_num_channels = num_channels;
 
 	//This should be art_free'd once the ArtPixBuf is destroyed - this should happen when we destroy the imageframe canvas item
-	unsigned char* the_rgb_data = (unsigned char*) art_alloc(width*height*num_channels) ;
-	memcpy(the_rgb_data, rgb_data, (width*height*num_channels)) ;
+	unsigned char* the_rgb_data = (unsigned char*) art_alloc(width*height*num_channels);
+	memcpy(the_rgb_data, rgb_data, (width*height*num_channels));
 
-	ArtPixBuf* pbuf ;
+	ArtPixBuf* pbuf;
 	pbuf = art_pixbuf_new_rgba(the_rgb_data, width, height, (num_channels * width));
-	imageframe = 0 ;
+	imageframe = 0;
 
 	//calculate our image width based on the track height
-	double im_ratio = (double)width/(double)height ;
-	double im_width = ((double)(trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE) * im_ratio) ;
+	double im_ratio = (double)width/(double)height;
+	double im_width = ((double)(trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE) * im_ratio);
 
 	imageframe = new ImageFrame (*group, pbuf, 1.0, 1.0, ANCHOR_NW, im_width, (trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE));
 
@@ -101,8 +101,10 @@ ImageFrameView::ImageFrameView(const string & item_id,
 	frame_handle_start->raise_to_top();
 	frame_handle_end->raise_to_top();
 
-    set_position(start, this) ;
-    set_duration(duration, this) ;
+	set_position(start, this);
+	set_duration(duration, this);
+
+	MarkerView::CatchDeletion.connect (*this, ui_bind (&ImageFrameView::remove_marker_view_item, this, _1), gui_context());
 }
 
 /**
@@ -117,29 +119,29 @@ ImageFrameView::~ImageFrameView()
 
 	for(MarkerViewList::iterator iter = marker_view_list.begin(); iter != marker_view_list.end(); ++iter)
 	{
-		MarkerView* mv = (*iter) ;
+		MarkerView* mv = (*iter);
 
-		MarkerViewList::iterator next = iter ;
-		next++ ;
+		MarkerViewList::iterator next = iter;
+		next++;
 
 		// remove the item from our marker list
 		// the current iterator becomes invalid after this point, so we cannot call next upon it
 		// luckily enough, we already have next
-		marker_view_list.erase(iter) ;
+		marker_view_list.erase(iter);
 
 		// remove the item from the marker time axis
-		MarkerTimeAxisView* mtav = dynamic_cast<MarkerTimeAxis*>(&mv->get_time_axis_view())->get_view() ;
+		MarkerTimeAxisView* mtav = dynamic_cast<MarkerTimeAxis*>(&mv->get_time_axis_view())->get_view();
 		if(mtav)
 		{
-			mtav->remove_marker_view(mv, this) ;
+			mtav->remove_marker_view(mv, this);
 		}
 
-		mv->set_marked_item(0) ;
-		delete mv ;
-		mv = 0 ;
+		mv->set_marked_item(0);
+		delete mv;
+		mv = 0;
 
 		// set our iterator to next, as we have invalided the current iterator with the call to erase
-		iter = next ;
+		iter = next;
 	}
 
 	// if we are the currently selected item withi the parent track, we need to se-select
@@ -147,12 +149,12 @@ ImageFrameView::~ImageFrameView()
 	{
 		if(the_parent_group->get_view().get_selected_imageframe_view() == this)
 		{
-			the_parent_group->get_view().clear_selected_imageframe_item(false) ;
+			the_parent_group->get_view().clear_selected_imageframe_item(false);
 		}
 	}
 
 	delete imageframe;
-	imageframe = 0 ;
+	imageframe = 0;
 }
 
 
@@ -169,10 +171,10 @@ ImageFrameView::~ImageFrameView()
 bool
 ImageFrameView::set_position(nframes64_t pos, void* src, double* delta)
 {
-	nframes64_t old_pos = frame_position ;
+	nframes64_t old_pos = frame_position;
 
 	// do the standard stuff
-	bool ret = TimeAxisViewItem::set_position(pos, src, delta) ;
+	bool ret = TimeAxisViewItem::set_position(pos, src, delta);
 
 	// everything went ok with the standard stuff?
  	if (ret) {
@@ -180,14 +182,14 @@ ImageFrameView::set_position(nframes64_t pos, void* src, double* delta)
 		for (MarkerViewList::iterator i = marker_view_list.begin(); i != marker_view_list.end(); ++i)
 		{
 			// calculate the offset of the marker
-			MarkerView* mv = (MarkerView*)*i ;
-			nframes64_t marker_old_pos = mv->get_position() ;
+			MarkerView* mv = (MarkerView*)*i;
+			nframes64_t marker_old_pos = mv->get_position();
 
-			mv->set_position(pos + (marker_old_pos - old_pos), src) ;
+			mv->set_position(pos + (marker_old_pos - old_pos), src);
 		}
 	}
 
-	return(ret) ;
+	return(ret);
 }
 
 /**
@@ -201,7 +203,7 @@ bool
 ImageFrameView::set_duration(nframes64_t dur, void* src)
 {
 	/* do the standard stuff */
-	bool ret = TimeAxisViewItem::set_duration(dur, src) ;
+	bool ret = TimeAxisViewItem::set_duration(dur, src);
 
 	// eveything went ok with the standard stuff?
 	if(ret)
@@ -210,7 +212,7 @@ ImageFrameView::set_duration(nframes64_t dur, void* src)
 		imageframe->property_drawwidth() = trackview.editor.frame_to_pixel(get_duration());
 	}
 
-	return(ret) ;
+	return(ret);
 }
 
 //---------------------------------------------------------------------------------------//
@@ -225,7 +227,7 @@ ImageFrameView::set_duration(nframes64_t dur, void* src)
 void
 ImageFrameView::set_time_axis_group(ImageFrameTimeAxisGroup* group)
 {
-	the_parent_group = group ;
+	the_parent_group = group;
 }
 
 /**
@@ -236,7 +238,7 @@ ImageFrameView::set_time_axis_group(ImageFrameTimeAxisGroup* group)
 ImageFrameTimeAxisGroup*
 ImageFrameView::get_time_axis_group()
 {
-	return(the_parent_group) ;
+	return(the_parent_group);
 }
 
 
@@ -253,7 +255,7 @@ ImageFrameView::set_height (gdouble h)
 {
 	// set the image size
 	// @todo might have to re-get the image data, for a large height...hmmm.
-	double im_ratio = (double)image_data_width/(double)image_data_height ;
+	double im_ratio = (double)image_data_width/(double)image_data_height;
 
 	imageframe->property_width() = (h - TimeAxisViewItem::NAME_Y_OFFSET) * im_ratio;
 	imageframe->property_height() = h - TimeAxisViewItem::NAME_Y_OFFSET;
@@ -285,11 +287,8 @@ ImageFrameView::set_height (gdouble h)
 void
 ImageFrameView::add_marker_view_item(MarkerView* item, void* src)
 {
-	marker_view_list.push_back(item) ;
-
-	item->CatchDeletion.connect (*this, boost::bind (&ImageFrameView::remove_marker_view_item, this, (void*)this), gui_context());
-
-	 MarkerViewAdded(item, src) ; /* EMIT_SIGNAL */
+	marker_view_list.push_back(item);
+	 MarkerViewAdded(item, src); /* EMIT_SIGNAL */
 }
 
 /**
@@ -303,28 +302,28 @@ ImageFrameView::add_marker_view_item(MarkerView* item, void* src)
 MarkerView*
 ImageFrameView::remove_named_marker_view_item(const string & markerId, void* src)
 {
-	MarkerView* mv = 0 ;
-	MarkerViewList::iterator i = marker_view_list.begin() ;
+	MarkerView* mv = 0;
+	MarkerViewList::iterator i = marker_view_list.begin();
 
 	while(i != marker_view_list.end())
 	{
 		if (((MarkerView*)*i)->get_item_name() == markerId)
 		{
-			mv = (*i) ;
+			mv = (*i);
 
-			marker_view_list.erase(i) ;
+			marker_view_list.erase(i);
 
-			 MarkerViewRemoved(mv,src) ; /* EMIT_SIGNAL */
+			 MarkerViewRemoved(mv,src); /* EMIT_SIGNAL */
 
 			// iterator is now invalid, but since we should only ever have
 			// one item with the specified name, things are ok, and we can
 			// break from the while loop
-			break ;
+			break;
 		}
-		i++ ;
+		i++;
 	}
 
-	return(mv) ;
+	return(mv);
 }
 
 /**
@@ -335,15 +334,15 @@ ImageFrameView::remove_named_marker_view_item(const string & markerId, void* src
  * @param src the identity of the object that initiated the change
  */
 void
-ImageFrameView::remove_marker_view_item(MarkerView* mv, void* src)
+ImageFrameView::remove_marker_view_item (MarkerView* mv)
 {
 	ENSURE_GUI_THREAD (*this, &ImageFrameView::remove_marker_view_item, mv, src)
 
-	MarkerViewList::iterator i ;
+	MarkerViewList::iterator i;
 
-	if((i = find (marker_view_list.begin(), marker_view_list.end(), mv)) != marker_view_list.end()) {
-		marker_view_list.erase(i) ;
-		 MarkerViewRemoved (mv, src) ; /* EMIT_SIGNAL */
+	if ((i = find (marker_view_list.begin(), marker_view_list.end(), mv)) != marker_view_list.end()) {
+		marker_view_list.erase(i);
+		MarkerViewRemoved (mv, src); /* EMIT_SIGNAL */
 	}
 }
 
@@ -355,18 +354,18 @@ ImageFrameView::remove_marker_view_item(MarkerView* mv, void* src)
 bool
 ImageFrameView::has_marker_view_item(const string & mname)
 {
-	bool result = false ;
+	bool result = false;
 
 	for (MarkerViewList::const_iterator ci = marker_view_list.begin(); ci != marker_view_list.end(); ++ci)
 	{
 		if (((MarkerView*)*ci)->get_item_name() == mname)
 		{
-			result = true ;
+			result = true;
 
 			// found the item, so we can break the for loop
-			break ;
+			break;
 		}
 	}
 
-	return(result) ;
+	return(result);
 }

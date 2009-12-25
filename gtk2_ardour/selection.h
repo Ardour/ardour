@@ -85,9 +85,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	MidiRegionSelection  midi_regions;
 	MidiNoteSelection    midi_notes;
 
-	Selection (PublicEditor const * e) : tracks (e), editor (e), next_time_id (0) {
-		clear();
-	}
+	Selection (PublicEditor const * e);
 
 	// Selection& operator= (const Selection& other);
 

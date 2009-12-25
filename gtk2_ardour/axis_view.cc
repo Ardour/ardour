@@ -44,7 +44,6 @@ using namespace Gtkmm2ext;
 using namespace ARDOUR;
 
 list<Gdk::Color> AxisView::used_colors;
-PBD::Signal1<void,AxisView*> AxisView::CatchDeletion;
 
 AxisView::AxisView (ARDOUR::Session* sess) 
 	: SessionHandlePtr (sess)

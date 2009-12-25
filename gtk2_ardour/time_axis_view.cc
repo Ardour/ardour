@@ -74,6 +74,7 @@ uint32_t TimeAxisView::hSmaller = 0;
 uint32_t TimeAxisView::hSmall = 0;
 bool TimeAxisView::need_size_info = true;
 int const TimeAxisView::_max_order = 512;
+PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
 
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess),
@@ -178,6 +179,8 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_hbox.show ();
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
+
+	GhostRegion::CatchDeletion.connect (*this, ui_bind (&TimeAxisView::erase_ghost, this, _1), gui_context());
 }
 
 TimeAxisView::~TimeAxisView()
@@ -925,24 +928,23 @@ TimeAxisView::add_ghost (RegionView* rv)
 
 	if(gr) {
 		ghosts.push_back(gr);
-		gr->CatchDeletion.connect (*this, ui_bind (&TimeAxisView::erase_ghost, this, _1), gui_context());
 	}
 }
 
 void
-TimeAxisView::remove_ghost (RegionView* rv) {
+TimeAxisView::remove_ghost (RegionView* rv) 
+{
 	rv->remove_ghost_in (*this);
 }
 
 void
-TimeAxisView::erase_ghost (GhostRegion* gr) {
-	if(in_destructor) {
+TimeAxisView::erase_ghost (GhostRegion* gr) 
+{
+	if (in_destructor) {
 		return;
 	}
-
-	list<GhostRegion*>::iterator i;
-
-	for (i = ghosts.begin(); i != ghosts.end(); ++i) {
+	
+	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 		if ((*i) == gr) {
 			ghosts.erase (i);
 			break;

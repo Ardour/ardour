@@ -310,7 +310,6 @@ Editor::Editor ()
 	_show_waveforms_recording = true;
 	show_gain_after_trim = false;
 	verbose_cursor_on = true;
-	route_removal = false;
 	last_item_entered = 0;
 	last_item_entered_n = 0;
 
@@ -687,6 +686,8 @@ Editor::Editor ()
 	Session::AskAboutPlaylistDeletion.connect_same_thread (*this, boost::bind (&Editor::playlist_deletion_dialog, this, _1));
 
 	Config->ParameterChanged.connect (*this, ui_bind (&Editor::parameter_changed, this, _1), gui_context());
+
+	TimeAxisView::CatchDeletion.connect (*this, ui_bind (&Editor::timeaxisview_deleted, this, _1), gui_context());
 
 	_last_normalization_value = 0;
 
@@ -4803,8 +4804,6 @@ Editor::handle_new_route (RouteList& routes)
 
 		rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
 		rtv->view()->HeightChanged.connect (sigc::mem_fun (*this, &Editor::streamview_height_changed));
-
-		route->DropReferences.connect (*this, boost::bind (&Editor::remove_route, this, rtv), gui_context());
 	}
 
 	_routes->routes_added (new_views);
@@ -4819,56 +4818,62 @@ Editor::handle_new_route (RouteList& routes)
 }
 
 void
-Editor::remove_route (TimeAxisView *tv)
+Editor::timeaxisview_deleted (TimeAxisView *tv)
 {
-	ENSURE_GUI_THREAD (*this, &Editor::remove_route, tv)
-
-	TrackViewList::iterator i;
-	if ((i = find (track_views.begin(), track_views.end(), tv)) == track_views.end()) {
-		/* this track view has already been removed by someone else; e.g. when
-		 * the session goes away, all TimeAxisViews are removed by the Editor's
-		 * session_going_away handler.
-		 */
+	if (_session && _session->deletion_in_progress()) {
+		/* the situation is under control */
 		return;
 	}
 
-	boost::shared_ptr<Route> route;
-	RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (tv);
-	if (rtav) {
-		route = rtav->route ();
-	}
+	ENSURE_GUI_THREAD (*this, &Editor::timeaxisview_deleted, tv);
 		
-	TimeAxisView* next_tv = 0;
 
 	_routes->route_removed (tv);
 
 	if (tv == entered_track) {
 		entered_track = 0;
 	}
-
-	i = track_views.erase (i);
 	
-	if (track_views.empty()) {
-		next_tv = 0;
-	} else if (i == track_views.end()) {
-		next_tv = track_views.front();
-	} else {
-		next_tv = (*i);
+	/* remove it from the list of track views */
+
+	TrackViewList::iterator i;
+
+	if ((i = find (track_views.begin(), track_views.end(), tv)) != track_views.end()) {
+		i = track_views.erase (i);
 	}
+
+	/* update whatever the current mixer strip is displaying, if revelant */
+
+	boost::shared_ptr<Route> route;
+	RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (tv);
+
+	if (rtav) {
+		route = rtav->route ();
+	} 
 
 	if (current_mixer_strip && current_mixer_strip->route() == route) {
 
-               if (next_tv) {
-                       set_selected_mixer_strip (*next_tv);
-               } else {
-                       /* make the editor mixer strip go away setting the
-                        * button to inactive (which also unticks the menu option)
-                        */
+		TimeAxisView* next_tv;
 
-                       ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
-               }
-	}
-
+		if (track_views.empty()) {
+			next_tv = 0;
+		} else if (i == track_views.end()) {
+			next_tv = track_views.front();
+		} else {
+			next_tv = (*i);
+		}
+		
+		
+		if (next_tv) {
+			set_selected_mixer_strip (*next_tv);
+		} else {
+			/* make the editor mixer strip go away setting the
+			 * button to inactive (which also unticks the menu option)
+			 */
+			
+			ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
+		}
+	} 
 }
 
 void

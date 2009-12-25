@@ -46,6 +46,22 @@ struct AudioRangeComparator {
     }
 };
 
+Selection::Selection (const PublicEditor* e)
+	: tracks (e)
+	, editor (e)
+	, next_time_id (0) 
+{
+	clear ();
+
+	/* we have disambiguate which remove() for the compiler */
+
+	void (Selection::*track_remove)(TimeAxisView*) = &Selection::remove;
+	TimeAxisView::CatchDeletion.connect (*this, ui_bind (track_remove, this, _1), gui_context());
+
+	void (Selection::*marker_remove)(Marker*) = &Selection::remove;
+	Marker::CatchDeletion.connect (*this, ui_bind (marker_remove, this, _1), gui_context());
+}	
+
 #if 0
 Selection&
 Selection::operator= (const Selection& other)
@@ -209,8 +225,6 @@ Selection::toggle (TimeAxisView* track)
 	TrackSelection::iterator i;
 
 	if ((i = find (tracks.begin(), tracks.end(), track)) == tracks.end()) {
-		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
-		track->CatchDeletion.connect (*this, boost::bind (pmf, this, track), gui_context());
 		tracks.push_back (track);
 	} else {
 		tracks.erase (i);
@@ -336,11 +350,6 @@ void
 Selection::add (const TrackViewList& track_list)
 {
 	TrackViewList added = tracks.add (track_list);
-
-	for (list<TimeAxisView*>::const_iterator i = added.begin(); i != added.end(); ++i) {
-		void (Selection::*pmf)(TimeAxisView*) = &Selection::remove;
-		(*i)->CatchDeletion.connect (*this, boost::bind (pmf, this, (*i)), gui_context());
-	}
 
 	if (!added.empty()) {
 		TracksChanged ();
@@ -945,13 +954,6 @@ void
 Selection::add (Marker* m)
 {
 	if (find (markers.begin(), markers.end(), m) == markers.end()) {
-
-		/* disambiguate which remove() for the compiler */
-
-		void (Selection::*pmf)(Marker*) = &Selection::remove;
-
-		m->CatchDeletion.connect (*this, boost::bind (pmf, this, _1), gui_context());
-
 		markers.push_back (m);
 		MarkersChanged();
 	}

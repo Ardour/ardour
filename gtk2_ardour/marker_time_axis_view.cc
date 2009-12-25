@@ -67,6 +67,7 @@ MarkerTimeAxisView::MarkerTimeAxisView(MarkerTimeAxis& tv)
 	_samples_per_unit = _trackview.editor.get_current_zoom() ;
 
 	_trackview.editor.ZoomChanged.connect (sigc::mem_fun(*this, &MarkerTimeAxisView::reset_samples_per_unit));
+	MarkerView::CatchDeletion.connect (*this, ui_bind (&MarkerTimeAxisView::remove_marker_view, this, _1), gui_context());
 }
 
 /**
@@ -211,8 +212,6 @@ MarkerTimeAxisView::add_marker_view(ImageFrameView* ifv, std::string mark_type, 
 	ifv->add_marker_view_item(mv, src) ;
 	marker_view_list.push_front(mv) ;
 
-	mv->CatchDeletion.connect (*this, boost::bind (&MarkerTimeAxisView::remove_marker_view, this, _1), gui_context());
-	
 	MarkerViewAdded(mv,src) ; /* EMIT_SIGNAL */
 
 	return(mv) ;
@@ -311,7 +310,7 @@ MarkerTimeAxisView::remove_named_marker_view(std::string item_id, void* src)
  * @param src the identity of the object that initiated the change
  */
 void
-MarkerTimeAxisView::remove_marker_view(MarkerView* mv)
+MarkerTimeAxisView::remove_marker_view (MarkerView* mv)
 {
 	ENSURE_GUI_THREAD (*this, &MarkerTimeAxisView::remove_marker_view, mv, src)
 
@@ -325,7 +324,6 @@ MarkerTimeAxisView::remove_marker_view(MarkerView* mv)
 		 MarkerViewRemoved(mv->get_item_name(), src) ; /* EMIT_SIGNAL */
 	}
 }
-
 
 /**
  * Sets the duration of the selected MarkerView to the specified number of seconds

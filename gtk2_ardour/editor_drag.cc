@@ -2662,7 +2662,7 @@ RubberbandSelectDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 }
 
 void
-RubberbandSelectDrag::motion (GdkEvent* event, bool first_move)
+RubberbandSelectDrag::motion (GdkEvent* event, bool)
 {
 	nframes64_t start;
 	nframes64_t end;

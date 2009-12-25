@@ -81,6 +81,8 @@ ImageFrameTimeAxis::ImageFrameTimeAxis(const string & track_id, PublicEditor& ed
 
 	// set the initial height of this time axis
 	set_height(hNormal) ;
+
+	TimeAxisView::CatchDeletion.connect (*this, ui_bind (&ImageFrameTimeAxis::remove_time_axis_view, this, _1), gui_context());
 }
 
 /**
@@ -322,8 +324,6 @@ ImageFrameTimeAxis::add_marker_time_axis(MarkerTimeAxis* marker_track, void* src
 	else
 	{
 		marker_time_axis_list.push_back(marker_track) ;
-		marker_track->CatchDeletion.connect (*this, boost::bind (&ImageFrameTimeAxis::remove_time_axis_view, this, marker_track, (void*)this), gui_context());
-
 		 MarkerTimeAxisAdded(marker_track, src) ; /* EMIT_SIGNAL */
 		ret = true ;
 	}
@@ -390,17 +390,20 @@ ImageFrameTimeAxis::remove_named_marker_time_axis(const string & track_id, void*
  * @param src the identity of the object that initiated the change
  */
 void
-ImageFrameTimeAxis::remove_time_axis_view(MarkerTimeAxis* mta, void* src)
+ImageFrameTimeAxis::remove_time_axis_view (TimeAxisView* tav)
 {
-	ENSURE_GUI_THREAD (*this, &ImageFrameTimeAxis::remove_time_axis_view, mta, src)
+	MarkerTimeAxisView* mtav = dynamic_cast<MarkerTimeAxisView*> (tav);
+
+	if (!mtav) {
+		return;
+	}
 
 	MarkerTimeAxisList::iterator i;
-	if((i = find (marker_time_axis_list.begin(), marker_time_axis_list.end(), mta)) != marker_time_axis_list.end())
-	{
+
+	if ((i = find (marker_time_axis_list.begin(), marker_time_axis_list.end(), mta)) != marker_time_axis_list.end())  {
 		// note that we dont delete the object itself, we just remove it from our list
 		marker_time_axis_list.erase(i) ;
-
-		 MarkerTimeAxisRemoved(mta->name(), src) ; /* EMIT_SIGNAL */
+		MarkerTimeAxisRemoved (mta->name(), src) ; /* EMIT_SIGNAL */
 	}
 }
 

@@ -80,6 +80,7 @@ RegionView::RegionView (ArdourCanvas::Group*              parent,
 	, wait_for_data(false)
 	, _time_converter(r->session().tempo_map(), r->position())
 {
+	GhostRegion::CatchDeletion.connect (*this, ui_bind (&RegionView::remove_ghost, this, _1), gui_context());
 }
 
 RegionView::RegionView (const RegionView& other)
@@ -94,6 +95,8 @@ RegionView::RegionView (const RegionView& other)
 	valid = false;
 	_pixel_width = other._pixel_width;
 	_height = other._height;
+
+	GhostRegion::CatchDeletion.connect (*this, ui_bind (&RegionView::remove_ghost, this, _1), gui_context());
 }
 
 RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other_region)
@@ -112,6 +115,8 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 	valid = false;
 	_pixel_width = other._pixel_width;
 	_height = other._height;
+
+	GhostRegion::CatchDeletion.connect (*this, ui_bind (&RegionView::remove_ghost, this, _1), gui_context());
 }
 
 RegionView::RegionView (ArdourCanvas::Group*         parent,

@@ -64,12 +64,6 @@ Editor::editor_list_button_toggled ()
 }
 
 void
-Editor::cms_deleted ()
-{
-	current_mixer_strip = 0;
-}
-
-void
 Editor::show_editor_mixer (bool yn)
 {
 	boost::shared_ptr<ARDOUR::Route> r;
@@ -169,7 +163,7 @@ Editor::create_editor_mixer ()
 					      _session,
 					      false);
 	current_mixer_strip->Hiding.connect (sigc::mem_fun(*this, &Editor::current_mixer_strip_hidden));
-	current_mixer_strip->CatchDeletion.connect (*this, boost::bind (&Editor::current_mixer_strip_removed, this), gui_context());
+
 #ifdef GTKOSX
 	current_mixer_strip->WidthChanged.connect (sigc::mem_fun(*this, &Editor::ensure_all_elements_drawn));
 #endif
@@ -293,15 +287,6 @@ Editor::update_current_screen ()
 			current_mixer_strip->fast_update ();
 		}
 
-	}
-}
-
-void
-Editor::current_mixer_strip_removed ()
-{
-	if (current_mixer_strip) {
-		/* it is being deleted elsewhere */
-		current_mixer_strip = 0;
 	}
 }
 

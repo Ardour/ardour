@@ -72,6 +72,7 @@ using namespace std;
 sigc::signal<void,boost::shared_ptr<Route> > MixerStrip::SwitchIO;
 
 int MixerStrip::scrollbar_height = 0;
+PBD::Signal1<void,MixerStrip*> MixerStrip::CatchDeletion;
 
 MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	: AxisView(sess)
