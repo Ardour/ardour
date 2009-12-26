@@ -134,6 +134,10 @@ _thread_init_callback (void * /*arg*/)
 	   knows about it.
 	*/
 
+	char* c = new char[12];
+	strcpy (c, X_("audioengine"));
+	pthread_set_name (c);
+
 	PBD::notify_gui_about_thread_creation ("gui", pthread_self(), X_("Audioengine"), 4096);
 	PBD::notify_gui_about_thread_creation ("midiui", pthread_self(), X_("Audioengine"), 128);
 

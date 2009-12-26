@@ -425,7 +425,6 @@ Session::destroy ()
 	routes.flush ();
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
-	cerr << "\n\n\n AFTER ROUTE CLEARING, there are " << r->size() << " routes in RCU\n";
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete diskstreams\n");
 	{
@@ -2129,20 +2128,21 @@ Session::add_routes (RouteList& new_routes, bool save)
 	for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
 
 		boost::weak_ptr<Route> wpr (*x);
+		boost::shared_ptr<Route> r (*x);
 
-		(*x)->listen_changed.connect_same_thread (*this, boost::bind (&Session::route_listen_changed, this, _1, wpr));
-		(*x)->solo_changed.connect_same_thread (*this, boost::bind (&Session::route_solo_changed, this, _1, wpr));
-		(*x)->mute_changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this, _1));
-		(*x)->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
-		(*x)->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
-		(*x)->route_group_changed.connect_same_thread (*this, boost::bind (&Session::route_group_changed, this));
+		r->listen_changed.connect_same_thread (*this, boost::bind (&Session::route_listen_changed, this, _1, wpr));
+		r->solo_changed.connect_same_thread (*this, boost::bind (&Session::route_solo_changed, this, _1, wpr));
+		r->mute_changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this, _1));
+		r->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
+		r->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
+		r->route_group_changed.connect_same_thread (*this, boost::bind (&Session::route_group_changed, this));
 
-		if ((*x)->is_master()) {
-			_master_out = (*x);
+		if (r->is_master()) {
+			_master_out = r;
 		}
 
-		if ((*x)->is_control()) {
-			_control_out = (*x);
+		if (r->is_control()) {
+			_control_out = r;
 		}
 	}
 

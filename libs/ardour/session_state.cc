@@ -1104,7 +1104,6 @@ Session::set_state (const XMLNode& node, int version)
 	XMLNode* child;
 	const XMLProperty* prop;
 	int ret = -1;
-	extern void boost_debug_shared_ptr_show_live_debugging (bool);
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state|CannotSave);
 
@@ -1379,6 +1378,7 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 
 	DataType type = DataType::AUDIO;
 	const XMLProperty* prop = node.property("default-type");
+	boost::shared_ptr<Route> ret;
 
 	if (prop) {
 		type = DataType(prop->value());
@@ -1390,17 +1390,18 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 		if (type == DataType::AUDIO) {
 			AudioTrack* at = new AudioTrack (*this, node, version);
 			boost_debug_shared_ptr_mark_interesting (at, "Track");
-			return boost::shared_ptr<Route> (at);
-
+			ret.reset (at);
+			
 		} else {
-			boost::shared_ptr<Route> ret (new MidiTrack (*this, node, version));
-			return ret;
+			ret.reset (new MidiTrack (*this, node, version));
 		}
 	} else {
 		Route* rt = new Route (*this, node);
 		boost_debug_shared_ptr_mark_interesting (rt, "Route");
-		return boost::shared_ptr<Route> (rt);
+		ret.reset (rt);
 	}
+
+	return ret;
 }
 
 int

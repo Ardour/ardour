@@ -18,7 +18,7 @@
     $Id$
 */
 
-#include <map>
+#include <set>
 #include <iostream>
 #include <string>
 #include <stdint.h>
@@ -30,9 +30,10 @@
 
 using namespace std;
 
-typedef std::map<string,pthread_t> ThreadMap;
+typedef std::set<pthread_t> ThreadMap;
 static ThreadMap all_threads;
 static pthread_mutex_t thread_map_lock = PTHREAD_MUTEX_INITIALIZER;
+static Glib::StaticPrivate<char> thread_name;
 
 namespace PBD {
 	PBD::Signal4<void,std::string, pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
@@ -55,23 +56,48 @@ PBD::notify_gui_about_thread_creation (std::string target_gui, pthread_t thread,
 	ThreadCreatedWithRequestSize (target_gui, thread, str, request_count);
 }
 
+struct ThreadStartWithName {
+    void* (*thread_work)(void*);
+    void* arg;
+    const char* name;
+    
+    ThreadStartWithName (void* (*f)(void*), void* a, const char* s)
+	    : thread_work (f), arg (a), name (s) {}
+};
+
+static void*
+fake_thread_start (void* arg)
+{
+	ThreadStartWithName* ts = (ThreadStartWithName*) arg;
+	void* (*thread_work)(void*) = ts->thread_work;
+	void* thread_arg = ts->arg;
+
+	pthread_set_name (ts->name);
+
+	delete ts;
+	/* name will be deleted by the default handler for GStaticPrivate, when the thread exits */
+
+	return thread_work (thread_arg);
+}
+
 int  
 pthread_create_and_store (string name, pthread_t  *thread, void * (*start_routine)(void *), void * arg)
 {
 	pthread_attr_t default_attr;
 	int ret;
-	
+
 	// set default stack size to sensible default for memlocking
 	pthread_attr_init(&default_attr);
 	pthread_attr_setstacksize(&default_attr, 500000);
 
-	if ((ret = thread_creator (thread, &default_attr, start_routine, arg)) == 0) {
-		std::pair<string,pthread_t> newpair;
-		newpair.first = name;
-		newpair.second = *thread;
+	char* cname = new char[name.length() + 1];
+	strcpy (cname, name.c_str());
 
+	ThreadStartWithName* ts = new ThreadStartWithName (start_routine, arg, cname);
+
+	if ((ret = thread_creator (thread, &default_attr, fake_thread_start, ts)) == 0) {
 		pthread_mutex_lock (&thread_map_lock);
-		all_threads.insert (newpair);
+		all_threads.insert (*thread);
 		pthread_mutex_unlock (&thread_map_lock);
 	}
 
@@ -80,21 +106,21 @@ pthread_create_and_store (string name, pthread_t  *thread, void * (*start_routin
 	return ret;
 }
 
-string
+void
+pthread_set_name (const char *str)
+{
+	/* str will be deleted when this thread exits */
+	thread_name.set (const_cast<char*>(str));
+}
+
+const char *
 pthread_name ()
 {
-	pthread_t self = pthread_self();
-	string str;
+	const char* str = thread_name.get ();
 
-	pthread_mutex_lock (&thread_map_lock);
-	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
-		if (i->second == self) {
-			str = i->first;
-			pthread_mutex_unlock (&thread_map_lock);
-			return str;
-		}
-	}
-	pthread_mutex_unlock (&thread_map_lock);
+	if (str) {
+		return str;
+	} 
 	return "unknown";
 }
 
@@ -103,8 +129,8 @@ pthread_kill_all (int signum)
 {	
 	pthread_mutex_lock (&thread_map_lock);
 	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
-		if (i->second != pthread_self()) {
-			pthread_kill (i->second, signum);
+		if ((*i) != pthread_self()) {
+			pthread_kill ((*i), signum);
 		}
 	}
 	all_threads.clear();
@@ -116,8 +142,8 @@ pthread_cancel_all ()
 {	
 	pthread_mutex_lock (&thread_map_lock);
 	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
-		if (i->second != pthread_self()) {
-			pthread_cancel (i->second);
+		if ((*i) != pthread_self()) {
+			pthread_cancel ((*i));
 		}
 	}
 	all_threads.clear();
@@ -129,7 +155,7 @@ pthread_cancel_one (pthread_t thread)
 {	
 	pthread_mutex_lock (&thread_map_lock);
 	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
-		if (i->second == thread) {
+		if ((*i) == thread) {
 			all_threads.erase (i);
 			break;
 		}
@@ -146,7 +172,7 @@ pthread_exit_pbd (void* status)
 
 	pthread_mutex_lock (&thread_map_lock);
 	for (ThreadMap::iterator i = all_threads.begin(); i != all_threads.end(); ++i) {
-		if (i->second == thread) {
+		if ((*i) == thread) {
 			all_threads.erase (i);
 			break;
 		}

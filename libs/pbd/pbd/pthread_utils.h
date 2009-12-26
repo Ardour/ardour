@@ -32,7 +32,8 @@ void pthread_cancel_one (pthread_t thread);
 void pthread_cancel_all ();
 void pthread_kill_all (int signum);
 void pthread_exit_pbd (void* status);
-std::string pthread_name ();
+const char* pthread_name ();
+void pthread_set_name (const char* name);
 
 namespace PBD {
 	extern void notify_gui_about_thread_creation (std::string, pthread_t, std::string, int requests = 256);

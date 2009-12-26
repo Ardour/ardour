@@ -65,7 +65,7 @@ Backtrace::print (std::ostream& str) const
 		strings = ::backtrace_symbols (trace, size);
 #endif		
 		if (strings) {
-			for (i = 5; i < 5+18 && i < size; i++) {
+			for (i = 3; i < 5+18 && i < size; i++) {
 				str << strings[i] << std::endl;
 			}
 			free (strings);
@@ -204,13 +204,51 @@ boost_debug_shared_ptr_operator_equals (void const *sp, void const *old_obj, int
 }
 
 void
-boost_debug_shared_ptr_reset (void const *sp, void const *obj, int use_count)
+boost_debug_shared_ptr_reset (void const *sp, void const *old_obj, int old_use_count,  void const *obj, int new_use_count)
 {
-	if (is_interesting_object (obj)) {
+	if (old_obj == 0 && obj == 0) {
+		return;
+	}
+
+	Glib::Mutex::Lock guard (the_lock);
+
+	if (is_interesting_object  (old_obj) || is_interesting_object (obj)) {
 		if (debug_out) {
-			cerr << "reset sp to object @ " << obj << " @ " << sp << " UC was " << use_count << " (total sp's = " << sptrs.size() << ')' << endl;
+			cerr << "RESET SWAPS " << old_obj << " & " << obj << endl;
 		}
 	}
+
+	if (is_interesting_object (old_obj)) {
+		if (debug_out) {
+			cerr << "\tlost old sp @ " << sp << " for " << old_obj << " UC = " << old_use_count << " now for " << obj << " UC = " << new_use_count 
+			     << " (total sp's = " << sptrs.size() << ')' << endl;			
+		}
+		PointerMap::iterator x = sptrs.find (sp);
+		
+		if (x != sptrs.end()) {
+			sptrs.erase (x);
+			if (debug_out) {
+				cerr << "\tRemoved (by reset) sp for " << old_obj << " @ " << sp << " UC = " << old_use_count << " (total sp's = " << sptrs.size() << ')' << endl;
+			}
+		}
+	}
+
+	if (is_interesting_object (obj)) {
+
+		pair<void const*, SPDebug*> newpair;
+
+		newpair.first = sp;
+		newpair.second = new SPDebug (new Backtrace());
+
+		sptrs.insert (newpair);
+		
+		if (debug_out) {
+			cerr << "reset created sp for " << obj << " @ " << sp << " used to point to " << old_obj << " UC = " << old_use_count 
+			     << " UC = " << new_use_count 
+			     << " (total sp's = " << sptrs.size() << ')' << endl;			
+			cerr << *newpair.second << endl;
+		}
+	} 
 }
 
 void
