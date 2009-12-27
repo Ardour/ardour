@@ -27,8 +27,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "ardour/session.h"
 #include "ardour/ardour.h"
+#include "ardour/session.h"
 #include "ardour/types.h"
 
 namespace ARDOUR
@@ -38,11 +38,11 @@ class ExportTimespan;
 class ExportChannelConfiguration;
 class ExportFormatSpecification;
 class ExportFilename;
-class ExportProcessor;
+class ExportGraphBuilder;
 
 class ExportElementFactory
 {
-  protected:
+  public:
 	typedef boost::shared_ptr<ExportTimespan> TimespanPtr;
 	typedef boost::shared_ptr<ExportChannelConfiguration> ChannelConfigPtr;
 	typedef boost::shared_ptr<ExportFormatSpecification> FormatPtr;
@@ -70,29 +70,30 @@ class ExportElementFactory
 
 class ExportHandler : public ExportElementFactory
 {
+  public:
+	struct FileSpec {
+		FileSpec() {}
+		FileSpec (ChannelConfigPtr channel_config, FormatPtr format, FilenamePtr filename)
+		  : channel_config (channel_config)
+		  , format (format)
+		  , filename (filename)
+			{}
+
+		ChannelConfigPtr channel_config;
+		FormatPtr        format;
+		FilenamePtr      filename;
+	};
+	
   private:
 
 	/* Stuff for export configs
 	 * The multimap maps timespans to file specifications
 	 */
 
-	struct FileSpec {
-
-		FileSpec (ChannelConfigPtr channel_config, FormatPtr format, FilenamePtr filename) :
-		  channel_config (channel_config),
-		  format (format),
-		  filename (filename)
-		  {}
-
-		ChannelConfigPtr channel_config;
-		FormatPtr        format;
-		FilenamePtr      filename;
-	};
-
 	typedef std::pair<TimespanPtr, FileSpec> ConfigPair;
 	typedef std::multimap<TimespanPtr, FileSpec> ConfigMap;
 
-	typedef boost::shared_ptr<ExportProcessor> ProcessorPtr;
+	typedef boost::shared_ptr<ExportGraphBuilder> GraphBuilderPtr;
 	typedef boost::shared_ptr<ExportStatus> StatusPtr;
 
   private:
@@ -112,16 +113,26 @@ class ExportHandler : public ExportElementFactory
   private:
 
 	Session &          session;
-	ProcessorPtr       processor;
+	GraphBuilderPtr    graph_builder;
 	StatusPtr          export_status;
 	ConfigMap          config_map;
 
 	bool               realtime;
 
-	PBD::ScopedConnection          files_written_connection;
-	PBD::ScopedConnection          export_read_finished_connection;
-	std::list<Glib::ustring> files_written;
-	void add_file (const Glib::ustring&);
+	/* Timespan management */
+
+	void start_timespan ();
+	int  process_timespan (nframes_t frames);
+	void finish_timespan ();
+
+	typedef std::pair<ConfigMap::iterator, ConfigMap::iterator> TimespanBounds;
+	TimespanPtr           current_timespan;
+	TimespanBounds        timespan_bounds;
+	
+	PBD::ScopedConnection process_connection;
+	sframes_t             process_position;
+	
+	PBD::ScopedConnection export_read_finished_connection;
 
 	/* CD Marker stuff */
 
@@ -141,13 +152,13 @@ class ExportHandler : public ExportElementFactory
 
 		/* Track info */
 		uint32_t       track_number;
-		nframes_t      track_position;
-		nframes_t      track_duration;
-		nframes_t      track_start_frame;
+		sframes_t      track_position;
+		sframes_t      track_duration;
+		sframes_t      track_start_frame;
 
 		/* Index info */
 		uint32_t       index_number;
-		nframes_t      index_position;
+		sframes_t      index_position;
 	};
 
 
@@ -162,23 +173,10 @@ class ExportHandler : public ExportElementFactory
 	void write_index_info_cue (CDMarkerStatus & status);
 	void write_index_info_toc (CDMarkerStatus & status);
 
-	void frames_to_cd_frames_string (char* buf, nframes_t when);
+	void frames_to_cd_frames_string (char* buf, sframes_t when);
 
 	int cue_tracknum;
 	int cue_indexnum;
-
-	/* Timespan management */
-
-	void start_timespan ();
-	void finish_timespan ();
-	void timespan_thread_finished ();
-
-	typedef std::pair<ConfigMap::iterator, ConfigMap::iterator> TimespanBounds;
-	TimespanPtr          current_timespan;
-	ConfigMap::iterator  current_map_it;
-	TimespanBounds       timespan_bounds;
-	PBD::ScopedConnection     channel_config_connection;
-
 };
 
 } // namespace ARDOUR

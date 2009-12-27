@@ -28,6 +28,7 @@ children = [
 	'libs/ardour',
 	'libs/gtkmm2ext',
 	'libs/clearlooks-newer',
+	'libs/audiographer',
 	'gtk2_ardour'
 ]
 

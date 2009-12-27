@@ -17,9 +17,9 @@
  *
  */
 
-#include "ardour/gdither_types_internal.h"
-#include "ardour/gdither.h"
-#include "ardour/noise.h"
+#include "gdither_types_internal.h"
+#include "gdither.h"
+#include "noise.h"
 
 /* this monstrosity is necessary to get access to lrintf() and random().
    whoever is writing the glibc headers <cmath> and <cstdlib> should be
@@ -169,7 +169,7 @@ inline static void gdither_innner_loop(const GDitherType dt,
     const uint32_t post_scale, const int bit_depth,
     const uint32_t channel, const uint32_t length, float *ts,
 
-    GDitherShapedState *ss, float *x, void *y, const int clamp_u,
+    GDitherShapedState *ss, float const *x, void *y, const int clamp_u,
 
     const int clamp_l)
 {
@@ -245,7 +245,7 @@ inline static void gdither_innner_loop_fp(const GDitherType dt,
     const float post_scale, const int bit_depth,
     const uint32_t channel, const uint32_t length, float *ts,
 
-    GDitherShapedState *ss, float *x, void *y, const int clamp_u,
+    GDitherShapedState *ss, float const *x, void *y, const int clamp_u,
 
     const int clamp_l)
 {
@@ -313,7 +313,7 @@ inline static void gdither_innner_loop_fp(const GDitherType dt,
 #define GDITHER_CONV_BLOCK 512
 
 void gdither_run(GDither s, uint32_t channel, uint32_t length,
-                 double *x, void *y)
+                 double const *x, void *y)
 {
     float conv[GDITHER_CONV_BLOCK];
     uint32_t i, pos;
@@ -351,7 +351,7 @@ void gdither_run(GDither s, uint32_t channel, uint32_t length,
 }
 
 void gdither_runf(GDither s, uint32_t channel, uint32_t length,
-                 float *x, void *y)
+                 float const *x, void *y)
 {
     uint32_t pos, i;
     float tmp;

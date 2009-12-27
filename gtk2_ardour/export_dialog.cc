@@ -311,6 +311,10 @@ ExportDialog::show_progress ()
 			usleep (10000);
 		}
 	}
+	
+	if (!status->aborted()) {
+		status->finish ();
+	}
 }
 
 gint

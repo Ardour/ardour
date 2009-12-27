@@ -74,8 +74,8 @@ class AudioEngine : public SessionHandlePtr
 
 	Glib::Mutex& process_lock() { return _process_lock; }
 
-	nframes_t frame_rate();
-	nframes_t frames_per_cycle();
+	nframes_t frame_rate() const;
+	nframes_t frames_per_cycle() const;
 
 	size_t raw_buffer_size(DataType t);
 
@@ -230,9 +230,9 @@ _	   the regular process() call to session->process() is not made.
 	bool                       session_remove_pending;
 	bool                      _running;
 	bool                      _has_run;
-	nframes_t                 _buffer_size;
+	mutable nframes_t         _buffer_size;
 	std::map<DataType,size_t> _raw_buffer_sizes;
-	nframes_t                 _frame_rate;
+	mutable nframes_t         _frame_rate;
 	/// number of frames between each check for changes in monitor input
 	nframes_t                  monitor_check_interval;
 	/// time of the last monitor check in frames

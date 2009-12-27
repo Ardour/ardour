@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2008 Paul Davis
+    Copyright (C) 2008-2009 Paul Davis
     Author: Sakari Bergen
 
     This program is free software; you can redistribute it and/or modify
@@ -27,12 +27,12 @@
 
 #include "ardour/ardour.h"
 #include "ardour/configuration.h"
+#include "ardour/export_graph_builder.h"
 #include "ardour/export_timespan.h"
 #include "ardour/export_channel_configuration.h"
 #include "ardour/export_status.h"
 #include "ardour/export_format_specification.h"
 #include "ardour/export_filename.h"
-#include "ardour/export_processor.h"
 #include "ardour/export_failed.h"
 
 using namespace std;
@@ -98,33 +98,19 @@ ExportElementFactory::add_filename_copy (FilenamePtr other)
 
 /*** ExportHandler ***/
 
-ExportHandler::ExportHandler (Session & session) 
-	: ExportElementFactory (session)
-	, session (session)
-	, export_status (session.get_export_status ())
-	, realtime (false)
-{
-	processor.reset (new ExportProcessor (session));
+ExportHandler::ExportHandler (Session & session)
+  : ExportElementFactory (session)
+  , session (session)
+  , graph_builder (new ExportGraphBuilder (session))
+  , export_status (session.get_export_status ())
+  , realtime (false)
 
-	ExportProcessor::WritingFile.connect_same_thread (files_written_connection, boost::bind (&ExportHandler::add_file, this, _1));
+{
 }
 
 ExportHandler::~ExportHandler ()
 {
-	if (export_status->aborted()) {
-		for (std::list<Glib::ustring>::iterator it = files_written.begin(); it != files_written.end(); ++it) {
-			sys::remove (sys::path (*it));
-		}
-	}
-
-	channel_config_connection.disconnect();
-	files_written_connection.disconnect();
-}
-
-void
-ExportHandler::add_file (const Glib::ustring& str)
-{
-	files_written.push_back (str);
+	// TODO remove files that were written but not finsihed
 }
 
 bool
@@ -136,21 +122,6 @@ ExportHandler::add_export_config (TimespanPtr timespan, ChannelConfigPtr channel
 
 	return true;
 }
-
-/// Starts exporting the registered configurations
-/** The following happens, when do_export is called:
- * 1. Session is prepared in do_export
- * 2. start_timespan is called, which then registers all necessary channel configs to a timespan
- * 3. The timespan reads each unique channel into a tempfile and calls Session::stop_export when the end is reached
- * 4. stop_export emits ExportReadFinished after stopping the transport, this ends up calling finish_timespan
- * 5. finish_timespan registers all the relevant formats and filenames to relevant channel configurations
- * 6. finish_timespan does a manual call to timespan_thread_finished, which gets the next channel configuration
- *    for the current timespan, calling write_files for it
- * 7. write_files writes the actual export files, composing them from the individual channels from tempfiles and
- *    emits FilesWritten when it is done, which ends up calling timespan_thread_finished
- * 8. Once all channel configs are written, a new timespan is started by calling start_timespan
- * 9. When all timespans are written the session is taken out of export.
- */
 
 void
 ExportHandler::do_export (bool rt)
@@ -171,6 +142,73 @@ ExportHandler::do_export (bool rt)
 	session.ExportReadFinished.connect_same_thread (export_read_finished_connection, boost::bind (&ExportHandler::finish_timespan, this));
 	start_timespan ();
 }
+
+void
+ExportHandler::start_timespan ()
+{
+	export_status->timespan++;
+
+	if (config_map.empty()) {
+		export_status->running = false;
+		return;
+	}
+
+	current_timespan = config_map.begin()->first;
+
+	/* Register file configurations to graph builder */
+
+	timespan_bounds = config_map.equal_range (current_timespan);
+	graph_builder->reset ();
+	for (ConfigMap::iterator it = timespan_bounds.first; it != timespan_bounds.second; ++it) {
+		graph_builder->add_config (it->second);
+	}
+
+	/* start export */
+
+	session.ProcessExport.connect_same_thread (process_connection, boost::bind (&ExportHandler::process_timespan, this, _1));
+	process_position = current_timespan->get_start();
+	session.start_audio_export (process_position, realtime);
+}
+
+int
+ExportHandler::process_timespan (nframes_t frames)
+{
+	/* update position */
+
+	nframes_t frames_to_read = 0;
+	sframes_t const start = current_timespan->get_start();
+	sframes_t const end = current_timespan->get_end();
+	
+	bool const last_cycle = (process_position + frames >= end);
+
+	if (last_cycle) {
+		frames_to_read = end - process_position;
+		export_status->stop = true;
+	} else {
+		frames_to_read = frames;
+	}
+
+	process_position += frames_to_read;
+	export_status->progress = (float) (process_position - start) / (end - start);
+
+	/* Do actual processing */
+
+	return graph_builder->process (frames_to_read, last_cycle);
+}
+
+void
+ExportHandler::finish_timespan ()
+{
+	process_connection.disconnect ();
+	
+	while (config_map.begin() != timespan_bounds.second) {
+		config_map.erase (config_map.begin());
+	}
+
+	start_timespan ();
+}
+
+/*** CD Marker sutff ***/
 
 struct LocationSortByStart {
     bool operator() (Location *a, Location *b) {
@@ -242,7 +280,7 @@ ExportHandler::export_cd_marker_file (TimespanPtr timespan, FormatPtr file_forma
 
 	/* Start actual marker stuff */
 
-	nframes_t last_end_time = timespan->get_start(), last_start_time = timespan->get_start();
+	sframes_t last_end_time = timespan->get_start(), last_start_time = timespan->get_start();
 	status.track_position = last_start_time - timespan->get_start();
 
 	for (i = temp.begin(); i != temp.end(); ++i) {
@@ -469,9 +507,9 @@ ExportHandler::write_index_info_toc (CDMarkerStatus & status)
 }
 
 void
-ExportHandler::frames_to_cd_frames_string (char* buf, nframes_t when)
+ExportHandler::frames_to_cd_frames_string (char* buf, sframes_t when)
 {
-	nframes_t remainder;
+	sframes_t remainder;
 	nframes_t fr = session.nominal_frame_rate();
 	int mins, secs, frames;
 
@@ -481,111 +519,6 @@ ExportHandler::frames_to_cd_frames_string (char* buf, nframes_t when)
 	remainder -= secs * fr;
 	frames = remainder / (fr / 75);
 	sprintf (buf, " %02d:%02d:%02d", mins, secs, frames);
-}
-
-void
-ExportHandler::start_timespan ()
-{
-	export_status->timespan++;
-
-	if (config_map.empty()) {
-		export_status->finish ();
-		return;
-	}
-
-	current_timespan = config_map.begin()->first;
-
-	/* Register channel configs with timespan */
-
-	timespan_bounds = config_map.equal_range (current_timespan);
-
-	for (ConfigMap::iterator it = timespan_bounds.first; it != timespan_bounds.second; ++it) {
-		it->second.channel_config->register_with_timespan (current_timespan);
-	}
-
-	/* connect stuff and start export */
-
-	session.ProcessExport.connect_same_thread (current_timespan->process_connection, boost::bind (&ExportTimespan::process, current_timespan, _1));
-	session.start_audio_export (current_timespan->get_start(), realtime);
-}
-
-void
-ExportHandler::finish_timespan ()
-{
-	current_timespan->process_connection.disconnect ();
-
-	/* Register formats and filenames to relevant channel configs */
-
-	export_status->total_formats = 0;
-	export_status->format = 0;
-
-	for (ConfigMap::iterator it = timespan_bounds.first; it != timespan_bounds.second; ++it) {
-
-		export_status->total_formats++;
-
-		/* Setup filename */
-
-		it->second.filename->set_timespan (current_timespan);
-		it->second.filename->set_channel_config (it->second.channel_config);
-
-		/* Do actual registration */
-
-		ChannelConfigPtr chan_config = it->second.channel_config;
-		chan_config->register_file_config (it->second.format, it->second.filename);
-	}
-
-	/* Start writing files by doing a manual call to timespan_thread_finished */
-
-	current_map_it = timespan_bounds.first;
-	timespan_thread_finished ();
-}
-
-void
-ExportHandler::timespan_thread_finished ()
-{
-	channel_config_connection.disconnect();
-	export_read_finished_connection.disconnect ();
-
-	if (current_map_it != timespan_bounds.second) {
-
-		/* Get next configuration as long as no new export process is started */
-
-		ChannelConfigPtr cc = current_map_it->second.channel_config;
-		while (!cc->write_files(processor)) {
-
-			++current_map_it;
-
-			if (current_map_it == timespan_bounds.second) {
-
-				/* reached end of bounds, this call will end up in the else block below */
-
-				timespan_thread_finished ();
-				return;
-			}
-
-			cc = current_map_it->second.channel_config;
-		}
-
-		cc->FilesWritten.connect_same_thread (channel_config_connection, boost::bind (&ExportHandler::timespan_thread_finished, this));
-		++current_map_it;
-
-	} else { /* All files are written from current timespan, reset timespan and start new */
-
-		/* Unregister configs and remove configs with this timespan */
-
-		for (ConfigMap::iterator it = timespan_bounds.first; it != timespan_bounds.second;) {
-			it->second.channel_config->unregister_all ();
-
-			ConfigMap::iterator to_erase = it;
-			++it;
-			config_map.erase (to_erase);
-		}
-
-		/* Start new timespan */
-
-		start_timespan ();
-
-	}
 }
 
 } // namespace ARDOUR

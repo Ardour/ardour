@@ -809,7 +809,7 @@ AudioEngine::disconnect (Port& port)
 }
 
 ARDOUR::nframes_t
-AudioEngine::frame_rate ()
+AudioEngine::frame_rate () const
 {
         GET_PRIVATE_JACK_POINTER_RET (_jack,0);
 	if (_frame_rate == 0) {
@@ -827,7 +827,7 @@ AudioEngine::raw_buffer_size (DataType t)
 }
 
 ARDOUR::nframes_t
-AudioEngine::frames_per_cycle ()
+AudioEngine::frames_per_cycle () const
 {
         GET_PRIVATE_JACK_POINTER_RET (_jack,0);
 	if (_buffer_size == 0) {

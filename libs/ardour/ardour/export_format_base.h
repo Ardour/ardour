@@ -28,8 +28,10 @@
 
 #include <sndfile.h>
 #include <samplerate.h>
-#include "ardour/gdither_types.h"
+
 #include "ardour/ardour.h"
+
+#include "audiographer/sample_format_converter.h"
 
 namespace ARDOUR
 {
@@ -76,10 +78,10 @@ class ExportFormatBase {
 	};
 
 	enum DitherType {
-		D_None = GDitherNone,
-		D_Rect = GDitherRect,
-		D_Tri = GDitherTri,
-		D_Shaped = GDitherShaped
+		D_None = AudioGrapher::D_None,
+		D_Rect = AudioGrapher::D_Rect,
+		D_Tri = AudioGrapher::D_Tri,
+		D_Shaped = AudioGrapher::D_Shaped
 	};
 
 	enum Quality {

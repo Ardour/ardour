@@ -39,9 +39,6 @@ class ExportTempFile;
 class ExportTimespan
 {
   private:
-	typedef boost::shared_ptr<ExportTempFile> TempFilePtr;
-	typedef std::pair<ExportChannelPtr, TempFilePtr> ChannelFilePair;
-	typedef std::map<ExportChannelPtr, TempFilePtr> TempFileMap;
 	typedef boost::shared_ptr<ExportStatus> ExportStatusPtr;
 
   private:
@@ -57,20 +54,6 @@ class ExportTimespan
 	Glib::ustring range_id () const { return _range_id; }
 	void set_range_id (Glib::ustring range_id) { _range_id = range_id; }
 
-	/// Registers a channel to be read when export starts rolling
-	void register_channel (ExportChannelPtr channel);
-
-	/// "Rewinds" the tempfiles to start reading the beginnings again
-	void rewind ();
-
-	/// Reads data from the tempfile belonging to channel into data
-	nframes_t get_data (float * data, nframes_t frames, ExportChannelPtr channel);
-
-	/// Reads data from each channel and writes to tempfile
-	int process (nframes_t frames);
-
-	PBD::ScopedConnection  process_connection;
-
 	void set_range (nframes_t start, nframes_t end);
 	nframes_t get_length () const { return end_frame - start_frame; }
 	nframes_t get_start () const { return start_frame; }
@@ -84,8 +67,6 @@ class ExportTimespan
 	nframes_t      end_frame;
 	nframes_t      position;
 	nframes_t      frame_rate;
-
-	TempFileMap    filemap;
 
 	Glib::ustring _name;
 	Glib::ustring _range_id;

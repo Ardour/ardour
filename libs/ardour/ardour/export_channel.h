@@ -25,6 +25,7 @@
 
 #include <boost/signals2.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/operators.hpp>
 
 #include "ardour/audioregion.h"
 #include "ardour/buffer_set.h"
@@ -36,7 +37,7 @@ class AudioTrack;
 class AudioPort;
 
 /// Export channel base class interface for different source types
-class ExportChannel
+class ExportChannel : public boost::less_than_comparable<ExportChannel>
 {
   public:
 
@@ -57,6 +58,7 @@ class ExportChannel
 
 /// Safe pointer for storing ExportChannels in ordered STL containers
 class ExportChannelPtr : public boost::shared_ptr<ExportChannel>
+                       , public boost::less_than_comparable<ExportChannel>
 {
   public:
 	ExportChannelPtr () {}

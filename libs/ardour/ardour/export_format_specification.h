@@ -126,6 +126,9 @@ class ExportFormatSpecification : public ExportFormatBase {
 	nframes_t silence_beginning () const { return _silence_beginning.get_frames (sample_rate()); }
 	nframes_t silence_end () const { return _silence_end.get_frames (sample_rate()); }
 
+	nframes_t silence_beginning (nframes_t samplerate) const { return _silence_beginning.get_frames (samplerate); }
+	nframes_t silence_end (nframes_t samplerate) const { return _silence_end.get_frames (samplerate); }
+
 	AnyTime silence_beginning_time () const { return _silence_beginning; }
 	AnyTime silence_end_time () const { return _silence_end; }
 

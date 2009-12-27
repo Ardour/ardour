@@ -79,11 +79,11 @@ void gdither_free(GDither s);
  * type for the chosen bit depth
  */
 void gdither_runf(GDither s, uint32_t channel, uint32_t length,
-		   float *x, void *y);
+		   float const *x, void *y);
 
 /* see gdither_runf, vut input argument is double format */
 void gdither_run(GDither s, uint32_t channel, uint32_t length,
-		   double *x, void *y);
+		   double const *x, void *y);
 
 #ifdef __cplusplus
 }

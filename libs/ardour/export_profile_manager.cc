@@ -28,13 +28,13 @@
 #include "pbd/convert.h"
 
 #include "ardour/export_profile_manager.h"
-#include "ardour/export_file_io.h"
 #include "ardour/export_format_specification.h"
 #include "ardour/export_timespan.h"
 #include "ardour/export_channel_configuration.h"
 #include "ardour/export_filename.h"
 #include "ardour/export_preset.h"
 #include "ardour/export_handler.h"
+#include "ardour/export_failed.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/session.h"
 
@@ -724,7 +724,7 @@ ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
 		warnings->errors.push_back (_("No format selected!"));
 	} else if (!channel_config->get_n_chans()) {
 		warnings->errors.push_back (_("All channels are empty!"));
-	} else if (!ExportFileFactory::check (format, channel_config->get_n_chans())) {
+	} else if (!check_format (format, channel_config->get_n_chans())) {
 		warnings->errors.push_back (_("One or more of the selected formats is not compatible with this system!"));
 	} else if (format->channel_limit() < channel_config->get_n_chans()) {
 		warnings->errors.push_back
@@ -764,6 +764,29 @@ ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
 			}
 		}
 	}
+}
+
+bool
+ExportProfileManager::check_format (FormatPtr format, uint32_t channels)
+{
+	switch (format->type()) {
+	  case ExportFormatBase::T_Sndfile:
+		return check_sndfile_format (format, channels);
+
+	  default:
+		throw ExportFailed (X_("Invalid format given for ExportFileFactory::check!"));
+	}
+}
+
+bool
+ExportProfileManager::check_sndfile_format (FormatPtr format, unsigned int channels)
+{
+	SF_INFO sf_info;
+	sf_info.channels = channels;
+	sf_info.samplerate = format->sample_rate ();
+	sf_info.format = format->format_id () | format->sample_format ();
+
+	return (sf_format_check (&sf_info) == SF_TRUE ? true : false);
 }
 
 }; // namespace ARDOUR

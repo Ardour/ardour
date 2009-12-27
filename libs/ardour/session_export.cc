@@ -25,10 +25,8 @@
 #include "ardour/audioengine.h"
 #include "ardour/butler.h"
 #include "ardour/export_failed.h"
-#include "ardour/export_file_io.h"
 #include "ardour/export_handler.h"
 #include "ardour/export_status.h"
-#include "ardour/export_utilities.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 
@@ -183,7 +181,8 @@ Session::process_export (nframes_t nframes)
 
 		ProcessExport (nframes);
 
-	} catch (ExportFailed e) {
+	} catch (std::exception & e) {
+		std::cout << e.what() << std::endl;
 		export_status->abort (true);
 	}
 }

@@ -79,26 +79,23 @@ libardour_sources = [
 	'event_type_map.cc',
 	'export_channel.cc',
 	'export_channel_configuration.cc',
-	'export_file_io.cc',
 	'export_filename.cc',
 	'export_format_base.cc',
 	'export_format_manager.cc',
 	'export_format_specification.cc',
 	'export_formats.cc',
+	'export_graph_builder.cc',
 	'export_handler.cc',
 	'export_preset.cc',
-	'export_processor.cc',
 	'export_profile_manager.cc',
 	'export_status.cc',
 	'export_timespan.cc',
-	'export_utilities.cc',
 	'file_source.cc',
 	'filename_extensions.cc',
 	'filesystem_paths.cc',
 	'filter.cc',
 	'find_session.cc',
 	'gain.cc',
-	'gdither.cc',
 	'globals.cc',
 	'import.cc',
 	'internal_return.cc',
@@ -268,7 +265,7 @@ def build(bld):
 	obj.name         = 'libardour'
 	obj.target       = 'ardour'
 	obj.uselib       = 'GLIBMM GTHREAD AUBIO SIGCPP XML UUID JACK SNDFILE SAMPLERATE LRDF OSX COREAUDIO'
-	obj.uselib_local = 'libpbd libmidipp libevoral libvamphost libvampplugin libtaglib librubberband'
+	obj.uselib_local = 'libpbd libmidipp libevoral libvamphost libvampplugin libtaglib librubberband libaudiographer'
 	obj.vnum         = LIBARDOUR_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3')
 	obj.cxxflags     = ['-DPACKAGE="libardour3"']
