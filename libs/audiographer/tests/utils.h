@@ -12,6 +12,7 @@
 #include "audiographer/exception.h"
 
 #include <vector>
+#include <list>
 #include <cstring>
 #include <cstdlib>
 #include <ctime>
@@ -114,6 +115,21 @@ class ThrowingSink : public AudioGrapher::Sink<T>
 		throw AudioGrapher::Exception(*this, "ThrowingSink threw!");
 	}
 	using AudioGrapher::Sink<T>::process;
+};
+
+template<typename T>
+class ProcessContextGrabber : public AudioGrapher::Sink<T>
+{
+  public:
+	void process (AudioGrapher::ProcessContext<T> const & c)
+	{
+		contexts.push_back (c);
+	}
+	using AudioGrapher::Sink<T>::process;
+	
+	typedef std::list<AudioGrapher::ProcessContext<T> > ContextList;
+	ContextList contexts;
+	
 };
 
 #endif // AUDIOGRAPHER_TESTS_UTILS_H

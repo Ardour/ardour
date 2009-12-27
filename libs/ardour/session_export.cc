@@ -123,8 +123,6 @@ Session::start_audio_export (nframes_t position, bool realtime)
 	*/
 
 	_transport_frame = position;
-
-	_exporting_realtime = realtime;
 	export_status->stop = false;
 
 	/* get transport ready. note how this is calling butler functions
@@ -144,39 +142,30 @@ Session::start_audio_export (nframes_t position, bool realtime)
 		return -1;
 	}
 
-	if (realtime) {
-		last_process_function = process_function;
-		process_function = &Session::process_export;
-	} else {
-		_engine.Freewheel.connect_same_thread (export_freewheel_connection, boost::bind (&Session::process_export_fw, this, _1));
-		return _engine.freewheel (true);
-	}
-
-	return 0;
+	_engine.Freewheel.connect_same_thread (export_freewheel_connection, boost::bind (&Session::process_export_fw, this, _1));
+	_export_rolling = true;
+	return _engine.freewheel (true);
 }
 
 void
 Session::process_export (nframes_t nframes)
 {
-	try {
+	if (_export_rolling && export_status->stop) {
+		stop_audio_export ();
+	}
 
-		if (export_status->stop) {
-			stop_audio_export ();
-			return;
-		}
-
-		if (!_exporting_realtime) {
-			/* make sure we've caught up with disk i/o, since
-			we're running faster than realtime c/o JACK.
-			*/
-
-			_butler->wait_until_finished ();
-		}
+	if (_export_rolling) {
+		/* make sure we've caught up with disk i/o, since
+		we're running faster than realtime c/o JACK.
+		*/
+		_butler->wait_until_finished ();
 
 		/* do the usual stuff */
 
 		process_without_events (nframes);
-
+	}
+	
+	try {
 		/* handle export - XXX what about error handling? */
 
 		ProcessExport (nframes);
@@ -197,23 +186,16 @@ Session::process_export_fw (nframes_t nframes)
 int
 Session::stop_audio_export ()
 {
-	if (_exporting_realtime) {
-		process_function = last_process_function;
-	} else {
-		export_freewheel_connection.disconnect();
-	}
-
 	/* can't use stop_transport() here because we need
 	   an immediate halt and don't require all the declick
 	   stuff that stop_transport() implements.
 	*/
 
 	realtime_stop (true, true);
+	_export_rolling = false;
 	_butler->schedule_transport_work ();
 
-	if (!export_status->aborted()) {
-		ExportReadFinished ();
-	} else {
+	if (export_status->aborted()) {
 		finalize_audio_export ();
 	}
 
@@ -225,20 +207,11 @@ void
 Session::finalize_audio_export ()
 {
 	_exporting = false;
-	export_status->running = false;
-
-	if (!_exporting_realtime) {
-		_engine.freewheel (false);
-		_exporting_realtime = false;
-	}
+	_export_rolling = false;
 
 	/* Clean up */
 
-	/* BOOST SIGNAL are these necessary? 
-	   ProcessExport.clear();
-	   ExportReadFinished.clear();
-	*/
-
+	_engine.freewheel (false);
 	export_freewheel_connection.disconnect();
 	export_handler.reset();
 	export_status.reset();

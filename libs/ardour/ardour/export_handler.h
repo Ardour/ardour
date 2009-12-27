@@ -112,17 +112,21 @@ class ExportHandler : public ExportElementFactory
 
   private:
 
+	int process (nframes_t frames);
+	
 	Session &          session;
 	GraphBuilderPtr    graph_builder;
 	StatusPtr          export_status;
 	ConfigMap          config_map;
 
 	bool               realtime;
+	bool               normalizing;
 
 	/* Timespan management */
 
 	void start_timespan ();
 	int  process_timespan (nframes_t frames);
+	int  process_normalize ();
 	void finish_timespan ();
 
 	typedef std::pair<ConfigMap::iterator, ConfigMap::iterator> TimespanBounds;
@@ -131,8 +135,6 @@ class ExportHandler : public ExportElementFactory
 	
 	PBD::ScopedConnection process_connection;
 	sframes_t             process_position;
-	
-	PBD::ScopedConnection export_read_finished_connection;
 
 	/* CD Marker stuff */
 

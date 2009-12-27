@@ -6,11 +6,12 @@
 #include <sigc++/signal.h>
 
 #include "types.h"
+#include "debuggable.h"
 
 namespace AudioGrapher {
 
 /// Common interface for templated libsndfile readers/writers
-class SndfileBase
+class SndfileBase : public Debuggable<>
 {
   public:
 	

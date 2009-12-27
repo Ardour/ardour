@@ -530,7 +530,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int  start_audio_export (nframes_t position, bool realtime);
 
 	PBD::Signal1<int,nframes_t> ProcessExport;
-	PBD::Signal0<void> ExportReadFinished;
 	static PBD::Signal2<void,std::string, std::string> Exported;
 
 	void add_source (boost::shared_ptr<Source>);
@@ -934,7 +933,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	nframes_t post_export_position;
 
 	bool _exporting;
-	bool _exporting_realtime;
+	bool _export_rolling;
 
 	boost::shared_ptr<ExportHandler> export_handler;
 	boost::shared_ptr<ExportStatus>  export_status;

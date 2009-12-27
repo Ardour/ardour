@@ -23,7 +23,8 @@ class ThreaderException : public Exception
 	ThreaderException (T const & thrower, std::exception const & e)
 		: Exception (thrower,
 			boost::str ( boost::format
-			("\n\t- Dynamic type: %1%\n\t- what(): %2%") % name (e) % e.what() ))
+			("\n\t- Dynamic type: %1%\n\t- what(): %2%")
+			% DebugUtils::demangled_name (e) % e.what() ))
 	{ }
 };
 

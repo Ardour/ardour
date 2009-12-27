@@ -62,6 +62,7 @@ class ExportGraphBuilder
 	~ExportGraphBuilder ();
 	
 	int process (nframes_t frames, bool last_cycle);
+	bool process_normalize (); // returns true when finished
 	
 	void reset ();
 	void add_config (FileSpec const & config);
@@ -124,6 +125,9 @@ class ExportGraphBuilder
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;
 		
+		/// Returns true when finished
+		bool process ();
+		
 	  private:
 		typedef boost::shared_ptr<AudioGrapher::PeakReader> PeakReaderPtr;
 		typedef boost::shared_ptr<AudioGrapher::Normalizer> NormalizerPtr;
@@ -132,7 +136,6 @@ class ExportGraphBuilder
 		typedef boost::shared_ptr<AudioGrapher::AllocatingProcessContext<Sample> > BufferPtr;
 		
 		void start_post_processing();
-		void do_post_processing();
 		
 		ExportGraphBuilder & parent;
 		
@@ -216,6 +219,8 @@ class ExportGraphBuilder
 	
 	Sample *  process_buffer;
 	nframes_t process_buffer_frames;
+	
+	std::list<Normalizer *> normalizers;
 	
 	Glib::ThreadPool thread_pool;
 };

@@ -60,9 +60,10 @@ SndfileWriter<T>::process (ProcessContext<T> const & c)
 
 	if (c.has_flag(ProcessContext<T>::EndOfInput)) {
 		sf_write_sync (sndfile);
-		//#ifdef HAVE_SIGCPP
 		FileWritten (path);
-		//#endif
+		if (debug_level (DebugProcess)) {
+			debug_stream() << str ( format("Finished writing file %1%") % path) << std::endl;
+		}
 	}
 }
 

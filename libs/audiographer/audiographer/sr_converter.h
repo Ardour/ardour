@@ -3,14 +3,20 @@
 
 #include <samplerate.h>
 
-#include "types.h"
+#include "debuggable.h"
 #include "listed_source.h"
 #include "sink.h"
+#include "throwing.h"
+#include "types.h"
 
 namespace AudioGrapher
 {
 
-class SampleRateConverter : public ListedSource<float>, public Sink<float>
+class SampleRateConverter
+  : public ListedSource<float>
+  , public Sink<float>
+  , public Debuggable<>
+  , public Throwing<>
 {
   public:
 	SampleRateConverter (uint32_t channels);

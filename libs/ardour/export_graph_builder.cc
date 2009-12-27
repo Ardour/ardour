@@ -56,11 +56,26 @@ ExportGraphBuilder::process (nframes_t frames, bool last_cycle)
 	return 0;
 }
 
+bool
+ExportGraphBuilder::process_normalize ()
+{
+	for (std::list<Normalizer *>::iterator it = normalizers.begin(); it != normalizers.end(); /* ++ in loop */) {
+		if ((*it)->process()) {
+			it = normalizers.erase (it);
+		} else {
+			++it;
+		}
+	}
+	
+	return normalizers.empty();
+}
+
 void
 ExportGraphBuilder::reset ()
 {
 	channel_configs.clear ();
 	channels.clear ();
+	normalizers.clear ();
 }
 
 void
@@ -252,20 +267,21 @@ ExportGraphBuilder::Normalizer::operator== (FileSpec const & other_config) const
 	       config.format->normalize_target() == other_config.format->normalize_target();
 }
 
+bool
+ExportGraphBuilder::Normalizer::process()
+{
+	ProcessContext<Sample> buffer_copy (*buffer);
+	tmp_file->read (buffer_copy);
+	normalizer->process (buffer_copy);
+	return buffer_copy.frames() != buffer->frames();
+}
+
 void
 ExportGraphBuilder::Normalizer::start_post_processing()
 {
 	normalizer->set_peak (peak_reader->get_peak());
 	tmp_file->seek (0, SndfileReader<Sample>::SeekBeginning);
-	parent.thread_pool.push (sigc::mem_fun (*this, &Normalizer::do_post_processing));
-}
-
-void
-ExportGraphBuilder::Normalizer::do_post_processing()
-{
-	while (tmp_file->read (*buffer) == buffer->frames()) {
-		normalizer->process (*buffer);
-	}
+	parent.normalizers.push_back (this);
 }
 
 /* SRC */

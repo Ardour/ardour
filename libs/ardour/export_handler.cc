@@ -119,7 +119,7 @@ ExportHandler::add_export_config (TimespanPtr timespan, ChannelConfigPtr channel
 	FileSpec spec (channel_config, format, filename);
 	ConfigPair pair (timespan, spec);
 	config_map.insert (pair);
-
+	
 	return true;
 }
 
@@ -138,8 +138,6 @@ ExportHandler::do_export (bool rt)
 	/* Start export */
 
 	realtime = rt;
-
-	session.ExportReadFinished.connect_same_thread (export_read_finished_connection, boost::bind (&ExportHandler::finish_timespan, this));
 	start_timespan ();
 }
 
@@ -149,6 +147,7 @@ ExportHandler::start_timespan ()
 	export_status->timespan++;
 
 	if (config_map.empty()) {
+		// freewheeling has to be stopped from outside the process cycle
 		export_status->running = false;
 		return;
 	}
@@ -160,14 +159,30 @@ ExportHandler::start_timespan ()
 	timespan_bounds = config_map.equal_range (current_timespan);
 	graph_builder->reset ();
 	for (ConfigMap::iterator it = timespan_bounds.first; it != timespan_bounds.second; ++it) {
-		graph_builder->add_config (it->second);
+		// Filenames can be shared across timespans
+		FileSpec & spec = it->second;
+		spec.filename->set_timespan (it->first);
+		graph_builder->add_config (spec);
 	}
 
 	/* start export */
 
-	session.ProcessExport.connect_same_thread (process_connection, boost::bind (&ExportHandler::process_timespan, this, _1));
+	normalizing = false;
+	session.ProcessExport.connect_same_thread (process_connection, boost::bind (&ExportHandler::process, this, _1));
 	process_position = current_timespan->get_start();
 	session.start_audio_export (process_position, realtime);
+}
+
+int
+ExportHandler::process (nframes_t frames)
+{
+	if (!export_status->running) {
+		return 0;
+	} else if (normalizing) {
+		return process_normalize ();
+	} else {
+		return process_timespan (frames);
+	}
 }
 
 int
@@ -184,6 +199,7 @@ ExportHandler::process_timespan (nframes_t frames)
 	if (last_cycle) {
 		frames_to_read = end - process_position;
 		export_status->stop = true;
+		normalizing = true;
 	} else {
 		frames_to_read = frames;
 	}
@@ -196,11 +212,19 @@ ExportHandler::process_timespan (nframes_t frames)
 	return graph_builder->process (frames_to_read, last_cycle);
 }
 
+int
+ExportHandler::process_normalize ()
+{
+	if (graph_builder->process_normalize ()) {
+		finish_timespan ();
+	}
+	
+	return 0;
+}
+
 void
 ExportHandler::finish_timespan ()
 {
-	process_connection.disconnect ();
-	
 	while (config_map.begin() != timespan_bounds.second) {
 		config_map.erase (config_map.begin());
 	}

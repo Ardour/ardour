@@ -1,9 +1,11 @@
 #ifndef AUDIOGRAPHER_PROCESS_CONTEXT_H
 #define AUDIOGRAPHER_PROCESS_CONTEXT_H
 
-#include "types.h"
+#include <boost/static_assert.hpp>
+#include <boost/type_traits.hpp>
 
-#include <cstring>
+#include "types.h"
+#include "type_utils.h"
 
 namespace AudioGrapher
 {
@@ -14,7 +16,9 @@ namespace AudioGrapher
 
 template <typename T>
 class ProcessContext  {
-	
+
+	BOOST_STATIC_ASSERT (boost::has_trivial_destructor<T>::value);
+
 public:
 
 	typedef FlagField::Flag Flag;

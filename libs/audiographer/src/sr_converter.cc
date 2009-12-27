@@ -1,18 +1,9 @@
 #include "audiographer/sr_converter.h"
 #include "audiographer/exception.h"
+#include "audiographer/type_utils.h"
 
 #include <cmath>
-#include <cstring>
 #include <boost/format.hpp>
-
-#define ENABLE_DEBUG 0
-
-#if ENABLE_DEBUG
-	#include <iostream>
-	#define DEBUG(str) std::cout << str << std::endl;
-#else
-	#define DEBUG(str)
-#endif
 
 namespace AudioGrapher
 {
@@ -44,8 +35,11 @@ SampleRateConverter::init (nframes_t in_rate, nframes_t out_rate, int quality)
 
 	active = true;
 	int err;
-	if ((src_state = src_new (quality, channels, &err)) == 0) {
-		throw Exception (*this, str (format ("Cannot initialize sample rate converter: %1%") % src_strerror (err)));
+	src_state = src_new (quality, channels, &err);
+	if (throw_level (ThrowObject) && !src_state) {
+		throw Exception (*this, str (format 
+			("Cannot initialize sample rate converter: %1%")
+			% src_strerror (err)));
 	}
 
 	src_data.src_ratio = (double) out_rate / (double) in_rate;
@@ -70,7 +64,7 @@ SampleRateConverter::allocate_buffers (nframes_t max_frames)
 
 		max_leftover_frames = 4 * max_frames;
 		leftover_data = (float *) realloc (leftover_data, max_leftover_frames * sizeof (float));
-		if (!leftover_data) {
+		if (throw_level (ThrowObject) && !leftover_data) {
 			throw Exception (*this, "A memory allocation error occured");
 		}
 
@@ -92,13 +86,13 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 	nframes_t frames = c.frames();
 	float * in = const_cast<float *> (c.data()); // TODO check if this is safe!
 
-	if (frames > max_frames_in) {
+	if (throw_level (ThrowStrict) && frames > max_frames_in) {
 		throw Exception (*this, str (format (
 			"process() called with too many frames, %1% instead of %2%")
 			% frames % max_frames_in));
 	}
 	
-	if (frames % channels != 0) {
+	if (throw_level (ThrowStrict) && frames % channels != 0) {
 		throw Exception (*this, boost::str (boost::format (
 			"Number of frames given to process() was not a multiple of channels: %1% frames with %2% channels")
 			% frames % channels));
@@ -121,7 +115,7 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 
 				/* first time, append new data from data_in into the leftover_data buffer */
 
-				memcpy (&leftover_data [leftover_frames * channels], in, frames * sizeof(float));
+				TypeUtils<float>::copy (&leftover_data [leftover_frames * channels], in, frames);
 				src_data.input_frames = frames + leftover_frames;
 			} else {
 
@@ -140,23 +134,28 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 
 		first_time = false;
 
-		DEBUG ("data_in: " << src_data.data_in);
-		DEBUG ("input_frames: " << src_data.input_frames);
-		DEBUG ("data_out: " << src_data.data_out);
-		DEBUG ("output_frames: " << src_data.output_frames);
+		if (debug_level (DebugVerbose)) {
+			debug_stream() << "data_in: " << src_data.data_in <<
+				", input_frames: " << src_data.input_frames <<
+				", data_out: " << src_data.data_out <<
+				", output_frames: " << src_data.output_frames << std::endl;
+		}
 		
-		if ((err = src_process (src_state, &src_data)) != 0) {
-			throw Exception (*this, str (format ("An error occured during sample rate conversion: %1%") % src_strerror (err)));
+		err = src_process (src_state, &src_data);
+		if (throw_level (ThrowProcess) && err) {
+			throw Exception (*this, str (format 
+			("An error occured during sample rate conversion: %1%")
+			% src_strerror (err)));
 		}
 
 		leftover_frames = src_data.input_frames - src_data.input_frames_used;
 
 		if (leftover_frames > 0) {
-			if (leftover_frames > max_leftover_frames) {
+			if (throw_level (ThrowProcess) && leftover_frames > max_leftover_frames) {
 				throw Exception(*this, "leftover frames overflowed");
 			}
-			memmove (leftover_data, (char *) &src_data.data_in[src_data.input_frames_used * channels],
-			         leftover_frames * channels * sizeof(float));
+			TypeUtils<float>::move (&src_data.data_in[src_data.input_frames_used * channels],
+			                        leftover_data, leftover_frames * channels);
 		}
 
 		ProcessContext<float> c_out (c, data_out, src_data.output_frames_gen * channels);
@@ -165,11 +164,17 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 		}
 		output (c_out);
 
-		DEBUG ("src_data.output_frames_gen: " << src_data.output_frames_gen << ", leftover_frames: " << leftover_frames);
+		if (debug_level (DebugProcess)) {
+			debug_stream() <<
+				"src_data.output_frames_gen: " << src_data.output_frames_gen <<
+				", leftover_frames: " << leftover_frames << std::endl;
+		}
 
-		if (src_data.output_frames_gen == 0 && leftover_frames) { throw Exception (*this, boost::str (boost::format (
-			"No output frames genereated with %1% leftover frames")
-			% leftover_frames)); }
+		if (throw_level (ThrowProcess) && src_data.output_frames_gen == 0 && leftover_frames) {
+			throw Exception (*this, boost::str (boost::format 
+				("No output frames genereated with %1% leftover frames")
+				% leftover_frames));
+		}
 		
 	} while (leftover_frames > frames);
 	
@@ -189,7 +194,9 @@ void SampleRateConverter::set_end_of_input (ProcessContext<float> const & c)
 	/* No idea why this has to be done twice for all data to be written,
 	 * but that just seems to be the way it is...
 	 */
+	dummy.remove_flag (ProcessContext<float>::EndOfInput);
 	process (dummy);
+	dummy.set_flag (ProcessContext<float>::EndOfInput);
 	process (dummy);
 }
 

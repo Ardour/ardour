@@ -209,7 +209,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	g_atomic_int_set (&_capture_load_min, 100);
 	_play_range = false;
 	_exporting = false;
-	_exporting_realtime = false;
 	_gain_automation_buffer = 0;
 	_pan_automation_buffer = 0;
 	_npan_buffers = 0;
