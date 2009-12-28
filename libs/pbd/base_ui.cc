@@ -25,6 +25,7 @@
 #include <cstring>
 
 #include "pbd/base_ui.h"
+#include "pbd/pthread_utils.h"
 #include "pbd/error.h"
 #include "pbd/compose.h"
 #include "pbd/failed_constructor.h"

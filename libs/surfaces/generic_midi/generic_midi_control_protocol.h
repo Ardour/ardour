@@ -1,7 +1,27 @@
+/*
+    Copyright (C) 2006 Paul Davis
+ 
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #ifndef ardour_generic_midi_control_protocol_h
 #define ardour_generic_midi_control_protocol_h
 
 #include <set>
+#include <list>
 #include <glibmm/thread.h>
 #include "ardour/types.h"
 
@@ -20,6 +40,7 @@ namespace ARDOUR {
 }
 
 class MIDIControllable;
+class MIDIFunction;
 
 class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
   public:
@@ -50,6 +71,9 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	typedef std::set<MIDIControllable*> MIDIControllables;
 	MIDIControllables controllables;
 
+	typedef std::list<MIDIFunction*> MIDIFunctions;
+	MIDIFunctions functions;
+
 	typedef std::pair<MIDIControllable*,PBD::Connection> MIDIPendingControllable;
 	typedef std::list<MIDIPendingControllable* > MIDIPendingControllables;
 	MIDIPendingControllables pending_controllables;
@@ -63,6 +87,12 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 
 	void create_binding (PBD::Controllable*, int, int);
 	void delete_binding (PBD::Controllable*);
+
+	int load_bindings (const std::string&);
+	MIDIControllable* create_binding (const XMLNode&);
+	MIDIFunction* create_function (const XMLNode&);
+
+	void reset_controllables ();
 };
 
 #endif /* ardour_generic_midi_control_protocol_h */

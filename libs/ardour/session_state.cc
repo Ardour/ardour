@@ -2678,6 +2678,41 @@ Session::controllable_by_id (const PBD::ID& id)
 	return boost::shared_ptr<Controllable>();
 }
 
+boost::shared_ptr<Controllable>
+Session::controllable_by_uri (const std::string& uri)
+{
+	boost::shared_ptr<Controllable> c;
+	string::size_type last_slash;
+	string useful_part;
+
+	if ((last_slash = uri.find_last_of ('/')) == string::npos) {
+		return c;
+	}
+
+	useful_part = uri.substr (last_slash+1);
+
+	uint32_t rid;
+	char what[64];
+
+	if (sscanf (useful_part.c_str(), "rid=%" PRIu32 "?%63s", &rid, what) != 2) {
+		return c;
+	}
+
+	boost::shared_ptr<Route> r = route_by_remote_id (rid);
+	
+	if (!r) {
+		return c;
+	}
+
+	if (strncmp (what, "gain", 4) == 0) {
+		c = r->gain_control ();
+	} else if (strncmp (what, "pan", 3) == 0) {
+	} else if (strncmp (what, "plugin", 6) == 0) {
+	}
+
+	return c;
+}
+
 void
 Session::add_instant_xml (XMLNode& node, bool write_to_config)
 {

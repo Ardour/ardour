@@ -91,13 +91,9 @@ MIDIControllable::drop_external_control ()
 }
 
 void
-MIDIControllable::reacquire_controllable ()
+MIDIControllable::set_controllable (Controllable* c)
 {
-	if (!_current_uri.empty()) {
-		controllable = Controllable::by_uri (_current_uri);
-	} else {
-		controllable = 0;
-	}
+	controllable = c;
 }
 
 void

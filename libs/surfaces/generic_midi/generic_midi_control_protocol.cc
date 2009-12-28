@@ -34,9 +34,11 @@
 
 #include "generic_midi_control_protocol.h"
 #include "midicontrollable.h"
+#include "midifunction.h"
 
 using namespace ARDOUR;
 using namespace PBD;
+using namespace std;
 
 #include "i18n.h"
 
@@ -44,7 +46,7 @@ using namespace PBD;
 #define ui_bind(x) boost::protect (boost::bind ((x)))
 
 GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
-	: ControlProtocol (s, _("Generic MIDI"), MidiControlUI::instance())
+	: ControlProtocol (s, _("Generic MIDI"), midi_ui_context())
 {
 	MIDI::Manager* mm = MIDI::Manager::instance();
 
@@ -71,10 +73,32 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	Controllable::DeleteBinding.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::delete_binding, this, _1));
 
 	Session::SendFeedback.connect (*this, boost::bind (&GenericMidiControlProtocol::send_feedback, this), midi_ui_context());;
+
+	std::string xmlpath = "/tmp/midi.map";
+
+	load_bindings (xmlpath);
+	reset_controllables ();
 }
 
 GenericMidiControlProtocol::~GenericMidiControlProtocol ()
 {
+	Glib::Mutex::Lock lm (pending_lock);
+	Glib::Mutex::Lock lm2 (controllables_lock);
+
+	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
+		delete *i;
+	}
+	controllables.clear ();
+
+	for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ++i) {
+		delete *i;
+	}
+	pending_controllables.clear ();
+
+	for (MIDIFunctions::iterator i = functions.begin(); i != functions.end(); ++i) {
+		delete *i;
+	}
+	functions.clear ();
 }
 
 int
@@ -135,6 +159,9 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	if (c == 0) {
 		return false;
 	}
+
+	Glib::Mutex::Lock lm (pending_lock);
+	Glib::Mutex::Lock lm2 (controllables_lock);
 
 	MIDIControllables::iterator tmp;
 	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ) {
@@ -392,3 +419,167 @@ GenericMidiControlProtocol::get_feedback () const
 	return do_feedback;
 }
 
+int
+GenericMidiControlProtocol::load_bindings (const string& xmlpath)
+{
+	XMLTree state_tree;
+
+	if (!state_tree.read (xmlpath.c_str())) {
+		error << string_compose(_("Could not understand MIDI bindings file %1"), xmlpath) << endmsg;
+		return -1;
+	}
+
+	XMLNode* root = state_tree.root();
+
+	if (root->name() != X_("ArdourMIDIBindings")) {
+		error << string_compose (_("MIDI Bindings file %1 is not really a MIDI bindings file"), xmlpath) << endmsg;
+		return -1;
+	}
+
+	const XMLProperty* prop;
+
+	if ((prop = root->property ("version")) == 0) {
+		return -1;
+	} else {
+		int major;
+		int minor;
+		int micro;
+
+		sscanf (prop->value().c_str(), "%d.%d.%d", &major, &minor, &micro);
+		Stateful::loading_state_version = (major * 1000) + minor;
+	}
+	
+	const XMLNodeList& children (root->children());
+	XMLNodeConstIterator citer;
+	XMLNodeConstIterator gciter;
+
+	MIDIControllable* mc;
+
+	for (citer = children.begin(); citer != children.end(); ++citer) {
+		if ((*citer)->name() == "Binding") {
+			const XMLNode* child = *citer;
+
+			if (child->property ("uri")) {
+				/* controllable */
+				
+				if ((mc = create_binding (*child)) != 0) {
+					Glib::Mutex::Lock lm2 (controllables_lock);
+					controllables.insert (mc);
+				}
+
+			} else if (child->property ("function")) {
+
+				/* function */
+				MIDIFunction* mf;
+
+				if ((mf = create_function (*child)) != 0) {
+					functions.push_back (mf);
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+MIDIControllable*
+GenericMidiControlProtocol::create_binding (const XMLNode& node)
+{
+	const XMLProperty* prop;
+	int detail;
+	int channel;
+	string uri;
+	MIDI::eventType ev;
+
+	if ((prop = node.property (X_("channel"))) == 0) {
+		return 0;
+	}
+	
+	if (sscanf (prop->value().c_str(), "%d", &channel) != 1) {
+		return 0;
+	}
+
+	if ((prop = node.property (X_("ctl"))) != 0) {
+		ev = MIDI::controller;
+	} else if ((prop = node.property (X_("note"))) != 0) {
+		ev = MIDI::on;
+	} else if ((prop = node.property (X_("pgm"))) != 0) {
+		ev = MIDI::program;
+	} else {
+		return 0;
+	}
+
+	if (sscanf (prop->value().c_str(), "%d", &detail) != 1) {
+		return 0;
+	}
+
+	prop = node.property (X_("uri"));
+	uri = prop->value();
+
+	MIDIControllable* mc = new MIDIControllable (*_port, uri, false);
+	mc->bind_midi (channel, ev, detail);
+
+	cerr << "New MC with URI = " << uri << endl;
+
+	return mc;
+}
+
+void
+GenericMidiControlProtocol::reset_controllables ()
+{
+	Glib::Mutex::Lock lm2 (controllables_lock);
+	
+	for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ++iter) {
+		MIDIControllable* existingBinding = (*iter);
+		
+		boost::shared_ptr<Controllable> c = session->controllable_by_uri (existingBinding->current_uri());
+		existingBinding->set_controllable (c.get());
+	}
+}
+
+MIDIFunction*
+GenericMidiControlProtocol::create_function (const XMLNode& node)
+{
+	const XMLProperty* prop;
+	int detail;
+	int channel;
+	string uri;
+	MIDI::eventType ev;
+
+	if ((prop = node.property (X_("channel"))) == 0) {
+		return 0;
+	}
+	
+	if (sscanf (prop->value().c_str(), "%d", &channel) != 1) {
+		return 0;
+	}
+
+	if ((prop = node.property (X_("ctl"))) != 0) {
+		ev = MIDI::controller;
+	} else if ((prop = node.property (X_("note"))) != 0) {
+		ev = MIDI::on;
+	} else if ((prop = node.property (X_("pgm"))) != 0) {
+		ev = MIDI::program;
+	} else {
+		return 0;
+	}
+
+	if (sscanf (prop->value().c_str(), "%d", &detail) != 1) {
+		return 0;
+	}
+
+	prop = node.property (X_("function"));
+	
+	MIDIFunction* mf = new MIDIFunction (*_port);
+	
+	if (mf->init (*this, prop->value())) {
+		delete mf;
+		return 0;
+	}
+
+	mf->bind_midi (channel, ev, detail);
+	
+	cerr << "New MF with function = " << prop->value() << endl;
+
+	return mf;
+}

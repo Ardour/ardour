@@ -68,6 +68,12 @@ MidiControlUI::do_request (MidiUIRequest* req)
 
 	} else if (req->type == CallSlot) {
 
+#ifndef NDEBUG
+		if (getenv ("DEBUG_THREADED_SIGNALS")) {
+			cerr << "MIDI UI calls a slot\n";
+		}
+#endif
+
 		req->the_slot ();
 
 	} else if (req->type == Quit) {
@@ -148,6 +154,12 @@ void
 MidiControlUI::thread_init ()
 {	
 	struct sched_param rtparam;
+
+	char* c = new char[7];
+	strcpy (c, X_("midiUI"));
+	pthread_set_name (c);
+
+	cerr << "MIDI UI running\n";
 
 	PBD::notify_gui_about_thread_creation (X_("gui"), pthread_self(), X_("MIDI"), 2048);
 	SessionEvent::create_per_thread_pool (X_("MIDI I/O"), 128);
