@@ -1679,22 +1679,22 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 		region_menu->signal_map_event().connect (
 			sigc::bind (sigc::mem_fun(*this, &Editor::set_selected_regionview_from_map_event), sv, boost::weak_ptr<Region>(region)));
 
-		items.push_back (MenuElem (_("Rename"), sigc::mem_fun(*this, &Editor::rename_region)));
+		items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &Editor::rename_region)));
 		if (mr && internal_editing()) {
 			items.push_back (MenuElem (_("List editor..."), sigc::mem_fun(*this, &Editor::show_midi_list_editor)));
 		} else {
-			items.push_back (MenuElem (_("Region editor"), sigc::mem_fun(*this, &Editor::edit_region)));
+			items.push_back (MenuElem (_("Region Properties..."), sigc::mem_fun(*this, &Editor::edit_region)));
 		}
 	}
 
 	items.push_back (MenuElem (_("Raise to top layer"), sigc::mem_fun(*this, &Editor::raise_region_to_top)));
 	items.push_back (MenuElem (_("Lower to bottom layer"), sigc::mem_fun  (*this, &Editor::lower_region_to_bottom)));
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Define sync point"), sigc::mem_fun(*this, &Editor::set_region_sync_from_edit_point)));
+	items.push_back (MenuElem (_("Define Sync Point"), sigc::mem_fun(*this, &Editor::set_region_sync_from_edit_point)));
 	if (_edit_point == EditAtMouse) {
 		items.back ().set_sensitive (false);
 	}
-	items.push_back (MenuElem (_("Remove sync point"), sigc::mem_fun(*this, &Editor::remove_region_sync)));
+	items.push_back (MenuElem (_("Remove Sync Point"), sigc::mem_fun(*this, &Editor::remove_region_sync)));
 	items.push_back (SeparatorElem());
 
 	items.push_back (MenuElem (_("Audition"), sigc::mem_fun(*this, &Editor::play_selected_region)));
@@ -1723,7 +1723,7 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 	}
 	region_lock_item->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_region_lock));
 
-	items.push_back (CheckMenuElem (_("Glue to Bars&Beats")));
+	items.push_back (CheckMenuElem (_("Glue to Bars & Beats")));
 	CheckMenuItem* bbt_glue_item = static_cast<CheckMenuItem*>(&items.back());
 
 	switch (region_to_check->positional_lock_style()) {
@@ -1757,7 +1757,7 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 		}
 	}
 
-	items.push_back (CheckMenuElem (_("Original position"), sigc::mem_fun(*this, &Editor::naturalize)));
+	items.push_back (CheckMenuElem (_("Original Position"), sigc::mem_fun(*this, &Editor::naturalize)));
 	if (region_to_check->at_natural_position()) {
 		items.back().set_sensitive (false);
 	}
@@ -1860,7 +1860,7 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 		region_edit_menu_split_item->set_sensitive (false);
 	}
 
-	items.push_back (MenuElem (_("Make mono regions"), (sigc::mem_fun(*this, &Editor::split_multichannel_region))));
+	items.push_back (MenuElem (_("Make Mono Regions"), (sigc::mem_fun(*this, &Editor::split_multichannel_region))));
 	region_edit_menu_split_multichannel_item = &items.back();
 
 	items.push_back (MenuElem (_("Duplicate"), (sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), false))));
