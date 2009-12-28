@@ -772,6 +772,16 @@ AudioRegion::set_fade_out_shape (FadeShape shape)
 }
 
 void
+AudioRegion::set_fade_in (boost::shared_ptr<AutomationList> f)
+{
+	_fade_in->freeze ();
+	*_fade_in = *f;
+	_fade_in->thaw ();
+	
+	send_change (FadeInChanged);
+}
+
+void
 AudioRegion::set_fade_in (FadeShape shape, nframes_t len)
 {
 	_fade_in->freeze ();
@@ -826,7 +836,16 @@ AudioRegion::set_fade_in (FadeShape shape, nframes_t len)
 	}
 
 	_fade_in->thaw ();
-	_fade_in_shape = shape;
+
+	send_change (FadeInChanged);
+}
+
+void
+AudioRegion::set_fade_out (boost::shared_ptr<AutomationList> f)
+{
+	_fade_out->freeze ();
+	*_fade_out = *f;
+	_fade_out->thaw ();
 
 	send_change (FadeInChanged);
 }
@@ -884,7 +903,6 @@ AudioRegion::set_fade_out (FadeShape shape, nframes_t len)
 	}
 
 	_fade_out->thaw ();
-	_fade_out_shape = shape;
 
 	send_change (FadeOutChanged);
 }
@@ -952,13 +970,13 @@ AudioRegion::set_fade_out_active (bool yn)
 bool
 AudioRegion::fade_in_is_default () const
 {
-	return _fade_in_shape == Linear && _fade_in->back()->when == 64;
+	return _fade_in->size() == 2 && _fade_in->front()->when == 0 && _fade_in->back()->when == 64;
 }
 
 bool
 AudioRegion::fade_out_is_default () const
 {
-	return _fade_out_shape == Linear && _fade_out->back()->when == 64;
+	return _fade_out->size() == 2 && _fade_out->front()->when == 0 && _fade_out->back()->when == 64;
 }
 
 void

@@ -125,11 +125,13 @@ class AudioRegion : public Region
 	void set_fade_in_shape (FadeShape);
 	void set_fade_in_length (nframes_t);
 	void set_fade_in (FadeShape, nframes_t);
+	void set_fade_in (boost::shared_ptr<AutomationList>);
 
 	void set_fade_out_active (bool yn);
 	void set_fade_out_shape (FadeShape);
 	void set_fade_out_length (nframes_t);
 	void set_fade_out (FadeShape, nframes_t);
+	void set_fade_out (boost::shared_ptr<AutomationList>);
 
 	void set_envelope_active (bool yn);
 	void set_default_envelope ();
@@ -206,9 +208,7 @@ class AudioRegion : public Region
 	AutomatableControls _automatable;
 
 	boost::shared_ptr<AutomationList> _fade_in;
-	FadeShape                         _fade_in_shape;
 	boost::shared_ptr<AutomationList> _fade_out;
-	FadeShape                         _fade_out_shape;
 	boost::shared_ptr<AutomationList> _envelope;
 	gain_t                            _scale_amplitude;
 	uint32_t                          _fade_in_disabled;
