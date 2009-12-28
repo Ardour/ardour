@@ -20,6 +20,7 @@
 #define __STDC_FORMAT_MACROS 1
 #include <stdint.h>
 
+#include <sstream>
 #include <algorithm>
 
 #include "pbd/error.h"
@@ -469,6 +470,8 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 
 			} else if (child->property ("function")) {
 
+				cerr << "try to create a function from " << child->property ("function")->value() << endl;
+
 				/* function */
 				MIDIFunction* mf;
 
@@ -541,18 +544,13 @@ MIDIFunction*
 GenericMidiControlProtocol::create_function (const XMLNode& node)
 {
 	const XMLProperty* prop;
-	int detail;
-	int channel;
+	int intval;
+	MIDI::byte detail = 0;
+	MIDI::channel_t channel = 0;
 	string uri;
 	MIDI::eventType ev;
-
-	if ((prop = node.property (X_("channel"))) == 0) {
-		return 0;
-	}
-	
-	if (sscanf (prop->value().c_str(), "%d", &channel) != 1) {
-		return 0;
-	}
+	MIDI::byte* sysex = 0;
+	uint32_t sysex_size = 0;
 
 	if ((prop = node.property (X_("ctl"))) != 0) {
 		ev = MIDI::controller;
@@ -560,25 +558,77 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 		ev = MIDI::on;
 	} else if ((prop = node.property (X_("pgm"))) != 0) {
 		ev = MIDI::program;
+	} else if ((prop = node.property (X_("sysex"))) != 0) {
+
+		ev = MIDI::sysex;
+		int val;
+		uint32_t cnt;
+
+		{
+			cnt = 0;
+			stringstream ss (prop->value());
+			ss << hex;
+			
+			while (ss >> val) {
+				cnt++;
+			}
+		}
+
+		if (cnt == 0) {
+			return 0;
+		}
+
+		sysex = new MIDI::byte[cnt];
+		sysex_size = cnt;
+		
+		{
+			stringstream ss (prop->value());
+			ss << hex;
+			cnt = 0;
+			
+			while (ss >> val) {
+				sysex[cnt++] = (MIDI::byte) val;
+				cerr << hex << (int) sysex[cnt-1] << dec << ' ' << endl;
+			}
+		}
+		
 	} else {
+		warning << "Binding ignored - unknown type" << endmsg;
 		return 0;
 	}
 
-	if (sscanf (prop->value().c_str(), "%d", &detail) != 1) {
-		return 0;
+	if (sysex_size == 0) {
+		if ((prop = node.property (X_("channel"))) == 0) {
+			return 0;
+		}
+	
+		if (sscanf (prop->value().c_str(), "%d", &intval) != 1) {
+			return 0;
+		}
+		channel = (MIDI::channel_t) intval;
+		/* adjust channel to zero-based counting */
+		if (channel > 0) {
+			channel -= 1;
+		}
+		
+		if (sscanf (prop->value().c_str(), "%d", &intval) != 1) {
+			return 0;
+		}
+		
+		detail = (MIDI::byte) intval;
 	}
 
 	prop = node.property (X_("function"));
 	
 	MIDIFunction* mf = new MIDIFunction (*_port);
 	
-	if (mf->init (*this, prop->value())) {
+	if (mf->init (*this, prop->value(), sysex, sysex_size)) {
 		delete mf;
 		return 0;
 	}
 
 	mf->bind_midi (channel, ev, detail);
-	
+
 	cerr << "New MF with function = " << prop->value() << endl;
 
 	return mf;

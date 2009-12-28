@@ -28,14 +28,17 @@ using namespace MIDI;
 MIDIFunction::MIDIFunction (MIDI::Port& p)
 	: _port (p)
 {
+	sysex_size = 0;
+	sysex = 0;
 }
 
 MIDIFunction::~MIDIFunction ()
 {
+	delete sysex;
 }
 
 int
-MIDIFunction::init (BasicUI& ui, const std::string& function_name)
+MIDIFunction::init (BasicUI& ui, const std::string& function_name, MIDI::byte* sysex_data, size_t sysex_sz)
 {
 	if (strcasecmp (function_name.c_str(), "transport-stop") == 0) {
 		_function = TransportStop;
@@ -47,11 +50,24 @@ MIDIFunction::init (BasicUI& ui, const std::string& function_name)
 		_function = TransportStart;
 	} else if (strcasecmp (function_name.c_str(), "transport-end") == 0) {
 		_function = TransportEnd;
+	} else if (strcasecmp (function_name.c_str(), "loop-toggle") == 0) {
+		_function = TransportLoopToggle;
+	} else if (strcasecmp (function_name.c_str(), "rec-enable") == 0) {
+		_function = TransportRecordEnable;
+	} else if (strcasecmp (function_name.c_str(), "rec-disable") == 0) {
+		_function = TransportRecordDisable;
 	} else {
 		return -1;
 	}
 
 	_ui = &ui;
+
+	if (sysex_sz) {
+		/* we take ownership of the sysex data */
+		sysex = sysex_data;
+		sysex_size = sysex_sz;
+	}
+
 	return 0;
 }
 
@@ -77,6 +93,18 @@ MIDIFunction::execute ()
 
 	case TransportEnd:
 		_ui->goto_end ();
+		break;
+
+	case TransportLoopToggle:
+		_ui->loop_toggle ();
+		break;
+
+	case TransportRecordEnable:
+		_ui->set_record_enable (true);
+		break;
+
+	case TransportRecordDisable:
+		_ui->set_record_enable (false);
 		break;
 	}
 }
@@ -118,6 +146,20 @@ MIDIFunction::midi_sense_program_change (Parser &, byte msg)
 }
 
 void
+MIDIFunction::midi_sense_sysex (Parser &, byte* msg, size_t sz)
+{
+	if (sz != sysex_size) {
+		return;
+	}
+
+	if (memcmp (msg, sysex, sysex_size) != 0) {
+		return;
+	}
+
+	execute ();
+}
+
+void
 MIDIFunction::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 {
 	midi_sense_connection[0].disconnect ();
@@ -156,6 +198,10 @@ MIDIFunction::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 		p.channel_program_change[chn_i].connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIFunction::midi_sense_program_change, this, _1, _2));
 		break;
 
+	case MIDI::sysex:
+		p.sysex.connect_same_thread (midi_sense_connection[0], boost::bind (&MIDIFunction::midi_sense_sysex, this, _1, _2, _3));
+		break;
+
 	default:
 		break;
 	}
@@ -173,3 +219,4 @@ MIDIFunction::set_state (const XMLNode& node, int version)
 {
 	return 0;
 }
+

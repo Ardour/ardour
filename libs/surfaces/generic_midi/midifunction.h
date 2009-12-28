@@ -45,13 +45,16 @@ class MIDIFunction : public PBD::Stateful
 		TransportStop,
 		TransportZero,
 		TransportStart,
-		TransportEnd
+		TransportEnd,
+		TransportLoopToggle,
+		TransportRecordEnable,
+		TransportRecordDisable
 	};
 
 	MIDIFunction (MIDI::Port&);
 	virtual ~MIDIFunction ();
 
-	int init (BasicUI&, const std::string&);
+	int init (BasicUI&, const std::string& function_name, MIDI::byte* sysex = 0, size_t ssize = 0);
 
 	MIDI::Port& get_port() const { return _port; }
 	const std::string& function_name() const { return _function_name; }
@@ -73,8 +76,9 @@ class MIDIFunction : public PBD::Stateful
 	MIDI::eventType  control_type;
 	MIDI::byte       control_additional;
 	MIDI::channel_t  control_channel;
+	MIDI::byte*      sysex;
+	size_t         sysex_size;
 
-	void init (const std::string& function_name);
 	void execute ();
 
 	void midi_sense_note (MIDI::Parser &, MIDI::EventTwoBytes *, bool is_on);
@@ -82,6 +86,7 @@ class MIDIFunction : public PBD::Stateful
 	void midi_sense_note_off (MIDI::Parser &p, MIDI::EventTwoBytes *tb);
 	void midi_sense_controller (MIDI::Parser &, MIDI::EventTwoBytes *);
 	void midi_sense_program_change (MIDI::Parser &, MIDI::byte);
+	void midi_sense_sysex (MIDI::Parser &, MIDI::byte*, size_t);
 };
 
 #endif // __gm_midicontrollable_h__
