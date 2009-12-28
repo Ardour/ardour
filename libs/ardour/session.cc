@@ -2949,6 +2949,10 @@ Session::remove_last_capture ()
 		}
 	}
 
+	for (list<boost::shared_ptr<Region> >::iterator i = r.begin(); i != r.end(); ++i) {
+		remove_region (*i);
+	}
+	
 	destroy_regions (r);
 
 	save_state (_current_snapshot_name);
