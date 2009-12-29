@@ -200,8 +200,9 @@ PluginSelector::~PluginSelector ()
 void
 PluginSelector::row_clicked(GdkEventButton* event)
 {
-	if (event->type == GDK_2BUTTON_PRESS)
+	if (event->type == GDK_2BUTTON_PRESS) {
 		btn_add_clicked();
+	}
 }
 
 bool

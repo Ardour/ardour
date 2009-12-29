@@ -55,6 +55,7 @@ MIDIControllable::~MIDIControllable ()
 void
 MIDIControllable::init ()
 {
+	_learned = false;
 	setting = false;
 	last_value = 0; // got a better idea ?
 	control_type = none;

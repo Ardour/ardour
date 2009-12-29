@@ -25,10 +25,13 @@
 
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
+#include "pbd/pathscanner.h"
+#include "pbd/xml++.h"
 
 #include "midi++/port.h"
 #include "midi++/manager.h"
 
+#include "ardour/filesystem_paths.h"
 #include "ardour/session.h"
 #include "ardour/route.h"
 #include "ardour/midi_ui.h"
@@ -48,9 +51,11 @@ using namespace std;
 
 GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	: ControlProtocol (s, _("Generic MIDI"), midi_ui_context())
+	, gui (0)
 {
-	MIDI::Manager* mm = MIDI::Manager::instance();
 
+	MIDI::Manager* mm = MIDI::Manager::instance();
+	
 	/* XXX it might be nice to run "control" through i18n, but thats a bit tricky because
 	   the name is defined in ardour.rc which is likely not internationalized.
 	*/
@@ -66,6 +71,9 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	_feedback_interval = 10000; // microseconds
 	last_feedback_time = 0;
 
+	_current_bank = 0;
+	_bank_size = 0;
+
 	/* XXX is it right to do all these in the same thread as whatever emits the signal? */
 
 	Controllable::StartLearning.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::start_learning, this, _1));
@@ -75,13 +83,93 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 
 	Session::SendFeedback.connect (*this, boost::bind (&GenericMidiControlProtocol::send_feedback, this), midi_ui_context());;
 
-	std::string xmlpath = "/tmp/midi.map";
-
-	load_bindings (xmlpath);
-	reset_controllables ();
+	reload_maps ();
 }
 
 GenericMidiControlProtocol::~GenericMidiControlProtocol ()
+{
+	drop_all ();
+	tear_down_gui ();
+}
+
+static const char* const midi_map_dir_name = "midi_maps";
+static const char* const midi_map_suffix = ".map";
+
+static sys::path
+system_midi_map_search_path ()
+{
+	SearchPath spath(system_data_search_path());
+	spath.add_subdirectory_to_paths(midi_map_dir_name);
+
+	// just return the first directory in the search path that exists
+	SearchPath::const_iterator i = std::find_if(spath.begin(), spath.end(), sys::exists);
+
+	if (i == spath.end()) return sys::path();
+
+	return *i;
+}
+
+static sys::path
+user_midi_map_directory ()
+{
+	sys::path p(user_config_directory());
+	p /= midi_map_dir_name;
+
+	return p;
+}
+
+static bool
+midi_map_filter (const string &str, void */*arg*/)
+{
+	return (str.length() > strlen(midi_map_suffix) &&
+		str.find (midi_map_suffix) == (str.length() - strlen (midi_map_suffix)));
+}
+
+void
+GenericMidiControlProtocol::reload_maps ()
+{
+	vector<string *> *midi_maps;
+	PathScanner scanner;
+	SearchPath spath (system_midi_map_search_path());
+	spath += user_midi_map_directory ();
+
+	midi_maps = scanner (spath.to_string(), midi_map_filter, 0, false, true);
+
+	if (!midi_maps) {
+		cerr << "No MIDI maps found using " << spath.to_string() << endl;
+		return;
+	}
+
+	cerr << "Found " << midi_maps->size() << " MIDI maps along " << spath.to_string() << endl;
+
+	for (vector<string*>::iterator i = midi_maps->begin(); i != midi_maps->end(); ++i) {
+		string fullpath = *(*i);
+
+		XMLTree tree;
+
+		if (!tree.read (fullpath.c_str())) {
+			continue;
+		}
+
+		MapInfo mi;
+
+		XMLProperty* prop = tree.root()->property ("name");
+
+		if (!prop) {
+			continue;
+		}
+
+		mi.name = prop->value ();
+		mi.path = fullpath;
+		
+		map_info.push_back (mi);
+	}
+
+	delete midi_maps;
+}
+	
+void
+GenericMidiControlProtocol::drop_all ()
 {
 	Glib::Mutex::Lock lm (pending_lock);
 	Glib::Mutex::Lock lm2 (controllables_lock);
@@ -100,6 +188,30 @@ GenericMidiControlProtocol::~GenericMidiControlProtocol ()
 		delete *i;
 	}
 	functions.clear ();
+}
+
+void
+GenericMidiControlProtocol::drop_bindings ()
+{
+	Glib::Mutex::Lock lm2 (controllables_lock);
+
+	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ) {
+		if (!(*i)->learned()) {
+			delete *i;
+			i = controllables.erase (i);
+		} else {
+			++i;
+		}
+	}
+
+	for (MIDIFunctions::iterator i = functions.begin(); i != functions.end(); ++i) {
+		delete *i;
+	}
+	functions.clear ();
+
+	_current_binding = "";
+	_bank_size = 0;
+	_current_bank = 0;
 }
 
 int
@@ -237,7 +349,7 @@ GenericMidiControlProtocol::learning_stopped (MIDIControllable* mc)
 		i = tmp;
 	}
 
-	controllables.insert (mc);
+	controllables.push_back (mc);
 }
 
 void
@@ -314,8 +426,9 @@ GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos,
 		// Update the MIDI Controllable based on the the pos param
 		// Here is where a table lookup for user mappings could go; for now we'll just wing it...
 		mc->bind_midi(channel, MIDI::controller, value);
-		
-		controllables.insert (mc);
+		mc->set_learned (true);
+
+		controllables.push_back (mc);
 	}
 }
 
@@ -330,13 +443,25 @@ GenericMidiControlProtocol::get_state ()
 	snprintf (buf, sizeof (buf), "%" PRIu64, _feedback_interval);
 	node->add_property (X_("feedback_interval"), buf);
 
+	if (!_current_binding.empty()) {
+		node->add_property ("binding", _current_binding);
+	}
+
 	XMLNode* children = new XMLNode (X_("controls"));
 
 	node->add_child_nocopy (*children);
 
 	Glib::Mutex::Lock lm2 (controllables_lock);
 	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
-		children->add_child_nocopy ((*i)->get_state());
+
+		/* we don't care about bindings that come from a bindings map, because
+		   they will all be reset/recreated when we load the relevant bindings
+		   file.
+		*/
+
+		if ((*i)->learned()) {
+			children->add_child_nocopy ((*i)->get_state());
+		}
 	}
 
 	return *node;
@@ -372,37 +497,50 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 		}
 		pending_controllables.clear ();
 	}
-	
-	Glib::Mutex::Lock lm2 (controllables_lock);
-	controllables.clear ();
-	nlist = node.children(); // "controls"
-	
-	if (nlist.empty()) {
-		return 0;
-	}
-	
-	nlist = nlist.front()->children ();
+
+	{
+		Glib::Mutex::Lock lm2 (controllables_lock);
+		controllables.clear ();
+		nlist = node.children(); // "controls"
 		
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if (nlist.empty()) {
+			return 0;
+		}
 		
-		if ((prop = (*niter)->property ("id")) != 0) {
+		nlist = nlist.front()->children ();
+		
+		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			
-			ID id = prop->value ();
-			c = session->controllable_by_id (id);
-			
-			if (c) {
-				MIDIControllable* mc = new MIDIControllable (*_port, *c);
-				if (mc->set_state (**niter, version) == 0) {
-					controllables.insert (mc);
-				}
+			if ((prop = (*niter)->property ("id")) != 0) {
 				
-			} else {
-				warning << string_compose (
-					_("Generic MIDI control: controllable %1 not found in session (ignored)"),
-					id) << endmsg;
+				ID id = prop->value ();
+				c = session->controllable_by_id (id);
+				
+				if (c) {
+					MIDIControllable* mc = new MIDIControllable (*_port, *c);
+					if (mc->set_state (**niter, version) == 0) {
+						controllables.push_back (mc);
+					}
+					
+				} else {
+					warning << string_compose (
+						_("Generic MIDI control: controllable %1 not found in session (ignored)"),
+						id) << endmsg;
+				}
+			}
+		}
+
+	}
+
+	if ((prop = node.property ("binding")) != 0) {
+		for (list<MapInfo>::iterator x = map_info.begin(); x != map_info.end(); ++x) {
+			if (prop->value() == (*x).name) {
+				load_bindings ((*x).path);
+				break;
 			}
 		}
 	}
+
 	return 0;
 }
 
@@ -419,6 +557,9 @@ GenericMidiControlProtocol::get_feedback () const
 {
 	return do_feedback;
 }
+
+
+
 
 int
 GenericMidiControlProtocol::load_bindings (const string& xmlpath)
@@ -456,7 +597,19 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 
 	MIDIControllable* mc;
 
+	drop_all ();
+
 	for (citer = children.begin(); citer != children.end(); ++citer) {
+		
+		if ((*citer)->name() == "DeviceInfo") {
+			const XMLProperty* prop;
+
+			if ((prop = (*citer)->property ("bank-size")) != 0) {
+				_bank_size = atoi (prop->value());
+				_current_bank = 0;
+			}
+		}
+
 		if ((*citer)->name() == "Binding") {
 			const XMLNode* child = *citer;
 
@@ -465,7 +618,7 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 				
 				if ((mc = create_binding (*child)) != 0) {
 					Glib::Mutex::Lock lm2 (controllables_lock);
-					controllables.insert (mc);
+					controllables.push_back (mc);
 				}
 
 			} else if (child->property ("function")) {
@@ -481,6 +634,12 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 			}
 		}
 	}
+	
+	if ((prop = root->property ("name")) != 0) {
+		_current_binding = prop->value ();
+	}
+
+	reset_controllables ();
 
 	return 0;
 }
@@ -489,18 +648,11 @@ MIDIControllable*
 GenericMidiControlProtocol::create_binding (const XMLNode& node)
 {
 	const XMLProperty* prop;
-	int detail;
-	int channel;
+	MIDI::byte detail;
+	MIDI::channel_t channel;
 	string uri;
 	MIDI::eventType ev;
-
-	if ((prop = node.property (X_("channel"))) == 0) {
-		return 0;
-	}
-	
-	if (sscanf (prop->value().c_str(), "%d", &channel) != 1) {
-		return 0;
-	}
+	int intval;
 
 	if ((prop = node.property (X_("ctl"))) != 0) {
 		ev = MIDI::controller;
@@ -511,18 +663,33 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 	} else {
 		return 0;
 	}
-
-	if (sscanf (prop->value().c_str(), "%d", &detail) != 1) {
+	
+	if (sscanf (prop->value().c_str(), "%d", &intval) != 1) {
 		return 0;
 	}
+	
+	detail = (MIDI::byte) intval;
 
+	if ((prop = node.property (X_("channel"))) == 0) {
+		return 0;
+	}
+	
+	if (sscanf (prop->value().c_str(), "%d", &intval) != 1) {
+		return 0;
+	}
+	channel = (MIDI::channel_t) intval;
+	/* adjust channel to zero-based counting */
+	if (channel > 0) {
+		channel -= 1;
+	}
+	
 	prop = node.property (X_("uri"));
 	uri = prop->value();
 
 	MIDIControllable* mc = new MIDIControllable (*_port, uri, false);
 	mc->bind_midi (channel, ev, detail);
 
-	cerr << "New MC with URI = " << uri << endl;
+	cerr << "New MC with URI " << uri << " on channel " << (int) channel << " detail = " << (int) detail << endl;
 
 	return mc;
 }
@@ -534,9 +701,59 @@ GenericMidiControlProtocol::reset_controllables ()
 	
 	for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ++iter) {
 		MIDIControllable* existingBinding = (*iter);
-		
-		boost::shared_ptr<Controllable> c = session->controllable_by_uri (existingBinding->current_uri());
-		existingBinding->set_controllable (c.get());
+
+		if (!existingBinding->learned()) {
+			cerr << "Look for " << existingBinding->current_uri() << endl;
+
+			/* parse URI to get remote control ID and "what" is to be controlled */
+
+			std::string uri = existingBinding->current_uri();
+			string::size_type last_slash;
+			string useful_part;
+			
+			if ((last_slash = uri.find_last_of ('/')) == string::npos) {
+				existingBinding->set_controllable (0);
+				continue;
+			}
+			
+			useful_part = uri.substr (last_slash+1);
+			
+			char ridstr[64];
+			char what[64];
+			
+			if (sscanf (useful_part.c_str(), "rid=%63[^?]?%63s", ridstr, what) != 2) {
+				existingBinding->set_controllable (0);
+				continue;
+			}
+			
+			/* now parse RID string and determine if its a bank-driven ID */
+			
+			uint32_t rid;
+
+			if (strncmp (ridstr, "B-", 2) == 0) {
+
+				if (sscanf (&ridstr[2], "%" PRIu32, &rid) != 1) {
+					existingBinding->set_controllable (0);
+					continue;
+				}
+				
+				rid += _bank_size * _current_bank;
+
+			} else {
+				if (sscanf (&ridstr[2], "%" PRIu32, &rid) != 1) {
+					existingBinding->set_controllable (0);
+					continue;
+				}
+			}
+
+			/* go get it (allowed to fail) */
+
+			cerr << "Look for controllable via " << rid << " and " << what << endl;
+
+			boost::shared_ptr<Controllable> c = session->controllable_by_rid_and_name (rid, what);
+			cerr << "\tgot " << c << endl;
+			existingBinding->set_controllable (c.get());
+		}
 	}
 }
 
@@ -588,7 +805,6 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 			
 			while (ss >> val) {
 				sysex[cnt++] = (MIDI::byte) val;
-				cerr << hex << (int) sysex[cnt-1] << dec << ' ' << endl;
 			}
 		}
 		
@@ -598,6 +814,12 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 	}
 
 	if (sysex_size == 0) {
+		if (sscanf (prop->value().c_str(), "%d", &intval) != 1) {
+			return 0;
+		}
+		
+		detail = (MIDI::byte) intval;
+
 		if ((prop = node.property (X_("channel"))) == 0) {
 			return 0;
 		}
@@ -610,12 +832,6 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 		if (channel > 0) {
 			channel -= 1;
 		}
-		
-		if (sscanf (prop->value().c_str(), "%d", &intval) != 1) {
-			return 0;
-		}
-		
-		detail = (MIDI::byte) intval;
 	}
 
 	prop = node.property (X_("function"));
@@ -627,9 +843,32 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 		return 0;
 	}
 
+	cerr << "New MF with function = " << prop->value() << " on channel " << (int) channel << " detail = " << (int) detail << endl;
 	mf->bind_midi (channel, ev, detail);
 
-	cerr << "New MF with function = " << prop->value() << endl;
 
 	return mf;
+}
+
+void
+GenericMidiControlProtocol::set_current_bank (uint32_t b)
+{
+	_current_bank = b;
+	reset_controllables ();
+}
+
+void
+GenericMidiControlProtocol::next_bank ()
+{
+	_current_bank++;
+	reset_controllables ();
+}
+
+void
+GenericMidiControlProtocol::prev_bank()
+{
+	if (_current_bank) {
+		_current_bank--;
+		reset_controllables ();
+	}
 }

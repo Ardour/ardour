@@ -765,7 +765,8 @@ private:
 class ControlSurfacesOptions : public OptionEditorBox
 {
 public:
-	ControlSurfacesOptions ()
+	ControlSurfacesOptions (ArdourDialog& parent)
+		: _parent (parent)
 	{
 		_store = ListStore::create (_model);
 		_view.set_model (_store);
@@ -777,7 +778,13 @@ public:
 
 		_box->pack_start (_view, false, false);
 
+		Label* label = manage (new Label (_("Double-click on a name to edit settings for an enabled protocol")));
+
+		_box->pack_start (*label, false, false);
+		label->show ();
+		
 		_store->signal_row_changed().connect (sigc::mem_fun (*this, &ControlSurfacesOptions::model_changed));
+		_view.signal_button_press_event().connect_notify (sigc::mem_fun(*this, &ControlSurfacesOptions::edit_clicked));
 	}
 
 	void parameter_changed (std::string const &)
@@ -832,6 +839,38 @@ private:
 		}
 	}
 
+        void edit_clicked (GdkEventButton* ev)
+        {
+		if (ev->type != GDK_2BUTTON_PRESS) {
+			return;
+		}
+
+		std::string name;
+		ControlProtocolInfo* cpi;
+		TreeModel::Row row;
+		
+		row = *(_view.get_selection()->get_selected());
+
+		Window* win = row[_model.editor];
+		if (win && !win->is_visible()) {
+			win->present (); 
+		} else {
+			cpi = row[_model.protocol_info];
+			
+			if (cpi && cpi->protocol && cpi->protocol->has_editor ()) {
+				Box* box = (Box*) cpi->protocol->get_gui ();
+				if (box) {
+					string title = row[_model.name];
+					ArdourDialog* win = new ArdourDialog (_parent, title);
+					win->get_vbox()->pack_start (*box, false, false);
+					box->show ();
+					win->present ();
+					row[_model.editor] = win;
+				}
+			}
+		}
+	}
+
         class ControlSurfacesModelColumns : public TreeModelColumnRecord
 	{
 	public:
@@ -842,17 +881,20 @@ private:
 			add (enabled);
 			add (feedback);
 			add (protocol_info);
+			add (editor);
 		}
 
 		TreeModelColumn<string> name;
 		TreeModelColumn<bool> enabled;
 		TreeModelColumn<bool> feedback;
 		TreeModelColumn<ControlProtocolInfo*> protocol_info;
+	        TreeModelColumn<Gtk::Window*> editor;
 	};
 
 	Glib::RefPtr<ListStore> _store;
 	ControlSurfacesModelColumns _model;
 	TreeView _view;
+        Gtk::Window& _parent;
 };
 
 
@@ -1355,7 +1397,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* CONTROL SURFACES */
 
-	add_option (_("Control surfaces"), new ControlSurfacesOptions);
+	add_option (_("Control surfaces"), new ControlSurfacesOptions (*this));
 
 	ComboOption<RemoteModel>* rm = new ComboOption<RemoteModel> (
 		"remote-model",

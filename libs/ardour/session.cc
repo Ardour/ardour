@@ -32,9 +32,9 @@
 #include <glibmm/thread.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
+#include <glibmm/thread.h>
 
 #include "pbd/error.h"
-#include <glibmm/thread.h>
 #include "pbd/boost_debug.h"
 #include "pbd/pathscanner.h"
 #include "pbd/stl_delete.h"
@@ -92,6 +92,8 @@
 #include "ardour/tape_file_matcher.h"
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
+
+#include "midi++/jack.h"
 
 #include "i18n.h"
 
@@ -790,6 +792,7 @@ Session::hookup_io ()
 	/* Tell all IO objects to connect themselves together */
 
 	IO::enable_connecting ();
+	MIDI::JACK_MidiPort::MakeConnections ();
 
 	/* Now reset all panners */
 

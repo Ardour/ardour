@@ -22,6 +22,7 @@ def build(bld):
 	obj = bld.new_task_gen('cxx', 'shlib')
 	obj.source = '''
 		generic_midi_control_protocol.cc
+                gmcp_gui.cc
 		interface.cc
 		midicontrollable.cc
 		midifunction.cc
@@ -31,7 +32,8 @@ def build(bld):
 	obj.includes     = ['.', './generic_midi']
 	obj.name         = 'libardour_generic_midi'
 	obj.target       = 'ardour_generic_midi'
-	obj.uselib_local = 'libardour libardour_cp'
+	obj.uselib       = 'GTKMM GTK GDK'
+	obj.uselib_local = 'libardour libardour_cp libgtkmm2ext libpbd'
 	obj.vnum         = LIBARDOUR_GENERIC_MIDI_LIB_VERSION
 	obj.install_path = os.path.join(bld.env['LIBDIR'], 'ardour3', 'surfaces')
 

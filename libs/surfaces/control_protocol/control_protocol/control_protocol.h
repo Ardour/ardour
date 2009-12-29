@@ -98,6 +98,10 @@ class ControlProtocol : virtual public sigc::trackable, public PBD::Stateful, pu
 
 	std::string route_get_name (uint32_t table_index);
 
+	virtual bool  has_editor () const { return false; }
+	virtual void* get_gui() const { return 0; }
+	virtual void  tear_down_gui() { }
+
   protected:
 	PBD::EventLoop* _event_loop;
 	bool _own_event_loop;

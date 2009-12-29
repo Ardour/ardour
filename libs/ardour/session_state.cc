@@ -2679,25 +2679,9 @@ Session::controllable_by_id (const PBD::ID& id)
 }
 
 boost::shared_ptr<Controllable>
-Session::controllable_by_uri (const std::string& uri)
+Session::controllable_by_rid_and_name (uint32_t rid, const char* const what)
 {
 	boost::shared_ptr<Controllable> c;
-	string::size_type last_slash;
-	string useful_part;
-
-	if ((last_slash = uri.find_last_of ('/')) == string::npos) {
-		return c;
-	}
-
-	useful_part = uri.substr (last_slash+1);
-
-	uint32_t rid;
-	char what[64];
-
-	if (sscanf (useful_part.c_str(), "rid=%" PRIu32 "?%63s", &rid, what) != 2) {
-		return c;
-	}
-
 	boost::shared_ptr<Route> r = route_by_remote_id (rid);
 	
 	if (!r) {
@@ -2706,8 +2690,17 @@ Session::controllable_by_uri (const std::string& uri)
 
 	if (strncmp (what, "gain", 4) == 0) {
 		c = r->gain_control ();
+	} else if (strncmp (what, "solo", 4) == 0) {
+		c = r->solo_control();
+	} else if (strncmp (what, "mute", 4) == 0) {
+		c = r->mute_control();
 	} else if (strncmp (what, "pan", 3) == 0) {
 	} else if (strncmp (what, "plugin", 6) == 0) {
+	} else if (strncmp (what, "recenable", 9) == 0) {
+		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(r);
+		if (t) {
+			c = t->rec_enable_control ();
+		}
 	}
 
 	return c;

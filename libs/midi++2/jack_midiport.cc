@@ -25,6 +25,7 @@
 
 #include "pbd/error.h"
 #include "pbd/compose.h"
+#include "pbd/strsplit.h"
 
 #include "midi++/types.h"
 #include "midi++/jack.h"
@@ -34,6 +35,9 @@ using namespace MIDI;
 using namespace PBD;
 
 pthread_t JACK_MidiPort::_process_thread;
+
+Signal0<void> JACK_MidiPort::JackHalted;
+Signal0<void> JACK_MidiPort::MakeConnections;
 
 JACK_MidiPort::JACK_MidiPort(const XMLNode& node, jack_client_t* jack_client)
 	: Port(node)
@@ -47,19 +51,36 @@ JACK_MidiPort::JACK_MidiPort(const XMLNode& node, jack_client_t* jack_client)
 	if (!create_ports (node)) {
 		_ok = true;
 	}
+
+	MakeConnections.connect_same_thread (connect_connection, boost::bind (&JACK_MidiPort::make_connections, this));
+	JackHalted.connect_same_thread (halt_connection, boost::bind (&JACK_MidiPort::jack_halted, this));
+
+	set_state (node);
 }
 
 JACK_MidiPort::~JACK_MidiPort()
 {
 	if (_jack_input_port) {
-		jack_port_unregister (_jack_client, _jack_input_port);
+		if (_jack_client) {
+			jack_port_unregister (_jack_client, _jack_input_port);
+		}
 		_jack_input_port = 0;
 	}
 
 	if (_jack_output_port) {
-		jack_port_unregister (_jack_client, _jack_input_port);
+		if (_jack_client) {
+			jack_port_unregister (_jack_client, _jack_input_port);
+		}
 		_jack_input_port = 0;
 	}
+}
+
+void
+JACK_MidiPort::jack_halted ()
+{
+	_jack_client = 0;
+	_jack_input_port = 0;
+	_jack_output_port = 0;
 }
 
 void
@@ -270,12 +291,88 @@ XMLNode&
 JACK_MidiPort::get_state () const
 {
 	XMLNode& root (Port::get_state ());
+
+	if (_jack_output_port) {
+
+		const char** jc = jack_port_get_connections (_jack_output_port);
+		string connection_string;
+		if (jc) {
+			for (int i = 0; jc[i]; ++i) {
+				if (i > 0) {
+					connection_string += ',';
+				}
+				connection_string += jc[i];
+			}
+			free (jc);
+		}
+
+		if (!connection_string.empty()) {
+			root.add_property ("outbound", connection_string);
+		}
+	}
+
+	if (_jack_input_port) {
+
+		const char** jc = jack_port_get_connections (_jack_input_port);
+		string connection_string;
+		if (jc) {
+			for (int i = 0; jc[i]; ++i) {
+				if (i > 0) {
+					connection_string += ',';
+				}
+				connection_string += jc[i];
+			}
+			free (jc);
+		}
+
+		if (!connection_string.empty()) {
+			root.add_property ("inbound", connection_string);
+		}
+	}
+
 	return root;
 }
 
 void
-JACK_MidiPort::set_state (const XMLNode& /*node*/)
+JACK_MidiPort::set_state (const XMLNode& node)
 {
+	Port::set_state (node);
+	const XMLProperty* prop;
+
+	if ((prop = node.property ("outbound")) != 0 && _jack_output_port) {
+		_inbound_connections = prop->value ();
+	}
+
+	if ((prop = node.property ("inbound")) != 0 && _jack_input_port) {
+		_outbound_connections = prop->value();
+	}
+}
+
+void
+JACK_MidiPort::make_connections ()
+{
+	if (!_inbound_connections.empty()) {
+		vector<string> ports;
+		split (_inbound_connections, ports, ',');
+		for (vector<string>::iterator x = ports.begin(); x != ports.end(); ++x) {
+			if (_jack_client) {
+				jack_connect (_jack_client, jack_port_name (_jack_output_port), (*x).c_str());
+				/* ignore failures */
+			}
+		}
+	}
+
+	if (!_outbound_connections.empty()) {
+		vector<string> ports;
+		split (_outbound_connections, ports, ',');
+		for (vector<string>::iterator x = ports.begin(); x != ports.end(); ++x) {
+			if (_jack_client) {
+				jack_connect (_jack_client, (*x).c_str(), jack_port_name (_jack_input_port));
+				/* ignore failures */
+			}
+		}
+	}
+	connect_connection.disconnect ();
 }
 
 void

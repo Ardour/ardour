@@ -34,6 +34,7 @@
 #include <jack/midiport.h>
 
 #include "pbd/ringbuffer.h"
+#include "pbd/signals.h"
 #include "pbd/crossthread.h"
 #include "evoral/EventRingBuffer.hpp"
 
@@ -42,7 +43,6 @@
 
 namespace MIDI
 {
-
 
 class JACK_MidiPort : public Port
 {
@@ -69,7 +69,10 @@ public:
 	static bool is_process_thread();
 	
 	nframes_t nframes_this_cycle() const {	return _nframes_this_cycle; }
-	
+
+	static PBD::Signal0<void> MakeConnections;
+	static PBD::Signal0<void> JackHalted;
+
   protected:
 	std::string get_typestring () const {
 		return typestring;
@@ -84,8 +87,13 @@ private:
 	nframes_t      _last_read_index;
 	timestamp_t    _last_write_timestamp;
 	CrossThreadChannel xthread;
-
+	std::string    _inbound_connections;
+	std::string    _outbound_connections;
+	PBD::Connection connect_connection;
+	PBD::Connection halt_connection;
 	void flush (void* jack_port_buffer);
+	void jack_halted ();
+	void make_connections();
 
 	static pthread_t _process_thread;
 

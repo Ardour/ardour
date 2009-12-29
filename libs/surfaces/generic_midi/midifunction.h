@@ -35,12 +35,14 @@ namespace MIDI {
 	class Parser;
 }
 
-class BasicUI;
+class GenericMidiControlProtocol;
 
 class MIDIFunction : public PBD::Stateful
 {
   public:
 	enum Function { 
+		NextBank,
+		PrevBank,
 		TransportRoll,
 		TransportStop,
 		TransportZero,
@@ -54,7 +56,7 @@ class MIDIFunction : public PBD::Stateful
 	MIDIFunction (MIDI::Port&);
 	virtual ~MIDIFunction ();
 
-	int init (BasicUI&, const std::string& function_name, MIDI::byte* sysex = 0, size_t ssize = 0);
+	int init (GenericMidiControlProtocol&, const std::string& function_name, MIDI::byte* sysex = 0, size_t ssize = 0);
 
 	MIDI::Port& get_port() const { return _port; }
 	const std::string& function_name() const { return _function_name; }
@@ -69,7 +71,7 @@ class MIDIFunction : public PBD::Stateful
 	
   private:
 	Function        _function;
-	BasicUI*        _ui;
+	GenericMidiControlProtocol* _ui;
 	std::string     _function_name;
 	MIDI::Port&     _port;
 	PBD::ScopedConnection midi_sense_connection[2];

@@ -769,7 +769,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* Controllables */
 
 	boost::shared_ptr<PBD::Controllable> controllable_by_id (const PBD::ID&);
-	boost::shared_ptr<PBD::Controllable> controllable_by_uri (const std::string&);
+	boost::shared_ptr<PBD::Controllable> controllable_by_rid_and_name (uint32_t, const char* const);
 
 	void add_controllable (boost::shared_ptr<PBD::Controllable>);
 	void remove_controllable (PBD::Controllable*);

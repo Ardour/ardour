@@ -64,6 +64,9 @@ class MIDIControllable : public PBD::Stateful
 	float control_to_midi(float val);
 	float midi_to_control(float val);
 
+	void set_learned (bool yn) { _learned = yn; }
+	bool learned() const { return _learned; }
+
 	MIDI::Port& get_port() const { return _port; }
 	PBD::Controllable* get_controllable() const { return controllable; }
 	void set_controllable (PBD::Controllable*);
@@ -86,6 +89,7 @@ class MIDIControllable : public PBD::Stateful
 	bool             setting;
 	MIDI::byte       last_value;
 	bool             bistate;
+	bool            _learned;
 	int              midi_msg_id;      /* controller ID or note number */
 	PBD::ScopedConnection midi_sense_connection[2];
 	PBD::ScopedConnection midi_learn_connection;

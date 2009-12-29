@@ -20,7 +20,6 @@
 #ifndef ardour_generic_midi_control_protocol_h
 #define ardour_generic_midi_control_protocol_h
 
-#include <set>
 #include <list>
 #include <glibmm/thread.h>
 #include "ardour/types.h"
@@ -59,6 +58,27 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
+	bool has_editor () const { return true; }
+	void* get_gui () const;
+	void  tear_down_gui ();
+
+	int load_bindings (const std::string&);
+	void drop_bindings ();
+	
+	std::string current_binding() const { return _current_binding; }
+
+	struct MapInfo {
+	    std::string name;
+	    std::string path;
+	};
+
+	std::list<MapInfo> map_info;
+	void reload_maps ();
+
+	void set_current_bank (uint32_t);
+	void next_bank ();
+	void prev_bank ();
+
   private:
 	MIDI::Port* _port;
 	ARDOUR::microseconds_t _feedback_interval;
@@ -68,7 +88,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	void _send_feedback ();
 	void  send_feedback ();
 
-	typedef std::set<MIDIControllable*> MIDIControllables;
+	typedef std::list<MIDIControllable*> MIDIControllables;
 	MIDIControllables controllables;
 
 	typedef std::list<MIDIFunction*> MIDIFunctions;
@@ -88,11 +108,18 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	void create_binding (PBD::Controllable*, int, int);
 	void delete_binding (PBD::Controllable*);
 
-	int load_bindings (const std::string&);
 	MIDIControllable* create_binding (const XMLNode&);
 	MIDIFunction* create_function (const XMLNode&);
 
 	void reset_controllables ();
+	void drop_all ();
+
+	std::string _current_binding;
+	uint32_t _bank_size;
+	uint32_t _current_bank;
+
+	mutable void *gui;
+	void build_gui ();
 };
 
 #endif /* ardour_generic_midi_control_protocol_h */

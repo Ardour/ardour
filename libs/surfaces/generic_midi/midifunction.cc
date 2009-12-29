@@ -21,7 +21,7 @@
 #include "midi++/port.h"
 
 #include "midifunction.h"
-#include "control_protocol/basic_ui.h"
+#include "generic_midi_control_protocol.h"
 
 using namespace MIDI;
 
@@ -38,7 +38,7 @@ MIDIFunction::~MIDIFunction ()
 }
 
 int
-MIDIFunction::init (BasicUI& ui, const std::string& function_name, MIDI::byte* sysex_data, size_t sysex_sz)
+MIDIFunction::init (GenericMidiControlProtocol& ui, const std::string& function_name, MIDI::byte* sysex_data, size_t sysex_sz)
 {
 	if (strcasecmp (function_name.c_str(), "transport-stop") == 0) {
 		_function = TransportStop;
@@ -56,6 +56,10 @@ MIDIFunction::init (BasicUI& ui, const std::string& function_name, MIDI::byte* s
 		_function = TransportRecordEnable;
 	} else if (strcasecmp (function_name.c_str(), "rec-disable") == 0) {
 		_function = TransportRecordDisable;
+	} else if (strcasecmp (function_name.c_str(), "next-bank") == 0) {
+		_function = NextBank;
+	} else if (strcasecmp (function_name.c_str(), "prev-bank") == 0) {
+		_function = PrevBank;
 	} else {
 		return -1;
 	}
@@ -75,6 +79,14 @@ void
 MIDIFunction::execute ()
 {
 	switch (_function) {
+	case NextBank:
+		_ui->next_bank();
+		break;
+
+	case PrevBank:
+		_ui->prev_bank();
+		break;
+
 	case TransportStop:
 		_ui->transport_stop ();
 		break;
