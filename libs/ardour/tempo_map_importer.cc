@@ -87,8 +87,8 @@ bool
 TempoMapImporter::_prepare_move ()
 {
 	// Prompt user for verification
-	bool replace = Prompt (_("This will replace the current tempo map!\nAre you shure you want to do this?"));
-	return replace;
+	boost::optional<bool> replace = Prompt (_("This will replace the current tempo map!\nAre you shure you want to do this?"));
+	return replace.get_value_or (false);
 }
 
 void
