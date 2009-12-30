@@ -205,12 +205,19 @@ PluginInsert::set_automatable ()
 
 	for (set<Evoral::Parameter>::iterator i = a.begin(); i != a.end(); ++i) {
 		if (i->type() == PluginAutomation) {
-			can_automate (*i);
-			_plugins.front()->get_parameter_descriptor(i->id(), desc);
+
 			Evoral::Parameter param(*i);
-			param.set_range(desc.lower, desc.upper, _plugins.front()->default_value(i->id()));
+
+			_plugins.front()->get_parameter_descriptor(i->id(), desc);
+			
+			/* the Parameter belonging to the actual plugin doesn't have its range set
+			   but we want the Controllable related to this Parameter to have those limits.
+			*/
+
+			param.set_range (desc.lower, desc.upper, _plugins.front()->default_value(i->id()));
+			can_automate (param);
 			boost::shared_ptr<AutomationList> list(new AutomationList(param));
-			add_control(boost::shared_ptr<AutomationControl>(new PluginControl(this, *i, list)));
+			add_control (boost::shared_ptr<AutomationControl>(new PluginControl(this, param, list)));
 		}
 	}
 }
