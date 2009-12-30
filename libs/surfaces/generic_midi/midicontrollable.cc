@@ -30,6 +30,7 @@
 #include "midi++/channel.h"
 
 #include "ardour/automation_control.h"
+#include "ardour/utils.h"
 
 #include "midicontrollable.h"
 
@@ -196,10 +197,14 @@ MIDIControllable::midi_to_control(float val)
 		control_max = ac->parameter().max();
 	}
 
-	const float control_range = control_max - control_min;
 	const float midi_range    = 127.0f; // TODO: NRPN etc.
 
-	return val / midi_range * control_range + control_min;
+	if (ac->is_gain_like()) {
+		return  slider_position_to_gain (val/midi_range);
+	} 
+
+	const float control_range = control_max - control_min;
+	return  val / midi_range * control_range + control_min;
 }
 
 void
@@ -459,8 +464,11 @@ MIDIControllable::get_state ()
 
 	XMLNode* node = new XMLNode ("MIDIControllable");
 
+	if (!_current_uri.empty()) {
+		node->add_property ("uri", _current_uri);
+	}
+
 	if (controllable) {
-		node->add_property ("uri", controllable->uri());
 		snprintf (buf, sizeof(buf), "0x%x", (int) control_type);
 		node->add_property ("event", buf);
 		snprintf (buf, sizeof(buf), "%d", (int) control_channel);

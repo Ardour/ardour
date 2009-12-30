@@ -304,7 +304,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	void automation_snapshot (nframes_t now, bool force=false);
 	void protect_automation ();
 
-	void set_remote_control_id (uint32_t id);
+	void set_remote_control_id (uint32_t id, bool notify_class_listeners = true);
 	uint32_t remote_control_id () const;
 
 	/* for things concerned about *this* route's RID */

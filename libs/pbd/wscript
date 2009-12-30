@@ -61,6 +61,7 @@ def build(bld):
 		enumwriter.cc
                 event_loop.cc
 		dmalloc.cc
+                enums.cc
 		error.cc
 		filesystem.cc
 		filesystem_paths.cc

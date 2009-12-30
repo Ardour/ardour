@@ -26,6 +26,7 @@
 #include "ardour/session.h"
 #include "ardour/session_route.h"
 #include "ardour/dB.h"
+#include "ardour/utils.h"
 
 #include <gtkmm/style.h>
 #include <gdkmm/color.h>
@@ -40,11 +41,11 @@
 
 #include "ardour_ui.h"
 #include "gain_meter.h"
-#include "utils.h"
 #include "logmeter.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "public_editor.h"
+#include "utils.h"
 
 #include "ardour/session.h"
 #include "ardour/route.h"

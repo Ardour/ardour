@@ -689,9 +689,7 @@ void
 Mixer_UI::track_list_reorder (const TreeModel::Path&, const TreeModel::iterator&, int* /*new_order*/)
 {
 	strip_redisplay_does_not_sync_order_keys = true;
-	if (!strip_redisplay_does_not_reset_order_keys) {
-		_session->set_remote_control_ids();
-	}
+	_session->set_remote_control_ids();
 	redisplay_track_list ();
 	strip_redisplay_does_not_sync_order_keys = false;
 }
@@ -701,6 +699,7 @@ Mixer_UI::track_list_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel::
 {
 	// never reset order keys because of a property change
 	strip_redisplay_does_not_reset_order_keys = true;
+	_session->set_remote_control_ids();
 	redisplay_track_list ();
 	strip_redisplay_does_not_reset_order_keys = false;
 }
@@ -710,6 +709,7 @@ Mixer_UI::track_list_delete (const Gtk::TreeModel::Path&)
 {
 	/* this could require an order sync */
 	if (_session && !_session->deletion_in_progress()) {
+		_session->set_remote_control_ids();
 		redisplay_track_list ();
 	}
 }

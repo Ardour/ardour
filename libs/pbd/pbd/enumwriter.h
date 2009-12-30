@@ -36,10 +36,7 @@ class unknown_enumeration : public std::exception {
 
 class EnumWriter {
   public:
-	EnumWriter ();
-	~EnumWriter ();
-
-	static EnumWriter& instance() { return *_instance; }
+	static EnumWriter& instance();
 
 	void register_distinct (std::string type, std::vector<int>, std::vector<std::string>);
 	void register_bits     (std::string type, std::vector<int>, std::vector<std::string>);
@@ -50,6 +47,9 @@ class EnumWriter {
 	void add_to_hack_table (std::string str, std::string hacked_str);
 
   private:
+	EnumWriter ();
+	~EnumWriter ();
+
 	struct EnumRegistration {
 	    std::vector<int> values;
 	    std::vector<std::string> names;

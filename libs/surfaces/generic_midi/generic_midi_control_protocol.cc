@@ -274,7 +274,6 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 		return false;
 	}
 
-	Glib::Mutex::Lock lm (pending_lock);
 	Glib::Mutex::Lock lm2 (controllables_lock);
 
 	MIDIControllables::iterator tmp;
@@ -288,19 +287,22 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 		i = tmp;
 	}
 
-	MIDIPendingControllables::iterator ptmp;
-	for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ) {
-		ptmp = i;
-		++ptmp;
-		if (((*i)->first)->get_controllable() == c) {
-			(*i)->second.disconnect();
-			delete (*i)->first;
-			delete *i;
-			pending_controllables.erase (i);
+	{
+		Glib::Mutex::Lock lm (pending_lock);
+		
+		MIDIPendingControllables::iterator ptmp;
+		for (MIDIPendingControllables::iterator i = pending_controllables.begin(); i != pending_controllables.end(); ) {
+			ptmp = i;
+			++ptmp;
+			if (((*i)->first)->get_controllable() == c) {
+				(*i)->second.disconnect();
+				delete (*i)->first;
+				delete *i;
+				pending_controllables.erase (i);
+			}
+			i = ptmp;
 		}
-		i = ptmp;
 	}
-
 
 	MIDIControllable* mc = 0;
 
@@ -702,6 +704,7 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 void
 GenericMidiControlProtocol::reset_controllables ()
 {
+	cerr << "GM::RC\n";
 	Glib::Mutex::Lock lm2 (controllables_lock);
 	
 	for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ++iter) {

@@ -18,6 +18,7 @@
 */
 
 #include "pbd/controllable.h"
+#include "pbd/enumwriter.h"
 #include "pbd/xml++.h"
 #include "pbd/error.h"
 
@@ -34,13 +35,11 @@ PBD::Signal1<void,Controllable*> Controllable::DeleteBinding;
 
 Glib::StaticRWLock Controllable::registry_lock = GLIBMM_STATIC_RW_LOCK_INIT;
 Controllable::Controllables Controllable::registry;
-Controllable::ControllablesByURI Controllable::registry_by_uri;
 PBD::ScopedConnectionList registry_connections;
 
-Controllable::Controllable (const string& name, const string& uri)
+Controllable::Controllable (const string& name, Flag f)
 	: _name (name)
-	, _uri (uri)
-	, _touching (false)
+	, _flags (f)
 {
 	add (*this);
 }
@@ -52,13 +51,6 @@ Controllable::add (Controllable& ctl)
 
 	Glib::RWLock::WriterLock lm (registry_lock);
 	registry.insert (&ctl);
-
-	if (!ctl.uri().empty()) {
-		pair<string,Controllable*> newpair;
-		newpair.first = ctl.uri();
-		newpair.second = &ctl;
-		registry_by_uri.insert (newpair);
-	}
 
 	/* Controllable::remove() is static - no need to manage this connection */
 
@@ -76,35 +68,6 @@ Controllable::remove (Controllable* ctl)
 			break;
 		}
 	}
-
-	if (!ctl->uri().empty()) {
-		ControllablesByURI::iterator i = registry_by_uri.find (ctl->uri());
-		if (i != registry_by_uri.end()) {
-			registry_by_uri.erase (i);
-		}
-	}
-}
-
-void
-Controllable::set_uri (const string& new_uri)
-{
-	Glib::RWLock::WriterLock lm (registry_lock);
-
-	if (!_uri.empty()) {
-		ControllablesByURI::iterator i = registry_by_uri.find (_uri);
-		if (i != registry_by_uri.end()) {
-			registry_by_uri.erase (i);
-		}
-	}
-
-	_uri = new_uri;
-
-	if (!_uri.empty()) {
-		pair<string,Controllable*> newpair;
-		newpair.first = _uri;
-		newpair.second = this;
-		registry_by_uri.insert (newpair);
-	}
 }
 
 Controllable*
@@ -116,18 +79,6 @@ Controllable::by_id (const ID& id)
 		if ((*i)->id() == id) {
 			return (*i);
 		}
-	}
-	return 0;
-}
-
-Controllable*
-Controllable::by_uri (const string& uri)
-{
-	Glib::RWLock::ReaderLock lm (registry_lock);
-	ControllablesByURI::iterator i;
-
-	if ((i = registry_by_uri.find (uri)) != registry_by_uri.end()) {
-		return i->second;
 	}
 	return 0;
 }
@@ -154,11 +105,8 @@ Controllable::get_state ()
 	node->add_property (X_("name"), _name); // not reloaded from XML state, just there to look at
 	_id.print (buf, sizeof (buf));
 	node->add_property (X_("id"), buf);
+	node->add_property (X_("flags"), enum_2_string (_flags));
 
-	if (!_uri.empty()) {
-		node->add_property (X_("uri"), _uri);
-	}
-		
 	return *node;
 }
 
@@ -175,7 +123,13 @@ Controllable::set_state (const XMLNode& node, int /*version*/)
 		return -1;
 	}
 
-	if ((prop = node.property (X_("uri"))) != 0) {
-		set_uri (prop->value());
+	if ((prop = node.property (X_("flags"))) != 0) {
+		_flags = (Flag) string_2_enum (prop->value(), _flags);
 	}
+}
+
+void
+Controllable::set_flags (Flag f)
+{
+	_flags = f;
 }

@@ -37,22 +37,6 @@ namespace Gtk {
 	class Paned;
 }
 
-static inline double
-gain_to_slider_position (ARDOUR::gain_t g)
-{
-	if (g == 0) return 0;
-	return pow((6.0*log(g)/log(2.0)+192.0)/198.0, 8.0);
-
-}
-
-static inline ARDOUR::gain_t
-slider_position_to_gain (double pos)
-{
-	/* XXX Marcus writes: this doesn't seem right to me. but i don't have a better answer ... */
-	if (pos == 0.0) return 0;
-	return pow (2.0,(sqrt(sqrt(sqrt(pos)))*198.0-192.0)/6.0);
-}
-
 Glib::ustring fit_to_pixels (const Glib::ustring&, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses = false);
 
 std::pair<std::string, double> fit_to_pixels (cairo_t *, std::string, double);

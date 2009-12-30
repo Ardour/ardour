@@ -91,6 +91,7 @@ class MIDIControllable : public PBD::Stateful
 	bool             setting;
 	MIDI::byte       last_value;
 	bool             bistate;
+	bool            _is_gain_controller;
 	bool            _learned;
 	int              midi_msg_id;      /* controller ID or note number */
 	PBD::ScopedConnection midi_sense_connection[2];

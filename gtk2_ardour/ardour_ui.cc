@@ -3400,7 +3400,7 @@ ARDOUR_UI::store_clock_modes ()
 
 
 ARDOUR_UI::TransportControllable::TransportControllable (std::string name, ARDOUR_UI& u, ToggleType tp)
-	: Controllable (name,  string() /* missing URI */), ui (u), type(tp)
+	: Controllable (name), ui (u), type(tp)
 {
 
 }

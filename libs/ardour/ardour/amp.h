@@ -73,8 +73,9 @@ public:
 		GainControl (std::string name, Session& session, Amp* a, const Evoral::Parameter &param,
 				boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>() )
 			: AutomationControl (session, param, al, name)
-			, _amp (a)
-		{}
+			, _amp (a) {
+			set_flags (Controllable::Flag (flags() | Controllable::GainLike));
+		}
 
 		void set_value (float val);
 		float get_value (void) const;

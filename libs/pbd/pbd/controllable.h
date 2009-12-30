@@ -35,11 +35,15 @@ namespace PBD {
 
 class Controllable : public PBD::StatefulDestructible {
   public:
-	Controllable (const std::string& name, const std::string& uri);
-	virtual ~Controllable() { Destroyed (this); }
+	enum Flag {
+		Toggle = 0x1,
+		Discrete = 0x2,
+		GainLike = 0x4,
+		IntegerOnly = 0x8
+	};
 
-	void set_uri (const std::string&);
-	const std::string& uri() const { return _uri; }
+	Controllable (const std::string& name, Flag f = Flag (0));
+	virtual ~Controllable() { Destroyed (this); }
 
 	virtual void set_value (float) = 0;
 	virtual float get_value (void) const = 0;
@@ -59,27 +63,35 @@ class Controllable : public PBD::StatefulDestructible {
 	XMLNode& get_state ();
 
 	std::string name()      const { return _name; }
-	bool        touching () const { return _touching; }
-	
+
+	bool touching () const { return _touching; }
 	void set_touching (bool yn) { _touching = yn; }
+
+	bool is_toggle() const { return _flags & Toggle; }
+	bool is_discrete() const { return _flags & Discrete; }
+	bool is_gain_like() const { return _flags & GainLike; }
+	bool is_integral_only() const { return _flags & IntegerOnly; }
+
+	Flag flags() const { return _flags; }
+	void set_flags (Flag f);
+
+	virtual uint32_t get_discrete_values (std::list<float>&) { return 0; /* no values returned */ }
 
 	static Controllable* by_id (const PBD::ID&);
 	static Controllable* by_name (const std::string&);
-	static Controllable* by_uri (const std::string&);
 
   private:
 	std::string _name;
-	std::string _uri;
+
+	Flag        _flags;
 	bool        _touching;
 
 	static void add (Controllable&);
 	static void remove (Controllable*);
 
 	typedef std::set<PBD::Controllable*> Controllables;
-	typedef std::map<std::string,PBD::Controllable*> ControllablesByURI;
 	static Glib::StaticRWLock registry_lock;
 	static Controllables registry;
-	static ControllablesByURI registry_by_uri;
 };
 
 /* a utility class for the occasions when you need but do not have
@@ -89,7 +101,7 @@ class Controllable : public PBD::StatefulDestructible {
 class IgnorableControllable : public Controllable 
 {
   public: 
-	IgnorableControllable () : PBD::Controllable ("ignoreMe", std::string()) {}
+	IgnorableControllable () : PBD::Controllable ("ignoreMe") {}
 	~IgnorableControllable () {}
     
 	void set_value (float /*v*/) {}

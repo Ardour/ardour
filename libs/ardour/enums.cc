@@ -48,7 +48,7 @@ namespace ARDOUR {
 void
 setup_enum_writer ()
 {
-	EnumWriter* enum_writer = new EnumWriter();
+	EnumWriter& enum_writer (EnumWriter::instance());
 	vector<int> i;
 	vector<string> s;
 
@@ -122,8 +122,8 @@ setup_enum_writer ()
 	Session::SlaveState _Session_SlaveState;
 	MTC_Status _MIDI_MTC_Status;
 
-#define REGISTER(e) enum_writer->register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
-#define REGISTER_BITS(e) enum_writer->register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
+#define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
+#define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
 #define REGISTER_CLASS_ENUM(t,e) i.push_back (t::e); s.push_back (#e)
 

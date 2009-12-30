@@ -63,11 +63,18 @@ nocase_cmp(const string & s1, const string& s2)
 	return (size1 < size2) ? -1 : 1;
 }
 
-EnumWriter::EnumWriter ()
+EnumWriter&
+EnumWriter::instance() 
 {
 	if (_instance == 0) {
-		_instance = this;
-	}
+		_instance = new EnumWriter;
+	} 
+
+	return *_instance;
+}
+
+EnumWriter::EnumWriter ()
+{
 }
 
 EnumWriter::~EnumWriter ()

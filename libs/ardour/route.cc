@@ -174,12 +174,14 @@ Route::~Route ()
 }
 
 void
-Route::set_remote_control_id (uint32_t id)
+Route::set_remote_control_id (uint32_t id, bool notify_class_listeners)
 {
 	if (id != _remote_control_id) {
 		_remote_control_id = id;
 		RemoteControlIDChanged ();
-		RemoteControlIDChange ();
+		if (notify_class_listeners) {
+			RemoteControlIDChange ();
+		}
 	}
 }
 

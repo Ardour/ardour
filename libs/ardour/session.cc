@@ -1863,19 +1863,26 @@ void
 Session::set_remote_control_ids ()
 {
 	RemoteModel m = Config->get_remote_model();
+	bool emit_signal = false;
 
 	shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ( MixerOrdered == m) {
+		if (MixerOrdered == m) {
 			long order = (*i)->order_key(N_("signal"));
-			(*i)->set_remote_control_id( order+1 );
-		} else if ( EditorOrdered == m) {
+			(*i)->set_remote_control_id (order+1, false);
+			emit_signal = true;
+		} else if (EditorOrdered == m) {
 			long order = (*i)->order_key(N_("editor"));
-			(*i)->set_remote_control_id( order+1 );
-		} else if ( UserOrdered == m) {
+			(*i)->set_remote_control_id (order+1, false);
+			emit_signal = true;
+		} else if (UserOrdered == m) {
 			//do nothing ... only changes to remote id's are initiated by user
 		}
+	}
+
+	if (emit_signal) {
+		Route::RemoteControlIDChange();
 	}
 }
 
@@ -2372,6 +2379,8 @@ Session::remove_route (shared_ptr<Route> route)
 	route->drop_references ();
 
 	sync_order_keys (N_("session"));
+
+	Route::RemoteControlIDChange(); /* EMIT SIGNAL */
 
 	/* save the new state of the world */
 
@@ -4184,9 +4193,11 @@ Session::sync_order_keys (std::string const & base)
 	}
 
 	Route::SyncOrderKeys (base); // EMIT SIGNAL
-	Route::RemoteControlIDChange (); // EMIT SIGNAL
-}
 
+	/* this might not do anything */
+
+	set_remote_control_ids ();
+}
 
 /** @return true if there is at least one record-enabled diskstream, otherwise false */
 bool
