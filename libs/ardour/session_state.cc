@@ -64,6 +64,7 @@
 #include "pbd/search_path.h"
 #include "pbd/stacktrace.h"
 
+#include "ardour/amp.h"
 #include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
@@ -2695,9 +2696,70 @@ Session::controllable_by_rid_and_name (uint32_t rid, const char* const what)
 	} else if (strncmp (what, "mute", 4) == 0) {
 		c = r->mute_control();
 	} else if (strncmp (what, "pan", 3) == 0) {
+
+		/* XXX pan control */
+
 	} else if (strncmp (what, "plugin", 6) == 0) {
+
+		/* parse to identify plugin & parameter */
+
+		uint32_t plugin;
+		uint32_t parameter_index;
+
+		if (sscanf (what, "plugin%" PRIu32 ":%" PRIu32,  &plugin, &parameter_index) == 2) {
+
+			/* revert to zero based counting */
+			
+			if (plugin > 0) {
+				--plugin;
+			}
+			
+			if (parameter_index > 0) {
+				--parameter_index;
+			}
+
+			boost::shared_ptr<Processor> p = r->nth_plugin (plugin);
+
+			if (p) {
+				c = boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
+					p->data().control(Evoral::Parameter(PluginAutomation, 0, parameter_index)));
+			}
+		}
+
+	} else if (strncmp (what, "send", 4) == 0) {
+
+		/* parse to identify send & property */
+
+		uint32_t send;
+		char property[64];
+
+		if (sscanf (what, "send%" PRIu32 ":%63s", &send, property) == 2) {
+
+			/* revert to zero-based counting */
+			
+			if (send > 0) {
+				--send;
+			}
+
+			boost::shared_ptr<Processor> p = r->nth_send (send);
+
+			if (p) {
+				boost::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(p);
+
+				if (strcmp (property, "gain") == 0) {
+					boost::shared_ptr<Amp> a = s->amp();
+					if (a) {
+						c = s->amp()->gain_control();
+					}
+				}
+				/* XXX pan control */
+			}
+		}
+		
 	} else if (strncmp (what, "recenable", 9) == 0) {
+
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(r);
+
 		if (t) {
 			c = t->rec_enable_control ();
 		}

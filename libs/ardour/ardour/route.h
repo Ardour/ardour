@@ -181,6 +181,9 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 		}
 	}
 
+	boost::shared_ptr<Processor> nth_plugin (uint32_t n);
+	boost::shared_ptr<Processor> nth_send (uint32_t n);
+
 	bool processor_is_prefader (boost::shared_ptr<Processor> p);
 
 	ChanCount max_processor_streams () const { return processor_max_streams; }

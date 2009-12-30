@@ -141,6 +141,9 @@ Route::init ()
 
 	/* add standard controls */
 
+	_solo_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
+	_mute_master->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
+	
 	add_control (_solo_control);
 	add_control (_mute_master);
 
@@ -3104,4 +3107,41 @@ Route::get_control (const Evoral::Parameter& param)
 	}
 
 	return c;
+}
+
+boost::shared_ptr<Processor>
+Route::nth_plugin (uint32_t n)
+{
+	Glib::RWLock::ReaderLock lm (_processor_lock);
+	ProcessorList::iterator i;
+
+	for (i = _processors.begin(); i != _processors.end(); ++i) {
+		if (boost::dynamic_pointer_cast<PluginInsert> (*i)) {
+			if (n-- == 0) {
+				return *i;
+			}
+		}
+	}
+
+	return boost::shared_ptr<Processor> ();
+}
+
+boost::shared_ptr<Processor>
+Route::nth_send (uint32_t n)
+{
+	Glib::RWLock::ReaderLock lm (_processor_lock);
+	ProcessorList::iterator i;
+
+	for (i = _processors.begin(); i != _processors.end(); ++i) {
+		cerr << "check " << (*i)->name() << endl;
+		if (boost::dynamic_pointer_cast<Send> (*i)) {
+			if (n-- == 0) {
+				return *i;
+			}
+		} else {
+			cerr << "\tnot a send\n";
+		}
+	}
+
+	return boost::shared_ptr<Processor> ();
 }

@@ -192,16 +192,18 @@ MIDIControllable::midi_to_control(float val)
 	float control_min = 0.0f;
 	float control_max = 1.0f;
 	ARDOUR::AutomationControl* ac = dynamic_cast<ARDOUR::AutomationControl*>(controllable);
+
+	const float midi_range = 127.0f; // TODO: NRPN etc.
+	
 	if (ac) {
+
+		if (ac->is_gain_like()) {
+			return slider_position_to_gain (val/midi_range);
+		}
+		
 		control_min = ac->parameter().min();
 		control_max = ac->parameter().max();
 	}
-
-	const float midi_range    = 127.0f; // TODO: NRPN etc.
-
-	if (ac->is_gain_like()) {
-		return  slider_position_to_gain (val/midi_range);
-	} 
 
 	const float control_range = control_max - control_min;
 	return  val / midi_range * control_range + control_min;
