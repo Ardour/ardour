@@ -293,7 +293,7 @@ JACK_MidiPort::get_state () const
 	XMLNode& root (Port::get_state ());
 
 	if (_jack_output_port) {
-
+		
 		const char** jc = jack_port_get_connections (_jack_output_port);
 		string connection_string;
 		if (jc) {
@@ -305,9 +305,13 @@ JACK_MidiPort::get_state () const
 			}
 			free (jc);
 		}
-
+		
 		if (!connection_string.empty()) {
 			root.add_property ("outbound", connection_string);
+		}
+	} else {
+		if (!_outbound_connections.empty()) {
+			root.add_property ("outbound", _outbound_connections);
 		}
 	}
 
@@ -327,6 +331,10 @@ JACK_MidiPort::get_state () const
 
 		if (!connection_string.empty()) {
 			root.add_property ("inbound", connection_string);
+		}
+	} else {
+		if (!_inbound_connections.empty()) {
+			root.add_property ("inbound", _inbound_connections);
 		}
 	}
 

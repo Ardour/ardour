@@ -228,6 +228,7 @@ AudioEngine::stop (bool forever)
 		} else {
 			jack_deactivate (_priv_jack);
 			Stopped(); /* EMIT SIGNAL */
+			MIDI::JACK_MidiPort::JackHalted (); /* EMIT SIGNAL */
 		}
 	}
 
@@ -918,6 +919,7 @@ AudioEngine::halted (void *arg)
 
 	if (was_running) {
 		ae->Halted(); /* EMIT SIGNAL */
+		MIDI::JACK_MidiPort::JackHalted (); /* EMIT SIGNAL */
 	}
 }
 
@@ -1182,6 +1184,7 @@ AudioEngine::disconnect_from_jack ()
 	if (_running) {
 		_running = false;
 		Stopped(); /* EMIT SIGNAL */
+		MIDI::JACK_MidiPort::JackHalted (); /* EMIT SIGNAL */
 	}
 
 	return 0;
