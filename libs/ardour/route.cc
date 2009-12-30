@@ -25,6 +25,7 @@
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
+#include "pbd/stacktrace.h"
 
 #include "evoral/Curve.hpp"
 
@@ -64,6 +65,7 @@ using namespace PBD;
 
 uint32_t Route::order_key_cnt = 0;
 PBD::Signal1<void,string const&> Route::SyncOrderKeys;
+PBD::Signal0<void> Route::RemoteControlIDChange;
 
 Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	: SessionObject (sess, name)
@@ -177,6 +179,7 @@ Route::set_remote_control_id (uint32_t id)
 	if (id != _remote_control_id) {
 		_remote_control_id = id;
 		RemoteControlIDChanged ();
+		RemoteControlIDChange ();
 	}
 }
 

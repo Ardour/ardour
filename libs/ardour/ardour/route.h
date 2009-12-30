@@ -306,7 +306,14 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	void set_remote_control_id (uint32_t id);
 	uint32_t remote_control_id () const;
+
+	/* for things concerned about *this* route's RID */
+
 	PBD::Signal0<void> RemoteControlIDChanged;
+
+	/* for things concerned about any route's RID changes */
+
+	static PBD::Signal0<void> RemoteControlIDChange;
 
 	void sync_order_keys (std::string const &);
 	static PBD::Signal1<void,std::string const &> SyncOrderKeys;

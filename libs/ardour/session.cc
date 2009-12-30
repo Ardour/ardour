@@ -2170,6 +2170,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 	}
 
 	RouteAdded (new_routes); /* EMIT SIGNAL */
+	Route::RemoteControlIDChange (); /* EMIT SIGNAL */
 }
 
 void
@@ -4183,6 +4184,7 @@ Session::sync_order_keys (std::string const & base)
 	}
 
 	Route::SyncOrderKeys (base); // EMIT SIGNAL
+	Route::RemoteControlIDChange (); // EMIT SIGNAL
 }
 
 

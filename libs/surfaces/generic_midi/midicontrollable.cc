@@ -17,6 +17,9 @@
 
 */
 
+#define __STDC_FORMAT_MACROS 1
+#include <stdint.h>
+
 #include <cstdio> /* for sprintf, sigh */
 #include <climits>
 
@@ -35,16 +38,32 @@ using namespace MIDI;
 using namespace PBD;
 using namespace ARDOUR;
 
-MIDIControllable::MIDIControllable (Port& p, const string& c, bool is_bistate)
-	: controllable (0), _current_uri (c), _port (p), bistate (is_bistate)
+MIDIControllable::MIDIControllable (Port& p, bool is_bistate)
+	: controllable (0)
+	, _port (p)
+	, bistate (is_bistate)
 {
-	init ();
+	_learned = false; /* from URI */
+	setting = false;
+	last_value = 0; // got a better idea ?
+	control_type = none;
+	_control_description = "MIDI Control: none";
+	control_additional = (byte) -1;
+	feedback = true; // for now
 }
 
 MIDIControllable::MIDIControllable (Port& p, Controllable& c, bool is_bistate)
-	: controllable (&c), _current_uri (c.uri()), _port (p), bistate (is_bistate)
+	: controllable (&c)
+	, _port (p)
+	, bistate (is_bistate)
 {
-	init ();
+	_learned = true; /* from controllable */
+	setting = false;
+	last_value = 0; // got a better idea ?
+	control_type = none;
+	_control_description = "MIDI Control: none";
+	control_additional = (byte) -1;
+	feedback = true; // for now
 }
 
 MIDIControllable::~MIDIControllable ()
@@ -52,20 +71,52 @@ MIDIControllable::~MIDIControllable ()
 	drop_external_control ();
 }
 
-void
-MIDIControllable::init ()
+int
+MIDIControllable::init (const std::string& s)
 {
-	_learned = false;
-	setting = false;
-	last_value = 0; // got a better idea ?
-	control_type = none;
-	_control_description = "MIDI Control: none";
-	control_additional = (byte) -1;
-	feedback = true; // for now
+	_current_uri = s;
 
-	/* use channel 0 ("1") as the initial channel */
+	if (!_current_uri.empty()) {
 
-	midi_rebind (0);
+		/* parse URI to get remote control ID and "what" is to be controlled */
+		
+		string::size_type last_slash;
+		string useful_part;
+		
+		if ((last_slash = _current_uri.find_last_of ('/')) == string::npos) {
+			return -1;
+		}
+		
+		useful_part = _current_uri.substr (last_slash+1);
+		
+		char ridstr[64];
+		char what[64];
+		
+		if (sscanf (useful_part.c_str(), "rid=%63[^?]?%63s", ridstr, what) != 2) {
+			return -1;
+		}
+		
+		_what = what;
+
+		/* now parse RID string and determine if its a bank-driven ID */
+		
+		if (strncmp (ridstr, "B-", 2) == 0) {
+			
+			if (sscanf (&ridstr[2], "%" PRIu32, &_rid) != 1) {
+				return -1;
+			}
+			
+			_bank_relative = true;
+
+		} else {
+			if (sscanf (&ridstr[2], "%" PRIu32, &_rid) != 1) {
+				return -1;
+			}
+			_bank_relative = false;
+		}
+	}
+
+	return 0;
 }
 
 void
@@ -83,10 +134,7 @@ MIDIControllable::midi_forget ()
 void
 MIDIControllable::drop_external_control ()
 {
-	midi_sense_connection[0].disconnect ();
-	midi_sense_connection[1].disconnect ();
-	midi_learn_connection.disconnect ();
-
+	midi_forget ();
 	control_type = none;
 	control_additional = (byte) -1;
 }

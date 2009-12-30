@@ -892,8 +892,6 @@ EditorRoutes::move_selected_tracks (bool up)
 	}
 
 	_model->reorder (neworder);
-
-	_session->sync_order_keys (N_ ("editor"));
 }
 
 void

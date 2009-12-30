@@ -82,6 +82,7 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	Controllable::DeleteBinding.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::delete_binding, this, _1));
 
 	Session::SendFeedback.connect (*this, boost::bind (&GenericMidiControlProtocol::send_feedback, this), midi_ui_context());;
+	Route::RemoteControlIDChange.connect (*this, boost::bind (&GenericMidiControlProtocol::reset_controllables, this), midi_ui_context());
 
 	reload_maps ();
 }
@@ -407,7 +408,7 @@ GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos,
 		
 		// Create a MIDIControllable
 		MIDIControllable* mc = new MIDIControllable (*_port, *control);
-		
+
 		// Remove any old binding for this midi channel/type/value pair
 		// Note:  can't use delete_binding() here because we don't know the specific controllable we want to remove, only the midi information
 		for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ++iter) {
@@ -426,7 +427,6 @@ GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos,
 		// Update the MIDI Controllable based on the the pos param
 		// Here is where a table lookup for user mappings could go; for now we'll just wing it...
 		mc->bind_midi(channel, MIDI::controller, value);
-		mc->set_learned (true);
 
 		controllables.push_back (mc);
 	}
@@ -518,6 +518,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 				
 				if (c) {
 					MIDIControllable* mc = new MIDIControllable (*_port, *c);
+
 					if (mc->set_state (**niter, version) == 0) {
 						controllables.push_back (mc);
 					}
@@ -623,8 +624,6 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 
 			} else if (child->property ("function")) {
 
-				cerr << "try to create a function from " << child->property ("function")->value() << endl;
-
 				/* function */
 				MIDIFunction* mf;
 
@@ -686,7 +685,13 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 	prop = node.property (X_("uri"));
 	uri = prop->value();
 
-	MIDIControllable* mc = new MIDIControllable (*_port, uri, false);
+	MIDIControllable* mc = new MIDIControllable (*_port, false);
+
+	if (mc->init (uri)) {
+		delete mc;
+		return 0;
+	}
+
 	mc->bind_midi (channel, ev, detail);
 
 	cerr << "New MC with URI " << uri << " on channel " << (int) channel << " detail = " << (int) detail << endl;
@@ -703,55 +708,11 @@ GenericMidiControlProtocol::reset_controllables ()
 		MIDIControllable* existingBinding = (*iter);
 
 		if (!existingBinding->learned()) {
-			cerr << "Look for " << existingBinding->current_uri() << endl;
-
-			/* parse URI to get remote control ID and "what" is to be controlled */
-
-			std::string uri = existingBinding->current_uri();
-			string::size_type last_slash;
-			string useful_part;
-			
-			if ((last_slash = uri.find_last_of ('/')) == string::npos) {
-				existingBinding->set_controllable (0);
-				continue;
+			uint32_t rid = existingBinding->rid();
+			if (existingBinding->bank_relative()) {
+				rid += _current_bank * _bank_size;
 			}
-			
-			useful_part = uri.substr (last_slash+1);
-			
-			char ridstr[64];
-			char what[64];
-			
-			if (sscanf (useful_part.c_str(), "rid=%63[^?]?%63s", ridstr, what) != 2) {
-				existingBinding->set_controllable (0);
-				continue;
-			}
-			
-			/* now parse RID string and determine if its a bank-driven ID */
-			
-			uint32_t rid;
-
-			if (strncmp (ridstr, "B-", 2) == 0) {
-
-				if (sscanf (&ridstr[2], "%" PRIu32, &rid) != 1) {
-					existingBinding->set_controllable (0);
-					continue;
-				}
-				
-				rid += _bank_size * _current_bank;
-
-			} else {
-				if (sscanf (&ridstr[2], "%" PRIu32, &rid) != 1) {
-					existingBinding->set_controllable (0);
-					continue;
-				}
-			}
-
-			/* go get it (allowed to fail) */
-
-			cerr << "Look for controllable via " << rid << " and " << what << endl;
-
-			boost::shared_ptr<Controllable> c = session->controllable_by_rid_and_name (rid, what);
-			cerr << "\tgot " << c << endl;
+			boost::shared_ptr<Controllable> c = session->controllable_by_rid_and_name (rid, existingBinding->what().c_str());
 			existingBinding->set_controllable (c.get());
 		}
 	}
