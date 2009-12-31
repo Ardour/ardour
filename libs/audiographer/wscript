@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import autowaf
+import os
 
 # Version of this package (even if built as a child)
 AUDIOGRAPHER_VERSION = '0.0.0'
@@ -74,8 +75,7 @@ def build(bld):
 	audiographer.includes       = ['.', './src']
 	audiographer.uselib         = 'GLIB GLIBMM GTHREAD SAMPLERATE SNDFILE'
 	audiographer.vnum           = AUDIOGRAPHER_LIB_VERSION
-	audiographer.install_path   = '${LIBDIR}'
-	
+	audiographer.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
 
 	if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
 		# Unit tests

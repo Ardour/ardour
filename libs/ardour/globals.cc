@@ -76,6 +76,8 @@
 #include "ardour/source_factory.h"
 #include "ardour/utils.h"
 
+#include "audiographer/routines.h"
+
 #if defined (__APPLE__)
        #include <Carbon/Carbon.h> // For Gestalt
 #endif
@@ -254,6 +256,9 @@ setup_hardware_optimization (bool try_optimization)
 
 		info << "No H/W specific optimizations in use" << endmsg;
 	}
+	
+	AudioGrapher::Routines::override_compute_peak (compute_peak);
+	AudioGrapher::Routines::override_apply_gain_to_buffer (apply_gain_to_buffer);
 }
 
 static void
