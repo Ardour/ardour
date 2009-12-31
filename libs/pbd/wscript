@@ -57,6 +57,7 @@ def build(bld):
 		command.cc
 		convert.cc
 		controllable.cc
+		controllable_descriptor.cc
                 crossthread.cc
 		enumwriter.cc
                 event_loop.cc

@@ -57,6 +57,7 @@
 #include "midi++/port.h"
 
 #include "pbd/boost_debug.h"
+#include "pbd/controllable_descriptor.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 #include "pbd/pathscanner.h"
@@ -2680,89 +2681,114 @@ Session::controllable_by_id (const PBD::ID& id)
 }
 
 boost::shared_ptr<Controllable>
-Session::controllable_by_rid_and_name (uint32_t rid, const char* const what)
+Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 {
 	boost::shared_ptr<Controllable> c;
-	boost::shared_ptr<Route> r = route_by_remote_id (rid);
+	boost::shared_ptr<Route> r;
+
+	switch (desc.top_level_type()) {
+	case ControllableDescriptor::NamedRoute:
+	{
+		std::string str = desc.top_level_name();
+		if (str == "master") {
+			r = _master_out;
+		} else if (str == "control" || str == "listen") {
+			r = _control_out;
+		} else {
+			r = route_by_name (desc.top_level_name());
+		}
+		break;
+	}
+
+	case ControllableDescriptor::RemoteControlID:
+		r = route_by_remote_id (desc.rid());
+		break;
+	}
 	
 	if (!r) {
 		return c;
 	}
 
-	if (strncmp (what, "gain", 4) == 0) {
+	switch (desc.subtype()) {
+	case ControllableDescriptor::Gain:
 		c = r->gain_control ();
-	} else if (strncmp (what, "solo", 4) == 0) {
+		break;
+	case ControllableDescriptor::Solo:
 		c = r->solo_control();
-	} else if (strncmp (what, "mute", 4) == 0) {
+		break;
+
+	case ControllableDescriptor::Mute:
 		c = r->mute_control();
-	} else if (strncmp (what, "pan", 3) == 0) {
+		break;
 
-		/* XXX pan control */
-
-	} else if (strncmp (what, "plugin", 6) == 0) {
-
-		/* parse to identify plugin & parameter */
-
-		uint32_t plugin;
-		uint32_t parameter_index;
-
-		if (sscanf (what, "plugin%" PRIu32 ":%" PRIu32,  &plugin, &parameter_index) == 2) {
-
-			/* revert to zero based counting */
-			
-			if (plugin > 0) {
-				--plugin;
-			}
-			
-			if (parameter_index > 0) {
-				--parameter_index;
-			}
-
-			boost::shared_ptr<Processor> p = r->nth_plugin (plugin);
-
-			if (p) {
-				c = boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
-					p->data().control(Evoral::Parameter(PluginAutomation, 0, parameter_index)));
-			}
-		}
-
-	} else if (strncmp (what, "send", 4) == 0) {
-
-		/* parse to identify send & property */
-
-		uint32_t send;
-		char property[64];
-
-		if (sscanf (what, "send%" PRIu32 ":%63s", &send, property) == 2) {
-
-			/* revert to zero-based counting */
-			
-			if (send > 0) {
-				--send;
-			}
-
-			boost::shared_ptr<Processor> p = r->nth_send (send);
-
-			if (p) {
-				boost::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(p);
-
-				if (strcmp (property, "gain") == 0) {
-					boost::shared_ptr<Amp> a = s->amp();
-					if (a) {
-						c = s->amp()->gain_control();
-					}
-				}
-				/* XXX pan control */
-			}
-		}
-		
-	} else if (strncmp (what, "recenable", 9) == 0) {
-
+	case ControllableDescriptor::Recenable:
+	{
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(r);
-
+		
 		if (t) {
 			c = t->rec_enable_control ();
 		}
+		break;
+	}
+
+	case ControllableDescriptor::Pan:
+		/* XXX pan control */
+		break;
+
+	case ControllableDescriptor::Balance:
+		/* XXX simple pan control */
+		break;
+
+	case ControllableDescriptor::PluginParameter:
+	{
+		uint32_t plugin = desc.target (0);
+		uint32_t parameter_index = desc.target (1);
+
+		/* revert to zero based counting */
+		
+		if (plugin > 0) {
+			--plugin;
+		}
+		
+		if (parameter_index > 0) {
+			--parameter_index;
+		}
+
+		boost::shared_ptr<Processor> p = r->nth_plugin (plugin);
+		
+		if (p) {
+			c = boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
+				p->data().control(Evoral::Parameter(PluginAutomation, 0, parameter_index)));
+		}
+		break;
+	}
+
+	case ControllableDescriptor::SendGain: 
+	{
+		uint32_t send = desc.target (0);
+
+		/* revert to zero-based counting */
+		
+		if (send > 0) {
+			--send;
+		}
+		
+		boost::shared_ptr<Processor> p = r->nth_send (send);
+		
+		if (p) {
+			boost::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(p);
+			boost::shared_ptr<Amp> a = s->amp();
+
+			if (a) {
+				c = s->amp()->gain_control();
+			}
+		}
+		break;
+	}
+
+	default:
+		/* relax and return a null pointer */
+		break;
 	}
 
 	return c;

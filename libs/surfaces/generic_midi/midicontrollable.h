@@ -30,12 +30,14 @@
 
 #include "ardour/types.h"
 
+namespace PBD {
+	class ControllableDescriptor;
+}
+
 namespace MIDI {
-
-class Channel;
-class Port;
-class Parser;
-
+	class Channel;
+	class Port;
+	class Parser;
 }
 
 class MIDIControllable : public PBD::Stateful
@@ -74,6 +76,8 @@ class MIDIControllable : public PBD::Stateful
 	void set_controllable (PBD::Controllable*);
 	const std::string& current_uri() const { return _current_uri; }
 
+	PBD::ControllableDescriptor& descriptor() const { return *_descriptor; }
+
 	std::string control_description() const { return _control_description; }
 
 	XMLNode& get_state (void);
@@ -86,6 +90,7 @@ class MIDIControllable : public PBD::Stateful
 	
   private:
 	PBD::Controllable* controllable;
+	PBD::ControllableDescriptor* _descriptor;
 	std::string        _current_uri;
 	MIDI::Port&     _port;
 	bool             setting;

@@ -23,6 +23,7 @@
 #include <sstream>
 #include <algorithm>
 
+#include "pbd/controllable_descriptor.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/pathscanner.h"
@@ -711,11 +712,13 @@ GenericMidiControlProtocol::reset_controllables ()
 		MIDIControllable* existingBinding = (*iter);
 
 		if (!existingBinding->learned()) {
-			uint32_t rid = existingBinding->rid();
-			if (existingBinding->bank_relative()) {
-				rid += _current_bank * _bank_size;
+			ControllableDescriptor& desc (existingBinding->descriptor());
+
+			if (desc.banked()) {
+				desc.set_bank_offset (_current_bank * _bank_size);
 			}
-			boost::shared_ptr<Controllable> c = session->controllable_by_rid_and_name (rid, existingBinding->what().c_str());
+
+			boost::shared_ptr<Controllable> c = session->controllable_by_descriptor (desc);
 			existingBinding->set_controllable (c.get());
 		}
 	}
