@@ -50,7 +50,9 @@ split (string str, vector<string>& result, char splitchar)
 	remaining = str;
 
 	while ((pos = remaining.find_first_of (splitchar)) != string::npos) {
-		result.push_back (remaining.substr (0, pos));
+		if (pos != 0) {
+			result.push_back (remaining.substr (0, pos));
+		}
 		remaining = remaining.substr (pos+1);
 	}
 
