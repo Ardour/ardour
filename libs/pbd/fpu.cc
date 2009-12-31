@@ -1,4 +1,5 @@
 #define _XOPEN_SOURCE 600
+#include <cstring> // for memset
 #include <cstdlib>
 #include <stdint.h>
 
@@ -19,6 +20,12 @@ FPU::FPU ()
 #ifndef ARCH_X86
 	return;
 #endif
+
+	/* asm notes: although we explicitly save&restore ebx/rbx (stack pointer), we must tell
+	   gcc that ebx,rbx is clobbered so that it doesn't try to use it as an intermediate
+	   register when storing edx/rdx. gcc 4.3 didn't make this "mistake", but gcc 4.4
+	   does, at least on x86_64.
+	*/
 	
 #ifndef USE_X86_64_ASM
 	asm volatile (
@@ -29,7 +36,7 @@ FPU::FPU ()
 		"popl %%ebx\n"
 		: "=r" (cpuflags)
 		: 
-		: "%eax", "%ebx", "%edx"
+		: "%eax", "%ebx", "%ecx", "%edx"
 		);
 	
 #else
@@ -42,11 +49,11 @@ FPU::FPU ()
 		"popq %%rbx\n"
 		: "=r" (cpuflags)
 		: 
-		: "%rax", "%rbx", "%rdx"
+		: "%rax", "%rbx", "%rcx", "%rdx"
 		);
 
 #endif /* USE_X86_64_ASM */
-	
+
 	if (cpuflags & (1<<25)) {
 		_flags = Flags (_flags | (HasSSE|HasFlushToZero));
 	}
@@ -68,6 +75,8 @@ FPU::FPU ()
 			error << _("cannot allocate 16 byte aligned buffer for h/w feature detection") << endmsg;
 		} else {
 			
+			memset (fxbuf, 0, 512);
+
 			asm volatile (
 				"fxsave (%0)"
 				:
