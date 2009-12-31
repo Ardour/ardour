@@ -21,6 +21,12 @@ FPU::FPU ()
 
 #else
 	
+	/* asm notes: although we explicitly save&restore ebx/rbx (stack pointer), we must tell
+	   gcc that ebx,rbx is clobbered so that it doesn't try to use it as an intermediate
+	   register when storing edx/rdx. gcc 4.3 didn't make this "mistake", but gcc 4.4
+	   does, at least on x86_64.
+	*/
+	
 #ifndef USE_X86_64_ASM
 	asm volatile (
 		"mov $1, %%eax\n"
@@ -30,7 +36,7 @@ FPU::FPU ()
 		"popl %%ebx\n"
 		: "=r" (cpuflags)
 		: 
-		: "%eax", "%ecx", "%edx", "memory"
+		: "%eax", "%ebx", "%ecx", "%edx"
 		);
 	
 #else
@@ -43,7 +49,7 @@ FPU::FPU ()
 		"popq %%rbx\n"
 		: "=r" (cpuflags)
 		: 
-		: "%rax", "%rcx", "%rdx", "memory"
+		: "%rax", "%rbx", "%rcx", "%rdx"
 		);
 
 #endif /* USE_X86_64_ASM */
@@ -69,6 +75,8 @@ FPU::FPU ()
 			error << _("cannot allocate 16 byte aligned buffer for h/w feature detection") << endmsg;
 		} else {
 			
+			memset (fxbuf, 0, 512);
+
 			asm volatile (
 				"fxsave (%0)"
 				:
