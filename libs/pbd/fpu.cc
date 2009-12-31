@@ -1,6 +1,7 @@
 #define _XOPEN_SOURCE 600
 #include <cstdlib>
 #include <stdint.h>
+#include <cstring>
 
 #include <pbd/fpu.h>
 #include <pbd/error.h>
