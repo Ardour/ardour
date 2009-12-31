@@ -29,7 +29,7 @@ FPU::FPU ()
 		"popl %%ebx\n"
 		: "=r" (cpuflags)
 		: 
-		: "%eax", "%ecx", "%edx", "memory"
+		: "%eax", "%ebx", "%edx"
 		);
 	
 #else
@@ -42,7 +42,7 @@ FPU::FPU ()
 		"popq %%rbx\n"
 		: "=r" (cpuflags)
 		: 
-		: "%rax", "%rcx", "%rdx", "memory"
+		: "%rax", "%rbx", "%rdx"
 		);
 
 #endif /* USE_X86_64_ASM */
