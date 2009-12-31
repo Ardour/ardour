@@ -21,12 +21,6 @@ FPU::FPU ()
 
 #else
 	
-	/* asm notes: although we explicitly save&restore ebx/rbx (stack pointer), we must tell
-	   gcc that ebx,rbx is clobbered so that it doesn't try to use it as an intermediate
-	   register when storing edx/rdx. gcc 4.3 didn't make this "mistake", but gcc 4.4
-	   does, at least on x86_64.
-	*/
-	
 #ifndef USE_X86_64_ASM
 	asm volatile (
 		"mov $1, %%eax\n"
@@ -36,11 +30,17 @@ FPU::FPU ()
 		"popl %%ebx\n"
 		: "=r" (cpuflags)
 		: 
-		: "%eax", "%ebx", "%ecx", "%edx"
+		: "%eax", "%ecx", "%edx"
 		);
 	
 #else
 	
+	/* asm notes: although we explicitly save&restore rbx, we must tell
+	   gcc that ebx,rbx is clobbered so that it doesn't try to use it as an intermediate
+	   register when storing rbx. gcc 4.3 didn't make this "mistake", but gcc 4.4
+	   does, at least on x86_64.
+	*/
+
 	asm volatile (
 		"pushq %%rbx\n"
 		"movq $1, %%rax\n"
