@@ -36,7 +36,7 @@ FPU::FPU ()
 		"popl %%ebx\n"
 		: "=r" (cpuflags)
 		: 
-		: "%eax", "%ebx", "%ecx", "%edx"
+		: "%eax", "%ecx", "%edx"
 		);
 	
 #else
