@@ -165,8 +165,14 @@ Route::~Route ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("route %1 destructor\n", _name));
 
+	/* do this early so that we don't get incoming signals as we are going through destruction 
+	 */
+
+	drop_connections ();
+
 	/* don't use clear_processors here, as it depends on the session which may
-	   be half-destroyed by now */
+	   be half-destroyed by now 
+	*/
 
 	Glib::RWLock::WriterLock lm (_processor_lock);
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {

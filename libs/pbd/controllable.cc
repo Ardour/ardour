@@ -40,6 +40,7 @@ PBD::ScopedConnectionList registry_connections;
 Controllable::Controllable (const string& name, Flag f)
 	: _name (name)
 	, _flags (f)
+	, _touching (false)
 {
 	add (*this);
 }

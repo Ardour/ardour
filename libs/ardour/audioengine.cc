@@ -134,9 +134,7 @@ _thread_init_callback (void * /*arg*/)
 	   knows about it.
 	*/
 
-	char* c = new char[12];
-	strcpy (c, X_("audioengine"));
-	pthread_set_name (c);
+	pthread_set_name (X_("audioengine"));
 
 	PBD::notify_gui_about_thread_creation ("gui", pthread_self(), X_("Audioengine"), 4096);
 	PBD::notify_gui_about_thread_creation ("midiui", pthread_self(), X_("Audioengine"), 128);
@@ -208,8 +206,6 @@ AudioEngine::start ()
 		} else {
 			// error << _("cannot activate JACK client") << endmsg;
 		}
-
-		start_metering_thread();
 
 		_raw_buffer_sizes[DataType::AUDIO] = blocksize * sizeof(float);
 	}
@@ -550,6 +546,8 @@ AudioEngine::start_metering_thread ()
 void
 AudioEngine::meter_thread ()
 {
+	pthread_set_name (X_("meter"));
+
 	while (true) {
 		Glib::usleep (10000); /* 1/100th sec interval */
 		if (g_atomic_int_get(&m_meter_exit)) {
@@ -567,6 +565,8 @@ AudioEngine::set_session (Session *s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
+
+		start_metering_thread ();
 		
 		nframes_t blocksize = jack_get_buffer_size (_jack);
 		
@@ -601,6 +601,8 @@ AudioEngine::remove_session ()
 	Glib::Mutex::Lock lm (_process_lock);
 
 	if (_running) {
+
+		stop_metering_thread ();
 
 		if (_session) {
 			session_remove_pending = true;

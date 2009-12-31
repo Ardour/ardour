@@ -21,6 +21,7 @@
 #include <set>
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <stdint.h>
 
 #include "pbd/pthread_utils.h"
@@ -59,9 +60,9 @@ PBD::notify_gui_about_thread_creation (std::string target_gui, pthread_t thread,
 struct ThreadStartWithName {
     void* (*thread_work)(void*);
     void* arg;
-    const char* name;
+    std::string name;
     
-    ThreadStartWithName (void* (*f)(void*), void* a, const char* s)
+    ThreadStartWithName (void* (*f)(void*), void* a, const std::string& s)
 	    : thread_work (f), arg (a), name (s) {}
 };
 
@@ -72,7 +73,7 @@ fake_thread_start (void* arg)
 	void* (*thread_work)(void*) = ts->thread_work;
 	void* thread_arg = ts->arg;
 
-	pthread_set_name (ts->name);
+	pthread_set_name (ts->name.c_str());
 
 	delete ts;
 	/* name will be deleted by the default handler for GStaticPrivate, when the thread exits */
@@ -90,10 +91,7 @@ pthread_create_and_store (string name, pthread_t  *thread, void * (*start_routin
 	pthread_attr_init(&default_attr);
 	pthread_attr_setstacksize(&default_attr, 500000);
 
-	char* cname = new char[name.length() + 1];
-	strcpy (cname, name.c_str());
-
-	ThreadStartWithName* ts = new ThreadStartWithName (start_routine, arg, cname);
+	ThreadStartWithName* ts = new ThreadStartWithName (start_routine, arg, name);
 
 	if ((ret = thread_creator (thread, &default_attr, fake_thread_start, ts)) == 0) {
 		pthread_mutex_lock (&thread_map_lock);
@@ -109,8 +107,9 @@ pthread_create_and_store (string name, pthread_t  *thread, void * (*start_routin
 void
 pthread_set_name (const char *str)
 {
-	/* str will be deleted when this thread exits */
-	thread_name.set (const_cast<char*>(str));
+	/* copy string and delete it when exiting */
+	
+	thread_name.set (strdup (str), free);
 }
 
 const char *

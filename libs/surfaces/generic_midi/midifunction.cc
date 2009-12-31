@@ -34,7 +34,7 @@ MIDIFunction::MIDIFunction (MIDI::Port& p)
 
 MIDIFunction::~MIDIFunction ()
 {
-	delete sysex;
+	delete [] sysex;
 }
 
 int
