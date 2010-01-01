@@ -178,6 +178,7 @@ ARDOUR_UI::setup_transport ()
 	play_selection_button.set_name ("TransportButton");
 	rec_button.set_name ("TransportRecButton");
 	auto_loop_button.set_name ("TransportButton");
+	join_play_range_button.set_name ("TransportButton");
 
 	auto_return_button.set_name ("TransportButton");
 	auto_play_button.set_name ("TransportButton");
@@ -221,6 +222,9 @@ ARDOUR_UI::setup_transport ()
 	w = manage (new Image (get_icon (X_("transport_loop"))));
 	w->show();
 	auto_loop_button.add (*w);
+	w = manage (new Image (get_icon (X_("join_tools"))));
+	w->show ();
+	join_play_range_button.add (*w);
 
 	RefPtr<Action> act;
 
@@ -361,11 +365,17 @@ ARDOUR_UI::setup_transport ()
 
 	transport_tearoff_hbox.pack_start (*svbox, false, false, 3);
 
-	transport_tearoff_hbox.pack_start (auto_loop_button, false, false);
-	if (!Profile->get_sae()) {
-		transport_tearoff_hbox.pack_start (play_selection_button, false, false);
+	if (Profile->get_sae()) {
+		transport_tearoff_hbox.pack_start (auto_loop_button);
+		transport_tearoff_hbox.pack_start (roll_button);
+	} else {
+		transport_tearoff_hbox.pack_start (auto_loop_button, false, false);
+		play_range_hbox.pack_start (play_selection_button, false, false);
+		play_range_hbox.pack_start (roll_button, false, false);
+		play_range_vbox.pack_start (play_range_hbox, false, false);
+		play_range_vbox.pack_start (join_play_range_button, false, false);
+		transport_tearoff_hbox.pack_start (play_range_vbox, false, false);
 	}
-	transport_tearoff_hbox.pack_start (roll_button, false, false);
 	transport_tearoff_hbox.pack_start (stop_button, false, false);
 	transport_tearoff_hbox.pack_start (rec_button, false, false, 6);
 

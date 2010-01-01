@@ -239,7 +239,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 
 
 void
-AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool with_push)
+AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool keep_x, bool with_push)
 {
 	double delta = 0.0;
 	uint32_t last_movable = UINT_MAX;
@@ -257,7 +257,7 @@ AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool wi
 	y = min (1.0, y);
 	y = _height - (y * _height);
 
-	if (cp.can_slide()) {
+	if (cp.can_slide() && !keep_x) {
 
 		/* x-coord cannot move beyond adjacent points or the start/end, and is
 		   already in frames. it needs to be converted to canvas units.
@@ -362,15 +362,12 @@ AutomationLine::reset_line_coords (ControlPoint& cp)
 }
 
 void
-AutomationLine::sync_model_with_view_line (uint32_t start, uint32_t end)
+AutomationLine::sync_model_with_view_points (list<ControlPoint*> cp, bool did_push, int64_t distance)
 {
-	ControlPoint *p;
-
 	update_pending = true;
 
-	for (uint32_t i = start; i <= end; ++i) {
-		p = nth(i);
-		sync_model_with_view_point (*p, false, 0);
+	for (list<ControlPoint*>::iterator i = cp.begin(); i != cp.end(); ++i) {
+		sync_model_with_view_point (**i, did_push, distance);
 	}
 }
 
@@ -487,6 +484,14 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 
 		double tx = points[pi].x;
 		double ty = points[pi].y;
+
+		if (find (_always_in_view.begin(), _always_in_view.end(), (*model)->when) != _always_in_view.end()) {
+			add_visible_control_point (view_index, pi, tx, ty, model, npoints);
+			prev_rx = this_rx;
+			prev_ry = this_ry;
+			++view_index;
+			continue;
+		}
 
 		if (isnan (tx) || isnan (ty)) {
 			warning << string_compose (_("Ignoring illegal points on AutomationLine \"%1\""),
@@ -667,66 +672,36 @@ AutomationLine::invalidate_point (ALPoints& p, uint32_t index)
 	p[index].y = DBL_MAX;
 }
 
+/** Start dragging a single point.
+ *  @param cp Point to drag.
+ *  @param x Initial x position (frames).
+ *  @param fraction Initial y position (as a fraction of the track height, where 0 is the bottom and 1 the top)
+ */
 void
-AutomationLine::start_drag (ControlPoint* cp, nframes_t x, float fraction)
+AutomationLine::start_drag_single (ControlPoint* cp, nframes_t x, float fraction)
 {
-	if (trackview.editor().session() == 0) { /* how? */
-		return;
-	}
-
-	string str;
-
-	if (cp) {
-		str = _("automation event move");
-	} else {
-		str = _("automation range drag");
-	}
-
-	trackview.editor().session()->begin_reversible_command (str);
+	trackview.editor().session()->begin_reversible_command (_("automation event move"));
 	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &get_state(), 0));
 
-	drag_x = x;
-	drag_distance = 0;
-	first_drag_fraction = fraction;
-	last_drag_fraction = fraction;
-	drags = 0;
-	did_push = false;
+	_drag_points.clear ();
+	_drag_points.push_back (cp);
+	start_drag_common (x, fraction);
 }
 
+/** Start dragging a line vertically (with no change in x)
+ *  @param i1 Control point index of the `left' point on the line.
+ *  @param i2 Control point index of the `right' point on the line.
+ *  @param fraction Initial y position (as a fraction of the track height, where 0 is the bottom and 1 the top)
+ */
 void
-AutomationLine::point_drag (ControlPoint& cp, nframes_t x, float fraction, bool with_push)
+AutomationLine::start_drag_line (uint32_t i1, uint32_t i2, float fraction)
 {
-	if (x > drag_x) {
-		drag_distance += (x - drag_x);
-	} else {
-		drag_distance -= (drag_x - x);
-	}
+	trackview.editor().session()->begin_reversible_command (_("automation range move"));
+	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &get_state(), 0));
 
-	drag_x = x;
+	_drag_points.clear ();
 
-	modify_view_point (cp, x, fraction, with_push);
-
-	if (line_points.size() > 1) {
-		line->property_points() = line_points;
-	}
-
-	drags++;
-	did_push = with_push;
-}
-
-void
-AutomationLine::line_drag (uint32_t i1, uint32_t i2, float fraction, bool with_push)
-{
-	double ydelta = fraction - last_drag_fraction;
-
-	did_push = with_push;
-
-	last_drag_fraction = fraction;
-
-	line_drag_cp1 = i1;
-	line_drag_cp2 = i2;
-
-	//check if one of the control points on the line is in a selected range
+	// check if one of the control points on the line is in a selected range
 	bool range_found = false;
 	ControlPoint *cp;
 
@@ -740,38 +715,92 @@ AutomationLine::line_drag (uint32_t i1, uint32_t i2, float fraction, bool with_p
 	if (range_found) {
 		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 			if ((*i)->selected()) {
-				modify_view_point (*(*i), trackview.editor().unit_to_frame ((*i)->get_x()), ((_height - (*i)->get_y()) /_height) + ydelta, with_push);
+				_drag_points.push_back (*i);
 			}
 		}
 	} else {
-		ControlPoint *cp;
 		for (uint32_t i = i1 ; i <= i2; i++) {
-			cp = nth (i);
-			modify_view_point (*cp, trackview.editor().unit_to_frame (cp->get_x()), ((_height - cp->get_y()) /_height) + ydelta, with_push);
+			_drag_points.push_back (nth (i));
 		}
+	}
+
+	start_drag_common (0, fraction);
+}
+
+/** Start dragging multiple points (with no change in x)
+ *  @param cp Points to drag.
+ *  @param fraction Initial y position (as a fraction of the track height, where 0 is the bottom and 1 the top)
+ */
+void
+AutomationLine::start_drag_multiple (list<ControlPoint*> cp, float fraction, XMLNode* state)
+{
+	trackview.editor().session()->begin_reversible_command (_("automation range move"));
+	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), state, 0));
+
+	_drag_points = cp;
+	start_drag_common (0, fraction);
+}
+
+/** Common parts of starting a drag.
+ *  @param d Description of the drag.
+ *  @param x Starting x position in frames, or 0 if x is being ignored.
+ *  @param fraction Starting y position (as a fraction of the track height, where 0 is the bottom and 1 the top)
+ */
+void
+AutomationLine::start_drag_common (nframes_t x, float fraction)
+{
+	drag_x = x;
+	drag_distance = 0;
+	_last_drag_fraction = fraction;
+	_drag_had_movement = false;
+	did_push = false;
+}
+
+/** Should be called to indicate motion during a drag.
+ *  @param x New x position of the drag in frames, or 0 if x is being ignored.
+ *  @param fraction New y fraction.
+ */
+void
+AutomationLine::drag_motion (nframes_t x, float fraction, bool with_push)
+{
+	int64_t const dx = x - drag_x;
+	drag_distance += dx;
+	drag_x = x;
+
+	double const dy = fraction - _last_drag_fraction;
+
+	_last_drag_fraction = fraction;
+
+	for (list<ControlPoint*>::iterator i = _drag_points.begin(); i != _drag_points.end(); ++i) {
+
+		modify_view_point (
+			**i,
+			trackview.editor().unit_to_frame ((*i)->get_x()) + dx,
+			((_height - (*i)->get_y()) / _height) + dy,
+			(x == 0),
+			with_push
+			);
 	}
 
 	if (line_points.size() > 1) {
 		line->property_points() = line_points;
 	}
 
-	drags++;
+	_drag_had_movement = true;
+	did_push = with_push;
 }
 
+/** Should be called to indicate the end of a drag */
 void
-AutomationLine::end_drag (ControlPoint* cp)
+AutomationLine::end_drag ()
 {
-	if (!drags) {
+	if (!_drag_had_movement) {
 		return;
 	}
 
 	alist->freeze ();
 
-	if (cp) {
-		sync_model_with_view_point (*cp, did_push, drag_distance);
-	} else {
-		sync_model_with_view_line (line_drag_cp1, line_drag_cp2);
-	}
+	sync_model_with_view_points (_drag_points, did_push, drag_distance);
 
 	alist->thaw ();
 
@@ -781,7 +810,6 @@ AutomationLine::end_drag (ControlPoint* cp)
 	trackview.editor().session()->commit_reversible_command ();
 	trackview.editor().session()->set_dirty ();
 }
-
 
 void
 AutomationLine::sync_model_with_view_point (ControlPoint& cp, bool did_push, int64_t distance)
@@ -849,7 +877,6 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp, bool did_push, int
 
 		alist->slide (mr.end, drag_distance);
 	}
-
 }
 
 bool
@@ -1302,7 +1329,7 @@ AutomationLine::add_visible_control_point (uint32_t view_index, uint32_t pi, dou
 		control_points[view_index]->set_can_slide(true);
 		shape = ControlPoint::Full;
 	}
-	
+
 	control_points[view_index]->reset (tx, ty, model, view_index, shape);
 
 	/* finally, control visibility */
@@ -1316,3 +1343,18 @@ AutomationLine::add_visible_control_point (uint32_t view_index, uint32_t pi, dou
 		}
 	}
 }
+
+void
+AutomationLine::add_always_in_view (double x)
+{
+	_always_in_view.push_back (x);
+	alist->apply_to_points (*this, &AutomationLine::reset_callback);
+}
+
+void
+AutomationLine::clear_always_in_view ()
+{
+	_always_in_view.clear ();
+	alist->apply_to_points (*this, &AutomationLine::reset_callback);
+}
+

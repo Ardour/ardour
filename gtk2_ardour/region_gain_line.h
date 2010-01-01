@@ -38,8 +38,8 @@ class AudioRegionGainLine : public AutomationLine
   public:
 	AudioRegionGainLine (const std::string & name, AudioRegionView&, ArdourCanvas::Group& parent, boost::shared_ptr<ARDOUR::AutomationList>);
 
-	void start_drag (ControlPoint*, nframes_t x, float fraction);
-	void end_drag (ControlPoint*);
+	void start_drag_single (ControlPoint*, nframes_t x, float fraction);
+	void end_drag ();
 
 	void remove_point (ControlPoint&);
 

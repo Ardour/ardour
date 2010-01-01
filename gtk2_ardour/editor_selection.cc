@@ -171,6 +171,9 @@ Editor::select_all_tracks ()
 	selection->set (visible_views);
 }
 
+/** Select clicked_routeview, unless there are no currently selected
+ *  tracks, in which case nothing will happen unless `force' is true.
+ */
 void
 Editor::set_selected_track_as_side_effect (bool force)
 {
@@ -1392,4 +1395,12 @@ Editor::deselect_all ()
 	selection->clear ();
 }
 
-
+void
+Editor::select_range_around_region (RegionView* rv)
+{
+	selection->set (&rv->get_time_axis_view());
+	
+	selection->time.clear ();
+	boost::shared_ptr<Region> r = rv->region ();
+	selection->set (r->position(), r->position() + r->length());
+}

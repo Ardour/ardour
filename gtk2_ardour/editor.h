@@ -487,6 +487,19 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Editing::MouseMode mouse_mode;
 	bool _internal_editing;
+	Editing::MouseMode effective_mouse_mode () const;
+
+	enum JoinObjectRangeState {
+		JOIN_OBJECT_RANGE_NONE,
+		/** `join object/range' mode is active and the mouse is over a place where object mode should happen */
+		JOIN_OBJECT_RANGE_OBJECT,
+		/** `join object/range' mode is active and the mouse is over a place where range mode should happen */
+		JOIN_OBJECT_RANGE_RANGE
+	};
+
+	JoinObjectRangeState _join_object_range_state;
+
+	void update_join_object_range_location (double, double);
 
 	int  post_maximal_editor_width;
 	int  post_maximal_pane_position;
@@ -593,6 +606,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool set_selected_regionview_from_map_event (GdkEventAny*, StreamView*, boost::weak_ptr<ARDOUR::Region>);
 	void collect_new_region_view (RegionView *);
 	void collect_and_select_new_region_view (RegionView *);
+
+	void select_range_around_region (RegionView *);
 
 	Gtk::Menu track_context_menu;
 	Gtk::Menu track_region_context_menu;
@@ -1492,7 +1507,6 @@ public:
 	Gtk::Table               toolbar_selection_clock_table;
 	Gtk::Label               toolbar_selection_cursor_label;
 
-	Gtk::HBox                mouse_mode_button_box;
 	Gtkmm2ext::TearOff*      mouse_mode_tearoff;
 	Gtk::ToggleButton         mouse_select_button;
 	Gtk::ToggleButton         mouse_move_button;
@@ -1500,6 +1514,7 @@ public:
 	Gtk::ToggleButton         mouse_zoom_button;
 	Gtk::ToggleButton         mouse_timefx_button;
 	Gtk::ToggleButton         mouse_audition_button;
+	Gtk::ToggleButton         join_object_range_button;
 
 	void                     mouse_mode_toggled (Editing::MouseMode m);
 	bool                     ignore_mouse_mode_toggle;

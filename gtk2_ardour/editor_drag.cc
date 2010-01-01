@@ -40,6 +40,7 @@
 #include "canvas-note.h"
 #include "selection.h"
 #include "midi_selection.h"
+#include "automation_time_axis.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -2466,15 +2467,12 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	// the point doesn't 'jump' to the mouse after the first drag
 	_time_axis_view_grab_x = _point->get_x();
 	_time_axis_view_grab_y = _point->get_y();
+	nframes64_t grab_frame = _editor->pixel_to_frame (_time_axis_view_grab_x);
 
-	_point->line().parent_group().i2w (_time_axis_view_grab_x, _time_axis_view_grab_y);
-	_editor->track_canvas->w2c (_time_axis_view_grab_x, _time_axis_view_grab_y, _time_axis_view_grab_x, _time_axis_view_grab_y);
+	float const fraction = 1 - (_point->get_y() / _point->line().height());
 
-	_time_axis_view_grab_frame = _editor->pixel_to_frame (_time_axis_view_grab_x);
+	_point->line().start_drag_single (_point, grab_frame, fraction);
 
-	_point->line().start_drag (_point, _time_axis_view_grab_frame, 0);
-
-	float fraction = 1.0 - (_point->get_y() / _point->line().height());
 	_editor->set_verbose_canvas_cursor (_point->line().get_verbose_cursor_string (fraction),
 					    event->button.x + 10, event->button.y + 10);
 
@@ -2492,18 +2490,16 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 		dy *= 0.1;
 	}
 
+	/* coordinate in TimeAxisView's space */
 	double cx = _time_axis_view_grab_x + _cumulative_x_drag + dx;
 	double cy = _time_axis_view_grab_y + _cumulative_y_drag + dy;
 
 	// calculate zero crossing point. back off by .01 to stay on the
 	// positive side of zero
-	double _unused = 0;
-	double zero_gain_y = (1.0 - _zero_gain_fraction) * _point->line().height() - .01;
-	_point->line().parent_group().i2w(_unused, zero_gain_y);
+	double const zero_gain_y = (1.0 - _zero_gain_fraction) * _point->line().height() - .01;
 
 	// make sure we hit zero when passing through
-	if ((cy < zero_gain_y and (cy - dy) > zero_gain_y)
-			or (cy > zero_gain_y and (cy - dy) < zero_gain_y)) {
+	if ((cy < zero_gain_y && (cy - dy) > zero_gain_y) || (cy > zero_gain_y && (cy - dy) < zero_gain_y)) {
 		cy = zero_gain_y;
 	}
 
@@ -2517,13 +2513,10 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 	_cumulative_x_drag = cx - _time_axis_view_grab_x;
 	_cumulative_y_drag = cy - _time_axis_view_grab_y;
 
-	_point->line().parent_group().w2i (cx, cy);
-
 	cx = max (0.0, cx);
 	cy = max (0.0, cy);
 	cy = min ((double) _point->line().height(), cy);
 
-	//translate cx to frames
 	nframes64_t cx_frames = _editor->unit_to_frame (cx);
 
 	if (!_x_constrained) {
@@ -2534,7 +2527,7 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 
 	bool const push = Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier);
 
-	_point->line().point_drag (*_point, cx_frames, fraction, push);
+	_point->line().drag_motion (cx_frames, fraction, push);
 
 	_editor->set_verbose_canvas_cursor_text (_point->line().get_verbose_cursor_string (fraction));
 }
@@ -2553,7 +2546,7 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 	} else {
 		motion (event, false);
 	}
-	_point->line().end_drag (_point);
+	_point->line().end_drag ();
 }
 
 bool
@@ -2594,7 +2587,10 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	nframes64_t const frame_within_region = (nframes64_t) floor (cx * _editor->frames_per_unit);
 
-	if (!_line->control_points_adjacent (frame_within_region, _before, _after)) {
+	uint32_t before;
+	uint32_t after;
+	
+	if (!_line->control_points_adjacent (frame_within_region, before, after)) {
 		/* no adjacent points */
 		return;
 	}
@@ -2608,7 +2604,7 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	double fraction = 1.0 - (cy / _line->height());
 
-	_line->start_drag (0, grab_frame(), fraction);
+	_line->start_drag_line (before, after, fraction);
 
 	_editor->set_verbose_canvas_cursor (_line->get_verbose_cursor_string (fraction),
 					    event->button.x + 10, event->button.y + 10);
@@ -2642,7 +2638,8 @@ LineDrag::motion (GdkEvent* event, bool)
 		push = true;
 	}
 
-	_line->line_drag (_before, _after, fraction, push);
+	/* we are ignoring x position for this drag, so we can just pass in 0 */
+	_line->drag_motion (0, fraction, push);
 
 	_editor->set_verbose_canvas_cursor_text (_line->get_verbose_cursor_string (fraction));
 }
@@ -2651,7 +2648,7 @@ void
 LineDrag::finished (GdkEvent* event, bool)
 {
 	motion (event, false);
-	_line->end_drag (0);
+	_line->end_drag ();
 }
 
 void
@@ -2850,6 +2847,8 @@ SelectionDrag::SelectionDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
 	: Drag (e, i)
 	, _operation (o)
 	, _copy (false)
+	, _original_pointer_time_axis (-1)
+	, _last_pointer_time_axis (-1)
 {
 
 }
@@ -2909,6 +2908,8 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	} else {
 		_editor->show_verbose_time_cursor (adjusted_current_frame (event), 10);
 	}
+
+	_original_pointer_time_axis = _editor->trackview_by_y_position (current_pointer_y ()).first->order ();
 }
 
 void
@@ -2918,13 +2919,16 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 	nframes64_t end = 0;
 	nframes64_t length;
 
+	pair<TimeAxisView*, int> const pending_time_axis = _editor->trackview_by_y_position (current_pointer_y ());
+	if (pending_time_axis.first == 0) {
+		return;
+	}
+	
 	nframes64_t const pending_position = adjusted_current_frame (event);
 
-	/* only alter selection if the current frame is
-	   different from the last frame position (adjusted)
-	 */
+	/* only alter selection if things have changed */
 
-	if (pending_position == last_pointer_frame()) {
+	if (pending_time_axis.first->order() == _last_pointer_time_axis && pending_position == last_pointer_frame()) {
 		return;
 	}
 
@@ -2969,8 +2973,36 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 				_editor->clicked_selection = _editor->selection->set (start, end);
 			}
 		}
-		break;
+
+		/* select the track that we're in */
+		if (find (_added_time_axes.begin(), _added_time_axes.end(), pending_time_axis.first) == _added_time_axes.end()) {
+			_editor->selection->add (pending_time_axis.first);
+			_added_time_axes.push_back (pending_time_axis.first);
+		}
+
+		/* deselect any tracks that this drag no longer includes, being careful to only deselect
+		   tracks that we selected in the first place.
+		*/
+		
+		int min_order = min (_original_pointer_time_axis, pending_time_axis.first->order());
+		int max_order = max (_original_pointer_time_axis, pending_time_axis.first->order());
+
+		list<TimeAxisView*>::iterator i = _added_time_axes.begin();
+		while (i != _added_time_axes.end()) {
+
+			list<TimeAxisView*>::iterator tmp = i;
+			++tmp;
+			
+			if ((*i)->order() < min_order || (*i)->order() > max_order) {
+				_editor->selection->remove (*i);
+				_added_time_axes.remove (*i);
+			}
+
+			i = tmp;
+		}
+
 	}
+	break;
 
 	case SelectionStartTrim:
 
@@ -3489,4 +3521,97 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 	} else {
 		region->note_dropped (cnote, drag_delta_x, drag_delta_note);
 	}
+}
+
+AutomationRangeDrag::AutomationRangeDrag (Editor* e, ArdourCanvas::Item* i, list<AudioRange> const & r)
+	: Drag (e, i)
+	, _ranges (r)
+	, _nothing_to_drag (false)
+{
+	_atav = reinterpret_cast<AutomationTimeAxisView*> (_item->get_data ("trackview"));
+	assert (_atav);
+
+	_line = _atav->line ();
+}
+
+void
+AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+{
+	Drag::start_grab (event, cursor);
+
+	list<ControlPoint*> points;
+
+	XMLNode* state = &_line->get_state ();
+	
+	if (_ranges.empty()) {
+		
+		uint32_t const N = _line->npoints ();
+		for (uint32_t i = 0; i < N; ++i) {
+			points.push_back (_line->nth (i));
+		}
+		
+	} else {
+
+		boost::shared_ptr<AutomationList> the_list = _line->the_list ();
+		for (list<AudioRange>::const_iterator j = _ranges.begin(); j != _ranges.end(); ++j) {
+			the_list->add (j->start, the_list->eval (j->start));
+			_line->add_always_in_view (j->start);
+			the_list->add (j->start + 1, the_list->eval (j->start + 1));
+			_line->add_always_in_view (j->start + 1);
+			the_list->add (j->end - 1, the_list->eval (j->end - 1));
+			_line->add_always_in_view (j->end - 1);
+			the_list->add (j->end, the_list->eval (j->end));
+			_line->add_always_in_view (j->end);
+		}
+
+		uint32_t const N = _line->npoints ();
+		AutomationList::const_iterator j = the_list->begin ();
+		for (uint32_t i = 0; i < N; ++i) {
+
+			ControlPoint* p = _line->nth (i);
+
+			list<AudioRange>::const_iterator k = _ranges.begin ();
+			while (k != _ranges.end() && (k->start >= (*j)->when || k->end <= (*j)->when)) {
+				++k;
+			}
+
+			if (k != _ranges.end()) {
+				points.push_back (p);
+			}
+
+			++j;
+		}
+	}
+
+	if (points.empty()) {
+		_nothing_to_drag = true;
+		return;
+	}
+
+	_line->start_drag_multiple (points, 1 - (current_pointer_y() / _line->height ()), state);
+}
+
+void
+AutomationRangeDrag::motion (GdkEvent* event, bool first_move)
+{
+	if (_nothing_to_drag) {
+		return;
+	}
+	
+	float const f = 1 - (current_pointer_y() / _line->height());
+
+	/* we are ignoring x position for this drag, so we can just pass in 0 */
+	_line->drag_motion (0, f, false);
+}
+
+void
+AutomationRangeDrag::finished (GdkEvent* event, bool)
+{
+	if (_nothing_to_drag) {
+		return;
+	}
+	
+	motion (event, false);
+	_line->end_drag ();
+	_line->clear_always_in_view ();
 }

@@ -155,15 +155,6 @@ void
 ControlPoint::set_size (double sz)
 {
 	_size = sz;
-
-#if 0
-	if (_size > 6.0) {
-		item->property_fill() = (gboolean) TRUE;
-	} else {
-		item->property_fill() = (gboolean) FALSE;
-	}
-#endif
-
 	move_to (_x, _y, _shape);
 }
 

@@ -474,7 +474,6 @@ private:
 	ControlPoint* _point;
 	double _time_axis_view_grab_x;
 	double _time_axis_view_grab_y;
-	nframes64_t _time_axis_view_grab_frame;
 	double _cumulative_x_drag;
 	double _cumulative_y_drag;
 	static double const _zero_gain_fraction;
@@ -537,7 +536,7 @@ public:
 	void finished (GdkEvent *, bool);
 };
 
-/** Drag in range select(gc_owner.get()) moAutomatable */
+/** Drag in range select mode */
 class SelectionDrag : public Drag
 {
 public:
@@ -557,6 +556,9 @@ public:
 private:
 	Operation _operation;
 	bool _copy;
+	int _original_pointer_time_axis;
+	int _last_pointer_time_axis;
+	std::list<TimeAxisView*> _added_time_axes;
 };
 
 /** Range marker drag */
@@ -583,15 +585,32 @@ private:
 	bool _copy;
 };
 
-/* Drag of rectangle to set zoom */
+/** Drag of rectangle to set zoom */
 class MouseZoomDrag : public Drag
 {
 public:
-	MouseZoomDrag (Editor *e, ArdourCanvas::Item *i) : Drag (e, i) {}
+	MouseZoomDrag (Editor* e, ArdourCanvas::Item *i) : Drag (e, i) {}
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+};
+
+/** Drag of a range of automation data, changing value but not position */
+class AutomationRangeDrag : public Drag
+{
+public:
+	AutomationRangeDrag (Editor *, ArdourCanvas::Item *, std::list<ARDOUR::AudioRange> const &);
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+
+private:
+	std::list<ARDOUR::AudioRange> _ranges;
+	AutomationTimeAxisView* _atav;
+	boost::shared_ptr<AutomationLine> _line;
+	bool _nothing_to_drag;
 };
 
 #endif /* __gtk2_ardour_editor_drag_h_ */

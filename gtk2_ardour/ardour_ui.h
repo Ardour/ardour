@@ -328,6 +328,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtkmm2ext::TearOff*      transport_tearoff;
 	Gtk::Frame               transport_frame;
 	Gtk::HBox                transport_tearoff_hbox;
+	Gtk::HBox                play_range_hbox;
+	Gtk::VBox                play_range_vbox;
 	Gtk::HBox                transport_hbox;
 	Gtk::Fixed               transport_base;
 	Gtk::Fixed               transport_button_base;
@@ -385,6 +387,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	BindableButton auto_loop_button;
 	BindableButton play_selection_button;
 	BindableButton rec_button;
+	Gtk::ToggleButton join_play_range_button;
 
 	void toggle_external_sync ();
 	void toggle_time_master ();

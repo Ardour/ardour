@@ -683,7 +683,11 @@ Editor::register_actions ()
 	mouse_select_button.set_name ("MouseModeButton");
 	mouse_select_button.get_image ()->show ();
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("Gain Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseGain));
+	join_object_range_button.set_image (*(manage (new Image (::get_icon ("join_tools")))));
+	join_object_range_button.set_name ("MouseModeButton");
+	join_object_range_button.get_image()->show ();
+
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("Gain Tool"), sigc::bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseGain));
 	act->connect_proxy (mouse_gain_button);
 	mouse_gain_button.set_image (*(manage (new Image (::get_icon("tool_gain")))));
 	mouse_gain_button.set_label ("");

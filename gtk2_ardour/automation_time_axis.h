@@ -100,6 +100,10 @@ class AutomationTimeAxisView : public TimeAxisView {
 	boost::shared_ptr<ARDOUR::AutomationControl> control()    { return _control; }
 	boost::shared_ptr<AutomationController>      controller() { return _controller; }
 
+	ArdourCanvas::Item* base_item () const {
+		return _base_rect;
+	}
+
   protected:
 	boost::shared_ptr<ARDOUR::Route> _route; ///< Parent route
 	boost::shared_ptr<ARDOUR::AutomationControl> _control; ///< Control

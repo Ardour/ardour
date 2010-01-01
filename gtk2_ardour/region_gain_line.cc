@@ -50,9 +50,10 @@ AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& 
 }
 
 void
-AudioRegionGainLine::start_drag (ControlPoint* cp, nframes_t x, float fraction)
+AudioRegionGainLine::start_drag_single (ControlPoint* cp, nframes_t x, float fraction)
 {
-	AutomationLine::start_drag (cp, x, fraction);
+	AutomationLine::start_drag_single (cp, x, fraction);
+	
 	if (!rv.audio_region()->envelope_active()) {
 		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &rv.audio_region()->get_state(), 0));
 		rv.audio_region()->set_envelope_active(false);
@@ -85,13 +86,13 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
 }
 
 void
-AudioRegionGainLine::end_drag (ControlPoint* cp)
+AudioRegionGainLine::end_drag ()
 {
 	if (!rv.audio_region()->envelope_active()) {
 		rv.audio_region()->set_envelope_active(true);
 		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), 0, &rv.audio_region()->get_state()));
 	}
 
-	AutomationLine::end_drag(cp);
+	AutomationLine::end_drag ();
 }
 

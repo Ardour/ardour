@@ -220,8 +220,10 @@ show_me_the_size (Requisition* r, const char* what)
 }
 
 Editor::Editor ()
+	: _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
+
 	  /* time display buttons */
-	: minsec_label (_("Mins:Secs"))
+	, minsec_label (_("Mins:Secs"))
 	, bbt_label (_("Bars:Beats"))
 	, timecode_label (_("Timecode"))
 	, frame_label (_("Samples"))
@@ -2314,6 +2316,10 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		}
 	}
 
+	if ((prop = node.property ("join-object-range"))) {
+		join_object_range_button.set_active (string_is_affirmative (prop->value ()));
+	}
+
 	if ((prop = node.property ("edit-point"))) {
 		set_edit_point_preference ((EditPoint) string_2_enum (prop->value(), _edit_point), true);
 	}
@@ -2461,6 +2467,7 @@ Editor::get_state ()
 	node->add_property ("region-list-sort-type", enum2str (_regions->sort_type ()));
 	node->add_property ("mouse-mode", enum2str(mouse_mode));
 	node->add_property ("internal-edit", _internal_editing ? "yes" : "no");
+	node->add_property ("join-object-range", join_object_range_button.get_active () ? "yes" : "no");
 
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
 	if (act) {
@@ -2752,24 +2759,45 @@ Editor::setup_toolbar ()
 	mouse_timefx_button.set_relief(Gtk::RELIEF_NONE);
 	mouse_audition_button.set_relief(Gtk::RELIEF_NONE);
 	// internal_edit_button.set_relief(Gtk::RELIEF_NONE);
+	join_object_range_button.set_relief(Gtk::RELIEF_NONE);
 
 	HBox* mode_box = manage(new HBox);
 	mode_box->set_border_width (2);
 	mode_box->set_spacing(4);
-	mouse_mode_button_box.set_spacing(1);
-	mouse_mode_button_box.pack_start(mouse_move_button, true, true);
-	if (!Profile->get_sae()) {
-		mouse_mode_button_box.pack_start(mouse_select_button, true, true);
-	}
-	mouse_mode_button_box.pack_start(mouse_zoom_button, true, true);
-	if (!Profile->get_sae()) {
-		mouse_mode_button_box.pack_start(mouse_gain_button, true, true);
-	}
-	mouse_mode_button_box.pack_start(mouse_timefx_button, true, true);
-	mouse_mode_button_box.pack_start(mouse_audition_button, true, true);
-	mouse_mode_button_box.pack_start(internal_edit_button, true, true);
-	mouse_mode_button_box.set_homogeneous(true);
 
+	/* table containing mode buttons */
+
+	Table* mouse_mode_button_table = manage (new Table (Profile->get_sae() ? 4 : 6, 2));
+
+	int c = 0;
+
+	if (Profile->get_sae()) {
+		mouse_mode_button_table->attach (mouse_move_button, c, c + 1, 0, 1);
+		++c;
+	} else {
+		mouse_mode_button_table->attach (mouse_move_button, c, c + 1, 0, 1);
+		mouse_mode_button_table->attach (mouse_select_button, c + 1, c + 2, 0, 1);
+		mouse_mode_button_table->attach (join_object_range_button, c, c + 2, 1, 2);
+		c += 2;
+	}
+
+	mouse_mode_button_table->attach (mouse_zoom_button, c, c + 1, 0, 1);
+	++c;
+	
+	if (!Profile->get_sae()) {
+		mouse_mode_button_table->attach (mouse_gain_button, c, c + 1, 0, 1);
+		++c;
+	}
+	
+	mouse_mode_button_table->attach (mouse_timefx_button, c, c + 1, 0, 1);
+	++c;
+	
+	mouse_mode_button_table->attach (mouse_audition_button, c, c + 1, 0, 1);
+	++c;
+	
+	mouse_mode_button_table->attach (internal_edit_button, c, c + 1, 0, 1);
+	++c;
+	
 	vector<string> edit_mode_strings;
 	edit_mode_strings.push_back (edit_mode_to_string (Slide));
 	if (!Profile->get_sae()) {
@@ -2781,8 +2809,8 @@ Editor::setup_toolbar ()
 	set_popdown_strings (edit_mode_selector, edit_mode_strings, true);
 	edit_mode_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::edit_mode_selection_done));
 
-	mode_box->pack_start(edit_mode_selector);
-	mode_box->pack_start(mouse_mode_button_box);
+	mode_box->pack_start (edit_mode_selector);
+	mode_box->pack_start (*mouse_mode_button_table);
 
 	mouse_mode_tearoff = manage (new TearOff (*mode_box));
 	mouse_mode_tearoff->set_name ("MouseModeBase");
@@ -2807,6 +2835,7 @@ Editor::setup_toolbar ()
 	mouse_zoom_button.set_mode (false);
 	mouse_timefx_button.set_mode (false);
 	mouse_audition_button.set_mode (false);
+	join_object_range_button.set_mode (false);
 
 	mouse_move_button.set_name ("MouseModeButton");
 	mouse_select_button.set_name ("MouseModeButton");
@@ -2814,8 +2843,8 @@ Editor::setup_toolbar ()
 	mouse_zoom_button.set_name ("MouseModeButton");
 	mouse_timefx_button.set_name ("MouseModeButton");
 	mouse_audition_button.set_name ("MouseModeButton");
-
 	internal_edit_button.set_name ("MouseModeButton");
+	join_object_range_button.set_name ("MouseModeButton");
 
 	mouse_move_button.unset_flags (CAN_FOCUS);
 	mouse_select_button.unset_flags (CAN_FOCUS);
@@ -2824,6 +2853,7 @@ Editor::setup_toolbar ()
 	mouse_timefx_button.unset_flags (CAN_FOCUS);
 	mouse_audition_button.unset_flags (CAN_FOCUS);
 	internal_edit_button.unset_flags (CAN_FOCUS);
+	join_object_range_button.unset_flags (CAN_FOCUS);
 
 	/* Zoom */
 

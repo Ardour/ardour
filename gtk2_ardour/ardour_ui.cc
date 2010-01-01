@@ -1558,9 +1558,14 @@ ARDOUR_UI::transport_roll ()
 
 	if (_session->get_play_loop()) {
 		_session->request_play_loop (false, true);
-	} else if (_session->get_play_range ()) {
-		_session->request_play_range (false, true);
-	} 
+	} else if (_session->get_play_range () && !join_play_range_button.get_active()) {
+		/* stop playing a range if we currently are */
+		_session->request_play_range (0, true);
+	}
+
+	if (join_play_range_button.get_active()) {
+		_session->request_play_range (&editor->get_selection().time, true);
+	}
 
 	if (!rolling) {
 		_session->request_transport_speed (1.0f);
@@ -1619,6 +1624,10 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		if (rolling) {
 			_session->request_stop (with_abort, true);
 		} else {
+			if (join_play_range_button.get_active()) {
+				_session->request_play_range (&editor->get_selection().time, true);
+			}
+			
 			_session->request_transport_speed (1.0f);
 		}
 	}
@@ -1761,12 +1770,14 @@ ARDOUR_UI::map_transport_state ()
 
 	if (sp != 0.0) {
 
+		/* we're rolling */
+
 		if (_session->get_play_range()) {
 
 			play_selection_button.set_visual_state (1);
 			roll_button.set_visual_state (0);
 			auto_loop_button.set_visual_state (0);
-			
+
 		} else if (_session->get_play_loop ()) {
 			
 			auto_loop_button.set_visual_state (1);
@@ -1778,6 +1789,12 @@ ARDOUR_UI::map_transport_state ()
 			roll_button.set_visual_state (1);
 			play_selection_button.set_visual_state (0);
 			auto_loop_button.set_visual_state (0);
+		}
+
+		if (join_play_range_button.get_active()) {
+			/* light up both roll and play-selection if they are joined */
+			roll_button.set_visual_state (1);
+			play_selection_button.set_visual_state (1);
 		}
 
 		stop_button.set_visual_state (0);
