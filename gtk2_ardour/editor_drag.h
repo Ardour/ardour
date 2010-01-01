@@ -358,6 +358,10 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+	
 private:
 	MeterMarker* _marker;
 	bool _copy;
@@ -372,6 +376,10 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
 
 private:
 	TempoMarker* _marker;
@@ -436,6 +444,10 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+	
 private:
 	void update_item (ARDOUR::Location *);
 
