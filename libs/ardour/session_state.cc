@@ -146,10 +146,8 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	}
 
 	if (Glib::file_test (_path, Glib::FILE_TEST_EXISTS) && ::access (_path.c_str(), W_OK)) {
-		cerr << "Session non-writable based on " << _path << endl;
 		_writable = false;
 	} else {
-		cerr << "Session writable based on " << _path << endl;
 		_writable = true;
 	}
 
@@ -2713,6 +2711,7 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 	case ControllableDescriptor::Gain:
 		c = r->gain_control ();
 		break;
+
 	case ControllableDescriptor::Solo:
 		c = r->solo_control();
 		break;

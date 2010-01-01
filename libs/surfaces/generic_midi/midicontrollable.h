@@ -43,8 +43,8 @@ namespace MIDI {
 class MIDIControllable : public PBD::Stateful
 {
   public:
-	MIDIControllable (MIDI::Port&, PBD::Controllable&, bool bistate = false);
-	MIDIControllable (MIDI::Port&, bool bistate = false);
+	MIDIControllable (MIDI::Port&, PBD::Controllable&, bool momentary);
+	MIDIControllable (MIDI::Port&, bool momentary = false);
 	virtual ~MIDIControllable ();
 
 	int init (const std::string&);
@@ -95,7 +95,7 @@ class MIDIControllable : public PBD::Stateful
 	MIDI::Port&     _port;
 	bool             setting;
 	MIDI::byte       last_value;
-	bool             bistate;
+	bool            _momentary;
 	bool            _is_gain_controller;
 	bool            _learned;
 	int              midi_msg_id;      /* controller ID or note number */

@@ -315,7 +315,7 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	}
 
 	if (!mc) {
-		mc = new MIDIControllable (*_port, *c);
+		mc = new MIDIControllable (*_port, *c, false);
 	}
 	
 	{
@@ -410,7 +410,7 @@ GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos,
 		MIDI::byte value = control_number;
 		
 		// Create a MIDIControllable
-		MIDIControllable* mc = new MIDIControllable (*_port, *control);
+		MIDIControllable* mc = new MIDIControllable (*_port, *control, false);
 
 		// Remove any old binding for this midi channel/type/value pair
 		// Note:  can't use delete_binding() here because we don't know the specific controllable we want to remove, only the midi information
@@ -520,7 +520,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 				c = session->controllable_by_id (id);
 				
 				if (c) {
-					MIDIControllable* mc = new MIDIControllable (*_port, *c);
+					MIDIControllable* mc = new MIDIControllable (*_port, *c, false);
 
 					if (mc->set_state (**niter, version) == 0) {
 						controllables.push_back (mc);
@@ -655,6 +655,7 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 	string uri;
 	MIDI::eventType ev;
 	int intval;
+	bool momentary;
 
 	if ((prop = node.property (X_("ctl"))) != 0) {
 		ev = MIDI::controller;
@@ -684,11 +685,17 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 	if (channel > 0) {
 		channel -= 1;
 	}
+
+	if ((prop = node.property (X_("momentary"))) != 0) {
+		momentary = string_is_affirmative (prop->value());
+	} else {
+		momentary = false;
+	}
 	
 	prop = node.property (X_("uri"));
 	uri = prop->value();
 
-	MIDIControllable* mc = new MIDIControllable (*_port, false);
+	MIDIControllable* mc = new MIDIControllable (*_port, momentary);
 
 	if (mc->init (uri)) {
 		delete mc;

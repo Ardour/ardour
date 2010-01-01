@@ -2852,14 +2852,30 @@ void
 Route::SoloControllable::set_value (float val)
 {
 	bool bval = ((val >= 0.5f) ? true: false);
+# if 0
+	this is how it should be done 
 
+	boost::shared_ptr<RouteList> rl (new RouteList);
+	rl->push_back (route);
+
+	if (Config->get_solo_control_is_listen_control()) {
+		_session.set_listen (rl, bval);
+	} else {
+		_session.set_solo (rl, bval);
+	}
+#else
 	route.set_solo (bval, this);
+#endif
 }
 
 float
 Route::SoloControllable::get_value (void) const
 {
-	return route.self_soloed() ? 1.0f : 0.0f;
+	if (Config->get_solo_control_is_listen_control()) {
+		return route.listening() ? 1.0f : 0.0f;
+	} else {
+		return route.self_soloed() ? 1.0f : 0.0f;
+	}
 }
 
 void

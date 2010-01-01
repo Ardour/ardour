@@ -49,18 +49,6 @@ ControllableDescriptor::set (const std::string& str)
 		return -1;
 	}
 
-	cerr << "Path: " << endl;
-	for (vector<string>::iterator x = path.begin(); x != path.end(); ++x) {
-		cerr << '[' << (*x) << "] ";
-	} 
-	cerr << endl;
-
-	cerr << "Rest: " << endl;
-	for (vector<string>::iterator x = rest.begin(); x != rest.end(); ++x) {
-		cerr << '[' << (*x) << "] ";
-	} 
-	cerr << endl;
-
 	if (path[0] == "route" || path[0] == "rid") {
 
 		_top_level_type = RemoteControlID;

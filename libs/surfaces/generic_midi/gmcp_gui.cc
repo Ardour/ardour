@@ -5,6 +5,8 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/label.h>
 #include <gtkmm/box.h>
+#include <gtkmm/adjustment.h>
+#include <gtkmm/spinbutton.h>
 
 #include "gtkmm2ext/utils.h"
 
@@ -21,8 +23,11 @@ public:
 private:
     GenericMidiControlProtocol& cp;
     Gtk::ComboBoxText map_combo;
+    Gtk::Adjustment bank_adjustment;
+    Gtk::SpinButton bank_spinner;
 
     void binding_changed ();
+    void bank_change ();
 };
 
 using namespace PBD;
@@ -56,6 +61,8 @@ GenericMidiControlProtocol::build_gui ()
 
 GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 	: cp (p)
+	, bank_adjustment (1, 1, 100, 1, 10)
+	, bank_spinner (bank_adjustment)
 {
 	vector<string> popdowns;
 	popdowns.push_back (_("Reset All"));
@@ -74,6 +81,7 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 
 	map_combo.signal_changed().connect (sigc::mem_fun (*this, &GMCPGUI::binding_changed));
 
+	set_spacing (6);
 	set_border_width (12);
 
 	Label* label = manage (new Label (_("Available MIDI bindings:")));
@@ -83,15 +91,40 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 	hpack->pack_start (*label, false, false);
 	hpack->pack_start (map_combo, false, false);
 
-	pack_start (*hpack, false, false);
-
 	map_combo.show ();
 	label->show ();
 	hpack->show ();
+	
+	pack_start (*hpack, false, false);
+
+
+	bank_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &GMCPGUI::bank_change));
+
+	label = manage (new Label (_("Current Bank:")));
+	hpack = manage (new HBox);
+
+	hpack->set_spacing (6);
+	hpack->pack_start (*label, false, false);
+	hpack->pack_start (bank_spinner, false, false);
+
+
+	bank_spinner.show ();
+	label->show ();
+	hpack->show ();
+
+	pack_start (*hpack, false, false);
+
 }
 
 GMCPGUI::~GMCPGUI ()
 {
+}
+
+void
+GMCPGUI::bank_change ()
+{
+	int new_bank = bank_adjustment.get_value() - 1;
+	cp.set_current_bank (new_bank);
 }
 
 void
