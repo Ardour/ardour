@@ -767,9 +767,16 @@ AutomationLine::drag_motion (nframes_t x, float fraction, bool with_push)
 	drag_distance += dx;
 	drag_x = x;
 
-	double const dy = fraction - _last_drag_fraction;
-
+	double dy = fraction - _last_drag_fraction;
 	_last_drag_fraction = fraction;
+
+	/* clamp y so that the "lowest" point hits the bottom but goes no further */
+	for (list<ControlPoint*>::iterator i = _drag_points.begin(); i != _drag_points.end(); ++i) {
+		double const y = ((_height - (*i)->get_y()) / _height) + dy;
+		if (y < 0) {
+			dy -= y;
+		}
+	}
 
 	for (list<ControlPoint*>::iterator i = _drag_points.begin(); i != _drag_points.end(); ++i) {
 
