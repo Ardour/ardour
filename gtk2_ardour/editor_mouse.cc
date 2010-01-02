@@ -612,6 +612,28 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		break;
 	}
 
+	if (_join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
+		/* special case: allow trim of range selections in joined object mode;
+		   in theory eff should equal MouseRange in this case, but it doesn't
+		   because entering the range selection canvas item results in entered_regionview
+		   being set to 0, so update_join_object_range_location acts as if we aren't
+		   over a region.
+		*/
+		switch (item_type) {
+		case StartSelectionTrimItem:
+			assert (_drag == 0);
+			_drag = new SelectionDrag (this, item, SelectionDrag::SelectionStartTrim);
+			_drag->start_grab (event);
+			break;
+
+		case EndSelectionTrimItem:
+			assert (_drag == 0);
+			_drag = new SelectionDrag (this, item, SelectionDrag::SelectionEndTrim);
+			_drag->start_grab (event);
+			break;
+		}
+	}
+
 	Editing::MouseMode eff = effective_mouse_mode ();
 
 	switch (eff) {
@@ -770,15 +792,8 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				
 			case AutomationTrackItem:
 				assert (_drag == 0);
-				
-				if (join_object_range_button.get_active()) {
-					/* smart "join" mode: drag automation */
-					_drag = new AutomationRangeDrag (this, item, selection->time);
-				} else {
-					/* otherwise: rubberband drag to select automation points */
-					_drag = new RubberbandSelectDrag (this, item);
-				}
-				
+				/* rubberband drag to select automation points */
+				_drag = new RubberbandSelectDrag (this, item);
 				_drag->start_grab (event);
 				break;
 
@@ -2681,7 +2696,7 @@ Editor::update_join_object_range_location (double x, double y)
 		_join_object_range_state = JOIN_OBJECT_RANGE_NONE;
 		return;
 	}
-	
+
 	if (entered_regionview) {
 
 		double cx = x;

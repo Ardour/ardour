@@ -2880,8 +2880,7 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		if (_editor->clicked_axisview) {
 			_editor->clicked_axisview->order_selection_trims (_item, true);
 		}
-		Drag::start_grab (event, cursor);
-		cursor = _editor->trimmer_cursor;
+		Drag::start_grab (event, _editor->trimmer_cursor);
 		start = _editor->selection->time[_editor->clicked_selection].start;
 		_pointer_frame_offset = grab_frame() - start;
 		break;
@@ -2890,8 +2889,7 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		if (_editor->clicked_axisview) {
 			_editor->clicked_axisview->order_selection_trims (_item, false);
 		}
-		Drag::start_grab (event, cursor);
-		cursor = _editor->trimmer_cursor;
+		Drag::start_grab (event, _editor->trimmer_cursor);
 		end = _editor->selection->time[_editor->clicked_selection].end;
 		_pointer_frame_offset = grab_frame() - end;
 		break;
@@ -3554,12 +3552,26 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 		boost::shared_ptr<AutomationList> the_list = _line->the_list ();
 		for (list<AudioRange>::const_iterator j = _ranges.begin(); j != _ranges.end(); ++j) {
+
+			/* fade into and out of the region that we're dragging;
+			   64 samples length plucked out of thin air.
+			*/
+			nframes64_t const h = (j->start + j->end) / 2;
+			nframes64_t a = j->start + 64;
+			if (a > h) {
+				a = h;
+			}
+			nframes64_t b = j->end - 64;
+			if (b < h) {
+				b = h;
+			}
+			
 			the_list->add (j->start, the_list->eval (j->start));
 			_line->add_always_in_view (j->start);
-			the_list->add (j->start + 1, the_list->eval (j->start + 1));
-			_line->add_always_in_view (j->start + 1);
-			the_list->add (j->end - 1, the_list->eval (j->end - 1));
-			_line->add_always_in_view (j->end - 1);
+			the_list->add (a, the_list->eval (a));
+			_line->add_always_in_view (a);
+			the_list->add (b, the_list->eval (b));
+			_line->add_always_in_view (b);
 			the_list->add (j->end, the_list->eval (j->end));
 			_line->add_always_in_view (j->end);
 		}
