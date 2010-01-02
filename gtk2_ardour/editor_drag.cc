@@ -3577,21 +3577,18 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		}
 
 		uint32_t const N = _line->npoints ();
-		AutomationList::const_iterator j = the_list->begin ();
 		for (uint32_t i = 0; i < N; ++i) {
 
 			ControlPoint* p = _line->nth (i);
 
-			list<AudioRange>::const_iterator k = _ranges.begin ();
-			while (k != _ranges.end() && (k->start >= (*j)->when || k->end <= (*j)->when)) {
-				++k;
+			list<AudioRange>::const_iterator j = _ranges.begin ();
+			while (j != _ranges.end() && (j->start >= (*p->model())->when || j->end <= (*p->model())->when)) {
+				++j;
 			}
 
-			if (k != _ranges.end()) {
+			if (j != _ranges.end()) {
 				points.push_back (p);
 			}
-
-			++j;
 		}
 	}
 

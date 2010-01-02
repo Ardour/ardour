@@ -770,11 +770,16 @@ AutomationLine::drag_motion (nframes_t x, float fraction, bool with_push)
 	double dy = fraction - _last_drag_fraction;
 	_last_drag_fraction = fraction;
 
-	/* clamp y so that the "lowest" point hits the bottom but goes no further */
+	/* clamp y so that the "lowest" point hits the bottom but goes no further
+	   and similarly with the "highest" and the top
+	*/
 	for (list<ControlPoint*>::iterator i = _drag_points.begin(); i != _drag_points.end(); ++i) {
 		double const y = ((_height - (*i)->get_y()) / _height) + dy;
 		if (y < 0) {
 			dy -= y;
+		}
+		if (y > 1) {
+			dy -= (y - 1);
 		}
 	}
 
@@ -1072,8 +1077,9 @@ AutomationLine::set_selected_points (PointSelection& points)
 
 }
 
-void AutomationLine::set_colors() {
-	set_line_color( ARDOUR_UI::config()->canvasvar_AutomationLine.get() );
+void AutomationLine::set_colors()
+{
+	set_line_color (ARDOUR_UI::config()->canvasvar_AutomationLine.get());
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		(*i)->show_color (false, !points_visible);
 	}
