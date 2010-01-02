@@ -619,18 +619,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		   being set to 0, so update_join_object_range_location acts as if we aren't
 		   over a region.
 		*/
-		switch (item_type) {
-		case StartSelectionTrimItem:
+		if (item_type == StartSelectionTrimItem) {
 			assert (_drag == 0);
 			_drag = new SelectionDrag (this, item, SelectionDrag::SelectionStartTrim);
 			_drag->start_grab (event);
-			break;
-
-		case EndSelectionTrimItem:
+		} else if (item_type == EndSelectionTrimItem) {
 			assert (_drag == 0);
 			_drag = new SelectionDrag (this, item, SelectionDrag::SelectionEndTrim);
 			_drag->start_grab (event);
-			break;
 		}
 	}
 
