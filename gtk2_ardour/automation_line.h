@@ -104,9 +104,6 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	ArdourCanvas::Item&  parent_group() const { return _parent_group; }
 	ArdourCanvas::Item&  grab_item() const { return *line; }
 
-	void show_selection();
-	void hide_selection ();
-
 	std::string get_verbose_cursor_string (double) const;
 	std::string fraction_to_string (double) const;
 	double string_to_fraction (std::string const &) const;

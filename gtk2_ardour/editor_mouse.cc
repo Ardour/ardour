@@ -1441,7 +1441,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			double at_x, at_y;
 			at_x = cp->get_x();
 			at_y = cp->get_y ();
-			cp->item()->i2w (at_x, at_y);
+			cp->i2w (at_x, at_y);
 			at_x += 10.0;
 			at_y += 10.0;
 

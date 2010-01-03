@@ -816,8 +816,9 @@ AutomationTimeAxisView::get_inverted_selectables (Selection& sel, list<Selectabl
 void
 AutomationTimeAxisView::set_selected_points (PointSelection& points)
 {
-	if (_line)
+	if (_line) {
 		_line->set_selected_points (points);
+	}
 }
 
 void

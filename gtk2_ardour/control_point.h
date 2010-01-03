@@ -62,10 +62,11 @@ class ControlPoint
 
 	void hide ();
 	void show ();
-	void show_color (bool entered, bool hide_too);
+	void set_color ();
 
 	void set_size (double);
 	void set_visible (bool);
+	bool visible () const;
 
 	bool     can_slide() const          { return _can_slide; }
 	void     set_can_slide(bool yn)     { _can_slide = yn; }
@@ -74,11 +75,12 @@ class ControlPoint
 	uint32_t view_index() const         { return _view_index; }
 	void     set_view_index(uint32_t i) { _view_index = i; }
 
+	void i2w (double &, double &) const;
+
 	ARDOUR::AutomationList::iterator model() const { return _model; }
 	AutomationLine&                  line()  const { return _line; }
-	ArdourCanvas::Item*              item()  const { return _item; }
 
-  protected:
+  private:
 	ArdourCanvas::SimpleRect* _item;
 
 	AutomationLine& _line;
@@ -90,7 +92,6 @@ class ControlPoint
 
 	virtual bool event_handler (GdkEvent*);
 
-  private:
 	double    _x;
 	double    _y;
 	double    _size;

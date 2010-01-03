@@ -20,7 +20,6 @@ enum {
 	PROP_FILL_COLOR_RGBA,
 	PROP_OUTLINE_COLOR_RGBA,
 	PROP_DRAW
-
 };
 
 static void   gnome_canvas_simplerect_class_init    (GnomeCanvasSimpleRectClass *class);
@@ -255,7 +254,6 @@ gnome_canvas_simplerect_bounds (GnomeCanvasItem *item, double *x1, double *y1, d
 	*y1 = simplerect->y1;
 	*x2 = simplerect->x2 + 1;
 	*y2 = simplerect->y2 + 1;
-
 }
 
 
@@ -456,7 +454,23 @@ gnome_canvas_simplerect_set_property (GObject      *object,
 		break;
 	}
 
-	simplerect->full_draw_on_update = update;
+	if (!simplerect->full_draw_on_update) {
+		/* XXX: not sure about this;
+		 *
+		 * I changed the next line to be conditional, rather than always
+		 * being executed.  Without the condition, the following bug occurs:
+		 *
+		 * caller sets a property (e.g. outline colour); this sets update = TRUE and hence full_draw_on_update = TRUE
+		 * update is requested (and it is intended, I suppose, that during this update, full_draw_on_update is noted)
+		 * ... update does not occur before ...
+		 * caller sets the same property again to the same value; this sets update = FALSE and hence full_draw_on_update = FALSE
+		 * update now occurs, but full_draw_on_update is FALSE, so the full redraw does not happen,
+		 * which results in graphical glitches.
+		 *
+		 * (Carl, 2/1/2010)
+		 */
+		simplerect->full_draw_on_update = update;
+	}
 
 	if (update || bounds_changed) {
 		gnome_canvas_item_request_update (GNOME_CANVAS_ITEM(object));

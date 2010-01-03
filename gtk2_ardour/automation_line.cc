@@ -592,7 +592,6 @@ AutomationLine::determine_visible_control_points (ALPoints& points)
 	}
 
 	set_selected_points (trackview.editor().get_selection().points);
-
 }
 
 string
@@ -672,7 +671,9 @@ AutomationLine::invalidate_point (ALPoints& p, uint32_t index)
 	p[index].y = DBL_MAX;
 }
 
-/** Start dragging a single point.
+/** Start dragging a single point, possibly adding others if the supplied point is selected and there
+ *  are other selected points.
+ *
  *  @param cp Point to drag.
  *  @param x Initial x position (frames).
  *  @param fraction Initial y position (as a fraction of the track height, where 0 is the bottom and 1 the top)
@@ -685,6 +686,15 @@ AutomationLine::start_drag_single (ControlPoint* cp, nframes_t x, float fraction
 
 	_drag_points.clear ();
 	_drag_points.push_back (cp);
+
+	if (cp->selected ()) {
+		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+			if (*i != cp && (*i)->selected()) {
+				_drag_points.push_back (*i);
+			}
+		}
+	}
+	
 	start_drag_common (x, fraction);
 }
 
@@ -1034,7 +1044,7 @@ AutomationLine::set_selected_points (PointSelection& points)
 	double bot;
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-			(*i)->set_selected(false);
+		(*i)->set_selected(false);
 	}
 
 	if (points.empty()) {
@@ -1071,49 +1081,15 @@ AutomationLine::set_selected_points (PointSelection& points)
 	}
 
   out:
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		(*i)->show_color (false, !points_visible);
-	}
-
+	set_colors ();
 }
 
-void AutomationLine::set_colors()
+void AutomationLine::set_colors ()
 {
 	set_line_color (ARDOUR_UI::config()->canvasvar_AutomationLine.get());
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		(*i)->show_color (false, !points_visible);
+		(*i)->set_color ();
 	}
-}
-
-void
-AutomationLine::show_selection ()
-{
-	TimeSelection& time (trackview.editor().get_selection().time);
-
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-
-		(*i)->set_selected(false);
-
-		for (list<AudioRange>::iterator r = time.begin(); r != time.end(); ++r) {
-			double rstart, rend;
-
-			rstart = trackview.editor().frame_to_unit ((*r).start);
-			rend = trackview.editor().frame_to_unit ((*r).end);
-
-			if ((*i)->get_x() >= rstart && (*i)->get_x() <= rend) {
-				(*i)->set_selected(true);
-				break;
-			}
-		}
-
-		(*i)->show_color (false, !points_visible);
-	}
-}
-
-void
-AutomationLine::hide_selection ()
-{
-//	show_selection ();
 }
 
 void
@@ -1201,9 +1177,10 @@ AutomationLine::show_all_control_points ()
 	points_visible = true;
 
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		(*i)->show_color((_interpolation != AutomationList::Discrete), false);
-		(*i)->show ();
-		(*i)->set_visible (true);
+		if (!(*i)->visible()) {
+			(*i)->show ();
+			(*i)->set_visible (true);
+		}
 	}
 }
 
