@@ -249,8 +249,15 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool /*n
 
 	x1 = pixel_to_frame (clicked_control_point->get_x() - 10);
 	x2 = pixel_to_frame (clicked_control_point->get_x() + 10);
- 	y1 = clicked_control_point->get_x() - 10;
+ 	y1 = clicked_control_point->get_y() - 10;
 	y2 = clicked_control_point->get_y() + 10;
+
+	/* convert the y values to trackview space */
+	double dummy = 0;
+	clicked_control_point->line().parent_group().i2w (dummy, y1);
+	clicked_control_point->line().parent_group().i2w (dummy, y2);
+	_trackview_group->w2i (dummy, y1);
+	_trackview_group->w2i (dummy, y2);
 
 	return select_all_within (x1, x2, y1, y2, selection->tracks, op);
 }
@@ -958,6 +965,9 @@ Editor::invert_selection ()
 	selection->set (touched);
 }
 
+/** @param top Top (lower) y limit in trackview coordinates.
+ *  @param bottom Bottom (higher) y limit in trackview coordinates.
+ */
 bool
 Editor::select_all_within (nframes64_t start, nframes64_t end, double top, double bot, const TrackViewList& tracklist, Selection::Operation op)
 {
