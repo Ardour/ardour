@@ -296,7 +296,7 @@ Diskstream::get_captured_frames (uint32_t n)
 	if (capture_info.size() > n) {
 		return capture_info[n]->frames;
 	}
-	else {
+	else {  
 		return capture_captured;
 	}
 }
@@ -525,7 +525,11 @@ Diskstream::check_record_status (nframes_t transport_frame, nframes_t /*nframes*
 			/* was stopped, now rolling (and recording) */
 
 			if (_alignment_style == ExistingMaterial) {
+			  
 				first_recordable_frame += _session.worst_output_latency();
+				
+				DEBUG_TRACE (DEBUG::Latency, string_compose ("Offset rec from stop. Capture offset: %1 Worst O/P Latency: %2 Roll Delay: %3 First Recordable Frame: %4 Transport Frame: %5\n",
+									     _capture_offset, _session.worst_output_latency(), _roll_delay, first_recordable_frame, transport_frame));
 			} else {
 				first_recordable_frame += _roll_delay;
 			}
@@ -536,34 +540,23 @@ Diskstream::check_record_status (nframes_t transport_frame, nframes_t /*nframes*
 
 			if (_alignment_style == ExistingMaterial) {
 
-
-				if (!_session.config.get_punch_in()) {
-
-					/* manual punch in happens at the correct transport frame
-					   because the user hit a button. but to get alignment correct
-					   we have to back up the position of the new region to the
-					   appropriate spot given the roll delay.
-					*/
-
-					capture_start_frame -= _roll_delay;
-
-					/* XXX paul notes (august 2005): i don't know why
-					   this is needed.
-					*/
-
-					first_recordable_frame += _capture_offset;
-
-				} else {
-
-					/* autopunch toggles recording at the precise
-					   transport frame, and then the DS waits
-					   to start recording for a time that depends
-					   on the output latency.
-					*/
-
-					first_recordable_frame += _session.worst_output_latency();
-				}
-
+				/* manual punch in happens at the correct transport frame
+				   because the user hit a button. but to get alignment correct
+				   we have to back up the position of the new region to the
+				   appropriate spot given the roll delay.
+				*/
+				
+				
+				/* autopunch toggles recording at the precise
+				   transport frame, and then the DS waits
+				   to start recording for a time that depends
+				   on the output latency.
+				*/
+				
+				first_recordable_frame += _session.worst_output_latency();
+				
+				DEBUG_TRACE (DEBUG::Latency, string_compose ("Punch in manual/auto. Capture offset: %1 Worst O/P Latency: %2 Roll Delay: %3 First Recordable Frame: %4 Transport Frame: %5\n",
+									     _capture_offset, _session.worst_output_latency(), _roll_delay, first_recordable_frame, transport_frame));
 			} else {
 
 				if (_session.config.get_punch_in()) {
@@ -589,7 +582,11 @@ Diskstream::check_record_status (nframes_t transport_frame, nframes_t /*nframes*
 			last_recordable_frame += _roll_delay;
 		}
 		
-		first_recordable_frame = max_frames;
+		//first_recordable_frame = max_frames;
+		
+		DEBUG_TRACE (DEBUG::Latency, string_compose ("Stop record - %6 | %7. Capture offset: %1 Worst O/P Latency: %2 Roll Delay: %3 First Recordable Frame: %4 Transport Frame: %5\n",
+							     _capture_offset, _session.worst_output_latency(), _roll_delay, first_recordable_frame, transport_frame,
+							     can_record, record_enabled()));
 	}
 
 	last_possibly_recording = possibly_recording;

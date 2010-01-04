@@ -118,4 +118,5 @@ ARDOUR::list_debug_options ()
 	cerr << "\tSlave" << endl;
 	cerr << "\tSessionEvents" << endl;
 	cerr << "\tMidiIO" << endl;
+	cerr << "\tLatencyCompensation" << endl;
 }
