@@ -297,7 +297,7 @@ BasicUI::sample_to_timecode (nframes_t sample, Timecode::Time& timecode, bool us
 }
 
 #if 0
-this stuff is waiting to go in so that all UI's can offer complex solo/mute functionality
+this stuff is waiting to go in so that all UIs can offer complex solo/mute functionality
 
 void
 BasicUI::solo_release (boost::shared_ptr<Route> r)
