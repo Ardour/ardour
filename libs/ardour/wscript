@@ -64,6 +64,7 @@ libardour_sources = [
 	'chan_count.cc',
 	'chan_mapping.cc',
 	'configuration.cc',
+	'config_text.cc',
 	'control_protocol_manager.cc',
 	'control_protocol_search_path.cc',
 	'crossfade.cc',

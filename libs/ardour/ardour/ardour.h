@@ -54,6 +54,7 @@ namespace ARDOUR {
 	bool no_auto_connect ();
 
 	std::string get_ardour_revision ();
+	extern const char* const ardour_config_info;
 
 	void find_bindings_files (std::map<std::string,std::string>&);
 

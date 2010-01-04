@@ -308,7 +308,7 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	MIDIControllable* mc = 0;
 
 	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ++i) {
-		if ((*i)->get_controllable()->id() == c->id()) {
+		if ((*i)->get_controllable() && ((*i)->get_controllable()->id() == c->id())) {
 			mc = *i;
 			break;
 		}

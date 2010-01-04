@@ -528,6 +528,38 @@ def configure(conf):
 	autowaf.display_msg(conf, 'C Compiler flags', conf.env['CCFLAGS'])
 	autowaf.display_msg(conf, 'C++ Compiler flags', conf.env['CXXFLAGS'])
 
+	# and dump the same stuff to a file for use in the build
+
+	config_text = open ('libs/ardour/config_text.cc',"w")
+	config_text.write ('#include "ardour/ardour.h"\n\nnamespace ARDOUR {\nconst char* const ardour_config_info = "\\n\\\n')
+	config_text.write ("Install prefix "); config_text.write (str (conf.env['PREFIX'])); config_text.write ("\\n\\\n")
+	config_text.write ("Debuggable build "); config_text.write (str (str(conf.env['DEBUG']))); config_text.write ("\\n\\\n")
+	config_text.write ("Strict compiler flags "); config_text.write (str (str(conf.env['STRICT']))); config_text.write ("\\n\\\n")
+	config_text.write ("Build documentation "); config_text.write (str (str(conf.env['BUILD_DOCS']))); config_text.write ("\\n\\\n")
+	config_text.write ('Build Target '); config_text.write (str (conf.env['build_target'])); config_text.write ("\\n\\\n")
+	config_text.write ('Architecture flags '); config_text.write (str (opts.arch)); config_text.write ("\\n\\\n")
+	config_text.write ('Aubio '); config_text.write (str (bool(conf.env['HAVE_AUBIO']))); config_text.write ("\\n\\\n")
+	config_text.write ('AudioUnits '); config_text.write (str (opts.audiounits)); config_text.write ("\\n\\\n")
+	config_text.write ('CoreAudio '); config_text.write (str (bool(conf.env['HAVE_COREAUDIO']))); config_text.write ("\\n\\\n")
+	config_text.write ('FPU Optimization '); config_text.write (str (opts.fpu_optimization)); config_text.write ("\\n\\\n")
+	config_text.write ('Freedesktop Files '); config_text.write (str (opts.freedesktop)); config_text.write ("\\n\\\n")
+	config_text.write ('Freesound '); config_text.write (str (opts.freesound)); config_text.write ("\\n\\\n")
+	config_text.write ('GtkOSX '); config_text.write (str (opts.gtkosx)); config_text.write ("\\n\\\n")
+	config_text.write ('LV2 Support '); config_text.write (str (bool(conf.env['HAVE_SLV2']))); config_text.write ("\\n\\\n")
+	config_text.write ('Rubberband '); config_text.write (str (bool(conf.env['HAVE_RUBBERBAND']))); config_text.write ("\\n\\\n")
+	config_text.write ('Samplerate '); config_text.write (str (bool(conf.env['HAVE_SAMPLERATE']))); config_text.write ("\\n\\\n")
+	config_text.write ('Soundtouch '); config_text.write (str (bool(conf.env['HAVE_SOUNDTOUCH']))); config_text.write ("\\n\\\n")
+	config_text.write ('Translation '); config_text.write (str (opts.nls)); config_text.write ("\\n\\\n")
+	config_text.write ('Tranzport '); config_text.write (str (opts.tranzport)); config_text.write ("\\n\\\n")
+	config_text.write ('Universal Binary '); config_text.write (str (opts.universal)); config_text.write ("\\n\\\n")
+	config_text.write ('VST Support '); config_text.write (str (opts.vst)); config_text.write ("\\n\\\n")
+	config_text.write ('Wiimote Support '); config_text.write (str (opts.wiimote)); config_text.write ("\\n\\\n")
+	config_text.write ('Windows Key '); config_text.write (str (opts.windows_key)); config_text.write ("\\n\\\n")
+	config_text.write ('C Compiler flags '); config_text.write (str (conf.env['CCFLAGS'])); config_text.write ("\\n\\\n")
+	config_text.write ('C++ Compiler flags '); config_text.write (str (conf.env['CXXFLAGS'])); config_text.write ("\\n\\\n")
+	config_text.write ('";}\n')
+	config_text.close ()
+
 def build(bld):
 	autowaf.set_recursive()
 	if sys.platform == 'darwin':

@@ -36,6 +36,7 @@
 #include "version.h"
 
 #include "about.h"
+#include "configinfo.h"
 #include "rgb_macros.h"
 #include "ardour_ui.h"
 
@@ -185,8 +186,9 @@ static const char* translators[] = {
 
 
 About::About ()
+	: config_info (0)
 #ifdef WITH_PAYMENT_OPTIONS
-	: paypal_pixmap (paypal_xpm)
+	, paypal_pixmap (paypal_xpm)
 #endif
 {
 	// set_type_hint(Gdk::WINDOW_TYPE_HINT_SPLASHSCREEN);
@@ -218,11 +220,14 @@ About::About ()
 		       "under certain conditions; see the file COPYING for details.\n"));
 	set_name (X_("ardour"));
 	set_website (X_("http://ardour.org/"));
-	set_website_label (_("visit http://www.ardour.org/"));
+	set_website_label (_("visit http://ardour.org/"));
 	set_version ((string_compose(_("%1\n(built from revision %2)"),
 				     VERSIONSTRING,
 				     svn_revision)));
 
+	Gtk::Button* config_button = manage (new Button (_("Config")));
+	get_action_area()->pack_start (*config_button, false, false);
+	config_button->signal_clicked().connect (mem_fun (*this, &About::show_config_info));
 
 #ifdef WITH_PAYMENT_OPTIONS
 	paypal_button.add (paypal_pixmap);
@@ -237,6 +242,16 @@ About::About ()
 
 About::~About ()
 {
+}
+
+void
+About::show_config_info ()
+{
+	if (!config_info) {
+		config_info = new ConfigInfoDialog;
+	}
+
+	config_info->present ();
 }
 
 #ifdef WITH_PAYMENT_OPTIONS

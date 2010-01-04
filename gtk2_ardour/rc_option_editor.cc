@@ -778,7 +778,8 @@ public:
 
 		_box->pack_start (_view, false, false);
 
-		Label* label = manage (new Label (_("Double-click on a name to edit settings for an enabled protocol")));
+		Label* label = manage (new Label);
+		label->set_markup (string_compose (X_("<i>%1</i>"), _("Double-click on a name to edit settings for an enabled protocol")));
 
 		_box->pack_start (*label, false, false);
 		label->show ();

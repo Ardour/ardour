@@ -22,13 +22,17 @@
 
 #include <gtkmm/aboutdialog.h>
 
-class ARDOUR_UI;
+class ConfigInfoDialog;
 
 class About : public Gtk::AboutDialog
 {
   public:
 	About ();
 	~About ();
+
+  private:
+	ConfigInfoDialog* config_info;
+	void show_config_info ();
 
 #ifdef WITH_PAYMENT_OPTIONS
 	Gtk::Image      paypal_pixmap;
