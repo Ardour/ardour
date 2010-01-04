@@ -33,12 +33,6 @@ class About : public Gtk::AboutDialog
   private:
 	ConfigInfoDialog* config_info;
 	void show_config_info ();
-
-#ifdef WITH_PAYMENT_OPTIONS
-	Gtk::Image      paypal_pixmap;
-	Gtk::Button      paypal_button;
-	void goto_paypal ();
-#endif
 };
 
 #endif /* __ardour_gtk_about_h__ */

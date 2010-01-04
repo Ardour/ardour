@@ -228,20 +228,11 @@ About::About ()
 	Gtk::Button* config_button = manage (new Button (_("Config")));
 	get_action_area()->pack_start (*config_button, false, false);
 	config_button->signal_clicked().connect (mem_fun (*this, &About::show_config_info));
-
-#ifdef WITH_PAYMENT_OPTIONS
-	paypal_button.add (paypal_pixmap);
-
-	HBox *payment_box = manage (new HBox);
-	payment_box->pack_start (paypal_button, true, false);
-
-	subvbox.pack_start (*payment_box, false, false);
-#endif
-
 }
 
 About::~About ()
 {
+	delete config_info;
 }
 
 void
@@ -254,37 +245,3 @@ About::show_config_info ()
 	config_info->present ();
 }
 
-#ifdef WITH_PAYMENT_OPTIONS
-void
-About::goto_paypal ()
-{
-	char buf[PATH_MAX+16];
-	char *argv[4];
-	char *docfile = "foo";
-	int grandchild;
-
-	if (fork() == 0) {
-
-		/* child */
-
-		if ((grandchild = fork()) == 0) {
-
-			/* grandchild */
-
-			argv[0] = "mozilla";
-			argv[1] = "-remote";
-			snprintf (buf, sizeof(buf), "openurl(%s)", docfile);
-			argv[2] = buf;
-			argv[3] = 0;
-
-			execvp ("mozilla", argv);
-			error << "could not start mozilla" << endmsg;
-
-		} else {
-			int status;
-			waitpid (grandchild, &status, 0);
-		}
-
-	}
-}
-#endif
