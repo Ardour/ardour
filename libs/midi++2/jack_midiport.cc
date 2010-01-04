@@ -347,11 +347,11 @@ JACK_MidiPort::set_state (const XMLNode& node)
 	Port::set_state (node);
 	const XMLProperty* prop;
 
-	if ((prop = node.property ("outbound")) != 0 && _jack_output_port) {
+	if ((prop = node.property ("inbound")) != 0 && _jack_input_port) {
 		_inbound_connections = prop->value ();
 	}
 
-	if ((prop = node.property ("inbound")) != 0 && _jack_input_port) {
+	if ((prop = node.property ("outbound")) != 0 && _jack_output_port) {
 		_outbound_connections = prop->value();
 	}
 }
@@ -364,7 +364,7 @@ JACK_MidiPort::make_connections ()
 		split (_inbound_connections, ports, ',');
 		for (vector<string>::iterator x = ports.begin(); x != ports.end(); ++x) {
 			if (_jack_client) {
-				jack_connect (_jack_client, jack_port_name (_jack_output_port), (*x).c_str());
+				jack_connect (_jack_client, (*x).c_str(), jack_port_name (_jack_input_port));
 				/* ignore failures */
 			}
 		}
@@ -375,7 +375,7 @@ JACK_MidiPort::make_connections ()
 		split (_outbound_connections, ports, ',');
 		for (vector<string>::iterator x = ports.begin(); x != ports.end(); ++x) {
 			if (_jack_client) {
-				jack_connect (_jack_client, (*x).c_str(), jack_port_name (_jack_input_port));
+				jack_connect (_jack_client, jack_port_name (_jack_output_port), (*x).c_str());
 				/* ignore failures */
 			}
 		}
