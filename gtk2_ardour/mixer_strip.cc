@@ -264,23 +264,13 @@ MixerStrip::init ()
 	input_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::input_press), false);
 	output_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::output_press), false);
 
-	solo_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::solo_press), false);
-	solo_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::solo_release), false);
-	mute_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::mute_press), false);
-	mute_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::mute_release), false);
-
 	/* we don't need this if its not an audio track, but we don't know that yet and it doesn't
 	   hurt (much).
 	*/
 
 	rec_enable_button->set_name ("MixerRecordEnableButton");
-	rec_enable_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_press), false);
-	rec_enable_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_release));
 
 	/* ditto for this button and busses */
-
-	show_sends_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::show_sends_press), false);
-	show_sends_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::show_sends_release));
 
 	name_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::name_button_button_press), false);
 	group_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::select_route_group), false);
@@ -426,7 +416,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		audio_track()->DiskstreamChanged.connect (route_connections, boost::bind (&MixerStrip::diskstream_changed, this), gui_context());
 	}
 
-	_route->NameChanged.connect (route_connections, boost::bind (&RouteUI::name_changed, this), gui_context());
 	_route->comment_changed.connect (route_connections, ui_bind (&MixerStrip::comment_changed, this, _1), gui_context());
 	_route->gui_changed.connect (route_connections, ui_bind (&MixerStrip::route_gui_changed, this, _1, _2), gui_context());
 

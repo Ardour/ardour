@@ -140,6 +140,17 @@ RouteUI::init ()
 	_session->RecordStateChanged.connect (_session_connections, boost::bind (&RouteUI::session_rec_enable_changed, this), gui_context());
 
 	Config->ParameterChanged.connect (*this, ui_bind (&RouteUI::parameter_changed, this, _1), gui_context());
+
+	rec_enable_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_press), false);
+	rec_enable_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_release), false);
+
+	show_sends_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::show_sends_press), false);
+	show_sends_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::show_sends_release));
+
+	solo_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::solo_press), false);
+	solo_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::solo_release), false);
+	mute_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::mute_press), false);
+	mute_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::mute_release), false);
 }
 
 void
@@ -194,6 +205,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route->solo_changed.connect (route_connections, ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
 	_route->listen_changed.connect (route_connections, ui_bind (&RouteUI::listen_changed, this, _1), gui_context());
 	_route->solo_isolated_changed.connect (route_connections, ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
+	_route->NameChanged.connect (route_connections, boost::bind (&RouteUI::name_changed, this), gui_context());
 
 	if (_session->writable() && is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);

@@ -162,11 +162,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	visual_button.signal_clicked().connect (sigc::mem_fun(*this, &RouteTimeAxisView::visual_click));
 	hide_button.signal_clicked().connect (sigc::mem_fun(*this, &RouteTimeAxisView::hide_click));
 
-	solo_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::solo_press), false);
-	solo_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::solo_release), false);
-	mute_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::mute_press), false);
-	mute_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::mute_release), false);
-
 	if (is_track()) {
 
 		/* use icon */
@@ -184,8 +179,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 		}
 		rec_enable_button->show_all ();
 
-		rec_enable_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_press), false);
-		rec_enable_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_release), false);
 		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 		ARDOUR_UI::instance()->tooltips().set_tip(*rec_enable_button, _("Record"));
 
@@ -234,12 +227,8 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 
 	_y_position = -1;
 
-	_route->mute_changed.connect (*this, ui_bind (&RouteUI::mute_changed, this, _1), gui_context());
-	_route->solo_changed.connect (*this, ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
 	_route->processors_changed.connect (*this, ui_bind (&RouteTimeAxisView::processors_changed, this, _1), gui_context());
 	_route->NameChanged.connect (*this, boost::bind (&RouteTimeAxisView::route_name_changed, this), gui_context());
-	_route->solo_isolated_changed.connect (*this, ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
-
 
 	if (is_track()) {
 
