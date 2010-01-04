@@ -704,15 +704,12 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 
 	mc->bind_midi (channel, ev, detail);
 
-	cerr << "New MC with URI " << uri << " on channel " << (int) channel << " detail = " << (int) detail << endl;
-
 	return mc;
 }
 
 void
 GenericMidiControlProtocol::reset_controllables ()
 {
-	cerr << "GM::RC\n";
 	Glib::Mutex::Lock lm2 (controllables_lock);
 	
 	for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ++iter) {
@@ -817,9 +814,7 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 		return 0;
 	}
 
-	cerr << "New MF with function = " << prop->value() << " on channel " << (int) channel << " detail = " << (int) detail << endl;
 	mf->bind_midi (channel, ev, detail);
-
 
 	return mf;
 }

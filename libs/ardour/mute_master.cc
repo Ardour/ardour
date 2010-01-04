@@ -19,7 +19,9 @@
 */
 
 #include "pbd/enumwriter.h"
+#include "pbd/xml++.h"
 
+#include "ardour/types.h"
 #include "ardour/mute_master.h"
 #include "ardour/rc_configuration.h"
 
@@ -33,13 +35,8 @@ const MuteMaster::MutePoint MuteMaster::AllPoints = MutePoint (MuteMaster::PreFa
 							       MuteMaster::Main);
 
 MuteMaster::MuteMaster (Session& s, const std::string& name)
-	: AutomationControl (s, Evoral::Parameter (MuteAutomation), boost::shared_ptr<AutomationList>(), name)
-	, _mute_point (MutePoint (0))
+	: _mute_point (MutePoint (0))
 {
-	// default range for parameter is fine
-
-	_automation = new AutomationList (MuteAutomation);
-	set_list (boost::shared_ptr<AutomationList>(_automation));
 }
 
 void
@@ -69,18 +66,6 @@ MuteMaster::unmute_at (MutePoint mp)
 	}
 }
 
-void
-MuteMaster::mute (bool yn)
-{
-	/* convenience wrapper around AutomationControl method */
-
-	if (yn) {
-		set_value ((float) 0xffff);
-	} else {
-		set_value (0.0f);
-	}
-}
-
 gain_t
 MuteMaster::mute_gain_at (MutePoint mp) const
 {
@@ -89,22 +74,6 @@ MuteMaster::mute_gain_at (MutePoint mp) const
 	} else {
 		return 1.0;
 	}
-}
-
-void
-MuteMaster::set_value (float f)
-{
-	MutePoint old = _mute_point;
-	_mute_point = (MutePoint) (rint (f));
-	if (old != _mute_point) {
-		MutePointChanged (); // EMIT SIGNAL
-	}
-}
-
-float
-MuteMaster::get_value () const
-{
-	return (float) _mute_point;
 }
 
 int

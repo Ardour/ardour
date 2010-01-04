@@ -185,7 +185,7 @@ MIDIControllable::midi_sense_note_off (Parser &p, EventTwoBytes *tb)
 }
 
 void
-MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool /* is_on */)
+MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool is_on)
 {
 	if (!controllable) { 
 		return;
@@ -197,10 +197,6 @@ MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool /* is_on *
 	} else {
 
 		if (control_additional == msg->note_number) {
-			/* Note: parser handles the use of zero velocity to
-			   mean note off. if we get called with is_on=true, then we
-			   got a *real* note on.
-			*/
 			controllable->set_value (controllable->get_value() > 0.5f ? 0.0f : 1.0f);
 		}
 	}

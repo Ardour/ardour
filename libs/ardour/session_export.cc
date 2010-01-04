@@ -96,7 +96,7 @@ Session::pre_export ()
 }
 
 int
-Session::start_audio_export (nframes_t position, bool realtime)
+Session::start_audio_export (nframes_t position, bool /* realtime */)
 {
 	if (!_exporting) {
 		pre_export ();

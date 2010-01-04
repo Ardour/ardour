@@ -21,14 +21,14 @@
 #define __ardour_mute_master_h__
 
 #include "evoral/Parameter.hpp"
-#include "ardour/automation_control.h"
-#include "ardour/automation_list.h"
+#include "pbd/signals.h"
+#include "pbd/stateful.h"
 
 namespace ARDOUR {
 
 class Session;
 
-class MuteMaster : public AutomationControl
+class MuteMaster : public PBD::Stateful
 {
   public:
 	enum MutePoint {
@@ -57,20 +57,12 @@ class MuteMaster : public AutomationControl
 	void mute_at (MutePoint);
 	void unmute_at (MutePoint);
 
-	void mute (bool yn);
-
-	/* Controllable interface */
-
-	void set_value (float); /* note: float is used as a bitfield of MutePoints */
-	float get_value () const;
-
 	PBD::Signal0<void> MutePointChanged;
 
 	XMLNode& get_state();
 	int set_state(const XMLNode&, int version);
 
   private:
-	AutomationList* _automation;
 	MutePoint _mute_point;
 };
 

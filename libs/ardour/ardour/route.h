@@ -284,12 +284,20 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 		Route& route;
 	};
 
+	struct MuteControllable : public AutomationControl {
+		MuteControllable (std::string name, Route&);
+		void set_value (float);
+		float get_value (void) const;
+
+		Route& route;
+	};
+
 	boost::shared_ptr<AutomationControl> solo_control() const {
 		return _solo_control;
 	}
 
 	boost::shared_ptr<AutomationControl> mute_control() const {
-		return _mute_master;
+		return _mute_control;
 	}
 
 	boost::shared_ptr<MuteMaster> mute_master() const {
@@ -372,6 +380,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	bool _declickable : 1;
 
 	boost::shared_ptr<SoloControllable> _solo_control;
+	boost::shared_ptr<MuteControllable> _mute_control;
 	boost::shared_ptr<MuteMaster> _mute_master;
 	MuteMaster::MutePoint _mute_points;
 

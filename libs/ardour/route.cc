@@ -72,6 +72,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, AutomatableControls (sess)
 	, _flags (flg)
 	, _solo_control (new SoloControllable (X_("solo"), *this))
+	, _mute_control (new MuteControllable (X_("mute"), *this))
 	, _mute_master (new MuteMaster (sess, name))
 	, _default_type (default_type)
 
@@ -102,6 +103,7 @@ Route::Route (Session& sess, const XMLNode& node, DataType default_type)
 	: SessionObject (sess, "toBeReset")
 	, AutomatableControls (sess)
 	, _solo_control (new SoloControllable (X_("solo"), *this))
+	, _mute_control (new MuteControllable (X_("mute"), *this))
 	, _mute_master (new MuteMaster (sess, "toBeReset"))
 	, _default_type (default_type)
 {
@@ -142,10 +144,10 @@ Route::init ()
 	/* add standard controls */
 
 	_solo_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
-	_mute_master->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
+	_mute_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
 	
 	add_control (_solo_control);
-	add_control (_mute_master);
+	add_control (_mute_control);
 
 	/* input and output objects */
 
@@ -2876,6 +2878,36 @@ Route::SoloControllable::get_value (void) const
 	} else {
 		return route.self_soloed() ? 1.0f : 0.0f;
 	}
+}
+
+Route::MuteControllable::MuteControllable (std::string name, Route& r)
+	: AutomationControl (r.session(), Evoral::Parameter (MuteAutomation),
+			     boost::shared_ptr<AutomationList>(), name)
+	, route (r)
+{
+	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(MuteAutomation)));
+	set_list (gl);
+}
+
+void
+Route::MuteControllable::set_value (float val)
+{
+	bool bval = ((val >= 0.5f) ? true: false);
+# if 0
+	this is how it should be done 
+
+	boost::shared_ptr<RouteList> rl (new RouteList);
+	rl->push_back (route);
+	_session.set_mute (rl, bval);
+#else
+	route.set_mute (bval, this);
+#endif
+}
+
+float
+Route::MuteControllable::get_value (void) const
+{
+	return route.muted() ? 1.0f : 0.0f;
 }
 
 void
