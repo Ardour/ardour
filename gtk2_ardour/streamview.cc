@@ -404,19 +404,19 @@ StreamView::region_layered (RegionView* rv)
 void
 StreamView::rec_enable_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&StreamView::setup_rec_box, this));
+	setup_rec_box ();
 }
 
 void
 StreamView::sess_rec_enable_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&StreamView::setup_rec_box, this));
+	setup_rec_box ();
 }
 
 void
 StreamView::transport_changed()
 {
-	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&StreamView::setup_rec_box, this));
+	setup_rec_box ();
 }
 
 void
