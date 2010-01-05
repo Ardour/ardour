@@ -1778,7 +1778,7 @@ void
 RouteTimeAxisView::region_view_added (RegionView* rv)
 {
 	/* XXX need to find out if automation children have automationstreamviews. If yes, no ghosts */
-	if(is_audio_track()) {
+	if (is_audio_track()) {
 		for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 			boost::shared_ptr<AutomationTimeAxisView> atv;
 
@@ -2205,10 +2205,11 @@ boost::shared_ptr<AutomationTimeAxisView>
 RouteTimeAxisView::automation_child(Evoral::Parameter param)
 {
 	AutomationTracks::iterator i = _automation_tracks.find(param);
-	if (i != _automation_tracks.end())
+	if (i != _automation_tracks.end()) {
 		return i->second->track;
-	else
+	} else {
 		return boost::shared_ptr<AutomationTimeAxisView>();
+	}
 }
 
 void
@@ -2260,10 +2261,11 @@ RouteTimeAxisView::io_changed (IOChange /*change*/, void */*src*/)
 }
 
 void
-RouteTimeAxisView::build_underlay_menu(Gtk::Menu* parent_menu) {
+RouteTimeAxisView::build_underlay_menu(Gtk::Menu* parent_menu)
+{
 	using namespace Menu_Helpers;
 
-	if(!_underlay_streams.empty()) {
+	if (!_underlay_streams.empty()) {
 		MenuList& parent_items = parent_menu->items();
 		Menu* gs_menu = manage (new Menu);
 		gs_menu->set_name ("ArdourContextMenu");
@@ -2281,7 +2283,7 @@ RouteTimeAxisView::build_underlay_menu(Gtk::Menu* parent_menu) {
 bool
 RouteTimeAxisView::set_underlay_state()
 {
-	if(!underlay_xml_node) {
+	if (!underlay_xml_node) {
 		return false;
 	}
 
@@ -2292,7 +2294,7 @@ RouteTimeAxisView::set_underlay_state()
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		child_node = *niter;
 
-		if(child_node->name() != "Underlay") {
+		if (child_node->name() != "Underlay") {
 			continue;
 		}
 
@@ -2312,16 +2314,16 @@ RouteTimeAxisView::set_underlay_state()
 }
 
 void
-RouteTimeAxisView::add_underlay(StreamView* v, bool update_xml)
+RouteTimeAxisView::add_underlay (StreamView* v, bool update_xml)
 {
-	if(!v) {
+	if (!v) {
 		return;
 	}
 
 	RouteTimeAxisView& other = v->trackview();
 
-	if(find(_underlay_streams.begin(), _underlay_streams.end(), v) == _underlay_streams.end()) {
-		if(find(other._underlay_mirrors.begin(), other._underlay_mirrors.end(), this) != other._underlay_mirrors.end()) {
+	if (find(_underlay_streams.begin(), _underlay_streams.end(), v) == _underlay_streams.end()) {
+		if (find(other._underlay_mirrors.begin(), other._underlay_mirrors.end(), this) != other._underlay_mirrors.end()) {
 			fatal << _("programming error: underlay reference pointer pairs are inconsistent!") << endmsg;
 			/*NOTREACHED*/
 		}
@@ -2331,8 +2333,8 @@ RouteTimeAxisView::add_underlay(StreamView* v, bool update_xml)
 
 		v->foreach_regionview(sigc::mem_fun(*this, &RouteTimeAxisView::add_ghost));
 
-		if(update_xml) {
-			if(!underlay_xml_node) {
+		if (update_xml) {
+			if (!underlay_xml_node) {
 				ensure_xml_node();
 				underlay_xml_node = xml_node->add_child("Underlays");
 			}
@@ -2345,19 +2347,19 @@ RouteTimeAxisView::add_underlay(StreamView* v, bool update_xml)
 }
 
 void
-RouteTimeAxisView::remove_underlay(StreamView* v)
+RouteTimeAxisView::remove_underlay (StreamView* v)
 {
-	if(!v) {
+	if (!v) {
 		return;
 	}
 
 	UnderlayList::iterator it = find(_underlay_streams.begin(), _underlay_streams.end(), v);
 	RouteTimeAxisView& other = v->trackview();
 
-	if(it != _underlay_streams.end()) {
+	if (it != _underlay_streams.end()) {
 		UnderlayMirrorList::iterator gm = find(other._underlay_mirrors.begin(), other._underlay_mirrors.end(), this);
 
-		if(gm == other._underlay_mirrors.end()) {
+		if (gm == other._underlay_mirrors.end()) {
 			fatal << _("programming error: underlay reference pointer pairs are inconsistent!") << endmsg;
 			/*NOTREACHED*/
 		}
@@ -2367,7 +2369,7 @@ RouteTimeAxisView::remove_underlay(StreamView* v)
 		_underlay_streams.erase(it);
 		other._underlay_mirrors.erase(gm);
 
-		if(underlay_xml_node) {
+		if (underlay_xml_node) {
 			underlay_xml_node->remove_nodes_and_delete("id", v->trackview().route()->id().to_s());
 		}
 	}
