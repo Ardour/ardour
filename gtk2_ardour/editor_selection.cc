@@ -243,6 +243,9 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool /*n
 	}
 
 	/* rectangle 10 pixels surrounding the clicked control point */
+	/* XXX: not really sure why we look for more control points close to the clicked one,
+	   and don't just use the clicked one
+	*/
 	nframes64_t const x1 = pixel_to_frame (clicked_control_point->get_x() - 10);
 	nframes64_t const x2 = pixel_to_frame (clicked_control_point->get_x() + 10);
  	double y1 = clicked_control_point->get_y() - 10;
