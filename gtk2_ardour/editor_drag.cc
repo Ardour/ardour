@@ -58,7 +58,6 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i)
 	, _item (i)
 	, _pointer_frame_offset (0)
 	, _have_transaction (false)
-	, _had_movement (false)
 	, _move_threshold_passed (false)
 	, _grab_frame (0)
 	, _last_pointer_frame (0)
@@ -103,6 +102,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	}
 
 	_grab_frame = _editor->event_frame (event, &_grab_x, &_grab_y);
+	_grab_frame = adjusted_frame (_grab_frame, event);
 	_last_pointer_frame = _grab_frame;
 	_current_pointer_frame = _grab_frame;
 	_current_pointer_x = _grab_x;
@@ -150,22 +150,22 @@ Drag::end_grab (GdkEvent* event)
 
 	_last_pointer_x = _current_pointer_x;
 	_last_pointer_y = _current_pointer_y;
-	finished (event, _had_movement);
+	finished (event, _move_threshold_passed);
 
 	_editor->hide_verbose_canvas_cursor();
 
 	_ending = false;
 
-	return _had_movement;
+	return _move_threshold_passed;
 }
 
 nframes64_t
-Drag::adjusted_current_frame (GdkEvent const * event, bool snap) const
+Drag::adjusted_frame (nframes64_t f, GdkEvent const * event, bool snap) const
 {
 	nframes64_t pos = 0;
 
-	if (_current_pointer_frame > _pointer_frame_offset) {
-		pos = _current_pointer_frame - _pointer_frame_offset;
+	if (f > _pointer_frame_offset) {
+		pos = f - _pointer_frame_offset;
 	}
 
 	if (snap) {
@@ -173,6 +173,12 @@ Drag::adjusted_current_frame (GdkEvent const * event, bool snap) const
 	}
 
 	return pos;
+}
+
+nframes64_t
+Drag::adjusted_current_frame (GdkEvent const * event, bool snap) const
+{
+	return adjusted_frame (_current_pointer_frame, event, snap);
 }
 
 bool
@@ -183,32 +189,26 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 	_last_pointer_frame = adjusted_current_frame (event);
 	_current_pointer_frame = _editor->event_frame (event, &_current_pointer_x, &_current_pointer_y);
 
+	pair<nframes64_t, int> const threshold = move_threshold ();
+
+	bool const old_move_threshold_passed = _move_threshold_passed;
+	
 	if (!from_autoscroll && !_move_threshold_passed) {
 
-		bool const xp = (::llabs ((nframes64_t) (_current_pointer_x - _grab_x)) > 4LL);
-		bool const yp = (::llabs ((nframes64_t) (_current_pointer_y - _grab_y)) > 4LL);
+		bool const xp = (::llabs (adjusted_current_frame (event) - _grab_frame) >= threshold.first);
+		bool const yp = (::fabs ((_current_pointer_y - _grab_y)) >= threshold.second);
 
-		_move_threshold_passed = (xp || yp);
+		_move_threshold_passed = ((xp && x_movement_matters()) || (yp && y_movement_matters()));
 	}
 
-	bool old_had_movement = _had_movement;
-
-	/* a motion event has happened, so we've had movement... */
-	_had_movement = true;
-
-	/* ... unless we're using a move threshold and we've not yet passed it */
-	if (apply_move_threshold() && !_move_threshold_passed) {
-		_had_movement = false;
-	}
-
-	if (active (_editor->mouse_mode) && _had_movement) {
+	if (active (_editor->mouse_mode) && _move_threshold_passed) {
 
 		if (event->motion.state & Gdk::BUTTON1_MASK || event->motion.state & Gdk::BUTTON2_MASK) {
 			if (!from_autoscroll) {
 				_editor->maybe_autoscroll (&event->motion, allow_vertical_autoscroll ());
 			}
 
-			motion (event, _had_movement != old_had_movement);
+			motion (event, _move_threshold_passed != old_move_threshold_passed);
 			return true;
 		}
 	}

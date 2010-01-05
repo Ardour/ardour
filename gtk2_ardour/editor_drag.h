@@ -71,6 +71,7 @@ public:
 		return _current_pointer_y;
 	}
 
+	nframes64_t adjusted_frame (nframes64_t, GdkEvent const *, bool snap = true) const;
 	nframes64_t adjusted_current_frame (GdkEvent const *, bool snap = true) const;
 	
 	/** Called to start a grab of an item.
@@ -100,14 +101,22 @@ public:
 		return (m != Editing::MouseGain);
 	}
 
-	/** @return true if a small threshold should be applied before a mouse movement
-	 *  is considered a drag, otherwise false.
-	 */
-	virtual bool apply_move_threshold () const {
-		return false;
+	/** @return minimum number of frames (in x) and pixels (in y) that should be considered a movement */
+	virtual std::pair<nframes64_t, int> move_threshold () const {
+		return std::make_pair (1, 1);
 	}
 
 	virtual bool allow_vertical_autoscroll () const {
+		return true;
+	}
+
+	/** @return true if x movement matters to this drag */
+	virtual bool x_movement_matters () const {
+		return true;
+	}
+
+	/** @return true if y movement matters to this drag */
+	virtual bool y_movement_matters () const {
 		return true;
 	}
 
@@ -149,7 +158,6 @@ protected:
 private:
 
 	bool _ending; ///< true if end_grab is in progress, otherwise false
-	bool _had_movement; ///< true if movement has occurred, otherwise false
 	bool _move_threshold_passed; ///< true if the move threshold has been passed, otherwise false
 	double _original_x; ///< original world x of the thing being dragged
 	double _original_y; ///< original world y of the thing being dragged
@@ -159,8 +167,8 @@ private:
 	double _current_pointer_y; ///< trackview y of the current pointer
 	double _last_pointer_x; ///< trackview x of the pointer last time a motion occurred
 	double _last_pointer_y; ///< trackview y of the pointer last time a motion occurred
-	nframes64_t _grab_frame; ///< frame that the mouse was at when start_grab was called, or 0
-	nframes64_t _last_pointer_frame; ///< adjusted_current_frame the last time a motion occurred
+	nframes64_t _grab_frame; ///< adjusted_frame that the mouse was at when start_grab was called, or 0
+	nframes64_t _last_pointer_frame; ///< adjusted_frame the last time a motion occurred
 	nframes64_t _current_pointer_frame; ///< frame that the pointer is now at
 };
 
@@ -238,8 +246,8 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 
-	bool apply_move_threshold () const {
-		return true;
+	std::pair<nframes64_t, int> move_threshold () const {
+		return std::make_pair (4, 4);
 	}
 
 private:
@@ -343,6 +351,10 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 
+	bool y_movement_matters () const {
+		return false;
+	}
+
 private:
 
 	Operation _operation;
@@ -359,6 +371,10 @@ public:
 	void finished (GdkEvent *, bool);
 
 	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+	bool y_movement_matters () const {
 		return false;
 	}
 	
@@ -378,6 +394,10 @@ public:
 	void finished (GdkEvent *, bool);
 
 	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+	bool y_movement_matters () const {
 		return false;
 	}
 
@@ -405,6 +425,10 @@ public:
 		return false;
 	}
 
+	bool y_movement_matters () const {
+		return false;
+	}
+
 private:
 	EditorCursor* _cursor; ///< cursor being dragged
 	bool _stop; ///< true to stop the transport on starting the drag, otherwise false
@@ -420,6 +444,10 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+
+	bool y_movement_matters () const {
+		return false;
+	}
 };
 
 /** Region fade-out drag */
@@ -431,6 +459,10 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+
+	bool y_movement_matters () const {
+		return false;
+	}
 };
 
 /** Marker drag */
@@ -445,6 +477,10 @@ public:
 	void finished (GdkEvent *, bool);
 
 	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+	bool y_movement_matters () const {
 		return false;
 	}
 	
@@ -577,6 +613,10 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 
+	bool y_movement_matters () const {
+		return false;
+	}
+
 private:
 	void update_item (ARDOUR::Location *);
 
@@ -605,6 +645,10 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+
+	bool x_movement_matters () const {
+		return false;
+	}
 
 private:
 	std::list<ARDOUR::AudioRange> _ranges;
