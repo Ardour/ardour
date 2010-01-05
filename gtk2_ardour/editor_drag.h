@@ -613,6 +613,10 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
 	bool y_movement_matters () const {
 		return false;
 	}

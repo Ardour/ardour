@@ -189,10 +189,16 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 	_last_pointer_frame = adjusted_current_frame (event);
 	_current_pointer_frame = _editor->event_frame (event, &_current_pointer_x, &_current_pointer_y);
 
+	/* check to see if we have moved in any way that matters since the last motion event */
+	if ( (!x_movement_matters() || _last_pointer_frame == adjusted_current_frame (event)) &&
+	     (!y_movement_matters() || _last_pointer_y == _current_pointer_y) ) {
+		return false;
+	}
+
 	pair<nframes64_t, int> const threshold = move_threshold ();
 
 	bool const old_move_threshold_passed = _move_threshold_passed;
-	
+
 	if (!from_autoscroll && !_move_threshold_passed) {
 
 		bool const xp = (::llabs (adjusted_current_frame (event) - _grab_frame) >= threshold.first);
