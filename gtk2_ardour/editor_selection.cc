@@ -242,14 +242,25 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool /*n
 		return false;
 	}
 
-	/* rectangle 10 pixels surrounding the clicked control point */
-	/* XXX: not really sure why we look for more control points close to the clicked one,
-	   and don't just use the clicked one
-	*/
-	nframes64_t const x1 = pixel_to_frame (clicked_control_point->get_x() - 10);
-	nframes64_t const x2 = pixel_to_frame (clicked_control_point->get_x() + 10);
- 	double y1 = clicked_control_point->get_y() - 10;
-	double y2 = clicked_control_point->get_y() + 10;
+	if (clicked_control_point->selected()) {
+		/* the clicked control point is already selected; others may be as well, so
+		   don't change the selection.
+		*/
+		return true;
+	}
+
+	/* We know the ControlPoint that was clicked, but (as discussed in automation_selectable.h)
+	 * selected automation data are described by areas on the AutomationLine.  A ControlPoint
+	 * represents any model points in the space that it takes up, so the AutomationSelectable
+	 * needs to be the size of the ControlPoint.
+	 */
+
+	double const size = clicked_control_point->size ();
+	
+	nframes64_t const x1 = pixel_to_frame (clicked_control_point->get_x() - size / 2);
+	nframes64_t const x2 = pixel_to_frame (clicked_control_point->get_x() + size / 2);
+ 	double y1 = clicked_control_point->get_y() - size / 2;
+	double y2 = clicked_control_point->get_y() + size / 2;
 
 	/* convert the y values to trackview space */
 	double dummy = 0;
@@ -258,36 +269,8 @@ Editor::set_selected_control_point_from_click (Selection::Operation op, bool /*n
 	_trackview_group->w2i (dummy, y1);
 	_trackview_group->w2i (dummy, y2);
 
-	/* find any other points nearby */
-	pair<list<Selectable*>, TrackViewList> const f = find_selectables_within (x1, x2, y1, y2, selection->tracks);
-
-	PointSelection ps;
-	for (list<Selectable*>::const_iterator i = f.first.begin(); i != f.first.end(); ++i) {
-		AutomationSelectable* a = dynamic_cast<AutomationSelectable*> (*i);
-		if (a) {
-			ps.push_back (*a);
-		}
-	}
-
-	list<ControlPoint*> const cp = clicked_control_point->line().point_selection_to_control_points (ps);
-	list<ControlPoint*>::const_iterator i = cp.begin ();
-	while (i != cp.end() && (*i)->selected() == false) {
-		++i;
-	}
-
-	if (i != cp.end()) {
-		/* one of the control points that we just clicked on is already selected,
-		   so leave the selection alone.
-		*/
-
-		for (list<Selectable*>::const_iterator i = f.first.begin(); i != f.first.end(); ++i) {
-			delete *i;
-		}
-
-		return true;
-	}
-
-	return select_selectables_and_tracks (f.first, f.second, op);
+	/* and set up the selection */
+	return select_all_within (x1, x2, y1, y2, selection->tracks, Selection::Set);
 }
 
 void
@@ -993,15 +976,13 @@ Editor::invert_selection ()
 	selection->set (touched);
 }
 
-/** Find Selectable things within an area.
- *  @param start Start temporal position (session frames)
- *  @param end End temporal position (session frames)
- *  @param top Top (lower) y position (trackview coordinates)
- *  @param bot Bottom (higher) y position (trackview coordinates)
- *  @return Selectable things and tracks that they are on.
+/** @param top Top (lower) y limit in trackview coordinates.
+ *  @param bottom Bottom (higher) y limit in trackview coordinates.
  */
-pair<list<Selectable*>, TrackViewList>
-Editor::find_selectables_within (nframes64_t start, nframes64_t end, double top, double bot, const TrackViewList& tracklist)
+bool
+Editor::select_all_within (
+	nframes64_t start, nframes64_t end, double top, double bot, const TrackViewList& tracklist, Selection::Operation op
+	)
 {
 	list<Selectable*> found;
 	TrackViewList tracks;
@@ -1020,41 +1001,22 @@ Editor::find_selectables_within (nframes64_t start, nframes64_t end, double top,
 			tracks.push_back (*iter);
 		}
 	}
-
-	return make_pair (found, tracks);
-}
-
-/** @param top Top (lower) y limit in trackview coordinates.
- *  @param bottom Bottom (higher) y limit in trackview coordinates.
- */
-bool
-Editor::select_all_within (
-	nframes64_t start, nframes64_t end, double top, double bot, const TrackViewList& tracklist, Selection::Operation op
-	)
-{
-	pair<list<Selectable*>, TrackViewList> const f = find_selectables_within (start, end, top, bot, tracklist);
-	return select_selectables_and_tracks (f.first, f.second, op);
-}
-
-/** Select a list of Selectables and also a list of Tracks; nothing will be selected if there are no Selectables */
-bool
-Editor::select_selectables_and_tracks (list<Selectable*> const & s, TrackViewList const & t, Selection::Operation op)
-{
-	if (s.empty()) {
+	
+	if (found.empty()) {
 		return false;
 	}
 
-	if (!t.empty()) {
+	if (!tracks.empty()) {
 
 		switch (op) {
 		case Selection::Add:
-			selection->add (t);
+			selection->add (tracks);
 			break;
 		case Selection::Toggle:
-			selection->toggle (t);
+			selection->toggle (tracks);
 			break;
 		case Selection::Set:
-			selection->set (t);
+			selection->set (tracks);
 			break;
 		case Selection::Extend:
 			/* not defined yet */
@@ -1065,13 +1027,13 @@ Editor::select_selectables_and_tracks (list<Selectable*> const & s, TrackViewLis
 	begin_reversible_command (_("select all within"));
 	switch (op) {
 	case Selection::Add:
-		selection->add (s);
+		selection->add (found);
 		break;
 	case Selection::Toggle:
-		selection->toggle (s);
+		selection->toggle (found);
 		break;
 	case Selection::Set:
-		selection->set (s);
+		selection->set (found);
 		break;
 	case Selection::Extend:
 		/* not defined yet */
@@ -1080,7 +1042,7 @@ Editor::select_selectables_and_tracks (list<Selectable*> const & s, TrackViewLis
 
 	commit_reversible_command ();
 
-	return !s.empty();
+	return !found.empty();
 }
 
 void
