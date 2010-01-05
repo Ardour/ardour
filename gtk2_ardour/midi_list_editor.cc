@@ -19,6 +19,8 @@
 #include <cmath>
 
 #include "evoral/midi_util.h"
+
+#include "ardour/beats_frames_converter.h"
 #include "ardour/midi_region.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
@@ -58,6 +60,9 @@ MidiListEditor::MidiListEditor (Session* s, boost::shared_ptr<MidiRegion> r)
 	for (int i = 0; i < 6; ++i) {
 		CellRendererText* renderer = dynamic_cast<CellRendererText*>(view.get_column_cell_renderer (i));
 		renderer->property_editable() = true;
+
+		renderer->signal_editing_started().connect (sigc::bind (sigc::mem_fun (*this, &MidiListEditor::editing_started), i));
+		renderer->signal_editing_canceled().connect (sigc::mem_fun (*this, &MidiListEditor::editing_canceled));
 		renderer->signal_edited().connect (sigc::mem_fun (*this, &MidiListEditor::edited));
 	}
 
@@ -80,21 +85,44 @@ MidiListEditor::~MidiListEditor ()
 bool
 MidiListEditor::key_press (GdkEventKey* ev)
 {
-	return true;
+	bool editing = !_current_edit.empty();
+	bool ret = false;
+
+	if (editing) {
+		switch (ev->keyval) {
+		case GDK_Tab:
+			break;
+		case GDK_Right:
+			break;
+		case GDK_Left:
+			break;
+		case GDK_Up:
+			break;
+		case GDK_Down:
+			break;
+		case GDK_Escape:
+			break;
+		}
+	}
+
+	return ret;
 }
 
 bool
 MidiListEditor::key_release (GdkEventKey* ev)
 {
+	bool ret = false;
+
 	switch (ev->keyval) {
 	case GDK_Delete:
 		delete_selected_note ();
+		ret = true;
 		break;
 	default:
 		break;
 	}
 
-	return true;
+	return ret;
 }
 
 void
@@ -118,6 +146,20 @@ MidiListEditor::delete_selected_note ()
 	}
 
 }
+
+void
+MidiListEditor::editing_started (CellEditable*, const ustring& path, int colno)
+{
+	_current_edit = path;
+	cerr << "Now editing " << _current_edit << " Column " << colno << endl;
+}
+
+void
+MidiListEditor::editing_canceled ()
+{
+	_current_edit = "";
+}
+
 void
 MidiListEditor::edited (const Glib::ustring& path, const Glib::ustring& /* text */)
 {
@@ -146,6 +188,7 @@ MidiListEditor::redisplay_model ()
 
 	if (_session) {
 		
+		BeatsFramesConverter conv (_session->tempo_map(), region->position());
 		MidiModel::Notes notes = region->midi_source(0)->model()->notes();
 		TreeModel::Row row;
 		stringstream ss;
@@ -159,11 +202,8 @@ MidiListEditor::redisplay_model ()
 			
 			BBT_Time bbt;
 			double dur;
-			bbt.bars = 0;
-			bbt.beats = (uint32_t) floor ((*i)->time());
-			bbt.ticks = (uint32_t) lrint (fmod ((*i)->time(), 1.0) * Meter::ticks_per_beat);
 
-			_session->tempo_map().bbt_time (region->position(), bbt);
+			_session->tempo_map().bbt_time (conv.to ((*i)->time()), bbt);
 			
 			ss.str ("");
 			ss << bbt;
@@ -180,12 +220,8 @@ MidiListEditor::redisplay_model ()
 			ss << bbt;
 			row[columns.length] = ss.str();
 			
-			bbt.bars = 0;
-			bbt.beats = (uint32_t) floor ((*i)->end_time());
-			bbt.ticks = (uint32_t) lrint (fmod ((*i)->end_time(), 1.0) * Meter::ticks_per_beat);
-
-			_session->tempo_map().bbt_time (region->position(), bbt);
-			
+			_session->tempo_map().bbt_time (conv.to ((*i)->end_time()), bbt);
+												 
 			ss.str ("");
 			ss << bbt;
 			row[columns.end] = ss.str();

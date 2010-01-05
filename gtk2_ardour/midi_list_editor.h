@@ -70,10 +70,14 @@ class MidiListEditor : public ArdourDialog
 	Glib::RefPtr<Gtk::ListStore> model;
 	Gtk::TreeView                view;
 	Gtk::ScrolledWindow          scroller;
+	Glib::ustring               _current_edit;
 
 	boost::shared_ptr<ARDOUR::MidiRegion> region;
 
 	void edited (const Glib::ustring&, const Glib::ustring&);
+	void editing_started (Gtk::CellEditable*, const Glib::ustring& path, int);
+	void editing_canceled ();
+
 	void redisplay_model ();
 
 	bool key_press (GdkEventKey* ev);
