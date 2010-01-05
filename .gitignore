@@ -32,6 +32,7 @@ gtk2_ardour/version.h
 gtk2_ardour/test/*.cpp
 gtk2_ardour/test/test_ui_config
 libs/ardour/ardour/version.h
+libs/ardour/config_text.cc
 libs/ardour/svn_revision.cc
 libs/ardour/version.cc
 libs/glibmm2/Makefile.in
