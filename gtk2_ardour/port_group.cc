@@ -451,11 +451,11 @@ PortGroupList::gather (ARDOUR::Session* session, bool inputs, bool allow_dups)
 		system->remove_duplicates ();
 	}
 
-	add_group_if_not_empty (system);
+	add_group_if_not_empty (other);
 	add_group_if_not_empty (bus);
 	add_group_if_not_empty (track);
 	add_group_if_not_empty (ardour);
-	add_group_if_not_empty (other);
+	add_group_if_not_empty (system);
 
 	emit_changed ();
 }
