@@ -322,9 +322,7 @@ MidiTimeAxisView::build_def_channel_menu ()
 {
 	using namespace Menu_Helpers;
 
-	if (default_channel_menu == 0) {
-		default_channel_menu = manage (new Menu ());
-	}
+	default_channel_menu = manage (new Menu ());
 
 	uint8_t defchn = midi_track()->default_channel();
 	MenuList& def_channel_items = default_channel_menu->items();

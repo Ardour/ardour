@@ -427,26 +427,31 @@ RouteTimeAxisView::build_automation_action_menu ()
 	automation_items.push_back (MenuElem (_("Hide all automation"),
 					      sigc::mem_fun(*this, &RouteTimeAxisView::hide_all_automation)));
 
-	if (subplugin_menu.get_attach_widget())
-		subplugin_menu.detach();
+	if (subplugin_menu.gobj()) {
+		/* this will break if the underlying GTK menu has never been set up, hence
+		   the if() above. we have to do this 
+		*/
+		if (subplugin_menu.get_attach_widget()) {
+			subplugin_menu.detach();
+		}
 
-	automation_items.push_back (MenuElem (_("Plugins"), subplugin_menu));
+		automation_items.push_back (MenuElem (_("Plugins..."), subplugin_menu));
+	} else {
+		automation_items.push_back (MenuElem (_("Plugins")));
+	}
 	automation_items.back().set_sensitive (!subplugin_menu.items().empty());
 
 	map<Evoral::Parameter, RouteAutomationNode*>::iterator i;
+
 	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 
 		automation_items.push_back (SeparatorElem());
-
-		delete i->second->menu_item;
 
 		automation_items.push_back(CheckMenuElem (_route->describe_parameter(i->second->param),
 				sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::toggle_automation_track), i->second->param)));
 
 		i->second->menu_item = static_cast<Gtk::CheckMenuItem*>(&automation_items.back());
-
 		i->second->menu_item->set_active(show_automation(i->second->param));
-		//i->second->menu_item->set_active(false);
 	}
 }
 

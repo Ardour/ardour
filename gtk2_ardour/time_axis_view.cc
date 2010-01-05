@@ -664,6 +664,8 @@ TimeAxisView::build_display_menu ()
 {
 	using namespace Menu_Helpers;
 
+	delete display_menu;
+
 	display_menu = new Menu;
 	display_menu->set_name ("ArdourContextMenu");
 
