@@ -833,14 +833,14 @@ Selection::toggle (const vector<AutomationSelectable*>& autos)
 }
 
 void
-Selection::toggle (list<Selectable*>& selectables)
+Selection::toggle (list<Selectable*> const & selectables)
 {
 	RegionView* rv;
 	AutomationSelectable* as;
 	vector<RegionView*> rvs;
 	vector<AutomationSelectable*> autos;
 
-	for (std::list<Selectable*>::iterator i = selectables.begin(); i != selectables.end(); ++i) {
+	for (std::list<Selectable*>::const_iterator i = selectables.begin(); i != selectables.end(); ++i) {
 		if ((rv = dynamic_cast<RegionView*> (*i)) != 0) {
 			rvs.push_back (rv);
 		} else if ((as = dynamic_cast<AutomationSelectable*> (*i)) != 0) {
@@ -863,7 +863,7 @@ Selection::toggle (list<Selectable*>& selectables)
 }
 
 void
-Selection::set (list<Selectable*>& selectables)
+Selection::set (list<Selectable*> const & selectables)
 {
 	clear_regions();
 	clear_points ();
@@ -872,14 +872,14 @@ Selection::set (list<Selectable*>& selectables)
 
 
 void
-Selection::add (list<Selectable*>& selectables)
+Selection::add (list<Selectable*> const & selectables)
 {
 	RegionView* rv;
 	AutomationSelectable* as;
 	vector<RegionView*> rvs;
 	vector<AutomationSelectable*> autos;
 
-	for (std::list<Selectable*>::iterator i = selectables.begin(); i != selectables.end(); ++i) {
+	for (std::list<Selectable*>::const_iterator i = selectables.begin(); i != selectables.end(); ++i) {
 		if ((rv = dynamic_cast<RegionView*> (*i)) != 0) {
 			rvs.push_back (rv);
 		} else if ((as = dynamic_cast<AutomationSelectable*> (*i)) != 0) {

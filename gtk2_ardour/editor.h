@@ -1630,7 +1630,13 @@ public:
 
 	/* object rubberband select process */
 
-	bool select_all_within (nframes64_t start, nframes64_t end, gdouble topy, gdouble boty, const TrackViewList&, Selection::Operation op);
+	std::pair<std::list<Selectable*>, TrackViewList> find_selectables_within (
+		nframes64_t, nframes64_t, double, double, TrackViewList const &
+		);
+
+	bool select_selectables_and_tracks (std::list<Selectable*> const &, TrackViewList const &, Selection::Operation);
+	
+	bool select_all_within (nframes64_t, nframes64_t, double, double, TrackViewList const &, Selection::Operation op);
 
 	ArdourCanvas::SimpleRect   *rubberband_rect;
 

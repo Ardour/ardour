@@ -1037,50 +1037,54 @@ AutomationLine::get_inverted_selectables (Selection&, list<Selectable*>& /*resul
 	// hmmm ....
 }
 
-void
-AutomationLine::set_selected_points (PointSelection& points)
+/** Take a PointSelection and find ControlPoints that fall within it */
+list<ControlPoint*>
+AutomationLine::point_selection_to_control_points (PointSelection const & s)
 {
-	double top;
-	double bot;
+	list<ControlPoint*> cp;
+	
+	for (PointSelection::const_iterator i = s.begin(); i != s.end(); ++i) {
 
-	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-		(*i)->set_selected(false);
-	}
-
-	if (points.empty()) {
-		goto out;
-	}
-
-	for (PointSelection::iterator r = points.begin(); r != points.end(); ++r) {
-
-		if ((*r).track != &trackview) {
+		if (i->track != &trackview) {
 			continue;
 		}
 
 		/* Curse X11 and its inverted coordinate system! */
 
-		bot = (1.0 - (*r).high_fract) * _height;
-		top = (1.0 - (*r).low_fract) * _height;
+		double const bot = (1.0 - i->high_fract) * _height;
+		double const top = (1.0 - i->low_fract) * _height;
 
-		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+		for (vector<ControlPoint*>::iterator j = control_points.begin(); j != control_points.end(); ++j) {
 
-			double rstart, rend;
+			double const rstart = trackview.editor().frame_to_unit (i->start);
+			double const rend = trackview.editor().frame_to_unit (i->end);
 
-			rstart = trackview.editor().frame_to_unit ((*r).start);
-			rend = trackview.editor().frame_to_unit ((*r).end);
-
-			if ((*i)->get_x() >= rstart && (*i)->get_x() <= rend) {
-
-				if ((*i)->get_y() >= bot && (*i)->get_y() <= top) {
-
-					(*i)->set_selected(true);
+			if ((*j)->get_x() >= rstart && (*j)->get_x() <= rend) {
+				if ((*j)->get_y() >= bot && (*j)->get_y() <= top) {
+					cp.push_back (*j);
 				}
 			}
+		}
 
+	}
+
+	return cp;
+}
+
+void
+AutomationLine::set_selected_points (PointSelection& points)
+{
+	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+		(*i)->set_selected (false);
+	}
+
+	if (!points.empty()) {
+		list<ControlPoint*> cp = point_selection_to_control_points (points);
+		for (list<ControlPoint*>::iterator i = cp.begin(); i != cp.end(); ++i) {
+			(*i)->set_selected (true);
 		}
 	}
 
-  out:
 	set_colors ();
 }
 

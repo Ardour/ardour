@@ -25,6 +25,12 @@
 
 class TimeAxisView;
 
+/** A selected automation point, expressed as a rectangle on a track (so that x coordinates
+ *  are frames and y coordinates are a fraction of track height).  This representation falls
+ *  between the visible GUI control points and the back-end "actual" automation points,
+ *  some of which may not be visible; it is not trivial to convert from one of these to the other,
+ *  so the AutomationSelectable is a kind of "best and worst of both worlds".
+ */
 struct AutomationSelectable : public Selectable
 {
     nframes_t start;
