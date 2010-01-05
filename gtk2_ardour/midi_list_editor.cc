@@ -16,6 +16,7 @@
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#include <cmath>
 
 #include "evoral/midi_util.h"
 #include "ardour/midi_region.h"
@@ -39,6 +40,9 @@ MidiListEditor::MidiListEditor (Session* s, boost::shared_ptr<MidiRegion> r)
 
 	model = ListStore::create (columns);
 	view.set_model (model);
+
+	view.signal_key_press_event().connect (sigc::mem_fun (*this, &MidiListEditor::key_press));
+	view.signal_key_release_event().connect (sigc::mem_fun (*this, &MidiListEditor::key_release));
 
 	view.append_column (_("Start"), columns.start);
 	view.append_column (_("Channel"), columns.channel);
@@ -73,6 +77,47 @@ MidiListEditor::~MidiListEditor ()
 {
 }
 
+bool
+MidiListEditor::key_press (GdkEventKey* ev)
+{
+	return true;
+}
+
+bool
+MidiListEditor::key_release (GdkEventKey* ev)
+{
+	switch (ev->keyval) {
+	case GDK_Delete:
+		delete_selected_note ();
+		break;
+	default:
+		break;
+	}
+
+	return true;
+}
+
+void
+MidiListEditor::delete_selected_note ()
+{
+	Glib::RefPtr<TreeSelection> selection = view.get_selection();
+	TreeView::Selection::ListHandle_Path rows = selection->get_selected_rows ();
+
+	if (rows.empty()) {
+		return;
+	}
+
+	TreeView::Selection::ListHandle_Path::iterator i = rows.begin();
+	TreeIter iter;
+
+	/* selection mode is single, so rows.begin() is it */
+
+	if ((iter = model->get_iter (*i))) {
+		boost::shared_ptr<NoteType> note = (*iter)[columns._note];
+		cerr << "Would have deleted " << *note << endl;
+	}
+
+}
 void
 MidiListEditor::edited (const Glib::ustring& path, const Glib::ustring& /* text */)
 {
@@ -89,6 +134,8 @@ MidiListEditor::edited (const Glib::ustring& path, const Glib::ustring& /* text 
 	cerr << "Edited " << *note << endl;
 
 	redisplay_model ();
+	
+	/* keep selected row(s), move cursor there, to allow us to continue editing */
 }
 
 void
@@ -101,34 +148,45 @@ MidiListEditor::redisplay_model ()
 		
 		MidiModel::Notes notes = region->midi_source(0)->model()->notes();
 		TreeModel::Row row;
+		stringstream ss;
 		
 		for (MidiModel::Notes::iterator i = notes.begin(); i != notes.end(); ++i) {
 			row = *(model->append());
-			row[columns.channel] = (*i)->channel();
-			row[columns.note_name] = _("Note");
+			row[columns.channel] = (*i)->channel() + 1;
+			row[columns.note_name] = Evoral::midi_note_name ((*i)->note());
 			row[columns.note] = (*i)->note();
 			row[columns.velocity] = (*i)->velocity();
 			
 			BBT_Time bbt;
-			BBT_Time dur;
-			stringstream ss;
-			
+			double dur;
+			bbt.bars = 0;
+			bbt.beats = (uint32_t) floor ((*i)->time());
+			bbt.ticks = (uint32_t) lrint (fmod ((*i)->time(), 1.0) * Meter::ticks_per_beat);
+
 			_session->tempo_map().bbt_time (region->position(), bbt);
 			
-			dur.bars = 0;
-			dur.beats = floor ((*i)->time());
-			dur.ticks = 0;
-			
-			_session->tempo_map().bbt_duration_at (region->position(), dur, 0);
-			
+			ss.str ("");
 			ss << bbt;
 			row[columns.start] = ss.str();
-			ss << dur;
+
+			bbt.bars = 0;
+			dur = (*i)->end_time() - (*i)->time();
+			bbt.beats = floor (dur);
+			bbt.ticks = (uint32_t) lrint (fmod (dur, 1.0) * Meter::ticks_per_beat);
+			
+			_session->tempo_map().bbt_duration_at (region->position(), bbt, 0);
+
+			ss.str ("");
+			ss << bbt;
 			row[columns.length] = ss.str();
 			
+			bbt.bars = 0;
+			bbt.beats = (uint32_t) floor ((*i)->end_time());
+			bbt.ticks = (uint32_t) lrint (fmod ((*i)->end_time(), 1.0) * Meter::ticks_per_beat);
+
 			_session->tempo_map().bbt_time (region->position(), bbt);
-			/* XXX get end point */
 			
+			ss.str ("");
 			ss << bbt;
 			row[columns.end] = ss.str();
 			

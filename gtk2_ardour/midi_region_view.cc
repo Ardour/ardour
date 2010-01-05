@@ -89,6 +89,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _pressed_button(0)
 	, _sort_needed (true)
 	, _optimization_iterator (_events.end())
+	, _list_editor (0)
 {
 	_note_group->raise_to_top();
 }
@@ -110,6 +111,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _pressed_button(0)
 	, _sort_needed (true)
 	, _optimization_iterator (_events.end())
+	, _list_editor (0)
 
 {
 	_note_group->raise_to_top();
@@ -132,6 +134,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _pressed_button(0)
 	, _sort_needed (true)
 	, _optimization_iterator (_events.end())
+	, _list_editor (0)
 {
 	Gdk::Color c;
 	int r,g,b,a;
@@ -157,6 +160,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _pressed_button(0)
 	, _sort_needed (true)
 	, _optimization_iterator (_events.end())
+	, _list_editor (0)
 {
 	Gdk::Color c;
 	int r,g,b,a;
@@ -517,8 +521,10 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 void
 MidiRegionView::show_list_editor ()
 {
-	MidiListEditor* mle = new MidiListEditor (trackview.session(), midi_region());
-	mle->show ();
+	if (!_list_editor) {
+		_list_editor = new MidiListEditor (trackview.session(), midi_region());
+	}
+	_list_editor->present ();
 }
 
 /** Add a note to the model, and the view, at a canvas (click) coordinate.
@@ -937,6 +943,8 @@ MidiRegionView::display_sysexes()
 MidiRegionView::~MidiRegionView ()
 {
 	in_destructor = true;
+
+	delete _list_editor;
 
 	RegionViewGoingAway (this); /* EMIT_SIGNAL */
 

@@ -54,7 +54,7 @@ class MidiListEditor : public ArdourDialog
 			add (start);
 			add (length);
 			add (end);
-			add (note);
+			add (_note);
 		};
 		Gtk::TreeModelColumn<uint8_t> channel;
 		Gtk::TreeModelColumn<uint8_t> note;
@@ -75,6 +75,11 @@ class MidiListEditor : public ArdourDialog
 
 	void edited (const Glib::ustring&, const Glib::ustring&);
 	void redisplay_model ();
+
+	bool key_press (GdkEventKey* ev);
+	bool key_release (GdkEventKey* ev);
+	
+	void delete_selected_note ();
 };
 
 #endif /* __ardour_gtk2_midi_list_editor_h_ */

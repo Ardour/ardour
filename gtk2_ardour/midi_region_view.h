@@ -63,6 +63,7 @@ class GhostRegion;
 class AutomationTimeAxisView;
 class AutomationRegionView;
 class MidiCutBuffer;
+class MidiListEditor;
 
 class MidiRegionView : public RegionView
 {
@@ -397,6 +398,7 @@ class MidiRegionView : public RegionView
 	void update_note (ArdourCanvas::CanvasNote*);
 	void update_hit (ArdourCanvas::CanvasHit*);
 
+	MidiListEditor* _list_editor;
 };
 
 
