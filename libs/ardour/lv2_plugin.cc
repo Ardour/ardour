@@ -722,6 +722,8 @@ LV2PluginInfo::discover (void* lv2_world)
 			continue;
 		}
 
+		info->type = LV2;
+
 		info->name = string(slv2_value_as_string(name));
 		slv2_value_free(name);
 
