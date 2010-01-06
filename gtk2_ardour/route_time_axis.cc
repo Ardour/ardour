@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include  <map>
 #include <utility>
 
 #include <sigc++/bind.h>
@@ -32,6 +33,7 @@
 #include "pbd/whitespace.h"
 #include "pbd/memento_command.h"
 #include "pbd/enumwriter.h"
+#include "pbd/stacktrace.h"
 
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
@@ -415,6 +417,7 @@ RouteTimeAxisView::build_automation_action_menu ()
 	using namespace Menu_Helpers;
 
 	automation_action_menu = manage (new Menu);
+	cerr << "New AAM @ " << automation_action_menu << endl;
 	MenuList& automation_items = automation_action_menu->items();
 	automation_action_menu->set_name ("ArdourContextMenu");
 
@@ -443,15 +446,47 @@ RouteTimeAxisView::build_automation_action_menu ()
 
 	map<Evoral::Parameter, RouteAutomationNode*>::iterator i;
 
+	map<string,Menu*> param_menu_map;
+
 	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
 
-		automation_items.push_back (SeparatorElem());
+		string desc = _route->describe_parameter(i->second->param);
+		string::size_type bracket = desc.find_first_of ('[');
 
-		automation_items.push_back(CheckMenuElem (_route->describe_parameter(i->second->param),
-				sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::toggle_automation_track), i->second->param)));
+		if (bracket == string::npos) {
 
-		i->second->menu_item = static_cast<Gtk::CheckMenuItem*>(&automation_items.back());
-		i->second->menu_item->set_active(show_automation(i->second->param));
+			/* item gets its own entry in the menu */
+
+			automation_items.push_back (CheckMenuElem (desc, sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::toggle_automation_track), i->second->param)));
+
+			i->second->menu_item = static_cast<Gtk::CheckMenuItem*>(&automation_items.back());
+			i->second->menu_item->set_active (show_automation (i->second->param));
+
+			automation_items.push_back (SeparatorElem());
+
+		} else {
+
+			/* subgroup related items in their own submenu */
+
+			string first_part = desc.substr (0, bracket);
+			Menu* m;
+			map<string,Menu*>::iterator x;
+			
+			if ((x = param_menu_map.find (first_part)) == param_menu_map.end()) {
+				m = manage (new Menu);
+				m->set_name ("ArdourContextMenu");
+				automation_items.push_back (MenuElem (first_part + "...", *m));
+				param_menu_map.insert (pair<string,Menu*>(first_part, m));
+			} else {
+				m = x->second;
+			}
+			
+			MenuList& mi = m->items();
+			mi.push_back (CheckMenuElem (desc, sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::toggle_automation_track), i->second->param)));
+
+			i->second->menu_item = static_cast<Gtk::CheckMenuItem*>(&mi.back());
+			i->second->menu_item->set_active(show_automation(i->second->param));
+		}
 	}
 }
 
@@ -481,8 +516,11 @@ RouteTimeAxisView::build_display_menu ()
 	if (!Profile->get_sae()) {
 		items.push_back (MenuElem (_("Remote Control ID..."), sigc::mem_fun (*this, &RouteUI::open_remote_control_id_dialog)));
 		/* rebuild this every time */
+		cerr << "Build a new AAM, old was " << automation_action_menu << endl;
 		build_automation_action_menu ();
+		cerr << "Attach AAM @ " << automation_action_menu << endl;
 		items.push_back (MenuElem (_("Automation"), *automation_action_menu));
+		cerr << "Attachment is done\n";
 		items.push_back (SeparatorElem());
 	}
 
@@ -1636,8 +1674,9 @@ RouteTimeAxisView::toggle_automation_track (Evoral::Parameter param)
 {
 	RouteAutomationNode* node = automation_track(param);
 
-	if (!node)
+	if (!node) {
 		return;
+	}
 
 	bool showit = node->menu_item->get_active();
 

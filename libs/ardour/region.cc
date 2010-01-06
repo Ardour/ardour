@@ -1416,12 +1416,17 @@ Region::source_deleted (boost::weak_ptr<Source>)
 {
 	_sources.clear ();
 
-	/* this is a very special case: at least one of the region's
-	   sources has bee deleted, so invalidate all references to
-	   ourselves.
-	*/
+	if (!_session.deletion_in_progress()) {
+		/* this is a very special case: at least one of the region's
+		   sources has bee deleted, so invalidate all references to
+		   ourselves. Do NOT do this during session deletion, because
+		   then we run the risk that this will actually result
+		   in this object being deleted (as refcnt goes to zero)
+		   while emitting DropReferences.
+		*/
 
-	drop_references ();
+		drop_references ();
+	}
 }
 
 vector<string>

@@ -116,7 +116,8 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 	_view = new MidiStreamView (*this);
 
 	ignore_toggle = false;
-
+	_ignore_toggle_parameter = false;
+	
 	mute_button->set_active (false);
 	solo_button->set_active (false);
 
@@ -371,17 +372,57 @@ MidiTimeAxisView::build_automation_action_menu ()
 	MenuList& automation_items = automation_action_menu->items();
 
 	automation_items.push_back (SeparatorElem());
-	automation_items.push_back (MenuElem (_("Controller..."),
+	automation_items.push_back (MenuElem (_("Show Controller..."),
 			sigc::mem_fun(*this, &MidiTimeAxisView::add_cc_track)));
-	automation_items.push_back (MenuElem (_("Program Change"),
-			sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
-				Evoral::Parameter(MidiPgmChangeAutomation))));
-	automation_items.push_back (MenuElem (_("Bender"),
-			sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
-				Evoral::Parameter(MidiPitchBenderAutomation))));
-	automation_items.push_back (MenuElem (_("Pressure"),
-			sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::add_parameter_track),
-				Evoral::Parameter(MidiChannelPressureAutomation))));
+
+	add_basic_parameter_menu_item (automation_items, _("Program Change"), Evoral::Parameter (MidiPgmChangeAutomation));
+	add_basic_parameter_menu_item (automation_items, _("Bender"), Evoral::Parameter (MidiPitchBenderAutomation));
+	add_basic_parameter_menu_item (automation_items, _("Pressure"), Evoral::Parameter (MidiChannelPressureAutomation));
+}
+
+void
+MidiTimeAxisView::add_basic_parameter_menu_item (Menu_Helpers::MenuList& items, const string& label, Evoral::Parameter param)
+{
+	items.push_back (Menu_Helpers::CheckMenuElem 
+			 (label, sigc::bind (sigc::mem_fun 
+					     (*this, &MidiTimeAxisView::toggle_parameter_track), param)));
+	
+	// cerr << "Create a new menu item from " << param.type() << '/' << param.id() << '/' << (int) param.channel() << endl;
+
+	uint16_t selected_channels = _channel_selector.get_selected_channels();
+	bool visible = false;
+
+	for (uint8_t i = 0; i < 16; i++) {
+		if (selected_channels & (0x0001 << i)) {
+			Evoral::Parameter param_with_channel(param.type(), i, param.id());
+
+			// cerr << "\tChecking on channel " << (int) i << " via " << param_with_channel.type() << '/' << param_with_channel.id() << endl;
+			
+			RouteAutomationNode* node = automation_track (param_with_channel);
+
+			if (node) {
+				if (node->track->marked_for_display()) {
+					visible = true;
+					// cerr << "\tGot a track, and it appears visible\n";
+					break;
+				} else {
+					// cerr << "\tGot a track, and it appears hidden\n";
+				}
+			} else {
+				// cerr << "\tno track found\n";
+			}
+		}
+	}
+
+	CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&items.back());
+	cmi->set_active (visible);
+
+	pair<ParameterMenuMap::iterator,bool> result;
+	result = parameter_menu_map.insert (pair<Evoral::Parameter,CheckMenuItem*> (param, cmi));
+	if (!result.second) {
+		/* it already exists, but we're asssigning a new menu item to it */
+		result.first->second = cmi;
+	}
 }
 
 Gtk::Menu*
@@ -533,17 +574,34 @@ MidiTimeAxisView::add_cc_track()
 		create_automation_child(param, true);
 }
 
-
-/** Add an automation track for the given parameter (pitch bend, channel pressure).
+/** Toggle an automation track for the given parameter (pitch bend, channel pressure).
+ *  Will add track if necessary.
  */
 void
-MidiTimeAxisView::add_parameter_track(const Evoral::Parameter& param)
+MidiTimeAxisView::toggle_parameter_track(const Evoral::Parameter& param)
 {
+	if (_ignore_toggle_parameter) {
+		return;
+	}
+
+	cerr << "CHANGE VISIBILITY OF " << param.type() << '/' << param.id() << '/' << (int) param.channel() << endl;
+
 	if ( !EventTypeMap::instance().is_midi_parameter(param) ) {
 		error << "MidiTimeAxisView: unknown automation child "
 			<< ARDOUR::EventTypeMap::instance().to_symbol(param) << endmsg;
 		return;
 	}
+
+	map<Evoral::Parameter,CheckMenuItem*>::iterator x = parameter_menu_map.find (param);
+	if (x == parameter_menu_map.end()) {
+		cerr << "Param not found in pm map\n";
+		return;
+	}
+
+	bool yn = x->second->get_active ();
+	cerr << "Menu item state for " << param.type() << '/' << param.id() << '/' << (int) param.channel() << ' ' << yn << endl;
+
+	cerr << "toggle param " << param.type() << '/' << param.id() << '/' << (int) param.channel() << " from " << !yn << " to " << yn << endl;
 
 	// create the parameter lane for each selected channel
 	uint16_t selected_channels = _channel_selector.get_selected_channels();
@@ -551,11 +609,28 @@ MidiTimeAxisView::add_parameter_track(const Evoral::Parameter& param)
 	for (uint8_t i = 0; i < 16; i++) {
 		if (selected_channels & (0x0001 << i)) {
 			Evoral::Parameter param_with_channel(param.type(), i, param.id());
-			create_automation_child(param_with_channel, true);
+
+			RouteAutomationNode* node = automation_track (param_with_channel);
+			
+			if (!node) {
+				cerr << "\tNO EXISTING TRACK FOR chn " << (int) i << endl;
+				if (yn) {
+					create_automation_child (param_with_channel, true);
+				}
+			} else {
+				cerr << "\tTRACK EXISTS, set its menu item to " << yn << " to change its visibilty\n";
+				node->menu_item->set_active (yn);
+			}
 		}
 	}
+
+	_ignore_toggle_parameter = true;
+	x->second->set_active (yn);
+	_ignore_toggle_parameter = false;
 }
 
+/** Hide an automation track for the given parameter (pitch bend, channel pressure).
+ */
 void
 MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool show)
 {

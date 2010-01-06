@@ -12,6 +12,7 @@
 #include "control_protocol/control_protocol.h"
 
 #include "gui_thread.h"
+#include "midi_tracer.h"
 #include "rc_option_editor.h"
 #include "utils.h"
 #include "midi_port_dialog.h"
@@ -65,6 +66,10 @@ public:
 
 private:
 
+        typedef std::map<MIDI::Port*,MidiTracer*> PortTraceMap;
+        PortTraceMap port_input_trace_map;
+        PortTraceMap port_output_trace_map;
+
 	void model_changed (TreeModel::Path const &, TreeModel::iterator const & i)
 	{
 		TreeModel::Row r = *i;
@@ -81,14 +86,32 @@ private:
 			}
 
 			if (r[_model.trace_input] != port->input()->tracing()) {
-				port->input()->trace (r[_model.trace_input], &cerr, string (port->name()) + _(" input: "));
+				PortTraceMap::iterator x = port_input_trace_map.find (port);
+				MidiTracer* mt;
+
+				if (x == port_input_trace_map.end()) {
+					 mt = new MidiTracer (port->name() + string (" [input]"), *port->input());
+					 port_input_trace_map.insert (pair<MIDI::Port*,MidiTracer*> (port, mt));
+				} else {
+					mt = x->second;
+				}
+				mt->present ();
 			}
 		}
 
 		if (port->output()) {
 
 			if (r[_model.trace_output] != port->output()->tracing()) {
-				port->output()->trace (r[_model.trace_output], &cerr, string (port->name()) + _(" output: "));
+				PortTraceMap::iterator x = port_output_trace_map.find (port);
+				MidiTracer* mt;
+
+				if (x == port_output_trace_map.end()) {
+					mt = new MidiTracer (port->name() + string (" [output]"), *port->output());
+					port_output_trace_map.insert (pair<MIDI::Port*,MidiTracer*> (port, mt));
+				} else {
+					mt = x->second;
+				}
+				mt->present ();
 			}
 
 		}

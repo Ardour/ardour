@@ -72,7 +72,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void show_all_automation ();
 	void show_existing_automation ();
 	void add_cc_track ();
-	void add_parameter_track (const Evoral::Parameter& param);
+	void toggle_parameter_track (const Evoral::Parameter& param);
 	void create_automation_child (const Evoral::Parameter& param, bool show);
 
 	ARDOUR::NoteMode  note_mode() const { return _note_mode; }
@@ -140,6 +140,12 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	Gtk::Menu* build_def_channel_menu();
 	void set_default_channel (int);
 	void toggle_midi_thru ();
+
+	void add_basic_parameter_menu_item (Gtk::Menu_Helpers::MenuList& items, const std::string& label, Evoral::Parameter param);
+	bool _ignore_toggle_parameter;
+
+	typedef std::map<Evoral::Parameter,Gtk::CheckMenuItem*> ParameterMenuMap;
+	ParameterMenuMap parameter_menu_map;
 };
 
 #endif /* __ardour_midi_time_axis_h__ */
