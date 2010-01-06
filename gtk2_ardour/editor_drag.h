@@ -120,6 +120,11 @@ public:
 		return true;
 	}
 
+	/** @return current x extent of the thing being dragged; ie
+	 *  a pair of (leftmost_position, rightmost_position)
+	 */
+	virtual std::pair<nframes64_t, nframes64_t> extent () const;
+
 protected:
 
 	double grab_x () const {
@@ -179,6 +184,8 @@ class RegionDrag : public Drag, public sigc::trackable
 public:
 	RegionDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
 	virtual ~RegionDrag () {}
+
+	std::pair<nframes64_t, nframes64_t> extent () const;
 
 protected:
 

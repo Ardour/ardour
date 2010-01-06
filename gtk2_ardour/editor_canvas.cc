@@ -551,7 +551,7 @@ void
 Editor::maybe_autoscroll (GdkEventMotion* event, bool allow_vert)
 {
 	nframes64_t rightmost_frame = leftmost_frame + current_page_frames();
-	nframes64_t frame = _drag->adjusted_current_frame (0);
+	pair<nframes64_t, nframes64_t> frames = _drag->extent ();
 	bool startit = false;
 
 	autoscroll_y = 0;
@@ -564,14 +564,14 @@ Editor::maybe_autoscroll (GdkEventMotion* event, bool allow_vert)
 		startit = true;
 	}
 
-	if (frame > rightmost_frame) {
+	if (frames.second > rightmost_frame) {
 
 		if (rightmost_frame < max_frames) {
 			autoscroll_x = 1;
 			startit = true;
 		}
 
-	} else if (frame < leftmost_frame) {
+	} else if (frames.first < leftmost_frame) {
 		if (leftmost_frame > 0) {
 			autoscroll_x = -1;
 			startit = true;
@@ -613,10 +613,13 @@ Editor::autoscroll_canvas ()
 	assert (_drag);
 
 	if (autoscroll_x_distance != 0) {
+
+		pair<nframes64_t, nframes64_t> const e = _drag->extent ();
+		
 		if (autoscroll_x > 0) {
-			autoscroll_x_distance = (unit_to_frame (_drag->current_pointer_x()) - (leftmost_frame + current_page_frames())) / 3;
+			autoscroll_x_distance = (e.second - (leftmost_frame + current_page_frames())) / 3;
 		} else if (autoscroll_x < 0) {
-			autoscroll_x_distance = (leftmost_frame - unit_to_frame (_drag->current_pointer_x())) / 3;
+			autoscroll_x_distance = (leftmost_frame - e.first) / 3;
 
 		}
 	}
@@ -702,7 +705,7 @@ Editor::autoscroll_canvas ()
 	Gdk::ModifierType mask;
 	canvas_window->get_pointer (x, y, mask);
 	ev.type = GDK_MOTION_NOTIFY;
-	ev.state &= Gdk::BUTTON1_MASK;
+	ev.state = Gdk::BUTTON1_MASK;
 	ev.x = x;
 	ev.y = y;
 

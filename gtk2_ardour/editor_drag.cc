@@ -242,6 +242,12 @@ Drag::break_drag ()
 	}
 }
 
+pair<nframes64_t, nframes64_t>
+Drag::extent () const
+{
+	nframes64_t const f = adjusted_current_frame (0);
+	return make_pair (f, f);
+}
 
 RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
 	: Drag (e, i),
@@ -256,6 +262,14 @@ RegionDrag::region_going_away (RegionView* v)
 {
 	_views.remove (v);
 }
+
+pair<nframes64_t, nframes64_t>
+RegionDrag::extent () const
+{
+	nframes64_t const f = adjusted_current_frame (0);
+	return make_pair (f, f + _primary->region()->length ());
+}
+
 
 RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b)
 	: RegionDrag (e, i, p, v),
