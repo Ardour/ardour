@@ -4325,35 +4325,22 @@ Editor::idle_visual_changer ()
 		update_tempo_based_rulers ();
 	}
 	if (p & VisualChange::TimeOrigin) {
+		// Add a little extra so we can see the end marker
+		nframes64_t e = 0;
+		if (_session) {
+			e = _session->current_end_frame ();
+		}
+		e += current_page_frames () / 10;
+		horizontal_adjustment.set_upper (e / frames_per_unit);
 		horizontal_adjustment.set_value (pending_visual_change.time_origin / frames_per_unit);
 	}
 	if (p & VisualChange::YOrigin) {
 		vertical_adjustment.set_value (pending_visual_change.y_origin);
 	}
 
-	nframes64_t csf=0, cef=0;
-	nframes64_t current_time_origin = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
-
-	if (_session) {
-		csf = _session->current_start_frame();
-		cef = _session->current_end_frame();
-	}
-
-	/* if we seek beyond the current end of the canvas, move the end */
-
-
-	if (last_time_origin == horizontal_adjustment.get_value() ) {
+	if (last_time_origin == horizontal_adjustment.get_value()) {
 		/* changed signal not emitted */
 		update_fixed_rulers ();
-		redisplay_tempo (true);
-	}
-
-	if (current_time_origin != pending_visual_change.time_origin) {
-		cef += current_page_frames() / 10; // Add a little extra so we can see the end marker
-		horizontal_adjustment.set_upper (cef / frames_per_unit);
-		horizontal_adjustment.set_value (pending_visual_change.time_origin / frames_per_unit);
-	} else {
-		update_fixed_rulers();
 		redisplay_tempo (true);
 	}
 
@@ -4753,7 +4740,7 @@ Editor::idle_resize ()
 void
 Editor::located ()
 {
-	ENSURE_GUI_THREAD (*this, &Editor::located)
+	ENSURE_GUI_THREAD (*this, &Editor::located);
 
 	_pending_locate_request = false;
 }
