@@ -874,6 +874,7 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 
 			rv->get_canvas_group()->reparent (*dest_rtv->view()->canvas_item());
 			rv->get_canvas_group()->property_y() = 0;
+			rv->get_time_axis_view().reveal_dependent_views (*rv);
 
 			/* just change the model */
 
