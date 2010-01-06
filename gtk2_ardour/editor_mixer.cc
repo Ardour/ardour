@@ -243,8 +243,20 @@ Editor::update_current_screen ()
 						} else {
 							center_screen (current_page_frames()/2);
 						}
+						
 					} else {
-						center_screen (frame+(current_page_frames()/2));
+
+						if (frame < leftmost_frame) {
+							/* moving left: end up with the playhead 3/4 of the way along the page */
+							nframes64_t l = frame - (3 * current_page_frames() / 4);
+							if (l < 0) {
+								l = 0;
+							}
+							center_screen_internal (l + (current_page_frames() / 2), current_page_frames ());
+						} else {
+							/* moving right: end up with the playhead 1/4 of the way along the page */
+							center_screen_internal (frame + (current_page_frames() / 4), current_page_frames ());
+						}
 					}
 				}
 
