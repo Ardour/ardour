@@ -4325,13 +4325,6 @@ Editor::idle_visual_changer ()
 		update_tempo_based_rulers ();
 	}
 	if (p & VisualChange::TimeOrigin) {
-		// Add a little extra so we can see the end marker
-		nframes64_t e = 0;
-		if (_session) {
-			e = _session->current_end_frame ();
-		}
-		e += current_page_frames () / 10;
-		horizontal_adjustment.set_upper (e / frames_per_unit);
 		horizontal_adjustment.set_value (pending_visual_change.time_origin / frames_per_unit);
 	}
 	if (p & VisualChange::YOrigin) {
