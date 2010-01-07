@@ -24,12 +24,11 @@
 #include <gdkmm/pixbuf.h>
 
 class MidiScroomer : public Gtkmm2ext::Scroomer {
-public:
+  public:
 	MidiScroomer(Gtk::Adjustment&);
 	~MidiScroomer();
 
 	bool on_expose_event(GdkEventExpose*);
-
 	void on_size_request(Gtk::Requisition*);
 	void on_size_allocate(Gtk::Allocation&);
 

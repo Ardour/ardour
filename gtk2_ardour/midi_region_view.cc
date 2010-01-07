@@ -90,6 +90,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _sort_needed (true)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
+	, no_sound_notes (false)
 {
 	_note_group->raise_to_top();
 }
@@ -112,6 +113,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _sort_needed (true)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
+	, no_sound_notes (false)
 
 {
 	_note_group->raise_to_top();
@@ -135,6 +137,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _sort_needed (true)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
+	, no_sound_notes (false)
 {
 	Gdk::Color c;
 	int r,g,b,a;
@@ -161,6 +164,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _sort_needed (true)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
+	, no_sound_notes (false)
 {
 	Gdk::Color c;
 	int r,g,b,a;
@@ -1147,7 +1151,7 @@ MidiRegionView::extend_active_notes()
 void
 MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
 {
-	if (!trackview.editor().sound_notes()) {
+	if (no_sound_notes || !trackview.editor().sound_notes()) {
 		return;
 	}
 
@@ -1527,6 +1531,91 @@ MidiRegionView::unique_select(ArdourCanvas::CanvasNoteEvent* ev)
 
 	if (!ev->selected()) {
 		add_to_selection (ev);
+	}
+}
+
+void
+MidiRegionView::select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend)
+{
+	uint8_t low_note = 127;
+	uint8_t high_note = 0;
+	MidiModel::Notes& notes (_model->notes());
+	_optimization_iterator = _events.begin();
+
+	if (extend && _selection.empty()) {
+		extend = false;
+	}
+
+	if (extend) {
+
+		/* scan existing selection to get note range */
+
+		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+			if ((*i)->note()->note() < low_note) {
+				low_note = (*i)->note()->note();
+			}
+			if ((*i)->note()->note() > high_note) {
+				high_note = (*i)->note()->note();
+			}
+		}
+
+		low_note = min (low_note, notenum);
+		high_note = max (high_note, notenum);
+	}
+
+	no_sound_notes = true;
+
+	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
+
+		boost::shared_ptr<NoteType> note (*n);
+		CanvasNoteEvent* cne;
+		bool select = false;
+
+		if (((0x0001 << note->channel()) & channel_mask) != 0) {
+			if (extend) {
+				if ((note->note() >= low_note && note->note() <= high_note)) {
+					select = true;
+				}
+			} else if (note->note() == notenum) {
+				select = true;
+			}
+		}
+
+		if (select) {
+			if ((cne = find_canvas_note (note)) != 0) {
+				// extend is false because we've taken care of it, 
+				// since it extends by time range, not pitch.
+				note_selected (cne, add, false);
+			}
+		}
+		
+		add = true; // we need to add all remaining matching notes, even if the passed in value was false (for "set")
+
+	}
+
+	no_sound_notes = false;
+}
+
+void
+MidiRegionView::toggle_matching_notes (uint8_t notenum, uint16_t channel_mask)
+{
+	MidiModel::Notes& notes (_model->notes());
+	_optimization_iterator = _events.begin();
+
+	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
+
+		boost::shared_ptr<NoteType> note (*n);
+		CanvasNoteEvent* cne;
+
+		if (note->note() == notenum && (((0x0001 << note->channel()) & channel_mask) != 0)) {
+			if ((cne = find_canvas_note (note)) != 0) {
+				if (cne->selected()) {
+					note_deselected (cne);
+				} else {
+					note_selected (cne, true, false);
+				}
+			}
+		}
 	}
 }
 

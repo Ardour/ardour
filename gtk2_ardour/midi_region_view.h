@@ -198,6 +198,9 @@ class MidiRegionView : public RegionView
 	void move_selection(double dx, double dy);
 	void note_dropped(ArdourCanvas::CanvasNoteEvent* ev, double d_pixels, int8_t d_note);
 
+	void select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend);
+	void toggle_matching_notes (uint8_t notenum, uint16_t channel_mask);
+
 	/** Return true iff the note is within the extent of the region.
 	 * @param visible will be set to true if the note is within the visible note range, false otherwise.
 	 */
@@ -399,6 +402,7 @@ class MidiRegionView : public RegionView
 	void update_hit (ArdourCanvas::CanvasHit*);
 
 	MidiListEditor* _list_editor;
+	bool no_sound_notes;
 };
 
 

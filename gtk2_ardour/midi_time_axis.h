@@ -146,6 +146,16 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	typedef std::map<Evoral::Parameter,Gtk::CheckMenuItem*> ParameterMenuMap;
 	ParameterMenuMap parameter_menu_map;
+
+	Gtk::Menu* controller_menu;
+	void build_controller_menu ();
+
+	void add_note_selection (uint8_t note);
+	void extend_note_selection (uint8_t note);
+	void toggle_note_selection (uint8_t note);
+	void add_note_selection_region_view (RegionView* rv, uint8_t note, uint16_t chn_mask);
+	void extend_note_selection_region_view (RegionView*, uint8_t note, uint16_t chn_mask);
+	void toggle_note_selection_region_view (RegionView*, uint8_t note, uint16_t chn_mask);
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

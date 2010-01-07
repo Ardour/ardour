@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2008 Paul Davis
+    Author: Audan Holland ??
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -56,6 +57,10 @@ public:
 		double g;
 		double b;
 	};
+
+	sigc::signal<void,uint8_t> AddNoteSelection;
+	sigc::signal<void,uint8_t> ToggleNoteSelection;
+	sigc::signal<void,uint8_t> ExtendNoteSelection;
 
 private:
 	static Color white;

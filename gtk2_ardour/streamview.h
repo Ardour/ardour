@@ -87,8 +87,11 @@ public:
 	Gdk::Color get_region_color () const { return region_color; }
 	void       apply_color (Gdk::Color&, ColorTarget t);
 
+	uint32_t     num_selected_regionviews () const;
+
 	RegionView*  find_view (boost::shared_ptr<const ARDOUR::Region>);
 	void         foreach_regionview (sigc::slot<void,RegionView*> slot);
+	void         foreach_selected_regionview (sigc::slot<void,RegionView*> slot);
 
 	void set_selected_regionviews (RegionSelection&);
 	void get_selectables (nframes_t, nframes_t, double, double, std::list<Selectable* >&);

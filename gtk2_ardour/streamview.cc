@@ -470,11 +470,34 @@ StreamView::find_view (boost::shared_ptr<const Region> region)
 	return 0;
 }
 
+uint32_t
+StreamView::num_selected_regionviews () const
+{
+	uint32_t cnt = 0;
+
+	for (list<RegionView*>::const_iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		if ((*i)->get_selected()) {
+			++cnt;
+		}
+	}
+	return cnt;
+}
+
 void
 StreamView::foreach_regionview (sigc::slot<void,RegionView*> slot)
 {
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		slot (*i);
+	}
+}
+
+void
+StreamView::foreach_selected_regionview (sigc::slot<void,RegionView*> slot)
+{
+	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		if ((*i)->get_selected()) {
+			slot (*i);
+		}
 	}
 }
 

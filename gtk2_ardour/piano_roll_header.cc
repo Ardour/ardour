@@ -20,6 +20,8 @@
 #include "evoral/midi_events.h"
 #include "ardour/midi_track.h"
 
+#include "gtkmm2ext/keyboard.h"
+
 #include "piano_roll_header.h"
 #include "midi_time_axis.h"
 #include "midi_streamview.h"
@@ -27,6 +29,7 @@
 const int no_note = 0xff;
 
 using namespace std;
+using namespace Gtkmm2ext;
 
 PianoRollHeader::Color PianoRollHeader::white = PianoRollHeader::Color(0.77f, 0.78f, 0.76f);
 PianoRollHeader::Color PianoRollHeader::white_highlight = PianoRollHeader::Color(0.87f, 0.88f, 0.86f);
@@ -458,28 +461,31 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 bool
 PianoRollHeader::on_motion_notify_event (GdkEventMotion* ev)
 {
-	int note = _view.y_to_note(ev->y);
+	if (_dragging) {
 
-	if (_highlighted_note != no_note) {
-		if (note > _highlighted_note) {
-			invalidate_note_range(_highlighted_note, note);
-		} else {
-			invalidate_note_range(note, _highlighted_note);
+		int note = _view.y_to_note(ev->y);
+
+		if (_highlighted_note != no_note) {
+			if (note > _highlighted_note) {
+				invalidate_note_range(_highlighted_note, note);
+			} else {
+				invalidate_note_range(note, _highlighted_note);
+			}
+			
+			_highlighted_note = note;
 		}
-
-		_highlighted_note = note;
-	}
-
-	/* redraw already taken care of above */
-	if (_clicked_note != no_note && _clicked_note != note) {
-		_active_notes[_clicked_note] = false;
-		send_note_off(_clicked_note);
-
-		_clicked_note = note;
-
-		if (!_active_notes[note]) {
-			_active_notes[note] = true;
-			send_note_on(note);
+		
+		/* redraw already taken care of above */
+		if (_clicked_note != no_note && _clicked_note != note) {
+			_active_notes[_clicked_note] = false;
+			send_note_off(_clicked_note);
+			
+			_clicked_note = note;
+			
+			if (!_active_notes[note]) {
+				_active_notes[note] = true;
+				send_note_on(note);
+			}
 		}
 	}
 
@@ -493,18 +499,25 @@ PianoRollHeader::on_button_press_event (GdkEventButton* ev)
 {
 	int note = _view.y_to_note(ev->y);
 
-	if (ev->type == GDK_BUTTON_PRESS && note >= 0 && note < 128) {
-		add_modal_grab();
-		_dragging = true;
-
-		if (!_active_notes[note]) {
-			_active_notes[note] = true;
-			_clicked_note = note;
-			send_note_on(note);
-
-			invalidate_note_range(note, note);
-		} else {
-			_clicked_note = no_note;
+	if (ev->button == 2) {
+		send_note_on (note);
+		/* relax till release */
+	} else {
+		
+		if (ev->type == GDK_BUTTON_PRESS && note >= 0 && note < 128) {
+			
+			add_modal_grab();
+			_dragging = true;
+			
+			if (!_active_notes[note]) {
+				_active_notes[note] = true;
+				_clicked_note = note;
+				send_note_on(note);
+				
+				invalidate_note_range(note, note);
+			} else {
+				_clicked_note = no_note;
+			}
 		}
 	}
 
@@ -516,17 +529,31 @@ PianoRollHeader::on_button_release_event (GdkEventButton* ev)
 {
 	int note = _view.y_to_note(ev->y);
 
-	if (_dragging) {
-		remove_modal_grab();
-		_dragging = false;
+	if (ev->button == 2) {
+		send_note_off (note);
 
-		if (note == _clicked_note) {
-			_active_notes[note] = false;
-			_clicked_note = no_note;
-			send_note_off(note);
-
-			invalidate_note_range(note, note);
+		if (Keyboard::no_modifiers_active (ev->state)) {
+			AddNoteSelection (note); // EMIT SIGNAL
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {			
+			ToggleNoteSelection (note); // EMIT SIGNAL
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::RangeSelectModifier)) {
+			ExtendNoteSelection (note); // EMIT SIGNAL
 		}
+		
+	} else {
+
+		if (_dragging) {
+			remove_modal_grab();
+			_dragging = false;
+			
+			if (note == _clicked_note) {
+				_active_notes[note] = false;
+				_clicked_note = no_note;
+				send_note_off(note);
+				
+				invalidate_note_range(note, note);
+			}
+		} 
 	}
 
 	return true;
@@ -672,3 +699,4 @@ PianoRollHeader::send_note_off(uint8_t note)
 		track->write_immediate_event(3, _event);
 	}
 }
+
