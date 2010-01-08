@@ -2704,7 +2704,7 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 ControlPointDrag::aborted ()
 {
-	/* XXX: TODO */
+	_point->line().reset ();
 }
 
 bool
@@ -2812,7 +2812,7 @@ LineDrag::finished (GdkEvent* event, bool)
 void
 LineDrag::aborted ()
 {
-	/* XXX: TODO */
+	_line->reset ();
 }
 
 void
@@ -2926,7 +2926,7 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 RubberbandSelectDrag::aborted ()
 {
-	/* XXX: TODO */
+	_editor->rubberband_rect->hide ();
 }
 
 void
@@ -2995,7 +2995,7 @@ TimeFXDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 void
 TimeFXDrag::aborted ()
 {
-	/* XXX: TODO */
+	_primary->get_time_axis_view().hide_timestretch ();
 }
 
 
@@ -3590,7 +3590,7 @@ MouseZoomDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 MouseZoomDrag::aborted ()
 {
-	/* XXX: TODO */
+	_editor->zoom_rect->hide ();
 }
 
 NoteDrag::NoteDrag (Editor* e, ArdourCanvas::Item* i)
@@ -3833,5 +3833,6 @@ AutomationRangeDrag::finished (GdkEvent* event, bool)
 void
 AutomationRangeDrag::aborted ()
 {
-	/* XXX: TODO */
+	_line->clear_always_in_view ();
+	_line->reset ();
 }
