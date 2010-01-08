@@ -106,7 +106,7 @@ Editor::register_actions ()
 
 	/* add named actions for the editor */
 
-	ActionManager::register_action (editor_actions, "break-drag", _("Break drag"), sigc::mem_fun (*this, &Editor::break_drag));
+	ActionManager::register_action (editor_actions, "escape", _("Break drag or deselect all"), sigc::mem_fun (*this, &Editor::escape));
 
 	act = ActionManager::register_toggle_action (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), sigc::mem_fun (*this, &Editor::editor_mixer_button_toggled));
 	ActionManager::session_sensitive_actions.push_back (act);

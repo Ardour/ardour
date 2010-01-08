@@ -52,9 +52,8 @@ public:
 	}
 
 	void swap_grab (ArdourCanvas::Item *, Gdk::Cursor *, uint32_t);
-	void break_drag ();
-
 	bool motion_handler (GdkEvent*, bool);
+	void break_drag ();
 
 	/** @return true if an end drag is in progress */
 	bool ending () const {
@@ -93,6 +92,11 @@ public:
 	 *  @param m true if some movement occurred, otherwise false.
 	 */
 	virtual void finished (GdkEvent* e, bool m) = 0;
+
+	/** Called to abort a drag and return things to how
+	 *  they were before it started.
+	 */
+	virtual void aborted () = 0;
 
 	/** @param m Mouse mode.
 	 *  @return true if this drag should happen in this mouse mode.
@@ -162,10 +166,8 @@ protected:
 
 private:
 
-	bool _ending; ///< true if end_grab is in progress, otherwise false
+	bool _ending; ///< true if end_grab or break_drag is in progress, otherwise false
 	bool _move_threshold_passed; ///< true if the move threshold has been passed, otherwise false
-	double _original_x; ///< original world x of the thing being dragged
-	double _original_y; ///< original world y of the thing being dragged
 	double _grab_x; ///< trackview x of the grab start position
 	double _grab_y; ///< trackview y of the grab start position
 	double _current_pointer_x; ///< trackview x of the current pointer
@@ -209,6 +211,7 @@ public:
 	virtual void start_grab (GdkEvent *, Gdk::Cursor *);
 	virtual void motion (GdkEvent *, bool);
 	virtual void finished (GdkEvent *, bool) = 0;
+	virtual void aborted ();
 
 protected:
 	struct TimeAxisViewSummary {
@@ -237,6 +240,7 @@ protected:
 	bool check_possible (RouteTimeAxisView **, ARDOUR::layer_t *);
 	bool _brushing;
 	nframes64_t _last_frame_position; ///< last position of the thing being dragged
+	double _total_x_delta;
 };
 
 
@@ -252,6 +256,7 @@ public:
 	virtual void start_grab (GdkEvent *, Gdk::Cursor *);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 
 	std::pair<nframes64_t, int> move_threshold () const {
 		return std::make_pair (4, 4);
@@ -268,6 +273,7 @@ public:
 	RegionInsertDrag (Editor *, boost::shared_ptr<ARDOUR::Region>, RouteTimeAxisView*, nframes64_t);
 
 	void finished (GdkEvent *, bool);
+	void aborted ();
 };
 
 /** Region drag in splice mode */
@@ -278,6 +284,7 @@ public:
 
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 };
 
 /** Drags to create regions */
@@ -289,6 +296,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 
 private:
 	TimeAxisView* _view;
@@ -304,6 +312,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 
 private:
 	MidiRegionView*     region;
@@ -319,6 +328,7 @@ class NoteDrag : public Drag
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 
   private:
 	MidiRegionView* region;
@@ -340,6 +350,8 @@ public:
 	bool active (Editing::MouseMode m) {
 		return (m == Editing::MouseGain);
 	}
+
+	void aborted ();
 };
 
 /** Drag to trim region(s) */
@@ -357,6 +369,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 
 	bool y_movement_matters () const {
 		return false;
@@ -376,6 +389,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 
 	bool allow_vertical_autoscroll () const {
 		return false;
@@ -399,6 +413,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 
 	bool allow_vertical_autoscroll () const {
 		return false;
@@ -423,6 +438,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 
 	bool active (Editing::MouseMode) {
 		return true;
@@ -451,6 +467,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 
 	bool y_movement_matters () const {
 		return false;
@@ -466,6 +483,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 
 	bool y_movement_matters () const {
 		return false;
@@ -482,6 +500,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 
 	bool allow_vertical_autoscroll () const {
 		return false;
@@ -509,6 +528,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 
 	bool active (Editing::MouseMode m);
 
@@ -531,6 +551,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 
 	bool active (Editing::MouseMode) {
 		return true;
@@ -555,6 +576,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 };
 
 /** Region drag in time-FX mode */
@@ -566,6 +588,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 };
 
 /** Scrub drag in audition mode */
@@ -577,6 +600,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 };
 
 /** Drag in range select mode */
@@ -595,6 +619,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 
 private:
 	Operation _operation;
@@ -619,6 +644,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 
 	bool allow_vertical_autoscroll () const {
 		return false;
@@ -645,6 +671,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 };
 
 /** Drag of a range of automation data, changing value but not position */
@@ -656,6 +683,7 @@ public:
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
+	void aborted ();
 
 	bool x_movement_matters () const {
 		return false;

@@ -58,6 +58,7 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i)
 	, _item (i)
 	, _pointer_frame_offset (0)
 	, _have_transaction (false)
+	, _ending (false)
 	, _move_threshold_passed (false)
 	, _grab_frame (0)
 	, _last_pointer_frame (0)
@@ -109,10 +110,6 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	_current_pointer_y = _grab_y;
 	_last_pointer_x = _current_pointer_x;
 	_last_pointer_y = _current_pointer_y;
-
-	_original_x = 0;
-	_original_y = 0;
-	_item->i2w (_original_x, _original_y);
 
 	_item->grab (Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK,
 			      *cursor,
@@ -222,24 +219,21 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 	return false;
 }
 
-
 void
 Drag::break_drag ()
 {
-	_editor->stop_canvas_autoscroll ();
-	_editor->hide_verbose_canvas_cursor ();
-
+	_ending = true;
+	
 	if (_item) {
 		_item->ungrab (0);
-
-		/* put it back where it came from */
-
-		double cxw, cyw;
-		cxw = 0;
-		cyw = 0;
-		_item->i2w (cxw, cyw);
-		_item->move (_original_x - cxw, _original_y - cyw);
 	}
+
+	aborted ();
+
+	_editor->stop_canvas_autoscroll ();
+	_editor->hide_verbose_canvas_cursor ();
+	
+	_ending = false;
 }
 
 pair<nframes64_t, nframes64_t>
@@ -260,7 +254,9 @@ RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Re
 void
 RegionDrag::region_going_away (RegionView* v)
 {
-	_views.remove (v);
+	if (!ending ()) {
+		_views.remove (v);
+	}
 }
 
 pair<nframes64_t, nframes64_t>
@@ -275,7 +271,8 @@ RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 	: RegionDrag (e, i, p, v),
 	  _dest_trackview (0),
 	  _dest_layer (0),
-	  _brushing (b)
+	  _brushing (b),
+	  _total_x_delta (0)
 {
 
 }
@@ -709,6 +706,8 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 	} /* foreach region */
 
+	_total_x_delta += x_delta;
+	
 	if (first_move) {
 		_editor->cursor_group->raise_to_top();
 	}
@@ -990,6 +989,40 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 	}
 }
 
+void
+RegionMoveDrag::aborted ()
+{
+	if (_copy) {
+
+		for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+			delete *i;
+		}
+
+		_views.clear ();
+
+	} else {
+		RegionMotionDrag::aborted ();
+	}
+}
+
+void
+RegionMotionDrag::aborted ()
+{
+	for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+		TimeAxisView* tv = &(*i)->get_time_axis_view ();
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+		assert (rtv);
+		(*i)->get_canvas_group()->reparent (*rtv->view()->canvas_item());
+		(*i)->get_canvas_group()->property_y() = 0;
+		(*i)->get_time_axis_view().reveal_dependent_views (**i);
+		(*i)->fake_set_opaque (false);
+		(*i)->move (-_total_x_delta, 0);
+		(*i)->set_height (rtv->view()->child_height ());
+	}
+
+	_editor->update_canvas_now ();
+}
+				      
 
 bool
 RegionMotionDrag::x_move_allowed () const
@@ -1060,7 +1093,7 @@ RegionMotionDrag::copy_regions (GdkEvent* event)
 	   without it, the canvas seems to
 	   "forget" to update properly after the upcoming reparent()
 	   ..only if the mouse is in rapid motion at the time of the grab.
-	   something to do with regionview creation raking so long?
+	   something to do with regionview creation taking so long?
 	*/
 	_editor->update_canvas_now();
 }
@@ -1273,6 +1306,12 @@ RegionInsertDrag::finished (GdkEvent* /*event*/, bool /*movement_occurred*/)
 	_views.clear ();
 }
 
+void
+RegionInsertDrag::aborted ()
+{
+	/* XXX: TODO */
+}
+
 RegionSpliceDrag::RegionSpliceDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
 	: RegionMoveDrag (e, i, p, v, false, false)
 {
@@ -1349,6 +1388,11 @@ RegionSpliceDrag::finished (GdkEvent* /*event*/, bool)
 
 }
 
+void
+RegionSpliceDrag::aborted ()
+{
+	/* XXX: TODO */
+}
 
 RegionCreateDrag::RegionCreateDrag (Editor* e, ArdourCanvas::Item* i, TimeAxisView* v)
 	: Drag (e, i),
@@ -1391,6 +1435,12 @@ RegionCreateDrag::finished (GdkEvent* event, bool movement_occurred)
 		motion (event, false);
 		// TODO: create region-create-drag region here
 	}
+}
+
+void
+RegionCreateDrag::aborted ()
+{
+	/* XXX: TODO */
 }
 
 NoteResizeDrag::NoteResizeDrag (Editor* e, ArdourCanvas::Item* i)
@@ -1466,6 +1516,12 @@ NoteResizeDrag::finished (GdkEvent*, bool /*movement_occurred*/)
 }
 
 void
+NoteResizeDrag::aborted ()
+{
+	/* XXX: TODO */
+}
+
+void
 RegionGainDrag::motion (GdkEvent* /*event*/, bool)
 {
 
@@ -1475,6 +1531,12 @@ void
 RegionGainDrag::finished (GdkEvent *, bool)
 {
 
+}
+
+void
+RegionGainDrag::aborted ()
+{
+	/* XXX: TODO */
 }
 
 TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
@@ -1535,7 +1597,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	nframes64_t frame_delta = 0;
 
 	bool left_direction;
-	bool obey_snap = !Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier());
+	bool obey_snap = event ? !Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier()) : false;
 
 	/* snap modifier works differently here..
 	   its current state has to be passed to the
@@ -1613,7 +1675,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 	bool non_overlap_trim = false;
 
-	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
+	if (event && Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
 		non_overlap_trim = true;
 	}
 
@@ -1644,7 +1706,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		{
 			bool swap_direction = false;
 
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+			if (event && Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 				swap_direction = true;
 			}
 
@@ -1700,6 +1762,21 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 	} else {
 		/* no mouse movement */
 		_editor->point_trim (event);
+	}
+}
+
+void
+TrimDrag::aborted ()
+{
+	/* Our motion method is changing model state, so use the Undo system
+	   to cancel.  Perhaps not ideal, as this will leave an Undo point
+	   behind which may be slightly odd from the user's point of view.
+	*/
+
+	finished (0, true);
+	
+	if (_have_transaction) {
+		_editor->undo ();
 	}
 }
 
@@ -1789,6 +1866,12 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		_editor->session()->add_command(new MementoCommand<TempoMap>(map, &before, &after));
 		_editor->commit_reversible_command ();
 	}
+}
+
+void
+MeterMarkerDrag::aborted ()
+{
+	_marker->set_position (_marker->meter().frame ());
 }
 
 TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
@@ -1881,6 +1964,11 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 }
 
+void
+TempoMarkerDrag::aborted ()
+{
+	_marker->set_position (_marker->tempo().frame());
+}
 
 CursorDrag::CursorDrag (Editor* e, ArdourCanvas::Item* i, bool s)
 	: Drag (e, i),
@@ -1915,6 +2003,8 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 			_editor->session()->cancel_audition ();
 		}
 	}
+
+	_pointer_frame_offset = grab_frame() - _cursor->current_frame;
 
 	_editor->show_verbose_time_cursor (_cursor->current_frame, 10);
 }
@@ -1955,6 +2045,13 @@ CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 			_editor->_pending_locate_request = true;
 		}
 	}
+}
+
+void
+CursorDrag::aborted ()
+{
+	_editor->_dragging_playhead = false;
+	_cursor->set_position (adjusted_frame (grab_frame (), 0, false));
 }
 
 FadeInDrag::FadeInDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
@@ -2048,6 +2145,20 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 
 	_editor->commit_reversible_command ();
+}
+
+void
+FadeInDrag::aborted ()
+{
+	for (RegionSelection::iterator i = _views.begin(); i != _views.end(); ++i) {
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*i);
+
+		if (!tmp) {
+			continue;
+		}
+
+		tmp->reset_fade_in_shape_width (tmp->audio_region()->fade_in()->back()->when);
+	}
 }
 
 FadeOutDrag::FadeOutDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
@@ -2145,6 +2256,20 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 
 	_editor->commit_reversible_command ();
+}
+
+void
+FadeOutDrag::aborted ()
+{
+	for (RegionSelection::iterator i = _views.begin(); i != _views.end(); ++i) {
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*i);
+
+		if (!tmp) {
+			continue;
+		}
+
+		tmp->reset_fade_out_shape_width (tmp->audio_region()->fade_out()->back()->when);
+	}
 }
 
 MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
@@ -2460,6 +2585,12 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
+MarkerDrag::aborted ()
+{
+	/* XXX: TODO */
+}
+
+void
 MarkerDrag::update_item (Location* location)
 {
 	double const x1 = _editor->frame_to_pixel (location->start());
@@ -2570,6 +2701,12 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 	_point->line().end_drag ();
 }
 
+void
+ControlPointDrag::aborted ()
+{
+	/* XXX: TODO */
+}
+
 bool
 ControlPointDrag::active (Editing::MouseMode m)
 {
@@ -2670,6 +2807,12 @@ LineDrag::finished (GdkEvent* event, bool)
 {
 	motion (event, false);
 	_line->end_drag ();
+}
+
+void
+LineDrag::aborted ()
+{
+	/* XXX: TODO */
 }
 
 void
@@ -2781,6 +2924,12 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
+RubberbandSelectDrag::aborted ()
+{
+	/* XXX: TODO */
+}
+
+void
 TimeFXDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
 	Drag::start_grab (event);
@@ -2844,6 +2993,13 @@ TimeFXDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 }
 
 void
+TimeFXDrag::aborted ()
+{
+	/* XXX: TODO */
+}
+
+
+void
 ScrubDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
 	Drag::start_grab (event);
@@ -2862,6 +3018,12 @@ ScrubDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 		/* make sure we stop */
 		_editor->session()->request_transport_speed (0.0);
 	}
+}
+
+void
+ScrubDrag::aborted ()
+{
+	/* XXX: TODO */
 }
 
 SelectionDrag::SelectionDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
@@ -3135,6 +3297,12 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 	_editor->stop_canvas_autoscroll ();
 }
 
+void
+SelectionDrag::aborted ()
+{
+	/* XXX: TODO */
+}
+
 RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
 	: Drag (e, i),
 	  _operation (o),
@@ -3337,7 +3505,11 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 	_editor->stop_canvas_autoscroll ();
 }
 
-
+void
+RangeMarkerBarDrag::aborted ()
+{
+	/* XXX: TODO */
+}
 
 void
 RangeMarkerBarDrag::update_item (Location* location)
@@ -3413,6 +3585,12 @@ MouseZoomDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 
 	_editor->zoom_rect->hide();
+}
+
+void
+MouseZoomDrag::aborted ()
+{
+	/* XXX: TODO */
 }
 
 NoteDrag::NoteDrag (Editor* e, ArdourCanvas::Item* i)
@@ -3542,6 +3720,12 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 	}
 }
 
+void
+NoteDrag::aborted ()
+{
+	/* XXX: TODO */
+}
+
 AutomationRangeDrag::AutomationRangeDrag (Editor* e, ArdourCanvas::Item* i, list<AudioRange> const & r)
 	: Drag (e, i)
 	, _ranges (r)
@@ -3644,4 +3828,10 @@ AutomationRangeDrag::finished (GdkEvent* event, bool)
 	motion (event, false);
 	_line->end_drag ();
 	_line->clear_always_in_view ();
+}
+
+void
+AutomationRangeDrag::aborted ()
+{
+	/* XXX: TODO */
 }

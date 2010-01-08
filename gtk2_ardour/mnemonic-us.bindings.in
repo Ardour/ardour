@@ -247,6 +247,8 @@ This mode provides many different operations on both regions and control points,
 @eep|Editor/edit-to-playhead|<@SECONDARY@>Return|move EP to playhead
 @trans|Editor/remove-last-capture|<@PRIMARY@>Delete|destroy last recording
 
+@-group|Editor/escape|Escape|break drag or deselect all
+
 ;; keypad
 
 @rop|Editor/nudge-backward|KP_Subtract|nudge backward

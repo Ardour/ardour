@@ -115,6 +115,7 @@ TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
 	: sigc::trackable(other)
 	, PBD::ScopedConnectionList()
 	, trackview (other.trackview)
+	, _recregion (other._recregion)
 {
 
 	Gdk::Color c;

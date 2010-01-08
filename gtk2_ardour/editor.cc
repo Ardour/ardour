@@ -2290,10 +2290,8 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 
 	if ((prop = node.property ("mouse-mode"))) {
 		MouseMode m = str2mousemode(prop->value());
-		mouse_mode = MouseMode ((int) m + 1); /* lie, force mode switch */
 		set_mouse_mode (m, true);
 	} else {
-		mouse_mode = MouseGain; /* lie, to force the mode switch */
 		set_mouse_mode (MouseObject, true);
 	}
 

@@ -2639,10 +2639,22 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 }
 
 void
+Editor::escape ()
+{
+	if (_drag) {
+		break_drag ();
+	} else {
+		selection->clear ();
+	}
+}
+
+void
 Editor::break_drag ()
 {
 	if (_drag) {
 		_drag->break_drag ();
+		delete _drag;
+		_drag = 0;
 	}
 }
 

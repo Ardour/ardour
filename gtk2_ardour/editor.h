@@ -1282,6 +1282,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Drag* _drag;
 
 	void break_drag ();
+	void escape ();
 
 	Gtk::Menu fade_context_menu;
 	void popup_fade_context_menu (int, int, ArdourCanvas::Item*, ItemType);
