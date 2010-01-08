@@ -2679,9 +2679,9 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 
 	bool const push = Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier);
 
-	_point->line().drag_motion (cx_frames, fraction, push);
+	pair<nframes_t, float> const c = _point->line().drag_motion (cx_frames, fraction, push);
 
-	_editor->set_verbose_canvas_cursor_text (_point->line().get_verbose_cursor_string (fraction));
+	_editor->set_verbose_canvas_cursor_text (_point->line().get_verbose_cursor_string (c.second));
 }
 
 void
@@ -2797,9 +2797,9 @@ LineDrag::motion (GdkEvent* event, bool)
 	}
 
 	/* we are ignoring x position for this drag, so we can just pass in 0 */
-	_line->drag_motion (0, fraction, push);
+	pair<nframes_t, float> const c = _line->drag_motion (0, fraction, push);
 
-	_editor->set_verbose_canvas_cursor_text (_line->get_verbose_cursor_string (fraction));
+	_editor->set_verbose_canvas_cursor_text (_line->get_verbose_cursor_string (c.second));
 }
 
 void

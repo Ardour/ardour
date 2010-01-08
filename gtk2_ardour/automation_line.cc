@@ -237,17 +237,15 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	trackview.editor().session()->set_dirty ();
 }
 
-
+/** Move a view point to a new position (without changing the model)
+ *  @param y New y position as a normalised fraction (0.0-1.0)
+ */
 void
 AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool keep_x, bool with_push)
 {
 	double delta = 0.0;
 	uint32_t last_movable = UINT_MAX;
 	double x_limit = DBL_MAX;
-
-	/* this just changes the current view. it does not alter
-	   the model in any way at all.
-	*/
 
 	/* clamp y-coord appropriately. y is supposed to be a normalized fraction (0.0-1.0),
 	   and needs to be converted to a canvas unit distance.
@@ -769,16 +767,13 @@ AutomationLine::start_drag_common (nframes_t x, float fraction)
 /** Should be called to indicate motion during a drag.
  *  @param x New x position of the drag in frames, or 0 if x is being ignored.
  *  @param fraction New y fraction.
+ *  @return x position and y fraction that were actually used (once clamped).
  */
-void
+pair<nframes_t, float>
 AutomationLine::drag_motion (nframes_t x, float fraction, bool with_push)
 {
 	int64_t const dx = x - drag_x;
-	drag_distance += dx;
-	drag_x = x;
-
 	double dy = fraction - _last_drag_fraction;
-	_last_drag_fraction = fraction;
 
 	/* clamp y so that the "lowest" point hits the bottom but goes no further
 	   and similarly with the "highest" and the top
@@ -792,6 +787,11 @@ AutomationLine::drag_motion (nframes_t x, float fraction, bool with_push)
 			dy -= (y - 1);
 		}
 	}
+
+	pair<nframes_t, float> const clamped (drag_x + dx, _last_drag_fraction + dy);
+	drag_distance += dx;
+	drag_x += dx;
+	_last_drag_fraction += dy;
 
 	for (list<ControlPoint*>::iterator i = _drag_points.begin(); i != _drag_points.end(); ++i) {
 
@@ -810,6 +810,8 @@ AutomationLine::drag_motion (nframes_t x, float fraction, bool with_push)
 
 	_drag_had_movement = true;
 	did_push = with_push;
+
+	return clamped;
 }
 
 /** Should be called to indicate the end of a drag */
