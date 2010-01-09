@@ -125,6 +125,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	playlist_menu = 0;
 	playlist_action_menu = 0;
 	automation_action_menu = 0;
+	plugins_submenu_item = 0;
 	mode_menu = 0;
 	_view = 0;
 
@@ -416,78 +417,27 @@ RouteTimeAxisView::build_automation_action_menu ()
 {
 	using namespace Menu_Helpers;
 
-	automation_action_menu = manage (new Menu);
-	cerr << "New AAM @ " << automation_action_menu << endl;
-	MenuList& automation_items = automation_action_menu->items();
+	delete automation_action_menu;
+	automation_action_menu = new Menu;
+
+	MenuList& items = automation_action_menu->items();
+
 	automation_action_menu->set_name ("ArdourContextMenu");
+	
+	items.push_back (MenuElem (_("Show all automation"),
+				   sigc::mem_fun(*this, &RouteTimeAxisView::show_all_automation)));
+	
+	items.push_back (MenuElem (_("Show existing automation"),
+				   sigc::mem_fun(*this, &RouteTimeAxisView::show_existing_automation)));
+	
+	items.push_back (MenuElem (_("Hide all automation"),
+				   sigc::mem_fun(*this, &RouteTimeAxisView::hide_all_automation)));
+	
+	/* attach the plugin submenu. It may have previously been used elsewhere, so we detach it first. */
 
-	automation_items.push_back (MenuElem (_("Show all automation"),
-					      sigc::mem_fun(*this, &RouteTimeAxisView::show_all_automation)));
-
-	automation_items.push_back (MenuElem (_("Show existing automation"),
-					      sigc::mem_fun(*this, &RouteTimeAxisView::show_existing_automation)));
-
-	automation_items.push_back (MenuElem (_("Hide all automation"),
-					      sigc::mem_fun(*this, &RouteTimeAxisView::hide_all_automation)));
-
-	if (subplugin_menu.gobj()) {
-		/* this will break if the underlying GTK menu has never been set up, hence
-		   the if() above. we have to do this 
-		*/
-		if (subplugin_menu.get_attach_widget()) {
-			subplugin_menu.detach();
-		}
-
-		automation_items.push_back (MenuElem (_("Plugins..."), subplugin_menu));
-	} else {
-		automation_items.push_back (MenuElem (_("Plugins")));
-	}
-	automation_items.back().set_sensitive (!subplugin_menu.items().empty());
-
-	map<Evoral::Parameter, RouteAutomationNode*>::iterator i;
-
-	map<string,Menu*> param_menu_map;
-
-	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-
-		string desc = _route->describe_parameter(i->second->param);
-		string::size_type bracket = desc.find_first_of ('[');
-
-		if (bracket == string::npos) {
-
-			/* item gets its own entry in the menu */
-
-			automation_items.push_back (CheckMenuElem (desc, sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::toggle_automation_track), i->second->param)));
-
-			i->second->menu_item = static_cast<Gtk::CheckMenuItem*>(&automation_items.back());
-			i->second->menu_item->set_active (show_automation (i->second->param));
-
-			automation_items.push_back (SeparatorElem());
-
-		} else {
-
-			/* subgroup related items in their own submenu */
-
-			string first_part = desc.substr (0, bracket);
-			Menu* m;
-			map<string,Menu*>::iterator x;
-			
-			if ((x = param_menu_map.find (first_part)) == param_menu_map.end()) {
-				m = manage (new Menu);
-				m->set_name ("ArdourContextMenu");
-				automation_items.push_back (MenuElem (first_part + "...", *m));
-				param_menu_map.insert (pair<string,Menu*>(first_part, m));
-			} else {
-				m = x->second;
-			}
-			
-			MenuList& mi = m->items();
-			mi.push_back (CheckMenuElem (desc, sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::toggle_automation_track), i->second->param)));
-
-			i->second->menu_item = static_cast<Gtk::CheckMenuItem*>(&mi.back());
-			i->second->menu_item->set_active(show_automation(i->second->param));
-		}
-	}
+	detach_menu (subplugin_menu);
+	items.push_back (MenuElem (_("Plugins"),  subplugin_menu));
+	items.back().set_sensitive (!subplugin_menu.items().empty());
 }
 
 void
@@ -516,11 +466,9 @@ RouteTimeAxisView::build_display_menu ()
 	if (!Profile->get_sae()) {
 		items.push_back (MenuElem (_("Remote Control ID..."), sigc::mem_fun (*this, &RouteUI::open_remote_control_id_dialog)));
 		/* rebuild this every time */
-		cerr << "Build a new AAM, old was " << automation_action_menu << endl;
 		build_automation_action_menu ();
-		cerr << "Attach AAM @ " << automation_action_menu << endl;
+		detach_menu (*automation_action_menu);
 		items.push_back (MenuElem (_("Automation"), *automation_action_menu));
-		cerr << "Attachment is done\n";
 		items.push_back (SeparatorElem());
 	}
 
@@ -1669,32 +1617,29 @@ RouteTimeAxisView::color_handler ()
 	reset_meter();
 }
 
+/** Toggle an automation track for a fully-specified Parameter (type,channel,id)
+ *  Will add track if necessary.
+ */
 void
-RouteTimeAxisView::toggle_automation_track (Evoral::Parameter param)
+RouteTimeAxisView::toggle_automation_track (const Evoral::Parameter& param)
 {
+	cerr << "CHANGE VISIBILITY OF " << param.type() << '/' << param.id() << '/' << (int) param.channel() << endl;
+
 	RouteAutomationNode* node = automation_track(param);
 
 	if (!node) {
-		return;
-	}
-
-	bool showit = node->menu_item->get_active();
-
-	if (showit != node->track->marked_for_display()) {
-		if (showit) {
-			node->track->set_marked_for_display (true);
-			node->track->canvas_display()->show();
-			node->track->get_state_node()->add_property ("shown", X_("yes"));
-		} else {
-			node->track->set_marked_for_display (false);
-			node->track->hide ();
-			node->track->get_state_node()->add_property ("shown", X_("no"));
-		}
-
-		/* now trigger a redisplay */
-
-		if (!no_redraw) {
-			 _route->gui_changed (X_("track_height"), (void *) 0); /* EMIT_SIGNAL */
+		cerr << "\tNO EXISTING TRACK, create it\n";
+		/* add it */
+		create_automation_child (param, true);
+	} else {
+		
+		if (node->track->set_visibility (node->menu_item->get_active())) {
+			
+			/* we changed the visibility, now trigger a redisplay */
+			
+			if (!no_redraw) {
+				_route->gui_changed (X_("track_height"), (void *) 0); /* EMIT_SIGNAL */
+			} 
 		}
 	}
 }
@@ -1983,7 +1928,7 @@ RouteTimeAxisView::add_existing_processor_automation_curves (boost::weak_ptr<Pro
 }
 
 void
-RouteTimeAxisView::add_automation_child(Evoral::Parameter param, boost::shared_ptr<AutomationTimeAxisView> track, bool show)
+RouteTimeAxisView::add_automation_child (Evoral::Parameter param, boost::shared_ptr<AutomationTimeAxisView> track, bool show)
 {
 	using namespace Menu_Helpers;
 
@@ -2004,20 +1949,25 @@ RouteTimeAxisView::add_automation_child(Evoral::Parameter param, boost::shared_p
 		}
 	}
 
-	_automation_tracks.insert(std::make_pair(param, new RouteAutomationNode(param, NULL, track)));
+	_automation_tracks.insert (std::make_pair (param, new RouteAutomationNode(param, NULL, track)));
 
-	if (hideit) {
-		track->hide ();
-	} else {
+	track->set_visibility (!hideit);
+
+	if (!hideit) {
 		_show_automation.insert (param);
-
-
-		if (!no_redraw) {
-			_route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
-		}
 	}
+	
+	_route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 
-	build_display_menu();
+	if (!EventTypeMap::instance().is_midi_parameter(param)) {
+		/* MIDI-related parameters are always in the menu, there's no
+		   reason to rebuild the menu just because we added a automation
+		   lane for one of them. But if we add a non-MIDI automation
+		   lane, then we need to invalidate the display menu.
+		*/
+		delete display_menu;
+		display_menu = 0;
+	}
 }
 
 

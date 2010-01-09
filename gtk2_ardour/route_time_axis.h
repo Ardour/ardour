@@ -99,6 +99,8 @@ public:
 
 	TimeAxisView::Children get_child_list();
 
+	void toggle_automation_track (const Evoral::Parameter& param);
+
 	/* The editor calls these when mapping an operation across multiple tracks */
 	void use_new_playlist (bool prompt, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
 	void use_copy_playlist (bool prompt, std::vector<boost::shared_ptr<ARDOUR::Playlist> > const &);
@@ -198,7 +200,7 @@ protected:
 	                                       boost::shared_ptr<ARDOUR::Processor>);
 
 	void automation_track_hidden (Evoral::Parameter param);
-
+	
 	RouteAutomationNode* automation_track(Evoral::Parameter param);
 	RouteAutomationNode* automation_track(ARDOUR::AutomationType type);
 
@@ -243,7 +245,6 @@ protected:
 	void rename_current_playlist ();
 
 	void         automation_click ();
-	void         toggle_automation_track (Evoral::Parameter param);
 	virtual void show_all_automation ();
 	virtual void show_existing_automation ();
 	virtual void hide_all_automation ();
@@ -277,6 +278,7 @@ protected:
 
 	Gtk::Menu           subplugin_menu;
 	Gtk::Menu*          automation_action_menu;
+	Gtk::MenuItem*      plugins_submenu_item;
 	RouteGroupMenu*     route_group_menu;
 	Gtk::RadioMenuItem* align_existing_item;
 	Gtk::RadioMenuItem* align_capture_item;

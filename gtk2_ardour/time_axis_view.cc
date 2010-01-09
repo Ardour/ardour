@@ -89,6 +89,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	}
 	_canvas_background = new Group (*ed.get_background_group (), 0.0, 0.0);
 	_canvas_display = new Group (*ed.get_trackview_group (), 0.0, 0.0);
+	_canvas_display->hide(); // reveal as needed 
 
 	selection_group = new Group (*_canvas_display);
 	selection_group->hide();
@@ -266,10 +267,15 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 
 	/* now show children */
 
+	cerr << name() << " has " << children.size() << " to show\n";
+
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		if (canvas_item_visible ((*i)->_canvas_display)) {
 			++nth;
 			_effective_height += (*i)->show_at (y + _effective_height, nth, parent);
+			cerr << "\tshowed " << (*i)->name() << " as " << nth << endl;
+		} else {
+			cerr << "\t" << (*i)->name() << " has an invisible canvas display\n";
 		}
 	}
 
@@ -282,9 +288,11 @@ TimeAxisView::clip_to_viewport ()
 	if (_marked_for_display) {
 		if (_y_position + _effective_height < _editor.get_trackview_group_vertical_offset () || _y_position > _editor.get_trackview_group_vertical_offset () + _canvas_display->get_canvas()->get_height()) {
 			_canvas_background->hide ();
+			cerr << "Clip hides canvas display for " << name() << endl;
 			_canvas_display->hide ();
 			return;
 		}
+		cerr << "Clip shows canvas display for " << name() << endl;
 		_canvas_background->show ();
 		_canvas_display->show ();
 	}
@@ -1357,3 +1365,19 @@ TimeAxisView::resizer_expose (GdkEventExpose* event)
 	return true;
 }
 
+bool
+TimeAxisView::set_visibility (bool yn)
+{
+	if (yn != marked_for_display()) {
+		if (yn) {
+			set_marked_for_display (true);
+			canvas_display()->show();
+		} else {
+			set_marked_for_display (false);
+			canvas_display()->hide ();
+		}
+		return true; // things changed
+	}
+	
+	return false;
+}

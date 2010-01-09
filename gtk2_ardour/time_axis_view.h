@@ -132,6 +132,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	void show_name_label ();
 	void show_name_entry ();
 
+	virtual bool set_visibility (bool);
 	virtual guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 
 	void clip_to_viewport ();

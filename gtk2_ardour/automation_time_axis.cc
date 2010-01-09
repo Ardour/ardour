@@ -454,8 +454,10 @@ AutomationTimeAxisView::set_height (uint32_t h)
 	}
 
 	if (changed) {
-		/* only emit the signal if the height really changed */
-		_route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
+		if (canvas_item_visible (_canvas_display)) {
+			/* only emit the signal if the height really changed and we were visible */
+			_route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
+		}
 	}
 }
 
@@ -928,3 +930,14 @@ AutomationTimeAxisView::hide ()
 	TimeAxisView::hide ();
 }
 
+bool
+AutomationTimeAxisView::set_visibility (bool yn)
+{
+	bool changed = TimeAxisView::set_visibility (yn);
+
+	if (changed) {
+		get_state_node()->add_property ("shown", yn ? X_("yes") : X_("no"));
+	}
+
+	return changed;
+}

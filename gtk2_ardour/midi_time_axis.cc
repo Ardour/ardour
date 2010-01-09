@@ -89,6 +89,7 @@
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace Editing;
 
 // Minimum height at which a control is displayed
@@ -112,13 +113,13 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 	, _step_edit_item (0)
 	, _midi_thru_item (0)
 	, default_channel_menu (0)
+	, controller_menu (0)
 {
 	subplugin_menu.set_name ("ArdourContextMenu");
 
 	_view = new MidiStreamView (*this);
 
 	ignore_toggle = false;
-	_ignore_toggle_parameter = false;
 	
 	mute_button->set_active (false);
 	solo_button->set_active (false);
@@ -200,6 +201,8 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 			diskstream->get_channel_mask());
 	_channel_selector.mode_changed.connect(
 		sigc::mem_fun(*midi_track()->midi_diskstream(), &MidiDiskstream::set_channel_mode));
+	_channel_selector.mode_changed.connect(
+		sigc::mem_fun(*this, &MidiTimeAxisView::set_channel_mode));
 
 	XMLProperty *prop;
 	if ((prop = xml_node->property ("color-mode")) != 0) {
@@ -215,8 +218,6 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 			_percussion_mode_item->set_active (_note_mode == Percussive);
 		}
 	}
-
-	build_controller_menu ();
 }
 
 MidiTimeAxisView::~MidiTimeAxisView ()
@@ -381,22 +382,161 @@ MidiTimeAxisView::build_automation_action_menu ()
 	RouteTimeAxisView::build_automation_action_menu ();
 
 	MenuList& automation_items = automation_action_menu->items();
+	
+	uint16_t selected_channels = _channel_selector.get_selected_channels();
 
-	automation_items.push_back (SeparatorElem());
+	if (selected_channels !=  0) {
 
-	add_basic_parameter_menu_item (automation_items, _("Program Change"), Evoral::Parameter (MidiPgmChangeAutomation));
-	add_basic_parameter_menu_item (automation_items, _("Bender"), Evoral::Parameter (MidiPitchBenderAutomation));
-	add_basic_parameter_menu_item (automation_items, _("Pressure"), Evoral::Parameter (MidiChannelPressureAutomation));
+		automation_items.push_back (SeparatorElem());
 
-	if (controller_menu) {
+		/* these 3 MIDI "command" types are semantically more like automation than note data,
+		   but they are not MIDI controllers. We give them special status in this menu, since
+		   they will not show up in the controller list and anyone who actually knows
+		   something about MIDI (!) would not expect to find them there.
+		*/
 
-		if (controller_menu->gobj()) {
-			if (controller_menu->get_attach_widget()) {
-				controller_menu->detach();
+		add_channel_command_menu_item (automation_items, _("Program Change"), MidiPgmChangeAutomation, MIDI_CMD_PGM_CHANGE);
+		add_channel_command_menu_item (automation_items, _("Bender"), MidiPitchBenderAutomation, MIDI_CMD_BENDER);
+		add_channel_command_menu_item (automation_items, _("Pressure"), MidiChannelPressureAutomation, MIDI_CMD_CHANNEL_PRESSURE);
+		
+		/* now all MIDI controllers. Always offer the possibility that we will rebuild the controllers menu
+		   since it might need to be updated after a channel mode change or other change. Also detach it
+		   first in case it has been used anywhere else.
+		*/
+		
+		build_controller_menu ();
+		detach_menu (*controller_menu);
+		
+		automation_items.push_back (SeparatorElem());
+		automation_items.push_back (MenuElem (_("Controllers"), *controller_menu));
+	} else {
+		automation_items.push_back (MenuElem (string_compose ("<i>%1</i>", _("No MIDI Channels selected"))));
+	}
+		
+}
+
+void
+MidiTimeAxisView::change_all_channel_tracks_visibility (bool yn, Evoral::Parameter param)
+{
+	uint16_t selected_channels = _channel_selector.get_selected_channels();
+	
+	for (uint8_t chn = 0; chn < 16; chn++) {
+		if (selected_channels & (0x0001 << chn)) {
+			
+			Evoral::Parameter fully_qualified_param (param.type(), chn, param.id());
+			RouteAutomationNode* node = automation_track (fully_qualified_param);
+
+			if (node && node->menu_item) {
+				node->menu_item->set_active (yn);
 			}
 		}
+	}
+}
 
-		automation_items.push_back (MenuElem (_("Controllers"), *controller_menu));
+void
+MidiTimeAxisView::add_channel_command_menu_item (Menu_Helpers::MenuList& items, const string& label, AutomationType auto_type, uint8_t cmd)
+{
+	using namespace Menu_Helpers;
+
+	/* count the number of selected channels because we will build a different menu structure if there is more than 1 selected.
+	 */
+
+	uint16_t selected_channels = _channel_selector.get_selected_channels();
+	int chn_cnt = 0;
+	
+	for (uint8_t chn = 0; chn < 16; chn++) {
+		if (selected_channels & (0x0001 << chn)) {
+			if (++chn_cnt > 1) {
+				break;
+			}
+		}
+	}
+	
+	if (chn_cnt > 1) {
+		
+		/* multiple channels - create a submenu, with 1 item per channel */
+		
+		Menu* chn_menu = manage (new Menu);
+		MenuList& chn_items (chn_menu->items());
+		Evoral::Parameter param_without_channel (auto_type, 0, cmd);
+
+		/* add a couple of items to hide/show all of them */
+
+		chn_items.push_back (MenuElem (_("Hide all channels"),
+						    sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::change_all_channel_tracks_visibility), 
+								false, param_without_channel)));
+		chn_items.push_back (MenuElem (_("Show all channels"),
+						    sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::change_all_channel_tracks_visibility), 
+								true, param_without_channel)));
+		
+		for (uint8_t chn = 0; chn < 16; chn++) {
+			if (selected_channels & (0x0001 << chn)) {
+				
+				/* for each selected channel, add a menu item for this controller */
+				
+				Evoral::Parameter fully_qualified_param (auto_type, chn, cmd);
+				chn_items.push_back (CheckMenuElem (string_compose (_("Channel %1"), chn+1),
+								    sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
+										fully_qualified_param)));
+				
+				RouteAutomationNode* node = automation_track (fully_qualified_param);
+				bool visible = false;
+				
+				if (node) {
+					if (node->track->marked_for_display()) {
+						visible = true;
+					}
+				}
+				
+				CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&chn_items.back());
+				if (node) {
+					node->menu_item = cmi;
+				}
+
+				cmi->set_active (visible);
+
+				parameter_menu_map[fully_qualified_param] = cmi;
+			}
+		}
+		
+		/* now create an item in the parent menu that has the per-channel list as a submenu */
+			
+		items.push_back (MenuElem (label, *chn_menu));
+		
+	} else {
+		
+		/* just one channel - create a single menu item for this command+channel combination*/
+		
+		for (uint8_t chn = 0; chn < 16; chn++) {
+			if (selected_channels & (0x0001 << chn)) {
+				
+				Evoral::Parameter fully_qualified_param (auto_type, chn, cmd);
+				items.push_back (CheckMenuElem (label,
+								sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
+									    fully_qualified_param)));
+				
+				RouteAutomationNode* node = automation_track (fully_qualified_param);
+				bool visible = false;
+				
+				if (node) {
+					if (node->track->marked_for_display()) {
+						visible = true;
+					}
+				}
+				
+				CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&items.back());
+				if (node) {
+					node->menu_item = cmi;
+				}
+
+				cmi->set_active (visible);
+				
+				parameter_menu_map[fully_qualified_param] = cmi;
+
+				/* one channel only */
+				break;
+			}
+		}
 	}
 }
 
@@ -405,7 +545,12 @@ MidiTimeAxisView::build_controller_menu ()
 {
 	using namespace Menu_Helpers;
 
-	controller_menu = new Menu; // not managed 
+	if (controller_menu) {
+		/* it exists and has not been invalidated by a channel mode change, so just return it */
+		return;
+	}
+
+	controller_menu = new Menu; // explicitly managed by us
 	MenuList& items (controller_menu->items());
 
 	/* create several "top level" menu items for sets of controllers (16 at a time), and populate each one with a submenu 
@@ -427,13 +572,17 @@ MidiTimeAxisView::build_controller_menu ()
 		}
 	}
 	
+	/* loop over all 127 MIDI controllers, in groups of 16 */
+
 	for (int i = 0; i < 127; i += 16) {
 
 		Menu* ctl_menu = manage (new Menu);
 		MenuList& ctl_items (ctl_menu->items());
 
-		for (int ctl = i; ctl < i+16; ++ctl) {
 
+		/* for each controller, consider whether to create a submenu or a single item */
+
+		for (int ctl = i; ctl < i+16; ++ctl) {
 
 			if (chn_cnt > 1) {
 
@@ -442,6 +591,16 @@ MidiTimeAxisView::build_controller_menu ()
 				Menu* chn_menu = manage (new Menu);
 				MenuList& chn_items (chn_menu->items());
 
+				/* add a couple of items to hide/show this controller on all channels */
+				
+				Evoral::Parameter param_without_channel (MidiCCAutomation, 0, ctl);
+				chn_items.push_back (MenuElem (_("Hide all channels"),
+								    sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::change_all_channel_tracks_visibility), 
+										false, param_without_channel)));
+				chn_items.push_back (MenuElem (_("Show all channels"),
+								    sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::change_all_channel_tracks_visibility), 
+										true, param_without_channel)));
+		
 				for (uint8_t chn = 0; chn < 16; chn++) {
 					if (selected_channels & (0x0001 << chn)) {
 						
@@ -449,9 +608,9 @@ MidiTimeAxisView::build_controller_menu ()
 						
 						Evoral::Parameter fully_qualified_param (MidiCCAutomation, chn, ctl);
 						chn_items.push_back (CheckMenuElem (string_compose (_("Channel %1"), chn+1),
-										    sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_parameter_track), 
+										    sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
 												fully_qualified_param)));
-						
+
 						RouteAutomationNode* node = automation_track (fully_qualified_param);
 						bool visible = false;
 						
@@ -462,6 +621,11 @@ MidiTimeAxisView::build_controller_menu ()
 						}
 						
 						CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&chn_items.back());
+
+						if (node) {
+							node->menu_item = cmi;
+						}
+
 						cmi->set_active (visible);
 						
 						parameter_menu_map[fully_qualified_param] = cmi;
@@ -481,7 +645,7 @@ MidiTimeAxisView::build_controller_menu ()
 						
 						Evoral::Parameter fully_qualified_param (MidiCCAutomation, chn, ctl);
 						ctl_items.push_back (CheckMenuElem (_route->describe_parameter (fully_qualified_param),
-										    sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_parameter_track), 
+										    sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
 												fully_qualified_param)));
 						
 						RouteAutomationNode* node = automation_track (fully_qualified_param);
@@ -494,8 +658,13 @@ MidiTimeAxisView::build_controller_menu ()
 						}
 						
 						CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&ctl_items.back());
+						if (node) {
+							node->menu_item = cmi;
+						}
+
 						cmi->set_active (visible);
 						
+
 						parameter_menu_map[fully_qualified_param] = cmi;
 						/* one channel only */
 						break;
@@ -507,51 +676,6 @@ MidiTimeAxisView::build_controller_menu ()
 		/* add the menu for this block of controllers to the overall controller menu */
 
 		items.push_back (MenuElem (string_compose (_("Controllers %1-%2"), i+1, i+16), *ctl_menu));
-	}
-}
-
-void
-MidiTimeAxisView::add_basic_parameter_menu_item (Menu_Helpers::MenuList& items, const string& label, Evoral::Parameter param)
-{
-	items.push_back (Menu_Helpers::CheckMenuElem 
-			 (label, sigc::bind (sigc::mem_fun 
-					     (*this, &MidiTimeAxisView::toggle_parameter_track), param)));
-	
-	// cerr << "Create a new menu item from " << param.type() << '/' << param.id() << '/' << (int) param.channel() << endl;
-
-	uint16_t selected_channels = _channel_selector.get_selected_channels();
-	bool visible = false;
-
-	for (uint8_t i = 0; i < 16; i++) {
-		if (selected_channels & (0x0001 << i)) {
-			Evoral::Parameter param_with_channel(param.type(), i, param.id());
-
-			// cerr << "\tChecking on channel " << (int) i << " via " << param_with_channel.type() << '/' << param_with_channel.id() << endl;
-			
-			RouteAutomationNode* node = automation_track (param_with_channel);
-
-			if (node) {
-				if (node->track->marked_for_display()) {
-					visible = true;
-					// cerr << "\tGot a track, and it appears visible\n";
-					break;
-				} else {
-					// cerr << "\tGot a track, and it appears hidden\n";
-				}
-			} else {
-				// cerr << "\tno track found\n";
-			}
-		}
-	}
-
-	CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&items.back());
-	cmi->set_active (visible);
-
-	pair<ParameterMenuMap::iterator,bool> result;
-	result = parameter_menu_map.insert (pair<Evoral::Parameter,CheckMenuItem*> (param, cmi));
-	if (!result.second) {
-		/* it already exists, but we're asssigning a new menu item to it */
-		result.first->second = cmi;
 	}
 }
 
@@ -683,82 +807,6 @@ MidiTimeAxisView::show_existing_automation ()
 	RouteTimeAxisView::show_existing_automation ();
 }
 
-/** Prompt for a controller with a dialog and add an automation track for it
- */
-void
-MidiTimeAxisView::add_cc_track()
-{
-	int response;
-	Evoral::Parameter param(0, 0, 0);
-
-	{
-		AddMidiCCTrackDialog dialog;
-		dialog.set_transient_for (_editor);
-		response = dialog.run();
-
-		if (response == Gtk::RESPONSE_ACCEPT)
-			param = dialog.parameter();
-	}
-
-	if (param.type() != 0 && response == Gtk::RESPONSE_ACCEPT)
-		create_automation_child(param, true);
-}
-
-/** Toggle an automation track for the given parameter (pitch bend, channel pressure).
- *  Will add track if necessary.
- */
-void
-MidiTimeAxisView::toggle_parameter_track(const Evoral::Parameter& param)
-{
-	if (_ignore_toggle_parameter) {
-		return;
-	}
-
-	cerr << "CHANGE VISIBILITY OF " << param.type() << '/' << param.id() << '/' << (int) param.channel() << endl;
-
-	if ( !EventTypeMap::instance().is_midi_parameter(param) ) {
-		error << "MidiTimeAxisView: unknown automation child "
-			<< ARDOUR::EventTypeMap::instance().to_symbol(param) << endmsg;
-		return;
-	}
-
-	map<Evoral::Parameter,CheckMenuItem*>::iterator x = parameter_menu_map.find (param);
-	if (x == parameter_menu_map.end()) {
-		cerr << "Param not found in pm map\n";
-		return;
-	}
-
-	bool yn = x->second->get_active ();
-	cerr << "Menu item state for " << param.type() << '/' << param.id() << '/' << (int) param.channel() << ' ' << yn << endl;
-
-	cerr << "toggle param " << param.type() << '/' << param.id() << '/' << (int) param.channel() << " from " << !yn << " to " << yn << endl;
-
-	// create the parameter lane for each selected channel
-	uint16_t selected_channels = _channel_selector.get_selected_channels();
-
-	for (uint8_t i = 0; i < 16; i++) {
-		if (selected_channels & (0x0001 << i)) {
-			Evoral::Parameter param_with_channel(param.type(), i, param.id());
-
-			RouteAutomationNode* node = automation_track (param_with_channel);
-			
-			if (!node) {
-				cerr << "\tNO EXISTING TRACK FOR chn " << (int) i << endl;
-				if (yn) {
-					create_automation_child (param_with_channel, true);
-				}
-			} else {
-				cerr << "\tTRACK EXISTS, set its menu item to " << yn << " to change its visibilty\n";
-				node->menu_item->set_active (yn);
-			}
-		}
-	}
-
-	_ignore_toggle_parameter = true;
-	x->second->set_active (yn);
-	_ignore_toggle_parameter = false;
-}
-
 /** Hide an automation track for the given parameter (pitch bend, channel pressure).
  */
 void
@@ -772,14 +820,16 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 		return;
 	}
 
-	AutomationTracks::iterator existing = _automation_tracks.find(param);
-	if (existing != _automation_tracks.end())
+	AutomationTracks::iterator existing = _automation_tracks.find (param);
+	if (existing != _automation_tracks.end()) {
 		return;
+	}
 
 	boost::shared_ptr<AutomationControl> c = _route->get_control (param);
 
 	assert(c);
 
+	cerr << "Create new ATAV\n";
 	boost::shared_ptr<AutomationTimeAxisView> track(new AutomationTimeAxisView (_session,
 			_route, boost::shared_ptr<ARDOUR::Automatable>(), c,
 			_editor,
@@ -788,7 +838,8 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 			parent_canvas,
 			_route->describe_parameter(param)));
 
-	add_automation_child(param, track, show);
+	cerr << "Adding new automation child\n";
+	add_automation_child (param, track, show);
 }
 
 
@@ -1006,4 +1057,12 @@ void
 MidiTimeAxisView::toggle_note_selection_region_view (RegionView* rv, uint8_t note, uint16_t chn_mask)
 {
 	dynamic_cast<MidiRegionView*>(rv)->toggle_matching_notes (note, chn_mask);
+}
+
+void
+MidiTimeAxisView::set_channel_mode (ChannelMode, uint16_t)
+{
+	/* invalidate the controller menu, so that we rebuilt it next time */
+	delete controller_menu;
+	controller_menu = 0;
 }

@@ -69,6 +69,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	virtual void set_height (uint32_t);
 	void set_samples_per_unit (double);
+	bool set_visibility (bool yn);
 	std::string name() const { return _name; }
 
 	void add_automation_event (ArdourCanvas::Item *item, GdkEvent *event, nframes_t, double);
