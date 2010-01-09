@@ -31,6 +31,7 @@ namespace Gtk {
 	class Widget;
 	class Window;
 	class Paned;
+	class Menu;
 }
 
 namespace Gtkmm2ext {
@@ -69,6 +70,7 @@ namespace Gtkmm2ext {
 	void set_decoration (Gtk::Window* win, Gdk::WMDecoration decor);
 	void set_treeview_header_as_default_label(Gtk::TreeViewColumn *c);
 	Glib::RefPtr<Gdk::Drawable> get_bogus_drawable();
+	void detach_menu (Gtk::Menu&);
 };
 
 #endif /*  __gtkmm2ext_utils_h__ */

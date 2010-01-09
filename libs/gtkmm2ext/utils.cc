@@ -135,3 +135,16 @@ void Gtkmm2ext::set_treeview_header_as_default_label(Gtk::TreeViewColumn* c)
 	gtk_tree_view_column_set_widget( c->gobj(), GTK_WIDGET(0) );
 }
 
+void
+Gtkmm2ext::detach_menu (Gtk::Menu& menu)
+{
+	/* its possible for a Gtk::Menu to have no gobj() because it has
+	   not yet been instantiated. Catch this and provide a safe
+	   detach method.
+	*/
+	if (menu.gobj()) {
+		if (menu.get_attach_widget()) {
+			menu.detach ();
+		}
+	}
+}
