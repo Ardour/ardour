@@ -1536,7 +1536,6 @@ RouteTimeAxisView::use_playlist (boost::weak_ptr<Playlist> wpl)
 
 
 		if (route_group() && route_group()->is_active()) {
-			//PBD::stacktrace(cerr, 20);
 			std::string group_string = "."+route_group()->name()+".";
 
 			std::string take_name = apl->name();
@@ -1623,12 +1622,9 @@ RouteTimeAxisView::color_handler ()
 void
 RouteTimeAxisView::toggle_automation_track (const Evoral::Parameter& param)
 {
-	cerr << "CHANGE VISIBILITY OF " << param.type() << '/' << param.id() << '/' << (int) param.channel() << endl;
-
 	RouteAutomationNode* node = automation_track(param);
 
 	if (!node) {
-		cerr << "\tNO EXISTING TRACK, create it\n";
 		/* add it */
 		create_automation_child (param, true);
 	} else {

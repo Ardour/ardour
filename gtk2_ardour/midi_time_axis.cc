@@ -829,7 +829,6 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 
 	assert(c);
 
-	cerr << "Create new ATAV\n";
 	boost::shared_ptr<AutomationTimeAxisView> track(new AutomationTimeAxisView (_session,
 			_route, boost::shared_ptr<ARDOUR::Automatable>(), c,
 			_editor,
@@ -838,7 +837,6 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 			parent_canvas,
 			_route->describe_parameter(param)));
 
-	cerr << "Adding new automation child\n";
 	add_automation_child (param, track, show);
 }
 
