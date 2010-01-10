@@ -1367,7 +1367,7 @@ TimeAxisView::set_visibility (bool yn)
 			canvas_display()->show();
 		} else {
 			set_marked_for_display (false);
-			canvas_display()->hide ();
+			hide ();
 		}
 		return true; // things changed
 	}

@@ -857,7 +857,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 		name_label.set_text (_route->name());
 	}
 
-	if (height_changed) {
+	if (height_changed && !no_redraw) {
 		/* only emit the signal if the height really changed */
 		 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 	}
@@ -1623,15 +1623,17 @@ void
 RouteTimeAxisView::toggle_automation_track (const Evoral::Parameter& param)
 {
 	RouteAutomationNode* node = automation_track(param);
-
+	
 	if (!node) {
-		/* add it */
+		/* it doesn't exist yet, so we don't care about the button state: just add it */
 		create_automation_child (param, true);
 	} else {
-		
-		if (node->track->set_visibility (node->menu_item->get_active())) {
+		bool yn = node->menu_item->get_active();
+		if (node->track->set_visibility (node->menu_item->get_active()) && yn) {
 			
-			/* we changed the visibility, now trigger a redisplay */
+			/* we made it visible, now trigger a redisplay. if it was hidden, then automation_track_hidden()
+			   will have done that for us.
+			*/
 			
 			if (!no_redraw) {
 				_route->gui_changed (X_("track_height"), (void *) 0); /* EMIT_SIGNAL */
@@ -1644,20 +1646,23 @@ void
 RouteTimeAxisView::automation_track_hidden (Evoral::Parameter param)
 {
 	RouteAutomationNode* ran = automation_track(param);
+
 	if (!ran) {
 		return;
 	}
 
 	// if Evoral::Parameter::operator< doesn't obey strict weak ordering, we may crash here....
-	_show_automation.erase(param);
+	_show_automation.erase (param);
 	ran->track->get_state_node()->add_property (X_("shown"), X_("no"));
 
 	if (ran->menu_item && !_hidden) {
+		ignore_toggle = true;
 		ran->menu_item->set_active (false);
+		ignore_toggle = false;
 	}
 
-	if (_route) {
-		_route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
+	if (_route && !no_redraw) {
+		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 	}
 }
 
@@ -1694,7 +1699,7 @@ RouteTimeAxisView::show_all_automation ()
 
 	/* Redraw */
 
-	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -1727,7 +1732,7 @@ RouteTimeAxisView::show_existing_automation ()
 
 	no_redraw = false;
 
-	_route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
+	_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -1755,7 +1760,7 @@ RouteTimeAxisView::hide_all_automation ()
 	_show_automation.clear();
 
 	no_redraw = false;
-	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
+	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 }
 
 
@@ -1897,7 +1902,9 @@ RouteTimeAxisView::processor_automation_track_hidden (RouteTimeAxisView::Process
 
 	i->mark_automation_visible (pan->what, false);
 
-	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
+	if (!no_redraw) {
+		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	}
 }
 
 void
@@ -1953,7 +1960,9 @@ RouteTimeAxisView::add_automation_child (Evoral::Parameter param, boost::shared_
 		_show_automation.insert (param);
 	}
 	
-	_route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
+	if (!no_redraw) {
+		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	}
 
 	if (!EventTypeMap::instance().is_midi_parameter(param)) {
 		/* MIDI-related parameters are always in the menu, there's no
@@ -1965,7 +1974,6 @@ RouteTimeAxisView::add_automation_child (Evoral::Parameter param, boost::shared_
 		display_menu = 0;
 	}
 }
-
 
 void
 RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p)
@@ -2086,10 +2094,7 @@ RouteTimeAxisView::processor_menu_item_toggled (RouteTimeAxisView::ProcessorAuto
 	}
 
 	if (redraw && !no_redraw) {
-
-		/* now trigger a redisplay */
-
-		 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
+		 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 
 	}
 }
@@ -2133,8 +2138,8 @@ RouteTimeAxisView::processors_changed (RouteProcessorChange c)
 		i = tmp;
 	}
 
-	if (deleted_processor_automation) {
-		_route->gui_changed ("visible_tracks", this);
+	if (deleted_processor_automation && !no_redraw) {
+		_route->gui_changed ("track_height", this);
 	}
 }
 

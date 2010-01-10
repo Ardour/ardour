@@ -1060,7 +1060,45 @@ MidiTimeAxisView::toggle_note_selection_region_view (RegionView* rv, uint8_t not
 void
 MidiTimeAxisView::set_channel_mode (ChannelMode, uint16_t)
 {
+	/* hide all automation tracks that use the wrong channel(s) and show all those that use
+	   the right ones.
+	*/
+
+	uint16_t selected_channels = _channel_selector.get_selected_channels();
+	bool changed = false;
+
+	no_redraw = true;
+
+	for (uint32_t ctl = 0; ctl < 127; ++ctl) {
+
+		for (uint32_t chn = 0; chn < 16; ++chn) {
+			Evoral::Parameter fully_qualified_param (MidiCCAutomation, chn, ctl);
+			RouteAutomationNode* node = automation_track (fully_qualified_param);
+
+			if (!node) {
+				continue;
+			}
+			
+			if ((selected_channels & (0x0001 << chn)) == 0) {
+				/* channel not in use. hiding it will trigger RouteTimeAxisView::automation_track_hidden() 
+				   which will cause a redraw. We don't want one per channel, so block that with no_redraw.
+				 */
+				changed = node->track->set_visibility (false) || changed;
+			} else {
+				changed = node->track->set_visibility (true) || changed;
+			}
+		}
+	}
+
+	no_redraw = false;
+
+	/* TODO: Bender, PgmChange, Pressure */
+
 	/* invalidate the controller menu, so that we rebuilt it next time */
 	delete controller_menu;
 	controller_menu = 0;
+
+	if (changed) {
+		_route->gui_changed ("track_height", this);
+	}
 }
