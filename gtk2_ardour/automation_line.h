@@ -75,10 +75,10 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	bool control_points_adjacent (double xval, uint32_t& before, uint32_t& after);
 
 	/* dragging API */
-	virtual void start_drag_single (ControlPoint*, nframes_t x, float);
+	virtual void start_drag_single (ControlPoint*, double, float);
 	virtual void start_drag_line (uint32_t, uint32_t, float);
 	virtual void start_drag_multiple (std::list<ControlPoint*>, float, XMLNode *);
-	virtual std::pair<nframes_t, float> drag_motion (nframes_t, float, bool);
+	virtual std::pair<double, float> drag_motion (double, float, bool, bool);
 	virtual void end_drag ();
 
 	ControlPoint* nth (uint32_t);
@@ -168,7 +168,7 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 	void determine_visible_control_points (ALPoints&);
 	void sync_model_with_view_point (ControlPoint&, bool, int64_t);
 	void sync_model_with_view_points (std::list<ControlPoint*>, bool, int64_t);
-	void start_drag_common (nframes_t, float);
+	void start_drag_common (double, float);
 
 	virtual void change_model (ARDOUR::AutomationList::iterator, double x, double y);
 
@@ -181,16 +181,16 @@ class AutomationLine : public sigc::trackable, public PBD::StatefulDestructible
 
   private:
 	std::list<ControlPoint*> _drag_points; ///< points we are dragging
+	std::list<ControlPoint*> _push_points; ///< additional points we are dragging if "push" is enabled
 	bool _drag_had_movement; ///< true if the drag has seen movement, otherwise false
-	nframes64_t drag_x; ///< last x position of the drag, in frames
-	nframes64_t drag_distance; ///< total x movement of the drag, in frames
+	double _drag_x; ///< last x position of the drag, in units
+	double _drag_distance; ///< total x movement of the drag, in units
 	double _last_drag_fraction; ///< last y position of the drag, as a fraction
 	std::list<double> _always_in_view;
 
 	const Evoral::TimeConverter<double, ARDOUR::sframes_t>& _time_converter;
 	ARDOUR::AutomationList::InterpolationStyle              _interpolation;
 
-	void modify_view_point (ControlPoint&, double, double, bool, bool with_push);
 	void reset_line_coords (ControlPoint&);
 	void add_visible_control_point (uint32_t, uint32_t, double, double, ARDOUR::AutomationList::iterator, uint32_t);
 

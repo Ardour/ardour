@@ -181,9 +181,6 @@ Drag::adjusted_current_frame (GdkEvent const * event, bool snap) const
 bool
 Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 {
-	_last_pointer_x = _current_pointer_x;
-	_last_pointer_y = _current_pointer_y;
-	_last_pointer_frame = adjusted_current_frame (event);
 	_current_pointer_frame = _editor->event_frame (event, &_current_pointer_x, &_current_pointer_y);
 
 	/* check to see if we have moved in any way that matters since the last motion event */
@@ -212,6 +209,11 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 			}
 
 			motion (event, _move_threshold_passed != old_move_threshold_passed);
+
+			_last_pointer_x = _current_pointer_x;
+			_last_pointer_y = _current_pointer_y;
+			_last_pointer_frame = adjusted_current_frame (event);
+			
 			return true;
 		}
 	}
@@ -2619,11 +2621,10 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	// the point doesn't 'jump' to the mouse after the first drag
 	_time_axis_view_grab_x = _point->get_x();
 	_time_axis_view_grab_y = _point->get_y();
-	nframes64_t grab_frame = _editor->pixel_to_frame (_time_axis_view_grab_x);
 
 	float const fraction = 1 - (_point->get_y() / _point->line().height());
 
-	_point->line().start_drag_single (_point, grab_frame, fraction);
+	_point->line().start_drag_single (_point, _time_axis_view_grab_x, fraction);
 
 	_editor->set_verbose_canvas_cursor (_point->line().get_verbose_cursor_string (fraction),
 					    event->button.x + 10, event->button.y + 10);
@@ -2679,9 +2680,9 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 
 	bool const push = Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier);
 
-	pair<nframes_t, float> const c = _point->line().drag_motion (cx_frames, fraction, push);
+	_point->line().drag_motion (_editor->frame_to_unit (cx_frames), fraction, false, push);
 
-	_editor->set_verbose_canvas_cursor_text (_point->line().get_verbose_cursor_string (c.second));
+	_editor->set_verbose_canvas_cursor_text (_point->line().get_verbose_cursor_string (fraction));
 }
 
 void
@@ -2796,10 +2797,10 @@ LineDrag::motion (GdkEvent* event, bool)
 		push = true;
 	}
 
-	/* we are ignoring x position for this drag, so we can just pass in 0 */
-	pair<nframes_t, float> const c = _line->drag_motion (0, fraction, push);
+	/* we are ignoring x position for this drag, so we can just pass in anything */
+	_line->drag_motion (0, fraction, true, push);
 
-	_editor->set_verbose_canvas_cursor_text (_line->get_verbose_cursor_string (c.second));
+	_editor->set_verbose_canvas_cursor_text (_line->get_verbose_cursor_string (fraction));
 }
 
 void
@@ -3814,8 +3815,8 @@ AutomationRangeDrag::motion (GdkEvent* event, bool first_move)
 	
 	float const f = 1 - (current_pointer_y() / _line->height());
 
-	/* we are ignoring x position for this drag, so we can just pass in 0 */
-	_line->drag_motion (0, f, false);
+	/* we are ignoring x position for this drag, so we can just pass in anything */
+	_line->drag_motion (0, f, true, false);
 }
 
 void

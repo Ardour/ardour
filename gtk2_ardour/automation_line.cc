@@ -237,119 +237,6 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	trackview.editor().session()->set_dirty ();
 }
 
-/** Move a view point to a new position (without changing the model)
- *  @param y New y position as a normalised fraction (0.0-1.0)
- */
-void
-AutomationLine::modify_view_point (ControlPoint& cp, double x, double y, bool keep_x, bool with_push)
-{
-	double delta = 0.0;
-	uint32_t last_movable = UINT_MAX;
-	double x_limit = DBL_MAX;
-
-	/* clamp y-coord appropriately. y is supposed to be a normalized fraction (0.0-1.0),
-	   and needs to be converted to a canvas unit distance.
-	*/
-
-	y = max (0.0, y);
-	y = min (1.0, y);
-	y = _height - (y * _height);
-
-	if (cp.can_slide() && !keep_x) {
-
-		/* x-coord cannot move beyond adjacent points or the start/end, and is
-		   already in frames. it needs to be converted to canvas units.
-		*/
-
-		x = trackview.editor().frame_to_unit (x);
-
-		/* clamp x position using view coordinates */
-
-		ControlPoint *before;
-		ControlPoint *after;
-
-		if (cp.view_index()) {
-			before = nth (cp.view_index() - 1);
-			x = max (x, before->get_x()+1.0);
-		} else {
-			before = &cp;
-		}
-
-
-		if (!with_push) {
-			if (cp.view_index() < control_points.size() - 1) {
-
-				after = nth (cp.view_index() + 1);
-
-				/*if it is a "spike" leave the x alone */
-
-				if (after->get_x() - before->get_x() < 2) {
-					x = cp.get_x();
-
-				} else {
-					x = min (x, after->get_x()-1.0);
-				}
-			} else {
-				after = &cp;
-			}
-
-		} else {
-
-			ControlPoint* after;
-
-			/* find the first point that can't move */
-
-			for (uint32_t n = cp.view_index() + 1; (after = nth (n)) != 0; ++n) {
-				if (!after->can_slide()) {
-					x_limit = after->get_x() - 1.0;
-					last_movable = after->view_index();
-					break;
-				}
-			}
-
-			delta = x - cp.get_x();
-		}
-
-	} else {
-
-		/* leave the x-coordinate alone */
-
-		x = trackview.editor().frame_to_unit (_time_converter.to((*cp.model())->when));
-
-	}
-
-	if (!with_push) {
-
-		cp.move_to (x, y, ControlPoint::Full);
-		reset_line_coords (cp);
-
-	} else {
-
-		uint32_t limit = min (control_points.size(), (size_t)last_movable);
-
-		/* move the current point to wherever the user told it to go, subject
-		   to x_limit.
-		*/
-
-		cp.move_to (min (x, x_limit), y, ControlPoint::Full);
-		reset_line_coords (cp);
-
-		/* now move all subsequent control points, to reflect the motion.
-		 */
-
-		for (uint32_t i = cp.view_index() + 1; i < limit; ++i) {
-			ControlPoint *p = nth (i);
-			double new_x;
-
-			if (p->can_slide()) {
-				new_x = min (p->get_x() + delta, x_limit);
-				p->move_to (new_x, p->get_y(), ControlPoint::Full);
-				reset_line_coords (*p);
-			}
-		}
-	}
-}
-
 void
 AutomationLine::reset_line_coords (ControlPoint& cp)
 {
@@ -673,11 +560,11 @@ AutomationLine::invalidate_point (ALPoints& p, uint32_t index)
  *  are other selected points.
  *
  *  @param cp Point to drag.
- *  @param x Initial x position (frames).
+ *  @param x Initial x position (units).
  *  @param fraction Initial y position (as a fraction of the track height, where 0 is the bottom and 1 the top)
  */
 void
-AutomationLine::start_drag_single (ControlPoint* cp, nframes_t x, float fraction)
+AutomationLine::start_drag_single (ControlPoint* cp, double x, float fraction)
 {
 	trackview.editor().session()->begin_reversible_command (_("automation event move"));
 	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &get_state(), 0));
@@ -708,28 +595,8 @@ AutomationLine::start_drag_line (uint32_t i1, uint32_t i2, float fraction)
 	trackview.editor().session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &get_state(), 0));
 
 	_drag_points.clear ();
-
-	// check if one of the control points on the line is in a selected range
-	bool range_found = false;
-	ControlPoint *cp;
-
-	for (uint32_t i = i1 ; i <= i2; i++) {
-		cp = nth (i);
-		if (cp->selected()) {
-			range_found = true;
-		}
-	}
-
-	if (range_found) {
-		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
-			if ((*i)->selected()) {
-				_drag_points.push_back (*i);
-			}
-		}
-	} else {
-		for (uint32_t i = i1 ; i <= i2; i++) {
-			_drag_points.push_back (nth (i));
-		}
+	for (uint32_t i = i1; i <= i2; i++) {
+		_drag_points.push_back (nth (i));
 	}
 
 	start_drag_common (0, fraction);
@@ -749,36 +616,108 @@ AutomationLine::start_drag_multiple (list<ControlPoint*> cp, float fraction, XML
 	start_drag_common (0, fraction);
 }
 
+
+struct ControlPointSorter
+{
+	bool operator() (ControlPoint const * a, ControlPoint const * b) {
+		return a->get_x() < b->get_x();
+	}
+};
+
 /** Common parts of starting a drag.
  *  @param d Description of the drag.
- *  @param x Starting x position in frames, or 0 if x is being ignored.
+ *  @param x Starting x position in units, or 0 if x is being ignored.
  *  @param fraction Starting y position (as a fraction of the track height, where 0 is the bottom and 1 the top)
  */
 void
-AutomationLine::start_drag_common (nframes_t x, float fraction)
+AutomationLine::start_drag_common (double x, float fraction)
 {
-	drag_x = x;
-	drag_distance = 0;
+	_drag_x = x;
+	_drag_distance = 0;
 	_last_drag_fraction = fraction;
 	_drag_had_movement = false;
 	did_push = false;
+
+	_drag_points.sort (ControlPointSorter ());
+
+	/* find the additional points that will be dragged when the user is holding
+	   the "push" modifier
+	*/
+
+	uint32_t i = _drag_points.back()->view_index () + 1;
+	ControlPoint* p = 0;
+	_push_points.clear ();
+	while ((p = nth (i)) != 0 && p->can_slide()) {
+		_push_points.push_back (p);
+		++i;
+	}
 }
 
 /** Should be called to indicate motion during a drag.
- *  @param x New x position of the drag in frames, or 0 if x is being ignored.
+ *  @param x New x position of the drag in units, or undefined if ignore_x == true.
  *  @param fraction New y fraction.
  *  @return x position and y fraction that were actually used (once clamped).
  */
-pair<nframes_t, float>
-AutomationLine::drag_motion (nframes_t x, float fraction, bool with_push)
+pair<double, float>
+AutomationLine::drag_motion (double x, float fraction, bool ignore_x, bool with_push)
 {
-	int64_t const dx = x - drag_x;
+	/* setup the points that are to be moved this time round */
+	list<ControlPoint*> points = _drag_points;
+	if (with_push) {
+		copy (_push_points.begin(), _push_points.end(), back_inserter (points));
+		points.sort (ControlPointSorter ());
+	}
+	   
+	double dx = ignore_x ? 0 : (x - _drag_x);
 	double dy = fraction - _last_drag_fraction;
 
-	/* clamp y so that the "lowest" point hits the bottom but goes no further
-	   and similarly with the "highest" and the top
-	*/
-	for (list<ControlPoint*>::iterator i = _drag_points.begin(); i != _drag_points.end(); ++i) {
+	/* find x limits */
+	ControlPoint* before = 0;
+	ControlPoint* after = 0;
+
+	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
+		if ((*i)->get_x() < points.front()->get_x()) {
+			before = *i;
+		}
+		if ((*i)->get_x() > points.back()->get_x() && after == 0) {
+			after = *i;
+		}
+	}
+
+	double const before_x = before ? before->get_x() : 0;
+	double const after_x = after ? after->get_x() : DBL_MAX;
+
+	/* clamp x */
+	for (list<ControlPoint*>::iterator i = points.begin(); i != points.end(); ++i) {
+
+		if ((*i)->can_slide() && !ignore_x) {
+
+			/* clamp min x */
+			double const a = (*i)->get_x() + dx;
+			double const b = before_x + 1;
+			if (a < b) {
+				dx += b - a;
+			}
+
+			/* clamp max x */
+			if (after) {
+
+				if (after_x - before_x < 2) {
+					/* after and before are very close, so just leave this alone */
+					dx = 0;
+				} else {
+					double const a = (*i)->get_x() + dx;
+					double const b = after_x - 1;
+					if (a > b) {
+						dx -= a - b;
+					}
+				}
+			}
+		}
+	}
+
+	/* clamp y */
+	for (list<ControlPoint*>::iterator i = points.begin(); i != points.end(); ++i) {
 		double const y = ((_height - (*i)->get_y()) / _height) + dy;
 		if (y < 0) {
 			dy -= y;
@@ -788,20 +727,22 @@ AutomationLine::drag_motion (nframes_t x, float fraction, bool with_push)
 		}
 	}
 
-	pair<nframes_t, float> const clamped (drag_x + dx, _last_drag_fraction + dy);
-	drag_distance += dx;
-	drag_x += dx;
-	_last_drag_fraction += dy;
+	pair<double, float> const clamped (_drag_x + dx, _last_drag_fraction + dy);
+	_drag_distance += dx;
+	_drag_x = x;
+	_last_drag_fraction = fraction;
 
 	for (list<ControlPoint*>::iterator i = _drag_points.begin(); i != _drag_points.end(); ++i) {
+		(*i)->move_to ((*i)->get_x() + dx, (*i)->get_y() - _height * dy, ControlPoint::Full);
+		reset_line_coords (**i);
+	}
 
-		modify_view_point (
-			**i,
-			trackview.editor().unit_to_frame ((*i)->get_x()) + dx,
-			((_height - (*i)->get_y()) / _height) + dy,
-			(x == 0),
-			with_push
-			);
+	if (with_push) {
+		/* move push points, preserving their y */
+		for (list<ControlPoint*>::iterator i = _push_points.begin(); i != _push_points.end(); ++i) {
+			(*i)->move_to ((*i)->get_x() + dx, (*i)->get_y(), ControlPoint::Full);
+			reset_line_coords (**i);
+		}
 	}
 
 	if (line_points.size() > 1) {
@@ -824,7 +765,14 @@ AutomationLine::end_drag ()
 
 	alist->freeze ();
 
-	sync_model_with_view_points (_drag_points, did_push, drag_distance);
+	/* set up the points that were moved this time round */
+	list<ControlPoint*> points = _drag_points;
+	if (did_push) {
+		copy (_push_points.begin(), _push_points.end(), back_inserter (points));
+		points.sort (ControlPointSorter ());
+	}
+	
+	sync_model_with_view_points (points, did_push, rint (_drag_distance * trackview.editor().get_current_zoom ()));
 
 	alist->thaw ();
 
@@ -899,7 +847,7 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp, bool did_push, int
 		   as the main point moved.
 		*/
 
-		alist->slide (mr.end, drag_distance);
+		alist->slide (mr.end, distance);
 	}
 }
 

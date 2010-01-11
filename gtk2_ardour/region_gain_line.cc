@@ -50,7 +50,7 @@ AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& 
 }
 
 void
-AudioRegionGainLine::start_drag_single (ControlPoint* cp, nframes_t x, float fraction)
+AudioRegionGainLine::start_drag_single (ControlPoint* cp, double x, float fraction)
 {
 	AutomationLine::start_drag_single (cp, x, fraction);
 	
