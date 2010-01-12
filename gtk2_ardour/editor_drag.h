@@ -37,27 +37,34 @@ namespace ARDOUR {
 class Editor;
 class EditorCursor;
 class TimeAxisView;
+class Drag;
 
-/** Abstract base class for dragging of things within the editor */
-class Drag
+/** Class to manage current drags */
+class DragManager
 {
-
 public:
-	Drag (Editor *, ArdourCanvas::Item *);
-	virtual ~Drag () {}
 
-	/** @return the canvas item being dragged */
-	ArdourCanvas::Item* item () const {
-		return _item;
-	}
+	DragManager (Editor* e);
+	~DragManager ();
 
-	void swap_grab (ArdourCanvas::Item *, Gdk::Cursor *, uint32_t);
-	bool motion_handler (GdkEvent*, bool);
+	bool motion_handler (GdkEvent *, bool);
+
+	void abort ();
 	void break_drag ();
+	void add (Drag *);
+	void set (Drag *, GdkEvent *, Gdk::Cursor* c = 0);
+	void start_grab (GdkEvent *);
+	bool end_grab (GdkEvent *);
+	bool have_item (ArdourCanvas::Item *) const;
+	std::pair<nframes64_t, nframes64_t> extent () const;
 
-	/** @return true if an end drag is in progress */
+	/** @return true if an end drag or break_drag is in progress */
 	bool ending () const {
 		return _ending;
+	}
+
+	bool active () const {
+		return !_drags.empty ();
 	}
 
 	/** @return current pointer x position in trackview coordinates */
@@ -69,6 +76,40 @@ public:
 	double current_pointer_y () const {
 		return _current_pointer_y;
 	}
+
+	/** @return current pointer frame */
+	nframes64_t current_pointer_frame () const {
+		return _current_pointer_frame;
+	}
+
+private:
+	Editor* _editor;
+	std::list<Drag*> _drags;
+	bool _ending; ///< true if end_grab or break_drag is in progress, otherwise false
+	double _current_pointer_x; ///< trackview x of the current pointer
+	double _current_pointer_y; ///< trackview y of the current pointer
+	nframes64_t _current_pointer_frame; ///< frame that the pointer is now at
+};
+
+/** Abstract base class for dragging of things within the editor */
+class Drag
+{
+public:
+	Drag (Editor *, ArdourCanvas::Item *);
+	virtual ~Drag () {}
+
+	void set_manager (DragManager* m) {
+		_drags = m;
+	}
+
+	/** @return the canvas item being dragged */
+	ArdourCanvas::Item* item () const {
+		return _item;
+	}
+
+	void swap_grab (ArdourCanvas::Item *, Gdk::Cursor *, uint32_t);
+	bool motion_handler (GdkEvent*, bool);
+	void break_drag ();
 
 	nframes64_t adjusted_frame (nframes64_t, GdkEvent const *, bool snap = true) const;
 	nframes64_t adjusted_current_frame (GdkEvent const *, bool snap = true) const;
@@ -156,6 +197,7 @@ protected:
 	}
 
 	Editor* _editor; ///< our editor
+	DragManager* _drags;
 	ArdourCanvas::Item* _item; ///< our item
 	/** Offset from the mouse's position for the drag to the start of the thing that is being dragged */
 	nframes64_t _pointer_frame_offset;
@@ -165,17 +207,13 @@ protected:
 
 private:
 
-	bool _ending; ///< true if end_grab or break_drag is in progress, otherwise false
 	bool _move_threshold_passed; ///< true if the move threshold has been passed, otherwise false
 	double _grab_x; ///< trackview x of the grab start position
 	double _grab_y; ///< trackview y of the grab start position
-	double _current_pointer_x; ///< trackview x of the current pointer
-	double _current_pointer_y; ///< trackview y of the current pointer
 	double _last_pointer_x; ///< trackview x of the pointer last time a motion occurred
 	double _last_pointer_y; ///< trackview y of the pointer last time a motion occurred
 	nframes64_t _grab_frame; ///< adjusted_frame that the mouse was at when start_grab was called, or 0
 	nframes64_t _last_pointer_frame; ///< adjusted_frame the last time a motion occurred
-	nframes64_t _current_pointer_frame; ///< frame that the pointer is now at
 };
 
 

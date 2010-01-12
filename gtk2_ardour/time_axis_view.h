@@ -221,6 +221,8 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	typedef std::vector<boost::shared_ptr<TimeAxisView> > Children;
 
+	SelectionRect* get_selection_rect(uint32_t id);
+	
   protected:
 	/* The Standard LHS Controls */
 	Gtk::HBox     controls_hbox;
@@ -316,8 +318,6 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 
 	std::list<SelectionRect*> free_selection_rects;
 	std::list<SelectionRect*> used_selection_rects;
-
-	SelectionRect* get_selection_rect(uint32_t id);
 
 	virtual void selection_click (GdkEventButton*);
 

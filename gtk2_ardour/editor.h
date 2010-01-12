@@ -107,7 +107,7 @@ class AutomationTimeAxisView;
 class BundleManager;
 class ControlPoint;
 class CrossfadeView;
-class Drag;
+class DragManager;
 class GlobalPortMatrixWindow;
 class GroupedButtons;
 class Marker;
@@ -607,7 +607,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void collect_new_region_view (RegionView *);
 	void collect_and_select_new_region_view (RegionView *);
 
-	void select_range_around_region (RegionView *);
+	long select_range_around_region (RegionView *);
 
 	Gtk::Menu track_context_menu;
 	Gtk::Menu track_region_context_menu;
@@ -1260,7 +1260,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	int scrubbing_direction;
 	int scrub_reversals;
 	int scrub_reverse_distance;
-	void scrub ();
+	void scrub (nframes64_t, double);
 
 	void keyboard_selection_begin ();
 	void keyboard_selection_finish (bool add);
@@ -1279,9 +1279,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	bool ignore_gui_changes;
 
-	Drag* _drag;
+	DragManager* _drags;
 
-	void break_drag ();
 	void escape ();
 
 	Gtk::Menu fade_context_menu;
@@ -1305,10 +1304,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	gint mouse_rename_region (ArdourCanvas::Item*, GdkEvent*);
 
-	void start_region_grab (ArdourCanvas::Item*, GdkEvent*, RegionView*);
+	void add_region_drag (ArdourCanvas::Item*, GdkEvent*, RegionView*);
 	void start_create_region_grab (ArdourCanvas::Item*, GdkEvent*);
-	void start_region_copy_grab (ArdourCanvas::Item*, GdkEvent*, RegionView*);
-	void start_region_brush_grab (ArdourCanvas::Item*, GdkEvent*, RegionView*);
+	void add_region_copy_drag (ArdourCanvas::Item*, GdkEvent*, RegionView*);
+	void add_region_brush_drag (ArdourCanvas::Item*, GdkEvent*, RegionView*);
 	void start_selection_grab (ArdourCanvas::Item*, GdkEvent*);
 
 	void region_view_item_click (AudioRegionView&, GdkEventButton*);
@@ -1676,7 +1675,7 @@ public:
 	bool allow_vertical_scroll;
 
 	/* trimming */
-	void point_trim (GdkEvent*);
+	void point_trim (GdkEvent *, nframes64_t);
 	void single_contents_trim (RegionView&, nframes64_t, bool, bool, bool);
 	void single_start_trim (RegionView&, nframes64_t, bool, bool, bool);
 	void single_end_trim (RegionView&, nframes64_t, bool, bool, bool);

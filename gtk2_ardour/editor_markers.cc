@@ -37,6 +37,7 @@
 #include "simplerect.h"
 #include "actions.h"
 #include "prompter.h"
+#include "editor_drag.h"
 
 #include "i18n.h"
 
@@ -1088,7 +1089,7 @@ Editor::new_transport_marker_menu_popdown ()
 	// hide rects
 	transport_bar_drag_rect->hide();
 
-	break_drag ();
+	_drags->break_drag ();
 }
 
 void

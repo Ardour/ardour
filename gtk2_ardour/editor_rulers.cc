@@ -246,9 +246,7 @@ Editor::ruler_button_press (GdkEventButton* ev)
 		}
 
 		/* playhead cursor */
-		assert (_drag == 0);
-		_drag = new CursorDrag (this, &playhead_cursor->canvas_item, false);
-		_drag->start_grab (reinterpret_cast<GdkEvent *> (ev));
+		_drags->set (new CursorDrag (this, &playhead_cursor->canvas_item, false), reinterpret_cast<GdkEvent *> (ev));
 		_dragging_playhead = true;
 	}
 
@@ -265,10 +263,8 @@ Editor::ruler_button_release (GdkEventButton* ev)
 	gint x,y;
 	Gdk::ModifierType state;
 
-	if (_drag) {
-		_drag->end_grab (reinterpret_cast<GdkEvent*> (ev));
-		delete _drag;
-		_drag = 0;
+	if (_drags->active ()) {
+		_drags->end_grab (reinterpret_cast<GdkEvent*> (ev));
 		_dragging_playhead = false;
 	}
 
@@ -312,8 +308,8 @@ Editor::ruler_mouse_motion (GdkEventMotion* ev)
 		return FALSE;
 	}
 
-	if (_drag) {
-		_drag->motion_handler (reinterpret_cast<GdkEvent*> (ev), false);
+	if (_drags->active ()) {
+		_drags->motion_handler (reinterpret_cast<GdkEvent*> (ev), false);
 	}
 
 	return TRUE;

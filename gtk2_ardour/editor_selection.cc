@@ -1418,12 +1418,12 @@ Editor::deselect_all ()
 	selection->clear ();
 }
 
-void
+long
 Editor::select_range_around_region (RegionView* rv)
 {
 	selection->set (&rv->get_time_axis_view());
 	
 	selection->time.clear ();
 	boost::shared_ptr<Region> r = rv->region ();
-	selection->set (r->position(), r->position() + r->length());
+	return selection->set (r->position(), r->position() + r->length());
 }

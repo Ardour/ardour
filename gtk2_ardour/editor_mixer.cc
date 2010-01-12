@@ -36,6 +36,7 @@
 #include "editor_route_groups.h"
 #include "editor_regions.h"
 #include "gui_thread.h"
+#include "editor_drag.h"
 
 #include "i18n.h"
 
@@ -342,7 +343,7 @@ Editor::session_going_away ()
 	entered_regionview = 0;
 	entered_track = 0;
 	last_update_frame = 0;
-	_drag = 0;
+	_drags->abort ();
 
 	playhead_cursor->canvas_item.hide ();
 

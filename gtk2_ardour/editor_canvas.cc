@@ -541,17 +541,14 @@ Editor::drop_regions (const RefPtr<Gdk::DragContext>& /*context*/,
 		      const SelectionData& /*data*/,
 		      guint /*info*/, guint /*time*/)
 {
-	assert (_drag);
-	_drag->end_grab (0);
-	delete _drag;
-	_drag = 0;
+	_drags->end_grab (0);
 }
 
 void
 Editor::maybe_autoscroll (GdkEventMotion* event, bool allow_vert)
 {
 	nframes64_t rightmost_frame = leftmost_frame + current_page_frames();
-	pair<nframes64_t, nframes64_t> frames = _drag->extent ();
+	pair<nframes64_t, nframes64_t> frames = _drags->extent ();
 	bool startit = false;
 
 	autoscroll_y = 0;
@@ -610,11 +607,9 @@ Editor::autoscroll_canvas ()
 	double new_pixel;
 	double target_pixel;
 
-	assert (_drag);
-
 	if (autoscroll_x_distance != 0) {
 
-		pair<nframes64_t, nframes64_t> const e = _drag->extent ();
+		pair<nframes64_t, nframes64_t> const e = _drags->extent ();
 		
 		if (autoscroll_x > 0) {
 			autoscroll_x_distance = (e.second - (leftmost_frame + current_page_frames())) / 3;
@@ -626,10 +621,10 @@ Editor::autoscroll_canvas ()
 
 	if (autoscroll_y_distance != 0) {
 		if (autoscroll_y > 0) {
-			autoscroll_y_distance = (_drag->current_pointer_y() - (get_trackview_group_vertical_offset() + _canvas_height)) / 3;
+			autoscroll_y_distance = (_drags->current_pointer_y() - (get_trackview_group_vertical_offset() + _canvas_height)) / 3;
 		} else if (autoscroll_y < 0) {
 
-			autoscroll_y_distance = (vertical_adjustment.get_value () - _drag->current_pointer_y()) / 3;
+			autoscroll_y_distance = (vertical_adjustment.get_value () - _drags->current_pointer_y()) / 3;
 		}
 	}
 
@@ -659,7 +654,7 @@ Editor::autoscroll_canvas ()
 			new_pixel = vertical_pos - autoscroll_y_distance;
 		}
 
-		target_pixel = _drag->current_pointer_y() - autoscroll_y_distance;
+		target_pixel = _drags->current_pointer_y() - autoscroll_y_distance;
 		target_pixel = max (target_pixel, 0.0);
 
  	} else if (autoscroll_y > 0) {
@@ -674,7 +669,7 @@ Editor::autoscroll_canvas ()
 
 		new_pixel = min (top_of_bottom_of_canvas, new_pixel);
 
-		target_pixel = _drag->current_pointer_y() + autoscroll_y_distance;
+		target_pixel = _drags->current_pointer_y() + autoscroll_y_distance;
 
 		/* don't move to the full canvas height because the item will be invisible
 		   (its top edge will line up with the bottom of the visible canvas.
@@ -683,7 +678,7 @@ Editor::autoscroll_canvas ()
 		target_pixel = min (target_pixel, full_canvas_height - 10);
 
 	} else {
-	  	target_pixel = _drag->current_pointer_y();
+	  	target_pixel = _drags->current_pointer_y();
 		new_pixel = vertical_pos;
 	}
 
@@ -709,7 +704,7 @@ Editor::autoscroll_canvas ()
 	ev.x = x;
 	ev.y = y;
 
-	motion_handler (_drag->item(), (GdkEvent*) &ev, true);
+	motion_handler (0, (GdkEvent*) &ev, true);
 
 	autoscroll_cnt++;
 

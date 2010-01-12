@@ -281,7 +281,7 @@ Editor::Editor ()
 	clicked_crossfadeview = 0;
 	clicked_control_point = 0;
 	last_update_frame = 0;
-	_drag = 0;
+	_drags = new DragManager (this);
 	current_mixer_strip = 0;
 	current_bbt_points = 0;
 	tempo_lines = 0;
@@ -714,7 +714,7 @@ Editor::~Editor()
 	delete _routes;
 	delete _route_groups;
 	delete track_canvas;
-	delete _drag;
+	delete _drags;
 }
 
 void
@@ -731,10 +731,8 @@ Editor::catch_vanishing_regionview (RegionView *rv)
 	   audioregionview by itself.
 	*/
 
-	if (_drag && rv->get_canvas_group() == _drag->item() && !_drag->ending()) {
-		_drag->end_grab (0);
-		delete _drag;
-		_drag = 0;
+	if (_drags->active() && _drags->have_item (rv->get_canvas_group()) && !_drags->ending()) {
+		_drags->abort ();
 	}
 
 	if (clicked_regionview == rv) {

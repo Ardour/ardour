@@ -196,10 +196,8 @@ Editor::track_canvas_button_press_event (GdkEventButton */*event*/)
 bool
 Editor::track_canvas_button_release_event (GdkEventButton *event)
 {
-	if (_drag) {
-		_drag->end_grab ((GdkEvent*) event);
-		delete _drag;
-		_drag = 0;
+	if (_drags->active ()) {
+		_drags->end_grab ((GdkEvent*) event);
 	}
 	return false;
 }
@@ -1008,7 +1006,7 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const & /*c*/, 
 	/* assume we're dragging with button 1 */
 	event.motion.state = Gdk::BUTTON1_MASK;
 
-	if (_drag == 0) {
+	if (!_drags->active ()) {
 
 		double px;
 		double py;
@@ -1042,11 +1040,10 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const & /*c*/, 
 			return true;
 		}
 
-		_drag = new RegionInsertDrag (this, region_copy, rtav, pos);
-		_drag->start_grab (&event);
+		_drags->set (new RegionInsertDrag (this, region_copy, rtav, pos), &event);
 	}
 
-	_drag->motion_handler (&event, false);
+	_drags->motion_handler (&event, false);
 
 	return true;
 }

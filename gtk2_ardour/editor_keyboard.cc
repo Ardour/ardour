@@ -53,10 +53,8 @@ Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, b
 	/* any use of "keyboard mouse buttons" invalidates an existing grab
 	*/
 
-	if (_drag) {
-		_drag->item()->ungrab (GDK_CURRENT_TIME);
-		delete _drag;
-		_drag = 0;
+	if (_drags->active ()) {
+		_drags->abort ();
 	}
 
 	if (doit) {

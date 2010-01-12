@@ -3826,10 +3826,8 @@ Editor::cut_copy (CutCopyOp op)
 	*/
 
 	if (op == Cut || op == Clear) {
-		if (_drag) {
-			_drag->item()->ungrab (0);
-			delete _drag;
-			_drag = 0;
+		if (_drags->active ()) {
+			_drags->abort ();
 		}
 	}
 
@@ -3846,10 +3844,7 @@ Editor::cut_copy (CutCopyOp op)
 			Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc));
 		}
 
-		break_drag ();
-		delete _drag;
-		_drag = 0;
-
+		_drags->break_drag ();
 		return;
 	}
 
@@ -3930,9 +3925,7 @@ Editor::cut_copy (CutCopyOp op)
 	}
 
 	if (op == Cut || op == Clear) {
-		break_drag ();
-		delete _drag;
-		_drag = 0;
+		_drags->break_drag ();
 	}
 }
 
