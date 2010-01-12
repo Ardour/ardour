@@ -1421,6 +1421,8 @@ Editor::deselect_all ()
 long
 Editor::select_range_around_region (RegionView* rv)
 {
+	assert (rv);
+	
 	selection->set (&rv->get_time_axis_view());
 	
 	selection->time.clear ();

@@ -774,13 +774,15 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 								boost::shared_ptr<Playlist> pl = t->diskstream()->playlist ();
 								if (pl) {
 									boost::shared_ptr<Region> r = pl->top_region_at (unit_to_frame (event->button.x));
-									RegionView* rv = rtv->view()->find_view (r);
-									clicked_selection = select_range_around_region (rv);
-									_drags->add (new SelectionDrag (this, item, SelectionDrag::SelectionMove));
-									list<RegionView*> rvs;
-									rvs.push_back (rv);
-									_drags->add (new RegionMoveDrag (this, item, rv, rvs, false, false));
-									_drags->start_grab (event);
+									if (r) {
+										RegionView* rv = rtv->view()->find_view (r);
+										clicked_selection = select_range_around_region (rv);
+										_drags->add (new SelectionDrag (this, item, SelectionDrag::SelectionMove));
+										list<RegionView*> rvs;
+										rvs.push_back (rv);
+										_drags->add (new RegionMoveDrag (this, item, rv, rvs, false, false));
+										_drags->start_grab (event);
+									}
 								}
 							}
 						}
