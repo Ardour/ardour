@@ -488,6 +488,15 @@ ExportDialog::set_state()
 	channels_chosen();
 	sample_rate_chosen();
 
+	//header_chosen initializes the file_entry text.  we need to clear it so it will be set to the default, and/or recover the val that was stored in instant.xml
+	file_entry.set_text("");
+	if (node) {
+		if ((prop = node->property (X_("filename"))) != 0) {
+			file_entry.set_text(prop->value());
+		}
+	}
+
+
 	if (session->master_out()) {
 		track_scroll.hide ();
 	} else {
