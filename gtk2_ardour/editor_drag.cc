@@ -57,7 +57,6 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i)
 	: _editor (e)
 	, _item (i)
 	, _pointer_frame_offset (0)
-	, _have_transaction (false)
 	, _ending (false)
 	, _move_threshold_passed (false)
 	, _grab_frame (0)
@@ -784,8 +783,6 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			_editor->begin_reversible_command (_("region drag"));
 		}
 	}
-
-	_have_transaction = true;
 
 	changed_position = (_last_frame_position != (nframes64_t) (_primary->region()->position()));
 	changed_tracks = (_dest_trackview != &_primary->get_time_axis_view());
@@ -1543,6 +1540,7 @@ RegionGainDrag::aborted ()
 
 TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
 	: RegionDrag (e, i, p, v)
+	, _have_transaction (false)
 {
 
 }
@@ -1661,9 +1659,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			}
 		}
 	}
-
-	/* XXX i hope to god that we can really conclude this ... */
-	_have_transaction = true;
 
 	if (left_direction) {
 		frame_delta = (last_pointer_frame() - pf);
@@ -3111,9 +3106,6 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
 		if (first_move) {
 
-			_editor->begin_reversible_command (_("range selection"));
-			_have_transaction = true;
-
 			if (_copy) {
 				/* adding to the selection */
 				_editor->selection->add (_editor->clicked_axisview);
@@ -3162,11 +3154,6 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
 	case SelectionStartTrim:
 
-		if (first_move) {
-			_editor->begin_reversible_command (_("trim selection start"));
-			_have_transaction = true;
-		}
-		
 		start = _editor->selection->time[_editor->clicked_selection].start;
 		end = _editor->selection->time[_editor->clicked_selection].end;
 
@@ -3178,11 +3165,6 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		break;
 
 	case SelectionEndTrim:
-
-		if (first_move) {
-			_editor->begin_reversible_command (_("trim selection end"));
-			_have_transaction = true;
-		}
 
 		start = _editor->selection->time[_editor->clicked_selection].start;
 		end = _editor->selection->time[_editor->clicked_selection].end;
@@ -3196,11 +3178,6 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		break;
 
 	case SelectionMove:
-
-		if (first_move) {
-			_editor->begin_reversible_command (_("move selection"));
-			_have_transaction = true;
-		}
 
 		start = _editor->selection->time[_editor->clicked_selection].start;
 		end = _editor->selection->time[_editor->clicked_selection].end;
@@ -3240,10 +3217,6 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 		/* XXX this is not object-oriented programming at all. ick */
 		if (_editor->selection->time.consolidate()) {
 			_editor->selection->TimeChanged ();
-		}
-
-		if (_have_transaction) {
-			_editor->commit_reversible_command ();
 		}
 
 		/* XXX what if its a music time selection? */
