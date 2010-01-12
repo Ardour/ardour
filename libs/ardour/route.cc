@@ -452,11 +452,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			assert (bufs.count() == (*i)->input_streams());
 
 			(*i)->run (bufs, start_frame, end_frame, nframes, *i != _processors.back());
-			bufs.set_count (ChanCount::max(bufs.count(), (*i)->output_streams()));
-		}
-
-		if (!_processors.empty()) {
-			bufs.set_count (ChanCount::max (bufs.count(), _processors.back()->output_streams()));
+			bufs.set_count ((*i)->output_streams());
 		}
 	}
 }
