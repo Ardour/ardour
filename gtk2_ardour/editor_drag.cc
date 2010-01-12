@@ -1662,10 +1662,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		}
 	}
 
-	if (pf == last_pointer_frame()) {
-		return;
-	}
-
 	/* XXX i hope to god that we can really conclude this ... */
 	_have_transaction = true;
 
@@ -1826,10 +1822,6 @@ MeterMarkerDrag::motion (GdkEvent* event, bool)
 {
 	nframes64_t const pf = adjusted_current_frame (event);
 
-	if (pf == last_pointer_frame()) {
-		return;
-	}
-
 	_marker->set_position (pf);
 	
 	_editor->show_verbose_time_cursor (pf, 10);
@@ -1919,15 +1911,7 @@ void
 TempoMarkerDrag::motion (GdkEvent* event, bool)
 {
 	nframes64_t const pf = adjusted_current_frame (event);
-
-	if (pf == last_pointer_frame()) {
-		return;
-	}
-
-	/* OK, we've moved far enough to make it worth actually move the thing. */
-
 	_marker->set_position (pf);
-
 	_editor->show_verbose_time_cursor (pf, 10);
 }
 
@@ -2945,10 +2929,6 @@ TimeFXDrag::motion (GdkEvent* event, bool)
 
 	nframes64_t const pf = adjusted_current_frame (event);
 
-	if (pf == last_pointer_frame()) {
-		return;
-	}
-
 	if (pf > rv->region()->position()) {
 		rv->get_time_axis_view().show_timestretch (rv->region()->position(), pf);
 	}
@@ -3373,14 +3353,6 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 
 	nframes64_t const pf = adjusted_current_frame (event);
 
-	/* only alter selection if the current frame is
-	   different from the last frame position.
-	 */
-
-	if (pf == last_pointer_frame()) {
-		return;
-	}
-
 	if (_operation == CreateRangeMarker || _operation == CreateTransportMarker || _operation == CreateCDMarker) {
 		nframes64_t grab = grab_frame ();
 		_editor->snap_to (grab);
@@ -3536,10 +3508,6 @@ MouseZoomDrag::motion (GdkEvent* event, bool first_move)
 	nframes64_t end;
 
 	nframes64_t const pf = adjusted_current_frame (event);
-
-	if (pf == last_pointer_frame()) {
-		return;
-	}
 
 	nframes64_t grab = grab_frame ();
 	_editor->snap_to_with_modifier (grab, event);
