@@ -2815,13 +2815,7 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 	double y1;
 	double y2;
 
-	/* use a bigger drag threshold than the default */
-
 	nframes64_t const pf = adjusted_current_frame (event, Config->get_rubberbanding_snaps_to_grid ());
-
-	if (abs ((int) (pf - grab_frame())) < 8) {
-		return;
-	}
 
 	nframes64_t grab = grab_frame ();
 	if (Config->get_rubberbanding_snaps_to_grid ()) {

@@ -577,6 +577,10 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 	void aborted ();
+
+	std::pair<nframes64_t, int> move_threshold () const {
+		return std::make_pair (8, 1);
+	}
 };
 
 /** Region drag in time-FX mode */
