@@ -399,7 +399,7 @@ NewSessionDialog::NewSessionDialog()
 	const char * const template_dir_name = X_("templates");
 
 	//if SYSTEM template folder exists, add it to the file chooser
-	const std::string sys_templates_path = ARDOUR::get_system_data_path() + template_dir_name;
+	const std::string sys_templates_path = ARDOUR::get_system_data_path() + "/" + template_dir_name;
 printf("system template path = %s\n", sys_templates_path.c_str());
 	if (Glib::file_test(sys_templates_path, Glib::FILE_TEST_IS_DIR))
 	{
