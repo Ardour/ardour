@@ -54,12 +54,8 @@ char *StringForOSType (OSType t, char *writeLocation)
 	unsigned char str[4], *q = str;
 	*(UInt32 *)str = EndianU32_NtoB(t);
 	for (int i = 0; i < 4; ++i) {
-		if (isprint(*q) && *q != '\\')
-			*p++ = *q++;
-		else {
-			sprintf(p, "\\x%02X", *q++);
-			p += 4;
-		}
+		sprintf(p, "\\x%02X", *q++);
+		p += 4;
 	}
 	*p = '\0';
 	return writeLocation;

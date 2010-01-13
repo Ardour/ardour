@@ -2021,9 +2021,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			info->n_inputs = info->cache.io_configs.front().first;
 			info->n_outputs = info->cache.io_configs.front().second;
 
-			if (info->cache.io_configs.size() > 1) {
-				cerr << "ODD: variable IO config for " << info->unique_id << endl;
-			}
+			cerr << "detected AU: " << info->name.c_str() << "  (" << info->cache.io_configs.size() << " i/o configurations) - " << info->unique_id << endl;
 
 			plugs.push_back (info);
 
@@ -2116,12 +2114,15 @@ AUPluginInfo::add_cached_info (const std::string& id, AUPluginCachedInfo& cinfo)
 	cached_info[id] = cinfo;
 }
 
+#define AU_CACHE_VERSION "2.0"
+
 void
 AUPluginInfo::save_cached_info ()
 {
 	XMLNode* node;
 
 	node = new XMLNode (X_("AudioUnitPluginCache"));
+	node->add_property( "version", AU_CACHE_VERSION );
 	
 	for (map<string,AUPluginCachedInfo>::iterator i = cached_info.begin(); i != cached_info.end(); ++i) {
 		XMLNode* parent = new XMLNode (X_("plugin"));
@@ -2163,13 +2164,24 @@ AUPluginInfo::load_cached_info ()
 		return 0;
 	}
 
-	tree.read (path);
+	if ( !tree.read (path) ) {
+		error << "au_cache is not a valid XML file.  AU plugins will be re-scanned" << endmsg;
+		return -1;
+	}
+	
 	const XMLNode* root (tree.root());
 
 	if (root->name() != X_("AudioUnitPluginCache")) {
 		return -1;
 	}
-
+	
+	//initial version has incorrectly stored i/o info, and/or garbage chars.
+	const XMLProperty* version = root->property(X_("version"));
+	if (! (version != NULL) && (version->value() == X_(AU_CACHE_VERSION)))) {
+		error << "au_cache is not correct version.  AU plugins will be re-scanned" << endmsg;
+		return -1;
+	}
+	
 	cached_info.clear ();
 
 	const XMLNodeList children = root->children();
