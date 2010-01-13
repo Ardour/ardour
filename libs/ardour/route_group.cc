@@ -71,6 +71,8 @@ RouteGroup::set_name (string str)
 int
 RouteGroup::add (boost::shared_ptr<Route> r)
 {
+	assert (find (routes->begin(), routes->end(), r) == routes->end ());
+	
 	r->leave_route_group ();
 
 	routes->push_back (r);

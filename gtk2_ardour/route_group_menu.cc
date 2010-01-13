@@ -31,6 +31,8 @@ using namespace ARDOUR;
 RouteGroupMenu::RouteGroupMenu (Session* s, RouteGroup::Property p)
 	: SessionHandlePtr (s)
 	, _default_properties (p)
+	, _inhibit_group_selected (false)
+	, _selected_route_group (0)
 {
 	rebuild (0);
 }
@@ -39,6 +41,10 @@ void
 RouteGroupMenu::rebuild (RouteGroup* curr)
 {
 	using namespace Menu_Helpers;
+
+	_selected_route_group = curr;
+
+	_inhibit_group_selected = true;
 
 	items().clear ();
 
@@ -55,6 +61,8 @@ RouteGroupMenu::rebuild (RouteGroup* curr)
 	if (_session) {
 		_session->foreach_route_group (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::add_item), curr, &group));
 	}
+
+	_inhibit_group_selected = false;
 }
 
 void
@@ -72,7 +80,18 @@ RouteGroupMenu::add_item (RouteGroup* rg, RouteGroup* curr, RadioMenuItem::Group
 void
 RouteGroupMenu::set_group (RouteGroup* g)
 {
-	GroupSelected (g);
+	if (g == _selected_route_group) {
+		/* cut off the signal_toggled that GTK emits for an option that is being un-selected
+		   when a new option is being selected instead
+		*/
+		return;
+	}
+	
+	if (!_inhibit_group_selected) {
+		GroupSelected (g);
+	}
+
+	_selected_route_group = g;
 }
 
 void

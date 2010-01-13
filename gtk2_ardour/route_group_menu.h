@@ -39,6 +39,8 @@ public:
 	void set_group (ARDOUR::RouteGroup *);
 
 	ARDOUR::RouteGroup::Property _default_properties;
+	bool _inhibit_group_selected;
+	ARDOUR::RouteGroup* _selected_route_group;
 };
 
 #endif /* __ardour_gtk_route_group_menu_h__ */
