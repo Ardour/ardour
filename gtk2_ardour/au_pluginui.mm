@@ -45,6 +45,70 @@ static const gchar* _automation_mode_strings[] = {
 	0
 };
 
+@implementation NotificationObject
+
+- (NotificationObject*) initWithPluginUI: (AUPluginUI*) apluginui andCocoaParent: (NSWindow*) cp andTopLevelParent: (NSWindow*) tlp
+{
+	self = [ super init ];
+
+	if (self) {
+		plugin_ui = apluginui;
+		cocoa_parent = cp;
+		top_level_parent = tlp;
+
+		[[NSNotificationCenter defaultCenter] addObserver:self
+		 selector:@selector(cocoaParentActivationHandler:)
+		 name:NSWindowDidBecomeMainNotification
+		 object:nil];
+
+		[[NSNotificationCenter defaultCenter] addObserver:self
+		 selector:@selector(cocoaParentBecameKeyHandler:)
+		 name:NSWindowDidBecomeKeyNotification
+		 object:nil];
+	}
+
+	return self;
+}
+		
+- (void)cocoaParentActivationHandler:(NSNotification *)notification
+{
+	NSWindow* notification_window = (NSWindow *)[notification object];
+
+	if (top_level_parent == notification_window || cocoa_parent == notification_window) {
+		if ([notification_window isMainWindow]) {
+			plugin_ui->activate();
+		} else {
+			plugin_ui->deactivate();
+		}
+	} 
+}
+
+- (void)cocoaParentBecameKeyHandler:(NSNotification *)notification
+{
+	NSWindow* notification_window = (NSWindow *)[notification object];
+
+	cerr << "KeyNotification Handler\n";
+
+	if (top_level_parent == notification_window || cocoa_parent == notification_window) {
+		cerr << "\tKeyHandler, top level parent is key: " <<  ([top_level_parent isKeyWindow] ? "yes" : "no") << endl;
+		cerr << "\tKeyHandler, cocoa parent is key: " <<  ([cocoa_parent isKeyWindow] ? "yes" : "no") << endl;
+		
+		if ([notification_window isKeyWindow]) {
+			cerr << "\t\tActivating plugin UI\n";
+			plugin_ui->activate();
+		} else {
+			cerr << "\t\tDeActivating plugin UI\n";
+			plugin_ui->deactivate();
+		}
+	} else {
+		cerr << "\tsome other window become Key (" << notification_window << ") CP is " << cocoa_parent << "\n";
+	}
+}
+
+
+
+@end
+
 AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	: PlugUIBase (insert)
 	, automation_mode_label (_("Automation"))
@@ -102,6 +166,7 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	_activating_from_app = false;
 	cocoa_parent = 0;
+	_notify = 0;
 	cocoa_window = 0;
 	au_view = 0;
 	packView = 0;
@@ -124,8 +189,9 @@ AUPluginUI::~AUPluginUI ()
 {
 	if (cocoa_parent) {
 		NSWindow* win = get_nswindow();
-		RemoveEventHandler(carbon_event_handler);
+		[[NSNotificationCenter defaultCenter] removeObserver:_notify];
 		[win removeChildWindow:cocoa_parent];
+
 	} else if (carbon_window) {
 		/* not parented, just overlaid on top of our window */
 		DisposeWindow (carbon_window);
@@ -389,70 +455,14 @@ AUPluginUI::get_nswindow ()
 void
 AUPluginUI::activate ()
 {
-	if (carbon_window && cocoa_parent) {
-		cerr << "APP activated, activate carbon window " << insert->name() << endl;
-		_activating_from_app = true;
-		ActivateWindow (carbon_window, TRUE);
-		_activating_from_app = false;
-		[cocoa_parent makeKeyAndOrderFront:nil];
-	} 
+	ActivateWindow (carbon_window, TRUE);
+	// [cocoa_parent makeKeyAndOrderFront:nil];
 }
 
 void
 AUPluginUI::deactivate ()
 {
- 	return;
-	cerr << "APP DEactivated, for " << insert->name() << endl;
-	_activating_from_app = true;
 	ActivateWindow (carbon_window, FALSE);
-	_activating_from_app = false;
-}
-
-
-OSStatus 
-_carbon_event (EventHandlerCallRef nextHandlerRef, EventRef event, void *userData) 
-{
-	return ((AUPluginUI*)userData)->carbon_event (nextHandlerRef, event);
-}
-
-OSStatus 
-AUPluginUI::carbon_event (EventHandlerCallRef nextHandlerRef, EventRef event)
-{
-	cerr << "CARBON EVENT\n";
-
-	UInt32 eventKind = GetEventKind(event);
-	ClickActivationResult howToHandleClick;
-	NSWindow* win = get_nswindow ();
-
-	cerr << "window " << win << " carbon event type " << eventKind << endl;
-
-	switch (eventKind) {
-	case kEventWindowHandleActivate:
-		cerr << "carbon window for " << insert->name() << " activated\n";
-		if (_activating_from_app) {
-			cerr << "app activation, ignore window activation\n";
-			return noErr;
-		}
-		[win makeMainWindow];
-		return eventNotHandledErr;
-		break;
-
-	case kEventWindowHandleDeactivate:
-		cerr << "carbon window for " << insert->name() << " would have been deactivated\n";
-		// never deactivate the carbon window
-		return noErr;
-		break;
-		
-	case kEventWindowGetClickActivation:
-		cerr << "carbon window CLICK activated\n";
-		[win makeKeyAndOrderFront:nil];
-		howToHandleClick = kActivateAndHandleClick;
-		SetEventParameter(event, kEventParamClickActivation, typeClickActivationResult, 
-				  sizeof(ClickActivationResult), &howToHandleClick);
-		break;
-	}
-
-	return noErr;
 }
 
 int
@@ -491,18 +501,9 @@ AUPluginUI::parent_carbon_window ()
 	// create the cocoa window for the carbon one and make it visible
 	cocoa_parent = [[NSWindow alloc] initWithWindowRef: carbon_window];
 
-	EventTypeSpec	windowEventTypes[] = {
-		{kEventClassWindow, kEventWindowGetClickActivation },
-		{kEventClassWindow, kEventWindowHandleDeactivate }
-	};
-	
-	EventHandlerUPP   ehUPP = NewEventHandlerUPP(_carbon_event);
-	OSStatus result = InstallWindowEventHandler (carbon_window, ehUPP, 
-						     sizeof(windowEventTypes) / sizeof(EventTypeSpec), 
-						     windowEventTypes, this, &carbon_event_handler);
-	if (result != noErr) {
-		return -1;
-	}
+	SetWindowActivationScope (carbon_window, kWindowActivationScopeNone);
+
+	_notify = [ [NotificationObject alloc] initWithPluginUI:this andCocoaParent:cocoa_parent andTopLevelParent:win ]; 
 
 	[win addChildWindow:cocoa_parent ordered:NSWindowAbove];
 
@@ -564,13 +565,6 @@ AUPluginUI::lower_box_realized ()
 	}
 }
 
-void
-AUPluginUI::on_hide ()
-{
-	// VBox::on_hide ();
-	cerr << "AU plugin window hidden\n";
-}
-
 bool
 AUPluginUI::on_map_event (GdkEventAny* ev)
 {
@@ -578,20 +572,31 @@ AUPluginUI::on_map_event (GdkEventAny* ev)
 }
 
 void
-AUPluginUI::on_show ()
+AUPluginUI::on_window_hide ()
 {
-	cerr << "AU plugin window shown\n";
+	if (carbon_window) {
+		HideWindow (carbon_window);
+		ActivateWindow (carbon_window, FALSE);
+	}
 
-	VBox::on_show ();
+	hide_all ();
+}
+
+bool
+AUPluginUI::on_window_show (const Glib::ustring& title)
+{
+	/* this is idempotent so just call it every time we show the window */
 
 	gtk_widget_realize (GTK_WIDGET(low_box.gobj()));
 
-	if (au_view) {
-		show_all ();
-	} else if (carbon_window) {
-		[cocoa_parent setIsVisible:YES];
+	show_all ();
+
+	if (carbon_window) {
 		ShowWindow (carbon_window);
+		ActivateWindow (carbon_window, TRUE);
 	}
+
+	return true;
 }
 
 bool

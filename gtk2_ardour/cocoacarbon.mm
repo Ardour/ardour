@@ -16,151 +16,111 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <Carbon/Carbon.h>
-#undef check // stupid, stupid carbon
-#undef YES   // stupid, stupid gtkmm and/or NSObjC
-#undef NO    // ditto
+#include <Carbon/Carbon.h> // bring it in early
+#undef check // nuke this stupidity
+#define APPLE_SAYS_YES YES
+#undef YES   // and this
+#undef NO    // and this
 
 #include "ardour_ui.h"
 #include "actions.h"
 #include "opts.h"
 #include <gtkmm2ext/sync-menu.h>
-
-#include <Appkit/Appkit.h>
 #include <gdk/gdkquartz.h>
 
 sigc::signal<void,bool> ApplicationActivationChanged;
-static EventHandlerRef  application_event_handler_ref;
 
-/* Called for clicks on the dock icon. Can be used to unminimize or
- * create a new window for example.
- */
+@interface AppNotificationObject : NSObject {}
+- (AppNotificationObject*) init; 
+@end
 
-static OSErr
-handle_reopen_application (const AppleEvent *inAppleEvent, 
-                           AppleEvent       *outAppleEvent, 
-                           long              inHandlerRefcon)
+@implementation AppNotificationObject
+- (AppNotificationObject*) init
 {
-        return noErr;
-}
+	self = [ super init ];
 
+	if (self) {
+		[[NSNotificationCenter defaultCenter] addObserver:self
+		 selector:@selector(appDidBecomeActive:)
+		 name:NSApplicationDidBecomeActiveNotification
+		 object:[NSApplication sharedApplication]];
 
-static OSErr
-handle_print_documents (const AppleEvent *inAppleEvent, 
-                           AppleEvent       *outAppleEvent, 
-                           long              inHandlerRefcon)
-{
-        return noErr;
-}
-
-
-static OSErr
-handle_open_documents (const AppleEvent *inAppleEvent, 
-		       AppleEvent       *outAppleEvent, 
-		       long              inHandlerRefcon)
-{
-	AEDescList docs;
-
-        if (AEGetParamDesc(inAppleEvent, keyDirectObject, typeAEList, &docs) == noErr) {
-		long n = 0;
-		AECountItems(&docs, &n);
-		UInt8 strBuffer[PATH_MAX+1];
-
-		/* ardour only opens 1 session at a time */
-
-		FSRef ref;
-
-		if (AEGetNthPtr(&docs, 1, typeFSRef, 0, 0, &ref, sizeof(ref), 0) == noErr) {
-			if (FSRefMakePath(&ref, strBuffer, sizeof(strBuffer)) == noErr) {
-				Glib::ustring utf8_path ((const char*) strBuffer);
-				ARDOUR_UI::instance()->idle_load (utf8_path);
-			}
-		}
+		[[NSNotificationCenter defaultCenter] addObserver:self
+		 selector:@selector(appDidBecomeInactive:)
+		 name:NSApplicationWillResignActiveNotification 
+		 object:[NSApplication sharedApplication]];
 	}
 
-        return noErr;
+	return self;
 }
 
-static OSErr
-handle_open_application (const AppleEvent *inAppleEvent, 
-                         AppleEvent       *outAppleEvent, 
-                         long              inHandlerRefcon)
+- (void)appDidBecomeActive:(NSNotification *)notification
 {
-        return noErr;
+	ApplicationActivationChanged (true);
 }
 
-static OSStatus 
-application_event_handler (EventHandlerCallRef nextHandlerRef, EventRef event, void *userData) 
+- (void)appDidBecomeInactive:(NSNotification *)notification
 {
-	UInt32 eventKind = GetEventKind (event);
-	
-	switch (eventKind) {
-	case kEventAppActivated:
-		ApplicationActivationChanged (true); // EMIT SIGNAL
-		return eventNotHandledErr;
-
-	case kEventAppDeactivated:
-		ApplicationActivationChanged (false); // EMIT SIGNAL
-		return eventNotHandledErr;
-		
-	default:
-		// pass-thru all kEventClassApplication events we're not interested in.
-		break;
-	}
-	return eventNotHandledErr;
+	ApplicationActivationChanged (false);
 }
+
+@end
+
+@interface ArdourApplicationDelegate : NSObject {}
+@end
+
+@implementation ArdourApplicationDelegate
+-(BOOL) application:(NSApplication*) theApplication openFile:(NSString*) file
+{
+	Glib::ustring utf8_path ([file UTF8String]);
+	ARDOUR_UI::instance()->idle_load (utf8_path);
+	return APPLE_SAYS_YES;
+}
+@end
 
 void
 ARDOUR_UI::platform_specific ()
 {
-	Gtk::Widget* widget = ActionManager::get_widget ("/ui/Main/Session/Quit");
+	Gtk::Widget* widget;
+
+	cerr << "Plaform specific GUI stuff\n";
+
+	widget = ActionManager::get_widget ("/ui/Main/Session/Quit");
 	if (widget) {
 		ige_mac_menu_set_quit_menu_item ((GtkMenuItem*) widget->gobj());
 	}
 
 	IgeMacMenuGroup* group = ige_mac_menu_add_app_menu_group ();
 
-	widget = ActionManager::get_widget ("/ui/Main/Session/About");
+	widget = ActionManager::get_widget ("/ui/Main/Help/About");
 	if (widget) {
 		ige_mac_menu_add_app_menu_item (group, (GtkMenuItem*) widget->gobj(), 0);
 	}
-	widget = ActionManager::get_widget ("/ui/Main/Session/ToggleOptionsEditor");
 
+	widget = ActionManager::get_widget ("/ui/Main/WindowMenu/ToggleOptionsEditor");
 	if (widget) {
 		ige_mac_menu_add_app_menu_item (group, (GtkMenuItem*) widget->gobj(), 0);
 	}
-}
 
-void
-ARDOUR_UI::platform_setup ()
-{
-        AEInstallEventHandler (kCoreEventClass, kAEOpenDocuments, 
-                               handle_open_documents, 0, true);
+	[ NSApp finishLaunching ];
 
-        AEInstallEventHandler (kCoreEventClass, kAEOpenApplication, 
-                               handle_open_application, 0, true);
-
-        AEInstallEventHandler (kCoreEventClass, kAEReopenApplication, 
-                               handle_reopen_application, 0, true);
-
-        AEInstallEventHandler (kCoreEventClass, kAEPrintDocuments, 
-                               handle_print_documents, 0, true);
-
-	EventTypeSpec applicationEventTypes[] = {
-		{kEventClassApplication, kEventAppActivated },
-		{kEventClassApplication, kEventAppDeactivated }
-	};	
-	
-	EventHandlerUPP ehUPP = NewEventHandlerUPP (application_event_handler);
-	
-	InstallApplicationEventHandler (ehUPP, sizeof(applicationEventTypes) / sizeof(EventTypeSpec), 
-					applicationEventTypes, 0, &application_event_handler_ref);
 	if (!ARDOUR_COMMAND_LINE::finder_invoked_ardour) {
 		
 		/* if invoked from the command line, make sure we're visible */
 		
 		[NSApp activateIgnoringOtherApps:1];
 	} 
+}
+
+void
+ARDOUR_UI::platform_setup ()
+{
+	/* this will stick around for ever ... is that OK ? */
+	
+	[ [AppNotificationObject alloc] init];
+
+	[ NSApp setDelegate: [ArdourApplicationDelegate new]];
+
 }
 
 bool

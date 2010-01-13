@@ -191,7 +191,7 @@ void
 PluginUIWindow::on_show ()
 {
 	set_role("plugin_ui");
-
+	
 	if (_pluginui) {
 		_pluginui->update_presets ();
 	}
@@ -200,7 +200,7 @@ PluginUIWindow::on_show ()
 		if (_pluginui->on_window_show (_title)) {
 			Window::on_show ();
 		}
-	}
+	} 
 
 	if (parent) {
 		// set_transient_for (*parent);
@@ -273,12 +273,12 @@ void
 PluginUIWindow::app_activated (bool yn)
 {
 #if defined (HAVE_AUDIOUNITS) && defined(GTKOSX)
-	cerr << "APP activated ? " << yn << endl;
 	if (_pluginui) {
 		if (yn) {
 			if (was_visible) {
 				_pluginui->activate ();
-				present ();
+				// present ();
+				show ();
 				was_visible = true;
 			}
 		} else {

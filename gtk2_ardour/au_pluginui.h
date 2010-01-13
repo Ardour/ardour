@@ -28,6 +28,16 @@ namespace ARDOUR {
 	class Redirect;
 }
 
+class AUPluginUI;
+
+@interface NotificationObject : NSObject {
+	@private
+		AUPluginUI* plugin_ui;
+	        NSWindow* cocoa_parent;
+		NSWindow* top_level_parent;
+}
+@end
+
 class AUPluginUI : public PlugUIBase, public Gtk::VBox
 {
   public:
@@ -42,10 +52,11 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	void activate ();
 	void deactivate ();
 
+	bool on_window_show (const Glib::ustring&);
+	void on_window_hide ();
+
 	void lower_box_realized ();
 	void on_realize ();
-	void on_show ();
-	void on_hide ();
 	bool on_map_event (GdkEventAny*);
 	bool on_focus_in_event (GdkEventFocus*);
 	bool on_focus_out_event (GdkEventFocus*);
@@ -80,6 +91,7 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
  	EventHandlerRef      carbon_event_handler;
 	bool                 _activating_from_app;
 	NSView*              packView;
+	NotificationObject* _notify;
 
 	bool test_cocoa_view_support ();
 	bool test_carbon_view_support ();
