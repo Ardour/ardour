@@ -258,7 +258,7 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (transport_actions, X_("ToggleRollMaybe"), _("Start/Continue/Stop"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_roll), false, true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (transport_actions, X_("ToggleRollForgetCapture"), _("Stop + Forget Capture"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_roll), true, false));
+	act = ActionManager::register_action (transport_actions, X_("ToggleRollForgetCapture"), _("Stop and Forget Capture"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_roll), true, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
@@ -365,77 +365,19 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleVideoSync"), _("Sync startup to video"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_video_sync));
+	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleVideoSync"), _("Sync Startup to Video"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_video_sync));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleTimeMaster"), _("Time Master"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_time_master));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (transport_actions, X_("ToggleExternalSync"), _(""), sigc::mem_fun(*this, &ARDOUR_UI::toggle_external_sync));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack1"), _("Toggle Record Enable Track1"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  0U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack2"), _("Toggle Record Enable Track2"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  1U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack3"), _("Toggle Record Enable Track3"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  2U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack4"), _("Toggle Record Enable Track4"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  3U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack5"), _("Toggle Record Enable Track5"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  4U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack6"), _("Toggle Record Enable Track6"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  5U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack7"), _("Toggle Record Enable Track7"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  6U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack8"), _("Toggle Record Enable Track8"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  7U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack9"), _("Toggle Record Enable Track9"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable),  8U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack10"), _("Toggle Record Enable Track10"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 9U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack11"), _("Toggle Record Enable Track11"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 10U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack12"), _("Toggle Record Enable Track12"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 11U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack13"), _("Toggle Record Enable Track13"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 12U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack14"), _("Toggle Record Enable Track14"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 13U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack15"), _("Toggle Record Enable Track15"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 14U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack16"), _("Toggle Record Enable Track16"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 15U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack17"), _("Toggle Record Enable Track17"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 16U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack18"), _("Toggle Record Enable Track18"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 17U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack19"), _("Toggle Record Enable Track19"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 18U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack20"), _("Toggle Record Enable Track20"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 19U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack21"), _("Toggle Record Enable Track21"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 20U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack22"), _("Toggle Record Enable Track22"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 21U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack23"), _("Toggle Record Enable Track23"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 22U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack24"), _("Toggle Record Enable Track24"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 23U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack25"), _("Toggle Record Enable Track25"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 24U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack26"), _("Toggle Record Enable Track26"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 25U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack27"), _("Toggle Record Enable Track27"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 26U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack28"), _("Toggle Record Enable Track28"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 27U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack29"), _("Toggle Record Enable Track29"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 28U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack30"), _("Toggle Record Enable Track30"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 29U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack31"), _("Toggle Record Enable Track31"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 30U));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (common_actions, X_("ToggleRecordEnableTrack32"), _("Toggle Record Enable Track32"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_record_enable), 31U));
-	ActionManager::session_sensitive_actions.push_back (act);
+	for (int i = 1; i <= 32; ++i) {
+		string const a = string_compose (X_("ToggleRecordEnableTrack%1"), i);
+		string const n = string_compose (_("Toggle Record Enable Track %1"), i);
+		act = ActionManager::register_action (common_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_record_enable), i - 1));
+		ActionManager::session_sensitive_actions.push_back (act);
+	}
 
 	Glib::RefPtr<ActionGroup> shuttle_actions = ActionGroup::create ("ShuttleActions");
 

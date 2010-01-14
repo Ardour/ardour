@@ -208,75 +208,26 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "track-record-enable-toggle", _("Toggle Record Enable"), sigc::mem_fun(*this, &Editor::toggle_record_enable));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	for (int i = 1; i <= 12; ++i) {
+		string const a = string_compose (X_("save-visual-state-%1"), i);
+		string const n = string_compose (_("Save View %1"), i);
+		act = ActionManager::register_action (editor_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &Editor::start_visual_state_op), i - 1));
+		ActionManager::session_sensitive_actions.push_back (act);
+	}
 
-	act = ActionManager::register_action (editor_actions, "save-visual-state-1", _("Save View 1"), sigc::bind (sigc::mem_fun (*this, &Editor::start_visual_state_op), 0));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-visual-state-1", _("Goto View 1"), sigc::bind (sigc::mem_fun (*this, &Editor::cancel_visual_state_op), 0));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "save-visual-state-2", _("Save View 2"), sigc::bind (sigc::mem_fun (*this, &Editor::start_visual_state_op), 1));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-visual-state-2", _("Goto View 2"), sigc::bind (sigc::mem_fun (*this, &Editor::cancel_visual_state_op), 1));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "save-visual-state-3", _("Save View 3"), sigc::bind (sigc::mem_fun (*this, &Editor::start_visual_state_op), 2));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-visual-state-3", _("Goto View 3"), sigc::bind (sigc::mem_fun (*this, &Editor::cancel_visual_state_op), 2));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "save-visual-state-4", _("Save View 4"), sigc::bind (sigc::mem_fun (*this, &Editor::start_visual_state_op), 3));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-visual-state-4", _("Goto View 4"), sigc::bind (sigc::mem_fun (*this, &Editor::cancel_visual_state_op), 3));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "save-visual-state-5", _("Save View 5"), sigc::bind (sigc::mem_fun (*this, &Editor::start_visual_state_op), 4));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-visual-state-5", _("Goto View 5"), sigc::bind (sigc::mem_fun (*this, &Editor::cancel_visual_state_op), 4));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "save-visual-state-6", _("Save View 6"), sigc::bind (sigc::mem_fun (*this, &Editor::start_visual_state_op), 5));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-visual-state-6", _("Goto View 6"), sigc::bind (sigc::mem_fun (*this, &Editor::cancel_visual_state_op), 5));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "save-visual-state-7", _("Save View 7"), sigc::bind (sigc::mem_fun (*this, &Editor::start_visual_state_op), 6));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-visual-state-7", _("Goto View 7"), sigc::bind (sigc::mem_fun (*this, &Editor::cancel_visual_state_op), 6));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "save-visual-state-8", _("Save View 8"), sigc::bind (sigc::mem_fun (*this, &Editor::start_visual_state_op), 7));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-visual-state-8", _("Goto View 8"), sigc::bind (sigc::mem_fun (*this, &Editor::cancel_visual_state_op), 7));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "save-visual-state-9", _("Save View 9"), sigc::bind (sigc::mem_fun (*this, &Editor::start_visual_state_op), 8));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-visual-state-9", _("Goto View 9"), sigc::bind (sigc::mem_fun (*this, &Editor::cancel_visual_state_op), 8));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "save-visual-state-10", _("Save View 10"), sigc::bind (sigc::mem_fun (*this, &Editor::start_visual_state_op), 9));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-visual-state-10", _("Goto View 10"), sigc::bind (sigc::mem_fun (*this, &Editor::cancel_visual_state_op), 9));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "save-visual-state-11", _("Save View 11"), sigc::bind (sigc::mem_fun (*this, &Editor::start_visual_state_op), 10));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-visual-state-11", _("Goto View 11"), sigc::bind (sigc::mem_fun (*this, &Editor::cancel_visual_state_op), 10));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "save-visual-state-12", _("Save View 12"), sigc::bind (sigc::mem_fun (*this, &Editor::start_visual_state_op), 11));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-visual-state-12", _("Goto View 12"), sigc::bind (sigc::mem_fun (*this, &Editor::cancel_visual_state_op), 11));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-
-	act = ActionManager::register_action (editor_actions, "goto-mark-1", _("Locate to Mark 1"), sigc::bind (sigc::mem_fun (*this, &Editor::goto_nth_marker), 0));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-mark-2", _("Locate to Mark 2"), sigc::bind (sigc::mem_fun (*this, &Editor::goto_nth_marker), 1));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-mark-3", _("Locate to Mark 3"), sigc::bind (sigc::mem_fun (*this, &Editor::goto_nth_marker), 2));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-mark-4", _("Locate to Mark 4"), sigc::bind (sigc::mem_fun (*this, &Editor::goto_nth_marker), 3));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-mark-5", _("Locate to Mark 5"), sigc::bind (sigc::mem_fun (*this, &Editor::goto_nth_marker), 4));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-mark-6", _("Locate to Mark 6"), sigc::bind (sigc::mem_fun (*this, &Editor::goto_nth_marker), 5));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-mark-7", _("Locate to Mark 7"), sigc::bind (sigc::mem_fun (*this, &Editor::goto_nth_marker), 6));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-mark-8", _("Locate to Mark 8"), sigc::bind (sigc::mem_fun (*this, &Editor::goto_nth_marker), 7));
-	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "goto-mark-9", _("Locate to Mark 9"), sigc::bind (sigc::mem_fun (*this, &Editor::goto_nth_marker), 8));
-	ActionManager::session_sensitive_actions.push_back (act);
+	for (int i = 1; i <= 12; ++i) {
+		string const a = string_compose (X_("goto-visual-state-%1"), i);
+		string const n = string_compose (_("Goto View %1"), i);
+		act = ActionManager::register_action (editor_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &Editor::cancel_visual_state_op), i - 1));
+		ActionManager::session_sensitive_actions.push_back (act);
+	}
+	
+	for (int i = 1; i <= 9; ++i) {
+		string const a = string_compose (X_("goto-mark-%1"), i);
+		string const n = string_compose (_("Locate to Mark %1"), i);
+		act = ActionManager::register_action (editor_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &Editor::goto_nth_marker), i - 1));
+		ActionManager::session_sensitive_actions.push_back (act);
+	}
 
 	act = ActionManager::register_action (editor_actions, "jump-forward-to-mark", _("Jump Forward to Mark"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -312,7 +263,7 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "zoom-to-region", _("Zoom to Region"), sigc::bind (sigc::mem_fun(*this, &Editor::zoom_to_region), false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "zoom-to-region-both-axes", _("Zoom to Region (W&H)"), sigc::bind (sigc::mem_fun(*this, &Editor::zoom_to_region), true));
+	act = ActionManager::register_action (editor_actions, "zoom-to-region-both-axes", _("Zoom to Region (Width and Height)"), sigc::bind (sigc::mem_fun(*this, &Editor::zoom_to_region), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "toggle-zoom", _("Toggle Zoom State"), sigc::mem_fun(*this, &Editor::swap_visual_state));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -436,7 +387,7 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "play-from-edit-point", _("Play From Edit Point"), sigc::mem_fun(*this, &Editor::play_from_edit_point));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "play-from-edit-point-and-return", _("Play from Edit Point & Return"), sigc::mem_fun(*this, &Editor::play_from_edit_point_and_return));
+	act = ActionManager::register_action (editor_actions, "play-from-edit-point-and-return", _("Play from Edit Point and Return"), sigc::mem_fun(*this, &Editor::play_from_edit_point_and_return));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "play-edit-range", _("Play Edit Range"), sigc::mem_fun(*this, &Editor::play_edit_range));
@@ -499,7 +450,7 @@ Editor::register_actions ()
 	act = ActionManager::register_toggle_action (editor_actions, "lock-region", _("Lock Region"), sigc::mem_fun(*this, &Editor::toggle_region_lock));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (editor_actions, "glue-region", _("Glue Region to Bars & Beats"), sigc::bind (sigc::mem_fun (*this, &Editor::set_region_lock_style), Region::MusicTime));
+	act = ActionManager::register_toggle_action (editor_actions, "glue-region", _("Glue Region to Bars and Beats"), sigc::bind (sigc::mem_fun (*this, &Editor::set_region_lock_style), Region::MusicTime));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "naturalize-region", _("Move to Original Position"), sigc::mem_fun (*this, &Editor::naturalize));
@@ -508,7 +459,7 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "reverse-region", _("Reverse"), sigc::mem_fun (*this, &Editor::reverse_region));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "monoize-region", _("Make mono regions"), (sigc::mem_fun(*this, &Editor::split_multichannel_region)));
+	act = ActionManager::register_action (editor_actions, "monoize-region", _("Make Mono Regions"), (sigc::mem_fun(*this, &Editor::split_multichannel_region)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "region-fill-track", _("Fill Track"), (sigc::mem_fun(*this, &Editor::region_fill_track)));
@@ -585,7 +536,7 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "finish-add-range", _("Finish add Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), true));
+	act = ActionManager::register_action (editor_actions, "finish-add-range", _("Finish Add Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "extend-range-to-end-of-region", _("Extend Range to End of Region"), sigc::bind (sigc::mem_fun(*this, &Editor::extend_selection_to_end_of_region), false));
@@ -753,20 +704,20 @@ Editor::register_actions ()
 	RadioAction::Group snap_choice_group;
 
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-cd-frame"), _("Snap to CD Frame"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToCDFrame)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-frame"), _("Snap to Timecode frame"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToTimecodeFrame)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-seconds"), _("Snap to Timecode seconds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToTimecodeSeconds)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-minutes"), _("Snap to Timecode minutes"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToTimecodeMinutes)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-frame"), _("Snap to Timecode Frame"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToTimecodeFrame)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-seconds"), _("Snap to Timecode Seconds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToTimecodeSeconds)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-timecode-minutes"), _("Snap to Timecode Minutes"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToTimecodeMinutes)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-seconds"), _("Snap to Seconds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToSeconds)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-minutes"), _("Snap to Minutes"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToMinutes)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirtyseconds"), _("Snap to Thirtyseconds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToAThirtysecondBeat)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-asixteenthbeat"), _("Snap to Asixteenthbeat"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToASixteenthBeat)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirtyseconds"), _("Snap to Thirty Seconds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToAThirtysecondBeat)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-asixteenthbeat"), _("Snap to A Sixteenth Beat"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToASixteenthBeat)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-eighths"), _("Snap to Eighths"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToAEighthBeat)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-quarters"), _("Snap to Quarters"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToAQuarterBeat)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-thirds"), _("Snap to Thirds"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToAThirdBeat)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-beat"), _("Snap to Beat"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBeat)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-bar"), _("Snap to Bar"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToBar)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-mark"), _("Snap to Mark"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToMark)));
-	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-start"), _("Snap to Region start"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToRegionStart)));
+	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-start"), _("Snap to Region Start"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToRegionStart)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-end"), _("Snap to Region End"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToRegionEnd)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-sync"), _("Snap to Region Sync"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToRegionSync)));
 	ActionManager::register_radio_action (snap_actions, snap_choice_group, X_("snap-to-region-boundary"), _("Snap to Region Boundary"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_chosen), Editing::SnapToRegionBoundary)));

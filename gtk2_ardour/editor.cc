@@ -1620,9 +1620,9 @@ Editor::add_crossfade_context_items (AudioStreamView* /*view*/, boost::shared_pt
 	if (xfade->can_follow_overlap()) {
 
 		if (xfade->following_overlap()) {
-			str = _("Convert to short");
+			str = _("Convert to Short");
 		} else {
-			str = _("Convert to full");
+			str = _("Convert to Full");
 		}
 
 		items.push_back (MenuElem (str, sigc::bind (sigc::mem_fun(*this, &Editor::toggle_xfade_length), xfade)));
@@ -1687,8 +1687,8 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 		}
 	}
 
-	items.push_back (MenuElem (_("Raise to top layer"), sigc::mem_fun(*this, &Editor::raise_region_to_top)));
-	items.push_back (MenuElem (_("Lower to bottom layer"), sigc::mem_fun  (*this, &Editor::lower_region_to_bottom)));
+	items.push_back (MenuElem (_("Raise to Top Layer"), sigc::mem_fun(*this, &Editor::raise_region_to_top)));
+	items.push_back (MenuElem (_("Lower to Bottom Layer"), sigc::mem_fun  (*this, &Editor::lower_region_to_bottom)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Define Sync Point"), sigc::mem_fun(*this, &Editor::set_region_sync_from_edit_point)));
 	if (_edit_point == EditAtMouse) {
@@ -1723,7 +1723,7 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 	}
 	region_lock_item->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_region_lock));
 
-	items.push_back (CheckMenuElem (_("Glue to Bars & Beats")));
+	items.push_back (CheckMenuElem (_("Glue to Bars and Beats")));
 	CheckMenuItem* bbt_glue_item = static_cast<CheckMenuItem*>(&items.back());
 
 	switch (region_to_check->positional_lock_style()) {
@@ -1825,10 +1825,10 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 	MenuList& nudge_items = nudge_menu->items();
 	nudge_menu->set_name ("ArdourContextMenu");
 
-	nudge_items.push_back (MenuElem (_("Nudge fwd"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_forward), false, false))));
-	nudge_items.push_back (MenuElem (_("Nudge bwd"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_backward), false, false))));
-	nudge_items.push_back (MenuElem (_("Nudge fwd by capture offset"), (sigc::mem_fun(*this, &Editor::nudge_forward_capture_offset))));
-	nudge_items.push_back (MenuElem (_("Nudge bwd by capture offset"), (sigc::mem_fun(*this, &Editor::nudge_backward_capture_offset))));
+	nudge_items.push_back (MenuElem (_("Nudge Forward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_forward), false, false))));
+	nudge_items.push_back (MenuElem (_("Nudge Backward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_backward), false, false))));
+	nudge_items.push_back (MenuElem (_("Nudge Forward by Capture Offset"), (sigc::mem_fun(*this, &Editor::nudge_forward_capture_offset))));
+	nudge_items.push_back (MenuElem (_("Nudge Backward by Capture Offset"), (sigc::mem_fun(*this, &Editor::nudge_backward_capture_offset))));
 
 	items.push_back (MenuElem (_("Nudge"), *nudge_menu));
 	items.push_back (SeparatorElem());
@@ -1837,18 +1837,18 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 	MenuList& trim_items = trim_menu->items();
 	trim_menu->set_name ("ArdourContextMenu");
 
-	trim_items.push_back (MenuElem (_("Start to edit point"), sigc::mem_fun(*this, &Editor::trim_region_from_edit_point)));
+	trim_items.push_back (MenuElem (_("Start to Edit Point"), sigc::mem_fun(*this, &Editor::trim_region_from_edit_point)));
 	foo_item = &trim_items.back();
 	if (_edit_point == EditAtMouse) {
 		foo_item->set_sensitive (false);
 	}
-	trim_items.push_back (MenuElem (_("Edit point to end"), sigc::mem_fun(*this, &Editor::trim_region_to_edit_point)));
+	trim_items.push_back (MenuElem (_("Edit Point to End"), sigc::mem_fun(*this, &Editor::trim_region_to_edit_point)));
 	foo_item = &trim_items.back();
 	if (_edit_point == EditAtMouse) {
 		foo_item->set_sensitive (false);
 	}
-	trim_items.push_back (MenuElem (_("Trim To Loop"), sigc::mem_fun(*this, &Editor::trim_region_to_loop)));
-	trim_items.push_back (MenuElem (_("Trim To Punch"), sigc::mem_fun(*this, &Editor::trim_region_to_punch)));
+	trim_items.push_back (MenuElem (_("Trim to Loop"), sigc::mem_fun(*this, &Editor::trim_region_to_loop)));
+	trim_items.push_back (MenuElem (_("Trim to Punch"), sigc::mem_fun(*this, &Editor::trim_region_to_punch)));
 
 	items.push_back (MenuElem (_("Trim"), *trim_menu));
 	items.push_back (SeparatorElem());
@@ -1878,7 +1878,7 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 	*/
 
 	string::size_type pos = 0;
-	string menu_item_name = (region) ? region->name() : _("Selected regions");
+	string menu_item_name = (region) ? region->name() : _("Selected Regions");
 
 	while ((pos = menu_item_name.find ("_", pos)) != string::npos) {
 		menu_item_name.replace (pos, 1, "__");
@@ -1948,9 +1948,9 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	MenuList& play_items = play_menu->items();
 	play_menu->set_name ("ArdourContextMenu");
 
-	play_items.push_back (MenuElem (_("Play from edit point"), sigc::mem_fun(*this, &Editor::play_from_edit_point)));
-	play_items.push_back (MenuElem (_("Play from start"), sigc::mem_fun(*this, &Editor::play_from_start)));
-	play_items.push_back (MenuElem (_("Play region"), sigc::mem_fun(*this, &Editor::play_selected_region)));
+	play_items.push_back (MenuElem (_("Play From Edit Point"), sigc::mem_fun(*this, &Editor::play_from_edit_point)));
+	play_items.push_back (MenuElem (_("Play From Start"), sigc::mem_fun(*this, &Editor::play_from_start)));
+	play_items.push_back (MenuElem (_("Play Region"), sigc::mem_fun(*this, &Editor::play_selected_region)));
 	play_items.push_back (SeparatorElem());
 	play_items.push_back (MenuElem (_("Loop Region"), sigc::mem_fun(*this, &Editor::loop_selected_region)));
 
@@ -1962,21 +1962,21 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	MenuList& select_items = select_menu->items();
 	select_menu->set_name ("ArdourContextMenu");
 
-	select_items.push_back (MenuElem (_("Select All in track"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_in_track), Selection::Set)));
+	select_items.push_back (MenuElem (_("Select All in Track"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_in_track), Selection::Set)));
 	select_items.push_back (MenuElem (_("Select All"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all), Selection::Set)));
-	select_items.push_back (MenuElem (_("Invert selection in track"), sigc::mem_fun(*this, &Editor::invert_selection_in_track)));
-	select_items.push_back (MenuElem (_("Invert selection"), sigc::mem_fun(*this, &Editor::invert_selection)));
+	select_items.push_back (MenuElem (_("Invert Selection in Track"), sigc::mem_fun(*this, &Editor::invert_selection_in_track)));
+	select_items.push_back (MenuElem (_("Invert Selection"), sigc::mem_fun(*this, &Editor::invert_selection)));
 	select_items.push_back (SeparatorElem());
-	select_items.push_back (MenuElem (_("Set range to loop range"), sigc::mem_fun(*this, &Editor::set_selection_from_loop)));
-	select_items.push_back (MenuElem (_("Set range to punch range"), sigc::mem_fun(*this, &Editor::set_selection_from_punch)));
+	select_items.push_back (MenuElem (_("Set Range to Loop Range"), sigc::mem_fun(*this, &Editor::set_selection_from_loop)));
+	select_items.push_back (MenuElem (_("Set Range to Punch Range"), sigc::mem_fun(*this, &Editor::set_selection_from_punch)));
 	select_items.push_back (SeparatorElem());
 	select_items.push_back (MenuElem (_("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true)));
 	select_items.push_back (MenuElem (_("Select All Before Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), false)));
 	select_items.push_back (MenuElem (_("Select All After Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, true)));
 	select_items.push_back (MenuElem (_("Select All Before Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, false)));
-	select_items.push_back (MenuElem (_("Select All Between Playhead & Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_between), false)));
-	select_items.push_back (MenuElem (_("Select All Within Playhead & Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_between), true)));
-	select_items.push_back (MenuElem (_("Select Range Between Playhead & Edit Point"), sigc::mem_fun(*this, &Editor::select_range_between)));
+	select_items.push_back (MenuElem (_("Select All Between Playhead and Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_between), false)));
+	select_items.push_back (MenuElem (_("Select All Within Playhead and Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_between), true)));
+	select_items.push_back (MenuElem (_("Select Range Between Playhead and Edit Point"), sigc::mem_fun(*this, &Editor::select_range_between)));
 
 	edit_items.push_back (MenuElem (_("Select"), *select_menu));
 
@@ -1995,8 +1995,6 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	cutnpaste_items.push_back (MenuElem (_("Align"), sigc::bind (sigc::mem_fun(*this, &Editor::align), ARDOUR::SyncPoint)));
 	cutnpaste_items.push_back (MenuElem (_("Align Relative"), sigc::bind (sigc::mem_fun(*this, &Editor::align_relative), ARDOUR::SyncPoint)));
 
-	cutnpaste_items.push_back (SeparatorElem());
-
 	edit_items.push_back (MenuElem (_("Edit"), *cutnpaste_menu));
 
 	/* Adding new material */
@@ -2012,10 +2010,10 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	nudge_menu->set_name ("ArdourContextMenu");
 
 	edit_items.push_back (SeparatorElem());
-	nudge_items.push_back (MenuElem (_("Nudge entire track fwd"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, true))));
-	nudge_items.push_back (MenuElem (_("Nudge track after edit point fwd"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, true))));
-	nudge_items.push_back (MenuElem (_("Nudge entire track bwd"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, false))));
-	nudge_items.push_back (MenuElem (_("Nudge track after edit point bwd"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, false))));
+	nudge_items.push_back (MenuElem (_("Nudge Entire Track Forward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, true))));
+	nudge_items.push_back (MenuElem (_("Nudge Track After Edit Point Forward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, true))));
+	nudge_items.push_back (MenuElem (_("Nudge Entire Track Backward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, false))));
+	nudge_items.push_back (MenuElem (_("Nudge Track After Edit Point Backward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, false))));
 
 	edit_items.push_back (MenuElem (_("Nudge"), *nudge_menu));
 }
@@ -2031,8 +2029,8 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	MenuList& play_items = play_menu->items();
 	play_menu->set_name ("ArdourContextMenu");
 
-	play_items.push_back (MenuElem (_("Play from edit point"), sigc::mem_fun(*this, &Editor::play_from_edit_point)));
-	play_items.push_back (MenuElem (_("Play from start"), sigc::mem_fun(*this, &Editor::play_from_start)));
+	play_items.push_back (MenuElem (_("Play From Edit Point"), sigc::mem_fun(*this, &Editor::play_from_edit_point)));
+	play_items.push_back (MenuElem (_("Play From Start"), sigc::mem_fun(*this, &Editor::play_from_start)));
 	edit_items.push_back (MenuElem (_("Play"), *play_menu));
 
 	/* Selection */
@@ -2041,15 +2039,15 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	MenuList& select_items = select_menu->items();
 	select_menu->set_name ("ArdourContextMenu");
 
-	select_items.push_back (MenuElem (_("Select All in track"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_in_track), Selection::Set)));
+	select_items.push_back (MenuElem (_("Select All in Track"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_in_track), Selection::Set)));
 	select_items.push_back (MenuElem (_("Select All"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all), Selection::Set)));
-	select_items.push_back (MenuElem (_("Invert selection in track"), sigc::mem_fun(*this, &Editor::invert_selection_in_track)));
-	select_items.push_back (MenuElem (_("Invert selection"), sigc::mem_fun(*this, &Editor::invert_selection)));
+	select_items.push_back (MenuElem (_("Invert Selection in Track"), sigc::mem_fun(*this, &Editor::invert_selection_in_track)));
+	select_items.push_back (MenuElem (_("Invert Selection"), sigc::mem_fun(*this, &Editor::invert_selection)));
 	select_items.push_back (SeparatorElem());
-	select_items.push_back (MenuElem (_("Select all after edit point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true)));
-	select_items.push_back (MenuElem (_("Select all before edit point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), false)));
-	select_items.push_back (MenuElem (_("Select all after playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, true)));
-	select_items.push_back (MenuElem (_("Select all before playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, false)));
+	select_items.push_back (MenuElem (_("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true)));
+	select_items.push_back (MenuElem (_("Select All Before Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), false)));
+	select_items.push_back (MenuElem (_("Select All After Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, true)));
+	select_items.push_back (MenuElem (_("Select All Before Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, false)));
 
 	edit_items.push_back (MenuElem (_("Select"), *select_menu));
 
@@ -2068,10 +2066,10 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	nudge_menu->set_name ("ArdourContextMenu");
 
 	edit_items.push_back (SeparatorElem());
-	nudge_items.push_back (MenuElem (_("Nudge entire track fwd"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, true))));
-	nudge_items.push_back (MenuElem (_("Nudge track after edit point fwd"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, true))));
-	nudge_items.push_back (MenuElem (_("Nudge entire track bwd"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, false))));
-	nudge_items.push_back (MenuElem (_("Nudge track after edit point bwd"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, false))));
+	nudge_items.push_back (MenuElem (_("Nudge Entire Track Forward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, true))));
+	nudge_items.push_back (MenuElem (_("Nudge Track After Edit Point Forward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, true))));
+	nudge_items.push_back (MenuElem (_("Nudge Entire Track Backward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, false))));
+	nudge_items.push_back (MenuElem (_("Nudge Track After Edit Point Backward"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, false))));
 
 	edit_items.push_back (MenuElem (_("Nudge"), *nudge_menu));
 }
