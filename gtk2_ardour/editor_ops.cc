@@ -1587,11 +1587,8 @@ Editor::temporal_zoom (gdouble fpu)
 		break;
 
 	case ZoomFocusPlayhead:
-		/* try to keep the playhead in the same place */
-
-		where = playhead_cursor->current_frame;
-
-		l = - ((new_page_size * ((where - current_leftmost)/(double)current_page)) - where);
+		/* centre playhead */
+		l = playhead_cursor->current_frame - (new_page_size * 0.5);
 
 		if (l < 0) {
 			leftmost_after_zoom = 0;
