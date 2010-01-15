@@ -68,10 +68,15 @@ RouteGroup::set_name (string str)
 	FlagsChanged (0); /* EMIT SIGNAL */
 }
 
+/** Add a route to a group.  Adding a route which is already in the group is allowed; nothing will happen.
+ *  @param r Route to add.
+ */
 int
 RouteGroup::add (boost::shared_ptr<Route> r)
 {
-	assert (find (routes->begin(), routes->end(), r) == routes->end ());
+	if (find (routes->begin(), routes->end(), r) != routes->end()) {
+		return 0;
+	}
 	
 	r->leave_route_group ();
 
