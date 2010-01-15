@@ -26,79 +26,10 @@
 #include "actions.h"
 #include "opts.h"
 
-sigc::signal<void,bool> ApplicationActivationChanged;
-
-@interface AppNotificationObject : NSObject {}
-- (AppNotificationObject*) init; 
-@end
-
-@implementation AppNotificationObject
-- (AppNotificationObject*) init
-{
-	self = [ super init ];
-
-	if (self) {
-		[[NSNotificationCenter defaultCenter] addObserver:self
-		 selector:@selector(appDidBecomeActive:)
-		 name:NSApplicationDidBecomeActiveNotification
-		 object:[NSApplication sharedApplication]];
-
-		[[NSNotificationCenter defaultCenter] addObserver:self
-		 selector:@selector(appDidBecomeInactive:)
-		 name:NSApplicationWillResignActiveNotification 
-		 object:[NSApplication sharedApplication]];
-	}
-
-	return self;
-}
-
-- (void)appDidBecomeActive:(NSNotification *)notification
-{
-	ApplicationActivationChanged (true);
-}
-
-- (void)appDidBecomeInactive:(NSNotification *)notification
-{
-	ApplicationActivationChanged (false);
-}
-
-@end
-
-@interface ArdourApplicationDelegate : NSObject {}
-@end
-
-@implementation ArdourApplicationDelegate
--(BOOL) application:(NSApplication*) theApplication openFile:(NSString*) file
-{
-	Glib::ustring utf8_path ([file UTF8String]);
-	ARDOUR_UI::instance()->idle_load (utf8_path);
-	return 1;
-}
-- (NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication *)sender
-{
-	Gtkmm2ext::UI::instance()->quit ();
-	return NSTerminateCancel;
-}
-@end
-
 void
 ARDOUR_UI::platform_specific ()
 {
-	Gtk::Widget* widget;
-
-	GtkApplicationMenuGroup* group = gtk_application_add_app_menu_group ();
-
-	widget = ActionManager::get_widget ("/ui/Main/Help/About");
-	if (widget) {
-		gtk_application_add_app_menu_item (group, (GtkMenuItem*) widget->gobj(), 0);
-	}
-
-	widget = ActionManager::get_widget ("/ui/Main/WindowMenu/ToggleOptionsEditor");
-	if (widget) {
-		gtk_application_add_app_menu_item (group, (GtkMenuItem*) widget->gobj(), 0);
-	}
-
-	[ NSApp finishLaunching ];
+	gtk_application_ready ();
 
 	if (!ARDOUR_COMMAND_LINE::finder_invoked_ardour) {
 		
@@ -111,11 +42,6 @@ ARDOUR_UI::platform_specific ()
 void
 ARDOUR_UI::platform_setup ()
 {
-	/* this will stick around for ever ... is that OK ? */
-	
-	[ [AppNotificationObject alloc] init];
-	[ NSApp setDelegate: [ArdourApplicationDelegate new]];
-
 }
 
 bool

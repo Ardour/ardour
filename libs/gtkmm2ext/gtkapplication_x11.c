@@ -40,8 +40,7 @@ gtk_application_set_menu_bar       (GtkMenuShell    *menu_shell)
 
 void                      
 gtk_application_add_app_menu_item   (GtkApplicationMenuGroup *group,
-				     GtkMenuItem     *menu_item,
-				     const gchar     *label)
+				     GtkMenuItem     *menu_item)
 {
 }
 

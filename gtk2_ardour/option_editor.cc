@@ -257,12 +257,14 @@ OptionEditor::add_session_paths ()
 	session_raid_entry.set_text(session->raid_path());
 }
 
+#ifndef GTKOSX
 static void
 font_scale_changed (Gtk::Adjustment* adj)
 {
 	Config->set_font_scale((long)floor (adj->get_value() * 1024));
 	reset_dpi();
 }
+#endif
 
 void
 OptionEditor::setup_misc_options ()

@@ -142,6 +142,7 @@ class UI : public Receiver, public AbstractUI<UIRequest>
 
   protected:
 	bool _auto_display_errors;
+
 	virtual void handle_fatal (const char *);
 	virtual void display_message (const char *prefix, gint prefix_len, 
 				      Glib::RefPtr<Gtk::TextBuffer::Tag> ptag, 

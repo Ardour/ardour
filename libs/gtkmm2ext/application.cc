@@ -21,28 +21,58 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __GTK_APPLICATION_H__
-#define __GTK_APPLICATION_H__
+#include <gtkmm/menushell.h>
+#include <gtkmm/menuitem.h>
 
-#include <gtk/gtk.h>
+#include "gtkmm2ext/application.h"
+#include "gtkmm2ext/gtkapplication.h"
 
-G_BEGIN_DECLS
+using namespace Gtk;
+using namespace Gtkmm2ext;
 
-typedef struct _GtkApplicationMenuGroup GtkApplicationMenuGroup;
+Application* Application::_instance = 0;
 
-int  gtk_application_init ();
-void gtk_application_ready ();
-void gtk_application_cleanup ();
+Application*
+Application::instance ()
+{
+	if (!_instance) {
+		_instance = new Application;
+	}
+	return _instance;
+}
 
-void                      gtk_application_set_menu_bar       (GtkMenuShell    *menu_shell);
-GtkApplicationMenuGroup * gtk_application_add_app_menu_group (void);
-void                      gtk_application_add_app_menu_item   (GtkApplicationMenuGroup *group,
-							       GtkMenuItem     *menu_item);
+Application::Application ()
+{
+	gtk_application_init ();
+}
 
-/* these are private but here until GtkApplication becomes a GtkObject with an interface */
+Application::~Application ()
+{
+	_instance = 0;
+	gtk_application_cleanup ();
+}
 
-extern GList *_gtk_application_menu_groups;
+void
+Application::ready ()
+{
+	gtk_application_ready ();
+}
 
-G_END_DECLS
+void
+Application::set_menu_bar (MenuShell& shell)
+{
+	gtk_application_set_menu_bar (shell.gobj());
+}
 
-#endif /* __GTK_APPLICATION_H__ */
+GtkApplicationMenuGroup*
+Application::add_app_menu_group ()
+{
+	return gtk_application_add_app_menu_group ();
+}
+
+void
+Application::add_app_menu_item (GtkApplicationMenuGroup* group,
+				MenuItem* item)
+{
+	gtk_application_add_app_menu_item (group, item->gobj());
+}

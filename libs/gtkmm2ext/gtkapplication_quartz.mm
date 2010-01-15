@@ -30,12 +30,16 @@
 #import <AppKit/NSEvent.h>
 #import <AppKit/NSApplication.h>
 #import <Foundation/NSString.h>
+#import <Foundation/NSNotification.h>
 
 #include <string.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include <gtkmm2ext/gtkapplication.h>
 #include <gtkmm2ext/gtkapplication-private.h>
+
+#define DEBUG(format, ...) g_printerr ("%s: " format, G_STRFUNC, ## __VA_ARGS__)
+#define DEBUG(format, ...)
 
 /* TODO
  *
@@ -561,7 +565,6 @@ idle_call_activate (gpointer data)
 }
 - (void) activate:(id) sender
 {
-	printf ("will call %s\n", [[self title] cStringUsingEncoding:NSUTF8StringEncoding]);
 	g_idle_add (idle_call_activate, gtk_menu_item);
 }
 @end
@@ -996,13 +999,52 @@ cocoa_menu_item_connect (GtkWidget*   menu_item,
 						  G_CALLBACK (cocoa_menu_item_notify_label),
 						  menu_item);
 	}
-
-	gtk_widget_hide (GTK_WIDGET (menu_item));
 }
 
 static void
-sync_menu_item (NSMenuItem* cocoa_item, GtkWidget* menu_item)
+add_menu_item (NSMenu* cocoa_menu, GtkWidget* menu_item, int index)
 {
+	GtkWidget* label      = NULL;
+	GNSMenuItem *cocoa_item;
+	
+	DEBUG ("add %s to menu %s separator ? %d\n", get_menu_label_text (menu_item, NULL), 
+	       [[cocoa_menu title] cStringUsingEncoding:NSUTF8StringEncoding],
+	       GTK_IS_SEPARATOR_MENU_ITEM(menu_item));
+
+	cocoa_item = cocoa_menu_item_get (menu_item);
+
+	if (cocoa_item) 
+		return;
+
+	if (GTK_IS_SEPARATOR_MENU_ITEM (menu_item)) {
+		cocoa_item = [NSMenuItem separatorItem];
+		DEBUG ("\ta separator\n");
+	} else {
+
+		if (!GTK_WIDGET_VISIBLE (menu_item)) {
+			DEBUG ("\tnot visible\n");
+			return;
+		}
+
+		const gchar* label_text = get_menu_label_text (menu_item, &label);
+		
+		if (label_text)
+			cocoa_item = [ [ GNSMenuItem alloc] initWithTitle:[ [ NSString alloc] initWithCString:label_text encoding:NSUTF8StringEncoding]
+				       andGtkWidget:(GtkMenuItem*)menu_item];
+		else
+			cocoa_item = [ [ GNSMenuItem alloc] initWithTitle:@"" andGtkWidget:(GtkMenuItem*)menu_item];
+		DEBUG ("\tan item\n");
+	}
+	
+	/* connect GtkMenuItem and NSMenuItem so that we can notice changes to accel/label/submenu etc. */
+	cocoa_menu_item_connect (menu_item, (GNSMenuItem*) cocoa_item, label);
+	
+	[ cocoa_item setEnabled:YES];
+	if (index >= 0) 
+		[ cocoa_menu insertItem:cocoa_item atIndex:index];
+	else 
+		[ cocoa_menu addItem:cocoa_item];
+	
 	if (!GTK_WIDGET_IS_SENSITIVE (menu_item))
 		[cocoa_item setState:NSOffState];
 
@@ -1020,36 +1062,6 @@ sync_menu_item (NSMenuItem* cocoa_item, GtkWidget* menu_item)
 	
 	if (gtk_menu_item_get_submenu (GTK_MENU_ITEM (menu_item))) 
 		cocoa_menu_item_update_submenu (cocoa_item, menu_item);
-}	
-
-static void
-add_menu_item (NSMenu* cocoa_menu, GtkWidget* menu_item)
-{
-	GtkWidget* label      = NULL;
-	GNSMenuItem *cocoa_item;
-
-	if (!GTK_WIDGET_VISIBLE (menu_item))
-		return;
-
-	if (GTK_IS_SEPARATOR_MENU_ITEM (menu_item))
-		cocoa_item = [NSMenuItem separatorItem];
-	else {
-		const gchar* label_text = get_menu_label_text (menu_item, &label);
-		
-		if (label_text)
-			cocoa_item = [ [ GNSMenuItem alloc] initWithTitle:[ [ NSString alloc] initWithCString:label_text encoding:NSUTF8StringEncoding]
-				       andGtkWidget:(GtkMenuItem*)menu_item];
-		else
-			cocoa_item = [ [ GNSMenuItem alloc] initWithTitle:@"" andGtkWidget:(GtkMenuItem*)menu_item];
-	}
-	
-	/* connect GtkMenuItem and NSMenuItem so that we can notice changes to accel/label/submenu etc. */
-	cocoa_menu_item_connect (menu_item, (GNSMenuItem*) cocoa_item, label);
-	
-	[ cocoa_item setEnabled:YES];
-	[ cocoa_menu addItem:cocoa_item];
-	
-	sync_menu_item (cocoa_item, menu_item);
 
 	[ cocoa_item release];
 }
@@ -1068,7 +1080,6 @@ push_menu_shell_to_nsmenu (GtkMenuShell *menu_shell,
   for (l = children; l; l = l->next)
     {
       GtkWidget   *menu_item = (GtkWidget*) l->data;
-      NSMenuItem* cocoa_item;
 
       if (GTK_IS_TEAROFF_MENU_ITEM (menu_item))
 	continue;
@@ -1076,12 +1087,7 @@ push_menu_shell_to_nsmenu (GtkMenuShell *menu_shell,
       if (g_object_get_data (G_OBJECT (menu_item), "gtk-empty-menu-item"))
 	continue;
 
-      cocoa_item = cocoa_menu_item_get (menu_item);
-
-      if (!cocoa_item) 
-	add_menu_item (cocoa_menu, menu_item);
-      else 
-	sync_menu_item (cocoa_item, menu_item);
+      add_menu_item (cocoa_menu, menu_item, -1);
     }
   
   g_list_free (children);
@@ -1118,14 +1124,6 @@ parent_set_emission_hook (GSignalInvocationHint *ihint,
 
 	  if (cocoa_menu)
 	    {
-#if 0
-	      g_printerr ("%s: item %s %p (%s, %s)\n", G_STRFUNC,
-			  previous_parent ? "removed from" : "added to",
-			  menu_shell,
-			  get_menu_label_text (instance, NULL),
-			  g_type_name (G_TYPE_FROM_INSTANCE (instance)));
-#endif
-
 	      push_menu_shell_to_nsmenu (GTK_MENU_SHELL (menu_shell),
 					 cocoa_menu,
 					 cocoa_menu == (NSMenu*) data,
@@ -1294,8 +1292,7 @@ gtk_application_set_menu_bar (GtkMenuShell *menu_shell)
 
 extern "C" void
 gtk_application_add_app_menu_item (GtkApplicationMenuGroup *group,
-				   GtkMenuItem     *menu_item,
-				   const gchar     *label)
+				   GtkMenuItem     *menu_item)
 {
   // we know that the application menu is always the submenu of the first item in the main menu
   NSMenu* mainMenu;
@@ -1334,9 +1331,11 @@ gtk_application_add_app_menu_item (GtkApplicationMenuGroup *group,
 			   [appMenu insertItem:[NSMenuItem separatorItem] atIndex:index+1];
 			   index++;
 		   }
-		
-		add_menu_item (appMenu, GTK_WIDGET(menu_item));
+		DEBUG ("Add to APP menu bar %s\n", get_menu_label_text (GTK_WIDGET(menu_item), NULL));
+		add_menu_item (appMenu, GTK_WIDGET(menu_item), index+1);
+
 		group->items = g_list_append (group->items, menu_item);
+		gtk_widget_hide (GTK_WIDGET (menu_item));
 		return;
 	}
     }
@@ -1346,25 +1345,108 @@ gtk_application_add_app_menu_item (GtkApplicationMenuGroup *group,
 	       G_STRFUNC, group);
 }
 
+/* application delegate, currently in C++ */
+
+#include <gtkmm2ext/application.h>
+#include <glibmm/ustring.h>
+
+namespace Gtk {
+	namespace Application {
+		sigc::signal<void,bool> ActivationChanged;
+		sigc::signal<void,const Glib::ustring&> ShouldLoad;
+		sigc::signal<void> ShouldQuit;
+	}
+}
+
+@interface GtkApplicationNotificationObject : NSObject {}
+- (GtkApplicationNotificationObject*) init; 
+@end
+
+@implementation GtkApplicationNotificationObject
+- (GtkApplicationNotificationObject*) init
+{
+	self = [ super init ];
+
+	if (self) {
+		[[NSNotificationCenter defaultCenter] addObserver:self
+		 selector:@selector(appDidBecomeActive:)
+		 name:NSApplicationDidBecomeActiveNotification
+		 object:[NSApplication sharedApplication]];
+
+		[[NSNotificationCenter defaultCenter] addObserver:self
+		 selector:@selector(appDidBecomeInactive:)
+		 name:NSApplicationWillResignActiveNotification 
+		 object:[NSApplication sharedApplication]];
+	}
+
+	return self;
+}
+
+- (void)appDidBecomeActive:(NSNotification *)notification
+{
+	Gtkmm2ext::Application::instance()->ActivationChanged (true);
+}
+
+- (void)appDidBecomeInactive:(NSNotification *)notification
+{
+	Gtkmm2ext::Application::instance()->ActivationChanged (false);
+}
+
+@end
+
+@interface GtkApplicationDelegate : NSObject {}
+@end
+
+@implementation GtkApplicationDelegate
+-(BOOL) application:(NSApplication*) theApplication openFile:(NSString*) file
+{
+	Glib::ustring utf8_path ([file UTF8String]);
+	Gtkmm2ext::Application::instance()->ShouldLoad (utf8_path);
+	return 1;
+}
+- (NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication *)sender
+{
+	Gtkmm2ext::Application::instance()->ShouldQuit ();
+	return NSTerminateCancel;
+}
+@end
+
+
 /* Basic setup */
 
 extern "C" int
 gtk_application_init ()
 {
 	_main_menubar = [[NSMenu alloc] initWithTitle: @""];
-	if (_main_menubar) {
-		[NSApp setMainMenu: _main_menubar];
-		create_apple_menu ();
-		create_window_menu ();
-		return 0;
-	}
-	return -1;
+
+	if (!_main_menubar) 
+		return -1;
+
+	[NSApp setMainMenu: _main_menubar];
+	create_apple_menu ();
+	// create_window_menu ();
+
+	/* this will stick around for ever ... is that OK ? */
+
+	[ [GtkApplicationNotificationObject alloc] init];
+	[ NSApp setDelegate: [GtkApplicationDelegate new]];
+
+	return 0;
+}
+
+extern "C" void
+gtk_application_ready ()
+{
+	[ NSApp finishLaunching ];
 }
 
 extern "C" void
 gtk_application_cleanup()
 {
-	[ _window_menu release ];
-	[ _app_menu release ];
-	[ _main_menubar release ];
+	if (_window_menu)
+		[ _window_menu release ];
+	if (_app_menu)
+		[ _app_menu release ];
+	if (_main_menubar)
+		[ _main_menubar release ];
 }

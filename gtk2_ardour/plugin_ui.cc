@@ -33,6 +33,7 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/slider_controller.h>
+#include <gtkmm2ext/application.h>
 
 #include <midi++/manager.h>
 
@@ -262,8 +263,7 @@ PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PluginInsert> insert)
 	add (*box);
 	non_gtk_gui = true;
 
-	extern sigc::signal<void,bool> ApplicationActivationChanged;
-	ApplicationActivationChanged.connect (mem_fun (*this, &PluginUIWindow::app_activated));
+	Application::instance()->ActivationChanged.connect (mem_fun (*this, &PluginUIWindow::app_activated));
 
 	return true;
 #endif

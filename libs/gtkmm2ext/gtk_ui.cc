@@ -33,7 +33,7 @@
 #include <pbd/pthread_utils.h>
 #include <pbd/stacktrace.h>
 
-#include <gtkmm2ext/gtkapplication.h>
+#include <gtkmm2ext/application.h>
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/textviewer.h>
@@ -61,7 +61,6 @@ BaseUI::RequestType Gtkmm2ext::AddIdle = BaseUI::new_request_type();
 BaseUI::RequestType Gtkmm2ext::AddTimeout = BaseUI::new_request_type();
 
 #include <pbd/abstract_ui.cc>  /* instantiate the template */
-
 
 UI::UI (string namestr, int *argc, char ***argv) 
 	: AbstractUI<UIRequest> (namestr, true)
@@ -105,13 +104,15 @@ UI::UI (string namestr, int *argc, char ***argv)
 
 	register_thread (pthread_self(), X_("GUI"));
 
-	gtk_application_init ();
+	/* instantiate the Application singleton */
+
+	Application::instance();
 }
 
 UI::~UI ()
 {
+	delete Application::instance ();
 }
-
 
 bool
 UI::caller_is_ui_thread ()
