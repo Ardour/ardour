@@ -60,16 +60,23 @@ textviewer.cc
 utils.cc
 version.cc
 window_title.cc
+gtkapplication.c
+""")
+
+x11_files=Split("""
+gtkapplication_x11.c
 """)
 
 gtkosx_files=Split("""
-sync-menu.c
+gtkapplication_quartz.mm
 """)
 
 if gtkmm2ext['GTKOSX']:
     extra_sources += gtkosx_files
     gtkmm2ext.Append (CCFLAGS="-DTOP_MENUBAR -DGTKOSX")
-    gtkmm2ext.Append (LINKFLAGS="-framework Carbon")
+    gtkmm2ext.Append (LINKFLAGS=" -framework AppKit")
+else:
+    extra_sources += x11_files
 
 gtkmm2ext.VersionBuild(['version.cc','gtkmm2ext/version.h'], [])
 
@@ -88,6 +95,6 @@ env.Alias('install', env.Install(os.path.join(install_prefix, env['LIBDIR'], 'ar
 env.Alias('tarball', env.Distribute (env['DISTTREE'],
                                      [ 'SConscript', 'i18n.h', 'gettext.h'] +
                                      gtkmm2ext_files +
-				     gtkosx_files + 
+				     gtkosx_files + x11_files +
                                      glob.glob('po/*.po') +
                                      glob.glob('gtkmm2ext/*.h')))

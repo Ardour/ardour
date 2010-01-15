@@ -400,12 +400,6 @@ set_color (Gdk::Color& c, int rgb)
 	c.set_rgb((rgb >> 16)*256, ((rgb & 0xff00) >> 8)*256, (rgb & 0xff)*256);
 }
 
-#ifdef GTKOSX
-extern "C" {
-	gboolean gdk_quartz_possibly_forward (GdkEvent*);
-}
-#endif
-
 bool
 relay_key_press (GdkEventKey* ev, Gtk::Window* win)
 {
@@ -424,7 +418,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	bool special_handling_of_unmodified_accelerators = false;
 	bool allow_activating = true;
 
-#undef DEBUG_ACCELERATOR_HANDLING
+#define DEBUG_ACCELERATOR_HANDLING
 #ifdef  DEBUG_ACCELERATOR_HANDLING
 	//bool debug = (getenv ("ARDOUR_DEBUG_ACCELERATOR_HANDLING") != 0);
 	bool debug=true;
@@ -447,7 +441,13 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 
 #ifdef DEBUG_ACCELERATOR_HANDLING
 	if (debug) {
-		cerr << "Win = " << win << " Key event: code = " << ev->keyval << " state = " << hex << ev->state << dec << " special handling ? " 
+		cerr << "Win = " << win << " Key event: code = " << ev->keyval << " name = " << gdk_keyval_name (ev->keyval) << " state = " << hex << ev->state << dec 
+		     << " ctrl " << ((ev->state & GDK_CONTROL_MASK) ? 1 : 0)
+		     << " alt " << ((ev->state & GDK_MOD1_MASK) ? 1 : 0)
+		     << " shift " << ((ev->state & GDK_SHIFT_MASK) ? 1 : 0)
+		     << " cmd/meta " << ((ev->state & GDK_META_MASK) ? 1 : 0)
+		     << " lock " << ((ev->state & GDK_LOCK_MASK) ? 1 : 0)
+		     << " special handling ? " 
 		     << special_handling_of_unmodified_accelerators
 		     << " magic widget focus ? "
 		     << Keyboard::some_magic_widget_has_focus()
@@ -499,20 +499,19 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 		uint32_t fakekey = ev->keyval;
 
 		if (possibly_translate_keyval_to_make_legal_accelerator (fakekey)) {
-			if (allow_activating && gtk_accel_groups_activate(G_OBJECT(win), fakekey, GdkModifierType(ev->state))) {
-				return true;
-			}
-
-#ifdef GTKOSX
-			if (allow_activating) {
-				int oldval = ev->keyval;
-				ev->keyval = fakekey;
-				if (gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
-					return true;
-				}
-				ev->keyval = oldval;
+#ifdef DEBUG_ACCELERATOR_HANDLING
+			if (debug) {
+				cerr << "\tactivate without special handling of unmodified accels\n";
 			}
 #endif
+			if (allow_activating && gtk_accel_groups_activate(G_OBJECT(win), fakekey, GdkModifierType(ev->state))) {
+#ifdef DEBUG_ACCELERATOR_HANDLING
+				if (debug) {
+					cerr << "\tactivation handled key\n";
+				}
+#endif
+				return true;
+			}
 		}
 	}
 
@@ -531,12 +530,13 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 #endif
 
 		if (allow_activating) {
-#ifdef GTKOSX
-			if (gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
-				return true;
-			}
-#endif
 			if (gtk_window_activate_key (win, ev)) {
+#ifdef DEBUG_ACCELERATOR_HANDLING
+				if (debug) {
+					cerr << "\tactivation handled key\n";
+				}
+#endif
+				
 				return true;
 			}
 		}
@@ -564,12 +564,6 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 #endif
 
 		if (allow_activating) {
-			
-#ifdef GTKOSX
-			if (gdk_quartz_possibly_forward ((GdkEvent*) ev)) {
-				return true;
-			}
-#endif
 			return gtk_window_activate_key (win, ev);
 		} 
 			

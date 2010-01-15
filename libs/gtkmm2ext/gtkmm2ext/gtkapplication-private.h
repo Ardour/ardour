@@ -1,10 +1,9 @@
-/* GTK+ Integration for the Mac OS X Menubar.
+/* GTK+ Integration with platform-specific application-wide features 
+ * such as the OS X menubar and application delegate concepts.
  *
  * Copyright (C) 2007 Pioneer Research Center USA, Inc.
  * Copyright (C) 2007 Imendio AB
- *
- * For further information, see:
- * http://developer.imendio.com/projects/gtk-macosx/menubar
+ * Copyright (C) 2009 Paul Davis
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,23 +21,18 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __IGE_MAC_MENU_H__
-#define __IGE_MAC_MENU_H__
+#ifndef __GTK_APPLICATION_PRIVATE_H__
+#define __GTK_APPLICATION_PRIVATE_H__
 
 #include <gtk/gtk.h>
 
 G_BEGIN_DECLS
 
-typedef struct _IgeMacMenuGroup IgeMacMenuGroup;
-
-void              ige_mac_menu_set_menu_bar       (GtkMenuShell    *menu_shell);
-void              ige_mac_menu_set_quit_menu_item (GtkMenuItem     *menu_item);
-
-IgeMacMenuGroup * ige_mac_menu_add_app_menu_group (void);
-void              ige_mac_menu_add_app_menu_item  (IgeMacMenuGroup *group,
-						   GtkMenuItem     *menu_item,
-						   const gchar     *label);
+struct _GtkApplicationMenuGroup
+{
+  GList *items;
+};
 
 G_END_DECLS
 
-#endif /* __IGE_MAC_MENU_H__ */
+#endif /* __GTK_APPLICATION_PRIVATE_H__ */

@@ -16,17 +16,15 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <Carbon/Carbon.h> // bring it in early
-#undef check // nuke this stupidity
-#define APPLE_SAYS_YES YES
-#undef YES   // and this
-#undef NO    // and this
+#include <gtkmm2ext/gtkapplication.h>
+#include <gdk/gdkquartz.h>
+#undef check
+#undef YES
+#undef NO
 
 #include "ardour_ui.h"
 #include "actions.h"
 #include "opts.h"
-#include <gtkmm2ext/sync-menu.h>
-#include <gdk/gdkquartz.h>
 
 sigc::signal<void,bool> ApplicationActivationChanged;
 
@@ -74,7 +72,12 @@ sigc::signal<void,bool> ApplicationActivationChanged;
 {
 	Glib::ustring utf8_path ([file UTF8String]);
 	ARDOUR_UI::instance()->idle_load (utf8_path);
-	return APPLE_SAYS_YES;
+	return 1;
+}
+- (NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication *)sender
+{
+	Gtkmm2ext::UI::instance()->quit ();
+	return NSTerminateCancel;
 }
 @end
 
@@ -83,23 +86,16 @@ ARDOUR_UI::platform_specific ()
 {
 	Gtk::Widget* widget;
 
-	cerr << "Plaform specific GUI stuff\n";
-
-	widget = ActionManager::get_widget ("/ui/Main/Session/Quit");
-	if (widget) {
-		ige_mac_menu_set_quit_menu_item ((GtkMenuItem*) widget->gobj());
-	}
-
-	IgeMacMenuGroup* group = ige_mac_menu_add_app_menu_group ();
+	GtkApplicationMenuGroup* group = gtk_application_add_app_menu_group ();
 
 	widget = ActionManager::get_widget ("/ui/Main/Help/About");
 	if (widget) {
-		ige_mac_menu_add_app_menu_item (group, (GtkMenuItem*) widget->gobj(), 0);
+		gtk_application_add_app_menu_item (group, (GtkMenuItem*) widget->gobj(), 0);
 	}
 
 	widget = ActionManager::get_widget ("/ui/Main/WindowMenu/ToggleOptionsEditor");
 	if (widget) {
-		ige_mac_menu_add_app_menu_item (group, (GtkMenuItem*) widget->gobj(), 0);
+		gtk_application_add_app_menu_item (group, (GtkMenuItem*) widget->gobj(), 0);
 	}
 
 	[ NSApp finishLaunching ];
@@ -118,7 +114,6 @@ ARDOUR_UI::platform_setup ()
 	/* this will stick around for ever ... is that OK ? */
 	
 	[ [AppNotificationObject alloc] init];
-
 	[ NSApp setDelegate: [ArdourApplicationDelegate new]];
 
 }

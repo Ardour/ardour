@@ -41,9 +41,7 @@
 #include "mixer_ui.h"
 #include "utils.h"
 
-#ifdef GTKOSX
-#include <gtkmm2ext/sync-menu.h>
-#endif
+#include <gtkmm2ext/gtkapplication.h>
 
 #include <ardour/session.h>
 #include <ardour/profile.h>
@@ -854,7 +852,7 @@ void
 ARDOUR_UI::use_menubar_as_top_menubar ()
 {
 #ifdef GTKOSX
-	ige_mac_menu_set_menu_bar ((GtkMenuShell*) menu_bar->gobj());
+	gtk_application_set_menu_bar ((GtkMenuShell*) menu_bar->gobj());
 	// ige_mac_menu_set_quit_menu_item (some_item->gobj());
 #endif
 }
