@@ -17,6 +17,8 @@
 
 */
 
+#define __STDC_LIMIT_MACROS 1
+#include <stdint.h>
 #include "pbd/memento_command.h"
 #include "pbd/basename.h"
 #include "ardour/diskstream.h"
@@ -1891,6 +1893,22 @@ TrimDrag::aborted ()
 		_editor->undo ();
 	}
 }
+
+pair<nframes64_t, nframes64_t>
+TrimDrag::extent () const
+{
+	pair<nframes64_t, nframes64_t> e = make_pair (INT64_MAX, 0);
+	
+	for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+		boost::shared_ptr<Region> r = (*i)->region ();
+		pair<nframes64_t, nframes64_t> const t = make_pair (r->position(), r->position() + r->length ());
+		e.first = min (e.first, t.first);
+		e.second = max (e.second, t.second);
+	}
+
+	return e;
+}
+
 
 MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	: Drag (e, i),

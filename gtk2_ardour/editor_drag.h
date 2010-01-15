@@ -224,7 +224,7 @@ public:
 	RegionDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
 	virtual ~RegionDrag () {}
 
-	std::pair<nframes64_t, nframes64_t> extent () const;
+	virtual std::pair<nframes64_t, nframes64_t> extent () const;
 
 protected:
 
@@ -411,6 +411,8 @@ public:
 	bool y_movement_matters () const {
 		return false;
 	}
+
+	std::pair<nframes64_t, nframes64_t> extent () const;
 
 private:
 
