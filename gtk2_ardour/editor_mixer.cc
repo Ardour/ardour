@@ -248,15 +248,30 @@ Editor::update_current_screen ()
 					} else {
 
 						if (frame < leftmost_frame) {
-							/* moving left: end up with the playhead 3/4 of the way along the page */
-							nframes64_t l = frame - (3 * current_page_frames() / 4);
+							/* moving left */
+							nframes64_t l = 0;
+							if (_session->transport_rolling()) {
+								/* rolling; end up with the playhead at the right of the page */
+								l = frame - current_page_frames ();
+							} else {
+								/* not rolling: end up with the playhead 3/4 of the way along the page */
+								l = frame - (3 * current_page_frames() / 4);
+							}
+							
 							if (l < 0) {
 								l = 0;
 							}
+							
 							center_screen_internal (l + (current_page_frames() / 2), current_page_frames ());
 						} else {
-							/* moving right: end up with the playhead 1/4 of the way along the page */
-							center_screen_internal (frame + (current_page_frames() / 4), current_page_frames ());
+							/* moving right */
+							if (_session->transport_rolling()) {
+								/* rolling: end up with the playhead on the left of the page */
+								center_screen_internal (frame + (current_page_frames() / 2), current_page_frames ());
+							} else {
+								/* not rolling: end up with the playhead 1/4 of the way along the page */
+								center_screen_internal (frame + (current_page_frames() / 4), current_page_frames ());
+							}
 						}
 					}
 				}
