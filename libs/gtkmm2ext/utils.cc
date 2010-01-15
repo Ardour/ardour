@@ -46,6 +46,14 @@ Gtkmm2ext::get_ink_pixel_size (Glib::RefPtr<Pango::Layout> layout,
 }
 
 void
+get_pixel_size (Glib::RefPtr<Pango::Layout> layout,
+			       int& width,
+			       int& height)
+{
+	layout->get_pixel_size (width, height);
+}
+
+void
 Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, const gchar *text,
 						   gint hpadding, gint vpadding)
 	
@@ -53,7 +61,7 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w, const gchar *
 	int width, height;
 	w.ensure_style ();
 	
-	get_ink_pixel_size (w.create_pango_layout (text), width, height);
+	get_pixel_size (w.create_pango_layout (text), width, height);
 	w.set_size_request(width + hpadding, height + vpadding);
 }
 
@@ -69,7 +77,7 @@ Gtkmm2ext::set_size_request_to_display_given_text (Gtk::Widget &w,
 	w.ensure_style ();
 	
 	for (vector<string>::const_iterator i = strings.begin(); i != strings.end(); ++i) {
-		get_ink_pixel_size (w.create_pango_layout (*i), width, height);
+		get_pixel_size (w.create_pango_layout (*i), width, height);
 		width_max = max(width_max,width);
 		height_max = max(height_max, height);
 	}

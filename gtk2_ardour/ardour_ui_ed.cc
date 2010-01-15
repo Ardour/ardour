@@ -536,11 +536,20 @@ ARDOUR_UI::setup_clock ()
 
 	big_clock_window->set_title (_("Big Clock"));
 	big_clock_window->set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
-	big_clock_window->signal_realize().connect (sigc::bind (sigc::ptr_fun (set_decoration), big_clock_window,  (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
+	big_clock_window->signal_realize().connect (sigc::mem_fun (*this, &ARDOUR_UI::big_clock_realized));
 	big_clock_window->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleBigClock")));
 	big_clock_window->signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), big_clock_window), false);
+	big_clock_window->signal_size_allocate().connect (sigc::mem_fun (*this, &ARDOUR_UI::big_clock_size_allocate));
 
 	manage_window (*big_clock_window);
+}
+
+void
+ARDOUR_UI::big_clock_realized ()
+{
+	set_decoration (big_clock_window, (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
+	int x, y, w, d;
+	big_clock_window->get_window()->get_geometry (x, y, w, big_clock_height, d);
 }
 
 void
@@ -555,3 +564,111 @@ ARDOUR_UI::float_big_clock (Gtk::Window* parent)
 	}
 }
 
+void
+ARDOUR_UI::big_clock_size_allocate (Gtk::Allocation& allocation)
+{
+	if (!big_clock_resize_in_progress) {
+		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::idle_big_clock_text_resizer), 0, 0));
+		big_clock_resize_in_progress = true;
+	}
+
+	big_clock_window->set_size_request (allocation.get_width() - 2, allocation.get_height() - 1);
+}
+
+bool
+ARDOUR_UI::idle_big_clock_text_resizer (int win_w, int win_h)
+{
+	extern void get_pixel_size (Glib::RefPtr<Pango::Layout> layout, int& width, int& height);
+	Glib::RefPtr<Gdk::Window> win = big_clock_window->get_window();
+	assert (win);
+
+	big_clock_resize_in_progress = false;
+
+	Pango::FontDescription fd (big_clock.get_style()->get_font());
+	string family = fd.get_family();
+	int size = fd.get_size ();
+	int original_size;
+	bool absolute = fd.get_size_is_absolute ();
+	int stepsize;
+
+	if (!absolute) {
+		size /= PANGO_SCALE;
+	}
+
+ 	original_size = size;
+
+	int x, y, winw, winh, d;
+	int w, h;
+	int slop;
+	int limit;
+
+	win->get_geometry (x, y, winw, winh, d);
+
+	Glib::RefPtr<Pango::Layout> layout = big_clock.create_pango_layout ("0");
+	get_pixel_size (layout, w, h);
+
+	/* we want about 10% of the font height as padding, and we'll allow 10% of slop
+	   in the accuracy of the fit.
+	*/
+
+	slop = 10;
+	limit = winh - (h/4);
+
+	if (h < limit && limit - h < slop) {
+		/* current font is smaller than the window height but not by too much */
+		return false;
+	}
+
+	stepsize = 16;
+	if (h > limit) {
+		/* font is too big, lets get smaller */
+		size -= stepsize;
+	} else {
+		/* font is too big, lets get bigger */
+		size += stepsize;
+	}
+
+	while (1) {
+		
+		char buf[family.length()+16];
+		snprintf (buf, family.length()+16, "%s %d", family.c_str(), size);
+		Pango::FontDescription fd (buf);
+		layout->set_font_description (fd);
+		get_pixel_size (layout, w, h);
+
+		if (abs (h - limit) < slop) {
+			if (size != original_size) {
+				
+				/* use the size from the last loop */
+				
+				Glib::RefPtr<Gtk::RcStyle> rcstyle = big_clock.get_modifier_style ();
+				rcstyle->set_font (fd);
+				big_clock.modify_style (rcstyle);
+			}
+			break;
+		}
+		
+		if (h > limit) {
+			
+			/* too big, stepsize should be smaller */
+
+			if (size < 2) {
+				break;
+			}
+			size -= stepsize;
+
+		} else if (h < limit) {
+
+			/* too small (but not small enough): step size should be bigger */
+			
+			if (size > 720) {
+				break;
+			}
+			size += stepsize;
+		}
+
+		stepsize /= 2;
+	}
+
+	return false;
+}

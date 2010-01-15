@@ -197,6 +197,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	engine = 0;
 	_session_is_new = false;
 	big_clock_window = 0;
+	big_clock_height = 0;
+	big_clock_resize_in_progress = false;
 	session_selector_window = 0;
 	last_key_press_time = 0;
 	_will_create_new_session_automatically = false;

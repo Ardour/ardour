@@ -2044,30 +2044,30 @@ AudioClock::set_mode (Mode m)
 void
 AudioClock::set_size_requests ()
 {
-	/* note that in some fonts, "88" is narrower than "00", hence the 2 pixel padding */
+	/* note that in some fonts, "88" is narrower than "00" */
 
 	switch (_mode) {
 	case Timecode:
-		Gtkmm2ext::set_size_request_to_display_given_text (hours_label, "-00", 5, 5);
-		Gtkmm2ext::set_size_request_to_display_given_text (minutes_label, "00", 5, 5);
-		Gtkmm2ext::set_size_request_to_display_given_text (seconds_label, "00", 5, 5);
-		Gtkmm2ext::set_size_request_to_display_given_text (frames_label, "00", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (hours_label, "-88", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (minutes_label, "88", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (seconds_label, "88", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (frames_label, "88", 5, 5);
 		break;
 
 	case BBT:
-		Gtkmm2ext::set_size_request_to_display_given_text (bars_label, "-000", 5, 5);
-		Gtkmm2ext::set_size_request_to_display_given_text (beats_label, "00", 5, 5);
-		Gtkmm2ext::set_size_request_to_display_given_text (ticks_label, "0000", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (bars_label, "-888", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (beats_label, "88", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (ticks_label, "8888", 5, 5);
 		break;
 
 	case MinSec:
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_hours_label, "00", 5, 5);
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_minutes_label, "00", 5, 5);
-		Gtkmm2ext::set_size_request_to_display_given_text (ms_seconds_label, "00.000", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (ms_hours_label, "88", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (ms_minutes_label, "88", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (ms_seconds_label, "88.888", 5, 5);
 		break;
 
 	case Frames:
-		Gtkmm2ext::set_size_request_to_display_given_text (audio_frames_label, "0000000000", 5, 5);
+		Gtkmm2ext::set_size_request_to_display_given_text (audio_frames_label, "8888888888", 5, 5);
 		break;
 
 	case Off:
@@ -2081,4 +2081,48 @@ void
 AudioClock::set_bbt_reference (nframes64_t pos)
 {
 	bbt_reference_time = pos;
+}
+
+void
+AudioClock::on_style_changed (const Glib::RefPtr<Style>& old_style)
+{
+	HBox::on_style_changed (old_style);
+
+	/* propagate style changes to all component widgets that should inherit the main one */
+
+	Glib::RefPtr<RcStyle> rcstyle = get_modifier_style();
+
+	clock_base.modify_style (rcstyle);
+	audio_frames_label.modify_style (rcstyle);
+	hours_label.modify_style (rcstyle);
+	minutes_label.modify_style (rcstyle);
+	seconds_label.modify_style (rcstyle);
+	frames_label.modify_style (rcstyle);
+	bars_label.modify_style (rcstyle);
+	beats_label.modify_style (rcstyle);
+	ticks_label.modify_style (rcstyle);
+	ms_hours_label.modify_style (rcstyle);
+	ms_minutes_label.modify_style (rcstyle);
+	ms_seconds_label.modify_style (rcstyle);
+	hours_ebox.modify_style (rcstyle);
+	minutes_ebox.modify_style (rcstyle);
+	seconds_ebox.modify_style (rcstyle);
+	frames_ebox.modify_style (rcstyle);
+	audio_frames_ebox.modify_style (rcstyle);
+	bars_ebox.modify_style (rcstyle);
+	beats_ebox.modify_style (rcstyle);
+	ticks_ebox.modify_style (rcstyle);
+	ms_hours_ebox.modify_style (rcstyle);
+	ms_minutes_ebox.modify_style (rcstyle);
+	ms_seconds_ebox.modify_style (rcstyle);
+
+	colon1.modify_style (rcstyle);
+	colon2.modify_style (rcstyle);
+	colon3.modify_style (rcstyle);
+	colon4.modify_style (rcstyle);
+	colon5.modify_style (rcstyle);
+	b1.modify_style (rcstyle);
+	b2.modify_style (rcstyle);
+
+	set_size_requests ();
 }

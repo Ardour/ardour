@@ -216,6 +216,7 @@ class AudioClock : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	static const uint32_t field_length[(int)AudioFrames+1];
 	static bool _has_focus;
 
+	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 };
 
 #endif /* __audio_clock_h__ */
