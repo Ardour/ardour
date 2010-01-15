@@ -1679,7 +1679,9 @@ RouteTimeAxisView::show_all_automation ()
 		i->second->track->set_marked_for_display (true);
 		i->second->track->canvas_display()->show();
 		i->second->track->get_state_node()->add_property ("shown", X_("yes"));
-		i->second->menu_item->set_active(true);
+		if (i->second->menu_item) {
+			i->second->menu_item->set_active(true);
+		}
 	}
 
 
@@ -1746,7 +1748,9 @@ RouteTimeAxisView::hide_all_automation ()
 		i->second->track->set_marked_for_display (false);
 		i->second->track->hide ();
 		i->second->track->get_state_node()->add_property ("shown", X_("no"));
-		i->second->menu_item->set_active (false);
+		if (i->second->menu_item) {
+			i->second->menu_item->set_active (false);
+		}
 	}
 
 	/* Hide processor automation */
