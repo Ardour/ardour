@@ -172,10 +172,12 @@ RegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	if (name_pixbuf) {
 		name_pixbuf->set_data ("regionview", this);
+		name_pixbuf->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_event), name_pixbuf, this));
 	}
 
-	if (wfd)
+	if (wfd) {
 		_enable_display = true;
+	}
 
 	set_height (trackview.current_height());
 
