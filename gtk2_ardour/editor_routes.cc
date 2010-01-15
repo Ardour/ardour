@@ -404,6 +404,9 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 	}
 
 	update_rec_display ();
+	update_mute_display ();
+	update_solo_display ();
+	update_solo_isolate_display ();
 	resume_redisplay ();
 	_redisplay_does_not_sync_order_keys = false;
 }
