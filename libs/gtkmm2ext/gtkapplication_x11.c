@@ -44,4 +44,7 @@ gtk_application_add_app_menu_item   (GtkApplicationMenuGroup *group,
 {
 }
 
-
+void
+gtk_application_ready ()
+{
+}
