@@ -110,8 +110,8 @@ RegionExportChannelFactory::RegionExportChannelFactory (Session * session, Audio
 
 	session->ProcessExport.connect_same_thread (export_connection, boost::bind (&RegionExportChannelFactory::new_cycle_started, this, _1));
 
-	buffers.set_count (ChanCount (DataType::AUDIO, n_channels));
 	buffers.ensure_buffers (DataType::AUDIO, n_channels, frames_per_cycle);
+	buffers.set_count (ChanCount (DataType::AUDIO, n_channels));
 }
 
 RegionExportChannelFactory::~RegionExportChannelFactory ()
