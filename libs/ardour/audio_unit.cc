@@ -2177,7 +2177,7 @@ AUPluginInfo::load_cached_info ()
 	
 	//initial version has incorrectly stored i/o info, and/or garbage chars.
 	const XMLProperty* version = root->property(X_("version"));
-	if (! (version != NULL) && (version->value() == X_(AU_CACHE_VERSION)))) {
+	if (! ((version != NULL) && (version->value() == X_(AU_CACHE_VERSION)))) {
 		error << "au_cache is not correct version.  AU plugins will be re-scanned" << endmsg;
 		return -1;
 	}
