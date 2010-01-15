@@ -95,4 +95,6 @@ Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_ustring (const Glib::ustring& name,
 
 void resize_window_to_proportion_of_monitor (Gtk::Window*, int, int);
 
+std::string escape_underscores (std::string const &);
+
 #endif /* __ardour_gtk_utils_h__ */

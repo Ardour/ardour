@@ -35,6 +35,7 @@
 #include "port_matrix_component.h"
 #include "i18n.h"
 #include "gui_thread.h"
+#include "utils.h"
 
 using namespace std;
 using namespace Gtk;
@@ -393,7 +394,10 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 
 
 			if (can_rename_channels (bc[dim].bundle)) {
-				snprintf (buf, sizeof (buf), _("Rename '%s'..."), bc[dim].bundle->channel_name (bc[dim].channel).c_str());
+				snprintf (
+					buf, sizeof (buf), _("Rename '%s'..."),
+					escape_underscores (bc[dim].bundle->channel_name (bc[dim].channel)).c_str()
+					);
 				sub.push_back (
 					MenuElem (
 						buf,
@@ -445,7 +449,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 				}
 			}
 
-			items.push_back (MenuElem (bc[dim].bundle->name().c_str(), *m));
+			items.push_back (MenuElem (escape_underscores (bc[dim].bundle->name()).c_str(), *m));
 			need_separator = true;
 		}
 
@@ -807,7 +811,7 @@ PortMatrix::add_remove_option (Menu_Helpers::MenuList& m, boost::weak_ptr<Bundle
 	}
 	
 	char buf [64];
-	snprintf (buf, sizeof (buf), _("Remove '%s'"), b->channel_name (c).c_str());
+	snprintf (buf, sizeof (buf), _("Remove '%s'"), escape_underscores (b->channel_name (c)).c_str());
 	m.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::remove_channel_proxy), w, c)));
 }
 
@@ -822,6 +826,6 @@ PortMatrix::add_disassociate_option (Menu_Helpers::MenuList& m, boost::weak_ptr<
 	}
 	
 	char buf [64];
-	snprintf (buf, sizeof (buf), _("%s all from '%s'"), disassociation_verb().c_str(), b->channel_name (c).c_str());
+	snprintf (buf, sizeof (buf), _("%s all from '%s'"), disassociation_verb().c_str(), escape_underscores (b->channel_name (c)).c_str());
 	m.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, c, d)));
 }

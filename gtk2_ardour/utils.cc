@@ -1016,3 +1016,21 @@ pixbuf_from_ustring(const ustring& name, Pango::FontDescription* font, int clip_
 
 	return buf;
 }
+
+/** Replace _ with __ in a string; for use with menu item text to make underscores displayed correctly */
+string
+escape_underscores (string const & s)
+{
+	string o;
+	string::size_type const N = s.length ();
+
+	for (string::size_type i = 0; i < N; ++i) {
+		if (s[i] == '_') {
+			o += "__";
+		} else {
+			o += s[i];
+		}
+	}
+
+	return o;
+}
