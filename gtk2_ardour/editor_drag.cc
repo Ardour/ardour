@@ -1897,16 +1897,31 @@ TrimDrag::aborted ()
 pair<nframes64_t, nframes64_t>
 TrimDrag::extent () const
 {
-	pair<nframes64_t, nframes64_t> e = make_pair (INT64_MAX, 0);
-	
-	for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-		boost::shared_ptr<Region> r = (*i)->region ();
-		pair<nframes64_t, nframes64_t> const t = make_pair (r->position(), r->position() + r->length ());
-		e.first = min (e.first, t.first);
-		e.second = max (e.second, t.second);
-	}
+	/* we only want to autoscroll to keep the most `outward' region edge on-screen,
+	   not the whole region(s) that is/are being trimmed.
+	*/
 
-	return e;
+	nframes64_t f = 0;
+
+	switch (_operation) {
+	case StartTrim:
+		f = INT64_MAX;
+		for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+			f = min (f, (nframes64_t) (*i)->region()->position());
+		}
+		break; 
+	case ContentsTrim:
+		f = adjusted_current_frame (0);
+		break;
+	case EndTrim:
+		f = 0;
+		for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+			f = max (f, (nframes64_t) (*i)->region()->position() + (*i)->region()->length());
+		}
+		break;
+	}
+		
+	return make_pair (f, f);
 }
 
 
