@@ -38,7 +38,7 @@
 #include <gtkmm2ext/gtkapplication.h>
 #include <gtkmm2ext/gtkapplication-private.h>
 
-#define DEBUG(format, ...) g_printerr ("%s: " format, G_STRFUNC, ## __VA_ARGS__)
+// #define DEBUG(format, ...) g_printerr ("%s: " format, G_STRFUNC, ## __VA_ARGS__)
 #define DEBUG(format, ...)
 
 /* TODO
@@ -1048,8 +1048,7 @@ add_menu_item (NSMenu* cocoa_menu, GtkWidget* menu_item, int index)
 	if (!GTK_WIDGET_IS_SENSITIVE (menu_item))
 		[cocoa_item setState:NSOffState];
 
-#if 0
-// requires OS X 10.5 or later		 
+#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_4
 	if (!GTK_WIDGET_VISIBLE (menu_item))
 		[cocoa_item setHidden:YES];
 #endif

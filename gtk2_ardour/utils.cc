@@ -418,7 +418,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	bool special_handling_of_unmodified_accelerators = false;
 	bool allow_activating = true;
 
-#define DEBUG_ACCELERATOR_HANDLING
+#undef DEBUG_ACCELERATOR_HANDLING
 #ifdef  DEBUG_ACCELERATOR_HANDLING
 	//bool debug = (getenv ("ARDOUR_DEBUG_ACCELERATOR_HANDLING") != 0);
 	bool debug=true;
@@ -501,7 +501,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 		if (possibly_translate_keyval_to_make_legal_accelerator (fakekey)) {
 #ifdef DEBUG_ACCELERATOR_HANDLING
 			if (debug) {
-				cerr << "\tactivate without special handling of unmodified accels\n";
+				cerr << "\tactivate (was " << ev->keyval << " now " << fakekey << ") without special handling of unmodified accels\n";
 			}
 #endif
 			if (allow_activating && gtk_accel_groups_activate(G_OBJECT(win), fakekey, GdkModifierType(ev->state))) {
@@ -533,7 +533,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 			if (gtk_window_activate_key (win, ev)) {
 #ifdef DEBUG_ACCELERATOR_HANDLING
 				if (debug) {
-					cerr << "\tactivation handled key\n";
+					cerr << "\tactivation handled key " << ev->keyval << endl;
 				}
 #endif
 				
