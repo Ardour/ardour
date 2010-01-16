@@ -70,6 +70,11 @@ private:
 	std::pair<double, double> _start_editor_y;
 	double _start_mouse_x;
 	double _start_mouse_y;
+	enum {
+		IN_VIEWBOX,
+		BELOW_OR_ABOVE_VIEWBOX,
+		TO_LEFT_OR_RIGHT_OF_VIEWBOX
+	} _start_position;
 
 	bool _move_dragging;
 	double _x_offset;

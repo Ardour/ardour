@@ -153,11 +153,10 @@ EditorSummary::render (cairo_t* cr)
 	_y_scale = static_cast<double> (_height) / h;
 
 	/* tallest a region should ever be in the summary, in pixels */
-	int const tallest_region_pixels = 4;
+	int const tallest_region_pixels = _height / 16;
 
 	if (max_height * _y_scale > tallest_region_pixels) {
 		_y_scale = static_cast<double> (tallest_region_pixels) / max_height;
-
 	}
 
 	/* render regions */
@@ -292,6 +291,22 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 		_start_mouse_x = ev->x;
 		_start_mouse_y = ev->y;
 
+		if (
+			_start_editor_x.first <= _start_mouse_x && _start_mouse_x <= _start_editor_x.second &&
+			_start_editor_y.first <= _start_mouse_y && _start_mouse_y <= _start_editor_y.second
+			) {
+
+			_start_position = IN_VIEWBOX;
+
+		} else if (_start_editor_x.first <= _start_mouse_x && _start_mouse_x <= _start_editor_x.second) {
+
+			_start_position = BELOW_OR_ABOVE_VIEWBOX;
+
+		} else {
+
+			_start_position = TO_LEFT_OR_RIGHT_OF_VIEWBOX;
+		}
+
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
 			/* primary-modifier-click: start a zoom drag */
@@ -358,10 +373,17 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 
 		_moved = true;
 
-		xr.first += ev->x - _start_mouse_x;
-		xr.second += ev->x - _start_mouse_x;
-		yr.first += ev->y - _start_mouse_y;
-		yr.second += ev->y - _start_mouse_y;
+		/* don't alter x if we clicked outside and above or below the viewbox */
+		if (_start_position == IN_VIEWBOX || _start_position == TO_LEFT_OR_RIGHT_OF_VIEWBOX) {
+			xr.first += ev->x - _start_mouse_x;
+			xr.second += ev->x - _start_mouse_x;
+		}
+
+		/* don't alter y if we clicked outside and to the left or right of the viewbox */
+		if (_start_position == IN_VIEWBOX || _start_position == BELOW_OR_ABOVE_VIEWBOX) {
+			yr.first += ev->y - _start_mouse_y;
+			yr.second += ev->y - _start_mouse_y;
+		}
 
 		if (xr.first < 0) {
 			xr.second -= xr.first;
