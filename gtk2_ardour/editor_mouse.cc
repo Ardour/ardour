@@ -773,7 +773,8 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 							if (t) {
 								boost::shared_ptr<Playlist> pl = t->diskstream()->playlist ();
 								if (pl) {
-									boost::shared_ptr<Region> r = pl->top_region_at (unit_to_frame (event->button.x));
+									
+									boost::shared_ptr<Region> r = pl->top_region_at (event_frame (event));
 									if (r) {
 										RegionView* rv = rtv->view()->find_view (r);
 										clicked_selection = select_range_around_region (rv);
