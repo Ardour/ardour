@@ -733,7 +733,8 @@ ARDOUR_UI::finish()
 		int tries = 0;
 
 		while (session->transport_rolling() && (++tries < 8)) {
-			session->request_stop (true, false);
+			/* stop but do not abort capture */
+			session->request_stop (false, true);
 			usleep (10000);
 		}
 
