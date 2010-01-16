@@ -379,7 +379,7 @@ class Session : public PBD::StatefulDestructible
 
 	void request_roll_at_and_return (nframes_t start, nframes_t return_to);
 	void request_bounded_roll (nframes_t start, nframes_t end);
-	void request_stop (bool clear_state = true, bool abort = false);
+	void request_stop (bool abort = false, bool clear_state = true);
 	void request_locate (nframes_t frame, bool with_roll = false);
 	void request_transport_speed (float speed);
 	void request_play_loop (bool yn, bool leave_rolling = false);
