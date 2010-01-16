@@ -417,10 +417,10 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 
 			if (_alignment_style == ExistingMaterial) {
 				//cerr << "A FRF += " << _session.worst_output_latency () << endl;
-				// first_recordable_frame += _session.worst_output_latency();
+				first_recordable_frame += _session.worst_output_latency();
 			} else {
 				// cerr << "B FRF += " << _roll_delay<< endl;
-				// first_recordable_frame += _roll_delay;
+				first_recordable_frame += _roll_delay;
   			}
 
 		} else {
@@ -429,48 +429,24 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 
 			if (_alignment_style == ExistingMaterial) {
 
-				if (!Config->get_punch_in()) {
+				/* manual punch in happens at the correct transport frame
+				    because the user hit a button. but to get alignment correct 
+				    we have to back up the position of the new region to the 
+				    appropriate spot given the roll delay.
+				*/
 
-					/* manual punch in happens at the correct transport frame
-					   because the user hit a button. but to get alignment correct 
-					   we have to back up the position of the new region to the 
-					   appropriate spot given the roll delay.
-					*/
 
-					capture_start_frame -= _roll_delay;
+				/* autopunch toggles recording at the precise
+				   transport frame, and then the DS waits
+				   to start recording for a time that depends
+				   on the output latency.
+				*/
 
-					/* XXX paul notes (august 2005): i don't know why
-					   this is needed.
-					*/
-
-					// cerr << "1 FRF += " << _capture_offset << endl;
-					first_recordable_frame += _capture_offset;
-
-				} else {
-
-					/* autopunch toggles recording at the precise
-					   transport frame, and then the DS waits
-					   to start recording for a time that depends
-					   on the output latency.
-					*/
-
-					// cerr << "2 FRF += " << _session.worst_output_latency() << endl;
-					first_recordable_frame += _session.worst_output_latency();
-				}
-
+				first_recordable_frame += _session.worst_output_latency();
 			} else {
-
-				if (Config->get_punch_in()) {
-					// cerr << "3 FRF += " << _roll_delay << endl;
-					first_recordable_frame += _roll_delay;
-				} else {
-					capture_start_frame -= _roll_delay;
-				}
+				capture_start_frame -= _roll_delay;
 			}
-			
 		}
-
-		// cerr << _name << " FRF = " << first_recordable_frame << " CSF = " << capture_start_frame << endl;
 
 		if (recordable() && destructive()) {
 			boost::shared_ptr<ChannelList> c = channels.reader();
@@ -503,8 +479,6 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 		} else {
 			last_recordable_frame += _roll_delay;
 		}
-
-      first_recordable_frame = max_frames;
 	}
 
 	last_possibly_recording = possibly_recording;
