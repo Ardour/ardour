@@ -525,6 +525,15 @@ AudioPlaylist::set_state (const XMLNode& node)
 		try {
 			boost::shared_ptr<Crossfade> xfade = boost::shared_ptr<Crossfade> (new Crossfade (*((const Playlist *)this), *child));
 			_crossfades.push_back (xfade);
+
+			/* we should not need to do this here, since all values were set via XML. however
+			   some older sessions may have bugs and this allows us to fix them.
+			*/
+			
+			xfade->update ();
+
+			/* we care about these signals ... */
+
 			xfade->Invalidated.connect (mem_fun (*this, &AudioPlaylist::crossfade_invalidated));
 			xfade->StateChanged.connect (mem_fun (*this, &AudioPlaylist::crossfade_changed));
 			NewCrossfade(xfade);

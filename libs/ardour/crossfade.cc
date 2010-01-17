@@ -163,12 +163,6 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 	if (set_state (node)) {
 		throw failed_constructor();
 	}
-
-	/* we should not need to do this here, since all values were set via XML. however
-	   some older sessions may have bugs and this allows us to fix them.
-	*/
-	
-	update ();
 }
 
 Crossfade::Crossfade (const Crossfade &orig, boost::shared_ptr<AudioRegion> newin, boost::shared_ptr<AudioRegion> newout)
