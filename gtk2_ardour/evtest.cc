@@ -6,6 +6,8 @@ using namespace std;
 bool
 print_event (GdkEvent* event)
 {
+	const gchar* kstr;
+
 	cerr << hex;
 	cerr << "Event: type = " << event->type << ' ';
 
@@ -38,7 +40,7 @@ print_event (GdkEvent* event)
 		cerr << "Key press, keycode = "
 		     << event->key.keyval
 		     << " name " 
-		     << gdk_keyval_name (event->key.keyval)
+		     << ((kstr = gdk_keyval_name (event->key.keyval)) ? kstr : "UNKNOWN KEY")
 		     << " state = "
 		     << event->key.state
 		     << " hw keycode = "
@@ -52,7 +54,7 @@ print_event (GdkEvent* event)
 		cerr << "Key release, keycode = "
 		     << event->key.keyval
 		     << " name " 
-		     << gdk_keyval_name (event->key.keyval)
+		     << ((kstr = gdk_keyval_name (event->key.keyval)) ? kstr : "UNKNOWN KEY")
 		     << " state = "
 		     << event->key.state
 		     << " hw keycode = "
