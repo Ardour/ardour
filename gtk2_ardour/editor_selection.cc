@@ -870,14 +870,11 @@ Editor::region_selection_changed ()
 	_regions->block_change_connection (true);
 	editor_regions_selection_changed_connection.block(true);
 
-	_regions->unselect_all ();
-
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-
 		(*i)->set_selected_regionviews (selection->regions);
-		_regions->set_selected (selection->regions);
-
 	}
+
+	_regions->set_selected (selection->regions);
 
 	sensitize_the_right_region_actions (!selection->regions.empty());
 
