@@ -539,7 +539,7 @@ msgstr ""
 "1) Hai richiesto parametri audio non supportati.\n"
 "2) JACK è stato lanciato come altro utente.\n"
 "\n"
-"Per favore considera le possibilità , e prova altri parametri."
+"Per favore considera le possibilità , e prova altri parametri."
 
 #: gtk2_ardour/ardour_ui.cc:604
 #: gtk2_ardour/main.cc:73
@@ -555,9 +555,9 @@ msgstr ""
 "Ci sono molite ragioni possibili:\n"
 "\n"
 "1) JACK non è stato lanciato2) JACK è stato lanciato come altro utente, forse radice.\n"
-"3) C'è già  un altro client chiamato\"ardour\".\n"
+"3) C'è già  un altro client chiamato\"ardour\".\n"
 "\n"
-"Per favore considera le possibilità  e forse rilancia JACK."
+"Per favore considera le possibilità  e forse rilancia JACK."
 
 #: gtk2_ardour/ardour_ui.cc:652
 msgid "Ardour is ready for use"
@@ -579,7 +579,7 @@ msgstr "Non mostrare più questa finestra."
 
 #: gtk2_ardour/ardour_ui.cc:734
 msgid "quit"
-msgstr "esci"
+msgstr "Esci"
 
 #: gtk2_ardour/ardour_ui.cc:743
 msgid ""
@@ -632,7 +632,7 @@ msgstr ""
 "non è stata salvata.\n"
 "\n"
 "Ogni cambiamento effettuato adesso\n"
-"sarà  perduto se non lo salvi.\n"
+"sarà  perduto se non lo salvi.\n"
 "\n"
 "Cosa vuoi fare?"
 
@@ -809,7 +809,7 @@ msgid ""
 msgstr ""
 "Benvenuto in Ardour.\n"
 "\n"
-"Il programma avrà bisogno di un po' di tempo per partire\n"
+"Il programma avrà bisogno di un po' di tempo per partire\n"
 "mentre le font di sistema verranno controllatte.\n"
 "\n"
 "Questo verrà fatto solo una volta\n"
@@ -821,7 +821,7 @@ msgid ""
 "%1\n"
 "already exists. Do you want to open it?"
 msgstr ""
-"Questa sessione esiste già .\n"
+"Questa sessione esiste già .\n"
 "%1\n"
 "Vuoi aprirla?"
 
@@ -1123,7 +1123,7 @@ msgstr "Manopola del controllo della velocità"
 #: gtk2_ardour/ardour_ui2.cc:303
 #, c-format
 msgid "Select semitones or %%-age for speed display"
-msgstr "Seleziona semitoni o percentuale per la velocità  di visualizzazione"
+msgstr "Seleziona semitoni o percentuale per la velocità  di visualizzazione"
 
 #: gtk2_ardour/ardour_ui2.cc:304
 msgid "Current transport speed"
@@ -1168,7 +1168,7 @@ msgstr "spinta"
 
 #: gtk2_ardour/ardour_ui2.cc:601
 msgid "Maximum speed"
-msgstr "Velocità  massima"
+msgstr "Velocità  massima"
 
 #: gtk2_ardour/ardour_ui2.cc:839
 #: gtk2_ardour/ardour_ui2.cc:862
@@ -1364,11 +1364,11 @@ msgstr "Massimizza lo spazio nella finestra di lavoro"
 
 #: gtk2_ardour/ardour_ui_ed.cc:202
 msgid "Show Editor"
-msgstr "Mostra la finestra di lavoro"
+msgstr "Mostra Finestra di Lavoro"
 
 #: gtk2_ardour/ardour_ui_ed.cc:203
 msgid "Show Mixer"
-msgstr "Mostra il mixer"
+msgstr "Mostra Mixer"
 
 #: gtk2_ardour/ardour_ui_ed.cc:204
 msgid "Toggle Editor Mixer on Top"
@@ -1416,7 +1416,7 @@ msgstr "Scorciatoie da tastiera"
 #: gtk2_ardour/ardour_ui_ed.cc:217
 #: gtk2_ardour/editor_actions.cc:566
 msgid "Bundle Manager"
-msgstr "Gestore del pacchetto"
+msgstr "Gestore Pacchetto"
 
 #: gtk2_ardour/ardour_ui_ed.cc:219
 msgid "Add Audio Track"
@@ -1726,7 +1726,7 @@ msgstr "Manda il ritorno MIDI"
 
 #: gtk2_ardour/ardour_ui_ed.cc:444
 msgid "Tape Machine Mode"
-msgstr "Modalità  Registratore (Tape Machine)"
+msgstr "Modalità  Registratore (Tape Machine)"
 
 #: gtk2_ardour/ardour_ui_ed.cc:447
 msgid "Sync Editor and Mixer Track Order"
@@ -2078,7 +2078,7 @@ msgstr "Mostra tutte le dissolvenze incrociate"
 
 #: gtk2_ardour/audio_time_axis.cc:187
 msgid "Show waveforms"
-msgstr "Mostra le forme d'onda"
+msgstr "Mostra forme d'onda"
 
 #: gtk2_ardour/audio_time_axis.cc:197
 msgid "Traditional"
@@ -2281,7 +2281,7 @@ msgstr "Aggiungi Canale"
 
 #: gtk2_ardour/bundle_manager.cc:223
 msgid "Bundle manager"
-msgstr "Gestore Pacchetto"
+msgstr "Gestore pacchetto"
 
 #: gtk2_ardour/bundle_manager.cc:223
 #: gtk2_ardour/editor.cc:1851
@@ -2572,7 +2572,7 @@ msgstr "Fine regioni"
 #: gtk2_ardour/editor.cc:133
 #: gtk2_ardour/editor.cc:3804
 msgid "Region syncs"
-msgstr "Sincro delle regioni"
+msgstr "Sincro regione"
 
 #: gtk2_ardour/editor.cc:134
 #: gtk2_ardour/editor.cc:3802
@@ -2809,7 +2809,7 @@ msgstr "Finestra di lavoro"
 #: gtk2_ardour/editor.cc:4939
 #: gtk2_ardour/editor_actions.cc:84
 msgid "Loop"
-msgstr "ciclo"
+msgstr "Ciclo"
 
 #: gtk2_ardour/editor.cc:1327
 #: gtk2_ardour/editor.cc:1335
@@ -2897,7 +2897,7 @@ msgstr "Rinomina"
 
 #: gtk2_ardour/editor.cc:1930
 msgid "Popup region editor"
-msgstr "Mostra la finestra di lavoro della regione"
+msgstr "Mostra finestra di lavoro della regione"
 
 #: gtk2_ardour/editor.cc:1933
 msgid "Raise to top layer"
@@ -2909,11 +2909,11 @@ msgstr "Porta la regione all'ultimo livello"
 
 #: gtk2_ardour/editor.cc:1936
 msgid "Define sync point"
-msgstr "Definisci il punto di sincro"
+msgstr "Definisci punto di sincro"
 
 #: gtk2_ardour/editor.cc:1937
 msgid "Remove sync point"
-msgstr "Rimuovi il punto di sincro"
+msgstr "Rimuovi punto di sincro"
 
 #: gtk2_ardour/editor.cc:1942
 msgid "Bounce"
@@ -3150,7 +3150,7 @@ msgstr "Riproduci la regione"
 #: gtk2_ardour/editor.cc:2193
 #: gtk2_ardour/editor_actions.cc:385
 msgid "Loop Region"
-msgstr "Regione in ciclo"
+msgstr "Regione in Ciclo"
 
 #: gtk2_ardour/editor.cc:2203
 #: gtk2_ardour/editor.cc:2286
@@ -3346,7 +3346,7 @@ msgstr "Fuoco dell'ingrandimento"
 
 #: gtk2_ardour/editor.cc:3179
 msgid "Snap/Grid Units"
-msgstr "Allinea/Griglia Unità "
+msgstr "Allinea/Griglia Unità "
 
 msgid "Magnetic Snap"
 msgstr "Allineamento Magnetico"
@@ -3424,7 +3424,7 @@ msgid ""
 "If deleted, audio files used by it alone by will cleaned."
 msgstr ""
 "L'elenco Scelte %1 è al momento non in uso.\n"
-"Se lasciato solo, nessun file audio utilizzato verrà  cancellato.\n"
+"Se lasciato solo, nessun file audio utilizzato verrà  cancellato.\n"
 "Se cancellato, solo gli audio file utilizzatio solo da questo elenco saranno cancellati."
 
 #: gtk2_ardour/editor.cc:4193
@@ -3650,11 +3650,11 @@ msgstr "Trascinamento rotto"
 
 #: gtk2_ardour/editor_actions.cc:106
 msgid "Show Editor Mixer"
-msgstr "Mostra il mixer della finestra di lavoro"
+msgstr "Mostra Mixer della Finestra di Lavoro"
 
 #: gtk2_ardour/editor_actions.cc:108
 msgid "Show Editor List"
-msgstr "Mostra la lista della finestra di lavoro"
+msgstr "Mostra Lista della Finestra di Lavoro"
 
 #: gtk2_ardour/editor_actions.cc:113
 msgid "Span Entire Overlap"
@@ -3670,15 +3670,15 @@ msgstr "Usa le dissolvenze della regione (globale)"
 
 #: gtk2_ardour/editor_actions.cc:127
 msgid "Show Region Fades"
-msgstr "Mostra le dissolvenze della regione"
+msgstr "Mostra Dissolvenze della Regione"
 
 #: gtk2_ardour/editor_actions.cc:129
 msgid "Toggle Region Fade In"
-msgstr "Attiva/Disattiva l'assolvenza della regione"
+msgstr "Attiva/Disattiva l'Assolvenza della Regione"
 
 #: gtk2_ardour/editor_actions.cc:131
 msgid "Toggle Region Fade Out"
-msgstr "Attiva/Disattiva la dissolvenza della regione"
+msgstr "Attiva/Disattiva la Dissolvenza della Regione"
 
 #: gtk2_ardour/editor_actions.cc:133
 #, fuzzy
@@ -3687,11 +3687,11 @@ msgstr "Alterna le dissolvenze della regione"
 
 #: gtk2_ardour/editor_actions.cc:136
 msgid "Playhead to Next Region Boundary"
-msgstr "Testina sul prossimo margine di regione"
+msgstr "Testina sul Prossimo Margine di Regione"
 
 #: gtk2_ardour/editor_actions.cc:138
 msgid "Playhead to Previous Region Boundary"
-msgstr "Testina sul precedente margine di regione"
+msgstr "Testina sul Precedente Margine di Regione"
 
 #: gtk2_ardour/editor_actions.cc:141
 msgid "Playhead to Next Region Start"
@@ -3703,7 +3703,7 @@ msgstr "Testina sul Prossimo Fine Regione"
 
 #: gtk2_ardour/editor_actions.cc:145
 msgid "Playhead to Next Region Sync"
-msgstr "Testina sul Prossimo Sincro della Regione"
+msgstr "Testina sul Prossimo Sincro Regione"
 
 #: gtk2_ardour/editor_actions.cc:148
 msgid "Playhead to Previous Region Start"
@@ -3715,7 +3715,7 @@ msgstr "Testina sul Precedente Fine Regione"
 
 #: gtk2_ardour/editor_actions.cc:152
 msgid "Playhead to Previous Region Sync"
-msgstr "Testina sul Precedente Sincro della Regione"
+msgstr "Testina sul Precedente Sincro Regione"
 
 #: gtk2_ardour/editor_actions.cc:155
 msgid "To Next Region Boundary"
@@ -3735,7 +3735,7 @@ msgstr "Sulla prossima fine di regione"
 
 #: gtk2_ardour/editor_actions.cc:164
 msgid "To Next Region Sync"
-msgstr "Sul prossimo punto di Sincro della regione"
+msgstr "Sul prossimo Sincro Regione"
 
 #: gtk2_ardour/editor_actions.cc:167
 msgid "To Previous Region Start"
@@ -3747,7 +3747,7 @@ msgstr "Sulla precedente fine regione"
 
 #: gtk2_ardour/editor_actions.cc:171
 msgid "To Previous Region Sync"
-msgstr "Sul precedente punto di Sincro della regione"
+msgstr "Sul precedente Sincro Regione"
 
 #: gtk2_ardour/editor_actions.cc:174
 msgid "To Range Start"
@@ -3792,7 +3792,7 @@ msgstr "Seleziona Tutto nell'Intervallo di Punch"
 
 #: gtk2_ardour/editor_actions.cc:205
 msgid "Select All in Loop Range"
-msgstr "Seleziona Tutto nell'Intevallo Ciclo"
+msgstr "Seleziona Tutto nell'Intevallo di Ciclo"
 
 #: gtk2_ardour/editor_actions.cc:208
 msgid "Select Next Track/Bus"
@@ -4000,7 +4000,7 @@ msgstr "Sposta Tracce Selezionate in Alto"
 
 #: gtk2_ardour/editor_actions.cc:327
 msgid "Move Selected Tracks Down"
-msgstr "Sposta le tracce selezionate in basso"
+msgstr "Sposta Tracce Selezionate in Basso"
 
 #: gtk2_ardour/editor_actions.cc:330
 msgid "Scroll Tracks Up"
@@ -4144,11 +4144,11 @@ msgstr "Allineamento Relativo delle Regioni"
 
 #: gtk2_ardour/editor_actions.cc:428
 msgid "Align Regions Sync"
-msgstr "Allinea i Punti di Sincro delle Regioni"
+msgstr "Allinea Sincro Regione"
 
 #: gtk2_ardour/editor_actions.cc:431
 msgid "Align Regions Sync Relative"
-msgstr "Allineamento Relativo del Punto di Sincro delle Regioni"
+msgstr "Allineamento Relativo del Sincro Regione"
 
 #: gtk2_ardour/editor_actions.cc:435
 msgid "Play From Edit Point"
@@ -4216,11 +4216,11 @@ msgstr "Separa la Regione"
 
 #: gtk2_ardour/editor_actions.cc:482
 msgid "Set Region Sync Position"
-msgstr "Imposta la Posizione di Sincro della Regione"
+msgstr "Imposta la Posizione del Sincro Regione"
 
 #: gtk2_ardour/editor_actions.cc:485
 msgid "Remove Region Sync"
-msgstr "Rimuovi il Sincro della Regione"
+msgstr "Rimuovi Sincro Regione"
 
 #: gtk2_ardour/editor_actions.cc:488
 msgid "Raise Region"
@@ -4297,11 +4297,11 @@ msgstr "Rhythm Ferret"
 
 #: gtk2_ardour/editor_actions.cc:568
 msgid "Audio Connection Manager"
-msgstr "Gestore Connessioni Audio"
+msgstr "Gestore Connessione Audio"
 
 #: gtk2_ardour/editor_actions.cc:570
 msgid "MIDI Connection Manager"
-msgstr "Gestore delle connessioni MIDI"
+msgstr "Gestore Connessioni MIDI"
 
 #: gtk2_ardour/editor_actions.cc:573
 msgid "Move Forward to Transient"
@@ -4425,7 +4425,7 @@ msgstr "Strumento Nota"
 #: gtk2_ardour/editor_actions.cc:666
 #, fuzzy
 msgid "Step Mouse Mode"
-msgstr "Modalità  Mouse gradino"
+msgstr "Modalità  Mouse gradino"
 
 #: gtk2_ardour/editor_actions.cc:673
 #, fuzzy
@@ -4531,7 +4531,7 @@ msgstr "Allinea alla Fine Regione"
 
 #: gtk2_ardour/editor_actions.cc:712
 msgid "Snap to Region Sync"
-msgstr "Allinea al Sincro della Regione"
+msgstr "Allinea al Sincro Regione"
 
 #: gtk2_ardour/editor_actions.cc:713
 msgid "Snap to Region Boundary"
@@ -4629,11 +4629,11 @@ msgstr "Importa dalla sessione"
 
 #: gtk2_ardour/editor_actions.cc:806
 msgid "Show Waveforms"
-msgstr "Mostra le Forme d'onda"
+msgstr "Mostra Forme d'onda"
 
 #: gtk2_ardour/editor_actions.cc:809
 msgid "Show Waveforms While Recording"
-msgstr "Mostra le Forme d'onda Durante la Registrazione"
+msgstr "Mostra Forme d'onda Durante la Registrazione"
 
 #: gtk2_ardour/editor_actions.cc:810
 msgid "Show Measures"
@@ -4641,7 +4641,7 @@ msgstr "Mostra le Misure"
 
 #: gtk2_ardour/editor_actions.cc:821
 msgid "Show Logo"
-msgstr "Mostra il logo"
+msgstr "Mostra Logo"
 
 #: gtk2_ardour/editor_actions.cc:827
 msgid "Later is Higher"
@@ -4649,7 +4649,7 @@ msgstr "Più tardi più in Alto"
 
 #: gtk2_ardour/editor_actions.cc:828
 msgid "Most Recently Moved/Added is Higher"
-msgstr "Spostati/Aggiunti più di recente più in alto"
+msgstr "Spostato/Aggiunto di recente  è più in Alto"
 
 #: gtk2_ardour/editor_actions.cc:829
 msgid "Most Recently Added is Higher"
@@ -4781,7 +4781,7 @@ msgstr "Questa sessione contiene già un file sorgente col nome %1. Questo file 
 
 #: gtk2_ardour/editor_audio_import.cc:236
 msgid "A source file %1 already exists. This operation will not update that source but import the file %2 as a new source, please confirm."
-msgstr "Un file sorgente %1 esiste già. Questa operazione non aggiornerà  quella sorgente ma importerà  il file %2 come nuova sorgente, per favore conferma."
+msgstr "Un file sorgente %1 esiste già. Questa operazione non aggiornerà  quella sorgente ma importerà  il file %2 come nuova sorgente, per favore conferma."
 
 #: gtk2_ardour/editor_audio_import.cc:486
 msgid "importing %1"
@@ -5251,7 +5251,7 @@ msgstr "imposta punto di sincro"
 
 #: gtk2_ardour/editor_ops.cc:3275
 msgid "remove sync"
-msgstr "rimuovi punto di sincro"
+msgstr "rimuovi sincro"
 
 #: gtk2_ardour/editor_ops.cc:3297
 msgid "naturalize"
@@ -5338,8 +5338,8 @@ msgid ""
 "Do you really want to destroy the last capture?\n"
 "(This is destructive and cannot be undone)"
 msgstr ""
-"Si vuole realmente rimuovere l'ultima registrazione?\n"
-"(questa azione non potrà essere annullata)"
+"Vuoi veramente rimuovere l'ultima registrazione?\n"
+"(questa azione non può essere annullata)"
 
 #: gtk2_ardour/editor_ops.cc:4415
 msgid "Yes, destroy it."
@@ -5492,10 +5492,10 @@ msgid ""
 "\n"
 "This action cannot be undone!"
 msgstr ""
-"vuoi veramente rimuovere  %1 %2 e %3 %4?\n"
+"Vuoi veramente rimuovere  %1 %2 e %3 %4?\n"
 "/Potresti perdere anche gli Elenchi Scelte associati con il %2)\n"
 "\n"
-"(questa azione non potrà  essere annullata)"
+"(questa azione non potrà  essere annullata)"
 
 #: gtk2_ardour/editor_ops.cc:6008
 msgid ""
@@ -5504,10 +5504,10 @@ msgid ""
 "\n"
 "This action cannot be undone!"
 msgstr ""
-"vuoi veramente rimuovere %1 %2?\n"
+"Vuoi veramente rimuovere %1 %2?\n"
 "/Potresti perdere anche gli Elenchi Scelte associati con %2)\n"
 "\n"
-"(questa azione non potrà  essere annullata)"
+"(questa azione non potrà  essere annullata)"
 
 #: gtk2_ardour/editor_ops.cc:6014
 msgid "Do you really want to remove %1 %2?"
@@ -5589,22 +5589,22 @@ msgstr "Nascondi tutto"
 #: gtk2_ardour/editor_route_list.cc:422
 #: gtk2_ardour/mixer_ui.cc:976
 msgid "Show All Audio Tracks"
-msgstr "Mostra tutte le Tracce Audio"
+msgstr "Mostra Tutte le Tracce Audio"
 
 #: gtk2_ardour/editor_route_list.cc:423
 #: gtk2_ardour/mixer_ui.cc:977
 msgid "Hide All Audio Tracks"
-msgstr "Nascondi tutte le Tracce Audio"
+msgstr "Nascondi Tutte le Tracce Audio"
 
 #: gtk2_ardour/editor_route_list.cc:424
 #: gtk2_ardour/mixer_ui.cc:978
 msgid "Show All Audio Busses"
-msgstr "Mostra tutti i Bus Audio"
+msgstr "Mostra Tutti i Bus Audio"
 
 #: gtk2_ardour/editor_route_list.cc:425
 #: gtk2_ardour/mixer_ui.cc:979
 msgid "Hide All Audio Busses"
-msgstr "Nascondi tutti i Bus Audio"
+msgstr "Nascondi Tutti i Bus Audio"
 
 #: gtk2_ardour/editor_rulers.cc:426
 msgid "New location marker"
@@ -5956,11 +5956,11 @@ msgstr "Latenza approssimata"
 
 #: gtk2_ardour/engine_dialog.cc:183
 msgid "Audio Mode"
-msgstr "Modalità Audio"
+msgstr "Modalità Audio"
 
 #: gtk2_ardour/engine_dialog.cc:222
 msgid "Realtime Priority"
-msgstr "Priorità del tempo reale"
+msgstr "Priorità del tempo reale"
 
 #: gtk2_ardour/engine_dialog.cc:251
 #: gtk2_ardour/engine_dialog.cc:375
@@ -6043,7 +6043,7 @@ msgstr ""
 "Non hai alcun dispositivo audio capace di\n"
 "riproduzione e registrazione simultanea\n"
 "\n"
-"Per favore usa Applicazioni -> Utilità  -> Impostazioni Audio MIDI\n"
+"Per favore usa Applicazioni -> Utilità  -> Impostazioni Audio MIDI\n"
 "per creare un dispositivo \"aggregato\" o installare\n"
 "un'nterfaccia adatta.\n"
 "\n"
@@ -6411,7 +6411,7 @@ msgstr "Gestore dei Plugin: impossibile creare elemento di controllo per la port
 
 #: gtk2_ardour/generic_pluginui.cc:321
 msgid "Automation control"
-msgstr "Controllo dell'automazione"
+msgstr "Controllo automazione"
 
 #: gtk2_ardour/generic_pluginui.cc:328
 msgid "Mgnual"
@@ -6419,11 +6419,11 @@ msgstr "Manuale"
 
 #: gtk2_ardour/global_port_matrix.cc:109
 msgid "Audio Connections Manager"
-msgstr "Gestore delle Connessioni Audio"
+msgstr "Gestore Connessioni Audio"
 
 #: gtk2_ardour/global_port_matrix.cc:112
 msgid "MIDI Connections Manager"
-msgstr "Gestore delle Connessioni MIDI"
+msgstr "Gestore Connessioni MIDI"
 
 #: gtk2_ardour/gtk-custom-ruler.c:126
 msgid "Lower"
@@ -6459,7 +6459,7 @@ msgstr "Dimensione massima del righello"
 
 #: gtk2_ardour/gtk-custom-ruler.c:166
 msgid "Show Position"
-msgstr "Mostra la posizione"
+msgstr "Mostra Posizione"
 
 #: gtk2_ardour/gtk-custom-ruler.c:167
 msgid "Draw current ruler position"
@@ -6529,7 +6529,7 @@ msgstr "tuo"
 #: gtk2_ardour/keyboard.cc:569
 #: gtk2_ardour/keyboard.cc:593
 msgid "Default keybindings not found - Ardour will be hard to use!"
-msgstr "I comandi da tastiera predefiniti non sono stati trovati - Ardour sarà  difficile da usare!"
+msgstr "I comandi da tastiera predefiniti non sono stati trovati - Ardour sarà  difficile da usare!"
 
 #: gtk2_ardour/keyboard.cc:572
 #: gtk2_ardour/keyboard.cc:596
@@ -6999,13 +6999,13 @@ msgid ""
 msgstr ""
 "Congratulazioni per l'esportazione della tua sessione.\n"
 "\n"
-"Sembra che tu sia già  un abbonato. Se è così, grazie e scusami\n"
+"Sembra che tu sia già  un abbonato. Se è così, grazie e scusami\n"
 "per annoiarti ancora - Sto lavorando per mogliorare il nostro sistema di abbonamento\n"
 "in modo che non debba più continuare a disturbarti con questo messaggio.\n"
 "\n"
 "Se non sei un abbonato, forse dovresti condiderare di appoggiare il mio lavoro\n"
 "su Ardour con una singola donazione o un abbonamento.\n"
-"Non succederà  niente se decidi di non farlo.\n"
+"Non succederà  niente se decidi di non farlo.\n"
 "Comunque Ardour sta continuando lo sviluppo contando\n"
 "su un flusso di introiti stabile e rinnovabile.\n"
 "Grazie per usare Ardour!"
@@ -7192,11 +7192,11 @@ msgstr "Lunghezza della dissolvenza distruttiva (msec)"
 #: gtk2_ardour/option_editor.cc:326
 #, fuzzy
 msgid "History depth (commands)"
-msgstr "Profondità  della storia (comandi)"
+msgstr "Profondità  della storia (comandi)"
 
 #: gtk2_ardour/option_editor.cc:347
 msgid "Saved history depth (commands)"
-msgstr "Profondità  della storia salvata (comandi)"
+msgstr "Profondità  della storia salvata (comandi)"
 
 #: gtk2_ardour/option_editor.cc:445
 msgid "SMPTE Offset"
@@ -7629,7 +7629,7 @@ msgstr "Nuova mandata"
 
 #: gtk2_ardour/processor_box.cc:225
 msgid "Show send controls"
-msgstr "Mostra i controlli delle mandate"
+msgstr "Mostra controlli delle mandate"
 
 #: gtk2_ardour/processor_box.cc:422
 #: gtk2_ardour/processor_box.cc:745
@@ -7672,7 +7672,7 @@ msgstr ""
 "\n"
 "Questo non ha senso - almeno che il plugin supporti\n"
 "un ingresso side-chain. Una versione futura di Ardour\n"
-"supporterà  questo tipo di configurazione."
+"supporterà  questo tipo di configurazione."
 
 #: gtk2_ardour/processor_box.cc:454
 msgid ""
@@ -7740,7 +7740,7 @@ msgid ""
 "(this cannot be undone)"
 msgstr ""
 "Vuoi veramente rimuovere tutti i processori pre-fader da questa traccia?\n"
-"(questa azione non potrà  essere annullata)"
+"(questa azione non potrà  essere annullata)"
 
 #: gtk2_ardour/processor_box.cc:1061
 msgid ""
@@ -7748,7 +7748,7 @@ msgid ""
 "(this cannot be undone)"
 msgstr ""
 "Vuoi veramente rimuovere tutti i processori post-fader da questa traccia?\n"
-"(questa azione non potrà  essere annullata)"
+"(questa azione non potrà  essere annullata)"
 
 #: gtk2_ardour/processor_box.cc:1066
 msgid ""
@@ -7756,7 +7756,7 @@ msgid ""
 "(this cannot be undone)"
 msgstr ""
 "Vuoi veramente rimuovere tutti i processori pre-fader da questo bus?\n"
-"(questa azione non potrà  essere annullata)"
+"(questa azione non potrà  essere annullata)"
 
 #: gtk2_ardour/processor_box.cc:1069
 msgid ""
@@ -7764,7 +7764,7 @@ msgid ""
 "(this cannot be undone)"
 msgstr ""
 "Vuoi veramente rimuovere tutti i processori post-fader di questo bus?\n"
-"(questa azione non potrà  essere annullata)"
+"(questa azione non potrà  essere annullata)"
 
 #: gtk2_ardour/processor_box.cc:1075
 msgid "Yes, remove them all"
@@ -8851,7 +8851,7 @@ msgstr "Nome per la nuova connessione:"
 #~ msgid "Fader"
 #~ msgstr "Smorzamenti"
 #~ msgid "a track already exists with that name"
-#~ msgstr "esiste giÃ  una traccia con quel nome"
+#~ msgstr "esiste giÃ  una traccia con quel nome"
 #~ msgid "Current: %1"
 #~ msgstr "Corrente %1"
 
@@ -9113,7 +9113,7 @@ msgstr "Nome per la nuova connessione:"
 #~ "Without a UI style file, ardour will look strange.\n"
 #~ " Please set ARDOUR2_UI_RC to point to a valid UI style file"
 #~ msgstr ""
-#~ "Senza uno Stile per l'Interfaccia, ardour apparirÃ  strano\n"
+#~ "Senza uno Stile per l'Interfaccia, ardour apparirÃ  strano\n"
 #~ "Impostare la variabile ARDOUR_UI_RC per puntare ad uno Stile"
 
 #, fuzzy
@@ -9236,7 +9236,7 @@ msgstr "Nome per la nuova connessione:"
 #~ "(cannot be undone)"
 #~ msgstr ""
 #~ "Si vuole realmente rimuovere la traccia \"%1\" ?\n"
-#~ "(questa azione non potrÃ  essere annullata)"
+#~ "(questa azione non potrÃ  essere annullata)"
 #~ msgid "new name: "
 #~ msgstr "nuovo nome: "
 
