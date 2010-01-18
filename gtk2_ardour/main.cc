@@ -73,6 +73,27 @@ fixup_bundle_environment ()
 		return;
 	}
 
+	/* pull user's language preference from Cocoa and push
+	   it into the environment. Thanks to Bjorn Winckler for
+	   this code.
+	*/
+	
+	NSArray *languages = [NSLocale preferredLanguages];
+	if (languages && [languages count] > 0) {
+		int i, count = [languages count];
+		for (i = 0; i < count; ++i) {
+			if ([[languages objectAtIndex:i]
+			     isEqualToString:@"en"]) {
+				count = i+1;
+				break;
+			}
+		}
+		NSRange r = { 0, count };
+		NSString *s = [[languages subarrayWithRange:r]
+			       componentsJoinedByString:@":"];
+		setenv("LANGUAGE", [s UTF8String], 0);
+	}
+
 	char execpath[MAXPATHLEN+1];
 	uint32_t pathsz = sizeof (execpath);
 
