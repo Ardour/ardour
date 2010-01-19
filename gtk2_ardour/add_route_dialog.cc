@@ -290,7 +290,7 @@ AddRouteDialog::refill_channel_setups ()
 		chn.channels = 12;
 		channel_setups.push_back (chn);
 
-		chn.name = X_("Custom");
+		chn.name = _("Custom");
 		chn.channels = 0;
 		channel_setups.push_back (chn);
 	}
