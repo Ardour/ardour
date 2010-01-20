@@ -179,7 +179,8 @@ static const char* translators[] = {
 \n\tDavid Täht <d@teklibre.com>\
 \n\tOscar Valladarez <dulcevendetta@hotmail.com>\
 \n\tDaniel Vidal <danielvidalchornet@gmail.com>\n"),
-	N_("Russian:\n\t Igor Blinov <pitstop@nm.ru>\n"),
+	N_("Russian:\n\t Igor Blinov <pitstop@nm.ru>\
+\n\tAlexandre Prokoudine <alexandre.prokoudine@gmail.com>\n");
 	N_("Greek:\n\t Klearchos Gourgourinis <muadib@in.gr>\n"),
 	N_("Swedish:\n\t Petter Sundlöf <petter.sundlof@gmail.com>\n"),
 	N_("Polish:\n\t Piotr Zaryk <pzaryk@gmail.com>\n"),
