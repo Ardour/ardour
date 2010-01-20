@@ -1,0 +1,2436 @@
+# translation of nn_NO.po to Nynorsk
+# Copyright (C) 2007 "Paul Davis"
+# This file is distributed under the same license as the Ardour package.
+#
+#
+# Eivind Ødegård <gingermig@yahoo.no>, 2009.
+msgid ""
+msgstr ""
+"Project-Id-Version: nn_NO\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2009-12-24 15:13+0100\n"
+"PO-Revision-Date: 2010-01-09 23:28+0100\n"
+"Last-Translator: Eivind Ødegård <gingermig@yahoo.no>\n"
+"Language-Team: Nynorsk <i18n-nn@lister.ping.uio.no>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: libs/ardour/audioanalyser.cc:29
+msgid "cannot load VAMP plugin \"%1\""
+msgstr "greier ikkje lasta VAMP-innstikket \"%1\""
+
+#: libs/ardour/audioanalyser.cc:49
+msgid "VAMP Plugin \"%1\" could not be loaded"
+msgstr "VAMP-innstikket \"%1\" vart ikkje lasta"
+
+#: libs/ardour/audio_diskstream.cc:249
+msgid "AudioDiskstream: Playlist \"%1\" isn't an audio playlist"
+msgstr "Lyd-diskstraum: Spelelista \"%1\" er ikkje ei lydspeleliste"
+
+#: libs/ardour/audio_diskstream.cc:302
+msgid "AudioDiskstream %1: there is no existing playlist to make a copy of!"
+msgstr "Lyd-diskstraum %1: det finst inga speleliste å kopiera!"
+
+#: libs/ardour/audio_diskstream.cc:947
+#: libs/ardour/audio_diskstream.cc:958
+msgid "AudioDiskstream %1: when refilling, cannot read %2 from playlist at frame %3"
+msgstr "Lyd-diskstraum %1: greidde ikkje lesa %2 frå spelelista, ramme %3, ved attfylling"
+
+#: libs/ardour/audio_diskstream.cc:1106
+msgid "AudioDiskstream %1: cannot read %2 from playlist at frame %3"
+msgstr "Lyd-diskstraum %1: greidde ikkje lesa %2 frå spelelista, ramme %3"
+
+#: libs/ardour/audio_diskstream.cc:1148
+msgid "AudioDiskstream %1: cannot read xfade samples %2 from playlist at frame %3"
+msgstr "Lyd-diskstraum %1: greidde ikkje lesa krysstoningspunkt %2 frå spelelista, ramme %3"
+
+#: libs/ardour/audio_diskstream.cc:1502
+#: libs/ardour/audio_diskstream.cc:1519
+msgid "AudioDiskstream %1: cannot write to disk"
+msgstr "Lyd-diskstraum %1: greidde ikkje skriva til disk"
+
+#: libs/ardour/audio_diskstream.cc:1564
+msgid "AudioDiskstream \"%1\": cannot flush captured data to disk!"
+msgstr "Lyd-diskstraum \"%1\": greier ikkje skriva opptaket til disken!"
+
+#: libs/ardour/audio_diskstream.cc:1652
+msgid "%1: could not create region for complete audio file"
+msgstr "%1: greidde ikkje laga bolk for heil lydfil"
+
+#: libs/ardour/audio_diskstream.cc:1677
+msgid "AudioDiskstream: could not create region for captured audio!"
+msgstr "Lyd-diskstraum: greidde ikkje laga bolk frå opptaket!"
+
+#: libs/ardour/audio_diskstream.cc:1785
+msgid "programmer error: %1"
+msgstr "Programmerarfeil: %1"
+
+#: libs/ardour/audio_diskstream.cc:2062
+msgid "AudioDiskstream: channel %1 out of range"
+msgstr "Lyd-diskstraum: kanal %1 utanfor rekkjevidd"
+
+#: libs/ardour/audio_diskstream.cc:2081
+msgid "%1:%2 new capture file not initialized correctly"
+msgstr "%1: ny opptaksfil %2 vart ikkje påbyrja rett"
+
+#: libs/ardour/audio_diskstream.cc:2333
+msgid "%1: cannot restore pending capture source file %2"
+msgstr "%1: greidde ikkje henta fram att den ventande opptakskjeldefila %2"
+
+#: libs/ardour/audio_diskstream.cc:2355
+msgid "%1: incorrect number of pending sources listed - ignoring them all"
+msgstr "%1: feil tal på ventande kjelder på lista - ser bort frå alle"
+
+#: libs/ardour/audio_diskstream.cc:2370
+msgid "%1: cannot create whole-file region from pending capture sources"
+msgstr "%1: greidde ikkje laga heilfilbolk frå ventande opptakskjelder"
+
+#: libs/ardour/audio_diskstream.cc:2382
+msgid "%1: cannot create region from pending capture sources"
+msgstr "%1: greidde ikkje laga bolk frå ventande opptakskjelder"
+
+#: libs/ardour/audioengine.cc:135
+msgid "Connect session to engine"
+msgstr "Kople økta til maskin"
+
+#: libs/ardour/audioengine.cc:537
+msgid "a port with the name \"%1\" already exists: check for duplicated track/bus names"
+msgstr "ein port med namnet \"%1\" finst frå før: sjekk opp dublettar i namn på spor eller bussar"
+
+#: libs/ardour/audioengine.cc:539
+msgid "No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks."
+msgstr "Det finst ikkje fleire JACK-portar. Du må stoppa Ardour og starta JACK på nytt med nok portar viss du treng så mange spor."
+
+#: libs/ardour/audioengine.cc:542
+msgid "AudioEngine: cannot register port \"%1\": %2"
+msgstr "AudioEngine: greier ikkje registrera porten \"%1\": %2"
+
+#: libs/ardour/audioengine.cc:551
+msgid "register input port called before engine was started"
+msgstr "registerinngangsporten vart oppkalla før tenaren starta"
+
+#: libs/ardour/audioengine.cc:587
+msgid "register output port called before engine was started"
+msgstr "registerutgangsporten vart oppkalla før tenaren starta"
+
+#: libs/ardour/audioengine.cc:678
+msgid "AudioEngine: connection already exists: %1 (%2) to %3 (%4)"
+msgstr "AudioEngine: tilkoplinga finst frå før: %1 (%2) til %3 (%4)."
+
+#: libs/ardour/audioengine.cc:682
+msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
+msgstr "Lydmaskineri: Klarte ikkje kopla %1 (%2) til %3 (%4)."
+
+#: libs/ardour/audioengine.cc:697
+#: libs/ardour/audioengine.cc:728
+msgid "disconnect called before engine was started"
+msgstr "fråkoplinga vart oppkalla før tenaren starta"
+
+#: libs/ardour/audioengine.cc:775
+msgid "get_port_by_name() called before engine was started"
+msgstr "get_port_by_name() vart oppkalla før tenaren starta"
+
+#: libs/ardour/audioengine.cc:820
+msgid "get_ports called before engine was started"
+msgstr "get_ports vart oppkalla før tenaren starta"
+
+#: libs/ardour/audioengine.cc:1192
+msgid "failed to connect to JACK"
+msgstr "greidde ikkje kopla til JACK"
+
+#: libs/ardour/audioengine.cc:1215
+msgid "could not reregister %1"
+msgstr "greidde ikkje registrera %1."
+
+#: libs/ardour/audioengine.cc:1274
+msgid "Disconnected from JACK while reconnecting. You should quit Ardour now."
+msgstr "Kopla frå JACK ved ny tilkopling. Du bør avslutta Ardour no."
+
+#: libs/ardour/audioengine.cc:1280
+msgid "could not reconnect %1 and %2 (err = %3)"
+msgstr "greidde ikkje kopla til att %1 og %2 (feil = %3)"
+
+#: libs/ardour/audiofilesource.cc:427
+#: libs/ardour/session_state.cc:2924
+msgid "there are already 1000 files with names like %1; versioning discontinued"
+msgstr "Det er alt 1000 filer med namn som %1, kuttar ut versjonsnamn"
+
+#: libs/ardour/audiofilesource.cc:441
+#: libs/ardour/session_state.cc:2938
+msgid "cannot rename audio file source from %1 to %2 (%3)"
+msgstr "kan ikkje døypa om lydfilkjelda frå %1 til %2 (%3)"
+
+#: libs/ardour/audiofilesource.cc:448
+#: libs/ardour/session_state.cc:2952
+msgid "cannot remove peakfile %1 for %2 (%3)"
+msgstr "kan ikkje fjerna toppfil %1 for %2 (%3)"
+
+#: libs/ardour/audiofilesource.cc:486
+msgid "FileSource: search path not set"
+msgstr "Filkjelde: søkjestigen er ikkje sett opp"
+
+#: libs/ardour/audiofilesource.cc:558
+msgid ""
+"FileSource: \"%1\" is ambigous when searching %2\n"
+"\t"
+msgstr ""
+"Filkjelde: \"%1\" er tvetydig når du søkjer %2\n"
+"\t"
+
+#: libs/ardour/audiofilesource.cc:564
+msgid "Filesource: cannot find required file (%1): while searching %2"
+msgstr "Filkjelde: Kan ikkje finna fila (%1) under søking i %2"
+
+#: libs/ardour/audiofilesource.cc:604
+msgid "Filesource: cannot find required file (%1): %2"
+msgstr "Filkjelde: Kan ikkje finna den naudsynte fila %1: %2"
+
+#: libs/ardour/audiofilesource.cc:609
+msgid "Filesource: cannot check for existing file (%1): %2"
+msgstr "Filkjelde:Kan ikkje sjå etter eksisterande fil %1: %2"
+
+#: libs/ardour/audiofilesource.cc:674
+#: libs/ardour/audiosource.cc:883
+#: libs/ardour/automation_event.cc:639
+#: libs/ardour/insert.cc:554
+#: libs/ardour/session.cc:2349
+#: libs/ardour/session.cc:3789
+#: libs/ardour/session.cc:3828
+#: libs/ardour/session_command.cc:432
+#: libs/ardour/sndfilesource.cc:130
+msgid "programming error: %1"
+msgstr "Programmeringsfeil: %1"
+
+#: libs/ardour/audiofilesource.cc:680
+msgid "Programming error! Ardour tried to rename a file over another file! It's safe to continue working, but please report this to the developers."
+msgstr "Programmeringsfeil! Ardor prøvde å døypa ei fil til eit filnamn som alt eksisterer. Det er trygt å halda fram å arbeida, men ver god å seia frå til utviklarane."
+
+#: libs/ardour/audiofilesource.cc:685
+msgid "cannot rename audio file %1 to %2"
+msgstr "kan ikkje døypa om lydfil %1 til %2"
+
+#: libs/ardour/audiofilter.cc:43
+msgid ""
+"This is an old Ardour session that does not have\n"
+"sufficient information for rendered FX"
+msgstr ""
+"Dette er ei gamal Ardour-økt som ikkje har\n"
+"nok informasjon for oppteikna effektar"
+
+#: libs/ardour/audiofilter.cc:66
+msgid "audiofilter: error creating name for new audio file based on %1"
+msgstr "lydfilter: feil med å laga namn for ny lydfil bygd på %1"
+
+#: libs/ardour/audiofilter.cc:77
+msgid "audiofilter: error creating new audio file %1 (%2)"
+msgstr "lydfilter: feil med å laga den nye lydfila %1 (%2)"
+
+#: libs/ardour/audio_library.cc:61
+msgid "Could not open %1.  Audio Library not saved"
+msgstr "Greidde ikkje opna %1. Lydbiblioteket er ikkje lagra"
+
+#: libs/ardour/audio_playlist.cc:226
+#: libs/ardour/audio_playlist.cc:615
+msgid "programming error: non-audio Region passed to remove_overlap in audio playlist"
+msgstr "programmeringsfeil: ikkje-lydbolk gjeve til fjern_overlapping i lydspelelista"
+
+#: libs/ardour/audio_playlist.cc:356
+msgid "programming error: non-audio Region tested for overlap in audio playlist"
+msgstr "programmeringsfeil: ikkje-lydbolk prøvd for overlapping i lydspelelista"
+
+#: libs/ardour/audioregion.cc:1647
+msgid ""
+"You have requested an operation that requires audio analysis.\n"
+"\n"
+"You currently have \"auto-analyse-audio\" disabled, which means\n"
+"that transient data must be generated every time it is required.\n"
+"\n"
+"If you are doing work that will require transient data on a\n"
+"regular basis, you should probably enable \"auto-analyse-audio\"\n"
+"then quit ardour and restart.\n"
+"\n"
+"This dialog will not display again.  But you may notice a slight delay\n"
+"in this and future transient-detection operations.\n"
+msgstr ""
+"Du spurde etter ein operasjon som krev lydanalyse.\n"
+"\n"
+"No har du skrudd av \"auto-analyser-lyd\", som tyder at\n"
+"lydtoppdata må lagast på nytt kvar gong det krevst.\n"
+"\n"
+"Viss du arbeider med lydtoppdata ofte, bør du truleg skru på\n"
+"\"auto-analyser-lyd\", og so starta Ardour på nytt.\n"
+"\n"
+"Denne ruta blir ikkje synt på nytt, men du vil kanskje merka små\n"
+"forseinkingar i denne og framtidige lydtoppdata-søk.\n"
+
+#: libs/ardour/audiosource.cc:178
+msgid "cannot rename peakfile for %1 from %2 to %3 (%4)"
+msgstr "kan ikkje døypa om toppfil for %1 frå %2 til %3 (%4)"
+
+#: libs/ardour/audiosource.cc:205
+msgid "AudioSource: cannot stat peakfile \"%1\""
+msgstr "Lydkjelde: kan ikkje bruka toppfil \"%1\""
+
+#: libs/ardour/audiosource.cc:329
+msgid "cannot read sample data for unscaled peak computation"
+msgstr "kan ikkje lesa lyddata for uskalert topputrekning"
+
+#: libs/ardour/audiosource.cc:349
+msgid "AudioSource: cannot open peakpath (a) \"%1\" (%2)"
+msgstr "Lydkjelde: kan ikkje opna toppstig (a) \"%1\" (%2)"
+
+#: libs/ardour/audiosource.cc:423
+msgid "AudioSource: cannot open peakpath (b) \"%1\" (%2)"
+msgstr "Lydkjelde: kan ikkje opna toppstig (b) \"%1\" (%2)"
+
+#: libs/ardour/audiosource.cc:543
+msgid "AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"
+msgstr "AudioSource [%1]: topplesing - kan ikkje lesa %2 punkt ved forskuvinga %3 av %4 (%5)"
+
+#: libs/ardour/audiosource.cc:631
+msgid "%1: could not write read raw data for peak computation (%2)"
+msgstr "%1 greidde ikkje skriva/lesa rådata for topputrekninga (%2)"
+
+#: libs/ardour/audiosource.cc:677
+msgid "AudioSource: cannot open peakpath (c) \"%1\" (%2)"
+msgstr "Lydkjelde: kan ikkje opna toppstig (c) \"%1\" (%2)"
+
+#: libs/ardour/audiosource.cc:743
+#: libs/ardour/audiosource.cc:855
+msgid "%1: could not write peak file data (%2)"
+msgstr "%1: greidde ikkje skriva toppfildata (%2)"
+
+#: libs/ardour/audio_track.cc:147
+msgid "Unknown connection \"%1\" listed for input of %2"
+msgstr "Ukjend tilkopling \"%1\" gjeve for inngangen på %2"
+
+#: libs/ardour/audio_track.cc:152
+msgid "in 1+2"
+msgstr "inn 1+2"
+
+#: libs/ardour/audio_track.cc:154
+msgid "in 1"
+msgstr "inn 1"
+
+#: libs/ardour/audio_track.cc:158
+msgid "No input connections available as a replacement"
+msgstr "Ingen inngangstilkoplingar klare som erstatting"
+
+#: libs/ardour/audio_track.cc:162
+#: libs/ardour/io.cc:1887
+msgid "Connection %1 was not available - \"%2\" used instead"
+msgstr "Tilkoplinga %1 var ikkje tilgjengeleg - brukte \"%2\" i staden"
+
+#: libs/ardour/audio_track.cc:171
+#: libs/ardour/io.cc:1967
+msgid "improper input channel list in XML node (%1)"
+msgstr "Feil inngangskanalliste i XML-node (%1)"
+
+#: libs/ardour/audio_track.cc:212
+#: libs/ardour/audio_track.cc:225
+msgid "AudioTrack: audio diskstream \"%1\" not known by session"
+msgstr "Lydspor: økta kjenner ikkje att lyd-diskstraumen \"%1\""
+
+#: libs/ardour/audio_track.cc:267
+msgid "programming error: AudioTrack given state without diskstream!"
+msgstr "Programmeringsfeil: Ardour fekk tilstand utan diskstraum1"
+
+#: libs/ardour/auditioner.cc:56
+msgid "no outputs available for auditioner - manual connection required"
+msgstr "ingen utgangar for lyttinga - du må kopla til manuelt"
+
+#: libs/ardour/auditioner.cc:127
+msgid "Auditioning of non-audio regions not yet supported"
+msgstr "Me har ikkje laga lytting for bolkar som ikkje er lyd enno"
+
+#: libs/ardour/automation_event.cc:785
+#: libs/ardour/panner.cc:919
+msgid "programming error:"
+msgstr "programmeringsfeil: "
+
+#: libs/ardour/automation_event.cc:1310
+msgid "automation list: cannot load coordinates from XML, all points ignored"
+msgstr "automasjonsliste: greier ikkje lasta koordinater frå XML, såg bort frå alle punkt"
+
+#: libs/ardour/automation_event.cc:1356
+msgid "automation list: no x-coordinate stored for control point (point ignored)"
+msgstr "automasjonsliste: ingen x-koordinatar er lagra for kontrollpunktet (hoppar over)"
+
+#: libs/ardour/automation_event.cc:1362
+msgid "automation list: no y-coordinate stored for control point (point ignored)"
+msgstr "automasjonsliste: ingen y-koordinatar er lagra for kontrollpunktet (hoppar over)"
+
+#: libs/ardour/automation_event.cc:1376
+msgid "AutomationList: passed XML node called %1, not \"AutomationList\" - ignored"
+msgstr "AutomationList: gav XML-node med namet %1, ikkje \"AutomationList\" - såg bort frå."
+
+#: libs/ardour/configuration.cc:98
+msgid "loading system configuration file %1"
+msgstr "lastar systemoppsettfila %1"
+
+#: libs/ardour/configuration.cc:101
+msgid "Ardour: cannot read system configuration file \"%1\""
+msgstr "Ardour: greier ikkje lesa systemoppsettfila \"%1\""
+
+#: libs/ardour/configuration.cc:108
+msgid "Ardour: system configuration file \"%1\" not loaded successfully."
+msgstr "Ardour: greidde ikkje lasta systemoppsettfila \"%1\" skikkeleg."
+
+#: libs/ardour/configuration.cc:112
+msgid "your system Ardour configuration file is empty. This probably means that there as an error installing Ardour"
+msgstr "Oppsettsfila for Ardour er tom. Dette tyder truleg at det vart ein feil då Ardour vart installert."
+
+#: libs/ardour/configuration.cc:132
+msgid "loading user configuration file %1"
+msgstr "lastar brukaroppsettfila %1"
+
+#: libs/ardour/configuration.cc:135
+msgid "Ardour: cannot read configuration file \"%1\""
+msgstr "Ardour: greier ikkje lesa oppsettfila \"%1\""
+
+#: libs/ardour/configuration.cc:142
+msgid "Ardour: user configuration file \"%1\" not loaded successfully."
+msgstr "Ardour: greidde ikkje lasta brukaroppsettfila \"%1\" skikkeleg."
+
+#: libs/ardour/configuration.cc:146
+msgid "your Ardour configuration file is empty. This is not normal."
+msgstr "Ardour-oppsettsfila di er tom. Dette er ikkje normalt!"
+
+#: libs/ardour/configuration.cc:164
+msgid "Config file %1 not saved"
+msgstr "Oppsettfila %1 er ikkje lagra"
+
+#: libs/ardour/configuration.cc:253
+msgid "ill-formed MIDI port specification in ardour rcfile (ignored)"
+msgstr "feilforma MIDI-portspesifikasjon oppgjeve i ardour-rc-fila (hoppa over)"
+
+#: libs/ardour/connection.cc:182
+msgid "Node for Connection has no \"name\" property"
+msgstr "Punkt for tilkopling har ingen \"namn\"-eigenskapar"
+
+#: libs/ardour/connection.cc:190
+msgid "Node for Connection has no \"connections\" property"
+msgstr "Punkt for tilkopling har ingen \"tilkopingar\"-eigenskapar"
+
+#: libs/ardour/connection.cc:226
+#: libs/ardour/io.cc:2018
+msgid "IO: badly formed string in XML node for inputs \"%1\""
+msgstr "IU: feilforma streng i XML-opunkt for inngangane \"%1\""
+
+#: libs/ardour/connection.cc:231
+#: libs/ardour/io.cc:2023
+msgid "bad input string in XML node \"%1\""
+msgstr "feil inngangsstreng i XML-punktet \"%1\""
+
+#: libs/ardour/control_protocol_manager.cc:117
+msgid "control protocol name \"%1\" has no descriptor"
+msgstr "kontrollprotokollnamnet \"%1\" har inga skildring"
+
+#: libs/ardour/control_protocol_manager.cc:122
+msgid "control protocol name \"%1\" could not be initialized"
+msgstr "kontrollprotokollnamnet \"%1\" greidde ikkje starta opp"
+
+#: libs/ardour/control_protocol_manager.cc:189
+msgid "Instantiating mandatory control protocol %1"
+msgstr "Lagar obligatorisk kontrollprotokolløkt %1"
+
+#: libs/ardour/control_protocol_manager.cc:201
+msgid "looking for control protocols in %1"
+msgstr "ser etter kontrollprotokollar i %1"
+
+#: libs/ardour/control_protocol_manager.cc:223
+msgid "Control protocol %1 not usable"
+msgstr "Kontrollprotokollen %1 er ikkje brukande"
+
+#: libs/ardour/control_protocol_manager.cc:237
+msgid "Control surface protocol discovered: \"%1\""
+msgstr "Kontrollflateprotokollen \"%1\" oppdaga"
+
+#: libs/ardour/control_protocol_manager.cc:255
+msgid "ControlProtocolManager: cannot load module \"%1\" (%2)"
+msgstr "Kontrollprotokollstyring: kan ikkje lasta modulen \"%1\" (%2)"
+
+#: libs/ardour/control_protocol_manager.cc:263
+msgid "ControlProtocolManager: module \"%1\" has no descriptor function."
+msgstr "Kontrollprotokollstyring: modulen \"%1\" har ingen skildringsfunksjon."
+
+#: libs/ardour/control_protocol_manager.cc:380
+msgid "control protocol XML node has no name property. Ignored."
+msgstr "XML-noden for kontrollprotokollen har ingen namneeigenskap. Såg bort frå."
+
+#: libs/ardour/control_protocol_manager.cc:387
+msgid "control protocol \"%1\" is not known. Ignored"
+msgstr "kontrollprotokollen \"%1\" er ukjent. Såg bort frå"
+
+#: libs/ardour/crossfade.cc:125
+msgid "Crossfade: no \"in\" region in state"
+msgstr "Overtoning: Ingen \"inn\"-bolk her"
+
+#: libs/ardour/crossfade.cc:132
+msgid "Crossfade: no \"in\" region %1 found in playlist %2"
+msgstr "Overtoning: fann ingen \"inn\"-bolk %1 i spelelista %2"
+
+#: libs/ardour/crossfade.cc:142
+msgid "Crossfade: no \"out\" region in state"
+msgstr "Overtoning: ingen \"ut\"-bolk her"
+
+#: libs/ardour/crossfade.cc:149
+msgid "Crossfade: no \"out\" region %1 found in playlist %2"
+msgstr "Overtoning: fann ingen \"ut\"-bolk %1 i spelelista %2"
+
+#: libs/ardour/crossfade.cc:726
+msgid "old-style crossfade information - no position information"
+msgstr "gamaldags overtoningsinformasjon - ingen posisjonsinformasjon"
+
+#: libs/ardour/curve.cc:127
+#: libs/ardour/globals.cc:403
+#: libs/ardour/insert.cc:468
+#: libs/ardour/session.cc:2849
+#: libs/ardour/session.cc:2960
+msgid "programming error: "
+msgstr "programmeringsfeil: "
+
+#: libs/ardour/cycle_timer.cc:36
+msgid "CycleTimer::get_mhz(): can't open /proc/cpuinfo"
+msgstr "CycleTimer::get:mhz()-funksjonen: kan ikkje opna /proc/cpuinfo"
+
+#: libs/ardour/cycle_timer.cc:48
+msgid "CycleTimer::get_mhz(): cannot locate cpu MHz in /proc/cpuinfo"
+msgstr "CycleTimer::get:mhz()-funksjonen: finn ikkje prosessor-MHz i /proc/cpuinfo"
+
+#: libs/ardour/cycle_timer.cc:71
+msgid "cannot locate cpu MHz in /proc/cpuinfo"
+msgstr "finn ikkje prosessor-MHz i /proc/cpuinfo"
+
+#: libs/ardour/diskstream.cc:253
+msgid "Location \"%1\" not valid for track loop (start >= end)"
+msgstr "Staden \"%1\" er ikkje gyldig for å spela spor i lykkje (start >= slutt)"
+
+#: libs/ardour/globals.cc:116
+msgid "Starting OSC"
+msgstr "Startar OSC"
+
+#: libs/ardour/globals.cc:129
+msgid "no MIDI ports specified: no MMC or MTC control possible"
+msgstr "ingen MIDI-portar er spesifiserte. MMC- eller MTC-kontroll er ikkje mogleg."
+
+#: libs/ardour/globals.cc:133
+msgid "Configuring MIDI ports"
+msgstr "Set opp MIDI-portar"
+
+#: libs/ardour/globals.cc:148
+#: libs/ardour/globals.cc:152
+#: libs/ardour/globals.cc:156
+msgid "default"
+msgstr "standard"
+
+#: libs/ardour/globals.cc:186
+msgid "No MMC control (MIDI port \"%1\" not available)"
+msgstr "Ingen MMC-kontroll (MIDI-porten \"%1\" er ikkje tilgjengeleg)"
+
+#: libs/ardour/globals.cc:193
+msgid "No MTC support (MIDI port \"%1\" not available)"
+msgstr "Inga MTC-støtte (MIDI-porten \"%1\" er ikkje tilgjengeleg)"
+
+#: libs/ardour/globals.cc:198
+msgid "No MIDI parameter support (MIDI port \"%1\" not available)"
+msgstr "Ingen MIDI-parameterstøtte (MIDI-porten \"%1\" er ikkje tilgjengeleg)"
+
+#: libs/ardour/globals.cc:279
+msgid "Could not set system open files limit to \"unlimited\""
+msgstr "Greidde ikkje setja systemgrensa for opne filer til \"uavgrensa\""
+
+#: libs/ardour/globals.cc:281
+msgid "Could not set system open files limit to %1"
+msgstr "Greidde ikkje setja grensa for opne systemfiler til %1"
+
+#: libs/ardour/globals.cc:285
+msgid "Removed open file count limit. Excellent!"
+msgstr "Fjerna teljegrensa for opne filer. Steikande bra!"
+
+#: libs/ardour/globals.cc:287
+msgid "Ardour will be limited to %1 open files"
+msgstr "Ardour vil vera avgrensa til å opna %1 filer"
+
+#: libs/ardour/globals.cc:291
+msgid "Could not get system open files limit (%1)"
+msgstr "Greidde ikkje få tak i grensa for opne systemfiler (%1)"
+
+#: libs/ardour/globals.cc:310
+msgid "Loading configuration"
+msgstr "Lastar oppsettet"
+
+#: libs/ardour/import.cc:185
+msgid "Could not find a source for %1 even though we are updating this file!"
+msgstr "Greier ikkje finna kjelda for %1, sjølv om det er denne fila me oppdaterer!"
+
+#: libs/ardour/import.cc:217
+msgid "Unable to create file %1 during import"
+msgstr "Greier ikkje laga fila %1 under import!"
+
+#: libs/ardour/import.cc:236
+msgid ""
+"converting %1\n"
+"(resample from %2KHz to %3KHz)\n"
+"(%4 of %5)"
+msgstr ""
+"omdannar %1\n"
+"(ompunkting frå %1KHz til %3KHz)\n"
+"(%4 av %5)"
+
+#: libs/ardour/import.cc:243
+msgid ""
+"converting %1\n"
+"(%2 of %3)"
+msgstr ""
+"omdannar %1\n"
+"(%2 av %3)"
+
+#: libs/ardour/import.cc:330
+msgid "Import: cannot open input sound file \"%1\""
+msgstr "Import: greier ikkje opna inn-lydfila \"%1\""
+
+#: libs/ardour/insert.cc:655
+#: libs/ardour/insert.cc:1026
+msgid "XML node describing insert is missing the `type' field"
+msgstr "XML-punktet som skildrar tappinga manglar 'type'-feltet"
+
+#: libs/ardour/insert.cc:668
+msgid "unknown plugin type %1 in plugin insert state"
+msgstr "ukjent programtilleggstype %1 i innpluggingstilstanden"
+
+#: libs/ardour/insert.cc:687
+msgid "Plugin has no unique ID field"
+msgstr "Innstikket har ikkje noko eige ID-felt"
+
+#: libs/ardour/insert.cc:697
+msgid ""
+"Found a reference to a plugin (\"%1\") that is unknown.\n"
+"Perhaps it was removed or moved since it was last used."
+msgstr ""
+"Fann ein referanse til det ukjende tilleggsprogrammet \"%1\".\n"
+"Kanskje det har vorte fjerna eller flytt sidan sist det vart brukt."
+
+#: libs/ardour/insert.cc:728
+msgid "XML node describing a plugin insert is missing the `%1' information"
+msgstr "XML-punktet som skildrar tilleggsprogramtappinga manglar '%1'-informasjon"
+
+#: libs/ardour/insert.cc:740
+#: libs/ardour/insert.cc:1054
+msgid "XML node describing insert is missing a Redirect node"
+msgstr "XML-punktet som skildrar tappinga manglar omdirigeringspunkt"
+
+#: libs/ardour/insert.cc:794
+msgid "PluginInsert: Auto: no ladspa port number"
+msgstr "PluginInsert:Auto: ikkje noko ladspa-portnummer"
+
+#: libs/ardour/insert.cc:801
+msgid "PluginInsert: Auto: port id out of range"
+msgstr "PluginInsert: Auto: port-id utanfor rekkjevidd"
+
+#: libs/ardour/insert.cc:832
+msgid "XML node describing a port automation is missing the `%1' information"
+msgstr "XML-punktet som skildrar portautomasjonen manglar '%1'-informasjon"
+
+#: libs/ardour/insert.cc:864
+#: libs/ardour/insert.cc:872
+msgid "insert %1"
+msgstr "set inn %1"
+
+#: libs/ardour/insert.cc:1031
+msgid "non-port insert XML used for port plugin insert"
+msgstr "tappingspunkt-XML som ikkje er ein port er brukt for porttilleggstapping"
+
+#: libs/ardour/io.cc:665
+msgid "IO: cannot disconnect input port %1 from %2"
+msgstr "IU: kan ikkje kopla inngangsporten %1 frå %2"
+
+#: libs/ardour/io.cc:733
+msgid "IO: cannot disconnect output port %1 from %2"
+msgstr "IU: kan ikkje kopla utgangsporten %1 frå %2"
+
+#: libs/ardour/io.cc:887
+#: libs/ardour/io.cc:1216
+#: libs/ardour/io.cc:1335
+msgid "IO: cannot register output port %1"
+msgstr "IU: greier ikkje registrera utgangsporten %1"
+
+#: libs/ardour/io.cc:994
+#: libs/ardour/io.cc:1093
+#: libs/ardour/io.cc:1191
+msgid "IO: cannot register input port %1"
+msgstr "IU: greier ikkje registrera inngangsporten %1"
+
+#: libs/ardour/io.cc:1585
+msgid "incorrect XML node \"%1\" passed to IO object"
+msgstr "feil XML-punkt, \"%1\", sendt til IU-objektet"
+
+#: libs/ardour/io.cc:1709
+msgid "%1: cannot open automation event file \"%2\""
+msgstr "%1: greier ikkje opna automasjonshendingsfila \"%2\""
+
+#: libs/ardour/io.cc:1724
+msgid "badly formed version number in automation event file \"%1\""
+msgstr "feilforma versjonsnummer i automasjonshendingsfila \"%1\""
+
+#: libs/ardour/io.cc:1728
+msgid "no version information in automation event file \"%1\""
+msgstr "ingen versjonsinformasjon i automasjonshendingsfila \"%1\""
+
+#: libs/ardour/io.cc:1736
+msgid "badly formatted automation event record at line %1 of %2 (ignored)"
+msgstr "feilformatert automasjonshendingsopptak på linje %1 av %2 (hoppa over)"
+
+#: libs/ardour/io.cc:1756
+msgid "dubious automation event found (and ignored)"
+msgstr "fann tvilsam automasjonshending (og hoppa over henne)"
+
+#: libs/ardour/io.cc:1769
+msgid "IO::connecting_became_legal() called without a pending state node"
+msgstr "IO::connecting_became_legal()-funksjonen vart oppkalla utan ventande tilstandsnode"
+
+#: libs/ardour/io.cc:1791
+msgid "IO::ports_became_legal() called without a pending state node"
+msgstr "IO::ports_became_legal()-funksjonen vart oppkalla utan ventande tilstandsnode"
+
+#: libs/ardour/io.cc:1821
+msgid "Unknown connection \"%1\" listed for %2 of %3"
+msgstr "Ukjend tilkopling \"%1\" gjeve for %2 av %3"
+
+#: libs/ardour/io.cc:1890
+msgid "No %1 connections available as a replacement"
+msgstr "Ingen %1-tilkoplingar klare som erstatting"
+
+#: libs/ardour/io.cc:1909
+#: libs/ardour/io.cc:1957
+#: libs/ardour/io.cc:2734
+msgid "in"
+msgstr "inn"
+
+#: libs/ardour/io.cc:1909
+#: libs/ardour/io.cc:1957
+msgid "input"
+msgstr "inngang"
+
+#: libs/ardour/io.cc:1923
+#: libs/ardour/io.cc:1973
+#: libs/ardour/io.cc:2741
+msgid "out"
+msgstr "ut"
+
+#: libs/ardour/io.cc:1923
+#: libs/ardour/io.cc:1973
+msgid "output"
+msgstr "utgang"
+
+#: libs/ardour/io.cc:1938
+msgid "%1: cannot create I/O ports"
+msgstr "%1: greier ikkje laga I/U-portar"
+
+#: libs/ardour/io.cc:1983
+msgid "improper output channel list in XML node (%1)"
+msgstr "feil utgangskanalliste i XML-punktet %1"
+
+#: libs/ardour/io.cc:2068
+msgid "IO: badly formed string in XML node for outputs \"%1\""
+msgstr "IU: feilforma streng i XML-punktet for utgangane \"%1\""
+
+#: libs/ardour/io.cc:2073
+msgid "IO: bad output string in XML node \"%1\""
+msgstr "IU: feil utgangsstreng i XML-punktet \"%1\""
+
+#: libs/ardour/io.cc:2157
+msgid "you cannot use colons to name objects with I/O connections"
+msgstr "du kan ikkje bruka kolon i namn på objekt med I/U-tilkoplingar"
+
+#: libs/ardour/io.cc:2796
+#: libs/ardour/io.cc:2829
+#, c-format
+msgid "%s %u"
+msgstr "%s %u"
+
+#: libs/ardour/ladspa_plugin.cc:86
+msgid "LADSPA: module has no descriptor function."
+msgstr "LADSPA: modulen har ingen skildringsfunksjon"
+
+#: libs/ardour/ladspa_plugin.cc:91
+msgid "LADSPA: plugin has gone away since discovery!"
+msgstr "LADSPA: tilleggsprogrammet har vorte borte sidan det vart oppdaga!"
+
+#: libs/ardour/ladspa_plugin.cc:98
+msgid "LADSPA: \"%1\" cannot be used, since it cannot do inplace processing"
+msgstr "LADSPA: kan ikkje bruka \"%1\", sidan han ikkje kan prosessera på staden"
+
+#: libs/ardour/ladspa_plugin.cc:316
+msgid "illegal parameter number used with plugin \"%1\". This mayindicate a change in the plugin design, and presets may beinvalid"
+msgstr "ein ulovleg parameter vart brukt med tilleggsprogrammet \"%1\". Dette kan tyda på feil i korleis tilleggsprogrammet er utforma, og at eventuelle ferdigprogram kan vera ugyldige."
+
+#: libs/ardour/ladspa_plugin.cc:399
+msgid "Bad node sent to LadspaPlugin::set_state"
+msgstr "Feil punkt sendt til LadspaPlugin::set_state"
+
+#: libs/ardour/ladspa_plugin.cc:412
+msgid "LADSPA: no ladspa port number"
+msgstr "LADSPA: ikkje noko Ladspa-portnummer"
+
+#: libs/ardour/ladspa_plugin.cc:419
+msgid "LADSPA: no ladspa port data"
+msgstr "LADSPA: ingen portdata"
+
+#: libs/ardour/ladspa_plugin.cc:658
+msgid "LADSPA: cannot load module from \"%1\""
+msgstr "LADSPA: greier ikkje lasta modul frå \"%1\""
+
+#: libs/ardour/location.cc:224
+msgid "You cannot put a CD marker at this position"
+msgstr "Du kan ikkje leggja til ein CD-markør her"
+
+#: libs/ardour/location.cc:353
+msgid "incorrect XML node passed to Location::set_state"
+msgstr "feil XML-punkt sendt til Location::set_state"
+
+#: libs/ardour/location.cc:358
+msgid "XML node for Location has no ID information"
+msgstr "XML-punktet for denne staden har ingen ID-informasjon"
+
+#: libs/ardour/location.cc:364
+msgid "XML node for Location has no name information"
+msgstr "XML-punktet for denne staden har ingen namneinformasjon"
+
+#: libs/ardour/location.cc:371
+msgid "XML node for Location has no start information"
+msgstr "XML-punktet for denne staden har ingen startinformasjon"
+
+#: libs/ardour/location.cc:382
+msgid "XML node for Location has no end information"
+msgstr "XML-punktet for denne staden har ingen sluttinformasjon"
+
+#: libs/ardour/location.cc:389
+msgid "XML node for Location has no flags information"
+msgstr "XML-punktet for denne staden har ingen flagginformasjon"
+
+#: libs/ardour/location.cc:506
+msgid "Locations: attempt to use unknown location as selected location"
+msgstr "Stader: forsøk på å bruka ukjend stad som vald stad"
+
+#: libs/ardour/location.cc:674
+msgid "incorrect XML mode passed to Locations::set_state"
+msgstr "feil XML-modus send til Locations::set_state"
+
+#: libs/ardour/location.cc:695
+msgid "could not load location from session file - ignored"
+msgstr "greidde ikkje lasta stad frå øktfila - hoppa over"
+
+#: libs/ardour/mtc_slave.cc:127
+msgid "Unknown rate/drop value %1 in incoming MTC stream, session values used instead"
+msgstr "Ukjent rate/sleppverdi %1 i innkomande MTC-straum, bruker øktverdiar i staden"
+
+#: libs/ardour/mtc_slave.cc:238
+msgid "MTC Slave: atomic read of current time failed, sleeping!"
+msgstr "MTC-slave: greidde ikkje lesa gyldig tid. Søv."
+
+#: libs/ardour/named_selection.cc:88
+msgid "Chunk %1 uses an unknown playlist \"%2\""
+msgstr "Beten %1 bruker ei ukjend speleliste, \"%2\""
+
+#: libs/ardour/named_selection.cc:91
+msgid "Chunk %1 contains misformed playlist information"
+msgstr "Beten %1 inneheld feilforma spelelisteinformasjon"
+
+#: libs/ardour/panner.cc:256
+msgid "badly formatted pan automation event record at line %1 of %2 (ignored) [%3]"
+msgstr "feilformatert handlingsopptak av panoreringsautomasjon på linja %1 av %2 (hoppa over) [%3]"
+
+#: libs/ardour/panner.cc:752
+msgid "badly-formed positional data for Multi2dPanner - ignored"
+msgstr "feilforma posisjonsdata for Multi2dPanner - hoppa over"
+
+#: libs/ardour/panner.cc:1225
+msgid "Unknown panner plugin \"%1\" found in pan state - ignored"
+msgstr "Ukjent panoreringstilleggsprogram, \"%1\", funne i panoreringstilstand. Hoppa over."
+
+#: libs/ardour/panner.cc:1231
+msgid "panner plugin node has no type information!"
+msgstr "tilleggsprogrampunktet for panoreringa har ingen typeinformasjon!"
+
+#: libs/ardour/panner.cc:1437
+msgid "cannot open pan automation file %1 (%2)"
+msgstr "greier ikkje opna panoreringsautomasjonsfil %1 (%2)"
+
+#: libs/ardour/panner.cc:1450
+msgid "badly formed version number in pan automation event file \"%1\""
+msgstr "feilforma versjonsnummer i handlingsfila for panoreringsautomasjon \"%1\""
+
+#: libs/ardour/panner.cc:1454
+msgid "no version information in pan automation event file \"%1\" (first line = %2)"
+msgstr "ingen versjonsinformasjon i handlingsfila for panoreringsautomasjon \"%1\" (fyrste linja= %2)"
+
+#: libs/ardour/panner.cc:1469
+msgid "too many panner states found in pan automation file %1"
+msgstr "for mange panoreringstilstandar i automasjonsfila %1"
+
+#: libs/ardour/playlist.cc:254
+msgid "playlist const copy constructor called"
+msgstr "konstant kopikonstruktør for speleliste vart oppkalla"
+
+#: libs/ardour/playlist.cc:260
+msgid "playlist non-const copy constructor called"
+msgstr "ikkje-konstant kopikonstruktør for speleliste vart oppkalla"
+
+#: libs/ardour/playlist.cc:1265
+msgid "%1: bounds changed received for region (%2)not in playlist"
+msgstr "%1: mottok grenseendring for bolken (%2) - ikkje i spelelista"
+
+#: libs/ardour/playlist.cc:1815
+msgid "region state node has no ID, ignored"
+msgstr "områdestatusnoden har ingen ID, ser bort frå"
+
+#: libs/ardour/playlist.cc:1826
+msgid "Playlist: cannot reset region state from XML"
+msgstr "Speleliste: greier ikkje stilla bolkstatusen tilbake frå XML"
+
+#: libs/ardour/playlist.cc:1831
+msgid "Playlist: cannot create region from XML"
+msgstr "Speleliste: greier ikkje laga bolk frå XML"
+
+#: libs/ardour/playlist.cc:2101
+msgid "change region layer"
+msgstr "endre bolklag"
+
+#: libs/ardour/plugin.cc:283
+msgid "Could not locate HOME.  Preset not saved."
+msgstr "Greidde ikkje finna heimemappa. Har ikkje lagra ferdigoppsett."
+
+#: libs/ardour/plugin.cc:293
+#: libs/ardour/plugin.cc:299
+msgid "Could not create %1.  Preset not saved. (%2)"
+msgstr "Greidde ikkje laga %1. Har ikkje lagra ferdigoppsett. (%2)"
+
+#: libs/ardour/plugin.cc:304
+msgid "Error saving presets file %1."
+msgstr "Feil med å lagra ferdigoppsettfila %1."
+
+#: libs/ardour/plugin_manager.cc:79
+msgid "Cannot become GUI app"
+msgstr "Greier ikkje bli grafisk program"
+
+#: libs/ardour/plugin_manager.cc:129
+msgid "Discovering Plugins"
+msgstr "Finn innstikk"
+
+#: libs/ardour/plugin_manager.cc:274
+msgid "Could not parse rdf file: %1"
+msgstr "Greidde ikkje tolka rdf-fila: %1"
+
+#: libs/ardour/plugin_manager.cc:314
+msgid "LADSPA: cannot load module \"%1\" (%2)"
+msgstr "LADSPA: greier ikkje lasta modulen \"%1\" (%2)"
+
+#: libs/ardour/plugin_manager.cc:321
+msgid "LADSPA: module \"%1\" has no descriptor function."
+msgstr "LADSPA: modulen \"%1\" har ingen skildringsfunksjon."
+
+#: libs/ardour/plugin_manager.cc:522
+msgid "VST plugin %1 does not support processReplacing, and so cannot be used in ardour at this time"
+msgstr "VST-tilleggsprogrammet %1 støttar ikkje prosessbyte, og kan ikkje brukast i Ardour nett no."
+
+#: libs/ardour/plugin_manager.cc:660
+msgid "unknown plugin type \"%1\" - ignored"
+msgstr "\"%1\" er ein ukjend innstikktype - hoppa over"
+
+#: libs/ardour/plugin_manager.cc:672
+msgid "unknown plugin status type \"%1\" - ignored"
+msgstr "\"%1\" er ein ukjend innstikkstatustype, hoppa over"
+
+#: libs/ardour/recent_sessions.cc:48
+msgid "cannot open recent session file %1 (%2)"
+msgstr "greier ikkje opna den nyleg brukte øktfila %1 (%2)"
+
+#: libs/ardour/redirect.cc:80
+msgid "programming error: unknown Redirect type in Redirect::Clone!\n"
+msgstr "programmeringsfeil: ukjend omdirigeringstype i Redirect::Clone-funksjonen!\n"
+
+#: libs/ardour/redirect.cc:130
+msgid "%2: badly formatted node name in XML automation state, ignored"
+msgstr "%2: feilforma nodenamn i XML-automasjonsstatusen, såg bort frå"
+
+#: libs/ardour/redirect.cc:143
+msgid "%1: cannot load automation data from XML"
+msgstr "%1: greier ikkje lasta automasjonsdata frå XML"
+
+#: libs/ardour/redirect.cc:224
+msgid "incorrect XML node \"%1\" passed to Redirect object"
+msgstr "feil XML-punkt, \"%1\", vart sendt til omdirigeringsobjektet"
+
+#: libs/ardour/redirect.cc:272
+msgid "XML node describing an IO is missing an IO node"
+msgstr "XML-punktet som skildrar IU manglar eit IU-punkt"
+
+#: libs/ardour/redirect.cc:277
+msgid "XML node describing a redirect is missing the `active' field"
+msgstr "XML-punktet som skildrar ei omdirigering manglar 'aktiv'-feltet"
+
+#: libs/ardour/redirect.cc:290
+msgid "XML node describing a redirect is missing the `placement' field"
+msgstr "XML-punktet som skildrar ei omdirigering manglar 'plassering'-feltet"
+
+#: libs/ardour/redirect.cc:320
+msgid "%1: Automation node has no path property"
+msgstr "%1: Automasjonspunktet har ingen stigeigenskapar"
+
+#: libs/ardour/redirect.cc:355
+msgid "%1: cannot open %2 to load automation data (%3)"
+msgstr "%1: greier ikkje opna %2 for å lasta automasjonsdata (%3)"
+
+#: libs/ardour/redirect.cc:380
+msgid "%1: cannot load automation data from %2"
+msgstr "%1: greier ikkje lasta automasjonsdata frå %2"
+
+#: libs/ardour/region.cc:1034
+msgid "XMLNode describing a Region is incomplete (no name)"
+msgstr "XML-punktet som skildrar ein bolk er ufullstendig (utan namn)"
+
+#: libs/ardour/region.cc:1191
+msgid "Session: XMLNode describing a Region is incomplete (no id)"
+msgstr "Økt: XML-punktet som skildrar ein bolk er ufullstendig (ingen id)"
+
+#: libs/ardour/region_factory.cc:52
+#: libs/ardour/region_factory.cc:69
+#: libs/ardour/region_factory.cc:104
+msgid "programming error: RegionFactory::create() called with unknown Region type"
+msgstr "programmeringsfeil: RegionFactory::create()-funksjonen oppkalle med ukjent bolktype"
+
+#: libs/ardour/resampled_source.cc:61
+msgid "Import: src_new() failed : %1"
+msgstr "Import: src_new()-funkjsonen lukkast ikkje: %1"
+
+#: libs/ardour/resampled_source.cc:113
+msgid "Import: %1"
+msgstr "Import: %1"
+
+#: libs/ardour/route.cc:84
+#: libs/ardour/session.cc:1626
+#: libs/ardour/session.cc:1632
+#: libs/ardour/session.cc:1938
+#: libs/ardour/session.cc:3582
+msgid "signal"
+msgstr "signal"
+
+#: libs/ardour/route.cc:1618
+msgid "Send construction failed"
+msgstr "Send-konstruksjon mislukka"
+
+#: libs/ardour/route.cc:1646
+msgid "unknown Insert type \"%1\"; ignored"
+msgstr "\"%1\" er ein ukjend tappingstype, hoppa over"
+
+#: libs/ardour/route.cc:1654
+msgid "Insert XML node has no type property"
+msgstr "Tappings-XML-punkt har ingen typeeigenskapar"
+
+#: libs/ardour/route.cc:1659
+msgid "insert could not be created. Ignored."
+msgstr "greidde ikkje laga tapping. Hoppa over."
+
+#: libs/ardour/route.cc:1681
+msgid "Bad node sent to Route::set_state() [%1]"
+msgstr "Feil punkt sendt til Route::set_state()-funksjonen [%1]"
+
+#: libs/ardour/route.cc:1747
+msgid "Route %1: unknown edit group \"%2 in saved state (ignored)"
+msgstr "Ruting %1: ukjend redigert gruppe \"%2 i lagra tilstand (hoppa over)"
+
+#: libs/ardour/route.cc:1763
+#: libs/ardour/route.cc:1767
+msgid "badly formed order key string in state file! [%1] ... ignored."
+msgstr "feilforma tingingsnykjelstreng i tilstandsfil! [%1] ... hoppa over."
+
+#: libs/ardour/route.cc:1833
+#: libs/ardour/route.cc:2063
+#: libs/ardour/route.cc:2705
+msgid "[control]"
+msgstr "[kontroll]"
+
+#: libs/ardour/route.cc:1885
+msgid "Route %1: unknown mix group \"%2 in saved state (ignored)"
+msgstr "Ruting %1: ukjend miksgruppe \"%2 i lagra tilstand (hoppa over)"
+
+#: libs/ardour/route.cc:2081
+msgid "could not connect %1 to %2"
+msgstr "greidde ikkje kopla %1 til %2"
+
+#: libs/ardour/send.cc:35
+#: libs/ardour/send.cc:58
+msgid "send %1"
+msgstr "send %1"
+
+#: libs/ardour/send.cc:145
+msgid "XML node describing a send is missing a Redirect node"
+msgstr "XML-punktet som skildrar ein send manglar eit omdirigeringspunkt"
+
+#: libs/ardour/session_butler.cc:80
+#: libs/ardour/session_midi.cc:1082
+msgid "Cannot create transport request signal pipe (%1)"
+msgstr "Kan ikkje laga transportspørjingssignalrøyr (%1)"
+
+#: libs/ardour/session_butler.cc:85
+#: libs/ardour/session_butler.cc:90
+msgid "UI: cannot set O_NONBLOCK on butler request pipe (%1)"
+msgstr "Grensesnitt: greier ikkje setja opp O_NONBLOCK på butler-spørjingsrøyret (%1)"
+
+#: libs/ardour/session_butler.cc:95
+msgid "Session: could not create butler thread"
+msgstr "Økt: greier ikkje laga butler-tråd"
+
+#: libs/ardour/session_butler.cc:185
+msgid "poll on butler request pipe failed (%1)"
+msgstr "undersøkjing på butler-spørjingsrøyret mislukka (%1)"
+
+#: libs/ardour/session_butler.cc:192
+msgid "Error on butler thread request pipe: fd=%1 err=%2"
+msgstr "Feil på butler-spørsjingsrøyret: fd=%1 feil=%2"
+
+#: libs/ardour/session_butler.cc:233
+msgid "Error reading from butler request pipe"
+msgstr "Feil: greidde ikkje lesa frå butlerspørjingsrøyr"
+
+#: libs/ardour/session_butler.cc:278
+msgid "Butler read ahead failure on dstream %1"
+msgstr "Butler-førlesingsfeil på dstream %1"
+
+#: libs/ardour/session_butler.cc:323
+msgid "Butler write-behind failure on dstream %1"
+msgstr "Butler-etterskrivingsfeil på dstream %1"
+
+#: libs/ardour/session.cc:132
+msgid "Could not resolve path: %1 (%2)"
+msgstr "Greidde ikkje finna stigen: %1: (%2)"
+
+#: libs/ardour/session.cc:144
+msgid "cannot check session path %1 (%2)"
+msgstr "greier ikkje sjekka øktstigen %1 (%2)"
+
+#: libs/ardour/session.cc:174
+msgid "cannot check statefile %1 (%2)"
+msgstr "greier ikkje sjekka tilstandsfila %1 (%2)"
+
+#: libs/ardour/session.cc:210
+msgid "%1 is not an Ardour snapshot file"
+msgstr "%1 er ikkje ei Ardour-snøggbiletefil"
+
+#: libs/ardour/session.cc:227
+msgid "cannot determine current working directory (%1)"
+msgstr "greier ikkje avgjera kva som er arbeidsmappa no (%1)"
+
+#: libs/ardour/session.cc:244
+msgid "unknown file type for session %1"
+msgstr "ukjend filtype for økta %1"
+
+#: libs/ardour/session.cc:405
+msgid "monitor"
+msgstr "lytting"
+
+#: libs/ardour/session.cc:412
+#: libs/ardour/session.cc:1967
+msgid "master"
+msgstr "master"
+
+#: libs/ardour/session.cc:677
+msgid "Set block size and sample rate"
+msgstr "Set blokkstorleik og punktrate"
+
+#: libs/ardour/session.cc:682
+msgid "Using configuration"
+msgstr "Bruker oppsett"
+
+#: libs/ardour/session.cc:715
+msgid "could not setup Click I/O"
+msgstr "greidde ikkje setja opp klikk-I/U"
+
+#: libs/ardour/session.cc:740
+msgid "cannot setup Click I/O"
+msgstr "greier ikkje setja opp klikk-I/U"
+
+#: libs/ardour/session.cc:743
+msgid "Compute I/O Latencies"
+msgstr "Rekn ut I/U-seinkingar"
+
+#: libs/ardour/session.cc:755
+msgid "Set up standard connections"
+msgstr "Set opp standartilkoplingar"
+
+#: libs/ardour/session.cc:761
+#, c-format
+msgid "out %<PRIu32>"
+msgstr "ut %<PRIu32>"
+
+#: libs/ardour/session.cc:773
+#, c-format
+msgid "in %<PRIu32>"
+msgstr "inn %<PRIu32>"
+
+#: libs/ardour/session.cc:787
+#, c-format
+msgid "out %<PRIu32>+%<PRIu32>"
+msgstr "ut %<PRIu32>+%<PRIu32>"
+
+#: libs/ardour/session.cc:801
+#, c-format
+msgid "in %<PRIu32>+%<PRIu32>"
+msgstr "inn %<PRIu32>+%<PRIu32>"
+
+#: libs/ardour/session.cc:834
+msgid "cannot setup master inputs"
+msgstr "greier ikkje setja opp masterinngangar"
+
+#: libs/ardour/session.cc:842
+msgid "cannot setup master outputs"
+msgstr "greier ikkje setja opp masterutgangar"
+
+#: libs/ardour/session.cc:853
+msgid "Master Out"
+msgstr "Master ut"
+
+#: libs/ardour/session.cc:862
+msgid "Setup signal flow and plugins"
+msgstr "Set opp signalflyt og innstikk"
+
+#: libs/ardour/session.cc:868
+msgid "Catch up with send/insert state"
+msgstr "Ta att send/omvegstatus"
+
+#: libs/ardour/session.cc:899
+msgid "Connect to engine"
+msgstr "Kople til maskin"
+
+#: libs/ardour/session.cc:906
+msgid "OSC startup"
+msgstr "OSC-oppstart"
+
+#: libs/ardour/session.cc:935
+msgid "cannot create Auditioner: no auditioning of regions possible"
+msgstr "greier ikkje laga Lytting: det er ikkje råd å lytta på nokon bolkar."
+
+#: libs/ardour/session.cc:949
+msgid "cannot setup control inputs"
+msgstr "greier ikkje setja opp kontrollinngangar"
+
+#: libs/ardour/session.cc:957
+msgid "cannot set up master outputs"
+msgstr "greier ikkje setja opp masterutgangar"
+
+#: libs/ardour/session.cc:1190
+msgid "Session: you can't use that location for auto punch (start <= end)"
+msgstr "Økt: du kan ikkje bruka denne staden for autoinnslag (start<=slutt)"
+
+#: libs/ardour/session.cc:1231
+msgid "Session: you can't use a mark for auto loop"
+msgstr "Økt: du kan ikkje bruka eit merke for auto-lykkjespel"
+
+#: libs/ardour/session.cc:1644
+msgid "feedback loop setup between %1 and %2"
+msgstr "rundgang-lykkjeoppsett mellom %1 og %2"
+
+#: libs/ardour/session.cc:1832
+#: libs/ardour/session.cc:1998
+msgid "cannot configure %1 in/%2 out configuration for new audio track"
+msgstr "greier ikkje stilla inn %1 inn/%2 ut-innstillingane for det nye lydsporet"
+
+#: libs/ardour/session.cc:1884
+msgid "Session: could not create new audio track."
+msgstr "Økt: greidde ikkje laga nytt lydspor."
+
+#: libs/ardour/session.cc:1941
+msgid "editor"
+msgstr "redigering"
+
+#: libs/ardour/session.cc:2042
+msgid "Session: could not create new audio route."
+msgstr "Økt: greidde ikkje laga ny lydrute."
+
+#: libs/ardour/session.cc:2101
+msgid "Session: UINT_MAX routes? impossible!"
+msgstr "Økt: UINT_MAX-ruter? Går ikkje an!"
+
+#: libs/ardour/session.cc:2113
+msgid "Session: cannot create track/bus from template description"
+msgstr "Økt: greier ikkje laga spor/buss frå malskildringa"
+
+#: libs/ardour/session.cc:2133
+msgid "Session: could not create new route from template"
+msgstr "Økt: greidde ikkje laga ny lydrute frå malen"
+
+#: libs/ardour/session.cc:2321
+msgid "session"
+msgstr "økt"
+
+#: libs/ardour/session.cc:2738
+msgid "cannot create new name for region \"%1\""
+msgstr "greier ikkje laga nytt namn for bolken \"%1\""
+
+#: libs/ardour/session.cc:2816
+#: libs/ardour/session.cc:2876
+msgid "Session::add_region() ignored a null region. Warning: you might have lost a region."
+msgstr "Økt::add_region() såg bort frå ein null-bolk. Pass på: det kan henda du har mista ein bolk."
+
+#: libs/ardour/session.cc:3372
+msgid "There are already %1 recordings for %2, which I consider too many."
+msgstr "Det er alt %1 opptak for %2, og eg synest det er for mange."
+
+#: libs/ardour/session.cc:3603
+msgid "Cannot compile tape track regexp for use (%1)"
+msgstr "Greier ikkje setja saman bandspor-reguttrykk til bruk (%1)"
+
+#: libs/ardour/session.cc:3756
+msgid "programming error: unknown type of Insert created!"
+msgstr "programmeringsfeil: det er laga ein ukjend tappingstype!"
+
+#: libs/ardour/session.cc:3762
+msgid "programming error: unknown type of Redirect created!"
+msgstr "programmeringsfeil: det er laga ein ukjend omdirigeringstype!"
+
+#: libs/ardour/session.cc:3801
+msgid "programming error: unknown type of Redirect deleted!"
+msgstr "programmeringsfeil: det er sletta ein ukjend omdirigeringstype!"
+
+#: libs/ardour/session.cc:3921
+#: libs/ardour/session.cc:3935
+#: libs/ardour/session.cc:4342
+msgid "Memory allocation error: posix_memalign (%1 * %2) failed (%3)"
+msgstr "Minnetildelingsfeil: posix_memalign (%1 * %2) mislukka (%3)"
+
+#: libs/ardour/session.cc:4005
+msgid "send ID %1 appears to be in use already"
+msgstr "send-IDen %1 ser ut til å vera i bruk frå før"
+
+#: libs/ardour/session.cc:4017
+msgid "insert ID %1 appears to be in use already"
+msgstr "send-IDen %2 ser ut til å vera i bruk frå før"
+
+#: libs/ardour/session.cc:4170
+msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
+msgstr "Kan ikkje skriva eit område der slutten <= starten (td. %1 <= %2)"
+
+#: libs/ardour/session.cc:4208
+msgid "too many bounced versions of playlist \"%1\""
+msgstr "for mange samanmiksa versjonar av spelelista \"%1\""
+
+#: libs/ardour/session.cc:4217
+msgid "cannot create new audio file \"%1\" for %2"
+msgstr "greier ikkje laga ny lydfil \"%1\" for %2"
+
+#: libs/ardour/session.cc:4327
+msgid "Programming error: get_silent_buffers() called for %1 buffers but only %2 exist"
+msgstr "Programmeringsfeil: get_silent_buffers() oppropt for %1 bufrar, men det finst berre %2"
+
+#: libs/ardour/session_click.cc:160
+msgid "cannot open click soundfile %1 (%2)"
+msgstr "greier ikkje opna klikk-lydfila %1 (%2)"
+
+#: libs/ardour/session_click.cc:169
+msgid "cannot read data from click soundfile"
+msgstr "greier ikkje lesa data frå klikklydfila"
+
+#: libs/ardour/session_click.cc:196
+msgid "cannot open click emphasis soundfile %1 (%2)"
+msgstr "greier ikkje opna uthevings-klikklydfila %1 (%2)"
+
+#: libs/ardour/session_click.cc:204
+msgid "cannot read data from click emphasis soundfile"
+msgstr "greier ikkje lesa data frå uthevings-klikklydfila"
+
+#: libs/ardour/session_command.cc:75
+msgid "Tried to reconstitute a MementoCommand with no contents, failing. id="
+msgstr "Prøvde å byggja opp att ein memento-kommando utan innhald, og mislukkast. id="
+
+#: libs/ardour/session_command.cc:111
+msgid "could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"
+msgstr "greier ikkje byggja oppatt Memento-kommando frå XML-punkt. Objekttype = %1 id = %2"
+
+#: libs/ardour/session_command.cc:123
+msgid "GlobalRouteStateCommand has no \"type\" node, ignoring"
+msgstr "GlobalRouteStateCommand har ingen \"type\"-node, ser bort frå"
+
+#: libs/ardour/session_command.cc:138
+msgid "unknown type of GlobalRouteStateCommand (%1), ignored"
+msgstr "ukjent slag GlobalRouteStateCommand (%1), ser bort frå"
+
+#: libs/ardour/session_command.cc:186
+msgid "global route state command has no \"%1\" node, ignoring entire command"
+msgstr "allmenn rutestatuskommando har ingen \"%1\"-node, ser bort frå heile kommandoen"
+
+#: libs/ardour/session_command.cc:202
+#: libs/ardour/session_command.cc:515
+msgid "cannot find track/bus \"%1\" while rebuilding a global route state command, ignored"
+msgstr "greier ikkje finna spor/buss \"%1\" ved oppattbygging ein allmenn rutestatuskommando, såg bort frå"
+
+#: libs/ardour/session_command.cc:499
+msgid "global route meter state command has no \"%1\" node, ignoring entire command"
+msgstr "allmenn kommando for rutemælestatus har ingen \"%1\"-node, ser bort frå heile kommandoen"
+
+#: libs/ardour/session_events.cc:140
+msgid "Session: cannot have two events of type %1 at the same frame (%2)."
+msgstr "Økt: du kan ikkje ha to handlingar av typen %1 på same ramma (%2)."
+
+#: libs/ardour/session_events.cc:413
+msgid "Programming error: illegal event type in process_event (%1)"
+msgstr "Programmeringsfeil: ulovleg handlingstype i process-event (%1)"
+
+#: libs/ardour/session_export.cc:62
+msgid "Export: no output file specified"
+msgstr "Eksport: du har ikkje skrive inn ut-fil"
+
+#: libs/ardour/session_export.cc:164
+#: libs/ardour/session_export.cc:169
+msgid "illegal frame range in export specification"
+msgstr "ulovleg "
+
+#: libs/ardour/session_export.cc:174
+msgid "Bad data width size.  Report me!"
+msgstr "Feil storleik på databreidd. Sei frå om dette til utviklarane!"
+
+#: libs/ardour/session_export.cc:204
+msgid "Export: cannot open output file \"%1\" (%2)"
+msgstr "Eksport: greier ikkje opna utfila \"%1\" (%2)"
+
+#: libs/ardour/session_export.cc:214
+msgid "cannot initialize sample rate conversion: %1"
+msgstr "greier ikkje byrja punktrateomdanning: %1"
+
+#: libs/ardour/session_export.cc:322
+msgid "an error occured during sample rate conversion: %1"
+msgstr "ompunktinga var mislukka: %1"
+
+#: libs/ardour/session_export.cc:333
+msgid "warning, leftover frames overflowed, glitches might occur in output"
+msgstr "åtvaring: nokre rammer vart til overs i, det kan vera hakk i utfila"
+
+#: libs/ardour/session_export.cc:424
+msgid "Export: could not write data to output file (%1)"
+msgstr "Eksport: greidde ikkje skriva data til utfil (%1)"
+
+#: libs/ardour/session_export.cc:519
+msgid "%1: cannot seek to %2 for export"
+msgstr "%1: greier ikkje finna %2 for eksportering"
+
+#: libs/ardour/session_midi.cc:94
+msgid "Ardour is slaved to MTC - port cannot be reset"
+msgstr "Ardour er slave til ein MTC-port og kan ikkje nullstillast"
+
+#: libs/ardour/session_midi.cc:109
+msgid "unknown port %1 requested for MTC"
+msgstr "førespurnad til ukjend MTC-port %1"
+
+#: libs/ardour/session_midi.cc:446
+msgid "Error reading from MIDI port %1"
+msgstr "Greidde ikkje lesa frå MIDI-port %1"
+
+#: libs/ardour/session_midi.cc:818
+msgid "Session: could not send full MIDI time code"
+msgstr "Økt: greidde ikke senda full MIDI-tidskode"
+
+#: libs/ardour/session_midi.cc:871
+msgid "Session: cannot send quarter-frame MTC message (%1)"
+msgstr "Økt: greidde ikkje senda kvartramme-MTC-melding (%1)"
+
+#: libs/ardour/session_midi.cc:979
+msgid "MMC: cannot send command %1%2%3"
+msgstr "MMC: greier ikkje senda kommandoen %1%2%3"
+
+#: libs/ardour/session_midi.cc:1087
+msgid "UI: cannot set O_NONBLOCK on signal read pipe (%1)"
+msgstr "Grensesnitt: O_NONBLOCK fastsett for signallesingsrøyr (%1)"
+
+#: libs/ardour/session_midi.cc:1092
+msgid "UI: cannot set O_NONBLOCK on signal write pipe (%1)"
+msgstr "Grensesnitt: greier ikkje fastsetja O_NONBLOCK for signalskrivingsrøyr (%1)"
+
+#: libs/ardour/session_midi.cc:1097
+msgid "Session: could not create transport thread"
+msgstr "Økt: greidde ikkje laga transporttråd"
+
+#: libs/ardour/session_midi.cc:1128
+msgid "cannot send signal to midi thread! (%1)"
+msgstr "greier ikkje senda signal til MIDI-tråden! (%1)"
+
+#: libs/ardour/session_midi.cc:1226
+msgid "MIDI thread poll failed (%1)"
+msgstr "Spørjing på MIDI-tråd mislukka (%1)"
+
+#: libs/ardour/session_midi.cc:1238
+msgid "Error on transport thread request pipe"
+msgstr "Feil på transporttrådspørjingsrøyr"
+
+#: libs/ardour/session_midi.cc:1265
+msgid "Error reading from transport request pipe"
+msgstr "Greidde ikkje lesa frå transportspørjingsrøyr"
+
+#: libs/ardour/session_process.cc:108
+msgid "Session: error in no roll for %1"
+msgstr "Økt: feil på ingen rull for %1"
+
+#: libs/ardour/session_state.cc:109
+msgid "Could not use path %1 (%s)"
+msgstr "Greidde ikkje bruka stigen %1 (%s)"
+
+#: libs/ardour/session_state.cc:154
+#: libs/ardour/session_state.cc:1054
+msgid "end"
+msgstr "slutten"
+
+#: libs/ardour/session_state.cc:155
+#: libs/ardour/session_state.cc:1053
+msgid "start"
+msgstr "start"
+
+#: libs/ardour/session_state.cc:342
+msgid "Reset Remote Controls"
+msgstr "Still tilbake fjernkontrollar"
+
+#: libs/ardour/session_state.cc:351
+msgid "Reset Control Protocols"
+msgstr "Still tilbake kontrollprotokollar"
+
+#: libs/ardour/session_state.cc:371
+msgid "Session loading complete"
+msgstr "Ferdig å lasta økta."
+
+#: libs/ardour/session_state.cc:471
+#: libs/ardour/session_state.cc:2900
+msgid "Session: cannot create session peakfile folder \"%1\" (%2)"
+msgstr "Økt: greier ikkje laga mappa \"%1\" for økttoppfiler (%2)"
+
+#: libs/ardour/session_state.cc:482
+msgid "Session: cannot create session sounds folder \"%1\" (%2)"
+msgstr "Økt: greier ikkje laga mappa \"%1\" for lydfiler (%2)"
+
+#: libs/ardour/session_state.cc:490
+msgid "Session: cannot create session dead sounds folder \"%1\" (%2)"
+msgstr "Økt: greier ikkje laga mappa \"%1\" for daudlyd (%2)"
+
+#: libs/ardour/session_state.cc:497
+msgid "Session: cannot create session export folder \"%1\" (%2)"
+msgstr "Økt: greidde ikkje laga mappa \"%1\" for eksportlyd (%2)"
+
+#: libs/ardour/session_state.cc:504
+msgid "Session: cannot create session analysis folder \"%1\" (%2)"
+msgstr "Økt: greidde ikkje laga mappa \"%1\" for øktanalyse (%2)"
+
+#: libs/ardour/session_state.cc:516
+msgid "Session: cannot create session folder \"%1\" (%2)"
+msgstr "Økt: greidde ikkje laga øktmappa \"%1\" (%2)"
+
+#: libs/ardour/session_state.cc:548
+msgid "Could not open %1 for writing mix template"
+msgstr "Greidde ikkje opna %1 for å skriva miksarmal"
+
+#: libs/ardour/session_state.cc:554
+msgid "Could not open mix template %1 for reading"
+msgstr "Greidde ikkje opna miksarmalen %1 for å lesa han"
+
+#: libs/ardour/session_state.cc:593
+msgid "Session: could not load diskstream via XML state"
+msgstr "Økt: greidde ikkje lasta diskstraumen via XML-tilstand"
+
+#: libs/ardour/session_state.cc:636
+msgid "could not rename snapshot %1 to %2"
+msgstr "greidde ikkje døypa om snøggbiletet %1 til %2"
+
+#: libs/ardour/session_state.cc:675
+msgid "Ardour's audio engine is not connected and state saving would lose all I/O connections. Session not saved"
+msgstr "Lydmotoren i Ardour er ikkje kopla til, og å lagra statusen ville kasta bort alle I/U-tilkoplingar. Økta er ikkje lagra"
+
+#: libs/ardour/session_state.cc:721
+msgid "state could not be saved to %1"
+msgstr "greidde ikkje lagra tilstanden til %1"
+
+#: libs/ardour/session_state.cc:728
+msgid "could not rename temporary session file %1 to %2"
+msgstr "greidde ikkje døypa om mellombels øktfil %1 til %2"
+
+#: libs/ardour/session_state.cc:798
+msgid "%1: session state information file \"%2\" doesn't exist!"
+msgstr "%1: tilstandsinformasjonsfila \"%2\" for økta finst ikkje!"
+
+#: libs/ardour/session_state.cc:816
+msgid "Could not understand ardour file %1"
+msgstr "Skjønte ikkje ardour-fila %1"
+
+#: libs/ardour/session_state.cc:825
+msgid "Session file %1 is not an Ardour session"
+msgstr "%1 er ikkje ei Ardour-øktfil"
+
+#: libs/ardour/session_state.cc:856
+msgid ""
+"Copying old session file %1 to %2\n"
+"Use %2 with Ardour versions before 2.0 from now on"
+msgstr ""
+"Kopierer gamal øktfil %1 til %2\n"
+"Bruk %2 med Ardour-versjonar før 2.0 frå no av"
+
+#: libs/ardour/session_state.cc:1172
+msgid "programming error: Session: incorrect XML node sent to set_state()"
+msgstr "programmeringsfeil: Økt: feil XML-punkt sendt til set_state()-funksjonen"
+
+#: libs/ardour/session_state.cc:1238
+msgid "Session: XML state has no options section"
+msgstr "Økt: XML-tilstandsfila har ikkje noko avsnitt om instillingar"
+
+#: libs/ardour/session_state.cc:1245
+msgid "Session: XML state has no locations section"
+msgstr "Økt: XML-fila har ikkje noko avsnitt om stader"
+
+#: libs/ardour/session_state.cc:1278
+msgid "Session: XML state has no sources section"
+msgstr "Økt: XML-tilstandsfila har ikkje noko avsnitt om kjelder"
+
+#: libs/ardour/session_state.cc:1285
+msgid "Session: XML state has no Regions section"
+msgstr "Økt: XML-tilstandsfila har ikkje noko avsnitt om bolkar"
+
+#: libs/ardour/session_state.cc:1292
+msgid "Session: XML state has no playlists section"
+msgstr "Økt: XML-tilstandsfila har ikkje noko avsnitt om spelelister"
+
+#: libs/ardour/session_state.cc:1311
+msgid "Session: XML state has no diskstreams section"
+msgstr "Økt: XML-fila har ikkje nok avsnitt om diskstraumar"
+
+#: libs/ardour/session_state.cc:1318
+msgid "Session: XML state has no connections section"
+msgstr "Økt: XML-fila har ikkje noko avsnitt om tilkoplingar"
+
+#: libs/ardour/session_state.cc:1325
+msgid "Session: XML state has no edit groups section"
+msgstr "Økt: XML-fila har ikkje noko avsnitt om grupperedigering"
+
+#: libs/ardour/session_state.cc:1332
+msgid "Session: XML state has no mix groups section"
+msgstr "Økt: XML-fila har ikkje noko avsnitt om miksgrupper"
+
+#: libs/ardour/session_state.cc:1339
+msgid "Session: XML state has no Tempo Map section"
+msgstr "Økt: XML-fila har ikkje noko avsnitt om tempokart"
+
+#: libs/ardour/session_state.cc:1346
+msgid "Session: XML state has no routes section"
+msgstr "Økt: XML-fila har ikkje noko avsnitt om ruter"
+
+#: libs/ardour/session_state.cc:1353
+msgid "Session: XML state has no click section"
+msgstr "Økt: XML-fila har ikkje noko avsnitt om klikk"
+
+#: libs/ardour/session_state.cc:1395
+msgid "Session: cannot create Route from XML description."
+msgstr "Økt: greier ikkje laga rute ut frå XML-skildringa."
+
+#: libs/ardour/session_state.cc:1399
+msgid "Loaded track/bus %1"
+msgstr "Lasta spor/buss %1"
+
+#: libs/ardour/session_state.cc:1438
+msgid "Session: cannot create Region from XML description."
+msgstr "Økt: greier ikkje laga bolkar ut frå XML-skildringa."
+
+#: libs/ardour/session_state.cc:1442
+msgid "Can not load state for region '%1'"
+msgstr "Greier ikkje laga status for bolken '%1'"
+
+#: libs/ardour/session_state.cc:1479
+msgid "Session: XMLNode describing a AudioRegion is incomplete (no source)"
+msgstr "Økt: XML-punktet som skildrar ein lydbolk er uferdig (manglar kjelde)"
+
+#: libs/ardour/session_state.cc:1487
+#: libs/ardour/session_state.cc:1508
+#: libs/ardour/session_state.cc:1528
+msgid "Session: XMLNode describing a AudioRegion references an unknown source id =%1"
+msgstr "Økt: XML-punktet som skildrar ein lydbolk peikar på ein ukjend kjelde-ID = %1"
+
+#: libs/ardour/session_state.cc:1493
+#: libs/ardour/session_state.cc:1514
+#: libs/ardour/session_state.cc:1534
+msgid "Session: XMLNode describing a AudioRegion references a non-audio source id =%1"
+msgstr "Økt: XML-punktet som skildrar ein lydbolk peikar på ein kjelde-ID %1 som ikkje er ei lydfil"
+
+#: libs/ardour/session_state.cc:1557
+msgid "Session: XMLNode describing an AudioRegion is missing some master sources; ignored"
+msgstr "Økt: XML-punktet som skildrar ein lydbolk manglar nokre masterkjelder, ser bort frå"
+
+#: libs/ardour/session_state.cc:1608
+msgid "cannot create new file from region name \"%1\" with ident = \"%2\": too many existing files with similar names"
+msgstr "greier ikkje laga ny fil frå bolknamn \"%1\" med ident = \"%2\": det finst for mange med same namnet"
+
+#: libs/ardour/session_state.cc:1631
+msgid "Session: cannot create Source from XML description."
+msgstr "Økt: greier ikkje laga kjelde ut frå XML-skildringa."
+
+#: libs/ardour/session_state.cc:1636
+msgid "A sound file is missing. It will be replaced by silence."
+msgstr "Det manglar ei lydfil. Ho vil bli erstatta med stille."
+
+#: libs/ardour/session_state.cc:1657
+msgid "Found a sound file that cannot be used by Ardour. Talk to the progammers."
+msgstr "Fann ei lydfil som Ardour ikkje kan bruka. Prat med utviklarane."
+
+#: libs/ardour/session_state.cc:1679
+msgid "Could not create mix templates directory \"%1\" (%2)"
+msgstr "Greidde ikkje laga miksarmalmappa \"%1\" (%2)"
+
+#: libs/ardour/session_state.cc:1691
+msgid "Template \"%1\" already exists - new version not created"
+msgstr "Malen \"%1\" finst alt - laga ingen ny versjon"
+
+#: libs/ardour/session_state.cc:1698
+msgid "mix template not saved"
+msgstr "miksarmalen vart ikkje lagra"
+
+#: libs/ardour/session_state.cc:1755
+msgid "cannot create session directory \"%1\"; ignored"
+msgstr "greier ikkje laga øktmappa \"%1\", hoppa over"
+
+#: libs/ardour/session_state.cc:1764
+msgid "cannot create sounds directory \"%1\"; ignored"
+msgstr "greier ikkje laga lydmappa \"%1\", hoppa over"
+
+#: libs/ardour/session_state.cc:1771
+msgid "cannot create dead sounds directory \"%1\"; ignored"
+msgstr "greier ikkje laga daudlydmappa \"%1\", hoppa over"
+
+#: libs/ardour/session_state.cc:1778
+msgid "cannot create peak file directory \"%1\"; ignored"
+msgstr "greier ikkje laga toppfilmappa \"%1\", hoppa over"
+
+#: libs/ardour/session_state.cc:1910
+#: libs/ardour/session_state.cc:1931
+msgid "Session: cannot create Playlist from XML description."
+msgstr "Økt: greier ikkje laga speleliste ut frå XML-skildringa."
+
+#: libs/ardour/session_state.cc:1970
+msgid "Session: cannot create Named Selection from XML description."
+msgstr "Økt: greier ikkje laga namngjeve utval ut frå XML-skildringa."
+
+#: libs/ardour/session_state.cc:2172
+msgid "Unknown node \"%1\" found in Connections list from state file"
+msgstr "Fann ukjent punkt \"%1\" i tilkoplingslista i tilstandsfila"
+
+#: libs/ardour/session_state.cc:3025
+msgid "cannot remove dead sound file %1 (%2)"
+msgstr "greier ikkje fjerna daudlyd-fila %1 (%2)"
+
+#: libs/ardour/session_state.cc:3147
+msgid "could not backup old history file, current history not saved."
+msgstr "greidde ikkje ta tryggingskopi av den gamle historiefila, noverande historie vart ikkje lagra."
+
+#: libs/ardour/session_state.cc:3159
+msgid "history could not be saved to %1"
+msgstr "greidde ikkje lagra historia til %1"
+
+#: libs/ardour/session_state.cc:3166
+msgid "could not remove corrupt history file %1"
+msgstr "greidde ikkje fjerna den øydelagde historiefila %1"
+
+#: libs/ardour/session_state.cc:3170
+msgid "could not restore history file from backup %1"
+msgstr "greidde ikkje henta fram att historiefila frå tryggingskopien %1"
+
+#: libs/ardour/session_state.cc:3192
+msgid "Loading history from '%1'."
+msgstr "Lastar historie frå '%1'."
+
+#: libs/ardour/session_state.cc:3199
+msgid "Could not understand session history file \"%1\""
+msgstr "Skjønte ikkje økthistoriefila \"%1\""
+
+#: libs/ardour/session_state.cc:3242
+msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
+msgstr "Fann ikkje ut korleis eg skal laga ein kommando av eit %1-XML-punkt."
+
+#: libs/ardour/session_time.cc:483
+msgid "Unknown JACK transport state %1 in sync callback"
+msgstr "Ukjend JACK-transporttilstand %1 i synk-tilbakekallet"
+
+#: libs/ardour/session_transport.cc:127
+msgid "Cannot loop - no loop range defined"
+msgstr "Greidde ikkje spela i lykkje - du har ikkje gjeve noko lykkjeområde"
+
+#: libs/ardour/session_transport.cc:597
+msgid ""
+"Seamless looping cannot be supported while Ardour is using JACK transport.\n"
+"Recommend changing the configured options"
+msgstr ""
+"Saumlaus lykkjespeling er ikkje støtta når Ardour bruker JACK-transporten.\n"
+"Me rår til at du endrar innstillingane."
+
+#: libs/ardour/session_transport.cc:900
+msgid "Global varispeed cannot be supported while Ardour is connected to JACK transport control"
+msgstr "Allmenn varifart-kontroll kan ikkje brukast når Ardour er kopla til JACK-transportkontrollen"
+
+#: libs/ardour/session_transport.cc:1088
+msgid "please stop the transport before adjusting slave settings"
+msgstr "hugs å stoppa spelinga før du justerer slaveinnstillingar"
+
+#: libs/ardour/session_transport.cc:1123
+msgid "No MTC port defined: MTC slaving is impossible."
+msgstr "Ingen MTC-port er gjeven. MTC-slaving er umogleg."
+
+#: libs/ardour/sndfile_helpers.cc:35
+msgid "WAV"
+msgstr "WAV"
+
+#: libs/ardour/sndfile_helpers.cc:36
+msgid "AIFF"
+msgstr "AIFF"
+
+#: libs/ardour/sndfile_helpers.cc:37
+msgid "CAF"
+msgstr "CAF"
+
+#: libs/ardour/sndfile_helpers.cc:38
+msgid "W64 (64 bit WAV)"
+msgstr "W64 (64-bits WAV)"
+
+#: libs/ardour/sndfile_helpers.cc:39
+msgid "FLAC"
+msgstr "FLAC"
+
+#: libs/ardour/sndfile_helpers.cc:40
+msgid "Ogg/Vorbis"
+msgstr "Ogg/Vorbis"
+
+#: libs/ardour/sndfile_helpers.cc:41
+msgid "raw (no header)"
+msgstr "rå fil (utan tittellinje)"
+
+#: libs/ardour/sndfile_helpers.cc:46
+msgid ".wav"
+msgstr ".wav"
+
+#: libs/ardour/sndfile_helpers.cc:47
+msgid ".aiff"
+msgstr ".aiff"
+
+#: libs/ardour/sndfile_helpers.cc:48
+msgid ".caf"
+msgstr ".caf"
+
+#: libs/ardour/sndfile_helpers.cc:49
+msgid ".w64"
+msgstr ".w64"
+
+#: libs/ardour/sndfile_helpers.cc:50
+msgid ".flac"
+msgstr ".flac"
+
+#: libs/ardour/sndfile_helpers.cc:51
+msgid ".ogg"
+msgstr ".ogg"
+
+#: libs/ardour/sndfile_helpers.cc:52
+msgid ".raw"
+msgstr ".raw"
+
+#: libs/ardour/sndfile_helpers.cc:67
+msgid "16 bit"
+msgstr "16-bit"
+
+#: libs/ardour/sndfile_helpers.cc:68
+msgid "24 bit"
+msgstr "24-bit"
+
+#: libs/ardour/sndfile_helpers.cc:69
+msgid "32 bit"
+msgstr "32-bit"
+
+#: libs/ardour/sndfile_helpers.cc:70
+msgid "8 bit"
+msgstr "8-bit"
+
+#: libs/ardour/sndfile_helpers.cc:71
+msgid "float"
+msgstr "flyttal"
+
+#: libs/ardour/sndfile_helpers.cc:84
+msgid "Little-endian (Intel)"
+msgstr "Liten endian (Intel)"
+
+#: libs/ardour/sndfile_helpers.cc:85
+msgid "Big-endian (Mac)"
+msgstr "Stor endian (Mac)"
+
+#: libs/ardour/sndfilesource.cc:185
+msgid "cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"
+msgstr "greier ikkje fastsetja kringkastingsinformasjon for lydfila %1 (%2), hoppar over kringkastingsinformasjonen for denne fila"
+
+#: libs/ardour/sndfilesource.cc:238
+msgid "SndFileSource: cannot open file \"%1\" for %2 (%3)"
+msgstr "Lydfilkjelde: greier ikkje opna fila \"%1\" for %2 (%3)"
+
+#: libs/ardour/sndfilesource.cc:246
+msgid "SndFileSource: file only contains %1 channels; %2 is invalid as a channel number"
+msgstr "Lydfilkjelde: fila inneheld berre %1 kanalar, %2 er eit ugyldig kanalnummer"
+
+#: libs/ardour/sndfilesource.cc:346
+msgid "SndFileSource: could not seek to frame %1 within %2 (%3)"
+msgstr "Lydfilkjelde: greier ikkje leita fram til ramma %1 innan %2 (%3)"
+
+#: libs/ardour/sndfilesource.cc:356
+msgid "SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5)"
+msgstr "SndFileSource: @ %1 greidde ikkje lesa %2 i %3 (%4) (len = %5)"
+
+#: libs/ardour/sndfilesource.cc:396
+#: libs/ardour/sndfilesource.cc:431
+msgid "attempt to write a non-writable audio file source (%1)"
+msgstr "prøvde å skriva til ei ikkje-skrivbar lydkjeldefil (%1)"
+
+#: libs/ardour/sndfilesource.cc:401
+#: libs/ardour/utils.cc:523
+#: libs/ardour/utils.cc:547
+#: libs/ardour/utils.cc:561
+#: libs/ardour/utils.cc:580
+msgid "programming error: %1 %2"
+msgstr "programmeringsfeil: %1 %2"
+
+#: libs/ardour/sndfilesource.cc:535
+msgid "attempt to flush a non-writable audio file source (%1)"
+msgstr "prøvde å tømma ei ikkje-skrivbar lydkjeldefil (%1)"
+
+#: libs/ardour/sndfilesource.cc:545
+msgid "attempt to store broadcast info in a non-writable audio file source (%1)"
+msgstr "prøvde å lagra kringastingsinfo til ei ikkje-skrivbar lydkjeldefil (%1)"
+
+#: libs/ardour/sndfilesource.cc:581
+#: libs/ardour/sndfilesource.cc:602
+msgid "cannot set broadcast info for audio file %1; Dropping broadcast info for this file"
+msgstr "greier ikkje fastsetja kringkastingsinformasjon for lydfila %1, hoppar over kringkastingsinformasjon for denne fila"
+
+#: libs/ardour/sndfilesource.cc:615
+msgid "%1: cannot seek to %2 (libsndfile error: %3"
+msgstr "%1: greier ikkje gå til %2 (libsndfile-feil: %3"
+
+#: libs/ardour/sndfilesource.cc:724
+msgid "SndFileSource: \"%1\" bad read retval: %2 of %5 (%3: %4)"
+msgstr "SndFileSource: \"%1\" feillesen returverdi: %2 av %5 (%3: %4)"
+
+#: libs/ardour/sndfilesource.cc:737
+#: libs/ardour/sndfilesource.cc:787
+#: libs/ardour/sndfilesource.cc:794
+msgid "SndFileSource: \"%1\" bad write (%2)"
+msgstr "SndFileSource: \"%1\" feilskriving (%2)"
+
+#: libs/ardour/sndfilesource.cc:817
+msgid "Filesource: start time is already set for existing file (%1): Cannot change start time."
+msgstr "Filkjelde: starttida er alt sett for denne fila (%1): kan ikkje endra starttid."
+
+#: libs/ardour/tempo.cc:71
+msgid "TempoSection XML node has no \"start\" property"
+msgstr "TempoSection-XML-punktet har ingen \"start\"-eigenskap"
+
+#: libs/ardour/tempo.cc:79
+msgid "TempoSection XML node has an illegal \"start\" value"
+msgstr "TempoSection-XML-punktet har ein ulovleg \"start\"-verdi"
+
+#: libs/ardour/tempo.cc:86
+msgid "TempoSection XML node has no \"beats-per-minute\" property"
+msgstr "TempoSection-XML-punktet har ingen \"slag per minutt\"-eigenskap"
+
+#: libs/ardour/tempo.cc:91
+msgid "TempoSection XML node has an illegal \"beats_per_minute\" value"
+msgstr "TempoSection-XML-punktet har ein ulovleg \"slag per minutt\"-verdi"
+
+#: libs/ardour/tempo.cc:100
+msgid "TempoSection XML node has an illegal \"note-type\" value"
+msgstr "TempoSection-XML-punktet har ein ulovleg \"note-type\"-verdi"
+
+#: libs/ardour/tempo.cc:106
+msgid "TempoSection XML node has no \"movable\" property"
+msgstr "TempoSection-XML-punktet har ingen \"flyttbar\"-eigenskap"
+
+#: libs/ardour/tempo.cc:147
+msgid "MeterSection XML node has no \"start\" property"
+msgstr "MeterSection-XML-punktet har ingen \"start\"-eigenskap"
+
+#: libs/ardour/tempo.cc:155
+msgid "MeterSection XML node has an illegal \"start\" value"
+msgstr "MeterSection-XML-punktet har ein ulovleg \"start\"-verdi"
+
+#: libs/ardour/tempo.cc:162
+msgid "MeterSection XML node has no \"beats-per-bar\" property"
+msgstr "MeterSection-XML-punktet har ingen \"slag per takt\"-eigenskap"
+
+#: libs/ardour/tempo.cc:167
+msgid "MeterSection XML node has an illegal \"beats-per-bar\" value"
+msgstr "MeterSection-XML-punktet har ein ulovleg \"start\"-verdi"
+
+#: libs/ardour/tempo.cc:172
+msgid "MeterSection XML node has no \"note-type\" property"
+msgstr "MeterSection-XML-punktet har ingen \"notetype\"-eigenskap"
+
+#: libs/ardour/tempo.cc:177
+msgid "MeterSection XML node has an illegal \"note-type\" value"
+msgstr "MeterSection-XML-punktet har ein ulovleg \"start\"-verdi"
+
+#: libs/ardour/tempo.cc:182
+msgid "MeterSection XML node has no \"movable\" property"
+msgstr "MeterSection-XML-punktet har ingen \"flyttbar\"-eigenskap"
+
+#: libs/ardour/tempo.cc:576
+msgid "no tempo sections defined in tempo map - cannot change tempo @ %1"
+msgstr "ingen temposeksjonar sette opp i tempokartet - kan ikkje endra tempoet ved %1"
+
+#: libs/ardour/tempo.cc:600
+#: libs/ardour/tempo.cc:616
+msgid "programming error: no tempo section in tempo map!"
+msgstr "programmeringsfeil: ikkje noko tempoavsnitt i tempokartet!"
+
+#: libs/ardour/tempo.cc:659
+#: libs/ardour/tempo.cc:717
+msgid "programming error: unhandled MetricSection type"
+msgstr "programmeringsfeil: uhandtert MetricSection-type"
+
+#: libs/ardour/tempo.cc:1476
+#: libs/ardour/tempo.cc:1488
+msgid "Tempo map: could not set new state, restoring old one."
+msgstr "Tempokart: greidde ikkje fastsetja den nye tilstanden, hentar fram att den gamle."
+
+#: libs/ardour/utils.cc:300
+msgid "illegal or badly-formed string used for path (%1)"
+msgstr "ulovleg eller feilforma streng brukt for stigen (%1)"
+
+#: libs/ardour/utils.cc:305
+msgid "path (%1) is ambiguous"
+msgstr "stigen (%1) er tvitydig"
+
+#: libs/ardour/utils.cc:367
+#: libs/ardour/utils.cc:391
+msgid "Splice Edit"
+msgstr "Splitt-redigering"
+
+#: libs/ardour/utils.cc:369
+#: libs/ardour/utils.cc:384
+msgid "Slide Edit"
+msgstr "Glidredigering"
+
+#: libs/ardour/utils.cc:371
+#: libs/ardour/utils.cc:387
+msgid "Lock Edit"
+msgstr "Lås redigering"
+
+#: libs/ardour/utils.cc:374
+msgid "programming error: unknown edit mode string \"%1\""
+msgstr "programmeringsfeil: ukjend redigeringsmodus-streng \"%1\""
+
+#: libs/ardour/utils.cc:398
+#: libs/ardour/utils.cc:427
+msgid "Internal"
+msgstr "Intern"
+
+#: libs/ardour/utils.cc:402
+#: libs/ardour/utils.cc:423
+msgid "MTC"
+msgstr "MTC"
+
+#: libs/ardour/utils.cc:406
+#: libs/ardour/utils.cc:420
+msgid "JACK"
+msgstr "JACK"
+
+#: libs/ardour/utils.cc:410
+msgid "programming error: unknown slave source string \"%1\""
+msgstr "programmeringsfeil: ukjend slavekjeldestreng \"%1\""
+
+#: libs/ardour/vst_plugin.cc:206
+msgid "Bad node sent to VSTPlugin::set_state"
+msgstr "Feil punkt sendt til VSTPlugin::set_state-funksjonen"
+
+#: libs/ardour/vst_plugin.cc:337
+#: libs/ardour/vst_plugin.cc:348
+msgid "no support for presets using chunks at this time"
+msgstr "det er ikkje støtte for ferdigprogram som brukar bitar for augneblinken"
+
+#: libs/ardour/vst_plugin.cc:395
+msgid "VST plugin called with zero frames - please notify Ardour developers"
+msgstr "VST-innstikk påkalla med null rammer - sei frå til Ardour-utviklarane"
+
+#: libs/ardour/vst_plugin.cc:520
+msgid "VST: cannot load module from \"%1\""
+msgstr "VST: greier ikkje lasta modul frå \"%1\""
+
+#: libs/ardour/vst_plugin.cc:525
+msgid "You asked ardour to not use any VST plugins"
+msgstr "Du sa at Ardour ikkje skulle bruka nokon VST-tilleggsprogram"
+
+#: libs/ardour/coreaudiosource.cc:82
+msgid "CoreAudioSource: cannot open file \"%1\" for %2"
+msgstr "CoreAudioSource: greier ikkje opna fila \"%1\" for %2"
+
+#: libs/ardour/rb_effect.cc:224
+#: libs/ardour/rb_effect.cc:265
+msgid "tempoize: error reading data from %1 at %2 (wanted %3, got %4)"
+msgstr "lag tempo: greidde ikkje lesa data frå %1 ved %2 (ville ha %3, fekk %4)"
+
+#: libs/ardour/rb_effect.cc:290
+#: libs/ardour/rb_effect.cc:307
+msgid "error writing tempo-adjusted data to %1"
+msgstr "greidde ikkje skriva tempo-justert fil til %1"
+
+#: libs/ardour/rb_effect.cc:314
+msgid "timefx code failure. please notify ardour-developers."
+msgstr "kodefeil på tidseffektar, sei frå til Ardour-utviklarane"
+
+#: libs/ardour/audio_unit.cc:143
+#: libs/ardour/audio_unit.cc:1318
+msgid "Could not create XML version of property list"
+msgstr "Greidde ikkje laga XML-versjon av eigenskaplista"
+
+#: libs/ardour/audio_unit.cc:161
+msgid "Cannot open preset file %1 (%2)"
+msgstr "Greier ikkje opna ferdigoppsettfila %1 (%2)"
+
+#: libs/ardour/audio_unit.cc:423
+msgid "Exception thrown during AudioUnit plugin loading - plugin ignored"
+msgstr "Det vart kasta inn eit unntak under AudioUnit-innstikklastinga - såg bort frå innstikket"
+
+#: libs/ardour/audio_unit.cc:428
+msgid "AudioUnit: Could not convert CAComponent to CAAudioUnit"
+msgstr "Lydeinging: Greidde ikkje gjera om CAComponent til CAAudioUnit"
+
+#: libs/ardour/audio_unit.cc:471
+msgid "AUPlugin: cannot set processing block size"
+msgstr "AUPlugin: Greier ikkje setja opp blokkstorleik for handsaming"
+
+#: libs/ardour/audio_unit.cc:688
+msgid "AUPlugin: %1 cannot initialize plugin (err = %2)"
+msgstr "AUPlugin: %1 greier ikkje starta innstikk (feil = %2)"
+
+#: libs/ardour/audio_unit.cc:799
+msgid "AU %1 has zero outputs - configuration ignored"
+msgstr "AU %1 har ingen utgangar - såg bort frå oppsettet"
+
+#: libs/ardour/audio_unit.cc:857
+#: libs/ardour/audio_unit.cc:885
+msgid "AU plugin %1 has illegal IO configuration (-2,-2)"
+msgstr "AU-innstikket %1 har ugyldig IU-oppsett (-2,-2)"
+
+#: libs/ardour/audio_unit.cc:973
+msgid "AUPlugin: could not set stream format for %1/%2 (err = %3)"
+msgstr "AUPlugin: greidde ikkje setja opp straumformat for %1/%2 (feil = %3)"
+
+#: libs/ardour/audio_unit.cc:992
+msgid "AUPlugin: %1 input_streams() called without any format set!"
+msgstr "AUPlugin: %1 input_streams() påkalla utan oppsett format!"
+
+#: libs/ardour/audio_unit.cc:1003
+msgid "AUPlugin: %1 output_streams() called without any format set!"
+msgstr "AUPlugin: %1 output_streams() påkalla utan oppsett format!"
+
+#: libs/ardour/audio_unit.cc:1019
+msgid "AUPlugin: render callback called illegally!"
+msgstr "AUPlugin: oppteiknings-tilbakekall påkalla ulovleg!"
+
+#: libs/ardour/audio_unit.cc:1338
+msgid "Saving AudioUnit settings is not supported in this build of Ardour. Consider paying for a newer version"
+msgstr "Du kan ikkje lagra AudioUnit-innstillingar i denne versjonen av Ardour. Du bør vurdera å betala for ein nyare verjson"
+
+#: libs/ardour/audio_unit.cc:1356
+msgid "Bad node sent to AUPlugin::set_state"
+msgstr "Feil punkt sendt til AUPlugin::set_state"
+
+#: libs/ardour/audio_unit.cc:1398
+msgid "Restoring AudioUnit settings is not supported in this build of Ardour. Consider paying for a newer version"
+msgstr "Du kan ikkje henta framatt AudioUnit-innstillingar i denne versjonen av Ardour. Du bør vurdera å betala for ein nyare verjson"
+
+#: libs/ardour/audio_unit.cc:1457
+msgid "Loading AudioUnit presets is not supported in this build of Ardour. Consider paying for a newer version"
+msgstr "Du kan ikkje lagra AudioUnit-innstillingar i denne versjonen av Ardour. Du bør vurdera å betala for ein nyare verjson"
+
+#: libs/ardour/audio_unit.cc:1490
+msgid "Cannot create user plugin presets folder (%1)"
+msgstr "Greier ikkje laga mappe for brukarlaga innstikkoppsett (%1)"
+
+#: libs/ardour/audio_unit.cc:1509
+msgid "Saving plugin state to %1 failed"
+msgstr "Greidde ikkje lagra innstikkstatus til %1"
+
+#: libs/ardour/audio_unit.cc:1518
+msgid "Saving AudioUnit presets is not supported in this build of Ardour. Consider paying for a newer version"
+msgstr "Du kan ikkje lagra førehandsoppsett for AudioUnit i denne versjonen av Ardour. Du bør vurdera å betala for ein nyare verjson"
+
+#: libs/ardour/audio_unit.cc:1813
+msgid "Discovering AudioUnit plugins (could take some time ...)"
+msgstr "Finn AudioUnit-innstikk (dette kan ta litt tid...)"
+
+#: libs/ardour/audio_unit.cc:2031
+msgid "Cannot get I/O configuration info for AU %1"
+msgstr "Greier ikkje få tak i I/U-oppsettsinfo for AU %1"
+
+#: libs/ardour/audio_unit.cc:2070
+msgid "Checking AudioUnit: %1"
+msgstr "Sjekkar AudioUnit: %1"
+
+#: libs/ardour/audio_unit.cc:2080
+#: libs/ardour/audio_unit.cc:2081
+msgid "Could not load AU plugin %1 - ignored"
+msgstr "Greier ikkje lasta AU-innstikk %1 - såg bort frå"
+
+#: libs/ardour/audio_unit.cc:2151
+msgid "could not save AU cache to %1"
+msgstr "greidde ikkje lagra AU-mellomlageret til %1"
+
+#~ msgid "channels"
+#~ msgstr "kanalar"
+#~ msgid "samplerate"
+#~ msgstr "opptaksfrekvens"
+#~ msgid "resolution"
+#~ msgstr "oppløysing"
+#~ msgid "format"
+#~ msgstr "format"
+#~ msgid "initial state"
+#~ msgstr "opphavstilstand"
+#~ msgid "xfade change"
+#~ msgstr "overtoningsendring"
+#~ msgid "region modified"
+#~ msgstr "bolk endra"
+#~ msgid "cannot activate JACK client"
+#~ msgstr "greier ikkje slå på JACK-klienten"
+#~ msgid "connect called before engine was started"
+#~ msgstr "tilkoplinga vart oppkalla frø tenaren starta"
+#~ msgid "get_nth_physical called before engine was started"
+#~ msgstr "get_nth_physical vart oppkalla før tenaren starta"
+#~ msgid "get_port_total_latency() called with no JACK client connection"
+#~ msgstr ""
+#~ "get_port_total_latency()-funksjonen vart oppkalla utan tilknyting til "
+#~ "JACK-klienten"
+#~ msgid "get_port_total_latency() called before engine was started"
+#~ msgstr ""
+#~ "get_port_total_latency()-funksjonen vart oppkalla før tenaren starta"
+#~ msgid "Unable to connect to JACK server"
+#~ msgstr "Greidde ikkje kopla til JACK-tenaren"
+#~ msgid "Could not connect to JACK server as  \"%1\""
+#~ msgstr "Greidde ikkje kopla til JACK-tenaren som \"%1\""
+#~ msgid "JACK server started"
+#~ msgstr "JACK-tenaren er starta"
+#~ msgid "cannot shutdown connection to JACK"
+#~ msgstr "greier ikkje kopla frå JACK"
+#~ msgid "fade in change"
+#~ msgstr "inntoningsendring"
+#~ msgid "normalized to %.2fdB"
+#~ msgstr "normalisert til %.2fdB"
+#~ msgid "envelope change"
+#~ msgstr "omhyllingsendring"
+#~ msgid "poll on peak request pipe failed (%1)"
+#~ msgstr "undersøking ved toppspørjingsrøyr gjekk gale (%1)"
+#~ msgid "Error on peak thread request pipe"
+#~ msgstr "Feil på topptrådspørjingsrøyr"
+#~ msgid "Error reading from peak request pipe"
+#~ msgstr "Feil ved lesing frå toppspørjingsrøyr"
+#~ msgid "UI: cannot set O_NONBLOCK on peak request pipe (%1)"
+#~ msgstr "Brukarflate: Kan ikkje bruka O_NONBLOCK ved toppspørjingsrøyr (%1)"
+#~ msgid "AudioSource: could not create peak thread"
+#~ msgstr "Lydkjelde: greidde ikkje laga topptråd"
+#~ msgid "initial"
+#~ msgstr "fyrste"
+#~ msgid "cleared"
+#~ msgstr "tom"
+#~ msgid "added event"
+#~ msgstr "la til hending"
+#~ msgid "removed event"
+#~ msgstr "fjerna hending"
+#~ msgid "removed multiple events"
+#~ msgstr "fjerna fleire hendingar"
+#~ msgid "removed range"
+#~ msgstr "fjerna område"
+#~ msgid "event range adjusted"
+#~ msgstr "justert hendingsområde"
+#~ msgid "event adjusted"
+#~ msgstr "justert hending"
+#~ msgid "cut/copy/clear"
+#~ msgstr "klypp/kopier/tøm"
+#~ msgid "copy"
+#~ msgstr "kopier"
+#~ msgid "paste"
+#~ msgstr "lim inn"
+#~ msgid "active changed"
+#~ msgstr "endra på/av"
+#~ msgid "MIDI port specifications for \"%1\" are not understandable."
+#~ msgstr "MIDI-portspesifikasjonane for \"%1\" er uforståelege."
+
+#, fuzzy
+#~ msgid "resampling audio"
+#~ msgstr "samplar om lyd"
+#~ msgid "Import: cannot open converted sound file \"%1\""
+#~ msgstr "Import: kan ikkje opna den omkoda lydfila \"%1\""
+
+#, fuzzy
+#~ msgid "Import: error while resampling sound file \"%1\""
+#~ msgstr "Import: feil under omsampling av lydfila \"%1\""
+#~ msgid ""
+#~ "Session::import_audiofile: cannot open new file source for channel %1"
+#~ msgstr "Økt::import_lydfil: kan ikkje opna ny kjeldefil for kanalen %1"
+#~ msgid "building region"
+#~ msgstr "lagar bolk"
+#~ msgid "building regions"
+#~ msgstr "lagar bolkar"
+#~ msgid "Import/SRC: could not open input file: %1"
+#~ msgstr "Import/kjelde: greidde ikkje opna innfila: %1"
+#~ msgid "Import/SRC: could not open output file: %1"
+#~ msgstr "Import/kjelde: greidde ikkje opna utfila: %1"
+#~ msgid "XML node describing insert is missing the `id' field"
+#~ msgstr "XML-punktet som skildrar tappinga manglar 'id'-feltet"
+#~ msgid "PortInsert: cannot add input port"
+#~ msgstr "PortInsert: greier ikkje leggja til inngangsport"
+#~ msgid "PortInsert: cannot add output port"
+#~ msgstr "PortInsert: greier ikkje leggja til utgangsport"
+#~ msgid "%s/out"
+#~ msgstr "%s/ut"
+#~ msgid "%s/out %u"
+#~ msgstr "%s/ut %u"
+#~ msgid "%s/in"
+#~ msgstr " %s/inn"
+#~ msgid "Unknown connection \"%1\" listed for output of %2"
+#~ msgstr "Ukjend tilkopling \"%1\" lista opp for %2-utgangen"
+#~ msgid "No output connections available as a replacement"
+#~ msgstr "Det finst ingen utgangstilkoplingar som kan brukast som erstatting"
+#~ msgid "Connection %1 was not available - \"out 1\" used instead"
+#~ msgstr ""
+#~ "Tilkoplinga %1 var ikkje tilgjengeleg - bruker \"ut 1\" i staden for"
+#~ msgid "%1: could not open automation event file \"%2\""
+#~ msgstr "%1: greier ikkje opna automasjonshendingsfila \"%2\""
+#~ msgid "mismatched automation event file version (%1)"
+#~ msgstr "ikkje like versjonsnummer i automasjonshendingsfila (%1)"
+#~ msgid "loaded from disk"
+#~ msgstr "lasta frå disk"
+#~ msgid "automation write/touch"
+#~ msgstr "automasjonsskriving/rørsle"
+#~ msgid "clear"
+#~ msgstr "tøm"
+#~ msgid "clear markers"
+#~ msgstr "tøm merke"
+#~ msgid "clear ranges"
+#~ msgstr "tøm område"
+#~ msgid "add"
+#~ msgstr "legg til"
+#~ msgid "remove"
+#~ msgstr "fjern"
+#~ msgid "automation write pass"
+#~ msgstr "automasjonsskriveomgang"
+#~ msgid "error writing pan automation file (%s)"
+#~ msgstr "greidde ikkje skriva panoreringsautomasjonsfil (%s)"
+#~ msgid "cannot open pan automation file \"%1\" for saving (%2)"
+#~ msgstr ""
+#~ "kan ikkje opna panoreringsautomasjonsfil \"%1\" for å lagra henne (%2)"
+#~ msgid "mismatched pan automation event file version (%1)"
+#~ msgstr ""
+#~ "handlingsfila for panoreringsautomasjon har versjonsnummer som ikkje "
+#~ "stemmer overeins (%1)"
+#~ msgid "add region"
+#~ msgstr "legg til bolk"
+#~ msgid "replace region"
+#~ msgstr "byt ut bolk"
+#~ msgid "remove region"
+#~ msgstr "fjern bolk"
+#~ msgid "separate"
+#~ msgstr "del opp"
+#~ msgid "cut"
+#~ msgstr "klypp"
+#~ msgid "duplicate"
+#~ msgstr "klon"
+#~ msgid "split"
+#~ msgstr "del"
+#~ msgid "nudged"
+#~ msgstr "skubba"
+#~ msgid ""
+#~ "programming error: Playlist::copyPlaylist called with unknown Playlist "
+#~ "type"
+#~ msgstr ""
+#~ "programmeringsfeil: Playlist::copyPlaylist-funksjonen vart oppkalla med "
+#~ "ukjend spelelistetype"
+#~ msgid "Unknown"
+#~ msgstr "Ukjent"
+#~ msgid "pre"
+#~ msgstr "før"
+#~ msgid "post"
+#~ msgstr "etter"
+#~ msgid "Redirect: unknown placement string \"%1\" (ignored)"
+#~ msgstr "Omdirigering: ukjend plasseringsstreng \"%1\" (hoppa over)"
+#~ msgid "%1: cannot open %2 to store automation data (%3)"
+#~ msgstr "%1: greier ikkje opna %2 for å lagra automasjonsdata (%3)"
+#~ msgid "%1: could not save automation state to %2"
+#~ msgstr "%1: greier ikkje lagra automasjonstilstanden til %2"
+#~ msgid ""
+#~ "Could not get state from Redirect (%1).  Problem with save_automation"
+#~ msgstr ""
+#~ "Greier ikkje få tak i tilstanden frå omdirigeringa (%1). Problem med å "
+#~ "lagra automasjonen."
+#~ msgid "active_changed"
+#~ msgstr "aktiv_endra"
+#~ msgid "Could not get state of route.  Problem with save_automation"
+#~ msgstr ""
+#~ "Greidde ikkje få tak i tilstanden for rutinga. Problem med å lagra "
+#~ "automasjon."
+#~ msgid "too many regions with names like %1"
+#~ msgstr "for mange bolkar med namn som %1"
+#~ msgid "programming error: unknown type of Insert deleted!"
+#~ msgstr "programmeringsfeil: ein ukjend tappingstype er sletta!"
+#~ msgid "Session: cannot create session automation dir \"%1\" (%2)"
+#~ msgstr "Økt: greier ikkje laga automasjonsmappa \"%1\" for økta (%2)"
+#~ msgid "could not backup old state file, current state not saved."
+#~ msgstr ""
+#~ "greidde ikkje ta tryggingskopi av den gamle tilstandsfila. Den noverande "
+#~ "tilstanden er ikkje lagra."
+#~ msgid "could not remove corrupt state file %1"
+#~ msgstr "greidde ikkje fjerna den øydelagde tilstandsfila %1"
+#~ msgid "%1: session history file \"%2\" doesn't exist!"
+#~ msgstr "%1: økthistoriefila \"%2\" finst ikkje!"
+#~ msgid "tempoize: error creating name for new audio file based on %1"
+#~ msgstr ""
+#~ "lag tempo: greidde ikkje gje namn til den nye lydfila som er bygd på %1"
+#~ msgid "tempoize: error creating new audio file %1 (%2)"
+#~ msgstr "lag tempo: greidde ikkje laga den nye lydfila %1 (%2)"
+#~ msgid "PAF (Ensoniq Paris)"
+#~ msgstr "PAF (Ensoniq Paris)"
+#~ msgid "AU (Sun/NeXT)"
+#~ msgstr "AU (Sun/NeXT)"
+#~ msgid "IRCAM"
+#~ msgstr "IRCAM"
+#~ msgid ".au"
+#~ msgstr ".au"
+#~ msgid ".ircam"
+#~ msgstr ".ircam"
+#~ msgid "FileSource: cannot get host information for BWF header (%1)"
+#~ msgstr ""
+#~ "Filkjelde: greier ikkje finna vertsinformasjonen for BWF-tittellinja (%1)"
+#~ msgid "%1: cannot seek to %2"
+#~ msgstr "%1: greier ikkje leita fram til %2"
+#~ msgid "cleared history"
+#~ msgstr "tømte historia"
+#~ msgid ""
+#~ "programming error: illegal state ID (%1) passed to StateManager::set_state"
+#~ "() (range = 0-%2)"
+#~ msgstr ""
+#~ "programmeringsfeil: ulovleg tilgangs-ID (%1) send til StateManager::"
+#~ "set_state()-funksjonen (område = 0-%2)"
+
+#, fuzzy
+#~ msgid "move metric"
+#~ msgstr "flytt taktart"
+#~ msgid "metric removed"
+#~ msgstr "fjerna taktart"
+#~ msgid "add tempo"
+#~ msgstr "legg til tempo"
+#~ msgid "replace tempo"
+#~ msgstr "byt ut tempo"
+#~ msgid "add meter"
+#~ msgstr "legg til taktart"
+#~ msgid "replaced meter"
+#~ msgstr "bytte ut taktart"
+#~ msgid "load XML data"
+#~ msgstr "last XML-data"
+#~ msgid "cannot create VST chunk directory: %1"
+#~ msgstr "greier ikkje laga mappe for VST-bitar: %1"
+#~ msgid "cannot check VST chunk directory: %1"
+#~ msgstr "greier ikkje sjekka mappe for VST-bitar: %1"
+#~ msgid "%1 exists but is not a directory"
+#~ msgstr "%1 finst, men det er ikkje ei mappe"
+
