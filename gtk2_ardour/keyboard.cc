@@ -72,7 +72,6 @@ guint Keyboard::RangeSelectModifier = GDK_SHIFT_MASK;
 guint Keyboard::button2_modifiers = 0; /* not used */
 #endif
 
-
 Keyboard*    Keyboard::_the_keyboard = 0;
 Gtk::Window* Keyboard::current_window = 0;
 bool         Keyboard::_some_magic_widget_has_focus = false;
@@ -81,7 +80,7 @@ std::string Keyboard::user_keybindings_path;
 bool Keyboard::can_save_keybindings = false;
 bool Keyboard::bindings_changed_after_save_became_legal = false;
 map<string,string> Keyboard::binding_files;
-string Keyboard::_current_binding_name = _("Unknown");
+string Keyboard::_current_binding_name;
 map<AccelKey,pair<string,string>,Keyboard::AccelKeyLess> Keyboard::release_keys;
 
 /* set this to initially contain the modifiers we care about, then track changes in ::set_edit_modifier() etc. */
@@ -110,6 +109,7 @@ Keyboard::Keyboard ()
 {
 	if (_the_keyboard == 0) {
 		_the_keyboard = this;
+		_current_binding_name = _("Unknown");
 	}
 
 	RelevantModifierKeyMask = (GdkModifierType) gtk_accelerator_get_default_mod_mask ();
