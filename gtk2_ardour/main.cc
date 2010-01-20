@@ -66,6 +66,8 @@ static const char* localedir = LOCALEDIR;
 #include <sys/param.h>
 #include <fstream>
 
+extern void set_language_preference (); // cocoacarbon.mm
+
 void
 fixup_bundle_environment ()
 {
@@ -73,26 +75,7 @@ fixup_bundle_environment ()
 		return;
 	}
 
-	/* pull user's language preference from Cocoa and push
-	   it into the environment. Thanks to Bjorn Winckler for
-	   this code.
-	*/
-	
-	NSArray *languages = [NSLocale preferredLanguages];
-	if (languages && [languages count] > 0) {
-		int i, count = [languages count];
-		for (i = 0; i < count; ++i) {
-			if ([[languages objectAtIndex:i]
-			     isEqualToString:@"en"]) {
-				count = i+1;
-				break;
-			}
-		}
-		NSRange r = { 0, count };
-		NSString *s = [[languages subarrayWithRange:r]
-			       componentsJoinedByString:@":"];
-		setenv("LANGUAGE", [s UTF8String], 0);
-	}
+	set_language_preference ();
 
 	char execpath[MAXPATHLEN+1];
 	uint32_t pathsz = sizeof (execpath);
@@ -199,6 +182,7 @@ fixup_bundle_environment ()
 	path += "/../Resources/locale";
 	
 	localedir = strdup (path.c_str());
+	setenv ("GTK_LOCALEDIR", localedir, 1);
 
 	/* write a pango.rc file and tell pango to use it. we'd love
 	   to put this into the Ardour.app bundle and leave it there,
@@ -333,7 +317,6 @@ int main (int argc, char* argv[])
 #endif
 
         Glib::thread_init();
-	gtk_set_locale ();
 
 #ifdef VST_SUPPORT
 	/* this does some magic that is needed to make GTK and Wine's own
@@ -348,6 +331,10 @@ int main (int argc, char* argv[])
 	   we use that when handling them.
 	*/
 	(void) bind_textdomain_codeset (PACKAGE,"UTF-8");
+
+	/* this really does nothing since we don't get gettext(),
+	   only dgettext(), but whatever ...
+	*/
 	(void) textdomain (PACKAGE);
 
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);

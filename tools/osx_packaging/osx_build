@@ -30,7 +30,7 @@ while [ $# -gt 0 ] ; do
 	       APPNAME=Ardour ;
 	       shift ;;
 	--mixbus) MIXBUS=1; 
-	          WITH_NLS= ; 
+	          WITH_NLS=1 ; 
                   SAE= ; 
                   INTERNAL_JACK=; 
                   WITH_LADSPA=; 
@@ -38,7 +38,7 @@ while [ $# -gt 0 ] ; do
 		  PRODUCT_PKG_DIR=MixBus;
 		  APPNAME=Mixbus ;
                   shift ;;
-	--public) WITH_NLS= ; 
+	--public) WITH_NLS=1 ; 
 	          SAE= ; 
 		  INTERNAL_JACK=; 
                   WITH_LADSPA=1; 
@@ -212,11 +212,34 @@ fi
 # copy locale files
 if test x$WITH_NLS != x ; then
     echo "NLS support ..."
-    for file in ../../gtk2_ardour/*.mo
+    echo "I hope you remembered to run scons msgupdate!"
+    LINGUAS=
+    for file in ../../gtk2_ardour/*.mo 
     do
 	lang=`basename $file | sed 's/\.mo//'`
 	mkdir -p $Locale/$lang/LC_MESSAGES
 	cp $file $Locale/$lang/LC_MESSAGES/gtk2_ardour.mo
+	LINGUAS="$LINGUAS $lang"
+    done
+    for file in ../../libs/ardour/*.mo 
+    do
+	lang=`basename $file | sed 's/\.mo//'`
+	mkdir -p $Locale/$lang/LC_MESSAGES
+	cp $file $Locale/$lang/LC_MESSAGES/libardour.mo
+    done
+    for l in $LINGUAS
+    do
+      if [ -d $GTKQUARTZ_ROOT/share/locale/$l ] ; then
+	  echo "Copying GTK i18n files for $l..."
+	  cp -r $GTKQUARTZ_ROOT/share/locale/$l $Locale
+      else
+	  # try with just the language spec
+	  just_lang=`echo $l | sed 's/_[A-Z][A-Z]$//'`
+	  if [ -d $GTKQUARTZ_ROOT/share/locale/$just_lang ] ; then
+	      echo "Copying GTK i18n files for $just_lang..."
+	      cp -r $GTKQUARTZ_ROOT/share/locale/$just_lang $Locale
+	  fi
+      fi
     done
 else
     echo "Skipping NLS support"
@@ -453,6 +476,7 @@ else
 fi
 
 echo "Building DMG ..."
+exit 0
 
 # UC_DMG=$APPNAME-${release_version}-${svn_version}-UC.dmg
 # FINAL_DMG=$APPNAME-${release_version}-${svn_version}.dmg

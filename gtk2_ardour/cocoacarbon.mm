@@ -16,6 +16,10 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <string>
+#include <ctype.h>
+#include <stdlib.h>
+#include <pbd/error.h>
 #include <gtkmm2ext/gtkapplication.h>
 #include <gdk/gdkquartz.h>
 #undef check
@@ -25,6 +29,14 @@
 #include "ardour_ui.h"
 #include "actions.h"
 #include "opts.h"
+
+#include <CoreFoundation/CFLocale.h>
+#import <CoreFoundation/CFString.h>
+#import <Foundation/NSString.h>
+#import <Foundation/NSAutoreleasePool.h>
+
+using namespace std;
+using namespace PBD;
 
 void
 ARDOUR_UI::platform_specific ()
@@ -56,4 +68,71 @@ cocoa_open_url (const char* uri)
 	[nsurl release];
 
 	return ret;
+}
+
+void
+set_language_preference ()
+{
+	if (g_getenv ("LANGUAGE") || g_getenv ("LC_ALL") || g_getenv ("LANG")) {
+		return;
+	}
+
+	if (g_getenv ("ARDOUR_EN")) {
+		return;
+	}
+
+	/* the gettext manual is potentially misleading about the utility of
+	   LANGUAGE.  It notes that if LANGUAGE is set to include a dialect/region-free
+	   language code, like "it", it will assume that you mean the main
+	   dialect (e.g. "it_IT"). But in reality, it doesn't bother looking for
+	   locale dirs with the full name, only the short code (it doesn't
+	   know any better).
+	   
+	   Since Apple's preferred language list only consists of short language codes,
+	   if we set LANGUAGE then gettext will not look for the relevant long-form
+	   variants.
+	*/
+
+	/* how to get language preferences with CoreFoundation
+	 */
+
+	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+	NSUserDefaults* defs = [NSUserDefaults standardUserDefaults];
+	NSArray* languages = [defs objectForKey:@"AppleLanguages"];
+	
+	/* push into LANGUAGE */
+
+	if (languages && [languages count] > 0) {
+
+		int i, count = [languages count];
+		for (i = 0; i < count; ++i) {
+			if ([[languages objectAtIndex:i]
+			     isEqualToString:@"en"]) {
+				count = i+1;
+				break;
+			}
+		}
+		NSRange r = { 0, count };
+		NSString* s = [[languages subarrayWithRange:r]
+			       componentsJoinedByString:@":"];
+		cout << "LANGUAGE set to " << [s UTF8String] << endl;
+		setenv ("LANGUAGE", [s UTF8String], 0);
+		[s release];
+	}
+
+	/* done */
+
+	[pool release];
+
+	/* now get AppleLocale value and use that for LANG */
+
+	CFLocaleRef cflocale = CFLocaleCopyCurrent();
+	NSString* nslocale = (NSString*) CFLocaleGetValue (cflocale, kCFLocaleIdentifier);
+
+	/* the full POSIX locale specification allows for lots of things. that could be an issue. Silly Apple.
+	 */
+
+	cout << "LANG set to " << [nslocale UTF8String] << endl;
+	setenv ("LANG", [nslocale UTF8String], 0);
+	CFRelease (cflocale);
 }
