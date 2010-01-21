@@ -655,6 +655,10 @@ cocoa_menu_connect (GtkWidget *menu,
 		    NSMenu*    cocoa_menu)
 {
 	[cocoa_menu retain];
+
+	if (cocoa_menu_quark == 0)
+		cocoa_menu_quark = g_quark_from_static_string ("NSMenu");
+	
 	g_object_set_qdata_full (G_OBJECT (menu), cocoa_menu_quark,
 				 cocoa_menu,
 				 (GDestroyNotify) cocoa_menu_free);
@@ -983,6 +987,9 @@ cocoa_menu_item_connect (GtkWidget*   menu_item,
 	GNSMenuItem* old_item = cocoa_menu_item_get (menu_item);
 
 	[cocoa_item retain];
+
+	if (cocoa_menu_item_quark == 0)
+		cocoa_menu_item_quark = g_quark_from_static_string ("NSMenuItem");
 
 	g_object_set_qdata_full (G_OBJECT (menu_item), cocoa_menu_item_quark,
 				 cocoa_item,
