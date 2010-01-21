@@ -2520,9 +2520,23 @@ Route::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 		return 0;
 	}
 
-	if (session_state_changing || !_active || n_inputs() == ChanCount::ZERO)  {
+	if (!_active || n_inputs() == ChanCount::ZERO)  {
 		silence (nframes);
 		return 0;
+	}
+	if (session_state_changing) {
+		if (_session.transport_speed() != 0.0f) {
+			/* we're rolling but some state is changing (e.g. our diskstream contents)
+			   so we cannot use them. Be silent till this is over.
+			   
+			   XXX note the absurdity of ::no_roll() being called when we ARE rolling!
+			*/
+			silence (nframes);
+			return 0;
+		}
+		/* we're really not rolling, so we're either delivery silence or actually
+		   monitoring, both of which are safe to do while session_state_changing is true.
+		*/
 	}
 
 	_amp->apply_gain_automation (false);
