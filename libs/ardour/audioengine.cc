@@ -428,7 +428,6 @@ AudioEngine::jack_bufsize_callback (nframes_t nframes)
 	_usecs_per_cycle = (int) floor ((((double) nframes / frame_rate())) * 1000000.0);
 	last_monitor_check = 0;
 
-	cerr << "bufsize: Set Port buffer size to " << nframes << endl;
 	Port::set_buffer_size (nframes);
 
 	boost::shared_ptr<Ports> p = ports.reader();

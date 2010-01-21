@@ -1019,8 +1019,7 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags *ioActionFlags,
 		error << _("AUPlugin: render callback called illegally!") << endmsg;
 		return kAudioUnitErr_CannotDoInCurrentContext;
 	}
-
-	for (uint32_t i = 0; i < current_maxbuf; ++i) {
+	for (uint32_t i = 0; i < ioData->mNumberBuffers; ++i) {
 		ioData->mBuffers[i].mNumberChannels = 1;
 		ioData->mBuffers[i].mDataByteSize = sizeof (Sample) * inNumberFrames;
 		ioData->mBuffers[i].mData = (*current_buffers)[i] + cb_offset + current_offset;

@@ -2266,7 +2266,7 @@ Route::handle_transport_stopped (bool abort_ignored, bool did_locate, bool can_f
 			if (Config->get_plugins_stop_with_transport() && can_flush_redirects) {
 				(*i)->deactivate ();
 				(*i)->activate ();
-			}
+			} 
 			
 			(*i)->transport_stopped (now);
 		}
