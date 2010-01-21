@@ -534,3 +534,8 @@ VSTPluginInfo::load (Session& session)
 		return PluginPtr ((Plugin*) 0);
 	}
 }
+
+VSTPluginInfo::VSTPluginInfo()
+{
+	type = ARDOUR::VST;
+}
