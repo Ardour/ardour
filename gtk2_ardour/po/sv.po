@@ -907,7 +907,7 @@ msgstr "Spara mall..."
 
 #: ../ardour_ui_ed.cc:118
 msgid "Export session to audiofile..."
-msgstr "Exportera sessionen till ljudfil"
+msgstr "Exportera sessionen till en ljudfil..."
 
 #: ../ardour_ui_ed.cc:121
 msgid "Export selection to audiofile..."
@@ -4350,10 +4350,6 @@ msgstr "Dither-typ"
 msgid "Export CD Marker File Only"
 msgstr "Exportera endast CD-markörsfil"
 
-#: ../export_dialog.cc:111
-msgid "Export to File"
-msgstr "Exportera till fil"
-
 #: ../export_dialog.cc:112 ../option_editor.cc:82 ../option_editor.cc:83
 msgid "Browse"
 msgstr "Bläddra"
@@ -4981,7 +4977,7 @@ msgstr "*Kommentarer"
 
 #: ../mixer_strip.cc:859
 msgid ": comment editor"
-msgstr ""
+msgstr ": kommentar"
 
 #: ../mixer_strip.cc:953
 msgid "Grp"
@@ -7735,11 +7731,11 @@ msgstr "Nya insticksprogram är aktiverade"
 
 #: gtk2_ardour/editor_actions.cc:393
 msgid "Add 1 Range Marker"
-msgstr "Lägga till 1 omfångsmarkör"
+msgstr "Lägg till 1 omfångsmarkör"
 
 #: gtk2_ardour/editor_actions.cc:396
 msgid "Add Range Marker(s)"
-msgstr "Lägga till omfångsmarkörer"
+msgstr "Lägg till omfångsmarkörer"
 
 #: gtk2_ardour/ardour_ui_ed.cc:597
 msgid "Auto Rebind Controls"
@@ -7945,3 +7941,94 @@ msgstr "Ny CD-spårsmarkör"
 #: gtk2_ardour/engine_dialog.cc:157
 msgid "Buffer size"
 msgstr "Buffertstorlek"
+
+
+#: gtk2_ardour/ardour_ui_ed.cc:150
+msgid "Export selected range to audiofile..."
+msgstr "Exportera valt omfång till en ljudfil..."
+
+#: gtk2_ardour/editor_actions.cc:500
+msgid "Export selected regions to audiofile..."
+msgstr "Exportera valda regioner till en ljudfil..."
+
+#: gtk2_ardour/ardour_ui_ed.cc:154
+msgid "Export range markers to multiple audiofiles..."
+msgstr "Exportera valda omfångsmarkörer till ljudfiler..."
+
+#: gtk2_ardour/export_range_markers_dialog.cc:42
+msgid "Export to Directory"
+msgstr "Exportera till katalog"
+
+#: gtk2_ardour/export_range_markers_dialog.cc:41
+msgid "ardour: export ranges"
+msgstr "ardour: exportera omfång"
+
+#: gtk2_ardour/export_region_dialog.cc:35
+#: gtk2_ardour/export_session_dialog.cc:29
+msgid "Export to File"
+msgstr "Exportera till fil"
+
+#: gtk2_ardour/route_ui.cc:90
+msgid "Mute this track"
+msgstr "Tysta detta spår"
+
+#: gtk2_ardour/route_ui.cc:95
+msgid "Mute other (non-soloed) tracks"
+msgstr "Tysta andra (icke-solade) spår"
+
+#: gtk2_ardour/mixer_strip.cc:209
+msgid "Mix group"
+msgstr "Mixgrupp"
+
+#: gtk2_ardour/mixer_strip.cc:168
+msgid "Select metering point"
+msgstr "Välj nivåmätningskälla"
+
+#: gtk2_ardour/panner_ui.cc:398
+#, c-format
+msgid "panner for channel %zu"
+msgstr "panorering för kanal %zu"
+
+#: gtk2_ardour/add_route_dialog.cc:269
+msgid "3 Channel"
+msgstr "3 kanaler"
+
+#: gtk2_ardour/add_route_dialog.cc:273
+msgid "4 Channel"
+msgstr "4 kanaler"
+
+#: gtk2_ardour/add_route_dialog.cc:277
+msgid "5 Channel"
+msgstr "5 kanaler"
+
+#: gtk2_ardour/add_route_dialog.cc:281
+msgid "6 Channel"
+msgstr "6 kanaler"
+
+#: gtk2_ardour/add_route_dialog.cc:285
+msgid "8 Channel"
+msgstr "8 kanaler"
+
+#: gtk2_ardour/add_route_dialog.cc:289
+msgid "12 Channel"
+msgstr "12 kanaler"
+
+#: gtk2_ardour/add_route_dialog.cc:293
+msgid "Custom"
+msgstr "Manuellt"
+
+
+#: gtk2_ardour/editor_route_list.cc:425 gtk2_ardour/mixer_ui.cc:972
+msgid "Show Tracks With Regions Under Playhead"
+msgstr "Visa spår med regioner under startmarkören"
+
+#: gtk2_ardour/about.cc:222
+msgid ""
+"%1\n"
+"(built from revision %2)"
+msgstr ""
+"%1\n"
+"(kompilerat från revision %2)"
+
+
+
