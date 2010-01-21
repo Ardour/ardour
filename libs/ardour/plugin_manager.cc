@@ -33,6 +33,7 @@
 #include <glibmm/miscutils.h>
 
 #include <pbd/pathscanner.h>
+#include <pbd/whitespace.h>
 
 #include <ardour/ladspa.h>
 #include <ardour/session.h>
@@ -593,7 +594,7 @@ PluginManager::save_statuses ()
 			break;
 		}
 		
-		ofs << ' ' << (*i).unique_id << ' ';
+		ofs << ' ';
 
 		switch ((*i).status) {
 		case Normal:
@@ -606,6 +607,10 @@ PluginManager::save_statuses ()
 			ofs << "Hidden";
 			break;
 		}
+
+		ofs << ' ';
+
+		ofs << (*i).unique_id;
 
 		ofs << endl;
 	}
@@ -625,10 +630,11 @@ PluginManager::load_statuses ()
 	}
 	
 	std::string stype;
-	std::string id;
 	std::string sstatus;
+	std::string id;
 	PluginType type;
 	PluginStatusType status;
+	char buf[1024];
 
 	while (ifs) {
 
@@ -637,15 +643,31 @@ PluginManager::load_statuses ()
 			break;
 
 		}
-		ifs >> id;
-		if (!ifs) {
-			break;
-		}
 
 		ifs >> sstatus;
 		if (!ifs) {
 			break;
 
+		}
+
+		/* rest of the line is the plugin ID */
+
+		ifs.getline (buf, sizeof (buf), '\n');
+		if (!ifs) {
+			break;
+		}
+
+		if (sstatus == "Normal") {
+			status = Normal;
+		} else if (sstatus == "Favorite") {
+			status = Favorite;
+		} else if (sstatus == "Hidden") {
+			status = Hidden;
+		} else {
+			error << string_compose (_("unknown plugin status type \"%1\" - all entries ignored"), sstatus)
+				  << endmsg;
+			statuses.clear ();
+			break;
 		}
 
 		if (stype == "LADSPA") {
@@ -662,18 +684,8 @@ PluginManager::load_statuses ()
 			continue;
 		}
 		
-		if (sstatus == "Normal") {
-			status = Normal;
-		} else if (sstatus == "Favorite") {
-			status = Favorite;
-		} else if (sstatus == "Hidden") {
-			status = Hidden;
-		} else {
-			error << string_compose (_("unknown plugin status type \"%1\" - ignored"), sstatus)
-				  << endmsg;
-			continue;
-		}
-
+		id = buf;
+		strip_whitespace_edges (id);
 		set_status (type, id, status);
 	}
 	
