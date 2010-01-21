@@ -2328,6 +2328,7 @@ Route::no_roll (nframes_t nframes, nframes_t start_frame, nframes_t end_frame,
 			   XXX note the absurdity of ::no_roll() being called when we ARE rolling!
 			*/
 			silence (nframes);
+			return 0;
 		}
 		/* we're really not rolling, so we're either delivery silence or actually
 		   monitoring, both of which are safe to do while session_state_changing is true.
