@@ -451,11 +451,11 @@ gdk_quartz_keyval_to_string (guint keyval)
 	case GDK_z:
 		return "z";
 	case GDK_bracketleft:
-		return "]";
+		return "[";
 	case GDK_backslash:
 		return "\\";
 	case GDK_bracketright:
-		return "[";
+		return "]";
 	case GDK_asciicircum:
 		return "^";
 	case GDK_underscore:
@@ -800,7 +800,7 @@ cocoa_menu_item_update_accelerator (NSMenuItem *cocoa_item,
      appear.
   */
   
-  get_menu_label_text (widget, &label);
+  const gchar* ltxt = get_menu_label_text (widget, &label);
   
   if (GTK_IS_ACCEL_LABEL (label) &&
 	    GTK_ACCEL_LABEL (label)->accel_closure)
