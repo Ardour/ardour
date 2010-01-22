@@ -236,7 +236,7 @@ if test x$WITH_NLS != x ; then
 	  # try with just the language spec
 	  just_lang=`echo $l | sed 's/_[A-Z][A-Z]$//'`
 	  if [ -d $GTKQUARTZ_ROOT/share/locale/$just_lang ] ; then
-	      echo "Copying GTK i18n files for $just_lang..."
+	      echo "Copying GTK i18n files for $l..."
 	      cp -r $GTKQUARTZ_ROOT/share/locale/$just_lang $Locale
 	  fi
       fi
@@ -476,7 +476,6 @@ else
 fi
 
 echo "Building DMG ..."
-exit 0
 
 # UC_DMG=$APPNAME-${release_version}-${svn_version}-UC.dmg
 # FINAL_DMG=$APPNAME-${release_version}-${svn_version}.dmg
