@@ -27,7 +27,9 @@
                <menuitem action='CleanupUnused'/>
                <menuitem action='FlushWastebasket'/>
            </menu>
+#ifndef GTKOSX
            <separator/>
+#endif
            <menuitem action='Quit'/>
         </menu>
 
@@ -426,7 +428,6 @@
                <menuitem action='ToggleKeyEditor'/>
                <menuitem action='ToggleThemeManager'/>
                <menuitem action='ToggleOptionsEditor'/>
-   	       <separator/>
         </menu>
 
         <menu name='Options' action='Options'>
