@@ -12,6 +12,14 @@ print_event (GdkEvent* event)
 	cerr << "Event: type = " << event->type << ' ';
 
 	switch (event->type) {
+	case GDK_2BUTTON_PRESS:
+		cerr << "2-Button press, button = " 
+		     << event->button.button
+		     << " state "
+		     << event->button.state 
+		     << endl;
+		break;
+
 	case GDK_BUTTON_PRESS:
 		cerr << "Button press, button = " 
 		     << event->button.button

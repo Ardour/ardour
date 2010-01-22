@@ -280,6 +280,7 @@
 	      <menuitem action='region-fill-track'/>
 	      <separator/>
 	      <menuitem action='loop-region'/>
+	      <menuitem action='set-loop-from-region'/>
 	      <menuitem action='set-punch-from-region'/>
 	      <menuitem action='add-range-marker-from-region'/>
 	      <menuitem action='add-range-markers-from-region'/>
