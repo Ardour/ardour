@@ -249,11 +249,11 @@ Track::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 	if (session_state_changing) {
 		if (_session.transport_speed() != 0.0f) {
 			/* we're rolling but some state is changing (e.g. our diskstream contents)
-			   so we cannot use them. Be silent till this is over.
+			   so we cannot use them. Be silent till this is over. Don't declick.
 
 			   XXX note the absurdity of ::no_roll() being called when we ARE rolling!
 			*/
-			passthru_silence (start_frame, end_frame, nframes, 0, false);
+			passthru_silence (start_frame, end_frame, nframes, 0);
 			return 0;
 		}
 		/* we're really not rolling, so we're either delivery silence or actually
