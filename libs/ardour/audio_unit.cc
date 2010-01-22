@@ -697,6 +697,7 @@ void
 AUPlugin::deactivate ()
 {
 	unit->GlobalReset ();
+	initialized = false;
 }
 
 void
@@ -734,6 +735,12 @@ int32_t
 AUPlugin::configure_io (int32_t in, int32_t out)
 {
 	AudioStreamBasicDescription streamFormat;
+	bool was_initialized = initialized;
+
+	if (initialized) {
+		unit->Uninitialize ();
+		initialized = false;
+	}
 
 	streamFormat.mSampleRate = _session.frame_rate();
 	streamFormat.mFormatID = kAudioFormatLinearPCM;
@@ -766,7 +773,15 @@ AUPlugin::configure_io (int32_t in, int32_t out)
 		return -1;
 	}
 
-	return Plugin::configure_io (in, out);
+	int ret = Plugin::configure_io (in, out);
+
+	if (ret == 0) {
+		if (was_initialized) {
+			activate ();
+		}
+	}
+
+	return ret;
 }
 
 int32_t
@@ -1019,10 +1034,12 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags *ioActionFlags,
 		error << _("AUPlugin: render callback called illegally!") << endmsg;
 		return kAudioUnitErr_CannotDoInCurrentContext;
 	}
-	for (uint32_t i = 0; i < ioData->mNumberBuffers; ++i) {
+	uint32_t limit = min ((uint32_t) ioData->mNumberBuffers, current_maxbuf);
+	for (uint32_t i = 0; i < limit; ++i) {
 		ioData->mBuffers[i].mNumberChannels = 1;
 		ioData->mBuffers[i].mDataByteSize = sizeof (Sample) * inNumberFrames;
 		ioData->mBuffers[i].mData = (*current_buffers)[i] + cb_offset + current_offset;
+		// cerr << "chn " << i << " rendering from " << ioData->mBuffers[i].mData << endl;
 	}
 
 	cb_offset += inNumberFrames;
@@ -1041,9 +1058,10 @@ AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, 
 	current_offset = offset;
 	cb_offset = 0;
 
-	buffers->mNumberBuffers = maxbuf;
+	buffers->mNumberBuffers = min ((uint32_t) output_channels, maxbuf);
+	// cerr << "Will render " << buffers->mNumberBuffers << " channels\n";
 
-	for (uint32_t i = 0; i < maxbuf; ++i) {
+	for (uint32_t i = 0; i < buffers->mNumberBuffers; ++i) {
 		buffers->mBuffers[i].mNumberChannels = 1;
 		buffers->mBuffers[i].mDataByteSize = nframes * sizeof (Sample);
 		buffers->mBuffers[i].mData = 0;
@@ -1056,9 +1074,12 @@ AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, 
 
 		current_maxbuf = 0;
 		frames_processed += nframes;
-		
-		for (uint32_t i = 0; i < maxbuf; ++i) {
+
+		uint32_t limit = min ((uint32_t) buffers->mNumberBuffers, maxbuf);
+
+		for (uint32_t i = 0; i < limit; ++i) {
 			if (bufs[i] + offset != buffers->mBuffers[i].mData) {
+				// cerr << "chn " << i << " rendered into " << bufs[i]+offset << endl;
 				memcpy (bufs[i]+offset, buffers->mBuffers[i].mData, nframes * sizeof (Sample));
 			}
 		}
@@ -2277,11 +2298,12 @@ AUPluginInfo::get_names (CAComponentDescription& comp_desc, std::string& name, G
 	if (colon) {
 		name = str.substr (colon+1);
 		maker = str.substr (0, colon);
-		// strip_whitespace_edges (maker);
-		// strip_whitespace_edges (name);
+		strip_whitespace_edges (maker);
+		strip_whitespace_edges (name);
 	} else {
 		name = str;
 		maker = "unknown";
+		strip_whitespace_edges (name);
 	}
 }
 
