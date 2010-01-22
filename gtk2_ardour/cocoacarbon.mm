@@ -96,9 +96,7 @@ set_language_preference ()
 	/* how to get language preferences with CoreFoundation
 	 */
 
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-	NSUserDefaults* defs = [NSUserDefaults standardUserDefaults];
-	NSArray* languages = [defs objectForKey:@"AppleLanguages"];
+	NSArray* languages = [[NSUserDefaults standardUserDefaults] objectForKey:@"AppleLanguages"];
 	
 	/* push into LANGUAGE */
 
@@ -113,16 +111,9 @@ set_language_preference ()
 			}
 		}
 		NSRange r = { 0, count };
-		NSString* s = [[languages subarrayWithRange:r]
-			       componentsJoinedByString:@":"];
-		cout << "LANGUAGE set to " << [s UTF8String] << endl;
-		setenv ("LANGUAGE", [s UTF8String], 0);
-		[s release];
+		setenv ("LANGUAGE", [[[languages subarrayWithRange:r] componentsJoinedByString:@":"] UTF8String], 0);
+		cout << "LANGUAGE set to " << getenv ("LANGUAGE") << endl;
 	}
-
-	/* done */
-
-	[pool release];
 
 	/* now get AppleLocale value and use that for LANG */
 

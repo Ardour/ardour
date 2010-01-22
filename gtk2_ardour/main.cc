@@ -74,7 +74,7 @@ fixup_bundle_environment ()
 	if (!getenv ("ARDOUR_BUNDLED")) {
 		return;
 	}
-
+	
 	set_language_preference ();
 
 	char execpath[MAXPATHLEN+1];
