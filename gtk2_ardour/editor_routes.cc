@@ -81,6 +81,10 @@ EditorRoutes::EditorRoutes (Editor* e)
 
 	rec_state_column->add_attribute(rec_col_renderer->property_active(), _columns.rec_enabled);
 	rec_state_column->add_attribute(rec_col_renderer->property_visible(), _columns.is_track);
+	rec_state_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
+	rec_state_column->set_alignment(ALIGN_CENTER);
+	rec_state_column->set_expand(false);
+	rec_state_column->set_fixed_width(15);
 
 	// Mute enable toggle
 	CellRendererPixbufMulti* mute_col_renderer = manage (new CellRendererPixbufMulti());
@@ -92,6 +96,10 @@ EditorRoutes::EditorRoutes (Editor* e)
 	TreeViewColumn* mute_state_column = manage (new TreeViewColumn("M", *mute_col_renderer));
 
 	mute_state_column->add_attribute(mute_col_renderer->property_state(), _columns.mute_state);
+	mute_state_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
+	mute_state_column->set_alignment(ALIGN_CENTER);
+	mute_state_column->set_expand(false);
+	mute_state_column->set_fixed_width(15);
 
 	// Solo enable toggle
 	CellRendererPixbufMulti* solo_col_renderer = manage (new CellRendererPixbufMulti());
@@ -103,6 +111,10 @@ EditorRoutes::EditorRoutes (Editor* e)
 	TreeViewColumn* solo_state_column = manage (new TreeViewColumn("S", *solo_col_renderer));
 
 	solo_state_column->add_attribute(solo_col_renderer->property_state(), _columns.solo_state);
+	solo_state_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
+	solo_state_column->set_alignment(ALIGN_CENTER);
+	solo_state_column->set_expand(false);
+	solo_state_column->set_fixed_width(15);
 
 	// Solo isolate toggle
 	CellRendererPixbufMulti* solo_iso_renderer = manage (new CellRendererPixbufMulti());
@@ -114,14 +126,19 @@ EditorRoutes::EditorRoutes (Editor* e)
 	TreeViewColumn* solo_isolate_state_column = manage (new TreeViewColumn("I", *solo_iso_renderer));
 
 	solo_isolate_state_column->add_attribute(solo_iso_renderer->property_state(), _columns.solo_isolate_state);
+	solo_isolate_state_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
+	solo_isolate_state_column->set_alignment(ALIGN_CENTER);
+	solo_isolate_state_column->set_expand(false);
+	solo_isolate_state_column->set_fixed_width(15);
 
 	_display.append_column (*rec_state_column);
 	_display.append_column (*mute_state_column);
 	_display.append_column (*solo_state_column);
 	_display.append_column (*solo_isolate_state_column);
-	_display.append_column (_("Show"), _columns.visible);
+	
 	_display.append_column (_("Name"), _columns.text);
-
+	_display.append_column (_("Show"), _columns.visible);
+	
 	_display.set_headers_visible (true);
 	_display.set_name ("TrackListDisplay");
 	_display.get_selection()->set_mode (SELECTION_SINGLE);
@@ -130,24 +147,37 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.set_size_request (100, -1);
 	_display.add_object_drag (_columns.route.index(), "routes");
 
-	CellRendererText* name_cell = dynamic_cast<CellRendererText*> (_display.get_column_cell_renderer (5));
+
+	CellRendererText* name_cell = dynamic_cast<CellRendererText*> (_display.get_column_cell_renderer (4));
+
 	assert (name_cell);
 
-	TreeViewColumn* name_column = _display.get_column (5);
+	TreeViewColumn* name_column = _display.get_column (4);
+
 	assert (name_column);
 
 	name_column->add_attribute (name_cell->property_editable(), _columns.name_editable);
+	name_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
+	name_column->set_expand(true);
+	name_column->set_min_width(50);
+
 	name_cell->property_editable() = true;
 	name_cell->signal_edited().connect (sigc::mem_fun (*this, &EditorRoutes::name_edit));
 
-	CellRendererToggle* visible_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (4));
+	// Set the visible column cell renderer to radio toggle
+	CellRendererToggle* visible_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (5));
 
 	visible_cell->property_activatable() = true;
 	visible_cell->property_radio() = false;
 	visible_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRoutes::visible_changed));
-
+	
+	TreeViewColumn* visible_col = dynamic_cast<TreeViewColumn*> (_display.get_column (5));
+	visible_col->set_sizing(TREE_VIEW_COLUMN_AUTOSIZE);
+	visible_col->set_expand(false);
+	
 	_model->signal_row_deleted().connect (sigc::mem_fun (*this, &EditorRoutes::route_deleted));
 	_model->signal_rows_reordered().connect (sigc::mem_fun (*this, &EditorRoutes::reordered));
+	
 	_display.signal_button_press_event().connect (sigc::mem_fun (*this, &EditorRoutes::button_press), false);
 
 	Route::SyncOrderKeys.connect (*this, ui_bind (&EditorRoutes::sync_order_keys, this, _1), gui_context());
@@ -378,6 +408,9 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		row[_columns.tv] = *x;
 		row[_columns.route] = (*x)->route ();
 		row[_columns.is_track] = (boost::dynamic_pointer_cast<Track> ((*x)->route()) != 0);
+		row[_columns.mute_state] = (*x)->route()->muted();
+		row[_columns.solo_state] = (*x)->route()->soloed();
+		row[_columns.solo_isolate_state] = (*x)->route()->solo_isolated();
 
 		_ignore_reorder = true;
 
@@ -702,7 +735,35 @@ EditorRoutes::button_press (GdkEventButton* ev)
 		show_menu ();
 		return true;
 	}
+	
+	//Scroll editor canvas to selected track
+	if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+		
+		TreeModel::Path path;
+		TreeViewColumn *tvc;
+		int cell_x;
+		int cell_y;
+		
+		_display.get_path_at_pos ((int) ev->x, (int) ev->y, path, tvc, cell_x, cell_y);
 
+		// Get the model row.
+		Gtk::TreeModel::Row row = *_model->get_iter (path);
+		
+		TimeAxisView *tv = row[_columns.tv];
+		
+		int y_pos = tv->y_position();
+		
+		//Clamp the y pos so that we do not extend beyond the canvas full height.
+		if (_editor->full_canvas_height - y_pos < _editor->_canvas_height){
+		    y_pos = _editor->full_canvas_height - _editor->_canvas_height;
+		}
+		
+		//Only scroll to if the track is visible
+		if(y_pos != -1){
+		    _editor->reset_y_origin (y_pos);
+		}
+	}
+	
 	return false;
 }
 
@@ -747,6 +808,7 @@ EditorRoutes::initial_display ()
 		_no_redisplay = true;
 
 		for (i = rows.begin(); i != rows.end(); ++i) {
+
 			TimeAxisView *tv =  (*i)[_columns.tv];
 			RouteTimeAxisView *rtv;
 
