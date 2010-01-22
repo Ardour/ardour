@@ -86,7 +86,12 @@ class PluginManager : public boost::noncopyable {
 	    }
 
 	    bool operator<(const PluginStatus& other) const {
-		    return other.type < type || other.unique_id < unique_id;
+		    if (other.type < type) {
+			    return true;
+		    } else if (other.type == type && other.unique_id < unique_id) {
+			    return true;
+		    }
+		    return false;
 	    }
 	};
 	typedef std::set<PluginStatus> PluginStatusList;
