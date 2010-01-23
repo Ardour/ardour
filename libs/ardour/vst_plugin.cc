@@ -501,10 +501,6 @@ VSTPlugin::print_parameter (uint32_t param, char *buf, uint32_t len) const
 	memmove (buf, first_nonws, strlen (buf) - (first_nonws - buf) + 1);
 }
 
-VSTPluginInfo::VSTPluginInfo()
-{
-}
-
 PluginPtr
 VSTPluginInfo::load (Session& session)
 {
