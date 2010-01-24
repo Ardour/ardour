@@ -216,6 +216,10 @@ OSC::start ()
 void
 OSC::thread_init ()
 {
+	char* c = new char[4];
+	strcpy (c, X_("OSC"));
+	pthread_set_name (c);
+
 	if (_osc_unix_server) {
 		Glib::RefPtr<IOSource> src = IOSource::create (lo_server_get_socket_fd (_osc_unix_server), IO_IN|IO_HUP|IO_ERR);
 		src->connect (sigc::bind (sigc::mem_fun (*this, &OSC::osc_input_handler), _osc_unix_server));
