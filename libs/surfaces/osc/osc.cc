@@ -231,6 +231,9 @@ OSC::thread_init ()
 		remote_server = src->gobj();
 		g_source_ref (remote_server);
 	}
+
+	PBD::notify_gui_about_thread_creation (X_("gui"), pthread_self(), X_("OSC"), 2048);
+	SessionEvent::create_per_thread_pool (X_("OSC"), 128);
 }
 
 int
