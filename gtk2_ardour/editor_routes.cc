@@ -137,7 +137,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.append_column (*solo_isolate_state_column);
 	
 	_display.append_column (_("Name"), _columns.text);
-	_display.append_column (_("Show"), _columns.visible);
+	_display.append_column (_("V"), _columns.visible);
 	
 	_display.set_headers_visible (true);
 	_display.set_name ("TrackListDisplay");
@@ -146,7 +146,6 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.set_rules_hint (true);
 	_display.set_size_request (100, -1);
 	_display.add_object_drag (_columns.route.index(), "routes");
-
 
 	CellRendererText* name_cell = dynamic_cast<CellRendererText*> (_display.get_column_cell_renderer (4));
 
@@ -172,8 +171,10 @@ EditorRoutes::EditorRoutes (Editor* e)
 	visible_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRoutes::visible_changed));
 	
 	TreeViewColumn* visible_col = dynamic_cast<TreeViewColumn*> (_display.get_column (5));
-	visible_col->set_sizing(TREE_VIEW_COLUMN_AUTOSIZE);
 	visible_col->set_expand(false);
+	visible_col->set_sizing(TREE_VIEW_COLUMN_FIXED);
+	visible_col->set_fixed_width(30);
+	visible_col->set_alignment(ALIGN_CENTER);
 	
 	_model->signal_row_deleted().connect (sigc::mem_fun (*this, &EditorRoutes::route_deleted));
 	_model->signal_rows_reordered().connect (sigc::mem_fun (*this, &EditorRoutes::reordered));
@@ -201,8 +202,6 @@ EditorRoutes::on_tv_rec_enable_toggled (Glib::ustring const & path_string)
 	// Get the model row that has been toggled.
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 
-	row[_columns.name_editable] = !row[_columns.rec_enabled];
-	
 	TimeAxisView *tv = row[_columns.tv];
 	AudioTimeAxisView *atv = dynamic_cast<AudioTimeAxisView*> (tv);
 
@@ -1076,5 +1075,4 @@ EditorRoutes::show_tracks_with_regions_at_playhead ()
 	}
 
 	resume_redisplay ();
-	
 }
