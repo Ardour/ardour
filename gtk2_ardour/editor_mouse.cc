@@ -616,6 +616,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	Editing::MouseMode eff = effective_mouse_mode ();
 
+	/* special case: allow drag of region fade in/out in object mode with join object/range enabled */
+	if (item_type == FadeInHandleItem || item_type == FadeOutHandleItem) {
+		eff = MouseObject;
+	}
+
 	switch (eff) {
 	case MouseRange:
 		switch (item_type) {
@@ -1542,6 +1547,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 				rect->property_fill_color_rgba() = 0;
 				rect->property_outline_pixels() = 1;
 			}
+			track_canvas->get_window()->set_cursor (*grabber_cursor);
 		}
 		break;
 
@@ -1676,6 +1682,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 				rect->property_outline_pixels() = 0;
 			}
 		}
+		track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 		break;
 
 	case AutomationTrackItem:
