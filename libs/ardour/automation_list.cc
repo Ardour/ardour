@@ -219,6 +219,7 @@ AutomationList::thaw ()
 	ControlList::thaw();
 
 	if (_changed_when_thawed) {
+		_changed_when_thawed = false;
 		StateChanged(); /* EMIT SIGNAL */
 	}
 }

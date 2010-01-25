@@ -1003,20 +1003,19 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 				rv->region()->set_layer (dest_layer);
 				rv->region()->set_pending_explicit_relayer (true);
 			}
+			
+			/* freeze playlist to avoid lots of relayering in the case of a multi-region drag */
 
-			insert_result = modified_playlists.insert (playlist);
-
-			if (insert_result.second) {
-				_editor->session()->add_command (new MementoCommand<Playlist>(*playlist, &playlist->get_state(), 0));
-			}
-			/* freeze to avoid lots of relayering in the case of a multi-region drag */
 			frozen_insert_result = frozen_playlists.insert(playlist);
 
 			if (frozen_insert_result.second) {
 				playlist->freeze();
 			}
 
+			XMLNode& before (rv->region()->get_state());
 			rv->region()->set_position (where, (void*) this);
+			_editor->session()->add_command (new MementoCommand<Region>(*rv->region(), &before, &playlist->get_state()));
+
 		}
 
 		if (changed_tracks && !_copy) {

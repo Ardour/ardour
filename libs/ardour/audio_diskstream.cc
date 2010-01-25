@@ -1451,7 +1451,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 		   process. this problem is deferred to the UI.
 		 */
 
-		_playlist->Modified();
+		_playlist->LayeringChanged(); // XXX this may not get the UI to do the right thing
 
 	} else {
 

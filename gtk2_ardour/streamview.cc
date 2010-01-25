@@ -169,20 +169,12 @@ StreamView::set_samples_per_unit (gdouble spp)
 }
 
 void
-StreamView::add_region_view_weak (boost::weak_ptr<Region> r)
+StreamView::add_region_view (boost::weak_ptr<Region> wr)
 {
-	boost::shared_ptr<Region> sp (r.lock());
-
-	if (sp) {
-		add_region_view (sp);
+	boost::shared_ptr<Region> r (wr.lock());
+	if (!r) {
+		return;
 	}
-}
-
-
-void
-StreamView::add_region_view (boost::shared_ptr<Region> r)
-{
-	ENSURE_GUI_THREAD (*this, &StreamView::add_region_view_weak, boost::weak_ptr<Region>(r));
 
 	add_region_view_internal (r, true);
 
@@ -229,9 +221,9 @@ StreamView::undisplay_diskstream ()
 void
 StreamView::display_diskstream (boost::shared_ptr<Diskstream> ds)
 {
-	playlist_change_connection.disconnect();
-	playlist_changed (ds);
-	ds->PlaylistChanged.connect (playlist_change_connection, boost::bind (&StreamView::playlist_changed_weak, this, boost::weak_ptr<Diskstream> (ds)), gui_context());
+	playlist_switched_connection.disconnect();
+	playlist_switched (ds);
+	ds->PlaylistChanged.connect (playlist_switched_connection, boost::bind (&StreamView::playlist_switched, this, boost::weak_ptr<Diskstream> (ds)), gui_context());
 }
 
 void
@@ -292,20 +284,13 @@ StreamView::layer_regions()
 }
 
 void
-StreamView::playlist_modified_weak (boost::weak_ptr<Diskstream> ds)
+StreamView::playlist_layered (boost::weak_ptr<Diskstream> wds)
 {
-	boost::shared_ptr<Diskstream> sp (ds.lock());
+	boost::shared_ptr<Diskstream> ds (wds.lock());
 
-	if (sp) {
-		playlist_modified (sp);
+	if (!ds) {
+		return;
 	}
-}
-
-void
-StreamView::playlist_modified (boost::shared_ptr<Diskstream> ds)
-{
-	/* we do not allow shared_ptr<T> to be bound to slots */
-	ENSURE_GUI_THREAD (*this, &StreamView::playlist_modified_weak, ds)
 
 	/* update layers count and the y positions and heights of our regions */
 	if (ds->playlist()) {
@@ -322,18 +307,13 @@ StreamView::playlist_modified (boost::shared_ptr<Diskstream> ds)
 }
 
 void
-StreamView::playlist_changed_weak (boost::weak_ptr<Diskstream> ds)
+StreamView::playlist_switched (boost::weak_ptr<Diskstream> wds)
 {
-	boost::shared_ptr<Diskstream> sp (ds.lock());
-	if (sp) {
-		playlist_changed (sp);
-	}
-}
+	boost::shared_ptr<Diskstream> ds (wds.lock());
 
-void
-StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
-{
-	ENSURE_GUI_THREAD (*this, &StreamView::playlist_changed_weak, boost::weak_ptr<Diskstream> (ds));
+	if (!ds) {
+		return;
+	}
 
 	/* disconnect from old playlist */
 
@@ -353,8 +333,8 @@ StreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 
 	/* catch changes */
 
-	ds->playlist()->Modified.connect (playlist_connections, boost::bind (&StreamView::playlist_modified_weak, this, ds), gui_context());
-	ds->playlist()->RegionAdded.connect (playlist_connections, ui_bind (&StreamView::add_region_view_weak, this, _1), gui_context());
+	ds->playlist()->LayeringChanged.connect (playlist_connections, boost::bind (&StreamView::playlist_layered, this, boost::weak_ptr<Diskstream>(ds)), gui_context());
+	ds->playlist()->RegionAdded.connect (playlist_connections, ui_bind (&StreamView::add_region_view, this, _1), gui_context());
 	ds->playlist()->RegionRemoved.connect (playlist_connections, ui_bind (&StreamView::remove_region_view, this, _1), gui_context());
 }
 

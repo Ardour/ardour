@@ -251,8 +251,9 @@ Playlist::init (bool hide)
 {
 	g_atomic_int_set (&block_notifications, 0);
 	g_atomic_int_set (&ignore_state_changes, 0);
-	pending_modified = false;
+	pending_contents_change = false;
 	pending_length = false;
+	pending_layering = false;
 	first_set_state = true;
 	_refcnt = 0;
 	_hidden = hide;
@@ -270,7 +271,7 @@ Playlist::init (bool hide)
 	freeze_length = 0;
 	_explicit_relayering = false;
 
-	Modified.connect_same_thread (*this, boost::bind (&Playlist::mark_session_dirty, this));
+	ContentsChanged.connect_same_thread (*this, boost::bind (&Playlist::mark_session_dirty, this));
 }
 
 Playlist::~Playlist ()
@@ -343,13 +344,28 @@ Playlist::release_notifications ()
 }
 
 void
-Playlist::notify_modified ()
+Playlist::notify_contents_changed ()
 {
 	if (holding_state ()) {
-		pending_modified = true;
+		pending_contents_change = true;
 	} else {
-		pending_modified = false;
-		Modified(); /* EMIT SIGNAL */
+		pending_contents_change = false;
+		cerr << _name << "send contents change @ " << get_microseconds() << endl;
+		ContentsChanged(); /* EMIT SIGNAL */
+		cerr << _name << "done with cc @ " << get_microseconds() << endl;
+	}
+}
+
+void
+Playlist::notify_layering_changed ()
+{
+	if (holding_state ()) {
+		pending_layering = true;
+	} else {
+		pending_layering = false;
+		cerr << _name << "send layering @ " << get_microseconds() << endl;
+		LayeringChanged(); /* EMIT SIGNAL */
+		cerr << _name << "done with layering @ " << get_microseconds() << endl;
 	}
 }
 
@@ -358,7 +374,7 @@ Playlist::notify_region_removed (boost::shared_ptr<Region> r)
 {
 	if (holding_state ()) {
 		pending_removes.insert (r);
-		pending_modified = true;
+		pending_contents_change = true;
 		pending_length = true;
 	} else {
 		/* this might not be true, but we have to act
@@ -366,9 +382,9 @@ Playlist::notify_region_removed (boost::shared_ptr<Region> r)
 		*/
 		pending_length = false;
 		LengthChanged (); /* EMIT SIGNAL */
-		pending_modified = false;
+		pending_contents_change = false;
 		RegionRemoved (boost::weak_ptr<Region> (r)); /* EMIT SIGNAL */
-		Modified (); /* EMIT SIGNAL */
+		ContentsChanged (); /* EMIT SIGNAL */
 	}
 }
 
@@ -399,14 +415,16 @@ Playlist::notify_region_added (boost::shared_ptr<Region> r)
 
 	if (holding_state()) {
 		pending_adds.insert (r);
-		pending_modified = true;
+		pending_contents_change = true;
 		pending_length = true;
 	} else {
 		pending_length = false;
 		LengthChanged (); /* EMIT SIGNAL */
-		pending_modified = false;
+		pending_contents_change = false;
 		RegionAdded (boost::weak_ptr<Region> (r)); /* EMIT SIGNAL */
-		Modified (); /* EMIT SIGNAL */
+		cerr << _name << "send3 contents changed @ " << get_microseconds() << endl;
+		ContentsChanged (); /* EMIT SIGNAL */
+		cerr << _name << "done contents changed @ " << get_microseconds() << endl;
 	}
 }
 
@@ -418,8 +436,10 @@ Playlist::notify_length_changed ()
 	} else {
 		pending_length = false;
 		LengthChanged(); /* EMIT SIGNAL */
-		pending_modified = false;
-		Modified (); /* EMIT SIGNAL */
+		pending_contents_change = false;
+		cerr << _name << "send4 contents change @ " << get_microseconds() << endl;
+		ContentsChanged (); /* EMIT SIGNAL */
+		cerr << _name << "done contents change @ " << get_microseconds() << endl;
 	}
 }
 
@@ -428,13 +448,23 @@ Playlist::flush_notifications ()
 {
 	set<boost::shared_ptr<Region> > dependent_checks_needed;
 	set<boost::shared_ptr<Region> >::iterator s;
-	uint32_t n = 0;
+	uint32_t regions_changed = false;
+	bool check_length = false;
+	nframes64_t old_length = 0;
 
 	if (in_flush) {
 		return;
 	}
 
 	in_flush = true;
+
+	if (!pending_bounds.empty() || !pending_removes.empty() || !pending_adds.empty()) {
+		regions_changed = true;
+		if (!pending_length) {
+			old_length = _get_maximum_extent ();
+			check_length = true;
+		}
+	}
 
 	/* we have no idea what order the regions ended up in pending
 	   bounds (it could be based on selection order, for example).
@@ -449,37 +479,42 @@ Playlist::flush_notifications ()
 		if (_session.config.get_layer_model() == MoveAddHigher) {
 			timestamp_layer_op (*r);
 		}
-
-		pending_length = true;
 		dependent_checks_needed.insert (*r);
-
-		n++;
 	}
 
 	for (s = pending_removes.begin(); s != pending_removes.end(); ++s) {
 		remove_dependents (*s);
+		cerr << _name << " sends RegionRemoved\n";
 		RegionRemoved (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
-		n++;
 	}
 
 	for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
+		cerr << _name << " sends RegionAdded\n";
 		RegionAdded (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
 		dependent_checks_needed.insert (*s);
-		n++;
 	}
 
-	if ((freeze_length != _get_maximum_extent()) || pending_length) {
-		pending_length = 0;
+	if (check_length) {
+		if (old_length != _get_maximum_extent()) {
+			pending_length = true;
+			cerr << _name << " length has changed\n";
+		}
+	}
+
+	if (pending_length || (freeze_length != _get_maximum_extent())) {
+		pending_length = false;
+		cerr << _name << " sends LengthChanged\n";
 		LengthChanged(); /* EMIT SIGNAL */
-		n++;
 	}
 
-	if (n || pending_modified) {
+	if (regions_changed || pending_contents_change) {
 		if (!in_set_state) {
 			relayer ();
 		}
-		pending_modified = false;
-		Modified (); /* EMIT SIGNAL */
+		pending_contents_change = false;
+		cerr << _name << " sends 5 contents change @ " << get_microseconds() << endl;
+		ContentsChanged (); /* EMIT SIGNAL */
+		cerr << _name << "done contents change @ " << get_microseconds() << endl;
 	}
 
 	for (s = dependent_checks_needed.begin(); s != dependent_checks_needed.end(); ++s) {
@@ -487,15 +522,24 @@ Playlist::flush_notifications ()
 	}
 
 	if (!pending_range_moves.empty ()) {
+		cerr << _name << " sends RangesMoved\n";
 		RangesMoved (pending_range_moves);
 	}
+	
+	clear_pending ();
 
+	in_flush = false;
+}
+
+void
+Playlist::clear_pending ()
+{
 	pending_adds.clear ();
 	pending_removes.clear ();
 	pending_bounds.clear ();
 	pending_range_moves.clear ();
-
-	in_flush = false;
+	pending_contents_change = false;
+	pending_length = false;
 }
 
 /*************************************************************
@@ -638,6 +682,7 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region)
 {
 	RegionList::iterator i;
 	nframes_t old_length = 0;
+	int ret = -1;
 
 	if (!holding_state()) {
 		old_length = _get_maximum_extent();
@@ -647,6 +692,8 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region)
 		/* unset playlist */
 		region->set_playlist (boost::weak_ptr<Playlist>());
 	}
+
+	/* XXX should probably freeze here .... */
 
 	for (i = regions.begin(); i != regions.end(); ++i) {
 		if (*i == region) {
@@ -668,13 +715,14 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region)
 			}
 
 			notify_region_removed (region);
-			return 0;
+			ret = 0;
+			break;
 		}
 	}
 
+	/* XXX and thaw ... */
 
-
-	return -1;
+	return ret;
 }
 
 void
@@ -1348,6 +1396,11 @@ Playlist::region_changed (Change what_changed, boost::shared_ptr<Region> region)
 		notify_region_moved (region);
 	}
 
+
+	/* don't notify about layer changes, since we are the only object that can initiate
+	   them, and we notify in ::relayer()
+	*/
+
 	if (what_changed & our_interests) {
 		save = true;
 	}
@@ -1381,8 +1434,10 @@ Playlist::clear (bool with_signals)
 	if (with_signals) {
 		pending_length = false;
 		LengthChanged ();
-		pending_modified = false;
-		Modified ();
+		pending_contents_change = false;
+		cerr << _name << "send2 contents change @ " << get_microseconds() << endl;
+		ContentsChanged ();
+		cerr << _name << "done with contents changed @ " << get_microseconds() << endl;
 	}
 
 }
@@ -1842,12 +1897,16 @@ Playlist::set_state (const XMLNode& node, int version)
 
 				Change what_changed = Change (0);
 
-				if (region->set_live_state (*child, version, what_changed, true)) {
-					error << _("Playlist: cannot reset region state from XML") << endmsg;
+				region->freeze ();
+
+				if (region->set_live_state (*child, version, what_changed, false)) {
+					region->thaw ("");
 					continue;
 				}
 
-			} else if ((region = RegionFactory::create (_session, *child, true)) == 0) {
+			} else if ((region = RegionFactory::create (_session, *child, true)) != 0) {
+				region->freeze ();
+			} else {
 				error << _("Playlist: cannot create region from XML") << endmsg;
 				continue;
 			}
@@ -1856,13 +1915,9 @@ Playlist::set_state (const XMLNode& node, int version)
 
 			// So that layer_op ordering doesn't get screwed up
 			region->set_last_layer_op( region->layer());
-
+			region->thaw ("");
 		}
 	}
-
-	notify_modified ();
-
-	thaw ();
 
 	/* update dependents, which was not done during add_region_internal
 	   due to in_set_state being true
@@ -1871,6 +1926,10 @@ Playlist::set_state (const XMLNode& node, int version)
 	for (RegionList::iterator r = regions.begin(); r != regions.end(); ++r) {
 		check_dependents (*r, false);
 	}
+
+	clear_pending (); // this makes thaw() do nothing
+	thaw ();
+	notify_contents_changed ();
 
 	in_set_state--;
 	first_set_state = false;
@@ -1993,11 +2052,7 @@ Playlist::set_edit_mode (EditMode mode)
 void
 Playlist::relayer ()
 {
-	/* don't send multiple Modified notifications
-	   when multiple regions are relayered.
-	*/
-
-	freeze ();
+	bool changed = false;
 
 	/* Build up a new list of regions on each layer, stored in a set of lists
 	   each of which represent some period of time on some layer.  The idea
@@ -2093,21 +2148,17 @@ Playlist::relayer ()
 		for (int k = start_division; k <= end_division; ++k) {
 			layers[j][k].push_back (*i);
 		}
+		
+		if ((*i)->layer() != j) {
+			changed = true;
+		}
 
 		(*i)->set_layer (j);
 	}
 
-	/* sending Modified means that various kinds of layering
-	   models operate correctly at the GUI
-	   level. slightly inefficient, but only slightly.
-
-	   We force a Modified signal here in case no layers actually
-	   changed.
-	*/
-
-	notify_modified ();
-
-	thaw ();
+	if (changed) {
+		notify_layering_changed ();
+	}
 }
 
 /* XXX these layer functions are all deprecated */
@@ -2454,7 +2505,7 @@ Playlist::shuffle (boost::shared_ptr<Region> region, int dir)
 		relayer ();
 		check_dependents (region, false);
 
-		notify_modified();
+		notify_contents_changed();
 	}
 
 }

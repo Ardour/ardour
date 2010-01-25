@@ -2198,6 +2198,8 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	int x, y, xoff, yoff;
 	Gdk::Geometry g;
 
+	// return 0;
+
 	if ((prop = node.property ("id")) != 0) {
 		_id = prop->value ();
 	}
@@ -2355,7 +2357,8 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	if ((prop = node.property ("region-list-sort-type"))) {
-		_regions->reset_sort_type (str2regionlistsorttype(prop->value()), true);
+		RegionListSortType st;
+		_regions->reset_sort_type ((RegionListSortType) string_2_enum (prop->value(), st), true);
 	}
 
 	if ((prop = node.property ("xfades-visible"))) {
@@ -2458,7 +2461,7 @@ Editor::get_state ()
 	node->add_property ("show-measures", _show_measures ? "yes" : "no");
 	node->add_property ("follow-playhead", _follow_playhead ? "yes" : "no");
 	node->add_property ("xfades-visible", _xfade_visibility ? "yes" : "no");
-	node->add_property ("region-list-sort-type", enum2str (_regions->sort_type ()));
+	node->add_property ("region-list-sort-type", enum_2_string (_regions->sort_type ()));
 	node->add_property ("mouse-mode", enum2str(mouse_mode));
 	node->add_property ("internal-edit", _internal_editing ? "yes" : "no");
 	node->add_property ("join-object-range", join_object_range_button.get_active () ? "yes" : "no");

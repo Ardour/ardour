@@ -2454,13 +2454,14 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes64_t pos)
 	double speed = rtv->get_diskstream()->speed();
 
 	XMLNode &before = playlist->get_state();
-	playlist->add_region (RegionFactory::create (rv->region()), (nframes64_t) (pos * speed));
+	boost::shared_ptr<Region> new_region (RegionFactory::create (rv->region()));
+	playlist->add_region (new_region, (nframes64_t) (pos * speed));
 	XMLNode &after = playlist->get_state();
 	_session->add_command(new MementoCommand<Playlist>(*playlist.get(), &before, &after));
 
-	// playlist is frozen, so we have to update manually
+	// playlist is frozen, so we have to update manually XXX this is disgusting
 
-	playlist->Modified(); /* EMIT SIGNAL */
+	playlist->RegionAdded (new_region); /* EMIT SIGNAL */
 }
 
 gint

@@ -40,6 +40,7 @@ setup_gtk_ardour_enums ()
 	ImportMode import_mode;
 	EditPoint edit_point;
 	LayerDisplay layer_display;
+	RegionListSortType region_list_sort_type;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -71,4 +72,16 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (Overlaid);
 	REGISTER_ENUM (Stacked);
 	REGISTER (layer_display);
+
+	REGISTER_ENUM (ByEndInFile);
+	REGISTER_ENUM (ByLength);
+	REGISTER_ENUM (ByName);
+	REGISTER_ENUM (ByPosition);
+	REGISTER_ENUM (BySourceFileCreationDate);
+	REGISTER_ENUM (BySourceFileFS);
+	REGISTER_ENUM (BySourceFileLength);
+	REGISTER_ENUM (BySourceFileName);
+	REGISTER_ENUM (ByStartInFile);
+	REGISTER_ENUM (ByTimestamp);
+	REGISTER (region_list_sort_type);
 }

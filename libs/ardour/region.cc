@@ -1148,6 +1148,7 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 		sscanf (prop->value().c_str(), "%" PRIu32, &val);
 		if (val != _start) {
 			what_changed = Change (what_changed|StartChanged);
+			cerr << _name << " start changed\n";
 			_start = val;
 		}
 	} else {
@@ -1158,6 +1159,7 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 		sscanf (prop->value().c_str(), "%" PRIu32, &val);
 		if (val != _length) {
 			what_changed = Change (what_changed|LengthChanged);
+			cerr << _name << " length changed\n";
 			_last_length = _length;
 			_length = val;
 		}
@@ -1170,6 +1172,7 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 		sscanf (prop->value().c_str(), "%" PRIu32, &val);
 		if (val != _position) {
 			what_changed = Change (what_changed|PositionChanged);
+			cerr << _name << " position changed\n";
 			_last_position = _position;
 			_position = val;
 		}
@@ -1183,6 +1186,7 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 		x = (layer_t) atoi (prop->value().c_str());
 		if (x != _layer) {
 			what_changed = Change (what_changed|LayerChanged);
+			cerr << _name << " layer changed\n";
 			_layer = x;
 		}
 	} else {
@@ -1193,6 +1197,7 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 		sscanf (prop->value().c_str(), "%" PRIu32, &val);
 		if (val != _sync_position) {
 			what_changed = Change (what_changed|SyncOffsetChanged);
+			cerr << _name << " sync changed\n";
 			_sync_position = val;
 		}
 	} else {
@@ -1281,6 +1286,7 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 	}
 
 	if (send) {
+		cerr << _name << ": final change to be sent: " << hex << what_changed << dec << endl;
 		send_change (what_changed);
 	}
 
@@ -1346,12 +1352,13 @@ Region::thaw (const string& /*why*/)
 		recompute_at_end ();
 	}
 
-	StateChanged (what_changed);
+	send_change (what_changed);
 }
 
 void
 Region::send_change (Change what_changed)
 {
+
 	{
 		Glib::Mutex::Lock lm (_lock);
 		if (_frozen) {
@@ -1360,7 +1367,9 @@ Region::send_change (Change what_changed)
 		}
 	}
 
+	cerr << _name << " actually sends " << hex << what_changed << dec << " @" << get_microseconds() << endl;
 	StateChanged (what_changed);
+	cerr << _name << " done with " << hex << what_changed << dec << " @" << get_microseconds() << endl;
 
 	if (!(_flags & DoNotSendPropertyChanges)) {
 
@@ -1370,7 +1379,9 @@ Region::send_change (Change what_changed)
 
 		try {
 			boost::shared_ptr<Region> rptr = shared_from_this();
+			cerr << _name << " actually sends prop change " << hex << what_changed << dec <<  " @ " << get_microseconds() << endl;
 			RegionPropertyChanged (rptr);
+			cerr << _name << " done with prop change  @ " << get_microseconds() << endl;
 		} catch (...) {
 			/* no shared_ptr available, relax; */
 		}

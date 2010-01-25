@@ -150,6 +150,8 @@ private:
 	bool _no_redisplay;
 	std::list<boost::shared_ptr<ARDOUR::Region> > tmp_region_list;
 	PBD::ScopedConnection region_property_connection;
+	bool ignore_region_list_selection_change;
+	bool ignore_selected_region_change;
 };
 
 #endif /* __gtk_ardour_editor_regions_h__ */

@@ -99,8 +99,7 @@ public:
 
 	virtual void update_contents_metrics(boost::shared_ptr<ARDOUR::Region>) {}
 
-	void add_region_view_weak (boost::weak_ptr<ARDOUR::Region> r);
-	void add_region_view (boost::shared_ptr<ARDOUR::Region>);
+	void add_region_view (boost::weak_ptr<ARDOUR::Region>);
 
 	void region_layered (RegionView*);
 	virtual void update_contents_height ();
@@ -135,10 +134,8 @@ protected:
 	void         diskstream_changed ();
 	void         layer_regions ();
 
-	virtual void playlist_changed_weak (boost::weak_ptr<ARDOUR::Diskstream>);
-	virtual void playlist_changed (boost::shared_ptr<ARDOUR::Diskstream>);
-	virtual void playlist_modified_weak (boost::weak_ptr<ARDOUR::Diskstream>);
-	virtual void playlist_modified (boost::shared_ptr<ARDOUR::Diskstream>);
+	virtual void playlist_switched (boost::weak_ptr<ARDOUR::Diskstream>);
+	virtual void playlist_layered (boost::weak_ptr<ARDOUR::Diskstream>);
 
 	virtual void color_handler () = 0;
 
@@ -164,7 +161,7 @@ protected:
 	uint32_t   stream_base_color; ///< Background color
 
 	PBD::ScopedConnectionList playlist_connections;
-	PBD::ScopedConnection playlist_change_connection;
+	PBD::ScopedConnection playlist_switched_connection;
 
 	ARDOUR::layer_t _layers;
 	LayerDisplay    _layer_display;

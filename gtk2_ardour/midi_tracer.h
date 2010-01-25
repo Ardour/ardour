@@ -1,7 +1,6 @@
 #ifndef __ardour_gtk_midi_tracer_h__
 #define __ardour_gtk_midi_tracer_h__
 
-#include <types.h>
 #include <gtkmm/textview.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/togglebutton.h>

@@ -24,6 +24,8 @@
 
 #include <gtkmm2ext/gtk_ui.h>
 
+#include "pbd/stacktrace.h"
+
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/audiofilesource.h"
@@ -202,13 +204,13 @@ AudioStreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 {
 	ENSURE_GUI_THREAD (*this, &AudioStreamView::remove_region_view, weak_r);
 
-	cerr << "a region went way, it appears to be ours (" << this << ")\n";
-
 	boost::shared_ptr<Region> r (weak_r.lock());
 
 	if (!r) {
 		return;
 	}
+
+	cerr << "a region went way, it appears to be ours (" << this << ")\n";
 
 	if (!_trackview.session()->deletion_in_progress()) {
 
@@ -244,46 +246,41 @@ AudioStreamView::undisplay_diskstream ()
 }
 
 void
-AudioStreamView::playlist_modified_weak (boost::weak_ptr<Diskstream> ds)
+AudioStreamView::playlist_layered (boost::weak_ptr<Diskstream> wds)
 {
-	boost::shared_ptr<Diskstream> sp (ds.lock());
-	if (sp) {
-		playlist_modified (sp);
+	boost::shared_ptr<Diskstream> ds (wds.lock());
+
+	if (!ds) {
+		return;
 	}
-}
 
-void
-AudioStreamView::playlist_modified (boost::shared_ptr<Diskstream> ds)
-{
-	/* we do not allow shared_ptr<T> to be bound to slots */
-	ENSURE_GUI_THREAD (*this, &AudioStreamView::playlist_modified_weak, ds)
+	cerr << "AS, call SV::modified @ " << get_microseconds() << endl;
 
-	StreamView::playlist_modified (ds);
+	StreamView::playlist_layered (wds);
+
+	cerr << "AS, done with SV::modified @ " << get_microseconds() << endl;
 
 	/* make sure xfades are on top and all the regionviews are stacked correctly. */
 
+	cerr << "AS, raise xfades @ " << get_microseconds() << endl;
 	for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
 		i->second->get_canvas_group()->raise_to_top();
 	}
+	cerr << "AS, done with xfades @ " << get_microseconds() << endl;
 }
 
 void
-AudioStreamView::playlist_changed_weak (boost::weak_ptr<Diskstream> ds)
+AudioStreamView::playlist_switched (boost::weak_ptr<Diskstream> wds)
 {
-	boost::shared_ptr<Diskstream> sp (ds.lock());
-	if (sp) {
-		playlist_changed (sp);
+	boost::shared_ptr<Diskstream> ds (wds.lock());
+
+	if (!ds) {
+		return;
 	}
-}
-
-void
-AudioStreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
-{
-	ENSURE_GUI_THREAD (*this, &AudioStreamView::playlist_changed_weak, boost::weak_ptr<Diskstream> (ds));
 
 	playlist_connections.drop_connections ();
 
-	StreamView::playlist_changed(ds);
+	StreamView::playlist_switched (ds);
 
 	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(ds->playlist());
 
@@ -293,26 +290,16 @@ AudioStreamView::playlist_changed (boost::shared_ptr<Diskstream> ds)
 }
 
 void
-AudioStreamView::add_crossfade_weak (boost::weak_ptr<Crossfade> crossfade)
+AudioStreamView::add_crossfade (boost::weak_ptr<Crossfade> wc)
 {
-	boost::shared_ptr<Crossfade> sp (crossfade.lock());
+	boost::shared_ptr<Crossfade> crossfade (wc.lock());
 
-	if (!sp) {
+	if (!crossfade) {
 		return;
 	}
 
-	add_crossfade (sp);
-}
-
-void
-AudioStreamView::add_crossfade (boost::shared_ptr<Crossfade> crossfade)
-{
 	AudioRegionView* lview = 0;
 	AudioRegionView* rview = 0;
-
-	/* we do not allow shared_ptr<T> to be bound to slots */
-
-	ENSURE_GUI_THREAD (*this, &AudioStreamView::add_crossfade_weak, boost::weak_ptr<Crossfade> (crossfade));
 
 	/* first see if we already have a CrossfadeView for this Crossfade */
 

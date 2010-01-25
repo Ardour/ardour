@@ -72,7 +72,7 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<Audio
 		      nframes_t length,
 		      nframes_t position,
 		      AnchorPoint ap)
-	: AudioRegion (in->session(), position, length, "foobar"),
+	: AudioRegion (in->session(), position, length, in->name() + string ("<>") + out->name()),
 	  _fade_in (Evoral::Parameter(FadeInAutomation)), // linear (gain coefficient) => -inf..+6dB
 	  _fade_out (Evoral::Parameter(FadeOutAutomation)) // linear (gain coefficient) => -inf..+6dB
 
@@ -89,7 +89,7 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<Audio
 }
 
 Crossfade::Crossfade (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioRegion> b, CrossfadeModel model, bool act)
-	: AudioRegion (a->session(), 0, 0, "foobar"),
+	: AudioRegion (a->session(), 0, 0, a->name() + string ("<>") + b->name()),
 	  _fade_in (Evoral::Parameter(FadeInAutomation)), // linear (gain coefficient) => -inf..+6dB
 	  _fade_out (Evoral::Parameter(FadeOutAutomation)) // linear (gain coefficient) => -inf..+6dB
 {
@@ -107,7 +107,7 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioR
 }
 
 Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
-	: AudioRegion (playlist.session(), 0, 0, "foobar"),
+	: AudioRegion (playlist.session(), 0, 0, "unnamed crossfade"),
 	  _fade_in (Evoral::Parameter(FadeInAutomation)), // linear (gain coefficient) => -inf..+6dB
 	  _fade_out (Evoral::Parameter(FadeOutAutomation)) // linear (gain coefficient) => -inf..+6dB
 

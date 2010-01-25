@@ -24,6 +24,7 @@
 #include <sstream>
 
 #include "pbd/basename.h"
+#include "pbd/enumwriter.h"
 
 #include "ardour/audioregion.h"
 #include "ardour/audiofilesource.h"
@@ -54,11 +55,13 @@ using namespace Editing;
 using Gtkmm2ext::Keyboard;
 
 EditorRegions::EditorRegions (Editor* e)
-	: EditorComponent (e),
-	  _menu (0),
-	  _show_automatic_regions (true),
-	  _sort_type ((Editing::RegionListSortType) 0),
-	  _no_redisplay (false)
+	: EditorComponent (e)
+	, _menu (0)
+	, _show_automatic_regions (true)
+	, _sort_type ((Editing::RegionListSortType) 0)
+ 	, _no_redisplay (false) 
+	, ignore_region_list_selection_change (false)
+	, ignore_selected_region_change (false)
 {
 	_display.set_size_request (100, -1);
 	_display.set_name ("RegionListDisplay");
@@ -383,37 +386,42 @@ EditorRegions::region_changed (Change what_changed, boost::weak_ptr<Region> regi
 void
 EditorRegions::selection_changed ()
 {
+	if (ignore_region_list_selection_change) {
+		return;
+	}
+
 	if (_display.get_selection()->count_selected_rows() > 0) {
 
 		TreeIter iter;
 		TreeView::Selection::ListHandle_Path rows = _display.get_selection()->get_selected_rows ();
 
-		_editor->deselect_all ();
+		_editor->get_selection().clear_regions ();
 
 		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
 
-			if (iter = _model->get_iter (*i)) {									// they could have clicked on a row that is just a placeholder, like "Hidden"
+			if (iter = _model->get_iter (*i)) { 
 				boost::shared_ptr<Region> region = (*iter)[_columns.region];
+
+                                // they could have clicked on a row that is just a placeholder, like "Hidden"
 
 				if (region) {
 
 					if (region->automatic()) {
+
 						_display.get_selection()->unselect(*i);
 
 					} else {
 						_change_connection.block (true);
-						//editor_regions_selection_changed_connection.block(true);
-
+						cerr << "\tpush to region selection\n";
 						_editor->set_selected_regionview_from_region_list (region, Selection::Add);
 
 						_change_connection.block (false);
-						//editor_regions_selection_changed_connection.block(false);
 					}
 				}
 			}
 		}
 	} else {
-		_editor->deselect_all ();
+		_editor->get_selection().clear_regions ();
 	}
 }
 
@@ -431,11 +439,13 @@ EditorRegions::set_selected (RegionSelection& regions)
 			boost::shared_ptr<Region> compared_region = (*i)[_columns.region];
 
 			if (r == compared_region) {
+				cerr << "\tpush into region list\n";
 				_display.get_selection()->select(*i);
 				break;
 			}
 
 			if (!(*i).children().empty()) {
+				cerr << "\tlook for " << r->name() << " among children of " << (compared_region ? compared_region->name() : string ("NO REGION")) << endl;
 				if (set_selected_in_subrow(r, (*i), 2)) {
 					break;
 				}
@@ -524,6 +534,8 @@ EditorRegions::update_row (boost::shared_ptr<Region> region)
 
 	TreeModel::iterator i;
 	TreeModel::Children rows = _model->children();
+	
+	return;
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
 
@@ -543,6 +555,7 @@ EditorRegions::update_row (boost::shared_ptr<Region> region)
 			}
 		}
 	}
+
 //	cerr << "Returning - No match\n";
 }
 
@@ -570,6 +583,7 @@ EditorRegions::update_subrows (boost::shared_ptr<Region> region, TreeModel::Row 
 			}
 		}
 	}
+
 	return false;
 }
 
@@ -579,7 +593,7 @@ EditorRegions::update_all_rows ()
 	if (!_session) {
 		return;
 	}
-
+	
 	TreeModel::iterator i;
 	TreeModel::Children rows = _model->children();
 
@@ -1049,6 +1063,7 @@ EditorRegions::sorter (TreeModel::iterator a, TreeModel::iterator b)
 		break;
 
 	case ByEndInFile:
+		// cerr << "Compare " << (region1->start() + region1->length()) << " and " << (region2->start() + region2->length()) << endl;
 		cmp = (region1->start() + region1->length()) - (region2->start() + region2->length());
 		break;
 
@@ -1072,6 +1087,8 @@ EditorRegions::sorter (TreeModel::iterator a, TreeModel::iterator b)
 		}
 		break;
 	}
+
+	// cerr << "Comparison on " << enum_2_string (_sort_type) << " gives " << cmp << endl;
 
 	if (cmp < 0) {
 		return -1;

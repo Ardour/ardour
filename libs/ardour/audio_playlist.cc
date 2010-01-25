@@ -738,7 +738,7 @@ AudioPlaylist::crossfade_changed (Change)
 	   that occured.
 	*/
 
-	notify_modified ();
+	notify_contents_changed ();
 }
 
 bool
@@ -760,7 +760,7 @@ AudioPlaylist::region_changed (Change what_changed, boost::shared_ptr<Region> re
 	parent_wants_notify = Playlist::region_changed (what_changed, region);
 
 	if ((parent_wants_notify || (what_changed & our_interests))) {
-		notify_modified ();
+		notify_contents_changed ();
 	}
 
 	return true;

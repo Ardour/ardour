@@ -294,6 +294,8 @@ AudioRegion::connect_to_header_position_offset_changed ()
 void
 AudioRegion::listen_to_my_curves ()
 {
+	cerr << _name << ": listeing my own curves\n";
+
 	_envelope->StateChanged.connect_same_thread (*this, boost::bind (&AudioRegion::envelope_changed, this));
 	_fade_in->StateChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fade_in_changed, this));
 	_fade_out->StateChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fade_out_changed, this));
@@ -637,8 +639,15 @@ AudioRegion::set_live_state (const XMLNode& node, int version, Change& what_chan
 	const XMLNodeList& nlist = node.children();
 	const XMLProperty *prop;
 	LocaleGuard lg (X_("POSIX"));
+	boost::shared_ptr<Playlist> the_playlist (_playlist.lock());	
+
+	freeze ();
+	if (the_playlist) {
+		the_playlist->freeze ();
+	}
 
 	Region::set_live_state (node, version, what_changed, false);
+	cerr << "After region SLS, wc = " << what_changed << endl;
 
 	uint32_t old_flags = _flags;
 
@@ -661,22 +670,31 @@ AudioRegion::set_live_state (const XMLNode& node, int version, Change& what_chan
 
 	if ((old_flags ^ _flags) & Muted) {
 		what_changed = Change (what_changed|MuteChanged);
+		cerr << _name << " mute changed\n";
 	}
 	if ((old_flags ^ _flags) & Opaque) {
 		what_changed = Change (what_changed|OpacityChanged);
+		cerr << _name << " opacity changed\n";
 	}
 	if ((old_flags ^ _flags) & Locked) {
 		what_changed = Change (what_changed|LockChanged);
+		cerr << _name << " lock changed\n";
 	}
 
 	if ((prop = node.property ("scale-gain")) != 0) {
-		_scale_amplitude = atof (prop->value().c_str());
-		what_changed = Change (what_changed|ScaleAmplitudeChanged);
+		float a = atof (prop->value().c_str());
+		if (a != _scale_amplitude) {
+			_scale_amplitude = a;
+			what_changed = Change (what_changed|ScaleAmplitudeChanged);
+			cerr << _name << " amp changed\n";
+		}
 	} else {
 		_scale_amplitude = 1.0;
 	}
 
 	/* Now find envelope description and other misc child items */
+
+	_envelope->freeze ();
 
 	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
@@ -685,6 +703,7 @@ AudioRegion::set_live_state (const XMLNode& node, int version, Change& what_chan
 
 		child = (*niter);
 
+#if 0
 		if (child->name() == "Envelope") {
 
 			_envelope->clear ();
@@ -695,6 +714,9 @@ AudioRegion::set_live_state (const XMLNode& node, int version, Change& what_chan
 
 			_envelope->set_max_xval (_length);
 			_envelope->truncate_end (_length);
+
+			cerr << _name << " envelope changd\n";
+		
 
 		} else if (child->name() == "FadeIn") {
 
@@ -716,6 +738,7 @@ AudioRegion::set_live_state (const XMLNode& node, int version, Change& what_chan
 					set_fade_in_active (false);
 				}
 			}
+			cerr << _name << " fadein changd\n";
 
 		} else if (child->name() == "FadeOut") {
 
@@ -737,12 +760,22 @@ AudioRegion::set_live_state (const XMLNode& node, int version, Change& what_chan
 					set_fade_out_active (false);
 				}
 			}
+			cerr << _name << " fadeout changd\n";
 
 		}
+#endif
 	}
 
+	_envelope->thaw ();
+	thaw ("");
+
 	if (send) {
+		cerr << _name << ": audio final change: " << hex << what_changed << dec << endl;
 		send_change (what_changed);
+	}
+
+	if (the_playlist) {
+		the_playlist->thaw ();
 	}
 
 	return 0;
@@ -836,8 +869,6 @@ AudioRegion::set_fade_in (FadeShape shape, nframes_t len)
 	}
 
 	_fade_in->thaw ();
-
-	send_change (FadeInChanged);
 }
 
 void
@@ -903,8 +934,6 @@ AudioRegion::set_fade_out (FadeShape shape, nframes_t len)
 	}
 
 	_fade_out->thaw ();
-
-	send_change (FadeOutChanged);
 }
 
 void
@@ -1175,7 +1204,7 @@ AudioRegion::set_scale_amplitude (gain_t g)
 	/* tell the diskstream we're in */
 
 	if (pl) {
-		pl->Modified();
+		pl->ContentsChanged();
 	}
 
 	/* tell everybody else */
@@ -1245,7 +1274,7 @@ AudioRegion::normalize_to (float target_dB)
 	boost::shared_ptr<Playlist> pl (playlist());
 
 	if (pl) {
-		pl->Modified();
+		pl->ContentsChanged();
 	}
 
 	/* tell everybody else */

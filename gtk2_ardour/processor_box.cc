@@ -1019,10 +1019,11 @@ ProcessorBox::compute_processor_sort_keys ()
 		Label label;
 
 		label.set_text (_("\
-You cannot reorder this set of processors\n\
+You cannot reorder these plugins/sends/inserts\n\
 in that way because the inputs and\n\
-outputs do not work correctly."));
+outputs will not work correctly."));
 
+		dialog.get_vbox()->set_border_width (12);
 		dialog.get_vbox()->pack_start (label);
 		dialog.add_button (Stock::OK, RESPONSE_ACCEPT);
 

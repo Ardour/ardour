@@ -130,11 +130,12 @@ class Playlist : public SessionObject
 	XMLNode& get_template ();
 
 	PBD::Signal1<void,bool> InUse;
-	PBD::Signal0<void>      Modified;
+	PBD::Signal0<void>      ContentsChanged;
 	PBD::Signal1<void,boost::weak_ptr<Region> > RegionAdded;
 	PBD::Signal1<void,boost::weak_ptr<Region> > RegionRemoved;
 	PBD::Signal0<void>      NameChanged;
 	PBD::Signal0<void>      LengthChanged;
+	PBD::Signal0<void>      LayeringChanged;
 	PBD::Signal1<void,std::list< Evoral::RangeMove<nframes_t> > const &> RangesMoved;
 
 	static std::string bump_name (std::string old_name, Session&);
@@ -201,7 +202,8 @@ class Playlist : public SessionObject
 	std::set<boost::shared_ptr<Region> > pending_adds;
 	std::set<boost::shared_ptr<Region> > pending_removes;
 	RegionList       pending_bounds;
-	bool             pending_modified;
+	bool             pending_contents_change;
+	bool             pending_layering;
 	bool             pending_length;
 	std::list< Evoral::RangeMove<nframes_t> > pending_range_moves;
 	bool             save_on_thaw;
@@ -240,12 +242,13 @@ class Playlist : public SessionObject
 	void delay_notifications ();
 	void release_notifications ();
 	virtual void flush_notifications ();
+	void clear_pending ();
 
 	void notify_region_removed (boost::shared_ptr<Region>);
 	void notify_region_added (boost::shared_ptr<Region>);
 	void notify_length_changed ();
 	void notify_layering_changed ();
-	void notify_modified ();
+	void notify_contents_changed ();
 	void notify_state_changed (Change);
 	void notify_region_moved (boost::shared_ptr<Region>);
 

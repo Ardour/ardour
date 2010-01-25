@@ -435,7 +435,7 @@ MidiPlaylist::region_changed (Change what_changed, boost::shared_ptr<Region> reg
 	parent_wants_notify = Playlist::region_changed (what_changed, region);
 
 	if ((parent_wants_notify || (what_changed & our_interests))) {
-		notify_modified ();
+		notify_contents_changed ();
 	}
 
 	return true;
