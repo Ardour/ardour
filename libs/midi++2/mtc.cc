@@ -33,6 +33,8 @@ using namespace std;
 using namespace sigc;
 using namespace MIDI;
 
+#define DEBUG_MTC
+
 bool
 Parser::possible_mtc (byte *sysex_buf, size_t msglen)
 {
@@ -62,6 +64,9 @@ Parser::possible_mtc (byte *sysex_buf, size_t msglen)
 
 	mtc (*this, &sysex_buf[1], msglen - 1);
 	mtc_time (fake_mtc_time, true, _timestamp);
+#ifdef DEBUG_MTC
+	cerr << "New full-MTC message marks state stopped" << endl;
+#endif
 	mtc_status (MTC_Stopped);
 
 	return true;
@@ -70,6 +75,9 @@ Parser::possible_mtc (byte *sysex_buf, size_t msglen)
 void
 Parser::reset_mtc_state ()
 {
+#ifdef DEBUG_MTC
+	cerr << "MTC state reset" << endl;
+#endif
 	/* MUST REMAIN RT-SAFE */
 
 	_mtc_forward = false;
@@ -213,6 +221,10 @@ Parser::process_mtc_quarter_frame (byte *msg)
 
 			_mtc_running = MTC_Stopped;
 			_mtc_locked = false;
+
+#ifdef DEBUG_MTC
+			cerr << "Skipped MTC qtr frame, return to stopped state" << endl;
+#endif
 			mtc_status (MTC_Stopped);
 			
 			return;
