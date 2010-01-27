@@ -482,6 +482,8 @@ MTC_Slave::resolution() const
 void
 MTC_Slave::queue_reset ()
 {
+	DEBUG_TRACE (DEBUG::MTC, "queue reset of MTC slave state\n");
+	PBD::stacktrace (cerr, 35);
 	Glib::Mutex::Lock lm (reset_lock);
 	reset_pending++;
 }
