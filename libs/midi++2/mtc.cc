@@ -33,7 +33,7 @@ using namespace std;
 using namespace sigc;
 using namespace MIDI;
 
-#define DEBUG_MTC
+#undef DEBUG_MTC
 
 bool
 Parser::possible_mtc (byte *sysex_buf, size_t msglen)
