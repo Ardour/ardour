@@ -186,6 +186,8 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 		session.timecode_to_sample (timecode, mtc_frame, true, false);
 		session.request_locate (mtc_frame, false);
 		session.request_transport_speed (0);
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("reset MTC status to stopped, outside MTC window (%1 .. %2 vs. %3)",
+							 window_begin, window_end, mtc_frame));
 		update_mtc_status (MIDI::MTC_Stopped);
 		reset_window (mtc_frame);
 		reset ();
