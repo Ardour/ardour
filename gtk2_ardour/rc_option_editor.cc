@@ -1369,6 +1369,14 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("MIDI control"),
 		    new BoolOption (
+			    "send-mtc",
+			    _("Send MIDI Time Code"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_mtc),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_mtc)
+			    ));
+
+	add_option (_("MIDI control"),
+		    new BoolOption (
 			    "mmc-control",
 			    _("Obey MIDI Machine Control commands"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_control),
