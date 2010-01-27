@@ -21,7 +21,9 @@
 #include <poll.h>
 #include <sys/types.h>
 #include <unistd.h>
+
 #include "pbd/error.h"
+#include "pbd/stacktrace.h"
 #include "pbd/enumwriter.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/pthread_utils.h"
@@ -531,6 +533,7 @@ MTC_Slave::reset_window (nframes64_t root)
 	*/
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("trying to reset MTC window with state = %1\n", enum_2_string (port->input()->mtc_running())));
+	PBD::stacktrace (cerr, 35);
 
 	switch (port->input()->mtc_running()) {
 	case MTC_Forward:
