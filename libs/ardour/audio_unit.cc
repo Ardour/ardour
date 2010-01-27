@@ -801,6 +801,18 @@ AUPlugin::can_do (int32_t in, int32_t& out)
 		cerr << name() << " has " << io_configs.size() << " IO Configurations\n";
 	}
 
+	//first search for the simple case that matches what we need exactly
+	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
+		int32_t possible_in = i->first;
+		int32_t possible_out = i->second;
+
+		if (possible_in == in && possible_out== out) {
+			return 1;
+		}
+	}
+
+	/* now allow potentially "imprecise" matches */
+
 	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
 
 		int32_t possible_in = i->first;
