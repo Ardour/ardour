@@ -194,8 +194,8 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 							 window_begin, window_end, mtc_frame));
 		update_mtc_status (MIDI::MTC_Stopped);
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("outside, so window root reset to %1\n", mtc_frame));
-		reset_window (mtc_frame);
 		reset ();
+		reset_window (mtc_frame);
 
 	} else {
 			
