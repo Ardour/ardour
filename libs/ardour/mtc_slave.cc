@@ -537,16 +537,17 @@ MTC_Slave::reset_window (nframes64_t root)
 
 	switch (port->input()->mtc_running()) {
 	case MTC_Forward:
+		DEBUG_TRACE (DEBUG::MTC, "set MTC window while running forward\n");
 		window_begin = root;
 		if (session.slave_state() == Session::Running) {
 			window_end = root + (session.frames_per_timecode_frame() * frame_tolerance);
 		} else {
 			window_end = root + seekahead_distance ();
 		}
-		DEBUG_TRACE (DEBUG::MTC, string_compose ("legal MTC window now %1 .. %2\n", window_begin, window_end));
 		break;
 
 	case MTC_Backward:
+		DEBUG_TRACE (DEBUG::MTC, "set MTC window while running backward\n");
 		if (session.slave_state() == Session::Running) {
 			nframes_t d = session.frames_per_timecode_frame() * frame_tolerance;
 			if (root > d) {
@@ -564,13 +565,15 @@ MTC_Slave::reset_window (nframes64_t root)
 			}
 		}
 		window_end = root;
-		DEBUG_TRACE (DEBUG::MTC, string_compose ("legal MTC window now %1 .. %2\n", window_begin, window_end));
 		break;
 		
 	default:
+		DEBUG_TRACE (DEBUG::MTC, "not touching MTC window - MTC_Stopped\n");
 		/* do nothing */
 		break;
 	}
+
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("legal MTC window now %1 .. %2\n", window_begin, window_end));
 }
 
 nframes64_t
