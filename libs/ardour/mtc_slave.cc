@@ -115,6 +115,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 	*/
 
 	if (now) {
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("update MTC time does a reset, was full ? %1 now = %2\n", was_full, now));
 		maybe_reset ();
 	}
 
@@ -180,7 +181,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC time timestamp = %1 TC %2 = frame %3 (from full message ? %4)\n", 
 						 now, timecode, mtc_frame, was_full));
-
+	
 	if (was_full || outside_window (mtc_frame)) {
 
 		session.timecode_to_sample (timecode, mtc_frame, true, false);
@@ -488,6 +489,7 @@ MTC_Slave::maybe_reset ()
 	reset_lock.lock ();
 
 	if (reset_pending) {
+		DEBUG_TRACE (DEBUG::MTC, "actually reset\n");
 		reset ();
 		reset_pending = 0;
 	} 
