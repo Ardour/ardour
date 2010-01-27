@@ -186,9 +186,10 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 		session.timecode_to_sample (timecode, mtc_frame, true, false);
 		session.request_locate (mtc_frame, false);
 		session.request_transport_speed (0);
-		DEBUG_TRACE (DEBUG::MTC, string_compose ("reset MTC status to stopped, outside MTC window (%1 .. %2 vs. %3)",
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("reset MTC status to stopped, outside MTC window (%1 .. %2 vs. %3)\n",
 							 window_begin, window_end, mtc_frame));
 		update_mtc_status (MIDI::MTC_Stopped);
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("outside, so window root reset to %1\n", mtc_frame));
 		reset_window (mtc_frame);
 		reset ();
 
@@ -280,6 +281,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 	}
 
 	if (window_root >= 0) {
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("window root reset to %1\n", window_root));
 		reset_window (window_root);
 	}
 }
@@ -525,6 +527,8 @@ MTC_Slave::reset_window (nframes64_t root)
 	   of acceptable MTC frames wide open. otherwise, shrink it down to just 2 video frames
 	   ahead of the window root (taking direction into account).
 	*/
+
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("trying to reset MTC window with state = %1\n", enum_2_string (port->input()->mtc_running())));
 
 	switch (port->input()->mtc_running()) {
 	case MTC_Forward:
