@@ -185,7 +185,9 @@ Parser::process_mtc_quarter_frame (byte *msg)
 			   true, just ignore this in terms of it being an error.
 			*/
 
-			if (1) { /* mtc_skipped () */
+			boost::optional<bool> res = mtc_skipped ();
+			
+			if (res.get_value_or (false)) {
 
 				/* no error, reset next expected frame */
 
@@ -217,17 +219,12 @@ Parser::process_mtc_quarter_frame (byte *msg)
 				return;
 			}
 
-			/* go back to waiting for the first frame */
-
-			expected_mtc_quarter_frame_code = 0;
-			memset (_qtr_mtc_time, 0, sizeof (_qtr_mtc_time));
-
-			_mtc_running = MTC_Stopped;
-			_mtc_locked = false;
+			/* skip counts as an error ... go back to waiting for the first frame */
 
 #ifdef DEBUG_MTC
 			cerr << "Skipped MTC qtr frame, return to stopped state" << endl;
 #endif
+			reset_mtc_state ();
 			mtc_status (MTC_Stopped);
 			
 			return;

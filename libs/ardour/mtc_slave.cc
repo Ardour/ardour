@@ -23,7 +23,6 @@
 #include <unistd.h>
 
 #include "pbd/error.h"
-#include "pbd/stacktrace.h"
 #include "pbd/enumwriter.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/pthread_utils.h"
@@ -57,6 +56,7 @@ MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 {
 	can_notify_on_unknown_rate = true;
 	did_reset_tc_format = false;
+	reset_pending = false;
 
 	pic = new PIChaser();
 	
@@ -190,10 +190,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 		session.timecode_to_sample (timecode, mtc_frame, true, false);
 		session.request_locate (mtc_frame, false);
 		session.request_transport_speed (0);
-		DEBUG_TRACE (DEBUG::MTC, string_compose ("reset MTC status to stopped, outside MTC window (%1 .. %2 vs. %3)\n",
-							 window_begin, window_end, mtc_frame));
 		update_mtc_status (MIDI::MTC_Stopped);
-		DEBUG_TRACE (DEBUG::MTC, string_compose ("outside, so window root reset to %1\n", mtc_frame));
 		reset ();
 		reset_window (mtc_frame);
 
@@ -506,8 +503,6 @@ void
 MTC_Slave::reset ()
 {
 	DEBUG_TRACE (DEBUG::MTC, "*****************\n\n\n MTC SLAVE reset ********************\n\n\n");
-	PBD::stacktrace (cerr, 35);
-	port->input()->reset_mtc_state ();
 
 	last_inbound_frame = 0;
 	current.guard1++;
