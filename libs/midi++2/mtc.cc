@@ -129,14 +129,17 @@ Parser::process_mtc_quarter_frame (byte *msg)
 
 			/* third quarter frame */
 			
-			// cerr << "second seen qframe = " << (int) which_quarter_frame << endl;
-
+#ifdef DEBUG_MTC
+			cerr << "second seen qframe = " << (int) which_quarter_frame << endl;
+#endif
 			if (last_qtr_frame < which_quarter_frame) {
 				_mtc_running = MTC_Forward;
 			} else if (last_qtr_frame > which_quarter_frame) {
 				_mtc_running = MTC_Backward;
 			}
-			
+#ifdef DEBUG_MTC
+			cerr << "Send MTC status as " << _mtc_running << endl;
+#endif
 			mtc_status (_mtc_running);
 		} 
 
