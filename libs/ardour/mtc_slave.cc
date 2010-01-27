@@ -102,7 +102,7 @@ MTC_Slave::rebind (MIDI::Port& p)
 void
 MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, nframes_t now)
 {
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("update MTC time does a reset, was full ? %1 now = %2\n", was_full, now));
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("update MTC qtr does a reset, qtr = %1 now = %2\n", which_qtr, now));
 	maybe_reset ();
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr frame %1 at %2\n", which_qtr, now));
