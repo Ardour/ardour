@@ -102,6 +102,7 @@ MTC_Slave::rebind (MIDI::Port& p)
 void
 MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, nframes_t now)
 {
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("update MTC time does a reset, was full ? %1 now = %2\n", was_full, now));
 	maybe_reset ();
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr frame %1 at %2\n", which_qtr, now));
@@ -502,6 +503,8 @@ MTC_Slave::maybe_reset ()
 void
 MTC_Slave::reset ()
 {
+	DEBUG_TRACE (DEBUG::MTC, "*****************\n\n\n MTC SLAVE reset ********************\n\n\n");
+	PBD::stacktrace (cerr, 35);
 	port->input()->reset_mtc_state ();
 
 	last_inbound_frame = 0;
@@ -533,7 +536,6 @@ MTC_Slave::reset_window (nframes64_t root)
 	*/
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("trying to reset MTC window with state = %1\n", enum_2_string (port->input()->mtc_running())));
-	PBD::stacktrace (cerr, 35);
 
 	switch (port->input()->mtc_running()) {
 	case MTC_Forward:
