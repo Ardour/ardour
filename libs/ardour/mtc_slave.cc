@@ -83,8 +83,8 @@ MTC_Slave::~MTC_Slave()
 bool 
 MTC_Slave::give_slave_full_control_over_transport_speed() const
 {
-	// return true; // for PiC control */
-	return false; // for Session-level computed varispeed
+	return true; // for PiC control */
+	// return false; // for Session-level computed varispeed
 }
 
 void
@@ -102,10 +102,8 @@ MTC_Slave::rebind (MIDI::Port& p)
 void
 MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, nframes_t now)
 {
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("update MTC qtr does a reset, qtr = %1 now = %2\n", which_qtr, now));
-	maybe_reset ();
-
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr frame %1 at %2\n", which_qtr, now));
+	maybe_reset ();
 	last_inbound_frame = now;
 }
 
@@ -118,7 +116,6 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 	*/
 
 	if (now) {
-		DEBUG_TRACE (DEBUG::MTC, string_compose ("update MTC time does a reset, was full ? %1 now = %2\n", was_full, now));
 		maybe_reset ();
 	}
 
@@ -282,7 +279,6 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 	}
 
 	if (window_root >= 0) {
-		DEBUG_TRACE (DEBUG::MTC, string_compose ("window root reset to %1\n", window_root));
 		reset_window (window_root);
 	}
 }
@@ -335,8 +331,6 @@ MTC_Slave::update_mtc_status (MIDI::MTC_Status status)
 	   and process() context (via ::speed_and_position())
 	*/
 
-
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("new MTC status %1\n", enum_2_string (status)));
 	switch (status) {
 	case MTC_Stopped:
 		current.guard1++;
@@ -479,8 +473,6 @@ MTC_Slave::resolution() const
 void
 MTC_Slave::queue_reset ()
 {
-	DEBUG_TRACE (DEBUG::MTC, "queue reset of MTC slave state\n");
-	PBD::stacktrace (cerr, 35);
 	Glib::Mutex::Lock lm (reset_lock);
 	reset_pending++;
 }
@@ -491,7 +483,6 @@ MTC_Slave::maybe_reset ()
 	reset_lock.lock ();
 
 	if (reset_pending) {
-		DEBUG_TRACE (DEBUG::MTC, "actually reset\n");
 		reset ();
 		reset_pending = 0;
 	} 
@@ -502,8 +493,6 @@ MTC_Slave::maybe_reset ()
 void
 MTC_Slave::reset ()
 {
-	DEBUG_TRACE (DEBUG::MTC, "*****************\n\n\n MTC SLAVE reset ********************\n\n\n");
-
 	last_inbound_frame = 0;
 	current.guard1++;
 	current.position = 0;
@@ -532,11 +521,8 @@ MTC_Slave::reset_window (nframes64_t root)
 	   ahead of the window root (taking direction into account).
 	*/
 
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("trying to reset MTC window with state = %1\n", enum_2_string (port->input()->mtc_running())));
-
 	switch (port->input()->mtc_running()) {
 	case MTC_Forward:
-		DEBUG_TRACE (DEBUG::MTC, "set MTC window while running forward\n");
 		window_begin = root;
 		if (session.slave_state() == Session::Running) {
 			window_end = root + (session.frames_per_timecode_frame() * frame_tolerance);
@@ -546,7 +532,6 @@ MTC_Slave::reset_window (nframes64_t root)
 		break;
 
 	case MTC_Backward:
-		DEBUG_TRACE (DEBUG::MTC, "set MTC window while running backward\n");
 		if (session.slave_state() == Session::Running) {
 			nframes_t d = session.frames_per_timecode_frame() * frame_tolerance;
 			if (root > d) {
@@ -567,7 +552,6 @@ MTC_Slave::reset_window (nframes64_t root)
 		break;
 		
 	default:
-		DEBUG_TRACE (DEBUG::MTC, "not touching MTC window - MTC_Stopped\n");
 		/* do nothing */
 		break;
 	}
