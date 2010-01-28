@@ -793,8 +793,6 @@ AUPlugin::can_do (int32_t in, int32_t& out)
 	int32_t plugcnt = -1;
 	AUPluginInfoPtr pinfo = boost::dynamic_pointer_cast<AUPluginInfo>(get_info());
 
-	out = -1;
-
 	vector<pair<int,int> >& io_configs = pinfo->cache.io_configs;
 
 	if (debug_io_config) {
@@ -812,7 +810,7 @@ AUPlugin::can_do (int32_t in, int32_t& out)
 	}
 
 	/* now allow potentially "imprecise" matches */
-
+	out = -1;
 	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
 
 		int32_t possible_in = i->first;
