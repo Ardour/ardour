@@ -14,4 +14,4 @@ export LD_LIBRARY_PATH=$libs/audiographer:$libs/vamp-sdk:$libs/surfaces:$libs/su
 
 echo LD_LIBRARY_PATH = $LD_LIBRARY_PATH
 
-gdb ./libs/ardour/run-tests
+./libs/ardour/run-tests
