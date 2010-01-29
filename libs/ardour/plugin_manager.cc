@@ -685,6 +685,15 @@ PluginManager::load_statuses ()
 		}
 		
 		id = buf;
+
+#ifdef HAVE_AUDIOUNITS
+		if (type == AudioUnit) {
+			id = AudioUnit::maybe_fix_broken_au_id (id);
+			if (id.empty()) {
+				continue;
+			}
+		}
+#endif
 		strip_whitespace_edges (id);
 		set_status (type, id, status);
 	}

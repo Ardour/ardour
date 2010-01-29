@@ -592,6 +592,113 @@ AUPlugin::discover_parameters ()
 }
 
 
+static unsigned int
+four_ints_to_four_byte_literal (unsigned char n[4])
+{
+	/* this is actually implementation dependent. sigh. this is what gcc
+	   and quite a few others do.
+	 */
+	return ((n[0] << 24) + (n[1] << 16) + (n[2] << 8) + n[3]);
+}
+
+std::string
+AudioUnit::maybe_fix_broken_au_id (const std::string& id)
+{
+	if (isnum (id[0])) {
+		return;
+	}
+
+	/* ID format is xxxx-xxxx-xxxx
+	   where x maybe \xNN or a printable character.
+	   
+	   Split at the '-' and and process each part into an integer. 
+	   Then put it back together.
+	*/
+
+
+	unsigned char nascent[4];
+	const char* cstr = id.c_str();
+	const char* estr = cstr + id.size();
+	uint32_t n[3];
+	int in;
+	int next_int;
+	char short_buf[5];
+	stringstream s;
+
+	in = 0;
+	next_int = 0;
+	short_buf[4] = '\0';
+
+	while (*cstr && next_int < 4) {
+
+		if (*cstr == '\\') {
+
+			if (estr - cstr < 3) {
+
+				/* too close to the end for \xNN parsing: treat as literal characters */
+
+				cerr << "Parse " << cstr << " as a literal \\" << endl;
+				nascent[in] = *cstr;
+				++cstr;
+				++in;
+
+			} else {
+				
+				if (cstr[1] == 'x' && isdigit (cstr[2]) && isdigit (cstr[3])) {
+					
+					/* parse \xNN */
+					
+					memcpy (short_buf, cstr, 4);
+					nascent[in] = strtol (short_buf, NULL, 16);
+					cstr += 4;
+					++in;
+					
+				} else {
+
+					/* treat as literal characters */
+					cerr << "Parse " << cstr << " as a literal \\" << endl;
+					nascent[in] = *cstr;
+					++cstr;
+					++in;
+				}
+			}
+
+		} else {
+
+			nascent[in] = *cstr;
+			++cstr;
+			++in;
+		}
+
+		if (in && (in % 4 == 0)) {
+			/* nascent is ready */
+			n[next_int] = four_ints_to_four_byte_literal (nascent);
+			in = 0;
+			next_int++;
+
+			/* swallow space-hyphen-space */
+
+			if (next_int < 3) {
+				++cstr;
+				++cstr;
+				++cstr;
+			}
+		}
+	}
+
+	if (next_int != 3) {
+		goto err;
+	}
+
+	s << n[0] << '-' << n[1] << '-' << n[2];
+	
+	return s.str();
+
+  err:
+	error _("This session contains an AU plugin whose ID cannot be understood - ignored (" << id << ')' << endmsg;
+	return string();
+}
+
 string
 AUPlugin::unique_id () const
 {
@@ -2184,7 +2291,7 @@ AUPluginInfo::save_cached_info ()
 	}
 }
 
-int
+nt
 AUPluginInfo::load_cached_info ()
 {
 	Glib::ustring path = au_cache_path ();
@@ -2231,6 +2338,12 @@ AUPluginInfo::load_cached_info ()
 			}
 
 			std::string id = prop->value();
+
+			id = maybe_fix_broken_au_id (id);
+			if (id.empty()) {
+				continue;
+			}
+
 			AUPluginCachedInfo cinfo;
 
 			for (XMLNodeConstIterator giter = gchildren.begin(); giter != gchildren.end(); giter++) {
@@ -2317,22 +2430,22 @@ AUPluginInfo::get_names (CAComponentDescription& comp_desc, std::string& name, G
 	}
 }
 
-// from CAComponentDescription.cpp (in libs/appleutility in ardour source)
-extern char *StringForOSType (OSType t, char *writeLocation);
-
 std::string
 AUPluginInfo::stringify_descriptor (const CAComponentDescription& desc)
 {
-	char str[24];
 	stringstream s;
 
-	s << StringForOSType (desc.Type(), str);
-	s << " - ";
-		
-	s << StringForOSType (desc.SubType(), str);
-	s << " - ";
-		
-	s << StringForOSType (desc.Manu(), str);
+	/* note: OSType is a compiler-implemenation-defined value,
+	   historically a 32 bit integer created with a multi-character
+	   constant such as 'abcd'. It is, fundamentally, an abomination.
+	*/
+
+	s << desc.Type()
+	s << '-';
+	s << desc.SubType();
+	s << '-';
+	s << desc.OSType();
 
 	return s.str();
 }
+

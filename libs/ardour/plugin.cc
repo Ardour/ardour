@@ -333,6 +333,24 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 
 #ifdef HAVE_AUDIOUNITS
 	case ARDOUR::AudioUnit:
+
+		/* Ardour before 2.8.5 stored identifiers using a broken function
+		   provided by Apple (StringForOSType()) that couldn't properly
+		   handle some bytes stored in some plugins' multi-character literal
+		   identifiers.
+		   
+		   Ardour 2.8.5 switched to use a modified version of this
+		   function, but one that was still problematic and not
+		   backwards compatible.
+		   
+		   So, if this is an AU and we didn't find it above, fix up
+		   the identifier we are looking for and check again.
+		*/
+		
+		identifier = AudioUnit::maybe_fix_broken_au_id (identifier);
+		if (identifier.empty()) {
+			return PluginPtr ((Plugin*) 0);
+		}
 		plugs = mgr->au_plugin_info();
 		break;
 #endif
@@ -354,14 +372,19 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 	   we used to store the name of a VST plugin, not its unique ID. so try
 	   again.
 	*/
-
-	for (i = plugs.begin(); i != plugs.end(); ++i) {
-		if (identifier == (*i)->name){
-			return (*i)->load (session);
+	switch (type) {
+	case ARDOUR::VST:
+		for (i = plugs.begin(); i != plugs.end(); ++i) {
+			if (identifier == (*i)->name){
+				return (*i)->load (session);
+			}
 		}
+		break;
+	default:
+		break;
 	}
 #endif
-	
+
 	return PluginPtr ((Plugin*) 0);
 }
 

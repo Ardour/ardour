@@ -133,6 +133,8 @@ class AUPlugin : public ARDOUR::Plugin
 					       Float64*  outCycleStartBeat,
 					       Float64*  outCycleEndBeat);
 
+	static std::string maybe_fix_broken_au_id (const std::string&);
+
   private:
         boost::shared_ptr<CAComponent> comp;
         boost::shared_ptr<CAAudioUnit> unit;
