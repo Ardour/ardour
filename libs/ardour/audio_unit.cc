@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <string.h>
 #include <math.h>
+#include <ctype.h>
 
 #include <pbd/transmitter.h>
 #include <pbd/xml++.h>
@@ -602,10 +603,10 @@ four_ints_to_four_byte_literal (unsigned char n[4])
 }
 
 std::string
-AudioUnit::maybe_fix_broken_au_id (const std::string& id)
+AUPlugin::maybe_fix_broken_au_id (const std::string& id)
 {
-	if (isnum (id[0])) {
-		return;
+	if (isdigit (id[0])) {
+		return id;
 	}
 
 	/* ID format is xxxx-xxxx-xxxx
@@ -695,7 +696,7 @@ AudioUnit::maybe_fix_broken_au_id (const std::string& id)
 	return s.str();
 
   err:
-	error _("This session contains an AU plugin whose ID cannot be understood - ignored (" << id << ')' << endmsg;
+	error << string_compose (_("This session contains an AU plugin whose ID cannot be understood - ignored (%1)"), id) << endmsg;
 	return string();
 }
 
@@ -2291,7 +2292,7 @@ AUPluginInfo::save_cached_info ()
 	}
 }
 
-nt
+int
 AUPluginInfo::load_cached_info ()
 {
 	Glib::ustring path = au_cache_path ();
@@ -2339,7 +2340,7 @@ AUPluginInfo::load_cached_info ()
 
 			std::string id = prop->value();
 
-			id = maybe_fix_broken_au_id (id);
+			id = AUPlugin::maybe_fix_broken_au_id (id);
 			if (id.empty()) {
 				continue;
 			}
@@ -2440,11 +2441,11 @@ AUPluginInfo::stringify_descriptor (const CAComponentDescription& desc)
 	   constant such as 'abcd'. It is, fundamentally, an abomination.
 	*/
 
-	s << desc.Type()
+	s << desc.Type();
 	s << '-';
 	s << desc.SubType();
 	s << '-';
-	s << desc.OSType();
+	s << desc.Manu();
 
 	return s.str();
 }

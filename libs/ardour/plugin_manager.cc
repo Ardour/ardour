@@ -688,7 +688,7 @@ PluginManager::load_statuses ()
 
 #ifdef HAVE_AUDIOUNITS
 		if (type == AudioUnit) {
-			id = AudioUnit::maybe_fix_broken_au_id (id);
+			id = AUPlugin::maybe_fix_broken_au_id (id);
 			if (id.empty()) {
 				continue;
 			}

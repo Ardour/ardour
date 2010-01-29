@@ -347,7 +347,7 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 		   the identifier we are looking for and check again.
 		*/
 		
-		identifier = AudioUnit::maybe_fix_broken_au_id (identifier);
+		identifier = AUPlugin::maybe_fix_broken_au_id (identifier);
 		if (identifier.empty()) {
 			return PluginPtr ((Plugin*) 0);
 		}
