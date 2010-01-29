@@ -343,6 +343,8 @@ def set_options(opt):
 	opt.add_option('--no-nls', action='store_false', dest='nls')
 	opt.add_option('--stl-debug', action='store_true', default=False, dest='stl_debug',
 			help='Build with debugging for the STL')
+	opt.add_option('--test', action='store_true', default=False, dest='build_tests', 
+			help="Build unit tests")
 	opt.add_option('--tranzport', action='store_true', default=False, dest='tranzport',
 			help='Compile with support for Frontier Designs Tranzport (if libusb is available)')
 	opt.add_option('--universal', action='store_true', default=False, dest='universal',
@@ -464,6 +466,7 @@ def configure(conf):
 		      okmsg = 'ok',
 		      errmsg = 'too old\nPlease install boost version 1.39 or higher.')
 
+	autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=False)
 	autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.2')
 	autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD', atleast_version='2.2')
 	autowaf.check_pkg(conf, 'glibmm-2.4', uselib_store='GLIBMM', atleast_version='2.14.0')
@@ -479,7 +482,7 @@ def configure(conf):
 
 	conf.env.append_value('CCFLAGS', '-DWAF_BUILD')
 	conf.env.append_value('CXXFLAGS', '-DWAF_BUILD')
-
+	
 	autowaf.print_summary(conf)
 	opts = Options.options
 	autowaf.display_header('Ardour Configuration')
@@ -510,6 +513,9 @@ def configure(conf):
 	if opts.nls:
 		conf.define ('ENABLE_NLS', 1)
 	autowaf.display_msg(conf, 'Tranzport', opts.tranzport)
+	if opts.build_tests:
+		conf.env['BUILD_TESTS'] = opts.build_tests
+		autowaf.display_msg(conf, 'Unit Tests', bool(conf.env['BUILD_TESTS']) and bool (conf.env['HAVE_CPPUNIT']))
 	if opts.tranzport:
 		conf.define('TRANZPORT', 1)
 	autowaf.display_msg(conf, 'Universal Binary', opts.universal)

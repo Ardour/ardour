@@ -1,6 +1,6 @@
 #include <cassert>
 #include "ardour/tempo.h"
-#include "BBTTest.hpp"
+#include "bbt_test.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION(BBTTest);
 

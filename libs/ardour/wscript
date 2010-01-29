@@ -321,8 +321,8 @@ def build(bld):
 		# Unit tests
 		testobj              = bld.new_task_gen('cxx', 'program')
 		testobj.source       = '''
-			test/BBTTest.cpp
-			test/InterpolationTest.cpp
+			test/bbt_test.cpp
+			test/interpolation_test.cpp
 			test/testrunner.cpp
 		'''.split()
 		testobj.includes     = obj.includes + ['../pbd/']
