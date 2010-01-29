@@ -284,7 +284,7 @@ class MIDIClock_Slave : public Slave {
 	MIDIClock_Slave (Session&, MIDI::Port&, int ppqn = 24);
 
 	/// Constructor for unit tests
-	MIDIClock_Slave (ISlaveSessionProxy* session_proxy, int ppqn = 24);
+	MIDIClock_Slave (ISlaveSessionProxy* session_proxy = 0, int ppqn = 24);
 	~MIDIClock_Slave ();
 
 	void rebind (MIDI::Port&);
@@ -300,7 +300,7 @@ class MIDIClock_Slave : public Slave {
 
 	void set_bandwidth (double a_bandwith) { bandwidth = a_bandwith; }
 
-  private:
+  protected:
 	ISlaveSessionProxy* session;
 	MIDI::Port* port;
 	PBD::ScopedConnectionList port_connections;

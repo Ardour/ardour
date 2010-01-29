@@ -56,7 +56,6 @@ MIDIClock_Slave::MIDIClock_Slave (ISlaveSessionProxy* session_proxy, int ppqn)
 	, ppqn (ppqn)
 	, bandwidth (30.0 / 60.0) // 1 BpM = 1 / 60 Hz
 {
-	session = session_proxy;
 	reset ();
 }
 
@@ -216,7 +215,7 @@ MIDIClock_Slave::reset ()
 	_starting = false;
 	_started  = false;
 
-	session->request_locate(0, false);
+        if (session) session->request_locate(0, false);
 }
 
 void

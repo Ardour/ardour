@@ -74,27 +74,22 @@ class TestSlaveSessionProxy : public ISlaveSessionProxy {
         void request_transport_speed (const double speed) { transport_speed = speed; }
 };
 
-class MIDIClock_SlaveTest : public CppUnit::TestFixture
+class MIDIClock_SlaveTest : public CppUnit::TestFixture, ARDOUR::MIDIClock_Slave
 {
     CPPUNIT_TEST_SUITE(MIDIClock_SlaveTest);
     CPPUNIT_TEST(testStepResponse);
     CPPUNIT_TEST_SUITE_END();
-    
-    ISlaveSessionProxy *session_proxy;
-    MIDIClock_Slave    *slave;
-    
+
     public:
        	
         void setUp() {
-          session_proxy = new TestSlaveSessionProxy ();
-          slave = new MIDIClock_Slave (session_proxy);
+          session = new TestSlaveSessionProxy ();
         }
         
         void tearDown() {
         }
 
         void testStepResponse();
-
 };
 
 } // namespace ARDOUR
