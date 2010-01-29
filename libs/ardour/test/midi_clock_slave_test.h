@@ -33,34 +33,35 @@ class TestSlaveSessionProxy : public ISlaveSessionProxy {
   double       transport_speed;
   nframes64_t _transport_frame;
   nframes64_t _frame_time;
-  TempoMap    _tempo_map;
+  TempoMap    *_tempo_map;
 
   Tempo     tempo;
   Meter     meter;
-  BBT_Time  zero;
 
   public:
         TestSlaveSessionProxy() : 
            transport_speed  (1.0), 
           _transport_frame  (0), 
           _frame_time       (1000000),
-          _tempo_map        (FRAME_RATE),
+          _tempo_map        (0),
           tempo             (120),
           meter             (4.0, 4.0)
         {
-          _tempo_map.add_tempo (tempo, zero);
-          _tempo_map.add_meter (meter, zero);          
+          _tempo_map = new TempoMap (FRAME_RATE);
+          _tempo_map->add_tempo (tempo, BBT_Time(1, 1, 0));
+          _tempo_map->add_meter (meter, BBT_Time(1, 1, 0));          
         }
 
         // Controlling the mock object
-        void set_period_size (nframes64_t a_size) { _period_size = a_size; }
+        void        set_period_size (nframes64_t a_size) { _period_size = a_size; }
+        nframes64_t period_size () const                 { return _period_size; }
         void next_period ()                       { 
-          _transport_frame += _period_size; 
+          _transport_frame += double(_period_size) * double(transport_speed); 
           _frame_time += _period_size;
         }
 
         // Implementation
-  	TempoMap&   tempo_map ()                { return _tempo_map; }
+  	TempoMap&   tempo_map ()                const { return *_tempo_map; }
 	nframes_t   frame_rate ()               const { return FRAME_RATE; }
 	nframes64_t audible_frame ()            const { return _transport_frame; }
 	nframes64_t transport_frame ()          const { return _transport_frame; }
