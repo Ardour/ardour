@@ -685,16 +685,18 @@ PluginManager::load_statuses ()
 		}
 		
 		id = buf;
+		strip_whitespace_edges (id);
 
 #ifdef HAVE_AUDIOUNITS
 		if (type == AudioUnit) {
-			id = AUPlugin::maybe_fix_broken_au_id (id);
-			if (id.empty()) {
+			string fixed = AUPlugin::maybe_fix_broken_au_id (id);
+			if (fixed.empty()) {
+				error << string_compose (_("Your favorite plugin list contains an AU plugin whose ID cannot be understood - ignored (%1)"), id) << endmsg;
 				continue;
 			}
+			id = fixed;
 		}
 #endif
-		strip_whitespace_edges (id);
 		set_status (type, id, status);
 	}
 	

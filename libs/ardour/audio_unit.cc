@@ -623,12 +623,12 @@ AUPlugin::maybe_fix_broken_au_id (const std::string& id)
 	uint32_t n[3];
 	int in;
 	int next_int;
-	char short_buf[5];
+	char short_buf[3];
 	stringstream s;
 
 	in = 0;
 	next_int = 0;
-	short_buf[4] = '\0';
+	short_buf[2] = '\0';
 
 	while (*cstr && next_int < 4) {
 
@@ -649,7 +649,7 @@ AUPlugin::maybe_fix_broken_au_id (const std::string& id)
 					
 					/* parse \xNN */
 					
-					memcpy (short_buf, cstr, 4);
+					memcpy (short_buf, &cstr[2], 2);
 					nascent[in] = strtol (short_buf, NULL, 16);
 					cstr += 4;
 					++in;
@@ -696,7 +696,6 @@ AUPlugin::maybe_fix_broken_au_id (const std::string& id)
 	return s.str();
 
   err:
-	error << string_compose (_("This session contains an AU plugin whose ID cannot be understood - ignored (%1)"), id) << endmsg;
 	return string();
 }
 
@@ -2337,13 +2336,28 @@ AUPluginInfo::load_cached_info ()
 			if (!prop) {
 				continue;
 			}
+			
+			string id = prop->value();
+			string fixed;
+			string version;
 
-			std::string id = prop->value();
+			string::size_type slash = id.find_last_of ('/');
 
-			id = AUPlugin::maybe_fix_broken_au_id (id);
-			if (id.empty()) {
+			if (slash == string::npos) {
 				continue;
 			}
+
+			version = id.substr (slash);
+			id = id.substr (0, slash);
+			fixed = AUPlugin::maybe_fix_broken_au_id (id);
+
+			if (fixed.empty()) {
+				error << string_compose (_("Your AudioUnit configuration cache contains an AU plugin whose ID cannot be understood - ignored (%1)"), id) << endmsg;
+				continue;
+			} 
+
+			id = fixed;
+			id += version;
 
 			AUPluginCachedInfo cinfo;
 

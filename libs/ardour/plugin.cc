@@ -347,9 +347,13 @@ ARDOUR::find_plugin(Session& session, string identifier, PluginType type)
 		   the identifier we are looking for and check again.
 		*/
 		
-		identifier = AUPlugin::maybe_fix_broken_au_id (identifier);
-		if (identifier.empty()) {
-			return PluginPtr ((Plugin*) 0);
+		{ 
+			std::string fixed = AUPlugin::maybe_fix_broken_au_id (identifier);
+			if (fixed.empty()) {
+				error << string_compose (_("This session contains an AU plugin whose ID cannot be understood - ignored (%1)"), identifier) << endmsg;
+				return PluginPtr ((Plugin*) 0);
+			}
+			identifier = fixed;
 		}
 		plugs = mgr->au_plugin_info();
 		break;
