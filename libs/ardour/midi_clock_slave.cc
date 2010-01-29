@@ -42,6 +42,8 @@ using namespace ARDOUR;
 using namespace MIDI;
 using namespace PBD;
 
+#define DEBUG_MIDI_CLOCK 1
+
 MIDIClock_Slave::MIDIClock_Slave (Session& s, MIDI::Port& p, int ppqn)
 	: ppqn (ppqn)
 	, bandwidth (30.0 / 60.0) // 1 BpM = 1 / 60 Hz
@@ -184,14 +186,14 @@ MIDIClock_Slave::update_midi_clock (Parser& /*parser*/, nframes64_t timestamp)
 				  << " frame-rate: " << session->frame_rate()
 				  << endl;
 
-		cerr      << "frames since cycle start: " << session->frames_since_cycle_start() << endl;
+		//cerr      << "frames since cycle start: " << session->frames_since_cycle_start() << endl;
 	#endif // DEBUG_MIDI_CLOCK
 
 	last_timestamp = timestamp;
 }
 
 void
-MIDIClock_Slave::start (Parser& /*parser*/, nframes64_t /*timestamp*/)
+MIDIClock_Slave::start (Parser& /*parser*/, nframes64_t timestamp)
 {
 	#ifdef DEBUG_MIDI_CLOCK
 		cerr << "MIDIClock_Slave got start message at time "  <<  timestamp << " engine time: " << session->frame_time() << endl;
