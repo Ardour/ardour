@@ -46,7 +46,7 @@ using namespace PBD;
 
 MIDIClock_Slave::MIDIClock_Slave (Session& s, MIDI::Port& p, int ppqn)
 	: ppqn (ppqn)
-	, bandwidth (30.0 / 60.0) // 1 BpM = 1 / 60 Hz
+	, bandwidth (1.0 / 60.0) // 1 BpM = 1 / 60 Hz
 {
 	session = (ISlaveSessionProxy *) new SlaveSessionProxy(s);
 	rebind (p);
@@ -56,7 +56,7 @@ MIDIClock_Slave::MIDIClock_Slave (Session& s, MIDI::Port& p, int ppqn)
 MIDIClock_Slave::MIDIClock_Slave (ISlaveSessionProxy* session_proxy, int ppqn)
 	: session(session_proxy)
 	, ppqn (ppqn)
-	, bandwidth (30.0 / 60.0) // 1 BpM = 1 / 60 Hz
+	, bandwidth (1.0 / 60.0) // 1 BpM = 1 / 60 Hz
 {
 	reset ();
 }
