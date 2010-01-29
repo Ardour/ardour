@@ -645,7 +645,7 @@ AUPlugin::maybe_fix_broken_au_id (const std::string& id)
 
 			} else {
 				
-				if (cstr[1] == 'x' && isdigit (cstr[2]) && isdigit (cstr[3])) {
+				if (cstr[1] == 'x' && isxdigit (cstr[2]) && isxdigit (cstr[3])) {
 					
 					/* parse \xNN */
 					
