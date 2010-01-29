@@ -346,6 +346,10 @@ MIDIClock_Slave::speed_and_position (double& speed, nframes64_t& pos)
 
 	// calculate speed
 	speed = ((t1 - t0) * session->frame_rate()) / one_ppqn_in_frames;
+	
+	// provide a 3% deadzone to lock the speed
+	if (fabs(speed - 1.0) <= 0.03)
+	        speed = 1.0;
 
 	// calculate position
 	if (engine_now > last_timestamp) {

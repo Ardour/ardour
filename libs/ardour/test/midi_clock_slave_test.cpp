@@ -15,9 +15,10 @@ MIDIClock_SlaveTest::testStepResponse ()
   MIDI::Parser* parser = 0;
 
   TestSlaveSessionProxy *sess = (TestSlaveSessionProxy *) session;
-  nframes64_t period_size = 1024;
+  nframes64_t period_size = 4096;
   sess->set_period_size (period_size);
-  
+
+  bandwidth = 1.0 / 60.0;
 
   nframes64_t start_time = 1000000;
   start (*parser, start_time);
