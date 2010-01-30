@@ -30,6 +30,7 @@
 
 #include <pbd/xml++.h>
 #include <pbd/replace_all.h>
+#include <pbd/localeguard.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/io.h>

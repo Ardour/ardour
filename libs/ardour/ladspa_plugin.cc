@@ -33,6 +33,7 @@
 #include <pbd/error.h>
 #include <pbd/pathscanner.h>
 #include <pbd/xml++.h>
+#include <pbd/localeguard.h>
 
 #include <midi++/manager.h>
 
@@ -44,7 +45,6 @@
 #include <pbd/stl_delete.h>
 
 #include "i18n.h"
-#include <locale.h>
 
 using namespace std;
 using namespace ARDOUR;

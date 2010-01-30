@@ -24,7 +24,6 @@
 #include <sys/resource.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <locale.h>
 #include <errno.h>
 
 #ifdef VST_SUPPORT
@@ -604,20 +603,6 @@ ARDOUR::find_data_file (string name, string subdir)
 	}
 
 	return find_file (name, envvar, subdir);
-}
-
-ARDOUR::LocaleGuard::LocaleGuard (const char* str)
-{
-	old = strdup (setlocale (LC_NUMERIC, NULL));
-	if (strcmp (old, str)) {
-		setlocale (LC_NUMERIC, str);
-	} 
-}
-
-ARDOUR::LocaleGuard::~LocaleGuard ()
-{
-	setlocale (LC_NUMERIC, old);
-	free ((char*)old);
 }
 
 void

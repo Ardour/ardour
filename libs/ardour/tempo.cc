@@ -25,7 +25,10 @@
 #include <sigc++/bind.h>
 
 #include <glibmm/thread.h>
+
 #include <pbd/xml++.h>
+#include <pbd/localeguard.h>
+
 #include <ardour/tempo.h>
 #include <ardour/utils.h>
 

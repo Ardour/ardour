@@ -23,6 +23,7 @@
 
 #include <pbd/error.h>
 #include <pbd/enumwriter.h>
+#include <pbd/localeguard.h>
 
 #include <ardour/audio_track.h>
 #include <ardour/audio_diskstream.h>

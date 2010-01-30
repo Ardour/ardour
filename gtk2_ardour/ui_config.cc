@@ -25,6 +25,7 @@
 #include <pbd/failed_constructor.h>
 #include <pbd/xml++.h>
 #include <pbd/error.h>
+#include <pbd/localeguard.h>
 
 #include <ardour/ardour.h>
 

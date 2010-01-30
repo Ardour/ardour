@@ -79,12 +79,6 @@ namespace ARDOUR {
 	extern Change NameChanged;
 	extern Change BoundsChanged;
 
-	struct LocaleGuard {
-	    LocaleGuard (const char*);
-	    ~LocaleGuard ();
-	    const char* old;
-	};
-
 	static const double SHUTTLE_FRACT_SPEED1=0.48412291827; /* derived from A1,A2 */
 
 	void setup_fpu ();

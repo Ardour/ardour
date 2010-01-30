@@ -26,6 +26,7 @@
 
 #include <pbd/failed_constructor.h>
 #include <pbd/xml++.h>
+#include <pbd/localeguard.h>
 
 #include <midi++/manager.h>
 

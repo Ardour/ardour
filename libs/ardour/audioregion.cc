@@ -34,6 +34,7 @@
 #include <pbd/stacktrace.h>
 #include <pbd/enumwriter.h>
 #include <pbd/convert.h>
+#include <pbd/localeguard.h>
 
 #include <ardour/audioregion.h>
 #include <ardour/session.h>

@@ -19,7 +19,7 @@
 
 #include <sigc++/bind.h>
 
-#include <pbd/stacktrace.h>
+#include <pbd/localeguard.h>
 
 #include <ardour/types.h>
 #include <ardour/crossfade.h>

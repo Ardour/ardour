@@ -33,6 +33,7 @@
 #include <pbd/failed_constructor.h>
 #include <pbd/xml++.h>
 #include <pbd/enumwriter.h>
+#include <pbd/localeguard.h>
 
 #include <ardour/session.h>
 #include <ardour/panner.h>

@@ -28,6 +28,7 @@
 #include <pbd/xml++.h>
 #include <pbd/whitespace.h>
 #include <pbd/pathscanner.h>
+#include <pbd/localeguard.h>
 
 #include <glibmm/thread.h>
 #include <glibmm/fileutils.h>

@@ -40,6 +40,7 @@
 #include <pbd/error.h>
 #include <pbd/pathscanner.h>
 #include <pbd/xml++.h>
+#include <pbd/localeguard.h>
 
 #include <ardour/ardour.h>
 #include <ardour/session.h>

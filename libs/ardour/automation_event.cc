@@ -26,6 +26,7 @@
 #include <sigc++/bind.h>
 #include <ardour/automation_event.h>
 #include <pbd/stacktrace.h>
+#include <pbd/localeguard.h>
 
 #include "i18n.h"
 

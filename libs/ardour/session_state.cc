@@ -55,6 +55,7 @@
 #include <pbd/strsplit.h>
 #include <pbd/stacktrace.h>
 #include <pbd/copyfile.h>
+#include <pbd/localeguard.h>
 
 #include <ardour/audioengine.h>
 #include <ardour/configuration.h>
