@@ -4164,6 +4164,7 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t en
 	nframes_t this_chunk;
 	nframes_t to_do;
 	nframes_t len = end - start;
+	nframes_t need_block_size_reset = false;
 	vector<Sample*> buffers;
 
 	if (end <= start) {
@@ -4221,6 +4222,11 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t en
 		srcs.push_back (fsource);
 	}
 
+	/* tell redirects that care that we are about to use a much larger blocksize */
+
+	need_block_size_reset = true;
+	track.set_block_size (chunk_size);
+	
 	/* XXX need to flush all redirects */
 	
 	position = start;
@@ -4310,6 +4316,10 @@ Session::write_one_audio_track (AudioTrack& track, nframes_t start, nframes_t en
 
 	for (vector<Sample*>::iterator i = buffers.begin(); i != buffers.end(); ++i) {
 		free (*i);
+	}
+
+	if (need_block_size_reset) {
+		track.set_block_size (get_block_size());
 	}
 
 	unblock_processing ();
