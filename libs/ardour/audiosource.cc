@@ -443,6 +443,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t s
 
 		if ((_peakfile = ::open (peakpath.c_str(), O_RDONLY, 0664)) < 0) {
 			error << string_compose(_("AudioSource: cannot open peakpath (b) \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
+			delete [] staging;
 			return 0;
 		}
 
