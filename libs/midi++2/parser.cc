@@ -328,7 +328,7 @@ Parser::scanner (unsigned char inbyte)
 	bool statusbit;
 
 	// cerr << "parse: " << hex << (int) inbyte << dec << " state = " << state << " msgindex = " << msgindex << " runnable = " << runnable << endl;
-
+	
 	/* Check active sensing early, so it doesn't interrupt sysex. 
 	   
 	   NOTE: active sense messages are not considered to fit under
@@ -386,9 +386,11 @@ Parser::scanner (unsigned char inbyte)
 	}
 
 	if (rtmsg) {
-		if (edit (&inbyte, 1) >= 0 && !_offline) {
+		boost::optional<int> res = edit (&inbyte, 1);
+		
+		if (res.get_value_or (1) >= 0 && !_offline) {
 			realtime_msg (inbyte);
-		}
+		} 
 		
 		return;
 	} 
@@ -419,17 +421,22 @@ Parser::scanner (unsigned char inbyte)
 		}
 		cerr << dec << endl;
 #endif
-		if (msgindex > 0 && (edit.empty() || !(*edit (msgbuf, msgindex) >= 0))) {
-			if (!possible_mmc (msgbuf, msgindex) || _mmc_forward) {
-				if (!possible_mtc (msgbuf, msgindex) || _mtc_forward) {
-					if (!_offline) {
-						sysex (*this, msgbuf, msgindex);
+		if (msgindex > 0) {
+
+			boost::optional<int> res = edit (msgbuf, msgindex);
+
+			if (res.get_value_or (1) >= 0) {
+				if (!possible_mmc (msgbuf, msgindex) || _mmc_forward) {
+					if (!possible_mtc (msgbuf, msgindex) || _mtc_forward) {
+						if (!_offline) {
+							sysex (*this, msgbuf, msgindex);
+						}
 					}
 				}
+				if (!_offline) {
+					any (*this, msgbuf, msgindex);
+				} 
 			}
-			if (!_offline) {
-				any (*this, msgbuf, msgindex);
-			} 
 		}
 	}
 	
