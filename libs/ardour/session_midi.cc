@@ -746,7 +746,7 @@ Session::send_full_time_code(nframes_t /*nframes*/)
 
 	_send_timecode_update = false;
 
-	if (_mtc_port == 0 || !session_send_mtc) {
+	if (_mtc_port == 0 || !session_send_mtc || _slave) {
 		return 0;
 	}
 
@@ -759,13 +759,12 @@ Session::send_full_time_code(nframes_t /*nframes*/)
 	// I don't understand this bit yet.. [DR]
 	if (((mtc_timecode_bits >> 5) != MIDI::MTC_25_FPS) && (transmitting_timecode_time.frames % 2)) {
 		// start MTC quarter frame transmission on an even frame
-		Timecode::increment( transmitting_timecode_time, config.get_subframes_per_frame() );
+		Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
 		outbound_mtc_timecode_frame += (nframes_t) _frames_per_timecode_frame;
 	}
 
 	// Compensate for audio latency
 	outbound_mtc_timecode_frame += _worst_output_latency;
-
 	next_quarter_frame_to_send = 0;
 
 	// Sync slave to the same Timecode time as we are on
@@ -802,14 +801,13 @@ Session::send_full_time_code(nframes_t /*nframes*/)
 int
 Session::send_midi_time_code_for_cycle(nframes_t nframes)
 {
-	assert (next_quarter_frame_to_send >= 0);
-	assert (next_quarter_frame_to_send <= 7);
-
-	if (_mtc_port == 0 || !session_send_mtc || transmitting_timecode_time.negative
-	    /*|| (next_quarter_frame_to_send < 0)*/ ) {
+	if (_mtc_port == 0 || _slave || !session_send_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
 		// cerr << "(MTC) Not sending MTC\n";
 		return 0;
 	}
+
+	assert (next_quarter_frame_to_send >= 0);
+	assert (next_quarter_frame_to_send <= 7);
 
 	/* Duration of one quarter frame */
 	nframes_t quarter_frame_duration = ((long) _frames_per_timecode_frame) >> 2;
