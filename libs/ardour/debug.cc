@@ -90,7 +90,9 @@ ARDOUR::parse_debug_options (const char* str)
 			bits |= ARDOUR::DEBUG::SessionEvents;
 		} else if (strncasecmp (p, "midiio", strlen (p)) == 0) {
 			bits |= ARDOUR::DEBUG::MidiIO;
-		}
+		} else if (strncasecmp (p, "midiclock", strlen (p)) == 0) {
+			bits |= ARDOUR::DEBUG::MidiClock;
+		}		
 
 		p = strtok_r (0, ",", &sp);
 	}
@@ -119,4 +121,5 @@ ARDOUR::list_debug_options ()
 	cerr << "\tSessionEvents" << endl;
 	cerr << "\tMidiIO" << endl;
 	cerr << "\tLatencyCompensation" << endl;
+	cerr << "\tMidiClock" << endl;
 }

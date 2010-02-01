@@ -51,7 +51,8 @@ namespace ARDOUR {
 			Slave = 0x800,
 			SessionEvents = 0x800,
 			MidiIO = 0x1000,
-			MackieControl = 0x2000
+			MackieControl = 0x2000,
+			MidiClock = 0x4000
 		};
 	}
 

@@ -18,6 +18,7 @@
 
 */
 
+#include <cmath>
 #include <errno.h>
 #include <poll.h>
 #include <sys/types.h>
@@ -28,6 +29,8 @@
 
 #include "midi++/port.h"
 #include "midi++/jack.h"
+
+#include "ardour/debug.h"
 #include "ardour/slave.h"
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
@@ -73,9 +76,7 @@ MIDIClock_Slave::rebind (MIDI::Port& p)
 
 	port = &p;
 
-#ifdef DEBUG_MIDI_CLOCK
-	std::cerr << "MIDIClock_Slave: connecting to port " << port->name() << std::endl;
-#endif
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MIDIClock_Slave: connecting to port %1\n", port->name()));
 
 	port->input()->timing.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::update_midi_clock, this, _1, _2));
 	port->input()->start.connect_same_thread (port_connections, boost::bind (&MIDIClock_Slave::start, this, _1, _2));
@@ -97,6 +98,7 @@ MIDIClock_Slave::calculate_one_ppqn_in_frames_at(nframes64_t time)
 	double frames_per_quarter_note = frames_per_beat / quarter_notes_per_beat;
 
 	one_ppqn_in_frames = frames_per_quarter_note / double (ppqn);
+	// DEBUG_TRACE (DEBUG::MidiClock, string_compose ("at %1, one ppqn = %2\n", time, one_ppqn_in_frames));
 }
 
 ARDOUR::nframes64_t
@@ -116,7 +118,7 @@ void
 MIDIClock_Slave::calculate_filter_coefficients()
 {
 	// omega = 2 * PI * Bandwidth / MIDI clock frame frequency in Hz
-	omega = 2.0 * 3.14159265358979323846 * bandwidth * one_ppqn_in_frames / session->frame_rate();
+	omega = 2.0 * M_PI * bandwidth * one_ppqn_in_frames / session->frame_rate();
 	b = 1.4142135623730950488 * omega;
 	c = omega * omega;
 }
@@ -156,7 +158,7 @@ MIDIClock_Slave::update_midi_clock (Parser& /*parser*/, nframes64_t timestamp)
 		calculate_filter_coefficients();
 
 		// calculate loop error
-		// we use session->transport_frame() instead of t1 here
+		// we use session->audible_frame() instead of t1 here
 		// because t1 is used to calculate the transport speed,
 		// so the loop will compensate for accumulating rounding errors
 		error = (double(should_be_position) - double(session->audible_frame()));
@@ -168,64 +170,57 @@ MIDIClock_Slave::update_midi_clock (Parser& /*parser*/, nframes64_t timestamp)
 		e2 += c * e;
 	}
 
-	#ifdef DEBUG_MIDI_CLOCK
-		cerr
-				  << "MIDI Clock #" << midi_clock_count
-				  //<< "@" << timestamp
-				  << " arrived at: " << elapsed_since_start << " (elapsed time) "
-				  << " should-be transport: " << should_be_position
-				  << " audible: " << session->audible_frame()
-				  << " real transport: " << session->transport_frame()
-				  << " error: " << error
-				  //<< " engine: " << session->frame_time()
-				  << " real delta: " << timestamp - last_timestamp
-				  << " should-be delta: " << one_ppqn_in_frames
-				  << " t1-t0: " << (t1 -t0) * session->frame_rate()
-				  << " t0: " << t0 * session->frame_rate()
-				  << " t1: " << t1 * session->frame_rate()
-				  << " frame-rate: " << session->frame_rate()
-				  << endl;
-
-		//cerr      << "frames since cycle start: " << session->frames_since_cycle_start() << endl;
-	#endif // DEBUG_MIDI_CLOCK
-
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("clock #%1 @ %2 arrived %3 (theoretical) audible %4 transport %5 error %6 "
+						       "read delta %7 should-be delta %8 t1-t0 %9 t0 %10 t1 %11 framerate %12 appspeed %13\n",
+						       midi_clock_count,
+						       elapsed_since_start,
+						       should_be_position,
+						       session->audible_frame(),
+						       session->transport_frame(),
+						       error,
+						       timestamp - last_timestamp,
+						       one_ppqn_in_frames,
+						       (t1 -t0) * session->frame_rate(),
+						       t0 * session->frame_rate(),
+						       t1 * session->frame_rate(),
+						       session->frame_rate(),
+						       ((t1 - t0) * session->frame_rate()) / one_ppqn_in_frames));
+	
 	last_timestamp = timestamp;
 }
 
 void
 MIDIClock_Slave::start (Parser& /*parser*/, nframes64_t timestamp)
 {
-	#ifdef DEBUG_MIDI_CLOCK
-		cerr << "MIDIClock_Slave got start message at time "  <<  timestamp << " engine time: " << session->frame_time() << endl;
-	#endif
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MIDIClock_Slave got start message at time %1 engine time %2\n", timestamp, session->frame_time()));
 
 	if (!_started) {
 		reset();
 
 		_started = true;
 		_starting = true;
+
+		should_be_position = session->transport_frame();
 	}
 }
 
 void
 MIDIClock_Slave::reset ()
 {
-
-	should_be_position = 0;
+	should_be_position = session->transport_frame();
 	last_timestamp = 0;
 
-	_starting = false;
-	_started  = false;
-
-        if (session) session->request_locate(0, false);
+	_starting = true;
+	_started  = true;
+	
+	// session->request_locate(0, false);
 }
 
 void
 MIDIClock_Slave::contineu (Parser& /*parser*/, nframes64_t /*timestamp*/)
 {
-	#ifdef DEBUG_MIDI_CLOCK
-		std::cerr << "MIDIClock_Slave got continue message" << endl;
-	#endif
+	DEBUG_TRACE (DEBUG::MidiClock, "MIDIClock_Slave got continue message\n");
+
 	if (!_started) {
 		_starting = true;
 		_started  = true;
@@ -236,9 +231,7 @@ MIDIClock_Slave::contineu (Parser& /*parser*/, nframes64_t /*timestamp*/)
 void
 MIDIClock_Slave::stop (Parser& /*parser*/, nframes64_t /*timestamp*/)
 {
-	#ifdef DEBUG_MIDI_CLOCK
-		std::cerr << "MIDIClock_Slave got stop message" << endl;
-	#endif
+	DEBUG_TRACE (DEBUG::MidiClock, "MIDIClock_Slave got stop message\n");
 
 	if (_started || _starting) {
 		_starting = false;
@@ -282,9 +275,7 @@ MIDIClock_Slave::position (Parser& /*parser*/, byte* message, size_t size)
 	uint16_t position_in_sixteenth_notes = (uint16_t(msb) << 7) | uint16_t(lsb);
 	nframes64_t position_in_frames = calculate_song_position(position_in_sixteenth_notes);
 
-	#ifdef DEBUG_MIDI_CLOCK
-	cerr << "Song Position: " << position_in_sixteenth_notes << " frames: " << position_in_frames << endl;
-	#endif
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Song Position: %1 frames: %2\n", position_in_sixteenth_notes, position_in_frames));
 
 	session->request_locate(position_in_frames, false);
 	should_be_position  = position_in_frames;
@@ -317,9 +308,7 @@ MIDIClock_Slave::stop_if_no_more_clock_events(nframes64_t& pos, nframes64_t now)
 	if (last_timestamp &&
 	    now > last_timestamp &&
 	    now - last_timestamp > session->frame_rate() / 4) {
-        #ifdef DEBUG_MIDI_CLOCK
-			cerr << "No MIDI Clock frames received for some time, stopping!" << endl;
-        #endif
+		DEBUG_TRACE (DEBUG::MidiClock, "No MIDI Clock frames received for some time, stopping!\n");
 		pos = should_be_position;
 		session->request_transport_speed (0);
 		session->request_locate (should_be_position, false);
@@ -362,9 +351,7 @@ MIDIClock_Slave::speed_and_position (double& speed, nframes64_t& pos)
 		pos = should_be_position;
 	}
 
-	#ifdef DEBUG_MIDI_CLOCK
-	cerr << "speed_and_position: " << speed << " & " << pos << " <-> " << session->transport_frame() << " (transport)" << endl;
-	#endif
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("speed_and_position: %1 & %2 <-> %3 (transport)\n", speed, pos, session->transport_frame()));
 
 	return true;
 }
