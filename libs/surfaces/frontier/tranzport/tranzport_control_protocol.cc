@@ -510,7 +510,7 @@ TranzportControlProtocol::show_meter ()
 	   */
 
 	uint32_t fill  = (uint32_t) floor (fraction * 40);
-	char buf[21];
+	char buf[22];
 	uint32_t i;
 
 	if (fill == last_meter_fill) {
