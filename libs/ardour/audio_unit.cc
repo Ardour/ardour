@@ -1183,7 +1183,7 @@ AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, 
 	cb_offset = 0;
 
 	buffers->mNumberBuffers = min ((uint32_t) output_channels, maxbuf);
-	// cerr << "Will render " << buffers->mNumberBuffers << " channels\n";
+	cerr << name() << ": will render " << buffers->mNumberBuffers << " buffers, of " << maxbuf << endl;
 
 	for (uint32_t i = 0; i < buffers->mNumberBuffers; ++i) {
 		buffers->mBuffers[i].mNumberChannels = 1;
@@ -1198,6 +1198,8 @@ AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, 
 
 		current_maxbuf = 0;
 		frames_processed += nframes;
+		
+		cerr << name() << " gave back " << buffers->mNumberBuffers << " buffers as output, of " << maxbuf << endl;
 
 		uint32_t limit = min ((uint32_t) buffers->mNumberBuffers, maxbuf);
 
