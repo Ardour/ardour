@@ -88,16 +88,6 @@ TranzportControlProtocol::set_active (bool yn)
 
 			if (pthread_create_and_store (X_("tranzport monitor"), &thread, _monitor_work, this) == 0) {
 				_active = true;
-#if TRANZPORT_THREADS                      
-			if (pthread_create_and_store (X_("tranzport read"), &thread_read, _read_work, this) == 0) {
-				_active_read = true;
-			if (pthread_create_and_store (X_("tranzport write"), &thread_write, _write_work, this) == 0) {
-				_active_write = true;
-			if (pthread_create_and_store (X_("tranzport process"), &thread_process, _process_work, this) == 0) {
-				_active_process = true;
-			if (pthread_create_and_store (X_("tranzport timer"), &thread_timer, _process_timer, this) == 0) {
-				_active_process = true;
-#endif
 			} else {
 				return -1;
 			}
@@ -112,19 +102,14 @@ TranzportControlProtocol::set_active (bool yn)
 // thread FIXME - wait til all writes are done
 				for(int x = 0; (x < 20/MAX_TRANZPORT_INFLIGHT) && flush(); x++) { usleep(100); }
 			}
-#if TRANZPORT_THREADS                      
-			pthread_cancel_one (_thread_timer);
-			pthread_cancel_one (_thread_process);
-			pthread_cancel_one (_thread_read);
-			pthread_cancel_one (_thread_write);
-#endif
+
 			pthread_cancel_one (thread);
 
 			cerr << "Tranzport Thread dead\n";
 			close ();
 			_active = false;
 			cerr << "End tranzport shutdown\n";
-		} 
+		}
 	}
 
 	return 0;

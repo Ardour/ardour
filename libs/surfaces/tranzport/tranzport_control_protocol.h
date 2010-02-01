@@ -145,7 +145,7 @@ private:
 		BlingEnter,
 		BlingExit
 	};
-	
+
 	pthread_t       thread;
 #if HAVE_TRANZPORT_KERNEL_DRIVER
 	int udev;
@@ -153,18 +153,12 @@ private:
 	usb_dev_handle* udev;
 #endif
 
-#if TRANZPORT_THREADS
-	pthread_t       thread_read;
-#endif
 	int             last_read_error;
 
 	uint32_t        buttonmask;
 	uint32_t        timeout;
 	uint32_t        inflight;
 	uint32_t        current_track_id;
-#if TRANZPORT_THREADS
-	pthread_t       thread_write;
-#endif
 	int             last_write_error;
 	uint8_t        _datawheel;
 	uint8_t        _device_status;
