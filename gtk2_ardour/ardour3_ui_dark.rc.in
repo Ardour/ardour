@@ -27,6 +27,11 @@ style "medium_text"
  	font_name = "@FONT_NORMAL@"
 }
 
+style "medium_monospace_text"
+{
+ 	font_name = "@FONT_MONOSPACE_NORMAL@"
+}
+
 style "red_medium_text" = "medium_text"
 {	
 	fg[NORMAL] = { 1.0, 0, 0 }
@@ -74,6 +79,11 @@ style "verbose_canvas_cursor"
 style "marker_text" 
 {
 	font_name = "@FONT_SMALL@"
+}
+
+style "midi_tracer_textview" = "medium_monospace_text"
+{
+	
 }
 
 style "time_axis_view_item_name"
@@ -1670,3 +1680,4 @@ widget "*EvenPortGroups" style:highest "even_port_groups"
 widget "*MidiListView*" style:highest "white_tree_view"
 widget "*ProcessorSelector*" style:highest "processor_list_display"
 widget "*PortMatrixLabel*" style:highest "small_text"
+widget "*MidiTracerTextView" style:highest "midi_tracer_textview"

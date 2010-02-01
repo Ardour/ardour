@@ -9,6 +9,8 @@
 #include <gtkmm/label.h>
 
 #include "pbd/signals.h"
+#include "pbd/ringbuffer.h"
+#include "pbd/pool.h"
 #include "midi++/types.h"
 #include "ardour_dialog.h"
 
@@ -34,9 +36,13 @@ class MidiTracer : public ArdourDialog
 	bool autoscroll;
 	bool show_hex;
 	bool collect;
+	volatile bool update_queued;
+	RingBuffer<char *> fifo;
+	Pool buffer_pool;
+	static const size_t buffer_size = 256;
 
 	void tracer (MIDI::Parser&, MIDI::byte*, size_t);
-	void add_string (std::string);
+	void update ();
 	
 	Gtk::ToggleButton autoscroll_button;
 	Gtk::ToggleButton base_button;

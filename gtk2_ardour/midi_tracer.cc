@@ -25,6 +25,9 @@ MidiTracer::MidiTracer (const std::string& name, Parser& p)
 	, autoscroll (true)
 	, show_hex (true)
 	, collect (true)
+	, update_queued (false)
+	, fifo (1024)
+	, buffer_pool ("miditracer", buffer_size, 1024) // 1024 256 byte buffers
 	, autoscroll_button (_("Auto-Scroll"))
 	, base_button (_("Decimal"))
 	, collect_button (_("Enabled"))
@@ -34,6 +37,7 @@ MidiTracer::MidiTracer (const std::string& name, Parser& p)
 	get_vbox()->pack_start (scroller, true, true);
 	
 	text.show ();
+	text.set_name ("MidiTracerTextView");
 	scroller.show ();
 	scroller.set_size_request (400, 400);
 
@@ -65,6 +69,7 @@ MidiTracer::MidiTracer (const std::string& name, Parser& p)
 	connect ();
 }
 
+
 MidiTracer::~MidiTracer()
 {
 }
@@ -87,7 +92,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 {
 	stringstream ss;
 	struct timeval tv;
-	char buf[256];
+	char* buf;
 	struct tm now;
 	size_t bufsize;
 	size_t s;
@@ -95,11 +100,14 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 	gettimeofday (&tv, 0);
 	localtime_r (&tv.tv_sec, &now);
 
-	s = strftime (buf, sizeof (buf), "%H:%M:%S", &now);
-	bufsize = sizeof (buf) - s;
-	s += snprintf (&buf[s], bufsize, ".%-9" PRId64, (int64_t) tv.tv_usec);
-	bufsize = sizeof (buf) - s;
-	
+	buf = (char *) buffer_pool.alloc ();
+	bufsize = buffer_size;
+
+	s = strftime (buf, bufsize, "%H:%M:%S", &now);
+	bufsize -= s;
+	s = snprintf (&buf[s], bufsize, ".%-9" PRId64, (int64_t) tv.tv_usec);
+	bufsize -= s;
+
 	switch ((eventType) msg[0]&0xf0) {
 	case off:
 		if (show_hex) {
@@ -182,10 +190,10 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 				s += snprintf (&buf[s], bufsize, "%16s %02x\n", "Sysex", (int) msg[1]);
 				break;
 			} 
-			bufsize = sizeof (buf) - s;
+			bufsize -= s;
 		} else {
 			s += snprintf (&buf[s], bufsize, " %16s (%d) = [", "Sysex", (int) len);
-			bufsize = sizeof (buf) - s;
+			bufsize -= s;
 
 			for (unsigned int i = 0; i < len && s < sizeof (buf)-3; ++i) {
 				if (i > 0) {
@@ -237,14 +245,22 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 	}
 
 	// If you want to append more to the line, uncomment this first
-	// bufsize = sizeof (buf) - s;
+	// bufsize -= s;
 
-	gui_context()->call_slot (boost::bind (&MidiTracer::add_string, this, string (buf)));
+	fifo.write (&buf, 1);
+
+	if (!update_queued) {
+		gui_context()->call_slot (boost::bind (&MidiTracer::update, this));
+		update_queued = true;
+	}
 }
 
 void
-MidiTracer::add_string (std::string s)
+MidiTracer::update ()
 {
+	bool updated = false;
+	update_queued = false;
+
 	RefPtr<TextBuffer> buf (text.get_buffer());
 
 	int excess = buf->get_line_count() - line_count_adjustment.get_value();
@@ -253,9 +269,15 @@ MidiTracer::add_string (std::string s)
 		buf->erase (buf->begin(), buf->get_iter_at_line (excess));
 	}
 
-	buf->insert (buf->end(), s);
+	char *str;
 
-	if (autoscroll) {
+	while (fifo.read (&str, 1)) {
+		buf->insert (buf->end(), string (str));
+		buffer_pool.release (str);
+		updated = true;
+	}
+
+	if (updated && autoscroll) {
 		scroller.get_vadjustment()->set_value (scroller.get_vadjustment()->get_upper());
 	}
 }
