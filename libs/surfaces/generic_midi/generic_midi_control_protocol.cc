@@ -388,12 +388,14 @@ GenericMidiControlProtocol::delete_binding (PBD::Controllable* control)
 	if (control != 0) {
 		Glib::Mutex::Lock lm2 (controllables_lock);
 		
-		for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ++iter) {
+		for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end();) {
 			MIDIControllable* existingBinding = (*iter);
 			
 			if (control == (existingBinding->get_controllable())) {
 				delete existingBinding;
-				controllables.erase (iter);
+				iter = controllables.erase (iter);
+			} else {
+				++iter;
 			}
 			
 		}
@@ -414,7 +416,7 @@ GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos,
 
 		// Remove any old binding for this midi channel/type/value pair
 		// Note:  can't use delete_binding() here because we don't know the specific controllable we want to remove, only the midi information
-		for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end(); ++iter) {
+		for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end();) {
 			MIDIControllable* existingBinding = (*iter);
 			
 			if ((existingBinding->get_control_channel() & 0xf ) == channel &&
@@ -422,7 +424,9 @@ GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos,
 			    (existingBinding->get_control_type() & 0xf0 ) == MIDI::controller) {
 				
 				delete existingBinding;
-				controllables.erase (iter);
+				iter = controllables.erase (iter);
+			} else {
+				++iter;
 			}
 			
 		}
