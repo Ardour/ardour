@@ -1175,6 +1175,7 @@ AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, 
 {
 	AudioUnitRenderActionFlags flags = 0;
 	AudioTimeStamp ts;
+	OSErr err;
 
 	current_buffers = &bufs;
 	current_maxbuf = maxbuf;
@@ -1193,7 +1194,7 @@ AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, 
 	ts.mSampleTime = frames_processed;
 	ts.mFlags = kAudioTimeStampSampleTimeValid;
 
-	if (unit->Render (&flags, &ts, 0, nframes, buffers) == noErr) {
+	if ((err = unit->Render (&flags, &ts, 0, nframes, buffers)) == noErr) {
 
 		current_maxbuf = 0;
 		frames_processed += nframes;
@@ -1207,7 +1208,9 @@ AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, 
 			}
 		}
 		return 0;
-	}
+	} 
+
+	// cerr << name() << " render error " << err << endl;
 
 	return -1;
 }
