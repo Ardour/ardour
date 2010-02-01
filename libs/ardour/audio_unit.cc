@@ -907,12 +907,17 @@ AUPlugin::can_do (int32_t in, int32_t& out)
 		cerr << name() << " has " << io_configs.size() << " IO Configurations\n";
 	}
 
-	//first search for the simple case that matches what we need exactly
+	//Ardour expects the plugin to tell it the output configuration
+	//but AU plugins can have multiple I/O configurations
+	//in most cases (since we don't allow special routing like sidechains in A2, we want to preserve the number of streams
+	//so first lets see if there's a configuration that keeps out==in
+	out = in;
 	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
 		int32_t possible_in = i->first;
 		int32_t possible_out = i->second;
 
 		if (possible_in == in && possible_out== out) {
+			cerr << "\tCHOSEN: in " << in << " out " << out << endl;
 			return 1;
 		}
 	}
