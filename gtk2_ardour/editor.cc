@@ -3191,7 +3191,7 @@ Editor::set_route_group_mute (Route& route, bool yn)
 {
 	RouteGroup *route_group = 0;
 
-	if ((route_group == route.route_group()) != 0) {
+	if ((route_group = route.route_group()) != 0) {
 		route_group->apply (&Route::set_mute, yn, this);
 	} else {
 		route.set_mute (yn, this);
