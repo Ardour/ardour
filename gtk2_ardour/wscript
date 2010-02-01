@@ -344,7 +344,11 @@ def build(bld):
 			else:
 				key = "_".join (['FONT',sizename])
 				fontstyle = " ".join ([basefont,points])
+				
 			font_subst_dict[key] = fontstyle
+
+	# add normal monospace to font dict
+	font_subst_dict['FONT_MONOSPACE_NORMAL'] = 'monospace 10'
 
 	# RC files
 	obj              = bld.new_task_gen('subst')
