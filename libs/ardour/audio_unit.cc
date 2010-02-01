@@ -1207,6 +1207,15 @@ AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, 
 				memcpy (bufs[i]+offset, buffers->mBuffers[i].mData, nframes * sizeof (Sample));
 			}
 		}
+
+		/* now silence any buffers that were passed in but the that the plugin
+		   did not fill/touch/use.
+		*/
+
+		for (i < maxbuf) {
+			memset (bufs[i]+offset, 0, nframes * sizeof (Sample));
+		}
+
 		return 0;
 	} 
 
