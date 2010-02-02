@@ -846,8 +846,13 @@ AUPlugin::configure_io (int32_t in, int32_t out)
 	bool was_initialized = initialized;
 
 	if (initialized) {
-		unit->Uninitialize ();
-		initialized = false;
+		//if we are already running with the requested i/o config, bail out here
+		if ( (in==input_channels) && (out==output_channels) ) {
+			return 0;
+		} else {
+			unit->Uninitialize ();
+			initialized = false;
+		}
 	}
 
 	streamFormat.mSampleRate = _session.frame_rate();
