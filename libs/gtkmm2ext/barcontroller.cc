@@ -108,14 +108,20 @@ BarController::entry_input (double* new_value)
 	}
 
 	// extract a double from the string and take its log
+
 	Entry *entry = dynamic_cast<Entry *>(&spinner);
+	double value;
 
 	{
-		PBD::LocaleGuard lg (X_("POSIX"));
-		double value;
-		sscanf (entry->get_text().c_str(), "%g", &value);
-		*new_value = log(value);
+		// Switch to user's preferred locale so that
+		// if they use different LC_NUMERIC conventions,
+		// we will honor them.
+
+		PBD::LocaleGuard lg ("");
+		sscanf (entry->get_text().c_str(), "%lf", &value);
 	}
+
+	*new_value = log(value);
 
 	return true;
 }
@@ -137,23 +143,24 @@ BarController::entry_output ()
 	}
 
 	// generate the exponential and turn it into a string
-	// convert to correct locale. 
 	
 	stringstream stream;
 	string str;
 	size_t found;
 
-	// Be sure to use POSIX or C locale here so that
-	// we don't end up with commas (as used by some locales)
-	// in the text entry.
+	char buf[128];
 
 	{
-		PBD::LocaleGuard lg (X_("POSIX"));
-		char buf[128];
-		snprintf (buf, sizeof (buf), "%g", spinner.get_adjustment()->get_value());
-		Entry *entry = dynamic_cast<Entry *>(&spinner);
-		entry->set_text (buf);
+		// Switch to user's preferred locale so that
+		// if they use different LC_NUMERIC conventions,
+		// we will honor them.
+		
+		PBD::LocaleGuard lg ("");
+		snprintf (buf, sizeof (buf), "%g", exp (spinner.get_adjustment()->get_value()));
 	}
+
+	Entry *entry = dynamic_cast<Entry *>(&spinner);
+	entry->set_text (buf);
 	
 	return true;
 }
