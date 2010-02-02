@@ -105,7 +105,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 
 	s = strftime (buf, bufsize, "%H:%M:%S", &now);
 	bufsize -= s;
-	s = snprintf (&buf[s], bufsize, ".%-9" PRId64, (int64_t) tv.tv_usec);
+	s += snprintf (&buf[s], bufsize, ".%-9" PRId64, (int64_t) tv.tv_usec);
 	bufsize -= s;
 
 	switch ((eventType) msg[0]&0xf0) {
@@ -190,18 +190,19 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 				s += snprintf (&buf[s], bufsize, "%16s %02x\n", "Sysex", (int) msg[1]);
 				break;
 			} 
-			bufsize -= s;
+
 		} else {
-			s += snprintf (&buf[s], bufsize, " %16s (%d) = [", "Sysex", (int) len);
+
+			s += snprintf (&buf[s], bufsize, "%16s (%d) = [", "Sysex", (int) len);
 			bufsize -= s;
 
-			for (unsigned int i = 0; i < len && s < sizeof (buf)-3; ++i) {
+			for (unsigned int i = 0; i < len && bufsize > 3; ++i) {
 				if (i > 0) {
 					s += snprintf (&buf[s], bufsize, " %02x", msg[i]);
 				} else {
 					s += snprintf (&buf[s], bufsize, "%02x", msg[i]);
 				}
-				bufsize = sizeof (buf) - s;
+				bufsize -= s;
 			}
 			s += snprintf (&buf[s], bufsize, "]\n");
 		}

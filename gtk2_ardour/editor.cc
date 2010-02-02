@@ -2198,8 +2198,8 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	int x, y, xoff, yoff;
 	Gdk::Geometry g;
 
-	// return 0;
-
+	return 0;
+	
 	if ((prop = node.property ("id")) != 0) {
 		_id = prop->value ();
 	}
