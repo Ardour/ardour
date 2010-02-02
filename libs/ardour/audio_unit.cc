@@ -1202,8 +1202,9 @@ AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, 
 		cerr << name() << " gave back " << buffers->mNumberBuffers << " buffers as output, of " << maxbuf << endl;
 
 		uint32_t limit = min ((uint32_t) buffers->mNumberBuffers, maxbuf);
+		uint32_t i;
 
-		for (uint32_t i = 0; i < limit; ++i) {
+		for (i = 0; i < limit; ++i) {
 			if (bufs[i] + offset != buffers->mBuffers[i].mData) {
 				// cerr << "chn " << i << " rendered into " << bufs[i]+offset << endl;
 				memcpy (bufs[i]+offset, buffers->mBuffers[i].mData, nframes * sizeof (Sample));
@@ -1214,7 +1215,7 @@ AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, 
 		   did not fill/touch/use.
 		*/
 
-		for (i < maxbuf) {
+		for (;i < maxbuf; ++i) {
 			memset (bufs[i]+offset, 0, nframes * sizeof (Sample));
 		}
 
