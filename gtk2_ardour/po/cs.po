@@ -1,16 +1,17 @@
-# German translations for gtk-ardour
+# Czech translations for gtk-ardour
 # Copyright (C) 2003 Paul Davis
 # This file is distributed under the same license as the gtk-ardour package.
 #
 # Karsten Petersen <kapet@kapet.de>, 2003.
 # Edgar Aichinger <edgar.aichinger@aon.at>, 2008.
 # Pavel Fric <pavelfric@seznam.cz>, 2009.
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-10-20 19:01+0100\n"
-"PO-Revision-Date: 2009-05-20 22:27+0200\n"
+"PO-Revision-Date: 2010-02-03 13:57-0500\n"
 "Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
 "Language-Team: Czech <kde-i18n-doc@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -18,7 +19,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 0.3\n"
-"X-Poedit-Country: GERMANY\n"
+"X-Poedit-Country: Czech Republic\n"
 "X-Poedit-Basepath: ../../\n"
 "X-Poedit-SearchPath-0: gtk2_ardour\n"
 
