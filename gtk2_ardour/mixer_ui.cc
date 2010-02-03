@@ -250,10 +250,12 @@ Mixer_UI::Mixer_UI ()
 	group_display.show();
 
 	auto_rebinding = FALSE;
-	
+
 	MixerStrip::CatchDeletion.connect (*this, ui_bind (&Mixer_UI::remove_strip, this, _1), gui_context());
 
+#ifndef DEFER_PLUGIN_SELECTOR_LOAD
 	_plugin_selector = new PluginSelector (PluginManager::the_manager ());
+#endif
 }
 
 Mixer_UI::~Mixer_UI ()
@@ -492,7 +494,7 @@ Mixer_UI::set_session (Session* sess)
 	route_groups_changed ();
 
 	if (_visible) {
-	       show_window();
+		show_window();
 	}
 
 	start_updating ();
@@ -1580,5 +1582,10 @@ Mixer_UI::set_route_group_activation (RouteGroup* g, bool a)
 PluginSelector*
 Mixer_UI::plugin_selector()
 {
+#ifdef DEFER_PLUGIN_SELECTOR_LOAD
+	if (!_plugin_selector)
+		_plugin_selector = new PluginSelector (PluginManager::the_manager ());
+#endif
+
 	return _plugin_selector;
 }
