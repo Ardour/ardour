@@ -6,7 +6,6 @@ import Options
 import sys
 import TaskGen
 import re
-from w18n import build_i18n
 
 # Version of this package (even if built as a child)
 MAJOR = '1'
@@ -418,5 +417,5 @@ def build(bld):
 			bld.install_as (os.path.join (bld.env['PREFIX'], 'share', 'locale', lang, 'LC_MESSAGES', APPNAME + '.mo'), mo)
 
 def i18n(bld):
-	build_i18n (bld, 'gtk2_ardour', APPNAME, gtk2_ardour_sources)
+	autowaf.build_i18n (bld, 'gtk2_ardour', APPNAME, gtk2_ardour_sources)
 

@@ -10,6 +10,7 @@ import Configure
 import Options
 import Utils
 import sys
+import glob
 from TaskGen import feature, before, after
 
 global g_is_child
@@ -365,6 +366,43 @@ def build_version_files(header_path, source_path, domain, major, minor, micro):
 		sys.exit(-1)
 		
 	return None
+
+# Internationalisation (gettext)
+def build_i18n(bld,dir,name,sources):
+	pwd = bld.get_curdir()
+	os.chdir(pwd)
+
+	pot_file = '%s.pot' % name
+
+	args = [ 'xgettext',
+		 '--keyword=_',
+		 '--keyword=N_',
+		 '--from-code=UTF-8',
+		 '-o', pot_file,
+		 '--copyright-holder="Paul Davis"' ]
+	args += sources
+	Utils.pprint('GREEN', 'Updating ' + pot_file, sep='')
+	os.spawnvp (os.P_WAIT, 'xgettext', args)
+	
+	po_files = glob.glob ('po/*.po')
+	
+	for po_file in po_files:
+		args = [ 'msgmerge',
+			 '--update',
+			 po_file,
+			 pot_file ]
+		Utils.pprint('GREEN', 'Updating ' + po_file, sep='')
+		os.spawnvp (os.P_WAIT, 'msgmerge', args)
+		
+	for po_file in po_files:
+		mo_file = po_file.replace ('.po', '.mo')
+		args = [ 'msgfmt',
+			 '-c',
+			 '-o',
+			 mo_file,
+			 po_file ]
+		Utils.pprint('GREEN', 'Generating ' + po_file)
+		os.spawnvp (os.P_WAIT, 'msgfmt', args)
 
 def shutdown():
 	# This isn't really correct (for packaging), but people asking is annoying

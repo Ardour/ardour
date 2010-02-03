@@ -5,7 +5,6 @@ import glob
 import Options
 import re
 import subprocess
-from w18n import build_i18n
 
 # Version of this package (even if built as a child)
 MAJOR = '3'
@@ -351,4 +350,4 @@ def shutdown():
 	autowaf.shutdown()
 
 def i18n(bld):
-	build_i18n (bld, 'libs/ardour', APPNAME, libardour_sources)
+	autowaf.build_i18n (bld, 'libs/ardour', APPNAME, libardour_sources)
