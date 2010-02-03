@@ -34,7 +34,7 @@ namespace ARDOUR {
 	class Automatable;
 }
 
-
+/** A BarController which displays the value and allows control of an AutomationControl */
 class AutomationController : public Gtkmm2ext::BarController {
 public:
 	static boost::shared_ptr<AutomationController> create(
@@ -50,6 +50,8 @@ public:
 
 	void display_effective_value();
 	void value_adjusted();
+
+	void stop_updating ();
 
 private:
 	AutomationController (boost::shared_ptr<ARDOUR::AutomationControl> ac, Gtk::Adjustment* adj);

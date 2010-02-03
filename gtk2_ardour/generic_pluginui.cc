@@ -381,9 +381,10 @@ GenericPluginUI::print_parameter (char *buf, uint32_t len, uint32_t param)
 GenericPluginUI::ControlUI*
 GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<AutomationControl> mcontrol)
 {
-	ControlUI* control_ui = NULL;
-	if (!mcontrol)
+	ControlUI* control_ui = 0;
+	if (!mcontrol) {
 		return control_ui;
+	}
 
 	Plugin::ParameterDescriptor desc;
 
@@ -544,6 +545,8 @@ GenericPluginUI::build_control_ui (guint32 port_index, boost::shared_ptr<Automat
 
 		mcontrol->Changed.connect (control_connections, boost::bind (&GenericPluginUI::parameter_changed, this, control_ui), gui_context());
 		mcontrol->alist()->automation_state_changed.connect (control_connections, boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
+
+		input_controls.push_back (control_ui);
 
 	} else if (plugin->parameter_is_output (port_index)) {
 
@@ -749,9 +752,14 @@ GenericPluginUI::start_updating (GdkEventAny*)
 bool
 GenericPluginUI::stop_updating (GdkEventAny*)
 {
+	for (vector<ControlUI*>::iterator i = input_controls.begin(); i != input_controls.end(); ++i) {
+		(*i)->controller->stop_updating ();
+	}
+	
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
 	}
+	
 	return false;
 }
 

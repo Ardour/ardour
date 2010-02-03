@@ -120,7 +120,7 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 		GenericPluginUI*  pu  = new GenericPluginUI (insert, scrollable);
 
 		_pluginui = pu;
-		add( *pu );
+		add (*pu);
 
 		/*
 		Gtk::HBox *hbox = new Gtk::HBox();

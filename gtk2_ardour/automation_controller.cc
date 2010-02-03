@@ -150,3 +150,9 @@ AutomationController::value_changed ()
 	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&AutomationController::display_effective_value, this));
 }
 
+/** Stop updating our value from our controllable */
+void
+AutomationController::stop_updating ()
+{
+	_screen_update_connection.disconnect ();
+}

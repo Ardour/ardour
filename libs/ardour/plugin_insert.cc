@@ -432,11 +432,12 @@ PluginInsert::set_parameter (Evoral::Parameter param, float val)
 float
 PluginInsert::get_parameter (Evoral::Parameter param)
 {
-	if (param.type() != PluginAutomation)
+	if (param.type() != PluginAutomation) {
 		return 0.0;
-	else
-		return
-		_plugins[0]->get_parameter (param.id());
+	} else {
+		assert (!_plugins.empty ());
+		return _plugins[0]->get_parameter (param.id());
+	}
 }
 
 void
