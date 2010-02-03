@@ -410,6 +410,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		row[_columns.mute_state] = (*x)->route()->muted();
 		row[_columns.solo_state] = (*x)->route()->soloed();
 		row[_columns.solo_isolate_state] = (*x)->route()->solo_isolated();
+		row[_columns.name_editable] = true;
 
 		_ignore_reorder = true;
 
