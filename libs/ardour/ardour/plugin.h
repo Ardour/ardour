@@ -113,6 +113,7 @@ class Plugin : public PBD::StatefulDestructible
 	virtual uint32_t nth_parameter (uint32_t which, bool& ok) const = 0;
 	virtual void activate () = 0;
 	virtual void deactivate () = 0;
+	virtual void flush () { deactivate(); activate(); }
 	virtual void set_block_size (nframes_t nframes) = 0;
 
 	virtual int connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, nframes_t nframes, nframes_t offset) = 0;

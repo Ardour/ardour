@@ -73,6 +73,7 @@ class Redirect : public IO
 	virtual void run (vector<Sample *>& ibufs, uint32_t nbufs, nframes_t nframes) = 0;
 	virtual void activate () = 0;
 	virtual void deactivate () = 0;
+	virtual void flush () = 0;
 	virtual nframes_t latency() { return 0; }
 
 	virtual void set_block_size (nframes_t nframes) {}

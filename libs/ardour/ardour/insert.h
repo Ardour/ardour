@@ -53,6 +53,7 @@ class Insert : public Redirect
 	virtual void run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t nframes) = 0;
 	virtual void activate () {}
 	virtual void deactivate () {}
+	virtual void flush () {}
 
 	virtual int32_t can_do (int32_t in, int32_t& out) = 0;
 	virtual int32_t configure_io (int32_t magic, int32_t in, int32_t out) = 0;
@@ -114,6 +115,7 @@ class PluginInsert : public Insert
 	void silence (nframes_t nframes);
 	void activate ();
 	void deactivate ();
+	void flush ();
 
 	void set_block_size (nframes_t nframes);
 

@@ -45,6 +45,7 @@ class Send : public Redirect
 	void run (vector<Sample *> &bufs, uint32_t nbufs, nframes_t nframes);
 	void activate() {}
 	void deactivate () {}
+	void flush () {}
 
 	void set_metering (bool yn);
 

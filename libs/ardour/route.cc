@@ -2264,8 +2264,7 @@ Route::handle_transport_stopped (bool abort_ignored, bool did_locate, bool can_f
 		for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
 			
 			if (Config->get_plugins_stop_with_transport() && can_flush_redirects) {
-				(*i)->deactivate ();
-				(*i)->activate ();
+				(*i)->flush ();
 			} 
 			
 			(*i)->transport_stopped (now);

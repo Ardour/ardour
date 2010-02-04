@@ -804,8 +804,14 @@ AUPlugin::activate ()
 void
 AUPlugin::deactivate ()
 {
-	unit->GlobalReset ();
+	unit->Uninitialize ();
 	initialized = false;
+}
+
+void
+AUPlugin::flush ()
+{
+	unit->GlobalReset ();
 }
 
 void
@@ -822,8 +828,7 @@ AUPlugin::_set_block_size (nframes_t nframes)
 	OSErr err;
 
 	if (initialized) {
-		unit->Uninitialize ();
-		initialized = false;
+		deactivate ();
 	}
 
 	if ((err = unit->SetProperty (kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 
@@ -850,8 +855,7 @@ AUPlugin::configure_io (int32_t in, int32_t out)
 		if ( (in==input_channels) && (out==output_channels) ) {
 			return 0;
 		} else {
-			unit->Uninitialize ();
-			initialized = false;
+			deactivate ();
 		}
 	}
 

@@ -276,6 +276,14 @@ PluginInsert::deactivate ()
 }
 
 void
+PluginInsert::flush ()
+{
+	for (vector<boost::shared_ptr<Plugin> >::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+		(*i)->flush ();
+	}
+}
+
+void
 PluginInsert::connect_and_run (vector<Sample*>& bufs, uint32_t nbufs, nframes_t nframes, nframes_t offset, bool with_auto, nframes_t now)
 {
 	int32_t in_index = 0;
