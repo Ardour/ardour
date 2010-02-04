@@ -2475,8 +2475,7 @@ Route::flush_redirects ()
 	Glib::RWLock::ReaderLock lm (redirect_lock);
 
 	for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-		(*i)->deactivate ();
-		(*i)->activate ();
+		(*i)->flush ();
 	}
 }
 
