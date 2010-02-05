@@ -200,7 +200,7 @@ AudioEngine::stop (bool forever)
 			Stopped(); /* EMIT SIGNAL */
 		}
 	}
-
+	
 	return _running ? -1 : 0;
 }
 

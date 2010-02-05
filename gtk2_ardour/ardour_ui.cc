@@ -724,6 +724,18 @@ ARDOUR_UI::check_memory_locking ()
 #endif // !__APPLE__
 }
 
+void
+ARDOUR_UI::queue_finish ()
+{
+	Glib::signal_idle().connect (mem_fun (*this, &ARDOUR_UI::idle_finish));
+}
+
+bool
+ARDOUR_UI::idle_finish ()
+{
+	finish ();
+	return false; /* do not call again */
+}
 
 void
 ARDOUR_UI::finish()
