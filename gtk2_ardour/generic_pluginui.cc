@@ -225,7 +225,7 @@ GenericPluginUI::build ()
 
 			boost::shared_ptr<ARDOUR::AutomationControl> c
 				= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
-					insert->data().control(Evoral::Parameter(PluginAutomation, 0, i)));
+					insert->control(Evoral::Parameter(PluginAutomation, 0, i)));
 
 			if ((cui = build_control_ui (i, c)) == 0) {
 				error << string_compose(_("Plugin Editor: could not build control element for port %1"), i) << endmsg;

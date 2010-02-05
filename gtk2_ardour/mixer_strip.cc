@@ -915,7 +915,7 @@ MixerStrip::connect_to_pan ()
 
 	boost::shared_ptr<ARDOUR::AutomationControl> pan_control
 		= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
-				_route->panner()->data().control(Evoral::Parameter(PanAutomation)));
+				_route->panner()->control(Evoral::Parameter(PanAutomation)));
 
 	if (pan_control) {
 		pan_control->alist()->automation_state_changed.connect (panstate_connection, boost::bind (&PannerUI::pan_automation_state_changed, &panners), gui_context());

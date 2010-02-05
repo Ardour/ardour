@@ -2757,7 +2757,7 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 		
 		if (p) {
 			c = boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
-				p->data().control(Evoral::Parameter(PluginAutomation, 0, parameter_index)));
+				p->control(Evoral::Parameter(PluginAutomation, 0, parameter_index)));
 		}
 		break;
 	}

@@ -142,12 +142,12 @@ class AudioRegion : public Region
 
 	boost::shared_ptr<Evoral::Control>
 	control(const Evoral::Parameter& id, bool create=false) {
-		return _automatable.data().control(id, create);
+		return _automatable.control(id, create);
 	}
 
 	virtual boost::shared_ptr<const Evoral::Control>
 	control(const Evoral::Parameter& id) const {
-		return _automatable.data().control(id);
+		return _automatable.control(id);
 	}
 
 	/* export */

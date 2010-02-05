@@ -90,9 +90,6 @@ public:
 
 	typedef Evoral::ControlSet::Controls Controls;
 
-	Evoral::ControlSet&       data()       { return *dynamic_cast<Evoral::ControlSet*>(this); }
-	const Evoral::ControlSet& data() const { return *dynamic_cast<const Evoral::ControlSet*>(this); }
-
 	int set_automation_state (const XMLNode&, Evoral::Parameter default_param);
 	XMLNode& get_automation_state();
 

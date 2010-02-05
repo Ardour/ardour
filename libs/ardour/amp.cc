@@ -374,7 +374,7 @@ Amp::GainControl::get_value (void) const
 void
 Amp::setup_gain_automation (sframes_t start_frame, sframes_t end_frame, nframes_t nframes)
 {
-	Glib::Mutex::Lock am (data().control_lock(), Glib::TRY_LOCK);
+	Glib::Mutex::Lock am (control_lock(), Glib::TRY_LOCK);
 
 	if (am.locked() && _session.transport_rolling() && _gain_control->automation_playback()) {
 		_apply_gain_automation = _gain_control->list()->curve().rt_safe_get_vector (

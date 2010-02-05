@@ -283,7 +283,7 @@ AudioTimeAxisView::ensure_pan_views (bool show)
 	for (p = params.begin(); p != params.end(); ++p) {
 		boost::shared_ptr<ARDOUR::AutomationControl> pan_control
 			= boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(
-				_route->panner()->data().control(*p));
+				_route->panner()->control(*p));
 
 		if (pan_control->parameter().type() == NullAutomation) {
 			error << "Pan control has NULL automation type!" << endmsg;

@@ -3148,7 +3148,7 @@ Route::get_control (const Evoral::Parameter& param)
 {
 	/* either we own the control or .... */
 
-	boost::shared_ptr<AutomationControl> c = boost::dynamic_pointer_cast<AutomationControl>(data().control (param));
+	boost::shared_ptr<AutomationControl> c = boost::dynamic_pointer_cast<AutomationControl>(control (param));
 
 	if (!c) {
 
@@ -3156,7 +3156,7 @@ Route::get_control (const Evoral::Parameter& param)
 
 		Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			if ((c = boost::dynamic_pointer_cast<AutomationControl>((*i)->data().control (param))) != 0) {
+			if ((c = boost::dynamic_pointer_cast<AutomationControl>((*i)->control (param))) != 0) {
 				break;
 			}
 		}

@@ -78,12 +78,12 @@ class MidiRegion : public Region
 
 	boost::shared_ptr<Evoral::Control>
 	control(const Evoral::Parameter& id, bool create=false) {
-		return model()->data().control(id, create);
+		return model()->control(id, create);
 	}
 
 	virtual boost::shared_ptr<const Evoral::Control>
 	control(const Evoral::Parameter& id) const {
-		return model()->data().control(id);
+		return model()->control(id);
 	}
 
 	/* export */
