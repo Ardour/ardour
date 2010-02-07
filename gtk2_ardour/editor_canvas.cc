@@ -548,7 +548,6 @@ void
 Editor::maybe_autoscroll (GdkEventMotion* event, bool allow_vert)
 {
 	nframes64_t rightmost_frame = leftmost_frame + current_page_frames();
-	pair<nframes64_t, nframes64_t> frames = _drags->extent ();
 	bool startit = false;
 
 	autoscroll_y = 0;
@@ -561,19 +560,16 @@ Editor::maybe_autoscroll (GdkEventMotion* event, bool allow_vert)
 		startit = true;
 	}
 
-	if (frames.second > rightmost_frame) {
-
+	if (_drags->current_pointer_frame() > rightmost_frame) {
 		if (rightmost_frame < max_frames) {
 			autoscroll_x = 1;
 			startit = true;
 		}
-
-	} else if (frames.first < leftmost_frame) {
+	} else if (_drags->current_pointer_frame() < leftmost_frame) {
 		if (leftmost_frame > 0) {
 			autoscroll_x = -1;
 			startit = true;
 		}
-
 	}
 
 	if (!allow_vertical_scroll) {
@@ -609,12 +605,10 @@ Editor::autoscroll_canvas ()
 
 	if (autoscroll_x_distance != 0) {
 
-		pair<nframes64_t, nframes64_t> const e = _drags->extent ();
-		
 		if (autoscroll_x > 0) {
-			autoscroll_x_distance = (e.second - (leftmost_frame + current_page_frames())) / 3;
+			autoscroll_x_distance = (_drags->current_pointer_frame() - (leftmost_frame + current_page_frames())) / 3;
 		} else if (autoscroll_x < 0) {
-			autoscroll_x_distance = (leftmost_frame - e.first) / 3;
+			autoscroll_x_distance = (leftmost_frame - _drags->current_pointer_frame()) / 3;
 
 		}
 	}

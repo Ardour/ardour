@@ -56,7 +56,6 @@ public:
 	void start_grab (GdkEvent *);
 	bool end_grab (GdkEvent *);
 	bool have_item (ArdourCanvas::Item *) const;
-	std::pair<nframes64_t, nframes64_t> extent () const;
 
 	/** @return true if an end drag or break_drag is in progress */
 	bool ending () const {
@@ -165,11 +164,6 @@ public:
 		return true;
 	}
 
-	/** @return current x extent of the thing being dragged; ie
-	 *  a pair of (leftmost_position, rightmost_position)
-	 */
-	virtual std::pair<nframes64_t, nframes64_t> extent () const;
-
 protected:
 
 	double grab_x () const {
@@ -223,8 +217,6 @@ class RegionDrag : public Drag, public sigc::trackable
 public:
 	RegionDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &);
 	virtual ~RegionDrag () {}
-
-	virtual std::pair<nframes64_t, nframes64_t> extent () const;
 
 protected:
 
@@ -411,8 +403,6 @@ public:
 	bool y_movement_matters () const {
 		return false;
 	}
-
-	std::pair<nframes64_t, nframes64_t> extent () const;
 
 private:
 

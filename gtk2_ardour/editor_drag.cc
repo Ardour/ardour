@@ -170,27 +170,6 @@ DragManager::have_item (ArdourCanvas::Item* i) const
 	return j != _drags.end ();
 }
 
-pair<nframes64_t, nframes64_t>
-DragManager::extent () const
-{
-	if (_drags.empty()) {
-		return make_pair (0, 0);
-	}
-
-	list<Drag*>::const_iterator i = _drags.begin ();
-	pair<nframes64_t, nframes64_t> e = (*i)->extent ();
-	++i;
-
-	while (i != _drags.end()) {
-		pair<nframes64_t, nframes64_t> const t = (*i)->extent ();
-		e.first = min (e.first, t.first);
-		e.second = max (e.second, t.second);
-		++i;
-	}
-
-	return e;
-}
-
 Drag::Drag (Editor* e, ArdourCanvas::Item* i) 
 	: _editor (e)
 	, _item (i)
@@ -358,13 +337,6 @@ Drag::break_drag ()
 	_editor->hide_verbose_canvas_cursor ();
 }
 
-pair<nframes64_t, nframes64_t>
-Drag::extent () const
-{
-	nframes64_t const f = adjusted_current_frame (0);
-	return make_pair (f, f);
-}
-
 RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
 	: Drag (e, i),
 	  _primary (p),
@@ -380,14 +352,6 @@ RegionDrag::region_going_away (RegionView* v)
 		_views.remove (v);
 	}
 }
-
-pair<nframes64_t, nframes64_t>
-RegionDrag::extent () const
-{
-	nframes64_t const f = adjusted_current_frame (0);
-	return make_pair (f, f + _primary->region()->length ());
-}
-
 
 RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b)
 	: RegionDrag (e, i, p, v),
@@ -1892,37 +1856,6 @@ TrimDrag::aborted ()
 		_editor->undo ();
 	}
 }
-
-pair<nframes64_t, nframes64_t>
-TrimDrag::extent () const
-{
-	/* we only want to autoscroll to keep the most `outward' region edge on-screen,
-	   not the whole region(s) that is/are being trimmed.
-	*/
-
-	nframes64_t f = 0;
-
-	switch (_operation) {
-	case StartTrim:
-		f = INT64_MAX;
-		for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			f = min (f, (nframes64_t) (*i)->region()->position());
-		}
-		break; 
-	case ContentsTrim:
-		f = adjusted_current_frame (0);
-		break;
-	case EndTrim:
-		f = 0;
-		for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			f = max (f, (nframes64_t) (*i)->region()->position() + (*i)->region()->length());
-		}
-		break;
-	}
-		
-	return make_pair (f, f);
-}
-
 
 MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	: Drag (e, i),
