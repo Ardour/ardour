@@ -23,9 +23,6 @@
 
 #include "pbd/enumwriter.h"
 
-#include "ardour/audioengine.h"
-#include "ardour/session.h"
-
 #include "editor.h"
 #include "mixer_strip.h"
 #include "ardour_ui.h"
@@ -36,7 +33,6 @@
 #include "editor_route_groups.h"
 #include "editor_regions.h"
 #include "gui_thread.h"
-#include "editor_drag.h"
 
 #include "i18n.h"
 
@@ -148,16 +144,6 @@ Editor::ensure_all_elements_drawn ()
 #endif
 
 void
-Editor::show_editor_list (bool yn)
-{
-	if (yn) {
-		the_notebook.show();
-	} else {
-		the_notebook.hide();
-	}
-}
-
-void
 Editor::create_editor_mixer ()
 {
 	current_mixer_strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(),
@@ -204,120 +190,6 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 	current_mixer_strip->set_width_enum (editor_mixer_strip_width, (void*) this);
 }
 
-double current = 0.0;
-
-void
-Editor::update_current_screen ()
-{
-	if (_pending_locate_request) {
-		/* we don't update things when there's a pending locate request, otherwise
-		   when the editor requests a locate there is a chance that this method
-		   will move the playhead before the locate request is processed, causing
-		   a visual glitch. */
-		return;
-	}
-
-	if (_session && _session->engine().running()) {
-
-		nframes64_t const frame = _session->audible_frame();
-
-		if (_dragging_playhead) {
-			goto almost_done;
-		}
-
-		/* only update if the playhead is on screen or we are following it */
-
-		if (_follow_playhead && _session->requested_return_frame() < 0) {
-
-			//playhead_cursor->canvas_item.show();
-
-			if (frame != last_update_frame) {
-
-
-#undef CONTINUOUS_SCROLL
-#ifndef  CONTINUOUS_SCROLL
-				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
-
-					if (_session->transport_speed() < 0) {
-						if (frame > (current_page_frames()/2)) {
-							center_screen (frame-(current_page_frames()/2));
-						} else {
-							center_screen (current_page_frames()/2);
-						}
-						
-					} else {
-
-						if (frame < leftmost_frame) {
-							/* moving left */
-							nframes64_t l = 0;
-							if (_session->transport_rolling()) {
-								/* rolling; end up with the playhead at the right of the page */
-								l = frame - current_page_frames ();
-							} else {
-								/* not rolling: end up with the playhead 3/4 of the way along the page */
-								l = frame - (3 * current_page_frames() / 4);
-							}
-							
-							if (l < 0) {
-								l = 0;
-							}
-							
-							center_screen_internal (l + (current_page_frames() / 2), current_page_frames ());
-						} else {
-							/* moving right */
-							if (_session->transport_rolling()) {
-								/* rolling: end up with the playhead on the left of the page */
-								center_screen_internal (frame + (current_page_frames() / 2), current_page_frames ());
-							} else {
-								/* not rolling: end up with the playhead 1/4 of the way along the page */
-								center_screen_internal (frame + (current_page_frames() / 4), current_page_frames ());
-							}
-						}
-					}
-				}
-
-				playhead_cursor->set_position (frame);
-
-#else  // CONTINUOUS_SCROLL
-
-				/* don't do continuous scroll till the new position is in the rightmost quarter of the
-				   editor canvas
-				*/
-
-				if (_session->transport_speed()) {
-					double target = ((double)frame - (double)current_page_frames()/2.0) / frames_per_unit;
-					if (target <= 0.0) target = 0.0;
-					if ( fabs(target - current) < current_page_frames()/frames_per_unit ) {
-						target = (target * 0.15) + (current * 0.85);
-					} else {
-						/* relax */
-					}
-					//printf("frame: %d,  cpf: %d,  fpu: %6.6f, current: %6.6f, target : %6.6f\n", frame, current_page_frames(), frames_per_unit, current, target );
-					current = target;
-					horizontal_adjustment.set_value ( current );
-				}
-
-				playhead_cursor->set_position (frame);
-
-#endif // CONTINUOUS_SCROLL
-
-			}
-
-		} else {
-			if (frame != last_update_frame) {
-				playhead_cursor->set_position (frame);
-			}
-		}
-
-	  almost_done:
-		last_update_frame = frame;
-		if (current_mixer_strip) {
-			current_mixer_strip->fast_update ();
-		}
-
-	}
-}
-
 void
 Editor::current_mixer_strip_hidden ()
 {
@@ -338,77 +210,6 @@ Editor::current_mixer_strip_hidden ()
 		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
 		tact->set_active (false);
 	}
-}
-
-void
-Editor::session_going_away ()
-{
-	_have_idled = false;
-
-	_session_connections.drop_connections ();
-
-	stop_scrolling ();
-	selection->clear ();
-	cut_buffer->clear ();
-
-	clicked_regionview = 0;
-	clicked_axisview = 0;
-	clicked_routeview = 0;
-	clicked_crossfadeview = 0;
-	entered_regionview = 0;
-	entered_track = 0;
-	last_update_frame = 0;
-	_drags->abort ();
-
-	playhead_cursor->canvas_item.hide ();
-
-	/* rip everything out of the list displays */
-
-	_regions->clear ();
-	_routes->clear ();
-	_route_groups->clear ();
-
-	/* do this first so that deleting a track doesn't reset cms to null
-	   and thus cause a leak.
-	*/
-
-	if (current_mixer_strip) {
-		if (current_mixer_strip->get_parent() != 0) {
-			global_hpacker.remove (*current_mixer_strip);
-		}
-		delete current_mixer_strip;
-		current_mixer_strip = 0;
-	}
-
-	/* delete all trackviews */
-
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		delete *i;
-	}
-	track_views.clear ();
-
-	zoom_range_clock.set_session (0);
-	nudge_clock.set_session (0);
-
-	editor_list_button.set_active(false);
-	editor_list_button.set_sensitive(false);
-
-	/* clear tempo/meter rulers */
-	remove_metric_marks ();
-	hide_measures ();
-	clear_marker_display ();
-
-	delete current_bbt_points;
-	current_bbt_points = 0;
-
-	/* get rid of any existing editor mixer strip */
-
-	WindowTitle title(Glib::get_application_name());
-	title += _("Editor");
-
-	set_title (title.get_string());
-
-	SessionHandlePtr::session_going_away ();
 }
 
 void
