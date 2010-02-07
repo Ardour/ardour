@@ -2846,6 +2846,8 @@ Route::set_latency_delay (nframes_t longest_session_latency)
 void
 Route::automation_snapshot (nframes_t now, bool force)
 {
+	panner()->automation_snapshot (now, force);
+	
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->automation_snapshot (now, force);
 	}
@@ -3132,14 +3134,12 @@ Route::meter ()
 boost::shared_ptr<Panner>
 Route::panner() const
 {
-
 	return _main_outs->panner();
 }
 
 boost::shared_ptr<AutomationControl>
 Route::gain_control() const
 {
-
 	return _amp->gain_control();
 }
 
