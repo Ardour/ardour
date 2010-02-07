@@ -626,9 +626,8 @@ PannerUI::pan_adjustment_changed (uint32_t which)
 {
 	if (!in_pan_update && which < _panner->npanners()) {
 
-		float xpos;
 		float val = pan_adjustments[which]->get_value ();
-		xpos = _panner->pan_control( which )->get_value();
+		float const xpos = _panner->pan_control(which)->get_value();
 
 		/* add a kinda-sorta detent for the middle */
 
@@ -645,7 +644,7 @@ PannerUI::pan_adjustment_changed (uint32_t which)
 
 		if (!Panner::equivalent (val, xpos)) {
 
-			_panner->streampanner(which).set_position (val);
+			_panner->pan_control(which)->set_value (val);
 			/* XXX
 			   the panner objects have no access to the session,
 			   so do this here. ick.
