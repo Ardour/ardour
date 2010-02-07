@@ -48,15 +48,14 @@ class StreamPanner : public PBD::Stateful
 
 	void set_muted (bool yn);
 	bool muted() const { return _muted; }
-	void set_mono (bool);
 
 	void set_position (float x, bool link_call = false);
 	void set_position (float x, float y, bool link_call = false);
 	void set_position (float x, float y, float z, bool link_call = false);
 
-	void get_position (float& xpos) const { xpos = x; }
-	void get_position (float& xpos, float& ypos) const { xpos = x; ypos = y; }
-	void get_position (float& xpos, float& ypos, float& zpos) const { xpos = x; ypos = y; zpos = z; }
+	void get_position (float& xpos) const { xpos = _x; }
+	void get_position (float& xpos, float& ypos) const { xpos = _x; ypos = _y; }
+	void get_position (float& xpos, float& ypos, float& zpos) const { xpos = _x; ypos = _y; zpos = _z; }
 
 	void get_effective_position (float& xpos) const { xpos = effective_x; }
 	void get_effective_position (float& xpos, float& ypos) const { xpos = effective_x; ypos = effective_y; }
@@ -73,7 +72,7 @@ class StreamPanner : public PBD::Stateful
 	 *  @param src Input buffer.
 	 *  @param obufs Output buffers (one per panner output).
 	 *  @param gain_coeff Gain coefficient to apply to output samples.
-	 *  @param nframes Numbner of frames in the input.
+	 *  @param nframes Number of frames in the input.
 	 */
 	virtual void do_distribute (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, nframes_t nframes) = 0;
 	virtual void do_distribute_automated (AudioBuffer& src, BufferSet& obufs,
@@ -82,7 +81,7 @@ class StreamPanner : public PBD::Stateful
 	boost::shared_ptr<AutomationControl> pan_control()  { return _control; }
 
 	PBD::Signal0<void> Changed;      /* for position */
-	PBD::Signal0<void> StateChanged; /* for mute */
+	PBD::Signal0<void> StateChanged; /* for mute, mono */
 
 	int set_state (const XMLNode&, int version);
 	virtual XMLNode& state (bool full_state) = 0;
@@ -90,16 +89,17 @@ class StreamPanner : public PBD::Stateful
 	Panner & get_parent() { return parent; }
 
 	/* old school automation loading */
-
 	virtual int load (std::istream&, std::string path, uint32_t&) = 0;
 
   protected:
 	friend class Panner;
 	Panner& parent;
 
-	float x;
-	float y;
-	float z;
+	void set_mono (bool);
+	
+	float _x;
+	float _y;
+	float _z;
 
 	/* these are for automation. they store the last value
 	   used by the most recent process() cycle.
@@ -115,6 +115,8 @@ class StreamPanner : public PBD::Stateful
 	boost::shared_ptr<AutomationControl> _control;
 
 	void add_state (XMLNode&);
+
+	/* Update internal parameters based on _x, _y and _z */
 	virtual void update () = 0;
 };
 
@@ -194,8 +196,9 @@ class Multi2dPanner : public StreamPanner
 };
 
 
-///< Class to pan from some number of inputs to some number of outputs
-
+/** Class to pan from some number of inputs to some number of outputs.
+ *  This class has a number of StreamPanners, one for each input.
+ */
 class Panner : public SessionObject, public AutomatableControls
 {
 public:
@@ -206,11 +209,10 @@ public:
 		pan_t desired_pan;
 
 		Output (float xp, float yp)
-			: x (xp), y (yp), current_pan (0.0f), desired_pan (0.f) {}
+			: x (xp), y (yp), current_pan (0), desired_pan (0) {}
 
 	};
 
-	//Panner (std::string name, Session&, int _num_bufs);
 	Panner (std::string name, Session&);
 	virtual ~Panner ();
 
@@ -227,9 +229,6 @@ public:
 
 	/// The fundamental Panner function
 	void run (BufferSet& src, BufferSet& dest, sframes_t start_frame, sframes_t end_frames, nframes_t nframes);
-
-	//void* get_inline_gui() const = 0;
-	//void* get_full_gui() const = 0;
 
 	bool bypassed() const { return _bypassed; }
 	void set_bypassed (bool yn);
@@ -253,8 +252,6 @@ public:
 	void move_output (uint32_t, float x, float y);
 	uint32_t nouts() const { return outputs.size(); }
 	Output& output (uint32_t n) { return outputs[n]; }
-
-	std::vector<Output> outputs;
 
 	enum LinkDirection {
 		SameDirection,
@@ -299,11 +296,11 @@ public:
 	};
 
 	boost::shared_ptr<AutomationControl> pan_control (int id, int chan=0) {
-		return automation_control(Evoral::Parameter (PanAutomation, chan, id));
+		return automation_control (Evoral::Parameter (PanAutomation, chan, id));
 	}
 
 	boost::shared_ptr<const AutomationControl> pan_control (int id, int chan=0) const {
-		return automation_control(Evoral::Parameter (PanAutomation, chan, id));
+		return automation_control (Evoral::Parameter (PanAutomation, chan, id));
 	}
 
   private:
@@ -312,6 +309,7 @@ public:
 
 	void distribute_no_automation(BufferSet& src, BufferSet& dest, nframes_t nframes, gain_t gain_coeff);
 	std::vector<StreamPanner*> _streampanners; ///< one StreamPanner per input
+	std::vector<Output> outputs;
 	uint32_t     current_outs;
 	bool             _linked;
 	bool             _bypassed;

@@ -64,7 +64,6 @@ ControlSet::control (const Parameter& parameter, bool create_if_missing)
 		return ac;
 
 	} else {
-		//warning << "ControlList " << parameter.to_string() << " not found for " << _name << endmsg;
 		return boost::shared_ptr<Control>();
 	}
 }

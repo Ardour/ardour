@@ -61,32 +61,29 @@ float Panner::current_automation_version_number = 1.0;
 string EqualPowerStereoPanner::name = "Equal Power Stereo";
 string Multi2dPanner::name = "Multiple (2D)";
 
-/* this is a default mapper of  control values to a pan position
+/* this is a default mapper of control values to a pan position
    others can be imagined.
 */
 
-static pan_t direct_control_to_pan (double fract) {
+static pan_t direct_control_to_pan (double fract)
+{
 	return fract;
 }
-
-
-//static double direct_pan_to_control (pan_t val) {
-//	return val;
-//}
 
 StreamPanner::StreamPanner (Panner& p, Evoral::Parameter param)
 	: parent (p)
 {
-	assert(param.type() != NullAutomation);
+	assert (param.type() != NullAutomation);
 
 	_muted = false;
 	_mono = false;
 
-	_control = boost::dynamic_pointer_cast<AutomationControl>( parent.control( param, true ) );
+	/* get our AutomationControl from our parent Panner, creating it if required */
+	_control = boost::dynamic_pointer_cast<AutomationControl> (parent.control (param, true));
 
-	x = 0.5;
-	y = 0.5;
-	z = 0.5;
+	_x = 0.5;
+	_y = 0.5;
+	_z = 0.5;
 }
 
 StreamPanner::~StreamPanner ()
@@ -105,7 +102,7 @@ StreamPanner::set_mono (bool yn)
 void
 Panner::PanControllable::set_value (float val)
 {
-	panner.streampanner(parameter().id()).set_position (direct_control_to_pan (val));
+	panner.streampanner (parameter().id()).set_position (direct_control_to_pan (val));
 	AutomationControl::set_value(val);
 }
 
@@ -131,8 +128,8 @@ StreamPanner::set_position (float xpos, bool link_call)
 		parent.set_position (xpos, *this);
 	}
 
-	if (x != xpos) {
-		x = xpos;
+	if (_x != xpos) {
+		_x = xpos;
 		update ();
 		Changed ();
 		_control->Changed ();
@@ -146,10 +143,9 @@ StreamPanner::set_position (float xpos, float ypos, bool link_call)
 		parent.set_position (xpos, ypos, *this);
 	}
 
-	if (x != xpos || y != ypos) {
-
-		x = xpos;
-		y = ypos;
+	if (_x != xpos || _y != ypos) {
+		_x = xpos;
+		_y = ypos;
 		update ();
 		Changed ();
 	}
@@ -162,10 +158,10 @@ StreamPanner::set_position (float xpos, float ypos, float zpos, bool link_call)
 		parent.set_position (xpos, ypos, zpos, *this);
 	}
 
-	if (x != xpos || y != ypos || z != zpos) {
-		x = xpos;
-		y = ypos;
-		z = zpos;
+	if (_x != xpos || _y != ypos || _z != zpos) {
+		_x = xpos;
+		_y = ypos;
+		_z = zpos;
 		update ();
 		Changed ();
 	}
@@ -181,6 +177,10 @@ StreamPanner::set_state (const XMLNode& node, int /*version*/)
 		set_muted (string_is_affirmative (prop->value()));
 	}
 
+	if ((prop = node.property (X_("mono")))) {
+		set_mono (string_is_affirmative (prop->value()));
+	}
+	
 	return 0;
 }
 
@@ -188,6 +188,7 @@ void
 StreamPanner::add_state (XMLNode& node)
 {
 	node.add_property (X_("muted"), (muted() ? "yes" : "no"));
+	node.add_property (X_("mono"), (_mono ? "yes" : "no"));
 }
 
 void
@@ -426,16 +427,16 @@ EqualPowerStereoPanner::update ()
 	   x == 1 => hard right
 	*/
 
-	float panR = x;
-	float panL = 1 - panR;
+	float const panR = _x;
+	float const panL = 1 - panR;
 
-	const float pan_law_attenuation = -3.0f;
-	const float scale = 2.0f - 4.0f * powf (10.0f,pan_law_attenuation/20.0f);
+	float const pan_law_attenuation = -3.0f;
+	float const scale = 2.0f - 4.0f * powf (10.0f,pan_law_attenuation/20.0f);
 
 	desired_left = panL * (scale * panL + 1.0f - scale);
 	desired_right = panR * (scale * panR + 1.0f - scale);
 
-	effective_x = x;
+	effective_x = _x;
 	//_control->set_value(x);
 }
 
@@ -444,7 +445,7 @@ EqualPowerStereoPanner::do_distribute_automated (AudioBuffer& srcbuf, BufferSet&
 						 nframes_t start, nframes_t end, nframes_t nframes,
 						 pan_t** buffers)
 {
-	assert(obufs.count().n_audio() == 2);
+	assert (obufs.count().n_audio() == 2);
 
 	Sample* dst;
 	pan_t* pbuf;
@@ -479,8 +480,8 @@ EqualPowerStereoPanner::do_distribute_automated (AudioBuffer& srcbuf, BufferSet&
 
 	for (nframes_t n = 0; n < nframes; ++n) {
 
-		float panR = buffers[0][n];
-		float panL = 1 - panR;
+		float const panR = buffers[0][n];
+		float const panL = 1 - panR;
 
 		buffers[0][n] = panL * (scale * panL + 1.0f - scale);
 		buffers[1][n] = panR * (scale * panR + 1.0f - scale);
@@ -528,7 +529,7 @@ EqualPowerStereoPanner::state (bool /*full_state*/)
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	snprintf (buf, sizeof (buf), "%.12g", x);
+	snprintf (buf, sizeof (buf), "%.12g", _x);
 	root->add_property (X_("x"), buf);
 	root->add_property (X_("type"), EqualPowerStereoPanner::name);
 
@@ -592,7 +593,7 @@ Multi2dPanner::update ()
 {
 	static const float BIAS = FLT_MIN;
 	uint32_t i;
-	uint32_t nouts = parent.outputs.size();
+	uint32_t const nouts = parent.nouts ();
 	float dsq[nouts];
 	float f, fr;
 	vector<pan_t> pans;
@@ -600,7 +601,7 @@ Multi2dPanner::update ()
 	f = 0.0f;
 
 	for (i = 0; i < nouts; i++) {
-		dsq[i] = ((x - parent.outputs[i].x) * (x - parent.outputs[i].x) + (y - parent.outputs[i].y) * (y - parent.outputs[i].y) + BIAS);
+		dsq[i] = ((_x - parent.output(i).x) * (_x - parent.output(i).x) + (_y - parent.output(i).y) * (_y - parent.output(i).y) + BIAS);
 		if (dsq[i] < 0.0) {
 			dsq[i] = 0.0;
 		}
@@ -613,10 +614,10 @@ Multi2dPanner::update ()
 	fr = 1.0 / sqrtf(f);
 #endif
 	for (i = 0; i < nouts; ++i) {
-		parent.outputs[i].desired_pan = 1.0f - (dsq[i] * fr);
+		parent.output(i).desired_pan = 1.0f - (dsq[i] * fr);
 	}
 
-	effective_x = x;
+	effective_x = _x;
 }
 
 void
@@ -624,8 +625,6 @@ Multi2dPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 {
 	Sample* dst;
 	pan_t pan;
-	vector<Panner::Output>::iterator o;
-	uint32_t n;
 
 	if (_muted) {
 		return;
@@ -633,8 +632,9 @@ Multi2dPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 
 	Sample* const src = srcbuf.data();
 
-
-	for (n = 0, o = parent.outputs.begin(); o != parent.outputs.end(); ++o, ++n) {
+	uint32_t const N = parent.nouts ();
+	for (uint32_t n = 0; n < N; ++n) {
+		Panner::Output& o = parent.output (n);
 
 		dst = obufs.get_audio(n).data();
 
@@ -660,13 +660,14 @@ Multi2dPanner::do_distribute (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain
 		} else {
 
 #else
-			pan = (*o).desired_pan;
+			pan = o.desired_pan;
 
 			if ((pan *= gain_coeff) != 1.0f) {
 
 				if (pan != 0.0f) {
 					mix_buffers_with_gain(dst,src,nframes,pan);
 				}
+				
 			} else {
 					mix_buffers_no_gain(dst,src,nframes);
 			}
@@ -718,9 +719,9 @@ Multi2dPanner::state (bool /*full_state*/)
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	snprintf (buf, sizeof (buf), "%.12g", x);
+	snprintf (buf, sizeof (buf), "%.12g", _x);
 	root->add_property (X_("x"), buf);
-	snprintf (buf, sizeof (buf), "%.12g", y);
+	snprintf (buf, sizeof (buf), "%.12g", _y);
 	root->add_property (X_("y"), buf);
 	root->add_property (X_("type"), Multi2dPanner::name);
 
@@ -747,7 +748,7 @@ Multi2dPanner::set_state (const XMLNode& node, int /*version*/)
 		newy = atof (prop->value().c_str());
 	}
 
-	if (x < 0 || y < 0) {
+	if (_x < 0 || _y < 0) {
 		error << _("badly-formed positional data for Multi2dPanner - ignored")
 		      << endmsg;
 		return -1;
