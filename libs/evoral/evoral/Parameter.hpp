@@ -24,8 +24,6 @@
 #include <map>
 #include <stdint.h>
 #include <boost/shared_ptr.hpp>
-#include <boost/format.hpp>
-#include <iostream>
 
 namespace Evoral {
 
