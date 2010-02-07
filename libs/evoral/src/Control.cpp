@@ -37,10 +37,11 @@ Control::Control(const Parameter& parameter, boost::shared_ptr<ControlList> list
 float
 Control::get_float(bool from_list, FrameTime frame) const
 {
-	if (from_list)
+	if (from_list) {
 		return _list->eval(frame);
-	else
+	} else {
 		return _user_value;
+	}
 }
 
 
@@ -49,8 +50,9 @@ Control::set_float(float value, bool to_list, FrameTime frame)
 {
 	_user_value = value;
 
-	if (to_list)
+	if (to_list) {
 		_list->add(frame, value);
+	}
 }
 
 
