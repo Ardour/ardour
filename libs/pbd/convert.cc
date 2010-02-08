@@ -106,6 +106,18 @@ atoi (const string& s)
 	return ::atoi (s.c_str());
 }
 
+int32_t
+atol (const string& s)
+{
+	return (int32_t) ::atol (s.c_str());
+}
+
+int64_t
+atoll (const string& s)
+{
+	return (int64_t) ::atoll (s.c_str());
+}
+
 double
 atof (const string& s)
 {
@@ -282,11 +294,14 @@ length2string (const int64_t frames, const double sample_rate)
 	
 	return duration_str;
 }
+
 static bool 
 chars_equal_ignore_case(char x, char y)
 {
-	static std::locale loc;
-	return toupper(x, loc) == toupper(y, loc);
+	/* app should have called setlocale() if its wants this comparison to be
+	   locale sensitive.
+	*/
+	return toupper (x) == toupper (y);
 }
 
 bool 

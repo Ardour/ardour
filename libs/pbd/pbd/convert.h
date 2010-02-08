@@ -31,10 +31,12 @@ namespace PBD {
 
 std::string short_version (std::string, std::string::size_type target_length);
 
-int    atoi (const std::string&);
-double atof (const std::string&);
-void   url_decode (std::string&);
-void   url_decode (Glib::ustring&);
+int     atoi (const std::string&);
+int32_t atol (const std::string&);
+int64_t atoll (const std::string&);
+double  atof (const std::string&);
+void    url_decode (std::string&);
+void    url_decode (Glib::ustring&);
 
 // std::string length2string (const int32_t frames, const float sample_rate);
 std::string length2string (const int64_t frames, const double sample_rate);
