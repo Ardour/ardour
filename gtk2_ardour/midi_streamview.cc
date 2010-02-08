@@ -554,7 +554,7 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 						region->freeze ();
 						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);
 						region->set_length (start + dur - region->position(), this);
-						region->thaw ("updated");
+						region->thaw ();
 
 						if (origlen == 1) {
 							/* our special initial length */
@@ -618,7 +618,7 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 						region->freeze ();
 						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);
 						region->set_length (nlen, this);
-						region->thaw ("updated");
+						region->thaw ();
 
 						if (origlen == 1) {
 							/* our special initial length */

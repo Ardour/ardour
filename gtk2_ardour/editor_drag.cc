@@ -22,6 +22,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/basename.h"
 #include "ardour/diskstream.h"
+#include "ardour/region_command.h"
 #include "ardour/session.h"
 #include "ardour/dB.h"
 #include "ardour/region_factory.h"
@@ -949,6 +950,8 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			}
 
 		} else {
+			RegionCommand* rcmd = new RegionCommand (rv->region());
+
 			/*
 			   motion on the same track. plonk the previously reparented region
 			   back to its original canvas group (its streamview).
@@ -962,10 +965,12 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			/* just change the model */
 
 			boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();
-
+			
 			if (dest_rtv->view()->layer_display() == Stacked) {
+				layer_t old_layer = rv->region()->layer();
 				rv->region()->set_layer (dest_layer);
 				rv->region()->set_pending_explicit_relayer (true);
+				rcmd->add_property_change (RegionCommand::Layer, old_layer, dest_layer);
 			}
 			
 			/* freeze playlist to avoid lots of relayering in the case of a multi-region drag */
@@ -976,10 +981,11 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 				playlist->freeze();
 			}
 
-			XMLNode& before (rv->region()->get_state());
+			nframes64_t old_pos = rv->region()->position();
 			rv->region()->set_position (where, (void*) this);
-			_editor->session()->add_command (new MementoCommand<Region>(*rv->region(), &before, &playlist->get_state()));
+			rcmd->add_property_change (RegionCommand::Position, old_pos, where);
 
+			_editor->session()->add_command (rcmd);
 		}
 
 		if (changed_tracks && !_copy) {

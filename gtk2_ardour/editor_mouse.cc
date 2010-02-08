@@ -2354,7 +2354,7 @@ Editor::thaw_region_after_trim (RegionView& rv)
 		return;
 	}
 
-	region->thaw (_("trimmed region"));
+	region->thaw ();
 
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*>(&rv);
 
@@ -2487,8 +2487,6 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent* event, RegionView* 
 		RegionSelection s = get_equivalent_regions (selection->regions, RouteGroup::Edit);
 		_drags->add (new RegionMoveDrag (this, item, region_view, s.by_layer(), false, false));
 	}
-
-	begin_reversible_command (_("move region(s)"));
 
 	/* sync the canvas to what we think is its current state */
 	update_canvas_now();
