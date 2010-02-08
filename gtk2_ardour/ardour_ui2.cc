@@ -250,6 +250,7 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::instance()->tooltips().set_tip (roll_button, _("Play from playhead"));
 	ARDOUR_UI::instance()->tooltips().set_tip (stop_button, _("Stop playback"));
 	ARDOUR_UI::instance()->tooltips().set_tip (play_selection_button, _("Play range/selection"));
+	ARDOUR_UI::instance()->tooltips().set_tip (join_play_range_button, _("Always play range/selection"));
 	ARDOUR_UI::instance()->tooltips().set_tip (goto_start_button, _("Go to start of session"));
 	ARDOUR_UI::instance()->tooltips().set_tip (goto_end_button, _("Go to end of session"));
 	ARDOUR_UI::instance()->tooltips().set_tip (auto_loop_button, _("Play loop range"));

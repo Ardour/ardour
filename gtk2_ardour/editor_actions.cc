@@ -618,6 +618,7 @@ Editor::register_actions ()
 	ARDOUR_UI::instance()->tooltips().set_tip (mouse_zoom_button, _("Select Zoom Range"));
 	ARDOUR_UI::instance()->tooltips().set_tip (mouse_timefx_button, _("Stretch/Shrink Regions"));
 	ARDOUR_UI::instance()->tooltips().set_tip (mouse_audition_button, _("Listen to Specific Regions"));
+	ARDOUR_UI::instance()->tooltips().set_tip (join_object_range_button, _("Select/Move Objects or Ranges"));
 	/* in the future, this may allow other kinds of "intra-region" editing, but for now its just MIDI */
 	ARDOUR_UI::instance()->tooltips().set_tip (internal_edit_button, _("Edit MIDI Notes"));
 
