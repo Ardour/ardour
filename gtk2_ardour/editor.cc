@@ -263,6 +263,7 @@ Editor::Editor ()
 	, nudge_clock (X_("nudge"), false, X_("NudgeClock"), true, false, true)
 	, meters_running(false)
 	, _pending_locate_request (false)
+	, _pending_initial_locate (false)
 
 {
 	constructed = false;
@@ -923,8 +924,6 @@ Editor::access_action (std::string action_group, std::string action_item)
 	if (act) {
 		act->activate();
 	}
-
-
 }
 
 void
@@ -932,20 +931,6 @@ Editor::on_realize ()
 {
 	Window::on_realize ();
 	Realized ();
-}
-
-void
-Editor::start_scrolling ()
-{
-	scroll_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect
-		(sigc::mem_fun(*this, &Editor::update_current_screen));
-
-}
-
-void
-Editor::stop_scrolling ()
-{
-	scroll_connection.disconnect ();
 }
 
 void
@@ -1068,7 +1053,6 @@ Editor::set_session (Session *t)
 	compute_fixed_ruler_scale ();
 
 	/* there are never any selected regions at startup */
-
 	sensitize_the_right_region_actions (false);
 
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
@@ -1077,6 +1061,7 @@ Editor::set_session (Session *t)
 	/* catch up with the playhead */
 
 	_session->request_locate (playhead_cursor->current_frame);
+	_pending_initial_locate = true;
 
 	update_title ();
 
@@ -1158,8 +1143,10 @@ Editor::set_session (Session *t)
 		(static_cast<TimeAxisView*>(*i))->set_samples_per_unit (frames_per_unit);
 	}
 
-	start_scrolling ();
-
+	super_rapid_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (
+		sigc::mem_fun (*this, &Editor::super_rapid_screen_update)
+		);
+	
 	switch (_snap_type) {
 	case SnapToRegionStart:
 	case SnapToRegionEnd:
@@ -1175,7 +1162,7 @@ Editor::set_session (Session *t)
 	/* register for undo history */
 	_session->register_with_memento_command_factory(_id, this);
 
-	start_updating ();
+	start_updating_meters ();
 }
 
 void
@@ -2296,9 +2283,11 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		nframes64_t pos;
 		if (sscanf (prop->value().c_str(), "%" PRId64, &pos) == 1) {
 			reset_x_origin (pos);
-			/* this hack prevents the initial call to update_current_screen() from doing re-centering on the playhead */
-			last_update_frame = pos;
 		}
+	}
+
+	if ((prop = node.property ("y-origin")) != 0) {
+		reset_y_origin (atof (prop->value ()));
 	}
 
 	if ((prop = node.property ("internal-edit"))) {
@@ -2455,6 +2444,8 @@ Editor::get_state ()
 	node->add_property ("playhead", buf);
 	snprintf (buf, sizeof (buf), "%" PRIi64, leftmost_frame);
 	node->add_property ("left-frame", buf);
+	snprintf (buf, sizeof (buf), "%f", vertical_adjustment.get_value ());
+	node->add_property ("y-origin", buf);
 
 	node->add_property ("show-waveforms-recording", _show_waveforms_recording ? "yes" : "no");
 	node->add_property ("show-measures", _show_measures ? "yes" : "no");
@@ -3699,7 +3690,7 @@ Editor::set_follow_playhead (bool yn)
 	if (_follow_playhead != yn) {
 		if ((_follow_playhead = yn) == true) {
 			/* catch up */
-			update_current_screen ();
+			reset_x_origin_to_follow_playhead ();
 		}
 		instant_save ();
 	}
@@ -4066,10 +4057,12 @@ Editor::on_key_release_event (GdkEventKey* ev)
 	// return key_press_focus_accelerator_handler (*this, ev);
 }
 
+/** Queue up a change to the viewport x origin.
+ *  @param frame New x origin.
+ */
 void
 Editor::reset_x_origin (nframes64_t frame)
 {
-	//cerr << "resetting x origin" << endl;
 	queue_visual_change (frame);
 }
 
@@ -4731,7 +4724,13 @@ Editor::located ()
 {
 	ENSURE_GUI_THREAD (*this, &Editor::located);
 
+	playhead_cursor->set_position (_session->audible_frame ());
+	if (_follow_playhead && !_pending_initial_locate) {
+		reset_x_origin_to_follow_playhead ();
+	}
+
 	_pending_locate_request = false;
+	_pending_initial_locate = false;
 }
 
 void
@@ -5025,115 +5024,127 @@ Editor::horizontal_scroll_right ()
 	reset_x_origin (leftmost_position() + current_page_frames() / 5);
 }
 
+/** Queue a change for the Editor viewport x origin to follow the playhead */
 void
-Editor::update_current_screen ()
+Editor::reset_x_origin_to_follow_playhead ()
 {
-	if (_pending_locate_request) {
-		/* we don't update things when there's a pending locate request, otherwise
-		   when the editor requests a locate there is a chance that this method
-		   will move the playhead before the locate request is processed, causing
-		   a visual glitch. */
+	nframes64_t const frame = playhead_cursor->current_frame;
+
+	if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
+
+		if (_session->transport_speed() < 0) {
+			
+			if (frame > (current_page_frames() / 2)) {
+				center_screen (frame-(current_page_frames()/2));
+			} else {
+				center_screen (current_page_frames()/2);
+			}
+			
+		} else {
+						
+			if (frame < leftmost_frame) {
+				/* moving left */
+				nframes64_t l = 0;
+				if (_session->transport_rolling()) {
+					/* rolling; end up with the playhead at the right of the page */
+					l = frame - current_page_frames ();
+				} else {
+					/* not rolling: end up with the playhead 3/4 of the way along the page */
+					l = frame - (3 * current_page_frames() / 4);
+				}
+				
+				if (l < 0) {
+					l = 0;
+				}
+				
+				center_screen_internal (l + (current_page_frames() / 2), current_page_frames ());
+			} else {
+				/* moving right */
+				if (_session->transport_rolling()) {
+					/* rolling: end up with the playhead on the left of the page */
+					center_screen_internal (frame + (current_page_frames() / 2), current_page_frames ());
+				} else {
+					/* not rolling: end up with the playhead 1/4 of the way along the page */
+					center_screen_internal (frame + (current_page_frames() / 4), current_page_frames ());
+				}
+			}
+		}
+	}
+}
+
+void
+Editor::super_rapid_screen_update ()
+{
+	if (!_session || !_session->engine().running()) {
 		return;
 	}
 
-	if (_session && _session->engine().running()) {
+	/* METERING / MIXER STRIPS */
 
-		nframes64_t const frame = _session->audible_frame();
-
-		if (_dragging_playhead) {
-			goto almost_done;
+	/* update track meters, if required */
+	if (is_mapped() && meters_running) {
+		RouteTimeAxisView* rtv;
+		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
+				rtv->fast_update ();
+			}
 		}
+	}
 
-		/* only update if the playhead is on screen or we are following it */
+	/* and any current mixer strip */
+	if (current_mixer_strip) {
+		current_mixer_strip->fast_update ();
+	}
 
-		if (_follow_playhead && _session->requested_return_frame() < 0) {
+	/* PLAYHEAD AND VIEWPORT */
 
-			//playhead_cursor->canvas_item.show();
+	nframes64_t const frame = _session->audible_frame();
 
-			if (frame != last_update_frame) {
+	/* There are a few reasons why we might not update the playhead / viewport stuff:
+	 *
+	 * 1.  we don't update things when there's a pending locate request, otherwise
+	 *     when the editor requests a locate there is a chance that this method
+	 *     will move the playhead before the locate request is processed, causing
+	 * 2.  if we're not rolling, there's nothing to do here (locates are handled elsewhere).
+	 * 3.  if we're still at the same frame that we were last time, there's nothing to do.
+	 */
 
+	if (!_pending_locate_request && _session->transport_speed() != 0 && frame != last_update_frame) {
+
+		last_update_frame = frame;
+
+		if (!_dragging_playhead) {
+			playhead_cursor->set_position (frame);
+		}
 
 #undef CONTINUOUS_SCROLL
-#ifndef  CONTINUOUS_SCROLL
-				if (frame < leftmost_frame || frame > leftmost_frame + current_page_frames()) {
+#ifndef CONTINUOUS_SCROLL		
 
-					if (_session->transport_speed() < 0) {
-						if (frame > (current_page_frames()/2)) {
-							center_screen (frame-(current_page_frames()/2));
-						} else {
-							center_screen (current_page_frames()/2);
-						}
-						
-					} else {
-
-						if (frame < leftmost_frame) {
-							/* moving left */
-							nframes64_t l = 0;
-							if (_session->transport_rolling()) {
-								/* rolling; end up with the playhead at the right of the page */
-								l = frame - current_page_frames ();
-							} else {
-								/* not rolling: end up with the playhead 3/4 of the way along the page */
-								l = frame - (3 * current_page_frames() / 4);
-							}
-							
-							if (l < 0) {
-								l = 0;
-							}
-							
-							center_screen_internal (l + (current_page_frames() / 2), current_page_frames ());
-						} else {
-							/* moving right */
-							if (_session->transport_rolling()) {
-								/* rolling: end up with the playhead on the left of the page */
-								center_screen_internal (frame + (current_page_frames() / 2), current_page_frames ());
-							} else {
-								/* not rolling: end up with the playhead 1/4 of the way along the page */
-								center_screen_internal (frame + (current_page_frames() / 4), current_page_frames ());
-							}
-						}
-					}
-				}
-
-				playhead_cursor->set_position (frame);
+		if (!_dragging_playhead && _follow_playhead && _session->requested_return_frame() < 0) {
+			reset_x_origin_to_follow_playhead ();
+		}
 
 #else  // CONTINUOUS_SCROLL
-
-				/* don't do continuous scroll till the new position is in the rightmost quarter of the
-				   editor canvas
-				*/
-
-				if (_session->transport_speed()) {
-					double target = ((double)frame - (double)current_page_frames()/2.0) / frames_per_unit;
-					if (target <= 0.0) target = 0.0;
-					if ( fabs(target - current) < current_page_frames()/frames_per_unit ) {
-						target = (target * 0.15) + (current * 0.85);
-					} else {
-						/* relax */
-					}
-					//printf("frame: %d,  cpf: %d,  fpu: %6.6f, current: %6.6f, target : %6.6f\n", frame, current_page_frames(), frames_per_unit, current, target );
-					current = target;
-					horizontal_adjustment.set_value ( current );
-				}
-
-				playhead_cursor->set_position (frame);
+				
+		/* don't do continuous scroll till the new position is in the rightmost quarter of the
+		   editor canvas
+		*/
+		
+		double target = ((double)frame - (double)current_page_frames()/2.0) / frames_per_unit;
+		if (target <= 0.0) {
+			target = 0.0;
+		}
+		if (fabs(target - current) < current_page_frames() / frames_per_unit) {
+			target = (target * 0.15) + (current * 0.85);
+		} else {
+			/* relax */
+		}
+		
+		current = target;
+		horizontal_adjustment.set_value (current);
 
 #endif // CONTINUOUS_SCROLL
-
-			}
-
-		} else {
-			if (frame != last_update_frame) {
-				playhead_cursor->set_position (frame);
-			}
-		}
-
-	  almost_done:
-		last_update_frame = frame;
-		if (current_mixer_strip) {
-			current_mixer_strip->fast_update ();
-		}
-
+		
 	}
 }
 
@@ -5145,7 +5156,8 @@ Editor::session_going_away ()
 
 	_session_connections.drop_connections ();
 
-	stop_scrolling ();
+	super_rapid_screen_update_connection.disconnect ();
+	
 	selection->clear ();
 	cut_buffer->clear ();
 

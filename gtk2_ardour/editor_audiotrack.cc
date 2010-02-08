@@ -49,12 +49,11 @@ Editor::set_show_waveforms_recording (bool yn)
 	}
 }
 
-gint
-Editor::start_updating ()
+void
+Editor::start_updating_meters ()
 {
 	RouteTimeAxisView* rtv;
 
-	//cerr << "Editor::start_updating () called" << endl;//DEBUG
 	if (is_mapped() && _session) {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
@@ -63,21 +62,16 @@ Editor::start_updating ()
 		}
 	}
 
-	if (!meters_running) {
-		fast_screen_update_connection = ARDOUR_UI::SuperRapidScreenUpdate.connect (sigc::mem_fun(*this, &Editor::fast_update_strips));
-		meters_running = true;
-	}
-    return 0;
+	meters_running = true;
 }
 
-gint
-Editor::stop_updating ()
+void
+Editor::stop_updating_meters ()
 {
 	RouteTimeAxisView* rtv;
 
 	meters_running = false;
-	fast_screen_update_connection.disconnect();
-	//cerr << "Editor::stop_updating () called" << endl;//DEBUG
+
 	if (is_mapped() && _session) {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
@@ -85,32 +79,17 @@ Editor::stop_updating ()
 			}
 		}
 	}
-
-    return 0;
 }
 
 void
 Editor::toggle_meter_updating()
 {
 	if (Config->get_show_track_meters()) {
-		start_updating();
+		start_updating_meters ();
 	} else {
-		stop_updating ();
+		stop_updating_meters ();
 	}
-	track_canvas_allocate(track_canvas->get_allocation());
-}
-
-void
-Editor::fast_update_strips ()
-{
-	RouteTimeAxisView* rtv;
-
-	if (is_mapped() && _session) {
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
-				rtv->fast_update ();
-			}
-		}
-	}
+	
+	track_canvas_allocate (track_canvas->get_allocation());
 }
 

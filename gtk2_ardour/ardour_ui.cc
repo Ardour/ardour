@@ -1416,7 +1416,6 @@ ARDOUR_UI::transport_goto_zero ()
 	if (_session) {
 		_session->request_locate (0);
 
-
 		/* force displayed area in editor to start no matter
 		   what "follow playhead" setting is.
 		*/
@@ -3147,7 +3146,6 @@ ARDOUR_UI::push_buffer_stats (uint32_t capture, uint32_t playback)
 void
 ARDOUR_UI::write_buffer_stats ()
 {
-
 	std::ofstream fout;
 	struct tm tm;
 	char buf[64];

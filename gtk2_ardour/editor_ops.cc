@@ -820,7 +820,6 @@ Editor::cursor_to_region_boundary (bool with_selection, int32_t dir)
 		return;
 	}
 
-
 	_session->request_locate (target);
 }
 

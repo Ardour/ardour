@@ -401,6 +401,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void restore_editing_space();
 
 	void reset_x_origin (nframes64_t);
+	void reset_x_origin_to_follow_playhead ();
 	void reset_y_origin (double);
 	void reset_zoom (double);
 	void reposition_and_zoom (nframes64_t, double);
@@ -987,11 +988,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	static void build_cursors ();
 
-	sigc::connection scroll_connection;
+	sigc::connection super_rapid_screen_update_connection;
 	nframes64_t last_update_frame;
 	void center_screen_internal (nframes64_t, float);
 
-	void update_current_screen ();
+	void super_rapid_screen_update ();
 
 	void session_going_away ();
 
@@ -1252,9 +1253,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void reverse_selection ();
 	void edit_envelope ();
-
-	void start_scrolling ();
-	void stop_scrolling ();
 
 	double last_scrub_x;
 	int scrubbing_direction;
@@ -1966,10 +1964,8 @@ public:
 
 	void get_regions_for_action (RegionSelection&, bool allow_entered = false, bool allow_edit_position = true);
 
-	sigc::connection fast_screen_update_connection;
-	gint start_updating ();
-	gint stop_updating ();
-	void fast_update_strips ();
+	void start_updating_meters ();
+	void stop_updating_meters ();
 	bool meters_running;
 
 	void select_next_route ();
@@ -1999,7 +1995,15 @@ public:
 	void visible_order_range (int*, int*) const;
 
 	void located ();
+	
+	/** true if we've made a locate request that hasn't yet been processed */
 	bool _pending_locate_request;
+	
+	/** if true, there is a pending Session locate which is the initial one when loading a session;
+	    we need to know this so that we don't (necessarily) set the viewport to show the playhead
+	    initially.
+	*/
+	bool _pending_initial_locate;
 
 	Gtk::HBox _summary_hbox;
 	EditorSummary* _summary;
