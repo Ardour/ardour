@@ -697,13 +697,12 @@ AudioRegion::set_live_state (const XMLNode& node, int version, Change& what_chan
 	_envelope->freeze ();
 
 	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
+#if 0
 		XMLNode *child;
 		XMLProperty *prop;
 
 		child = (*niter);
 
-#if 0
 		if (child->name() == "Envelope") {
 
 			_envelope->clear ();
