@@ -83,32 +83,40 @@ Session::memento_command_factory(XMLNode *n)
 
     /* create command */
     string obj_T = n->property ("type-name")->value();
+
     if (obj_T == typeid (AudioRegion).name() || obj_T == typeid (MidiRegion).name() || obj_T == typeid (Region).name()) {
 	    if (regions.count(id)) {
 		    return new MementoCommand<Region>(*regions[id], before, after);
 	    }
+
     } else if (obj_T == typeid (AudioSource).name() || obj_T == typeid (MidiSource).name()) {
 	    if (sources.count(id))
 		    return new MementoCommand<Source>(*sources[id], before, after);
+
     } else if (obj_T == typeid (Location).name()) {
 	    Location* loc = _locations.get_location_by_id(id);
 	    if (loc) {
 		    return new MementoCommand<Location>(*loc, before, after);
 	    }
+
     } else if (obj_T == typeid (Locations).name()) {
 	    return new MementoCommand<Locations>(_locations, before, after);
+
     } else if (obj_T == typeid (TempoMap).name()) {
 	    return new MementoCommand<TempoMap>(*_tempo_map, before, after);
+
     } else if (obj_T == typeid (Playlist).name() || obj_T == typeid (AudioPlaylist).name() || obj_T == typeid (MidiPlaylist).name()) {
 	    if (boost::shared_ptr<Playlist> pl = playlists->by_name(child->property("name")->value())) {
 		    return new MementoCommand<Playlist>(*(pl.get()), before, after);
 	    }
+
     } else if (obj_T == typeid (Route).name() || obj_T == typeid (AudioTrack).name() || obj_T == typeid(MidiTrack).name()) {
 		if (boost::shared_ptr<Route> r = route_by_id(id)) {
 			return new MementoCommand<Route>(*r, before, after);
 		} else {
 			error << string_compose (X_("Route %1 not found in session"), id) << endmsg;
 		}
+
     } else if (obj_T == typeid (Evoral::Curve).name() || obj_T == typeid (AutomationList).name()) {
 		std::map<PBD::ID, AutomationList*>::iterator i = automation_lists.find(id);
 		if (i != automation_lists.end()) {

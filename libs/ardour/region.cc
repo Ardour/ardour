@@ -1324,7 +1324,7 @@ Region::freeze ()
 }
 
 void
-Region::thaw (const string& /*why*/)
+Region::thaw ()
 {
 	Change what_changed = Change (0);
 

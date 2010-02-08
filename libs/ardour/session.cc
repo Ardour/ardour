@@ -352,6 +352,10 @@ Session::destroy ()
 
 	_engine.remove_session ();
 
+	/* clear region map. it doesn't hold references, but lets just be sensible here */
+
+	RegionFactory::clear_map ();
+
 	/* clear history so that no references to objects are held any more */
 
 	_history.clear ();

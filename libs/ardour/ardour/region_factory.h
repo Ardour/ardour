@@ -20,6 +20,10 @@
 #ifndef __ardour_region_factory_h__
 #define __ardour_region_factory_h__
 
+#include <map>
+
+#include "pbd/id.h"
+
 #include "ardour/types.h"
 #include "ardour/region.h"
 
@@ -33,6 +37,10 @@ class AudioRegion;
 class RegionFactory {
 
   public:
+
+	static boost::shared_ptr<Region> region_by_id (const PBD::ID&);
+	static void clear_map ();
+
 	/** This is emitted only when a new id is assigned. Therefore,
 	   in a pure Region copy, it will not be emitted.
 
@@ -59,6 +67,10 @@ class RegionFactory {
 	static boost::shared_ptr<Region> create (const SourceList &, nframes_t start, nframes_t length, const std::string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
 	static boost::shared_ptr<Region> create (Session&, XMLNode&, bool);
 	static boost::shared_ptr<Region> create (SourceList &, const XMLNode&);
+
+  private:
+	static std::map<PBD::ID,boost::weak_ptr<Region> > region_map;
+	static void map_add (boost::shared_ptr<Region>);
 };
 
 }

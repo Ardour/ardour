@@ -34,7 +34,7 @@ const MuteMaster::MutePoint MuteMaster::AllPoints = MutePoint (MuteMaster::PreFa
 							       MuteMaster::Listen|
 							       MuteMaster::Main);
 
-MuteMaster::MuteMaster (Session& s, const std::string& name)
+MuteMaster::MuteMaster (Session&, const std::string&)
 	: _mute_point (MutePoint (0))
 {
 }

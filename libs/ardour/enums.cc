@@ -33,6 +33,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/mute_master.h"
 #include "ardour/panner.h"
+#include "ardour/region_command.h"
 #include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
@@ -121,6 +122,7 @@ setup_enum_writer ()
 	Session::PostTransportWork _Session_PostTransportWork;
 	Session::SlaveState _Session_SlaveState;
 	MTC_Status _MIDI_MTC_Status;
+	RegionCommand::Property _RegionCommandProperty;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -583,6 +585,31 @@ setup_enum_writer ()
 	REGISTER_ENUM(Groove);
 	REGISTER(_QuantizeType);
 
+	REGISTER_CLASS_ENUM (RegionCommand, Name);
+	REGISTER_CLASS_ENUM (RegionCommand, PositionLockStyle);
+	REGISTER_CLASS_ENUM (RegionCommand, Length);
+	REGISTER_CLASS_ENUM (RegionCommand, Start);
+	REGISTER_CLASS_ENUM (RegionCommand, Position);
+	REGISTER_CLASS_ENUM (RegionCommand, PositionOnTop);
+	REGISTER_CLASS_ENUM (RegionCommand, Layer);
+	REGISTER_CLASS_ENUM (RegionCommand, SyncPosition);
+	REGISTER_CLASS_ENUM (RegionCommand, Hidden);
+	REGISTER_CLASS_ENUM (RegionCommand, Muted);
+	REGISTER_CLASS_ENUM (RegionCommand, Opaque);
+	REGISTER_CLASS_ENUM (RegionCommand, Locked);
+	REGISTER_CLASS_ENUM (RegionCommand, PositionLocked);
+	REGISTER_CLASS_ENUM (RegionCommand, ScaleAmplitude);
+	REGISTER_CLASS_ENUM (RegionCommand, FadeInActive);
+	REGISTER_CLASS_ENUM (RegionCommand, FadeInShape);
+	REGISTER_CLASS_ENUM (RegionCommand, FadeInLength);
+	REGISTER_CLASS_ENUM (RegionCommand, FadeIn);
+	REGISTER_CLASS_ENUM (RegionCommand, FadeOutActive);
+	REGISTER_CLASS_ENUM (RegionCommand, FadeOutShape);
+	REGISTER_CLASS_ENUM (RegionCommand, FadeOutLength);
+	REGISTER_CLASS_ENUM (RegionCommand, FadeOut);
+	REGISTER_CLASS_ENUM (RegionCommand, EnvelopActive);
+	REGISTER_CLASS_ENUM (RegionCommand, DefaultEnvelope);
+	REGISTER(_RegionCommandProperty);
 }
 
 } /* namespace ARDOUR */

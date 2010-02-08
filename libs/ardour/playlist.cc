@@ -762,7 +762,7 @@ Playlist::partition (nframes_t start, nframes_t end, bool cut)
 	partition_internal (start, end, cut, thawlist);
 
 	for (RegionList::iterator i = thawlist.begin(); i != thawlist.end(); ++i) {
-		(*i)->thaw ("separation");
+		(*i)->thaw ();
 	}
 }
 
@@ -1027,7 +1027,7 @@ Playlist::cut (nframes_t start, nframes_t cnt, bool result_is_hidden)
 	partition_internal (start, start+cnt-1, true, thawlist);
 
 	for (RegionList::iterator i = thawlist.begin(); i != thawlist.end(); ++i) {
-		(*i)->thaw ("playlist cut");
+		(*i)->thaw ();
 	}
 
 	return the_copy;
@@ -1900,7 +1900,7 @@ Playlist::set_state (const XMLNode& node, int version)
 				region->freeze ();
 
 				if (region->set_live_state (*child, version, what_changed, false)) {
-					region->thaw ("");
+					region->thaw ();
 					continue;
 				}
 
@@ -1915,7 +1915,7 @@ Playlist::set_state (const XMLNode& node, int version)
 
 			// So that layer_op ordering doesn't get screwed up
 			region->set_last_layer_op( region->layer());
-			region->thaw ("");
+			region->thaw ();
 		}
 	}
 

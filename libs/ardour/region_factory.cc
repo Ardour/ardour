@@ -35,6 +35,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 PBD::Signal1<void,boost::shared_ptr<Region> > RegionFactory::CheckNewRegion;
+map<PBD::ID,boost::weak_ptr<Region> > RegionFactory::region_map;
 
 boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<Region> region, nframes_t start,
@@ -50,6 +51,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, nframes_t start,
 		boost::shared_ptr<AudioRegion> arp (ar);
 		boost::shared_ptr<Region> ret (boost::static_pointer_cast<Region> (arp));
 		ret->unlock_property_changes ();
+		map_add (ret);
 		if (announce) {
 			CheckNewRegion (ret);
 		}
@@ -59,6 +61,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, nframes_t start,
 		boost::shared_ptr<MidiRegion> arp (ar);
 		boost::shared_ptr<Region> ret (boost::static_pointer_cast<Region> (arp));
 		ret->unlock_property_changes ();
+		map_add (ret);
 		if (announce) {
 			CheckNewRegion (ret);
 		}
@@ -82,6 +85,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region)
 		boost_debug_shared_ptr_mark_interesting (arn, "Region");
 		boost::shared_ptr<Region> ret (arn);
 		ret->unlock_property_changes ();
+		map_add (ret);
 		/* pure copy constructor - no CheckNewRegion emitted */
 		return ret;
 	} else if ((mr = boost::dynamic_pointer_cast<const MidiRegion>(region)) != 0) {
@@ -122,6 +126,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 		boost::shared_ptr<AudioRegion> arp (ar);
 		boost::shared_ptr<Region> ret (boost::static_pointer_cast<Region> (arp));
 		ret->unlock_property_changes ();
+		map_add (ret);
 		if (announce) {
 			CheckNewRegion (ret);
 		}
@@ -141,6 +146,7 @@ RegionFactory::create (Session& session, XMLNode& node, bool yn)
 
 	if (r) {
 		r->unlock_property_changes ();
+		map_add (r);
 		CheckNewRegion (r);
 	}
 
@@ -161,6 +167,7 @@ RegionFactory::create (const SourceList& srcs, nframes_t start, nframes_t length
 		boost::shared_ptr<AudioRegion> arp (ar);
 		boost::shared_ptr<Region> ret (boost::static_pointer_cast<Region> (arp));
 		ret->unlock_property_changes ();
+		map_add (ret);
 		if (announce) {
 			CheckNewRegion (ret);
 		}
@@ -172,6 +179,7 @@ RegionFactory::create (const SourceList& srcs, nframes_t start, nframes_t length
 		boost::shared_ptr<MidiRegion> mrp (ar);
 		boost::shared_ptr<Region> ret (boost::static_pointer_cast<Region> (mrp));
 		ret->unlock_property_changes ();
+		map_add (ret);
 		if (announce) {
 			CheckNewRegion (ret);
 		}
@@ -194,11 +202,13 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 		boost_debug_shared_ptr_mark_interesting (ar, "Region");
 		boost::shared_ptr<Region> ret (ar);
 		ret->unlock_property_changes ();
+		map_add (ret);
 		CheckNewRegion (ret);
 		return ret;
 	} else if (srcs[0]->type() == DataType::MIDI) {
 		boost::shared_ptr<Region> ret (new MidiRegion (srcs, node));
 		ret->unlock_property_changes ();
+		map_add (ret);
 		CheckNewRegion (ret);
 		return ret;
 	}
@@ -217,6 +227,7 @@ RegionFactory::create (boost::shared_ptr<Source> src, nframes_t start, nframes_t
 		boost_debug_shared_ptr_mark_interesting (ar, "Region");
 		boost::shared_ptr<Region> ret (ar);
 		ret->unlock_property_changes ();
+		map_add (ret);
 		if (announce) {
 			CheckNewRegion (ret);
 		}
@@ -224,6 +235,7 @@ RegionFactory::create (boost::shared_ptr<Source> src, nframes_t start, nframes_t
 	} else if ((ms = boost::dynamic_pointer_cast<MidiSource>(src)) != 0) {
 		boost::shared_ptr<Region> ret (new MidiRegion (ms, start, length, name, layer, flags));
 		ret->unlock_property_changes ();
+		map_add (ret);
 		if (announce) {
 			CheckNewRegion (ret);
 		}
@@ -231,4 +243,32 @@ RegionFactory::create (boost::shared_ptr<Source> src, nframes_t start, nframes_t
 	}
 
 	return boost::shared_ptr<Region>();
+}
+
+void
+RegionFactory::map_add (boost::shared_ptr<Region> r)
+{
+	pair<ID,boost::weak_ptr<Region> > p;
+	p.first = r->id();
+	p.second = r;
+
+	region_map.insert (p);
+}
+
+boost::shared_ptr<Region>
+RegionFactory::region_by_id (const PBD::ID& id)
+{
+	map<ID,boost::weak_ptr<Region> >::iterator i = region_map.find (id);
+
+	if (i == region_map.end()) {
+		return boost::shared_ptr<Region>();
+	}
+
+	return i->second.lock();
+}
+	
+void
+RegionFactory::clear_map ()
+{
+	region_map.clear ();
 }

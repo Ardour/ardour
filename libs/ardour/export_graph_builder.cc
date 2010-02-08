@@ -44,7 +44,7 @@ ExportGraphBuilder::~ExportGraphBuilder ()
 }
 
 int
-ExportGraphBuilder::process (nframes_t frames, bool last_cycle)
+ExportGraphBuilder::process (nframes_t /* frames */, bool last_cycle)
 {
 	for (ChannelMap::iterator it = channels.begin(); it != channels.end(); ++it) {
 		it->first->read (process_buffer, process_buffer_frames);

@@ -767,7 +767,7 @@ AudioRegion::set_live_state (const XMLNode& node, int version, Change& what_chan
 	}
 
 	_envelope->thaw ();
-	thaw ("");
+	thaw ();
 
 	if (send) {
 		cerr << _name << ": audio final change: " << hex << what_changed << dec << endl;

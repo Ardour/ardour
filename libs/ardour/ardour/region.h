@@ -162,7 +162,7 @@ class Region
 	void recompute_position_from_lock_style ();
 
 	void freeze ();
-	void thaw (const std::string& why);
+	void thaw ();
 
 	bool covers (nframes_t frame) const {
 		return first_frame() <= frame && frame <= last_frame();

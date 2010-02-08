@@ -144,6 +144,7 @@ libardour_sources = [
 	'rc_configuration.cc',
 	'recent_sessions.cc',
 	'region.cc',
+	'region_command.cc',
 	'region_factory.cc',
 	'resampled_source.cc',
 	'return.cc',
