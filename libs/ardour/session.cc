@@ -2449,8 +2449,7 @@ Session::route_solo_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		bool via_sends_only;
 
-
-		if ((*i) == route || !(*i)->solo_isolated() || !(*i)->is_master() || !(*i)->is_control() || (*i)->is_hidden()) {
+		if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_control() || (*i)->is_hidden()) {
 			continue;
 		} else if ((*i)->feeds (route, &via_sends_only)) {
 			if (!via_sends_only) {
