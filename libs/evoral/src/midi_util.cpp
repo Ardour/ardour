@@ -37,10 +37,10 @@ midi_note_name (uint8_t val)
 		"f",
 		"f#",
 		"g",
+		"g#",
 		"a",
 		"a#",
-		"b",
-		"b#"
+		"b"
 	};
 
 	int octave = val/12;
