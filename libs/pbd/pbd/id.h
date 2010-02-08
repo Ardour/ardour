@@ -31,7 +31,8 @@ class ID {
   public:
 	ID ();
 	ID (std::string);
-	
+	ID (const ID&);
+
 	bool operator== (const ID& other) const {
 		return _id == other._id; 
 	}
@@ -43,6 +44,7 @@ class ID {
 	bool operator== (const std::string&) const;
 
 	ID& operator= (std::string); 
+	ID& operator= (const ID&); 
 
 	bool operator< (const ID& other) const {
 		return _id < other._id;

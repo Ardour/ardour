@@ -48,6 +48,11 @@ ID::ID ()
 	_id = _counter++;
 }
 
+ID::ID (const ID& other)
+{
+	_id = other._id;
+}
+
 ID::ID (string str)
 {
 	string_assign (str);
@@ -82,6 +87,15 @@ ID&
 ID::operator= (string str)
 {
 	string_assign (str);
+	return *this;
+}
+
+ID&
+ID::operator= (const ID& other)
+{
+	if (&other != this) {
+		_id = other._id;
+	}
 	return *this;
 }
 
