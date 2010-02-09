@@ -47,10 +47,6 @@ Stateful::~Stateful ()
 	// means it needs to live on indefinately.
 
 	delete _instant_xml;
-
-	for (list<StateBase*>::iterator i = _states.begin(); i != _states.end(); ++i) {
-		delete *i;
-	}
 }
 
 void
