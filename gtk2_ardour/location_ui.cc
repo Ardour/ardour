@@ -866,6 +866,9 @@ LocationUI::set_session(ARDOUR::Session* s)
 		_session->locations()->removed.connect (_session_connections, ui_bind (&LocationUI::location_removed, this, _1), gui_context());
 	}
 
+	loop_edit_row.set_session (s);
+	punch_edit_row.set_session (s);
+
 	refresh_location_list ();
 }
 
