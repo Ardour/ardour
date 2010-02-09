@@ -350,9 +350,7 @@ RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Re
 void
 RegionDrag::region_going_away (RegionView* v)
 {
-	if (!_drags->ending ()) {
-		_views.remove (v);
-	}
+	_views.remove (v);
 }
 
 RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b)
