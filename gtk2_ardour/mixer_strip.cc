@@ -399,7 +399,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	delete route_ops_menu;
 	route_ops_menu = 0;
 
-	ARDOUR_UI::instance()->tooltips().set_tip (comment_button, _route->comment().empty() ?
+	ARDOUR_UI::instance()->set_tip (comment_button, _route->comment().empty() ?
 						   _("Click to Add/Edit Comments"):
 						   _route->comment());
 
@@ -1210,7 +1210,7 @@ MixerStrip::comment_editor_done_editing()
 			break;
 		}
 
-		ARDOUR_UI::instance()->tooltips().set_tip (comment_button,
+		ARDOUR_UI::instance()->set_tip (comment_button,
 				str.empty() ? _("Click to Add/Edit Comments") : str);
 	}
 

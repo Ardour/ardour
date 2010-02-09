@@ -86,9 +86,9 @@ VisualTimeAxis::VisualTimeAxis(const string & name, PublicEditor& ed, ARDOUR::Se
 	size_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VisualTimeAxis::size_click)) ;
 	visual_button.signal_clicked().connect (sigc::mem_fun (*this, &VisualTimeAxis::visual_click)) ;
 	hide_button.signal_clicked().connect (sigc::mem_fun (*this, &VisualTimeAxis::hide_click)) ;
-	ARDOUR_UI::instance()->tooltips().set_tip(size_button,_("Display Height")) ;
-	ARDOUR_UI::instance()->tooltips().set_tip(visual_button, _("Visual options")) ;
-	ARDOUR_UI::instance()->tooltips().set_tip(hide_button, _("Hide this track")) ;
+	ARDOUR_UI::instance()->set_tip(size_button,_("Display Height")) ;
+	ARDOUR_UI::instance()->set_tip(visual_button, _("Visual options")) ;
+	ARDOUR_UI::instance()->set_tip(hide_button, _("Hide this track")) ;
 
 	controls_table.attach (hide_button, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 	controls_table.attach (visual_button, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
@@ -342,7 +342,7 @@ VisualTimeAxis::label_view()
 {
 	name_label.set_text(time_axis_name) ;
 	name_entry.set_text(time_axis_name) ;
-	ARDOUR_UI::instance()->tooltips().set_tip(name_entry, time_axis_name) ;
+	ARDOUR_UI::instance()->set_tip(name_entry, time_axis_name) ;
 }
 
 

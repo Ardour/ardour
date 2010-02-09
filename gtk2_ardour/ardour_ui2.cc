@@ -97,7 +97,40 @@ ARDOUR_UI::setup_windows ()
 
 	editor->add_toplevel_controls (top_packer);
 
+	setup_tooltips ();
+
 	return 0;
+}
+
+void
+ARDOUR_UI::setup_tooltips ()
+{
+	set_tip (roll_button, _("Play from playhead"));
+	set_tip (stop_button, _("Stop playback"));
+	set_tip (rec_button, _("Toggle record"));
+	set_tip (play_selection_button, _("Play range/selection"));
+	set_tip (join_play_range_button, _("Always play range/selection"));
+	set_tip (goto_start_button, _("Go to start of session"));
+	set_tip (goto_end_button, _("Go to end of session"));
+	set_tip (auto_loop_button, _("Play loop range"));
+
+	set_tip (auto_return_button, _("Return to last playback start when stopped"));
+	set_tip (auto_play_button, _("Start playback after any locate"));
+	set_tip (auto_input_button, _("Be sensible about input monitoring"));
+	set_tip (punch_in_button, _("Start recording at auto-punch start"));
+	set_tip (punch_out_button, _("Stop recording at auto-punch end"));
+	set_tip (click_button, _("Enable/Disable audio click"));
+	set_tip (sync_button, _("Enable/Disable external positional sync"));
+	set_tip (time_master_button, _("Does Ardour control the time?"));
+	set_tip (shuttle_box, _("Shuttle speed control"));
+	set_tip (shuttle_units_button, _("Select semitones or %%-age for speed display"));
+	set_tip (speed_display_box, _("Current transport speed"));
+	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
+	set_tip (auditioning_alert_button, _("When active, auditioning is taking place\nClick to stop the audition"));
+	set_tip (primary_clock, _("Primary clock"));
+	set_tip (secondary_clock, _("secondary clock"));
+
+	editor->setup_tooltips ();
 }
 
 void
@@ -247,27 +280,6 @@ ARDOUR_UI::setup_transport ()
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
 	act->connect_proxy (sync_button);
 
-	ARDOUR_UI::instance()->tooltips().set_tip (roll_button, _("Play from playhead"));
-	ARDOUR_UI::instance()->tooltips().set_tip (stop_button, _("Stop playback"));
-	ARDOUR_UI::instance()->tooltips().set_tip (play_selection_button, _("Play range/selection"));
-	ARDOUR_UI::instance()->tooltips().set_tip (join_play_range_button, _("Always play range/selection"));
-	ARDOUR_UI::instance()->tooltips().set_tip (goto_start_button, _("Go to start of session"));
-	ARDOUR_UI::instance()->tooltips().set_tip (goto_end_button, _("Go to end of session"));
-	ARDOUR_UI::instance()->tooltips().set_tip (auto_loop_button, _("Play loop range"));
-
-	ARDOUR_UI::instance()->tooltips().set_tip (auto_return_button, _("Return to last playback start when stopped"));
-	ARDOUR_UI::instance()->tooltips().set_tip (auto_play_button, _("Start playback after any locate"));
-	ARDOUR_UI::instance()->tooltips().set_tip (auto_input_button, _("Be sensible about input monitoring"));
-	ARDOUR_UI::instance()->tooltips().set_tip (punch_in_button, _("Start recording at auto-punch start"));
-	ARDOUR_UI::instance()->tooltips().set_tip (punch_out_button, _("Stop recording at auto-punch end"));
-	ARDOUR_UI::instance()->tooltips().set_tip (click_button, _("Enable/Disable audio click"));
-	ARDOUR_UI::instance()->tooltips().set_tip (sync_button, _("Enable/Disable external positional sync"));
-	ARDOUR_UI::instance()->tooltips().set_tip (time_master_button, _("Does Ardour control the time?"));
-	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_box, _("Shuttle speed control"));
-	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_units_button, _("Select semitones or %%-age for speed display"));
-	ARDOUR_UI::instance()->tooltips().set_tip (speed_display_box, _("Current transport speed"));
-
-
 	shuttle_box.set_flags (CAN_FOCUS);
 	shuttle_box.add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 	shuttle_box.set_size_request (100, 15);
@@ -286,9 +298,6 @@ ARDOUR_UI::setup_transport ()
 	primary_clock.ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::primary_clock_value_changed));
 	secondary_clock.ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));
 	big_clock.ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::big_clock_value_changed));
-
-	ARDOUR_UI::instance()->tooltips().set_tip (primary_clock, _("Primary clock"));
-	ARDOUR_UI::instance()->tooltips().set_tip (secondary_clock, _("secondary clock"));
 
 	ActionManager::get_action ("Transport", "ToggleAutoReturn")->connect_proxy (auto_return_button);
 	ActionManager::get_action ("Transport", "ToggleAutoPlay")->connect_proxy (auto_play_button);
@@ -313,9 +322,6 @@ ARDOUR_UI::setup_transport ()
 	solo_alert_button.signal_pressed().connect (sigc::mem_fun(*this,&ARDOUR_UI::solo_alert_toggle));
 	auditioning_alert_button.set_name ("TransportAuditioningAlert");
 	auditioning_alert_button.signal_pressed().connect (sigc::mem_fun(*this,&ARDOUR_UI::audition_alert_toggle));
-
-	tooltips().set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
-	tooltips().set_tip (auditioning_alert_button, _("When active, auditioning is taking place\nClick to stop the audition"));
 
 	alert_box.pack_start (solo_alert_button, false, false);
 	alert_box.pack_start (auditioning_alert_button, false, false);

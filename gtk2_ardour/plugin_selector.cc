@@ -127,13 +127,13 @@ PluginSelector::PluginSelector (PluginManager *mgr)
 	ascroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	ascroller.add(added_list);
 	btn_add = manage(new Gtk::Button(Stock::ADD));
-	ARDOUR_UI::instance()->tooltips().set_tip(*btn_add, _("Add a plugin to the effect list"));
+	ARDOUR_UI::instance()->set_tip(*btn_add, _("Add a plugin to the effect list"));
 	btn_add->set_sensitive (false);
 	btn_remove = manage(new Gtk::Button(Stock::REMOVE));
 	btn_remove->set_sensitive (false);
-	ARDOUR_UI::instance()->tooltips().set_tip(*btn_remove, _("Remove a plugin from the effect list"));
+	ARDOUR_UI::instance()->set_tip(*btn_remove, _("Remove a plugin from the effect list"));
 	Gtk::Button *btn_update = manage(new Gtk::Button(Stock::REFRESH));
-	ARDOUR_UI::instance()->tooltips().set_tip(*btn_update, _("Update available plugins"));
+	ARDOUR_UI::instance()->set_tip(*btn_update, _("Update available plugins"));
 
 	btn_add->set_name("PluginSelectorButton");
 	btn_remove->set_name("PluginSelectorButton");

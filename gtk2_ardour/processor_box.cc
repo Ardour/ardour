@@ -988,7 +988,7 @@ ProcessorBox::build_processor_tooltip (EventBox& box, string start)
   		tip += (*i)->processor()->name();
 	}
 	
-	ARDOUR_UI::instance()->tooltips().set_tip (box, tip);
+	ARDOUR_UI::instance()->set_tip (box, tip);
 }
 
 void

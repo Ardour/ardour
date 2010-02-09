@@ -183,7 +183,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 		rec_enable_button->show_all ();
 
 		controls_table.attach (*rec_enable_button, 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-		ARDOUR_UI::instance()->tooltips().set_tip(*rec_enable_button, _("Record"));
+		ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record"));
 
 		rec_enable_button->set_sensitive (_session->writable());
 	}
@@ -199,14 +199,14 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	controls_table.attach (route_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	controls_table.attach (gm.get_gain_slider(), 0, 5, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 
-	ARDOUR_UI::instance()->tooltips().set_tip(*solo_button,_("Solo"));
-	ARDOUR_UI::instance()->tooltips().set_tip(*mute_button,_("Mute"));
-	ARDOUR_UI::instance()->tooltips().set_tip(route_group_button, _("Route Group"));
-	ARDOUR_UI::instance()->tooltips().set_tip(size_button,_("Display Height"));
-	ARDOUR_UI::instance()->tooltips().set_tip(playlist_button,_("Playlist"));
-	ARDOUR_UI::instance()->tooltips().set_tip(automation_button, _("Automation"));
-	ARDOUR_UI::instance()->tooltips().set_tip(visual_button, _("Visual options"));
-	ARDOUR_UI::instance()->tooltips().set_tip(hide_button, _("Hide this track"));
+	ARDOUR_UI::instance()->set_tip(*solo_button,_("Solo"));
+	ARDOUR_UI::instance()->set_tip(*mute_button,_("Mute"));
+	ARDOUR_UI::instance()->set_tip(route_group_button, _("Route Group"));
+	ARDOUR_UI::instance()->set_tip(size_button,_("Display Height"));
+	ARDOUR_UI::instance()->set_tip(playlist_button,_("Playlist"));
+	ARDOUR_UI::instance()->set_tip(automation_button, _("Automation"));
+	ARDOUR_UI::instance()->set_tip(visual_button, _("Visual options"));
+	ARDOUR_UI::instance()->set_tip(hide_button, _("Hide this track"));
 
 	label_view ();
 
@@ -341,7 +341,7 @@ RouteTimeAxisView::label_view ()
 		name_entry.set_text (x);
 	}
 
-	ARDOUR_UI::instance()->tooltips().set_tip (name_entry, x);
+	ARDOUR_UI::instance()->set_tip (name_entry, x);
 }
 
 void

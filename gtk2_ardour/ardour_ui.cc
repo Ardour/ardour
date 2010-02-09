@@ -274,7 +274,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	/* we like keyboards */
 
-	keyboard = new ArdourKeyboard;
+	keyboard = new ArdourKeyboard(*this);
 
 	XMLNode* node = ARDOUR_UI::instance()->keyboard_settings();
 	if (node) {

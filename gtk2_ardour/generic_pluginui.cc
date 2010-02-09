@@ -315,7 +315,7 @@ GenericPluginUI::ControlUI::ControlUI ()
 	: automate_button (X_("")) // force creation of a label
 {
 	automate_button.set_name ("PluginAutomateButton");
-	ARDOUR_UI::instance()->tooltips().set_tip (automate_button, _("Automation control"));
+	ARDOUR_UI::instance()->set_tip (automate_button, _("Automation control"));
 
 	/* XXX translators: use a string here that will be at least as long
 	   as the longest automation label (see ::automation_state_changed()

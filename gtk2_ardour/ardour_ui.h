@@ -229,6 +229,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void setup_profile ();
 	void setup_theme ();
+	void setup_tooltips ();
 
 	void set_shuttle_fract (double);
 

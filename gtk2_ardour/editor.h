@@ -1566,6 +1566,8 @@ public:
 
 	void setup_toolbar ();
 
+	void setup_tooltips ();
+
 	Gtkmm2ext::TearOff*      tools_tearoff;
 	Gtk::HBox                toolbar_hbox;
 	Gtk::EventBox            toolbar_base;

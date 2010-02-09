@@ -38,6 +38,7 @@
 #include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
+#include <gtkmm2ext/actions.h>
 
 #include "i18n.h"
 
@@ -298,16 +299,39 @@ UI::touch_display (Touchable *display)
 }
 
 void
+UI::set_tip (Widget &w, const gchar *tip)
+{
+	set_tip(&w, tip, "");
+}
+
+void
+UI::set_tip (Widget &w, const std::string& tip)
+{
+	set_tip(&w, tip.c_str(), "");
+}
+
+void
 UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 {
 	UIRequest *req = get_request (SetTip);
+
+	std::string msg(tip);
+
+	Glib::RefPtr<Gtk::Action> action = w->get_action();
+	if (action) {
+		Gtk::AccelKey key;
+		bool has_key = ActionManager::lookup_entry(action->get_accel_path(), key);
+		if (has_key && key.get_abbrev() != "") {
+			msg.append("\n\n Key: ").append(key.get_abbrev());
+		}
+	}
 
 	if (req == 0) {
 		return;
 	}
 
 	req->widget = w;
-	req->msg = tip;
+	req->msg = msg.c_str();
 	req->msg2 = hlp;
 
 	send_request (req);

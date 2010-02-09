@@ -120,8 +120,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session* s, boost::shared_ptr<Ro
 
 	controls_table.set_no_show_all();
 
-	ARDOUR_UI::instance()->tooltips().set_tip(auto_button, _("automation state"));
-	ARDOUR_UI::instance()->tooltips().set_tip(hide_button, _("hide track"));
+	ARDOUR_UI::instance()->set_tip(auto_button, _("automation state"));
+	ARDOUR_UI::instance()->set_tip(hide_button, _("hide track"));
 
 	/* rearrange the name display */
 
@@ -174,7 +174,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (Session* s, boost::shared_ptr<Ro
 			tipname += ": ";
 		}
 		tipname += _name;
-		ARDOUR_UI::instance()->tooltips().set_tip(controls_ebox, tipname);
+		ARDOUR_UI::instance()->set_tip(controls_ebox, tipname);
 	}
 
 	/* add the buttons */

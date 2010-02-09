@@ -71,17 +71,17 @@ PannerUI::PannerUI (Session* s)
 	pan_automation_style_button.set_name ("MixerAutomationModeButton");
 	pan_automation_state_button.set_name ("MixerAutomationPlaybackButton");
 
-	ARDOUR_UI::instance()->tooltips().set_tip (pan_automation_state_button, _("Pan automation mode"));
-	ARDOUR_UI::instance()->tooltips().set_tip (pan_automation_style_button, _("Pan automation type"));
+	ARDOUR_UI::instance()->set_tip (pan_automation_state_button, _("Pan automation mode"));
+	ARDOUR_UI::instance()->set_tip (pan_automation_style_button, _("Pan automation type"));
 
 	//set_size_request_to_display_given_text (pan_automation_state_button, X_("O"), 2, 2);
 	//set_size_request_to_display_given_text (pan_automation_style_button, X_("0"), 2, 2);
 
 	panning_viewport.set_name (X_("BaseFrame"));
 
-	ARDOUR_UI::instance()->tooltips().set_tip (panning_link_button,
+	ARDOUR_UI::instance()->set_tip (panning_link_button,
 						   _("panning link control"));
-	ARDOUR_UI::instance()->tooltips().set_tip (panning_link_direction_button,
+	ARDOUR_UI::instance()->set_tip (panning_link_direction_button,
 						   _("panning link direction"));
 
 	pan_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
@@ -424,7 +424,7 @@ PannerUI::setup_pan ()
 
 			char buf[64];
 			snprintf (buf, sizeof (buf), _("panner for channel %zu"), asz + 1);
-			ARDOUR_UI::instance()->tooltips().set_tip (bc->event_widget(), buf);
+			ARDOUR_UI::instance()->set_tip (bc->event_widget(), buf);
 
 			bc->event_widget().signal_button_release_event().connect
 				(sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_button_event), (uint32_t) asz));

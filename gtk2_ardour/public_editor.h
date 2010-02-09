@@ -94,6 +94,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual bool have_idled() const = 0;
 	virtual void first_idle() = 0;
 
+	virtual void setup_tooltips() = 0;
+
 	/** Attach this editor to a Session.
 	 * @param s Session to connect to.
 	 */

@@ -132,8 +132,8 @@ GainMeterBase::GainMeterBase (Session* s,
 	gain_automation_style_button.set_name ("MixerAutomationModeButton");
 	gain_automation_state_button.set_name ("MixerAutomationPlaybackButton");
 
-	ARDOUR_UI::instance()->tooltips().set_tip (gain_automation_state_button, _("Fader automation mode"));
-	ARDOUR_UI::instance()->tooltips().set_tip (gain_automation_style_button, _("Fader automation type"));
+	ARDOUR_UI::instance()->set_tip (gain_automation_state_button, _("Fader automation mode"));
+	ARDOUR_UI::instance()->set_tip (gain_automation_style_button, _("Fader automation type"));
 
 	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
 	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
@@ -802,8 +802,8 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	gain_automation_style_button.set_name ("MixerAutomationModeButton");
 	gain_automation_state_button.set_name ("MixerAutomationPlaybackButton");
 
-	ARDOUR_UI::instance()->tooltips().set_tip (gain_automation_state_button, _("Fader automation mode"));
-	ARDOUR_UI::instance()->tooltips().set_tip (gain_automation_style_button, _("Fader automation type"));
+	ARDOUR_UI::instance()->set_tip (gain_automation_state_button, _("Fader automation mode"));
+	ARDOUR_UI::instance()->set_tip (gain_automation_style_button, _("Fader automation type"));
 
 	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
 	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);

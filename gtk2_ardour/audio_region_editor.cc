@@ -72,7 +72,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion>
 	name_hbox.pack_start (name_label, false, false);
 	name_hbox.pack_start (name_entry, false, false);
 
-	ARDOUR_UI::instance()->tooltips().set_tip (audition_button, _("audition this region"));
+	ARDOUR_UI::instance()->set_tip (audition_button, _("audition this region"));
 
 	audition_button.unset_flags (Gtk::CAN_FOCUS);
 

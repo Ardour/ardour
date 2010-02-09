@@ -260,18 +260,18 @@ LocationEditRow::set_location (Location *loc)
 		end_clock.show();
 		length_clock.show();
 
-		ARDOUR_UI::instance()->tooltips().set_tip (end_go_button, _("Jump to the end of this range"));
-		ARDOUR_UI::instance()->tooltips().set_tip (start_go_button, _("Jump to the start of this range"));
-		ARDOUR_UI::instance()->tooltips().set_tip (remove_button, _("Forget this range"));
-		ARDOUR_UI::instance()->tooltips().set_tip (start_clock, _("Start time"));
-		ARDOUR_UI::instance()->tooltips().set_tip (end_clock, _("End time"));
-		ARDOUR_UI::instance()->tooltips().set_tip (length_clock, _("Length"));
+		ARDOUR_UI::instance()->set_tip (end_go_button, _("Jump to the end of this range"));
+		ARDOUR_UI::instance()->set_tip (start_go_button, _("Jump to the start of this range"));
+		ARDOUR_UI::instance()->set_tip (remove_button, _("Forget this range"));
+		ARDOUR_UI::instance()->set_tip (start_clock, _("Start time"));
+		ARDOUR_UI::instance()->set_tip (end_clock, _("End time"));
+		ARDOUR_UI::instance()->set_tip (length_clock, _("Length"));
 
 	} else {
 
-		ARDOUR_UI::instance()->tooltips().set_tip (start_go_button, _("Jump to this marker"));
-		ARDOUR_UI::instance()->tooltips().set_tip (remove_button, _("Forget this marker"));
-		ARDOUR_UI::instance()->tooltips().set_tip (start_clock, _("Position"));
+		ARDOUR_UI::instance()->set_tip (start_go_button, _("Jump to this marker"));
+		ARDOUR_UI::instance()->set_tip (remove_button, _("Forget this marker"));
+		ARDOUR_UI::instance()->set_tip (start_clock, _("Position"));
 
 		end_go_button.hide();
 		end_clock.hide();

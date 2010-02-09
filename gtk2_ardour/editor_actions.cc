@@ -612,16 +612,6 @@ Editor::register_actions ()
 	Glib::RefPtr<ActionGroup> mouse_mode_actions = ActionGroup::create (X_("MouseMode"));
 	RadioAction::Group mouse_mode_group;
 
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_move_button, _("Select/Move Objects"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_select_button, _("Select/Move Ranges"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_gain_button, _("Draw Gain Automation"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_zoom_button, _("Select Zoom Range"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_timefx_button, _("Stretch/Shrink Regions"));
-	ARDOUR_UI::instance()->tooltips().set_tip (mouse_audition_button, _("Listen to Specific Regions"));
-	ARDOUR_UI::instance()->tooltips().set_tip (join_object_range_button, _("Select/Move Objects or Ranges"));
-	/* in the future, this may allow other kinds of "intra-region" editing, but for now its just MIDI */
-	ARDOUR_UI::instance()->tooltips().set_tip (internal_edit_button, _("Edit MIDI Notes"));
-
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Object Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseObject));
 	act->connect_proxy (mouse_move_button);
 	mouse_move_button.set_image (*(manage (new Image (::get_icon("tool_object")))));

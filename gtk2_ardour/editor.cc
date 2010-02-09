@@ -459,8 +459,6 @@ Editor::Editor ()
 	h->pack_start (edit_controls_vbox);
 	controls_layout.add (*h);
 
-	ARDOUR_UI::instance()->tooltips().set_tip (*_group_tabs, _("Groups: context-click for possible operations"));
-
 	controls_layout.set_name ("EditControlsBase");
 	controls_layout.add_events (Gdk::SCROLL_MASK);
 	controls_layout.signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::control_layout_scroll), false);
@@ -635,9 +633,6 @@ Editor::Editor ()
 
 	nudge_forward_button.add (*(manage (new Image (::get_icon("nudge_right")))));
 	nudge_backward_button.add (*(manage (new Image (::get_icon("nudge_left")))));
-
-	ARDOUR_UI::instance()->tooltips().set_tip (nudge_forward_button, _("Nudge Region/Selection Forwards"));
-	ARDOUR_UI::instance()->tooltips().set_tip (nudge_backward_button, _("Nudge Region/Selection Backwards"));
 
 	nudge_forward_button.set_name ("TransportButton");
 	nudge_backward_button.set_name ("TransportButton");
@@ -2850,22 +2845,18 @@ Editor::setup_toolbar ()
 	zoom_in_button.set_name ("EditorTimeButton");
 	zoom_in_button.set_image (*(manage (new Image (Stock::ZOOM_IN, Gtk::ICON_SIZE_BUTTON))));
 	zoom_in_button.signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), false));
-	ARDOUR_UI::instance()->tooltips().set_tip (zoom_in_button, _("Zoom In"));
 
 	zoom_out_button.set_name ("EditorTimeButton");
 	zoom_out_button.set_image (*(manage (new Image (Stock::ZOOM_OUT, Gtk::ICON_SIZE_BUTTON))));
 	zoom_out_button.signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), true));
-	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_button, _("Zoom Out"));
 
 	zoom_out_full_button.set_name ("EditorTimeButton");
 	zoom_out_full_button.set_image (*(manage (new Image (Stock::ZOOM_100, Gtk::ICON_SIZE_BUTTON))));
 	zoom_out_full_button.signal_clicked().connect (sigc::mem_fun(*this, &Editor::temporal_zoom_session));
-	ARDOUR_UI::instance()->tooltips().set_tip (zoom_out_full_button, _("Zoom to Session"));
 
 	zoom_focus_selector.set_name ("ZoomFocusSelector");
 	set_popdown_strings (zoom_focus_selector, zoom_focus_strings, true);
 	zoom_focus_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::zoom_focus_selection_done));
-	ARDOUR_UI::instance()->tooltips().set_tip (zoom_focus_selector, _("Zoom focus"));
 
 	zoom_box.pack_start (zoom_out_button, false, false);
 	zoom_box.pack_start (zoom_in_button, false, false);
@@ -2876,13 +2867,11 @@ Editor::setup_toolbar ()
 	tav_expand_button.set_size_request(-1,20);
 	tav_expand_button.add (*(manage (new Image (::get_icon("tav_exp")))));
 	tav_expand_button.signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &Editor::tav_zoom_step), true));
-	ARDOUR_UI::instance()->tooltips().set_tip (tav_expand_button, _("Expand Tracks"));
 
 	tav_shrink_button.set_name ("TrackHeightButton");
 	tav_shrink_button.set_size_request(-1,20);
 	tav_shrink_button.add (*(manage (new Image (::get_icon("tav_shrink")))));
 	tav_shrink_button.signal_clicked().connect (sigc::bind (sigc::mem_fun(*this, &Editor::tav_zoom_step), false));
-	ARDOUR_UI::instance()->tooltips().set_tip (tav_shrink_button, _("Shrink Tracks"));
 
 	track_zoom_box.set_spacing (1);
 	track_zoom_box.set_border_width (0);
@@ -2902,17 +2891,14 @@ Editor::setup_toolbar ()
 	snap_type_selector.set_name ("SnapTypeSelector");
 	set_popdown_strings (snap_type_selector, snap_type_strings, true);
 	snap_type_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::snap_type_selection_done));
-	ARDOUR_UI::instance()->tooltips().set_tip (snap_type_selector, _("Snap/Grid Units"));
 
 	snap_mode_selector.set_name ("SnapModeSelector");
 	set_popdown_strings (snap_mode_selector, snap_mode_strings, true);
 	snap_mode_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::snap_mode_selection_done));
-	ARDOUR_UI::instance()->tooltips().set_tip (snap_mode_selector, _("Snap/Grid Mode"));
 
 	edit_point_selector.set_name ("EditPointSelector");
 	set_popdown_strings (edit_point_selector, edit_point_strings, true);
 	edit_point_selector.signal_changed().connect (sigc::mem_fun(*this, &Editor::edit_point_selection_done));
-	ARDOUR_UI::instance()->tooltips().set_tip (edit_point_selector, _("Edit point"));
 
 	snap_box.pack_start (snap_mode_selector, false, false);
 	snap_box.pack_start (snap_type_selector, false, false);
@@ -2975,6 +2961,33 @@ Editor::setup_toolbar ()
 }
 
 void
+Editor::setup_tooltips ()
+{
+	ARDOUR_UI::instance()->set_tip (mouse_move_button, _("Select/Move Objects"));
+	ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Select/Move Ranges"));
+	ARDOUR_UI::instance()->set_tip (mouse_gain_button, _("Draw Gain Automation"));
+	ARDOUR_UI::instance()->set_tip (mouse_zoom_button, _("Select Zoom Range"));
+	ARDOUR_UI::instance()->set_tip (mouse_timefx_button, _("Stretch/Shrink Regions"));
+	ARDOUR_UI::instance()->set_tip (mouse_audition_button, _("Listen to Specific Regions"));
+	ARDOUR_UI::instance()->set_tip (join_object_range_button, _("Select/Move Objects or Ranges"));
+	ARDOUR_UI::instance()->set_tip (internal_edit_button, _("Edit Region Contents (e.g. notes)"));
+	ARDOUR_UI::instance()->set_tip (*_group_tabs, _("Groups: context-click for possible operations"));
+	ARDOUR_UI::instance()->set_tip (nudge_forward_button, _("Nudge Region/Selection Forwards"));
+	ARDOUR_UI::instance()->set_tip (nudge_backward_button, _("Nudge Region/Selection Backwards"));
+	ARDOUR_UI::instance()->set_tip (zoom_in_button, _("Zoom In"));
+	ARDOUR_UI::instance()->set_tip (zoom_out_button, _("Zoom Out"));
+	ARDOUR_UI::instance()->set_tip (zoom_out_full_button, _("Zoom to Session"));
+	ARDOUR_UI::instance()->set_tip (zoom_focus_selector, _("Zoom focus"));
+	ARDOUR_UI::instance()->set_tip (tav_expand_button, _("Expand Tracks"));
+	ARDOUR_UI::instance()->set_tip (tav_shrink_button, _("Shrink Tracks"));
+	ARDOUR_UI::instance()->set_tip (snap_type_selector, _("Snap/Grid Units"));
+	ARDOUR_UI::instance()->set_tip (snap_mode_selector, _("Snap/Grid Mode"));
+	ARDOUR_UI::instance()->set_tip (edit_point_selector, _("Edit point"));
+	ARDOUR_UI::instance()->set_tip (midi_sound_notes, _("Sound Notes"));
+	ARDOUR_UI::instance()->set_tip (midi_panic_button, _("Send note off and reset controller messages on all MIDI channels"));
+}
+
+void
 Editor::midi_panic ()
 {
 	cerr << "MIDI panic\n";
@@ -2992,14 +3005,12 @@ Editor::setup_midi_toolbar ()
 	/* Midi sound notes */
 	midi_sound_notes.add (*(manage (new Image (::get_icon("midi_sound_notes")))));
 	midi_sound_notes.set_relief(Gtk::RELIEF_NONE);
-	ARDOUR_UI::instance()->tooltips().set_tip (midi_sound_notes, _("Sound Notes"));
 	midi_sound_notes.unset_flags (CAN_FOCUS);
 
 	/* Panic */
 
 	act = ActionManager::get_action (X_("MIDI"), X_("panic"));
 	midi_panic_button.set_name("MidiPanicButton");
-	ARDOUR_UI::instance()->tooltips().set_tip (midi_panic_button, _("Send note off and reset controller messages on all MIDI channels"));
 	act->connect_proxy (midi_panic_button);
 
 	panic_box.pack_start (midi_sound_notes , true, true);

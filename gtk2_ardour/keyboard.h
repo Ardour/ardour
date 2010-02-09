@@ -25,15 +25,18 @@
 
 #include "selection.h"
 
+class ARDOUR_UI;
 
-class ArdourKeyboard : public Gtkmm2ext::Keyboard 
+class ArdourKeyboard : public Gtkmm2ext::Keyboard
 {
   public:
-	ArdourKeyboard() {}
+	ArdourKeyboard(ARDOUR_UI& ardour_ui) : ui(ardour_ui) {}
 
 	void setup_keybindings ();
 
 	static Selection::Operation selection_type (guint state);
+
+	ARDOUR_UI& ui;
 };
 
 #endif /* __ardour_keyboard_h__ */

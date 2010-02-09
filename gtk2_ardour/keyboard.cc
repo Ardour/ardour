@@ -22,6 +22,7 @@
 
 #include "ardour/filesystem_paths.h"
 
+#include "ardour_ui.h"
 #include "keyboard.h"
 #include "opts.h"
 
@@ -38,9 +39,11 @@ accel_map_changed (GtkAccelMap* /*map*/,
 		   gchar* /*path*/,
 		   guint /*key*/,
 		   GdkModifierType /*mod*/,
-		   gpointer /*arg*/)
+		   gpointer keyboard)
 {
+	ArdourKeyboard* me = (ArdourKeyboard*)keyboard;
 	Keyboard::keybindings_changed ();
+	me->ui.setup_tooltips ();
 }
 
 void
@@ -173,7 +176,7 @@ ArdourKeyboard::setup_keybindings ()
 	/* catch changes */
 
 	GtkAccelMap* accelmap = gtk_accel_map_get();
-	g_signal_connect (accelmap, "changed", (GCallback) accel_map_changed, 0);
+	g_signal_connect (accelmap, "changed", (GCallback) accel_map_changed, this);
 }
 
 Selection::Operation
