@@ -32,6 +32,7 @@
 #include "ardour/midi_source.h"
 #include "ardour/midi_region.h"
 #include "ardour/session_playlists.h"
+#include "ardour/region_factory.h"
 #include "pbd/error.h"
 #include "pbd/id.h"
 #include "pbd/statefuldestructible.h"
@@ -86,8 +87,9 @@ Session::memento_command_factory(XMLNode *n)
     string obj_T = n->property ("type-name")->value();
 
     if (obj_T == typeid (AudioRegion).name() || obj_T == typeid (MidiRegion).name() || obj_T == typeid (Region).name()) {
-	    if (regions.count(id)) {
-		    return new MementoCommand<Region>(*regions[id], before, after);
+	    boost::shared_ptr<Region> r = RegionFactory::region_by_id (id);
+	    if (r) {
+		    return new MementoCommand<Region>(*r, before, after);
 	    }
 
     } else if (obj_T == typeid (AudioSource).name() || obj_T == typeid (MidiSource).name()) {
@@ -139,8 +141,11 @@ Session::stateful_diff_command_factory (XMLNode* n)
 	PBD::ID const id (n->property("obj-id")->value ());
 
 	string const obj_T = n->property ("type-name")->value ();
-	if ((obj_T == typeid (AudioRegion).name() || obj_T == typeid (MidiRegion).name()) && regions.count(id)) {
-		return new StatefulDiffCommand (regions[id].get(), *n);
+	if ((obj_T == typeid (AudioRegion).name() || obj_T == typeid (MidiRegion).name())) {
+		boost::shared_ptr<Region> r = RegionFactory::region_by_id (id);
+		if (r) {
+			return new StatefulDiffCommand (r.get(), *n);
+		}
 	}
 
 	/* we failed */
