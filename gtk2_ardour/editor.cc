@@ -374,7 +374,7 @@ Editor::Editor ()
 
 	zoom_focus = ZoomFocusLeft;
 	set_zoom_focus (ZoomFocusLeft);
- 	zoom_range_clock.ValueChanged.connect (sigc::mem_fun(*this, &Editor::zoom_adjustment_changed));
+	zoom_range_clock.ValueChanged.connect (sigc::mem_fun(*this, &Editor::zoom_adjustment_changed));
 
 	bbt_label.set_name ("EditorTimeButton");
 	bbt_label.set_size_request (-1, (int)timebar_height);
@@ -793,6 +793,8 @@ Editor::show_window ()
 			tv = (static_cast<TimeAxisView*>(*i));
 			tv->reset_height ();
 		}
+
+		reset_zoom (frames_per_unit);
 	}
 
 	present ();
