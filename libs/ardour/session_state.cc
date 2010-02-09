@@ -2955,6 +2955,10 @@ Session::restore_history (string snapshot_name)
 					error << string_compose (_("Region command references an unknown region ID=%1"), id.to_s()) << endmsg;
 				}
 
+			} else if (n->name() == "StatefulDiffCommand") {
+				if ((c = stateful_diff_command_factory (n))) {
+					ut->add_command (c);
+				}
 			} else {
 				error << string_compose(_("Couldn't figure out how to make a Command out of a %1 XMLNode."), n->name()) << endmsg;
 			}

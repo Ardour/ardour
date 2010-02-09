@@ -36,6 +36,7 @@
 #include "pbd/id.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/failed_constructor.h"
+#include "pbd/stateful_diff_command.h"
 #include "evoral/Curve.hpp"
 
 using namespace PBD;
@@ -132,3 +133,21 @@ Session::memento_command_factory(XMLNode *n)
     return 0 ;
 }
 
+Command *
+Session::stateful_diff_command_factory (XMLNode* n)
+{
+	PBD::ID const id (n->property("obj-id")->value ());
+
+	string const obj_T = n->property ("type-name")->value ();
+	if ((obj_T == typeid (AudioRegion).name() || obj_T == typeid (MidiRegion).name()) && regions.count(id)) {
+		return new StatefulDiffCommand (regions[id].get(), *n);
+	}
+
+	/* we failed */
+	
+	error << string_compose (
+		_("could not reconstitute StatefulDiffCommand from XMLNode. object type = %1 id = %2"), obj_T, id.to_s())
+	      << endmsg;
+	
+	return 0;
+}

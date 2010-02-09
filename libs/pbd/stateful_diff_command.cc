@@ -18,6 +18,7 @@
 */
 
 #include "pbd/stateful_diff_command.h"
+#include "i18n.h"
 
 using namespace std;
 using namespace PBD;
@@ -33,6 +34,13 @@ StatefulDiffCommand::StatefulDiffCommand (Stateful* s)
 	pair<XMLNode *, XMLNode*> const p = s->diff ();
 	_before = p.first;
 	_after = p.second;
+}
+
+StatefulDiffCommand::StatefulDiffCommand (Stateful* s, XMLNode const & n)
+	: _object (s)
+{
+	_before = new XMLNode (*n.children().front());
+	_after = new XMLNode (*n.children().back());
 }
 
 
@@ -57,5 +65,12 @@ StatefulDiffCommand::undo ()
 XMLNode&
 StatefulDiffCommand::get_state ()
 {
-	/* XXX */
+	XMLNode* node = new XMLNode (X_("StatefulDiffCommand"));
+
+	node->add_property ("obj-id", _object->id().to_s());
+	node->add_property ("type-name", typeid(*_object).name());
+	node->add_child_copy (*_before);
+	node->add_child_copy (*_after);
+
+	return *node;
 }

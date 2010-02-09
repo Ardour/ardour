@@ -30,7 +30,8 @@ class Stateful;
 class StatefulDiffCommand : public Command
 {
 public:
-	StatefulDiffCommand (Stateful* s);
+	StatefulDiffCommand (Stateful *);
+	StatefulDiffCommand (Stateful *, XMLNode const &);
 	~StatefulDiffCommand ();
 
 	void operator() ();

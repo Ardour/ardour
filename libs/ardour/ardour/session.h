@@ -728,6 +728,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	// these commands are implemented in libs/ardour/session_command.cc
 	Command* memento_command_factory(XMLNode* n);
+	Command* stateful_diff_command_factory (XMLNode *);
 	void register_with_memento_command_factory(PBD::ID, PBD::StatefulDestructible*);
 
 	/* clicking */
