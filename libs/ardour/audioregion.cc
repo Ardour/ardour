@@ -688,8 +688,6 @@ AudioRegion::set_live_state (const XMLNode& node, int version, Change& what_chan
 			what_changed = Change (what_changed|ScaleAmplitudeChanged);
 			cerr << _name << " amp changed\n";
 		}
-	} else {
-		_scale_amplitude = 1.0;
 	}
 
 	/* Now find envelope description and other misc child items */
