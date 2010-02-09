@@ -315,14 +315,14 @@ class Region
 
 	DataType                _type;
 	Flag                    _flags;
-	nframes_t               _start;
+	PBD::State<nframes_t>   _start;
 	nframes_t               _length;
 	nframes_t               _last_length;
-	nframes_t               _position;
+	PBD::State<nframes_t>   _position;
 	nframes_t               _last_position;
 	PositionLockStyle       _positional_lock_style;
 	nframes_t               _sync_position;
-	layer_t                 _layer;
+	PBD::State<layer_t>     _layer;
 	mutable RegionEditState _first_edit;
 	int                     _frozen;
 	nframes64_t             _ancestral_start;
@@ -347,6 +347,7 @@ class Region
 
 private:
 
+	void register_states ();
 	void use_sources (SourceList const &);
 };
 

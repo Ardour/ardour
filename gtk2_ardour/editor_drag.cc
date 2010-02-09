@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include "pbd/memento_command.h"
 #include "pbd/basename.h"
+#include "pbd/stateful_diff_command.h"
 #include "ardour/diskstream.h"
 #include "ardour/region_command.h"
 #include "ardour/session.h"
@@ -950,7 +951,7 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			}
 
 		} else {
-			RegionCommand* rcmd = new RegionCommand (rv->region());
+			rv->region()->clear_history ();
 
 			/*
 			   motion on the same track. plonk the previously reparented region
@@ -967,10 +968,8 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();
 			
 			if (dest_rtv->view()->layer_display() == Stacked) {
-				layer_t old_layer = rv->region()->layer();
 				rv->region()->set_layer (dest_layer);
 				rv->region()->set_pending_explicit_relayer (true);
-				rcmd->add_property_change (RegionCommand::Layer, old_layer, dest_layer);
 			}
 			
 			/* freeze playlist to avoid lots of relayering in the case of a multi-region drag */
@@ -981,11 +980,9 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 				playlist->freeze();
 			}
 
-			nframes64_t old_pos = rv->region()->position();
 			rv->region()->set_position (where, (void*) this);
-			rcmd->add_property_change (RegionCommand::Position, old_pos, where);
 
-			_editor->session()->add_command (rcmd);
+			_editor->session()->add_command (new StatefulDiffCommand (rv->region().get()));
 		}
 
 		if (changed_tracks && !_copy) {

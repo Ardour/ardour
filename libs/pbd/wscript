@@ -80,6 +80,7 @@ def build(bld):
 		shortpath.cc
 		signals.cc
 		stacktrace.cc
+		stateful_diff_command.cc
 		stateful.cc
 		strreplace.cc
 		strsplit.cc

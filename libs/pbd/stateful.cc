@@ -47,6 +47,10 @@ Stateful::~Stateful ()
 	// means it needs to live on indefinately.
 
 	delete _instant_xml;
+
+	for (list<StateBase*>::iterator i = _states.begin(); i != _states.end(); ++i) {
+		delete *i;
+	}
 }
 
 void
@@ -147,6 +151,33 @@ Stateful::instant_xml (const string& str, const sys::path& directory_path)
 	}
 
 	return 0;
+}
+
+/** Forget about any old state for this object */	
+void
+Stateful::clear_history ()
+{
+	for (list<StateBase*>::iterator i = _states.begin(); i != _states.end(); ++i) {
+		(*i)->clear_history ();
+	}
+}
+
+/** @return A pair of XMLNodes representing state that has changed since the last time clear_history
+ *  was called on this object; the first is the state before, the second the state after.
+ *
+ *  It is the caller's responsibility to delete the returned XMLNodes.
+ */
+pair<XMLNode *, XMLNode *>
+Stateful::diff ()
+{
+	XMLNode* old = new XMLNode (_xml_node_name);
+	XMLNode* current = new XMLNode (_xml_node_name);
+
+	for (list<StateBase*>::iterator i = _states.begin(); i != _states.end(); ++i) {
+		(*i)->diff (old, current);
+	}
+
+	return make_pair (old, current);
 }
 
 } // namespace PBD

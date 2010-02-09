@@ -56,18 +56,27 @@ Change Region::HiddenChanged     = ARDOUR::new_change ();
 
 PBD::Signal1<void,boost::shared_ptr<ARDOUR::Region> > Region::RegionPropertyChanged;
 
+void
+Region::register_states ()
+{
+	_xml_node_name = X_("Region");
+	add_state (_start);
+	add_state (_position);
+	add_state (_layer);
+}
+
 /* derived-from-derived constructor (no sources in constructor) */
 Region::Region (Session& s, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
 	: SessionObject(s, name)
 	, _type(type)
 	, _flags(Flag (flags|DoNotSendPropertyChanges))
-	, _start(start)
+	, _start (X_("start"), start)
 	, _length(length)
-	, _position(0)
+	, _position (X_("position"), 0)
 	, _last_position(0)
 	, _positional_lock_style(AudioTime)
 	, _sync_position(_start)
-	, _layer(layer)
+	, _layer (X_("layer"), layer)
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
 	, _ancestral_start (0)
@@ -79,6 +88,8 @@ Region::Region (Session& s, nframes_t start, nframes_t length, const string& nam
 	, _last_layer_op(0)
 	, _pending_explicit_relayer (false)
 {
+	register_states ();
+	
 	/* no sources at this point */
 }
 
@@ -87,13 +98,13 @@ Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length
 	: SessionObject(src->session(), name)
 	, _type(type)
 	, _flags(Flag (flags|DoNotSendPropertyChanges))
-	, _start(start)
+	, _start (X_("start"), start)
 	, _length(length)
-	, _position(0)
+	, _position (X_("position"), 0)
 	, _last_position(0)
 	, _positional_lock_style(AudioTime)
 	, _sync_position(_start)
-	, _layer(layer)
+	, _layer (X_("layer"), layer)
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
 	, _ancestral_start (0)
@@ -106,6 +117,8 @@ Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length
 	, _last_layer_op(0)
 	, _pending_explicit_relayer (false)
 {
+	register_states ();
+
 	_sources.push_back (src);
 	_master_sources.push_back (src);
 
@@ -120,13 +133,13 @@ Region::Region (const SourceList& srcs, nframes_t start, nframes_t length, const
 	: SessionObject(srcs.front()->session(), name)
 	, _type(type)
 	, _flags(Flag (flags|DoNotSendPropertyChanges))
-	, _start(start)
+	, _start (X_("start"), start)
 	, _length(length)
-	, _position(0)
+	, _position (X_("position"), 0)
 	, _last_position(0)
 	, _positional_lock_style(AudioTime)
 	, _sync_position(_start)
-	, _layer(layer)
+	, _layer (X_("layer"), layer)
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
 	, _ancestral_start (0)
@@ -138,6 +151,8 @@ Region::Region (const SourceList& srcs, nframes_t start, nframes_t length, const
 	, _last_layer_op(0)
 	, _pending_explicit_relayer (false)
 {
+	register_states ();
+
 	use_sources (srcs);
 	assert(_sources.size() > 0);
 }
@@ -146,9 +161,14 @@ Region::Region (const SourceList& srcs, nframes_t start, nframes_t length, const
 Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: SessionObject(other->session(), name)
 	, _type (other->data_type())
+	, _start (X_("start"), 0)
+	, _position (X_("position"), 0)
+	, _layer (X_("layer"), 0)
 	, _pending_explicit_relayer (false)
 
 {
+	register_states ();
+
 	_start = other->_start + offset;
 	copy_stuff (other, offset, length, name, layer, flags);
 
@@ -186,8 +206,13 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 Region::Region (boost::shared_ptr<const Region> other, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: SessionObject(other->session(), name)
 	, _type (other->data_type())
+	, _start (X_("start"), 0)
+	, _position (X_("position"), 0)
+	, _layer (X_("layer"), 0)
 	, _pending_explicit_relayer (false)
 {
+	register_states ();
+
 	/* create a new Region exactly like another but starting at 0 in its sources */
 
 	_start = 0;
@@ -261,6 +286,8 @@ Region::Region (boost::shared_ptr<const Region> other)
 	, _last_layer_op(other->_last_layer_op)
 	, _pending_explicit_relayer (false)
 {
+	register_states ();
+
 	_flags = Flag (_flags | DoNotSendPropertyChanges);
 
 	other->_first_edit = EditChangesName;
@@ -279,13 +306,13 @@ Region::Region (const SourceList& srcs, const XMLNode& node)
 	: SessionObject(srcs.front()->session(), X_("error: XML did not reset this"))
 	, _type(DataType::NIL) // to be loaded from XML
 	, _flags(DoNotSendPropertyChanges)
-	, _start(0)
+	, _start (X_("start"), 0)
 	, _length(0)
-	, _position(0)
+	, _position (X_("position"), 0)
 	, _last_position(0)
 	, _positional_lock_style(AudioTime)
 	, _sync_position(_start)
-	, _layer(0)
+	, _layer (X_("layer"), 0)
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
 	, _stretch(1.0)
@@ -295,6 +322,8 @@ Region::Region (const SourceList& srcs, const XMLNode& node)
 	, _last_layer_op(0)
 	, _pending_explicit_relayer (false)
 {
+	register_states ();
+
 	use_sources (srcs);
 
 	if (set_state (node, Stateful::loading_state_version)) {
@@ -309,13 +338,13 @@ Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 	: SessionObject(src->session(), X_("error: XML did not reset this"))
 	, _type(DataType::NIL)
 	, _flags(DoNotSendPropertyChanges)
-	, _start(0)
+	, _start (X_("start"), 0)
 	, _length(0)
-	, _position(0)
+	, _position (X_("position"), 0)
 	, _last_position(0)
 	, _positional_lock_style(AudioTime)
 	, _sync_position(_start)
-	, _layer(0)
+	, _layer (X_("layer"), 0)
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
 	, _stretch(1.0)
@@ -325,6 +354,8 @@ Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 	, _last_layer_op(0)
 	, _pending_explicit_relayer (false)
 {
+	register_states ();
+
 	_sources.push_back (src);
 
 	if (set_state (node, Stateful::loading_state_version)) {
@@ -1065,11 +1096,11 @@ Region::state (bool /*full_state*/)
 	node->add_property ("id", buf);
 	node->add_property ("name", _name);
 	node->add_property ("type", _type.to_string());
-	snprintf (buf, sizeof (buf), "%u", _start);
+	snprintf (buf, sizeof (buf), "%u", _start.get ());
 	node->add_property ("start", buf);
 	snprintf (buf, sizeof (buf), "%u", _length);
 	node->add_property ("length", buf);
-	snprintf (buf, sizeof (buf), "%u", _position);
+	snprintf (buf, sizeof (buf), "%u", _position.get ());
 	node->add_property ("position", buf);
 	snprintf (buf, sizeof (buf), "%" PRIi64, _ancestral_start);
 	node->add_property ("ancestral-start", buf);
@@ -1099,7 +1130,7 @@ Region::state (bool /*full_state*/)
 
 	/* note: flags are stored by derived classes */
 
-	snprintf (buf, sizeof (buf), "%d", (int) _layer);
+	snprintf (buf, sizeof (buf), "%d", (int) _layer.get());
 	node->add_property ("layer", buf);
 	snprintf (buf, sizeof (buf), "%" PRIu32, _sync_position);
 	node->add_property ("sync-position", buf);
@@ -1131,12 +1162,9 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 	   that are mutable after construction.
 	*/
 
-	if ((prop = node.property ("name")) == 0) {
-		error << _("XMLNode describing a Region is incomplete (no name)") << endmsg;
-		return -1;
+	if ((prop = node.property ("name"))) {
+		_name = prop->value();
 	}
-
-	_name = prop->value();
 
 	if ((prop = node.property ("type")) == 0) {
 		_type = DataType::AUDIO;
@@ -1151,8 +1179,6 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 			cerr << _name << " start changed\n";
 			_start = val;
 		}
-	} else {
-		_start = 0;
 	}
 
 	if ((prop = node.property ("length")) != 0) {
@@ -1163,9 +1189,6 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 			_last_length = _length;
 			_length = val;
 		}
-	} else {
-		_last_length = _length;
-		_length = 1;
 	}
 
 	if ((prop = node.property ("position")) != 0) {
@@ -1176,9 +1199,6 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 			_last_position = _position;
 			_position = val;
 		}
-	} else {
-		_last_position = _position;
-		_position = 0;
 	}
 
 	if ((prop = node.property ("layer")) != 0) {
@@ -1189,8 +1209,6 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 			cerr << _name << " layer changed\n";
 			_layer = x;
 		}
-	} else {
-		_layer = 0;
 	}
 
 	if ((prop = node.property ("sync-position")) != 0) {
@@ -1200,8 +1218,6 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 			cerr << _name << " sync changed\n";
 			_sync_position = val;
 		}
-	} else {
-		_sync_position = _start;
 	}
 
 	if ((prop = node.property ("positional-lock-style")) != 0) {
@@ -1221,8 +1237,6 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 			}
 		}
 
-	} else {
-		_positional_lock_style = AudioTime;
 	}
 
 	/* XXX FIRST EDIT !!! */
@@ -1270,9 +1284,6 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 
 	/* note: derived classes set flags */
 
-	delete _extra_xml;
-	_extra_xml = 0;
-
 	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		XMLNode *child;
@@ -1280,6 +1291,7 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 		child = (*niter);
 
 		if (child->name () == "Extra") {
+			delete _extra_xml;
 			_extra_xml = new XMLNode (*child);
 			break;
 		}
@@ -1301,12 +1313,9 @@ Region::set_state (const XMLNode& node, int version)
 
 	/* ID is not allowed to change, ever */
 
-	if ((prop = node.property ("id")) == 0) {
-		error << _("Session: XMLNode describing a Region is incomplete (no id)") << endmsg;
-		return -1;
+	if ((prop = node.property ("id"))) {
+		_id = prop->value();
 	}
-
-	_id = prop->value();
 
 	_first_edit = EditChangesNothing;
 
@@ -1382,6 +1391,7 @@ Region::send_change (Change what_changed)
 			cerr << _name << " actually sends prop change " << hex << what_changed << dec <<  " @ " << get_microseconds() << endl;
 			RegionPropertyChanged (rptr);
 			cerr << _name << " done with prop change  @ " << get_microseconds() << endl;
+
 		} catch (...) {
 			/* no shared_ptr available, relax; */
 		}
