@@ -594,7 +594,7 @@ OMF::create_xml ()
 
 	session->add_property ("version", sbuf);
 	session->add_property ("name", session_name);
-
+	
 	char **tracks;
 	int numtracks;
 	sqlite3_get_table(db, "SELECT value FROM data WHERE object IN (SELECT value FROM data WHERE object IN (SELECT object FROM data WHERE property = 'OMFI:OOBJ:ObjClass' AND value = 'CMOB' LIMIT 1) AND property = 'OMFI:MOBJ:Slots')", &tracks, &numtracks, 0, 0);
@@ -674,6 +674,7 @@ OMF::create_xml ()
 			denom = e32(denom);
 			fread(&num, 4, 1, file);
 			num = e32(num);
+			INFO ("Rate = %d / %d\n", num, denom);
 			if (frame_rate == 0) {
 				frame_rate = (double) num / (double) denom;
 			}
@@ -940,6 +941,8 @@ OMF::create_xml ()
 	id_counter++;
 	snprintf (sbuf, sizeof (sbuf), "%" PRId64, id_counter);
 	session->add_property ("id-counter", sbuf);
+	snprintf (sbuf, sizeof (sbuf), "%" PRId32, sample_rate);
+	session->add_property ("sample-rate", sbuf);
 
 	XMLTree xml;
 
@@ -963,6 +966,7 @@ print_help (const char* execname)
 	     << " [ -r sample-rate ]"
 	     << " [ -n session-name ]"
 	     << " [ -v ardour-session-version ]"
+	     << " OMF2_session_file"
 	     << endl;
 	exit (1);
 }
@@ -973,14 +977,14 @@ main (int argc, char* argv[])
 	const char *execname = strrchr (argv[0], '/');
 	const char* optstring = "r:n:v:h";
 	const char* session_name = 0;
-	int         sample_rate = 44100;
-	int         version = 3000;
+	int         sample_rate = 0;
+	int         version = 0;
 
 	const struct option longopts[] = {
 		{ "rate", 1, 0, 'r' },
 		{ "name", 1, 0, 'n' },
 		{ "version", 1, 0, 'v' },
-		{ "help", 1, 0, 'h' },
+		{ "help", 0, 0, 'h' },
 		{ 0, 0, 0, 0 }
 	};	
 
@@ -1022,8 +1026,13 @@ main (int argc, char* argv[])
 	
 	OMF omf;
 
-	omf.set_version (version);
-	omf.set_sample_rate (sample_rate);
+	if (version) {
+		omf.set_version (version);
+	}
+
+	if (sample_rate) {
+		omf.set_sample_rate (sample_rate);
+	}
 
 	if (session_name) {
 		omf.set_session_name (session_name);
