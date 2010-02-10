@@ -17,11 +17,21 @@ public:
 
 	int init ();
 	int load (const std::string&);
-	void create_xml ();
+	int create_xml ();
 
 	void set_version (int);
 	void set_session_name (const std::string&);
 	void set_sample_rate (int);
+
+	struct SourceInfo {
+	    int channels;
+	    int sample_rate;
+	    uint64_t length;
+	    XMLNode* node;
+
+	    SourceInfo (int chn, int sr, uint64_t l, XMLNode* n)
+	    : channels (chn), sample_rate (sr), length (l), node (n) {}
+	};
 
 private:
 	bool bigEndian;
@@ -32,7 +42,8 @@ private:
 	std::string base_dir;
 	std::string session_name;
 	std::vector<std::string> audiofile_path_vector;
-	int      sample_rate;
+	int      sample_rate; /* audio samples per second */
+	double   frame_rate;  /* time per video frame */
 	XMLNode* session;
 	XMLNode* sources;
 	XMLNode* routes;
@@ -48,14 +59,18 @@ private:
 	XMLNode* new_playlist_node ();
 	XMLNode* new_diskstream_node ();
 	
-	typedef std::map<std::string,XMLNode*> KnownSources;
+	typedef std::map<std::string,SourceInfo*> KnownSources;
 	KnownSources known_sources;
 	
-	XMLNode* get_known_source (const char*);
-	void add_source (const char*, XMLNode*);
+	SourceInfo* get_known_source (const char*);
 	char* read_name (size_t offset, size_t length);
-	bool get_offset_and_length (const char* offstr, const char* lenstr, uint32_t& offset, uint32_t len);
+	bool get_offset_and_length (const char* offstr, const char* lenstr, uint32_t& offset, uint32_t& len);
 	void name_types ();
+	void add_id (XMLNode*);
+	void set_route_node_channels (XMLNode* route, int in, int out, bool send_to_master);
+	bool get_audio_info (const std::string& path);
+	void set_region_sources (XMLNode*, SourceInfo*);
+	void legalize_name (std::string&);
 
 	uint16_t e16(uint16_t x)
 	{
@@ -64,7 +79,7 @@ private:
 				| (x<<8);
 		else
 			return x;
-    }
+	}
 	
 	uint32_t e32(uint32_t x)
 	{
