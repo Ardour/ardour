@@ -158,7 +158,7 @@ AutomationRegionView::reset_width_dependent_items (double pixel_width)
 
 
 void
-AutomationRegionView::region_resized (ARDOUR::Change what_changed)
+AutomationRegionView::region_resized (PBD::Change what_changed)
 {
 	RegionView::region_resized(what_changed);
 

@@ -75,7 +75,7 @@ class RegionView : public TimeAxisViewItem
 	virtual void show_region_editor () {}
 	virtual void hide_region_editor();
 
-	virtual void region_changed (ARDOUR::Change);
+	virtual void region_changed (PBD::Change);
 
 	virtual GhostRegion* add_ghost (TimeAxisView&) = 0;
 	void remove_ghost_in (TimeAxisView&);
@@ -104,7 +104,7 @@ class RegionView : public TimeAxisViewItem
 		bool recording,
 		TimeAxisViewItem::Visibility);
 
-    virtual void region_resized (ARDOUR::Change);
+    virtual void region_resized (PBD::Change);
     virtual void region_muted ();
     void         region_locked ();
     void         region_opacity ();

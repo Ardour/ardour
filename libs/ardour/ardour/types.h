@@ -261,11 +261,6 @@ namespace ARDOUR {
 		SyncPoint
 	};
 
-	enum Change {
-		range_guarantee = ~0
-	};
-
-
 	enum Placement {
 		PreFader,
 		PostFader

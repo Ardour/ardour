@@ -99,11 +99,11 @@ MIDI::Port *ARDOUR::default_mtc_port = 0;
 MIDI::Port *ARDOUR::default_midi_port = 0;
 MIDI::Port *ARDOUR::default_midi_clock_port = 0;
 
-Change ARDOUR::StartChanged = ARDOUR::new_change ();
-Change ARDOUR::LengthChanged = ARDOUR::new_change ();
-Change ARDOUR::PositionChanged = ARDOUR::new_change ();
-Change ARDOUR::NameChanged = ARDOUR::new_change ();
-Change ARDOUR::BoundsChanged = Change (0); // see init(), below
+PBD::Change ARDOUR::StartChanged = PBD::new_change ();
+PBD::Change ARDOUR::LengthChanged = PBD::new_change ();
+PBD::Change ARDOUR::PositionChanged = PBD::new_change ();
+PBD::Change ARDOUR::NameChanged = PBD::new_change ();
+PBD::Change ARDOUR::BoundsChanged = Change (0); // see init(), below
 
 compute_peak_t          ARDOUR::compute_peak = 0;
 find_peaks_t            ARDOUR::find_peaks = 0;
@@ -386,27 +386,6 @@ ARDOUR::cleanup ()
 	fst_exit ();
 #endif
 	return 0;
-}
-
-ARDOUR::Change
-ARDOUR::new_change ()
-{
-	Change c;
-	static uint32_t change_bit = 1;
-
-	/* catch out-of-range */
-	if (!change_bit)
-	{
-		fatal << _("programming error: ")
-			<< "change_bit out of range in ARDOUR::new_change()"
-			<< endmsg;
-		/*NOTREACHED*/
-	}
-
-	c = Change (change_bit);
-	change_bit <<= 1;	// if it shifts too far, change_bit == 0
-
-	return c;
 }
 
 string

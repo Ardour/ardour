@@ -33,13 +33,20 @@ namespace sys {
 	class path;
 }
 
+enum Change {
+	range_guarantee = ~0
+};
+
+Change new_change ();
+
 /** Base (non template) part of State */	
 class StateBase
 {
 public:
-	StateBase (std::string const & p)
+	StateBase (std::string const & p, Change c)
 		: _have_old (false)
 		, _xml_property_name (p)
+		, _change (c)
 	{
 
 	}
@@ -47,6 +54,7 @@ public:
 	StateBase (StateBase const & s)
 		: _have_old (s._have_old)
 		, _xml_property_name (s._xml_property_name)
+		, _change (s._change)
 	{
 
 	}
@@ -57,10 +65,13 @@ public:
 	}
 
 	virtual void diff (XMLNode *, XMLNode *) const = 0;
+	virtual Change set_state (XMLNode const &) = 0;
+	virtual void add_state (XMLNode &) const = 0;
 
 protected:
 	bool _have_old;
 	std::string _xml_property_name;
+	Change _change;
 };
 
 /** Class to represent a single piece of state in a Stateful object */
@@ -68,8 +79,8 @@ template <class T>
 class State : public StateBase
 {
 public:
-	State (std::string const & p, T const & v)
-		: StateBase (p)
+	State (std::string const & p, Change c, T const & v)
+		: StateBase (p, c)
 		, _current (v)
 	{
 
@@ -86,6 +97,7 @@ public:
 		/* XXX: isn't there a nicer place to do this? */
 		_have_old = s._have_old;
 		_xml_property_name = s._xml_property_name;
+		_change = s._change;
 		
 		_current = s._current;
 		_old = s._old;
@@ -112,13 +124,36 @@ public:
 
 	void diff (XMLNode* old, XMLNode* current) const {
 		if (_have_old) {
-			std::stringstream o;
-			o << _old;
-			old->add_property (_xml_property_name.c_str(), o.str().c_str());
-			std::stringstream c;
-			c << _current;
-			current->add_property (_xml_property_name.c_str(), c.str().c_str());
+			old->add_property (_xml_property_name.c_str(), to_string (_old));
+			current->add_property (_xml_property_name.c_str(), to_string (_current));
 		}
+	}
+
+	/** Try to set state from the property of an XML node.
+	 *  @param node XML node.
+	 *  @return Change effected, or 0.
+	 */
+	Change set_state (XMLNode const & node) {
+		XMLProperty const * p = node.property (_xml_property_name.c_str());
+
+		if (p) {
+			std::stringstream s (p->value ());
+			T v;
+			s >> v;
+
+			if (v == _current) {
+				return Change (0);
+			}
+
+			set (v);
+			return _change;
+		}
+
+		return Change (0);
+	}
+
+	void add_state (XMLNode & node) const {
+		node.add_property (_xml_property_name.c_str(), to_string (_current));
 	}
 
 private:
@@ -126,6 +161,12 @@ private:
 		_old = _current;
 		_have_old = true;
 		_current = v;
+	}
+
+	std::string to_string (T const & v) const {
+		std::stringstream s;
+		s << v;
+		return s.str ();
 	}
 		
 	T _current;
@@ -163,6 +204,8 @@ class Stateful {
 
 	void add_instant_xml (XMLNode&, const sys::path& directory_path);
 	XMLNode *instant_xml (const std::string& str, const sys::path& directory_path);
+	Change set_state_using_states (XMLNode const &);
+	void add_states (XMLNode &);
 
 	XMLNode *_extra_xml;
 	XMLNode *_instant_xml;

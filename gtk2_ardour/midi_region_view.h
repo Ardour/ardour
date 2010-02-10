@@ -305,7 +305,7 @@ class MidiRegionView : public RegionView
 	                Gdk::Color& basic_color,
 	                TimeAxisViewItem::Visibility);
 
-	void region_resized (ARDOUR::Change);
+	void region_resized (PBD::Change);
 
 	void set_flags (XMLNode *);
 	void store_flags ();

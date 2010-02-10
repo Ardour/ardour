@@ -121,7 +121,7 @@ class MidiRegion : public Region
 
   protected:
 
-	int set_live_state (const XMLNode&, int version, Change&, bool send);
+	int set_live_state (const XMLNode&, int version, PBD::Change&, bool send);
 };
 
 } /* namespace ARDOUR */

@@ -45,13 +45,13 @@ class AudioSource;
 class AudioRegion : public Region
 {
   public:
-	static Change FadeInChanged;
-	static Change FadeOutChanged;
-	static Change FadeInActiveChanged;
-	static Change FadeOutActiveChanged;
-	static Change EnvelopeActiveChanged;
-	static Change ScaleAmplitudeChanged;
-	static Change EnvelopeChanged;
+	static PBD::Change FadeInChanged;
+	static PBD::Change FadeOutChanged;
+	static PBD::Change FadeInActiveChanged;
+	static PBD::Change FadeOutActiveChanged;
+	static PBD::Change EnvelopeActiveChanged;
+	static PBD::Change ScaleAmplitudeChanged;
+	static PBD::Change EnvelopeChanged;
 
 	~AudioRegion();
 
@@ -219,7 +219,7 @@ class AudioRegion : public Region
 
 	AudioRegion (Session& s, nframes_t, nframes_t, std::string name);
 
-	int set_live_state (const XMLNode&, int version, Change&, bool send);
+	int set_live_state (const XMLNode&, int version, PBD::Change&, bool send);
 };
 
 } /* namespace ARDOUR */

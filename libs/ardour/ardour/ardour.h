@@ -31,6 +31,7 @@
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/locale_guard.h"
+#include "pbd/stateful.h"
 
 #include "ardour/types.h"
 
@@ -64,13 +65,11 @@ namespace ARDOUR {
 		return (microseconds_t) jack_get_time();
 	}
 
-	Change new_change ();
-
-	extern Change StartChanged;
-	extern Change LengthChanged;
-	extern Change PositionChanged;
-	extern Change NameChanged;
-	extern Change BoundsChanged;
+	extern PBD::Change StartChanged;
+	extern PBD::Change LengthChanged;
+	extern PBD::Change PositionChanged;
+	extern PBD::Change NameChanged;
+	extern PBD::Change BoundsChanged;
 
 	static const double SHUTTLE_FRACT_SPEED1=0.48412291827; /* derived from A1,A2 */
 

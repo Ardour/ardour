@@ -167,7 +167,7 @@ AudioRegionEditor::~AudioRegionEditor ()
 }
 
 void
-AudioRegionEditor::region_changed (Change what_changed)
+AudioRegionEditor::region_changed (PBD::Change what_changed)
 {
 	if (what_changed & NameChanged) {
 		name_changed ();

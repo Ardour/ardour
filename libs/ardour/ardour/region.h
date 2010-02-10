@@ -87,15 +87,15 @@ class Region
 
 	static const Flag DefaultFlags = Flag (Opaque|DefaultFadeIn|DefaultFadeOut|FadeIn|FadeOut);
 
-	static Change FadeChanged;
-	static Change SyncOffsetChanged;
-	static Change MuteChanged;
-	static Change OpacityChanged;
-	static Change LockChanged;
-	static Change LayerChanged;
-	static Change HiddenChanged;
+	static PBD::Change FadeChanged;
+	static PBD::Change SyncOffsetChanged;
+	static PBD::Change MuteChanged;
+	static PBD::Change OpacityChanged;
+	static PBD::Change LockChanged;
+	static PBD::Change LayerChanged;
+	static PBD::Change HiddenChanged;
 
-	PBD::Signal1<void,Change> StateChanged;
+	PBD::Signal1<void,PBD::Change> StateChanged;
 	static PBD::Signal1<void,boost::shared_ptr<ARDOUR::Region> > RegionPropertyChanged;
 	void unlock_property_changes () { _flags = Flag (_flags & ~DoNotSendPropertyChanges); }
 	void block_property_changes () { _flags = Flag (_flags | DoNotSendPropertyChanges); }
@@ -242,7 +242,7 @@ class Region
 	XMLNode&         get_state ();
 	virtual XMLNode& state (bool);
 	virtual int      set_state (const XMLNode&, int version);
-	virtual int      set_live_state (const XMLNode&, int version, Change&, bool send);
+	virtual int      set_live_state (const XMLNode&, int version, PBD::Change&, bool send);
 
 	virtual boost::shared_ptr<Region> get_parent() const;
 
@@ -296,7 +296,7 @@ class Region
 
 	XMLNode& get_short_state (); /* used only by Session */
 
-	void send_change (Change);
+	void send_change (PBD::Change);
 
 	void trim_to_internal (nframes_t position, nframes_t length, void *src);
 	virtual void set_position_internal (nframes_t pos, bool allow_bbt_recompute);
@@ -333,7 +333,7 @@ class Region
 	AnalysisFeatureList     _transients;
 	bool                    _valid_transients;
 	mutable uint32_t        _read_data_count;  ///< modified in read()
-	Change                  _pending_changed;
+	PBD::Change             _pending_changed;
 	uint64_t                _last_layer_op;  ///< timestamp
 	Glib::Mutex             _lock;
 	SourceList              _sources;

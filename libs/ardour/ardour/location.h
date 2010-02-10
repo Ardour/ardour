@@ -179,7 +179,7 @@ class Locations : public PBD::StatefulDestructible
 	PBD::Signal0<void>           changed;
 	PBD::Signal1<void,Location*> added;
 	PBD::Signal1<void,Location*> removed;
-	PBD::Signal1<void,Change>    StateChanged;
+	PBD::Signal1<void,PBD::Change>    StateChanged;
 
 	template<class T> void apply (T& obj, void (T::*method)(LocationList&)) {
 		Glib::Mutex::Lock lm (lock);

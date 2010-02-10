@@ -54,13 +54,13 @@ using namespace PBD;
 
 /* a Session will reset these to its chosen defaults by calling AudioRegion::set_default_fade() */
 
-Change AudioRegion::FadeInChanged         = ARDOUR::new_change();
-Change AudioRegion::FadeOutChanged        = ARDOUR::new_change();
-Change AudioRegion::FadeInActiveChanged   = ARDOUR::new_change();
-Change AudioRegion::FadeOutActiveChanged  = ARDOUR::new_change();
-Change AudioRegion::EnvelopeActiveChanged = ARDOUR::new_change();
-Change AudioRegion::ScaleAmplitudeChanged = ARDOUR::new_change();
-Change AudioRegion::EnvelopeChanged       = ARDOUR::new_change();
+Change AudioRegion::FadeInChanged         = PBD::new_change();
+Change AudioRegion::FadeOutChanged        = PBD::new_change();
+Change AudioRegion::FadeInActiveChanged   = PBD::new_change();
+Change AudioRegion::FadeOutActiveChanged  = PBD::new_change();
+Change AudioRegion::EnvelopeActiveChanged = PBD::new_change();
+Change AudioRegion::ScaleAmplitudeChanged = PBD::new_change();
+Change AudioRegion::EnvelopeChanged       = PBD::new_change();
 
 void
 AudioRegion::init ()

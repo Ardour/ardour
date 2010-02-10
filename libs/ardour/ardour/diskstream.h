@@ -206,7 +206,7 @@ class Diskstream : public SessionObject
 
 	/* XXX fix this redundancy ... */
 
-	virtual void playlist_changed (Change);
+	virtual void playlist_changed (PBD::Change);
 	virtual void playlist_deleted (boost::weak_ptr<Playlist>);
 	virtual void playlist_ranges_moved (std::list< Evoral::RangeMove<nframes_t> > const &);
 

@@ -213,7 +213,7 @@ class CrossfadeEditor : public ArdourDialog
 	void audition_right_dry ();
 	void audition_right ();
 
-	void xfade_changed (ARDOUR::Change);
+	void xfade_changed (PBD::Change);
 
 	void dump ();
 };

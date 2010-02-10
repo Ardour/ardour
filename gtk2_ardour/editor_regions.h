@@ -104,7 +104,7 @@ private:
 
 	Columns _columns;
 
-	void region_changed (ARDOUR::Change, boost::weak_ptr<ARDOUR::Region>);
+	void region_changed (PBD::Change, boost::weak_ptr<ARDOUR::Region>);
 	void selection_changed ();
 	sigc::connection _change_connection;
 	bool set_selected_in_subrow (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &, int);

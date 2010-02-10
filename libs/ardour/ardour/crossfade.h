@@ -106,7 +106,7 @@ class Crossfade : public ARDOUR::AudioRegion
 	nframes_t overlap_length() const;
 
 	PBD::Signal1<void,boost::shared_ptr<Region> > Invalidated;
-	PBD::Signal1<void,Change>     StateChanged;
+	PBD::Signal1<void,PBD::Change>     StateChanged;
 
 	bool covers (nframes_t frame) const {
 		return _position <= frame && frame < _position + _length;
@@ -136,8 +136,8 @@ class Crossfade : public ARDOUR::AudioRegion
 	static nframes_t short_xfade_length() { return _short_xfade_length; }
 	static void set_short_xfade_length (nframes_t n);
 
-	static Change ActiveChanged;
-	static Change FollowOverlapChanged;
+	static PBD::Change ActiveChanged;
+	static PBD::Change FollowOverlapChanged;
 
   private:
 	friend struct CrossfadeComparePtr;

@@ -98,8 +98,8 @@ class AudioRegionEditor : public RegionEditor
 	PBD::ScopedConnection state_connection;
 	PBD::ScopedConnection audition_connection;
 
-	void region_changed (ARDOUR::Change);
-	void bounds_changed (ARDOUR::Change);
+	void region_changed (PBD::Change);
+	void bounds_changed (PBD::Change);
 	void name_changed ();
 	void gain_changed ();
 
