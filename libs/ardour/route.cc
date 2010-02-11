@@ -78,6 +78,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _default_type (default_type)
 
 {
+	cerr << "New route with n=" << name << " has name = " << _name.val() << endl;
 	init ();
 
 	/* add standard processors other than amp (added by ::init()) */

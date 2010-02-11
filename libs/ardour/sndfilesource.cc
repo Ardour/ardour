@@ -306,7 +306,7 @@ SndFileSource::read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) const
 		if (sf_seek (sf, (sf_count_t) start, SEEK_SET|SFM_READ) != (sf_count_t) start) {
 			char errbuf[256];
 			sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-			error << string_compose(_("SndFileSource: could not seek to frame %1 within %2 (%3)"), start, _name.get().substr (1), errbuf) << endmsg;
+			error << string_compose(_("SndFileSource: could not seek to frame %1 within %2 (%3)"), start, _name.val().substr (1), errbuf) << endmsg;
 			return 0;
 		}
 
@@ -316,7 +316,7 @@ SndFileSource::read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) const
 			if (ret != file_cnt) {
 				char errbuf[256];
 				sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-				cerr << string_compose(_("SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5)"), start, file_cnt, _name.get().substr (1), errbuf, _length) << endl;
+				cerr << string_compose(_("SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5)"), start, file_cnt, _name.val().substr (1), errbuf, _length) << endl;
 			}
 			return ret;
 		}

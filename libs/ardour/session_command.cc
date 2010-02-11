@@ -144,7 +144,7 @@ Session::stateful_diff_command_factory (XMLNode* n)
 	if ((obj_T == typeid (AudioRegion).name() || obj_T == typeid (MidiRegion).name())) {
 		boost::shared_ptr<Region> r = RegionFactory::region_by_id (id);
 		if (r) {
-			return new StatefulDiffCommand (r.get(), *n);
+			return new StatefulDiffCommand (r, *n);
 		}
 	}
 

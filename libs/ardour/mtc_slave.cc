@@ -429,7 +429,7 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 		static double average_speed = 0;
 		
 		nframes64_t ref_now = session.engine().frame_time_at_cycle_start();
-		average_speed = pic->get_ratio (last.timestamp, last.position, ref_now, slave_pos, in_control );
+		average_speed = pic->get_ratio (last.timestamp, last.position, ref_now, slave_pos, in_control, session.engine().frames_per_cycle());
   
 		pic_want_locate = pic->want_locate();
 		

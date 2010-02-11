@@ -980,7 +980,7 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 
 			rv->region()->set_position (where, (void*) this);
 
-			_editor->session()->add_command (new StatefulDiffCommand (rv->region().get()));
+			_editor->session()->add_command (new StatefulDiffCommand (rv->region()));
 		}
 
 		if (changed_tracks && !_copy) {

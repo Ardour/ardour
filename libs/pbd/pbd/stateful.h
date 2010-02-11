@@ -99,20 +99,20 @@ public:
 		set (_current + v);
 		return _current;
 	}
-
-	bool operator== (std::string const & o) const {
-		return o == to_string (_current);
+	
+	bool operator== (const T& other) const {
+		return _current == other;
 	}
 
-	bool operator!= (std::string const & o) const {
-		return o != to_string (_current);
+	bool operator!= (const T& other) const {
+		return _current != other;
 	}
 
 	operator T const & () const {
 		return _current;
 	}
 
-	T const & get () const {
+	T const & val () const {
 		return _current;
 	}
 
@@ -165,7 +165,7 @@ protected:
 template<class T>	
 std::ostream& operator<< (std::ostream& os, StateTemplate<T> const & s)
 {
-	os << s.get();
+	os << s.val();
 	return os;
 }
 
@@ -190,6 +190,7 @@ public:
 private:	
 	std::string to_string (T const & v) const {
 		std::stringstream s;
+		s.precision (12); // in case its floating point
 		s << v;
 		return s.str ();
 	}
@@ -197,6 +198,7 @@ private:
 	T from_string (std::string const & s) const {
 		std::stringstream t (s);
 		T v;
+		t.precision (12); // in case its floating point
 		t >> v;
 		return v;
 	}

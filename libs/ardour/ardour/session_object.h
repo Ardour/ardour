@@ -41,7 +41,7 @@ class SessionObject : public SessionHandleRef, public PBD::StatefulDestructible
   public:
 	SessionObject (Session& session, const std::string& name)
 		: SessionHandleRef (session)
-		, _name (X_("name"), PBD::Change (0), "")
+		, _name (X_("name"), PBD::Change (0), name)
 	{
 		add_state (_name);
 	}

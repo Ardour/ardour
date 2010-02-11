@@ -230,7 +230,7 @@ MidiSource::session_saved()
 
 	if (_model && _model->edited()) {
 		string newname;
-		const string basename = PBD::basename_nosuffix(_name.get());
+		const string basename = PBD::basename_nosuffix(_name.val());
 		string::size_type last_dash = basename.find_last_of("-");
 		if (last_dash == string::npos || last_dash == basename.find_first_of("-")) {
 			newname = basename + "-1";

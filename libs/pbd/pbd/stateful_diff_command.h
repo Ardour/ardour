@@ -17,6 +17,11 @@
 
 */
 
+#ifndef __pbd_stateful_diff_command_h__
+#define __pbd_stateful_diff_command_h__
+
+#include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 #include "pbd/command.h"
 
 namespace PBD
@@ -30,8 +35,8 @@ class Stateful;
 class StatefulDiffCommand : public Command
 {
 public:
-	StatefulDiffCommand (Stateful *);
-	StatefulDiffCommand (Stateful *, XMLNode const &);
+	StatefulDiffCommand (boost::shared_ptr<Stateful>);
+	StatefulDiffCommand (boost::shared_ptr<Stateful>, XMLNode const &);
 	~StatefulDiffCommand ();
 
 	void operator() ();
@@ -40,9 +45,11 @@ public:
 	XMLNode& get_state ();
 
 private:
-	Stateful* _object; ///< the object in question
+	boost::weak_ptr<Stateful> _object; ///< the object in question
 	XMLNode* _before; ///< XML node containing the previous values of XML properties which changed
 	XMLNode* _after; ///< XML node containing the new values of XML properties which changed
 };
 
 };
+
+#endif /* __pbd_stateful_diff_command_h__ */

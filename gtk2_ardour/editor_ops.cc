@@ -3180,7 +3180,7 @@ Editor::naturalize ()
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 		(*i)->region()->clear_history ();
 		(*i)->region()->move_to_natural_position (this);
-		_session->add_command (new StatefulDiffCommand ((*i)->region().get()));
+		_session->add_command (new StatefulDiffCommand ((*i)->region()));
 	}
 	commit_reversible_command ();
 }
@@ -4932,7 +4932,7 @@ Editor::toggle_gain_envelope_active ()
 		if (arv) {
 			arv->region()->clear_history ();
 			arv->audio_region()->set_envelope_active (!arv->audio_region()->envelope_active());
-			_session->add_command (new StatefulDiffCommand (arv->region().get()));
+			_session->add_command (new StatefulDiffCommand (arv->region()));
 		}
 	}
 
@@ -4953,7 +4953,7 @@ Editor::toggle_region_lock ()
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 		(*i)->region()->clear_history ();
 		(*i)->region()->set_locked (!(*i)->region()->locked());
-		_session->add_command (new StatefulDiffCommand ((*i)->region().get()));
+		_session->add_command (new StatefulDiffCommand ((*i)->region()));
 	}
 
 	_session->commit_reversible_command ();
@@ -4995,7 +4995,7 @@ Editor::toggle_region_mute ()
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 		(*i)->region()->clear_history ();
 		(*i)->region()->set_muted (!(*i)->region()->muted());
-		_session->add_command (new StatefulDiffCommand ((*i)->region().get()));
+		_session->add_command (new StatefulDiffCommand ((*i)->region()));
 	}
 
 	_session->commit_reversible_command ();
@@ -5015,7 +5015,7 @@ Editor::toggle_region_opaque ()
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 		(*i)->region()->clear_history ();
 		(*i)->region()->set_opaque (!(*i)->region()->opaque());
-		_session->add_command (new StatefulDiffCommand ((*i)->region().get()));
+		_session->add_command (new StatefulDiffCommand ((*i)->region()));
 	}
 
 	_session->commit_reversible_command ();

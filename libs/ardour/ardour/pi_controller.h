@@ -33,7 +33,7 @@ class PIController {
 	    out_of_bounds ();
     }
         
-    double get_ratio (int fill_level);
+    double get_ratio (int fill_level, int period_size);
     void out_of_bounds();
 
   public:
@@ -60,7 +60,7 @@ class PIChaser {
     PIChaser();
     ~PIChaser();
 
-    double get_ratio( nframes64_t chasetime_measured, nframes64_t chasetime, nframes64_t slavetime_measured, nframes64_t slavetime, bool in_control );
+    double get_ratio( nframes64_t chasetime_measured, nframes64_t chasetime, nframes64_t slavetime_measured, nframes64_t slavetime, bool in_control, int period_size );
     void reset();
     nframes64_t want_locate() { return want_locate_val; }
 

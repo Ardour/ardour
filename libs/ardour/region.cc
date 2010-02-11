@@ -1197,12 +1197,12 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 	/* fix problems with old sessions corrupted by impossible
 	   values for _stretch or _shift
 	*/
-	if (_stretch == 0.0) {
-		_stretch = 1.0;
+	if (_stretch == 0.0f) {
+		_stretch = 1.0f;
 	}
 	
-	if (_shift == 0.0) {
-		_shift = 1.0;
+	if (_shift == 0.0f) {
+		_shift = 1.0f;
 	}
 
 	/* note: derived classes set flags */

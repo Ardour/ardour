@@ -56,10 +56,10 @@ PIController::~PIController ()
 }
 
 double
-PIController::get_ratio (int fill_level)
+PIController::get_ratio (int fill_level, int period_size)
 {
 	double offset = fill_level;
-	double this_catch_factor = catch_factor;
+	double this_catch_factor = catch_factor * 4096.0/(double)period_size;
 
 	
 	// Save offset.
@@ -151,7 +151,7 @@ PIChaser::~PIChaser() {
 }
 
 double
-PIChaser::get_ratio(nframes64_t chasetime_measured, nframes64_t chasetime, nframes64_t slavetime_measured, nframes64_t slavetime, bool in_control ) {
+PIChaser::get_ratio(nframes64_t chasetime_measured, nframes64_t chasetime, nframes64_t slavetime_measured, nframes64_t slavetime, bool in_control, int period_size ) {
 
 	feed_estimator( chasetime_measured, chasetime );
 	std::cerr << (double)chasetime_measured/48000.0 << " " << chasetime << " " << slavetime << " ";
@@ -159,7 +159,7 @@ PIChaser::get_ratio(nframes64_t chasetime_measured, nframes64_t chasetime, nfram
 	double fine;  
 	nframes64_t massaged_chasetime = chasetime + (nframes64_t)( (double)(slavetime_measured - chasetime_measured) * crude );
 
-	fine = pic->get_ratio( slavetime - massaged_chasetime );
+	fine = pic->get_ratio( slavetime - massaged_chasetime, period_size );
 	if (in_control) {
 	    if (fabs(fine-crude) > crude*speed_threshold) {
 		std::cout << "reset to " << crude << " fine = " << fine << "\n";

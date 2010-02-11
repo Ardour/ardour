@@ -28,7 +28,7 @@ using namespace PBD;
  *  @param s Stateful object.
  */
 
-StatefulDiffCommand::StatefulDiffCommand (Stateful* s)
+StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<Stateful> s)
 	: _object (s)
 {
 	pair<XMLNode *, XMLNode*> const p = s->diff ();
@@ -36,7 +36,7 @@ StatefulDiffCommand::StatefulDiffCommand (Stateful* s)
 	_after = p.second;
 }
 
-StatefulDiffCommand::StatefulDiffCommand (Stateful* s, XMLNode const & n)
+StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<Stateful> s, XMLNode const & n)
 	: _object (s)
 {
 	_before = new XMLNode (*n.children().front());
@@ -53,22 +53,37 @@ StatefulDiffCommand::~StatefulDiffCommand ()
 void
 StatefulDiffCommand::operator() ()
 {
-	_object->set_state (*_after, Stateful::current_state_version);
+	boost::shared_ptr<Stateful> s (_object.lock());
+
+	if (s) {
+		s->set_state (*_after, Stateful::current_state_version);
+	}
 }
 
 void
 StatefulDiffCommand::undo ()
 {
-	_object->set_state (*_before, Stateful::current_state_version);
+	boost::shared_ptr<Stateful> s (_object.lock());
+
+	if (s) {
+		s->set_state (*_before, Stateful::current_state_version);
+	}
 }
 
 XMLNode&
 StatefulDiffCommand::get_state ()
 {
+	boost::shared_ptr<Stateful> s (_object.lock());
+
+	if (!s) {
+		/* XXX should we throw? */
+		return * new XMLNode("");
+	}
+
 	XMLNode* node = new XMLNode (X_("StatefulDiffCommand"));
 
-	node->add_property ("obj-id", _object->id().to_s());
-	node->add_property ("type-name", typeid(*_object).name());
+	node->add_property ("obj-id", s->id().to_s());
+	node->add_property ("type-name", typeid(*s.get()).name());
 	node->add_child_copy (*_before);
 	node->add_child_copy (*_after);
 

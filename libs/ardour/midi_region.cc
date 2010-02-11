@@ -51,7 +51,7 @@ using namespace PBD;
 MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, nframes_t start, nframes_t length)
 	: Region (src, start, length, PBD::basename_nosuffix(src->name()), DataType::MIDI, 0,  Region::Flag(Region::DefaultFlags|Region::External))
 {
-	assert(_name.get().find("/") == string::npos);
+	assert(_name.val().find("/") == string::npos);
 	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
 }
 
@@ -59,7 +59,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, nframes_t start, nfra
 MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (src, start, length, name, DataType::MIDI, layer, flags)
 {
-	assert(_name.get().find("/") == string::npos);
+	assert(_name.val().find("/") == string::npos);
 	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
 }
 
@@ -67,7 +67,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, nframes_t start, nfra
 MidiRegion::MidiRegion (const SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (srcs, start, length, name, DataType::MIDI, layer, flags)
 {
-	assert(_name.get().find("/") == string::npos);
+	assert(_name.val().find("/") == string::npos);
 	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
 }
 
@@ -76,14 +76,14 @@ MidiRegion::MidiRegion (const SourceList& srcs, nframes_t start, nframes_t lengt
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: Region (other, offset, length, name, layer, flags)
 {
-	assert(_name.get().find("/") == string::npos);
+	assert(_name.val().find("/") == string::npos);
 	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
 }
 
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 	: Region (other)
 {
-	assert(_name.get().find("/") == string::npos);
+	assert(_name.val().find("/") == string::npos);
 	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
 }
 
@@ -95,7 +95,7 @@ MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, const XMLNode& node)
 	}
 
 	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
-	assert(_name.get().find("/") == string::npos);
+	assert(_name.val().find("/") == string::npos);
 	assert(_type == DataType::MIDI);
 }
 
@@ -107,7 +107,7 @@ MidiRegion::MidiRegion (const SourceList& srcs, const XMLNode& node)
 	}
 
 	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
-	assert(_name.get().find("/") == string::npos);
+	assert(_name.val().find("/") == string::npos);
 	assert(_type == DataType::MIDI);
 }
 
