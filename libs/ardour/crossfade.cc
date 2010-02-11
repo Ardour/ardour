@@ -314,7 +314,7 @@ Crossfade::read_at (Sample *buf, Sample *mixdown_buffer,
 
 		start = _position;
 		buf += offset;
-		to_write = min (_length, cnt);
+		to_write = min (_length.get(), cnt);
 
 	} else {
 
@@ -679,7 +679,7 @@ Crossfade::get_state ()
 	node->add_property ("active", (_active ? "yes" : "no"));
 	node->add_property ("follow-overlap", (_follow_overlap ? "yes" : "no"));
 	node->add_property ("fixed", (_fixed ? "yes" : "no"));
-	snprintf (buf, sizeof(buf), "%" PRIu32, _length);
+	snprintf (buf, sizeof(buf), "%" PRIu32, _length.get());
 	node->add_property ("length", buf);
 	snprintf (buf, sizeof(buf), "%" PRIu32, (uint32_t) _anchor_point);
 	node->add_property ("anchor-point", buf);

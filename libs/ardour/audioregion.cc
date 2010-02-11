@@ -305,12 +305,9 @@ void
 AudioRegion::set_envelope_active (bool yn)
 {
 	if (envelope_active() != yn) {
-		char buf[64];
 		if (yn) {
-			snprintf (buf, sizeof (buf), "envelope active");
 			_flags = Flag (_flags|EnvelopeActive);
 		} else {
-			snprintf (buf, sizeof (buf), "envelope off");
 			_flags = Flag (_flags & ~EnvelopeActive);
 		}
 		send_change (EnvelopeActiveChanged);

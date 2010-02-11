@@ -64,6 +64,7 @@
 #include "pbd/pthread_utils.h"
 #include "pbd/search_path.h"
 #include "pbd/stacktrace.h"
+#include "pbd/convert.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_diskstream.h"

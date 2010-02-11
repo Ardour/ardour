@@ -2,6 +2,7 @@
 #include <gtkmm2ext/utils.h>
 
 #include "pbd/memento_command.h"
+#include "pbd/convert.h"
 
 #include "ardour/transient_detector.h"
 #include "ardour/onset_detector.h"

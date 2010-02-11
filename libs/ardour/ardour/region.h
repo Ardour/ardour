@@ -314,21 +314,21 @@ class Region
 	virtual void recompute_at_end () = 0;
 
 	DataType                _type;
-	Flag                    _flags;
+	PBD::EnumState<Flag>    _flags;
 	PBD::State<nframes_t>   _start;
-	nframes_t               _length;
+	PBD::State<nframes_t>   _length;
 	nframes_t               _last_length;
 	PBD::State<nframes_t>   _position;
 	nframes_t               _last_position;
 	PositionLockStyle       _positional_lock_style;
-	nframes_t               _sync_position;
+	PBD::State<nframes_t>   _sync_position;
 	PBD::State<layer_t>     _layer;
 	mutable RegionEditState _first_edit;
 	int                     _frozen;
-	nframes64_t             _ancestral_start;
-	nframes64_t             _ancestral_length;
-	float                   _stretch;
-	float                   _shift;
+	PBD::State<nframes64_t> _ancestral_start;
+	PBD::State<nframes64_t> _ancestral_length;
+	PBD::State<float>       _stretch;
+	PBD::State<float>       _shift;
 	BBT_Time                _bbt_time;
 	AnalysisFeatureList     _transients;
 	bool                    _valid_transients;

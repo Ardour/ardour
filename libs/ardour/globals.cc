@@ -104,6 +104,7 @@ PBD::Change ARDOUR::LengthChanged = PBD::new_change ();
 PBD::Change ARDOUR::PositionChanged = PBD::new_change ();
 PBD::Change ARDOUR::NameChanged = PBD::new_change ();
 PBD::Change ARDOUR::BoundsChanged = Change (0); // see init(), below
+PBD::Change ARDOUR::FlagsChanged = PBD::new_change ();
 
 compute_peak_t          ARDOUR::compute_peak = 0;
 find_peaks_t            ARDOUR::find_peaks = 0;

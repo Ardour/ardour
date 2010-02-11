@@ -252,7 +252,7 @@ AudioRegionImporter::parse_source_xml ()
 		return false;
 	}
 
-	channels = atoi (prop->value());
+	channels = atoi (prop->value().c_str());
 	for (uint32_t i = 0; i < channels; ++i) {
 		bool source_found = false;
 

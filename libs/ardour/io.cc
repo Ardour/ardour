@@ -1086,7 +1086,7 @@ IO::set_name (const string& requested_name)
 {
 	string name = requested_name;
 
-	if (name == _name) {
+	if (_name == name) {
 		return true;
 	}
 
@@ -1098,7 +1098,7 @@ IO::set_name (const string& requested_name)
 
 	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		string current_name = i->name();
-		current_name.replace (current_name.find (_name), _name.length(), name);
+		current_name.replace (current_name.find (_name), _name.get().length(), name);
 		i->set_name (current_name);
 	}
 
@@ -1267,7 +1267,7 @@ IO::build_legal_port_name (DataType type)
 	char buf1[name_size+1];
 	char buf2[name_size+1];
 
-	snprintf (buf1, name_size+1, ("%.*s/%s"), limit, _name.c_str(), suffix.c_str());
+	snprintf (buf1, name_size+1, ("%.*s/%s"), limit, _name.get().c_str(), suffix.c_str());
 
 	int port_number = find_port_hole (buf1);
 	snprintf (buf2, name_size+1, "%s %d", buf1, port_number);
@@ -1342,9 +1342,9 @@ IO::setup_bundle ()
 	_bundle->remove_channels ();
 
 	if (_direction == Input) {
-		snprintf(buf, sizeof (buf), _("%s in"), _name.c_str());
+		snprintf(buf, sizeof (buf), _("%s in"), _name.get().c_str());
 	} else {
-		snprintf(buf, sizeof (buf), _("%s out"), _name.c_str());
+		snprintf(buf, sizeof (buf), _("%s out"), _name.get().c_str());
 	}
         _bundle->set_name (buf);
 	uint32_t const ni = _ports.num_ports();

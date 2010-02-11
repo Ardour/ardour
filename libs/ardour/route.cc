@@ -26,6 +26,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
+#include "pbd/convert.h"
 
 #include "evoral/Curve.hpp"
 

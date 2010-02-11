@@ -170,7 +170,7 @@ IOProcessor::set_state (const XMLNode& node, int version)
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			const XMLProperty* prop;
 			if ((prop = (*niter)->property ("name")) != 0) {
-				if (prop->value() == _name) {
+				if (_name == prop->value()) {
 					if ((prop = (*niter)->property ("direction")) != 0) {
 						if (prop->value() == instr) {
 							io_node = (*niter);
@@ -200,7 +200,7 @@ IOProcessor::set_state (const XMLNode& node, int version)
 			if ((*niter)->name() == "IO") {
 				const XMLProperty* prop;
 				if ((prop = (*niter)->property ("name")) != 0) {
-					if (prop->value() == _name) {
+					if (_name == prop->value()) {
 						if ((prop = (*niter)->property ("direction")) != 0) {
 							if (prop->value() == outstr) {
 								io_node = (*niter);

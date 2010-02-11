@@ -41,6 +41,7 @@
 #include "pbd/basename.h"
 #include "pbd/stacktrace.h"
 #include "pbd/file_utils.h"
+#include "pbd/convert.h"
 
 #include "ardour/amp.h"
 #include "ardour/analyser.h"

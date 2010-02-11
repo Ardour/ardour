@@ -1433,7 +1433,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 		if (s) {
 			srcs.push_back (s);
 			s->update_header (capture_info.front()->start, when, twhen);
-			s->set_captured_for (_name);
+			s->set_captured_for (_name.get());
 			s->mark_immutable ();
 			if (Config->get_auto_analyse_audio()) {
 				Analyser::queue_source_for_analysis (s, true);
@@ -1970,7 +1970,7 @@ AudioDiskstream::rename_write_sources ()
 
 	for (chan = c->begin(), n = 0; chan != c->end(); ++chan, ++n) {
 		if ((*chan)->write_source != 0) {
-			(*chan)->write_source->set_source_name (_name, destructive());
+			(*chan)->write_source->set_source_name (_name.get(), destructive());
 			/* XXX what to do if one of them fails ? */
 		}
 	}
@@ -2178,7 +2178,7 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 				first_fs = fs;
 			}
 
-			fs->set_captured_for (_name);
+			fs->set_captured_for (_name.get());
 		}
 	}
 

@@ -24,6 +24,7 @@
 #include <cassert>
 #include "pbd/id.h"
 #include "pbd/xml++.h"
+#include "pbd/enumwriter.h"
 
 class XMLNode;
 
@@ -51,14 +52,6 @@ public:
 
 	}
 
-	StateBase (StateBase const & s)
-		: _have_old (s._have_old)
-		, _xml_property_name (s._xml_property_name)
-		, _change (s._change)
-	{
-
-	}
-
 	/** Forget about any old value for this state */
 	void clear_history () {
 		_have_old = false;
@@ -74,26 +67,19 @@ protected:
 	Change _change;
 };
 
-/** Class to represent a single piece of state in a Stateful object */
+/** Parent class for classes which represent a single piece of state in a Stateful object */
 template <class T>
-class State : public StateBase
+class StateTemplate : public StateBase
 {
 public:
-	State (std::string const & p, Change c, T const & v)
+	StateTemplate (std::string const & p, Change c, T const & v)
 		: StateBase (p, c)
 		, _current (v)
 	{
 
 	}
 
-	State (State<T> const & s)
-		: StateBase (s)
-	{
-		_current = s._current;
-		_old = s._old;
-	}		
-
-	State<T> & operator= (State<T> const & s) {
+	StateTemplate<T> & operator= (StateTemplate<T> const & s) {
 		/* XXX: isn't there a nicer place to do this? */
 		_have_old = s._have_old;
 		_xml_property_name = s._xml_property_name;
@@ -114,10 +100,18 @@ public:
 		return _current;
 	}
 
-	operator T () const {
+	bool operator== (std::string const & o) const {
+		return o == to_string (_current);
+	}
+
+	bool operator!= (std::string const & o) const {
+		return o != to_string (_current);
+	}
+
+	operator T const & () const {
 		return _current;
 	}
-	
+
 	T const & get () const {
 		return _current;
 	}
@@ -137,9 +131,7 @@ public:
 		XMLProperty const * p = node.property (_xml_property_name.c_str());
 
 		if (p) {
-			std::stringstream s (p->value ());
-			T v;
-			s >> v;
+			T const v = from_string (p->value ());
 
 			if (v == _current) {
 				return Change (0);
@@ -156,21 +148,83 @@ public:
 		node.add_property (_xml_property_name.c_str(), to_string (_current));
 	}
 
-private:
+protected:
 	void set (T const & v) {
 		_old = _current;
 		_have_old = true;
 		_current = v;
 	}
 
+	virtual std::string to_string (T const & v) const = 0;
+	virtual T from_string (std::string const & s) const = 0;
+		
+	T _current;
+	T _old;
+};
+
+template<class T>	
+std::ostream& operator<< (std::ostream& os, StateTemplate<T> const & s)
+{
+	os << s.get();
+	return os;
+}
+
+/** Representation of a single piece of state in a Stateful; for use
+ *  with types that can be written to / read from stringstreams.
+ */
+template <class T>
+class State : public StateTemplate<T>
+{
+public:
+	State (std::string const & p, Change c, T const & v)
+		: StateTemplate<T> (p, c, v)
+	{
+
+	}
+	
+	T & operator= (T const & v) {
+		this->set (v);
+		return this->_current;
+	}
+	
+private:	
 	std::string to_string (T const & v) const {
 		std::stringstream s;
 		s << v;
 		return s.str ();
 	}
-		
-	T _current;
-	T _old;
+
+	T from_string (std::string const & s) const {
+		std::stringstream t (s);
+		T v;
+		t >> v;
+		return v;
+	}
+};
+
+template <class T>
+class EnumState : public StateTemplate<T>
+{
+public:
+	EnumState (std::string const & p, Change c, T const & v)
+		: StateTemplate<T> (p, c, v)
+	{
+
+	}
+	
+	T & operator= (T const & v) {
+		this->set (v);
+		return this->_current;
+	}
+
+private:
+	std::string to_string (T const & v) const {
+		return enum_2_string (v);
+	}
+
+	T from_string (std::string const & v) const {
+		return T (string_2_enum (v, this->_current));
+	}
 };
 
 /** Base class for objects with saveable and undoable state */

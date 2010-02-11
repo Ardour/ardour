@@ -26,6 +26,8 @@
 
 #include "ardour/session_handle.h"
 
+#include "i18n.h"
+
 namespace ARDOUR {
 
 class Session;
@@ -39,11 +41,13 @@ class SessionObject : public SessionHandleRef, public PBD::StatefulDestructible
   public:
 	SessionObject (Session& session, const std::string& name)
 		: SessionHandleRef (session)
-		, _name(name)
-	{}
+		, _name (X_("name"), PBD::Change (0), "")
+	{
+		add_state (_name);
+	}
 	
-	Session&           session() const { return _session; }
-	const std::string& name()    const { return _name; }
+	Session&    session() const { return _session; }
+	std::string name()    const { return _name; }
 
 	virtual bool set_name (const std::string& str) {
 		if (_name != str) {
@@ -56,7 +60,7 @@ class SessionObject : public SessionHandleRef, public PBD::StatefulDestructible
 	PBD::Signal0<void> NameChanged;
 
   protected:
-	std::string _name;
+	PBD::State<std::string> _name;
 };
 
 } // namespace ARDOUR

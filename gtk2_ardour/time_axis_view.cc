@@ -28,6 +28,7 @@
 #include <libgnomecanvasmm/item.h>
 
 #include "pbd/error.h"
+#include "pbd/convert.h"
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/selector.h>

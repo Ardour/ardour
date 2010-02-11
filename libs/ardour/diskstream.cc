@@ -396,7 +396,7 @@ Diskstream::playlist_deleted (boost::weak_ptr<Playlist> wpl)
 bool
 Diskstream::set_name (const string& str)
 {
-	if (str != _name) {
+	if (_name != str) {
 		assert(playlist());
 		playlist()->set_name (str);
 

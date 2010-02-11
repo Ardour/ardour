@@ -32,6 +32,7 @@
 #include "pbd/pthread_utils.h"
 #include "pbd/memento_command.h"
 #include "pbd/whitespace.h"
+#include "pbd/stateful_diff_command.h"
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/choice.h>
@@ -3177,10 +3178,9 @@ Editor::naturalize ()
 
 	begin_reversible_command (_("naturalize"));
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
-                XMLNode &before = (*i)->region()->get_state();
+		(*i)->region()->clear_history ();
 		(*i)->region()->move_to_natural_position (this);
-                XMLNode &after = (*i)->region()->get_state();
-		_session->add_command (new MementoCommand<Region>(*((*i)->region().get()), &before, &after));
+		_session->add_command (new StatefulDiffCommand ((*i)->region().get()));
 	}
 	commit_reversible_command ();
 }
@@ -4930,10 +4930,9 @@ Editor::toggle_gain_envelope_active ()
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
-			XMLNode &before = arv->region()->get_state ();
+			arv->region()->clear_history ();
 			arv->audio_region()->set_envelope_active (!arv->audio_region()->envelope_active());
-			XMLNode &after = arv->region()->get_state ();
-			_session->add_command (new MementoCommand<Region> (*(arv->region().get()), &before, &after));
+			_session->add_command (new StatefulDiffCommand (arv->region().get()));
 		}
 	}
 
@@ -4952,10 +4951,9 @@ Editor::toggle_region_lock ()
 	_session->begin_reversible_command (_("region lock"));
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
-		XMLNode &before = (*i)->region()->get_state ();
+		(*i)->region()->clear_history ();
 		(*i)->region()->set_locked (!(*i)->region()->locked());
-		XMLNode &after = (*i)->region()->get_state ();
-		_session->add_command (new MementoCommand<Region> (*((*i)->region().get()), &before, &after));
+		_session->add_command (new StatefulDiffCommand ((*i)->region().get()));
 	}
 
 	_session->commit_reversible_command ();
@@ -4995,10 +4993,9 @@ Editor::toggle_region_mute ()
 	_session->begin_reversible_command (_("region mute"));
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
-		XMLNode &before = (*i)->region()->get_state ();
+		(*i)->region()->clear_history ();
 		(*i)->region()->set_muted (!(*i)->region()->muted());
-		XMLNode &after = (*i)->region()->get_state ();
-		_session->add_command (new MementoCommand<Region> (*((*i)->region().get()), &before, &after));
+		_session->add_command (new StatefulDiffCommand ((*i)->region().get()));
 	}
 
 	_session->commit_reversible_command ();
@@ -5016,10 +5013,9 @@ Editor::toggle_region_opaque ()
 	_session->begin_reversible_command (_("region opacity"));
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
-		XMLNode &before = (*i)->region()->get_state ();
+		(*i)->region()->clear_history ();
 		(*i)->region()->set_opaque (!(*i)->region()->opaque());
-		XMLNode &after = (*i)->region()->get_state ();
-		_session->add_command (new MementoCommand<Region> (*((*i)->region().get()), &before, &after));
+		_session->add_command (new StatefulDiffCommand ((*i)->region().get()));
 	}
 
 	_session->commit_reversible_command ();

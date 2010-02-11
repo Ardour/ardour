@@ -60,29 +60,36 @@ void
 Region::register_states ()
 {
 	_xml_node_name = X_("Region");
+	add_state (_flags);
 	add_state (_start);
+	add_state (_length);
 	add_state (_position);
+	add_state (_sync_position);
 	add_state (_layer);
+	add_state (_ancestral_start);
+	add_state (_ancestral_length);
+	add_state (_stretch);
+	add_state (_shift);
 }
 
 /* derived-from-derived constructor (no sources in constructor) */
 Region::Region (Session& s, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
 	: SessionObject(s, name)
 	, _type(type)
-	, _flags(Flag (flags|DoNotSendPropertyChanges))
+	, _flags (X_("flags"), FlagsChanged, Flag (flags|DoNotSendPropertyChanges))
 	, _start (X_("start"), StartChanged, start)
-	, _length(length)
+	, _length (X_("length"), LengthChanged, length)
 	, _position (X_("position"), PositionChanged, 0)
-	, _last_position(0)
+	, _last_position (0)
 	, _positional_lock_style(AudioTime)
-	, _sync_position(_start)
+	, _sync_position (X_("sync-position"), SyncOffsetChanged, _start)
 	, _layer (X_("layer"), LayerChanged, layer)
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
-	, _ancestral_start (0)
-	, _ancestral_length (0)
-	, _stretch(1.0)
-	, _shift(1.0)
+	, _ancestral_start (X_("ancestral-start"), Change (0), 0)
+	, _ancestral_length (X_("ancestral-length"), Change (0), 0)
+	, _stretch (X_("stretch"), Change (0), 1.0)
+	, _shift (X_("shift"), Change (0), 1.0)
 	, _read_data_count(0)
 	, _pending_changed(Change (0))
 	, _last_layer_op(0)
@@ -97,20 +104,20 @@ Region::Region (Session& s, nframes_t start, nframes_t length, const string& nam
 Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
 	: SessionObject(src->session(), name)
 	, _type(type)
-	, _flags(Flag (flags|DoNotSendPropertyChanges))
+	, _flags (X_("flags"), FlagsChanged, Flag (flags|DoNotSendPropertyChanges))
 	, _start (X_("start"), StartChanged, start)
-	, _length(length)
+	, _length (X_("length"), LengthChanged, length)
 	, _position (X_("position"), PositionChanged, 0)
 	, _last_position(0)
 	, _positional_lock_style(AudioTime)
-	, _sync_position(_start)
+	, _sync_position (X_("sync-position"), SyncOffsetChanged, _start)
 	, _layer (X_("layer"), LayerChanged, layer)
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
-	, _ancestral_start (0)
-	, _ancestral_length (0)
-	, _stretch (1.0)
-	, _shift (1.0)
+	, _ancestral_start (X_("ancestral-start"), Change (0), 0)
+	, _ancestral_length (X_("ancestral-length"), Change (0), 0)
+	, _stretch (X_("stretch"), Change (0), 1.0)
+	, _shift (X_("shift"), Change (0), 1.0)
 	, _valid_transients(false)
 	, _read_data_count(0)
 	, _pending_changed(Change (0))
@@ -132,20 +139,20 @@ Region::Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length
 Region::Region (const SourceList& srcs, nframes_t start, nframes_t length, const string& name, DataType type, layer_t layer, Region::Flag flags)
 	: SessionObject(srcs.front()->session(), name)
 	, _type(type)
-	, _flags(Flag (flags|DoNotSendPropertyChanges))
+	, _flags (X_("flags"), FlagsChanged, Flag (flags|DoNotSendPropertyChanges))
 	, _start (X_("start"), StartChanged, start)
-	, _length(length)
+	, _length (X_("length"), LengthChanged, length)
 	, _position (X_("position"), PositionChanged, 0)
 	, _last_position(0)
 	, _positional_lock_style(AudioTime)
-	, _sync_position(_start)
+	, _sync_position (X_("sync-position"), SyncOffsetChanged, _start)
 	, _layer (X_("layer"), LayerChanged, layer)
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
-	, _ancestral_start (0)
-	, _ancestral_length (0)
-	, _stretch(1.0)
-	, _shift(1.0)
+	, _ancestral_start (X_("ancestral-start"), Change (0), 0)
+	, _ancestral_length (X_("ancestral-length"), Change (0), 0)
+	, _stretch (X_("stretch"), Change (0), 1.0)
+	, _shift (X_("shift"), Change (0), 1.0)
 	, _read_data_count(0)
 	, _pending_changed(Change (0))
 	, _last_layer_op(0)
@@ -161,9 +168,16 @@ Region::Region (const SourceList& srcs, nframes_t start, nframes_t length, const
 Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: SessionObject(other->session(), name)
 	, _type (other->data_type())
+	, _flags (X_("flags"), FlagsChanged, Flag (flags | DoNotSendPropertyChanges))
 	, _start (X_("start"), StartChanged, 0)
+	, _length (X_("length"), LengthChanged, 0)
 	, _position (X_("position"), PositionChanged, 0)
+	, _sync_position (X_("sync-position"), SyncOffsetChanged, 0)
 	, _layer (X_("layer"), LayerChanged, 0)
+	, _ancestral_start (X_("ancestral-start"), Change (0), 0)
+	, _ancestral_length (X_("ancestral-length"), Change (0), 0)
+	, _stretch (X_("stretch"), Change (0), 1.0)
+	, _shift (X_("shift"), Change (0), 1.0)
 	, _pending_explicit_relayer (false)
 
 {
@@ -171,8 +185,6 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 
 	_start = other->_start + offset;
 	copy_stuff (other, offset, length, name, layer, flags);
-
-	_flags = Flag (_flags | DoNotSendPropertyChanges);
 
 	/* if the other region had a distinct sync point
 	   set, then continue to use it as best we can.
@@ -206,9 +218,16 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t offset, nframes
 Region::Region (boost::shared_ptr<const Region> other, nframes_t length, const string& name, layer_t layer, Flag flags)
 	: SessionObject(other->session(), name)
 	, _type (other->data_type())
+	, _flags (X_("flags"), FlagsChanged, Flag (flags|DoNotSendPropertyChanges))
 	, _start (X_("start"), StartChanged, 0)
+	, _length (X_("length"), LengthChanged, 0)
 	, _position (X_("position"), PositionChanged, 0)
+	, _sync_position (X_("sync-position"), SyncOffsetChanged, 0)
 	, _layer (X_("layer"), LayerChanged, 0)
+	, _ancestral_start (X_("ancestral-start"), Change (0), 0)
+	, _ancestral_length (X_("ancestral-length"), Change (0), 0)
+	, _stretch (X_("stretch"), Change (0), 1.0)
+	, _shift (X_("shift"), Change (0), 1.0)
 	, _pending_explicit_relayer (false)
 {
 	register_states ();
@@ -266,7 +285,7 @@ Region::Region (boost::shared_ptr<const Region> other, nframes_t length, const s
 Region::Region (boost::shared_ptr<const Region> other)
 	: SessionObject(other->session(), other->name())
 	, _type(other->data_type())
-	, _flags(Flag(other->_flags & ~(Locked|PositionLocked)))
+	, _flags (other->_flags)
 	, _start(other->_start)
 	, _length(other->_length)
 	, _position(other->_position)
@@ -288,6 +307,7 @@ Region::Region (boost::shared_ptr<const Region> other)
 {
 	register_states ();
 
+	_flags = Flag (_flags & ~ (Locked | PositionLocked));
 	_flags = Flag (_flags | DoNotSendPropertyChanges);
 
 	other->_first_edit = EditChangesName;
@@ -305,18 +325,20 @@ Region::Region (boost::shared_ptr<const Region> other)
 Region::Region (const SourceList& srcs, const XMLNode& node)
 	: SessionObject(srcs.front()->session(), X_("error: XML did not reset this"))
 	, _type(DataType::NIL) // to be loaded from XML
-	, _flags(DoNotSendPropertyChanges)
+	, _flags (X_("flags"), FlagsChanged, Flag (DoNotSendPropertyChanges))
 	, _start (X_("start"), StartChanged, 0)
-	, _length(0)
+	, _length (X_("length"), LengthChanged, 0)
 	, _position (X_("position"), PositionChanged, 0)
 	, _last_position(0)
 	, _positional_lock_style(AudioTime)
-	, _sync_position(_start)
+	, _sync_position (X_("sync-position"), SyncOffsetChanged, _start)
 	, _layer (X_("layer"), LayerChanged, 0)
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
-	, _stretch(1.0)
-	, _shift(1.0)
+	, _ancestral_start (X_("ancestral-start"), Change (0), 0)
+	, _ancestral_length (X_("ancestral-length"), Change (0), 0)
+	, _stretch (X_("stretch"), Change (0), 1.0)
+	, _shift (X_("shift"), Change (0), 1.0)
 	, _read_data_count(0)
 	, _pending_changed(Change(0))
 	, _last_layer_op(0)
@@ -337,18 +359,20 @@ Region::Region (const SourceList& srcs, const XMLNode& node)
 Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
 	: SessionObject(src->session(), X_("error: XML did not reset this"))
 	, _type(DataType::NIL)
-	, _flags(DoNotSendPropertyChanges)
+	, _flags (X_("flags"), FlagsChanged, Flag (DoNotSendPropertyChanges))
 	, _start (X_("start"), StartChanged, 0)
-	, _length(0)
+	, _length (X_("length"), LengthChanged, 0)
 	, _position (X_("position"), PositionChanged, 0)
 	, _last_position(0)
 	, _positional_lock_style(AudioTime)
-	, _sync_position(_start)
+	, _sync_position (X_("sync-position"), SyncOffsetChanged, _start)
 	, _layer (X_("layer"), LayerChanged, 0)
 	, _first_edit(EditChangesNothing)
 	, _frozen(0)
-	, _stretch(1.0)
-	, _shift(1.0)
+	, _ancestral_start (X_("ancestral-start"), Change (0), 0)
+	, _ancestral_length (X_("ancestral-length"), Change (0), 0)
+	, _stretch (X_("stretch"), Change (0), 1.0)
+	, _shift (X_("shift"), Change (0), 1.0)
 	, _read_data_count(0)
 	, _pending_changed(Change(0))
 	, _last_layer_op(0)
@@ -1096,18 +1120,7 @@ Region::state (bool /*full_state*/)
 
 	_id.print (buf, sizeof (buf));
 	node->add_property ("id", buf);
-	node->add_property ("name", _name);
 	node->add_property ("type", _type.to_string());
-	snprintf (buf, sizeof (buf), "%u", _length);
-	node->add_property ("length", buf);
-	snprintf (buf, sizeof (buf), "%" PRIi64, _ancestral_start);
-	node->add_property ("ancestral-start", buf);
-	snprintf (buf, sizeof (buf), "%" PRIi64, _ancestral_length);
-	node->add_property ("ancestral-length", buf);
-	snprintf (buf, sizeof (buf), "%.12g", _stretch);
-	node->add_property ("stretch", buf);
-	snprintf (buf, sizeof (buf), "%.12g", _shift);
-	node->add_property ("shift", buf);
 
 	switch (_first_edit) {
 	case EditChangesNothing:
@@ -1127,9 +1140,6 @@ Region::state (bool /*full_state*/)
 	node->add_property ("first-edit", fe);
 
 	/* note: flags are stored by derived classes */
-
-	snprintf (buf, sizeof (buf), "%" PRIu32, _sync_position);
-	node->add_property ("sync-position", buf);
 
 	if (_positional_lock_style != AudioTime) {
 		node->add_property ("positional-lock-style", enum_2_string (_positional_lock_style));
@@ -1152,39 +1162,15 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 {
 	const XMLNodeList& nlist = node.children();
 	const XMLProperty *prop;
-	nframes_t val;
 
 	/* this is responsible for setting those aspects of Region state
 	   that are mutable after construction.
 	*/
 
-	if ((prop = node.property ("name"))) {
-		_name = prop->value();
-	}
-
 	if ((prop = node.property ("type")) == 0) {
 		_type = DataType::AUDIO;
 	} else {
 		_type = DataType(prop->value());
-	}
-
-	if ((prop = node.property ("length")) != 0) {
-		sscanf (prop->value().c_str(), "%" PRIu32, &val);
-		if (val != _length) {
-			what_changed = Change (what_changed|LengthChanged);
-			cerr << _name << " length changed\n";
-			_last_length = _length;
-			_length = val;
-		}
-	}
-
-	if ((prop = node.property ("sync-position")) != 0) {
-		sscanf (prop->value().c_str(), "%" PRIu32, &val);
-		if (val != _sync_position) {
-			what_changed = Change (what_changed|SyncOffsetChanged);
-			cerr << _name << " sync changed\n";
-			_sync_position = val;
-		}
 	}
 
 	if ((prop = node.property ("positional-lock-style")) != 0) {
@@ -1208,46 +1194,16 @@ Region::set_live_state (const XMLNode& node, int /*version*/, Change& what_chang
 
 	/* XXX FIRST EDIT !!! */
 
-	/* these 3 properties never change as a result of any editing */
-
-	if ((prop = node.property ("ancestral-start")) != 0) {
-		_ancestral_start = strtoll (prop->value().c_str(), 0, 10);
-	} else {
-		_ancestral_start = _start;
-	}
-
-	if ((prop = node.property ("ancestral-length")) != 0) {
-		_ancestral_length = strtoll (prop->value().c_str(), 0, 10);
-	} else {
-		_ancestral_length = _length;
-	}
-
-	if ((prop = node.property ("stretch")) != 0) {
-		_stretch = atof (prop->value());
-
-		/* fix problem with old sessions corrupted by an impossible
-		   value for _stretch
-		*/
-		if (_stretch == 0.0) {
-			_stretch = 1.0;
-		}
-	} else {
+	/* fix problems with old sessions corrupted by impossible
+	   values for _stretch or _shift
+	*/
+	if (_stretch == 0.0) {
 		_stretch = 1.0;
 	}
-
-	if ((prop = node.property ("shift")) != 0) {
-		_shift = atof (prop->value());
-
-		/* fix problem with old sessions corrupted by an impossible
-		   value for _shift
-		*/
-		if (_shift == 0.0) {
-			_shift = 1.0;
-		}
-	} else {
+	
+	if (_shift == 0.0) {
 		_shift = 1.0;
 	}
-
 
 	/* note: derived classes set flags */
 

@@ -70,6 +70,7 @@ namespace ARDOUR {
 	extern PBD::Change PositionChanged;
 	extern PBD::Change NameChanged;
 	extern PBD::Change BoundsChanged;
+	extern PBD::Change FlagsChanged;
 
 	static const double SHUTTLE_FRACT_SPEED1=0.48412291827; /* derived from A1,A2 */
 

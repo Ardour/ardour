@@ -19,6 +19,7 @@
 #include "pbd/error.h"
 
 #include "pbd/enumwriter.h"
+#include "pbd/convert.h"
 #include "midi++/events.h"
 #include "evoral/midi_util.h"
 
