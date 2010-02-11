@@ -160,7 +160,6 @@ PIChaser::get_ratio(nframes64_t chasetime_measured, nframes64_t chasetime, nfram
 	nframes64_t massaged_chasetime = chasetime + (nframes64_t)( (double)(slavetime_measured - chasetime_measured) * crude );
 
 	fine = pic->get_ratio( slavetime - massaged_chasetime );
-	fine = pic->get_ratio( slavetime - chasetime );
 	if (in_control) {
 	    if (fabs(fine-crude) > crude*speed_threshold) {
 		std::cout << "reset to " << crude << " fine = " << fine << "\n";
