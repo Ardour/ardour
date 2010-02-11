@@ -94,6 +94,12 @@ class AudioEngine : public SessionHandlePtr
 		return jack_frame_time (_priv_jack);
 	}
 
+	nframes_t frame_time_at_cycle_start () {
+  	        jack_client_t* _priv_jack = _jack;
+		if (!_running || !_priv_jack) return 0;
+		return jack_last_frame_time (_priv_jack);
+	}
+
 	nframes_t transport_frame () const {
   	        const jack_client_t* _priv_jack = _jack;
 		if (!_running || !_priv_jack) return 0;

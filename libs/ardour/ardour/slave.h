@@ -264,10 +264,11 @@ class MTC_Slave : public Slave {
 	bool           have_first_speed_accumulator;
 	double         average_speed;
 	Glib::Mutex    reset_lock;
-	bool           reset_pending;
+	uint32_t       reset_pending;
+	bool           reset_position;
 
-	void reset ();
-	void queue_reset ();
+	void reset (bool with_pos);
+	void queue_reset (bool with_pos);
 	void maybe_reset ();
 
 	void update_mtc_qtr (MIDI::Parser&, int, nframes_t);

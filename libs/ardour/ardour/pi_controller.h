@@ -60,7 +60,7 @@ class PIChaser {
     PIChaser();
     ~PIChaser();
 
-    double get_ratio( nframes64_t realtime, nframes64_t chasetime, nframes64_t slavetime, bool in_control );
+    double get_ratio( nframes64_t chasetime_measured, nframes64_t chasetime, nframes64_t slavetime_measured, nframes64_t slavetime, bool in_control );
     void reset();
     nframes64_t want_locate() { return want_locate_val; }
 

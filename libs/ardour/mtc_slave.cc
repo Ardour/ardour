@@ -56,7 +56,8 @@ MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 {
 	can_notify_on_unknown_rate = true;
 	did_reset_tc_format = false;
-	reset_pending = false;
+	reset_pending = 0;
+	reset_position = false;
 
 	pic = new PIChaser();
 	
@@ -67,7 +68,7 @@ MTC_Slave::MTC_Slave (Session& s, MIDI::Port& p)
 	speed_accumulator = new double[speed_accumulator_size];
 
 	rebind (p);
-	reset ();
+	reset (true);
 }
 
 MTC_Slave::~MTC_Slave()
@@ -188,7 +189,7 @@ MTC_Slave::update_mtc_time (const byte *msg, bool was_full, nframes_t now)
 		session.request_locate (mtc_frame, false);
 		session.request_transport_speed (0);
 		update_mtc_status (MIDI::MTC_Stopped);
-		reset ();
+		reset (false);
 		reset_window (mtc_frame);
 
 	} else {
@@ -395,6 +396,7 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 	nframes64_t now = session.engine().frame_time();
 	SafeTime last;
 	nframes_t elapsed;
+	bool in_control = false;
 
 	read_current (&last);
 
@@ -412,7 +414,7 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 		pos = last.position;
 		session.request_locate (pos, false);
 		session.request_transport_speed (0);
-		queue_reset ();
+		queue_reset (false);
 		DEBUG_TRACE (DEBUG::MTC, "MTC not seen for 1/4 second - reset pending\n");
 		return false;
 	}
@@ -420,21 +422,23 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::speed_and_position %1 %2\n", last.speed, last.position));
 
 	if (give_slave_full_control_over_transport_speed()) {
-	    bool in_control = (session.slave_state() == Session::Running);
-	    nframes64_t pic_want_locate = 0; 
-	    //nframes64_t slave_pos = session.audible_frame();
-	    nframes64_t slave_pos = session.transport_frame();
-	    static double average_speed = 0;
-
-	    average_speed = pic->get_ratio (last.timestamp, last.position, slave_pos, in_control );
-	    pic_want_locate = pic->want_locate();
-
-	    if (in_control && pic_want_locate) {
-		last.speed = average_speed + (double) (pic_want_locate - session.transport_frame()) / (double)session.get_block_size();
-		std::cout << "locate req " << pic_want_locate << " speed: " << average_speed << "\n"; 
-	    } else {
-		last.speed = average_speed;
-	    }
+		in_control = (session.slave_state() == Session::Running);
+		nframes64_t pic_want_locate = 0; 
+		//nframes64_t slave_pos = session.audible_frame();
+		nframes64_t slave_pos = session.transport_frame();
+		static double average_speed = 0;
+		
+		nframes64_t ref_now = session.engine().frame_time_at_cycle_start();
+		average_speed = pic->get_ratio (last.timestamp, last.position, ref_now, slave_pos, in_control );
+  
+		pic_want_locate = pic->want_locate();
+		
+		if (in_control && pic_want_locate) {
+			last.speed = average_speed + (double) (pic_want_locate - session.transport_frame()) / (double)session.get_block_size();
+			std::cout << "locate req " << pic_want_locate << " speed: " << average_speed << "\n"; 
+		} else {
+			last.speed = average_speed;
+		}
 	}
 
 	if (last.speed == 0.0f) {
@@ -456,7 +460,12 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 
 	/* now add the most recent timecode value plus the estimated elapsed interval */
 
-	pos = last.position + elapsed; 
+	if (in_control) {
+		pos = session.transport_frame();
+	} else {
+		pos = last.position + elapsed; 
+	}
+
 	speed = last.speed;
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::speed_and_position FINAL %1 %2\n", last.speed, pos));
@@ -471,34 +480,44 @@ MTC_Slave::resolution() const
 }
 
 void
-MTC_Slave::queue_reset ()
+MTC_Slave::queue_reset (bool reset_pos)
 {
 	Glib::Mutex::Lock lm (reset_lock);
 	reset_pending++;
+	if (reset_pos) {
+		reset_position = true;
+	}
 }
 
 void
 MTC_Slave::maybe_reset ()
 {
-	reset_lock.lock ();
+	Glib::Mutex::Lock lm (reset_lock);
 
 	if (reset_pending) {
-		reset ();
+		reset (reset_position);
 		reset_pending = 0;
+		reset_position = false;
 	} 
-
-	reset_lock.unlock ();
 }
 
 void
-MTC_Slave::reset ()
+MTC_Slave::reset (bool with_position)
 {
-	last_inbound_frame = 0;
-	current.guard1++;
-	current.position = 0;
-	current.timestamp = 0;
-	current.speed = 0;
-	current.guard2++;
+	if (with_position) {
+		last_inbound_frame = 0;
+		current.guard1++;
+		current.position = 0;
+		current.timestamp = 0;
+		current.speed = 0;
+		current.guard2++;
+	} else {
+		last_inbound_frame = 0;
+		current.guard1++;
+		current.timestamp = 0;
+		current.speed = 0;
+		current.guard2++;
+	}
 
 	window_begin = 0;
 	window_end = 0;
