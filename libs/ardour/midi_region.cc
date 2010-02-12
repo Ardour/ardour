@@ -222,8 +222,6 @@ MidiRegion::state (bool full)
 	char buf2[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	node.add_property ("flags", enum_2_string (_flags));
-
 	// XXX these should move into Region
 
 	for (uint32_t n=0; n < _sources.size(); ++n) {

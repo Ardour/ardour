@@ -552,8 +552,6 @@ AudioRegion::state (bool full)
 	char buf2[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	node.add_property ("flags", enum_2_string (_flags));
-
 	snprintf (buf, sizeof(buf), "%.12g", _scale_amplitude);
 	node.add_property ("scale-gain", buf);
 
@@ -646,37 +644,13 @@ AudioRegion::set_live_state (const XMLNode& node, int version, Change& what_chan
 	Region::set_live_state (node, version, what_changed, false);
 	cerr << "After region SLS, wc = " << what_changed << endl;
 
-	uint32_t old_flags = _flags;
 
 	if ((prop = node.property ("flags")) != 0) {
-		_flags = Flag (string_2_enum (prop->value(), _flags));
-
-		//_flags = Flag (strtol (prop->value().c_str(), (char **) 0, 16));
-
 		_flags = Flag (_flags & ~Region::LeftOfSplit);
 		_flags = Flag (_flags & ~Region::RightOfSplit);
 	}
 
-	/* leave this flag setting in place, no matter what */
-
-	if ((old_flags & DoNotSendPropertyChanges)) {
-		_flags = Flag (_flags | DoNotSendPropertyChanges);
-	}
-
 	/* find out if any flags changed that we signal about */
-
-	if ((old_flags ^ _flags) & Muted) {
-		what_changed = Change (what_changed|MuteChanged);
-		cerr << _name << " mute changed\n";
-	}
-	if ((old_flags ^ _flags) & Opaque) {
-		what_changed = Change (what_changed|OpacityChanged);
-		cerr << _name << " opacity changed\n";
-	}
-	if ((old_flags ^ _flags) & Locked) {
-		what_changed = Change (what_changed|LockChanged);
-		cerr << _name << " lock changed\n";
-	}
 
 	if ((prop = node.property ("scale-gain")) != 0) {
 		float a = atof (prop->value().c_str());

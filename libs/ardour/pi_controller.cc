@@ -59,7 +59,8 @@ double
 PIController::get_ratio (int fill_level, int period_size)
 {
 	double offset = fill_level;
-	double this_catch_factor = catch_factor * 4096.0/(double)period_size;
+	double this_catch_factor = catch_factor;
+	double this_catch_factor2 = catch_factor2 * 4096.0/(double)period_size;
 
 	
 	// Save offset.
@@ -96,7 +97,7 @@ PIController::get_ratio (int fill_level, int period_size)
 	// u(t) = K * (e(t) + 1/T \int e(t') dt')
 	// Kp = 1/catch_factor and T = catch_factor2  Ki = Kp/T 
 	current_resample_factor 
-                = static_resample_factor - smooth_offset / this_catch_factor - offset_integral / this_catch_factor / catch_factor2;
+                = static_resample_factor - smooth_offset / this_catch_factor - offset_integral / this_catch_factor / this_catch_factor2;
 	
 	// Now quantize this value around resample_mean, so that the noise which is in the integral component doesnt hurt.
 	current_resample_factor = floor((current_resample_factor - resample_mean) * controlquant + 0.5) / controlquant + resample_mean;

@@ -1241,7 +1241,28 @@ Region::set_state (const XMLNode& node, int version)
 
 	_first_edit = EditChangesNothing;
 
+	uint32_t old_flags = _flags;
+
 	Change what_changed = set_state_using_states (node);
+
+	/* leave this flag setting in place, no matter what */
+
+	if ((old_flags & DoNotSendPropertyChanges)) {
+		_flags = Flag (_flags | DoNotSendPropertyChanges);
+	}
+
+	if ((old_flags ^ _flags) & Muted) {
+		what_changed = Change (what_changed|MuteChanged);
+		cerr << _name << " mute changed\n";
+	}
+	if ((old_flags ^ _flags) & Opaque) {
+		what_changed = Change (what_changed|OpacityChanged);
+		cerr << _name << " opacity changed\n";
+	}
+	if ((old_flags ^ _flags) & Locked) {
+		what_changed = Change (what_changed|LockChanged);
+		cerr << _name << " lock changed\n";
+	}
 
 	set_live_state (node, version, what_changed, true);
 
