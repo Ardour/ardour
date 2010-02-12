@@ -117,7 +117,7 @@ class PluginInsert : public Insert
 	void deactivate ();
 	void flush ();
 
-	void set_block_size (nframes_t nframes);
+	int set_block_size (nframes_t nframes);
 
 	uint32_t output_streams() const;
 	uint32_t input_streams() const;

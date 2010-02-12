@@ -839,7 +839,7 @@ AUPlugin::flush ()
 	unit->GlobalReset ();
 }
 
-void
+int
 AUPlugin::set_block_size (nframes_t nframes)
 {
 	bool was_initialized = initialized;
@@ -1211,7 +1211,7 @@ AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, 
 	AudioTimeStamp ts;
 	OSErr err;
 
-	if (requires_fixed_size_buffers() && (nframes != _current_block_size) {
+	if (requires_fixed_size_buffers() && (nframes != _current_block_size)) {
 		unit->GlobalReset();
 	}
 
@@ -1996,7 +1996,8 @@ AUPluginInfo::load (Session& session)
 		
 		AUPluginInfo *aup = new AUPluginInfo (*this);
 		plugin->set_info (PluginInfoPtr (aup));
-		plugin->set_fixed_size_buffers (aup->creator() == "!UAD");
+		boost::dynamic_pointer_cast<AUPlugin> (plugin)->set_fixed_size_buffers (aup->creator == "!UAD");
+		return plugin;
 	}
 
 	catch (failed_constructor &err) {

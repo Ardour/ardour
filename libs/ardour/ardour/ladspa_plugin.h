@@ -82,7 +82,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 			_descriptor->cleanup (_handle);
 	}
 
-	void set_block_size (nframes_t nframes) {}
+	int set_block_size (nframes_t nframes) {return 0; }
 	
 	int         connect_and_run (std::vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, nframes_t nframes, nframes_t offset);
 	std::string describe_parameter (uint32_t);

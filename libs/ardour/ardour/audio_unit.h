@@ -80,7 +80,7 @@ class AUPlugin : public ARDOUR::Plugin
 	void activate ();
 	void deactivate ();
 	void flush ();
-	void set_block_size (nframes_t nframes);
+	int set_block_size (nframes_t nframes);
     
 	int connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, int32_t& out, nframes_t nframes, nframes_t offset);
 	std::set<uint32_t> automatable() const;
@@ -108,6 +108,10 @@ class AUPlugin : public ARDOUR::Plugin
 	uint32_t input_streams() const;
 	int32_t configure_io (int32_t in, int32_t out);
 	bool requires_fixed_size_buffers() const;
+
+	void set_fixed_size_buffers (bool yn) { 
+		_requires_fixed_size_buffers = yn;
+	}
 
 	boost::shared_ptr<CAAudioUnit> get_au () { return unit; }
 	boost::shared_ptr<CAComponent> get_comp () const { return comp; }
