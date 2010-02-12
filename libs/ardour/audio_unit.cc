@@ -56,6 +56,13 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
+#define TRACE_AU_API
+#ifdef TRACE_AU_API
+#define TRACE_API(fmt,...) fprintf (stderr, fmt, ## __VA_ARGS__)
+#else
+#define TRACE_API(fmt,...)
+#endif
+
 #ifndef AU_STATE_SUPPORT
 static bool seen_get_state_message = false;
 static bool seen_set_state_message = false;
@@ -341,6 +348,8 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	, comp (_comp)
 	, unit (new CAAudioUnit)
 	, initialized (false)
+	, _current_block_size (0)
+	, _requires_fixed_size_buffers (false)
 	, buffers (0)
 	, current_maxbuf (0)
 	, current_offset (0)
@@ -365,6 +374,8 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 	, comp (other.get_comp())
 	, unit (new CAAudioUnit)
 	, initialized (false)
+	, _current_block_size (0)
+	, _requires_fixed_size_buffers (false)
 	, buffers (0)
 	, current_maxbuf (0)
 	, current_offset (0)
@@ -378,6 +389,7 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 AUPlugin::~AUPlugin ()
 {
 	if (unit) {
+		TRACE_API ("about to call uninitialize in plugin destructor\n");
 		unit->Uninitialize ();
 	}
 
@@ -393,6 +405,7 @@ AUPlugin::discover_factory_presets ()
 	UInt32 dataSize = sizeof (presets);
 	OSStatus err;
 	
+	TRACE_API ("get property FactoryPresets in global scope\n");
 	if ((err = unit->GetProperty (kAudioUnitProperty_FactoryPresets, kAudioUnitScope_Global, 0, (void*) &presets, &dataSize)) != 0) {
 		cerr << "cannot get factory preset info: " << err << endl;
 		return;
@@ -420,6 +433,7 @@ AUPlugin::init ()
 	OSErr err;
 
 	try {
+		TRACE_API ("opening AudioUnit\n");
 		err = CAAudioUnit::Open (*(comp.get()), *unit);
 	} catch (...) {
 		error << _("Exception thrown during AudioUnit plugin loading - plugin ignored") << endmsg;
@@ -436,6 +450,7 @@ AUPlugin::init ()
 	renderCallbackInfo.inputProc = _render_callback;
 	renderCallbackInfo.inputProcRefCon = this;
 
+	TRACE_API ("set render callback in input scope\n");
 	if ((err = unit->SetProperty (kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 
 					 0, (void*) &renderCallbackInfo, sizeof(renderCallbackInfo))) != 0) {
 		cerr << "cannot install render callback (err = " << err << ')' << endl;
@@ -452,14 +467,18 @@ AUPlugin::init ()
 	info.transportStateProc = _get_transport_state_callback;
 	
         //ignore result of this - don't care if the property isn't supported
+	TRACE_API ("set host callbacks in global scope\n");
 	unit->SetProperty (kAudioUnitProperty_HostCallbacks, 
 			   kAudioUnitScope_Global, 
 			   0, //elementID 
 			   &info,
 			   sizeof (HostCallbackInfo));
 
+	TRACE_API ("count global elements\n");
 	unit->GetElementCount (kAudioUnitScope_Global, global_elements);
+	TRACE_API ("count input elements\n");
 	unit->GetElementCount (kAudioUnitScope_Input, input_elements);
+	TRACE_API ("count output elements\n");
 	unit->GetElementCount (kAudioUnitScope_Output, output_elements);
 
 	/* these keep track of *configured* channel set up,
@@ -739,6 +758,7 @@ AUPlugin::set_parameter (uint32_t which, float val)
 {
 	if (which < descriptors.size()) {
 		const AUParameterDescriptor& d (descriptors[which]);
+		TRACE_API ("set parameter %d in scope %d element %d to %f\n", d.id, d.scope, d.element, val);
 		unit->SetParameter (d.id, d.scope, d.element, val);
 
 		/* tell the world what we did */
@@ -750,7 +770,8 @@ AUPlugin::set_parameter (uint32_t which, float val)
 		theEvent.mArgument.mParameter.mParameterID = d.id;
 		theEvent.mArgument.mParameter.mScope = d.scope;
 		theEvent.mArgument.mParameter.mElement = d.element;
-		
+
+		TRACE_API ("notify about parameter change\n");
 		AUEventListenerNotify (NULL, NULL, &theEvent);
 	}
 }
@@ -761,6 +782,7 @@ AUPlugin::get_parameter (uint32_t which) const
 	float val = 0.0;
 	if (which < descriptors.size()) {
 		const AUParameterDescriptor& d (descriptors[which]);
+		TRACE_API ("get value of parameter %d in scope %d element %d\n", d.id, d.scope, d.element);
 		unit->GetParameter(d.id, d.scope, d.element, val);
 	}
 	return val;
@@ -792,6 +814,7 @@ AUPlugin::activate ()
 {
 	if (!initialized) {
 		OSErr err;
+		TRACE_API ("call Initialize in activate()\n");
 		if ((err = unit->Initialize()) != noErr) {
 			error << string_compose (_("AUPlugin: %1 cannot initialize plugin (err = %2)"), name(), err) << endmsg;
 		} else {
@@ -804,6 +827,7 @@ AUPlugin::activate ()
 void
 AUPlugin::deactivate ()
 {
+	TRACE_API ("call Uninitialize in deactivate()\n");
 	unit->Uninitialize ();
 	initialized = false;
 }
@@ -811,17 +835,12 @@ AUPlugin::deactivate ()
 void
 AUPlugin::flush ()
 {
+	TRACE_API ("call Reset in flush()\n");
 	unit->GlobalReset ();
 }
 
 void
 AUPlugin::set_block_size (nframes_t nframes)
-{
-	_set_block_size (nframes);
-}
-
-int
-AUPlugin::_set_block_size (nframes_t nframes)
 {
 	bool was_initialized = initialized;
 	UInt32 numFrames = nframes;
@@ -831,6 +850,7 @@ AUPlugin::_set_block_size (nframes_t nframes)
 		deactivate ();
 	}
 
+	TRACE_API ("set MaximumFramesPerSlice in global scope to %u\n", numFrames);
 	if ((err = unit->SetProperty (kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 
 				      0, &numFrames, sizeof (numFrames))) != noErr) {
 		cerr << "cannot set max frames (err = " << err << ')' << endl;
@@ -840,6 +860,8 @@ AUPlugin::_set_block_size (nframes_t nframes)
 	if (was_initialized) {
 		activate ();
 	}
+
+	_current_block_size = nframes;
 
 	return 0;
 }
@@ -1116,6 +1138,9 @@ AUPlugin::set_stream_format (int scope, uint32_t cnt, AudioStreamBasicDescriptio
 	OSErr result;
 
 	for (uint32_t i = 0; i < cnt; ++i) {
+		TRACE_API ("set stream format for %s, scope = %d element %d\n",
+			   (scope == kAudioUnitScope_Input ? "input" : "output"),
+			   scope, cnt);
 		if ((result = unit->SetFormat (scope, i, fmt)) != 0) {
 			error << string_compose (_("AUPlugin: could not set stream format for %1/%2 (err = %3)"),
 						 (scope == kAudioUnitScope_Input ? "input" : "output"), i, result) << endmsg;
@@ -1186,6 +1211,10 @@ AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, 
 	AudioTimeStamp ts;
 	OSErr err;
 
+	if (requires_fixed_size_buffers() && (nframes != _current_block_size) {
+		unit->GlobalReset();
+	}
+
 	current_buffers = &bufs;
 	current_maxbuf = maxbuf;
 	current_offset = offset;
@@ -1239,6 +1268,8 @@ AUPlugin::get_beat_and_tempo_callback (Float64* outCurrentBeat,
 {
 	TempoMap& tmap (_session.tempo_map());
 
+	TRACE_API ("AU calls ardour beat&tempo callback\n");
+
 	/* more than 1 meter or more than 1 tempo means that a simplistic computation 
 	   (and interpretation) of a beat position will be incorrect. So refuse to 
 	   offer the value.
@@ -1275,6 +1306,8 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 					      Float64*  outCurrentMeasureDownBeat)
 {
 	TempoMap& tmap (_session.tempo_map());
+
+	TRACE_API ("AU calls ardour music time location callback\n");
 
 	/* more than 1 meter or more than 1 tempo means that a simplistic computation 
 	   (and interpretation) of a beat position will be incorrect. So refuse to 
@@ -1331,6 +1364,8 @@ AUPlugin::get_transport_state_callback (Boolean*  outIsPlaying,
 {
 	bool rolling;
 	float speed;
+
+	TRACE_API ("AU calls ardour transport state callback\n");
 
 	rolling = _session.transport_rolling();
 	speed = _session.transport_speed ();
@@ -1470,6 +1505,7 @@ AUPlugin::get_state()
 	CFDataRef xmlData;
 	CFPropertyListRef propertyList;
 
+	TRACE_API ("get preset state\n");
 	if (unit->GetAUPreset (propertyList) != noErr) {
 		return *root;
 	}
@@ -1543,6 +1579,7 @@ AUPlugin::set_state(const XMLNode& node)
 	CFRelease (xmlData);
 	
 	if (propertyList) {
+		TRACE_API ("set preset\n");
 		if (unit->SetAUPreset (propertyList) == noErr) {
 			ret = 0;
 			
@@ -1581,6 +1618,7 @@ AUPlugin::load_preset (const string preset_label)
 	if ((ux = user_preset_map.find (preset_label)) != user_preset_map.end()) {
 	
 		if ((propertyList = load_property_list (ux->second)) != 0) {
+			TRACE_API ("set preset from user presets\n");
 			if (unit->SetAUPreset (propertyList) == noErr) {
 				ret = true;
 
@@ -1601,7 +1639,7 @@ AUPlugin::load_preset (const string preset_label)
 		preset.presetNumber = fx->second;
 		preset.presetName = CFStringCreateWithCString (kCFAllocatorDefault, fx->first.c_str(), kCFStringEncodingUTF8);
 		
-		cerr << "Setting factory preset " << fx->second << endl;
+		TRACE_API ("set preset from factory presets\n");
 
 		if (unit->SetPresentPreset (preset) == 0) {
 			ret = true;
@@ -1655,6 +1693,7 @@ AUPlugin::save_preset (string preset_name)
 		return false;
 	}
 
+	TRACE_API ("get current preset\n");
 	if (unit->GetAUPreset (propertyList) != noErr) {
 		return false;
 	}
@@ -1854,6 +1893,7 @@ AUPlugin::current_preset() const
 #ifdef AU_STATE_SUPPORT
 	CFPropertyListRef propertyList;
 
+	TRACE_API ("get current preset for current_preset()\n");
 	if (unit->GetAUPreset (propertyList) == noErr) {
 		preset_name = get_preset_name_in_plist (propertyList);
 		CFRelease(propertyList);
@@ -1945,6 +1985,7 @@ AUPluginInfo::load (Session& session)
 	try {
 		PluginPtr plugin;
 
+		TRACE_API ("load AU as a component\n");
 		boost::shared_ptr<CAComponent> comp (new CAComponent(*descriptor));
 		
 		if (!comp->IsValid()) {
@@ -1953,8 +1994,9 @@ AUPluginInfo::load (Session& session)
 			plugin.reset (new AUPlugin (session.engine(), session, comp));
 		}
 		
-		plugin->set_info (PluginInfoPtr (new AUPluginInfo (*this)));
-		return plugin;
+		AUPluginInfo *aup = new AUPluginInfo (*this);
+		plugin->set_info (PluginInfoPtr (aup));
+		plugin->set_fixed_size_buffers (aup->creator() == "!UAD");
 	}
 
 	catch (failed_constructor &err) {
@@ -2245,6 +2287,7 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 
 	}
 		
+	TRACE_API ("get AU channel info\n");
 	if ((ret = unit.GetChannelInfo (&channel_info, cnt)) < 0) {
 		return false;
 	}

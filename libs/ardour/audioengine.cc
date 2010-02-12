@@ -201,6 +201,8 @@ AudioEngine::stop (bool forever)
 		}
 	}
 	
+	stop_metering_thread ();
+
 	return _running ? -1 : 0;
 }
 

@@ -441,26 +441,26 @@ PluginInsert::automation_run (vector<Sample *>& bufs, uint32_t nbufs, nframes_t 
 		return;
 	}
 
-	if (!find_next_event (now, end, next_event)) {
+	if (!find_next_event (now, end, next_event) || requires_fixed_size_buffers()) {
  		/* no events have a time within the relevant range */
  		connect_and_run (bufs, nbufs, nframes, 0, true, now);
  		return;
 	}
-
- 	while (nframes) {
+	
+	while (nframes) {
 		nframes_t cnt = min (((nframes_t) ceil (next_event.when) - now), nframes);
-
- 		connect_and_run (bufs, nbufs, cnt, offset, true, now);
- 		
- 		nframes -= cnt;
+		
+		connect_and_run (bufs, nbufs, cnt, offset, true, now);
+		
+		nframes -= cnt;
 		now += cnt;
 		offset += cnt;
-
+		
 		if (!find_next_event (now, end, next_event)) {
 			break;
 		}
 	}
-	    
+
  	/* cleanup anything that is left to do */
   
  	if (nframes) {

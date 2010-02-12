@@ -77,6 +77,7 @@ class Redirect : public IO
 	virtual nframes_t latency() { return 0; }
 
 	virtual void set_block_size (nframes_t nframes) {}
+	virtual bool requires_fixed_size_buffers () const { return false; }
 
 	sigc::signal<void,Redirect*,void*> active_changed;
 	sigc::signal<void,Redirect*,void*> placement_changed;

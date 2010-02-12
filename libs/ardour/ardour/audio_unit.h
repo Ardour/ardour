@@ -107,6 +107,7 @@ class AUPlugin : public ARDOUR::Plugin
 	uint32_t output_streams() const;
 	uint32_t input_streams() const;
 	int32_t configure_io (int32_t in, int32_t out);
+	bool requires_fixed_size_buffers() const;
 
 	boost::shared_ptr<CAAudioUnit> get_au () { return unit; }
 	boost::shared_ptr<CAComponent> get_comp () const { return comp; }
@@ -144,6 +145,8 @@ class AUPlugin : public ARDOUR::Plugin
 	int32_t input_channels;
 	int32_t output_channels;
 	std::vector<std::pair<int,int> > io_configs;
+	nframes_t _current_block_size;
+	bool _requires_fixed_size_buffers;
 	AudioBufferList* buffers;
 
 	/* despite all the cool work that apple did on their AU preset
