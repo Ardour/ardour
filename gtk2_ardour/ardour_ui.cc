@@ -774,6 +774,7 @@ If you still wish to quit, please use the\n\n\
 			}
 		}
 		
+		session->set_clean();
 		session->set_deletion_in_progress ();
 		unload_session(true);
 	}
