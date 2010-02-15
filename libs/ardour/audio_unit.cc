@@ -841,7 +841,7 @@ AUPlugin::flush ()
 }
 
 bool
-AUPlugin::requires_fixed_size_buffers()
+AUPlugin::requires_fixed_size_buffers() const
 {
 	return _requires_fixed_size_buffers;
 }
