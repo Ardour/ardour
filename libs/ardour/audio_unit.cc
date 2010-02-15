@@ -840,6 +840,13 @@ AUPlugin::flush ()
 	unit->GlobalReset ();
 }
 
+bool
+AUPlugin::requires_fixed_size_buffers()
+{
+	return _requires_fixed_size_buffers;
+}
+
+
 int
 AUPlugin::set_block_size (nframes_t nframes)
 {
