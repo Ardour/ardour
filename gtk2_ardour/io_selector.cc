@@ -735,8 +735,23 @@ PortInsertUI::PortInsertUI (Session& sess, boost::shared_ptr<PortInsert> pi)
 
 	pack_start (latency_frame);
 	pack_start (hbox);
-
+	
+	update_latency_display();
+	
 	latency_button.signal_toggled().connect (mem_fun (*this, &PortInsertUI::latency_button_toggled));
+}
+
+void
+PortInsertUI::update_latency_display ()
+{
+	nframes_t sample_rate = input_selector.session.engine().frame_rate();
+	if (sample_rate == 0) {
+		latency_display.set_text (_("Disconnected from audio engine"));
+	} else {
+		char buf[64];
+		snprintf (buf, sizeof (buf), "%10.3lf frames %10.3lf ms", (float)_pi->latency(), (float)_pi->latency() * 1000.0f/sample_rate);
+		latency_display.set_text(buf);
+	}
 }
 
 bool
@@ -754,7 +769,7 @@ PortInsertUI::check_latency_measurement ()
 		mtdm->resolve ();
 	}
 
-	char buf[64];
+	char buf[128];
 	nframes_t sample_rate = input_selector.session.engine().frame_rate();
 
 	if (sample_rate == 0) {
@@ -780,6 +795,7 @@ PortInsertUI::check_latency_measurement ()
 	if (solid) {
 		_pi->set_measured_latency ((nframes_t) rint (mtdm->del()));
 		strcat (buf, " (set)");
+		latency_button.set_active (false);
 	}
 
 	latency_display.set_text (buf);

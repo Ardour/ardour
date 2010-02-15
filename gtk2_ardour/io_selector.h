@@ -175,6 +175,7 @@ class PortInsertUI : public Gtk::VBox
 	sigc::connection latency_timeout;
 	bool check_latency_measurement ();
 	void latency_button_toggled ();
+	void update_latency_display();
 
 	Gtk::HBox  hbox;
 	IOSelector input_selector;
