@@ -150,6 +150,7 @@ class AUPlugin : public ARDOUR::Plugin
 	int32_t output_channels;
 	std::vector<std::pair<int,int> > io_configs;
 	nframes_t _current_block_size;
+	nframes_t _last_nframes;
 	bool _requires_fixed_size_buffers;
 	AudioBufferList* buffers;
 
@@ -173,7 +174,6 @@ class AUPlugin : public ARDOUR::Plugin
 	int set_output_format (AudioStreamBasicDescription&);
 	int set_input_format (AudioStreamBasicDescription&);
 	int set_stream_format (int scope, uint32_t cnt, AudioStreamBasicDescription&);
-        int _set_block_size (nframes_t nframes);
 	void discover_parameters ();
 
 	std::vector<std::pair<uint32_t, uint32_t> > parameter_map;

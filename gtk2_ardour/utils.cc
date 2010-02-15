@@ -485,7 +485,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 	bool special_handling_of_unmodified_accelerators = false;
 	bool allow_activating = true;
 
-#define DEBUG_ACCELERATOR_HANDLING
+//#define DEBUG_ACCELERATOR_HANDLING
 #ifdef  DEBUG_ACCELERATOR_HANDLING
 	//bool debug = (getenv ("ARDOUR_DEBUG_ACCELERATOR_HANDLING") != 0);
 	bool debug=true;

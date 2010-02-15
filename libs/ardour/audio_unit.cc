@@ -56,7 +56,7 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
-#define TRACE_AU_API
+//#define TRACE_AU_API
 #ifdef TRACE_AU_API
 #define TRACE_API(fmt,...) fprintf (stderr, fmt, ## __VA_ARGS__)
 #else
@@ -375,6 +375,7 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 	, unit (new CAAudioUnit)
 	, initialized (false)
 	, _current_block_size (0)
+	, _last_nframes (0)
 	, _requires_fixed_size_buffers (false)
 	, buffers (0)
 	, current_maxbuf (0)
@@ -488,7 +489,7 @@ AUPlugin::init ()
 	input_channels = -1;
 	output_channels = -1;
 
-	if (_set_block_size (_session.get_block_size())) {
+	if (set_block_size (_session.get_block_size())) {
 		error << _("AUPlugin: cannot set processing block size") << endmsg;
 		throw failed_constructor();
 	}
@@ -1211,8 +1212,9 @@ AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, 
 	AudioTimeStamp ts;
 	OSErr err;
 
-	if (requires_fixed_size_buffers() && (nframes != _current_block_size)) {
+	if (requires_fixed_size_buffers() && (nframes != _last_nframes)) {
 		unit->GlobalReset();
+		_last_nframes = nframes;
 	}
 
 	current_buffers = &bufs;
@@ -1996,7 +1998,7 @@ AUPluginInfo::load (Session& session)
 		
 		AUPluginInfo *aup = new AUPluginInfo (*this);
 		plugin->set_info (PluginInfoPtr (aup));
-		boost::dynamic_pointer_cast<AUPlugin> (plugin)->set_fixed_size_buffers (aup->creator == "!UAD");
+		boost::dynamic_pointer_cast<AUPlugin> (plugin)->set_fixed_size_buffers (aup->creator == "Universal Audio");
 		return plugin;
 	}
 

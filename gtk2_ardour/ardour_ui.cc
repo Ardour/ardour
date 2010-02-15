@@ -775,6 +775,7 @@ If you still wish to quit, please use the\n\n\
 		}
 		
 		session->set_deletion_in_progress ();
+		unload_session(true);
 	}
 
 	ArdourDialog::close_all_dialogs ();
