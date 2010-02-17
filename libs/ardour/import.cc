@@ -50,9 +50,7 @@
 #include <ardour/analyser.h>
 
 #ifdef HAVE_COREAUDIO
-#ifdef USE_COREAUDIO_FOR_FILE_IO
 #include <ardour/caimportable.h>
-#endif
 #endif
 
 #include "i18n.h"
@@ -65,10 +63,9 @@ static boost::shared_ptr<ImportableSource>
 open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQuality quality)
 {
 #ifdef HAVE_COREAUDIO
-#ifdef USE_COREAUDIO_FOR_FILE_IO
 
 	/* see if we can use CoreAudio to handle the IO */
-	
+
 	try { 
 		CAImportableSource* src = new CAImportableSource(path);
 		boost::shared_ptr<CAImportableSource> source (src);
@@ -85,7 +82,6 @@ open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQua
 	catch (...) {
 
 		/* fall back to SndFile */
-#endif	
 #endif
 
 		try { 
@@ -105,9 +101,7 @@ open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQua
 		}
 		
 #ifdef HAVE_COREAUDIO		
-#ifdef USE_COREAUDIO_FOR_FILE_IO
 	}
-#endif
 #endif
 }
 
