@@ -312,10 +312,6 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 		boost::shared_ptr<AudioRegion> arp (ar);
 		ret = boost::static_pointer_cast<Region> (arp);
 
-		boost::shared_ptr<Region> ret (ar);
-
-		return ret;
-
 	} else if (srcs[0]->type() == DataType::MIDI) {
 		
 		MidiRegion* mr = new MidiRegion (srcs, node);
