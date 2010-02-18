@@ -339,7 +339,7 @@ Editor::refresh_location_display ()
 }
 
 void
-Editor::refresh_location_display_s (Change)
+Editor::refresh_location_display_s (PropertyChange)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::refresh_location_display_s, ignored)
 

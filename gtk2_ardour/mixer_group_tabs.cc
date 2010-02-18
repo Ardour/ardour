@@ -29,6 +29,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace PBD;
 
 MixerGroupTabs::MixerGroupTabs (Mixer_UI* m)
 	: GroupTabs (0),
@@ -200,12 +201,16 @@ MixerGroupTabs::destroy_subgroup (RouteGroup* g)
 ARDOUR::RouteGroup *
 MixerGroupTabs::new_route_group () const
 {
-	RouteGroup* g = new RouteGroup (
-		*_session,
-		"",
-		RouteGroup::Active,
-		(RouteGroup::Property) (RouteGroup::Gain | RouteGroup::Mute | RouteGroup::Solo | RouteGroup::RecEnable)
-		);
+	PropertyList plist;
+
+	plist.add (Properties::active, true);
+	plist.add (Properties::mute, true);
+	plist.add (Properties::solo, true);
+	plist.add (Properties::gain, true);
+	plist.add (Properties::recenable, true);
+
+	RouteGroup* g = new RouteGroup (*_session, "");
+	g->set_properties (plist);
 
 	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();

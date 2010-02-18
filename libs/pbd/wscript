@@ -74,6 +74,7 @@ def build(bld):
 		mountpoint.cc
 		pathscanner.cc
 		pool.cc
+                property.cc
 		pthread_utils.cc
 		receiver.cc
 		search_path.cc

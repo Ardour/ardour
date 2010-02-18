@@ -120,9 +120,15 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 	}
 	results.clear ();
 
-	boost::shared_ptr<Region> r = RegionFactory::create (nsrcs, 0, region->length(), region_name, 0,
-							     Region::Flag (Region::WholeFile|Region::DefaultFlags));
-	r->set_position (region->position(), 0);
+	PropertyList plist;
+	
+	plist.add (Properties::start, 0);
+	plist.add (Properties::length, region->length());
+	plist.add (Properties::name, region_name);
+	plist.add (Properties::whole_file, true);
+	plist.add (Properties::position, region->position());
+
+	boost::shared_ptr<Region> r = RegionFactory::create (nsrcs, plist);
 
 	boost::shared_ptr<AudioRegion> audio_region = boost::dynamic_pointer_cast<AudioRegion> (region);
 	boost::shared_ptr<AudioRegion> audio_r = boost::dynamic_pointer_cast<AudioRegion> (r);

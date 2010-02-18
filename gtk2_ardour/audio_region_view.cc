@@ -264,7 +264,7 @@ AudioRegionView::audio_region() const
 }
 
 void
-AudioRegionView::region_changed (Change what_changed)
+AudioRegionView::region_changed (PropertyChange what_changed)
 {
 	ENSURE_GUI_THREAD (*this, &AudioRegionView::region_changed, what_changed)
 	//cerr << "AudioRegionView::region_changed() called" << endl;
@@ -372,13 +372,13 @@ AudioRegionView::region_renamed ()
 }
 
 void
-AudioRegionView::region_resized (Change what_changed)
+AudioRegionView::region_resized (PropertyChange what_changed)
 {
 	AudioGhostRegion* agr;
 
 	RegionView::region_resized(what_changed);
 
-	if (what_changed & Change (StartChanged|LengthChanged)) {
+	if (what_changed & PropertyChange (StartChanged|LengthChanged)) {
 
 		for (uint32_t n = 0; n < waves.size(); ++n) {
 			waves[n]->property_region_start() = _region->start();

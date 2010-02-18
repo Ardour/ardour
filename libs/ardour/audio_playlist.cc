@@ -420,7 +420,7 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 				   audio engineering.
 				*/
 
-				xfade_length = min ((nframes_t) 720, top->length());
+				xfade_length = min ((framecnt_t) 720, top->length());
 
 				if (top_region_at (top->first_frame()) == top) {
 
@@ -454,7 +454,7 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 				} else {
 
 					touched_regions = regions_touched (top->first_frame(),
-									   top->first_frame() + min ((nframes_t)_session.config.get_short_xfade_seconds() * _session.frame_rate(),
+									   top->first_frame() + min ((framecnt_t) _session.config.get_short_xfade_seconds() * _session.frame_rate(),
 												     top->length()));
 					if (touched_regions->size() <= 2) {
 						xfade = boost::shared_ptr<Crossfade> (new Crossfade (region, other, _session.config.get_xfade_model(), _session.config.get_xfades_active()));
@@ -480,7 +480,7 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 
 				} else {
 					touched_regions = regions_touched (bottom->first_frame(),
-									   bottom->first_frame() + min ((nframes_t)_session.config.get_short_xfade_seconds() * _session.frame_rate(),
+									   bottom->first_frame() + min ((framecnt_t)_session.config.get_short_xfade_seconds() * _session.frame_rate(),
 													bottom->length()));
 					if (touched_regions->size() <= 2) {
 						xfade = boost::shared_ptr<Crossfade> (new Crossfade (region, other, _session.config.get_xfade_model(), _session.config.get_xfades_active()));
@@ -726,7 +726,7 @@ AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
 }
 
 void
-AudioPlaylist::crossfade_changed (Change)
+AudioPlaylist::crossfade_changed (PropertyChange)
 {
 	if (in_flush || in_set_state) {
 		return;
@@ -742,13 +742,13 @@ AudioPlaylist::crossfade_changed (Change)
 }
 
 bool
-AudioPlaylist::region_changed (Change what_changed, boost::shared_ptr<Region> region)
+AudioPlaylist::region_changed (PropertyChange what_changed, boost::shared_ptr<Region> region)
 {
 	if (in_flush || in_set_state) {
 		return false;
 	}
 
-	Change our_interests = Change (AudioRegion::FadeInChanged|
+	PropertyChange our_interests = PropertyChange (AudioRegion::FadeInChanged|
 				       AudioRegion::FadeOutChanged|
 				       AudioRegion::FadeInActiveChanged|
 				       AudioRegion::FadeOutActiveChanged|

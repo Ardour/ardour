@@ -347,9 +347,15 @@ SoundFileBox::audition ()
 
 	afs = boost::dynamic_pointer_cast<AudioFileSource> (srclist[0]);
 	string rname = region_name_from_path (afs->path(), false);
-	r = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, 0,
-				srclist[0]->length(srclist[0]->timeline_position()),
-				rname, 0, Region::DefaultFlags, false));
+	
+	PropertyList plist; 
+	
+	plist.add (ARDOUR::Properties::start, 0);
+	plist.add (ARDOUR::Properties::length, srclist[0]->length(srclist[0]->timeline_position()));
+	plist.add (ARDOUR::Properties::name, rname);
+	plist.add (ARDOUR::Properties::layer, 0);
+	
+	r = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, plist, false));
 
 	_session->audition_region(r);
 }

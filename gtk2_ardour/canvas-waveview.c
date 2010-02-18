@@ -763,23 +763,27 @@ gnome_canvas_waveview_set_property (GObject      *object,
 		break;
 
 	case PROP_LENGTH_FUNCTION:
-		waveview->length_function = g_value_get_pointer(value);
+		waveview->length_function = (gulong (*)(void*)) g_value_get_pointer(value);
 		redraw = TRUE;
 		break;
 
 	case PROP_SOURCEFILE_LENGTH_FUNCTION:
-		waveview->sourcefile_length_function = g_value_get_pointer(value);
+		waveview->sourcefile_length_function = (gulong (*)(void*,double)) g_value_get_pointer(value);
 		redraw = TRUE;
 		break;
 
 	case PROP_PEAK_FUNCTION:
-		waveview->peak_function = g_value_get_pointer(value);
+		waveview->peak_function = 
+			(void (*)(void*,gulong,gulong,gulong,gpointer,guint32,double))
+			 g_value_get_pointer(value);
 		redraw = TRUE;
 		break;
 
 	case PROP_GAIN_FUNCTION:
-		waveview->gain_curve_function = g_value_get_pointer(value);
-		redraw = TRUE;
+		waveview->gain_curve_function = 
+			(void (*)(void *arg, double start, double end, float* vector, gint64 veclen))
+			 g_value_get_pointer(value);
+			 redraw = TRUE;
 		break;
 
 	case PROP_GAIN_SRC:
@@ -946,19 +950,19 @@ gnome_canvas_waveview_get_property (
 		break;
 
 	case PROP_LENGTH_FUNCTION:
-		g_value_set_pointer(value, waveview->length_function);
+		g_value_set_pointer(value, (void*) waveview->length_function);
 		break;
 
 	case PROP_SOURCEFILE_LENGTH_FUNCTION:
-		g_value_set_pointer(value, waveview->sourcefile_length_function);
+		g_value_set_pointer(value, (void*) waveview->sourcefile_length_function);
 		break;
 
 	case PROP_PEAK_FUNCTION:
-		g_value_set_pointer(value, waveview->peak_function);
+		g_value_set_pointer(value, (void*) waveview->peak_function);
 		break;
 
 	case PROP_GAIN_FUNCTION:
-		g_value_set_pointer(value, waveview->gain_curve_function);
+		g_value_set_pointer(value, (void*) waveview->gain_curve_function);
 		break;
 
 	case PROP_GAIN_SRC:

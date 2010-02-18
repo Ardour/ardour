@@ -53,29 +53,29 @@ class MidiRegion : public Region
 	boost::shared_ptr<MidiSource> midi_source (uint32_t n=0) const;
 
 	/* Stub Readable interface */
-	virtual nframes_t read (Sample*, sframes_t /*pos*/, nframes_t /*cnt*/, int /*channel*/) const { return 0; }
-	virtual sframes_t readable_length() const { return length(); }
+	virtual framecnt_t read (Sample*, framepos_t /*pos*/, framecnt_t /*cnt*/, int /*channel*/) const { return 0; }
+	virtual framecnt_t readable_length() const { return length(); }
 
-	nframes_t read_at (Evoral::EventSink<nframes_t>& dst,
-			   sframes_t position,
-			   nframes_t dur,
-			   uint32_t  chan_n = 0,
-			   NoteMode  mode = Sustained,
-			   MidiStateTracker* tracker = 0) const;
-
-	nframes_t master_read_at (MidiRingBuffer<nframes_t>& dst,
-			sframes_t position,
-			nframes_t dur,
-			uint32_t  chan_n = 0,
-			NoteMode  mode = Sustained) const;
+	framecnt_t read_at (Evoral::EventSink<nframes_t>& dst,
+			    framepos_t position,
+			    framecnt_t dur,
+			    uint32_t  chan_n = 0,
+			    NoteMode  mode = Sustained,
+			    MidiStateTracker* tracker = 0) const;
+	
+	framepos_t master_read_at (MidiRingBuffer<nframes_t>& dst,
+				   framepos_t position,
+				   framecnt_t dur,
+				   uint32_t  chan_n = 0,
+				   NoteMode  mode = Sustained) const;
 
 	XMLNode& state (bool);
 	int      set_state (const XMLNode&, int version);
-
+	
 	int separate_by_channel (ARDOUR::Session&, std::vector< boost::shared_ptr<Region> >&) const;
 
 	/* automation */
-
+	
 	boost::shared_ptr<Evoral::Control>
 	control(const Evoral::Parameter& id, bool create=false) {
 		return model()->control(id, create);
@@ -96,32 +96,26 @@ class MidiRegion : public Region
   private:
 	friend class RegionFactory;
 
-	MidiRegion (boost::shared_ptr<MidiSource>, nframes_t start, nframes_t length);
-	MidiRegion (boost::shared_ptr<MidiSource>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
-	MidiRegion (const SourceList &, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
-	MidiRegion (boost::shared_ptr<const MidiRegion>, nframes_t start, nframes_t length, const string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
-	MidiRegion (boost::shared_ptr<const MidiRegion>);
+	MidiRegion (boost::shared_ptr<MidiSource>);
+	MidiRegion (const SourceList&);
+	MidiRegion (boost::shared_ptr<const MidiRegion>, frameoffset_t offset = 0, bool offset_relative = true);
 	MidiRegion (boost::shared_ptr<MidiSource>, const XMLNode&);
 	MidiRegion (const SourceList &, const XMLNode&);
 
   private:
-	nframes_t _read_at (const SourceList&, Evoral::EventSink<nframes_t>& dst,
-			    sframes_t position,
-			    nframes_t dur,
-			    uint32_t chan_n = 0,
-			    NoteMode mode = Sustained, 
-			    MidiStateTracker* tracker = 0) const;
+	framecnt_t _read_at (const SourceList&, Evoral::EventSink<nframes_t>& dst,
+			     framepos_t position,
+			     framecnt_t dur,
+			     uint32_t chan_n = 0,
+			     NoteMode mode = Sustained, 
+			     MidiStateTracker* tracker = 0) const;
 
 	void recompute_at_start ();
 	void recompute_at_end ();
 
-	void set_position_internal (nframes_t pos, bool allow_bbt_recompute);
+	void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
 
 	void switch_source(boost::shared_ptr<Source> source);
-
-  protected:
-
-	int set_live_state (const XMLNode&, int version, PBD::Change&, bool send);
 };
 
 } /* namespace ARDOUR */

@@ -205,7 +205,6 @@ class RouteUI : public virtual AxisView
  	void init ();
  	void reset ();
 
-	void queue_route_group_op (ARDOUR::RouteGroup::Property prop, void (ARDOUR::Session::*session_method)(boost::shared_ptr<ARDOUR::RouteList>, bool), bool yn);
 	void self_delete ();
 
   private:

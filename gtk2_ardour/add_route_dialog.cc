@@ -414,7 +414,11 @@ void
 AddRouteDialog::group_changed ()
 {
 	if (_session && route_group_combo.get_active_text () == _("New group...")) {
-		RouteGroup* g = new RouteGroup (*_session, "", RouteGroup::Active);
+		RouteGroup* g = new RouteGroup (*_session, "");
+
+		PropertyList plist;
+		plist.add (Properties::active, true);
+		g->set_properties (plist);
 
 		RouteGroupDialog d (g, Gtk::Stock::NEW);
 		int const r = d.do_run ();

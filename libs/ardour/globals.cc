@@ -62,6 +62,7 @@
 #include "ardour/ardour.h"
 #include "ardour/audio_library.h"
 #include "ardour/audioengine.h"
+#include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/debug.h"
@@ -69,7 +70,9 @@
 #include "ardour/mix.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/profile.h"
+#include "ardour/region.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/route_group.h"
 #include "ardour/runtime_functions.h"
 #include "ardour/session.h"
 #include "ardour/session_event.h"
@@ -99,12 +102,11 @@ MIDI::Port *ARDOUR::default_mtc_port = 0;
 MIDI::Port *ARDOUR::default_midi_port = 0;
 MIDI::Port *ARDOUR::default_midi_clock_port = 0;
 
-PBD::Change ARDOUR::StartChanged = PBD::new_change ();
-PBD::Change ARDOUR::LengthChanged = PBD::new_change ();
-PBD::Change ARDOUR::PositionChanged = PBD::new_change ();
-PBD::Change ARDOUR::NameChanged = PBD::new_change ();
-PBD::Change ARDOUR::BoundsChanged = Change (0); // see init(), below
-PBD::Change ARDOUR::FlagsChanged = PBD::new_change ();
+PropertyChange ARDOUR::StartChanged = PBD::new_change ();
+PropertyChange ARDOUR::LengthChanged = PBD::new_change ();
+PropertyChange ARDOUR::PositionChanged = PBD::new_change ();
+PropertyChange ARDOUR::NameChanged = PBD::new_change ();
+PropertyChange ARDOUR::BoundsChanged = PropertyChange (0); // see init(), below
 
 compute_peak_t          ARDOUR::compute_peak = 0;
 find_peaks_t            ARDOUR::find_peaks = 0;
@@ -301,6 +303,10 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	PBD::ID::init ();
 	SessionEvent::init_event_pool ();
 
+	SessionObject::make_property_quarks ();
+	Region::make_property_quarks ();
+	AudioRegion::make_property_quarks ();
+	RouteGroup::make_property_quarks ();
 
 	/* provide a state version for the few cases that need it and are not
 	   driven by reading state from disk (e.g. undo/redo)
@@ -361,7 +367,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	/* singleton - first object is "it" */
 	new PluginManager ();
 
-	BoundsChanged = Change (StartChanged|PositionChanged|LengthChanged);
+	BoundsChanged = PropertyChange (StartChanged|PositionChanged|LengthChanged);
 
 	return 0;
 }

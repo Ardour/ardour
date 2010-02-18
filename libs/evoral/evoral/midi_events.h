@@ -107,8 +107,8 @@
 #define MIDI_CMD_NOTE_OFF               0x80 /**< Note Off */
 #define MIDI_CMD_NOTE_ON                0x90 /**< Note On */
 #define MIDI_CMD_NOTE_PRESSURE          0xA0 /**< Key Pressure */
-#define MIDI_CMD_CONTROL                0xB0 /**< Control Change */
-#define MIDI_CMD_PGM_CHANGE             0xC0 /**< Program Change */
+#define MIDI_CMD_CONTROL                0xB0 /**< Control PropertyChange */
+#define MIDI_CMD_PGM_CHANGE             0xC0 /**< Program PropertyChange */
 #define MIDI_CMD_CHANNEL_PRESSURE       0xD0 /**< Channel Pressure */
 #define MIDI_CMD_BENDER                 0xE0 /**< Pitch Bender */
 #define MIDI_CMD_COMMON_SYSEX           0xF0 /**< Sysex (System Exclusive) Begin */

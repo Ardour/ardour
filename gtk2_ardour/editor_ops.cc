@@ -2668,8 +2668,15 @@ Editor::region_from_selection ()
 
 		internal_start = start - current->position();
 		_session->region_name (new_name, current->name(), true);
-		boost::shared_ptr<Region> region (RegionFactory::create (current,
-				internal_start, selection_cnt, new_name));
+
+		PropertyList plist; 
+		
+		plist.add (ARDOUR::Properties::start, internal_start);
+		plist.add (ARDOUR::Properties::length, selection_cnt);
+		plist.add (ARDOUR::Properties::name, new_name);
+		plist.add (ARDOUR::Properties::layer, 0);
+
+		boost::shared_ptr<Region> region (RegionFactory::create (current, plist));
 	}
 }
 
@@ -2702,8 +2709,13 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<Region> >& new_re
 		internal_start = start - current->position();
 		_session->region_name (new_name, current->name(), true);
 
-		new_regions.push_back (RegionFactory::create (current,
-					internal_start, end - start + 1, new_name));
+		PropertyList plist; 
+		
+		plist.add (ARDOUR::Properties::start, internal_start);
+		plist.add (ARDOUR::Properties::length, end - start + 1);
+		plist.add (ARDOUR::Properties::name, new_name);
+
+		new_regions.push_back (RegionFactory::create (current, plist));
 	}
 }
 
@@ -3604,7 +3616,7 @@ Editor::trim_to_region(bool forward)
 		    }
 
 		    region->trim_end((nframes64_t) (next_region->first_frame() * speed), this);
-		    arv->region_changed (Change (LengthChanged));
+		    arv->region_changed (PropertyChange (LengthChanged));
 		}
 		else {
 
@@ -3615,7 +3627,7 @@ Editor::trim_to_region(bool forward)
 		    }
 
 		    region->trim_front((nframes64_t) ((next_region->last_frame() + 1) * speed), this);
-		    arv->region_changed (Change (LengthChanged|PositionChanged|StartChanged));
+		    arv->region_changed (PropertyChange (LengthChanged|PositionChanged|StartChanged));
 		}
 
 		XMLNode &after = playlist->get_state();
@@ -4870,7 +4882,7 @@ Editor::brush (nframes64_t pos)
 void
 Editor::reset_region_gain_envelopes ()
 {
-	RegionSelection rs = get_equivalent_regions (selection->regions, RouteGroup::Edit);
+	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.id);
 
 	if (!_session || rs.empty()) {
 		return;
@@ -4895,7 +4907,7 @@ Editor::reset_region_gain_envelopes ()
 void
 Editor::toggle_gain_envelope_visibility ()
 {
-	RegionSelection rs = get_equivalent_regions (selection->regions, RouteGroup::Edit);
+	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.id);
 
 	if (!_session || rs.empty()) {
 		return;
@@ -4919,7 +4931,7 @@ Editor::toggle_gain_envelope_visibility ()
 void
 Editor::toggle_gain_envelope_active ()
 {
-	RegionSelection rs = get_equivalent_regions (selection->regions, RouteGroup::Edit);
+	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.id);
 
 	if (!_session || rs.empty()) {
 		return;
@@ -4942,7 +4954,7 @@ Editor::toggle_gain_envelope_active ()
 void
 Editor::toggle_region_lock ()
 {
-	RegionSelection rs = get_equivalent_regions (selection->regions, RouteGroup::Edit);
+	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.id);
 
 	if (!_session || rs.empty()) {
 		return;
@@ -4962,7 +4974,7 @@ Editor::toggle_region_lock ()
 void
 Editor::set_region_lock_style (Region::PositionLockStyle ps)
 {
-	RegionSelection rs = get_equivalent_regions (selection->regions, RouteGroup::Edit);
+	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.id);
 
 	if (!_session || rs.empty()) {
 		return;
@@ -4984,7 +4996,7 @@ Editor::set_region_lock_style (Region::PositionLockStyle ps)
 void
 Editor::toggle_region_mute ()
 {
-	RegionSelection rs = get_equivalent_regions (selection->regions, RouteGroup::Edit);
+	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.id);
 
 	if (!_session || rs.empty()) {
 		return;
@@ -5004,7 +5016,7 @@ Editor::toggle_region_mute ()
 void
 Editor::toggle_region_opaque ()
 {
-	RegionSelection rs = get_equivalent_regions (selection->regions, RouteGroup::Edit);
+	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.id);
 
 	if (!_session || rs.empty()) {
 		return;
@@ -5959,7 +5971,14 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 
 		/* do NOT announce new regions 1 by one, just wait till they are all done */
 
-		boost::shared_ptr<Region> nr = RegionFactory::create (r->sources(), file_start, len, new_name, 0, Region::DefaultFlags, false);
+		PropertyList plist; 
+		
+		plist.add (ARDOUR::Properties::start, file_start);
+		plist.add (ARDOUR::Properties::length, len);
+		plist.add (ARDOUR::Properties::name, new_name);
+		plist.add (ARDOUR::Properties::layer, 0);
+
+		boost::shared_ptr<Region> nr = RegionFactory::create (r->sources(), plist, false);
 		pl->add_region (nr, pos);
 
 		pos += len;
@@ -5972,7 +5991,14 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 			file_start = r->start() + (pos - r->position());
 			len = r->last_frame() - pos;
 
-			nr = RegionFactory::create (r->sources(), file_start, len, new_name, 0, Region::DefaultFlags);
+			PropertyList plist2; 
+			
+			plist2.add (ARDOUR::Properties::start, file_start);
+			plist2.add (ARDOUR::Properties::length, len);
+			plist2.add (ARDOUR::Properties::name, new_name);
+			plist2.add (ARDOUR::Properties::layer, 0);
+
+			nr = RegionFactory::create (r->sources(), plist2); 
 			pl->add_region (nr, pos);
 
 			break;

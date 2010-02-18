@@ -45,16 +45,16 @@ class AudioSource : virtual public Source,
 	AudioSource (Session&, const XMLNode&);
 	virtual ~AudioSource ();
 
-	nframes64_t readable_length() const { return _length; }
-	uint32_t    n_channels()      const { return 1; }
+	framecnt_t readable_length() const { return _length; }
+	uint32_t   n_channels()      const { return 1; }
 
-	sframes_t length (sframes_t pos) const;
-	void      update_length (sframes_t pos, sframes_t cnt);
+	framecnt_t length (framepos_t pos) const;
+	void      update_length (framepos_t pos, framecnt_t cnt);
 
-	virtual nframes_t available_peaks (double zoom) const;
+	virtual framecnt_t available_peaks (double zoom) const;
 
-	virtual nframes_t read (Sample *dst, sframes_t start, nframes_t cnt, int channel=0) const;
-	virtual nframes_t write (Sample *src, nframes_t cnt);
+	virtual framecnt_t read (Sample *dst, framepos_t start, framecnt_t cnt, int channel=0) const;
+	virtual framecnt_t write (Sample *src, framecnt_t cnt);
 
 	virtual float sample_rate () const = 0;
 
@@ -68,14 +68,14 @@ class AudioSource : virtual public Source,
 	uint32_t read_data_count() const { return _read_data_count; }
 	uint32_t write_data_count() const { return _write_data_count; }
 
-	int read_peaks (PeakData *peaks, nframes_t npeaks,
-			sframes_t start, nframes_t cnt, double samples_per_visual_peak) const;
+	int read_peaks (PeakData *peaks, framecnt_t npeaks,
+			framepos_t start, framecnt_t cnt, double samples_per_visual_peak) const;
 
 	int  build_peaks ();
 	bool peaks_ready (boost::function<void()> callWhenReady, PBD::Connection& connection_created_if_not_ready, PBD::EventLoop* event_loop) const;
 
 	mutable PBD::Signal0<void>  PeaksReady;
-	mutable PBD::Signal2<void,nframes_t,nframes_t>  PeakRangeReady;
+	mutable PBD::Signal2<void,framepos_t,framepos_t>  PeakRangeReady;
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
@@ -104,7 +104,7 @@ class AudioSource : virtual public Source,
 	static bool _build_missing_peakfiles;
 	static bool _build_peakfiles;
 
-	sframes_t            _length;
+	framecnt_t           _length;
 	bool                 _peaks_built;
 	mutable Glib::Mutex  _peaks_ready_lock;
 	Glib::ustring         peakpath;
@@ -115,31 +115,32 @@ class AudioSource : virtual public Source,
 
 	int initialize_peakfile (bool newfile, Glib::ustring path);
 	int build_peaks_from_scratch ();
-	int compute_and_write_peaks (Sample* buf, sframes_t first_frame, nframes_t cnt,
+	int compute_and_write_peaks (Sample* buf, framepos_t first_frame, framecnt_t cnt,
 	bool force, bool intermediate_peaks_ready_signal);
 	void truncate_peakfile();
 
 	mutable off_t _peak_byte_max; // modified in compute_and_write_peak()
 
-	virtual nframes_t read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) const = 0;
-	virtual nframes_t write_unlocked (Sample *dst, nframes_t cnt) = 0;
+	virtual framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const = 0;
+	virtual framecnt_t write_unlocked (Sample *dst, framecnt_t cnt) = 0;
 	virtual Glib::ustring peak_path(Glib::ustring audio_path) = 0;
 	virtual Glib::ustring find_broken_peakfile (Glib::ustring missing_peak_path,
 	                                            Glib::ustring audio_path) = 0;
 
 	virtual int read_peaks_with_fpp (PeakData *peaks,
-	nframes_t npeaks, sframes_t start, nframes_t cnt,
-	double samples_per_visual_peak, nframes_t fpp) const;
-
-	int compute_and_write_peaks (Sample* buf, sframes_t first_frame, nframes_t cnt,
-	bool force, bool intermediate_peaks_ready_signal, nframes_t frames_per_peak);
+					 framecnt_t npeaks, framepos_t start, framecnt_t cnt,
+					 double samples_per_visual_peak, framecnt_t fpp) const;
+	
+	int compute_and_write_peaks (Sample* buf, framepos_t first_frame, framecnt_t cnt,
+				     bool force, bool intermediate_peaks_ready_signal, 
+				     framecnt_t frames_per_peak);
 
   private:
-	int       peakfile;
-	nframes_t peak_leftover_cnt;
-	nframes_t peak_leftover_size;
-	Sample*   peak_leftovers;
-	nframes_t peak_leftover_frame;
+	int        peakfile;
+	framecnt_t peak_leftover_cnt;
+	framecnt_t peak_leftover_size;
+	Sample*    peak_leftovers;
+	framepos_t peak_leftover_frame;
 };
 
 }

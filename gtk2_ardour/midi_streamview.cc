@@ -413,9 +413,16 @@ MidiStreamView::setup_rec_box ()
 					start = rec_regions.back().first->start()
 							+ _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
 				}
+				
+				PropertyList plist; 
+				
+				plist.add (ARDOUR::Properties::start, start);
+				plist.add (ARDOUR::Properties::length, 1);
+				plist.add (ARDOUR::Properties::name, string());
+				plist.add (ARDOUR::Properties::layer, 0);
 
 				boost::shared_ptr<MidiRegion> region (boost::dynamic_pointer_cast<MidiRegion>
-					(RegionFactory::create (sources, start, 1 , "", 0, Region::DefaultFlags, false)));
+								      (RegionFactory::create (sources, plist, false)));
 
 				assert(region);
 				region->block_property_changes ();

@@ -1131,7 +1131,17 @@ Mixer_UI::route_groups_changed ()
 void
 Mixer_UI::new_route_group ()
 {
-	_session->add_route_group (new RouteGroup (*_session, "", RouteGroup::Active, (RouteGroup::Property) (RouteGroup::Gain |RouteGroup::Mute | RouteGroup::Solo)));
+	PropertyList plist;
+
+	plist.add (Properties::active, true);
+	plist.add (Properties::gain, true);
+	plist.add (Properties::mute, true);
+	plist.add (Properties::solo, true);
+
+	RouteGroup* g = new RouteGroup (*_session, "");
+	g->set_properties (plist);
+
+	_session->add_route_group (g);
 }
 
 void

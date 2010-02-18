@@ -36,7 +36,32 @@
 
 class XMLNode;
 
+
 namespace ARDOUR {
+
+namespace Properties {
+	extern PBD::PropertyDescriptor<bool> muted;
+	extern PBD::PropertyDescriptor<bool> opaque;
+	extern PBD::PropertyDescriptor<bool> locked;
+	extern PBD::PropertyDescriptor<bool> automatic;
+	extern PBD::PropertyDescriptor<bool> whole_file;
+	extern PBD::PropertyDescriptor<bool> import;
+	extern PBD::PropertyDescriptor<bool> external;
+	extern PBD::PropertyDescriptor<bool> sync_marked;
+	extern PBD::PropertyDescriptor<bool> left_of_split;
+	extern PBD::PropertyDescriptor<bool> right_of_split;
+	extern PBD::PropertyDescriptor<bool> hidden;
+	extern PBD::PropertyDescriptor<bool> position_locked;
+	extern PBD::PropertyDescriptor<framepos_t> start;
+	extern PBD::PropertyDescriptor<framecnt_t> length;
+	extern PBD::PropertyDescriptor<framepos_t> position;
+	extern PBD::PropertyDescriptor<framecnt_t> sync_position;
+	extern PBD::PropertyDescriptor<layer_t> layer;
+	extern PBD::PropertyDescriptor<framepos_t> ancestral_start;
+	extern PBD::PropertyDescriptor<framecnt_t> ancestral_length;
+	extern PBD::PropertyDescriptor<float> stretch;
+	extern PBD::PropertyDescriptor<float> shift;
+};
 
 class Playlist;
 class Filter;
@@ -48,6 +73,7 @@ enum RegionEditState {
 	EditChangesID      = 2
 };
 
+
 class Region
 	: public SessionObject
 	, public boost::enable_shared_from_this<Region>
@@ -56,106 +82,82 @@ class Region
   public:
 	typedef std::vector<boost::shared_ptr<Source> > SourceList;
 
-	enum Flag {
-		Muted = 0x1,
-		Opaque = 0x2,
-		EnvelopeActive = 0x4,
-		DefaultFadeIn = 0x8,
-		DefaultFadeOut = 0x10,
-		Locked = 0x20,
-		Automatic = 0x40,
-		WholeFile = 0x80,
-		FadeIn = 0x100,
-		FadeOut = 0x200,
-		Copied = 0x400,
-		Import = 0x800,
-		External = 0x1000,
-		SyncMarked = 0x2000,
-		LeftOfSplit = 0x4000,
-		RightOfSplit = 0x8000,
-		Hidden = 0x10000,
-		DoNotSendPropertyChanges = 0x20000,
-		PositionLocked = 0x40000,
-		//
-		range_guarantoor = USHRT_MAX
-	};
-
+	static void make_property_quarks ();
+	
 	enum PositionLockStyle {
 		AudioTime,
 		MusicTime
 	};
 
-	static const Flag DefaultFlags = Flag (Opaque|DefaultFadeIn|DefaultFadeOut|FadeIn|FadeOut);
+	static PBD::PropertyChange FadeChanged;
+	static PBD::PropertyChange SyncOffsetChanged;
+	static PBD::PropertyChange MuteChanged;
+	static PBD::PropertyChange OpacityChanged;
+	static PBD::PropertyChange LockChanged;
+	static PBD::PropertyChange LayerChanged;
+	static PBD::PropertyChange HiddenChanged;
 
-	static PBD::Change FadeChanged;
-	static PBD::Change SyncOffsetChanged;
-	static PBD::Change MuteChanged;
-	static PBD::Change OpacityChanged;
-	static PBD::Change LockChanged;
-	static PBD::Change LayerChanged;
-	static PBD::Change HiddenChanged;
-
-	PBD::Signal1<void,PBD::Change> StateChanged;
+	PBD::Signal1<void,PBD::PropertyChange> StateChanged;
 	static PBD::Signal1<void,boost::shared_ptr<ARDOUR::Region> > RegionPropertyChanged;
-	void unlock_property_changes () { _flags = Flag (_flags & ~DoNotSendPropertyChanges); }
-	void block_property_changes () { _flags = Flag (_flags | DoNotSendPropertyChanges); }
 
+	void unlock_property_changes () { _no_property_changes = false; }
+	void block_property_changes () { _no_property_changes = true; }
+	
 	virtual ~Region();
-
+	
 	/** Note: changing the name of a Region does not constitute an edit */
 	bool set_name (const std::string& str);
 
 	const DataType& data_type() const { return _type; }
 
 	/** How the region parameters play together:
-	 * <PRE>
-	 * |------------------------------------------------------------------- track
-	 *                    |..........[------------------].....| region
-	 * |-----------------------------| _position
-	 *                               |------------------| _length
-	 *                    |----------| _start
-	 * </PRE>
+	 *   
+	 * POSITION: first frame of the region along the timeline
+	 * START:    first frame of the region within its source(s)
+	 * LENGTH:   number of frames the region represents
 	 */
-	nframes_t position () const { return _position; }
-	nframes_t start ()    const { return _start; }
-	nframes_t length()    const { return _length; }
-	layer_t   layer ()    const { return _layer; }
+	sframes_t  position () const { return _position; }
+	sframes_t  start ()    const { return _start; }
+	framecnt_t length()    const { return _length; }
+	layer_t    layer ()    const { return _layer; }
 
-	sframes_t source_length(uint32_t n) const;
+	framecnt_t source_length(uint32_t n) const;
 
 	/* these two are valid ONLY during a StateChanged signal handler */
 
-	nframes_t last_position() const { return _last_position; }
-	nframes_t last_length() const { return _last_length; }
+	sframes_t  last_position() const { return _last_position; }
+	framecnt_t last_length() const { return _last_length; }
 
-	nframes64_t ancestral_start () const { return _ancestral_start; }
-	nframes64_t ancestral_length () const { return _ancestral_length; }
+	sframes_t ancestral_start () const { return _ancestral_start; }
+	framecnt_t ancestral_length () const { return _ancestral_length; }
 	float stretch() const { return _stretch; }
 	float shift() const { return _shift; }
 
 	void set_ancestral_data (nframes64_t start, nframes64_t length, float stretch, float shift);
 
-	nframes_t sync_offset(int& dir) const;
-	nframes_t sync_position() const;
-	nframes_t sync_point () const;
-
-	nframes_t adjust_to_sync (nframes_t) const;
+	frameoffset_t sync_offset(int& dir) const;
+	framepos_t sync_position() const;
+	framepos_t sync_point () const;
+	
+	framepos_t adjust_to_sync (framepos_t) const;
 
 	/* first_frame() is an alias; last_frame() just hides some math */
 
-	nframes_t first_frame() const { return _position; }
-	nframes_t last_frame() const { return _position + _length - 1; }
+	framepos_t first_frame() const { return _position; }
+	framepos_t last_frame()  const { return _position + _length - 1; }
 
-	Flag flags()      const { return _flags; }
-	bool hidden()     const { return _flags & Hidden; }
-	bool muted()      const { return _flags & Muted; }
-	bool opaque ()    const { return _flags & Opaque; }
-	bool locked()     const { return _flags & Locked; }
-	bool position_locked() const { return _flags & PositionLocked; }
-	bool automatic()  const { return _flags & Automatic; }
-	bool whole_file() const { return _flags & WholeFile ; }
-	bool captured()   const { return !(_flags & (Region::Flag (Region::Import|Region::External))); }
-	bool can_move()   const { return !(_flags & (Locked|PositionLocked)); }
+	bool hidden()     const  { return _hidden; }
+	bool muted()      const  { return _muted; }
+	bool opaque ()    const  { return _opaque; }
+	bool locked()     const  { return _locked; }
+	bool position_locked() const { return _position_locked; }
+	bool automatic()  const  { return _automatic; }
+	bool whole_file() const  { return _whole_file; }
+	bool captured()   const  { return !(_import || _external); }
+	bool can_move()   const  { return !_position_locked; }
+	bool sync_marked() const { return _sync_marked; }
+	bool external() const    { return _external; }
+	bool import() const      { return _import; }
 
 	PositionLockStyle positional_lock_style() const { return _positional_lock_style; }
 	void set_position_lock_style (PositionLockStyle ps);
@@ -164,11 +166,11 @@ class Region
 	void freeze ();
 	void thaw ();
 
-	bool covers (nframes_t frame) const {
+	bool covers (framepos_t frame) const {
 		return first_frame() <= frame && frame <= last_frame();
 	}
 
-	OverlapType coverage (nframes_t start, nframes_t end) const {
+	OverlapType coverage (framepos_t start, framepos_t end) const {
 		return ARDOUR::coverage (first_frame(), last_frame(), start, end);
 	}
 
@@ -181,21 +183,21 @@ class Region
 
 	/* EDITING OPERATIONS */
 
-	void set_length (nframes_t, void *src);
-	void set_start (nframes_t, void *src);
-	void set_position (nframes_t, void *src);
-	void set_position_on_top (nframes_t, void *src);
-	void special_set_position (nframes_t);
+	void set_length (framecnt_t, void *src);
+	void set_start (framepos_t, void *src);
+	void set_position (framepos_t, void *src);
+	void set_position_on_top (framepos_t, void *src);
+	void special_set_position (framepos_t);
 	void update_position_after_tempo_map_change ();
-	void nudge_position (nframes64_t, void *src);
+	void nudge_position (frameoffset_t, void *src);
 
 	bool at_natural_position () const;
 	void move_to_natural_position (void *src);
 
-	void trim_start (nframes_t new_position, void *src);
-	void trim_front (nframes_t new_position, void *src);
-	void trim_end (nframes_t new_position, void *src);
-	void trim_to (nframes_t position, nframes_t length, void *src);
+	void trim_start (framepos_t new_position, void *src);
+	void trim_front (framepos_t new_position, void *src);
+	void trim_end (framepos_t new_position, void *src);
+	void trim_to (framepos_t position, framecnt_t length, void *src);
 
 	void set_layer (layer_t l); /* ONLY Playlist can call this */
 	void raise ();
@@ -203,17 +205,19 @@ class Region
 	void raise_to_top ();
 	void lower_to_bottom ();
 
-	void set_sync_position (nframes_t n);
+	void set_sync_position (framepos_t n);
 	void clear_sync_position ();
 	void set_hidden (bool yn);
 	void set_muted (bool yn);
+	void set_whole_file (bool yn);
+	void set_automatic (bool yn);
 	void set_opaque (bool yn);
 	void set_locked (bool yn);
 	void set_position_locked (bool yn);
 
 	int apply (Filter&);
 
-	virtual uint32_t read_data_count() const { return _read_data_count; }
+	virtual uint64_t read_data_count() const { return _read_data_count; }
 
 	boost::shared_ptr<ARDOUR::Playlist> playlist() const { return _playlist.lock(); }
 	virtual void set_playlist (boost::weak_ptr<ARDOUR::Playlist>);
@@ -242,7 +246,6 @@ class Region
 	XMLNode&         get_state ();
 	virtual XMLNode& state (bool);
 	virtual int      set_state (const XMLNode&, int version);
-	virtual int      set_live_state (const XMLNode&, int version, PBD::Change&, bool send);
 
 	virtual boost::shared_ptr<Region> get_parent() const;
 
@@ -278,62 +281,77 @@ class Region
   protected:
 	friend class RegionFactory;
 
-	Region (boost::shared_ptr<Source> src, nframes_t start, nframes_t length,
-		const std::string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
-	Region (const SourceList& srcs, nframes_t start, nframes_t length,
-		const std::string& name, DataType type, layer_t = 0, Flag flags = DefaultFlags);
-
-	Region (boost::shared_ptr<const Region>, nframes_t start, nframes_t length, const std::string& name, layer_t = 0, Flag flags = DefaultFlags);
-	Region (boost::shared_ptr<const Region>, nframes_t length, const std::string& name, layer_t = 0, Flag flags = DefaultFlags);
+	/** Construct a region from a single source */
+	Region (boost::shared_ptr<Source> src);
+	/** Construct a region from multiple sources*/
+	Region (const SourceList& srcs);
+	/** Construct a region from another region, at an offset within that region */
+	Region (boost::shared_ptr<const Region>, frameoffset_t start_offset = 0, bool start_relative = true);
+	/** Construct a region as a copy of another region, but with different sources */
+	Region (boost::shared_ptr<const Region>, const SourceList&);
+	/** normal Region copy constructor */
 	Region (boost::shared_ptr<const Region>);
+
+	/** Construct a region from 1 source and XML state */
 	Region (boost::shared_ptr<Source> src, const XMLNode&);
+	/** Construct a region from multiple sources and XML state */
 	Region (const SourceList& srcs, const XMLNode&);
 
-	Region (Session& s, nframes_t start, nframes_t length, const std::string& name, DataType, layer_t = 0, Flag flags = DefaultFlags);
+	/** Constructor for derived types only */
+	Region (Session& s, framepos_t start, framecnt_t length, const std::string& name, DataType);
 
   protected:
-	void copy_stuff (boost::shared_ptr<const Region>, nframes_t start, nframes_t length, const std::string& name, layer_t, Flag flags);
+	void send_change (PBD::PropertyChange);
 
-	XMLNode& get_short_state (); /* used only by Session */
+	void trim_to_internal (framepos_t position, framecnt_t length, void *src);
+	virtual void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
 
-	void send_change (PBD::Change);
-
-	void trim_to_internal (nframes_t position, nframes_t length, void *src);
-	virtual void set_position_internal (nframes_t pos, bool allow_bbt_recompute);
-
-	bool copied() const { return _flags & Copied; }
 	void maybe_uncopy ();
 	void first_edit ();
 
-	bool verify_start (nframes_t);
-	bool verify_start_and_length (nframes_t, nframes_t&);
-	bool verify_start_mutable (nframes_t&_start);
-	bool verify_length (nframes_t);
+	bool verify_start (framepos_t);
+	bool verify_start_and_length (framepos_t, framecnt_t&);
+	bool verify_start_mutable (framepos_t&_start);
+	bool verify_length (framecnt_t);
 
 	virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;
-
+	
 	DataType                _type;
-	PBD::EnumState<Flag>    _flags;
-	PBD::State<nframes_t>   _start;
-	PBD::State<nframes_t>   _length;
-	nframes_t               _last_length;
-	PBD::State<nframes_t>   _position;
-	nframes_t               _last_position;
+	bool                    _no_property_changes;
+
+	PBD::Property<bool>        _muted;
+	PBD::Property<bool>        _opaque;
+	PBD::Property<bool>        _locked;
+	PBD::Property<bool>        _automatic;
+	PBD::Property<bool>        _whole_file;
+	PBD::Property<bool>        _import;
+	PBD::Property<bool>        _external;
+	PBD::Property<bool>        _sync_marked;
+	PBD::Property<bool>        _left_of_split;
+	PBD::Property<bool>        _right_of_split;
+	PBD::Property<bool>        _hidden;
+	PBD::Property<bool>        _position_locked;
+	PBD::Property<framepos_t>  _start;
+	PBD::Property<framecnt_t>  _length;
+	PBD::Property<framepos_t>  _position;
+	PBD::Property<framepos_t>  _sync_position;
+	PBD::Property<layer_t>     _layer;
+	PBD::Property<framepos_t>  _ancestral_start;
+	PBD::Property<framecnt_t>  _ancestral_length;
+	PBD::Property<float>       _stretch;
+	PBD::Property<float>       _shift;
+
+	framecnt_t              _last_length;
+	framepos_t              _last_position;
 	PositionLockStyle       _positional_lock_style;
-	PBD::State<nframes_t>   _sync_position;
-	PBD::State<layer_t>     _layer;
 	mutable RegionEditState _first_edit;
 	int                     _frozen;
-	PBD::State<nframes64_t> _ancestral_start;
-	PBD::State<nframes64_t> _ancestral_length;
-	PBD::State<float>       _stretch;
-	PBD::State<float>       _shift;
 	BBT_Time                _bbt_time;
 	AnalysisFeatureList     _transients;
 	bool                    _valid_transients;
-	mutable uint32_t        _read_data_count;  ///< modified in read()
-	PBD::Change             _pending_changed;
+	mutable uint64_t        _read_data_count;  ///< modified in read()
+	PBD::PropertyChange             _pending_changed;
 	uint64_t                _last_layer_op;  ///< timestamp
 	Glib::Mutex             _lock;
 	SourceList              _sources;
@@ -345,9 +363,12 @@ class Region
 
 	boost::weak_ptr<ARDOUR::Playlist> _playlist;
 
-private:
+	virtual int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
 
-	void register_states ();
+	PBD::PropertyChange set_property (const PBD::PropertyBase&);
+	void register_properties ();
+
+private:
 	void use_sources (SourceList const &);
 };
 

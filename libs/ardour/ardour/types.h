@@ -63,6 +63,11 @@ namespace ARDOUR {
 	 * don't want to pay for extremely long session times they don't need...
 	 */
 	typedef int64_t sframes_t;
+	typedef int64_t framepos_t;
+	/* any offset from a framepos_t, measured in audio frames */
+	typedef int64_t frameoffset_t;
+	/* any count of audio frames */
+	typedef int64_t framecnt_t;
 
 	enum IOChange {
 		NoChange = 0,

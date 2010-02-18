@@ -27,7 +27,8 @@
 class RouteGroupMenu : public Gtk::Menu, public ARDOUR::SessionHandlePtr
 {
 public:
-	RouteGroupMenu (ARDOUR::Session*, ARDOUR::RouteGroup::Property);
+	RouteGroupMenu (ARDOUR::Session*, PBD::PropertyList*);
+	~RouteGroupMenu();
 
 	void rebuild (ARDOUR::RouteGroup *);
 
@@ -38,7 +39,7 @@ public:
 	void new_group ();
 	void set_group (ARDOUR::RouteGroup *);
 
-	ARDOUR::RouteGroup::Property _default_properties;
+	PBD::PropertyList* _default_properties;
 	bool _inhibit_group_selected;
 	ARDOUR::RouteGroup* _selected_route_group;
 };

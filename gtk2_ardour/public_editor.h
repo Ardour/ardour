@@ -275,7 +275,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 
 	virtual RouteTimeAxisView* get_route_view_by_id (PBD::ID& id) = 0;
 
-	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, ARDOUR::RouteGroup::Property) const = 0;
+	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, PBD::PropertyID) const = 0;
 
 	sigc::signal<void> ZoomFocusChanged;
 	sigc::signal<void> ZoomChanged;

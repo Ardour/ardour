@@ -21,10 +21,12 @@
 #define __pbd_stateful_h__
 
 #include <string>
+#include <list>
 #include <cassert>
 #include "pbd/id.h"
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
+#include "pbd/properties.h"
 
 class XMLNode;
 
@@ -34,201 +36,6 @@ namespace sys {
 	class path;
 }
 
-enum Change {
-	range_guarantee = ~0
-};
-
-Change new_change ();
-
-/** Base (non template) part of State */	
-class StateBase
-{
-public:
-	StateBase (std::string const & p, Change c)
-		: _have_old (false)
-		, _xml_property_name (p)
-		, _change (c)
-	{
-
-	}
-
-	/** Forget about any old value for this state */
-	void clear_history () {
-		_have_old = false;
-	}
-
-	virtual void diff (XMLNode *, XMLNode *) const = 0;
-	virtual Change set_state (XMLNode const &) = 0;
-	virtual void add_state (XMLNode &) const = 0;
-
-protected:
-	bool _have_old;
-	std::string _xml_property_name;
-	Change _change;
-};
-
-/** Parent class for classes which represent a single piece of state in a Stateful object */
-template <class T>
-class StateTemplate : public StateBase
-{
-public:
-	StateTemplate (std::string const & p, Change c, T const & v)
-		: StateBase (p, c)
-		, _current (v)
-	{
-
-	}
-
-	StateTemplate<T> & operator= (StateTemplate<T> const & s) {
-		/* XXX: isn't there a nicer place to do this? */
-		_have_old = s._have_old;
-		_xml_property_name = s._xml_property_name;
-		_change = s._change;
-		
-		_current = s._current;
-		_old = s._old;
-		return *this;
-	}
-
-	T & operator= (T const & v) {
-		set (v);
-		return _current;
-	}
-
-	T & operator+= (T const & v) {
-		set (_current + v);
-		return _current;
-	}
-	
-	bool operator== (const T& other) const {
-		return _current == other;
-	}
-
-	bool operator!= (const T& other) const {
-		return _current != other;
-	}
-
-	operator T const & () const {
-		return _current;
-	}
-
-	T const & val () const {
-		return _current;
-	}
-
-	void diff (XMLNode* old, XMLNode* current) const {
-		if (_have_old) {
-			old->add_property (_xml_property_name.c_str(), to_string (_old));
-			current->add_property (_xml_property_name.c_str(), to_string (_current));
-		}
-	}
-
-	/** Try to set state from the property of an XML node.
-	 *  @param node XML node.
-	 *  @return Change effected, or 0.
-	 */
-	Change set_state (XMLNode const & node) {
-		XMLProperty const * p = node.property (_xml_property_name.c_str());
-
-		if (p) {
-			T const v = from_string (p->value ());
-
-			if (v == _current) {
-				return Change (0);
-			}
-
-			set (v);
-			return _change;
-		}
-
-		return Change (0);
-	}
-
-	void add_state (XMLNode & node) const {
-		node.add_property (_xml_property_name.c_str(), to_string (_current));
-	}
-
-protected:
-	void set (T const & v) {
-		_old = _current;
-		_have_old = true;
-		_current = v;
-	}
-
-	virtual std::string to_string (T const & v) const = 0;
-	virtual T from_string (std::string const & s) const = 0;
-		
-	T _current;
-	T _old;
-};
-
-template<class T>	
-std::ostream& operator<< (std::ostream& os, StateTemplate<T> const & s)
-{
-	os << s.val();
-	return os;
-}
-
-/** Representation of a single piece of state in a Stateful; for use
- *  with types that can be written to / read from stringstreams.
- */
-template <class T>
-class State : public StateTemplate<T>
-{
-public:
-	State (std::string const & p, Change c, T const & v)
-		: StateTemplate<T> (p, c, v)
-	{
-
-	}
-	
-	T & operator= (T const & v) {
-		this->set (v);
-		return this->_current;
-	}
-	
-private:	
-	std::string to_string (T const & v) const {
-		std::stringstream s;
-		s.precision (12); // in case its floating point
-		s << v;
-		return s.str ();
-	}
-
-	T from_string (std::string const & s) const {
-		std::stringstream t (s);
-		T v;
-		t.precision (12); // in case its floating point
-		t >> v;
-		return v;
-	}
-};
-
-template <class T>
-class EnumState : public StateTemplate<T>
-{
-public:
-	EnumState (std::string const & p, Change c, T const & v)
-		: StateTemplate<T> (p, c, v)
-	{
-
-	}
-	
-	T & operator= (T const & v) {
-		this->set (v);
-		return this->_current;
-	}
-
-private:
-	std::string to_string (T const & v) const {
-		return enum_2_string (v);
-	}
-
-	T from_string (std::string const & v) const {
-		return T (string_2_enum (v, this->_current));
-	}
-};
-
 /** Base class for objects with saveable and undoable state */
 class Stateful {
   public:
@@ -236,14 +43,21 @@ class Stateful {
 	virtual ~Stateful();
 
 	virtual XMLNode& get_state (void) = 0;
-
 	virtual int set_state (const XMLNode&, int version) = 0;
+	/* derived types do not have to implement this, but probably should
+	   give it serious attention.
+	*/
+	virtual PropertyChange set_property (const PropertyBase&) { return PropertyChange (0); }
 
-	void add_state (StateBase & s) {
-		_states.push_back (&s);
+	PropertyChange set_properties (const PropertyList&);
+
+	void add_property (PropertyBase& s) {
+		_properties.add (s);
 	}
 
-	/* Extra XML nodes */
+	/* Extra XML node: so that 3rd parties can attach state to the XMLNode
+	   representing the state of this object.
+	 */
 
 	void add_extra_xml (XMLNode&);
 	XMLNode *extra_xml (const std::string& str);
@@ -251,7 +65,8 @@ class Stateful {
 	const PBD::ID& id() const { return _id; }
 
 	void clear_history ();
-	std::pair<XMLNode *, XMLNode*> diff ();
+	std::pair<XMLNode *, XMLNode*> diff () const;
+	void changed (PropertyChange&) const;
 
 	static int current_state_version;
 	static int loading_state_version;
@@ -260,15 +75,25 @@ class Stateful {
 
 	void add_instant_xml (XMLNode&, const sys::path& directory_path);
 	XMLNode *instant_xml (const std::string& str, const sys::path& directory_path);
-	Change set_state_using_states (XMLNode const &);
-	void add_states (XMLNode &);
+	void add_properties (XMLNode &);
+	/* derived types can call this from ::set_state() (or elsewhere)
+	   to get basic property setting done.
+	*/
+	PropertyChange set_properties (XMLNode const &);
+
+	
+	/* derived classes can implement this to do cross-checking
+	   of property values after either a PropertyList or XML 
+	   driven property change.
+	*/
+	virtual void post_set () { };
 
 	XMLNode *_extra_xml;
 	XMLNode *_instant_xml;
 	PBD::ID _id;
 
 	std::string _xml_node_name; ///< name of node to use for this object in XML
-	std::list<StateBase*> _states; ///< state variables that this object has
+	OwnedPropertyList _properties;
 };
 
 } // namespace PBD

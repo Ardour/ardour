@@ -4,7 +4,6 @@
 #include "pbd/enumwriter.h"
 
 #include "ardour/region.h"
-#include "ardour/region_command.h"
 #include "ardour/utils.h"
 
 #include "i18n.h"

@@ -624,7 +624,7 @@ CrossfadeEditor::canvas_allocation (Gtk::Allocation& /*alloc*/)
 
 
 void
-CrossfadeEditor::xfade_changed (Change)
+CrossfadeEditor::xfade_changed (PropertyChange)
 {
 	set (xfade->fade_in(), In);
 	set (xfade->fade_out(), Out);
@@ -1220,25 +1220,41 @@ CrossfadeEditor::audition (Audition which)
 		right_length = xfade->in()->length();
 	}
 
-	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->out(), left_start_offset, left_length, "xfade out",
-													      0, Region::DefaultFlags, false)));
-	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->in(), 0, right_length, "xfade in",
-													       0, Region::DefaultFlags, false)));
+	PropertyList left_plist; 
+	PropertyList right_plist; 
 
-	//apply a 20ms declicking fade at the start and end of auditioning
-	left->set_fade_in_active(true);
-	left->set_fade_in_length(_session->frame_rate() / 50);
-	right->set_fade_out_active(true);
-	right->set_fade_out_length(_session->frame_rate() / 50);
+	
+	left_plist.add (ARDOUR::Properties::start, left_start_offset);
+	left_plist.add (ARDOUR::Properties::length, left_length);
+	left_plist.add (ARDOUR::Properties::name, string ("xfade out"));
+	left_plist.add (ARDOUR::Properties::layer, 0);
+	left_plist.add (ARDOUR::Properties::fade_in_active, true);
+	
+	right_plist.add (ARDOUR::Properties::start, 0);
+	right_plist.add (ARDOUR::Properties::length, right_length);
+	right_plist.add (ARDOUR::Properties::name, string("xfade in"));
+	right_plist.add (ARDOUR::Properties::layer, 0);
+	right_plist.add (ARDOUR::Properties::fade_out_active, true);
+
+	if (which == Left) {
+		right_plist.add (ARDOUR::Properties::scale_amplitude, 0.0f);
+	} else if (which == Right) {
+		left_plist.add (ARDOUR::Properties::scale_amplitude, 0.0f);
+	}
+
+	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> 
+						     (RegionFactory::create (xfade->out(), left_plist, false)));
+	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> 
+					      (RegionFactory::create (xfade->in(), right_plist, false)));
+
+	// apply a 20ms declicking fade at the start and end of auditioning
+	// XXX this should really be a property
+
+	left->set_fade_in_length (_session->frame_rate() / 50);
+	right->set_fade_out_length (_session->frame_rate() / 50);
 
 	pl.add_region (left, 0);
 	pl.add_region (right, 1 + preroll);
-
-	if (which == Left) {
-		right->set_scale_amplitude (0.0);
-	} else if (which == Right) {
-		left->set_scale_amplitude (0.0);
-	}
 
 	/* there is only one ... */
 	pl.foreach_crossfade (sigc::mem_fun (*this, &CrossfadeEditor::setup));
@@ -1255,8 +1271,15 @@ CrossfadeEditor::audition_both ()
 void
 CrossfadeEditor::audition_left_dry ()
 {
-	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->out(), xfade->out()->length() - xfade->length(), xfade->length(), "xfade left",
-													      0, Region::DefaultFlags, false)));
+	PropertyList plist; 
+
+	plist.add (ARDOUR::Properties::start, xfade->out()->length() - xfade->length());
+	plist.add (ARDOUR::Properties::length, xfade->length());
+	plist.add (ARDOUR::Properties::name, string("xfade left"));
+	plist.add (ARDOUR::Properties::layer, 0);
+	
+	boost::shared_ptr<AudioRegion> left (boost::dynamic_pointer_cast<AudioRegion> 
+					     (RegionFactory::create (xfade->out(), plist, false)));
 
 	_session->audition_region (left);
 }
@@ -1270,8 +1293,16 @@ CrossfadeEditor::audition_left ()
 void
 CrossfadeEditor::audition_right_dry ()
 {
-	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (xfade->in(), 0, xfade->length(), "xfade in",
-													       0, Region::DefaultFlags, false)));
+	PropertyList plist; 
+
+	plist.add (ARDOUR::Properties::start, 0);
+	plist.add (ARDOUR::Properties::length, xfade->length());
+	plist.add (ARDOUR::Properties::name, string ("xfade right"));
+	plist.add (ARDOUR::Properties::layer, 0);
+
+	boost::shared_ptr<AudioRegion> right (boost::dynamic_pointer_cast<AudioRegion> 
+					      (RegionFactory::create (xfade->in(), plist, false)));
+
 	_session->audition_region (right);
 }
 

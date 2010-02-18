@@ -963,7 +963,7 @@ MidiRegionView::~MidiRegionView ()
 }
 
 void
-MidiRegionView::region_resized (Change what_changed)
+MidiRegionView::region_resized (PropertyChange what_changed)
 {
 	RegionView::region_resized(what_changed);
 

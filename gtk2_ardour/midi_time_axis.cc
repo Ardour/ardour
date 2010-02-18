@@ -395,7 +395,7 @@ MidiTimeAxisView::build_automation_action_menu ()
 		   something about MIDI (!) would not expect to find them there.
 		*/
 
-		add_channel_command_menu_item (automation_items, _("Program Change"), MidiPgmChangeAutomation, MIDI_CMD_PGM_CHANGE);
+		add_channel_command_menu_item (automation_items, _("Program PropertyChange"), MidiPgmChangeAutomation, MIDI_CMD_PGM_CHANGE);
 		add_channel_command_menu_item (automation_items, _("Bender"), MidiPitchBenderAutomation, MIDI_CMD_BENDER);
 		add_channel_command_menu_item (automation_items, _("Pressure"), MidiChannelPressureAutomation, MIDI_CMD_CHANNEL_PRESSURE);
 		
@@ -968,7 +968,7 @@ MidiTimeAxisView::add_region (nframes64_t pos)
 	real_editor->begin_reversible_command (_("create region"));
 	XMLNode &before = playlist()->get_state();
 
-	nframes64_t start = pos;
+	framepos_t start = pos;
 	real_editor->snap_to (start, -1);
 	const Meter& m = _session->tempo_map().meter_at(start);
 	const Tempo& t = _session->tempo_map().tempo_at(start);
@@ -979,8 +979,13 @@ MidiTimeAxisView::add_region (nframes64_t pos)
 
 	boost::shared_ptr<Source> src = _session->create_midi_source_for_session (*diskstream.get());
 
-	boost::shared_ptr<Region> region = (RegionFactory::create (src, 0, (nframes_t) length,
-								   PBD::basename_nosuffix(src->name())));
+	PropertyList plist; 
+	
+	plist.add (ARDOUR::Properties::start, 0);
+	plist.add (ARDOUR::Properties::length, length);
+	plist.add (ARDOUR::Properties::name, PBD::basename_nosuffix(src->name()));
+	
+	boost::shared_ptr<Region> region = (RegionFactory::create (src, plist));
 
 	playlist()->add_region (region, start);
 	XMLNode &after = playlist()->get_state();

@@ -58,7 +58,7 @@ class Playlist : public SessionObject
 	Playlist (Session&, const XMLNode&, DataType type, bool hidden = false);
 	Playlist (Session&, std::string name, DataType type, bool hidden = false);
 	Playlist (boost::shared_ptr<const Playlist>, std::string name, bool hidden = false);
-	Playlist (boost::shared_ptr<const Playlist>, nframes_t start, nframes_t cnt, std::string name, bool hidden = false);
+	Playlist (boost::shared_ptr<const Playlist>, framepos_t start, framecnt_t cnt, std::string name, bool hidden = false);
 
 	virtual ~Playlist ();
 
@@ -81,7 +81,7 @@ class Playlist : public SessionObject
 	bool hidden() const { return _hidden; }
 	bool empty() const;
 	uint32_t n_regions() const;
-	nframes_t get_maximum_extent () const;
+	framecnt_t get_maximum_extent () const;
 	layer_t top_layer() const;
 
 	EditMode get_edit_mode() const { return _edit_mode; }
@@ -89,39 +89,39 @@ class Playlist : public SessionObject
 
 	/* Editing operations */
 
-	void add_region (boost::shared_ptr<Region>, nframes_t position, float times = 1, bool auto_partition = false);
+	void add_region (boost::shared_ptr<Region>, framepos_t position, float times = 1, bool auto_partition = false);
 	void remove_region (boost::shared_ptr<Region>);
 	void get_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
 	void get_region_list_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
-	void replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Region> newr, nframes_t pos);
-	void split_region (boost::shared_ptr<Region>, nframes_t position);
-	void split (nframes64_t at);
-	void shift (nframes64_t at, nframes64_t distance, bool move_intersected, bool ignore_music_glue);
-	void partition (nframes_t start, nframes_t end, bool cut = false);
-	void duplicate (boost::shared_ptr<Region>, nframes_t position, float times);
-	void nudge_after (nframes_t start, nframes_t distance, bool forwards);
+	void replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Region> newr, framepos_t pos);
+	void split_region (boost::shared_ptr<Region>, framepos_t position);
+	void split (framepos_t at);
+	void shift (framepos_t at, frameoffset_t distance, bool move_intersected, bool ignore_music_glue);
+	void partition (framepos_t start, framepos_t end, bool cut = false);
+	void duplicate (boost::shared_ptr<Region>, framepos_t position, float times);
+	void nudge_after (framepos_t start, framecnt_t distance, bool forwards);
 	void shuffle (boost::shared_ptr<Region>, int dir);
 	void update_after_tempo_map_change ();
 
 	boost::shared_ptr<Playlist> cut  (std::list<AudioRange>&, bool result_is_hidden = true);
 	boost::shared_ptr<Playlist> copy (std::list<AudioRange>&, bool result_is_hidden = true);
-	int                         paste (boost::shared_ptr<Playlist>, nframes_t position, float times);
+	int                         paste (boost::shared_ptr<Playlist>, framepos_t position, float times);
 
 	const RegionList& region_list () const { return regions; }
 
-	RegionList*                regions_at (nframes_t frame);
-	RegionList*                regions_touched (nframes_t start, nframes_t end);
-	RegionList*                regions_to_read (nframes_t start, nframes_t end);
+	RegionList*                regions_at (framepos_t frame);
+	RegionList*                regions_touched (framepos_t start, framepos_t end);
+	RegionList*                regions_to_read (framepos_t start, framepos_t end);
 	boost::shared_ptr<Region>  find_region (const PBD::ID&) const;
-	boost::shared_ptr<Region>  top_region_at (nframes_t frame);
-	boost::shared_ptr<Region>  top_unmuted_region_at (nframes_t frame);
-	boost::shared_ptr<Region>  find_next_region (nframes_t frame, RegionPoint point, int dir);
-	nframes64_t                find_next_region_boundary (nframes64_t frame, int dir);
+	boost::shared_ptr<Region>  top_region_at (framepos_t frame);
+	boost::shared_ptr<Region>  top_unmuted_region_at (framepos_t frame);
+	boost::shared_ptr<Region>  find_next_region (framepos_t frame, RegionPoint point, int dir);
+	framepos_t                 find_next_region_boundary (framepos_t frame, int dir);
 	bool                       region_is_shuffle_constrained (boost::shared_ptr<Region>);
-	bool                       has_region_at (nframes64_t const) const;
+	bool                       has_region_at (framepos_t const) const;
 
 
-	nframes64_t find_next_transient (nframes64_t position, int dir);
+	framepos_t find_next_transient (framepos_t position, int dir);
 
 	void foreach_region (boost::function<void (boost::shared_ptr<Region>)>);
 
@@ -136,7 +136,7 @@ class Playlist : public SessionObject
 	PBD::Signal0<void>      NameChanged;
 	PBD::Signal0<void>      LengthChanged;
 	PBD::Signal0<void>      LayeringChanged;
-	PBD::Signal1<void,std::list< Evoral::RangeMove<nframes_t> > const &> RangesMoved;
+	PBD::Signal1<void,std::list< Evoral::RangeMove<framepos_t> > const &> RangesMoved;
 
 	static std::string bump_name (std::string old_name, Session&);
 
@@ -205,7 +205,7 @@ class Playlist : public SessionObject
 	bool             pending_contents_change;
 	bool             pending_layering;
 	bool             pending_length;
-	std::list< Evoral::RangeMove<nframes_t> > pending_range_moves;
+	std::list< Evoral::RangeMove<framepos_t> > pending_range_moves;
 	bool             save_on_thaw;
 	std::string      last_save_reason;
 	uint32_t         in_set_state;
@@ -223,7 +223,7 @@ class Playlist : public SessionObject
 	uint32_t        _read_data_count;
 	PBD::ID         _orig_diskstream_id;
 	uint64_t         layer_op_counter;
-	nframes_t        freeze_length;
+	framecnt_t       freeze_length;
 	bool             auto_partition;
 
 	/** true if relayering should be done using region's current layers and their `pending explicit relayer'
@@ -249,25 +249,25 @@ class Playlist : public SessionObject
 	void notify_length_changed ();
 	void notify_layering_changed ();
 	void notify_contents_changed ();
-	void notify_state_changed (PBD::Change);
+	void notify_state_changed (PBD::PropertyChange);
 	void notify_region_moved (boost::shared_ptr<Region>);
 
 	void mark_session_dirty();
 
-	void region_changed_proxy (PBD::Change, boost::weak_ptr<Region>);
-	virtual bool region_changed (PBD::Change, boost::shared_ptr<Region>);
+	void region_changed_proxy (PBD::PropertyChange, boost::weak_ptr<Region>);
+	virtual bool region_changed (PBD::PropertyChange, boost::shared_ptr<Region>);
 
-	void region_bounds_changed (PBD::Change, boost::shared_ptr<Region>);
+	void region_bounds_changed (PBD::PropertyChange, boost::shared_ptr<Region>);
 	void region_deleted (boost::shared_ptr<Region>);
 
 	void sort_regions ();
 
-	void possibly_splice (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude = boost::shared_ptr<Region>());
-	void possibly_splice_unlocked(nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude = boost::shared_ptr<Region>());
+	void possibly_splice (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude = boost::shared_ptr<Region>());
+	void possibly_splice_unlocked(framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude = boost::shared_ptr<Region>());
 
-	void core_splice (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude);
-	void splice_locked (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude);
-	void splice_unlocked (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude);
+	void core_splice (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude);
+	void splice_locked (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude);
+	void splice_unlocked (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude);
 
 	virtual void finalize_split_region (boost::shared_ptr<Region> /*original*/, boost::shared_ptr<Region> /*left*/, boost::shared_ptr<Region> /*right*/) {}
 
@@ -279,19 +279,19 @@ class Playlist : public SessionObject
 
 	boost::shared_ptr<Region> region_by_id (PBD::ID);
 
-	bool add_region_internal (boost::shared_ptr<Region>, nframes_t position);
+	bool add_region_internal (boost::shared_ptr<Region>, framepos_t position);
 
 	int remove_region_internal (boost::shared_ptr<Region>);
-	RegionList *find_regions_at (nframes_t frame);
+	RegionList *find_regions_at (framepos_t frame);
 	void copy_regions (RegionList&) const;
-	void partition_internal (nframes_t start, nframes_t end, bool cutting, RegionList& thawlist);
+	void partition_internal (framepos_t start, framepos_t end, bool cutting, RegionList& thawlist);
 
-	nframes_t _get_maximum_extent() const;
+	framecnt_t _get_maximum_extent() const;
 
-	boost::shared_ptr<Playlist> cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf)(nframes_t, nframes_t, bool),
-			std::list<AudioRange>& ranges, bool result_is_hidden);
-	boost::shared_ptr<Playlist> cut (nframes_t start, nframes_t cnt, bool result_is_hidden);
-	boost::shared_ptr<Playlist> copy (nframes_t start, nframes_t cnt, bool result_is_hidden);
+	boost::shared_ptr<Playlist> cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf)(framepos_t, framecnt_t, bool),
+					      std::list<AudioRange>& ranges, bool result_is_hidden);
+	boost::shared_ptr<Playlist> cut (framepos_t start, framecnt_t cnt, bool result_is_hidden);
+	boost::shared_ptr<Playlist> copy (framepos_t start, framecnt_t cnt, bool result_is_hidden);
 
 	int move_region_to_layer (layer_t, boost::shared_ptr<Region> r, int dir);
 	void relayer ();
@@ -301,7 +301,7 @@ class Playlist : public SessionObject
 
 	void timestamp_layer_op (boost::shared_ptr<Region>);
 
-	void _split_region (boost::shared_ptr<Region>, nframes_t position);
+	void _split_region (boost::shared_ptr<Region>, framepos_t position);
 };
 
 } /* namespace ARDOUR */

@@ -171,7 +171,7 @@ Track::set_record_enable (bool yn, void *src)
 		return;
 	}
 
-	if (_route_group && src != _route_group && _route_group->active_property (RouteGroup::RecEnable)) {
+	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_recenable()) {
 		_route_group->apply (&Track::set_record_enable, yn, _route_group);
 		return;
 	}

@@ -234,12 +234,16 @@ EditorRouteGroups::set_activation (RouteGroup* g, bool a)
 ARDOUR::RouteGroup *
 EditorRouteGroups::new_route_group () const
 {
-	RouteGroup* g = new RouteGroup (
-		*_session,
-		"",
-		RouteGroup::Active,
-		(RouteGroup::Property) (RouteGroup::Mute | RouteGroup::Solo | RouteGroup::Edit)
-		);
+	PropertyList plist;
+
+	plist.add (Properties::active, true);
+	plist.add (Properties::mute, true);
+	plist.add (Properties::solo, true);
+	plist.add (Properties::edit, true);
+
+	RouteGroup* g = new RouteGroup (*_session, "");
+
+	g->set_properties (plist);
 
 	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();
@@ -255,12 +259,16 @@ EditorRouteGroups::new_route_group () const
 void
 EditorRouteGroups::run_new_group_dialog (const RouteList& rl)
 {
-	RouteGroup* g = new RouteGroup (
-		*_session,
-		"",
-		RouteGroup::Active,
-		(RouteGroup::Property) (RouteGroup::Mute | RouteGroup::Solo | RouteGroup::Edit | RouteGroup::RecEnable)
-		);
+	PropertyList plist;
+
+	plist.add (Properties::active, true);
+	plist.add (Properties::mute, true);
+	plist.add (Properties::solo, true);
+	plist.add (Properties::recenable, true);
+	plist.add (Properties::edit, true);
+
+	RouteGroup* g = new RouteGroup (*_session, "");
+	g->set_properties (plist);
 
 	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();
@@ -533,18 +541,22 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 		}
 	}
 
-	group->set_property (RouteGroup::Gain, (*iter)[_columns.gain]);
-	group->set_property (RouteGroup::RecEnable, (*iter)[_columns.record]);
-	group->set_property (RouteGroup::Mute, (*iter)[_columns.mute]);
-	group->set_property (RouteGroup::Solo, (*iter)[_columns.solo]);
-	group->set_property (RouteGroup::Select, (*iter)[_columns.select]);
-	group->set_property (RouteGroup::Edit, (*iter)[_columns.edits]);
-
-	string name = (*iter)[_columns.text];
-
-	if (name != group->name()) {
-		group->set_name (name);
-	}
+	PropertyList plist;
+	bool val = (*iter)[_columns.gain];
+	plist.add (Properties::gain, val);
+	val = (*iter)[_columns.record];
+	plist.add (Properties::recenable, val);
+	val = (*iter)[_columns.mute];
+	plist.add (Properties::mute, val);
+	val = (*iter)[_columns.solo];
+	plist.add (Properties::solo, val);
+	val = (*iter)[_columns.select];
+	plist.add (Properties::select, val);
+	val = (*iter)[_columns.edits];
+	plist.add (Properties::edit, val);
+	plist.add (Properties::name, string ((*iter)[_columns.text]));
+	
+	group->set_properties (plist);
 }
 
 void
@@ -556,12 +568,12 @@ EditorRouteGroups::add (RouteGroup* group)
 	TreeModel::Row row = *(_model->append());
 
 	row[_columns.is_visible] = !group->is_hidden();
-	row[_columns.gain] = group->property(RouteGroup::Gain);
-	row[_columns.record] = group->property(RouteGroup::RecEnable);
-	row[_columns.mute] = group->property(RouteGroup::Mute);
-	row[_columns.solo] = group->property(RouteGroup::Solo);
-	row[_columns.select] = group->property(RouteGroup::Select);
-	row[_columns.edits] = group->property(RouteGroup::Edit);
+	row[_columns.gain] = group->is_gain ();
+	row[_columns.record] = group->is_recenable();
+	row[_columns.mute] = group->is_mute ();
+	row[_columns.solo] = group->is_solo ();
+	row[_columns.select] = group->is_select ();
+	row[_columns.edits] = group->is_edit ();
 
 	_in_row_change = true;
 
@@ -622,12 +634,12 @@ EditorRouteGroups::flags_changed (void*, RouteGroup* group)
 		if (group == (*iter)[_columns.routegroup]) {
 			(*iter)[_columns.is_visible] = !group->is_hidden();
 			(*iter)[_columns.text] = group->name();
-			(*iter)[_columns.gain] = group->property(RouteGroup::Gain);
-			(*iter)[_columns.record] = group->property(RouteGroup::RecEnable);
-			(*iter)[_columns.mute] = group->property(RouteGroup::Mute);
-			(*iter)[_columns.solo] = group->property(RouteGroup::Solo);
-			(*iter)[_columns.select] = group->property(RouteGroup::Select);
-			(*iter)[_columns.edits] = group->property(RouteGroup::Edit);
+			(*iter)[_columns.gain] = group->is_gain ();
+			(*iter)[_columns.record] = group->is_recenable ();
+			(*iter)[_columns.mute] = group->is_mute ();
+			(*iter)[_columns.solo] = group->is_solo ();
+			(*iter)[_columns.select] = group->is_select ();
+			(*iter)[_columns.edits] = group->is_edit ();
 		}
 	}
 

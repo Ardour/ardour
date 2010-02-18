@@ -27,6 +27,7 @@
 using namespace Gtk;
 using namespace ARDOUR;
 using namespace std;
+using namespace PBD;
 
 RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
 	: ArdourDialog (_("route group dialog")),
@@ -77,13 +78,13 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
 
 	_name.signal_activate ().connect (sigc::bind (sigc::mem_fun (*this, &Dialog::response), RESPONSE_OK));
 
-	_gain.set_active (_group->property (RouteGroup::Gain));
+	_gain.set_active (_group->is_gain());
 	_relative.set_active (_group->is_relative());
-	_mute.set_active (_group->property (RouteGroup::Mute));
-	_solo.set_active (_group->property (RouteGroup::Solo));
-	_rec_enable.set_active (_group->property (RouteGroup::RecEnable));
-	_select.set_active (_group->property (RouteGroup::Select));
-	_edit.set_active (_group->property (RouteGroup::Edit));
+	_mute.set_active (_group->is_mute());
+	_solo.set_active (_group->is_solo());
+	_rec_enable.set_active (_group->is_recenable());
+	_select.set_active (_group->is_select());
+	_edit.set_active (_group->is_edit());
 
 	gain_toggled ();
 
@@ -128,15 +129,20 @@ RouteGroupDialog::do_run ()
 	int const r = run ();
 
 	if (r == Gtk::RESPONSE_OK || r == Gtk::RESPONSE_ACCEPT) {
-		_group->set_property (RouteGroup::Gain, _gain.get_active ());
-		_group->set_property (RouteGroup::Mute, _mute.get_active ());
-		_group->set_property (RouteGroup::Solo, _solo.get_active ());
-		_group->set_property (RouteGroup::RecEnable, _rec_enable.get_active ());
-		_group->set_property (RouteGroup::Select, _select.get_active ());
-		_group->set_property (RouteGroup::Edit, _edit.get_active ());
-		_group->set_name (_name.get_text ()); // This emits changed signal
-		_group->set_active (_active.get_active (), this);
-		_group->set_relative (_relative.get_active(), this);
+
+		PropertyList plist;
+
+		plist.add (Properties::gain, _gain.get_active());
+		plist.add (Properties::recenable, _rec_enable.get_active());
+		plist.add (Properties::mute, _mute.get_active());
+		plist.add (Properties::solo, _solo.get_active ());
+		plist.add (Properties::select, _select.get_active());
+		plist.add (Properties::edit, _edit.get_active());
+		plist.add (Properties::relative, _relative.get_active());
+		plist.add (Properties::active, _active.get_active());
+		plist.add (Properties::name, string (_name.get_text()));
+		
+		_group->set_properties (plist);
 	}
 
 	return r;

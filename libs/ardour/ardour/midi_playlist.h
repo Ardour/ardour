@@ -74,7 +74,7 @@ protected:
 private:
 	void dump () const;
 
-	bool region_changed (PBD::Change, boost::shared_ptr<Region>);
+	bool region_changed (PBD::PropertyChange, boost::shared_ptr<Region>);
 
 	NoteMode _note_mode;
 

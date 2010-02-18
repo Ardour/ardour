@@ -1210,7 +1210,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void xrun_recovery ();
 
 	TempoMap    *_tempo_map;
-	void          tempo_map_changed (PBD::Change);
+	void          tempo_map_changed (PBD::PropertyChange);
 
 	/* edit/mix groups */
 
@@ -1257,7 +1257,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	RegionList regions;
 
 	void add_region (boost::shared_ptr<Region>);
-	void region_changed (PBD::Change, boost::weak_ptr<Region>);
+	void region_changed (PBD::PropertyChange, boost::weak_ptr<Region>);
 	void remove_region (boost::weak_ptr<Region>);
 
 	int load_regions (const XMLNode& node);

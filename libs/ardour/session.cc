@@ -2840,7 +2840,7 @@ Session::update_region_name_map (boost::shared_ptr<Region> region)
 }
 
 void
-Session::region_changed (Change what_changed, boost::weak_ptr<Region> weak_region)
+Session::region_changed (PropertyChange what_changed, boost::weak_ptr<Region> weak_region)
 {
 	boost::shared_ptr<Region> region (weak_region.lock ());
 
@@ -3675,7 +3675,7 @@ Session::bundle_by_name (string name) const
 }
 
 void
-Session::tempo_map_changed (Change)
+Session::tempo_map_changed (PropertyChange)
 {
 	clear_clicks ();
 
@@ -4069,9 +4069,14 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 
 		/* construct a region to represent the bounced material */
 
-		result = RegionFactory::create (srcs, 0,
-				srcs.front()->length(srcs.front()->timeline_position()),
-				region_name_from_path (srcs.front()->name(), true));
+		PropertyList plist;
+		
+		plist.add (Properties::start, 0);
+		plist.add (Properties::length, srcs.front()->length(srcs.front()->timeline_position()));
+		plist.add (Properties::name, region_name_from_path (srcs.front()->name(), true));
+		
+		result = RegionFactory::create (srcs, plist);
+			   
 	}
 
   out:

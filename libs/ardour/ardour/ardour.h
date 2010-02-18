@@ -65,12 +65,11 @@ namespace ARDOUR {
 		return (microseconds_t) jack_get_time();
 	}
 
-	extern PBD::Change StartChanged;
-	extern PBD::Change LengthChanged;
-	extern PBD::Change PositionChanged;
-	extern PBD::Change NameChanged;
-	extern PBD::Change BoundsChanged;
-	extern PBD::Change FlagsChanged;
+	extern PBD::PropertyChange StartChanged;
+	extern PBD::PropertyChange LengthChanged;
+	extern PBD::PropertyChange PositionChanged;
+	extern PBD::PropertyChange NameChanged;
+	extern PBD::PropertyChange BoundsChanged;
 
 	static const double SHUTTLE_FRACT_SPEED1=0.48412291827; /* derived from A1,A2 */
 

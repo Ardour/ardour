@@ -148,14 +148,14 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 	freeze_length = other->freeze_length;
 }
 
-Playlist::Playlist (boost::shared_ptr<const Playlist> other, nframes_t start, nframes_t cnt, string str, bool hide)
+Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, framecnt_t cnt, string str, bool hide)
 	: SessionObject(other->_session, str)
 	, _type(other->_type)
 	, _orig_diskstream_id(other->_orig_diskstream_id)
 {
 	RegionLock rlock2 (const_cast<Playlist*> (other.get()));
 
-	nframes_t end = start + cnt - 1;
+	framepos_t end = start + cnt - 1;
 
 	init (hide);
 
@@ -165,9 +165,9 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, nframes_t start, nf
 
 		boost::shared_ptr<Region> region;
 		boost::shared_ptr<Region> new_region;
-		nframes_t offset = 0;
-		nframes_t position = 0;
-		nframes_t len = 0;
+		frameoffset_t offset = 0;
+		framepos_t position = 0;
+		framecnt_t len = 0;
 		string    new_name;
 		OverlapType overlap;
 
@@ -206,7 +206,14 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, nframes_t start, nf
 
 		_session.region_name (new_name, region->name(), false);
 
-		new_region = RegionFactory::RegionFactory::create (region, offset, len, new_name, region->layer(), region->flags());
+		PropertyList plist; 
+
+		plist.add (Properties::start, offset);
+		plist.add (Properties::length, len);
+		plist.add (Properties::name, new_name);
+		plist.add (Properties::layer, region->layer());
+
+		new_region = RegionFactory::RegionFactory::create (region, plist);
 
 		add_region_internal (new_region, position);
 	}
@@ -391,7 +398,7 @@ Playlist::notify_region_removed (boost::shared_ptr<Region> r)
 void
 Playlist::notify_region_moved (boost::shared_ptr<Region> r)
 {
-	Evoral::RangeMove<nframes_t> const move (r->last_position (), r->length (), r->position ());
+	Evoral::RangeMove<framepos_t> const move (r->last_position (), r->length (), r->position ());
 
 	if (holding_state ()) {
 
@@ -399,7 +406,7 @@ Playlist::notify_region_moved (boost::shared_ptr<Region> r)
 
 	} else {
 
-		list< Evoral::RangeMove<nframes_t> > m;
+		list< Evoral::RangeMove<framepos_t> > m;
 		m.push_back (move);
 		RangesMoved (m);
 	}
@@ -450,7 +457,7 @@ Playlist::flush_notifications ()
 	set<boost::shared_ptr<Region> >::iterator s;
 	uint32_t regions_changed = false;
 	bool check_length = false;
-	nframes64_t old_length = 0;
+	framecnt_t old_length = 0;
 
 	if (in_flush) {
 		return;
@@ -547,17 +554,17 @@ Playlist::clear_pending ()
  *************************************************************/
 
 void
-Playlist::add_region (boost::shared_ptr<Region> region, nframes_t position, float times, bool auto_partition)
+Playlist::add_region (boost::shared_ptr<Region> region, framepos_t position, float times, bool auto_partition)
 {
 	RegionLock rlock (this);
 	times = fabs (times);
 
 	int itimes = (int) floor (times);
 
-	nframes_t pos = position;
+	framepos_t pos = position;
 
 	if (times == 1 && auto_partition){
-		partition(pos, (nframes_t) (pos + region->length()), true);
+		partition(pos, (pos + region->length()), true);
 	}
 
 	if (itimes >= 1) {
@@ -577,14 +584,24 @@ Playlist::add_region (boost::shared_ptr<Region> region, nframes_t position, floa
 		pos += region->length();
 	}
 
-	nframes_t length = 0;
+	framecnt_t length = 0;
 
 	if (floor (times) != times) {
-		length = (nframes_t) floor (region->length() * (times - floor (times)));
+		length = (framecnt_t) floor (region->length() * (times - floor (times)));
 		string name;
 		_session.region_name (name, region->name(), false);
-		boost::shared_ptr<Region> sub = RegionFactory::create (region, 0, length, name, region->layer(), region->flags());
-		add_region_internal (sub, pos);
+
+		{
+			PropertyList plist;
+			
+			plist.add (Properties::start, 0);
+			plist.add (Properties::length, length);
+			plist.add (Properties::name, name);
+			plist.add (Properties::layer, region->layer());
+
+			boost::shared_ptr<Region> sub = RegionFactory::create (region, plist);
+			add_region_internal (sub, pos);
+		}
 	}
 
 	possibly_splice_unlocked (position, (pos + length) - position, boost::shared_ptr<Region>());
@@ -603,7 +620,7 @@ Playlist::set_region_ownership ()
 }
 
 bool
-Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t position)
+Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t position)
 {
 	if (region->data_type() != _type){
 		return false;
@@ -611,7 +628,7 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t posit
 
 	RegionSortByPosition cmp;
 
-	nframes_t old_length = 0;
+	framecnt_t old_length = 0;
 
 	if (!holding_state()) {
 		 old_length = _get_maximum_extent();
@@ -655,7 +672,7 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, nframes_t posit
 }
 
 void
-Playlist::replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Region> newr, nframes_t pos)
+Playlist::replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Region> newr, framepos_t pos)
 {
 	RegionLock rlock (this);
 
@@ -667,7 +684,7 @@ Playlist::replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Regio
 
 	_splicing = old_sp;
 
-	possibly_splice_unlocked (pos, (nframes64_t) old->length() - (nframes64_t) newr->length());
+	possibly_splice_unlocked (pos, old->length() - newr->length());
 }
 
 void
@@ -681,7 +698,7 @@ int
 Playlist::remove_region_internal (boost::shared_ptr<Region> region)
 {
 	RegionList::iterator i;
-	nframes_t old_length = 0;
+	framecnt_t old_length = 0;
 	int ret = -1;
 
 	if (!holding_state()) {
@@ -698,8 +715,8 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region)
 	for (i = regions.begin(); i != regions.end(); ++i) {
 		if (*i == region) {
 
-			nframes_t pos = (*i)->position();
-			nframes64_t distance = (*i)->length();
+			framepos_t pos = (*i)->position();
+			framecnt_t distance = (*i)->length();
 
 			regions.erase (i);
 
@@ -755,7 +772,7 @@ Playlist::get_region_list_equivalent_regions (boost::shared_ptr<Region> other, v
 }
 
 void
-Playlist::partition (nframes_t start, nframes_t end, bool cut)
+Playlist::partition (framepos_t start, framepos_t end, bool cut)
 {
 	RegionList thawlist;
 
@@ -767,7 +784,7 @@ Playlist::partition (nframes_t start, nframes_t end, bool cut)
 }
 
 void
-Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, RegionList& thawlist)
+Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, RegionList& thawlist)
 {
 	RegionList new_regions;
 
@@ -779,7 +796,7 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 		string new_name;
 		RegionList::iterator tmp;
 		OverlapType overlap;
-		nframes_t pos1, pos2, pos3, pos4;
+		framepos_t pos1, pos2, pos3, pos4;
 
 		in_partition = true;
 
@@ -843,8 +860,18 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 					/* "middle" ++++++ */
 
 					_session.region_name (new_name, current->name(), false);
-					region = RegionFactory::create (current, pos2 - pos1, pos3 - pos2, new_name,
-									regions.size(), Region::Flag(current->flags()|Region::Automatic|Region::LeftOfSplit|Region::RightOfSplit));
+
+					PropertyList plist;
+					
+					plist.add (Properties::start, pos2 - pos1);
+					plist.add (Properties::length, pos3 - pos2);
+					plist.add (Properties::name, new_name);
+					plist.add (Properties::layer, regions.size());
+					plist.add (Properties::automatic, true);
+					plist.add (Properties::left_of_split, true);
+					plist.add (Properties::right_of_split, true);
+
+					region = RegionFactory::create (current, plist);
 					add_region_internal (region, start);
 					new_regions.push_back (region);
 				}
@@ -852,8 +879,17 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 				/* "end" ====== */
 
 				_session.region_name (new_name, current->name(), false);
-				region = RegionFactory::create (current, pos3 - pos1, pos4 - pos3, new_name,
-								regions.size(), Region::Flag(current->flags()|Region::Automatic|Region::RightOfSplit));
+
+				PropertyList plist;
+				
+				plist.add (Properties::start, pos3 - pos1);
+				plist.add (Properties::length, pos4 - pos3);
+				plist.add (Properties::name, new_name);
+				plist.add (Properties::layer, regions.size());
+				plist.add (Properties::automatic, true);
+				plist.add (Properties::right_of_split, true);
+				
+				region = RegionFactory::create (current, plist);
 
 				add_region_internal (region, end);
 				new_regions.push_back (region);
@@ -881,8 +917,17 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 					/* end +++++ */
 
 					_session.region_name (new_name, current->name(), false);
-					region = RegionFactory::create (current, pos2 - pos1, pos4 - pos2, new_name, (layer_t) regions.size(),
-									Region::Flag(current->flags()|Region::Automatic|Region::LeftOfSplit));
+					
+					PropertyList plist;
+					
+					plist.add (Properties::start, pos2 - pos1);
+					plist.add (Properties::length, pos4 - pos2);
+					plist.add (Properties::name, new_name);
+					plist.add (Properties::layer, regions.size());
+					plist.add (Properties::automatic, true);
+					plist.add (Properties::left_of_split, true);
+
+					region = RegionFactory::create (current, plist);
 
 					add_region_internal (region, start);
 					new_regions.push_back (region);
@@ -915,8 +960,17 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 				if (!cutting) {
 					/* front **** */
 					_session.region_name (new_name, current->name(), false);
-					region = RegionFactory::create (current, 0, pos3 - pos1, new_name,
-									regions.size(), Region::Flag(current->flags()|Region::Automatic|Region::RightOfSplit));
+
+					PropertyList plist;
+					
+					plist.add (Properties::start, 0);
+					plist.add (Properties::length, pos3 - pos1);
+					plist.add (Properties::name, new_name);
+					plist.add (Properties::layer, regions.size());
+					plist.add (Properties::automatic, true);
+					plist.add (Properties::right_of_split, true);
+
+					region = RegionFactory::create (current, plist);
 
 					add_region_internal (region, pos1);
 					new_regions.push_back (region);
@@ -962,11 +1016,11 @@ Playlist::partition_internal (nframes_t start, nframes_t end, bool cutting, Regi
 }
 
 boost::shared_ptr<Playlist>
-Playlist::cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf)(nframes_t, nframes_t,bool), list<AudioRange>& ranges, bool result_is_hidden)
+Playlist::cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf)(framepos_t, framecnt_t,bool), list<AudioRange>& ranges, bool result_is_hidden)
 {
 	boost::shared_ptr<Playlist> ret;
 	boost::shared_ptr<Playlist> pl;
-	nframes_t start;
+	framepos_t start;
 
 	if (ranges.empty()) {
 		return boost::shared_ptr<Playlist>();
@@ -997,19 +1051,19 @@ Playlist::cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf)(nframes_t, nfra
 boost::shared_ptr<Playlist>
 Playlist::cut (list<AudioRange>& ranges, bool result_is_hidden)
 {
-	boost::shared_ptr<Playlist> (Playlist::*pmf)(nframes_t,nframes_t,bool) = &Playlist::cut;
+	boost::shared_ptr<Playlist> (Playlist::*pmf)(framepos_t,framecnt_t,bool) = &Playlist::cut;
 	return cut_copy (pmf, ranges, result_is_hidden);
 }
 
 boost::shared_ptr<Playlist>
 Playlist::copy (list<AudioRange>& ranges, bool result_is_hidden)
 {
-	boost::shared_ptr<Playlist> (Playlist::*pmf)(nframes_t,nframes_t,bool) = &Playlist::copy;
+	boost::shared_ptr<Playlist> (Playlist::*pmf)(framepos_t,framecnt_t,bool) = &Playlist::copy;
 	return cut_copy (pmf, ranges, result_is_hidden);
 }
 
 boost::shared_ptr<Playlist>
-Playlist::cut (nframes_t start, nframes_t cnt, bool result_is_hidden)
+Playlist::cut (framepos_t start, framecnt_t cnt, bool result_is_hidden)
 {
 	boost::shared_ptr<Playlist> the_copy;
 	RegionList thawlist;
@@ -1034,7 +1088,7 @@ Playlist::cut (nframes_t start, nframes_t cnt, bool result_is_hidden)
 }
 
 boost::shared_ptr<Playlist>
-Playlist::copy (nframes_t start, nframes_t cnt, bool result_is_hidden)
+Playlist::copy (framepos_t start, framecnt_t cnt, bool result_is_hidden)
 {
 	char buf[32];
 
@@ -1048,10 +1102,10 @@ Playlist::copy (nframes_t start, nframes_t cnt, bool result_is_hidden)
 }
 
 int
-Playlist::paste (boost::shared_ptr<Playlist> other, nframes_t position, float times)
+Playlist::paste (boost::shared_ptr<Playlist> other, framepos_t position, float times)
 {
 	times = fabs (times);
-	nframes_t old_length;
+	framecnt_t old_length;
 
 	{
 		RegionLock rl1 (this);
@@ -1060,8 +1114,8 @@ Playlist::paste (boost::shared_ptr<Playlist> other, nframes_t position, float ti
 		old_length = _get_maximum_extent();
 
 		int itimes = (int) floor (times);
-		nframes_t pos = position;
-		nframes_t shift = other->_get_maximum_extent();
+		framepos_t pos = position;
+		framecnt_t shift = other->_get_maximum_extent();
 		layer_t top_layer = regions.size();
 
 		while (itimes--) {
@@ -1093,13 +1147,13 @@ Playlist::paste (boost::shared_ptr<Playlist> other, nframes_t position, float ti
 
 
 void
-Playlist::duplicate (boost::shared_ptr<Region> region, nframes_t position, float times)
+Playlist::duplicate (boost::shared_ptr<Region> region, framepos_t position, float times)
 {
 	times = fabs (times);
 
 	RegionLock rl (this);
 	int itimes = (int) floor (times);
-	nframes_t pos = position;
+	framepos_t pos = position;
 
 	while (itimes--) {
 		boost::shared_ptr<Region> copy = RegionFactory::create (region);
@@ -1108,16 +1162,25 @@ Playlist::duplicate (boost::shared_ptr<Region> region, nframes_t position, float
 	}
 
 	if (floor (times) != times) {
-		nframes_t length = (nframes_t) floor (region->length() * (times - floor (times)));
+		framecnt_t length = (framecnt_t) floor (region->length() * (times - floor (times)));
 		string name;
 		_session.region_name (name, region->name(), false);
-		boost::shared_ptr<Region> sub = RegionFactory::create (region, 0, length, name, region->layer(), region->flags());
-		add_region_internal (sub, pos);
+		
+		{
+			PropertyList plist;
+			
+			plist.add (Properties::start, 0);
+			plist.add (Properties::length, length);
+			plist.add (Properties::name, name);
+			
+			boost::shared_ptr<Region> sub = RegionFactory::create (region, plist);
+			add_region_internal (sub, pos);
+		}
 	}
 }
 
 void
-Playlist::shift (nframes64_t at, nframes64_t distance, bool move_intersected, bool ignore_music_glue)
+Playlist::shift (framepos_t at, frameoffset_t distance, bool move_intersected, bool ignore_music_glue)
 {
 	RegionLock rlock (this);
 	RegionList copy (regions);
@@ -1155,7 +1218,7 @@ Playlist::shift (nframes64_t at, nframes64_t distance, bool move_intersected, bo
 }
 
 void
-Playlist::split (nframes64_t at)
+Playlist::split (framepos_t at)
 {
 	RegionLock rlock (this);
 	RegionList copy (regions);
@@ -1169,14 +1232,14 @@ Playlist::split (nframes64_t at)
 }
 
 void
-Playlist::split_region (boost::shared_ptr<Region> region, nframes_t playlist_position)
+Playlist::split_region (boost::shared_ptr<Region> region, framepos_t playlist_position)
 {
 	RegionLock rl (this);
 	_split_region (region, playlist_position);
 }
 
 void
-Playlist::_split_region (boost::shared_ptr<Region> region, nframes_t playlist_position)
+Playlist::_split_region (boost::shared_ptr<Region> region, framepos_t playlist_position)
 {
 	if (!region->covers (playlist_position)) {
 		return;
@@ -1189,8 +1252,8 @@ Playlist::_split_region (boost::shared_ptr<Region> region, nframes_t playlist_po
 
 	boost::shared_ptr<Region> left;
 	boost::shared_ptr<Region> right;
-	nframes_t before;
-	nframes_t after;
+	frameoffset_t before;
+	frameoffset_t after;
 	string before_name;
 	string after_name;
 
@@ -1203,10 +1266,30 @@ Playlist::_split_region (boost::shared_ptr<Region> region, nframes_t playlist_po
 	after = region->length() - before;
 
 	_session.region_name (before_name, region->name(), false);
-	left = RegionFactory::create (region, 0, before, before_name, region->layer(), Region::Flag (region->flags()|Region::LeftOfSplit));
+
+	{
+		PropertyList plist;
+		
+		plist.add (Properties::start, 0);
+		plist.add (Properties::length, before);
+		plist.add (Properties::name, before_name);
+		plist.add (Properties::left_of_split, true);
+		
+		left = RegionFactory::create (region, plist);
+	}
 
 	_session.region_name (after_name, region->name(), false);
-	right = RegionFactory::create (region, before, after, after_name, region->layer(), Region::Flag (region->flags()|Region::RightOfSplit));
+
+	{
+		PropertyList plist;
+		
+		plist.add (Properties::start, before);
+		plist.add (Properties::length, after);
+		plist.add (Properties::name, after_name);
+		plist.add (Properties::right_of_split, true);
+
+		right = RegionFactory::create (region, plist);
+	}
 
 	add_region_internal (left, region->position());
 	add_region_internal (right, region->position() + before);
@@ -1231,7 +1314,7 @@ Playlist::_split_region (boost::shared_ptr<Region> region, nframes_t playlist_po
 }
 
 void
-Playlist::possibly_splice (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude)
+Playlist::possibly_splice (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude)
 {
 	if (_splicing || in_set_state) {
 		/* don't respond to splicing moves or state setting */
@@ -1244,7 +1327,7 @@ Playlist::possibly_splice (nframes_t at, nframes64_t distance, boost::shared_ptr
 }
 
 void
-Playlist::possibly_splice_unlocked (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude)
+Playlist::possibly_splice_unlocked (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude)
 {
 	if (_splicing || in_set_state) {
 		/* don't respond to splicing moves or state setting */
@@ -1257,7 +1340,7 @@ Playlist::possibly_splice_unlocked (nframes_t at, nframes64_t distance, boost::s
 }
 
 void
-Playlist::splice_locked (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude)
+Playlist::splice_locked (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude)
 {
 	{
 		RegionLock rl (this);
@@ -1266,13 +1349,13 @@ Playlist::splice_locked (nframes_t at, nframes64_t distance, boost::shared_ptr<R
 }
 
 void
-Playlist::splice_unlocked (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude)
+Playlist::splice_unlocked (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude)
 {
 	core_splice (at, distance, exclude);
 }
 
 void
-Playlist::core_splice (nframes_t at, nframes64_t distance, boost::shared_ptr<Region> exclude)
+Playlist::core_splice (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude)
 {
 	_splicing = true;
 
@@ -1283,7 +1366,7 @@ Playlist::core_splice (nframes_t at, nframes64_t distance, boost::shared_ptr<Reg
 		}
 
 		if ((*i)->position() >= at) {
-			nframes64_t new_pos = (*i)->position() + distance;
+			framepos_t new_pos = (*i)->position() + distance;
 			if (new_pos < 0) {
 				new_pos = 0;
 			} else if (new_pos >= max_frames - (*i)->length()) {
@@ -1300,7 +1383,7 @@ Playlist::core_splice (nframes_t at, nframes64_t distance, boost::shared_ptr<Reg
 }
 
 void
-Playlist::region_bounds_changed (Change what_changed, boost::shared_ptr<Region> region)
+Playlist::region_bounds_changed (PropertyChange what_changed, boost::shared_ptr<Region> region)
 {
 	if (in_set_state || _splicing || _nudging || _shuffling) {
 		return;
@@ -1327,16 +1410,16 @@ Playlist::region_bounds_changed (Change what_changed, boost::shared_ptr<Region> 
 		regions.insert (upper_bound (regions.begin(), regions.end(), region, cmp), region);
 	}
 
-	if (what_changed & Change (ARDOUR::PositionChanged|ARDOUR::LengthChanged)) {
+	if (what_changed & PropertyChange (ARDOUR::PositionChanged|ARDOUR::LengthChanged)) {
 
-		nframes64_t delta = 0;
+		frameoffset_t delta = 0;
 
 		if (what_changed & ARDOUR::PositionChanged) {
-			delta = (nframes64_t) region->position() - (nframes64_t) region->last_position();
+			delta = region->position() - region->last_position();
 		}
 
 		if (what_changed & ARDOUR::LengthChanged) {
-			delta += (nframes64_t) region->length() - (nframes64_t) region->last_length();
+			delta += region->length() - region->last_length();
 		}
 
 		if (delta) {
@@ -1359,7 +1442,7 @@ Playlist::region_bounds_changed (Change what_changed, boost::shared_ptr<Region> 
 }
 
 void
-Playlist::region_changed_proxy (Change what_changed, boost::weak_ptr<Region> weak_region)
+Playlist::region_changed_proxy (PropertyChange what_changed, boost::weak_ptr<Region> weak_region)
 {
 	boost::shared_ptr<Region> region (weak_region.lock());
 
@@ -1373,9 +1456,9 @@ Playlist::region_changed_proxy (Change what_changed, boost::weak_ptr<Region> wea
 }
 
 bool
-Playlist::region_changed (Change what_changed, boost::shared_ptr<Region> region)
+Playlist::region_changed (PropertyChange what_changed, boost::shared_ptr<Region> region)
 {
-	Change our_interests = Change (Region::MuteChanged|Region::LayerChanged|Region::OpacityChanged);
+	PropertyChange our_interests = PropertyChange (Region::MuteChanged|Region::LayerChanged|Region::OpacityChanged);
 	bool save = false;
 
 	if (in_set_state || in_flush) {
@@ -1388,11 +1471,11 @@ Playlist::region_changed (Change what_changed, boost::shared_ptr<Region> region)
 	}
 
 	if ((what_changed & our_interests) &&
-	    !(what_changed & Change (ARDOUR::PositionChanged|ARDOUR::LengthChanged))) {
+	    !(what_changed & PropertyChange (ARDOUR::PositionChanged|ARDOUR::LengthChanged))) {
 		check_dependents (region, false);
 	}
 
-	if (what_changed & Change (ARDOUR::PositionChanged)) {
+	if (what_changed & PropertyChange (ARDOUR::PositionChanged)) {
 		notify_region_moved (region);
 	}
 
@@ -1447,7 +1530,7 @@ Playlist::clear (bool with_signals)
  **********************************************************************/
 
 Playlist::RegionList *
-Playlist::regions_at (nframes_t frame)
+Playlist::regions_at (framepos_t frame)
 
 {
 	RegionLock rlock (this);
@@ -1455,7 +1538,7 @@ Playlist::regions_at (nframes_t frame)
 }
 
 boost::shared_ptr<Region>
-Playlist::top_region_at (nframes_t frame)
+Playlist::top_region_at (framepos_t frame)
 
 {
 	RegionLock rlock (this);
@@ -1473,7 +1556,7 @@ Playlist::top_region_at (nframes_t frame)
 }
 
 boost::shared_ptr<Region>
-Playlist::top_unmuted_region_at (nframes_t frame)
+Playlist::top_unmuted_region_at (framepos_t frame)
 
 {
 	RegionLock rlock (this);
@@ -1504,12 +1587,12 @@ Playlist::top_unmuted_region_at (nframes_t frame)
 }
 
 Playlist::RegionList*
-Playlist::regions_to_read (nframes_t start, nframes_t end)
+Playlist::regions_to_read (framepos_t start, framepos_t end)
 {
 	/* Caller must hold lock */
 
 	RegionList covering;
-	set<nframes_t> to_check;
+	set<framepos_t> to_check;
 	set<boost::shared_ptr<Region> > unique;
 	RegionList here;
 
@@ -1562,7 +1645,7 @@ Playlist::regions_to_read (nframes_t start, nframes_t end)
 
 	} else {
 
-		for (set<nframes_t>::iterator t = to_check.begin(); t != to_check.end(); ++t) {
+		for (set<framepos_t>::iterator t = to_check.begin(); t != to_check.end(); ++t) {
 
 			here.clear ();
 
@@ -1607,7 +1690,7 @@ Playlist::regions_to_read (nframes_t start, nframes_t end)
 }
 
 Playlist::RegionList *
-Playlist::find_regions_at (nframes_t frame)
+Playlist::find_regions_at (framepos_t frame)
 {
 	/* Caller must hold lock */
 
@@ -1623,7 +1706,7 @@ Playlist::find_regions_at (nframes_t frame)
 }
 
 Playlist::RegionList *
-Playlist::regions_touched (nframes_t start, nframes_t end)
+Playlist::regions_touched (framepos_t start, framepos_t end)
 {
 	RegionLock rlock (this);
 	RegionList *rlist = new RegionList;
@@ -1637,8 +1720,8 @@ Playlist::regions_touched (nframes_t start, nframes_t end)
 	return rlist;
 }
 
-nframes64_t
-Playlist::find_next_transient (nframes64_t from, int dir)
+framepos_t
+Playlist::find_next_transient (framepos_t from, int dir)
 {
 	RegionLock rlock (this);
 	AnalysisFeatureList points;
@@ -1698,11 +1781,11 @@ Playlist::find_next_transient (nframes64_t from, int dir)
 }
 
 boost::shared_ptr<Region>
-Playlist::find_next_region (nframes_t frame, RegionPoint point, int dir)
+Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 {
 	RegionLock rlock (this);
 	boost::shared_ptr<Region> ret;
-	nframes_t closest = max_frames;
+	framepos_t closest = max_frames;
 
 	bool end_iter = false;
 
@@ -1710,9 +1793,9 @@ Playlist::find_next_region (nframes_t frame, RegionPoint point, int dir)
 
 		if(end_iter) break;
 
-		nframes_t distance;
+		frameoffset_t distance;
 		boost::shared_ptr<Region> r = (*i);
-		nframes_t pos = 0;
+		framepos_t pos = 0;
 
 		switch (point) {
 		case Start:
@@ -1759,20 +1842,20 @@ Playlist::find_next_region (nframes_t frame, RegionPoint point, int dir)
 	return ret;
 }
 
-nframes64_t
-Playlist::find_next_region_boundary (nframes64_t frame, int dir)
+framepos_t
+Playlist::find_next_region_boundary (framepos_t frame, int dir)
 {
 	RegionLock rlock (this);
 
-	nframes64_t closest = max_frames;
-	nframes64_t ret = -1;
+	framepos_t closest = max_frames;
+	framepos_t ret = -1;
 
 	if (dir > 0) {
 
 		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 
 			boost::shared_ptr<Region> r = (*i);
-			nframes64_t distance;
+			frameoffset_t distance;
 
 			if (r->first_frame() > frame) {
 
@@ -1800,7 +1883,7 @@ Playlist::find_next_region_boundary (nframes64_t frame, int dir)
 		for (RegionList::reverse_iterator i = regions.rbegin(); i != regions.rend(); ++i) {
 
 			boost::shared_ptr<Region> r = (*i);
-			nframes64_t distance;
+			frameoffset_t distance;
 
 			if (r->last_frame() < frame) {
 
@@ -1895,15 +1978,13 @@ Playlist::set_state (const XMLNode& node, int version)
 
 			if ((region = region_by_id (id))) {
 
-				Change what_changed = Change (0);
-
 				region->freeze ();
 
-				if (region->set_live_state (*child, version, what_changed, false)) {
+				if (region->set_state (*child, version)) {
 					region->thaw ();
 					continue;
 				}
-
+				
 			} else if ((region = RegionFactory::create (_session, *child, true)) != 0) {
 				region->freeze ();
 			} else {
@@ -1991,19 +2072,19 @@ Playlist::n_regions() const
 	return regions.size();
 }
 
-nframes_t
+framecnt_t
 Playlist::get_maximum_extent () const
 {
 	RegionLock rlock (const_cast<Playlist *>(this), false);
 	return _get_maximum_extent ();
 }
 
-ARDOUR::nframes_t
+framecnt_t
 Playlist::_get_maximum_extent () const
 {
 	RegionList::const_iterator i;
-	nframes_t max_extent = 0;
-	nframes_t end = 0;
+	framecnt_t max_extent = 0;
+	framepos_t end = 0;
 
 	for (i = regions.begin(); i != regions.end(); ++i) {
 		if ((end = (*i)->position() + (*i)->length()) > max_extent) {
@@ -2063,8 +2144,8 @@ Playlist::relayer ()
 	int const divisions = 512;
 
 	/* find the start and end positions of the regions on this playlist */
-	nframes_t start = UINT_MAX;
-	nframes_t end = 0;
+	framepos_t start = UINT_MAX;
+	framepos_t end = 0;
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 		start = min (start, (*i)->position());
 		end = max (end, (*i)->position() + (*i)->length());
@@ -2286,10 +2367,10 @@ Playlist::move_region_to_layer (layer_t target_layer, boost::shared_ptr<Region> 
 }
 
 void
-Playlist::nudge_after (nframes_t start, nframes_t distance, bool forwards)
+Playlist::nudge_after (framepos_t start, framecnt_t distance, bool forwards)
 {
 	RegionList::iterator i;
-	nframes_t new_pos;
+	framepos_t new_pos;
 	bool moved = false;
 
 	_nudging = true;
@@ -2400,7 +2481,7 @@ void
 Playlist::shuffle (boost::shared_ptr<Region> region, int dir)
 {
 	bool moved = false;
-	nframes_t new_pos;
+	framepos_t new_pos;
 
 	if (region->locked()) {
 		return;
@@ -2570,7 +2651,7 @@ Playlist::set_explicit_relayering (bool e)
 
 
 bool
-Playlist::has_region_at (nframes64_t const p) const
+Playlist::has_region_at (framepos_t const p) const
 {
 	RegionLock (const_cast<Playlist *> (this));
 	

@@ -299,7 +299,7 @@ void
 TempoMap::move_tempo (TempoSection& tempo, const BBT_Time& when)
 {
 	if (move_metric_section (tempo, when) == 0) {
-		StateChanged (Change (0));
+		StateChanged (PropertyChange (0));
 	}
 }
 
@@ -307,7 +307,7 @@ void
 TempoMap::move_meter (MeterSection& meter, const BBT_Time& when)
 {
 	if (move_metric_section (meter, when) == 0) {
-		StateChanged (Change (0));
+		StateChanged (PropertyChange (0));
 	}
 }
 
@@ -334,7 +334,7 @@ TempoMap::remove_tempo (const TempoSection& tempo)
 	}
 
 	if (removed) {
-		StateChanged (Change (0));
+		StateChanged (PropertyChange (0));
 	}
 }
 
@@ -361,7 +361,7 @@ TempoMap::remove_meter (const MeterSection& tempo)
 	}
 
 	if (removed) {
-		StateChanged (Change (0));
+		StateChanged (PropertyChange (0));
 	}
 }
 
@@ -406,7 +406,7 @@ TempoMap::add_tempo (const Tempo& tempo, BBT_Time where)
 		do_insert (new TempoSection (where, tempo.beats_per_minute(), tempo.note_type()), true);
 	}
 
-	StateChanged (Change (0));
+	StateChanged (PropertyChange (0));
 }
 
 void
@@ -417,7 +417,7 @@ TempoMap::add_tempo (const Tempo& tempo, nframes64_t where)
 		do_insert (new TempoSection (where, tempo.beats_per_minute(), tempo.note_type()), false);
 	}
 
-	StateChanged (Change (0));
+	StateChanged (PropertyChange (0));
 }
 
 void
@@ -445,7 +445,7 @@ TempoMap::replace_tempo (TempoSection& existing, const Tempo& replacement)
 	}
 
 	if (replaced) {
-		StateChanged (Change (0));
+		StateChanged (PropertyChange (0));
 	}
 }
 
@@ -474,7 +474,7 @@ TempoMap::add_meter (const Meter& meter, BBT_Time where)
 		do_insert (new MeterSection (where, meter.beats_per_bar(), meter.note_divisor()), true);
 	}
 
-	StateChanged (Change (0));
+	StateChanged (PropertyChange (0));
 }
 
 void
@@ -485,7 +485,7 @@ TempoMap::add_meter (const Meter& meter, nframes64_t where)
 		do_insert (new MeterSection (where, meter.beats_per_bar(), meter.note_divisor()), false);
 	}
 
-	StateChanged (Change (0));
+	StateChanged (PropertyChange (0));
 }
 
 void
@@ -511,7 +511,7 @@ TempoMap::replace_meter (MeterSection& existing, const Meter& replacement)
 	}
 
 	if (replaced) {
-		StateChanged (Change (0));
+		StateChanged (PropertyChange (0));
 	}
 }
 
@@ -524,7 +524,7 @@ TempoMap::change_initial_tempo (double beats_per_minute, double note_type)
 	for (Metrics::iterator i = metrics->begin(); i != metrics->end(); ++i) {
 		if ((t = dynamic_cast<TempoSection*> (*i)) != 0) {
 			*((Tempo*) t) = newtempo;
-			StateChanged (Change (0));
+			StateChanged (PropertyChange (0));
 			break;
 		}
 	}
@@ -570,7 +570,7 @@ TempoMap::change_existing_tempo_at (nframes64_t where, double beats_per_minute, 
 	/* reset */
 
 	*((Tempo*)prev) = newtempo;
-	StateChanged (Change (0));
+	StateChanged (PropertyChange (0));
 }
 
 const MeterSection&
@@ -1609,7 +1609,7 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 		}
 	}
 
-	StateChanged (Change (0));
+	StateChanged (PropertyChange (0));
 
 	return 0;
 }
@@ -1673,7 +1673,7 @@ TempoMap::insert_time (nframes64_t where, nframes64_t amount)
 
 	timestamp_metrics (false);
 
-	StateChanged (Change (0));
+	StateChanged (PropertyChange (0));
 }
 
 BBT_Time

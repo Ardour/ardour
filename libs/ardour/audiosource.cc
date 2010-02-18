@@ -265,15 +265,15 @@ AudioSource::initialize_peakfile (bool newfile, ustring audio_path)
 	return 0;
 }
 
-nframes_t
-AudioSource::read (Sample *dst, sframes_t start, nframes_t cnt, int /*channel*/) const
+framecnt_t
+AudioSource::read (Sample *dst, framepos_t start, framecnt_t cnt, int /*channel*/) const
 {
 	Glib::Mutex::Lock lm (_lock);
 	return read_unlocked (dst, start, cnt);
 }
 
-nframes_t
-AudioSource::write (Sample *dst, nframes_t cnt)
+framecnt_t
+AudioSource::write (Sample *dst, framecnt_t cnt)
 {
 	Glib::Mutex::Lock lm (_lock);
 	/* any write makes the fill not removable */
@@ -282,7 +282,7 @@ AudioSource::write (Sample *dst, nframes_t cnt)
 }
 
 int
-AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, sframes_t start, nframes_t cnt, double samples_per_visual_peak) const
+AudioSource::read_peaks (PeakData *peaks, framecnt_t npeaks, framepos_t start, framecnt_t cnt, double samples_per_visual_peak) const
 {
 	return read_peaks_with_fpp (peaks, npeaks, start, cnt, samples_per_visual_peak, _FPP);
 }
@@ -292,8 +292,8 @@ AudioSource::read_peaks (PeakData *peaks, nframes_t npeaks, sframes_t start, nfr
  */
 
 int
-AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t start, nframes_t cnt,
-				  double samples_per_visual_peak, nframes_t samples_per_file_peak) const
+AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t start, framecnt_t cnt,
+				  double samples_per_visual_peak, framecnt_t samples_per_file_peak) const
 {
 	Glib::Mutex::Lock lm (_lock);
 	double scale;
@@ -302,7 +302,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t s
 	PeakData::PeakDatum xmin;
 	int32_t to_read;
 	uint32_t nread;
-	nframes_t zero_fill = 0;
+	framecnt_t zero_fill = 0;
 	int ret = -1;
 	PeakData* staging = 0;
 	Sample* raw_staging = 0;
@@ -329,8 +329,8 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t s
 	if (cnt > _length - start) {
 		// cerr << "too close to end @ " << _length << " given " << start << " + " << cnt << endl;
 		cnt = _length - start;
-		nframes_t old = npeaks;
-		npeaks = min ((nframes_t) floor (cnt / samples_per_visual_peak), npeaks);
+		framecnt_t old = npeaks;
+		npeaks = min ((framecnt_t) floor (cnt / samples_per_visual_peak), npeaks);
 		zero_fill = old - npeaks;
 	}
 
@@ -352,7 +352,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t s
 			return -1;
 		}
 
-		for (nframes_t i = 0; i < npeaks; ++i) {
+		for (framecnt_t i = 0; i < npeaks; ++i) {
 			peaks[i].max = raw_staging[i];
 			peaks[i].min = raw_staging[i];
 		}
@@ -403,7 +403,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t s
 	}
 
 
-	nframes_t tnp;
+	framecnt_t tnp;
 
 	if (scale < 1.0) {
 
@@ -420,20 +420,20 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t s
 		    to avoid confusion, I'll refer to the requested peaks as visual_peaks and the peakfile peaks as stored_peaks
 		*/
 
-		const uint32_t chunksize = (uint32_t) min (expected_peaks, 65536.0);
-
+		const framecnt_t chunksize = (framecnt_t) min (expected_peaks, 65536.0);
+		
 		staging = new PeakData[chunksize];
 
 		/* compute the rounded up frame position  */
 
-		nframes_t current_frame = start;
-		nframes_t current_stored_peak = (nframes_t) ceil (current_frame / (double) samples_per_file_peak);
-		uint32_t       next_visual_peak  = (uint32_t) ceil (current_frame / samples_per_visual_peak);
-		double         next_visual_peak_frame = next_visual_peak * samples_per_visual_peak;
-		uint32_t       stored_peak_before_next_visual_peak = (nframes_t) next_visual_peak_frame / samples_per_file_peak;
-		uint32_t       nvisual_peaks = 0;
-		uint32_t       stored_peaks_read = 0;
-		uint32_t       i = 0;
+		framepos_t current_frame = start;
+		framepos_t current_stored_peak = (framepos_t) ceil (current_frame / (double) samples_per_file_peak);
+		framepos_t next_visual_peak  = (framepos_t) ceil (current_frame / samples_per_visual_peak);
+		double     next_visual_peak_frame = next_visual_peak * samples_per_visual_peak;
+		framepos_t stored_peak_before_next_visual_peak = (framepos_t) next_visual_peak_frame / samples_per_file_peak;
+		framecnt_t nvisual_peaks = 0;
+		framecnt_t stored_peaks_read = 0;
+		framecnt_t i = 0;
 
 		/* handle the case where the initial visual peak is on a pixel boundary */
 
@@ -452,7 +452,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t s
 			if (i == stored_peaks_read) {
 
 				uint32_t       start_byte = current_stored_peak * sizeof(PeakData);
-				tnp = min ((nframes_t)(_length/samples_per_file_peak - current_stored_peak), (nframes_t) expected_peaks);
+				tnp = min ((framecnt_t)(_length/samples_per_file_peak - current_stored_peak), (framecnt_t) expected_peaks);
 				to_read = min (chunksize, tnp);
 
 #ifdef DEBUG_READ_PEAKS
@@ -527,14 +527,14 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t s
 		   data on the fly.
 		*/
 
-		nframes_t frames_read = 0;
-		nframes_t current_frame = start;
-		nframes_t i = 0;
-		nframes_t nvisual_peaks = 0;
-		nframes_t chunksize = (nframes_t) min (cnt, (nframes_t) 4096);
+		framecnt_t frames_read = 0;
+		framepos_t current_frame = start;
+		framecnt_t i = 0;
+		framecnt_t nvisual_peaks = 0;
+		framecnt_t chunksize = (framecnt_t) min (cnt, (framecnt_t) 4096);
 		raw_staging = new Sample[chunksize];
 
-		nframes_t frame_pos = start;
+		framepos_t frame_pos = start;
 		double pixel_pos = floor (frame_pos / samples_per_visual_peak);
 		double next_pixel_pos = ceil (frame_pos / samples_per_visual_peak);
 		double pixels_per_frame = 1.0 / samples_per_visual_peak;
@@ -546,7 +546,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t s
 
 			if (i == frames_read) {
 
-				to_read = min (chunksize, nframes_t(_length - current_frame));
+				to_read = min (chunksize, (framecnt_t)(_length - current_frame));
 
 				if (to_read == 0) {
 					/* XXX ARGH .. out by one error ... need to figure out why this happens
@@ -612,12 +612,12 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t s
 int
 AudioSource::build_peaks_from_scratch ()
 {
-	nframes_t current_frame;
-	nframes_t cnt;
+	framepos_t current_frame;
+	framecnt_t cnt;
 	Sample* buf = 0;
-	nframes_t frames_read;
-	nframes_t frames_to_read;
-	const nframes_t bufsize = 65536; // 256kB per disk read for mono data is about ideal
+	framecnt_t frames_read;
+	framecnt_t frames_to_read;
+	const framecnt_t bufsize = 65536; // 256kB per disk read for mono data is about ideal
 
 	int ret = -1;
 
@@ -708,23 +708,23 @@ AudioSource::done_with_peakfile_writes (bool done)
 }
 
 int
-AudioSource::compute_and_write_peaks (Sample* buf, sframes_t first_frame, nframes_t cnt,
-		bool force, bool intermediate_peaks_ready)
+AudioSource::compute_and_write_peaks (Sample* buf, framepos_t first_frame, framecnt_t cnt,
+				      bool force, bool intermediate_peaks_ready)
 {
 	return compute_and_write_peaks (buf, first_frame, cnt, force, intermediate_peaks_ready, _FPP);
 }
 
 int
-AudioSource::compute_and_write_peaks (Sample* buf, sframes_t first_frame, nframes_t cnt,
-		bool force, bool intermediate_peaks_ready, nframes_t fpp)
+AudioSource::compute_and_write_peaks (Sample* buf, framepos_t first_frame, framecnt_t cnt,
+				      bool force, bool intermediate_peaks_ready, framecnt_t fpp)
 {
 	Sample* buf2 = 0;
-	nframes_t to_do;
+	framecnt_t to_do;
 	uint32_t  peaks_computed;
 	PeakData* peakbuf = 0;
 	int ret = -1;
-	nframes_t current_frame;
-	nframes_t frames_done;
+	framepos_t current_frame;
+	framecnt_t frames_done;
 	const size_t blocksize = (128 * 1024);
 	off_t first_peak_byte;
 
@@ -828,7 +828,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, sframes_t first_frame, nframe
 			break;
 		}
 
-		nframes_t this_time = min (fpp, to_do);
+		framecnt_t this_time = min (fpp, to_do);
 
 		peakbuf[peaks_computed].max = buf[0];
 		peakbuf[peaks_computed].min = buf[0];
@@ -903,7 +903,7 @@ AudioSource::truncate_peakfile ()
 	}
 }
 
-nframes_t
+framecnt_t
 AudioSource::available_peaks (double zoom_factor) const
 {
 	if (zoom_factor < _FPP) {

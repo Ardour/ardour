@@ -24,46 +24,52 @@
 #include <set>
 #include <string>
 #include <stdint.h>
-#include "pbd/signals.h"
 
+#include "pbd/signals.h"
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
 
 #include "ardour/types.h"
+#include "ardour/session_object.h"
 
 namespace ARDOUR {
+
+namespace Properties {
+	extern PBD::PropertyDescriptor<bool> relative;
+	extern PBD::PropertyDescriptor<bool> active;
+	extern PBD::PropertyDescriptor<bool> gain;
+	extern PBD::PropertyDescriptor<bool> mute;
+	extern PBD::PropertyDescriptor<bool> solo;
+	extern PBD::PropertyDescriptor<bool> recenable;
+	extern PBD::PropertyDescriptor<bool> select;
+	extern PBD::PropertyDescriptor<bool> edit;
+	/* we use this, but its declared in region.cc */
+	extern PBD::PropertyDescriptor<bool> hidden;
+};
 
 class Route;
 class Track;
 class AudioTrack;
 class Session;
 
-class RouteGroup : public PBD::Stateful, public PBD::ScopedConnectionList {
-public:
-	enum Flag {
-		Relative = 0x1,
-		Active = 0x2,
-		Hidden = 0x4
-	};
-
-	enum Property {
-		Gain = 0x1,
-		Mute = 0x2,
-		Solo = 0x4,
-		RecEnable = 0x8,
-		Select = 0x10,
-		Edit = 0x20
-	};
-
-	RouteGroup (Session& s, const std::string &n, Flag f = Flag(0), Property p = Property(0));
+class RouteGroup : public SessionObject 
+{
+  public:
+	static void make_property_quarks();
+	
+	RouteGroup (Session& s, const std::string &n);
 	~RouteGroup ();
 
-	const std::string& name() { return _name; }
-	void set_name (std::string str);
+	bool is_active () const { return _active.val(); }
+	bool is_relative () const { return _relative.val(); }
+	bool is_hidden () const { return _hidden.val(); }
+	bool is_gain () const { return _gain.val(); }
+	bool is_mute () const { return _mute.val(); }
+	bool is_solo () const { return _solo.val(); }
+	bool is_recenable () const { return _recenable.val(); }
+	bool is_select () const { return _select.val(); }
+	bool is_edit () const { return _edit.val(); }
 
-	bool is_active () const { return _flags & Active; }
-	bool is_relative () const { return _flags & Relative; }
-	bool is_hidden () const { return _flags & Hidden; }
 	bool empty() const {return routes->empty();}
 	size_t size() const { return routes->size();}
 
@@ -74,20 +80,14 @@ public:
 	void set_relative (bool yn, void *src);
 	void set_hidden (bool yn, void *src);
 
-	bool property (Property p) const {
-		return ((_properties & p) == p);
-	}
+	void set_gain (bool yn);
+	void set_mute (bool yn);
+	void set_solo (bool yn);
+	void set_recenable (bool yn);
+	void set_select (bool yn);
+	void set_edit (bool yn);
 
-	bool active_property (Property p) const {
-		return is_active() && property (p);
-	}
-
-	void set_property (Property p, bool v) {
-		_properties = (Property) (_properties & ~p);
-		if (v) {
-			_properties = (Property) (_properties | p);
-		}
-	}
+	bool enabled_property (PBD::PropertyID);
 
 	int add (boost::shared_ptr<Route>);
 	int remove (boost::shared_ptr<Route>);
@@ -131,17 +131,26 @@ public:
 	PBD::Signal0<void> changed;
 	PBD::Signal1<void,void*> FlagsChanged;
 
+	static PBD::PropertyChange FlagsChange;
+	static PBD::PropertyChange PropertiesChange;
+
 	XMLNode& get_state ();
 	
 	int set_state (const XMLNode&, int version);
 	
 private:
-	Session& _session;
 	boost::shared_ptr<RouteList> routes;
 	boost::shared_ptr<Route> subgroup_bus;
-	std::string _name;
-	Flag _flags;
-	Property _properties;
+
+	PBD::Property<bool> _relative;
+	PBD::Property<bool> _active;
+	PBD::Property<bool> _hidden;
+	PBD::Property<bool> _gain;
+	PBD::Property<bool> _mute;
+	PBD::Property<bool> _solo;
+	PBD::Property<bool> _recenable;
+	PBD::Property<bool> _select;
+	PBD::Property<bool> _edit;
 
 	void remove_when_going_away (boost::weak_ptr<Route>);
 	int set_state_2X (const XMLNode&, int);

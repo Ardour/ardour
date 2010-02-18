@@ -152,7 +152,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion>
 	show_all();
 
 	name_changed ();
-	bounds_changed (Change (StartChanged|LengthChanged|PositionChanged|Region::SyncOffsetChanged));
+	bounds_changed (PropertyChange (StartChanged|LengthChanged|PositionChanged|Region::SyncOffsetChanged));
 	gain_changed ();
 
 	_region->StateChanged.connect (state_connection, ui_bind (&AudioRegionEditor::region_changed, this, _1), gui_context());
@@ -167,13 +167,13 @@ AudioRegionEditor::~AudioRegionEditor ()
 }
 
 void
-AudioRegionEditor::region_changed (PBD::Change what_changed)
+AudioRegionEditor::region_changed (PBD::PropertyChange what_changed)
 {
 	if (what_changed & NameChanged) {
 		name_changed ();
 	}
 
-	if (what_changed & Change (BoundsChanged|StartChanged|Region::SyncOffsetChanged)) {
+	if (what_changed & PropertyChange (BoundsChanged|StartChanged|Region::SyncOffsetChanged)) {
 		bounds_changed (what_changed);
 	}
 
@@ -326,16 +326,16 @@ AudioRegionEditor::name_changed ()
 }
 
 void
-AudioRegionEditor::bounds_changed (Change what_changed)
+AudioRegionEditor::bounds_changed (PropertyChange what_changed)
 {
-	if ((what_changed & Change (PositionChanged|LengthChanged)) == Change (PositionChanged|LengthChanged)) {
+	if ((what_changed & PropertyChange (PositionChanged|LengthChanged)) == PropertyChange (PositionChanged|LengthChanged)) {
 		position_clock.set (_region->position(), true);
 		end_clock.set (_region->position() + _region->length() - 1, true);
 		length_clock.set (_region->length(), true);
-	} else if (what_changed & Change (PositionChanged)) {
+	} else if (what_changed & PropertyChange (PositionChanged)) {
 		position_clock.set (_region->position(), true);
 		end_clock.set (_region->position() + _region->length() - 1, true);
-	} else if (what_changed & Change (LengthChanged)) {
+	} else if (what_changed & PropertyChange (LengthChanged)) {
 		end_clock.set (_region->position() + _region->length() - 1, true);
 		length_clock.set (_region->length(), true);
 	}
@@ -412,6 +412,6 @@ AudioRegionEditor::sync_offset_relative_clock_changed ()
 bool
 AudioRegionEditor::on_delete_event (GdkEventAny* ev)
 {
-	bounds_changed (Change (StartChanged|LengthChanged|PositionChanged|Region::SyncOffsetChanged));
+	bounds_changed (PropertyChange (StartChanged|LengthChanged|PositionChanged|Region::SyncOffsetChanged));
 	return RegionEditor::on_delete_event (ev);
 }

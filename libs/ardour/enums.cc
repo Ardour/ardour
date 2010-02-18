@@ -33,7 +33,6 @@
 #include "ardour/midi_track.h"
 #include "ardour/mute_master.h"
 #include "ardour/panner.h"
-#include "ardour/region_command.h"
 #include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
@@ -94,9 +93,6 @@ setup_enum_writer ()
 	Source::Flag _Source_Flag;
 	Diskstream::Flag _Diskstream_Flag;
 	Location::Flags _Location_Flags;
-	RouteGroup::Flag _RouteGroup_Flag;
-	RouteGroup::Property _RouteGroup_Property;
-	Region::Flag _Region_Flag;
 	Region::PositionLockStyle _Region_PositionLockStyle;
 	Track::FreezeState _Track_FreezeState;
 	AutomationList::InterpolationStyle _AutomationList_InterpolationStyle;
@@ -122,7 +118,6 @@ setup_enum_writer ()
 	Session::PostTransportWork _Session_PostTransportWork;
 	Session::SlaveState _Session_SlaveState;
 	MTC_Status _MIDI_MTC_Status;
-	RegionCommand::Property _RegionCommandProperty;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -410,43 +405,9 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Location, IsStart);
 	REGISTER_BITS (_Location_Flags);
 
-	REGISTER_CLASS_ENUM (RouteGroup, Relative);
-	REGISTER_CLASS_ENUM (RouteGroup, Active);
-	REGISTER_CLASS_ENUM (RouteGroup, Hidden);
-	REGISTER_BITS (_RouteGroup_Flag);
-
-	REGISTER_CLASS_ENUM (RouteGroup, Gain);
-	REGISTER_CLASS_ENUM (RouteGroup, Mute);
-	REGISTER_CLASS_ENUM (RouteGroup, Solo);
-	REGISTER_CLASS_ENUM (RouteGroup, RecEnable);
-	REGISTER_CLASS_ENUM (RouteGroup, Select);
-	REGISTER_CLASS_ENUM (RouteGroup, Edit);
-	REGISTER_BITS (_RouteGroup_Property);
-
 	REGISTER_CLASS_ENUM (Panner, SameDirection);
 	REGISTER_CLASS_ENUM (Panner, OppositeDirection);
 	REGISTER (_Panner_LinkDirection);
-
-	REGISTER_CLASS_ENUM (Region, Muted);
-	REGISTER_CLASS_ENUM (Region, Opaque);
-	REGISTER_CLASS_ENUM (Region, EnvelopeActive);
-	REGISTER_CLASS_ENUM (Region, DefaultFadeIn);
-	REGISTER_CLASS_ENUM (Region, DefaultFadeOut);
-	REGISTER_CLASS_ENUM (Region, Locked);
-	REGISTER_CLASS_ENUM (Region, PositionLocked);
-	REGISTER_CLASS_ENUM (Region, Automatic);
-	REGISTER_CLASS_ENUM (Region, WholeFile);
-	REGISTER_CLASS_ENUM (Region, FadeIn);
-	REGISTER_CLASS_ENUM (Region, FadeOut);
-	REGISTER_CLASS_ENUM (Region, Copied);
-	REGISTER_CLASS_ENUM (Region, Import);
-	REGISTER_CLASS_ENUM (Region, External);
-	REGISTER_CLASS_ENUM (Region, SyncMarked);
-	REGISTER_CLASS_ENUM (Region, LeftOfSplit);
-	REGISTER_CLASS_ENUM (Region, RightOfSplit);
-	REGISTER_CLASS_ENUM (Region, Hidden);
-	REGISTER_CLASS_ENUM (Region, DoNotSendPropertyChanges);
-	REGISTER_BITS (_Region_Flag);
 
 	REGISTER_CLASS_ENUM (Region, AudioTime);
 	REGISTER_CLASS_ENUM (Region, MusicTime);
@@ -584,32 +545,6 @@ setup_enum_writer ()
 	REGISTER_ENUM(Legato);
 	REGISTER_ENUM(Groove);
 	REGISTER(_QuantizeType);
-
-	REGISTER_CLASS_ENUM (RegionCommand, Name);
-	REGISTER_CLASS_ENUM (RegionCommand, PositionLockStyle);
-	REGISTER_CLASS_ENUM (RegionCommand, Length);
-	REGISTER_CLASS_ENUM (RegionCommand, Start);
-	REGISTER_CLASS_ENUM (RegionCommand, Position);
-	REGISTER_CLASS_ENUM (RegionCommand, PositionOnTop);
-	REGISTER_CLASS_ENUM (RegionCommand, Layer);
-	REGISTER_CLASS_ENUM (RegionCommand, SyncPosition);
-	REGISTER_CLASS_ENUM (RegionCommand, Hidden);
-	REGISTER_CLASS_ENUM (RegionCommand, Muted);
-	REGISTER_CLASS_ENUM (RegionCommand, Opaque);
-	REGISTER_CLASS_ENUM (RegionCommand, Locked);
-	REGISTER_CLASS_ENUM (RegionCommand, PositionLocked);
-	REGISTER_CLASS_ENUM (RegionCommand, ScaleAmplitude);
-	REGISTER_CLASS_ENUM (RegionCommand, FadeInActive);
-	REGISTER_CLASS_ENUM (RegionCommand, FadeInShape);
-	REGISTER_CLASS_ENUM (RegionCommand, FadeInLength);
-	REGISTER_CLASS_ENUM (RegionCommand, FadeIn);
-	REGISTER_CLASS_ENUM (RegionCommand, FadeOutActive);
-	REGISTER_CLASS_ENUM (RegionCommand, FadeOutShape);
-	REGISTER_CLASS_ENUM (RegionCommand, FadeOutLength);
-	REGISTER_CLASS_ENUM (RegionCommand, FadeOut);
-	REGISTER_CLASS_ENUM (RegionCommand, EnvelopActive);
-	REGISTER_CLASS_ENUM (RegionCommand, DefaultEnvelope);
-	REGISTER(_RegionCommandProperty);
 }
 
 } /* namespace ARDOUR */

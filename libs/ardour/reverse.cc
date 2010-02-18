@@ -46,11 +46,11 @@ Reverse::run (boost::shared_ptr<Region> r)
 {
 	SourceList nsrcs;
 	SourceList::iterator si;
-	nframes_t blocksize = 256 * 1024;
+	framecnt_t blocksize = 256 * 1024;
 	Sample* buf = 0;
-	nframes_t fpos;
-	nframes_t fstart;
-	nframes_t to_read;
+	framepos_t fpos;
+	framepos_t fstart;
+	framecnt_t to_read;
 	int ret = -1;
 
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(r);

@@ -52,7 +52,8 @@ namespace ARDOUR {
 			SessionEvents = 0x800,
 			MidiIO = 0x1000,
 			MackieControl = 0x2000,
-			MidiClock = 0x4000
+			MidiClock = 0x4000,
+			Properties = 0x8000
 		};
 	}
 

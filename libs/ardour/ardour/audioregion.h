@@ -34,7 +34,17 @@
 
 class XMLNode;
 
+
 namespace ARDOUR {
+
+namespace Properties {
+	extern PBD::PropertyDescriptor<bool> envelope_active;
+	extern PBD::PropertyDescriptor<bool> default_fade_in;
+	extern PBD::PropertyDescriptor<bool> default_fade_out;
+	extern PBD::PropertyDescriptor<bool> fade_in_active;
+	extern PBD::PropertyDescriptor<bool> fade_out_active;
+	extern PBD::PropertyDescriptor<float> scale_amplitude;
+}
 
 class Route;
 class Playlist;
@@ -42,16 +52,19 @@ class Session;
 class Filter;
 class AudioSource;
 
+
 class AudioRegion : public Region
 {
   public:
-	static PBD::Change FadeInChanged;
-	static PBD::Change FadeOutChanged;
-	static PBD::Change FadeInActiveChanged;
-	static PBD::Change FadeOutActiveChanged;
-	static PBD::Change EnvelopeActiveChanged;
-	static PBD::Change ScaleAmplitudeChanged;
-	static PBD::Change EnvelopeChanged;
+	static void make_property_quarks ();
+
+	static PBD::PropertyChange FadeInChanged;
+	static PBD::PropertyChange FadeOutChanged;
+	static PBD::PropertyChange FadeInActiveChanged;
+	static PBD::PropertyChange FadeOutActiveChanged;
+	static PBD::PropertyChange EnvelopeActiveChanged;
+	static PBD::PropertyChange ScaleAmplitudeChanged;
+	static PBD::PropertyChange EnvelopeChanged;
 
 	~AudioRegion();
 
@@ -68,9 +81,9 @@ class AudioRegion : public Region
 
 	void normalize_to (float target_in_dB = 0.0f);
 
-	bool envelope_active () const { return _flags & Region::EnvelopeActive; }
-	bool fade_in_active ()  const { return _flags & Region::FadeIn; }
-	bool fade_out_active () const { return _flags & Region::FadeOut; }
+	bool envelope_active () const { return _envelope_active; }
+	bool fade_in_active ()  const { return _fade_in_active; }
+	bool fade_out_active () const { return _fade_out_active; }
 
 	boost::shared_ptr<AutomationList> fade_in()  { return _fade_in; }
 	boost::shared_ptr<AutomationList> fade_out() { return _fade_out; }
@@ -90,26 +103,26 @@ class AudioRegion : public Region
 		ReadOpsFades = 0x8
 	};
 
-	virtual nframes_t read (Sample*, sframes_t pos, nframes_t cnt, int channel) const;
-	virtual nframes_t read_with_ops (Sample*, sframes_t pos, nframes_t cnt, int channel, ReadOps rops) const;
-	virtual nframes64_t readable_length() const { return length(); }
+	virtual framecnt_t read (Sample*, framepos_t pos, framecnt_t cnt, int channel) const;
+	virtual framecnt_t read_with_ops (Sample*, framepos_t pos, framecnt_t cnt, int channel, ReadOps rops) const;
+	virtual framecnt_t readable_length() const { return length(); }
 
-	virtual nframes_t read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
-			sframes_t position,
-			nframes_t cnt,
-			uint32_t  chan_n      = 0,
-			nframes_t read_frames = 0,
-			nframes_t skip_frames = 0) const;
-
-	virtual nframes_t master_read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
-			sframes_t position, nframes_t cnt, uint32_t chan_n=0) const;
-
-	virtual nframes_t read_raw_internal (Sample*, sframes_t, nframes_t, int channel) const;
+	virtual framecnt_t read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
+				     framepos_t position,
+				     framecnt_t cnt,
+				     uint32_t  chan_n      = 0,
+				     framecnt_t read_frames = 0,
+				     framecnt_t skip_frames = 0) const;
+	
+	virtual framecnt_t master_read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
+					   framepos_t position, framecnt_t cnt, uint32_t chan_n=0) const;
+	
+	virtual framecnt_t read_raw_internal (Sample*, framepos_t, framecnt_t, int channel) const;
 
 	XMLNode& state (bool);
-	int      set_state (const XMLNode&, int version);
+	int set_state (const XMLNode&, int version);
 
-	static void set_default_fade (float steepness, nframes_t len);
+	static void set_default_fade (float steepness, framecnt_t len);
 	bool fade_in_is_default () const;
 	bool fade_out_is_default () const;
 
@@ -123,14 +136,14 @@ class AudioRegion : public Region
 
 	void set_fade_in_active (bool yn);
 	void set_fade_in_shape (FadeShape);
-	void set_fade_in_length (nframes_t);
-	void set_fade_in (FadeShape, nframes_t);
+	void set_fade_in_length (framecnt_t);
+	void set_fade_in (FadeShape, framecnt_t);
 	void set_fade_in (boost::shared_ptr<AutomationList>);
 
 	void set_fade_out_active (bool yn);
 	void set_fade_out_shape (FadeShape);
-	void set_fade_out_length (nframes_t);
-	void set_fade_out (FadeShape, nframes_t);
+	void set_fade_out_length (framecnt_t);
+	void set_fade_out (FadeShape, framecnt_t);
 	void set_fade_out (boost::shared_ptr<AutomationList>);
 
 	void set_envelope_active (bool yn);
@@ -162,22 +175,31 @@ class AudioRegion : public Region
 	void resume_fade_out ();
 
 	int get_transients (AnalysisFeatureList&, bool force_new = false);
-	std::list<std::pair<nframes_t, nframes_t> > find_silence (Sample, nframes_t) const;
+	std::list<std::pair<frameoffset_t, framecnt_t> > find_silence (Sample, framecnt_t) const;
 
   private:
 	friend class RegionFactory;
 	friend class Crossfade;
 
-	AudioRegion (boost::shared_ptr<AudioSource>, nframes_t start, nframes_t length);
-	AudioRegion (boost::shared_ptr<AudioSource>, nframes_t start, nframes_t length, const std::string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
-	AudioRegion (const SourceList &, nframes_t start, nframes_t length, const std::string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
-	AudioRegion (boost::shared_ptr<const AudioRegion>, nframes_t start, nframes_t length, const std::string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
-	AudioRegion (boost::shared_ptr<const AudioRegion>, const SourceList&, nframes_t length, const std::string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags);
-	AudioRegion (boost::shared_ptr<const AudioRegion>);
+	AudioRegion (boost::shared_ptr<AudioSource>);
+	AudioRegion (const SourceList &);
+	AudioRegion (boost::shared_ptr<const AudioRegion>, frameoffset_t offset = 0, bool offset_relative = true);
+	AudioRegion (boost::shared_ptr<const AudioRegion>, const SourceList&);
 	AudioRegion (boost::shared_ptr<AudioSource>, const XMLNode&);
 	AudioRegion (SourceList &, const XMLNode&);
 
   private:
+	PBD::Property<bool>     _envelope_active;
+	PBD::Property<bool>     _default_fade_in;
+	PBD::Property<bool>     _default_fade_out;
+	PBD::Property<bool>     _fade_in_active;
+	PBD::Property<bool>     _fade_out_active;
+	PBD::Property<gain_t>   _scale_amplitude;
+	
+	void register_properties ();
+	PBD::PropertyChange set_property (const PBD::PropertyBase& prop);
+	void post_set ();
+
 	void init ();
 	void set_default_fades ();
 	void set_default_fade_in ();
@@ -186,13 +208,13 @@ class AudioRegion : public Region
 	void recompute_gain_at_end ();
 	void recompute_gain_at_start ();
 
-	nframes_t _read_at (const SourceList&, nframes_t limit,
-			Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
-			sframes_t position, nframes_t cnt,
-			uint32_t chan_n = 0,
-			nframes_t read_frames = 0,
-			nframes_t skip_frames = 0,
-			ReadOps readops = ReadOps (~0)) const;
+	framecnt_t _read_at (const SourceList&, framecnt_t limit,
+			     Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
+			     framepos_t position, framecnt_t cnt,
+			     uint32_t chan_n = 0,
+			     framecnt_t read_frames = 0,
+			     framecnt_t skip_frames = 0,
+			     ReadOps readops = ReadOps (~0)) const;
 
 	void recompute_at_start ();
 	void recompute_at_end ();
@@ -210,16 +232,15 @@ class AudioRegion : public Region
 	boost::shared_ptr<AutomationList> _fade_in;
 	boost::shared_ptr<AutomationList> _fade_out;
 	boost::shared_ptr<AutomationList> _envelope;
-	gain_t                            _scale_amplitude;
-	uint32_t                          _fade_in_disabled;
-	uint32_t                          _fade_out_disabled;
+	uint32_t                          _fade_in_suspended;
+	uint32_t                          _fade_out_suspended;
 
   protected:
 	/* default constructor for derived (compound) types */
 
-	AudioRegion (Session& s, nframes_t, nframes_t, std::string name);
+	AudioRegion (Session& s, framepos_t, framecnt_t, std::string name);
 
-	int set_live_state (const XMLNode&, int version, PBD::Change&, bool send);
+	int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
 };
 
 } /* namespace ARDOUR */

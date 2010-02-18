@@ -39,7 +39,7 @@ public:
 protected:
 	friend class SourceFactory;
 
-	SilentFileSource (Session& s, const XMLNode& x, nframes_t len, float srate)
+	SilentFileSource (Session& s, const XMLNode& x, framecnt_t len, float srate)
 		: Source (s, x)
 		, AudioFileSource (s, x, false)
 		, _sample_rate(srate)
@@ -47,17 +47,17 @@ protected:
 		_length = len;
 	}
 
-	nframes_t read_unlocked (Sample *dst, sframes_t /*start*/, nframes_t cnt) const {
+	framecnt_t read_unlocked (Sample *dst, framepos_t /*start*/, framecnt_t cnt) const {
 		memset (dst, 0, sizeof (Sample) * cnt);
 		return cnt;
 	}
 
-	nframes_t write_unlocked (Sample */*dst*/, nframes_t /*cnt*/) { return 0; }
-
+	framecnt_t write_unlocked (Sample */*dst*/, framecnt_t /*cnt*/) { return 0; }
+	
 	void set_header_timeline_position () {}
 
-	int read_peaks_with_fpp (PeakData *peaks, nframes_t npeaks, sframes_t /*start*/, nframes_t /*cnt*/,
-	double /*samples_per_unit*/, nframes_t /*fpp*/) const {
+	int read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t /*start*/, framecnt_t /*cnt*/,
+				 double /*samples_per_unit*/, framecnt_t /*fpp*/) const {
 		memset (peaks, 0, sizeof (PeakData) * npeaks);
 		return 0;
 	}

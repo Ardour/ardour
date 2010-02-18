@@ -520,7 +520,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void location_changed (ARDOUR::Location *);
 	void location_flags_changed (ARDOUR::Location *, void *);
 	void refresh_location_display ();
-	void refresh_location_display_s (PBD::Change);
+	void refresh_location_display_s (PBD::PropertyChange);
 	void refresh_location_display_internal (ARDOUR::Locations::LocationList&);
 	void add_new_location (ARDOUR::Location *);
 	void location_gone (ARDOUR::Location *);
@@ -578,9 +578,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void sort_track_selection (TrackViewList* sel = 0);
 
-	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*> &, ARDOUR::RouteGroup::Property) const;
-	RegionSelection get_equivalent_regions (RegionSelection &, ARDOUR::RouteGroup::Property) const;
-	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, ARDOUR::RouteGroup::Property) const;
+	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*> &, PBD::PropertyID) const;
+	RegionSelection get_equivalent_regions (RegionSelection &, PBD::PropertyID) const;
+	void mapover_tracks (sigc::slot<void,RouteTimeAxisView&,uint32_t> sl, TimeAxisView*, PBD::PropertyID) const;
 
 	/* functions to be passed to mapover_tracks(), possibly with sigc::bind()-supplied arguments */
 
@@ -1475,7 +1475,7 @@ public:
 	void draw_metric_marks (const ARDOUR::Metrics& metrics);
 
 	void compute_current_bbt_points (nframes_t left, nframes_t right);
-	void tempo_map_changed (PBD::Change);
+	void tempo_map_changed (PBD::PropertyChange);
 	void redisplay_tempo (bool immediate_redraw);
 
 	void snap_to (nframes64_t& first, int32_t direction = 0, bool for_mark = false);

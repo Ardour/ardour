@@ -344,7 +344,12 @@ AudioDiskstream::setup_destructive_playlist ()
 
 	/* a single full-sized region */
 
-	boost::shared_ptr<Region> region (RegionFactory::create (srcs, 0, max_frames - srcs.front()->natural_position(), _name));
+	PropertyList plist;
+	plist.add (Properties::name, _name.val());
+	plist.add (Properties::start, 0);
+	plist.add (Properties::length, max_frames - max_frames - srcs.front()->natural_position());
+
+	boost::shared_ptr<Region> region (RegionFactory::create (srcs, plist));
 	_playlist->add_region (region, srcs.front()->natural_position());
 }
 
@@ -1465,10 +1470,15 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 		*/
 
 		try {
-			boost::shared_ptr<Region> rx (RegionFactory::create (srcs,
-						c->front()->write_source->last_capture_start_frame(), total_capture,
-						whole_file_region_name, 0,
-						Region::Flag (Region::DefaultFlags|Region::Automatic|Region::WholeFile)));
+			PropertyList plist;
+
+			plist.add (Properties::start, c->front()->write_source->last_capture_start_frame());
+			plist.add (Properties::length, total_capture);
+			plist.add (Properties::name, whole_file_region_name);
+
+			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
+			rx->set_automatic (true);
+			rx->set_whole_file (true);
 
 			region = boost::dynamic_pointer_cast<AudioRegion> (rx);
 			region->special_set_position (capture_info.front()->start);
@@ -1496,7 +1506,14 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add region " << region_name << endl;
 
 			try {
-				boost::shared_ptr<Region> rx (RegionFactory::create (srcs, buffer_position, (*ci)->frames, region_name));
+
+				PropertyList plist;
+				
+				plist.add (Properties::start, buffer_position);
+				plist.add (Properties::length, (*ci)->frames);
+				plist.add (Properties::name, region_name);
+				
+				boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 				region = boost::dynamic_pointer_cast<AudioRegion> (rx);
 			}
 
@@ -2196,10 +2213,17 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 	boost::shared_ptr<AudioRegion> region;
 
 	try {
-		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (
-				pending_sources, 0, first_fs->length(first_fs->timeline_position()),
-				region_name_from_path (first_fs->name(), true), 0,
-				Region::Flag (Region::DefaultFlags|Region::Automatic|Region::WholeFile)));
+		
+		PropertyList plist;
+		
+		plist.add (Properties::start, 0);
+		plist.add (Properties::length, first_fs->length (first_fs->timeline_position()));
+		plist.add (Properties::name, region_name_from_path (first_fs->name(), true));
+
+		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (pending_sources, plist));
+
+		region->set_automatic (true);
+		region->set_whole_file (true);
 		region->special_set_position (0);
 	}
 
@@ -2207,20 +2231,6 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 		error << string_compose (
 				_("%1: cannot create whole-file region from pending capture sources"),
 				_name) << endmsg;
-
-		return -1;
-	}
-
-	try {
-		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (
-				pending_sources, 0, first_fs->length(first_fs->timeline_position()),
-				region_name_from_path (first_fs->name(), true)));
-	}
-
-	catch (failed_constructor& err) {
-		error << string_compose (_("%1: cannot create region from pending capture sources"),
-				  _name)
-		      << endmsg;
 
 		return -1;
 	}

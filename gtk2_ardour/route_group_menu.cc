@@ -27,14 +27,20 @@
 
 using namespace Gtk;
 using namespace ARDOUR;
+using namespace PBD;
 
-RouteGroupMenu::RouteGroupMenu (Session* s, RouteGroup::Property p)
+RouteGroupMenu::RouteGroupMenu (Session* s, PropertyList* plist)
 	: SessionHandlePtr (s)
-	, _default_properties (p)
+	, _default_properties (plist)
 	, _inhibit_group_selected (false)
 	, _selected_route_group (0)
 {
 	rebuild (0);
+}
+
+RouteGroupMenu::~RouteGroupMenu()
+{
+	delete _default_properties; 
 }
 
 void
@@ -101,7 +107,8 @@ RouteGroupMenu::new_group ()
 		return;
 	}
 
-	RouteGroup* g = new RouteGroup (*_session, "", RouteGroup::Active, _default_properties);
+	RouteGroup* g = new RouteGroup (*_session, "");
+	g->set_properties (*_default_properties);
 
 	RouteGroupDialog d (g, Gtk::Stock::NEW);
 	int const r = d.do_run ();

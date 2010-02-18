@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis
+    Copyright (C) 2000-2010 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,11 +24,16 @@
 #include "pbd/statefuldestructible.h"
 #include "pbd/signals.h"
 
+#include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
 #include "i18n.h"
 
 namespace ARDOUR {
+
+namespace Properties {
+	extern PBD::PropertyDescriptor<std::string> name;
+}
 
 class Session;
 
@@ -39,15 +44,19 @@ class Session;
 class SessionObject : public SessionHandleRef, public PBD::StatefulDestructible
 {
   public:
+	static void make_property_quarks ();
+
 	SessionObject (Session& session, const std::string& name)
 		: SessionHandleRef (session)
-		, _name (X_("name"), PBD::Change (0), name)
+		, _name (Properties::name, PBD::PropertyChange (0), name)
 	{
-		add_state (_name);
+		add_property (_name);
 	}
 	
 	Session&    session() const { return _session; }
 	std::string name()    const { return _name; }
+
+	PBD::PropertyChange set_property (const PBD::PropertyBase& prop);
 
 	virtual bool set_name (const std::string& str) {
 		if (_name != str) {
@@ -60,7 +69,7 @@ class SessionObject : public SessionHandleRef, public PBD::StatefulDestructible
 	PBD::Signal0<void> NameChanged;
 
   protected:
-	PBD::State<std::string> _name;
+	PBD::Property<std::string> _name;
 };
 
 } // namespace ARDOUR

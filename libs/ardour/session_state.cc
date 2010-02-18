@@ -92,7 +92,6 @@
 #include "ardour/midi_track.h"
 #include "ardour/named_selection.h"
 #include "ardour/processor.h"
-#include "ardour/region_command.h"
 #include "ardour/region_factory.h"
 #include "ardour/route_group.h"
 #include "ardour/send.h"
@@ -2944,16 +2943,6 @@ Session::restore_history (string snapshot_name)
 					ut->add_command(new MidiModel::DiffCommand(midi_source->model(), *n));
 				} else {
 					error << _("Failed to downcast MidiSource for DeltaCommand") << endmsg;
-				}
-
-			} else if (n->name() == "RegionCommand") {
-				PBD::ID id (n->property ("region")->value());
-				boost::shared_ptr<Region> region = RegionFactory::region_by_id (id);
-
-				if (region) {
-					ut->add_command (new RegionCommand (region, *n));
-				} else {
-					error << string_compose (_("Region command references an unknown region ID=%1"), id.to_s()) << endmsg;
 				}
 
 			} else if (n->name() == "StatefulDiffCommand") {

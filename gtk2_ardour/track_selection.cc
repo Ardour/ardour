@@ -41,7 +41,7 @@ TrackSelection::add (TrackViewList const & t)
 
 		/* select anything in the same select-enabled route group */
 		ARDOUR::RouteGroup* rg = (*i)->route_group ();
-		if (rg && rg->property (ARDOUR::RouteGroup::Select)) {
+		if (rg && rg->is_active() && rg->is_select ()) {
 			TrackViewList tr = _editor->axis_views_from_routes (rg->route_list ());
 			for (TrackViewList::iterator j = tr.begin(); j != tr.end(); ++j) {
 				if (!contains (*j)) {

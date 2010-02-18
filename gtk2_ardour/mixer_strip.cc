@@ -1295,11 +1295,13 @@ MixerStrip::select_route_group (GdkEventButton *ev)
 
 		if (group_menu == 0) {
 
-			group_menu = new RouteGroupMenu (
-				_session,
-				(RouteGroup::Property) (RouteGroup::Gain | RouteGroup::Mute | RouteGroup::Solo)
-				);
+			PropertyList* plist = new PropertyList();
 
+			plist->add (Properties::gain, true);
+			plist->add (Properties::mute, true);
+			plist->add (Properties::solo, true);
+
+			group_menu = new RouteGroupMenu (_session, plist);
 			group_menu->GroupSelected.connect (sigc::mem_fun (*this, &MixerStrip::set_route_group));
 		}
 

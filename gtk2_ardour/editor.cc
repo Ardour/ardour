@@ -1133,7 +1133,7 @@ Editor::set_session (Session *t)
 	handle_new_duration ();
 
 	restore_ruler_visibility ();
-	//tempo_map_changed (Change (0));
+	//tempo_map_changed (PropertyChange (0));
 	_session->tempo_map().apply_with_metrics (*this, &Editor::draw_metric_marks);
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
@@ -3737,7 +3737,7 @@ Editor::edit_xfade (boost::weak_ptr<Crossfade> wxfade)
 	}
 
 	cew.apply ();
-	xfade->StateChanged (Change (~0));
+	xfade->StateChanged (PropertyChange (~0));
 }
 
 PlaylistSelector&
@@ -3993,7 +3993,7 @@ Editor::new_playlists (TimeAxisView* v)
 	begin_reversible_command (_("new playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists->get (playlists);
-	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), v, RouteGroup::Edit);
+	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), v, ARDOUR::Properties::edit.id);
 	commit_reversible_command ();
 }
 
@@ -4009,7 +4009,7 @@ Editor::copy_playlists (TimeAxisView* v)
 	begin_reversible_command (_("copy playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists->get (playlists);
-	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), v, RouteGroup::Edit);
+	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), v, ARDOUR::Properties::edit.id);
 	commit_reversible_command ();
 }
 
@@ -4024,7 +4024,7 @@ Editor::clear_playlists (TimeAxisView* v)
 	begin_reversible_command (_("clear playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists->get (playlists);
-	mapover_tracks (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), v, RouteGroup::Edit);
+	mapover_tracks (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), v, ARDOUR::Properties::edit.id);
 	commit_reversible_command ();
 }
 
@@ -4562,7 +4562,7 @@ Editor::get_regions_for_action (RegionSelection& rs, bool allow_entered, bool al
 		for (RegionSelection::iterator i = rs.begin (); i != rs.end(); ++i) {
 
 		 	RouteGroup* g = (*i)->get_time_axis_view().route_group ();
-		 	if (g && g->active_property (RouteGroup::Edit)) {
+		 	if (g && g->is_active() && g->is_edit()) {
 		 		tracks.add (axis_views_from_routes (g->route_list()));
 		 	}
 			

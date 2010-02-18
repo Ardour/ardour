@@ -44,29 +44,35 @@ class RegionFactory {
 	/** This is emitted only when a new id is assigned. Therefore,
 	   in a pure Region copy, it will not be emitted.
 
-	   It must be emitted by derived classes, not Region
+	   It must be emitted using a derived instance of Region, not Region
 	   itself, to permit dynamic_cast<> to be used to
 	   infer the type of Region.
 	*/
 	static PBD::Signal1<void,boost::shared_ptr<Region> >  CheckNewRegion;
 
-	static boost::shared_ptr<Region> create (boost::shared_ptr<const Region>);
+	/** create a "pure copy" of Region @param other */
+	static boost::shared_ptr<Region> create (boost::shared_ptr<const Region> other);
 
-	/* note: both of the first two should use const shared_ptr as well, but
-	   gcc 4.1 doesn't seem to be able to disambiguate them if they do.
-	*/
-
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Region>, nframes_t start,
-			nframes_t length, const std::string& name,
-			layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	static boost::shared_ptr<Region> create (boost::shared_ptr<AudioRegion>, nframes_t start,
-			nframes_t length, const std::string& name,
-			layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Region>, const SourceList&, const std::string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Source>, nframes_t start, nframes_t length, const std::string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
-	static boost::shared_ptr<Region> create (const SourceList &, nframes_t start, nframes_t length, const std::string& name, layer_t = 0, Region::Flag flags = Region::DefaultFlags, bool announce = true);
+	/** create a region from a single Source */
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Source>, 
+						 const PBD::PropertyList&, bool announce = true);
+	/** create a region from a multiple sources */
+	static boost::shared_ptr<Region> create (const SourceList &, 
+						 const PBD::PropertyList&, bool announce = true);
+	/** create a copy of @other starting at zero within @param other's sources */
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, 
+						 const PBD::PropertyList&, bool announce = true);
+	/** create a copy of @other starting at @param offset within @param other */
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Region>, frameoffset_t offset, 
+						 const PBD::PropertyList&, bool announce = true);
+	/** create a "copy" of @param other but using a different set of sources @param srcs */
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, const SourceList& srcs, 
+						 const PBD::PropertyList&, bool announce = true);
+	
+	/** create a region with no sources, using XML state */
 	static boost::shared_ptr<Region> create (Session&, XMLNode&, bool);
-	static boost::shared_ptr<Region> create (SourceList &, const XMLNode&);
+	/** create a region with specified sources @param srcs and XML state */
+	static boost::shared_ptr<Region> create (SourceList& srcs, const XMLNode&);
 
   private:
 	static std::map<PBD::ID,boost::weak_ptr<Region> > region_map;

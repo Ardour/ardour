@@ -17,6 +17,8 @@
 
 */
 
+#include <stdint.h>
+
 #include "pbd/properties.h"
 #include "pbd/error.h"
 
@@ -25,7 +27,7 @@
 using namespace PBD;
 
 PropertyChange
-new_change ()
+PBD::new_change ()
 {
 	static uint64_t change_bit = 1;
 

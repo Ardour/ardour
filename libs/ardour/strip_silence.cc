@@ -52,7 +52,7 @@ StripSilence::run (boost::shared_ptr<Region> r)
 	}
 
 	/* find periods of silence in the region */
-	std::list<std::pair<nframes_t, nframes_t> > const silence =
+	std::list<std::pair<frameoffset_t, framecnt_t> > const silence =
 		region->find_silence (dB_to_coefficient (_threshold), _minimum_length);
 
 	if (silence.size () == 1 && silence.front().first == 0 && silence.front().second == region->length() - 1) {
@@ -66,10 +66,10 @@ StripSilence::run (boost::shared_ptr<Region> r)
 		return 0;
 	}
 
-	std::list<std::pair<nframes_t, nframes_t > >::const_iterator s = silence.begin ();
-	nframes_t const pos = region->position ();
-	nframes_t const end = region->start () + region->length() - 1;
-	nframes_t const start = region->start ();
+	std::list<std::pair<framepos_t, framecnt_t > >::const_iterator s = silence.begin ();
+	framepos_t const pos = region->position ();
+	framepos_t const end = region->start () + region->length() - 1;
+	framepos_t const start = region->start ();
 
 	region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region));
 	region->set_name (session.new_region_name (region->name ()));

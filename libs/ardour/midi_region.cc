@@ -48,24 +48,16 @@ using namespace ARDOUR;
 using namespace PBD;
 
 /** Basic MidiRegion constructor (one channel) */
-MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, nframes_t start, nframes_t length)
-	: Region (src, start, length, PBD::basename_nosuffix(src->name()), DataType::MIDI, 0,  Region::Flag(Region::DefaultFlags|Region::External))
-{
-	assert(_name.val().find("/") == string::npos);
-	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
-}
-
-/* Basic MidiRegion constructor (one channel) */
-MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
-	: Region (src, start, length, name, DataType::MIDI, layer, flags)
+MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src)
+	: Region (src)
 {
 	assert(_name.val().find("/") == string::npos);
 	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
 }
 
 /* Basic MidiRegion constructor (many channels) */
-MidiRegion::MidiRegion (const SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
-	: Region (srcs, start, length, name, DataType::MIDI, layer, flags)
+MidiRegion::MidiRegion (const SourceList& srcs)
+	: Region (srcs)
 {
 	assert(_name.val().find("/") == string::npos);
 	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
@@ -73,15 +65,8 @@ MidiRegion::MidiRegion (const SourceList& srcs, nframes_t start, nframes_t lengt
 
 
 /** Create a new MidiRegion, that is part of an existing one */
-MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
-	: Region (other, offset, length, name, layer, flags)
-{
-	assert(_name.val().find("/") == string::npos);
-	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
-}
-
-MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
-	: Region (other)
+MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t offset, bool offset_relative)
+	: Region (other, offset, offset_relative)
 {
 	assert(_name.val().find("/") == string::npos);
 	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
@@ -116,7 +101,7 @@ MidiRegion::~MidiRegion ()
 }
 
 void
-MidiRegion::set_position_internal (nframes_t pos, bool allow_bbt_recompute)
+MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 {
 	BeatsFramesConverter old_converter(_session.tempo_map(), _position - _start);
 	double length_beats = old_converter.from(_length);
@@ -128,25 +113,25 @@ MidiRegion::set_position_internal (nframes_t pos, bool allow_bbt_recompute)
 	set_length(new_converter.to(length_beats), 0);
 }
 
-nframes_t
-MidiRegion::read_at (Evoral::EventSink<nframes_t>& out, sframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode, MidiStateTracker* tracker) const
+framecnt_t
+MidiRegion::read_at (Evoral::EventSink<nframes_t>& out, framepos_t position, framecnt_t dur, uint32_t chan_n, NoteMode mode, MidiStateTracker* tracker) const
 {
 	return _read_at (_sources, out, position, dur, chan_n, mode, tracker);
 }
 
-nframes_t
-MidiRegion::master_read_at (MidiRingBuffer<nframes_t>& out, sframes_t position, nframes_t dur, uint32_t chan_n, NoteMode mode) const
+framecnt_t
+MidiRegion::master_read_at (MidiRingBuffer<nframes_t>& out, framepos_t position, framecnt_t dur, uint32_t chan_n, NoteMode mode) const
 {
 	return _read_at (_master_sources, out, position, dur, chan_n, mode); /* no tracker */
 }
 
-nframes_t
-MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<nframes_t>& dst, sframes_t position, nframes_t dur, uint32_t chan_n, 
+framecnt_t
+MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<nframes_t>& dst, framepos_t position, framecnt_t dur, uint32_t chan_n, 
 		      NoteMode mode, MidiStateTracker* tracker) const
 {
-	nframes_t internal_offset = 0;
-	nframes_t src_offset      = 0;
-	nframes_t to_read         = 0;
+	frameoffset_t internal_offset = 0;
+	frameoffset_t src_offset      = 0;
+	framecnt_t to_read         = 0;
 
 	/* precondition: caller has verified that we cover the desired section */
 
@@ -178,8 +163,8 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<nframes_t>& 
 	boost::shared_ptr<MidiSource> src = midi_source(chan_n);
 	src->set_note_mode(mode);
 
-	nframes_t output_buffer_position = 0;
-	nframes_t negative_output_buffer_position = 0;
+	framepos_t output_buffer_position = 0;
+	framepos_t negative_output_buffer_position = 0;
 	if (_position >= _start) {
 		// handle resizing of beginnings of regions correctly
 		output_buffer_position = _position - _start;
@@ -244,49 +229,8 @@ MidiRegion::state (bool full)
 }
 
 int
-MidiRegion::set_live_state (const XMLNode& node, int version, Change& what_changed, bool send)
-{
-	const XMLProperty *prop;
-	LocaleGuard lg (X_("POSIX"));
-
-	Region::set_live_state (node, version, what_changed, false);
-
-	uint32_t old_flags = _flags;
-
-	if ((prop = node.property ("flags")) != 0) {
-		_flags = Flag (string_2_enum (prop->value(), _flags));
-
-		//_flags = Flag (strtol (prop->value().c_str(), (char **) 0, 16));
-
-		_flags = Flag (_flags & ~Region::LeftOfSplit);
-		_flags = Flag (_flags & ~Region::RightOfSplit);
-	}
-
-	if ((old_flags ^ _flags) & Muted) {
-		what_changed = Change (what_changed|MuteChanged);
-	}
-	if ((old_flags ^ _flags) & Opaque) {
-		what_changed = Change (what_changed|OpacityChanged);
-	}
-	if ((old_flags ^ _flags) & Locked) {
-		what_changed = Change (what_changed|LockChanged);
-	}
-
-	if (send) {
-		send_change (what_changed);
-	}
-
-	return 0;
-}
-
-int
 MidiRegion::set_state (const XMLNode& node, int version)
 {
-	/* Region::set_state() calls the virtual set_live_state(),
-	   which will get us back to AudioRegion::set_live_state()
-	   to handle the relevant stuff.
-	*/
-
 	return Region::set_state (node, version);
 }
 

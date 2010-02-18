@@ -37,15 +37,65 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace std;
 
-RouteGroup::RouteGroup (Session& s, const string &n, Flag f, Property p)
-	: _session (s)
-	, routes (new RouteList)
-	, _name (n)
-	, _flags (f)
-	, _properties (Property (p))
+PropertyChange RouteGroup::FlagsChange = new_change ();
+PropertyChange RouteGroup::PropertiesChange = new_change ();
+
+namespace ARDOUR {
+	namespace Properties {
+		PropertyDescriptor<bool> relative;
+		PropertyDescriptor<bool> active;
+		PropertyDescriptor<bool> gain;
+		PropertyDescriptor<bool> mute;
+		PropertyDescriptor<bool> solo;
+		PropertyDescriptor<bool> recenable;
+		PropertyDescriptor<bool> select;
+		PropertyDescriptor<bool> edit;
+	}	
+}
+
+void
+RouteGroup::make_property_quarks ()
 {
+	Properties::relative.id = g_quark_from_static_string (X_("relative"));
+	Properties::active.id = g_quark_from_static_string (X_("active"));
+	Properties::hidden.id = g_quark_from_static_string (X_("hidden"));
+	Properties::gain.id = g_quark_from_static_string (X_("gain"));
+	Properties::mute.id = g_quark_from_static_string (X_("mute"));
+	Properties::solo.id = g_quark_from_static_string (X_("solo"));
+	Properties::recenable.id = g_quark_from_static_string (X_("recenable"));
+	Properties::select.id = g_quark_from_static_string (X_("select"));
+	Properties::edit.id = g_quark_from_static_string (X_("edit"));
+}
+
+#define ROUTE_GROUP_DEFAULT_PROPERTIES  _relative (Properties::relative, FlagsChange, false) \
+	, _active (Properties::active, FlagsChange, false) \
+	, _hidden (Properties::hidden, FlagsChange, false) \
+	, _gain (Properties::gain, PropertiesChange, false) \
+	, _mute (Properties::mute, PropertiesChange, false) \
+	, _solo (Properties::solo, PropertiesChange , false) \
+	, _recenable (Properties::recenable, PropertiesChange, false) \
+	, _select (Properties::select, PropertiesChange, false) \
+	, _edit (Properties::edit, PropertiesChange , false)
+
+RouteGroup::RouteGroup (Session& s, const string &n)
+	: SessionObject (s, n)
+	, routes (new RouteList)
+	, ROUTE_GROUP_DEFAULT_PROPERTIES
+{
+	_xml_node_name = X_("RegionGroup");
+
+	add_property (_relative);
+	add_property (_active);
+	add_property (_hidden);
+	add_property (_gain);
+	add_property (_mute);
+	add_property (_solo);
+	add_property (_recenable);
+	add_property (_select);
+	add_property (_edit);
 }
 
 RouteGroup::~RouteGroup ()
@@ -58,14 +108,6 @@ RouteGroup::~RouteGroup ()
 		
 		i = tmp;
 	}
-}
-
-void
-RouteGroup::set_name (string str)
-{
-	_name = str;
-	_session.set_dirty ();
-	FlagsChanged (0); /* EMIT SIGNAL */
 }
 
 /** Add a route to a group.  Adding a route which is already in the group is allowed; nothing will happen.
@@ -163,9 +205,8 @@ XMLNode&
 RouteGroup::get_state (void)
 {
 	XMLNode *node = new XMLNode ("RouteGroup");
-	node->add_property ("name", _name);
-	node->add_property ("flags", enum_2_string (_flags));
-	node->add_property ("properties", enum_2_string (_properties));
+	
+	add_properties (*node);
 
 	if (!routes->empty()) {
 		stringstream str;
@@ -189,18 +230,6 @@ RouteGroup::set_state (const XMLNode& node, int version)
 
 	const XMLProperty *prop;
 
-	if ((prop = node.property ("name")) != 0) {
-		_name = prop->value();
-	}
-
-	if ((prop = node.property ("flags")) != 0) {
-		_flags = Flag (string_2_enum (prop->value(), _flags));
-	}
-
-	if ((prop = node.property ("properties")) != 0) {
-		_properties = Property (string_2_enum (prop->value(), _properties));
-	}
-
 	if ((prop = node.property ("routes")) != 0) {
 		stringstream str (prop->value());
 		vector<string> ids;
@@ -222,23 +251,77 @@ RouteGroup::set_state (const XMLNode& node, int version)
 int
 RouteGroup::set_state_2X (const XMLNode& node, int /*version*/)
 {
-	XMLProperty const * prop;
-
-	if ((prop = node.property ("name")) != 0) {
-		_name = prop->value();
-	}
-
-	if ((prop = node.property ("flags")) != 0) {
-		_flags = Flag (string_2_enum (prop->value(), _flags));
-	}
+	set_properties (node);
 
 	if (node.name() == "MixGroup") {
-		_properties = Property (Gain | Mute | Solo | RecEnable);
+		_gain = true;
+		_mute = true;
+		_solo = true;
+		_recenable = true;
+		_edit = false;
 	} else if (node.name() == "EditGroup") {
-		_properties = Property (Select | Edit);
+		_gain = false;
+		_mute = false;
+		_solo = false;
+		_recenable = false;
+		_edit = true;
 	}
 
 	return 0;
+}
+
+void
+RouteGroup::set_gain (bool yn)
+{
+	if (is_gain() == yn) {
+		return;
+	}
+	_gain = yn;
+}
+
+void
+RouteGroup::set_mute (bool yn)
+{
+	if (is_mute() == yn) {
+		return;
+	}
+	_mute = yn;
+}
+
+void
+RouteGroup::set_solo (bool yn)
+{
+	if (is_solo() == yn) {
+		return;
+	}
+	_solo = yn;
+}
+
+void
+RouteGroup::set_recenable (bool yn)
+{
+	if (is_recenable() == yn) {
+		return;
+	}
+	_recenable = yn;
+}
+
+void
+RouteGroup::set_select (bool yn)
+{
+	if (is_select() == yn) {
+		return;
+	}
+	_select = yn;
+}
+
+void
+RouteGroup::set_edit (bool yn)
+{
+	if (is_edit() == yn) {
+		return;
+	}
+	_edit = yn;
 }
 
 void
@@ -247,11 +330,7 @@ RouteGroup::set_active (bool yn, void *src)
 	if (is_active() == yn) {
 		return;
 	}
-	if (yn) {
-		_flags = Flag (_flags | Active);
-	} else {
-		_flags = Flag (_flags & ~Active);
-	}
+	_active = yn;
 	_session.set_dirty ();
 	FlagsChanged (src); /* EMIT SIGNAL */
 }
@@ -263,31 +342,26 @@ RouteGroup::set_relative (bool yn, void *src)
 	if (is_relative() == yn) {
 		return;
 	}
-	if (yn) {
-		_flags = Flag (_flags | Relative);
-	} else {
-		_flags = Flag (_flags & ~Relative);
-	}
+	_relative = yn;
 	_session.set_dirty ();
 	FlagsChanged (src); /* EMIT SIGNAL */
 }
 
 void
 RouteGroup::set_hidden (bool yn, void *src)
-
 {
 	if (is_hidden() == yn) {
 		return;
 	}
 	if (yn) {
-		_flags = Flag (_flags | Hidden);
+		_hidden = true;
 		if (Config->get_hiding_groups_deactivates_groups()) {
-			_flags = Flag (_flags & ~Active);
+			_active = false;
 		}
 	} else {
-		_flags = Flag (_flags & ~Hidden);
+		_hidden = false;
 		if (Config->get_hiding_groups_deactivates_groups()) {
-			_flags = Flag (_flags | Active);
+			_active = true;
 		}
 	}
 	_session.set_dirty ();
@@ -356,4 +430,30 @@ RouteGroup::destroy_subgroup ()
 
 	_session.remove_route (subgroup_bus);
 	subgroup_bus.reset ();
+}
+
+bool
+RouteGroup::enabled_property (PBD::PropertyID prop)
+{
+	if (Properties::relative.id == prop) {
+		return is_relative();
+	} else if (Properties::active.id == prop) {
+		return is_active();
+	} else if (Properties::hidden.id == prop) {
+		return is_hidden();
+	} else if (Properties::gain.id == prop) {
+		return is_gain();
+	} else if (Properties::mute.id == prop) {
+		return is_mute();
+	} else if (Properties::solo.id == prop) {
+		return is_solo();
+	} else if (Properties::recenable.id == prop) {
+		return is_recenable();
+	} else if (Properties::select.id == prop) {
+		return is_select();
+	} else if (Properties::edit.id == prop) {
+		return is_edit();
+	}
+
+	return false;
 }

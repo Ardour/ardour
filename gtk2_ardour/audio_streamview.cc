@@ -483,8 +483,16 @@ AudioStreamView::setup_rec_box ()
 							+ _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
 				}
 
-				boost::shared_ptr<AudioRegion> region (boost::dynamic_pointer_cast<AudioRegion>(
-						RegionFactory::create (sources, start, 1, "", 0, Region::DefaultFlags, false)));
+				PropertyList plist; 
+				
+				plist.add (Properties::start, start);
+				plist.add (Properties::length, 1);
+				plist.add (Properties::name, string());
+				plist.add (Properties::layer, 0);
+
+				boost::shared_ptr<AudioRegion> region (
+					boost::dynamic_pointer_cast<AudioRegion>(RegionFactory::create (sources, plist, false)));
+
 				assert(region);
 				region->block_property_changes ();
 				region->set_position (_trackview.session()->transport_frame(), this);

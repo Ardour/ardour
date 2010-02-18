@@ -33,6 +33,8 @@
 #include "rgb_macros.h"
 #include "i18n.h"
 
+using namespace ARDOUR;
+
 /** Construct Strip silence dialog box */
 StripSilenceDialog::StripSilenceDialog (std::list<boost::shared_ptr<ARDOUR::AudioRegion> > const & regions)
 	: ArdourDialog (_("Strip Silence")), _wave_width (640), _wave_height (64)
@@ -183,10 +185,10 @@ StripSilenceDialog::update_silence_rects ()
 
 		i->silence_rects.clear ();
 
-		std::list<std::pair<nframes_t, nframes_t> > const silence =
+		std::list<std::pair<frameoffset_t, framecnt_t> > const silence =
 			i->region->find_silence (dB_to_coefficient (threshold ()), minimum_length ());
-
-		for (std::list<std::pair<nframes_t, nframes_t> >::const_iterator j = silence.begin(); j != silence.end(); ++j) {
+		
+		for (std::list<std::pair<frameoffset_t, framecnt_t> >::const_iterator j = silence.begin(); j != silence.end(); ++j) {
 
 			ArdourCanvas::SimpleRect* r = new ArdourCanvas::SimpleRect (*(_canvas->root()));
 			r->property_x1() = j->first / i->samples_per_unit;

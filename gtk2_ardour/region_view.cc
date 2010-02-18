@@ -228,7 +228,7 @@ RegionView::lock_toggle ()
 }
 
 void
-RegionView::region_changed (Change what_changed)
+RegionView::region_changed (PropertyChange what_changed)
 {
 	ENSURE_GUI_THREAD (*this, &RegionView::region_changed, what_changed)
 
@@ -261,7 +261,7 @@ RegionView::region_locked ()
 }
 
 void
-RegionView::region_resized (Change what_changed)
+RegionView::region_resized (PropertyChange what_changed)
 {
 	double unit_length;
 
@@ -270,7 +270,7 @@ RegionView::region_resized (Change what_changed)
 		_time_converter.set_origin(_region->position());
 	}
 
-	if (what_changed & Change (StartChanged|LengthChanged)) {
+	if (what_changed & PropertyChange (StartChanged|LengthChanged)) {
 
 		set_duration (_region->length(), 0);
 

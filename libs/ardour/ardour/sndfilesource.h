@@ -65,10 +65,9 @@ class SndFileSource : public AudioFileSource {
   protected:
 	void set_header_timeline_position ();
 
-	nframes_t read_unlocked (Sample *dst, sframes_t start, nframes_t cnt) const;
-	nframes_t write_unlocked (Sample *dst, nframes_t cnt);
-
-	nframes_t write_float (Sample* data, sframes_t pos, nframes_t cnt);
+	framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const;
+	framecnt_t write_unlocked (Sample *dst, framecnt_t cnt);
+	framecnt_t write_float (Sample* data, framepos_t pos, framecnt_t cnt);
 
   private:
 	SNDFILE *sf;
@@ -77,26 +76,26 @@ class SndFileSource : public AudioFileSource {
 
 	void init_sndfile ();
 	int open();
-	int setup_broadcast_info (sframes_t when, struct tm&, time_t);
+	int setup_broadcast_info (framepos_t when, struct tm&, time_t);
 
 	/* destructive */
 
-	static nframes_t xfade_frames;
+	static framecnt_t xfade_frames;
 	static gain_t* out_coefficient;
 	static gain_t* in_coefficient;
 
 	bool          _capture_start;
 	bool          _capture_end;
-	sframes_t      capture_start_frame;
-	sframes_t      file_pos; // unit is frames
-	nframes_t      xfade_out_count;
-	nframes_t      xfade_in_count;
+	framepos_t     capture_start_frame;
+	framepos_t     file_pos; // unit is frames
+	framecnt_t     xfade_out_count;
+	framecnt_t     xfade_in_count;
 	Sample*        xfade_buf;
-
-	nframes_t crossfade (Sample* data, nframes_t cnt, int dir);
-	void set_timeline_position (int64_t);
-	nframes_t destructive_write_unlocked (Sample *dst, nframes_t cnt);
-	nframes_t nondestructive_write_unlocked (Sample *dst, nframes_t cnt);
+	
+	framecnt_t crossfade (Sample* data, framecnt_t cnt, int dir);
+	void set_timeline_position (framepos_t);
+	framecnt_t destructive_write_unlocked (Sample *dst, framecnt_t cnt);
+	framecnt_t nondestructive_write_unlocked (Sample *dst, framecnt_t cnt);
 	void handle_header_position_change ();
 	PBD::ScopedConnection header_position_connection;
 };

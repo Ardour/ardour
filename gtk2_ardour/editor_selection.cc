@@ -292,7 +292,7 @@ Editor::get_onscreen_tracks (TrackViewList& tvl)
  */
 
 void
-Editor::mapover_tracks (sigc::slot<void, RouteTimeAxisView&, uint32_t> sl, TimeAxisView* basis, RouteGroup::Property prop) const
+Editor::mapover_tracks (sigc::slot<void, RouteTimeAxisView&, uint32_t> sl, TimeAxisView* basis, PBD::PropertyID prop) const
 {
 	RouteTimeAxisView* route_basis = dynamic_cast<RouteTimeAxisView*> (basis);
 	if (route_basis == 0) {
@@ -303,7 +303,7 @@ Editor::mapover_tracks (sigc::slot<void, RouteTimeAxisView&, uint32_t> sl, TimeA
 	tracks.insert (route_basis);
 
 	RouteGroup* group = route_basis->route()->route_group();
-	if (group && group->active_property (prop)) {
+	if (group && group->enabled_property (prop)) {
 
 		/* the basis is a member of an active route group, with the appropriate
 		   properties; find other members */
@@ -353,9 +353,9 @@ Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t, RegionVi
 }
 
 void
-Editor::get_equivalent_regions (RegionView* basis, vector<RegionView*>& equivalent_regions, RouteGroup::Property prop) const
+Editor::get_equivalent_regions (RegionView* basis, vector<RegionView*>& equivalent_regions, PBD::PropertyID property) const
 {
-	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions), &basis->get_trackview(), prop);
+	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions), &basis->get_trackview(), property);
 
 	/* add clicked regionview since we skipped all other regions in the same track as the one it was in */
 
@@ -363,7 +363,7 @@ Editor::get_equivalent_regions (RegionView* basis, vector<RegionView*>& equivale
 }
 
 RegionSelection
-Editor::get_equivalent_regions (RegionSelection & basis, RouteGroup::Property prop) const
+Editor::get_equivalent_regions (RegionSelection & basis, PBD::PropertyID prop) const
 {
 	RegionSelection equivalent;
 
@@ -476,7 +476,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 				if (press) {
 
 					if (selection->selected (clicked_routeview)) {
-						get_equivalent_regions (clicked_regionview, all_equivalent_regions, RouteGroup::Select);
+						get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::select.id);
 					} else {
 						all_equivalent_regions.push_back (clicked_regionview);
 					}
@@ -494,7 +494,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 		case Selection::Set:
 			if (!selection->selected (clicked_regionview)) {
-				get_equivalent_regions (clicked_regionview, all_equivalent_regions, RouteGroup::Select);
+				get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::select.id);
 				selection->set (all_equivalent_regions);
 				commit = true;
 			} else {

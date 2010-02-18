@@ -36,6 +36,7 @@
 #include "evoral/Curve.hpp"
 
 #include "ardour/audioregion.h"
+#include "ardour/debug.h"
 #include "ardour/session.h"
 #include "ardour/gain.h"
 #include "ardour/dB.h"
@@ -52,186 +53,180 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-/* a Session will reset these to its chosen defaults by calling AudioRegion::set_default_fade() */
+namespace ARDOUR {
+	namespace Properties {
+		PBD::PropertyDescriptor<bool> envelope_active;
+		PBD::PropertyDescriptor<bool> default_fade_in;
+		PBD::PropertyDescriptor<bool> default_fade_out;
+		PBD::PropertyDescriptor<bool> fade_in_active;
+		PBD::PropertyDescriptor<bool> fade_out_active;
+		PBD::PropertyDescriptor<float> scale_amplitude;
+	}
+}
 
-Change AudioRegion::FadeInChanged         = PBD::new_change();
-Change AudioRegion::FadeOutChanged        = PBD::new_change();
-Change AudioRegion::FadeInActiveChanged   = PBD::new_change();
-Change AudioRegion::FadeOutActiveChanged  = PBD::new_change();
-Change AudioRegion::EnvelopeActiveChanged = PBD::new_change();
-Change AudioRegion::ScaleAmplitudeChanged = PBD::new_change();
-Change AudioRegion::EnvelopeChanged       = PBD::new_change();
+void
+AudioRegion::make_property_quarks ()
+{
+	Properties::envelope_active.id = g_quark_from_static_string (X_("envelope-active"));
+	Properties::default_fade_in.id = g_quark_from_static_string (X_("default-fade-in"));
+	Properties::default_fade_out.id = g_quark_from_static_string (X_("default-fade-out"));
+	Properties::fade_in_active.id = g_quark_from_static_string (X_("fade-in-active"));
+	Properties::fade_out_active.id = g_quark_from_static_string (X_("fade-out-active"));
+	Properties::scale_amplitude.id = g_quark_from_static_string (X_("scale-amplitude"));
+}
+
+void
+AudioRegion::register_properties ()
+{
+	/* no need to register parent class properties */
+
+	add_property (_envelope_active);
+	add_property (_default_fade_in);
+	add_property (_default_fade_out);
+	add_property (_fade_in_active);
+	add_property (_fade_out_active);
+	add_property (_scale_amplitude);
+}
+
+#define AUDIOREGION_STATE_DEFAULT \
+	_envelope_active (Properties::envelope_active, EnvelopeActiveChanged, false) \
+	, _default_fade_in (Properties::default_fade_in, FadeInChanged, true) \
+	, _default_fade_out (Properties::default_fade_out, FadeOutChanged, true) \
+	, _fade_in_active (Properties::fade_in_active, FadeInActiveChanged, true) \
+	, _fade_out_active (Properties::fade_out_active, FadeOutActiveChanged, true) \
+	, _scale_amplitude (Properties::scale_amplitude, ScaleAmplitudeChanged, 1.0)
+
+#define AUDIOREGION_COPY_STATE(other) \
+	 _envelope_active (other->_envelope_active) \
+	, _default_fade_in (other->_default_fade_in) \
+	, _default_fade_out (other->_default_fade_out) \
+        , _fade_in_active (other->_fade_in_active) \
+        , _fade_out_active (other->_fade_out_active) \
+	, _scale_amplitude (other->_scale_amplitude) 
+
+PropertyChange AudioRegion::FadeInChanged         = PBD::new_change();
+PropertyChange AudioRegion::FadeOutChanged        = PBD::new_change();
+PropertyChange AudioRegion::FadeInActiveChanged   = PBD::new_change();
+PropertyChange AudioRegion::FadeOutActiveChanged  = PBD::new_change();
+PropertyChange AudioRegion::EnvelopeActiveChanged = PBD::new_change();
+PropertyChange AudioRegion::ScaleAmplitudeChanged = PBD::new_change();
+PropertyChange AudioRegion::EnvelopeChanged       = PBD::new_change();
+
+/* a Session will reset these to its chosen defaults by calling AudioRegion::set_default_fade() */
 
 void
 AudioRegion::init ()
 {
-	_scale_amplitude = 1.0;
+	register_properties ();
 
 	set_default_fades ();
 	set_default_envelope ();
 
 	listen_to_my_curves ();
 	connect_to_analysis_changed ();
+	connect_to_header_position_offset_changed ();
 }
 
 /** Constructor for use by derived types only */
-AudioRegion::AudioRegion (Session& s, nframes_t start, nframes_t length, string name)
-	: Region (s, start, length, name, DataType::AUDIO)
-	, _automatable(s)
+AudioRegion::AudioRegion (Session& s, framepos_t start, framecnt_t len, std::string name)
+	: Region (s, start, len, name, DataType::AUDIO)
+	, AUDIOREGION_STATE_DEFAULT
+	, _automatable (s)
 	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
 	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
 	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
+	, _fade_in_suspended (0)
+	, _fade_out_suspended (0)
 {
 	init ();
 	assert (_sources.size() == _master_sources.size());
 }
 
 /** Basic AudioRegion constructor (one channel) */
-AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length)
-	: Region (src, start, length, PBD::basename_nosuffix(src->name()), DataType::AUDIO, 0,  Region::Flag(Region::DefaultFlags|Region::External))
+AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src)
+	: Region (boost::static_pointer_cast<Source>(src))
+	, AUDIOREGION_STATE_DEFAULT
 	, _automatable(src->session())
 	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
 	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
 	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
+	, _fade_in_suspended (0)
+	, _fade_out_suspended (0)
 {
-	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
-	if (afs) {
-		afs->HeaderPositionOffsetChanged.connect_same_thread (*this, boost::bind (&AudioRegion::source_offset_changed, this));
-	}
-
 	init ();
-	assert (_sources.size() == _master_sources.size());
-}
+	
+	/* XXX why is this set here ? - set in a property list given to RegionFactory */
+	_external = true;
 
-/* Basic AudioRegion constructor (one channel) */
-AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
-	: Region (src, start, length, name, DataType::AUDIO, layer, flags)
-	, _automatable(src->session())
-	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
-	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
-	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
-{
-	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
-	if (afs) {
-		afs->HeaderPositionOffsetChanged.connect_same_thread (*this, boost::bind (&AudioRegion::source_offset_changed, this));
-	}
-
-	init ();
 	assert (_sources.size() == _master_sources.size());
 }
 
 /** Basic AudioRegion constructor (many channels) */
-AudioRegion::AudioRegion (const SourceList& srcs, nframes_t start, nframes_t length, const string& name, layer_t layer, Flag flags)
-	: Region (srcs, start, length, name, DataType::AUDIO, layer, flags)
+AudioRegion::AudioRegion (const SourceList& srcs)
+	: Region (srcs)
+	, AUDIOREGION_STATE_DEFAULT
 	, _automatable(srcs[0]->session())
 	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
 	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
 	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
+	, _fade_in_suspended (0)
+	, _fade_out_suspended (0)
 {
 	init ();
-	connect_to_analysis_changed ();
 	assert (_sources.size() == _master_sources.size());
 }
 
-/** Create a new AudioRegion, that is part of an existing one */
-AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes_t offset, nframes_t length, const string& name, layer_t layer, Flag flags)
-	: Region (other, offset, length, name, layer, flags)
-	, _automatable(other->session())
-	, _fade_in (new AutomationList(*other->_fade_in))
-	, _fade_out (new AutomationList(*other->_fade_out))
-	, _envelope (new AutomationList(*other->_envelope, offset, offset + length))
+AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, nframes64_t offset, bool offset_relative)
+	: Region (other, offset, offset_relative)
+	, AUDIOREGION_COPY_STATE (other)
+	, _automatable (other->session())
+	, _fade_in (new AutomationList (*other->_fade_in))
+	, _fade_out (new AutomationList (*other->_fade_out))
+	  /* XXX is this guaranteed to work for all values of offset+offset_relative? */
+	, _envelope (new AutomationList (*other->_envelope, _start, _start + _length))
+	, _fade_in_suspended (0)
+	, _fade_out_suspended (0)
 {
+	/* don't use init here, because we got fade in/out from the other region
+	*/
+	register_properties ();
+	listen_to_my_curves ();
+	connect_to_analysis_changed ();
 	connect_to_header_position_offset_changed ();
 
-	/* return to default fades if the existing ones are too long */
-
-	if (_flags & LeftOfSplit) {
-		if (_fade_in->back()->when >= _length) {
-			set_default_fade_in ();
-		} else {
-			_fade_in_disabled = other->_fade_in_disabled;
-		}
-		set_default_fade_out ();
-		_flags = Flag (_flags & ~Region::LeftOfSplit);
-	}
-
-	if (_flags & RightOfSplit) {
-		if (_fade_out->back()->when >= _length) {
-			set_default_fade_out ();
-		} else {
-			_fade_out_disabled = other->_fade_out_disabled;
-		}
-		set_default_fade_in ();
-		_flags = Flag (_flags & ~Region::RightOfSplit);
-	}
-
-	_scale_amplitude = other->_scale_amplitude;
-
 	assert(_type == DataType::AUDIO);
-
-	listen_to_my_curves ();
-	connect_to_analysis_changed ();
-
 	assert (_sources.size() == _master_sources.size());
 }
 
-AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other)
-	: Region (other)
+AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, const SourceList& srcs)
+	: Region (boost::static_pointer_cast<const Region>(other), srcs)
+	, AUDIOREGION_COPY_STATE (other)
 	, _automatable (other->session())
 	, _fade_in (new AutomationList (*other->_fade_in))
 	, _fade_out (new AutomationList (*other->_fade_out))
 	, _envelope (new AutomationList (*other->_envelope))
-{
-	assert(_type == DataType::AUDIO);
-	_scale_amplitude = other->_scale_amplitude;
-
-	listen_to_my_curves ();
-	connect_to_analysis_changed ();
-
-	assert (_sources.size() == _master_sources.size());
-}
-
-AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, const SourceList& /*srcs*/,
-			  nframes_t length, const string& name, layer_t layer, Flag flags)
-	: Region (other, length, name, layer, flags)
-	, _automatable (other->session())
-	, _fade_in (new AutomationList (*other->_fade_in))
-	, _fade_out (new AutomationList (*other->_fade_out))
-	, _envelope (new AutomationList (*other->_envelope))
+	, _fade_in_suspended (0)
+	, _fade_out_suspended (0)
 {
 	/* make-a-sort-of-copy-with-different-sources constructor (used by audio filter) */
 
-	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
-
-		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> ((*i));
-		if (afs) {
-			afs->HeaderPositionOffsetChanged.connect_same_thread (*this, boost::bind (&AudioRegion::source_offset_changed, this));
-		}
-	}
-
-	_scale_amplitude = other->_scale_amplitude;
-
-	_fade_in_disabled = 0;
-	_fade_out_disabled = 0;
+	register_properties ();
 
 	listen_to_my_curves ();
 	connect_to_analysis_changed ();
+	connect_to_header_position_offset_changed ();
 
 	assert (_sources.size() == _master_sources.size());
 }
 
 AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& node)
 	: Region (src, node)
+	, AUDIOREGION_STATE_DEFAULT
 	, _automatable(src->session())
 	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
 	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
 	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
 {
-	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
-	if (afs) {
-		afs->HeaderPositionOffsetChanged.connect_same_thread (*this, boost::bind (&AudioRegion::source_offset_changed, this));
-	}
-
 	init ();
 
 	if (set_state (node, Stateful::loading_state_version)) {
@@ -239,17 +234,18 @@ AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& nod
 	}
 
 	assert(_type == DataType::AUDIO);
-	connect_to_analysis_changed ();
-
 	assert (_sources.size() == _master_sources.size());
 }
 
 AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 	: Region (srcs, node)
+	, AUDIOREGION_STATE_DEFAULT
 	, _automatable(srcs[0]->session())
 	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
 	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
 	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
+	, _fade_in_suspended (0)
+	, _fade_out_suspended (0)
 {
 	init ();
 
@@ -264,6 +260,33 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 
 AudioRegion::~AudioRegion ()
 {
+}
+
+void
+AudioRegion::post_set ()
+{
+	if (!_sync_marked) {
+		_sync_position = _start;
+	}
+
+	/* return to default fades if the existing ones are too long */
+
+	if (_left_of_split) {
+		if (_fade_in->back()->when >= _length) {
+			set_default_fade_in ();
+		} 
+		set_default_fade_out ();
+		_left_of_split = false;
+	}
+
+	if (_right_of_split) {
+		if (_fade_out->back()->when >= _length) {
+			set_default_fade_out ();
+		} 
+
+		set_default_fade_in ();
+		_right_of_split = false;
+	}
 }
 
 void
@@ -294,8 +317,6 @@ AudioRegion::connect_to_header_position_offset_changed ()
 void
 AudioRegion::listen_to_my_curves ()
 {
-	cerr << _name << ": listeing my own curves\n";
-
 	_envelope->StateChanged.connect_same_thread (*this, boost::bind (&AudioRegion::envelope_changed, this));
 	_fade_in->StateChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fade_in_changed, this));
 	_fade_out->StateChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fade_out_changed, this));
@@ -305,11 +326,7 @@ void
 AudioRegion::set_envelope_active (bool yn)
 {
 	if (envelope_active() != yn) {
-		if (yn) {
-			_flags = Flag (_flags|EnvelopeActive);
-		} else {
-			_flags = Flag (_flags & ~EnvelopeActive);
-		}
+		_envelope_active = yn;
 		send_change (EnvelopeActiveChanged);
 	}
 }
@@ -324,7 +341,7 @@ AudioRegion::read_peaks (PeakData *buf, nframes_t npeaks, nframes_t offset, nfra
 	if (audio_source(chan_n)->read_peaks (buf, npeaks, offset, cnt, samples_per_unit)) {
 		return 0;
 	} else {
-		if (_scale_amplitude != 1.0) {
+		if (_scale_amplitude != 1.0f) {
 			for (nframes_t n = 0; n < npeaks; ++n) {
 				buf[n].max *= _scale_amplitude;
 				buf[n].min *= _scale_amplitude;
@@ -334,32 +351,32 @@ AudioRegion::read_peaks (PeakData *buf, nframes_t npeaks, nframes_t offset, nfra
 	}
 }
 
-nframes_t
-AudioRegion::read (Sample* buf, sframes_t timeline_position, nframes_t cnt, int channel) const
+framecnt_t
+AudioRegion::read (Sample* buf, framepos_t timeline_position, framecnt_t cnt, int channel) const
 {
 	/* raw read, no fades, no gain, nada */
 	return _read_at (_sources, _length, buf, 0, 0, _position + timeline_position, cnt, channel, 0, 0, ReadOps (0));
 }
 
-nframes_t
-AudioRegion::read_with_ops (Sample* buf, sframes_t file_position, nframes_t cnt, int channel, ReadOps rops) const
+framecnt_t
+AudioRegion::read_with_ops (Sample* buf, framepos_t file_position, framecnt_t cnt, int channel, ReadOps rops) const
 {
 	return _read_at (_sources, _length, buf, 0, 0, file_position, cnt, channel, 0, 0, rops);
 }
 
-nframes_t
+framecnt_t
 AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
-		sframes_t file_position, nframes_t cnt, uint32_t chan_n,
-		nframes_t read_frames, nframes_t skip_frames) const
+		      framepos_t file_position, framecnt_t cnt, uint32_t chan_n,
+		      framecnt_t read_frames, framecnt_t skip_frames) const
 {
 	/* regular diskstream/butler read complete with fades etc */
 	return _read_at (_sources, _length, buf, mixdown_buffer, gain_buffer,
 			file_position, cnt, chan_n, read_frames, skip_frames, ReadOps (~0));
 }
 
-nframes_t
+framecnt_t
 AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
-		sframes_t position, nframes_t cnt, uint32_t chan_n) const
+			     framepos_t position, framecnt_t cnt, uint32_t chan_n) const
 {
 	/* do not read gain/scaling/fades and do not count this disk i/o in statistics */
 
@@ -367,18 +384,19 @@ AudioRegion::master_read_at (Sample *buf, Sample *mixdown_buffer, float *gain_bu
 			 buf, mixdown_buffer, gain_buffer, position, cnt, chan_n, 0, 0, ReadOps (0));
 }
 
-nframes_t
-AudioRegion::_read_at (const SourceList& /*srcs*/, nframes_t limit,
-		Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
-		sframes_t position, nframes_t cnt,
-		uint32_t chan_n,
-	        nframes_t /*read_frames*/,
-		nframes_t /*skip_frames*/,
-		ReadOps rops) const
+framecnt_t
+AudioRegion::_read_at (const SourceList& /*srcs*/, framecnt_t limit,
+		       Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
+		       framepos_t position, 
+		       framecnt_t cnt,
+		       uint32_t chan_n,
+		       framecnt_t /*read_frames*/,
+		       framecnt_t /*skip_frames*/,
+		       ReadOps rops) const
 {
-	nframes_t internal_offset;
-	nframes_t buf_offset;
-	nframes_t to_read;
+	frameoffset_t internal_offset;
+	frameoffset_t buf_offset;
+	framecnt_t to_read;
 	bool raw = (rops == ReadOpsNone);
 
 	if (muted() && !raw) {
@@ -439,7 +457,7 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, nframes_t limit,
 
 		/* fade in */
 
-		if ((_flags & FadeIn) && _session.config.get_use_region_fades()) {
+		if (_fade_in_active && _session.config.get_use_region_fades()) {
 
 			nframes_t fade_in_length = (nframes_t) _fade_in->back()->when;
 
@@ -462,7 +480,7 @@ AudioRegion::_read_at (const SourceList& /*srcs*/, nframes_t limit,
 
 		/* fade out */
 
-		if ((_flags & FadeOut) && _session.config.get_use_region_fades()) {
+		if (_fade_out_active && _session.config.get_use_region_fades()) {
 
 			/* see if some part of this read is within the fade out */
 
@@ -552,8 +570,6 @@ AudioRegion::state (bool full)
 	char buf2[64];
 	LocaleGuard lg (X_("POSIX"));
 
-	snprintf (buf, sizeof(buf), "%.12g", _scale_amplitude);
-	node.add_property ("scale-gain", buf);
 
 	// XXX these should move into Region
 
@@ -573,26 +589,7 @@ AudioRegion::state (bool full)
 	node.add_property ("channels", buf);
 
 	if (full) {
-
-		child = node.add_child (X_("FadeIn"));
-
-		if ((_flags & DefaultFadeIn)) {
-			child->add_property (X_("default"), X_("yes"));
-		} else {
-			child->add_child_nocopy (_fade_in->get_state ());
-		}
-
-		child->add_property (X_("active"), fade_in_active () ? X_("yes") : X_("no"));
-
-		child = node.add_child (X_("FadeOut"));
-
-		if ((_flags & DefaultFadeOut)) {
-			child->add_property (X_("default"), X_("yes"));
-		} else {
-			child->add_child_nocopy (_fade_out->get_state ());
-		}
-
-		child->add_property (X_("active"), fade_out_active () ? X_("yes") : X_("no"));
+		Stateful::add_properties (node);
 	}
 
 	child = node.add_child ("Envelope");
@@ -629,7 +626,7 @@ AudioRegion::state (bool full)
 }
 
 int
-AudioRegion::set_live_state (const XMLNode& node, int version, Change& what_changed, bool send)
+AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_changed, bool send)
 {
 	const XMLNodeList& nlist = node.children();
 	const XMLProperty *prop;
@@ -637,36 +634,32 @@ AudioRegion::set_live_state (const XMLNode& node, int version, Change& what_chan
 	boost::shared_ptr<Playlist> the_playlist (_playlist.lock());	
 
 	freeze ();
+
 	if (the_playlist) {
 		the_playlist->freeze ();
 	}
 
-	Region::set_live_state (node, version, what_changed, false);
-	cerr << "After region SLS, wc = " << what_changed << endl;
 
+	/* this will set all our State members and stuff controlled by the Region.
+	   It should NOT send any changed signals - that is our responsibility.
+	*/
 
-	if ((prop = node.property ("flags")) != 0) {
-		_flags = Flag (_flags & ~Region::LeftOfSplit);
-		_flags = Flag (_flags & ~Region::RightOfSplit);
-	}
-
-	/* find out if any flags changed that we signal about */
+	Region::_set_state (node, version, what_changed, false);
 
 	if ((prop = node.property ("scale-gain")) != 0) {
 		float a = atof (prop->value().c_str());
 		if (a != _scale_amplitude) {
 			_scale_amplitude = a;
-			what_changed = Change (what_changed|ScaleAmplitudeChanged);
+			what_changed = PropertyChange (what_changed|ScaleAmplitudeChanged);
 			cerr << _name << " amp changed\n";
 		}
 	}
 
-	/* Now find envelope description and other misc child items */
+	/* Now find envelope description and other related child items */
 
 	_envelope->freeze ();
 
 	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
-#if 0
 		XMLNode *child;
 		XMLProperty *prop;
 
@@ -731,7 +724,6 @@ AudioRegion::set_live_state (const XMLNode& node, int version, Change& what_chan
 			cerr << _name << " fadeout changd\n";
 
 		}
-#endif
 	}
 
 	_envelope->thaw ();
@@ -749,15 +741,61 @@ AudioRegion::set_live_state (const XMLNode& node, int version, Change& what_chan
 	return 0;
 }
 
+PropertyChange
+AudioRegion::set_property (const PropertyBase& prop)
+{
+	PropertyChange c = PropertyChange (0);
+
+	DEBUG_TRACE (DEBUG::Properties,  string_compose ("audio region %1 set property %2\n", _name.val(), prop.property_name()));
+
+	if (prop == Properties::envelope_active.id) {
+		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
+		if (val != _envelope_active) {
+			_envelope_active = val;
+			c = EnvelopeActiveChanged;
+		}
+	} else if (prop == Properties::default_fade_in.id) {
+		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
+		if (val != _default_fade_in) {
+			_default_fade_in = val;
+			c = FadeInChanged;
+		}
+	} else if (prop == Properties::default_fade_out.id) {
+		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
+		if (val != _default_fade_out) {
+			_default_fade_out = val;
+			c = FadeOutChanged;
+		}
+	} else if (prop == Properties::fade_in_active.id) {
+		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
+		if (val != _fade_in_active) {
+			_fade_in_active = val;
+			c = FadeInActiveChanged;
+		}
+	} else if (prop == Properties::fade_out_active.id) {
+		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
+		if (val != _fade_out_active) {
+			_fade_out_active = val;
+			c = FadeOutChanged;
+		}
+	} else if (prop == Properties::scale_amplitude.id) {
+		gain_t val = dynamic_cast<const PropertyTemplate<gain_t>*>(&prop)->val();
+		if (val != _scale_amplitude) {
+			_scale_amplitude = val;
+			c = ScaleAmplitudeChanged;
+		}
+	} else {
+		return Region::set_property (prop);
+	}
+
+	return c;
+}
+
 int
 AudioRegion::set_state (const XMLNode& node, int version)
 {
-	/* Region::set_state() calls the virtual set_live_state(),
-	   which will get us back to AudioRegion::set_live_state()
-	   to handle the relevant stuff.
-	*/
-
-	return Region::set_state (node, version);
+	PropertyChange what_changed;
+	return _set_state (node, version, what_changed, true);
 }
 
 void
@@ -783,7 +821,7 @@ AudioRegion::set_fade_in (boost::shared_ptr<AutomationList> f)
 }
 
 void
-AudioRegion::set_fade_in (FadeShape shape, nframes_t len)
+AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 {
 	_fade_in->freeze ();
 	_fade_in->clear ();
@@ -850,7 +888,7 @@ AudioRegion::set_fade_out (boost::shared_ptr<AutomationList> f)
 }
 
 void
-AudioRegion::set_fade_out (FadeShape shape, nframes_t len)
+AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 {
 	_fade_out->freeze ();
 	_fade_out->clear ();
@@ -905,7 +943,7 @@ AudioRegion::set_fade_out (FadeShape shape, nframes_t len)
 }
 
 void
-AudioRegion::set_fade_in_length (nframes_t len)
+AudioRegion::set_fade_in_length (framecnt_t len)
 {
 	if (len > _length) {
 		len = _length - 1;
@@ -914,13 +952,13 @@ AudioRegion::set_fade_in_length (nframes_t len)
 	bool changed = _fade_in->extend_to (len);
 
 	if (changed) {
-		_flags = Flag (_flags & ~DefaultFadeIn);
+		_default_fade_in = false;
 		send_change (FadeInChanged);
 	}
 }
 
 void
-AudioRegion::set_fade_out_length (nframes_t len)
+AudioRegion::set_fade_out_length (framecnt_t len)
 {
 	if (len > _length) {
 		len = _length - 1;
@@ -929,7 +967,7 @@ AudioRegion::set_fade_out_length (nframes_t len)
 	bool changed =	_fade_out->extend_to (len);
 
 	if (changed) {
-		_flags = Flag (_flags & ~DefaultFadeOut);
+		_default_fade_out = false;
 		send_change (FadeOutChanged);
 	}
 }
@@ -937,30 +975,21 @@ AudioRegion::set_fade_out_length (nframes_t len)
 void
 AudioRegion::set_fade_in_active (bool yn)
 {
-	if (yn == (_flags & FadeIn)) {
+	if (yn == _fade_in_active) {
 		return;
 	}
-	if (yn) {
-		_flags = Flag (_flags|FadeIn);
-	} else {
-		_flags = Flag (_flags & ~FadeIn);
-	}
 
+	_fade_in_active = yn;
 	send_change (FadeInActiveChanged);
 }
 
 void
 AudioRegion::set_fade_out_active (bool yn)
 {
-	if (yn == (_flags & FadeOut)) {
+	if (yn == _fade_out_active) {
 		return;
 	}
-	if (yn) {
-		_flags = Flag (_flags | FadeOut);
-	} else {
-		_flags = Flag (_flags & ~FadeOut);
-	}
-
+	_fade_out_active = yn;
 	send_change (FadeOutActiveChanged);
 }
 
@@ -979,14 +1008,14 @@ AudioRegion::fade_out_is_default () const
 void
 AudioRegion::set_default_fade_in ()
 {
-	_fade_in_disabled = 0;
+	_fade_in_suspended = 0;
 	set_fade_in (Linear, 64);
 }
 
 void
 AudioRegion::set_default_fade_out ()
 {
-	_fade_out_disabled = 0;
+	_fade_out_suspended = 0;
 	set_fade_out (Linear, 64);
 }
 
@@ -1080,9 +1109,15 @@ AudioRegion::separate_by_channel (Session& /*session*/, vector<boost::shared_ptr
 		   "whole file" even if it covers the entire source file(s).
 		 */
 
-		Flag f = Flag (_flags & ~WholeFile);
+		PropertyList plist;
+		
+		plist.add (Properties::start, _start.val());
+		plist.add (Properties::length, _length.val());
+		plist.add (Properties::name, new_name);
+		plist.add (Properties::layer, _layer.val());
 
-		v.push_back(RegionFactory::create (srcs, _start, _length, new_name, _layer, f));
+		v.push_back(RegionFactory::create (srcs, plist));
+		v.back()->set_whole_file (false);
 
 		++n;
 	}
@@ -1090,8 +1125,8 @@ AudioRegion::separate_by_channel (Session& /*session*/, vector<boost::shared_ptr
 	return 0;
 }
 
-nframes_t
-AudioRegion::read_raw_internal (Sample* buf, sframes_t pos, nframes_t cnt, int channel) const
+framecnt_t
+AudioRegion::read_raw_internal (Sample* buf, framepos_t pos, framecnt_t cnt, int channel) const
 {
 	return audio_source()->read (buf, pos, cnt, channel);
 }
@@ -1183,11 +1218,11 @@ AudioRegion::set_scale_amplitude (gain_t g)
 void
 AudioRegion::normalize_to (float target_dB)
 {
-	const nframes_t blocksize = 64 * 1024;
+	const framecnt_t blocksize = 64 * 1024;
 	Sample buf[blocksize];
-	nframes_t fpos;
-	nframes_t fend;
-	nframes_t to_read;
+	framepos_t fpos;
+	framepos_t fend;
+	framecnt_t to_read;
 	double maxamp = 0;
 	gain_t target = dB_to_coefficient (target_dB);
 
@@ -1271,7 +1306,7 @@ AudioRegion::envelope_changed ()
 void
 AudioRegion::suspend_fade_in ()
 {
-	if (++_fade_in_disabled == 1) {
+	if (++_fade_in_suspended == 1) {
 		if (fade_in_is_default()) {
 			set_fade_in_active (false);
 		}
@@ -1281,7 +1316,7 @@ AudioRegion::suspend_fade_in ()
 void
 AudioRegion::resume_fade_in ()
 {
-	if (--_fade_in_disabled == 0 && _fade_in_disabled) {
+	if (--_fade_in_suspended == 0 && _fade_in_suspended) {
 		set_fade_in_active (true);
 	}
 }
@@ -1289,7 +1324,7 @@ AudioRegion::resume_fade_in ()
 void
 AudioRegion::suspend_fade_out ()
 {
-	if (++_fade_out_disabled == 1) {
+	if (++_fade_out_suspended == 1) {
 		if (fade_out_is_default()) {
 			set_fade_out_active (false);
 		}
@@ -1299,7 +1334,7 @@ AudioRegion::suspend_fade_out ()
 void
 AudioRegion::resume_fade_out ()
 {
-	if (--_fade_out_disabled == 0 &&_fade_out_disabled) {
+	if (--_fade_out_suspended == 0 &&_fade_out_suspended) {
 		set_fade_out_active (true);
 	}
 }
@@ -1474,20 +1509,20 @@ then quit ardour and restart."));
  *  @return Silent periods; first of pair is the offset within the region, second is the length of the period
  */
 
-std::list<std::pair<nframes_t, nframes_t> >
-AudioRegion::find_silence (Sample threshold, nframes_t min_length) const
+std::list<std::pair<frameoffset_t, framecnt_t> >
+AudioRegion::find_silence (Sample threshold, framecnt_t min_length) const
 {
-	nframes_t const block_size = 64 * 1024;
+	framecnt_t const block_size = 64 * 1024;
 	Sample loudest[block_size];
 	Sample buf[block_size];
 
-	nframes_t pos = _start;
-	nframes_t const end = _start + _length - 1;
+	framepos_t pos = _start;
+	framepos_t const end = _start + _length - 1;
 
-	std::list<std::pair<nframes_t, nframes_t> > silent_periods;
+	std::list<std::pair<frameoffset_t, framecnt_t> > silent_periods;
 
 	bool in_silence = false;
-	nframes_t silence_start = 0;
+	frameoffset_t silence_start = 0;
 	bool silence;
 
 	while (pos < end) {
@@ -1497,13 +1532,13 @@ AudioRegion::find_silence (Sample threshold, nframes_t min_length) const
 		for (uint32_t n = 0; n < n_channels(); ++n) {
 
 			read_raw_internal (buf, pos, block_size, n);
-			for (nframes_t i = 0; i < block_size; ++i) {
+			for (framecnt_t i = 0; i < block_size; ++i) {
 				loudest[i] = max (loudest[i], abs (buf[i]));
 			}
 		}
 
 		/* now look for silence */
-		for (nframes_t i = 0; i < block_size; ++i) {
+		for (framecnt_t i = 0; i < block_size; ++i) {
 			silence = abs (loudest[i]) < threshold;
 			if (silence && !in_silence) {
 				/* non-silence to silence */
@@ -1530,11 +1565,12 @@ AudioRegion::find_silence (Sample threshold, nframes_t min_length) const
 }
 
 
+
 extern "C" {
 
 	int region_read_peaks_from_c (void *arg, uint32_t npeaks, uint32_t start, uint32_t cnt, intptr_t data, uint32_t n_chan, double samples_per_unit)
 {
-	return ((AudioRegion *) arg)->read_peaks ((PeakData *) data, (nframes_t) npeaks, (nframes_t) start, (nframes_t) cnt, n_chan,samples_per_unit);
+	return ((AudioRegion *) arg)->read_peaks ((PeakData *) data, (framecnt_t) npeaks, (framepos_t) start, (framecnt_t) cnt, n_chan,samples_per_unit);
 }
 
 uint32_t region_length_from_c (void *arg)

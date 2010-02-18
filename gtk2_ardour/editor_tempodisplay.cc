@@ -93,7 +93,7 @@ Editor::draw_metric_marks (const Metrics& metrics)
 }
 
 void
-Editor::tempo_map_changed (Change ignored)
+Editor::tempo_map_changed (PropertyChange ignored)
 {
 	if (!_session) {
 		return;

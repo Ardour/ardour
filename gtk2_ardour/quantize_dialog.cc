@@ -20,6 +20,7 @@
 #include <gtkmm/stock.h>
 #include "gtkmm2ext/utils.h"
 
+#include "pbd/convert.h"
 #include "quantize_dialog.h"
 #include "public_editor.h"
 

@@ -59,12 +59,12 @@ class Source : public SessionObject
 	time_t timestamp() const { return _timestamp; }
 	void stamp (time_t when) { _timestamp = when; }
 
-	virtual sframes_t length (sframes_t pos) const = 0;
-	virtual void      update_length (sframes_t pos, sframes_t cnt) = 0;
+	virtual framecnt_t length (framepos_t pos) const = 0;
+	virtual void       update_length (framepos_t pos, framecnt_t cnt) = 0;
 
 	virtual const Glib::ustring& path() const = 0;
 
-	virtual nframes64_t natural_position() const { return 0; }
+	virtual framepos_t natural_position() const { return 0; }
 
 	void mark_for_remove();
 

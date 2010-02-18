@@ -82,7 +82,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 
 	group->signal_event().connect (sigc::bind (sigc::mem_fun (tv.editor(), &PublicEditor::canvas_crossfade_view_event), group, this));
 
-	crossfade_changed (Change (~0));
+	crossfade_changed (PropertyChange (~0));
 
 	crossfade->StateChanged.connect (*this, ui_bind (&CrossfadeView::crossfade_changed, this, _1), gui_context());
 	ColorsChanged.connect (sigc::mem_fun (*this, &CrossfadeView::color_handler));
@@ -123,7 +123,7 @@ CrossfadeView::set_height (double height)
 }
 
 void
-CrossfadeView::crossfade_changed (Change what_changed)
+CrossfadeView::crossfade_changed (PropertyChange what_changed)
 {
 	bool need_redraw_curves = false;
 

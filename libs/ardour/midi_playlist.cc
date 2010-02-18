@@ -415,7 +415,7 @@ MidiPlaylist::contained_automation()
 
 
 bool
-MidiPlaylist::region_changed (PBD::Change what_changed, boost::shared_ptr<Region> region)
+MidiPlaylist::region_changed (PBD::PropertyChange what_changed, boost::shared_ptr<Region> region)
 {
 	if (in_flush || in_set_state) {
 		return false;
@@ -423,7 +423,7 @@ MidiPlaylist::region_changed (PBD::Change what_changed, boost::shared_ptr<Region
 
 	// Feeling rather uninterested today, but thanks for the heads up anyway!
 
-	PBD::Change our_interests = PBD::Change (/*MidiRegion::FadeInChanged|
+	PBD::PropertyChange our_interests = PBD::PropertyChange (/*MidiRegion::FadeInChanged|
 	                               MidiRegion::FadeOutChanged|
 	                               MidiRegion::FadeInActiveChanged|
 	                               MidiRegion::FadeOutActiveChanged|

@@ -35,27 +35,6 @@ namespace PBD {
 int Stateful::current_state_version = 0;
 int Stateful::loading_state_version = 0;
 
-PBD::Change
-new_change ()
-{
-	Change c;
-	static uint32_t change_bit = 1;
-
-	/* catch out-of-range */
-	if (!change_bit)
-	{
-		fatal << _("programming error: ")
-			<< "change_bit out of range in ARDOUR::new_change()"
-			<< endmsg;
-		/*NOTREACHED*/
-	}
-
-	c = Change (change_bit);
-	change_bit <<= 1;	// if it shifts too far, change_bit == 0
-
-	return c;
-}
-
 Stateful::Stateful ()
 {
 	_extra_xml = 0;
@@ -174,8 +153,8 @@ Stateful::instant_xml (const string& str, const sys::path& directory_path)
 void
 Stateful::clear_history ()
 {
-	for (list<StateBase*>::iterator i = _states.begin(); i != _states.end(); ++i) {
-		(*i)->clear_history ();
+	for (OwnedPropertyList::iterator i = _properties.begin(); i != _properties.end(); ++i) {
+		i->second->clear_history ();
 	}
 }
 
@@ -185,42 +164,75 @@ Stateful::clear_history ()
  *  It is the caller's responsibility to delete the returned XMLNodes.
  */
 pair<XMLNode *, XMLNode *>
-Stateful::diff ()
+Stateful::diff () const
 {
 	XMLNode* old = new XMLNode (_xml_node_name);
 	XMLNode* current = new XMLNode (_xml_node_name);
 
-	for (list<StateBase*>::iterator i = _states.begin(); i != _states.end(); ++i) {
-		(*i)->diff (old, current);
+	for (OwnedPropertyList::const_iterator i = _properties.begin(); i != _properties.end(); ++i) {
+		i->second->diff (old, current);
 	}
 
 	return make_pair (old, current);
 }
-	
-/** Set state of _states from an XML node.
- *  @param node Node.
- *  @return Changes made.
- */
-Change
-Stateful::set_state_using_states (XMLNode const & node)
+
+/** Modifies PropertyChange @param c to indicate what properties have changed since the last
+    time clear_history was called on this object. Note that not all properties have change
+    values - if this object has any such Property members, they will never show up in
+    the value of @param c. Note also that @param c is not cleared by this function.
+*/
+void
+Stateful::changed (PropertyChange& c) const
 {
-	Change c = Change (0);
-	
-	for (list<StateBase*>::iterator i = _states.begin(); i != _states.end(); ++i) {
-		c = Change (c | (*i)->set_state (node));
+	for (OwnedPropertyList::const_iterator i = _properties.begin(); i != _properties.end(); ++i) {
+		i->second->diff (c);
 	}
+}	
+	
+/** Set state of some/all _properties from an XML node.
+ *  @param node Node.
+ *  @return PropertyChanges made.
+ */
+PropertyChange
+Stateful::set_properties (XMLNode const & node)
+{
+	PropertyChange c = PropertyChange (0);
+
+	for (OwnedPropertyList::iterator i = _properties.begin(); i != _properties.end(); ++i) {
+		c = PropertyChange (c | i->second->set_state (node));
+	}
+
+	post_set ();
 
 	return c;
 }
 
-/** Add state of _states to an XML node.
+PropertyChange
+Stateful::set_properties (const PropertyList& property_list)
+{
+	PropertyChange c = PropertyChange (0);
+	PropertyList::const_iterator p;
+
+	for (OwnedPropertyList::iterator i = _properties.begin(); i != _properties.end(); ++i) {
+		if ((p = property_list.find (i->first)) != property_list.end()) {
+			c = PropertyChange (c|set_property (*(p->second)));
+		}
+	}
+	
+	post_set ();
+
+	return c;
+}
+
+
+/** Add property states to an XML node.
  *  @param node Node.
  */
 void
-Stateful::add_states (XMLNode & node)
+Stateful::add_properties (XMLNode & node)
 {
-	for (list<StateBase*>::iterator i = _states.begin(); i != _states.end(); ++i) {
-		(*i)->add_state (node);
+	for (OwnedPropertyList::iterator i = _properties.begin(); i != _properties.end(); ++i) {
+		i->second->add_state (node);
 	}
 }
 

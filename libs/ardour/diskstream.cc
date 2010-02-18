@@ -361,7 +361,7 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 }
 
 void
-Diskstream::playlist_changed (Change)
+Diskstream::playlist_changed (PropertyChange)
 {
 	playlist_modified ();
 }
@@ -426,7 +426,7 @@ Diskstream::remove_region_from_last_capture (boost::weak_ptr<Region> wregion)
 }
 
 void
-Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<nframes_t> > const & movements_frames)
+Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const & movements_frames)
 {
 	if (!_route || Config->get_automation_follows_regions () == false) {
 		return;
@@ -434,7 +434,7 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<nframes_t> > const & 
 
 	list< Evoral::RangeMove<double> > movements;
 
-	for (list< Evoral::RangeMove<nframes_t> >::const_iterator i = movements_frames.begin();
+	for (list< Evoral::RangeMove<framepos_t> >::const_iterator i = movements_frames.begin();
 	     i != movements_frames.end();
 	     ++i) {
 
@@ -458,7 +458,7 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<nframes_t> > const & 
 }
 
 void
-Diskstream::move_processor_automation (boost::weak_ptr<Processor> p, list< Evoral::RangeMove<nframes_t> > const & movements_frames)
+Diskstream::move_processor_automation (boost::weak_ptr<Processor> p, list< Evoral::RangeMove<framepos_t> > const & movements_frames)
 {
 	boost::shared_ptr<Processor> processor (p.lock ());
 	if (!processor) {
@@ -466,7 +466,7 @@ Diskstream::move_processor_automation (boost::weak_ptr<Processor> p, list< Evora
 	}
 
 	list< Evoral::RangeMove<double> > movements;
-	for (list< Evoral::RangeMove<nframes_t> >::const_iterator i = movements_frames.begin();
+	for (list< Evoral::RangeMove<framepos_t> >::const_iterator i = movements_frames.begin();
 		   i != movements_frames.end(); ++i) {
 		movements.push_back(Evoral::RangeMove<double>(i->from, i->length, i->to));
 	}

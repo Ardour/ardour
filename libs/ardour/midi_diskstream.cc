@@ -373,7 +373,7 @@ trace_midi (ostream& o, MIDI::byte *msg, size_t len)
 		o << trace_prefix
 		   << "Channel "
 		   << (msg[0]&0xF)+1
-		   <<  " Program Change ProgNum "
+		   <<  " Program PropertyChange ProgNum "
 		   << (int) msg[1]
 		   << endl;
 		break;
@@ -985,9 +985,16 @@ MidiDiskstream::transport_stopped (struct tm& /*when*/, time_t /*twhen*/, bool a
 		   */
 
 		try {
-			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, 0,
-					total_capture, whole_file_region_name, 0,
-					Region::Flag (Region::DefaultFlags|Region::Automatic|Region::WholeFile)));
+			PropertyList plist;
+
+			plist.add (Properties::name, whole_file_region_name);
+			plist.add (Properties::whole_file, true);
+			plist.add (Properties::automatic, true);
+			plist.add (Properties::start, 0);
+			plist.add (Properties::length, total_capture);
+			plist.add (Properties::layer, 0);
+				   
+			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 
 			region = boost::dynamic_pointer_cast<MidiRegion> (rx);
 			region->special_set_position (capture_info.front()->start);
@@ -1015,7 +1022,13 @@ MidiDiskstream::transport_stopped (struct tm& /*when*/, time_t /*twhen*/, bool a
 			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
 
 			try {
-				boost::shared_ptr<Region> rx (RegionFactory::create (srcs, buffer_position, (*ci)->frames, region_name));
+				PropertyList plist;
+				
+				plist.add (Properties::start, buffer_position);
+				plist.add (Properties::length, (*ci)->frames);
+				plist.add (Properties::name, region_name);
+				
+				boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 				region = boost::dynamic_pointer_cast<MidiRegion> (rx);
 			}
 

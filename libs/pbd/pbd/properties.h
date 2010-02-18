@@ -21,26 +21,35 @@
 #define __pbd_properties_h__
 
 #include <string>
+#include <sstream>
 #include <list>
-#include <glib/glib.h>
+#include <glib.h>
 
-class XMLNode;
+#include "pbd/xml++.h"
 
 namespace PBD {
 
 enum PropertyChange {
-	range_guarantee = ~0
+	range_guarantee = ~0ULL
 };
 
 PropertyChange new_change ();
+
+typedef GQuark PropertyID;
+
+template<typename T> 
+struct PropertyDescriptor {
+    PropertyID id;
+    typedef T value_type;
+};
 
 /** Base (non template) part of Property */	
 class PropertyBase
 {
 public:
-	PropertyBase (GQuark quark, PropertyChange c)
+	PropertyBase (PropertyID pid, PropertyChange c)
 		: _have_old (false)
-		, _property_quark (q)
+		, _property_id (pid)
 		, _change (c)
 	{
 
@@ -52,19 +61,21 @@ public:
 	}
 
 	virtual void diff (XMLNode *, XMLNode *) const = 0;
+	virtual void diff (PropertyChange&) const = 0;
 	virtual PropertyChange set_state (XMLNode const &) = 0;
 	virtual void add_state (XMLNode &) const = 0;
 
-	std::string property_name() const { return g_quark_to_string (_property_quark); }
+	const gchar* property_name() const { return g_quark_to_string (_property_id); }
 	PropertyChange change() const { return _change; }
+	PropertyID id() const { return _property_id; }
 
-	bool operator== (GQuark q) const {
-		return _property_quark == q;
+	bool operator== (PropertyID pid) const {
+		return _property_id == pid;
 	}
 
 protected:
 	bool _have_old;
-	GQuark _property_quark;
+	PropertyID _property_id;
 	PropertyChange _change;
 };
 
@@ -73,17 +84,16 @@ template <class T>
 class PropertyTemplate : public PropertyBase
 {
 public:
-	PropertyTemplate (GQuark q, PropertyChange c, T const & v)
-		: PropertyBase (q, c)
+	PropertyTemplate (PropertyDescriptor<T> p, PropertyChange c, T const & v)
+		: PropertyBase (p.id, c)
 		, _current (v)
 	{
 
 	}
-
 	PropertyTemplate<T> & operator= (PropertyTemplate<T> const & s) {
 		/* XXX: isn't there a nicer place to do this? */
 		_have_old = s._have_old;
-		_property_quark = s._property_quark;
+		_property_id = s._property_id;
 		_change = s._change;
 		
 		_current = s._current;
@@ -119,8 +129,14 @@ public:
 
 	void diff (XMLNode* old, XMLNode* current) const {
 		if (_have_old) {
-			old->add_property (g_quark_to_string (_property_quark), to_string (_old));
-			current->add_property (g_quark_to_string (_property_quark), to_string (_current));
+			old->add_property (g_quark_to_string (_property_id), to_string (_old));
+			current->add_property (g_quark_to_string (_property_id), to_string (_current));
+		}
+	}
+	
+	void diff (PropertyChange& c) const {
+		if (_have_old && _change) {
+			c = PropertyChange (c | _change);
 		}
 	}
 
@@ -129,24 +145,23 @@ public:
 	 *  @return PropertyChange effected, or 0.
 	 */
 	PropertyChange set_state (XMLNode const & node) {
-		XMLProperty const * p = node.property (g_quark_to_string (_property_quark));
+		XMLProperty const * p = node.property (g_quark_to_string (_property_id));
+		PropertyChange c = PropertyChange (0);
 
 		if (p) {
 			T const v = from_string (p->value ());
 
-			if (v == _current) {
-				return PropertyChange (0);
+			if (v != _current) {
+				set (v);
+				c = _change;
 			}
-
-			set (v);
-			return _change;
 		}
 
-		return PropertyChange (0);
+		return c;
 	}
 
 	void add_state (XMLNode & node) const {
-		node.add_property (g_quark_to_string (_property_quark), to_string (_current));
+		node.add_property (g_quark_to_string (_property_id), to_string (_current));
 	}
 
 protected:
@@ -176,8 +191,14 @@ template <class T>
 class Property : public PropertyTemplate<T>
 {
 public:
-	Property (GQuark q, PropertyChange c, T const & v)
+	Property (PropertyDescriptor<T> q, PropertyChange c, T const & v)
 		: PropertyTemplate<T> (q, c, v)
+	{
+
+	}
+
+	Property (PropertyDescriptor<T> q, T const & v)
+		: PropertyTemplate<T> (q, PropertyChange (0), v)
 	{
 
 	}
@@ -188,8 +209,14 @@ public:
 	}
 	
 private:	
-	std::string to_string (T const & v) const {
-		// XXX LocaleGuard
+        /* note that we do not set a locale for the streams used
+	   in to_string() or from_string(), because we want the
+	   format to be portable across locales (i.e. C or
+	   POSIX). Also, there is the small matter of
+	   std::locale aborting on OS X if used with anything
+	   other than C or POSIX locales.
+	*/
+        std::string to_string (T const & v) const {
 		std::stringstream s;
 		s.precision (12); // in case its floating point
 		s << v;
@@ -197,15 +224,53 @@ private:
 	}
 
 	T from_string (std::string const & s) const {
-		// XXX LocaleGuard	
 		std::stringstream t (s);
 		T v;
-		t.precision (12); // in case its floating point
 		t >> v;
 		return v;
 	}
 };
 
+class PropertyList : public std::map<PropertyID,PropertyBase*>
+{
+public:
+    PropertyList() : property_owner (true) {}
+    virtual ~PropertyList() {
+	    if (property_owner)
+		    for (std::map<PropertyID,PropertyBase*>::iterator i = begin(); i != end(); ++i) {
+			    delete i->second;
+		    }
+    }
+    /* classes that own property lists use this to add their
+       property members to their plists.
+    */
+    bool add (PropertyBase& p) {
+	    return insert (value_type (p.id(), &p)).second;
+    }
+
+    /* code that is constructing a property list for use 
+       in setting the state of an object uses this.
+    */
+    template<typename T, typename V> bool add (PropertyDescriptor<T> pid, const V& v) {
+	    return insert (value_type (pid.id, new Property<T> (pid, (T) v))).second;
+    }
+
+protected:
+    bool property_owner;
+};
+
+/** A variant of PropertyList that does not delete its
+    property list in its destructor. Objects with their
+    own Properties store them in an OwnedPropertyList
+    to avoid having them deleted at the wrong time.
+*/
+
+class OwnedPropertyList : public PropertyList
+{
+public:
+    OwnedPropertyList() { property_owner = false; }
+};
+	    
 } /* namespace PBD */
 
 #endif /* __pbd_properties_h__ */

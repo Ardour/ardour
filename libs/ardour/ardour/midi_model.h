@@ -90,7 +90,7 @@ public:
 	};
 
 
-	/** Change note properties.
+	/** PropertyChange note properties.
 	 * More efficient than DeltaCommand and has the important property that
 	 * it leaves the objects in the MidiModel (Notes) the same, thus
 	 * enabling selection and other state to persist across command

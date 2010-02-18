@@ -50,9 +50,9 @@ class Crossfade : public ARDOUR::AudioRegion
 	/* constructor for "fixed" xfades at each end of an internal overlap */
 
 	Crossfade (boost::shared_ptr<ARDOUR::AudioRegion> in, boost::shared_ptr<ARDOUR::AudioRegion> out,
-			nframes_t position,
-			nframes_t initial_length,
-			AnchorPoint);
+		   framepos_t position,
+		   framecnt_t initial_length,
+		   AnchorPoint);
 
 	/* constructor for xfade between two regions that are overlapped in any way
 	   except the "internal" case.
@@ -79,11 +79,11 @@ class Crossfade : public ARDOUR::AudioRegion
 	boost::shared_ptr<ARDOUR::AudioRegion> in() const { return _in; }
 	boost::shared_ptr<ARDOUR::AudioRegion> out() const { return _out; }
 
-	nframes_t read_at (Sample *buf, Sample *mixdown_buffer,
-			float *gain_buffer, sframes_t position, nframes_t cnt,
-			uint32_t chan_n,
-			nframes_t read_frames = 0,
-			nframes_t skip_frames = 0) const;
+	framecnt_t read_at (Sample *buf, Sample *mixdown_buffer,
+			    float *gain_buffer, framepos_t position, framecnt_t cnt,
+			    uint32_t chan_n,
+			    framecnt_t read_frames = 0,
+			    framecnt_t skip_frames = 0) const;
 
 	bool refresh ();
 
@@ -103,18 +103,18 @@ class Crossfade : public ARDOUR::AudioRegion
 		return (_in == a && _out == b) || (_in == b && _out == a);
 	}
 
-	nframes_t overlap_length() const;
+	framecnt_t overlap_length() const;
 
 	PBD::Signal1<void,boost::shared_ptr<Region> > Invalidated;
-	PBD::Signal1<void,PBD::Change>     StateChanged;
+	PBD::Signal1<void,PBD::PropertyChange>     StateChanged;
 
-	bool covers (nframes_t frame) const {
+	bool covers (framecnt_t frame) const {
 		return _position <= frame && frame < _position + _length;
 	}
 
-	OverlapType coverage (nframes_t start, nframes_t end) const;
+	OverlapType coverage (framepos_t start, framepos_t end) const;
 
-	static void set_buffer_size (nframes_t);
+	static void set_buffer_size (framecnt_t);
 
 	bool active () const { return _active; }
 	void set_active (bool yn);
@@ -126,24 +126,24 @@ class Crossfade : public ARDOUR::AudioRegion
 	AutomationList& fade_in() { return _fade_in; }
 	AutomationList& fade_out() { return _fade_out; }
 
-	nframes_t set_xfade_length (nframes_t);
+	framecnt_t set_xfade_length (framecnt_t);
 
 	bool is_dependent() const { return true; }
 	bool depends_on (boost::shared_ptr<Region> other) const {
 		return other == _in || other == _out;
 	}
 
-	static nframes_t short_xfade_length() { return _short_xfade_length; }
-	static void set_short_xfade_length (nframes_t n);
+	static framecnt_t short_xfade_length() { return _short_xfade_length; }
+	static void set_short_xfade_length (framecnt_t n);
 
-	static PBD::Change ActiveChanged;
-	static PBD::Change FollowOverlapChanged;
+	static PBD::PropertyChange ActiveChanged;
+	static PBD::PropertyChange FollowOverlapChanged;
 
   private:
 	friend struct CrossfadeComparePtr;
 	friend class AudioPlaylist;
 
-	static nframes_t _short_xfade_length;
+	static framecnt_t _short_xfade_length;
 
 	boost::shared_ptr<ARDOUR::AudioRegion> _in;
 	boost::shared_ptr<ARDOUR::AudioRegion> _out;
@@ -167,7 +167,7 @@ class Crossfade : public ARDOUR::AudioRegion
 	bool update ();
 
   protected:
-	nframes_t read_raw_internal (Sample*, sframes_t, nframes_t, int) const;
+	framecnt_t read_raw_internal (Sample*, framepos_t, framecnt_t, int) const;
 };
 
 

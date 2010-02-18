@@ -720,8 +720,16 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 
 		region_name = region_name_from_path (paths.front(), (sources.size() > 1), false);
 
-		boost::shared_ptr<Region> r = RegionFactory::create (sources, 0, sources[0]->length(pos), region_name, 0,
-								     Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External));
+		PropertyList plist; 
+		
+		plist.add (ARDOUR::Properties::start, 0);
+		plist.add (ARDOUR::Properties::length, sources[0]->length (pos));
+		plist.add (ARDOUR::Properties::name, region_name);
+		plist.add (ARDOUR::Properties::layer, 0);
+		plist.add (ARDOUR::Properties::whole_file, true);
+		plist.add (ARDOUR::Properties::external, true);
+
+		boost::shared_ptr<Region> r = RegionFactory::create (sources, plist);
 
 		if (use_timestamp && boost::dynamic_pointer_cast<AudioRegion>(r)) {
 			boost::dynamic_pointer_cast<AudioRegion>(r)->special_set_position(sources[0]->natural_position());
@@ -745,8 +753,16 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 
 			region_name = region_name_from_path ((*x)->path(), false, false, sources.size(), n);
 
-			boost::shared_ptr<Region> r = RegionFactory::create (just_one, 0, (*x)->length(pos), region_name, 0,
-									     Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External));
+			PropertyList plist; 
+			
+			plist.add (ARDOUR::Properties::start, 0);
+			plist.add (ARDOUR::Properties::length, (*x)->length (pos));
+			plist.add (ARDOUR::Properties::name, region_name);
+			plist.add (ARDOUR::Properties::layer, 0);
+			plist.add (ARDOUR::Properties::whole_file, true);
+			plist.add (ARDOUR::Properties::external, true);
+
+			boost::shared_ptr<Region> r = RegionFactory::create (just_one, plist);
 
 			if (use_timestamp && boost::dynamic_pointer_cast<AudioRegion>(r)) {
 				boost::dynamic_pointer_cast<AudioRegion>(r)->special_set_position((*x)->natural_position());

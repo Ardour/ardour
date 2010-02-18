@@ -347,7 +347,7 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 
 
 void
-EditorRegions::region_changed (Change what_changed, boost::weak_ptr<Region> region)
+EditorRegions::region_changed (PropertyChange what_changed, boost::weak_ptr<Region> region)
 {
 	ENSURE_GUI_THREAD (*this, &EditorRegions::region_changed, what_changed, region)
 

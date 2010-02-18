@@ -186,11 +186,11 @@
  * adding the event (using smf_track_add_event_seconds(), smf_track_add_event_pulses() or
  * smf_track_add_event_delta_pulses()); the remaining two values are computed from that.
  *
- * Tempo related stuff happens automatically - when you add a metaevent that is Tempo Change or
- * Time Signature, libsmf adds that event to the tempo map.  If you remove Tempo Change event
+ * Tempo related stuff happens automatically - when you add a metaevent that is Tempo PropertyChange or
+ * Time Signature, libsmf adds that event to the tempo map.  If you remove Tempo PropertyChange event
  * that is in the middle of the song, the rest of the events will have their event->time_seconds
  * recomputed from event->time_pulses before smf_event_remove_from_track() function returns.
- * Adding Tempo Change in the middle of the song works in a similar way.
+ * Adding Tempo PropertyChange in the middle of the song works in a similar way.
  *
  * MIDI data (event->midi_buffer) is always kept in normalized form - it always begins with
  * status byte (no running status), there are no System Realtime events embedded in them etc.

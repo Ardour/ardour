@@ -281,7 +281,7 @@ Route::inc_gain (gain_t fraction, void *src)
 void
 Route::set_gain (gain_t val, void *src)
 {
-	if (src != 0 && _route_group && src != _route_group && _route_group->active_property (RouteGroup::Gain)) {
+	if (src != 0 && _route_group && src != _route_group && _route_group->is_active() && _route_group->is_gain()) {
 
 		if (_route_group->is_relative()) {
 
@@ -563,7 +563,7 @@ Route::set_solo (bool yn, void *src)
 		return;
 	}
 
-	if (_route_group && src != _route_group && _route_group->active_property (RouteGroup::Solo)) {
+	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_solo()) {
 		_route_group->apply (&Route::set_solo, yn, _route_group);
 		return;
 	}
@@ -624,7 +624,7 @@ Route::set_solo_isolated (bool yn, void *src)
 		return;
 	}
 
-	if (_route_group && src != _route_group && _route_group->active_property (RouteGroup::Solo)) {
+	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_solo()) {
 		_route_group->apply (&Route::set_solo_isolated, yn, _route_group);
 		return;
 	}
@@ -682,7 +682,7 @@ Route::set_mute_points (MuteMaster::MutePoint mp)
 void
 Route::set_mute (bool yn, void *src)
 {
-	if (_route_group && src != _route_group && _route_group->active_property (RouteGroup::Mute)) {
+	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_mute()) {
 		_route_group->apply (&Route::set_mute, yn, _route_group);
 		return;
 	}
