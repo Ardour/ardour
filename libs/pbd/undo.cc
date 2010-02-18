@@ -122,15 +122,25 @@ UndoTransaction::operator() ()
 void
 UndoTransaction::undo ()
 {
+	struct timeval start, end, diff;
+	gettimeofday (&start, 0);
 	for (list<Command*>::reverse_iterator i = actions.rbegin(); i != actions.rend(); ++i) {
 		(*i)->undo();
 	}
+	gettimeofday (&end, 0);
+	timersub (&end, &start, &diff);
+	cerr << "Undo took " << diff.tv_sec << '.' << diff.tv_usec << endl;
 }
 
 void
 UndoTransaction::redo ()
 {
+	struct timeval start, end, diff;
+	gettimeofday (&start, 0);
         (*this)();
+	gettimeofday (&end, 0);
+	timersub (&end, &start, &diff);
+	cerr << "Undo took " << diff.tv_sec << '.' << diff.tv_usec << endl;
 }
 
 XMLNode &UndoTransaction::get_state()
