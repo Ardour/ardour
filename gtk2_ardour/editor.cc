@@ -3153,7 +3153,6 @@ void
 Editor::begin_reversible_command (string name)
 {
 	if (_session) {
-		before = &get_state();
 		_session->begin_reversible_command (name);
 	}
 }
@@ -3162,7 +3161,7 @@ void
 Editor::commit_reversible_command ()
 {
 	if (_session) {
-		_session->commit_reversible_command (new MementoCommand<Editor>(*this, before, &get_state()));
+		_session->commit_reversible_command ();
 	}
 }
 
