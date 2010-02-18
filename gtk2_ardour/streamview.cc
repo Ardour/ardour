@@ -336,6 +336,7 @@ StreamView::playlist_switched (boost::weak_ptr<Diskstream> wds)
 	ds->playlist()->LayeringChanged.connect (playlist_connections, boost::bind (&StreamView::playlist_layered, this, boost::weak_ptr<Diskstream>(ds)), gui_context());
 	ds->playlist()->RegionAdded.connect (playlist_connections, ui_bind (&StreamView::add_region_view, this, _1), gui_context());
 	ds->playlist()->RegionRemoved.connect (playlist_connections, ui_bind (&StreamView::remove_region_view, this, _1), gui_context());
+	ds->playlist()->ContentsChanged.connect (playlist_connections, boost::bind (&StreamView::redisplay_diskstream, this), gui_context());
 }
 
 void
