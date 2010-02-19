@@ -40,9 +40,9 @@ inline static const char* midi_name(uint8_t status)
 	case MIDI_CMD_NOTE_PRESSURE:
 		return "Key Pressure"; break;
 	case MIDI_CMD_CONTROL:
-		return "Control PropertyChange"; break;
+		return "Control Change"; break;
 	case MIDI_CMD_PGM_CHANGE:
-		return "Program PropertyChange"; break;
+		return "Program Change"; break;
 	case MIDI_CMD_CHANNEL_PRESSURE:
 		return "Channel Pressure"; break;
 	case MIDI_CMD_BENDER:
