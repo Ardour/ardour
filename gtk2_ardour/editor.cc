@@ -1073,7 +1073,7 @@ Editor::set_session (Session *t)
 	_session->DurationChanged.connect (_session_connections, boost::bind (&Editor::handle_new_duration, this), gui_context());
 	_session->DirtyChanged.connect (_session_connections, boost::bind (&Editor::update_title, this), gui_context());
 	_session->TimecodeOffsetChanged.connect (_session_connections, boost::bind (&Editor::update_just_timecode, this), gui_context());
-	_session->tempo_map().StateChanged.connect (_session_connections, ui_bind (&Editor::tempo_map_changed, this, _1), gui_context());
+	_session->tempo_map().PropertyChanged.connect (_session_connections, ui_bind (&Editor::tempo_map_changed, this, _1), gui_context());
 	_session->Located.connect (_session_connections, boost::bind (&Editor::located, this), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, ui_bind (&Editor::parameter_changed, this, _1), gui_context());
 	_session->StateSaved.connect (_session_connections, ui_bind (&Editor::session_state_saved, this, _1), gui_context());
@@ -3736,7 +3736,10 @@ Editor::edit_xfade (boost::weak_ptr<Crossfade> wxfade)
 	}
 
 	cew.apply ();
-	xfade->StateChanged (PropertyChange (~0));
+	PropertyChange all_crossfade_properties;
+	all_crossfade_properties.add (ARDOUR::Properties::active);
+	all_crossfade_properties.add (ARDOUR::Properties::follow_overlap);
+	xfade->PropertyChanged (all_crossfade_properties);
 }
 
 PlaylistSelector&

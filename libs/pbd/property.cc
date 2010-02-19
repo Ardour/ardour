@@ -26,22 +26,3 @@
 
 using namespace PBD;
 
-PropertyChange
-PBD::new_change ()
-{
-	static uint64_t change_bit = 1;
-
-	/* catch out-of-range */
-	if (!change_bit) {
-		fatal << _("programming error: ")
-			<< "change_bit out of range in ARDOUR::new_change()"
-			<< endmsg;
-		/*NOTREACHED*/
-	}
-
-	PropertyChange c = PropertyChange (change_bit);
-	change_bit <<= 1;	// if it shifts too far, change_bit == 0
-
-	return c;
-}
-

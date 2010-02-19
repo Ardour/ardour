@@ -196,10 +196,12 @@ Stateful::changed (PropertyChange& c) const
 PropertyChange
 Stateful::set_properties (XMLNode const & node)
 {
-	PropertyChange c = PropertyChange (0);
+	PropertyChange c;
 
 	for (OwnedPropertyList::iterator i = _properties.begin(); i != _properties.end(); ++i) {
-		c = PropertyChange (c | i->second->set_state (node));
+		if (i->second->set_state (node)) {
+			c.add (i->first);
+		}
 	}
 
 	post_set ();
@@ -210,12 +212,14 @@ Stateful::set_properties (XMLNode const & node)
 PropertyChange
 Stateful::set_properties (const PropertyList& property_list)
 {
-	PropertyChange c = PropertyChange (0);
+	PropertyChange c;
 	PropertyList::const_iterator p;
 
 	for (OwnedPropertyList::iterator i = _properties.begin(); i != _properties.end(); ++i) {
 		if ((p = property_list.find (i->first)) != property_list.end()) {
-			c = PropertyChange (c|set_property (*(p->second)));
+			if (set_property (*p->second)) {
+				c.add (i->first);
+			}
 		}
 	}
 	

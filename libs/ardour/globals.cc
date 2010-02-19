@@ -102,12 +102,6 @@ MIDI::Port *ARDOUR::default_mtc_port = 0;
 MIDI::Port *ARDOUR::default_midi_port = 0;
 MIDI::Port *ARDOUR::default_midi_clock_port = 0;
 
-PropertyChange ARDOUR::StartChanged = PBD::new_change ();
-PropertyChange ARDOUR::LengthChanged = PBD::new_change ();
-PropertyChange ARDOUR::PositionChanged = PBD::new_change ();
-PropertyChange ARDOUR::NameChanged = PBD::new_change ();
-PropertyChange ARDOUR::BoundsChanged = PropertyChange (0); // see init(), below
-
 compute_peak_t          ARDOUR::compute_peak = 0;
 find_peaks_t            ARDOUR::find_peaks = 0;
 apply_gain_to_buffer_t  ARDOUR::apply_gain_to_buffer = 0;
@@ -117,6 +111,36 @@ mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain = 0;
 PBD::Signal1<void,std::string> ARDOUR::BootMessage;
 
 void ARDOUR::setup_enum_writer ();
+
+/* this is useful for quite a few things that want to check
+   if any bounds-related property has changed
+*/
+PBD::PropertyChange ARDOUR::bounds_change;
+
+namespace ARDOUR { 
+	namespace Properties {
+
+		/* the envelope and fades are not scalar items and so
+		   currently (2010/02) are not stored using Property.
+		   However, these descriptors enable us to notify
+		   about changes to them via PropertyChange. 
+
+		   Declared in ardour/audioregion.h ...
+		*/
+
+		PBD::PropertyDescriptor<bool> fade_in;
+		PBD::PropertyDescriptor<bool> fade_out;
+		PBD::PropertyDescriptor<bool> envelope;
+	}
+}
+
+void
+ARDOUR::make_property_quarks ()
+{
+	Properties::fade_in.id = g_quark_from_static_string (X_("fade_in_FAKE"));
+	Properties::fade_out.id = g_quark_from_static_string (X_("fade_out_FAKE"));
+	Properties::envelope.id = g_quark_from_static_string (X_("envelope_FAKE"));
+}
 
 int
 ARDOUR::setup_midi ()
@@ -302,11 +326,22 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 
 	PBD::ID::init ();
 	SessionEvent::init_event_pool ();
-
+	
+	make_property_quarks ();
 	SessionObject::make_property_quarks ();
 	Region::make_property_quarks ();
 	AudioRegion::make_property_quarks ();
 	RouteGroup::make_property_quarks ();
+
+	/* this is a useful ready to use PropertyChange that many
+	   things need to check. This avoids having to compose
+	   it every time we want to check for any of the relevant
+	   property changes.
+	*/
+
+	bounds_change.add (ARDOUR::Properties::start);
+	bounds_change.add (ARDOUR::Properties::position);
+	bounds_change.add (ARDOUR::Properties::length);
 
 	/* provide a state version for the few cases that need it and are not
 	   driven by reading state from disk (e.g. undo/redo)
@@ -366,8 +401,6 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 
 	/* singleton - first object is "it" */
 	new PluginManager ();
-
-	BoundsChanged = PropertyChange (StartChanged|PositionChanged|LengthChanged);
 
 	return 0;
 }

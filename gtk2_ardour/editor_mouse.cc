@@ -2151,7 +2151,7 @@ Editor::single_contents_trim (RegionView& rv, nframes64_t frame_delta, bool left
 		snap_to (new_bound);
 	}
 	region->trim_start ((nframes64_t) (new_bound * speed), this);
-	rv.region_changed (StartChanged);
+	rv.region_changed (PropertyChange (ARDOUR::Properties::start));
 }
 
 void
@@ -2206,7 +2206,7 @@ Editor::single_start_trim (RegionView& rv, nframes64_t frame_delta, bool left_di
 		}
 	}
 
-	rv.region_changed (PropertyChange (LengthChanged|PositionChanged|StartChanged));
+	rv.region_changed (ARDOUR::bounds_change);
 }
 
 void
@@ -2260,10 +2260,10 @@ Editor::single_end_trim (RegionView& rv, nframes64_t frame_delta, bool left_dire
 			region_right->trim_front(region->last_frame() + 1, this);
 		}
 
-		rv.region_changed (PropertyChange (LengthChanged|PositionChanged|StartChanged));
-	}
-	else {
-		rv.region_changed (LengthChanged);
+		rv.region_changed (ARDOUR::bounds_change);
+			
+	} else {
+		rv.region_changed (PropertyChange (ARDOUR::Properties::length));
 	}
 }
 

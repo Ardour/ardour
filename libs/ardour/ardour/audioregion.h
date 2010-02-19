@@ -44,6 +44,17 @@ namespace Properties {
 	extern PBD::PropertyDescriptor<bool> fade_in_active;
 	extern PBD::PropertyDescriptor<bool> fade_out_active;
 	extern PBD::PropertyDescriptor<float> scale_amplitude;
+	extern PBD::PropertyDescriptor<float> scale_amplitude;
+
+	/* the envelope and fades are not scalar items and so
+	   currently (2010/02) are not stored using Property.
+	   However, these descriptors enable us to notify
+	   about changes to them via PropertyChange.
+	*/
+
+	extern PBD::PropertyDescriptor<bool> envelope;
+	extern PBD::PropertyDescriptor<bool> fade_in;
+	extern PBD::PropertyDescriptor<bool> fade_out;
 }
 
 class Route;
@@ -57,14 +68,6 @@ class AudioRegion : public Region
 {
   public:
 	static void make_property_quarks ();
-
-	static PBD::PropertyChange FadeInChanged;
-	static PBD::PropertyChange FadeOutChanged;
-	static PBD::PropertyChange FadeInActiveChanged;
-	static PBD::PropertyChange FadeOutActiveChanged;
-	static PBD::PropertyChange EnvelopeActiveChanged;
-	static PBD::PropertyChange ScaleAmplitudeChanged;
-	static PBD::PropertyChange EnvelopeChanged;
 
 	~AudioRegion();
 
@@ -185,8 +188,7 @@ class AudioRegion : public Region
 	AudioRegion (const SourceList &);
 	AudioRegion (boost::shared_ptr<const AudioRegion>, frameoffset_t offset = 0, bool offset_relative = true);
 	AudioRegion (boost::shared_ptr<const AudioRegion>, const SourceList&);
-	AudioRegion (boost::shared_ptr<AudioSource>, const XMLNode&);
-	AudioRegion (SourceList &, const XMLNode&);
+	AudioRegion (SourceList &);
 
   private:
 	PBD::Property<bool>     _envelope_active;
@@ -197,7 +199,7 @@ class AudioRegion : public Region
 	PBD::Property<gain_t>   _scale_amplitude;
 	
 	void register_properties ();
-	PBD::PropertyChange set_property (const PBD::PropertyBase& prop);
+	bool set_property (const PBD::PropertyBase& prop);
 	void post_set ();
 
 	void init ();

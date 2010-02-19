@@ -249,15 +249,15 @@ class Playlist : public SessionObject
 	void notify_length_changed ();
 	void notify_layering_changed ();
 	void notify_contents_changed ();
-	void notify_state_changed (PBD::PropertyChange);
+	void notify_state_changed (const PBD::PropertyChange&);
 	void notify_region_moved (boost::shared_ptr<Region>);
 
 	void mark_session_dirty();
 
-	void region_changed_proxy (PBD::PropertyChange, boost::weak_ptr<Region>);
-	virtual bool region_changed (PBD::PropertyChange, boost::shared_ptr<Region>);
+	void region_changed_proxy (const PBD::PropertyChange&, boost::weak_ptr<Region>);
+	virtual bool region_changed (const PBD::PropertyChange&, boost::shared_ptr<Region>);
 
-	void region_bounds_changed (PBD::PropertyChange, boost::shared_ptr<Region>);
+	void region_bounds_changed (const PBD::PropertyChange&, boost::shared_ptr<Region>);
 	void region_deleted (boost::shared_ptr<Region>);
 
 	void sort_regions ();

@@ -347,7 +347,7 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 
 
 void
-EditorRegions::region_changed (PropertyChange what_changed, boost::weak_ptr<Region> region)
+EditorRegions::region_changed (const PropertyChange& what_changed, boost::weak_ptr<Region> region)
 {
 	ENSURE_GUI_THREAD (*this, &EditorRegions::region_changed, what_changed, region)
 
@@ -357,7 +357,7 @@ EditorRegions::region_changed (PropertyChange what_changed, boost::weak_ptr<Regi
 		return;
 	}
 
-	if (what_changed & ARDOUR::NameChanged) {
+	if (what_changed.contains (ARDOUR::Properties::name)) {
 		/* find the region in our model and change its name */
 		TreeModel::Children rows = _model->children ();
 		TreeModel::iterator i = rows.begin ();
@@ -762,10 +762,10 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 		break;
 
 	case AudioClock::Frames:
-		snprintf (start_str, sizeof (start_str), "%u", region->position());
-		snprintf (end_str, sizeof (end_str), "%u", (region->position() + region->length() - 1));
-		snprintf (length_str, sizeof (length_str), "%u", region->length());
-		snprintf (sync_str, sizeof (sync_str), "%u", region->sync_position() + region->position());
+		snprintf (start_str, sizeof (start_str), "%" PRId64, region->position());
+		snprintf (end_str, sizeof (end_str), "%" PRId64, (region->position() + region->length() - 1));
+		snprintf (length_str, sizeof (length_str), "%" PRId64, region->length());
+		snprintf (sync_str, sizeof (sync_str), "%" PRId64, region->sync_position() + region->position());
 
 		if (audioRegion && !fades_in_seconds) {
 			snprintf (fadein_str, sizeof (fadein_str), "%u", uint (audioRegion->fade_in()->back()->when));

@@ -48,7 +48,7 @@ class SessionObject : public SessionHandleRef, public PBD::StatefulDestructible
 
 	SessionObject (Session& session, const std::string& name)
 		: SessionHandleRef (session)
-		, _name (Properties::name, PBD::PropertyChange (0), name)
+		, _name (Properties::name, name)
 	{
 		add_property (_name);
 	}
@@ -56,17 +56,15 @@ class SessionObject : public SessionHandleRef, public PBD::StatefulDestructible
 	Session&    session() const { return _session; }
 	std::string name()    const { return _name; }
 
-	PBD::PropertyChange set_property (const PBD::PropertyBase& prop);
+	bool set_property (const PBD::PropertyBase& prop);
 
 	virtual bool set_name (const std::string& str) {
 		if (_name != str) {
 			_name = str;
-			NameChanged();
+			PropertyChanged (PBD::PropertyChange (Properties::name));
 		}
 		return true;
 	}
-
-	PBD::Signal0<void> NameChanged;
 
   protected:
 	PBD::Property<std::string> _name;

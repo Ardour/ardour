@@ -91,7 +91,7 @@ private:
 
 	void active_toggled ();
 	void processor_active_changed ();
-	void processor_name_changed ();
+	void processor_property_changed (const PBD::PropertyChange&);
 	std::string name () const;
 	
 	Gtk::EventBox _event_box;
@@ -275,7 +275,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	static void rb_ab_plugins ();
 	static void rb_edit ();
 
-	void route_name_changed ();
+	void route_property_changed (const PBD::PropertyChange&);
 	std::string generate_processor_title (boost::shared_ptr<ARDOUR::PluginInsert> pi);
 };
 

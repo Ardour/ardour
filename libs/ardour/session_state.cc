@@ -165,7 +165,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	_base_frame_rate = _current_frame_rate;
 
 	_tempo_map = new TempoMap (_current_frame_rate);
-	_tempo_map->StateChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
+	_tempo_map->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
 
 
 	_non_soloed_outs_muted = false;

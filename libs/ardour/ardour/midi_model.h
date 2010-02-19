@@ -90,7 +90,7 @@ public:
 	};
 
 
-	/** PropertyChange note properties.
+	/** Change note properties.
 	 * More efficient than DeltaCommand and has the important property that
 	 * it leaves the objects in the MidiModel (Notes) the same, thus
 	 * enabling selection and other state to persist across command
@@ -126,7 +126,7 @@ public:
 		boost::shared_ptr<MidiModel> _model;
 		const std::string            _name;
 
-		struct NotePropertyChange {
+		struct NoteChange {
 			DiffCommand::Property property;
 			boost::shared_ptr< Evoral::Note<TimeType> > note;
 			union {
@@ -139,11 +139,11 @@ public:
 			};
 		};
 
-		typedef std::list<NotePropertyChange> ChangeList;
+		typedef std::list<NoteChange> ChangeList;
 		ChangeList _changes;
 
-		XMLNode &marshal_change(const NotePropertyChange&);
-		NotePropertyChange unmarshal_change(XMLNode *xml_note);
+		XMLNode &marshal_change(const NoteChange&);
+		NoteChange unmarshal_change(XMLNode *xml_note);
 	};
 
 	MidiModel::DeltaCommand* new_delta_command(const std::string name="midi edit");

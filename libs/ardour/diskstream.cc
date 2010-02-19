@@ -361,7 +361,7 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 }
 
 void
-Diskstream::playlist_changed (PropertyChange)
+Diskstream::playlist_changed (const PropertyChange&)
 {
 	playlist_modified ();
 }

@@ -44,7 +44,7 @@ InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, boost:
 	set_name (sendto->name());
 
 	_send_to->DropReferences.connect_same_thread (*this, boost::bind (&InternalSend::send_to_going_away, this));
-	_send_to->NameChanged.connect_same_thread (*this, boost::bind (&InternalSend::send_to_name_changed, this));
+	_send_to->PropertyChanged.connect_same_thread (*this, boost::bind (&InternalSend::send_to_property_changed, this, _1));;
 }
 
 InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node)
@@ -269,7 +269,9 @@ InternalSend::visible () const
 }
 
 void
-InternalSend::send_to_name_changed ()
+InternalSend::send_to_property_changed (const PropertyChange& what_changed)
 {
-	set_name (_send_to->name ());
+	if (what_changed.contains (Properties::name)) {
+		set_name (_send_to->name ());
+	}
 }

@@ -291,7 +291,7 @@ CrossfadeEditor::CrossfadeEditor (Session* s, boost::shared_ptr<Crossfade> xf, d
 
 	curve_select_clicked (In);
 
-	xfade->StateChanged.connect (state_connection, ui_bind (&CrossfadeEditor::xfade_changed, this, _1), gui_context());
+	xfade->PropertyChanged.connect (state_connection, ui_bind (&CrossfadeEditor::xfade_changed, this, _1), gui_context());
 
 	_session->AuditionActive.connect (_session_connections, ui_bind (&CrossfadeEditor::audition_state_changed, this, _1), gui_context());
 	show_all_children();
@@ -624,7 +624,7 @@ CrossfadeEditor::canvas_allocation (Gtk::Allocation& /*alloc*/)
 
 
 void
-CrossfadeEditor::xfade_changed (PropertyChange)
+CrossfadeEditor::xfade_changed (const PropertyChange&)
 {
 	set (xfade->fade_in(), In);
 	set (xfade->fade_out(), Out);

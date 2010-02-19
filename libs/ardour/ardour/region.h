@@ -89,16 +89,7 @@ class Region
 		MusicTime
 	};
 
-	static PBD::PropertyChange FadeChanged;
-	static PBD::PropertyChange SyncOffsetChanged;
-	static PBD::PropertyChange MuteChanged;
-	static PBD::PropertyChange OpacityChanged;
-	static PBD::PropertyChange LockChanged;
-	static PBD::PropertyChange LayerChanged;
-	static PBD::PropertyChange HiddenChanged;
-
-	PBD::Signal1<void,PBD::PropertyChange> StateChanged;
-	static PBD::Signal1<void,boost::shared_ptr<ARDOUR::Region> > RegionPropertyChanged;
+	static PBD::Signal2<void,boost::shared_ptr<ARDOUR::Region>, const PBD::PropertyChange&> RegionPropertyChanged;
 
 	void unlock_property_changes () { _no_property_changes = false; }
 	void block_property_changes () { _no_property_changes = true; }
@@ -281,8 +272,6 @@ class Region
   protected:
 	friend class RegionFactory;
 
-	/** Construct a region from a single source */
-	Region (boost::shared_ptr<Source> src);
 	/** Construct a region from multiple sources*/
 	Region (const SourceList& srcs);
 	/** Construct a region from another region, at an offset within that region */
@@ -292,16 +281,11 @@ class Region
 	/** normal Region copy constructor */
 	Region (boost::shared_ptr<const Region>);
 
-	/** Construct a region from 1 source and XML state */
-	Region (boost::shared_ptr<Source> src, const XMLNode&);
-	/** Construct a region from multiple sources and XML state */
-	Region (const SourceList& srcs, const XMLNode&);
-
 	/** Constructor for derived types only */
 	Region (Session& s, framepos_t start, framecnt_t length, const std::string& name, DataType);
 
   protected:
-	void send_change (PBD::PropertyChange);
+	void send_change (const PBD::PropertyChange&);
 
 	void trim_to_internal (framepos_t position, framecnt_t length, void *src);
 	virtual void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
@@ -351,7 +335,7 @@ class Region
 	AnalysisFeatureList     _transients;
 	bool                    _valid_transients;
 	mutable uint64_t        _read_data_count;  ///< modified in read()
-	PBD::PropertyChange             _pending_changed;
+	PBD::PropertyChange     _pending_changed;
 	uint64_t                _last_layer_op;  ///< timestamp
 	Glib::Mutex             _lock;
 	SourceList              _sources;
@@ -365,7 +349,7 @@ class Region
 
 	virtual int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
 
-	PBD::PropertyChange set_property (const PBD::PropertyBase&);
+	bool set_property (const PBD::PropertyBase&);
 	void register_properties ();
 
 private:

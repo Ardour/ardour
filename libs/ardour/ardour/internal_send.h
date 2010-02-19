@@ -56,7 +56,7 @@ class InternalSend : public Send
 	PBD::ScopedConnection connect_c;
 
 	void send_to_going_away ();
-	void send_to_name_changed ();
+	void send_to_property_changed (const PBD::PropertyChange&);
 	int  connect_when_legal ();
 	int  set_our_state (XMLNode const &, int);
 };

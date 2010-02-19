@@ -34,6 +34,11 @@
 #include "evoral/Curve.hpp"
 
 namespace ARDOUR {
+	namespace Properties {
+		/* "active" is defined elsewhere but we use it with crossfade also */
+		extern PBD::PropertyDescriptor<bool> active;
+		extern PBD::PropertyDescriptor<bool> follow_overlap;
+	}
 
 class AudioRegion;
 class Playlist;
@@ -71,6 +76,8 @@ class Crossfade : public ARDOUR::AudioRegion
 	Crossfade (const Playlist&, XMLNode&);
 	virtual ~Crossfade();
 
+	static void make_property_quarks ();
+
 	bool operator== (const ARDOUR::Crossfade&);
 
 	XMLNode& get_state (void);
@@ -106,7 +113,6 @@ class Crossfade : public ARDOUR::AudioRegion
 	framecnt_t overlap_length() const;
 
 	PBD::Signal1<void,boost::shared_ptr<Region> > Invalidated;
-	PBD::Signal1<void,PBD::PropertyChange>     StateChanged;
 
 	bool covers (framecnt_t frame) const {
 		return _position <= frame && frame < _position + _length;
@@ -136,9 +142,6 @@ class Crossfade : public ARDOUR::AudioRegion
 	static framecnt_t short_xfade_length() { return _short_xfade_length; }
 	static void set_short_xfade_length (framecnt_t n);
 
-	static PBD::PropertyChange ActiveChanged;
-	static PBD::PropertyChange FollowOverlapChanged;
-
   private:
 	friend struct CrossfadeComparePtr;
 	friend class AudioPlaylist;
@@ -147,11 +150,11 @@ class Crossfade : public ARDOUR::AudioRegion
 
 	boost::shared_ptr<ARDOUR::AudioRegion> _in;
 	boost::shared_ptr<ARDOUR::AudioRegion> _out;
-	bool                 _active;
+	PBD::Property<bool>  _active;
+	PBD::Property<bool>  _follow_overlap;
 	bool                 _in_update;
 	OverlapType           overlap_type;
 	AnchorPoint          _anchor_point;
-	bool                 _follow_overlap;
 	bool                 _fixed;
 	int32_t               layer_relation;
 

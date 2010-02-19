@@ -181,7 +181,7 @@ RegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	set_height (trackview.current_height());
 
-	_region->StateChanged.connect (*this, ui_bind (&RegionView::region_changed, this, _1), gui_context());
+	_region->PropertyChanged.connect (*this, ui_bind (&RegionView::region_changed, this, _1), gui_context());
 	
 	group->signal_event().connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_event), group, this));
 
@@ -228,27 +228,27 @@ RegionView::lock_toggle ()
 }
 
 void
-RegionView::region_changed (PropertyChange what_changed)
+RegionView::region_changed (const PropertyChange& what_changed)
 {
-	ENSURE_GUI_THREAD (*this, &RegionView::region_changed, what_changed)
+	ENSURE_GUI_THREAD (*this, &RegionView::region_changed, what_changed);
 
-	if (what_changed & BoundsChanged) {
+	if (what_changed.contains (ARDOUR::bounds_change)) {
 		region_resized (what_changed);
 		region_sync_changed ();
 	}
-	if (what_changed & Region::MuteChanged) {
+	if (what_changed.contains (ARDOUR::Properties::muted)) {
 		region_muted ();
 	}
-	if (what_changed & Region::OpacityChanged) {
+	if (what_changed.contains (ARDOUR::Properties::opaque)) {
 		region_opacity ();
 	}
-	if (what_changed & ARDOUR::NameChanged) {
+	if (what_changed.contains (ARDOUR::Properties::name)) {
 		region_renamed ();
 	}
-	if (what_changed & Region::SyncOffsetChanged) {
+	if (what_changed.contains (ARDOUR::Properties::sync_position)) {
 		region_sync_changed ();
 	}
-	if (what_changed & Region::LockChanged) {
+	if (what_changed.contains (ARDOUR::Properties::locked)) {
 		region_locked ();
 	}
 }
@@ -261,16 +261,20 @@ RegionView::region_locked ()
 }
 
 void
-RegionView::region_resized (PropertyChange what_changed)
+RegionView::region_resized (const PropertyChange& what_changed)
 {
 	double unit_length;
 
-	if (what_changed & ARDOUR::PositionChanged) {
+	if (what_changed.contains (ARDOUR::Properties::position)) {
 		set_position (_region->position(), 0);
 		_time_converter.set_origin(_region->position());
 	}
 
-	if (what_changed & PropertyChange (StartChanged|LengthChanged)) {
+	PropertyChange s_and_l;
+	s_and_l.add (ARDOUR::Properties::start);
+	s_and_l.add (ARDOUR::Properties::length);
+
+	if (what_changed.contains (s_and_l)) {
 
 		set_duration (_region->length(), 0);
 

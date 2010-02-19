@@ -1442,7 +1442,7 @@ MixerStrip::name_changed ()
 {
 	switch (_width) {
 	case Wide:
-		RouteUI::name_changed ();
+		RouteUI::property_changed (PropertyChange (ARDOUR::Properties::name));
 		break;
 	case Narrow:
 	        name_label.set_text (PBD::short_version (_route->name(), 5));

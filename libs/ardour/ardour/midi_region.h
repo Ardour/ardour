@@ -96,11 +96,8 @@ class MidiRegion : public Region
   private:
 	friend class RegionFactory;
 
-	MidiRegion (boost::shared_ptr<MidiSource>);
 	MidiRegion (const SourceList&);
 	MidiRegion (boost::shared_ptr<const MidiRegion>, frameoffset_t offset = 0, bool offset_relative = true);
-	MidiRegion (boost::shared_ptr<MidiSource>, const XMLNode&);
-	MidiRegion (const SourceList &, const XMLNode&);
 
   private:
 	framecnt_t _read_at (const SourceList&, Evoral::EventSink<nframes_t>& dst,

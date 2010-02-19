@@ -136,7 +136,7 @@ class MidiRegionView : public RegionView
 	 */
 	void get_patch_key_at(double time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key);
 
-	/** PropertyChange the 'automation' data of old_program to new values which correspond to new_patch.
+	/** Change the 'automation' data of old_program to new values which correspond to new_patch.
 	 * @param old_program the program change event which is to be altered
 	 * @param new_patch the new lsb, msb and program number which are to be set
 	 */
@@ -239,7 +239,7 @@ class MidiRegionView : public RegionView
 	 */
 	void change_velocity(ArdourCanvas::CanvasNoteEvent* ev, int8_t velocity, bool relative=false);
 
-	/** PropertyChange the channel of the selection.
+	/** Change the channel of the selection.
 	 * @param channel - the channel number of the new channel, zero-based
 	 */
 	void change_channel(uint8_t channel);
@@ -305,7 +305,7 @@ class MidiRegionView : public RegionView
 	                Gdk::Color& basic_color,
 	                TimeAxisViewItem::Visibility);
 
-	void region_resized (PBD::PropertyChange);
+	void region_resized (const PBD::PropertyChange&);
 
 	void set_flags (XMLNode *);
 	void store_flags ();

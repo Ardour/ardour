@@ -23,17 +23,12 @@
 #include <string>
 #include <sstream>
 #include <list>
+#include <set>
 #include <glib.h>
 
 #include "pbd/xml++.h"
 
 namespace PBD {
-
-enum PropertyChange {
-	range_guarantee = ~0ULL
-};
-
-PropertyChange new_change ();
 
 typedef GQuark PropertyID;
 
@@ -43,14 +38,48 @@ struct PropertyDescriptor {
     typedef T value_type;
 };
 
+class PropertyChange : public std::set<PropertyID> 
+{
+  public:
+	PropertyChange() { }
+	template<typename T> PropertyChange(PropertyDescriptor<T> p) { insert (p.id); }
+        PropertyChange(const PropertyChange& other) : std::set<PropertyID> (other) { }
+	
+	PropertyChange operator= (const PropertyChange& other) {
+		clear ();
+		insert (other.begin(), other.end());
+		return *this;
+	}
+
+	template<typename T> PropertyChange operator= (PropertyDescriptor<T> p) {
+		clear ();
+		insert (p.id);
+		return *this;
+	}
+
+	template<typename T> bool contains (PropertyDescriptor<T> p) const { return find (p.id) != end(); }
+
+	bool contains (const PropertyChange& other) const { 
+		for (const_iterator x = other.begin(); x != other.end(); ++x) {
+			if (find (*x) != end()) {
+			    return true;
+			}
+		}
+		return false;
+	}
+
+	void add (PropertyID id) { (void) insert (id); }
+	void add (const PropertyChange& other) { (void) insert (other.begin(), other.end()); }
+	template<typename T> void add (PropertyDescriptor<T> p) { (void) insert (p.id); }
+};
+
 /** Base (non template) part of Property */	
 class PropertyBase
 {
 public:
-	PropertyBase (PropertyID pid, PropertyChange c)
+	PropertyBase (PropertyID pid)
 		: _have_old (false)
 		, _property_id (pid)
-		, _change (c)
 	{
 
 	}
@@ -62,11 +91,10 @@ public:
 
 	virtual void diff (XMLNode *, XMLNode *) const = 0;
 	virtual void diff (PropertyChange&) const = 0;
-	virtual PropertyChange set_state (XMLNode const &) = 0;
+	virtual bool set_state (XMLNode const &) = 0;
 	virtual void add_state (XMLNode &) const = 0;
 
 	const gchar* property_name() const { return g_quark_to_string (_property_id); }
-	PropertyChange change() const { return _change; }
 	PropertyID id() const { return _property_id; }
 
 	bool operator== (PropertyID pid) const {
@@ -76,7 +104,6 @@ public:
 protected:
 	bool _have_old;
 	PropertyID _property_id;
-	PropertyChange _change;
 };
 
 /** Parent class for classes which represent a single property in a Stateful object */
@@ -84,8 +111,8 @@ template <class T>
 class PropertyTemplate : public PropertyBase
 {
 public:
-	PropertyTemplate (PropertyDescriptor<T> p, PropertyChange c, T const & v)
-		: PropertyBase (p.id, c)
+	PropertyTemplate (PropertyDescriptor<T> p, T const & v)
+		: PropertyBase (p.id)
 		, _current (v)
 	{
 
@@ -94,7 +121,6 @@ public:
 		/* XXX: isn't there a nicer place to do this? */
 		_have_old = s._have_old;
 		_property_id = s._property_id;
-		_change = s._change;
 		
 		_current = s._current;
 		_old = s._old;
@@ -129,39 +155,38 @@ public:
 
 	void diff (XMLNode* old, XMLNode* current) const {
 		if (_have_old) {
-			old->add_property (g_quark_to_string (_property_id), to_string (_old));
-			current->add_property (g_quark_to_string (_property_id), to_string (_current));
+			old->add_property (property_name(), to_string (_old));
+			current->add_property (property_name(), to_string (_current));
 		}
 	}
 	
 	void diff (PropertyChange& c) const {
-		if (_have_old && _change) {
-			c = PropertyChange (c | _change);
+		if (_have_old) {
+			c.add (_property_id);
 		}
 	}
 
 	/** Try to set state from the property of an XML node.
 	 *  @param node XML node.
-	 *  @return PropertyChange effected, or 0.
+	 *  @return true if the value of the property is changed
 	 */
-	PropertyChange set_state (XMLNode const & node) {
-		XMLProperty const * p = node.property (g_quark_to_string (_property_id));
-		PropertyChange c = PropertyChange (0);
+	bool set_state (XMLNode const & node) {
+		XMLProperty const * p = node.property (property_name());
 
 		if (p) {
 			T const v = from_string (p->value ());
 
 			if (v != _current) {
 				set (v);
-				c = _change;
+				return true;
 			}
-		}
+		} 
 
-		return c;
+		return false;
 	}
 
 	void add_state (XMLNode & node) const {
-		node.add_property (g_quark_to_string (_property_id), to_string (_current));
+		node.add_property (property_name(), to_string (_current));
 	}
 
 protected:
@@ -191,14 +216,8 @@ template <class T>
 class Property : public PropertyTemplate<T>
 {
 public:
-	Property (PropertyDescriptor<T> q, PropertyChange c, T const & v)
-		: PropertyTemplate<T> (q, c, v)
-	{
-
-	}
-
 	Property (PropertyDescriptor<T> q, T const & v)
-		: PropertyTemplate<T> (q, PropertyChange (0), v)
+		: PropertyTemplate<T> (q, v)
 	{
 
 	}
@@ -222,12 +241,41 @@ private:
 		s << v;
 		return s.str ();
 	}
-
+	
 	T from_string (std::string const & s) const {
 		std::stringstream t (s);
 		T v;
 		t >> v;
 		return v;
+	}
+};
+
+/** Specialization, for std::string which is common and special (see to_string() and from_string()
+    Using stringstream to read from a std::string is easy to get wrong because of whitespace
+    delineation, etc.
+ */
+template <>
+class Property<std::string> : public PropertyTemplate<std::string>
+{
+public:
+	Property (PropertyDescriptor<std::string> q, std::string const & v)
+		: PropertyTemplate<std::string> (q, v)
+	{
+
+	}
+
+	std::string & operator= (std::string const & v) {
+		this->set (v);
+		return this->_current;
+	}
+	
+private:	
+        std::string to_string (std::string const & v) const {
+		return _current;
+	}
+	
+	std::string from_string (std::string const & s) const {
+		return s;
 	}
 };
 

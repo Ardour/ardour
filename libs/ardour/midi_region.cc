@@ -47,22 +47,14 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-/** Basic MidiRegion constructor (one channel) */
-MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src)
-	: Region (src)
-{
-	assert(_name.val().find("/") == string::npos);
-	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
-}
-
 /* Basic MidiRegion constructor (many channels) */
 MidiRegion::MidiRegion (const SourceList& srcs)
 	: Region (srcs)
 {
-	assert(_name.val().find("/") == string::npos);
 	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
+	assert(_name.val().find("/") == string::npos);
+	assert(_type == DataType::MIDI);
 }
-
 
 /** Create a new MidiRegion, that is part of an existing one */
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t offset, bool offset_relative)
@@ -70,30 +62,6 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t
 {
 	assert(_name.val().find("/") == string::npos);
 	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
-}
-
-MidiRegion::MidiRegion (boost::shared_ptr<MidiSource> src, const XMLNode& node)
-	: Region (src, node)
-{
-	if (set_state (node, Stateful::loading_state_version)) {
-		throw failed_constructor();
-	}
-
-	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
-	assert(_name.val().find("/") == string::npos);
-	assert(_type == DataType::MIDI);
-}
-
-MidiRegion::MidiRegion (const SourceList& srcs, const XMLNode& node)
-	: Region (srcs, node)
-{
-	if (set_state (node, Stateful::loading_state_version)) {
-		throw failed_constructor();
-	}
-
-	midi_source(0)->Switched.connect_same_thread (*this, boost::bind (&MidiRegion::switch_source, this, _1));
-	assert(_name.val().find("/") == string::npos);
-	assert(_type == DataType::MIDI);
 }
 
 MidiRegion::~MidiRegion ()

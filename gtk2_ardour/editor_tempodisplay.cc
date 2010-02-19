@@ -93,13 +93,13 @@ Editor::draw_metric_marks (const Metrics& metrics)
 }
 
 void
-Editor::tempo_map_changed (PropertyChange ignored)
+Editor::tempo_map_changed (const PropertyChange& ignored)
 {
 	if (!_session) {
 		return;
 	}
 
-	ENSURE_GUI_THREAD (*this, &Editor::tempo_map_changed ignored);
+	ENSURE_GUI_THREAD (*this, &Editor::tempo_map_changed, ignored);
 
 	if (tempo_lines) {
 		tempo_lines->tempo_map_changed();

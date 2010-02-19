@@ -666,7 +666,7 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t posi
 		}
 	}
 
-	region->StateChanged.connect_same_thread (region_state_changed_connections, boost::bind (&Playlist::region_changed_proxy, this, _1, boost::weak_ptr<Region> (region)));
+	region->PropertyChanged.connect_same_thread (region_state_changed_connections, boost::bind (&Playlist::region_changed_proxy, this, _1, boost::weak_ptr<Region> (region)));
 
 	return true;
 }
@@ -1383,13 +1383,13 @@ Playlist::core_splice (framepos_t at, framecnt_t distance, boost::shared_ptr<Reg
 }
 
 void
-Playlist::region_bounds_changed (PropertyChange what_changed, boost::shared_ptr<Region> region)
+Playlist::region_bounds_changed (const PropertyChange& what_changed, boost::shared_ptr<Region> region)
 {
 	if (in_set_state || _splicing || _nudging || _shuffling) {
 		return;
 	}
 
-	if (what_changed & ARDOUR::PositionChanged) {
+	if (what_changed.contains (Properties::position)) {
 
 		/* remove it from the list then add it back in
 		   the right place again.
@@ -1410,15 +1410,15 @@ Playlist::region_bounds_changed (PropertyChange what_changed, boost::shared_ptr<
 		regions.insert (upper_bound (regions.begin(), regions.end(), region, cmp), region);
 	}
 
-	if (what_changed & PropertyChange (ARDOUR::PositionChanged|ARDOUR::LengthChanged)) {
+	if (what_changed.contains (Properties::position) || what_changed.contains (Properties::length)) {
 
 		frameoffset_t delta = 0;
 
-		if (what_changed & ARDOUR::PositionChanged) {
+		if (what_changed.contains (Properties::position)) {
 			delta = region->position() - region->last_position();
 		}
 
-		if (what_changed & ARDOUR::LengthChanged) {
+		if (what_changed.contains (Properties::length)) {
 			delta += region->length() - region->last_length();
 		}
 
@@ -1442,7 +1442,7 @@ Playlist::region_bounds_changed (PropertyChange what_changed, boost::shared_ptr<
 }
 
 void
-Playlist::region_changed_proxy (PropertyChange what_changed, boost::weak_ptr<Region> weak_region)
+Playlist::region_changed_proxy (const PropertyChange& what_changed, boost::weak_ptr<Region> weak_region)
 {
 	boost::shared_ptr<Region> region (weak_region.lock());
 
@@ -1456,26 +1456,38 @@ Playlist::region_changed_proxy (PropertyChange what_changed, boost::weak_ptr<Reg
 }
 
 bool
-Playlist::region_changed (PropertyChange what_changed, boost::shared_ptr<Region> region)
+Playlist::region_changed (const PropertyChange& what_changed, boost::shared_ptr<Region> region)
 {
-	PropertyChange our_interests = PropertyChange (Region::MuteChanged|Region::LayerChanged|Region::OpacityChanged);
+	PropertyChange our_interests;
+	PropertyChange bounds;
+	PropertyChange pos_and_length;
 	bool save = false;
 
 	if (in_set_state || in_flush) {
 		return false;
 	}
 
-	if (what_changed & BoundsChanged) {
+	our_interests.add (Properties::muted);
+	our_interests.add (Properties::layer);
+	our_interests.add (Properties::opaque);
+
+	bounds.add (Properties::start);
+	bounds.add (Properties::position);
+	bounds.add (Properties::length);
+
+	pos_and_length.add (Properties::position);
+	pos_and_length.add (Properties::length);
+
+	if (what_changed.contains (bounds)) {
 		region_bounds_changed (what_changed, region);
 		save = !(_splicing || _nudging);
 	}
 
-	if ((what_changed & our_interests) &&
-	    !(what_changed & PropertyChange (ARDOUR::PositionChanged|ARDOUR::LengthChanged))) {
+	if (what_changed.contains (our_interests) && !what_changed.contains (pos_and_length)) {
 		check_dependents (region, false);
 	}
 
-	if (what_changed & PropertyChange (ARDOUR::PositionChanged)) {
+	if (what_changed.contains (Properties::position)) {
 		notify_region_moved (region);
 	}
 
@@ -1484,7 +1496,7 @@ Playlist::region_changed (PropertyChange what_changed, boost::shared_ptr<Region>
 	   them, and we notify in ::relayer()
 	*/
 
-	if (what_changed & our_interests) {
+	if (what_changed.contains (our_interests)) {
 		save = true;
 	}
 
@@ -1973,7 +1985,7 @@ Playlist::set_state (const XMLNode& node, int version)
 				error << _("region state node has no ID, ignored") << endmsg;
 				continue;
 			}
-
+			
 			ID id = prop->value ();
 
 			if ((region = region_by_id (id))) {

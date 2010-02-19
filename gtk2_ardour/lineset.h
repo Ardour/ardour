@@ -65,7 +65,7 @@ public:
 	 */
 	void change_line_width(double coord, double width);
 
-	/** PropertyChange the color of a line.
+	/** Change the color of a line.
 	 */
 	void change_line_color(double coord, uint32_t color);
 

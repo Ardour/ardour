@@ -205,7 +205,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route->solo_changed.connect (route_connections, ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
 	_route->listen_changed.connect (route_connections, ui_bind (&RouteUI::listen_changed, this, _1), gui_context());
 	_route->solo_isolated_changed.connect (route_connections, ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
-	_route->NameChanged.connect (route_connections, boost::bind (&RouteUI::name_changed, this), gui_context());
+	_route->PropertyChanged.connect (route_connections, ui_bind (&RouteUI::property_changed, this, _1), gui_context());
 
 	if (_session->writable() && is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
@@ -1164,11 +1164,11 @@ RouteUI::route_rename ()
 }
 
 void
-RouteUI::name_changed ()
+RouteUI::property_changed (const PropertyChange& what_changed)
 {
-	ENSURE_GUI_THREAD (*this, &RouteUI::name_changed);
-
-	name_label.set_text (_route->name());
+	if (what_changed.contains (ARDOUR::Properties::name)) {
+		name_label.set_text (_route->name());
+	}
 }
 
 void

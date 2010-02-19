@@ -164,7 +164,7 @@ class RouteUI : public virtual AxisView
 
 	void route_rename();
 
-	virtual void name_changed ();
+	virtual void property_changed (const PBD::PropertyChange&);
 	void route_removed ();
 
 	Gtk::CheckMenuItem *route_active_menu_item;

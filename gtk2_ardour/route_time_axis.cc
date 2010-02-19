@@ -231,7 +231,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	_y_position = -1;
 
 	_route->processors_changed.connect (*this, ui_bind (&RouteTimeAxisView::processors_changed, this, _1), gui_context());
-	_route->NameChanged.connect (*this, boost::bind (&RouteTimeAxisView::route_name_changed, this), gui_context());
+	_route->PropertyChanged.connect (*this, ui_bind (&RouteTimeAxisView::route_property_changed, this, _1), gui_context());
 
 	if (is_track()) {
 
@@ -347,9 +347,11 @@ RouteTimeAxisView::label_view ()
 }
 
 void
-RouteTimeAxisView::route_name_changed ()
+RouteTimeAxisView::route_property_changed (const PropertyChange& what_changed)
 {
-	label_view ();
+	if (what_changed.contains (ARDOUR::Properties::name)) {
+		label_view ();
+	}
 }
 
 void

@@ -53,6 +53,9 @@ namespace ARDOUR {
 	void init_post_engine ();
 	int cleanup ();
 	bool no_auto_connect ();
+	void make_property_quarks ();
+
+	extern PBD::PropertyChange bounds_change;
 
 	std::string get_ardour_revision ();
 	extern const char* const ardour_config_info;
@@ -64,12 +67,6 @@ namespace ARDOUR {
 	static inline microseconds_t get_microseconds () {
 		return (microseconds_t) jack_get_time();
 	}
-
-	extern PBD::PropertyChange StartChanged;
-	extern PBD::PropertyChange LengthChanged;
-	extern PBD::PropertyChange PositionChanged;
-	extern PBD::PropertyChange NameChanged;
-	extern PBD::PropertyChange BoundsChanged;
 
 	static const double SHUTTLE_FRACT_SPEED1=0.48412291827; /* derived from A1,A2 */
 

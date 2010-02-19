@@ -89,12 +89,12 @@ AudioRegion::register_properties ()
 }
 
 #define AUDIOREGION_STATE_DEFAULT \
-	_envelope_active (Properties::envelope_active, EnvelopeActiveChanged, false) \
-	, _default_fade_in (Properties::default_fade_in, FadeInChanged, true) \
-	, _default_fade_out (Properties::default_fade_out, FadeOutChanged, true) \
-	, _fade_in_active (Properties::fade_in_active, FadeInActiveChanged, true) \
-	, _fade_out_active (Properties::fade_out_active, FadeOutActiveChanged, true) \
-	, _scale_amplitude (Properties::scale_amplitude, ScaleAmplitudeChanged, 1.0)
+	_envelope_active (Properties::envelope_active, false) \
+	, _default_fade_in (Properties::default_fade_in, true) \
+	, _default_fade_out (Properties::default_fade_out, true) \
+	, _fade_in_active (Properties::fade_in_active, true) \
+	, _fade_out_active (Properties::fade_out_active, true) \
+	, _scale_amplitude (Properties::scale_amplitude, 0.0)
 
 #define AUDIOREGION_COPY_STATE(other) \
 	 _envelope_active (other->_envelope_active) \
@@ -103,14 +103,6 @@ AudioRegion::register_properties ()
         , _fade_in_active (other->_fade_in_active) \
         , _fade_out_active (other->_fade_out_active) \
 	, _scale_amplitude (other->_scale_amplitude) 
-
-PropertyChange AudioRegion::FadeInChanged         = PBD::new_change();
-PropertyChange AudioRegion::FadeOutChanged        = PBD::new_change();
-PropertyChange AudioRegion::FadeInActiveChanged   = PBD::new_change();
-PropertyChange AudioRegion::FadeOutActiveChanged  = PBD::new_change();
-PropertyChange AudioRegion::EnvelopeActiveChanged = PBD::new_change();
-PropertyChange AudioRegion::ScaleAmplitudeChanged = PBD::new_change();
-PropertyChange AudioRegion::EnvelopeChanged       = PBD::new_change();
 
 /* a Session will reset these to its chosen defaults by calling AudioRegion::set_default_fade() */
 
@@ -142,26 +134,7 @@ AudioRegion::AudioRegion (Session& s, framepos_t start, framecnt_t len, std::str
 	assert (_sources.size() == _master_sources.size());
 }
 
-/** Basic AudioRegion constructor (one channel) */
-AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src)
-	: Region (boost::static_pointer_cast<Source>(src))
-	, AUDIOREGION_STATE_DEFAULT
-	, _automatable(src->session())
-	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
-	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
-	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
-	, _fade_in_suspended (0)
-	, _fade_out_suspended (0)
-{
-	init ();
-	
-	/* XXX why is this set here ? - set in a property list given to RegionFactory */
-	_external = true;
-
-	assert (_sources.size() == _master_sources.size());
-}
-
-/** Basic AudioRegion constructor (many channels) */
+/** Basic AudioRegion constructor */
 AudioRegion::AudioRegion (const SourceList& srcs)
 	: Region (srcs)
 	, AUDIOREGION_STATE_DEFAULT
@@ -219,26 +192,8 @@ AudioRegion::AudioRegion (boost::shared_ptr<const AudioRegion> other, const Sour
 	assert (_sources.size() == _master_sources.size());
 }
 
-AudioRegion::AudioRegion (boost::shared_ptr<AudioSource> src, const XMLNode& node)
-	: Region (src, node)
-	, AUDIOREGION_STATE_DEFAULT
-	, _automatable(src->session())
-	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
-	, _fade_out (new AutomationList(Evoral::Parameter(FadeOutAutomation)))
-	, _envelope (new AutomationList(Evoral::Parameter(EnvelopeAutomation)))
-{
-	init ();
-
-	if (set_state (node, Stateful::loading_state_version)) {
-		throw failed_constructor();
-	}
-
-	assert(_type == DataType::AUDIO);
-	assert (_sources.size() == _master_sources.size());
-}
-
-AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
-	: Region (srcs, node)
+AudioRegion::AudioRegion (SourceList& srcs)
+	: Region (srcs)
 	, AUDIOREGION_STATE_DEFAULT
 	, _automatable(srcs[0]->session())
 	, _fade_in (new AutomationList(Evoral::Parameter(FadeInAutomation)))
@@ -249,12 +204,7 @@ AudioRegion::AudioRegion (SourceList& srcs, const XMLNode& node)
 {
 	init ();
 
-	if (set_state (node, Stateful::loading_state_version)) {
-		throw failed_constructor();
-	}
-
 	assert(_type == DataType::AUDIO);
-	connect_to_analysis_changed ();
 	assert (_sources.size() == _master_sources.size());
 }
 
@@ -327,7 +277,7 @@ AudioRegion::set_envelope_active (bool yn)
 {
 	if (envelope_active() != yn) {
 		_envelope_active = yn;
-		send_change (EnvelopeActiveChanged);
+		send_change (PropertyChange (Properties::envelope_active));
 	}
 }
 
@@ -650,8 +600,7 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 		float a = atof (prop->value().c_str());
 		if (a != _scale_amplitude) {
 			_scale_amplitude = a;
-			what_changed = PropertyChange (what_changed|ScaleAmplitudeChanged);
-			cerr << _name << " amp changed\n";
+			what_changed.add (Properties::scale_amplitude);
 		}
 	}
 
@@ -730,7 +679,6 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 	thaw ();
 
 	if (send) {
-		cerr << _name << ": audio final change: " << hex << what_changed << dec << endl;
 		send_change (what_changed);
 	}
 
@@ -741,54 +689,52 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 	return 0;
 }
 
-PropertyChange
+bool
 AudioRegion::set_property (const PropertyBase& prop)
 {
-	PropertyChange c = PropertyChange (0);
-
 	DEBUG_TRACE (DEBUG::Properties,  string_compose ("audio region %1 set property %2\n", _name.val(), prop.property_name()));
 
 	if (prop == Properties::envelope_active.id) {
 		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
 		if (val != _envelope_active) {
 			_envelope_active = val;
-			c = EnvelopeActiveChanged;
+			return true;
 		}
 	} else if (prop == Properties::default_fade_in.id) {
 		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
 		if (val != _default_fade_in) {
 			_default_fade_in = val;
-			c = FadeInChanged;
+			return true;
 		}
 	} else if (prop == Properties::default_fade_out.id) {
 		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
 		if (val != _default_fade_out) {
 			_default_fade_out = val;
-			c = FadeOutChanged;
+			return true;
 		}
 	} else if (prop == Properties::fade_in_active.id) {
 		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
 		if (val != _fade_in_active) {
 			_fade_in_active = val;
-			c = FadeInActiveChanged;
+			return true;
 		}
 	} else if (prop == Properties::fade_out_active.id) {
 		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
 		if (val != _fade_out_active) {
 			_fade_out_active = val;
-			c = FadeOutChanged;
+			return true;
 		}
 	} else if (prop == Properties::scale_amplitude.id) {
 		gain_t val = dynamic_cast<const PropertyTemplate<gain_t>*>(&prop)->val();
 		if (val != _scale_amplitude) {
 			_scale_amplitude = val;
-			c = ScaleAmplitudeChanged;
+			return true;
 		}
 	} else {
 		return Region::set_property (prop);
 	}
-
-	return c;
+	
+	return false;
 }
 
 int
@@ -817,7 +763,7 @@ AudioRegion::set_fade_in (boost::shared_ptr<AutomationList> f)
 	*_fade_in = *f;
 	_fade_in->thaw ();
 	
-	send_change (FadeInChanged);
+	send_change (PropertyChange (Properties::fade_in));
 }
 
 void
@@ -884,7 +830,7 @@ AudioRegion::set_fade_out (boost::shared_ptr<AutomationList> f)
 	*_fade_out = *f;
 	_fade_out->thaw ();
 
-	send_change (FadeInChanged);
+	send_change (PropertyChange (Properties::fade_in));
 }
 
 void
@@ -953,7 +899,7 @@ AudioRegion::set_fade_in_length (framecnt_t len)
 
 	if (changed) {
 		_default_fade_in = false;
-		send_change (FadeInChanged);
+		send_change (PropertyChange (Properties::fade_in));
 	}
 }
 
@@ -968,7 +914,7 @@ AudioRegion::set_fade_out_length (framecnt_t len)
 
 	if (changed) {
 		_default_fade_out = false;
-		send_change (FadeOutChanged);
+		send_change (PropertyChange (Properties::fade_out));
 	}
 }
 
@@ -980,7 +926,7 @@ AudioRegion::set_fade_in_active (bool yn)
 	}
 
 	_fade_in_active = yn;
-	send_change (FadeInActiveChanged);
+	send_change (PropertyChange (Properties::fade_in_active));
 }
 
 void
@@ -990,7 +936,7 @@ AudioRegion::set_fade_out_active (bool yn)
 		return;
 	}
 	_fade_out_active = yn;
-	send_change (FadeOutActiveChanged);
+	send_change (PropertyChange (Properties::fade_out_active));
 }
 
 bool
@@ -1050,12 +996,12 @@ AudioRegion::recompute_at_end ()
 
 	if (_fade_in->back()->when > _length) {
 		_fade_in->extend_to (_length);
-		send_change (FadeInChanged);
+		send_change (PropertyChange (Properties::fade_in));
 	}
 
 	if (_fade_out->back()->when > _length) {
 		_fade_out->extend_to (_length);
-		send_change (FadeOutChanged);
+		send_change (PropertyChange (Properties::fade_out));
 	}
 }
 
@@ -1068,12 +1014,12 @@ AudioRegion::recompute_at_start ()
 
 	if (_fade_in->back()->when > _length) {
 		_fade_in->extend_to (_length);
-		send_change (FadeInChanged);
+		send_change (PropertyChange (Properties::fade_in));
 	}
 
 	if (_fade_out->back()->when > _length) {
 		_fade_out->extend_to (_length);
-		send_change (FadeOutChanged);
+		send_change (PropertyChange (Properties::fade_out));
 	}
 }
 
@@ -1212,7 +1158,7 @@ AudioRegion::set_scale_amplitude (gain_t g)
 
 	/* tell everybody else */
 
-	send_change (ScaleAmplitudeChanged);
+	send_change (PropertyChange (Properties::scale_amplitude));
 }
 
 void
@@ -1282,25 +1228,25 @@ AudioRegion::normalize_to (float target_dB)
 
 	/* tell everybody else */
 
-	send_change (ScaleAmplitudeChanged);
+	send_change (PropertyChange (Properties::scale_amplitude));
 }
 
 void
 AudioRegion::fade_in_changed ()
 {
-	send_change (FadeInChanged);
+	send_change (PropertyChange (Properties::fade_in));
 }
 
 void
 AudioRegion::fade_out_changed ()
 {
-	send_change (FadeOutChanged);
+	send_change (PropertyChange (Properties::fade_out));
 }
 
 void
 AudioRegion::envelope_changed ()
 {
-	send_change (EnvelopeChanged);
+	send_change (PropertyChange (Properties::envelope));
 }
 
 void

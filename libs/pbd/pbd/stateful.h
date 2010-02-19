@@ -23,10 +23,11 @@
 #include <string>
 #include <list>
 #include <cassert>
+
 #include "pbd/id.h"
 #include "pbd/xml++.h"
-#include "pbd/enumwriter.h"
 #include "pbd/properties.h"
+#include "pbd/signals.h"
 
 class XMLNode;
 
@@ -47,7 +48,7 @@ class Stateful {
 	/* derived types do not have to implement this, but probably should
 	   give it serious attention.
 	*/
-	virtual PropertyChange set_property (const PropertyBase&) { return PropertyChange (0); }
+	virtual bool set_property (const PropertyBase&) { return false; }
 
 	PropertyChange set_properties (const PropertyList&);
 
@@ -67,6 +68,10 @@ class Stateful {
 	void clear_history ();
 	std::pair<XMLNode *, XMLNode*> diff () const;
 	void changed (PropertyChange&) const;
+
+	/* How stateful's notify of changes to their properties
+	 */
+	PBD::Signal1<void,const PropertyChange&> PropertyChanged;
 
 	static int current_state_version;
 	static int loading_state_version;

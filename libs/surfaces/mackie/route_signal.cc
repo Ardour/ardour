@@ -21,6 +21,7 @@
 #include "ardour/track.h"
 #include "ardour/midi_ui.h"
 #include "ardour/panner.h"
+#include "ardour/session_object.h" // for Properties::name 
 
 #include "mackie_control_protocol.h"
 
@@ -47,7 +48,7 @@ void RouteSignal::connect()
 		_route->gain_control()->Changed.connect(connections, ui_bind (&MackieControlProtocol::notify_gain_changed, &_mcp, this, false), midi_ui_context());
 	}
 
-	_route->NameChanged.connect (connections, ui_bind (&MackieControlProtocol::notify_name_changed, &_mcp, this), midi_ui_context());
+	_route->PropertyChanged.connect (connections, ui_bind (&MackieControlProtocol::notify_property_changed, &_mcp, _1, this), midi_ui_context());
 	
 	if (_route->panner()) {
 		_route->panner()->Changed.connect(connections, ui_bind (&MackieControlProtocol::notify_panner_changed, &_mcp, this, false), midi_ui_context());
@@ -90,7 +91,7 @@ void RouteSignal::notify_all()
 	if ( _strip.has_gain() )
 		_mcp.notify_gain_changed( this );
 	
-	_mcp.notify_name_changed( this );
+	_mcp.notify_property_changed (PBD::PropertyChange (ARDOUR::Properties::name), this );
 	
 	if ( _strip.has_vpot() )
 		_mcp.notify_panner_changed( this );

@@ -99,7 +99,7 @@ class MackieControlProtocol
 	/// Signal handler for Route::gain_changed (from IO)
 	void notify_gain_changed(Mackie::RouteSignal *, bool force_update = true);
 	/// Signal handler for Route::name_change
-	void notify_name_changed(Mackie::RouteSignal *);
+	void notify_property_changed(const PBD::PropertyChange&, Mackie::RouteSignal *);
 	/// Signal handler from Panner::Change
 	void notify_panner_changed(Mackie::RouteSignal *, bool force_update = true);
 	/// Signal handler for new routes added

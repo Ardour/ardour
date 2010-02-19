@@ -258,8 +258,6 @@ class TempoMap : public PBD::StatefulDestructible
 
 	nframes_t frame_rate () const { return _frame_rate; }
 
-	PBD::Signal1<void,PBD::PropertyChange> StateChanged;
-
   private:
 	static Tempo    _default_tempo;
 	static Meter    _default_meter;

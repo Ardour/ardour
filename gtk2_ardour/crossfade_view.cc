@@ -82,9 +82,12 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 
 	group->signal_event().connect (sigc::bind (sigc::mem_fun (tv.editor(), &PublicEditor::canvas_crossfade_view_event), group, this));
 
-	crossfade_changed (PropertyChange (~0));
+	PropertyChange all_crossfade_properties;
+	all_crossfade_properties.add (ARDOUR::Properties::active);
+	all_crossfade_properties.add (ARDOUR::Properties::follow_overlap);
+	crossfade_changed (all_crossfade_properties);
 
-	crossfade->StateChanged.connect (*this, ui_bind (&CrossfadeView::crossfade_changed, this, _1), gui_context());
+	crossfade->PropertyChanged.connect (*this, ui_bind (&CrossfadeView::crossfade_changed, this, _1), gui_context());
 	ColorsChanged.connect (sigc::mem_fun (*this, &CrossfadeView::color_handler));
 }
 
@@ -123,11 +126,11 @@ CrossfadeView::set_height (double height)
 }
 
 void
-CrossfadeView::crossfade_changed (PropertyChange what_changed)
+CrossfadeView::crossfade_changed (const PropertyChange& what_changed)
 {
 	bool need_redraw_curves = false;
 
-	if (what_changed & BoundsChanged) {
+	if (what_changed.contains (ARDOUR::bounds_change)) {
 		set_position (crossfade->position(), this);
 		set_duration (crossfade->length(), this);
 
@@ -136,11 +139,11 @@ CrossfadeView::crossfade_changed (PropertyChange what_changed)
 		need_redraw_curves = false;
 	}
 
-	if (what_changed & Crossfade::FollowOverlapChanged) {
+	if (what_changed.contains (ARDOUR::Properties::follow_overlap)) {
 		need_redraw_curves = true;
 	}
 
-	if (what_changed & Crossfade::ActiveChanged) {
+	if (what_changed.contains (ARDOUR::Properties::active)) {
 		/* calls redraw_curves */
 		active_changed ();
 	} else if (need_redraw_curves) {

@@ -107,7 +107,7 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	_active.signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::active_toggled));
 	
 	_processor->ActiveChanged.connect (active_connection, boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
-	_processor->NameChanged.connect (name_connection, boost::bind (&ProcessorEntry::processor_name_changed, this), gui_context());
+	_processor->PropertyChanged.connect (name_connection, ui_bind (&ProcessorEntry::processor_property_changed, this, _1), gui_context());
 }
 
 EventBox&
@@ -163,9 +163,11 @@ ProcessorEntry::processor_active_changed ()
 }
 
 void
-ProcessorEntry::processor_name_changed ()
+ProcessorEntry::processor_property_changed (const PropertyChange& what_changed)
 {
-	_name.set_text (name ());
+	if (what_changed.contains (ARDOUR::Properties::name)) {
+		_name.set_text (name ());
+	}
 }
 
 string
@@ -328,7 +330,7 @@ ProcessorBox::set_route (boost::shared_ptr<Route> r)
 
 	_route->processors_changed.connect (connections, ui_bind (&ProcessorBox::route_processors_changed, this, _1), gui_context());
 	_route->DropReferences.connect (connections, boost::bind (&ProcessorBox::route_going_away, this), gui_context());
-	_route->NameChanged.connect (connections, boost::bind (&ProcessorBox::route_name_changed, this), gui_context());
+	_route->PropertyChanged.connect (connections, ui_bind (&ProcessorBox::route_property_changed, this, _1), gui_context());
 
 	redisplay_processors ();
 }
@@ -1764,9 +1766,13 @@ ProcessorBox::rb_edit ()
 }
 
 void
-ProcessorBox::route_name_changed ()
+ProcessorBox::route_property_changed (const PropertyChange& what_changed)
 {
-	ENSURE_GUI_THREAD (*this, &ProcessorBox::route_name_changed)
+	if (!what_changed.contains (ARDOUR::Properties::name)) {
+		return;
+	}
+
+	ENSURE_GUI_THREAD (*this, &ProcessorBox::route_property_changed, what_changed);
 
 	boost::shared_ptr<Processor> processor;
 	boost::shared_ptr<PluginInsert> plugin_insert;

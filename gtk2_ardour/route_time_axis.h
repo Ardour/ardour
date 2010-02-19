@@ -218,7 +218,7 @@ protected:
 	void reset_processor_automation_curves ();
 
 	void take_name_changed (void *src);
-	void route_name_changed ();
+	void route_property_changed (const PBD::PropertyChange&);
 	void name_entry_changed ();
 
 	void update_rec_display ();

@@ -37,8 +37,6 @@ using namespace ARDOUR;
 using namespace PBD;
 
 framecnt_t Crossfade::_short_xfade_length = 0;
-PropertyChange Crossfade::ActiveChanged = new_change();
-PropertyChange Crossfade::FollowOverlapChanged = new_change();
 
 /* XXX if and when we ever implement parallel processing of the process()
    callback, these will need to be handled on a per-thread basis.
@@ -46,6 +44,24 @@ PropertyChange Crossfade::FollowOverlapChanged = new_change();
 
 Sample* Crossfade::crossfade_buffer_out = 0;
 Sample* Crossfade::crossfade_buffer_in = 0;
+
+
+#define CROSSFADE_DEFAULT_PROPERTIES \
+	_active (Properties::active, _session.config.get_xfades_active ()) \
+	, _follow_overlap (Properties::follow_overlap, false)
+
+
+namespace ARDOUR {
+	namespace Properties {
+		PropertyDescriptor<bool> follow_overlap;
+	}
+}
+
+void
+Crossfade::make_property_quarks ()
+{
+	Properties::follow_overlap.id = g_quark_from_static_string (X_("follow-overlap"));
+}
 
 void
 Crossfade::set_buffer_size (framecnt_t sz)
@@ -72,26 +88,25 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<Audio
 		      framecnt_t length,
 		      framepos_t position,
 		      AnchorPoint ap)
-	: AudioRegion (in->session(), position, length, in->name() + string ("<>") + out->name()),
-	  _fade_in (Evoral::Parameter(FadeInAutomation)), // linear (gain coefficient) => -inf..+6dB
-	  _fade_out (Evoral::Parameter(FadeOutAutomation)) // linear (gain coefficient) => -inf..+6dB
+	: AudioRegion (in->session(), position, length, in->name() + string ("<>") + out->name())
+	, CROSSFADE_DEFAULT_PROPERTIES
+	, _fade_in (Evoral::Parameter(FadeInAutomation)) // linear (gain coefficient) => -inf..+6dB
+	, _fade_out (Evoral::Parameter(FadeOutAutomation)) // linear (gain coefficient) => -inf..+6dB
 
 {
 	_in = in;
 	_out = out;
 	_anchor_point = ap;
-	_follow_overlap = false;
-
-	_active = _session.config.get_xfades_active ();
 	_fixed = true;
 
 	initialize ();
 }
 
 Crossfade::Crossfade (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioRegion> b, CrossfadeModel model, bool act)
-	: AudioRegion (a->session(), 0, 0, a->name() + string ("<>") + b->name()),
-	  _fade_in (Evoral::Parameter(FadeInAutomation)), // linear (gain coefficient) => -inf..+6dB
-	  _fade_out (Evoral::Parameter(FadeOutAutomation)) // linear (gain coefficient) => -inf..+6dB
+	: AudioRegion (a->session(), 0, 0, a->name() + string ("<>") + b->name())
+	, CROSSFADE_DEFAULT_PROPERTIES
+	, _fade_in (Evoral::Parameter(FadeInAutomation)) // linear (gain coefficient) => -inf..+6dB
+	, _fade_out (Evoral::Parameter(FadeOutAutomation)) // linear (gain coefficient) => -inf..+6dB
 {
 	_in_update = false;
 	_fixed = false;
@@ -107,9 +122,10 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> a, boost::shared_ptr<AudioR
 }
 
 Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
-	: AudioRegion (playlist.session(), 0, 0, "unnamed crossfade"),
-	  _fade_in (Evoral::Parameter(FadeInAutomation)), // linear (gain coefficient) => -inf..+6dB
-	  _fade_out (Evoral::Parameter(FadeOutAutomation)) // linear (gain coefficient) => -inf..+6dB
+	: AudioRegion (playlist.session(), 0, 0, "unnamed crossfade")
+	, CROSSFADE_DEFAULT_PROPERTIES
+	, _fade_in (Evoral::Parameter(FadeInAutomation)) // linear (gain coefficient) => -inf..+6dB
+	, _fade_out (Evoral::Parameter(FadeOutAutomation)) // linear (gain coefficient) => -inf..+6dB
 
 {
 	boost::shared_ptr<Region> r;
@@ -163,6 +179,7 @@ Crossfade::Crossfade (const Playlist& playlist, XMLNode& node)
 
 Crossfade::Crossfade (boost::shared_ptr<Crossfade> orig, boost::shared_ptr<AudioRegion> newin, boost::shared_ptr<AudioRegion> newout)
 	: AudioRegion (boost::dynamic_pointer_cast<const AudioRegion> (orig), 0, true)
+	, CROSSFADE_DEFAULT_PROPERTIES
 	, _fade_in (orig->_fade_in)
 	, _fade_out (orig->_fade_out)
 {
@@ -377,7 +394,7 @@ Crossfade::set_active (bool yn)
 {
 	if (_active != yn) {
 		_active = yn;
-		StateChanged (ActiveChanged);
+		PropertyChanged (PropertyChange (Properties::active));
 	}
 }
 
@@ -442,7 +459,11 @@ Crossfade::refresh ()
 	}
 
 	if (send_signal) {
-		StateChanged (BoundsChanged); /* EMIT SIGNAL */
+		PropertyChange bounds;
+		bounds.add (Properties::start);
+		bounds.add (Properties::position);
+		bounds.add (Properties::length);
+		PropertyChanged (bounds); /* EMIT SIGNAL */
 	}
 
 	_in_update = false;
@@ -722,14 +743,14 @@ Crossfade::set_state (const XMLNode& node, int /*version*/)
 	XMLNode* fo;
 	const XMLProperty* prop;
 	LocaleGuard lg (X_("POSIX"));
-	PropertyChange what_changed = PropertyChange (0);
+	PropertyChange what_changed;
 	framepos_t val;
 
 	if ((prop = node.property ("position")) != 0) {
 		sscanf (prop->value().c_str(), "%" PRId64, &val);
 		if (val != _position) {
 			_position = val;
-			what_changed = PropertyChange (what_changed | PositionChanged);
+			what_changed.add (Properties::position);
 		}
 	} else {
 		warning << _("old-style crossfade information - no position information") << endmsg;
@@ -740,7 +761,7 @@ Crossfade::set_state (const XMLNode& node, int /*version*/)
 		bool x = string_is_affirmative (prop->value());
 		if (x != _active) {
 			_active = x;
-			what_changed = PropertyChange (what_changed | ActiveChanged);
+			what_changed.add (Properties::active);
 		}
 	} else {
 		_active = true;
@@ -769,7 +790,7 @@ Crossfade::set_state (const XMLNode& node, int /*version*/)
 		sscanf (prop->value().c_str(), "%" PRId64, &val);
 		if (val != _length) {
 			_length = val;
-			what_changed = PropertyChange (what_changed | LengthChanged);
+			what_changed.add (Properties::length);
 		}
 
 	} else {
@@ -840,7 +861,7 @@ Crossfade::set_state (const XMLNode& node, int /*version*/)
 
 	_fade_out.thaw ();
 
-	StateChanged (what_changed); /* EMIT SIGNAL */
+	PropertyChanged (what_changed); /* EMIT SIGNAL */
 
 	return 0;
 }
@@ -866,7 +887,7 @@ Crossfade::set_follow_overlap (bool yn)
 		set_xfade_length (_out->first_frame() + _out->length() - _in->first_frame());
 	}
 
-	StateChanged (FollowOverlapChanged);
+	PropertyChanged (PropertyChange (Properties::follow_overlap));
 }
 
 framecnt_t
@@ -900,8 +921,8 @@ Crossfade::set_xfade_length (framecnt_t len)
 
 	_length = len;
 
-	StateChanged (LengthChanged);
-
+	PropertyChanged (PropertyChange (Properties::length));
+	
 	return len;
 }
 

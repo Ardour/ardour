@@ -152,10 +152,19 @@ AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion>
 	show_all();
 
 	name_changed ();
-	bounds_changed (PropertyChange (StartChanged|LengthChanged|PositionChanged|Region::SyncOffsetChanged));
+
+	PropertyChange change;
+
+	change.add (ARDOUR::Properties::start);
+	change.add (ARDOUR::Properties::length);
+	change.add (ARDOUR::Properties::position);
+	change.add (ARDOUR::Properties::sync_position);
+
+	bounds_changed (change);
+
 	gain_changed ();
 
-	_region->StateChanged.connect (state_connection, ui_bind (&AudioRegionEditor::region_changed, this, _1), gui_context());
+	_region->PropertyChanged.connect (state_connection, ui_bind (&AudioRegionEditor::region_changed, this, _1), gui_context());
 
 	spin_arrow_grab = false;
 
@@ -167,17 +176,24 @@ AudioRegionEditor::~AudioRegionEditor ()
 }
 
 void
-AudioRegionEditor::region_changed (PBD::PropertyChange what_changed)
+AudioRegionEditor::region_changed (const PBD::PropertyChange& what_changed)
 {
-	if (what_changed & NameChanged) {
+	if (what_changed.contains (ARDOUR::Properties::name)) {
 		name_changed ();
 	}
 
-	if (what_changed & PropertyChange (BoundsChanged|StartChanged|Region::SyncOffsetChanged)) {
+	PropertyChange interesting_stuff;
+
+	interesting_stuff.add (ARDOUR::Properties::position);
+	interesting_stuff.add (ARDOUR::Properties::length);
+	interesting_stuff.add (ARDOUR::Properties::start);
+	interesting_stuff.add (ARDOUR::Properties::sync_position);
+
+	if (what_changed.contains (interesting_stuff)) {
 		bounds_changed (what_changed);
 	}
 
-	if (what_changed & AudioRegion::ScaleAmplitudeChanged) {
+	if (what_changed.contains (ARDOUR::Properties::scale_amplitude)) {
 		gain_changed ();
 	}
 }
@@ -326,35 +342,35 @@ AudioRegionEditor::name_changed ()
 }
 
 void
-AudioRegionEditor::bounds_changed (PropertyChange what_changed)
+AudioRegionEditor::bounds_changed (const PropertyChange& what_changed)
 {
-	if ((what_changed & PropertyChange (PositionChanged|LengthChanged)) == PropertyChange (PositionChanged|LengthChanged)) {
+	if (what_changed.contains (ARDOUR::Properties::position) && what_changed.contains (ARDOUR::Properties::length)) {
 		position_clock.set (_region->position(), true);
 		end_clock.set (_region->position() + _region->length() - 1, true);
 		length_clock.set (_region->length(), true);
-	} else if (what_changed & PropertyChange (PositionChanged)) {
+	} else if (what_changed.contains (ARDOUR::Properties::position)) {
 		position_clock.set (_region->position(), true);
 		end_clock.set (_region->position() + _region->length() - 1, true);
-	} else if (what_changed & PropertyChange (LengthChanged)) {
+	} else if (what_changed.contains (ARDOUR::Properties::length)) {
 		end_clock.set (_region->position() + _region->length() - 1, true);
 		length_clock.set (_region->length(), true);
 	}
 
-	if ((what_changed & Region::SyncOffsetChanged) || (what_changed & PositionChanged)) {
+	if (what_changed.contains (ARDOUR::Properties::sync_position) || what_changed.contains (ARDOUR::Properties::position)) {
 		int dir;
 		nframes_t off = _region->sync_offset (dir);
 		if (dir == -1) {
 			off = -off;
 		}
 
-		if (what_changed & Region::SyncOffsetChanged) {
+		if (what_changed.contains (ARDOUR::Properties::sync_position)) {
 			sync_offset_relative_clock.set (off, true);
 		}
 
 		sync_offset_absolute_clock.set (off + _region->position (), true);
 	}
 
-	if (what_changed & StartChanged) {
+	if (what_changed.contains (ARDOUR::Properties::start)) {
 		start_clock.set (_region->start(), true);
 	}
 }
@@ -412,6 +428,14 @@ AudioRegionEditor::sync_offset_relative_clock_changed ()
 bool
 AudioRegionEditor::on_delete_event (GdkEventAny* ev)
 {
-	bounds_changed (PropertyChange (StartChanged|LengthChanged|PositionChanged|Region::SyncOffsetChanged));
+	PropertyChange change;
+
+	change.add (ARDOUR::Properties::start);
+	change.add (ARDOUR::Properties::length);
+	change.add (ARDOUR::Properties::position);
+	change.add (ARDOUR::Properties::sync_position);
+
+	bounds_changed (change);
+
 	return RegionEditor::on_delete_event (ev);
 }

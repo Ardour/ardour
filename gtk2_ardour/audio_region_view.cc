@@ -222,7 +222,8 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	region_muted ();
 	region_sync_changed ();
-	region_resized (BoundsChanged);
+
+	region_resized (ARDOUR::bounds_change);
 	set_waveview_data_src();
 	region_locked ();
 	envelope_active_changed ();
@@ -264,29 +265,29 @@ AudioRegionView::audio_region() const
 }
 
 void
-AudioRegionView::region_changed (PropertyChange what_changed)
+AudioRegionView::region_changed (const PropertyChange& what_changed)
 {
 	ENSURE_GUI_THREAD (*this, &AudioRegionView::region_changed, what_changed)
 	//cerr << "AudioRegionView::region_changed() called" << endl;
 
-	RegionView::region_changed(what_changed);
+	RegionView::region_changed (what_changed);
 
-	if (what_changed & AudioRegion::ScaleAmplitudeChanged) {
+	if (what_changed.contains (ARDOUR::Properties::scale_amplitude)) {
 		region_scale_amplitude_changed ();
 	}
-	if (what_changed & AudioRegion::FadeInChanged) {
-		fade_in_changed ();
+	if (what_changed.contains (ARDOUR::Properties::fade_in)) {
+			fade_in_changed ();
 	}
-	if (what_changed & AudioRegion::FadeOutChanged) {
+	if (what_changed.contains (ARDOUR::Properties::fade_out)) {
 		fade_out_changed ();
 	}
-	if (what_changed & AudioRegion::FadeInActiveChanged) {
+	if (what_changed.contains (ARDOUR::Properties::fade_in_active)) {
 		fade_in_active_changed ();
 	}
-	if (what_changed & AudioRegion::FadeOutActiveChanged) {
+	if (what_changed.contains (ARDOUR::Properties::fade_out_active)) {
 		fade_out_active_changed ();
 	}
-	if (what_changed & AudioRegion::EnvelopeActiveChanged) {
+	if (what_changed.contains (ARDOUR::Properties::envelope_active)) {
 		envelope_active_changed ();
 	}
 }
@@ -372,13 +373,17 @@ AudioRegionView::region_renamed ()
 }
 
 void
-AudioRegionView::region_resized (PropertyChange what_changed)
+AudioRegionView::region_resized (const PropertyChange& what_changed)
 {
 	AudioGhostRegion* agr;
 
 	RegionView::region_resized(what_changed);
+	PropertyChange interesting_stuff;
 
-	if (what_changed & PropertyChange (StartChanged|LengthChanged)) {
+	interesting_stuff.add (ARDOUR::Properties::start);
+	interesting_stuff.add (ARDOUR::Properties::length);
+
+	if (what_changed.contains (interesting_stuff)) {
 
 		for (uint32_t n = 0; n < waves.size(); ++n) {
 			waves[n]->property_region_start() = _region->start();

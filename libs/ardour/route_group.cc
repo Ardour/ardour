@@ -40,9 +40,6 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-PropertyChange RouteGroup::FlagsChange = new_change ();
-PropertyChange RouteGroup::PropertiesChange = new_change ();
-
 namespace ARDOUR {
 	namespace Properties {
 		PropertyDescriptor<bool> relative;
@@ -70,15 +67,15 @@ RouteGroup::make_property_quarks ()
 	Properties::edit.id = g_quark_from_static_string (X_("edit"));
 }
 
-#define ROUTE_GROUP_DEFAULT_PROPERTIES  _relative (Properties::relative, FlagsChange, false) \
-	, _active (Properties::active, FlagsChange, false) \
-	, _hidden (Properties::hidden, FlagsChange, false) \
-	, _gain (Properties::gain, PropertiesChange, false) \
-	, _mute (Properties::mute, PropertiesChange, false) \
-	, _solo (Properties::solo, PropertiesChange , false) \
-	, _recenable (Properties::recenable, PropertiesChange, false) \
-	, _select (Properties::select, PropertiesChange, false) \
-	, _edit (Properties::edit, PropertiesChange , false)
+#define ROUTE_GROUP_DEFAULT_PROPERTIES  _relative (Properties::relative, false) \
+	, _active (Properties::active, false) \
+	, _hidden (Properties::hidden, false) \
+	, _gain (Properties::gain, false) \
+	, _mute (Properties::mute, false) \
+	, _solo (Properties::solo, false) \
+	, _recenable (Properties::recenable, false) \
+	, _select (Properties::select, false) \
+	, _edit (Properties::edit, false)
 
 RouteGroup::RouteGroup (Session& s, const string &n)
 	: SessionObject (s, n)

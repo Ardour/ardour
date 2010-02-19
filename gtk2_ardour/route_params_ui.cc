@@ -181,15 +181,19 @@ RouteParams_UI::add_routes (RouteList& routes)
 
 		//route_select_list.rows().back().select ();
 
-		route->NameChanged.connect (*this, boost::bind (&RouteParams_UI::route_name_changed, this, boost::weak_ptr<Route>(route)), gui_context());
+		route->PropertyChanged.connect (*this, ui_bind (&RouteParams_UI::route_property_changed, this, _1, boost::weak_ptr<Route>(route)), gui_context());
 		route->DropReferences.connect (*this, boost::bind (&RouteParams_UI::route_removed, this, boost::weak_ptr<Route>(route)), gui_context());
 	}
 }
 
 
 void
-RouteParams_UI::route_name_changed (boost::weak_ptr<Route> wr)
+RouteParams_UI::route_property_changed (const PropertyChange& what_changed, boost::weak_ptr<Route> wr)
 {
+	if (!what_changed.contains (ARDOUR::Properties::name)) {
+		return;
+	}
+
 	boost::shared_ptr<Route> route (wr.lock());
 
 	if (!route) { 

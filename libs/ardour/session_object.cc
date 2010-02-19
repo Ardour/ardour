@@ -37,27 +37,19 @@ SessionObject::make_property_quarks ()
 	Properties::name.id = g_quark_from_static_string (X_("name"));
 }
 
-PropertyChange 
+bool
 SessionObject::set_property (const PropertyBase& prop)
 {
-	PropertyChange c = PropertyChange (0);
-
-	DEBUG_TRACE (DEBUG::Properties,  string_compose ("session object %1 set property %2\n", _name.val(), prop.property_name()));
-	
 	if (prop == Properties::name.id) {
 		std::string str = dynamic_cast<const PropertyTemplate<std::string>*>(&prop)->val();
-		cerr << "prop @ " << &prop << " has quark " << prop.id() << " str value = " << str << endl;
-		cerr << "nameprop @ " << &_name << " has quark " << _name.id() << " str value = " << _name.val() << endl;
 		if (_name != str) {
 			DEBUG_TRACE (DEBUG::Properties, string_compose ("session object named %1 renamed %2\n",
 									_name.val(), str));
 			_name = str;
-			c = _name.change();
-		} else {
-			DEBUG_TRACE (DEBUG::Properties, string_compose ("name %1 matches %2\n", _name.val(), str));
-		}
+			return true;
+		} 
 	}
-	
-	return c;
+
+	return false;
 }
 

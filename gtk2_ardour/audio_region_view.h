@@ -98,7 +98,7 @@ class AudioRegionView : public RegionView
 
 	AudioRegionGainLine* get_gain_line() const { return gain_line; }
 
-	void region_changed (PBD::PropertyChange);
+	void region_changed (const PBD::PropertyChange&);
 	void envelope_active_changed ();
 
 	GhostRegion* add_ghost (TimeAxisView&);
@@ -150,7 +150,7 @@ class AudioRegionView : public RegionView
     void fade_in_active_changed ();
     void fade_out_active_changed ();
 
-    void region_resized (PBD::PropertyChange);
+    void region_resized (const PBD::PropertyChange&);
     void region_muted ();
     void region_scale_amplitude_changed ();
 	void region_renamed ();

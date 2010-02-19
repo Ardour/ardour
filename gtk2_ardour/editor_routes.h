@@ -69,7 +69,7 @@ private:
 	void visible_changed (Glib::ustring const &);
 	void reordered (Gtk::TreeModel::Path const &, Gtk::TreeModel::iterator const &, int *);
 	bool button_press (GdkEventButton *);
-	void route_name_changed (boost::weak_ptr<ARDOUR::Route>);
+	void route_property_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route>);
 	void handle_gui_changes (std::string const &, void *);
 	void update_rec_display ();
 	void update_mute_display ();

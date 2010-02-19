@@ -337,7 +337,7 @@ Mixer_UI::add_strip (RouteList& routes)
 			route->set_order_key (N_("signal"), track_model->children().size()-1);
 		}
 
-		route->NameChanged.connect (*this, boost::bind (&Mixer_UI::strip_name_changed, this, strip), gui_context());
+		route->PropertyChanged.connect (*this, ui_bind (&Mixer_UI::strip_property_changed, this, _1, strip), gui_context());
 
 		strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
 		strip->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::strip_button_release_event), strip));
@@ -1005,9 +1005,13 @@ Mixer_UI::build_track_menu ()
 }
 
 void
-Mixer_UI::strip_name_changed (MixerStrip* mx)
+Mixer_UI::strip_property_changed (const PropertyChange& what_changed, MixerStrip* mx)
 {
-	ENSURE_GUI_THREAD (*this, &Mixer_UI::strip_name_changed, mx)
+	if (!what_changed.contains (ARDOUR::Properties::name)) {
+		return;
+	}
+
+	ENSURE_GUI_THREAD (*this, &Mixer_UI::strip_name_changed, what_changed, mx)
 
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator i;

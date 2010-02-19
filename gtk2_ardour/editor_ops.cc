@@ -3616,7 +3616,7 @@ Editor::trim_to_region(bool forward)
 		    }
 
 		    region->trim_end((nframes64_t) (next_region->first_frame() * speed), this);
-		    arv->region_changed (PropertyChange (LengthChanged));
+		    arv->region_changed (PropertyChange (ARDOUR::Properties::length));
 		}
 		else {
 
@@ -3627,7 +3627,8 @@ Editor::trim_to_region(bool forward)
 		    }
 
 		    region->trim_front((nframes64_t) ((next_region->last_frame() + 1) * speed), this);
-		    arv->region_changed (PropertyChange (LengthChanged|PositionChanged|StartChanged));
+
+		    arv->region_changed (ARDOUR::bounds_change);
 		}
 
 		XMLNode &after = playlist->get_state();

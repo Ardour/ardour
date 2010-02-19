@@ -193,7 +193,7 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	region_muted ();
 	region_sync_changed ();
-	region_resized (BoundsChanged);
+	region_resized (ARDOUR::bounds_change);
 	region_locked ();
 
 	reset_width_dependent_items (_pixel_width);
@@ -963,11 +963,11 @@ MidiRegionView::~MidiRegionView ()
 }
 
 void
-MidiRegionView::region_resized (PropertyChange what_changed)
+MidiRegionView::region_resized (const PropertyChange& what_changed)
 {
 	RegionView::region_resized(what_changed);
 
-	if (what_changed & ARDOUR::PositionChanged) {
+	if (what_changed.contains (ARDOUR::Properties::position)) {
 		set_duration(_region->length(), 0);
 		if (_enable_display) {
 			redisplay_model();

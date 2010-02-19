@@ -424,7 +424,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		boost::weak_ptr<Route> wr ((*x)->route());
 
 		(*x)->route()->gui_changed.connect (*this, ui_bind (&EditorRoutes::handle_gui_changes, this, _1, _2), gui_context());
-		(*x)->route()->NameChanged.connect (*this, boost::bind (&EditorRoutes::route_name_changed, this, wr), gui_context());
+		(*x)->route()->PropertyChanged.connect (*this, ui_bind (&EditorRoutes::route_property_changed, this, _1, wr), gui_context());
 
 		if ((*x)->is_track()) {
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> ((*x)->route());
@@ -487,11 +487,16 @@ EditorRoutes::route_removed (TimeAxisView *tv)
 }
 
 void
-EditorRoutes::route_name_changed (boost::weak_ptr<Route> r)
+EditorRoutes::route_property_changed (const PropertyChange& what_changed, boost::weak_ptr<Route> r)
 {
+	if (!what_changed.contains (ARDOUR::Properties::name)) {
+		return;
+	}
+
 	ENSURE_GUI_THREAD (*this, &EditorRoutes::route_name_changed, r)
 
 	boost::shared_ptr<Route> route = r.lock ();
+
 	if (!route) {
 		return;
 	}

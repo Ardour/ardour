@@ -209,38 +209,9 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<Source> src, const PropertyList& plist, bool announce)
 {
-	boost::shared_ptr<Region> ret; 
-	boost::shared_ptr<AudioSource> as;
-	boost::shared_ptr<MidiSource> ms;
-
-	if ((as = boost::dynamic_pointer_cast<AudioSource>(src)) != 0) {
-
-		AudioRegion* ar = new AudioRegion (as);
-		boost_debug_shared_ptr_mark_interesting (ar, "Region");
-
-		boost::shared_ptr<AudioRegion> arp (ar);
-		ret = boost::static_pointer_cast<Region> (arp);
-
-	} else if ((ms = boost::dynamic_pointer_cast<MidiSource>(src)) != 0) {
-		MidiRegion* mr = new MidiRegion (ms);
-		boost_debug_shared_ptr_mark_interesting (mr, "Region");
-
-		boost::shared_ptr<MidiRegion> mrp (mr);
-		ret = boost::static_pointer_cast<Region> (mrp);
-	}
-
-	if (ret) {
-		ret->set_properties (plist);
-		ret->unlock_property_changes ();
-
-		map_add (ret);
-
-		if (announce) {
-			CheckNewRegion (ret);
-		}
-	}
-
-	return ret;
+	SourceList srcs;
+	srcs.push_back (src);
+	return create (srcs, plist, announce);
 }
 
 boost::shared_ptr<Region>
@@ -283,17 +254,8 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 boost::shared_ptr<Region>
 RegionFactory::create (Session& session, XMLNode& node, bool yn)
 {
-	boost::shared_ptr<Region> r = session.XMLRegionFactory (node, yn);
-
-	if (r) {
-		r->unlock_property_changes ();
-		map_add (r);
-		CheckNewRegion (r);
-	}
-
-	return r;
+	return session.XMLRegionFactory (node, yn);
 }
-
 
 boost::shared_ptr<Region>
 RegionFactory::create (SourceList& srcs, const XMLNode& node)
@@ -306,7 +268,7 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 
 	if (srcs[0]->type() == DataType::AUDIO) {
 
-		AudioRegion* ar = new AudioRegion (srcs, node);
+		AudioRegion* ar = new AudioRegion (srcs);
 		boost_debug_shared_ptr_mark_interesting (ar, "Region");
 
 		boost::shared_ptr<AudioRegion> arp (ar);
@@ -314,16 +276,21 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 
 	} else if (srcs[0]->type() == DataType::MIDI) {
 		
-		MidiRegion* mr = new MidiRegion (srcs, node);
+		MidiRegion* mr = new MidiRegion (srcs);
 
 		boost::shared_ptr<MidiRegion> mrp (mr);
 		ret = boost::static_pointer_cast<Region> (mrp);
 	}
 
 	if (ret) {
-		ret->unlock_property_changes ();
-		map_add (ret);
-		CheckNewRegion (ret);
+
+		if (ret->set_state (node, Stateful::loading_state_version)) {
+			ret.reset ();
+		} else {
+			ret->unlock_property_changes ();
+			map_add (ret);
+			CheckNewRegion (ret);
+		}
 	}
 
 	return ret;

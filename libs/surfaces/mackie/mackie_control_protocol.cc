@@ -946,8 +946,12 @@ MackieControlProtocol::notify_gain_changed (RouteSignal * route_signal, bool for
 }
 
 void 
-MackieControlProtocol::notify_name_changed (RouteSignal * route_signal)
+MackieControlProtocol::notify_property_changed (const PropertyChange& what_changed, RouteSignal * route_signal)
 {
+	if (!what_changed.contains (Properties::name)) {
+		return;
+	}
+
 	try
 	{
 		Strip & strip = route_signal->strip();

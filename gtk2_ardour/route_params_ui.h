@@ -161,7 +161,7 @@ class RouteParams_UI : public ArdourDialog, public PBD::ScopedConnectionList
 
 	void add_routes (ARDOUR::RouteList&);
 
-	void route_name_changed (boost::weak_ptr<ARDOUR::Route> route);
+	void route_property_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route> route);
 	void route_removed (boost::weak_ptr<ARDOUR::Route> route);
 
 

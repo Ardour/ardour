@@ -46,14 +46,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PropertyChange Region::FadeChanged       = PBD::new_change ();
-PropertyChange Region::SyncOffsetChanged = PBD::new_change ();
-PropertyChange Region::MuteChanged       = PBD::new_change ();
-PropertyChange Region::OpacityChanged    = PBD::new_change ();
-PropertyChange Region::LockChanged       = PBD::new_change ();
-PropertyChange Region::LayerChanged      = PBD::new_change ();
-PropertyChange Region::HiddenChanged     = PBD::new_change ();
-
 namespace ARDOUR { 
 	namespace Properties {
 		PBD::PropertyDescriptor<bool> muted;
@@ -80,7 +72,7 @@ namespace ARDOUR {
 	}
 }
 	
-PBD::Signal1<void,boost::shared_ptr<ARDOUR::Region> > Region::RegionPropertyChanged;
+PBD::Signal2<void,boost::shared_ptr<ARDOUR::Region>,const PropertyChange&> Region::RegionPropertyChanged;
 
 void
 Region::make_property_quarks ()
@@ -137,27 +129,27 @@ Region::register_properties ()
 }
 
 #define REGION_DEFAULT_STATE(s,l) \
-	_muted (Properties::muted, MuteChanged, false)	     \
-	, _opaque (Properties::opaque, OpacityChanged, true) \
-	, _locked (Properties::locked, LockChanged, false) \
-	, _automatic (Properties::automatic, PropertyChange (0), false) \
-	, _whole_file (Properties::whole_file, PropertyChange (0), false) \
-	, _import (Properties::import, PropertyChange (0), false) \
-	, _external (Properties::external, PropertyChange (0), false) \
-	, _sync_marked (Properties::sync_marked, SyncOffsetChanged, false) \
-	, _left_of_split (Properties::left_of_split, PropertyChange (0), false) \
-	, _right_of_split (Properties::right_of_split, PropertyChange (0), false) \
-	, _hidden (Properties::hidden, HiddenChanged, false) \
-	, _position_locked (Properties::position_locked, PropertyChange (0), false) \
-	, _start (Properties::start, StartChanged, (s))	\
-	, _length (Properties::length, LengthChanged, (l))	\
-	, _position (Properties::position, PositionChanged, 0) \
-	, _sync_position (Properties::sync_position, SyncOffsetChanged, (s)) \
-	, _layer (Properties::layer, LayerChanged, 0)	\
-	, _ancestral_start (Properties::ancestral_start, PropertyChange (0), (s)) \
-	, _ancestral_length (Properties::ancestral_length, PropertyChange (0), (l)) \
-	, _stretch (Properties::stretch, PropertyChange (0), 1.0) \
-	, _shift (Properties::shift, PropertyChange (0), 1.0)
+	_muted (Properties::muted, false)	     \
+	, _opaque (Properties::opaque, true) \
+	, _locked (Properties::locked, false) \
+	, _automatic (Properties::automatic, false) \
+	, _whole_file (Properties::whole_file, false) \
+	, _import (Properties::import, false) \
+	, _external (Properties::external, false) \
+	, _sync_marked (Properties::sync_marked, false) \
+	, _left_of_split (Properties::left_of_split, false) \
+	, _right_of_split (Properties::right_of_split, false) \
+	, _hidden (Properties::hidden, false) \
+	, _position_locked (Properties::position_locked, false) \
+	, _start (Properties::start, (s))	\
+	, _length (Properties::length, (l))	\
+	, _position (Properties::position, 0) \
+	, _sync_position (Properties::sync_position, (s)) \
+	, _layer (Properties::layer, 0)	\
+	, _ancestral_start (Properties::ancestral_start, (s)) \
+	, _ancestral_length (Properties::ancestral_length, (l)) \
+	, _stretch (Properties::stretch, 1.0) \
+	, _shift (Properties::shift, 1.0)
 
 #define REGION_COPY_STATE(other) \
 	  _muted (other->_muted) \
@@ -194,41 +186,12 @@ Region::Region (Session& s, framepos_t start, framecnt_t length, const string& n
 	, _first_edit (EditChangesNothing)
 	, _frozen(0)
 	, _read_data_count(0)
-	, _pending_changed(PropertyChange (0))
 	, _last_layer_op(0)
 	, _pending_explicit_relayer (false)
 {
 	register_properties ();
 
 	/* no sources at this point */
-}
-
-/** Basic Region constructor (single source) */
-Region::Region (boost::shared_ptr<Source> src)
-	: SessionObject(src->session(), "toBeRenamed")
-	, _type (src->type())
-	, _no_property_changes (true)
-	, REGION_DEFAULT_STATE(0,0)
-	, _last_length (0)
-	, _last_position (0)
-        , _positional_lock_style (_type == DataType::AUDIO ? AudioTime : MusicTime)
-	, _first_edit (EditChangesNothing)
-	, _frozen(0)
-	, _valid_transients(false)
-	, _read_data_count(0)
-	, _pending_changed(PropertyChange (0))
-	, _last_layer_op(0)
-	, _pending_explicit_relayer (false)
-{
-	register_properties ();
-
-	_sources.push_back (src);
-	_master_sources.push_back (src);
-
-	src->DropReferences.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(src)));
-	
-	assert (_sources.size() > 0);
-	assert (_type == src->type());
 }
 
 /** Basic Region constructor (many sources) */
@@ -244,7 +207,6 @@ Region::Region (const SourceList& srcs)
 	, _frozen (0)
 	, _valid_transients(false)
 	, _read_data_count(0)
-	, _pending_changed(PropertyChange (0))
 	, _last_layer_op (0)
 	, _pending_explicit_relayer (false)
 {
@@ -277,7 +239,6 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, boo
 	, _frozen (0)
 	, _valid_transients(false)
 	, _read_data_count(0)
-	, _pending_changed(PropertyChange (0))
 	, _last_layer_op (0)
 	, _pending_explicit_relayer (false)
 
@@ -387,7 +348,6 @@ Region::Region (boost::shared_ptr<const Region> other, const SourceList& srcs)
 	, _frozen (0)
 	, _valid_transients (false)
 	, _read_data_count (0)
-	, _pending_changed (PropertyChange(0))
 	, _last_layer_op (other->_last_layer_op)
 	, _pending_explicit_relayer (false)
 {
@@ -421,7 +381,6 @@ Region::Region (boost::shared_ptr<const Region> other)
 	, _frozen(0)
 	, _valid_transients(false)
 	, _read_data_count(0)
-	, _pending_changed(PropertyChange(0))
 	, _last_layer_op(other->_last_layer_op)
 	, _pending_explicit_relayer (false)
 {
@@ -442,74 +401,6 @@ Region::Region (boost::shared_ptr<const Region> other)
 	assert(_sources.size() > 0);
 }
 
-Region::Region (const SourceList& srcs, const XMLNode& node)
-	: SessionObject(srcs.front()->session(), X_("error: XML did not reset this"))
-	, _type (srcs.front()->type())
-	, REGION_DEFAULT_STATE(0,0)
-	, _last_length (0)
-	, _last_position (0)
-        , _positional_lock_style (_type == DataType::AUDIO ? AudioTime : MusicTime)
-	, _first_edit (EditChangesNothing)
-	, _frozen(0)
-	, _valid_transients(false)
-	, _read_data_count(0)
-	, _pending_changed(PropertyChange(0))
-	, _last_layer_op(0)
-	, _pending_explicit_relayer (false)
-{
-	const XMLProperty* prop;
-
-	register_properties ();
-
-	if ((prop = node.property (X_("id")))) {
-		_id = prop->value();
-	}
-
-	use_sources (srcs);
-
-	if (set_state (node, Stateful::loading_state_version)) {
-		throw failed_constructor();
-	}
-
-	assert(_type != DataType::NIL);
-	assert(_sources.size() > 0);
-	assert (_type == srcs.front()->type());
-
-}
-
-Region::Region (boost::shared_ptr<Source> src, const XMLNode& node)
-	: SessionObject(src->session(), X_("error: XML did not reset this"))
-	, _type (src->type())
-	, REGION_DEFAULT_STATE(0,0)
-	, _last_length (0)
-	, _last_position (0)
-        , _positional_lock_style (_type == DataType::AUDIO ? AudioTime : MusicTime)
-	, _first_edit (EditChangesNothing)
-	, _frozen (0)
-	, _read_data_count (0)
-	, _pending_changed (PropertyChange(0))
-	, _last_layer_op (0)
-	, _pending_explicit_relayer (false)
-{
-	const XMLProperty *prop;
-
-	register_properties ();
-
-	_sources.push_back (src);
-
-	if ((prop = node.property (X_("id")))) {
-		_id = prop->value();
-	}
-
-	if (set_state (node, Stateful::loading_state_version)) {
-		throw failed_constructor();
-	}
-
-	assert (_type != DataType::NIL);
-	assert (_sources.size() > 0);
-	assert (_type == src->type());
-}
-
 Region::~Region ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("Region %1 destructor @ %2\n", _name, this));
@@ -527,7 +418,7 @@ Region::set_name (const std::string& str)
 	if (_name != str) {
 		SessionObject::set_name(str); // EMIT SIGNAL NameChanged()
 		assert(_name == str);
-		send_change (ARDOUR::NameChanged);
+		send_change (Properties::name);
 	}
 
 	return true;
@@ -567,7 +458,7 @@ Region::set_length (framecnt_t len, void */*src*/)
 			recompute_at_end ();
 		}
 
-		send_change (LengthChanged);
+		send_change (Properties::length);
 	}
 }
 
@@ -587,7 +478,7 @@ Region::first_edit ()
 		_name = _session.new_region_name (_name);
 		_first_edit = EditChangesNothing;
 
-		send_change (ARDOUR::NameChanged);
+		send_change (Properties::name);
 		RegionFactory::CheckNewRegion (shared_from_this());
 	}
 }
@@ -709,7 +600,7 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 	   a GUI that has moved its representation already.
 	*/
 
-	send_change (PositionChanged);
+	send_change (Properties::position);
 }
 
 void
@@ -734,7 +625,7 @@ Region::set_position_on_top (framepos_t pos, void* /*src*/)
 	   a GUI that has moved its representation already.
 	*/
 
-	send_change (PositionChanged);
+	send_change (Properties::position);
 }
 
 void
@@ -772,7 +663,7 @@ Region::nudge_position (frameoffset_t n, void* /*src*/)
 		}
 	}
 
-	send_change (PositionChanged);
+	send_change (Properties::position);
 }
 
 void
@@ -806,7 +697,7 @@ Region::set_start (framepos_t pos, void* /*src*/)
 		first_edit ();
 		invalidate_transients ();
 
-		send_change (StartChanged);
+		send_change (Properties::start);
 	}
 }
 
@@ -856,7 +747,7 @@ Region::trim_start (framepos_t new_position, void */*src*/)
 	_whole_file = false;
 	first_edit ();
 
-	send_change (StartChanged);
+	send_change (Properties::start);
 }
 
 void
@@ -971,34 +862,39 @@ Region::trim_to_internal (framepos_t position, framecnt_t length, void */*src*/)
 		return;
 	}
 
-	PropertyChange what_changed = PropertyChange (0);
+	PropertyChange what_changed;
 
 	if (_start != new_start) {
 		_start = new_start;
-		what_changed = PropertyChange (what_changed|StartChanged);
+		what_changed.add (Properties::start);
 	}
 	if (_length != length) {
 		if (!_frozen) {
 			_last_length = _length;
 		}
 		_length = length;
-		what_changed = PropertyChange (what_changed|LengthChanged);
+		what_changed.add (Properties::length);
 	}
 	if (_position != position) {
 		if (!_frozen) {
 			_last_position = _position;
 		}
 		_position = position;
-		what_changed = PropertyChange (what_changed|PositionChanged);
+		what_changed.add (Properties::position);
 	}
 
 	_whole_file = false;
 
-	if (what_changed & (StartChanged|LengthChanged)) {
+	PropertyChange start_and_length;
+
+	start_and_length.add (Properties::start);
+	start_and_length.add (Properties::length);
+
+	if (what_changed.contains (start_and_length)) {
 		first_edit ();
 	}
 
-	if (what_changed) {
+	if (!what_changed.empty()) {
 		send_change (what_changed);
 	}
 }
@@ -1008,7 +904,7 @@ Region::set_hidden (bool yn)
 {
 	if (hidden() != yn) {
 		_hidden = yn;
-		send_change (HiddenChanged);
+		send_change (Properties::hidden);
 	}
 }
 
@@ -1031,7 +927,7 @@ Region::set_muted (bool yn)
 {
 	if (muted() != yn) {
 		_muted = yn;
-		send_change (MuteChanged);
+		send_change (Properties::muted);
 	}
 }
 
@@ -1040,7 +936,7 @@ Region::set_opaque (bool yn)
 {
 	if (opaque() != yn) {
 		_opaque = yn;
-		send_change (OpacityChanged);
+		send_change (Properties::opaque);
 	}
 }
 
@@ -1049,7 +945,7 @@ Region::set_locked (bool yn)
 {
 	if (locked() != yn) {
 		_locked = yn;
-		send_change (LockChanged);
+		send_change (Properties::locked);
 	}
 }
 
@@ -1058,7 +954,7 @@ Region::set_position_locked (bool yn)
 {
 	if (position_locked() != yn) {
 		_position_locked = yn;
-		send_change (LockChanged);
+		send_change (Properties::locked);
 	}
 }
 
@@ -1073,7 +969,7 @@ Region::set_sync_position (framepos_t absolute_pos)
 		if (!_frozen) {
 			maybe_uncopy ();
 		}
-		send_change (SyncOffsetChanged);
+		send_change (Properties::sync_position);
 	}
 }
 
@@ -1085,7 +981,7 @@ Region::clear_sync_position ()
 		if (!_frozen) {
 			maybe_uncopy ();
 		}
-		send_change (SyncOffsetChanged);
+		send_change (Properties::sync_position);
 	}
 }
 
@@ -1184,7 +1080,7 @@ Region::set_layer (layer_t l)
 	if (_layer != l) {
 		_layer = l;
 
-		send_change (LayerChanged);
+		send_change (Properties::layer);
 	}
 }
 
@@ -1239,7 +1135,7 @@ Region::get_state ()
 int
 Region::set_state (const XMLNode& node, int version)
 {
-	PropertyChange what_changed = PropertyChange (0);
+	PropertyChange what_changed;
 	return _set_state (node, version, what_changed, true);
 }
 
@@ -1247,6 +1143,8 @@ int
 Region::_set_state (const XMLNode& node, int version, PropertyChange& what_changed, bool send)
 {
 	const XMLProperty* prop;
+
+	cerr << "about to call ::set_properties for an XMLNode\n";
 
 	what_changed = set_properties (node);
 
@@ -1300,7 +1198,11 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 	}
 
 	if (send) {
-		cerr << _name << ": final change to be sent: " << hex << what_changed << dec << endl;
+		cerr << _name << ": final change to be sent: ";
+		for (PropertyChange::iterator i = what_changed.begin(); i != what_changed.end(); ++i) {
+			cerr << g_quark_to_string ((GQuark) *i) << ' ';
+		}
+		cerr << endl;
 		send_change (what_changed);
 	}
 
@@ -1318,7 +1220,7 @@ Region::freeze ()
 void
 Region::thaw ()
 {
-	PropertyChange what_changed = PropertyChange (0);
+	PropertyChange what_changed;
 
 	{
 		Glib::Mutex::Lock lm (_lock);
@@ -1327,18 +1229,18 @@ Region::thaw ()
 			return;
 		}
 
-		if (_pending_changed) {
+		if (!_pending_changed.empty()) {
 			what_changed = _pending_changed;
-			_pending_changed = PropertyChange (0);
+			_pending_changed.clear ();
 		}
 	}
 
-	if (what_changed == PropertyChange (0)) {
+	if (what_changed.empty()) {
 		return;
 	}
 
-	if (what_changed & LengthChanged) {
-		if (what_changed & PositionChanged) {
+	if (what_changed.contains (Properties::length)) {
+		if (what_changed.contains (Properties::position)) {
 			recompute_at_start ();
 		}
 		recompute_at_end ();
@@ -1348,20 +1250,21 @@ Region::thaw ()
 }
 
 void
-Region::send_change (PropertyChange what_changed)
+Region::send_change (const PropertyChange& what_changed)
 {
+	if (what_changed.empty()) {
+		return;
+	}
 
 	{
 		Glib::Mutex::Lock lm (_lock);
 		if (_frozen) {
-			_pending_changed = PropertyChange (_pending_changed|what_changed);
+			_pending_changed.add (what_changed);
 			return;
 		}
 	}
 
-	cerr << _name << " actually sends " << hex << what_changed << dec << " @" << get_microseconds() << endl;
-	StateChanged (what_changed);
-	cerr << _name << " done with " << hex << what_changed << dec << " @" << get_microseconds() << endl;
+	PropertyChanged (what_changed);
 
 	if (!_no_property_changes) {
 		
@@ -1371,9 +1274,7 @@ Region::send_change (PropertyChange what_changed)
 
 		try {
 			boost::shared_ptr<Region> rptr = shared_from_this();
-			cerr << _name << " actually sends prop change " << hex << what_changed << dec <<  " @ " << get_microseconds() << endl;
-			RegionPropertyChanged (rptr);
-			cerr << _name << " done with prop change  @ " << get_microseconds() << endl;
+			RegionPropertyChanged (rptr, what_changed);
 
 		} catch (...) {
 			/* no shared_ptr available, relax; */
@@ -1612,11 +1513,9 @@ Region::use_sources (SourceList const & s)
 }
 
 
-PropertyChange
+bool
 Region::set_property (const PropertyBase& prop)
 {
-	PropertyChange c = PropertyChange (0);
-
 	DEBUG_TRACE (DEBUG::Properties,  string_compose ("region %1 set property %2\n", _name.val(), prop.property_name()));
 
 	if (prop == Properties::muted.id) {
@@ -1625,7 +1524,7 @@ Region::set_property (const PropertyBase& prop)
 			DEBUG_TRACE (DEBUG::Properties, string_compose ("region %1 muted changed from %2 to %3",
 									_name.val(), _muted.val(), val));
 			_muted = val;
-			c = MuteChanged;
+			return true;
 		}
 	} else if (prop == Properties::opaque.id) {
 		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
@@ -1633,7 +1532,7 @@ Region::set_property (const PropertyBase& prop)
 			DEBUG_TRACE (DEBUG::Properties, string_compose ("region %1 opaque changed from %2 to %3",
 									_name.val(), _opaque.val(), val));
 			_opaque = val;
-			c = OpacityChanged;
+			return true;
 		}
 	} else if (prop == Properties::locked.id) {
 		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
@@ -1641,7 +1540,7 @@ Region::set_property (const PropertyBase& prop)
 			DEBUG_TRACE (DEBUG::Properties, string_compose ("region %1 locked changed from %2 to %3",
 									_name.val(), _locked.val(), val));
 			_locked = val;
-			c = LockChanged;
+			return true;
 		}
 	} else if (prop == Properties::automatic.id) {
 		_automatic = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
@@ -1661,51 +1560,35 @@ Region::set_property (const PropertyBase& prop)
 		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
 		if (val != _hidden) {
 			_hidden = val;
-			c = HiddenChanged;
+			return true;
 		}
 	} else if (prop == Properties::position_locked.id) {
 		_position_locked = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
 	} else if (prop == Properties::start.id) {
 		_start = dynamic_cast<const PropertyTemplate<framepos_t>*>(&prop)->val();
 	} else if (prop == Properties::length.id) {
-		const PropertyTemplate<framecnt_t>* pt1 = dynamic_cast<const PropertyTemplate<framecnt_t>* >(&prop);
-		const PropertyTemplate<int>* pt2 = dynamic_cast<const PropertyTemplate<int>* >(&prop);
-		
-		cerr << "Cast to frmecnt = " << pt1 << " to int = " << pt2 << endl;
-
 		framecnt_t val = dynamic_cast<const PropertyTemplate<framecnt_t>* > (&prop)->val();
 		if (val != _length) {
-			DEBUG_TRACE (DEBUG::Properties, string_compose ("region %1 length changed from %2 to %3",
-									_name.val(), _length.val(), val));
 			_length = val;
-			c = LengthChanged;
-		} else {
-			DEBUG_TRACE (DEBUG::Properties, string_compose ("length %1 matches %2\n", _length.val(), val));
+			return true;
 		}
-
 	} else if (prop == Properties::position.id) {
 		framepos_t val = dynamic_cast<const PropertyTemplate<framepos_t>*>(&prop)->val();
 		if (val != _position) {
-			DEBUG_TRACE (DEBUG::Properties, string_compose ("region %1 position changed from %2 to %3",
-									_name.val(), _position.val(), val));
 			_position = val;
-			c = PositionChanged;
+			return true;
 		}
 	} else if (prop == Properties::sync_position.id) {
 		framepos_t val = dynamic_cast<const PropertyTemplate<framepos_t>*>(&prop)->val();
 		if (val != _sync_position) {
-			DEBUG_TRACE (DEBUG::Properties, string_compose ("region %1 syncpos changed from %2 to %3",
-									_name.val(), _sync_position, val));
 			_sync_position = val;
-			c = SyncOffsetChanged;
+			return true;
 		}
 	} else if (prop == Properties::layer.id) {
 		layer_t val = dynamic_cast<const PropertyTemplate<layer_t>*>(&prop)->val();
 		if (val != _layer) {
-			DEBUG_TRACE (DEBUG::Properties, string_compose ("region %1 syncpos changed from %2 to %3",
-									_name.val(), _sync_position, val));
 			_layer = val;
-			c = LayerChanged;
+			return true;
 		}
 	} else if (prop == Properties::ancestral_start.id) {
 		_ancestral_start = dynamic_cast<const PropertyTemplate<framepos_t>*>(&prop)->val();
@@ -1719,5 +1602,5 @@ Region::set_property (const PropertyBase& prop)
 		return SessionObject::set_property (prop);
 	}
 	
-	return c;
+	return false;
 }

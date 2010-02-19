@@ -326,7 +326,7 @@ void
 MidiModel::DiffCommand::change(const boost::shared_ptr< Evoral::Note<TimeType> > note, Property prop,
 			       uint8_t new_value)
 {
-	NotePropertyChange change;
+	NoteChange change;
 
 	change.note = note;
 	change.property = prop;
@@ -359,7 +359,7 @@ void
 MidiModel::DiffCommand::change(const boost::shared_ptr< Evoral::Note<TimeType> > note, Property prop,
 			       TimeType new_time)
 {
-	NotePropertyChange change;
+	NoteChange change;
 
 	change.note = note;
 	change.property = prop;
@@ -443,7 +443,7 @@ MidiModel::DiffCommand::undo()
 }
 
 XMLNode&
-MidiModel::DiffCommand::marshal_change(const NotePropertyChange& change)
+MidiModel::DiffCommand::marshal_change(const NoteChange& change)
 {
 	XMLNode* xml_change = new XMLNode("change");
 
@@ -516,11 +516,11 @@ MidiModel::DiffCommand::marshal_change(const NotePropertyChange& change)
 	return *xml_change;
 }
 
-MidiModel::DiffCommand::NotePropertyChange
+MidiModel::DiffCommand::NoteChange
 MidiModel::DiffCommand::unmarshal_change(XMLNode *xml_change)
 {
 	XMLProperty* prop;
-	NotePropertyChange change;
+	NoteChange change;
 	unsigned int note;
 	unsigned int channel;
 	unsigned int velocity;

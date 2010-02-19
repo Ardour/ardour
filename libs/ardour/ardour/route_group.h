@@ -131,9 +131,6 @@ class RouteGroup : public SessionObject
 	PBD::Signal0<void> changed;
 	PBD::Signal1<void,void*> FlagsChanged;
 
-	static PBD::PropertyChange FlagsChange;
-	static PBD::PropertyChange PropertiesChange;
-
 	XMLNode& get_state ();
 	
 	int set_state (const XMLNode&, int version);

@@ -525,7 +525,7 @@ AudioPlaylist::add_crossfade (boost::shared_ptr<Crossfade> xfade)
 		_crossfades.push_back (xfade);
 
 		xfade->Invalidated.connect_same_thread (*this, boost::bind (&AudioPlaylist::crossfade_invalidated, this, _1));
-		xfade->StateChanged.connect_same_thread (*this, boost::bind (&AudioPlaylist::crossfade_changed, this, _1));
+		xfade->PropertyChanged.connect_same_thread (*this, boost::bind (&AudioPlaylist::crossfade_changed, this, _1));
 
 		notify_crossfade_added (xfade);
 	}
@@ -581,7 +581,7 @@ AudioPlaylist::set_state (const XMLNode& node, int version)
 			boost::shared_ptr<Crossfade> xfade = boost::shared_ptr<Crossfade> (new Crossfade (*((const Playlist *)this), *child));
 			_crossfades.push_back (xfade);
 			xfade->Invalidated.connect_same_thread (*this, boost::bind (&AudioPlaylist::crossfade_invalidated, this, _1));
-			xfade->StateChanged.connect_same_thread (*this, boost::bind (&AudioPlaylist::crossfade_changed, this, _1));
+			xfade->PropertyChanged.connect_same_thread (*this, boost::bind (&AudioPlaylist::crossfade_changed, this, _1));
 			NewCrossfade(xfade);
 		}
 
@@ -726,7 +726,7 @@ AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
 }
 
 void
-AudioPlaylist::crossfade_changed (PropertyChange)
+AudioPlaylist::crossfade_changed (const PropertyChange&)
 {
 	if (in_flush || in_set_state) {
 		return;
@@ -742,24 +742,27 @@ AudioPlaylist::crossfade_changed (PropertyChange)
 }
 
 bool
-AudioPlaylist::region_changed (PropertyChange what_changed, boost::shared_ptr<Region> region)
+AudioPlaylist::region_changed (const PropertyChange& what_changed, boost::shared_ptr<Region> region)
 {
 	if (in_flush || in_set_state) {
 		return false;
 	}
 
-	PropertyChange our_interests = PropertyChange (AudioRegion::FadeInChanged|
-				       AudioRegion::FadeOutChanged|
-				       AudioRegion::FadeInActiveChanged|
-				       AudioRegion::FadeOutActiveChanged|
-				       AudioRegion::EnvelopeActiveChanged|
-				       AudioRegion::ScaleAmplitudeChanged|
-				       AudioRegion::EnvelopeChanged);
+	PropertyChange our_interests;
+
+	our_interests.add (Properties::fade_in_active);
+	our_interests.add (Properties::fade_out_active);
+	our_interests.add (Properties::scale_amplitude);
+	our_interests.add (Properties::envelope_active);
+	our_interests.add (Properties::envelope);
+	our_interests.add (Properties::fade_in);
+	our_interests.add (Properties::fade_out);
+
 	bool parent_wants_notify;
 
 	parent_wants_notify = Playlist::region_changed (what_changed, region);
 
-	if ((parent_wants_notify || (what_changed & our_interests))) {
+	if (parent_wants_notify || (what_changed.contains (our_interests))) {
 		notify_contents_changed ();
 	}
 

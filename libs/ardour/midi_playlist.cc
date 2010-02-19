@@ -415,7 +415,7 @@ MidiPlaylist::contained_automation()
 
 
 bool
-MidiPlaylist::region_changed (PBD::PropertyChange what_changed, boost::shared_ptr<Region> region)
+MidiPlaylist::region_changed (const PBD::PropertyChange& what_changed, boost::shared_ptr<Region> region)
 {
 	if (in_flush || in_set_state) {
 		return false;
@@ -423,18 +423,13 @@ MidiPlaylist::region_changed (PBD::PropertyChange what_changed, boost::shared_pt
 
 	// Feeling rather uninterested today, but thanks for the heads up anyway!
 
-	PBD::PropertyChange our_interests = PBD::PropertyChange (/*MidiRegion::FadeInChanged|
-	                               MidiRegion::FadeOutChanged|
-	                               MidiRegion::FadeInActiveChanged|
-	                               MidiRegion::FadeOutActiveChanged|
-	                               MidiRegion::EnvelopeActiveChanged|
-	                               MidiRegion::ScaleAmplitudeChanged|
-	                               MidiRegion::EnvelopeChanged*/);
+	PBD::PropertyChange our_interests;
+
 	bool parent_wants_notify;
 
 	parent_wants_notify = Playlist::region_changed (what_changed, region);
 
-	if ((parent_wants_notify || (what_changed & our_interests))) {
+	if (parent_wants_notify || what_changed.contains (our_interests)) {
 		notify_contents_changed ();
 	}
 

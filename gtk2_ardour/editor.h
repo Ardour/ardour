@@ -520,7 +520,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void location_changed (ARDOUR::Location *);
 	void location_flags_changed (ARDOUR::Location *, void *);
 	void refresh_location_display ();
-	void refresh_location_display_s (PBD::PropertyChange);
+	void refresh_location_display_s (const PBD::PropertyChange&);
 	void refresh_location_display_internal (ARDOUR::Locations::LocationList&);
 	void add_new_location (ARDOUR::Location *);
 	void location_gone (ARDOUR::Location *);
@@ -1475,7 +1475,7 @@ public:
 	void draw_metric_marks (const ARDOUR::Metrics& metrics);
 
 	void compute_current_bbt_points (nframes_t left, nframes_t right);
-	void tempo_map_changed (PBD::PropertyChange);
+	void tempo_map_changed (const PBD::PropertyChange&);
 	void redisplay_tempo (bool immediate_redraw);
 
 	void snap_to (nframes64_t& first, int32_t direction = 0, bool for_mark = false);

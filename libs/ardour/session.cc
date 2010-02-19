@@ -2810,7 +2810,7 @@ Session::add_regions (vector<boost::shared_ptr<Region> >& new_regions)
 				}
 			}
 
-			region->StateChanged.connect_same_thread (*this, boost::bind (&Session::region_changed, this, _1, boost::weak_ptr<Region>(region)));
+			region->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::region_changed, this, _1, boost::weak_ptr<Region>(region)));
 			update_region_name_map (region);
 		}
 
@@ -2840,7 +2840,7 @@ Session::update_region_name_map (boost::shared_ptr<Region> region)
 }
 
 void
-Session::region_changed (PropertyChange what_changed, boost::weak_ptr<Region> weak_region)
+Session::region_changed (const PropertyChange& what_changed, boost::weak_ptr<Region> weak_region)
 {
 	boost::shared_ptr<Region> region (weak_region.lock ());
 
@@ -2848,12 +2848,12 @@ Session::region_changed (PropertyChange what_changed, boost::weak_ptr<Region> we
 		return;
 	}
 
-	if (what_changed & Region::HiddenChanged) {
+	if (what_changed.contains (Properties::hidden)) {
 		/* relay hidden changes */
 		RegionHiddenChange (region);
 	}
 
-	if (what_changed & NameChanged) {
+	if (what_changed.contains (Properties::name)) {
 		update_region_name_map (region);
 	}
 }
@@ -3675,7 +3675,7 @@ Session::bundle_by_name (string name) const
 }
 
 void
-Session::tempo_map_changed (PropertyChange)
+Session::tempo_map_changed (const PropertyChange&)
 {
 	clear_clicks ();
 

@@ -61,7 +61,7 @@ AutomationRegionView::init (Gdk::Color const & basic_color, bool /*wfd*/)
 
 	set_height (trackview.current_height());
 
-	_region->StateChanged.connect (*this, ui_bind (&RegionView::region_changed, this, _1), gui_context());
+	_region->PropertyChanged.connect (*this, ui_bind (&RegionView::region_changed, this, _1), gui_context());
 
 	set_colors ();
 
@@ -158,7 +158,7 @@ AutomationRegionView::reset_width_dependent_items (double pixel_width)
 
 
 void
-AutomationRegionView::region_resized (PBD::PropertyChange what_changed)
+AutomationRegionView::region_resized (const PBD::PropertyChange& what_changed)
 {
 	RegionView::region_resized(what_changed);
 

@@ -79,8 +79,8 @@ class AudioPlaylist : public ARDOUR::Playlist
        XMLNode& state (bool full_state);
        void dump () const;
 
-       bool region_changed (PBD::PropertyChange, boost::shared_ptr<Region>);
-       void crossfade_changed (PBD::PropertyChange);
+       bool region_changed (const PBD::PropertyChange&, boost::shared_ptr<Region>);
+       void crossfade_changed (const PBD::PropertyChange&);
        void add_crossfade (boost::shared_ptr<Crossfade>);
 
        void source_offset_changed (boost::shared_ptr<AudioRegion> region);

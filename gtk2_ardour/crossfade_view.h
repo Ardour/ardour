@@ -75,10 +75,10 @@ struct CrossfadeView : public TimeAxisViewItem
     ArdourCanvas::Line *fade_out;
     ArdourCanvas::Item *active_button;
 
-    void crossfade_changed (PBD::PropertyChange);
+    void crossfade_changed (const PBD::PropertyChange&);
     void active_changed ();
-	void redraw_curves ();
-	void color_handler ();
+    void redraw_curves ();
+    void color_handler ();
 };
 
 #endif /* __gtk_ardour_crossfade_view_h__ */

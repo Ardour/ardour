@@ -196,7 +196,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 
 	PluginSelector    *_plugin_selector;
 
-	void strip_name_changed (MixerStrip *);
+	void strip_property_changed (const PBD::PropertyChange&, MixerStrip *);
 
 	void group_flags_changed (void *src, ARDOUR::RouteGroup *);
 
