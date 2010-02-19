@@ -296,6 +296,8 @@ class Playlist : public SessionObject
 	int move_region_to_layer (layer_t, boost::shared_ptr<Region> r, int dir);
 	void relayer ();
 
+	void begin_undo ();
+	void end_undo ();
 	void unset_freeze_parent (Playlist*);
 	void unset_freeze_child (Playlist*);
 

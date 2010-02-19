@@ -122,25 +122,15 @@ UndoTransaction::operator() ()
 void
 UndoTransaction::undo ()
 {
-	struct timeval start, end, diff;
-	gettimeofday (&start, 0);
 	for (list<Command*>::reverse_iterator i = actions.rbegin(); i != actions.rend(); ++i) {
 		(*i)->undo();
 	}
-	gettimeofday (&end, 0);
-	timersub (&end, &start, &diff);
-	cerr << "Undo took " << diff.tv_sec << '.' << diff.tv_usec << endl;
 }
 
 void
 UndoTransaction::redo ()
 {
-	struct timeval start, end, diff;
-	gettimeofday (&start, 0);
         (*this)();
-	gettimeofday (&end, 0);
-	timersub (&end, &start, &diff);
-	cerr << "Undo took " << diff.tv_sec << '.' << diff.tv_usec << endl;
 }
 
 XMLNode &UndoTransaction::get_state()
@@ -160,6 +150,20 @@ XMLNode &UndoTransaction::get_state()
 
     return *node;
 }
+
+class UndoRedoSignaller {
+public:
+    UndoRedoSignaller (UndoHistory& uh) 
+	    : _history (uh) { 
+	    _history.BeginUndoRedo(); 
+    }
+    ~UndoRedoSignaller() { 
+	    _history.EndUndoRedo(); 
+    }
+
+private:
+    UndoHistory& _history;
+};
 
 UndoHistory::UndoHistory ()
 {
@@ -242,15 +246,34 @@ UndoHistory::remove (UndoTransaction* const ut)
 void
 UndoHistory::undo (unsigned int n)
 {
-	while (n--) {
-		if (UndoList.size() == 0) {
-			return;
-		}
-		UndoTransaction* ut = UndoList.back ();
-		UndoList.pop_back ();
-		ut->undo ();
-		RedoList.push_back (ut);
+	if (n == 0) {
+		return;
 	}
+
+	struct timeval start, end, diff;
+	gettimeofday (&start, 0);
+
+	{
+		UndoRedoSignaller exception_safe_signaller (*this);
+
+		while (n--) {
+			if (UndoList.size() == 0) {
+				return;
+			}
+			UndoTransaction* ut = UndoList.back ();
+			UndoList.pop_back ();
+			ut->undo ();
+			RedoList.push_back (ut);
+		}
+		gettimeofday (&end, 0);
+		timersub (&end, &start, &diff);
+		cerr << "Undo-pre-signals took " << diff.tv_sec << '.' << diff.tv_usec << endl;
+
+	}
+
+	gettimeofday (&end, 0);
+	timersub (&end, &start, &diff);
+	cerr << "Undo took " << diff.tv_sec << '.' << diff.tv_usec << endl;
 
 	Changed (); /* EMIT SIGNAL */
 }
@@ -258,16 +281,35 @@ UndoHistory::undo (unsigned int n)
 void
 UndoHistory::redo (unsigned int n)
 {
-	while (n--) {
-		if (RedoList.size() == 0) {
-			return;
-		}
-		UndoTransaction* ut = RedoList.back ();
-		RedoList.pop_back ();
-		ut->redo ();
-		UndoList.push_back (ut);
+	if (n == 0) {
+		return;
 	}
 
+	struct timeval start, end, diff;
+	gettimeofday (&start, 0);
+
+	{
+		UndoRedoSignaller exception_safe_signaller (*this);
+		
+		while (n--) {
+			if (RedoList.size() == 0) {
+				return;
+			}
+			UndoTransaction* ut = RedoList.back ();
+			RedoList.pop_back ();
+			ut->redo ();
+			UndoList.push_back (ut);
+		}
+		gettimeofday (&end, 0);
+		timersub (&end, &start, &diff);
+		cerr << "Redo-pre-signals took " << diff.tv_sec << '.' << diff.tv_usec << endl;
+	}
+
+	gettimeofday (&end, 0);
+	timersub (&end, &start, &diff);
+	cerr << "Redo took " << diff.tv_sec << '.' << diff.tv_usec << endl;
+
+	EndUndoRedo (); /* EMIT SIGNAL */
 	Changed (); /* EMIT SIGNAL */
 }
 

@@ -278,6 +278,9 @@ Playlist::init (bool hide)
 	freeze_length = 0;
 	_explicit_relayering = false;
 
+	_session.history().BeginUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::begin_undo, this));
+	_session.history().EndUndoRedo.connect_same_thread (*this, boost::bind (&Playlist::end_undo, this));
+	
 	ContentsChanged.connect_same_thread (*this, boost::bind (&Playlist::mark_session_dirty, this));
 }
 
@@ -321,6 +324,18 @@ Playlist::set_name (const string& str)
  ***********************************************************************/
 
 void
+Playlist::begin_undo ()
+{
+	freeze ();
+}
+
+void
+Playlist::end_undo ()
+{
+	thaw ();
+}
+
+void
 Playlist::freeze ()
 {
 	delay_notifications ();
@@ -357,9 +372,7 @@ Playlist::notify_contents_changed ()
 		pending_contents_change = true;
 	} else {
 		pending_contents_change = false;
-		cerr << _name << "send contents change @ " << get_microseconds() << endl;
 		ContentsChanged(); /* EMIT SIGNAL */
-		cerr << _name << "done with cc @ " << get_microseconds() << endl;
 	}
 }
 
@@ -370,9 +383,7 @@ Playlist::notify_layering_changed ()
 		pending_layering = true;
 	} else {
 		pending_layering = false;
-		cerr << _name << "send layering @ " << get_microseconds() << endl;
 		LayeringChanged(); /* EMIT SIGNAL */
-		cerr << _name << "done with layering @ " << get_microseconds() << endl;
 	}
 }
 
@@ -429,9 +440,7 @@ Playlist::notify_region_added (boost::shared_ptr<Region> r)
 		LengthChanged (); /* EMIT SIGNAL */
 		pending_contents_change = false;
 		RegionAdded (boost::weak_ptr<Region> (r)); /* EMIT SIGNAL */
-		cerr << _name << "send3 contents changed @ " << get_microseconds() << endl;
 		ContentsChanged (); /* EMIT SIGNAL */
-		cerr << _name << "done contents changed @ " << get_microseconds() << endl;
 	}
 }
 
@@ -444,9 +453,7 @@ Playlist::notify_length_changed ()
 		pending_length = false;
 		LengthChanged(); /* EMIT SIGNAL */
 		pending_contents_change = false;
-		cerr << _name << "send4 contents change @ " << get_microseconds() << endl;
 		ContentsChanged (); /* EMIT SIGNAL */
-		cerr << _name << "done contents change @ " << get_microseconds() << endl;
 	}
 }
 
@@ -491,12 +498,12 @@ Playlist::flush_notifications ()
 
 	for (s = pending_removes.begin(); s != pending_removes.end(); ++s) {
 		remove_dependents (*s);
-		cerr << _name << " sends RegionRemoved\n";
+		// cerr << _name << " sends RegionRemoved\n";
 		RegionRemoved (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
 	}
 
 	for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {
-		cerr << _name << " sends RegionAdded\n";
+		// cerr << _name << " sends RegionAdded\n";
 		RegionAdded (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
 		dependent_checks_needed.insert (*s);
 	}
@@ -504,13 +511,13 @@ Playlist::flush_notifications ()
 	if (check_length) {
 		if (old_length != _get_maximum_extent()) {
 			pending_length = true;
-			cerr << _name << " length has changed\n";
+			// cerr << _name << " length has changed\n";
 		}
 	}
 
 	if (pending_length || (freeze_length != _get_maximum_extent())) {
 		pending_length = false;
-		cerr << _name << " sends LengthChanged\n";
+		// cerr << _name << " sends LengthChanged\n";
 		LengthChanged(); /* EMIT SIGNAL */
 	}
 
@@ -519,9 +526,9 @@ Playlist::flush_notifications ()
 			relayer ();
 		}
 		pending_contents_change = false;
-		cerr << _name << " sends 5 contents change @ " << get_microseconds() << endl;
+		// cerr << _name << " sends 5 contents change @ " << get_microseconds() << endl;
 		ContentsChanged (); /* EMIT SIGNAL */
-		cerr << _name << "done contents change @ " << get_microseconds() << endl;
+		// cerr << _name << "done contents change @ " << get_microseconds() << endl;
 	}
 
 	for (s = dependent_checks_needed.begin(); s != dependent_checks_needed.end(); ++s) {
@@ -529,7 +536,7 @@ Playlist::flush_notifications ()
 	}
 
 	if (!pending_range_moves.empty ()) {
-		cerr << _name << " sends RangesMoved\n";
+		// cerr << _name << " sends RangesMoved\n";
 		RangesMoved (pending_range_moves);
 	}
 	
@@ -1530,9 +1537,7 @@ Playlist::clear (bool with_signals)
 		pending_length = false;
 		LengthChanged ();
 		pending_contents_change = false;
-		cerr << _name << "send2 contents change @ " << get_microseconds() << endl;
 		ContentsChanged ();
-		cerr << _name << "done with contents changed @ " << get_microseconds() << endl;
 	}
 
 }

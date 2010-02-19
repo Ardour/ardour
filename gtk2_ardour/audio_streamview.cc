@@ -254,19 +254,13 @@ AudioStreamView::playlist_layered (boost::weak_ptr<Diskstream> wds)
 		return;
 	}
 
-	cerr << "AS, call SV::modified @ " << get_microseconds() << endl;
-
 	StreamView::playlist_layered (wds);
-
-	cerr << "AS, done with SV::modified @ " << get_microseconds() << endl;
 
 	/* make sure xfades are on top and all the regionviews are stacked correctly. */
 
-	cerr << "AS, raise xfades @ " << get_microseconds() << endl;
 	for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
 		i->second->get_canvas_group()->raise_to_top();
 	}
-	cerr << "AS, done with xfades @ " << get_microseconds() << endl;
 }
 
 void

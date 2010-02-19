@@ -625,8 +625,6 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 			_envelope->set_max_xval (_length);
 			_envelope->truncate_end (_length);
 
-			cerr << _name << " envelope changd\n";
-		
 
 		} else if (child->name() == "FadeIn") {
 
@@ -648,7 +646,6 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 					set_fade_in_active (false);
 				}
 			}
-			cerr << _name << " fadein changd\n";
 
 		} else if (child->name() == "FadeOut") {
 
@@ -670,7 +667,6 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 					set_fade_out_active (false);
 				}
 			}
-			cerr << _name << " fadeout changd\n";
 
 		}
 	}

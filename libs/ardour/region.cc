@@ -1144,8 +1144,6 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 {
 	const XMLProperty* prop;
 
-	cerr << "about to call ::set_properties for an XMLNode\n";
-
 	what_changed = set_properties (node);
 
 	if ((prop = node.property (X_("id")))) {

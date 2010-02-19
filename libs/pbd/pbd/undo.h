@@ -107,6 +107,8 @@ class UndoHistory : public PBD::ScopedConnectionList
 	void set_depth (uint32_t);
 
 	PBD::Signal0<void> Changed;
+	PBD::Signal0<void> BeginUndoRedo;
+	PBD::Signal0<void> EndUndoRedo;
 	
   private:
 	bool _clearing;
