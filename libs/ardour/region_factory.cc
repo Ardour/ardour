@@ -28,6 +28,7 @@
 #include "ardour/audiosource.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_region.h"
+#include "ardour/utils.h"
 
 #include "i18n.h"
 
@@ -238,6 +239,7 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 	}
 
 	if (ret) {
+
 		ret->set_properties (plist);
 		ret->unlock_property_changes ();
 

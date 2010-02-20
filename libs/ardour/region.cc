@@ -228,7 +228,7 @@ Region::Region (const SourceList& srcs)
     if @param offset_relative is false, then the start within the source is given @param offset.
 */
 Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, bool offset_relative)
-	: SessionObject(other->session(), "toBeRenamed")
+	: SessionObject(other->session(), other->name())
 	, _type (other->data_type())
 	, _no_property_changes (true)
 	, REGION_COPY_STATE (other)
