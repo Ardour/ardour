@@ -94,7 +94,7 @@ AudioRegion::register_properties ()
 	, _default_fade_out (Properties::default_fade_out, true) \
 	, _fade_in_active (Properties::fade_in_active, true) \
 	, _fade_out_active (Properties::fade_out_active, true) \
-	, _scale_amplitude (Properties::scale_amplitude, 0.0)
+	, _scale_amplitude (Properties::scale_amplitude, 1.0)
 
 #define AUDIOREGION_COPY_STATE(other) \
 	 _envelope_active (other->_envelope_active) \
