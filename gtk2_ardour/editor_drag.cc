@@ -23,7 +23,6 @@
 #include "pbd/basename.h"
 #include "pbd/stateful_diff_command.h"
 #include "ardour/diskstream.h"
-#include "ardour/region_command.h"
 #include "ardour/session.h"
 #include "ardour/dB.h"
 #include "ardour/region_factory.h"
