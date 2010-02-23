@@ -98,7 +98,7 @@ class ExportGraphBuilder
 	class SFC {
 	  public:
 		// This constructor so that this can be constructed like a Normalizer
-		SFC (ExportGraphBuilder &) {}
+		SFC (ExportGraphBuilder &) : data_width(0) {}
 		FloatSinkPtr init (FileSpec const & new_config, nframes_t max_frames);
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;

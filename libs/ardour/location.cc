@@ -676,15 +676,12 @@ Locations::get_state ()
 int
 Locations::set_state (const XMLNode& node, int /*version*/)
 {
-	XMLNodeList nlist;
-	XMLNodeConstIterator niter;
-
 	if (node.name() != "Locations") {
 		error << _("incorrect XML mode passed to Locations::set_state") << endmsg;
 		return -1;
 	}
 
-	nlist = node.children();
+	XMLNodeList nlist = node.children();
 
 	locations.clear ();
 	current_location = 0;
@@ -692,6 +689,7 @@ Locations::set_state (const XMLNode& node, int /*version*/)
 	{
 		Glib::Mutex::Lock lm (lock);
 
+		XMLNodeConstIterator niter;
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 			try {
@@ -910,7 +908,7 @@ Location *
 Locations::get_location_by_id(PBD::ID id)
 {
     LocationList::iterator it;
-    for (it  = locations.begin(); it != locations.end(); it++)
+    for (it  = locations.begin(); it != locations.end(); ++it)
         if (id == (*it)->id())
             return *it;
 

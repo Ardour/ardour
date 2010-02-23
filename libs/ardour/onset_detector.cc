@@ -12,6 +12,7 @@ string OnsetDetector::_op_id = X_("libardourvampplugins:aubioonset:2");
 
 OnsetDetector::OnsetDetector (float sr)
 	: AudioAnalyser (sr, X_("libardourvampplugins:aubioonset"))
+	, current_results (0)
 {
 	/* update the op_id */
 

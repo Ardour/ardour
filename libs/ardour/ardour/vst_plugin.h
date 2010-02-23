@@ -79,7 +79,7 @@ class VSTPlugin : public ARDOUR::Plugin
 	bool parameter_is_input(uint32_t i) const { return true; }
 	bool parameter_is_output(uint32_t i) const { return false; }
 
-	bool load_preset (const std::string preset_label );
+	bool load_preset (const std::string& preset_label);
 	bool save_preset (std::string name);
 
 	bool has_editor () const;

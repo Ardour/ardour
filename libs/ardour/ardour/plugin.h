@@ -127,7 +127,7 @@ class Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool parameter_is_output(uint32_t) const = 0;
 
 	virtual bool save_preset (std::string) = 0;
-	virtual bool load_preset (const std::string uri);
+	virtual bool load_preset (const std::string& uri);
 
 	struct PresetRecord {
 		PresetRecord(const std::string& u, const std::string& l) : uri(u), label(l) {}

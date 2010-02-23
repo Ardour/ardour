@@ -58,9 +58,7 @@ AudioBuffer::resize (size_t size)
 		return;
 	}
 
-	if (_data) {
-		free (_data);
-	}
+	free (_data);
 
 	_capacity = size;
 	_size = size;

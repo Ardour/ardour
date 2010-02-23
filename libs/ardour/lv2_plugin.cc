@@ -319,7 +319,7 @@ LV2Plugin::get_presets()
 }
 
 bool
-LV2Plugin::load_preset(const string uri)
+LV2Plugin::load_preset(const string& uri)
 {
 	const string query = string(
 			"PREFIX lv2p: <http://lv2plug.in/ns/dev/presets#>\n"

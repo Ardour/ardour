@@ -621,9 +621,8 @@ MidiTrack::MidiControl::set_value(float val)
 	}
 
 	assert(val <= _list->parameter().max());
-	size_t size = 3;
-
 	if ( ! automation_playback()) {
+		size_t size = 3;
 		uint8_t ev[3] = { _list->parameter().channel(), int(val), 0 };
 		switch(_list->parameter().type()) {
 		case MidiCCAutomation:

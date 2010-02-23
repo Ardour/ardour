@@ -142,6 +142,13 @@ PluginManager::PluginManager ()
 	BootMessage (_("Discovering Plugins"));
 }
 
+
+PluginManager::~PluginManager()
+{
+	delete _lv2_world;
+}
+
+
 void
 PluginManager::refresh ()
 {
@@ -302,13 +309,12 @@ PluginManager::add_lrdf_data (const string &path)
 	PathScanner scanner;
 	vector<string *>* rdf_files;
 	vector<string *>::iterator x;
-	string uri;
 
 	rdf_files = scanner (path, rdf_filter, 0, true, true);
 
 	if (rdf_files) {
 		for (x = rdf_files->begin(); x != rdf_files->end (); ++x) {
-			uri = "file://" + **x;
+			const string uri(string("file://") + **x);
 
 			if (lrdf_read_file(uri.c_str())) {
 				warning << "Could not parse rdf file: " << uri << endmsg;

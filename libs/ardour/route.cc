@@ -1368,7 +1368,6 @@ int
 Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* err)
 {
 	ProcessorList deleted;
-	ProcessorList as_we_were;
 
 	if (!_session.engine().connected()) {
 		return 1;
@@ -1381,7 +1380,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 		ProcessorList::iterator i;
 		boost::shared_ptr<Processor> processor;
 
-		as_we_were = _processors;
+		ProcessorList as_we_were = _processors;
 
 		for (i = _processors.begin(); i != _processors.end(); ) {
 
@@ -2435,7 +2434,7 @@ Route::feeds (boost::shared_ptr<Route> other, bool* only_send)
 	}
 
 	
-	for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); r++) {
+	for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
 
 		boost::shared_ptr<IOProcessor> iop;
 

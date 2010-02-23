@@ -322,9 +322,7 @@ AUPlugin::~AUPlugin ()
 		unit->Uninitialize ();
 	}
 
-	if (buffers) {
-		free (buffers);
-	}
+	free (buffers);
 }
 
 
@@ -1090,7 +1088,7 @@ AUPlugin::set_state(const XMLNode& node)
 }
 
 bool
-AUPlugin::load_preset (const string preset_label)
+AUPlugin::load_preset (const string& preset_label)
 {
 #ifdef AU_STATE_SUPPORT
 	bool ret = false;
@@ -1837,15 +1835,13 @@ AUPluginInfo::load_cached_info ()
 
 				if (gchild->name() == X_("io")) {
 
-					int in;
-					int out;
 					const XMLProperty* iprop;
 					const XMLProperty* oprop;
 
 					if (((iprop = gchild->property (X_("in"))) != 0) &&
 					    ((oprop = gchild->property (X_("out"))) != 0)) {
-						in = atoi (iprop->value());
-						out = atoi (iprop->value());
+						const int in = atoi (iprop->value());
+						const int out = atoi (iprop->value());
 
 						cinfo.io_configs.push_back (pair<int,int> (in, out));
 					}

@@ -35,7 +35,7 @@ class AudioLibrary
 	void set_tags (std::string member, std::vector<std::string> tags);
 	std::vector<std::string> get_tags (std::string member);
 
-	void search_members_and (std::vector<std::string>& results, const std::vector<std::string> tags);
+	void search_members_and (std::vector<std::string>& results, const std::vector<std::string>& tags);
 
 	void save_changes();
 

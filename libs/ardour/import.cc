@@ -125,7 +125,7 @@ open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQua
 }
 
 static std::string
-get_non_existent_filename (DataType type, const bool allow_replacing, const std::string destdir, const std::string& basename, uint channel, uint channels)
+get_non_existent_filename (DataType type, const bool allow_replacing, const std::string& destdir, const std::string& basename, uint channel, uint channels)
 {
 	char buf[PATH_MAX+1];
 	bool goodfile = false;

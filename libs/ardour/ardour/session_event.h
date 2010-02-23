@@ -120,15 +120,16 @@ private:
 };
 
 class SessionEventManager {
-   public:
-        SessionEventManager () : pending_events (2048){}
-        virtual ~SessionEventManager() {}
+public:
+	SessionEventManager () : pending_events (2048),
+		auto_loop_event(0), punch_out_event(0), punch_in_event(0) {}
+	virtual ~SessionEventManager() {}
 
-        virtual void queue_event (SessionEvent *ev) = 0; 
+	virtual void queue_event (SessionEvent *ev) = 0;
 	void clear_events (SessionEvent::Type type);
-        
-  protected:
-        RingBuffer<SessionEvent*> pending_events;
+
+protected:
+	RingBuffer<SessionEvent*> pending_events;
 	typedef std::list<SessionEvent *> Events;
 	Events           events;
 	Events           immediate_events;
@@ -138,8 +139,8 @@ class SessionEventManager {
 
 	SessionEvent *auto_loop_event;
 	SessionEvent *punch_out_event;
-        SessionEvent *punch_in_event;
-    
+	SessionEvent *punch_in_event;
+
 	void dump_events () const;
 	void merge_event (SessionEvent*);
 	void replace_event (SessionEvent::Type, nframes64_t action_frame, nframes64_t target = 0);
@@ -150,8 +151,8 @@ class SessionEventManager {
 	void add_event (nframes64_t action_frame, SessionEvent::Type type, nframes64_t target_frame = 0);
 	void remove_event (nframes64_t frame, SessionEvent::Type type);
 
-        virtual void process_event(SessionEvent*) = 0;
-        virtual void set_next_event () = 0;
+	virtual void process_event(SessionEvent*) = 0;
+	virtual void set_next_event () = 0;
 };
 
 } /* namespace */

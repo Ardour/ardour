@@ -326,7 +326,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 }
 
 bool
-VSTPlugin::load_preset (string name)
+VSTPlugin::load_preset (const string& name)
 {
 	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 		error << _("no support for presets using chunks at this time")

@@ -161,7 +161,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, f
 
 	in_set_state++;
 
-	for (RegionList::const_iterator i = other->regions.begin(); i != other->regions.end(); i++) {
+	for (RegionList::const_iterator i = other->regions.begin(); i != other->regions.end(); ++i) {
 
 		boost::shared_ptr<Region> region;
 		boost::shared_ptr<Region> new_region;
@@ -1112,13 +1112,12 @@ int
 Playlist::paste (boost::shared_ptr<Playlist> other, framepos_t position, float times)
 {
 	times = fabs (times);
-	framecnt_t old_length;
 
 	{
 		RegionLock rl1 (this);
 		RegionLock rl2 (other.get());
 
-		old_length = _get_maximum_extent();
+		framecnt_t old_length = _get_maximum_extent();
 
 		int itimes = (int) floor (times);
 		framepos_t pos = position;
@@ -1611,7 +1610,6 @@ Playlist::regions_to_read (framepos_t start, framepos_t end)
 	RegionList covering;
 	set<framepos_t> to_check;
 	set<boost::shared_ptr<Region> > unique;
-	RegionList here;
 
 	to_check.insert (start);
 	to_check.insert (end);
@@ -1662,6 +1660,7 @@ Playlist::regions_to_read (framepos_t start, framepos_t end)
 
 	} else {
 
+		RegionList here;
 		for (set<framepos_t>::iterator t = to_check.begin(); t != to_check.end(); ++t) {
 
 			here.clear ();
@@ -2316,7 +2315,6 @@ Playlist::move_region_to_layer (layer_t target_layer, boost::shared_ptr<Region> 
 	RegionList::iterator i;
 	typedef pair<boost::shared_ptr<Region>,layer_t> LayerInfo;
 	list<LayerInfo> layerinfo;
-	layer_t dest;
 
 	{
 		RegionLock rlock (const_cast<Playlist *> (this));
@@ -2326,6 +2324,8 @@ Playlist::move_region_to_layer (layer_t target_layer, boost::shared_ptr<Region> 
 			if (region == *i) {
 				continue;
 			}
+
+			layer_t dest;
 
 			if (dir > 0) {
 
@@ -2387,7 +2387,6 @@ void
 Playlist::nudge_after (framepos_t start, framecnt_t distance, bool forwards)
 {
 	RegionList::iterator i;
-	framepos_t new_pos;
 	bool moved = false;
 
 	_nudging = true;
@@ -2398,6 +2397,8 @@ Playlist::nudge_after (framepos_t start, framecnt_t distance, bool forwards)
 		for (i = regions.begin(); i != regions.end(); ++i) {
 
 			if ((*i)->position() >= start) {
+
+				framepos_t new_pos;
 
 				if (forwards) {
 
@@ -2498,7 +2499,6 @@ void
 Playlist::shuffle (boost::shared_ptr<Region> region, int dir)
 {
 	bool moved = false;
-	framepos_t new_pos;
 
 	if (region->locked()) {
 		return;
@@ -2524,6 +2524,8 @@ Playlist::shuffle (boost::shared_ptr<Region> region, int dir)
 						if ((*next)->locked()) {
 							break;
 						}
+
+						framepos_t new_pos;
 
 						if ((*next)->position() != region->last_frame() + 1) {
 							/* they didn't used to touch, so after shuffle,
@@ -2566,6 +2568,7 @@ Playlist::shuffle (boost::shared_ptr<Region> region, int dir)
 							break;
 						}
 
+						framepos_t new_pos;
 						if (region->position() != (*prev)->last_frame() + 1) {
 							/* they didn't used to touch, so after shuffle,
 							   just have them swap positions.

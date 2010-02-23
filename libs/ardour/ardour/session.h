@@ -411,7 +411,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	PBD::Signal0<void>             route_group_removed;
 
 	void foreach_route_group (boost::function<void(RouteGroup*)> f) {
-		for (std::list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); i++) {
+		for (std::list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
 			f (*i);
 		}
 	}

@@ -674,12 +674,12 @@ IO::find_possible_bundle (const string &desired_name)
 		// see if it's a stereo connection e.g. "in 3+4"
 
 		if (last_non_digit_pos > 1 && desired_name[last_non_digit_pos] == '+') {
-			int left_bundle_number = 0;
 			string::size_type left_last_non_digit_pos;
 
 			left_last_non_digit_pos = desired_name.find_last_not_of(digits, last_non_digit_pos-1);
 
 			if (left_last_non_digit_pos != string::npos) {
+				int left_bundle_number = 0;
 				stringstream s;
 				s << desired_name.substr(left_last_non_digit_pos, last_non_digit_pos-1);
 				s >> left_bundle_number;

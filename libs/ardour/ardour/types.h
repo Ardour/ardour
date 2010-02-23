@@ -438,19 +438,14 @@ namespace ARDOUR {
 			MeterPointChange = 0x1
 		};
 
-		RouteProcessorChange () {
-			type = GeneralChange;
-		}
+		RouteProcessorChange () : type (GeneralChange), meter_visibly_changed (true)
+		{}
 
-		RouteProcessorChange (Type t) {
-			type = t;
-			meter_visibly_changed = true;
-		}
+		RouteProcessorChange (Type t) : type (t), meter_visibly_changed (true)
+		{}
 
-		RouteProcessorChange (Type t, bool m) {
-			type = t;
-			meter_visibly_changed = m;
-		}
+		RouteProcessorChange (Type t, bool m) : type (t), meter_visibly_changed (m)
+		{}
 
 		/** type of change; "GeneralChange" means anything could have changed */
 		Type type;

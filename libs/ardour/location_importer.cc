@@ -46,7 +46,7 @@ LocationImportHandler::LocationImportHandler (XMLTree const & source, Session & 
 
 	// Construct importable locations
 	XMLNodeList const & locations = location_node->children();
-	for (XMLNodeList::const_iterator it = locations.begin(); it != locations.end(); it++) {
+	for (XMLNodeList::const_iterator it = locations.begin(); it != locations.end(); ++it) {
 		try {
 			elements.push_back (ElementPtr ( new LocationImporter (source, session, *this, **it)));
 		} catch (failed_constructor err) {

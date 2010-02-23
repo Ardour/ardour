@@ -703,10 +703,12 @@ MidiDiskstream::read (nframes_t& start, nframes_t dur, bool reversed)
 	bool reloop = false;
 	nframes_t loop_end = 0;
 	nframes_t loop_start = 0;
-	nframes_t loop_length = 0;
 	Location *loc = 0;
 
 	if (!reversed) {
+
+		nframes_t loop_length = 0;
+
 		/* Make the use of a Location atomic for this read operation.
 
 		   Note: Locations don't get deleted, so all we care about
@@ -914,11 +916,9 @@ out:
 void
 MidiDiskstream::transport_stopped (struct tm& /*when*/, time_t /*twhen*/, bool abort_capture)
 {
-	uint32_t buffer_position;
 	bool more_work = true;
 	int err = 0;
 	boost::shared_ptr<MidiRegion> region;
-	nframes_t total_capture;
 	MidiRegion::SourceList srcs;
 	MidiRegion::SourceList::iterator src;
 	vector<CaptureInfo*>::iterator ci;
@@ -965,7 +965,8 @@ MidiDiskstream::transport_stopped (struct tm& /*when*/, time_t /*twhen*/, bool a
 
 		assert(_write_source);
 
-		for (total_capture = 0, ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+		nframes_t total_capture = 0;
+		for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 			total_capture += (*ci)->frames;
 		}
 
@@ -993,7 +994,7 @@ MidiDiskstream::transport_stopped (struct tm& /*when*/, time_t /*twhen*/, bool a
 			plist.add (Properties::start, 0);
 			plist.add (Properties::length, total_capture);
 			plist.add (Properties::layer, 0);
-				   
+
 			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 
 			region = boost::dynamic_pointer_cast<MidiRegion> (rx);
@@ -1013,6 +1014,7 @@ MidiDiskstream::transport_stopped (struct tm& /*when*/, time_t /*twhen*/, bool a
 		XMLNode &before = _playlist->get_state();
 		_playlist->freeze ();
 
+		uint32_t buffer_position = 0;
 		for (buffer_position = 0, ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 
 			string region_name;
@@ -1248,7 +1250,6 @@ MidiDiskstream::set_state (const XMLNode& node, int /*version*/)
 	const XMLProperty* prop;
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
-	uint32_t nchans = 1;
 	XMLNode* capture_pending_node = 0;
 	LocaleGuard lg (X_("POSIX"));
 
@@ -1295,10 +1296,6 @@ MidiDiskstream::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	set_channel_mode(channel_mode, channel_mask);
-
-	if ((prop = node.property ("channels")) != 0) {
-		nchans = atoi (prop->value().c_str());
-	}
 
 	if ((prop = node.property ("playlist")) == 0) {
 		return -1;

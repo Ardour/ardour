@@ -266,7 +266,7 @@ AudioRegionImporter::parse_source_xml ()
 		string source_id = prop->value();
 
 		// Get source
-		for (XMLNodeList::const_iterator it = sources.begin(); it != sources.end(); it++) {
+		for (XMLNodeList::const_iterator it = sources.begin(); it != sources.end(); ++it) {
 			prop = (*it)->property ("id");
 			if (prop && !source_id.compare (prop->value())) {
 				source_path = source_dir;

@@ -59,6 +59,7 @@ public:
 
 	Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const std::string& name, Role);
 	Delivery (Session&, boost::shared_ptr<MuteMaster> mm, const XMLNode&);
+	~Delivery ();
 
 	bool set_name (const std::string& name);
 	std::string display_name() const;

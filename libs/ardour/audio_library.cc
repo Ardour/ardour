@@ -116,7 +116,7 @@ AudioLibrary::get_tags (string member)
 }
 
 void
-AudioLibrary::search_members_and (vector<string>& members, const vector<string> tags)
+AudioLibrary::search_members_and (vector<string>& members, const vector<string>& tags)
 {
 	lrdf_statement **head;
 	lrdf_statement* pattern = 0;

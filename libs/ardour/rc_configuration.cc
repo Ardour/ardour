@@ -65,6 +65,12 @@ RCConfiguration::RCConfiguration ()
 {
 }
 
+
+RCConfiguration::~RCConfiguration ()
+{
+	delete _control_protocol_state;
+}
+
 int
 RCConfiguration::load_state ()
 {
@@ -78,7 +84,6 @@ RCConfiguration::load_state ()
 	if (find_file_in_search_path (ardour_search_path() + system_config_search_path(),
 			"ardour_system.rc", system_rc_file) )
 	{
-		XMLTree tree;
 		found = true;
 
 		string rcfile = system_rc_file.to_string();
@@ -92,6 +97,7 @@ RCConfiguration::load_state ()
 		if (statbuf.st_size != 0) {
 			info << string_compose (_("Loading system configuration file %1"), rcfile) << endl;
 
+			XMLTree tree;
 			if (!tree.read (rcfile.c_str())) {
 				error << string_compose(_("Ardour: cannot read system configuration file \"%1\""), rcfile) << endmsg;
 				return -1;
@@ -113,7 +119,6 @@ RCConfiguration::load_state ()
 	if (find_file_in_search_path (ardour_search_path() + user_config_directory(),
 			"ardour.rc", user_rc_file))
 	{
-		XMLTree tree;
 		found = true;
 
 		string rcfile = user_rc_file.to_string();
@@ -127,6 +132,7 @@ RCConfiguration::load_state ()
 		if (statbuf.st_size != 0) {
 			info << string_compose (_("Loading user configuration file %1"), rcfile) << endl;
 
+			XMLTree tree;
 			if (!tree.read (rcfile)) {
 				error << string_compose(_("Ardour: cannot read configuration file \"%1\""), rcfile) << endmsg;
 				return -1;
@@ -150,8 +156,6 @@ RCConfiguration::load_state ()
 int
 RCConfiguration::save_state()
 {
-	XMLTree tree;
-
 	try
 	{
 		sys::create_directories (user_config_directory ());
@@ -169,6 +173,7 @@ RCConfiguration::save_state()
 
 	// this test seems bogus?
 	if (rcfile.length()) {
+		XMLTree tree;
 		tree.set_root (&get_state());
 		if (!tree.write (rcfile.c_str())){
 			error << string_compose (_("Config file %1 not saved"), rcfile) << endmsg;

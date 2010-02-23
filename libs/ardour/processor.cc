@@ -111,7 +111,6 @@ XMLNode&
 Processor::state (bool full_state)
 {
 	XMLNode* node = new XMLNode (state_node_name);
-	stringstream sstr;
 	char buf[64];
 
 	id().print (buf, sizeof (buf));
@@ -129,6 +128,7 @@ Processor::state (bool full_state)
 				|| !automation.properties().empty()
 				|| !_visible_controls.empty()) {
 
+			stringstream sstr;
 			for (set<Evoral::Parameter>::iterator x = _visible_controls.begin();
 					x != _visible_controls.end(); ++x) {
 				if (x != _visible_controls.begin()) {

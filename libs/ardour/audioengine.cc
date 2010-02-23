@@ -153,7 +153,7 @@ ardour_jack_error (const char* msg)
 int
 AudioEngine::start ()
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
+	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
 
 	if (!_running) {
 
@@ -216,7 +216,7 @@ AudioEngine::start ()
 int
 AudioEngine::stop (bool forever)
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
+	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
 
 	if (_priv_jack) {
 		if (forever) {
@@ -238,7 +238,7 @@ AudioEngine::get_sync_offset (nframes_t& offset) const
 
 #ifdef HAVE_JACK_VIDEO_SUPPORT
 
-        GET_PRIVATE_JACK_POINTER_RET (_jack, false);
+	GET_PRIVATE_JACK_POINTER_RET (_jack, false);
 
 	jack_position_t pos;
 
@@ -619,7 +619,7 @@ AudioEngine::remove_session ()
 void
 AudioEngine::port_registration_failure (const std::string& portname)
 {
-        GET_PRIVATE_JACK_POINTER (_jack);
+	GET_PRIVATE_JACK_POINTER (_jack);
 	string full_portname = jack_client_name;
 	full_portname += ':';
 	full_portname += portname;
@@ -797,7 +797,7 @@ AudioEngine::disconnect (const string& source, const string& destination)
 int
 AudioEngine::disconnect (Port& port)
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack,-1);
+	GET_PRIVATE_JACK_POINTER_RET (_jack,-1);
 
 	if (!_running) {
 		if (!_has_run) {
@@ -814,7 +814,7 @@ AudioEngine::disconnect (Port& port)
 ARDOUR::nframes_t
 AudioEngine::frame_rate () const
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack,0);
+	GET_PRIVATE_JACK_POINTER_RET (_jack,0);
 	if (_frame_rate == 0) {
 	  return (_frame_rate = jack_get_sample_rate (_priv_jack));
 	} else {
@@ -832,7 +832,7 @@ AudioEngine::raw_buffer_size (DataType t)
 ARDOUR::nframes_t
 AudioEngine::frames_per_cycle () const
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack,0);
+	GET_PRIVATE_JACK_POINTER_RET (_jack,0);
 	if (_buffer_size == 0) {
 	  return (_buffer_size = jack_get_buffer_size (_jack));
 	} else {
@@ -893,7 +893,7 @@ AudioEngine::get_port_by_name_locked (const string& portname)
 const char **
 AudioEngine::get_ports (const string& port_name_pattern, const string& type_name_pattern, uint32_t flags)
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack,0);
+	GET_PRIVATE_JACK_POINTER_RET (_jack,0);
 	if (!_running) {
 		if (!_has_run) {
 			fatal << _("get_ports called before engine was started") << endmsg;
@@ -941,7 +941,7 @@ AudioEngine::died ()
 bool
 AudioEngine::can_request_hardware_monitoring ()
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack,false);
+	GET_PRIVATE_JACK_POINTER_RET (_jack,false);
 	const char ** ports;
 
 	if ((ports = jack_get_ports (_priv_jack, NULL, JACK_DEFAULT_AUDIO_TYPE, JackPortCanMonitor)) == 0) {
@@ -957,7 +957,7 @@ AudioEngine::can_request_hardware_monitoring ()
 uint32_t
 AudioEngine::n_physical_outputs (DataType type) const
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack,0);
+	GET_PRIVATE_JACK_POINTER_RET (_jack,0);
 	const char ** ports;
 	uint32_t i = 0;
 
@@ -974,7 +974,7 @@ AudioEngine::n_physical_outputs (DataType type) const
 uint32_t
 AudioEngine::n_physical_inputs (DataType type) const
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack,0);
+	GET_PRIVATE_JACK_POINTER_RET (_jack,0);
 	const char ** ports;
 	uint32_t i = 0;
 
@@ -991,17 +991,15 @@ AudioEngine::n_physical_inputs (DataType type) const
 void
 AudioEngine::get_physical_inputs (DataType type, vector<string>& ins)
 {
-        GET_PRIVATE_JACK_POINTER (_jack);
+	GET_PRIVATE_JACK_POINTER (_jack);
 	const char ** ports;
-	uint32_t i = 0;
-
 
 	if ((ports = jack_get_ports (_priv_jack, NULL, type.to_jack_type(), JackPortIsPhysical|JackPortIsOutput)) == 0) {
 		return;
 	}
 
 	if (ports) {
-		for (i = 0; ports[i]; ++i) {
+		for (uint32_t i = 0; ports[i]; ++i) {
 			ins.push_back (ports[i]);
 		}
 		free (ports);
@@ -1011,7 +1009,7 @@ AudioEngine::get_physical_inputs (DataType type, vector<string>& ins)
 void
 AudioEngine::get_physical_outputs (DataType type, vector<string>& outs)
 {
-        GET_PRIVATE_JACK_POINTER (_jack);
+	GET_PRIVATE_JACK_POINTER (_jack);
 	const char ** ports;
 	uint32_t i = 0;
 
@@ -1028,7 +1026,7 @@ AudioEngine::get_physical_outputs (DataType type, vector<string>& outs)
 string
 AudioEngine::get_nth_physical (DataType type, uint32_t n, int flag)
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack,"");
+	GET_PRIVATE_JACK_POINTER_RET (_jack,"");
 	const char ** ports;
 	uint32_t i;
 	string ret;
@@ -1045,7 +1043,7 @@ AudioEngine::get_nth_physical (DataType type, uint32_t n, int flag)
 		ret = ports[i];
 	}
 
-	free ((char *) ports);
+	free ((const char **) ports);
 
 	return ret;
 }
@@ -1059,21 +1057,21 @@ AudioEngine::update_total_latency (const Port& port)
 void
 AudioEngine::transport_stop ()
 {
-        GET_PRIVATE_JACK_POINTER (_jack);
+	GET_PRIVATE_JACK_POINTER (_jack);
 	jack_transport_stop (_priv_jack);
 }
 
 void
 AudioEngine::transport_start ()
 {
-        GET_PRIVATE_JACK_POINTER (_jack);
+	GET_PRIVATE_JACK_POINTER (_jack);
 	jack_transport_start (_priv_jack);
 }
 
 void
 AudioEngine::transport_locate (nframes_t where)
 {
-        GET_PRIVATE_JACK_POINTER (_jack);
+	GET_PRIVATE_JACK_POINTER (_jack);
 	// cerr << "tell JACK to locate to " << where << endl;
 	jack_transport_locate (_priv_jack, where);
 }
@@ -1081,7 +1079,7 @@ AudioEngine::transport_locate (nframes_t where)
 AudioEngine::TransportState
 AudioEngine::transport_state ()
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack, ((TransportState) JackTransportStopped));
+	GET_PRIVATE_JACK_POINTER_RET (_jack, ((TransportState) JackTransportStopped));
 	jack_position_t pos;
 	return (TransportState) jack_transport_query (_priv_jack, &pos);
 }
@@ -1089,7 +1087,7 @@ AudioEngine::transport_state ()
 int
 AudioEngine::reset_timebase ()
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
+	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
 	if (_session) {
 		if (_session->config.get_jack_time_master()) {
 			return jack_set_timebase_callback (_priv_jack, 0, _jack_timebase_callback, this);
@@ -1103,7 +1101,7 @@ AudioEngine::reset_timebase ()
 int
 AudioEngine::freewheel (bool onoff)
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
+	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
 
 	if (onoff != _freewheeling) {
 	  
@@ -1155,7 +1153,7 @@ AudioEngine::connect_to_jack (string client_name)
 		return -1;
 	}
 
-        GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
+	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
 
 	if (status & JackNameNotUnique) {
 		jack_client_name = jack_get_client_name (_priv_jack);
@@ -1167,7 +1165,7 @@ AudioEngine::connect_to_jack (string client_name)
 int
 AudioEngine::disconnect_from_jack ()
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack, 0);
+	GET_PRIVATE_JACK_POINTER_RET (_jack, 0);
 
 	if (_running) {
 		stop_metering_thread ();
@@ -1222,7 +1220,7 @@ AudioEngine::reconnect_to_jack ()
 		return -1;
 	}
 
-        GET_PRIVATE_JACK_POINTER_RET (_jack,-1);
+	GET_PRIVATE_JACK_POINTER_RET (_jack,-1);
 
 	if (_session) {
 		_session->reset_jack_connection (_priv_jack);
@@ -1274,7 +1272,7 @@ AudioEngine::reconnect_to_jack ()
 int
 AudioEngine::request_buffer_size (nframes_t nframes)
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
+	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
 
 	if (nframes == jack_get_buffer_size (_priv_jack)) {
 	  return 0;
@@ -1287,7 +1285,7 @@ void
 AudioEngine::update_total_latencies ()
 {
 #ifdef HAVE_JACK_RECOMPUTE_LATENCIES
-        GET_PRIVATE_JACK_POINTER (_jack);
+	GET_PRIVATE_JACK_POINTER (_jack);
 	jack_recompute_total_latencies (_priv_jack);
 #endif
 }
@@ -1332,6 +1330,6 @@ AudioEngine::make_port_name_non_relative (string portname)
 bool
 AudioEngine::is_realtime () const
 {
-        GET_PRIVATE_JACK_POINTER_RET (_jack,false);
+	GET_PRIVATE_JACK_POINTER_RET (_jack,false);
 	return jack_is_realtime (_priv_jack);
 }

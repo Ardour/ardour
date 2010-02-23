@@ -228,6 +228,10 @@ StreamPanner::distribute_automated (AudioBuffer& src, BufferSet& obufs,
 
 BaseStereoPanner::BaseStereoPanner (Panner& p, Evoral::Parameter param)
 	: StreamPanner (p, param)
+	, left (0.5)
+	, right (0.5)
+	, left_interp (left)
+	, right_interp (right)
 {
 }
 
@@ -546,11 +550,10 @@ int
 EqualPowerStereoPanner::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
-	float pos;
 	LocaleGuard lg (X_("POSIX"));
 
 	if ((prop = node.property (X_("x")))) {
-		pos = atof (prop->value().c_str());
+		const float pos = atof (prop->value().c_str());
 		set_position (pos, true);
 	}
 

@@ -55,16 +55,19 @@ MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 
 MidiPlaylist::MidiPlaylist (Session& session, string name, bool hidden)
 	: Playlist (session, name, DataType::MIDI, hidden)
+	, _note_mode(Sustained)
 {
 }
 
 MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, string name, bool hidden)
 	: Playlist (other, name, hidden)
+	, _note_mode(other->_note_mode)
 {
 }
 
 MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, nframes_t start, nframes_t dur, string name, bool hidden)
-		: Playlist (other, start, dur, name, hidden)
+	: Playlist (other, start, dur, name, hidden)
+	, _note_mode(other->_note_mode)
 {
 	/* this constructor does NOT notify others (session) */
 }

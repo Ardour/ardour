@@ -365,9 +365,6 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 	}
 
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-
-		nframes_t xfade_length;
-
 		other = boost::dynamic_pointer_cast<AudioRegion> (*i);
 
 		if (other == region) {
@@ -397,6 +394,7 @@ AudioPlaylist::check_dependents (boost::shared_ptr<Region> r, bool norefresh)
 		touched_regions = 0;
 
 		try {
+			nframes_t xfade_length;
 			switch (c) {
 			case OverlapNone:
 				break;

@@ -161,7 +161,7 @@ RouteGroup::get_min_factor(gain_t factor)
 {
 	gain_t g;
 
-	for (RouteList::iterator i = routes->begin(); i != routes->end(); i++) {
+	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 		g = (*i)->amp()->gain();
 
 		if ( (g+g*factor) >= 0.0f)

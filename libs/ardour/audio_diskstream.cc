@@ -139,6 +139,8 @@ AudioDiskstream::~AudioDiskstream ()
 	}
 
 	channels.flush ();
+
+	delete deprecated_io_node;
 }
 
 void
@@ -905,13 +907,14 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer, 
 	bool reloop = false;
 	nframes_t loop_end = 0;
 	nframes_t loop_start = 0;
-	nframes_t loop_length = 0;
 	nframes_t offset = 0;
 	Location *loc = 0;
 
 	/* XXX we don't currently play loops in reverse. not sure why */
 
 	if (!reversed) {
+
+		nframes_t loop_length = 0;
 
 		/* Make the use of a Location atomic for this read operation.
 
@@ -2258,11 +2261,10 @@ AudioDiskstream::set_non_layered (bool yn)
 int
 AudioDiskstream::set_destructive (bool yn)
 {
-	bool bounce_ignored;
-
 	if (yn != destructive()) {
 
 		if (yn) {
+			bool bounce_ignored;
 			/* requestor should already have checked this and
 			   bounced if necessary and desired
 			*/

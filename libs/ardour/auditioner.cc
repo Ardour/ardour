@@ -202,9 +202,8 @@ Auditioner::play_audition (nframes_t nframes)
 void
 Auditioner::output_changed (IOChange change, void* /*src*/)
 {
-	string phys;
-
 	if (change & ConnectionsChanged) {
+		string phys;
 		vector<string> connections;
 		if (_output->nth (0)->get_connections (connections)) {
 			phys = _session.engine().get_nth_physical_output (DataType::AUDIO, 0);

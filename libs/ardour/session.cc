@@ -725,24 +725,27 @@ Session::when_engine_running ()
 
 				} else {
 
-					/* XXX this logic is wrong for mixed port types */
+					for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+						uint32_t shift = _master_out->n_outputs().get(*t);
+						uint32_t mod = _engine.n_physical_outputs (*t);
+						limit = _control_out->n_outputs().get(*t);
 
-					uint32_t shift = _master_out->n_outputs().n_audio();
-					uint32_t mod = _engine.n_physical_outputs (DataType::AUDIO);
-					limit = _control_out->n_outputs().n_audio();
+						cerr << "Connecting " << limit << " control out ports, shift is " << shift
+							<< " mod is " << mod << endl;
 
-					cerr << "Connecting " << limit << " control out ports, shift is " << shift << " mod is " << mod << endl;
+						for (uint32_t n = 0; n < limit; ++n) {
 
-					for (uint32_t n = 0; n < limit; ++n) {
+							Port* p = _control_out->output()->ports().port(*t, n);
+							string connect_to = _engine.get_nth_physical_output (*t, (n+shift) % mod);
 
-						Port* p = _control_out->output()->nth (n);
-						string connect_to = _engine.get_nth_physical_output (DataType (p->type()), (n+shift) % mod);
-
-						if (!connect_to.empty()) {
-							if (_control_out->output()->connect (p, connect_to, this)) {
-								error << string_compose (_("cannot connect control output %1 to %2"), n, connect_to)
-								      << endmsg;
-								break;
+							if (!connect_to.empty()) {
+								if (_control_out->output()->connect (p, connect_to, this)) {
+									error << string_compose (
+											_("cannot connect control output %1 to %2"),
+											n, connect_to)
+										<< endmsg;
+									break;
+								}
 							}
 						}
 					}
@@ -1527,12 +1530,11 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 	char track_name[32];
 	uint32_t track_id = 0;
 	uint32_t n = 0;
+	uint32_t channels_used = 0;
 	string port;
 	RouteList new_routes;
 	list<boost::shared_ptr<MidiTrack> > ret;
-	//uint32_t control_id;
-
-	// FIXME: need physical I/O and autoconnect stuff for MIDI
+	uint32_t control_id;
 
 	/* count existing midi tracks */
 
@@ -1543,7 +1545,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 			if (boost::dynamic_pointer_cast<MidiTrack>(*i) != 0) {
 				if (!(*i)->is_hidden()) {
 					n++;
-					//channels_used += (*i)->n_inputs().n_midi();
+					channels_used += (*i)->n_inputs().n_midi();
 				}
 			}
 		}
@@ -1555,7 +1557,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 	_engine.get_physical_outputs (DataType::MIDI, physoutputs);
 	_engine.get_physical_inputs (DataType::MIDI, physinputs);
 
-	// control_id = ntracks() + nbusses();
+	control_id = ntracks() + nbusses();
 
 	while (how_many) {
 
@@ -1580,7 +1582,9 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 		shared_ptr<MidiTrack> track;
 
 		try {
-			track = boost::shared_ptr<MidiTrack>((new MidiTrack (*this, track_name, Route::Flag (0), mode)));
+			MidiTrack* mt = new MidiTrack (*this, track_name, Route::Flag (0), mode);
+			boost_debug_shared_ptr_mark_interesting (mt, "Track");
+			track = boost::shared_ptr<MidiTrack>(mt);
 
 			if (track->input()->ensure_io (ChanCount(DataType::MIDI, 1), false, this)) {
 				error << "cannot configure 1 in/1 out configuration for new midi track" << endmsg;
@@ -1592,6 +1596,47 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 				error << "cannot configure 1 in/1 out configuration for new midi track" << endmsg;
 				goto failed;
 			}
+
+			if (!physinputs.empty()) {
+				uint32_t nphysical_in = physinputs.size();
+
+				for (uint32_t x = 0; x < track->n_inputs().n_midi() && x < nphysical_in; ++x) {
+
+					port = "";
+
+					if (Config->get_input_auto_connect() & AutoConnectPhysical) {
+						port = physinputs[(channels_used+x)%nphysical_in];
+					}
+
+					if (port.length() && track->input()->connect (track->input()->nth(x), port, this)) {
+						break;
+					}
+				}
+			}
+
+			if (!physoutputs.empty()) {
+				uint32_t nphysical_out = physoutputs.size();
+
+				for (uint32_t x = 0; x < track->n_outputs().n_midi(); ++x) {
+					port = "";
+
+					if (Config->get_output_auto_connect() & AutoConnectPhysical) {
+						port = physoutputs[(channels_used+x)%nphysical_out];
+					} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
+						if (_master_out && _master_out->n_inputs().n_midi() > 0) {
+							port = _master_out->input()->nth (x % _master_out->input()->n_ports().n_midi())->name();
+						}
+					}
+
+					if (port.length() && track->output()->connect (track->output()->nth(x), port, this)) {
+						break;
+					}
+				}
+			}
+
+			channels_used += track->n_inputs ().n_audio();
+
+
 
 			/*
 			if (nphysical_in) {

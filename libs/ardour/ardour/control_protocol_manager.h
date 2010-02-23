@@ -45,8 +45,10 @@ struct ControlProtocolInfo {
     bool supports_feedback;
     XMLNode* state;
 
-    ControlProtocolInfo() : descriptor (0), protocol (0), state (0) {}
-    ~ControlProtocolInfo() { if (state) { delete state; } }
+    ControlProtocolInfo() : descriptor (0), protocol (0), requested(false),
+		mandatory(false), supports_feedback(false), state (0)
+	{}
+    ~ControlProtocolInfo() { delete state; }
 };
 
 class ControlProtocolManager : public PBD::Stateful, public ARDOUR::SessionHandlePtr

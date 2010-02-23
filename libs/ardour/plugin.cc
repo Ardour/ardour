@@ -142,7 +142,7 @@ Plugin::get_presets()
 }
 
 bool
-Plugin::load_preset(const string preset_uri)
+Plugin::load_preset(const string& preset_uri)
 {
 	lrdf_defaults* defs = lrdf_get_setting_values(preset_uri.c_str());
 

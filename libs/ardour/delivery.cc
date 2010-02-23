@@ -150,6 +150,11 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> out, boost::shared_ptr<Mut
 	CycleStart.connect_same_thread (*this, boost::bind (&Delivery::cycle_start, this, _1));
 }
 
+Delivery::~Delivery()
+{
+	delete _output_buffers;
+}
+
 std::string
 Delivery::display_name () const
 {

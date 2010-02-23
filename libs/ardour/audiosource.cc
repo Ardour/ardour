@@ -612,11 +612,8 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 int
 AudioSource::build_peaks_from_scratch ()
 {
-	framepos_t current_frame;
-	framecnt_t cnt;
 	Sample* buf = 0;
-	framecnt_t frames_read;
-	framecnt_t frames_to_read;
+
 	const framecnt_t bufsize = 65536; // 256kB per disk read for mono data is about ideal
 
 	int ret = -1;
@@ -630,14 +627,16 @@ AudioSource::build_peaks_from_scratch ()
 			goto out;
 		}
 
-		current_frame = 0;
-		cnt = _length;
+		framepos_t current_frame = 0;
+		framecnt_t cnt = _length;
+
 		_peaks_built = false;
 		buf = new Sample[bufsize];
 
 		while (cnt) {
 
-			frames_to_read = min (bufsize, cnt);
+			framecnt_t frames_to_read = min (bufsize, cnt);
+			framecnt_t frames_read;
 
 			if ((frames_read = read_unlocked (buf, current_frame, frames_to_read)) != frames_to_read) {
 				error << string_compose(_("%1: could not write read raw data for peak computation (%2)"), _name, strerror (errno)) << endmsg;

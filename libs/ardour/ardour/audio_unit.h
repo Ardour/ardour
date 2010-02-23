@@ -96,7 +96,7 @@ class AUPlugin : public ARDOUR::Plugin
 	int set_state(const XMLNode& node);
 
 	bool save_preset (std::string name);
-	bool load_preset (const std::string preset_label);
+	bool load_preset (const std::string& preset_label);
 	std::vector<std::string> get_presets ();
 	std::string current_preset() const;
 

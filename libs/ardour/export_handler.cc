@@ -104,7 +104,9 @@ ExportHandler::ExportHandler (Session & session)
   , graph_builder (new ExportGraphBuilder (session))
   , export_status (session.get_export_status ())
   , realtime (false)
-
+  , normalizing (false)
+  , cue_tracknum (0)
+  , cue_indexnum (0)
 {
 }
 

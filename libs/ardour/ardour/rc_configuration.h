@@ -35,6 +35,7 @@ class RCConfiguration : public Configuration
 {
   public:
 	RCConfiguration();
+	~RCConfiguration();
 
 	void map_parameters (boost::function<void (std::string)>&);
 	int set_state (XMLNode const &, int version);
