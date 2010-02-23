@@ -114,6 +114,13 @@ public:
 		return ret;
 	}
 
+	ChanCount& operator+=(const ChanCount& other) {
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			_counts[*t] += other._counts[*t];
+		}
+		return *this;
+	}
+
 	static ChanCount min(const ChanCount& a, const ChanCount& b) {
 		ChanCount ret;
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {

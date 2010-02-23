@@ -1235,6 +1235,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void route_processors_changed (RouteProcessorChange);
 
+	bool find_route_name (const char* base, uint32_t& id, char* name, size_t name_len);
+	void count_existing_route_channels (ChanCount& in, ChanCount& out);
+	void auto_connect_route (boost::shared_ptr<Route> route,
+		ChanCount& existing_inputs, ChanCount& existing_outputs);
+
 	/* mixer stuff */
 
 	bool solo_update_disabled;

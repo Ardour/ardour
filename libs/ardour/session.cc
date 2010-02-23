@@ -1524,60 +1524,67 @@ Session::resort_routes_using (shared_ptr<RouteList> r)
 
 }
 
+/** Find the route name starting with \a base with the lowest \a id.
+ *
+ * Names are constructed like e.g. "Audio 3" for base="Audio" and id=3.
+ * The available route name with the lowest ID will be used, and \a id
+ * will be set to the ID.
+ *
+ * \return false if a route name could not be found, and \a track_name
+ * and \a id do not reflect a free route name.
+ */
+bool
+Session::find_route_name (const char* base, uint32_t& id, char* name, size_t name_len)
+{
+	do {
+		snprintf (name, name_len, "%s %" PRIu32, base, id);
+
+		if (route_by_name (name) == 0) {
+			return true;
+		}
+
+		++id;
+
+	} while (id < (UINT_MAX-1));
+
+	return false;
+}
+
+void
+Session::count_existing_route_channels (ChanCount& in, ChanCount& out)
+{
+	in  = ChanCount::ZERO;
+	out = ChanCount::ZERO;
+	shared_ptr<RouteList> r = routes.reader ();
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		if (!(*i)->is_hidden()) {
+			in += (*i)->n_inputs();
+			out	+= (*i)->n_outputs();
+		}
+	}
+}
+
 list<boost::shared_ptr<MidiTrack> >
 Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_many)
 {
 	char track_name[32];
-	uint32_t track_id = 0;
-	uint32_t n = 0;
-	uint32_t channels_used = 0;
+	uint32_t track_id = 1;
+	ChanCount existing_inputs;
+	ChanCount existing_outputs;
 	string port;
 	RouteList new_routes;
 	list<boost::shared_ptr<MidiTrack> > ret;
 	uint32_t control_id;
 
-	/* count existing midi tracks */
-
-	{
-		shared_ptr<RouteList> r = routes.reader ();
-
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			if (boost::dynamic_pointer_cast<MidiTrack>(*i) != 0) {
-				if (!(*i)->is_hidden()) {
-					n++;
-					channels_used += (*i)->n_inputs().n_midi();
-				}
-			}
-		}
-	}
-
-	vector<string> physinputs;
-	vector<string> physoutputs;
-
-	_engine.get_physical_outputs (DataType::MIDI, physoutputs);
-	_engine.get_physical_inputs (DataType::MIDI, physinputs);
+	count_existing_route_channels (existing_inputs, existing_outputs);
 
 	control_id = ntracks() + nbusses();
 
 	while (how_many) {
-
-		/* check for duplicate route names, since we might have pre-existing
-		   routes with this name (e.g. create Audio1, Audio2, delete Audio1,
-		   save, close,restart,add new route - first named route is now
-		   Audio2)
-		*/
-
-
-		do {
-			++track_id;
-
-			snprintf (track_name, sizeof(track_name), "Midi %" PRIu32, track_id);
-
-			if (route_by_name (track_name) == 0) {
-				break;
-			}
-
-		} while (track_id < (UINT_MAX-1));
+		if (!find_route_name ("Midi", track_id, track_name, sizeof(track_name))) {
+			error << "cannot find name for new midi track" << endmsg;
+			goto failed;
+		}
 
 		shared_ptr<MidiTrack> track;
 
@@ -1597,83 +1604,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 				goto failed;
 			}
 
-			if (!physinputs.empty()) {
-				uint32_t nphysical_in = physinputs.size();
-
-				for (uint32_t x = 0; x < track->n_inputs().n_midi() && x < nphysical_in; ++x) {
-
-					port = "";
-
-					if (Config->get_input_auto_connect() & AutoConnectPhysical) {
-						port = physinputs[(channels_used+x)%nphysical_in];
-					}
-
-					if (port.length() && track->input()->connect (track->input()->nth(x), port, this)) {
-						break;
-					}
-				}
-			}
-
-			if (!physoutputs.empty()) {
-				uint32_t nphysical_out = physoutputs.size();
-
-				for (uint32_t x = 0; x < track->n_outputs().n_midi(); ++x) {
-					port = "";
-
-					if (Config->get_output_auto_connect() & AutoConnectPhysical) {
-						port = physoutputs[(channels_used+x)%nphysical_out];
-					} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
-						if (_master_out && _master_out->n_inputs().n_midi() > 0) {
-							port = _master_out->input()->nth (x % _master_out->input()->n_ports().n_midi())->name();
-						}
-					}
-
-					if (port.length() && track->output()->connect (track->output()->nth(x), port, this)) {
-						break;
-					}
-				}
-			}
-
-			channels_used += track->n_inputs ().n_audio();
-
-
-
-			/*
-			if (nphysical_in) {
-				for (uint32_t x = 0; x < track->n_inputs().n_midi() && x < nphysical_in; ++x) {
-
-					port = "";
-
-					if (Config->get_input_auto_connect() & AutoConnectPhysical) {
-						port = physinputs[(channels_used+x)%nphysical_in];
-					}
-
-					if (port.length() && track->connect_input (track->input (x), port, this)) {
-						break;
-					}
-				}
-			}
-
-			for (uint32_t x = 0; x < track->n_outputs().n_midi(); ++x) {
-
-				port = "";
-
-				if (nphysical_out && (Config->get_output_auto_connect() & AutoConnectPhysical)) {
-					port = physoutputs[(channels_used+x)%nphysical_out];
-				} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
-					if (_master_out) {
-						port = _master_out->input (x%_master_out->n_inputs().n_midi())->name();
-					}
-				}
-
-				if (port.length() && track->connect_output (track->output (x), port, this)) {
-					break;
-				}
-			}
-
-			channels_used += track->n_inputs ().n_midi();
-
-			*/
+			auto_connect_route (track, existing_inputs, existing_outputs);
 
 			track->midi_diskstream()->non_realtime_input_change();
 			if (route_group) {
@@ -1681,7 +1612,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 			}
 
 			track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this));
-			//track->set_remote_control_id (control_id);
+			track->set_remote_control_id (control_id);
 
 			new_routes.push_back (track);
 			ret.push_back (track);
@@ -1734,60 +1665,102 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 	return ret;
 }
 
-list<boost::shared_ptr<AudioTrack> >
-Session::new_audio_track (int input_channels, int output_channels, TrackMode mode, RouteGroup* route_group,  uint32_t how_many)
+void
+Session::auto_connect_route (boost::shared_ptr<Route> route,
+		ChanCount& existing_inputs, ChanCount& existing_outputs)
 {
-	char track_name[32];
-	uint32_t track_id = 0;
-	uint32_t n = 0;
-	uint32_t channels_used = 0;
-	string port;
-	RouteList new_routes;
-	list<boost::shared_ptr<AudioTrack> > ret;
-	uint32_t control_id;
+	/* If both inputs and outputs are auto-connected to physical ports,
+	   use the max of input and output offsets to ensure auto-connected
+	   port numbers always match up (e.g. the first audio input and the
+	   first audio output of the route will have the same physical
+	   port number).  Otherwise just use the lowest input or output
+	   offset possible.
+	*/
+	const bool in_out_physical =
+		   (Config->get_input_auto_connect() & AutoConnectPhysical)
+		&& (Config->get_output_auto_connect() & AutoConnectPhysical);
 
-	/* count existing audio tracks */
+	const ChanCount in_offset = in_out_physical
+		? ChanCount::max(existing_inputs, existing_outputs)
+		: existing_inputs;
 
-	{
-		shared_ptr<RouteList> r = routes.reader ();
+	const ChanCount out_offset = in_out_physical
+		? ChanCount::max(existing_inputs, existing_outputs)
+		: existing_outputs;
 
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			if (boost::dynamic_pointer_cast<AudioTrack>(*i) != 0) {
-				if (!(*i)->is_hidden()) {
-					n++;
-					channels_used += (*i)->n_inputs().n_audio();
+	static string empty_string;
+	string& port = empty_string;
+
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		vector<string> physinputs;
+		vector<string> physoutputs;
+
+		_engine.get_physical_outputs (*t, physoutputs);
+		_engine.get_physical_inputs (*t, physinputs);
+
+		if (!physinputs.empty()) {
+			uint32_t nphysical_in = physinputs.size();
+			for (uint32_t i = 0; i < route->n_inputs().get(*t) && i < nphysical_in; ++i) {
+				port = empty_string;
+
+				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
+					port = physinputs[(in_offset.get(*t) + i) % nphysical_in];
+				}
+
+				if (!port.empty() && route->input()->connect (
+						route->input()->ports().port(*t, i), port, this)) {
+					break;
+				}
+			}
+		}
+
+		if (!physoutputs.empty()) {
+			uint32_t nphysical_out = physoutputs.size();
+			for (uint32_t i = 0; i < route->n_outputs().get(*t); ++i) {
+				port = empty_string;
+
+				if (Config->get_output_auto_connect() & AutoConnectPhysical) {
+					port = physoutputs[(out_offset.get(*t) + i) % nphysical_out];
+				} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
+					if (_master_out && _master_out->n_inputs().get(*t) > 0) {
+						port = _master_out->input()->ports().port(*t,
+								i % _master_out->input()->n_ports().get(*t))->name();
+					}
+				}
+
+				if (!port.empty() && route->output()->connect (
+						route->output()->ports().port(*t, i), port, this)) {
+					break;
 				}
 			}
 		}
 	}
 
-	vector<string> physinputs;
-	vector<string> physoutputs;
+	existing_inputs += route->n_inputs();
+	existing_outputs += route->n_outputs();
+}
 
-	_engine.get_physical_outputs (DataType::AUDIO, physoutputs);
-	_engine.get_physical_inputs (DataType::AUDIO, physinputs);
+list<boost::shared_ptr<AudioTrack> >
+Session::new_audio_track (int input_channels, int output_channels, TrackMode mode, RouteGroup* route_group,  uint32_t how_many)
+{
+	char track_name[32];
+	uint32_t track_id = 1;
+	ChanCount existing_inputs;
+	ChanCount existing_outputs;
+	string port;
+	RouteList new_routes;
+	list<boost::shared_ptr<AudioTrack> > ret;
+	uint32_t control_id;
+
+	count_existing_route_channels (existing_inputs, existing_outputs);
 
 	control_id = ntracks() + nbusses() + 1;
 
 	while (how_many) {
-
-		/* check for duplicate route names, since we might have pre-existing
-		   routes with this name (e.g. create Audio1, Audio2, delete Audio1,
-		   save, close,restart,add new route - first named route is now
-		   Audio2)
-		*/
-
-
-		do {
-			++track_id;
-
-			snprintf (track_name, sizeof(track_name), "Audio %" PRIu32, track_id);
-
-			if (route_by_name (track_name) == 0) {
-				break;
-			}
-
-		} while (track_id < (UINT_MAX-1));
+		if (!find_route_name ("Audio", track_id, track_name, sizeof(track_name))) {
+			error << "cannot find name for new audio track" << endmsg;
+			goto failed;
+		}
 
 		shared_ptr<AudioTrack> track;
 
@@ -1797,57 +1770,22 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			track = boost::shared_ptr<AudioTrack>(at);
 
 			if (track->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
-				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
+				error << string_compose (
+							_("cannot configure %1 in/%2 out configuration for new audio track"),
 							 input_channels, output_channels)
 				      << endmsg;
 				goto failed;
 			}
 
 			if (track->output()->ensure_io (ChanCount(DataType::AUDIO, output_channels), false, this)) {
-				error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
+				error << string_compose (
+							_("cannot configure %1 in/%2 out configuration for new audio track"),
 							 input_channels, output_channels)
 				      << endmsg;
 				goto failed;
 			}
 
-			if (!physinputs.empty()) {
-				uint32_t nphysical_in = physinputs.size();
-
-				for (uint32_t x = 0; x < track->n_inputs().n_audio() && x < nphysical_in; ++x) {
-
-					port = "";
-
-					if (Config->get_input_auto_connect() & AutoConnectPhysical) {
-						port = physinputs[(channels_used+x)%nphysical_in];
-					}
-
-					if (port.length() && track->input()->connect (track->input()->nth(x), port, this)) {
-						break;
-					}
-				}
-			}
-
-			if (!physoutputs.empty()) {
-				uint32_t nphysical_out = physoutputs.size();
-
-				for (uint32_t x = 0; x < track->n_outputs().n_audio(); ++x) {
-					port = "";
-
-					if (Config->get_output_auto_connect() & AutoConnectPhysical) {
-						port = physoutputs[(channels_used+x)%nphysical_out];
-					} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
-						if (_master_out && _master_out->n_inputs().n_audio() > 0) {
-							port = _master_out->input()->nth (x % _master_out->input()->n_ports().n_audio())->name();
-						}
-					}
-
-					if (port.length() && track->output()->connect (track->output()->nth(x), port, this)) {
-						break;
-					}
-				}
-			}
-
-			channels_used += track->n_inputs ().n_audio();
+			auto_connect_route (track, existing_inputs, existing_outputs);
 
 			if (route_group) {
 				route_group->add (track);
@@ -1942,52 +1880,21 @@ Session::new_audio_route (bool aux, int input_channels, int output_channels, Rou
 {
 	char bus_name[32];
 	uint32_t bus_id = 1;
-	uint32_t n = 0;
-	uint32_t channels_used = 0;
+	ChanCount existing_inputs;
+	ChanCount existing_outputs;
 	string port;
 	RouteList ret;
 	uint32_t control_id;
 
-	/* count existing audio busses */
-
-	{
-		shared_ptr<RouteList> r = routes.reader ();
-
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			if (boost::dynamic_pointer_cast<Track>(*i) == 0) {
-				/* its a bus ? */
-				if (!(*i)->is_hidden() && (*i)->name() != _("master")) {
-					bus_id++;
-					n++;
-					channels_used += (*i)->n_inputs().n_audio();
-				}
-			}
-		}
-	}
-
-	vector<string> physinputs;
-	vector<string> physoutputs;
-
-	_engine.get_physical_outputs (DataType::AUDIO, physoutputs);
-	_engine.get_physical_inputs (DataType::AUDIO, physinputs);
-
-	n_physical_audio_outputs = physoutputs.size();
-	n_physical_audio_inputs = physinputs.size();
+	count_existing_route_channels (existing_inputs, existing_outputs);
 
 	control_id = ntracks() + nbusses() + 1;
 
 	while (how_many) {
-
-		do {
-			snprintf (bus_name, sizeof(bus_name), "Bus %" PRIu32, bus_id);
-
-			bus_id++;
-
-			if (route_by_name (bus_name) == 0) {
-				break;
-			}
-
-		} while (bus_id < (UINT_MAX-1));
+		if (!find_route_name ("Bus", bus_id, bus_name, sizeof(bus_name))) {
+			error << "cannot find name for new audio bus" << endmsg;
+			goto failure;
+		}
 
 		try {
 			Route* rt = new Route (*this, bus_name, Route::Flag(0), DataType::AUDIO);
@@ -2009,35 +1916,7 @@ Session::new_audio_route (bool aux, int input_channels, int output_channels, Rou
 				goto failure;
 			}
 
-			for (uint32_t x = 0; n_physical_audio_inputs && x < bus->input()->n_ports().n_audio(); ++x) {
-				port = "";
-
-				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
-					port = physinputs[((n+x)%n_physical_audio_inputs)];
-				}
-
-				if (port.length() && bus->input()->connect (bus->input()->nth (x), port, this)) {
-					break;
-				}
-			}
-
-			for (uint32_t x = 0; n_physical_audio_outputs && x < bus->n_outputs().n_audio(); ++x) {
-				port = "";
-
-				if (Config->get_output_auto_connect() & AutoConnectPhysical) {
-					port = physoutputs[((n+x)%n_physical_outputs)];
-				} else if (Config->get_output_auto_connect() & AutoConnectMaster) {
-					if (_master_out) {
-						port = _master_out->input()->nth (x%_master_out->input()->n_ports().n_audio())->name();
-					}
-				}
-
-				if (port.length() && bus->output()->connect (bus->output()->nth(x), port, this)) {
-					break;
-				}
-			}
-
-			channels_used += bus->n_inputs ().n_audio();
+			auto_connect_route (bus, existing_inputs, existing_outputs);
 
 			if (route_group) {
 				route_group->add (bus);
@@ -2100,19 +1979,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 		std::string node_name = IO::name_from_state (*node_copy.children().front());
 
 		/* generate a new name by adding a number to the end of the template name */
-
-		do {
-			snprintf (name, sizeof (name), "%s %" PRIu32, node_name.c_str(), number);
-
-			number++;
-
-			if (route_by_name (name) == 0) {
-				break;
-			}
-
-		} while (number < UINT_MAX);
-
-		if (number == UINT_MAX) {
+		if (!find_route_name (node_name.c_str(), number, name, sizeof(name))) {
 			fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
 			/*NOTREACHED*/
 		}
