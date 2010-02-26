@@ -1568,7 +1568,7 @@ list<boost::shared_ptr<MidiTrack> >
 Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_many)
 {
 	char track_name[32];
-	uint32_t track_id = 1;
+	uint32_t track_id = 0;
 	ChanCount existing_inputs;
 	ChanCount existing_outputs;
 	string port;
@@ -1581,7 +1581,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 	control_id = ntracks() + nbusses();
 
 	while (how_many) {
-		if (!find_route_name ("Midi", track_id, track_name, sizeof(track_name))) {
+		if (!find_route_name ("Midi", ++track_id, track_name, sizeof(track_name))) {
 			error << "cannot find name for new midi track" << endmsg;
 			goto failed;
 		}
@@ -1740,11 +1740,11 @@ Session::auto_connect_route (boost::shared_ptr<Route> route,
 	existing_outputs += route->n_outputs();
 }
 
-list<boost::shared_ptr<AudioTrack> >
-Session::new_audio_track (int input_channels, int output_channels, TrackMode mode, RouteGroup* route_group,  uint32_t how_many)
+list< boost::shared_ptr<AudioTrack> >
+Session::new_audio_track (int input_channels, int output_channels, TrackMode mode, RouteGroup* route_group, uint32_t how_many)
 {
 	char track_name[32];
-	uint32_t track_id = 1;
+	uint32_t track_id = 0;
 	ChanCount existing_inputs;
 	ChanCount existing_outputs;
 	string port;
@@ -1757,7 +1757,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	control_id = ntracks() + nbusses() + 1;
 
 	while (how_many) {
-		if (!find_route_name ("Audio", track_id, track_name, sizeof(track_name))) {
+		if (!find_route_name ("Audio", ++track_id, track_name, sizeof(track_name))) {
 			error << "cannot find name for new audio track" << endmsg;
 			goto failed;
 		}
@@ -1879,7 +1879,7 @@ RouteList
 Session::new_audio_route (bool aux, int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many)
 {
 	char bus_name[32];
-	uint32_t bus_id = 1;
+	uint32_t bus_id = 0;
 	ChanCount existing_inputs;
 	ChanCount existing_outputs;
 	string port;
@@ -1891,7 +1891,7 @@ Session::new_audio_route (bool aux, int input_channels, int output_channels, Rou
 	control_id = ntracks() + nbusses() + 1;
 
 	while (how_many) {
-		if (!find_route_name ("Bus", bus_id, bus_name, sizeof(bus_name))) {
+		if (!find_route_name ("Bus", ++bus_id, bus_name, sizeof(bus_name))) {
 			error << "cannot find name for new audio bus" << endmsg;
 			goto failure;
 		}
@@ -1962,7 +1962,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 	RouteList ret;
 	uint32_t control_id;
 	XMLTree tree;
-	uint32_t number = 1;
+	uint32_t number = 0;
 
 	if (!tree.read (template_path.c_str())) {
 		return ret;
@@ -1979,7 +1979,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 		std::string node_name = IO::name_from_state (*node_copy.children().front());
 
 		/* generate a new name by adding a number to the end of the template name */
-		if (!find_route_name (node_name.c_str(), number, name, sizeof(name))) {
+		if (!find_route_name (node_name.c_str(), ++number, name, sizeof(name))) {
 			fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
 			/*NOTREACHED*/
 		}
