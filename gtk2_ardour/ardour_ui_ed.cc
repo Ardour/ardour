@@ -684,6 +684,9 @@ ARDOUR_UI::set_jack_buffer_size (nframes_t nframes)
 	case 128:
 		action_name = X_("JACKLatency128");
 		break;
+	case 256:
+		action_name = X_("JACKLatency256");
+		break;
 	case 512:
 		action_name = X_("JACKLatency512");
 		break;
