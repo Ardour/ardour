@@ -1290,6 +1290,9 @@ TimeAxisView::resizer_expose (GdkEventExpose* event)
 	win->draw_line (light, 1, 9, w - 1, 9);
 	win->draw_point (light, w - 1, 8);
 
+	/* use vertical resize mouse cursor */
+	win->set_cursor(Gdk::Cursor(Gdk::SB_V_DOUBLE_ARROW));
+
 	return true;
 }
 
