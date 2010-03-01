@@ -64,6 +64,11 @@ struct _GnomeCanvasWaveViewCache
 GnomeCanvasWaveViewCache* gnome_canvas_waveview_cache_new ();
 void                    gnome_canvas_waveview_cache_destroy (GnomeCanvasWaveViewCache*);
 
+typedef  gulong (*waveview_length_function_t)(void*);
+typedef  gulong (*waveview_sourcefile_length_function_t)(void*, double);
+typedef  void (*waveview_gain_curve_function_t)(void *arg, double start, double end, float* vector, gint64 veclen);
+typedef  void (*waveview_peak_function_t)(void*,gulong,gulong,gulong,gpointer,guint32,double);
+
 struct _GnomeCanvasWaveView
 {
     GnomeCanvasItem item;
@@ -74,10 +79,10 @@ struct _GnomeCanvasWaveView
 
     void *data_src;
     guint32 channel;
-	void (*peak_function)(void*,gulong,gulong,gulong,gpointer,guint32,double);
-    gulong (*length_function)(void *);
-    gulong (*sourcefile_length_function)(void*,double);
-    void (*gain_curve_function)(void *arg, double start, double end, float* vector, gint64 veclen);
+    waveview_peak_function_t peak_function;
+    waveview_length_function_t length_function;
+    waveview_sourcefile_length_function_t sourcefile_length_function;
+    waveview_gain_curve_function_t gain_curve_function;
     void *gain_src;
 
     /** x-axis: samples per canvas unit. */
