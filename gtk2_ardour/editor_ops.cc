@@ -2666,7 +2666,7 @@ Editor::region_from_selection ()
 
 		PropertyList plist; 
 		
-		plist.add (ARDOUR::Properties::start, internal_start);
+		plist.add (ARDOUR::Properties::start, current->start() + internal_start);
 		plist.add (ARDOUR::Properties::length, selection_cnt);
 		plist.add (ARDOUR::Properties::name, new_name);
 		plist.add (ARDOUR::Properties::layer, 0);
@@ -2706,7 +2706,7 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<Region> >& new_re
 
 		PropertyList plist; 
 		
-		plist.add (ARDOUR::Properties::start, internal_start);
+		plist.add (ARDOUR::Properties::start, current->start() + internal_start);
 		plist.add (ARDOUR::Properties::length, end - start + 1);
 		plist.add (ARDOUR::Properties::name, new_name);
 

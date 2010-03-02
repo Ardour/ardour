@@ -143,12 +143,6 @@ RegionListProperty::diff (PropertyList& before, PropertyList& after) const
 
                 before.add (b);
                 after.add (a);
-
-                cerr << "pdiff on " << _playlist.name() << " before contains "
-                     << b->change().added.size() << " adds and " << b->change().removed.size() << " removes\n";
-                cerr << "pdiff on " << _playlist.name() << " after contains "
-                     << a->change().added.size() << " adds and " << a->change().removed.size() << " removes\n";
-
         }
 }
 
@@ -274,7 +268,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, f
 
 		PropertyList plist; 
 
-		plist.add (Properties::start, offset);
+		plist.add (Properties::start, region->start() + offset);
 		plist.add (Properties::length, len);
 		plist.add (Properties::name, new_name);
 		plist.add (Properties::layer, region->layer());
@@ -432,6 +426,7 @@ Playlist::release_notifications ()
 	if (g_atomic_int_dec_and_test (&block_notifications)) {
 		flush_notifications ();
         }
+
 }
 
 void
@@ -499,7 +494,7 @@ Playlist::notify_region_added (boost::shared_ptr<Region> r)
 	/* the length change might not be true, but we have to act
 	   as though it could be.
 	*/
-
+        
 	if (holding_state()) {
 		pending_adds.insert (r);
 		pending_contents_change = true;
@@ -670,7 +665,7 @@ Playlist::add_region (boost::shared_ptr<Region> region, framepos_t position, flo
 		{
 			PropertyList plist;
 			
-			plist.add (Properties::start, 0);
+			plist.add (Properties::start, region->start());
 			plist.add (Properties::length, length);
 			plist.add (Properties::name, name);
 			plist.add (Properties::layer, region->layer());
@@ -939,7 +934,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 
 					PropertyList plist;
 					
-					plist.add (Properties::start, pos2 - pos1);
+					plist.add (Properties::start, current->start() + (pos2 - pos1));
 					plist.add (Properties::length, pos3 - pos2);
 					plist.add (Properties::name, new_name);
 					plist.add (Properties::layer, regions.size());
@@ -958,7 +953,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 
 				PropertyList plist;
 				
-				plist.add (Properties::start, pos3 - pos1);
+				plist.add (Properties::start, current->start() + (pos3 - pos1));
 				plist.add (Properties::length, pos4 - pos3);
 				plist.add (Properties::name, new_name);
 				plist.add (Properties::layer, regions.size());
@@ -996,7 +991,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 					
 					PropertyList plist;
 					
-					plist.add (Properties::start, pos2 - pos1);
+					plist.add (Properties::start, current->start() + (pos2 - pos1));
 					plist.add (Properties::length, pos4 - pos2);
 					plist.add (Properties::name, new_name);
 					plist.add (Properties::layer, regions.size());
@@ -1039,7 +1034,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 
 					PropertyList plist;
 					
-					plist.add (Properties::start, 0);
+					plist.add (Properties::start, current->start());
 					plist.add (Properties::length, pos3 - pos1);
 					plist.add (Properties::name, new_name);
 					plist.add (Properties::layer, regions.size());
@@ -1244,7 +1239,7 @@ Playlist::duplicate (boost::shared_ptr<Region> region, framepos_t position, floa
 		{
 			PropertyList plist;
 			
-			plist.add (Properties::start, 0);
+			plist.add (Properties::start, region->start());
 			plist.add (Properties::length, length);
 			plist.add (Properties::name, name);
 			
@@ -1600,9 +1595,19 @@ Playlist::clear (bool with_signals)
 		}
 
 		regions.clear ();
+
+                for (set<boost::shared_ptr<Region> >::iterator s = pending_removes.begin(); s != pending_removes.end(); ++s) {
+                        remove_dependents (*s);
+                }
 	}
 
 	if (with_signals) {
+
+                for (set<boost::shared_ptr<Region> >::iterator s = pending_removes.begin(); s != pending_removes.end(); ++s) {
+                        RegionRemoved (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
+                }
+
+                pending_removes.clear ();
 		pending_length = false;
 		LengthChanged ();
 		pending_contents_change = false;
@@ -2104,7 +2109,7 @@ Playlist::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	clear (false);
+	clear (true);
 
 	nlist = node.children();
 
@@ -2136,7 +2141,7 @@ Playlist::set_state (const XMLNode& node, int version)
 				error << _("Playlist: cannot create region from XML") << endmsg;
 				continue;
 			}
-
+                        
 			add_region (region, region->position(), 1.0);
 
 			// So that layer_op ordering doesn't get screwed up
@@ -2153,7 +2158,6 @@ Playlist::set_state (const XMLNode& node, int version)
 		check_dependents (*r, false);
 	}
 
-	clear_pending (); // this makes thaw() do nothing
 	thaw ();
 	notify_contents_changed ();
 
