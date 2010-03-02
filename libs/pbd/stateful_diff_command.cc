@@ -21,6 +21,7 @@
 
 #include "pbd/stateful_diff_command.h"
 #include "pbd/property_list.h"
+#include "pbd/demangle.h"
 #include "i18n.h"
 
 using namespace std;
@@ -105,7 +106,7 @@ StatefulDiffCommand::get_state ()
 	XMLNode* node = new XMLNode (X_("StatefulDiffCommand"));
 
 	node->add_property ("obj-id", s->id().to_s());
-	node->add_property ("type-name", typeid(*s.get()).name());
+	node->add_property ("type-name", demangled_name (*s.get()));
 
         XMLNode* before = new XMLNode (X_("Undo"));
         XMLNode* after = new XMLNode (X_("Do"));

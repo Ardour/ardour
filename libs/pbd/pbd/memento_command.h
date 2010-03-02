@@ -26,6 +26,7 @@
 #include "pbd/command.h"
 #include "pbd/stacktrace.h"
 #include "pbd/xml++.h"
+#include "pbd/demangle.h"
 
 #include <sigc++/slot.h>
 #include <typeinfo>
@@ -80,7 +81,7 @@ public:
 		XMLNode* node = new XMLNode(name);
 
 		node->add_property("obj_id", obj.id().to_s());
-		node->add_property("type_name", typeid(obj).name());
+		node->add_property("type_name", demangled_name (obj));
 
 		if (before) {
 			node->add_child_copy(*before);

@@ -1345,7 +1345,7 @@ Playlist::_split_region (boost::shared_ptr<Region> region, framepos_t playlist_p
 	{
 		PropertyList plist;
 		
-		plist.add (Properties::start, 0);
+		plist.add (Properties::start, region->start());
 		plist.add (Properties::length, before);
 		plist.add (Properties::name, before_name);
 		plist.add (Properties::left_of_split, true);
@@ -1358,7 +1358,7 @@ Playlist::_split_region (boost::shared_ptr<Region> region, framepos_t playlist_p
 	{
 		PropertyList plist;
 		
-		plist.add (Properties::start, before);
+		plist.add (Properties::start, region->start() + before);
 		plist.add (Properties::length, after);
 		plist.add (Properties::name, after_name);
 		plist.add (Properties::right_of_split, true);

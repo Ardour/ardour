@@ -86,45 +86,46 @@ Session::memento_command_factory(XMLNode *n)
     /* create command */
     string obj_T = n->property ("type-name")->value();
 
-    if (obj_T == typeid (AudioRegion).name() || obj_T == typeid (MidiRegion).name() || obj_T == typeid (Region).name()) {
+    if (obj_T == "ARDOUR::AudioRegion" || obj_T == "ARDOUR::MidiRegion" || obj_T == "ARDOUR::Region") {
 	    boost::shared_ptr<Region> r = RegionFactory::region_by_id (id);
 	    if (r) {
 		    return new MementoCommand<Region>(*r, before, after);
 	    }
 
-    } else if (obj_T == typeid (AudioSource).name() || obj_T == typeid (MidiSource).name()) {
+    } else if (obj_T == "ARDOUR::AudioSource" || obj_T == "ARDOUR::MidiSource") {
 	    if (sources.count(id))
 		    return new MementoCommand<Source>(*sources[id], before, after);
 
-    } else if (obj_T == typeid (Location).name()) {
+    } else if (obj_T == "ARDOUR::Location") {
 	    Location* loc = _locations.get_location_by_id(id);
 	    if (loc) {
 		    return new MementoCommand<Location>(*loc, before, after);
 	    }
 
-    } else if (obj_T == typeid (Locations).name()) {
+    } else if (obj_T == "ARDOUR::Locations") {
 	    return new MementoCommand<Locations>(_locations, before, after);
 
-    } else if (obj_T == typeid (TempoMap).name()) {
+    } else if (obj_T == "ARDOUR::TempoMap") {
 	    return new MementoCommand<TempoMap>(*_tempo_map, before, after);
 
-    } else if (obj_T == typeid (Playlist).name() || obj_T == typeid (AudioPlaylist).name() || obj_T == typeid (MidiPlaylist).name()) {
+    } else if (obj_T == "ARDOUR::Playlist" || obj_T == "ARDOUR::AudioPlaylist" || obj_T == "ARDOUR::MidiPlaylist") {
 	    if (boost::shared_ptr<Playlist> pl = playlists->by_name(child->property("name")->value())) {
 		    return new MementoCommand<Playlist>(*(pl.get()), before, after);
 	    }
 
-    } else if (obj_T == typeid (Route).name() || obj_T == typeid (AudioTrack).name() || obj_T == typeid(MidiTrack).name()) {
+    } else if (obj_T == "ARDOUR::Route" || obj_T == "ARDOUR::AudioTrack" || obj_T == "ARDOUR::MidiTrack") {
 		if (boost::shared_ptr<Route> r = route_by_id(id)) {
 			return new MementoCommand<Route>(*r, before, after);
 		} else {
 			error << string_compose (X_("Route %1 not found in session"), id) << endmsg;
 		}
 
-    } else if (obj_T == typeid (Evoral::Curve).name() || obj_T == typeid (AutomationList).name()) {
+    } else if (obj_T == "Evoral::Curve" || obj_T == "ARDOUR::AutomationList") {
 		std::map<PBD::ID, AutomationList*>::iterator i = automation_lists.find(id);
 		if (i != automation_lists.end()) {
 		    return new MementoCommand<AutomationList>(*i->second, before, after);
 		}
+                cerr << "Alist not found\n";
     } else if (registry.count(id)) { // For Editor and AutomationLine which are off-limits herea
 	    return new MementoCommand<PBD::StatefulDestructible>(*registry[id], before, after);
     }
@@ -141,13 +142,13 @@ Session::stateful_diff_command_factory (XMLNode* n)
 	PBD::ID const id (n->property("obj-id")->value ());
 
 	string const obj_T = n->property ("type-name")->value ();
-	if ((obj_T == typeid (AudioRegion).name() || obj_T == typeid (MidiRegion).name())) {
+	if ((obj_T == "ARDOUR::AudioRegion" || obj_T == "ARDOUR::MidiRegion")) {
 		boost::shared_ptr<Region> r = RegionFactory::region_by_id (id);
 		if (r) {
 			return new StatefulDiffCommand (r, *n);
 		}
 
-	} else if (obj_T == typeid (AudioPlaylist).name() ||  obj_T == typeid (MidiPlaylist).name()) {
+	} else if (obj_T == "ARDOUR::AudioPlaylist" ||  obj_T == "ARDOUR::MidiPlaylist") {
                 boost::shared_ptr<Playlist> p = playlists->by_id (id);
                 if (p) {
                         return new StatefulDiffCommand (p, *n);
