@@ -1425,9 +1425,9 @@ RegionInsertDrag::finished (GdkEvent* /*event*/, bool /*movement_occurred*/)
 	boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();
 
 	_editor->begin_reversible_command (_("insert region"));
-	XMLNode& before = playlist->get_state ();
+        playlist->clear_history ();
 	playlist->add_region (_primary->region (), _last_frame_position);
-	_editor->session()->add_command (new MementoCommand<Playlist> (*playlist, &before, &playlist->get_state()));
+	_editor->session()->add_command (new StatefulDiffCommand (playlist));
 	_editor->commit_reversible_command ();
 
 	delete _primary;
@@ -1772,7 +1772,8 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 		for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 			(*i)->fake_set_opaque(false);
-			(*i)->region()->freeze ();
+                        (*i)->region()->clear_history ();
+			(*i)->region()->suspend_property_changes ();
 
 			AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 
@@ -1784,7 +1785,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			insert_result = _editor->motion_frozen_playlists.insert (pl);
 
 			if (insert_result.second) {
-				_editor->session()->add_command(new MementoCommand<Playlist>(*pl, &pl->get_state(), 0));
 				pl->freeze();
 			}
 		}
@@ -1867,13 +1867,13 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 			for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 				_editor->thaw_region_after_trim (**i);
 				(*i)->fake_set_opaque (true);
+                                if (_have_transaction) {
+                                        _editor->session()->add_command (new StatefulDiffCommand ((*i)->region()));
+                                }
 			}
 		}
 		for (set<boost::shared_ptr<Playlist> >::iterator p = _editor->motion_frozen_playlists.begin(); p != _editor->motion_frozen_playlists.end(); ++p) {
 			(*p)->thaw ();
-			if (_have_transaction) {
-				_editor->session()->add_command (new MementoCommand<Playlist>(*(*p).get(), 0, &(*p)->get_state()));
-			}
 		}
 
 		_editor->motion_frozen_playlists.clear ();

@@ -93,9 +93,6 @@ class Region
 
         PBD::PropertyList* property_factory (const XMLNode&) const;
 
-	void unlock_property_changes () { _no_property_changes = false; }
-	void block_property_changes () { _no_property_changes = true; }
-	
 	virtual ~Region();
 	
 	/** Note: changing the name of a Region does not constitute an edit */
@@ -156,8 +153,7 @@ class Region
 	void set_position_lock_style (PositionLockStyle ps);
 	void recompute_position_from_lock_style ();
 
-	void freeze ();
-	void thaw ();
+	void suspend_property_changes ();
 
 	bool covers (framepos_t frame) const {
 		return first_frame() <= frame && frame <= last_frame();
@@ -288,6 +284,7 @@ class Region
 
   protected:
 	void send_change (const PBD::PropertyChange&);
+        void mid_thaw (const PBD::PropertyChange&);
 
 	void trim_to_internal (framepos_t position, framecnt_t length, void *src);
 	virtual void set_position_internal (framepos_t pos, bool allow_bbt_recompute);
@@ -304,7 +301,6 @@ class Region
 	virtual void recompute_at_end () = 0;
 	
 	DataType                _type;
-	bool                    _no_property_changes;
 
 	PBD::Property<bool>        _muted;
 	PBD::Property<bool>        _opaque;
@@ -332,14 +328,11 @@ class Region
 	framepos_t              _last_position;
 	PositionLockStyle       _positional_lock_style;
 	mutable RegionEditState _first_edit;
-	int                     _frozen;
 	BBT_Time                _bbt_time;
 	AnalysisFeatureList     _transients;
 	bool                    _valid_transients;
 	mutable uint64_t        _read_data_count;  ///< modified in read()
-	PBD::PropertyChange     _pending_changed;
 	uint64_t                _last_layer_op;  ///< timestamp
-	Glib::Mutex             _lock;
 	SourceList              _sources;
 	/** Used when timefx are applied, so we can always use the original source */
 	SourceList              _master_sources;

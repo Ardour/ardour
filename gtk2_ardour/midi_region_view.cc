@@ -29,6 +29,7 @@
 #include <sigc++/signal.h>
 
 #include "pbd/memento_command.h"
+#include "pbd/stateful_diff_command.h"
 
 #include "ardour/playlist.h"
 #include "ardour/tempo.h"
@@ -2530,9 +2531,9 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 
 		trackview.session()->begin_reversible_command (_("paste"));
 
-		XMLNode& before (_region->get_state());
+                _region->clear_history ();
 		_region->set_length (end_frame, this);
-		trackview.session()->add_command (new MementoCommand<Region>(*_region, &before, &_region->get_state()));
+		trackview.session()->add_command (new StatefulDiffCommand (_region));
 	}
 
 	apply_delta ();

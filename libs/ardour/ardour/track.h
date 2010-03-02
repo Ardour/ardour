@@ -74,7 +74,7 @@ class Track : public Route
 
 	FreezeState freeze_state() const;
 
-	virtual void freeze (InterThreadInfo&) = 0;
+	virtual void freeze_me (InterThreadInfo&) = 0;
 	virtual void unfreeze () = 0;
 
 	virtual boost::shared_ptr<Region> bounce (InterThreadInfo&) = 0;

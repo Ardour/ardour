@@ -692,7 +692,7 @@ AudioTrack::bounce_range (nframes_t start, nframes_t end, InterThreadInfo& itt, 
 }
 
 void
-AudioTrack::freeze (InterThreadInfo& itt)
+AudioTrack::freeze_me (InterThreadInfo& itt)
 {
 	vector<boost::shared_ptr<Source> > srcs;
 	string new_playlist_name;

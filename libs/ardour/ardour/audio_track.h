@@ -49,7 +49,7 @@ class AudioTrack : public Track
 
 	int export_stuff (BufferSet& bufs, sframes_t start_frame, nframes_t nframes, bool enable_processing = true);
 
-	void freeze (InterThreadInfo&);
+	void freeze_me (InterThreadInfo&);
 	void unfreeze ();
 
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);

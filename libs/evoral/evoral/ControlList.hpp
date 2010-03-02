@@ -94,8 +94,9 @@ public:
 	ControlList& operator= (const ControlList&);
 	bool operator== (const ControlList&);
 
-	void freeze();
-	void thaw ();
+	virtual void freeze();
+        virtual void thaw ();
+        bool frozen() const { return _frozen; }
 
 	const Parameter& parameter() const                 { return _parameter; }
 	void             set_parameter(const Parameter& p) { _parameter = p; }

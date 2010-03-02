@@ -50,7 +50,7 @@ class OSCControllable : public PBD::Stateful
 	lo_address addr;
 	std::string path;
 
-	virtual void send_change ();
+	virtual void send_change_message ();
 };
 
 class OSCRouteControllable : public OSCControllable
@@ -67,7 +67,7 @@ class OSCRouteControllable : public OSCControllable
   private:
 	boost::shared_ptr<ARDOUR::Route> _route;
 
-	void send_change ();
+	void send_change_message ();
 };
 
 #endif /* __osc_osccontrollable_h__ */

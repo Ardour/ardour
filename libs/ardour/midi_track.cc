@@ -556,7 +556,7 @@ MidiTrack::bounce_range (nframes_t /*start*/, nframes_t /*end*/, InterThreadInfo
 }
 
 void
-MidiTrack::freeze (InterThreadInfo& /*itt*/)
+MidiTrack::freeze_me (InterThreadInfo& /*itt*/)
 {
 }
 

@@ -67,7 +67,6 @@ RegionFactory::create (boost::shared_ptr<const Region> region)
 	}
 
 	if (ret) {
-		ret->unlock_property_changes ();
 		map_add (ret);
 
 		/* pure copy constructor - no property list */
@@ -106,10 +105,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, c
 	}
 
 	if (ret) {
-
 		ret->set_properties (plist);
-		ret->unlock_property_changes ();
-
 		map_add (ret);
 
 		if (announce) {
@@ -149,10 +145,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 	}
 
 	if (ret) {
-
 		ret->set_properties (plist);
-		ret->unlock_property_changes ();
-
 		map_add (ret);
 
 		if (announce) {
@@ -195,8 +188,6 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 	if (ret) {
 
 		ret->set_properties (plist);
-		ret->unlock_property_changes ();
-
 		map_add (ret);
 
 		if (announce) {
@@ -242,8 +233,6 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 	if (ret) {
 
 		ret->set_properties (plist);
-		ret->unlock_property_changes ();
-
 		map_add (ret);
 
 		if (announce) {
@@ -290,7 +279,6 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 		if (ret->set_state (node, Stateful::loading_state_version)) {
 			ret.reset ();
 		} else {
-			ret->unlock_property_changes ();
 			map_add (ret);
 			CheckNewRegion (ret);
 		}

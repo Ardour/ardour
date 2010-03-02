@@ -35,7 +35,7 @@
 #include "pbd/xml++.h"
 #include "pbd/memento_command.h"
 #include "pbd/enumwriter.h"
-#include "pbd/stacktrace.h"
+#include "pbd/stateful_diff_command.h"
 
 #include "ardour/analyser.h"
 #include "ardour/ardour.h"
@@ -1497,7 +1497,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 
 		// cerr << _name << ": there are " << capture_info.size() << " capture_info records\n";
 
-		XMLNode &before = _playlist->get_state();
+                _playlist->clear_history ();
 		_playlist->freeze ();
 
 		for (buffer_position = c->front()->write_source->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
@@ -1537,8 +1537,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 		}
 
 		_playlist->thaw ();
-		XMLNode &after = _playlist->get_state();
-		_session.add_command (new MementoCommand<Playlist>(*_playlist, &before, &after));
+		_session.add_command (new StatefulDiffCommand (_playlist));
 	}
 
 	mark_write_completed = true;

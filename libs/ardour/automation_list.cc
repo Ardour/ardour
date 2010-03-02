@@ -170,7 +170,7 @@ AutomationList::maybe_signal_changed ()
 {
 	ControlList::maybe_signal_changed ();
 
-	if (!_frozen) {
+	if (!ControlList::frozen()) {
 		StateChanged (); /* EMIT SIGNAL */
 	}
 }
@@ -205,12 +205,6 @@ AutomationList::stop_touch ()
 {
 	_touching = false;
 	_new_value = false;
-}
-
-void
-AutomationList::freeze ()
-{
-	_frozen++;
 }
 
 void
@@ -313,7 +307,7 @@ AutomationList::deserialize_events (const XMLNode& node)
 		return -1;
 	}
 
-	freeze ();
+        ControlList::freeze ();
 	clear ();
 
 	stringstream str (content_node->content());
@@ -344,8 +338,8 @@ AutomationList::deserialize_events (const XMLNode& node)
 		maybe_signal_changed ();
 	}
 
-	thaw ();
-
+        ControlList::thaw ();
+        
 	return 0;
 }
 
@@ -377,7 +371,7 @@ AutomationList::set_state (const XMLNode& node, int version)
 		nframes_t x;
 		double y;
 
-		freeze ();
+                ControlList::freeze ();
 		clear ();
 
 		for (i = elist.begin(); i != elist.end(); ++i) {
@@ -397,7 +391,7 @@ AutomationList::set_state (const XMLNode& node, int version)
 			fast_simple_add (x, y);
 		}
 
-		thaw ();
+                ControlList::thaw ();
 
 		return 0;
 	}

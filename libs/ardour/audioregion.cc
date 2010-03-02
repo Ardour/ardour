@@ -589,7 +589,7 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 	LocaleGuard lg (X_("POSIX"));
 	boost::shared_ptr<Playlist> the_playlist (_playlist.lock());	
 
-	freeze ();
+	suspend_property_changes ();
 
 	if (the_playlist) {
 		the_playlist->freeze ();
@@ -612,7 +612,7 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 
 	/* Now find envelope description and other related child items */
 
-	_envelope->freeze ();
+        _envelope->freeze ();
 
 	for (XMLNodeConstIterator niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		XMLNode *child;
@@ -677,9 +677,9 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 		}
 	}
 
-	_envelope->thaw ();
-	thaw ();
-
+        _envelope->thaw ();
+	resume_property_changes ();
+        
 	if (send) {
 		send_change (what_changed);
 	}
@@ -761,9 +761,9 @@ AudioRegion::set_fade_out_shape (FadeShape shape)
 void
 AudioRegion::set_fade_in (boost::shared_ptr<AutomationList> f)
 {
-	_fade_in->freeze ();
+        _fade_in->freeze ();
 	*_fade_in = *f;
-	_fade_in->thaw ();
+        _fade_in->thaw ();
 	
 	send_change (PropertyChange (Properties::fade_in));
 }
@@ -771,7 +771,7 @@ AudioRegion::set_fade_in (boost::shared_ptr<AutomationList> f)
 void
 AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 {
-	_fade_in->freeze ();
+        _fade_in->freeze ();
 	_fade_in->clear ();
 
 	switch (shape) {
@@ -822,15 +822,15 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		break;
 	}
 
-	_fade_in->thaw ();
+        _fade_in->thaw ();
 }
 
 void
 AudioRegion::set_fade_out (boost::shared_ptr<AutomationList> f)
 {
-	_fade_out->freeze ();
+        _fade_out->freeze ();
 	*_fade_out = *f;
-	_fade_out->thaw ();
+        _fade_out->thaw ();
 
 	send_change (PropertyChange (Properties::fade_in));
 }
@@ -838,7 +838,7 @@ AudioRegion::set_fade_out (boost::shared_ptr<AutomationList> f)
 void
 AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 {
-	_fade_out->freeze ();
+        _fade_out->freeze ();
 	_fade_out->clear ();
 
 	switch (shape) {
@@ -887,7 +887,7 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		break;
 	}
 
-	_fade_out->thaw ();
+        _fade_out->thaw ();
 }
 
 void
@@ -977,11 +977,11 @@ AudioRegion::set_default_fades ()
 void
 AudioRegion::set_default_envelope ()
 {
-	_envelope->freeze ();
+        _envelope->freeze ();
 	_envelope->clear ();
 	_envelope->fast_simple_add (0, 1.0f);
 	_envelope->fast_simple_add (_length, 1.0f);
-	_envelope->thaw ();
+        _envelope->thaw ();
 }
 
 void
@@ -991,10 +991,10 @@ AudioRegion::recompute_at_end ()
 	   based on the the existing curve.
 	*/
 
-	_envelope->freeze ();
+        _envelope->freeze ();
 	_envelope->truncate_end (_length);
 	_envelope->set_max_xval (_length);
-	_envelope->thaw ();
+        _envelope->thaw ();
 
 	if (_fade_in->back()->when > _length) {
 		_fade_in->extend_to (_length);

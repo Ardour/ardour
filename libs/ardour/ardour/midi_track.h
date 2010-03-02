@@ -53,7 +53,7 @@ public:
 
 	int export_stuff (BufferSet& bufs, nframes_t nframes, sframes_t end_frame);
 
-	void freeze (InterThreadInfo&);
+	void freeze_me (InterThreadInfo&);
 	void unfreeze ();
 
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);

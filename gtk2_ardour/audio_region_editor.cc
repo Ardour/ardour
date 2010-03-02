@@ -18,6 +18,7 @@
 */
 
 #include "pbd/memento_command.h"
+#include "pbd/stateful_diff_command.h"
 
 #include "ardour/session.h"
 #include "ardour/audioregion.h"
@@ -256,10 +257,9 @@ AudioRegionEditor::position_clock_changed ()
 	boost::shared_ptr<Playlist> pl = _region->playlist();
 
 	if (pl) {
-		XMLNode &before = pl->get_state();
+		_region->clear_history ();
 		_region->set_position (position_clock.current_time(), this);
-		XMLNode &after = pl->get_state();
-		_session->add_command(new MementoCommand<Playlist>(*pl, &before, &after));
+		_session->add_command(new StatefulDiffCommand (_region));
 	}
 
 	_session->commit_reversible_command ();
@@ -273,10 +273,9 @@ AudioRegionEditor::end_clock_changed ()
 	boost::shared_ptr<Playlist> pl = _region->playlist();
 
 	if (pl) {
-		XMLNode &before = pl->get_state();
+                _region->clear_history ();
 		_region->trim_end (end_clock.current_time(), this);
-		XMLNode &after = pl->get_state();
-		_session->add_command(new MementoCommand<Playlist>(*pl, &before, &after));
+		_session->add_command(new StatefulDiffCommand (_region));
 	}
 
 	_session->commit_reversible_command ();
@@ -294,10 +293,9 @@ AudioRegionEditor::length_clock_changed ()
 	boost::shared_ptr<Playlist> pl = _region->playlist();
 
 	if (pl) {
-		XMLNode &before = pl->get_state();
+                _region->clear_history ();
 		_region->trim_end (_region->position() + frames - 1, this);
-		XMLNode &after = pl->get_state();
-		_session->add_command(new MementoCommand<Playlist>(*pl, &before, &after));
+		_session->add_command(new StatefulDiffCommand (_region));
 	}
 
 	_session->commit_reversible_command ();
@@ -404,10 +402,9 @@ AudioRegionEditor::sync_offset_absolute_clock_changed ()
 {
 	_session->begin_reversible_command (_("change region sync point"));
 
-	XMLNode& before = _region->get_state ();
+        _region->clear_history ();
 	_region->set_sync_position (sync_offset_absolute_clock.current_time());
-	XMLNode& after = _region->get_state ();
-	_session->add_command (new MementoCommand<AudioRegion> (*_region.get(), &before, &after));
+	_session->add_command (new StatefulDiffCommand (_region));
 	
 	_session->commit_reversible_command ();
 }
@@ -417,10 +414,9 @@ AudioRegionEditor::sync_offset_relative_clock_changed ()
 {
 	_session->begin_reversible_command (_("change region sync point"));
 
-	XMLNode& before = _region->get_state ();
+        _region->clear_history ();
 	_region->set_sync_position (sync_offset_relative_clock.current_time() + _region->position ());
-	XMLNode& after = _region->get_state ();
-	_session->add_command (new MementoCommand<AudioRegion> (*_region.get(), &before, &after));
+	_session->add_command (new StatefulDiffCommand (_region));
 	
 	_session->commit_reversible_command ();
 }

@@ -39,7 +39,9 @@ int Stateful::current_state_version = 0;
 int Stateful::loading_state_version = 0;
 
 Stateful::Stateful ()
-        : _properties (new OwnedPropertyList)
+        : _frozen (0)
+        , _no_property_changes (false)
+        , _properties (new OwnedPropertyList)
 {
 	_extra_xml = 0;
 	_instant_xml = 0;
@@ -237,5 +239,53 @@ Stateful::add_property (PropertyBase& s)
 {
         _properties->add (s);
 }
+
+void
+Stateful::send_change (const PropertyChange& what_changed)
+{
+	if (what_changed.empty()) {
+		return;
+	}
+
+	{
+		Glib::Mutex::Lock lm (_lock);
+		if (_frozen) {
+			_pending_changed.add (what_changed);
+			return;
+		}
+	}
+
+	PropertyChanged (what_changed);
+}
+
+void
+Stateful::suspend_property_changes ()
+{
+        _frozen++;
+}
+
+void
+Stateful::resume_property_changes ()
+{
+	PropertyChange what_changed;
+
+	{
+		Glib::Mutex::Lock lm (_lock);
+
+		if (_frozen && --_frozen > 0) {
+			return;
+		}
+
+		if (!_pending_changed.empty()) {
+			what_changed = _pending_changed;
+			_pending_changed.clear ();
+		}
+	}
+
+        mid_thaw (what_changed);
+
+        send_change (what_changed);
+}
+
 
 } // namespace PBD

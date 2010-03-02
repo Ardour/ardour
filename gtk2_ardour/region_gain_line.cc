@@ -19,6 +19,7 @@
 
 #include "evoral/Curve.hpp"
 #include "pbd/memento_command.h"
+#include "pbd/stateful_diff_command.h"
 
 #include "ardour/audioregion.h"
 #include "ardour/session.h"
@@ -53,6 +54,8 @@ void
 AudioRegionGainLine::start_drag_single (ControlPoint* cp, double x, float fraction)
 {
 	AutomationLine::start_drag_single (cp, x, fraction);
+
+        // XXX Stateful need to capture automation curve data
 	
 	if (!rv.audio_region()->envelope_active()) {
 		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &rv.audio_region()->get_state(), 0));
@@ -72,10 +75,9 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
 	XMLNode &before = alist->get_state();
 
 	if (!rv.audio_region()->envelope_active()) {
-		XMLNode &region_before = rv.audio_region()->get_state();
+                rv.audio_region()->clear_history ();
 		rv.audio_region()->set_envelope_active(true);
-		XMLNode &region_after = rv.audio_region()->get_state();
-		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &region_before, &region_after));
+		trackview.session()->add_command(new StatefulDiffCommand (rv.audio_region()));
 	}
 
 	alist->erase (mr.start, mr.end);

@@ -199,13 +199,11 @@ Region::register_properties ()
 Region::Region (Session& s, framepos_t start, framecnt_t length, const string& name, DataType type)
 	: SessionObject(s, name)
 	, _type(type)
-	, _no_property_changes (true)
 	, REGION_DEFAULT_STATE(start,length)
 	, _last_length (length)
 	, _last_position (0)
 	, _positional_lock_style(AudioTime)
 	, _first_edit (EditChangesNothing)
-	, _frozen(0)
 	, _read_data_count(0)
 	, _last_layer_op(0)
 	, _pending_explicit_relayer (false)
@@ -219,13 +217,11 @@ Region::Region (Session& s, framepos_t start, framecnt_t length, const string& n
 Region::Region (const SourceList& srcs)
 	: SessionObject(srcs.front()->session(), "toBeRenamed")
 	, _type (srcs.front()->type())
-	, _no_property_changes (true)
 	, REGION_DEFAULT_STATE(0,0)
 	, _last_length (0)
 	, _last_position (0)
         , _positional_lock_style (_type == DataType::AUDIO ? AudioTime : MusicTime)
 	, _first_edit (EditChangesNothing)
-	, _frozen (0)
 	, _valid_transients(false)
 	, _read_data_count(0)
 	, _last_layer_op (0)
@@ -251,13 +247,11 @@ Region::Region (const SourceList& srcs)
 Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, bool offset_relative)
 	: SessionObject(other->session(), other->name())
 	, _type (other->data_type())
-	, _no_property_changes (true)
 	, REGION_COPY_STATE (other)
 	, _last_length (other->_last_length)
 	, _last_position(other->_last_position) \
 	, _positional_lock_style(other->_positional_lock_style) \
 	, _first_edit (EditChangesNothing)
-	, _frozen (0)
 	, _valid_transients(false)
 	, _read_data_count(0)
 	, _last_layer_op (0)
@@ -360,13 +354,11 @@ Region::Region (boost::shared_ptr<const Region> other, frameoffset_t offset, boo
 Region::Region (boost::shared_ptr<const Region> other, const SourceList& srcs)
 	: SessionObject (other->session(), other->name())
 	, _type (srcs.front()->type())
-	, _no_property_changes (true)
 	, REGION_COPY_STATE (other)
 	, _last_length (other->_last_length)
 	, _last_position (other->_last_position)
         , _positional_lock_style (other->_positional_lock_style)
 	, _first_edit (EditChangesID)
-	, _frozen (0)
 	, _valid_transients (false)
 	, _read_data_count (0)
 	, _last_layer_op (other->_last_layer_op)
@@ -393,13 +385,11 @@ Region::Region (boost::shared_ptr<const Region> other, const SourceList& srcs)
 Region::Region (boost::shared_ptr<const Region> other)
 	: SessionObject(other->session(), other->name())
 	, _type(other->data_type())
-	, _no_property_changes (true)
 	, REGION_COPY_STATE (other)
 	, _last_length (other->_last_length)
 	, _last_position (other->_last_position)
         , _positional_lock_style (other->_positional_lock_style)
 	, _first_edit (EditChangesID)
-	, _frozen(0)
 	, _valid_transients(false)
 	, _read_data_count(0)
 	, _last_layer_op(other->_last_layer_op)
@@ -475,7 +465,7 @@ Region::set_length (framecnt_t len, void */*src*/)
 		maybe_uncopy ();
 		invalidate_transients ();
 
-		if (!_frozen) {
+		if (!property_changes_suspended()) {
 			recompute_at_end ();
 		}
 
@@ -803,7 +793,7 @@ Region::trim_front (framepos_t new_position, void *src)
 		}
 
 		trim_to_internal (new_position, newlen, src);
-		if (!_frozen) {
+		if (!property_changes_suspended()) {
 			recompute_at_start ();
 		}
 	}
@@ -822,7 +812,7 @@ Region::trim_end (framepos_t new_endpoint, void */*src*/)
 
 	if (new_endpoint > _position) {
 		trim_to_internal (_position, new_endpoint - _position + 1, this);
-		if (!_frozen) {
+		if (!property_changes_suspended()) {
 			recompute_at_end ();
 		}
 	}
@@ -837,7 +827,7 @@ Region::trim_to (framepos_t position, framecnt_t length, void *src)
 
 	trim_to_internal (position, length, src);
 
-	if (!_frozen) {
+	if (!property_changes_suspended()) {
 		recompute_at_start ();
 		recompute_at_end ();
 	}
@@ -890,14 +880,14 @@ Region::trim_to_internal (framepos_t position, framecnt_t length, void */*src*/)
 		what_changed.add (Properties::start);
 	}
 	if (_length != length) {
-		if (!_frozen) {
+		if (!property_changes_suspended()) {
 			_last_length = _length;
 		}
 		_length = length;
 		what_changed.add (Properties::length);
 	}
 	if (_position != position) {
-		if (!_frozen) {
+		if (!property_changes_suspended()) {
 			_last_position = _position;
 		}
 		_position = position;
@@ -987,7 +977,7 @@ Region::set_sync_position (framepos_t absolute_pos)
 	if (file_pos != _sync_position) {
 		_sync_marked = true;
 		_sync_position = file_pos;
-		if (!_frozen) {
+		if (!property_changes_suspended()) {
 			maybe_uncopy ();
 		}
 		send_change (Properties::sync_position);
@@ -999,7 +989,7 @@ Region::clear_sync_position ()
 {
 	if (sync_marked()) {
 		_sync_marked = false;
-		if (!_frozen) {
+		if (!property_changes_suspended()) {
 			maybe_uncopy ();
 		}
 		send_change (Properties::sync_position);
@@ -1229,43 +1219,22 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 }
 
 void
-Region::freeze ()
+Region::suspend_property_changes ()
 {
-	_frozen++;
+        Stateful::suspend_property_changes ();
 	_last_length = _length;
 	_last_position = _position;
 }
 
 void
-Region::thaw ()
+Region::mid_thaw (const PropertyChange& what_changed)
 {
-	PropertyChange what_changed;
-
-	{
-		Glib::Mutex::Lock lm (_lock);
-
-		if (_frozen && --_frozen > 0) {
-			return;
-		}
-
-		if (!_pending_changed.empty()) {
-			what_changed = _pending_changed;
-			_pending_changed.clear ();
-		}
-	}
-
-	if (what_changed.empty()) {
-		return;
-	}
-
 	if (what_changed.contains (Properties::length)) {
 		if (what_changed.contains (Properties::position)) {
 			recompute_at_start ();
 		}
 		recompute_at_end ();
 	}
-
-	send_change (what_changed);
 }
 
 void
@@ -1275,15 +1244,7 @@ Region::send_change (const PropertyChange& what_changed)
 		return;
 	}
 
-	{
-		Glib::Mutex::Lock lm (_lock);
-		if (_frozen) {
-			_pending_changed.add (what_changed);
-			return;
-		}
-	}
-
-	PropertyChanged (what_changed);
+        Stateful::send_change (what_changed);
 
 	if (!_no_property_changes) {
 		
@@ -1294,12 +1255,10 @@ Region::send_change (const PropertyChange& what_changed)
 		try {
 			boost::shared_ptr<Region> rptr = shared_from_this();
 			RegionPropertyChanged (rptr, what_changed);
-
 		} catch (...) {
 			/* no shared_ptr available, relax; */
 		}
 	}
-
 }
 
 void
@@ -1584,16 +1543,26 @@ Region::set_property (const PropertyBase& prop)
 	} else if (prop == Properties::position_locked.property_id) {
 		_position_locked = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
 	} else if (prop == Properties::start.property_id) {
-		_start = dynamic_cast<const PropertyTemplate<framepos_t>*>(&prop)->val();
+		framepos_t val = dynamic_cast<const PropertyTemplate<framepos_t>*>(&prop)->val();
+                if (val != _start) {
+                        DEBUG_TRACE (DEBUG::Properties, string_compose ("region %1 start changed from %2 to %3",
+									_name.val(), _start, val));
+                        _start = val;
+                        return true;
+                }
 	} else if (prop == Properties::length.property_id) {
 		framecnt_t val = dynamic_cast<const PropertyTemplate<framecnt_t>* > (&prop)->val();
 		if (val != _length) {
+			DEBUG_TRACE (DEBUG::Properties, string_compose ("region %1 length changed from %2 to %3",
+									_name.val(), _length, val));
 			_length = val;
 			return true;
 		}
 	} else if (prop == Properties::position.property_id) {
 		framepos_t val = dynamic_cast<const PropertyTemplate<framepos_t>*>(&prop)->val();
 		if (val != _position) {
+			DEBUG_TRACE (DEBUG::Properties, string_compose ("region %1 position changed from %2 to %3",
+									_name.val(), _position, val));
 			_position = val;
 			return true;
 		}

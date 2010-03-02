@@ -29,6 +29,7 @@
 #include "pbd/pthread_utils.h"
 #include "pbd/basename.h"
 #include "pbd/shortpath.h"
+#include "pbd/stateful_diff_command.h"
 
 #include <gtkmm2ext/choice.h>
 
@@ -840,9 +841,9 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 		boost::shared_ptr<Playlist> playlist = existing_track->diskstream()->playlist();
 		boost::shared_ptr<Region> copy (RegionFactory::create (region, region->properties()));
 		begin_reversible_command (_("insert file"));
-		XMLNode &before = playlist->get_state();
+                playlist->clear_history ();
 		playlist->add_region (copy, pos);
-		_session->add_command (new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
+		_session->add_command (new StatefulDiffCommand (playlist));
 		commit_reversible_command ();
 		break;
 	}

@@ -35,6 +35,7 @@
 #include "pbd/xml++.h"
 #include "pbd/memento_command.h"
 #include "pbd/enumwriter.h"
+#include "pbd/stateful_diff_command.h"
 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
@@ -1011,7 +1012,7 @@ MidiDiskstream::transport_stopped (struct tm& /*when*/, time_t /*twhen*/, bool a
 
 		// cerr << _name << ": there are " << capture_info.size() << " capture_info records\n";
 
-		XMLNode &before = _playlist->get_state();
+		_playlist->clear_history ();
 		_playlist->freeze ();
 
 		uint32_t buffer_position = 0;
@@ -1053,8 +1054,7 @@ MidiDiskstream::transport_stopped (struct tm& /*when*/, time_t /*twhen*/, bool a
 		}
 
 		_playlist->thaw ();
-		XMLNode &after = _playlist->get_state();
-		_session.add_command (new MementoCommand<Playlist>(*_playlist, &before, &after));
+		_session.add_command (new StatefulDiffCommand(_playlist));
 
 	}
 

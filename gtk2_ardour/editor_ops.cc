@@ -323,10 +323,9 @@ Editor::nudge_forward (bool next, bool force_playhead)
 				distance = next_distance;
 			}
 
-                        XMLNode &before = r->playlist()->get_state();
+                        r->clear_history ();
 			r->set_position (r->position() + distance, this);
-                        XMLNode &after = r->playlist()->get_state();
-			_session->add_command (new MementoCommand<Playlist>(*(r->playlist()), &before, &after));
+			_session->add_command (new StatefulDiffCommand (r));
 		}
 
 		commit_reversible_command ();
@@ -403,16 +402,15 @@ Editor::nudge_backward (bool next, bool force_playhead)
 			if (next) {
 				distance = next_distance;
 			}
-
-                        XMLNode &before = r->playlist()->get_state();
+                        
+                        r->clear_history ();
 
 			if (r->position() > distance) {
 				r->set_position (r->position() - distance, this);
 			} else {
 				r->set_position (0, this);
 			}
-                        XMLNode &after = r->playlist()->get_state();
-			_session->add_command(new MementoCommand<Playlist>(*(r->playlist()), &before, &after));
+			_session->add_command (new StatefulDiffCommand (r));
 		}
 
 		commit_reversible_command ();
@@ -493,10 +491,9 @@ Editor::nudge_forward_capture_offset ()
 		for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 			boost::shared_ptr<Region> r ((*i)->region());
 
-			XMLNode &before = r->playlist()->get_state();
+                        r->clear_history ();
 			r->set_position (r->position() + distance, this);
-			XMLNode &after = r->playlist()->get_state();
-			_session->add_command(new MementoCommand<Playlist>(*(r->playlist()), &before, &after));
+			_session->add_command(new StatefulDiffCommand (r));
 		}
 
 		commit_reversible_command ();
@@ -523,15 +520,14 @@ Editor::nudge_backward_capture_offset ()
 		for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 			boost::shared_ptr<Region> r ((*i)->region());
 
-                        XMLNode &before = r->playlist()->get_state();
+                        r->clear_history ();
 
 			if (r->position() > distance) {
 				r->set_position (r->position() - distance, this);
 			} else {
 				r->set_position (0, this);
 			}
-                        XMLNode &after = r->playlist()->get_state();
-			_session->add_command(new MementoCommand<Playlist>(*(r->playlist()), &before, &after));
+			_session->add_command(new StatefulDiffCommand (r));
 		}
 
 		commit_reversible_command ();
@@ -2225,9 +2221,9 @@ Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 	snap_to (where);
 
 	begin_reversible_command (_("insert dragged region"));
-        XMLNode &before = playlist->get_state();
+        playlist->clear_history ();
 	playlist->add_region (RegionFactory::create (region), where, 1.0);
-	_session->add_command(new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
+	_session->add_command(new StatefulDiffCommand (playlist));
 	commit_reversible_command ();
 }
 
@@ -2303,9 +2299,9 @@ Editor::insert_region_list_selection (float times)
 	}
 
 	begin_reversible_command (_("insert region"));
-	XMLNode &before = playlist->get_state();
+        playlist->clear_history ();
 	playlist->add_region ((RegionFactory::create (region)), get_preferred_edit_position(), times);
-	_session->add_command(new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
+	_session->add_command(new StatefulDiffCommand (playlist));
 	commit_reversible_command ();
 }
 
@@ -2818,11 +2814,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 
 				if ((playlist = rtv->playlist()) != 0) {
 
-					XMLNode *before;
-					bool got_some;
-
-					before = &(playlist->get_state());
-					got_some = false;
+					playlist->clear_history ();
 
 					/* XXX need to consider musical time selections here at some point */
 
@@ -2842,24 +2834,17 @@ Editor::separate_regions_between (const TimeSelection& ts)
 
 						if (!latest_regionviews.empty()) {
 
-							got_some = true;
-
 							rtv->view()->foreach_regionview (sigc::bind (
 										sigc::ptr_fun (add_if_covered),
 										&(*t), &new_selection));
-
+                                                        
 							if (!in_command) {
 								begin_reversible_command (_("separate"));
 								in_command = true;
 							}
 
-							_session->add_command(new MementoCommand<Playlist>(
-									*playlist, before, &playlist->get_state()));
+							_session->add_command(new StatefulDiffCommand (playlist));
 						}
-					}
-
-					if (!got_some) {
-						delete before;
 					}
 				}
 			}
@@ -3022,10 +3007,9 @@ Editor::crop_region_to (nframes64_t start, nframes64_t end)
 		the_end = min (end, the_end);
 		cnt = the_end - the_start + 1;
 
-		XMLNode &before = (*i)->get_state();
+                region->clear_history ();
 		region->trim_to (the_start, cnt, this);
-		XMLNode &after = (*i)->get_state();
-		_session->add_command (new MementoCommand<Playlist>(*(*i), &before, &after));
+		_session->add_command (new StatefulDiffCommand (region));
 	}
 
 	commit_reversible_command ();
@@ -3063,9 +3047,9 @@ Editor::region_fill_track ()
 			return;
 		}
 
-		XMLNode &before = pl->get_state();
+                pl->clear_history ();
 		pl->add_region (RegionFactory::create (region), region->last_frame(), times);
-		_session->add_command (new MementoCommand<Playlist>(*pl, &before, &pl->get_state()));
+		_session->add_command (new StatefulDiffCommand (pl));
 	}
 
 	commit_reversible_command ();
@@ -3107,9 +3091,9 @@ Editor::region_fill_selection ()
 			continue;
 		}
 
-                XMLNode &before = playlist->get_state();
+                playlist->clear_history ();
 		playlist->add_region (RegionFactory::create (region), start, times);
-		_session->add_command (new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
+		_session->add_command (new StatefulDiffCommand (playlist));
 	}
 
 	commit_reversible_command ();
@@ -3142,10 +3126,9 @@ Editor::set_sync_point (nframes64_t where, const RegionSelection& rs)
 			in_command = true;
 		}
 
-		XMLNode &before = region->playlist()->get_state();
+                region->clear_history ();
 		region->set_sync_position (where);
-		XMLNode &after = region->playlist()->get_state();
-		_session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
+		_session->add_command(new StatefulDiffCommand (region));
 	}
 
 	if (in_command) {
@@ -3168,10 +3151,9 @@ Editor::remove_region_sync ()
 	begin_reversible_command (_("remove sync"));
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 
-                XMLNode &before = (*i)->region()->playlist()->get_state();
+                (*i)->region()->clear_history ();
 		(*i)->region()->clear_sync_position ();
-                XMLNode &after = (*i)->region()->playlist()->get_state();
-		_session->add_command(new MementoCommand<Playlist>(*((*i)->region()->playlist()), &before, &after));
+		_session->add_command(new StatefulDiffCommand ((*i)->region()));
 	}
 	commit_reversible_command ();
 }
@@ -3290,10 +3272,9 @@ Editor::align_selection_relative (RegionPoint point, nframes64_t position, const
 
 	/* move first one specially */
 
-	XMLNode &before = r->playlist()->get_state();
+        r->clear_history ();
 	r->set_position (pos, this);
-	XMLNode &after = r->playlist()->get_state();
-	_session->add_command(new MementoCommand<Playlist>(*(r->playlist()), &before, &after));
+	_session->add_command(new StatefulDiffCommand (r));
 
 	/* move rest by the same amount */
 
@@ -3303,16 +3284,15 @@ Editor::align_selection_relative (RegionPoint point, nframes64_t position, const
 
 		boost::shared_ptr<Region> region ((*i)->region());
 
-                XMLNode &before = region->playlist()->get_state();
+                region->clear_history ();
 
 		if (dir > 0) {
 			region->set_position (region->position() + distance, this);
 		} else {
 			region->set_position (region->position() - distance, this);
 		}
-
-                XMLNode &after = region->playlist()->get_state();
-		_session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
+                
+		_session->add_command(new StatefulDiffCommand (region));
 
 	}
 
@@ -3346,7 +3326,7 @@ Editor::align_region (boost::shared_ptr<Region> region, RegionPoint point, nfram
 void
 Editor::align_region_internal (boost::shared_ptr<Region> region, RegionPoint point, nframes64_t position)
 {
-	XMLNode &before = region->playlist()->get_state();
+	region->clear_history ();
 
 	switch (point) {
 	case SyncPoint:
@@ -3364,8 +3344,7 @@ Editor::align_region_internal (boost::shared_ptr<Region> region, RegionPoint poi
 		break;
 	}
 
-	XMLNode &after = region->playlist()->get_state();
-	_session->add_command(new MementoCommand<Playlist>(*(region->playlist()), &before, &after));
+	_session->add_command(new StatefulDiffCommand (region));
 }
 
 void
@@ -3396,15 +3375,13 @@ Editor::trim_region (bool front)
 
 	for (list<RegionView*>::const_iterator i = rs.by_layer().begin(); i != rs.by_layer().end(); ++i) {
 		if (!(*i)->region()->locked()) {
-			boost::shared_ptr<Playlist> pl = (*i)->region()->playlist();
-			XMLNode &before = pl->get_state();
+                        (*i)->region()->clear_history ();
 			if (front) {
 				(*i)->region()->trim_front (where, this);
 			} else {
 				(*i)->region()->trim_end (where, this);
 			}
-			XMLNode &after = pl->get_state();
-			_session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
+			_session->add_command (new StatefulDiffCommand ((*i)->region()));
 		}
 	}
 
@@ -3466,12 +3443,10 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 
 		start = session_frame_to_track_frame (loc.start(), speed);
 		end = session_frame_to_track_frame (loc.end(), speed);
-
-		XMLNode &before = rv->region()->playlist()->get_state();
+                
+		rv->region()->clear_history ();
 		rv->region()->trim_to (start, (end - start), this);
-		XMLNode &after = rv->region()->playlist()->get_state();
-		_session->add_command(new MementoCommand<Playlist>(
-				*(rv->region()->playlist()), &before, &after));
+		_session->add_command(new StatefulDiffCommand (rv->region()));
 	}
 
 	commit_reversible_command ();
@@ -3507,11 +3482,9 @@ Editor::trim_region_to_edit_point ()
 			speed = tav->get_diskstream()->speed();
 		}
 
-		XMLNode &before = rv->region()->playlist()->get_state();
+                rv->region()->clear_history ();
 		rv->region()->trim_end (session_frame_to_track_frame(where, speed), this);
-		XMLNode &after = rv->region()->playlist()->get_state();
-		_session->add_command(new MementoCommand<Playlist>(
-				*(rv->region()->playlist()), &before, &after));
+		_session->add_command(new StatefulDiffCommand (rv->region()));
 	}
 
 	commit_reversible_command ();
@@ -3547,11 +3520,9 @@ Editor::trim_region_from_edit_point ()
 			speed = tav->get_diskstream()->speed();
 		}
 
-		XMLNode &before = rv->region()->playlist()->get_state();
+                rv->region()->clear_history ();
 		rv->region()->trim_front (session_frame_to_track_frame(where, speed), this);
-		XMLNode &after = rv->region()->playlist()->get_state();
-		_session->add_command(new MementoCommand<Playlist>(
-				*(rv->region()->playlist()), &before, &after));
+		_session->add_command(new StatefulDiffCommand (rv->region()));
 	}
 
 	commit_reversible_command ();
@@ -3604,7 +3575,7 @@ Editor::trim_to_region(bool forward)
 		boost::shared_ptr<Region> region = arv->region();
 		boost::shared_ptr<Playlist> playlist (region->playlist());
 
-		XMLNode &before = playlist->get_state();
+                region->clear_history ();
 
 		if(forward){
 
@@ -3630,8 +3601,7 @@ Editor::trim_to_region(bool forward)
 		    arv->region_changed (ARDOUR::bounds_change);
 		}
 
-		XMLNode &after = playlist->get_state();
-		_session->add_command(new MementoCommand<Playlist>(*playlist, &before, &after));
+		_session->add_command(new StatefulDiffCommand (region));
 	}
 
 	commit_reversible_command ();
@@ -3658,7 +3628,7 @@ Editor::_freeze_thread (void* arg)
 void*
 Editor::freeze_thread ()
 {
-	clicked_routeview->audio_track()->freeze (*current_interthread_info);
+	clicked_routeview->audio_track()->freeze_me (*current_interthread_info);
 	current_interthread_info->done = true;
 	return 0;
 }
@@ -3747,7 +3717,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 		itt.cancel = false;
 		itt.progress = false;
 
-                XMLNode &before = playlist->get_state();
+                playlist->clear_history ();
 		boost::shared_ptr<Region> r = rtv->track()->bounce_range (start, start+cnt, itt, enable_processing);
 
 		if (replace) {
@@ -3757,8 +3727,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 			playlist->add_region (r, start);
 		}
 
-                XMLNode &after = playlist->get_state();
-		_session->add_command (new MementoCommand<Playlist> (*playlist, &before, &after));
+		_session->add_command (new StatefulDiffCommand (playlist));
 	}
 
 	commit_reversible_command ();
@@ -3994,10 +3963,9 @@ Editor::remove_clicked_region ()
 	boost::shared_ptr<Playlist> playlist = clicked_routeview->playlist();
 
 	begin_reversible_command (_("remove region"));
-        XMLNode &before = playlist->get_state();
+        playlist->clear_history ();
 	playlist->remove_region (clicked_regionview->region());
-        XMLNode &after = playlist->get_state();
-	_session->add_command(new MementoCommand<Playlist>(*playlist, &before, &after));
+	_session->add_command(new StatefulDiffCommand (playlist));
 	commit_reversible_command ();
 }
 
@@ -4034,7 +4002,7 @@ Editor::remove_selected_regions ()
 		regions_to_remove.push_back ((*i)->region());
 	}
 
-	vector<PlaylistState> playlists;
+        vector<boost::shared_ptr<Playlist> > playlists;
 
 	for (list<boost::shared_ptr<Region> >::iterator rl = regions_to_remove.begin(); rl != regions_to_remove.end(); ++rl) {
 
@@ -4045,33 +4013,31 @@ Editor::remove_selected_regions ()
 	        	continue;
 	        }
 
-		vector<PlaylistState>::iterator i;
+		vector<boost::shared_ptr<Playlist> >::iterator i;
 
-		//only take state if this is a new playlist.
+		//only prep history if this is a new playlist.
 		for (i = playlists.begin(); i != playlists.end(); ++i) {
-			if ((*i).playlist == playlist) {
+			if ((*i) == playlist) {
 				break;
 			}
 		}
 
 		if (i == playlists.end()) {
 
-			PlaylistState before;
-			before.playlist = playlist;
-			before.before = &playlist->get_state();
-
+                        playlist->clear_history ();
 			playlist->freeze ();
-			playlists.push_back(before);
+
+			playlists.push_back (playlist);
 		}
 
 		playlist->remove_region (*rl);
 	}
 
-	vector<PlaylistState>::iterator pl;
+	vector<boost::shared_ptr<Playlist> >::iterator pl;
 
 	for (pl = playlists.begin(); pl != playlists.end(); ++pl) {
-		(*pl).playlist->thaw ();
-		_session->add_command(new MementoCommand<Playlist>(*(*pl).playlist, (*pl).before, &(*pl).playlist->get_state()));
+		(*pl)->thaw ();
+		_session->add_command(new StatefulDiffCommand (*pl));
 	}
 
 	commit_reversible_command ();
@@ -4351,9 +4317,9 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		sigc::connection c = rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
  		playlist = (*i)->region()->playlist();
-                XMLNode &before = playlist->get_state();
+                playlist->clear_history ();
 		playlist->duplicate (r, end_frame + (r->first_frame() - start_frame) + 1, times);
-		_session->add_command(new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
+		_session->add_command(new StatefulDiffCommand (playlist));
 
 		c.disconnect ();
 
@@ -4392,10 +4358,9 @@ Editor::duplicate_selection (float times)
 		if ((playlist = (*i)->playlist()) == 0) {
 			continue;
 		}
-		XMLNode &before = playlist->get_state();
+                playlist->clear_history ();
 		playlist->duplicate (*ri, selection->time[clicked_selection].end, times);
-		XMLNode &after = playlist->get_state();
-		_session->add_command (new MementoCommand<Playlist>(*playlist, &before, &after));
+		_session->add_command (new StatefulDiffCommand (playlist));
 
 		++ri;
 		if (ri == new_regions.end()) {
@@ -4439,10 +4404,9 @@ void
 Editor::clear_playlist (boost::shared_ptr<Playlist> playlist)
 {
 	begin_reversible_command (_("clear playlist"));
-        XMLNode &before = playlist->get_state();
+        playlist->clear_history ();
 	playlist->clear ();
-        XMLNode &after = playlist->get_state();
-	_session->add_command (new MementoCommand<Playlist>(*playlist.get(), &before, &after));
+	_session->add_command (new StatefulDiffCommand (playlist));
 	commit_reversible_command ();
 }
 
@@ -4475,6 +4439,9 @@ Editor::nudge_track (bool use_edit, bool forwards)
 		if ((playlist = (*i)->playlist()) == 0) {
 			continue;
 		}
+
+                /* XXX STATEFUL this won't capture region moves if don't as a stateful diff
+                 */
 
                 XMLNode &before = playlist->get_state();
 		playlist->nudge_after (start, distance, forwards);
@@ -4555,9 +4522,10 @@ Editor::normalize_region ()
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
 		if (!arv)
 			continue;
- 		XMLNode &before = arv->region()->get_state();
+                arv->region()->clear_history ();
 		arv->audio_region()->normalize_to (spin.get_value());
-		_session->add_command (new MementoCommand<Region>(*(arv->region().get()), &before, &arv->region()->get_state()));
+		_session->add_command (new StatefulDiffCommand (arv->region()));
+                                       
 	}
 
 	commit_reversible_command ();
@@ -4588,9 +4556,9 @@ Editor::reset_region_scale_amplitude ()
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
 		if (!arv)
 			continue;
-		XMLNode &before = arv->region()->get_state();
+                arv->region()->clear_history ();
 		arv->audio_region()->set_scale_amplitude (1.0f);
-		_session->add_command (new MementoCommand<Region>(*(arv->region().get()), &before, &arv->region()->get_state()));
+		_session->add_command (new StatefulDiffCommand (arv->region()));
 	}
 
 	commit_reversible_command ();
@@ -4615,10 +4583,12 @@ Editor::adjust_region_scale_amplitude (bool up)
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
-		if (!arv)
+		if (!arv) {
 			continue;
-		XMLNode &before = arv->region()->get_state();
+                }
 
+                arv->region()->clear_history ();
+                
 		double fraction = gain_to_slider_position (arv->audio_region()->scale_amplitude ());
 
 		if (up) {
@@ -4640,7 +4610,7 @@ Editor::adjust_region_scale_amplitude (bool up)
 		}
 
 		arv->audio_region()->set_scale_amplitude (fraction);
-		_session->add_command (new MementoCommand<Region>(*(arv->region().get()), &before, &arv->region()->get_state()));
+		_session->add_command (new StatefulDiffCommand (arv->region()));
 	}
 
 	commit_reversible_command ();
@@ -4786,8 +4756,8 @@ Editor::apply_filter (Filter& filter, string command)
 
 			if (arv->audio_region()->apply (filter) == 0) {
 
-				XMLNode &before = playlist->get_state();
-
+				playlist->clear_history ();
+                                
 				if (filter.results.empty ()) {
 
 					/* no regions returned; remove the old one */
@@ -4809,8 +4779,7 @@ Editor::apply_filter (Filter& filter, string command)
 
 				}
 
-				XMLNode &after = playlist->get_state();
-				_session->add_command(new MementoCommand<Playlist>(*playlist, &before, &after));
+				_session->add_command(new StatefulDiffCommand (playlist));
 			} else {
 				goto out;
 			}
@@ -4918,10 +4887,9 @@ Editor::toggle_gain_envelope_visibility ()
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
-			XMLNode &before = arv->region()->get_state ();
+                        arv->region()->clear_history ();
 			arv->set_envelope_visible (!arv->envelope_visible());
-			XMLNode &after = arv->region()->get_state ();
-			_session->add_command (new MementoCommand<Region> (*(arv->region().get()), &before, &after));
+			_session->add_command (new StatefulDiffCommand (arv->region()));
 		}
 	}
 
@@ -4983,10 +4951,9 @@ Editor::set_region_lock_style (Region::PositionLockStyle ps)
 	_session->begin_reversible_command (_("region lock style"));
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
-		XMLNode &before = (*i)->region()->get_state ();
+                (*i)->region()->clear_history ();
 		(*i)->region()->set_position_lock_style (ps);
-		XMLNode &after = (*i)->region()->get_state ();
-		_session->add_command (new MementoCommand<Region> (*((*i)->region().get()), &before, &after));
+		_session->add_command (new StatefulDiffCommand ((*i)->region()));
 	}
 
 	_session->commit_reversible_command ();
@@ -5165,14 +5132,15 @@ Editor::toggle_fade_active (bool in)
 			have_switch = true;
 		}
 
-		XMLNode &before = region->get_state();
+		region->clear_history ();
+
 		if (in) {
 			region->set_fade_in_active (!yn);
 		} else {
 			region->set_fade_out_active (!yn);
 		}
-		XMLNode &after = region->get_state();
-		_session->add_command(new MementoCommand<AudioRegion>(*region.get(), &before, &after));
+		
+		_session->add_command(new StatefulDiffCommand (region));
 	}
 
 	commit_reversible_command ();
@@ -5265,13 +5233,10 @@ Editor::set_fade_in_active (bool yn)
 
 
 		boost::shared_ptr<AudioRegion> ar (tmp->audio_region());
-
-		XMLNode &before = ar->get_state();
-
+		
+                ar->clear_history ();
 		ar->set_fade_in_active (yn);
-
-		XMLNode &after = ar->get_state();
-		_session->add_command(new MementoCommand<AudioRegion>(*ar, &before, &after));
+		_session->add_command (new StatefulDiffCommand (ar));
 	}
 
 	commit_reversible_command ();
@@ -5299,12 +5264,9 @@ Editor::set_fade_out_active (bool yn)
 
 		boost::shared_ptr<AudioRegion> ar (tmp->audio_region());
 
-		XMLNode &before = ar->get_state();
-
+                ar->clear_history ();
 		ar->set_fade_out_active (yn);
-
-		XMLNode &after = ar->get_state();
-		_session->add_command(new MementoCommand<AudioRegion>(*ar, &before, &after));
+		_session->add_command(new StatefulDiffCommand (ar));
 	}
 
 	commit_reversible_command ();
@@ -5925,7 +5887,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 
 	nframes64_t pos = r->position();
 
-	XMLNode& before (pl->get_state());
+        pl->clear_history ();
 
 	x = positions.begin();
 
@@ -6007,9 +5969,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 
 	pl->thaw ();
 
-	XMLNode& after (pl->get_state());
-
-	_session->add_command (new MementoCommand<Playlist>(*pl, &before, &after));
+	_session->add_command (new StatefulDiffCommand (pl));
 }
 
 void
@@ -6329,6 +6289,9 @@ Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt,
 		boost::shared_ptr<Playlist> pl = (*x)->playlist();
 
 		if (pl) {
+
+                        /* XXX STATEFUL this won't capture region motion if done as stateful diff 
+                         */
 
 			XMLNode &before = pl->get_state();
 

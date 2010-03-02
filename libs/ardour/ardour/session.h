@@ -603,7 +603,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::shared_ptr<Region> write_one_track (AudioTrack&, nframes_t start, nframes_t end,
 			bool overwrite, std::vector<boost::shared_ptr<Source> >&, InterThreadInfo& wot,
 			bool enable_processing = true);
-	int freeze (InterThreadInfo&);
+	int freeze_all (InterThreadInfo&);
 
 	/* session-wide solo/mute/rec-enable */
 

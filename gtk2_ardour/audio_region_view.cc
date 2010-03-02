@@ -267,8 +267,8 @@ AudioRegionView::audio_region() const
 void
 AudioRegionView::region_changed (const PropertyChange& what_changed)
 {
-	ENSURE_GUI_THREAD (*this, &AudioRegionView::region_changed, what_changed)
-	//cerr << "AudioRegionView::region_changed() called" << endl;
+	ENSURE_GUI_THREAD (*this, &AudioRegionView::region_changed, what_changed);
+        // cerr << "AudioRegionView::region_changed() called" << endl;
 
 	RegionView::region_changed (what_changed);
 
@@ -276,7 +276,7 @@ AudioRegionView::region_changed (const PropertyChange& what_changed)
 		region_scale_amplitude_changed ();
 	}
 	if (what_changed.contains (ARDOUR::Properties::fade_in)) {
-			fade_in_changed ();
+                fade_in_changed ();
 	}
 	if (what_changed.contains (ARDOUR::Properties::fade_out)) {
 		fade_out_changed ();
@@ -1021,6 +1021,10 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev)
 	/* map using gain line */
 
 	gain_line->view_to_model_coord (x, y);
+
+        /* XXX STATEFUL: can't convert to stateful diff until we 
+           can represent automation data with it.
+        */
 
 	trackview.session()->begin_reversible_command (_("add gain control point"));
 	XMLNode &before = audio_region()->envelope()->get_state();

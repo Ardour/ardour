@@ -36,7 +36,7 @@ OSCControllable::OSCControllable (lo_address a, const std::string& p, boost::sha
 	, addr (a)
 	, path (p)
 {
-	c->Changed.connect (changed_connection, boost::bind (&OSCControllable::send_change, this), OSC::instance());
+	c->Changed.connect (changed_connection, boost::bind (&OSCControllable::send_change_message, this), OSC::instance());
 }
 
 OSCControllable::~OSCControllable ()
@@ -58,7 +58,7 @@ OSCControllable::set_state (const XMLNode& /*node*/, int /*version*/)
 }
 
 void
-OSCControllable::send_change ()
+OSCControllable::send_change_message ()
 {
 	lo_message msg = lo_message_new ();
 	
@@ -84,7 +84,7 @@ OSCRouteControllable::~OSCRouteControllable ()
 }
 
 void
-OSCRouteControllable::send_change ()
+OSCRouteControllable::send_change_message ()
 {
 	lo_message msg = lo_message_new ();
 

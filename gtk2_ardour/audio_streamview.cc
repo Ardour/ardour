@@ -660,10 +660,10 @@ AudioStreamView::update_rec_regions ()
 
 					if (nlen != region->length()) {
 
-						region->freeze ();
+						region->suspend_property_changes ();
 						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);
 						region->set_length (nlen, this);
-						region->thaw ();
+						region->resume_property_changes ();
 
 						if (origlen == 1) {
 							/* our special initial length */
@@ -685,10 +685,10 @@ AudioStreamView::update_rec_regions ()
 
 					if (region->source_length(0) >= region->start() + nlen) {
 
-						region->freeze ();
+						region->suspend_property_changes ();
 						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);
 						region->set_length (nlen, this);
-						region->thaw ();
+						region->resume_property_changes ();
 
 						if (origlen == 1) {
 							/* our special initial length */

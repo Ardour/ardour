@@ -82,6 +82,12 @@ class Stateful {
 	static int current_state_version;
 	static int loading_state_version;
 
+	virtual void suspend_property_changes ();
+	virtual void resume_property_changes ();
+
+	void unlock_property_changes () { _no_property_changes = false; }
+	void block_property_changes () { _no_property_changes = true; }
+	
   protected:
 
 	void add_instant_xml (XMLNode&, const sys::path& directory_path);
@@ -100,10 +106,21 @@ class Stateful {
 
 	XMLNode *_extra_xml;
 	XMLNode *_instant_xml;
-	PBD::ID _id;
+	PBD::ID  _id;
+        int32_t  _frozen;
+        bool     _no_property_changes;
+	PBD::PropertyChange     _pending_changed;
+        Glib::Mutex _lock;
 
 	std::string _xml_node_name; ///< name of node to use for this object in XML
 	OwnedPropertyList* _properties;
+
+        virtual void send_change (const PropertyChange&);
+        /** derived classes can implement this in order to process a property change
+            within thaw() just before send_change() is called.
+        */
+        virtual void mid_thaw (const PropertyChange&) { }
+        bool property_changes_suspended() const { return g_atomic_int_get (&_frozen) > 0; }
 };
 
 } // namespace PBD

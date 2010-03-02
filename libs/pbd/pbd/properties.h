@@ -122,8 +122,10 @@ protected:
 	{}
 
 	void set (T const& v) {
-		_old      = _current;
-		_have_old = true;
+                if (!_have_old) {
+                        _old      = _current;
+                        _have_old = true;
+                }
 		_current  = v;
 	}
 

@@ -50,7 +50,6 @@ class AutomationList : public PBD::StatefulDestructible, public Evoral::ControlL
 	AutomationList& operator= (const AutomationList&);
 	bool operator== (const AutomationList&);
 
-	void freeze();
 	void thaw ();
 	void mark_dirty () const;
 

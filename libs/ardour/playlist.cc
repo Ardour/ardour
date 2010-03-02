@@ -855,7 +855,7 @@ Playlist::partition (framepos_t start, framepos_t end, bool cut)
 	partition_internal (start, end, cut, thawlist);
 
 	for (RegionList::iterator i = thawlist.begin(); i != thawlist.end(); ++i) {
-		(*i)->thaw ();
+		(*i)->resume_property_changes ();
 	}
 }
 
@@ -972,7 +972,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 
 				/* "front" ***** */
 
-				current->freeze ();
+				current->suspend_property_changes ();
 				thawlist.push_back (current);
 				current->trim_end (pos2, this);
 
@@ -1011,7 +1011,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 
 				/* front ****** */
 
-				current->freeze ();
+				current->suspend_property_changes ();
 				thawlist.push_back (current);
 				current->trim_end (pos2, this);
 
@@ -1054,7 +1054,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 
 				/* end */
 
-				current->freeze ();
+				current->suspend_property_changes ();
 				thawlist.push_back (current);
 				current->trim_front (pos3, this);
 			} else if (overlap == OverlapExternal) {
@@ -1157,7 +1157,7 @@ Playlist::cut (framepos_t start, framecnt_t cnt, bool result_is_hidden)
 	partition_internal (start, start+cnt-1, true, thawlist);
 
 	for (RegionList::iterator i = thawlist.begin(); i != thawlist.end(); ++i) {
-		(*i)->thaw ();
+		(*i)->resume_property_changes();
 	}
 
 	return the_copy;
@@ -2123,15 +2123,15 @@ Playlist::set_state (const XMLNode& node, int version)
 
 			if ((region = region_by_id (id))) {
 
-				region->freeze ();
+				region->suspend_property_changes ();
 
 				if (region->set_state (*child, version)) {
-					region->thaw ();
+					region->resume_property_changes ();
 					continue;
 				}
 				
 			} else if ((region = RegionFactory::create (_session, *child, true)) != 0) {
-				region->freeze ();
+				region->suspend_property_changes ();
 			} else {
 				error << _("Playlist: cannot create region from XML") << endmsg;
 				continue;
@@ -2141,7 +2141,7 @@ Playlist::set_state (const XMLNode& node, int version)
 
 			// So that layer_op ordering doesn't get screwed up
 			region->set_last_layer_op( region->layer());
-			region->thaw ();
+			region->resume_property_changes ();
 		}
 	}
 

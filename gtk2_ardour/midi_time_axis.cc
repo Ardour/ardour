@@ -31,6 +31,7 @@
 #include "pbd/basename.h"
 #include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
+#include "pbd/stateful_diff_command.h"
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/selector.h>
@@ -966,7 +967,7 @@ MidiTimeAxisView::add_region (nframes64_t pos)
 	Editor* real_editor = dynamic_cast<Editor*> (&_editor);
 
 	real_editor->begin_reversible_command (_("create region"));
-	XMLNode &before = playlist()->get_state();
+        playlist()->clear_history ();
 
 	framepos_t start = pos;
 	real_editor->snap_to (start, -1);
@@ -988,8 +989,7 @@ MidiTimeAxisView::add_region (nframes64_t pos)
 	boost::shared_ptr<Region> region = (RegionFactory::create (src, plist));
 
 	playlist()->add_region (region, start);
-	XMLNode &after = playlist()->get_state();
-	_session->add_command (new MementoCommand<Playlist> (*playlist().get(), &before, &after));
+	_session->add_command (new StatefulDiffCommand (playlist()));
 
 	real_editor->commit_reversible_command();
 

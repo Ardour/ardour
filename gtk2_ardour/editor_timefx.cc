@@ -26,6 +26,7 @@
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/memento_command.h"
+#include "pbd/stateful_diff_command.h"
 
 #include <gtkmm2ext/utils.h>
 
@@ -80,11 +81,10 @@ Editor::time_stretch (RegionSelection& regions, float fraction)
 		MidiStretch stretch(*_session, request);
 		begin_reversible_command ("midi stretch");
 		stretch.run(regions.front()->region());
-		XMLNode &before = playlist->get_state();
+                playlist->clear_history ();
 		playlist->replace_region (regions.front()->region(), stretch.results[0],
 				regions.front()->region()->position());
-		XMLNode &after = playlist->get_state();
-		_session->add_command (new MementoCommand<Playlist>(*playlist, &before, &after));
+		_session->add_command (new StatefulDiffCommand (playlist));
 		commit_reversible_command ();
 	}
 
@@ -315,10 +315,9 @@ Editor::do_timefx (TimeFXDialog& dialog)
 				in_command = true;
 			}
 
-			XMLNode &before = playlist->get_state();
+                        playlist->clear_history ();
 			playlist->replace_region (region, new_region, region->position());
-			XMLNode &after = playlist->get_state();
-			_session->add_command (new MementoCommand<Playlist>(*playlist, &before, &after));
+			_session->add_command (new StatefulDiffCommand (playlist));
 		}
 
 		i = tmp;

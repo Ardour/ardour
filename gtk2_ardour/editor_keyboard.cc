@@ -17,12 +17,13 @@
 
 */
 
+#include "pbd/memento_command.h"
+#include "pbd/stateful_diff_command.h"
+
 #include "ardour/audioregion.h"
 #include "ardour/playlist.h"
 #include "ardour/session.h"
 #include "ardour/location.h"
-
-#include "pbd/memento_command.h"
 
 #include "editor.h"
 #include "region_view.h"
@@ -33,6 +34,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 void
 Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, bool use_time_canvas, bool can_select)
@@ -89,11 +91,9 @@ Editor::kbd_mute_unmute_region ()
 
 		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 
-			XMLNode &before = (*i)->region()->playlist()->get_state ();
+			(*i)->region()->playlist()->clear_history ();
 			(*i)->region()->set_muted (!(*i)->region()->muted ());
-			XMLNode &after = (*i)->region()->playlist()->get_state ();
-
-			_session->add_command (new MementoCommand<ARDOUR::Playlist>(*((*i)->region()->playlist()), &before, &after));
+			_session->add_command (new StatefulDiffCommand ((*i)->region()->playlist()));
 
 		}
 
@@ -102,12 +102,9 @@ Editor::kbd_mute_unmute_region ()
 	} else if (entered_regionview) {
 
 		begin_reversible_command (_("mute region"));
-		XMLNode &before = entered_regionview->region()->playlist()->get_state();
-
+                entered_regionview->region()->playlist()->clear_history ();
 		entered_regionview->region()->set_muted (!entered_regionview->region()->muted());
-
-		XMLNode &after = entered_regionview->region()->playlist()->get_state();
-		_session->add_command (new MementoCommand<ARDOUR::Playlist>(*(entered_regionview->region()->playlist()), &before, &after));
+		_session->add_command (new StatefulDiffCommand (entered_regionview->region()->playlist()));
 		commit_reversible_command();
 
 	}

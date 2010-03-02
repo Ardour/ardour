@@ -31,6 +31,7 @@
 #include <gtkmm2ext/tearoff.h>
 #include "pbd/memento_command.h"
 #include "pbd/basename.h"
+#include "pbd/stateful_diff_command.h"
 
 #include "ardour_ui.h"
 #include "actions.h"
@@ -2287,23 +2288,17 @@ Editor::point_trim (GdkEvent* event, nframes64_t new_bound)
 				}
 
 				if (!(*i)->region()->locked()) {
-					boost::shared_ptr<Playlist> pl = (*i)->region()->playlist();
-					XMLNode &before = pl->get_state();
-
+					(*i)->region()->clear_history ();
 					(*i)->region()->trim_front (new_bound, this);
-
-					XMLNode &after = pl->get_state();
-					_session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
+					_session->add_command(new StatefulDiffCommand ((*i)->region()));
 				}
 			}
 
 		} else {
 			if (!rv->region()->locked()) {
-				boost::shared_ptr<Playlist> pl = rv->region()->playlist();
-				XMLNode &before = pl->get_state();
+				rv->region()->clear_history ();
 				rv->region()->trim_front (new_bound, this);
-				XMLNode &after = pl->get_state();
-				_session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
+				_session->add_command(new StatefulDiffCommand (rv->region()));
 			}
 		}
 
@@ -2318,22 +2313,18 @@ Editor::point_trim (GdkEvent* event, nframes64_t new_bound)
 			for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i)
 			{
 				if (!(*i)->region()->locked()) {
-					boost::shared_ptr<Playlist> pl = (*i)->region()->playlist();
-					XMLNode &before = pl->get_state();
+					(*i)->region()->clear_history();
 					(*i)->region()->trim_end (new_bound, this);
-					XMLNode &after = pl->get_state();
-					_session->add_command(new MementoCommand<Playlist>(*pl.get(), &before, &after));
+					_session->add_command(new StatefulDiffCommand ((*i)->region()));
 				}
 			}
 
 		} else {
 
 			if (!rv->region()->locked()) {
-				boost::shared_ptr<Playlist> pl = rv->region()->playlist();
-				XMLNode &before = pl->get_state();
+				rv->region()->clear_history ();
 				rv->region()->trim_end (new_bound, this);
-				XMLNode &after = pl->get_state();
-				_session->add_command (new MementoCommand<Playlist>(*pl.get(), &before, &after));
+				_session->add_command (new StatefulDiffCommand (rv->region()));
 			}
 		}
 
@@ -2354,7 +2345,7 @@ Editor::thaw_region_after_trim (RegionView& rv)
 		return;
 	}
 
-	region->thaw ();
+	region->resume_property_changes ();
 
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*>(&rv);
 
@@ -2453,11 +2444,10 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes64_t pos)
 	boost::shared_ptr<Playlist> playlist = rtv->playlist();
 	double speed = rtv->get_diskstream()->speed();
 
-	XMLNode &before = playlist->get_state();
+        playlist->clear_history ();
 	boost::shared_ptr<Region> new_region (RegionFactory::create (rv->region()));
-	playlist->add_region (new_region, (nframes64_t) (pos * speed));
-	XMLNode &after = playlist->get_state();
-	_session->add_command(new MementoCommand<Playlist>(*playlist.get(), &before, &after));
+        playlist->add_region (new_region, (nframes64_t) (pos * speed));
+	_session->add_command (new StatefulDiffCommand (playlist));
 
 	// playlist is frozen, so we have to update manually XXX this is disgusting
 
@@ -2560,10 +2550,9 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 
 	boost::shared_ptr<Playlist> playlist = clicked_axisview->playlist();
 
-	XMLNode *before = &(playlist->get_state());
+        playlist->clear_history ();
 	clicked_routeview->playlist()->add_region (region, selection->time[clicked_selection].start);
-	XMLNode *after = &(playlist->get_state());
-	_session->add_command(new MementoCommand<Playlist>(*playlist, before, after));
+	_session->add_command(new StatefulDiffCommand (playlist));
 
 	commit_reversible_command ();
 

@@ -3847,7 +3847,7 @@ Session::allocate_pan_automation_buffers (nframes_t nframes, uint32_t howmany, b
 }
 
 int
-Session::freeze (InterThreadInfo& itt)
+Session::freeze_all (InterThreadInfo& itt)
 {
 	shared_ptr<RouteList> r = routes.reader ();
 
@@ -3859,7 +3859,7 @@ Session::freeze (InterThreadInfo& itt)
 			/* XXX this is wrong because itt.progress will keep returning to zero at the start
 			   of every track.
 			*/
-			t->freeze (itt);
+			t->freeze_me (itt);
 		}
 	}
 
