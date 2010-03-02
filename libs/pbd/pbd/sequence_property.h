@@ -8,6 +8,7 @@
 
 #include <boost/function.hpp>
 
+#include "pbd/convert.h"
 #include "pbd/id.h"
 #include "pbd/property_basics.h"
 
@@ -44,8 +45,7 @@ class SequenceProperty : public PropertyBase
 
 	void add_history_state (XMLNode* history_node) const {
                 
-                /* XXX need to capitalize property name */
-                XMLNode* child = new XMLNode (property_name());
+                XMLNode* child = new XMLNode (PBD::capitalize (property_name()));
                 history_node->add_child_nocopy (*child);
                 
 		/* record the change described in our change member */

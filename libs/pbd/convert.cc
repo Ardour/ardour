@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <cstdio>
+#include <ctype.h>
 #ifndef __STDC_FORMAT_MACROS
 #define __STDC_FORMAT_MACROS
 #endif
@@ -35,6 +36,17 @@ using std::vector;
 using Glib::ustring;
 
 namespace PBD {
+
+string
+capitalize (const string& str)
+{
+        string ret = str;
+        if (!str.empty()) {
+                /* XXX not unicode safe */
+                ret[0] = toupper (str[0]);
+        }
+        return ret;
+}
 
 string
 short_version (string orig, string::size_type target_length)

@@ -38,6 +38,8 @@ double  atof (const std::string&);
 void    url_decode (std::string&);
 void    url_decode (Glib::ustring&);
 
+std::string capitalize (const std::string&);
+
 // std::string length2string (const int32_t frames, const float sample_rate);
 std::string length2string (const int64_t frames, const double sample_rate);
 

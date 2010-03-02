@@ -25,7 +25,6 @@
 #include <string>
 #include <climits>
 
-
 #include "pbd/failed_constructor.h"
 #include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
@@ -2049,7 +2048,7 @@ Playlist::property_factory (const XMLNode& history_node) const
 
                 /* XXX property name needs capitalizing */
 
-                if ((*i)->name() == regions.property_name()) {
+                if ((*i)->name() == capitalize (regions.property_name())) {
                         
                         RegionListProperty* rlp = new RegionListProperty (*const_cast<Playlist*> (this));
 
