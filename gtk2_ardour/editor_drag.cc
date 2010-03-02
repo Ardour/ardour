@@ -1179,11 +1179,13 @@ RegionMotionDrag::copy_regions (GdkEvent* event)
 
 		const boost::shared_ptr<const Region> original = rv->region();
 		boost::shared_ptr<Region> region_copy = RegionFactory::create (original);
+                region_copy->set_position (original->position(), this);
 
 		RegionView* nrv;
 		if (arv) {
 			boost::shared_ptr<AudioRegion> audioregion_copy
 				= boost::dynamic_pointer_cast<AudioRegion>(region_copy);
+
 			nrv = new AudioRegionView (*arv, audioregion_copy);
 		} else if (mrv) {
 			boost::shared_ptr<MidiRegion> midiregion_copy
