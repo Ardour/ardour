@@ -20,6 +20,7 @@
 
 #include "pbd/stacktrace.h"
 
+#include "ardour/debug.h"
 #include "ardour/types.h"
 #include "ardour/crossfade.h"
 #include "ardour/crossfade_compare.h"
@@ -60,7 +61,8 @@ namespace ARDOUR {
 void
 Crossfade::make_property_quarks ()
 {
-	Properties::follow_overlap.id = g_quark_from_static_string (X_("follow-overlap"));
+	Properties::follow_overlap.property_id = g_quark_from_static_string (X_("follow-overlap"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for follow-overlap = %1\n", 	Properties::follow_overlap.property_id));
 }
 
 void

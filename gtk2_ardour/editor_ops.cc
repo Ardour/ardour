@@ -169,10 +169,9 @@ Editor::split_regions_at (nframes64_t where, RegionSelection& regions)
 		}
 
 		if (pl) {
-			XMLNode &before = pl->get_state();
+                        pl->clear_history ();
 			pl->split_region ((*a)->region(), where);
-			XMLNode &after = pl->get_state();
-			_session->add_command(new MementoCommand<Playlist>(*pl, &before, &after));
+			_session->add_command (new StatefulDiffCommand (pl));
 		}
 
 		a = tmp;
@@ -4883,7 +4882,7 @@ Editor::brush (nframes64_t pos)
 void
 Editor::reset_region_gain_envelopes ()
 {
-	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.id);
+	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.property_id);
 
 	if (!_session || rs.empty()) {
 		return;
@@ -4908,7 +4907,7 @@ Editor::reset_region_gain_envelopes ()
 void
 Editor::toggle_gain_envelope_visibility ()
 {
-	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.id);
+	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.property_id);
 
 	if (!_session || rs.empty()) {
 		return;
@@ -4932,7 +4931,7 @@ Editor::toggle_gain_envelope_visibility ()
 void
 Editor::toggle_gain_envelope_active ()
 {
-	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.id);
+	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.property_id);
 
 	if (!_session || rs.empty()) {
 		return;
@@ -4955,7 +4954,7 @@ Editor::toggle_gain_envelope_active ()
 void
 Editor::toggle_region_lock ()
 {
-	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.id);
+	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.property_id);
 
 	if (!_session || rs.empty()) {
 		return;
@@ -4975,7 +4974,7 @@ Editor::toggle_region_lock ()
 void
 Editor::set_region_lock_style (Region::PositionLockStyle ps)
 {
-	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.id);
+	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.property_id);
 
 	if (!_session || rs.empty()) {
 		return;
@@ -4997,7 +4996,7 @@ Editor::set_region_lock_style (Region::PositionLockStyle ps)
 void
 Editor::toggle_region_mute ()
 {
-	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.id);
+	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.property_id);
 
 	if (!_session || rs.empty()) {
 		return;
@@ -5017,7 +5016,7 @@ Editor::toggle_region_mute ()
 void
 Editor::toggle_region_opaque ()
 {
-	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.id);
+	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.property_id);
 
 	if (!_session || rs.empty()) {
 		return;

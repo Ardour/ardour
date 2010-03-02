@@ -39,6 +39,7 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 using namespace std;
 
 MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)

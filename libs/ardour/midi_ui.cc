@@ -34,6 +34,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace Glib;
 
 #include "i18n.h"

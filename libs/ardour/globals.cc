@@ -68,6 +68,7 @@
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/mix.h"
+#include "ardour/playlist.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/profile.h"
 #include "ardour/region.h"
@@ -94,8 +95,6 @@ ARDOUR::AudioLibrary* ARDOUR::Library = 0;
 using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
-
-uint64_t ARDOUR::debug_bits = 0x0;
 
 MIDI::Port *ARDOUR::default_mmc_port = 0;
 MIDI::Port *ARDOUR::default_mtc_port = 0;
@@ -137,9 +136,12 @@ namespace ARDOUR {
 void
 ARDOUR::make_property_quarks ()
 {
-	Properties::fade_in.id = g_quark_from_static_string (X_("fade_in_FAKE"));
-	Properties::fade_out.id = g_quark_from_static_string (X_("fade_out_FAKE"));
-	Properties::envelope.id = g_quark_from_static_string (X_("envelope_FAKE"));
+	Properties::fade_in.property_id = g_quark_from_static_string (X_("fade_in_FAKE"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade_in_FAKE = %1\n", 	Properties::fade_in.property_id));
+	Properties::fade_out.property_id = g_quark_from_static_string (X_("fade_out_FAKE"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade_out_FAKE = %1\n", 	Properties::fade_out.property_id));
+	Properties::envelope.property_id = g_quark_from_static_string (X_("envelope_FAKE"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for envelope_FAKE = %1\n", 	Properties::envelope.property_id));
 }
 
 int
@@ -332,6 +334,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	Region::make_property_quarks ();
 	AudioRegion::make_property_quarks ();
 	RouteGroup::make_property_quarks ();
+        Playlist::make_property_quarks ();
 
 	/* this is a useful ready to use PropertyChange that many
 	   things need to check. This avoids having to compose

@@ -40,6 +40,7 @@
 using namespace std;
 using namespace Mackie;
 using namespace ARDOUR;
+using namespace PBD;
 
 // The MCU sysex header
 MidiByteArray mackie_sysex_hdr ( 5, MIDI::sysex, 0x0, 0x0, 0x66, 0x10 );

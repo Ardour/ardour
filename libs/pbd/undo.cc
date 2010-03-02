@@ -309,7 +309,6 @@ UndoHistory::redo (unsigned int n)
 	timersub (&end, &start, &diff);
 	cerr << "Redo took " << diff.tv_sec << '.' << diff.tv_usec << endl;
 
-	EndUndoRedo (); /* EMIT SIGNAL */
 	Changed (); /* EMIT SIGNAL */
 }
 

@@ -23,6 +23,7 @@
 #include <string>
 #include "pbd/statefuldestructible.h"
 #include "pbd/signals.h"
+#include "pbd/properties.h"
 
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"

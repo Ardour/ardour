@@ -91,6 +91,8 @@ class Region
 
 	static PBD::Signal2<void,boost::shared_ptr<ARDOUR::Region>, const PBD::PropertyChange&> RegionPropertyChanged;
 
+        PBD::PropertyList* property_factory (const XMLNode&) const;
+
 	void unlock_property_changes () { _no_property_changes = false; }
 	void block_property_changes () { _no_property_changes = true; }
 	

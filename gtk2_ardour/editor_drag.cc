@@ -818,6 +818,7 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 	vector<RegionView*> copies;
 	boost::shared_ptr<Diskstream> ds;
 	boost::shared_ptr<Playlist> from_playlist;
+	boost::shared_ptr<Playlist> to_playlist;
 	RegionSelection new_views;
 	typedef set<boost::shared_ptr<Playlist> > PlaylistSet;
 	PlaylistSet modified_playlists;
@@ -828,6 +829,7 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 	bool changed_tracks, changed_position;
 	map<RegionView*, pair<RouteTimeAxisView*, int> > final;
 	RouteTimeAxisView* source_tv;
+        vector<StatefulDiffCommand*> sdc;
 
 	if (!movement_occurred) {
 		/* just a click */
@@ -878,6 +880,8 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 	/* make a list of where each region ended up */
 	final = find_time_axis_views_and_layers ();
 
+        cerr << "Iterate over " << _views.size() << " views\n";
+
 	for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ) {
 
 		RegionView* rv = (*i);
@@ -885,6 +889,9 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 		layer_t dest_layer = final[*i].second;
 
 		nframes64_t where;
+
+                from_playlist.reset ();
+                to_playlist.reset ();
 
 		if (rv->region()->locked()) {
 			++i;
@@ -915,7 +922,7 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 
 		if (changed_tracks || _copy) {
 
-			boost::shared_ptr<Playlist> to_playlist = dest_rtv->playlist();
+			to_playlist = dest_rtv->playlist();
 
 			if (!to_playlist) {
 				++i;
@@ -929,10 +936,18 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			insert_result = modified_playlists.insert (to_playlist);
 
 			if (insert_result.second) {
-				_editor->session()->add_command (new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));
+                                to_playlist->clear_history ();
 			}
 
+                        cerr << "To playlist " << to_playlist->name() << " region history contains "
+                             << to_playlist->region_list().change().added.size() << " adds and " 
+                             << to_playlist->region_list().change().removed.size() << " removes\n";
+
+                        cerr << "Adding new region " << new_region->id() << " based on "
+                             << rv->region()->id() << endl;
+                        
 			to_playlist->add_region (new_region, where);
+
 			if (dest_rtv->view()->layer_display() == Stacked) {
 				new_region->set_layer (dest_layer);
 				new_region->set_pending_explicit_relayer (true);
@@ -977,9 +992,11 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 				playlist->freeze();
 			}
 
+                        cerr << "Moving region " << rv->region()->id() << endl;
+
 			rv->region()->set_position (where, (void*) this);
 
-			_editor->session()->add_command (new StatefulDiffCommand (rv->region()));
+			sdc.push_back (new StatefulDiffCommand (rv->region()));
 		}
 
 		if (changed_tracks && !_copy) {
@@ -1012,9 +1029,15 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			insert_result = modified_playlists.insert (from_playlist);
 
 			if (insert_result.second) {
-				_editor->session()->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));
+				from_playlist->clear_history ();
 			}
+                        
+                        cerr << "From playlist " << from_playlist->name() << " region history contains "
+                             << from_playlist->region_list().change().added.size() << " adds and " 
+                             << from_playlist->region_list().change().removed.size() << " removes\n";
 
+                        cerr << "removing region " << rv->region() << endl;
+                        
 			from_playlist->remove_region (rv->region());
 
 			/* OK, this is where it gets tricky. If the playlist was being used by >1 tracks, and the region
@@ -1035,7 +1058,16 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			*/
 
 			if (_views.empty()) {
-				break;
+                                if (to_playlist) {
+                                        sdc.push_back (new StatefulDiffCommand (to_playlist));
+                                        cerr << "Saved diff for to:" << to_playlist->name() << endl;
+                                }
+                                
+                                if (from_playlist && (from_playlist != to_playlist)) {
+                                        sdc.push_back (new StatefulDiffCommand (from_playlist));
+                                        cerr << "Saved diff for from:" << from_playlist->name() << endl;
+                                }				
+                                break;
 			} else {
 				i = _views.begin();
 			}
@@ -1047,11 +1079,25 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 		if (_copy) {
 			copies.push_back (rv);
 		}
+
+                cerr << "Done with TV, top = " << to_playlist << " from = " << from_playlist << endl;
+
+                if (to_playlist) {
+                        sdc.push_back (new StatefulDiffCommand (to_playlist));
+                        cerr << "Saved diff for to:" << to_playlist->name() << endl;
+                }
+
+                if (from_playlist && (from_playlist != to_playlist)) {
+                        sdc.push_back (new StatefulDiffCommand (from_playlist));
+                        cerr << "Saved diff for from:" << from_playlist->name() << endl;
+                }
 	}
+
 	/*
 	   if we've created new regions either by copying or moving 
 	   to a new track, we want to replace the old selection with the new ones 
 	*/
+
 	if (new_views.size() > 0) {
 		_editor->selection->set (new_views);
 	}
@@ -1061,9 +1107,9 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 	}
 
   out:
-	for (set<boost::shared_ptr<Playlist> >::iterator p = modified_playlists.begin(); p != modified_playlists.end(); ++p) {
-		_editor->session()->add_command (new MementoCommand<Playlist>(*(*p), 0, &(*p)->get_state()));
-	}
+        for (vector<StatefulDiffCommand*>::iterator i = sdc.begin(); i != sdc.end(); ++i) {
+		_editor->session()->add_command (*i);
+        }
 
 	_editor->commit_reversible_command ();
 

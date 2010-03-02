@@ -2803,9 +2803,9 @@ Session::remove_region (boost::weak_ptr<Region> weak_region)
 }
 
 boost::shared_ptr<Region>
-Session::find_whole_file_parent (boost::shared_ptr<Region const> child)
+Session::find_whole_file_parent (boost::shared_ptr<Region const> child) const
 {
-	RegionList::iterator i;
+	RegionList::const_iterator i;
 	boost::shared_ptr<Region> region;
 
 	Glib::Mutex::Lock lm (region_lock);
@@ -2820,6 +2820,20 @@ Session::find_whole_file_parent (boost::shared_ptr<Region const> child)
 				return region;
 			}
 		}
+	}
+
+	return boost::shared_ptr<Region> ();
+}
+
+boost::shared_ptr<Region>
+Session::region_by_id (const PBD::ID& id) const
+{
+	Glib::Mutex::Lock lm (region_lock);
+
+        RegionList::const_iterator i = regions.find (id);
+
+        if (i != regions.end()) {
+                return i->second;
 	}
 
 	return boost::shared_ptr<Region> ();

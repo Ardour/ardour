@@ -20,7 +20,10 @@
 
 #include <unistd.h>
 
+#include "pbd/debug.h"
 #include "pbd/stateful.h"
+#include "pbd/property_list.h"
+#include "pbd/properties.h"
 #include "pbd/destructible.h"
 #include "pbd/filesystem.h"
 #include "pbd/xml++.h"
@@ -36,6 +39,7 @@ int Stateful::current_state_version = 0;
 int Stateful::loading_state_version = 0;
 
 Stateful::Stateful ()
+        : _properties (new OwnedPropertyList)
 {
 	_extra_xml = 0;
 	_instant_xml = 0;
@@ -43,6 +47,8 @@ Stateful::Stateful ()
 
 Stateful::~Stateful ()
 {
+        delete _properties;
+
 	// Do not delete _extra_xml.  The use of add_child_nocopy() 
 	// means it needs to live on indefinately.
 
@@ -153,53 +159,30 @@ Stateful::instant_xml (const string& str, const sys::path& directory_path)
 void
 Stateful::clear_history ()
 {
-	for (OwnedPropertyList::iterator i = _properties.begin(); i != _properties.end(); ++i) {
+	for (OwnedPropertyList::iterator i = _properties->begin(); i != _properties->end(); ++i) {
 		i->second->clear_history ();
 	}
 }
 
-/** @return A pair of XMLNodes representing state that has changed since the last time clear_history
- *  was called on this object; the first is the state before, the second the state after.
- *
- *  It is the caller's responsibility to delete the returned XMLNodes.
- */
-pair<XMLNode *, XMLNode *>
-Stateful::diff () const
+void
+Stateful::diff (PropertyList& before, PropertyList& after) const
 {
-	XMLNode* old = new XMLNode (_xml_node_name);
-	XMLNode* current = new XMLNode (_xml_node_name);
-
-	for (OwnedPropertyList::const_iterator i = _properties.begin(); i != _properties.end(); ++i) {
-		i->second->diff (old, current);
+	for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
+		i->second->diff (before, after);
 	}
-
-	return make_pair (old, current);
 }
 
-/** Modifies PropertyChange @param c to indicate what properties have changed since the last
-    time clear_history was called on this object. Note that not all properties have change
-    values - if this object has any such Property members, they will never show up in
-    the value of @param c. Note also that @param c is not cleared by this function.
-*/
-void
-Stateful::changed (PropertyChange& c) const
-{
-	for (OwnedPropertyList::const_iterator i = _properties.begin(); i != _properties.end(); ++i) {
-		i->second->diff (c);
-	}
-}	
-	
 /** Set state of some/all _properties from an XML node.
  *  @param node Node.
  *  @return PropertyChanges made.
  */
 PropertyChange
-Stateful::set_properties (XMLNode const & node)
+Stateful::set_properties (XMLNode const & owner_state)
 {
 	PropertyChange c;
-
-	for (OwnedPropertyList::iterator i = _properties.begin(); i != _properties.end(); ++i) {
-		if (i->second->set_state (node)) {
+        
+	for (OwnedPropertyList::iterator i = _properties->begin(); i != _properties->end(); ++i) {
+		if (i->second->set_state_from_owner_state (owner_state)) {
 			c.add (i->first);
 		}
 	}
@@ -215,12 +198,22 @@ Stateful::set_properties (const PropertyList& property_list)
 	PropertyChange c;
 	PropertyList::const_iterator p;
 
-	for (OwnedPropertyList::iterator i = _properties.begin(); i != _properties.end(); ++i) {
-		if ((p = property_list.find (i->first)) != property_list.end()) {
-			if (set_property (*p->second)) {
+        DEBUG_TRACE (DEBUG::Stateful, string_compose ("Stateful %1 setting properties from list of %2\n", this, property_list.size()));
+
+        for (PropertyList::const_iterator pp = property_list.begin(); pp != property_list.end(); ++pp) {
+                DEBUG_TRACE (DEBUG::Stateful, string_compose ("in plist: %1\n", pp->second->property_name()));
+        }
+        
+        for (PropertyList::const_iterator i = property_list.begin(); i != property_list.end(); ++i) {
+                if ((p = _properties->find (i->first)) != _properties->end()) {
+                        DEBUG_TRACE (DEBUG::Stateful, string_compose ("actually setting property %1\n", p->second->property_name()));
+			if (set_property (*i->second)) {
 				c.add (i->first);
 			}
-		}
+		} else {
+                        DEBUG_TRACE (DEBUG::Stateful, string_compose ("passed in property %1 not found in own property list\n",
+                                                                      i->second->property_name()));
+                }
 	}
 	
 	post_set ();
@@ -228,16 +221,21 @@ Stateful::set_properties (const PropertyList& property_list)
 	return c;
 }
 
-
 /** Add property states to an XML node.
  *  @param node Node.
  */
 void
-Stateful::add_properties (XMLNode & node)
+Stateful::add_properties (XMLNode& owner_state)
 {
-	for (OwnedPropertyList::iterator i = _properties.begin(); i != _properties.end(); ++i) {
-		i->second->add_state (node);
+	for (OwnedPropertyList::iterator i = _properties->begin(); i != _properties->end(); ++i) {
+		i->second->add_state_to_owner_state (owner_state);
 	}
+}
+
+void
+Stateful::add_property (PropertyBase& s)
+{
+        _properties->add (s);
 }
 
 } // namespace PBD

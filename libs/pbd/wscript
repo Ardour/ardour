@@ -59,6 +59,7 @@ def build(bld):
 		controllable.cc
 		controllable_descriptor.cc
                 crossthread.cc
+                debug.cc
 		enumwriter.cc
                 event_loop.cc
 		dmalloc.cc
@@ -74,6 +75,8 @@ def build(bld):
 		mountpoint.cc
 		pathscanner.cc
 		pool.cc
+                property_factory.cc
+                property_list.cc
 		pthread_utils.cc
 		receiver.cc
 		search_path.cc

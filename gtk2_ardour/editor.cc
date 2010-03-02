@@ -3995,7 +3995,7 @@ Editor::new_playlists (TimeAxisView* v)
 	begin_reversible_command (_("new playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists->get (playlists);
-	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), v, ARDOUR::Properties::edit.id);
+	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), playlists), v, ARDOUR::Properties::edit.property_id);
 	commit_reversible_command ();
 }
 
@@ -4011,7 +4011,7 @@ Editor::copy_playlists (TimeAxisView* v)
 	begin_reversible_command (_("copy playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists->get (playlists);
-	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), v, ARDOUR::Properties::edit.id);
+	mapover_tracks (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_copy_playlist), playlists), v, ARDOUR::Properties::edit.property_id);
 	commit_reversible_command ();
 }
 
@@ -4026,7 +4026,7 @@ Editor::clear_playlists (TimeAxisView* v)
 	begin_reversible_command (_("clear playlists"));
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists->get (playlists);
-	mapover_tracks (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), v, ARDOUR::Properties::edit.id);
+	mapover_tracks (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), v, ARDOUR::Properties::edit.property_id);
 	commit_reversible_command ();
 }
 

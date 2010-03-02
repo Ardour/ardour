@@ -167,6 +167,26 @@ SessionPlaylists::by_name (string name)
 	return boost::shared_ptr<Playlist>();
 }
 
+boost::shared_ptr<Playlist>
+SessionPlaylists::by_id (const PBD::ID& id)
+{
+	Glib::Mutex::Lock lm (lock);
+
+	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		if ((*i)->id() == id) {
+			return* i;
+		}
+	}
+	
+	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+		if ((*i)->id() == id) {
+			return* i;
+		}
+	}
+
+	return boost::shared_ptr<Playlist>();
+}
+
 void
 SessionPlaylists::unassigned (std::list<boost::shared_ptr<Playlist> > & list)
 {

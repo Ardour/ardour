@@ -139,7 +139,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 			break;
 
 		case 'D':
-			if (ARDOUR::parse_debug_options (optarg)) {
+			if (PBD::parse_debug_options (optarg)) {
 				exit (0);
 			}
 			break;

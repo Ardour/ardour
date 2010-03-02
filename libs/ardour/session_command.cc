@@ -146,7 +146,15 @@ Session::stateful_diff_command_factory (XMLNode* n)
 		if (r) {
 			return new StatefulDiffCommand (r, *n);
 		}
-	}
+
+	} else if (obj_T == typeid (AudioPlaylist).name() ||  obj_T == typeid (MidiPlaylist).name()) {
+                boost::shared_ptr<Playlist> p = playlists->by_id (id);
+                if (p) {
+                        return new StatefulDiffCommand (p, *n);
+                } else {
+                        cerr << "Playlist with ID = " << id << " not found\n";
+                }
+        }
 
 	/* we failed */
 	

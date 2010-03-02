@@ -23,106 +23,22 @@
 
 #include "ardour/debug.h"
 
-#include "i18n.h"
-
 using namespace std;
 
-void
-ARDOUR::debug_print (const char* prefix, string str)
-{
-	cerr << prefix << ": " << str;
-}
+uint64_t PBD::DEBUG::MidiSourceIO = PBD::new_debug_bit ("midisourceio");
+uint64_t PBD::DEBUG::MidiPlaylistIO = PBD::new_debug_bit ("midiplaylistio");
+uint64_t PBD::DEBUG::MidiDiskstreamIO = PBD::new_debug_bit ("mididiskstreamio");
+uint64_t PBD::DEBUG::SnapBBT = PBD::new_debug_bit ("snapbbt");
+uint64_t PBD::DEBUG::Configuration = PBD::new_debug_bit ("configuration");
+uint64_t PBD::DEBUG::Latency = PBD::new_debug_bit ("latency");
+uint64_t PBD::DEBUG::Processors = PBD::new_debug_bit ("processors");
+uint64_t PBD::DEBUG::Graph = PBD::new_debug_bit ("graph");
+uint64_t PBD::DEBUG::Destruction = PBD::new_debug_bit ("destruction");
+uint64_t PBD::DEBUG::MTC = PBD::new_debug_bit ("mtc");
+uint64_t PBD::DEBUG::Transport = PBD::new_debug_bit ("transport");
+uint64_t PBD::DEBUG::Slave = PBD::new_debug_bit ("slave");
+uint64_t PBD::DEBUG::SessionEvents = PBD::new_debug_bit ("sessionevents");
+uint64_t PBD::DEBUG::MidiIO = PBD::new_debug_bit ("midiio");
+uint64_t PBD::DEBUG::MackieControl = PBD::new_debug_bit ("mackiecontrol");
+uint64_t PBD::DEBUG::MidiClock = PBD::new_debug_bit ("midiclock");
 
-void
-ARDOUR::set_debug_bits (uint64_t bits)
-{
-	debug_bits = bits;
-}
-
-int
-ARDOUR::parse_debug_options (const char* str)
-{
-	char* p;
-	char* sp;
-	uint64_t bits = 0;
-	char* copy = strdup (str);
-
-	p = strtok_r (copy, ",", &sp);
-
-	while (p) {
-		if (strcasecmp (p, "list") == 0) {
-			list_debug_options ();
-			free (copy);
-			return 1;
-		}
-
-		if (strcasecmp (p, "all") == 0) {
-			ARDOUR::set_debug_bits (~0ULL);
-			free (copy);
-			return 0;
-		}
-
-		if (strncasecmp (p, "midisourceio", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::MidiSourceIO;
-		} else if (strncasecmp (p, "midiplaylistio", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::MidiPlaylistIO;
-		} else if (strncasecmp (p, "mididiskstreamio", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::MidiDiskstreamIO;
-		} else if (strncasecmp (p, "snapbbt", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::SnapBBT;
-		} else if (strncasecmp (p, "configuration", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::Configuration;
-		} else if (strncasecmp (p, "latency", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::Latency;
-		} else if (strncasecmp (p, "processors", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::Processors;
-		} else if (strncasecmp (p, "graph", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::Graph;
-		} else if (strncasecmp (p, "destruction", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::Destruction;
-		} else if (strncasecmp (p, "mtc", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::MTC;
-		} else if (strncasecmp (p, "transport", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::Transport;
-		} else if (strncasecmp (p, "slave", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::Slave;
-		} else if (strncasecmp (p, "sessionevents", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::SessionEvents;
-		} else if (strncasecmp (p, "midiio", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::MidiIO;
-		} else if (strncasecmp (p, "midiclock", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::MidiClock;
-		} else if (strncasecmp (p, "properties", strlen (p)) == 0) {
-			bits |= ARDOUR::DEBUG::Properties;
-		}		
-
-		p = strtok_r (0, ",", &sp);
-	}
-	
-	free (copy);
-	ARDOUR::set_debug_bits (bits);
-	return 0;
-}
-
-void
-ARDOUR::list_debug_options ()
-{
-	cerr << _("The following debug options are available. Separate multipe options with commas.\nNames are case-insensitive and can be abbreviated.") << endl << endl;
-	cerr << "\tAll" << endl;
-	cerr << "\tMidiSourceIO" << endl;
-	cerr << "\tMidiPlaylistIO" << endl;
-	cerr << "\tMidiDiskstreamIO" << endl;
-	cerr << "\tSnapBBT" << endl;
-	cerr << "\tConfiguration" << endl;
-	cerr << "\tLatency" << endl;
-	cerr << "\tGraph" << endl;
-	cerr << "\tDestruction" << endl;
-	cerr << "\tMTC" << endl;
-	cerr << "\tTransport" << endl;
-	cerr << "\tSlave" << endl;
-	cerr << "\tSessionEvents" << endl;
-	cerr << "\tMidiIO" << endl;
-	cerr << "\tLatencyCompensation" << endl;
-	cerr << "\tMidiClock" << endl;
-	cerr << "\tProperties" << endl;
-}

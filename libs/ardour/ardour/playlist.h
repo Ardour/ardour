@@ -36,6 +36,7 @@
 #include "pbd/undo.h"
 #include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
+#include "pbd/sequence_property.h"
 
 #include "evoral/types.hpp"
 
@@ -49,11 +50,43 @@ namespace ARDOUR  {
 
 class Session;
 class Region;
+class Playlist;
+
+namespace Properties {
+        /* fake the type, since regions are handled by SequenceProperty which doesn't
+           care about such things.
+        */
+        extern PBD::PropertyDescriptor<bool> regions;
+}
+
+class RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_ptr<Region > > >
+{
+  public:
+        RegionListProperty (Playlist&);
+
+        boost::shared_ptr<Region> lookup_id (const PBD::ID& id);
+        void diff (PBD::PropertyList& before, PBD::PropertyList& after) const;
+
+  private:
+        friend class Playlist;
+        std::list<boost::shared_ptr<Region> > rlist() { return _val; }
+
+        /* we live and die with our playlist, no lifetime management needed */
+        Playlist& _playlist;
+
+        /* create a copy of this RegionListProperty that only
+           has what is needed for use in a history list command. This
+           means that it won't contain the actual region list but
+           will have the added/removed list.
+        */
+        RegionListProperty* copy_for_history () const;
+};
 
 class Playlist : public SessionObject
 	       , public boost::enable_shared_from_this<Playlist> {
   public:
 	typedef std::list<boost::shared_ptr<Region> >    RegionList;
+        static void make_property_quarks ();
 
 	Playlist (Session&, const XMLNode&, DataType type, bool hidden = false);
 	Playlist (Session&, std::string name, DataType type, bool hidden = false);
@@ -61,6 +94,13 @@ class Playlist : public SessionObject
 	Playlist (boost::shared_ptr<const Playlist>, framepos_t start, framecnt_t cnt, std::string name, bool hidden = false);
 
 	virtual ~Playlist ();
+
+        bool set_property (const PBD::PropertyBase&);
+        void update (const RegionListProperty::ChangeRecord&);
+
+        PBD::PropertyList* property_factory (const XMLNode&) const;
+
+	boost::shared_ptr<Region> region_by_id (const PBD::ID&);
 
 	void set_region_ownership ();
 
@@ -107,7 +147,7 @@ class Playlist : public SessionObject
 	boost::shared_ptr<Playlist> copy (std::list<AudioRange>&, bool result_is_hidden = true);
 	int                         paste (boost::shared_ptr<Playlist>, framepos_t position, float times);
 
-	const RegionList& region_list () const { return regions; }
+	const RegionListProperty& region_list () const { return regions; }
 
 	RegionList*                regions_at (framepos_t frame);
 	RegionList*                regions_touched (framepos_t start, framepos_t end);
@@ -192,7 +232,7 @@ class Playlist : public SessionObject
 
 	friend class RegionLock;
 
-	RegionList       regions;  /* the current list of regions in the playlist */
+        RegionListProperty   regions;  /* the current list of regions in the playlist */
 	std::set<boost::shared_ptr<Region> > all_regions; /* all regions ever added to this playlist */
 	PBD::ScopedConnectionList region_state_changed_connections;
 	DataType        _type;
@@ -276,8 +316,6 @@ class Playlist : public SessionObject
 	virtual void remove_dependents (boost::shared_ptr<Region> /*region*/) {}
 
 	virtual XMLNode& state (bool);
-
-	boost::shared_ptr<Region> region_by_id (PBD::ID);
 
 	bool add_region_internal (boost::shared_ptr<Region>, framepos_t position);
 

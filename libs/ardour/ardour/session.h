@@ -501,6 +501,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* region info  */
 
+        boost::shared_ptr<Region> region_by_id (const PBD::ID&) const;
+	boost::shared_ptr<Region> find_whole_file_parent (boost::shared_ptr<Region const>) const;
+
 	void add_regions (std::vector<boost::shared_ptr<Region> >&);
 
 	PBD::Signal1<void,boost::weak_ptr<Region> >              RegionAdded;
@@ -510,8 +513,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int region_name (std::string& result, std::string base = std::string(""), bool newlevel = false);
 	std::string new_region_name (std::string);
 	std::string path_from_region_name (DataType type, std::string name, std::string identifier);
-
-	boost::shared_ptr<Region> find_whole_file_parent (boost::shared_ptr<Region const>);
 
 	boost::shared_ptr<Region>      XMLRegionFactory (const XMLNode&, bool full);
 	boost::shared_ptr<AudioRegion> XMLAudioRegionFactory (const XMLNode&, bool full);

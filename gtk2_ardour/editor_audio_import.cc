@@ -838,7 +838,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 		}
 
 		boost::shared_ptr<Playlist> playlist = existing_track->diskstream()->playlist();
-		boost::shared_ptr<Region> copy (RegionFactory::create (region));
+		boost::shared_ptr<Region> copy (RegionFactory::create (region, region->properties()));
 		begin_reversible_command (_("insert file"));
 		XMLNode &before = playlist->get_state();
 		playlist->add_region (copy, pos);

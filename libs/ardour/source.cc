@@ -45,6 +45,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 Source::Source (Session& s, DataType type, const string& name, Flag flags)
 	: SessionObject(s, name)

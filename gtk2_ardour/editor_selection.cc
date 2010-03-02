@@ -476,7 +476,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 				if (press) {
 
 					if (selection->selected (clicked_routeview)) {
-						get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::select.id);
+						get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::select.property_id);
 					} else {
 						all_equivalent_regions.push_back (clicked_regionview);
 					}
@@ -494,7 +494,7 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op,
 
 		case Selection::Set:
 			if (!selection->selected (clicked_regionview)) {
-				get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::select.id);
+				get_equivalent_regions (clicked_regionview, all_equivalent_regions, ARDOUR::Properties::select.property_id);
 				selection->set (all_equivalent_regions);
 				commit = true;
 			} else {

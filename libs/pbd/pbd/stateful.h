@@ -26,7 +26,7 @@
 
 #include "pbd/id.h"
 #include "pbd/xml++.h"
-#include "pbd/properties.h"
+#include "pbd/property_basics.h"
 #include "pbd/signals.h"
 
 class XMLNode;
@@ -36,6 +36,9 @@ namespace PBD {
 namespace sys {
 	class path;
 }
+
+class PropertyList;
+class OwnedPropertyList;
 
 /** Base class for objects with saveable and undoable state */
 class Stateful {
@@ -51,10 +54,9 @@ class Stateful {
 	virtual bool set_property (const PropertyBase&) { return false; }
 
 	PropertyChange set_properties (const PropertyList&);
+        const OwnedPropertyList& properties() const { return *_properties; }
 
-	void add_property (PropertyBase& s) {
-		_properties.add (s);
-	}
+	void add_property (PropertyBase& s);
 
 	/* Extra XML node: so that 3rd parties can attach state to the XMLNode
 	   representing the state of this object.
@@ -65,9 +67,13 @@ class Stateful {
 
 	const PBD::ID& id() const { return _id; }
 
+        /* history management */
+
 	void clear_history ();
-	std::pair<XMLNode *, XMLNode*> diff () const;
-	void changed (PropertyChange&) const;
+        void diff (PropertyList&, PropertyList&) const;
+        /* create a property list from an XMLNode
+         */
+        virtual PropertyList* property_factory(const XMLNode&) const { return 0; }
 
 	/* How stateful's notify of changes to their properties
 	 */
@@ -85,7 +91,6 @@ class Stateful {
 	   to get basic property setting done.
 	*/
 	PropertyChange set_properties (XMLNode const &);
-
 	
 	/* derived classes can implement this to do cross-checking
 	   of property values after either a PropertyList or XML 
@@ -98,7 +103,7 @@ class Stateful {
 	PBD::ID _id;
 
 	std::string _xml_node_name; ///< name of node to use for this object in XML
-	OwnedPropertyList _properties;
+	OwnedPropertyList* _properties;
 };
 
 } // namespace PBD

@@ -24,51 +24,28 @@
 
 #include <sstream>
 
-namespace ARDOUR {
+#include "pbd/debug.h"
 
-	extern uint64_t debug_bits;
-	void debug_print (const char* prefix, std::string str);
-	void set_debug_bits (uint64_t bits);
-	int parse_debug_options (const char* str);
-	void list_debug_options ();
-
+namespace PBD {
 	namespace DEBUG {
-
-		/* this namespace is so that we can write DEBUG::bit_name */
-
-		enum DebugBits {
-			MidiSourceIO = 0x1,
-			MidiPlaylistIO = 0x2,
-			MidiDiskstreamIO = 0x4,
-			SnapBBT = 0x8,
-			Configuration = 0x10,
-			Latency = 0x20,
-			Processors = 0x40,
-			Graph = 0x80,
-			Destruction = 0x100,
-			MTC = 0x200,
-			Transport = 0x400,
-			Slave = 0x800,
-			SessionEvents = 0x800,
-			MidiIO = 0x1000,
-			MackieControl = 0x2000,
-			MidiClock = 0x4000,
-			Properties = 0x8000
-		};
+                extern uint64_t MidiSourceIO;
+                extern uint64_t MidiPlaylistIO;
+                extern uint64_t MidiDiskstreamIO;
+                extern uint64_t SnapBBT;
+                extern uint64_t Configuration;
+                extern uint64_t Latency;
+                extern uint64_t Processors;
+                extern uint64_t Graph;
+                extern uint64_t Destruction;
+                extern uint64_t MTC;
+                extern uint64_t Transport;
+                extern uint64_t Slave;
+                extern uint64_t SessionEvents;
+                extern uint64_t MidiIO;
+                extern uint64_t MackieControl;
+                extern uint64_t MidiClock;
 	}
-
 }
-
-#ifndef NDEBUG
-#define DEBUG_TRACE(bits,str) if ((bits) & ARDOUR::debug_bits) { ARDOUR::debug_print (# bits, str); }
-#define DEBUG_STR_DECL(id) std::stringstream __debug_str ## id;
-#define DEBUG_STR(id) __debug_str ## id
-#define DEBUG_STR_APPEND(id,s) __debug_str ## id << s;
-#else
-#define DEBUG_TRACE(bits,fmt,...) /*empty*/
-#define DEBUG_STR(a) /* empty */
-#define DEBUG_STR_APPEND(a,b) /* empty */
-#endif
 
 #endif /* __ardour_debug_h__ */
 

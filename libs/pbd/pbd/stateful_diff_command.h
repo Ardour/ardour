@@ -28,6 +28,7 @@ namespace PBD
 {
 
 class Stateful;	
+class PropertyList;
 
 /** A Command which stores its action as the differences between the before and after
  *  state of a Stateful object.
@@ -46,8 +47,8 @@ public:
 
 private:
 	boost::weak_ptr<Stateful> _object; ///< the object in question
-	XMLNode* _before; ///< XML node containing the previous values of XML properties which changed
-	XMLNode* _after; ///< XML node containing the new values of XML properties which changed
+        PBD::PropertyList* _before; ///< its (partial) state before the command
+        PBD::PropertyList* _after;  ///< its (partial) state after the operation
 };
 
 };

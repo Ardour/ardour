@@ -46,6 +46,12 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+namespace ARDOUR {
+namespace Properties {
+PBD::PropertyDescriptor<bool> regions;
+}
+}
+
 struct ShowMeTheList {
     ShowMeTheList (boost::shared_ptr<Playlist> pl, const string& n) : playlist (pl), name (n) {}
     ~ShowMeTheList () {
@@ -90,9 +96,66 @@ struct RegionSortByLastLayerOp {
     }
 };
 
+void
+Playlist::make_property_quarks ()
+{
+        Properties::regions.property_id = g_quark_from_static_string (X_("regions"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for regions = %1\n",         Properties::regions.property_id));
+}
+
+RegionListProperty::RegionListProperty (Playlist& pl)
+        : SequenceProperty<std::list<boost::shared_ptr<Region> > > (Properties::regions.property_id, boost::bind (&Playlist::update, &pl, _1))
+        , _playlist (pl)
+{
+}
+
+boost::shared_ptr<Region>
+RegionListProperty::lookup_id (const ID& id)
+{
+        boost::shared_ptr<Region> ret =  _playlist.region_by_id (id);
+        
+        if (!ret) {
+                ret = _playlist.session().region_by_id (id);
+        }
+
+        if (!ret) {
+                ret = RegionFactory::region_by_id (id);
+        }
+        return ret;
+}
+
+RegionListProperty*
+RegionListProperty::copy_for_history () const
+{
+        RegionListProperty* copy = new RegionListProperty (_playlist);
+        /* this is all we need */
+        copy->_change = _change;
+        return copy;
+}
+
+void 
+RegionListProperty::diff (PropertyList& before, PropertyList& after) const
+{
+        if (_have_old) {
+                RegionListProperty* a = copy_for_history ();
+                RegionListProperty* b = copy_for_history ();
+
+                b->invert_changes ();
+
+                before.add (b);
+                after.add (a);
+
+                cerr << "pdiff on " << _playlist.name() << " before contains "
+                     << b->change().added.size() << " adds and " << b->change().removed.size() << " removes\n";
+                cerr << "pdiff on " << _playlist.name() << " after contains "
+                     << a->change().added.size() << " adds and " << a->change().removed.size() << " removes\n";
+
+        }
+}
 
 Playlist::Playlist (Session& sess, string nom, DataType type, bool hide)
 	: SessionObject(sess, nom)
+        , regions (*this)
 	, _type(type)
 {
 	init (hide);
@@ -103,7 +166,9 @@ Playlist::Playlist (Session& sess, string nom, DataType type, bool hide)
 
 Playlist::Playlist (Session& sess, const XMLNode& node, DataType type, bool hide)
 	: SessionObject(sess, "unnamed playlist")
-	, _type(type)
+        , regions (*this)	
+        , _type(type)
+
 {
 	const XMLProperty* prop = node.property("type");
 	assert(!prop || DataType(prop->value()) == _type);
@@ -116,6 +181,7 @@ Playlist::Playlist (Session& sess, const XMLNode& node, DataType type, bool hide
 
 Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, bool hide)
 	: SessionObject(other->_session, namestr)
+        , regions (*this)
 	, _type(other->_type)
 	, _orig_diskstream_id(other->_orig_diskstream_id)
 {
@@ -150,6 +216,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 
 Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, framecnt_t cnt, string str, bool hide)
 	: SessionObject(other->_session, str)
+        , regions (*this)
 	, _type(other->_type)
 	, _orig_diskstream_id(other->_orig_diskstream_id)
 {
@@ -256,6 +323,9 @@ Playlist::copy_regions (RegionList& newlist) const
 void
 Playlist::init (bool hide)
 {
+        add_property (regions);
+        _xml_node_name = X_("Playlist");
+
 	g_atomic_int_set (&block_notifications, 0);
 	g_atomic_int_set (&ignore_state_changes, 0);
 	pending_contents_change = false;
@@ -362,7 +432,7 @@ Playlist::release_notifications ()
 {
 	if (g_atomic_int_dec_and_test (&block_notifications)) {
 		flush_notifications ();
-	}
+        }
 }
 
 void
@@ -811,7 +881,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 		   get operated on as well.
 		*/
 
-		RegionList copy = regions;
+		RegionList copy = regions.rlist();
 
 		for (RegionList::iterator i = copy.begin(); i != copy.end(); i = tmp) {
 
@@ -1189,7 +1259,7 @@ void
 Playlist::shift (framepos_t at, frameoffset_t distance, bool move_intersected, bool ignore_music_glue)
 {
 	RegionLock rlock (this);
-	RegionList copy (regions);
+	RegionList copy (regions.rlist());
 	RegionList fixup;
 
 	for (RegionList::iterator r = copy.begin(); r != copy.end(); ++r) {
@@ -1227,7 +1297,7 @@ void
 Playlist::split (framepos_t at)
 {
 	RegionLock rlock (this);
-	RegionList copy (regions);
+	RegionList copy (regions.rlist());
 
 	/* use a copy since this operation can modify the region list
 	 */
@@ -1406,9 +1476,10 @@ Playlist::region_bounds_changed (const PropertyChange& what_changed, boost::shar
 		RegionList::iterator i = find (regions.begin(), regions.end(), region);
 
 		if (i == regions.end()) {
-			warning << string_compose (_("%1: bounds changed received for region (%2)not in playlist"),
-					    _name, region->name())
-				<< endmsg;
+                        /* the region bounds are being modified but its not currently
+                           in the region list. we will use its bounds correctly when/if
+                           it is added
+                        */
 			return;
 		}
 
@@ -1939,6 +2010,63 @@ Playlist::mark_session_dirty ()
 	}
 }
 
+bool
+Playlist::set_property (const PropertyBase& prop)
+{
+        if (prop == Properties::regions.property_id) {
+                const RegionListProperty::ChangeRecord& change (dynamic_cast<const RegionListProperty*>(&prop)->change());
+                regions.update (change);
+                return (!change.added.empty() && !change.removed.empty());
+        }
+        return false;
+}
+
+void
+Playlist::update (const RegionListProperty::ChangeRecord& change)
+{
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("Playlist %1 updates from a change record with %2 adds %3 removes\n", 
+                                                        name(), change.added.size(), change.removed.size()));
+        
+        freeze ();
+        /* add the added regions */
+        for (RegionListProperty::ChangeContainer::iterator i = change.added.begin(); i != change.added.end(); ++i) {
+                add_region ((*i), (*i)->position());
+        }
+        /* remove the removed regions */
+        for (RegionListProperty::ChangeContainer::iterator i = change.removed.begin(); i != change.removed.end(); ++i) {
+                remove_region (*i);
+        }
+        thaw ();
+}
+
+PropertyList*
+Playlist::property_factory (const XMLNode& history_node) const
+{
+        const XMLNodeList& children (history_node.children());
+        PropertyList* prop_list = 0;
+
+        for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+
+                /* XXX property name needs capitalizing */
+
+                if ((*i)->name() == regions.property_name()) {
+                        
+                        RegionListProperty* rlp = new RegionListProperty (*const_cast<Playlist*> (this));
+
+                        if (rlp->load_history_state (**i)) {
+                                if (!prop_list) {
+                                        prop_list = new PropertyList();
+                                }
+                                prop_list->add (rlp);
+                        } else {
+                                delete rlp;
+                        }
+                }
+        }
+
+        return prop_list;
+}
+
 int
 Playlist::set_state (const XMLNode& node, int version)
 {
@@ -1968,6 +2096,8 @@ Playlist::set_state (const XMLNode& node, int version)
 
 		if (prop->name() == X_("name")) {
 			_name = prop->value();
+		} else if (prop->name() == X_("id")) {
+                        _id = prop->value();
 		} else if (prop->name() == X_("orig_diskstream_id")) {
 			_orig_diskstream_id = prop->value ();
 		} else if (prop->name() == X_("frozen")) {
@@ -2053,6 +2183,7 @@ Playlist::state (bool full_state)
 	XMLNode *node = new XMLNode (X_("Playlist"));
 	char buf[64];
 
+	node->add_property (X_("id"), id().to_s());
 	node->add_property (X_("name"), _name);
 	node->add_property (X_("type"), _type.to_string());
 
@@ -2177,7 +2308,7 @@ Playlist::relayer ()
 	   which depends on the layer model
 	*/
 
-	RegionList copy = regions;
+	RegionList copy = regions.rlist();
 
 	/* sort according to the model and the layering mode that we're in */
 
@@ -2190,6 +2321,7 @@ Playlist::relayer ()
 		copy.sort (RegionSortByLastLayerOp ());
 
 	}
+
 
 	for (RegionList::iterator i = copy.begin(); i != copy.end(); ++i) {
 
@@ -2447,7 +2579,7 @@ Playlist::find_region (const ID& id) const
 }
 
 boost::shared_ptr<Region>
-Playlist::region_by_id (ID id)
+Playlist::region_by_id (const ID& id)
 {
 	/* searches all regions ever added to this playlist */
 
@@ -2627,7 +2759,7 @@ void
 Playlist::update_after_tempo_map_change ()
 {
 	RegionLock rlock (const_cast<Playlist*> (this));
-	RegionList copy (regions);
+	RegionList copy (regions.rlist());
 
 	freeze ();
 

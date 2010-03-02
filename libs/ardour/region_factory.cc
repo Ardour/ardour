@@ -36,7 +36,8 @@ using namespace ARDOUR;
 using namespace PBD;
 
 PBD::Signal1<void,boost::shared_ptr<Region> > RegionFactory::CheckNewRegion;
-map<PBD::ID,boost::weak_ptr<Region> > RegionFactory::region_map;
+Glib::StaticMutex RegionFactory::region_map_lock;
+RegionFactory::RegionMap RegionFactory::region_map;
 
 boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<const Region> region)
@@ -302,23 +303,40 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 void
 RegionFactory::map_add (boost::shared_ptr<Region> r)
 {
-	pair<ID,boost::weak_ptr<Region> > p;
+	pair<ID,boost::shared_ptr<Region> > p;
 	p.first = r->id();
 	p.second = r;
 
-	region_map.insert (p);
+        { 
+                Glib::Mutex::Lock lm (region_map_lock);
+                region_map.insert (p);
+                /* we pay no attention to attempts to delete regions */
+        }
+}
+
+void
+RegionFactory::map_remove (boost::shared_ptr<Region> r)
+{
+        { 
+                Glib::Mutex::Lock lm (region_map_lock);
+                RegionMap::iterator i = region_map.find (r->id());
+                if (i != region_map.end()) {
+                        region_map.erase (i);
+                }
+        }
 }
 
 boost::shared_ptr<Region>
 RegionFactory::region_by_id (const PBD::ID& id)
 {
-	map<ID,boost::weak_ptr<Region> >::iterator i = region_map.find (id);
+	RegionMap::iterator i = region_map.find (id);
 
 	if (i == region_map.end()) {
+                cerr << "ID " << id << " not found in region map\n";
 		return boost::shared_ptr<Region>();
 	}
 
-	return i->second.lock();
+	return i->second;
 }
 	
 void

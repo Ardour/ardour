@@ -28,6 +28,7 @@
 #include "pbd/strsplit.h"
 
 #include "ardour/amp.h"
+#include "ardour/debug.h"
 #include "ardour/route_group.h"
 #include "ardour/audio_track.h"
 #include "ardour/audio_diskstream.h"
@@ -56,15 +57,24 @@ namespace ARDOUR {
 void
 RouteGroup::make_property_quarks ()
 {
-	Properties::relative.id = g_quark_from_static_string (X_("relative"));
-	Properties::active.id = g_quark_from_static_string (X_("active"));
-	Properties::hidden.id = g_quark_from_static_string (X_("hidden"));
-	Properties::gain.id = g_quark_from_static_string (X_("gain"));
-	Properties::mute.id = g_quark_from_static_string (X_("mute"));
-	Properties::solo.id = g_quark_from_static_string (X_("solo"));
-	Properties::recenable.id = g_quark_from_static_string (X_("recenable"));
-	Properties::select.id = g_quark_from_static_string (X_("select"));
-	Properties::edit.id = g_quark_from_static_string (X_("edit"));
+	Properties::relative.property_id = g_quark_from_static_string (X_("relative"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for relative = %1\n", 	Properties::relative.property_id));
+	Properties::active.property_id = g_quark_from_static_string (X_("active"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for active = %1\n", 	Properties::active.property_id));
+	Properties::hidden.property_id = g_quark_from_static_string (X_("hidden"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for hidden = %1\n", 	Properties::hidden.property_id));
+	Properties::gain.property_id = g_quark_from_static_string (X_("gain"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for gain = %1\n", 	Properties::gain.property_id));
+	Properties::mute.property_id = g_quark_from_static_string (X_("mute"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for mute = %1\n", 	Properties::mute.property_id));
+	Properties::solo.property_id = g_quark_from_static_string (X_("solo"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for solo = %1\n", 	Properties::solo.property_id));
+	Properties::recenable.property_id = g_quark_from_static_string (X_("recenable"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for recenable = %1\n", 	Properties::recenable.property_id));
+	Properties::select.property_id = g_quark_from_static_string (X_("select"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for select = %1\n", 	Properties::select.property_id));
+	Properties::edit.property_id = g_quark_from_static_string (X_("edit"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for edit = %1\n", 	Properties::edit.property_id));
 }
 
 #define ROUTE_GROUP_DEFAULT_PROPERTIES  _relative (Properties::relative, false) \
@@ -432,23 +442,23 @@ RouteGroup::destroy_subgroup ()
 bool
 RouteGroup::enabled_property (PBD::PropertyID prop)
 {
-	if (Properties::relative.id == prop) {
+	if (Properties::relative.property_id == prop) {
 		return is_relative();
-	} else if (Properties::active.id == prop) {
+	} else if (Properties::active.property_id == prop) {
 		return is_active();
-	} else if (Properties::hidden.id == prop) {
+	} else if (Properties::hidden.property_id == prop) {
 		return is_hidden();
-	} else if (Properties::gain.id == prop) {
+	} else if (Properties::gain.property_id == prop) {
 		return is_gain();
-	} else if (Properties::mute.id == prop) {
+	} else if (Properties::mute.property_id == prop) {
 		return is_mute();
-	} else if (Properties::solo.id == prop) {
+	} else if (Properties::solo.property_id == prop) {
 		return is_solo();
-	} else if (Properties::recenable.id == prop) {
+	} else if (Properties::recenable.property_id == prop) {
 		return is_recenable();
-	} else if (Properties::select.id == prop) {
+	} else if (Properties::select.property_id == prop) {
 		return is_select();
-	} else if (Properties::edit.id == prop) {
+	} else if (Properties::edit.property_id == prop) {
 		return is_edit();
 	}
 

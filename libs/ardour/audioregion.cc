@@ -67,12 +67,18 @@ namespace ARDOUR {
 void
 AudioRegion::make_property_quarks ()
 {
-	Properties::envelope_active.id = g_quark_from_static_string (X_("envelope-active"));
-	Properties::default_fade_in.id = g_quark_from_static_string (X_("default-fade-in"));
-	Properties::default_fade_out.id = g_quark_from_static_string (X_("default-fade-out"));
-	Properties::fade_in_active.id = g_quark_from_static_string (X_("fade-in-active"));
-	Properties::fade_out_active.id = g_quark_from_static_string (X_("fade-out-active"));
-	Properties::scale_amplitude.id = g_quark_from_static_string (X_("scale-amplitude"));
+	Properties::envelope_active.property_id = g_quark_from_static_string (X_("envelope-active"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for envelope-active = %1\n", 	Properties::envelope_active.property_id));
+	Properties::default_fade_in.property_id = g_quark_from_static_string (X_("default-fade-in"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for default-fade-in = %1\n", 	Properties::default_fade_in.property_id));
+	Properties::default_fade_out.property_id = g_quark_from_static_string (X_("default-fade-out"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for default-fade-out = %1\n", 	Properties::default_fade_out.property_id));
+	Properties::fade_in_active.property_id = g_quark_from_static_string (X_("fade-in-active"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-in-active = %1\n", 	Properties::fade_in_active.property_id));
+	Properties::fade_out_active.property_id = g_quark_from_static_string (X_("fade-out-active"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fade-out-active = %1\n", 	Properties::fade_out_active.property_id));
+	Properties::scale_amplitude.property_id = g_quark_from_static_string (X_("scale-amplitude"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for scale-amplitude = %1\n", 	Properties::scale_amplitude.property_id));
 }
 
 void
@@ -690,37 +696,37 @@ AudioRegion::set_property (const PropertyBase& prop)
 {
 	DEBUG_TRACE (DEBUG::Properties,  string_compose ("audio region %1 set property %2\n", _name.val(), prop.property_name()));
 
-	if (prop == Properties::envelope_active.id) {
+	if (prop == Properties::envelope_active.property_id) {
 		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
 		if (val != _envelope_active) {
 			_envelope_active = val;
 			return true;
 		}
-	} else if (prop == Properties::default_fade_in.id) {
+	} else if (prop == Properties::default_fade_in.property_id) {
 		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
 		if (val != _default_fade_in) {
 			_default_fade_in = val;
 			return true;
 		}
-	} else if (prop == Properties::default_fade_out.id) {
+	} else if (prop == Properties::default_fade_out.property_id) {
 		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
 		if (val != _default_fade_out) {
 			_default_fade_out = val;
 			return true;
 		}
-	} else if (prop == Properties::fade_in_active.id) {
+	} else if (prop == Properties::fade_in_active.property_id) {
 		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
 		if (val != _fade_in_active) {
 			_fade_in_active = val;
 			return true;
 		}
-	} else if (prop == Properties::fade_out_active.id) {
+	} else if (prop == Properties::fade_out_active.property_id) {
 		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
 		if (val != _fade_out_active) {
 			_fade_out_active = val;
 			return true;
 		}
-	} else if (prop == Properties::scale_amplitude.id) {
+	} else if (prop == Properties::scale_amplitude.property_id) {
 		gain_t val = dynamic_cast<const PropertyTemplate<gain_t>*>(&prop)->val();
 		if (val != _scale_amplitude) {
 			_scale_amplitude = val;

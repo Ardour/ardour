@@ -77,27 +77,48 @@ PBD::Signal2<void,boost::shared_ptr<ARDOUR::Region>,const PropertyChange&> Regio
 void
 Region::make_property_quarks ()
 {
-	Properties::muted.id = g_quark_from_static_string (X_("muted"));
-	Properties::opaque.id = g_quark_from_static_string (X_("opaque"));
-	Properties::locked.id = g_quark_from_static_string (X_("locked"));
-	Properties::automatic.id = g_quark_from_static_string (X_("automatic"));
-	Properties::whole_file.id = g_quark_from_static_string (X_("whole-file"));
-	Properties::import.id = g_quark_from_static_string (X_("import"));
-	Properties::external.id = g_quark_from_static_string (X_("external"));
-	Properties::sync_marked.id = g_quark_from_static_string (X_("sync-marked"));
-	Properties::left_of_split.id = g_quark_from_static_string (X_("left-of-split"));
-	Properties::right_of_split.id = g_quark_from_static_string (X_("right-of-split"));
-	Properties::hidden.id = g_quark_from_static_string (X_("hidden"));
-	Properties::position_locked.id = g_quark_from_static_string (X_("position-locked"));
-	Properties::start.id = g_quark_from_static_string (X_("start"));
-	Properties::length.id = g_quark_from_static_string (X_("length"));
-	Properties::position.id = g_quark_from_static_string (X_("position"));
-	Properties::sync_position.id = g_quark_from_static_string (X_("sync-position"));
-	Properties::layer.id = g_quark_from_static_string (X_("layer"));
-	Properties::ancestral_start.id = g_quark_from_static_string (X_("ancestral-start"));
-	Properties::ancestral_length.id = g_quark_from_static_string (X_("ancestral-length"));
-	Properties::stretch.id = g_quark_from_static_string (X_("stretch"));
-	Properties::shift.id = g_quark_from_static_string (X_("shift"));
+	Properties::muted.property_id = g_quark_from_static_string (X_("muted"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for muted = %1\n", 	Properties::muted.property_id));
+	Properties::opaque.property_id = g_quark_from_static_string (X_("opaque"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for opaque = %1\n", 	Properties::opaque.property_id));
+	Properties::locked.property_id = g_quark_from_static_string (X_("locked"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for locked = %1\n", 	Properties::locked.property_id));
+	Properties::automatic.property_id = g_quark_from_static_string (X_("automatic"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for automatic = %1\n", 	Properties::automatic.property_id));
+	Properties::whole_file.property_id = g_quark_from_static_string (X_("whole-file"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for whole-file = %1\n", 	Properties::whole_file.property_id));
+	Properties::import.property_id = g_quark_from_static_string (X_("import"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for import = %1\n", 	Properties::import.property_id));
+	Properties::external.property_id = g_quark_from_static_string (X_("external"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for external = %1\n", 	Properties::external.property_id));
+	Properties::sync_marked.property_id = g_quark_from_static_string (X_("sync-marked"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for sync-marked = %1\n", 	Properties::sync_marked.property_id));
+	Properties::left_of_split.property_id = g_quark_from_static_string (X_("left-of-split"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for left-of-split = %1\n", 	Properties::left_of_split.property_id));
+	Properties::right_of_split.property_id = g_quark_from_static_string (X_("right-of-split"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for right-of-split = %1\n", 	Properties::right_of_split.property_id));
+	Properties::hidden.property_id = g_quark_from_static_string (X_("hidden"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for hidden = %1\n", 	Properties::hidden.property_id));
+	Properties::position_locked.property_id = g_quark_from_static_string (X_("position-locked"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position-locked = %1\n", 	Properties::position_locked.property_id));
+	Properties::start.property_id = g_quark_from_static_string (X_("start"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for start = %1\n", 	Properties::start.property_id));
+	Properties::length.property_id = g_quark_from_static_string (X_("length"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for length = %1\n", 	Properties::length.property_id));
+	Properties::position.property_id = g_quark_from_static_string (X_("position"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for position = %1\n", 	Properties::position.property_id));
+	Properties::sync_position.property_id = g_quark_from_static_string (X_("sync-position"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for sync-position = %1\n", 	Properties::sync_position.property_id));
+	Properties::layer.property_id = g_quark_from_static_string (X_("layer"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for layer = %1\n", 	Properties::layer.property_id));
+	Properties::ancestral_start.property_id = g_quark_from_static_string (X_("ancestral-start"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for ancestral-start = %1\n", 	Properties::ancestral_start.property_id));
+	Properties::ancestral_length.property_id = g_quark_from_static_string (X_("ancestral-length"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for ancestral-length = %1\n", 	Properties::ancestral_length.property_id));
+	Properties::stretch.property_id = g_quark_from_static_string (X_("stretch"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for stretch = %1\n", 	Properties::stretch.property_id));
+	Properties::shift.property_id = g_quark_from_static_string (X_("shift"));
+        DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for shift = %1\n", 	Properties::shift.property_id));
 }
 
 void
@@ -1516,7 +1537,7 @@ Region::set_property (const PropertyBase& prop)
 {
 	DEBUG_TRACE (DEBUG::Properties,  string_compose ("region %1 set property %2\n", _name.val(), prop.property_name()));
 
-	if (prop == Properties::muted.id) {
+	if (prop == Properties::muted.property_id) {
 		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
 		if (val != _muted) {
 			DEBUG_TRACE (DEBUG::Properties, string_compose ("region %1 muted changed from %2 to %3",
@@ -1524,7 +1545,7 @@ Region::set_property (const PropertyBase& prop)
 			_muted = val;
 			return true;
 		}
-	} else if (prop == Properties::opaque.id) {
+	} else if (prop == Properties::opaque.property_id) {
 		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
 		if (val != _opaque) {
 			DEBUG_TRACE (DEBUG::Properties, string_compose ("region %1 opaque changed from %2 to %3",
@@ -1532,7 +1553,7 @@ Region::set_property (const PropertyBase& prop)
 			_opaque = val;
 			return true;
 		}
-	} else if (prop == Properties::locked.id) {
+	} else if (prop == Properties::locked.property_id) {
 		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
 		if (val != _locked) {
 			DEBUG_TRACE (DEBUG::Properties, string_compose ("region %1 locked changed from %2 to %3",
@@ -1540,65 +1561,81 @@ Region::set_property (const PropertyBase& prop)
 			_locked = val;
 			return true;
 		}
-	} else if (prop == Properties::automatic.id) {
+	} else if (prop == Properties::automatic.property_id) {
 		_automatic = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
-	} else if (prop == Properties::whole_file.id) {
+	} else if (prop == Properties::whole_file.property_id) {
 		_whole_file = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
-	} else if (prop == Properties::import.id) {
+	} else if (prop == Properties::import.property_id) {
 		_import = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
-	} else if (prop == Properties::external.id) {
+	} else if (prop == Properties::external.property_id) {
 		_external = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
-	} else if (prop == Properties::sync_marked.id) {
+	} else if (prop == Properties::sync_marked.property_id) {
 		_sync_marked = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
-	} else if (prop == Properties::left_of_split.id) {
+	} else if (prop == Properties::left_of_split.property_id) {
 		_left_of_split = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
-	} else if (prop == Properties::right_of_split.id) {
+	} else if (prop == Properties::right_of_split.property_id) {
 		_right_of_split = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
-	} else if (prop == Properties::hidden.id) {
+	} else if (prop == Properties::hidden.property_id) {
 		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
 		if (val != _hidden) {
 			_hidden = val;
 			return true;
 		}
-	} else if (prop == Properties::position_locked.id) {
+	} else if (prop == Properties::position_locked.property_id) {
 		_position_locked = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
-	} else if (prop == Properties::start.id) {
+	} else if (prop == Properties::start.property_id) {
 		_start = dynamic_cast<const PropertyTemplate<framepos_t>*>(&prop)->val();
-	} else if (prop == Properties::length.id) {
+	} else if (prop == Properties::length.property_id) {
 		framecnt_t val = dynamic_cast<const PropertyTemplate<framecnt_t>* > (&prop)->val();
 		if (val != _length) {
 			_length = val;
 			return true;
 		}
-	} else if (prop == Properties::position.id) {
+	} else if (prop == Properties::position.property_id) {
 		framepos_t val = dynamic_cast<const PropertyTemplate<framepos_t>*>(&prop)->val();
 		if (val != _position) {
 			_position = val;
 			return true;
 		}
-	} else if (prop == Properties::sync_position.id) {
+	} else if (prop == Properties::sync_position.property_id) {
 		framepos_t val = dynamic_cast<const PropertyTemplate<framepos_t>*>(&prop)->val();
 		if (val != _sync_position) {
 			_sync_position = val;
 			return true;
 		}
-	} else if (prop == Properties::layer.id) {
+	} else if (prop == Properties::layer.property_id) {
 		layer_t val = dynamic_cast<const PropertyTemplate<layer_t>*>(&prop)->val();
 		if (val != _layer) {
 			_layer = val;
 			return true;
 		}
-	} else if (prop == Properties::ancestral_start.id) {
+	} else if (prop == Properties::ancestral_start.property_id) {
 		_ancestral_start = dynamic_cast<const PropertyTemplate<framepos_t>*>(&prop)->val();
-	} else if (prop == Properties::ancestral_length.id) {
+	} else if (prop == Properties::ancestral_length.property_id) {
 		_ancestral_length = dynamic_cast<const PropertyTemplate<framecnt_t>*>(&prop)->val();
-	} else if (prop == Properties::stretch.id) {
+	} else if (prop == Properties::stretch.property_id) {
 		_stretch = dynamic_cast<const PropertyTemplate<float>*>(&prop)->val();
-	} else if (prop == Properties::shift.id) {
+	} else if (prop == Properties::shift.property_id) {
 		_shift = dynamic_cast<const PropertyTemplate<float>*>(&prop)->val();
 	} else {
 		return SessionObject::set_property (prop);
 	}
 	
 	return false;
+}
+
+PropertyList*
+Region::property_factory (const XMLNode& history_node) const
+{
+        PropertyList* prop_list = new PropertyList;
+
+        for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
+                PropertyBase* prop = i->second->maybe_clone_self_if_found_in_history_node (history_node);
+
+                if (prop) {
+                        prop_list->add (prop);
+                }
+        }
+
+        return prop_list;
 }

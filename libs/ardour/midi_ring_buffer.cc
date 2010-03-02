@@ -25,6 +25,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 /** Read a block of MIDI events from buffer into a MidiBuffer.
  *

@@ -21,6 +21,7 @@
 #define __ardour_region_factory_h__
 
 #include <map>
+#include <glibmm/thread.h>
 
 #include "pbd/id.h"
 
@@ -37,8 +38,10 @@ class AudioRegion;
 class RegionFactory {
 
   public:
+        typedef std::map<PBD::ID,boost::shared_ptr<Region> > RegionMap;
 
 	static boost::shared_ptr<Region> region_by_id (const PBD::ID&);
+        static const RegionMap all_regions() { return region_map; }
 	static void clear_map ();
 
 	/** This is emitted only when a new id is assigned. Therefore,
@@ -75,8 +78,10 @@ class RegionFactory {
 	static boost::shared_ptr<Region> create (SourceList& srcs, const XMLNode&);
 
   private:
-	static std::map<PBD::ID,boost::weak_ptr<Region> > region_map;
+        static Glib::StaticMutex region_map_lock;
+	static RegionMap region_map;
 	static void map_add (boost::shared_ptr<Region>);
+	static void map_remove (boost::shared_ptr<Region>);
 };
 
 }
