@@ -18,6 +18,9 @@
 */
 
 #include <gtkmm/spinbutton.h>
+#include <glibmm/thread.h>
+
+#include "ardour/types.h"
 #include "ardour_dialog.h"
 #include "canvas.h"
 
@@ -44,27 +47,50 @@ public:
 		return _fade_length.get_value_as_int ();
 	}
 
+    static void stop_thread ();
+
 private:
 	void create_waves ();
 	void peaks_ready ();
 	void canvas_allocation (Gtk::Allocation &);
 	void update_silence_rects ();
+        void redraw_silence_rects ();
 
 	Gtk::SpinButton _threshold;
 	Gtk::SpinButton _minimum_length;
 	Gtk::SpinButton _fade_length;
+        Gtk::Label      _segment_count_label;
 
 	struct Wave {
-		boost::shared_ptr<ARDOUR::AudioRegion> region;
-		ArdourCanvas::WaveView* view;
-		std::list<ArdourCanvas::SimpleRect*> silence_rects;
-		double samples_per_unit;
+            boost::shared_ptr<ARDOUR::AudioRegion> region;
+            ArdourCanvas::WaveView* view;
+            std::list<ArdourCanvas::SimpleRect*> silence_rects;
+            double samples_per_unit;
+            std::list<std::pair<ARDOUR::frameoffset_t,ARDOUR::framecnt_t> >silence;
+          
+            Wave() : view (0), samples_per_unit (1) { }
 	};
 
 	ArdourCanvas::Canvas* _canvas;
 	std::list<Wave> _waves;
 	int _wave_width;
 	int _wave_height;
+        bool restart_queued;
+
+    static ARDOUR::InterThreadInfo itt;
+    static bool thread_should_exit;
+    static Glib::Cond *thread_run;
+    static Glib::Cond *thread_waiting;
+    static Glib::StaticMutex run_lock;
+    static StripSilenceDialog* current;
 
 	PBD::ScopedConnection _peaks_ready_connection;
+    
+        static bool  _detection_done (void*);
+        static void* _detection_thread_work (void*);
+
+        bool  detection_done ();
+        void* detection_thread_work ();
+        bool  start_silence_detection ();
+        void  maybe_start_silence_detection ();
 };
