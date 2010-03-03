@@ -46,14 +46,25 @@ StripSilence::run (boost::shared_ptr<Region> r)
 	/* we only operate on AudioRegions, for now, though this could be adapted to MIDI
 	   as well I guess */
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
+        InterThreadInfo itt;
+        
 	if (!region) {
 		results.push_back (r);
 		return -1;
 	}
 
+        /* we don't care about this but we need to fill out the fields
+           anyway. XXX should really be a default constructor for ITT
+        */
+
+        itt.done = false;
+        itt.cancel = false;
+        itt.progress = 0.0;
+        itt.thread = 0;
+
 	/* find periods of silence in the region */
 	std::list<std::pair<frameoffset_t, framecnt_t> > const silence =
-		region->find_silence (dB_to_coefficient (_threshold), _minimum_length);
+		region->find_silence (dB_to_coefficient (_threshold), _minimum_length, itt);
 
 	if (silence.size () == 1 && silence.front().first == 0 && silence.front().second == region->length() - 1) {
 		/* the region is all silence, so just return with nothing */

@@ -178,7 +178,7 @@ class AudioRegion : public Region
 	void resume_fade_out ();
 
 	int get_transients (AnalysisFeatureList&, bool force_new = false);
-	std::list<std::pair<frameoffset_t, framecnt_t> > find_silence (Sample, framecnt_t) const;
+	std::list<std::pair<frameoffset_t, framecnt_t> > find_silence (Sample, framecnt_t, InterThreadInfo&) const;
 
   private:
 	friend class RegionFactory;

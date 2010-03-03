@@ -1458,7 +1458,7 @@ then quit ardour and restart."));
  */
 
 std::list<std::pair<frameoffset_t, framecnt_t> >
-AudioRegion::find_silence (Sample threshold, framecnt_t min_length) const
+AudioRegion::find_silence (Sample threshold, framecnt_t min_length, InterThreadInfo& itt) const
 {
 	framecnt_t const block_size = 64 * 1024;
 	Sample loudest[block_size];
@@ -1473,7 +1473,7 @@ AudioRegion::find_silence (Sample threshold, framecnt_t min_length) const
 	frameoffset_t silence_start = 0;
 	bool silence;
 
-	while (pos < end) {
+	while (pos < end && !itt.cancel) {
 
 		/* fill `loudest' with the loudest absolute sample at each instant, across all channels */
 		memset (loudest, 0, sizeof (Sample) * block_size);
@@ -1502,12 +1502,15 @@ AudioRegion::find_silence (Sample threshold, framecnt_t min_length) const
 		}
 
 		pos += block_size;
+                itt.progress = (end-pos)/(double)_length;
 	}
 
 	if (in_silence && end - 1 - silence_start >= min_length) {
 		/* last block was silent, so finish off the last period */
 		silent_periods.push_back (std::make_pair (silence_start, end));
 	}
+
+        itt.done = true;
 
 	return silent_periods;
 }
