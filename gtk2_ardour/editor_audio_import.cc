@@ -351,39 +351,64 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 
 	} else {
 
+                bool replace = false;
+		bool ok = true;
+		vector<ustring>::size_type total = paths.size();
+
 		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
 
-			int const check = check_whether_and_how_to_import (*a, true);
-
-			if (check != 2) {
-				to_import.push_back (*a);
+                        const int check = check_whether_and_how_to_import (*a, true);
+                        
+			switch (check) {
+			case 2:
+				// user said skip
+				continue;
+			case 0:
+				fatal << "Updating existing sources should be disabled!" << endmsg;
+				/* NOTREACHED*/
+				break;
+			case 1:
+				replace = false;
+				break;
+			default:
+				fatal << "Illegal return " << check <<  " from check_whether_and_how_to_import()!" << endmsg;
+				/* NOTREACHED*/
 			}
-		}
 
-		bool ok = true;
+                        switch (chns) {
+                        case Editing::ImportDistinctFiles:
+                                
+                                to_import.clear ();
+                                to_import.push_back (*a);
+                                
+                                if (mode == Editing::ImportToTrack) {
+                                        track = get_nth_selected_audio_track (nth++);
+                                }
+			
+                                ok = (import_sndfiles (to_import, mode, quality, pos, 1, -1, track, replace, total) == 0);
+                                break;
+				
+                        case Editing::ImportDistinctChannels:
+				
+                                to_import.clear ();
+                                to_import.push_back (*a);
+				
+                                ok = (import_sndfiles (to_import, mode, quality, pos, -1, -1, track, replace, total) == 0);
+                                break;
+				
+                        case Editing::ImportSerializeFiles:
+				
+                                to_import.clear ();
+                                to_import.push_back (*a);
 
-		switch (chns) {
-		case Editing::ImportDistinctFiles:
+                                ok = (import_sndfiles (to_import, mode, quality, pos, 1, 1, track, replace, total) == 0);
+                                break;
 
-			if (mode == Editing::ImportToTrack) {
-				track = get_nth_selected_audio_track (nth++);
-			}
-
-			ok = (import_sndfiles (to_import, mode, quality, pos, 1, -1, track, false, to_import.size()) == 0);
-			break;
-
-		case Editing::ImportDistinctChannels:
-			ok = (import_sndfiles (to_import, mode, quality, pos, -1, -1, track, false, to_import.size()) == 0);
-			break;
-
-		case Editing::ImportSerializeFiles:
-			ok = (import_sndfiles (to_import, mode, quality, pos, 1, 1, track, false, to_import.size()) == 0);
-			break;
-
-		case Editing::ImportMergeFiles:
-			// Not entered, handled in earlier if() branch
-			break;
-		}
+                        case Editing::ImportMergeFiles:
+                                // Not entered, handled in earlier if() branch
+                                break;
+                        }
+                }
 	}
 
 	interthread_progress_window->hide_all ();
@@ -432,7 +457,7 @@ Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode
 		if (embed_sndfiles (paths, multi, check_sample_rate, mode, pos, 1, 1, track) < -1) {
 			goto out;
 		}
-	break;
+                break;
 
 	case Editing::ImportSerializeFiles:
 		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
@@ -457,7 +482,7 @@ Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode
 
 int
 Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality quality, nframes64_t& pos,
-			 int target_regions, int target_tracks, boost::shared_ptr<Track> track, bool replace, uint32_t total)
+			 int target_regions, int target_tracks, boost::shared_ptr<Track>& track, bool replace, uint32_t total)
 {
 	interthread_progress_window->set_title (string_compose (_("Importing %1"), paths.front()));
 	interthread_progress_window->set_position (Gtk::WIN_POS_MOUSE);
@@ -509,7 +534,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 				 import_status.mode,
 				 import_status.target_regions,
 				 import_status.target_tracks,
-				 import_status.track, false) == 0) {
+				 track, false) == 0) {
 			_session->save_state ("");
 		}
 
