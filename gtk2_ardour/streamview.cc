@@ -198,7 +198,6 @@ StreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 		if (((*i)->region()) == r) {
 			RegionView* rv = *i;
 			region_views.erase (i);
-			cerr << "Deleting RV for " << r->name() << " @ " << r << endl;
 			delete rv;
 			break;
 		}

@@ -27,7 +27,6 @@
 
 #include "pbd/failed_constructor.h"
 #include "pbd/stateful_diff_command.h"
-#include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
 
 #include "ardour/debug.h"
@@ -331,6 +330,7 @@ Playlist::init (bool hide)
 	_shuffling = false;
 	_nudging = false;
 	in_set_state = 0;
+        in_update = false;
 	_edit_mode = Config->get_edit_mode();
 	in_flush = false;
 	in_partition = false;
@@ -389,6 +389,7 @@ Playlist::set_name (const string& str)
 void
 Playlist::begin_undo ()
 {
+        in_update = true;
 	freeze ();
 }
 
@@ -396,6 +397,7 @@ void
 Playlist::end_undo ()
 {
 	thaw ();
+        in_update = false;
 }
 
 void
@@ -719,8 +721,8 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t posi
 
 	possibly_splice_unlocked (position, region->length(), region);
 
-	if (!holding_state () && !in_set_state) {
-		/* layers get assigned from XML state */
+	if (!holding_state ()) {
+		/* layers get assigned from XML state, and are not reset during undo/redo */
 		relayer ();
 	}
 
@@ -794,7 +796,7 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region)
 			possibly_splice_unlocked (pos, -distance);
 
 			if (!holding_state ()) {
-				relayer ();
+                                relayer ();
 				remove_dependents (region);
 
 				if (old_length != _get_maximum_extent()) {
@@ -2063,6 +2065,7 @@ Playlist::update (const RegionListProperty::ChangeRecord& change)
         for (RegionListProperty::ChangeContainer::iterator i = change.removed.begin(); i != change.removed.end(); ++i) {
                 remove_region (*i);
         }
+
         thaw ();
 }
 
@@ -2306,6 +2309,12 @@ Playlist::set_edit_mode (EditMode mode)
 void
 Playlist::relayer ()
 {
+        /* never compute layers when changing state for undo/redo or setting from XML*/
+
+        if (in_update || in_set_state) {
+                return;
+        }
+
 	bool changed = false;
 
 	/* Build up a new list of regions on each layer, stored in a set of lists

@@ -40,7 +40,6 @@ PBD::new_debug_bit (const char* name)
 {
         uint64_t ret;
         _debug_bit_map.insert (make_pair (name, _debug_bit));
-        cerr << "debug name " << name << " = " << _debug_bit << endl;
         ret = _debug_bit;
         _debug_bit <<= 1;
         return ret;
@@ -83,7 +82,6 @@ PBD::parse_debug_options (const char* str)
 
                 for (map<const char*,uint64_t>::iterator i = _debug_bit_map.begin(); i != _debug_bit_map.end(); ++i) {
                         if (strncasecmp (p, i->first, strlen (p)) == 0) {
-                                cerr << "debug args matched for " << p << " set bit " << i->second << endl;
                                 bits |= i->second;
                         }
                 }
@@ -99,10 +97,10 @@ PBD::parse_debug_options (const char* str)
 void
 PBD::list_debug_options ()
 {
-	cerr << _("The following debug options are available. Separate multipe options with commas.\nNames are case-insensitive and can be abbreviated.") << endl << endl;
-	cerr << "\tAll" << endl;
+	cout << _("The following debug options are available. Separate multipe options with commas.\nNames are case-insensitive and can be abbreviated.") << endl << endl;
+	cout << "\tAll" << endl;
 
         for (map<const char*,uint64_t>::iterator i = _debug_bit_map.begin(); i != _debug_bit_map.end(); ++i) {
-                cerr << "\t" << i->first << endl;
+                cout << "\t" << i->first << endl;
         }
 }

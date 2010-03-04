@@ -253,6 +253,7 @@ class Playlist : public SessionObject
 	bool             save_on_thaw;
 	std::string      last_save_reason;
 	uint32_t         in_set_state;
+	bool             in_update;
 	bool             first_set_state;
 	bool            _hidden;
 	bool            _splicing;

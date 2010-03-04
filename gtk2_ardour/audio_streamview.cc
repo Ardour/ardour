@@ -210,8 +210,6 @@ AudioStreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 		return;
 	}
 
-	cerr << "a region went way, it appears to be ours (" << this << ")\n";
-
 	if (!_trackview.session()->deletion_in_progress()) {
 
 		for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end();) {
