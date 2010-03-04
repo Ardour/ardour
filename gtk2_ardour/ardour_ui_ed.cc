@@ -640,6 +640,7 @@ ARDOUR_UI::idle_big_clock_text_resizer (int win_w, int win_h)
 		get_pixel_size (layout, w, h);
 
 		if (abs (h - limit) < slop) {
+                        cerr << "error is less than the slop, use " << h << endl;
 			if (size != original_size) {
 				
 				/* use the size from the last loop */
@@ -654,7 +655,7 @@ ARDOUR_UI::idle_big_clock_text_resizer (int win_w, int win_h)
 		if (h > limit) {
 			
 			/* too big, stepsize should be smaller */
-
+                        cerr << h << " is too big, reduce by " << stepsize << endl;
 			if (size < 2) {
 				break;
 			}
@@ -662,6 +663,7 @@ ARDOUR_UI::idle_big_clock_text_resizer (int win_w, int win_h)
 
 		} else if (h < limit) {
 
+                        cerr << h << " is too small, increase by " << stepsize << endl;
 			/* too small (but not small enough): step size should be bigger */
 			
 			if (size > 720) {
