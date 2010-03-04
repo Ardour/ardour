@@ -430,10 +430,10 @@ Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode
 			to_embed.clear ();
 			to_embed.push_back (*a);
 
-			if (embed_sndfiles (to_embed, multi, check_sample_rate, mode, pos, 1, 1, track) < -1) {
-				goto out;
-			}
-		}
+                        if (embed_sndfiles (to_embed, multi, check_sample_rate, mode, pos, 1, 1, track) < -1) {
+                                goto out;
+                        }
+                }
 		break;
 	}
 
@@ -447,7 +447,7 @@ Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode
 
 int
 Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality quality, nframes64_t& pos, 
-			 int target_regions, int target_tracks, boost::shared_ptr<AudioTrack> track, bool replace,
+			 int target_regions, int target_tracks, boost::shared_ptr<AudioTrack>& track, bool replace,
 			 uint32_t total)
 {
 	interthread_progress_window->set_title (string_compose (_("Importing %1"), paths.front()));
@@ -500,7 +500,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 				 import_status.mode, 
 				 import_status.target_regions, 
 				 import_status.target_tracks, 
-				 import_status.track, false) == 0) {
+				 track, false) == 0) {
 			session->save_state ("");
 		}
 		
@@ -509,7 +509,6 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 		pos = import_status.pos;
 	}
 
-
 	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 	return 0;
 }
@@ -517,7 +516,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 int
 Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 			bool& check_sample_rate, ImportMode mode, nframes64_t& pos, int target_regions, int target_tracks,
-			boost::shared_ptr<AudioTrack> track)
+			boost::shared_ptr<AudioTrack>& track)
 {
 	boost::shared_ptr<AudioFileSource> source;
 	SourceList sources;
@@ -667,7 +666,6 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 	if (sources.empty()) {
 		goto out;
 	}
-
 	ret = add_sources (paths, sources, pos, mode, target_regions, target_tracks, track, true);
 
   out:
@@ -730,11 +728,11 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 					   (RegionFactory::create (just_one, 0, (*x)->length(), region_name, 0,
 								   Region::Flag (Region::DefaultFlags|Region::WholeFile|Region::External)));
 
-            if (use_timestamp) {
-    		    ar->special_set_position((*x)->natural_position());
-    		}
-
-			regions.push_back (ar);
+                        if (use_timestamp) {
+                                ar->special_set_position((*x)->natural_position());
+                        }
+                        
+                        regions.push_back (ar);
 		}
 	}
 
@@ -756,12 +754,12 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 
 	int n = 0;
 
-	for (vector<boost::shared_ptr<AudioRegion> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {
+        for (vector<boost::shared_ptr<AudioRegion> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {
+                
+                finish_bringing_in_audio (*r, input_chan, output_chan, pos, mode, track);
 
-		finish_bringing_in_audio (*r, input_chan, output_chan, pos, mode, track);
-
-		if (target_tracks != 1) {
-			track.reset ();
+                if (target_tracks != 1) {
+                        track.reset ();
 		} else {
 			pos += (*r)->length();
 		} 
