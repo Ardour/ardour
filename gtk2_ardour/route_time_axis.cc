@@ -33,7 +33,7 @@
 #include "pbd/whitespace.h"
 #include "pbd/memento_command.h"
 #include "pbd/enumwriter.h"
-#include "pbd/stacktrace.h"
+#include "pbd/stateful_diff_command.h"
 
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
@@ -1385,12 +1385,22 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 		}
 	}
 
-	XMLNode &before = playlist->get_state();
+        playlist->clear_history ();
+        playlist->clear_owned_history ();
+
 	switch (op) {
 	case Cut:
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			_editor.get_cut_buffer().add (what_we_got);
-			_session->add_command( new MementoCommand<Playlist>(*playlist.get(), &before, &playlist->get_state()));
+
+                        vector<StatefulDiffCommand*> cmds;
+                        
+                        playlist->rdiff (cmds);
+                        
+                        for (vector<StatefulDiffCommand*>::iterator c = cmds.begin(); c != cmds.end(); ++c) {
+                                _session->add_command (*c);
+                        }
+                        _session->add_command (new StatefulDiffCommand (playlist));
 			ret = true;
 		}
 		break;
@@ -1402,7 +1412,14 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 
 	case Clear:
 		if ((what_we_got = playlist->cut (time)) != 0) {
-			_session->add_command( new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
+                        vector<StatefulDiffCommand*> cmds;
+                        
+                        playlist->rdiff (cmds);
+                        
+                        for (vector<StatefulDiffCommand*>::iterator c = cmds.begin(); c != cmds.end(); ++c) {
+                                _session->add_command (*c);
+                        }
+                        _session->add_command (new StatefulDiffCommand (playlist));
 			what_we_got->release ();
 			ret = true;
 		}
@@ -1432,9 +1449,9 @@ RouteTimeAxisView::paste (nframes_t pos, float times, Selection& selection, size
 		pos = session_frame_to_track_frame(pos, get_diskstream()->speed() );
 	}
 
-	XMLNode &before = playlist->get_state();
+        playlist->clear_history ();
 	playlist->paste (*p, pos, times);
-	_session->add_command( new MementoCommand<Playlist>(*playlist, &before, &playlist->get_state()));
+	_session->add_command (new StatefulDiffCommand (playlist));
 
 	return true;
 }

@@ -26,9 +26,9 @@
 #include <climits>
 
 #include "pbd/failed_constructor.h"
+#include "pbd/stateful_diff_command.h"
 #include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
-#include "pbd/stacktrace.h"
 
 #include "ardour/debug.h"
 #include "ardour/playlist.h"
@@ -2023,6 +2023,29 @@ Playlist::set_property (const PropertyBase& prop)
                 return (!change.added.empty() && !change.removed.empty());
         }
         return false;
+}
+
+void
+Playlist::rdiff (vector<StatefulDiffCommand*>& cmds) const
+{
+	RegionLock rlock (const_cast<Playlist *> (this));
+
+	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+		if ((*i)->changed ()) {
+                        StatefulDiffCommand* sdc = new StatefulDiffCommand (*i);
+                        cmds.push_back (sdc);
+                }
+	}
+}
+
+void
+Playlist::clear_owned_history ()
+{
+	RegionLock rlock (this);
+
+	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+                (*i)->clear_history ();
+        }
 }
 
 void

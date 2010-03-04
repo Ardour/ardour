@@ -35,6 +35,7 @@
 
 #include "pbd/undo.h"
 #include "pbd/stateful.h"
+#include "pbd/stateful_owner.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/sequence_property.h"
 
@@ -83,6 +84,7 @@ class RegionListProperty : public PBD::SequenceProperty<std::list<boost::shared_
 };
 
 class Playlist : public SessionObject
+               , public PBD::StatefulOwner
 	       , public boost::enable_shared_from_this<Playlist> {
   public:
 	typedef std::list<boost::shared_ptr<Region> >    RegionList;
@@ -97,6 +99,8 @@ class Playlist : public SessionObject
 
         bool set_property (const PBD::PropertyBase&);
         void update (const RegionListProperty::ChangeRecord&);
+        void clear_owned_history ();
+        void rdiff (std::vector<PBD::StatefulDiffCommand*>&) const;
 
         PBD::PropertyList* property_factory (const XMLNode&) const;
 

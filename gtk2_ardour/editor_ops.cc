@@ -155,7 +155,13 @@ Editor::split_regions_at (nframes64_t where, RegionSelection& regions)
 
 		boost::shared_ptr<Playlist> pl = (*a)->region()->playlist();
 
-		if (! pl->frozen()) {
+                if (!pl) {
+                        cerr << "region " << (*a)->region()->name() << " has no playlist!\n";
+                        a = tmp;
+                        continue;
+                }
+
+		if (!pl->frozen()) {
 			/* we haven't seen this playlist before */
 
 			/* remember used playlists so we can thaw them later */
@@ -3934,17 +3940,6 @@ Editor::cut_copy_midi (CutCopyOp op)
 	}
 }
 
-struct PlaylistState {
-    boost::shared_ptr<Playlist> playlist;
-    XMLNode*  before;
-};
-
-struct lt_playlist {
-    bool operator () (const PlaylistState& a, const PlaylistState& b) {
-	    return a.playlist < b.playlist;
-    }
-};
-
 struct PlaylistMapping {
     TimeAxisView* tv;
     boost::shared_ptr<Playlist> pl;
@@ -4057,8 +4052,8 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 
 	nframes64_t first_position = max_frames;
 
-	set<PlaylistState, lt_playlist> freezelist;
-	pair<set<PlaylistState, lt_playlist>::iterator,bool> insert_result;
+	typedef set<boost::shared_ptr<Playlist> > FreezeList;
+        FreezeList freezelist;
 
 	/* get ordering correct before we cut/copy */
 
@@ -4072,21 +4067,19 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 			boost::shared_ptr<Playlist> pl = (*x)->region()->playlist();
 
 			if (pl) {
-				set<PlaylistState, lt_playlist>::iterator fl;
+				FreezeList::iterator fl;
 
 				//only take state if this is a new playlist.
 				for (fl = freezelist.begin(); fl != freezelist.end(); ++fl) {
-					if ((*fl).playlist == pl) {
+					if ((*fl) == pl) {
 						break;
 					}
 				}
 
 				if (fl == freezelist.end()) {
-					PlaylistState before;
-					before.playlist = pl;
-					before.before = &pl->get_state();
+                                        pl->clear_history();
 					pl->freeze ();
-					insert_result = freezelist.insert (before);
+					freezelist.insert (pl);
 				}
 			}
 		}
@@ -4177,10 +4170,10 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 	if (!foo.empty()) {
 		cut_buffer->set (foo);
 	}
-
-	for (set<PlaylistState, lt_playlist>::iterator pl = freezelist.begin(); pl != freezelist.end(); ++pl) {
-		(*pl).playlist->thaw ();
-		_session->add_command (new MementoCommand<Playlist>(*(*pl).playlist, (*pl).before, &(*pl).playlist->get_state()));
+        
+	for (FreezeList::iterator pl = freezelist.begin(); pl != freezelist.end(); ++pl) {
+		(*pl)->thaw ();
+		_session->add_command (new StatefulDiffCommand (*pl));
 	}
 }
 
@@ -4440,13 +4433,20 @@ Editor::nudge_track (bool use_edit, bool forwards)
 			continue;
 		}
 
-                /* XXX STATEFUL this won't capture region moves if don't as a stateful diff
-                 */
+                playlist->clear_history ();
+                playlist->clear_owned_history ();
 
-                XMLNode &before = playlist->get_state();
 		playlist->nudge_after (start, distance, forwards);
-                XMLNode &after = playlist->get_state();
-		_session->add_command (new MementoCommand<Playlist>(*playlist, &before, &after));
+                
+                vector<StatefulDiffCommand*> cmds;
+
+                playlist->rdiff (cmds);
+
+                for (vector<StatefulDiffCommand*>::iterator c = cmds.begin(); c != cmds.end(); ++c) {
+                        _session->add_command (*c);
+                }
+
+                _session->add_command (new StatefulDiffCommand (playlist));
 	}
 
 	commit_reversible_command ();
@@ -6290,10 +6290,8 @@ Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt,
 
 		if (pl) {
 
-                        /* XXX STATEFUL this won't capture region motion if done as stateful diff 
-                         */
-
-			XMLNode &before = pl->get_state();
+			pl->clear_history ();
+                        pl->clear_owned_history ();
 
 			if (opt == SplitIntersected) {
 				pl->split (pos);
@@ -6301,9 +6299,17 @@ Editor::insert_time (nframes64_t pos, nframes64_t frames, InsertTimeOption opt,
 
 			pl->shift (pos, frames, (opt == MoveIntersected), ignore_music_glue);
 
-			XMLNode &after = pl->get_state();
+                        vector<StatefulDiffCommand*> cmds;
+                        
+                        pl->rdiff (cmds);
+                        
+                        cerr << "Shift generated " << cmds.size() << " sdc's\n";
 
-			_session->add_command (new MementoCommand<Playlist> (*pl, &before, &after));
+                        for (vector<StatefulDiffCommand*>::iterator c = cmds.begin(); c != cmds.end(); ++c) {
+                                _session->add_command (*c);
+                        }
+                        
+			_session->add_command (new StatefulDiffCommand (pl));
 			commit = true;
 		}
 

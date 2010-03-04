@@ -95,6 +95,7 @@ public:
 
 	const gchar*property_name () const { return g_quark_to_string (_property_id); }
 	PropertyID  property_id () const   { return _property_id; }
+        bool changed() const { return _have_old; }
 
 	bool operator==(PropertyID pid) const {
 		return _property_id == pid;

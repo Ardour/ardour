@@ -71,6 +71,8 @@ class Stateful {
 
 	void clear_history ();
         void diff (PropertyList&, PropertyList&) const;
+        bool changed() const;
+
         /* create a property list from an XMLNode
          */
         virtual PropertyList* property_factory(const XMLNode&) const { return 0; }

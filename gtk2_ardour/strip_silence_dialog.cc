@@ -270,7 +270,7 @@ StripSilenceDialog::_detection_done (void* arg)
 bool
 StripSilenceDialog::detection_done ()
 {
-        get_window()->set_cursor (Gdk::Cursor (Gdk::LEFT_PTR));
+        // get_window()->set_cursor (Gdk::Cursor (Gdk::LEFT_PTR));
         update_silence_rects ();
         return false;
 }
@@ -287,22 +287,15 @@ StripSilenceDialog::detection_thread_work ()
 {
         ARDOUR_UI::instance()->register_thread ("gui", pthread_self(), "silence", 32);
         
-        cerr << pthread_self() << ": thread exists\n";
-
         while (1) {
 
                 run_lock.lock ();
-                cerr << pthread_self() << ": thread notes that its waiting\n";
                 thread_waiting->signal ();
-                cerr << pthread_self() << ": thread waits to run\n";
                 thread_run->wait (run_lock);
-
-                cerr << pthread_self() << ": silence thread active\n";
 
                 if (thread_should_exit) {
                         thread_waiting->signal ();
                         run_lock.unlock ();
-                        cerr << pthread_self() << ": silence thread exited\n";
                         break;
                 }
 
@@ -319,7 +312,6 @@ StripSilenceDialog::detection_thread_work ()
                         }
                 }
 
-                cerr << pthread_self() << ": silence iteration done\n";
         }
 
         return 0;
@@ -349,9 +341,7 @@ StripSilenceDialog::start_silence_detection ()
 
                 pthread_create (&itt.thread, 0, StripSilenceDialog::_detection_thread_work, this);
                 /* wait for it to get started */
-                cerr << "Wait for new thread to be ready\n";
                 thread_waiting->wait (run_lock);
-                cerr << "\tits ready\n";
 
         } else {
                 
@@ -361,11 +351,8 @@ StripSilenceDialog::start_silence_detection ()
                 current = 0;
 
                 while (!itt.done) {
-                        cerr << "tell existing thread to stop\n";
                         thread_run->signal ();
-                        cerr << "wait for existing thread to stop\n";
                         thread_waiting->wait (run_lock);
-                        cerr << "its stopped\n";
                 }
         }
 
@@ -377,7 +364,6 @@ StripSilenceDialog::start_silence_detection ()
         
         /* and start it up (again) */
         
-        cerr << "signal thread to run again\n";
         thread_run->signal ();
 
         /* change cursor */
@@ -398,4 +384,5 @@ StripSilenceDialog::stop_thread ()
         thread_should_exit = true;
         thread_run->signal (); 
         thread_waiting->wait (run_lock);
+        itt.thread = 0;
 }

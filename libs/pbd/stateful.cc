@@ -287,5 +287,16 @@ Stateful::resume_property_changes ()
         send_change (what_changed);
 }
 
+bool
+Stateful::changed() const  
+{
+	for (OwnedPropertyList::const_iterator i = _properties->begin(); i != _properties->end(); ++i) {
+                if (i->second->changed()) {
+                        return true;
+                }
+        }
+
+        return false;
+}
 
 } // namespace PBD
