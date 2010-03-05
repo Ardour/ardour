@@ -660,6 +660,8 @@ ARDOUR_UI::idle_big_clock_text_resizer (int win_w, int win_h)
 				break;
 			}
 			size -= stepsize;
+                        
+                        stepsize /= 2;
 
 		} else if (h < limit) {
 
@@ -670,9 +672,10 @@ ARDOUR_UI::idle_big_clock_text_resizer (int win_w, int win_h)
 				break;
 			}
 			size += stepsize;
+                        
+                        stepsize *= 2;
 		}
 
-		stepsize /= 2;
 	}
 
 	return false;
