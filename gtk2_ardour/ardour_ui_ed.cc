@@ -577,11 +577,12 @@ ARDOUR_UI::big_clock_size_allocate (Gtk::Allocation& allocation)
 		big_clock_resize_in_progress = true;
 	}
 
-	big_clock_window->set_size_request (allocation.get_width() - 2, allocation.get_height() - 1);
+	// big_clock_window->set_size_request (allocation.get_width() - 2, allocation.get_height() - 1);
 }
 
 static int old_big_clock_width = -1;
 static int old_big_clock_height = -1;
+static double big_clock_precise_font_size = 0;
 
 bool
 ARDOUR_UI::idle_big_clock_text_resizer (int win_w, int win_h)
@@ -589,41 +590,37 @@ ARDOUR_UI::idle_big_clock_text_resizer (int win_w, int win_h)
 	big_clock_resize_in_progress = false;
 
 	Glib::RefPtr<Gdk::Window> win = big_clock_window->get_window();
+	Pango::FontDescription fd (big_clock.get_style()->get_font());
+	int size = fd.get_size ();
+	bool absolute = fd.get_size_is_absolute ();
+	int original_size;
+        int x, y, winw, winh, d;
 
-	int x, y, winw, winh, d;
+	if (!absolute) {
+		size /= PANGO_SCALE;
+	}
 
 	win->get_geometry (x, y, winw, winh, d);
 
         if (old_big_clock_width < 0 || old_big_clock_height < 0) {
                 old_big_clock_height = winh;
                 old_big_clock_width = winw;
+                big_clock_precise_font_size = size;
                 return false;
         }
 
         double scale;
-        
-        scale = min (((double) winw / (double)old_big_clock_width), 
+
+        scale = min (((double) winw / (double) old_big_clock_width), 
                      ((double) winh / (double) old_big_clock_height));
 
-        cerr << "Window scaled by " << scale << endl;
-        
-	Pango::FontDescription fd (big_clock.get_style()->get_font());
 	string family = fd.get_family();
-	int size = fd.get_size ();
-	bool absolute = fd.get_size_is_absolute ();
-	int original_size;
-
-	if (!absolute) {
-		size /= PANGO_SCALE;
-	}
 
         original_size = size;
-        size = lrintf (size * scale);
-        size -= 2;
+
+        size = (int) lrintf (big_clock_precise_font_size * scale);
 
         if (size != original_size) {
-
-                cerr << "new font size = " << size << endl;
 
                 char buf[family.length()+16];
                 snprintf (buf, family.length()+16, "%s %d", family.c_str(), size);
