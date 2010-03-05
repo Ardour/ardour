@@ -23,14 +23,16 @@
    is to cut down on the nasty compile times for both these classes.
 */
 
-#include "pbd/file_utils.h"
-#include "pbd/fpu.h"
+#include <cmath>
 
 #include <glibmm/miscutils.h>
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/window_title.h>
 #include <gtk/gtk.h>
+
+#include "pbd/file_utils.h"
+#include "pbd/fpu.h"
 
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -578,105 +580,59 @@ ARDOUR_UI::big_clock_size_allocate (Gtk::Allocation& allocation)
 	big_clock_window->set_size_request (allocation.get_width() - 2, allocation.get_height() - 1);
 }
 
+static int old_big_clock_width = -1;
+static int old_big_clock_height = -1;
+
 bool
 ARDOUR_UI::idle_big_clock_text_resizer (int win_w, int win_h)
 {
-	extern void get_pixel_size (Glib::RefPtr<Pango::Layout> layout, int& width, int& height);
-	Glib::RefPtr<Gdk::Window> win = big_clock_window->get_window();
-	assert (win);
-
 	big_clock_resize_in_progress = false;
 
+	Glib::RefPtr<Gdk::Window> win = big_clock_window->get_window();
+
+	int x, y, winw, winh, d;
+
+	win->get_geometry (x, y, winw, winh, d);
+
+        if (old_big_clock_width < 0 || old_big_clock_height < 0) {
+                old_big_clock_height = winh;
+                old_big_clock_width = winw;
+                return false;
+        }
+
+        double scale;
+        
+        scale = min (((double) winw / (double)old_big_clock_width), 
+                     ((double) winh / (double) old_big_clock_height));
+        
 	Pango::FontDescription fd (big_clock.get_style()->get_font());
 	string family = fd.get_family();
 	int size = fd.get_size ();
-	int original_size;
 	bool absolute = fd.get_size_is_absolute ();
-	int stepsize;
+	int original_size;
 
 	if (!absolute) {
 		size /= PANGO_SCALE;
 	}
 
- 	original_size = size;
+        original_size = size;
+        size = lrintf (size * scale);
 
-	int x, y, winw, winh, d;
-	int w, h;
-	int slop;
-	int limit;
-
-	win->get_geometry (x, y, winw, winh, d);
-
-	Glib::RefPtr<Pango::Layout> layout = big_clock.create_pango_layout ("0");
-	get_pixel_size (layout, w, h);
-
-	/* we want about 10% of the font height as padding, and we'll allow 10% of slop
-	   in the accuracy of the fit.
-	*/
-
-	slop = 10;
-	limit = winh - (h/4);
-
-	if (h < limit && limit - h < slop) {
-		/* current font is smaller than the window height but not by too much */
-		return false;
-	}
-
-	stepsize = 16;
-	if (h > limit) {
-		/* font is too big, lets get smaller */
-		size -= stepsize;
-	} else {
-		/* font is too big, lets get bigger */
-		size += stepsize;
-	}
-
-	while (1) {
-		
-		char buf[family.length()+16];
-		snprintf (buf, family.length()+16, "%s %d", family.c_str(), size);
-		Pango::FontDescription fd (buf);
-		layout->set_font_description (fd);
-		get_pixel_size (layout, w, h);
-
-		if (abs (h - limit) < slop) {
-                        cerr << "error is less than the slop, use " << h << endl;
-			if (size != original_size) {
-				
-				/* use the size from the last loop */
-				
-				Glib::RefPtr<Gtk::RcStyle> rcstyle = big_clock.get_modifier_style ();
-				rcstyle->set_font (fd);
-				big_clock.modify_style (rcstyle);
-			}
-			break;
-		}
-		
-		if (h > limit) {
-			
-			/* too big, stepsize should be smaller */
-                        cerr << h << " is too big, reduce by " << stepsize << endl;
-			if (size < 2) {
-				break;
-			}
-			size -= stepsize;
-                        
-                        stepsize /= 2;
-
-		} else if (h < limit) {
-
-                        cerr << h << " is too small, increase by " << stepsize << endl;
-			/* too small (but not small enough): step size should be bigger */
-			
-			if (size > 720) {
-				break;
-			}
-			size += stepsize;
-                        
-                        stepsize *= 2;
-		}
-
-	}
+        if (size != original_size) {
+                char buf[family.length()+16];
+                snprintf (buf, family.length()+16, "%s %d", family.c_str(), size);
+                
+                try { 
+                        Pango::FontDescription fd (buf);
+                        Glib::RefPtr<Gtk::RcStyle> rcstyle = big_clock.get_modifier_style ();
+                        rcstyle->set_font (fd);
+                        big_clock.modify_style (rcstyle);
+                } 
+                
+                catch (...) {
+                        /* oh well, do nothing */
+                }
+        }
 
 	return false;
 }
