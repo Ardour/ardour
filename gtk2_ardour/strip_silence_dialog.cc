@@ -27,6 +27,8 @@
 
 #include "ardour/dB.h"
 #include "ardour_ui.h"
+#include "ardour/session.h"
+
 #include "gui_thread.h"
 #include "strip_silence_dialog.h"
 #include "canvas_impl.h"
@@ -47,12 +49,16 @@ InterThreadInfo   StripSilenceDialog::itt;
 StripSilenceDialog* StripSilenceDialog::current = 0;
 
 /** Construct Strip silence dialog box */
-StripSilenceDialog::StripSilenceDialog (std::list<boost::shared_ptr<ARDOUR::AudioRegion> > const & regions)
+StripSilenceDialog::StripSilenceDialog (Session* s, std::list<boost::shared_ptr<ARDOUR::AudioRegion> > const & regions)
 	: ArdourDialog (_("Strip Silence"))
+        , _minimum_length (X_("silence duration"), true, "SilenceDurationClock", true, false, true, false)
+        , _fade_length (X_("silence duration"), true, "SilenceDurationClock", true, false, true, false)
         , _wave_width (640)
         , _wave_height (64)
         , restart_queued (false)
 {
+        set_session (s);
+
         if (thread_waiting == 0) {
                 thread_waiting = new Glib::Cond;
                 thread_run = new Glib::Cond;
@@ -74,44 +80,44 @@ StripSilenceDialog::StripSilenceDialog (std::list<boost::shared_ptr<ARDOUR::Audi
 
 	Gtk::Label* l = Gtk::manage (new Gtk::Label (_("Threshold:")));
 	l->set_alignment (1, 0.5);
-	table->attach (*l, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
+        
+        hbox->pack_start (*l, false, false);
+        hbox->pack_start (_threshold, true, true);
+
 	_threshold.set_digits (1);
 	_threshold.set_increments (1, 10);
 	_threshold.set_range (-120, 0);
 	_threshold.set_value (-60);
-	table->attach (_threshold, 1, 2, 0, 1, Gtk::FILL, Gtk::FILL);
+
 	l = Gtk::manage (new Gtk::Label (_("dBFS")));
 	l->set_alignment (0, 0.5);
-	table->attach (*l, 2, 3, 0, 1, Gtk::FILL, Gtk::FILL);
 
+        hbox->pack_start (*l, false, false);
+        
 	l = Gtk::manage (new Gtk::Label (_("Minimum length:")));
 	l->set_alignment (1, 0.5);
-	table->attach (*l, 0, 1, 1, 2, Gtk::FILL, Gtk::FILL);
-	_minimum_length.set_digits (0);
-	_minimum_length.set_increments (1, 10);
-	_minimum_length.set_range (0, 65536);
-	_minimum_length.set_value (256);
-	table->attach (_minimum_length, 1, 2, 1, 2, Gtk::FILL, Gtk::FILL);
-	l = Gtk::manage (new Gtk::Label (_("samples")));
-	table->attach (*l, 2, 3, 1, 2, Gtk::FILL, Gtk::FILL);
+
+        hbox->pack_start (*l, false, false);
+        hbox->pack_start (_minimum_length, true, true);
+
+        _minimum_length.set_session (s);
+        _minimum_length.set_mode (AudioClock::Frames);
+        _minimum_length.set (1000, true);
 
 	l = Gtk::manage (new Gtk::Label (_("Fade length:")));
 	l->set_alignment (1, 0.5);
-	table->attach (*l, 0, 1, 2, 3, Gtk::FILL, Gtk::FILL);
-	_fade_length.set_digits (0);
-	_fade_length.set_increments (1, 10);
-	_fade_length.set_range (0, 1024);
-	_fade_length.set_value (64);
-	table->attach (_fade_length, 1, 2, 2, 3, Gtk::FILL, Gtk::FILL);
-	l = Gtk::manage (new Gtk::Label (_("samples")));
-	table->attach (*l, 2, 3, 2, 3, Gtk::FILL, Gtk::FILL);
 
-	hbox->pack_start (*table, false, false);
+        hbox->pack_start (*l, false, false);
+        hbox->pack_start (_fade_length, true, true);
+
+        _fade_length.set_session (s);
+        _fade_length.set_mode (AudioClock::Frames);
+        _fade_length.set (64, true);
 
         _segment_count_label.set_text (_("Silent segments: none"));
-	hbox->pack_start (_segment_count_label, false, false);
 
 	get_vbox()->pack_start (*hbox, false, false);
+
 
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_OK);
@@ -121,11 +127,12 @@ StripSilenceDialog::StripSilenceDialog (std::list<boost::shared_ptr<ARDOUR::Audi
 	_canvas->set_size_request (_wave_width, _wave_height * _waves.size ());
 
 	get_vbox()->pack_start (*_canvas, true, true);
+	get_vbox()->pack_start (_segment_count_label, false, false);
 
 	show_all ();
 
         _threshold.get_adjustment()->signal_value_changed().connect (sigc::mem_fun (*this, &StripSilenceDialog::maybe_start_silence_detection));
-        _minimum_length.get_adjustment()->signal_value_changed().connect (sigc::mem_fun (*this, &StripSilenceDialog::maybe_start_silence_detection));
+        _minimum_length.ValueChanged.connect (sigc::mem_fun (*this, &StripSilenceDialog::maybe_start_silence_detection));
 
 	create_waves ();
 	update_silence_rects ();
@@ -257,7 +264,33 @@ StripSilenceDialog::update_silence_rects ()
 		++n;
 	}
 
-        _segment_count_label.set_text (string_compose (_("Silent segments: %1"), max_segments));
+        if (min_audible > 0) {
+                float ms, ma;
+                char* aunits;
+                char* sunits;
+
+                ma = (float) min_audible/_session->frame_rate();
+                ms = (float) min_silence/_session->frame_rate();
+
+                if (min_audible > _session->frame_rate()) {
+                        aunits = _("secs");
+                        ma /= 1000.0;
+                } else {
+                        aunits = _("msecs");
+                }
+
+                if (min_silence > _session->frame_rate()) {
+                        sunits = _("secs");
+                        ms /= 1000.0;
+                } else {
+                        sunits = _("msecs");
+                }
+
+                _segment_count_label.set_text (string_compose (_("Silent segments: %1\nShortest silence %2 %3 Shortest audible %4 %5"), 
+                                                               max_segments, ms, sunits, ma, aunits));
+        } else {
+                _segment_count_label.set_text (_("Full silence"));
+        }
 }
 
 bool
@@ -270,7 +303,7 @@ StripSilenceDialog::_detection_done (void* arg)
 bool
 StripSilenceDialog::detection_done ()
 {
-        // get_window()->set_cursor (Gdk::Cursor (Gdk::LEFT_PTR));
+        get_window()->set_cursor (Gdk::Cursor (Gdk::LEFT_PTR));
         update_silence_rects ();
         return false;
 }
@@ -305,15 +338,18 @@ StripSilenceDialog::detection_thread_work ()
                         
                         for (std::list<Wave>::iterator i = ssd->_waves.begin(); i != ssd->_waves.end(); ++i) {
                                 i->silence = i->region->find_silence (dB_to_coefficient (ssd->threshold ()), ssd->minimum_length (), ssd->itt);
+                                ssd->update_stats (i->silence);
                         }
                         
                         if (!ssd->itt.cancel) {
                                 g_idle_add ((gboolean (*)(void*)) StripSilenceDialog::_detection_done, ssd);
                         }
+                } else {
+                        run_lock.unlock ();
                 }
 
         }
-
+        
         return 0;
 }
 
@@ -385,4 +421,69 @@ StripSilenceDialog::stop_thread ()
         thread_run->signal (); 
         thread_waiting->wait (run_lock);
         itt.thread = 0;
+}
+
+void
+StripSilenceDialog::update_stats (const SilenceResult& res)
+{
+        if (res.empty()) {
+                return;
+        }
+
+        max_silence = 0;
+        min_silence = max_frames;
+        max_audible = 0;
+        min_audible = max_frames;
+        
+        SilenceResult::const_iterator cur;
+
+        cur = res.begin();
+
+        framepos_t start = 0;
+        framepos_t end;
+        bool in_silence;
+
+        if (cur->first == 0) {
+                /* initial segment, starting at zero, is silent */
+                end = cur->second;
+                in_silence = true;
+        } else {
+                /* initial segment, starting at zero, is audible */
+                end = cur->first;
+                in_silence = false;
+        }
+
+        while (cur != res.end()) {
+
+                framecnt_t interval_duration;
+
+                interval_duration = end - start;
+
+                if (in_silence) {
+
+                        max_silence = max (max_silence, interval_duration);
+                        min_silence = min (min_silence, interval_duration);
+                } else {
+
+                        max_audible = max (max_audible, interval_duration);
+                        min_audible = min (min_audible, interval_duration);
+                }
+
+                start = end;
+                ++cur;
+                end = cur->first;
+                in_silence = !in_silence;
+        }
+}
+
+nframes_t
+StripSilenceDialog::minimum_length () const
+{
+        return _minimum_length.current_duration (_waves.front().region->position());
+}
+
+nframes_t
+StripSilenceDialog::fade_length () const
+{
+        return _minimum_length.current_duration (_waves.front().region->position());
 }
