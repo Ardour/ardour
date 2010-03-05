@@ -604,6 +604,8 @@ ARDOUR_UI::idle_big_clock_text_resizer (int win_w, int win_h)
         
         scale = min (((double) winw / (double)old_big_clock_width), 
                      ((double) winh / (double) old_big_clock_height));
+
+        cerr << "Window scaled by " << scale << endl;
         
 	Pango::FontDescription fd (big_clock.get_style()->get_font());
 	string family = fd.get_family();
@@ -617,8 +619,12 @@ ARDOUR_UI::idle_big_clock_text_resizer (int win_w, int win_h)
 
         original_size = size;
         size = lrintf (size * scale);
+        size -= 2;
 
         if (size != original_size) {
+
+                cerr << "new font size = " << size << endl;
+
                 char buf[family.length()+16];
                 snprintf (buf, family.length()+16, "%s %d", family.c_str(), size);
                 
