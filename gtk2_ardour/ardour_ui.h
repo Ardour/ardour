@@ -314,6 +314,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	AudioClock   big_clock;
 	Gtk::Window* big_clock_window;
+        int original_big_clock_width;
+        int original_big_clock_height;
+        double original_big_clock_font_size;
+
 	void big_clock_size_allocate (Gtk::Allocation&);
 	bool idle_big_clock_text_resizer (int width, int height);
 	void big_clock_realized ();

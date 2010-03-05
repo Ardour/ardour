@@ -33,6 +33,7 @@
 
 #include "pbd/file_utils.h"
 #include "pbd/fpu.h"
+#include "pbd/convert.h"
 
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -552,9 +553,59 @@ ARDOUR_UI::setup_clock ()
 void
 ARDOUR_UI::big_clock_realized ()
 {
-	set_decoration (big_clock_window, (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 	int x, y, w, d;
+
+	set_decoration (big_clock_window, (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH));
 	big_clock_window->get_window()->get_geometry (x, y, w, big_clock_height, d);
+
+        original_big_clock_height = big_clock_height;
+        original_big_clock_width = w;
+
+        Pango::FontDescription fd (big_clock.get_style()->get_font());
+        original_big_clock_font_size = fd.get_size ();
+        
+        if (!fd.get_size_is_absolute ()) {
+                original_big_clock_font_size /= PANGO_SCALE;
+        }
+
+        /* we can't set the real size until we know the original one, with the UI rc-file-set font 
+           size, so do this here.
+        */
+
+	XMLNode* node = Config->extra_xml (X_("UI"));
+
+	if (node) {
+
+		const XMLProperty* prop;
+                int w, h, x, y;
+                int have_pos = 0;
+
+                w = h = x = y = 0;
+
+                if ((prop = node->property ("big-clock-x-size")) != 0) {
+                        w = atoi (prop->value());
+                }
+                if ((prop = node->property ("big-clock-y-size")) != 0) {
+                        h = atoi (prop->value());
+                }
+
+                if (w && h) {
+                        big_clock_window->set_default_size (w, h);
+                }
+
+                if ((prop = node->property ("big-clock-x-off")) != 0) {
+                        x = atoi (prop->value());
+                        have_pos++;
+                }
+                if ((prop = node->property ("big-clock-y-off")) != 0) {
+                        y = atoi (prop->value());
+                        have_pos++;
+                }
+
+                if (have_pos == 2) {
+                        big_clock_window->move (x, y);
+                }
+        }
 }
 
 void
@@ -576,13 +627,7 @@ ARDOUR_UI::big_clock_size_allocate (Gtk::Allocation& allocation)
 		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::idle_big_clock_text_resizer), 0, 0));
 		big_clock_resize_in_progress = true;
 	}
-
-	// big_clock_window->set_size_request (allocation.get_width() - 2, allocation.get_height() - 1);
 }
-
-static int old_big_clock_width = -1;
-static int old_big_clock_height = -1;
-static double big_clock_precise_font_size = 0;
 
 bool
 ARDOUR_UI::idle_big_clock_text_resizer (int win_w, int win_h)
@@ -591,37 +636,23 @@ ARDOUR_UI::idle_big_clock_text_resizer (int win_w, int win_h)
 
 	Glib::RefPtr<Gdk::Window> win = big_clock_window->get_window();
 	Pango::FontDescription fd (big_clock.get_style()->get_font());
-	int size = fd.get_size ();
-	bool absolute = fd.get_size_is_absolute ();
-	int original_size;
-        int x, y, winw, winh, d;
+	int current_size = fd.get_size ();
+        int x, y, w, h, d;
 
-	if (!absolute) {
-		size /= PANGO_SCALE;
+	if (!fd.get_size_is_absolute ()) {
+		current_size /= PANGO_SCALE;
 	}
 
-	win->get_geometry (x, y, winw, winh, d);
+	win->get_geometry (x, y, w, h, d);
 
-        if (old_big_clock_width < 0 || old_big_clock_height < 0) {
-                old_big_clock_height = winh;
-                old_big_clock_width = winw;
-                big_clock_precise_font_size = size;
-                return false;
-        }
+        double scale  = min (((double) w / (double) original_big_clock_width), 
+                             ((double) h / (double) original_big_clock_height));
 
-        double scale;
+        int size = (int) lrintf (original_big_clock_font_size * scale);
 
-        scale = min (((double) winw / (double) old_big_clock_width), 
-                     ((double) winh / (double) old_big_clock_height));
+        if (size != current_size) {
 
-	string family = fd.get_family();
-
-        original_size = size;
-
-        size = (int) lrintf (big_clock_precise_font_size * scale);
-
-        if (size != original_size) {
-
+                string family = fd.get_family();
                 char buf[family.length()+16];
                 snprintf (buf, family.length()+16, "%s %d", family.c_str(), size);
                 

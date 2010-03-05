@@ -214,6 +214,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	last_speed_displayed = -1.0f;
 	ignore_dual_punch = false;
 	_mixer_on_top = false;
+        original_big_clock_width = -1;
+        original_big_clock_height = -1;
+        original_big_clock_font_size = 0;
 
 	roll_button.unset_flags (Gtk::CAN_FOCUS);
 	stop_button.unset_flags (Gtk::CAN_FOCUS);
@@ -548,6 +551,34 @@ ARDOUR_UI::save_ardour_state ()
 	XMLNode* node = new XMLNode (keyboard->get_state());
 	Config->add_extra_xml (*node);
 	Config->add_extra_xml (get_transport_controllable_state());
+
+        XMLNode* window_node = new XMLNode (X_("UI"));
+        
+        window_node->add_property ("show-big-clock", (big_clock_window && big_clock_window->is_visible() ? "yes" : "no"));
+
+        Glib::RefPtr<Gdk::Window> win;
+
+        if (big_clock_window && (win = big_clock_window->get_window())) {
+
+                int w, h;
+                int xoff, yoff;
+                char buf[32];
+
+                win->get_size (w, h);
+                win->get_position (xoff, yoff);
+
+                snprintf (buf, sizeof (buf), "%d", w);
+                window_node->add_property ("big-clock-x-size", buf);
+                snprintf (buf, sizeof (buf), "%d", h);
+                window_node->add_property ("big-clock-y-size", buf);
+                snprintf (buf, sizeof (buf), "%d", xoff);
+                window_node->add_property ("big-clock-x-off", buf);
+                snprintf (buf, sizeof (buf), "%d", yoff);
+                window_node->add_property ("big-clock-y-off", buf);
+        }
+
+        Config->add_extra_xml (*window_node);
+
 	if (_startup && _startup->engine_control() && _startup->engine_control()->was_used()) {
 		Config->add_extra_xml (_startup->engine_control()->get_state());
 	}
@@ -3344,6 +3375,17 @@ ARDOUR_UI::use_config ()
 	if (node) {
 		set_transport_controllable_state (*node);
 	}
+
+	node = Config->extra_xml (X_("UI"));
+
+        if (node) {
+                const XMLProperty* prop = node->property (X_("show-big-clock"));
+                Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("ToggleBigClock"));
+                if (act) {
+                        Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+                        tact->set_active (string_is_affirmative (prop->value()));
+                }
+        }
 }
 
 void
