@@ -128,7 +128,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 	  /* big clock */
 
-	  big_clock (X_("bigclock"), false, "BigClockNonRecording", true, true, false, true),
+	  big_clock (X_("bigclock"), false, "BigClockNonRecording", true, true, false, false),
 
 	  /* transport */
 

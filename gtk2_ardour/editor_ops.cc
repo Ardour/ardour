@@ -4651,7 +4651,7 @@ Editor::strip_region_silence ()
 		}
 	}
 
-	StripSilenceDialog d (ar);
+	StripSilenceDialog d (_session, ar);
 	int const r = d.run ();
 
 	if (r == Gtk::RESPONSE_OK) {

@@ -26,28 +26,23 @@
 
 namespace ARDOUR {
 	class AudioRegion;
+        class Session;
 }
 
 /// Dialog box to set options for the `strip silence' filter
 class StripSilenceDialog : public ArdourDialog
 {
 public:
-	StripSilenceDialog (std::list<boost::shared_ptr<ARDOUR::AudioRegion> > const &);
+        StripSilenceDialog (ARDOUR::Session*, std::list<boost::shared_ptr<ARDOUR::AudioRegion> > const &);
 	~StripSilenceDialog ();
 
 	double threshold () const {
 		return _threshold.get_value ();
 	}
 
-	nframes_t minimum_length () const {
-		return _minimum_length.get_value_as_int ();
-	}
-
-	nframes_t fade_length () const {
-		return _fade_length.get_value_as_int ();
-	}
-
-    static void stop_thread ();
+        nframes_t minimum_length () const;
+        nframes_t fade_length () const;
+        static void stop_thread ();
 
 private:
 	void create_waves ();
@@ -57,16 +52,17 @@ private:
         void redraw_silence_rects ();
 
 	Gtk::SpinButton _threshold;
-	Gtk::SpinButton _minimum_length;
-	Gtk::SpinButton _fade_length;
+	AudioClock      _minimum_length;
+        AudioClock      _fade_length;
         Gtk::Label      _segment_count_label;
+        typedef std::list<std::pair<ARDOUR::frameoffset_t,ARDOUR::framecnt_t> > SilenceResult;
 
 	struct Wave {
             boost::shared_ptr<ARDOUR::AudioRegion> region;
             ArdourCanvas::WaveView* view;
             std::list<ArdourCanvas::SimpleRect*> silence_rects;
             double samples_per_unit;
-            std::list<std::pair<ARDOUR::frameoffset_t,ARDOUR::framecnt_t> >silence;
+            SilenceResult silence;
           
             Wave() : view (0), samples_per_unit (1) { }
 	};
@@ -77,12 +73,17 @@ private:
 	int _wave_height;
         bool restart_queued;
 
-    static ARDOUR::InterThreadInfo itt;
-    static bool thread_should_exit;
-    static Glib::Cond *thread_run;
-    static Glib::Cond *thread_waiting;
-    static Glib::StaticMutex run_lock;
-    static StripSilenceDialog* current;
+        static ARDOUR::InterThreadInfo itt;
+        static bool thread_should_exit;
+        static Glib::Cond *thread_run;
+        static Glib::Cond *thread_waiting;
+        static Glib::StaticMutex run_lock;
+        static StripSilenceDialog* current;
+
+        ARDOUR::framecnt_t max_audible;
+        ARDOUR::framecnt_t min_audible;
+        ARDOUR::framecnt_t max_silence;
+        ARDOUR::framecnt_t min_silence;
 
 	PBD::ScopedConnection _peaks_ready_connection;
     
@@ -93,4 +94,6 @@ private:
         void* detection_thread_work ();
         bool  start_silence_detection ();
         void  maybe_start_silence_detection ();
+
+        void update_stats (const SilenceResult&);
 };

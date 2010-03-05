@@ -65,7 +65,7 @@ const uint32_t AudioClock::field_length[(int) AudioClock::AudioFrames+1] = {
 	10   /* Audio Frame */
 };
 
-AudioClock::AudioClock (std::string clock_name, bool transient, std::string widget_name, 
+AudioClock::AudioClock (const string& clock_name, bool transient, const string& widget_name, 
 			bool allow_edit, bool follows_playhead, bool duration, bool with_info)
 	: _name (clock_name),
 	  is_transient (transient),

@@ -758,6 +758,18 @@ style "default_clock_display" = "medium text"
 	bg[ACTIVE] = { 0, 0, 0 }
 }
 
+
+style "white_on_black_clock_display" = "medium text"
+{
+	fg[NORMAL] = { 1.0, 1.0, 1.0 }
+	fg[ACTIVE] = { 1.0, 0.0, 0.0 }
+	fg[SELECTED] = { 1.0, 0, 0 }
+	base[NORMAL] = { 0, 0, 0 }
+	base[ACTIVE] = { 0, 0, 0 }
+	bg[NORMAL] = { 0, 0, 0 }
+	bg[ACTIVE] = { 0, 0, 0 }
+}
+
 style "editor_time_ruler" = "small_text"
 {
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
@@ -1440,6 +1452,7 @@ widget "*AudioClockBBTUpperInfo" style:highest "tempo_meter_clock_display"
 widget "*AudioClockBBTLowerInfo" style:highest "tempo_meter_clock_display"
 widget "*SelectionStartClock" style:highest "default_clock_display"
 widget "*SelectionEndClock" style:highest "default_clock_display"
+widget "*SilenceDurationClock" style:highest "white_on_black_clock_display"
 widget "*EditPointClock" style:highest "default_clock_display"
 widget "*PreRollClock" style:highest "default_clock_display"
 widget "*PostRollClock" style:highest "default_clock_display"
