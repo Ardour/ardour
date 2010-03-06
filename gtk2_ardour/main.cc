@@ -291,10 +291,6 @@ sigpipe_handler (int sig)
 	}
 }
 
-#ifdef HAVE_LV2
-void close_external_ui_windows();
-#endif
-
 #ifdef VST_SUPPORT
 
 extern int gui_init (int* argc, char** argv[]);
@@ -399,9 +395,7 @@ int main (int argc, char* argv[])
 
 	ARDOUR::cleanup ();
 	pthread_cancel_all ();
-#ifdef HAVE_LV2
-	close_external_ui_windows();
-#endif
+
 	return 0;
 }
 #ifdef VST_SUPPORT
