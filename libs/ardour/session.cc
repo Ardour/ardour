@@ -353,10 +353,6 @@ Session::destroy ()
 
 	_engine.remove_session ();
 
-	/* clear region map. it doesn't hold references, but lets just be sensible here */
-
-	RegionFactory::clear_map ();
-
 	/* clear history so that no references to objects are held any more */
 
 	_history.clear ();
@@ -403,11 +399,7 @@ Session::destroy ()
 	named_selections.clear ();
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete regions\n");
-	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for region %1 ; pre-ref = %2\n", i->second->name(), i->second.use_count()));
-		i->second->drop_references ();
-	}
-	regions.clear ();
+	RegionFactory::delete_all_regions ();
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete routes\n");
 	
@@ -2559,7 +2551,8 @@ Session::new_region_name (string old)
 
 	while (number < (UINT_MAX-1)) {
 
-		RegionList::const_iterator i;
+                const RegionFactory::RegionMap& regions (RegionFactory::regions());
+		RegionFactory::RegionMap::const_iterator i;
 		string sbuf;
 
 		number++;
@@ -2598,9 +2591,7 @@ Session::region_name (string& result, string base, bool newlevel)
 
 	if (base == "") {
 
-		Glib::Mutex::Lock lm (region_lock);
-
-		snprintf (buf, sizeof (buf), "%d", (int)regions.size() + 1);
+		snprintf (buf, sizeof (buf), "%d", RegionFactory::nregions() + 1);
 		result = "region.";
 		result += buf;
 
@@ -2652,84 +2643,23 @@ Session::add_region (boost::shared_ptr<Region> region)
 void
 Session::add_regions (vector<boost::shared_ptr<Region> >& new_regions)
 {
-	bool added = false;
-
-	{
-		Glib::Mutex::Lock lm (region_lock);
-
-		for (vector<boost::shared_ptr<Region> >::iterator ii = new_regions.begin(); ii != new_regions.end(); ++ii) {
-
-			boost::shared_ptr<Region> region = *ii;
-
-			if (region == 0) {
-
-				error << _("Session::add_region() ignored a null region. Warning: you might have lost a region.") << endmsg;
-
-			} else {
-
-				RegionList::iterator x;
-
-				for (x = regions.begin(); x != regions.end(); ++x) {
-
-					if (region->region_list_equivalent (x->second)) {
-						break;
-					}
-				}
-
-				if (x == regions.end()) {
-
-					pair<RegionList::key_type,RegionList::mapped_type> entry;
-
-					entry.first = region->id();
-					entry.second = region;
-
-					pair<RegionList::iterator,bool> x = regions.insert (entry);
-
-					if (!x.second) {
-						return;
-					}
-
-					added = true;
-				}
-			}
-		}
-	}
-
-	/* mark dirty because something has changed even if we didn't
-	   add the region to the region list.
+	/* mark dirty because something has changed
 	*/
 
 	set_dirty ();
-
-	if (added) {
-
-		vector<boost::weak_ptr<Region> > v;
-		boost::shared_ptr<Region> first_r;
-
-		for (vector<boost::shared_ptr<Region> >::iterator ii = new_regions.begin(); ii != new_regions.end(); ++ii) {
-
-			boost::shared_ptr<Region> region = *ii;
-
-			if (region == 0) {
-
-				error << _("Session::add_region() ignored a null region. Warning: you might have lost a region.") << endmsg;
-
-			} else {
-				v.push_back (region);
-
-				if (!first_r) {
-					first_r = region;
-				}
-			}
-
-			region->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::region_changed, this, _1, boost::weak_ptr<Region>(region)));
-			update_region_name_map (region);
-		}
-
-		if (!v.empty()) {
-			RegionsAdded (v); /* EMIT SIGNAL */
-		}
-	}
+        
+        for (vector<boost::shared_ptr<Region> >::iterator ii = new_regions.begin(); ii != new_regions.end(); ++ii) {
+                
+                boost::shared_ptr<Region> region = *ii;
+                assert (region);
+                
+                region->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::region_changed, this, _1, boost::weak_ptr<Region>(region)));
+                update_region_name_map (region);
+        }
+        
+        if (!new_regions.empty()) {
+                RegionsAdded (new_regions); /* EMIT SIGNAL */
+        }
 }
 
 void
@@ -2773,39 +2703,23 @@ Session::region_changed (const PropertyChange& what_changed, boost::weak_ptr<Reg
 void
 Session::remove_region (boost::weak_ptr<Region> weak_region)
 {
-	RegionList::iterator i;
 	boost::shared_ptr<Region> region (weak_region.lock ());
 
 	if (!region) {
 		return;
 	}
 
-	bool removed = false;
-
-	{
-		Glib::Mutex::Lock lm (region_lock);
-
-		if ((i = regions.find (region->id())) != regions.end()) {
-			regions.erase (i);
-			removed = true;
-		}
-	}
-
-	/* mark dirty because something has changed even if we didn't
-	   remove the region from the region list.
-	*/
-
+        RegionFactory::map_remove (region);
 	set_dirty();
 
-	if (removed) {
-		 RegionRemoved(region); /* EMIT SIGNAL */
-	}
+        RegionRemoved(region); /* EMIT SIGNAL */
 }
 
 boost::shared_ptr<Region>
 Session::find_whole_file_parent (boost::shared_ptr<Region const> child) const
 {
-	RegionList::const_iterator i;
+        const RegionFactory::RegionMap& regions (RegionFactory::regions());
+	RegionFactory::RegionMap::const_iterator i;
 	boost::shared_ptr<Region> region;
 
 	Glib::Mutex::Lock lm (region_lock);
@@ -2820,20 +2734,6 @@ Session::find_whole_file_parent (boost::shared_ptr<Region const> child) const
 				return region;
 			}
 		}
-	}
-
-	return boost::shared_ptr<Region> ();
-}
-
-boost::shared_ptr<Region>
-Session::region_by_id (const PBD::ID& id) const
-{
-	Glib::Mutex::Lock lm (region_lock);
-
-        RegionList::const_iterator i = regions.find (id);
-
-        if (i != regions.end()) {
-                return i->second;
 	}
 
 	return boost::shared_ptr<Region> ();
@@ -2858,10 +2758,10 @@ Session::destroy_region (boost::shared_ptr<Region> region)
 
 	for (vector<boost::shared_ptr<Source> >::iterator i = srcs.begin(); i != srcs.end(); ++i) {
 
-			(*i)->mark_for_remove ();
-			(*i)->drop_references ();
-
-			cerr << "source was not used by any playlist\n";
+                (*i)->mark_for_remove ();
+                (*i)->drop_references ();
+                
+                cerr << "source was not used by any playlist\n";
 	}
 
 	return 0;
@@ -2892,21 +2792,10 @@ Session::remove_last_capture ()
 		}
 	}
 
-	for (list<boost::shared_ptr<Region> >::iterator i = r.begin(); i != r.end(); ++i) {
-		remove_region (*i);
-	}
-	
 	destroy_regions (r);
 
 	save_state (_current_snapshot_name);
 
-	return 0;
-}
-
-int
-Session::remove_region_from_region_list (boost::shared_ptr<Region> r)
-{
-	remove_region (r);
 	return 0;
 }
 

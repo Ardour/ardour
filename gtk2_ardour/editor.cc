@@ -4971,7 +4971,7 @@ Editor::hide_a_region (boost::shared_ptr<Region> r)
 void
 Editor::remove_a_region (boost::shared_ptr<Region> r)
 {
-	_session->remove_region_from_region_list (r);
+	// _session->remove_region_from_region_list (r);
 }
 
 void

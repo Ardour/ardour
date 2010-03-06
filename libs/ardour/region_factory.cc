@@ -38,6 +38,7 @@ using namespace PBD;
 PBD::Signal1<void,boost::shared_ptr<Region> > RegionFactory::CheckNewRegion;
 Glib::StaticMutex RegionFactory::region_map_lock;
 RegionFactory::RegionMap RegionFactory::region_map;
+PBD::ScopedConnectionList RegionFactory::region_list_connections;
 
 boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<const Region> region)
@@ -287,7 +288,6 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 	return ret;
 }
 
-
 void
 RegionFactory::map_add (boost::shared_ptr<Region> r)
 {
@@ -298,19 +298,19 @@ RegionFactory::map_add (boost::shared_ptr<Region> r)
         { 
                 Glib::Mutex::Lock lm (region_map_lock);
                 region_map.insert (p);
-                /* we pay no attention to attempts to delete regions */
         }
+
+        r->DropReferences.connect_same_thread (region_list_connections, boost::bind (&RegionFactory::map_remove, r));
 }
 
 void
 RegionFactory::map_remove (boost::shared_ptr<Region> r)
 {
-        { 
-                Glib::Mutex::Lock lm (region_map_lock);
-                RegionMap::iterator i = region_map.find (r->id());
-                if (i != region_map.end()) {
-                        region_map.erase (i);
-                }
+        Glib::Mutex::Lock lm (region_map_lock);
+        RegionMap::iterator i = region_map.find (r->id());
+
+        if (i != region_map.end()) {
+                region_map.erase (i);
         }
 }
 
@@ -330,5 +330,42 @@ RegionFactory::region_by_id (const PBD::ID& id)
 void
 RegionFactory::clear_map ()
 {
-	region_map.clear ();
+        region_list_connections.drop_connections ();
+
+        {
+                Glib::Mutex::Lock lm (region_map_lock);
+                region_map.clear ();
+        }
+
+}
+
+void
+RegionFactory::delete_all_regions ()
+{
+        RegionMap copy;
+
+        /* copy region list */
+        {
+                Glib::Mutex::Lock lm (region_map_lock);
+                copy = region_map;
+        }
+
+        /* clear existing map */
+        clear_map ();
+
+        /* tell everyone to drop references */
+        for (RegionMap::iterator i = copy.begin(); i != copy.end(); ++i) {
+                i->second->drop_references ();
+        }
+
+        /* the copy should now hold the only references, which will
+           vanish as we leave this scope, thus calling all destructors.
+        */
+}
+        
+uint32_t
+RegionFactory::nregions ()
+{
+        Glib::Mutex::Lock lm (region_map_lock);
+        return region_map.size ();
 }

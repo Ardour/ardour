@@ -17,6 +17,8 @@
 
 */
 
+#include "pbd/property_list.h"
+
 #include "ardour/strip_silence.h"
 #include "ardour/audioregion.h"
 #include "ardour/region_factory.h"
@@ -44,7 +46,8 @@ StripSilence::run (boost::shared_ptr<Region> r)
 	results.clear ();
 
 	/* we only operate on AudioRegions, for now, though this could be adapted to MIDI
-	   as well I guess */
+	   as well I guess 
+        */
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
         InterThreadInfo itt;
         
@@ -78,59 +81,54 @@ StripSilence::run (boost::shared_ptr<Region> r)
 	}
 
 	std::list<std::pair<framepos_t, framecnt_t > >::const_iterator s = silence.begin ();
-	framepos_t const pos = region->position ();
-	framepos_t const end = region->start () + region->length() - 1;
-	framepos_t const start = region->start ();
+        PBD::PropertyList plist;
+        framepos_t start = 0;
+        framepos_t end;
+        bool in_silence;
+        boost::shared_ptr<AudioRegion> copy;
 
-	region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region));
-	region->set_name (session.new_region_name (region->name ()));
-	boost::shared_ptr<AudioRegion> last_region = region;
-	results.push_back (region);
+        if (s->first == 0) {
+                /* initial segment, starting at zero, is silent */
+                end = s->second;
+                in_silence = true;
+        } else {
+                /* initial segment, starting at zero, is audible */
+                end = s->first;
+                in_silence = false;
+        }
 
-	if (s->first == 0) {
-		/* the region starts with some silence */
+        while (s != silence.end()) {
 
-		/* we must set length to an intermediate value here, otherwise the call
-		** to set_start will fail */
-		region->set_length (region->length() - s->second + _fade_length, 0);
-		region->set_start (start + s->second - _fade_length, 0);
-		region->set_position (pos + s->second - _fade_length, 0);
-		region->set_fade_in_active (true);
-		region->set_fade_in (AudioRegion::Linear, _fade_length);
-		s++;
-	}
+                framecnt_t interval_duration;
 
-	while (s != silence.end()) {
+                interval_duration = end - start;
 
-		/* trim the end of this region */
-		region->trim_end (pos + s->first + _fade_length, 0);
-		region->set_fade_out_active (true);
-		region->set_fade_out (AudioRegion::Linear, _fade_length);
 
-		/* make a new region and trim its start */
-		region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region));
-		region->set_name (session.new_region_name (region->name ()));
-		last_region = region;
-		assert (region);
-		results.push_back (region);
+                if (!in_silence && interval_duration > 0) {
 
-		/* set length here for the same reasons as above */
-		region->set_length (region->length() - s->second + _fade_length, 0);
-		region->set_start (start + s->second - _fade_length, 0);
-		region->set_position (pos + s->second - _fade_length, 0);
-		region->set_fade_in_active (true);
-		region->set_fade_in (AudioRegion::Linear, _fade_length);
+                        plist.clear ();
+                        plist.add (Properties::length, interval_duration);
+                        plist.add (Properties::position, region->position() + start);
 
-		s++;
-	}
+                        copy = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create 
+                                                                         (region, start, plist));
 
-	if (silence.back().second == end) {
-		/* the last region we created is zero-sized, so just remove it */
-		results.pop_back ();
-	} else {
-		/* finish off the last region */
-		last_region->trim_end (end, 0);
-	}
+                        copy->set_name (session.new_region_name (region->name ()));
+
+                        std::cerr << "New silent delineated region called " << copy->name()
+                                  << " @ " << copy->start() << " length = " << copy->length() << " pos = " << 
+                                copy->position() << std::endl;
+
+                        copy->set_fade_in_active (true);
+                        copy->set_fade_in (AudioRegion::Linear, _fade_length);
+                        results.push_back (copy);
+                }
+
+                start = end;
+                ++s;
+                end = s->first;
+                in_silence = !in_silence;
+        }
 
 	return 0;
 }

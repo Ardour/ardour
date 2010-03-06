@@ -991,16 +991,6 @@ Session::state(bool full_state)
 
 	if (full_state) {
 		Glib::Mutex::Lock rl (region_lock);
-#if 0
-		for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-
-			/* only store regions not attached to playlists */
-
-			if (i->second->playlist() == 0) {
-				child->add_child_nocopy (i->second->state (true));
-			}
-		}
-#else
                 const RegionFactory::RegionMap& region_map (RegionFactory::all_regions());
                 for (RegionFactory::RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
                         boost::shared_ptr<Region> r = i->second;
@@ -1009,8 +999,6 @@ Session::state(bool full_state)
                                 child->add_child_nocopy (r->state (true));
                         }
                 }
-#endif
-
 	}
 
 	child = node->add_child ("DiskStreams");

@@ -501,14 +501,12 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* region info  */
 
-        boost::shared_ptr<Region> region_by_id (const PBD::ID&) const;
 	boost::shared_ptr<Region> find_whole_file_parent (boost::shared_ptr<Region const>) const;
 
 	void add_regions (std::vector<boost::shared_ptr<Region> >&);
 
-	PBD::Signal1<void,boost::weak_ptr<Region> >              RegionAdded;
-	PBD::Signal1<void,std::vector<boost::weak_ptr<Region> >&> RegionsAdded;
-	PBD::Signal1<void,boost::weak_ptr<Region> >              RegionRemoved;
+	PBD::Signal1<void,std::vector<boost::shared_ptr<Region> >&> RegionsAdded;
+	PBD::Signal1<void,boost::shared_ptr<Region> >               RegionRemoved;
 
 	int region_name (std::string& result, std::string base = std::string(""), bool newlevel = false);
 	std::string new_region_name (std::string);
@@ -517,8 +515,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::shared_ptr<Region>      XMLRegionFactory (const XMLNode&, bool full);
 	boost::shared_ptr<AudioRegion> XMLAudioRegionFactory (const XMLNode&, bool full);
 	boost::shared_ptr<MidiRegion>  XMLMidiRegionFactory (const XMLNode&, bool full);
-
-	template<class T> void foreach_region (T *obj, void (T::*func)(boost::shared_ptr<Region>));
 
 	/* source management */
 
@@ -1259,8 +1255,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void update_region_name_map (boost::shared_ptr<Region>);
 
 	mutable Glib::Mutex region_lock;
-	typedef std::map<PBD::ID,boost::shared_ptr<Region> > RegionList;
-	RegionList regions;
 
 	void add_region (boost::shared_ptr<Region>);
 	void region_changed (const PBD::PropertyChange&, boost::weak_ptr<Region>);

@@ -145,7 +145,9 @@ PluginManager::PluginManager ()
 
 PluginManager::~PluginManager()
 {
+#ifdef HAVE_SLV2
 	delete _lv2_world;
+#endif
 }
 
 

@@ -24,6 +24,7 @@
 #include <glibmm/thread.h>
 
 #include "pbd/id.h"
+#include "pbd/signals.h"
 
 #include "ardour/types.h"
 #include "ardour/region.h"
@@ -77,11 +78,17 @@ class RegionFactory {
 	/** create a region with specified sources @param srcs and XML state */
 	static boost::shared_ptr<Region> create (SourceList& srcs, const XMLNode&);
 
+	static void map_remove (boost::shared_ptr<Region>);
+        static void delete_all_regions ();
+        static const RegionMap& regions() { return region_map; }
+        static uint32_t nregions ();
+
   private:
         static Glib::StaticMutex region_map_lock;
 	static RegionMap region_map;
 	static void map_add (boost::shared_ptr<Region>);
-	static void map_remove (boost::shared_ptr<Region>);
+        
+        static PBD::ScopedConnectionList region_list_connections;
 };
 
 }

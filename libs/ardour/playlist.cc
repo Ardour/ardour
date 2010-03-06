@@ -113,12 +113,9 @@ RegionListProperty::lookup_id (const ID& id)
         boost::shared_ptr<Region> ret =  _playlist.region_by_id (id);
         
         if (!ret) {
-                ret = _playlist.session().region_by_id (id);
-        }
-
-        if (!ret) {
                 ret = RegionFactory::region_by_id (id);
         }
+
         return ret;
 }
 
@@ -2076,8 +2073,6 @@ Playlist::property_factory (const XMLNode& history_node) const
         PropertyList* prop_list = 0;
 
         for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-
-                /* XXX property name needs capitalizing */
 
                 if ((*i)->name() == capitalize (regions.property_name())) {
                         

@@ -28,8 +28,9 @@
 
 #include "ardour/audioregion.h"
 #include "ardour/audiofilesource.h"
+#include "ardour/region_factory.h"
+#include "ardour/session.h"
 #include "ardour/silentfilesource.h"
-#include "ardour/session_region.h"
 #include "ardour/profile.h"
 
 #include <gtkmm2ext/stop_signal.h>
@@ -139,7 +140,6 @@ EditorRegions::set_session (ARDOUR::Session* s)
 
 	if (_session) {
 		_session->RegionsAdded.connect (_session_connections, ui_bind (&EditorRegions::handle_new_regions, this, _1), gui_context());
-		_session->RegionRemoved.connect (_session_connections, ui_bind (&EditorRegions::handle_region_removed, this, _1), gui_context());
 		_session->RegionHiddenChange.connect (_session_connections, ui_bind (&EditorRegions::region_hidden, this, _1), gui_context());
 	}
 
@@ -147,15 +147,7 @@ EditorRegions::set_session (ARDOUR::Session* s)
 }
 
 void
-EditorRegions::handle_region_removed (boost::weak_ptr<Region> wregion)
-{
-	ENSURE_GUI_THREAD (*this, &EditorRegions::handle_region_removed, wregion)
-
-	redisplay ();
-}
-
-void
-EditorRegions::handle_new_regions (vector<boost::weak_ptr<Region> >& v)
+EditorRegions::handle_new_regions (vector<boost::shared_ptr<Region> >& v)
 {
 	ENSURE_GUI_THREAD (*this, &EditorRegions::handle_new_regions, v)
 	add_regions (v);
@@ -180,13 +172,10 @@ EditorRegions::region_hidden (boost::shared_ptr<Region> r)
 
 
 void
-EditorRegions::add_regions (vector<boost::weak_ptr<Region> >& regions)
+EditorRegions::add_regions (vector<boost::shared_ptr<Region> >& regions)
 {
-	for (vector<boost::weak_ptr<Region> >::iterator x = regions.begin(); x != regions.end(); ++x) {
-		boost::shared_ptr<Region> region ((*x).lock());
-		if (region) {
-			add_region (region);
-		}
+	for (vector<boost::shared_ptr<Region> >::iterator x = regions.begin(); x != regions.end(); ++x) {
+                add_region (*x);
 	}
 }
 
@@ -511,7 +500,11 @@ EditorRegions::redisplay ()
 	*/
 
 	tmp_region_list.clear();
-	_session->foreach_region (this, &EditorRegions::insert_into_tmp_regionlist);
+
+        const RegionFactory::RegionMap& regions (RegionFactory::regions());
+        for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+                insert_into_tmp_regionlist (i->second);
+        }
 
 	for (list<boost::shared_ptr<Region> >::iterator r = tmp_region_list.begin(); r != tmp_region_list.end(); ++r) {
 		add_region (*r);
@@ -1000,7 +993,7 @@ EditorRegions::button_release (GdkEventButton *ev)
 	}
 
 	if (region && Keyboard::is_delete_event (ev)) {
-		_session->remove_region_from_region_list (region);
+		// _session->remove_region_from_region_list (region);
 		return true;
 	}
 
