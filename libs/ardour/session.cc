@@ -806,13 +806,20 @@ Session::hookup_io ()
 
 		for (RouteList::iterator x = r->begin(); x != r->end(); ++x) {
 
-			if ((*x)->is_control() || (*x)->is_master()) {
-				continue;
-			}
+			if ((*x)->is_control()) {
 
-			(*x)->listen_via (_control_out,
-					  (Config->get_listen_position() == AfterFaderListen ? PostFader : PreFader),
-					  false, false);
+				/* relax */
+
+			} else if ((*x)->is_master()) {
+
+                                (*x)->listen_via (_control_out, PostFader, false, false);
+
+                        } else {
+
+                                (*x)->listen_via (_control_out,
+                                                  (Config->get_listen_position() == AfterFaderListen ? PostFader : PreFader),
+                                                  false, false);
+                        }
 		}
 	}
 
@@ -2068,12 +2075,15 @@ Session::add_routes (RouteList& new_routes, bool save)
 	if (_control_out && IO::connecting_legal) {
 
 		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
-			if ((*x)->is_control() || (*x)->is_master()) {
-				continue;
-			}
-			(*x)->listen_via (_control_out,
-					  (Config->get_listen_position() == AfterFaderListen ? PostFader : PreFader),
-					  false, false);
+			if ((*x)->is_control()) {
+                                /* relax */
+                        } else if ((*x)->is_master()) {
+                                (*x)->listen_via (_control_out, PostFader, false, false);
+			} else {
+                                (*x)->listen_via (_control_out,
+                                                  (Config->get_listen_position() == AfterFaderListen ? PostFader : PreFader),
+                                                  false, false);
+                        }
 		}
 
 		resort_routes ();
@@ -2398,6 +2408,8 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 			break;
 		}
 	}
+
+        cerr << "something soloed ? " << something_soloed << endl;
 
 	if (something_soloed != _non_soloed_outs_muted) {
 		_non_soloed_outs_muted = something_soloed;

@@ -2361,7 +2361,20 @@ Route::listen_via (boost::shared_ptr<Route> route, Placement placement, bool /*a
 	boost::shared_ptr<InternalSend> listener;
 
 	try {
-		listener.reset (new InternalSend (_session, _mute_master, route, (aux ? Delivery::Aux : Delivery::Listen)));
+
+                if (is_master()) {
+
+                        if (route == _session.control_out()) {
+                                listener.reset (new InternalSend (_session, _mute_master, route, (aux ? Delivery::Aux : Delivery::MainListen)));
+                        } else {
+                                listener.reset (new InternalSend (_session, _mute_master, route, (aux ? Delivery::Aux : Delivery::Listen)));
+                        }
+
+                } else {
+                        listener.reset (new InternalSend (_session, _mute_master, route, (aux ? Delivery::Aux : Delivery::Listen)));
+                        if (route == _session.control_out()) {
+                        }
+                }
 
 	} catch (failed_constructor& err) {
 		return -1;
@@ -2369,7 +2382,10 @@ Route::listen_via (boost::shared_ptr<Route> route, Placement placement, bool /*a
 
 	if (route == _session.control_out()) {
 		_control_outs = listener;
+                /* send to control/listen/monitor bus is active by default */
+                listener->activate ();
 	}
+
 
 	add_processor (listener, placement);
 

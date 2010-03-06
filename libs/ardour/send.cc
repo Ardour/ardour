@@ -260,9 +260,9 @@ Send::display_to_user () const
 {
 	/* we ignore Deliver::_display_to_user */
 
-	if (_role == Listen) {
-		return false;
-	}
+//	if (_role == Listen || _role == MainListen) {
+//		return false;
+//	}
 
 	return true;
 }

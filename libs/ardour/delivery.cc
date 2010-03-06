@@ -163,6 +163,7 @@ Delivery::display_name () const
 		return _("main outs");
 		break;
 	case Listen:
+        case MainListen:
 		return _("listen");
 		break;
 	case Send:
@@ -369,6 +370,8 @@ Delivery::state (bool full_state)
 		node.add_property("type", "main-outs");
 	} else if (_role & Listen) {
 		node.add_property("type", "listen");
+	} else if (_role & MainListen) {
+		node.add_property("type", "main-listen");
 	} else {
 		node.add_property("type", "delivery");
 	}
@@ -538,39 +541,58 @@ Delivery::target_gain ()
 		return 0.0;
 	}
 
-	gain_t desired_gain;
+	gain_t desired_gain = -1.0f;
 
+        if (_role == MainListen) {
+                
+                /* silent if anyone else soloing; unity gain otherwise */
+                
+                desired_gain = (_session.soloing() ? 0.0 : 1.0);
 
-	if (_solo_level) {
+        } else if (_solo_level) {
+
 		desired_gain = 1.0;
-	} else {
 
-		MuteMaster::MutePoint mp;
+        } else {
 
-		switch (_role) {
-		case Main:
-			mp = MuteMaster::Main;
-			break;
-		case Listen:
-			mp = MuteMaster::Listen;
-			break;
-		case Send:
-		case Insert:
-		case Aux:
-			/* XXX FIX ME this is wrong, we need per-delivery muting */
-			mp = MuteMaster::PreFader;
-			break;
-		}
-		
-		if (!_solo_isolated && _session.soloing()) {
-			desired_gain = min (Config->get_solo_mute_gain(), _mute_master->mute_gain_at (mp));
+                if (_role == Listen && _session.control_out() && !_session.soloing()) {
 
-		} else {
+                        /* nobody is soloed, so control/monitor/listen bus gets its
+                           signal from master out, we should be silent
+                        */
+                        desired_gain = 0.0;
 
-			desired_gain = _mute_master->mute_gain_at (mp);
-		}
-
-	}
+                } else {
+                
+                        MuteMaster::MutePoint mp;
+                
+                        switch (_role) {
+                        case Main:
+                                mp = MuteMaster::Main;
+                                break;
+                        case Listen:
+                                mp = MuteMaster::Listen;
+                                break;
+                        case Send:
+                        case Insert:
+                        case Aux:
+                                /* XXX FIX ME this is wrong, we need per-delivery muting */
+                                mp = MuteMaster::PreFader;
+                                break;
+                        case MainListen:
+                                /* we can't get here, see if() above */
+                                break;
+                        }
+                        
+                        if (!_solo_isolated && _session.soloing()) {
+                                desired_gain = min (Config->get_solo_mute_gain(), _mute_master->mute_gain_at (mp));
+                                
+                        } else {
+                                
+                                desired_gain = _mute_master->mute_gain_at (mp);
+                        }
+                }
+        }
 
 	return desired_gain;
 }
