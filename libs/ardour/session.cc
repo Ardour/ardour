@@ -720,7 +720,7 @@ Session::when_engine_running ()
 					for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 						uint32_t shift = _master_out->n_outputs().get(*t);
 						uint32_t mod = _engine.n_physical_outputs (*t);
-						limit = _control_out->n_outputs().get(*t);
+						uint32_t limit = _control_out->n_outputs().get(*t);
 
 						cerr << "Connecting " << limit << " control out ports, shift is " << shift
 							<< " mod is " << mod << endl;

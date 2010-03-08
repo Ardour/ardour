@@ -163,7 +163,6 @@ Delivery::display_name () const
 		return _("main outs");
 		break;
 	case Listen:
-        case MainListen:
 		return _("listen");
 		break;
 	case Send:
@@ -370,8 +369,6 @@ Delivery::state (bool full_state)
 		node.add_property("type", "main-outs");
 	} else if (_role & Listen) {
 		node.add_property("type", "listen");
-	} else if (_role & MainListen) {
-		node.add_property("type", "main-listen");
 	} else {
 		node.add_property("type", "delivery");
 	}
@@ -543,13 +540,7 @@ Delivery::target_gain ()
 
 	gain_t desired_gain = -1.0f;
 
-        if (_role == MainListen) {
-                
-                /* silent if anyone else soloing; unity gain otherwise */
-                
-                desired_gain = (_session.soloing() ? 0.0 : 1.0);
-
-        } else if (_solo_level) {
+        if (_solo_level) {
 
 		desired_gain = 1.0;
 
@@ -578,9 +569,6 @@ Delivery::target_gain ()
                         case Aux:
                                 /* XXX FIX ME this is wrong, we need per-delivery muting */
                                 mp = MuteMaster::PreFader;
-                                break;
-                        case MainListen:
-                                /* we can't get here, see if() above */
                                 break;
                         }
                         

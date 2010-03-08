@@ -520,8 +520,10 @@ Route::set_listen (bool yn, void* src)
 	if (_control_outs) {
 		if (yn != _control_outs->active()) {
 			if (yn) {
+                                _control_outs->set_solo_level (1);
 				_control_outs->activate ();
 			} else {
+                                _control_outs->set_solo_level (0);
 				_control_outs->deactivate ();
 			}
 
@@ -2363,9 +2365,10 @@ Route::listen_via (boost::shared_ptr<Route> route, Placement placement, bool /*a
 	try {
 
                 if (is_master()) {
-
+                        
                         if (route == _session.control_out()) {
-                                listener.reset (new InternalSend (_session, _mute_master, route, (aux ? Delivery::Aux : Delivery::MainListen)));
+                                /* master never sends to control outs */
+                                return 0;
                         } else {
                                 listener.reset (new InternalSend (_session, _mute_master, route, (aux ? Delivery::Aux : Delivery::Listen)));
                         }

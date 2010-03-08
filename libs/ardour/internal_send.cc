@@ -17,8 +17,6 @@
 
 */
 
-#include <iostream>
-
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 
@@ -32,6 +30,7 @@
 
 using namespace PBD;
 using namespace ARDOUR;
+using namespace std;
 
 InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, boost::shared_ptr<Route> sendto, Delivery::Role role)
 	: Send (s, mm, role)
@@ -96,7 +95,7 @@ InternalSend::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, 
 
 		Amp::apply_gain (mixbufs, nframes, _current_gain, tgain);
 		_current_gain = tgain;
-
+                
 	} else if (tgain == 0.0) {
 
 		/* we were quiet last time, and we're still supposed to be quiet.
@@ -242,13 +241,13 @@ InternalSend::configure_io (ChanCount in, ChanCount out)
 }
 
 bool
-InternalSend::set_name (const std::string& str)
+InternalSend::set_name (const string& str)
 {
 	/* rules for external sends don't apply to us */
 	return IOProcessor::set_name (str);
 }
 
-std::string
+string
 InternalSend::display_name () const
 {
 	if (_role == Aux) {

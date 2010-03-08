@@ -45,9 +45,7 @@ public:
 		/* listen - internal send used only to deliver to control/monitor bus */
 		Listen = 0x8,
 		/* aux - internal send used to deliver to any bus, by user request */
-		Aux    = 0x10,
-                /* main listen - internal send used only to deliver from master to control/monitor bus */
-                MainListen = 0x20
+		Aux    = 0x10
 	};
 
 	static bool role_requires_output_ports (Role r) { return r == Main || r == Send || r == Insert; }
