@@ -42,6 +42,7 @@
 #include "keyboard.h"
 #include "mixer_ui.h"
 #include "mixer_strip.h"
+#include "monitor_section.h"
 #include "plugin_selector.h"
 #include "ardour_ui.h"
 #include "prompter.h"
@@ -66,6 +67,7 @@ Mixer_UI::Mixer_UI ()
 {
 	_strip_width = Config->get_default_narrow_ms() ? Narrow : Wide;
 	track_menu = 0;
+        monitor_section = 0;
 	route_group_context_menu = 0;
 	no_track_list_redisplay = false;
 	in_group_row_change = false;
@@ -253,6 +255,8 @@ Mixer_UI::Mixer_UI ()
 
 	MixerStrip::CatchDeletion.connect (*this, ui_bind (&Mixer_UI::remove_strip, this, _1), gui_context());
 
+        MonitorSection::setup_knob_images ();
+
 #ifndef DEFER_PLUGIN_SELECTOR_LOAD
 	_plugin_selector = new PluginSelector (PluginManager::the_manager ());
 #endif
@@ -313,8 +317,17 @@ Mixer_UI::add_strip (RouteList& routes)
 		boost::shared_ptr<Route> route = (*x);
 
 		if (route->is_hidden()) {
-			return;
+			continue;
 		}
+
+                if (route->is_control()) {
+                        monitor_section = new MonitorSection (_session);
+                        out_packer.pack_end (monitor_section->pack_widget(), false, false);
+                        monitor_section->pack_widget().show_all ();
+                        /* no regular strip */
+                        continue;
+                }
+
 
 		strip = new MixerStrip (*this, _session, route);
 		strips.push_back (strip);
@@ -508,10 +521,14 @@ Mixer_UI::session_going_away ()
 	group_model->clear ();
 	_selection.clear ();
 	track_model->clear ();
+        
+        delete monitor_section;
+        monitor_section = 0;
 
 	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
 		delete (*i);
 	}
+
 	strips.clear ();
 
 	WindowTitle title(Glib::get_application_name());
@@ -576,6 +593,10 @@ Mixer_UI::fast_update_strips ()
 		for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
 			(*i)->fast_update ();
 		}
+
+                if (monitor_section) {
+                        monitor_section->fast_update ();
+                }
 	}
 }
 

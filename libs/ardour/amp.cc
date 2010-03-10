@@ -179,10 +179,10 @@ Amp::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_frame*/, n
 void
 Amp::apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t target)
 {
-        /** Apply a (potentially) declicked gain to the audio buffers of @a bufs
+        /** Apply a (potentially) declicked gain to the buffers of @a bufs
 	 */
 
-	if (nframes == 0 || bufs.count().n_audio() == 0) {
+	if (nframes == 0 || bufs.count().n_total() == 0) {
 		return;
 	}
 
@@ -196,7 +196,6 @@ Amp::apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t targ
 	gain_t         delta;
 	double         fractional_shift = -1.0/declick;
 	double         fractional_pos;
-	gain_t         polscale = 1.0f;
 
 	if (target < initial) {
 		/* fade out: remove more and more of delta from initial */
@@ -232,7 +231,7 @@ Amp::apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t targ
 		fractional_pos = 1.0;
 
 		for (nframes_t nx = 0; nx < declick; ++nx) {
-			buffer[nx] *= polscale * (initial + (delta * (0.5 + 0.5 * cos (M_PI * fractional_pos))));
+			buffer[nx] *= (initial + (delta * (0.5 + 0.5 * cos (M_PI * fractional_pos))));
 			fractional_pos += fractional_shift;
 		}
 
@@ -247,6 +246,57 @@ Amp::apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t targ
 			}
 		}
 	}
+}
+
+void
+Amp::apply_gain (AudioBuffer& buf, nframes_t nframes, gain_t initial, gain_t target)
+{
+        /** Apply a (potentially) declicked gain to the contents of @a buf
+	 */
+
+	if (nframes == 0) {
+		return;
+	}
+
+	// if we don't need to declick, defer to apply_simple_gain
+	if (initial == target) {
+		apply_simple_gain (buf, nframes, target);
+		return;
+	}
+
+	const nframes_t declick = std::min ((nframes_t)128, nframes);
+	gain_t         delta;
+	double         fractional_shift = -1.0/declick;
+	double         fractional_pos;
+
+	if (target < initial) {
+		/* fade out: remove more and more of delta from initial */
+		delta = -(initial - target);
+	} else {
+		/* fade in: add more and more of delta from initial */
+		delta = target - initial;
+	}
+
+
+        Sample* const buffer = buf.data();
+        
+        fractional_pos = 1.0;
+        
+        for (nframes_t nx = 0; nx < declick; ++nx) {
+                buffer[nx] *= (initial + (delta * (0.5 + 0.5 * cos (M_PI * fractional_pos))));
+                fractional_pos += fractional_shift;
+        }
+        
+        /* now ensure the rest of the buffer has the target value applied, if necessary. */
+        
+        if (declick != nframes) {
+                
+                if (target == 0.0) {
+                        memset (&buffer[declick], 0, sizeof (Sample) * (nframes - declick));
+                } else if (target != 1.0) {
+                        apply_gain_to_buffer (&buffer[declick], nframes - declick, target);
+                }
+        }
 }
 
 void
@@ -285,6 +335,16 @@ Amp::apply_simple_gain (BufferSet& bufs, nframes_t nframes, gain_t target)
 		for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 			apply_gain_to_buffer (i->data(), nframes, target);
 		}
+	}
+}
+
+void
+Amp::apply_simple_gain (AudioBuffer& buf, nframes_t nframes, gain_t target)
+{
+	if (target == 0.0) {
+                memset (buf.data(), 0, sizeof (Sample) * nframes);
+	} else if (target != 1.0) {
+                apply_gain_to_buffer (buf.data(), nframes, target);
 	}
 }
 

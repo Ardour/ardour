@@ -483,7 +483,7 @@ Session::set_worst_io_latencies ()
 }
 
 void
-Session::when_engine_running ()
+Session::when_engine_running (bool new_session)
 {
 	string first_physical_output;
 
@@ -644,9 +644,9 @@ Session::when_engine_running ()
 
 	BootMessage (_("Setup signal flow and plugins"));
 
-	hookup_io ();
+	hookup_io (new_session);
 
-	if (!no_auto_connect()) {
+	if (new_session && !no_auto_connect()) {
 
 		if (_master_out && Config->get_auto_connect_standard_busses()) {
 
@@ -758,7 +758,7 @@ Session::when_engine_running ()
 }
 
 void
-Session::hookup_io ()
+Session::hookup_io (bool new_session)
 {
 	/* stop graph reordering notifications from
 	   causing resorts, etc.
@@ -771,7 +771,6 @@ Session::hookup_io ()
 
 		/* we delay creating the auditioner till now because
 		   it makes its own connections to ports.
-		   the engine has to be running for this to work.
 		*/
 
 		try {
@@ -798,30 +797,34 @@ Session::hookup_io ()
 
 	Delivery::reset_panners ();
 
-	/* Connect tracks to listen/solo etc. busses XXX generalize this beyond control_out */
+	/* Connect tracks to monitor/listen bus if there is one.
+           Note that in an existing session, the internal sends will
+           already exist, but we want the routes to notice that
+           they connect to the control out specifically.
+         */
 
-	if (_control_out) {
-
+        if (_control_out) {
 		boost::shared_ptr<RouteList> r = routes.reader ();
-
-		for (RouteList::iterator x = r->begin(); x != r->end(); ++x) {
-
-			if ((*x)->is_control()) {
-
-				/* relax */
-
-			} else if ((*x)->is_master()) {
-
-                                (*x)->listen_via (_control_out, PostFader, false, false);
-
+                for (RouteList::iterator x = r->begin(); x != r->end(); ++x) {
+                        
+                        if ((*x)->is_control()) {
+                                
+                                /* relax */
+                                
+                        } else if ((*x)->is_master()) {
+                                
+                                /* relax */
+                                
                         } else {
-
+                                
+                                cerr << "Connecting route " << (*x)->name() << " to control outs\n";
+                                
                                 (*x)->listen_via (_control_out,
                                                   (Config->get_listen_position() == AfterFaderListen ? PostFader : PreFader),
                                                   false, false);
                         }
-		}
-	}
+                }
+        }
 
 	/* Anyone who cares about input state, wake up and do something */
 
@@ -2078,7 +2081,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 			if ((*x)->is_control()) {
                                 /* relax */
                         } else if ((*x)->is_master()) {
-                                (*x)->listen_via (_control_out, PostFader, false, false);
+                                /* relax */
 			} else {
                                 (*x)->listen_via (_control_out,
                                                   (Config->get_listen_position() == AfterFaderListen ? PostFader : PreFader),
@@ -2394,9 +2397,10 @@ Session::route_solo_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 void
 Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 {
-	/* now figure out if anything that matters is soloed */
+	/* now figure out if anything that matters is soloed (or is "listening")*/
 
 	bool something_soloed = false;
+        uint32_t listeners = 0;
 
 	if (!r) {
 		r = routes.reader();
@@ -2407,14 +2411,20 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 			something_soloed = true;
 			break;
 		}
+
+                if (!(*i)->is_hidden() && (*i)->listening()) {
+                        listeners++;
+                }
 	}
 
-        cerr << "something soloed ? " << something_soloed << endl;
+        if (something_soloed != _non_soloed_outs_muted) {
+                _non_soloed_outs_muted = something_soloed;
+                SoloActive (_non_soloed_outs_muted); /* EMIT SIGNAL */
+        }
 
-	if (something_soloed != _non_soloed_outs_muted) {
-		_non_soloed_outs_muted = something_soloed;
-		SoloActive (_non_soloed_outs_muted); /* EMIT SIGNAL */
-	}
+        if (listeners) {
+                 _listen_cnt = listeners;
+        }
 }
 
 boost::shared_ptr<RouteList> 
@@ -3291,6 +3301,12 @@ Session::cancel_audition ()
 bool
 Session::RoutePublicOrderSorter::operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b)
 {
+        if (a->is_control()) { 
+                return true;
+        }
+        if (b->is_control()) {
+                return false;
+        }
 	return a->order_key(N_("signal")) < b->order_key(N_("signal"));
 }
 

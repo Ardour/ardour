@@ -34,6 +34,7 @@ gtkmm2ext_sources = [
 	'gtk_ui.cc',
 	'idle_adjustment.cc',
 	'keyboard.cc',
+        'motionfeedback.cc',
 	'pixfader.cc',
 	'pixscroller.cc',
 	'popup.cc',

@@ -4792,7 +4792,7 @@ Editor::handle_new_route (RouteList& routes)
 	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
 
-		if (route->is_hidden()) {
+		if (route->is_hidden() || route->is_control()) {
 			continue;
 		}
 

@@ -780,8 +780,6 @@ Session::send_full_time_code(nframes_t /*nframes*/)
 	msg[7] = timecode.seconds;
 	msg[8] = timecode.frames;
 
-	cerr << "MTC: Sending full time code at " << outbound_mtc_timecode_frame << endl;
-
 	// Send message at offset 0, sent time is for the start of this cycle
 	if (_mtc_port->midimsg (msg, sizeof (msg), 0)) {
 		error << _("Session: could not send full MIDI time code") << endmsg;

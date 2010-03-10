@@ -993,8 +993,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	boost::scoped_ptr<SessionDirectory> _session_dir;
 
-	void hookup_io ();
-	void when_engine_running ();
+	void hookup_io (bool new_session);
+	void when_engine_running (bool new_session);
 	void graph_reordered ();
 
 	std::string _current_snapshot_name;

@@ -59,6 +59,9 @@ public:
 
 	static void apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t target);
 	static void apply_simple_gain(BufferSet& bufs, nframes_t nframes, gain_t target);
+        
+        static void apply_gain (AudioBuffer& buf, nframes_t nframes, gain_t initial, gain_t target);
+	static void apply_simple_gain(AudioBuffer& buf, nframes_t nframes, gain_t target);
 
 	gain_t         gain () const { return _gain_control->user_float(); }
 

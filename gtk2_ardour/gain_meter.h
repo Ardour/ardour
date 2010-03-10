@@ -34,6 +34,7 @@
 
 #include "pbd/signals.h"
 
+#include "ardour/chan_count.h"
 #include "ardour/types.h"
 #include "ardour/session_handle.h"
 

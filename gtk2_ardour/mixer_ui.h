@@ -50,6 +50,7 @@ namespace ARDOUR {
 class MixerStrip;
 class PluginSelector;
 class MixerGroupTabs;
+class MonitorSection;
 
 class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
 {
@@ -193,6 +194,8 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	Gtk::Menu *track_menu;
 	void track_column_click (gint);
 	void build_track_menu ();
+
+        MonitorSection* monitor_section;
 
 	PluginSelector    *_plugin_selector;
 

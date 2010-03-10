@@ -137,6 +137,7 @@ gtk2_ardour_sources = [
 	'mixer_group_tabs.cc',
 	'mixer_strip.cc',
 	'mixer_ui.cc',
+        'monitor_section.cc',
 	'nag.cc',
 	'option_editor.cc',
 	'opts.cc',
@@ -197,6 +198,7 @@ gtk2_ardour_sources = [
 	'ui_config.cc',
 	'utils.cc',
 	'version.cc',
+        'volume_controller.cc',
 	'waveview.cc',
 ]
 

@@ -54,6 +54,7 @@ class Processor;
 class RouteGroup;
 class Send;
 class InternalReturn;
+class MonitorProcessor;
 
 class Route : public SessionObject, public AutomatableControls, public RouteGroupMember
 {
@@ -79,7 +80,6 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	bool active() const { return _active; }
 	void set_active (bool yn);
-
 
 	static std::string ensure_track_or_route_name(std::string, Session &);
 
@@ -190,10 +190,11 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	/* special processors */
 
-	boost::shared_ptr<Delivery>       control_outs() const { return _control_outs; }
-	boost::shared_ptr<Delivery>       main_outs() const { return _main_outs; }
-	boost::shared_ptr<InternalReturn> internal_return() const { return _intreturn; }
-	boost::shared_ptr<Send>           internal_send_for (boost::shared_ptr<const Route> target) const;
+	boost::shared_ptr<Delivery>         control_outs() const { return _control_outs; }
+	boost::shared_ptr<Delivery>         main_outs() const { return _main_outs; }
+	boost::shared_ptr<InternalReturn>   internal_return() const { return _intreturn; }
+	boost::shared_ptr<MonitorProcessor> monitor_control() const { return _monitor_control; }
+	boost::shared_ptr<Send>             internal_send_for (boost::shared_ptr<const Route> target) const;
 	void add_internal_return ();
 	BufferSet* get_return_buffer () const;
 	void release_return_buffer () const;
@@ -210,7 +211,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	};
 
 	int add_processor (boost::shared_ptr<Processor>, Placement placement, ProcessorStreams* err = 0);
-	int add_processor (boost::shared_ptr<Processor>, ProcessorList::iterator iter, ProcessorStreams* err = 0);
+	int add_processor (boost::shared_ptr<Processor>, ProcessorList::iterator iter, ProcessorStreams* err = 0, bool activation_allowed = true);
 	int add_processors (const ProcessorList&, boost::shared_ptr<Processor> before, ProcessorStreams* err = 0);
 	int add_processors (const ProcessorList&, ProcessorList::iterator iter, ProcessorStreams* err = 0);
 	int remove_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0);
@@ -364,6 +365,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	boost::shared_ptr<Delivery> _main_outs;
 	boost::shared_ptr<Delivery> _control_outs;
 	boost::shared_ptr<InternalReturn> _intreturn;
+	boost::shared_ptr<MonitorProcessor> _monitor_control;
 
 	Flag           _flags;
 	int            _pending_declick;

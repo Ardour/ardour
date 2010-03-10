@@ -738,6 +738,7 @@ public:
 		h->pack_start (*l, false, false);
 		h->pack_start (*_db_slider, false, false);
 		h->pack_start (_db_display, false, false);
+                h->show_all ();
 
 		set_size_request_to_display_given_text (_db_display, "-99.0", 12, 12);
 

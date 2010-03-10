@@ -123,6 +123,7 @@ libardour_sources = [
 	'midi_track.cc',
 	'midi_ui.cc',
 	'mix.cc',
+        'monitor_processor.cc',
 	'mtc_slave.cc',
 	'mtdm.cc',
 	'mute_master.cc',

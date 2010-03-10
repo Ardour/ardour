@@ -766,13 +766,13 @@ RouteUI::update_solo_display ()
 void
 RouteUI::solo_changed_so_update_mute ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&RouteUI::update_mute_display, this));
+	update_mute_display ();
 }
 
 void
 RouteUI::mute_changed(void* /*src*/)
 {
-	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&RouteUI::update_mute_display, this));
+	update_mute_display ();
 }
 
 int
@@ -812,6 +812,10 @@ RouteUI::mute_visual_state (Session* s, boost::shared_ptr<Route> r)
 void
 RouteUI::update_mute_display ()
 {
+        if (!_route) {
+                return;
+        }
+
 	bool model = _route->muted();
 	bool view = mute_button->get_active();
 
@@ -837,17 +841,13 @@ RouteUI::route_rec_enable_changed ()
 void
 RouteUI::session_rec_enable_changed ()
 {
-	if (!rec_enable_button) {
-		return;
-	}
-
-	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&RouteUI::update_rec_display, this));
+        update_rec_display ();
 }
 
 void
 RouteUI::update_rec_display ()
 {
-	if (!rec_enable_button) {
+	if (!rec_enable_button || !_route) {
 		return;
 	}
 			

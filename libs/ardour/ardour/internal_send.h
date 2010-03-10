@@ -47,6 +47,7 @@ class InternalSend : public Send
 	void set_block_size (nframes_t);
 
 	boost::shared_ptr<Route> target_route() const { return _send_to; }
+	const PBD::ID& target_id() const { return _send_to_id; }
 
   private:
 	BufferSet  mixbufs;

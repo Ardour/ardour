@@ -84,7 +84,6 @@ Processor::Processor (Session& session, const XMLNode& node)
 	, _display_to_user (true)
 {
 	set_state (node, Stateful::loading_state_version);
-	_pending_active = _active;
 }
 
 XMLNode&
@@ -167,6 +166,7 @@ Processor::set_state_2X (const XMLNode & node, int /*version*/)
 			if ((prop = (*i)->property ("active")) != 0) {
 				if (_active != string_is_affirmative (prop->value())) {
 					_active = !_active;
+                                        _pending_active = _active;
 					ActiveChanged (); /* EMIT_SIGNAL */
 				}
 			}
@@ -238,8 +238,6 @@ Processor::set_state (const XMLNode& node, int version)
 	}
 
 	if ((prop = node.property ("active")) == 0) {
-		warning << _("XML node describing a processor is missing the `active' field,"
-			   "trying legacy active flag from child node") << endmsg;
 		if (legacy_active) {
 			prop = legacy_active;
 		} else {
@@ -250,7 +248,8 @@ Processor::set_state (const XMLNode& node, int version)
 
 	if (_active != string_is_affirmative (prop->value())) {
 		_active = !_active;
-		ActiveChanged (); /* EMIT_SIGNAL */
+                _pending_active = _active;
+ 		ActiveChanged (); /* EMIT_SIGNAL */
 	}
 
 	return 0;

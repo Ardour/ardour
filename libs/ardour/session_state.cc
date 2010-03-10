@@ -339,7 +339,7 @@ Session::second_stage_init (bool new_session)
 	_engine.Xrun.connect_same_thread (*this, boost::bind (&Session::xrun_recovery, this));
 
 	try {
-		when_engine_running();
+		when_engine_running (new_session);
 	}
 
 	/* handle this one in a different way than all others, so that its clear what happened */
@@ -1045,6 +1045,12 @@ Session::state(bool full_state)
 		RoutePublicOrderSorter cmp;
 		RouteList public_order (*r);
 		public_order.sort (cmp);
+
+                /* the sort should have put control outs first */
+
+                if (_control_out) {
+                        assert (_control_out == public_order.front());
+                }
 
 		for (RouteList::iterator i = public_order.begin(); i != public_order.end(); ++i) {
 			if (!(*i)->is_hidden()) {

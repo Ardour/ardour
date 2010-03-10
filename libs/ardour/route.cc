@@ -45,6 +45,7 @@
 #include "ardour/ladspa_plugin.h"
 #include "ardour/meter.h"
 #include "ardour/mix.h"
+#include "ardour/monitor_processor.h"
 #include "ardour/panner.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/port.h"
@@ -84,12 +85,16 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 
 	_meter.reset (new PeakMeter (_session));
 	_meter->set_display_to_user (false);
+
 	add_processor (_meter, PostFader);
 
-	if (_flags & ControlOut) {
+	if (is_control()) {
 		/* where we listen to tracks */
 		_intreturn.reset (new InternalReturn (_session));
 		add_processor (_intreturn, PreFader);
+
+                _monitor_control.reset (new MonitorProcessor (_session));
+                add_processor (_monitor_control, PostFader);
 	}
 
 	_main_outs.reset (new Delivery (_session, _output, _mute_master, _name, Delivery::Main));
@@ -485,7 +490,6 @@ Route::passthru (sframes_t start_frame, sframes_t end_frame, nframes_t nframes, 
 		   feeding the listen "stream". data will "arrive" into the
 		   route from the intreturn processor element.
 		*/
-
 		bufs.silence (nframes, 0);
 
 	} else {
@@ -745,7 +749,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, Placement placemen
  * @a position is used.
  */
 int
-Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::iterator iter, ProcessorStreams* err)
+Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::iterator iter, ProcessorStreams* err, bool activation_allowed)
 {
 	ChanCount old_pms = processor_max_streams;
 
@@ -803,8 +807,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 
 		}
 
-		if (_control_outs != processor) {
-			// XXX: do we want to emit the signal here ? change call order.
+		if (activation_allowed && (processor != _control_outs)) {
 			processor->activate ();
 		}
 
@@ -861,6 +864,20 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 				_meter->set_display_to_user (_meter_point == MeterCustom);
 				processor = _meter;
 
+                        } else if (prop->value() == "monitor") {
+
+                                if (_monitor_control) {
+                                        if (_monitor_control->set_state (node, Stateful::loading_state_version)) {
+                                                return false;
+                                        } else {
+                                                return true;
+                                        }
+                                }
+                                
+                                _monitor_control.reset (new MonitorProcessor (_session));
+                                _monitor_control->set_state (node, Stateful::loading_state_version);
+                                processor = _monitor_control;
+
 			} else if (prop->value() == "amp") {
 
 				/* amp always exists */
@@ -875,9 +892,24 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 
 			} else if (prop->value() == "intsend") {
 
-				processor.reset (new InternalSend (_session, _mute_master, node));
+                                InternalSend* isend = new InternalSend (_session, _mute_master, node);
+                                
+                                if (_session.control_out() && (isend->target_id() == _session.control_out()->id())) {
+                                        _control_outs.reset (isend);
+                                        if (_control_outs->active()) {
+                                                _control_outs->set_solo_level (1);
+                                        } else {
+                                                _control_outs->set_solo_level (0);
+                                        }
+                                }
+
+                                processor.reset (isend);
 
 			} else if (prop->value() == "intreturn") {
+
+                                /* a route only has one internal return. If it exists already
+                                   just set its state, and return
+                                */
 
 				if (_intreturn) {
 					if (_intreturn->set_state (node, Stateful::loading_state_version)) {
@@ -919,7 +951,7 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 				iter = p;
 			}
 
-			return (add_processor (processor, iter) == 0);
+			return (add_processor (processor, iter, 0, false) == 0);
 
 		} else {
 			error << _("Processor XML node has no type property") << endmsg;
@@ -1979,10 +2011,13 @@ Route::_set_state_2X (const XMLNode& node, int version)
 	_meter.reset (new PeakMeter (_session));
 	add_processor (_meter, PreFader);
 
-	if (_flags & ControlOut) {
+	if (is_control()) {
 		/* where we listen to tracks */
 		_intreturn.reset (new InternalReturn (_session));
 		add_processor (_intreturn, PreFader);
+
+                _monitor_control.reset (new MonitorProcessor (_session));
+                add_processor (_monitor_control, PostFader);
 	}
 
 	_main_outs.reset (new Delivery (_session, _output, _mute_master, _name, Delivery::Main));
@@ -2351,6 +2386,11 @@ Route::listen_via (boost::shared_ptr<Route> route, Placement placement, bool /*a
 
 				if (route == _session.control_out()) {
 					_control_outs = boost::dynamic_pointer_cast<Delivery>(d);
+                                        if (_control_outs->active()) {
+                                                _control_outs->set_solo_level (1);
+                                        } else {
+                                                _control_outs->set_solo_level (0);
+                                        }
 				}
 
 				/* already listening via the specified IO: do nothing */
@@ -2385,10 +2425,7 @@ Route::listen_via (boost::shared_ptr<Route> route, Placement placement, bool /*a
 
 	if (route == _session.control_out()) {
 		_control_outs = listener;
-                /* send to control/listen/monitor bus is active by default */
-                listener->activate ();
 	}
-
 
 	add_processor (listener, placement);
 

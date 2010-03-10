@@ -74,13 +74,13 @@ class LevelMeter : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	struct MeterInfo {
 	    Gtkmm2ext::FastMeter *meter;
 	    gint16                width;
-		int			          length;
+            int			  length;
 	    bool                  packed;
 
 	    MeterInfo() {
 		    meter = 0;
 		    width = 0;
-			length = 0;
+                    length = 0;
 		    packed = false;
 	    }
 	};
