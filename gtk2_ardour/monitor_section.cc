@@ -12,6 +12,7 @@
 #include "ardour/route.h"
 #include "ardour/utils.h"
 
+#include "ardour_ui.h"
 #include "monitor_section.h"
 #include "utils.h"
 #include "volume_controller.h"
@@ -34,7 +35,7 @@ MonitorSection::MonitorSection (Session* s)
         , main_table (2, 3)
         , meter (s)
         , _tearoff (0)
-        , gain_adjustment (1.0, 0.0, 2.0, 0.01, 0.1)
+        , gain_adjustment (1.0, 0.0, 1.0, 0.01, 0.1)
         , gain_control (0)
         , dim_adjustment (0.2, 0.0, 1.0, 0.01, 0.1) 
         , dim_control (0)
@@ -44,7 +45,9 @@ MonitorSection::MonitorSection (Session* s)
         , afl_button (solo_model_group, _("AFL"))
         , pfl_button (solo_model_group, _("PFL"))
         , cut_all_button (_("MUTE"))
-        , dim_all_button (_("DIM"))
+        , dim_all_button (_("dim"))
+        , mono_button (_("mono"))
+        , rude_solo_button (_("soloing"))
 
 {
         Glib::RefPtr<Action> act;
@@ -69,7 +72,7 @@ MonitorSection::MonitorSection (Session* s)
                 throw failed_constructor ();
         }
 
-        HBox* sub_knob_packer = manage (new HBox);
+        VBox* sub_knob_packer = manage (new VBox);
         sub_knob_packer->set_spacing (12);
 
         VBox* spin_packer;
@@ -80,42 +83,73 @@ MonitorSection::MonitorSection (Session* s)
         gain_control->spinner().signal_output().connect (sigc::bind (sigc::mem_fun (*this, &MonitorSection::nonlinear_gain_printer), 
                                                                      &gain_control->spinner()));
 
-        HBox* center_gain_control = manage (new HBox);
-        center_gain_control->pack_start (*gain_control, true, true);
-
         spin_label = manage (new Label (_("Gain (dB)")));
         spin_packer = manage (new VBox);
+        spin_packer->show ();
         spin_packer->set_spacing (6);
-        spin_packer->pack_start (*center_gain_control, false, false);
+        spin_packer->pack_start (*gain_control, false, false);
         spin_packer->pack_start (*spin_label, false, false);
 
-        knob_packer.pack_start (*spin_packer, false, false);
+        sub_knob_packer->pack_start (*spin_packer, false, false);
                 
         dim_control = new VolumeController (little_knob_pixbuf, &dim_adjustment, true, 30, 30);
         dim_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MonitorSection::dim_level_changed));
         dim_control->spinner().signal_output().connect (sigc::bind (sigc::mem_fun (*this, &MonitorSection::linear_gain_printer), 
                                                                     &dim_control->spinner()));
 
+        HBox* dim_packer = manage (new HBox);
+        dim_packer->show ();
+
         spin_label = manage (new Label (_("Dim Cut (dB)")));
         spin_packer = manage (new VBox);
+        spin_packer->show ();
         spin_packer->set_spacing (6);
         spin_packer->pack_start (*dim_control, false, false);
         spin_packer->pack_start (*spin_label, false, false); 
 
-        sub_knob_packer->pack_start (*spin_packer, false, true);
+        dim_packer->set_spacing (12);
+        dim_packer->pack_start (*spin_packer, false, false);
+
+        VBox* keep_dim_under_vertical_size_control = manage (new VBox);
+        keep_dim_under_vertical_size_control->pack_start (dim_all_button, true, false);
+        keep_dim_under_vertical_size_control->show ();
+        dim_all_button.set_size_request (40,40);
+        dim_all_button.show ();
+
+        dim_packer->pack_start (*keep_dim_under_vertical_size_control, false, false);
+        sub_knob_packer->pack_start (*dim_packer, false, true);
 
         solo_boost_control = new VolumeController (little_knob_pixbuf, &solo_boost_adjustment, true, 30, 30);
         solo_boost_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MonitorSection::solo_boost_changed));
         solo_boost_control->spinner().signal_output().connect (sigc::bind (sigc::mem_fun (*this, &MonitorSection::linear_gain_printer),
                                                                            &solo_boost_control->spinner()));
 
+        HBox* solo_packer = manage (new HBox);
+        solo_packer->show ();
+
         spin_label = manage (new Label (_("Solo Boost (dB)")));
         spin_packer = manage (new VBox);
+        spin_packer->show ();
         spin_packer->set_spacing (6);
         spin_packer->pack_start (*solo_boost_control, false, false);
         spin_packer->pack_start (*spin_label, false, false); 
 
-        sub_knob_packer->pack_start (*spin_packer, false, true);
+        VBox* keep_rude_solo_under_vertical_size_control = manage (new VBox);
+        keep_rude_solo_under_vertical_size_control->show ();
+        keep_rude_solo_under_vertical_size_control->pack_start (rude_solo_button, true, false);
+
+        solo_packer->set_spacing (12);
+        solo_packer->pack_start (*spin_packer, false, false);
+        solo_packer->pack_start (*keep_rude_solo_under_vertical_size_control, true, false);
+
+	rude_solo_button.set_name ("TransportSoloAlert");
+        rude_solo_button.show ();
+
+        ARDOUR_UI::Blink.connect (sigc::mem_fun (*this, &MonitorSection::solo_blink));
+	rude_solo_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_solo));
+        UI::instance()->set_tip (rude_solo_button, _("When active, something is soloed.\nClick to de-solo everything"));
+
+        sub_knob_packer->pack_start (*solo_packer, false, true);
 
         knob_packer.pack_start (*sub_knob_packer, false, true);
 
@@ -133,7 +167,7 @@ MonitorSection::MonitorSection (Session* s)
 
         table_knob_packer.show ();
 
-        solo_model_box.set_spacing (12);
+        solo_model_box.set_spacing (6);
         solo_model_box.pack_start (solo_in_place_button, false, false);
         solo_model_box.pack_start (afl_button, false, false);
         solo_model_box.pack_start (pfl_button, false, false);
@@ -142,6 +176,21 @@ MonitorSection::MonitorSection (Session* s)
         afl_button.show ();
         pfl_button.show ();
         solo_model_box.show ();
+
+        act = ActionManager::get_action (X_("Solo"), X_("solo-use-in-place"));
+        if (act) {
+                act->connect_proxy (solo_in_place_button);
+        } 
+
+        act = ActionManager::get_action (X_("Solo"), X_("solo-use-afl"));
+        if (act) {
+                act->connect_proxy (afl_button);
+        } 
+
+        act = ActionManager::get_action (X_("Solo"), X_("solo-use-pfl"));
+        if (act) {
+                act->connect_proxy (pfl_button);
+        } 
 
         upper_packer.pack_start (solo_model_box, false, false);
 
@@ -155,10 +204,16 @@ MonitorSection::MonitorSection (Session* s)
                 act->connect_proxy (dim_all_button);
         } 
 
-        cut_all_button.show ();
-        dim_all_button.show ();
+        act = ActionManager::get_action (X_("Monitor"), X_("monitor-mono"));
+        if (act) {
+                act->connect_proxy (mono_button);
+        } 
 
-        lower_packer.pack_start (dim_all_button, false, false);
+        cut_all_button.set_size_request (50,50);
+        cut_all_button.show ();
+
+        lower_packer.set_spacing (12);
+        lower_packer.pack_start (mono_button, false, false);
         lower_packer.pack_start (cut_all_button, false, false);
 
         vpacker.set_border_width (12);
@@ -194,10 +249,10 @@ MonitorSection::MonitorSection (Session* s)
 
 MonitorSection::~MonitorSection ()
 {
-        delete _tearoff;
         delete gain_control;
         delete dim_control;
         delete solo_boost_control;
+        delete _tearoff;
 }
 
 void
@@ -371,6 +426,16 @@ MonitorSection::cut_all ()
 }
 
 void
+MonitorSection::mono ()
+{
+        Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), "monitor-mono");
+        if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+                _monitor->set_mono (tact->get_active());
+        }
+}
+
+void
 MonitorSection::cut_channel (uint32_t chn)
 {
         char buf[64];
@@ -442,6 +507,9 @@ MonitorSection::register_actions ()
         monitor_actions = ActionGroup::create (X_("Monitor"));
 	ActionManager::add_action_group (monitor_actions);
 
+        ActionManager::register_toggle_action (monitor_actions, "monitor-mono", "", 
+                                               sigc::mem_fun (*this, &MonitorSection::mono));
+
         ActionManager::register_toggle_action (monitor_actions, "monitor-cut-all", "", 
                                                sigc::mem_fun (*this, &MonitorSection::cut_all));
 
@@ -476,6 +544,77 @@ MonitorSection::register_actions ()
                 ActionManager::register_toggle_action (monitor_actions, action_name.c_str(), "", 
                                                        sigc::bind (sigc::mem_fun (*this, &MonitorSection::invert_channel), chn));
 
+        }
+
+
+        Glib::RefPtr<ActionGroup> solo_actions = ActionGroup::create (X_("Solo"));
+        RadioAction::Group solo_group;
+
+        ActionManager::register_radio_action (solo_actions, solo_group, "solo-use-in-place", "",
+                                              sigc::mem_fun (*this, &MonitorSection::solo_use_in_place));
+        ActionManager::register_radio_action (solo_actions, solo_group, "solo-use-afl", "",
+                                              sigc::mem_fun (*this, &MonitorSection::solo_use_afl));
+        ActionManager::register_radio_action (solo_actions, solo_group, "solo-use-pfl", "",
+                                              sigc::mem_fun (*this, &MonitorSection::solo_use_pfl));
+
+	ActionManager::add_action_group (solo_actions);
+}
+
+void
+MonitorSection::solo_use_in_place ()
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+        Glib::RefPtr<Action> act = ActionManager::get_action (X_("Solo"), X_("solo-use-in-place"));
+
+        if (act) {
+                Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
+                if (ract) {
+                        Config->set_solo_control_is_listen_control (!ract->get_active());
+                }
+        }
+}
+
+void
+MonitorSection::solo_use_afl ()
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+        
+        Glib::RefPtr<Action> act = ActionManager::get_action (X_("Solo"), X_("solo-use-afl"));
+        if (act) {
+                Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
+                if (ract) {
+                        if (ract->get_active()) {
+                                Config->set_listen_position (AfterFaderListen);
+                                Config->set_solo_control_is_listen_control (true);
+                        }
+                }
+        }
+}
+
+void
+MonitorSection::solo_use_pfl ()
+{
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+        Glib::RefPtr<Action> act = ActionManager::get_action (X_("Solo"), X_("solo-use-afl"));
+        if (act) {
+                Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
+                if (ract) {
+                        if (ract->get_active()) {
+                                Config->set_listen_position (PreFaderListen);
+                                Config->set_solo_control_is_listen_control (true);
+                        }
+                }
         }
 }
 
@@ -554,9 +693,59 @@ MonitorSection::linear_gain_printer (SpinButton* button)
 void
 MonitorSection::map_state ()
 {
-        cerr << "route gain = " << _route->gain_control()->get_value() << endl;
-
         gain_control->get_adjustment()->set_value (gain_to_slider_position (_route->gain_control()->get_value()));
         dim_control->get_adjustment()->set_value (_monitor->dim_level());
         solo_boost_control->get_adjustment()->set_value (_monitor->solo_boost_level());
+
+        const char *action_name;
+
+        if (Config->get_solo_control_is_listen_control()) {
+		switch (Config->get_listen_position()) {
+		case AfterFaderListen:
+                        action_name = X_("solo-use-afl");
+			break;
+		case PreFaderListen:
+                        action_name = X_("solo-use-afl");
+			break;
+		}
+        } else {
+                action_name = X_("solo-use-in-place");
+        }
+        
+        Glib::RefPtr<Action> act = ActionManager::get_action (X_("Solo"), action_name);
+        if (act) {
+                Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
+                if (ract) {
+                        ract->set_active (true);
+                }
+        }
+}
+
+void
+MonitorSection::solo_blink (bool onoff)
+{
+	if (_session == 0) {
+		return;
+	}
+
+	if (_session->soloing() || _session->listening()) {
+		if (onoff) {
+			rude_solo_button.set_state (STATE_ACTIVE);
+		} else {
+			rude_solo_button.set_state (STATE_NORMAL);
+		}
+	} else {
+		rude_solo_button.set_active (false);
+		rude_solo_button.set_state (STATE_NORMAL);
+	}
+}
+
+bool
+MonitorSection::cancel_solo (GdkEventButton* ev)
+{
+        if (_session && _session->soloing()) {
+                _session->set_solo (_session->get_routes(), false);
+        }
+
+        return true;
 }

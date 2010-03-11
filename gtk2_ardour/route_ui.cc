@@ -1404,8 +1404,6 @@ RouteUI::check_rec_enable_sensitivity ()
 void
 RouteUI::parameter_changed (string const & p)
 {
-	ENSURE_GUI_THREAD (*this, &RouteUI::parameter_changed, p)
-
 	if (p == "disable-disarm-during-roll") {
 		check_rec_enable_sensitivity ();
 	} else if (p == "solo-control-is-listen-control") {

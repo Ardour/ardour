@@ -2,6 +2,7 @@
 
 #include "ardour/amp.h"
 #include "ardour/dB.h"
+#include "ardour/audio_buffer.h"
 #include "ardour/monitor_processor.h"
 #include "ardour/session.h"
 
@@ -84,6 +85,42 @@ MonitorProcessor::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*e
 
                 ++chn;
         }
+
+        if (_mono) {
+                /* chn is now the number of channels, use as a scaling factor when mixing
+                 */
+                gain_t scale = 1.0/chn;
+                BufferSet::audio_iterator b = bufs.audio_begin();
+                AudioBuffer& ab (*b);
+                Sample* buf = ab.data();
+
+                /* scale the first channel */
+
+                for (nframes_t n = 0; n < nframes; ++n) {
+                        buf[n] *= scale;
+                }
+
+                /* add every other channel into the first channel's buffer */
+
+                ++b;
+                for (; b != bufs.audio_end(); ++b) {
+                        AudioBuffer& ob (*b);
+                        Sample* obuf = ob.data ();
+                        for (nframes_t n = 0; n < nframes; ++n) {
+                                buf[n] += obuf[n] * scale;
+                        }
+                }
+
+                /* copy the first channel to every other channel's buffer */
+
+                b = bufs.audio_begin();
+                ++b;
+                for (; b != bufs.audio_end(); ++b) {
+                        AudioBuffer& ob (*b);
+                        Sample* obuf = ob.data ();
+                        memcpy (obuf, buf, sizeof (Sample) * nframes);
+                }
+        }
 }
 
 bool
@@ -164,6 +201,12 @@ MonitorProcessor::set_solo (uint32_t chn, bool solo)
 }
 
 void
+MonitorProcessor::set_mono (bool yn)
+{
+        _mono = yn;
+}
+
+void
 MonitorProcessor::set_cut_all (bool yn)
 {
         _cut_all = yn;
@@ -219,3 +262,8 @@ MonitorProcessor::dimmed (uint32_t chn) const
         return _dim[chn];
 }
 
+bool
+MonitorProcessor::mono () const
+{
+        return _mono;
+}

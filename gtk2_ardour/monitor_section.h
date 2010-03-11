@@ -49,7 +49,7 @@ class MonitorSection : public RouteUI
         Gtk::VBox upper_packer;
         Gtk::VBox lower_packer;
         Gtk::VBox table_knob_packer;
-        Gtk::VBox knob_packer;
+        Gtk::HBox knob_packer;
         LevelMeter meter;
         Gtkmm2ext::TearOff* _tearoff;
 
@@ -93,6 +93,15 @@ class MonitorSection : public RouteUI
         Gtk::RadioButton pfl_button;
         Gtk::HBox        solo_model_box;
 
+        void solo_use_in_place ();
+        void solo_use_afl ();
+        void solo_use_pfl ();
+
         BindableToggleButton cut_all_button;
         BindableToggleButton dim_all_button;
+        BindableToggleButton mono_button;
+        BindableToggleButton rude_solo_button;
+
+        void solo_blink (bool);
+        bool cancel_solo (GdkEventButton*);
 };

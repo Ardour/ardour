@@ -55,6 +55,7 @@ class MonitorProcessor : public Processor
         void set_cut (uint32_t, bool cut);
         void set_dim (uint32_t, bool dim);
         void set_solo (uint32_t, bool);
+        void set_mono (bool);
 
         void set_dim_level (gain_t);
         void set_solo_boost_level (gain_t);
@@ -66,6 +67,9 @@ class MonitorProcessor : public Processor
         bool soloed (uint32_t chn) const;
         bool inverted (uint32_t chn) const;
         bool cut (uint32_t chn) const;
+        bool cut_all () const;
+        bool dim_all () const;
+        bool mono () const;
 
         PBD::Signal0<void> Changed;
         
@@ -78,6 +82,7 @@ class MonitorProcessor : public Processor
         uint32_t             solo_cnt;
         bool                _dim_all;
         bool                _cut_all;
+        bool                _mono;
         volatile gain_t     _dim_level;
         volatile gain_t     _solo_boost_level;
 };
