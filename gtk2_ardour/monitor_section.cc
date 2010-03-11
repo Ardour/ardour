@@ -14,6 +14,7 @@
 
 #include "ardour_ui.h"
 #include "monitor_section.h"
+#include "public_editor.h"
 #include "utils.h"
 #include "volume_controller.h"
 
@@ -245,6 +246,7 @@ MonitorSection::MonitorSection (Session* s)
         /* if torn off, make this a normal window */
         _tearoff->tearoff_window().set_type_hint (Gdk::WINDOW_TYPE_HINT_NORMAL);
         _tearoff->tearoff_window().set_title (X_("Monitor"));
+        _tearoff->tearoff_window().signal_key_press_event().connect (sigc::mem_fun (*this, &MonitorSection::tearoff_key_press_event), false);
 }
 
 MonitorSection::~MonitorSection ()
@@ -253,6 +255,13 @@ MonitorSection::~MonitorSection ()
         delete dim_control;
         delete solo_boost_control;
         delete _tearoff;
+}
+
+bool
+MonitorSection::tearoff_key_press_event (GdkEventKey* ev)
+{
+        cerr << "T key event\n";
+        return forward_key_press (ev);
 }
 
 void

@@ -74,17 +74,27 @@ class MonitorProcessor : public Processor
         PBD::Signal0<void> Changed;
         
   private:
-        std::vector<gain_t>  current_gain;
-        std::vector<gain_t> _cut;
-        std::vector<bool>   _dim;
-        std::vector<gain_t> _polarity;
-        std::vector<bool>   _soloed;
+        struct ChannelRecord { 
+            gain_t current_gain;
+            gain_t cut;
+            bool   dim;
+            gain_t polarity;
+            bool   soloed;
+
+            ChannelRecord () 
+            : current_gain(1.0), cut(1.0), dim(false), polarity(1.0), soloed (false) {}
+        };
+
+        std::vector<ChannelRecord> _channels;
+
         uint32_t             solo_cnt;
         bool                _dim_all;
         bool                _cut_all;
         bool                _mono;
         volatile gain_t     _dim_level;
         volatile gain_t     _solo_boost_level;
+
+        void allocate_channels (uint32_t);
 };
 
 } /* namespace */

@@ -104,4 +104,6 @@ class MonitorSection : public RouteUI
 
         void solo_blink (bool);
         bool cancel_solo (GdkEventButton*);
+
+        bool tearoff_key_press_event (GdkEventKey*);
 };

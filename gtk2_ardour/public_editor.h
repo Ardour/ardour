@@ -360,6 +360,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	static PublicEditor* _instance;
 
 	friend bool relay_key_press (GdkEventKey*, Gtk::Window*);
+	friend bool forward_key_press (GdkEventKey*);
 };
 
 #endif // __gtk_ardour_public_editor_h__

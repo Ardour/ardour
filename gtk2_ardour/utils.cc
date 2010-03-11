@@ -520,6 +520,12 @@ relay_key_press (GdkEventKey* ev, Gtk::Window* win)
 }
 
 bool
+forward_key_press (GdkEventKey* ev)
+{
+        return PublicEditor::instance().on_key_press_event(ev);
+}
+
+bool
 key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 {
 	GtkWindow* win = window.gobj();
