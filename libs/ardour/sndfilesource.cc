@@ -910,7 +910,7 @@ SndFileSource::get_timecode_info (SNDFILE* sf, SF_BROADCAST_INFO* binfo, bool& e
 	/* XXX 64 bit alert: when JACK switches to a 64 bit frame count, this needs to use the high bits
 	   of the time reference.
 	*/
-	
+
 	exists = true;
 	int64_t ret = (uint32_t) binfo->time_reference_high;
 	ret <<= 32;
