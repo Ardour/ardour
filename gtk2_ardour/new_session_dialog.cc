@@ -430,6 +430,10 @@ printf("system template path = %s\n", sys_templates_path.c_str());
 	m_open_filechooser->set_current_folder(getenv ("HOME"));
 	m_open_filechooser->set_title(_("select session file"));
 
+#ifdef GTKOSX
+	m_open_filechooser->add_shortcut_folder_uri("file:///Volumes");
+#endif
+
 	Gtk::FileFilter* template_filter = manage (new (Gtk::FileFilter));
 	template_filter->add_pattern(X_("*.ardour"));
 	template_filter->add_pattern(X_("*.ardour.bak"));
