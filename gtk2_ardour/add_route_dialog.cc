@@ -67,7 +67,7 @@ AddRouteDialog::AddRouteDialog ()
 	}
 	
 	set_name ("AddRouteDialog");
-	set_wmclass (X_("ardour_add_track_bus"), "Ardour");
+	set_wmclass (X_("ardour_add_track_bus"), PROGRAM_NAME);
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_resizable (false);
 

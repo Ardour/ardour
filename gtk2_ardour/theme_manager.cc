@@ -184,7 +184,7 @@ load_rc_file (const string& filename, bool themechange)
 
 	if(!rcfile.length())
 	{
-		warning << string_compose(_("Unable to find UI style file %1. Ardour will look strange"), rcfile) << endmsg;
+		warning << string_compose(_("Unable to find UI style file %1. %2 will look strange"), rcfile, PROGRAM_NAME) << endmsg;
 		return;
 	}
 

@@ -405,12 +405,12 @@ SoundFileBrowser::SoundFileBrowser (Gtk::Window& parent, string title, ARDOUR::S
 	resetting_ourselves = false;
 	gm = 0;
 
-	if (ARDOUR::Profile->get_sae()) {
-		chooser.add_shortcut_folder_uri("file:///Library/GarageBand/Apple Loops");
-		chooser.add_shortcut_folder_uri("file:///Library/Application Support/GarageBand/Instrument Library/Sampler/Sampler Files");
-	}
 	
 #ifdef GTKOSX
+	chooser.add_shortcut_folder_uri("file:///Library/GarageBand/Apple Loops");
+	chooser.add_shortcut_folder_uri("file:///Library/Audio/Apple Loops");
+	chooser.add_shortcut_folder_uri("file:///Library/Application Support/GarageBand/Instrument Library/Sampler/Sampler Files");
+	
 	chooser.add_shortcut_folder_uri("file:///Volumes");
 #endif
 
@@ -1045,7 +1045,7 @@ bool
 SoundFileOmega::bad_file_message()
 {
 	MessageDialog msg (*this, 
-			   _("One or more of the selected files\ncannot be used by Ardour"),
+			   string_compose (_("One or more of the selected files\ncannot be used by %1"), PROGRAM_NAME),
 			   true,
 			   Gtk::MESSAGE_INFO,
 			   Gtk::BUTTONS_OK);

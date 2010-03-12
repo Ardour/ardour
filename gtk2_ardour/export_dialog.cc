@@ -122,7 +122,7 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	export_cd_markers_allowed = true;
 
 	set_title (_("Export"));
-	set_wmclass (X_("ardour_export"), "Ardour");
+	set_wmclass (X_("ardour_export"), PROGRAM_NAME);
 	set_name ("ExportWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 	
@@ -1060,7 +1060,7 @@ ExportDialog::do_export ()
 				   true,
 				   MESSAGE_ERROR,
 				   BUTTONS_OK);
-		msg.set_secondary_text (_("Ardour cannot export audio when disconnected"));
+		msg.set_secondary_text (string_compose (_("%1 cannot export audio when disconnected"), PROGRAM_NAME));
 		msg.present ();
 		msg.run ();
 		return;

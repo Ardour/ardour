@@ -33,6 +33,7 @@ opts = Options('scache.conf')
 opts.AddOptions(
     ('ARCH', 'Set architecture-specific compilation flags by hand (all flags as 1 argument)',''),
     ('WINDOWS_KEY', 'Set X Modifier (Mod1,Mod2,Mod3,Mod4,Mod5) for "Windows" key', 'Mod4><Super'),
+    ('PROGRAM_NAME', 'Set program name (default is "Ardour")', 'Ardour'),
     BoolOption('AUDIOUNITS', 'Compile with Apple\'s AudioUnit library. (experimental)', 0),
     BoolOption('COREAUDIO', 'Compile with Apple\'s CoreAudio library', 0),
     BoolOption('GTKOSX', 'Compile for use with GTK-OSX, not GTK-X11', 0),
@@ -847,9 +848,14 @@ if env['LIBLO']:
 
 
 #
+# the program name is defined everywhere
+#
+env.Append(CCFLAGS='-DPROGRAM_NAME=\\"' + env['PROGRAM_NAME'] + '\\"')
+env.Append(CXXFLAGS='-DPROGRAM_NAME=\\"' + env['PROGRAM_NAME'] + '\\"')
+
+#
 # fix scons nitpickiness on APPLE
 #
-
 
 def prep_libcheck(topenv, libinfo):
     if topenv['IS_OSX']:

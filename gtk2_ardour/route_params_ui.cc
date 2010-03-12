@@ -137,7 +137,7 @@ RouteParams_UI::RouteParams_UI ()
 	
 	set_name ("RouteParamsWindow");
 	set_default_size (620,370);
-	set_wmclass (X_("ardour_route_parameters"), "Ardour");
+	set_wmclass (X_("ardour_route_parameters"), PROGRAM_NAME);
 
 	set_title (_("Track/Bus Inspector"));
 

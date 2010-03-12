@@ -575,7 +575,7 @@ ARDOUR_UI::install_actions ()
 	if (!engine->can_request_hardware_monitoring()) {
 		act->set_sensitive (false);
 	}
-	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseSoftwareMonitoring"), _("Ardour does monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), SoftwareMonitoring));
+	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseSoftwareMonitoring"), string_compose (_("%1 does monitoring"), PROGRAM_NAME).c_str(), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), SoftwareMonitoring));
 	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseExternalMonitoring"), _("Audio Hardware does monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), ExternalMonitoring));
 
 	RadioAction::Group solo_group;
@@ -613,6 +613,15 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_toggle_action (option_actions, X_("AutoRebinding"), _("Auto Rebind Controls"), mem_fun (*(this->mixer), &Mixer_UI::toggle_auto_rebinding));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	if (getenv ("ARDOUR_BUNDLED")) {
+		act = ActionManager::register_toggle_action (main_actions, X_("EnableTranslation"), _("Enable Translations"), mem_fun (*this, &ARDOUR_UI::toggle_translations));
+		if (act) {
+			RefPtr<ToggleAction> ract = RefPtr<ToggleAction>::cast_dynamic (act);
+			if (ract) {
+				ract->set_active (!ARDOUR::translations_are_disabled());
+			}
+		}
+	}
 
 	ActionManager::add_action_group (shuttle_actions);
 	ActionManager::add_action_group (option_actions);

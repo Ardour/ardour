@@ -73,6 +73,8 @@ cocoa_open_url (const char* uri)
 void
 set_language_preference ()
 {
+	gtk_disable_setlocale ();
+
 	if (g_getenv ("LANGUAGE") || g_getenv ("LC_ALL") || g_getenv ("LANG")) {
 		return;
 	}

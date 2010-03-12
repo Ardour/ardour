@@ -627,7 +627,7 @@ LocationUI::LocationUI ()
 	
 	set_title(_("Locations"));
 	
-	set_wmclass(X_("ardour_locations"), "Ardour");
+	set_wmclass(X_("ardour_locations"), PROGRAM_NAME);
 
 	set_name ("LocationWindow");
 

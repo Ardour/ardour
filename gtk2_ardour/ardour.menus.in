@@ -573,6 +573,7 @@
 	             <menuitem action='NameNewMarkers'/>
                	     <menuitem action='RubberbandingSnapsToGrid'/>
                	     <menuitem action='AutoAnalyseAudio'/>
+               	     <menuitem action='EnableTranslation'/>
          </menu>
 	</menu>
          

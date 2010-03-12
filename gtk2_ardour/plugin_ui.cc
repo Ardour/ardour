@@ -112,7 +112,7 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
 		_pluginui = pu;
 		add (*pu);
 		
-		set_wmclass (X_("ardour_plugin_editor"), "Ardour");
+		set_wmclass (X_("ardour_plugin_editor"), PROGRAM_NAME);
 
 		signal_map_event().connect (mem_fun (*pu, &GenericPluginUI::start_updating));
 		signal_unmap_event().connect (mem_fun (*pu, &GenericPluginUI::stop_updating));
@@ -372,7 +372,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	
 	focus_button.add (*focus_out_image);
 
-	ARDOUR_UI::instance()->set_tip (&focus_button, _("Click to allow the plugin to receive keyboard events that Ardour would normally use as a shortcut"), "");
+	ARDOUR_UI::instance()->set_tip (&focus_button, string_compose (_("Click to allow the plugin to receive keyboard events that %1 would normally use as a shortcut"), PROGRAM_NAME).c_str(), "");
 	ARDOUR_UI::instance()->set_tip (&bypass_button, _("Click to enable/disable this plugin"), "");
 
 	insert->GoingAway.connect (mem_fun (*this, &PlugUIBase::plugin_going_away));
@@ -465,13 +465,13 @@ PlugUIBase::focus_toggled (GdkEventButton* ev)
 		focus_button.remove ();
 		focus_button.add (*focus_out_image);
 		focus_out_image->show ();
-		ARDOUR_UI::instance()->set_tip (&focus_button, _("Click to allow the plugin to receive keyboard events that Ardour would normally use as a shortcut"), "");
+		ARDOUR_UI::instance()->set_tip (&focus_button, string_compose (_("Click to allow the plugin to receive keyboard events that %1 would normally use as a shortcut"), PROGRAM_NAME).c_str(), "");
 	} else {
 		Keyboard::the_keyboard().magic_widget_grab_focus();
 		focus_button.remove ();
 		focus_button.add (*focus_in_image);
 		focus_in_image->show ();
-		ARDOUR_UI::instance()->set_tip (&focus_button, _("Click to allow normal use of Ardour keyboard shortcuts"), "");
+		ARDOUR_UI::instance()->set_tip (&focus_button, string_compose (_("Click to allow normal use of %1 keyboard shortcuts"), PROGRAM_NAME).c_str(), "");
 	}
 
 	return true;

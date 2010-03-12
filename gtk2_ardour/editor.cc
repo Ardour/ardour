@@ -824,7 +824,7 @@ Editor::Editor ()
 	WindowTitle title(Glib::get_application_name());
 	title += _("Editor");
 	set_title (title.get_string());
-	set_wmclass (X_("ardour_editor"), "Ardour");
+	set_wmclass (X_("ardour_editor"), PROGRAM_NAME);
 
 	add (vpacker);
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
@@ -4924,7 +4924,7 @@ Editor::first_idle ()
 
 	if (track_views.size() > 1) { 
 		dialog = new MessageDialog (*this, 
-					    _("Please wait while Ardour loads visual data"),
+					    string_compose (_("Please wait while %1 loads visual data"), PROGRAM_NAME),
 					    true,
 					    Gtk::MESSAGE_INFO,
 					    Gtk::BUTTONS_NONE);

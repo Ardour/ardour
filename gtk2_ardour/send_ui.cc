@@ -26,6 +26,8 @@
 #include "ardour_ui.h"
 #include "gui_thread.h"
 
+#include "i18n.h"
+
 using namespace ARDOUR;
 using namespace PBD;
 
@@ -113,7 +115,7 @@ SendUI::fast_update ()
 }
 	
 SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session& ss)
-	: ArdourDialog (string("Ardour: send ") + s->name())
+	: ArdourDialog (string_compose (_("%1: send "), PROGRAM_NAME) + s->name())
 {
 	ui = new SendUI (s, ss);
 

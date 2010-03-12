@@ -96,7 +96,7 @@ CrossfadeEditor::CrossfadeEditor (Session& s, boost::shared_ptr<Crossfade> xf, d
 	  select_in_button (_("Fade In")),
 	  select_out_button (_("Fade Out"))
 {
-	set_wmclass (X_("ardour_automationedit"), "Ardour");
+	set_wmclass (X_("ardour_automationedit"), PROGRAM_NAME);
 	set_name ("CrossfadeEditWindow");
 	set_position (Gtk::WIN_POS_MOUSE);
 

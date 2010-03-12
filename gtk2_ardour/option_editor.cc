@@ -124,7 +124,7 @@ OptionEditor::OptionEditor (ARDOUR_UI& uip, PublicEditor& ed, Mixer_UI& mixui)
 	set_title(_("Preferences"));
 
 	set_default_size (300, 300);
-	set_wmclass (X_("ardour_preferences"), "Ardour");
+	set_wmclass (X_("ardour_preferences"), PROGRAM_NAME);
 
 	set_name ("Preferences");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);

@@ -777,6 +777,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI
 	void platform_specific ();
 	void platform_setup ();
 	void fontconfig_dialog ();
+	void toggle_translations ();
 
 	/* these are used only in response to a platform-specific "ShouldQuit" signal
 	 */

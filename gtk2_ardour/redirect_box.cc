@@ -456,11 +456,11 @@ RedirectBox::weird_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr
 "only %3 active signal streams.\n"
 "\n"
 "This makes no sense - unless the plugin supports\n"
-"side-chain inputs. A future version of Ardour will\n"
+"side-chain inputs. A future version of %4 will\n"
 "support this type of configuration."),
 					 p.name(),
 					 p.get_info()->n_inputs,
-					 streams));
+					 streams, PROGRAM_NAME));
 	} else {
 		label.set_text (string_compose (_(
 "You attempted to add a plugin (%1).\n"
@@ -471,13 +471,13 @@ RedirectBox::weird_plugin_dialog (Plugin& p, uint32_t streams, boost::shared_ptr
 "The track/bus has %4 inputs and %5 outputs.\n"
 "The insertion point, has %6 active signals.\n"
 "\n"
-"Ardour does not understand what to do in such situations.\n"),
+"%7 does not understand what to do in such situations.\n"),
 					 p.name(),
 					 p.get_info()->n_inputs,
 					 p.get_info()->n_outputs,
 					 io->n_inputs(),
 					 io->n_outputs(),
-					 streams));
+					 streams, PROGRAM_NAME));
 	}
 
 	dialog.set_border_width (PublicEditor::window_border_width);

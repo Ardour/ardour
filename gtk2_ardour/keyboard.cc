@@ -563,7 +563,7 @@ Keyboard::setup_keybindings ()
 			if (path.empty()) {
 				
 				if (keybindings_path == default_bindings) {
-					error << _("Default keybindings not found - Ardour will be hard to use!") << endmsg;
+					error << string_compose (_("Default keybindings not found - %1 will be hard to use!"), PROGRAM_NAME) << endmsg;
 					return;
 				} else {
 					warning << string_compose (_("Key bindings file \"%1\" not found. Default bindings used instead"), 
@@ -587,7 +587,7 @@ Keyboard::setup_keybindings ()
 
 			if (!Glib::file_test (keybindings_path, Glib::FILE_TEST_EXISTS)) {
 				if (keybindings_path == default_bindings) {
-					error << _("Default keybindings not found - Ardour will be hard to use!") << endmsg;
+					error << string_compose (_("Default keybindings not found - %1 will be hard to use!"), PROGRAM_NAME) << endmsg;
 					return;
 				} else {
 					warning << string_compose (_("Key bindings file \"%1\" not found. Default bindings used instead"), 
@@ -629,7 +629,7 @@ Keyboard::load_keybindings (string path)
 
 
 	} catch (...) {
-		error << string_compose (_("Ardour key bindings file not found at \"%1\" or contains errors."), path)
+		error << string_compose (_("%1 key bindings file not found at \"%2\" or contains errors."), PROGRAM_NAME, path)
 		      << endmsg;
 		return false;
 	}

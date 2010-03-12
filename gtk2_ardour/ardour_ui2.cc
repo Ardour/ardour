@@ -264,7 +264,7 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::instance()->tooltips().set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 	ARDOUR_UI::instance()->tooltips().set_tip (click_button, _("Enable/Disable audio click"));
 	ARDOUR_UI::instance()->tooltips().set_tip (sync_option_combo, _("Positional sync source"));
-	ARDOUR_UI::instance()->tooltips().set_tip (time_master_button, _("Does Ardour control the time?"));
+	ARDOUR_UI::instance()->tooltips().set_tip (time_master_button, string_compose (_("Does %1 control the time?"), PROGRAM_NAME));
 	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_box, _("Shuttle speed control"));
 	ARDOUR_UI::instance()->tooltips().set_tip (shuttle_units_button, _("Select semitones or %%-age for speed display"));
 	ARDOUR_UI::instance()->tooltips().set_tip (speed_display_box, _("Current transport speed"));

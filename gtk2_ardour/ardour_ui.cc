@@ -107,7 +107,7 @@ sigc::signal<void,nframes_t, bool, nframes_t> ARDOUR_UI::Clock;
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
-	: Gtkmm2ext::UI (X_("Ardour"), argcp, argvp),
+	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp),
 
 	  primary_clock (X_("primary"), false, X_("TransportClockDisplay"), true, false, true),
 	  secondary_clock (X_("secondary"), false, X_("SecondaryClockDisplay"), true, false, true),
@@ -258,7 +258,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 		RouteTimeAxisView::setup_slider_pix ();
 
 	} catch (failed_constructor& err) {
-		error << _("could not initialize Ardour.") << endmsg;
+		error << string_compose (_("could not initialize %1."), PROGRAM_NAME) << endmsg;
 		// pass it on up
 		throw;
 	} 
@@ -591,9 +591,9 @@ ARDOUR_UI::backend_audio_error (bool we_set_params, Gtk::Window* toplevel)
 {
 	string title;
 	if (we_set_params) {
-		title = _("Ardour could not start JACK");
+		title = string_compose (_("%1 could not start JACK"), PROGRAM_NAME);
 	} else {
-		title = _("Ardour could not connect to JACK.");
+		title = string_compose (_("%1 could not connect to JACK."), PROGRAM_NAME);
 	}
 
 	MessageDialog win (title,
@@ -657,7 +657,7 @@ ARDOUR_UI::startup ()
 		return;
 	}
 	
-	BootMessage (_("Ardour is ready for use"));
+	BootMessage (string_compose (_("%1 is ready for use"), PROGRAM_NAME));
 	show ();
 }
 
@@ -699,12 +699,12 @@ ARDOUR_UI::check_memory_locking ()
 			if (ram == 0 || ((double) limits.rlim_cur / ram) < 0.75) {
 			
 
-				MessageDialog msg (_("WARNING: Your system has a limit for maximum amount of locked memory. "
-						     "This might cause Ardour to run out of memory before your system "
-						     "runs out of memory. \n\n"
-						     "You can view the memory limit with 'ulimit -l', "
-						     "and it is normally controlled by /etc/security/limits.conf"));
-				
+				MessageDialog msg (string_compose (_("WARNING: Your system has a limit for maximum amount of locked memory. "
+								     "This might cause %1 to run out of memory before your system "
+								     "runs out of memory. \n\n"
+								     "You can view the memory limit with 'ulimit -l', "
+								     "and it is normally controlled by /etc/security/limits.conf"), PROGRAM_NAME));
+						   
 				VBox* vbox = msg.get_vbox();
 				HBox hbox;
 				CheckButton cb (_("Do not show this window again"));
@@ -1176,8 +1176,8 @@ ARDOUR_UI::check_audioengine ()
 {
 	if (engine) {
 		if (!engine->connected()) {
-			MessageDialog msg (_("Ardour is not connected to JACK\n"
-					     "You cannot open or close sessions in this condition"));
+			MessageDialog msg (string_compose (_("%1 is not connected to JACK\n"
+							     "You cannot open or close sessions in this condition"), PROGRAM_NAME));
 			pop_back_splash ();
 			msg.set_position (WIN_POS_CENTER);
 			msg.run ();
@@ -2151,11 +2151,11 @@ ARDOUR_UI::fontconfig_dialog ()
 	
 	if (!Glib::file_test (fontconfig, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
 		MessageDialog msg (*new_session_dialog,
-				   _("Welcome to Ardour.\n\n"
-				     "The program will take a bit longer to start up\n"
-				     "while the system fonts are checked.\n\n"
-				     "This will only be done once, and you will\n"
-				     "not see this message again\n"),
+				   string_compose (_("Welcome to %1.\n\n"
+						     "The program will take a bit longer to start up\n"
+						     "while the system fonts are checked.\n\n"
+						     "This will only be done once, and you will\n"
+						     "not see this message again\n"), PROGRAM_NAME),
 				   true,
 				   Gtk::MESSAGE_INFO,
 				   Gtk::BUTTONS_OK);
@@ -2250,7 +2250,7 @@ ARDOUR_UI::ask_about_loading_existing_session (const Glib::ustring& session_path
 	
 	msg.set_name (X_("CleanupDialog"));
 	msg.set_title (_("Cleanup Unused Sources"));
-	msg.set_wmclass (X_("existing_session"), "Ardour");
+	msg.set_wmclass (X_("existing_session"), PROGRAM_NAME);
 	msg.set_position (Gtk::WIN_POS_MOUSE);
 	pop_back_splash ();
 
@@ -2644,7 +2644,7 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 		goto out;
 	}
 
-	loading_message (_("Please wait while Ardour loads your session"));
+	loading_message (string_compose (_("Please wait while %1 loads your session"), PROGRAM_NAME));
 
 	try {
 		new_session = new Session (*engine, path, snap_name, mix_template);
@@ -2995,7 +2995,7 @@ After cleanup, unused audio files will be moved to a \
 	checker.set_default_response (RESPONSE_CANCEL);
 
 	checker.set_name (_("CleanupDialog"));
-	checker.set_wmclass (X_("ardour_cleanup"), "Ardour");
+	checker.set_wmclass (X_("ardour_cleanup"), PROGRAM_NAME);
 	checker.set_position (Gtk::WIN_POS_MOUSE);
 
 	switch (checker.run()) {
@@ -3305,7 +3305,7 @@ ARDOUR_UI::write_buffer_stats ()
 
 	fout.close ();
 
-	cerr << "Ardour buffering statistics can be found in: " << path << endl;
+	cerr << "buffering statistics can be found in: " << path << endl;
 }
 
 void
@@ -3714,3 +3714,40 @@ ARDOUR_UI::setup_profile ()
 	}
 }
 
+
+void
+ARDOUR_UI::toggle_translations ()
+{
+	using namespace Glib;
+
+	RefPtr<Action> act = ActionManager::get_action (X_("Main"), X_("EnableTranslation"));
+	if (act) {
+		RefPtr<ToggleAction> ract = RefPtr<ToggleAction>::cast_dynamic (act);
+		if (ract) {
+
+			string i18n_killer = ARDOUR::translation_kill_path();
+			
+			bool already_enabled = !ARDOUR::translations_are_disabled ();
+
+			if (ract->get_active ()) {
+				/* we don't care about errors */
+				int fd = ::open (i18n_killer.c_str(), O_RDONLY|O_CREAT, 0644);
+				close (fd);
+			} else {
+				/* we don't care about errors */
+				unlink (i18n_killer.c_str());
+			}
+
+			if (already_enabled != ract->get_active()) {
+				MessageDialog win (already_enabled ? _("Translations disabled") : _("Translations enabled"),
+						   false,
+						   Gtk::MESSAGE_WARNING,
+						   Gtk::BUTTONS_OK);
+				win.set_secondary_text (string_compose (_("You must restart %1 for this to take effect."), PROGRAM_NAME));
+				win.set_position (Gtk::WIN_POS_CENTER);
+				win.present ();
+				win.run ();
+			}
+		}
+	}
+}

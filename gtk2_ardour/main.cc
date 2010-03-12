@@ -178,11 +178,14 @@ fixup_bundle_environment ()
 
 	setenv ("GTK_PATH", path.c_str(), 1);
 
-	path = dir_path;
-	path += "/../Resources/locale";
-	
-	localedir = strdup (path.c_str());
-	setenv ("GTK_LOCALEDIR", localedir, 1);
+	if (!ARDOUR::translations_are_disabled ()) {
+
+		path = dir_path;
+		path += "/../Resources/locale";
+		
+		localedir = strdup (path.c_str());
+		setenv ("GTK_LOCALEDIR", localedir, 1);
+	}
 
 	/* write a pango.rc file and tell pango to use it. we'd love
 	   to put this into the Ardour.app bundle and leave it there,
@@ -253,12 +256,12 @@ tell_about_jack_death (void* /* ignored */)
 		/* died during startup */
 		MessageDialog msg (_("JACK exited"), false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_OK);
 		msg.set_position (Gtk::WIN_POS_CENTER);
-		msg.set_secondary_text (_(
-"JACK exited unexpectedly, and without notifying Ardour.\n\
+		msg.set_secondary_text (string_compose (_(
+"JACK exited unexpectedly, and without notifying %1.\n\
 \n\
 This could be due to misconfiguration or to an error inside JACK.\n\
 \n\
-Click OK to exit Ardour."));
+Click OK to exit %1."), PROGRAM_NAME));
     
 		msg.run ();
 		_exit (0);
@@ -268,12 +271,12 @@ Click OK to exit Ardour."));
 		/* engine has already run, so this is a mid-session JACK death */
 		
 		MessageDialog* msg = manage (new MessageDialog (_("JACK exited"), false, Gtk::MESSAGE_INFO, Gtk::BUTTONS_NONE));
-		msg->set_secondary_text (_(
-"JACK exited unexpectedly, and without notifying Ardour.\n\
+		msg->set_secondary_text (string_compose (_(
+"JACK exited unexpectedly, and without notifying %1.\n\
 \n\
 This is probably due to an error inside JACK. You should restart JACK\n\
-and reconnect Ardour to it, or exit Ardour now. You cannot save your\n\
-session at this time, because we would lose your connection information.\n"));
+and reconnect %1 to it, or exit %1 now. You cannot save your\n\
+session at this time, because we would lose your connection information.\n"), PROGRAM_NAME));
 		msg->present ();
 	}
 	return false; /* do not call again */
@@ -350,7 +353,7 @@ int main (int argc, char* argv[])
 		return curvetest (curvetest_file);
 	}
 	
-	cout << _("Ardour/GTK ") 
+	cout << PROGRAM_NAME << ' '
 	     << VERSIONSTRING
 	     << _("\n   (built using ")
 	     << svn_revision
@@ -368,7 +371,7 @@ int main (int argc, char* argv[])
 		cerr << _("Copyright (C) 1999-2008 Paul Davis") << endl
 		     << _("Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker") << endl
 		     << endl
-		     << _("Ardour comes with ABSOLUTELY NO WARRANTY") << endl
+		     << string_compose (_("%1 comes with ABSOLUTELY NO WARRANTY"), PROGRAM_NAME) << endl
 		     <<	_("not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.") << endl
 		     << _("This is free software, and you are welcome to redistribute it ") << endl
 		     << _("under certain conditions; see the source for copying conditions.")

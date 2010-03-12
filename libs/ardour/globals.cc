@@ -742,6 +742,19 @@ ARDOUR::coverage (nframes_t sa, nframes_t ea,
 	return OverlapNone;
 }
 
+string
+ARDOUR::translation_kill_path ()
+{
+	return Glib::build_filename (get_user_ardour_path(), ".love_is_the_language_of_audio");
+}
+
+bool
+ARDOUR::translations_are_disabled ()
+{
+	/* if file does not exist, we don't translate (bundled ardour only) */
+	return Glib::file_test (translation_kill_path(), Glib::FILE_TEST_EXISTS) == false;
+}
+
 /* not sure where to put these */
 
 template<class T>
