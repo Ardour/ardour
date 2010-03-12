@@ -58,15 +58,32 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-
 static boost::shared_ptr<ImportableSource>
 open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQuality quality)
 {
-#ifdef HAVE_COREAUDIO
-
-	/* see if we can use CoreAudio to handle the IO */
+	/* try libsndfile first, because it can get BWF info from .wav, which ExtAudioFile cannot.
+	   We don't necessarily need that information in an ImportableSource, but it keeps the 
+	   logic the same as in SourceFactory::create() 
+	 */
 
 	try { 
+		boost::shared_ptr<SndFileImportableSource> source(new SndFileImportableSource(path));
+		
+		if (source->samplerate() == samplerate) {
+			return source;
+		}
+		
+		/* rewrap as a resampled source */
+		
+		return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
+	}
+
+	catch (...) {
+
+#ifdef HAVE_COREAUDIO
+
+		/* libsndfile failed, see if we can use CoreAudio to handle the IO */
+		
 		CAImportableSource* src = new CAImportableSource(path);
 		boost::shared_ptr<CAImportableSource> source (src);
 		
@@ -75,34 +92,14 @@ open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQua
 		}
 		
 		/* rewrap as a resampled source */
-
+		
 		return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
-	}
 
-	catch (...) {
-
-		/* fall back to SndFile */
+#else
+		throw; // rethrow
 #endif
 
-		try { 
-			boost::shared_ptr<SndFileImportableSource> source(new SndFileImportableSource(path));
-			
-			if (source->samplerate() == samplerate) {
-				return source;
-			}
-			
-			/* rewrap as a resampled source */
-			
-			return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
-		}
-		
-		catch (...) {
-			throw; // rethrow
-		}
-		
-#ifdef HAVE_COREAUDIO		
 	}
-#endif
 }
 
 static std::string
