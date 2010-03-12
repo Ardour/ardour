@@ -2247,6 +2247,9 @@ Session::add_diskstream (boost::shared_ptr<Diskstream> dstream)
 void
 Session::remove_route (shared_ptr<Route> route)
 {
+	//clear solos before removing the route
+	route->set_solo ( false, this);
+	
 	{ 	
 		RCUWriter<RouteList> writer (routes);
 		shared_ptr<RouteList> rs = writer.get_copy ();

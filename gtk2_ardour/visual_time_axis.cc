@@ -273,7 +273,7 @@ VisualTimeAxis::remove_this_time_axis(void* src)
 {
 	vector<string> choices;
 
-	std::string prompt  = string_compose (_("Do you really want to remove track \"%1\" ?\n(cannot be undone)"), time_axis_name);
+	std::string prompt  = string_compose (_("Do you really want to remove track \"%1\" ?\n\n(This action cannot be undone, and the session file will be overwritten!)"), time_axis_name);
 
 	choices.push_back (_("No, do nothing."));
 	choices.push_back (_("Yes, remove it."));
