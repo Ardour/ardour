@@ -1544,7 +1544,8 @@ AUPlugin::get_state()
 	CFRelease (propertyList);
 #else
 	if (!seen_get_state_message) {
-		info << _("Saving AudioUnit settings is not supported in this build of Ardour. Consider paying for a newer version")
+		info << string_compose (_("Saving AudioUnit settings is not supported in this build of %1. Consider paying for a newer version"),
+					PROGRAM_NAME)
 		     << endmsg;
 		seen_get_state_message = true;
 	}
@@ -1605,7 +1606,8 @@ AUPlugin::set_state(const XMLNode& node)
 	return ret;
 #else
 	if (!seen_set_state_message) {
-		info << _("Restoring AudioUnit settings is not supported in this build of Ardour. Consider paying for a newer version")
+		info << string_compose (_("Restoring AudioUnit settings is not supported in this build of %1. Consider paying for a newer version"),
+					PROGRAM_NAME)
 		     << endmsg;
 	}
 	return 0;
@@ -1665,7 +1667,8 @@ AUPlugin::load_preset (const string preset_label)
 	return ret;
 #else
 	if (!seen_loading_message) {
-		info << _("Loading AudioUnit presets is not supported in this build of Ardour. Consider paying for a newer version")
+		info << string_compose (_("Loading AudioUnit presets is not supported in this build of %1. Consider paying for a newer version"),
+					PROGRAM_NAME)
 		     << endmsg;
 		seen_loading_message = true;
 	}
@@ -1727,7 +1730,8 @@ AUPlugin::save_preset (string preset_name)
 	return ret;
 #else
 	if (!seen_saving_message) {
-		info << _("Saving AudioUnit presets is not supported in this build of Ardour. Consider paying for a newer version")
+		info << string_compose (_("Saving AudioUnit presets is not supported in this build of %1. Consider paying for a newer version"),
+					PROGRAM_NAME)
 		     << endmsg;
 		seen_saving_message = true;
 	}

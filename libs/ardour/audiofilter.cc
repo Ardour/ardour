@@ -40,7 +40,7 @@ AudioFilter::make_new_sources (boost::shared_ptr<AudioRegion> region, SourceList
 	vector<string> names = region->master_source_names();
 
 	if (names.size() != region->n_channels()) {
-		warning << _("This is an old Ardour session that does not have\n\
+		warning << _("This is an old session that does not have\n\
 sufficient information for rendered FX") << endmsg;
 		return -1;
 	}

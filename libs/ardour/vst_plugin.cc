@@ -394,7 +394,7 @@ VSTPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in_
 	int32_t i;
 
 	if (nframes == 0) {
-		warning << _("VST plugin called with zero frames - please notify Ardour developers") << endmsg;
+		warning << string_compose (_("VST plugin called with zero frames - please notify %1 developers"), PROGRAM_NAME) << endmsg;
 		return 0;
 	}
 

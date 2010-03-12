@@ -681,7 +681,7 @@ AudioFileSource::set_name (ustring newname, bool destructive)
 
 	// Test whether newpath exists, if yes notify the user but continue. 
 	if (access(newpath.c_str(),F_OK) == 0) {
-		error << _("Programming error! Ardour tried to rename a file over another file! It's safe to continue working, but please report this to the developers.") << endmsg;
+		error << _("Programming error! Tried to rename a file over another file! It's safe to continue working, but please report this to the developers.") << endmsg;
 		return -1;
 	}
 

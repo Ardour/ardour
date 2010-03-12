@@ -537,7 +537,8 @@ AudioEngine::port_registration_failure (const std::string& portname)
 	if (p) {
 		reason = string_compose (_("a port with the name \"%1\" already exists: check for duplicated track/bus names"), portname);
 	} else {
-		reason = _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.");
+		reason = string_compose (_("No more JACK ports are available. You will need to stop %1 and restart JACK with ports if you need this many tracks."),
+					 PROGRAM_NAME);
 	}
 	
 	throw PortRegistrationFailure (string_compose (_("AudioEngine: cannot register port \"%1\": %2"), portname, reason).c_str());
@@ -1272,7 +1273,7 @@ AudioEngine::reconnect_to_jack ()
 		int err;
 
 		if (!_jack) {
-			error << _("Disconnected from JACK while reconnecting. You should quit Ardour now.") << endmsg;
+			error << string_compose (_("Disconnected from JACK while reconnecting. You should quit %1 now."), PROGRAM_NAME) << endmsg;
 			return -1;
 		}
 		

@@ -233,8 +233,8 @@ LV2Plugin::set_parameter (uint32_t which, float val)
 		
 	} else {
 		warning << string_compose (_("Illegal parameter number used with plugin \"%1\"."
-				"This is a bug in either Ardour or the LV2 plugin (%2)"),
-				name(), unique_id()) << endmsg;
+				"This is a bug in either %2 or the LV2 plugin (%3)"),
+				name(), PROGRAM_NAME, unique_id()) << endmsg;
 	}
 }
 

@@ -91,7 +91,7 @@ Session::set_mtc_port (string port_tag)
 	if (port_tag.length() == 0) {
 
 		if (_slave && ((ms = dynamic_cast<MTC_Slave*> (_slave)) != 0)) {
-			error << _("Ardour is slaved to MTC - port cannot be reset") << endmsg;
+			error << string_compose (_("%1 is slaved to MTC - port cannot be reset"), PROGRAM_NAME) << endmsg;
 			return -1;
 		}
 

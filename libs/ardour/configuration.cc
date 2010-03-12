@@ -99,18 +99,20 @@ Configuration::load_state ()
 			cerr << string_compose (_("loading system configuration file %1"), rcfile) << endl;
 			
 			if (!tree.read (rcfile.c_str())) {
-				error << string_compose(_("Ardour: cannot read system configuration file \"%1\""), rcfile) << endmsg;
+				error << string_compose(_("%1: cannot read system configuration file \"%2\""), PROGRAM_NAME, rcfile) << endmsg;
 				return -1;
 			}
 			
 			current_owner = ConfigVariableBase::System;
 			
 			if (set_state (*tree.root())) {
-				error << string_compose(_("Ardour: system configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
+				error << string_compose(_("%1: system configuration file \"%2\" not loaded successfully."), PROGRAM_NAME, rcfile) << endmsg;
 				return -1;
 			}
 		} else {
-			error << _("your system Ardour configuration file is empty. This probably means that there as an error installing Ardour") << endmsg;
+			error << string_compose (_("your system %1 configuration file is empty. This probably means that there as an error installing Ardour"),
+						 PROGRAM_NAME)
+			      << endmsg;
 		}
 	}
 
@@ -133,18 +135,18 @@ Configuration::load_state ()
 			cerr << string_compose (_("loading user configuration file %1"), rcfile) << endl;
 			
 			if (!tree.read (rcfile)) {
-				error << string_compose(_("Ardour: cannot read configuration file \"%1\""), rcfile) << endmsg;
+				error << string_compose(_("%1: cannot read configuration file \"%2\""), PROGRAM_NAME, rcfile) << endmsg;
 				return -1;
 			}
 			
 			current_owner = ConfigVariableBase::Config;
 			
 			if (set_state (*tree.root())) {
-				error << string_compose(_("Ardour: user configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
+				error << string_compose(_("%1: user configuration file \"%2\" not loaded successfully."), PROGRAM_NAME, rcfile) << endmsg;
 				return -1;
 			}
 		} else {
-			warning << _("your Ardour configuration file is empty. This is not normal.") << endmsg;
+			warning << string_compose (_("your %1 configuration file is empty. This is not normal."), PROGRAM_NAME) << endmsg;
 		}	
 	}
 

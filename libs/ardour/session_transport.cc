@@ -594,8 +594,8 @@ Session::set_play_loop (bool yn)
 	set_dirty();
 	
 	if (yn && Config->get_seamless_loop() && synced_to_jack()) {
-		warning << _("Seamless looping cannot be supported while Ardour is using JACK transport.\n"
-			     "Recommend changing the configured options")
+		warning << string_compose (_("Seamless looping cannot be supported while %1 is using JACK transport.\n"
+					     "Recommend changing the configured options"), PROGRAM_NAME)
 			<< endmsg;
 		return;
 	}
@@ -897,7 +897,8 @@ Session::set_transport_speed (float speed, bool abort, bool clear_state)
 		}
 
 		if ((synced_to_jack()) && speed != 0.0 && speed != 1.0) {
-			warning << _("Global varispeed cannot be supported while Ardour is connected to JACK transport control")
+			warning << string_compose (_("Global varispeed cannot be supported while %1 is connected to JACK transport control"),
+						   PROGRAM_NAME)
 				<< endmsg;
 			return;
 		}
