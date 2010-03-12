@@ -2091,7 +2091,13 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		AUPluginInfoPtr info (new AUPluginInfo 
 				      (boost::shared_ptr<CAComponentDescription> (new CAComponentDescription(temp))));
 
-		/* no panners, format converters or i/o AU's for our purposes
+		/* although apple designed the subtype field to be a "category" indicator,
+		   its really turned into a plugin ID field for a given manufacturer. Hence
+		   there are no categories for AudioUnits. However, to keep the plugins
+		   showing up under "categories", we'll use the "type" as a high level
+		   selector.
+		   
+		   NOTE: no panners, format converters or i/o AU's for our purposes
 		 */
 
 		switch (info->descriptor->Type()) {
@@ -2099,121 +2105,32 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		case kAudioUnitType_OfflineEffect:
 		case kAudioUnitType_FormatConverter:
 			continue;
+
 		case kAudioUnitType_Output:
+			info->category = _("AudioUnit Outputs");
+			break;
 		case kAudioUnitType_MusicDevice:
+			info->category = _("AudioUnit Instruments");
+			break;
 		case kAudioUnitType_MusicEffect:
+			info->category = _("AudioUnit MusicEffects");
+			break;
 		case kAudioUnitType_Effect:
+			info->category = _("AudioUnit Effects");
+			break;
 		case kAudioUnitType_Mixer:
+			info->category = _("AudioUnit Mixers");
+			break;
 		case kAudioUnitType_Generator:
+			info->category = _("AudioUnit Generators");
 			break;
 		default:
+			info->category = _("AudioUnit (Unknown)");
 			break;
-		}
-
-		switch (info->descriptor->SubType()) {
-		case kAudioUnitSubType_DefaultOutput:
-		case kAudioUnitSubType_SystemOutput:
-		case kAudioUnitSubType_GenericOutput:
-		case kAudioUnitSubType_AUConverter:
-			/* we don't want output units here */
-			continue;
-			break;
-
-		case kAudioUnitSubType_DLSSynth:
-			info->category = "DLS Synth";
-			break;
-
-		case kAudioUnitSubType_Varispeed:
-			info->category = "Varispeed";
-			break;
-
-		case kAudioUnitSubType_Delay:
-			info->category = "Delay";
-			break;
-
-		case kAudioUnitSubType_LowPassFilter:
-			info->category = "Low-pass Filter";
-			break;
-
-		case kAudioUnitSubType_HighPassFilter:
-			info->category = "High-pass Filter";
-			break;
-
-		case kAudioUnitSubType_BandPassFilter:
-			info->category = "Band-pass Filter";
-			break;
-
-		case kAudioUnitSubType_HighShelfFilter:
-			info->category = "High-shelf Filter";
-			break;
-
-		case kAudioUnitSubType_LowShelfFilter:
-			info->category = "Low-shelf Filter";
-			break;
-
-		case kAudioUnitSubType_ParametricEQ:
-			info->category = "Parametric EQ";
-			break;
-
-		case kAudioUnitSubType_GraphicEQ:
-			info->category = "Graphic EQ";
-			break;
-
-		case kAudioUnitSubType_PeakLimiter:
-			info->category = "Peak Limiter";
-			break;
-
-		case kAudioUnitSubType_DynamicsProcessor:
-			info->category = "Dynamics Processor";
-			break;
-
-		case kAudioUnitSubType_MultiBandCompressor:
-			info->category = "Multiband Compressor";
-			break;
-
-		case kAudioUnitSubType_MatrixReverb:
-			info->category = "Matrix Reverb";
-			break;
-
-		case kAudioUnitSubType_SampleDelay:
-			info->category = "Sample Delay";
-			break;
-
-		case kAudioUnitSubType_Pitch:
-			info->category = "Pitch";
-			break;
-
-		case kAudioUnitSubType_NetSend:
-			info->category = "Net Sender";
-			break;
-
-		case kAudioUnitSubType_3DMixer:
-			info->category = "3DMixer";
-			break;
-
-		case kAudioUnitSubType_MatrixMixer:
-			info->category = "MatrixMixer";
-			break;
-
-		case kAudioUnitSubType_ScheduledSoundPlayer:
-			info->category = "Scheduled Sound Player";
-			break;
-
-
-		case kAudioUnitSubType_AudioFilePlayer:
-			info->category = "Audio File Player";
-			break;
-
-		case kAudioUnitSubType_NetReceive:
-			info->category = "Net Receiver";
-			break;
-
-		default:
-			info->category = "";
 		}
 
 		AUPluginInfo::get_names (temp, info->name, info->creator);
-
+		
 		info->type = ARDOUR::AudioUnit;
 		info->unique_id = stringify_descriptor (*info->descriptor);
 
