@@ -53,6 +53,18 @@ class MonitorSection : public RouteUI
         LevelMeter meter;
         Gtkmm2ext::TearOff* _tearoff;
 
+        struct ChannelButtonSet { 
+            BindableToggleButton cut;
+            BindableToggleButton dim;
+            BindableToggleButton solo;
+            BindableToggleButton invert;
+
+            ChannelButtonSet ();
+        };
+
+        typedef std::vector<ChannelButtonSet*> ChannelButtons;
+        ChannelButtons _channel_buttons;
+
         Gtk::Adjustment   gain_adjustment;
         VolumeController* gain_control;
         Gtk::Adjustment   dim_adjustment;
@@ -104,6 +116,4 @@ class MonitorSection : public RouteUI
 
         void solo_blink (bool);
         bool cancel_solo (GdkEventButton*);
-
-        bool tearoff_key_press_event (GdkEventKey*);
 };

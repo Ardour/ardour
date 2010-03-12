@@ -243,32 +243,48 @@ MonitorSection::MonitorSection (Session* s)
         map_state ();
 
         _tearoff = new TearOff (hpacker);
+
         /* if torn off, make this a normal window */
         _tearoff->tearoff_window().set_type_hint (Gdk::WINDOW_TYPE_HINT_NORMAL);
         _tearoff->tearoff_window().set_title (X_("Monitor"));
-        _tearoff->tearoff_window().signal_key_press_event().connect (sigc::mem_fun (*this, &MonitorSection::tearoff_key_press_event), false);
+        _tearoff->tearoff_window().signal_key_press_event().connect (sigc::ptr_fun (forward_key_press), false);
 }
 
 MonitorSection::~MonitorSection ()
 {
+        for (ChannelButtons::iterator i = _channel_buttons.begin(); i != _channel_buttons.end(); ++i) {
+                delete *i;
+        }
+
+        _channel_buttons.clear ();
+
         delete gain_control;
         delete dim_control;
         delete solo_boost_control;
         delete _tearoff;
 }
 
-bool
-MonitorSection::tearoff_key_press_event (GdkEventKey* ev)
+MonitorSection::ChannelButtonSet::ChannelButtonSet ()
+        : cut (X_(""))
+        , dim (X_(""))
+        , solo (X_(""))
+        , invert (X_(""))
 {
-        cerr << "T key event\n";
-        return forward_key_press (ev);
+        cut.set_name (X_("MixerMuteButton"));
+        dim.set_name (X_("MixerMuteButton"));
+        solo.set_name (X_("MixerSoloButton"));
+
+        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (cut.gobj()), false);
+        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (dim.gobj()), false);
+        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (invert.gobj()), false);
+        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (solo.gobj()), false);
 }
 
 void
 MonitorSection::populate_buttons ()
 {
         Glib::RefPtr<Action> act;
-        uint32_t nchans = _route->monitor_control()->output_streams().n_audio();
+        uint32_t nchans = _monitor->output_streams().n_audio();
         
         main_table.resize (nchans+1, 5);
         main_table.set_col_spacings (6);
@@ -286,41 +302,7 @@ MonitorSection::populate_buttons ()
         l1 = manage (new Label (X_("inv")));
         main_table.attach (*l1, 4, 5, 0, 1, SHRINK|FILL, SHRINK|FILL);
 
-#if 0
-        /* the "all" buttons for cut & dim */
-        
-        Label *la = manage (new Label (X_("all")));
-        main_table.attach (*la, 0, 1, 1, 2, SHRINK|FILL, SHRINK|FILL);
-
-
-        /* cut all */
-
-        BindableToggleButton* ca = manage (new BindableToggleButton (X_("")));
-        ca->set_name (X_("MixerMuteButton"));
-        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (ca->gobj()), false);
-        main_table.attach (*ca, 1, 2, 1, 2, SHRINK|FILL, SHRINK|FILL);
-
-        act = ActionManager::get_action (X_("Monitor"), X_("monitor-cut-all"));
-        if (act) {
-                act->connect_proxy (*ca);
-        } 
-
-        /* dim all */
-
-        BindableToggleButton* da = manage (new BindableToggleButton (X_("")));
-        da->set_name (X_("MixerMuteButton"));
-        gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (da->gobj()), false);
-        main_table.attach (*da, 2, 3, 1, 2, SHRINK|FILL, SHRINK|FILL);
-
-        act = ActionManager::get_action (X_("Monitor"), X_("monitor-dim-all"));
-        if (act) {
-                act->connect_proxy (*da);
-        } 
-
-        uint32_t row_offset = 2;
-#else
-        uint32_t row_offset = 1;
-#endif
+        const uint32_t row_offset = 1;
 
         for (uint32_t i = 0; i < nchans; ++i) {
                 
@@ -339,61 +321,41 @@ MonitorSection::populate_buttons ()
                         l = buf;
                 }
 
-                Label* c1 = manage (new Label (l));
-                main_table.attach (*c1, 0, 1, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
-                
-                /* Cut */
+                Label* label = manage (new Label (l));
+                main_table.attach (*label, 0, 1, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
 
-                BindableToggleButton* c2 = manage (new BindableToggleButton (X_("")));
-                c2->set_name (X_("MixerMuteButton"));
-                gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (c2->gobj()), false);
-                main_table.attach (*c2, 1, 2, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
-                
+                ChannelButtonSet* cbs = new ChannelButtonSet;
+
+                _channel_buttons.push_back (cbs);
+
+                main_table.attach (cbs->cut, 1, 2, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
+                main_table.attach (cbs->dim, 2, 3, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL); 
+                main_table.attach (cbs->solo, 3, 4, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
+                main_table.attach (cbs->invert, 4, 5, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
+               
                 snprintf (buf, sizeof (buf), "monitor-cut-%u", i+1);
                 act = ActionManager::get_action (X_("Monitor"), buf);
                 if (act) {
-                        act->connect_proxy (*c2);
+                        act->connect_proxy (cbs->cut);
                 } 
-
-                /* Dim */
-
-                BindableToggleButton* c3 = manage (new BindableToggleButton (X_("")));
-                c3->set_name (X_("MixerMuteButton"));
-                gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (c2->gobj()), false);
-                main_table.attach (*c3, 2, 3, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
 
                 snprintf (buf, sizeof (buf), "monitor-dim-%u", i+1);
                 act = ActionManager::get_action (X_("Monitor"), buf);
                 if (act) {
-                        act->connect_proxy (*c3);
+                        act->connect_proxy (cbs->dim);
                 }
-
-                /* Solo */
-
-                BindableToggleButton* c4 = manage (new BindableToggleButton (X_("")));
-                c4->set_name (X_("MixerSoloButton"));
-                gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (c2->gobj()), false);
-                main_table.attach (*c4, 3, 4, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
 
                 snprintf (buf, sizeof (buf), "monitor-solo-%u", i+1);
                 act = ActionManager::get_action (X_("Monitor"), buf);
                 if (act) {
-                        act->connect_proxy (*c4);
+                        act->connect_proxy (cbs->solo);
                 }
-
-                /* Invert (Polarity/Phase) */
-
-                BindableToggleButton* c5 = manage (new BindableToggleButton (X_("")));
-                c5->set_name (X_("MixerPhaseInvertButton"));
-                gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (c2->gobj()), false);
-                main_table.attach (*c5, 4, 5, i+row_offset, i+row_offset+1, SHRINK|FILL, SHRINK|FILL);
 
                 snprintf (buf, sizeof (buf), "monitor-invert-%u", i+1);
                 act = ActionManager::get_action (X_("Monitor"), buf);
                 if (act) {
-                        act->connect_proxy (*c5);
+                        act->connect_proxy (cbs->invert);
                 }
-
         }
 
         main_table.show_all ();
@@ -495,16 +457,15 @@ void
 MonitorSection::invert_channel (uint32_t chn)
 {
         char buf[64];
+        snprintf (buf, sizeof (buf), "monitor-invert-%u", chn);
 
         --chn; // 0-based in backend
 
-        snprintf (buf, sizeof (buf), "monitor-invert-%u", chn);
         Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), buf);
         if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
                 _monitor->set_polarity (chn, tact->get_active());
-        }
-
+        } 
 }
 
 void
@@ -525,7 +486,7 @@ MonitorSection::register_actions ()
         ActionManager::register_toggle_action (monitor_actions, "monitor-dim-all", "", 
                                                sigc::mem_fun (*this, &MonitorSection::dim_all));
 
-        /* note the 1-based counting for naming vs. 0-based for action */
+        /* note the 1-based counting (for naming - backend uses 0-based) */
 
         for (uint32_t chn = 1; chn <= 16; ++chn) {
 
@@ -721,12 +682,58 @@ MonitorSection::map_state ()
                 action_name = X_("solo-use-in-place");
         }
         
-        Glib::RefPtr<Action> act = ActionManager::get_action (X_("Solo"), action_name);
+        Glib::RefPtr<Action> act;
+        
+        act = ActionManager::get_action (X_("Solo"), action_name);
         if (act) {
                 Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
                 if (ract) {
                         ract->set_active (true);
                 }
+        }
+
+        act = ActionManager::get_action (X_("Monitor"), "monitor-solo");
+        if (act) {
+                Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
+                if (ract) {
+                        ract->set_active (_monitor->mono());
+                }
+        }
+
+        act = ActionManager::get_action (X_("Monitor"), "monitor-cut-all");
+        if (act) {
+                Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
+                if (ract) {
+                        ract->set_active (_monitor->cut_all());
+                }
+        }
+
+        act = ActionManager::get_action (X_("Monitor"), "monitor-dim-all");
+        if (act) {
+                Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
+                if (ract) {
+                        ract->set_active (_monitor->dim_all());
+                }
+        }
+
+        act = ActionManager::get_action (X_("Monitor"), "monitor-mono");
+        if (act) {
+                Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
+                if (ract) {
+                        ract->set_active (_monitor->mono());
+                }
+        }
+
+        uint32_t nchans = _monitor->output_streams().n_audio();
+
+        assert (nchans == _channel_buttons.size ());
+
+        for (uint32_t n = 0; n < nchans; ++n) {
+                ChannelButtonSet* cbs = _channel_buttons[n];
+                cbs->cut.set_active (_monitor->cut (n));
+                cbs->dim.set_active (_monitor->dimmed (n));
+                cbs->solo.set_active (_monitor->soloed (n));
+                cbs->invert.set_active (_monitor->inverted (n));
         }
 }
 

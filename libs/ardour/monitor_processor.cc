@@ -201,7 +201,7 @@ MonitorProcessor::state (bool full)
                 chn_node->add_property ("id", buf);
 
                 chn_node->add_property (X_("cut"), x->cut == 1.0 ? "no" : "yes");
-                chn_node->add_property (X_("invert"), x->polarity == 1.0 ? "yes" : "no");
+                chn_node->add_property (X_("invert"), x->polarity == 1.0 ? "no" : "yes");
                 chn_node->add_property (X_("dim"), x->dim ? "yes" : "no");
                 chn_node->add_property (X_("solo"), x->soloed ? "yes" : "no");
                 
@@ -408,4 +408,16 @@ bool
 MonitorProcessor::mono () const
 {
         return _mono;
+}
+
+bool
+MonitorProcessor::dim_all () const
+{
+        return _dim_all;
+}
+
+bool
+MonitorProcessor::cut_all () const
+{
+        return _cut_all;
 }
