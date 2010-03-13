@@ -278,6 +278,8 @@ def build(bld):
 			os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
 	obj.cxxflags     += ['-DVAMP_DIR="' + os.path.join(
 			os.path.normpath(bld.env['LIBDIR']), 'ardour3', 'vamp') + '"']
+        obj.cxxflags     += ['-DPROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"']
+
 	#obj.source += ' st_stretch.cc st_pitch.cc '
 	#obj.uselib += ' SOUNDTOUCH '
 	#obj.add_objects = 'default/libs/surfaces/control_protocol/smpte_1.o'

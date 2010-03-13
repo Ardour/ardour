@@ -1639,7 +1639,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 
 		catch (AudioEngine::PortRegistrationFailure& pfe) {
 
-			error << _("No more JACK ports are available. You will need to stop Ardour and restart JACK with ports if you need this many tracks.") << endmsg;
+			error << string_compose (_("No more JACK ports are available. You will need to stop %1 and restart JACK with ports if you need this many tracks."), PROGRAM_NAME) << endmsg;
 
 			if (track) {
 				/* we need to get rid of this, since the track failed to be created */

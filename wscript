@@ -313,6 +313,8 @@ def set_compiler_flags (conf,opt):
 
 def set_options(opt):
 	autowaf.set_options(opt)
+	opt.add_option('--program-name', type='string', action='store', default='Ardour', dest='program_name',
+			help='The user-visible name of the program being built')
 	opt.add_option('--arch', type='string', action='store', dest='arch',
 			help='Architecture-specific compiler flags')
 	opt.add_option('--boost-sp-debug', action='store_true', default=False, dest='boost_sp_debug',
@@ -528,6 +530,8 @@ def configure(conf):
 	if opts.windows_key:
 		conf.define('WINDOWS_KEY', opts.windows_key)
 	autowaf.display_msg(conf, 'Windows Key', opts.windows_key)
+        conf.env['PROGRAM_NAME'] = opts.program_name
+        autowaf.display_msg(conf, 'Program Name', opts.program_name)
 
 	set_compiler_flags (conf, Options.options)
 

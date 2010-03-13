@@ -1027,7 +1027,7 @@ AUPlugin::get_state()
 	CFRelease (propertyList);
 #else
 	if (!seen_get_state_message) {
-		info << _("Saving AudioUnit settings is not supported in this build of Ardour. Consider paying for a newer version")
+		info << string_compose (_("Saving AudioUnit settings is not supported in this build of %1. Consider paying for a newer version"), PROGRAM_NAME)
 		     << endmsg;
 		seen_get_state_message = true;
 	}

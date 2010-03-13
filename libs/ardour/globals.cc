@@ -309,7 +309,7 @@ lotsa_files_please ()
 			if (rl.rlim_cur == RLIM_INFINITY) {
 				info << _("Removed open file count limit. Excellent!") << endmsg;
 			} else {
-				info << string_compose (_("Ardour will be limited to %1 open files"), rl.rlim_cur) << endmsg;
+				info << string_compose (_("%1 will be limited to %2 open files"), PROGRAM_NAME, rl.rlim_cur) << endmsg;
 			}
 		}
 	} else {

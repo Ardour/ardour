@@ -687,7 +687,8 @@ Session::save_state (string snapshot_name, bool pending)
 	}
 
 	if (!_engine.connected ()) {
-		error << _("Ardour's audio engine is not connected and state saving would lose all I/O connections. Session not saved")
+		error << string_compose (_("the %1 audio engine is not connected and state saving would lose all I/O connections. Session not saved"),
+                                         PROGRAM_NAME)
 		      << endmsg;
 		return 1;
 	}
@@ -826,7 +827,7 @@ Session::load_state (string snapshot_name)
 	XMLNode& root (*state_tree->root());
 
 	if (root.name() != X_("Session")) {
-		error << string_compose (_("Session file %1 is not an Ardour session"), xmlpath.to_string()) << endmsg;
+		error << string_compose (_("Session file %1 is not a session"), xmlpath.to_string()) << endmsg;
 		delete state_tree;
 		state_tree = 0;
 		return -1;
@@ -857,8 +858,8 @@ Session::load_state (string snapshot_name)
 			return 0;
 		}
 
-		info << string_compose (_("Copying old session file %1 to %2\nUse %2 with Ardour versions before 2.0 from now on"),
-					xmlpath.to_string(), backup_path.to_string())
+		info << string_compose (_("Copying old session file %1 to %2\nUse %2 with %3 versions before 2.0 from now on"),
+					xmlpath.to_string(), backup_path.to_string(), PROGRAM_NAME)
 		     << endmsg;
 
 		try
@@ -1734,7 +1735,7 @@ Session::XMLSourceFactory (const XMLNode& node)
 	}
 
 	catch (failed_constructor& err) {
-		error << _("Found a sound file that cannot be used by Ardour. Talk to the progammers.") << endmsg;
+		error << string_compose (_("Found a sound file that cannot be used by %1. Talk to the progammers."), PROGRAM_NAME) << endmsg;
 		return boost::shared_ptr<Source>();
 	}
 }

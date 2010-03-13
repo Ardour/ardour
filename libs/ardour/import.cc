@@ -63,9 +63,7 @@
 #include "ardour/tempo.h"
 
 #ifdef HAVE_COREAUDIO
-#ifdef USE_COREAUDIO_FOR_FILE_IO
 #include "ardour/caimportable.h"
-#endif
 #endif
 
 #include "i18n.h"
@@ -77,51 +75,45 @@ using namespace PBD;
 static boost::shared_ptr<ImportableSource>
 open_importable_source (const string& path, nframes_t samplerate, ARDOUR::SrcQuality quality)
 {
-#ifdef HAVE_COREAUDIO
-#ifdef USE_COREAUDIO_FOR_FILE_IO
+	/* try libsndfile first, because it can get BWF info from .wav, which ExtAudioFile cannot.
+	   We don't necessarily need that information in an ImportableSource, but it keeps the 
+	   logic the same as in SourceFactory::create() 
+	 */
 
-	/* see if we can use CoreAudio to handle the IO */
-
-	try {
-		CAImportableSource* src = new CAImportableSource(path);
-		boost::shared_ptr<CAImportableSource> source (src);
-
+	try { 
+		boost::shared_ptr<SndFileImportableSource> source(new SndFileImportableSource(path));
+		
 		if (source->samplerate() == samplerate) {
 			return source;
 		}
-
+		
 		/* rewrap as a resampled source */
-
+		
 		return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
 	}
 
 	catch (...) {
 
-		/* fall back to SndFile */
-#endif
-#endif
-
-		try {
-			boost::shared_ptr<SndFileImportableSource> source(new SndFileImportableSource(path));
-
-			if (source->samplerate() == samplerate) {
-				return source;
-			}
-
-			/* rewrap as a resampled source */
-
-			return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
-		}
-
-		catch (...) {
-			throw; // rethrow
-		}
-
 #ifdef HAVE_COREAUDIO
-#ifdef USE_COREAUDIO_FOR_FILE_IO
+
+		/* libsndfile failed, see if we can use CoreAudio to handle the IO */
+		
+		CAImportableSource* src = new CAImportableSource(path);
+		boost::shared_ptr<CAImportableSource> source (src);
+		
+		if (source->samplerate() == samplerate) {
+			return source;
+		}
+		
+		/* rewrap as a resampled source */
+		
+		return boost::shared_ptr<ImportableSource>(new ResampledImportableSource(source, samplerate, quality));
+
+#else
+		throw; // rethrow
+#endif
+
 	}
-#endif
-#endif
 }
 
 static std::string

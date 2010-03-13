@@ -235,15 +235,19 @@ AudioFileSource::old_peak_path (ustring audio_path)
 bool
 AudioFileSource::get_soundfile_info (ustring path, SoundFileInfo& _info, string& error_msg)
 {
+        /* try sndfile first because it gets timecode info from .wav (BWF) if it exists,
+           which at present, ExtAudioFile from Apple seems unable to do.
+        */
+
+	if (SndFileSource::get_soundfile_info (path, _info, error_msg) != 0) {
+		return true;
+	}
+        
 #ifdef HAVE_COREAUDIO
 	if (CoreAudioSource::get_soundfile_info (path, _info, error_msg) == 0) {
 		return true;
 	}
 #endif // HAVE_COREAUDIO
-
-	if (SndFileSource::get_soundfile_info (path, _info, error_msg) != 0) {
-		return true;
-	}
 
 	return false;
 }

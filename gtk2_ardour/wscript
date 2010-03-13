@@ -254,6 +254,7 @@ def build(bld):
 	obj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
 	obj.cxxflags     += ['-DLOCALEDIR="' + os.path.join(
 			os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
+        obj.cxxflags     += ['-DPROGRAM_NAME="' + bld.env['PROGRAM_NAME'] + '"']
 
 	if bld.env['HAVE_SLV2']:
 		obj.source += [ 'lv2_plugin_ui.cc' ]
