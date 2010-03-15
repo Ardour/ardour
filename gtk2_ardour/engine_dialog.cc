@@ -959,7 +959,7 @@ EngineControl::find_jack_servers (vector<string>& strings)
 	if (getenv ("ARDOUR_WITH_JACK")) {
 		/* no other options - only use the JACK we supply */
 		if (strings.empty()) {
-			fatal << _("JACK appears to be missing from the Ardour bundle") << endmsg;
+			fatal << string_compose (_("JACK appears to be missing from the %1 bundle"), PROGRAM_NAME) << endmsg;
 			/*NOTREACHED*/
 		}
 		return;

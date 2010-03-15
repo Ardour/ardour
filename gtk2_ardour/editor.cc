@@ -4640,7 +4640,7 @@ Editor::first_idle ()
 
 	if (track_views.size() > 1) {
 		dialog = new MessageDialog (*this,
-					    _("Please wait while Ardour loads visual data"),
+					    string_compose (_("Please wait while %1 loads visual data"), PROGRAM_NAME),
 					    true,
 					    Gtk::MESSAGE_INFO,
 					    Gtk::BUTTONS_NONE);

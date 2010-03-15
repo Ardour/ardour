@@ -646,9 +646,9 @@ ARDOUR_UI::backend_audio_error (bool we_set_params, Gtk::Window* toplevel)
 {
 	string title;
 	if (we_set_params) {
-		title = _("Ardour could not start JACK");
+		title = string_compose (_("%1 could not start JACK"), PROGRAM_NAME);
 	} else {
-		title = _("Ardour could not connect to JACK.");
+		title = string_compose (_("%1 could not connect to JACK."), PROGRAM_NAME);
 	}
 
 	MessageDialog win (title,
@@ -711,7 +711,7 @@ ARDOUR_UI::startup ()
 
 	goto_editor_window ();
 
-	BootMessage (_("Ardour is ready for use"));
+	BootMessage (string_compose (_("%1 is ready for use"), PROGRAM_NAME));
 	show ();
 }
 
@@ -753,12 +753,13 @@ ARDOUR_UI::check_memory_locking ()
 			if (ram == 0 || ((double) limits.rlim_cur / ram) < 0.75) {
 
 
-				MessageDialog msg (_("WARNING: Your system has a limit for maximum amount of locked memory. "
-						     "This might cause Ardour to run out of memory before your system "
-						     "runs out of memory. \n\n"
-						     "You can view the memory limit with 'ulimit -l', "
-						     "and it is normally controlled by /etc/security/limits.conf"));
-
+				MessageDialog msg (string_compose (_("WARNING: Your system has a limit for maximum amount of locked memory. "
+                                                                     "This might cause %1 to run out of memory before your system "
+                                                                     "runs out of memory. \n\n"
+                                                                     "You can view the memory limit with 'ulimit -l', "
+                                                                     "and it is normally controlled by /etc/security/limits.conf"),
+                                                                   PROGRAM_NAME).c_str());
+                                                   
 				VBox* vbox = msg.get_vbox();
 				HBox hbox;
 				CheckButton cb (_("Do not show this window again"));
@@ -1242,8 +1243,9 @@ ARDOUR_UI::check_audioengine ()
 {
 	if (engine) {
 		if (!engine->connected()) {
-			MessageDialog msg (_("Ardour is not connected to JACK\n"
-					     "You cannot open or close sessions in this condition"));
+			MessageDialog msg (string_compose (_("%1 is not connected to JACK\n"
+                                                             "You cannot open or close sessions in this condition"),
+                                                           PROGRAM_NAME));
 			pop_back_splash ();
 			msg.run ();
 			return false;
@@ -1275,7 +1277,7 @@ ARDOUR_UI::open_session ()
 
 		FileFilter session_filter;
 		session_filter.add_pattern ("*.ardour");
-		session_filter.set_name (_("Ardour sessions"));
+		session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
 		open_session_selector->add_filter (session_filter);
 		open_session_selector->set_filter (session_filter);
   	}
@@ -2582,7 +2584,7 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 		goto out;
 	}
 
-	loading_message (_("Please wait while Ardour loads your session"));
+	loading_message (string_compose (_("Please wait while %1loads your session"), PROGRAM_NAME));
 
 	try {
 		new_session = new Session (*engine, path, snap_name, mix_template);
@@ -3185,7 +3187,7 @@ ARDOUR_UI::write_buffer_stats ()
 	strcpy (path, "ardourBufferingXXXXXX");
 
 	if ((fd = mkstemp (path )) < 0) {
-		cerr << X_("cannot find temporary name for ardour buffer stats") << endl;
+		cerr << X_("cannot find temporary name for buffer stats") << endl;
 		return;
 	}
 	
@@ -3193,7 +3195,7 @@ ARDOUR_UI::write_buffer_stats ()
 	close (fd);
 
 	if (!fout) {
-		cerr << string_compose (X_("cannot open file %1 for ardour buffer stats"), path) << endl;
+		cerr << string_compose (X_("cannot open file %1 for buffer stats"), path) << endl;
 		return;
 	}
 
@@ -3207,7 +3209,7 @@ ARDOUR_UI::write_buffer_stats ()
 
 	fout.close ();
 
-	cerr << "Ardour buffering statistics can be found in: " << path << endl;
+	cerr << "buffering statistics can be found in: " << path << endl;
 }
 
 void

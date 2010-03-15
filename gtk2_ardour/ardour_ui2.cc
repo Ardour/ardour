@@ -121,7 +121,7 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (punch_out_button, _("Stop recording at auto-punch end"));
 	set_tip (click_button, _("Enable/Disable audio click"));
 	set_tip (sync_button, _("Enable/Disable external positional sync"));
-	set_tip (time_master_button, _("Does Ardour control the time?"));
+	set_tip (time_master_button, string_compose (_("Does %1 control the time?"), PROGRAM_NAME));
 	set_tip (shuttle_box, _("Shuttle speed control"));
 	set_tip (shuttle_units_button, _("Select semitones or %%-age for speed display"));
 	set_tip (speed_display_box, _("Current transport speed"));

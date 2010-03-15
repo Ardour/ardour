@@ -796,7 +796,7 @@ ProcessorBox::weird_plugin_dialog (Plugin& p, Route::ProcessorStreams streams)
 		text += string_compose("\t%1 ", streams.count.n_audio()) + _("audio channel(s)\n");
 	}
 
-	text += _("\nArdour is unable to insert this plugin here.\n");
+	text += string_compose (_("\n%1 is unable to insert this plugin here.\n"), PROGRAM_NAME);
 	label.set_text(text);
 
 	dialog.get_vbox()->pack_start (label);

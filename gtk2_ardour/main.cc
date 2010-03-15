@@ -66,7 +66,7 @@ static const char* localedir = LOCALEDIR;
 void
 gui_jack_error ()
 {
-	MessageDialog win (_("Ardour could not connect to JACK."),
+	MessageDialog win (string_compose (_("%1 could not connect to JACK."), PROGRAM_NAME),
 		     false,
 		     Gtk::MESSAGE_INFO,
 		     (Gtk::ButtonsType)(Gtk::BUTTONS_NONE));
@@ -348,7 +348,7 @@ int main (int argc, char *argv[])
 		return curvetest (curvetest_file);
 	}
 
-	cout << _("Ardour/GTK ")
+	cout << PROGRAM_NAME
 	     << VERSIONSTRING
 	     << _(" (built using ")
 	     << svn_revision
@@ -366,7 +366,7 @@ int main (int argc, char *argv[])
 		cerr << _("Copyright (C) 1999-2008 Paul Davis") << endl
 		     << _("Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker") << endl
 		     << endl
-		     << _("Ardour comes with ABSOLUTELY NO WARRANTY") << endl
+		     << string_compose (_("%1 comes with ABSOLUTELY NO WARRANTY"), PROGRAM_NAME) << endl
 		     <<	_("not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.") << endl
 		     << _("This is free software, and you are welcome to redistribute it ") << endl
 		     << _("under certain conditions; see the source for copying conditions.")

@@ -43,7 +43,7 @@ ArdourStartup::ArdourStartup ()
 	, ic_existing_session_button (_("Open an existing session"))
 	, monitor_via_hardware_button (_("Use an external mixer or the hardware mixer of your audio interface.\n\
 Ardour will play NO role in monitoring"))
-	, monitor_via_ardour_button (_("Ask Ardour to playback material as it is being recorded"))
+	, monitor_via_ardour_button (string_compose (_("Ask %1 to playback material as it is being recorded"), PROGRAM_NAME))
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
 	, more_new_session_options_button (_("I'd like more options for this session"))
 	, _output_limit_count_adj (1, 0, 100, 1, 10, 0)
@@ -226,15 +226,15 @@ ArdourStartup::setup_new_user_page ()
 {
 	Label* foomatic = manage (new Label);
 
-	foomatic->set_markup (_("\
-<span size=\"larger\">Ardour is a digital audio workstation. You can use it to\n\
+	foomatic->set_markup (string_compose (_("\
+<span size=\"larger\">%1 is a digital audio workstation. You can use it to\n\
 record, edit and mix multi-track audio. You can produce your\n\
 own CDs, mix video soundtracks, or just experiment with new\n\
 ideas about music and sound.\n\
 \n\
 There are a few things that need to configured before you start\n\
 using the program.</span>\
-"));
+"), PROGRAM_NAME));
 
 	HBox* hbox = manage (new HBox);
 	HBox* vbox = manage (new HBox);
@@ -265,7 +265,7 @@ ArdourStartup::default_dir_changed ()
 void
 ArdourStartup::setup_first_time_config_page ()
 {
-	default_dir_chooser = manage (new FileChooserButton (_("Default folder for Ardour sessions"),
+	default_dir_chooser = manage (new FileChooserButton (string_compose (_("Default folder for %1 sessions"), PROGRAM_NAME),
 							     FILE_CHOOSER_ACTION_SELECT_FOLDER));
 	Gtk::Label* txt = manage (new Label);
 	HBox* hbox = manage (new HBox);
@@ -417,7 +417,7 @@ ArdourStartup::setup_session_page ()
 void
 ArdourStartup::setup_final_page ()
 {
-	final_page.set_text ("Ardour is ready for use");
+	final_page.set_text (string_compose (_("%1 is ready for use"), PROGRAM_NAME));
 	final_page.show ();
 	final_page_index = append_page (final_page);
 	set_page_complete (final_page, true);

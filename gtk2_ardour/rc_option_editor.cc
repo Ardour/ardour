@@ -924,8 +924,8 @@ private:
 
 
 RCOptionEditor::RCOptionEditor ()
-	: OptionEditor (Config, _("Ardour Preferences")),
-	  _rc_config (Config)
+	: OptionEditor (Config, string_compose (_("%1 Preferences"), PROGRAM_NAME))
+        , _rc_config (Config)
 {
 	/* MISC */
 

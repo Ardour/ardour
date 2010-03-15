@@ -674,7 +674,7 @@ SessionMetadataImporter::run ()
 
 	Gtk::FileFilter session_filter;
 	session_filter.add_pattern ("*.ardour");
-	session_filter.set_name (_("Ardour sessions"));
+	session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
 	session_selector.add_filter (session_filter);
 	session_selector.set_filter (session_filter);
 
@@ -705,7 +705,7 @@ SessionMetadataImporter::run ()
 	string filename = Glib::build_filename (path, name + ".ardour");
 	XMLTree session_tree;
 	if (!session_tree.read (filename)) {
-		warn_user (_("A proper ardour session file was not selected!"));
+		warn_user (_("This session file could not be read!"));
 		return;
 	}
 

@@ -104,7 +104,7 @@ ARDOUR::find_session (string str, string& path, string& snapshot, bool& isnew)
 			suffix = snapshot.find (statefile_suffix);
 
 			if (suffix == string::npos) {
-				error << string_compose (_("%1 is not an Ardour snapshot file"), str) << endmsg;
+				error << string_compose (_("%1 is not a snapshot file"), str) << endmsg;
 				return -1;
 			}
 

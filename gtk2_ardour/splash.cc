@@ -42,7 +42,7 @@ Splash::Splash ()
 
 	layout = create_pango_layout ("");
 	string str = "<b>";
-	string i18n = _("Ardour loading ...");
+	string i18n = string_compose (_("%1 loading ..."), PROGRAM_NAME);
 	str += i18n;
 	str += "</b>";
 

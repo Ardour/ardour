@@ -132,7 +132,7 @@ ArdourKeyboard::setup_keybindings ()
 			if ( ! find_file_in_search_path (spath, keybindings_path, keybindings_file)) {
 
 				if (keybindings_path == default_bindings) {
-					error << _("Default keybindings not found - Ardour will be hard to use!") << endmsg;
+					error << string_compose (_("Default keybindings not found - %1 will be hard to use!"), PROGRAM_NAME) << endmsg;
 					return;
 				} else {
 					warning << string_compose (_("Key bindings file \"%1\" not found. Default bindings used instead"),
@@ -156,7 +156,7 @@ ArdourKeyboard::setup_keybindings ()
 
 			if (!Glib::file_test (keybindings_path, Glib::FILE_TEST_EXISTS)) {
 				if (keybindings_path == default_bindings) {
-					error << _("Default keybindings not found - Ardour will be hard to use!") << endmsg;
+					error << string_compose (_("Default keybindings not found - %1 will be hard to use!"), PROGRAM_NAME) << endmsg;
 					return;
 				} else {
 					warning << string_compose (_("Key bindings file \"%1\" not found. Default bindings used instead"),

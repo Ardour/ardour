@@ -87,12 +87,12 @@ ActionManager::init ()
 		error << string_compose (_("badly formatted UI definition file: %1"), err.what()) << endmsg;
 		cerr << string_compose (_("badly formatted UI definition file: %1"), err.what()) << endl;
 	} catch (...) {
-		error << _("Ardour menu definition file not found") << endmsg;
+		error << string_compose (_("%1 menu definition file not found"), PROGRAM_NAME) << endmsg;
 	}
 
 	if (!loaded) {
-		cerr << _("ardour will not work without a valid ardour.menus file") << endl;
-		error << _("ardour will not work without a valid ardour.menus file") << endmsg;
+		cerr << string_compose (_("%1 will not work without a valid ardour.menus file"), PROGRAM_NAME) << endl;
+                error << string_compose (_("%1 will not work without a valid ardour.menus file"), PROGRAM_NAME) << endmsg;
 		exit(1);
 	}
 }
