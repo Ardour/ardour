@@ -8,6 +8,9 @@
 namespace AudioGrapher
 {
 
+/** A sink for data
+  * This is a pure virtual interface for all data sinks in AudioGrapher
+  */
 template <typename T>
 class Sink  {
   public:

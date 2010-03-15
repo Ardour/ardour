@@ -9,6 +9,9 @@
 namespace AudioGrapher
 {
 
+/** A source for data
+  * This is a pure virtual interface for all data sources in AudioGrapher
+  */
 template<typename T>
 class Source
 {
@@ -17,8 +20,13 @@ class Source
 	
 	typedef boost::shared_ptr<Sink<T> > SinkPtr;
 	
+	/// Adds an output to this source. All data generated is forwarded to \a output
 	virtual void add_output (SinkPtr output) = 0;
+	
+	/// Removes all outputs added
 	virtual void clear_outputs () = 0;
+	
+	/// Removes a specific output from this source
 	virtual void remove_output (SinkPtr output) = 0;
 };
 

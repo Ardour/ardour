@@ -26,7 +26,7 @@
 #include "ardour/export_channel.h"
 #include "ardour/export_format_base.h"
 
-#include "audiographer/identity_vertex.h"
+#include "audiographer/utils/identity_vertex.h"
 
 #include <glibmm/threadpool.h>
 

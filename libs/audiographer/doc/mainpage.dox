@@ -1,0 +1,26 @@
+/** @mainpage
+
+@section Overview
+
+AudioGrapher is best described as a signal flow management library.
+It includes facilities to build graphs out of signal processing elements.
+Once a graph is set up, all signal flow within the graph happens automatically.
+
+The data flow model in Audiographer is dynamic instead of synchronous -
+the type and amount of data that goes in to a graph may differ from what comes out.
+AudioGrapher is aimed mostly for usage by developers,
+as it includes lots of facilities that ease the development process.
+
+The main aim of AudioGrapher is to ease development and debugging of signal flow graphs.
+It makes heavy use of modern C++ techniques like templates,
+and uses the boost libraries a lot.
+
+The essential classes in AudioGrapher are Sink, Source and ProcessContext.
+These three define the signal flow in a graph.
+In addition, the core of AudioGrapher includes lots of utility classes.
+
+AudioGrapher includes a bunch of ready Sink, Source and Vertex implementations.
+Some are utilities used when developing more vertices,
+while others are general utilities (file i/o, sample rate conversion etc.).
+
+*/

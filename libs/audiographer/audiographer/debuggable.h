@@ -10,16 +10,31 @@
 namespace AudioGrapher
 {
 
+/// Compile time defined debug level
 enum DebugLevel
 {
-	DebugNone,     //< Disabled
-	DebugObject,   //< Object level stuff, ctors, initalizers etc.
-	DebugProcess,  //< Process cycle level stuff
-	DebugVerbose,  //< Lots of output, not on sample level
-	DebugSample    //< Sample level stuff
+	DebugNone,     ///< Disabled
+	DebugObject,   ///< Object level stuff, ctors, initalizers etc.
+	DebugFlags,    ///< Debug ProcessContext flags only on process cycle level
+	DebugProcess,  ///< Process cycle level stuff
+	DebugVerbose,  ///< Lots of output, not on sample level
+	DebugSample    ///< Sample level stuff
 };
 
-/// Class that allows optimizing out debugging code during compile time
+/** Class that allows optimizing out debugging code during compile time.
+  * Usage: to take all advantage of this class you should wrap all 
+  * debugging statemets like this:
+  * \code
+  * if (debug_level (SomeDebugLevel) && other_optional_conditionals) {
+  * 	debug_stream() << "Debug output" << std::endl;
+  * }
+  * \endcode
+  *
+  * The order of the conditionals in the if-clause is important.
+  * The checks specified in \a other_optional_conditionals are only
+  * optimized out if \a debug_level() is placed before it with a
+  * logical and (short-circuiting).
+  */
 template<DebugLevel L = DEFAULT_DEBUG_LEVEL>
 class Debuggable
 {

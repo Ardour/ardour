@@ -11,6 +11,9 @@
 namespace AudioGrapher
 {
 
+/** AudioGrapher Exception class.
+  * Automatically tells which class an exception was thrown from.
+  */
 class Exception : public std::exception
 {
   public:

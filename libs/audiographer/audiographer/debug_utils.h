@@ -1,6 +1,8 @@
 #ifndef AUDIOGRAPHER_DEBUG_UTILS_H
 #define AUDIOGRAPHER_DEBUG_UTILS_H
 
+#include "flag_field.h"
+
 #include <string>
 
 #ifdef __GNUC__
@@ -10,8 +12,10 @@
 namespace AudioGrapher
 {
 
+/// Utilities for debugging
 struct DebugUtils
 {
+	/// Returns the demangled name of the object passed as the parameter
 	template<typename T>
 	static std::string demangled_name (T const & obj)
 	{
@@ -27,6 +31,8 @@ struct DebugUtils
 		return typeid(obj).name();
 	}
 	
+	/// Returns name of ProcessContext::Flag
+	static std::string process_context_flag_name (FlagField::Flag flag);
 };
 
 } // namespace

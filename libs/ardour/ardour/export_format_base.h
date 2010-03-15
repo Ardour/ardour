@@ -31,7 +31,7 @@
 
 #include "ardour/ardour.h"
 
-#include "audiographer/sample_format_converter.h"
+#include "audiographer/general/sample_format_converter.h"
 
 namespace ARDOUR
 {

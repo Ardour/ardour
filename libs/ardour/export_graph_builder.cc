@@ -1,16 +1,15 @@
 #include "ardour/export_graph_builder.h"
 
-#include "audiographer/interleaver.h"
-#include "audiographer/normalizer.h"
-#include "audiographer/peak_reader.h"
 #include "audiographer/process_context.h"
-#include "audiographer/sample_format_converter.h"
-#include "audiographer/sndfile_writer.h"
-#include "audiographer/sr_converter.h"
-#include "audiographer/silence_trimmer.h"
-#include "audiographer/threader.h"
-#include "audiographer/tmp_file.h"
-#include "audiographer/utils.h"
+#include "audiographer/general/interleaver.h"
+#include "audiographer/general/normalizer.h"
+#include "audiographer/general/peak_reader.h"
+#include "audiographer/general/sample_format_converter.h"
+#include "audiographer/general/sr_converter.h"
+#include "audiographer/general/silence_trimmer.h"
+#include "audiographer/general/threader.h"
+#include "audiographer/sndfile/tmp_file.h"
+#include "audiographer/sndfile/sndfile_writer.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/export_channel_configuration.h"
@@ -30,17 +29,11 @@ ExportGraphBuilder::ExportGraphBuilder (Session const & session)
 {
 	process_buffer_frames = session.engine().frames_per_cycle();
 	process_buffer = new Sample[process_buffer_frames];
-	
-	// TODO move and/or use global silent buffers
-	AudioGrapher::Utils::init_zeros<Sample> (process_buffer_frames);
 }
 
 ExportGraphBuilder::~ExportGraphBuilder ()
 {
 	delete [] process_buffer;
-	
-	// TODO see bove
-	AudioGrapher::Utils::free_resources();
 }
 
 int
@@ -150,7 +143,7 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::Sndfil
 	int format = get_real_format (config);
 	Glib::ustring filename = config.filename->get_path (config.format);
 	
-	writer.reset (new AudioGrapher::SndfileWriter<T> (channels, config.format->sample_rate(), format, filename));
+	writer.reset (new AudioGrapher::SndfileWriter<T> (filename, format, channels, config.format->sample_rate()));
 	writer->FileWritten.connect (sigc::mem_fun (*this, &ExportGraphBuilder::Encoder::copy_files));
 }
 
@@ -236,8 +229,8 @@ ExportGraphBuilder::Normalizer::init (FileSpec const & new_config, nframes_t /*m
 	normalizer->add_output (threader);
 	
 	int format = ExportFormatBase::F_RAW | ExportFormatBase::SF_Float;
-	tmp_file.reset (new TmpFile<float> (config.channel_config->get_n_chans(), 
-	                                    config.format->sample_rate(), format));
+	tmp_file.reset (new TmpFile<float> (format, config.channel_config->get_n_chans(), 
+	                                    config.format->sample_rate()));
 	tmp_file->FileWritten.connect (sigc::hide (sigc::mem_fun (*this, &Normalizer::start_post_processing)));
 	
 	add_child (new_config);
@@ -270,17 +263,16 @@ ExportGraphBuilder::Normalizer::operator== (FileSpec const & other_config) const
 bool
 ExportGraphBuilder::Normalizer::process()
 {
-	ProcessContext<Sample> buffer_copy (*buffer);
-	tmp_file->read (buffer_copy);
-	normalizer->process (buffer_copy);
-	return buffer_copy.frames() != buffer->frames();
+	nframes_t frames_read = tmp_file->read (*buffer);
+	return frames_read != buffer->frames();
 }
 
 void
 ExportGraphBuilder::Normalizer::start_post_processing()
 {
 	normalizer->set_peak (peak_reader->get_peak());
-	tmp_file->seek (0, SndfileReader<Sample>::SeekBeginning);
+	tmp_file->seek (0, SEEK_SET);
+	tmp_file->add_output (normalizer);
 	parent.normalizers.push_back (this);
 }
 
@@ -339,12 +331,11 @@ ExportGraphBuilder::SilenceHandler::init (FileSpec const & new_config, nframes_t
 	max_frames_in = max_frames;
 	nframes_t sample_rate = parent.session.nominal_frame_rate();
 	
-	silence_trimmer.reset (new SilenceTrimmer<Sample>());
+	silence_trimmer.reset (new SilenceTrimmer<Sample>(max_frames_in));
 	silence_trimmer->set_trim_beginning (config.format->trim_beginning());
 	silence_trimmer->set_trim_end (config.format->trim_end());
 	silence_trimmer->add_silence_to_beginning (config.format->silence_beginning(sample_rate));
 	silence_trimmer->add_silence_to_end (config.format->silence_end(sample_rate));
-	silence_trimmer->limit_output_size (max_frames_in);
 	
 	add_child (new_config);
 	
