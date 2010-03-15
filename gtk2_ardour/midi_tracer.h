@@ -44,9 +44,9 @@ class MidiTracer : public ArdourDialog
 	void tracer (MIDI::Parser&, MIDI::byte*, size_t);
 	void update ();
 	
-	Gtk::ToggleButton autoscroll_button;
-	Gtk::ToggleButton base_button;
-	Gtk::ToggleButton collect_button;
+	Gtk::CheckButton autoscroll_button;
+	Gtk::CheckButton base_button;
+	Gtk::CheckButton collect_button;
 
 	void base_toggle ();
 	void autoscroll_toggle ();

@@ -54,9 +54,14 @@ MidiTracer::MidiTracer (const std::string& name, Parser& p)
 	line_count_box.show ();
 
 	get_action_area()->add (line_count_box);
-	get_action_area()->add (base_button);
-	get_action_area()->add(collect_button);
-	get_action_area()->add (autoscroll_button);
+
+	HBox* bbox = manage (new HBox);
+	bbox->add (base_button);
+	bbox->add (collect_button);
+	bbox->add (autoscroll_button);
+	bbox->show ();
+	
+	get_action_area()->add (*bbox);
 
 	base_button.signal_toggled().connect (sigc::mem_fun (*this, &MidiTracer::base_toggle));
 	collect_button.signal_toggled().connect (sigc::mem_fun (*this, &MidiTracer::collect_toggle));
