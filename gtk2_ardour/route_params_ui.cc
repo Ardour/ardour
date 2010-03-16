@@ -93,6 +93,8 @@ RouteParams_UI::RouteParams_UI ()
 	route_display.set_headers_visible(true);
 	route_display.set_headers_clickable(true);
 
+	dynamic_cast<Gtk::CellRendererText*>(route_display.get_column_cell_renderer(0))->property_ellipsize() = true; /* LT */
+
 	route_select_scroller.add(route_display);
 	route_select_scroller.set_policy(Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
