@@ -78,7 +78,7 @@ double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
 TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color const & base_color,
 				   nframes64_t start, nframes64_t duration, bool recording,
 				   Visibility vis)
-	: trackview (tv), _recregion(recording)
+	: trackview (tv), _height (1.0), _recregion(recording)
 {
 	if (!have_name_font) {
 
@@ -558,6 +558,8 @@ TimeAxisViewItem::set_name_text(const ustring& new_name)
 void
 TimeAxisViewItem::set_height (double height)
 {
+        _height = height;
+
 	if (name_highlight) {
 		if (height < NAME_HIGHLIGHT_THRESH) {
 			name_highlight->hide ();
@@ -841,9 +843,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 
 		if (name_highlight) {
 
-			double height = name_highlight->property_y2 ();
-
-			if (height < NAME_HIGHLIGHT_THRESH) {
+			if (_height < NAME_HIGHLIGHT_THRESH) {
 				name_highlight->hide();
 				high_enough_for_name = false;
 			} else {
@@ -853,7 +853,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 				}
 				high_enough_for_name = true;
 			}
-
+                        
 			if (visibility & FullWidthNameHighlight) {
 				name_highlight->property_x2() = pixel_width;
 			} else {
@@ -878,6 +878,8 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 			frame_handle_end->property_x2() = pixel_width;
 		}
 	}
+
+        update_name_pixbuf_visibility ();
 }
 
 void

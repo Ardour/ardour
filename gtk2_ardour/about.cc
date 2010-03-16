@@ -156,6 +156,7 @@ static const char* authors[] = {
 	N_("Nimal Ratnayake"),
 	N_("Dave Robillard"),
 	N_("Taybin Rutkin"),
+        N_("Andreas Ruge"),
 	N_("Sampo Savolainen"),
 	N_("Per Sigmond"),
 	N_("Lincoln Spiteri"),
@@ -168,7 +169,7 @@ static const char* authors[] = {
 };
 
 static const char* translators[] = {
-	N_("French:\n\tAlain Fréhel <alain.frehel@free.fr>\n\tChristophe Combelles <ccomb@free.fr>\n"),
+        N_("French:\n\tAlain Fréhel <alain.frehel@free.fr>\n\tChristophe Combelles <ccomb@free.fr>\n\tMartin Blanchard\n"),
 	N_("German:\n\tKarsten Petersen <kapet@kapet.de>\
 \n\tSebastian Arnold <mail@sebastian-arnold.net>\
 \n\tRobert Schwede<schwede@ironshark.com>\n"),
@@ -181,6 +182,8 @@ static const char* translators[] = {
 	N_("Greek:\n\t Klearchos Gourgourinis <muadib@in.gr>\n"),
 	N_("Swedish:\n\t Petter Sundlöf <petter.sundlof@gmail.com>\n"),
 	N_("Polish:\n\t Piotr Zaryk <pzaryk@gmail.com>\n"),
+        N_("Czech:\n\t Pavel Frich\n"),
+        N_("Norwegian:\n\t Eivind Ødegård\n"),
 	0
 };
 
@@ -559,7 +562,7 @@ About::About ()
 	}
 
 	set_translator_credits (t);
-	set_copyright (_("Copyright (C) 1999-2009 Paul Davis\n"));
+	set_copyright (_("Copyright (C) 1999-2010 Paul Davis\n"));
 	set_license (gpl);
 	set_name (X_("ardour"));
 	set_website (X_("http://ardour.org/"));

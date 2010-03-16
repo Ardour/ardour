@@ -116,6 +116,7 @@ class Playlist : public SessionObject
 	bool used () const { return _refcnt != 0; }
 
 	bool set_name (const std::string& str);
+        int sort_id() { return _sort_id; }
 
 	const DataType& data_type() const { return _type; }
 
@@ -240,6 +241,7 @@ class Playlist : public SessionObject
 	std::set<boost::shared_ptr<Region> > all_regions; /* all regions ever added to this playlist */
 	PBD::ScopedConnectionList region_state_changed_connections;
 	DataType        _type;
+        int             _sort_id;
 	mutable gint    block_notifications;
 	mutable gint    ignore_state_changes;
 	mutable Glib::RecMutex region_lock;
@@ -288,6 +290,8 @@ class Playlist : public SessionObject
 	void release_notifications ();
 	virtual void flush_notifications ();
 	void clear_pending ();
+
+        void _set_sort_id ();
 
 	void notify_region_removed (boost::shared_ptr<Region>);
 	void notify_region_added (boost::shared_ptr<Region>);

@@ -357,6 +357,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* playhead/screen stuff */
 
+        void set_stationary_playhead (bool yn);
+        void toggle_stationary_playhead ();
+        bool stationary_playhead() const { return _stationary_playhead; }
+        
 	void set_follow_playhead (bool yn);
 	void toggle_follow_playhead ();
 	bool follow_playhead() const { return _follow_playhead; }
@@ -418,6 +422,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void goto_visual_state (uint32_t);
 	void save_visual_state (uint32_t);
+
+	void queue_draw_resize_line (int at);
+	void start_resize_line_ops ();
+	void end_resize_line_ops ();
 
 	TrackViewList const & get_track_views () {
 		return track_views;
@@ -1401,6 +1409,8 @@ public:
 	bool _show_measures;
 	/// true if the editor should follow the playhead, otherwise false
 	bool _follow_playhead;
+        /// true if we scroll the tracks rather than the playhead
+        bool _stationary_playhead;
 	/// true if waveforms should be shown while recording audio tracks, otherwise false
 	bool _show_waveforms_recording;
 

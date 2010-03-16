@@ -98,8 +98,18 @@ class PortInsertUI : public Gtk::HBox
 	void finished (IOSelector::Result);
 
   private:
+        boost::shared_ptr<ARDOUR::PortInsert> _pi;
+        
+        Gtk::ToggleButton latency_button;
 	IOSelector input_selector;
 	IOSelector output_selector;
+        Gtk::Label latency_display;
+        Gtk::Frame latency_frame;
+        Gtk::HBox  latency_hbox;
+        sigc::connection latency_timeout;
+
+        bool check_latency_measurement ();
+        void latency_button_toggled ();
 };
 
 class PortInsertWindow : public ArdourDialog

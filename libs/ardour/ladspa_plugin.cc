@@ -178,8 +178,6 @@ LadspaPlugin::default_value (uint32_t port)
 			sr_scaling = true;
 		}
 
-		/* FIXME: add support for logarithmic defaults */
-
 		else if (LADSPA_IS_HINT_DEFAULT_LOW(prh[port].HintDescriptor)) {
 			if (LADSPA_IS_HINT_LOGARITHMIC(prh[port].HintDescriptor)) {
 				ret = exp(log(prh[port].LowerBound) * 0.75f + log(prh[port].UpperBound) * 0.25f);

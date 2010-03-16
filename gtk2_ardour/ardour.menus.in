@@ -286,6 +286,7 @@
 		     <menuitem action='track-height-smaller'/>
 		     <menuitem action='track-height-small'/>
 		</menu>
+                <menuitem action='track-record-enable-toggle'/>
 		<menuitem action='toggle-track-active'/>	
 		<menuitem action='remove-track'/>	
 	</menu>
@@ -433,7 +434,10 @@
    	       <separator/>
         </menu>
 	 <menu name='Help' action='Help'>
+#ifndef GTKOSX
 	     <menuitem action='About'/>
+#endif
+             <menuitem action='Chat'/>
 	</menu>
      </menubar>
 

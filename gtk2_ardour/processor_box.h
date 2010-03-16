@@ -238,8 +238,11 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void rename_processors ();
 
 	void for_selected_processors (void (ProcessorBox::*pmf)(boost::shared_ptr<ARDOUR::Processor>));
-	void get_selected_processors (ProcSelection&);
+	void get_selected_processors (ProcSelection&) const;
 
+        bool can_cut() const;
+
+	static Glib::RefPtr<Gtk::Action> cut_action;
 	static Glib::RefPtr<Gtk::Action> paste_action;
 	void paste_processor_state (const XMLNodeList&, boost::shared_ptr<ARDOUR::Processor>);
 

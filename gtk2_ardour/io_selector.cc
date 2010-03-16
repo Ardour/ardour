@@ -29,6 +29,7 @@
 #include "ardour/track.h"
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
+#include "ardour/mtdm.h"
 #include "ardour/data_type.h"
 #include "ardour/port.h"
 #include "ardour/bundle.h"
@@ -216,15 +217,87 @@ IOSelectorWindow::io_name_changed (void* src)
 }
 
 PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session* sess, boost::shared_ptr<ARDOUR::PortInsert> pi)
-	: input_selector (parent, sess, pi->input())
-	, output_selector (parent, sess, pi->output())
+        : _pi (pi)
+        , latency_button (_("Measure Latency"))
+        , input_selector (parent, sess, pi->input())
+        , output_selector (parent, sess, pi->output())
 {
+        latency_hbox.pack_start (latency_button, false, false);
+        latency_hbox.pack_start (latency_display, false, false);
+        latency_frame.add (latency_hbox);
+        
 	output_selector.set_min_height_divisor (2);
 	input_selector.set_min_height_divisor (2);
-
+        
+        pack_start (latency_frame);
 	pack_start (output_selector, true, true);
 	pack_start (input_selector, true, true);
+
+        latency_button.signal_toggled().connect (mem_fun (*this, &PortInsertUI::latency_button_toggled));
 }
+
+bool
+PortInsertUI::check_latency_measurement ()
+{
+        MTDM* mtdm = _pi->mtdm ();
+
+        if (mtdm->resolve () < 0) {
+                latency_display.set_text (_("No signal detected"));
+                return true;
+        }
+
+        if (mtdm->err () > 0.3) {
+                mtdm->invert ();
+                mtdm->resolve ();
+        }
+
+        char buf[64];
+        nframes_t sample_rate = AudioEngine::instance()->frame_rate();
+
+        if (sample_rate == 0) {
+                latency_display.set_text (_("Disconnected from audio engine"));
+                _pi->stop_latency_detection ();
+                return false;
+        }
+
+        snprintf (buf, sizeof (buf), "%10.3lf frames %10.3lf ms", mtdm->del (), mtdm->del () * 1000.0f/sample_rate);
+
+        bool solid = true;
+
+        if (mtdm->err () > 0.2) {
+                strcat (buf, " ??");
+                solid = false;
+        }
+
+        if (mtdm->inv ()) {
+                strcat (buf, " (Inv)");
+                solid = false;
+        }
+
+        if (solid) {
+                _pi->set_measured_latency ((nframes_t) rint (mtdm->del()));
+                strcat (buf, " (set)");
+        }
+
+        latency_display.set_text (buf);
+        return true;
+}
+
+void
+PortInsertUI::latency_button_toggled ()
+{
+        if (latency_button.get_active ()) {
+
+                _pi->start_latency_detection ();
+                latency_display.set_text (_("Detecting ..."));
+                latency_timeout = Glib::signal_timeout().connect (mem_fun (*this, &PortInsertUI::check_latency_measurement), 250);
+
+        } else {
+                _pi->stop_latency_detection ();
+                latency_timeout.disconnect ();
+        }
+}
+
 
 void
 PortInsertUI::redisplay ()

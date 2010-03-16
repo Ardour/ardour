@@ -73,6 +73,7 @@ def build(bld):
                 locale_guard.cc
                 malign.cc
 		mountpoint.cc
+                openuri.cc
 		pathscanner.cc
 		pool.cc
                 property_list.cc

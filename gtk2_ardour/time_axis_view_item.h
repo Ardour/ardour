@@ -467,6 +467,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
     ArdourCanvas::SimpleRect* frame_handle_start;
     ArdourCanvas::SimpleRect* frame_handle_end;
 
+    double _height;
     Visibility visibility;
     bool _recregion;
 

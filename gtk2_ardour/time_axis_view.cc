@@ -153,6 +153,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	resizer.signal_button_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::resizer_button_press));
 	resizer.signal_button_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::resizer_button_release));
 	resizer.signal_motion_notify_event().connect (sigc::mem_fun (*this, &TimeAxisView::resizer_motion));
+
 	resizer.set_events (Gdk::BUTTON_PRESS_MASK|
 			Gdk::BUTTON_RELEASE_MASK|
 			Gdk::POINTER_MOTION_MASK|
@@ -1307,13 +1308,11 @@ TimeAxisView::idle_resize (uint32_t h)
 bool
 TimeAxisView::resizer_motion (GdkEventMotion* ev)
 {
-	if (_resize_drag_start < 0) {
-		return true;
-	}
-
-	int32_t const delta = (int32_t) floor (ev->y_root - _resize_drag_start);
-	_editor.add_to_idle_resize (this, delta);
-	_resize_drag_start = ev->y_root;
+	if (_resize_drag_start >= 0) {
+                int32_t const delta = (int32_t) floor (ev->y_root - _resize_drag_start);
+                _editor.add_to_idle_resize (this, delta);
+                _resize_drag_start = ev->y_root;
+        }
 
 	return true;
 }

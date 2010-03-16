@@ -115,6 +115,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void show_splash ();
 	void hide_splash ();
 
+        void launch_chat ();
 	void show_about ();
 	void hide_about ();
 

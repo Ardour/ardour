@@ -255,20 +255,17 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	/* setup name pixbuf sizes */
 	name_font = get_font_for_style (N_("MarkerText"));
 
-	Gtk::Window win;
 	Gtk::Label foo;
-	win.add (foo);
 
 	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (X_("Hg")); /* ascender + descender */
 	int width;
-	int height;
 
 	layout->set_font_description (*name_font);
-	Gtkmm2ext::get_ink_pixel_size (layout, width, height);
-	name_height = height + 6;
+	Gtkmm2ext::get_ink_pixel_size (layout, width, name_height);
 
 	name_pixbuf = new ArdourCanvas::Pixbuf(*group);
 	name_pixbuf->property_x() = label_offset;
+	name_pixbuf->property_y() = (13/2) - (name_height/2);
 
 	set_name (annotation.c_str());
 

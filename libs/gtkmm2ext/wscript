@@ -32,6 +32,7 @@ gtkmm2ext_sources = [
 	'focus_entry.cc',
 	'grouped_buttons.cc',
 	'gtk_ui.cc',
+        'gtkapplication.c',
 	'idle_adjustment.cc',
 	'keyboard.cc',
         'motionfeedback.cc',
@@ -84,7 +85,9 @@ def build(bld):
 			'-DLOCALEDIR="' + os.path.join(
 				os.path.normpath(bld.env['DATADIRNAME']), 'locale') + '"']
 	if bld.env['GTKOSX']:
-		obj.source	+= ['sync-menu.c']
+		obj.source += ['gtkapplication_quartz.mm']
+        else:
+                obj.source += ['gtkapplication_x11.c']
 
 def shutdown():
 	autowaf.shutdown()

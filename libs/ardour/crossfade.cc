@@ -100,6 +100,7 @@ Crossfade::Crossfade (boost::shared_ptr<AudioRegion> in, boost::shared_ptr<Audio
 	_out = out;
 	_anchor_point = ap;
 	_fixed = true;
+        _follow_overlap = false;
 
 	initialize ();
 }

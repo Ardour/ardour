@@ -23,14 +23,15 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/xml++.h"
 
+#include "ardour/audioengine.h"
+#include "ardour/audio_port.h"
+#include "ardour/buffer_set.h"
 #include "ardour/delivery.h"
-#include "ardour/port_insert.h"
+#include "ardour/mtdm.h"
 #include "ardour/plugin.h"
 #include "ardour/port.h"
+#include "ardour/port_insert.h"
 #include "ardour/route.h"
-#include "ardour/buffer_set.h"
-
-#include "ardour/audioengine.h"
 #include "ardour/session.h"
 #include "ardour/types.h"
 
@@ -44,6 +45,11 @@ PortInsert::PortInsert (Session& s, boost::shared_ptr<MuteMaster> mm)
 	: IOProcessor (s, true, true, string_compose (_("insert %1"), (bitslot = s.next_insert_id()) + 1), "")
 	, _out (new Delivery (s, _output, mm, _name, Delivery::Insert))
 {
+        _mtdm = 0;
+        _latency_detect = false;
+        _latency_flush_frames = false;
+        _measured_latency = 0;
+
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
@@ -52,6 +58,11 @@ PortInsert::PortInsert (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLN
 	, _out (new Delivery (s, _output, mm, _name, Delivery::Insert))
 
 {
+        _mtdm = 0;
+        _latency_detect = false;
+        _latency_flush_frames = false;
+        _measured_latency = 0;
+        
 	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
 	}
@@ -61,6 +72,33 @@ PortInsert::PortInsert (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLN
 
 PortInsert::~PortInsert ()
 {
+        delete _mtdm;
+}
+
+void
+PortInsert::start_latency_detection ()
+{
+        if (_mtdm != 0) {
+                delete _mtdm;
+        }
+
+        _mtdm = new MTDM;
+        _latency_flush_frames = false;
+        _latency_detect = true;
+        _measured_latency = 0;
+}
+
+void
+PortInsert::stop_latency_detection ()
+{
+        _latency_flush_frames = signal_latency() + _session.engine().frames_per_cycle();
+        _latency_detect = false;
+}
+
+void
+PortInsert::set_measured_latency (nframes_t n)
+{
+        _measured_latency = n;
 }
 
 void
@@ -70,6 +108,38 @@ PortInsert::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nf
 		return;
 	}
 
+        if (_latency_detect) {
+                
+                if (_input->n_ports().n_audio() != 0) {
+
+                        AudioBuffer& outbuf (_output->ports().nth_audio_port(0)->get_audio_buffer (nframes));
+                        Sample* in = _input->ports().nth_audio_port(0)->get_audio_buffer (nframes).data();
+                        Sample* out = outbuf.data();
+                        
+                        _mtdm->process (nframes, in, out);
+                        
+                        outbuf.is_silent (false);
+                }
+                
+                return;
+                
+        } else if (_latency_flush_frames) {
+                
+                /* wait for the entire input buffer to drain before picking up input again so that we can't
+                   hear the remnants of whatever MTDM pumped into the pipeline.
+                */
+                
+                silence (nframes);
+                
+                if (_latency_flush_frames > nframes) {
+                        _latency_flush_frames -= nframes;
+                } else {
+                        _latency_flush_frames = 0;
+                }
+                
+                return;
+        }
+        
 	if (!_active && !_pending_active) {
 		/* deliver silence */
 		silence (nframes);
@@ -151,7 +221,11 @@ PortInsert::signal_latency() const
 	   need to take that into account too.
 	*/
 
-	return _session.engine().frames_per_cycle() + _input->signal_latency();
+        if (_measured_latency == 0) {
+                return _session.engine().frames_per_cycle() + _input->signal_latency();
+        } else {
+                return _measured_latency;
+        }
 }
 
 bool

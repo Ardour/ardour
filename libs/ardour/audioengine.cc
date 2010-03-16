@@ -76,7 +76,6 @@ AudioEngine::AudioEngine (string client_name)
 	_jack = 0;
 	_frame_rate = 0;
 	_buffer_size = 0;
-	_freewheel_thread_registered = false;
 	_freewheeling = false;
 
 	m_meter_thread = 0;
@@ -1104,16 +1103,11 @@ AudioEngine::freewheel (bool onoff)
 	GET_PRIVATE_JACK_POINTER_RET (_jack, -1);
 
 	if (onoff != _freewheeling) {
-	  
-	  if (onoff) {
-	    _freewheel_thread_registered = false;
-	  }
-	  
-	  return jack_set_freewheel (_priv_jack, onoff);
-	  
+                return jack_set_freewheel (_priv_jack, onoff);
+                
 	} else {
-	  /* already doing what has been asked for */
-	  return 0;
+                /* already doing what has been asked for */
+                return 0;
 	}
 }
 

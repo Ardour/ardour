@@ -88,6 +88,7 @@ using namespace Gtkmm2ext;
 
 ProcessorBox* ProcessorBox::_current_processor_box = 0;
 RefPtr<Action> ProcessorBox::paste_action;
+RefPtr<Action> ProcessorBox::cut_action;
 Glib::RefPtr<Gdk::Pixbuf> SendProcessorEntry::_slider;
 
 ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
@@ -494,6 +495,7 @@ ProcessorBox::show_processor_menu (gint arg)
 		}
 	}
 
+        cut_action->set_sensitive (can_cut());
 	paste_action->set_sensitive (!_rr_selection.processors.empty());
 
 	processor_menu->popup (1, arg);
@@ -1054,6 +1056,27 @@ ProcessorBox::rename_processors ()
 	}
 }
 
+bool
+ProcessorBox::can_cut () const
+{
+        vector<boost::shared_ptr<Processor> > sel;
+
+        get_selected_processors (sel);
+        
+        /* cut_processors () does not cut inserts */
+
+        for (vector<boost::shared_ptr<Processor> >::const_iterator i = sel.begin (); i != sel.end (); ++i) {
+                
+		if (boost::dynamic_pointer_cast<PluginInsert>((*i)) != 0 ||
+		    (boost::dynamic_pointer_cast<Send>((*i)) != 0) ||
+		    (boost::dynamic_pointer_cast<Return>((*i)) != 0)) {
+                        return true;
+                }
+        }
+        
+        return false;
+}
+
 void
 ProcessorBox::cut_processors ()
 {
@@ -1333,10 +1356,10 @@ ProcessorBox::deactivate_processor (boost::shared_ptr<Processor> r)
 }
 
 void
-ProcessorBox::get_selected_processors (ProcSelection& processors)
+ProcessorBox::get_selected_processors (ProcSelection& processors) const
 {
-	list<ProcessorEntry*> selection = processor_display.selection ();
-	for (list<ProcessorEntry*>::iterator i = selection.begin(); i != selection.end(); ++i) {
+	const list<ProcessorEntry*> selection = processor_display.selection ();
+	for (list<ProcessorEntry*>::const_iterator i = selection.begin(); i != selection.end(); ++i) {
 		processors.push_back ((*i)->processor ());
 	}
 }
@@ -1551,9 +1574,9 @@ ProcessorBox::register_actions ()
 			sigc::ptr_fun (ProcessorBox::rb_clear_post));
 
 	/* standard editing stuff */
-	act = ActionManager::register_action (popup_act_grp, X_("cut"), _("Cut"),
-			sigc::ptr_fun (ProcessorBox::rb_cut));
-	ActionManager::plugin_selection_sensitive_actions.push_back(act);
+	cut_action = ActionManager::register_action (popup_act_grp, X_("cut"), _("Cut"),
+                                                     sigc::ptr_fun (ProcessorBox::rb_cut));
+	ActionManager::plugin_selection_sensitive_actions.push_back(cut_action);
 	act = ActionManager::register_action (popup_act_grp, X_("copy"), _("Copy"),
 			sigc::ptr_fun (ProcessorBox::rb_copy));
 	ActionManager::plugin_selection_sensitive_actions.push_back(act);

@@ -319,6 +319,7 @@ Editor::Editor ()
 
 	have_pending_keyboard_selection = false;
 	_follow_playhead = true;
+        _stationary_playhead = false;
 	_xfade_visibility = true;
 	editor_ruler_menu = 0;
 	no_ruler_shown_update = false;
@@ -1730,6 +1731,8 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 		region_mute_item->set_active();
 		fooc.block (false);
 	}
+        
+        items.push_back (MenuElem (_("Transpose"), mem_fun(*this, &Editor::pitch_shift_regions)));
 
 	if (!Profile->get_sae()) {
 		items.push_back (CheckMenuElem (_("Opaque")));
@@ -2243,7 +2246,8 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	move (x, y);
 
 	if (_session && (prop = node.property ("playhead"))) {
-		nframes64_t pos = atol (prop->value().c_str());
+		nframes64_t pos;
+                sscanf (prop->value().c_str(), "%" PRIi64, &pos);
 		playhead_cursor->set_position (pos);
 	} else {
 		playhead_cursor->set_position (0);
@@ -2341,6 +2345,18 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		}
 	}
 
+        if ((prop = node.property ("stationary-playhead"))) {
+                bool yn = (prop->value() == "yes");
+                set_stationary_playhead (yn);
+                RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-stationary-playhead"));
+                if (act) {
+                        RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+                        if (tact->get_active() != yn) {
+                                tact->set_active (yn);
+                        }
+                }
+        }
+        
 	if ((prop = node.property ("region-list-sort-type"))) {
 		RegionListSortType st;
 		_regions->reset_sort_type ((RegionListSortType) string_2_enum (prop->value(), st), true);
@@ -2447,6 +2463,7 @@ Editor::get_state ()
 	node->add_property ("show-waveforms-recording", _show_waveforms_recording ? "yes" : "no");
 	node->add_property ("show-measures", _show_measures ? "yes" : "no");
 	node->add_property ("follow-playhead", _follow_playhead ? "yes" : "no");
+        node->add_property ("stationary-playhead", _stationary_playhead ? "yes" : "no");
 	node->add_property ("xfades-visible", _xfade_visibility ? "yes" : "no");
 	node->add_property ("region-list-sort-type", enum_2_string (_regions->sort_type ()));
 	node->add_property ("mouse-mode", enum2str(mouse_mode));
@@ -3698,6 +3715,29 @@ Editor::set_follow_playhead (bool yn)
 }
 
 void
+Editor::toggle_stationary_playhead ()
+{
+       RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-stationary-playhead"));
+       if (act) {
+               RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+               set_stationary_playhead (tact->get_active());
+       }
+}
+
+void
+Editor::set_stationary_playhead (bool yn)
+{
+       if (_stationary_playhead != yn) {
+               if ((_stationary_playhead = yn) == true) {
+                       /* catch up */
+                       // FIXME need a 3.0 equivalent of this 2.X call
+                       // update_current_screen ();
+               }
+               instant_save ();
+       }
+}
+
+void
 Editor::toggle_xfade_active (boost::weak_ptr<Crossfade> wxfade)
 {
 	boost::shared_ptr<Crossfade> xfade (wxfade.lock());
@@ -4119,10 +4159,11 @@ Editor::undo_visual_state ()
 		return;
 	}
 
+	redo_visual_stack.push_back (current_visual_state());
+
 	VisualState* vs = undo_visual_stack.back();
 	undo_visual_stack.pop_back();
 	use_visual_state (*vs);
-	redo_visual_stack.push_back (vs);
 }
 
 void
@@ -4132,10 +4173,11 @@ Editor::redo_visual_state ()
 		return;
 	}
 
+	undo_visual_stack.push_back (current_visual_state());
+
 	VisualState* vs = redo_visual_stack.back();
 	redo_visual_stack.pop_back();
 	use_visual_state (*vs);
-	undo_visual_stack.push_back (vs);
 }
 
 void
@@ -4669,6 +4711,8 @@ _idle_resizer (gpointer arg)
 void
 Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 {
+        cerr << "add tav " << view << " with hdelta = " << h << endl;
+
 	if (resize_idle_id < 0) {
 		resize_idle_id = g_idle_add (_idle_resizer, this);
 		_pending_resize_amount = 0;
@@ -4681,6 +4725,8 @@ Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 
 	_pending_resize_amount += h;
 	_pending_resize_view = view;
+
+        cerr << "Pending resize amount initially set at " << _pending_resize_amount << endl;
 
 	min_resulting = min (min_resulting, int32_t (_pending_resize_view->current_height()) + _pending_resize_amount);
 
@@ -4697,6 +4743,7 @@ Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 	/* clamp */
 	if (uint32_t (min_resulting) < TimeAxisView::hSmall) {
 		_pending_resize_amount += TimeAxisView::hSmall - min_resulting;
+                cerr << "pending resize amount = " << _pending_resize_amount << endl;
 	}
 }
 
@@ -4704,6 +4751,9 @@ Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 bool
 Editor::idle_resize ()
 {
+        cerr << "Idle resize, pra = " << _pending_resize_amount 
+             << " set height to " << _pending_resize_view->current_height() << " + " << _pending_resize_amount << endl;
+
 	_pending_resize_view->idle_resize (_pending_resize_view->current_height() + _pending_resize_amount);
 
 	if (dynamic_cast<AutomationTimeAxisView*> (_pending_resize_view) == 0 &&
@@ -4716,6 +4766,7 @@ Editor::idle_resize ()
 		}
 	}
 
+        _pending_resize_amount = 0;
 	flush_canvas ();
 	_group_tabs->set_dirty ();
 	resize_idle_id = -1;
@@ -5121,33 +5172,33 @@ Editor::super_rapid_screen_update ()
 			playhead_cursor->set_position (frame);
 		}
 
-#undef CONTINUOUS_SCROLL
-#ifndef CONTINUOUS_SCROLL		
+                if (!_stationary_playhead) {
 
-		if (!_dragging_playhead && _follow_playhead && _session->requested_return_frame() < 0) {
-			reset_x_origin_to_follow_playhead ();
-		}
+                        if (!_dragging_playhead && _follow_playhead && _session->requested_return_frame() < 0) {
+                                reset_x_origin_to_follow_playhead ();
+                        }
 
-#else  // CONTINUOUS_SCROLL
-				
-		/* don't do continuous scroll till the new position is in the rightmost quarter of the
-		   editor canvas
-		*/
-		
-		double target = ((double)frame - (double)current_page_frames()/2.0) / frames_per_unit;
-		if (target <= 0.0) {
-			target = 0.0;
-		}
-		if (fabs(target - current) < current_page_frames() / frames_per_unit) {
-			target = (target * 0.15) + (current * 0.85);
-		} else {
-			/* relax */
-		}
-		
-		current = target;
-		horizontal_adjustment.set_value (current);
-
-#endif // CONTINUOUS_SCROLL
+                } else {
+			
+                        /* don't do continuous scroll till the new position is in the rightmost quarter of the
+                           editor canvas
+                        */
+#if 0                        
+                        // FIXME DO SOMETHING THAT WORKS HERE - this is 2.X code                         
+                        double target = ((double)frame - (double)current_page_frames()/2.0) / frames_per_unit;
+                        if (target <= 0.0) {
+                                target = 0.0;
+                        }
+                        if (fabs(target - current) < current_page_frames() / frames_per_unit) {
+                                target = (target * 0.15) + (current * 0.85);
+                        } else {
+                                /* relax */
+                        }
+                        
+                        current = target;
+                        horizontal_adjustment.set_value (current);
+#endif
+                }
 		
 	}
 }

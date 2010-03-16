@@ -801,7 +801,7 @@ Editor::scroll_canvas_horizontally ()
 	}
 
 #ifndef GTKOSX
-	if (!autoscroll_active) {
+	if (!autoscroll_active && !_stationary_playhead) {
 		/* force rulers and canvas to move in lock step */
 		while (gtk_events_pending ()) {
 			gtk_main_iteration ();

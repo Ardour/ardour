@@ -94,7 +94,6 @@ RegionView::RegionView (const RegionView& other)
 	current_visible_sync_position = other.current_visible_sync_position;
 	valid = false;
 	_pixel_width = other._pixel_width;
-	_height = other._height;
 
 	GhostRegion::CatchDeletion.connect (*this, ui_bind (&RegionView::remove_ghost, this, _1), gui_context());
 }
@@ -114,7 +113,6 @@ RegionView::RegionView (const RegionView& other, boost::shared_ptr<Region> other
 	current_visible_sync_position = other.current_visible_sync_position;
 	valid = false;
 	_pixel_width = other._pixel_width;
-	_height = other._height;
 
 	GhostRegion::CatchDeletion.connect (*this, ui_bind (&RegionView::remove_ghost, this, _1), gui_context());
 }
@@ -147,7 +145,6 @@ RegionView::init (Gdk::Color const & basic_color, bool wfd)
 	editor        = 0;
 	valid         = true;
 	in_destructor = false;
-	_height       = 0;
 	wait_for_data = wfd;
 	sync_mark     = 0;
 	sync_line     = 0;

@@ -29,6 +29,7 @@
 #include "ardour/types.h"
 
 class XMLNode;
+class MTDM;
 
 namespace ARDOUR {
 
@@ -64,6 +65,12 @@ class PortInsert : public IOProcessor
 
 	uint32_t bit_slot() const { return bitslot; }
 
+        void start_latency_detection ();
+        void stop_latency_detection ();
+
+        MTDM* mtdm () const { return _mtdm; }
+        void set_measured_latency (nframes_t);
+
   private:
 	/* disallow copy construction */
 	PortInsert (const PortInsert&);
@@ -71,7 +78,10 @@ class PortInsert : public IOProcessor
 	boost::shared_ptr<Delivery> _out;
 
 	uint32_t bitslot;
-};
+        MTDM*     _mtdm;
+        bool      _latency_detect;
+        nframes_t _latency_flush_frames;
+        nframes_t _measured_latency;};
 
 } // namespace ARDOUR
 

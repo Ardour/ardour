@@ -25,6 +25,8 @@
 #include <string>
 #include <climits>
 
+#include <boost/lexical_cast.hpp>
+
 #include "pbd/failed_constructor.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/xml++.h"
@@ -150,6 +152,7 @@ Playlist::Playlist (Session& sess, string nom, DataType type, bool hide)
 	init (hide);
 	first_set_state = false;
 	_name = nom;
+        _set_sort_id ();
 
 }
 
@@ -164,6 +167,7 @@ Playlist::Playlist (Session& sess, const XMLNode& node, DataType type, bool hide
 
 	init (hide);
 	_name = "unnamed"; /* reset by set_state */
+        _set_sort_id ();
 
 	/* set state called by derived class */
 }
@@ -359,6 +363,32 @@ Playlist::~Playlist ()
 	/* GoingAway must be emitted by derived classes */
 }
 
+void
+Playlist::_set_sort_id ()
+{
+        /*
+          Playlists are given names like <track name>.<id>
+          or <track name>.<edit group name>.<id> where id
+          is an integer. We extract the id and sort by that.
+        */
+        
+        size_t dot_position = _name.val().find_last_of(".");
+
+        if (dot_position == string::npos) {
+                _sort_id = 0;
+        } else {
+                string t = _name.val().substr(dot_position + 1);
+
+                try {
+                        _sort_id = boost::lexical_cast<int>(t);
+                }
+
+                catch (boost::bad_lexical_cast e) {
+                        _sort_id = 0;
+                }
+        }
+}
+
 bool
 Playlist::set_name (const string& str)
 {
@@ -370,9 +400,13 @@ Playlist::set_name (const string& str)
 
 	if (_refcnt > 2) {
 		return false;
-	} else {
-		return SessionObject::set_name(str);
-	}
+	} 
+
+        bool ret =  SessionObject::set_name(str);
+        if (ret) {
+                _set_sort_id ();
+        }
+        return ret;
 }
 
 /***********************************************************************
@@ -2121,6 +2155,7 @@ Playlist::set_state (const XMLNode& node, int version)
 
 		if (prop->name() == X_("name")) {
 			_name = prop->value();
+                        _set_sort_id ();
 		} else if (prop->name() == X_("id")) {
                         _id = prop->value();
 		} else if (prop->name() == X_("orig_diskstream_id")) {

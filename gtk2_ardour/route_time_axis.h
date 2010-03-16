@@ -294,7 +294,7 @@ protected:
 	virtual Gtk::Menu* build_mode_menu() { return 0; }
 	virtual Gtk::Menu* build_color_mode_menu() { return 0; }
 
-	void use_playlist (boost::weak_ptr<ARDOUR::Playlist>);
+	void use_playlist (Gtk::RadioMenuItem *item, boost::weak_ptr<ARDOUR::Playlist> wpl);
 
 	ArdourCanvas::SimpleRect* timestretch_rect;
 

@@ -42,6 +42,7 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
+#include "pbd/openuri.h"
 #include "pbd/file_utils.h"
 
 #include "gtkmm2ext/gtk_ui.h"
@@ -2036,12 +2037,28 @@ ARDOUR_UI::snapshot_session ()
 	prompter.set_prompt (_("Name of New Snapshot"));
 	prompter.set_initial_text (timebuf);
 
+  again:
 	switch (prompter.run()) {
 	case RESPONSE_ACCEPT:
 	{
 		prompter.get_result (snapname);
 
 		bool do_save = (snapname.length() != 0);
+
+                if (do_save) {
+                        if (snapname.find ('/') != string::npos) {
+                                MessageDialog msg (_("To ensure compatibility with various systems\n"
+                                                     "snapshot names may not contain a '/' character"));
+                                msg.run ();
+                                goto again;
+                        }
+                        if (snapname.find ('\\') != string::npos) {
+                                MessageDialog msg (_("To ensure compatibility with various systems\n"
+                                                     "snapshot names may not contain a '\\' character"));
+                                msg.run ();
+                                goto again;
+                        }
+                }
 
 		vector<sys::path> p;
 		get_state_files_in_directory (_session->session_directory().root_path(), p);
@@ -2493,6 +2510,10 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new)
 			    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
 			    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
 
+                                /* absolute path or cwd-relative path specified for session name: infer session folder
+                                   from what was given.
+                                */
+                                
 				session_path = Glib::path_get_dirname (session_name);
 				session_name = Glib::path_get_basename (session_name);
 
@@ -2529,6 +2550,22 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new)
 				continue;
 			}
 
+                        if (session_name.find ('/') != Glib::ustring::npos) {
+                                MessageDialog msg (*_startup, _("To ensure compatibility with various systems\n"
+                                                                          "session names may not contain a '/' character"));
+                                msg.run ();
+				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
+                                continue;
+                        }
+
+                        if (session_name.find ('\\') != Glib::ustring::npos) {
+                                MessageDialog msg (*_startup, _("To ensure compatibility with various systems\n"
+                                                                          "session names may not contain a '\\' character"));
+                                msg.run ();
+				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
+                                continue;
+                        }
+
 			_session_is_new = true;
 		}
 
@@ -2556,7 +2593,9 @@ ARDOUR_UI::close_session()
 		return;
 	}
 
-	unload_session (true);
+	if (unload_session (true)) {
+                return;
+        }
 
 	ARDOUR_COMMAND_LINE::session_name = "";
 	get_session_parameters (true, false);
@@ -2727,6 +2766,16 @@ ARDOUR_UI::show ()
 }
 
 void
+ARDOUR_UI::launch_chat ()
+{
+#ifdef __APPLE__
+        open_uri("http://webchat.freenode.net/?channels=ardour-osx");
+#else
+        open_uri("http://webchat.freenode.net/?channels=ardour");
+#endif
+}
+
+void
 ARDOUR_UI::show_about ()
 {
 	if (about == 0) {
@@ -2734,6 +2783,7 @@ ARDOUR_UI::show_about ()
 		about->signal_response().connect(sigc::mem_fun (*this, &ARDOUR_UI::about_signal_response) );
 	}
 
+        about->set_transient_for(*editor);
 	about->show_all ();
 }
 
@@ -2837,9 +2887,6 @@ require some unused files to continue to exist."));
 
 	const string dead_sound_directory = _session->session_directory().dead_sound_path().to_string();
 
-
-
-
 	/* subst:
 	   %1 - number of files removed
 	   %2 - location of "dead_sounds"
@@ -2848,19 +2895,22 @@ require some unused files to continue to exist."));
 	*/
 
 	const char* bprefix;
+        double space_adjusted = 0;
 
-	if (rep.space < 1048576.0f) {
+	if (rep.space < 100000.0f) {
 		bprefix = X_("kilo");
-	} else if (rep.space < 1048576.0f * 1000) {
+	} else if (rep.space < 1000000.0f * 1000) {
 		bprefix = X_("mega");
+                space_adjusted = truncf((float)rep.space / 1000.0);
 	} else {
 		bprefix = X_("giga");
+                space_adjusted = truncf((float)rep.space / (1000000.0 * 1000));
 	}
 
 	if (removed > 1) {
-		txt.set_text (string_compose (plural_msg, removed, dead_sound_directory, (float) rep.space / 1024.0f, bprefix));
+                txt.set_text (string_compose (plural_msg, removed, _session->path() + "dead_sounds", space_adjusted, bprefix));
 	} else {
-		txt.set_text (string_compose (singular_msg, removed, dead_sound_directory, (float) rep.space / 1024.0f, bprefix));
+                txt.set_text (string_compose (singular_msg, removed, _session->path() + "dead_sounds", space_adjusted, bprefix));
 	}
 
 	dhbox.pack_start (*dimage, true, false, 5);

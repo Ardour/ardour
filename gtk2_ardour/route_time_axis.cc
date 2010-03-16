@@ -1471,6 +1471,12 @@ RouteTimeAxisView::get_child_list()
 }
 
 
+struct PlaylistSorter {
+    bool operator() (boost::shared_ptr<Playlist> a, boost::shared_ptr<Playlist> b) const {
+            return a->sort_id() < b->sort_id();
+    }
+};
+
 void
 RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 {
@@ -1486,32 +1492,36 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 
 	delete playlist_menu;
 
-	playlist_menu = new Menu;
-	playlist_menu->set_name ("ArdourContextMenu");
 
-	vector<boost::shared_ptr<Playlist> > playlists;
+        vector<boost::shared_ptr<Playlist> > playlists, playlists_ds;
 	boost::shared_ptr<Diskstream> ds = get_diskstream();
 	RadioMenuItem::Group playlist_group;
 
 	_session->playlists->get (playlists);
 
-	for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+        /* find the playlists for this diskstream */
+        for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+                if (((*i)->get_orig_diskstream_id() == ds->id()) || (ds->playlist()->id() == (*i)->id())) {
+                        playlists_ds.push_back(*i);
+                }
+        }
 
-		if ((*i)->get_orig_diskstream_id() == ds->id()) {
-			playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name(), sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::use_playlist),
-												     boost::weak_ptr<Playlist> (*i))));
-
-			if (ds->playlist()->id() == (*i)->id()) {
-				static_cast<RadioMenuItem*>(&playlist_items.back())->set_active();
-			}
-		} else if (ds->playlist()->id() == (*i)->id()) {
-			playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name(), sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::use_playlist),
-												     boost::weak_ptr<Playlist>(*i))));
-			static_cast<RadioMenuItem*>(&playlist_items.back())->set_active();
-
+        /* sort the playlists */
+        PlaylistSorter cmp;
+        sort(playlists_ds.begin(), playlists_ds.end(), cmp);
+        
+        /* add the playlists to the menu */
+        for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists_ds.begin(); i != playlists_ds.end(); ++i) {
+                playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name()));
+                RadioMenuItem *item = static_cast<RadioMenuItem*>(&playlist_items.back());
+                item->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::use_playlist), item, boost::weak_ptr<Playlist> (*i)));
+                
+                if (ds->playlist()->id() == (*i)->id()) {
+                        item->set_active();
+                        
 		}
 	}
-
+        
 	playlist_items.push_back (SeparatorElem());
 	playlist_items.push_back (MenuElem (_("Rename"), sigc::mem_fun(*this, &RouteTimeAxisView::rename_current_playlist)));
 	playlist_items.push_back (SeparatorElem());
@@ -1535,9 +1545,14 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 }
 
 void
-RouteTimeAxisView::use_playlist (boost::weak_ptr<Playlist> wpl)
+RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> wpl)
 {
 	assert (is_track());
+
+        // exit if we were triggered by deactivating the old playlist
+        if (!item->get_active()) {
+                return;
+        }
 
 	boost::shared_ptr<Playlist> pl (wpl.lock());
 
@@ -1549,8 +1564,8 @@ RouteTimeAxisView::use_playlist (boost::weak_ptr<Playlist> wpl)
 
 	if (apl) {
 		if (get_diskstream()->playlist() == apl) {
-			// radio button cotnrols mean this function is called for both the
-			// old and new playlist
+                        // exit when use_playlist is called by the creation of the playlist menu
+                        // or the playlist choice is unchanged
 			return;
 		}
 		get_diskstream()->use_playlist (apl);

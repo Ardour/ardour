@@ -247,7 +247,6 @@ _	   the regular process() call to session->process() is not made.
 	nframes_t                 _processed_frames;
 	bool                      _freewheeling;
 	bool                      _freewheel_pending;
-	bool                      _freewheel_thread_registered;
 	boost::function<int(nframes_t)>  freewheel_action;
 	bool                       reconnect_on_halt;
 	int                       _usecs_per_cycle;

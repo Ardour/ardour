@@ -32,7 +32,6 @@ class NagScreen : public ArdourDialog
 	void mark_affirmed_subscriber ();
 	void offer_to_donate ();
 	void offer_to_subscribe ();
-	bool open_uri (const char*);
 	static bool is_subscribed (bool& really);
 };
 

@@ -207,6 +207,7 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "track-record-enable-toggle", _("Toggle Record Enable"), sigc::mem_fun(*this, &Editor::toggle_record_enable));
 	ActionManager::session_sensitive_actions.push_back (act);
+        ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	for (int i = 1; i <= 12; ++i) {
 		string const a = string_compose (X_("save-visual-state-%1"), i);
@@ -270,17 +271,23 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "move-selected-tracks-up", _("Move Selected Tracks Up"), sigc::bind (sigc::mem_fun(*_routes, &EditorRoutes::move_selected_tracks), true));
 	ActionManager::session_sensitive_actions.push_back (act);
+        ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "move-selected-tracks-down", _("Move Selected Tracks Down"), sigc::bind (sigc::mem_fun(*_routes, &EditorRoutes::move_selected_tracks), false));
 	ActionManager::session_sensitive_actions.push_back (act);
+        ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "scroll-tracks-up", _("Scroll Tracks Up"), sigc::mem_fun(*this, &Editor::scroll_tracks_up));
 	ActionManager::session_sensitive_actions.push_back (act);
+        ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "scroll-tracks-down", _("Scroll Tracks Down"), sigc::mem_fun(*this, &Editor::scroll_tracks_down));
+        ActionManager::track_selection_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "step-tracks-up", _("Step Tracks Up"), sigc::mem_fun(*this, &Editor::scroll_tracks_up_line));
+        ActionManager::track_selection_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "step-tracks-down", _("Step Tracks Down"), sigc::mem_fun(*this, &Editor::scroll_tracks_down_line));
 	ActionManager::session_sensitive_actions.push_back (act);
+        ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "scroll-backward", _("Scroll Backward"), sigc::bind (sigc::mem_fun(*this, &Editor::scroll_backward), 0.8f));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -550,6 +557,8 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "remove-last-capture", _("Remove Last Capture"), (sigc::mem_fun(*this, &Editor::remove_last_capture)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+        ActionManager::register_toggle_action (editor_actions, "toggle-stationary-playhead", _("Stationary Playhead"), (mem_fun(*this, &Editor::toggle_stationary_playhead)));
+
 	act = ActionManager::register_action (editor_actions, "insert-time", _("Insert Time"), (sigc::mem_fun(*this, &Editor::do_insert_time)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
@@ -567,6 +576,7 @@ Editor::register_actions ()
 
 	act = ActionManager::register_action (editor_actions, "fit-tracks", _("Fit Selected Tracks"), sigc::mem_fun(*this, &Editor::fit_selected_tracks));
 	ActionManager::session_sensitive_actions.push_back (act);
+        ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "track-height-largest", _("Largest"), sigc::bind (
 				sigc::mem_fun(*this, &Editor::set_track_height), TimeAxisView::hLargest));
 	ActionManager::session_sensitive_actions.push_back (act);

@@ -5,6 +5,8 @@
 #include <fstream>
 #include <gtkmm/stock.h>
 
+#include "pbd/openuri.h"
+
 #include "ardour/ardour.h"
 #include "ardour/filesystem_paths.h"
 
@@ -176,35 +178,16 @@ NagScreen::offer_to_donate ()
 
 	/* we don't care if it fails */
 
-	open_uri (uri);
+        PBD::open_uri (uri);
 }
 
 void
 NagScreen::offer_to_subscribe ()
 {
 	const char* uri = "http://ardour.org/subscribe";
-
-	if (open_uri (uri)) {
+        
+	if (PBD::open_uri (uri)) {
 		mark_subscriber ();
 	}
 }
 
-bool
-NagScreen::open_uri (const char* uri)
-{
-#ifdef HAVE_GTK_OPEN_URI
-	GError* err;
-	return gtk_open_uri (0, uri, GDK_CURRENT_TIME, &err);
-#else
-#ifdef GTKOSX
-	extern bool cocoa_open_url (const char*);
-	return cocoa_open_url (uri);
-#else
-	std::string command = "xdg-open ";
-	command += uri;
-	spawn_command_line_async (command);
-
-	return true;
-#endif
-#endif
-}

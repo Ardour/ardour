@@ -207,6 +207,7 @@ MixerStrip::init ()
 	ARDOUR_UI::instance()->set_tip (&group_button, _("Mix group"), "");
 	group_button.add (group_label);
 	group_button.set_name ("MixerGroupButton");
+        Gtkmm2ext::set_size_request_to_display_given_text (group_button, "Group", 2, 2);
 	group_label.set_name ("MixerGroupButtonLabel");
 
 	comment_button.set_name ("MixerCommentButton");
@@ -1319,12 +1320,7 @@ MixerStrip::route_group_changed ()
 	RouteGroup *rg = _route->route_group();
 
 	if (rg) {
-		/* XXX: this needs a better algorithm */
-		string truncated = rg->name ();
-		if (truncated.length () > 5) {
-			truncated = truncated.substr (0, 5);
-		}
-		group_label.set_text (truncated);
+                group_label.set_text (PBD::short_version (rg->name(), 5));
 	} else {
 		switch (_width) {
 		case Wide:

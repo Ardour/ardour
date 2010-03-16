@@ -262,9 +262,10 @@ RouteUI::mute_press (GdkEventButton* ev)
 				// Primary-button2 click is the midi binding click
 				// button2-click is "momentary"
 
-				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier))) {
-					return false;
-				}
+
+				if (mute_button->on_button_press_event (ev)) {
+                                        return true;
+                                }
 
 				_mute_release = new SoloMuteRelease (_route->muted ());
 			}
@@ -357,9 +358,9 @@ RouteUI::solo_press(GdkEventButton* ev)
 				// Primary-button2 click is the midi binding click
 				// button2-click is "momentary"
 				
-				if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier))) {
-					return false;
-				}
+                                if (solo_button->on_button_press_event (ev)) {
+                                        return true;
+                                }
 
 				_solo_release = new SoloMuteRelease (_route->soloed());
 			}
@@ -491,10 +492,10 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 	if (!ignore_toggle && is_track() && rec_enable_button) {
 
-		if (Keyboard::is_button2_event (ev) && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+		if (Keyboard::is_button2_event (ev)) {
 
 			// do nothing on midi sigc::bind event
-			return false;
+			return rec_enable_button->on_button_press_event (ev);
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
