@@ -635,10 +635,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		case SelectionItem:
 			if (Keyboard::modifier_state_contains
-			    (event->button.state, Keyboard::ModifierMask(Keyboard::SecondaryModifier))) {
+			    (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier))) {
 				// contains and not equals because I can't use alt as a modifier alone.
 				start_selection_grab (item, event);
-			} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+			} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::SecondaryModifier)) {
 				/* grab selection for moving */
 				_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionMove), event);
 			} else {
