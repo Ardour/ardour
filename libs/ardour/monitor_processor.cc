@@ -4,6 +4,7 @@
 
 #include "ardour/amp.h"
 #include "ardour/dB.h"
+#include "ardour/debug.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/monitor_processor.h"
 #include "ardour/session.h"
@@ -243,6 +244,20 @@ MonitorProcessor::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*e
                         }
                 }
 
+                DEBUG_TRACE (DEBUG::Monitor, 
+                             string_compose("channel %1 sb %2 gc %3 gd %4 cd %5 dl %6 cp %7 cc %8 cs %9 sc %10 TG %11\n", 
+                                            chn, 
+                                            solo_boost,
+                                            global_cut,
+                                            global_dim,
+                                            _channels[chn].dim,
+                                            dim_level,
+                                            _channels[chn].polarity,
+                                            _channels[chn].cut,
+                                            _channels[chn].soloed,
+                                            solo_cnt,
+                                            target_gain));
+                
                 if (target_gain != _channels[chn].current_gain || target_gain != 1.0f) {
 
                         Amp::apply_gain (*b, nframes, _channels[chn].current_gain, target_gain);
@@ -331,13 +346,15 @@ MonitorProcessor::set_cut (uint32_t chn, bool yn)
 void
 MonitorProcessor::set_solo (uint32_t chn, bool solo)
 {
-        _channels[chn].soloed = solo;
-
-        if (solo) {
-                solo_cnt++;
-        } else {
-                if (solo_cnt > 0) {
-                        solo_cnt--;
+        if (solo != _channels[chn].soloed) {
+                _channels[chn].soloed = solo;
+                
+                if (solo) {
+                        solo_cnt++;
+                } else {
+                        if (solo_cnt > 0) {
+                                solo_cnt--;
+                        }
                 }
         }
 }

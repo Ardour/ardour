@@ -44,6 +44,7 @@ namespace PBD {
                 extern uint64_t MidiIO;
                 extern uint64_t MackieControl;
                 extern uint64_t MidiClock;
+                extern uint64_t Monitor;
 	}
 }
 

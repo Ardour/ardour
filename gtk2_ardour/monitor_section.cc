@@ -692,35 +692,32 @@ MonitorSection::map_state ()
                 }
         }
 
-        act = ActionManager::get_action (X_("Monitor"), "monitor-solo");
-        if (act) {
-                Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
-                if (ract) {
-                        ract->set_active (_monitor->mono());
-                }
-        }
-
         act = ActionManager::get_action (X_("Monitor"), "monitor-cut-all");
         if (act) {
-                Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
-                if (ract) {
-                        ract->set_active (_monitor->cut_all());
+                Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+                if (tact) {
+                        cerr << "Set monitor cut all action to " << _monitor->cut_all () << endl;
+                        tact->set_active (_monitor->cut_all());
+                } else {
+                        cerr << " no global cut action\n";
                 }
+        } else {
+                cerr << " no global cut action2\n";
         }
 
         act = ActionManager::get_action (X_("Monitor"), "monitor-dim-all");
         if (act) {
-                Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
-                if (ract) {
-                        ract->set_active (_monitor->dim_all());
+                Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+                if (tact) {
+                        tact->set_active (_monitor->dim_all());
                 }
         }
-
+        
         act = ActionManager::get_action (X_("Monitor"), "monitor-mono");
         if (act) {
-                Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
-                if (ract) {
-                        ract->set_active (_monitor->mono());
+                Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+                if (tact) {
+                        tact->set_active (_monitor->mono());
                 }
         }
 
@@ -729,11 +726,44 @@ MonitorSection::map_state ()
         assert (nchans == _channel_buttons.size ());
 
         for (uint32_t n = 0; n < nchans; ++n) {
-                ChannelButtonSet* cbs = _channel_buttons[n];
-                cbs->cut.set_active (_monitor->cut (n));
-                cbs->dim.set_active (_monitor->dimmed (n));
-                cbs->solo.set_active (_monitor->soloed (n));
-                cbs->invert.set_active (_monitor->inverted (n));
+
+                char action_name[32];
+
+                snprintf (action_name, sizeof (action_name), "monitor-cut-%u", n+1);
+                act = ActionManager::get_action (X_("Monitor"), action_name);
+                if (act) {
+                        Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+                        if (tact) {
+                                tact->set_active (_monitor->cut (n));
+                        }
+                }
+
+                snprintf (action_name, sizeof (action_name), "monitor-dim-%u", n+1);
+                act = ActionManager::get_action (X_("Monitor"), action_name);
+                if (act) {
+                        Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+                        if (tact) {
+                                tact->set_active (_monitor->dimmed (n));
+                        }
+                }
+
+                snprintf (action_name, sizeof (action_name), "monitor-solo-%u", n+1);
+                act = ActionManager::get_action (X_("Monitor"), action_name);
+                if (act) {
+                        Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+                        if (tact) {
+                                tact->set_active (_monitor->soloed (n));
+                        }
+                }
+
+                snprintf (action_name, sizeof (action_name), "monitor-invert-%u", n+1);
+                act = ActionManager::get_action (X_("Monitor"), action_name);
+                if (act) {
+                        Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+                        if (tact) {
+                                tact->set_active (_monitor->inverted (n));
+                        }
+                }
         }
 }
 

@@ -41,4 +41,5 @@ uint64_t PBD::DEBUG::SessionEvents = PBD::new_debug_bit ("sessionevents");
 uint64_t PBD::DEBUG::MidiIO = PBD::new_debug_bit ("midiio");
 uint64_t PBD::DEBUG::MackieControl = PBD::new_debug_bit ("mackiecontrol");
 uint64_t PBD::DEBUG::MidiClock = PBD::new_debug_bit ("midiclock");
+uint64_t PBD::DEBUG::Monitor = PBD::new_debug_bit ("monitor");
 
