@@ -26,6 +26,7 @@
 #include <climits>
 #include <fcntl.h>
 #include <cstdlib>
+#include <sys/time.h>
 #include <ctime>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -34,6 +35,7 @@
 #include <pbd/basename.h>
 #include <pbd/localeguard.h>
 #include <glibmm/thread.h>
+#include <glibmm/fileutils.h>
 #include <pbd/xml++.h>
 #include <pbd/memento_command.h>
 #include <pbd/enumwriter.h>
@@ -1163,6 +1165,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	ChannelList::iterator i;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	nframes_t ts;
+        bool debug = Glib::file_test ("/tmp/debug_ardour_disk_io", Glib::FILE_TEST_EXISTS);
 
 	if (c->empty()) {
 		return 0;
@@ -1178,6 +1181,15 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 	c->front()->playback_buf->get_write_vector (&vector);
 	
+        if (debug) {
+                cerr << "***************\n";
+                cerr << _name << " do_refill: write spac = " << vector.len[0] << " + " << vector.len[1]
+                     << " = " << vector.len[0] + vector.len[1] 
+                     << " (" << ((vector.len[0] + vector.len[1]) / (double) c->front()->playback_buf->bufsize()) * 100.0
+                     << "%"
+                     << endl;
+        }
+
 	if ((total_space = vector.len[0] + vector.len[1]) == 0) {
 		return 0;
 	}
@@ -1188,6 +1200,11 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	*/
 	
 	if (total_space >= (_slaved?3:2) * disk_io_chunk_frames) {
+                if (debug) {
+                        cerr << _name << " do_refill: more than " << ((_slaved?3:2) * disk_io_chunk_frames)
+                             << " frames available in write buffer - will ask for more I/O when done"
+                             << endl;
+                }
 		ret = 1;
 	}
 	
@@ -1199,7 +1216,10 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	*/
 	
 	if ((total_space < disk_io_chunk_frames) && fabs (_actual_speed) < 2.0f) {
-		return 0;
+                if (debug) {
+                        cerr << _name << " insufficient space in write buffer - do refill will do nothing\n";
+                }
+                return 0;
 	}
 	
 	/* when slaved, don't try to get too close to the read pointer. this
@@ -1282,6 +1302,10 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	
 	nframes_t file_frame_tmp = 0;
 
+        if (debug) {
+                cerr << _name << " do refill : zero fill = " << zero_fill << " total to read = " << total_space << endl;
+        }
+
 	for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 
 		ChannelInfo* chan (*i);
@@ -1326,11 +1350,29 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 		to_read = min (to_read, disk_io_chunk_frames);
 
 		if (to_read) {
+                        struct timeval before;
+                        struct timeval after;
+                        struct timeval diff;
+                        double usecs;
+
+                        if (debug) {
+                                cerr << _name << " do refill1: read " << to_read << " samples for chan " << chan_n << endl;
+                        }
+                        gettimeofday (&before, 0);
 
 			if (read (buf1, mixdown_buffer, gain_buffer, file_frame_tmp, to_read, chan, chan_n, reversed)) {
 				ret = -1;
 				goto out;
 			}
+                        gettimeofday (&after, 0);
+                        timersub (&after, &before, &diff);
+                        usecs = diff.tv_sec * 1000000.0 + diff.tv_usec;
+
+                        if (debug) {
+                                cerr << _name << " usecs = " << usecs << " throughput = " 
+                                     << ((to_read/usecs) * 1000000.0 * sizeof (Sample)/1048576.0) << " MiB/sec"
+                                     << endl;
+                        }
 
 			chan->playback_buf->increment_write_ptr (to_read);
 			ts -= to_read;
@@ -1339,6 +1381,16 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 		to_read = min (ts, len2);
 
 		if (to_read) {
+                        struct timeval before;
+                        struct timeval after;
+                        struct timeval diff;
+                        double usecs;
+
+                        if (debug) {
+                                cerr << _name << " do refill2: read " << to_read << " samples for chan " << chan_n << endl;
+                        }
+                        gettimeofday (&before, 0);
+
 
 			/* we read all of vector.len[0], but it wasn't an entire disk_io_chunk_frames of data,
 			   so read some or all of vector.len[1] as well.
@@ -1348,14 +1400,23 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 				ret = -1;
 				goto out;
 			}
-		
+                        gettimeofday (&after, 0);
+                        timersub (&after, &before, &diff);
+                        usecs = diff.tv_sec * 1000000.0 + diff.tv_usec;
+                        
+                        if (debug) {
+                                cerr << _name << " usecs = " << usecs << " throughput = " 
+                                     << ((to_read/usecs) * 1000000.0 * sizeof (Sample)/1048576.0) << " MiB/sec"
+                                     << endl;
+                        }
+                        
 			chan->playback_buf->increment_write_ptr (to_read);
 		}
 
 		if (zero_fill) {
 			/* do something */
 		}
-
+                
 	}
 	
 	file_frame = file_frame_tmp;
@@ -1363,7 +1424,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
   out:
 
 	return ret;
-}	
+}
 
 /** Flush pending data to disk.
  *
