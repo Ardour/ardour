@@ -1184,10 +1184,10 @@ ExportDialog::header_chosen ()
 		bitdepth_format_combo.set_sensitive (false);     
         } else {
                 if ((fmt & SF_FORMAT_TYPEMASK) == SF_FORMAT_WAV) {
-                        endian_format_combo.set_active_text (sndfile_endian_formats_strings[SF_ENDIAN_LITTLE]);
+                        endian_format_combo.set_active_text (sndfile_endian_formats_strings[0]);
                         endian_format_combo.set_sensitive (false);
                 } else if ((fmt & SF_FORMAT_TYPEMASK) == SF_FORMAT_AIFF) {
-                        endian_format_combo.set_active_text (sndfile_endian_formats_strings[SF_ENDIAN_BIG]);
+                        endian_format_combo.set_active_text (sndfile_endian_formats_strings[1]);
                         endian_format_combo.set_sensitive (false);
                 } else {
                         endian_format_combo.set_sensitive (true);
