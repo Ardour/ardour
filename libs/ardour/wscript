@@ -307,11 +307,10 @@ def build(bld):
 		obj.source += [ 'audio_unit.cc' ]
 
 	if bld.env['FPU_OPTIMIZATION']:
-		obj.source += [ 'sse_functions_xmm.cc' ]
 		if bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686':
-			obj.source += [ 'sse_functions.s' ]
+                        obj.source += [ 'sse_functions_xmm.cc', 'sse_functions.s' ]
 		elif bld.env['build_target'] == 'x86_64':
-			obj.source += [ 'sse_functions_64bit.s' ]
+                        obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit.s' ]
 
 	# i18n
 	if bld.env['ENABLE_NLS']:
