@@ -82,7 +82,7 @@ int sndfile_bitdepth_formats[SNDFILE_BITDEPTH_FORMATS] = {
 
 const char * const sndfile_endian_formats_strings[SNDFILE_ENDIAN_FORMATS+1] = {
 	N_("Little-endian (Intel)"),
-	N_("Big-endian (Mac)"),
+	N_("Big-endian (PowerPC)"),
 	0
 };
 

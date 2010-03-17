@@ -237,7 +237,7 @@ ExportDialog::ExportDialog(PublicEditor& e)
 	Gtkmm2ext::set_popdown_strings (cue_file_combo, pop_strings);
 	cue_file_combo.set_active_text (pop_strings.front());
 
-	/* this will re-sensitized as soon as a non RIFF/WAV
+	/* this will re-sensitized as soon as a something other than RIFF/WAV, AIFF or OGG
 	   header format is chosen.
 	*/
 
@@ -1183,11 +1183,16 @@ ExportDialog::header_chosen ()
 		endian_format_combo.set_sensitive (false);
 		bitdepth_format_combo.set_sensitive (false);     
         } else {
-	        if ((fmt & SF_FORMAT_TYPEMASK) == SF_FORMAT_WAV) {
-		       endian_format_combo.set_sensitive (false);
-		} else {
-		       endian_format_combo.set_sensitive (true);
-		}
+                if ((fmt & SF_FORMAT_TYPEMASK) == SF_FORMAT_WAV) {
+                        endian_format_combo.set_active_text (sndfile_endian_formats_strings[SF_ENDIAN_LITTLE]);
+                        endian_format_combo.set_sensitive (false);
+                } else if ((fmt & SF_FORMAT_TYPEMASK) == SF_FORMAT_AIFF) {
+                        endian_format_combo.set_active_text (sndfile_endian_formats_strings[SF_ENDIAN_BIG]);
+                        endian_format_combo.set_sensitive (false);
+                } else {
+                        endian_format_combo.set_sensitive (true);
+                }
+
 		bitdepth_format_combo.set_sensitive (true);     
 	}
 
@@ -1395,14 +1400,14 @@ ExportDialog::initSpec(string &filepath)
 	}
 
 	if (!Profile->get_sae()) {
-	  if (((spec.format & SF_FORMAT_TYPEMASK) != SF_FORMAT_WAV) && ((spec.format & SF_FORMAT_TYPEMASK) != SF_FORMAT_OGG)) {
-			/* RIFF/WAV specifies endianess and O/V has no such concept */
+                if ((spec.format & SF_FORMAT_TYPEMASK) != SF_FORMAT_OGG) {
+			/* O/V has no concept of endianness */
 			spec.format |= sndfile_endian_format_from_string (endian_format_combo.get_active_text ());
 		}
 	}
 
 	if ((spec.format & SF_FORMAT_TYPEMASK) != SF_FORMAT_OGG) {
-	  spec.format |= sndfile_bitdepth_format_from_string (bitdepth_format_combo.get_active_text ());
+                spec.format |= sndfile_bitdepth_format_from_string (bitdepth_format_combo.get_active_text ());
 	}
 
 	string sr_str = sample_rate_combo.get_active_text();
