@@ -88,17 +88,33 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 
 	add_processor (_meter, PostFader);
 
+	_main_outs.reset (new Delivery (_session, _output, _mute_master, _name, Delivery::Main));
+        
+        add_processor (_main_outs, PostFader);
+
 	if (is_control()) {
 		/* where we listen to tracks */
 		_intreturn.reset (new InternalReturn (_session));
 		add_processor (_intreturn, PreFader);
 
+                ProcessorList::iterator i;
+
+                for (i = _processors.begin(); i != _processors.end(); ++i) {
+                        if (*i == _intreturn) {
+                                ++i;
+                                break;
+                        }
+                }
+
+                /* the thing that provides proper control over a control/monitor/listen bus 
+                   (such as per-channel cut, dim, solo, invert, etc).
+                   It always goes right after the internal return;
+                 */
                 _monitor_control.reset (new MonitorProcessor (_session));
-                add_processor (_monitor_control, PostFader);
+                add_processor (_monitor_control, i);
 	}
 
-	_main_outs.reset (new Delivery (_session, _output, _mute_master, _name, Delivery::Main));
-	add_processor (_main_outs, PostFader);
+
 
 	/* now that we have _meter, its safe to connect to this */
 
@@ -744,7 +760,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, Placement placemen
 
 
 /** Add a processor to the route.
- * If @a iter is not NULL, it must point to an iterator in _processors and the new
+ * @a iter must point to an iterator in _processors and the new
  * processor will be inserted immediately before this location.  Otherwise,
  * @a position is used.
  */
@@ -2427,7 +2443,13 @@ Route::listen_via (boost::shared_ptr<Route> route, Placement placement, bool /*a
 		_control_outs = listener;
 	}
 
-	add_processor (listener, placement);
+        if (placement == PostFader) {
+                /* put it *really* at the end, not just after the panner (main outs)
+                 */
+                add_processor (listener, _processors.end());
+        } else {
+                add_processor (listener, PreFader);
+        }
 
 	return 0;
 }
@@ -2803,7 +2825,6 @@ Route::put_control_outs_at (Placement p)
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
 		ProcessorList as_it_was (_processors);
-		// Move meter in the processors list
 		ProcessorList::iterator loc = find(_processors.begin(), _processors.end(), _control_outs);
 		_processors.erase(loc);
 		
@@ -2815,13 +2836,11 @@ Route::put_control_outs_at (Placement p)
 			}
 			break;
 		case PostFader:
-			loc = find(_processors.begin(), _processors.end(), _amp);
-			assert (loc != _processors.end());
-			loc++;
+			loc = _processors.end();
 			break;
 		}
 		
-		_processors.insert(loc, _control_outs);
+		_processors.insert (loc, _control_outs);
 
 		if (configure_processors_unlocked (0)) {
 			_processors = as_it_was;

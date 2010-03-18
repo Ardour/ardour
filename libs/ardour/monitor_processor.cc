@@ -268,6 +268,8 @@ MonitorProcessor::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*e
         }
 
         if (_mono) {
+                DEBUG_TRACE (DEBUG::Monitor, "mono-izing\n");
+
                 /* chn is now the number of channels, use as a scaling factor when mixing
                  */
                 gain_t scale = 1.0/chn;

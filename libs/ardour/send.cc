@@ -259,9 +259,10 @@ Send::display_to_user () const
 {
 	/* we ignore Deliver::_display_to_user */
 
-//	if (_role == Listen || _role == MainListen) {
-//		return false;
-//	}
+	if (_role == Listen) {
+                /* don't make the monitor/control/listen send visible */
+		return false;
+	}
 
 	return true;
 }
