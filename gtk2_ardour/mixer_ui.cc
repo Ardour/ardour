@@ -324,26 +324,16 @@ Mixer_UI::add_strip (RouteList& routes)
                 if (route->is_control()) {
                         if (!_monitor_section) {
                                 _monitor_section = new MonitorSection (_session);
-                                out_packer.pack_end (_monitor_section->pack_widget(), false, false);
+                                out_packer.pack_end (_monitor_section->tearoff(), false, false);
                         } else {
                                 _monitor_section->set_session (_session);
                         }
 
-                        _monitor_section->pack_widget().show_all ();
+                        _monitor_section->tearoff().show_all ();
 
-                        XMLNode* ui_node = Config->extra_xml(X_("UI"));
-
-                        if (ui_node) {
-                                cerr << "Got UI node\n";
-                                XMLNode* tearoff_node = ui_node->child (X_("Tearoffs"));
-                                if (tearoff_node) {
-                                        cerr << "Got tearoff node\n";
-                                        XMLNode* mnode = tearoff_node->child (X_("monitor-section"));
-                                        if (mnode) {
-                                                cerr << "got mndeo\n";
-                                                _monitor_section->tearoff()->set_tornoff_state (*mnode);
-                                        }
-                                }
+                        XMLNode* mnode = ARDOUR_UI::instance()->tearoff_settings (X_("monitor-section"));
+                        if (mnode) {
+                                _monitor_section->tearoff().set_state (*mnode);
                         }
 
                         /* no regular strip shown for control out */
@@ -548,7 +538,7 @@ Mixer_UI::session_going_away ()
 		delete (*i);
 	}
 
-        _monitor_section->pack_widget().hide ();
+        _monitor_section->tearoff().hide_visible ();
 
 	strips.clear ();
 
@@ -614,10 +604,6 @@ Mixer_UI::fast_update_strips ()
 		for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
 			(*i)->fast_update ();
 		}
-
-                if (_monitor_section) {
-                        _monitor_section->fast_update ();
-                }
 	}
 }
 

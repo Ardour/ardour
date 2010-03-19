@@ -4104,11 +4104,11 @@ Session::solo_control_mode_changed ()
 {
 	/* cancel all solo or all listen when solo control mode changes */
 
-	if (Config->get_solo_control_is_listen_control()) {
-		set_solo (routes.reader(), false);
-	} else {
-		set_listen (routes.reader(), false);
-	}
+        if (soloing()) {
+                set_solo (get_routes(), false);
+        } else if (listening()) {
+                set_listen (get_routes(), false);
+        }
 }
 
 void

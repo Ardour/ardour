@@ -48,9 +48,10 @@ class TearOff : public Gtk::HBox
 	bool torn_off() const;
         void tear_it_off ();
         void put_it_back ();
+        void hide_visible ();
 
-        void set_tornoff_state (const XMLNode&);
-        void add_tornoff_state (XMLNode&) const;
+        void set_state (const XMLNode&);
+        void add_state (XMLNode&) const;
 
   private:
 	Gtk::Widget&   contents;

@@ -1132,7 +1132,7 @@ style "flashing_alert" = "very_small_text"
 {
 	fg[NORMAL] = { 0.80, 0.80, 0.80 }
 	bg[NORMAL] = { 0.26, 0.26, 0.31 }
-
+        
 	fg[ACTIVE] = { 0.80, 0.80, 0.80 }
 	bg[ACTIVE] = { 1.0, 0, 0}
 }
@@ -1585,6 +1585,8 @@ widget "*BypassButton" style:highest "red_when_active"
 widget "*BypassButton*" style:highest "red_when_active"
 widget "*TransportSoloAlert" style:highest "flashing_alert"
 widget "*TransportSoloAlert.*" style:highest "flashing_alert"
+widget "*TransportSoloAlert-active" style:highest "flashing_alert"
+widget "*TransportSoloAlert-alternate" style:highest "flashing_alert"
 widget "*SendAlert" style:highest "green_flashing_alert"
 widget "*SendAlert.*" style:highest "green_flashing_alert"
 widget "*TransportAuditioningAlert" style:highest "flashing_alert"

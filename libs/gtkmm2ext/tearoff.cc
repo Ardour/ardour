@@ -56,24 +56,25 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 	close_event_box.set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 	close_event_box.signal_button_release_event().connect (mem_fun (*this, &TearOff::close_click));
 	
-	own_window.add_events (KEY_PRESS_MASK|KEY_RELEASE_MASK|BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK|POINTER_MOTION_MASK|POINTER_MOTION_HINT_MASK);
-	own_window.set_resizable (allow_resize);
-	own_window.set_type_hint (WINDOW_TYPE_HINT_TOOLBAR);
-        own_window.signal_realize().connect (sigc::mem_fun (*this, &TearOff::own_window_realized));
-        own_window.signal_configure_event().connect (sigc::mem_fun (*this, &TearOff::own_window_configured), false);
 
 	VBox* box1;
 	box1 = manage (new VBox);
 	box1->pack_start (close_event_box, false, false, 2);
 	
 	window_box.pack_end (*box1, false, false, 2);
+
+	own_window.add_events (KEY_PRESS_MASK|KEY_RELEASE_MASK|BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK|POINTER_MOTION_MASK|POINTER_MOTION_HINT_MASK);
+	own_window.set_resizable (allow_resize);
+	own_window.set_type_hint (WINDOW_TYPE_HINT_TOOLBAR);
+
 	own_window.add (window_box);
 	
 	own_window.signal_button_press_event().connect (mem_fun (*this, &TearOff::window_button_press));
 	own_window.signal_button_release_event().connect (mem_fun (*this, &TearOff::window_button_release));
 	own_window.signal_motion_notify_event().connect (mem_fun (*this, &TearOff::window_motion));
 	own_window.signal_delete_event().connect (mem_fun (*this, &TearOff::window_delete_event));
-	own_window.signal_realize().connect (bind (sigc::ptr_fun (Gtkmm2ext::set_decoration), &own_window, WMDecoration (DECOR_BORDER|DECOR_RESIZEH)));
+        own_window.signal_realize().connect (sigc::mem_fun (*this, &TearOff::own_window_realized));
+        own_window.signal_configure_event().connect (sigc::mem_fun (*this, &TearOff::own_window_configured), false);
 
 	tearoff_arrow.set_name ("TearOffArrow");
 	close_arrow.set_name ("TearOffArrow");
@@ -249,7 +250,7 @@ TearOff::torn_off() const
 }
 
 void
-TearOff::add_tornoff_state (XMLNode& node) const
+TearOff::add_state (XMLNode& node) const
 {
         node.add_property ("tornoff", (own_window.is_visible() ? "yes" : "no"));
 
@@ -268,7 +269,7 @@ TearOff::add_tornoff_state (XMLNode& node) const
 }        
 
 void
-TearOff::set_tornoff_state (const XMLNode& node)
+TearOff::set_state (const XMLNode& node)
 {
         Glib::RefPtr<Gdk::Window> win;
         const XMLProperty* prop;
@@ -278,8 +279,10 @@ TearOff::set_tornoff_state (const XMLNode& node)
         }
 
         if (prop->value() == "yes") {
+                cerr << "Tearing off " << node.name() << endl;
                 tear_it_off ();
         } else {
+                cerr << "Putting back " << node.name() << endl;
                 put_it_back ();
         }
 
@@ -296,13 +299,20 @@ TearOff::set_tornoff_state (const XMLNode& node)
                 sscanf (prop->value().c_str(), "%d", &own_window_ypos);
         }
 
-        own_window.set_default_size (own_window_width, own_window_height);
-        own_window.move (own_window_xpos, own_window_ypos);
+        if (own_window.is_realized()) {
+                own_window.set_default_size (own_window_width, own_window_height);
+                own_window.move (own_window_xpos, own_window_ypos);
+        }
+        /* otherwise do it once the window is realized, see below */
 }        
 
 void
 TearOff::own_window_realized ()
 {
+        cerr << "tearoff realized\n";
+
+	own_window.get_window()->set_decorations (WMDecoration (DECOR_BORDER|DECOR_RESIZEH));
+
         if (own_window_width > 0) {
                 own_window.set_default_size (own_window_width, own_window_height);
                 own_window.move (own_window_xpos, own_window_ypos);
@@ -323,3 +333,15 @@ TearOff::own_window_configured (GdkEventConfigure*)
 
         return false;
 }
+
+void
+TearOff::hide_visible ()
+{
+        if (torn_off()) {
+                own_window.hide ();
+        }
+
+        hide ();
+}
+
+

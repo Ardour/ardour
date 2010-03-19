@@ -72,10 +72,6 @@ ARDOUR_UI::setup_windows ()
 
 	we_have_dependents ();
 
-	setup_clock ();
-	setup_transport();
-	build_menu_bar ();
-
 	theme_manager->signal_unmap().connect (sigc::bind (sigc::ptr_fun(&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/ToggleThemeManager")));
 
 #ifdef TOP_MENUBAR
@@ -96,6 +92,10 @@ ARDOUR_UI::setup_windows ()
 	top_packer.pack_start (transport_frame, false, false);
 
 	editor->add_toplevel_controls (top_packer);
+
+	setup_clock ();
+	setup_transport();
+	build_menu_bar ();
 
 	setup_tooltips ();
 
@@ -173,6 +173,22 @@ block_prelight (Gtk::Widget& w)
 	w.signal_leave_notify_event().connect (sigc::ptr_fun (null_crossing), false);
 }
 #endif
+
+XMLNode*
+ARDOUR_UI::tearoff_settings (const char* name) const
+{
+        XMLNode* ui_node = Config->extra_xml(X_("UI"));
+        
+        if (ui_node) {
+                XMLNode* tearoff_node = ui_node->child (X_("Tearoffs"));
+                if (tearoff_node) {
+                        XMLNode* mnode = tearoff_node->child (name);
+                        return mnode;
+                }
+        }
+
+        return 0;
+}
 
 void
 ARDOUR_UI::setup_transport ()
@@ -319,9 +335,9 @@ ARDOUR_UI::setup_transport ()
 	/* CANNOT sigc::bind these to clicked or toggled, must use pressed or released */
 
 	solo_alert_button.set_name ("TransportSoloAlert");
-	solo_alert_button.signal_pressed().connect (sigc::mem_fun(*this,&ARDOUR_UI::solo_alert_toggle));
+	solo_alert_button.signal_button_press_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::solo_alert_press), false);
 	auditioning_alert_button.set_name ("TransportAuditioningAlert");
-	auditioning_alert_button.signal_pressed().connect (sigc::mem_fun(*this,&ARDOUR_UI::audition_alert_toggle));
+	auditioning_alert_button.signal_button_press_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::audition_alert_press), false);
 
 	alert_box.pack_start (solo_alert_button, false, false);
 	alert_box.pack_start (auditioning_alert_button, false, false);
@@ -435,6 +451,11 @@ ARDOUR_UI::setup_transport ()
 		Image* img = manage (new Image ((::get_icon (X_("sae")))));
 		transport_tearoff_hbox.pack_end (*img, false, false, 6);
 	}
+
+        XMLNode* tnode = tearoff_settings ("transport");
+        if (tnode) {
+                transport_tearoff->set_state (*tnode);
+        }
 }
 
 void
@@ -482,20 +503,26 @@ ARDOUR_UI::auditioning_changed (bool onoff)
 	UI::instance()->call_slot (boost::bind (&ARDOUR_UI::_auditioning_changed, this, onoff));
 }
 
-void
-ARDOUR_UI::audition_alert_toggle ()
+bool
+ARDOUR_UI::audition_alert_press (GdkEventButton* ev)
 {
 	if (_session) {
 		_session->cancel_audition();
 	}
+        return true;
 }
 
-void
-ARDOUR_UI::solo_alert_toggle ()
+bool
+ARDOUR_UI::solo_alert_press (GdkEventButton* ev)
 {
-	if (_session) {
-		_session->set_solo (_session->get_routes(), !_session->soloing());
-	}
+        if (_session) {
+                if (_session->soloing()) {
+                        _session->set_solo (_session->get_routes(), false);
+                } else if (_session->listening()) {
+                        _session->set_listen (_session->get_routes(), false);
+                }
+        }
+        return true;
 }
 
 void
@@ -505,7 +532,7 @@ ARDOUR_UI::solo_blink (bool onoff)
 		return;
 	}
 
-	if (_session->soloing()) {
+	if (_session->soloing() || _session->listening()) {
 		if (onoff) {
 			solo_alert_button.set_state (STATE_ACTIVE);
 		} else {

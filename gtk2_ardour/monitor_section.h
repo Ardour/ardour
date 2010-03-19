@@ -39,12 +39,9 @@ class MonitorSection : public RouteUI
         ~MonitorSection ();
 
         void set_session (ARDOUR::Session*);
-
-        Gtk::Widget& pack_widget () const;
-        void fast_update ();
         static void setup_knob_images ();
 
-        Gtkmm2ext::TearOff* tearoff() const { return _tearoff; }
+        Gtkmm2ext::TearOff& tearoff() const { return *_tearoff; }
 
   private:
         Gtk::VBox vpacker;
@@ -52,9 +49,6 @@ class MonitorSection : public RouteUI
         Gtk::Table main_table;
         Gtk::VBox upper_packer;
         Gtk::VBox lower_packer;
-        Gtk::VBox table_knob_packer;
-        Gtk::HBox knob_packer;
-        LevelMeter meter;
         Gtkmm2ext::TearOff* _tearoff;
 
         struct ChannelButtonSet { 
@@ -75,6 +69,8 @@ class MonitorSection : public RouteUI
         VolumeController* dim_control;
         Gtk::Adjustment   solo_boost_adjustment;
         VolumeController* solo_boost_control;
+        Gtk::Adjustment   solo_cut_adjustment;
+        VolumeController* solo_cut_control;
 
         void populate_buttons ();
 	void set_button_names ();

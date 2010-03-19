@@ -184,6 +184,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	XMLNode* editor_settings() const;
 	XMLNode* mixer_settings () const;
 	XMLNode* keyboard_settings () const;
+        XMLNode* tearoff_settings (const char*) const;
 
 	void save_ardour_state ();
 	gboolean configure_handler (GdkEventConfigure* conf);
@@ -455,8 +456,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void auditioning_changed (bool);
 	void _auditioning_changed (bool);
 
-	void solo_alert_toggle ();
-	void audition_alert_toggle ();
+	bool solo_alert_press (GdkEventButton* ev);
+	bool audition_alert_press (GdkEventButton* ev);
 
 	void big_clock_value_changed ();
 	void primary_clock_value_changed ();

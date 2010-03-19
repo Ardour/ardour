@@ -54,7 +54,10 @@ MotionFeedback::MotionFeedback (Glib::RefPtr<Gdk::Pixbuf> pix,
 	    set_adjustment (adj);
 	}
 
-	pack_start (pixwin, false, false);
+        HBox* hpacker = manage (new HBox);
+        hpacker->pack_start (pixwin, true, false);
+        hpacker->show ();
+	pack_start (*hpacker, false, false);
 	pixwin.show ();
 
 	if (with_numeric_display) {

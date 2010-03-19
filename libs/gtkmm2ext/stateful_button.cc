@@ -22,8 +22,6 @@
 
 #include <gtkmm/main.h>
 
-#include "pbd/stacktrace.h"
-
 #include <gtkmm2ext/stateful_button.h>
 
 using namespace Gtk;
@@ -65,6 +63,7 @@ StateButton::set_visual_state (int n)
 	}
 
 	set_widget_name (name);
+
 	visual_state = n;
 }
 
@@ -110,10 +109,7 @@ StatefulToggleButton::set_widget_name (const std::string& name)
 
 	if (w) {
 		w->set_name (name); 
-	} else {
-		cerr << "Statefull TOggle button - no child\n";
-		PBD::stacktrace (cerr, 20);
-	}
+	} 
 }
 
 void
@@ -124,8 +120,5 @@ StatefulButton::set_widget_name (const std::string& name)
 
 	if (w) {
 		w->set_name (name); 
-	} else {
-		cerr << "Stateful button - no child\n";
-		PBD::stacktrace (cerr, 20);
-	}
+	} 
 }

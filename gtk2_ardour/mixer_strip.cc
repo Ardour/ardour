@@ -193,7 +193,7 @@ MixerStrip::init ()
 	middle_button_table.set_homogeneous (true);
 	middle_button_table.set_spacings (0);
 	middle_button_table.attach (*mute_button, 0, 1, 0, 1);
-	middle_button_table.attach (*solo_button, 1, 2, 0, 1);
+        middle_button_table.attach (*solo_button, 1, 2, 0, 1);
 
 	bottom_button_table.set_col_spacings (0);
 	bottom_button_table.set_homogeneous (true);
@@ -337,6 +337,12 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	if (set_color_from_route()) {
 		set_color (unique_random_color());
 	}
+
+        if (route()->is_master()) {
+                solo_button->hide ();
+        } else {
+                solo_button->show ();
+        }
 
 	if (_mixer_owned && (route()->is_master() || route()->is_control())) {
 

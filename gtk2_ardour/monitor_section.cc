@@ -30,11 +30,31 @@ Glib::RefPtr<ActionGroup> MonitorSection::monitor_actions;
 Glib::RefPtr<Gdk::Pixbuf> MonitorSection::big_knob_pixbuf;
 Glib::RefPtr<Gdk::Pixbuf> MonitorSection::little_knob_pixbuf;
 
+static bool
+fixup_prelight (GdkEventCrossing* /* ignored */, GtkWidget* widget)
+{
+        GtkRcStyle* style = gtk_rc_style_copy (gtk_widget_get_modifier_style (widget));
+        int current = gtk_widget_get_state (widget);
+
+        style->fg[GTK_STATE_PRELIGHT] = style->fg[current];
+        style->bg[GTK_STATE_PRELIGHT] = style->bg[current];
+
+        gtk_widget_modify_style(widget, style);
+        g_object_unref(style);
+
+	return false;
+}
+
+static void
+block_prelight (Gtk::Widget& w)
+{
+	w.signal_enter_notify_event().connect (sigc::bind (sigc::ptr_fun (fixup_prelight), w.gobj()), false);
+}
+
 MonitorSection::MonitorSection (Session* s)
         : AxisView (s)
         , RouteUI (s)
         , main_table (2, 3)
-        , meter (s)
         , _tearoff (0)
         , gain_adjustment (1.0, 0.0, 1.0, 0.01, 0.1)
         , gain_control (0)
@@ -42,6 +62,8 @@ MonitorSection::MonitorSection (Session* s)
         , dim_control (0)
         , solo_boost_adjustment (1.0, 1.0, 2.0, 0.01, 0.1) 
         , solo_boost_control (0)
+        , solo_cut_adjustment (0.0, 0.0, 1.0, 0.01, 0.1) 
+        , solo_cut_control (0)
         , solo_in_place_button (solo_model_group, _("SiP"))
         , afl_button (solo_model_group, _("AFL"))
         , pfl_button (solo_model_group, _("PFL"))
@@ -63,35 +85,18 @@ MonitorSection::MonitorSection (Session* s)
         
         set_session (s);
         
-        VBox* sub_knob_packer = manage (new VBox);
-        sub_knob_packer->set_spacing (12);
-
         VBox* spin_packer;
         Label* spin_label;
 
-        gain_control = new VolumeController (big_knob_pixbuf, &gain_adjustment, true);
-        gain_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MonitorSection::gain_value_changed));
-        gain_control->spinner().signal_output().connect (sigc::bind (sigc::mem_fun (*this, &MonitorSection::nonlinear_gain_printer), 
-                                                                     &gain_control->spinner()));
+        /* Dim */
 
-        spin_label = manage (new Label (_("Gain (dB)")));
-        spin_packer = manage (new VBox);
-        spin_packer->show ();
-        spin_packer->set_spacing (6);
-        spin_packer->pack_start (*gain_control, false, false);
-        spin_packer->pack_start (*spin_label, false, false);
-
-        sub_knob_packer->pack_start (*spin_packer, false, false);
-                
-        dim_control = new VolumeController (little_knob_pixbuf, &dim_adjustment, true, 30, 30);
+        dim_control = new VolumeController (little_knob_pixbuf, &dim_adjustment, false, 30, 30);
         dim_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MonitorSection::dim_level_changed));
-        dim_control->spinner().signal_output().connect (sigc::bind (sigc::mem_fun (*this, &MonitorSection::linear_gain_printer), 
-                                                                    &dim_control->spinner()));
 
         HBox* dim_packer = manage (new HBox);
         dim_packer->show ();
 
-        spin_label = manage (new Label (_("Dim Cut (dB)")));
+        spin_label = manage (new Label (_("Dim Cut")));
         spin_packer = manage (new VBox);
         spin_packer->show ();
         spin_packer->set_spacing (6);
@@ -99,64 +104,18 @@ MonitorSection::MonitorSection (Session* s)
         spin_packer->pack_start (*spin_label, false, false); 
 
         dim_packer->set_spacing (12);
-        dim_packer->pack_start (*spin_packer, false, false);
+        dim_packer->pack_start (*spin_packer, true, true);
 
-        VBox* keep_dim_under_vertical_size_control = manage (new VBox);
-        keep_dim_under_vertical_size_control->pack_start (dim_all_button, true, false);
-        keep_dim_under_vertical_size_control->show ();
-        dim_all_button.set_size_request (40,40);
-        dim_all_button.show ();
-
-        dim_packer->pack_start (*keep_dim_under_vertical_size_control, false, false);
-        sub_knob_packer->pack_start (*dim_packer, false, true);
-
-        solo_boost_control = new VolumeController (little_knob_pixbuf, &solo_boost_adjustment, true, 30, 30);
-        solo_boost_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MonitorSection::solo_boost_changed));
-        solo_boost_control->spinner().signal_output().connect (sigc::bind (sigc::mem_fun (*this, &MonitorSection::linear_gain_printer),
-                                                                           &solo_boost_control->spinner()));
-
-        HBox* solo_packer = manage (new HBox);
-        solo_packer->show ();
-
-        spin_label = manage (new Label (_("Solo Boost (dB)")));
-        spin_packer = manage (new VBox);
-        spin_packer->show ();
-        spin_packer->set_spacing (6);
-        spin_packer->pack_start (*solo_boost_control, false, false);
-        spin_packer->pack_start (*spin_label, false, false); 
-
-        VBox* keep_rude_solo_under_vertical_size_control = manage (new VBox);
-        keep_rude_solo_under_vertical_size_control->show ();
-        keep_rude_solo_under_vertical_size_control->pack_start (rude_solo_button, true, false);
-
-        solo_packer->set_spacing (12);
-        solo_packer->pack_start (*spin_packer, false, false);
-        solo_packer->pack_start (*keep_rude_solo_under_vertical_size_control, true, false);
+        /* Rude Solo */
 
 	rude_solo_button.set_name ("TransportSoloAlert");
         rude_solo_button.show ();
+        block_prelight (rude_solo_button);
 
         ARDOUR_UI::Blink.connect (sigc::mem_fun (*this, &MonitorSection::solo_blink));
-	rude_solo_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_solo));
+	rude_solo_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_solo), false);
         UI::instance()->set_tip (rude_solo_button, _("When active, something is soloed.\nClick to de-solo everything"));
 
-        sub_knob_packer->pack_start (*solo_packer, false, true);
-
-        knob_packer.pack_start (*sub_knob_packer, false, true);
-
-        sub_knob_packer->show ();
-        knob_packer.show ();
-        gain_control->show_all ();
-        dim_control->show_all ();
-        solo_boost_control->show_all ();
-
-        meter.set_meter (&_route->peak_meter());
-        meter.setup_meters (300, 5);
-        
-        table_knob_packer.pack_start (main_table, true, true);
-        table_knob_packer.pack_start (knob_packer, false, false);
-
-        table_knob_packer.show ();
 
         solo_model_box.set_spacing (6);
         solo_model_box.pack_start (solo_in_place_button, false, false);
@@ -183,7 +142,43 @@ MonitorSection::MonitorSection (Session* s)
                 act->connect_proxy (pfl_button);
         } 
 
+
+        /* Solo Boost */
+
+        solo_boost_control = new VolumeController (little_knob_pixbuf, &solo_boost_adjustment, false, 30, 30);
+        solo_boost_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MonitorSection::solo_boost_changed));
+
+        HBox* solo_packer = manage (new HBox);
+        solo_packer->set_spacing (12);
+        solo_packer->show ();
+
+        spin_label = manage (new Label (_("Solo Boost")));
+        spin_packer = manage (new VBox);
+        spin_packer->show ();
+        spin_packer->set_spacing (6);
+        spin_packer->pack_start (*solo_boost_control, false, false);
+        spin_packer->pack_start (*spin_label, false, false); 
+
+        solo_packer->pack_start (*spin_packer, true, true);
+
+        /* Solo (SiP) cut */
+
+        solo_cut_control = new VolumeController (little_knob_pixbuf, &solo_cut_adjustment, false, 30, 30);
+        // solo_cut_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MonitorSection::solo_cut_changed));
+
+        spin_label = manage (new Label (_("SiP Cut")));
+        spin_packer = manage (new VBox);
+        spin_packer->show ();
+        spin_packer->set_spacing (6);
+        spin_packer->pack_start (*solo_cut_control, false, false);
+        spin_packer->pack_start (*spin_label, false, false); 
+
+        solo_packer->pack_start (*spin_packer, true, true);
+
+        upper_packer.set_spacing (12);
+        upper_packer.pack_start (rude_solo_button, false, false);
         upper_packer.pack_start (solo_model_box, false, false);
+        upper_packer.pack_start (*solo_packer, false, false);
 
         act = ActionManager::get_action (X_("Monitor"), X_("monitor-cut-all"));
         if (act) {
@@ -203,31 +198,50 @@ MonitorSection::MonitorSection (Session* s)
         cut_all_button.set_size_request (50,50);
         cut_all_button.show ();
 
+        HBox* bbox = manage (new HBox);
+
+        bbox->set_spacing (12);
+        bbox->pack_start (mono_button, true, true);
+        bbox->pack_start (dim_all_button, true, true);
+
         lower_packer.set_spacing (12);
-        lower_packer.pack_start (mono_button, false, false);
+        lower_packer.pack_start (*bbox, false, false);
         lower_packer.pack_start (cut_all_button, false, false);
+
+        /* Gain */
+
+        gain_control = new VolumeController (big_knob_pixbuf, &gain_adjustment, false, 80, 80);
+        gain_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MonitorSection::gain_value_changed));
+
+        spin_label = manage (new Label (_("Gain")));
+        spin_packer = manage (new VBox);
+        spin_packer->show ();
+        spin_packer->set_spacing (6);
+        spin_packer->pack_start (*gain_control, false, false);
+        spin_packer->pack_start (*spin_label, false, false);
+
+        lower_packer.pack_start (*spin_packer, true, true);
 
         vpacker.set_border_width (12);
         vpacker.set_spacing (12);
         vpacker.pack_start (upper_packer, false, false);
-        vpacker.pack_start (table_knob_packer, false, false);
+        vpacker.pack_start (*dim_packer, false, false);
+        vpacker.pack_start (main_table, false, false);
         vpacker.pack_start (lower_packer, false, false);
-
-        VBox* keep_meter_under_control = manage (new VBox);
-        keep_meter_under_control->pack_start (meter, false, false);
-        keep_meter_under_control->show ();
 
         hpacker.set_border_width (12);
         hpacker.set_spacing (12);
-        hpacker.pack_start (*keep_meter_under_control, false, false);
         hpacker.pack_start (vpacker, true, true);
+
+        gain_control->show_all ();
+        dim_control->show_all ();
+        solo_boost_control->show_all ();
 
         main_table.show ();
         hpacker.show ();
         upper_packer.show ();
         lower_packer.show ();
         vpacker.show ();
-        meter.show_all ();
 
         populate_buttons ();
         map_state ();
@@ -266,19 +280,16 @@ MonitorSection::set_session (Session* s)
                 if (_route) {
                         /* session with control outs */
                         _monitor = _route->monitor_control ();
-                        meter.set_meter (&_route->peak_meter());
                 } else { 
                         /* session with no control outs */
                         _monitor.reset ();
                         _route.reset ();
-                        meter.set_meter (0);
                 }
                         
         } else {
                 /* no session */
                 _monitor.reset ();
                 _route.reset ();
-                meter.set_meter (0);
         }
 
         /* both might be null */
@@ -298,6 +309,11 @@ MonitorSection::ChannelButtonSet::ChannelButtonSet ()
         gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (dim.gobj()), false);
         gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (invert.gobj()), false);
         gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (solo.gobj()), false);
+
+        block_prelight (cut);
+        block_prelight (dim);
+        block_prelight (solo);
+        block_prelight (invert);
 }
 
 void
@@ -391,12 +407,6 @@ MonitorSection::set_button_names ()
         rec_enable_button_label.set_text ("rec");
         mute_button_label.set_text ("rec");
         solo_button_label.set_text ("rec");
-}
-
-Widget&
-MonitorSection::pack_widget () const
-{
-        return *_tearoff;
 }
 
 void
@@ -641,17 +651,11 @@ MonitorSection::solo_use_pfl ()
 }
 
 void
-MonitorSection::fast_update ()
-{
-        meter.update_meters ();
-}
-
-void
 MonitorSection::setup_knob_images ()
 {
         try {
                 
-                big_knob_pixbuf = ::get_icon ("knob");
+                big_knob_pixbuf = ::get_icon ("bigknob");
                 
         }  catch (...) {
                 
@@ -843,7 +847,7 @@ MonitorSection::solo_blink (bool onoff)
 			rude_solo_button.set_state (STATE_NORMAL);
 		}
 	} else {
-		rude_solo_button.set_active (false);
+		// rude_solo_button.set_active (false);
 		rude_solo_button.set_state (STATE_NORMAL);
 	}
 }
@@ -851,8 +855,12 @@ MonitorSection::solo_blink (bool onoff)
 bool
 MonitorSection::cancel_solo (GdkEventButton* ev)
 {
-        if (_session && _session->soloing()) {
-                _session->set_solo (_session->get_routes(), false);
+        if (_session) {
+                if (_session->soloing()) {
+                        _session->set_solo (_session->get_routes(), false);
+                } else if (_session->listening()) {
+                        _session->set_listen (_session->get_routes(), false);
+                }
         }
 
         return true;
