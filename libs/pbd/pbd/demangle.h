@@ -44,6 +44,7 @@ namespace PBD
 
                 /* Note: on win32, you can use UnDecorateSymbolName.
                    See http://msdn.microsoft.com/en-us/library/ms681400%28VS.85%29.aspx
+                   See also: http://msdn.microsoft.com/en-us/library/ms680344%28VS.85%29.aspx
                 */
                 
 		return typeid(obj).name();
