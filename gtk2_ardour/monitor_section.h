@@ -116,4 +116,5 @@ class MonitorSection : public RouteUI
 
         void solo_blink (bool);
         bool cancel_solo (GdkEventButton*);
+        void solo_cut_changed ();
 };

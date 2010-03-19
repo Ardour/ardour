@@ -54,6 +54,8 @@ MotionFeedback::MotionFeedback (Glib::RefPtr<Gdk::Pixbuf> pix,
 	    set_adjustment (adj);
 	}
 
+        default_value = adjustment->get_value();
+
         HBox* hpacker = manage (new HBox);
         hpacker->pack_start (pixwin, true, false);
         hpacker->show ();
@@ -168,6 +170,11 @@ MotionFeedback::pixwin_button_release_event (GdkEventButton *ev)
 					(GTK_WIDGET(pixwin.gobj()));
 			}
 		}
+                if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+                        /* shift click back to the default */
+                        adjustment->set_value (default_value);
+                        return true;
+                }
 		break;
 		
 	case 3:

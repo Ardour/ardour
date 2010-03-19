@@ -62,7 +62,7 @@ MonitorSection::MonitorSection (Session* s)
         , dim_control (0)
         , solo_boost_adjustment (1.0, 1.0, 2.0, 0.01, 0.1) 
         , solo_boost_control (0)
-        , solo_cut_adjustment (0.0, 0.0, 1.0, 0.01, 0.1) 
+        , solo_cut_adjustment (0.0, 0.0, 1.0, 0.01, 0.1)
         , solo_cut_control (0)
         , solo_in_place_button (solo_model_group, _("SiP"))
         , afl_button (solo_model_group, _("AFL"))
@@ -164,7 +164,7 @@ MonitorSection::MonitorSection (Session* s)
         /* Solo (SiP) cut */
 
         solo_cut_control = new VolumeController (little_knob_pixbuf, &solo_cut_adjustment, false, 30, 30);
-        // solo_cut_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MonitorSection::solo_cut_changed));
+        solo_cut_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MonitorSection::solo_cut_changed));
 
         spin_label = manage (new Label (_("SiP Cut")));
         spin_packer = manage (new VBox);
@@ -864,4 +864,10 @@ MonitorSection::cancel_solo (GdkEventButton* ev)
         }
 
         return true;
+}
+
+void
+MonitorSection::solo_cut_changed ()
+{
+        Config->set_solo_mute_gain (slider_position_to_gain (solo_cut_adjustment.get_value()));
 }

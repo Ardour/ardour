@@ -84,12 +84,13 @@ class MotionFeedback : public Gtk::VBox
 	Gtk::SpinButton*   value;
 	Gtk::Adjustment*   adjustment;
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf;
-	
-	gfloat step_inc;
-	gfloat page_inc;
+
+        double default_value;
+	double  step_inc;
+	double page_inc;
 	bool   grab_is_fine;
-	gdouble grabbed_y;
-	gdouble grabbed_x;
+	double grabbed_y;
+	double grabbed_x;
 	bool i_own_my_adjustment;
         int subwidth;
         int subheight;
