@@ -30,6 +30,7 @@
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/stop_signal.h>
+#include <gtkmm2ext/tearoff.h>
 #include <gtkmm2ext/window_title.h>
 
 #include "ardour/audio_diskstream.h"
@@ -67,7 +68,7 @@ Mixer_UI::Mixer_UI ()
 {
 	_strip_width = Config->get_default_narrow_ms() ? Narrow : Wide;
 	track_menu = 0;
-        monitor_section = 0;
+        _monitor_section = 0;
 	route_group_context_menu = 0;
 	no_track_list_redisplay = false;
 	in_group_row_change = false;
@@ -321,13 +322,34 @@ Mixer_UI::add_strip (RouteList& routes)
 		}
 
                 if (route->is_control()) {
-                        monitor_section = new MonitorSection (_session);
-                        out_packer.pack_end (monitor_section->pack_widget(), false, false);
-                        monitor_section->pack_widget().show_all ();
-                        /* no regular strip */
+                        if (!_monitor_section) {
+                                _monitor_section = new MonitorSection (_session);
+                                out_packer.pack_end (_monitor_section->pack_widget(), false, false);
+                        } else {
+                                _monitor_section->set_session (_session);
+                        }
+
+                        _monitor_section->pack_widget().show_all ();
+
+                        XMLNode* ui_node = Config->extra_xml(X_("UI"));
+
+                        if (ui_node) {
+                                cerr << "Got UI node\n";
+                                XMLNode* tearoff_node = ui_node->child (X_("Tearoffs"));
+                                if (tearoff_node) {
+                                        cerr << "Got tearoff node\n";
+                                        XMLNode* mnode = tearoff_node->child (X_("monitor-section"));
+                                        if (mnode) {
+                                                cerr << "got mndeo\n";
+                                                _monitor_section->tearoff()->set_tornoff_state (*mnode);
+                                        }
+                                }
+                        }
+
+                        /* no regular strip shown for control out */
+
                         continue;
                 }
-
 
 		strip = new MixerStrip (*this, _session, route);
 		strips.push_back (strip);
@@ -521,13 +543,12 @@ Mixer_UI::session_going_away ()
 	group_model->clear ();
 	_selection.clear ();
 	track_model->clear ();
-        
-        delete monitor_section;
-        monitor_section = 0;
 
 	for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
 		delete (*i);
 	}
+
+        _monitor_section->pack_widget().hide ();
 
 	strips.clear ();
 
@@ -594,8 +615,8 @@ Mixer_UI::fast_update_strips ()
 			(*i)->fast_update ();
 		}
 
-                if (monitor_section) {
-                        monitor_section->fast_update ();
+                if (_monitor_section) {
+                        _monitor_section->fast_update ();
                 }
 	}
 }

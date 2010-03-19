@@ -81,6 +81,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void set_auto_rebinding(bool);
 
 	RouteRedirectSelection& selection() { return _selection; }
+        MonitorSection* monitor_section() const { return _monitor_section; }
 
   private:
 	bool					_visible;
@@ -195,8 +196,7 @@ class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public AR
 	void track_column_click (gint);
 	void build_track_menu ();
 
-        MonitorSection* monitor_section;
-
+        MonitorSection* _monitor_section;
 	PluginSelector    *_plugin_selector;
 
 	void strip_property_changed (const PBD::PropertyChange&, MixerStrip *);

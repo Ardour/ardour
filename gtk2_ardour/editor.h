@@ -444,6 +444,15 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void center_screen (nframes64_t);
 
 	TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const;
+	Gtkmm2ext::TearOff* mouse_mode_tearoff () const { return _mouse_mode_tearoff; }
+	Gtkmm2ext::TearOff* tools_tearoff () const { return _tools_tearoff; }
+
+	void snap_to (nframes64_t& first, int32_t direction = 0, bool for_mark = false);
+	void snap_to_with_modifier (nframes64_t& first, GdkEvent const *, int32_t direction = 0, bool for_mark = false);
+	void snap_to (nframes64_t& first, nframes64_t& last, int32_t direction = 0, bool for_mark = false);
+
+	void begin_reversible_command (std::string cmd_name);
+	void commit_reversible_command ();
 
   protected:
 	void map_transport_state ();
@@ -1347,8 +1356,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 private:
 	ArdourCanvas::Item *last_item_entered;
 	int last_item_entered_n;
-public:
 
+public:
 	bool canvas_region_view_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_frame_handle_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_region_view_name_highlight_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
@@ -1376,6 +1385,11 @@ public:
 	bool canvas_markerview_item_view_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*);
 	bool canvas_markerview_start_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*);
 	bool canvas_markerview_end_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*);
+
+  private:
+        friend class DragManager;
+        friend class EditorRouteGroups;
+        friend class EditorRegions;
 
 	/* non-public event handlers */
 
@@ -1488,10 +1502,6 @@ public:
 	void tempo_map_changed (const PBD::PropertyChange&);
 	void redisplay_tempo (bool immediate_redraw);
 
-	void snap_to (nframes64_t& first, int32_t direction = 0, bool for_mark = false);
-	void snap_to_with_modifier (nframes64_t& first, GdkEvent const *, int32_t direction = 0, bool for_mark = false);
-	void snap_to (nframes64_t& first, nframes64_t& last, int32_t direction = 0, bool for_mark = false);
-
 	uint32_t bbt_beat_subdivision;
 
 	/* toolbar */
@@ -1515,7 +1525,7 @@ public:
 	Gtk::Table               toolbar_selection_clock_table;
 	Gtk::Label               toolbar_selection_cursor_label;
 
-	Gtkmm2ext::TearOff*      mouse_mode_tearoff;
+	Gtkmm2ext::TearOff*      _mouse_mode_tearoff;
 	Gtk::ToggleButton         mouse_select_button;
 	Gtk::ToggleButton         mouse_move_button;
 	Gtk::ToggleButton         mouse_gain_button;
@@ -1578,7 +1588,7 @@ public:
 
 	void setup_tooltips ();
 
-	Gtkmm2ext::TearOff*      tools_tearoff;
+	Gtkmm2ext::TearOff*     _tools_tearoff;
 	Gtk::HBox                toolbar_hbox;
 	Gtk::EventBox            toolbar_base;
 	Gtk::Frame               toolbar_frame;
@@ -1765,9 +1775,6 @@ public:
 	void write_selection ();
 
 	XMLNode *before; /* used in *_reversible_command */
-
-	void begin_reversible_command (std::string cmd_name);
-	void commit_reversible_command ();
 
 	void update_title ();
 	void update_title_s (const std::string & snapshot_name);
@@ -1999,8 +2006,8 @@ public:
 
 	bool _have_idled;
 	int resize_idle_id;
+	static gboolean _idle_resize (gpointer);
 	bool idle_resize();
-	friend gboolean _idle_resize (gpointer);
 	int32_t _pending_resize_amount;
 	TimeAxisView* _pending_resize_view;
 

@@ -30,6 +30,9 @@ class CrossThreadChannel {
 	void wakeup();
 	int selectable() const { return fds[0]; }
 
+        int deliver (char msg);
+        int receive (char& msg);
+        
 	void drain ();
 	static void drain (int fd);
 

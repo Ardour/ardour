@@ -130,3 +130,4 @@ ARDOUR_UI::exit_on_main_window_close (GdkEventAny * /*ev*/)
 	return TRUE;
 #endif
 }
+

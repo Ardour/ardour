@@ -38,9 +38,13 @@ class MonitorSection : public RouteUI
         MonitorSection (ARDOUR::Session*);
         ~MonitorSection ();
 
+        void set_session (ARDOUR::Session*);
+
         Gtk::Widget& pack_widget () const;
         void fast_update ();
         static void setup_knob_images ();
+
+        Gtkmm2ext::TearOff* tearoff() const { return _tearoff; }
 
   private:
         Gtk::VBox vpacker;

@@ -52,6 +52,10 @@ namespace Gtk {
 	class Menu;
 }
 
+namespace Gtkmm2ext { 
+        class TearOff;
+}
+
 class Editor;
 class TimeAxisViewItem;
 class TimeAxisView;
@@ -359,6 +363,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const = 0;
 	virtual TrackViewList const & get_track_views () = 0;
 	
+	virtual Gtkmm2ext::TearOff* mouse_mode_tearoff () const = 0;
+	virtual Gtkmm2ext::TearOff* tools_tearoff () const = 0;
+
 	/// Singleton instance, set up by Editor::Editor()
 
 	static PublicEditor* _instance;

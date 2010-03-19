@@ -2802,22 +2802,22 @@ Editor::setup_toolbar ()
 	mode_box->pack_start (edit_mode_selector);
 	mode_box->pack_start (*mouse_mode_button_box);
 
-	mouse_mode_tearoff = manage (new TearOff (*mode_box));
-	mouse_mode_tearoff->set_name ("MouseModeBase");
-	mouse_mode_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), &mouse_mode_tearoff->tearoff_window()), false);
+	_mouse_mode_tearoff = manage (new TearOff (*mode_box));
+	_mouse_mode_tearoff->set_name ("MouseModeBase");
+	_mouse_mode_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), &_mouse_mode_tearoff->tearoff_window()), false);
 
 	if (Profile->get_sae()) {
-		mouse_mode_tearoff->set_can_be_torn_off (false);
+		_mouse_mode_tearoff->set_can_be_torn_off (false);
 	}
 
-	mouse_mode_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-						  &mouse_mode_tearoff->tearoff_window()));
-	mouse_mode_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-						  &mouse_mode_tearoff->tearoff_window(), 1));
-	mouse_mode_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-						  &mouse_mode_tearoff->tearoff_window()));
-	mouse_mode_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-						   &mouse_mode_tearoff->tearoff_window(), 1));
+	_mouse_mode_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
+                                                         &_mouse_mode_tearoff->tearoff_window()));
+	_mouse_mode_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
+                                                         &_mouse_mode_tearoff->tearoff_window(), 1));
+	_mouse_mode_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
+                                                         &_mouse_mode_tearoff->tearoff_window()));
+	_mouse_mode_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
+                                                          &_mouse_mode_tearoff->tearoff_window(), 1));
 
 	mouse_move_button.set_mode (false);
 	mouse_select_button.set_mode (false);
@@ -2931,28 +2931,28 @@ Editor::setup_toolbar ()
 	HBox* hbox = manage (new HBox);
 	hbox->set_spacing(10);
 
-	tools_tearoff = manage (new TearOff (*hbox));
-	tools_tearoff->set_name ("MouseModeBase");
-	tools_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), &tools_tearoff->tearoff_window()), false);
-
+	_tools_tearoff = manage (new TearOff (*hbox));
+	_tools_tearoff->set_name ("MouseModeBase");
+	_tools_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), &_tools_tearoff->tearoff_window()), false);
+        
 	if (Profile->get_sae()) {
-		tools_tearoff->set_can_be_torn_off (false);
+		_tools_tearoff->set_can_be_torn_off (false);
 	}
 
-	tools_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-					     &tools_tearoff->tearoff_window()));
-	tools_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-					     &tools_tearoff->tearoff_window(), 0));
-	tools_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-					     &tools_tearoff->tearoff_window()));
-	tools_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-					      &tools_tearoff->tearoff_window(), 0));
+	_tools_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
+                                                    &_tools_tearoff->tearoff_window()));
+	_tools_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
+                                                    &_tools_tearoff->tearoff_window(), 0));
+	_tools_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
+                                                    &_tools_tearoff->tearoff_window()));
+	_tools_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
+                                                     &_tools_tearoff->tearoff_window(), 0));
 
 	toolbar_hbox.set_spacing (10);
 	toolbar_hbox.set_border_width (1);
 
-	toolbar_hbox.pack_start (*mouse_mode_tearoff, false, false);
-	toolbar_hbox.pack_start (*tools_tearoff, false, false);
+	toolbar_hbox.pack_start (*_mouse_mode_tearoff, false, false);
+	toolbar_hbox.pack_start (*_tools_tearoff, false, false);
 
 	hbox->pack_start (snap_box, false, false);
 	hbox->pack_start (*nudge_box, false, false);
@@ -3660,10 +3660,7 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 void
 Editor::detach_tearoff (Box* /*b*/, Window* /*w*/)
 {
-	cerr << "remove tearoff\n";
-
-	if (tools_tearoff->torn_off() &&
-	    mouse_mode_tearoff->torn_off()) {
+	if (_tools_tearoff->torn_off() && _mouse_mode_tearoff->torn_off()) {
 		top_hbox.remove (toolbar_frame);
 	}
 }
@@ -3671,7 +3668,6 @@ Editor::detach_tearoff (Box* /*b*/, Window* /*w*/)
 void
 Editor::reattach_tearoff (Box* /*b*/, Window* /*w*/, int32_t /*n*/)
 {
-	cerr << "reattach tearoff\n";
 	if (toolbar_frame.get_parent() == 0) {
 		top_hbox.pack_end (toolbar_frame);
 	}
@@ -3985,8 +3981,8 @@ Editor::session_state_saved (string snap_name)
 void
 Editor::maximise_editing_space ()
 {
-	mouse_mode_tearoff->set_visible (false);
-	tools_tearoff->set_visible (false);
+	_mouse_mode_tearoff->set_visible (false);
+	_tools_tearoff->set_visible (false);
 
 	pre_maximal_pane_position = edit_pane.get_position();
 	pre_maximal_editor_width = this->get_width();
@@ -4016,8 +4012,8 @@ Editor::restore_editing_space ()
 
 	unfullscreen();
 
-	mouse_mode_tearoff->set_visible (true);
-	tools_tearoff->set_visible (true);
+	_mouse_mode_tearoff->set_visible (true);
+	_tools_tearoff->set_visible (true);
 	post_maximal_editor_width = this->get_width();
 
 	edit_pane.set_position (pre_maximal_pane_position + abs(this->get_width() - pre_maximal_editor_width));
@@ -4702,8 +4698,8 @@ Editor::first_idle ()
 	_have_idled = true;
 }
 
-static gboolean
-_idle_resizer (gpointer arg)
+gboolean
+Editor::_idle_resize (gpointer arg)
 {
 	return ((Editor*)arg)->idle_resize ();
 }
@@ -4711,10 +4707,8 @@ _idle_resizer (gpointer arg)
 void
 Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 {
-        cerr << "add tav " << view << " with hdelta = " << h << endl;
-
 	if (resize_idle_id < 0) {
-		resize_idle_id = g_idle_add (_idle_resizer, this);
+		resize_idle_id = g_idle_add (_idle_resize, this);
 		_pending_resize_amount = 0;
 	}
 
@@ -4725,8 +4719,6 @@ Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 
 	_pending_resize_amount += h;
 	_pending_resize_view = view;
-
-        cerr << "Pending resize amount initially set at " << _pending_resize_amount << endl;
 
 	min_resulting = min (min_resulting, int32_t (_pending_resize_view->current_height()) + _pending_resize_amount);
 
@@ -4743,7 +4735,6 @@ Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 	/* clamp */
 	if (uint32_t (min_resulting) < TimeAxisView::hSmall) {
 		_pending_resize_amount += TimeAxisView::hSmall - min_resulting;
-                cerr << "pending resize amount = " << _pending_resize_amount << endl;
 	}
 }
 
@@ -4751,9 +4742,6 @@ Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 bool
 Editor::idle_resize ()
 {
-        cerr << "Idle resize, pra = " << _pending_resize_amount 
-             << " set height to " << _pending_resize_view->current_height() << " + " << _pending_resize_amount << endl;
-
 	_pending_resize_view->idle_resize (_pending_resize_view->current_height() + _pending_resize_amount);
 
 	if (dynamic_cast<AutomationTimeAxisView*> (_pending_resize_view) == 0 &&

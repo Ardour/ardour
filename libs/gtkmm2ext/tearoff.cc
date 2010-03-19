@@ -20,8 +20,13 @@
 
 #include <cmath>
 #include <iostream>
-#include <gtkmm2ext/tearoff.h>
-#include <gtkmm2ext/utils.h>
+
+#include "pbd/xml++.h"
+
+#include "gtkmm2ext/tearoff.h"
+#include "gtkmm2ext/utils.h"
+
+#include "i18n.h"
 
 using namespace Gtkmm2ext;
 using namespace Gtk;
@@ -38,6 +43,10 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 	dragging = false;
 	_visible = true;
 	_can_be_torn_off = true;
+        own_window_width = 0;
+        own_window_height = 0;
+        own_window_xpos = 0;
+        own_window_ypos = 0;
 
 	tearoff_event_box.add (tearoff_arrow);
 	tearoff_event_box.set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
@@ -50,7 +59,9 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 	own_window.add_events (KEY_PRESS_MASK|KEY_RELEASE_MASK|BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK|POINTER_MOTION_MASK|POINTER_MOTION_HINT_MASK);
 	own_window.set_resizable (allow_resize);
 	own_window.set_type_hint (WINDOW_TYPE_HINT_TOOLBAR);
-	
+        own_window.signal_realize().connect (sigc::mem_fun (*this, &TearOff::own_window_realized));
+        own_window.signal_configure_event().connect (sigc::mem_fun (*this, &TearOff::own_window_configured), false);
+
 	VBox* box1;
 	box1 = manage (new VBox);
 	box1->pack_start (close_event_box, false, false, 2);
@@ -73,7 +84,6 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 
 	pack_start (contents);
 	pack_start (*box2, false, false, 2);
-
 }
 
 TearOff::~TearOff ()
@@ -119,32 +129,52 @@ TearOff::set_visible (bool yn)
 gint
 TearOff::tearoff_click (GdkEventButton* /*ev*/)
 {
-	if (_can_be_torn_off) {
-		remove (contents);
-		window_box.pack_start (contents);
-		own_window.set_name (get_name());
-		close_event_box.set_name (get_name());
-		own_window.show_all ();
-		own_window.present ();
-		std::cerr << "own window should be visible\n";
-		hide ();
-		Detach ();
-	}
-
+        tear_it_off ();
 	return true;
 }
+
+void
+TearOff::tear_it_off ()
+{
+	if (!_can_be_torn_off) {
+                return;
+        }
+                
+        if (torn_off()) {
+                return;
+        }
+
+        remove (contents);
+        window_box.pack_start (contents);
+        own_window.set_name (get_name());
+        close_event_box.set_name (get_name());
+        own_window.show_all ();
+        own_window.present ();
+        hide ();
+        Detach ();
+}        
 
 gint
 TearOff::close_click (GdkEventButton* /*ev*/)
 {
+        put_it_back ();
+	return true;
+}		
+
+void
+TearOff::put_it_back ()
+{
+        if (!torn_off()) {
+                return;
+        }
+
 	window_box.remove (contents);
 	pack_start (contents);
 	reorder_child (contents, 0);
 	own_window.hide ();
 	show_all ();
 	Attach ();
-	return true;
-}		
+}
 
 gint
 TearOff::window_button_press (GdkEventButton* ev)
@@ -216,4 +246,80 @@ bool
 TearOff::torn_off() const
 {
 	return own_window.is_visible();
+}
+
+void
+TearOff::add_tornoff_state (XMLNode& node) const
+{
+        node.add_property ("tornoff", (own_window.is_visible() ? "yes" : "no"));
+
+        if (own_window_width > 0) {
+                char buf[32];
+
+                snprintf (buf, sizeof (buf), "%d", own_window_width);
+                node.add_property ("width", buf);
+                snprintf (buf, sizeof (buf), "%d", own_window_height);
+                node.add_property ("height", buf);
+                snprintf (buf, sizeof (buf), "%d", own_window_xpos);
+                node.add_property ("xpos", buf);
+                snprintf (buf, sizeof (buf), "%d", own_window_ypos);
+                node.add_property ("ypos", buf);
+        }
+}        
+
+void
+TearOff::set_tornoff_state (const XMLNode& node)
+{
+        Glib::RefPtr<Gdk::Window> win;
+        const XMLProperty* prop;
+
+        if ((prop = node.property (X_("tornoff"))) == 0) {
+                return;
+        }
+
+        if (prop->value() == "yes") {
+                tear_it_off ();
+        } else {
+                put_it_back ();
+        }
+
+        if ((prop = node.property (X_("width"))) != 0) {
+                sscanf (prop->value().c_str(), "%d", &own_window_width);
+        }
+        if ((prop = node.property (X_("height"))) != 0) {
+                sscanf (prop->value().c_str(), "%d", &own_window_height);
+        }
+        if ((prop = node.property (X_("xpos"))) != 0) {
+                sscanf (prop->value().c_str(), "%d", &own_window_xpos);
+        }
+        if ((prop = node.property (X_("ypos"))) != 0) {
+                sscanf (prop->value().c_str(), "%d", &own_window_ypos);
+        }
+
+        own_window.set_default_size (own_window_width, own_window_height);
+        own_window.move (own_window_xpos, own_window_ypos);
+}        
+
+void
+TearOff::own_window_realized ()
+{
+        if (own_window_width > 0) {
+                own_window.set_default_size (own_window_width, own_window_height);
+                own_window.move (own_window_xpos, own_window_ypos);
+        }
+}
+
+bool
+TearOff::own_window_configured (GdkEventConfigure*)
+{
+        Glib::RefPtr<const Gdk::Window> win;
+
+        win = own_window.get_window ();
+        
+        if (win) {
+                win->get_size (own_window_width, own_window_height);
+                win->get_position (own_window_xpos, own_window_ypos);
+        }
+
+        return false;
 }

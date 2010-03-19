@@ -61,18 +61,8 @@ MonitorSection::MonitorSection (Session* s)
 
         }
         
-        _route = _session->control_out ();
-
-        if (!_route) {
-                throw failed_constructor ();
-        }
-
-        _monitor = _route->monitor_control ();
-
-        if (!_monitor) {
-                throw failed_constructor ();
-        }
-
+        set_session (s);
+        
         VBox* sub_knob_packer = manage (new VBox);
         sub_knob_packer->set_spacing (12);
 
@@ -264,6 +254,36 @@ MonitorSection::~MonitorSection ()
         delete _tearoff;
 }
 
+void
+MonitorSection::set_session (Session* s)
+{
+        AxisView::set_session (s);
+
+        if (_session) {
+
+                _route = _session->control_out ();
+
+                if (_route) {
+                        /* session with control outs */
+                        _monitor = _route->monitor_control ();
+                        meter.set_meter (&_route->peak_meter());
+                } else { 
+                        /* session with no control outs */
+                        _monitor.reset ();
+                        _route.reset ();
+                        meter.set_meter (0);
+                }
+                        
+        } else {
+                /* no session */
+                _monitor.reset ();
+                _route.reset ();
+                meter.set_meter (0);
+        }
+
+        /* both might be null */
+}
+
 MonitorSection::ChannelButtonSet::ChannelButtonSet ()
         : cut (X_(""))
         , dim (X_(""))
@@ -283,6 +303,10 @@ MonitorSection::ChannelButtonSet::ChannelButtonSet ()
 void
 MonitorSection::populate_buttons ()
 {
+        if (!_monitor) {
+                return;
+        }
+
         Glib::RefPtr<Action> act;
         uint32_t nchans = _monitor->output_streams().n_audio();
         
@@ -378,6 +402,10 @@ MonitorSection::pack_widget () const
 void
 MonitorSection::dim_all ()
 {
+        if (!_monitor) {
+                return;
+        }
+
         Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), "monitor-dim-all");
         if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
@@ -389,6 +417,10 @@ MonitorSection::dim_all ()
 void
 MonitorSection::cut_all ()
 {
+        if (!_monitor) {
+                return;
+        }
+
         Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), "monitor-cut-all");
         if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
@@ -399,6 +431,10 @@ MonitorSection::cut_all ()
 void
 MonitorSection::mono ()
 {
+        if (!_monitor) {
+                return;
+        }
+
         Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), "monitor-mono");
         if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
@@ -409,6 +445,10 @@ MonitorSection::mono ()
 void
 MonitorSection::cut_channel (uint32_t chn)
 {
+        if (!_monitor) {
+                return;
+        }
+
         char buf[64];
         snprintf (buf, sizeof (buf), "monitor-cut-%u", chn);
 
@@ -424,6 +464,10 @@ MonitorSection::cut_channel (uint32_t chn)
 void
 MonitorSection::dim_channel (uint32_t chn)
 {
+        if (!_monitor) {
+                return;
+        }
+
         char buf[64];
         snprintf (buf, sizeof (buf), "monitor-dim-%u", chn);
 
@@ -440,6 +484,10 @@ MonitorSection::dim_channel (uint32_t chn)
 void
 MonitorSection::solo_channel (uint32_t chn)
 {
+        if (!_monitor) {
+                return;
+        }
+
         char buf[64];
         snprintf (buf, sizeof (buf), "monitor-solo-%u", chn);
 
@@ -456,6 +504,10 @@ MonitorSection::solo_channel (uint32_t chn)
 void
 MonitorSection::invert_channel (uint32_t chn)
 {
+        if (!_monitor) {
+                return;
+        }
+
         char buf[64];
         snprintf (buf, sizeof (buf), "monitor-invert-%u", chn);
 
@@ -625,19 +677,25 @@ MonitorSection::setup_knob_images ()
 void
 MonitorSection::gain_value_changed ()
 {
-        _route->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
+        if (_route) {
+                _route->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
+        }
 }
 
 void
 MonitorSection::dim_level_changed ()
 {
-        _monitor->set_dim_level (dim_adjustment.get_value());
+        if (_monitor) {
+                _monitor->set_dim_level (dim_adjustment.get_value());
+        }
 }
 
 void
 MonitorSection::solo_boost_changed ()
 {
-        _monitor->set_solo_boost_level (solo_boost_adjustment.get_value());
+        if (_monitor) {
+                _monitor->set_solo_boost_level (solo_boost_adjustment.get_value());
+        }
 }
 
 bool
@@ -663,6 +721,10 @@ MonitorSection::linear_gain_printer (SpinButton* button)
 void
 MonitorSection::map_state ()
 {
+        if (!_route || !_monitor) {
+                return;
+        }
+
         gain_control->get_adjustment()->set_value (gain_to_slider_position (_route->gain_control()->get_value()));
         dim_control->get_adjustment()->set_value (_monitor->dim_level());
         solo_boost_control->get_adjustment()->set_value (_monitor->solo_boost_level());

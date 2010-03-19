@@ -404,7 +404,7 @@ ARDOUR_UI::post_engine ()
 	/* start the time-of-day-clock */
 
 #ifndef GTKOSX
-	/* OS X provides an always visible wallclock, so don't be stupid */
+	/* OS X provides a nearly-always visible wallclock, so don't be stupid */
 	update_wall_clock ();
 	Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::update_wall_clock), 60000);
 #endif
@@ -431,8 +431,6 @@ ARDOUR_UI::post_engine ()
 
 ARDOUR_UI::~ARDOUR_UI ()
 {
-	save_ardour_state ();
-
 	delete keyboard;
 	delete editor;
 	delete mixer;
@@ -453,18 +451,19 @@ ARDOUR_UI::configure_timeout ()
 {
 	if (last_configure_time == 0) {
 		/* no configure events yet */
-		return TRUE;
+		return true;
 	}
 
 	/* force a gap of 0.5 seconds since the last configure event
 	 */
 
 	if (get_microseconds() - last_configure_time < 500000) {
-		return TRUE;
+		return true;
 	} else {
 		have_configure_timeout = false;
+                cerr << "config event-driven save\n";
 		save_ardour_state ();
-		return FALSE;
+		return false;
 	}
 }
 
@@ -538,67 +537,6 @@ ARDOUR_UI::get_transport_controllable_state ()
 	return *node;
 }
 
-void
-ARDOUR_UI::save_ardour_state ()
-{
-	if (!keyboard || !mixer || !editor) {
-		return;
-	}
-
-	/* XXX this is all a bit dubious. add_extra_xml() uses
-	   a different lifetime model from add_instant_xml().
-	*/
-
-	XMLNode* node = new XMLNode (keyboard->get_state());
-	Config->add_extra_xml (*node);
-	Config->add_extra_xml (get_transport_controllable_state());
-
-        XMLNode* window_node = new XMLNode (X_("UI"));
-        
-        window_node->add_property ("show-big-clock", (big_clock_window && big_clock_window->is_visible() ? "yes" : "no"));
-
-        Glib::RefPtr<Gdk::Window> win;
-
-        if (big_clock_window && (win = big_clock_window->get_window())) {
-
-                int w, h;
-                int xoff, yoff;
-                char buf[32];
-
-                win->get_size (w, h);
-                win->get_position (xoff, yoff);
-
-                snprintf (buf, sizeof (buf), "%d", w);
-                window_node->add_property ("big-clock-x-size", buf);
-                snprintf (buf, sizeof (buf), "%d", h);
-                window_node->add_property ("big-clock-y-size", buf);
-                snprintf (buf, sizeof (buf), "%d", xoff);
-                window_node->add_property ("big-clock-x-off", buf);
-                snprintf (buf, sizeof (buf), "%d", yoff);
-                window_node->add_property ("big-clock-y-off", buf);
-        }
-
-        Config->add_extra_xml (*window_node);
-
-	if (_startup && _startup->engine_control() && _startup->engine_control()->was_used()) {
-		Config->add_extra_xml (_startup->engine_control()->get_state());
-	}
-	Config->save_state();
-	ui_config->save_state ();
-
-	XMLNode enode(static_cast<Stateful*>(editor)->get_state());
-	XMLNode mnode(mixer->get_state());
-
-	if (_session) {
-		_session->add_instant_xml (enode);
-		_session->add_instant_xml (mnode);
-	} else {
-		Config->add_instant_xml (enode);
-		Config->add_instant_xml (mnode);
-	}
-
-	Keyboard::save_keybindings ();
-}
 
 gint
 ARDOUR_UI::autosave_session ()
@@ -831,6 +769,7 @@ If you still wish to quit, please use the\n\n\
 
 	ArdourDialog::close_all_dialogs ();
 	engine->stop (true);
+        cerr << "Save before quit\n";
 	save_ardour_state ();
 	quit ();
 }
@@ -2091,7 +2030,7 @@ ARDOUR_UI::snapshot_session ()
 void
 ARDOUR_UI::save_state (const string & name)
 {
-	(void) save_state_canfail (name);
+	save_state_canfail (name);
 }
 
 int
@@ -2108,6 +2047,7 @@ ARDOUR_UI::save_state_canfail (string name)
 			return ret;
 		}
 	}
+        cerr << "SS canfail\n";
 	save_ardour_state (); /* XXX cannot fail? yeah, right ... */
 	return 0;
 }

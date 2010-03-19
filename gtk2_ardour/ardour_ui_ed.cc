@@ -26,10 +26,11 @@
 #include <cmath>
 
 #include <glibmm/miscutils.h>
-
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/window_title.h>
 #include <gtk/gtk.h>
+
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/window_title.h"
+#include "gtkmm2ext/tearoff.h"
 
 #include "pbd/file_utils.h"
 #include "pbd/fpu.h"
@@ -38,10 +39,13 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "audio_clock.h"
+#include "keyboard.h"
+#include "monitor_section.h"
 #include "engine_dialog.h"
 #include "editor.h"
 #include "actions.h"
 #include "mixer_ui.h"
+#include "startup.h"
 #include "utils.h"
 
 #ifdef GTKOSX
@@ -671,3 +675,90 @@ ARDOUR_UI::idle_big_clock_text_resizer (int win_w, int win_h)
 
 	return false;
 }
+
+void
+ARDOUR_UI::save_ardour_state ()
+{
+	if (!keyboard || !mixer || !editor) {
+		return;
+	}
+
+	/* XXX this is all a bit dubious. add_extra_xml() uses
+	   a different lifetime model from add_instant_xml().
+	*/
+
+	XMLNode* node = new XMLNode (keyboard->get_state());
+	Config->add_extra_xml (*node);
+	Config->add_extra_xml (get_transport_controllable_state());
+
+        XMLNode* window_node = new XMLNode (X_("UI"));
+        
+        window_node->add_property ("show-big-clock", (big_clock_window && big_clock_window->is_visible() ? "yes" : "no"));
+
+        Glib::RefPtr<Gdk::Window> win;
+
+        if (big_clock_window && (win = big_clock_window->get_window())) {
+
+                int w, h;
+                int xoff, yoff;
+                char buf[32];
+
+                win->get_size (w, h);
+                win->get_position (xoff, yoff);
+
+                snprintf (buf, sizeof (buf), "%d", w);
+                window_node->add_property ("big-clock-x-size", buf);
+                snprintf (buf, sizeof (buf), "%d", h);
+                window_node->add_property ("big-clock-y-size", buf);
+                snprintf (buf, sizeof (buf), "%d", xoff);
+                window_node->add_property ("big-clock-x-off", buf);
+                snprintf (buf, sizeof (buf), "%d", yoff);
+                window_node->add_property ("big-clock-y-off", buf);
+        }
+
+        /* tearoffs */
+
+        XMLNode* tearoff_node = new XMLNode (X_("Tearoffs"));
+
+        if (transport_tearoff) {
+                XMLNode* t = new XMLNode (X_("transport"));
+                transport_tearoff->add_tornoff_state (*t);
+                tearoff_node->add_child_nocopy (*t);
+        } 
+
+        if (mixer && mixer->monitor_section()) {
+                XMLNode* t = new XMLNode (X_("monitor-section"));
+                mixer->monitor_section()->tearoff()->add_tornoff_state (*t);
+                tearoff_node->add_child_nocopy (*t);
+        } 
+
+        if (editor && editor->mouse_mode_tearoff()) {
+                XMLNode* t = new XMLNode (X_("mouse-mode"));
+                editor->mouse_mode_tearoff ()->add_tornoff_state (*t);
+                tearoff_node->add_child_nocopy (*t);
+        } 
+        
+        window_node->add_child_nocopy (*tearoff_node);
+
+        Config->add_extra_xml (*window_node);
+
+	if (_startup && _startup->engine_control() && _startup->engine_control()->was_used()) {
+		Config->add_extra_xml (_startup->engine_control()->get_state());
+	}
+	Config->save_state();
+	ui_config->save_state ();
+
+	XMLNode enode(static_cast<Stateful*>(editor)->get_state());
+	XMLNode mnode(mixer->get_state());
+
+	if (_session) {
+		_session->add_instant_xml (enode);
+		_session->add_instant_xml (mnode);
+	} else {
+		Config->add_instant_xml (enode);
+		Config->add_instant_xml (mnode);
+	}
+
+	Keyboard::save_keybindings ();
+}
+

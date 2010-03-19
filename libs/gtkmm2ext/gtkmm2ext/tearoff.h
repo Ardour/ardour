@@ -25,6 +25,8 @@
 #include <gtkmm/box.h>
 #include <gtkmm/eventbox.h>
 
+class XMLNode;
+
 namespace Gtkmm2ext {
 
 class TearOff : public Gtk::HBox
@@ -44,6 +46,11 @@ class TearOff : public Gtk::HBox
 
 	Gtk::Window& tearoff_window() { return own_window; }
 	bool torn_off() const;
+        void tear_it_off ();
+        void put_it_back ();
+
+        void set_tornoff_state (const XMLNode&);
+        void add_tornoff_state (XMLNode&) const;
 
   private:
 	Gtk::Widget&   contents;
@@ -58,6 +65,10 @@ class TearOff : public Gtk::HBox
 	bool           dragging;
 	bool          _visible;
 	bool          _can_be_torn_off;
+        int            own_window_width;
+        int            own_window_height;
+        int            own_window_xpos;
+        int            own_window_ypos;
 
 	gint tearoff_click (GdkEventButton*);
 	gint close_click (GdkEventButton*);
@@ -66,6 +77,9 @@ class TearOff : public Gtk::HBox
 	gint window_button_press (GdkEventButton*);
 	gint window_button_release (GdkEventButton*);
 	gint window_delete_event (GdkEventAny*);
+
+        void own_window_realized ();
+        bool own_window_configured (GdkEventConfigure*);
 };
 
 } /* namespace */

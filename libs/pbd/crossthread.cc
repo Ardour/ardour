@@ -104,3 +104,15 @@ CrossThreadChannel::drain (int fd)
 	char buf[64];
 	while (::read (fd, buf, sizeof (buf)) > 0);
 }
+
+int
+CrossThreadChannel::deliver (char msg)
+{
+        return ::write (fds[1], &msg, 1);
+}
+
+int 
+CrossThreadChannel::receive (char& msg)
+{
+        return ::read (fds[0], &msg, 1);
+}
