@@ -206,7 +206,7 @@ Session::Session (AudioEngine &eng,
 		  string snapshot_name,
 		  AutoConnectOption input_ac,
 		  AutoConnectOption output_ac,
-		  uint32_t control_out_channels,
+                  bool with_monitor,
 		  uint32_t master_out_channels,
 		  uint32_t requested_physical_in,
 		  uint32_t requested_physical_out,
@@ -295,8 +295,8 @@ Session::Session (AudioEngine &eng,
 			output_ac = AutoConnectOption (output_ac & ~AutoConnectMaster);
 		}
 
-		if (control_out_channels) {
-			ChanCount count(DataType::AUDIO, control_out_channels);
+		if (with_monitor) {
+			ChanCount count(DataType::AUDIO, master_out_channels);
 			Route* rt = new Route (*this, _("monitor"), Route::ControlOut, DataType::AUDIO);
 			boost_debug_shared_ptr_mark_interesting (rt, "Route");
 			shared_ptr<Route> r (rt);
@@ -648,7 +648,9 @@ Session::when_engine_running (bool new_session)
 
 	if (new_session && !no_auto_connect()) {
 
-		if (_master_out && Config->get_auto_connect_standard_busses()) {
+                /* don't connect the master bus outputs if there is a monitor bus */
+
+		if (_master_out && Config->get_auto_connect_standard_busses() && !_control_out) {
 
 			/* if requested auto-connect the outputs to the first N physical ports.
 			 */
@@ -697,11 +699,10 @@ Session::when_engine_running (bool new_session)
 				}
 			}
 
-			/* if control out is not connected,
-			   connect control out to physical outs, but use ones after the master if possible
+			/* if control out is not connected, connect control out to physical outs
 			*/
 
-			if (!_control_out->output()->connected_to (boost::shared_ptr<IO>())) {
+			if (!_control_out->output()->connected ()) {
 
 				if (!Config->get_monitor_bus_preferred_bundle().empty()) {
 
@@ -716,19 +717,15 @@ Session::when_engine_running (bool new_session)
 					}
 
 				} else {
-
+                                        
 					for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-						uint32_t shift = _master_out->n_outputs().get(*t);
 						uint32_t mod = _engine.n_physical_outputs (*t);
 						uint32_t limit = _control_out->n_outputs().get(*t);
-
-						cerr << "Connecting " << limit << " control out ports, shift is " << shift
-							<< " mod is " << mod << endl;
 
 						for (uint32_t n = 0; n < limit; ++n) {
 
 							Port* p = _control_out->output()->ports().port(*t, n);
-							string connect_to = _engine.get_nth_physical_output (*t, (n+shift) % mod);
+							string connect_to = _engine.get_nth_physical_output (*t, (n % mod));
 
 							if (!connect_to.empty()) {
 								if (_control_out->output()->connect (p, connect_to, this)) {

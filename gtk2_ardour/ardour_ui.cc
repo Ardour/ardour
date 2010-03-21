@@ -2273,7 +2273,6 @@ int
 ARDOUR_UI::build_session_from_nsd (const Glib::ustring& session_path, const Glib::ustring& session_name)
 {
 
-	uint32_t cchns;
 	uint32_t mchns;
 	AutoConnectOption iconnect;
 	AutoConnectOption oconnect;
@@ -2282,7 +2281,6 @@ ARDOUR_UI::build_session_from_nsd (const Glib::ustring& session_path, const Glib
 
 	if (Profile->get_sae()) {
 
-		cchns = 0;
 		mchns = 2;
 		iconnect = AutoConnectPhysical;
 		oconnect = AutoConnectMaster;
@@ -2292,12 +2290,6 @@ ARDOUR_UI::build_session_from_nsd (const Glib::ustring& session_path, const Glib
 	} else {
 
 		/* get settings from advanced section of NSD */
-
-		if (_startup->create_control_bus()) {
-			cchns = (uint32_t) _startup->control_channel_count();
-		} else {
-			cchns = 0;
-		}
 
 		if (_startup->create_master_bus()) {
 			mchns = (uint32_t) _startup->master_channel_count();
@@ -2329,7 +2321,7 @@ ARDOUR_UI::build_session_from_nsd (const Glib::ustring& session_path, const Glib
 
 	if (build_session (session_path,
 			   session_name,
-			   cchns,
+                           _startup->create_control_bus(),
 			   mchns,
 			   iconnect,
 			   oconnect,
@@ -2642,7 +2634,7 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 
 int
 ARDOUR_UI::build_session (const Glib::ustring& path, const Glib::ustring& snap_name,
-			  uint32_t control_channels,
+                          bool with_monitor,
 			  uint32_t master_channels,
 			  AutoConnectOption input_connect,
 			  AutoConnectOption output_connect,
@@ -2671,7 +2663,7 @@ ARDOUR_UI::build_session (const Glib::ustring& path, const Glib::ustring& snap_n
 
 	try {
 		new_session = new Session (*engine, path, snap_name, input_connect, output_connect,
-					   control_channels, master_channels, nphysin, nphysout, initial_length);
+					   with_monitor, master_channels, nphysin, nphysout, initial_length);
 	}
 
 	catch (...) {

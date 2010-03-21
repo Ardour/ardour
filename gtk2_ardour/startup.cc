@@ -812,21 +812,15 @@ ArdourStartup::setup_more_options_page ()
 
 	_output_limit_count.set_adjustment (_output_limit_count_adj);
 	_input_limit_count.set_adjustment (_input_limit_count_adj);
-	_control_bus_channel_count.set_adjustment (_control_bus_channel_count_adj);
 	_master_bus_channel_count.set_adjustment (_master_bus_channel_count_adj);
 
 	chan_count_label_1.set_text (_("channels"));
-	chan_count_label_2.set_text (_("channels"));
 	chan_count_label_3.set_text (_("channels"));
 	chan_count_label_4.set_text (_("channels"));
 
 	chan_count_label_1.set_alignment(0,0.5);
 	chan_count_label_1.set_padding(0,0);
 	chan_count_label_1.set_line_wrap(false);
-
-	chan_count_label_2.set_alignment(0,0.5);
-	chan_count_label_2.set_padding(0,0);
-	chan_count_label_2.set_line_wrap(false);
 
 	chan_count_label_3.set_alignment(0,0.5);
 	chan_count_label_3.set_padding(0,0);
@@ -846,13 +840,6 @@ ArdourStartup::setup_more_options_page ()
 	_create_control_bus.set_mode(true);
 	_create_control_bus.set_active(false);
 	_create_control_bus.set_border_width(0);
-
-	_control_bus_channel_count.set_flags(Gtk::CAN_FOCUS);
-	_control_bus_channel_count.set_update_policy(Gtk::UPDATE_ALWAYS);
-	_control_bus_channel_count.set_numeric(true);
-	_control_bus_channel_count.set_digits(0);
-	_control_bus_channel_count.set_wrap(false);
-	_control_bus_channel_count.set_sensitive(false);
 
 	_master_bus_channel_count.set_flags(Gtk::CAN_FOCUS);
 	_master_bus_channel_count.set_update_policy(Gtk::UPDATE_ALWAYS);
@@ -909,8 +896,6 @@ ArdourStartup::setup_more_options_page ()
 	bus_table.attach (_master_bus_channel_count, 1, 2, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 0);
 	bus_table.attach (chan_count_label_1, 2, 3, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 6, 0);
 	bus_table.attach (_create_control_bus, 0, 1, 1, 2, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 0);
-	bus_table.attach (_control_bus_channel_count, 1, 2, 1, 2, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 0);
-	bus_table.attach (chan_count_label_2, 2, 3, 1, 2, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 6, 0);
 
 	input_port_limit_hbox.pack_start(_limit_input_ports, Gtk::PACK_SHRINK, 6);
 	input_port_limit_hbox.pack_start(_input_limit_count, Gtk::PACK_SHRINK, 0);
@@ -1037,12 +1022,6 @@ ArdourStartup::create_control_bus() const
 	return _create_control_bus.get_active();
 }
 
-int
-ArdourStartup::control_channel_count() const
-{
-	return _control_bus_channel_count.get_value_as_int();
-}
-
 bool
 ArdourStartup::connect_inputs() const
 {
@@ -1130,13 +1109,16 @@ ArdourStartup::limit_outputs_clicked ()
 void
 ArdourStartup::master_bus_button_clicked ()
 {
-	_master_bus_channel_count.set_sensitive(_create_master_bus.get_active());
+        bool yn = _create_master_bus.get_active();
+
+	_master_bus_channel_count.set_sensitive(yn);
+        _create_control_bus.set_sensitive (yn);
 }
 
 void
 ArdourStartup::monitor_bus_button_clicked ()
 {
-	_control_bus_channel_count.set_sensitive(_create_control_bus.get_active());
+        /* relax */
 }
 
 void

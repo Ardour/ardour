@@ -45,7 +45,6 @@ class ArdourStartup : public Gtk::Assistant {
 	int master_channel_count() const;
 
 	bool create_control_bus() const;
-	int control_channel_count() const;
 
 	bool connect_inputs() const;
 	bool limit_inputs_used_for_connection() const;
@@ -180,7 +179,6 @@ class ArdourStartup : public Gtk::Assistant {
 	Gtk::VBox more_options_vbox;
 
 	Gtk::Label chan_count_label_1;
-	Gtk::Label chan_count_label_2;
 	Gtk::Label chan_count_label_3;
 	Gtk::Label chan_count_label_4;
 	Gtk::Table advanced_table;
@@ -211,7 +209,6 @@ class ArdourStartup : public Gtk::Assistant {
 	Gtk::SpinButton _master_bus_channel_count;
 
 	Gtk::CheckButton _create_control_bus;
-	Gtk::SpinButton _control_bus_channel_count;
 
 	Gtk::CheckButton _connect_inputs;
 	Gtk::CheckButton _limit_input_ports;

@@ -1444,18 +1444,24 @@ IO::set_name_in_state (XMLNode& node, const string& new_name)
 }
 
 bool
+IO::connected () const
+{
+        /* do we have any connections at all? */
+        
+        for (PortSet::const_iterator p = _ports.begin(); p != _ports.end(); ++p) {
+                if (p->connected()) {
+                        return true;
+                }
+        }
+        
+        return false;
+}
+
+bool
 IO::connected_to (boost::shared_ptr<const IO> other) const
 {
 	if (!other) {
-		/* do we have any connections at all? */
-
-		for (PortSet::const_iterator p = _ports.begin(); p != _ports.end(); ++p) {
-			if (p->connected()) {
-				return true;
-			}
-		}
-
-		return false;
+                return connected ();
 	}
 
 	assert (_direction != other->direction());

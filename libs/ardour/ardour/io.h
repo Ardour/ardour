@@ -107,6 +107,7 @@ class IO : public SessionObject, public Latent
 	int disconnect (Port *our_port, std::string other_port, void *src);
 	int disconnect (void *src);
 	bool connected_to (boost::shared_ptr<const IO>) const;
+        bool connected () const;
 
 	nframes_t signal_latency() const { return _own_latency; }
 	nframes_t latency() const;

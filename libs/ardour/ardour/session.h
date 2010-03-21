@@ -138,18 +138,18 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	/* creating a new Session */
 
 	Session (AudioEngine&,
-			std::string fullpath,
-			std::string snapshot_name,
-			AutoConnectOption input_auto_connect,
-			AutoConnectOption output_auto_connect,
-			uint32_t control_out_channels,
-			uint32_t master_out_channels,
-			uint32_t n_physical_in,
-			uint32_t n_physical_out,
-			nframes_t initial_length);
-
+                 std::string fullpath,
+                 std::string snapshot_name,
+                 AutoConnectOption input_auto_connect,
+                 AutoConnectOption output_auto_connect,
+                 bool with_monitor,
+                 uint32_t master_out_channels,
+                 uint32_t n_physical_in,
+                 uint32_t n_physical_out,
+                 nframes_t initial_length);
+        
 	virtual ~Session ();
-
+        
 	std::string path() const { return _path; }
 	std::string name() const { return _name; }
 	std::string snap_name() const { return _current_snapshot_name; }
