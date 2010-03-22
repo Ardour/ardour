@@ -80,6 +80,7 @@ class ArdourStartup : public Gtk::Assistant {
 	bool splash_expose (GdkEventExpose* ev);
 
 	void setup_first_time_config_page ();
+        void config_changed ();
 
 	/* first page */
 	Gtk::FileChooserButton* default_dir_chooser;

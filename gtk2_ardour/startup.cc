@@ -261,6 +261,12 @@ void
 ArdourStartup::default_dir_changed ()
 {
 	Config->set_default_session_parent_dir (default_dir_chooser->get_current_folder());
+        config_changed ();
+}
+
+void
+ArdourStartup::config_changed ()
+{
 	config_modified = true;
 }
 
@@ -355,6 +361,15 @@ ArdourStartup::setup_monitor_section_choice_page ()
 	VBox* vbox = manage (new VBox);
 	RadioButton::Group g (use_monitor_section_button.get_group());
 	no_monitor_section_button.set_group (g);
+
+        if (Config->get_use_monitor_bus()) {
+                use_monitor_section_button.set_active (true);
+        } else {
+                no_monitor_section_button.set_active (true);
+        }
+
+        use_monitor_section_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
+        no_monitor_section_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
         
 	monitor_section_label.set_markup("\
 When connecting speakers to Ardour, would you prefer to use a monitor bus,\n\
@@ -502,6 +517,8 @@ ArdourStartup::on_apply ()
 		} else if (monitor_via_ardour_button.get_active()) {
 			Config->set_monitoring_model (SoftwareMonitoring);
 		}
+
+                Config->set_use_monitor_bus (use_monitor_section_button.get_active());
 
 		Config->save_state ();
 	}
