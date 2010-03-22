@@ -44,8 +44,6 @@ class ArdourStartup : public Gtk::Assistant {
 	bool create_master_bus() const;
 	int master_channel_count() const;
 
-	bool create_control_bus() const;
-
 	bool connect_inputs() const;
 	bool limit_inputs_used_for_connection() const;
 	int input_limit_count() const;
@@ -104,6 +102,14 @@ class ArdourStartup : public Gtk::Assistant {
 	Gtk::RadioButton monitor_via_hardware_button;
 	Gtk::RadioButton monitor_via_ardour_button;
 	void setup_monitoring_choice_page ();
+
+	/* monitor section choices */
+
+	Gtk::VBox mon_sec_vbox;
+	Gtk::Label monitor_section_label;
+	Gtk::RadioButton use_monitor_section_button;
+	Gtk::RadioButton no_monitor_section_button;
+	void setup_monitor_section_choice_page ();
 
 	/* session page (could be new or existing) */
 
@@ -208,8 +214,6 @@ class ArdourStartup : public Gtk::Assistant {
 	Gtk::CheckButton _create_master_bus;
 	Gtk::SpinButton _master_bus_channel_count;
 
-	Gtk::CheckButton _create_control_bus;
-
 	Gtk::CheckButton _connect_inputs;
 	Gtk::CheckButton _limit_input_ports;
 	Gtk::SpinButton _input_limit_count;
@@ -224,7 +228,6 @@ class ArdourStartup : public Gtk::Assistant {
 
 	Gtk::Adjustment _output_limit_count_adj;
 	Gtk::Adjustment _input_limit_count_adj;
-	Gtk::Adjustment _control_bus_channel_count_adj;
 	Gtk::Adjustment _master_bus_channel_count_adj;
 
 	void connect_inputs_clicked ();
@@ -232,7 +235,6 @@ class ArdourStartup : public Gtk::Assistant {
 	void limit_inputs_clicked ();
 	void limit_outputs_clicked ();
 	void master_bus_button_clicked ();
-	void monitor_bus_button_clicked ();
 	void setup_more_options_page ();
 
 	/* final page */
@@ -250,6 +252,7 @@ class ArdourStartup : public Gtk::Assistant {
 	gint new_user_page_index;
 	gint default_folder_page_index;
 	gint monitoring_page_index;
+	gint monitor_section_page_index;
 	gint session_page_index;
 	gint initial_choice_index;
 	gint final_page_index;

@@ -2321,7 +2321,6 @@ ARDOUR_UI::build_session_from_nsd (const Glib::ustring& session_path, const Glib
 
 	if (build_session (session_path,
 			   session_name,
-                           _startup->create_control_bus(),
 			   mchns,
 			   iconnect,
 			   oconnect,
@@ -2634,7 +2633,6 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 
 int
 ARDOUR_UI::build_session (const Glib::ustring& path, const Glib::ustring& snap_name,
-                          bool with_monitor,
 			  uint32_t master_channels,
 			  AutoConnectOption input_connect,
 			  AutoConnectOption output_connect,
@@ -2663,7 +2661,7 @@ ARDOUR_UI::build_session (const Glib::ustring& path, const Glib::ustring& snap_n
 
 	try {
 		new_session = new Session (*engine, path, snap_name, input_connect, output_connect,
-					   with_monitor, master_channels, nphysin, nphysout, initial_length);
+					   master_channels, nphysin, nphysout, initial_length);
 	}
 
 	catch (...) {

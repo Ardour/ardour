@@ -142,7 +142,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
                  std::string snapshot_name,
                  AutoConnectOption input_auto_connect,
                  AutoConnectOption output_auto_connect,
-                 bool with_monitor,
                  uint32_t master_out_channels,
                  uint32_t n_physical_in,
                  uint32_t n_physical_out,

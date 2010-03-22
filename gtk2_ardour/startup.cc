@@ -44,11 +44,12 @@ ArdourStartup::ArdourStartup ()
 	, monitor_via_hardware_button (_("Use an external mixer or the hardware mixer of your audio interface.\n\
 Ardour will play NO role in monitoring"))
 	, monitor_via_ardour_button (string_compose (_("Ask %1 to playback material as it is being recorded"), PROGRAM_NAME))
+        , use_monitor_section_button (_("Use a monitor bus in new sessions (more complex, more control)"))
+        , no_monitor_section_button (_("Just use the master out bus (simpler, less control)"))
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
 	, more_new_session_options_button (_("I'd like more options for this session"))
 	, _output_limit_count_adj (1, 0, 100, 1, 10, 0)
 	, _input_limit_count_adj (1, 0, 100, 1, 10, 0)
-	, _control_bus_channel_count_adj (2, 0, 100, 1, 10, 0)
 	, _master_bus_channel_count_adj (2, 0, 100, 1, 10, 0)
 
 {
@@ -100,6 +101,7 @@ Ardour will play NO role in monitoring"))
 		setup_new_user_page ();
 		setup_first_time_config_page ();
 		setup_monitoring_choice_page ();
+		setup_monitor_section_choice_page ();
 
 		if (need_audio_setup) {
 			setup_audio_page ();
@@ -319,7 +321,7 @@ signal as well as record it. This is called \"monitoring\". There are\n\
 different ways to do this depending on the equipment you have and the\n\
 configuration of that equipment. The two most common are presented here.\n\
 Please choose whichever one is right for your setup.\n\n\
-<i>(You can change this preference at any time, via the Options menu)</i>");
+<i>(You can change this preference at any time, via the Preferences dialog)</i>");
 	monitor_label.set_alignment (0.0, 0.0);
 
 	vbox->set_spacing (6);
@@ -341,6 +343,48 @@ Please choose whichever one is right for your setup.\n\n\
 	 */
 
 	set_page_complete (mon_vbox, true);
+}
+
+void
+ArdourStartup::setup_monitor_section_choice_page ()
+{
+	mon_sec_vbox.set_spacing (18);
+	mon_sec_vbox.set_border_width (24);
+
+	HBox* hbox = manage (new HBox);
+	VBox* vbox = manage (new VBox);
+	RadioButton::Group g (use_monitor_section_button.get_group());
+	no_monitor_section_button.set_group (g);
+        
+	monitor_section_label.set_markup("\
+When connecting speakers to Ardour, would you prefer to use a monitor bus,\n\
+which will offer various kinds of control at the last stage of output\n\
+or would you prefer to just connect directly to the master outs?\n\n\
+Most home studio users will probably want to start <i>without</i> a monitor bus.\n\
+Those with experience of traditional mixing consoles may prefer to use one.\n\
+Please choose whichever one is right for your setup.\n\n\
+<i>(You can change this preference at any time, via the Preferences dialog)</i>");
+	monitor_section_label.set_alignment (0.0, 0.0);
+
+	vbox->set_spacing (6);
+
+	vbox->pack_start (no_monitor_section_button, false, true);
+	vbox->pack_start (use_monitor_section_button, false, true);
+	hbox->pack_start (*vbox, true, true, 8);
+	mon_sec_vbox.pack_start (monitor_section_label, false, false);
+	mon_sec_vbox.pack_start (*hbox, false, false);
+
+	mon_sec_vbox.show_all ();
+
+	monitor_section_page_index = append_page (mon_sec_vbox);
+	set_page_title (mon_sec_vbox, _("Monitor Section"));
+	set_page_header_image (mon_sec_vbox, icon_pixbuf);
+
+	/* user could just click on "Forward" if default
+	 * choice is correct.
+	 */
+
+	set_page_complete (mon_sec_vbox, true);
 }
 
 void
@@ -834,13 +878,6 @@ ArdourStartup::setup_more_options_page ()
 	input_label.set_markup (_("<b>Inputs</b>"));
 	output_label.set_markup (_("<b>Outputs</b>"));
 
-	_create_control_bus.set_label (_("Create monitor bus"));
-	_create_control_bus.set_flags(Gtk::CAN_FOCUS);
-	_create_control_bus.set_relief(Gtk::RELIEF_NORMAL);
-	_create_control_bus.set_mode(true);
-	_create_control_bus.set_active(false);
-	_create_control_bus.set_border_width(0);
-
 	_master_bus_channel_count.set_flags(Gtk::CAN_FOCUS);
 	_master_bus_channel_count.set_update_policy(Gtk::UPDATE_ALWAYS);
 	_master_bus_channel_count.set_numeric(true);
@@ -895,7 +932,6 @@ ArdourStartup::setup_more_options_page ()
 	bus_table.attach (_create_master_bus, 0, 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 0);
 	bus_table.attach (_master_bus_channel_count, 1, 2, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 0);
 	bus_table.attach (chan_count_label_1, 2, 3, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 6, 0);
-	bus_table.attach (_create_control_bus, 0, 1, 1, 2, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 0);
 
 	input_port_limit_hbox.pack_start(_limit_input_ports, Gtk::PACK_SHRINK, 6);
 	input_port_limit_hbox.pack_start(_input_limit_count, Gtk::PACK_SHRINK, 0);
@@ -992,7 +1028,6 @@ ArdourStartup::setup_more_options_page ()
 	_limit_input_ports.signal_clicked().connect (sigc::mem_fun (*this, &ArdourStartup::limit_inputs_clicked));
 	_limit_output_ports.signal_clicked().connect (sigc::mem_fun (*this, &ArdourStartup::limit_outputs_clicked));
 	_create_master_bus.signal_clicked().connect (sigc::mem_fun (*this, &ArdourStartup::master_bus_button_clicked));
-	_create_control_bus.signal_clicked().connect (sigc::mem_fun (*this, &ArdourStartup::monitor_bus_button_clicked));
 
 	/* note that more_options_vbox is NOT visible by
 	 * default. this is entirely by design - this page
@@ -1014,12 +1049,6 @@ int
 ArdourStartup::master_channel_count() const
 {
 	return _master_bus_channel_count.get_value_as_int();
-}
-
-bool
-ArdourStartup::create_control_bus() const
-{
-	return _create_control_bus.get_active();
 }
 
 bool
@@ -1112,13 +1141,6 @@ ArdourStartup::master_bus_button_clicked ()
         bool yn = _create_master_bus.get_active();
 
 	_master_bus_channel_count.set_sensitive(yn);
-        _create_control_bus.set_sensitive (yn);
-}
-
-void
-ArdourStartup::monitor_bus_button_clicked ()
-{
-        /* relax */
 }
 
 void

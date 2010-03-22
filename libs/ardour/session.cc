@@ -206,7 +206,6 @@ Session::Session (AudioEngine &eng,
 		  string snapshot_name,
 		  AutoConnectOption input_ac,
 		  AutoConnectOption output_ac,
-                  bool with_monitor,
 		  uint32_t master_out_channels,
 		  uint32_t requested_physical_in,
 		  uint32_t requested_physical_out,
@@ -295,7 +294,7 @@ Session::Session (AudioEngine &eng,
 			output_ac = AutoConnectOption (output_ac & ~AutoConnectMaster);
 		}
 
-		if (with_monitor) {
+		if (Config->get_use_monitor_bus()) {
 			ChanCount count(DataType::AUDIO, master_out_channels);
 			Route* rt = new Route (*this, _("monitor"), Route::ControlOut, DataType::AUDIO);
 			boost_debug_shared_ptr_mark_interesting (rt, "Route");
@@ -813,8 +812,6 @@ Session::hookup_io (bool new_session)
                                 /* relax */
                                 
                         } else {
-                                
-                                cerr << "Connecting route " << (*x)->name() << " to control outs\n";
                                 
                                 (*x)->listen_via (_control_out,
                                                   (Config->get_listen_position() == AfterFaderListen ? PostFader : PreFader),

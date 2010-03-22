@@ -125,7 +125,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	int load_session (const Glib::ustring& path, const Glib::ustring& snapshot, Glib::ustring mix_template = Glib::ustring());
 	bool session_loaded;
 	int build_session (const Glib::ustring& path, const Glib::ustring& snapshot,
-			   bool with_monitor,
 			   uint32_t master_chns,
 			   ARDOUR::AutoConnectOption input_connect,
 			   ARDOUR::AutoConnectOption output_connect,

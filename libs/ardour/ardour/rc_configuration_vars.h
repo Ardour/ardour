@@ -79,6 +79,7 @@ CONFIG_VARIABLE (bool, mute_affects_control_outs, "mute-affects-control-outs", t
 CONFIG_VARIABLE (bool, mute_affects_main_outs, "mute-affects-main-outs", true)
 CONFIG_VARIABLE (MonitorModel, monitoring_model, "monitoring-model", ExternalMonitoring)
 CONFIG_VARIABLE (ListenPosition, listen_position, "listen-position", AfterFaderListen)
+CONFIG_VARIABLE (bool, use_monitor_bus, "use-monitor-bus", false)
 
 CONFIG_VARIABLE (bool, solo_control_is_listen_control, "solo-control-is-listen-control", false)
 CONFIG_VARIABLE (bool, solo_latched, "solo-latched", true)
