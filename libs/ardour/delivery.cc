@@ -546,7 +546,7 @@ Delivery::target_gain ()
 
         } else {
 
-                if (_role == Listen && _session.control_out() && !_session.soloing()) {
+                if (_role == Listen && _session.monitor_out() && !_session.soloing()) {
 
                         /* nobody is soloed, so control/monitor/listen bus gets its
                            signal from master out, we should be silent

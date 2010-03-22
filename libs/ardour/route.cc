@@ -92,7 +92,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
         
         add_processor (_main_outs, PostFader);
 
-	if (is_control()) {
+	if (is_monitor()) {
 		/* where we listen to tracks */
 		_intreturn.reset (new InternalReturn (_session));
 		add_processor (_intreturn, PreFader);
@@ -500,7 +500,7 @@ Route::passthru (sframes_t start_frame, sframes_t end_frame, nframes_t nframes, 
 
 	bufs.set_count (_input->n_ports());
 
-	if (is_control() && _session.listening()) {
+	if (is_monitor() && _session.listening()) {
 
 		/* control/monitor bus ignores input ports when something is
 		   feeding the listen "stream". data will "arrive" into the
@@ -537,14 +537,14 @@ Route::passthru_silence (sframes_t start_frame, sframes_t end_frame, nframes_t n
 void
 Route::set_listen (bool yn, void* src)
 {
-	if (_control_outs) {
-		if (yn != _control_outs->active()) {
+	if (_monitor_send) {
+		if (yn != _monitor_send->active()) {
 			if (yn) {
-                                _control_outs->set_solo_level (1);
-				_control_outs->activate ();
+                                _monitor_send->set_solo_level (1);
+				_monitor_send->activate ();
 			} else {
-                                _control_outs->set_solo_level (0);
-				_control_outs->deactivate ();
+                                _monitor_send->set_solo_level (0);
+				_monitor_send->deactivate ();
 			}
 
 			listen_changed (src); /* EMIT SIGNAL */
@@ -555,8 +555,8 @@ Route::set_listen (bool yn, void* src)
 bool
 Route::listening () const
 {
-	if (_control_outs) {
-		return _control_outs->active ();
+	if (_monitor_send) {
+		return _monitor_send->active ();
 	} else {
 		return false;
 	}
@@ -641,7 +641,7 @@ Route::set_delivery_solo ()
 void
 Route::set_solo_isolated (bool yn, void *src)
 {
-	if (is_master() || is_control() || is_hidden()) {
+	if (is_master() || is_monitor() || is_hidden()) {
 		return;
 	}
 
@@ -823,7 +823,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 
 		}
 
-		if (activation_allowed && (processor != _control_outs)) {
+		if (activation_allowed && (processor != _monitor_send)) {
 			processor->activate ();
 		}
 
@@ -910,12 +910,12 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 
                                 InternalSend* isend = new InternalSend (_session, _mute_master, node);
                                 
-                                if (_session.control_out() && (isend->target_id() == _session.control_out()->id())) {
-                                        _control_outs.reset (isend);
-                                        if (_control_outs->active()) {
-                                                _control_outs->set_solo_level (1);
+                                if (_session.monitor_out() && (isend->target_id() == _session.monitor_out()->id())) {
+                                        _monitor_send.reset (isend);
+                                        if (_monitor_send->active()) {
+                                                _monitor_send->set_solo_level (1);
                                         } else {
-                                                _control_outs->set_solo_level (0);
+                                                _monitor_send->set_solo_level (0);
                                         }
                                 }
 
@@ -2027,7 +2027,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 	_meter.reset (new PeakMeter (_session));
 	add_processor (_meter, PreFader);
 
-	if (is_control()) {
+	if (is_monitor()) {
 		/* where we listen to tracks */
 		_intreturn.reset (new InternalReturn (_session));
 		add_processor (_intreturn, PreFader);
@@ -2400,12 +2400,12 @@ Route::listen_via (boost::shared_ptr<Route> route, Placement placement, bool /*a
 				   we take note of which i-send is doing that.
 				*/
 
-				if (route == _session.control_out()) {
-					_control_outs = boost::dynamic_pointer_cast<Delivery>(d);
-                                        if (_control_outs->active()) {
-                                                _control_outs->set_solo_level (1);
+				if (route == _session.monitor_out()) {
+					_monitor_send = boost::dynamic_pointer_cast<Delivery>(d);
+                                        if (_monitor_send->active()) {
+                                                _monitor_send->set_solo_level (1);
                                         } else {
-                                                _control_outs->set_solo_level (0);
+                                                _monitor_send->set_solo_level (0);
                                         }
 				}
 
@@ -2422,7 +2422,7 @@ Route::listen_via (boost::shared_ptr<Route> route, Placement placement, bool /*a
 
                 if (is_master()) {
                         
-                        if (route == _session.control_out()) {
+                        if (route == _session.monitor_out()) {
                                 /* master never sends to control outs */
                                 return 0;
                         } else {
@@ -2431,7 +2431,7 @@ Route::listen_via (boost::shared_ptr<Route> route, Placement placement, bool /*a
 
                 } else {
                         listener.reset (new InternalSend (_session, _mute_master, route, (aux ? Delivery::Aux : Delivery::Listen)));
-                        if (route == _session.control_out()) {
+                        if (route == _session.monitor_out()) {
                         }
                 }
 
@@ -2439,8 +2439,8 @@ Route::listen_via (boost::shared_ptr<Route> route, Placement placement, bool /*a
 		return -1;
 	}
 
-	if (route == _session.control_out()) {
-		_control_outs = listener;
+	if (route == _session.monitor_out()) {
+		_monitor_send = listener;
 	}
 
         if (placement == PostFader) {
@@ -2483,8 +2483,8 @@ Route::drop_listen (boost::shared_ptr<Route> route)
 
 	rl.release ();
 
-	if (route == _session.control_out()) {
-		_control_outs.reset ();
+	if (route == _session.monitor_out()) {
+		_monitor_send.reset ();
 	}
 }
 
@@ -2816,16 +2816,16 @@ Route::set_meter_point (MeterPoint p, void *src)
 }
 
 void
-Route::put_control_outs_at (Placement p)
+Route::put_monitor_send_at (Placement p)
 {
-	if (!_control_outs) {
+	if (!_monitor_send) {
 		return;
 	}
 
 	{
 		Glib::RWLock::WriterLock lm (_processor_lock);
 		ProcessorList as_it_was (_processors);
-		ProcessorList::iterator loc = find(_processors.begin(), _processors.end(), _control_outs);
+		ProcessorList::iterator loc = find(_processors.begin(), _processors.end(), _monitor_send);
 		_processors.erase(loc);
 		
 		switch (p) {
@@ -2840,7 +2840,7 @@ Route::put_control_outs_at (Placement p)
 			break;
 		}
 		
-		_processors.insert (loc, _control_outs);
+		_processors.insert (loc, _monitor_send);
 
 		if (configure_processors_unlocked (0)) {
 			_processors = as_it_was;

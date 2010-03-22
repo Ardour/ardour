@@ -370,7 +370,7 @@ setup_enum_writer ()
 
 	REGISTER_CLASS_ENUM (Route, Hidden);
 	REGISTER_CLASS_ENUM (Route, MasterOut);
-	REGISTER_CLASS_ENUM (Route, ControlOut);
+	REGISTER_CLASS_ENUM (Route, MonitorOut);
 	REGISTER_BITS (_Route_Flag);
 
 	REGISTER_CLASS_ENUM (Source, Writable);

@@ -122,31 +122,22 @@ extern void setup_enum_writer ();
 class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager
 {
   public:
-	enum RecordState {
+        enum RecordState {
 		Disabled = 0,
 		Enabled = 1,
 		Recording = 2
 	};
 
-	/* creating from an XML file */
+        /* a new session might have non-empty mix_template, an existing session should always have an empty one.
+           the bus profile can be null if no master out bus is required.
+         */
 
 	Session (AudioEngine&,
-			const std::string& fullpath,
-			const std::string& snapshot_name,
-			std::string mix_template = "");
+                 const std::string& fullpath,
+                 const std::string& snapshot_name,
+                 BusProfile* bus_profile = 0,
+                 std::string mix_template = "");
 
-	/* creating a new Session */
-
-	Session (AudioEngine&,
-                 std::string fullpath,
-                 std::string snapshot_name,
-                 AutoConnectOption input_auto_connect,
-                 AutoConnectOption output_auto_connect,
-                 uint32_t master_out_channels,
-                 uint32_t n_physical_in,
-                 uint32_t n_physical_out,
-                 nframes_t initial_length);
-        
 	virtual ~Session ();
         
 	std::string path() const { return _path; }
@@ -619,7 +610,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* control/master out */
 
-	boost::shared_ptr<Route> control_out() const { return _control_out; }
+	boost::shared_ptr<Route> monitor_out() const { return _monitor_out; }
 	boost::shared_ptr<Route> master_out() const { return _master_out; }
 
 	void globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p);
@@ -825,7 +816,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void update_latency_compensation (bool, bool);
 
   private:
-	int  create (bool& new_session, const std::string& mix_template, nframes_t initial_length);
+	int  create (const std::string& mix_template, nframes_t initial_length, BusProfile*);
 	void destroy ();
 
 	nframes_t compute_initial_length ();
@@ -983,6 +974,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	MIDI::Port*             _midi_clock_port;
 	std::string             _path;
 	std::string             _name;
+        bool                    _is_new;
 	bool                     session_send_mmc;
 	bool                     session_send_mtc;
 	bool                     session_midi_feedback;
@@ -992,8 +984,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	boost::scoped_ptr<SessionDirectory> _session_dir;
 
-	void hookup_io (bool new_session);
-	void when_engine_running (bool new_session);
+	void hookup_io ();
+	void when_engine_running ();
 	void graph_reordered ();
 
 	std::string _current_snapshot_name;
@@ -1074,7 +1066,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void             auto_loop_changed (Location *);
 
 	void first_stage_init (std::string path, std::string snapshot_name);
-	int  second_stage_init (bool new_tracks);
+	int  second_stage_init ();
 	void find_current_end ();
 	void remove_empty_sounds ();
 
@@ -1409,7 +1401,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	uint32_t main_outs;
 
 	boost::shared_ptr<Route> _master_out;
-	boost::shared_ptr<Route> _control_out;
+	boost::shared_ptr<Route> _monitor_out;
 
 	gain_t* _gain_automation_buffer;
 	pan_t** _pan_automation_buffer;

@@ -65,7 +65,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	enum Flag {
 		Hidden = 0x1,
 		MasterOut = 0x2,
-		ControlOut = 0x4
+		MonitorOut = 0x4
 	};
 
 	Route (Session&, std::string name, Flag flags = Flag(0), DataType default_type = DataType::AUDIO);
@@ -93,7 +93,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	bool is_hidden() const { return _flags & Hidden; }
 	bool is_master() const { return _flags & MasterOut; }
-	bool is_control() const { return _flags & ControlOut; }
+	bool is_monitor() const { return _flags & MonitorOut; }
 
 	/* these are the core of the API of a Route. see the protected sections as well */
 
@@ -190,7 +190,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	/* special processors */
 
-	boost::shared_ptr<Delivery>         control_outs() const { return _control_outs; }
+	boost::shared_ptr<Delivery>         monitor_send() const { return _monitor_send; }
 	boost::shared_ptr<Delivery>         main_outs() const { return _main_outs; }
 	boost::shared_ptr<InternalReturn>   internal_return() const { return _intreturn; }
 	boost::shared_ptr<MonitorProcessor> monitor_control() const { return _monitor_control; }
@@ -198,7 +198,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	void add_internal_return ();
 	BufferSet* get_return_buffer () const;
 	void release_return_buffer () const;
-	void put_control_outs_at (Placement);
+	void put_monitor_send_at (Placement);
 
 	/** A record of the stream configuration at some point in the processor list.
 	 * Used to return where and why an processor list configuration request failed.
@@ -363,7 +363,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	ProcessorList  _processors;
 	mutable Glib::RWLock   _processor_lock;
 	boost::shared_ptr<Delivery> _main_outs;
-	boost::shared_ptr<Delivery> _control_outs;
+	boost::shared_ptr<Delivery> _monitor_send;
 	boost::shared_ptr<InternalReturn> _intreturn;
 	boost::shared_ptr<MonitorProcessor> _monitor_control;
 

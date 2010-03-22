@@ -222,7 +222,7 @@ MackieControlProtocol::get_sorted_routes()
 				route.active()
 				&& !route.is_master()
 				&& !route.is_hidden()
-				&& !route.is_control()
+				&& !route.is_monitor()
 				&& remote_ids.find (route.remote_control_id()) == remote_ids.end()
 		)
 		{

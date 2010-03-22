@@ -125,6 +125,7 @@ const SessionEvent::RTeventCallback Session::rt_cleanup (clean_up_session_event)
 Session::Session (AudioEngine &eng,
 		  const string& fullpath,
 		  const string& snapshot_name,
+                  BusProfile* bus_profile,
 		  string mix_template)
 
 	: _engine (eng),
@@ -158,31 +159,27 @@ Session::Session (AudioEngine &eng,
 {
 	playlists.reset (new SessionPlaylists);
 	
-	bool new_session;
-
 	interpolation.add_channel_to (0, 0);
 
 	if (!eng.connected()) {
 		throw failed_constructor();
 	}
 
-	info << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (1)" << endl;
-
 	n_physical_outputs = _engine.n_physical_outputs(DataType::AUDIO);
 	n_physical_inputs =  _engine.n_physical_inputs(DataType::AUDIO);
 
 	first_stage_init (fullpath, snapshot_name);
 
-	new_session = !Glib::file_test (_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+        _is_new = !Glib::file_test (_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
 
-	if (new_session) {
-		if (create (new_session, mix_template, compute_initial_length())) {
+	if (_is_new) {
+		if (create (mix_template, compute_initial_length(), bus_profile)) {
 			destroy ();
 			throw failed_constructor ();
 		}
-	}
+        }
 
-	if (second_stage_init (new_session)) {
+	if (second_stage_init ()) {
 		destroy ();
 		throw failed_constructor ();
 	}
@@ -199,137 +196,6 @@ Session::Session (AudioEngine &eng,
 	if (was_dirty) {
 		DirtyChanged (); /* EMIT SIGNAL */
 	}
-}
-
-Session::Session (AudioEngine &eng,
-		  string fullpath,
-		  string snapshot_name,
-		  AutoConnectOption input_ac,
-		  AutoConnectOption output_ac,
-		  uint32_t master_out_channels,
-		  uint32_t requested_physical_in,
-		  uint32_t requested_physical_out,
-		  nframes_t initial_length)
-
-	: _engine (eng),
-	  _target_transport_speed (0.0),
-	  _requested_return_frame (-1),
-	  _scratch_buffers(new BufferSet()),
-	  _silent_buffers(new BufferSet()),
-	  _mix_buffers(new BufferSet()),
-	  mmc (0),
-	  _mmc_port (default_mmc_port),
-	  _mtc_port (default_mtc_port),
-	  _midi_port (default_midi_port),
-	  _midi_clock_port (default_midi_clock_port),
-	  _session_dir ( new SessionDirectory(fullpath)),
-	  state_tree (0),
-	  _butler (new Butler (*this)),
-	  _post_transport_work (0),
-	  _send_timecode_update (false),
-	  diskstreams (new DiskstreamList),
-	  routes (new RouteList),
-	  _total_free_4k_blocks (0),
-	  _bundles (new BundleList),
-	  _bundle_xml_node (0),
-	  _click_io ((IO *) 0),
-	  click_data (0),
-	  click_emphasis_data (0),
-	  main_outs (0),
-	  _metadata (new SessionMetadata()),
-	  _have_rec_enabled_diskstream (false)
-{
-	playlists.reset (new SessionPlaylists);
-
-	bool new_session;
-
-	interpolation.add_channel_to (0, 0);
-
-	if (!eng.connected()) {
-		throw failed_constructor();
-	}
-
-	info << "Loading session " << fullpath << " using snapshot " << snapshot_name << " (2)" << endl;
-
-	n_physical_outputs = _engine.n_physical_outputs (DataType::AUDIO);
-	n_physical_inputs = _engine.n_physical_inputs (DataType::AUDIO);
-
-	if (n_physical_inputs) {
-		n_physical_inputs = max (requested_physical_in, n_physical_inputs);
-	}
-
-	if (n_physical_outputs) {
-		n_physical_outputs = max (requested_physical_out, n_physical_outputs);
-	}
-
-	first_stage_init (fullpath, snapshot_name);
-
-	new_session = !g_file_test (_path.c_str(), GFileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
-
-	if (new_session) {
-		if (create (new_session, string(), initial_length)) {
-			destroy ();
-			throw failed_constructor ();
-		}
-	}
-
-	{
-		/* set up Master Out and Control Out if necessary */
-
-		RouteList rl;
-		int control_id = 1;
-
-		if (master_out_channels) {
-			ChanCount count(DataType::AUDIO, master_out_channels);
-			Route* rt = new Route (*this, _("master"), Route::MasterOut, DataType::AUDIO);
-			boost_debug_shared_ptr_mark_interesting (rt, "Route");
-			boost::shared_ptr<Route> r (rt);
-			r->input()->ensure_io (count, false, this);
-			r->output()->ensure_io (count, false, this);
-			r->set_remote_control_id (control_id);
-
-			rl.push_back (r);
-		} else {
-			/* prohibit auto-connect to master, because there isn't one */
-			output_ac = AutoConnectOption (output_ac & ~AutoConnectMaster);
-		}
-
-		if (Config->get_use_monitor_bus()) {
-			ChanCount count(DataType::AUDIO, master_out_channels);
-			Route* rt = new Route (*this, _("monitor"), Route::ControlOut, DataType::AUDIO);
-			boost_debug_shared_ptr_mark_interesting (rt, "Route");
-			shared_ptr<Route> r (rt);
-			r->input()->ensure_io (count, false, this);
-			r->output()->ensure_io (count, false, this);
-			r->set_remote_control_id (control_id++);
-
-			rl.push_back (r);
-		}
-
-		if (!rl.empty()) {
-			add_routes (rl, false);
-		}
-
-	}
-
-	if (no_auto_connect()) {
-		input_ac = AutoConnectOption (0);
-		output_ac = AutoConnectOption (0);
-	}
-
-	Config->set_input_auto_connect (input_ac);
-	Config->set_output_auto_connect (output_ac);
-
-	if (second_stage_init (new_session)) {
-		destroy ();
-		throw failed_constructor ();
-	}
-
-	store_recent_sessions (_name, _path);
-
-	_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
-
-	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Session::config_changed, this, _1, false));
 }
 
 Session::~Session ()
@@ -406,7 +272,7 @@ Session::destroy ()
 
 	auditioner.reset ();
 	_master_out.reset ();
-	_control_out.reset ();
+	_monitor_out.reset ();
 
 	{
 		RCUWriter<RouteList> writer (routes);
@@ -482,7 +348,7 @@ Session::set_worst_io_latencies ()
 }
 
 void
-Session::when_engine_running (bool new_session)
+Session::when_engine_running ()
 {
 	string first_physical_output;
 
@@ -643,13 +509,13 @@ Session::when_engine_running (bool new_session)
 
 	BootMessage (_("Setup signal flow and plugins"));
 
-	hookup_io (new_session);
+	hookup_io ();
 
-	if (new_session && !no_auto_connect()) {
+	if (_is_new && !no_auto_connect()) {
 
                 /* don't connect the master bus outputs if there is a monitor bus */
 
-		if (_master_out && Config->get_auto_connect_standard_busses() && !_control_out) {
+		if (_master_out && Config->get_auto_connect_standard_busses() && !_monitor_out) {
 
 			/* if requested auto-connect the outputs to the first N physical ports.
 			 */
@@ -670,7 +536,7 @@ Session::when_engine_running (bool new_session)
 			}
 		}
 
-		if (_control_out) {
+		if (_monitor_out) {
 
 			/* AUDIO ONLY as of june 29th 2009, because listen semantics for anything else
 			   are undefined, at best.
@@ -680,16 +546,16 @@ Session::when_engine_running (bool new_session)
 			   under some conditions)
 			*/
 
-			uint32_t limit = _control_out->n_inputs().n_audio();
+			uint32_t limit = _monitor_out->n_inputs().n_audio();
 
 			if (_master_out) {
 				for (uint32_t n = 0; n < limit; ++n) {
-					AudioPort* p = _control_out->input()->ports().nth_audio_port (n);
+					AudioPort* p = _monitor_out->input()->ports().nth_audio_port (n);
 					AudioPort* o = _master_out->output()->ports().nth_audio_port (n);
 
 					if (o) {
 						string connect_to = o->name();
-						if (_control_out->input()->connect (p, connect_to, this)) {
+						if (_monitor_out->input()->connect (p, connect_to, this)) {
 							error << string_compose (_("cannot connect control input %1 to %2"), n, connect_to)
 							      << endmsg;
 							break;
@@ -701,14 +567,14 @@ Session::when_engine_running (bool new_session)
 			/* if control out is not connected, connect control out to physical outs
 			*/
 
-			if (!_control_out->output()->connected ()) {
+			if (!_monitor_out->output()->connected ()) {
 
 				if (!Config->get_monitor_bus_preferred_bundle().empty()) {
 
 					boost::shared_ptr<Bundle> b = bundle_by_name (Config->get_monitor_bus_preferred_bundle());
 
 					if (b) {
-						_control_out->output()->connect_ports_to_bundle (b, this);
+						_monitor_out->output()->connect_ports_to_bundle (b, this);
 					} else {
 						warning << string_compose (_("The preferred I/O for the monitor bus (%1) cannot be found"),
 									   Config->get_monitor_bus_preferred_bundle())
@@ -719,15 +585,15 @@ Session::when_engine_running (bool new_session)
                                         
 					for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 						uint32_t mod = _engine.n_physical_outputs (*t);
-						uint32_t limit = _control_out->n_outputs().get(*t);
+						uint32_t limit = _monitor_out->n_outputs().get(*t);
 
 						for (uint32_t n = 0; n < limit; ++n) {
 
-							Port* p = _control_out->output()->ports().port(*t, n);
+							Port* p = _monitor_out->output()->ports().port(*t, n);
 							string connect_to = _engine.get_nth_physical_output (*t, (n % mod));
 
 							if (!connect_to.empty()) {
-								if (_control_out->output()->connect (p, connect_to, this)) {
+								if (_monitor_out->output()->connect (p, connect_to, this)) {
 									error << string_compose (
 											_("cannot connect control output %1 to %2"),
 											n, connect_to)
@@ -754,7 +620,7 @@ Session::when_engine_running (bool new_session)
 }
 
 void
-Session::hookup_io (bool new_session)
+Session::hookup_io ()
 {
 	/* stop graph reordering notifications from
 	   causing resorts, etc.
@@ -799,11 +665,11 @@ Session::hookup_io (bool new_session)
            they connect to the control out specifically.
          */
 
-        if (_control_out) {
+        if (_monitor_out) {
 		boost::shared_ptr<RouteList> r = routes.reader ();
                 for (RouteList::iterator x = r->begin(); x != r->end(); ++x) {
                         
-                        if ((*x)->is_control()) {
+                        if ((*x)->is_monitor()) {
                                 
                                 /* relax */
                                 
@@ -813,7 +679,7 @@ Session::hookup_io (bool new_session)
                                 
                         } else {
                                 
-                                (*x)->listen_via (_control_out,
+                                (*x)->listen_via (_monitor_out,
                                                   (Config->get_listen_position() == AfterFaderListen ? PostFader : PreFader),
                                                   false, false);
                         }
@@ -2043,7 +1909,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 		   we will resort when done.
 		*/
 
-		if (!_control_out && IO::connecting_legal) {
+		if (!_monitor_out && IO::connecting_legal) {
 			resort_routes_using (r);
 		}
 	}
@@ -2064,20 +1930,20 @@ Session::add_routes (RouteList& new_routes, bool save)
 			_master_out = r;
 		}
 
-		if (r->is_control()) {
-			_control_out = r;
+		if (r->is_monitor()) {
+			_monitor_out = r;
 		}
 	}
 
-	if (_control_out && IO::connecting_legal) {
+	if (_monitor_out && IO::connecting_legal) {
 
 		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
-			if ((*x)->is_control()) {
+			if ((*x)->is_monitor()) {
                                 /* relax */
                         } else if ((*x)->is_master()) {
                                 /* relax */
 			} else {
-                                (*x)->listen_via (_control_out,
+                                (*x)->listen_via (_monitor_out,
                                                   (Config->get_listen_position() == AfterFaderListen ? PostFader : PreFader),
                                                   false, false);
                         }
@@ -2167,7 +2033,7 @@ Session::globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p
 void
 Session::add_internal_sends (boost::shared_ptr<Route> dest, Placement p, boost::shared_ptr<RouteList> senders)
 {
-	if (dest->is_control() || dest->is_master()) {
+	if (dest->is_monitor() || dest->is_master()) {
 		return;
 	}
 
@@ -2177,7 +2043,7 @@ Session::add_internal_sends (boost::shared_ptr<Route> dest, Placement p, boost::
 
 	for (RouteList::iterator i = senders->begin(); i != senders->end(); ++i) {
 
-		if ((*i)->is_control() || (*i)->is_master() || (*i) == dest) {
+		if ((*i)->is_monitor() || (*i)->is_master() || (*i) == dest) {
 			continue;
 		}
 
@@ -2230,15 +2096,15 @@ Session::remove_route (shared_ptr<Route> route)
 			_master_out = shared_ptr<Route> ();
 		}
 
-		if (route == _control_out) {
+		if (route == _monitor_out) {
 
 			/* cancel control outs for all routes */
 
 			for (RouteList::iterator r = rs->begin(); r != rs->end(); ++r) {
-				(*r)->drop_listen (_control_out);
+				(*r)->drop_listen (_monitor_out);
 			}
 
-			_control_out.reset ();
+			_monitor_out.reset ();
 		}
 
 		update_route_solo_state ();
@@ -2361,7 +2227,7 @@ Session::route_solo_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		bool via_sends_only;
 
-		if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_control() || (*i)->is_hidden()) {
+		if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden()) {
 			continue;
 		} else if ((*i)->feeds (route, &via_sends_only)) {
 			if (!via_sends_only) {
@@ -2378,8 +2244,8 @@ Session::route_solo_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
  
 	/* ditto for control outs make sure master is never muted by solo */
 
-	if (_control_out && route != _control_out && _control_out && _control_out->soloed_by_others() == 0) {
-		_control_out->mod_solo_by_others (1);
+	if (_monitor_out && route != _monitor_out && _monitor_out && _monitor_out->soloed_by_others() == 0) {
+		_monitor_out->mod_solo_by_others (1);
 	}
 
 	solo_update_disabled = false;
@@ -2401,7 +2267,7 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 	}
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->is_master() && !(*i)->is_control() && !(*i)->is_hidden() && (*i)->self_soloed()) {
+		if (!(*i)->is_master() && !(*i)->is_monitor() && !(*i)->is_hidden() && (*i)->self_soloed()) {
 			something_soloed = true;
 			break;
 		}
@@ -3295,10 +3161,10 @@ Session::cancel_audition ()
 bool
 Session::RoutePublicOrderSorter::operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b)
 {
-        if (a->is_control()) { 
+        if (a->is_monitor()) { 
                 return true;
         }
-        if (b->is_control()) {
+        if (b->is_monitor()) {
                 return false;
         }
 	return a->order_key(N_("signal")) < b->order_key(N_("signal"));
@@ -4089,7 +3955,7 @@ Session::listen_position_changed ()
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->put_control_outs_at (p);
+		(*i)->put_monitor_send_at (p);
 	}
 }
 

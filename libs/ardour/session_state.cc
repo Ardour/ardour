@@ -285,11 +285,11 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 }
 
 int
-Session::second_stage_init (bool new_session)
+Session::second_stage_init ()
 {
 	AudioFileSource::set_peak_dir (_session_dir->peak_path().to_string());
 
-	if (!new_session) {
+	if (!_is_new) {
 		if (load_state (_current_snapshot_name)) {
 			return -1;
 		}
@@ -339,7 +339,7 @@ Session::second_stage_init (bool new_session)
 	_engine.Xrun.connect_same_thread (*this, boost::bind (&Session::xrun_recovery, this));
 
 	try {
-		when_engine_running (new_session);
+		when_engine_running ();
 	}
 
 	/* handle this one in a different way than all others, so that its clear what happened */
@@ -369,7 +369,7 @@ Session::second_stage_init (bool new_session)
 
 	ControlProtocolManager::instance().set_session (this);
 
-	config.set_end_marker_is_free (new_session);
+	config.set_end_marker_is_free (_is_new);
 
 	_state_of_the_state = Clean;
 
@@ -495,7 +495,7 @@ Session::ensure_subdirs ()
 }
 
 int
-Session::create (bool& new_session, const string& mix_template, nframes_t initial_length)
+Session::create (const string& mix_template, nframes_t initial_length, BusProfile* bus_profile)
 {
 
 	if (g_mkdir_with_parents (_path.c_str(), 0755) < 0) {
@@ -506,8 +506,6 @@ Session::create (bool& new_session, const string& mix_template, nframes_t initia
 	if (ensure_subdirs ()) {
 		return -1;
 	}
-
-	/* check new_session so we don't overwrite an existing one */
 
 	if (!mix_template.empty()) {
 		std::string in_path = mix_template;
@@ -523,11 +521,6 @@ Session::create (bool& new_session, const string& mix_template, nframes_t initia
 
 			if (out){
 				out << in.rdbuf();
-
-				// okay, session is set up.  Treat like normal saved
-				// session from now on.
-
-				new_session = false;
 				return 0;
 
 			} else {
@@ -557,6 +550,56 @@ Session::create (bool& new_session, const string& mix_template, nframes_t initia
 	_locations.add (end_location);
 
 	_state_of_the_state = Clean;
+        
+        /* set up Master Out and Control Out if necessary */
+
+        if (bus_profile) {
+
+		RouteList rl;
+		int control_id = 1;
+                ChanCount count(DataType::AUDIO, bus_profile->master_out_channels);
+
+		if (bus_profile->master_out_channels) {
+			Route* rt = new Route (*this, _("master"), Route::MasterOut, DataType::AUDIO);
+			boost_debug_shared_ptr_mark_interesting (rt, "Route");
+			boost::shared_ptr<Route> r (rt);
+			r->input()->ensure_io (count, false, this);
+			r->output()->ensure_io (count, false, this);
+			r->set_remote_control_id (control_id++);
+
+			rl.push_back (r);
+
+                        if (Config->get_use_monitor_bus()) {
+                                Route* rt = new Route (*this, _("monitor"), Route::MonitorOut, DataType::AUDIO);
+                                boost_debug_shared_ptr_mark_interesting (rt, "Route");
+                                boost::shared_ptr<Route> r (rt);
+                                r->input()->ensure_io (count, false, this);
+                                r->output()->ensure_io (count, false, this);
+                                r->set_remote_control_id (control_id);
+                                
+                                rl.push_back (r);
+                        }
+
+		} else {
+			/* prohibit auto-connect to master, because there isn't one */
+			bus_profile->output_ac = AutoConnectOption (bus_profile->output_ac & ~AutoConnectMaster);
+		}
+
+		if (!rl.empty()) {
+			add_routes (rl, false);
+		}
+
+                /* this allows the user to override settings with an environment variable.
+                 */
+
+                if (no_auto_connect()) {
+                        bus_profile->input_ac = AutoConnectOption (0);
+                        bus_profile->output_ac = AutoConnectOption (0);
+                }
+                
+                Config->set_input_auto_connect (bus_profile->input_ac);
+                Config->set_output_auto_connect (bus_profile->output_ac);
+        }
 
 	save_state ("");
 
@@ -751,6 +794,7 @@ Session::save_state (string snapshot_name, bool pending)
 		bool was_dirty = dirty();
 
 		_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
+                _is_new = false;
 
 		if (was_dirty) {
 			DirtyChanged (); /* EMIT SIGNAL */
@@ -1049,8 +1093,8 @@ Session::state(bool full_state)
 
                 /* the sort should have put control outs first */
 
-                if (_control_out) {
-                        assert (_control_out == public_order.front());
+                if (_monitor_out) {
+                        assert (_monitor_out == public_order.front());
                 }
 
 		for (RouteList::iterator i = public_order.begin(); i != public_order.end(); ++i) {
@@ -2698,7 +2742,7 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 		if (str == "master") {
 			r = _master_out;
 		} else if (str == "control" || str == "listen") {
-			r = _control_out;
+			r = _monitor_out;
 		} else {
 			r = route_by_name (desc.top_level_name());
 		}
