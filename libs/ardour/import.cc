@@ -235,8 +235,9 @@ create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
                 */
 
                 boost::shared_ptr<AudioFileSource> afs;
-                afs = boost::dynamic_pointer_cast<AudioFileSource>(source);
-                afs->set_timeline_position(timeline_position);
+                if ((afs = boost::dynamic_pointer_cast<AudioFileSource>(source)) != 0) {
+                        afs->set_timeline_position(timeline_position);
+                }
 	}
 	return true;
 }
@@ -315,7 +316,7 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 
 static void
 write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
-		vector<boost::shared_ptr<Source> >& newfiles)
+                              vector<boost::shared_ptr<Source> >& newfiles)
 {
 	uint32_t buf_size = 4;
 	uint8_t* buf      = (uint8_t*)malloc(buf_size);
@@ -333,6 +334,7 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 		uint64_t t       = 0;
 		uint32_t delta_t = 0;
 		uint32_t size    = 0;
+                bool first = true;
 
 		while (!status.cancel) {
 			size = buf_size;
@@ -350,6 +352,11 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 			if (ret == 0) { // Meta
 				continue;
 			}
+                        
+                        if (first) {
+                                smfs->mark_streaming_write_started ();
+                                first = false;
+                        }
 
 			smfs->append_event_unlocked_beats(Evoral::Event<double>(0,
 					(double)t / (double)source->ppqn(),
@@ -364,7 +371,7 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 		const double length_beats = ceil(t / (double)source->ppqn());
 		BeatsFramesConverter converter(smfs->session().tempo_map(), pos);
 		smfs->update_length(pos, converter.to(length_beats));
-		smfs->end_write();
+		smfs->mark_streaming_write_completed ();
 
 		if (status.cancel) {
 			break;
