@@ -346,6 +346,8 @@ AudioDiskstream::setup_destructive_playlist ()
 
 	/* a single full-sized region */
 
+	assert (!srcs.empty ());
+
 	PropertyList plist;
 	plist.add (Properties::name, _name.val());
 	plist.add (Properties::start, 0);
@@ -1968,7 +1970,7 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 		}
 	}
 
-	if (destructive()) {
+	if (destructive() && !c->empty ()) {
 
 		/* we now have all our write sources set up, so create the
 		   playlist's single region.
