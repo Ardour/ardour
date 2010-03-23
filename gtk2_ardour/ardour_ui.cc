@@ -1323,18 +1323,6 @@ ARDOUR_UI::session_add_audio_route (bool track, bool aux, int32_t input_channels
 				}
 			}
 		}
-
-#if CONTROLOUTS
-		if (need_control_room_outs) {
-			pan_t pans[2];
-
-			pans[0] = 0.5;
-			pans[1] = 0.5;
-
-			route->set_stereo_control_outs (control_lr_channels);
-			route->control_outs()->set_stereo_pan (pans, this);
-		}
-#endif /* CONTROLOUTS */
 	}
 
 	catch (...) {
@@ -2272,62 +2260,49 @@ ARDOUR_UI::ask_about_loading_existing_session (const Glib::ustring& session_path
 int
 ARDOUR_UI::build_session_from_nsd (const Glib::ustring& session_path, const Glib::ustring& session_name)
 {
-
-	uint32_t mchns;
-	AutoConnectOption iconnect;
-	AutoConnectOption oconnect;
-	uint32_t nphysin;
-	uint32_t nphysout;
+        BusProfile bus_profile;
 
 	if (Profile->get_sae()) {
 
-		mchns = 2;
-		iconnect = AutoConnectPhysical;
-		oconnect = AutoConnectMaster;
-		nphysin = 0; // use all available
-		nphysout = 0; // use all available
+		bus_profile.master_out_channels = 2;
+		bus_profile.input_ac = AutoConnectPhysical;
+		bus_profile.output_ac = AutoConnectMaster;
+		bus_profile.requested_physical_in = 0; // use all available
+		bus_profile.requested_physical_out = 0; // use all available
 
 	} else {
 
 		/* get settings from advanced section of NSD */
 
 		if (_startup->create_master_bus()) {
-			mchns = (uint32_t) _startup->master_channel_count();
+			bus_profile.master_out_channels = (uint32_t) _startup->master_channel_count();
 		} else {
-			mchns = 0;
+			bus_profile.master_out_channels = 0;
 		}
 
 		if (_startup->connect_inputs()) {
-			iconnect = AutoConnectPhysical;
+			bus_profile.input_ac = AutoConnectPhysical;
 		} else {
-			iconnect = AutoConnectOption (0);
+			bus_profile.input_ac = AutoConnectOption (0);
 		}
 
 		/// @todo some minor tweaks.
-
-		oconnect = AutoConnectOption (0);
+                
+		bus_profile.output_ac = AutoConnectOption (0);
 
 		if (_startup->connect_outputs ()) {
 			if (_startup->connect_outs_to_master()) {
-				oconnect = AutoConnectMaster;
+				bus_profile.output_ac = AutoConnectMaster;
 			} else if (_startup->connect_outs_to_physical()) {
-				oconnect = AutoConnectPhysical;
+				bus_profile.output_ac = AutoConnectPhysical;
 			}
 		}
 
-		nphysin = (uint32_t) _startup->input_limit_count();
-		nphysout = (uint32_t) _startup->output_limit_count();
+		bus_profile.requested_physical_in = (uint32_t) _startup->input_limit_count();
+		bus_profile.requested_physical_out = (uint32_t) _startup->output_limit_count();
 	}
 
-	if (build_session (session_path,
-			   session_name,
-			   mchns,
-			   iconnect,
-			   oconnect,
-			   nphysin,
-			   nphysout,
-			   engine->frame_rate() * 60 * 5)) {
-
+	if (build_session (session_path, session_name, bus_profile)) {
 		return -1;
 	}
 
@@ -2557,7 +2532,7 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 	loading_message (string_compose (_("Please wait while %1loads your session"), PROGRAM_NAME));
 
 	try {
-		new_session = new Session (*engine, path, snap_name, mix_template);
+		new_session = new Session (*engine, path, snap_name, 0, mix_template);
 	}
 
 	/* this one is special */
@@ -2632,13 +2607,7 @@ ARDOUR_UI::load_session (const Glib::ustring& path, const Glib::ustring& snap_na
 }
 
 int
-ARDOUR_UI::build_session (const Glib::ustring& path, const Glib::ustring& snap_name,
-			  uint32_t master_channels,
-			  AutoConnectOption input_connect,
-			  AutoConnectOption output_connect,
-			  uint32_t nphysin,
-			  uint32_t nphysout,
-			  nframes_t initial_length)
+ARDOUR_UI::build_session (const Glib::ustring& path, const Glib::ustring& snap_name, BusProfile& bus_profile)
 {
 	Session *new_session;
 	int x;
@@ -2660,8 +2629,7 @@ ARDOUR_UI::build_session (const Glib::ustring& path, const Glib::ustring& snap_n
 	_session_is_new = true;
 
 	try {
-		new_session = new Session (*engine, path, snap_name, input_connect, output_connect,
-					   master_channels, nphysin, nphysout, initial_length);
+		new_session = new Session (*engine, path, snap_name, &bus_profile);
 	}
 
 	catch (...) {

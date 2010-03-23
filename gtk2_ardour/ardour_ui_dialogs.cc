@@ -81,7 +81,7 @@ ARDOUR_UI::set_session (Session *s)
 		ActionManager::set_sensitive (ActionManager::range_sensitive_actions, false);
 	}
 
-	if (!_session->control_out()) {
+	if (!_session->monitor_out()) {
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("options"), X_("SoloViaBus"));
 		if (act) {
 			act->set_sensitive (false);

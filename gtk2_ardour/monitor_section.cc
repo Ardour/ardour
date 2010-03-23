@@ -275,7 +275,7 @@ MonitorSection::set_session (Session* s)
 
         if (_session) {
 
-                _route = _session->control_out ();
+                _route = _session->monitor_out ();
 
                 if (_route) {
                         /* session with control outs */

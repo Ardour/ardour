@@ -785,7 +785,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 
 		gm.get_gain_slider().show();
 		mute_button->show();
-		if (!_route || _route->is_control()) {
+		if (!_route || _route->is_monitor()) {
 			solo_button->hide();
 		} else {
 			solo_button->show();
@@ -811,7 +811,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 
 		gm.get_gain_slider().hide();
 		mute_button->show();
-		if (!_route || _route->is_control()) {
+		if (!_route || _route->is_monitor()) {
 			solo_button->hide();
 		} else {
 			solo_button->show();

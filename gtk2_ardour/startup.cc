@@ -561,6 +561,13 @@ ArdourStartup::populate_session_templates ()
 	}
 }
 
+static bool
+lost_name_entry_focus (GdkEventFocus* ev)
+{
+        cerr << "lost focus\n";
+        return false;
+}
+                
 void
 ArdourStartup::setup_new_session_page ()
 {
@@ -711,6 +718,14 @@ ArdourStartup::setup_new_session_page ()
 	set_page_title (session_vbox, _("New Session"));
 	set_page_type (session_vbox, ASSISTANT_PAGE_CONFIRM);
 
+	new_name_entry.signal_map().connect (sigc::mem_fun (*this, &ArdourStartup::new_name_mapped));
+        new_name_entry.signal_focus_out_event().connect (sigc::ptr_fun (lost_name_entry_focus));
+}
+
+void
+ArdourStartup::new_name_mapped ()
+{
+        cerr << "Grab new name focus\n";
 	new_name_entry.grab_focus ();
 }
 

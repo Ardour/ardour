@@ -124,13 +124,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	int load_session (const Glib::ustring& path, const Glib::ustring& snapshot, Glib::ustring mix_template = Glib::ustring());
 	bool session_loaded;
-	int build_session (const Glib::ustring& path, const Glib::ustring& snapshot,
-			   uint32_t master_chns,
-			   ARDOUR::AutoConnectOption input_connect,
-			   ARDOUR::AutoConnectOption output_connect,
-			   uint32_t nphysin,
-			   uint32_t nphysout,
-			   nframes_t initial_length);
+	int build_session (const Glib::ustring& path, const Glib::ustring& snapshot, ARDOUR::BusProfile&);
 	bool session_is_new() const { return _session_is_new; }
 
 	ARDOUR::Session* the_session() { return _session; }

@@ -344,7 +344,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
                 solo_button->show ();
         }
 
-	if (_mixer_owned && (route()->is_master() || route()->is_control())) {
+	if (_mixer_owned && (route()->is_master() || route()->is_monitor())) {
 
 		if (scrollbar_height == 0) {
 			HScrollbar scrollbar;
@@ -448,7 +448,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	processor_box.show();
 
-	if (!route()->is_master() && !route()->is_control()) {
+	if (!route()->is_master() && !route()->is_monitor()) {
 		/* we don't allow master or control routes to be hidden */
 		hide_button.show();
 	}

@@ -223,7 +223,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	mute_button->show();
 
-	if (_route->is_control()) {
+	if (_route->is_monitor()) {
 		solo_button->hide ();
 	} else {
 		solo_button->show();
@@ -677,7 +677,7 @@ RouteUI::listen_changed(void* /*src*/)
 int
 RouteUI::solo_visual_state (boost::shared_ptr<Route> r)
 {
-	if (r->is_master() || r->is_control()) {
+	if (r->is_master() || r->is_monitor()) {
 		return 0;
 	}
 	
@@ -701,7 +701,7 @@ RouteUI::solo_visual_state (boost::shared_ptr<Route> r)
 int
 RouteUI::solo_visual_state_with_isolate (boost::shared_ptr<Route> r)
 {
-	if (r->is_master() || r->is_control()) {
+	if (r->is_master() || r->is_monitor()) {
 		return 0;
 	}
 	
@@ -727,7 +727,7 @@ RouteUI::solo_visual_state_with_isolate (boost::shared_ptr<Route> r)
 int
 RouteUI::solo_isolate_visual_state (boost::shared_ptr<Route> r)
 {
-	if (r->is_master() || r->is_control()) {
+	if (r->is_master() || r->is_monitor()) {
 		return 0;
 	}
 	
@@ -779,7 +779,7 @@ RouteUI::mute_changed(void* /*src*/)
 int
 RouteUI::mute_visual_state (Session* s, boost::shared_ptr<Route> r)
 {
-	if (r->is_master() || r->is_control()) {
+	if (r->is_master() || r->is_monitor()) {
 		return 0;
 	}
 	
