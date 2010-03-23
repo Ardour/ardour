@@ -794,7 +794,6 @@ Session::save_state (string snapshot_name, bool pending)
 		bool was_dirty = dirty();
 
 		_state_of_the_state = StateOfTheState (_state_of_the_state & ~Dirty);
-                _is_new = false;
 
 		if (was_dirty) {
 			DirtyChanged (); /* EMIT SIGNAL */

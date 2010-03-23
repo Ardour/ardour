@@ -196,6 +196,8 @@ Session::Session (AudioEngine &eng,
 	if (was_dirty) {
 		DirtyChanged (); /* EMIT SIGNAL */
 	}
+
+        _is_new = false;
 }
 
 Session::~Session ()
