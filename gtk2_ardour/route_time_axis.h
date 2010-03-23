@@ -291,7 +291,6 @@ protected:
 	Gtk::Menu*          mode_menu;
 	Gtk::Menu*          color_mode_menu;
 
-	virtual Gtk::Menu* build_mode_menu() { return 0; }
 	virtual Gtk::Menu* build_color_mode_menu() { return 0; }
 
 	void use_playlist (Gtk::RadioMenuItem *item, boost::weak_ptr<ARDOUR::Playlist> wpl);
@@ -325,6 +324,8 @@ protected:
 	UnderlayList _underlay_streams;
 	typedef std::list<RouteTimeAxisView*> UnderlayMirrorList;
 	UnderlayMirrorList _underlay_mirrors;
+
+	bool _ignore_track_mode_change; ///< true to ignore track mode change signals
 };
 
 #endif /* __ardour_route_time_axis_h__ */

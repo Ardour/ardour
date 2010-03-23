@@ -114,6 +114,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	, automation_button (_("a"))
 	, visual_button (_("v"))
 	, gm (sess, slider, true, 115)
+	, _ignore_track_mode_change (false)
 {
 	set_button_names ();
 
@@ -428,13 +429,13 @@ RouteTimeAxisView::build_automation_action_menu ()
 
 	automation_action_menu->set_name ("ArdourContextMenu");
 	
-	items.push_back (MenuElem (_("Show all automation"),
+	items.push_back (MenuElem (_("Show All Automation"),
 				   sigc::mem_fun(*this, &RouteTimeAxisView::show_all_automation)));
 	
-	items.push_back (MenuElem (_("Show existing automation"),
+	items.push_back (MenuElem (_("Show Existing Automation"),
 				   sigc::mem_fun(*this, &RouteTimeAxisView::show_existing_automation)));
 	
-	items.push_back (MenuElem (_("Hide all automation"),
+	items.push_back (MenuElem (_("Hide All Automation"),
 				   sigc::mem_fun(*this, &RouteTimeAxisView::hide_all_automation)));
 	
 	/* attach the plugin submenu. It may have previously been used elsewhere, so we detach it first. */
@@ -501,39 +502,41 @@ RouteTimeAxisView::build_display_menu ()
 
 		RadioMenuItem::Group align_group;
 
-		alignment_items.push_back (RadioMenuElem (align_group, _("Align with existing material"),
+		alignment_items.push_back (RadioMenuElem (align_group, _("Align With Existing Material"),
 					sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_style), ExistingMaterial)));
 		align_existing_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
 		if (get_diskstream()->alignment_style() == ExistingMaterial)
 			align_existing_item->set_active();
 
-		alignment_items.push_back (RadioMenuElem (align_group, _("Align with capture time"),
+		alignment_items.push_back (RadioMenuElem (align_group, _("Align With Capture Time"),
 					sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_style), CaptureTime)));
 		align_capture_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
 		if (get_diskstream()->alignment_style() == CaptureTime)
 			align_capture_item->set_active();
 
 		if (!Profile->get_sae()) {
+
 			items.push_back (MenuElem (_("Alignment"), *alignment_menu));
 			get_diskstream()->AlignmentStyleChanged.connect (route_connections, boost::bind (&RouteTimeAxisView::align_style_changed, this), gui_context());
 
 			RadioMenuItem::Group mode_group;
-			items.push_back (RadioMenuElem (mode_group, _("Normal mode"), sigc::bind (
+			items.push_back (RadioMenuElem (mode_group, _("Normal Mode"), sigc::bind (
 					sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode),
 					ARDOUR::Normal)));
 			normal_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 
-			items.push_back (RadioMenuElem (mode_group, _("Tape mode"), sigc::bind (
+			items.push_back (RadioMenuElem (mode_group, _("Tape Mode"), sigc::bind (
 					sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode),
 					ARDOUR::Destructive)));
 			destructive_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 
- 			items.push_back (RadioMenuElem (mode_group, _("No layering mode"),
+ 			items.push_back (RadioMenuElem (mode_group, _("Non-Layered Mode"),
  							sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::NonLayered)));
  			non_layered_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
 
 
-
+			_ignore_track_mode_change = true;
+			
 			switch (track()->mode()) {
 			case ARDOUR::Destructive:
 				destructive_track_mode_item->set_active ();
@@ -545,17 +548,16 @@ RouteTimeAxisView::build_display_menu ()
 				non_layered_track_mode_item->set_active ();
 				break;
 			}
+			
+			_ignore_track_mode_change = false;
 		}
 
 		get_diskstream()->AlignmentStyleChanged.connect (route_connections, boost::bind (&RouteTimeAxisView::align_style_changed, this), gui_context());
 
-		mode_menu = build_mode_menu();
-		if (mode_menu)
-			items.push_back (MenuElem (_("Mode"), *mode_menu));
-
 		color_mode_menu = build_color_mode_menu();
-		if (color_mode_menu)
+		if (color_mode_menu) {
 			items.push_back (MenuElem (_("Color Mode"), *color_mode_menu));
+		}
 
 		items.push_back (SeparatorElem());
 	}
@@ -584,6 +586,10 @@ static bool __reset_item (RadioMenuItem* item, RadioMenuItem* item_2)
 void
 RouteTimeAxisView::set_track_mode (TrackMode mode)
 {
+	if (_ignore_track_mode_change) {
+		return;
+	}
+	
 	RadioMenuItem* item;
 	RadioMenuItem* other_item;
 	RadioMenuItem* other_item_2;
@@ -610,7 +616,7 @@ RouteTimeAxisView::set_track_mode (TrackMode mode)
 		return;
 	}
 
-	if (item && other_item && other_item_2 && item->get_active() && track()->mode() != mode) {
+	if (item && other_item && other_item_2 && track()->mode() != mode) {
 		_set_track_mode (track().get(), mode, other_item, other_item_2);
 	}
 }
@@ -628,6 +634,7 @@ RouteTimeAxisView::_set_track_mode (Track* track, TrackMode mode, RadioMenuItem*
 			return;
 		} else {
 			cerr << "would bounce this one\n";
+			/* XXX: radio menu item becomes inconsistent with track state in this case */
 			return;
 		}
 	}

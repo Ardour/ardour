@@ -2299,7 +2299,10 @@ AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 	}
 
 	boost::shared_ptr<Region> first = _playlist->find_next_region (_session.current_start_frame(), Start, 1);
-	assert (first);
+	if (!first) {
+		requires_bounce = false;
+		return true;
+	}
 
 	/* do the source(s) for the region cover the session start position ? */
 

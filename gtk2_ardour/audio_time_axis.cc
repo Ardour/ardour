@@ -180,47 +180,9 @@ AudioTimeAxisView::append_extra_display_menu_items ()
 
 	// crossfade stuff
 	if (!Profile->get_sae()) {
-		items.push_back (MenuElem (_("Hide all crossfades"), sigc::mem_fun(*this, &AudioTimeAxisView::hide_all_xfades)));
-		items.push_back (MenuElem (_("Show all crossfades"), sigc::mem_fun(*this, &AudioTimeAxisView::show_all_xfades)));
+		items.push_back (MenuElem (_("Hide All Crossfades"), sigc::mem_fun(*this, &AudioTimeAxisView::hide_all_xfades)));
+		items.push_back (MenuElem (_("Show All Crossfades"), sigc::mem_fun(*this, &AudioTimeAxisView::show_all_xfades)));
 	}
-}
-
-Gtk::Menu*
-AudioTimeAxisView::build_mode_menu()
-{
-	using namespace Menu_Helpers;
-
-	Menu* mode_menu = manage (new Menu);
-	MenuList& items = mode_menu->items();
-	mode_menu->set_name ("ArdourContextMenu");
-
-	RadioMenuItem::Group mode_group;
-
-	items.push_back (RadioMenuElem (mode_group, _("Normal"),
-				sigc::bind (sigc::mem_fun (*this, &AudioTimeAxisView::set_track_mode), ARDOUR::Normal)));
-	normal_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
-
-	items.push_back (RadioMenuElem (mode_group, _("Non Overlapping"),
-				sigc::bind (sigc::mem_fun (*this, &AudioTimeAxisView::set_track_mode), ARDOUR::NonLayered)));
-	non_layered_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
-
-	items.push_back (RadioMenuElem (mode_group, _("Tape"),
-				sigc::bind (sigc::mem_fun (*this, &AudioTimeAxisView::set_track_mode), ARDOUR::Destructive)));
-	destructive_track_mode_item = dynamic_cast<RadioMenuItem*>(&items.back());
-
-	switch (track()->mode()) {
-		case ARDOUR::Destructive:
-			destructive_track_mode_item->set_active ();
-			break;
-		case ARDOUR::NonLayered:
-			non_layered_track_mode_item->set_active ();
-			break;
-		case ARDOUR::Normal:
-			normal_track_mode_item->set_active ();
-			break;
-	}
-
-	return mode_menu;
 }
 
 void
