@@ -69,7 +69,6 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	};
 
 	Route (Session&, std::string name, Flag flags = Flag(0), DataType default_type = DataType::AUDIO);
-	Route (Session&, const XMLNode&, DataType default_type = DataType::AUDIO);
 	virtual ~Route();
 
 	boost::shared_ptr<IO> input() const { return _input; }
@@ -390,6 +389,8 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	bool           _have_internal_generator;
 	bool           _solo_safe;
 	DataType       _default_type;
+
+        virtual ChanCount input_streams () const;
 
   protected:
 

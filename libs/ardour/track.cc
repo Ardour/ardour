@@ -49,15 +49,6 @@ Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, Data
 	_mode = mode;
 }
 
-Track::Track (Session& sess, const XMLNode& node, DataType default_type)
-	: Route (sess, node, default_type)
-	, _rec_enable_control (new RecEnableControllable(*this))
-{
-	_freeze_record.state = NoFreeze;
-	_declickable = true;
-	_saved_meter_point = _meter_point;
-}
-
 Track::~Track ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("track %1 destructor\n", _name));
@@ -347,4 +338,19 @@ Track::silent_roll (nframes_t nframes, sframes_t /*start_frame*/, sframes_t /*en
 	silence (nframes);
 
 	return diskstream()->process (_session.transport_frame(), nframes, can_record, rec_monitors_input);
+}
+
+ChanCount
+Track::input_streams () const
+{
+        ChanCount cc = _input->n_ports ();
+
+        cerr << "**************" << _name << " IS = " << cc << endl;
+
+        if (cc.n_total() == 0 && _diskstream) {
+                cerr << "*******" << _name << " use diskstream channel count\n";
+                return cc = _diskstream->n_channels();
+        }
+
+        return cc;
 }

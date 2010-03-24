@@ -33,7 +33,6 @@ class AudioTrack : public Track
 {
   public:
 	AudioTrack (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
-	AudioTrack (Session&, const XMLNode&, int);
 	~AudioTrack ();
 
 	int set_mode (TrackMode m);

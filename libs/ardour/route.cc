@@ -121,23 +121,6 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	Metering::Meter.connect_same_thread (*this, (boost::bind (&Route::meter, this)));
 }
 
-Route::Route (Session& sess, const XMLNode& node, DataType default_type)
-	: SessionObject (sess, "toBeReset")
-	, AutomatableControls (sess)
-	, _solo_control (new SoloControllable (X_("solo"), *this))
-	, _mute_control (new MuteControllable (X_("mute"), *this))
-	, _mute_master (new MuteMaster (sess, "toBeReset"))
-	, _default_type (default_type)
-{
-	init ();
-
-	_set_state (node, Stateful::loading_state_version, false);
-
-	/* now that we have _meter, its safe to connect to this */
-
-	Metering::Meter.connect_same_thread (*this, (boost::bind (&Route::meter, this)));
-}
-
 void
 Route::init ()
 {
@@ -472,6 +455,8 @@ Route::process_output_buffers (BufferSet& bufs,
 				     << endl;
 			}
 			assert (bufs.count() == (*i)->input_streams());
+                        
+                        cerr << _name << " run processor " << (*i)->name() << " with " << bufs.count() << endl;
 
 			(*i)->run (bufs, start_frame, end_frame, nframes, *i != _processors.back());
 			bufs.set_count ((*i)->output_streams());
@@ -1515,6 +1500,13 @@ Route::configure_processors (ProcessorStreams* err)
 	return 0;
 }
 
+ChanCount
+Route::input_streams () const
+{
+        cerr << "!!!!!!!!!" << _name << " ::input_streams()\n";
+        return _input->n_ports ();
+}
+
 /** Configure the input/output configuration of each processor in the processors list.
  * Return 0 on success, otherwise configuration is impossible.
  */
@@ -1528,7 +1520,10 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	_in_configure_processors = true;
 
 	// Check each processor in order to see if we can configure as requested
-	ChanCount in = _input->n_ports ();
+        if (_name == "auditioner") {
+                cerr << "AUD conf\n";
+        }
+	ChanCount in = input_streams ();
 	ChanCount out;
 	list< pair<ChanCount,ChanCount> > configuration;
 	uint32_t index = 0;

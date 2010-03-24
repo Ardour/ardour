@@ -36,7 +36,6 @@ class MidiTrack : public Track
 {
 public:
 	MidiTrack (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
-	MidiTrack (Session&, const XMLNode&, int);
 	~MidiTrack ();
 
 	int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,

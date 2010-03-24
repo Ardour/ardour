@@ -1419,35 +1419,43 @@ Session::load_routes (const XMLNode& node, int version)
 boost::shared_ptr<Route>
 Session::XMLRouteFactory (const XMLNode& node, int version)
 {
+	boost::shared_ptr<Route> ret;
+
 	if (node.name() != "Route") {
-		return boost::shared_ptr<Route> ((Route*) 0);
+		return ret;
 	}
 
 	bool has_diskstream = (node.property ("diskstream") != 0 || node.property ("diskstream-id") != 0);
 
 	DataType type = DataType::AUDIO;
 	const XMLProperty* prop = node.property("default-type");
-	boost::shared_ptr<Route> ret;
 
 	if (prop) {
-		type = DataType(prop->value());
+		type = DataType (prop->value());
 	}
 
-	assert(type != DataType::NIL);
+	assert (type != DataType::NIL);
 
 	if (has_diskstream) {
 		if (type == DataType::AUDIO) {
-			AudioTrack* at = new AudioTrack (*this, node, version);
-			boost_debug_shared_ptr_mark_interesting (at, "Track");
-			ret.reset (at);
-			
+			AudioTrack* at = new AudioTrack (*this, X_("toBeResetFroXML"));
+                        if (at->set_state (node, version) == 0) {
+                                boost_debug_shared_ptr_mark_interesting (at, "Track");
+                                ret.reset (at);
+                        }
+                        
 		} else {
-			ret.reset (new MidiTrack (*this, node, version));
+                        MidiTrack* mt = new MidiTrack (*this, X_("toBeResetFroXML"));
+                        if (mt->set_state (node, version) == 0) {
+                                ret.reset (mt);
+                        }
 		}
 	} else {
-		Route* rt = new Route (*this, node);
-		boost_debug_shared_ptr_mark_interesting (rt, "Route");
-		ret.reset (rt);
+		Route* rt = new Route (*this, X_("toBeResetFroXML"));
+                if (rt->set_state (node, version) == 0) {
+                        boost_debug_shared_ptr_mark_interesting (rt, "Route");
+                        ret.reset (rt);
+                }
 	}
 
 	return ret;

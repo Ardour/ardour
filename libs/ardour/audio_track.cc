@@ -55,12 +55,6 @@ AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode 
 	use_new_diskstream ();
 }
 
-AudioTrack::AudioTrack (Session& sess, const XMLNode& node, int /*version*/)
-	: Track (sess, node)
-{
-	_set_state (node, Stateful::loading_state_version, false);
-}
-
 AudioTrack::~AudioTrack ()
 {
 }
@@ -463,13 +457,12 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 		}
 	}
 
-
 	if (n_outputs().n_total() == 0 && _processors.empty()) {
 		return 0;
 	}
 
 	if (!_active) {
-		silence (nframes);
+                silence (nframes);
 		return 0;
 	}
 
@@ -523,8 +516,19 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 		BufferSet& bufs = _session.get_scratch_buffers ();
 		const size_t blimit = bufs.count().n_audio();
 
+                if (limit == 0) {
+                        /* no inputs, try for diskstream channel count */
+                        limit = diskstream->n_channels().n_audio();
+                }
+
 		uint32_t n;
 		uint32_t i;
+
+                cerr << _name << " Input = " << _input->n_ports() 
+                     << " Output " << _output->n_ports ()
+                     << " limit " << limit 
+                     << " blimit " << blimit
+                     << endl;
 
 		if (limit > blimit) {
 

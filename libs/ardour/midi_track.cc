@@ -65,18 +65,6 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 	_mode = mode;
 }
 
-MidiTrack::MidiTrack (Session& sess, const XMLNode& node, int /*version*/)
-	: Track (sess, node, DataType::MIDI)
-	, _immediate_events(1024) // FIXME: size?
-	, _step_edit_ring_buffer(64) // FIXME: size?
-	, _note_mode(Sustained)
-	, _step_editing (false)
-	, _default_channel (0)
-	, _midi_thru (true)
-{
-	_set_state (node, Stateful::loading_state_version, false);
-}
-
 MidiTrack::~MidiTrack ()
 {
 }

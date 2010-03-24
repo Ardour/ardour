@@ -29,6 +29,7 @@
 #include "ardour/session.h"
 #include "ardour/auditioner.h"
 #include "ardour/audioplaylist.h"
+#include "ardour/audio_port.h"
 #include "ardour/panner.h"
 #include "ardour/data_type.h"
 #include "ardour/region_factory.h"
@@ -46,11 +47,19 @@ Auditioner::Auditioner (Session& s)
 	string right = _session.config.get_auditioner_output_right();
 
 	if (left == "default") {
-		left = _session.engine().get_nth_physical_output (DataType::AUDIO, 0);
+                if (_session.monitor_out()) {
+                        left = _session.monitor_out()->input()->audio (0)->name();
+                } else {
+                        left = _session.engine().get_nth_physical_output (DataType::AUDIO, 0);
+                }
 	}
 
 	if (right == "default") {
-		right = _session.engine().get_nth_physical_output (DataType::AUDIO, 1);
+                if (_session.monitor_out()) {
+                        right = _session.monitor_out()->input()->audio (1)->name();
+                } else {
+                        right = _session.engine().get_nth_physical_output (DataType::AUDIO, 1);
+                }
 	}
 
 	if ((left.length() == 0) && (right.length() == 0)) {
@@ -59,6 +68,8 @@ Auditioner::Auditioner (Session& s)
 	}
 
 	_main_outs->defer_pan_reset ();
+
+        cerr << "Aud connect " << left << " + " << right << endl;
 
 	if (left.length()) {
 		_output->add_port (left, this, DataType::AUDIO);
@@ -183,7 +194,10 @@ Auditioner::play_audition (nframes_t nframes)
 
 	_diskstream->prepare ();
 
+        cerr << "Auditioner rolls, gain = " << gain_control()->get_value() << endl;
+
 	if ((ret = roll (this_nframes, current_frame, current_frame + nframes, false, false, false)) != 0) {
+                cerr << "\troll failed\n";
 		silence (nframes);
 		return ret;
 	}

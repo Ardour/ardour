@@ -94,13 +94,13 @@ class Track : public Route
 	PBD::Signal0<void> FreezeChange;
 
   protected:
-	Track (Session& sess, const XMLNode& node, DataType default_type = DataType::AUDIO);
-
 	virtual XMLNode& state (bool full) = 0;
 
 	boost::shared_ptr<Diskstream> _diskstream;
 	MeterPoint  _saved_meter_point;
 	TrackMode   _mode;
+
+        ChanCount input_streams () const;
 
 	//private: (FIXME)
 	struct FreezeRecordProcessorInfo {
