@@ -798,6 +798,9 @@ Crossfade::set_state (const XMLNode& node)
 		}
 	}
 
+	_fade_in.front()->value=0.0;
+	_fade_in.back()->value=1.0;
+
 	_fade_in.thaw ();
 	
         /* fade out */
@@ -822,6 +825,9 @@ Crossfade::set_state (const XMLNode& node)
 			_fade_out.add (x, y);
 		}
 	}
+
+	_fade_out.front()->value=1.0;
+	_fade_out.back()->value=0.0;
 
 	_fade_out.thaw ();
 

@@ -580,6 +580,8 @@
 	 <menu name='Help' action='Help'>
 	     <menuitem action='About'/>
 	     <menuitem action='Chat'/>
+	     <menuitem action='Manual'/>
+	     <menuitem action='Reference'/>
 	 </menu>
 	 
      </menubar>
