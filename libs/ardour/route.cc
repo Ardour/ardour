@@ -456,8 +456,6 @@ Route::process_output_buffers (BufferSet& bufs,
 			}
 			assert (bufs.count() == (*i)->input_streams());
                         
-                        cerr << _name << " run processor " << (*i)->name() << " with " << bufs.count() << endl;
-
 			(*i)->run (bufs, start_frame, end_frame, nframes, *i != _processors.back());
 			bufs.set_count ((*i)->output_streams());
 		}
@@ -808,6 +806,20 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 
 		}
 
+                /* is this the monitor send ? if so, make sure we keep track of it */
+
+                boost::shared_ptr<InternalSend> isend = boost::dynamic_pointer_cast<InternalSend> (processor);
+
+                if (isend && _session.monitor_out() && (isend->target_id() == _session.monitor_out()->id())) {
+                        _monitor_send = isend;
+                        
+                        if (_monitor_send->active()) {
+                                _monitor_send->set_solo_level (1);
+                        } else {
+                                _monitor_send->set_solo_level (0);
+                        }
+                }
+
 		if (activation_allowed && (processor != _monitor_send)) {
 			processor->activate ();
 		}
@@ -836,22 +848,9 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 
 			boost::shared_ptr<Processor> processor;
 
-			if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
-			    prop->value() == "lv2" ||
-			    prop->value() == "vst" ||
-			    prop->value() == "audiounit") {
-
-				processor.reset (new PluginInsert(_session, node));
-
-			} else if (prop->value() == "port") {
-
-				processor.reset (new PortInsert (_session, _mute_master, node));
-
-			} else if (prop->value() == "send") {
-
-				processor.reset (new Send (_session, _mute_master, node));
-
-			} else if (prop->value() == "meter") {
+                        /* meter, amp, monitor and intreturn are all singletons, deal with them first */
+                        
+			if (prop->value() == "meter") {
 
 				if (_meter) {
 					if (_meter->set_state (node, Stateful::loading_state_version)) {
@@ -861,8 +860,16 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 					}
 				}
 
-				_meter.reset (new PeakMeter (_session, node));
+                                PeakMeter* pm = new PeakMeter (_session);
+
+                                if (pm->set_state (node, Stateful::loading_state_version)) {
+                                        delete pm;
+                                        return false;
+                                }
+
+				_meter.reset (pm);
 				_meter->set_display_to_user (_meter_point == MeterCustom);
+
 				processor = _meter;
 
                         } else if (prop->value() == "monitor") {
@@ -874,37 +881,36 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
                                                 return true;
                                         }
                                 }
-                                
-                                _monitor_control.reset (new MonitorProcessor (_session));
-                                _monitor_control->set_state (node, Stateful::loading_state_version);
+
+                                MonitorProcessor* mp = new MonitorProcessor (_session);
+                                if (mp->set_state (node, Stateful::loading_state_version)) {
+                                        delete mp;
+                                        return false;
+                                }
+
+                                _monitor_control.reset (mp);
                                 processor = _monitor_control;
 
 			} else if (prop->value() == "amp") {
 
-				/* amp always exists */
-
-				processor = _amp;
-				if (processor->set_state (node, Stateful::loading_state_version)) {
-					return false;
-				} else {
-					/* never any reason to add it */
-					return true;
-				}
-
-			} else if (prop->value() == "intsend") {
-
-                                InternalSend* isend = new InternalSend (_session, _mute_master, node);
-                                
-                                if (_session.monitor_out() && (isend->target_id() == _session.monitor_out()->id())) {
-                                        _monitor_send.reset (isend);
-                                        if (_monitor_send->active()) {
-                                                _monitor_send->set_solo_level (1);
+                                if (_amp) {
+                                        processor = _amp;
+                                        if (processor->set_state (node, Stateful::loading_state_version)) {
+                                                return false;
                                         } else {
-                                                _monitor_send->set_solo_level (0);
+                                                /* no reason to add it */
+                                                return true;
                                         }
                                 }
 
-                                processor.reset (isend);
+                                Amp* a = new Amp (_session, _mute_master);
+                                if (_amp->set_state (node, Stateful::loading_state_version)) {
+                                        delete a;
+                                        return false;
+                                }
+
+                                _amp.reset (a);
+                                processor = _amp;
 
 			} else if (prop->value() == "intreturn") {
 
@@ -919,7 +925,14 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 						return true;
 					}
 				}
-				_intreturn.reset (new InternalReturn (_session, node));
+
+                                InternalReturn* iret = new InternalReturn (_session);
+                                if (iret->set_state (node, Stateful::loading_state_version)) { 
+                                        delete iret;
+                                        return false;
+                                }
+
+				_intreturn.reset (iret);
 				processor = _intreturn;
 
 			} else if (prop->value() == "main-outs") {
@@ -932,8 +945,39 @@ Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter
 					}
 				}
 
-				_main_outs.reset (new Delivery (_session, _output, _mute_master, node));
+                                Delivery* del = new Delivery (_session, _output, _mute_master, X_("toBeResetFroXML"), Delivery::Role (0));
+                                if (del->set_state (node, Stateful::loading_state_version)) { 
+                                        delete del;
+                                        return false;
+                                }
+
+				_main_outs.reset (del);
 				processor = _main_outs;
+
+			} else if (prop->value() == "intsend") {
+
+                                InternalSend* isend = new InternalSend (_session, _mute_master, boost::shared_ptr<Route>(), Delivery::Role (0));
+                                if (isend->set_state (node, Stateful::loading_state_version)) {
+                                        delete isend;
+                                        return false;
+                                }
+                                
+                                processor.reset (isend);
+
+                        } else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
+                                   prop->value() == "lv2" ||
+                                   prop->value() == "vst" ||
+                                   prop->value() == "audiounit") {
+                                
+				processor.reset (new PluginInsert(_session, node));
+
+			} else if (prop->value() == "port") {
+
+				processor.reset (new PortInsert (_session, _mute_master, node));
+
+			} else if (prop->value() == "send") {
+
+				processor.reset (new Send (_session, _mute_master, node));
 
 			} else {
 				error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;

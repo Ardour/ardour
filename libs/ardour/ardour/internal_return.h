@@ -31,7 +31,6 @@ class InternalReturn : public Return
 {
   public:
 	InternalReturn (Session&);
-	InternalReturn (Session&, const XMLNode&);
 
 	bool visible() const;
 

@@ -36,13 +36,6 @@ InternalReturn::InternalReturn (Session& s)
 	CycleStart.connect_same_thread (*this, boost::bind (&InternalReturn::cycle_start, this, _1));
 }
 
-InternalReturn::InternalReturn (Session& s, const XMLNode& node)
-	: Return (s, node, true)
-	, user_count (0)
-{
-	CycleStart.connect_same_thread (*this, boost::bind (&InternalReturn::cycle_start, this, _1));
-}
-
 void
 InternalReturn::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_frame*/, nframes_t nframes, bool)
 {

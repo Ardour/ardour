@@ -29,7 +29,6 @@ class InternalSend : public Send
 {
   public:
 	InternalSend (Session&, boost::shared_ptr<MuteMaster>, boost::shared_ptr<Route> send_to, Delivery::Role role);
-	InternalSend (Session&, boost::shared_ptr<MuteMaster>, const XMLNode&);
 	virtual ~InternalSend ();
 
 	std::string display_name() const;
@@ -55,11 +54,13 @@ class InternalSend : public Send
 	boost::shared_ptr<Route> _send_to;
 	PBD::ID _send_to_id;
 	PBD::ScopedConnection connect_c;
+        PBD::ScopedConnectionList target_connections;
 
 	void send_to_going_away ();
 	void send_to_property_changed (const PBD::PropertyChange&);
 	int  connect_when_legal ();
 	int  set_our_state (XMLNode const &, int);
+        int  use_target (boost::shared_ptr<Route>);
 };
 
 } // namespace ARDOUR

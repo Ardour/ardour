@@ -37,7 +37,6 @@ class MonitorProcessor : public Processor
 {
   public:
         MonitorProcessor (Session&);
-        MonitorProcessor (Session&, const XMLNode& name);
 
         bool display_to_user() const;
 

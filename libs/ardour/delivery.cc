@@ -94,61 +94,6 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const string& 
 	CycleStart.connect_same_thread (*this, boost::bind (&Delivery::cycle_start, this, _1));
 }
 
-/* deliver to a new IO object, reconstruct from XML */
-
-Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node)
-	: IOProcessor (s, false, true, "reset")
-	, _role (Role (0))
-	, _output_buffers (new BufferSet())
-	, _current_gain (1.0)
-	, _output_offset (0)
-	, _no_outs_cuz_we_no_monitor (false)
-	, _solo_level (0)
-	, _solo_isolated (false)
-	, _mute_master (mm)
-	, no_panner_reset (false)
-{
-	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
-	_display_to_user = false;
-
-	if (set_state (node, Stateful::loading_state_version)) {
-		throw failed_constructor ();
-	}
-
-	if (_output) {
-		_output->changed.connect_same_thread (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
-	}
-
-	CycleStart.connect_same_thread (*this, boost::bind (&Delivery::cycle_start, this, _1));
-}
-
-/* deliver to an existing IO object, reconstruct from XML */
-
-Delivery::Delivery (Session& s, boost::shared_ptr<IO> out, boost::shared_ptr<MuteMaster> mm, const XMLNode& node)
-	: IOProcessor (s, boost::shared_ptr<IO>(), out, "reset")
-	, _role (Role (0))
-	, _output_buffers (new BufferSet())
-	, _current_gain (1.0)
-	, _output_offset (0)
-	, _no_outs_cuz_we_no_monitor (false)
-	, _solo_level (0)
-	, _solo_isolated (false)
-	, _mute_master (mm)
-	, no_panner_reset (false)
-{
-	_panner = boost::shared_ptr<Panner>(new Panner (_name, _session));
-	_display_to_user = false;
-
-	if (set_state (node, Stateful::loading_state_version)) {
-		throw failed_constructor ();
-	}
-
-	if (_output) {
-		_output->changed.connect_same_thread (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
-	}
-
-	CycleStart.connect_same_thread (*this, boost::bind (&Delivery::cycle_start, this, _1));
-}
 
 Delivery::~Delivery()
 {

@@ -46,7 +46,6 @@ class Metering {
 class PeakMeter : public Processor {
 public:
 	PeakMeter(Session& s) : Processor(s, "Meter") {}
-	PeakMeter(Session&s, const XMLNode& node);
 
 	void meter();
 	void reset ();

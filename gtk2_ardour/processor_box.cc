@@ -1305,18 +1305,33 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 
 				XMLNode n (**niter);
 				Send::make_unique (n, *_session);
-				p.reset (new Send (*_session, _route->mute_master(), n));
+                                Send* s = new Send (*_session, _route->mute_master());
+                                if (s->set_state (n, Stateful::loading_state_version)) {
+                                        delete s;
+                                        return;
+                                }
+
+				p.reset (s);
+                                        
 
 			} else if (type->value() == "return") {
 
 				XMLNode n (**niter);
 				Return::make_unique (n, *_session);
-				p.reset (new Return (*_session, **niter));
+                                Return* r = new Return (*_session);
+
+                                if (r->set_state (n, Stateful::loading_state_version)) {
+                                        delete r;
+                                        return;
+                                }
+
+				p.reset (r);
 
 			} else {
 				/* XXX its a bit limiting to assume that everything else
 				   is a plugin.
 				*/
+
 				p.reset (new PluginInsert (*_session, **niter));
 			}
 

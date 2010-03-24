@@ -49,22 +49,6 @@ Return::Return (Session& s, bool internal)
 	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
-Return::Return (Session& s, const XMLNode& node, bool internal)
-	: IOProcessor (s, (internal ? false : true), false, "return")
-	, _metering (false)
-{
-	/* never muted */
-
-	_amp.reset (new Amp (_session, boost::shared_ptr<MuteMaster>()));
-	_meter.reset (new PeakMeter (_session));
-
-	if (set_state (node, Stateful::loading_state_version)) {
-		throw failed_constructor();
-	}
-
-	ProcessorCreated (this); /* EMIT SIGNAL */
-}
-
 Return::~Return ()
 {
 }

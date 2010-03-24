@@ -33,12 +33,6 @@ using namespace ARDOUR;
 
 PBD::Signal0<void> Metering::Meter;
 
-PeakMeter::PeakMeter (Session& s, const XMLNode& node)
-	: Processor (s, node)
-{
-	
-}
-
 /** Get peaks from @a bufs
  * Input acceptance is lenient - the first n buffers from @a bufs will
  * be metered, where n was set by the last call to setup(), excess meters will

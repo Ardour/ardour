@@ -34,24 +34,12 @@ using namespace std;
 
 InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, boost::shared_ptr<Route> sendto, Delivery::Role role)
 	: Send (s, mm, role)
-	, _send_to (sendto)
 {
-	if ((target = _send_to->get_return_buffer ()) == 0) {
-		throw failed_constructor();
-	}
-
-	set_name (sendto->name());
-
-	_send_to->DropReferences.connect_same_thread (*this, boost::bind (&InternalSend::send_to_going_away, this));
-	_send_to->PropertyChanged.connect_same_thread (*this, boost::bind (&InternalSend::send_to_property_changed, this, _1));;
-}
-
-InternalSend::InternalSend (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node)
-	: Send (s, mm, node, Stateful::loading_state_version, Delivery::Aux /* will be reset in set_state() */),
-	  target (0)
-{
-	/* Send constructor will set its state, so here we just need to set up our own */
-	set_our_state (node, Stateful::loading_state_version);
+        if (sendto) {
+                if (use_target (sendto)) {
+                        throw failed_constructor();
+                }
+        }
 }
 
 InternalSend::~InternalSend ()
@@ -59,14 +47,34 @@ InternalSend::~InternalSend ()
 	if (_send_to) {
 		_send_to->release_return_buffer ();
 	}
-
-	connect_c.disconnect ();
 }
+
+int
+InternalSend::use_target (boost::shared_ptr<Route> sendto)
+{
+        _send_to = sendto;
+
+        if ((target = _send_to->get_return_buffer ()) == 0) {
+                return -1;
+        }
+        
+        set_name (sendto->name());
+        _send_to_id = _send_to->id();
+
+        target_connections.drop_connections ();
+
+        _send_to->DropReferences.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_going_away, this));
+        _send_to->PropertyChanged.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_property_changed, this, _1));;
+
+        return 0;
+}
+
 
 void
 InternalSend::send_to_going_away ()
 {
 	target = 0;
+        target_connections.drop_connections ();
 	_send_to.reset ();
 	_send_to_id = "0";
 }
@@ -212,17 +220,14 @@ InternalSend::connect_when_legal ()
 		return 0;
 	}
 
-	if ((_send_to = _session.route_by_id (_send_to_id)) == 0) {
+        boost::shared_ptr<Route> sendto;
+
+	if ((sendto = _session.route_by_id (_send_to_id)) == 0) {
 		error << X_("cannot find route to connect to") << endmsg;
 		return -1;
 	}
 
-	if ((target = _send_to->get_return_buffer ()) == 0) {
-		error << X_("target for internal send has no return buffer") << endmsg;
-		return -1;
-	}
-
-	return 0;
+        return use_target (sendto);
 }
 
 bool

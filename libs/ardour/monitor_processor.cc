@@ -25,12 +25,6 @@ MonitorProcessor::MonitorProcessor (Session& s)
         _solo_boost_level = 1.0;
 }
 
-MonitorProcessor::MonitorProcessor (Session& s, const XMLNode& node)
-        : Processor (s, node)
-{
-        set_state (node, Stateful::loading_state_version);
-}
-
 void
 MonitorProcessor::allocate_channels (uint32_t size)
 {
