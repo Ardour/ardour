@@ -117,4 +117,8 @@ class MonitorSection : public RouteUI
         void solo_blink (bool);
         bool cancel_solo (GdkEventButton*);
         void solo_cut_changed ();
+        void update_solo_model ();
+        void parameter_changed (std::string);
+
+        PBD::ScopedConnection config_connection;
 };

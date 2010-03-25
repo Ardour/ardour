@@ -13,6 +13,7 @@
 #include "ardour/utils.h"
 
 #include "ardour_ui.h"
+#include "gui_thread.h"
 #include "monitor_section.h"
 #include "public_editor.h"
 #include "utils.h"
@@ -252,6 +253,10 @@ MonitorSection::MonitorSection (Session* s)
         _tearoff->tearoff_window().set_type_hint (Gdk::WINDOW_TYPE_HINT_NORMAL);
         _tearoff->tearoff_window().set_title (X_("Monitor"));
         _tearoff->tearoff_window().signal_key_press_event().connect (sigc::ptr_fun (forward_key_press), false);
+
+        /* catch changes that affect us */
+
+        Config->ParameterChanged.connect (config_connection, ui_bind (&MonitorSection::parameter_changed, this, _1), gui_context());
 }
 
 MonitorSection::~MonitorSection ()
@@ -723,6 +728,34 @@ MonitorSection::linear_gain_printer (SpinButton* button)
 }
 
 void
+MonitorSection::update_solo_model ()
+{
+        const char* action_name;
+        Glib::RefPtr<Action> act;
+
+        if (Config->get_solo_control_is_listen_control()) {
+		switch (Config->get_listen_position()) {
+		case AfterFaderListen:
+                        action_name = X_("solo-use-afl");
+			break;
+		case PreFaderListen:
+                        action_name = X_("solo-use-pfl");
+			break;
+		}
+        } else {
+                action_name = X_("solo-use-in-place");
+        }
+
+        act = ActionManager::get_action (X_("Solo"), action_name);
+        if (act) {
+                Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
+                if (ract) {
+                        ract->set_active (true);
+                }
+        }
+}
+
+void
 MonitorSection::map_state ()
 {
         if (!_route || !_monitor) {
@@ -733,31 +766,10 @@ MonitorSection::map_state ()
         dim_control->get_adjustment()->set_value (_monitor->dim_level());
         solo_boost_control->get_adjustment()->set_value (_monitor->solo_boost_level());
 
-        const char *action_name;
-
-        if (Config->get_solo_control_is_listen_control()) {
-		switch (Config->get_listen_position()) {
-		case AfterFaderListen:
-                        action_name = X_("solo-use-afl");
-			break;
-		case PreFaderListen:
-                        action_name = X_("solo-use-afl");
-			break;
-		}
-        } else {
-                action_name = X_("solo-use-in-place");
-        }
-        
         Glib::RefPtr<Action> act;
-        
-        act = ActionManager::get_action (X_("Solo"), action_name);
-        if (act) {
-                Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (act);
-                if (ract) {
-                        ract->set_active (true);
-                }
-        }
 
+        update_solo_model ();
+        
         act = ActionManager::get_action (X_("Monitor"), "monitor-cut-all");
         if (act) {
                 Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
@@ -870,4 +882,15 @@ void
 MonitorSection::solo_cut_changed ()
 {
         Config->set_solo_mute_gain (slider_position_to_gain (solo_cut_adjustment.get_value()));
+}
+
+void
+MonitorSection::parameter_changed (std::string name)
+{
+        if (name == "solo-control-is-listen-control" ||
+            name == "listen-position") {
+                update_solo_model ();
+        } else if (name == "solo-mute-gain") {
+                solo_cut_adjustment.set_value (gain_to_slider_position (Config->get_solo_mute_gain()));
+        }
 }

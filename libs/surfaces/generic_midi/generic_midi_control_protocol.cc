@@ -36,6 +36,7 @@
 #include "ardour/session.h"
 #include "ardour/route.h"
 #include "ardour/midi_ui.h"
+#include "ardour/rc_configuration.h"
 
 #include "generic_midi_control_protocol.h"
 #include "midicontrollable.h"
@@ -61,10 +62,12 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	   the name is defined in ardour.rc which is likely not internationalized.
 	*/
 	
-	_port = mm->port (X_("control"));
+	_port = mm->port (Config->get_midi_port_name());
 
 	if (_port == 0) {
-		error << _("no MIDI port named \"control\" exists - generic MIDI control disabled") << endmsg;
+		error << string_compose (_("no MIDI port named \"%1\" exists - generic MIDI control disabled"), 
+                                         Config->get_midi_port_name()) 
+                      << endmsg;
 		throw failed_constructor();
 	}
 
