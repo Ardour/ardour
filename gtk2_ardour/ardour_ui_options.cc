@@ -1294,6 +1294,8 @@ ARDOUR_UI::parameter_changed (const char* parameter_name)
 		editor->toggle_meter_updating();
 	} else if (PARAM_IS ("default-narrow_ms")) {
 		ActionManager::map_some_state ("options",  "DefaultNarrowMS", &Configuration::get_default_narrow_ms);
+	} else if (PARAM_IS ("name-new-markers")) {
+		ActionManager::map_some_state ("options",  "NameNewMarkers", &Configuration::get_name_new_markers);	
 	} else if (PARAM_IS ("rubberbanding-snaps-to-grid")) {
 		ActionManager::map_some_state ("options", "RubberbandingSnapsToGrid", &Configuration::get_rubberbanding_snaps_to_grid);
 	}
