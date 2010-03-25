@@ -561,6 +561,10 @@ Session::create (const string& mix_template, nframes_t initial_length, BusProfil
 
 		if (bus_profile->master_out_channels) {
 			Route* rt = new Route (*this, _("master"), Route::MasterOut, DataType::AUDIO);
+                        if (rt->init ()) {
+                                delete rt;
+                                return -1;
+                        }
 			boost_debug_shared_ptr_mark_interesting (rt, "Route");
 			boost::shared_ptr<Route> r (rt);
 			r->input()->ensure_io (count, false, this);
@@ -571,6 +575,10 @@ Session::create (const string& mix_template, nframes_t initial_length, BusProfil
 
                         if (Config->get_use_monitor_bus()) {
                                 Route* rt = new Route (*this, _("monitor"), Route::MonitorOut, DataType::AUDIO);
+                                if (rt->init ()) {
+                                        delete rt;
+                                        return -1;
+                                }
                                 boost_debug_shared_ptr_mark_interesting (rt, "Route");
                                 boost::shared_ptr<Route> r (rt);
                                 r->input()->ensure_io (count, false, this);
@@ -1425,8 +1433,12 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 		return ret;
 	}
 
-	bool has_diskstream = (node.property ("diskstream") != 0 || node.property ("diskstream-id") != 0);
+        const XMLProperty* dsprop;
 
+        if ((dsprop = node.property (X_("diskstream-id"))) == 0) {
+                dsprop = node.property (X_("diskstream"));
+        }
+        
 	DataType type = DataType::AUDIO;
 	const XMLProperty* prop = node.property("default-type");
 
@@ -1436,25 +1448,65 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 
 	assert (type != DataType::NIL);
 
-	if (has_diskstream) {
-		if (type == DataType::AUDIO) {
-			AudioTrack* at = new AudioTrack (*this, X_("toBeResetFroXML"));
-                        if (at->set_state (node, version) == 0) {
-                                boost_debug_shared_ptr_mark_interesting (at, "Track");
-                                ret.reset (at);
+	if (dsprop) {
+
+                boost::shared_ptr<Diskstream> ds;
+                PBD::ID diskstream_id (dsprop->value());
+		PBD::ID zero ("0");
+
+		/* this wierd hack is used when creating
+		   tracks from a template. We have a special
+		   ID for the diskstream that means "you
+		   should create a new diskstream here, not
+		   look for an old one."
+		*/
+                
+		if (diskstream_id != zero) {
+
+                        ds = diskstream_by_id (diskstream_id);
+
+                        if (!ds) {
+                                error << string_compose (_("cannot find diskstream ID %1"), diskstream_id.to_s()) << endmsg;
+                                return ret;
                         }
+		} 
+
+                Track* track;
+                
+                if (type == DataType::AUDIO) {
+                        track = new AudioTrack (*this, X_("toBeResetFroXML"));
                         
-		} else {
-                        MidiTrack* mt = new MidiTrack (*this, X_("toBeResetFroXML"));
-                        if (mt->set_state (node, version) == 0) {
-                                ret.reset (mt);
-                        }
-		}
+                } else {
+                        track = new MidiTrack (*this, X_("toBeResetFroXML"));
+                }
+                
+                if (track->init()) {
+                        delete track;
+                        return ret;
+                }
+                
+                if (ds) {
+                        track->set_diskstream (ds);
+                } else {
+                        track->use_new_diskstream ();
+                }
+                
+                if (track->set_state (node, version)) {
+                        delete track;
+                        return ret;
+                }
+                
+                boost_debug_shared_ptr_mark_interesting (track, "Track");
+                ret.reset (track);
+                
 	} else {
 		Route* rt = new Route (*this, X_("toBeResetFroXML"));
-                if (rt->set_state (node, version) == 0) {
+
+                if (rt->init () == 0 && rt->set_state (node, version) == 0) {
                         boost_debug_shared_ptr_mark_interesting (rt, "Route");
                         ret.reset (rt);
+                } else {
+                        delete rt;
                 }
 	}
 

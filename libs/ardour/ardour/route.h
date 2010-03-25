@@ -71,6 +71,8 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	Route (Session&, std::string name, Flag flags = Flag(0), DataType default_type = DataType::AUDIO);
 	virtual ~Route();
 
+	virtual int init ();
+
 	boost::shared_ptr<IO> input() const { return _input; }
 	boost::shared_ptr<IO> output() const { return _output; }
 
@@ -393,8 +395,9 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
         virtual ChanCount input_streams () const;
 
   protected:
-
 	virtual XMLNode& state(bool);
+
+	int configure_processors (ProcessorStreams*);
 
 	void passthru_silence (sframes_t start_frame, sframes_t end_frame,
 	                       nframes_t nframes, int declick);
@@ -413,7 +416,6 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	boost::shared_ptr<PeakMeter> _meter;
 
   private:
-	void init ();
 	int _set_state_2X (const XMLNode&, int);
 	void set_processor_state_2X (XMLNodeList const &, int);
 
@@ -427,7 +429,6 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	bool _in_configure_processors;
 
-	int configure_processors (ProcessorStreams*);
 	int configure_processors_unlocked (ProcessorStreams*);
 
 	bool add_processor_from_xml (const XMLNode&, ProcessorList::iterator iter);	

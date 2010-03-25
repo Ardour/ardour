@@ -35,8 +35,9 @@ class Track : public Route
 {
   public:
 	Track (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal, DataType default_type = DataType::AUDIO);
-
 	virtual ~Track ();
+
+        int init ();
 
 	bool set_name (const std::string& str);
 
@@ -60,8 +61,8 @@ class Track : public Route
 
 	boost::shared_ptr<Diskstream> diskstream() const { return _diskstream; }
 
-	virtual int use_diskstream (std::string name) = 0;
-	virtual int use_diskstream (const PBD::ID& id) = 0;
+        virtual void use_new_diskstream () = 0;
+        virtual void set_diskstream (boost::shared_ptr<Diskstream>) = 0;
 
 	nframes_t update_total_latency();
 	void           set_latency_delay (nframes_t);

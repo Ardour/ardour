@@ -498,7 +498,6 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 		}
 	}
 
-
 	if (can_record && !_last_capture_regions.empty()) {
 		_last_capture_regions.clear ();
 	}
@@ -666,7 +665,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 
 		_speed = _target_speed;
 
-	}
+	} 
 
 	ret = 0;
 

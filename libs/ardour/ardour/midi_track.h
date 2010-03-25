@@ -45,8 +45,8 @@ public:
 
 	boost::shared_ptr<MidiDiskstream> midi_diskstream() const;
 
-	int use_diskstream (string name);
-	int use_diskstream (const PBD::ID& id);
+	void use_new_diskstream ();
+        void set_diskstream (boost::shared_ptr<Diskstream>);
 
 	void set_latency_delay (nframes_t);
 
@@ -98,8 +98,6 @@ protected:
 private:
 	void write_out_of_band_data (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 
-	int set_diskstream (boost::shared_ptr<MidiDiskstream> ds);
-	void use_new_diskstream ();
 	void set_state_part_two ();
 	void set_state_part_three ();
 

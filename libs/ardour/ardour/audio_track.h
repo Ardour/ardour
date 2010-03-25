@@ -43,8 +43,8 @@ class AudioTrack : public Track
 
 	boost::shared_ptr<AudioDiskstream> audio_diskstream() const;
 
-	int use_diskstream (std::string name);
-	int use_diskstream (const PBD::ID& id);
+	void use_new_diskstream ();
+        void set_diskstream (boost::shared_ptr<Diskstream>);
 
 	int export_stuff (BufferSet& bufs, sframes_t start_frame, nframes_t nframes, bool enable_processing = true);
 
@@ -62,9 +62,7 @@ class AudioTrack : public Track
 	int _set_state (const XMLNode&, int, bool call_base);
 
   private:
-	int  set_diskstream (boost::shared_ptr<AudioDiskstream>, void *);
 	int  deprecated_use_diskstream_connections ();
-	void use_new_diskstream ();
 	void set_state_part_two ();
 	void set_state_part_three ();
 };

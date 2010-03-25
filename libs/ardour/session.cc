@@ -638,7 +638,13 @@ Session::hookup_io ()
 		*/
 
 		try {
-			auditioner.reset (new Auditioner (*this));
+                        Auditioner* a = new Auditioner (*this);
+                        if (a->init()) {
+                                delete a;
+                                throw failed_constructor();
+                        }
+                        a->use_new_diskstream ();
+			auditioner.reset (a);
 		}
 
 		catch (failed_constructor& err) {
@@ -1454,6 +1460,14 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 
 		try {
 			MidiTrack* mt = new MidiTrack (*this, track_name, Route::Flag (0), mode);
+
+                        if (mt->init ()) {
+                                delete mt;
+                                goto failed;
+                        }
+
+                        mt->use_new_diskstream();
+
 			boost_debug_shared_ptr_mark_interesting (mt, "Track");
 			track = boost::shared_ptr<MidiTrack>(mt);
 
@@ -1630,6 +1644,14 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 		try {
 			AudioTrack* at = new AudioTrack (*this, track_name, Route::Flag (0), mode);
+
+                        if (at->init ()) {
+                                delete at;
+                                goto failed;
+                        }
+
+                        at->use_new_diskstream();
+
 			boost_debug_shared_ptr_mark_interesting (at, "Track");
 			track = boost::shared_ptr<AudioTrack>(at);
 
@@ -1762,6 +1784,12 @@ Session::new_audio_route (bool aux, int input_channels, int output_channels, Rou
 
 		try {
 			Route* rt = new Route (*this, bus_name, Route::Flag(0), DataType::AUDIO);
+
+                        if (rt->init ()) {
+                                delete rt;
+                                goto failure;
+                        }
+
 			boost_debug_shared_ptr_mark_interesting (rt, "Route");
 			shared_ptr<Route> bus (rt);
 
@@ -3154,7 +3182,7 @@ Session::audition_region (boost::shared_ptr<Region> r)
 void
 Session::cancel_audition ()
 {
-	if (auditioner->active()) {
+	if (auditioner->auditioning()) {
 		auditioner->cancel_audition ();
 		AuditionActive (false); /* EMIT SIGNAL */
 	}
@@ -3213,7 +3241,7 @@ Session::is_auditioning () const
 {
 	/* can be called before we have an auditioner object */
 	if (auditioner) {
-		return auditioner->active();
+		return auditioner->auditioning();
 	} else {
 		return false;
 	}

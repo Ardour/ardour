@@ -72,14 +72,57 @@ PBD::Signal0<void> Route::RemoteControlIDChange;
 Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	: SessionObject (sess, name)
 	, AutomatableControls (sess)
+        , _active (true)
+        , _initial_delay (0)
+        , _roll_delay (0)
 	, _flags (flg)
+        , _pending_declick (true)
+        , _meter_point (MeterPostFader)
+        , _phase_invert (0)
+        , _self_solo (false)
+        , _soloed_by_others (0)
+        , _solo_isolated (0)
+        , _denormal_protection (false)
+        , _recordable (true)
+        , _silent (false)
+        , _declickable (false)
 	, _solo_control (new SoloControllable (X_("solo"), *this))
 	, _mute_control (new MuteControllable (X_("mute"), *this))
 	, _mute_master (new MuteMaster (sess, name))
+        , _mute_points (MuteMaster::AllPoints)
+        , _have_internal_generator (false)
+        , _solo_safe (false)
 	, _default_type (default_type)
-
+        , _remote_control_id (0)
+        , _in_configure_processors (false)
 {
-	init ();
+	processor_max_streams.reset();
+	order_keys[N_("signal")] = order_key_cnt++;
+}
+
+int
+Route::init ()
+{
+	/* add standard controls */
+
+	_solo_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
+	_mute_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
+	
+	add_control (_solo_control);
+	add_control (_mute_control);
+
+	/* input and output objects */
+
+	_input.reset (new IO (_session, _name, IO::Input, _default_type));
+	_output.reset (new IO (_session, _name, IO::Output, _default_type));
+
+	_input->changed.connect_same_thread (*this, boost::bind (&Route::input_change_handler, this, _1, _2));
+	_output->changed.connect_same_thread (*this, boost::bind (&Route::output_change_handler, this, _1, _2));
+
+	/* add amp processor  */
+
+	_amp.reset (new Amp (_session, _mute_master));
+	add_processor (_amp, PostFader);
 
 	/* add standard processors other than amp (added by ::init()) */
 
@@ -119,53 +162,8 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	/* now that we have _meter, its safe to connect to this */
 
 	Metering::Meter.connect_same_thread (*this, (boost::bind (&Route::meter, this)));
-}
 
-void
-Route::init ()
-{
-	_self_solo = false;
-	_soloed_by_others = 0;
-	_solo_isolated = 0;
-	_solo_safe = false;
-	_active = true;
-	processor_max_streams.reset();
-	_recordable = true;
-	order_keys[N_("signal")] = order_key_cnt++;
-	_silent = false;
-	_meter_point = MeterPostFader;
-	_initial_delay = 0;
-	_roll_delay = 0;
-	_have_internal_generator = false;
-	_declickable = false;
-	_pending_declick = true;
-	_remote_control_id = 0;
-	_in_configure_processors = false;
-	_mute_points = MuteMaster::AllPoints;
-
-	_phase_invert = 0;
-	_denormal_protection = false;
-
-	/* add standard controls */
-
-	_solo_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
-	_mute_control->set_flags (Controllable::Flag (_solo_control->flags() | Controllable::Toggle));
-	
-	add_control (_solo_control);
-	add_control (_mute_control);
-
-	/* input and output objects */
-
-	_input.reset (new IO (_session, _name, IO::Input, _default_type));
-	_output.reset (new IO (_session, _name, IO::Output, _default_type));
-
-	_input->changed.connect_same_thread (*this, boost::bind (&Route::input_change_handler, this, _1, _2));
-	_output->changed.connect_same_thread (*this, boost::bind (&Route::output_change_handler, this, _1, _2));
-
-	/* add amp processor  */
-
-	_amp.reset (new Amp (_session, _mute_master));
-	add_processor (_amp, PostFader);
+        return 0;
 }
 
 Route::~Route ()
@@ -455,7 +453,7 @@ Route::process_output_buffers (BufferSet& bufs,
 				     << endl;
 			}
 			assert (bufs.count() == (*i)->input_streams());
-                        
+
 			(*i)->run (bufs, start_frame, end_frame, nframes, *i != _processors.back());
 			bufs.set_count ((*i)->output_streams());
 		}
@@ -475,15 +473,15 @@ Route::passthru (sframes_t start_frame, sframes_t end_frame, nframes_t nframes, 
 
 	_silent = false;
 
-	assert (bufs.available() >= _input->n_ports());
+	assert (bufs.available() >= input_streams());
 
 	if (_input->n_ports() == ChanCount::ZERO) {
 		silence (nframes);
 	}
 
-	bufs.set_count (_input->n_ports());
+	bufs.set_count (input_streams());
 
-	if (is_monitor() && _session.listening()) {
+	if (is_monitor() && _session.listening() && !_session.is_auditioning()) {
 
 		/* control/monitor bus ignores input ports when something is
 		   feeding the listen "stream". data will "arrive" into the
@@ -1547,7 +1545,6 @@ Route::configure_processors (ProcessorStreams* err)
 ChanCount
 Route::input_streams () const
 {
-        cerr << "!!!!!!!!!" << _name << " ::input_streams()\n";
         return _input->n_ports ();
 }
 
@@ -1564,9 +1561,6 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	_in_configure_processors = true;
 
 	// Check each processor in order to see if we can configure as requested
-        if (_name == "auditioner") {
-                cerr << "AUD conf\n";
-        }
 	ChanCount in = input_streams ();
 	ChanCount out;
 	list< pair<ChanCount,ChanCount> > configuration;

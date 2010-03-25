@@ -290,6 +290,7 @@ Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nfra
 		}
 
 	} else {
+
 		// Do a 1:1 copy of data to output ports
 
 		if (bufs.count().n_audio() > 0 && ports.count().n_audio () > 0) {

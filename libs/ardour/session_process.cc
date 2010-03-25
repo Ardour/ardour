@@ -878,6 +878,12 @@ Session::process_audition (nframes_t nframes)
 		_butler->summon ();
 	}
 
+        /* if using a monitor section, run it because otherwise we don't hear anything */
+
+        if (_monitor_out) {
+                _monitor_out->passthru (_transport_frame, _transport_frame + nframes, nframes, false);
+        }
+        
 	/* handle pending events */
 
 	while (pending_events.read (&ev, 1) == 1) {
@@ -895,7 +901,7 @@ Session::process_audition (nframes_t nframes)
 		process_event (ev);
 	}
 
-	if (!auditioner->active()) {
+	if (!auditioner->auditioning()) {
 		/* auditioner no longer active, so go back to the normal process callback */
 		process_function = &Session::process_with_events;
 	}

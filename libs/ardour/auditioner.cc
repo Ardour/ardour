@@ -43,6 +43,15 @@ using namespace PBD;
 Auditioner::Auditioner (Session& s)
 	: AudioTrack (s, "auditioner", Route::Hidden)
 {
+}
+
+int
+Auditioner::init ()
+{
+        if (Track::init ()) {
+                return -1;
+        }
+
 	string left = _session.config.get_auditioner_output_left();
 	string right = _session.config.get_auditioner_output_right();
 
@@ -64,19 +73,16 @@ Auditioner::Auditioner (Session& s)
 
 	if ((left.length() == 0) && (right.length() == 0)) {
 		warning << _("no outputs available for auditioner - manual connection required") << endmsg;
-		return;
+		return -1;
 	}
 
 	_main_outs->defer_pan_reset ();
-
-        cerr << "Aud connect " << left << " + " << right << endl;
 
 	if (left.length()) {
 		_output->add_port (left, this, DataType::AUDIO);
 	}
 
 	if (right.length()) {
-		audio_diskstream()->add_channel (1);
 		_output->add_port (right, this, DataType::AUDIO);
 	}
 
@@ -86,7 +92,9 @@ Auditioner::Auditioner (Session& s)
 	_output->changed.connect_same_thread (*this, boost::bind (&Auditioner::output_changed, this, _1, _2));
 
 	the_region.reset ((AudioRegion*) 0);
-	g_atomic_int_set (&_active, 0);
+	g_atomic_int_set (&_auditioning, 0);
+
+        return 0;
 }
 
 Auditioner::~Auditioner ()
@@ -107,7 +115,7 @@ Auditioner::prepare_playlist ()
 void
 Auditioner::audition_current_playlist ()
 {
-	if (g_atomic_int_get (&_active)) {
+	if (g_atomic_int_get (&_auditioning)) {
 		/* don't go via session for this, because we are going
 		   to remain active.
 		*/
@@ -123,13 +131,13 @@ Auditioner::audition_current_playlist ()
 
 	_main_outs->panner()->reset (n_outputs().n_audio(), _diskstream->n_channels().n_audio());
 
-	g_atomic_int_set (&_active, 1);
+	g_atomic_int_set (&_auditioning, 1);
 }
 
 void
 Auditioner::audition_region (boost::shared_ptr<Region> region)
 {
-	if (g_atomic_int_get (&_active)) {
+	if (g_atomic_int_get (&_auditioning)) {
 		/* don't go via session for this, because we are going
 		   to remain active.
 		*/
@@ -157,6 +165,13 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 		audio_diskstream()->remove_channel (_diskstream->n_channels().n_audio() - the_region->n_channels());
 	}
 
+        ProcessorStreams ps;
+        if (configure_processors (&ps)) {
+                error << string_compose (_("Cannot setup auditioner processing flow for %1 channels"), 
+                                         _diskstream->n_channels()) << endmsg;
+                return;
+        }
+
 	/* force a panner reset now that we have all channels */
 
 	_main_outs->reset_panner();
@@ -175,7 +190,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 	_diskstream->seek (offset);
 	current_frame = offset;
 
-	g_atomic_int_set (&_active, 1);
+	g_atomic_int_set (&_auditioning, 1);
 }
 
 int
@@ -185,7 +200,7 @@ Auditioner::play_audition (nframes_t nframes)
 	nframes_t this_nframes;
 	int ret;
 
-	if (g_atomic_int_get (&_active) == 0) {
+	if (g_atomic_int_get (&_auditioning) == 0) {
 		silence (nframes);
 		return 0;
 	}
@@ -194,10 +209,7 @@ Auditioner::play_audition (nframes_t nframes)
 
 	_diskstream->prepare ();
 
-        cerr << "Auditioner rolls, gain = " << gain_control()->get_value() << endl;
-
 	if ((ret = roll (this_nframes, current_frame, current_frame + nframes, false, false, false)) != 0) {
-                cerr << "\troll failed\n";
 		silence (nframes);
 		return ret;
 	}

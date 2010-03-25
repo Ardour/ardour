@@ -1106,7 +1106,7 @@ Session::post_transport ()
 	PostTransportWork ptw = post_transport_work ();
 
 	if (ptw & PostTransportAudition) {
-		if (auditioner && auditioner->active()) {
+		if (auditioner && auditioner->auditioning()) {
 			process_function = &Session::process_audition;
 		} else {
 			process_function = &Session::process_with_events;

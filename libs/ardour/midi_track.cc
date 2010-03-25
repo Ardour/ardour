@@ -57,12 +57,6 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 	, _default_channel (0)
 	, _midi_thru (true)
 {
-	use_new_diskstream ();
-
-	_declickable = true;
-	_freeze_record.state = NoFreeze;
-	_saved_meter_point = _meter_point;
-	_mode = mode;
 }
 
 MidiTrack::~MidiTrack ()
@@ -88,8 +82,8 @@ MidiTrack::use_new_diskstream ()
 	set_diskstream (boost::dynamic_pointer_cast<MidiDiskstream> (ds));
 }
 
-int
-MidiTrack::set_diskstream (boost::shared_ptr<MidiDiskstream> ds)
+void
+MidiTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 {
 	_diskstream = ds;
 	_diskstream->set_route (*this);
@@ -99,34 +93,6 @@ MidiTrack::set_diskstream (boost::shared_ptr<MidiDiskstream> ds)
 	//_diskstream->monitor_input (false);
 
 	DiskstreamChanged (); /* EMIT SIGNAL */
-
-	return 0;
-}
-
-int
-MidiTrack::use_diskstream (string name)
-{
-	boost::shared_ptr<MidiDiskstream> dstream;
-
-	if ((dstream = boost::dynamic_pointer_cast<MidiDiskstream>(_session.diskstream_by_name (name))) == 0) {
-		error << string_compose(_("MidiTrack: midi diskstream \"%1\" not known by session"), name) << endmsg;
-		return -1;
-	}
-
-	return set_diskstream (dstream);
-}
-
-int
-MidiTrack::use_diskstream (const PBD::ID& id)
-{
-	boost::shared_ptr<MidiDiskstream> dstream;
-
-	if ((dstream = boost::dynamic_pointer_cast<MidiDiskstream> (_session.diskstream_by_id (id))) == 0) {
-		error << string_compose(_("MidiTrack: midi diskstream \"%1\" not known by session"), id) << endmsg;
-		return -1;
-	}
-
-	return set_diskstream (dstream);
 }
 
 boost::shared_ptr<MidiDiskstream>
@@ -166,40 +132,6 @@ MidiTrack::_set_state (const XMLNode& node, int version, bool call_base)
 
 	if ((prop = node.property ("default-channel")) != 0) {
 		set_default_channel ((uint8_t) atoi (prop->value()));
-	}
-
-	if ((prop = node.property ("diskstream-id")) == 0) {
-
-		/* some old sessions use the diskstream name rather than the ID */
-
-		if ((prop = node.property ("diskstream")) == 0) {
-			fatal << _("programming error: MidiTrack given state without diskstream!") << endmsg;
-			/*NOTREACHED*/
-			return -1;
-		}
-
-		if (use_diskstream (prop->value())) {
-			return -1;
-		}
-
-	} else {
-
-		PBD::ID id (prop->value());
-		PBD::ID zero ("0");
-
-		/* this wierd hack is used when creating tracks from a template. there isn't
-		   a particularly good time to interpose between setting the first part of
-		   the track state (notably Route::set_state() and the track mode), and the
-		   second part (diskstream stuff). So, we have a special ID for the diskstream
-		   that means "you should create a new diskstream here, not look for
-		   an old one.
-		*/
-
-		if (id == zero) {
-			use_new_diskstream ();
-		} else if (use_diskstream (id)) {
-			return -1;
-		}
 	}
 
 	XMLNodeList nlist;

@@ -52,7 +52,6 @@ using namespace PBD;
 AudioTrack::AudioTrack (Session& sess, string name, Route::Flag flag, TrackMode mode)
 	: Track (sess, name, flag, mode)
 {
-	use_new_diskstream ();
 }
 
 AudioTrack::~AudioTrack ()
@@ -81,7 +80,36 @@ AudioTrack::use_new_diskstream ()
 
 	_session.add_diskstream (ds);
 
-	set_diskstream (boost::dynamic_pointer_cast<AudioDiskstream> (ds), this);
+	set_diskstream (ds);
+}
+
+void
+AudioTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
+{
+	_diskstream = ds;
+        _diskstream->set_route (*this);
+	_diskstream->set_destructive (_mode == Destructive);
+	_diskstream->set_non_layered (_mode == NonLayered);
+
+	if (audio_diskstream()->deprecated_io_node) {
+
+		if (!IO::connecting_legal) {
+			IO::ConnectingLegal.connect_same_thread (*this, boost::bind (&AudioTrack::deprecated_use_diskstream_connections, this));
+		} else {
+			deprecated_use_diskstream_connections ();
+		}
+	}
+
+	_diskstream->set_record_enabled (false);
+	_diskstream->monitor_input (false);
+
+	DiskstreamChanged (); /* EMIT SIGNAL */
+}
+
+boost::shared_ptr<AudioDiskstream>
+AudioTrack::audio_diskstream() const
+{
+	return boost::dynamic_pointer_cast<AudioDiskstream>(_diskstream);
 }
 
 int
@@ -166,63 +194,6 @@ AudioTrack::deprecated_use_diskstream_connections ()
 }
 
 int
-AudioTrack::set_diskstream (boost::shared_ptr<AudioDiskstream> ds, void * /*src*/)
-{
-	_diskstream = ds;
-	_diskstream->set_route (*this);
-	_diskstream->set_destructive (_mode == Destructive);
-	_diskstream->set_non_layered (_mode == NonLayered);
-
-	if (audio_diskstream()->deprecated_io_node) {
-
-		if (!IO::connecting_legal) {
-			IO::ConnectingLegal.connect_same_thread (*this, boost::bind (&AudioTrack::deprecated_use_diskstream_connections, this));
-		} else {
-			deprecated_use_diskstream_connections ();
-		}
-	}
-
-	_diskstream->set_record_enabled (false);
-	_diskstream->monitor_input (false);
-
-	DiskstreamChanged (); /* EMIT SIGNAL */
-
-	return 0;
-}
-
-int
-AudioTrack::use_diskstream (string name)
-{
-	boost::shared_ptr<AudioDiskstream> dstream;
-
-	if ((dstream = boost::dynamic_pointer_cast<AudioDiskstream>(_session.diskstream_by_name (name))) == 0) {
-		error << string_compose(_("AudioTrack: audio diskstream \"%1\" not known by session"), name) << endmsg;
-		return -1;
-	}
-
-	return set_diskstream (dstream, this);
-}
-
-int
-AudioTrack::use_diskstream (const PBD::ID& id)
-{
-	boost::shared_ptr<AudioDiskstream> dstream;
-
-	if ((dstream = boost::dynamic_pointer_cast<AudioDiskstream> (_session.diskstream_by_id (id))) == 0) {
-		error << string_compose(_("AudioTrack: audio diskstream \"%1\" not known by session"), id) << endmsg;
-		return -1;
-	}
-
-	return set_diskstream (dstream, this);
-}
-
-boost::shared_ptr<AudioDiskstream>
-AudioTrack::audio_diskstream() const
-{
-	return boost::dynamic_pointer_cast<AudioDiskstream>(_diskstream);
-}
-
-int
 AudioTrack::set_state (const XMLNode& node, int version)
 {
 	return _set_state (node, version, true);
@@ -245,41 +216,6 @@ AudioTrack::_set_state (const XMLNode& node, int version, bool call_base)
 	} else {
 		_mode = Normal;
 	}
-
-	if ((prop = node.property ("diskstream-id")) == 0) {
-
-		/* some old sessions use the diskstream name rather than the ID */
-
-		if ((prop = node.property ("diskstream")) == 0) {
-			fatal << _("programming error: AudioTrack given state without diskstream!") << endmsg;
-			/*NOTREACHED*/
-			return -1;
-		}
-
-		if (use_diskstream (prop->value())) {
-			return -1;
-		}
-
-	} else {
-
-		PBD::ID id (prop->value());
-		PBD::ID zero ("0");
-
-		/* this wierd hack is used when creating tracks from a template. there isn't
-		   a particularly good time to interpose between setting the first part of
-		   the track state (notably Route::set_state() and the track mode), and the
-		   second part (diskstream stuff). So, we have a special ID for the diskstream
-		   that means "you should create a new diskstream here, not look for
-		   an old one.
-		*/
-
-		if (id == zero) {
-			use_new_diskstream ();
-		} else if (use_diskstream (id)) {
-			return -1;
-		}
-	}
-
 
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
@@ -512,23 +448,12 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 
 		/* copy the diskstream data to all output buffers */
 
-		size_t limit = _input->n_ports().n_audio();
+		size_t limit = input_streams ().n_audio();
 		BufferSet& bufs = _session.get_scratch_buffers ();
 		const size_t blimit = bufs.count().n_audio();
 
-                if (limit == 0) {
-                        /* no inputs, try for diskstream channel count */
-                        limit = diskstream->n_channels().n_audio();
-                }
-
 		uint32_t n;
 		uint32_t i;
-
-                cerr << _name << " Input = " << _input->n_ports() 
-                     << " Output " << _output->n_ports ()
-                     << " limit " << limit 
-                     << " blimit " << blimit
-                     << endl;
 
 		if (limit > blimit) {
 

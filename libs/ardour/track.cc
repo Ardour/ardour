@@ -41,12 +41,12 @@ using namespace PBD;
 
 Track::Track (Session& sess, string name, Route::Flag flag, TrackMode mode, DataType default_type)
 	: Route (sess, name, flag, default_type)
+        , _saved_meter_point (_meter_point)
+        , _mode (mode)
 	, _rec_enable_control (new RecEnableControllable(*this))
 {
-	_declickable = true;
 	_freeze_record.state = NoFreeze;
-	_saved_meter_point = _meter_point;
-	_mode = mode;
+        _declickable = true;
 }
 
 Track::~Track ()
@@ -54,6 +54,15 @@ Track::~Track ()
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("track %1 destructor\n", _name));
 }
 
+int
+Track::init ()
+{
+        if (Route::init ()) {
+                return -1;
+        }
+
+        return 0;
+}
 XMLNode&
 Track::get_state ()
 {
@@ -345,10 +354,7 @@ Track::input_streams () const
 {
         ChanCount cc = _input->n_ports ();
 
-        cerr << "**************" << _name << " IS = " << cc << endl;
-
         if (cc.n_total() == 0 && _diskstream) {
-                cerr << "*******" << _name << " use diskstream channel count\n";
                 return cc = _diskstream->n_channels();
         }
 
