@@ -95,7 +95,6 @@ XMLTree::read_internal(bool validate)
 		if (validate && ctxt->valid == 0) {
 			xmlFreeParserCtxt(ctxt);
 			xmlFreeDoc(doc);
-			xmlCleanupParser();
 			throw XMLException("Failed to validate document " + _filename);
 		}
 	}
@@ -107,7 +106,6 @@ XMLTree::read_internal(bool validate)
 		xmlFreeParserCtxt(ctxt);
 	}
 	xmlFreeDoc(doc);
-	xmlCleanupParser();
 
 	return true;
 }
