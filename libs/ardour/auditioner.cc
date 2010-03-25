@@ -42,6 +42,10 @@ using namespace PBD;
 
 Auditioner::Auditioner (Session& s)
 	: AudioTrack (s, "auditioner", Route::Hidden)
+        , current_frame (0)
+        , _auditioning (0)
+        , length (0)
+        , via_monitor (false)
 {
 }
 
@@ -58,6 +62,7 @@ Auditioner::init ()
 	if (left == "default") {
                 if (_session.monitor_out()) {
                         left = _session.monitor_out()->input()->audio (0)->name();
+                        via_monitor = true;
                 } else {
                         left = _session.engine().get_nth_physical_output (DataType::AUDIO, 0);
                 }
@@ -66,6 +71,7 @@ Auditioner::init ()
 	if (right == "default") {
                 if (_session.monitor_out()) {
                         right = _session.monitor_out()->input()->audio (1)->name();
+                        via_monitor = true;
                 } else {
                         right = _session.engine().get_nth_physical_output (DataType::AUDIO, 1);
                 }
@@ -90,9 +96,6 @@ Auditioner::init ()
 	_main_outs->reset_panner ();
 
 	_output->changed.connect_same_thread (*this, boost::bind (&Auditioner::output_changed, this, _1, _2));
-
-	the_region.reset ((AudioRegion*) 0);
-	g_atomic_int_set (&_auditioning, 0);
 
         return 0;
 }

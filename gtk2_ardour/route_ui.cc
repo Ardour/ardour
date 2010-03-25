@@ -466,7 +466,11 @@ RouteUI::solo_release (GdkEventButton*)
 			if (_solo_release->exclusive) {
 
 			} else {
-				_session->set_solo (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
+                                if (Config->get_solo_control_is_listen_control()) {
+                                        _session->set_listen (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
+                                } else {
+                                        _session->set_solo (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
+                                }
 			}
 
 			delete _solo_release;

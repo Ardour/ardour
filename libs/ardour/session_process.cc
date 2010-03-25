@@ -880,7 +880,7 @@ Session::process_audition (nframes_t nframes)
 
         /* if using a monitor section, run it because otherwise we don't hear anything */
 
-        if (_monitor_out) {
+        if (auditioner->needs_monitor()) {
                 _monitor_out->passthru (_transport_frame, _transport_frame + nframes, nframes, false);
         }
         

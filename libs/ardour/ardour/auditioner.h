@@ -53,6 +53,7 @@ class Auditioner : public AudioTrack
 	}
 
 	bool auditioning() const { return g_atomic_int_get (&_auditioning); }
+        bool needs_monitor() const { return via_monitor; }
 
   private:
 	boost::shared_ptr<AudioRegion> the_region;
@@ -60,6 +61,7 @@ class Auditioner : public AudioTrack
 	mutable gint _auditioning;
 	Glib::Mutex lock;
 	nframes_t length;
+        bool via_monitor;
 
 	void drop_ports ();
 	static void *_drop_ports (void *);
