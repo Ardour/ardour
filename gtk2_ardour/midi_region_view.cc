@@ -1757,6 +1757,7 @@ MidiRegionView::add_to_selection (CanvasNoteEvent* ev)
 	}
 
 	if (_selection.insert (ev).second) {
+                cerr << "Added CNE to selection, size now " << _selection.size() << endl;
 		ev->selected (true);
 		play_midi_note ((ev)->note());
 	}
@@ -2475,8 +2476,12 @@ MidiRegionView::selection_as_cut_buffer () const
 {
 	Notes notes;
 
+        cerr << "Convert selection of " << _selection.size() << " into a cut buffer\n";
+
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		notes.insert (boost::shared_ptr<NoteType> (new NoteType (*((*i)->note().get()))));
+                NoteType* n = (*i)->note().get();
+                cerr << "CNE's note is " << n << endl;
+		notes.insert (boost::shared_ptr<NoteType> (new NoteType (*n)));
 	}
 
 	MidiCutBuffer* cb = new MidiCutBuffer (trackview.session());

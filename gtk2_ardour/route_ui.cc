@@ -109,14 +109,14 @@ RouteUI::init ()
 	multiple_solo_change = false;
 
 	mute_button = manage (new BindableToggleButton ());
-	mute_button->set_self_managed (true);
+	// mute_button->set_self_managed (true);
 	mute_button->set_name ("MuteButton");
 	mute_button->add (mute_button_label);
 	mute_button_label.show ();
 	UI::instance()->set_tip (mute_button, _("Mute this track"), "");
 
 	solo_button = manage (new BindableToggleButton ());
-	solo_button->set_self_managed (true);
+	// solo_button->set_self_managed (true);
 	solo_button->set_name ("SoloButton");
 	solo_button->add (solo_button_label);
 	solo_button_label.show ();
@@ -125,14 +125,14 @@ RouteUI::init ()
 
 	rec_enable_button = manage (new BindableToggleButton ());
 	rec_enable_button->set_name ("RecordEnableButton");
-	rec_enable_button->set_self_managed (true);
+	// rec_enable_button->set_self_managed (true);
 	rec_enable_button->add (rec_enable_button_label);
 	rec_enable_button_label.show ();
 	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
 
 	show_sends_button = manage (new BindableToggleButton (""));
 	show_sends_button->set_name ("SendAlert");
-	show_sends_button->set_self_managed (true);
+	// show_sends_button->set_self_managed (true);
 	UI::instance()->set_tip (show_sends_button, _("make mixer strips show sends to this bus"), "");
 
 	_session->SoloChanged.connect (_session_connections, boost::bind (&RouteUI::solo_changed_so_update_mute, this), gui_context());

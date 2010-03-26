@@ -53,6 +53,8 @@ CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item,
 
 CanvasNoteEvent::~CanvasNoteEvent()
 {
+        cerr << "Destroying CNE @ " << this << endl;
+
 	if (_text) {
 		_text->hide();
 		delete _text;

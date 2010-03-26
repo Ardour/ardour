@@ -20,6 +20,7 @@
 #include <string>
 #include <iostream>
 
+
 #include <gtkmm/main.h>
 
 #include <gtkmm2ext/stateful_button.h>
@@ -29,9 +30,14 @@ using namespace Glib;
 using namespace Gtkmm2ext;
 using namespace std;
 
-StateButton::StateButton () : visual_state (0), _self_managed (false), _is_realized (false)
+StateButton::StateButton () 
+        : visual_state (0)
+        , _self_managed (false)
+        , _is_realized (false)
+        , style_changing (false)
+        , state_before_prelight (Gtk::STATE_NORMAL)
+        , is_toggle (false)
 {
-  
 }
 
 void
@@ -55,8 +61,9 @@ StateButton::set_visual_state (int n)
 		/* relax */
 		break;
 	case 1:
-		name += "-active";
+                name += "-active";
 		break;
+
 	case 2:
 		name += "-alternate";
 		break;
@@ -67,7 +74,93 @@ StateButton::set_visual_state (int n)
 	visual_state = n;
 }
 
+void
+StateButton::avoid_prelight_on_style_changed (const Glib::RefPtr<Gtk::Style>& /* old_style */,  GtkWidget* widget)
+{
+        /* don't go into an endless recursive loop if we're changing
+           the style in response to an existing style change.
+        */
+
+        if (style_changing) {
+                return;
+        }
+        
+        if (gtk_widget_get_state (widget) == GTK_STATE_PRELIGHT) {
+                
+                /* avoid PRELIGHT: make sure that the prelight colors in this new style match
+                   the colors of the new style in whatever state we were in
+                   before we switched to prelight.
+                */
+
+                GtkRcStyle* rcstyle = gtk_widget_get_modifier_style (widget);
+                GtkStyle* style = gtk_widget_get_style (widget);
+
+                rcstyle->fg[GTK_STATE_PRELIGHT] = style->fg[state_before_prelight];
+                rcstyle->bg[GTK_STATE_PRELIGHT] = style->bg[state_before_prelight];
+                rcstyle->color_flags[GTK_STATE_PRELIGHT] = (GtkRcFlags) (GTK_RC_FG|GTK_RC_BG);
+                
+                style_changing = true;
+                g_object_ref (rcstyle);
+                gtk_widget_modify_style (widget, rcstyle);
+
+                Widget* child = get_child_widget();
+                if (child) {
+                        gtk_widget_modify_style (GTK_WIDGET(child->gobj()), rcstyle);
+                }
+
+                g_object_unref (rcstyle);
+                style_changing = false;
+        }
+}
+
+void
+StateButton::avoid_prelight_on_state_changed (Gtk::StateType old_state, GtkWidget* widget)
+{
+        GtkStateType state = gtk_widget_get_state (widget);
+
+        if (state == GTK_STATE_PRELIGHT) {
+
+                state_before_prelight = old_state;
+                
+                
+                /* avoid PRELIGHT when currently ACTIVE: 
+                   if we just went into PRELIGHT, make sure that the colors 
+                   match those of whatever state we were in before. 
+                */
+                
+                GtkRcStyle* rcstyle = gtk_widget_get_modifier_style (widget);
+                GtkStyle* style = gtk_widget_get_style (widget);
+                
+                rcstyle->fg[GTK_STATE_PRELIGHT] = style->fg[old_state];
+                rcstyle->bg[GTK_STATE_PRELIGHT] = style->bg[old_state];
+                rcstyle->color_flags[GTK_STATE_PRELIGHT] = (GtkRcFlags) (GTK_RC_FG|GTK_RC_BG);
+                
+                g_object_ref (rcstyle);
+                gtk_widget_modify_style (widget, rcstyle);
+
+                Widget* child = get_child_widget ();
+
+                if (child) {
+                        gtk_widget_modify_style (GTK_WIDGET(child->gobj()), rcstyle);
+                }
+
+                g_object_unref (rcstyle);
+
+        }
+}
+
 /* ----------------------------------------------------------------- */
+
+StatefulToggleButton::StatefulToggleButton ()
+{
+        is_toggle = true;
+}
+
+StatefulToggleButton::StatefulToggleButton (const std::string& label)
+        : ToggleButton (label)
+{
+        is_toggle = true;
+}
 
 void
 StatefulToggleButton::on_realize ()
@@ -94,11 +187,32 @@ StatefulToggleButton::on_toggled ()
 {
 	if (!_self_managed) {
 		if (get_active()) {
-			set_visual_state (1);
+                        set_state (Gtk::STATE_ACTIVE);
 		} else {
-			set_visual_state (0);
+                        set_state (Gtk::STATE_NORMAL);
 		}
 	}
+}
+
+
+void
+StatefulToggleButton::on_style_changed (const Glib::RefPtr<Gtk::Style>& style)
+{
+        avoid_prelight_on_style_changed (style, GTK_WIDGET(gobj()));
+        Button::on_style_changed (style);
+}       
+
+void
+StatefulToggleButton::on_state_changed (Gtk::StateType old_state)
+{
+        avoid_prelight_on_state_changed (old_state, GTK_WIDGET(gobj()));
+        Button::on_state_changed (old_state);
+}       
+
+Widget*
+StatefulToggleButton::get_child_widget ()
+{
+        return get_child();
 }
 
 void
@@ -110,6 +224,37 @@ StatefulToggleButton::set_widget_name (const std::string& name)
 	if (w) {
 		w->set_name (name); 
 	} 
+}
+
+/*--------------------------------------------- */
+
+StatefulButton::StatefulButton ()
+{
+}
+
+StatefulButton::StatefulButton (const std::string& label)
+        : Button (label)
+{
+}
+
+void
+StatefulButton::on_style_changed (const Glib::RefPtr<Gtk::Style>& style)
+{
+        avoid_prelight_on_style_changed (style, GTK_WIDGET(gobj()));
+        Button::on_style_changed (style);
+}       
+
+void
+StatefulButton::on_state_changed (Gtk::StateType old_state)
+{
+        avoid_prelight_on_state_changed (old_state, GTK_WIDGET(gobj()));
+        Button::on_state_changed (old_state);
+}       
+
+Widget*
+StatefulButton::get_child_widget ()
+{
+        return get_child();
 }
 
 void

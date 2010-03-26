@@ -1532,8 +1532,6 @@ ARDOUR_UI::transport_roll ()
 	if (!rolling) {
 		_session->request_transport_speed (1.0f);
 	}
-
-	map_transport_state ();
 }
 
 void
@@ -1593,8 +1591,6 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 			_session->request_transport_speed (1.0f);
 		}
 	}
-
-	map_transport_state ();	
 }
 
 void
@@ -1768,7 +1764,6 @@ ARDOUR_UI::map_transport_state ()
 		play_selection_button.set_visual_state (0);
 		auto_loop_button.set_visual_state (0);
 	}
-
 }
 
 void

@@ -40,42 +40,52 @@ class StateButton
 	int  visual_state;
 	bool _self_managed;
 	bool _is_realized;
+        bool style_changing;
+        Gtk::StateType state_before_prelight;
+        bool is_toggle;
 
-	virtual std::string get_widget_name() const = 0;
-	virtual void set_widget_name (const std::string&) = 0;
-	virtual int get_widget_state() = 0;
+	virtual std::string  get_widget_name() const = 0;
+	virtual void         set_widget_name (const std::string& name) = 0;
+        virtual Gtk::Widget* get_child_widget () = 0;
+
+        void avoid_prelight_on_style_changed (const Glib::RefPtr<Gtk::Style>& style, GtkWidget* widget);
+        void avoid_prelight_on_state_changed (Gtk::StateType old_state, GtkWidget* widget);
 };
 
 
 class StatefulToggleButton : public StateButton, public Gtk::ToggleButton
 {
    public:
-	StatefulToggleButton() {}
-	explicit StatefulToggleButton(const std::string &label) : Gtk::ToggleButton (label) {}
+	StatefulToggleButton();
+	explicit StatefulToggleButton(const std::string &label);
 	~StatefulToggleButton() {}
 
   protected:
 	void on_realize ();
 	void on_toggled ();
+        void on_style_changed (const Glib::RefPtr<Gtk::Style>& style);
+        void on_state_changed (Gtk::StateType old_state);
 
+        Gtk::Widget* get_child_widget ();
 	std::string get_widget_name() const { return get_name(); }
 	void set_widget_name (const std::string& name);
-	int get_widget_state() { return get_state(); }
 };
 
 class StatefulButton : public StateButton, public Gtk::Button
 {
    public:
-	StatefulButton() {}
-	explicit StatefulButton(const std::string &label) : Gtk::Button (label) {}
+	StatefulButton();
+	explicit StatefulButton(const std::string &label);
 	virtual ~StatefulButton() {}
-
+        
   protected:
 	void on_realize ();
-
+        void on_style_changed (const Glib::RefPtr<Gtk::Style>& style);
+        void on_state_changed (Gtk::StateType old_state);
+        
+        Gtk::Widget* get_child_widget ();
 	std::string get_widget_name() const { return get_name(); }
 	void set_widget_name (const std::string& name);
-	int get_widget_state() { return get_state(); }
 };
 
 };

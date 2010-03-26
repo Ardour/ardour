@@ -268,12 +268,14 @@ style "gain_fader"
 
 style "track_rec_enable_button" = "small_button"
 {
+	fg[ACTIVE] =   { 0.0, 0.0, 0.0 }
+	bg[ACTIVE] =   { 1.0, 0.0, 0.0 }
 }
 
 style "track_rec_enable_button_active" = "small_button"
 {
-	fg[SELECTED] = { 0.0, 0.0, 0.0 }
 	fg[ACTIVE] =   { 0.0, 0.0, 0.0 }
+	fg[SELECTED] = { 0.0, 0.0, 0.0 }
 	fg[PRELIGHT] = { 0.0, 0.0, 0.0 }
 	fg[NORMAL] = { 0.0, 0.0, 0.0 }
 
@@ -319,6 +321,8 @@ style "mixer_track_rec_enable_button_active" = "track_rec_enable_button_active"
 
 style "solo_button" = "small_button"
 {
+	bg[ACTIVE] = { 0.66, 0.97, 0.19 }   # solo
+	fg[ACTIVE] = { 0, 0, 0 }
 }
 
 style "solo_button_alternate" = "small_button"
@@ -368,8 +372,16 @@ style "mixer_solo_button_active" = "solo_button_active"
 	ythickness = 0
 }
 
+style "monitor_section_button" = "small_button"
+{
+	bg[ACTIVE] = { 1.0, 0, 0 }
+	fg[ACTIVE] = { 0, 0, 0 }
+}
+
 style "mute_button" = "small_button"
 {
+	bg[ACTIVE] = { 0.90, 0.89, 0.73 }
+	fg[ACTIVE] = { 0, 0, 0 }
 }
 
 style "mute_button_alternate" = "small_button"
@@ -398,6 +410,13 @@ style "mute_button_active" = "small_button"
 	fg[PRELIGHT] = { 0, 0, 0 }
 }
 
+style "mixer_mute_button" = "mute_button"
+{
+	font_name = "@FONT_SMALLER@"
+	xthickness = 0
+	ythickness = 0
+}
+
 style "mixer_mute_button_alternate" = "mute_button_alternate"
 {
 	font_name = "@FONT_SMALLER@"
@@ -419,12 +438,6 @@ style "multiline_combo" = "small_button"
 	ythickness = 0
 }
 
-style "mixer_mute_button" = "mute_button"
-{
-	font_name = "@FONT_SMALLER@"
-	xthickness = 0
-	ythickness = 0
-}
 
 style "track_loop_button" = "small_button"
 {
@@ -449,6 +462,8 @@ style "time_button" = "default_button"
 
 style "transport_button"
 {
+	bg[ACTIVE] = { 0.50, 1.0, 0.50 }
+	fg[ACTIVE] = { 0, 0, 0 }
 }
 
 style "transport_button_active"
@@ -466,6 +481,7 @@ style "transport_button_active"
 
 style "transport_rec_button"
 {
+	bg[ACTIVE] = { 1.0, 0, 0 }
 }
 
 style "transport_rec_button_active"
@@ -1413,7 +1429,7 @@ widget "*MixerCommentButton*" style:highest "very_small_button"
 widget "*MixerMonoButton*" style:highest "very_small_button"
 widget "*EditGroupButton" style:highest "very_small_button"
 widget "*EditGroupButtonLabel" style:highest "very_small_button"
-widget "*TransportButton" style:highest "transport_rec_button"
+widget "*TransportButton" style:highest "transport_button"
 widget "*TransportButton-active" style:highest "transport_button_active"
 widget "*TransportSyncButton" style:highest "transport_button"
 widget "*TransportSyncButton*" style:highest "transport_button"
@@ -1581,6 +1597,8 @@ widget "*MixerStripSelectedFrame" style:highest "selected_strip_frame"
 widget "*MixerStripFrame" style:highest "base_frame"
 widget "*HWMonitorButton" style:highest "red_when_active"
 widget "*HWMonitorButton*" style:highest "red_when_active"
+widget "*MonitorSectionButton" style:highest "monitor_section_button"
+widget "*MonitorSectionButton*" style:highest "monitor_section_button"
 widget "*BypassButton" style:highest "red_when_active"
 widget "*BypassButton*" style:highest "red_when_active"
 widget "*TransportSoloAlert" style:highest "flashing_alert"

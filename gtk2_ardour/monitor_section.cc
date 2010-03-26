@@ -31,37 +31,16 @@ Glib::RefPtr<ActionGroup> MonitorSection::monitor_actions;
 Glib::RefPtr<Gdk::Pixbuf> MonitorSection::big_knob_pixbuf;
 Glib::RefPtr<Gdk::Pixbuf> MonitorSection::little_knob_pixbuf;
 
-static bool
-fixup_prelight (GdkEventCrossing* /* ignored */, GtkWidget* widget)
-{
-        GtkRcStyle* style = gtk_rc_style_copy (gtk_widget_get_modifier_style (widget));
-        int current = gtk_widget_get_state (widget);
-
-        style->fg[GTK_STATE_PRELIGHT] = style->fg[current];
-        style->bg[GTK_STATE_PRELIGHT] = style->bg[current];
-
-        gtk_widget_modify_style(widget, style);
-        g_object_unref(style);
-
-	return false;
-}
-
-static void
-block_prelight (Gtk::Widget& w)
-{
-	w.signal_enter_notify_event().connect (sigc::bind (sigc::ptr_fun (fixup_prelight), w.gobj()), false);
-}
-
 MonitorSection::MonitorSection (Session* s)
         : AxisView (s)
         , RouteUI (s)
         , main_table (2, 3)
         , _tearoff (0)
-        , gain_adjustment (1.0, 0.0, 1.0, 0.01, 0.1)
+        , gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1) // initial value is unity gain
         , gain_control (0)
         , dim_adjustment (0.2, 0.0, 1.0, 0.01, 0.1) 
         , dim_control (0)
-        , solo_boost_adjustment (1.0, 1.0, 2.0, 0.01, 0.1) 
+        , solo_boost_adjustment (1.0, 1.0, 3.0, 0.01, 0.1) 
         , solo_boost_control (0)
         , solo_cut_adjustment (0.0, 0.0, 1.0, 0.01, 0.1)
         , solo_cut_control (0)
@@ -111,7 +90,6 @@ MonitorSection::MonitorSection (Session* s)
 
 	rude_solo_button.set_name ("TransportSoloAlert");
         rude_solo_button.show ();
-        block_prelight (rude_solo_button);
 
         ARDOUR_UI::Blink.connect (sigc::mem_fun (*this, &MonitorSection::solo_blink));
 	rude_solo_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_solo), false);
@@ -196,6 +174,8 @@ MonitorSection::MonitorSection (Session* s)
                 act->connect_proxy (mono_button);
         } 
 
+        cut_all_button.set_name (X_("MixerMuteButton"));
+        cut_all_button.unset_flags (Gtk::CAN_FOCUS);
         cut_all_button.set_size_request (50,50);
         cut_all_button.show ();
 
@@ -204,6 +184,11 @@ MonitorSection::MonitorSection (Session* s)
         bbox->set_spacing (12);
         bbox->pack_start (mono_button, true, true);
         bbox->pack_start (dim_all_button, true, true);
+
+        dim_all_button.set_name (X_("MonitorSectionButton"));
+        dim_all_button.unset_flags (Gtk::CAN_FOCUS);
+        mono_button.set_name (X_("MonitorSectionButton"));
+        mono_button.unset_flags (Gtk::CAN_FOCUS);
 
         lower_packer.set_spacing (12);
         lower_packer.pack_start (*bbox, false, false);
@@ -309,16 +294,17 @@ MonitorSection::ChannelButtonSet::ChannelButtonSet ()
         cut.set_name (X_("MixerMuteButton"));
         dim.set_name (X_("MixerMuteButton"));
         solo.set_name (X_("MixerSoloButton"));
+        invert.set_name (X_("MonitorSectionButton"));
 
         gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (cut.gobj()), false);
         gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (dim.gobj()), false);
         gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (invert.gobj()), false);
         gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (solo.gobj()), false);
 
-        block_prelight (cut);
-        block_prelight (dim);
-        block_prelight (solo);
-        block_prelight (invert);
+        cut.unset_flags (Gtk::CAN_FOCUS);
+        dim.unset_flags (Gtk::CAN_FOCUS);
+        solo.unset_flags (Gtk::CAN_FOCUS);
+        invert.unset_flags (Gtk::CAN_FOCUS);
 }
 
 void
