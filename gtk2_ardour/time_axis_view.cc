@@ -1210,7 +1210,6 @@ TimeAxisView::resizer_button_press (GdkEventButton* event)
 {
 	resize_drag_start = event->y_root;
 	resize_idle_target = current_height();
-	editor.start_resize_line_ops ();
 	if (resizer_motion_signal) {
 		resizer_motion_signal.disconnect ();
 	}
@@ -1222,7 +1221,6 @@ bool
 TimeAxisView::resizer_button_release (GdkEventButton* ev)
 {
 	resize_drag_start = -1;
-	editor.end_resize_line_ops ();
 	resizer_motion_signal.disconnect ();
 	return true;
 }

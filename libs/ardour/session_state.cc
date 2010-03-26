@@ -349,10 +349,6 @@ Session::second_stage_init (bool new_session)
 
 	/* initial program change will be delivered later; see ::config_changed() */
 
-	BootMessage (_("Reset Control Protocols"));
-
-	ControlProtocolManager::instance().set_session (*this);
-
 	if (new_session) {
 		_end_location_is_free = true;
 	} else {

@@ -221,10 +221,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulThingWithGoingAway 
 	virtual bool canvas_markerview_start_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
 	virtual bool canvas_markerview_end_handle_event(GdkEvent* event, ArdourCanvas::Item*,MarkerView*) = 0;
 
-	virtual void queue_draw_resize_line (int at) = 0;
-	virtual void start_resize_line_ops () = 0;
-	virtual void end_resize_line_ops () = 0;
-
 	static const int window_border_width;
 	static const int container_border_width;
 	static const int vertical_spacing;

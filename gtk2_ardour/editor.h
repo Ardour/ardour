@@ -403,10 +403,6 @@ class Editor : public PublicEditor
 	void goto_visual_state (uint32_t);
 	void save_visual_state (uint32_t);
 
-	void queue_draw_resize_line (int at);
-	void start_resize_line_ops ();
-	void end_resize_line_ops ();
-
   protected:
 	void map_transport_state ();
 	void map_position_change (nframes64_t);

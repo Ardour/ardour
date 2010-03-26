@@ -620,10 +620,10 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 			case SelectionItem:
 				if (Keyboard::modifier_state_contains 
-				    (event->button.state, Keyboard::ModifierMask(Keyboard::SecondaryModifier))) {
+				    (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier))) {
 					// contains and not equals because I can't use alt as a modifier alone.
 					start_selection_grab (item, event);
-				} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+				} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::SecondaryModifier)) {
 					/* grab selection for moving */
 					start_selection_op (item, event, SelectionMove);
 				} else {
@@ -3981,6 +3981,8 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 		drag_info.x_constrained = !drag_info.x_constrained;
 	}
 
+        cerr << "drag done, copy ? " << drag_info.copy << " x-const ? " << drag_info.x_constrained << endl;
+
 	if (drag_info.copy) {
 		if (drag_info.x_constrained) {
 			op_string = _("fixed time region copy");
@@ -4019,8 +4021,10 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			++i;
 			continue;
 		}
+                
+                cerr << "drag delta = " << drag_delta << " rpos was " << rv->region()->position() << endl;
 
-		if (changed_position && !drag_info.x_constrained) {
+		if (changed_position && !drag_info.x_constrained && (mouse_mode != MouseRange)) {
 			where = rv->region()->position() - drag_delta;
 		} else {
 			where = rv->region()->position();
@@ -4054,6 +4058,8 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 			if (insert_result.second) {
 				session->add_command (new MementoCommand<Playlist>(*to_playlist, &to_playlist->get_state(), 0));
 			}
+
+                        cerr << "Adding region @ " << new_region->position() << " at " << where << endl;
 
 			to_playlist->add_region (new_region, where);
 
@@ -4118,7 +4124,9 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 			insert_result = modified_playlists.insert (from_playlist);
 			if (insert_result.second) {
-				session->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));
+                                if (mouse_mode != MouseRange) {
+                                        session->add_command (new MementoCommand<Playlist>(*from_playlist, &from_playlist->get_state(), 0));
+                                }
 			}
 
 			from_playlist->remove_region ((rv->region()));
@@ -4385,6 +4393,8 @@ Editor::start_selection_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	if (new_regions.empty()) {
 		return;
 	}
+
+        cerr << "got " << new_regions.size() << " regions in selection grab\n";
 
 	/* XXX fix me one day to use all new regions */
 	

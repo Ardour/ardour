@@ -4946,65 +4946,6 @@ Editor::first_idle ()
 	_have_idled = true;
 }
 
-void
-Editor::start_resize_line_ops ()
-{
-#if 0
-	old_resize_line_y = -1;
-	resize_line_y = -1;
-	need_resize_line = true;
-#endif	
-}
-
-void
-Editor::end_resize_line_ops ()
-{
-#if 0
-	need_resize_line = false;
-
-	if (old_resize_line_y >= 0) {
-		Gdk::Rectangle r (0, old_resize_line_y, (int) canvas_width, 3);
-		Glib::RefPtr<Gdk::Window> win = get_window();
-		cerr << "Final invalidation at " << old_resize_line_y << endl;
-		win->invalidate_rect (r, false);
-	}
-#endif
-}
-
-void
-Editor::queue_draw_resize_line (int at)
-{
-#if 0	
-	Glib::RefPtr<Gdk::Window> win = get_window();
-
-	resize_line_y = at;
-
-	if (win && canvas_width) {
-
-		int controls_width = controls_layout.get_width();
-		int xroot, discard;
-		
-		controls_layout.get_window()->get_origin (xroot, discard);
-
-		if (old_resize_line_y >= 0) {
-			
-			/* redraw where it used to be */
-			
-			
-			Gdk::Rectangle r (0, old_resize_line_y - 1, controls_width + (int) canvas_width, 3);
-			win->invalidate_rect (r, true);
-			cerr << "invalidate " << xroot << "," << old_resize_line_y - 1 << ' ' 
-			     << controls_width + canvas_width << " x 3\n";
-		}
-
-		/* draw where it is */
-
-		Gdk::Rectangle r (0, at - 1, controls_width + (int) canvas_width, 3);
-		win->invalidate_rect (r, true);
-	}
-#endif
-}
-
 bool
 Editor::on_expose_event (GdkEventExpose* ev)
 {
