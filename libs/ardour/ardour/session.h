@@ -934,10 +934,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	PBD::ScopedConnection export_freewheel_connection;
 
-	void prepare_diskstreams ();
-	void commit_diskstreams (nframes_t, bool& session_requires_butler);
-	int  process_routes (nframes_t);
-	int  silent_process_routes (nframes_t);
+	void get_diskstream_statistics ();
+	int  process_routes (nframes_t, bool& need_butler);
+	int  silent_process_routes (nframes_t, bool& need_butler);
 
 	bool get_rec_monitors_input () {
 		if (actively_recording()) {

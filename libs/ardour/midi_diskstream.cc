@@ -487,7 +487,7 @@ trace_midi (ostream& o, MIDI::byte *msg, size_t len)
 #endif
 
 int
-MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input)
+MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler)
 {
 	int       ret = -1;
 	nframes_t rec_offset = 0;
@@ -495,39 +495,22 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_
 	bool      nominally_recording;
 	bool      re = record_enabled ();
 
-	/* if we've already processed the frames corresponding to this call,
-	   just return. this allows multiple routes that are taking input
-	   from this diskstream to call our ::process() method, but have
-	   this stuff only happen once. more commonly, it allows both
-	   the AudioTrack that is using this AudioDiskstream *and* the Session
-	   to call process() without problems.
-	   */
-
-	if (_processed) {
-		return 0;
-	}
-
-	commit_should_unlock = false;
+        playback_distance = 0;
 
 	check_record_status (transport_frame, nframes, can_record);
 
 	nominally_recording = (can_record && re);
 
 	if (nframes == 0) {
-		_processed = true;
 		return 0;
 	}
 
-	/* This lock is held until the end of ::commit, so these two functions
-	   must always be called as a pair. The only exception is if this function
-	   returns a non-zero value, in which case, ::commit should not be called.
-	   */
+        Glib::Mutex::Lock sm (state_lock, Glib::TRY_LOCK);
 
-	// If we can't take the state lock return.
-	if (!state_lock.trylock()) {
+        if (!sm.locked()) {
 		return 1;
 	}
-	commit_should_unlock = true;
+
 	adjust_capture_position = 0;
 
 	if (nominally_recording || (_session.get_record_enabled() && _session.config.get_punch_in())) {
@@ -586,17 +569,9 @@ MidiDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_
 
 	ret = 0;
 
-	_processed = true;
-
-	if (ret) {
-
-		/* we're exiting with failure, so ::commit will not
-		   be called. unlock the state lock.
-		   */
-
-		commit_should_unlock = false;
-		state_lock.unlock();
-	}
+        if (commit (nframes)) {
+                need_butler = true;
+        }
 
 	return ret;
 }
@@ -626,12 +601,6 @@ MidiDiskstream::commit (nframes_t nframes)
 	/*cerr << "MDS written: " << frames_written << " - read: " << frames_read <<
 		" = " << frames_written - frames_read
 		<< " + " << nframes << " < " << midi_readahead << " = " << need_butler << ")" << endl;*/
-
-	if (commit_should_unlock) {
-		state_lock.unlock();
-	}
-
-	_processed = false;
 
 	return need_butler;
 }

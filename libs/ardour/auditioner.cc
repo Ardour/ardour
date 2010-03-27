@@ -199,7 +199,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 int
 Auditioner::play_audition (nframes_t nframes)
 {
-	bool need_butler;
+	bool need_butler = false;
 	nframes_t this_nframes;
 	int ret;
 
@@ -210,14 +210,11 @@ Auditioner::play_audition (nframes_t nframes)
 
 	this_nframes = min (nframes, length - current_frame);
 
-	_diskstream->prepare ();
-
-	if ((ret = roll (this_nframes, current_frame, current_frame + nframes, false, false, false)) != 0) {
+	if ((ret = roll (this_nframes, current_frame, current_frame + nframes, false, false, false, need_butler)) != 0) {
 		silence (nframes);
 		return ret;
 	}
 
-	need_butler = _diskstream->commit (this_nframes);
 	current_frame += this_nframes;
 
 	if (current_frame >= length) {

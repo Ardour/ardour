@@ -2103,9 +2103,6 @@ Session::add_diskstream (boost::shared_ptr<Diskstream> dstream)
 	diskstream_playlist_changed (boost::weak_ptr<Diskstream> (dstream));
 
 	dstream->RecordEnableChanged.connect_same_thread (*this, boost::bind (&Session::update_have_rec_enabled_diskstream, this));
-
-	dstream->prepare ();
-
 }
 
 void

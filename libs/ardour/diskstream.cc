@@ -104,7 +104,6 @@ Diskstream::init (Flag f)
 	last_recordable_frame = max_frames;
 	_roll_delay = 0;
 	_capture_offset = 0;
-	_processed = false;
 	_slaved = false;
 	adjust_capture_position = 0;
 	last_possibly_recording = 0;
@@ -118,7 +117,6 @@ Diskstream::init (Flag f)
 	playback_distance = 0;
 	_read_data_count = 0;
 	_write_data_count = 0;
-	commit_should_unlock = false;
 
 	pending_overwrite = false;
 	overwrite_frame = 0;
@@ -217,22 +215,6 @@ Diskstream::realtime_set_speed (double sp, bool global)
 	}
 
 	return _buffer_reallocation_required || _seek_required;
-}
-
-void
-Diskstream::prepare ()
-{
-	_processed = false;
-	playback_distance = 0;
-}
-
-void
-Diskstream::recover ()
-{
-	if (commit_should_unlock) {
-		state_lock.unlock();
-	}
-	_processed = false;
 }
 
 void

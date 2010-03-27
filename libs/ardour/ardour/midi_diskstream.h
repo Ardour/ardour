@@ -136,7 +136,7 @@ class MidiDiskstream : public Diskstream
   protected:
 	friend class MidiTrack;
 
-	int  process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input);
+	int  process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler);
 	bool commit  (nframes_t nframes);
 	static nframes_t midi_readahead;
 

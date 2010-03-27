@@ -38,8 +38,8 @@ public:
 	MidiTrack (Session&, string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal);
 	~MidiTrack ();
 
-	int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
-			int declick, bool can_record, bool rec_monitors_input);
+	int roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+                  int declick, bool can_record, bool rec_monitors_input, bool& need_butler);
 
 	void handle_transport_stopped (bool abort, bool did_locate, bool flush_processors);
 

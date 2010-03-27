@@ -180,10 +180,8 @@ class Diskstream : public SessionObject
   protected:
 	friend class Track;
 
-	virtual void prepare ();
-	virtual int  process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input) = 0;
+	virtual int  process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler) = 0;
 	virtual bool commit  (nframes_t nframes) = 0;
-	virtual void recover (); /* called if commit will not be called, but process was */
 
 	//private:
 
@@ -273,7 +271,6 @@ class Diskstream : public SessionObject
 	AlignStyle   _alignment_style;
 	bool         _scrubbing;
 	bool         _slaved;
-	bool         _processed;
 	Location*     loop_location;
 	nframes_t     overwrite_frame;
 	off_t         overwrite_offset;
@@ -289,7 +286,6 @@ class Diskstream : public SessionObject
 	nframes_t     file_frame;
 	nframes_t     playback_sample;
 	nframes_t     playback_distance;
-	bool          commit_should_unlock;
 
 	uint32_t     _read_data_count;
 	uint32_t     _write_data_count;

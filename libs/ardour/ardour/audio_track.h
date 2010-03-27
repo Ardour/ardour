@@ -38,8 +38,8 @@ class AudioTrack : public Track
 	int set_mode (TrackMode m);
 	bool can_use_mode (TrackMode m, bool& bounce_required);
 
-	int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
-			int declick, bool can_record, bool rec_monitors_input);
+	int roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+                  int declick, bool can_record, bool rec_monitors_input, bool& need_butler);
 
 	boost::shared_ptr<AudioDiskstream> audio_diskstream() const;
 

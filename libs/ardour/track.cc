@@ -234,7 +234,7 @@ Track::zero_diskstream_id_in_xml (XMLNode& node)
 }
 
 int
-Track::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
+Track::no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		bool session_state_changing, bool can_record, bool /*rec_monitors_input*/)
 {
 	if (n_outputs().n_total() == 0) {
@@ -329,8 +329,8 @@ Track::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 }
 
 int
-Track::silent_roll (nframes_t nframes, sframes_t /*start_frame*/, sframes_t /*end_frame*/,
-		    bool can_record, bool rec_monitors_input)
+Track::silent_roll (nframes_t nframes, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
+		    bool can_record, bool rec_monitors_input, bool& need_butler)
 {
 	if (n_outputs().n_total() == 0 && _processors.empty()) {
 		return 0;
@@ -346,7 +346,7 @@ Track::silent_roll (nframes_t nframes, sframes_t /*start_frame*/, sframes_t /*en
 
 	silence (nframes);
 
-	return diskstream()->process (_session.transport_frame(), nframes, can_record, rec_monitors_input);
+	return diskstream()->process (_session.transport_frame(), nframes, can_record, rec_monitors_input, need_butler);
 }
 
 ChanCount
@@ -360,3 +360,4 @@ Track::input_streams () const
 
         return cc;
 }
+

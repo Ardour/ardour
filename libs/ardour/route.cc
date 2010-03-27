@@ -2687,7 +2687,7 @@ Route::check_initial_delay (nframes_t nframes, nframes_t& transport_frame)
 
 int
 Route::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, int declick,
-	     bool /*can_record*/, bool /*rec_monitors_input*/)
+	     bool /*can_record*/, bool /*rec_monitors_input*/, bool& /* need_butler */)
 {
 	{
 		// automation snapshot can also be called from the non-rt context
@@ -2723,7 +2723,7 @@ Route::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, int 
 
 int
 Route::silent_roll (nframes_t nframes, sframes_t /*start_frame*/, sframes_t /*end_frame*/,
-		    bool /*can_record*/, bool /*rec_monitors_input*/)
+		    bool /*can_record*/, bool /*rec_monitors_input*/, bool& /* need_butler */)
 {
 	silence (nframes);
 	return 0;

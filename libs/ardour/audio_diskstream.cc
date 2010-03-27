@@ -425,7 +425,7 @@ AudioDiskstream::prepare_record_status(nframes_t capture_start_frame)
 }
 
 int
-AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input)
+AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can_record, bool rec_monitors_input, bool& need_butler)
 {
 	uint32_t n;
 	boost::shared_ptr<ChannelList> c = channels.reader();
@@ -437,22 +437,9 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 	bool re = record_enabled ();
 	bool collect_playback = false;
 
-	/* if we've already processed the frames corresponding to this call,
-	   just return. this allows multiple routes that are taking input
-	   from this diskstream to call our ::process() method, but have
-	   this stuff only happen once. more commonly, it allows both
-	   the AudioTrack that is using this AudioDiskstream *and* the Session
-	   to call process() without problems.
-	*/
-
-	if (_processed) {
-		return 0;
-	}
-
-	commit_should_unlock = false;
+        playback_distance = 0;
 
 	if (!_io || !_io->active()) {
-		_processed = true;
 		return 0;
 	}
 
@@ -461,20 +448,15 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 	nominally_recording = (can_record && re);
 
 	if (nframes == 0) {
-		_processed = true;
 		return 0;
 	}
 
-	/* This lock is held until the end of AudioDiskstream::commit, so these two functions
-	   must always be called as a pair. The only exception is if this function
-	   returns a non-zero value, in which case, ::commit should not be called.
-	*/
+        Glib::Mutex::Lock sm (state_lock, Glib::TRY_LOCK);
 
-	// If we can't take the state lock return.
-	if (!state_lock.trylock()) {
+        if (!sm.locked()) {
 		return 1;
 	}
-	commit_should_unlock = true;
+
 	adjust_capture_position = 0;
 
 	for (chan = c->begin(); chan != c->end(); ++chan) {
@@ -669,19 +651,11 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 
 	ret = 0;
 
+        if (commit (nframes)) {
+                need_butler = true;
+        }
+
   out:
-	_processed = true;
-
-	if (ret) {
-
-		/* we're exiting with failure, so ::commit will not
-		   be called. unlock the state lock.
-		*/
-
-		commit_should_unlock = false;
-		state_lock.unlock();
-	}
-
 	return ret;
 }
 
@@ -704,7 +678,7 @@ AudioDiskstream::process_varispeed_playback(nframes_t nframes, boost::shared_ptr
 }
 
 bool
-AudioDiskstream::commit (nframes_t /*nframes*/)
+AudioDiskstream::commit (nframes_t /* nframes */)
 {
 	bool need_butler = false;
 
@@ -747,12 +721,6 @@ AudioDiskstream::commit (nframes_t /*nframes*/)
 			need_butler = c->front()->capture_buf->read_space() >= disk_io_chunk_frames;
 		}
 	}
-
-	if (commit_should_unlock) {
-		state_lock.unlock();
-	}
-
-	_processed = false;
 
 	return need_butler;
 }

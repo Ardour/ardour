@@ -81,15 +81,6 @@ Session::process (nframes_t nframes)
 	MIDI::Manager::instance()->cycle_end();
 }
 
-void
-Session::prepare_diskstreams ()
-{
-	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		(*i)->prepare ();
-	}
-}
-
 int
 Session::fail_roll (nframes_t nframes)
 {
@@ -128,7 +119,7 @@ Session::no_roll (nframes_t nframes)
 }
 
 int
-Session::process_routes (nframes_t nframes)
+Session::process_routes (nframes_t nframes, bool& need_butler)
 {
 	bool record_active;
 	int  declick = get_transport_declick_required();
@@ -155,18 +146,7 @@ Session::process_routes (nframes_t nframes)
 
 		(*i)->set_pending_declick (declick);
 
-		if ((ret = (*i)->roll (nframes, start_frame, end_frame, declick, record_active, rec_monitors)) < 0) {
-
-			/* we have to do this here. Route::roll() for an AudioTrack will have called AudioDiskstream::process(),
-			   and the DS will expect AudioDiskstream::commit() to be called. but we're aborting from that
-			   call path, so make sure we release any outstanding locks here before we return failure.
-			*/
-
-			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-			for (DiskstreamList::iterator ids = dsl->begin(); ids != dsl->end(); ++ids) {
-				(*ids)->recover ();
-			}
-
+		if ((ret = (*i)->roll (nframes, start_frame, end_frame, declick, record_active, rec_monitors, need_butler)) < 0) {
 			stop_transport ();
 			return -1;
 		}
@@ -176,7 +156,7 @@ Session::process_routes (nframes_t nframes)
 }
 
 int
-Session::silent_process_routes (nframes_t nframes)
+Session::silent_process_routes (nframes_t nframes, bool& need_butler)
 {
 	bool record_active = actively_recording();
 	int  declick = get_transport_declick_required();
@@ -199,18 +179,7 @@ Session::silent_process_routes (nframes_t nframes)
 			continue;
 		}
 
-		if ((ret = (*i)->silent_roll (nframes, start_frame, end_frame, record_active, rec_monitors)) < 0) {
-
-			/* we have to do this here. Route::roll() for an AudioTrack will have called AudioDiskstream::process(),
-			   and the DS will expect AudioDiskstream::commit() to be called. but we're aborting from that
-			   call path, so make sure we release any outstanding locks here before we return failure.
-			*/
-
-			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-			for (DiskstreamList::iterator ids = dsl->begin(); ids != dsl->end(); ++ids) {
-				(*ids)->recover ();
-			}
-
+		if ((ret = (*i)->silent_roll (nframes, start_frame, end_frame, record_active, rec_monitors, need_butler)) < 0) {
 			stop_transport ();
 			return -1;
 		}
@@ -220,7 +189,7 @@ Session::silent_process_routes (nframes_t nframes)
 }
 
 void
-Session::commit_diskstreams (nframes_t nframes, bool &needs_butler)
+Session::get_diskstream_statistics ()
 {
 	int dret;
 	float pworst = 1.0f;
@@ -231,21 +200,6 @@ Session::commit_diskstreams (nframes_t nframes, bool &needs_butler)
 
 		if ((*i)->hidden()) {
 			continue;
-		}
-
-		/* force all diskstreams not handled by a Route to call do their stuff.
-		   Note: the diskstreams that were handled by a route will just return zero
-		   from this call, because they know they were processed. So in fact, this
-		   also runs commit() for every diskstream.
-		 */
-
-		if ((dret = (*i)->process (_transport_frame, nframes, actively_recording(), get_rec_monitors_input())) == 0) {
-			if ((*i)->commit (nframes)) {
-				needs_butler = true;
-			}
-
-		} else if (dret < 0) {
-			(*i)->recover();
 		}
 
 		pworst = min (pworst, (*i)->playback_buffer_load());
@@ -394,15 +348,10 @@ Session::process_with_events (nframes_t nframes)
 
 				click (_transport_frame, this_nframes);
 
-				/* now process frames between now and the first event in this block */
-				prepare_diskstreams ();
-
-				if (process_routes (this_nframes)) {
+				if (process_routes (this_nframes, session_needs_butler)) {
 					fail_roll (nframes);
 					return;
 				}
-
-				commit_diskstreams (this_nframes, session_needs_butler);
 
 				nframes -= this_nframes;
 
@@ -746,9 +695,7 @@ Session::follow_slave_silently (nframes_t nframes, float slave_speed)
 
 		bool need_butler;
 
-		prepare_diskstreams ();
-		silent_process_routes (nframes);
-		commit_diskstreams (nframes, need_butler);
+		silent_process_routes (nframes, need_butler);
 
 		if (need_butler) {
 			_butler->summon ();
@@ -826,8 +773,6 @@ Session::process_without_events (nframes_t nframes)
 
 	click (_transport_frame, nframes);
 
-	prepare_diskstreams ();
-
 	if (_transport_speed == 1.0) {
 		frames_moved = (long) nframes;
 	} else {
@@ -836,12 +781,10 @@ Session::process_without_events (nframes_t nframes)
 		frames_moved = (long) interpolation.interpolate (0, nframes, 0, 0);
 	}
 
-	if (process_routes (nframes)) {
+	if (process_routes (nframes, session_needs_butler)) {
 		fail_roll (nframes);
 		return;
 	}
-
-	commit_diskstreams (nframes, session_needs_butler);
 
 	if (frames_moved < 0) {
 		decrement_transport_position (-frames_moved);

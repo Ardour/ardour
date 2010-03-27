@@ -46,15 +46,16 @@ class Track : public Route
 	virtual bool can_use_mode (TrackMode /*m*/, bool& /*bounce_required*/) { return false; }
 	PBD::Signal0<void> TrackModeChanged;
 
-	virtual int no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
+	virtual int no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 			bool state_changing, bool can_record, bool rec_monitors_input);
 
-	int silent_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
-			bool can_record, bool rec_monitors_input);
+	int silent_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+                         bool can_record, bool rec_monitors_input, bool& need_butler);
 
-	virtual int roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
-			int declick, bool can_record, bool rec_monitors_input) = 0;
+	virtual int roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+                          int declick, bool can_record, bool rec_monitors_input, bool& need_butler) = 0;
 
+        bool needs_butler() const { return _needs_butler; }
 	void toggle_monitor_input ();
 
 	bool can_record();
@@ -100,6 +101,7 @@ class Track : public Route
 	boost::shared_ptr<Diskstream> _diskstream;
 	MeterPoint  _saved_meter_point;
 	TrackMode   _mode;
+        bool        _needs_butler;
 
         ChanCount input_streams () const;
 
