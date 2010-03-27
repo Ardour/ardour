@@ -372,9 +372,27 @@ style "mixer_solo_button_active" = "solo_button_active"
 	ythickness = 0
 }
 
-style "monitor_section_button" = "small_button"
+style "monitor_mono_button" = "small_button"
 {
-	bg[ACTIVE] = { 1.0, 0, 0 }
+	bg[ACTIVE] = { 0.725, 0.925, 0.949 }
+	fg[ACTIVE] = { 0, 0, 0 }
+}
+
+style "monitor_invert_button" = "small_button"
+{
+	bg[ACTIVE] = { 1.0, 0.749, 0.247 }
+	fg[ACTIVE] = { 0, 0, 0 }
+}
+
+style "monitor_mute_button" = "small_button"
+{
+	bg[ACTIVE] = { 1.0, 0.98, 0.53 }
+	fg[ACTIVE] = { 0, 0, 0 }
+}
+
+style "monitor_dim_button" = "small_button"
+{
+	bg[ACTIVE] = { 0.90, 0.89, 0.73 }
 	fg[ACTIVE] = { 0, 0, 0 }
 }
 
@@ -1597,8 +1615,16 @@ widget "*MixerStripSelectedFrame" style:highest "selected_strip_frame"
 widget "*MixerStripFrame" style:highest "base_frame"
 widget "*HWMonitorButton" style:highest "red_when_active"
 widget "*HWMonitorButton*" style:highest "red_when_active"
-widget "*MonitorSectionButton" style:highest "monitor_section_button"
-widget "*MonitorSectionButton*" style:highest "monitor_section_button"
+widget "*MonitorInvertButton" style:highest "monitor_invert_button"
+widget "*MonitorInvertButton*" style:highest "monitor_invert_button"
+widget "*MonitorMuteButton" style:highest "monitor_mute_button"
+widget "*MonitorMuteButton*" style:highest "monitor_mute_button"
+widget "*MonitorDimButton" style:highest "monitor_dim_button"
+widget "*MonitorDimButton*" style:highest "monitor_dim_button"
+widget "*MonitorMonoButton" style:highest "monitor_mono_button"
+widget "*MonitorMonoButton*" style:highest "monitor_mono_button"
+widget "*MonitorInvertButton" style:highest "monitor_invert_button"
+widget "*MonitorInvertButton*" style:highest "monitor_invert_button"
 widget "*BypassButton" style:highest "red_when_active"
 widget "*BypassButton*" style:highest "red_when_active"
 widget "*TransportSoloAlert" style:highest "flashing_alert"

@@ -174,7 +174,7 @@ MonitorSection::MonitorSection (Session* s)
                 act->connect_proxy (mono_button);
         } 
 
-        cut_all_button.set_name (X_("MixerMuteButton"));
+        cut_all_button.set_name (X_("MonitorMuteButton"));
         cut_all_button.unset_flags (Gtk::CAN_FOCUS);
         cut_all_button.set_size_request (50,50);
         cut_all_button.show ();
@@ -185,9 +185,9 @@ MonitorSection::MonitorSection (Session* s)
         bbox->pack_start (mono_button, true, true);
         bbox->pack_start (dim_all_button, true, true);
 
-        dim_all_button.set_name (X_("MonitorSectionButton"));
+        dim_all_button.set_name (X_("MonitorDimButton"));
         dim_all_button.unset_flags (Gtk::CAN_FOCUS);
-        mono_button.set_name (X_("MonitorSectionButton"));
+        mono_button.set_name (X_("MonitorMonoButton"));
         mono_button.unset_flags (Gtk::CAN_FOCUS);
 
         lower_packer.set_spacing (12);
@@ -291,10 +291,10 @@ MonitorSection::ChannelButtonSet::ChannelButtonSet ()
         , solo (X_(""))
         , invert (X_(""))
 {
-        cut.set_name (X_("MixerMuteButton"));
-        dim.set_name (X_("MixerMuteButton"));
+        cut.set_name (X_("MonitorMuteButton"));
+        dim.set_name (X_("MonitorDimButton"));
         solo.set_name (X_("MixerSoloButton"));
-        invert.set_name (X_("MonitorSectionButton"));
+        invert.set_name (X_("MonitorInvertButton"));
 
         gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (cut.gobj()), false);
         gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (dim.gobj()), false);
