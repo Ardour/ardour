@@ -155,9 +155,11 @@ Route::init ()
                  */
                 _monitor_control.reset (new MonitorProcessor (_session));
                 add_processor (_monitor_control, i);
+
+                /* no panning on the monitor main outs */
+
+                _main_outs->panner()->set_bypassed (true);
 	}
-
-
 
 	/* now that we have _meter, its safe to connect to this */
 
