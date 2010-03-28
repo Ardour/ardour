@@ -23,6 +23,7 @@
 #include "evoral/Parameter.hpp"
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
+#include <string>
 
 namespace ARDOUR {
 
@@ -61,6 +62,7 @@ class MuteMaster : public PBD::Stateful
 
 	XMLNode& get_state();
 	int set_state(const XMLNode&, int version);
+	int set_state(std::string mute_point);
 
   private:
 	MutePoint _mute_point;

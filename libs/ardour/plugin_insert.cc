@@ -798,8 +798,11 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		set_automatable ();
 	}
 
+	/* Handle the node list for this Processor (or Insert if an A2 session) */
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+
 		if ((*niter)->name() == plugin->state_node_name()) {
+
 			for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 				(*i)->set_state (**niter, version);
 			}
@@ -808,6 +811,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	}
 
 	if (version < 3000) {
+
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			if ((*niter)->name() == "Redirect") {
 				/* XXX do we need to tackle placement? i think not (pd; oct 16 2009) */
@@ -815,7 +819,9 @@ PluginInsert::set_state(const XMLNode& node, int version)
 				break;
 			}
 		}
+		
 		set_parameter_state_2X (node, version);
+		
 	} else {
 		Processor::set_state (node, version);
 		set_parameter_state (node, version);
@@ -910,7 +916,7 @@ PluginInsert::set_parameter_state_2X (const XMLNode& node, int version)
 		
 		cnodes = (*niter)->children ("port");
 		
-		for(iter = cnodes.begin(); iter != cnodes.end(); ++iter){
+		for (iter = cnodes.begin(); iter != cnodes.end(); ++iter){
 			
 			child = *iter;
 			

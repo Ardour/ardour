@@ -77,6 +77,14 @@ MuteMaster::mute_gain_at (MutePoint mp) const
 }
 
 int
+MuteMaster::set_state (std::string mute_point)
+{
+	_mute_point = (MutePoint) string_2_enum (mute_point, _mute_point);
+
+	return 0;
+}
+
+int
 MuteMaster::set_state (const XMLNode& node, int /*version*/)
 {
 	const XMLProperty* prop;

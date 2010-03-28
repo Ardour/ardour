@@ -352,7 +352,7 @@ LV2Plugin::has_editor() const
 }
 
 int
-LV2Plugin::set_state(const XMLNode& node, int /*version*/)
+LV2Plugin::set_state(const XMLNode& node, int version)
 {
 	XMLNodeList nodes;
 	XMLProperty *prop;
@@ -368,8 +368,12 @@ LV2Plugin::set_state(const XMLNode& node, int /*version*/)
 		return -1;
 	}
 
-	nodes = node.children ("Port");
-
+	if (version < 3000){
+		nodes = node.children ("port");
+	} else {
+		nodes = node.children ("Port");
+	}
+	
 	for (iter = nodes.begin(); iter != nodes.end(); ++iter){
 
 		child = *iter;
@@ -382,6 +386,7 @@ LV2Plugin::set_state(const XMLNode& node, int /*version*/)
 		}
 
 		map<string,uint32_t>::iterator i = _port_indices.find(sym);
+		
 		if (i != _port_indices.end()) {
 			port_id = i->second;
 		} else {

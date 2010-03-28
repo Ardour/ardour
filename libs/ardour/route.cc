@@ -2037,11 +2037,6 @@ Route::_set_state_2X (const XMLNode& node, int version)
 
 	/* 2X things which still remain to be handled:
 	 * default-type
-	 * muted
-	 * mute-affects-pre-fader
-	 * mute-affects-post-fader
-	 * mute-affects-control-outs
-	 * mute-affects-main-outs
 	 * automation
 	 * controlouts
 	 */
@@ -2056,58 +2051,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 	} else {
 		_flags = Flag (0);
 	}
-
-	/* add standard processors */
-
-	_meter.reset (new PeakMeter (_session));
-	add_processor (_meter, PreFader);
-
-	if (is_monitor()) {
-		/* where we listen to tracks */
-		_intreturn.reset (new InternalReturn (_session));
-		add_processor (_intreturn, PreFader);
-
-                _monitor_control.reset (new MonitorProcessor (_session));
-                add_processor (_monitor_control, PostFader);
-	}
-
-	_main_outs.reset (new Delivery (_session, _output, _mute_master, _name, Delivery::Main));
-	add_processor (_main_outs, PostFader);
-
-	/* IOs */
-
-	nlist = node.children ();
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
-		child = *niter;
-
-		if (child->name() == IO::state_node_name) {
-
-			/* there is a note in IO::set_state_2X() about why we have to call
-			   this directly.
-			   */
-
-			_input->set_state_2X (*child, version, true);
-			_output->set_state_2X (*child, version, false);
-
-			if ((prop = child->property (X_("name"))) != 0) {
-				set_name (prop->value ());
-			}
-
-			if ((prop = child->property (X_("id"))) != 0) {
-				_id = prop->value ();
-			}
-
-			if ((prop = child->property (X_("active"))) != 0) {
-				bool yn = string_is_affirmative (prop->value());
-				_active = !yn; // force switch
-				set_active (yn);
-			}
-		}
-
-		/* XXX: panners? */
-	}
-
+	
 	if ((prop = node.property (X_("phase-invert"))) != 0) {
 		set_phase_invert (string_is_affirmative (prop->value()));
 	}
@@ -2122,6 +2066,65 @@ Route::_set_state_2X (const XMLNode& node, int version)
 		/* XXX force reset of solo status */
 
 		set_solo (yn, this);
+	}
+
+	if ((prop = node.property (X_("muted"))) != 0) {
+		
+		bool first = true;
+		bool muted = string_is_affirmative (prop->value());
+		
+		if(muted){
+		  
+			string mute_point;
+			
+			if ((prop = node.property (X_("mute-affects-pre-fader"))) != 0) {
+			  
+				if (string_is_affirmative (prop->value())){
+					mute_point = mute_point + "PreFader";
+					first = false;
+				}
+			}
+			
+			if ((prop = node.property (X_("mute-affects-post-fader"))) != 0) {
+			  
+				if (string_is_affirmative (prop->value())){
+				  
+					if (!first) {
+						mute_point = mute_point + ",";
+					}
+					
+					mute_point = mute_point + "PostFader";
+					first = false;
+				}
+			}
+
+			if ((prop = node.property (X_("mute-affects-control-outs"))) != 0) {
+			  
+				if (string_is_affirmative (prop->value())){
+				  
+					if (!first) {
+						mute_point = mute_point + ",";
+					}
+					
+					mute_point = mute_point + "Listen";
+					first = false;
+				}
+			}
+
+			if ((prop = node.property (X_("mute-affects-main-outs"))) != 0) {
+			  
+				if (string_is_affirmative (prop->value())){
+				  
+					if (!first) {
+						mute_point = mute_point + ",";
+					}
+					
+					mute_point = mute_point + "Main";
+				}
+			}
+			
+			_mute_master->set_state (mute_point);
+		}
 	}
 
 	if ((prop = node.property (X_("meter-point"))) != 0) {
@@ -2159,6 +2162,78 @@ Route::_set_state_2X (const XMLNode& node, int version)
 				remaining = remaining.substr (colon+1);
 			} else {
 				break;
+			}
+		}
+	}
+
+	/* add standard processors */
+
+	//_meter.reset (new PeakMeter (_session));
+	//add_processor (_meter, PreFader);
+
+	if (is_monitor()) {
+		/* where we listen to tracks */
+		_intreturn.reset (new InternalReturn (_session));
+		add_processor (_intreturn, PreFader);
+
+                _monitor_control.reset (new MonitorProcessor (_session));
+                add_processor (_monitor_control, PostFader);
+	}
+
+	_main_outs.reset (new Delivery (_session, _output, _mute_master, _name, Delivery::Main));
+	add_processor (_main_outs, PostFader);
+
+	/* IOs */
+
+	nlist = node.children ();
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+
+		child = *niter;
+
+		if (child->name() == IO::state_node_name) {
+
+			/* there is a note in IO::set_state_2X() about why we have to call
+			   this directly.
+			   */
+
+			_input->set_state_2X (*child, version, true);
+			_output->set_state_2X (*child, version, false);
+
+			if ((prop = child->property (X_("name"))) != 0) {
+				Route::set_name (prop->value ());
+			}
+
+			if ((prop = child->property (X_("id"))) != 0) {
+				_id = prop->value ();
+			}
+
+			if ((prop = child->property (X_("active"))) != 0) {
+				bool yn = string_is_affirmative (prop->value());
+				_active = !yn; // force switch
+				set_active (yn);
+			}
+			
+			if ((prop = child->property (X_("gain"))) != 0) {
+				gain_t val;
+
+				if (sscanf (prop->value().c_str(), "%f", &val) == 1) {
+					_amp->gain_control()->set_value (val);
+				}
+			}
+			
+			/* Set up Panners in the IO */
+			XMLNodeList io_nlist = child->children ();
+			
+			XMLNodeConstIterator io_niter;
+			XMLNode *io_child;
+			
+			for (io_niter = io_nlist.begin(); io_niter != io_nlist.end(); ++io_niter) {
+
+				io_child = *io_niter;
+				
+				if (io_child->name() == X_("Panner")) {
+					_main_outs->panner()->set_state(*io_child, version);
+				}
 			}
 		}
 	}

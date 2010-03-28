@@ -1214,6 +1214,14 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 		cerr << endl;
 		send_change (what_changed);
 	}
+	
+	/* Quick fix for 2.x sessions when region is muted */
+	if ((prop = node.property (X_("flags")))) {
+		if (string::npos != prop->value().find("Muted")){
+			set_muted (true);
+		}
+	}
+	
 
 	return 0;
 }

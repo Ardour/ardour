@@ -748,8 +748,12 @@ IO::get_port_counts_2X (XMLNode const & node, int /*version*/, ChanCount& n, boo
 
 		if ((prop = node.property ("inputs")) != 0 && _direction == Input) {
 			n_audio = count (prop->value().begin(), prop->value().end(), '{');
+		} else if ((prop = node.property ("input-connection")) != 0 && _direction == Input) {
+			n_audio = 1;
 		} else if ((prop = node.property ("outputs")) != 0 && _direction == Output) {
 			n_audio = count (prop->value().begin(), prop->value().end(), '{');
+		} else if ((prop = node.property ("output-connection")) != 0 && _direction == Output) {
+			n_audio = 2;
 		}
 	}
 
