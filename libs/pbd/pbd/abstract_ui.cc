@@ -61,11 +61,13 @@ AbstractUI<RequestObject>::get_request (RequestType rt)
 		}
 
 		vec.buf[0]->type = rt;
+                vec.buf[0]->valid = true;
 		return vec.buf[0];
 	}
 
 	RequestObject* req = new RequestObject;
 	req->type = rt;
+
 	return req;
 }
 
@@ -98,10 +100,15 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 			if (vec.len[0] == 0) {
 				break;
 			} else {
-				request_buffer_map_lock.unlock ();
-				do_request (vec.buf[0]);
-				request_buffer_map_lock.lock ();
-				i->second->increment_read_ptr (1);
+                                if (vec.buf[0]->valid) {
+                                        request_buffer_map_lock.unlock ();
+                                        do_request (vec.buf[0]);
+                                        request_buffer_map_lock.lock ();
+                                        if (vec.buf[0]->invalidation) {
+                                                vec.buf[0]->invalidation->request = 0;
+                                        }
+                                        i->second->increment_read_ptr (1);
+                                }
 			} 
 		}
 	}
@@ -115,6 +122,30 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 	while (!request_list.empty()) {
 		RequestObject* req = request_list.front ();
 		request_list.pop_front ();
+
+                /* We need to use this lock, because its the one
+                   returned by slot_invalidation_mutex() and protects
+                   against request invalidation.
+                */
+
+                request_buffer_map_lock.lock ();
+                if (!req->valid) {
+                        delete req;
+                        request_buffer_map_lock.unlock ();
+                        continue;
+                }
+
+                /* we're about to execute this request, so its
+                   too late for any invalidation. mark
+                   the request as "done" before we start.
+                */
+
+                if (req->invalidation) {
+                        req->invalidation->request = 0;
+                }
+
+                request_buffer_map_lock.unlock ();
+
 		lm.release ();
 
 		do_request (req);
@@ -152,14 +183,9 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 }
 
 template<typename RequestObject> void
-AbstractUI<RequestObject>::call_slot (const boost::function<void()>& f)
+AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const boost::function<void()>& f)
 {
 	if (caller_is_self()) {
-#ifndef NDEBUG
-		if (getenv ("DEBUG_THREADED_SIGNALS")) {
-			std::cerr << "functor called in correct thread for " << name() << " , execute ...\n";
-		}
-#endif
 		f ();
 		return;
 	}
@@ -171,11 +197,13 @@ AbstractUI<RequestObject>::call_slot (const boost::function<void()>& f)
 	}
 
 	req->the_slot = f;
-#ifndef NDEBUG
-	if (getenv ("DEBUG_THREADED_SIGNALS")) {
-		std::cerr << "functor called in wrong thread for " << name() << " (from " << pthread_name() << ") send request ...\n";
-	}
-#endif
+        req->invalidation = invalidation;
+
+        if (invalidation) {
+                invalidation->request = req;
+                invalidation->event_loop = this;
+        }
+
 	send_request (req);
 }	
 

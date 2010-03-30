@@ -397,7 +397,7 @@ BundleManager::add_bundle (boost::shared_ptr<Bundle> b)
 	(*i)[_list_model_columns.name] = u->name ();
 	(*i)[_list_model_columns.bundle] = u;
 
-	u->Changed.connect (bundle_connections, ui_bind (&BundleManager::bundle_changed, this, _1, u), gui_context());
+	u->Changed.connect (bundle_connections, invalidator (*this), ui_bind (&BundleManager::bundle_changed, this, _1, u), gui_context());
 }
 
 void

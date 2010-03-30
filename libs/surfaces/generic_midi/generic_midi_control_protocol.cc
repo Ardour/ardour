@@ -85,8 +85,8 @@ GenericMidiControlProtocol::GenericMidiControlProtocol (Session& s)
 	Controllable::CreateBinding.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::create_binding, this, _1, _2, _3));
 	Controllable::DeleteBinding.connect_same_thread (*this, boost::bind (&GenericMidiControlProtocol::delete_binding, this, _1));
 
-	Session::SendFeedback.connect (*this, boost::bind (&GenericMidiControlProtocol::send_feedback, this), midi_ui_context());;
-	Route::RemoteControlIDChange.connect (*this, boost::bind (&GenericMidiControlProtocol::reset_controllables, this), midi_ui_context());
+	Session::SendFeedback.connect (*this, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::send_feedback, this), midi_ui_context());;
+	Route::RemoteControlIDChange.connect (*this, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::reset_controllables, this), midi_ui_context());
 
 	reload_maps ();
 }

@@ -191,7 +191,6 @@ Session::silent_process_routes (nframes_t nframes, bool& need_butler)
 void
 Session::get_diskstream_statistics ()
 {
-	int dret;
 	float pworst = 1.0f;
 	float cworst = 1.0f;
 

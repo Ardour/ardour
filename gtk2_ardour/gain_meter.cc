@@ -227,13 +227,13 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 
 		boost::shared_ptr<AutomationControl> gc = amp->gain_control();
 		
-		gc->alist()->automation_state_changed.connect (model_connections, boost::bind (&GainMeter::gain_automation_state_changed, this), gui_context());
-		gc->alist()->automation_style_changed.connect (model_connections, boost::bind (&GainMeter::gain_automation_style_changed, this), gui_context());
+		gc->alist()->automation_state_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::gain_automation_state_changed, this), gui_context());
+		gc->alist()->automation_style_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::gain_automation_style_changed, this), gui_context());
 		
 		gain_automation_state_changed ();
 	}
 	
-	amp->gain_control()->Changed.connect (model_connections, boost::bind (&GainMeterBase::gain_changed, this), gui_context());
+	amp->gain_control()->Changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeterBase::gain_changed, this), gui_context());
 
 	gain_changed ();
 	show_gain ();
@@ -439,7 +439,7 @@ GainMeterBase::effective_gain_display ()
 void
 GainMeterBase::gain_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&GainMeterBase::effective_gain_display, this));
+	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&GainMeterBase::effective_gain_display, this));
 }
 
 void

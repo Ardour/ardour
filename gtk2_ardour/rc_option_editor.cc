@@ -142,7 +142,7 @@ private:
 
 			if ((*i)->input()) {
 				r[_model.online] = !(*i)->input()->offline();
-				(*i)->input()->OfflineStatusChanged.connect (port_connections, boost::bind (&MIDIPorts::port_offline_changed, this, (*i)), gui_context());
+				(*i)->input()->OfflineStatusChanged.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&MIDIPorts::port_offline_changed, this, (*i)), gui_context());
 				r[_model.trace_input] = (*i)->input()->tracing();
 			}
 

@@ -47,8 +47,8 @@ EditorSummary::EditorSummary (Editor* e)
 	  _zoom_dragging (false)
 
 {
-	Region::RegionPropertyChanged.connect (region_property_connection, boost::bind (&CairoWidget::set_dirty, this), gui_context());
-	_editor->playhead_cursor->PositionChanged.connect (position_connection, ui_bind (&EditorSummary::playhead_position_changed, this, _1), gui_context());
+	Region::RegionPropertyChanged.connect (region_property_connection, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
+	_editor->playhead_cursor->PositionChanged.connect (position_connection, invalidator (*this), ui_bind (&EditorSummary::playhead_position_changed, this, _1), gui_context());
 }
 
 /** Connect to a session.
@@ -62,9 +62,9 @@ EditorSummary::set_session (Session* s)
 	set_dirty ();
 
 	if (_session) {
-		_session->RegionRemoved.connect (_session_connections, boost::bind (&EditorSummary::set_dirty, this), gui_context());
-		_session->StartTimeChanged.connect (_session_connections, boost::bind (&EditorSummary::set_dirty, this), gui_context());
-		_session->EndTimeChanged.connect (_session_connections, boost::bind (&EditorSummary::set_dirty, this), gui_context());
+		_session->RegionRemoved.connect (_session_connections, invalidator (*this), boost::bind (&EditorSummary::set_dirty, this), gui_context());
+		_session->StartTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&EditorSummary::set_dirty, this), gui_context());
+		_session->EndTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&EditorSummary::set_dirty, this), gui_context());
 	}
 }
 

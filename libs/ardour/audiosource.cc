@@ -159,7 +159,7 @@ AudioSource::peaks_ready (boost::function<void()> doThisWhenReady, Connection& c
 	*/
 
 	if (!(ret = _peaks_built)) {
-		PeaksReady.connect (connect_here_if_not, doThisWhenReady, event_loop);
+		PeaksReady.connect (connect_here_if_not, MISSING_INVALIDATOR, doThisWhenReady, event_loop);
 	}
 
 	return ret;

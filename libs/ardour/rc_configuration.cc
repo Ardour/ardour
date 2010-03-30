@@ -172,7 +172,7 @@ RCConfiguration::save_state()
 	const string rcfile = rcfile_path.to_string();
 
 	// this test seems bogus?
-	if (rcfile.length()) {
+	if (!rcfile.empty()) {
 		XMLTree tree;
 		tree.set_root (&get_state());
 		if (!tree.write (rcfile.c_str())){

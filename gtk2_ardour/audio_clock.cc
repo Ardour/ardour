@@ -215,7 +215,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	clock_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::SCROLL_MASK);
 	clock_base.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &AudioClock::field_button_release_event), Timecode_Hours));
 
-	Session::TimecodeOffsetChanged.connect (_session_connections, boost::bind (&AudioClock::timecode_offset_changed, this), gui_context());
+	Session::TimecodeOffsetChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::timecode_offset_changed, this), gui_context());
 
 	if (editable) {
 		setup_events ();

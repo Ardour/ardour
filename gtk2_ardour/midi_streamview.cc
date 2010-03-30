@@ -180,7 +180,7 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wfd,
 	display_region (region_view, wfd);
 
 	/* catch regionview going away */
-	region->DropReferences.connect (*this, boost::bind (&MidiStreamView::remove_region_view, this, region), gui_context());
+	region->DropReferences.connect (*this, invalidator (*this), boost::bind (&MidiStreamView::remove_region_view, this, region), gui_context());
 
 	RegionViewAdded (region_view);
 
@@ -403,6 +403,7 @@ MidiStreamView::setup_rec_box ()
 
 				mds->write_source()->ViewDataRangeReady.connect 
 					(rec_data_ready_connections, 
+                                         invalidator (*this),
 					 ui_bind (&MidiStreamView::rec_data_range_ready, this, _1, _2, boost::weak_ptr<Source>(mds->write_source())),
 					 gui_context());
 

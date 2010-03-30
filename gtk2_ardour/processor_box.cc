@@ -107,8 +107,8 @@ ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
 	_active.set_active (_processor->active ());
 	_active.signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::active_toggled));
 	
-	_processor->ActiveChanged.connect (active_connection, boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
-	_processor->PropertyChanged.connect (name_connection, ui_bind (&ProcessorEntry::processor_property_changed, this, _1), gui_context());
+	_processor->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_active_changed, this), gui_context());
+	_processor->PropertyChanged.connect (name_connection, invalidator (*this), ui_bind (&ProcessorEntry::processor_property_changed, this, _1), gui_context());
 }
 
 EventBox&
@@ -232,7 +232,7 @@ SendProcessorEntry::SendProcessorEntry (boost::shared_ptr<Send> s, Width w)
 	_vbox.pack_start (_fader);
 
 	_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &SendProcessorEntry::gain_adjusted));
-	_send->amp()->gain_control()->Changed.connect (send_gain_connection, boost::bind (&SendProcessorEntry::show_gain, this), gui_context());
+	_send->amp()->gain_control()->Changed.connect (send_gain_connection, invalidator (*this), boost::bind (&SendProcessorEntry::show_gain, this), gui_context());
 	show_gain ();
 }
 
@@ -329,9 +329,9 @@ ProcessorBox::set_route (boost::shared_ptr<Route> r)
 	no_processor_redisplay = false;
 	_route = r;
 
-	_route->processors_changed.connect (connections, ui_bind (&ProcessorBox::route_processors_changed, this, _1), gui_context());
-	_route->DropReferences.connect (connections, boost::bind (&ProcessorBox::route_going_away, this), gui_context());
-	_route->PropertyChanged.connect (connections, ui_bind (&ProcessorBox::route_property_changed, this, _1), gui_context());
+	_route->processors_changed.connect (connections, invalidator (*this), ui_bind (&ProcessorBox::route_processors_changed, this, _1), gui_context());
+	_route->DropReferences.connect (connections, invalidator (*this), boost::bind (&ProcessorBox::route_going_away, this), gui_context());
+	_route->PropertyChanged.connect (connections, invalidator (*this), ui_bind (&ProcessorBox::route_property_changed, this, _1), gui_context());
 
 	redisplay_processors ();
 }

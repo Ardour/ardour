@@ -256,7 +256,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 	fifo.write (&buf, 1);
 
 	if (!update_queued) {
-		gui_context()->call_slot (boost::bind (&MidiTracer::update, this));
+		gui_context()->call_slot (invalidator (*this), boost::bind (&MidiTracer::update, this));
 		update_queued = true;
 	}
 }

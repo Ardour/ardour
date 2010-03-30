@@ -56,10 +56,10 @@ Selection::Selection (const PublicEditor* e)
 	/* we have disambiguate which remove() for the compiler */
 
 	void (Selection::*track_remove)(TimeAxisView*) = &Selection::remove;
-	TimeAxisView::CatchDeletion.connect (*this, ui_bind (track_remove, this, _1), gui_context());
+	TimeAxisView::CatchDeletion.connect (*this, MISSING_INVALIDATOR, ui_bind (track_remove, this, _1), gui_context());
 
 	void (Selection::*marker_remove)(Marker*) = &Selection::remove;
-	Marker::CatchDeletion.connect (*this, ui_bind (marker_remove, this, _1), gui_context());
+	Marker::CatchDeletion.connect (*this, MISSING_INVALIDATOR, ui_bind (marker_remove, this, _1), gui_context());
 }	
 
 #if 0

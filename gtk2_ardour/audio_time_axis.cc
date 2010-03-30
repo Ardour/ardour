@@ -109,7 +109,8 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	}
 
 	if (_route->panner()) {
-		_route->panner()->Changed.connect (*this, boost::bind (&AudioTimeAxisView::ensure_pan_views, this, false), gui_context());
+		_route->panner()->Changed.connect (*this, invalidator (*this), 
+                                                   boost::bind (&AudioTimeAxisView::ensure_pan_views, this, false), gui_context());
 	}
 
 	/* map current state of the route */

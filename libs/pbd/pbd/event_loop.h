@@ -33,7 +33,34 @@ class EventLoop
 	EventLoop() {}
 	virtual ~EventLoop() {}
 
-	virtual void call_slot (const boost::function<void()>&) = 0;
+	enum RequestType {
+		range_guarantee = ~0
+	};
+
+        struct BaseRequestObject;
+    
+        struct InvalidationRecord {
+            BaseRequestObject* request;
+            PBD::EventLoop* event_loop;
+            const char* file;
+            int line;
+
+            InvalidationRecord() : request (0), event_loop (0) {}
+        };
+
+        static void* invalidate_request (void* data);
+
+	struct BaseRequestObject {
+	    RequestType             type;
+            bool                    valid;
+            InvalidationRecord*     invalidation;
+	    boost::function<void()> the_slot;
+            
+            BaseRequestObject() : valid (true), invalidation (0) {}
+	};
+
+	virtual void call_slot (InvalidationRecord*, const boost::function<void()>&) = 0;
+        virtual Glib::Mutex& slot_invalidation_mutex() = 0;
 
 	static EventLoop* get_event_loop_for_thread();
 	static void set_event_loop_for_thread (EventLoop* ui);
@@ -44,5 +71,7 @@ class EventLoop
 };
 
 }
+
+#define MISSING_INVALIDATOR 0 // used to mark places where we fail to provide an invalidator
 
 #endif /* __pbd_event_loop_h__ */

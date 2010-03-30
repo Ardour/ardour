@@ -129,7 +129,7 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 	display_region(region_view);
 
 	/* catch regionview going away */
-	region->DropReferences.connect (*this, boost::bind (&AutomationStreamView::remove_region_view, this, boost::weak_ptr<Region>(region)), gui_context());
+	region->DropReferences.connect (*this, invalidator (*this), boost::bind (&AutomationStreamView::remove_region_view, this, boost::weak_ptr<Region>(region)), gui_context());
 
 	RegionViewAdded (region_view);
 

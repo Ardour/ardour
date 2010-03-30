@@ -48,15 +48,6 @@ class BaseUI : virtual public sigc::trackable, public PBD::EventLoop
 
 	bool ok() const { return _ok; }
 	
-	enum RequestType {
-		range_guarantee = ~0
-	};
-
-	struct BaseRequestObject {
-	    RequestType type;
-	    boost::function<void()> the_slot;
-	};
-
 	static RequestType new_request_type();
 	static RequestType CallSlot;
 	static RequestType Quit;

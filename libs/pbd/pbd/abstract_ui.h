@@ -41,7 +41,8 @@ class AbstractUI : public BaseUI
 	virtual ~AbstractUI() {}
 
 	void register_thread (std::string, pthread_t, std::string, uint32_t num_requests);
-	void call_slot (const boost::function<void()>&);
+	void call_slot (EventLoop::InvalidationRecord*, const boost::function<void()>&);
+        Glib::Mutex& slot_invalidation_mutex() { return request_buffer_map_lock; }
 
   protected:
 	typedef RingBufferNPT<RequestObject> RequestBuffer;

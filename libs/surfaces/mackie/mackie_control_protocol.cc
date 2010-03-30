@@ -540,23 +540,23 @@ void
 MackieControlProtocol::connect_session_signals()
 {
 	// receive routes added
-	session->RouteAdded.connect(session_connections, ui_bind (&MackieControlProtocol::notify_route_added, this, _1), midi_ui_context());
+	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_route_added, this, _1), midi_ui_context());
 	// receive record state toggled
-	session->RecordStateChanged.connect(session_connections, ui_bind (&MackieControlProtocol::notify_record_state_changed, this), midi_ui_context());
+	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_record_state_changed, this), midi_ui_context());
 	// receive transport state changed
-	session->TransportStateChange.connect(session_connections, ui_bind (&MackieControlProtocol::notify_transport_state_changed, this), midi_ui_context());
+	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_transport_state_changed, this), midi_ui_context());
 	// receive punch-in and punch-out
-	Config->ParameterChanged.connect(session_connections, ui_bind (&MackieControlProtocol::notify_parameter_changed, this, _1), midi_ui_context());
-	session->config.ParameterChanged.connect (session_connections, ui_bind (&MackieControlProtocol::notify_parameter_changed, this, _1), midi_ui_context());
+	Config->ParameterChanged.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_parameter_changed, this, _1), midi_ui_context());
+	session->config.ParameterChanged.connect (session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_parameter_changed, this, _1), midi_ui_context());
 	// receive rude solo changed
-	session->SoloActive.connect(session_connections, ui_bind (&MackieControlProtocol::notify_solo_active_changed, this, _1), midi_ui_context());
+	session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_solo_active_changed, this, _1), midi_ui_context());
 
 	// make sure remote id changed signals reach here
 	// see also notify_route_added
 	Sorted sorted = get_sorted_routes();
 
 	for (Sorted::iterator it = sorted.begin(); it != sorted.end(); ++it) {
-		(*it)->RemoteControlIDChanged.connect (route_connections, ui_bind(&MackieControlProtocol::notify_remote_id_changed, this), midi_ui_context());
+		(*it)->RemoteControlIDChanged.connect (route_connections, MISSING_INVALIDATOR, ui_bind(&MackieControlProtocol::notify_remote_id_changed, this), midi_ui_context());
 	}
 }
 
@@ -1417,7 +1417,7 @@ MackieControlProtocol::notify_route_added (ARDOUR::RouteList & rl)
 	typedef ARDOUR::RouteList ARS;
 
 	for (ARS::iterator it = rl.begin(); it != rl.end(); ++it) {
-		(*it)->RemoteControlIDChanged.connect (route_connections, ui_bind (&MackieControlProtocol::notify_remote_id_changed, this), midi_ui_context());
+		(*it)->RemoteControlIDChanged.connect (route_connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_remote_id_changed, this), midi_ui_context());
 	}
 }
 

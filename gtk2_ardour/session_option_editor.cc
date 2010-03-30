@@ -162,9 +162,9 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_sync_source)
 		);
 	
-	s->MTC_PortChanged.connect (_session_connections, boost::bind (&SessionOptionEditor::populate_sync_options, this, s, ssrc), gui_context());
-	s->MIDIClock_PortChanged.connect (_session_connections, boost::bind (&SessionOptionEditor::populate_sync_options, this, s, ssrc), gui_context());
-	s->config.ParameterChanged.connect (_session_connections, ui_bind (&SessionOptionEditor::follow_sync_state, this, _1, s, ssrc), gui_context());
+	s->MTC_PortChanged.connect (_session_connections, invalidator (*this), boost::bind (&SessionOptionEditor::populate_sync_options, this, s, ssrc), gui_context());
+	s->MIDIClock_PortChanged.connect (_session_connections, invalidator (*this), boost::bind (&SessionOptionEditor::populate_sync_options, this, s, ssrc), gui_context());
+	s->config.ParameterChanged.connect (_session_connections, invalidator (*this), ui_bind (&SessionOptionEditor::follow_sync_state, this, _1, s, ssrc), gui_context());
 
 	populate_sync_options (s, ssrc);
 	follow_sync_state (string ("external-sync"), s, ssrc);

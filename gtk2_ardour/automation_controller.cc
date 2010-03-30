@@ -54,7 +54,7 @@ AutomationController::AutomationController(boost::shared_ptr<AutomationControl> 
 	_screen_update_connection = ARDOUR_UI::RapidScreenUpdate.connect (
 			sigc::mem_fun (*this, &AutomationController::display_effective_value));
 
-	ac->Changed.connect (_changed_connection, boost::bind (&AutomationController::value_changed, this), gui_context());
+	ac->Changed.connect (_changed_connection, invalidator (*this), boost::bind (&AutomationController::value_changed, this), gui_context());
 }
 
 AutomationController::~AutomationController()
@@ -147,7 +147,7 @@ AutomationController::automation_state_changed ()
 void
 AutomationController::value_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&AutomationController::display_effective_value, this));
+	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&AutomationController::display_effective_value, this));
 }
 
 /** Stop updating our value from our controllable */

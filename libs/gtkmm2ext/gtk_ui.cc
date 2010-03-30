@@ -369,6 +369,19 @@ UI::idle_add (int (*func)(void *), void *arg)
 
 /* END abstract_ui interfaces */
 
+PBD::EventLoop::InvalidationRecord*
+__invalidator (sigc::trackable& trackable, const char* file, int line)
+{
+        PBD::EventLoop::InvalidationRecord* ir = new PBD::EventLoop::InvalidationRecord;
+
+        ir->file = file;
+        ir->line = line;
+
+        trackable.add_destroy_notify_callback (ir, PBD::EventLoop::invalidate_request);
+
+        return ir;
+}
+
 void
 UI::do_request (UIRequest* req)
 {

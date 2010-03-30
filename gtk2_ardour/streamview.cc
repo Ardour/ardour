@@ -79,12 +79,12 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 			canvas_rect, &_trackview));
 
 	if (_trackview.is_track()) {
-		_trackview.track()->DiskstreamChanged.connect (*this, boost::bind (&StreamView::diskstream_changed, this), gui_context());
-		_trackview.get_diskstream()->RecordEnableChanged.connect (*this, boost::bind (&StreamView::rec_enable_changed, this), gui_context());
+		_trackview.track()->DiskstreamChanged.connect (*this, invalidator (*this), boost::bind (&StreamView::diskstream_changed, this), gui_context());
+		_trackview.get_diskstream()->RecordEnableChanged.connect (*this, invalidator (*this), boost::bind (&StreamView::rec_enable_changed, this), gui_context());
 
-		_trackview.session()->TransportStateChange.connect (*this, boost::bind (&StreamView::transport_changed, this), gui_context());
-		_trackview.session()->TransportLooped.connect (*this, boost::bind (&StreamView::transport_looped, this), gui_context());
-		_trackview.session()->RecordStateChanged.connect (*this, boost::bind (&StreamView::sess_rec_enable_changed, this), gui_context());
+		_trackview.session()->TransportStateChange.connect (*this, invalidator (*this), boost::bind (&StreamView::transport_changed, this), gui_context());
+		_trackview.session()->TransportLooped.connect (*this, invalidator (*this), boost::bind (&StreamView::transport_looped, this), gui_context());
+		_trackview.session()->RecordStateChanged.connect (*this, invalidator (*this), boost::bind (&StreamView::sess_rec_enable_changed, this), gui_context());
 	}
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &StreamView::color_handler));
@@ -222,7 +222,7 @@ StreamView::display_diskstream (boost::shared_ptr<Diskstream> ds)
 {
 	playlist_switched_connection.disconnect();
 	playlist_switched (ds);
-	ds->PlaylistChanged.connect (playlist_switched_connection, boost::bind (&StreamView::playlist_switched, this, boost::weak_ptr<Diskstream> (ds)), gui_context());
+	ds->PlaylistChanged.connect (playlist_switched_connection, invalidator (*this), boost::bind (&StreamView::playlist_switched, this, boost::weak_ptr<Diskstream> (ds)), gui_context());
 }
 
 void
@@ -332,21 +332,21 @@ StreamView::playlist_switched (boost::weak_ptr<Diskstream> wds)
 
 	/* catch changes */
 
-	ds->playlist()->LayeringChanged.connect (playlist_connections, boost::bind (&StreamView::playlist_layered, this, boost::weak_ptr<Diskstream>(ds)), gui_context());
-	ds->playlist()->RegionAdded.connect (playlist_connections, ui_bind (&StreamView::add_region_view, this, _1), gui_context());
-	ds->playlist()->RegionRemoved.connect (playlist_connections, ui_bind (&StreamView::remove_region_view, this, _1), gui_context());
-	// ds->playlist()->ContentsChanged.connect (playlist_connections, boost::bind (&StreamView::redisplay_diskstream, this), gui_context());
+	ds->playlist()->LayeringChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::playlist_layered, this, boost::weak_ptr<Diskstream>(ds)), gui_context());
+	ds->playlist()->RegionAdded.connect (playlist_connections, invalidator (*this), ui_bind (&StreamView::add_region_view, this, _1), gui_context());
+	ds->playlist()->RegionRemoved.connect (playlist_connections, invalidator (*this), ui_bind (&StreamView::remove_region_view, this, _1), gui_context());
+	// ds->playlist()->ContentsChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::redisplay_diskstream, this), gui_context());
 }
 
 void
 StreamView::diskstream_changed ()
 {
 	boost::shared_ptr<Track> t;
-
+        
 	if ((t = _trackview.track()) != 0) {
-		Gtkmm2ext::UI::instance()->call_slot (boost::bind (&StreamView::display_diskstream, this, t->diskstream()));
+		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&StreamView::display_diskstream, this, t->diskstream()));
 	} else {
-		Gtkmm2ext::UI::instance()->call_slot (boost::bind (&StreamView::undisplay_diskstream, this));
+		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&StreamView::undisplay_diskstream, this));
 	}
 }
 
@@ -404,7 +404,7 @@ StreamView::transport_looped()
 {
 	// to force a new rec region
 	rec_active = false;
-	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&StreamView::setup_rec_box, this));
+	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&StreamView::setup_rec_box, this));
 }
 
 void

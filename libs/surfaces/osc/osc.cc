@@ -87,7 +87,7 @@ OSC::OSC (Session& s, uint32_t port)
 
 	// "Application Hooks"
 	session_loaded (s);
-	session->Exported.connect (*this, ui_bind (&OSC::session_exported, this, _1, _2), this);
+	session->Exported.connect (*this, MISSING_INVALIDATOR, ui_bind (&OSC::session_exported, this, _1, _2), this);
 }
 
 OSC::~OSC()
@@ -101,7 +101,7 @@ OSC::do_request (OSCUIRequest* req)
 {
 	if (req->type == CallSlot) {
 
-		call_slot (req->the_slot);
+		call_slot (MISSING_INVALIDATOR, req->the_slot);
 
 	} else if (req->type == Quit) {
 
@@ -586,7 +586,7 @@ OSC::listen_to_route (boost::shared_ptr<Route> route, lo_address addr)
 	*/
 	
 	if (!route_exists) {
-		route->DropReferences.connect (*this, boost::bind (&OSC::drop_route, this, boost::weak_ptr<Route> (route)), this);
+		route->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::drop_route, this, boost::weak_ptr<Route> (route)), this);
 	}
 }
 

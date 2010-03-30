@@ -57,7 +57,7 @@ ReturnUI::ReturnUI (Gtk::Window* parent, boost::shared_ptr<Return> r, Session* s
 	show_all ();
 
 	_return->set_metering (true);
-	_return->input()->changed.connect (input_change_connection, ui_bind (&ReturnUI::ins_changed, this, _1, _2), gui_context());
+	_return->input()->changed.connect (input_change_connection, invalidator (*this), ui_bind (&ReturnUI::ins_changed, this, _1, _2), gui_context());
 
 	_gpm.setup_meters ();
 	_gpm.set_fader_name ("ReturnUIFrame");
@@ -110,7 +110,7 @@ ReturnUIWindow::ReturnUIWindow (boost::shared_ptr<Return> r, ARDOUR::Session* s)
 
 	set_name ("ReturnUIWindow");
 
-	r->DropReferences.connect (going_away_connection, boost::bind (&ReturnUIWindow::return_going_away, this), gui_context());
+	r->DropReferences.connect (going_away_connection, invalidator (*this), boost::bind (&ReturnUIWindow::return_going_away, this), gui_context());
 	signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), reinterpret_cast<Window *> (this)));
 }
 

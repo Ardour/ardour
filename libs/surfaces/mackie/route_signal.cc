@@ -37,35 +37,35 @@ using namespace std;
 void RouteSignal::connect()
 {
 	if (_strip.has_solo()) {
-		_route->solo_control()->Changed.connect(connections, ui_bind (&MackieControlProtocol::notify_solo_changed, &_mcp, this), midi_ui_context());
+		_route->solo_control()->Changed.connect(connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_solo_changed, &_mcp, this), midi_ui_context());
 	}
 
 	if (_strip.has_mute()) {
-		_route->mute_control()->Changed.connect(connections, ui_bind (&MackieControlProtocol::notify_mute_changed, &_mcp, this), midi_ui_context());
+		_route->mute_control()->Changed.connect(connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_mute_changed, &_mcp, this), midi_ui_context());
 	}
 
 	if (_strip.has_gain()) {
-		_route->gain_control()->Changed.connect(connections, ui_bind (&MackieControlProtocol::notify_gain_changed, &_mcp, this, false), midi_ui_context());
+		_route->gain_control()->Changed.connect(connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_gain_changed, &_mcp, this, false), midi_ui_context());
 	}
 
-	_route->PropertyChanged.connect (connections, ui_bind (&MackieControlProtocol::notify_property_changed, &_mcp, _1, this), midi_ui_context());
+	_route->PropertyChanged.connect (connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_property_changed, &_mcp, _1, this), midi_ui_context());
 	
 	if (_route->panner()) {
-		_route->panner()->Changed.connect(connections, ui_bind (&MackieControlProtocol::notify_panner_changed, &_mcp, this, false), midi_ui_context());
+		_route->panner()->Changed.connect(connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_panner_changed, &_mcp, this, false), midi_ui_context());
 		
 		for ( unsigned int i = 0; i < _route->panner()->npanners(); ++i ) {
-			_route->panner()->streampanner(i).Changed.connect (connections, ui_bind (&MackieControlProtocol::notify_panner_changed, &_mcp, this, false), midi_ui_context());
+			_route->panner()->streampanner(i).Changed.connect (connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_panner_changed, &_mcp, this, false), midi_ui_context());
 		}
 	}
 	
 	boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<ARDOUR::Track>(_route);
 	if (trk) {
-		trk->rec_enable_control()->Changed .connect(connections, ui_bind (&MackieControlProtocol::notify_record_enable_changed, &_mcp, this), midi_ui_context());
+		trk->rec_enable_control()->Changed .connect(connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_record_enable_changed, &_mcp, this), midi_ui_context());
 	}
 	
 	// TODO this works when a currently-banked route is made inactive, but not
 	// when a route is activated which should be currently banked.
-	_route->active_changed.connect (connections, ui_bind (&MackieControlProtocol::notify_active_changed, &_mcp, this), midi_ui_context());
+	_route->active_changed.connect (connections, MISSING_INVALIDATOR, ui_bind (&MackieControlProtocol::notify_active_changed, &_mcp, this), midi_ui_context());
 	
 	// TODO
 	// SelectedChanged

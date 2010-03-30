@@ -163,7 +163,7 @@ Session::process_rtop (SessionEvent* ev)
 	ev->rt_slot ();
 
 	if (ev->event_loop) {
-		ev->event_loop->call_slot (boost::bind (ev->rt_return, ev));
+		ev->event_loop->call_slot (MISSING_INVALIDATOR, boost::bind (ev->rt_return, ev));
 	} else {
 		warning << string_compose ("programming error: %1", X_("Session RT event queued from thread without a UI - cleanup in RT thread!")) << endmsg;
 		ev->rt_return (ev);

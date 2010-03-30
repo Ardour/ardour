@@ -89,7 +89,7 @@ ExportDialog::set_session (ARDOUR::Session* s)
 	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings));
 	file_notebook->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::update_warnings));
 
-	status->Aborting.connect (abort_connection, boost::bind (&ExportDialog::notify_errors, this), gui_context());
+	status->Aborting.connect (abort_connection, invalidator (*this), boost::bind (&ExportDialog::notify_errors, this), gui_context());
 
 	update_warnings ();
 }

@@ -124,11 +124,11 @@ Editor::add_new_location (Location *location)
 		lam->show ();
 	}
 
-	location->start_changed.connect (*this, ui_bind (&Editor::location_changed, this, _1), gui_context());
-	location->end_changed.connect (*this, ui_bind (&Editor::location_changed, this, _1), gui_context());
-	location->changed.connect (*this, ui_bind (&Editor::location_changed, this, _1), gui_context());
-	location->name_changed.connect (*this, ui_bind (&Editor::location_changed, this, _1), gui_context());
-	location->FlagsChanged.connect (*this, ui_bind (&Editor::location_flags_changed, this, _1, _2), gui_context());
+	location->start_changed.connect (*this, invalidator (*this), ui_bind (&Editor::location_changed, this, _1), gui_context());
+	location->end_changed.connect (*this, invalidator (*this), ui_bind (&Editor::location_changed, this, _1), gui_context());
+	location->changed.connect (*this, invalidator (*this), ui_bind (&Editor::location_changed, this, _1), gui_context());
+	location->name_changed.connect (*this, invalidator (*this), ui_bind (&Editor::location_changed, this, _1), gui_context());
+	location->FlagsChanged.connect (*this, invalidator (*this), ui_bind (&Editor::location_flags_changed, this, _1, _2), gui_context());
 
 	pair<Location*,LocationMarkers*> newpair;
 

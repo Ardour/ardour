@@ -485,7 +485,7 @@ ARDOUR_UI::_auditioning_changed (bool onoff)
 void
 ARDOUR_UI::auditioning_changed (bool onoff)
 {
-	UI::instance()->call_slot (boost::bind (&ARDOUR_UI::_auditioning_changed, this, onoff));
+	UI::instance()->call_slot (MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::_auditioning_changed, this, onoff));
 }
 
 bool

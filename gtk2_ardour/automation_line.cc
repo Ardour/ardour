@@ -86,7 +86,7 @@ AutomationLine::AutomationLine (const string& name, TimeAxisView& tv, ArdourCanv
 
 	line->signal_event().connect (sigc::mem_fun (*this, &AutomationLine::event_handler));
 
-	alist->StateChanged.connect (_state_connection, boost::bind (&AutomationLine::list_changed, this), gui_context());
+	alist->StateChanged.connect (_state_connection, invalidator (*this), boost::bind (&AutomationLine::list_changed, this), gui_context());
 
 	trackview.session()->register_with_memento_command_factory(alist->id(), this);
 
@@ -115,7 +115,7 @@ AutomationLine::queue_reset ()
 {
 	if (!update_pending) {
 		update_pending = true;
-		Gtkmm2ext::UI::instance()->call_slot (boost::bind (&AutomationLine::reset, this));
+		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&AutomationLine::reset, this));
 	}
 }
 

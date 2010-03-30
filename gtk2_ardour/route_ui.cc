@@ -135,11 +135,11 @@ RouteUI::init ()
 	// show_sends_button->set_self_managed (true);
 	UI::instance()->set_tip (show_sends_button, _("make mixer strips show sends to this bus"), "");
 
-	_session->SoloChanged.connect (_session_connections, boost::bind (&RouteUI::solo_changed_so_update_mute, this), gui_context());
-	_session->TransportStateChange.connect (_session_connections, boost::bind (&RouteUI::check_rec_enable_sensitivity, this), gui_context());
-	_session->RecordStateChanged.connect (_session_connections, boost::bind (&RouteUI::session_rec_enable_changed, this), gui_context());
+	_session->SoloChanged.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::solo_changed_so_update_mute, this), gui_context());
+	_session->TransportStateChange.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::check_rec_enable_sensitivity, this), gui_context());
+	_session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::session_rec_enable_changed, this), gui_context());
 
-	Config->ParameterChanged.connect (*this, ui_bind (&RouteUI::parameter_changed, this, _1), gui_context());
+	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&RouteUI::parameter_changed, this, _1), gui_context());
 
 	rec_enable_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_press), false);
 	rec_enable_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::rec_enable_release), false);
@@ -194,23 +194,23 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	}
 
 	if (self_destruct) {
-		rp->DropReferences.connect (route_connections, boost::bind (&RouteUI::self_delete, this), gui_context());
+		rp->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::self_delete, this), gui_context());
 	}
 	
 	mute_button->set_controllable (_route->mute_control());
 	solo_button->set_controllable (_route->solo_control());
 
-	_route->active_changed.connect (route_connections, boost::bind (&RouteUI::route_active_changed, this), gui_context());
-	_route->mute_changed.connect (route_connections, ui_bind (&RouteUI::mute_changed, this, _1), gui_context());
-	_route->solo_changed.connect (route_connections, ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
-	_route->listen_changed.connect (route_connections, ui_bind (&RouteUI::listen_changed, this, _1), gui_context());
-	_route->solo_isolated_changed.connect (route_connections, ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
-	_route->PropertyChanged.connect (route_connections, ui_bind (&RouteUI::property_changed, this, _1), gui_context());
+	_route->active_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_active_changed, this), gui_context());
+	_route->mute_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::mute_changed, this, _1), gui_context());
+	_route->solo_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
+	_route->listen_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::listen_changed, this, _1), gui_context());
+	_route->solo_isolated_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
+	_route->PropertyChanged.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::property_changed, this, _1), gui_context());
 
 	if (_session->writable() && is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
-		t->diskstream()->RecordEnableChanged.connect (route_connections, boost::bind (&RouteUI::route_rec_enable_changed, this), gui_context());
+		t->diskstream()->RecordEnableChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_rec_enable_changed, this), gui_context());
 
 		rec_enable_button->show();
  		rec_enable_button->set_controllable (t->rec_enable_control());
@@ -668,14 +668,14 @@ RouteUI::send_blink (bool onoff)
 void
 RouteUI::solo_changed(void* /*src*/)
 {
-	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&RouteUI::update_solo_display, this));
+	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&RouteUI::update_solo_display, this));
 }
 
 
 void
 RouteUI::listen_changed(void* /*src*/)
 {
-	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&RouteUI::update_solo_display, this));
+	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&RouteUI::update_solo_display, this));
 }
 
 int
@@ -840,7 +840,7 @@ RouteUI::update_mute_display ()
 void
 RouteUI::route_rec_enable_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&RouteUI::update_rec_display, this));
+	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&RouteUI::update_rec_display, this));
 }
 
 void
@@ -905,14 +905,14 @@ RouteUI::build_solo_menu (void)
 	check = new CheckMenuItem(_("Solo Isolate"));
 	check->set_active (_route->solo_isolated());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_isolated), check));
-	_route->solo_isolated_changed.connect (route_connections, ui_bind (&RouteUI::solo_isolated_toggle, this, _1, check), gui_context());
+	_route->solo_isolated_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::solo_isolated_toggle, this, _1, check), gui_context());
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
 	check = new CheckMenuItem(_("Solo Safe"));
 	check->set_active (_route->solo_safe());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_safe), check));
-	_route->solo_safe_changed.connect (route_connections, ui_bind (&RouteUI::solo_safe_toggle, this, _1, check), gui_context());
+	_route->solo_safe_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::solo_safe_toggle, this, _1, check), gui_context());
 	items.push_back (CheckMenuElem(*check));
 	check->show_all();
 
@@ -958,7 +958,7 @@ RouteUI::build_mute_menu(void)
 	//items.push_back (SeparatorElem());
 	// items.push_back (MenuElem (_("MIDI Bind"), sigc::mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
 
-	_route->mute_points_changed.connect (route_connections, boost::bind (&RouteUI::muting_change, this), gui_context());
+	_route->mute_points_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::muting_change, this), gui_context());
 }
 
 void
@@ -1192,7 +1192,7 @@ void
 RouteUI::route_active_changed ()
 {
 	if (route_active_menu_item) {
-		Gtkmm2ext::UI::instance()->call_slot (boost::bind (&CheckMenuItem::set_active, route_active_menu_item, _route->active()));
+		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&CheckMenuItem::set_active, route_active_menu_item, _route->active()));
 	}
 }
 

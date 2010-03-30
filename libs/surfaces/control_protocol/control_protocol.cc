@@ -52,7 +52,7 @@ ControlProtocol::ControlProtocol (Session& s, string str, EventLoop* evloop)
 
 	_active = false;
 	
-	session->RouteAdded.connect (*this, boost::protect (boost::bind (&ControlProtocol::add_strip, this, _1)), _event_loop);
+	session->RouteAdded.connect (*this, MISSING_INVALIDATOR, boost::protect (boost::bind (&ControlProtocol::add_strip, this, _1)), _event_loop);
 }
 
 ControlProtocol::~ControlProtocol ()

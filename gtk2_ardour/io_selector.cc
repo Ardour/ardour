@@ -347,7 +347,7 @@ PortInsertWindow::PortInsertWindow (ARDOUR::Session* sess, boost::shared_ptr<ARD
 
 	signal_delete_event().connect (sigc::mem_fun (*this, &PortInsertWindow::wm_delete), false);
 
-	pi->DropReferences.connect (going_away_connection, boost::bind (&PortInsertWindow::plugin_going_away, this), gui_context());
+	pi->DropReferences.connect (going_away_connection, invalidator (*this), boost::bind (&PortInsertWindow::plugin_going_away, this), gui_context());
 }
 
 bool

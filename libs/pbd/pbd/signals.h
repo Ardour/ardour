@@ -88,15 +88,17 @@ public:
     }
 
     void connect (ScopedConnectionList& clist, 
+                  PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
-	    clist.add_connection (_signal.connect (boost::bind (&EventLoop::call_slot, event_loop, slot)));
+	    clist.add_connection (_signal.connect (boost::bind (&EventLoop::call_slot, event_loop, ir, slot)));
     }
     
     void connect (Connection& c, 
+                  PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
-	    c = _signal.connect (boost::bind (&EventLoop::call_slot, event_loop, slot));
+	    c = _signal.connect (boost::bind (&EventLoop::call_slot, event_loop, ir, slot));
     }
     
     typename SignalType::result_type operator()() {
@@ -125,20 +127,22 @@ public:
 	    c = _signal.connect (slot);
     }
 
-    static void compositor (typename boost::function<void(A)> f, EventLoop* event_loop, A arg) {
-	    event_loop->call_slot (boost::bind (f, arg));
+    static void compositor (typename boost::function<void(A)> f, EventLoop* event_loop, EventLoop::InvalidationRecord* ir, A arg) {
+	    event_loop->call_slot (ir, boost::bind (f, arg));
     }
 
     void connect (ScopedConnectionList& clist, 
+                  PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
-	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, _1)));
+	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1)));
     }
 
     void connect (Connection& c, 
+                  PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
-	    c = _signal.connect (boost::bind (&compositor, slot, event_loop, _1));
+	    c = _signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1));
 
     }
     
@@ -168,20 +172,24 @@ public:
 	    c = _signal.connect (slot);
     }
 
-    static void compositor (typename boost::function<void(A1,A2)> f, PBD::EventLoop* event_loop, A1 arg1, A2 arg2) {
-	    event_loop->call_slot (boost::bind (f, arg1, arg2));
+    static void compositor (typename boost::function<void(A1,A2)> f, PBD::EventLoop* event_loop, 
+                            EventLoop::InvalidationRecord* ir,
+                            A1 arg1, A2 arg2) {
+	    event_loop->call_slot (ir, boost::bind (f, arg1, arg2));
     }
 
     void connect (ScopedConnectionList& clist, 
+                  PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
-	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, _1, _2)));
+	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2)));
     }
 
     void connect (Connection& c, 
+                  PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
-	    c = _signal.connect (boost::bind (&compositor, slot, event_loop, _1, _2));
+	    c = _signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2));
     }
 
     typename SignalType::result_type operator()(A1 arg1, A2 arg2) {
@@ -210,20 +218,24 @@ public:
 	    c = _signal.connect (slot);
     }
 
-    static void compositor (typename boost::function<void(A1,A2,A3)> f, PBD::EventLoop* event_loop, A1 arg1, A2 arg2, A3 arg3) {
-	    event_loop->call_slot (boost::bind (f, arg1, arg2, arg3));
+    static void compositor (typename boost::function<void(A1,A2,A3)> f, PBD::EventLoop* event_loop, 
+                            EventLoop::InvalidationRecord* ir, 
+                            A1 arg1, A2 arg2, A3 arg3) {
+	    event_loop->call_slot (ir, boost::bind (f, arg1, arg2, arg3));
     }
 
     void connect (ScopedConnectionList& clist, 
+                  PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
-	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, _1, _2, _3)));
+	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2, _3)));
     }
     
     void connect (Connection& c, 
+                  PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
-	    c = _signal.connect (_signal.connect (boost::bind (&compositor, slot, event_loop, _1, _2, _3)));
+	    c = _signal.connect (_signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2, _3)));
     }
     
     typename SignalType::result_type operator()(A1 arg1, A2 arg2, A3 arg3) {
@@ -252,20 +264,24 @@ public:
 	    c = _signal.connect (slot);
     }
 
-    static void compositor (typename boost::function<void(A1,A2,A3)> f, PBD::EventLoop* event_loop, A1 arg1, A2 arg2, A3 arg3, A4 arg4) {
-	    event_loop->call_slot (boost::bind (f, arg1, arg2, arg3, arg4));
+    static void compositor (typename boost::function<void(A1,A2,A3)> f, PBD::EventLoop* event_loop, 
+                            EventLoop::InvalidationRecord* ir, 
+                            A1 arg1, A2 arg2, A3 arg3, A4 arg4) {
+	    event_loop->call_slot (ir, boost::bind (f, arg1, arg2, arg3, arg4));
     }
 
     void connect (ScopedConnectionList& clist, 
+                  PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
-	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, _1, _2, _3, _4)));
+	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2, _3, _4)));
     }
     
     void connect (Connection& c, 
+                  PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
-	    c = _signal.connect (_signal.connect (boost::bind (&compositor, slot, event_loop, _1, _2, _3, _4)));
+	    c = _signal.connect (_signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2, _3, _4)));
     }
     
     typename SignalType::result_type operator()(A1 arg1, A2 arg2, A3 arg3, A4 arg4) {

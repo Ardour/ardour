@@ -2076,9 +2076,7 @@ int
 AudioDiskstream::remove_channel_from (boost::shared_ptr<ChannelList> c, uint32_t how_many)
 {
 	while (how_many-- && !c->empty()) {
-		// FIXME: crash (thread safe with RCU?)
-		// memory leak, when disabled.... :(
-		//delete c->back();
+		delete c->back();
 		c->pop_back();
 		interpolation.remove_channel_from ();
 	}
@@ -2324,9 +2322,7 @@ AudioDiskstream::ChannelInfo::ChannelInfo (nframes_t bufsize, nframes_t speed_si
 
 AudioDiskstream::ChannelInfo::~ChannelInfo ()
 {
-	if (write_source) {
-		write_source.reset ();
-	}
+        write_source.reset ();
 
 	delete [] speed_buffer;
 	speed_buffer = 0;

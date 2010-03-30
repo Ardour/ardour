@@ -837,7 +837,7 @@ AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 	assert(!_line);
 	assert(line->the_list() == _control->list());
 
-	_control->alist()->automation_state_changed.connect (automation_connection, boost::bind (&AutomationTimeAxisView::automation_state_changed, this), gui_context());
+	_control->alist()->automation_state_changed.connect (automation_connection, invalidator (*this), boost::bind (&AutomationTimeAxisView::automation_state_changed, this), gui_context());
 
 	_line = line;
 	//_controller = AutomationController::create(_session, line->the_list(), _control);

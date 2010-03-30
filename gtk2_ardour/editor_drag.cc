@@ -343,7 +343,7 @@ RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Re
 	  _primary (p),
 	  _views (v)
 {
-	RegionView::RegionViewGoingAway.connect (death_connection, ui_bind (&RegionDrag::region_going_away, this, _1), gui_context());
+	RegionView::RegionViewGoingAway.connect (death_connection, invalidator (*this), ui_bind (&RegionDrag::region_going_away, this, _1), gui_context());
 }
 
 void

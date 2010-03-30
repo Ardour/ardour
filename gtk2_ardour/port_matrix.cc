@@ -136,10 +136,10 @@ PortMatrix::init ()
 
 	for (int i = 0; i < 2; ++i) {
 		/* watch for the content of _ports[] changing */
-		_ports[i].Changed.connect (_changed_connections, boost::bind (&PortMatrix::setup, this), gui_context());
+		_ports[i].Changed.connect (_changed_connections, invalidator (*this), boost::bind (&PortMatrix::setup, this), gui_context());
 
 		/* and for bundles in _ports[] changing */
-		_ports[i].BundleChanged.connect (_bundle_changed_connections, boost::bind (&PortMatrix::setup, this), gui_context());
+		_ports[i].BundleChanged.connect (_bundle_changed_connections, invalidator (*this), boost::bind (&PortMatrix::setup, this), gui_context());
 	}
 
 	/* scrolling stuff */
@@ -150,13 +150,13 @@ PortMatrix::init ()
 	/* Part 2: notice when things have changed that require our subclass to clear and refill _ports[] */
 	
 	/* watch for routes being added or removed */
-	_session->RouteAdded.connect (_session_connections, boost::bind (&PortMatrix::routes_changed, this), gui_context());
+	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::routes_changed, this), gui_context());
 
 	/* and also bundles */
-	_session->BundleAdded.connect (_session_connections, boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
+	_session->BundleAdded.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
 
 	/* and also ports */
-	_session->engine().PortRegisteredOrUnregistered.connect (_session_connections, boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
+	_session->engine().PortRegisteredOrUnregistered.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
 
 	reconnect_to_routes ();
 	
@@ -171,7 +171,7 @@ PortMatrix::reconnect_to_routes ()
 
 	boost::shared_ptr<RouteList> routes = _session->get_routes ();
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		(*i)->processors_changed.connect (_route_connections, ui_bind (&PortMatrix::route_processors_changed, this, _1), gui_context());
+		(*i)->processors_changed.connect (_route_connections, invalidator (*this), ui_bind (&PortMatrix::route_processors_changed, this, _1), gui_context());
 	}
 }
 

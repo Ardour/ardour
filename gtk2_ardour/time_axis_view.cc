@@ -183,7 +183,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
 
-	GhostRegion::CatchDeletion.connect (*this, ui_bind (&TimeAxisView::erase_ghost, this, _1), gui_context());
+	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), ui_bind (&TimeAxisView::erase_ghost, this, _1), gui_context());
 }
 
 TimeAxisView::~TimeAxisView()

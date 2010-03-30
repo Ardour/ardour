@@ -190,9 +190,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	}
 
 	controls_hbox.pack_start(gm.get_level_meter(), false, false);
-	_route->meter_change.connect (*this, ui_bind (&RouteTimeAxisView::meter_changed, this, _1), gui_context());
-	_route->input()->changed.connect (*this, ui_bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
-	_route->output()->changed.connect (*this, ui_bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
+	_route->meter_change.connect (*this, invalidator (*this), ui_bind (&RouteTimeAxisView::meter_changed, this, _1), gui_context());
+	_route->input()->changed.connect (*this, invalidator (*this), ui_bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
+	_route->output()->changed.connect (*this, invalidator (*this), ui_bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
 
 	controls_table.attach (*mute_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	controls_table.attach (*solo_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
@@ -231,15 +231,15 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 
 	_y_position = -1;
 
-	_route->processors_changed.connect (*this, ui_bind (&RouteTimeAxisView::processors_changed, this, _1), gui_context());
-	_route->PropertyChanged.connect (*this, ui_bind (&RouteTimeAxisView::route_property_changed, this, _1), gui_context());
+	_route->processors_changed.connect (*this, invalidator (*this), ui_bind (&RouteTimeAxisView::processors_changed, this, _1), gui_context());
+	_route->PropertyChanged.connect (*this, invalidator (*this), ui_bind (&RouteTimeAxisView::route_property_changed, this, _1), gui_context());
 
 	if (is_track()) {
 
-		track()->TrackModeChanged.connect (*this, boost::bind (&RouteTimeAxisView::track_mode_changed, this), gui_context());
-		track()->FreezeChange.connect (*this, boost::bind (&RouteTimeAxisView::map_frozen, this), gui_context());
-		track()->DiskstreamChanged.connect (*this, boost::bind (&RouteTimeAxisView::diskstream_changed, this), gui_context());
-		get_diskstream()->SpeedChanged.connect (*this, boost::bind (&RouteTimeAxisView::speed_changed, this), gui_context());
+		track()->TrackModeChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::track_mode_changed, this), gui_context());
+		track()->FreezeChange.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::map_frozen, this), gui_context());
+		track()->DiskstreamChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::diskstream_changed, this), gui_context());
+		get_diskstream()->SpeedChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::speed_changed, this), gui_context());
 
 		/* pick up the correct freeze state */
 		map_frozen ();
@@ -517,7 +517,7 @@ RouteTimeAxisView::build_display_menu ()
 		if (!Profile->get_sae()) {
 
 			items.push_back (MenuElem (_("Alignment"), *alignment_menu));
-			get_diskstream()->AlignmentStyleChanged.connect (route_connections, boost::bind (&RouteTimeAxisView::align_style_changed, this), gui_context());
+			get_diskstream()->AlignmentStyleChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteTimeAxisView::align_style_changed, this), gui_context());
 
 			RadioMenuItem::Group mode_group;
 			items.push_back (RadioMenuElem (mode_group, _("Normal Mode"), sigc::bind (
@@ -552,7 +552,7 @@ RouteTimeAxisView::build_display_menu ()
 			_ignore_track_mode_change = false;
 		}
 
-		get_diskstream()->AlignmentStyleChanged.connect (route_connections, boost::bind (&RouteTimeAxisView::align_style_changed, this), gui_context());
+		get_diskstream()->AlignmentStyleChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteTimeAxisView::align_style_changed, this), gui_context());
 
 		color_mode_menu = build_color_mode_menu();
 		if (color_mode_menu) {
@@ -1132,13 +1132,13 @@ RouteTimeAxisView::clear_playlist ()
 void
 RouteTimeAxisView::speed_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&RouteTimeAxisView::reset_samples_per_unit, this));
+	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&RouteTimeAxisView::reset_samples_per_unit, this));
 }
 
 void
 RouteTimeAxisView::diskstream_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (boost::bind (&RouteTimeAxisView::update_diskstream_display, this));
+	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&RouteTimeAxisView::update_diskstream_display, this));
 }
 
 void

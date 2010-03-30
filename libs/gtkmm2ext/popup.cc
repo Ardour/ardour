@@ -83,12 +83,12 @@ PopUp::remove ()
 		gtk_idle_add (idle_delete, this);
 	}
 }
-
 #define ENSURE_GUI_THREAD(slot) \
      if (!Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {\
-	Gtkmm2ext::UI::instance()->call_slot ((slot));\
+             Gtkmm2ext::UI::instance()->call_slot (MISSING_INVALIDATOR, (slot)); \
         return;\
      }
+
 
 void
 PopUp::touch ()

@@ -8,15 +8,22 @@ using namespace PBD;
 
 LocaleGuard::LocaleGuard (const char* str)
 {
-	old = strdup (setlocale (LC_NUMERIC, NULL));
-	if (strcmp (old, str)) {
-		setlocale (LC_NUMERIC, str);
-	}
+	old = setlocale (LC_NUMERIC, NULL);
+
+        if (old) {
+                old = strdup (old);
+                if (strcmp (old, str)) {
+                        setlocale (LC_NUMERIC, str);
+                }
+        }
 }
 
 LocaleGuard::~LocaleGuard ()
 {
 	setlocale (LC_NUMERIC, old);
-	free ((char*)old);
+
+        if (old) {
+                free ((char*)old);
+        }
 }
 

@@ -165,7 +165,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion>
 
 	gain_changed ();
 
-	_region->PropertyChanged.connect (state_connection, ui_bind (&AudioRegionEditor::region_changed, this, _1), gui_context());
+	_region->PropertyChanged.connect (state_connection, invalidator (*this), ui_bind (&AudioRegionEditor::region_changed, this, _1), gui_context());
 
 	spin_arrow_grab = false;
 
@@ -246,7 +246,7 @@ AudioRegionEditor::connect_editor_events ()
 
 	audition_button.signal_toggled().connect (sigc::mem_fun(*this, &AudioRegionEditor::audition_button_toggled));
 
-	_session->AuditionActive.connect (audition_connection, ui_bind (&AudioRegionEditor::audition_state_changed, this, _1), gui_context());
+	_session->AuditionActive.connect (audition_connection, invalidator (*this), ui_bind (&AudioRegionEditor::audition_state_changed, this, _1), gui_context());
 }
 
 void

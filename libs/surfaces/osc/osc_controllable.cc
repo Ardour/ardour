@@ -36,7 +36,7 @@ OSCControllable::OSCControllable (lo_address a, const std::string& p, boost::sha
 	, addr (a)
 	, path (p)
 {
-	c->Changed.connect (changed_connection, boost::bind (&OSCControllable::send_change_message, this), OSC::instance());
+	c->Changed.connect (changed_connection, MISSING_INVALIDATOR, boost::bind (&OSCControllable::send_change_message, this), OSC::instance());
 }
 
 OSCControllable::~OSCControllable ()

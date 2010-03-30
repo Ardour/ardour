@@ -87,7 +87,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 	all_crossfade_properties.add (ARDOUR::Properties::follow_overlap);
 	crossfade_changed (all_crossfade_properties);
 
-	crossfade->PropertyChanged.connect (*this, ui_bind (&CrossfadeView::crossfade_changed, this, _1), gui_context());
+	crossfade->PropertyChanged.connect (*this, invalidator (*this), ui_bind (&CrossfadeView::crossfade_changed, this, _1), gui_context());
 	ColorsChanged.connect (sigc::mem_fun (*this, &CrossfadeView::color_handler));
 }
 

@@ -596,7 +596,7 @@ MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 {
 	_model = model;
 	content_connection.disconnect ();
-	_model->ContentsChanged.connect (content_connection, boost::bind (&MidiRegionView::redisplay_model, this), gui_context());
+	_model->ContentsChanged.connect (content_connection, invalidator (*this), boost::bind (&MidiRegionView::redisplay_model, this), gui_context());
 
 	clear_events ();
 
@@ -1084,7 +1084,7 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 		}
 	}
 
-	GhostRegion::CatchDeletion.connect (*this, ui_bind (&RegionView::remove_ghost, this, _1), gui_context());
+	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), ui_bind (&RegionView::remove_ghost, this, _1), gui_context());
 
 	return ghost;
 }
