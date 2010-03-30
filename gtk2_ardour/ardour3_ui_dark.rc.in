@@ -352,6 +352,12 @@ style "solo_button_active" = "small_button"
 	fg[PRELIGHT] = { 0, 0, 0 }
 }
 
+style "mixer_invert_button" = "small_button"
+{
+	bg[ACTIVE] = { 1.0, 0.749, 0.247 }
+	fg[ACTIVE] = { 0, 0, 0 }
+}
+
 style "mixer_solo_button" = "solo_button"
 {
 	font_name = "@FONT_SMALLER@"
@@ -1430,8 +1436,8 @@ widget "*MixerSoloButton-active" style:highest "mixer_solo_button_active"
 widget "*TrackLoopButton*" style:highest "track_loop_button"
 widget "*PanAutomationLineSelector*" style:highest "multiline_combo"
 widget "*EditorTimeButton*" style:highest "time_button"
-widget "*MixerPhaseInvertButton*" style:highest "very_small_button"
-widget "*MixerPhaseInvertButton.*" style:highest "very_small_button"
+widget "*MixerInvertButton*" style:highest "mixer_invert_button"
+widget "*MixerInvertButton.*" style:highest "mixer_invert_button"
 widget "*MixerAutomationRecordingButton*" style:highest "very_small_button"
 widget "*MixerAutomationRecordingButton.*" style:highest "very_small_button"
 widget "*MixerAutomationModeButton*" style:highest "very_small_button"

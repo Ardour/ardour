@@ -84,7 +84,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, panners (sess)
 	, _mono_button (_("Mono"))
 	, button_table (3, 2)
-	, middle_button_table (1, 2)
+	, middle_button_table (2, 2)
 	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
 	, comment_button (_("Comments"))
@@ -183,6 +183,7 @@ MixerStrip::init ()
 
 	mute_button->set_name ("MixerMuteButton");
 	solo_button->set_name ("MixerSoloButton");
+        invert_button->set_name ("MixerInvertButton");
 
 	button_table.set_homogeneous (true);
 	button_table.set_spacings (0);
@@ -194,6 +195,7 @@ MixerStrip::init ()
 	middle_button_table.set_spacings (0);
 	middle_button_table.attach (*mute_button, 0, 1, 0, 1);
         middle_button_table.attach (*solo_button, 1, 2, 0, 1);
+        middle_button_table.attach (*invert_button, 0, 2, 1, 2);
 
 	bottom_button_table.set_col_spacings (0);
 	bottom_button_table.set_homogeneous (true);
@@ -1727,7 +1729,9 @@ MixerStrip::revert_to_default_display ()
 void
 MixerStrip::set_button_names ()
 {
-	switch (_width) {
+        invert_button_label.set_text (X_("Ø"));
+
+        switch (_width) {
 	case Wide:
 		rec_enable_button_label.set_text (_("Rec"));
 		mute_button_label.set_text (_("Mute"));

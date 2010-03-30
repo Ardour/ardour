@@ -108,6 +108,13 @@ RouteUI::init ()
 	multiple_mute_change = false;
 	multiple_solo_change = false;
 
+	invert_button = manage (new BindableToggleButton ());
+	// mute_button->set_self_managed (true);
+	invert_button->set_name ("InvertButton");
+	invert_button->add (invert_button_label);
+	invert_button_label.show ();
+	UI::instance()->set_tip (invert_button, _("Invert (Phase reverse) this track"), "");
+
 	mute_button = manage (new BindableToggleButton ());
 	// mute_button->set_self_managed (true);
 	mute_button->set_name ("MuteButton");
@@ -151,6 +158,9 @@ RouteUI::init ()
 	solo_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::solo_release), false);
 	mute_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::mute_press), false);
 	mute_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::mute_release), false);
+	invert_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::invert_press), false);
+	invert_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::invert_release), false);
+
 }
 
 void
@@ -222,6 +232,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	solo_button->unset_flags (Gtk::CAN_FOCUS);
 
 	mute_button->show();
+        invert_button->show ();
 
 	if (_route->is_monitor()) {
 		solo_button->hide ();
@@ -235,6 +246,18 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	solo_changed (0);
 
 	map_frozen ();
+}
+
+bool
+RouteUI::invert_press (GdkEventButton* ev)
+{
+        return false;
+}
+
+bool
+RouteUI::invert_release (GdkEventButton* ev)
+{
+        return false;
 }
 
 bool
