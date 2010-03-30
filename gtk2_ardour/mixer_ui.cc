@@ -538,7 +538,9 @@ Mixer_UI::session_going_away ()
 		delete (*i);
 	}
 
-        _monitor_section->tearoff().hide_visible ();
+        if (_monitor_section) {
+                _monitor_section->tearoff().hide_visible ();
+        }
 
 	strips.clear ();
 
