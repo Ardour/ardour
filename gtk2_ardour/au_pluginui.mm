@@ -105,7 +105,10 @@ static const gchar* _automation_mode_strings[] = {
 	}
 }
 
-
+- (void)auViewResized:(NSNotification *)notification;
+{
+	plugin_ui->cocoa_view_resized();
+}
 
 @end
 
@@ -135,8 +138,11 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	smaller_hbox->pack_start (preset_label, false, false, 4);
 	smaller_hbox->pack_start (preset_combo, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
+#if 0
+	/* one day these might be useful with an AU plugin, but not yet */
 	smaller_hbox->pack_start (automation_mode_label, false, false);
 	smaller_hbox->pack_start (automation_mode_selector, false, false);
+#endif
 	smaller_hbox->pack_start (bypass_button, false, true);
 
 	VBox* v1_box = manage (new VBox);
@@ -362,6 +368,12 @@ AUPluginUI::create_cocoa_view ()
 
 	packView = au_view;
 
+	// watch for size changes of the view
+
+	 [[NSNotificationCenter defaultCenter] addObserver:_notify
+	       selector:@selector(auViewResized:) name:NSWindowDidResizeNotification
+	       object:au_view];
+
 	// Get the size of the new AU View's frame 
 	
 	NSRect packFrame;
@@ -370,6 +382,13 @@ AUPluginUI::create_cocoa_view ()
 	prefheight = packFrame.size.height;
 
 	return 0;
+}
+
+void
+AUPluginUI::cocoa_view_resized ()
+{
+	NSRect packFrame = [au_view frame];
+	cerr << "View was resized to " << packFrame.size.width << " x " << packFrame.size.height << endl;
 }
 
 int
