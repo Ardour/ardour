@@ -122,13 +122,15 @@ ExportDialog::init ()
 	/* Buttons */
 
 	cancel_button = add_button (Gtk::Stock::CANCEL, RESPONSE_CANCEL);
-	rt_export_button = add_button (_("Realtime Export"), RESPONSE_RT);
-	fast_export_button = add_button (_("Fast Export"), RESPONSE_FAST);
+	// Realtime export is disabled for now, as it will most probably not work
+	//rt_export_button = add_button (_("Realtime Export"), RESPONSE_RT);
+	//fast_export_button = add_button (_("Fast Export"), RESPONSE_FAST);
+	fast_export_button = add_button (_("Export"), RESPONSE_FAST);
 
 	list_files_button.set_name ("PaddedButton");
 
 	cancel_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::close_dialog));
-	rt_export_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::export_rt));
+	//rt_export_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::export_rt));
 	fast_export_button->signal_clicked().connect (sigc::mem_fun (*this, &ExportDialog::export_fw));
 
 	/* Done! */
@@ -233,7 +235,7 @@ ExportDialog::update_warnings ()
 	list_files_string = "";
 
 	fast_export_button->set_sensitive (true);
-	rt_export_button->set_sensitive (true);
+	//rt_export_button->set_sensitive (true);
 
 	/* Add new warnings */
 
@@ -294,7 +296,7 @@ ExportDialog::show_progress ()
 	status->running = true;
 
 	cancel_button->set_label (_("Stop Export"));
-	rt_export_button->set_sensitive (false);
+	//rt_export_button->set_sensitive (false);
 	fast_export_button->set_sensitive (false);
 
 	progress_bar.set_fraction (0.0);
@@ -349,7 +351,7 @@ void
 ExportDialog::add_error (Glib::ustring const & text)
 {
 	fast_export_button->set_sensitive (false);
-	rt_export_button->set_sensitive (false);
+	//rt_export_button->set_sensitive (false);
 
 	if (warn_string.empty()) {
 		warn_string = _("<span color=\"#ffa755\">Error: ") + text + "</span>";
