@@ -116,7 +116,7 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 	/* create a new region */
 
 	if (region_name.empty()) {
-		region_name = session.new_region_name (region->name());
+		region_name = RegionFactory::new_region_name (region->name());
 	}
 	results.clear ();
 

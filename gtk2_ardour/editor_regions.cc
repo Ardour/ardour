@@ -129,47 +129,16 @@ EditorRegions::EditorRegions (Editor* e)
 
 	//ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (sigc::mem_fun(*this, &Editor::redisplay_regions));
 	ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (sigc::mem_fun(*this, &EditorRegions::update_all_rows));
-	ARDOUR::Region::RegionPropertyChanged.connect (region_property_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::update_row, this, _1), gui_context());
-
+	ARDOUR::Region::RegionPropertyChanged.connect (region_property_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::region_changed, this, _1, _2), gui_context());
+	ARDOUR::RegionFactory::CheckNewRegion.connect (check_new_region_connection, MISSING_INVALIDATOR, ui_bind (&EditorRegions::add_region, this, _1), gui_context());
 }
 
 void
 EditorRegions::set_session (ARDOUR::Session* s)
 {
 	EditorComponent::set_session (s);
-
-	if (_session) {
-		_session->RegionsAdded.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&EditorRegions::handle_new_regions, this, _1), gui_context());
-		_session->RegionHiddenChange.connect (_session_connections, MISSING_INVALIDATOR, ui_bind (&EditorRegions::region_hidden, this, _1), gui_context());
-	}
-
 	redisplay ();
 }
-
-void
-EditorRegions::handle_new_regions (vector<boost::shared_ptr<Region> >& v)
-{
-	ENSURE_GUI_THREAD (*this, &EditorRegions::handle_new_regions, v)
-	add_regions (v);
-}
-
-void
-EditorRegions::region_hidden_weak (boost::weak_ptr<Region> wr)
-{
-	boost::shared_ptr<Region> r (wr.lock());
-
-	if (r) {
-		region_hidden (r);
-	}
-}
-
-void
-EditorRegions::region_hidden (boost::shared_ptr<Region> r)
-{
-	ENSURE_GUI_THREAD (*this, &EditorRegions::region_hidden, r)
-	redisplay ();
-}
-
 
 void
 EditorRegions::add_regions (vector<boost::shared_ptr<Region> >& regions)
@@ -334,18 +303,9 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 	populate_row(region, (*row));
 }
 
-
 void
-EditorRegions::region_changed (const PropertyChange& what_changed, boost::weak_ptr<Region> region)
+EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange& what_changed)
 {
-	ENSURE_GUI_THREAD (*this, &EditorRegions::region_changed, what_changed, region)
-
-	boost::shared_ptr<Region> r = region.lock ();
-
-	if (!r) {
-		return;
-	}
-
 	if (what_changed.contains (ARDOUR::Properties::name)) {
 		/* find the region in our model and change its name */
 		TreeModel::Children rows = _model->children ();
@@ -369,6 +329,10 @@ EditorRegions::region_changed (const PropertyChange& what_changed, boost::weak_p
 			++i;
 		}
 
+	}
+
+	if (what_changed.contains (ARDOUR::Properties::hidden)) {
+		redisplay ();
 	}
 }
 

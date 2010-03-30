@@ -104,7 +104,7 @@ private:
 
 	Columns _columns;
 
-	void region_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Region>);
+	void region_changed (boost::shared_ptr<ARDOUR::Region>, PBD::PropertyChange const &);
 	void selection_changed ();
 	sigc::connection _change_connection;
 	bool set_selected_in_subrow (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &, int);
@@ -120,12 +120,8 @@ private:
 
 	int sorter (Gtk::TreeModel::iterator, Gtk::TreeModel::iterator);
 
-	void handle_new_region (boost::weak_ptr<ARDOUR::Region>);
-	void handle_new_regions (std::vector<boost::shared_ptr<ARDOUR::Region> >& );
 	void add_region (boost::shared_ptr<ARDOUR::Region>);
 	void add_regions (std::vector<boost::shared_ptr<ARDOUR::Region> > & );
-	void region_hidden (boost::shared_ptr<ARDOUR::Region>);
-	void region_hidden_weak (boost::weak_ptr<ARDOUR::Region>);
 	void populate_row (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &);
 	void update_row (boost::shared_ptr<ARDOUR::Region>);
 	bool update_subrows (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &, int);
@@ -149,6 +145,7 @@ private:
 	bool _no_redisplay;
 	std::list<boost::shared_ptr<ARDOUR::Region> > tmp_region_list;
 	PBD::ScopedConnection region_property_connection;
+	PBD::ScopedConnection check_new_region_connection;
 	bool ignore_region_list_selection_change;
 	bool ignore_selected_region_change;
 };

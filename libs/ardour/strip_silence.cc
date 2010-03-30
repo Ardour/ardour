@@ -113,7 +113,7 @@ StripSilence::run (boost::shared_ptr<Region> r)
                         copy = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create 
                                                                          (region, start, plist));
 
-                        copy->set_name (session.new_region_name (region->name ()));
+                        copy->set_name (RegionFactory::new_region_name (region->name ()));
 
                         std::cerr << "New silent delineated region called " << copy->name()
                                   << " @ " << copy->start() << " length = " << copy->length() << " pos = " << 

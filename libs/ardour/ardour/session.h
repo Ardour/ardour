@@ -261,10 +261,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void maybe_write_autosave ();
 
-	/* Proxy signal for region hidden changes */
-
-	PBD::Signal1<void,boost::shared_ptr<Region> > RegionHiddenChange;
-
 	/* Emitted when all i/o connections are complete */
 
 	PBD::Signal0<void> IOConnectionsComplete;
@@ -313,8 +309,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	bool transport_locked () const;
 
 	int wipe ();
-
-	int remove_region_from_region_list (boost::shared_ptr<Region>);
 
 	nframes_t get_maximum_extent () const;
 	nframes_t current_end_frame() const { return end_location->start(); }
@@ -493,13 +487,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	boost::shared_ptr<Region> find_whole_file_parent (boost::shared_ptr<Region const>) const;
 
-	void add_regions (std::vector<boost::shared_ptr<Region> >&);
-
-	PBD::Signal1<void,std::vector<boost::shared_ptr<Region> >&> RegionsAdded;
-	PBD::Signal1<void,boost::shared_ptr<Region> >               RegionRemoved;
-
-	int region_name (std::string& result, std::string base = std::string(""), bool newlevel = false);
-	std::string new_region_name (std::string);
 	std::string path_from_region_name (DataType type, std::string name, std::string identifier);
 
 	boost::shared_ptr<Region>      XMLRegionFactory (const XMLNode&, bool full);
@@ -1241,14 +1228,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* REGION MANAGEMENT */
 
-	std::map<std::string,uint32_t> region_name_map;
-	void update_region_name_map (boost::shared_ptr<Region>);
-
 	mutable Glib::Mutex region_lock;
-
-	void add_region (boost::shared_ptr<Region>);
-	void region_changed (const PBD::PropertyChange&, boost::weak_ptr<Region>);
-	void remove_region (boost::weak_ptr<Region>);
 
 	int load_regions (const XMLNode& node);
 

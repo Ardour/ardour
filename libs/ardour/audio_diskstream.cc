@@ -1473,7 +1473,7 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 
 			string region_name;
 
-			_session.region_name (region_name, whole_file_region_name, false);
+			RegionFactory::region_name (region_name, whole_file_region_name, false);
 
 			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add region " << region_name << endl;
 

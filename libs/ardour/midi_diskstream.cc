@@ -989,7 +989,7 @@ MidiDiskstream::transport_stopped (struct tm& /*when*/, time_t /*twhen*/, bool a
 
 			string region_name;
 
-			_session.region_name (region_name, _write_source->name(), false);
+			RegionFactory::region_name (region_name, _write_source->name(), false);
 
 			// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
 

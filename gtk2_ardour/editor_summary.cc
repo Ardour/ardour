@@ -61,8 +61,12 @@ EditorSummary::set_session (Session* s)
 
 	set_dirty ();
 
+	/* Note: the EditorSummary already finds out about new regions from Editor::region_view_added
+	 * (which attaches to StreamView::RegionViewAdded), and cut regions by the RegionPropertyChanged
+	 * emitted when a cut region is added to the `cutlist' playlist.
+	 */
+
 	if (_session) {
-		_session->RegionRemoved.connect (_session_connections, invalidator (*this), boost::bind (&EditorSummary::set_dirty, this), gui_context());
 		_session->StartTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&EditorSummary::set_dirty, this), gui_context());
 		_session->EndTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&EditorSummary::set_dirty, this), gui_context());
 	}

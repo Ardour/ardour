@@ -176,8 +176,6 @@ AudioRegionImporter::_move ()
 	if (broken()) {
 		return;
 	}
-
-	session.add_regions (region);
 }
 
 bool
@@ -209,7 +207,7 @@ AudioRegionImporter::parse_xml_region ()
 		} else if (!prop.compare("name")) {
 			// rename region if necessary
 			name = (*it)->value();
-			name = session.new_region_name (name);
+			name = RegionFactory::new_region_name (name);
 			(*it)->set_value (name);
 			name_ok = true;
 		} else {

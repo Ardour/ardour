@@ -264,7 +264,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, f
 			break;
 		}
 
-		_session.region_name (new_name, region->name(), false);
+		RegionFactory::region_name (new_name, region->name(), false);
 
 		PropertyList plist; 
 
@@ -693,7 +693,7 @@ Playlist::add_region (boost::shared_ptr<Region> region, framepos_t position, flo
 	if (floor (times) != times) {
 		length = (framecnt_t) floor (region->length() * (times - floor (times)));
 		string name;
-		_session.region_name (name, region->name(), false);
+		RegionFactory::region_name (name, region->name(), false);
 
 		{
 			PropertyList plist;
@@ -963,7 +963,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 				if (!cutting) {
 					/* "middle" ++++++ */
 
-					_session.region_name (new_name, current->name(), false);
+				  	RegionFactory::region_name (new_name, current->name(), false);
 
 					PropertyList plist;
 					
@@ -982,7 +982,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 
 				/* "end" ====== */
 
-				_session.region_name (new_name, current->name(), false);
+				RegionFactory::region_name (new_name, current->name(), false);
 
 				PropertyList plist;
 				
@@ -1020,7 +1020,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 
 					/* end +++++ */
 
-					_session.region_name (new_name, current->name(), false);
+					RegionFactory::region_name (new_name, current->name(), false);
 					
 					PropertyList plist;
 					
@@ -1063,7 +1063,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 
 				if (!cutting) {
 					/* front **** */
-					_session.region_name (new_name, current->name(), false);
+					RegionFactory::region_name (new_name, current->name(), false);
 
 					PropertyList plist;
 					
@@ -1267,7 +1267,7 @@ Playlist::duplicate (boost::shared_ptr<Region> region, framepos_t position, floa
 	if (floor (times) != times) {
 		framecnt_t length = (framecnt_t) floor (region->length() * (times - floor (times)));
 		string name;
-		_session.region_name (name, region->name(), false);
+		RegionFactory::region_name (name, region->name(), false);
 		
 		{
 			PropertyList plist;
@@ -1368,7 +1368,7 @@ Playlist::_split_region (boost::shared_ptr<Region> region, framepos_t playlist_p
 	before = playlist_position - region->position();
 	after = region->length() - before;
 
-	_session.region_name (before_name, region->name(), false);
+	RegionFactory::region_name (before_name, region->name(), false);
 
 	{
 		PropertyList plist;
@@ -1381,7 +1381,7 @@ Playlist::_split_region (boost::shared_ptr<Region> region, framepos_t playlist_p
 		left = RegionFactory::create (region, plist);
 	}
 
-	_session.region_name (after_name, region->name(), false);
+	RegionFactory::region_name (after_name, region->name(), false);
 
 	{
 		PropertyList plist;

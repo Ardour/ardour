@@ -486,7 +486,7 @@ Region::first_edit ()
 
 	if (_first_edit != EditChangesNothing && pl) {
 
-		_name = _session.new_region_name (_name);
+		_name = RegionFactory::new_region_name (_name);
 		_first_edit = EditChangesNothing;
 
 		send_change (Properties::name);

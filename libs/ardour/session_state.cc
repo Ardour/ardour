@@ -270,7 +270,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	/* These are all static "per-class" signals */
 
-	RegionFactory::CheckNewRegion.connect_same_thread (*this, boost::bind (&Session::add_region, this, _1));
 	SourceFactory::SourceCreated.connect_same_thread (*this, boost::bind (&Session::add_source, this, _1));
 	PlaylistFactory::PlaylistCreated.connect_same_thread (*this, boost::bind (&Session::add_playlist, this, _1, _2));
 	Processor::ProcessorCreated.connect_same_thread (*this, boost::bind (&Session::add_processor, this, _1));

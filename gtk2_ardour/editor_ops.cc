@@ -2668,7 +2668,7 @@ Editor::region_from_selection ()
 		}
 
 		internal_start = start - current->position();
-		_session->region_name (new_name, current->name(), true);
+		RegionFactory::region_name (new_name, current->name(), true);
 
 		PropertyList plist; 
 		
@@ -2708,7 +2708,7 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<Region> >& new_re
 		}
 
 		internal_start = start - current->position();
-		_session->region_name (new_name, current->name(), true);
+		RegionFactory::region_name (new_name, current->name(), true);
 
 		PropertyList plist; 
 		
@@ -5927,7 +5927,7 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 
 		string new_name;
 
-		if (_session->region_name (new_name, r->name())) {
+		if (RegionFactory::region_name (new_name, r->name())) {
 			break;
 		}
 

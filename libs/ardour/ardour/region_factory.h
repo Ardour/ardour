@@ -83,11 +83,27 @@ class RegionFactory {
         static const RegionMap& regions() { return region_map; }
         static uint32_t nregions ();
 
+	static int region_name (std::string &, std::string, bool new_level = false);
+	static std::string new_region_name (std::string);
+  
   private:
+
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Region>, frameoffset_t offset,
+						 bool offset_relative,
+						 const PBD::PropertyList&, bool announce = true);
+
+	static void region_changed (PBD::PropertyChange const &, boost::weak_ptr<Region>);
+	
         static Glib::StaticMutex region_map_lock;
+	
 	static RegionMap region_map;
 	static void map_add (boost::shared_ptr<Region>);
-        
+
+	static Glib::StaticMutex region_name_map_lock;
+
+	static std::map<std::string, uint32_t> region_name_map;
+	static void update_region_name_map (boost::shared_ptr<Region>);
+
         static PBD::ScopedConnectionList region_list_connections;
 };
 

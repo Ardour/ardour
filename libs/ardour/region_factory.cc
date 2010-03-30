@@ -17,6 +17,9 @@
 
 */
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 #include "pbd/error.h"
 #include "pbd/boost_debug.h"
 
@@ -39,6 +42,8 @@ PBD::Signal1<void,boost::shared_ptr<Region> > RegionFactory::CheckNewRegion;
 Glib::StaticMutex RegionFactory::region_map_lock;
 RegionFactory::RegionMap RegionFactory::region_map;
 PBD::ScopedConnectionList RegionFactory::region_list_connections;
+Glib::StaticMutex RegionFactory::region_name_map_lock;
+std::map<std::string, uint32_t> RegionFactory::region_name_map;
 
 boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<const Region> region)
@@ -80,45 +85,17 @@ RegionFactory::create (boost::shared_ptr<const Region> region)
 boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, const PropertyList& plist, bool announce)
 {
-	boost::shared_ptr<Region> ret;
-	boost::shared_ptr<const AudioRegion> other_a;
-	boost::shared_ptr<const MidiRegion> other_m;
-
-	if ((other_a = boost::dynamic_pointer_cast<AudioRegion>(region)) != 0) {
-
-		AudioRegion* ar = new AudioRegion (other_a, offset, true);
-		boost_debug_shared_ptr_mark_interesting (ar, "Region");
-
-		boost::shared_ptr<AudioRegion> arp (ar);
-		ret = boost::static_pointer_cast<Region> (arp);
-
-	} else if ((other_m = boost::dynamic_pointer_cast<MidiRegion>(region)) != 0) {
-
-		MidiRegion* mr = new MidiRegion (other_m, offset, true);
-		boost::shared_ptr<MidiRegion> mrp (mr);
-		ret = boost::static_pointer_cast<Region> (mrp);
-
-	} else {
-		fatal << _("programming error: RegionFactory::create() called with unknown Region type")
-		      << endmsg;
-		/*NOTREACHED*/
-		return boost::shared_ptr<Region>();
-	}
-
-	if (ret) {
-		ret->set_properties (plist);
-		map_add (ret);
-
-		if (announce) {
-			CheckNewRegion (ret);
-		}
-	}
-
-	return ret;
+	return create (region, offset, true, plist, announce);
 }
 
 boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& plist, bool announce)
+{
+	return create (region, 0, false, plist, announce);
+}
+
+boost::shared_ptr<Region>
+RegionFactory::create (boost::shared_ptr<Region> region, frameoffset_t offset, bool offset_relative, const PropertyList& plist, bool announce)
 {
 	boost::shared_ptr<Region> ret;
 	boost::shared_ptr<const AudioRegion> other_a;
@@ -126,7 +103,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 
 	if ((other_a = boost::dynamic_pointer_cast<AudioRegion>(region)) != 0) {
 
-		AudioRegion* ar = new AudioRegion (other_a, 0, false);
+		AudioRegion* ar = new AudioRegion (other_a, offset, offset_relative);
 		boost_debug_shared_ptr_mark_interesting (ar, "Region");
 
 		boost::shared_ptr<AudioRegion> arp (ar);
@@ -134,7 +111,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 
 	} else if ((other_m = boost::dynamic_pointer_cast<MidiRegion>(region)) != 0) {
 
-		MidiRegion* mr = new MidiRegion (other_m, 0, false);
+		MidiRegion* mr = new MidiRegion (other_m, offset, offset_relative);
 		boost::shared_ptr<MidiRegion> mrp (mr);
 		ret = boost::static_pointer_cast<Region> (mrp);
 
@@ -156,9 +133,6 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 
 	return ret;
 }
-
-
-
 
 boost::shared_ptr<Region>
 RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs, const PropertyList& plist, bool announce)
@@ -301,6 +275,13 @@ RegionFactory::map_add (boost::shared_ptr<Region> r)
         }
 
         r->DropReferences.connect_same_thread (region_list_connections, boost::bind (&RegionFactory::map_remove, r));
+
+	r->PropertyChanged.connect_same_thread (
+		region_list_connections,
+		boost::bind (&RegionFactory::region_changed, _1, boost::weak_ptr<Region> (r))
+		);
+
+	update_region_name_map (r);
 }
 
 void
@@ -368,4 +349,141 @@ RegionFactory::nregions ()
 {
         Glib::Mutex::Lock lm (region_map_lock);
         return region_map.size ();
+}
+
+void
+RegionFactory::update_region_name_map (boost::shared_ptr<Region> region)
+{
+	string::size_type const last_period = region->name().find_last_of ('.');
+
+	if (last_period != string::npos && last_period < region->name().length() - 1) {
+
+		string const base = region->name().substr (0, last_period);
+		string const number = region->name().substr (last_period + 1);
+
+		/* note that if there is no number, we get zero from atoi,
+		   which is just fine
+		*/
+
+		Glib::Mutex::Lock lm (region_name_map_lock);
+		region_name_map[base] = atoi (number.c_str ());
+	}
+}
+
+void
+RegionFactory::region_changed (PropertyChange const & what_changed, boost::weak_ptr<Region> w)
+{
+	boost::shared_ptr<Region> r = w.lock ();
+	if (!r) {
+		return;
+	}
+
+	if (what_changed.contains (Properties::name)) {
+		update_region_name_map (r);
+	}
+}
+
+int
+RegionFactory::region_name (string& result, string base, bool newlevel)
+{
+	char buf[16];
+	string subbase;
+
+	if (base.find("/") != string::npos) {
+		base = base.substr(base.find_last_of("/") + 1);
+	}
+
+	if (base == "") {
+
+		snprintf (buf, sizeof (buf), "%d", RegionFactory::nregions() + 1);
+		result = "region.";
+		result += buf;
+
+	} else {
+
+		if (newlevel) {
+			subbase = base;
+		} else {
+			string::size_type pos;
+
+			pos = base.find_last_of ('.');
+
+			/* pos may be npos, but then we just use entire base */
+
+			subbase = base.substr (0, pos);
+
+		}
+
+		{
+			Glib::Mutex::Lock lm (region_name_map_lock);
+
+			map<string,uint32_t>::iterator x;
+
+			result = subbase;
+
+			if ((x = region_name_map.find (subbase)) == region_name_map.end()) {
+				result += ".1";
+				region_name_map[subbase] = 1;
+			} else {
+				x->second++;
+				snprintf (buf, sizeof (buf), ".%d", x->second);
+
+				result += buf;
+			}
+		}
+	}
+
+	return 0;
+}
+
+string
+RegionFactory::new_region_name (string old)
+{
+	string::size_type last_period;
+	uint32_t number;
+	string::size_type len = old.length() + 64;
+	char buf[len];
+
+	if ((last_period = old.find_last_of ('.')) == string::npos) {
+
+		/* no period present - add one explicitly */
+
+		old += '.';
+		last_period = old.length() - 1;
+		number = 0;
+
+	} else {
+
+		number = atoi (old.substr (last_period+1).c_str());
+
+	}
+
+	while (number < (UINT_MAX-1)) {
+		
+		const RegionMap& regions (RegionFactory::regions());
+		RegionMap::const_iterator i;
+		string sbuf;
+
+		number++;
+
+		snprintf (buf, len, "%s%" PRIu32, old.substr (0, last_period + 1).c_str(), number);
+		sbuf = buf;
+
+		for (i = regions.begin(); i != regions.end(); ++i) {
+			if (i->second->name() == sbuf) {
+				break;
+			}
+		}
+
+		if (i == regions.end()) {
+			break;
+		}
+	}
+
+	if (number != (UINT_MAX-1)) {
+		return buf;
+	}
+
+	error << string_compose (_("cannot create new name for region \"%1\""), old) << endmsg;
+	return old;
 }
