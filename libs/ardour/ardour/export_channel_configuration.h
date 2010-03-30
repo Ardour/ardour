@@ -22,8 +22,8 @@
 #define __ardour_export_channel_configuration_h__
 
 #include <list>
-
 #include <glibmm/ustring.h>
+#include <boost/enable_shared_from_this.hpp>
 
 #include "ardour/export_channel.h"
 #include "ardour/export_status.h"
@@ -43,7 +43,7 @@ class ExportProcessor;
 class ExportTimespan;
 class Session;
 
-class ExportChannelConfiguration
+class ExportChannelConfiguration : public boost::enable_shared_from_this<ExportChannelConfiguration>
 {
 
   private:
@@ -71,6 +71,10 @@ class ExportChannelConfiguration
 
 	void register_channel (ExportChannelPtr channel) { channels.push_back (channel); }
 	void clear_channels () { channels.clear (); }
+	
+	/** Returns a list of channel configurations that match the files created.
+	  * I.e. many configurations if splitting is enabled, one if not. */
+	void configurations_for_files (std::list<boost::shared_ptr<ExportChannelConfiguration> > & configs);
 
   private:
 

@@ -116,7 +116,8 @@ class ExportFilename {
 	TimeFormat time_format;
 
 	Glib::ustring get_formatted_time (Glib::ustring const & format) const;
-	struct tm * time_struct; // Due to static allocation no destructor or copy-ctor is needed because of this
+	// Due to the static allocation used in strftime(), no destructor or copy-ctor is needed for this
+	struct tm * time_struct;
 
 	TimespanPtr timespan;
 	ChannelConfigPtr channel_config;

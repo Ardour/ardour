@@ -69,6 +69,8 @@ class ExportGraphBuilder
 	
   private:
 	
+	void add_split_config (FileSpec const & config);
+	
 	class Encoder : public sigc::trackable {
 	  public:
 		template <typename T> boost::shared_ptr<AudioGrapher::Sink<T> > init (FileSpec const & new_config);

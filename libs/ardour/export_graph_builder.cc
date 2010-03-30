@@ -74,6 +74,33 @@ ExportGraphBuilder::reset ()
 void
 ExportGraphBuilder::add_config (FileSpec const & config)
 {
+	if (!config.channel_config->get_split ()) {
+		add_split_config (config);
+		return;
+	}
+	
+	// Split channel configurations are split into several channel configurations,
+	// each corresponding to a file, at this stage
+	typedef std::list<boost::shared_ptr<ExportChannelConfiguration> > ConfigList;
+	ConfigList file_configs;
+	config.channel_config->configurations_for_files (file_configs);
+	
+	unsigned chan = 1;
+	for (ConfigList::iterator it = file_configs.begin(); it != file_configs.end(); ++it, ++chan) {
+		FileSpec copy = config;
+		copy.channel_config = *it;
+		
+		copy.filename.reset (new ExportFilename (*copy.filename));
+		copy.filename->include_channel = true;
+		copy.filename->set_channel (chan);
+		
+		add_split_config (copy);
+	}
+}
+
+void
+ExportGraphBuilder::add_split_config (FileSpec const & config)
+{
 	for (ChannelConfigList::iterator it = channel_configs.begin(); it != channel_configs.end(); ++it) {
 		if (*it == config) {
 			it->add_child (config);

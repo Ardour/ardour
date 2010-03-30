@@ -99,4 +99,22 @@ ExportChannelConfiguration::all_channels_have_ports () const
 	return true;
 }
 
+void
+ExportChannelConfiguration::configurations_for_files (std::list<boost::shared_ptr<ExportChannelConfiguration> > & configs)
+{
+	configs.clear ();
+	
+	if (!split) {
+		configs.push_back (shared_from_this ());
+		return;
+	}
+	
+	for (ChannelList::const_iterator it = channels.begin (); it != channels.end (); ++it) {
+		boost::shared_ptr<ExportChannelConfiguration> config (new ExportChannelConfiguration (session));
+		config->set_name (_name);
+		config->register_channel (*it);
+		configs.push_back (config);
+	}
+}
+
 } // namespace ARDOUR
