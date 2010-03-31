@@ -39,7 +39,6 @@ public:
 	void reset_sort_direction (bool);
 	void reset_sort_type (Editing::RegionListSortType, bool);
 	void set_selected (RegionSelection &);
-	void remove_region ();
 	void selection_mapover (sigc::slot<void,boost::shared_ptr<ARDOUR::Region> >);
 	boost::shared_ptr<ARDOUR::Region> get_dragged_region ();
 	boost::shared_ptr<ARDOUR::Region> get_single_selection ();
@@ -112,9 +111,7 @@ private:
 	void name_edit (const Glib::ustring&, const Glib::ustring&);
 
 	bool key_press (GdkEventKey *);
-	bool key_release (GdkEventKey *);
 	bool button_press (GdkEventButton *);
-	bool button_release (GdkEventButton *);
 	void build_menu ();
 	void show_context_menu (int button, int time);
 
@@ -138,6 +135,8 @@ private:
 	Gtk::Frame _frame;
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Region> > _display;
 	Glib::RefPtr<Gtk::TreeStore> _model;
+	Glib::RefPtr<Gtk::Action> _hide_action; ///< the action for our Hide menu option
+	Glib::RefPtr<Gtk::Action> _show_action; ///< the action for our Show menu option
 	Glib::RefPtr<Gtk::ToggleAction> _toggle_full_action;
 	Glib::RefPtr<Gtk::ToggleAction> _toggle_show_auto_regions_action;
 	bool _show_automatic_regions;

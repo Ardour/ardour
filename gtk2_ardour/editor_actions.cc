@@ -775,7 +775,7 @@ Editor::register_actions ()
 	ActionManager::region_list_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (rl_actions, X_("rlHide"), _("Hide"), sigc::mem_fun(*this, &Editor::hide_region_from_region_list));
 	ActionManager::region_list_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (rl_actions, X_("rlRemove"), _("Remove"), sigc::mem_fun (*_regions, &EditorRegions::remove_region));
+	act = ActionManager::register_action (rl_actions, X_("rlShow"), _("Show"), sigc::mem_fun(*this, &Editor::show_region_in_region_list));
 	ActionManager::region_list_selection_sensitive_actions.push_back (act);
 	ActionManager::register_toggle_action (rl_actions, X_("rlShowAll"), _("Show All"), sigc::mem_fun(*_regions, &EditorRegions::toggle_full));
 	ActionManager::register_toggle_action (rl_actions, X_("rlShowAuto"), _("Show Automatic Regions"), sigc::mem_fun (*_regions, &EditorRegions::toggle_show_auto_regions));

@@ -5008,9 +5008,9 @@ Editor::hide_a_region (boost::shared_ptr<Region> r)
 }
 
 void
-Editor::remove_a_region (boost::shared_ptr<Region> r)
+Editor::show_a_region (boost::shared_ptr<Region> r)
 {
-	// _session->remove_region_from_region_list (r);
+	r->set_hidden (false);
 }
 
 void
@@ -5023,6 +5023,12 @@ void
 Editor::hide_region_from_region_list ()
 {
 	_regions->selection_mapover (sigc::mem_fun (*this, &Editor::hide_a_region));
+}
+
+void
+Editor::show_region_in_region_list ()
+{
+	_regions->selection_mapover (sigc::mem_fun (*this, &Editor::show_a_region));
 }
 
 void

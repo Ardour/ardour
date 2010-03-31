@@ -217,7 +217,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void consider_auditioning (boost::shared_ptr<ARDOUR::Region>);
 	void hide_a_region (boost::shared_ptr<ARDOUR::Region>);
-	void remove_a_region (boost::shared_ptr<ARDOUR::Region>);
+	void show_a_region (boost::shared_ptr<ARDOUR::Region>);
 
 #ifdef USE_RUBBERBAND
 	std::vector<std::string> rb_opt_strings;
@@ -1098,6 +1098,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void audition_region_from_region_list ();
 	void hide_region_from_region_list ();
+	void show_region_in_region_list ();
 
 	void align (ARDOUR::RegionPoint);
 	void align_relative (ARDOUR::RegionPoint);

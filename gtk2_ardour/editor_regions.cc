@@ -121,9 +121,7 @@ EditorRegions::EditorRegions (Editor* e)
 	_scroller.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 
 	_display.signal_key_press_event().connect (sigc::mem_fun(*this, &EditorRegions::key_press));
-	_display.signal_key_release_event().connect (sigc::mem_fun(*this, &EditorRegions::key_release));
 	_display.signal_button_press_event().connect (sigc::mem_fun(*this, &EditorRegions::button_press), false);
-	_display.signal_button_release_event().connect (sigc::mem_fun(*this, &EditorRegions::button_release));
 	_change_connection = _display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &EditorRegions::selection_changed));
 	// _display.signal_popup_menu().connect (sigc::bind (sigc::mem_fun (*this, &Editor::show__display_context_menu), 1, 0));
 
@@ -843,6 +841,9 @@ EditorRegions::build_menu ()
 
 	Glib::RefPtr<Action> act;
 
+	_hide_action = ActionManager::get_action (X_("RegionList"), X_("rlHide"));
+	_show_action = ActionManager::get_action (X_("RegionList"), X_("rlShow"));
+
 	act = ActionManager::get_action (X_("RegionList"), X_("rlShowAll"));
 	if (act) {
 		_toggle_full_action = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
@@ -884,6 +885,27 @@ EditorRegions::show_context_menu (int button, int time)
 		ActionManager::set_sensitive (ActionManager::region_list_selection_sensitive_actions, false);
 	}
 
+	/* Enable the "Show" option if any selected regions are hidden, and vice versa for "Hide" */
+
+	bool have_shown = false;
+	bool have_hidden = false;
+	
+	TreeView::Selection::ListHandle_Path rows = _display.get_selection()->get_selected_rows ();
+	for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
+		TreeIter t = _model->get_iter (*i);
+		boost::shared_ptr<Region> r = (*t)[_columns.region];
+		if (r) {
+			if (r->hidden ()) {
+				have_hidden = true;
+			} else {
+				have_shown = true;
+			}
+		}
+	}
+
+	_hide_action->set_sensitive (have_shown);
+	_show_action->set_sensitive (have_hidden);
+
 	_menu->popup (button, time);
 }
 
@@ -893,20 +915,6 @@ EditorRegions::key_press (GdkEventKey* /*ev*/)
 	return false;
 }
 
-bool
-EditorRegions::key_release (GdkEventKey* ev)
-{
-	switch (ev->keyval) {
-	case GDK_Delete:
-		remove_region ();
-		return true;
-		break;
-	default:
-		break;
-	}
-
-	return false;
-}
 
 bool
 EditorRegions::button_press (GdkEventButton *ev)
@@ -934,30 +942,6 @@ EditorRegions::button_press (GdkEventButton *ev)
 		if (!Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 			_editor->consider_auditioning (region);
 		}
-		return true;
-	}
-
-	return false;
-}
-
-bool
-EditorRegions::button_release (GdkEventButton *ev)
-{
-	TreeIter iter;
-	TreeModel::Path path;
-	TreeViewColumn* column;
-	int cellx;
-	int celly;
-	boost::shared_ptr<Region> region;
-
-	if (_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
-		if ((iter = _model->get_iter (path))) {
-			region = (*iter)[_columns.region];
-		}
-	}
-
-	if (region && Keyboard::is_delete_event (ev)) {
-		// _session->remove_region_from_region_list (region);
 		return true;
 	}
 
@@ -1100,12 +1084,6 @@ EditorRegions::selection_mapover (sigc::slot<void,boost::shared_ptr<Region> > sl
 	}
 }
 
-
-void
-EditorRegions::remove_region ()
-{
-	selection_mapover (sigc::mem_fun (*_editor, &Editor::remove_a_region));
-}
 
 void
 EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,

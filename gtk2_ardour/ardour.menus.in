@@ -491,7 +491,7 @@
      <popup name='RegionListMenu'>
          <menuitem action='rlAudition'/>
          <menuitem action='rlHide'/>
-         <menuitem action='rlRemove'/>
+         <menuitem action='rlShow'/>
 	  <separator/>
          <menuitem action='rlShowAll'/>
          <menuitem action='rlShowAuto'/>
