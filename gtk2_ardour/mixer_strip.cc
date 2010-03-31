@@ -83,8 +83,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, gpm (sess, 250)
 	, panners (sess)
 	, _mono_button (_("Mono"))
-	, button_table (3, 2)
-	, middle_button_table (2, 2)
+	, button_table (4, 2)
+	, middle_button_table (1, 2)
 	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
 	, comment_button (_("Comments"))
@@ -190,12 +190,12 @@ MixerStrip::init ()
 
 	button_table.attach (name_button, 0, 2, 0, 1);
 	button_table.attach (input_button, 0, 2, 1, 2);
+	button_table.attach (*invert_button, 0, 2, 3, 4);
 
 	middle_button_table.set_homogeneous (true);
 	middle_button_table.set_spacings (0);
 	middle_button_table.attach (*mute_button, 0, 1, 0, 1);
         middle_button_table.attach (*solo_button, 1, 2, 0, 1);
-        middle_button_table.attach (*invert_button, 0, 2, 1, 2);
 
 	bottom_button_table.set_col_spacings (0);
 	bottom_button_table.set_homogeneous (true);
@@ -1390,9 +1390,6 @@ MixerStrip::build_route_ops_menu ()
 	items.push_back (MenuElem (_("Adjust latency"), sigc::mem_fun (*this, &RouteUI::adjust_latency)));
 
 	items.push_back (SeparatorElem());
-	items.push_back (CheckMenuElem (_("Invert Polarity"), sigc::mem_fun (*this, &RouteUI::toggle_polarity)));
-	polarity_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
-	polarity_menu_item->set_active (_route->phase_invert());
 	items.push_back (CheckMenuElem (_("Protect against denormals"), sigc::mem_fun (*this, &RouteUI::toggle_denormal_protection)));
 	denormal_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
 	denormal_menu_item->set_active (_route->denormal_protection());

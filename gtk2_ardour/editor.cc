@@ -3147,7 +3147,7 @@ Editor::map_transport_state ()
 {
 	ENSURE_GUI_THREAD (*this, &Editor::map_transport_state)
 
-	if (_session->transport_stopped()) {
+	if (_session && _session->transport_stopped()) {
 		have_pending_keyboard_selection = false;
 	}
 

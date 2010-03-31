@@ -418,7 +418,7 @@ Route::process_output_buffers (BufferSet& bufs,
 			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i, ++chn) {
 				Sample* const sp = i->data();
 
-				if (_phase_invert & chn) {
+				if (_phase_invert & (1<<chn)) {
 					for (nframes_t nx = 0; nx < nframes; ++nx) {
 						sp[nx] = -sp[nx];
 					}
@@ -3257,8 +3257,14 @@ void
 Route::set_phase_invert (bool yn)
 {
 	if (_phase_invert != yn) {
-		_phase_invert = 0xffff; // XXX all channels
+                if (yn) {
+                        _phase_invert = 0xffff; // XXX all channels
+                } else {
+                        _phase_invert = 0; // XXX no channels
+                }
+
 		phase_invert_changed (); /* EMIT SIGNAL */
+                _session.set_dirty ();
 	}
 }
 

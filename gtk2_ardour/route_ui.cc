@@ -103,7 +103,6 @@ RouteUI::init ()
 	_solo_release = 0;
 	_mute_release = 0;
 	route_active_menu_item = 0;
-	polarity_menu_item = 0;
 	denormal_menu_item = 0;
 	multiple_mute_change = false;
 	multiple_solo_change = false;
@@ -158,8 +157,7 @@ RouteUI::init ()
 	solo_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::solo_release), false);
 	mute_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::mute_press), false);
 	mute_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::mute_release), false);
-	invert_button->signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::invert_press), false);
-	invert_button->signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::invert_release), false);
+	invert_button->signal_toggled().connect (sigc::mem_fun(*this, &RouteUI::invert_toggled), false);
 
 }
 
@@ -180,7 +178,6 @@ RouteUI::reset ()
 	}
 
 	route_active_menu_item = 0;
-	polarity_menu_item = 0;
 	denormal_menu_item = 0;
 }
 
@@ -215,6 +212,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route->solo_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
 	_route->listen_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::listen_changed, this, _1), gui_context());
 	_route->solo_isolated_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
+        _route->phase_invert_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::polarity_changed, this), gui_context());
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::property_changed, this, _1), gui_context());
 
 	if (_session->writable() && is_track()) {
@@ -248,16 +246,25 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	map_frozen ();
 }
 
-bool
-RouteUI::invert_press (GdkEventButton* ev)
+void
+RouteUI::invert_toggled ()
 {
-        return false;
+        cerr << this << " button state = " << invert_button->get_active() << " PI = " << _route->phase_invert() << endl;
+        _route->set_phase_invert (invert_button->get_active());
 }
 
-bool
-RouteUI::invert_release (GdkEventButton* ev)
+void
+RouteUI::polarity_changed ()
 {
-        return false;
+        if (!_route) {
+                return;
+        }
+        
+	if (_route->phase_invert()) {
+                invert_button->set_active (true);
+	} else {
+                invert_button->set_active (false);
+	}
 }
 
 bool
@@ -1219,35 +1226,6 @@ RouteUI::route_active_changed ()
 	}
 }
 
-void
-RouteUI::toggle_polarity ()
-{
-	if (polarity_menu_item) {
-
-		bool x;
-
-		ENSURE_GUI_THREAD (*this, &RouteUI::toggle_polarity)
-
-		if ((x = polarity_menu_item->get_active()) != _route->phase_invert()) {
-			_route->set_phase_invert (x);
-			if (x) {
-			        name_label.set_text (X_("Ø ") + name_label.get_text());
-			} else {
-			        name_label.set_text (_route->name());
-			}
-		}
-	}
-}
-
-void
-RouteUI::polarity_changed ()
-{
-	if (_route->phase_invert()) {
-		name_label.set_text (X_("Ø ") + name_label.get_text());
-	} else {
-		name_label.set_text (_route->name());
-	}
-}
 
 void
 RouteUI::toggle_denormal_protection ()

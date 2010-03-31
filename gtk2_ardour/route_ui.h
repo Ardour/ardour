@@ -111,8 +111,7 @@ class RouteUI : public virtual AxisView
 
 	virtual XMLNode* get_automation_child_xml_node (Evoral::Parameter param);
 
-	bool invert_press(GdkEventButton*);
-	bool invert_release(GdkEventButton*);
+	void invert_toggled();
 	bool mute_press(GdkEventButton*);
 	bool mute_release(GdkEventButton*);
 	bool solo_press(GdkEventButton*);
@@ -174,8 +173,6 @@ class RouteUI : public virtual AxisView
 	void toggle_route_active ();
 	virtual void route_active_changed ();
 
-	Gtk::CheckMenuItem *polarity_menu_item;
-	void toggle_polarity ();
 	virtual void polarity_changed ();
 
 	Gtk::CheckMenuItem *denormal_menu_item;
