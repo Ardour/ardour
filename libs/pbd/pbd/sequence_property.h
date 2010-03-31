@@ -113,9 +113,12 @@ class SequenceProperty : public PropertyBase
                         owner_state_node.add_child_nocopy ((*i)->get_state ());
                 } 
 	}
+
+	bool changed () const {
+		return !_change.added.empty() || !_change.removed.empty();
+	}
 	
 	void clear_history () {
-		PropertyBase::clear_history();
 		_change.added.clear ();
 		_change.removed.clear ();
 	}
@@ -145,21 +148,18 @@ class SequenceProperty : public PropertyBase
 	typename Container::const_reverse_iterator rend() const { return _val.rend(); }
 
 	typename Container::iterator insert (typename Container::iterator i, const typename Container::value_type& v) {
-                _have_old = true;
 		_change.added.insert (v);
 		return _val.insert (i, v);
 	}
 
 	typename Container::iterator erase (typename Container::iterator i) {
 		if (i != _val.end()) {
-                        _have_old = true;
 			_change.removed.insert (*i);
 		}
 		return _val.erase (i);
 	}
 
 	typename Container::iterator erase (typename Container::iterator f, typename Container::iterator l) {
-                _have_old = true;
 		for (typename Container::const_iterator i = f; i != l; ++i) {
 			_change.removed.insert(*i);
 		}
@@ -167,20 +167,17 @@ class SequenceProperty : public PropertyBase
 	}
 
 	void push_back (const typename Container::value_type& v) {
-                _have_old = true;
 		_change.added.insert (v);
 		_val.push_back (v);
 	}
 
 	void push_front (const typename Container::value_type& v) {
-                _have_old = true;
 		_change.added.insert (v);
 		_val.push_front (v);
 	}
 
 	void pop_front () {
                 if (!_val.empty()) {
-                        _have_old = true;
                         _change.removed.insert (front());
                 }
 		_val.pop_front ();
@@ -188,14 +185,12 @@ class SequenceProperty : public PropertyBase
 
 	void pop_back () {
                 if (!_val.empty()) {
-                        _have_old = true;
                         _change.removed.insert (front());
                 }
 		_val.pop_back ();
 	}
 
 	void clear () {
-                _have_old = true;
 		_change.removed.insert (_val.begin(), _val.end());
 		_val.clear ();
 	}
@@ -209,7 +204,6 @@ class SequenceProperty : public PropertyBase
 	}
 
 	Container& operator= (const Container& other) {
-                _have_old = true;
                 _change.removed.insert (_val.begin(), _val.end());
                 _change.added.insert (other.begin(), other.end());
 		return _val = other;

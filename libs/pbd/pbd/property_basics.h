@@ -77,13 +77,10 @@ class PropertyBase
 public:
 	PropertyBase (PropertyID pid)
 		: _property_id (pid)
-		, _have_old (false)
 	{}
 
 	/** Forget about any old value for this state */
-	virtual void clear_history () {
-		_have_old = false;
-	}
+	virtual void clear_history () = 0;
 
 	virtual void add_history_state (XMLNode*)        const = 0;
 	virtual void diff (PropertyList&, PropertyList&) const = 0;
@@ -92,10 +89,10 @@ public:
 
 	virtual bool set_state_from_owner_state (XMLNode const&) = 0;
 	virtual void add_state_to_owner_state (XMLNode&) const   = 0;
+	virtual bool changed() const = 0;
 
 	const gchar*property_name () const { return g_quark_to_string (_property_id); }
 	PropertyID  property_id () const   { return _property_id; }
-        bool changed() const { return _have_old; }
 
 	bool operator==(PropertyID pid) const {
 		return _property_id == pid;
@@ -103,13 +100,6 @@ public:
 
 protected:
 	PropertyID _property_id;
-	bool       _have_old;
-};
-
-class PropertyFactory 
-{
-  public:
-        static PropertyBase* create (const XMLNode&);
 };
 
 }

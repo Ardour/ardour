@@ -40,6 +40,7 @@ class PropertyTemplate : public PropertyBase
 public:
 	PropertyTemplate (PropertyDescriptor<T> p, T const& v)
 		: PropertyBase (p.property_id)
+		, _have_old (false)
 		, _current (v)
 	{}
 
@@ -79,6 +80,10 @@ public:
 		return _current;
 	}
 
+	void clear_history () {
+		_have_old = false;
+	}
+
         /** If this property has been changed since the last clear_history() call
             (or its construction), add an (XML) property describing the old value 
             to the XMLNode @param old and another describing the current value to
@@ -112,6 +117,8 @@ public:
                 owner_state.add_property (property_name(), to_string (_current));
 	}
 
+	bool changed () const { return _have_old; }
+
 protected:
         /** Constructs a PropertyTemplate with a default
             value for _old and _current.
@@ -132,6 +139,7 @@ protected:
 	virtual std::string to_string (T const& v) const             = 0;
 	virtual T           from_string (std::string const& s) const = 0;
 
+	bool _have_old;
 	T _current;
 	T _old;
 };

@@ -133,7 +133,7 @@ RegionListProperty::copy_for_history () const
 void 
 RegionListProperty::diff (PropertyList& before, PropertyList& after) const
 {
-        if (_have_old) {
+        if (changed()) {
                 RegionListProperty* a = copy_for_history ();
                 RegionListProperty* b = copy_for_history ();
 
