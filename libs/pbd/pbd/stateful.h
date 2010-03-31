@@ -48,10 +48,7 @@ class Stateful {
 
 	virtual XMLNode& get_state (void) = 0;
 	virtual int set_state (const XMLNode&, int version) = 0;
-	/* derived types do not have to implement this, but probably should
-	   give it serious attention.
-	*/
-	virtual bool set_property (const PropertyBase&) { return false; }
+	virtual bool set_property (const PropertyBase&);
 
 	PropertyChange set_properties (const PropertyList&);
         const OwnedPropertyList& properties() const { return *_properties; }

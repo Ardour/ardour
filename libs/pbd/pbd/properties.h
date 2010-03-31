@@ -118,6 +118,12 @@ public:
 	}
 
 	bool changed () const { return _have_old; }
+	void set_state_from_property (PropertyBase const * p) {
+		T v = dynamic_cast<const PropertyTemplate<T>* > (p)->val ();
+		if (v != _current) {
+			set (v);
+		}
+	}
 
 protected:
         /** Constructs a PropertyTemplate with a default

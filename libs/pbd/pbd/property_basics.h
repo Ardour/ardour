@@ -91,6 +91,9 @@ public:
 	virtual void add_state_to_owner_state (XMLNode&) const   = 0;
 	virtual bool changed() const = 0;
 
+	/** Set the value of this property from another */
+	virtual void set_state_from_property (PropertyBase const *) = 0;
+
 	const gchar*property_name () const { return g_quark_to_string (_property_id); }
 	PropertyID  property_id () const   { return _property_id; }
 

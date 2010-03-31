@@ -199,7 +199,6 @@ class AudioRegion : public Region
 	PBD::Property<gain_t>   _scale_amplitude;
 	
 	void register_properties ();
-	bool set_property (const PBD::PropertyBase& prop);
 	void post_set ();
 
 	void init ();

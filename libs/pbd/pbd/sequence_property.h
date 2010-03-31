@@ -123,6 +123,11 @@ class SequenceProperty : public PropertyBase
 		_change.removed.clear ();
 	}
 
+	void set_state_from_property (PropertyBase const * p) {
+		const ChangeRecord& change (dynamic_cast<const SequenceProperty*> (p)->change ());
+		update (change);
+	}
+
 	/** Given a record of changes to this property, pass it to a callback that will
 	 *  update the property in some appropriate way. 
 	 *

@@ -691,54 +691,6 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 	return 0;
 }
 
-bool
-AudioRegion::set_property (const PropertyBase& prop)
-{
-	DEBUG_TRACE (DEBUG::Properties,  string_compose ("audio region %1 set property %2\n", _name.val(), prop.property_name()));
-
-	if (prop == Properties::envelope_active.property_id) {
-		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
-		if (val != _envelope_active) {
-			_envelope_active = val;
-			return true;
-		}
-	} else if (prop == Properties::default_fade_in.property_id) {
-		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
-		if (val != _default_fade_in) {
-			_default_fade_in = val;
-			return true;
-		}
-	} else if (prop == Properties::default_fade_out.property_id) {
-		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
-		if (val != _default_fade_out) {
-			_default_fade_out = val;
-			return true;
-		}
-	} else if (prop == Properties::fade_in_active.property_id) {
-		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
-		if (val != _fade_in_active) {
-			_fade_in_active = val;
-			return true;
-		}
-	} else if (prop == Properties::fade_out_active.property_id) {
-		bool val = dynamic_cast<const PropertyTemplate<bool>*>(&prop)->val();
-		if (val != _fade_out_active) {
-			_fade_out_active = val;
-			return true;
-		}
-	} else if (prop == Properties::scale_amplitude.property_id) {
-		gain_t val = dynamic_cast<const PropertyTemplate<gain_t>*>(&prop)->val();
-		if (val != _scale_amplitude) {
-			_scale_amplitude = val;
-			return true;
-		}
-	} else {
-		return Region::set_property (prop);
-	}
-	
-	return false;
-}
-
 int
 AudioRegion::set_state (const XMLNode& node, int version)
 {

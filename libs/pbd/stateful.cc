@@ -299,4 +299,16 @@ Stateful::changed() const
         return false;
 }
 
+bool
+Stateful::set_property (const PropertyBase& prop)
+{
+	OwnedPropertyList::iterator i = _properties->find (prop.property_id());
+	if (i == _properties->end()) {
+		return false;
+	}
+
+	i->second->set_state_from_property (&prop);
+	return true;
+}
+
 } // namespace PBD
