@@ -2833,13 +2833,13 @@ ARDOUR_UI::launch_chat ()
 void
 ARDOUR_UI::launch_manual ()
 {
-	NagScreen::open_uri("http://en.flossmanuals.net/Ardour/Introduction");
+	NagScreen::open_uri("http://ardour.org/flossmanual");
 }
 
 void
 ARDOUR_UI::launch_reference ()
 {
-	NagScreen::open_uri("http://vm-nice.stackingdwarves.net:8888/ardour-en/8-ARDOUR/24-ARDOUR.html");
+	NagScreen::open_uri("http://ardour.org/refmanual");
 }
 
 void
