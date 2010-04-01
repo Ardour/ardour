@@ -1,3 +1,22 @@
+/*
+    Copyright (C) 2010 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #ifndef __libpbd_sequence_property_h__
 #define __libpbd_sequence_property_h__
 
@@ -15,12 +34,20 @@
 #include "i18n.h"
 
 namespace PBD {
+
+/** A base class for properties whose state is a container of other
+ *  things.  Its behaviour is `specialised' for this purpose in that
+ *  it holds state changes as additions to and removals from the
+ *  container, which is more efficient than storing entire state after
+ *  any change.
+ */
 template<typename Container>
 class SequenceProperty : public PropertyBase
 {
   public:
         typedef std::set<typename Container::value_type> ChangeContainer;
-	
+
+	/** A record of changes made */
         struct ChangeRecord { 
 	    ChangeContainer added;
 	    ChangeContainer removed;
@@ -36,7 +63,7 @@ class SequenceProperty : public PropertyBase
                 /* reverse the adds/removes so that this property's change member
                    correctly describes how to undo the changes it currently
                    reflects. A derived instance of this type of property will
-                   create a pdiff() pair by copying the property twice, and
+                   create a diff() pair by copying the property twice, and
                    calling this method on the "before" item of the pair.
                 */
 
@@ -44,6 +71,10 @@ class SequenceProperty : public PropertyBase
         }
 
 	void add_history_state (XMLNode* history_node) const {
+
+		/* We could record the whole of the current state here, but its
+		   obviously more efficient just to record what has changed.
+		*/
                 
                 XMLNode* child = new XMLNode (PBD::capitalize (property_name()));
                 history_node->add_child_nocopy (*child);

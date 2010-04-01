@@ -625,7 +625,6 @@ struct ControlPointSorter
 };
 
 /** Common parts of starting a drag.
- *  @param d Description of the drag.
  *  @param x Starting x position in units, or 0 if x is being ignored.
  *  @param fraction Starting y position (as a fraction of the track height, where 0 is the bottom and 1 the top)
  */

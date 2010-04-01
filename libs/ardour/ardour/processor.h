@@ -72,7 +72,7 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	/** @param result_required true if, on return from this method, bufs is required to contain valid data;
 	 *  if false, the method need not bother writing to bufs if it doesn't want to.
 	 */  
-	virtual void run (BufferSet& /*bufs*/, sframes_t /*start_frame*/, sframes_t /*end_frame*/, nframes_t /*nframes*/, bool /*result_required*/) {}
+	virtual void run (BufferSet& /*bufs*/, sframes_t /*start_frame*/, sframes_t /*end_frame*/, nframes_t /*nframes*/, bool result_required) {}
 	virtual void silence (nframes_t /*nframes*/) {}
 
 	virtual void activate ()   { _pending_active = true; ActiveChanged(); }

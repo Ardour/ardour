@@ -66,8 +66,8 @@ class RegionFactory {
 	/** create a copy of @other starting at zero within @param other's sources */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, 
 						 const PBD::PropertyList&, bool announce = true);
-	/** create a copy of @other starting at @param offset within @param other */
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Region>, frameoffset_t offset, 
+	/** create a copy of @param other starting at @param offset within @param other */
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, frameoffset_t offset, 
 						 const PBD::PropertyList&, bool announce = true);
 	/** create a "copy" of @param other but using a different set of sources @param srcs */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, const SourceList& srcs, 

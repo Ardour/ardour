@@ -143,7 +143,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	/** Set the mouse mode (gain, object, range, timefx etc.)
 	 * @param m Mouse mode (defined in editing_syms.h)
 	 * @param force Perform the effects of the change even if no change is required
-	 * (ie even if the current mouse mode is equal to \ref m)
+	 * (ie even if the current mouse mode is equal to @param m)
 	 */
 	virtual void set_mouse_mode (Editing::MouseMode m, bool force = false) = 0;
 
@@ -173,9 +173,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	 */
 	virtual bool sound_notes () const = 0;
 
-	/** Possibly start the audition of a region.  If \ref r is 0, or not an AudioRegion
-	 * any current audition is cancelled.  If we are currently auditioning \ref r,
-	 * the audition will be cancelled.  Otherwise an audition of \ref r will start.
+	/** Possibly start the audition of a region.  If @param r is 0, or not an AudioRegion
+	 * any current audition is cancelled.  If we are currently auditioning @param r,
+	 * the audition will be cancelled.  Otherwise an audition of @param r will start.
 	 * \param r Region to consider.
 	 */
 	virtual void consider_auditioning (boost::shared_ptr<ARDOUR::Region> r) = 0;

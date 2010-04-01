@@ -88,8 +88,8 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 	AutomationListCreated(this);
 }
 
-/** \a id is used for legacy sessions where the type is not present
- * in or below the <AutomationList> node.  It is used if \a id is non-null.
+/** @param id is used for legacy sessions where the type is not present
+ * in or below the AutomationList node.  It is used if @param id is non-null.
  */
 AutomationList::AutomationList (const XMLNode& node, Evoral::Parameter id)
 	: ControlList(id)

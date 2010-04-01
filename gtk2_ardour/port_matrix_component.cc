@@ -24,7 +24,8 @@
 using namespace std;
 
 /** Constructor.
- *  @param p Port matrix that we're in.
+ *  @param m Port matrix that we're in.
+ *  @param b Port matrix body that we're in.
  */
 PortMatrixComponent::PortMatrixComponent (PortMatrix* m, PortMatrixBody* b)
 	: _matrix (m),

@@ -27,6 +27,8 @@
 class XMLNode;
 
 namespace PBD {
+
+/** A list of properties, mapped using their ID */	
 class PropertyList : public std::map<PropertyID, PropertyBase*>
 {
 public:
@@ -37,7 +39,7 @@ public:
         void add_history_state (XMLNode* before);
 
         /** Add a property (of some kind) to the list. Used when
-            constructing PropertyList's that describe a change/operation.
+            constructing PropertyLists that describe a change/operation.
         */
         bool add (PropertyBase* prop);
 

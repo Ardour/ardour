@@ -34,35 +34,35 @@ using namespace PBD;
 
 StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<Stateful> s)
 	: _object (s)
-        , _before (new PropertyList)
-        , _after (new PropertyList)
+        , _undo (new PropertyList)
+        , _redo (new PropertyList)
 {
-        s->diff (*_before, *_after);
+        s->diff (*_undo, *_redo);
 }
 
 StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<Stateful> s, XMLNode const & n)
 	: _object (s)
-        , _before (0)
-        , _after (0)
+        , _undo (0)
+        , _redo (0)
 {
         const XMLNodeList& children (n.children());
 
         for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
                 if ((*i)->name() == X_("Undo")) {
-                        _before = s->property_factory (**i);
+                        _undo = s->property_factory (**i);
                 } else if ((*i)->name() == X_("Do")) {
-                        _after = s->property_factory (**i);
+                        _redo = s->property_factory (**i);
                 }
         }
 
-        assert (_before != 0);
-        assert (_after != 0);
+        assert (_undo != 0);
+        assert (_redo != 0);
 }
 
 StatefulDiffCommand::~StatefulDiffCommand ()
 {
-        delete _before;
-        delete _after;
+        delete _undo;
+        delete _redo;
 }
 
 void
@@ -71,7 +71,7 @@ StatefulDiffCommand::operator() ()
 	boost::shared_ptr<Stateful> s (_object.lock());
 
 	if (s) {
-                PropertyChange changed = s->set_properties (*_after);
+                PropertyChange changed = s->set_properties (*_redo);
                 if (!changed.empty()) {
                         s->PropertyChanged (changed);
                 }
@@ -85,7 +85,7 @@ StatefulDiffCommand::undo ()
 
 	if (s) {
                 std::cerr << "Undoing a stateful diff command\n";
-                PropertyChange changed = s->set_properties (*_before);
+                PropertyChange changed = s->set_properties (*_undo);
                 if (!changed.empty()) {
                         std::cerr << "Sending changed\n";
                         s->PropertyChanged (changed);
@@ -108,14 +108,14 @@ StatefulDiffCommand::get_state ()
 	node->add_property ("obj-id", s->id().to_s());
 	node->add_property ("type-name", demangled_name (*s.get()));
 
-        XMLNode* before = new XMLNode (X_("Undo"));
-        XMLNode* after = new XMLNode (X_("Do"));
+        XMLNode* undo = new XMLNode (X_("Undo"));
+        XMLNode* redo = new XMLNode (X_("Do"));
 
-        _before->add_history_state (before);
-        _after->add_history_state (after);
+        _undo->add_history_state (undo);
+        _redo->add_history_state (redo);
         
-        node->add_child_nocopy (*before);
-        node->add_child_nocopy (*after);
+        node->add_child_nocopy (*undo);
+        node->add_child_nocopy (*redo);
 
 	return *node;
 }

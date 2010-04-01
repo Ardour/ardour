@@ -84,12 +84,10 @@ public:
 		_have_old = false;
 	}
 
-        /** If this property has been changed since the last clear_history() call
-            (or its construction), add an (XML) property describing the old value 
-            to the XMLNode @param old and another describing the current value to
-            the XMLNode @param current.
-        */
 	void add_history_state (XMLNode* history_node) const {
+		/* We can get to the current state of a scalar property like this one simply
+		   by knowing what the new state is.
+		*/
                 history_node->add_property (property_name(), to_string (_current));
 	}
 
@@ -167,10 +165,10 @@ public:
 		: PropertyTemplate<T> (q, v)
 	{}
         
-        void diff (PropertyList& before, PropertyList& after) const {
+        void diff (PropertyList& undo, PropertyList& redo) const {
                 if (this->_have_old) {
-                        before.add (new Property<T> (this->property_id(), this->_old));
-                        after.add (new Property<T> (this->property_id(), this->_current));
+                        undo.add (new Property<T> (this->property_id(), this->_old));
+                        redo.add (new Property<T> (this->property_id(), this->_current));
                 }
         }
 

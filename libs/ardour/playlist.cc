@@ -131,16 +131,18 @@ RegionListProperty::copy_for_history () const
 }
 
 void 
-RegionListProperty::diff (PropertyList& before, PropertyList& after) const
+RegionListProperty::diff (PropertyList& undo, PropertyList& redo) const
 {
         if (changed()) {
+		/* list of the removed/added regions since clear_history() was last called */
                 RegionListProperty* a = copy_for_history ();
-                RegionListProperty* b = copy_for_history ();
 
+		/* the same list, but with removed/added lists swapped (for undo purposes) */
+                RegionListProperty* b = copy_for_history ();
                 b->invert_changes ();
 
-                before.add (b);
-                after.add (a);
+                undo.add (b);
+                redo.add (a);
         }
 }
 

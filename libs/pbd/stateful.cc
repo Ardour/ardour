@@ -175,7 +175,7 @@ Stateful::diff (PropertyList& before, PropertyList& after) const
 }
 
 /** Set state of some/all _properties from an XML node.
- *  @param node Node.
+ *  @param owner_state Node.
  *  @return PropertyChanges made.
  */
 PropertyChange
@@ -224,7 +224,7 @@ Stateful::set_properties (const PropertyList& property_list)
 }
 
 /** Add property states to an XML node.
- *  @param node Node.
+ *  @param owner_state Node.
  */
 void
 Stateful::add_properties (XMLNode& owner_state)

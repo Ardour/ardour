@@ -67,7 +67,7 @@ class Slave {
 	 *  and after the method call they should
 	 *
 	 * Session::follow_slave will then try to follow the given
-	 * <emph>position</emph> using a delay locked loop (DLL),
+	 * <em>position</em> using a delay locked loop (DLL),
 	 * starting with the first given transport speed.
 	 * If the values of speed and position contradict each other,
 	 * ARDOUR will always follow the position and disregard the speed.
@@ -153,7 +153,7 @@ class Slave {
 
 	/**
 	 * @return the number of frames that this slave wants to seek ahead. Relevant
-	 * only if @func requires_seekahead() returns true.
+	 * only if requires_seekahead() returns true.
 	 */
 
 	virtual nframes64_t seekahead_distance() const { return 0; }
