@@ -38,19 +38,3 @@ SessionObject::make_property_quarks ()
         DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for name = %1\n", 	Properties::name.property_id));
 }
 
-bool
-SessionObject::set_property (const PropertyBase& prop)
-{
-	if (prop == Properties::name.property_id) {
-		std::string str = dynamic_cast<const PropertyTemplate<std::string>*>(&prop)->val();
-		if (_name != str) {
-			DEBUG_TRACE (DEBUG::Properties, string_compose ("session object named %1 renamed %2\n",
-									_name.val(), str));
-			_name = str;
-			return true;
-		} 
-	}
-
-	return false;
-}
-
