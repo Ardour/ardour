@@ -35,14 +35,16 @@ using namespace Glib;
 using namespace std;
 
 TearOff::TearOff (Widget& c, bool allow_resize)
-	: contents (c),
-	  own_window (Gtk::WINDOW_TOPLEVEL),
-	  tearoff_arrow (ARROW_DOWN, SHADOW_OUT),
-	  close_arrow (ARROW_UP, SHADOW_OUT)
+	: contents (c)
+        , own_window (Gtk::WINDOW_TOPLEVEL)
+        , tearoff_arrow (ARROW_DOWN, SHADOW_OUT)
+        , close_arrow (ARROW_UP, SHADOW_OUT)
+        , dragging (false)
+        , _visible (true)
+        , _torn (false)
+        , _can_be_torn_off (true)
+         
 {
-	dragging = false;
-	_visible = true;
-	_can_be_torn_off = true;
         own_window_width = 0;
         own_window_height = 0;
         own_window_xpos = 0;
@@ -111,7 +113,7 @@ TearOff::set_visible (bool yn)
 {
 	/* don't change visibility if torn off */
 
-	if (own_window.is_visible()) {
+	if (_torn) {
 		return;
 	}
 
@@ -152,6 +154,9 @@ TearOff::tear_it_off ()
         own_window.show_all ();
         own_window.present ();
         hide ();
+
+        _torn = true;
+
         Detach ();
 }        
 
@@ -174,6 +179,9 @@ TearOff::put_it_back ()
 	reorder_child (contents, 0);
 	own_window.hide ();
 	show_all ();
+
+        _torn = false;
+
 	Attach ();
 }
 
@@ -246,13 +254,13 @@ TearOff::window_motion (GdkEventMotion* ev)
 bool
 TearOff::torn_off() const
 {
-	return own_window.is_visible();
+	return _torn;
 }
 
 void
 TearOff::add_state (XMLNode& node) const
 {
-        node.add_property ("tornoff", (own_window.is_visible() ? "yes" : "no"));
+        node.add_property ("tornoff", (_torn ? "yes" : "no"));
 
         if (own_window_width > 0) {
                 char buf[32];
@@ -279,10 +287,8 @@ TearOff::set_state (const XMLNode& node)
         }
 
         if (prop->value() == "yes") {
-                cerr << "Tearing off " << node.name() << endl;
                 tear_it_off ();
         } else {
-                cerr << "Putting back " << node.name() << endl;
                 put_it_back ();
         }
 
@@ -309,8 +315,6 @@ TearOff::set_state (const XMLNode& node)
 void
 TearOff::own_window_realized ()
 {
-        cerr << "tearoff realized\n";
-
 	own_window.get_window()->set_decorations (WMDecoration (DECOR_BORDER|DECOR_RESIZEH));
 
         if (own_window_width > 0) {

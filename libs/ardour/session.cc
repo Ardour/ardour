@@ -3288,8 +3288,6 @@ Session::next_return_id ()
 void
 Session::mark_send_id (uint32_t id)
 {
-        cerr << "Marking send ID " << id << " in use\n";
-
 	if (id >= send_bitset.size()) {
 		send_bitset.resize (id+16, false);
 	}

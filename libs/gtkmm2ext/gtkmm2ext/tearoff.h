@@ -65,6 +65,7 @@ class TearOff : public Gtk::HBox
 	double         drag_y;
 	bool           dragging;
 	bool          _visible;
+	bool          _torn;
 	bool          _can_be_torn_off;
         int            own_window_width;
         int            own_window_height;
