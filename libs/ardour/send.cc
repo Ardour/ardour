@@ -157,8 +157,6 @@ Send::set_state (const XMLNode& node, int version)
                 _session.mark_send_id (_bitslot);
         }
 
-        set_name (string_compose (_("send %1"), _bitslot));
-
 	/* XXX need to load automation state & data for amp */
 
 	return 0;

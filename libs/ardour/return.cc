@@ -98,9 +98,6 @@ Return::set_state (const XMLNode& node, int version)
 		_session.mark_return_id (_bitslot);
 	}
         
-        set_name (string_compose (_("return %1"), _bitslot));
-
-
 	return 0;
 }
 

@@ -191,8 +191,6 @@ PortInsert::set_state (const XMLNode& node, int version)
 		_session.mark_insert_id (bitslot);
 	}
 
-        set_name (string_compose (_("insert %1"), bitslot));
-
 	return 0;
 }
 
