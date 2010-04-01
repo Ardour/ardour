@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="M-Audio Oxygen8 V2">
+  <DeviceInfo bank-size="8"/>
+  <Binding channel="1" ctl="20" function="loop-toggle"/>
+  <Binding channel="1" ctl="21" function="transport-start"/>
+  <Binding channel="1" ctl="22" function="transport-end"/>
+  <Binding channel="1" ctl="23" function="transport-stop"/>
+  <Binding channel="1" ctl="24" function="transport-roll"/>
+  <Binding channel="1" ctl="25" function="rec-enable"/>
+  <Binding channel="1" ctl="25" function="rec-disable"/>
+
+  <Binding channel="1" ctl="91" uri="/route/gain B1"/>
+  <Binding channel="1" ctl="93" uri="/route/gain B2"/>
+  <Binding channel="1" ctl="5" uri="/route/gain B3"/>
+  <Binding channel="1" ctl="10" uri="/route/gain B4"/>
+  <Binding channel="1" ctl="71" uri="/route/gain B5"/>
+  <Binding channel="1" ctl="74" uri="/route/gain B6"/>
+  <Binding channel="1" ctl="84" uri="/route/gain B7"/>
+  <Binding channel="1" ctl="7" uri="/route/gain B8"/>
+
+  <Binding channel="2" ctl="91" uri="/route/gain B9"/>
+  <Binding channel="2" ctl="93" uri="/route/gain B10"/>
+  <Binding channel="2" ctl="5" uri="/route/gain B11"/>
+  <Binding channel="2" ctl="10" uri="/route/gain B12"/>
+  <Binding channel="2" ctl="71" uri="/route/gain B13"/>
+  <Binding channel="2" ctl="74" uri="/route/gain B14"/>
+  <Binding channel="2" ctl="84" uri="/route/gain B15"/>
+  <Binding channel="2" ctl="7" uri="/route/gain B16"/>
+
+  <Binding channel="3" ctl="91" uri="/route/gain B17"/>
+  <Binding channel="3" ctl="93" uri="/route/gain B18"/>
+  <Binding channel="3" ctl="5" uri="/route/gain B19"/>
+  <Binding channel="3" ctl="10" uri="/route/gain B20"/>
+  <Binding channel="3" ctl="71" uri="/route/gain B21"/>
+  <Binding channel="3" ctl="74" uri="/route/gain B22"/>
+  <Binding channel="3" ctl="84" uri="/route/gain B23"/>
+  <Binding channel="3" ctl="7" uri="/route/gain B24"/>
+
+  <Binding channel="4" ctl="91" uri="/route/gain B25"/>
+  <Binding channel="4" ctl="93" uri="/route/gain B26"/>
+  <Binding channel="4" ctl="5" uri="/route/gain B27"/>
+  <Binding channel="4" ctl="10" uri="/route/gain B28"/>
+  <Binding channel="4" ctl="71" uri="/route/gain B29"/>
+  <Binding channel="4" ctl="74" uri="/route/gain B30"/>
+  <Binding channel="4" ctl="84" uri="/route/gain B31"/>
+  <Binding channel="4" ctl="7" uri="/route/gain B32"/>
+
+</ArdourMIDIBindings>

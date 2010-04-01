@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Behringer BCF2000 Factory Preset 2">
+<!-- 2010-03-29 Sylvain Robitaille                                  -->
+
+<!-- Set the BCF2000 to factory preset number 2, and this will bind -->
+<!-- the controllers intuitively to the DAW controllers.            -->
+<!--                                                                -->
+<DeviceInfo bank-size="8"/>
+
+<!--  Channel controls:                                             -->
+<!--   - the rotary encoder, when pushed, will                      -->
+<!--     toggle record enable on individual channels, regardless    -->
+<!--     of which "page" the enoder is on (there are four encoder   -->
+<!--     pages).                                                    -->
+<!--   - Rotary control is as follows page 1: channel pan (not yet  -->
+<!--     implemented in Ardour-3, so commented out at the moment);  -->
+<!--     page 2: send 1 level; page 3: send 2 level; page 4: send   -->
+<!--     3 level.  Obviously the send levels depend on having the   -->
+<!--     appropriate sends configured for each channel.             -->
+<!--   - The buttons below the rotary encoder toggle the solo and   -->
+<!--     mute functions for that channel.                           -->
+<!--   - The slider, of course is the channel level control.        -->
+<!--                                                                -->
+
+<Binding channel="1"  ctl="7"                    uri="/route/gain      B1"/>
+<!-- <Binding channel="1"  ctl="10"                   uri="/route/pan       B1"/> -->
+<Binding channel="1"  ctl="8"                    uri="/route/send/gain B1 1"/>
+<Binding channel="1"  ctl="12"                   uri="/route/send/gain B1 2"/>
+<Binding channel="1"  ctl="13"                   uri="/route/send/gain B1 3"/>
+<Binding channel="11" pgm="9"                    uri="/route/solo      B1"/>
+<Binding channel="11" pgm="1"                    uri="/route/mute      B1"/>
+<Binding channel="11" pgm="17"                   uri="/route/recenable B1"/>
+<Binding channel="11" pgm="25"                   uri="/route/recenable B1"/>
+<Binding channel="11" pgm="33"                   uri="/route/recenable B1"/>
+<Binding channel="11" pgm="41"                   uri="/route/recenable B1"/>
+
+<Binding channel="2"  ctl="7"                    uri="/route/gain      B2"/>
+<!-- <Binding channel="2"  ctl="10"                   uri="/route/pan       B2"/> -->
+<Binding channel="2"  ctl="8"                    uri="/route/send/gain B2 1"/>
+<Binding channel="2"  ctl="12"                   uri="/route/send/gain B2 2"/>
+<Binding channel="2"  ctl="13"                   uri="/route/send/gain B2 3"/>
+<Binding channel="11" pgm="10"                   uri="/route/solo      B2"/>
+<Binding channel="11" pgm="2"                    uri="/route/mute      B2"/>
+<Binding channel="11" pgm="18"                   uri="/route/recenable B2"/>
+<Binding channel="11" pgm="26"                   uri="/route/recenable B2"/>
+<Binding channel="11" pgm="34"                   uri="/route/recenable B2"/>
+<Binding channel="11" pgm="42"                   uri="/route/recenable B2"/>
+
+<Binding channel="3"  ctl="7"                    uri="/route/gain      B3"/>
+<!-- <Binding channel="3"  ctl="10"                   uri="/route/pan       B3"/> -->
+<Binding channel="3"  ctl="8"                    uri="/route/send/gain B3 1"/>
+<Binding channel="3"  ctl="12"                   uri="/route/send/gain B3 2"/>
+<Binding channel="3"  ctl="13"                   uri="/route/send/gain B3 3"/>
+<Binding channel="11" pgm="11"                   uri="/route/solo      B3"/>
+<Binding channel="11" pgm="3"                    uri="/route/mute      B3"/>
+<Binding channel="11" pgm="19"                   uri="/route/recenable B3"/>
+<Binding channel="11" pgm="27"                   uri="/route/recenable B3"/>
+<Binding channel="11" pgm="35"                   uri="/route/recenable B3"/>
+<Binding channel="11" pgm="43"                   uri="/route/recenable B3"/>
+
+<Binding channel="4"  ctl="7"                    uri="/route/gain      B4"/>
+<!-- <Binding channel="4"  ctl="10"                   uri="/route/pan       B4"/> -->
+<Binding channel="4"  ctl="8"                    uri="/route/send/gain B4 1"/>
+<Binding channel="4"  ctl="12"                   uri="/route/send/gain B4 2"/>
+<Binding channel="4"  ctl="13"                   uri="/route/send/gain B4 3"/>
+<Binding channel="11" pgm="12"                   uri="/route/solo      B4"/>
+<Binding channel="11" pgm="4"                    uri="/route/mute      B4"/>
+<Binding channel="11" pgm="20"                   uri="/route/recenable B4"/>
+<Binding channel="11" pgm="28"                   uri="/route/recenable B4"/>
+<Binding channel="11" pgm="36"                   uri="/route/recenable B4"/>
+<Binding channel="11" pgm="44"                   uri="/route/recenable B4"/>
+
+<Binding channel="5"  ctl="7"                    uri="/route/gain      B5"/>
+<!-- <Binding channel="5"  ctl="10"                   uri="/route/pan       B5"/> -->
+<Binding channel="5"  ctl="8"                    uri="/route/send/gain B5 1"/>
+<Binding channel="5"  ctl="12"                   uri="/route/send/gain B5 2"/>
+<Binding channel="5"  ctl="13"                   uri="/route/send/gain B5 3"/>
+<Binding channel="11" pgm="13"                   uri="/route/solo      B5"/>
+<Binding channel="11" pgm="5"                    uri="/route/mute      B5"/>
+<Binding channel="11" pgm="21"                   uri="/route/recenable B5"/>
+<Binding channel="11" pgm="29"                   uri="/route/recenable B5"/>
+<Binding channel="11" pgm="37"                   uri="/route/recenable B5"/>
+<Binding channel="11" pgm="45"                   uri="/route/recenable B5"/>
+
+<Binding channel="6"  ctl="7"                    uri="/route/gain      B6"/>
+<!-- <Binding channel="6"  ctl="10"                   uri="/route/pan       B6"/> -->
+<Binding channel="6"  ctl="8"                    uri="/route/send/gain B6 1"/>
+<Binding channel="6"  ctl="12"                   uri="/route/send/gain B6 2"/>
+<Binding channel="6"  ctl="13"                   uri="/route/send/gain B6 3"/>
+<Binding channel="11" pgm="14"                   uri="/route/solo      B6"/>
+<Binding channel="11" pgm="6"                    uri="/route/mute      B6"/>
+<Binding channel="11" pgm="22"                   uri="/route/recenable B6"/>
+<Binding channel="11" pgm="30"                   uri="/route/recenable B6"/>
+<Binding channel="11" pgm="38"                   uri="/route/recenable B6"/>
+<Binding channel="11" pgm="46"                   uri="/route/recenable B6"/>
+
+<Binding channel="7"  ctl="7"                    uri="/route/gain      B7"/>
+<!-- <Binding channel="7"  ctl="10"                   uri="/route/pan       B7"/> -->
+<Binding channel="7"  ctl="8"                    uri="/route/send/gain B7 1"/>
+<Binding channel="7"  ctl="12"                   uri="/route/send/gain B7 2"/>
+<Binding channel="7"  ctl="13"                   uri="/route/send/gain B7 3"/>
+<Binding channel="11" pgm="15"                   uri="/route/solo      B7"/>
+<Binding channel="11" pgm="7"                    uri="/route/mute      B7"/>
+<Binding channel="11" pgm="23"                   uri="/route/recenable B7"/>
+<Binding channel="11" pgm="31"                   uri="/route/recenable B7"/>
+<Binding channel="11" pgm="39"                   uri="/route/recenable B7"/>
+<Binding channel="11" pgm="47"                   uri="/route/recenable B7"/>
+
+<Binding channel="8"  ctl="7"                    uri="/route/gain      B8"/>
+<!-- <Binding channel="8"  ctl="10"                   uri="/route/pan       B8"/> -->
+<Binding channel="8"  ctl="8"                    uri="/route/send/gain B8 1"/>
+<Binding channel="8"  ctl="12"                   uri="/route/send/gain B8 2"/>
+<Binding channel="8"  ctl="13"                   uri="/route/send/gain B8 3"/>
+<Binding channel="11" pgm="16"                   uri="/route/solo      B8"/>
+<Binding channel="11" pgm="8"                    uri="/route/mute      B8"/>
+<Binding channel="11" pgm="24"                   uri="/route/recenable B8"/>
+<Binding channel="11" pgm="32"                   uri="/route/recenable B8"/>
+<Binding channel="11" pgm="40"                   uri="/route/recenable B8"/>
+<Binding channel="11" pgm="48"                   uri="/route/recenable B8"/>
+
+<!-- expression pedal to master bus gain -->
+<Binding channel="11" ctl="7"                    uri="/bus/gain master"/>
+<!-- footswitch pedal to rec-enable; this will work for punch-in, but not punch-out -->
+<Binding sysex-"f0 7f 7f 6 6 f7"                 function-"rec-enable"/>
+
+<!-- bottom right soft-keys:  prev-bank       next-bank      -->
+<!--                          transport-stop  transport-roll -->
+<!--                                                         -->
+<Binding sysex-"f0 7f 7f 6 1 f7"                 function-"transport-stop"/>
+<Binding sysex-"f0 7f 7f 6 2 f7"                 function-"transport-roll"/>
+<Binding sysex-"f0 7f 7f 6 44 6 1 20 0 0 0 0 f7" function-"prev-bank"/>
+<Binding sysex-"f0 7f 7f 6 4 f7"                 function-"next-bank"/>
+</ArdourMIDIBindings>
