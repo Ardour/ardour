@@ -38,7 +38,6 @@ class Return : public IOProcessor
 {
 public:
 	Return (Session&, bool internal = false);
-	Return (Session&, const XMLNode&, bool internal = false);
 	virtual ~Return ();
 
 	uint32_t bit_slot() const { return _bitslot; }

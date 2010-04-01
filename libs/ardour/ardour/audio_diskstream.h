@@ -231,7 +231,7 @@ class AudioDiskstream : public Diskstream
 	void transport_stopped (struct tm&, time_t, bool abort);
 	void transport_looped (nframes_t transport_frame);
 
-	void init (Diskstream::Flag);
+	void init ();
 
 	void init_channel (ChannelInfo &chan);
 	void destroy_channel (ChannelInfo &chan);

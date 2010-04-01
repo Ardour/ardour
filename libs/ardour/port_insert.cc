@@ -49,29 +49,11 @@ PortInsert::PortInsert (Session& s, boost::shared_ptr<MuteMaster> mm)
         _latency_detect = false;
         _latency_flush_frames = false;
         _measured_latency = 0;
-
-	ProcessorCreated (this); /* EMIT SIGNAL */
-}
-
-PortInsert::PortInsert (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node)
-	: IOProcessor (s, true, true, "unnamed port insert")
-	, _out (new Delivery (s, _output, mm, _name, Delivery::Insert))
-
-{
-        _mtdm = 0;
-        _latency_detect = false;
-        _latency_flush_frames = false;
-        _measured_latency = 0;
-        
-	if (set_state (node, Stateful::loading_state_version)) {
-		throw failed_constructor();
-	}
-
-	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
 PortInsert::~PortInsert ()
 {
+        _session.unmark_insert_id (bitslot);
         delete _mtdm;
 }
 
@@ -179,6 +161,18 @@ PortInsert::set_state (const XMLNode& node, int version)
 	XMLPropertyList plist;
 	const XMLProperty *prop;
 
+	const XMLNode* insert_node = &node;
+
+	// legacy sessions: search for child IOProcessor node
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if ((*niter)->name() == "IOProcessor") {
+			insert_node = *niter;
+			break;
+		}
+	}
+
+	Processor::set_state (*insert_node, version);
+
 	if ((prop = node.property ("type")) == 0) {
 		error << _("XML node describing port insert is missing the `type' field") << endmsg;
 		return -1;
@@ -192,21 +186,12 @@ PortInsert::set_state (const XMLNode& node, int version)
 	if ((prop = node.property ("bitslot")) == 0) {
 		bitslot = _session.next_insert_id();
 	} else {
+                _session.unmark_insert_id (bitslot);
 		sscanf (prop->value().c_str(), "%" PRIu32, &bitslot);
 		_session.mark_insert_id (bitslot);
 	}
 
-	const XMLNode* insert_node = &node;
-
-	// legacy sessions: search for child IOProcessor node
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == "IOProcessor") {
-			insert_node = *niter;
-			break;
-		}
-	}
-
-	Processor::set_state (*insert_node, version);
+        set_name (string_compose (_("insert %1"), bitslot));
 
 	return 0;
 }

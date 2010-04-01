@@ -49,7 +49,6 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	static const std::string state_node_name;
 
 	Processor(Session&, const std::string& name);
-	Processor(Session&, const XMLNode& node);
 
 	virtual ~Processor() { }
 
@@ -97,8 +96,6 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	
 	void *get_gui () const { return _gui; }
 	void  set_gui (void *p) { _gui = p; }
-
-	static PBD::Signal1<void,Processor*> ProcessorCreated;
 
 	PBD::Signal0<void>                     ActiveChanged;
 	PBD::Signal2<void,ChanCount,ChanCount> ConfigurationChanged;

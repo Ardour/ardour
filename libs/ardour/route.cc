@@ -124,7 +124,7 @@ Route::init ()
 	_amp.reset (new Amp (_session, _mute_master));
 	add_processor (_amp, PostFader);
 
-	/* add standard processors other than amp (added by ::init()) */
+	/* add standard processors: meter, main outs, monitor out */
 
 	_meter.reset (new PeakMeter (_session));
 	_meter->set_display_to_user (false);
@@ -835,183 +835,6 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 }
 
 bool
-Route::add_processor_from_xml (const XMLNode& node, ProcessorList::iterator iter)
-{
-	const XMLProperty *prop;
-
-	if (node.name() != "Processor") {
-		return false;
-	}
-
-	try {
-		if ((prop = node.property ("type")) != 0) {
-
-			boost::shared_ptr<Processor> processor;
-
-                        /* meter, amp, monitor and intreturn are all singletons, deal with them first */
-                        
-			if (prop->value() == "meter") {
-
-				if (_meter) {
-					if (_meter->set_state (node, Stateful::loading_state_version)) {
-						return false;
-					} else {
-						return true;
-					}
-				}
-
-                                PeakMeter* pm = new PeakMeter (_session);
-
-                                if (pm->set_state (node, Stateful::loading_state_version)) {
-                                        delete pm;
-                                        return false;
-                                }
-
-				_meter.reset (pm);
-				_meter->set_display_to_user (_meter_point == MeterCustom);
-
-				processor = _meter;
-
-                        } else if (prop->value() == "monitor") {
-
-                                if (_monitor_control) {
-                                        if (_monitor_control->set_state (node, Stateful::loading_state_version)) {
-                                                return false;
-                                        } else {
-                                                return true;
-                                        }
-                                }
-
-                                MonitorProcessor* mp = new MonitorProcessor (_session);
-                                if (mp->set_state (node, Stateful::loading_state_version)) {
-                                        delete mp;
-                                        return false;
-                                }
-
-                                _monitor_control.reset (mp);
-                                processor = _monitor_control;
-
-			} else if (prop->value() == "amp") {
-
-                                if (_amp) {
-                                        processor = _amp;
-                                        if (processor->set_state (node, Stateful::loading_state_version)) {
-                                                return false;
-                                        } else {
-                                                /* no reason to add it */
-                                                return true;
-                                        }
-                                }
-
-                                Amp* a = new Amp (_session, _mute_master);
-                                if (_amp->set_state (node, Stateful::loading_state_version)) {
-                                        delete a;
-                                        return false;
-                                }
-
-                                _amp.reset (a);
-                                processor = _amp;
-
-			} else if (prop->value() == "intreturn") {
-
-                                /* a route only has one internal return. If it exists already
-                                   just set its state, and return
-                                */
-
-				if (_intreturn) {
-					if (_intreturn->set_state (node, Stateful::loading_state_version)) {
-						return false;
-					} else {
-						return true;
-					}
-				}
-
-                                InternalReturn* iret = new InternalReturn (_session);
-                                if (iret->set_state (node, Stateful::loading_state_version)) { 
-                                        delete iret;
-                                        return false;
-                                }
-
-				_intreturn.reset (iret);
-				processor = _intreturn;
-
-			} else if (prop->value() == "main-outs") {
-
-				if (_main_outs) {
-					if (_main_outs->set_state (node, Stateful::loading_state_version)) {
-						return false;
-					} else {
-						return true;
-					}
-				}
-
-                                Delivery* del = new Delivery (_session, _output, _mute_master, X_("toBeResetFroXML"), Delivery::Role (0));
-                                if (del->set_state (node, Stateful::loading_state_version)) { 
-                                        delete del;
-                                        return false;
-                                }
-
-				_main_outs.reset (del);
-				processor = _main_outs;
-
-			} else if (prop->value() == "intsend") {
-
-                                InternalSend* isend = new InternalSend (_session, _mute_master, boost::shared_ptr<Route>(), Delivery::Role (0));
-                                if (isend->set_state (node, Stateful::loading_state_version)) {
-                                        delete isend;
-                                        return false;
-                                }
-                                
-                                processor.reset (isend);
-
-                        } else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
-                                   prop->value() == "lv2" ||
-                                   prop->value() == "vst" ||
-                                   prop->value() == "audiounit") {
-                                
-				processor.reset (new PluginInsert(_session, node));
-
-			} else if (prop->value() == "port") {
-
-				processor.reset (new PortInsert (_session, _mute_master, node));
-
-			} else if (prop->value() == "send") {
-
-				processor.reset (new Send (_session, _mute_master, node));
-
-			} else {
-				error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
-				return false;
-			}
-
-			if (iter == _processors.end() && processor->display_to_user() && !_processors.empty()) {
-				/* check for invisible processors stacked at the end and leave them there */
-				ProcessorList::iterator p;
-				p = _processors.end();
-				--p;
-				while (!(*p)->display_to_user() && p != _processors.begin()) {
-					--p;
-				}
-				++p;
-				iter = p;
-			}
-
-			return (add_processor (processor, iter, 0, false) == 0);
-
-		} else {
-			error << _("Processor XML node has no type property") << endmsg;
-			return false;
-		}
-	}
-
-	catch (failed_constructor &err) {
-		warning << _("processor could not be created. Ignored.") << endmsg;
-		return false;
-	}
-}
-
-
-bool
 Route::add_processor_from_xml_2X (const XMLNode& node, int version, ProcessorList::iterator iter)
 {
 	const XMLProperty *prop;
@@ -1028,24 +851,28 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version, ProcessorLis
 						prop->value() == "vst" ||
 						prop->value() == "audiounit") {
 
-					processor.reset (new PluginInsert (_session, node));
+					processor.reset (new PluginInsert (_session));
 
 				} else {
 
-					processor.reset (new PortInsert (_session, _mute_master, node));
+					processor.reset (new PortInsert (_session, _mute_master));
 				}
 
 			}
 
 		} else if (node.name() == "Send") {
 
-			processor.reset (new Send (_session, _mute_master, node, version));
+			processor.reset (new Send (_session, _mute_master));
 
 		} else {
 
 			error << string_compose(_("unknown Processor type \"%1\"; ignored"), node.name()) << endmsg;
 			return false;
 		}
+
+                if (processor->set_state (node, version)) {
+                        return false;
+                }
 
 		if (iter == _processors.end() && processor->display_to_user() && !_processors.empty()) {
 			/* check for invisible processors stacked at the end and leave them there */
@@ -1769,7 +1596,9 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 		}
 	}
 
-	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+        if (true) {
+                processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+        }
 
 	return 0;
 }
@@ -2316,101 +2145,94 @@ Route::set_processor_state (const XMLNode& node)
 {
 	const XMLNodeList &nlist = node.children();
 	XMLNodeConstIterator niter;
-	ProcessorList::iterator i, o;
+        ProcessorList new_order;
+        bool must_configure = false;
 
-	// Iterate through existing processors, remove those which are not in the state list
-
-	for (i = _processors.begin(); i != _processors.end(); ) {
-
-		/* leave amp alone, always */
-
-		if ((*i) == _amp) {
-			++i;
-			continue;
-		}
-
-		ProcessorList::iterator tmp = i;
-		++tmp;
-
-		bool processorInStateList = false;
-
-		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-
-			XMLProperty* id_prop = (*niter)->property(X_("id"));
-
-			if (id_prop && (*i)->id() == id_prop->value()) {
-				processorInStateList = true;
-				break;
-			}
-		}
-
-		if (!processorInStateList) {
-			remove_processor (*i);
-		}
-
-		i = tmp;
-	}
-
-	// Iterate through state list and make sure all processors are on the track and in the correct order,
-	// set the state of existing processors according to the new state on the same go
-
-	i = _processors.begin();
-
-	for (niter = nlist.begin(); niter != nlist.end(); ++niter, ++i) {
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		XMLProperty* prop = (*niter)->property ("type");
 
-		o = i;
+		if (prop->value() == "amp") {
+                        _amp->set_state (**niter, Stateful::current_state_version);
+                        new_order.push_back (_amp);
+                } else if (prop->value() == "meter") {
+                        _meter->set_state (**niter, Stateful::current_state_version);
+                        new_order.push_back (_meter);
+                } else if (prop->value() == "main-outs") {
+                        _main_outs->set_state (**niter, Stateful::current_state_version);
+                        new_order.push_back (_main_outs);
+                } else if (is_monitor() && prop->value() == "intreturn") {
+                        if (!_intreturn) {
+                                _intreturn.reset (new InternalReturn (_session));
+                                must_configure = true;
+                        }
+                        _intreturn->set_state (**niter, Stateful::current_state_version);
+                        new_order.push_back (_intreturn);
+                } else if (is_monitor() && prop->value() == "monitor") {
+                        if (!_monitor_control) {
+                                _monitor_control.reset (new MonitorProcessor (_session));
+                                must_configure = true;
+                        }
+                        _monitor_control->set_state (**niter, Stateful::current_state_version);
+                        new_order.push_back (_monitor_control);
+                } else {
+                        ProcessorList::iterator o;
 
-		// Check whether the next processor in the list is the right one,
-		// except for "amp" which is always there and may not have the
-		// old ID since it is always created anew in every Route
-
-		if (prop->value() != "amp") {
-			while (o != _processors.end()) {
+			for (o = _processors.begin(); o != _processors.end(); ++o) {
 				XMLProperty* id_prop = (*niter)->property(X_("id"));
 				if (id_prop && (*o)->id() == id_prop->value()) {
+                                        (*o)->set_state (**niter, Stateful::current_state_version);
+                                        new_order.push_back (*o);
 					break;
 				}
-
-				++o;
-			}
-		}
-
-		// If the processor (*niter) is not on the route,
-		// create it and move it to the correct location
-
-		if (o == _processors.end()) {
-
-			if (add_processor_from_xml (**niter, i)) {
-				--i; // move iterator to the newly inserted processor
-			} else {
-				cerr << "Error restoring route: unable to restore processor" << endl;
 			}
 
-		} else {
+                        // If the processor (*niter) is not on the route then create it 
+                        
+                        if (o == _processors.end()) {
+                                
+                                boost::shared_ptr<Processor> processor;
 
-			// Otherwise, the processor already exists; just
-			// ensure it is at the location provided in the XML state
+                                if (prop->value() == "intsend") {
+                                        
+                                        processor.reset (new InternalSend (_session, _mute_master, boost::shared_ptr<Route>(), Delivery::Role (0)));
+                                        
+                                } else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
+                                           prop->value() == "lv2" ||
+                                           prop->value() == "vst" ||
+                                           prop->value() == "audiounit") {
+                                        
+                                        processor.reset (new PluginInsert(_session));
+                                        
+                                } else if (prop->value() == "port") {
+                                        
+                                        processor.reset (new PortInsert (_session, _mute_master));
+                                        
+                                } else if (prop->value() == "send") {
+                                        
+                                        processor.reset (new Send (_session, _mute_master));
+                                        
+                                } else {
+                                        error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
+                                        continue;
+                                }
 
-			if (i != o) {
-				boost::shared_ptr<Processor> tmp = (*o);
-				_processors.erase (o); // remove the old copy
-				_processors.insert (i, tmp); // insert the processor at the correct location
-				--i; // move iterator to the correct processor
-			}
+                                processor->set_state (**niter, Stateful::current_state_version);
+                                new_order.push_back (processor);
+                                must_configure = true;
+                        }
+                }
+        }
 
-			// and make it (just) so
+        { 
+		Glib::RWLock::WriterLock lm (_processor_lock);
+                _processors = new_order;
+                if (must_configure) {
+                        configure_processors_unlocked (0);
+                }
+        }
 
-			(*i)->set_state (**niter, Stateful::current_state_version);
-		}
-	}
-
-	/* note: there is no configure_processors() call because we figure that
-	   the XML state represents a working signal route.
-	*/
-
-	processors_changed (RouteProcessorChange ());
+        processors_changed (RouteProcessorChange ());
 }
 
 void
@@ -3388,14 +3210,11 @@ Route::nth_send (uint32_t n)
 	ProcessorList::iterator i;
 
 	for (i = _processors.begin(); i != _processors.end(); ++i) {
-		cerr << "check " << (*i)->name() << endl;
 		if (boost::dynamic_pointer_cast<Send> (*i)) {
 			if (n-- == 0) {
 				return *i;
 			}
-		} else {
-			cerr << "\tnot a send\n";
-		}
+		} 
 	}
 
 	return boost::shared_ptr<Processor> ();

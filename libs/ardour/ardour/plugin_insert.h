@@ -43,8 +43,7 @@ class Plugin;
 class PluginInsert : public Processor
 {
   public:
-	PluginInsert (Session&, boost::shared_ptr<Plugin>);
-	PluginInsert (Session&, const XMLNode&);
+	PluginInsert (Session&, boost::shared_ptr<Plugin> = boost::shared_ptr<Plugin>());
 	~PluginInsert ();
 
 	static const std::string port_automation_node_name;

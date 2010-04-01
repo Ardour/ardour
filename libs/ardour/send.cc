@@ -44,26 +44,11 @@ Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, Role r)
 {
 	_amp.reset (new Amp (_session, _mute_master));
 	_meter.reset (new PeakMeter (_session));
-
-	ProcessorCreated (this); /* EMIT SIGNAL */
-}
-
-Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, const XMLNode& node, int version, Role r)
-        : Delivery (s, mm, "send", r)
-	, _metering (false)
-{
-	_amp.reset (new Amp (_session, _mute_master));
-	_meter.reset (new PeakMeter (_session));
-
-	if (set_state (node, version)) {
-		throw failed_constructor();
-	}
-
-	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
 Send::~Send ()
 {
+        _session.unmark_send_id (_bitslot);
 }
 
 void
@@ -139,7 +124,7 @@ Send::get_state(void)
 }
 
 XMLNode&
-Send::state(bool full)
+Send::state (bool full)
 {
 	XMLNode& node = Delivery::state(full);
 	char buf[32];
@@ -158,18 +143,23 @@ Send::set_state (const XMLNode& node, int version)
 	XMLNodeIterator niter;
 	const XMLProperty* prop;
 
-	if ((prop = node.property ("bitslot")) == 0) {
-		_bitslot = _session.next_send_id();
-	} else {
-		sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
-		_session.mark_send_id (_bitslot);
-	}
+	Delivery::set_state (node, version);
 
-	const XMLNode* insert_node = &node;
+        /* don't try to reset bitslot if its already set: this can cause
+           issues with the session's accounting of send ID's
+        */
+
+        if ((prop = node.property ("bitslot")) == 0) {
+                _bitslot = _session.next_send_id();
+        } else {
+                _session.unmark_send_id (_bitslot);
+                sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
+                _session.mark_send_id (_bitslot);
+        }
+
+        set_name (string_compose (_("send %1"), _bitslot));
 
 	/* XXX need to load automation state & data for amp */
-
-	Delivery::set_state (*insert_node, version);
 
 	return 0;
 }

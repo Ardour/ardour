@@ -44,7 +44,6 @@ class PortInsert : public IOProcessor
 {
   public:
 	PortInsert (Session&, boost::shared_ptr<MuteMaster> mm);
-	PortInsert (Session&, boost::shared_ptr<MuteMaster> mm, const XMLNode&);
 	~PortInsert ();
 
 	XMLNode& state(bool full);

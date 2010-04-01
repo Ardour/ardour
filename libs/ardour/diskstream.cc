@@ -61,7 +61,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-/* XXX This goes uninitialized when there is no ~/.ardour3 directory.
+/* XXX This goes uninitialized when there is no ~/.config/ardour3 directory.
  * I can't figure out why, so this will do for now (just stole the
  * default from configuration_vars.h).  0 is not a good value for
  * allocating buffer sizes..
@@ -73,55 +73,97 @@ PBD::Signal0<void>                Diskstream::DiskUnderrun;
 
 Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
 	: SessionObject(sess, name)
+        , i_am_the_modifier (0)
+        , _route (0)
+        , _record_enabled (0)
+        , _visible_speed (1.0f)
+        , _actual_speed (1.0f)
+        , _buffer_reallocation_required (false)
+        , _seek_required (false)
+        , force_refill (false)
+        , capture_start_frame (0)
+        , capture_captured (0)
+        , was_recording (false)
+        , adjust_capture_position (0)
+        , _capture_offset (0)
+        , _roll_delay (0)
+        , first_recordable_frame (max_frames)
+        , last_recordable_frame (max_frames)
+        , last_possibly_recording (0)
+        , _alignment_style (ExistingMaterial)
+        , _scrubbing (false)
+        , _slaved (false)
+        , loop_location (0)
+        , overwrite_frame (0)
+        , overwrite_offset (0)
+        , pending_overwrite (false)
+        , overwrite_queued (false)
+        , input_change_pending (NoChange)
+        , wrap_buffer_size (0)
+        , speed_buffer_size (0)
+        , _speed (1.0)
+        , _target_speed (_speed)
+        , file_frame (0)
+        , playback_sample (0)
+        , playback_distance (0)
+        , _read_data_count (0)
+        , _write_data_count (0)
+        , in_set_state (false)
+        , _persistent_alignment_style (ExistingMaterial)
+        , first_input_change (true)
+        , scrub_start (0)
+        , scrub_buffer_size (0)
+        , scrub_offset (0)
+        , _flags (flag)
+
 {
-	init (flag);
 }
 
 Diskstream::Diskstream (Session& sess, const XMLNode& /*node*/)
 	: SessionObject(sess, "unnamed diskstream")
+        , i_am_the_modifier (0)
+        , _route (0)
+        , _record_enabled (0)
+        , _visible_speed (1.0f)
+        , _actual_speed (1.0f)
+        , _buffer_reallocation_required (false)
+        , _seek_required (false)
+        , force_refill (false)
+        , capture_start_frame (0)
+        , capture_captured (0)
+        , was_recording (false)
+        , adjust_capture_position (0)
+        , _capture_offset (0)
+        , _roll_delay (0)
+        , first_recordable_frame (max_frames)
+        , last_recordable_frame (max_frames)
+        , last_possibly_recording (0)
+        , _alignment_style (ExistingMaterial)
+        , _scrubbing (false)
+        , _slaved (false)
+        , loop_location (0)
+        , overwrite_frame (0)
+        , overwrite_offset (0)
+        , pending_overwrite (false)
+        , overwrite_queued (false)
+        , input_change_pending (NoChange)
+        , wrap_buffer_size (0)
+        , speed_buffer_size (0)
+        , _speed (1.0)
+        , _target_speed (_speed)
+        , file_frame (0)
+        , playback_sample (0)
+        , playback_distance (0)
+        , _read_data_count (0)
+        , _write_data_count (0)
+        , in_set_state (false)
+        , _persistent_alignment_style (ExistingMaterial)
+        , first_input_change (true)
+        , scrub_start (0)
+        , scrub_buffer_size (0)
+        , scrub_offset (0)
+        , _flags (Recordable)
 {
-	init (Recordable);
-}
-
-void
-Diskstream::init (Flag f)
-{
-	_flags = f;
-	_route = 0;
-	_alignment_style = ExistingMaterial;
-	_persistent_alignment_style = ExistingMaterial;
-	first_input_change = true;
-	i_am_the_modifier = 0;
-	g_atomic_int_set (&_record_enabled, 0);
-	was_recording = false;
-	capture_start_frame = 0;
-	capture_captured = 0;
-	_visible_speed = 1.0f;
-	_actual_speed = 1.0f;
-	_buffer_reallocation_required = false;
-	_seek_required = false;
-	first_recordable_frame = max_frames;
-	last_recordable_frame = max_frames;
-	_roll_delay = 0;
-	_capture_offset = 0;
-	_slaved = false;
-	adjust_capture_position = 0;
-	last_possibly_recording = 0;
-	loop_location = 0;
-	wrap_buffer_size = 0;
-	speed_buffer_size = 0;
-	_speed = 1.0;
-	_target_speed = _speed;
-	file_frame = 0;
-	playback_sample = 0;
-	playback_distance = 0;
-	_read_data_count = 0;
-	_write_data_count = 0;
-
-	pending_overwrite = false;
-	overwrite_frame = 0;
-	overwrite_queued = false;
-	input_change_pending = NoChange;
 }
 
 Diskstream::~Diskstream ()

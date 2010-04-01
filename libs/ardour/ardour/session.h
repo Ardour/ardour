@@ -619,6 +619,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void mark_send_id (uint32_t);
 	void mark_return_id (uint32_t);
 	void mark_insert_id (uint32_t);
+	void unmark_send_id (uint32_t);
+	void unmark_return_id (uint32_t);
+	void unmark_insert_id (uint32_t);
 
 	/* s/w "RAID" management */
 
@@ -1293,9 +1296,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	boost::dynamic_bitset<uint32_t> send_bitset;
 	boost::dynamic_bitset<uint32_t> return_bitset;
 	boost::dynamic_bitset<uint32_t> insert_bitset;
-
-	void add_processor (Processor *);
-	void remove_processor (Processor *);
 
 	/* S/W RAID */
 

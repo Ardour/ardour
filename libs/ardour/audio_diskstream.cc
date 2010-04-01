@@ -79,10 +79,7 @@ AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Diskstream:
 	/* prevent any write sources from being created */
 
 	in_set_state = true;
-
-	init(flag);
 	use_new_playlist ();
-
 	in_set_state = false;
 }
 
@@ -92,7 +89,7 @@ AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
 	, channels (new ChannelList)
 {
 	in_set_state = true;
-	init (Recordable);
+	init ();
 
 	if (set_state (node, Stateful::loading_state_version)) {
 		in_set_state = false;
@@ -107,10 +104,8 @@ AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
 }
 
 void
-AudioDiskstream::init (Diskstream::Flag f)
+AudioDiskstream::init ()
 {
-	Diskstream::init(f);
-
 	/* there are no channels at this point, so these
 	   two calls just get speed_buffer_size and wrap_buffer
 	   size setup without duplicating their code.

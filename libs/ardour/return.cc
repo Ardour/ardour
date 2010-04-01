@@ -45,12 +45,11 @@ Return::Return (Session& s, bool internal)
 
 	_amp.reset (new Amp (_session, boost::shared_ptr<MuteMaster>()));
 	_meter.reset (new PeakMeter (_session));
-
-	ProcessorCreated (this); /* EMIT SIGNAL */
 }
 
 Return::~Return ()
 {
+        _session.unmark_return_id (_bitslot);
 }
 
 XMLNode&
@@ -77,14 +76,6 @@ Return::set_state (const XMLNode& node, int version)
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
 	const XMLProperty* prop;
-
-	if ((prop = node.property ("bitslot")) == 0) {
-		_bitslot = _session.next_return_id();
-	} else {
-		sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
-		_session.mark_return_id (_bitslot);
-	}
-
 	const XMLNode* insert_node = &node;
 
 	/* Return has regular IO automation (gain, pan) */
@@ -98,6 +89,17 @@ Return::set_state (const XMLNode& node, int version)
 	}
 
 	IOProcessor::set_state (*insert_node, version);
+
+	if ((prop = node.property ("bitslot")) == 0) {
+		_bitslot = _session.next_return_id();
+	} else {
+                _session.unmark_return_id (_bitslot);
+		sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
+		_session.mark_return_id (_bitslot);
+	}
+        
+        set_name (string_compose (_("return %1"), _bitslot));
+
 
 	return 0;
 }

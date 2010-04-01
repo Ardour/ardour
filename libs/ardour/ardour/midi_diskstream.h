@@ -154,7 +154,7 @@ class MidiDiskstream : public Diskstream
 	void transport_stopped (struct tm&, time_t, bool abort);
 	void transport_looped (nframes_t transport_frame);
 
-	void init (Diskstream::Flag);
+	void init ();
 
 	int use_new_write_source (uint32_t n=0);
 

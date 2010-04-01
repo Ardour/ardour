@@ -56,8 +56,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal1<void,Processor*> Processor::ProcessorCreated;
-
 // Always saved as Processor, but may be IOProcessor or Send in legacy sessions
 const string Processor::state_node_name = "Processor";
 
@@ -71,19 +69,6 @@ Processor::Processor(Session& session, const string& name)
 	, _gui(0)
 	, _display_to_user (true)
 {
-}
-
-Processor::Processor (Session& session, const XMLNode& node)
-	: SessionObject(session, "renameMe")
-	, AutomatableControls(session)
-	, _pending_active(false)
-	, _active(false)
-	, _next_ab_is_active(false)
-	, _configured(false)
-	, _gui(0)
-	, _display_to_user (true)
-{
-	set_state (node, Stateful::loading_state_version);
 }
 
 XMLNode&

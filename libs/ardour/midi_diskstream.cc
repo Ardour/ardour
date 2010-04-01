@@ -81,7 +81,7 @@ MidiDiskstream::MidiDiskstream (Session &sess, const string &name, Diskstream::F
 
 	in_set_state = true;
 
-	init(flag);
+	init ();
 	use_new_playlist ();
 
 	in_set_state = false;
@@ -100,7 +100,7 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 	, _frames_read_from_ringbuffer(0)
 {
 	in_set_state = true;
-	init (Recordable);
+	init ();
 
 	if (set_state (node, Stateful::loading_state_version)) {
 		in_set_state = false;
@@ -115,10 +115,8 @@ MidiDiskstream::MidiDiskstream (Session& sess, const XMLNode& node)
 }
 
 void
-MidiDiskstream::init (Diskstream::Flag f)
+MidiDiskstream::init ()
 {
-	Diskstream::init(f);
-
 	/* there are no channels at this point, so these
 	   two calls just get speed_buffer_size and wrap_buffer
 	   size setup without duplicating their code.

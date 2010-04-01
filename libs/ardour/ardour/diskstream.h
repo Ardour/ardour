@@ -216,8 +216,6 @@ class Diskstream : public SessionObject
 		uint32_t frames;
 	};
 
-	virtual void init (Flag);
-
 	virtual int use_new_write_source (uint32_t n=0) = 0;
 
 	virtual int find_and_use_playlist (const std::string&) = 0;

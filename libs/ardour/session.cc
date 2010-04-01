@@ -3101,35 +3101,6 @@ Session::graph_reordered ()
 	}
 }
 
-void
-Session::add_processor (Processor* processor)
-{
-	/* Session does not own Processors (they belong to a Route) but we do want to track
-	   the arrival and departure of port inserts, sends and returns for naming
-	   purposes.
-	*/
-	processor->DropReferences.connect_same_thread (*this, boost::bind (&Session::remove_processor, this, processor));
-	set_dirty();
-}
-
-void
-Session::remove_processor (Processor* processor)
-{
-	Send* send;
-	Return* retrn;
-	PortInsert* port_insert;
-
-	if ((port_insert = dynamic_cast<PortInsert *> (processor)) != 0) {
-		insert_bitset[port_insert->bit_slot()] = false;
-	} else if ((send = dynamic_cast<Send *> (processor)) != 0) {
-		send_bitset[send->bit_slot()] = false;
-	} else if ((retrn = dynamic_cast<Return *> (processor)) != 0) {
-		return_bitset[retrn->bit_slot()] = false;
-	}
-
-	set_dirty();
-}
-
 nframes_t
 Session::available_capture_duration ()
 {
@@ -3317,6 +3288,8 @@ Session::next_return_id ()
 void
 Session::mark_send_id (uint32_t id)
 {
+        cerr << "Marking send ID " << id << " in use\n";
+
 	if (id >= send_bitset.size()) {
 		send_bitset.resize (id+16, false);
 	}
@@ -3349,6 +3322,31 @@ Session::mark_insert_id (uint32_t id)
 	}
 	insert_bitset[id] = true;
 }
+
+void
+Session::unmark_send_id (uint32_t id)
+{
+	if (id < send_bitset.size()) {
+                send_bitset[id] = false;
+        }
+}
+
+void
+Session::unmark_return_id (uint32_t id)
+{
+	if (id < return_bitset.size()) {
+                return_bitset[id] = false;
+        }
+}
+
+void
+Session::unmark_insert_id (uint32_t id)
+{
+	if (id < insert_bitset.size()) {
+                insert_bitset[id] = false;
+        }
+}
+
 
 /* Named Selection management */
 

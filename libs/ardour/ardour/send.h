@@ -37,7 +37,6 @@ class Send : public Delivery
 {
   public:
 	Send (Session&, boost::shared_ptr<MuteMaster>, Delivery::Role r = Delivery::Send);
-	Send (Session&, boost::shared_ptr<MuteMaster>, const XMLNode&, int version = 3000, Delivery::Role r = Delivery::Send);
 	virtual ~Send ();
 
 	uint32_t bit_slot() const { return _bitslot; }

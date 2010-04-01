@@ -177,10 +177,6 @@ ProcessorEntry::name () const
 	boost::shared_ptr<Send> send;
 	string name_display;
 	
-	if (!_processor->active()) {
-		name_display = " (";
-	}
-	
 	if ((send = boost::dynamic_pointer_cast<Send> (_processor)) != 0 &&
 	    !boost::dynamic_pointer_cast<InternalSend>(_processor)) {
 		
@@ -212,10 +208,6 @@ ProcessorEntry::name () const
 			break;
 		}
 		
-	}
-	
-	if (!_processor->active()) {
-		name_display += ')';
 	}
 	
 	return name_display;
@@ -1332,7 +1324,8 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				   is a plugin.
 				*/
 
-				p.reset (new PluginInsert (*_session, **niter));
+				p.reset (new PluginInsert (*_session));
+                                p->set_state (**niter, Stateful::current_state_version);
 			}
 
 			copies.push_back (p);

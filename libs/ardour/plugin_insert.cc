@@ -62,35 +62,16 @@ using namespace PBD;
 const string PluginInsert::port_automation_node_name = "PortAutomation";
 
 PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
-	: Processor (s, plug->name())
+	: Processor (s, (plug ? plug->name() : string ("toBeRenamed")))
 	, _signal_analysis_collected_nframes(0)
 	, _signal_analysis_collect_nframes_max(0)
 {
 	/* the first is the master */
 
-	_plugins.push_back (plug);
-	set_automatable ();
+        if (plug) {
+                _plugins.push_back (plug);
+                set_automatable ();
 
-	{
-		Glib::Mutex::Lock em (_session.engine().process_lock());
-		IO::PortCountChanged (max(input_streams(), output_streams()));
-	}
-
-	ProcessorCreated (this); /* EMIT SIGNAL */
-}
-
-PluginInsert::PluginInsert (Session& s, const XMLNode& node)
-	: Processor (s, "unnamed plugin insert"),
-          _signal_analysis_collected_nframes(0),
-          _signal_analysis_collect_nframes_max(0)
-{
-	if (set_state (node, Stateful::loading_state_version)) {
-		throw failed_constructor();
-	}
-
-	_pending_active = _active;
-
-	{
 		Glib::Mutex::Lock em (_session.engine().process_lock());
 		IO::PortCountChanged (max(input_streams(), output_streams()));
 	}
@@ -810,6 +791,8 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		}
 	}
 
+        Processor::set_state (node, version);
+
 	if (version < 3000) {
 
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
@@ -823,12 +806,19 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		set_parameter_state_2X (node, version);
 		
 	} else {
-		Processor::set_state (node, version);
+
 		set_parameter_state (node, version);
 	}
 
 	// The name of the PluginInsert comes from the plugin, nothing else
 	_name = plugin->get_info()->name;
+
+        /* catch up on I/O */
+
+	{
+		Glib::Mutex::Lock em (_session.engine().process_lock());
+		IO::PortCountChanged (max(input_streams(), output_streams()));
+	}
 
 	return 0;
 }
