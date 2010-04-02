@@ -344,7 +344,7 @@ int
 Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 {
         if (!playlist) {
-                return;
+                return 0;
         }
 
         bool no_prior_playlist = true;
