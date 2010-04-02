@@ -1,13 +1,17 @@
 #include "assert.h"
 #include <iostream>
 
+#include "xpath.h"
 #include "pbd/xml++.h"
+
+CPPUNIT_TEST_SUITE_REGISTRATION (XPathTest);
 
 using namespace std;
 
-string const prefix = "../../libs/pbd/test/";
+static string const prefix = "../../libs/pbd/test/";
 
-int main()
+void
+XPathTest::testMisc ()
 {
 	cout << "Test 1: RosegardenPatchFile.xml: Find all banks in the file" << endl;
 	XMLTree  doc(prefix + "RosegardenPatchFile.xml");
@@ -20,10 +24,10 @@ int main()
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
 		assert((*i)->name() == "bank");
 		assert((*i)->property("name"));
-		cout << "Found bank number " << counter++ << " with name: " << (*i)->property("name")->value() << endl;
+//		cout << "Found bank number " << counter++ << " with name: " << (*i)->property("name")->value() << endl;
 		for(XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
-			cout << "\t found program " << (*j)->property("id")->value() << 
-			        " with name: " << (*j)->property("name")->value() << endl;
+//			cout << "\t found program " << (*j)->property("id")->value() << 
+//			        " with name: " << (*j)->property("name")->value() << endl;
 		}
 	}
 	
@@ -33,11 +37,11 @@ int main()
 	assert(result->size() == 5);
 	
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
-		cout << "\t found program " << (*i)->property("id")->value() << 
-		        " with name: " << (*i)->property("name")->value() << endl;
+//		cout << "\t found program " << (*i)->property("id")->value() << 
+//		        " with name: " << (*i)->property("name")->value() << endl;
 	}
 
-	cout << endl << endl << "Test 3: TestSession.ardour: find all Sources where captured-for contains the string 'Guitar'" << endl;
+//	cout << endl << endl << "Test 3: TestSession.ardour: find all Sources where captured-for contains the string 'Guitar'" << endl;
 	
 	// We have to allocate a new document here, or we get segfaults
 	XMLTree doc2(prefix + "TestSession.ardour");
@@ -45,8 +49,8 @@ int main()
 	assert(result->size() == 16);
 	
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
-		cout << "\t found source '" << (*i)->property("name")->value() << 
-		        "' with id: " << (*i)->property("id")->value() << endl;
+//		cout << "\t found source '" << (*i)->property("name")->value() << 
+//		        "' with id: " << (*i)->property("id")->value() << endl;
 	}
 	
 	cout << endl << endl << "Test 4: TestSession.ardour: Find all elements with an 'id' and 'name' attribute" << endl;
@@ -56,9 +60,9 @@ int main()
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
 		assert((*i)->property("id"));
 		assert((*i)->property("name"));
-		cout << "\t found element '" << (*i)->name() << 
-		        "' with id: "  << (*i)->property("id")->value() << 
-        		"' and name: " << (*i)->property("name")->value() << endl;
+//		cout << "\t found element '" << (*i)->name() << 
+//		        "' with id: "  << (*i)->property("id")->value() << 
+//		      		"' and name: " << (*i)->property("name")->value() << endl;
 	}
 	
 	cout << endl << endl << "Test 5: ProtoolsPatchFile.midnam: Get Banks and Patches for 'Name Set 1'" << endl;
@@ -69,11 +73,11 @@ int main()
 	assert(result->size() == 16);
 	
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
-		cout << "\t found Patchbank " << (*i)->property("Name")->value() << endl;
+//		cout << "\t found Patchbank " << (*i)->property("Name")->value() << endl;
 		boost::shared_ptr<XMLSharedNodeList> patches = (*i)->find("//Patch[@Name]");
 		for(XMLSharedNodeList::const_iterator p = patches->begin(); p != patches->end(); ++p) {
-			cout << "\t\t found patch number " << (*p)->property("Number")->value() 
-			     << " with name: " << (*p)->property("Name")->value()  << endl;
+//			cout << "\t\t found patch number " << (*p)->property("Number")->value() 
+//			     << " with name: " << (*p)->property("Name")->value()  << endl;
 		}
 	}
 
@@ -82,8 +86,8 @@ int main()
 	
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
 		boost::shared_ptr<XMLNode> node = (*i);
-		cout << "\t found attribute node: " << node->name()  
-		     << " value: " << node->attribute_value() << endl;
+//		cout << "\t found attribute node: " << node->name()  
+//		     << " value: " << node->attribute_value() << endl;
 	}	
 	
 	cout << endl << endl << "Test 6: ProtoolsPatchFile.midnam: Find available channels on 'Name Set 1'" << endl;
@@ -93,8 +97,8 @@ int main()
 	assert(result->size() == 15);
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
 		boost::shared_ptr<XMLNode> node = (*i);
-		cout << "\t found available Channel: " << node->name()  
-		     << " value: " << node->attribute_value() << endl;
+//		cout << "\t found available Channel: " << node->name()  
+//		     << " value: " << node->attribute_value() << endl;
 	}	
 	
 }
