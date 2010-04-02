@@ -1,3 +1,7 @@
+all: waf
+
+waf:
+	./waf
 cscope: cscope.out
 
 cscope.out: cscope.files
@@ -6,4 +10,4 @@ cscope.out: cscope.files
 cscope.files:
 	find . -name '*.[ch]' -o -name '*.cc' > $@
 
-.PHONY: all cscope.files sconsi cscope
+.PHONY: all cscope.files sconsi cscope waf

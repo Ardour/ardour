@@ -461,6 +461,8 @@ def configure(conf):
 
 	autowaf.check_header(conf, 'boost/signals2.hpp', mandatory = True)
 
+	autowaf.check_header(conf, 'jack/session.h', define="JACK_SESSION")
+
 	conf.check_cc(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
 		      execute = "1",
 		      mandatory = True,
@@ -524,6 +526,8 @@ def configure(conf):
 	autowaf.display_msg(conf, 'VST Support', opts.vst)
 	if opts.vst:
 		conf.define('VST_SUPPORT', 1)
+	if bool(conf.env['JACK_SESSION']):
+		conf.define ('HAVE_JACK_SESSION', 1)
 	autowaf.display_msg(conf, 'Wiimote Support', opts.wiimote)
 	if opts.wiimote:
 		conf.define('WIIMOTE',1)

@@ -40,6 +40,10 @@
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
 
+#ifdef HAVE_JACK_SESSION
+#include <jack/session.h>
+#endif
+
 namespace ARDOUR {
 
 class InternalPort;
@@ -52,7 +56,7 @@ class AudioEngine : public SessionHandlePtr
    public:
 	typedef std::set<Port*> Ports;
 
-	AudioEngine (std::string client_name);
+	AudioEngine (std::string client_name, std::string session_uuid);
 	virtual ~AudioEngine ();
 
 	jack_client_t* jack() const;
@@ -201,6 +205,11 @@ _	   the regular process() call to session->process() is not made.
 
 	PBD::Signal0<void> GraphReordered;
 
+#ifdef HAVE_JACK_SESSION
+	PBD::Signal1<void,jack_session_event_t *> JackSessionEvent;
+#endif
+
+
 	/* this signal is emitted if the sample rate changes */
 
 	PBD::Signal1<void,nframes_t> SampleRateChanged;
@@ -263,6 +272,9 @@ _	   the regular process() call to session->process() is not made.
 	void port_registration_failure (const std::string& portname);
 
 	static int  _xrun_callback (void *arg);
+#ifdef HAVE_JACK_SESSION
+	static void _session_callback (jack_session_event_t *event, void *arg);
+#endif
 	static int  _graph_order_callback (void *arg);
 	static int  _process_callback (nframes_t nframes, void *arg);
 	static int  _sample_rate_callback (nframes_t nframes, void *arg);
@@ -277,7 +289,7 @@ _	   the regular process() call to session->process() is not made.
 	int  jack_bufsize_callback (nframes_t);
 	int  jack_sample_rate_callback (nframes_t);
 
-	int connect_to_jack (std::string client_name);
+	int connect_to_jack (std::string client_name, std::string session_uuid);
 
 	static void halted (void *);
 

@@ -725,6 +725,35 @@ Session::remove_state (string snapshot_name)
 	sys::remove (xml_path);
 }
 
+#ifdef HAVE_JACK_SESSION
+void
+Session::jack_session_event( jack_session_event_t * event )
+{
+	if (save_state ("jacksession_snap")) {
+                event->flags = JackSessionSaveError; 
+	} else {
+                sys::path xml_path (_session_dir->root_path());
+                xml_path /= legalize_for_path ("jacksession_snap") + statefile_suffix;
+                
+                string cmd ("PROG_NAME -U ");
+                cmd += event->client_uuid;
+                cmd += ' \"';
+                cmd += xml_path.to_string();
+                cmd += '\"';
+                
+                event->command_line = strdup (cmd.c_str());
+	}
+
+	jack_session_reply (_engine.jack(), event);
+
+	if (event->type == JackSessionSaveAndQuit) {
+                // TODO: make ardour quit.
+	}
+
+	jack_session_event_free( event );
+}
+#endif
+
 int
 Session::save_state (string snapshot_name, bool pending)
 {

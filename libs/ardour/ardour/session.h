@@ -54,6 +54,10 @@
 #include "ardour/timecode.h"
 #include "ardour/interpolation.h"
 
+#ifdef HAVE_JACK_SESSION
+#include <jack/session.h>
+#endif
+
 class XMLTree;
 class XMLNode;
 class AEffect;
@@ -348,6 +352,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	nframes_t worst_input_latency ()  const { return _worst_input_latency; }
 	nframes_t worst_track_latency ()  const { return _worst_track_latency; }
 
+#ifdef HAVE_JACK_SESSION 
+	void jack_session_event (jack_session_event_t* event);
+#endif
 	int save_state (std::string snapshot_name, bool pending = false);
 	int restore_state (std::string snapshot_name);
 	int save_template (std::string template_name);

@@ -61,7 +61,7 @@ AudioEngine* AudioEngine::_instance = 0;
 #define GET_PRIVATE_JACK_POINTER(j)  jack_client_t* _priv_jack = (jack_client_t*) (j); if (!_priv_jack) { return; }
 #define GET_PRIVATE_JACK_POINTER_RET(j,r) jack_client_t* _priv_jack = (jack_client_t*) (j); if (!_priv_jack) { return r; }
 
-AudioEngine::AudioEngine (string client_name)
+AudioEngine::AudioEngine (string client_name, string session_uuid)
 	: ports (new Ports)
 {
 	_instance = this; /* singleton */
@@ -81,7 +81,7 @@ AudioEngine::AudioEngine (string client_name)
 	m_meter_thread = 0;
 	g_atomic_int_set (&m_meter_exit, 0);
 
-	if (connect_to_jack (client_name)) {
+	if (connect_to_jack (client_name, session_uuid)) {
 		throw NoBackendAvailable ();
 	}
 
@@ -188,6 +188,10 @@ AudioEngine::start ()
 		jack_set_sample_rate_callback (_priv_jack, _sample_rate_callback, this);
 		jack_set_buffer_size_callback (_priv_jack, _bufsize_callback, this);
 		jack_set_xrun_callback (_priv_jack, _xrun_callback, this);
+#ifdef HAVE_JACK_SESSION 
+		if( jack_set_session_callback )
+		    jack_set_session_callback (_priv_jack, _session_callback, this);
+#endif
 		jack_set_sync_callback (_priv_jack, _jack_sync_callback, this);
 		jack_set_freewheel_callback (_priv_jack, _freewheel_callback, this);
 		jack_set_port_registration_callback (_priv_jack, _registration_callback, this);
@@ -299,6 +303,17 @@ AudioEngine::_xrun_callback (void *arg)
 	return 0;
 }
 
+#ifdef HAVE_JACK_SESSION
+void
+AudioEngine::_session_callback (jack_session_event_t *event, void *arg)
+{
+	printf( "helo.... " );
+	AudioEngine* ae = static_cast<AudioEngine*> (arg);
+	if (ae->connected()) {
+		ae->JackSessionEvent ( event ); /* EMIT SIGNAL */
+	}
+}
+#endif
 int
 AudioEngine::_graph_order_callback (void *arg)
 {
@@ -1133,14 +1148,19 @@ AudioEngine::remove_all_ports ()
 }
 
 int
-AudioEngine::connect_to_jack (string client_name)
+AudioEngine::connect_to_jack (string client_name, string session_uuid)
 {
 	jack_options_t options = JackNullOption;
 	jack_status_t status;
 	const char *server_name = NULL;
 
 	jack_client_name = client_name; /* might be reset below */
-	_jack = jack_client_open (jack_client_name.c_str(), options, &status, server_name);
+#ifdef HAVE_JACK_SESSION
+	if (! session_uuid.empty())
+	    _jack = jack_client_open (jack_client_name.c_str(), JackSessionID, &status, session_uuid.c_str());
+	else
+#endif
+	    _jack = jack_client_open (jack_client_name.c_str(), options, &status, server_name);
 
 	if (_jack == NULL) {
 		// error message is not useful here
@@ -1193,7 +1213,7 @@ AudioEngine::reconnect_to_jack ()
 		Glib::usleep (250000);
 	}
 
-	if (connect_to_jack (jack_client_name)) {
+	if (connect_to_jack (jack_client_name, "")) {
 		error << _("failed to connect to JACK") << endmsg;
 		return -1;
 	}
@@ -1236,6 +1256,10 @@ AudioEngine::reconnect_to_jack ()
 	jack_set_sample_rate_callback (_priv_jack, _sample_rate_callback, this);
 	jack_set_buffer_size_callback (_priv_jack, _bufsize_callback, this);
 	jack_set_xrun_callback (_priv_jack, _xrun_callback, this);
+#ifdef HAVE_JACK_SESSION
+	if( jack_set_session_callback )
+	    jack_set_session_callback (_priv_jack, _session_callback, this);
+#endif
 	jack_set_sync_callback (_priv_jack, _jack_sync_callback, this);
 	jack_set_freewheel_callback (_priv_jack, _freewheel_callback, this);
 
