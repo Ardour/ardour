@@ -107,6 +107,17 @@ def build(bld):
 	if bld.env['build_target'] == 'x86_64':
 		obj.cxxflags += [ '-DUSE_X86_64_ASM' ]
 
+	if bld.env['BUILD_TESTS'] and bld.env['HAVE_CPPUNIT']:
+		# Unit tests
+		testobj              = bld.new_task_gen('cxx', 'program')
+		testobj.source       = '''
+			test/xpath.cc
+		'''.split()
+		testobj.target       = 'run-tests'
+		testobj.includes     = obj.includes + ['test', '../pbd']
+		testobj.uselib       = 'XML'
+		testobj.uselib_local = 'libpbd'
+
 def shutdown():
 	autowaf.shutdown()
 

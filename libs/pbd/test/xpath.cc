@@ -5,10 +5,12 @@
 
 using namespace std;
 
+string const prefix = "../../libs/pbd/test/";
+
 int main()
 {
 	cout << "Test 1: RosegardenPatchFile.xml: Find all banks in the file" << endl;
-	XMLTree  doc("./RosegardenPatchFile.xml");
+	XMLTree  doc(prefix + "RosegardenPatchFile.xml");
 	// "//bank" gives as last element an empty element libxml bug????
 	boost::shared_ptr<XMLSharedNodeList> result = doc.root()->find("//bank[@name]");
 	
@@ -38,7 +40,7 @@ int main()
 	cout << endl << endl << "Test 3: TestSession.ardour: find all Sources where captured-for contains the string 'Guitar'" << endl;
 	
 	// We have to allocate a new document here, or we get segfaults
-	XMLTree doc2("./TestSession.ardour");
+	XMLTree doc2(prefix + "TestSession.ardour");
 	result = doc2.root()->find("/Session/Sources/Source[contains(@captured-for, 'Guitar')]");
 	assert(result->size() == 16);
 	
@@ -62,7 +64,7 @@ int main()
 	cout << endl << endl << "Test 5: ProtoolsPatchFile.midnam: Get Banks and Patches for 'Name Set 1'" << endl;
 	
 	// We have to allocate a new document here, or we get segfaults
-	XMLTree doc3("./ProtoolsPatchFile.midnam");
+	XMLTree doc3(prefix + "ProtoolsPatchFile.midnam");
 	result = doc3.root()->find("/MIDINameDocument/MasterDeviceNames/ChannelNameSet[@Name='Name Set 1']/PatchBank");
 	assert(result->size() == 16);
 	
