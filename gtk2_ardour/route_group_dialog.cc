@@ -141,7 +141,7 @@ RouteGroupDialog::do_run ()
 		plist.add (Properties::relative, _relative.get_active());
 		plist.add (Properties::active, _active.get_active());
 		plist.add (Properties::name, string (_name.get_text()));
-		
+
 		_group->set_properties (plist);
 	}
 

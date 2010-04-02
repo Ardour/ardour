@@ -81,7 +81,7 @@ private:
 	void add (ARDOUR::RouteGroup* group);
 	void remove_route_group ();
 	void groups_changed ();
-	void flags_changed (void*, ARDOUR::RouteGroup*);
+	void property_changed (ARDOUR::RouteGroup*, const PBD::PropertyChange &);
 	void set_activation (ARDOUR::RouteGroup *, bool);
 	void remove_selected ();
 	void run_new_group_dialog (const ARDOUR::RouteList&);
@@ -93,7 +93,7 @@ private:
 	Gtk::ScrolledWindow _scroller;
 	Gtk::VBox* _display_packer;
 	bool _in_row_change;
-	PBD::ScopedConnection flags_connection;
+	PBD::ScopedConnection property_changed_connection;
 };
 
 

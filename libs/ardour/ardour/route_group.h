@@ -128,8 +128,8 @@ class RouteGroup : public SessionObject
 
 	boost::shared_ptr<RouteList> route_list() { return routes; }
 
-	PBD::Signal0<void> changed;
-	PBD::Signal1<void,void*> FlagsChanged;
+	/** Emitted when a route has been added to or removed from this group */
+	PBD::Signal0<void> MembershipChanged;
 
 	XMLNode& get_state ();
 	

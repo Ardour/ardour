@@ -92,7 +92,7 @@ RouteGroup::RouteGroup (Session& s, const string &n)
 	, routes (new RouteList)
 	, ROUTE_GROUP_DEFAULT_PROPERTIES
 {
-	_xml_node_name = X_("RegionGroup");
+	_xml_node_name = X_("RouteGroup");
 
 	add_property (_relative);
 	add_property (_active);
@@ -135,7 +135,7 @@ RouteGroup::add (boost::shared_ptr<Route> r)
 	r->DropReferences.connect_same_thread (*this, boost::bind (&RouteGroup::remove_when_going_away, this, boost::weak_ptr<Route> (r)));
 	
 	_session.set_dirty ();
-	changed (); /* EMIT SIGNAL */
+	MembershipChanged (); /* EMIT SIGNAL */
 	return 0;
 }
 
@@ -158,7 +158,7 @@ RouteGroup::remove (boost::shared_ptr<Route> r)
 		r->leave_route_group ();
 		routes->erase (i);
 		_session.set_dirty ();
-		changed (); /* EMIT SIGNAL */
+		MembershipChanged (); /* EMIT SIGNAL */
 		return 0;
 	}
 
@@ -339,7 +339,6 @@ RouteGroup::set_active (bool yn, void *src)
 	}
 	_active = yn;
 	_session.set_dirty ();
-	FlagsChanged (src); /* EMIT SIGNAL */
 }
 
 void
@@ -351,7 +350,6 @@ RouteGroup::set_relative (bool yn, void *src)
 	}
 	_relative = yn;
 	_session.set_dirty ();
-	FlagsChanged (src); /* EMIT SIGNAL */
 }
 
 void
@@ -372,7 +370,6 @@ RouteGroup::set_hidden (bool yn, void *src)
 		}
 	}
 	_session.set_dirty ();
-	FlagsChanged (src); /* EMIT SIGNAL */
 }
 
 void
@@ -442,25 +439,10 @@ RouteGroup::destroy_subgroup ()
 bool
 RouteGroup::enabled_property (PBD::PropertyID prop)
 {
-	if (Properties::relative.property_id == prop) {
-		return is_relative();
-	} else if (Properties::active.property_id == prop) {
-		return is_active();
-	} else if (Properties::hidden.property_id == prop) {
-		return is_hidden();
-	} else if (Properties::gain.property_id == prop) {
-		return is_gain();
-	} else if (Properties::mute.property_id == prop) {
-		return is_mute();
-	} else if (Properties::solo.property_id == prop) {
-		return is_solo();
-	} else if (Properties::recenable.property_id == prop) {
-		return is_recenable();
-	} else if (Properties::select.property_id == prop) {
-		return is_select();
-	} else if (Properties::edit.property_id == prop) {
-		return is_edit();
+	OwnedPropertyList::iterator i = _properties->find (prop);
+	if (i == _properties->end()) {
+		return false;
 	}
 
-	return false;
+	return dynamic_cast<const PropertyTemplate<bool>* > (i->second)->val ();
 }

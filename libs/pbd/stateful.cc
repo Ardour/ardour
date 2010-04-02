@@ -220,6 +220,8 @@ Stateful::set_properties (const PropertyList& property_list)
 	
 	post_set ();
 
+	send_change (c);
+
 	return c;
 }
 

@@ -71,10 +71,7 @@ StatefulDiffCommand::operator() ()
 	boost::shared_ptr<Stateful> s (_object.lock());
 
 	if (s) {
-                PropertyChange changed = s->set_properties (*_redo);
-                if (!changed.empty()) {
-                        s->PropertyChanged (changed);
-                }
+                s->set_properties (*_redo);
 	}
 }
 
@@ -85,11 +82,7 @@ StatefulDiffCommand::undo ()
 
 	if (s) {
                 std::cerr << "Undoing a stateful diff command\n";
-                PropertyChange changed = s->set_properties (*_undo);
-                if (!changed.empty()) {
-                        std::cerr << "Sending changed\n";
-                        s->PropertyChanged (changed);
-                }
+                s->set_properties (*_undo);
 	}
 }
 

@@ -152,7 +152,7 @@ EditorGroupTabs::get_menu (RouteGroup *g)
 	return _editor->_route_groups->menu (g);
 }
 
-ARDOUR::RouteGroup *
+RouteGroup *
 EditorGroupTabs::new_route_group () const
 {
 	return _editor->_route_groups->new_route_group ();

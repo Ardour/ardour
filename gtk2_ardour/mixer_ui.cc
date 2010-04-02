@@ -1204,13 +1204,11 @@ Mixer_UI::remove_selected_route_group ()
 }
 
 void
-Mixer_UI::group_flags_changed (void* src, RouteGroup* group)
+Mixer_UI::route_group_property_changed (RouteGroup* group, const PropertyChange& change)
 {
 	if (in_group_row_change) {
 		return;
 	}
-
-	ENSURE_GUI_THREAD (*this, &Mixer_UI::group_flags_changed, src, group)
 
 	/* force an update of any mixer strips that are using this group,
 	   otherwise mix group names don't change in mixer strips
@@ -1238,7 +1236,9 @@ Mixer_UI::group_flags_changed (void* src, RouteGroup* group)
 
 	in_group_row_change = false;
 
-	_group_tabs->set_dirty ();
+	if (change.contains (Properties::name)) {
+		_group_tabs->set_dirty ();
+	}
 }
 
 void
@@ -1312,7 +1312,7 @@ Mixer_UI::add_route_group (RouteGroup* group)
 		focus = true;
 	}
 
-	group->FlagsChanged.connect (*this, invalidator (*this), ui_bind (&Mixer_UI::group_flags_changed, this, _1, group), gui_context());
+	group->PropertyChanged.connect (*this, invalidator (*this), ui_bind (&Mixer_UI::route_group_property_changed, this, group, _1), gui_context());
 
 	if (focus) {
 		TreeViewColumn* col = group_display.get_column (0);

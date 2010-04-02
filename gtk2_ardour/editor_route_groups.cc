@@ -586,7 +586,7 @@ EditorRouteGroups::add (RouteGroup* group)
 		focus = true;
 	}
 
-	group->FlagsChanged.connect (flags_connection, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::flags_changed, this, _1, group), gui_context());
+	group->PropertyChanged.connect (property_changed_connection, MISSING_INVALIDATOR, ui_bind (&EditorRouteGroups::property_changed, this, group, _1), gui_context());
 
 	if (focus) {
 		TreeViewColumn* col = _display.get_column (0);
@@ -622,10 +622,8 @@ EditorRouteGroups::groups_changed ()
 }
 
 void
-EditorRouteGroups::flags_changed (void*, RouteGroup* group)
+EditorRouteGroups::property_changed (RouteGroup* group, const PropertyChange& change)
 {
-        ENSURE_GUI_THREAD (*this, &EditorRouteGroups::flags_changed, src, group)
-
 	_in_row_change = true;
 
         Gtk::TreeModel::Children children = _model->children();
@@ -645,7 +643,9 @@ EditorRouteGroups::flags_changed (void*, RouteGroup* group)
 
 	_in_row_change = false;
 
-	_editor->_group_tabs->set_dirty ();
+	if (change.contains (Properties::name) || change.contains (Properties::active)) {
+		_editor->_group_tabs->set_dirty ();
+	}
 }
 
 void
