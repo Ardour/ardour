@@ -2,19 +2,30 @@
 
 using namespace PBD;
 
+namespace Properties {
+	PBD::PropertyDescriptor<int> fred;
+};
+
+ScalarPropertiesTest::ScalarPropertiesTest ()
+	: _fred (Properties::fred, 0)
+{
+
+}
+
+void
 ScalarPropertiesTest::testBasic ()
 {
-	CPPUNIT_ASSERT (_property.changed() == false);
+	CPPUNIT_ASSERT (_fred.changed() == false);
 	
-	_property = 4;
-	CPPUNIT_ASSERT (_property == 4);
-	CPPUNIT_ASSERT (_property.changed() == true);
+	_fred = 4;
+	CPPUNIT_ASSERT (_fred == 4);
+	CPPUNIT_ASSERT (_fred.changed() == true);
 
-	_property = 5;
-	CPPUNIT_ASSERT (_property == 5);
-	CPPUNIT_ASSERT (_property.changed() == true);
+	_fred = 5;
+	CPPUNIT_ASSERT (_fred == 5);
+	CPPUNIT_ASSERT (_fred.changed() == true);
 
 	PropertyList undo;
 	PropertyList redo;
-	_property.diff (undo, redo);
+	_fred.diff (undo, redo);
 }
