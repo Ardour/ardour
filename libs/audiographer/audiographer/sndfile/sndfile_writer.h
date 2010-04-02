@@ -10,6 +10,8 @@
 #include "audiographer/types.h"
 #include "audiographer/sndfile/sndfile_base.h"
 
+#include "pbd/signals.h"
+
 namespace AudioGrapher
 {
 
@@ -62,7 +64,7 @@ class SndfileWriter
 	
 	using Sink<T>::process;
 	
-	boost::signals2::signal<void (std::string)> FileWritten;
+	PBD::Signal1<void, std::string> FileWritten;
 
   protected:
 	/// SndfileHandle has to be constructed directly by deriving classes

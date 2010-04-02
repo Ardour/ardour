@@ -258,6 +258,8 @@ def configure(conf):
 	# Boost headers
 	autowaf.check_header(conf, 'boost/shared_ptr.hpp')
 	autowaf.check_header(conf, 'boost/weak_ptr.hpp')
+	autowaf.check_header(conf, 'boost/scoped_ptr.hpp')
+	autowaf.check_header(conf, 'boost/ptr_container/ptr_list.hpp')
 
 
 def build(bld):

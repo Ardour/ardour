@@ -109,9 +109,7 @@ ExportGraphBuilder::add_split_config (FileSpec const & config)
 	}
 	
 	// No duplicate channel config found, create new one
-	channel_configs.push_back (ChannelConfig (*this));
-	ChannelConfig & c_config (channel_configs.back());
-	c_config.init (config, channels);
+	channel_configs.push_back (new ChannelConfig (*this, config, channels));
 }
 
 /* Encoder */
@@ -171,7 +169,7 @@ ExportGraphBuilder::Encoder::init_writer (boost::shared_ptr<AudioGrapher::Sndfil
 	Glib::ustring filename = config.filename->get_path (config.format);
 	
 	writer.reset (new AudioGrapher::SndfileWriter<T> (filename, format, channels, config.format->sample_rate()));
-	writer->FileWritten.connect (sigc::mem_fun (*this, &ExportGraphBuilder::Encoder::copy_files));
+	writer->FileWritten.connect_same_thread (copy_files_connection, boost::bind (&ExportGraphBuilder::Encoder::copy_files, this, _1));
 }
 
 void
@@ -186,8 +184,8 @@ ExportGraphBuilder::Encoder::copy_files (std::string orig_path)
 
 /* SFC */
 
-ExportGraphBuilder::FloatSinkPtr
-ExportGraphBuilder::SFC::init (FileSpec const & new_config, nframes_t max_frames)
+ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &, FileSpec const & new_config, nframes_t max_frames)
+  : data_width(0)
 {
 	config = new_config;
 	data_width = sndfile_data_width (Encoder::get_real_format (config));
@@ -197,16 +195,25 @@ ExportGraphBuilder::SFC::init (FileSpec const & new_config, nframes_t max_frames
 		short_converter = ShortConverterPtr (new SampleFormatConverter<short> (channels));
 		short_converter->init (max_frames, config.format->dither_type(), data_width);
 		add_child (config);
-		return short_converter;
 	} else if (data_width == 24 || data_width == 32) {
 		int_converter = IntConverterPtr (new SampleFormatConverter<int> (channels));
 		int_converter->init (max_frames, config.format->dither_type(), data_width);
 		add_child (config);
-		return int_converter;
 	} else {
 		float_converter = FloatConverterPtr (new SampleFormatConverter<Sample> (channels));
 		float_converter->init (max_frames, config.format->dither_type(), data_width);
 		add_child (config);
+	}
+}
+
+ExportGraphBuilder::FloatSinkPtr
+ExportGraphBuilder::SFC::sink ()
+{
+	if (data_width == 8 || data_width == 16) {
+		return short_converter;
+	} else if (data_width == 24 || data_width == 32) {
+		return int_converter;
+	} else {
 		return float_converter;
 	}
 }
@@ -214,14 +221,14 @@ ExportGraphBuilder::SFC::init (FileSpec const & new_config, nframes_t max_frames
 void
 ExportGraphBuilder::SFC::add_child (FileSpec const & new_config)
 {
-	for (std::list<Encoder>::iterator it = children.begin(); it != children.end(); ++it) {
+	for (boost::ptr_list<Encoder>::iterator it = children.begin(); it != children.end(); ++it) {
 		if (*it == new_config) {
 			it->add_child (new_config);
 			return;
 		}
 	}
 	
-	children.push_back (Encoder());
+	children.push_back (new Encoder());
 	Encoder & encoder = children.back();
 	
 	if (data_width == 8 || data_width == 16) {
@@ -241,8 +248,8 @@ ExportGraphBuilder::SFC::operator== (FileSpec const & other_config) const
 
 /* Normalizer */
 
-ExportGraphBuilder::FloatSinkPtr
-ExportGraphBuilder::Normalizer::init (FileSpec const & new_config, nframes_t /*max_frames*/)
+ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpec const & new_config, nframes_t /*max_frames*/)
+  : parent (parent)
 {
 	config = new_config;
 	max_frames_out = 4086; // TODO good chunk size
@@ -258,26 +265,31 @@ ExportGraphBuilder::Normalizer::init (FileSpec const & new_config, nframes_t /*m
 	int format = ExportFormatBase::F_RAW | ExportFormatBase::SF_Float;
 	tmp_file.reset (new TmpFile<float> (format, config.channel_config->get_n_chans(), 
 	                                    config.format->sample_rate()));
-	tmp_file->FileWritten.connect (sigc::hide (sigc::mem_fun (*this, &Normalizer::start_post_processing)));
+	tmp_file->FileWritten.connect_same_thread (post_processing_connection, boost::bind (&Normalizer::start_post_processing, this));
 	
 	add_child (new_config);
 	
 	peak_reader->add_output (tmp_file);
+}
+
+ExportGraphBuilder::FloatSinkPtr
+ExportGraphBuilder::Normalizer::sink ()
+{
 	return peak_reader;
 }
 
 void
 ExportGraphBuilder::Normalizer::add_child (FileSpec const & new_config)
 {
-	for (std::list<SFC>::iterator it = children.begin(); it != children.end(); ++it) {
+	for (boost::ptr_list<SFC>::iterator it = children.begin(); it != children.end(); ++it) {
 		if (*it == new_config) {
 			it->add_child (new_config);
 			return;
 		}
 	}
 	
-	children.push_back (SFC (parent));
-	threader->add_output (children.back().init (new_config, max_frames_out));
+	children.push_back (new SFC (parent, new_config, max_frames_out));
+	threader->add_output (children.back().sink());
 }
 
 bool
@@ -305,8 +317,8 @@ ExportGraphBuilder::Normalizer::start_post_processing()
 
 /* SRC */
 
-ExportGraphBuilder::FloatSinkPtr
-ExportGraphBuilder::SRC::init (FileSpec const & new_config, nframes_t max_frames)
+ExportGraphBuilder::SRC::SRC (ExportGraphBuilder & parent, FileSpec const & new_config, nframes_t max_frames)
+  : parent (parent)
 {
 	config = new_config;
 	converter.reset (new SampleRateConverter (new_config.channel_config->get_n_chans()));
@@ -315,7 +327,11 @@ ExportGraphBuilder::SRC::init (FileSpec const & new_config, nframes_t max_frames
 	max_frames_out = converter->allocate_buffers (max_frames);
 	
 	add_child (new_config);
-	
+}
+
+ExportGraphBuilder::FloatSinkPtr
+ExportGraphBuilder::SRC::sink ()
+{
 	return converter;
 }
 
@@ -331,17 +347,17 @@ ExportGraphBuilder::SRC::add_child (FileSpec const & new_config)
 
 template<typename T>
 void
-ExportGraphBuilder::SRC::add_child_to_list (FileSpec const & new_config, std::list<T> & list)
+ExportGraphBuilder::SRC::add_child_to_list (FileSpec const & new_config, boost::ptr_list<T> & list)
 {
-	for (typename std::list<T>::iterator it = list.begin(); it != list.end(); ++it) {
+	for (typename boost::ptr_list<T>::iterator it = list.begin(); it != list.end(); ++it) {
 		if (*it == new_config) {
 			it->add_child (new_config);
 			return;
 		}
 	}
 	
-	list.push_back (T (parent));
-	converter->add_output (list.back().init (new_config, max_frames_out));
+	list.push_back (new T (parent, new_config, max_frames_out));
+	converter->add_output (list.back().sink ());
 }
 
 bool
@@ -351,8 +367,8 @@ ExportGraphBuilder::SRC::operator== (FileSpec const & other_config) const
 }
 
 /* SilenceHandler */
-ExportGraphBuilder::FloatSinkPtr
-ExportGraphBuilder::SilenceHandler::init (FileSpec const & new_config, nframes_t max_frames)
+ExportGraphBuilder::SilenceHandler::SilenceHandler (ExportGraphBuilder & parent, FileSpec const & new_config, nframes_t max_frames)
+  : parent (parent)
 {
 	config = new_config;
 	max_frames_in = max_frames;
@@ -365,22 +381,26 @@ ExportGraphBuilder::SilenceHandler::init (FileSpec const & new_config, nframes_t
 	silence_trimmer->add_silence_to_end (config.format->silence_end(sample_rate));
 	
 	add_child (new_config);
-	
+}
+
+ExportGraphBuilder::FloatSinkPtr
+ExportGraphBuilder::SilenceHandler::sink ()
+{
 	return silence_trimmer;
 }
 
 void
 ExportGraphBuilder::SilenceHandler::add_child (FileSpec const & new_config)
 {
-	for (std::list<SRC>::iterator it = children.begin(); it != children.end(); ++it) {
+	for (boost::ptr_list<SRC>::iterator it = children.begin(); it != children.end(); ++it) {
 		if (*it == new_config) {
 			it->add_child (new_config);
 			return;
 		}
 	}
 	
-	children.push_back (SRC (parent));
-	silence_trimmer->add_output (children.back().init (new_config, max_frames_in));
+	children.push_back (new SRC (parent, new_config, max_frames_in));
+	silence_trimmer->add_output (children.back().sink());
 }
 
 bool
@@ -396,8 +416,8 @@ ExportGraphBuilder::SilenceHandler::operator== (FileSpec const & other_config) c
 
 /* ChannelConfig */
 
-void
-ExportGraphBuilder::ChannelConfig::init (FileSpec const & new_config, ChannelMap & channel_map)
+ExportGraphBuilder::ChannelConfig::ChannelConfig (ExportGraphBuilder & parent, FileSpec const & new_config, ChannelMap & channel_map)
+  : parent (parent)
 {
 	typedef ExportChannelConfiguration::ChannelList ChannelList;
 	
@@ -426,16 +446,16 @@ ExportGraphBuilder::ChannelConfig::init (FileSpec const & new_config, ChannelMap
 void
 ExportGraphBuilder::ChannelConfig::add_child (FileSpec const & new_config)
 {
-	for (std::list<SilenceHandler>::iterator it = children.begin(); it != children.end(); ++it) {
+	for (boost::ptr_list<SilenceHandler>::iterator it = children.begin(); it != children.end(); ++it) {
 		if (*it == new_config) {
 			it->add_child (new_config);
 			return;
 		}
 	}
 	
-	children.push_back (SilenceHandler (parent));
 	nframes_t max_frames_out = new_config.channel_config->get_n_chans() * max_frames;
-	interleaver->add_output (children.back().init (new_config, max_frames_out));
+	children.push_back (new SilenceHandler (parent, new_config, max_frames_out));
+	interleaver->add_output (children.back().sink ());
 }
 
 bool

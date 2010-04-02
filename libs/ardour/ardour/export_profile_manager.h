@@ -124,13 +124,12 @@ class ExportProfileManager
 
 		TimespanState (boost::shared_ptr<Location> session_range,
 		               boost::shared_ptr<Location> selection_range,
-		               boost::shared_ptr<LocationList> ranges) :
-		  timespans (new TimespanList ()),
-		  time_format (Timecode),
-
-		  session_range (session_range),
-		  selection_range (selection_range),
-		  ranges (ranges)
+		               boost::shared_ptr<LocationList> ranges)
+		  : timespans (new TimespanList ())
+		  , time_format (Timecode)
+		  , session_range (session_range)
+		  , selection_range (selection_range)
+		  , ranges (ranges)
 		{}
 	};
 

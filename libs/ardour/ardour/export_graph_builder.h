@@ -28,6 +28,7 @@
 
 #include "audiographer/utils/identity_vertex.h"
 
+#include <boost/ptr_container/ptr_list.hpp>
 #include <glibmm/threadpool.h>
 
 namespace AudioGrapher {
@@ -71,7 +72,7 @@ class ExportGraphBuilder
 	
 	void add_split_config (FileSpec const & config);
 	
-	class Encoder : public sigc::trackable {
+	class Encoder {
 	  public:
 		template <typename T> boost::shared_ptr<AudioGrapher::Sink<T> > init (FileSpec const & new_config);
 		void add_child (FileSpec const & new_config);
@@ -89,6 +90,7 @@ class ExportGraphBuilder
 		
 		FileSpec               config;
 		std::list<FilenamePtr> filenames;
+		PBD::ScopedConnection  copy_files_connection;
 		
 		// Only one of these should be available at a time
 		FloatWriterPtr float_writer;
@@ -100,8 +102,8 @@ class ExportGraphBuilder
 	class SFC {
 	  public:
 		// This constructor so that this can be constructed like a Normalizer
-		SFC (ExportGraphBuilder &) : data_width(0) {}
-		FloatSinkPtr init (FileSpec const & new_config, nframes_t max_frames);
+		SFC (ExportGraphBuilder &, FileSpec const & new_config, nframes_t max_frames);
+		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;
 		
@@ -111,19 +113,19 @@ class ExportGraphBuilder
 		typedef boost::shared_ptr<AudioGrapher::SampleFormatConverter<short> > ShortConverterPtr;
 		
 		FileSpec           config;
-		std::list<Encoder> children;
+		boost::ptr_list<Encoder> children;
 		int                data_width;
 		
 		// Only one of these should be available at a time
 		FloatConverterPtr float_converter;
-		IntConverterPtr   int_converter;
+		IntConverterPtr int_converter;
 		ShortConverterPtr short_converter;
 	};
 	
-	class Normalizer : public sigc::trackable {
+	class Normalizer {
 	  public:
-		Normalizer (ExportGraphBuilder & parent) : parent (parent) {}
-		FloatSinkPtr init (FileSpec const & new_config, nframes_t max_frames);
+		Normalizer (ExportGraphBuilder & parent, FileSpec const & new_config, nframes_t max_frames);
+		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;
 		
@@ -149,14 +151,16 @@ class ExportGraphBuilder
 		TmpFilePtr      tmp_file;
 		NormalizerPtr   normalizer;
 		ThreaderPtr     threader;
-		std::list<SFC>  children;
+		boost::ptr_list<SFC> children;
+		
+		PBD::ScopedConnection post_processing_connection;
 	};
 	
 	// sample rate converter
 	class SRC {
 	  public:
-		SRC (ExportGraphBuilder & parent) : parent (parent) {}
-		FloatSinkPtr init (FileSpec const & new_config, nframes_t max_frames);
+		SRC (ExportGraphBuilder & parent, FileSpec const & new_config, nframes_t max_frames);
+		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;
 		
@@ -164,12 +168,12 @@ class ExportGraphBuilder
 		typedef boost::shared_ptr<AudioGrapher::SampleRateConverter> SRConverterPtr;
 		
 		template<typename T>
-		void add_child_to_list (FileSpec const & new_config, std::list<T> & list);
+		void add_child_to_list (FileSpec const & new_config, boost::ptr_list<T> & list);
   
 		ExportGraphBuilder &  parent;
 		FileSpec              config;
-		std::list<SFC>        children;
-		std::list<Normalizer> normalized_children;
+		boost::ptr_list<SFC>  children;
+		boost::ptr_list<Normalizer> normalized_children;
 		SRConverterPtr        converter;
 		nframes_t             max_frames_out;
 	};
@@ -177,8 +181,8 @@ class ExportGraphBuilder
 	// Silence trimmer + adder
 	class SilenceHandler {
 	  public:
-		SilenceHandler (ExportGraphBuilder & parent) : parent (parent) {}
-		FloatSinkPtr init (FileSpec const & new_config, nframes_t max_frames);
+		SilenceHandler (ExportGraphBuilder & parent, FileSpec const & new_config, nframes_t max_frames);
+		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;
 		
@@ -187,7 +191,7 @@ class ExportGraphBuilder
 		
 		ExportGraphBuilder & parent;
 		FileSpec             config;
-		std::list<SRC>       children;
+		boost::ptr_list<SRC> children;
 		SilenceTrimmerPtr    silence_trimmer;
 		nframes_t            max_frames_in;
 	};
@@ -195,8 +199,7 @@ class ExportGraphBuilder
 	// channel configuration
 	class ChannelConfig {
 	  public:
-		ChannelConfig (ExportGraphBuilder & parent) : parent (parent) {}
-		void init (FileSpec const & new_config, ChannelMap & channel_map);
+		ChannelConfig (ExportGraphBuilder & parent, FileSpec const & new_config, ChannelMap & channel_map);
 		void add_child (FileSpec const & new_config);
 		bool operator== (FileSpec const & other_config) const;
 		
@@ -205,7 +208,7 @@ class ExportGraphBuilder
 		
 		ExportGraphBuilder &      parent;
 		FileSpec                  config;
-		std::list<SilenceHandler> children;
+		boost::ptr_list<SilenceHandler> children;
 		InterleaverPtr            interleaver;
 		nframes_t                 max_frames;
 	};
@@ -213,7 +216,7 @@ class ExportGraphBuilder
 	Session const & session;
 	
 	// Roots for export processor trees
-	typedef std::list<ChannelConfig> ChannelConfigList;
+	typedef boost::ptr_list<ChannelConfig> ChannelConfigList;
 	ChannelConfigList channel_configs;
 	
 	// The sources of all data, each channel is read only once

@@ -21,7 +21,7 @@
 #ifndef __export_dialog_h__
 #define __export_dialog_h__
 
-#include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 
 #include "ardour/export_profile_manager.h"
 
@@ -75,10 +75,10 @@ class ExportDialog : public ArdourDialog {
 	// Must initialize all the shared_ptrs below
 	virtual void init_components ();
 
-	boost::shared_ptr<ExportPresetSelector>   preset_selector;
-	boost::shared_ptr<ExportTimespanSelector> timespan_selector;
-	boost::shared_ptr<ExportChannelSelector>  channel_selector;
-	boost::shared_ptr<ExportFileNotebook>     file_notebook;
+	boost::scoped_ptr<ExportPresetSelector>   preset_selector;
+	boost::scoped_ptr<ExportTimespanSelector> timespan_selector;
+	boost::scoped_ptr<ExportChannelSelector>  channel_selector;
+	boost::scoped_ptr<ExportFileNotebook>     file_notebook;
 
 	Gtk::VBox                                 warning_widget;
 	Gtk::VBox                                 progress_widget;
