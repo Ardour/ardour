@@ -20,6 +20,9 @@ EventLoop::set_event_loop_for_thread (EventLoop* loop)
 	thread_event_loop.set (loop, do_not_delete_the_loop_pointer); 
 }
 
+/** Called when a sigc::trackable that was connected to using the invalidator() macro
+ *  is destroyed.
+ */
 void* 
 EventLoop::invalidate_request (void* data)
 {

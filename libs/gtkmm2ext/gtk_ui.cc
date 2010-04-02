@@ -369,6 +369,10 @@ UI::idle_add (int (*func)(void *), void *arg)
 
 /* END abstract_ui interfaces */
 
+/** Create a PBD::EventLoop::InvalidationRecord and attach a callback
+ *  to a given sigc::trackable so that PBD::EventLoop::invalidate_request
+ *  is called when that trackable is destroyed.
+ */
 PBD::EventLoop::InvalidationRecord*
 __invalidator (sigc::trackable& trackable, const char* file, int line)
 {
