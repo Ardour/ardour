@@ -39,6 +39,7 @@ extern std::string keybindings_path;
 extern Glib::ustring menus_file;
 extern bool   finder_invoked_ardour;
 extern std::string immediate_save;
+extern std::string jack_session_uuid;
 
 extern int32_t parse_opts (int argc, char *argv[]);
 

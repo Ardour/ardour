@@ -44,6 +44,7 @@ string ARDOUR_COMMAND_LINE::keybindings_path = ""; /* empty means use builtin de
 Glib::ustring ARDOUR_COMMAND_LINE::menus_file = "ardour.menus";
 bool ARDOUR_COMMAND_LINE::finder_invoked_ardour = false;
 string ARDOUR_COMMAND_LINE::immediate_save;
+string ARDOUR_COMMAND_LINE::jack_session_uuid;
 
 using namespace ARDOUR_COMMAND_LINE;
 
@@ -105,6 +106,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		{ "sync", 0, 0, 'S' },
 		{ "curvetest", 1, 0, 'C' },
 		{ "save", 1, 0, 'E' },
+		{ "uuid", 1, 0, 'U' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -191,6 +193,9 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		case 'E':
 			immediate_save = optarg;
 			break;
+
+		case 'U':
+			jack_session_uuid = optarg;
 
 		default:
 			return print_help(execname);
