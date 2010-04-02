@@ -82,9 +82,9 @@ class MIDIClock_SlaveTest : public CppUnit::TestFixture, ARDOUR::MIDIClock_Slave
     CPPUNIT_TEST_SUITE_END();
 
     public:
+	MIDIClock_SlaveTest () : MIDIClock_Slave (new TestSlaveSessionProxy) {}
        	
         void setUp() {
-          session = new TestSlaveSessionProxy ();
         }
         
         void tearDown() {
