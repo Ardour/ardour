@@ -36,6 +36,7 @@
 #include "ardour/export_handler.h"
 #include "ardour/export_failed.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/route.h"
 #include "ardour/session.h"
 
 #include "i18n.h"
@@ -221,20 +222,20 @@ ExportProfileManager::load_preset_from_disk (PBD::sys::path const & path)
 bool
 ExportProfileManager::set_state (XMLNode const & root)
 {
-	return set_global_state (root) && set_local_state (root);
+	return set_global_state (root) & set_local_state (root);
 }
 
 bool
 ExportProfileManager::set_global_state (XMLNode const & root)
 {
-	return init_filenames (root.children ("ExportFilename")) &&
+	return init_filenames (root.children ("ExportFilename")) &
 	       init_formats (root.children ("ExportFormat"));
 }
 
 bool
 ExportProfileManager::set_local_state (XMLNode const & root)
 {
-	return init_timespans (root.children ("ExportTimespan")) &&
+	return init_timespans (root.children ("ExportTimespan")) &
 	       init_channel_configs (root.children ("ExportChannelConfiguration"));
 }
 
@@ -326,8 +327,15 @@ ExportProfileManager::init_timespans (XMLNodeList nodes)
 	}
 
 	if (timespans.empty()) {
-		TimespanStatePtr timespan (new TimespanState (session_range, selection_range, ranges));
-		timespans.push_back (timespan);
+		TimespanStatePtr state (new TimespanState (session_range, selection_range, ranges));
+		timespans.push_back (state);
+		
+		// Add session as default selection
+		TimespanPtr timespan = handler->add_timespan();
+		timespan->set_name (session_range->name());
+		timespan->set_range_id ("session");
+		timespan->set_range (session_range->start(), session_range->end());
+		state->timespans->push_back (timespan);
 		return false;
 	}
 
@@ -425,6 +433,18 @@ ExportProfileManager::init_channel_configs (XMLNodeList nodes)
 	if (nodes.empty()) {
 		ChannelConfigStatePtr config (new ChannelConfigState (handler->add_channel_config()));
 		channel_configs.push_back (config);
+		
+		// Add master outs as default
+		IO* master_out = session.master_out()->output().get();
+		if (!master_out) { return false; }
+		
+		for (uint32_t n = 0; n < master_out->n_ports().n_audio(); ++n) {
+			PortExportChannel * channel = new PortExportChannel ();
+			channel->add_port (master_out->audio (n));
+			
+			ExportChannelPtr chan_ptr (channel);
+			config->config->register_channel (chan_ptr);
+		}
 		return false;
 	}
 
