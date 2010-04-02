@@ -343,6 +343,12 @@ Diskstream::set_speed (double sp)
 int
 Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 {
+        if (!playlist) {
+                return;
+        }
+
+        bool no_prior_playlist = true;
+
 	{
 		Glib::Mutex::Lock lm (state_lock);
 
@@ -354,6 +360,7 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 
 		if (_playlist) {
 			_playlist->release();
+                        no_prior_playlist = false;
 		}
 
 		_playlist = playlist;
@@ -373,7 +380,7 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 	   take care of the buffer refill.
 	*/
 
-	if (!overwrite_queued && !(_session.state_of_the_state() & Session::CannotSave)) {
+	if (!overwrite_queued && no_prior_playlist) {
 		_session.request_overwrite_buffer (this);
 		overwrite_queued = true;
 	}
