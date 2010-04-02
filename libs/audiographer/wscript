@@ -71,6 +71,7 @@ def build(bld):
 	audiographer.export_incdirs = ['.', './src']
 	audiographer.includes       = ['.', './src']
 	audiographer.uselib         = 'GLIB GLIBMM GTHREAD SAMPLERATE SNDFILE'
+	audiographer.uselib_local   = 'libpbd'
 	audiographer.vnum           = AUDIOGRAPHER_LIB_VERSION
 	audiographer.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
 	
