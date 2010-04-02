@@ -328,7 +328,7 @@ def build(bld):
 			test/midi_clock_slave_test.cpp
 			test/testrunner.cpp
 		'''.split()
-		testobj.includes     = obj.includes + ['../pbd/']
+		testobj.includes     = obj.includes + ['test', '../pbd']
 		testobj.uselib       = 'CPPUNIT SIGCPP JACK GLIBMM GTHREAD SAMPLERATE XML LRDF COREAUDIO'
 		testobj.uselib_local = 'libpbd libmidipp libardour'
 		testobj.name         = 'libardour-tests'
