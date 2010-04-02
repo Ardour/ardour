@@ -43,6 +43,7 @@ public:
     ~Application ();
 
     void                     ready ();
+    void                     cleanup ();
     void                     set_menu_bar (Gtk::MenuShell&);
     GtkApplicationMenuGroup* add_app_menu_group ();
     void                     add_app_menu_item (GtkApplicationMenuGroup*, Gtk::MenuItem*);

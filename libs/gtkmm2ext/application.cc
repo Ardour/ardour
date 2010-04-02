@@ -59,6 +59,12 @@ Application::ready ()
 }
 
 void
+Application::cleanup ()
+{
+	gtk_application_cleanup ();
+}
+
+void
 Application::set_menu_bar (MenuShell& shell)
 {
 	gtk_application_set_menu_bar (shell.gobj());

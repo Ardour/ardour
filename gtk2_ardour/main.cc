@@ -37,6 +37,8 @@
 #include <ardour/audioengine.h>
 
 #include <gtkmm/main.h>
+
+#include <gtkmm2ext/application.h>
 #include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/utils.h>
 
@@ -394,6 +396,7 @@ int main (int argc, char* argv[])
 	}
 
 	ui->run (text_receiver);
+	Gtkmm2ext::Application::instance()->cleanup();
 	ui = 0;
 
 	ARDOUR::cleanup ();
