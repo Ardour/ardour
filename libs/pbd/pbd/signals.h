@@ -33,7 +33,6 @@
 namespace PBD {
 
 typedef boost::signals2::connection UnscopedConnection;
-typedef boost::signals2::connection Connection;
 typedef boost::signals2::scoped_connection ScopedConnection;
 
 class ScopedConnectionList  : public boost::noncopyable
@@ -77,7 +76,7 @@ public:
     Signal0 () {}
     typedef boost::signals2::signal<R()> SignalType;
 
-    void connect_same_thread (Connection& c, 
+    void connect_same_thread (ScopedConnection& c, 
 		  const typename SignalType::slot_function_type& slot) {
 	    c = _signal.connect (slot);
     }
@@ -94,7 +93,7 @@ public:
 	    clist.add_connection (_signal.connect (boost::bind (&EventLoop::call_slot, event_loop, ir, slot)));
     }
     
-    void connect (Connection& c, 
+    void connect (ScopedConnection& c, 
                   PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
@@ -122,7 +121,7 @@ public:
 	    clist.add_connection (_signal.connect (slot));
     }
 
-    void connect_same_thread (Connection& c, 
+    void connect_same_thread (ScopedConnection& c, 
 		     const typename SignalType::slot_function_type& slot) {
 	    c = _signal.connect (slot);
     }
@@ -138,7 +137,7 @@ public:
 	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1)));
     }
 
-    void connect (Connection& c, 
+    void connect (ScopedConnection& c, 
                   PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
@@ -167,7 +166,7 @@ public:
 	    clist.add_connection (_signal.connect (slot));
     }
 
-    void connect_same_thread (Connection& c, 
+    void connect_same_thread (ScopedConnection& c, 
 		     const typename SignalType::slot_function_type& slot) {
 	    c = _signal.connect (slot);
     }
@@ -185,7 +184,7 @@ public:
 	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2)));
     }
 
-    void connect (Connection& c, 
+    void connect (ScopedConnection& c, 
                   PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
@@ -213,7 +212,7 @@ public:
 	    clist.add_connection (_signal.connect (slot));
     }
 
-    void connect_same_thread (Connection& c, 
+    void connect_same_thread (ScopedConnection& c, 
 			      const typename SignalType::slot_function_type& slot) {
 	    c = _signal.connect (slot);
     }
@@ -231,7 +230,7 @@ public:
 	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2, _3)));
     }
     
-    void connect (Connection& c, 
+    void connect (ScopedConnection& c, 
                   PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {
@@ -259,7 +258,7 @@ public:
 	    clist.add_connection (_signal.connect (slot));
     }
 
-    void connect_same_thread (Connection& c, 
+    void connect_same_thread (ScopedConnection& c, 
 			      const typename SignalType::slot_function_type& slot) {
 	    c = _signal.connect (slot);
     }
@@ -277,7 +276,7 @@ public:
 	    clist.add_connection (_signal.connect (boost::bind (&compositor, slot, event_loop, ir, _1, _2, _3, _4)));
     }
     
-    void connect (Connection& c, 
+    void connect (ScopedConnection& c, 
                   PBD::EventLoop::InvalidationRecord* ir, 
 		  const typename SignalType::slot_function_type& slot,
 		  PBD::EventLoop* event_loop) {

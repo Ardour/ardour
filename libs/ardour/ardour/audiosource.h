@@ -72,7 +72,7 @@ class AudioSource : virtual public Source,
 			framepos_t start, framecnt_t cnt, double samples_per_visual_peak) const;
 
 	int  build_peaks ();
-	bool peaks_ready (boost::function<void()> callWhenReady, PBD::Connection& connection_created_if_not_ready, PBD::EventLoop* event_loop) const;
+	bool peaks_ready (boost::function<void()> callWhenReady, PBD::ScopedConnection& connection_created_if_not_ready, PBD::EventLoop* event_loop) const;
 
 	mutable PBD::Signal0<void>  PeaksReady;
 	mutable PBD::Signal2<void,framepos_t,framepos_t>  PeakRangeReady;

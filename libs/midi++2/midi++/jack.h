@@ -89,8 +89,8 @@ private:
 	CrossThreadChannel xthread;
 	std::string    _inbound_connections;
 	std::string    _outbound_connections;
-	PBD::Connection connect_connection;
-	PBD::Connection halt_connection;
+	PBD::ScopedConnection connect_connection;
+	PBD::ScopedConnection halt_connection;
 	void flush (void* jack_port_buffer);
 	void jack_halted ();
 	void make_connections();

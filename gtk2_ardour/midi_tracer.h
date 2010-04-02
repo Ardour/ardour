@@ -54,7 +54,7 @@ class MidiTracer : public ArdourDialog
 
 	void connect ();
 	void disconnect ();
-	PBD::Connection connection;
+	PBD::ScopedConnection connection;
 };
 
 #endif /* __ardour_gtk_midi_tracer_h__ */

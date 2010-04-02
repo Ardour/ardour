@@ -933,10 +933,6 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 
 		/* we are stopped and we want to start rolling at speed 1 */
 
-		if (!get_record_enabled() && Config->get_stop_at_session_end() && _transport_frame >= current_end_frame()) {
-			return;
-		}
-
 		if (Config->get_monitoring_model() == HardwareMonitoring) {
 
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
@@ -956,12 +952,6 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 		}
 
 	} else {
-
-		/* if not recording, don't roll forward past end if told to stop there */
-
-		if (!get_record_enabled() && (speed > 0.0 && Config->get_stop_at_session_end() && _transport_frame >= current_end_frame())) {
-			return;
-		}
 
 		if ((synced_to_jack()) && speed != 0.0 && speed != 1.0) {
 			warning << string_compose (_("Global varispeed cannot be supported while %1 is connected to JACK transport control"),

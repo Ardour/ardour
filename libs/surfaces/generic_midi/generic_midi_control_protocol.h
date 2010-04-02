@@ -94,7 +94,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	typedef std::list<MIDIFunction*> MIDIFunctions;
 	MIDIFunctions functions;
 
-	typedef std::pair<MIDIControllable*,PBD::Connection> MIDIPendingControllable;
+	typedef std::pair<MIDIControllable*,PBD::ScopedConnection> MIDIPendingControllable;
 	typedef std::list<MIDIPendingControllable* > MIDIPendingControllables;
 	MIDIPendingControllables pending_controllables;
 	Glib::Mutex controllables_lock;

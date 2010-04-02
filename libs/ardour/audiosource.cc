@@ -149,7 +149,7 @@ AudioSource::update_length (sframes_t pos, sframes_t cnt)
  ***********************************************************************/
 
 bool
-AudioSource::peaks_ready (boost::function<void()> doThisWhenReady, Connection& connect_here_if_not, EventLoop* event_loop) const
+AudioSource::peaks_ready (boost::function<void()> doThisWhenReady, ScopedConnection& connect_here_if_not, EventLoop* event_loop) const
 {
 	bool ret;
 	Glib::Mutex::Lock lm (_peaks_ready_lock);
