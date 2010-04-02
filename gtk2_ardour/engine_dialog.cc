@@ -1187,7 +1187,8 @@ EngineControl::set_state (const XMLNode& root)
 
 		if (!prop || prop->value().empty()) {
 
-			if ( using_dummy && ( child->name() == "interface" || child->name() == "inputdevice" || child->name() == "outputdevice" ))
+			if ((using_dummy && ( child->name() == "interface" || child->name() == "inputdevice" || child->name() == "outputdevice" )) ||
+				child->name() == "timeout")
 				continue;
 			error << string_compose (_("AudioSetup value for %1 is missing data"), child->name()) << endmsg;
 			continue;

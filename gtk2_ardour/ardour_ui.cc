@@ -300,6 +300,12 @@ ARDOUR_UI::run_startup (bool should_be_new)
 	if (_startup == 0) {
 		_startup = new ArdourStartup ();
 	}
+	
+	XMLNode* audio_setup = Config->extra_xml ("AudioSetup");
+
+	if (audio_setup && _startup->engine_control()) {
+		_startup->engine_control()->set_state (*audio_setup);
+	}
 
 	_startup->set_new_only (should_be_new);
 	_startup->present ();
@@ -636,12 +642,6 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 void
 ARDOUR_UI::startup ()
 {
-	XMLNode* audio_setup = Config->extra_xml ("AudioSetup");
-
-	if (audio_setup && _startup && _startup->engine_control()) {
-		_startup->engine_control()->set_state (*audio_setup);
-	}
-
 	if (get_session_parameters (true, ARDOUR_COMMAND_LINE::new_session)) {
 		exit (1);
 	}
