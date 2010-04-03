@@ -105,7 +105,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
                                         do_request (vec.buf[0]);
                                         request_buffer_map_lock.lock ();
                                         if (vec.buf[0]->invalidation) {
-                                                vec.buf[0]->invalidation->request = 0;
+                                                vec.buf[0]->invalidation->requests.remove (vec.buf[0]);
                                         }
                                         i->second->increment_read_ptr (1);
                                 }
@@ -141,7 +141,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
                 */
 
                 if (req->invalidation) {
-                        req->invalidation->request = 0;
+                        req->invalidation->requests.remove (req);
                 }
 
                 request_buffer_map_lock.unlock ();
@@ -200,7 +200,7 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
         req->invalidation = invalidation;
 
         if (invalidation) {
-                invalidation->request = req;
+                invalidation->requests.push_back (req);
                 invalidation->event_loop = this;
         }
 

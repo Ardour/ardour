@@ -29,21 +29,15 @@ EventLoop::invalidate_request (void* data)
         InvalidationRecord* ir = (InvalidationRecord*) data;
 
         if (ir->event_loop) {
-                Glib::Mutex::Lock lm (ir->event_loop->slot_invalidation_mutex());
-                if (ir->request) {
-                        cerr << "Object deleted had outstanding event loop request, IR created @ "
-                             << ir->file << ':' << ir->line
-                             << endl;
-                        ir->request->valid = false;
-                        ir->request->invalidation = 0;
-                } else {
-                        cerr << "No queued request associated with object deletion from "
-                             << ir->file << ':' << ir->line
-                             << endl;
-                        
-                }
-
-                delete ir;
+		Glib::Mutex::Lock lm (ir->event_loop->slot_invalidation_mutex());
+		for (list<BaseRequestObject*>::iterator i = ir->requests.begin(); i != ir->requests.end(); ++i) {
+			cerr << "Object deleted had outstanding event loop request, IR created @ "
+			     << ir->file << ':' << ir->line
+			     << endl;
+			(*i)->valid = false;
+			(*i)->invalidation = 0;
+		}
+		delete ir;
         }
 
         return 0;

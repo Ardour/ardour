@@ -40,12 +40,12 @@ class EventLoop
         struct BaseRequestObject;
     
         struct InvalidationRecord {
-            BaseRequestObject* request;
-            PBD::EventLoop* event_loop;
-            const char* file;
-            int line;
+	    std::list<BaseRequestObject*> requests;
+	    PBD::EventLoop* event_loop;
+	    const char* file;
+	    int line;
 
-            InvalidationRecord() : request (0), event_loop (0) {}
+	    InvalidationRecord() : event_loop (0) {}
         };
 
         static void* invalidate_request (void* data);
