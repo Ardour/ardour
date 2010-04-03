@@ -60,9 +60,11 @@ HasSampleFormat::add_sample_format (ExportFormatBase::SampleFormat format)
 	SampleFormatPtr ptr (new SampleFormatState (format, get_sample_format_name (format)));
 	sample_format_states.push_back (ptr);
 	ptr->SelectChanged.connect_same_thread (*this, boost::bind (&HasSampleFormat::update_sample_format_selection, this, _1));
-	// BOOST SIGNALS how to connect one signal to another
-	// ptr->SelectChanged.connect_same_thread (*this, boost::bind (SampleFormatSelectChanged, _1, WeakSampleFormatPtr (ptr));
-	// ptr->CompatibleChanged.connect_same_thread (*this, boost::bind (SampleFormatCompatibleChanged, _1, WeakSampleFormatPtr (ptr));
+	// BOOST SIGNALS Could this be made any uglier?
+	ptr->SelectChanged.connect_same_thread (*this,
+		boost::bind (boost::type<void> (), boost::ref (SampleFormatSelectChanged), _1, WeakSampleFormatPtr (ptr)));
+	ptr->CompatibleChanged.connect_same_thread (*this,
+		boost::bind (boost::type<void> (), boost::ref (SampleFormatCompatibleChanged), _1, WeakSampleFormatPtr (ptr)));
 }
 
 void
@@ -71,9 +73,11 @@ HasSampleFormat::add_dither_type (ExportFormatBase::DitherType type, Glib::ustri
 	DitherTypePtr ptr (new DitherTypeState (type, name));
 	dither_type_states.push_back (ptr);
 	ptr->SelectChanged.connect_same_thread (*this, boost::bind (&HasSampleFormat::update_dither_type_selection, this, _1));
-	// BOOST SIGNALS how to connect one signal to another
-	// ptr->SelectChanged.connect_same_thread (*this, boost::bind (DitherTypeSelectChanged, _1, WeakDitherTypePtr (ptr));
-	// ptr->CompatibleChanged.connect_same_thread (*this, boost::bind (DitherTypeCompatibleChanged, _1, WeakDitherTypePtr (ptr));
+	// BOOST SIGNALS Could this be made any uglier?
+	ptr->SelectChanged.connect_same_thread (*this,
+		boost::bind (boost::type<void> (), boost::ref (DitherTypeSelectChanged), _1, WeakDitherTypePtr (ptr)));
+	ptr->CompatibleChanged.connect_same_thread (*this,
+		boost::bind (boost::type<void> (),boost::ref ( DitherTypeCompatibleChanged), _1, WeakDitherTypePtr (ptr)));
 }
 
 HasSampleFormat::SampleFormatPtr
