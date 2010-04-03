@@ -18,10 +18,11 @@
 
 #include <fstream>
 #include <algorithm>
+#include <cmath>
+
 #include <unistd.h>
 #include <locale.h>
 #include <errno.h>
-
 
 #include <glibmm.h>
 #include <glibmm/thread.h>
@@ -46,18 +47,6 @@
 #include "ardour/user_bundle.h"
 
 #include "i18n.h"
-
-#include <cmath>
-
-/*
-  A bug in OS X's cmath that causes isnan() and isinf() to be
-  "undeclared". the following works around that
-*/
-
-#if defined(__APPLE__) && defined(__MACH__)
-extern "C" int isnan (double);
-extern "C" int isinf (double);
-#endif
 
 #define BLOCK_PROCESS_CALLBACK() Glib::Mutex::Lock em (AudioEngine::instance()->process_lock())
 
