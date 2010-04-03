@@ -190,7 +190,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	}
 
 	controls_hbox.pack_start(gm.get_level_meter(), false, false);
-	_route->meter_change.connect (*this, invalidator (*this), ui_bind (&RouteTimeAxisView::meter_changed, this, _1), gui_context());
+	_route->meter_change.connect (*this, invalidator (*this), bind (&RouteTimeAxisView::meter_changed, this), gui_context());
 	_route->input()->changed.connect (*this, invalidator (*this), ui_bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
 	_route->output()->changed.connect (*this, invalidator (*this), ui_bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
 
@@ -2290,9 +2290,9 @@ RouteTimeAxisView::clear_meter ()
 }
 
 void
-RouteTimeAxisView::meter_changed (void *src)
+RouteTimeAxisView::meter_changed ()
 {
-	ENSURE_GUI_THREAD (*this, &RouteTimeAxisView::meter_changed, src)
+	ENSURE_GUI_THREAD (*this, &RouteTimeAxisView::meter_changed)
 	reset_meter();
 }
 

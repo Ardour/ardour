@@ -151,7 +151,8 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	void set_denormal_protection (bool yn);
 	bool denormal_protection() const;
 
-	void         set_meter_point (MeterPoint, void *src);
+	void         set_meter_point (MeterPoint);
+	void         infer_meter_point () const;
 	MeterPoint   meter_point() const { return _meter_point; }
 	void         meter ();
 
@@ -247,7 +248,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	PBD::Signal1<void,RouteProcessorChange> processors_changed;
 	PBD::Signal1<void,void*> record_enable_changed;
 	/** the metering point has changed */
-	PBD::Signal1<void,void*> meter_change; 
+	PBD::Signal0<void>       meter_change; 
 	PBD::Signal0<void>       signal_latency_changed;
 	PBD::Signal0<void>       initial_delay_changed;
 

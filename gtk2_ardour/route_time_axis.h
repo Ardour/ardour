@@ -150,7 +150,7 @@ public:
 	void reset_meter ();
 	void clear_meter ();
 	void io_changed (ARDOUR::IOChange, void *);
-	void meter_changed (void *);
+	void meter_changed ();
 	void effective_gain_display () { gm.effective_gain_display(); }
 
 	static void setup_slider_pix ();

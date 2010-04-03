@@ -156,7 +156,7 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	Gtk::Button                  meter_point_button;
 	Gtk::Label                   meter_point_label;
 
-	void meter_changed (void *);
+	void meter_changed ();
 
 	Gtk::Button diskstream_button;
 	Gtk::Label  diskstream_label;

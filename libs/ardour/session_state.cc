@@ -727,7 +727,7 @@ Session::remove_state (string snapshot_name)
 
 #ifdef HAVE_JACK_SESSION
 void
-Session::jack_session_event( jack_session_event_t * event )
+Session::jack_session_event (jack_session_event_t * event)
 {
 	if (save_state ("jacksession_snap")) {
                 event->flags = JackSessionSaveError; 
@@ -737,7 +737,7 @@ Session::jack_session_event( jack_session_event_t * event )
                 
                 string cmd ("PROG_NAME -U ");
                 cmd += event->client_uuid;
-                cmd += ' \"';
+                cmd += " \"";
                 cmd += xml_path.to_string();
                 cmd += '\"';
                 

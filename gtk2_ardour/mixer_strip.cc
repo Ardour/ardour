@@ -412,7 +412,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 						   _("Click to Add/Edit Comments"):
 						   _route->comment());
 
-	_route->meter_change.connect (route_connections, invalidator (*this), ui_bind (&MixerStrip::meter_changed, this, _1), gui_context());
+	_route->meter_change.connect (route_connections, invalidator (*this), bind (&MixerStrip::meter_changed, this), gui_context());
 	_route->input()->changed.connect (route_connections, invalidator (*this), ui_bind (&MixerStrip::input_changed, this, _1, _2), gui_context());
 	_route->output()->changed.connect (route_connections, invalidator (*this), ui_bind (&MixerStrip::output_changed, this, _1, _2), gui_context());
 	_route->route_group_changed.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::route_group_changed, this), gui_context());
@@ -1599,9 +1599,9 @@ MixerStrip::engine_running ()
 
 /** Called when the metering point has changed */
 void
-MixerStrip::meter_changed (void *src)
+MixerStrip::meter_changed ()
 {
-	ENSURE_GUI_THREAD (*this, &MixerStrip::meter_changed, src)
+	ENSURE_GUI_THREAD (*this, &MixerStrip::meter_changed)
 
 	switch (_route->meter_point()) {
 	case MeterInput:

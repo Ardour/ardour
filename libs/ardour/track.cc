@@ -185,10 +185,10 @@ Track::set_record_enable (bool yn, void *src)
 
 	if (_diskstream->record_enabled()) {
 		if (_meter_point != MeterCustom) {
-			set_meter_point (MeterInput, this);
+			set_meter_point (MeterInput);
 		}
 	} else {
-		set_meter_point (_saved_meter_point, this);
+		set_meter_point (_saved_meter_point);
 	}
 
 	_rec_enable_control->Changed ();

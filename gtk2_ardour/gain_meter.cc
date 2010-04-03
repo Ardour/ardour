@@ -539,7 +539,7 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 
 					// XXX no undo yet
 
-					_route->set_meter_point (next_meter_point (_route->meter_point()), this);
+					_route->set_meter_point (next_meter_point (_route->meter_point()));
 				}
 			}
 		}
@@ -568,7 +568,7 @@ GainMeterBase::meter_release(GdkEventButton*)
 void
 GainMeterBase::set_meter_point (Route& route, MeterPoint mp)
 {
-	route.set_meter_point (mp, this);
+	route.set_meter_point (mp);
 }
 
 void
@@ -577,9 +577,9 @@ GainMeterBase::set_mix_group_meter_point (Route& route, MeterPoint mp)
 	RouteGroup* mix_group;
 
 	if((mix_group = route.route_group()) != 0){
-		mix_group->apply (&Route::set_meter_point, mp, this);
+		mix_group->apply (&Route::set_meter_point, mp);
 	} else {
-		route.set_meter_point (mp, this);
+		route.set_meter_point (mp);
 	}
 }
 

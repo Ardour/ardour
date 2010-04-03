@@ -98,9 +98,21 @@ class RouteGroup : public SessionObject
 		}
 	}
 
+	void apply (void (Route::*func)()) {
+		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+			((*i).get()->*func)();
+		}
+	}
+
 	template<class T> void apply (void (Route::*func)(T, void *), T val, void *src) {
 		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 			((*i).get()->*func)(val, src);
+		}
+	}
+
+	template<class T> void apply (void (Route::*func)(T), T val) {
+		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+			((*i).get()->*func)(val);
 		}
 	}
 

@@ -1782,7 +1782,8 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 	}
 
 	if ((prop = node.property (X_("meter-point"))) != 0) {
-		_meter_point = MeterPoint (string_2_enum (prop->value (), _meter_point));
+		MeterPoint mp = MeterPoint (string_2_enum (prop->value (), _meter_point));
+                set_meter_point (mp);
 		if (_meter) {
 			_meter->set_display_to_user (_meter_point == MeterCustom);
 		}
@@ -2678,7 +2679,7 @@ Route::flush_processors ()
 }
 
 void
-Route::set_meter_point (MeterPoint p, void *src)
+Route::set_meter_point (MeterPoint p)
 {
 	/* CAN BE CALLED FROM PROCESS CONTEXT */
 
@@ -2740,7 +2741,7 @@ Route::set_meter_point (MeterPoint p, void *src)
 	}
 
 	_meter_point = p;
-	meter_change (src); /* EMIT SIGNAL */
+	meter_change (); /* EMIT SIGNAL */
 
 	bool const meter_visibly_changed = (_meter->display_to_user() != meter_was_visible_to_user);
 	
