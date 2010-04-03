@@ -147,7 +147,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_table.show_all ();
 	controls_table.set_no_show_all ();
 
-	resizer.set_size_request (10, 10);
+	resizer.set_size_request (10, 6);
 	resizer.set_name ("ResizeHandle");
 	resizer.signal_expose_event().connect (sigc::mem_fun (*this, &TimeAxisView::resizer_expose));
 	resizer.signal_button_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::resizer_button_press));
@@ -166,8 +166,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	HSeparator* separator = manage (new HSeparator());
 
 	controls_vbox.pack_start (controls_table, false, false);
-	controls_vbox.pack_end (*separator, false, false);
-	controls_vbox.pack_end (resizer_box, false, true);
+	controls_vbox.pack_end (resizer_box, false, false);
 	controls_vbox.show ();
 
 	//controls_ebox.set_name ("TimeAxisViewControlsBaseUnselected");
@@ -178,8 +177,12 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_ebox.signal_button_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_button_release));
 	controls_ebox.signal_scroll_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_scroll), true);
 
-	controls_hbox.pack_start (controls_ebox,true,true);
+	controls_hbox.pack_start (controls_ebox, false, false);
 	controls_hbox.show ();
+
+	time_axis_vbox.pack_start (controls_hbox, true, true);
+	time_axis_vbox.pack_end (*separator, false, false);
+	time_axis_vbox.show();
 
 	ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
 
@@ -235,11 +238,11 @@ guint32
 TimeAxisView::show_at (double y, int& nth, VBox *parent)
 {
 	if (control_parent) {
-		control_parent->reorder_child (controls_hbox, nth);
+		control_parent->reorder_child (time_axis_vbox, nth);
 	} else {
 		control_parent = parent;
-		parent->pack_start (controls_hbox, false, false);
-		parent->reorder_child (controls_hbox, nth);
+		parent->pack_start (time_axis_vbox, false, false);
+		parent->reorder_child (time_axis_vbox, nth);
 	}
 
 	_order = nth;
@@ -258,7 +261,7 @@ TimeAxisView::show_at (double y, int& nth, VBox *parent)
 	_canvas_display->raise_to_top ();
 
 	if (_marked_for_display) {
-		controls_hbox.show ();
+		time_axis_vbox.show ();
 		controls_ebox.show ();
 		_canvas_background->show ();
 	}
@@ -364,7 +367,7 @@ TimeAxisView::hide ()
 	_canvas_background->hide ();
 
 	if (control_parent) {
-		control_parent->remove (controls_hbox);
+		control_parent->remove (time_axis_vbox);
 		control_parent = 0;
 	}
 
@@ -413,7 +416,7 @@ TimeAxisView::set_heights (uint32_t h)
 void
 TimeAxisView::set_height(uint32_t h)
 {
-	controls_ebox.property_height_request () = h;
+	time_axis_vbox.property_height_request () = h;
 	height = h;
 
 	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
@@ -624,11 +627,11 @@ TimeAxisView::set_selected (bool yn)
 
 	if (_selected) {
 		controls_ebox.set_name (controls_base_selected_name);
-		controls_hbox.set_name (controls_base_selected_name);
+		time_axis_vbox.set_name (controls_base_selected_name);
 		controls_vbox.set_name (controls_base_selected_name);
 	} else {
 		controls_ebox.set_name (controls_base_unselected_name);
-		controls_hbox.set_name (controls_base_unselected_name);
+		time_axis_vbox.set_name (controls_base_unselected_name);
 		controls_vbox.set_name (controls_base_unselected_name);
 		hide_selection ();
 
@@ -1347,13 +1350,6 @@ TimeAxisView::resizer_expose (GdkEventExpose* event)
 	win->draw_point (dark, 0, 5);
 	win->draw_line (light, 1, 5, w - 1, 5);
 	win->draw_point (light, w - 1, 4);
-
-	/* handle/line #3 */
-
-	win->draw_line (dark, 0, 8, w - 2, 8);
-	win->draw_point (dark, 0, 9);
-	win->draw_line (light, 1, 9, w - 1, 9);
-	win->draw_point (light, w - 1, 8);
 
 	/* use vertical resize mouse cursor */
 	win->set_cursor(Gdk::Cursor(Gdk::SB_V_DOUBLE_ARROW));

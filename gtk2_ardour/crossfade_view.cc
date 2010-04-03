@@ -55,8 +55,7 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 			    xf->length(), false, TimeAxisViewItem::Visibility (TimeAxisViewItem::ShowFrame)),
 	  crossfade (xf),
 	  left_view (lview),
-	  right_view (rview)
-
+	  right_view (rview)	
 {
 	_valid = true;
 	_visible = true;
@@ -76,7 +75,6 @@ CrossfadeView::CrossfadeView (ArdourCanvas::Group *parent,
 	frame->property_outline_what() = 0;
 
 	/* never show the vestigial frame */
-
 	vestigial_frame->hide();
 	show_vestigial = false;
 
@@ -114,9 +112,9 @@ CrossfadeView::set_height (double height)
 {
 	double h = 0;
 	if (height <= TimeAxisView::hSmaller) {
-		h = height - 3;
+		TimeAxisViewItem::set_height (height);
 	} else {
-		h = height - NAME_HIGHLIGHT_SIZE - 3;
+		TimeAxisViewItem::set_height (height - NAME_HIGHLIGHT_SIZE);
 	}
 
 	TimeAxisViewItem::set_height (h);
@@ -165,6 +163,20 @@ CrossfadeView::redraw_curves ()
 		return;
 	}
 
+	/*
+	 At "height - 3.0" the bottom of the crossfade touches the name highlight or the bottom of the track (if the
+	 track is either Small or Smaller.
+	 */
+
+	double tav_height = get_time_axis_view().current_height();
+	
+	if (tav_height == TimeAxisView::hSmaller ||
+	    tav_height == TimeAxisView::hSmall) {
+		_height = tav_height - 3.0;
+	} else {
+		_height = tav_height - NAME_HIGHLIGHT_SIZE - 3.0;
+	}
+
 	if (_height < 0) {
 		/* no space allocated yet */
 		return;
@@ -192,14 +204,17 @@ CrossfadeView::redraw_curves ()
 		p.set_x(i);
 		p.set_y(2.0 + _height - (_height * vec[i]));
 	}
+	
 	fade_in->property_points() = *points;
 
 	crossfade->fade_out().curve().get_vector (0, crossfade->length(), vec, npoints);
+
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
 		p.set_x(i);
 		p.set_y(2.0 + _height - (_height * vec[i]));
 	}
+	
 	fade_out->property_points() = *points;
 
 	delete [] vec;
@@ -266,4 +281,3 @@ CrossfadeView::fake_hide ()
 {
 	group->hide();
 }
-
