@@ -59,7 +59,7 @@ extern "C" int isnan (double);
 extern "C" int isinf (double);
 #endif
 
-#define BLOCK_PROCESS_CALLBACK() Glib::Mutex::Lock em (_session.engine().process_lock())
+#define BLOCK_PROCESS_CALLBACK() Glib::Mutex::Lock em (AudioEngine::instance()->process_lock())
 
 using namespace std;
 using namespace ARDOUR;

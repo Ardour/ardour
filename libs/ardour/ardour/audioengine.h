@@ -20,6 +20,11 @@
 #ifndef __ardour_audioengine_h__
 #define __ardour_audioengine_h__
 
+#ifdef WAF_BUILD
+#include "libardour-config.h"
+#endif
+
+#include <iostream>
 #include <list>
 #include <set>
 #include <cmath>
