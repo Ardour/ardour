@@ -63,6 +63,7 @@ private:
 	void on_tv_mute_enable_toggled (Glib::ustring const &);
 	void on_tv_solo_enable_toggled (Glib::ustring const &);
 	void on_tv_solo_isolate_toggled (Glib::ustring const &);
+	void on_tv_solo_safe_toggled (Glib::ustring const &);
 	void build_menu ();
 	void show_menu ();
 	void route_deleted (Gtk::TreeModel::Path const &);
@@ -75,6 +76,7 @@ private:
 	void update_mute_display ();
 	void update_solo_display ();
 	void update_solo_isolate_display ();
+	void update_solo_safe_display ();
 	void set_all_tracks_visibility (bool);
 	void set_all_audio_visibility (int, bool);
 	void show_all_routes ();
@@ -102,6 +104,7 @@ private:
 			add (mute_state);
 			add (solo_state);
 			add (solo_isolate_state);
+			add (solo_safe_state);
 			add (is_track);
 			add (tv);
 			add (route);
@@ -114,6 +117,7 @@ private:
 		Gtk::TreeModelColumn<uint32_t>       mute_state;
 		Gtk::TreeModelColumn<uint32_t>       solo_state;
 		Gtk::TreeModelColumn<uint32_t>       solo_isolate_state;
+		Gtk::TreeModelColumn<uint32_t>       solo_safe_state;
 		Gtk::TreeModelColumn<bool>           is_track;
 		Gtk::TreeModelColumn<TimeAxisView*>  tv;
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> >  route;

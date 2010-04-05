@@ -766,7 +766,21 @@ RouteUI::solo_isolate_visual_state (boost::shared_ptr<Route> r)
 	}
 	
 	if (r->solo_isolated()) {
-			return 1;
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
+int
+RouteUI::solo_safe_visual_state (boost::shared_ptr<Route> r)
+{
+	if (r->is_master() || r->is_monitor()) {
+		return 0;
+	}
+	
+	if (r->solo_safe()) {
+		return 1;
 	} else {
 		return 0;
 	}

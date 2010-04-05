@@ -196,6 +196,7 @@ class RouteUI : public virtual AxisView
 	static int solo_visual_state (boost::shared_ptr<ARDOUR::Route>);
 	static int solo_visual_state_with_isolate (boost::shared_ptr<ARDOUR::Route>);
 	static int solo_isolate_visual_state (boost::shared_ptr<ARDOUR::Route>);
+	static int solo_safe_visual_state (boost::shared_ptr<ARDOUR::Route>);
 	static int mute_visual_state (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
 
    protected:
