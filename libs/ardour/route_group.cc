@@ -235,6 +235,8 @@ RouteGroup::set_state (const XMLNode& node, int version)
 		return set_state_2X (node, version);
 	}
 
+	set_properties (node);
+
 	const XMLProperty *prop;
 
 	if ((prop = node.property ("routes")) != 0) {
@@ -337,13 +339,15 @@ RouteGroup::set_active (bool yn, void *src)
 	if (is_active() == yn) {
 		return;
 	}
+
 	_active = yn;
+	send_change (PropertyChange (Properties::active));
+		
 	_session.set_dirty ();
 }
 
 void
 RouteGroup::set_relative (bool yn, void *src)
-
 {
 	if (is_relative() == yn) {
 		return;
