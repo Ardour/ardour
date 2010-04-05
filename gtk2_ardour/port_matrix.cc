@@ -121,7 +121,7 @@ PortMatrix::init ()
 {
 	select_arrangement ();
 
-	/* Signal handling is kind of split into two parts:
+	/* Signal handling is kind of split into three parts:
 	 *
 	 * 1.  When _ports[] changes, we call setup().  This essentially sorts out our visual
 	 *     representation of the information in _ports[].
@@ -129,6 +129,8 @@ PortMatrix::init ()
 	 * 2.  When certain other things change, we need to get our subclass to clear and
 	 *     re-fill _ports[], which in turn causes appropriate signals to be raised to
 	 *     hook into part (1).
+	 *
+	 * 3.  Assorted other signals.
 	 */
 
 
@@ -142,11 +144,6 @@ PortMatrix::init ()
 		_ports[i].BundleChanged.connect (_bundle_changed_connections, invalidator (*this), boost::bind (&PortMatrix::setup, this), gui_context());
 	}
 
-	/* scrolling stuff */
-	_hscroll.signal_value_changed().connect (sigc::mem_fun (*this, &PortMatrix::hscroll_changed));
-	_vscroll.signal_value_changed().connect (sigc::mem_fun (*this, &PortMatrix::vscroll_changed));
-
-
 	/* Part 2: notice when things have changed that require our subclass to clear and refill _ports[] */
 	
 	/* watch for routes being added or removed */
@@ -157,6 +154,14 @@ PortMatrix::init ()
 
 	/* and also ports */
 	_session->engine().PortRegisteredOrUnregistered.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
+
+
+	/* Part 3: other stuff */
+	
+	_session->engine().PortConnectedOrDisconnected.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::port_connected_or_disconnected, this), gui_context ());
+
+	_hscroll.signal_value_changed().connect (sigc::mem_fun (*this, &PortMatrix::hscroll_changed));
+	_vscroll.signal_value_changed().connect (sigc::mem_fun (*this, &PortMatrix::vscroll_changed));
 
 	reconnect_to_routes ();
 	
@@ -828,4 +833,10 @@ PortMatrix::add_disassociate_option (Menu_Helpers::MenuList& m, boost::weak_ptr<
 	char buf [64];
 	snprintf (buf, sizeof (buf), _("%s all from '%s'"), disassociation_verb().c_str(), escape_underscores (b->channel_name (c)).c_str());
 	m.push_back (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PortMatrix::disassociate_all_on_channel), w, c, d)));
+}
+
+void
+PortMatrix::port_connected_or_disconnected ()
+{
+	_body->rebuild_and_draw_grid ();
 }

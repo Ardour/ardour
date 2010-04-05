@@ -195,6 +195,7 @@ AudioEngine::start ()
 		jack_set_sync_callback (_priv_jack, _jack_sync_callback, this);
 		jack_set_freewheel_callback (_priv_jack, _freewheel_callback, this);
 		jack_set_port_registration_callback (_priv_jack, _registration_callback, this);
+		jack_set_port_connect_callback (_priv_jack, _connect_callback, this);
 
 		if (_session && _session->config.get_jack_time_master()) {
 			jack_set_timebase_callback (_priv_jack, 0, _jack_timebase_callback, this);
@@ -346,6 +347,13 @@ AudioEngine::_registration_callback (jack_port_id_t /*id*/, int /*reg*/, void* a
 {
 	AudioEngine* ae = static_cast<AudioEngine*> (arg);
 	ae->PortRegisteredOrUnregistered (); /* EMIT SIGNAL */
+}
+
+void
+AudioEngine::_connect_callback (jack_port_id_t /*id_a*/, jack_port_id_t /*id_b*/, int /*conn*/, void* arg)
+{
+	AudioEngine* ae = static_cast<AudioEngine*> (arg);
+	ae->PortConnectedOrDisconnected (); /* EMIT SIGNAL */
 }
 
 void

@@ -189,6 +189,7 @@ private:
 	void session_going_away ();
 	void add_remove_option (Gtk::Menu_Helpers::MenuList &, boost::weak_ptr<ARDOUR::Bundle>, int);
 	void add_disassociate_option (Gtk::Menu_Helpers::MenuList &, boost::weak_ptr<ARDOUR::Bundle>, int, int);
+	void port_connected_or_disconnected ();
 
 	Gtk::Window* _parent;
 

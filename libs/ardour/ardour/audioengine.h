@@ -230,9 +230,11 @@ _	   the regular process() call to session->process() is not made.
 	PBD::Signal0<void> Running;
 	PBD::Signal0<void> Stopped;
 
-	/* this signal is emitted if a JACK port is registered or unregistered */
-
+	/** Emitted if a JACK port is registered or unregistered */
 	PBD::Signal0<void> PortRegisteredOrUnregistered;
+
+	/** Emitted if a JACK port is connected or disconnected */
+	PBD::Signal0<void> PortConnectedOrDisconnected;
 
 	std::string make_port_name_relative (std::string);
 	std::string make_port_name_non_relative (std::string);
@@ -288,6 +290,7 @@ _	   the regular process() call to session->process() is not made.
 	static int  _jack_sync_callback (jack_transport_state_t, jack_position_t*, void *arg);
 	static void _freewheel_callback (int , void *arg);
 	static void _registration_callback (jack_port_id_t, int, void *);
+	static void _connect_callback (jack_port_id_t, jack_port_id_t, int, void *);
 
 	void jack_timebase_callback (jack_transport_state_t, nframes_t, jack_position_t*, int);
 	int  jack_sync_callback (jack_transport_state_t, jack_position_t*);
