@@ -2399,6 +2399,13 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		}
 	}
 
+	if ((prop = node.property (X_("editor-list-page")))) {
+		the_notebook.set_current_page (atoi (prop->value ()));
+	}
+
+	if ((prop = node.property (X_("editor-pane-position")))) {
+		edit_pane.set_position (atoi (prop->value ()));
+	}
 
 	return 0;
 }
@@ -2481,6 +2488,12 @@ Editor::get_state ()
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		node->add_property (X_("show-editor-list"), tact->get_active() ? "yes" : "no");
 	}
+
+	snprintf (buf, sizeof (buf), "%d", the_notebook.get_current_page ());
+	node->add_property (X_("editor-list-page"), buf);
+
+	snprintf (buf, sizeof (buf), "%d", edit_pane.get_position ());
+	node->add_property (X_("editor-pane-position"), buf);
 
 	return *node;
 }
