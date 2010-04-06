@@ -240,7 +240,7 @@ Butler::thread_work ()
 
 		}
 
-		if (i != dsl->end()) {
+		if (i != dsl->begin() && i != dsl->end()) {
 			/* we didn't get to all the streams */
 			disk_work_outstanding = true;
 		}
@@ -294,7 +294,7 @@ Butler::thread_work ()
 			_session.request_stop ();
 		}
 
-		if (i != dsl->end()) {
+		if (i != dsl->begin() && i != dsl->end()) {
 			/* we didn't get to all the streams */
 			disk_work_outstanding = true;
 		}
