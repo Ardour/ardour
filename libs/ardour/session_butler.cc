@@ -175,7 +175,7 @@ Session::butler_thread_work ()
 	while (true) {
 		pfd[0].fd = butler_request_pipe[0];
 		pfd[0].events = POLLIN|POLLERR|POLLHUP;
-		
+
 		if (poll (pfd, 1, (disk_work_outstanding ? 0 : -1)) < 0) {
 			
 			if (errno == EINTR) {
@@ -281,7 +281,7 @@ Session::butler_thread_work ()
 
 		}
 
-		if (i != dsl->end()) {
+		if (i != dsl->begin() && i != dsl->end()) {
 			/* we didn't get to all the streams */
 			disk_work_outstanding = true;
 		}
@@ -333,8 +333,8 @@ Session::butler_thread_work ()
 			*/
 			request_stop ();
 		}
-
-		if (i != dsl->end()) {
+                
+		if (i != dsl->begin() && i != dsl->end()) {
 			/* we didn't get to all the streams */
 			disk_work_outstanding = true;
 		}
