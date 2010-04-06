@@ -1414,6 +1414,7 @@ Session::route_processors_changed (RouteProcessorChange c)
 	}
 
 	update_latency_compensation (false, false);
+	resort_routes ();
 }
 
 void
