@@ -38,11 +38,11 @@ MonitorSection::MonitorSection (Session* s)
         , _tearoff (0)
         , gain_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1) // initial value is unity gain
         , gain_control (0)
-        , dim_adjustment (0.2, 0.0, 1.0, 0.01, 0.1) 
+        , dim_adjustment (0.2, 0.0, 1.0, 0.01, 0.1) // upper+lower will be reset to match model
         , dim_control (0)
-        , solo_boost_adjustment (1.0, 1.0, 3.0, 0.01, 0.1) 
+        , solo_boost_adjustment (1.0, 1.0, 3.0, 0.01, 0.1)  // upper and lower will be reset to match model
         , solo_boost_control (0)
-        , solo_cut_adjustment (0.0, 0.0, 1.0, 0.01, 0.1)
+        , solo_cut_adjustment (0.0, 0.0, 1.0, 0.01, 0.1) // upper and lower will be reset to match model
         , solo_cut_control (0)
         , solo_in_place_button (solo_model_group, _("SiP"))
         , afl_button (solo_model_group, _("AFL"))
@@ -64,14 +64,13 @@ MonitorSection::MonitorSection (Session* s)
         }
         
         set_session (s);
-        
+
         VBox* spin_packer;
         Label* spin_label;
 
         /* Dim */
 
         dim_control = new VolumeController (little_knob_pixbuf, &dim_adjustment, false, 30, 30);
-        dim_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MonitorSection::dim_level_changed));
 
         HBox* dim_packer = manage (new HBox);
         dim_packer->show ();
@@ -125,7 +124,6 @@ MonitorSection::MonitorSection (Session* s)
         /* Solo Boost */
 
         solo_boost_control = new VolumeController (little_knob_pixbuf, &solo_boost_adjustment, false, 30, 30);
-        solo_boost_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MonitorSection::solo_boost_changed));
 
         HBox* solo_packer = manage (new HBox);
         solo_packer->set_spacing (12);
@@ -143,7 +141,6 @@ MonitorSection::MonitorSection (Session* s)
         /* Solo (SiP) cut */
 
         solo_cut_control = new VolumeController (little_knob_pixbuf, &solo_cut_adjustment, false, 30, 30);
-        solo_cut_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MonitorSection::solo_cut_changed));
 
         spin_label = manage (new Label (_("SiP Cut")));
         spin_packer = manage (new VBox);
@@ -197,7 +194,6 @@ MonitorSection::MonitorSection (Session* s)
         /* Gain */
 
         gain_control = new VolumeController (big_knob_pixbuf, &gain_adjustment, false, 80, 80);
-        gain_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MonitorSection::gain_value_changed));
 
         spin_label = manage (new Label (_("Gain")));
         spin_packer = manage (new VBox);
@@ -231,6 +227,7 @@ MonitorSection::MonitorSection (Session* s)
 
         populate_buttons ();
         map_state ();
+        assign_controllables ();
 
         _tearoff = new TearOff (hpacker);
 
@@ -270,16 +267,19 @@ MonitorSection::set_session (Session* s)
                 if (_route) {
                         /* session with control outs */
                         _monitor = _route->monitor_control ();
+                        assign_controllables ();
                 } else { 
                         /* session with no control outs */
                         _monitor.reset ();
                         _route.reset ();
                 }
+                
                         
         } else {
                 /* no session */
                 _monitor.reset ();
                 _route.reset ();
+                control_connections.drop_connections ();
         }
 
         /* both might be null */
@@ -669,30 +669,6 @@ MonitorSection::setup_knob_images ()
         }
 }
 
-void
-MonitorSection::gain_value_changed ()
-{
-        if (_route) {
-                _route->set_gain (slider_position_to_gain (gain_adjustment.get_value()), this);
-        }
-}
-
-void
-MonitorSection::dim_level_changed ()
-{
-        if (_monitor) {
-                _monitor->set_dim_level (dim_adjustment.get_value());
-        }
-}
-
-void
-MonitorSection::solo_boost_changed ()
-{
-        if (_monitor) {
-                _monitor->set_solo_boost_level (solo_boost_adjustment.get_value());
-        }
-}
-
 bool
 MonitorSection::nonlinear_gain_printer (SpinButton* button)
 {
@@ -878,5 +854,55 @@ MonitorSection::parameter_changed (std::string name)
                 update_solo_model ();
         } else if (name == "solo-mute-gain") {
                 solo_cut_adjustment.set_value (gain_to_slider_position (Config->get_solo_mute_gain()));
+        }
+}
+
+void
+MonitorSection::assign_controllables ()
+{
+        boost::shared_ptr<Controllable> none;
+
+        if (!gain_control) {
+                /* too early - GUI controls not set up yet */
+                return;
+        }
+
+        if (_route) {
+                gain_control->set_controllable (_route->gain_control());
+                control_link (control_connections, _route->gain_control(), gain_adjustment);
+        } else {
+                gain_control->set_controllable (none);
+        }
+
+        if (_monitor) {
+
+                cut_all_button.set_controllable (_monitor->cut_control());
+                cut_all_button.watch ();
+                dim_all_button.set_controllable (_monitor->dim_control());
+                dim_all_button.watch ();
+                mono_button.set_controllable (_monitor->mono_control());
+                mono_button.watch ();
+
+                boost::shared_ptr<Controllable> c (_monitor->dim_level_control ());
+
+                dim_control->set_controllable (c);
+                dim_adjustment.set_lower (c->lower());
+                dim_adjustment.set_upper (c->upper());
+                control_link (control_connections, c, dim_adjustment);
+                
+                c = _monitor->solo_boost_control ();
+                solo_boost_control->set_controllable (c);
+                solo_boost_adjustment.set_lower (c->lower());
+                solo_boost_adjustment.set_upper (c->upper());
+                control_link (control_connections, c, solo_boost_adjustment);
+
+        } else {
+
+                cut_all_button.set_controllable (none);
+                dim_all_button.set_controllable (none);
+                mono_button.set_controllable (none);
+
+                dim_control->set_controllable (none);
+                solo_boost_control->set_controllable (none);
         }
 }

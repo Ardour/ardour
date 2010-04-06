@@ -2245,7 +2245,7 @@ Session::route_solo_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 		delta = -1;
 	}
 
-	/* now mod the solo level of all other routes except master & control outs
+	/* now mod the solo level of all other routes except master/control outs/auditioner
 	   so that they will be silent if appropriate.
 	*/
 
@@ -2269,10 +2269,16 @@ Session::route_solo_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 		_master_out->mod_solo_by_others (1);
  	}
  
-	/* ditto for control outs make sure master is never muted by solo */
+	/* ditto for control outs make sure it is never muted by solo */
 
 	if (_monitor_out && route != _monitor_out && _monitor_out && _monitor_out->soloed_by_others() == 0) {
 		_monitor_out->mod_solo_by_others (1);
+	}
+
+	/* ditto for auditioner make sure it is never muted by solo */
+
+	if (auditioner) {
+		auditioner->mod_solo_by_others (1);
 	}
 
 	solo_update_disabled = false;
@@ -2300,7 +2306,11 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 		}
 
                 if (!(*i)->is_hidden() && (*i)->listening()) {
-                        listeners++;
+                        if (Config->get_solo_control_is_listen_control()) {
+                                listeners++;
+                        } else {
+                                (*i)->set_listen (false, this);
+                        }
                 }
 	}
 

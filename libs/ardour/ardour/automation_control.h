@@ -83,6 +83,9 @@ public:
 	 */
 	float get_value() const;
 
+        float lower() const { return parameter().min(); }
+        float upper() const { return parameter().max(); }
+
 protected:
 	ARDOUR::Session& _session;
 };

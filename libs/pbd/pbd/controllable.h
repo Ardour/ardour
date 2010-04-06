@@ -72,6 +72,9 @@ class Controllable : public PBD::StatefulDestructible {
 	bool is_gain_like() const { return _flags & GainLike; }
 	bool is_integral_only() const { return _flags & IntegerOnly; }
 
+        virtual float lower() const { return 0.0f; }
+        virtual float upper() const { return 1.0f; }
+
 	Flag flags() const { return _flags; }
 	void set_flags (Flag f);
 

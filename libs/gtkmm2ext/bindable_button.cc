@@ -18,122 +18,43 @@
 */
 
 #include <string>
-#include <climits>
 #include <iostream>
 
-#include <midi++/controllable.h>
+#include "pbd/controllable.h"
 
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/bindable_button.h>
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/bindable_button.h"
+#include "gtkmm2ext/gui_thread.h"
 
 #include "i18n.h"
 
 using namespace Gtkmm2ext;
 using namespace std;
-
-BindableToggleButton::BindableToggleButton (MIDI::Controllable *mc)
-	: prompter (Gtk::WIN_POS_MOUSE, 30000, false),
-	  midi_control (mc),
-	  bind_button (2),
-	  bind_statemask (Gdk::CONTROL_MASK)
-
-{			  
-	init_events ();
-}
-
-BindableToggleButton::BindableToggleButton(MIDI::Controllable *mc, const string &label)
-	: StatefulButton (label),
-	  prompter (Gtk::WIN_POS_MOUSE, 30000, false),
-	  midi_control (mc),
-	  bind_button (2),
-	  bind_statemask (Gdk::CONTROL_MASK)
-{			  
-	init_events ();
-}
-
+using namespace PBD;
 
 void
-BindableToggleButton::init_events ()
+BindableToggleButton::set_controllable (boost::shared_ptr<PBD::Controllable> c)
 {
-	prompter.signal_unmap_event().connect (mem_fun (*this, &BindableToggleButton::prompter_hiding));
-	
-	prompting = false;
-	unprompting = false;
-	
-	if (midi_control) {
-		midi_control->learning_started.connect (mem_fun (*this, &BindableToggleButton::midicontrol_prompt));
-		midi_control->learning_stopped.connect (mem_fun (*this, &BindableToggleButton::midicontrol_unprompt));
-	}
+        watch_connection.disconnect ();
+        binding_proxy.set_controllable (c);
 }
 
 void
-BindableToggleButton::set_bind_button_state (guint button, guint statemask)
+BindableToggleButton::watch ()
 {
-	bind_button = button;
-	bind_statemask = statemask;
+        boost::shared_ptr<Controllable> c (binding_proxy.get_controllable ());
+
+        if (!c) {
+                warning << _("button cannot watch state of non-existing Controllable\n") << endl;
+                return;
+        }
+
+        c->Changed.connect (watch_connection, invalidator(*this), boost::bind (&BindableToggleButton::controllable_changed, this), gui_context());
 }
 
 void
-BindableToggleButton::get_bind_button_state (guint &button, guint &statemask)
+BindableToggleButton::controllable_changed ()
 {
-	button = bind_button;
-	statemask = bind_statemask;
+        float val = binding_proxy.get_controllable()->get_value();
+        set_active (fabs (val) >= 0.5f);
 }
-
-void
-BindableToggleButton::midi_learn()
-{
-	if (midi_control) {
-		prompting = true;
-		midi_control->learn_about_external_control ();
-	}
-}
-
-bool
-BindableToggleButton::prompter_hiding (GdkEventAny *ev)
-{
-	if (unprompting) {
-		if (midi_control) {
-			midi_control->stop_learning();
-		}
-		unprompting = false;
-	}
-	
-	return false;
-}
-
-
-void
-BindableToggleButton::midicontrol_set_tip ()
-
-{
-	if (midi_control) {
-		// Gtkmm2ext::UI::instance()->set_tip (evbox, midi_control->control_description());
-	}
-}
-
-void
-BindableToggleButton::midicontrol_prompt ()
-
-{
-	if (prompting) {
-		string prompt = _("operate MIDI controller now");
-		prompter.set_text (prompt);
-		Gtkmm2ext::UI::instance()->touch_display (&prompter);
-		
-		unprompting = true;
-		prompting = false;
-	}
-}
-
-void
-BindableToggleButton::midicontrol_unprompt ()
-
-{
-	if (unprompting) {
-		Gtkmm2ext::UI::instance()->touch_display (&prompter);
-		unprompting = false;
-	}
-}
-
-

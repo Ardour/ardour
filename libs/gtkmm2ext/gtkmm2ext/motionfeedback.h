@@ -24,6 +24,8 @@
 #include <gtkmm/box.h>
 #include <gtkmm/eventbox.h>
 
+#include "gtkmm2ext/binding_proxy.h"
+
 namespace Gtk {
 	class Adjustment;
 	class SpinButton;
@@ -59,6 +61,8 @@ class MotionFeedback : public Gtk::VBox
 	gfloat upper () { return _upper; }
 	gfloat range () { return _range; }
 
+	void set_controllable (boost::shared_ptr<PBD::Controllable> c) { binding_proxy.set_controllable (c); }
+
  protected:
 	gfloat _range;
 	gfloat _lower;
@@ -84,6 +88,7 @@ class MotionFeedback : public Gtk::VBox
 	Gtk::SpinButton*   value;
 	Gtk::Adjustment*   adjustment;
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf;
+        BindingProxy       binding_proxy;
 
         double default_value;
 	double  step_inc;

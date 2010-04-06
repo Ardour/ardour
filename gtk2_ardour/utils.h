@@ -31,10 +31,16 @@
 
 #include "canvas.h"
 
+namespace PBD {
+        class Controllable;
+        class ScopedConnectionList;
+}
+
 namespace Gtk {
 	class Window;
 	class ComboBoxText;
 	class Paned;
+        class Adjustment;
 }
 
 Glib::ustring fit_to_pixels (const Glib::ustring&, int pixel_width, Pango::FontDescription& font, int& actual_width, bool with_ellipses = false);
@@ -97,5 +103,7 @@ Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_ustring (const Glib::ustring& name,
 void resize_window_to_proportion_of_monitor (Gtk::Window*, int, int);
 
 std::string escape_underscores (std::string const &);
+
+void control_link (PBD::ScopedConnectionList& scl, boost::shared_ptr<PBD::Controllable> c, Gtk::Adjustment& a);
 
 #endif /* __ardour_gtk_utils_h__ */

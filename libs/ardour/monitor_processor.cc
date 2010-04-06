@@ -15,30 +15,68 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
+/* specialize for bool because of set_value() semantics */
+
+namespace ARDOUR {
+        template<> void MPControl<bool>::set_value (float v) {
+                bool newval = fabs (v) >= 0.5;
+                if (newval != _value) {
+                        _value = newval;
+                        Changed(); /* EMIT SIGNAL */
+                }
+        }
+}
+
 MonitorProcessor::MonitorProcessor (Session& s)
         : Processor (s, X_("MonitorOut"))
+        , solo_cnt (0)
+
+        , _dim_all_ptr (new MPControl<bool> (false, _("monitor dim"), Controllable::Toggle))
+        , _cut_all_ptr (new MPControl<bool> (false, _("monitor cut"), Controllable::Toggle))
+        , _mono_ptr (new MPControl<bool> (false, _("monitor mono"), Controllable::Toggle))
+        , _dim_level_ptr (new MPControl<volatile gain_t> 
+                          (0.2, _("monitor mono"), Controllable::Flag (0), 0.0f, 1.0f))
+        , _solo_boost_level_ptr (new MPControl<volatile gain_t> 
+                                 (1.0, _("monitor mono"), Controllable::Flag (0), 1.0f, 3.0f))
+          
+        , _dim_all_control (_dim_all_ptr)
+        , _cut_all_control (_cut_all_ptr)
+        , _mono_control (_mono_ptr)
+        , _dim_level_control (_dim_level_ptr)
+        , _solo_boost_level_control (_solo_boost_level_ptr)
+
+        , _dim_all (*_dim_all_ptr)
+        , _cut_all (*_cut_all_ptr)
+        , _mono (*_mono_ptr)
+        , _dim_level (*_dim_level_ptr)
+        , _solo_boost_level (*_solo_boost_level_ptr)
+
 {
-        solo_cnt = 0;
-        _cut_all = false;
-        _dim_all = false;
-        _dim_level = 0.2;
-        _solo_boost_level = 1.0;
+}
+
+MonitorProcessor::~MonitorProcessor ()
+{
+        allocate_channels (0);
 }
 
 void
 MonitorProcessor::allocate_channels (uint32_t size)
 {
         while (_channels.size() > size) {
-                if (_channels.back().soloed) {
+                if (_channels.back()->soloed) {
                         if (solo_cnt > 0) {
                                 --solo_cnt;
                         }
                 }
+                ChannelRecord* cr = _channels.back();
                 _channels.pop_back();
+                delete cr;
         }
 
+        uint32_t n = _channels.size() + 1;
+
         while (_channels.size() < size) {
-                _channels.push_back (ChannelRecord());
+                _channels.push_back (new ChannelRecord (n));
         }
 }
 
@@ -74,12 +112,12 @@ MonitorProcessor::set_state (const XMLNode& node, int version)
         allocate_channels (atoi (prop->value()));
 
         if ((prop = node.property (X_("dim-level"))) != 0) {
-                double val = atof (prop->value());
+                gain_t val = atof (prop->value());
                 _dim_level = val;
         }
 
         if ((prop = node.property (X_("solo-boost-level"))) != 0) {
-                double val = atof (prop->value());
+                gain_t val = atof (prop->value());
                 _solo_boost_level = val;
         }
 
@@ -118,7 +156,7 @@ MonitorProcessor::set_state (const XMLNode& node, int version)
                                       << endmsg;
                                 return -1;
                         }
-                        ChannelRecord& cr (_channels[chn]);
+                        ChannelRecord& cr (*_channels[chn]);
 
                         if ((prop = (*i)->property ("cut")) != 0) {
                                 if (string_is_affirmative (prop->value())){
@@ -152,8 +190,8 @@ MonitorProcessor::set_state (const XMLNode& node, int version)
 
         solo_cnt = 0;
 
-        for (vector<ChannelRecord>::const_iterator x = _channels.begin(); x != _channels.end(); ++x) {
-                if (x->soloed) {
+        for (vector<ChannelRecord*>::const_iterator x = _channels.begin(); x != _channels.end(); ++x) {
+                if ((*x)->soloed) {
                         solo_cnt++;
                 }
         }
@@ -171,10 +209,10 @@ MonitorProcessor::state (bool full)
 
 	node.add_property (X_("type"), X_("monitor"));
         
-        snprintf (buf, sizeof(buf), "%.12g", _dim_level);
+        snprintf (buf, sizeof(buf), "%.12g", _dim_level.val());
         node.add_property (X_("dim-level"), buf);
 
-        snprintf (buf, sizeof(buf), "%.12g", _solo_boost_level);
+        snprintf (buf, sizeof(buf), "%.12g", _solo_boost_level.val());
         node.add_property (X_("solo-boost-level"), buf);
 
         node.add_property (X_("cut-all"), (_cut_all ? "yes" : "no"));
@@ -189,16 +227,16 @@ MonitorProcessor::state (bool full)
         XMLNode* chn_node;
         uint32_t chn = 0;
 
-        for (vector<ChannelRecord>::const_iterator x = _channels.begin(); x != _channels.end(); ++x, ++chn) {
+        for (vector<ChannelRecord*>::const_iterator x = _channels.begin(); x != _channels.end(); ++x, ++chn) {
                 chn_node = new XMLNode (X_("Channel"));
 
                 snprintf (buf, sizeof (buf), "%u", chn);
                 chn_node->add_property ("id", buf);
-
-                chn_node->add_property (X_("cut"), x->cut == 1.0 ? "no" : "yes");
-                chn_node->add_property (X_("invert"), x->polarity == 1.0 ? "no" : "yes");
-                chn_node->add_property (X_("dim"), x->dim ? "yes" : "no");
-                chn_node->add_property (X_("solo"), x->soloed ? "yes" : "no");
+                
+                chn_node->add_property (X_("cut"), (*x)->cut == 1.0f ? "no" : "yes");
+                chn_node->add_property (X_("invert"), (*x)->polarity == 1.0f ? "no" : "yes");
+                chn_node->add_property (X_("dim"), (*x)->dim ? "yes" : "no");
+                chn_node->add_property (X_("solo"), (*x)->soloed ? "yes" : "no");
                 
                 node.add_child_nocopy (*chn_node);
         }
@@ -226,36 +264,38 @@ MonitorProcessor::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*e
 
                 /* don't double-scale by both track dim and global dim coefficients */
 
-                gain_t dim_level = (global_dim == 1.0 ? (_channels[chn].dim ? dim_level_this_time : 1.0) : 1.0);
+                gain_t dim_level = (global_dim == 1.0 ? (_channels[chn]->dim ? dim_level_this_time : 1.0) : 1.0);
 
-                if (_channels[chn].soloed) {
-                        target_gain = _channels[chn].polarity * _channels[chn].cut * dim_level * global_cut * global_dim * solo_boost;
+                if (_channels[chn]->soloed) {
+                        target_gain = _channels[chn]->polarity * _channels[chn]->cut * dim_level * global_cut * global_dim * solo_boost;
                 } else {
                         if (solo_cnt == 0) {
-                                target_gain = _channels[chn].polarity * _channels[chn].cut * dim_level * global_cut * global_dim * solo_boost;
+                                target_gain = _channels[chn]->polarity * _channels[chn]->cut * dim_level * global_cut * global_dim * solo_boost;
                         } else {
                                 target_gain = 0.0;
                         }
                 }
 
                 DEBUG_TRACE (DEBUG::Monitor, 
-                             string_compose("channel %1 sb %2 gc %3 gd %4 cd %5 dl %6 cp %7 cc %8 cs %9 sc %10 TG %11\n", 
+                             string_compose("channel %1 SB %12 sb %2 gc %3 gd %4 cd %5 dl %6 cp %7 cc %8 cs %9 sc %10 TG %11\n", 
                                             chn, 
                                             solo_boost,
                                             global_cut,
                                             global_dim,
-                                            _channels[chn].dim,
+                                            _channels[chn]->dim,
                                             dim_level,
-                                            _channels[chn].polarity,
-                                            _channels[chn].cut,
-                                            _channels[chn].soloed,
+                                            _channels[chn]->polarity,
+                                            _channels[chn]->cut,
+                                            _channels[chn]->soloed,
                                             solo_cnt,
-                                            target_gain));
+                                            target_gain, 
+                                            (float) _solo_boost_level.val()
+                                     ));
                 
-                if (target_gain != _channels[chn].current_gain || target_gain != 1.0f) {
+                if (target_gain != _channels[chn]->current_gain || target_gain != 1.0f) {
 
-                        Amp::apply_gain (*b, nframes, _channels[chn].current_gain, target_gain);
-                        _channels[chn].current_gain = target_gain;
+                        Amp::apply_gain (*b, nframes, _channels[chn]->current_gain, target_gain);
+                        _channels[chn]->current_gain = target_gain;
                 }
 
                 ++chn;
@@ -317,33 +357,33 @@ void
 MonitorProcessor::set_polarity (uint32_t chn, bool invert)
 {
         if (invert) {
-                _channels[chn].polarity = -1.0f;
+                _channels[chn]->polarity = -1.0f;
         } else {
-                _channels[chn].polarity = 1.0f;
+                _channels[chn]->polarity = 1.0f;
         }
 }       
 
 void
 MonitorProcessor::set_dim (uint32_t chn, bool yn)
 {
-        _channels[chn].dim = yn;
+        _channels[chn]->dim = yn;
 }
 
 void
 MonitorProcessor::set_cut (uint32_t chn, bool yn)
 {
         if (yn) {
-                _channels[chn].cut = 0.0f;
+                _channels[chn]->cut = 0.0f;
         } else {
-                _channels[chn].cut = 1.0f;
+                _channels[chn]->cut = 1.0f;
         }
 }
 
 void
 MonitorProcessor::set_solo (uint32_t chn, bool solo)
 {
-        if (solo != _channels[chn].soloed) {
-                _channels[chn].soloed = solo;
+        if (solo != _channels[chn]->soloed) {
+                _channels[chn]->soloed = solo;
                 
                 if (solo) {
                         solo_cnt++;
@@ -394,27 +434,27 @@ MonitorProcessor::set_solo_boost_level (gain_t val)
 bool 
 MonitorProcessor::soloed (uint32_t chn) const
 {
-        return _channels[chn].soloed;
+        return _channels[chn]->soloed;
 }
 
 
 bool 
 MonitorProcessor::inverted (uint32_t chn) const
 {
-        return _channels[chn].polarity < 0.0f;
+        return _channels[chn]->polarity < 0.0f;
 }
 
 
 bool 
 MonitorProcessor::cut (uint32_t chn) const
 {
-        return _channels[chn].cut == 0.0f;
+        return _channels[chn]->cut == 0.0f;
 }
 
 bool 
 MonitorProcessor::dimmed (uint32_t chn) const
 {
-        return _channels[chn].dim;
+        return _channels[chn]->dim;
 }
 
 bool
@@ -433,4 +473,40 @@ bool
 MonitorProcessor::cut_all () const
 {
         return _cut_all;
+}
+
+boost::shared_ptr<Controllable>
+MonitorProcessor::channel_cut_control (uint32_t chn) const
+{
+        if (chn < _channels.size()) {
+                return _channels[chn]->cut_control;
+        }
+        return boost::shared_ptr<Controllable>();
+}
+
+boost::shared_ptr<Controllable>
+MonitorProcessor::channel_dim_control (uint32_t chn) const
+{
+        if (chn < _channels.size()) {
+                return _channels[chn]->dim_control;
+        }
+        return boost::shared_ptr<Controllable>();
+}
+
+boost::shared_ptr<Controllable>
+MonitorProcessor::channel_polarity_control (uint32_t chn) const
+{
+        if (chn < _channels.size()) {
+                return _channels[chn]->polarity_control;
+        }
+        return boost::shared_ptr<Controllable>();
+}
+
+boost::shared_ptr<Controllable>
+MonitorProcessor::channel_solo_control (uint32_t chn) const
+{
+        if (chn < _channels.size()) {
+                return _channels[chn]->soloed_control;
+        }
+        return boost::shared_ptr<Controllable>();
 }

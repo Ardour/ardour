@@ -138,6 +138,10 @@ MotionFeedback::set_adjustment (Adjustment *adj)
 bool
 MotionFeedback::pixwin_button_press_event (GdkEventButton *ev) 
 { 
+        if (binding_proxy.button_press_handler (ev)) {
+                return true;
+	}
+
 	switch (ev->button) {
 	case 2:
 		return FALSE;  /* XXX why ? */

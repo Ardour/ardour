@@ -121,4 +121,7 @@ class MonitorSection : public RouteUI
         void parameter_changed (std::string);
 
         PBD::ScopedConnection config_connection;
+        PBD::ScopedConnectionList control_connections;
+        
+        void assign_controllables ();
 };
