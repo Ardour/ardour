@@ -2341,7 +2341,7 @@ Playlist::set_edit_mode (EditMode mode)
 void
 Playlist::relayer ()
 {
-        /* never compute layers when changing state for undo/redo or setting from XML*/
+        /* never compute layers when changing state for undo/redo or setting from XML */
 
         if (in_update || in_set_state) {
                 return;
