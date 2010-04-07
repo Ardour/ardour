@@ -459,7 +459,16 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 		(*chan)->current_playback_buffer = 0;
 	}
 
-	if (nominally_recording || (_session.get_record_enabled() && _session.config.get_punch_in())) {
+        /* two conditions to test for here:
+           
+           A: this track is rec-enabled, and the session has confirmed that we can record
+           B: this track is rec-enabled, has been recording, and we are set up for auto-punch-in
+
+           The second test is necessary to capture the extra material that arrives AFTER the transport
+           frame has left the punch range (which will cause the "can_record" argument to be false).
+        */
+
+	if (nominally_recording || (re && was_recording && _session.get_record_enabled() && _session.config.get_punch_out())) {
 		// Safeguard against situations where process() goes haywire when autopunching and last_recordable_frame < first_recordable_frame
 		if (last_recordable_frame < first_recordable_frame) {
 			last_recordable_frame = max_frames;
@@ -467,7 +476,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 
 		OverlapType ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
 
-		calculate_record_range(ot, transport_frame, nframes, rec_nframes, rec_offset);
+		calculate_record_range (ot, transport_frame, nframes, rec_nframes, rec_offset);
 
 		if (rec_nframes && !was_recording) {
 			capture_captured = 0;
@@ -507,7 +516,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 				AudioPort* const ap = _io->audio (n);
 				assert(ap);
 				assert(rec_nframes <= ap->get_audio_buffer(nframes).capacity());
-				memcpy (chaninfo->current_capture_buffer, ap->get_audio_buffer (rec_nframes).data(rec_offset), sizeof (Sample) * rec_nframes);
+				memcpy (chaninfo->current_capture_buffer, ap->get_audio_buffer (nframes).data(rec_offset), sizeof (Sample) * rec_nframes);
 
 
 			} else {
@@ -1574,6 +1583,8 @@ void
 AudioDiskstream::finish_capture (bool /*rec_monitors_input*/, boost::shared_ptr<ChannelList> c)
 {
 	was_recording = false;
+        first_recordable_frame = max_frames;
+        last_recordable_frame = max_frames;
 
 	if (capture_captured == 0) {
 		return;
