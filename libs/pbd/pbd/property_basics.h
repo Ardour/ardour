@@ -82,6 +82,8 @@ public:
 		: _property_id (pid)
 	{}
 
+	virtual ~PropertyBase () {}
+
 	/** Forget about any old value for this state */
 	virtual void clear_history () = 0;
 
