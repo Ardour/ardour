@@ -67,10 +67,6 @@ struct CrossfadeView : public TimeAxisViewItem
     bool _valid;
     bool _visible;
 
-    double spu;
-    double _height;
-
-    ArdourCanvas::Item *overlap_rect;
     ArdourCanvas::Line *fade_in;
     ArdourCanvas::Line *fade_out;
     ArdourCanvas::Item *active_button;
