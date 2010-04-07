@@ -48,26 +48,20 @@ using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
 
-//------------------------------------------------------------------------------
-/** Initialize const static memeber data */
-
 Pango::FontDescription* TimeAxisViewItem::NAME_FONT = 0;
 bool TimeAxisViewItem::have_name_font = false;
 const double TimeAxisViewItem::NAME_X_OFFSET = 15.0;
-const double TimeAxisViewItem::GRAB_HANDLE_LENGTH = 6 ;
+const double TimeAxisViewItem::GRAB_HANDLE_LENGTH = 6;
 
 int    TimeAxisViewItem::NAME_HEIGHT;
 double TimeAxisViewItem::NAME_Y_OFFSET;
 double TimeAxisViewItem::NAME_HIGHLIGHT_SIZE;
 double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
 
-//---------------------------------------------------------------------------------------//
-// Constructor / Desctructor
-
 /**
- * Constructs a new TimeAxisViewItem.
+ * Construct a new TimeAxisViewItem.
  *
- * @param it_name the unique name/Id of this item
+ * @param it_name the unique name of this item
  * @param parant the parent canvas group
  * @param tv the TimeAxisView we are going to be added to
  * @param spu samples per unit
@@ -78,7 +72,9 @@ double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
 TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& parent, TimeAxisView& tv, double spu, Gdk::Color const & base_color,
 				   nframes64_t start, nframes64_t duration, bool recording,
 				   Visibility vis)
-	: trackview (tv), _height (1.0), _recregion(recording)
+	: trackview (tv)
+	, _height (1.0)
+	, _recregion (recording)
 {
 	if (!have_name_font) {
 
@@ -108,7 +104,6 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 	group = new ArdourCanvas::Group (parent);
 
 	init (it_name, spu, base_color, start, duration, vis, true, true);
-
 }
 
 TimeAxisViewItem::TimeAxisViewItem (const TimeAxisViewItem& other)
@@ -143,16 +138,16 @@ TimeAxisViewItem::init (
 	const string& it_name, double spu, Gdk::Color const & base_color, nframes64_t start, nframes64_t duration, Visibility vis, bool wide, bool high
 	)
 {
-	item_name = it_name ;
-	samples_per_unit = spu ;
+	item_name = it_name;
+	samples_per_unit = spu;
 	should_show_selection = true;
-	frame_position = start ;
-	item_duration = duration ;
+	frame_position = start;
+	item_duration = duration;
 	name_connected = false;
 	fill_opacity = 60;
-	position_locked = false ;
+	position_locked = false;
 	max_item_duration = ARDOUR::max_frames;
-	min_item_duration = 0 ;
+	min_item_duration = 0;
 	show_vestigial = true;
 	visibility = vis;
 	_sensitive = true;
@@ -162,7 +157,7 @@ TimeAxisViewItem::init (
 	high_enough_for_name = high;
 
 	if (duration == 0) {
-		warning << "Time Axis Item Duration == 0" << endl ;
+		warning << "Time Axis Item Duration == 0" << endl;
 	}
 
 	vestigial_frame = new ArdourCanvas::SimpleRect (*group, 0.0, 1.0, 2.0, trackview.current_height());
@@ -227,31 +222,26 @@ TimeAxisViewItem::init (
 	frame_handle_end = new ArdourCanvas::SimpleRect (*group, 0.0, TimeAxisViewItem::GRAB_HANDLE_LENGTH, 5.0, trackview.current_height());
 	frame_handle_end->property_outline_what() = 0x0;
 
-	set_color (base_color) ;
+	set_color (base_color);
 
-	set_duration (item_duration, this) ;
-	set_position (start, this) ;
+	set_duration (item_duration, this);
+	set_position (start, this);
 }
 
-/**
- * Destructor
- */
 TimeAxisViewItem::~TimeAxisViewItem()
 {
 	delete group;
 }
 
 
-//---------------------------------------------------------------------------------------//
-// Position and duration Accessors/Mutators
-
 /**
- * Set the position of this item upon the timeline to the specified value
+ * Set the position of this item on the timeline.
  *
  * @param pos the new position
  * @param src the identity of the object that initiated the change
- * @return true if the position change was a success, false otherwise
+ * @return true on success
  */
+
 bool
 TimeAxisViewItem::set_position(nframes64_t pos, void* src, double* delta)
 {
@@ -270,8 +260,8 @@ TimeAxisViewItem::set_position(nframes64_t pos, void* src, double* delta)
 	    version of GNOME Canvas rectifies this issue cleanly.
 	*/
 
-	double old_unit_pos ;
-	double new_unit_pos = pos / samples_per_unit ;
+	double old_unit_pos;
+	double new_unit_pos = pos / samples_per_unit;
 
 	old_unit_pos = group->property_x();
 
@@ -283,16 +273,12 @@ TimeAxisViewItem::set_position(nframes64_t pos, void* src, double* delta)
 		(*delta) = new_unit_pos - old_unit_pos;
 	}
 
-	PositionChanged (frame_position, src) ; /* EMIT_SIGNAL */
+	PositionChanged (frame_position, src); /* EMIT_SIGNAL */
 
 	return true;
 }
 
-/**
- * Return the position of this item upon the timeline
- *
- * @return the position of this item
- */
+/** @return position of this item on the timeline */
 nframes64_t
 TimeAxisViewItem::get_position() const
 {
@@ -300,12 +286,13 @@ TimeAxisViewItem::get_position() const
 }
 
 /**
- * Sets the duration of this item
+ * Set the duration of this item.
  *
  * @param dur the new duration of this item
  * @param src the identity of the object that initiated the change
- * @return true if the duration change was succesful, false otherwise
+ * @return true on success
  */
+
 bool
 TimeAxisViewItem::set_duration (nframes64_t dur, void* src)
 {
@@ -323,22 +310,19 @@ TimeAxisViewItem::set_duration (nframes64_t dur, void* src)
 
 	reset_width_dependent_items (trackview.editor().frame_to_pixel (dur));
 
-	DurationChanged (dur, src) ; /* EMIT_SIGNAL */
+	DurationChanged (dur, src); /* EMIT_SIGNAL */
 	return true;
 }
 
-/**
- * Returns the duration of this item
- *
- */
+/** @return duration of this item */
 nframes64_t
 TimeAxisViewItem::get_duration() const
 {
-	return (item_duration);
+	return item_duration;
 }
 
 /**
- * Sets the maximum duration that this item make have.
+ * Set the maximum duration that this item can have.
  *
  * @param dur the new maximum duration
  * @param src the identity of the object that initiated the change
@@ -346,23 +330,19 @@ TimeAxisViewItem::get_duration() const
 void
 TimeAxisViewItem::set_max_duration(nframes64_t dur, void* src)
 {
-	max_item_duration = dur ;
-	MaxDurationChanged(max_item_duration, src) ; /* EMIT_SIGNAL */
+	max_item_duration = dur;
+	MaxDurationChanged(max_item_duration, src); /* EMIT_SIGNAL */
 }
 
-/**
- * Returns the maxmimum duration that this item may be set to
- *
- * @return the maximum duration that this item may be set to
- */
+/** @return the maximum duration that this item may have */
 nframes64_t
 TimeAxisViewItem::get_max_duration() const
 {
-	return (max_item_duration) ;
+	return max_item_duration;
 }
 
 /**
- * Sets the minimu duration that this item may be set to
+ * Set the minimum duration that this item may have.
  *
  * @param the minimum duration that this item may be set to
  * @param src the identity of the object that initiated the change
@@ -370,50 +350,41 @@ TimeAxisViewItem::get_max_duration() const
 void
 TimeAxisViewItem::set_min_duration(nframes64_t dur, void* src)
 {
-	min_item_duration = dur ;
-	MinDurationChanged(max_item_duration, src) ; /* EMIT_SIGNAL */
+	min_item_duration = dur;
+	MinDurationChanged(max_item_duration, src); /* EMIT_SIGNAL */
 }
 
-/**
- * Returns the minimum duration that this item mey be set to
- *
- * @return the nimum duration that this item mey be set to
- */
+/** @return the minimum duration that this item mey have */
 nframes64_t
 TimeAxisViewItem::get_min_duration() const
 {
-	return(min_item_duration) ;
+	return min_item_duration;
 }
 
 /**
- * Sets whether the position of this Item is locked to its current position
+ * Set whether this item is locked to its current position.
  * Locked items cannot be moved until the item is unlocked again.
  *
- * @param yn set to true to lock this item to its current position
+ * @param yn true to lock this item to its current position
  * @param src the identity of the object that initiated the change
  */
 void
 TimeAxisViewItem::set_position_locked(bool yn, void* src)
 {
-	position_locked = yn ;
-	set_trim_handle_colors() ;
+	position_locked = yn;
+	set_trim_handle_colors();
 	PositionLockChanged (position_locked, src); /* EMIT_SIGNAL */
 }
 
-/**
- * Returns whether this item is locked to its current position
- *
- * @return true if this item is locked to its current posotion
- *         false otherwise
- */
+/** @return true if this item is locked to its current position */
 bool
 TimeAxisViewItem::get_position_locked() const
 {
-	return (position_locked);
+	return position_locked;
 }
 
 /**
- * Sets whether the Maximum Duration constraint is active and should be enforced
+ * Set whether the maximum duration constraint is active.
  *
  * @param active set true to enforce the max duration constraint
  * @param src the identity of the object that initiated the change
@@ -424,78 +395,61 @@ TimeAxisViewItem::set_max_duration_active (bool active, void* /*src*/)
 	max_duration_active = active;
 }
 
-/**
- * Returns whether the Maximum Duration constraint is active and should be enforced
- *
- * @return true if the maximum duration constraint is active, false otherwise
- */
+/** @return true if the maximum duration constraint is active */
 bool
 TimeAxisViewItem::get_max_duration_active() const
 {
-	return(max_duration_active) ;
+	return max_duration_active;
 }
 
 /**
- * Sets whether the Minimum Duration constraint is active and should be enforced
+ * Set whether the minimum duration constraint is active.
  *
  * @param active set true to enforce the min duration constraint
  * @param src the identity of the object that initiated the change
  */
+
 void
 TimeAxisViewItem::set_min_duration_active (bool active, void* /*src*/)
 {
-	min_duration_active = active ;
+	min_duration_active = active;
 }
 
-/**
- * Returns whether the Maximum Duration constraint is active and should be enforced
- *
- * @return true if the maximum duration constraint is active, false otherwise
- */
+/** @return true if the maximum duration constraint is active */
 bool
 TimeAxisViewItem::get_min_duration_active() const
 {
-	return(min_duration_active) ;
+	return min_duration_active;
 }
 
-//---------------------------------------------------------------------------------------//
-// Name/Id Accessors/Mutators
-
 /**
- * Set the name/Id of this item.
+ * Set the name of this item.
  *
  * @param new_name the new name of this item
  * @param src the identity of the object that initiated the change
  */
+
 void
 TimeAxisViewItem::set_item_name(std::string new_name, void* src)
 {
 	if (new_name != item_name) {
-		std::string temp_name = item_name ;
-		item_name = new_name ;
-		NameChanged (item_name, temp_name, src) ; /* EMIT_SIGNAL */
+		std::string temp_name = item_name;
+		item_name = new_name;
+		NameChanged (item_name, temp_name, src); /* EMIT_SIGNAL */
 	}
 }
 
-/**
- * Returns the name/id of this item
- *
- * @return the name/id of this item
- */
+/** @return the name of this item */
 std::string
 TimeAxisViewItem::get_item_name() const
 {
-	return(item_name) ;
+	return item_name;
 }
 
-//---------------------------------------------------------------------------------------//
-// Selection Methods
-
 /**
- * Set to true to indicate that this item is currently selected
+ * Set selection status.
  *
  * @param yn true if this item is currently selected
- * @param src the identity of the object that initiated the change
  */
 void
 TimeAxisViewItem::set_selected(bool yn)
@@ -506,6 +460,12 @@ TimeAxisViewItem::set_selected(bool yn)
 	}
 }
 
+/**
+ * Set whether an item should show its selection status.
+ *
+ * @param yn true if this item should show its selected status
+ */
+
 void
 TimeAxisViewItem::set_should_show_selection (bool yn)
 {
@@ -515,28 +475,20 @@ TimeAxisViewItem::set_should_show_selection (bool yn)
 	}
 }
 
-//---------------------------------------------------------------------------------------//
-// Parent Componenet Methods
-
-/**
- * Returns the TimeAxisView that this item is upon
- *
- * @return the timeAxisView that this item is placed upon
- */
+/** @return the TimeAxisView that this item is on */
 TimeAxisView&
 TimeAxisViewItem::get_time_axis_view()
 {
 	return trackview;
 }
-//---------------------------------------------------------------------------------------//
-// ui methods & data
 
 /**
- * Sets the displayed item text
- * This item is the visual text name displayed on the canvas item, this can be different to the name of the item
+ * Set the displayed item text.
+ * This item is the visual text name displayed on the canvas item, this can be different to the name of the item.
  *
  * @param new_name the new name text to display
  */
+
 void
 TimeAxisViewItem::set_name_text(const ustring& new_name)
 {
@@ -551,9 +503,9 @@ TimeAxisViewItem::set_name_text(const ustring& new_name)
 
 
 /**
- * Set the height of this item
+ * Set the height of this item.
  *
- * @param h the new height
+ * @param h new height
  */
 void
 TimeAxisViewItem::set_height (double height)
@@ -596,9 +548,6 @@ TimeAxisViewItem::set_height (double height)
 	update_name_pixbuf_visibility ();
 }
 
-/**
- *
- */
 void
 TimeAxisViewItem::set_color (Gdk::Color const & base_color)
 {
@@ -606,60 +555,48 @@ TimeAxisViewItem::set_color (Gdk::Color const & base_color)
 	set_colors ();
 }
 
-/**
- *
- */
 ArdourCanvas::Item*
 TimeAxisViewItem::get_canvas_frame()
 {
-	return(frame) ;
+	return frame;
 }
 
-/**
- *
- */
 ArdourCanvas::Group*
 TimeAxisViewItem::get_canvas_group()
 {
-	return (group) ;
+	return group;
 }
 
-/**
- *
- */
 ArdourCanvas::Item*
 TimeAxisViewItem::get_name_highlight()
 {
-	return (name_highlight) ;
+	return name_highlight;
 }
 
-/**
- *
- */
 ArdourCanvas::Pixbuf*
 TimeAxisViewItem::get_name_pixbuf()
 {
-	return (name_pixbuf) ;
+	return name_pixbuf;
 }
 
 /**
- * Calculates some contrasting color for displaying various parts of this item, based upon the base color
+ * Calculate some contrasting color for displaying various parts of this item, based upon the base color.
  *
  * @param color the base color of the item
  */
 void
 TimeAxisViewItem::compute_colors (Gdk::Color const & base_color)
 {
-	unsigned char radius ;
-	char minor_shift ;
+	unsigned char radius;
+	char minor_shift;
 
-	unsigned char r,g,b ;
+	unsigned char r,g,b;
 
 	/* FILL: this is simple */
-	r = base_color.get_red()/256 ;
-	g = base_color.get_green()/256 ;
-	b = base_color.get_blue()/256 ;
-	fill_color = RGBA_TO_UINT(r,g,b,160) ;
+	r = base_color.get_red()/256;
+	g = base_color.get_green()/256;
+	b = base_color.get_blue()/256;
+	fill_color = RGBA_TO_UINT(r,g,b,160);
 
 	/*  for minor colors:
 		if the overall saturation is strong, make the minor colors light.
@@ -669,8 +606,8 @@ TimeAxisViewItem::compute_colors (Gdk::Color const & base_color)
 		central circle in the color wheel from where we started.
 	*/
 
-	radius = (unsigned char) rint (floor (sqrt (static_cast<double>(r*r + g*g + b+b))/3.0f)) ;
-	minor_shift = 125 - radius ;
+	radius = (unsigned char) rint (floor (sqrt (static_cast<double>(r*r + g*g + b+b))/3.0f));
+	minor_shift = 125 - radius;
 
 	/* LABEL: rotate around color wheel by 120 degrees anti-clockwise */
 
@@ -710,14 +647,14 @@ TimeAxisViewItem::compute_colors (Gdk::Color const & base_color)
 	g += minor_shift;
 
 	label_color = RGBA_TO_UINT(r,g,b,255);
-	r = (base_color.get_red()/256)   + 127 ;
-	g = (base_color.get_green()/256) + 127 ;
-	b = (base_color.get_blue()/256)  + 127 ;
+	r = (base_color.get_red()/256)   + 127;
+	g = (base_color.get_green()/256) + 127;
+	b = (base_color.get_blue()/256)  + 127;
 
 	label_color = RGBA_TO_UINT(r,g,b,255);
 
 	/* XXX can we do better than this ? */
-	/* We're trying ;) */
+	/* We're trying;) */
 	/* NUKECOLORS */
 
 	//frame_color_r = 192;
@@ -728,10 +665,10 @@ TimeAxisViewItem::compute_colors (Gdk::Color const & base_color)
 	//selected_frame_color_g = 145;
 	//selected_frame_color_b = 168;
 
-	//handle_color_r = 25 ;
-	//handle_color_g = 0 ;
-	//handle_color_b = 255 ;
-	//lock_handle_color_r = 235 ;
+	//handle_color_r = 25;
+	//handle_color_g = 0;
+	//handle_color_b = 255;
+	//lock_handle_color_r = 235;
 	//lock_handle_color_g = 16;
 	//lock_handle_color_b = 16;
 }
@@ -742,13 +679,13 @@ TimeAxisViewItem::compute_colors (Gdk::Color const & base_color)
 void
 TimeAxisViewItem::set_colors()
 {
-	set_frame_color() ;
+	set_frame_color();
 
 	if (name_highlight) {
 		name_highlight->property_fill_color_rgba() = fill_color;
 		name_highlight->property_outline_color_rgba() = fill_color;
 	}
-	set_trim_handle_colors() ;
+	set_trim_handle_colors();
 }
 
 /**
@@ -776,8 +713,7 @@ TimeAxisViewItem::set_frame_color()
 }
 
 /**
- * Sets the colors of the start and end trim handle depending on object state
- *
+ * Set the colors of the start and end trim handle depending on object state
  */
 void
 TimeAxisViewItem::set_trim_handle_colors()
@@ -793,16 +729,24 @@ TimeAxisViewItem::set_trim_handle_colors()
 	}
 }
 
+/** @return the samples per unit of this item */
 double
 TimeAxisViewItem::get_samples_per_unit()
 {
-	return(samples_per_unit) ;
+	return samples_per_unit;
 }
 
+/**
+ * Set the samples per unit of this item.
+ * This item is used to determine the relative visual size and position of this item
+ * based upon its duration and start value.
+ *
+ * @param spu the new samples per unit value
+ */
 void
 TimeAxisViewItem::set_samples_per_unit (double spu)
 {
-	samples_per_unit = spu ;
+	samples_per_unit = spu;
 	set_position (this->get_position(), this);
 	reset_width_dependent_items ((double)get_duration() / samples_per_unit);
 }
@@ -923,42 +867,18 @@ TimeAxisViewItem::reset_name_width (double /*pixel_width*/)
 	}
 }
 
-
-//---------------------------------------------------------------------------------------//
-// Handle time axis removal
-
 /**
- * Handles the Removal of this time axis item
- * This _needs_ to be called to alert others of the removal properly, ie where the source
- * of the removal came from.
- *
- * XXX Although im not too happy about this method of doing things, I cant think of a cleaner method
- *     just now to capture the source of the removal
- *
- * @param src the identity of the object that initiated the change
- */
-void
-TimeAxisViewItem::remove_this_item(void* src)
-{
-	/*
-	   defer to idle loop, otherwise we'll delete this object
-	   while we're still inside this function ...
-	*/
-        Glib::signal_idle().connect(sigc::bind (sigc::ptr_fun (&TimeAxisViewItem::idle_remove_this_item), this, src));
-}
-
-/**
- * Callback used to remove this time axis item during the gtk idle loop
+ * Callback used to remove this time axis item during the gtk idle loop.
  * This is used to avoid deleting the obejct while inside the remove_this_item
- * method
+ * method.
  *
- * @param item the TimeAxisViewItem to remove
- * @param src the identity of the object that initiated the change
+ * @param item the TimeAxisViewItem to remove.
+ * @param src the identity of the object that initiated the change.
  */
 gint
 TimeAxisViewItem::idle_remove_this_item(TimeAxisViewItem* item, void* src)
 {
-	item->ItemRemoved (item->get_item_name(), src) ; /* EMIT_SIGNAL */
+	item->ItemRemoved (item->get_item_name(), src); /* EMIT_SIGNAL */
 	delete item;
 	item = 0;
 	return false;
