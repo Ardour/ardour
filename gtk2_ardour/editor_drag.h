@@ -210,6 +210,13 @@ private:
 	nframes64_t _last_pointer_frame; ///< adjusted_frame the last time a motion occurred
 };
 
+struct DraggingView
+{
+	DraggingView (RegionView* v);
+
+	RegionView* view; ///< the view
+	double initial_y; ///< the initial y position of the view before any reparenting
+};
 
 /** Abstract base class for drags that involve region(s) */
 class RegionDrag : public Drag, public sigc::trackable
@@ -221,7 +228,7 @@ public:
 protected:
 
 	RegionView* _primary; ///< the view that was clicked on (or whatever) to start the drag
-	std::list<RegionView*> _views; ///< all views that are being dragged
+	std::list<DraggingView> _views; ///< information about all views that are being dragged
 
 private:
 	void region_going_away (RegionView *);

@@ -340,16 +340,26 @@ Drag::break_drag ()
 
 RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
 	: Drag (e, i),
-	  _primary (p),
-	  _views (v)
+	  _primary (p)
 {
+	for (list<RegionView*>::const_iterator i = v.begin(); i != v.end(); ++i) {
+		_views.push_back (DraggingView (*i));
+	}
+	
 	RegionView::RegionViewGoingAway.connect (death_connection, invalidator (*this), ui_bind (&RegionDrag::region_going_away, this, _1), gui_context());
 }
 
 void
 RegionDrag::region_going_away (RegionView* v)
 {
-	_views.remove (v);
+	list<DraggingView>::iterator i = _views.begin ();
+	while (i != _views.end() && i->view != v) {
+		++i;
+	}
+
+	if (i != _views.end()) {
+		_views.erase (i);
+	}
 }
 
 RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b)
@@ -454,9 +464,9 @@ RegionMotionDrag::compute_y_delta (
 			}
 		}
 
-		for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 
-			RegionView* rv = (*i);
+			RegionView* rv = i->view;
 
 			if (rv->region()->locked()) {
 				continue;
@@ -545,9 +555,9 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, nframes64_t* pending_
 
 		if (*pending_region_position <= _last_frame_position) {
 
-			for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 
-				RegionView* rv = (*i);
+				RegionView* rv = i->view;
 
 				// If any regionview is at zero, we need to know so we can stop further leftward motion.
 
@@ -630,9 +640,9 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
 
-	for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 
-		RegionView* rv = (*i);
+		RegionView* rv = i->view;
 
 		if (rv->region()->locked()) {
 			continue;
@@ -840,8 +850,8 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 		/* all changes were made during motion event handlers */
 
 		if (_copy) {
-			for (list<RegionView*>::iterator i = _views.begin(); i != _views.end(); ++i) {
-				copies.push_back (*i);
+			for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
+				copies.push_back (i->view);
 			}
 		}
 
@@ -882,11 +892,11 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 
         cerr << "Iterate over " << _views.size() << " views\n";
 
-	for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ) {
+	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ) {
 
-		RegionView* rv = (*i);
-		RouteTimeAxisView* dest_rtv = final[*i].first;
-		layer_t dest_layer = final[*i].second;
+		RegionView* rv = i->view;
+		RouteTimeAxisView* dest_rtv = final[rv].first;
+		layer_t dest_layer = final[rv].second;
 
 		nframes64_t where;
 
@@ -972,7 +982,7 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			*/
 
 			rv->get_canvas_group()->reparent (*dest_rtv->view()->canvas_item());
-			rv->get_canvas_group()->property_y() = 0;
+			rv->get_canvas_group()->property_y() = i->initial_y;
 			rv->get_time_axis_view().reveal_dependent_views (*rv);
 
 			/* just change the model */
@@ -1123,8 +1133,8 @@ RegionMoveDrag::aborted ()
 {
 	if (_copy) {
 
-		for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			delete *i;
+		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+			delete i->view;
 		}
 
 		_views.clear ();
@@ -1137,16 +1147,17 @@ RegionMoveDrag::aborted ()
 void
 RegionMotionDrag::aborted ()
 {
-	for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-		TimeAxisView* tv = &(*i)->get_time_axis_view ();
+	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+		RegionView* rv = i->view;
+		TimeAxisView* tv = &(rv->get_time_axis_view ());
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 		assert (rtv);
-		(*i)->get_canvas_group()->reparent (*rtv->view()->canvas_item());
-		(*i)->get_canvas_group()->property_y() = 0;
-		(*i)->get_time_axis_view().reveal_dependent_views (**i);
-		(*i)->fake_set_opaque (false);
-		(*i)->move (-_total_x_delta, 0);
-		(*i)->set_height (rtv->view()->child_height ());
+		rv->get_canvas_group()->reparent (*rtv->view()->canvas_item());
+		rv->get_canvas_group()->property_y() = 0;
+		rv->get_time_axis_view().reveal_dependent_views (*rv);
+		rv->fake_set_opaque (false);
+		rv->move (-_total_x_delta, 0);
+		rv->set_height (rtv->view()->child_height ());
 	}
 
 	_editor->update_canvas_now ();
@@ -1169,11 +1180,11 @@ RegionMotionDrag::copy_regions (GdkEvent* event)
 {
 	/* duplicate the regionview(s) and region(s) */
 
-	list<RegionView*> new_regionviews;
+	list<DraggingView> new_regionviews;
 
-	for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 
-		RegionView* rv = (*i);
+		RegionView* rv = i->view;
 		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(rv);
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(rv);
 
@@ -1196,7 +1207,7 @@ RegionMotionDrag::copy_regions (GdkEvent* event)
 		}
 
 		nrv->get_canvas_group()->show ();
-		new_regionviews.push_back (nrv);
+		new_regionviews.push_back (DraggingView (nrv));
 
 		/* swap _primary to the copy */
 
@@ -1217,7 +1228,7 @@ RegionMotionDrag::copy_regions (GdkEvent* event)
 
 	_views = new_regionviews;
 
-	swap_grab (new_regionviews.front()->get_canvas_group (), 0, event ? event->motion.time : 0);
+	swap_grab (new_regionviews.front().view->get_canvas_group (), 0, event ? event->motion.time : 0);
 
 	/*
 	   sync the canvas to what we think is its current state
@@ -1383,7 +1394,7 @@ RegionInsertDrag::RegionInsertDrag (Editor* e, boost::shared_ptr<Region> r, Rout
 
 	_primary->get_canvas_group()->show ();
 	_primary->set_position (pos, 0);
-	_views.push_back (_primary);
+	_views.push_back (DraggingView (_primary));
 
 	_last_frame_position = pos;
 
@@ -1397,15 +1408,16 @@ RegionMotionDrag::find_time_axis_views_and_layers ()
 {
 	map<RegionView*, pair<RouteTimeAxisView*, int> > tav;
 
-	for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 
 		double ix1, ix2, iy1, iy2;
-		(*i)->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
-		(*i)->get_canvas_frame()->i2w (ix1, iy1);
+		RegionView* rv = i->view;
+		rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
+		rv->get_canvas_frame()->i2w (ix1, iy1);
 		iy1 += _editor->vertical_adjustment.get_value() - _editor->canvas_timebars_vsize;
 
 		pair<TimeAxisView*, int> tv = _editor->trackview_by_y_position (iy1);
-		tav[*i] = make_pair (dynamic_cast<RouteTimeAxisView*> (tv.first), tv.second);
+		tav[rv] = make_pair (dynamic_cast<RouteTimeAxisView*> (tv.first), tv.second);
 	}
 
 	return tav;
@@ -1772,18 +1784,19 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		_editor->begin_reversible_command (trim_type);
 		_have_transaction = true;
 
-		for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-			(*i)->fake_set_opaque(false);
-                        (*i)->region()->clear_history ();
-			(*i)->region()->suspend_property_changes ();
+		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+			RegionView* rv = i->view;
+			rv->fake_set_opaque(false);
+                        rv->region()->clear_history ();
+			rv->region()->suspend_property_changes ();
 
-			AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+			AudioRegionView* const arv = dynamic_cast<AudioRegionView*> (rv);
 
 			if (arv){
 				arv->temporarily_hide_envelope ();
 			}
 
-			boost::shared_ptr<Playlist> pl = (*i)->region()->playlist();
+			boost::shared_ptr<Playlist> pl = rv->region()->playlist();
 			insert_result = _editor->motion_frozen_playlists.insert (pl);
 
 			if (insert_result.second) {
@@ -1810,8 +1823,8 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			break;
 		} else {
 
-			for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				_editor->single_start_trim (**i, frame_delta, left_direction, obey_snap, non_overlap_trim);
+			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+				_editor->single_start_trim (*i->view, frame_delta, left_direction, obey_snap, non_overlap_trim);
 			}
 			break;
 		}
@@ -1821,8 +1834,8 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			break;
 		} else {
 
-			for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				_editor->single_end_trim (**i, frame_delta, left_direction, obey_snap, non_overlap_trim);
+			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+				_editor->single_end_trim (*i->view, frame_delta, left_direction, obey_snap, non_overlap_trim);
 			}
 			break;
 		}
@@ -1835,8 +1848,8 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 				swap_direction = true;
 			}
 
-			for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				_editor->single_contents_trim (**i, frame_delta, left_direction, swap_direction, obey_snap);
+			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+				_editor->single_contents_trim (*i->view, frame_delta, left_direction, swap_direction, obey_snap);
 			}
 		}
 		break;
@@ -1866,11 +1879,11 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 			_editor->thaw_region_after_trim (*_primary);
 		} else {
 
-			for (list<RegionView*>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				_editor->thaw_region_after_trim (**i);
-				(*i)->fake_set_opaque (true);
+			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+				_editor->thaw_region_after_trim (*i->view);
+				i->view->fake_set_opaque (true);
                                 if (_have_transaction) {
-                                        _editor->session()->add_command (new StatefulDiffCommand ((*i)->region()));
+                                        _editor->session()->add_command (new StatefulDiffCommand (i->view->region()));
                                 }
 			}
 		}
@@ -2202,9 +2215,9 @@ FadeInDrag::motion (GdkEvent* event, bool)
 		fade_length = pos - region->position();
 	}
 
-	for (RegionSelection::iterator i = _views.begin(); i != _views.end(); ++i) {
+	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 
-		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*i);
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (i->view);
 
 		if (!tmp) {
 			continue;
@@ -2239,9 +2252,9 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	_editor->begin_reversible_command (_("change fade in length"));
 
-	for (RegionSelection::iterator i = _views.begin(); i != _views.end(); ++i) {
+	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 
-		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*i);
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (i->view);
 
 		if (!tmp) {
 			continue;
@@ -2263,8 +2276,8 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 FadeInDrag::aborted ()
 {
-	for (RegionSelection::iterator i = _views.begin(); i != _views.end(); ++i) {
-		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*i);
+	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (i->view);
 
 		if (!tmp) {
 			continue;
@@ -2311,9 +2324,9 @@ FadeOutDrag::motion (GdkEvent* event, bool)
 		fade_length = region->last_frame() - pos;
 	}
 
-	for (RegionSelection::iterator i = _views.begin(); i != _views.end(); ++i) {
+	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 
-		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*i);
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (i->view);
 
 		if (!tmp) {
 			continue;
@@ -2350,9 +2363,9 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	_editor->begin_reversible_command (_("change fade out length"));
 
-	for (RegionSelection::iterator i = _views.begin(); i != _views.end(); ++i) {
+	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 
-		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*i);
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (i->view);
 
 		if (!tmp) {
 			continue;
@@ -2374,8 +2387,8 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 FadeOutDrag::aborted ()
 {
-	for (RegionSelection::iterator i = _views.begin(); i != _views.end(); ++i) {
-		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*i);
+	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
+		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (i->view);
 
 		if (!tmp) {
 			continue;
@@ -3903,4 +3916,10 @@ AutomationRangeDrag::aborted ()
 {
 	_line->clear_always_in_view ();
 	_line->reset ();
+}
+
+DraggingView::DraggingView (RegionView* v)
+	: view (v)
+{
+	initial_y = v->get_canvas_group()->property_y ();
 }
