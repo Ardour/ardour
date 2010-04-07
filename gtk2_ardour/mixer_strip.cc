@@ -378,11 +378,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		}
 	}
 
-	if (_route->phase_invert()) {
-	        name_label.set_text (X_("Ø ") + name_label.get_text());
-	} else {
-	        name_label.set_text (_route->name());
-	}
+	invert_button->set_active (_route->phase_invert ());
 
 	_mono_button.set_name ("MixerMonoButton");
 	_mono_button.signal_clicked().connect (sigc::mem_fun (*this, &MixerStrip::mono_button_clicked));
@@ -1448,9 +1444,6 @@ MixerStrip::name_changed ()
 	case Narrow:
 	        name_label.set_text (PBD::short_version (_route->name(), 5));
 		break;
-	}
-	if (_route->phase_invert()) {
-	        name_label.set_text (X_("Ø ") + name_label.get_text());
 	}
 }
 
