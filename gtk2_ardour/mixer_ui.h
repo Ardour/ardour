@@ -163,6 +163,15 @@ class Mixer_UI : public Gtk::Window
 	void track_list_delete (const Gtk::TreeModel::Path&);
 	void track_list_reorder (const Gtk::TreeModel::Path& path, const Gtk::TreeModel::iterator& iter, int* new_order);
 
+	/* Column order in track_display frame */
+	enum {TRACK_DISPLAY_STRIPS_COLUMN = 1,
+	      TRACK_DISPLAY_SHOW_COLUMN = 0};
+
+	/* Column order in group_display frame */
+	enum {GROUP_DISPLAY_GROUP_COLUMN = 2,
+	      GROUP_DISPLAY_ACTIVE_COLUMN = 1,
+	      GROUP_DISPLAY_SHOW_COLUMN = 0};
+
 	void initial_track_display ();
 	void show_track_list_menu ();
 

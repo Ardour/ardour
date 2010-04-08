@@ -85,12 +85,18 @@ Mixer_UI::Mixer_UI ()
 
 	track_model = ListStore::create (track_columns);
 	track_display.set_model (track_model);
-	track_display.append_column (_("Strips"), track_columns.text);
-	track_display.append_column (_("Show"), track_columns.visible);
-	track_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
-	track_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
-	track_display.get_column (0)->set_expand(true);
-	track_display.get_column (1)->set_expand(false);
+	/* LT change column order based on value of TRACK_DISPLAY_... enum. */
+	if (TRACK_DISPLAY_SHOW_COLUMN < TRACK_DISPLAY_STRIPS_COLUMN) {
+	  track_display.append_column (_("Show"), track_columns.visible);
+	  track_display.append_column (_("Strips"), track_columns.text);
+	} else {
+	  track_display.append_column (_("Strips"), track_columns.text);
+	  track_display.append_column (_("Show"), track_columns.visible);
+	}
+	track_display.get_column (TRACK_DISPLAY_STRIPS_COLUMN)->set_data (X_("colnum"), GUINT_TO_POINTER(TRACK_DISPLAY_STRIPS_COLUMN));
+	track_display.get_column (TRACK_DISPLAY_SHOW_COLUMN)->set_data (X_("colnum"), GUINT_TO_POINTER(TRACK_DISPLAY_SHOW_COLUMN));
+	track_display.get_column (TRACK_DISPLAY_STRIPS_COLUMN)->set_expand(true);
+	track_display.get_column (TRACK_DISPLAY_SHOW_COLUMN)->set_expand(false);
 	track_display.set_name (X_("MixerTrackDisplayList"));
 	track_display.get_selection()->set_mode (Gtk::SELECTION_NONE);
 	track_display.set_reorderable (true);
@@ -100,7 +106,7 @@ Mixer_UI::Mixer_UI ()
 	track_model->signal_row_changed().connect (mem_fun (*this, &Mixer_UI::track_list_change));
 	track_model->signal_rows_reordered().connect (mem_fun (*this, &Mixer_UI::track_list_reorder));
 
-	CellRendererToggle* track_list_visible_cell = dynamic_cast<CellRendererToggle*>(track_display.get_column_cell_renderer (1));
+	CellRendererToggle* track_list_visible_cell = dynamic_cast<CellRendererToggle*>(track_display.get_column_cell_renderer (TRACK_DISPLAY_SHOW_COLUMN));
 	track_list_visible_cell->property_activatable() = true;
 	track_list_visible_cell->property_radio() = false;
 
@@ -111,15 +117,23 @@ Mixer_UI::Mixer_UI ()
 
 	group_model = ListStore::create (group_columns);
 	group_display.set_model (group_model);
-	group_display.append_column (_("Group"), group_columns.text);
-	group_display.append_column (_("Active"), group_columns.active);
-	group_display.append_column (_("Show"), group_columns.visible);
-	group_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
-	group_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
-	group_display.get_column (2)->set_data (X_("colnum"), GUINT_TO_POINTER(2));
-	group_display.get_column (0)->set_expand(true);
-	group_display.get_column (1)->set_expand(false);
-	group_display.get_column (2)->set_expand(false);
+	/* LT change column order based on value of GROUP_DISPLAY_... enum. */
+	/* LT Code only two possibilities : Group, Active, Show or Show, Active, Group. */
+	if (GROUP_DISPLAY_SHOW_COLUMN < GROUP_DISPLAY_ACTIVE_COLUMN) {
+	  group_display.append_column (_("Show"), group_columns.visible);
+	  group_display.append_column (_("Active"), group_columns.active);
+	  group_display.append_column (_("Group"), group_columns.text);
+	} else {
+	  group_display.append_column (_("Group"), group_columns.text);
+	  group_display.append_column (_("Active"), group_columns.active);
+	  group_display.append_column (_("Show"), group_columns.visible);
+	}
+	group_display.get_column (GROUP_DISPLAY_GROUP_COLUMN)->set_data (X_("colnum"), GUINT_TO_POINTER(GROUP_DISPLAY_GROUP_COLUMN));
+	group_display.get_column (GROUP_DISPLAY_ACTIVE_COLUMN)->set_data (X_("colnum"), GUINT_TO_POINTER(GROUP_DISPLAY_ACTIVE_COLUMN));
+	group_display.get_column (GROUP_DISPLAY_SHOW_COLUMN)->set_data (X_("colnum"), GUINT_TO_POINTER(GROUP_DISPLAY_SHOW_COLUMN));
+	group_display.get_column (GROUP_DISPLAY_GROUP_COLUMN)->set_expand(true);
+	group_display.get_column (GROUP_DISPLAY_ACTIVE_COLUMN)->set_expand(false);
+	group_display.get_column (GROUP_DISPLAY_SHOW_COLUMN)->set_expand(false);
 	group_display.set_name ("MixerGroupList");
 	group_display.get_selection()->set_mode (Gtk::SELECTION_SINGLE);
 	group_display.set_reorderable (true);
@@ -128,19 +142,19 @@ Mixer_UI::Mixer_UI ()
 
 	/* name is directly editable */
 
-	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(group_display.get_column_cell_renderer (0));
+	CellRendererText* name_cell = dynamic_cast<CellRendererText*>(group_display.get_column_cell_renderer (GROUP_DISPLAY_GROUP_COLUMN));
 	name_cell->property_editable() = true;
 	name_cell->signal_edited().connect (mem_fun (*this, &Mixer_UI::mix_group_name_edit));
 
 	/* use checkbox for the active column */
 
-	CellRendererToggle* active_cell = dynamic_cast<CellRendererToggle*>(group_display.get_column_cell_renderer (1));
+	CellRendererToggle* active_cell = dynamic_cast<CellRendererToggle*>(group_display.get_column_cell_renderer (GROUP_DISPLAY_ACTIVE_COLUMN));
 	active_cell->property_activatable() = true;
 	active_cell->property_radio() = false;
 
 	/* use checkbox for the visible column */
 
-	active_cell = dynamic_cast<CellRendererToggle*>(group_display.get_column_cell_renderer (2));
+	active_cell = dynamic_cast<CellRendererToggle*>(group_display.get_column_cell_renderer (GROUP_DISPLAY_SHOW_COLUMN));
 	active_cell->property_activatable() = true;
 	active_cell->property_radio() = false;
 
@@ -923,11 +937,11 @@ Mixer_UI::track_display_button_press (GdkEventButton* ev)
 	}
 
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
-	case 0:
+	case TRACK_DISPLAY_STRIPS_COLUMN:
 		/* allow normal processing to occur */
 		return false;
 
-	case 1: /* visibility */
+	case TRACK_DISPLAY_SHOW_COLUMN: /* visibility */
 
 		if ((iter = track_model->get_iter (path))) {
 			MixerStrip* strip = (*iter)[track_columns.strip];
@@ -1034,7 +1048,7 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 	}
 
 	switch (GPOINTER_TO_UINT (column->get_data (X_("colnum")))) {
-	case 0:
+	case GROUP_DISPLAY_GROUP_COLUMN:
 		if (Keyboard::is_edit_event (ev)) {
 			if ((iter = group_model->get_iter (path))) {
 				if ((group = (*iter)[group_columns.group]) != 0) {
@@ -1049,7 +1063,7 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 		} 
 		break;
 
-	case 1:
+	case GROUP_DISPLAY_ACTIVE_COLUMN:
 		if ((iter = group_model->get_iter (path))) {
 			bool active = (*iter)[group_columns.active];
 			(*iter)[group_columns.active] = !active;
@@ -1060,7 +1074,7 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 		}
 		break;
 		
-	case 2:
+	case GROUP_DISPLAY_SHOW_COLUMN:
 		if ((iter = group_model->get_iter (path))) {
 			bool visible = (*iter)[group_columns.visible];
 			(*iter)[group_columns.visible] = !visible;
@@ -1286,8 +1300,8 @@ Mixer_UI::add_mix_group (RouteGroup* group)
 	group->FlagsChanged.connect (bind (mem_fun(*this, &Mixer_UI::group_flags_changed), group));
 	
 	if (focus) {
-		TreeViewColumn* col = group_display.get_column (0);
-		CellRendererText* name_cell = dynamic_cast<CellRendererText*>(group_display.get_column_cell_renderer (0));
+		TreeViewColumn* col = group_display.get_column (GROUP_DISPLAY_GROUP_COLUMN);
+		CellRendererText* name_cell = dynamic_cast<CellRendererText*>(group_display.get_column_cell_renderer (GROUP_DISPLAY_GROUP_COLUMN));
 		group_display.set_cursor (group_model->get_path (row), *col, *name_cell, true);
 	}
 
