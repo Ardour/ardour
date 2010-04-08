@@ -40,6 +40,7 @@ namespace ARDOUR {
 
 class MIDIControllable;
 class MIDIFunction;
+class MIDIAction;
 
 class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
   public:
@@ -94,6 +95,9 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	typedef std::list<MIDIFunction*> MIDIFunctions;
 	MIDIFunctions functions;
 
+	typedef std::list<MIDIAction*> MIDIActions;
+	MIDIActions actions;
+
 	typedef std::pair<MIDIControllable*,PBD::ScopedConnection> MIDIPendingControllable;
 	typedef std::list<MIDIPendingControllable* > MIDIPendingControllables;
 	MIDIPendingControllables pending_controllables;
@@ -110,6 +114,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 
 	MIDIControllable* create_binding (const XMLNode&);
 	MIDIFunction* create_function (const XMLNode&);
+	MIDIAction* create_action (const XMLNode&);
 
 	void reset_controllables ();
 	void drop_all ();

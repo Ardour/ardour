@@ -41,6 +41,7 @@
 #include "generic_midi_control_protocol.h"
 #include "midicontrollable.h"
 #include "midifunction.h"
+#include "midiaction.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -193,6 +194,11 @@ GenericMidiControlProtocol::drop_all ()
 		delete *i;
 	}
 	functions.clear ();
+
+	for (MIDIActions::iterator i = actions.begin(); i != actions.end(); ++i) {
+		delete *i;
+	}
+	actions.clear ();
 }
 
 void
@@ -640,7 +646,14 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 				if ((mf = create_function (*child)) != 0) {
 					functions.push_back (mf);
 				}
-			}
+
+			} else if (child->property ("action")) {
+                                MIDIAction* ma;
+
+				if ((ma = create_action (*child)) != 0) {
+					actions.push_back (ma);
+				}
+                        }
 		}
 	}
 	
@@ -744,8 +757,8 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 	MIDI::channel_t channel = 0;
 	string uri;
 	MIDI::eventType ev;
-	MIDI::byte* sysex = 0;
-	uint32_t sysex_size = 0;
+	MIDI::byte* data = 0;
+	uint32_t data_size = 0;
 
 	if ((prop = node.property (X_("ctl"))) != 0) {
 		ev = MIDI::controller;
@@ -753,9 +766,14 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 		ev = MIDI::on;
 	} else if ((prop = node.property (X_("pgm"))) != 0) {
 		ev = MIDI::program;
-	} else if ((prop = node.property (X_("sysex"))) != 0) {
+	} else if ((prop = node.property (X_("sysex"))) != 0 || (prop = node.property (X_("msg"))) != 0) {
 
-		ev = MIDI::sysex;
+                if (prop->name() == X_("sysex")) {
+                        ev = MIDI::sysex;
+                } else {
+                        ev = MIDI::any;
+                }
+
 		int val;
 		uint32_t cnt;
 
@@ -773,8 +791,8 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 			return 0;
 		}
 
-		sysex = new MIDI::byte[cnt];
-		sysex_size = cnt;
+		data = new MIDI::byte[cnt];
+		data_size = cnt;
 		
 		{
 			stringstream ss (prop->value());
@@ -782,16 +800,16 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 			cnt = 0;
 			
 			while (ss >> val) {
-				sysex[cnt++] = (MIDI::byte) val;
+				data[cnt++] = (MIDI::byte) val;
 			}
 		}
-		
+
 	} else {
 		warning << "Binding ignored - unknown type" << endmsg;
 		return 0;
 	}
 
-	if (sysex_size == 0) {
+	if (data_size == 0) {
 		if (sscanf (prop->value().c_str(), "%d", &intval) != 1) {
 			return 0;
 		}
@@ -816,7 +834,7 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 	
 	MIDIFunction* mf = new MIDIFunction (*_port);
 	
-	if (mf->init (*this, prop->value(), sysex, sysex_size)) {
+	if (mf->init (*this, prop->value(), data, data_size)) {
 		delete mf;
 		return 0;
 	}
@@ -824,6 +842,102 @@ GenericMidiControlProtocol::create_function (const XMLNode& node)
 	mf->bind_midi (channel, ev, detail);
 
 	return mf;
+}
+
+MIDIAction*
+GenericMidiControlProtocol::create_action (const XMLNode& node)
+{
+	const XMLProperty* prop;
+	int intval;
+	MIDI::byte detail = 0;
+	MIDI::channel_t channel = 0;
+	string uri;
+	MIDI::eventType ev;
+	MIDI::byte* data = 0;
+	uint32_t data_size = 0;
+
+	if ((prop = node.property (X_("ctl"))) != 0) {
+		ev = MIDI::controller;
+	} else if ((prop = node.property (X_("note"))) != 0) {
+		ev = MIDI::on;
+	} else if ((prop = node.property (X_("pgm"))) != 0) {
+		ev = MIDI::program;
+	} else if ((prop = node.property (X_("sysex"))) != 0 || (prop = node.property (X_("msg"))) != 0) {
+
+                if (prop->name() == X_("sysex")) {
+                        ev = MIDI::sysex;
+                } else {
+                        ev = MIDI::any;
+                }
+
+		int val;
+		uint32_t cnt;
+
+		{
+			cnt = 0;
+			stringstream ss (prop->value());
+			ss << hex;
+			
+			while (ss >> val) {
+				cnt++;
+			}
+		}
+
+		if (cnt == 0) {
+			return 0;
+		}
+
+		data = new MIDI::byte[cnt];
+		data_size = cnt;
+		
+		{
+			stringstream ss (prop->value());
+			ss << hex;
+			cnt = 0;
+			
+			while (ss >> val) {
+				data[cnt++] = (MIDI::byte) val;
+			}
+		}
+
+	} else {
+		warning << "Binding ignored - unknown type" << endmsg;
+		return 0;
+	}
+
+	if (data_size == 0) {
+		if (sscanf (prop->value().c_str(), "%d", &intval) != 1) {
+			return 0;
+		}
+		
+		detail = (MIDI::byte) intval;
+
+		if ((prop = node.property (X_("channel"))) == 0) {
+			return 0;
+		}
+	
+		if (sscanf (prop->value().c_str(), "%d", &intval) != 1) {
+			return 0;
+		}
+		channel = (MIDI::channel_t) intval;
+		/* adjust channel to zero-based counting */
+		if (channel > 0) {
+			channel -= 1;
+		}
+	}
+
+	prop = node.property (X_("action"));
+	
+	MIDIAction* ma = new MIDIAction (*_port);
+        
+	if (ma->init (*this, prop->value(), data, data_size)) {
+		delete ma;
+		return 0;
+	}
+
+	ma->bind_midi (channel, ev, detail);
+
+	return ma;
 }
 
 void

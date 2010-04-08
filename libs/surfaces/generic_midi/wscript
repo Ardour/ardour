@@ -24,8 +24,10 @@ def build(bld):
 		generic_midi_control_protocol.cc
                 gmcp_gui.cc
 		interface.cc
+		midiinvokable.cc
 		midicontrollable.cc
 		midifunction.cc
+	        midiaction.cc
 	'''
 	obj.export_incdirs = ['.']
 	obj.cxxflags     = '-DPACKAGE="ardour_genericmidi"'

@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __gm_midifunction_h__
-#define __gm_midifunction_h__
+#ifndef __gm_midiaction_h__
+#define __gm_midiaction_h__
 
 #include <string>
 
@@ -31,6 +31,10 @@
 
 #include "midiinvokable.h"
 
+namespace Gtk { 
+        class Action;
+}
+
 namespace MIDI {
 	class Channel;
 	class Port;
@@ -39,34 +43,21 @@ namespace MIDI {
 
 class GenericMidiControlProtocol;
 
-class MIDIFunction : public MIDIInvokable
+class MIDIAction : public MIDIInvokable
 {
   public:
-	enum Function { 
-		NextBank,
-		PrevBank,
-		TransportRoll,
-		TransportStop,
-		TransportZero,
-		TransportStart,
-		TransportEnd,
-		TransportLoopToggle,
-		TransportRecordEnable,
-		TransportRecordDisable
-	};
+	MIDIAction (MIDI::Port&);
+	virtual ~MIDIAction ();
 
-	MIDIFunction (MIDI::Port&);
-	virtual ~MIDIFunction ();
+	int init (GenericMidiControlProtocol&, const std::string& action_name, MIDI::byte* sysex = 0, size_t ssize = 0);
 
-	int init (GenericMidiControlProtocol&, const std::string& function_name, MIDI::byte* sysex = 0, size_t ssize = 0);
-
-	const std::string& function_name() const { return _invokable_name; }
+	const std::string& action_name() const { return _invokable_name; }
 
 	XMLNode& get_state (void);
 	int set_state (const XMLNode&, int version);
 
   private:
-	Function        _function;
+        Gtk::Action* _action;
 	void execute ();
 };
 
