@@ -419,9 +419,24 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 			/* was stopped, now rolling (and recording) */
 
 			if (_alignment_style == ExistingMaterial) {
-				// cerr << "\tA FRF += " << _session.worst_output_latency () << endl;
-				first_recordable_frame += _session.worst_output_latency();
-			} else {
+
+                                /* there are two delays happening:
+
+                                   1) inbound, represented by _capture_offset
+                                   2) outbound, represented by _session.worst_output_latency()
+
+                                   the first sample to record occurs when the larger of these
+                                   two has elapsed, since they occur in parallel.
+
+                                   since we've already added _capture_offset, just add the
+                                   difference if _session.worst_output_latency() is larger.
+                                */
+
+                                if (_capture_offset < _session.worst_output_latency()) {
+                                        // cerr << "\tA FRF += " << (_session.worst_output_latency () - _capture_offset) << endl;
+                                        first_recordable_frame += (_session.worst_output_latency() - _capture_offset);
+                                } 
+                        } else {
 				// cerr << "\tB FRF += " << _roll_delay<< endl;
 				first_recordable_frame += _roll_delay;
   			}
@@ -548,13 +563,22 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
         /* two conditions to test for here:
 
            A: this track is rec-enabled, and the session has confirmed that we can record
-           B: this track is rec-enabled, has been recording, and we are set up for auto-punch-in
+           B: this track is rec-enabled, has been recording, and we are set up for auto-punch
 
            The second test is necessary to capture the extra material that arrives AFTER the transport
            frame has left the punch range (which will cause the "can_record" argument to be false).
         */
 
-	if (nominally_recording || (re && was_recording && _session.get_record_enabled() && Config->get_punch_out())) {
+#if 0
+        cerr << _name << " can record " << can_record << " re " << re << " nomrec " << nominally_recording
+             << " FRF " << first_recordable_frame << " LRF " << last_recordable_frame
+             << endl;
+#endif
+
+	if (nominally_recording || 
+            (re && was_recording && _session.get_record_enabled() && 
+             (Config->get_punch_out() || Config->get_punch_in()))) {
+
 		OverlapType ot;
 		
 		// Safeguard against situations where process() goes haywire 
@@ -611,8 +635,9 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 			capture_captured = 0;
 			was_recording = true;
 		}
-	}
 
+                //cerr << "\trec nframes will be " << rec_nframes << endl;
+ 	}
 
 	if (can_record && !_last_capture_regions.empty()) {
 		_last_capture_regions.clear ();
@@ -852,6 +877,7 @@ AudioDiskstream::commit (nframes_t nframes)
 	
 	if (adjust_capture_position != 0) {
 		capture_captured += adjust_capture_position;
+                // cerr << "bump capture_captured by " << adjust_capture_position << " to " << capture_captured << endl;
 		adjust_capture_position = 0;
 	}
 	
@@ -1641,9 +1667,14 @@ AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_ca
 		goto out;
 	} 
 
+        // cerr << _name << " check capture info ...\n";
+
 	for (total_capture = 0, ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+                // cerr << "\tCI frames = " << (*ci)->frames << endl;
 		total_capture += (*ci)->frames;
 	}
+
+        // cerr << "\ttotal for this take = " << total_capture << endl;
 
 	/* figure out the name for this take */
 
