@@ -39,6 +39,7 @@ class SndFileImportableSource : public ImportableSource {
 	nframes_t samplerate() const;
 	void      seek (nframes_t pos);
 	nframes64_t natural_position() const;
+	bool clamped_at_unity () const;
 
    protected:
 	SF_INFO sf_info;

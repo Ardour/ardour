@@ -833,3 +833,10 @@ SndFileSource::one_of_several_channels () const
 	return _info.channels > 1;
 }
 
+bool
+SndFileSource::clamped_at_unity () const
+{
+	int const sub = _info.format & SF_FORMAT_SUBMASK;
+	/* XXX: this may not be the full list of formats that are unclamped */
+	return (sub != SF_FORMAT_FLOAT && sub != SF_FORMAT_DOUBLE);
+}

@@ -37,6 +37,8 @@ public:
 	virtual nframes_t samplerate() const = 0;
 	virtual void      seek (nframes_t pos) = 0;
 	virtual nframes64_t natural_position() const = 0;
+
+	virtual bool clamped_at_unity () const = 0;
 };
 
 }

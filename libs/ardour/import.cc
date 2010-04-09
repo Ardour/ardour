@@ -277,8 +277,48 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 		channel_data.push_back(boost::shared_array<Sample>(new Sample[nframes]));
 	}
 
-	uint read_count = 0;
+	float gain = 1;
+
+	boost::shared_ptr<AudioSource> s = boost::dynamic_pointer_cast<AudioSource> (newfiles[0]);
+	assert (s);
+
 	status.progress = 0.0f;
+	float progress_multiplier = 1;
+	float progress_base = 0;
+
+	if (!source->clamped_at_unity() && s->clamped_at_unity()) {
+
+		/* The source we are importing from can return sample values with a magnitude greater than 1,
+		   and the file we are writing the imported data to cannot handle such values.  Compute the gain
+		   factor required to normalize the input sources to have a magnitude of less than 1.
+		*/
+		
+		float peak = 0;
+		uint read_count = 0;
+		
+		while (!status.cancel) {
+			nframes_t const nread = source->read (data.get(), nframes);
+			if (nread == 0) {
+				break;
+			}
+
+			peak = compute_peak (data.get(), nread, peak);
+
+			read_count += nread;
+			status.progress = 0.5 * read_count / (source->ratio() * source->length() * channels);
+		}
+
+		if (peak >= 1) {
+			/* we are out of range: compute a gain to fix it */
+			gain = (1 - FLT_EPSILON) / peak;
+		}
+		
+		source->seek (0);
+		progress_multiplier = 0.5;
+		progress_base = 0.5;
+	}
+
+	uint read_count = 0;
 
 	while (!status.cancel) {
 
@@ -289,6 +329,12 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 		if ((nread = source->read (data.get(), nframes)) == 0) {
 			break;
 		}
+
+		if (gain != 1) {
+			/* here is the gain fix for out-of-range sample values that we computed earlier */
+			apply_gain_to_buffer (data.get(), nread, gain);
+		}
+		
 		nfread = nread / channels;
 
 		/* de-interleave */
@@ -310,7 +356,7 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 		}
 
 		read_count += nread;
-		status.progress = read_count / (source->ratio () * source->length() * channels);
+		status.progress = progress_base + progress_multiplier * read_count / (source->ratio () * source->length() * channels);
 	}
 }
 

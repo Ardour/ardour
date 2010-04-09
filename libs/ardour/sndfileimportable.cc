@@ -80,3 +80,11 @@ SndFileImportableSource::natural_position () const
 {
 	return timecode;
 }
+
+bool
+SndFileImportableSource::clamped_at_unity () const
+{
+	int const sub = sf_info.format & SF_FORMAT_SUBMASK;
+	/* XXX: this may not be the full list of formats that are unclamped */
+	return (sub != SF_FORMAT_FLOAT && sub != SF_FORMAT_DOUBLE);
+}

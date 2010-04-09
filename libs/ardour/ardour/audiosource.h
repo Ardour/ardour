@@ -100,6 +100,9 @@ class AudioSource : virtual public Source,
 	int prepare_for_peakfile_writes ();
 	void done_with_peakfile_writes (bool done = true);
 
+	/** @return true if the each source sample s must be clamped to -1 < s < 1 */
+	virtual bool clamped_at_unity () const = 0;
+
   protected:
 	static bool _build_missing_peakfiles;
 	static bool _build_peakfiles;

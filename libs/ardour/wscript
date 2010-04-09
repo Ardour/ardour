@@ -330,6 +330,7 @@ def build(bld):
 			test/bbt_test.cpp
 			test/interpolation_test.cpp
 			test/midi_clock_slave_test.cpp
+			test/resampled_source.cc
 			test/testrunner.cpp
 		'''.split()
 		testobj.includes     = obj.includes + ['test', '../pbd']

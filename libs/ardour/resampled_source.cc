@@ -30,48 +30,33 @@ const uint32_t ResampledImportableSource::blocksize = 16384U;
 
 ResampledImportableSource::ResampledImportableSource (boost::shared_ptr<ImportableSource> src, nframes_t rate, SrcQuality srcq)
 	: source (src)
+	, src_state (0)
 {
-	int err;
-
-	source->seek (0);
-
-	/* Initialize the sample rate converter. */
-
-	int src_type = SRC_SINC_BEST_QUALITY;
+	_src_type = SRC_SINC_BEST_QUALITY;
 
 	switch (srcq) {
 	case SrcBest:
-		src_type = SRC_SINC_BEST_QUALITY;
+		_src_type = SRC_SINC_BEST_QUALITY;
 		break;
 	case SrcGood:
-		src_type = SRC_SINC_MEDIUM_QUALITY;
+		_src_type = SRC_SINC_MEDIUM_QUALITY;
 		break;
 	case SrcQuick:
-		src_type = SRC_SINC_FASTEST;
+		_src_type = SRC_SINC_FASTEST;
 		break;
 	case SrcFast:
-		src_type = SRC_ZERO_ORDER_HOLD;
+		_src_type = SRC_ZERO_ORDER_HOLD;
 		break;
 	case SrcFastest:
-		src_type = SRC_LINEAR;
+		_src_type = SRC_LINEAR;
 		break;
 	}
 
-	if ((src_state = src_new (src_type, source->channels(), &err)) == 0) {
-		error << string_compose(_("Import: src_new() failed : %1"), src_strerror (err)) << endmsg ;
-		throw failed_constructor ();
-	}
-
-	src_data.end_of_input = 0 ; /* Set this later. */
-
-	/* Start with zero to force load in while loop. */
-
-	src_data.input_frames = 0 ;
-	src_data.data_in = input ;
-
-	src_data.src_ratio = ((float) rate) / source->samplerate();
-
 	input = new float[blocksize];
+
+	seek (0);
+	
+	src_data.src_ratio = ((float) rate) / source->samplerate();
 }
 
 ResampledImportableSource::~ResampledImportableSource ()
@@ -106,7 +91,7 @@ ResampledImportableSource::read (Sample* output, nframes_t nframes)
 	if (!src_data.end_of_input) {
 		src_data.output_frames = nframes / source->channels();
 	} else {
-		src_data.output_frames = src_data.input_frames;
+		src_data.output_frames = std::min ((nframes_t) src_data.input_frames, nframes / source->channels());
 	}
 
 	if ((err = src_process (src_state, &src_data))) {
@@ -126,3 +111,26 @@ ResampledImportableSource::read (Sample* output, nframes_t nframes)
 	return src_data.output_frames_gen * source->channels();
 }
 
+void
+ResampledImportableSource::seek (nframes_t pos)
+{
+	source->seek (pos);
+
+	/* and reset things so that we start from scratch with the conversion */
+
+	if (src_state) {
+		src_delete (src_state);
+	}
+
+	int err;
+
+	if ((src_state = src_new (_src_type, source->channels(), &err)) == 0) {
+		error << string_compose(_("Import: src_new() failed : %1"), src_strerror (err)) << endmsg ;
+		throw failed_constructor ();
+	}
+	
+	src_data.input_frames = 0;
+	src_data.data_in = input;
+	src_data.end_of_input = 0;
+}
+	

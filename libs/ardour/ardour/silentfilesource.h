@@ -36,6 +36,8 @@ public:
 	bool destructive() const { return false; }
 	bool can_be_analysed() const { return false; }
 
+	bool clamped_at_unity() const { return false; }
+
 protected:
 	friend class SourceFactory;
 

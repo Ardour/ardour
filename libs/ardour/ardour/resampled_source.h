@@ -39,14 +39,20 @@ class ResampledImportableSource : public ImportableSource
 	uint32_t channels() const { return source->channels(); }
 	nframes_t length() const { return source->length(); }
 	nframes_t samplerate() const { return source->samplerate(); }
-	void      seek (nframes_t pos) { source->seek (pos); }
+	void      seek (nframes_t);
 	nframes64_t natural_position() const { return source->natural_position(); }
+
+	bool clamped_at_unity () const {
+		/* resampling may generate inter-sample peaks with magnitude > 1 */
+		return false;
+	}
 
 	static const uint32_t blocksize;
 
    private:
 	boost::shared_ptr<ImportableSource> source;
         float* input;
+	int _src_type;
 	SRC_STATE*	src_state;
 	SRC_DATA	src_data;
 };
