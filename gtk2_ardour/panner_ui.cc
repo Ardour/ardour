@@ -659,7 +659,7 @@ PannerUI::pan_value_changed (uint32_t which)
 {
 	ENSURE_GUI_THREAD (*this, &PannerUI::pan_value_changed, which)
 
-	if (_panner->npanners() > 1 && which < _panner->npanners()) {
+	if (_panner->npanners() > 0 && which < _panner->npanners()) {
 		float xpos;
 		float val = pan_adjustments[which]->get_value ();
 
