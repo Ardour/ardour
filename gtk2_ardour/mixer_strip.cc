@@ -360,16 +360,18 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	if (is_audio_track()) {
-
 		boost::shared_ptr<AudioTrack> at = audio_track();
-
 		at->FreezeChange.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::map_frozen, this), gui_context());
+	}
 
+	if (is_track ()) {
+		
 		button_table.attach (*rec_enable_button, 0, 2, 2, 3);
 		rec_enable_button->set_sensitive (_session->writable());
 		rec_enable_button->show();
 
-	} else if (!is_track()) {
+	} else {
+		
 		/* non-master bus */
 
 		if (!_route->is_master()) {
