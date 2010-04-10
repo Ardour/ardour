@@ -33,6 +33,7 @@ struct ImportStatus : public InterThreadInfo {
 	std::string doing_what;
 
 	/* control info */
+	uint32_t                   current;
 	uint32_t                   total;
 	SrcQuality                 quality;
 	volatile bool              freeze;

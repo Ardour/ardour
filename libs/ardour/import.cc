@@ -250,14 +250,14 @@ compose_status_message (const string& path,
 			uint total_files)
 {
 	if (file_samplerate != session_samplerate) {
-		return string_compose (_("resampling %1 from %2kHz to %3kHz\n(%4 of %5)"),
-				       Glib::path_get_basename (path),
+		return string_compose (_("<b>Resampling</b> from %1kHz to %2kHz.\n<i>%3</i>\n(%4 of %5)"),
 				       file_samplerate/1000.0f,
 				       session_samplerate/1000.0f,
+				       Glib::path_get_basename (path),
 				       current_file, total_files);
 	}
 
-	return string_compose (_("copying %1\n(%2 of %3)"),
+	return string_compose (_("<b>Copying</b>\n<i>%1</i>\n(%2 of %3)"),
 			       Glib::path_get_basename (path),
 			       current_file, total_files);
 }
@@ -442,7 +442,6 @@ remove_file_source (boost::shared_ptr<Source> source)
 void
 Session::import_audiofiles (ImportStatus& status)
 {
-	uint32_t cnt = 1;
 	typedef vector<boost::shared_ptr<Source> > Sources;
 	Sources all_new_sources;
 	boost::shared_ptr<AudioFileSource> afs;
@@ -452,8 +451,8 @@ Session::import_audiofiles (ImportStatus& status)
 	status.sources.clear ();
 
 	for (vector<Glib::ustring>::iterator p = status.paths.begin();
-			p != status.paths.end() && !status.cancel;
-			++p, ++cnt)
+	     p != status.paths.end() && !status.cancel;
+	     ++p)
 	{
 		boost::shared_ptr<ImportableSource> source;
 		std::auto_ptr<Evoral::SMF>          smf_reader;
@@ -510,12 +509,14 @@ Session::import_audiofiles (ImportStatus& status)
 
 		if (source) { // audio
 			status.doing_what = compose_status_message (*p, source->samplerate(),
-								    frame_rate(), cnt, status.total);
+								    frame_rate(), status.current, status.total);
 			write_audio_data_to_new_files (source.get(), status, newfiles);
 		} else if (smf_reader.get()) { // midi
 			status.doing_what = string_compose(_("Loading MIDI file %1"), *p);
 			write_midi_data_to_new_files (smf_reader.get(), status, newfiles);
 		}
+
+		++status.current;
 	}
 
 	if (!status.cancel) {

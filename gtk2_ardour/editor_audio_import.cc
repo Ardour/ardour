@@ -326,9 +326,19 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 	vector<ustring> to_import;
 	int nth = 0;
 
+	current_interthread_info = &import_status;
+	import_status.current = 1;
+	import_status.total = paths.size ();
+
 	if (interthread_progress_window == 0) {
 		build_interthread_progress_window ();
 	}
+
+	interthread_progress_window->set_title (_("Import"));
+	interthread_progress_bar.set_fraction (0.0f);
+	interthread_cancel_label.set_text (_("Cancel Import"));
+	interthread_progress_connection = Glib::signal_timeout().connect
+		(sigc::bind (sigc::mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 500);
 
 	if (chns == Editing::ImportMergeFiles) {
 
@@ -346,14 +356,13 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 		}
 
 		if (!cancel) {
-			import_sndfiles (paths, mode, quality, pos, 1, 1, track, false, paths.size());
+			import_sndfiles (paths, mode, quality, pos, 1, 1, track, false);
 		}
 
 	} else {
 
                 bool replace = false;
 		bool ok = true;
-		vector<ustring>::size_type total = paths.size();
 
 		for (vector<ustring>::iterator a = paths.begin(); a != paths.end(); ++a) {
 
@@ -385,7 +394,7 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
                                         track = get_nth_selected_audio_track (nth++);
                                 }
 			
-                                ok = (import_sndfiles (to_import, mode, quality, pos, 1, -1, track, replace, total) == 0);
+                                ok = (import_sndfiles (to_import, mode, quality, pos, 1, -1, track, replace) == 0);
                                 break;
 				
                         case Editing::ImportDistinctChannels:
@@ -393,7 +402,7 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
                                 to_import.clear ();
                                 to_import.push_back (*a);
 				
-                                ok = (import_sndfiles (to_import, mode, quality, pos, -1, -1, track, replace, total) == 0);
+                                ok = (import_sndfiles (to_import, mode, quality, pos, -1, -1, track, replace) == 0);
                                 break;
 				
                         case Editing::ImportSerializeFiles:
@@ -401,7 +410,7 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
                                 to_import.clear ();
                                 to_import.push_back (*a);
 
-                                ok = (import_sndfiles (to_import, mode, quality, pos, 1, 1, track, replace, total) == 0);
+                                ok = (import_sndfiles (to_import, mode, quality, pos, 1, 1, track, replace) == 0);
                                 break;
 
                         case Editing::ImportMergeFiles:
@@ -412,6 +421,7 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 	}
 
 	interthread_progress_window->hide_all ();
+	interthread_progress_connection.disconnect ();
 }
 
 void
@@ -482,14 +492,8 @@ Editor::do_embed (vector<ustring> paths, ImportDisposition chns, ImportMode mode
 
 int
 Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality quality, nframes64_t& pos,
-			 int target_regions, int target_tracks, boost::shared_ptr<Track>& track, bool replace, uint32_t total)
+			 int target_regions, int target_tracks, boost::shared_ptr<Track>& track, bool replace)
 {
-	interthread_progress_window->set_title (string_compose (_("Importing %1"), paths.front()));
-	interthread_progress_window->set_position (Gtk::WIN_POS_MOUSE);
-	interthread_progress_bar.set_fraction (0.0f);
-	interthread_cancel_label.set_text (_("Cancel Import"));
- 	current_interthread_info = &import_status;
-
 	import_status.paths = paths;
 	import_status.done = false;
 	import_status.cancel = false;
@@ -497,7 +501,6 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 	import_status.done = 0.0;
 	import_status.quality = quality;
 	import_status.replace_existing_source = replace;
-	import_status.total = total;
 
 	import_status.mode = mode;
 	import_status.pos = pos;
@@ -505,8 +508,6 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 	import_status.target_regions = target_regions;
 	import_status.track = track;
 	import_status.replace = replace;
-	interthread_progress_connection = Glib::signal_timeout().connect
-		(sigc::bind (sigc::mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 500);
 
 	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
 	gdk_flush ();
@@ -523,9 +524,7 @@ Editor::import_sndfiles (vector<ustring> paths, ImportMode mode, SrcQuality qual
 		gtk_main_iteration ();
 	}
 
-	interthread_progress_window->hide ();
 	import_status.done = true;
-	interthread_progress_connection.disconnect ();
 
 	if (!import_status.cancel && !import_status.sources.empty()) {
 		if (add_sources (import_status.paths,
@@ -949,7 +948,7 @@ Editor::import_progress_timeout (void */*arg*/)
 		reset = true;
 	}
 
-	interthread_progress_label.set_text (import_status.doing_what);
+	interthread_progress_label.set_markup (import_status.doing_what);
 
 	if (import_status.freeze) {
 		interthread_cancel_button.set_sensitive(false);

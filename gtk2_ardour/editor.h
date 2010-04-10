@@ -1162,7 +1162,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void  drop_paths_part_two  (const std::vector<Glib::ustring>& paths, nframes64_t frame, double ypos);
 
 	int  import_sndfiles (std::vector<Glib::ustring> paths, Editing::ImportMode mode,  ARDOUR::SrcQuality, nframes64_t& pos,
-			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool, uint32_t total);
+			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool);
 	int  embed_sndfiles (std::vector<Glib::ustring> paths, bool multiple_files, bool& check_sample_rate, Editing::ImportMode mode,
 			     nframes64_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&);
 
