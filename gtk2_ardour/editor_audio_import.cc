@@ -731,7 +731,7 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 		if (sources[0]->natural_position() != 0) {
 			pos = sources[0]->natural_position();
 		} else {
-			pos = get_preferred_edit_position ();
+			pos = _session->current_start_frame();
 		}
 	}
 
