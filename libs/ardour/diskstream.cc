@@ -410,3 +410,8 @@ Diskstream::remove_region_from_last_capture (boost::weak_ptr<Region> wregion)
 	_last_capture_regions.remove (region);
 }
 
+void
+Diskstream::prepare_to_stop (nframes_t pos)
+{
+        last_recordable_frame = pos + _capture_offset;
+}

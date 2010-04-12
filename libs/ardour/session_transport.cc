@@ -168,17 +168,22 @@ Session::realtime_stop (bool abort, bool clear_state)
 
 		/* move the transport position back to where the
 		   request for a stop was noticed. we rolled
-		   past that point to pick up delayed input.
+		   past that point to pick up delayed input (and to declick).
 		*/
 
-#ifndef LEAVE_TRANSPORT_UNADJUSTED
-		decrement_transport_position (_worst_output_latency);
-#endif
+                if (_worst_output_latency > current_block_size) {
+                        /* we rolled past the stop point to pick up data that had
+                           not yet arrived. move back to where the stop occured.
+                        */
+                        decrement_transport_position (current_block_size + (_worst_output_latency - current_block_size));
+                } else {
+                        decrement_transport_position (current_block_size);
+                }
 
 		/* the duration change is not guaranteed to have happened, but is likely */
 
 		todo = PostTransportWork (todo | PostTransportDuration);
-	}
+	} 
 
 	if (abort) {
 		todo = PostTransportWork (todo | PostTransportAbort);
@@ -952,11 +957,15 @@ Session::stop_transport (bool abort, bool clear_state)
 	if (_transport_speed == 0.0f) {
 		return;
 	}
-	
-	if (actively_recording() && !(transport_sub_state & StopPendingCapture) && 
-	    _worst_output_latency > current_block_size) 
-	{
-		
+
+	if (actively_recording() && !(transport_sub_state & StopPendingCapture) && (_worst_output_latency > current_block_size)) {
+
+                boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+                
+                for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+                        (*i)->prepare_to_stop (_transport_frame);
+                }
+
 		/* we need to capture the audio that has still not yet been received by the system
 		   at the time the stop is requested, so we have to roll past that time.
 
@@ -977,6 +986,15 @@ Session::stop_transport (bool abort, bool clear_state)
 	} 
 
 	if ((transport_sub_state & PendingDeclickOut) == 0) {
+
+                if (!(transport_sub_state & StopPendingCapture)) {
+                        boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+                        
+                        for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+                                (*i)->prepare_to_stop (_transport_frame);
+                        }
+                }
+
 		transport_sub_state |= PendingDeclickOut;
 		/* we'll be called again after the declick */
 		pending_abort = abort;

@@ -233,6 +233,7 @@ class Diskstream : public PBD::StatefulDestructible
 	virtual void set_align_style_from_io() {}
 	virtual void setup_destructive_playlist () = 0;
 	virtual void use_destructive_playlist () = 0;
+        virtual void prepare_to_stop (nframes_t);
 
 	static nframes_t disk_io_chunk_frames;
 	std::vector<CaptureInfo*>  capture_info;

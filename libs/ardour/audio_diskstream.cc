@@ -387,6 +387,7 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 	const int transport_rolling = 0x4;
 	const int track_rec_enabled = 0x2;
 	const int global_rec_enabled = 0x1;
+        const int fully_rec_enabled = (transport_rolling|track_rec_enabled|global_rec_enabled);
 
 	/* merge together the 3 factors that affect record status, and compute
 	   what has changed.
@@ -396,32 +397,26 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
 	possibly_recording = (rolling << 2) | (record_enabled() << 1) | can_record;
 	change = possibly_recording ^ last_possibly_recording;
 
-	if (possibly_recording == last_possibly_recording) {
-		return;
-	}
+        if (possibly_recording == fully_rec_enabled) {
 
-	/* change state */
+                if (last_possibly_recording == fully_rec_enabled) {
+                        return;
+                }
 
-	/* if per-track or global rec-enable turned on while the other was already on, we've started recording */
-
-	if (((change & track_rec_enabled) && record_enabled() && (!(change & global_rec_enabled) && can_record)) || 
-	    ((change & global_rec_enabled) && can_record && (!(change & track_rec_enabled) && record_enabled()))) {
-		
-		/* starting to record: compute first+last frames */
-
+                /* we transitioned to recording. lets see if its transport based or a punch */
+                
 		first_recordable_frame = transport_frame + _capture_offset;
-		// cerr << _name << " set FRF = " << transport_frame << " + " << _capture_offset << " = " << first_recordable_frame << endl;
 		last_recordable_frame = max_frames;
 		capture_start_frame = transport_frame;
 
-		if (!(last_possibly_recording & transport_rolling) && (possibly_recording & transport_rolling)) {
+                if (change & transport_rolling) {
 
-			/* was stopped, now rolling (and recording) */
-
+                        /* transport-change (started rolling) */
+                        
 			if (_alignment_style == ExistingMaterial) {
-
+                                
                                 /* there are two delays happening:
-
+                                   
                                    1) inbound, represented by _capture_offset
                                    2) outbound, represented by _session.worst_output_latency()
 
@@ -433,38 +428,43 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
                                 */
 
                                 if (_capture_offset < _session.worst_output_latency()) {
-                                        // cerr << "\tA FRF += " << (_session.worst_output_latency () - _capture_offset) << endl;
                                         first_recordable_frame += (_session.worst_output_latency() - _capture_offset);
                                 } 
                         } else {
-				// cerr << "\tB FRF += " << _roll_delay<< endl;
 				first_recordable_frame += _roll_delay;
   			}
+                        
+                } else {
 
-		} else {
-
-			/* was rolling, but record state changed */
+                        /* punch in */
 
 			if (_alignment_style == ExistingMaterial) {
 
-				/* manual punch in happens at the correct transport frame
-				    because the user hit a button. but to get alignment correct 
-				    we have to back up the position of the new region to the 
-				    appropriate spot given the roll delay.
-				*/
+				/* There are two kinds of punch:
+                                   
+                                   manual punch in happens at the correct transport frame
+                                   because the user hit a button. but to get alignment correct 
+                                   we have to back up the position of the new region to the 
+                                   appropriate spot given the roll delay.
 
-
-				/* autopunch toggles recording at the precise
+                                   autopunch toggles recording at the precise
 				   transport frame, and then the DS waits
 				   to start recording for a time that depends
 				   on the output latency.
+
+                                   XXX: BUT THIS CODE DOESN'T DIFFERENTIATE !!!
+
 				*/
 
-				first_recordable_frame += _session.worst_output_latency();
+                                if (_capture_offset < _session.worst_output_latency()) {
+                                        /* see comment in ExistingMaterial block above */
+                                        first_recordable_frame += (_session.worst_output_latency() - _capture_offset);
+                                }
+
 			} else {
 				capture_start_frame -= _roll_delay;
 			}
-		}
+                }
 
 		if (recordable() && destructive()) {
 			boost::shared_ptr<ChannelList> c = channels.reader();
@@ -486,18 +486,31 @@ AudioDiskstream::check_record_status (nframes_t transport_frame, nframes_t nfram
  			}
 		}
 
-	} else if (!record_enabled() || !can_record) {
-		
-		/* stop recording */
 
-		last_recordable_frame = transport_frame + _capture_offset;
-		
-		if (_alignment_style == ExistingMaterial) {
-			last_recordable_frame += _session.worst_output_latency();
-		} else {
-			last_recordable_frame += _roll_delay;
-		}
-	}
+        } else {
+
+                if (last_possibly_recording == fully_rec_enabled) {
+
+                        /* we were recording last time */
+                        
+                        if (change & transport_rolling) {
+                                /* transport-change (stopped rolling): last_recordable_frame was set in ::prepare_to_stop() */
+                                
+                        } else {
+                                /* punch out */
+                                
+                                last_recordable_frame = transport_frame + _capture_offset;
+                                
+                                if (_alignment_style == ExistingMaterial) {
+                                        if (_session.worst_output_latency() > _capture_offset) {
+                                                last_recordable_frame += (_session.worst_output_latency() - _capture_offset);
+                                        }
+                                } else {
+                                        last_recordable_frame += _roll_delay;
+                                }
+                        }
+                }
+        }
 
 	last_possibly_recording = possibly_recording;
 }
@@ -511,8 +524,6 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 	int ret = -1;
 	nframes_t rec_offset = 0;
 	nframes_t rec_nframes = 0;
-	bool nominally_recording;
-	bool re = record_enabled ();
 	bool collect_playback = false;
 
 	/* if we've already processed the frames corresponding to this call,
@@ -536,7 +547,11 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 
 	check_record_status (transport_frame, nframes, can_record);
 
-	nominally_recording = (can_record && re);
+#if 0
+        cerr << _name << " can record " << can_record << " re " << record_enabled() 
+             << " FRF " << first_recordable_frame << " LRF " << last_recordable_frame
+             << endl;
+#endif
 
 	if (nframes == 0) {
 		_processed = true;
@@ -560,90 +575,67 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 		(*chan)->current_playback_buffer  = 0;
 	}
 
-        /* two conditions to test for here:
-
-           A: this track is rec-enabled, and the session has confirmed that we can record
-           B: this track is rec-enabled, has been recording, and we are set up for auto-punch
-
-           The second test is necessary to capture the extra material that arrives AFTER the transport
-           frame has left the punch range (which will cause the "can_record" argument to be false).
-        */
-
-#if 0
-        cerr << _name << " can record " << can_record << " re " << re << " nomrec " << nominally_recording
-             << " FRF " << first_recordable_frame << " LRF " << last_recordable_frame
-             << endl;
-#endif
-
-	if (nominally_recording || 
-            (re && was_recording && _session.get_record_enabled() && 
-             (Config->get_punch_out() || Config->get_punch_in()))) {
-
-		OverlapType ot;
+        OverlapType ot;
 		
-		// Safeguard against situations where process() goes haywire 
-                // when autopunching and last_recordable_frame < first_recordable_frame
-
-		if (last_recordable_frame < first_recordable_frame) {
-                        last_recordable_frame = max_frames;
-
-		}
+        // Safeguard against situations where process() goes haywire 
+        // when autopunching and last_recordable_frame < first_recordable_frame
+        
+        if (last_recordable_frame < first_recordable_frame) {
+                last_recordable_frame = max_frames;
+        }
 		
-		ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
-
-		switch (ot) {
-		case OverlapNone:
-			rec_nframes = 0;
-			break;
-			
-		case OverlapInternal:
+        ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
+        
+        switch (ot) {
+        case OverlapNone:
+                rec_nframes = 0;
+                break;
+		
+        case OverlapInternal:
 		/*     ----------    recrange
-                         |---|       transrange
+                       |---|       transrange
 		*/
-			rec_nframes = nframes;
-			rec_offset = 0;
-			break;
-			
-		case OverlapStart:
-			/*    |--------|    recrange
-                            -----|          transrange
-			*/
-			rec_nframes = transport_frame + nframes - first_recordable_frame;
-			if (rec_nframes) {
-				rec_offset = first_recordable_frame - transport_frame;
-			}
-			break;
-			
-		case OverlapEnd:
-			/*    |--------|    recrange
-                                 |--------  transrange
-			*/
-			rec_nframes = last_recordable_frame - transport_frame;
-			rec_offset = 0;
-			break;
-			
-		case OverlapExternal:
-			/*    |--------|    recrange
-                            --------------  transrange
-			*/
-			rec_nframes = last_recordable_frame - first_recordable_frame;
-			rec_offset = first_recordable_frame - transport_frame;
-			break;
-		}
-
-		if (rec_nframes && !was_recording) {
-			capture_captured = 0;
-			was_recording = true;
-		}
-
-                //cerr << "\trec nframes will be " << rec_nframes << endl;
- 	}
-
+                rec_nframes = nframes;
+                rec_offset = 0;
+                break;
+		
+        case OverlapStart:
+                /*    |--------|    recrange
+                      -----|          transrange
+                */
+                rec_nframes = transport_frame + nframes - first_recordable_frame;
+                if (rec_nframes) {
+                        rec_offset = first_recordable_frame - transport_frame;
+                }
+                break;
+		
+        case OverlapEnd:
+                /*    |--------|    recrange
+                      |--------  transrange
+                */
+                rec_nframes = last_recordable_frame - transport_frame;
+                rec_offset = 0;
+                break;
+		
+        case OverlapExternal:
+                /*    |--------|    recrange
+                      --------------  transrange
+                */
+                rec_nframes = last_recordable_frame - first_recordable_frame;
+                rec_offset = first_recordable_frame - transport_frame;
+                break;
+        }
+        
+        if (rec_nframes && !was_recording) {
+                capture_captured = 0;
+                was_recording = true;
+        }
+                
 	if (can_record && !_last_capture_regions.empty()) {
 		_last_capture_regions.clear ();
 	}
 
-	if (nominally_recording || rec_nframes) {
+	if (rec_nframes) {
 
 		uint32_t limit = _io->n_inputs ();
 
@@ -724,7 +716,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 
 		adjust_capture_position = rec_nframes;
 
-	} else if (nominally_recording) {
+	} else if (can_record && record_enabled()) {
 
 		/* can't do actual capture yet - waiting for latency effects to finish before we start*/
 
@@ -877,7 +869,6 @@ AudioDiskstream::commit (nframes_t nframes)
 	
 	if (adjust_capture_position != 0) {
 		capture_captured += adjust_capture_position;
-                // cerr << "bump capture_captured by " << adjust_capture_position << " to " << capture_captured << endl;
 		adjust_capture_position = 0;
 	}
 	
