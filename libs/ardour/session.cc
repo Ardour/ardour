@@ -28,11 +28,9 @@
 #include <unistd.h>
 #include <limits.h>
 
-
 #include <glibmm/thread.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
-#include <glibmm/thread.h>
 
 #include "pbd/error.h"
 #include "pbd/boost_debug.h"
@@ -1043,9 +1041,7 @@ Session::disable_record (bool rt_context, bool force)
 void
 Session::step_back_from_record ()
 {
-	/* XXX really atomic compare+swap here */
-	if (g_atomic_int_get (&_record_status) == Recording) {
-		g_atomic_int_set (&_record_status, Enabled);
+	if (g_atomic_int_compare_and_exchange (&_record_status, Recording, Enabled)) {
 
 		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
 			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();

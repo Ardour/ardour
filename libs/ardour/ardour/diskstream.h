@@ -233,6 +233,7 @@ class Diskstream : public SessionObject
 	virtual void set_align_style_from_io() {}
 	virtual void setup_destructive_playlist () {}
 	virtual void use_destructive_playlist () {}
+        virtual void prepare_to_stop (framepos_t pos);
 
 	void calculate_record_range(OverlapType ot, sframes_t transport_frame, nframes_t nframes,
 			nframes_t& rec_nframes, nframes_t& rec_offset);

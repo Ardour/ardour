@@ -525,6 +525,7 @@ Diskstream::check_record_status (nframes_t transport_frame, nframes_t /*nframes*
 	const int transport_rolling = 0x4;
 	const int track_rec_enabled = 0x2;
 	const int global_rec_enabled = 0x1;
+        const int fully_rec_enabled = (transport_rolling|track_rec_enabled|global_rec_enabled);
 
 	/* merge together the 3 factors that affect record status, and compute
 	   what has changed.
@@ -537,88 +538,101 @@ Diskstream::check_record_status (nframes_t transport_frame, nframes_t /*nframes*
 	if (possibly_recording == last_possibly_recording) {
 		return;
 	}
+        if (possibly_recording == fully_rec_enabled) {
 
-	/* change state */
+                if (last_possibly_recording == fully_rec_enabled) {
+                        return;
+                }
 
-	/* if per-track or global rec-enable turned on while the other was already on, we've started recording */
-
-	if (((change & track_rec_enabled) && record_enabled() && (!(change & global_rec_enabled) && can_record)) ||
-	    ((change & global_rec_enabled) && can_record && (!(change & track_rec_enabled) && record_enabled()))) {
-
-		/* starting to record: compute first+last frames */
-
+                /* we transitioned to recording. lets see if its transport based or a punch */
+                
 		first_recordable_frame = transport_frame + _capture_offset;
 		last_recordable_frame = max_frames;
 		capture_start_frame = transport_frame;
 
-		if (!(last_possibly_recording & transport_rolling) && (possibly_recording & transport_rolling)) {
+                if (change & transport_rolling) {
 
-			/* was stopped, now rolling (and recording) */
-
+                        /* transport-change (started rolling) */
+                        
 			if (_alignment_style == ExistingMaterial) {
-			  
-				first_recordable_frame += _session.worst_output_latency();
-				
-				DEBUG_TRACE (DEBUG::Latency, string_compose ("Offset rec from stop. Capture offset: %1 Worst O/P Latency: %2 Roll Delay: %3 First Recordable Frame: %4 Transport Frame: %5\n",
-									     _capture_offset, _session.worst_output_latency(), _roll_delay, first_recordable_frame, transport_frame));
-			} else {
+                                
+                                /* there are two delays happening:
+                                   
+                                   1) inbound, represented by _capture_offset
+                                   2) outbound, represented by _session.worst_output_latency()
+
+                                   the first sample to record occurs when the larger of these
+                                   two has elapsed, since they occur in parallel.
+
+                                   since we've already added _capture_offset, just add the
+                                   difference if _session.worst_output_latency() is larger.
+                                */
+
+                                if (_capture_offset < _session.worst_output_latency()) {
+                                        first_recordable_frame += (_session.worst_output_latency() - _capture_offset);
+                                } 
+                        } else {
 				first_recordable_frame += _roll_delay;
-			}
+  			}
+                        
+                } else {
 
-		} else {
-
-			/* was rolling, but record state changed */
+                        /* punch in */
 
 			if (_alignment_style == ExistingMaterial) {
 
-				/* manual punch in happens at the correct transport frame
-				   because the user hit a button. but to get alignment correct
-				   we have to back up the position of the new region to the
-				   appropriate spot given the roll delay.
-				*/
-				
-				
-				/* autopunch toggles recording at the precise
+				/* There are two kinds of punch:
+                                   
+                                   manual punch in happens at the correct transport frame
+                                   because the user hit a button. but to get alignment correct 
+                                   we have to back up the position of the new region to the 
+                                   appropriate spot given the roll delay.
+
+                                   autopunch toggles recording at the precise
 				   transport frame, and then the DS waits
 				   to start recording for a time that depends
 				   on the output latency.
+
+                                   XXX: BUT THIS CODE DOESN'T DIFFERENTIATE !!!
+
 				*/
-				
-				first_recordable_frame += _session.worst_output_latency();
-				
-				DEBUG_TRACE (DEBUG::Latency, string_compose ("Punch in manual/auto. Capture offset: %1 Worst O/P Latency: %2 Roll Delay: %3 First Recordable Frame: %4 Transport Frame: %5\n",
-									     _capture_offset, _session.worst_output_latency(), _roll_delay, first_recordable_frame, transport_frame));
+
+                                if (_capture_offset < _session.worst_output_latency()) {
+                                        /* see comment in ExistingMaterial block above */
+                                        first_recordable_frame += (_session.worst_output_latency() - _capture_offset);
+                                }
+
 			} else {
-
-				if (_session.config.get_punch_in()) {
-					first_recordable_frame += _roll_delay;
-				} else {
-					capture_start_frame -= _roll_delay;
-				}
+				capture_start_frame -= _roll_delay;
 			}
+                }
+                
+                prepare_record_status (capture_start_frame);
 
-		}
+        } else {
 
-		prepare_record_status(capture_start_frame);
+                if (last_possibly_recording == fully_rec_enabled) {
 
-	} else if (!record_enabled() || !can_record) {
-
-		/* stop recording */
-
-		last_recordable_frame = transport_frame + _capture_offset;
-
-		if (_alignment_style == ExistingMaterial) {
-			last_recordable_frame += _session.worst_output_latency();
-		} else {
-			last_recordable_frame += _roll_delay;
-		}
-		
-		//first_recordable_frame = max_frames;
-		
-		DEBUG_TRACE (DEBUG::Latency, string_compose ("Stop record - %6 | %7. Capture offset: %1 Worst O/P Latency: %2 Roll Delay: %3 First Recordable Frame: %4 Transport Frame: %5\n",
-							     _capture_offset, _session.worst_output_latency(), _roll_delay, first_recordable_frame, transport_frame,
-							     can_record, record_enabled()));
-	}
+                        /* we were recording last time */
+                        
+                        if (change & transport_rolling) {
+                                /* transport-change (stopped rolling): last_recordable_frame was set in ::prepare_to_stop() */
+                                
+                        } else {
+                                /* punch out */
+                                
+                                last_recordable_frame = transport_frame + _capture_offset;
+                                
+                                if (_alignment_style == ExistingMaterial) {
+                                        if (_session.worst_output_latency() > _capture_offset) {
+                                                last_recordable_frame += (_session.worst_output_latency() - _capture_offset);
+                                        }
+                                } else {
+                                        last_recordable_frame += _roll_delay;
+                                }
+                        }
+                }
+        }
 
 	last_possibly_recording = possibly_recording;
 }
@@ -672,4 +686,10 @@ Diskstream::calculate_record_range(OverlapType ot, sframes_t transport_frame, nf
 		rec_offset = first_recordable_frame - transport_frame;
 		break;
 	}
+}
+
+void
+Diskstream::prepare_to_stop (framepos_t pos)
+{
+        last_recordable_frame = pos + _capture_offset;
 }

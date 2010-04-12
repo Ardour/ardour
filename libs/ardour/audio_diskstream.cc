@@ -428,8 +428,6 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 	int ret = -1;
 	nframes_t rec_offset = 0;
 	nframes_t rec_nframes = 0;
-	bool nominally_recording;
-	bool re = record_enabled ();
 	bool collect_playback = false;
 
         playback_distance = 0;
@@ -439,8 +437,6 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 	}
 
 	check_record_status (transport_frame, nframes, can_record);
-
-	nominally_recording = (can_record && re);
 
 	if (nframes == 0) {
 		return 0;
@@ -468,27 +464,26 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
            frame has left the punch range (which will cause the "can_record" argument to be false).
         */
 
-	if (nominally_recording || (re && was_recording && _session.get_record_enabled() && _session.config.get_punch_out())) {
-		// Safeguard against situations where process() goes haywire when autopunching and last_recordable_frame < first_recordable_frame
-		if (last_recordable_frame < first_recordable_frame) {
-			last_recordable_frame = max_frames;
-		}
 
-		OverlapType ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
-
-		calculate_record_range (ot, transport_frame, nframes, rec_nframes, rec_offset);
-
-		if (rec_nframes && !was_recording) {
-			capture_captured = 0;
-			was_recording = true;
-		}
-	}
+        // Safeguard against situations where process() goes haywire when autopunching and last_recordable_frame < first_recordable_frame
+        if (last_recordable_frame < first_recordable_frame) {
+                last_recordable_frame = max_frames;
+        }
+        
+        OverlapType ot = coverage (first_recordable_frame, last_recordable_frame, transport_frame, transport_frame + nframes);
+        
+        calculate_record_range (ot, transport_frame, nframes, rec_nframes, rec_offset);
+        
+        if (rec_nframes && !was_recording) {
+                capture_captured = 0;
+                was_recording = true;
+        }
 
 	if (can_record && !_last_capture_regions.empty()) {
 		_last_capture_regions.clear ();
 	}
 
-	if (nominally_recording || rec_nframes) {
+	if (rec_nframes) {
 
 		uint32_t limit = _io->n_ports ().n_audio();
 
@@ -576,7 +571,7 @@ AudioDiskstream::process (nframes_t transport_frame, nframes_t nframes, bool can
 
 		adjust_capture_position = rec_nframes;
 
-	} else if (nominally_recording) {
+	} else if (can_record && record_enabled()) {
 
 		/* can't do actual capture yet - waiting for latency effects to finish before we start*/
 

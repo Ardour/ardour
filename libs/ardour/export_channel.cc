@@ -45,7 +45,7 @@ PortExportChannel::read (Sample * data, nframes_t frames) const
 
 	for (PortSet::const_iterator it = ports.begin(); it != ports.end(); ++it) {
 		if (*it != 0) {
-			Sample* port_buffer = (*it)->get_audio_buffer(frames, 0).data();
+			Sample* port_buffer = (*it)->get_audio_buffer(frames).data();
 
 			for (uint32_t i = 0; i < frames; ++i) {
 				data[i] += (float) port_buffer[i];
