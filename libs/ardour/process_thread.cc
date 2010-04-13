@@ -59,7 +59,6 @@ ProcessThread::get_buffers ()
 
         assert (tb);
         _private_thread_buffers->set (tb);
-        cerr << "ProcThread " << this << " using TBs at " << tb << " (aka. " << _private_thread_buffers->get() << endl;
 }
 
 void
@@ -69,7 +68,6 @@ ProcessThread::drop_buffers ()
         assert (tb);
         BufferManager::put_thread_buffers (tb);
         _private_thread_buffers->set (0);
-        cerr << "ProcThread " << this << " dropped TBs\n";
 }
 
 BufferSet&

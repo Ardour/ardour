@@ -385,7 +385,6 @@ void
 AudioEngine::finish_process_cycle (int status)
 {
         GET_PRIVATE_JACK_POINTER(_jack);
-        cerr << "signal process cycle end\n";
         jack_cycle_signal (_jack, 0);
 }
 
@@ -395,22 +394,13 @@ AudioEngine::process_thread ()
         /* JACK doesn't do this for us when we use the wait API 
          */
 
-        cerr << "JACK process thread is here\n";
-
         _thread_init_callback (0);
-
-        cerr << " its initialized\n";
 
         _main_thread = new ProcessThread;
 
-        cerr << " we have ProcThread\n";
-
         while (1) {
-                cerr << "getting client ptr from " << _jack << endl;
                 GET_PRIVATE_JACK_POINTER_RET(_jack,0);
-                cerr << "Wait for JACK\n";
                 jack_nframes_t nframes = jack_cycle_wait (_jack);
-                cerr << "run process\n";
 
                 if (process_callback (nframes)) {
                         return 0;

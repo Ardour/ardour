@@ -34,21 +34,10 @@ BufferManager::init (uint32_t size)
         /* and populate with actual ThreadBuffers 
          */
 
-        std::cerr << "BM: initial read space: " << thread_buffers->read_space() << std::endl;
-        
         for (uint32_t n = 0; n < size; ++n) {        
                 ThreadBuffers* ts = new ThreadBuffers;
                 thread_buffers->write (&ts, 1);
-                std::cerr << "BM: added one, read =  " << thread_buffers->read_space() 
-                          << " write = " << thread_buffers->write_space() 
-                          << std::endl;
         }
-
-        std::cerr << "BM: final, read =  " << thread_buffers->read_space() 
-                  << " write = " << thread_buffers->write_space() 
-                  << std::endl;
-
-        std::cerr << "BUFFER MANAGER INITIALIZED WITH " << size << " BUFFERs\n";
 }
 
 ThreadBuffers*
@@ -73,8 +62,6 @@ void
 BufferManager::ensure_buffers (ChanCount howmany)
 {
         /* this is protected by the audioengine's process lock: we do not  */
-
-        std::cerr << "BufMgr: ensure " << thread_buffers->bufsize() - 1 << " buffers match " << howmany << std::endl;
 
         for (uint32_t n = 0; n < thread_buffers->bufsize() - 1; ++n) {
                 thread_buffers->buffer()[n]->ensure_buffers (howmany);
