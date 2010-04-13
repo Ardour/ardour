@@ -17,6 +17,7 @@
 
 */
 
+#include <boost/scoped_array.hpp>
 
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
@@ -553,8 +554,8 @@ AudioTrack::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 int
 AudioTrack::export_stuff (BufferSet& buffers, sframes_t start, nframes_t nframes, bool enable_processing)
 {
-	gain_t  gain_buffer[nframes];
-	float   mix_buffer[nframes];
+	boost::scoped_array<gain_t> gain_buffer (new gain_t[nframes]);
+	boost::scoped_array<float> mix_buffer (new float[nframes]);
 	ProcessorList::iterator i;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 
@@ -565,7 +566,7 @@ AudioTrack::export_stuff (BufferSet& buffers, sframes_t start, nframes_t nframes
 
 	assert(buffers.get_audio(0).capacity() >= nframes);
 
-	if (apl->read (buffers.get_audio(0).data(), mix_buffer, gain_buffer, start, nframes) != nframes) {
+	if (apl->read (buffers.get_audio(0).data(), mix_buffer.get(), gain_buffer.get(), start, nframes) != nframes) {
 		return -1;
 	}
 
@@ -576,7 +577,7 @@ AudioTrack::export_stuff (BufferSet& buffers, sframes_t start, nframes_t nframes
 	++bi;
 	for ( ; bi != buffers.audio_end(); ++bi, ++n) {
 		if (n < diskstream->n_channels().n_audio()) {
-			if (apl->read (bi->data(), mix_buffer, gain_buffer, start, nframes, n) != nframes) {
+			if (apl->read (bi->data(), mix_buffer.get(), gain_buffer.get(), start, nframes, n) != nframes) {
 				return -1;
 			}
 			b = bi->data();
