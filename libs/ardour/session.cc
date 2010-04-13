@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999-2004 Paul Davis
+    Copyright (C) 1999-2010 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,6 +52,7 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/auditioner.h"
+#include "ardour/buffer_manager.h"
 #include "ardour/buffer_set.h"
 #include "ardour/bundle.h"
 #include "ardour/butler.h"
@@ -70,6 +71,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/midi_ui.h"
 #include "ardour/named_selection.h"
+#include "ardour/process_thread.h"
 #include "ardour/playlist.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/port_insert.h"
@@ -129,9 +131,6 @@ Session::Session (AudioEngine &eng,
 	: _engine (eng),
 	  _target_transport_speed (0.0),
 	  _requested_return_frame (-1),
-	  _scratch_buffers(new BufferSet()),
-	  _silent_buffers(new BufferSet()),
-	  _mix_buffers(new BufferSet()),
 	  mmc (0),
 	  _mmc_port (default_mmc_port),
 	  _mtc_port (default_mtc_port),
@@ -242,10 +241,6 @@ Session::destroy ()
 	}
 
 	clear_clicks ();
-
-	delete _scratch_buffers;
-	delete _silent_buffers;
-	delete _mix_buffers;
 
 	/* clear out any pending dead wood from RCU managed objects */
 
@@ -1193,12 +1188,7 @@ Session::set_block_size (nframes_t nframes)
 	{
 		current_block_size = nframes;
 
-		ensure_buffers(_scratch_buffers->available());
-
-		delete [] _gain_automation_buffer;
-		_gain_automation_buffer = new gain_t[nframes];
-
-		allocate_pan_automation_buffers (nframes, _npan_buffers, true);
+		ensure_buffers ();
 
 		boost::shared_ptr<RouteList> r = routes.reader ();
 
@@ -3209,18 +3199,7 @@ Session::tempo_map_changed (const PropertyChange&)
 void
 Session::ensure_buffers (ChanCount howmany)
 {
-	if (current_block_size == 0) {
-		return; // too early? (is this ok?)
-	}
-
-	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		size_t count = std::max(_scratch_buffers->available().get(*t), howmany.get(*t));
-		_scratch_buffers->ensure_buffers (*t, count, _engine.raw_buffer_size(*t));
-		_mix_buffers->ensure_buffers (*t, count, _engine.raw_buffer_size(*t));
-		_silent_buffers->ensure_buffers (*t, count, _engine.raw_buffer_size(*t));
-	}
-
-	allocate_pan_automation_buffers (current_block_size, howmany.n_audio(), false);
+        BufferManager::ensure_buffers (howmany);
 }
 
 void
@@ -3439,31 +3418,6 @@ Session::route_name_internal (string n) const
 	return false;
 }
 
-void
-Session::allocate_pan_automation_buffers (nframes_t nframes, uint32_t howmany, bool force)
-{
-	if (!force && howmany <= _npan_buffers) {
-		return;
-	}
-
-	if (_pan_automation_buffer) {
-
-		for (uint32_t i = 0; i < _npan_buffers; ++i) {
-			delete [] _pan_automation_buffer[i];
-		}
-
-		delete [] _pan_automation_buffer;
-	}
-
-	_pan_automation_buffer = new pan_t*[howmany];
-
-	for (uint32_t i = 0; i < howmany; ++i) {
-		_pan_automation_buffer[i] = new pan_t[nframes];
-	}
-
-	_npan_buffers = howmany;
-}
-
 int
 Session::freeze_all (InterThreadInfo& itt)
 {
@@ -3649,9 +3603,23 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 	return result;
 }
 
+gain_t*
+Session::gain_automation_buffer() const
+{
+        return ProcessThread::gain_automation_buffer ();
+}
+
+pan_t**
+Session::pan_automation_buffer() const
+{
+        return ProcessThread::pan_automation_buffer ();
+}
+
 BufferSet&
 Session::get_silent_buffers (ChanCount count)
 {
+        return ProcessThread::get_silent_buffers (count);
+#if 0
 	assert(_silent_buffers->available() >= count);
 	_silent_buffers->set_count(count);
 
@@ -3662,11 +3630,14 @@ Session::get_silent_buffers (ChanCount count)
 	}
 
 	return *_silent_buffers;
+#endif
 }
 
 BufferSet&
 Session::get_scratch_buffers (ChanCount count)
 {
+        return ProcessThread::get_scratch_buffers (count);
+#if 0
 	if (count != ChanCount::ZERO) {
 		assert(_scratch_buffers->available() >= count);
 		_scratch_buffers->set_count(count);
@@ -3675,14 +3646,18 @@ Session::get_scratch_buffers (ChanCount count)
 	}
 
 	return *_scratch_buffers;
+#endif
 }
 
 BufferSet&
 Session::get_mix_buffers (ChanCount count)
 {
+        return ProcessThread::get_mix_buffers (count);
+#if 0
 	assert(_mix_buffers->available() >= count);
 	_mix_buffers->set_count(count);
 	return *_mix_buffers;
+#endif
 }
 
 uint32_t

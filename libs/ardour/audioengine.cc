@@ -43,6 +43,7 @@
 #include "ardour/io.h"
 #include "ardour/meter.h"
 #include "ardour/midi_port.h"
+#include "ardour/process_thread.h"
 #include "ardour/port.h"
 #include "ardour/port_set.h"
 #include "ardour/session.h"
@@ -77,6 +78,7 @@ AudioEngine::AudioEngine (string client_name, string session_uuid)
 	_frame_rate = 0;
 	_buffer_size = 0;
 	_freewheeling = false;
+        _main_thread = 0;
 
 	m_meter_thread = 0;
 	g_atomic_int_set (&m_meter_exit, 0);
@@ -184,7 +186,8 @@ AudioEngine::start ()
 		jack_on_shutdown (_priv_jack, halted, this);
 		jack_set_graph_order_callback (_priv_jack, _graph_order_callback, this);
 		jack_set_thread_init_callback (_priv_jack, _thread_init_callback, this);
-		jack_set_process_callback (_priv_jack, _process_callback, this);
+		// jack_set_process_callback (_priv_jack, _process_callback, this);
+		jack_set_process_thread (_priv_jack, _process_thread, this);
 		jack_set_sample_rate_callback (_priv_jack, _sample_rate_callback, this);
 		jack_set_buffer_size_callback (_priv_jack, _bufsize_callback, this);
 		jack_set_xrun_callback (_priv_jack, _xrun_callback, this);
@@ -336,6 +339,12 @@ AudioEngine::_process_callback (nframes_t nframes, void *arg)
 	return static_cast<AudioEngine *> (arg)->process_callback (nframes);
 }
 
+void*
+AudioEngine::_process_thread (void *arg)
+{
+	return static_cast<AudioEngine *> (arg)->process_thread ();
+}
+
 void
 AudioEngine::_freewheel_callback (int onoff, void *arg)
 {
@@ -372,6 +381,47 @@ AudioEngine::split_cycle (nframes_t offset)
 	}
 }
 
+void
+AudioEngine::finish_process_cycle (int status)
+{
+        GET_PRIVATE_JACK_POINTER(_jack);
+        cerr << "signal process cycle end\n";
+        jack_cycle_signal (_jack, 0);
+}
+
+void*
+AudioEngine::process_thread ()
+{
+        /* JACK doesn't do this for us when we use the wait API 
+         */
+
+        cerr << "JACK process thread is here\n";
+
+        _thread_init_callback (0);
+
+        cerr << " its initialized\n";
+
+        _main_thread = new ProcessThread;
+
+        cerr << " we have ProcThread\n";
+
+        while (1) {
+                cerr << "getting client ptr from " << _jack << endl;
+                GET_PRIVATE_JACK_POINTER_RET(_jack,0);
+                cerr << "Wait for JACK\n";
+                jack_nframes_t nframes = jack_cycle_wait (_jack);
+                cerr << "run process\n";
+
+                if (process_callback (nframes)) {
+                        return 0;
+                }
+
+                finish_process_cycle (0);
+        }
+
+        return 0;
+}
+
 /** Method called by JACK (via _process_callback) which says that there
  * is work to be done.
  * @param nframes Number of frames to process.
@@ -379,7 +429,7 @@ AudioEngine::split_cycle (nframes_t offset)
 int
 AudioEngine::process_callback (nframes_t nframes)
 {
-	GET_PRIVATE_JACK_POINTER_RET(_jack,0)
+	GET_PRIVATE_JACK_POINTER_RET(_jack,0);
 	// CycleTimer ct ("AudioEngine::process");
 	Glib::Mutex::Lock tm (_process_lock, Glib::TRY_LOCK);
 
@@ -434,6 +484,7 @@ AudioEngine::process_callback (nframes_t nframes)
 	} else {
 		if (_session) {
 			_session->process (nframes);
+
 		}
 	}
 
@@ -930,6 +981,8 @@ AudioEngine::get_ports (const string& port_name_pattern, const string& type_name
 void
 AudioEngine::halted (void *arg)
 {
+        cerr << "HALTED by JACK\n";
+
         /* called from jack shutdown handler  */
 
 	AudioEngine* ae = static_cast<AudioEngine *> (arg);
@@ -1246,13 +1299,8 @@ AudioEngine::reconnect_to_jack ()
 
 	if (_session) {
 		_session->reset_jack_connection (_priv_jack);
-		nframes_t blocksize = jack_get_buffer_size (_priv_jack);
-		_session->set_block_size (blocksize);
+                jack_bufsize_callback (jack_get_buffer_size (_priv_jack));
 		_session->set_frame_rate (jack_get_sample_rate (_priv_jack));
-
-		_raw_buffer_sizes[DataType::AUDIO] = blocksize * sizeof(float);
-		cout << "FIXME: Assuming maximum MIDI buffer size " << blocksize * 4 << "bytes" << endl;
-		_raw_buffer_sizes[DataType::MIDI] = blocksize * 4;
 	}
 
 	last_monitor_check = 0;
@@ -1260,7 +1308,8 @@ AudioEngine::reconnect_to_jack ()
 	jack_on_shutdown (_priv_jack, halted, this);
 	jack_set_graph_order_callback (_priv_jack, _graph_order_callback, this);
 	jack_set_thread_init_callback (_priv_jack, _thread_init_callback, this);
-	jack_set_process_callback (_priv_jack, _process_callback, this);
+	// jack_set_process_callback (_priv_jack, _process_callback, this);
+	jack_set_process_thread (_priv_jack, _process_thread, this);
 	jack_set_sample_rate_callback (_priv_jack, _sample_rate_callback, this);
 	jack_set_buffer_size_callback (_priv_jack, _bufsize_callback, this);
 	jack_set_xrun_callback (_priv_jack, _xrun_callback, this);

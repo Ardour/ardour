@@ -57,6 +57,7 @@ libardour_sources = [
 	'beats_frames_converter.cc',
 	'broadcast_info.cc',
 	'buffer.cc',
+	'buffer_manager.cc',
 	'buffer_set.cc',
 	'bundle.cc',
 	'butler.cc',
@@ -140,6 +141,7 @@ libardour_sources = [
 	'port.cc',
 	'port_insert.cc',
 	'port_set.cc',
+	'process_thread.cc',
 	'processor.cc',
 	'quantize.cc',
 	'rc_configuration.cc',
@@ -187,6 +189,7 @@ libardour_sources = [
 	'template_utils.cc',
 	'tempo.cc',
 	'tempo_map_importer.cc',
+        'thread_buffers.cc',
 	'ticker.cc',
 	'track.cc',
 	'transient_detector.cc',
@@ -218,7 +221,7 @@ def configure(conf):
 	autowaf.configure(conf)
 	conf.check_tool('compiler_cxx gas')
 	autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO', atleast_version='0.3.2')
-	autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.109.0')
+	autowaf.check_pkg(conf, 'jack', uselib_store='JACK', atleast_version='0.119.0')
 	autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
 	autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF', atleast_version='0.4.0')
 	autowaf.check_pkg(conf, 'samplerate', uselib_store='SAMPLERATE', atleast_version='0.1.0')

@@ -64,12 +64,14 @@
 #include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
+#include "ardour/buffer_manager.h"
 #include "ardour/control_protocol_manager.h"
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/mix.h"
 #include "ardour/playlist.h"
 #include "ardour/plugin_manager.h"
+#include "ardour/process_thread.h"
 #include "ardour/profile.h"
 #include "ardour/region.h"
 #include "ardour/rc_configuration.h"
@@ -404,6 +406,9 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 
 	/* singleton - first object is "it" */
 	new PluginManager ();
+
+        ProcessThread::init ();
+        BufferManager::init (2); // XX should be num_processors_for_dsp
 
 	return 0;
 }

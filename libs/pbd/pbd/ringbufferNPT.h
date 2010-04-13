@@ -22,6 +22,7 @@
 
 //#include <sys/mman.h>
 
+#include <cstring>
 #include <glib.h>
 
 /* ringbuffer class where the element size is not required to be a power of two */

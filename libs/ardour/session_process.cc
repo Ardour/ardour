@@ -33,6 +33,7 @@
 #include "ardour/auditioner.h"
 #include "ardour/butler.h"
 #include "ardour/debug.h"
+#include "ardour/process_thread.h"
 #include "ardour/session.h"
 #include "ardour/slave.h"
 #include "ardour/timestamps.h"
@@ -65,8 +66,12 @@ Session::process (nframes_t nframes)
 			post_transport ();
 		}
 	}
+        
+        _engine.main_thread()->get_buffers ();
 
 	(this->*process_function) (nframes);
+
+        _engine.main_thread()->drop_buffers ();
 
 	// the ticker is for sending time information like MidiClock
 	nframes_t transport_frames = transport_frame();

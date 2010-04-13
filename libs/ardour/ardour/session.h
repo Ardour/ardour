@@ -106,6 +106,7 @@ class Playlist;
 class PluginInsert;
 class Port;
 class PortInsert;
+class ProcessThread;
 class Processor;
 class Region;
 class Return;
@@ -736,8 +737,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/* buffers for gain and pan */
 
-	gain_t* gain_automation_buffer () const { return _gain_automation_buffer; }
-	pan_t** pan_automation_buffer () const  { return _pan_automation_buffer; }
+	gain_t* gain_automation_buffer () const;
+	pan_t** pan_automation_buffer () const;
 
 	void ensure_buffer_set (BufferSet& buffers, const ChanCount& howmany);
 
@@ -859,9 +860,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	nframes64_t             _last_slave_transport_frame;
 	nframes_t                maximum_output_latency;
 	volatile nframes64_t    _requested_return_frame;
-	BufferSet*              _scratch_buffers;
-	BufferSet*              _silent_buffers;
-	BufferSet*              _mix_buffers;
 	nframes_t                current_block_size;
 	nframes_t               _worst_output_latency;
 	nframes_t               _worst_input_latency;
@@ -881,7 +879,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void update_latency_compensation_proxy (void* ignored);
 
-	void ensure_buffers (ChanCount howmany);
+	void ensure_buffers (ChanCount howmany = ChanCount::ZERO);
 
 	void process_scrub          (nframes_t);
 	void process_without_events (nframes_t);
@@ -893,6 +891,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void block_processing() { g_atomic_int_set (&processing_prohibited, 1); }
 	void unblock_processing() { g_atomic_int_set (&processing_prohibited, 0); }
 	bool processing_blocked() const { return g_atomic_int_get (&processing_prohibited); }
+
+        Glib::Mutex                process_thread_lock;
+        std::list<ProcessThread*>  process_threads;
 
 	/* slave tracking */
 
@@ -1388,11 +1389,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	boost::shared_ptr<Route> _master_out;
 	boost::shared_ptr<Route> _monitor_out;
-
-	gain_t* _gain_automation_buffer;
-	pan_t** _pan_automation_buffer;
-	void allocate_pan_automation_buffers (nframes_t nframes, uint32_t howmany, bool force);
-	uint32_t _npan_buffers;
 
 	/* VST support */
 

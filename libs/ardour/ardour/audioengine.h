@@ -55,6 +55,7 @@ class InternalPort;
 class MidiPort;
 class Port;
 class Session;
+class ProcessThread;
 
 class AudioEngine : public SessionHandlePtr
 {
@@ -68,6 +69,8 @@ class AudioEngine : public SessionHandlePtr
 	bool connected() const { return _jack != 0; }
 
 	bool is_realtime () const;
+
+        ProcessThread* main_thread() const { return _main_thread; }
 
 	std::string client_name() const { return jack_client_name; }
 
@@ -272,6 +275,8 @@ _	   the regular process() call to session->process() is not made.
 	Port *register_port (DataType type, const std::string& portname, bool input);
 
 	int    process_callback (nframes_t nframes);
+	void*  process_thread ();
+        void   finish_process_cycle (int status);
 	void   remove_all_ports ();
 
 	std::string get_nth_physical (DataType type, uint32_t n, int flags);
@@ -284,6 +289,7 @@ _	   the regular process() call to session->process() is not made.
 #endif
 	static int  _graph_order_callback (void *arg);
 	static int  _process_callback (nframes_t nframes, void *arg);
+	static void* _process_thread (void *arg);
 	static int  _sample_rate_callback (nframes_t nframes, void *arg);
 	static int  _bufsize_callback (nframes_t nframes, void *arg);
 	static void _jack_timebase_callback (jack_transport_state_t, nframes_t, jack_position_t*, int, void*);
@@ -307,6 +313,8 @@ _	   the regular process() call to session->process() is not made.
 
 	Glib::Thread*    m_meter_thread;
 	static gint      m_meter_exit;
+
+        ProcessThread* _main_thread;
 };
 
 } // namespace ARDOUR
