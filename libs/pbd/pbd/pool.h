@@ -111,10 +111,7 @@ class PerThreadPool
 	void  create_per_thread_pool (std::string name, unsigned long item_size, unsigned long nitems);
 	CrossThreadPool* per_thread_pool ();
 
-	void set_trash (RingBuffer<CrossThreadPool*>* t) {
-		_trash = t;
-	}
-
+	void set_trash (RingBuffer<CrossThreadPool*>* t);
 	void add_to_trash (CrossThreadPool *);
 
   private:
@@ -122,8 +119,10 @@ class PerThreadPool
 	std::string _name;
 	unsigned long _item_size;
 	unsigned long _nitems;
+
+	/** mutex to protect either changes to the _trash variable, or writes to the RingBuffer */
+	Glib::Mutex _trash_mutex;
 	RingBuffer<CrossThreadPool*>* _trash;
-	Glib::Mutex _trash_write_mutex;
 };
 
 #endif // __qm_pool_h__

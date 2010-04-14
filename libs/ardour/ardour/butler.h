@@ -49,6 +49,7 @@ class Butler : public SessionHandleRef
 	void stop();
 	void wait_until_finished();
 	bool transport_work_requested() const;
+	void drop_references ();
 
 	float read_data_rate() const; ///< in usec
 	float write_data_rate() const;

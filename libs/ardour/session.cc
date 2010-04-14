@@ -229,6 +229,7 @@ Session::destroy ()
 
 	Stateful::loading_state_version = 0;
 
+	_butler->drop_references ();
 	delete _butler;
 	delete midi_control_ui;
 

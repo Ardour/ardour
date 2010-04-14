@@ -198,10 +198,19 @@ PerThreadPool::per_thread_pool ()
 	return p;
 }
 
+void
+PerThreadPool::set_trash (RingBuffer<CrossThreadPool*>* t)
+{
+	Glib::Mutex::Lock lm (_trash_mutex);
+	_trash = t;
+}
+
 /** Add a CrossThreadPool to our trash, if we have one.  If not, a warning is emitted. */
 void
 PerThreadPool::add_to_trash (CrossThreadPool* p)
 {
+	Glib::Mutex::Lock lm (_trash_mutex);
+	
 	if (!_trash) {
 		warning << "Pool " << p->name() << " has no trash collector; a memory leak has therefore occurred" << endmsg;
 		return;
@@ -211,7 +220,6 @@ PerThreadPool::add_to_trash (CrossThreadPool* p)
 	   can only be one writer to the _trash RingBuffer)
 	*/
 		
-	Glib::Mutex::Lock lm (_trash_write_mutex);
 	_trash->write (&p, 1);
 }
 

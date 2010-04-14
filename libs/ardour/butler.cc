@@ -428,5 +428,12 @@ Butler::empty_pool_trash ()
 	}
 }
 
+void
+Butler::drop_references ()
+{
+	SessionEvent::pool->set_trash (0);
+}
+
+
 } // namespace ARDOUR
 
