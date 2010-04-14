@@ -116,6 +116,7 @@ gtk2_ardour_sources = [
 	'group_tabs.cc',
 	'gtk-custom-hruler.c',
 	'gtk-custom-ruler.c',
+	'interthread_progress_window.cc',
 	'io_selector.cc',
 	'keyboard.cc',
 	'keyeditor.cc',

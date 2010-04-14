@@ -304,7 +304,6 @@ Editor::Editor ()
 	last_autoscroll_y = 0;
 	autoscroll_active = false;
 	autoscroll_timeout_tag = -1;
-	interthread_progress_window = 0;
 	logo_item = 0;
 
 	analysis_window = 0;

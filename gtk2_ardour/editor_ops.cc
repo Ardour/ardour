@@ -79,6 +79,7 @@
 #include "editor_routes.h"
 #include "editor_regions.h"
 #include "quantize_dialog.h"
+#include "interthread_progress_window.h"
 
 #include "i18n.h"
 
@@ -2603,40 +2604,6 @@ Editor::audition_playlist_region_standalone (boost::shared_ptr<Region> region)
 }
 
 void
-Editor::build_interthread_progress_window ()
-{
-	interthread_progress_window = new ArdourDialog (X_("interthread progress"), true);
-
-	interthread_progress_bar.set_orientation (Gtk::PROGRESS_LEFT_TO_RIGHT);
-
-	interthread_progress_window->set_border_width (12);
-	interthread_progress_window->get_vbox()->set_spacing (6);
-
-	interthread_progress_label.set_alignment (0, 0.5);
-	interthread_progress_label.set_use_markup (true);
-
-	interthread_progress_window->get_vbox()->pack_start (interthread_progress_label, false, false);
-	interthread_progress_window->get_vbox()->pack_start (interthread_progress_bar,false, false);
-
-	// GTK2FIX: this button needs a modifiable label
-
-	Button* b = interthread_progress_window->add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	b->signal_clicked().connect (sigc::mem_fun(*this, &Editor::interthread_cancel_clicked));
-
-	interthread_cancel_button.add (interthread_cancel_label);
-
-	interthread_progress_window->set_default_size (200, 100);
-}
-
-void
-Editor::interthread_cancel_clicked ()
-{
-	if (current_interthread_info) {
-		current_interthread_info->cancel = true;
-	}
-}
-
-void
 Editor::region_from_selection ()
 {
 	if (clicked_axisview == 0) {
@@ -3640,13 +3607,6 @@ Editor::freeze_thread ()
 	return 0;
 }
 
-gint
-Editor::freeze_progress_timeout (void */*arg*/)
-{
-	interthread_progress_bar.set_fraction (current_interthread_info->progress);
-	return !(current_interthread_info->done || current_interthread_info->cancel);
-}
-
 void
 Editor::freeze_route ()
 {
@@ -3655,21 +3615,9 @@ Editor::freeze_route ()
 	}
 
 	InterThreadInfo itt;
-
-	if (interthread_progress_window == 0) {
-		build_interthread_progress_window ();
-	}
-
-	interthread_progress_window->set_title (_("Freeze"));
-	interthread_progress_window->set_position (Gtk::WIN_POS_MOUSE);
-	interthread_progress_window->show_all ();
-	interthread_progress_bar.set_fraction (0.0f);
-	interthread_progress_label.set_text ("");
-	interthread_cancel_label.set_text (_("Cancel Freeze"));
 	current_interthread_info = &itt;
 
-	interthread_progress_connection =
-	  Glib::signal_timeout().connect (sigc::bind (sigc::mem_fun(*this, &Editor::freeze_progress_timeout), (gpointer) 0), 100);
+	InterthreadProgressWindow ipw (current_interthread_info, _("Freeze"), _("Cancel Freeze"));
 
 	itt.done = false;
 	itt.cancel = false;
@@ -3683,8 +3631,6 @@ Editor::freeze_route ()
 		gtk_main_iteration ();
 	}
 
-	interthread_progress_connection.disconnect ();
-	interthread_progress_window->hide_all ();
 	current_interthread_info = 0;
 	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
 }

@@ -58,6 +58,7 @@
 #include "session_import_dialog.h"
 #include "utils.h"
 #include "gui_thread.h"
+#include "interthread_progress_window.h"
 
 #include "i18n.h"
 
@@ -330,15 +331,7 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
 	import_status.current = 1;
 	import_status.total = paths.size ();
 
-	if (interthread_progress_window == 0) {
-		build_interthread_progress_window ();
-	}
-
-	interthread_progress_window->set_title (_("Import"));
-	interthread_progress_bar.set_fraction (0.0f);
-	interthread_cancel_label.set_text (_("Cancel Import"));
-	interthread_progress_connection = Glib::signal_timeout().connect
-		(sigc::bind (sigc::mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 500);
+	ImportProgressWindow ipw (&import_status, _("Import"), _("Cancel Import"));
 
 	if (chns == Editing::ImportMergeFiles) {
 
@@ -419,9 +412,6 @@ Editor::do_import (vector<ustring> paths, ImportDisposition chns, ImportMode mod
                         }
                 }
 	}
-
-	interthread_progress_window->hide_all ();
-	interthread_progress_connection.disconnect ();
 }
 
 void
@@ -937,43 +927,3 @@ Editor::import_thread ()
 	/*NOTREACHED*/
 	return 0;
 }
-
-gint
-Editor::import_progress_timeout (void */*arg*/)
-{
-	bool reset = false;
-
-	if (!interthread_progress_window->is_visible()) {
-		interthread_progress_window->show_all ();
-		reset = true;
-	}
-
-	interthread_progress_label.set_markup (import_status.doing_what);
-
-	if (import_status.freeze) {
-		interthread_cancel_button.set_sensitive(false);
-	} else {
-		interthread_cancel_button.set_sensitive(true);
-	}
-
-	if (import_status.doing_what == "building peak files") {
-		interthread_progress_bar.pulse ();
-		return FALSE;
-	} else {
-		float val = import_status.progress;
-		interthread_progress_bar.set_fraction (min (max (0.0f, val), 1.0f));
-	}
-
-	if (reset) {
-
-		/* the window is now visible, speed up the updates */
-
-		interthread_progress_connection.disconnect ();
-		interthread_progress_connection = Glib::signal_timeout().connect
-			(sigc::bind (sigc::mem_fun(*this, &Editor::import_progress_timeout), (gpointer) 0), 100);
-		return false;
-	} else {
-		return !(import_status.done || import_status.cancel);
-	}
-}
-

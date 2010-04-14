@@ -1174,17 +1174,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	boost::shared_ptr<ARDOUR::AudioTrack> get_nth_selected_audio_track (int nth) const;
 	boost::shared_ptr<ARDOUR::MidiTrack> get_nth_selected_midi_track (int nth) const;
 
-	/* generic interthread progress window */
-
-	ArdourDialog* interthread_progress_window;
-	Gtk::Label interthread_progress_label;
-	Gtk::VBox interthread_progress_vbox;
-	Gtk::ProgressBar interthread_progress_bar;
-	Gtk::Button interthread_cancel_button;
-	Gtk::Label interthread_cancel_label;
-	sigc::connection  interthread_progress_connection;
-	void interthread_cancel_clicked ();
-	void build_interthread_progress_window ();
 	ARDOUR::InterThreadInfo* current_interthread_info;
 
 	AnalysisWindow* analysis_window;
@@ -1201,7 +1190,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	};
 
 	EditorImportStatus import_status;
-	gint import_progress_timeout (void *);
 	static void *_import_thread (void *);
 	void* import_thread ();
 	void finish_import ();
@@ -1795,7 +1783,6 @@ public:
 	/* freeze operations */
 
 	ARDOUR::InterThreadInfo freeze_status;
-	gint freeze_progress_timeout (void *);
 	static void* _freeze_thread (void*);
 	void* freeze_thread ();
 

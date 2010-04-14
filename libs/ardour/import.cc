@@ -250,16 +250,13 @@ compose_status_message (const string& path,
 			uint total_files)
 {
 	if (file_samplerate != session_samplerate) {
-		return string_compose (_("<b>Resampling</b> from %1kHz to %2kHz.\n<i>%3</i>\n(%4 of %5)"),
-				       file_samplerate/1000.0f,
-				       session_samplerate/1000.0f,
+		return string_compose (_("Resampling %1 from %2kHz to %3kHz"),
 				       Glib::path_get_basename (path),
-				       current_file, total_files);
+				       file_samplerate/1000.0f,
+				       session_samplerate/1000.0f);
 	}
-
-	return string_compose (_("<b>Copying</b>\n<i>%1</i>\n(%2 of %3)"),
-			       Glib::path_get_basename (path),
-			       current_file, total_files);
+	
+	return string_compose (_("Copying %1"), Glib::path_get_basename (path));
 }
 
 static void
@@ -517,6 +514,7 @@ Session::import_audiofiles (ImportStatus& status)
 		}
 
 		++status.current;
+		status.progress = 0;
 	}
 
 	if (!status.cancel) {
