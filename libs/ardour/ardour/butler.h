@@ -22,10 +22,19 @@
 
 #include <glibmm/thread.h>
 
+#include "pbd/ringbuffer.h"
+#include "pbd/pool.h"
 #include "ardour/types.h"
 #include "ardour/session_handle.h"
 
 namespace ARDOUR {
+
+/**
+ *  One of the Butler's functions is to clean up (ie delete) unused CrossThreadPools.
+ *  When a thread with a CrossThreadPool terminates, its CTP is added to pool_trash.
+ *  When the Butler thread wakes up, we check this trash buffer for CTPs, and if they
+ *  are empty they are deleted.
+ */
 
 class Butler : public SessionHandleRef
 {
@@ -67,6 +76,10 @@ class Butler : public SessionHandleRef
 	int          request_pipe[2];
 	uint32_t     audio_dstream_buffer_size;
 	uint32_t     midi_dstream_buffer_size;
+	RingBuffer<CrossThreadPool*> pool_trash;
+
+private:
+	void empty_pool_trash ();
 };
 
 } // namespace ARDOUR

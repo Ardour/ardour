@@ -117,6 +117,8 @@ struct SessionEvent {
 private:
     static PerThreadPool* pool;
     CrossThreadPool* own_pool;
+
+    friend class Butler;
 };
 
 class SessionEventManager {

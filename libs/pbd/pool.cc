@@ -22,6 +22,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
+#include <cassert>
 
 #include "pbd/pool.h"
 #include "pbd/error.h"
@@ -57,12 +58,13 @@ Pool::~Pool ()
 	free (block);
 }
 
+/** Allocate an item's worth of memory in the Pool by taking one from the free list.
+ *  @return Pointer to free item.
+ */
 void *
 Pool::alloc ()
 {
 	void *ptr;
-
-//	cerr << _name << " pool " << " alloc, thread = " << pthread_name() << " space = " << free_list->read_space() << endl;
 
 	if (free_list.read (&ptr, 1) < 1) {
 		fatal << "CRITICAL: " << _name << " POOL OUT OF MEMORY - RECOMPILE WITH LARGER SIZE!!" << endmsg;
@@ -73,18 +75,18 @@ Pool::alloc ()
 	}
 }
 
+/** Release an item's memory by writing its location to the free list */
 void		
 Pool::release (void *ptr)
 {
 	free_list.write (&ptr, 1);
-//	cerr << _name << ": release, now has " << free_list->read_space() << endl;
 }
 
 /*---------------------------------------------*/
 
 MultiAllocSingleReleasePool::MultiAllocSingleReleasePool (string n, unsigned long isize, unsigned long nitems) 
-	: Pool (n, isize, nitems),
-        m_lock(0)
+	: Pool (n, isize, nitems)
+	, m_lock(0)
 {
 }
 
@@ -94,8 +96,8 @@ MultiAllocSingleReleasePool::~MultiAllocSingleReleasePool ()
 }
 
 SingleAllocMultiReleasePool::SingleAllocMultiReleasePool (string n, unsigned long isize, unsigned long nitems) 
-	: Pool (n, isize, nitems),
-    m_lock(0)
+	: Pool (n, isize, nitems)
+	, m_lock(0)
 {
 }
 
@@ -148,11 +150,18 @@ SingleAllocMultiReleasePool::release (void* ptr)
 static void 
 free_per_thread_pool (void* ptr)
 {
-	Pool* pptr = static_cast<Pool*>(ptr);
-	delete pptr;
+	/* Rather than deleting the CrossThreadPool now, we add it to our trash buffer.
+	 * This prevents problems if other threads still require access to this CrossThreadPool.
+	 * We assume that some other agent will clean out the trash buffer as required.
+	 */
+	CrossThreadPool* cp = static_cast<CrossThreadPool*> (ptr);
+	assert (cp);
+
+	cp->parent()->add_to_trash (cp);
 }
  
 PerThreadPool::PerThreadPool ()
+	: _trash (0)
 {
 	{
 		/* for some reason this appears necessary to get glib's thread private stuff to work */
@@ -163,13 +172,21 @@ PerThreadPool::PerThreadPool ()
 	_key = g_private_new (free_per_thread_pool);
 }
 
+/** Create a new CrossThreadPool and set the current thread's private _key to point to it.
+ *  @param n Name.
+ *  @param isize Size of each item in the pool.
+ *  @param nitems Number of items in the pool.
+ */
 void
 PerThreadPool::create_per_thread_pool (string n, unsigned long isize, unsigned long nitems)
 {
-	Pool* p = new CrossThreadPool (n, isize, nitems);
+	CrossThreadPool* p = new CrossThreadPool (n, isize, nitems, this);
 	g_private_set (_key, p);
 }
 
+/** @return CrossThreadPool for the current thread, which must previously have been created by
+ *  calling create_per_thread_pool in the current thread.
+ */
 CrossThreadPool*
 PerThreadPool::per_thread_pool ()
 {
@@ -181,9 +198,27 @@ PerThreadPool::per_thread_pool ()
 	return p;
 }
 
-CrossThreadPool::CrossThreadPool  (string n, unsigned long isize, unsigned long nitems)
+/** Add a CrossThreadPool to our trash, if we have one.  If not, a warning is emitted. */
+void
+PerThreadPool::add_to_trash (CrossThreadPool* p)
+{
+	if (!_trash) {
+		warning << "Pool " << p->name() << " has no trash collector; a memory leak has therefore occurred" << endmsg;
+		return;
+	}
+
+	/* we have a lock here so that multiple threads can safely call add_to_trash (even though there
+	   can only be one writer to the _trash RingBuffer)
+	*/
+		
+	Glib::Mutex::Lock lm (_trash_write_mutex);
+	_trash->write (&p, 1);
+}
+
+CrossThreadPool::CrossThreadPool  (string n, unsigned long isize, unsigned long nitems, PerThreadPool* p)
 	: Pool (n, isize, nitems)
 	, pending (nitems)
+	, _parent (p)
 {
 	
 }
@@ -203,3 +238,11 @@ CrossThreadPool::push (void* t)
 {
 	pending.write (&t, 1);
 }
+
+/** @return true if there is nothing in this pool */
+bool
+CrossThreadPool::empty ()
+{
+	return (free_list.write_space() == pending.read_space());
+}
+

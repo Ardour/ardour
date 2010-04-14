@@ -27,6 +27,9 @@
 
 #include "pbd/ringbuffer.h"
 
+/** A pool of data items that can be allocated, read from and written to
+ *  without system memory allocation or locking.
+ */
 class Pool 
 {
   public:
@@ -39,11 +42,11 @@ class Pool
 	std::string name() const { return _name; }
 
   protected:
-	RingBuffer<void*> free_list;
+	RingBuffer<void*> free_list; ///< a list of pointers to free items within block
 	std::string _name;
 
   private:
-	void *block;
+	void *block; ///< data storage area
 };
 
 class SingleAllocMultiReleasePool : public Pool
@@ -73,18 +76,31 @@ class MultiAllocSingleReleasePool : public Pool
     Glib::Mutex* m_lock;
 };
 
+class PerThreadPool;
+
+/** A per-thread pool of data */
 class CrossThreadPool : public Pool
 {
   public:
-	CrossThreadPool (std::string n, unsigned long isize, unsigned long nitems);
+	CrossThreadPool (std::string n, unsigned long isize, unsigned long nitems, PerThreadPool *);
 
 	void* alloc ();
 	void push (void *);
+
+	PerThreadPool* parent () const {
+		return _parent;
+	}
+
+	bool empty ();
 	
   private:
 	RingBuffer<void*> pending;
+	PerThreadPool* _parent;
 };
 
+/** A class to manage per-thread pools of memory.  One object of this class is instantiated,
+ *  and then it is used to create per-thread pools as required.
+ */
 class PerThreadPool
 {
   public:
@@ -94,12 +110,20 @@ class PerThreadPool
 
 	void  create_per_thread_pool (std::string name, unsigned long item_size, unsigned long nitems);
 	CrossThreadPool* per_thread_pool ();
-	
+
+	void set_trash (RingBuffer<CrossThreadPool*>* t) {
+		_trash = t;
+	}
+
+	void add_to_trash (CrossThreadPool *);
+
   private:
 	GPrivate* _key;
 	std::string _name;
 	unsigned long _item_size;
 	unsigned long _nitems;
+	RingBuffer<CrossThreadPool*>* _trash;
+	Glib::Mutex _trash_write_mutex;
 };
 
 #endif // __qm_pool_h__

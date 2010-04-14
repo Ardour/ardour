@@ -43,8 +43,10 @@ Butler::Butler(Session& s)
 	, thread(0)
 	, audio_dstream_buffer_size(0)
 	, midi_dstream_buffer_size(0)
+	, pool_trash(16)
 {
 	g_atomic_int_set(&should_do_transport_work, 0);
+	SessionEvent::pool->set_trash (&pool_trash);
 }
 
 Butler::~Butler()
@@ -331,6 +333,8 @@ Butler::thread_work ()
 
 			paused.signal();
 		}
+
+		empty_pool_trash ();
 	}
 
 	pthread_exit_pbd (0);
@@ -394,4 +398,35 @@ Butler::write_data_rate () const
 	return _write_data_rate > 10485.7600000f ? 0.0f : _write_data_rate;
 }
 
+void
+Butler::empty_pool_trash ()
+{
+	/* look in the trash, deleting empty pools until we come to one that is not empty */
+	
+	RingBuffer<CrossThreadPool*>::rw_vector vec;
+	pool_trash.get_read_vector (&vec);
+
+	guint deleted = 0;
+	
+	for (int i = 0; i < 2; ++i) {
+		for (guint j = 0; j < vec.len[i]; ++j) {
+			if (vec.buf[i][j]->empty()) {
+				delete vec.buf[i][j];
+				++deleted;
+			} else {
+				/* found a non-empty pool, so stop deleting */
+				if (deleted) {
+					pool_trash.increment_read_idx (deleted);
+				}
+				return;
+			}
+		}
+	}
+
+	if (deleted) {
+		pool_trash.increment_read_idx (deleted);
+	}
+}
+
 } // namespace ARDOUR
+
