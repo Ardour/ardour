@@ -45,6 +45,7 @@
 #include "ardour/utils.h"
 #include "ardour/session_playlists.h"
 #include "ardour/delivery.h"
+#include "ardour/meter.h"
 #include "i18n.h"
 
 using namespace std;
@@ -595,14 +596,16 @@ AudioTrack::export_stuff (BufferSet& buffers, sframes_t start, nframes_t nframes
 
 	/* note: only run processors during export. other layers in the machinery
 	   will already have checked that there are no external port processors.
-	   Also, don't run deliveries that write to real output ports.
+	   Also, don't run deliveries that write to real output ports, and don't
+	   run meters.
 	*/
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		boost::shared_ptr<Processor> processor = boost::dynamic_pointer_cast<Processor> (*i);
 		boost::shared_ptr<Delivery> delivery = boost::dynamic_pointer_cast<Delivery> (*i);
+		boost::shared_ptr<PeakMeter> meter = boost::dynamic_pointer_cast<PeakMeter> (*i);
 		
-		if (processor && (!delivery || !Delivery::role_requires_output_ports (delivery->role()))) {
+		if (processor && (!delivery || !Delivery::role_requires_output_ports (delivery->role())) && !meter) {
 			processor->run (buffers, start, start+nframes, nframes, true);
 		}
 	}
