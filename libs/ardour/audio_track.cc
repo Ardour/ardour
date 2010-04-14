@@ -44,6 +44,7 @@
 #include "ardour/session.h"
 #include "ardour/utils.h"
 #include "ardour/session_playlists.h"
+#include "ardour/delivery.h"
 #include "i18n.h"
 
 using namespace std;
@@ -556,7 +557,6 @@ AudioTrack::export_stuff (BufferSet& buffers, sframes_t start, nframes_t nframes
 {
 	boost::scoped_array<gain_t> gain_buffer (new gain_t[nframes]);
 	boost::scoped_array<float> mix_buffer (new float[nframes]);
-	ProcessorList::iterator i;
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 
 	Glib::RWLock::ReaderLock rlock (_processor_lock);
@@ -595,11 +595,14 @@ AudioTrack::export_stuff (BufferSet& buffers, sframes_t start, nframes_t nframes
 
 	/* note: only run processors during export. other layers in the machinery
 	   will already have checked that there are no external port processors.
+	   Also, don't run deliveries that write to real output ports.
 	*/
 
-	for (i = _processors.begin(); i != _processors.end(); ++i) {
-		boost::shared_ptr<Processor> processor;
-		if ((processor = boost::dynamic_pointer_cast<Processor>(*i)) != 0) {
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		boost::shared_ptr<Processor> processor = boost::dynamic_pointer_cast<Processor> (*i);
+		boost::shared_ptr<Delivery> delivery = boost::dynamic_pointer_cast<Delivery> (*i);
+		
+		if (processor && (!delivery || !Delivery::role_requires_output_ports (delivery->role()))) {
 			processor->run (buffers, start, start+nframes, nframes, true);
 		}
 	}
