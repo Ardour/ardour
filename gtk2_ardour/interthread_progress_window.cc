@@ -21,6 +21,7 @@
 #include <gtkmm/stock.h>
 #include "ardour/import_status.h"
 #include "interthread_progress_window.h"
+#include "i18n.h"
 
 using namespace std;
 using namespace Gtk;
@@ -89,6 +90,8 @@ ImportProgressWindow::update ()
 
 	/* use overall progress for the bar, rather than that for individual files */
 	_bar.set_fraction ((_import_status->current - 1 + _import_status->progress) / _import_status->total);
+
+	_bar.set_text (string_compose (_("Importing file: %1 of %2"), _import_status->current, _import_status->total));
 	
 	return !(_import_status->done || _import_status->cancel);
 }
