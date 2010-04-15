@@ -103,6 +103,7 @@ This mode provides many different operations on both regions and control points,
 @trans|Transport/ToggleRoll|space|toggle roll
 @epp|Editor/play-edit-range|<@SECONDARY@>space|play edit range
 @epp|Editor/play-from-edit-point-and-return|<@LEVEL4@>space|play from EP \& return
+@trans|Transport/ToggleRollMaybe|<@PRIMARY@><@SECONDARY>space|stop but do not leave loop/range play
 @trans|Transport/ToggleRollForgetCapture|<@PRIMARY@>space|stop and destroy
 @trans|Transport/record-roll|<@TERTIARY@>space|start recording
 

@@ -948,14 +948,17 @@ AudioRegion::recompute_at_end ()
 	_envelope->set_max_xval (_length);
         _envelope->thaw ();
 
+        if (_left_of_split) {
+                set_default_fade_out ();
+                _left_of_split = false;
+        } else if (_fade_out->back()->when > _length) {
+                _fade_out->extend_to (_length);
+                send_change (PropertyChange (Properties::fade_out));
+        }
+        
 	if (_fade_in->back()->when > _length) {
 		_fade_in->extend_to (_length);
 		send_change (PropertyChange (Properties::fade_in));
-	}
-
-	if (_fade_out->back()->when > _length) {
-		_fade_out->extend_to (_length);
-		send_change (PropertyChange (Properties::fade_out));
 	}
 }
 
@@ -966,7 +969,10 @@ AudioRegion::recompute_at_start ()
 
 	_envelope->truncate_start (_length);
 
-	if (_fade_in->back()->when > _length) {
+        if (_right_of_split) {
+                set_default_fade_in ();
+                _right_of_split = false;
+        } else if (_fade_in->back()->when > _length) {
 		_fade_in->extend_to (_length);
 		send_change (PropertyChange (Properties::fade_in));
 	}

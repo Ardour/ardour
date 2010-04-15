@@ -764,12 +764,30 @@ Region::trim_start (framepos_t new_position, void */*src*/)
 void
 Region::trim_front (framepos_t new_position, void *src)
 {
+	modify_front (new_position, false, src);
+}
+
+void
+Region::cut_front (nframes_t new_position, void *src)
+{
+	modify_front (new_position, true, src);
+}
+
+void
+Region::cut_end (nframes_t new_endpoint, void *src)
+{
+	modify_end (new_endpoint, true, src);
+}
+
+void
+Region::modify_front (nframes_t new_position, bool reset_fade, void *src)
+{
 	if (locked()) {
 		return;
 	}
 
-	framepos_t end = last_frame();
-	framepos_t source_zero;
+	nframes_t end = last_frame();
+	nframes_t source_zero;
 
 	if (_position > _start) {
 		source_zero = _position - _start;
@@ -778,23 +796,44 @@ Region::trim_front (framepos_t new_position, void *src)
 	}
 
 	if (new_position < end) { /* can't trim it zero or negative length */
-
-		framecnt_t newlen;
+		
+		nframes_t newlen;
 
 		/* can't trim it back passed where source position zero is located */
-
+		
 		new_position = max (new_position, source_zero);
-
-
+		
 		if (new_position > _position) {
 			newlen = _length - (new_position - _position);
 		} else {
 			newlen = _length + (_position - new_position);
 		}
-
+		
 		trim_to_internal (new_position, newlen, src);
-		if (!property_changes_suspended()) {
+		if (reset_fade) {
+                        _right_of_split = true;
+		}
+	
+                if (!property_changes_suspended()) {
 			recompute_at_start ();
+		}
+	}
+}
+
+void
+Region::modify_end (nframes_t new_endpoint, bool reset_fade, void *src)
+{
+	if (locked()) {
+		return;
+	}
+
+	if (new_endpoint > _position) {
+		trim_to_internal (_position, new_endpoint - _position +1, this);
+		if (reset_fade) {
+                        _left_of_split = true;
+		}
+		if (!property_changes_suspended()) {
+			recompute_at_end ();
 		}
 	}
 }
@@ -804,18 +843,9 @@ Region::trim_front (framepos_t new_position, void *src)
  */
 
 void
-Region::trim_end (framepos_t new_endpoint, void */*src*/)
+Region::trim_end (framepos_t new_endpoint, void* src)
 {
-	if (locked()) {
-		return;
-	}
-
-	if (new_endpoint > _position) {
-		trim_to_internal (_position, new_endpoint - _position + 1, this);
-		if (!property_changes_suspended()) {
-			recompute_at_end ();
-		}
-	}
+	modify_end (new_endpoint, false, src);
 }
 
 void

@@ -137,7 +137,7 @@ class LadspaPlugin : public ARDOUR::Plugin
 
 class LadspaPluginInfo : public PluginInfo {
   public:
-	LadspaPluginInfo () { };
+	LadspaPluginInfo ();
 	~LadspaPluginInfo () { };
 
 	PluginPtr load (Session& session);

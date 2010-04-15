@@ -548,22 +548,30 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 				to_read = min (chunksize, (framecnt_t)(_length - current_frame));
 
-				if (to_read == 0) {
-					/* XXX ARGH .. out by one error ... need to figure out why this happens
-					   and fix it rather than do this band-aid move.
+				if (current_frame >= _length) {
+
+                                        /* hmm, error condition - we've reached the end of the file
+                                           without generating all the peak data. cook up a zero-filled
+                                           data buffer and then use it. this is simpler than
+                                           adjusting zero_fill and npeaks and then breaking out of
+                                           this loop early
 					*/
-					zero_fill = npeaks - nvisual_peaks;
-					npeaks -= zero_fill;
-					break;
-				}
-
-				if ((frames_read = read_unlocked (raw_staging, current_frame, to_read)) == 0) {
-					error << string_compose(_("AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"),
-								_name, to_read, current_frame, _length, strerror (errno))
-					      << endmsg;
-					goto out;
-				}
-
+                                        
+                                        memset (raw_staging, 0, sizeof (Sample) * chunksize);
+                                        
+                                } else {
+                                        
+                                        to_read = min (chunksize, (_length - current_frame));
+                                        
+                                        
+                                        if ((frames_read = read_unlocked (raw_staging, current_frame, to_read)) == 0) {
+                                                error << string_compose(_("AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"),
+                                                                        _name, to_read, current_frame, _length, strerror (errno))
+                                                      << endmsg;
+                                                goto out;
+                                        }
+                                }
+                                
 				i = 0;
 			}
 

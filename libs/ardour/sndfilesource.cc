@@ -816,9 +816,15 @@ SndFileSource::get_soundfile_info (const ustring& path, SoundFileInfo& info, str
 	info.samplerate  = sf_info.samplerate;
 	info.channels    = sf_info.channels;
 	info.length      = sf_info.frames;
-	info.format_name = string_compose("Format: %1, %2",
-					   sndfile_major_format(sf_info.format),
-					   sndfile_minor_format(sf_info.format));
+        
+        string major = sndfile_major_format(sf_info.format);
+        string minor = sndfile_minor_format(sf_info.format);
+        
+        if (major.length() + minor.length() < 16) { /* arbitrary */
+                info.format_name = string_compose("%1/%2", major, minor);
+        } else {
+                info.format_name = string_compose("%1\n%2", major, minor);
+        }
 
 	info.timecode = binfo.load_from_file (sf) ? binfo.get_time_reference() : 0;
 

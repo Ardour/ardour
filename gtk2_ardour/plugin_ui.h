@@ -176,7 +176,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 		}
 	};
 
-	static const int32_t initial_button_rows = 6;
+	static const int32_t initial_button_rows = 12;
 	static const int32_t initial_button_cols = 1;
 	static const int32_t initial_output_rows = 1;
 	static const int32_t initial_output_cols = 4;

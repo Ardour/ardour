@@ -680,6 +680,7 @@ LV2PluginInfo::LV2PluginInfo (void* lv2_world, void* slv2_plugin)
 	: _lv2_world(lv2_world)
 	, _slv2_plugin(slv2_plugin)
 {
+        type = ARDOUR::LV2;
 }
 
 LV2PluginInfo::~LV2PluginInfo()

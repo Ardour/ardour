@@ -965,30 +965,7 @@ PluginInsert::signal_latency() const
 ARDOUR::PluginType
 PluginInsert::type ()
 {
-	boost::shared_ptr<LadspaPlugin> lp;
-#ifdef VST_SUPPORT
-	boost::shared_ptr<VSTPlugin> vp;
-#endif
-#ifdef HAVE_AUDIOUNITS
-	boost::shared_ptr<AUPlugin> ap;
-#endif
-
-	PluginPtr other = plugin ();
-
-	if ((lp = boost::dynamic_pointer_cast<LadspaPlugin> (other)) != 0) {
-		return ARDOUR::LADSPA;
-#ifdef VST_SUPPORT
-	} else if ((vp = boost::dynamic_pointer_cast<VSTPlugin> (other)) != 0) {
-		return ARDOUR::VST;
-#endif
-#ifdef HAVE_AUDIOUNITS
-	} else if ((ap = boost::dynamic_pointer_cast<AUPlugin> (other)) != 0) {
-		return ARDOUR::AudioUnit;
-#endif
-	} else {
-		/* NOT REACHED */
-		return (ARDOUR::PluginType) 0;
-	}
+       return plugin()->get_info()->type;
 }
 
 PluginInsert::PluginControl::PluginControl (PluginInsert* p, const Evoral::Parameter &param, boost::shared_ptr<AutomationList> list)

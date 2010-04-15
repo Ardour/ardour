@@ -220,6 +220,27 @@ show_me_the_size (Requisition* r, const char* what)
 	cerr << "size of " << what << " = " << r->width << " x " << r->height << endl;
 }
 
+#ifdef GTKOSX
+static void
+pane_size_watcher (Paned* pane)
+{
+       /* if the handle of a pane vanishes into (at least) the tabs of a notebook,
+          it is no longer accessible. so stop that. this doesn't happen on X11,
+          just the quartz backend.
+
+          ugh.
+       */
+
+       int max_width_of_lhs = GTK_WIDGET(pane->gobj())->allocation.width - 25;
+
+       gint pos = pane->get_position ();
+
+       if (pos > max_width_of_lhs) {
+               pane->set_position (max_width_of_lhs);
+       }
+}
+#endif
+
 Editor::Editor ()
 	: _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
 
@@ -588,7 +609,10 @@ Editor::Editor ()
 	edit_pane.pack2 (the_notebook, false, true);
 
 	edit_pane.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&edit_pane)));
-
+#ifdef GTKOSX
+        Glib::PropertyProxy<int> proxy = edit_pane.property_position();
+        proxy.signal_changed().connect (bind (sigc::ptr_fun (pane_size_watcher), static_cast<Paned*> (&edit_pane)));
+#endif
 	top_hbox.pack_start (toolbar_frame, false, true);
 
 	HBox *hbox = manage (new HBox);

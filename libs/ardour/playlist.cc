@@ -1004,7 +1004,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 
 				current->suspend_property_changes ();
 				thawlist.push_back (current);
-				current->trim_end (pos2, this);
+				current->cut_end (pos2, this);
 
 			} else if (overlap == OverlapEnd) {
 
@@ -1043,7 +1043,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 
 				current->suspend_property_changes ();
 				thawlist.push_back (current);
-				current->trim_end (pos2, this);
+				current->cut_end (pos2, this);
 
 			} else if (overlap == OverlapStart) {
 
