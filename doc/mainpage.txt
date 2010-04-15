@@ -1,0 +1,13 @@
+/** \mainpage Ardour
+ *
+ *  Welcome to the in-code documentation for Ardour.
+ *
+ *  The main components of Ardour are as follows:
+ *  - A GTK2 front-end, in \c gtk2_ardour.
+ *  - libardour, the audio-processing back-end, in \c libs/ardour.
+ *  - libpbd, a utility library, in \c libs/pbd.
+ *
+ *  There are other assorted component libraries:
+ *  - gtkmm2ext, an library of extensions to gtkmm2, in \c libs/gtkmm2ext.
+ *  - and others...
+ */
