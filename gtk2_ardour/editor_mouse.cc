@@ -3745,20 +3745,35 @@ Editor::region_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 				x_delta = ((double) (pending_region_position - drag_info.last_frame_position) / frames_per_unit);
 			} else {
 				x_delta = -((double) (drag_info.last_frame_position - pending_region_position) / frames_per_unit);
-				for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
-
-					RegionView* rv2 = (*i);
-
-					// If any regionview is at zero, we need to know so we can stop further leftward motion.
-	
+				
+				//test to make sure that we aren't dragging near 0
+				if (selection->regions.by_layer().size() == 1) {  // If a single regionview is being dragged to zero, make sure we go all the way to zero.	
+					RegionView* rv2 = *(selection->regions.by_layer().begin());
 					double ix1, ix2, iy1, iy2;
 					rv2->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
 					rv2->get_canvas_group()->i2w (ix1, iy1);
-			
-					if (-x_delta > ix1 + horizontal_adjustment.get_value()) {
-						x_delta = 0;
-						pending_region_position = drag_info.last_frame_position;
-						break;
+					double pos = ix1 + horizontal_adjustment.get_value();
+					if (-x_delta > pos) {
+						pending_region_position = 0;
+					}
+				} else {  // If any regionview is at zero, we need to know so we can stop further leftward motion.	
+					
+ 					//first find the earliest region in the selection
+					RegionView *earliest_rv = selection->regions.by_layer().front();
+					for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ++i) {
+						RegionView* rv = (*i);
+						if (rv->region()->position() < earliest_rv->region()->position())
+							earliest_rv = rv;
+					}				
+					
+					//if the earliest region is near 0, then limit the drag so it doesn't go any farther left
+					double ix1, ix2, iy1, iy2;
+					earliest_rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
+					earliest_rv->get_canvas_group()->i2w (ix1, iy1);
+					double pos = ix1 + horizontal_adjustment.get_value();
+					if (x_delta < -pos) {
+						x_delta = -pos;
+						pending_region_position = clicked_regionview->region()->position() - earliest_rv->region()->position();
 					}
 				}
 
