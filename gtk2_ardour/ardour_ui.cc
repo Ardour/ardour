@@ -1039,7 +1039,7 @@ ARDOUR_UI::redisplay_recent_sessions ()
 		
 		/* remove any trailing / */
 
-		if (fullpath[fullpath.length()-1] == '/') {
+		if (fullpath[fullpath.length()-1] == G_DIR_SEPARATOR) {
 			fullpath = fullpath.substr (0, fullpath.length()-1);
 		}
 
@@ -2204,11 +2204,8 @@ ARDOUR_UI::load_cmdline_session (const Glib::ustring& session_name, const Glib::
 	if (Glib::file_test (session_path, Glib::FILE_TEST_IS_DIR)) {
 
 		Glib::ustring predicted_session_file;
-		
-		predicted_session_file = session_path;
-		predicted_session_file += '/';
-		predicted_session_file += session_name;
-		predicted_session_file += Session::statefile_suffix();
+                
+                predicted_session_file = Glib::build_filename (session_path, session_name + Session::statefile_suffix());
 		
 		if (Glib::file_test (predicted_session_file, Glib::FILE_TEST_EXISTS)) {
 			existing_session = true;
@@ -2497,9 +2494,9 @@ ARDOUR_UI::get_session_parameters (bool backend_audio_is_running, bool should_be
 			   convert what they typed into a path & a name
 			*/
 			
-			if (session_name[0] == '/' || 
-			    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == '/') ||
-			    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == '/')) {
+			if (Glib::path_is_absolute (session_name) || 
+			    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == G_DIR_SEPARATOR) ||
+			    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == G_DIR_SEPARATOR)) {
 
 				session_path = Glib::path_get_dirname (session_name);
 				session_name = Glib::path_get_basename (session_name);

@@ -114,8 +114,8 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 
 	_path = string(buf);
 
-	if (_path[_path.length()-1] != '/') {
-		_path += '/';
+	if (_path[_path.length()-1] != G_DIR_SEPARATOR) {
+		_path += G_DIR_SEPARATOR;
 	}
 
 	if (Glib::file_test (_path, Glib::FILE_TEST_EXISTS) && ::access (_path.c_str(), W_OK)) {
@@ -1779,7 +1779,7 @@ Session::ensure_sound_dir (string path, string& result)
 	
 	/* callers expect this to be terminated ... */
 			
-	result += '/';
+	result += G_DIR_SEPARATOR;
 	return 0;
 }	
 
@@ -2043,7 +2043,7 @@ Session::sound_dir (bool with_path) const
 	string old_withpath;
 
 	old_nopath += old_sound_dir_name;
-	old_nopath += '/';
+	old_nopath += G_DIR_SEPARATOR;
 	
 	old_withpath = _path;
 	old_withpath += old_sound_dir_name;
@@ -2120,7 +2120,7 @@ Session::suffixed_search_path (string suffix, bool data)
 	for (vector<string>::iterator i = split_path.begin(); i != split_path.end(); ++i) {
 		path += *i;
 		path += suffix;
-		path += '/';
+		path += G_DIR_SEPARATOR;
 		
 		if (distance (i, split_path.end()) != 1) {
 			path += ':';
@@ -2230,7 +2230,7 @@ remove_end(string* state)
 	string statename(*state);
 	
 	string::size_type start,end;
-	if ((start = statename.find_last_of ('/')) != string::npos) {
+	if ((start = statename.find_last_of (G_DIR_SEPARATOR)) != string::npos) {
 		statename = statename.substr (start+1);
 	}
 		
@@ -2502,7 +2502,7 @@ Session::get_template_list (list<string> &template_names)
 		string fullpath = *(*i);
 		int start, end;
 
-		start = fullpath.find_last_of ('/') + 1;
+		start = fullpath.find_last_of (G_DIR_SEPARATOR) + 1;
 		if ((end = fullpath.find_last_of ('.')) <0) {
 			end = fullpath.length();
 		}
@@ -2641,7 +2641,7 @@ Session::find_all_sources (string path, set<string>& result)
 			continue;
 		}
 
-		if (prop->value()[0] == '/') {
+		if (Glib::path_is_absolute (prop->value())) {
 			/* external file, ignore */
 			continue;
 		}
@@ -2654,7 +2654,6 @@ Session::find_all_sources (string path, set<string>& result)
 		std::string name;
 		
 		if (AudioFileSource::find (prop->value(), true, false, is_new, chan, path, name)) {
-			cerr << "Got " << path << " from XML source with prop = " << prop->value() << endl;
 			result.insert (path);
 		}
 	}
@@ -2674,7 +2673,7 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 
 	ripped = _path;
 
-	if (ripped[ripped.length()-1] == '/') {
+	if (ripped[ripped.length()-1] == G_DIR_SEPARATOR) {
 		ripped = ripped.substr (0, ripped.length() - 1);
 	}
 
@@ -2844,8 +2843,6 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 			realpath(spath.c_str(), tmppath1);
 			realpath((*i).c_str(),  tmppath2);
 
-			cerr << "comparing " << tmppath1 << " and " << tmppath2 << endl;
-
 			if (strcmp(tmppath1, tmppath2) == 0) {
 				used = true;
 				break;
@@ -2891,18 +2888,16 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 			newpath = Glib::path_get_dirname (newpath); // "session-dir"
 		}
 
-		newpath += '/';
-		newpath += dead_sound_dir_name;
+                newpath = Glib::build_filename (newpath, dead_sound_dir_name);
 
 		if (g_mkdir_with_parents (newpath.c_str(), 0755) < 0) {
 			error << string_compose(_("Session: cannot create session peakfile folder \"%1\" (%2)"), newpath, strerror (errno)) << endmsg;
 			return -1;
 		}
-
-		newpath += '/';
-		newpath += Glib::path_get_basename ((*x));
+                
+		newpath = Glib::build_filename (newpath, Glib::path_get_basename ((*x)));
 		
-		if (access (newpath.c_str(), F_OK) == 0) {
+		if (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS)) {
 			
 			/* the new path already exists, try versioning */
 			
@@ -2933,7 +2928,7 @@ Session::cleanup_sources (Session::cleanup_report& rep)
 		}
 
 		if (::rename ((*x).c_str(), newpath.c_str()) != 0) {
-			error << string_compose (_("cannot rename audio file source from %1 to %2 (%3)"),
+			error << string_compose (_("cannot 4 rename audio file source from %1 to %2 (%3)"),
 					  (*x), newpath, strerror (errno))
 			      << endmsg;
 			goto out;
@@ -3007,9 +3002,7 @@ Session::cleanup_trash_sources (Session::cleanup_report& rep)
 
 			string fullpath;
 
-			fullpath = dead_sound_dir;
-			fullpath += '/';
-			fullpath += dentry->d_name;
+			fullpath = Glib::build_filename (dead_sound_dir, dentry->d_name);
 
 			if (stat (fullpath.c_str(), &statbuf)) {
 				continue;

@@ -618,8 +618,8 @@ NewSessionDialog::set_session_folder(const Glib::ustring& dir)
 std::string
 NewSessionDialog::session_name() const
 {
-        std::string str = Glib::filename_from_utf8(m_open_filechooser->get_filename());
-	std::string::size_type position = str.find_last_of ('/');
+        std::string str = Glib::filename_from_utf8 (m_open_filechooser->get_filename());
+	std::string::size_type position = str.find_last_of (G_DIR_SEPARATOR);
 	str = str.substr (position+1);
 	position = str.find_last_of ('.');
 	str = str.substr (0, position);
@@ -1073,9 +1073,9 @@ NewSessionDialog::reset_recent()
 		std::vector<const gchar*> item;
 		std::string fullpath = *(*i);
 		
-		/* remove any trailing / */
+		/* remove any trailing separator */
 		
-		if (fullpath[fullpath.length()-1] == '/') {
+		if (fullpath[fullpath.length()-1] == G_DIR_SEPARATOR) {
 			fullpath = fullpath.substr (0, fullpath.length()-1);
 		}
 	    

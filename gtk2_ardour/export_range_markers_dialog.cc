@@ -110,22 +110,16 @@ ExportRangeMarkersDialog::process_range_markers_export(Locations::LocationList& 
 string
 ExportRangeMarkersDialog::get_target_filepath(string path, string filename, string postfix)
 {
-	string target_path = path;
-	if ((target_path.find_last_of ('/')) != string::npos) {
-		target_path += '/';
-	}
-
-	string target_filepath = target_path + filename + postfix;
+	string target_filepath = Glib::build_filename (path, filename + postfix);
 	struct stat statbuf;
 	
-	for(int counter=1; (stat (target_filepath.c_str(), &statbuf) == 0); counter++){
+	for (int counter=1; Glib::file_test (target_filepath, Glib::FILE_TEST_EXISTS); counter++) {
 		// while file exists	
 		ostringstream scounter;
 		scounter.flush();
 		scounter << counter;
 		
-		target_filepath = 
-			target_path + filename + "_" + scounter.str() + postfix;
+		target_filepath = Glib::build_filename (path, filename + "_" + scounter.str() + postfix);
 	}
 	
 	return target_filepath;

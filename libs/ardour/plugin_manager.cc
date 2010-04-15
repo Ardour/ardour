@@ -166,7 +166,7 @@ PluginManager::ladspa_refresh ()
 	/* allow LADSPA_PATH to augment, not override standard locations */
 
 	/* Only add standard locations to ladspa_path if it doesn't
-	 * already contain them. Check for trailing '/'s too.
+	 * already contain them. Check for trailing dir separators too.
 	 */
 	 
 	int i;
@@ -177,7 +177,7 @@ PluginManager::ladspa_refresh ()
 				case ':' :
 				case '\0':
 					continue;
-				case '/' :
+				case G_DIR_SEPARATOR:
 					if (ladspa_path[found + strlen(standard_paths[i]) + 1] == ':' ||
 					    ladspa_path[found + strlen(standard_paths[i]) + 1] == '\0') {
 						continue;

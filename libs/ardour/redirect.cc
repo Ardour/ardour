@@ -344,7 +344,7 @@ Redirect::load_automation (string path)
 {
 	string fullpath;
 
-	if (path[0] == '/') { // legacy
+	if (Glib::path_is_absolute (path)) { // legacy
 		fullpath = path;
 	} else {
 		fullpath = Glib::build_filename(_session.automation_dir(), path);

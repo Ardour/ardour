@@ -73,7 +73,7 @@ int
 ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 {
 	const char *optstring = "U:hSbvVnOdc:C:m:N:k:p:";
-	const char *execname = strrchr (argv[0], '/');
+	const char *execname = strrchr (argv[0], G_DIR_SEPARATOR);
 
 	if (getenv ("ARDOUR_SAE")) {
 		menus_file = "ardour-sae.menus";

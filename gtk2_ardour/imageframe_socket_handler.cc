@@ -1616,12 +1616,7 @@ ImageFrameSocketHandler::handle_session_name_request(const char* msg)
 		std::string sessionName = currentSession->name() ;
 		std::string sessionPath = currentSession->path() ;
 		
-		if(sessionPath[sessionPath.length() -1] != '/')
-		{
-			sessionPath.append("/") ;
-		}
-		
-		sessionPath.append(sessionName) ;
+                sessionPath = Glib::build_filename (sessionPath, sessionName);
 		
 		std::ostringstream msgBuf ;
 		msgBuf << ardourvis::RETURN_DATA << ardourvis::SESSION_NAME ;

@@ -406,12 +406,14 @@ AudioFileSource::move_to_trash (const ustring& trash_dir_name)
 
 	cerr << "from " << _path << " dead dir looks like " << newpath << endl;
 
-	newpath += '/';
-	newpath += trash_dir_name;
-	newpath += '/';
-	newpath += Glib::path_get_basename (_path);
+        vector<string> p;
+        p.push_back (newpath);
+        p.push_back (trash_dir_name);
+        p.push_back (Glib::path_get_basename (_path));
 
-	if (access (newpath.c_str(), F_OK) == 0) {
+	newpath = Glib::build_filename (p);
+
+	if (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS)) {
 
 		/* the new path already exists, try versioning */
 		
@@ -422,7 +424,7 @@ AudioFileSource::move_to_trash (const ustring& trash_dir_name)
 		snprintf (buf, sizeof (buf), "%s.%d", newpath.c_str(), version);
 		newpath_v = buf;
 
-		while (access (newpath_v.c_str(), F_OK) == 0 && version < 999) {
+		while (Glib::file_test (newpath_v, Glib::FILE_TEST_EXISTS) && version < 999) {
 			snprintf (buf, sizeof (buf), "%s.%d", newpath.c_str(), ++version);
 			newpath_v = buf;
 		}
@@ -442,7 +444,7 @@ AudioFileSource::move_to_trash (const ustring& trash_dir_name)
 	}
 
 	if (::rename (_path.c_str(), newpath.c_str()) != 0) {
-		error << string_compose (_("cannot rename audio file source from %1 to %2 (%3)"),
+		error << string_compose (_("cannot 1 rename audio file source from %1 to %2 (%3)"),
 				  _path, newpath, strerror (errno))
 		      << endmsg;
 		return -1;
@@ -477,7 +479,7 @@ AudioFileSource::find (ustring pathstr, bool must_exist, bool embedded,
 
 	isnew = false;
 
-	if (pathstr[0] != '/') {
+	if (!Glib::path_is_absolute (pathstr)) {
 
 		/* non-absolute pathname: find pathstr in search path */
 
@@ -497,12 +499,7 @@ AudioFileSource::find (ustring pathstr, bool must_exist, bool embedded,
 		
 		for (vector<ustring>::iterator i = dirs.begin(); i != dirs.end(); ++i) {
 
-			fullpath = *i;
-			if (fullpath[fullpath.length()-1] != '/') {
-				fullpath += '/';
-			}
-
-			fullpath += pathstr;
+			fullpath = Glib::build_filename (*i, pathstr);
 
 			/* i (paul) made a nasty design error by using ':' as a special character in
 			   Ardour 0.99 .. this hack tries to make things sort of work.
@@ -526,13 +523,7 @@ AudioFileSource::find (ustring pathstr, bool must_exist, bool embedded,
 						 */
 						
 						ustring shorter = pathstr.substr (0, pos);
-						fullpath = *i;
-
-						if (fullpath[fullpath.length()-1] != '/') {
-							fullpath += '/';
-						}
-
-						fullpath += shorter;
+						fullpath = Glib::build_filename (*i, shorter);
 
 						if (Glib::file_test (pathstr, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
 							chan = atoi (pathstr.substr (pos+1));
@@ -686,7 +677,7 @@ AudioFileSource::set_name (ustring newname, bool destructive)
 	}
 
 	if (rename (oldpath.c_str(), newpath.c_str()) != 0) {
-		error << string_compose (_("cannot rename audio file %1 to %2"), _name, newpath) << endmsg;
+		error << string_compose (_("cannot 2 rename audio file %1 to %2"), _name, newpath) << endmsg;
 		return -1;
 	}
 

@@ -156,17 +156,14 @@ Session::find_session (string str, string& path, string& snapshot, bool& isnew)
 
 		if (S_ISDIR (statbuf.st_mode)) {
 
-			string::size_type slash = str.find_last_of ('/');
+			string::size_type slash = str.find_last_of (G_DIR_SEPARATOR);
 		
 			if (slash == string::npos) {
 				
 				/* a subdirectory of cwd, so statefile should be ... */
 
 				string tmp;
-				tmp = str;
-				tmp += '/';
-				tmp += str;
-				tmp += _statefile_suffix;
+				tmp = Glib::build_filename (str, str + _statefile_suffix);
 
 				/* is it there ? */
 				
@@ -193,7 +190,7 @@ Session::find_session (string str, string& path, string& snapshot, bool& isnew)
 
 		} else if (S_ISREG (statbuf.st_mode)) {
 			
-			string::size_type slash = str.find_last_of ('/');
+			string::size_type slash = str.find_last_of (G_DIR_SEPARATOR);
 			string::size_type suffix;
 
 			/* remove the suffix */
@@ -251,7 +248,7 @@ Session::find_session (string str, string& path, string& snapshot, bool& isnew)
 		   as "dirname" does.
 		*/
 
-		string::size_type slash = str.find_last_of ('/');
+		string::size_type slash = str.find_last_of (G_DIR_SEPARATOR);
 
 		if (slash == string::npos) {
 			
@@ -3208,7 +3205,7 @@ Session::change_audio_path_by_name (string path, string oldname, string newname,
 		string::size_type slash;
 		string::size_type dash;
 
-		if ((slash = path.find_last_of ('/')) == string::npos) {
+		if ((slash = path.find_last_of (G_DIR_SEPARATOR)) == string::npos) {
 			return "";
 		}
 
@@ -3245,7 +3242,7 @@ Session::change_audio_path_by_name (string path, string oldname, string newname,
 
 		/* find last slash */
 
-		if ((slash = path.find_last_of ('/')) == string::npos) {
+		if ((slash = path.find_last_of (G_DIR_SEPARATOR)) == string::npos) {
 			return "";
 		}
 
@@ -3341,8 +3338,7 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 
 			} else {
 
-				spath += '/';
-				spath += legalized;
+				spath = Glib::build_filename (spath, legalized);
 
 				if (nchan < 2) {
 					snprintf (buf, sizeof(buf), "%s-%u.wav", spath.c_str(), cnt);
@@ -3383,14 +3379,13 @@ Session::audio_path_from_name (string name, uint32_t nchan, uint32_t chan, bool 
 	string foo = buf;
 
 	spath = discover_best_sound_dir ();
-	spath += '/';
 
-	string::size_type pos = foo.find_last_of ('/');
+	string::size_type pos = foo.find_last_of (G_DIR_SEPARATOR);
 	
 	if (pos == string::npos) {
-		spath += foo;
+		spath = Glib::build_filename (spath, foo);
 	} else {
-		spath += foo.substr (pos + 1);
+		spath = Glib::build_filename (spath, foo.substr (pos + 1));
 	}
 
 	return spath;

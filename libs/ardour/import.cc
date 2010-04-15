@@ -153,9 +153,8 @@ get_paths_for_new_sources (const bool allow_replacing, const string& import_file
 
 		std::string filepath;
 
-		filepath = session_dir;
-		filepath += '/';
-		filepath += get_non_existent_filename (allow_replacing, session_dir, basename, n, channels); 
+		filepath = Glib::build_filename (session_dir, 
+                                                 get_non_existent_filename (allow_replacing, session_dir, basename, n, channels));
 
 		new_paths.push_back (filepath);
 	}

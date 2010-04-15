@@ -42,7 +42,7 @@ NamedSelection::NamedSelection (string n, PlaylistList& l)
 		string new_name;
 
 		/* rename playlists to reflect our ownership */
-
+                
 		new_name = name;
 		new_name += '/';
 		new_name += (*i)->name();

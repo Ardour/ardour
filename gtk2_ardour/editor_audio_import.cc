@@ -534,10 +534,7 @@ Editor::embed_sndfiles (vector<Glib::ustring> paths, bool multifile,
 
 		/* lets see if we can link it into the session */
 		
-		linked_path = session->sound_dir();
-		linked_path += '/';
-		linked_path += Glib::path_get_basename (path);
-
+                linked_path = Glib::build_filename (session->sound_dir(), Glib::path_get_basename (path));
 		path_to_use = path;
 		
 		if (link (path.c_str(), linked_path.c_str()) == 0) {

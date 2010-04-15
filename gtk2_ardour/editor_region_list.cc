@@ -149,7 +149,7 @@ Editor::add_audio_region_to_region_display (boost::shared_ptr<AudioRegion> regio
 		}
 		row[region_list_columns.color_] = c;
 
-		if (region->source()->name()[0] == '/') { // external file
+		if (Glib::path_is_absolute (region->source()->name())) { // external file
 
 			/* XXX there was old code here to try to show an abbreviated version
 			   of the path name for whole file regions.
