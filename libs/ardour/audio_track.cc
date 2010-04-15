@@ -698,8 +698,6 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 	new_playlist = PlaylistFactory::create (DataType::AUDIO, _session, new_playlist_name, false);
 
-	_freeze_record.gain = _amp->gain();
-	_freeze_record.gain_automation_state = _amp->gain_control()->automation_state();
 	/* XXX need main outs automation state _freeze_record.pan_automation_state = _mainpanner->automation_state(); */
 
 	region_name = new_playlist_name;
@@ -752,8 +750,6 @@ AudioTrack::unfreeze ()
 		}
 
 		_freeze_record.playlist.reset ();
-		set_gain (_freeze_record.gain, this);
-		_amp->gain_control()->set_automation_state (_freeze_record.gain_automation_state);
 		/* XXX need to use _main_outs _panner->set_automation_state (_freeze_record.pan_automation_state); */
 	}
 
