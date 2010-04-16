@@ -115,6 +115,8 @@ PeakMeter::configure_io (ChanCount in, ChanCount out)
 
 	current_meters = in;
 
+        reset_max_channels (in);
+
 	return Processor::configure_io (in, out);
 }
 

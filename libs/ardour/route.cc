@@ -2162,7 +2162,7 @@ Route::set_processor_state (const XMLNode& node)
                 } else if (prop->value() == "main-outs") {
                         _main_outs->set_state (**niter, Stateful::current_state_version);
                         new_order.push_back (_main_outs);
-                } else if (is_monitor() && prop->value() == "intreturn") {
+                } else if (prop->value() == "intreturn") {
                         if (!_intreturn) {
                                 _intreturn.reset (new InternalReturn (_session));
                                 must_configure = true;
