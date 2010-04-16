@@ -583,11 +583,18 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 
 	} else {
 		
-		/* track is N-channel, this region has less channels; silence the ones
-		   we don't have.
+		/* track is N-channel, this region has less channels, so use a relevant channel
 		*/
 
-		memset (mixdown_buffer, 0, sizeof (Sample) * cnt);
+                uint32_t channel = n_channels() % chan_n;
+
+		if (srcs[channel]->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
+			return 0; /* "read nothing" */
+		}
+                
+                /* adjust read data count appropriately since this was a duplicate read */
+                srcs[channel]->dec_read_data_count (to_read);
+
 	}
 
 	if (rops & ReadOpsFades) {

@@ -90,6 +90,7 @@ class AudioSource : public Source, public boost::enable_shared_from_this<ARDOUR:
 
 	uint32_t read_data_count() const { return _read_data_count; }
 	uint32_t write_data_count() const { return _write_data_count; }
+	void dec_read_data_count(nframes_t);
 
  	int read_peaks (PeakData *peaks, nframes_t npeaks, nframes_t start, nframes_t cnt, double samples_per_visual_peak) const;
 
