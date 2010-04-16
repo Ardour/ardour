@@ -1091,7 +1091,11 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 		break;
 		
 	case Selection::Set:
-		editor.get_selection().set (*tracks);
+		if (find (editor.get_selection().tracks.begin(), editor.get_selection().tracks.end(), this) != editor.get_selection().tracks.end()) {
+			editor.get_selection().remove (*tracks);
+		} else {
+			editor.get_selection().set (*tracks);
+		}
 		break;
 
 	case Selection::Extend:

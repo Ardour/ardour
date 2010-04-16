@@ -272,6 +272,8 @@ Editor::Editor ()
 	selection = new Selection;
 	cut_buffer = new Selection;
 
+	all_group_is_active = false;
+
 	selection->TimeChanged.connect (mem_fun(*this, &Editor::time_selection_changed));
 	selection->TracksChanged.connect (mem_fun(*this, &Editor::track_selection_changed));
 	selection->RegionsChanged.connect (mem_fun(*this, &Editor::region_selection_changed));
@@ -3717,7 +3719,7 @@ Editor::get_valid_views (TimeAxisView* track, RouteGroup* group)
 
 	v = new TrackViewList;
 
-	if (track == 0 && group == 0) {
+	if (all_group_is_active || (track == 0 && group == 0) ) {
 
 		/* all views */
 

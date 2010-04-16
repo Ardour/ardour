@@ -210,6 +210,9 @@ Editor::edit_group_row_change (const Gtk::TreeModel::Path& path,const Gtk::TreeM
 	}
 
 	if ((group = (*iter)[group_columns.routegroup]) == 0) {
+		string name = (*iter)[group_columns.text];
+		if (name == "-all-")
+			all_group_is_active = (*iter)[group_columns.is_active];
 		return;
 	}
 
@@ -281,6 +284,15 @@ Editor::edit_groups_changed ()
 
 	group_model->clear ();
 
+	{ 	 
+		TreeModel::Row row; 	 
+		row = *(group_model->append()); 	 
+		row[group_columns.is_active] = false; 	 
+		row[group_columns.is_visible] = true; 	 
+		row[group_columns.text] = (_("-all-")); 	 
+		row[group_columns.routegroup] = 0; 	 
+	}
+	
 	session->foreach_edit_group (mem_fun (*this, &Editor::add_edit_group));
 }
 

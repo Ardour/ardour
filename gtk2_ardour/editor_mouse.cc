@@ -437,7 +437,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		if (mouse_mode != MouseRange) {
 			set_selected_regionview_from_click (press, op, true);
 		} else if (event->type == GDK_BUTTON_PRESS) {
-			set_selected_track_as_side_effect ();
+			set_selected_track_as_side_effect (op);
 		}
 		break;
 		
@@ -446,7 +446,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		if (mouse_mode != MouseRange) {
 			set_selected_regionview_from_click (press, op, true);
 		} else if (event->type == GDK_BUTTON_PRESS) {
-			set_selected_track_as_side_effect ();
+			set_selected_track_as_side_effect (op);
 		}
 		break;
 
@@ -457,14 +457,14 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		if (mouse_mode != MouseRange) {
 			set_selected_regionview_from_click (press, op, true);
 		} else if (event->type == GDK_BUTTON_PRESS) {
-			set_selected_track_as_side_effect ();
+			set_selected_track_as_side_effect (op);
 		}
 		break;
 		
 	case GainAutomationControlPointItem:
 	case PanAutomationControlPointItem:
 	case RedirectAutomationControlPointItem:
-		set_selected_track_as_side_effect ();
+		set_selected_track_as_side_effect (op);
 		if (mouse_mode != MouseRange) {
 			set_selected_control_point_from_click (op, false);
 		}
@@ -473,14 +473,14 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	case StreamItem:
 		/* for context click or range selection, select track */
 		if (event->button.button == 3) {
-			set_selected_track_as_side_effect ();
+			set_selected_track_as_side_effect (op);
 		} else if (event->type == GDK_BUTTON_PRESS && mouse_mode == MouseRange) {
-			set_selected_track_as_side_effect ();
+			set_selected_track_as_side_effect (op);
 		}
 		break;
 		    
 	case AutomationTrackItem:
-		set_selected_track_as_side_effect (true);
+		set_selected_track_as_side_effect (op, true);
 		break;
 		
 	default:

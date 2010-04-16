@@ -170,20 +170,81 @@ Editor::select_all_tracks ()
 }
 
 void
-Editor::set_selected_track_as_side_effect (bool force)
+Editor::set_selected_track_as_side_effect (Selection::Operation op, bool force)
 {
 	if (!clicked_trackview) {
 		return;
 	}
 
-	if (!selection->tracks.empty()) {
-
-		if (!selection->selected (clicked_trackview)) {
-			selection->add (clicked_trackview);
-		}
-
-	} else if (force) {
+	 if (force) {
 		selection->set (clicked_trackview);
+		return;
+	}
+	
+	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(clicked_trackview);
+	if (!atv) {
+		return;
+	}
+	RouteGroup* group = atv->route()->edit_group();
+
+	switch (op) {
+	case Selection::Toggle: {
+		if (selection->selected (clicked_trackview)) {
+			if (all_group_is_active) {
+				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
+						selection->remove(*i);
+				}
+			} else if (group && group->is_active()) {
+				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
+					if ( (*i)->edit_group() == group)
+						selection->remove(*i);
+				}
+			} else
+				selection->remove (clicked_trackview);
+		} else {
+			if (all_group_is_active) {
+				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
+						selection->add(*i);
+				}
+			} else if (group && group->is_active())
+				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
+					if ( (*i)->edit_group() == group)
+						selection->add(*i);
+				}
+			else
+				selection->add (clicked_trackview);
+		}
+	}
+	break;
+	
+	case Selection::Add: {
+		selection->clear();
+		cerr << ("Editor::set_selected_track_as_side_effect  case  Selection::Add  not yet implemented\n");
+	}
+	break;
+		
+	case Selection::Set:{
+		selection->clear();
+		if (all_group_is_active) {
+			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
+					selection->add(*i);
+			}
+		} else if (group && group->is_active())
+			for (TrackViewList::iterator i  = track_views.begin(); i != track_views.end (); ++i) {
+				if ( (*i)->edit_group() == group)
+					selection->add(*i);
+			}
+		else
+			selection->set (clicked_trackview);
+	}
+	break;
+	
+	case Selection::Extend: {
+		selection->clear();
+		cerr << ("Editor::set_selected_track_as_side_effect  case  Selection::Add  not yet implemented\n");
+	}
+	break;
+	
 	}
 }
 
@@ -276,7 +337,14 @@ Editor::get_relevant_audio_tracks (set<AudioTimeAxisView*>& relevant_tracks)
 
 		RouteGroup* group = atv->route()->edit_group();
 
-		if (group && group->is_active()) {
+		if ( all_group_is_active ) {
+			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+				AudioTimeAxisView* tatv;
+				if ((tatv = dynamic_cast<AudioTimeAxisView*> (*i)) != 0) {
+					relevant_tracks.insert (tatv);
+				}
+			}
+		} else if (group && group->is_active()) {
 			
 			/* active group for this track, loop over all tracks and get every member of the group */
 
@@ -322,7 +390,7 @@ Editor::mapover_audio_tracks (slot<void,AudioTimeAxisView&,uint32_t> sl, TimeAxi
 	tracks.insert (audio_basis);
 
 	RouteGroup* group = audio_basis->route()->edit_group();
-	if (group && group->is_active()) {
+	if ( all_group_is_active || (group && group->is_active()) ) {
 
 		/* the basis is a member of an active edit group; find other members */
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {

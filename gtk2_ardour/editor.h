@@ -549,7 +549,7 @@ class Editor : public PublicEditor
 	
 	bool set_selected_control_point_from_click (Selection::Operation op = Selection::Set, bool no_remove=false);
 	void set_selected_track_from_click (bool press, Selection::Operation op = Selection::Set, bool no_remove=false);
-	void set_selected_track_as_side_effect (bool force = false);
+	void set_selected_track_as_side_effect (Selection::Operation op, bool force = false);
 	bool set_selected_regionview_from_click (bool press, Selection::Operation op = Selection::Set, bool no_track_remove=false);
 
 	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
@@ -1806,6 +1806,8 @@ public:
 	        Gtk::TreeModelColumn<std::string> text;
 	        Gtk::TreeModelColumn<ARDOUR::RouteGroup*>   routegroup;
 	};
+
+	bool all_group_is_active;
 
 	GroupListModelColumns group_columns;
 	Glib::RefPtr<Gtk::ListStore> group_model;
