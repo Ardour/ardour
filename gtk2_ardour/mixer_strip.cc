@@ -1401,17 +1401,21 @@ MixerStrip::build_route_ops_menu ()
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &RouteUI::remove_this_route)));
 }
 
-gint
+gboolean
 MixerStrip::name_button_button_press (GdkEventButton* ev)
 {
-	if (ev->button == 1 || ev->button == 3) {
+	if (ev->button == 3) {
 		list_route_operations ();
 
 		/* do not allow rename if the track is record-enabled */
 		rename_menu_item->set_sensitive (!_route->record_enabled());
 		route_ops_menu->popup (1, ev->time);
-	}
-	return FALSE;
+
+	} else if (ev->button == 1) {
+                revert_to_default_display ();
+        }
+
+	return false;
 }
 
 void
