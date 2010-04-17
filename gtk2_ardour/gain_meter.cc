@@ -566,7 +566,7 @@ gint
 GainMeterBase::end_gain_touch (GdkEventButton* ev)
 {
 	_io->end_gain_touch ();
-	return FALSE;
+	return false;
 }
 
 gint

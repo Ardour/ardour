@@ -595,7 +595,15 @@ GenericPluginUI::start_touch (GenericPluginUI::ControlUI* cui)
 void
 GenericPluginUI::stop_touch (GenericPluginUI::ControlUI* cui)
 {
-	insert->automation_list (cui->port_index).stop_touch ();
+        bool mark = false;
+        double when = 0;
+
+        if (insert->session().transport_rolling()) {
+                mark = true;
+                when = insert->session().transport_frame();
+        }
+
+	insert->automation_list (cui->port_index).stop_touch (mark, when);
 }
 
 void

@@ -268,6 +268,8 @@ class IO : public PBD::StatefulDestructible
 	}
 	virtual void automation_snapshot (nframes_t now, bool force);
 
+        Session& session() const { return _session; }
+
 	ARDOUR::Curve& gain_automation_curve () { return _gain_automation_curve; }
 
 	void start_gain_touch ();

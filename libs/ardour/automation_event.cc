@@ -60,6 +60,7 @@ AutomationList::AutomationList (double defval)
 	_state = Off;
 	_style = Absolute;
 	_touching = false;
+        _new_touch = false;
 	min_yval = FLT_MIN;
 	max_yval = FLT_MAX;
 	max_xval = 0; // means "no limit" 
@@ -84,6 +85,7 @@ AutomationList::AutomationList (const AutomationList& other)
 	default_value = other.default_value;
 	_state = other._state;
 	_touching = other._touching;
+        _new_touch = false;
 	_dirty = false;
 	rt_insertion_point = events.end();
 	lookup_cache.left = -1;
@@ -235,10 +237,41 @@ AutomationList::start_touch ()
 }
 
 void
-AutomationList::stop_touch ()
+AutomationList::stop_touch (bool mark, double when)
 {
 	_touching = false;
 	_new_touch = false;
+
+        if (mark) {
+                /* get the value of the next point after "when", and replicate
+                   it directly after when, unless of course its already there.
+                */
+
+                double val;
+                AutomationList::const_iterator i;
+
+                for (i = const_begin(); i != const_end(); ++i) {
+                        if ((*i)->when >= when) {
+                                break;
+                        }
+                }
+
+                if (i == const_end()) {
+                        val = default_value;
+                } else {
+                        val = (*i)->value;
+                }
+
+                /* if the existing point is at "when", add a new one right after it,
+                   otherwise add it directly where the touch ended.
+                */
+
+                if ((*i)->when == when) {
+                        when++;
+                }
+
+                add (when, val);
+        }
 }
 
 void
@@ -390,7 +423,7 @@ AutomationList::fast_simple_add (double when, double value)
 void
 AutomationList::add (double when, double value)
 {
-	/* this is for graphical editing */
+	/* this is for making changes from some kind of user interface or control surface (GUI, MIDI, OSC etc) */
 
 	{
 		Glib::Mutex::Lock lm (lock);

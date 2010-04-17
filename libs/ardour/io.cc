@@ -2668,7 +2668,15 @@ IO::start_gain_touch ()
 void
 IO::end_gain_touch ()
 {
-	_gain_automation_curve.stop_touch ();
+        bool mark = false;
+        double when = 0;
+
+        if (_session.transport_rolling()) {
+                mark = true;
+                when = _session.transport_frame();
+        }
+
+	_gain_automation_curve.stop_touch (mark, when);
 }
 
 void
@@ -2683,9 +2691,16 @@ void
 IO::end_pan_touch (uint32_t which)
 {
 	if (which < _panner->size()) {
-		(*_panner)[which]->automation().stop_touch();
+                bool mark = false;
+                double when = 0;
+                
+                if (_session.transport_rolling()) {
+                        mark = true;
+                        when = _session.transport_frame();
+                }
+                
+		(*_panner)[which]->automation().stop_touch(mark, when);
 	}
-
 }
 
 void
