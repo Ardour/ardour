@@ -2671,7 +2671,7 @@ IO::end_gain_touch ()
         bool mark = false;
         double when = 0;
 
-        if (_session.transport_rolling()) {
+        if (_session.transport_rolling() && _gain_automation_curve.automation_state() == Touch) {
                 mark = true;
                 when = _session.transport_frame();
         }
@@ -2694,7 +2694,7 @@ IO::end_pan_touch (uint32_t which)
                 bool mark = false;
                 double when = 0;
                 
-                if (_session.transport_rolling()) {
+                if (_session.transport_rolling() && (*_panner)[which]->automation().automation_state() == Touch) {
                         mark = true;
                         when = _session.transport_frame();
                 }
