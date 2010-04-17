@@ -146,6 +146,7 @@ CONFIG_VARIABLE (nframes_t, over_length_long, "over-length-long", 10)
 
 /* miscellany */
 	
+CONFIG_VARIABLE (bool, replicate_missing_region_channels, "replicate-missing-region-channels", false)
 CONFIG_VARIABLE (bool, hiding_groups_deactivates_groups, "hiding-groups-deactivates-groups", true)
 CONFIG_VARIABLE (bool, verify_remove_last_capture, "verify-remove-last-capture", true)
 CONFIG_VARIABLE (bool, no_new_session_dialog, "no-new-session-dialog", false)

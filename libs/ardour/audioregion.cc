@@ -537,6 +537,10 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 	nframes_t to_read;
 	bool raw = (rops == ReadOpsNone);
 
+        if (n_channels() == 0) {
+                return 0;
+        }
+
 	if (muted() && !raw) {
 		return 0; /* read nothing */
 	}
@@ -583,18 +587,23 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 
 	} else {
 		
-		/* track is N-channel, this region has less channels, so use a relevant channel
-		*/
+                if (Config->get_replicate_missing_region_channels()) {
+                        /* track is N-channel, this region has less channels, so use a relevant channel
+                         */
+                        
+                        uint32_t channel = n_channels() % chan_n;
+                        
+                        if (srcs[channel]->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
+                                return 0; /* "read nothing" */
+                        }
+                        
+                        /* adjust read data count appropriately since this was a duplicate read */
+                        srcs[channel]->dec_read_data_count (to_read);
 
-                uint32_t channel = n_channels() % chan_n;
-
-		if (srcs[channel]->read (mixdown_buffer, _start + internal_offset, to_read) != to_read) {
-			return 0; /* "read nothing" */
-		}
-                
-                /* adjust read data count appropriately since this was a duplicate read */
-                srcs[channel]->dec_read_data_count (to_read);
-
+                } else {
+                        /* region has no data for requested channel, so make it silent */
+                        memset (mixdown_buffer, 0, to_read * sizeof (Sample));
+                }
 	}
 
 	if (rops & ReadOpsFades) {
