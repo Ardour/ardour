@@ -244,6 +244,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	static Glib::RefPtr<Gtk::Action> cut_action;
 	static Glib::RefPtr<Gtk::Action> paste_action;
+	static Glib::RefPtr<Gtk::Action> rename_action;
 	void paste_processor_state (const XMLNodeList&, boost::shared_ptr<ARDOUR::Processor>);
 
 	void activate_processor (boost::shared_ptr<ARDOUR::Processor>);

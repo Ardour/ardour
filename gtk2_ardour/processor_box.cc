@@ -89,6 +89,7 @@ using namespace Gtkmm2ext;
 ProcessorBox* ProcessorBox::_current_processor_box = 0;
 RefPtr<Action> ProcessorBox::paste_action;
 RefPtr<Action> ProcessorBox::cut_action;
+RefPtr<Action> ProcessorBox::rename_action;
 Glib::RefPtr<Gdk::Pixbuf> SendProcessorEntry::_slider;
 
 ProcessorEntry::ProcessorEntry (boost::shared_ptr<Processor> p, Width w)
@@ -717,6 +718,11 @@ ProcessorBox::selection_changed ()
 {
 	bool sensitive = (processor_display.selection().empty()) ? false : true;
 	ActionManager::set_sensitive (ActionManager::plugin_selection_sensitive_actions, sensitive);
+
+	/* disallow rename for multiple selections and for plugin inserts */
+	rename_action->set_sensitive (
+		processor_display.selection().size() == 1 && boost::dynamic_pointer_cast<PluginInsert> (processor_display.selection().front()->processor()) == 0
+		);
 }
 
 void
@@ -1595,9 +1601,8 @@ ProcessorBox::register_actions ()
 
 	paste_action = ActionManager::register_action (popup_act_grp, X_("paste"), _("Paste"),
 			sigc::ptr_fun (ProcessorBox::rb_paste));
-	act = ActionManager::register_action (popup_act_grp, X_("rename"), _("Rename"),
+	rename_action = ActionManager::register_action (popup_act_grp, X_("rename"), _("Rename"),
 			sigc::ptr_fun (ProcessorBox::rb_rename));
-	ActionManager::plugin_selection_sensitive_actions.push_back(act);
 	ActionManager::register_action (popup_act_grp, X_("selectall"), _("Select All"),
 			sigc::ptr_fun (ProcessorBox::rb_select_all));
 	ActionManager::register_action (popup_act_grp, X_("deselectall"), _("Deselect All"),
