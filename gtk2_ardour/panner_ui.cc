@@ -125,7 +125,7 @@ PannerUI::PannerUI (Session* s)
 
 	pack_start (pan_vbox, true, true);
 
-	panner = 0;
+	twod_panner = 0;
 	big_window = 0;
 
 	set_width(Narrow);
@@ -144,8 +144,8 @@ PannerUI::set_panner (boost::shared_ptr<Panner> p)
 
 	_panner = p;
 
-	delete panner;
-	panner = 0;
+	delete twod_panner;
+	twod_panner = 0;
 
 	if (!_panner) {
 		return;
@@ -154,6 +154,10 @@ PannerUI::set_panner (boost::shared_ptr<Panner> p)
 	_panner->Changed.connect (connections, invalidator (*this), boost::bind (&PannerUI::panner_changed, this), gui_context());
 	_panner->LinkStateChanged.connect (connections, invalidator (*this), boost::bind (&PannerUI::update_pan_linkage, this), gui_context());
 	_panner->StateChanged.connect (connections, invalidator (*this), boost::bind (&PannerUI::update_pan_state, this), gui_context());
+
+	for (uint32_t i = 0; i < _panner->npanners(); ++i) {
+		connect_to_pan_control (i);
+	}
 
 	setup_pan ();
 
@@ -309,7 +313,7 @@ PannerUI::~PannerUI ()
 		delete (*i);
 	}
 
-	delete panner;
+	delete twod_panner;
 	delete big_window;
 	delete pan_menu;
 	delete pan_astyle_menu;
@@ -358,8 +362,8 @@ PannerUI::setup_pan ()
 			pan_adjustments.pop_back ();
 		}
 
-		delete panner;
-		panner = 0;
+		delete twod_panner;
+		twod_panner = 0;
 
 		/* stick something into the panning viewport so that it redraws */
 
@@ -379,8 +383,8 @@ PannerUI::setup_pan ()
 			pan_adjustments.pop_back ();
 		}
 
-		delete panner;
-		panner = 0;
+		delete twod_panner;
+		twod_panner = 0;
 
 		while ((asz = pan_adjustments.size()) < npans) {
 
@@ -409,8 +413,7 @@ PannerUI::setup_pan ()
 			/* now set adjustment with current value of panner, then connect the signals */
 			pan_adjustments.back()->set_value(rx);
 			pan_adjustments.back()->signal_value_changed().connect (sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_adjustment_changed), (uint32_t) asz));
-
-			_panner->pan_control( asz )->Changed.connect (connections, invalidator (*this), boost::bind (&PannerUI::pan_value_changed, this, (uint32_t) asz), gui_context());
+			connect_to_pan_control (asz);
 
 			bc->set_name ("PanSlider");
 			bc->set_shadow_type (Gtk::SHADOW_NONE);
@@ -448,26 +451,26 @@ PannerUI::setup_pan ()
 
 	} else {
 
-		if (!panner) {
-			panner = new Panner2d (_panner, 61);
-			panner->set_name ("MixerPanZone");
-			panner->show ();
+		if (!twod_panner) {
+			twod_panner = new Panner2d (_panner, 61);
+			twod_panner->set_name ("MixerPanZone");
+			twod_panner->show ();
 
-			panner->signal_button_press_event().connect
+			twod_panner->signal_button_press_event().connect
 				(sigc::bind (sigc::mem_fun(*this, &PannerUI::pan_button_event), (uint32_t) 0), false);
 		}
 
 		update_pan_sensitive ();
-		panner->reset (npans);
+		twod_panner->reset (npans);
  		if (big_window) {
  			big_window->reset (npans);
  		}
-		panner->set_size_request (-1, 61);
+		twod_panner->set_size_request (-1, 61);
 
 		/* and finally, add it to the panner frame */
 
 		panning_viewport.remove ();
-		panning_viewport.add (*panner);
+		panning_viewport.add (*twod_panner);
 		panning_viewport.show_all ();
 	}
 }
@@ -477,7 +480,7 @@ PannerUI::pan_button_event (GdkEventButton* ev, uint32_t which)
 {
 	switch (ev->button) {
 	case 1:
-		if (panner && ev->type == GDK_2BUTTON_PRESS) {
+		if (twod_panner && ev->type == GDK_2BUTTON_PRESS) {
 			if (!big_window) {
 				big_window = new Panner2dWindow (_panner, 400, _panner->npanners());
 			}
@@ -722,8 +725,8 @@ PannerUI::update_pan_sensitive ()
 		}
 		break;
 	default:
-		if (panner) {
-			panner->set_sensitive (sensitive);
+		if (twod_panner) {
+			twod_panner->set_sensitive (sensitive);
 		}
 		if (big_window) {
 			big_window->set_sensitive (sensitive);
@@ -900,4 +903,9 @@ PannerUI::set_mono (bool yn)
 	update_pan_sensitive ();
 }
 
-	
+
+void
+PannerUI::connect_to_pan_control (uint32_t i)
+{
+	_panner->pan_control(i)->Changed.connect (connections, invalidator (*this), boost::bind (&PannerUI::pan_value_changed, this, i), gui_context ());
+}

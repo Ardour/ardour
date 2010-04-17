@@ -91,7 +91,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	static const int pan_bar_height;
 
-	Panner2d*       panner; ///< 2D panner, or 0
+	Panner2d*       twod_panner; ///< 2D panner, or 0
 	Panner2dWindow* big_window;
 
 	Gtk::VBox           pan_bar_packer;
@@ -142,6 +142,8 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	gint end_pan_touch (GdkEventButton*);
 
 	bool pan_button_event (GdkEventButton*, uint32_t which);
+
+	void connect_to_pan_control (uint32_t);
 
 	Gtk::Menu* pan_menu;
 	Gtk::CheckMenuItem* bypass_menu_item;
