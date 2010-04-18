@@ -226,7 +226,7 @@ LocationEditRow::set_location (Location *loc)
 			item_table.attach (remove_button, 6, 7, 0, 1, FILL, FILL, 4, 0);
 		}
 
-		if (location->is_end() || location->is_start()) {
+		if (location->is_session_range()) {
 			remove_button.set_sensitive (false);
 		}
 
@@ -671,7 +671,7 @@ LocationUI::do_location_remove (ARDOUR::Location *loc)
 	   cannot be removed.
 	*/
 
-	if (loc->is_end()) {
+	if (loc->is_session_range()) {
 		return FALSE;
 	}
 

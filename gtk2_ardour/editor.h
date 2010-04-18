@@ -977,7 +977,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void queue_visual_change_y (double);
 	void ensure_visual_change_idle_handler ();
 
-	void end_location_changed (ARDOUR::Location*);
+	void session_range_location_changed (ARDOUR::Location*);
 
 	/* track views */
 	TrackViewList track_views;
@@ -1468,13 +1468,13 @@ public:
 	void transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void new_transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void build_range_marker_menu (bool loop_or_punch);
-	void build_marker_menu (bool start_or_end);
+	void build_marker_menu (bool);
 	void build_tm_marker_menu ();
 	void build_new_transport_marker_menu ();
 
 	Gtk::Menu* tm_marker_menu;
 	Gtk::Menu* marker_menu;
-	Gtk::Menu* start_end_marker_menu;
+	Gtk::Menu* session_range_marker_menu;
 	Gtk::Menu* range_marker_menu;
 	Gtk::Menu* transport_marker_menu;
 	Gtk::Menu* new_transport_marker_menu;

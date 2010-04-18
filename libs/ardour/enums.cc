@@ -400,9 +400,8 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Location, IsAutoLoop);
 	REGISTER_CLASS_ENUM (Location, IsHidden);
 	REGISTER_CLASS_ENUM (Location, IsCDMarker);
-	REGISTER_CLASS_ENUM (Location, IsEnd);
+	REGISTER_CLASS_ENUM (Location, IsSessionRange);
 	REGISTER_CLASS_ENUM (Location, IsRangeMarker);
-	REGISTER_CLASS_ENUM (Location, IsStart);
 	REGISTER_BITS (_Location_Flags);
 
 	REGISTER_CLASS_ENUM (Panner, SameDirection);

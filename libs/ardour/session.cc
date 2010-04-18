@@ -712,9 +712,9 @@ Session::hookup_io ()
 void
 Session::playlist_length_changed ()
 {
-	/* we can't just increase end_location->end() if pl->get_maximum_extent()
+	/* we can't just increase session_range_location->end() if pl->get_maximum_extent()
 	   if larger. if the playlist used to be the longest playlist,
-	   and its now shorter, we have to decrease end_location->end(). hence,
+	   and its now shorter, we have to decrease session_range_location->end(). hence,
 	   we have to iterate over all diskstreams and check the
 	   playlists currently in use.
 	*/
@@ -954,11 +954,8 @@ Session::handle_locations_changed (Locations::LocationList& locations)
 			set_loop = true;
 		}
 
-		if (location->is_start()) {
-			start_location = location;
-		}
-		if (location->is_end()) {
-			end_location = location;
+		if (location->is_session_range()) {
+			_session_range_location = location;
 		}
 	}
 
@@ -2376,8 +2373,8 @@ Session::find_current_end ()
 
 	nframes_t max = get_maximum_extent ();
 
-	if (max > end_location->end()) {
-		end_location->set_end (max);
+	if (max > _session_range_location->end()) {
+		_session_range_location->set_end (max);
 		set_dirty();
 		DurationChanged(); /* EMIT SIGNAL */
 	}

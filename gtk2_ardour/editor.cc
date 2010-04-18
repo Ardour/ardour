@@ -344,7 +344,7 @@ Editor::Editor ()
 	editor_ruler_menu = 0;
 	no_ruler_shown_update = false;
 	marker_menu = 0;
-	start_end_marker_menu = 0;
+	session_range_marker_menu = 0;
 	range_marker_menu = 0;
 	marker_menu_item = 0;
 	tm_marker_menu = 0;
@@ -1105,7 +1105,7 @@ Editor::set_session (Session *t)
 	_session->locations()->removed.connect (_session_connections, invalidator (*this), ui_bind (&Editor::location_gone, this, _1), gui_context());
 	_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->locations()->StateChanged.connect (_session_connections, invalidator (*this), ui_bind (&Editor::refresh_location_display_s, this, _1), gui_context());
-	_session->locations()->end_location()->changed.connect (_session_connections, invalidator (*this), ui_bind (&Editor::end_location_changed, this, _1), gui_context());
+	_session->locations()->session_range_location()->changed.connect (_session_connections, invalidator (*this), ui_bind (&Editor::session_range_location_changed, this, _1), gui_context());
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
 
 	if (Profile->get_sae()) {
@@ -3886,11 +3886,11 @@ Editor::get_nudge_distance (nframes64_t pos, nframes64_t& next)
 }
 
 void
-Editor::end_location_changed (Location* location)
+Editor::session_range_location_changed (Location* location)
 {
-	ENSURE_GUI_THREAD (*this, &Editor::end_location_changed, location)
+	ENSURE_GUI_THREAD (*this, &Editor::session_range_location_changed, location)
 	//reset_scrolling_region ();
-	nframes64_t session_span = location->start() + (nframes64_t) floorf (current_page_frames() * 0.10f);
+	nframes64_t const session_span = location->end() + (nframes64_t) floorf (current_page_frames() * 0.10f);
 	horizontal_adjustment.set_upper (session_span / frames_per_unit);
 }
 

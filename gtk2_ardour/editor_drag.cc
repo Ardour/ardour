@@ -2491,10 +2491,10 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		break;
 	}
 
-	/* set up copies for us to manipulate during the drag */
+	/* Set up copies for us to manipulate during the drag */
 
 	for (MarkerSelection::iterator i = _editor->selection->markers.begin(); i != _editor->selection->markers.end(); ++i) {
-		Location *l = _editor->find_location_from_marker (*i, is_start);
+		Location* l = _editor->find_location_from_marker (*i, is_start);
 		_copied_locations.push_back (new Location (*l));
 	}
 }
@@ -2506,7 +2506,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 	bool is_start;
 	bool move_both = false;
 	Marker* marker;
-	Location  *real_location;
+	Location *real_location;
 	Location *copy_location = 0;
 
 	nframes64_t const newframe = adjusted_current_frame (event);
@@ -2592,7 +2592,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 
 		if (copy_location->is_mark()) {
 
-			/* just move it */
+			/* now move it */
 
 			copy_location->set_start (copy_location->start() + f_delta);
 

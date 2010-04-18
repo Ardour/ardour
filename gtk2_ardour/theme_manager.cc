@@ -48,7 +48,7 @@ sigc::signal<void> ColorsChanged;
 sigc::signal<void,uint32_t> ColorChanged;
 
 ThemeManager::ThemeManager()
-	: ArdourDialog (_("ThemeManager")),
+	: ArdourDialog (_("Theme Manager")),
 	  dark_button (_("Dark Theme")),
 	  light_button (_("Light Theme")),
 	  reset_button (_("Restore Defaults"))

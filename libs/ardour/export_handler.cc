@@ -290,7 +290,7 @@ ExportHandler::export_cd_marker_file (TimespanPtr timespan, FormatPtr file_forma
 	Locations::LocationList temp;
 
 	for (i = locations.begin(); i != locations.end(); ++i) {
-		if ((*i)->start() >= timespan->get_start() && (*i)->end() <= timespan->get_end() && (*i)->is_cd_marker() && !(*i)->is_end()) {
+		if ((*i)->start() >= timespan->get_start() && (*i)->end() <= timespan->get_end() && (*i)->is_cd_marker() && !(*i)->is_session_range()) {
 			temp.push_back (*i);
 		}
 	}

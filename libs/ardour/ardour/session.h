@@ -299,10 +299,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	bool get_play_loop () const { return play_loop; }
 
 	nframes_t  last_transport_start() const { return _last_roll_location; }
-	void goto_end ()   { request_locate (end_location->start(), false);}
-	void goto_start () { request_locate (start_location->start(), false); }
-	void set_session_start (nframes_t start) { start_location->set_start(start); }
-	void set_session_end (nframes_t end) { end_location->set_start(end); config.set_end_marker_is_free (false); }
+	void goto_end ()   { request_locate (_session_range_location->end(), false);}
+	void goto_start () { request_locate (_session_range_location->start(), false); }
+	void set_session_start (nframes_t start) { _session_range_location->set_start(start); }
+	void set_session_end (nframes_t end) { _session_range_location->set_end(end); config.set_end_marker_is_free (false); }
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
 	void request_transport_speed (double speed);
@@ -316,8 +316,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int wipe ();
 
 	nframes_t get_maximum_extent () const;
-	nframes_t current_end_frame() const { return end_location->start(); }
-	nframes_t current_start_frame() const { return start_location->start(); }
+	nframes_t current_end_frame() const { return _session_range_location->end(); }
+	nframes_t current_start_frame() const { return _session_range_location->start(); }
 	/// "actual" sample rate of session, set by current audioengine rate, pullup/down etc.
 	nframes_t frame_rate() const   { return _current_frame_rate; }
 	/// "native" sample rate of session, regardless of current audioengine rate, pullup/down etc
@@ -845,8 +845,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int                      transport_sub_state;
 	mutable gint            _record_status;
 	volatile nframes64_t    _transport_frame;
-	Location*                end_location;
-	Location*                start_location;
+	Location*               _session_range_location;
 	Slave*                  _slave;
 	bool                    _silent;
 

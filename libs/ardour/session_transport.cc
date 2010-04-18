@@ -400,7 +400,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	if (did_record) {
 		begin_reversible_command ("capture");
 
-		Location* loc = _locations.end_location();
+		Location* loc = _locations.session_range_location();
 		bool change_end = false;
 
 		if (_transport_frame < loc->end()) {

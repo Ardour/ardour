@@ -46,9 +46,8 @@ class Location : public PBD::StatefulDestructible
 		IsAutoLoop = 0x4,
 		IsHidden = 0x8,
 		IsCDMarker = 0x10,
-		IsEnd = 0x20,
-		IsRangeMarker = 0x40,
-		IsStart = 0x80
+		IsRangeMarker = 0x20,
+		IsSessionRange = 0x40
 	};
 
 	Location (nframes64_t sample_start,
@@ -94,8 +93,7 @@ class Location : public PBD::StatefulDestructible
 	void set_auto_loop (bool yn, void *src);
 	void set_hidden (bool yn, void *src);
 	void set_cd (bool yn, void *src);
-	void set_is_end (bool yn, void* src);
-	void set_is_start (bool yn, void* src);
+	void set_is_session_range (bool yn, void* src);
 	void set_is_range_marker (bool yn, void* src);
 
 	bool is_auto_punch () const { return _flags & IsAutoPunch; }
@@ -103,8 +101,7 @@ class Location : public PBD::StatefulDestructible
 	bool is_mark () const { return _flags & IsMark; }
 	bool is_hidden () const { return _flags & IsHidden; }
 	bool is_cd_marker () const { return _flags & IsCDMarker; }
-	bool is_end() const { return _flags & IsEnd; }
-	bool is_start() const { return _flags & IsStart; }
+	bool is_session_range () const { return _flags & IsSessionRange; }
 	bool is_range_marker() const { return _flags & IsRangeMarker; }
 	bool matches (Flags f) const { return _flags & f; }
 
@@ -159,8 +156,7 @@ class Locations : public PBD::StatefulDestructible
 
 	Location* auto_loop_location () const;
 	Location* auto_punch_location () const;
-	Location* end_location() const;
-	Location* start_location() const;
+	Location* session_range_location() const;
 
 	int next_available_name(std::string& result,std::string base);
 	uint32_t num_range_markers() const;

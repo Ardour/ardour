@@ -49,11 +49,6 @@ Location::Location (const Location& other)
 	  _end (other._end),
 	  _flags (other._flags)
 {
-	/* start and end flags can never be copied, because there can only ever be one of each */
-
-	_flags = Flags (_flags & ~IsStart);
-	_flags = Flags (_flags & ~IsEnd);
-
 	/* copy is not locked even if original was */
 
 	_locked = false;
@@ -103,17 +98,14 @@ Location::set_start (nframes64_t s)
 			start_changed(this); /* EMIT SIGNAL */
 			end_changed(this); /* EMIT SIGNAL */
 
-			if ( is_start() ) {
-
-				Session::StartTimeChanged (); /* EMIT SIGNAL */
-				AudioFileSource::set_header_position_offset ( s );
-			}
-
-			if ( is_end() ) {
-				Session::EndTimeChanged (); /* EMIT SIGNAL */
-			}
 		}
 		return 0;
+	}
+	
+	if (is_session_range()) {
+		start_changed (this); /* EMIT SIGNAL */
+		Session::StartTimeChanged (); /* EMIT SIGNAL */
+		AudioFileSource::set_header_position_offset (s);
 	}
 
 	if (((is_auto_punch() || is_auto_loop()) && s >= _end) || s > _end) {
@@ -141,17 +133,14 @@ Location::set_end (nframes64_t e)
 			_end = e;
 			start_changed(this); /* EMIT SIGNAL */
 			end_changed(this); /* EMIT SIGNAL */
-
-			if ( is_start() ) {
-				Session::StartTimeChanged (); /* EMIT SIGNAL */
-			}
-
-			if ( is_end() ) {
-				Session::EndTimeChanged (); /* EMIT SIGNAL */
-			}
-
 		}
 		return 0;
+	}
+
+	if (is_session_range()) {
+		_end = e;
+		end_changed (this); /* EMIT SIGNAL */
+		Session::EndTimeChanged (); /* EMIT SIGNAL */
 	}
 
 	if (((is_auto_punch() || is_auto_loop()) && e <= _start) || e < _start) {
@@ -232,17 +221,9 @@ Location::set_cd (bool yn, void *src)
 }
 
 void
-Location::set_is_end (bool yn, void *src)
+Location::set_is_session_range (bool yn, void *src)
 {
-	if (set_flag_internal (yn, IsEnd)) {
-		 FlagsChanged (this, src); /* EMIT SIGNAL */
-	}
-}
-
-void
-Location::set_is_start (bool yn, void *src)
-{
-	if (set_flag_internal (yn, IsStart)) {
+	if (set_flag_internal (yn, IsSessionRange)) {
 		 FlagsChanged (this, src); /* EMIT SIGNAL */
 	}
 }
@@ -531,7 +512,7 @@ Locations::clear ()
 			LocationList::iterator tmp = i;
 			++tmp;
 
-			if (!(*i)->is_end() && !(*i)->is_start()) {
+			if (!(*i)->is_session_range()) {
 				locations.erase (i);
 			}
 
@@ -556,7 +537,7 @@ Locations::clear_markers ()
 			tmp = i;
 			++tmp;
 
-			if ((*i)->is_mark() && !(*i)->is_end() && !(*i)->is_start()) {
+			if ((*i)->is_mark() && !(*i)->is_session_range()) {
 				locations.erase (i);
 			}
 
@@ -621,7 +602,7 @@ Locations::remove (Location *loc)
 	bool was_current = false;
 	LocationList::iterator i;
 
-	if (loc->is_end() || loc->is_start()) {
+	if (loc->is_session_range()) {
 		return;
 	}
 
@@ -848,21 +829,10 @@ Locations::marks_either_side (nframes64_t const frame, nframes64_t& before, nfra
 }
 
 Location*
-Locations::end_location () const
+Locations::session_range_location () const
 {
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
-		if ((*i)->is_end()) {
-			return const_cast<Location*> (*i);
-		}
-	}
-	return 0;
-}
-
-Location*
-Locations::start_location () const
-{
-	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
-		if ((*i)->is_start()) {
+		if ((*i)->is_session_range()) {
 			return const_cast<Location*> (*i);
 		}
 	}

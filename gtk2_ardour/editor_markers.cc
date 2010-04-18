@@ -101,6 +101,11 @@ Editor::add_new_location (Location *location)
 		lam->end   = new Marker (*this, *transport_marker_group, color,
 					 location->name(), Marker::PunchOut, location->end());
 
+	} else if (location->is_session_range()) {
+		// session range
+		lam->start = new Marker (*this, *marker_group, color, _("start"), Marker::Start, location->start());
+		lam->end = new Marker (*this, *marker_group, color, _("end"), Marker::End, location->end());
+		
 	} else {
 		// range marker
 		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
@@ -110,7 +115,6 @@ Editor::add_new_location (Location *location)
 						 location->name(), Marker::End, location->end());
 		}
 		else {
-
 			lam->start = new Marker (*this, *range_marker_group, color,
 						 location->name(), Marker::Start, location->start());
 			lam->end   = new Marker (*this, *range_marker_group, color,
@@ -155,7 +159,7 @@ Editor::location_changed (Location *location)
 		return;
 	}
 
-	lam->set_name (location->name());
+	lam->set_name (location->name ());
 	lam->set_position (location->start(), location->end());
 
 	if (location->is_auto_loop()) {
@@ -365,8 +369,15 @@ Editor::LocationMarkers::show()
 void
 Editor::LocationMarkers::set_name (const string& str)
 {
-	start->set_name (str);
-	if (end) { end->set_name (str); }
+	/* XXX: hack: don't change names of session start/end markers */
+	
+	if (start->type() != Marker::Start) {
+		start->set_name (str);
+	}
+	
+	if (end && end->type() != Marker::End) {
+		end->set_name (str);
+	}
 }
 
 void
@@ -510,12 +521,12 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 	} else {
 
 		if (loc->is_mark()) {
-			bool start_or_end = loc->is_start() || loc->is_end();
 			Menu *markerMenu;
-			if (start_or_end) {
-				if (start_end_marker_menu == 0)
+			if (loc->is_session_range ()) {
+				if (session_range_marker_menu == 0) {
 			   		build_marker_menu (true);
-				markerMenu = start_end_marker_menu;
+				}
+				markerMenu = session_range_marker_menu;
 			} else {
 				if (marker_menu == 0)
 			   		build_marker_menu (false);
@@ -573,13 +584,13 @@ Editor::transport_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item*)
 }
 
 void
-Editor::build_marker_menu (bool start_or_end)
+Editor::build_marker_menu (bool session_range)
 {
 	using namespace Menu_Helpers;
 
 	Menu *markerMenu = new Menu;
-	if (start_or_end) {
-		start_end_marker_menu = markerMenu;
+	if (session_range) {
+		session_range_marker_menu = markerMenu;
 	} else {
 		marker_menu = markerMenu;
 	}
@@ -595,7 +606,9 @@ Editor::build_marker_menu (bool start_or_end)
 	items.push_back (MenuElem (_("Create range to next marker"), sigc::mem_fun(*this, &Editor::marker_menu_range_to_next)));
 
 	items.push_back (MenuElem (_("Hide"), sigc::mem_fun(*this, &Editor::marker_menu_hide)));
-	if (start_or_end) return;
+	if (session_range) {
+		return;
+	}
 	items.push_back (MenuElem (_("Rename"), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
 	items.push_back (MenuElem (_("Lock"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_menu_lock), true)));
 	items.push_back (MenuElem (_("Unlock"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_menu_lock), false)));
@@ -1203,7 +1216,7 @@ Editor::goto_nth_marker (int n)
 	ordered.sort (cmp);
 
 	for (Locations::LocationList::iterator i = ordered.begin(); n >= 0 && i != ordered.end(); ++i) {
-		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_start()) {
+		if ((*i)->is_mark() && !(*i)->is_hidden() && !(*i)->is_session_range()) {
 			if (n == 0) {
 				_session->request_locate ((*i)->start(), _session->transport_rolling());
 				break;

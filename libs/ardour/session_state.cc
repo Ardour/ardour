@@ -178,8 +178,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	transport_sub_state = 0;
 	_transport_frame = 0;
 	_requested_return_frame = -1;
-	end_location = new Location (0, 0, _("end"), Location::Flags ((Location::IsMark|Location::IsEnd)));
-	start_location = new Location (0, 0, _("start"), Location::Flags ((Location::IsMark|Location::IsStart)));
+	_session_range_location = new Location (0, 0, _("session"), Location::Flags (Location::IsSessionRange));
 	g_atomic_int_set (&_record_status, Disabled);
 	loop_changing = false;
 	play_loop = false;
@@ -538,11 +537,8 @@ Session::create (const string& mix_template, nframes_t initial_length, BusProfil
 
 	/* set initial start + end point */
 
-	start_location->set_end (0);
-	_locations.add (start_location);
-
-	end_location->set_end (initial_length);
-	_locations.add (end_location);
+	_session_range_location->set (0, initial_length);
+	_locations.add (_session_range_location);
 
 	_state_of_the_state = Clean;
         
@@ -1094,12 +1090,9 @@ Session::state(bool full_state)
 		// for a template, just create a new Locations, populate it
 		// with the default start and end, and get the state for that.
 		Locations loc;
-		Location* start = new Location(0, 0, _("start"), Location::Flags ((Location::IsMark|Location::IsStart)));
-		Location* end = new Location(0, 0, _("end"), Location::Flags ((Location::IsMark|Location::IsEnd)));
-		start->set_end(0);
-		loc.add (start);
-		end->set_end(compute_initial_length());
-		loc.add (end);
+		Location* range = new Location (0, 0, _("session"), Location::Flags (Location::IsSessionRange));
+		range->set (0, compute_initial_length ());
+		loc.add (range);
 		node->add_child_nocopy (loc.get_state());
 	}
 
@@ -1290,21 +1283,14 @@ Session::set_state (const XMLNode& node, int version)
 		set_auto_punch_location (location);
 	}
 
-	if ((location = _locations.end_location()) == 0) {
-		_locations.add (end_location);
+	if ((location = _locations.session_range_location()) == 0) {
+		_locations.add (_session_range_location);
 	} else {
-		delete end_location;
-		end_location = location;
+		delete _session_range_location;
+		_session_range_location = location;
 	}
 
-	if ((location = _locations.start_location()) == 0) {
-		_locations.add (start_location);
-	} else {
-		delete start_location;
-		start_location = location;
-	}
-
-	AudioFileSource::set_header_position_offset (start_location->start());
+	AudioFileSource::set_header_position_offset (_session_range_location->start());
 
 	if ((child = find_named_node (node, "Sources")) == 0) {
 		error << _("Session: XML state has no sources section") << endmsg;
