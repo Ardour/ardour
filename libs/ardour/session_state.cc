@@ -178,7 +178,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	transport_sub_state = 0;
 	_transport_frame = 0;
 	_requested_return_frame = -1;
-	_session_range_location = new Location (0, 0, _("session"), Location::Flags (Location::IsSessionRange));
+	_session_range_location = new Location (0, 0, _("session"), Location::IsSessionRange);
 	g_atomic_int_set (&_record_status, Disabled);
 	loop_changing = false;
 	play_loop = false;
@@ -1090,7 +1090,7 @@ Session::state(bool full_state)
 		// for a template, just create a new Locations, populate it
 		// with the default start and end, and get the state for that.
 		Locations loc;
-		Location* range = new Location (0, 0, _("session"), Location::Flags (Location::IsSessionRange));
+		Location* range = new Location (0, 0, _("session"), Location::IsSessionRange);
 		range->set (0, compute_initial_length ());
 		loc.add (range);
 		node->add_child_nocopy (loc.get_state());
