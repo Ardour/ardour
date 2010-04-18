@@ -3289,8 +3289,8 @@ Editor::duplicate_dialog (bool with_dialog)
 
 	if (with_dialog) {
 
-		ArdourDialog win ("Duplicate");
-		Label  label (_("Number of Duplications:"));
+		ArdourDialog win (_("Duplicate"));
+		Label label (_("Number of Duplications:"));
 		Adjustment adjustment (1.0, 1.0, 1000000.0, 1.0, 5.0);
 		SpinButton spinner (adjustment, 0.0, 1);
 		HBox hbox;
