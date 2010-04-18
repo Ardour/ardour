@@ -555,6 +555,7 @@
 		   </menu>
 	       <menu action='MiscOptions'>
                	     <menuitem action='toggle-seamless-loop'/>
+               	     <menuitem action='toggle-replicate-missing-region-channels'/>
                	     <menuitem action='UseOSC'/>
                	     <menuitem action='NewPluginsActive'/>
                	     <menuitem action='LatchedRecordEnable'/>

@@ -365,6 +365,8 @@ class Editor : public PublicEditor
 	
 	void toggle_link_region_and_track_selection ();
 
+	void toggle_replicate_missing_region_channels ();
+
 	/* redirect shared ops menu. caller must free returned menu */
 
 	Gtk::Menu* redirect_menu ();

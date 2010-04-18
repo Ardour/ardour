@@ -118,6 +118,8 @@ Editor::register_actions ()
 	act = ActionManager::register_toggle_action (editor_actions, "toggle-auto-xfades", _("Created Automatically"), mem_fun(*this, &Editor::toggle_auto_xfade));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_toggle_action (editor_actions, "toggle-replicate-missing-region-channels", _("Replicate Missing Channels"), mem_fun(*this, &Editor::toggle_replicate_missing_region_channels));
+	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (editor_actions, "toggle-region-fades", _("Use Region Fades"), mem_fun(*this, &Editor::toggle_region_fades));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (editor_actions, "toggle-region-fades-visible", _("Show Region Fades"), mem_fun(*this, &Editor::toggle_region_fades_visible));
@@ -1683,6 +1685,12 @@ Editor::subframes_per_frame_chosen (uint32_t sfpf)
 	} else  {
 		error << string_compose (_("programming error: %1"), "Editor::subframes_per_frame_chosen could not find action to match value.") << endmsg;
 	}
+}
+
+void
+Editor::toggle_replicate_missing_region_channels ()
+{
+	ActionManager::toggle_config_state ("Editor", "toggle-replicate-missing-region-channels", &Configuration::set_replicate_missing_region_channels, &Configuration::get_replicate_missing_region_channels);
 }
 
 void
