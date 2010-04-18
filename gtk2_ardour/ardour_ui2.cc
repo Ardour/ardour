@@ -880,7 +880,7 @@ ARDOUR_UI::update_speed_display ()
 
 		if (x != 0) {
 			if (Config->get_shuttle_units() == Percentage) {
-				snprintf (buf, sizeof (buf), "%.2f", x);
+				snprintf (buf, sizeof (buf), "%d", (int) round (x * 100));
 			} else {
 
 				if (x < 0) {
