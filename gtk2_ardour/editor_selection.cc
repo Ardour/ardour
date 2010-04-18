@@ -979,12 +979,9 @@ Editor::invert_selection ()
  *  @param bottom Bottom (higher) y limit in trackview coordinates.
  */
 bool
-Editor::select_all_within (
-	nframes64_t start, nframes64_t end, double top, double bot, const TrackViewList& tracklist, Selection::Operation op
-	)
+Editor::select_all_within (nframes64_t start, nframes64_t end, double top, double bot, const TrackViewList& tracklist, Selection::Operation op)
 {
 	list<Selectable*> found;
-	TrackViewList tracks;
 
 	for (TrackViewList::const_iterator iter = tracklist.begin(); iter != tracklist.end(); ++iter) {
 		
@@ -992,35 +989,11 @@ Editor::select_all_within (
 			continue;
 		}
 
-		list<Selectable*>::size_type const n = found.size ();
-
 		(*iter)->get_selectables (start, end, top, bot, found);
-
-		if (n != found.size()) {
-			tracks.push_back (*iter);
-		}
 	}
 	
 	if (found.empty()) {
 		return false;
-	}
-
-	if (!tracks.empty()) {
-
-		switch (op) {
-		case Selection::Add:
-			selection->add (tracks);
-			break;
-		case Selection::Toggle:
-			selection->toggle (tracks);
-			break;
-		case Selection::Set:
-			selection->set (tracks);
-			break;
-		case Selection::Extend:
-			/* not defined yet */
-			break;
-		}
 	}
 
 	begin_reversible_command (_("select all within"));
