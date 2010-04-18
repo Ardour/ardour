@@ -655,7 +655,7 @@ Locations::get_state ()
 }
 
 int
-Locations::set_state (const XMLNode& node, int /*version*/)
+Locations::set_state (const XMLNode& node, int version)
 {
 	if (node.name() != "Locations") {
 		error << _("incorrect XML mode passed to Locations::set_state") << endmsg;
@@ -667,6 +667,12 @@ Locations::set_state (const XMLNode& node, int /*version*/)
 	locations.clear ();
 	current_location = 0;
 
+	Location* session_range_location = 0;
+	if (version < 3000) {
+		session_range_location = new Location (0, 0, _("session"), Location::IsSessionRange);
+		locations.push_back (session_range_location);
+	}
+
 	{
 		Glib::Mutex::Lock lm (lock);
 
@@ -676,7 +682,39 @@ Locations::set_state (const XMLNode& node, int /*version*/)
 			try {
 
 				Location *loc = new Location (**niter);
-				locations.push_back (loc);
+
+				bool add = true;
+
+				if (version < 3000) {
+					/* look for old-style IsStart / IsEnd properties in this location;
+					   if they are present, update the session_range_location accordingly
+					*/
+					XMLProperty const * prop = (*niter)->property ("flags");
+					if (prop) {
+						string v = prop->value ();
+						while (1) {
+							string::size_type const c = v.find_first_of (',');
+							string const s = v.substr (0, c);
+							if (s == X_("IsStart")) {
+								session_range_location->set_start (loc->start());
+								add = false;
+							} else if (s == X_("IsEnd")) {
+								session_range_location->set_end (loc->start());
+								add = false;
+							}
+
+							if (c == string::npos) {
+								break;
+							}
+
+							v = v.substr (c + 1);
+						}
+					}
+				}
+
+				if (add) {
+					locations.push_back (loc);
+				}
 			}
 
 			catch (failed_constructor& err) {
@@ -685,7 +723,6 @@ Locations::set_state (const XMLNode& node, int /*version*/)
 		}
 
 		if (locations.size()) {
-
 			current_location = locations.front();
 		} else {
 			current_location = 0;
