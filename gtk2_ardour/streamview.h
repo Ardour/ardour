@@ -155,7 +155,6 @@ protected:
 	std::list< std::pair<boost::shared_ptr<ARDOUR::Region>,RegionView* > > rec_regions;
 	bool                   rec_updating;
 	bool                   rec_active;
-	bool                   use_rec_regions;
 
 	Gdk::Color region_color;      ///< Contained region color
 	uint32_t   stream_base_color; ///< Background color

@@ -187,16 +187,6 @@ AudioTimeAxisView::append_extra_display_menu_items ()
 }
 
 void
-AudioTimeAxisView::set_show_waveforms_recording (bool yn)
-{
-	AudioStreamView* asv = audio_view();
-
-	if (asv) {
-		asv->set_show_waveforms_recording (yn);
-	}
-}
-
-void
 AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool show)
 {
 	if (param.type() == GainAutomation) {

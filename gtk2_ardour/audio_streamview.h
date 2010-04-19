@@ -63,7 +63,6 @@ class AudioStreamView : public StreamView
 	gdouble get_amplitude_above_axis () { return _amplitude_above_axis; }
 
 	void set_show_waveforms (bool yn);
-	void set_show_waveforms_recording (bool yn) { use_rec_regions = yn; }
 
 	void foreach_crossfadeview (void (CrossfadeView::*pmf)(void));
 

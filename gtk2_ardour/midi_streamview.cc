@@ -70,8 +70,6 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 		stream_base_color = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();
 	}
 
-	use_rec_regions = tv.editor().show_waveforms_recording ();
-
 	/* use a group dedicated to MIDI underlays. Audio underlays are not in this group. */
 	midi_underlay_group = new ArdourCanvas::Group (*canvas_group);
 	midi_underlay_group->lower_to_bottom();
@@ -389,9 +387,9 @@ MidiStreamView::setup_rec_box ()
 		    _trackview.session()->record_status() == Session::Recording &&
 		    _trackview.get_diskstream()->record_enabled()) {
 
-			if (use_rec_regions && rec_regions.size() == rec_rects.size()) {
+			if (Config->get_show_waveforms_while_recording() && rec_regions.size() == rec_rects.size()) {
 
-				/* add a new region, but don't bother if they set use_rec_regions mid-record */
+				/* add a new region, but don't bother if they set show-waveforms-while-recording mid-record */
 
 				MidiRegion::SourceList sources;
 
@@ -526,7 +524,7 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 {
 	ENSURE_GUI_THREAD (*this, &MidiStreamView::update_rec_regions, data, start, dur)
 
-	if (use_rec_regions) {
+	if (Config->get_show_waveforms_while_recording ()) {
 
 		uint32_t n = 0;
 		bool     update_range = false;

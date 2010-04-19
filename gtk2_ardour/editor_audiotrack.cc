@@ -35,21 +35,6 @@ using namespace ARDOUR;
 using namespace PBD;
 
 void
-Editor::set_show_waveforms_recording (bool yn)
-{
-	AudioTimeAxisView* atv;
-
-	if (_show_waveforms_recording != yn) {
-		_show_waveforms_recording = yn;
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			if ((atv = dynamic_cast<AudioTimeAxisView*>(*i)) != 0) {
-				atv->set_show_waveforms_recording (yn);
-			}
-		}
-	}
-}
-
-void
 Editor::start_updating_meters ()
 {
 	RouteTimeAxisView* rtv;

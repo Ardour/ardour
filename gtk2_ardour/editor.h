@@ -223,11 +223,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	std::vector<std::string> rb_opt_strings;
 #endif
 
-	/* option editor-access */
-
-	void set_show_waveforms_recording (bool yn);
-	bool show_waveforms_recording() const { return _show_waveforms_recording; }
-
 	/* things that need to be public to be used in the main menubar */
 
 	void new_region_from_selection ();
@@ -367,7 +362,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool dragging_playhead () const { return _dragging_playhead; }
 
 	void toggle_zero_line_visibility ();
-	void toggle_waveforms_while_recording ();
 	void set_summary ();
 	void set_group_tabs ();
 	void toggle_measure_visibility ();
@@ -1414,8 +1408,6 @@ public:
 	bool _follow_playhead;
         /// true if we scroll the tracks rather than the playhead
         bool _stationary_playhead;
-	/// true if waveforms should be shown while recording audio tracks, otherwise false
-	bool _show_waveforms_recording;
 
 	ARDOUR::TempoMap::BBTPointList *current_bbt_points;
 

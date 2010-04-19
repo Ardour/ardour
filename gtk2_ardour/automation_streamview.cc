@@ -60,8 +60,6 @@ AutomationStreamView::AutomationStreamView (AutomationTimeAxisView& tv)
 {
 	//canvas_rect->property_fill_color_rgba() = stream_base_color;
 	canvas_rect->property_outline_color_rgba() = RGBA_BLACK;
-
-	use_rec_regions = tv.editor().show_waveforms_recording ();
 }
 
 AutomationStreamView::~AutomationStreamView ()
@@ -179,21 +177,6 @@ AutomationStreamView::redisplay_diskstream ()
 void
 AutomationStreamView::setup_rec_box ()
 {
-}
-
-void
-AutomationStreamView::update_rec_regions (nframes_t /*start*/, nframes_t /*dur*/)
-{
-}
-
-void
-AutomationStreamView::rec_data_range_ready (jack_nframes_t start, jack_nframes_t dur)
-{
-	// this is called from the butler thread for now
-
-	ENSURE_GUI_THREAD (*this, &AutomationStreamView::rec_data_range_ready, start, dur)
-
-	this->update_rec_regions (start, dur);
 }
 
 void

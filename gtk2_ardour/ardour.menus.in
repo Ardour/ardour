@@ -397,7 +397,6 @@
 	       <menuitem action='show-editor-mixer'/>
 	       <menuitem action='show-editor-list'/>
                <menuitem action='ToggleMeasureVisibility'/>
-               <menuitem action='ToggleWaveformsWhileRecording'/>
                <menuitem action='ToggleSummary'/>
                <menuitem action='ToggleGroupTabs'/>
         </menu>

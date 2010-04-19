@@ -66,8 +66,6 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	color_handler ();
 	_amplitude_above_axis = 1.0;
 
-	use_rec_regions = tv.editor().show_waveforms_recording ();
-
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&AudioStreamView::parameter_changed, this, _1), gui_context());
 }
 
@@ -448,9 +446,9 @@ AudioStreamView::setup_rec_box ()
 		if (!rec_active &&
 		    _trackview.session()->record_status() == Session::Recording &&
 		    _trackview.get_diskstream()->record_enabled()) {
-			if (_trackview.audio_track()->mode() == Normal && use_rec_regions && rec_regions.size() == rec_rects.size()) {
+			if (_trackview.audio_track()->mode() == Normal && Config->get_show_waveforms_while_recording() && rec_regions.size() == rec_rects.size()) {
 
-				/* add a new region, but don't bother if they set use_rec_regions mid-record */
+				/* add a new region, but don't bother if they set show-waveforms-while-recording mid-record */
 
 				SourceList sources;
 
@@ -628,7 +626,7 @@ AudioStreamView::rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::we
 void
 AudioStreamView::update_rec_regions ()
 {
-	if (use_rec_regions) {
+	if (Config->get_show_waveforms_while_recording ()) {
 		uint32_t n = 0;
 
 		for (list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator iter = rec_regions.begin();

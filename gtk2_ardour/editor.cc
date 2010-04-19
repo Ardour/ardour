@@ -331,7 +331,6 @@ Editor::Editor ()
 
 	current_interthread_info = 0;
 	_show_measures = true;
-	_show_waveforms_recording = true;
 	show_gain_after_trim = false;
 	verbose_cursor_on = true;
 	last_item_entered = 0;
@@ -2332,18 +2331,6 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		set_edit_point_preference ((EditPoint) string_2_enum (prop->value(), _edit_point), true);
 	}
 
-	if ((prop = node.property ("show-waveforms-recording"))) {
-		bool yn = string_is_affirmative (prop->value());
-		_show_waveforms_recording = !yn;
-		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformsWhileRecording"));
-		if (act) {
-			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-			/* do it twice to force the change */
-			tact->set_active (!yn);
-			tact->set_active (yn);
-		}
-	}
-
 	if ((prop = node.property ("show-measures"))) {
 		bool yn = string_is_affirmative (prop->value());
 		_show_measures = !yn;
@@ -2490,7 +2477,6 @@ Editor::get_state ()
 	snprintf (buf, sizeof (buf), "%f", vertical_adjustment.get_value ());
 	node->add_property ("y-origin", buf);
 
-	node->add_property ("show-waveforms-recording", _show_waveforms_recording ? "yes" : "no");
 	node->add_property ("show-measures", _show_measures ? "yes" : "no");
 	node->add_property ("follow-playhead", _follow_playhead ? "yes" : "no");
         node->add_property ("stationary-playhead", _stationary_playhead ? "yes" : "no");

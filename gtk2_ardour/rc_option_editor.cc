@@ -1153,10 +1153,17 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Editor"), wfsh);
 
+	add_option (_("Editor"),
+	     new BoolOption (
+		     "show-waveforms-while-recording",
+		     _("Show waveforms for audio while it is being recorded"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_waveforms_while_recording),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_waveforms_while_recording)
+		     ));
+
 	/* AUDIO */
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Solo")));
-
 
 	add_option (_("Audio"),
 	     new BoolOption (

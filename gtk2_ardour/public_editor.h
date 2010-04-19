@@ -180,13 +180,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	 */
 	virtual void consider_auditioning (boost::shared_ptr<ARDOUR::Region> r) = 0;
 
-	/** Set whether waveforms should be shown while recording audio tracks.
-	 * @param yn true to show waveforms, otherwise false.
-	 */
-	virtual void set_show_waveforms_recording (bool yn) = 0;
-
-	/** @return true if waveforms are being shown while recording, otherwise false */
-	virtual bool show_waveforms_recording () const = 0;
 	virtual void new_region_from_selection () = 0;
 	virtual void separate_region_from_selection () = 0;
 

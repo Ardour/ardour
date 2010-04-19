@@ -147,6 +147,7 @@ CONFIG_VARIABLE (bool, rubberbanding_snaps_to_grid, "rubberbanding-snaps-to-grid
 CONFIG_VARIABLE (long, font_scale, "font-scale", 102400)
 CONFIG_VARIABLE (std::string, default_session_parent_dir, "default-session-parent-dir", "~")
 CONFIG_VARIABLE (bool, show_waveforms, "show-waveforms", true)
+CONFIG_VARIABLE (bool, show_waveforms_while_recording, "show-waveforms-while-recording", true)
 CONFIG_VARIABLE (WaveformScale, waveform_scale, "waveform-scale", Linear)
 CONFIG_VARIABLE (WaveformShape, waveform_shape, "waveform-shape", Traditional)
 

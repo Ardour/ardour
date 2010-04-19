@@ -820,8 +820,6 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, X_("importFromSession"), _("Import From Session"), sigc::mem_fun(*this, &Editor::session_import_dialog));
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	ActionManager::register_toggle_action (editor_actions, X_("ToggleWaveformsWhileRecording"), _("Show Waveforms While Recording"), sigc::mem_fun (*this, &Editor::toggle_waveforms_while_recording));
-
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleSummary"), _("Show Summary"), sigc::mem_fun (*this, &Editor::set_summary));
 
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleGroupTabs"), _("Show Group Tabs"), sigc::mem_fun (*this, &Editor::set_group_tabs));
@@ -895,16 +893,6 @@ Editor::toggle_ruler_visibility (RulerType rt)
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		update_ruler_visibility ();
 		store_ruler_visibility ();
-	}
-}
-
-void
-Editor::toggle_waveforms_while_recording ()
-{
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleWaveformsWhileRecording"));
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		set_show_waveforms_recording (tact->get_active());
 	}
 }
 

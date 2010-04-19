@@ -55,8 +55,6 @@ class AutomationStreamView : public StreamView
 
   private:
 	void setup_rec_box ();
-	void rec_data_range_ready (jack_nframes_t start, jack_nframes_t dur);
-	void update_rec_regions (jack_nframes_t start, jack_nframes_t dur);
 
 	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_data, bool recording = false);
 	void        display_region(AutomationRegionView* region_view);
