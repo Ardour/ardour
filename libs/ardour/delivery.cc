@@ -57,6 +57,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Mute
 	, _no_outs_cuz_we_no_monitor (false)
 	, _solo_level (0)
 	, _solo_isolated (false)
+        , _solo_ignored (false)
 	, _mute_master (mm)
 	, no_panner_reset (false)
 {
@@ -81,6 +82,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const string& 
 	, _no_outs_cuz_we_no_monitor (false)
 	, _solo_level (0)
 	, _solo_isolated (false)
+        , _solo_ignored (false)
 	, _mute_master (mm)
 	, no_panner_reset (false)
 {
@@ -486,7 +488,7 @@ Delivery::target_gain ()
 
 	gain_t desired_gain = -1.0f;
 
-        if (_solo_level) {
+        if (_solo_level || _solo_ignored) {
 
 		desired_gain = 1.0;
 

@@ -77,6 +77,7 @@ public:
 
 	void set_solo_level (int32_t sl) { _solo_level = sl; }
 	void set_solo_isolated (bool yn) { _solo_isolated = yn; }
+        void set_solo_ignored (bool yn)  { _solo_ignored = yn; }
 
 	void cycle_start (nframes_t);
 	void increment_output_offset (nframes_t);
@@ -114,6 +115,7 @@ public:
 	bool        _no_outs_cuz_we_no_monitor;
 	uint32_t    _solo_level;
 	bool        _solo_isolated;
+        bool        _solo_ignored;
 	boost::shared_ptr<MuteMaster> _mute_master;
 	bool         no_panner_reset;
 	boost::shared_ptr<Panner> _panner;

@@ -2247,24 +2247,6 @@ Session::route_solo_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 		} 
 	}
 
-	/* make sure master is never muted by solo */
-
-	if (_master_out && route != _master_out && _master_out->soloed_by_others() == 0 && !_master_out->soloed()) {
-		_master_out->mod_solo_by_others (1);
- 	}
- 
-	/* ditto for control outs make sure it is never muted by solo */
-
-	if (_monitor_out && route != _monitor_out && _monitor_out && _monitor_out->soloed_by_others() == 0) {
-		_monitor_out->mod_solo_by_others (1);
-	}
-
-	/* ditto for auditioner make sure it is never muted by solo */
-
-	if (auditioner) {
-		auditioner->mod_solo_by_others (1);
-	}
-
 	solo_update_disabled = false;
 	update_route_solo_state (r);
 	SoloChanged (); /* EMIT SIGNAL */

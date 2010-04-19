@@ -132,7 +132,7 @@ Route::init ()
 	add_processor (_meter, PostFader);
 
 	_main_outs.reset (new Delivery (_session, _output, _mute_master, _name, Delivery::Main));
-        
+
         add_processor (_main_outs, PostFader);
 
 	if (is_monitor()) {
@@ -590,7 +590,7 @@ void
 Route::mod_solo_by_others (int32_t delta)
 {
 	if (delta < 0) {
-		if (_soloed_by_others >= (uint32_t) delta) {
+		if (_soloed_by_others >= (uint32_t) abs (delta)) {
 			_soloed_by_others += delta;
 		} else {
 			_soloed_by_others = 0;
@@ -644,6 +644,8 @@ Route::set_solo_isolated (bool yn, void *src)
 			(*i)->set_solo_isolated (yn, (*i)->route_group());
 		}
 	}
+
+        /* XXX should we back-propagate as well? */
 
 	bool changed = false;
 
@@ -806,6 +808,14 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 
 		}
 
+                /* all delivery processors on master, monitor and auditioner never ever pay attention to solo
+                 */
+                boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery>(processor);
+
+                if (d && (is_master() || is_monitor() || is_hidden())) {
+                        d->set_solo_ignored (true);
+                }
+                
                 /* is this the monitor send ? if so, make sure we keep track of it */
 
                 boost::shared_ptr<InternalSend> isend = boost::dynamic_pointer_cast<InternalSend> (processor);
