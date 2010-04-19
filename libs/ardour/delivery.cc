@@ -521,6 +521,7 @@ Delivery::target_gain ()
                         }
                         
                         if (!_solo_isolated && _session.soloing()) {
+
                                 desired_gain = min (Config->get_solo_mute_gain(), _mute_master->mute_gain_at (mp));
                                 
                         } else {

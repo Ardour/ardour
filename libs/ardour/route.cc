@@ -161,6 +161,8 @@ Route::init ()
                 _main_outs->panner()->set_bypassed (true);
 	}
 
+        markup_solo_ignore ();
+
 	/* now that we have _meter, its safe to connect to this */
 
 	Metering::Meter.connect_same_thread (*this, (boost::bind (&Route::meter, this)));
@@ -808,14 +810,6 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 
 		}
 
-                /* all delivery processors on master, monitor and auditioner never ever pay attention to solo
-                 */
-                boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery>(processor);
-
-                if (d && (is_master() || is_monitor() || is_hidden())) {
-                        d->set_solo_ignored (true);
-                }
-                
                 /* is this the monitor send ? if so, make sure we keep track of it */
 
                 boost::shared_ptr<InternalSend> isend = boost::dynamic_pointer_cast<InternalSend> (processor);
@@ -2243,7 +2237,28 @@ Route::set_processor_state (const XMLNode& node)
                 }
         }
 
+        markup_solo_ignore ();
+
         processors_changed (RouteProcessorChange ());
+}
+
+void
+Route::markup_solo_ignore ()
+{
+        Glib::RWLock::ReaderLock lm (_processor_lock);
+        
+        for (ProcessorList::iterator p = _processors.begin(); p !=  _processors.end(); ++p) {
+
+                /* all delivery processors on master, monitor and auditioner never ever pay attention to solo
+                 */
+
+                boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery>(*p);
+                
+                if (d && (is_master() || is_monitor() || is_hidden())) {
+                        cerr << _name << " Found a delivery unit, mark solo ignored\n";
+                        d->set_solo_ignored (true);
+                }
+        }
 }
 
 void
@@ -2374,8 +2389,6 @@ Route::listen_via (boost::shared_ptr<Route> route, Placement placement, bool /*a
 
                 } else {
                         listener.reset (new InternalSend (_session, _mute_master, route, (aux ? Delivery::Aux : Delivery::Listen)));
-                        if (route == _session.monitor_out()) {
-                        }
                 }
 
 	} catch (failed_constructor& err) {

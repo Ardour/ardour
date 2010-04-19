@@ -323,6 +323,8 @@ Session::butler_transport_work ()
 	}
 
 	g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
+
+	DEBUG_TRACE (DEBUG::Transport, X_("Butler transport work all done\n"));
 }
 
 void
@@ -432,6 +434,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		_have_captured = true;
 	}
 
+	DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: DS stop\n"));
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		(*i)->transport_stopped (*now, xnow, abort);
 	}
@@ -467,7 +470,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		if ((auto_return_enabled || synced_to_jack() || _requested_return_frame >= 0) &&
 		    !(ptw & PostTransportLocate)) {
 
-	/* no explicit locate queued */
+                        /* no explicit locate queued */
 
 			bool do_locate = false;
 
@@ -538,10 +541,14 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	/* this for() block can be put inside the previous if() and has the effect of ... ??? what */
 
 
+	DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: locate\n"));
+
 	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
 		if (!(*i)->hidden()) {
+                        DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler PTW: locate on %1\n", (*i)->name()));
 			(*i)->non_realtime_locate (_transport_frame);
 		}
+
 		if (on_entry != g_atomic_int_get (&_butler->should_do_transport_work)) {
 			finished = false;
 			/* we will be back */

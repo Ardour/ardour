@@ -439,6 +439,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	void set_self_solo (bool yn);
 	void set_delivery_solo ();
+        void markup_solo_ignore ();
 };
 
 } // namespace ARDOUR

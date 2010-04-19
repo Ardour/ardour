@@ -1085,9 +1085,7 @@ IO::set_name (const string& requested_name)
 
 	/* replace all colons in the name. i wish we didn't have to do this */
 
-	if (replace_all (name, ":", "-")) {
-		warning << _("you cannot use colons to name objects with I/O connections") << endmsg;
-	}
+	replace_all (name, ":", "-"); 
 
 	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		string current_name = i->name();
