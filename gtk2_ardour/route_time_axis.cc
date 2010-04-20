@@ -196,7 +196,10 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	_route->output()->changed.connect (*this, invalidator (*this), ui_bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
 
 	controls_table.attach (*mute_button, 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	controls_table.attach (*solo_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+
+        if (!_route->is_master()) {
+                controls_table.attach (*solo_button, 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
+        }
 
 	controls_table.attach (route_group_button, 7, 8, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	controls_table.attach (gm.get_gain_slider(), 0, 5, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
