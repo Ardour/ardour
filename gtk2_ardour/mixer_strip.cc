@@ -115,7 +115,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, comment_button (_("Comments"))
 {
 	init ();
-	set_button_names ();
 	set_route (rt);
 }
 
@@ -325,6 +324,11 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	RouteUI::set_route (rt);
+
+	/* map the current state */
+
+	mute_changed (0);
+	solo_changed (0);
 
 	delete input_selector;
 	input_selector = 0;
@@ -1731,35 +1735,42 @@ MixerStrip::set_button_names ()
 	case Wide:
 		rec_enable_button_label.set_text (_("Rec"));
 		mute_button_label.set_text (_("Mute"));
-		if (!Config->get_solo_control_is_listen_control()) {
-			solo_button_label.set_text (_("Solo"));
-		} else {
-			switch (Config->get_listen_position()) {
-			case AfterFaderListen:
-				solo_button_label.set_text (_("AFL"));
-				break;
-			case PreFaderListen:
-				solo_button_label.set_text (_("PFL"));
-				break;
-			}
-		}
+                if (_route && _route->solo_safe()) {
+                        solo_button_label.set_text (X_("!"));
+                } else {
+                        if (!Config->get_solo_control_is_listen_control()) {
+                                solo_button_label.set_text (_("Solo"));
+                        } else {
+                                switch (Config->get_listen_position()) {
+                                case AfterFaderListen:
+                                        solo_button_label.set_text (_("AFL"));
+                                        break;
+                                case PreFaderListen:
+                                        solo_button_label.set_text (_("PFL"));
+                                        break;
+                                }
+                        }
+                }
 		break;
 
 	default:
 		rec_enable_button_label.set_text (_("R"));
 		mute_button_label.set_text (_("M"));
-		if (!Config->get_solo_control_is_listen_control()) {
-			solo_button_label.set_text (_("S"));
-		} else {
-			switch (Config->get_listen_position()) {
-			case AfterFaderListen:
-				solo_button_label.set_text (_("A"));
-				break;
-			case PreFaderListen:
-				solo_button_label.set_text (_("P"));
-				break;
-			}
-		}
+                if (_route && _route->solo_safe()) {
+                        solo_button_label.set_text (X_("!"));
+                        if (!Config->get_solo_control_is_listen_control()) {
+                                solo_button_label.set_text (_("S"));
+                        } else {
+                                switch (Config->get_listen_position()) {
+                                case AfterFaderListen:
+                                        solo_button_label.set_text (_("A"));
+                                        break;
+                                case PreFaderListen:
+                                        solo_button_label.set_text (_("P"));
+                                        break;
+                                }
+                        }
+                }
 		break;
 
 	}

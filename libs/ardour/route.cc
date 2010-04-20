@@ -522,6 +522,10 @@ Route::passthru_silence (sframes_t start_frame, sframes_t end_frame, nframes_t n
 void
 Route::set_listen (bool yn, void* src)
 {
+        if (_solo_safe) {
+                return;
+        }
+
 	if (_monitor_send) {
 		if (yn != _monitor_send->active()) {
 			if (yn) {
@@ -585,12 +589,16 @@ Route::set_solo (bool yn, void *src)
 void
 Route::set_self_solo (bool yn)
 {
-	_self_solo = yn;
+        _self_solo = yn;
 }
 
 void
 Route::mod_solo_by_others (int32_t delta)
 {
+        if (_solo_safe) {
+                return;
+        }
+
 	if (delta < 0) {
 		if (_soloed_by_others >= (uint32_t) abs (delta)) {
 			_soloed_by_others += delta;
@@ -602,6 +610,7 @@ Route::mod_solo_by_others (int32_t delta)
 	}
 
 	set_delivery_solo ();
+        solo_changed (this);
 }
 
 void

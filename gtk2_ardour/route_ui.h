@@ -153,6 +153,8 @@ class RouteUI : public virtual AxisView
 	Gtk::CheckMenuItem* post_fader_mute_check;
 	Gtk::CheckMenuItem* listen_mute_check;
 	Gtk::CheckMenuItem* main_mute_check;
+	Gtk::CheckMenuItem* solo_safe_check;
+	Gtk::CheckMenuItem* solo_isolated_check;
 
 	void toggle_mute_menu(ARDOUR::MuteMaster::MutePoint, Gtk::CheckMenuItem*);
 	void muting_change ();

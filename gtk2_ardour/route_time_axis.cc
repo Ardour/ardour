@@ -116,8 +116,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	, gm (sess, slider, true, 115)
 	, _ignore_track_mode_change (false)
 {
-	set_button_names ();
-
 	gm.set_controls (_route, _route->shared_peak_meter(), _route->amp());
 	gm.get_level_meter().set_no_show_all();
 	gm.get_level_meter().setup_meters(50);
@@ -133,6 +131,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	if (!_route->is_hidden()) {
 		_marked_for_display = true;
 	}
+
+	mute_changed (0);
+	solo_changed (0);
 
 	timestretch_rect = 0;
 	no_redraw = false;
@@ -2422,18 +2423,21 @@ RouteTimeAxisView::set_button_names ()
 {
 	rec_enable_button_label.set_text (_("r"));
 
-	if (Config->get_solo_control_is_listen_control()) {
-		switch (Config->get_listen_position()) {
-		case AfterFaderListen:
-			solo_button_label.set_text (_("A"));
-			break;
-		case PreFaderListen:
-			solo_button_label.set_text (_("P"));
-			break;
-		}
-	} else {
-		solo_button_label.set_text (_("s"));
-	}
-
+        if (_route && _route->solo_safe()) {
+                solo_button_label.set_text (X_("!"));
+        } else {
+                if (Config->get_solo_control_is_listen_control()) {
+                        switch (Config->get_listen_position()) {
+                        case AfterFaderListen:
+                                solo_button_label.set_text (_("A"));
+                                break;
+                        case PreFaderListen:
+                                solo_button_label.set_text (_("P"));
+                                break;
+                        }
+                } else {
+                        solo_button_label.set_text (_("s"));
+                }
+        }
 	mute_button_label.set_text (_("m"));
 }

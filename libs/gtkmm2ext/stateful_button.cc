@@ -67,6 +67,10 @@ StateButton::set_visual_state (int n)
 	case 2:
 		name += "-alternate";
 		break;
+
+        case 3:
+                name += "-alternate2";
+                break;
 	}
 
 	set_widget_name (name);

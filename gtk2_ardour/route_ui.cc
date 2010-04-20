@@ -99,6 +99,8 @@ RouteUI::init ()
 	post_fader_mute_check = 0;
 	listen_mute_check = 0;
 	main_mute_check = 0;
+        solo_safe_check = 0;
+        solo_isolated_check = 0;
 	ignore_toggle = false;
 	_solo_release = 0;
 	_mute_release = 0;
@@ -210,6 +212,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route->active_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_active_changed, this), gui_context());
 	_route->mute_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::mute_changed, this, _1), gui_context());
 	_route->solo_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
+	_route->solo_safe_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
 	_route->listen_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::listen_changed, this, _1), gui_context());
 	_route->solo_isolated_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
         _route->phase_invert_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::polarity_changed, this), gui_context());
@@ -237,11 +240,6 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	} else {
 		solo_button->show();
 	}
-
-	/* map the current state */
-
-	mute_changed (0);
-	solo_changed (0);
 
 	map_frozen ();
 }
@@ -752,7 +750,11 @@ RouteUI::solo_visual_state_with_isolate (boost::shared_ptr<Route> r)
 	if (r->solo_isolated()) {
 		return 2;
 	} else if (r->soloed()) {
-		return 1;
+                if (!r->self_soloed()) {
+                        return 3;
+                } else {
+                        return 1;
+                }
 	} else {
 		return 0;
 	}
@@ -808,6 +810,20 @@ RouteUI::update_solo_display ()
 		}
 
 	}
+
+	bool yn = _route->solo_safe ();
+
+	if (solo_safe_check && solo_safe_check->get_active() != yn) {
+		solo_safe_check->set_active (yn);
+	}
+
+	yn = _route->solo_isolated ();
+
+	if (solo_isolated_check && solo_isolated_check->get_active() != yn) {
+		solo_isolated_check->set_active (yn);
+	}
+
+        set_button_names ();
 
 	solo_button->set_visual_state (solo_visual_state_with_isolate (_route));
 }
@@ -949,15 +965,15 @@ RouteUI::build_solo_menu (void)
 	check = new CheckMenuItem(_("Solo Isolate"));
 	check->set_active (_route->solo_isolated());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_isolated), check));
-	_route->solo_isolated_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::solo_isolated_toggle, this, _1, check), gui_context());
 	items.push_back (CheckMenuElem(*check));
+        solo_isolated_check = dynamic_cast<CheckMenuItem*>(&items.back());
 	check->show_all();
 
 	check = new CheckMenuItem(_("Solo Safe"));
 	check->set_active (_route->solo_safe());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_safe), check));
-	_route->solo_safe_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::solo_safe_toggle, this, _1, check), gui_context());
 	items.push_back (CheckMenuElem(*check));
+        solo_safe_check = dynamic_cast<CheckMenuItem*>(&items.back());
 	check->show_all();
 
 	//items.push_back (SeparatorElem());
@@ -1261,27 +1277,6 @@ RouteUI::denormal_protection_changed ()
 {
 	if (denormal_menu_item) {
 		denormal_menu_item->set_active (_route->denormal_protection());
-	}
-}
-
-void
-RouteUI::solo_isolated_toggle(void* /*src*/, Gtk::CheckMenuItem* check)
-{
-	bool yn = _route->solo_isolated ();
-
-	if (check->get_active() != yn) {
-		check->set_active (yn);
-	}
-}
-
-
-void
-RouteUI::solo_safe_toggle(void* /*src*/, Gtk::CheckMenuItem* check)
-{
-	bool yn = _route->solo_safe ();
-
-	if (check->get_active() != yn) {
-		check->set_active (yn);
 	}
 }
 
