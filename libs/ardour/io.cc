@@ -165,8 +165,8 @@ IO::IO (Session& s, string name,
 	
 	last_automation_snapshot = 0;
 
-	_gain_automation_state = Off;
-	_gain_automation_style = Absolute;
+	_gain_automation_state = Auto_Off;
+	_gain_automation_style = Auto_Absolute;
 
 	{
 		// IO::Meter is emitted from another thread so the
@@ -1565,7 +1565,7 @@ IO::state (bool full_state)
 		snprintf (buf, sizeof (buf), "0x%x", (int) _gain_automation_curve.automation_state());
 	} else {
 		/* never store anything except Off for automation state in a template */
-		snprintf (buf, sizeof (buf), "0x%x", ARDOUR::Off); 
+		snprintf (buf, sizeof (buf), "0x%x", ARDOUR::Auto_Off); 
 	}
 
 	return *node;
@@ -2591,7 +2591,7 @@ IO::set_gain_automation_state (AutoState state)
 			/* don't reset gain if we're moving to Off or Write mode;
 			   if we're moving to Write, the user may have manually set up gains
 			   that they don't want to lose */
-			if (state != Off && state != Write) {
+			if (state != Auto_Off && state != Auto_Write) {
 				set_gain (_gain_automation_curve.eval (_session.transport_frame()), this);
 			}
 		}
@@ -2671,7 +2671,7 @@ IO::end_gain_touch ()
         bool mark = false;
         double when = 0;
 
-        if (_session.transport_rolling() && _gain_automation_curve.automation_state() == Touch) {
+        if (_session.transport_rolling() && _gain_automation_curve.automation_state() == Auto_Touch) {
                 mark = true;
                 when = _session.transport_frame();
         }
@@ -2694,7 +2694,7 @@ IO::end_pan_touch (uint32_t which)
                 bool mark = false;
                 double when = 0;
                 
-                if (_session.transport_rolling() && (*_panner)[which]->automation().automation_state() == Touch) {
+                if (_session.transport_rolling() && (*_panner)[which]->automation().automation_state() == Auto_Touch) {
                         mark = true;
                         when = _session.transport_frame();
                 }
@@ -2719,7 +2719,7 @@ IO::transport_stopped (nframes_t frame)
 {
 	_gain_automation_curve.reposition_for_rt_add (frame);
 
-	if (_gain_automation_curve.automation_state() != Off) {
+	if (_gain_automation_curve.automation_state() != Auto_Off) {
 		
 		/* the src=0 condition is a special signal to not propagate 
 		   automation gain changes into the mix group when locating.

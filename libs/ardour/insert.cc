@@ -169,7 +169,7 @@ PluginInsert::auto_state_changed (uint32_t which)
 	/* don't reset automation if we're moving to Off or Write mode;
 	   if we're moving to Write, the user may have manually set up automation
 	   that they don't want to lose */		
-	if (alist.automation_state() != Off && alist.automation_state() != Write) {
+	if (alist.automation_state() != Auto_Off && alist.automation_state() != Auto_Write) {
 		_plugins[0]->set_parameter (which, alist.eval (_session.transport_frame()));
 	}
 }
@@ -361,7 +361,7 @@ PluginInsert::transport_stopped (nframes_t now)
 
 		if (alist) {
 			alist->reposition_for_rt_add (now);
-			if (alist->automation_state() != Off) {
+			if (alist->automation_state() != Auto_Off) {
 				_plugins[0]->set_parameter (n, alist->eval (now));
 			}
 		}
@@ -507,7 +507,7 @@ PluginInsert::get_port_automation_state (uint32_t port)
 	if (port < _plugins[0]->parameter_count()) {
 		return automation_list (port).automation_state();
 	} else {
-		return Off;
+		return Auto_Off;
 	}
 }
 
@@ -523,11 +523,11 @@ PluginInsert::protect_automation ()
 		AutomationList& al = automation_list (*i);
 
 		switch (al.automation_state()) {
-		case Write:
-			al.set_automation_state (Off);
+		case Auto_Write:
+			al.set_automation_state (Auto_Off);
 			break;
-		case Touch:
-			al.set_automation_state (Play);
+		case Auto_Touch:
+			al.set_automation_state (Auto_Play);
 			break;
 		default:
 			break;
@@ -831,7 +831,7 @@ PluginInsert::set_state(const XMLNode& node)
 					
 					/* missing */
 					
-					automation_list (port_id).set_automation_state (Off);
+					automation_list (port_id).set_automation_state (Auto_Off);
 				}
 			}
 

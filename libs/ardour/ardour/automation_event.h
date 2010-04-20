@@ -129,10 +129,10 @@ class AutomationList : public PBD::StatefulDestructible
 	sigc::signal<void> automation_state_changed;
 
 	bool automation_playback() {
-		return (_state & Play) || ((_state & Touch) && !_touching);
+		return (_state & Auto_Play) || ((_state & Auto_Touch) && !_touching);
 	}
 	bool automation_write () {
-		return (_state & Write) || ((_state & Touch) && _touching);
+		return (_state & Auto_Write) || ((_state & Auto_Touch) && _touching);
 	}
 
 	void start_touch ();

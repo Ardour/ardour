@@ -175,13 +175,13 @@ PannerUI::build_astate_menu ()
 	}
 
 	pan_astate_menu->items().push_back (MenuElem (_("Manual"), 
-						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Off)));
+						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Auto_Off)));
 	pan_astate_menu->items().push_back (MenuElem (_("Play"),
-						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Play)));
+						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Auto_Play)));
 	pan_astate_menu->items().push_back (MenuElem (_("Write"),
-						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Write)));
+						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Auto_Write)));
 	pan_astate_menu->items().push_back (MenuElem (_("Touch"),
-						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Touch)));
+						     bind (mem_fun (_io->panner(), &Panner::set_automation_state), (AutoState) Auto_Touch)));
 
 }
 
@@ -684,7 +684,7 @@ PannerUI::pan_printer (char *buf, uint32_t len, Adjustment* adj)
 void
 PannerUI::update_pan_sensitive ()
 {
-	bool sensitive = !(_io->panner().automation_state() & Play);
+	bool sensitive = !(_io->panner().automation_state() & Auto_Play);
 
 	switch (_io->n_outputs()) {
 	case 0:
@@ -786,7 +786,7 @@ PannerUI::pan_automation_state_changed ()
 		return;
 	}
 
-	x = (_io->panner().front()->automation().automation_state() != Off);
+	x = (_io->panner().front()->automation().automation_state() != Auto_Off);
 
 	if (pan_automation_state_button.get_active() != x) {
 	ignore_toggle = true;
@@ -823,16 +823,16 @@ PannerUI::_astate_string (AutoState state, bool shrt)
 	string sstr;
 
 	switch (state) {
-	case Off:
+	case Auto_Off:
 		sstr = (shrt ? "M" : _("M"));
 		break;
-	case Play:
+	case Auto_Play:
 		sstr = (shrt ? "P" : _("P"));
 		break;
-	case Touch:
+	case Auto_Touch:
 		sstr = (shrt ? "T" : _("T"));
 		break;
-	case Write:
+	case Auto_Write:
 		sstr = (shrt ? "W" : _("W"));
 		break;
 	}
@@ -855,7 +855,7 @@ PannerUI::short_astyle_string (AutoStyle style)
 string
 PannerUI::_astyle_string (AutoStyle style, bool shrt)
 {
-	if (style & Trim) {
+	if (style & Auto_Trim) {
 		return _("Trim");
 	} else {
 	        /* XXX it might different in different languages */

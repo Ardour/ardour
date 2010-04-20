@@ -57,8 +57,8 @@ AutomationList::AutomationList (double defval)
 {
 	_frozen = 0;
 	changed_when_thawed = false;
-	_state = Off;
-	_style = Absolute;
+	_state = Auto_Off;
+	_style = Auto_Absolute;
 	_touching = false;
         _new_touch = false;
 	min_yval = FLT_MIN;
@@ -146,8 +146,8 @@ AutomationList::AutomationList (const XMLNode& node)
 	max_yval = FLT_MAX;
 	max_xval = 0; // means "no limit" 
 	_dirty = false;
-	_state = Off;
-	_style = Absolute;
+	_state = Auto_Off;
+	_style = Auto_Absolute;
 	rt_insertion_point = events.end();
 	lookup_cache.left = -1;
 	lookup_cache.range.first = events.end();
@@ -327,7 +327,7 @@ AutomationList::rt_add (double when, double value)
 {
 	/* this is for automation recording */
 
-	if ((_state & Touch) && !_touching) {
+	if ((_state & Auto_Touch) && !_touching) {
 		return;
 	}
 
@@ -1267,7 +1267,7 @@ AutomationList::state (bool full)
 		root->add_property ("state", auto_state_to_string (_state));
 	} else {
 		/* never save anything but Off for automation state to a template */
-		root->add_property ("state", auto_state_to_string (Off));
+		root->add_property ("state", auto_state_to_string (Auto_Off));
 	}
 
 	root->add_property ("style", auto_style_to_string (_style));
@@ -1426,13 +1426,13 @@ AutomationList::set_state (const XMLNode& node)
 	if ((prop = node.property (X_("style"))) != 0) {
 		_style = string_to_auto_style (prop->value());
 	} else {
-		_style = Absolute;
+		_style = Auto_Absolute;
 	}
 
 	if ((prop = node.property (X_("state"))) != 0) {
 		_state = string_to_auto_state (prop->value());
 	} else {
-		_state = Off;
+		_state = Auto_Off;
 	}
 
 	if ((prop = node.property (X_("min_yval"))) != 0) {

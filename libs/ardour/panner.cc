@@ -102,7 +102,7 @@ StreamPanner::PanControllable::can_send_feedback () const
 {
 	AutoState astate = panner.get_parent().automation_state ();
 
-	if ((astate == Play) || (astate == Touch && !panner.get_parent().touching())) {
+	if ((astate == Auto_Play) || (astate == Auto_Touch && !panner.get_parent().touching())) {
 		return true;
 	}
 
@@ -198,7 +198,7 @@ BaseStereoPanner::~BaseStereoPanner ()
 void
 BaseStereoPanner::snapshot (nframes_t now)
 {
-	if (_automation.automation_state() == Write || _automation.automation_state() == Touch) {
+	if (_automation.automation_state() == Auto_Write || _automation.automation_state() == Auto_Touch) {
 		_automation.rt_add (now, x);
 	}
 }
@@ -206,7 +206,7 @@ BaseStereoPanner::snapshot (nframes_t now)
 void
 BaseStereoPanner::transport_stopped (nframes_t frame)
 {
-	if (_automation.automation_state() != Off) {
+	if (_automation.automation_state() != Auto_Off) {
 		set_position (_automation.eval (frame));
 	}
 
@@ -229,7 +229,7 @@ BaseStereoPanner::set_automation_state (AutoState state)
 		/* don't reset pan if we're moving to Off or Write mode;
 		   if we're moving to Write, the user may have manually set up pans
 		   that they don't want to lose */		
-		if (state != Off && state != Write) {
+		if (state != Auto_Off && state != Auto_Write) {
 			set_position (_automation.eval (parent.session().transport_frame()));
 		}
 	}
@@ -546,7 +546,7 @@ EqualPowerStereoPanner::set_state (const XMLNode& node)
 
 			_automation.set_state (*((*iter)->children().front()));
 
-			if (_automation.automation_state() != Off) {
+			if (_automation.automation_state() != Auto_Off) {
 				set_position (_automation.eval (parent.session().transport_frame()));
 			}
 		}
@@ -1067,7 +1067,7 @@ Panner::automation_state () const
 	if (!empty()) {
 		return front()->automation().automation_state ();
 	} else {
-		return Off;
+		return Auto_Off;
 	}
 }
 
@@ -1077,7 +1077,7 @@ Panner::automation_style () const
 	if (!empty()) {
 		return front()->automation().automation_style ();
 	} else {
-		return Absolute;
+		return Auto_Absolute;
 	}
 }
 

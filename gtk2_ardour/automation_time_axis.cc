@@ -204,13 +204,13 @@ AutomationTimeAxisView::auto_clicked ()
 		MenuList& items (automation_menu->items());
 
 		items.push_back (MenuElem (_("Manual"), 
-					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Off)));
+					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Auto_Off)));
 		items.push_back (MenuElem (_("Play"),
-					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
+					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Auto_Play)));
 		items.push_back (MenuElem (_("Write"),
-					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
+					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Auto_Write)));
 		items.push_back (MenuElem (_("Touch"),
-					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
+					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Auto_Touch)));
 	}
 
 	automation_menu->popup (1, gtk_get_current_event_time());
@@ -225,13 +225,13 @@ AutomationTimeAxisView::automation_state_changed ()
 	/* update button label */
 
 	if (lines.empty()) {
-		state = Off;
+		state = Auto_Off;
 	} else {
 		state = lines.front()->the_list().automation_state ();
 	}
 
-	switch (state & (Off|Play|Touch|Write)) {
-	case Off:
+	switch (state & (Auto_Off|Auto_Play|Auto_Touch|Auto_Write)) {
+	case Auto_Off:
 		auto_button.set_label (_("Manual"));
 		if (auto_off_item) {
 			ignore_state_request = true;
@@ -242,7 +242,7 @@ AutomationTimeAxisView::automation_state_changed ()
 			ignore_state_request = false;
 		}
 		break;
-	case Play:
+	case Auto_Play:
 		auto_button.set_label (_("Play"));
 		if (auto_play_item) {
 			ignore_state_request = true;
@@ -253,7 +253,7 @@ AutomationTimeAxisView::automation_state_changed ()
 			ignore_state_request = false;
 		}
 		break;
-	case Write:
+	case Auto_Write:
 		auto_button.set_label (_("Write"));
 		if (auto_write_item) {
 			ignore_state_request = true;
@@ -264,7 +264,7 @@ AutomationTimeAxisView::automation_state_changed ()
 			ignore_state_request = false;
 		}
 		break;
-	case Touch:
+	case Auto_Touch:
 		auto_button.set_label (_("Touch"));
 		if (auto_touch_item) {
 			ignore_state_request = true;
@@ -421,19 +421,19 @@ AutomationTimeAxisView::build_display_menu ()
 	MenuList& as_items = auto_state_menu->items();
 	
 	as_items.push_back (CheckMenuElem (_("Manual"), 
-					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Off)));
+					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Auto_Off)));
 	auto_off_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
 	as_items.push_back (CheckMenuElem (_("Play"),
-					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
+					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Auto_Play)));
 	auto_play_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
 	as_items.push_back (CheckMenuElem (_("Write"),
-					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
+					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Auto_Write)));
 	auto_write_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
 	as_items.push_back (CheckMenuElem (_("Touch"),
-					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
+					   bind (mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Auto_Touch)));
 	auto_touch_item = dynamic_cast<CheckMenuItem*>(&as_items.back());
 
 	items.push_back (MenuElem (_("State"), *auto_state_menu));

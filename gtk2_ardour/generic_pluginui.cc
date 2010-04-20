@@ -332,17 +332,17 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 {
 	/* update button label */
 
-	switch (insert->get_port_automation_state (cui->port_index) & (Off|Play|Touch|Write)) {
-	case Off:
+	switch (insert->get_port_automation_state (cui->port_index) & (Auto_Off|Auto_Play|Auto_Touch|Auto_Write)) {
+	case Auto_Off:
 		cui->automate_button.set_label (_("Manual"));
 		break;
-	case Play:
+	case Auto_Play:
 		cui->automate_button.set_label (_("Play"));
 		break;
-	case Write:
+	case Auto_Write:
 		cui->automate_button.set_label (_("Write"));
 		break;
-	case Touch:
+	case Auto_Touch:
 		cui->automate_button.set_label (_("Touch"));
 		break;
 	default:
@@ -603,7 +603,7 @@ GenericPluginUI::stop_touch (GenericPluginUI::ControlUI* cui)
                 when = insert->session().transport_frame();
         }
 
-        if (insert->automation_list (cui->port_index).automation_state() == Touch) {
+        if (insert->automation_list (cui->port_index).automation_state() == Auto_Touch) {
                 insert->automation_list (cui->port_index).stop_touch (mark, when);
         }
 }
@@ -622,13 +622,13 @@ GenericPluginUI::astate_clicked (ControlUI* cui, uint32_t port)
 
 	items.clear ();
 	items.push_back (MenuElem (_("Manual"), 
-				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Off, cui)));
+				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Auto_Off, cui)));
 	items.push_back (MenuElem (_("Play"),
-				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Play, cui)));
+				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Auto_Play, cui)));
 	items.push_back (MenuElem (_("Write"),
-				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Write, cui)));
+				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Auto_Write, cui)));
 	items.push_back (MenuElem (_("Touch"),
-				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Touch, cui)));
+				   bind (mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Auto_Touch, cui)));
 
 	automation_menu->popup (1, gtk_get_current_event_time());
 }

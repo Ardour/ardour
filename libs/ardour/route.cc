@@ -717,8 +717,8 @@ Route::process_output_buffers (vector<Sample*>& bufs, uint32_t nbufs,
 			} else {
 				// cerr << _name << " panner state = " << _panner->automation_state() << endl;
 				if (!_panner->empty() &&
-				    (_panner->automation_state() & Play ||
-				     ((_panner->automation_state() & Touch) && !_panner->touching()))) {
+				    (_panner->automation_state() & Auto_Play ||
+				     ((_panner->automation_state() & Auto_Touch) && !_panner->touching()))) {
 					pan_automated (bufs, nbufs, start_frame, end_frame, nframes);
 				} else {
 					pan (bufs, nbufs, nframes, 1.0); 
@@ -2608,21 +2608,21 @@ void
 Route::protect_automation ()
 {
 	switch (gain_automation_state()) {
-	case Write:
-		set_gain_automation_state (Off);
-	case Touch:
-		set_gain_automation_state (Play);
+	case Auto_Write:
+		set_gain_automation_state (Auto_Off);
+	case Auto_Touch:
+		set_gain_automation_state (Auto_Play);
 		break;
 	default:
 		break;
 	}
 
 	switch (panner().automation_state ()) {
-	case Write:
-		panner().set_automation_state (Off);
+	case Auto_Write:
+		panner().set_automation_state (Auto_Off);
 		break;
-	case Touch:
-		panner().set_automation_state (Play);
+	case Auto_Touch:
+		panner().set_automation_state (Auto_Play);
 		break;
 	default:
 		break;

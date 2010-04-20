@@ -245,12 +245,12 @@ class IO : public PBD::StatefulDestructible
 	 void clear_automation ();
 	 
 	 bool gain_automation_recording() const { 
-		 return (_gain_automation_curve.automation_state() & (Write|Touch));
+		 return (_gain_automation_curve.automation_state() & (Auto_Write|Auto_Touch));
 	 }
 	 
 	 bool gain_automation_playback() const {
-		 return (_gain_automation_curve.automation_state() & Play) ||
-			 ((_gain_automation_curve.automation_state() & Touch) && 
+		 return (_gain_automation_curve.automation_state() & Auto_Play) ||
+			 ((_gain_automation_curve.automation_state() & Auto_Touch) && 
 			  !_gain_automation_curve.touching());
 	 }
 

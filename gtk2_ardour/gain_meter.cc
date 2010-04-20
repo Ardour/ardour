@@ -180,13 +180,13 @@ GainMeterBase::set_io (boost::shared_ptr<IO> io)
 			gain_astate_menu.items().clear ();
 			
 			gain_astate_menu.items().push_back (MenuElem (_("Manual"), 
-								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Off)));
+								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Auto_Off)));
 			gain_astate_menu.items().push_back (MenuElem (_("Play"),
-								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Play)));
+								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Auto_Play)));
 			gain_astate_menu.items().push_back (MenuElem (_("Write"),
-								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Write)));
+								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Auto_Write)));
 			gain_astate_menu.items().push_back (MenuElem (_("Touch"),
-								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Touch)));
+								      bind (mem_fun (*_io, &IO::set_gain_automation_state), (AutoState) Auto_Touch)));
 			
 			connections.push_back (gain_automation_style_button.signal_button_press_event().connect (mem_fun(*this, &GainMeterBase::gain_automation_style_button_event), false));
 			connections.push_back (gain_automation_state_button.signal_button_press_event().connect (mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false));
@@ -410,7 +410,7 @@ GainMeterBase::set_fader_name (const char * name)
 void
 GainMeterBase::update_gain_sensitive ()
 {
-	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (!(_io->gain_automation_state() & Play));
+	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (!(_io->gain_automation_state() & Auto_Play));
 }
 
 
@@ -622,16 +622,16 @@ GainMeterBase::_astate_string (AutoState state, bool shrt)
 	string sstr;
 
 	switch (state) {
-	case Off:
+	case Auto_Off:
 		sstr = (shrt ? "M" : _("M"));
 		break;
-	case Play:
+	case Auto_Play:
 		sstr = (shrt ? "P" : _("P"));
 		break;
-	case Touch:
+	case Auto_Touch:
 		sstr = (shrt ? "T" : _("T"));
 		break;
-	case Write:
+	case Auto_Write:
 		sstr = (shrt ? "W" : _("W"));
 		break;
 	}
@@ -654,7 +654,7 @@ GainMeterBase::short_astyle_string (AutoStyle style)
 string
 GainMeterBase::_astyle_string (AutoStyle style, bool shrt)
 {
-	if (style & Trim) {
+	if (style & Auto_Trim) {
 		return _("Trim");
 	} else {
 	        /* XXX it might different in different languages */
@@ -692,7 +692,7 @@ GainMeterBase::gain_automation_state_changed ()
 		break;
 	}
 
-	x = (_io->gain_automation_state() != Off);
+	x = (_io->gain_automation_state() != Auto_Off);
 	
 	if (gain_automation_state_button.get_active() != x) {
 		ignore_toggle = true;

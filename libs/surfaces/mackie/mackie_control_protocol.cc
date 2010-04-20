@@ -1117,13 +1117,13 @@ void
 MackieControlProtocol::update_automation( RouteSignal & rs )
 {
 	ARDOUR::AutoState gain_state = rs.route()->gain_automation_state();
-	if ( gain_state == Touch || gain_state == Play )
+	if ( gain_state == Auto_Touch || gain_state == Auto_Play )
 	{
 		notify_gain_changed( &rs, false );
 	}
 	
 	ARDOUR::AutoState panner_state = rs.route()->panner().automation_state();
-	if ( panner_state == Touch || panner_state == Play )
+	if ( panner_state == Auto_Touch || panner_state == Auto_Play )
 	{
 		notify_panner_changed( &rs, false );
 	}

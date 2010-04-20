@@ -90,18 +90,18 @@ namespace ARDOUR {
 	};
 
 	enum AutoState {
-		Off = 0x0,
-		Write = 0x1,
-		Touch = 0x2,
-		Play = 0x4
+		Auto_Off = 0x0,
+		Auto_Write = 0x1,
+		Auto_Touch = 0x2,
+		Auto_Play = 0x4
 	};
 
 	std::string auto_state_to_string (AutoState);
 	AutoState string_to_auto_state (std::string);
 
 	enum AutoStyle {
-		Absolute = 0x1,
-		Trim = 0x2
+		Auto_Absolute = 0x1,
+		Auto_Trim = 0x2
 	};
 
 	std::string auto_style_to_string (AutoStyle);

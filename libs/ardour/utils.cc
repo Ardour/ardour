@@ -511,18 +511,18 @@ AutoState
 ARDOUR::string_to_auto_state (std::string str)
 {
 	if (str == X_("Off")) {
-		return Off;
+		return Auto_Off;
 	} else if (str == X_("Play")) {
-		return Play;
+		return Auto_Play;
 	} else if (str == X_("Write")) {
-		return Write;
+		return Auto_Write;
 	} else if (str == X_("Touch")) {
-		return Touch;
+		return Auto_Touch;
 	}
 
 	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoState string: ", str) << endmsg;
 	/*NOTREACHED*/
-	return Touch;
+	return Auto_Touch;
 }
 
 string 
@@ -531,16 +531,16 @@ ARDOUR::auto_state_to_string (AutoState as)
 	/* to be used only for XML serialization, no i18n done */
 
 	switch (as) {
-	case Off:
+	case Auto_Off:
 		return X_("Off");
 		break;
-	case Play:
+	case Auto_Play:
 		return X_("Play");
 		break;
-	case Write:
+	case Auto_Write:
 		return X_("Write");
 		break;
-	case Touch:
+	case Auto_Touch:
 		return X_("Touch");
 	}
 
@@ -553,14 +553,14 @@ AutoStyle
 ARDOUR::string_to_auto_style (std::string str)
 {
 	if (str == X_("Absolute")) {
-		return Absolute;
+		return Auto_Absolute;
 	} else if (str == X_("Trim")) {
-		return Trim;
+		return Auto_Trim;
 	}
 
 	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoStyle string: ", str) << endmsg;
 	/*NOTREACHED*/
-	return Trim;
+	return Auto_Trim;
 }
 
 string 
@@ -569,10 +569,10 @@ ARDOUR::auto_style_to_string (AutoStyle as)
 	/* to be used only for XML serialization, no i18n done */
 
 	switch (as) {
-	case Absolute:
+	case Auto_Absolute:
 		return X_("Absolute");
 		break;
-	case Trim:
+	case Auto_Trim:
 		return X_("Trim");
 		break;
 	}

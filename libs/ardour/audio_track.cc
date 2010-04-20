@@ -813,7 +813,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t st
 		}
 	}
 	
-	if (_gain_automation_curve.automation_state() == Play) {
+	if (_gain_automation_curve.automation_state() == Auto_Play) {
 		
 		_gain_automation_curve.get_vector (start, start + nframes, gain_automation, nframes);
 
@@ -961,8 +961,8 @@ AudioTrack::freeze (InterThreadInfo& itt)
 	/* reset stuff that has already been accounted for in the freeze process */
 	
 	set_gain (1.0, this);
-	_gain_automation_curve.set_automation_state (Off);
-	_panner->set_automation_state (Off);
+	_gain_automation_curve.set_automation_state (Auto_Off);
+	_panner->set_automation_state (Auto_Off);
 
 	_freeze_record.state = Frozen;
 	FreezeChange(); /* EMIT SIGNAL */

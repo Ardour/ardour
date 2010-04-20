@@ -107,14 +107,14 @@ setup_enum_writer ()
 	REGISTER_ENUM (MuteAutomation);
 	REGISTER_BITS (_AutomationType);
 
-	REGISTER_ENUM (Off);
-	REGISTER_ENUM (Write);
-	REGISTER_ENUM (Touch);
-	REGISTER_ENUM (Play);
+	REGISTER_ENUM (Auto_Off);
+	REGISTER_ENUM (Auto_Write);
+	REGISTER_ENUM (Auto_Touch);
+	REGISTER_ENUM (Auto_Play);
 	REGISTER_BITS (_AutoState);
 
-	REGISTER_ENUM (Absolute);
-	REGISTER_ENUM (Trim);
+	REGISTER_ENUM (Auto_Absolute);
+	REGISTER_ENUM (Auto_Trim);
 	REGISTER_BITS (_AutoStyle);
 
 	REGISTER_ENUM (CaptureTime);
