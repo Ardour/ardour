@@ -51,10 +51,10 @@ class PlaylistSelector : public ArdourDialog
 	bool on_unmap_event (GdkEventAny*);
 
   private:
-	typedef std::map<PBD::ID,std::list<boost::shared_ptr<ARDOUR::Playlist> >*> DSPL_Map;
+	typedef std::map<PBD::ID,std::list<boost::shared_ptr<ARDOUR::Playlist> >*> TrackPlaylistMap;
 
 	Gtk::ScrolledWindow scroller;
-	DSPL_Map dspl_map;
+	TrackPlaylistMap trpl_map;
 	RouteUI* rui;
 
 	sigc::connection select_connection;

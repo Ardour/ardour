@@ -77,7 +77,8 @@ MidiTrack::use_new_diskstream ()
 	assert(_mode != Destructive);
 
 	boost::shared_ptr<MidiDiskstream> ds (new MidiDiskstream (_session, name(), dflags));
-	_session.add_diskstream (ds);
+	ds->do_refill_with_alloc ();
+	ds->set_block_size (_session.get_block_size ());
 
 	set_diskstream (boost::dynamic_pointer_cast<MidiDiskstream> (ds));
 }
@@ -85,8 +86,9 @@ MidiTrack::use_new_diskstream ()
 void
 MidiTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 {
-	_diskstream = ds;
-	_diskstream->set_route (*this);
+	Track::set_diskstream (ds);
+	
+	_diskstream->set_track (this);
 	_diskstream->set_destructive (_mode == Destructive);
 
 	_diskstream->set_record_enabled (false);
@@ -185,25 +187,9 @@ MidiTrack::state(bool full_state)
 		root.add_child_nocopy (*freeze_node);
 	}
 
-	/* Alignment: act as a proxy for the diskstream */
-
-	XMLNode* align_node = new XMLNode (X_("Alignment"));
-	AlignStyle as = _diskstream->alignment_style ();
-	align_node->add_property (X_("style"), enum_2_string (as));
-	root.add_child_nocopy (*align_node);
-
 	root.add_property (X_("note-mode"), enum_2_string (_note_mode));
-
-	/* we don't return diskstream state because we don't
-	   own the diskstream exclusively. control of the diskstream
-	   state is ceded to the Session, even if we create the
-	   diskstream.
-	*/
-
-	_diskstream->id().print (buf, sizeof(buf));
-	root.add_property ("diskstream-id", buf);
-
 	root.add_child_nocopy (_rec_enable_control->get_state());
+	root.add_child_nocopy (_diskstream->get_state ());
 
 	root.add_property ("step-editing", (_step_editing ? "yes" : "no"));
 	root.add_property ("note-mode", enum_2_string (_note_mode));
@@ -272,28 +258,13 @@ MidiTrack::set_state_part_two ()
 		}
 	}
 
-	/* Alignment: act as a proxy for the diskstream */
-
-	if ((fnode = find_named_node (*pending_state, X_("Alignment"))) != 0) {
-
-		if ((prop = fnode->property (X_("style"))) != 0) {
-
-			/* fix for older sessions from before EnumWriter */
-
-			string pstr;
-
-			if (prop->value() == "capture") {
-				pstr = "CaptureTime";
-			} else if (prop->value() == "existing") {
-				pstr = "ExistingMaterial";
-			} else {
-				pstr = prop->value();
-			}
-
-			AlignStyle as = AlignStyle (string_2_enum (pstr, as));
-			_diskstream->set_persistent_align_style (as);
-		}
+	if ((fnode = find_named_node (*pending_state, X_("Diskstream"))) != 0) {
+		boost::shared_ptr<MidiDiskstream> ds (new MidiDiskstream (_session, *fnode));
+		ds->do_refill_with_alloc ();
+		ds->set_block_size (_session.get_block_size ());
+		set_diskstream (ds);
 	}
+
 	return;
 }
 
@@ -392,7 +363,7 @@ MidiTrack::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_fram
 {
 	int ret = Track::no_roll (nframes, start_frame, end_frame, state_changing, can_record, rec_monitors_input);
 
-	if (ret == 0 && diskstream()->record_enabled() && _step_editing) {
+	if (ret == 0 && _diskstream->record_enabled() && _step_editing) {
 		push_midi_input_to_step_edit_ringbuffer (nframes);
 	}
 
@@ -594,4 +565,12 @@ void
 MidiTrack::set_midi_thru (bool yn)
 {
 	_midi_thru = yn;
+}
+
+boost::shared_ptr<SMFSource>
+MidiTrack::write_source (uint32_t n)
+{
+	boost::shared_ptr<MidiDiskstream> ds = boost::dynamic_pointer_cast<MidiDiskstream> (_diskstream);
+	assert (ds);
+	return ds->write_source ();
 }

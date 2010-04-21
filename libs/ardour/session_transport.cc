@@ -32,7 +32,6 @@
 #include "midi++/port.h"
 
 #include "ardour/ardour.h"
-#include "ardour/audio_diskstream.h"
 #include "ardour/audioengine.h"
 #include "ardour/auditioner.h"
 #include "ardour/butler.h"
@@ -107,10 +106,10 @@ Session::request_transport_speed (double speed)
 }
 
 void
-Session::request_diskstream_speed (Diskstream& ds, double speed)
+Session::request_track_speed (Track* tr, double speed)
 {
-	SessionEvent* ev = new SessionEvent (SessionEvent::SetDiskstreamSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
-	ev->set_ptr (&ds);
+	SessionEvent* ev = new SessionEvent (SessionEvent::SetTrackSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
+	ev->set_ptr (tr);
 	queue_event (ev);
 }
 
@@ -155,7 +154,7 @@ Session::request_play_loop (bool yn, bool leave_rolling)
 	queue_event (ev);
 
 	if (!leave_rolling && !yn && Config->get_seamless_loop() && transport_rolling()) {
-		// request an immediate locate to refresh the diskstreams
+		// request an immediate locate to refresh the tracks
 		// after disabling looping
 		request_locate (_transport_frame-1, false);
 	}
@@ -252,7 +251,6 @@ Session::butler_transport_work ()
 	bool finished;
 	PostTransportWork ptw;
 	boost::shared_ptr<RouteList> r = routes.reader ();
-	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
 	int on_entry = g_atomic_int_get (&_butler->should_do_transport_work);
 	finished = true;
@@ -267,8 +265,11 @@ Session::butler_transport_work ()
 	}
 
 	if (ptw & PostTransportInputChange) {
-		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-			(*i)->non_realtime_input_change ();
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+			if (tr) {
+				tr->non_realtime_input_change ();
+			}
 		}
 	}
 
@@ -286,9 +287,10 @@ Session::butler_transport_work ()
 
 		if (!(ptw & PostTransportLocate)) {
 
-			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-				if (!(*i)->hidden()) {
-					(*i)->non_realtime_locate (_transport_frame);
+			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+				if (tr && !tr->hidden()) {
+					tr->non_realtime_locate (_transport_frame);
 				}
 				if (on_entry != g_atomic_int_get (&_butler->should_do_transport_work)) {
 					/* new request, stop seeking, and start again */
@@ -331,21 +333,23 @@ Session::butler_transport_work ()
 void
 Session::non_realtime_set_speed ()
 {
-	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-
-	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		(*i)->non_realtime_set_speed ();
+	boost::shared_ptr<RouteList> rl = routes.reader();
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr) {
+			tr->non_realtime_set_speed ();
+		}
 	}
 }
 
 void
 Session::non_realtime_overwrite (int on_entry, bool& finished)
 {
-	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-
-	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		if ((*i)->pending_overwrite) {
-			(*i)->overwrite_existing_buffers ();
+	boost::shared_ptr<RouteList> rl = routes.reader();
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr && tr->pending_overwrite ()) {
+			tr->overwrite_existing_buffers ();
 		}
 		if (on_entry != g_atomic_int_get (&_butler->should_do_transport_work)) {
 			finished = false;
@@ -358,10 +362,12 @@ Session::non_realtime_overwrite (int on_entry, bool& finished)
 void
 Session::non_realtime_locate ()
 {
-	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-
-	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		(*i)->non_realtime_locate (_transport_frame);
+	boost::shared_ptr<RouteList> rl = routes.reader();
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr) {
+			tr->non_realtime_locate (_transport_frame);
+		}
 	}
 }
 
@@ -378,10 +384,10 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	did_record = false;
 	saved = false;
 
-	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-
-	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		if ((*i)->get_captured_frames () != 0) {
+	boost::shared_ptr<RouteList> rl = routes.reader();
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr && tr->get_captured_frames () != 0) {
 			did_record = true;
 			break;
 		}
@@ -436,8 +442,11 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	}
 
 	DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: DS stop\n"));
-	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		(*i)->transport_stopped (*now, xnow, abort);
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr) {
+			tr->transport_stopped_wallclock (*now, xnow, abort);
+		}
 	}
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
@@ -531,7 +540,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	}
 
-	/* do this before seeking, because otherwise the Diskstreams will do the wrong thing in seamless loop mode.
+	/* do this before seeking, because otherwise the tracks will do the wrong thing in seamless loop mode.
 	*/
 
 	if (ptw & PostTransportClearSubstate) {
@@ -541,13 +550,12 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	/* this for() block can be put inside the previous if() and has the effect of ... ??? what */
 
-
 	DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: locate\n"));
-
-	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		if (!(*i)->hidden()) {
-                        DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler PTW: locate on %1\n", (*i)->name()));
-			(*i)->non_realtime_locate (_transport_frame);
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler PTW: locate on %1\n", (*i)->name()));
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr && !tr->hidden()) {
+			tr->non_realtime_locate (_transport_frame);
 		}
 
 		if (on_entry != g_atomic_int_get (&_butler->should_do_transport_work)) {
@@ -631,11 +639,12 @@ Session::unset_play_loop ()
 	play_loop = false;
 	clear_events (SessionEvent::AutoLoop);
 	
-	// set all diskstreams to NOT use internal looping
-	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		if (!(*i)->hidden()) {
-			(*i)->set_loop (0);
+	// set all tracks to NOT use internal looping
+	boost::shared_ptr<RouteList> rl = routes.reader ();
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr && !tr->hidden()) {
+			tr->set_loop (0);
 		}
 	}
 }
@@ -670,20 +679,22 @@ Session::set_play_loop (bool yn)
 			unset_play_range ();
 
 			if (Config->get_seamless_loop()) {
-				// set all diskstreams to use internal looping
-				boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-				for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-					if (!(*i)->hidden()) {
-						(*i)->set_loop (loc);
+				// set all tracks to use internal looping
+				boost::shared_ptr<RouteList> rl = routes.reader ();
+				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+					boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+					if (tr && !tr->hidden()) {
+						tr->set_loop (loc);
 					}
 				}
 			}
 			else {
-				// set all diskstreams to NOT use internal looping
-				boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-				for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-					if (!(*i)->hidden()) {
-						(*i)->set_loop (0);
+				// set all tracks to NOT use internal looping
+				boost::shared_ptr<RouteList> rl = routes.reader ();
+				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+					boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+					if (tr && !tr->hidden()) {
+						tr->set_loop (0);
 					}
 				}
 			}
@@ -749,16 +760,19 @@ Session::start_locate (nframes64_t target_frame, bool with_roll, bool with_flush
 int
 Session::micro_locate (nframes_t distance)
 {
-	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-
-	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		if (!(*i)->can_internal_playback_seek (distance)) {
+	boost::shared_ptr<RouteList> rl = routes.reader();
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr && !tr->can_internal_playback_seek (distance)) {
 			return -1;
 		}
 	}
 
-	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		(*i)->internal_playback_seek (distance);
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr) {
+			tr->internal_playback_seek (distance);
+		}
 	}
 
 	_transport_frame += distance;
@@ -834,24 +848,25 @@ Session::locate (nframes64_t target_frame, bool with_roll, bool with_flush, bool
 		/* switch from input if we're going to roll */
 		if (Config->get_monitoring_model() == HardwareMonitoring) {
 
-			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-
-			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-				if ((*i)->record_enabled ()) {
+			boost::shared_ptr<RouteList> rl = routes.reader();
+			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+				if (tr && tr->record_enabled ()) {
 					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
-					(*i)->monitor_input (!config.get_auto_input());
+					tr->monitor_input (!config.get_auto_input());
 				}
 			}
 		}
 	} else {
 		/* otherwise we're going to stop, so do the opposite */
 		if (Config->get_monitoring_model() == HardwareMonitoring) {
-			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
 
-			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-				if ((*i)->record_enabled ()) {
+			boost::shared_ptr<RouteList> rl = routes.reader();
+			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+				if (tr && tr->record_enabled ()) {
 					//cerr << "switching to input" << __FILE__ << __LINE__ << endl << endl;
-					(*i)->monitor_input (true);
+					tr->monitor_input (true);
 				}
 			}
 		}
@@ -869,12 +884,12 @@ Session::locate (nframes64_t target_frame, bool with_roll, bool with_flush, bool
 			if (with_loop) {
 				// this is only necessary for seamless looping
 
-				boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-
-				for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-					if ((*i)->record_enabled ()) {
+				boost::shared_ptr<RouteList> rl = routes.reader();
+				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+					boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+					if (tr && tr->record_enabled ()) {
 						// tell it we've looped, so it can deal with the record state
-						(*i)->transport_looped(_transport_frame);
+						tr->transport_looped(_transport_frame);
 					}
 				}
 			}
@@ -921,12 +936,12 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 
 		if (Config->get_monitoring_model() == HardwareMonitoring)
 		{
-			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-
-			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-				if ((*i)->record_enabled ()) {
+			boost::shared_ptr<RouteList> rl = routes.reader();
+			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+				if (tr && tr->record_enabled ()) {
 					//cerr << "switching to input" << __FILE__ << __LINE__ << endl << endl;
-					(*i)->monitor_input (true);
+					tr->monitor_input (true);
 				}
 			}
 		}
@@ -950,12 +965,12 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 
 		if (Config->get_monitoring_model() == HardwareMonitoring) {
 
-			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-
-			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-				if (config.get_auto_input() && (*i)->record_enabled ()) {
+			boost::shared_ptr<RouteList> rl = routes.reader();
+			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+				if (config.get_auto_input() && tr && tr->record_enabled ()) {
 					//cerr << "switching from input" << __FILE__ << __LINE__ << endl << endl;
-					(*i)->monitor_input (false);
+					tr->monitor_input (false);
 				}
 			}
 		}
@@ -1002,9 +1017,10 @@ Session::set_transport_speed (double speed, bool abort, bool clear_state)
 		_last_transport_speed = _transport_speed;
 		_transport_speed = speed;
 
-		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-			if ((*i)->realtime_set_speed ((*i)->speed(), true)) {
+		boost::shared_ptr<RouteList> rl = routes.reader();
+		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+			if (tr && tr->realtime_set_speed (tr->speed(), true)) {
 				todo = PostTransportWork (todo | PostTransportSpeed);
 				break;
 			}
@@ -1028,10 +1044,12 @@ Session::stop_transport (bool abort, bool clear_state)
 
 	if (actively_recording() && !(transport_sub_state & StopPendingCapture) && _worst_output_latency > current_block_size) {
 
-                boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-
-                for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-                        (*i)->prepare_to_stop (_transport_frame);
+		boost::shared_ptr<RouteList> rl = routes.reader();
+		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+			if (tr) {
+				tr->prepare_to_stop (_transport_frame);
+			}
                 }
 
 		/* we need to capture the audio that has still not yet been received by the system
@@ -1056,10 +1074,12 @@ Session::stop_transport (bool abort, bool clear_state)
 	if ((transport_sub_state & PendingDeclickOut) == 0) {
 
                 if (!(transport_sub_state & StopPendingCapture)) {
-                        boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-                        
-                        for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-                                (*i)->prepare_to_stop (_transport_frame);
+			boost::shared_ptr<RouteList> rl = routes.reader();
+			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+				if (tr) {
+					tr->prepare_to_stop (_transport_frame);
+				}
                         }
                 }
                 
@@ -1105,9 +1125,12 @@ Session::start_transport ()
 	_transport_speed = 1.0;
 	_target_transport_speed = 1.0;
 
-	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		(*i)->realtime_set_speed ((*i)->speed(), true);
+	boost::shared_ptr<RouteList> rl = routes.reader();
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr) {
+			tr->realtime_set_speed (tr->speed(), true);
+		}
 	}
 
 	deliver_mmc(MIDI::MachineControl::cmdDeferredPlay, _transport_frame);
@@ -1185,13 +1208,14 @@ Session::use_sync_source (Slave* new_slave)
 	delete _slave;
 	_slave = new_slave;
 
-	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		if (!(*i)->hidden()) {
-			if ((*i)->realtime_set_speed ((*i)->speed(), true)) {
+	boost::shared_ptr<RouteList> rl = routes.reader();
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr && !tr->hidden()) {
+			if (tr->realtime_set_speed (tr->speed(), true)) {
 				non_rt_required = true;
 			}
-			(*i)->set_slaved (_slave != 0);
+			tr->set_slaved (_slave != 0);
 		}
 	}
 
@@ -1274,16 +1298,16 @@ Session::switch_to_sync_source (SyncSource src)
 }
 
 void
-Session::reverse_diskstream_buffers ()
+Session::reverse_track_buffers ()
 {
 	add_post_transport_work (PostTransportReverse);
 	_butler->schedule_transport_work ();
 }
 
 void
-Session::set_diskstream_speed (Diskstream* stream, double speed)
+Session::set_track_speed (Track* track, double speed)
 {
-	if (stream->realtime_set_speed (speed, false)) {
+	if (track->realtime_set_speed (speed, false)) {
 		add_post_transport_work (PostTransportSpeed);
 		_butler->schedule_transport_work ();
 		set_dirty ();
@@ -1501,11 +1525,13 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 
 	/* reflect any changes in latencies into capture offsets
 	*/
-
-	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-
-	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-		(*i)->set_capture_offset ();
+	
+	boost::shared_ptr<RouteList> rl = routes.reader();
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr) {
+			tr->set_capture_offset ();
+		}
 	}
 }
 

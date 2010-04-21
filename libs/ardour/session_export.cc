@@ -21,14 +21,13 @@
 #include "pbd/error.h"
 #include <glibmm/thread.h>
 
-#include "ardour/audio_diskstream.h"
 #include "ardour/audioengine.h"
 #include "ardour/butler.h"
 #include "ardour/export_failed.h"
 #include "ardour/export_handler.h"
 #include "ardour/export_status.h"
-#include "ardour/route.h"
 #include "ardour/session.h"
+#include "ardour/track.h"
 
 #include "i18n.h"
 
@@ -105,10 +104,11 @@ Session::start_audio_export (nframes_t position, bool /* realtime */)
 	/* get everyone to the right position */
 
 	{
-		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
+		boost::shared_ptr<RouteList> rl = routes.reader();
 
-		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-			if ((*i)-> seek (position, true)) {
+		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+			if (tr && tr->seek (position, true)) {
 				error << string_compose (_("%1: cannot seek to %2 for export"),
 						  (*i)->name(), position)
 				      << endmsg;

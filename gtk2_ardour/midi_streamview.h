@@ -35,7 +35,6 @@ namespace Gdk {
 
 namespace ARDOUR {
 	class Route;
-	class Diskstream;
 	class Crossfade;
 	class PeakData;
 	class MidiRegion;
@@ -76,7 +75,7 @@ class MidiStreamView : public StreamView
 
 	void update_note_range(uint8_t note_num);
 
-	void redisplay_diskstream ();
+	void redisplay_track ();
 
 	inline double contents_height() const
 	{ return (_trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
@@ -119,7 +118,7 @@ class MidiStreamView : public StreamView
 			bool recording = false);
 
 	void display_region(MidiRegionView* region_view, bool load_model);
-	void display_diskstream (boost::shared_ptr<ARDOUR::Diskstream> ds);
+	void display_track (boost::shared_ptr<ARDOUR::Track> tr);
 
 	void update_contents_height ();
 	void draw_note_lines();

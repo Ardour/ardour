@@ -35,7 +35,6 @@
 #include "ardour/tempo.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
-#include "ardour/midi_diskstream.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_patch_manager.h"
 #include "ardour/session.h"
@@ -678,7 +677,7 @@ MidiRegionView::apply_delta()
 
 	_model->apply_command(*trackview.session(), _delta_command);
 	_delta_command = 0;
-	midi_view()->midi_track()->diskstream()->playlist_modified();
+	midi_view()->midi_track()->playlist_modified();
 
 	_marked_for_selection.clear();
 	_marked_for_velocity.clear();
@@ -693,7 +692,7 @@ MidiRegionView::apply_diff ()
 
 	_model->apply_command(*trackview.session(), _diff_command);
 	_diff_command = 0;
-	midi_view()->midi_track()->diskstream()->playlist_modified();
+	midi_view()->midi_track()->playlist_modified();
 
 	_marked_for_velocity.clear();
 }
@@ -712,7 +711,7 @@ MidiRegionView::apply_delta_as_subcommand()
 
 	_model->apply_command_as_subcommand(*trackview.session(), _delta_command);
 	_delta_command = 0;
-	midi_view()->midi_track()->diskstream()->playlist_modified();
+	midi_view()->midi_track()->playlist_modified();
 
 	_marked_for_selection.clear();
 	_marked_for_velocity.clear();
@@ -732,7 +731,7 @@ MidiRegionView::apply_diff_as_subcommand()
 
 	_model->apply_command_as_subcommand(*trackview.session(), _diff_command);
 	_diff_command = 0;
-	midi_view()->midi_track()->diskstream()->playlist_modified();
+	midi_view()->midi_track()->playlist_modified();
 
 	_marked_for_selection.clear();
 	_marked_for_velocity.clear();

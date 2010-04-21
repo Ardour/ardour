@@ -480,7 +480,7 @@ Editor::drop_paths_part_two (const vector<ustring>& paths, nframes64_t frame, do
 
 		/* check that its an audio track, not a bus */
 
-		if (tv->get_diskstream()) {
+		if (tv->track()) {
 			/* select the track, then embed/import */
 			selection->set (tv);
 

@@ -81,7 +81,8 @@ AudioTrack::use_new_diskstream ()
 	AudioDiskstream* dsp (new AudioDiskstream (_session, name(), dflags));
 	boost::shared_ptr<AudioDiskstream> ds (dsp);
 
-	_session.add_diskstream (ds);
+	ds->do_refill_with_alloc ();
+	ds->set_block_size (_session.get_block_size ());
 
 	set_diskstream (ds);
 }
@@ -89,8 +90,9 @@ AudioTrack::use_new_diskstream ()
 void
 AudioTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 {
-	_diskstream = ds;
-        _diskstream->set_route (*this);
+	Track::set_diskstream (ds);
+
+        _diskstream->set_track (this);
 	_diskstream->set_destructive (_mode == Destructive);
 	_diskstream->set_non_layered (_mode == NonLayered);
 
@@ -234,6 +236,14 @@ AudioTrack::_set_state (const XMLNode& node, int version, bool call_base)
 		}
 	}
 
+	if (version >= 3000) {
+		if ((child = find_named_node (node, X_("Diskstream"))) != 0) {
+			boost::shared_ptr<AudioDiskstream> ds (new AudioDiskstream (_session, *child));
+			ds->do_refill_with_alloc ();
+			set_diskstream (ds);
+		}
+	}
+
 	pending_state = const_cast<XMLNode*> (&node);
 
 	if (_session.state_of_the_state() & Session::Loading) {
@@ -246,7 +256,7 @@ AudioTrack::_set_state (const XMLNode& node, int version, bool call_base)
 }
 
 XMLNode&
-AudioTrack::state(bool full_state)
+AudioTrack::state (bool full_state)
 {
 	XMLNode& root (Route::state(full_state));
 	XMLNode* freeze_node;
@@ -271,25 +281,9 @@ AudioTrack::state(bool full_state)
 		root.add_child_nocopy (*freeze_node);
 	}
 
-	/* Alignment: act as a proxy for the diskstream */
-
-	XMLNode* align_node = new XMLNode (X_("Alignment"));
-	AlignStyle as = _diskstream->alignment_style ();
-	align_node->add_property (X_("style"), enum_2_string (as));
-	root.add_child_nocopy (*align_node);
-
 	root.add_property (X_("mode"), enum_2_string (_mode));
-
-	/* we don't return diskstream state because we don't
-	   own the diskstream exclusively. control of the diskstream
-	   state is ceded to the Session, even if we create the
-	   diskstream.
-	*/
-
-	_diskstream->id().print (buf, sizeof (buf));
-	root.add_property ("diskstream-id", buf);
-
 	root.add_child_nocopy (_rec_enable_control->get_state());
+	root.add_child_nocopy (_diskstream->get_state ());
 
 	return root;
 }
@@ -351,30 +345,6 @@ AudioTrack::set_state_part_two ()
 			_freeze_record.processor_info.push_back (frii);
 		}
 	}
-
-	/* Alignment: act as a proxy for the diskstream */
-
-	if ((fnode = find_named_node (*pending_state, X_("Alignment"))) != 0) {
-
-		if ((prop = fnode->property (X_("style"))) != 0) {
-
-			/* fix for older sessions from before EnumWriter */
-
-			string pstr;
-
-			if (prop->value() == "capture") {
-				pstr = "CaptureTime";
-			} else if (prop->value() == "existing") {
-				pstr = "ExistingMaterial";
-			} else {
-				pstr = prop->value();
-			}
-
-			AlignStyle as = AlignStyle (string_2_enum (pstr, as));
-			_diskstream->set_persistent_align_style (as);
-		}
-	}
-	return;
 }
 
 int
@@ -713,7 +683,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 	boost::shared_ptr<Region> region (RegionFactory::create (srcs, plist, false));
 
-	new_playlist->set_orig_diskstream_id (diskstream->id());
+	new_playlist->set_orig_diskstream_id (_diskstream->id());
 	new_playlist->add_region (region, _session.current_start_frame());
 	new_playlist->set_frozen (true);
 	region->set_locked (true);
@@ -757,3 +727,10 @@ AudioTrack::unfreeze ()
 	FreezeChange (); /* EMIT SIGNAL */
 }
 
+boost::shared_ptr<AudioFileSource>
+AudioTrack::write_source (uint32_t n)
+{
+	boost::shared_ptr<AudioDiskstream> ds = boost::dynamic_pointer_cast<AudioDiskstream> (_diskstream);
+	assert (ds);
+	return ds->write_source (n);
+}

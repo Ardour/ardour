@@ -261,7 +261,7 @@ Track::no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		*/
 	}
 
-	diskstream()->check_record_status (start_frame, nframes, can_record);
+	_diskstream->check_record_status (start_frame, nframes, can_record);
 
 	bool send_silence;
 
@@ -346,7 +346,7 @@ Track::silent_roll (nframes_t nframes, framepos_t /*start_frame*/, framepos_t /*
 
 	silence (nframes);
 
-	return diskstream()->process (_session.transport_frame(), nframes, can_record, rec_monitors_input, need_butler);
+	return _diskstream->process (_session.transport_frame(), nframes, can_record, rec_monitors_input, need_butler);
 }
 
 ChanCount
@@ -361,3 +361,297 @@ Track::input_streams () const
         return cc;
 }
 
+void
+Track::set_diskstream (boost::shared_ptr<Diskstream> ds)
+{
+	_diskstream = ds;
+	
+	ds->PlaylistChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_playlist_changed, this));
+	diskstream_playlist_changed ();
+	ds->RecordEnableChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_record_enable_changed, this));
+	ds->SpeedChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_speed_changed, this));
+	ds->AlignmentStyleChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_alignment_style_changed, this));
+}
+
+void
+Track::diskstream_playlist_changed ()
+{
+	PlaylistChanged (); /* EMIT SIGNAL */
+}
+
+void
+Track::diskstream_record_enable_changed ()
+{
+	RecordEnableChanged (); /* EMIT SIGNAL */
+}
+
+void
+Track::diskstream_speed_changed ()
+{
+	SpeedChanged (); /* EMIT SIGNAL */
+}
+
+void
+Track::diskstream_alignment_style_changed ()
+{
+	AlignmentStyleChanged (); /* EMIT SIGNAL */
+}
+
+boost::shared_ptr<Playlist>
+Track::playlist ()
+{
+	return _diskstream->playlist ();
+}
+
+void
+Track::monitor_input (bool m)
+{
+	_diskstream->monitor_input (m);
+}
+
+bool
+Track::destructive () const
+{
+	return _diskstream->destructive ();
+}
+
+list<boost::shared_ptr<Region> > &
+Track::last_capture_regions ()
+{
+	return _diskstream->last_capture_regions ();
+}
+
+void
+Track::set_capture_offset ()
+{
+	_diskstream->set_capture_offset ();
+}
+
+void
+Track::reset_write_sources (bool r, bool force)
+{
+	_diskstream->reset_write_sources (r, force);
+}
+
+float
+Track::playback_buffer_load () const
+{
+	return _diskstream->playback_buffer_load ();
+}
+
+float
+Track::capture_buffer_load () const
+{
+	return _diskstream->capture_buffer_load ();
+}
+
+int
+Track::do_refill ()
+{
+	return _diskstream->do_refill ();
+}
+
+int
+Track::do_flush (RunContext c, bool force)
+{
+	return _diskstream->do_flush (c, force);
+}
+
+void
+Track::set_pending_overwrite (bool o)
+{
+	_diskstream->set_pending_overwrite (o);
+}
+
+int
+Track::seek (nframes_t s, bool complete_refill)
+{
+	return _diskstream->seek (s, complete_refill);
+}
+
+bool
+Track::hidden () const
+{
+	return _diskstream->hidden ();
+}
+
+int
+Track::can_internal_playback_seek (nframes_t d)
+{
+	return _diskstream->can_internal_playback_seek (d);
+}
+
+int
+Track::internal_playback_seek (nframes_t d)
+{
+	return _diskstream->internal_playback_seek (d);
+}
+
+void
+Track::non_realtime_input_change ()
+{
+	_diskstream->non_realtime_input_change ();
+}
+
+void
+Track::non_realtime_locate (nframes_t p)
+{
+	_diskstream->non_realtime_locate (p);
+}
+
+void
+Track::non_realtime_set_speed ()
+{
+	_diskstream->non_realtime_set_speed ();
+}
+
+int
+Track::overwrite_existing_buffers ()
+{
+	return _diskstream->overwrite_existing_buffers ();
+}
+
+nframes_t
+Track::get_captured_frames (uint32_t n)
+{
+	return _diskstream->get_captured_frames (n);
+}
+
+int
+Track::set_loop (Location* l)
+{
+	return _diskstream->set_loop (l);
+}
+
+void
+Track::transport_looped (nframes_t f)
+{
+	_diskstream->transport_looped (f);
+}
+
+bool
+Track::realtime_set_speed (double s, bool g)
+{
+	return _diskstream->realtime_set_speed (s, g);
+}
+
+void
+Track::transport_stopped_wallclock (struct tm & n, time_t t, bool g)
+{
+	_diskstream->transport_stopped_wallclock (n, t, g);
+}
+
+bool
+Track::pending_overwrite () const
+{
+	return _diskstream->pending_overwrite ();
+}
+
+double
+Track::speed () const
+{
+	return _diskstream->speed ();
+}
+
+void
+Track::prepare_to_stop (framepos_t p)
+{
+	_diskstream->prepare_to_stop (p);
+}
+
+void
+Track::set_slaved (bool s)
+{
+	_diskstream->set_slaved (s);
+}
+
+ChanCount
+Track::n_channels ()
+{
+	return _diskstream->n_channels ();
+}
+
+nframes_t
+Track::get_capture_start_frame (uint32_t n)
+{
+	return _diskstream->get_capture_start_frame (n);
+}
+
+AlignStyle
+Track::alignment_style () const
+{
+	return _diskstream->alignment_style ();
+}
+
+void
+Track::set_record_enabled (bool r)
+{
+	_diskstream->set_record_enabled (r);
+}
+
+nframes_t
+Track::current_capture_start () const
+{
+	return _diskstream->current_capture_start ();
+}
+
+nframes_t
+Track::current_capture_end () const
+{
+	return _diskstream->current_capture_end ();
+}
+
+void
+Track::playlist_modified ()
+{
+	_diskstream->playlist_modified ();
+}
+
+int
+Track::use_playlist (boost::shared_ptr<Playlist> p)
+{
+	return _diskstream->use_playlist (p);
+}
+
+int
+Track::use_copy_playlist ()
+{
+	return _diskstream->use_copy_playlist ();
+}
+
+int
+Track::use_new_playlist ()
+{
+	return _diskstream->use_new_playlist ();
+}
+
+uint32_t
+Track::read_data_count () const
+{
+	return _diskstream->read_data_count ();
+}
+
+void
+Track::set_align_style (AlignStyle s)
+{
+	_diskstream->set_align_style (s);
+}
+
+uint32_t
+Track::write_data_count () const
+{
+	return _diskstream->write_data_count ();
+}
+
+PBD::ID const &
+Track::diskstream_id () const
+{
+	return _diskstream->id ();
+}
+
+void
+Track::set_block_size (nframes_t n)
+{
+	Route::set_block_size (n);
+	_diskstream->set_block_size (n);
+}

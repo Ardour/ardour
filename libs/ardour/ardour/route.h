@@ -338,10 +338,10 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	void catch_up_on_solo_mute_override ();
 	void mod_solo_by_others (int32_t);
-	void set_block_size (nframes_t nframes);
 	bool has_external_redirects() const;
 	void curve_reallocate ();
 	void just_meter_input (sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
+	virtual void set_block_size (nframes_t nframes);
 
   protected:
 	nframes_t check_initial_delay (nframes_t, nframes_t&);

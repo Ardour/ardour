@@ -209,9 +209,9 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 }
 
 void
-MidiStreamView::display_diskstream (boost::shared_ptr<Diskstream> ds)
+MidiStreamView::display_track (boost::shared_ptr<Track> tr)
 {
-	StreamView::display_diskstream(ds);
+	StreamView::display_track (tr);
 	draw_note_lines();
 	NoteRangeChanged();
 }
@@ -244,7 +244,7 @@ MidiStreamView::update_data_note_range(uint8_t min, uint8_t max)
 }
 
 void
-MidiStreamView::redisplay_diskstream ()
+MidiStreamView::redisplay_track ()
 {
 	if (!_trackview.is_midi_track()) {
 		return;
@@ -256,7 +256,7 @@ MidiStreamView::redisplay_diskstream ()
 	_range_dirty = false;
 	_data_note_min = 127;
 	_data_note_max = 0;
-	_trackview.get_diskstream()->playlist()->foreach_region(
+	_trackview.track()->playlist()->foreach_region(
 		sigc::mem_fun (*this, &StreamView::update_contents_metrics)
 		);
 
@@ -279,7 +279,7 @@ MidiStreamView::redisplay_diskstream ()
 	}
 
 	// Add and display region views, and flag them as valid
-	_trackview.get_diskstream()->playlist()->foreach_region(
+	_trackview.track()->playlist()->foreach_region(
 		sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view))
 		);
 
@@ -385,7 +385,7 @@ MidiStreamView::setup_rec_box ()
 
 		if (!rec_active &&
 		    _trackview.session()->record_status() == Session::Recording &&
-		    _trackview.get_diskstream()->record_enabled()) {
+		    _trackview.track()->record_enabled()) {
 
 			if (Config->get_show_waveforms_while_recording() && rec_regions.size() == rec_rects.size()) {
 
@@ -397,12 +397,12 @@ MidiStreamView::setup_rec_box ()
 
 				boost::shared_ptr<MidiDiskstream> mds = _trackview.midi_track()->midi_diskstream();
 
-				sources.push_back(mds->write_source());
+				sources.push_back (_trackview.midi_track()->write_source());
 
 				mds->write_source()->ViewDataRangeReady.connect 
 					(rec_data_ready_connections, 
                                          invalidator (*this),
-					 ui_bind (&MidiStreamView::rec_data_range_ready, this, _1, _2, boost::weak_ptr<Source>(mds->write_source())),
+					 ui_bind (&MidiStreamView::rec_data_range_ready, this, _1, _2, boost::weak_ptr<Source>(_trackview.midi_track()->write_source())),
 					 gui_context());
 
 				// handle multi
@@ -410,7 +410,7 @@ MidiStreamView::setup_rec_box ()
 				nframes_t start = 0;
 				if (rec_regions.size() > 0) {
 					start = rec_regions.back().first->start()
-							+ _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
+							+ _trackview.track()->get_captured_frames(rec_regions.size()-1);
 				}
 				
 				PropertyList plist; 
@@ -436,8 +436,7 @@ MidiStreamView::setup_rec_box ()
 			/* start a new rec box */
 
 			boost::shared_ptr<MidiTrack> mt = _trackview.midi_track(); /* we know what it is already */
-			boost::shared_ptr<MidiDiskstream> ds = mt->midi_diskstream();
-			nframes_t frame_pos = ds->current_capture_start ();
+			nframes_t frame_pos = mt->current_capture_start ();
 			gdouble xstart = _trackview.editor().frame_to_pixel (frame_pos);
 			gdouble xend;
 			uint32_t fill_color;
@@ -471,7 +470,7 @@ MidiStreamView::setup_rec_box ()
 
 		} else if (rec_active &&
 			   (_trackview.session()->record_status() != Session::Recording ||
-			    !_trackview.get_diskstream()->record_enabled())) {
+			    !_trackview.track()->record_enabled())) {
 			screen_update_connection.disconnect();
 			rec_active = false;
 			rec_updating = false;
@@ -558,7 +557,7 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 					if (nlen != region->length()) {
 
 						region->suspend_property_changes ();
-						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);
+						region->set_position (_trackview.track()->get_capture_start_frame(n), this);
 						region->set_length (start + dur - region->position(), this);
 						region->resume_property_changes ();
 
@@ -615,14 +614,14 @@ MidiStreamView::update_rec_regions (boost::shared_ptr<MidiModel> data, nframes_t
 
 			} else {
 
-				nframes_t nlen = _trackview.get_diskstream()->get_captured_frames(n);
+				nframes_t nlen = _trackview.track()->get_captured_frames(n);
 
 				if (nlen != region->length()) {
 
 					if (region->source_length(0) >= region->position() + nlen) {
 
 						region->suspend_property_changes ();
-						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);
+						region->set_position (_trackview.track()->get_capture_start_frame(n), this);
 						region->set_length (nlen, this);
 						region->resume_property_changes ();
 

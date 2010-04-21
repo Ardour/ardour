@@ -22,16 +22,17 @@
 #include <boost/shared_ptr.hpp>
 
 #include "ardour/route.h"
+#include "ardour/public_diskstream.h"
 
 namespace ARDOUR {
 
 class Session;
-class Diskstream;
 class Playlist;
 class RouteGroup;
 class Region;
+class Diskstream;
 
-class Track : public Route
+class Track : public Route, public PublicDiskstream
 {
   public:
 	Track (Session&, std::string name, Route::Flag f = Route::Flag (0), TrackMode m = Normal, DataType default_type = DataType::AUDIO);
@@ -60,10 +61,8 @@ class Track : public Route
 
 	bool can_record();
 
-	boost::shared_ptr<Diskstream> diskstream() const { return _diskstream; }
-
         virtual void use_new_diskstream () = 0;
-        virtual void set_diskstream (boost::shared_ptr<Diskstream>) = 0;
+        virtual void set_diskstream (boost::shared_ptr<Diskstream>);
 
 	nframes_t update_total_latency();
 	void           set_latency_delay (nframes_t);
@@ -92,8 +91,60 @@ class Track : public Route
 	bool record_enabled() const;
 	void set_record_enable (bool yn, void *src);
 
+	/* XXX: unfortunate that this is exposed */
+	PBD::ID const & diskstream_id () const;
+
+	void set_block_size (nframes_t);
+
+	/* PublicDiskstream interface */
+	boost::shared_ptr<Playlist> playlist ();
+	void monitor_input (bool);
+	bool destructive () const;
+	std::list<boost::shared_ptr<Region> > & last_capture_regions ();
+	void set_capture_offset ();
+	void reset_write_sources (bool, bool force = false);
+	float playback_buffer_load () const;
+	float capture_buffer_load () const;
+	int do_refill ();
+	int do_flush (RunContext, bool force = false);
+	uint32_t read_data_count() const;
+	uint32_t write_data_count() const;
+	void set_pending_overwrite (bool);
+	int seek (nframes_t, bool complete_refill = false);
+	bool hidden () const;
+	int can_internal_playback_seek (nframes_t);
+	int internal_playback_seek (nframes_t);
+	void non_realtime_input_change ();
+	void non_realtime_locate (nframes_t);
+	void non_realtime_set_speed ();
+	int overwrite_existing_buffers ();
+	nframes_t get_captured_frames (uint32_t n = 0);
+	int set_loop (Location *);
+	void transport_looped (nframes_t);
+	bool realtime_set_speed (double, bool);
+	void transport_stopped_wallclock (struct tm &, time_t, bool);
+	bool pending_overwrite () const;
+	double speed () const;
+        void prepare_to_stop (framepos_t);
+	void set_slaved (bool);
+	ChanCount n_channels ();
+	nframes_t get_capture_start_frame (uint32_t n = 0);
+	AlignStyle alignment_style () const;
+	void set_record_enabled (bool);
+	nframes_t current_capture_start () const;
+	nframes_t current_capture_end () const;
+	void playlist_modified ();
+	int use_playlist (boost::shared_ptr<Playlist>);
+	void set_align_style (AlignStyle);
+	int use_copy_playlist ();
+	int use_new_playlist ();
+
 	PBD::Signal0<void> DiskstreamChanged;
 	PBD::Signal0<void> FreezeChange;
+	PBD::Signal0<void> PlaylistChanged;
+	PBD::Signal0<void> RecordEnableChanged;
+	PBD::Signal0<void> SpeedChanged;
+	PBD::Signal0<void> AlignmentStyleChanged;
 
   protected:
 	virtual XMLNode& state (bool full) = 0;
@@ -144,6 +195,12 @@ class Track : public Route
 	bool                  _destructive;
 
 	boost::shared_ptr<RecEnableControllable> _rec_enable_control;
+
+private:
+	void diskstream_playlist_changed ();
+	void diskstream_record_enable_changed ();
+	void diskstream_speed_changed ();
+	void diskstream_alignment_style_changed ();
 };
 
 }; /* namespace ARDOUR*/

@@ -228,7 +228,7 @@ class AudioDiskstream : public Diskstream
 			ChannelInfo* channel_info, int channel, bool reversed);
 
 	void finish_capture (bool rec_monitors_input, boost::shared_ptr<ChannelList>);
-	void transport_stopped (struct tm&, time_t, bool abort);
+	void transport_stopped_wallclock (struct tm&, time_t, bool abort);
 	void transport_looped (nframes_t transport_frame);
 
 	void init ();

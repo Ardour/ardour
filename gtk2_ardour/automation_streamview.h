@@ -47,7 +47,7 @@ class AutomationStreamView : public StreamView
 
 	void set_automation_state (ARDOUR::AutoState state);
 
-	void redisplay_diskstream ();
+	void redisplay_track ();
 
 	inline double contents_height() const {
 		return (_trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2);

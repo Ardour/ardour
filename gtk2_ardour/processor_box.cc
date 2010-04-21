@@ -42,7 +42,6 @@
 
 #include "ardour/amp.h"
 #include "ardour/ardour.h"
-#include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/internal_send.h"

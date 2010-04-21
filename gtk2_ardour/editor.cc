@@ -1358,7 +1358,7 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 		break;
 
 	case StreamItem:
-		if (clicked_routeview->get_diskstream()) {
+		if (clicked_routeview->track()) {
 			build_menu_function = &Editor::build_track_context_menu;
 		} else {
 			build_menu_function = &Editor::build_track_bus_context_menu;
@@ -1480,11 +1480,11 @@ Editor::build_track_region_context_menu (nframes64_t frame)
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (clicked_axisview);
 
 	if (rtv) {
-		boost::shared_ptr<Diskstream> ds;
+		boost::shared_ptr<Track> tr;
 		boost::shared_ptr<Playlist> pl;
 
-		if ((ds = rtv->get_diskstream()) && ((pl = ds->playlist()))) {
-			Playlist::RegionList* regions = pl->regions_at ((nframes64_t) floor ( (double)frame * ds->speed()));
+		if ((tr = rtv->track()) && ((pl = tr->playlist()))) {
+			Playlist::RegionList* regions = pl->regions_at ((nframes64_t) floor ( (double)frame * tr->speed()));
 
  			if (selection->regions.size() > 1) {
  				// there's already a multiple selection: just add a
@@ -1517,11 +1517,11 @@ Editor::build_track_crossfade_context_menu (nframes64_t frame)
 	AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*> (clicked_axisview);
 
 	if (atv) {
-		boost::shared_ptr<Diskstream> ds;
+		boost::shared_ptr<Track> tr;
 		boost::shared_ptr<Playlist> pl;
 		boost::shared_ptr<AudioPlaylist> apl;
 
-		if ((ds = atv->get_diskstream()) && ((pl = ds->playlist()) != 0) && ((apl = boost::dynamic_pointer_cast<AudioPlaylist> (pl)) != 0)) {
+		if ((tr = atv->track()) && ((pl = tr->playlist()) != 0) && ((apl = boost::dynamic_pointer_cast<AudioPlaylist> (pl)) != 0)) {
 
 			Playlist::RegionList* regions = pl->regions_at (frame);
 			AudioPlaylist::Crossfades xfades;
@@ -4537,13 +4537,13 @@ Editor::get_regions_at (RegionSelection& rs, nframes64_t where, const TrackViewL
 	for (TrackViewList::const_iterator t = tracks->begin(); t != tracks->end(); ++t) {
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*t);
 		if (rtv) {
-			boost::shared_ptr<Diskstream> ds;
+			boost::shared_ptr<Track> tr;
 			boost::shared_ptr<Playlist> pl;
 
-			if ((ds = rtv->get_diskstream()) && ((pl = ds->playlist()))) {
+			if ((tr = rtv->track()) && ((pl = tr->playlist()))) {
 
 				Playlist::RegionList* regions = pl->regions_at (
-						(nframes64_t) floor ( (double)where * ds->speed()));
+						(nframes64_t) floor ( (double)where * tr->speed()));
 
 				for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
 					RegionView* rv = rtv->view()->find_view (*i);
@@ -4572,13 +4572,13 @@ Editor::get_regions_after (RegionSelection& rs, nframes64_t where, const TrackVi
 	for (TrackViewList::const_iterator t = tracks->begin(); t != tracks->end(); ++t) {
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*t);
 		if (rtv) {
-			boost::shared_ptr<Diskstream> ds;
+			boost::shared_ptr<Track> tr;
 			boost::shared_ptr<Playlist> pl;
 
-			if ((ds = rtv->get_diskstream()) && ((pl = ds->playlist()))) {
+			if ((tr = rtv->track()) && ((pl = tr->playlist()))) {
 
 				Playlist::RegionList* regions = pl->regions_touched (
-						(nframes64_t) floor ( (double)where * ds->speed()), max_frames);
+						(nframes64_t) floor ( (double)where * tr->speed()), max_frames);
 
 				for (Playlist::RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
 
@@ -4650,14 +4650,14 @@ Editor::get_regions_corresponding_to (boost::shared_ptr<Region> region, vector<R
 			boost::shared_ptr<Playlist> pl;
 			vector<boost::shared_ptr<Region> > results;
 			RegionView* marv;
-			boost::shared_ptr<Diskstream> ds;
+			boost::shared_ptr<Track> tr;
 
-			if ((ds = tatv->get_diskstream()) == 0) {
+			if ((tr = tatv->track()) == 0) {
 				/* bus */
 				continue;
 			}
 
-			if ((pl = (ds->playlist())) != 0) {
+			if ((pl = (tr->playlist())) != 0) {
 				pl->get_region_list_equivalent_regions (region, results);
 			}
 

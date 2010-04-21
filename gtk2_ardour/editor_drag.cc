@@ -22,11 +22,9 @@
 #include "pbd/memento_command.h"
 #include "pbd/basename.h"
 #include "pbd/stateful_diff_command.h"
-#include "ardour/diskstream.h"
 #include "ardour/session.h"
 #include "ardour/dB.h"
 #include "ardour/region_factory.h"
-#include "ardour/midi_diskstream.h"
 #include "editor.h"
 #include "i18n.h"
 #include "keyboard.h"
@@ -826,7 +824,7 @@ void
 RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 {
 	vector<RegionView*> copies;
-	boost::shared_ptr<Diskstream> ds;
+	boost::shared_ptr<Track> tr;
 	boost::shared_ptr<Playlist> from_playlist;
 	boost::shared_ptr<Playlist> to_playlist;
 	RegionSelection new_views;
@@ -1016,11 +1014,11 @@ RegionMoveDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 			*/
 
 			source_tv = dynamic_cast<RouteTimeAxisView*> (&rv->get_time_axis_view());
-			ds = source_tv->get_diskstream();
-			from_playlist = ds->playlist();
+			tr = source_tv->track();
+			from_playlist = tr->playlist();
 
 			assert (source_tv);
-			assert (ds);
+			assert (tr);
 			assert (from_playlist);
 
 			/* moved to a different audio track, without copying */
@@ -1370,7 +1368,7 @@ RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p,
 	double speed = 1;
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 	if (rtv && rtv->is_track()) {
-		speed = rtv->get_diskstream()->speed ();
+		speed = rtv->track()->speed ();
 	}
 
 	_last_frame_position = static_cast<nframes64_t> (_primary->region()->position() / speed);
@@ -1697,7 +1695,7 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
 	if (tv && tv->is_track()) {
-		speed = tv->get_diskstream()->speed();
+		speed = tv->track()->speed();
 	}
 
 	nframes64_t region_start = (nframes64_t) (_primary->region()->position() / speed);
@@ -1754,7 +1752,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
 
 	if (tv && tv->is_track()) {
-		speed = tv->get_diskstream()->speed();
+		speed = tv->track()->speed();
 	}
 
 	nframes64_t const pf = adjusted_current_frame (event);

@@ -77,7 +77,6 @@ namespace Evoral {
 
 namespace ARDOUR {
 
-class AudioDiskstream;
 class AudioEngine;
 class AudioFileSource;
 class AudioRegion;
@@ -96,7 +95,6 @@ class ExportStatus;
 class IO;
 class IOProcessor;
 class ImportStatus;
-class MidiDiskstream;
 class MidiRegion;
 class MidiSource;
 class MidiTrack;
@@ -121,6 +119,7 @@ class Slave;
 class Source;
 class TempoMap;
 class VSTPlugin;
+class Track;
 
 extern void setup_enum_writer ();
 
@@ -193,26 +192,18 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	BufferSet& get_scratch_buffers (ChanCount count = ChanCount::ZERO);
 	BufferSet& get_mix_buffers (ChanCount count = ChanCount::ZERO);
 
-	void add_diskstream (boost::shared_ptr<Diskstream>);
-	boost::shared_ptr<Diskstream> diskstream_by_id (const PBD::ID& id);
-	boost::shared_ptr<Diskstream> diskstream_by_name (std::string name);
-	bool have_rec_enabled_diskstream () const;
+	bool have_rec_enabled_track () const;
 
 	bool have_captured() const { return _have_captured; }
 
-	void refill_all_diskstream_buffers ();
+	void refill_all_track_buffers ();
 	Butler* butler() { return _butler; }
 	void butler_transport_work ();
 
-	uint32_t get_next_diskstream_id() const { return n_diskstreams(); }
-	uint32_t n_diskstreams() const;
-
 	void refresh_disk_space ();
 
-	typedef std::list<boost::shared_ptr<Diskstream> > DiskstreamList;
-
-	SerializedRCUManager<DiskstreamList>& diskstream_list() { return diskstreams; }
-
+	int load_diskstreams_2X (XMLNode const &, int);
+	
 	int load_routes (const XMLNode&, int);
 	boost::shared_ptr<RouteList> get_routes() const {
 		return routes.reader ();
@@ -307,8 +298,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
 	void request_transport_speed (double speed);
-	void request_overwrite_buffer (Diskstream*);
-	void request_diskstream_speed (Diskstream&, double speed);
+	void request_overwrite_buffer (Track *);
+	void request_track_speed (Track *, double speed);
 	void request_input_change_handling ();
 
 	bool locate_pending() const { return static_cast<bool>(post_transport_work()&PostTransportLocate); }
@@ -542,9 +533,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	*/
 	static PBD::Signal0<int> AskAboutPendingState;
 
-	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (ARDOUR::AudioDiskstream&, uint32_t which_channel, bool destructive);
+	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (size_t, std::string const &, uint32_t, bool);
 
-	boost::shared_ptr<MidiSource> create_midi_source_for_session (ARDOUR::MidiDiskstream&);
+	boost::shared_ptr<MidiSource> create_midi_source_for_session (std::string const &);
 
 	boost::shared_ptr<Source> source_by_id (const PBD::ID&);
 	boost::shared_ptr<Source> source_by_path_and_channel (const Glib::ustring&, uint16_t);
@@ -932,7 +923,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	PBD::ScopedConnection export_freewheel_connection;
 
-	void get_diskstream_statistics ();
+	void get_track_statistics ();
 	int  process_routes (nframes_t, bool& need_butler);
 	int  silent_process_routes (nframes_t, bool& need_butler);
 
@@ -1174,13 +1165,13 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void set_play_loop (bool yn);
 	void unset_play_loop ();
-	void overwrite_some_buffers (Diskstream*);
+	void overwrite_some_buffers (Track *);
 	void flush_all_inserts ();
 	int  micro_locate (nframes_t distance);
         void locate (nframes64_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
         void start_locate (nframes64_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
 	void force_locate (nframes64_t frame, bool with_roll = false);
-	void set_diskstream_speed (Diskstream*, double speed);
+	void set_track_speed (Track *, double speed);
         void set_transport_speed (double speed, bool abort = false, bool clear_state = false);
 	void stop_transport (bool abort = false, bool clear_state = false);
 	void start_transport ();
@@ -1203,12 +1194,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	std::list<RouteGroup *> _route_groups;
 
-	/* disk-streams */
-
-	SerializedRCUManager<DiskstreamList>  diskstreams;
-
-	int load_diskstreams (const XMLNode&);
-
 	/* routes stuff */
 
 	SerializedRCUManager<RouteList>  routes;
@@ -1217,6 +1202,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	uint32_t destructive_index;
 
 	boost::shared_ptr<Route> XMLRouteFactory (const XMLNode&, int);
+	boost::shared_ptr<Route> XMLRouteFactory_2X (const XMLNode&, int);
 
 	void route_processors_changed (RouteProcessorChange);
 
@@ -1265,7 +1251,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void remove_playlist (boost::weak_ptr<Playlist>);
 	void playlist_length_changed ();
-	void diskstream_playlist_changed (boost::weak_ptr<Diskstream>);
+	void track_playlist_changed (boost::weak_ptr<Track>);
 
 	/* NAMED SELECTIONS */
 
@@ -1342,7 +1328,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	XMLNode* _bundle_xml_node;
 	int load_bundles (XMLNode const &);
 
-	void reverse_diskstream_buffers ();
+	void reverse_track_buffers ();
 
 	UndoHistory                  _history;
 	std::stack<UndoTransaction*> _current_trans;
@@ -1436,8 +1422,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	mutable bool have_looped; ///< Used in ::audible_frame(*)
 
-	void update_have_rec_enabled_diskstream ();
-	gint _have_rec_enabled_diskstream;
+	void update_have_rec_enabled_track ();
+	gint _have_rec_enabled_track;
 
 	static int ask_about_playlist_deletion (boost::shared_ptr<Playlist>);
 
@@ -1450,6 +1436,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void rt_set_mute (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 	void rt_set_listen (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 	void rt_set_record_enable (boost::shared_ptr<RouteList>, bool yn, bool group_override);
+
+	/** temporary list of Diskstreams used only during load of 2.X sessions */
+	std::list<boost::shared_ptr<Diskstream> > _diskstreams_2X;
 };
 
 } // namespace ARDOUR

@@ -52,7 +52,7 @@
 #include "ardour/panner.h"
 #include "ardour/session.h"
 #include "ardour/io.h"
-#include "ardour/route.h"
+#include "ardour/track.h"
 
 #include "i18n.h"
 #include <locale.h>
@@ -74,7 +74,7 @@ PBD::Signal0<void>                Diskstream::DiskUnderrun;
 Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
 	: SessionObject(sess, name)
         , i_am_the_modifier (0)
-        , _route (0)
+        , _track (0)
         , _record_enabled (0)
         , _visible_speed (1.0f)
         , _actual_speed (1.0f)
@@ -96,7 +96,7 @@ Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
         , loop_location (0)
         , overwrite_frame (0)
         , overwrite_offset (0)
-        , pending_overwrite (false)
+        , _pending_overwrite (false)
         , overwrite_queued (false)
         , input_change_pending (NoChange)
         , wrap_buffer_size (0)
@@ -122,7 +122,7 @@ Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
 Diskstream::Diskstream (Session& sess, const XMLNode& /*node*/)
 	: SessionObject(sess, "unnamed diskstream")
         , i_am_the_modifier (0)
-        , _route (0)
+        , _track (0)
         , _record_enabled (0)
         , _visible_speed (1.0f)
         , _actual_speed (1.0f)
@@ -144,7 +144,7 @@ Diskstream::Diskstream (Session& sess, const XMLNode& /*node*/)
         , loop_location (0)
         , overwrite_frame (0)
         , overwrite_offset (0)
-        , pending_overwrite (false)
+        , _pending_overwrite (false)
         , overwrite_queued (false)
         , input_change_pending (NoChange)
         , wrap_buffer_size (0)
@@ -176,10 +176,10 @@ Diskstream::~Diskstream ()
 }
 
 void
-Diskstream::set_route (Route& r)
+Diskstream::set_track (Track* t)
 {
-	_route = &r;
-	_io = _route->input();
+	_track = t;
+	_io = _track->input();
 
 	ic_connection.disconnect();
 	_io->changed.connect_same_thread (ic_connection, boost::bind (&Diskstream::handle_input_change, this, _1, _2));
@@ -188,7 +188,7 @@ Diskstream::set_route (Route& r)
 	non_realtime_input_change ();
 	set_align_style_from_io ();
 
-	_route->Destroyed.connect_same_thread (*this, boost::bind (&Diskstream::route_going_away, this));
+	_track->Destroyed.connect_same_thread (*this, boost::bind (&Diskstream::route_going_away, this));
 }
 
 void
@@ -331,15 +331,6 @@ Diskstream::set_roll_delay (ARDOUR::nframes_t nframes)
 	_roll_delay = nframes;
 }
 
-void
-Diskstream::set_speed (double sp)
-{
-	_session.request_diskstream_speed (*this, sp);
-
-	/* to force a rebuffering at the right place */
-	playlist_modified();
-}
-
 int
 Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 {
@@ -381,7 +372,7 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 	*/
 
 	if (!overwrite_queued && prior_playlist) {
-		_session.request_overwrite_buffer (this);
+		_session.request_overwrite_buffer (_track);
 		overwrite_queued = true;
 	}
 
@@ -401,7 +392,7 @@ void
 Diskstream::playlist_modified ()
 {
 	if (!i_am_the_modifier && !overwrite_queued) {
-		_session.request_overwrite_buffer (this);
+		_session.request_overwrite_buffer (_track);
 		overwrite_queued = true;
 	}
 }
@@ -459,7 +450,7 @@ Diskstream::remove_region_from_last_capture (boost::weak_ptr<Region> wregion)
 void
 Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const & movements_frames)
 {
-	if (!_route || Config->get_automation_follows_regions () == false) {
+	if (!_track || Config->get_automation_follows_regions () == false) {
 		return;
 	}
 
@@ -473,7 +464,7 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const &
 	}
 
 	/* move panner automation */
-	boost::shared_ptr<Panner> p = _route->main_outs()->panner ();
+	boost::shared_ptr<Panner> p = _track->main_outs()->panner ();
 	if (p) {
 		for (uint32_t i = 0; i < p->npanners (); ++i) {
 			boost::shared_ptr<AutomationList> pan_alist = p->streampanner(i).pan_control()->alist();
@@ -485,7 +476,7 @@ Diskstream::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const &
 	}
 
 	/* move processor automation */
-	_route->foreach_processor (boost::bind (&Diskstream::move_processor_automation, this, _1, movements_frames));
+	_track->foreach_processor (boost::bind (&Diskstream::move_processor_automation, this, _1, movements_frames));
 }
 
 void

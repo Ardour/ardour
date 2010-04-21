@@ -44,7 +44,6 @@
 namespace ARDOUR {
 	class Route;
 	class RouteGroup;
-	class AudioDiskstream;
 };
 
 class MixerStrip;

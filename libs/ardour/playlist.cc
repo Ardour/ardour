@@ -178,7 +178,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 	: SessionObject(other->_session, namestr)
         , regions (*this)
 	, _type(other->_type)
-	, _orig_diskstream_id(other->_orig_diskstream_id)
+	, _orig_diskstream_id (other->_orig_diskstream_id)
 {
 	init (hide);
 
@@ -213,7 +213,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, f
 	: SessionObject(other->_session, str)
         , regions (*this)
 	, _type(other->_type)
-	, _orig_diskstream_id(other->_orig_diskstream_id)
+	, _orig_diskstream_id (other->_orig_diskstream_id)
 {
 	RegionLock rlock2 (const_cast<Playlist*> (other.get()));
 

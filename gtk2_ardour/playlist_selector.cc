@@ -79,10 +79,10 @@ PlaylistSelector::~PlaylistSelector ()
 void
 PlaylistSelector::clear_map ()
 {
-	for (DSPL_Map::iterator x = dspl_map.begin(); x != dspl_map.end(); ++x) {
+	for (TrackPlaylistMap::iterator x = trpl_map.begin(); x != trpl_map.end(); ++x) {
 		delete x->second;
 	}
-	dspl_map.clear ();
+	trpl_map.clear ();
 }
 
 bool
@@ -99,7 +99,6 @@ void
 PlaylistSelector::show_for (RouteUI* ruix)
 {
 	vector<const char*> item;
-	boost::shared_ptr<Diskstream> this_ds;
 	string str;
 
 	rui = ruix;
@@ -113,7 +112,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 
 	_session->playlists->foreach (this, &PlaylistSelector::add_playlist_to_map);
 
-	this_ds = rui->get_diskstream();
+	boost::shared_ptr<Track> this_track = rui->track();
 
 	TreeModel::Row others = *(model->append ());
 
@@ -121,29 +120,29 @@ PlaylistSelector::show_for (RouteUI* ruix)
 	boost::shared_ptr<Playlist> proxy = others[columns.playlist];
 	proxy.reset ();
 
-	for (DSPL_Map::iterator x = dspl_map.begin(); x != dspl_map.end(); ++x) {
+	for (TrackPlaylistMap::iterator x = trpl_map.begin(); x != trpl_map.end(); ++x) {
 
-		boost::shared_ptr<Diskstream> ds = _session->diskstream_by_id (x->first);
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (_session->route_by_id (x->first));
 
-		if (ds == 0) {
+		if (tr == 0) {
 			continue;
 		}
 
-		/* add a node for the diskstream */
+		/* add a node for the track */
 
 		string nodename;
 
-		if (ds->name().empty()) {
+		if (tr->name().empty()) {
 			nodename = _("unassigned");
 		} else {
-			nodename = ds->name().c_str();
+			nodename = tr->name().c_str();
 		}
 
 		TreeModel::Row row;
 		TreeModel::Row* selected_row = 0;
 		TreePath this_path;
 
-		if (ds == this_ds) {
+		if (tr == this_track) {
 			row = *(model->prepend());
 			row[columns.text] = nodename;
 			boost::shared_ptr<Playlist> proxy = row[columns.playlist];
@@ -157,7 +156,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 
 		/* Now insert all the playlists for this diskstream/track in a subtree */
 
-		list<boost::shared_ptr<Playlist> > *pls = x->second;
+		list<boost::shared_ptr<Playlist> >* pls = x->second;
 
 		for (list<boost::shared_ptr<Playlist> >::iterator p = pls->begin(); p != pls->end(); ++p) {
 
@@ -167,7 +166,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 			child_row[columns.text] = (*p)->name();
 			child_row[columns.playlist] = *p;
 
-			if (*p == this_ds->playlist()) {
+			if (*p == this_track->playlist()) {
 				selected_row = &child_row;
 			}
 		}
@@ -197,7 +196,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 		child_row[columns.text] = (*p)->name();
 		child_row[columns.playlist] = *p;
 
-		if (*p == this_ds->playlist()) {
+		if (*p == this_track->playlist()) {
 			selected_row = &child_row;
 		}
 
@@ -223,13 +222,10 @@ PlaylistSelector::add_playlist_to_map (boost::shared_ptr<Playlist> pl)
 		return;
 	}
 
-	DSPL_Map::iterator x;
+	TrackPlaylistMap::iterator x;
 
-	if ((x = dspl_map.find (apl->get_orig_diskstream_id())) == dspl_map.end()) {
-
-		pair<PBD::ID,list<boost::shared_ptr<Playlist> >*> newp (apl->get_orig_diskstream_id(), new list<boost::shared_ptr<Playlist> >);
-
-		x = dspl_map.insert (dspl_map.end(), newp);
+	if ((x = trpl_map.find (apl->get_orig_diskstream_id())) == trpl_map.end()) {
+		x = trpl_map.insert (trpl_map.end(), make_pair (apl->get_orig_diskstream_id(), new list<boost::shared_ptr<Playlist> >));
 	}
 
 	x->second->push_back (pl);
@@ -269,7 +265,7 @@ PlaylistSelector::selection_changed ()
 			return;
 		}
 
-		at->diskstream()->use_playlist (apl);
+		at->use_playlist (apl);
 
 		hide ();
 	}

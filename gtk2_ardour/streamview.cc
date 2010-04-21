@@ -25,7 +25,6 @@
 #include "ardour/playlist.h"
 #include "ardour/region.h"
 #include "ardour/source.h"
-#include "ardour/diskstream.h"
 #include "ardour/track.h"
 #include "ardour/session.h"
 
@@ -79,7 +78,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 
 	if (_trackview.is_track()) {
 		_trackview.track()->DiskstreamChanged.connect (*this, invalidator (*this), boost::bind (&StreamView::diskstream_changed, this), gui_context());
-		_trackview.get_diskstream()->RecordEnableChanged.connect (*this, invalidator (*this), boost::bind (&StreamView::rec_enable_changed, this), gui_context());
+		_trackview.track()->RecordEnableChanged.connect (*this, invalidator (*this), boost::bind (&StreamView::rec_enable_changed, this), gui_context());
 
 		_trackview.session()->TransportStateChange.connect (*this, invalidator (*this), boost::bind (&StreamView::transport_changed, this), gui_context());
 		_trackview.session()->TransportLooped.connect (*this, invalidator (*this), boost::bind (&StreamView::transport_looped, this), gui_context());
@@ -91,7 +90,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 
 StreamView::~StreamView ()
 {
-	undisplay_diskstream ();
+	undisplay_track ();
 
 	delete canvas_rect;
 
@@ -104,7 +103,7 @@ void
 StreamView::attach ()
 {
 	if (_trackview.is_track()) {
-		display_diskstream (_trackview.get_diskstream());
+		display_track (_trackview.track ());
 	}
 }
 
@@ -204,7 +203,7 @@ StreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 }
 
 void
-StreamView::undisplay_diskstream ()
+StreamView::undisplay_track ()
 {
 	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end() ; ) {
 		RegionViewList::iterator next = i;
@@ -217,11 +216,11 @@ StreamView::undisplay_diskstream ()
 }
 
 void
-StreamView::display_diskstream (boost::shared_ptr<Diskstream> ds)
+StreamView::display_track (boost::shared_ptr<Track> tr)
 {
 	playlist_switched_connection.disconnect();
-	playlist_switched (ds);
-	ds->PlaylistChanged.connect (playlist_switched_connection, invalidator (*this), boost::bind (&StreamView::playlist_switched, this, boost::weak_ptr<Diskstream> (ds)), gui_context());
+	playlist_switched (tr);
+	tr->PlaylistChanged.connect (playlist_switched_connection, invalidator (*this), boost::bind (&StreamView::playlist_switched, this, boost::weak_ptr<Track> (tr)), gui_context());
 }
 
 void
@@ -282,17 +281,17 @@ StreamView::layer_regions()
 }
 
 void
-StreamView::playlist_layered (boost::weak_ptr<Diskstream> wds)
+StreamView::playlist_layered (boost::weak_ptr<Track> wtr)
 {
-	boost::shared_ptr<Diskstream> ds (wds.lock());
+	boost::shared_ptr<Track> tr (wtr.lock());
 
-	if (!ds) {
+	if (!tr) {
 		return;
 	}
 
 	/* update layers count and the y positions and heights of our regions */
-	if (ds->playlist()) {
-		_layers = ds->playlist()->top_layer() + 1;
+	if (tr->playlist()) {
+		_layers = tr->playlist()->top_layer() + 1;
 	}
 
 	if (_layer_display == Stacked) {
@@ -305,35 +304,35 @@ StreamView::playlist_layered (boost::weak_ptr<Diskstream> wds)
 }
 
 void
-StreamView::playlist_switched (boost::weak_ptr<Diskstream> wds)
+StreamView::playlist_switched (boost::weak_ptr<Track> wtr)
 {
-	boost::shared_ptr<Diskstream> ds (wds.lock());
+	boost::shared_ptr<Track> tr (wtr.lock());
 
-	if (!ds) {
+	if (!tr) {
 		return;
 	}
 
 	/* disconnect from old playlist */
 
 	playlist_connections.drop_connections ();
-	undisplay_diskstream ();
+	undisplay_track ();
 
 	/* update layers count and the y positions and heights of our regions */
-	_layers = ds->playlist()->top_layer() + 1;
+	_layers = tr->playlist()->top_layer() + 1;
 	update_contents_height ();
 	update_coverage_frames ();
 
-	ds->playlist()->set_explicit_relayering (_layer_display == Stacked);
+	tr->playlist()->set_explicit_relayering (_layer_display == Stacked);
 
 	/* draw it */
 
-	redisplay_diskstream ();
+	redisplay_track ();
 
 	/* catch changes */
 
-	ds->playlist()->LayeringChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::playlist_layered, this, boost::weak_ptr<Diskstream>(ds)), gui_context());
-	ds->playlist()->RegionAdded.connect (playlist_connections, invalidator (*this), ui_bind (&StreamView::add_region_view, this, _1), gui_context());
-	ds->playlist()->RegionRemoved.connect (playlist_connections, invalidator (*this), ui_bind (&StreamView::remove_region_view, this, _1), gui_context());
+	tr->playlist()->LayeringChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::playlist_layered, this, boost::weak_ptr<Track> (tr)), gui_context());
+	tr->playlist()->RegionAdded.connect (playlist_connections, invalidator (*this), ui_bind (&StreamView::add_region_view, this, _1), gui_context());
+	tr->playlist()->RegionRemoved.connect (playlist_connections, invalidator (*this), ui_bind (&StreamView::remove_region_view, this, _1), gui_context());
 	// ds->playlist()->ContentsChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::redisplay_diskstream, this), gui_context());
 }
 
@@ -343,15 +342,14 @@ StreamView::diskstream_changed ()
 	boost::shared_ptr<Track> t;
         
 	if ((t = _trackview.track()) != 0) {
-		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&StreamView::display_diskstream, this, t->diskstream()));
+		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&StreamView::display_track, this, t));
 	} else {
-		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&StreamView::undisplay_diskstream, this));
+		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&StreamView::undisplay_track, this));
 	}
 }
 
 void
 StreamView::apply_color (Gdk::Color& color, ColorTarget target)
-
 {
 	list<RegionView *>::iterator i;
 
@@ -412,7 +410,7 @@ StreamView::update_rec_box ()
 	if (rec_active && rec_rects.size() > 0) {
 		/* only update the last box */
 		RecBoxInfo & rect = rec_rects.back();
-		nframes_t at = _trackview.get_diskstream()->current_capture_end();
+		nframes_t at = _trackview.track()->current_capture_end();
 		double xstart;
 		double xend;
 
@@ -427,7 +425,7 @@ StreamView::update_rec_box ()
 
 		case Destructive:
 			rect.length = 2;
-			xstart = _trackview.editor().frame_to_pixel (_trackview.get_diskstream()->current_capture_start());
+			xstart = _trackview.editor().frame_to_pixel (_trackview.track()->current_capture_start());
 			xend = _trackview.editor().frame_to_pixel (at);
 			break;
 		}
@@ -577,7 +575,7 @@ StreamView::set_layer_display (LayerDisplay d)
 	_layer_display = d;
 	update_contents_height ();
 	update_coverage_frames ();
-	_trackview.get_diskstream()->playlist()->set_explicit_relayering (_layer_display == Stacked);
+	_trackview.track()->playlist()->set_explicit_relayering (_layer_display == Stacked);
 }
 
 void

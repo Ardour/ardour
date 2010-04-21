@@ -38,7 +38,6 @@
 #include <gtkmm2ext/utils.h>
 
 #include "ardour/amp.h"
-#include "ardour/audio_diskstream.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/event_type_map.h"
 #include "ardour/location.h"

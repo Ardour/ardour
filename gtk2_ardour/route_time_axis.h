@@ -48,7 +48,6 @@
 namespace ARDOUR {
 	class Session;
 	class Region;
-	class Diskstream;
 	class RouteGroup;
 	class IOProcessor;
 	class Processor;
@@ -183,7 +182,6 @@ protected:
 	};
 
 
-	void diskstream_changed ();
 	void update_diskstream_display ();
 
 	gint edit_click  (GdkEventButton *);

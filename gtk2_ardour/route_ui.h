@@ -69,8 +69,6 @@ class RouteUI : public virtual AxisView
 	boost::shared_ptr<ARDOUR::AudioTrack> audio_track() const;
 	boost::shared_ptr<ARDOUR::MidiTrack>  midi_track() const;
 
-	boost::shared_ptr<ARDOUR::Diskstream> get_diskstream() const;
-
 	std::string name() const;
 
 	// protected: XXX sigh this should be here

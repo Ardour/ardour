@@ -738,7 +738,7 @@ MidiTimeAxisView::set_note_mode(NoteMode mode)
 		_note_mode = mode;
 		midi_track()->set_note_mode(mode);
 		xml_node->add_property ("note-mode", enum_2_string(_note_mode));
-		_view->redisplay_diskstream();
+		_view->redisplay_track();
 	}
 }
 
@@ -754,7 +754,7 @@ MidiTimeAxisView::set_color_mode(ColorMode mode)
 
 		_color_mode = mode;
 		xml_node->add_property ("color-mode", enum_2_string(_color_mode));
-		_view->redisplay_diskstream();
+		_view->redisplay_track();
 	}
 }
 
@@ -975,10 +975,7 @@ MidiTimeAxisView::add_region (nframes64_t pos)
 	const Tempo& t = _session->tempo_map().tempo_at(start);
 	double length = floor (m.frames_per_bar(t, _session->frame_rate()));
 
-	const boost::shared_ptr<MidiDiskstream> diskstream =
-		boost::dynamic_pointer_cast<MidiDiskstream>(view()->trackview().track()->diskstream());
-
-	boost::shared_ptr<Source> src = _session->create_midi_source_for_session (*diskstream.get());
+	boost::shared_ptr<Source> src = _session->create_midi_source_for_session (view()->trackview().track()->name());
 
 	PropertyList plist; 
 	

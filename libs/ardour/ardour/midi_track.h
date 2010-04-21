@@ -31,6 +31,7 @@ class Session;
 class MidiDiskstream;
 class MidiPlaylist;
 class RouteGroup;
+class SMFSource;	
 
 class MidiTrack : public Track
 {
@@ -90,6 +91,8 @@ public:
 	bool midi_thru() const { return _midi_thru; }
 	void set_midi_thru (bool yn);
 
+	boost::shared_ptr<SMFSource> write_source (uint32_t n = 0);
+	
 protected:
 	XMLNode& state (bool full);
 	

@@ -41,7 +41,6 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioregion.h"
-#include "ardour/audio_diskstream.h"
 #include "ardour/stretch.h"
 #include "ardour/midi_stretch.h"
 #include "ardour/pitch.h"

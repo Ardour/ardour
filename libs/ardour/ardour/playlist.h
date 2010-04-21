@@ -195,6 +195,7 @@ class Playlist : public SessionObject
 
 	uint32_t read_data_count() const { return _read_data_count; }
 
+	/* XXX: use of diskstream here is a little unfortunate */
 	const PBD::ID& get_orig_diskstream_id () const { return _orig_diskstream_id; }
 	void set_orig_diskstream_id (const PBD::ID& did) { _orig_diskstream_id = did; }
 

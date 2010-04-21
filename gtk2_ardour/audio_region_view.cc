@@ -27,7 +27,6 @@
 #include "ardour/playlist.h"
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
-#include "ardour/audio_diskstream.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
 
@@ -847,11 +846,11 @@ AudioRegionView::create_waves ()
 	// cerr << "AudioRegionView::create_waves() called on " << this << endl;//DEBUG
 	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
 
-	if (!atv.get_diskstream()) {
+	if (!atv.track()) {
 		return;
 	}
 
-	ChanCount nchans = atv.get_diskstream()->n_channels();
+	ChanCount nchans = atv.track()->n_channels();
 
 	// cerr << "creating waves for " << _region->name() << " with wfd = " << wait_for_data
 	//		<< " and channels = " << nchans.n_audio() << endl;
@@ -894,7 +893,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 {
 	//cerr << "AudioRegionView::create_one_wave() called which: " << which << " this: " << this << endl;//DEBUG
 	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
-	uint32_t nchans = atv.get_diskstream()->n_channels().n_audio();
+	uint32_t nchans = atv.track()->n_channels().n_audio();
 	uint32_t n;
 	uint32_t nwaves = std::min (nchans, audio_region()->n_channels());
 	gdouble ht;
@@ -1163,7 +1162,7 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 	AudioGhostRegion* ghost = new AudioGhostRegion (tv, trackview, unit_position);
 	uint32_t nchans;
 
-	nchans = rtv->get_diskstream()->n_channels().n_audio();
+	nchans = rtv->track()->n_channels().n_audio();
 
 	for (uint32_t n = 0; n < nchans; ++n) {
 

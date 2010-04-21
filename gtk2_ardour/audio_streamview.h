@@ -36,7 +36,6 @@ namespace Gdk {
 
 namespace ARDOUR {
 	class Route;
-	class Diskstream;
 	class Crossfade;
 	class PeakData;
 	class AudioRegion;
@@ -85,10 +84,10 @@ class AudioStreamView : public StreamView
 	void remove_region_view (boost::weak_ptr<ARDOUR::Region> );
 	void remove_audio_region_view (boost::shared_ptr<ARDOUR::AudioRegion> );
 
-	void undisplay_diskstream ();
-	void redisplay_diskstream ();
-	void playlist_layered (boost::weak_ptr<ARDOUR::Diskstream>);
-	void playlist_switched (boost::weak_ptr<ARDOUR::Diskstream>);
+	void undisplay_track ();
+	void redisplay_track ();
+	void playlist_layered (boost::weak_ptr<ARDOUR::Track>);
+	void playlist_switched (boost::weak_ptr<ARDOUR::Track>);
 
 	void add_crossfade (boost::weak_ptr<ARDOUR::Crossfade>);
 	void remove_crossfade (boost::shared_ptr<ARDOUR::Region>);

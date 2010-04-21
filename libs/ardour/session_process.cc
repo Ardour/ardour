@@ -28,7 +28,6 @@
 #include <glibmm/thread.h>
 
 #include "ardour/ardour.h"
-#include "ardour/audio_diskstream.h"
 #include "ardour/audioengine.h"
 #include "ardour/auditioner.h"
 #include "ardour/butler.h"
@@ -37,6 +36,7 @@
 #include "ardour/session.h"
 #include "ardour/slave.h"
 #include "ardour/timestamps.h"
+#include "ardour/port.h"
 
 #include "midi++/manager.h"
 
@@ -194,20 +194,22 @@ Session::silent_process_routes (nframes_t nframes, bool& need_butler)
 }
 
 void
-Session::get_diskstream_statistics ()
+Session::get_track_statistics ()
 {
 	float pworst = 1.0f;
 	float cworst = 1.0f;
 
-	boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-	for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
+	boost::shared_ptr<RouteList> rl = routes.reader();
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 
-		if ((*i)->hidden()) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+
+		if (!tr || tr->hidden()) {
 			continue;
 		}
 
-		pworst = min (pworst, (*i)->playback_buffer_load());
-		cworst = min (cworst, (*i)->capture_buffer_load());
+		pworst = min (pworst, tr->playback_buffer_load());
+		cworst = min (cworst, tr->capture_buffer_load());
 	}
 
 	uint32_t pmin = g_atomic_int_get (&_playback_load);
@@ -639,18 +641,21 @@ Session::track_slave_state (float slave_speed, nframes_t slave_transport_frame, 
 				bool ok = true;
 				nframes_t frame_delta = slave_transport_frame - _transport_frame;
 
-				boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-
-				for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-					if (!(*i)->can_internal_playback_seek (frame_delta)) {
+				boost::shared_ptr<RouteList> rl = routes.reader();
+				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+					boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+					if (tr && !tr->can_internal_playback_seek (frame_delta)) {
 						ok = false;
 						break;
 					}
 				}
 
 				if (ok) {
-					for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-						(*i)->internal_playback_seek (frame_delta);
+					for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+						boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+						if (tr) {
+							tr->internal_playback_seek (frame_delta);
+						}
 					}
 					_transport_frame += frame_delta;
 
@@ -1048,11 +1053,11 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::Overwrite:
-		overwrite_some_buffers (static_cast<Diskstream*>(ev->ptr));
+		overwrite_some_buffers (static_cast<Track*>(ev->ptr));
 		break;
 
-	case SessionEvent::SetDiskstreamSpeed:
-		set_diskstream_speed (static_cast<Diskstream*> (ev->ptr), ev->speed);
+	case SessionEvent::SetTrackSpeed:
+		set_track_speed (static_cast<Track*> (ev->ptr), ev->speed);
 		break;
 
 	case SessionEvent::SetSyncSource:

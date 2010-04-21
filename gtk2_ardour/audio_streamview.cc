@@ -29,7 +29,6 @@
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/audiofilesource.h"
-#include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
 #include "ardour/source.h"
 #include "ardour/region_factory.h"
@@ -230,9 +229,9 @@ AudioStreamView::remove_region_view (boost::weak_ptr<Region> weak_r)
 }
 
 void
-AudioStreamView::undisplay_diskstream ()
+AudioStreamView::undisplay_track ()
 {
-	StreamView::undisplay_diskstream();
+	StreamView::undisplay_track ();
 
 	for (CrossfadeViewList::iterator i = crossfade_views.begin(); i != crossfade_views.end(); ++i) {
 		delete i->second;
@@ -242,15 +241,15 @@ AudioStreamView::undisplay_diskstream ()
 }
 
 void
-AudioStreamView::playlist_layered (boost::weak_ptr<Diskstream> wds)
+AudioStreamView::playlist_layered (boost::weak_ptr<Track> wtr)
 {
-	boost::shared_ptr<Diskstream> ds (wds.lock());
+	boost::shared_ptr<Track> tr (wtr.lock());
 
-	if (!ds) {
+	if (!tr) {
 		return;
 	}
 
-	StreamView::playlist_layered (wds);
+	StreamView::playlist_layered (wtr);
 
 	/* make sure xfades are on top and all the regionviews are stacked correctly. */
 
@@ -260,19 +259,19 @@ AudioStreamView::playlist_layered (boost::weak_ptr<Diskstream> wds)
 }
 
 void
-AudioStreamView::playlist_switched (boost::weak_ptr<Diskstream> wds)
+AudioStreamView::playlist_switched (boost::weak_ptr<Track> wtr)
 {
-	boost::shared_ptr<Diskstream> ds (wds.lock());
+	boost::shared_ptr<Track> tr (wtr.lock());
 
-	if (!ds) {
+	if (!tr) {
 		return;
 	}
 
 	playlist_connections.drop_connections ();
 
-	StreamView::playlist_switched (ds);
+	StreamView::playlist_switched (tr);
 
-	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(ds->playlist());
+	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist> (tr->playlist());
 
 	if (apl) {
 		apl->NewCrossfade.connect (playlist_connections, invalidator (*this), ui_bind (&AudioStreamView::add_crossfade, this, _1), gui_context());
@@ -350,7 +349,7 @@ AudioStreamView::remove_crossfade (boost::shared_ptr<Region> r)
 }
 
 void
-AudioStreamView::redisplay_diskstream ()
+AudioStreamView::redisplay_track ()
 {
 	list<RegionView *>::iterator i;
 	CrossfadeViewList::iterator xi, tmpx;
@@ -372,12 +371,12 @@ AudioStreamView::redisplay_diskstream ()
 	// Add and display region and crossfade views, and flag them as valid
 
 	if (_trackview.is_audio_track()) {
-		_trackview.get_diskstream()->playlist()->foreach_region(
+		_trackview.track()->playlist()->foreach_region(
 			sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view))
 			);
 
 		boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(
-				_trackview.get_diskstream()->playlist()
+				_trackview.track()->playlist()
 			);
 
 		if (apl) {
@@ -445,7 +444,7 @@ AudioStreamView::setup_rec_box ()
 
 		if (!rec_active &&
 		    _trackview.session()->record_status() == Session::Recording &&
-		    _trackview.get_diskstream()->record_enabled()) {
+		    _trackview.track()->record_enabled()) {
 			if (_trackview.audio_track()->mode() == Normal && Config->get_show_waveforms_while_recording() && rec_regions.size() == rec_rects.size()) {
 
 				/* add a new region, but don't bother if they set show-waveforms-while-recording mid-record */
@@ -453,10 +452,10 @@ AudioStreamView::setup_rec_box ()
 				SourceList sources;
 
 				rec_data_ready_connections.drop_connections ();
-				boost::shared_ptr<AudioDiskstream> ads = _trackview.audio_track()->audio_diskstream();
+				boost::shared_ptr<AudioTrack> tr = _trackview.audio_track();
 
-				for (uint32_t n=0; n < ads->n_channels().n_audio(); ++n) {
-					boost::shared_ptr<AudioFileSource> src = ads->write_source (n);
+				for (uint32_t n = 0; n < tr->n_channels().n_audio(); ++n) {
+					boost::shared_ptr<AudioFileSource> src = tr->write_source (n);
 					if (src) {
 						sources.push_back (src);
 						src->PeakRangeReady.connect (rec_data_ready_connections,
@@ -471,7 +470,7 @@ AudioStreamView::setup_rec_box ()
 				nframes_t start = 0;
 				if (rec_regions.size() > 0) {
 					start = rec_regions.back().first->start()
-							+ _trackview.get_diskstream()->get_captured_frames(rec_regions.size()-1);
+							+ _trackview.track()->get_captured_frames(rec_regions.size()-1);
 				}
 
 				PropertyList plist; 
@@ -495,8 +494,7 @@ AudioStreamView::setup_rec_box ()
 			boost::shared_ptr<AudioTrack> at;
 
 			at = _trackview.audio_track(); /* we know what it is already */
-			boost::shared_ptr<AudioDiskstream> ds = at->audio_diskstream();
-			nframes_t frame_pos = ds->current_capture_start ();
+			nframes_t frame_pos = at->current_capture_start ();
 			gdouble xstart = _trackview.editor().frame_to_pixel (frame_pos);
 			gdouble xend;
 			uint32_t fill_color;
@@ -543,7 +541,7 @@ AudioStreamView::setup_rec_box ()
 
 		} else if (rec_active &&
 			   (_trackview.session()->record_status() != Session::Recording ||
-			    !_trackview.get_diskstream()->record_enabled())) {
+			    !_trackview.track()->record_enabled())) {
 			screen_update_connection.disconnect();
 			rec_active = false;
 			rec_updating = false;
@@ -617,7 +615,7 @@ AudioStreamView::rec_peak_range_ready (nframes_t start, nframes_t cnt, boost::we
 
 	rec_data_ready_map[src] = true;
 
-	if (rec_data_ready_map.size() == _trackview.get_diskstream()->n_channels().n_audio()) {
+	if (rec_data_ready_map.size() == _trackview.track()->n_channels().n_audio()) {
 		this->update_rec_regions ();
 		rec_data_ready_map.clear();
 	}
@@ -658,7 +656,7 @@ AudioStreamView::update_rec_regions ()
 					if (nlen != region->length()) {
 
 						region->suspend_property_changes ();
-						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);
+						region->set_position (_trackview.track()->get_capture_start_frame(n), this);
 						region->set_length (nlen, this);
 						region->resume_property_changes ();
 
@@ -676,14 +674,14 @@ AudioStreamView::update_rec_regions ()
 
 			} else {
 
-				nframes_t nlen = _trackview.get_diskstream()->get_captured_frames(n);
+				nframes_t nlen = _trackview.track()->get_captured_frames(n);
 
 				if (nlen != region->length()) {
 
 					if (region->source_length(0) >= region->start() + nlen) {
 
 						region->suspend_property_changes ();
-						region->set_position (_trackview.get_diskstream()->get_capture_start_frame(n), this);
+						region->set_position (_trackview.track()->get_capture_start_frame(n), this);
 						region->set_length (nlen, this);
 						region->resume_property_changes ();
 

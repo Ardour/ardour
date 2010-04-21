@@ -777,7 +777,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 						if (rtv && _join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
 							boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (rtv->route ());
 							if (t) {
-								boost::shared_ptr<Playlist> pl = t->diskstream()->playlist ();
+								boost::shared_ptr<Playlist> pl = t->playlist ();
 								if (pl) {
 									
 									boost::shared_ptr<Region> r = pl->top_region_at (event_frame (event));
@@ -1927,7 +1927,7 @@ Editor::region_view_item_click (AudioRegionView& rv, GdkEventButton* event)
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(tv);
 		double speed = 1.0;
 		if (rtv && rtv->is_track()) {
-			speed = rtv->get_diskstream()->speed();
+			speed = rtv->track()->speed();
 		}
 
 		nframes64_t where = get_preferred_edit_position();
@@ -2131,7 +2131,7 @@ Editor::single_contents_trim (RegionView& rv, nframes64_t frame_delta, bool left
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
 	if (tv && tv->is_track()) {
-		speed = tv->get_diskstream()->speed();
+		speed = tv->track()->speed();
 	}
 
 	if (left_direction) {
@@ -2171,7 +2171,7 @@ Editor::single_start_trim (RegionView& rv, nframes64_t frame_delta, bool left_di
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
 	if (tv && tv->is_track()) {
-		speed = tv->get_diskstream()->speed();
+		speed = tv->track()->speed();
 	}
 
 	if (left_direction) {
@@ -2226,7 +2226,7 @@ Editor::single_end_trim (RegionView& rv, nframes64_t frame_delta, bool left_dire
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
 	if (tv && tv->is_track()) {
-		speed = tv->get_diskstream()->speed();
+		speed = tv->track()->speed();
 	}
 
 	if (left_direction) {
@@ -2442,7 +2442,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, nframes64_t pos)
 	}
 
 	boost::shared_ptr<Playlist> playlist = rtv->playlist();
-	double speed = rtv->get_diskstream()->speed();
+	double speed = rtv->track()->speed();
 
         playlist->clear_history ();
 	boost::shared_ptr<Region> new_region (RegionFactory::create (rv->region()));

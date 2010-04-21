@@ -23,7 +23,6 @@
 #include "pbd/stacktrace.h"
 
 #include "ardour/session.h"
-#include "ardour/diskstream.h"
 #include "ardour/playlist.h"
 #include "ardour/route_group.h"
 #include "ardour/profile.h"
@@ -329,9 +328,9 @@ Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t, RegionVi
 	boost::shared_ptr<Playlist> pl;
 	vector<boost::shared_ptr<Region> > results;
 	RegionView* marv;
-	boost::shared_ptr<Diskstream> ds;
+	boost::shared_ptr<Track> tr;
 
-	if ((ds = tv.get_diskstream()) == 0) {
+	if ((tr = tv.track()) == 0) {
 		/* bus */
 		return;
 	}
@@ -341,7 +340,7 @@ Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t, RegionVi
 		return;
 	}
 
-	if ((pl = ds->playlist()) != 0) {
+	if ((pl = tr->playlist()) != 0) {
 		pl->get_equivalent_regions (basis->region(), results);
 	}
 
@@ -401,14 +400,14 @@ Editor::get_regionview_count_from_region_list (boost::shared_ptr<Region> region)
 			boost::shared_ptr<Playlist> pl;
 			vector<boost::shared_ptr<Region> > results;
 			RegionView* marv;
-			boost::shared_ptr<Diskstream> ds;
+			boost::shared_ptr<Track> tr;
 
-			if ((ds = tatv->get_diskstream()) == 0) {
+			if ((tr = tatv->track()) == 0) {
 				/* bus */
 				continue;
 			}
 
-			if ((pl = (ds->playlist())) != 0) {
+			if ((pl = (tr->playlist())) != 0) {
 				pl->get_region_list_equivalent_regions (region, results);
 			}
 

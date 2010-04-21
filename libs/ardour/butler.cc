@@ -28,6 +28,7 @@
 #include "ardour/io.h"
 #include "ardour/midi_diskstream.h"
 #include "ardour/session.h"
+#include "ardour/track.h"
 
 #include "i18n.h"
 
@@ -131,7 +132,7 @@ Butler::thread_work ()
 
 	struct pollfd pfd[1];
 	bool disk_work_outstanding = false;
-	Session::DiskstreamList::iterator i;
+	RouteList::iterator i;
 
 	while (true) {
 		pfd[0].fd = request_pipe[0];
@@ -207,30 +208,33 @@ Butler::thread_work ()
 
 		begin = get_microseconds();
 
-		boost::shared_ptr<Session::DiskstreamList> dsl = _session.diskstream_list().reader ();
+		boost::shared_ptr<RouteList> rl = _session.get_routes();
 
 //		for (i = dsl->begin(); i != dsl->end(); ++i) {
 //			cerr << "BEFORE " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
 //		}
 
-		for (i = dsl->begin(); !transport_work_requested() && should_run && i != dsl->end(); ++i) {
+		for (i = rl->begin(); !transport_work_requested() && should_run && i != rl->end(); ++i) {
 
-			boost::shared_ptr<Diskstream> ds = *i;
+			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+			if (!tr) {
+				continue;
+			}
 
 			/* don't read inactive tracks */
 
-			boost::shared_ptr<IO> io = ds->io();
+			boost::shared_ptr<IO> io = tr->input ();
 
 			if (io && !io->active()) {
 				continue;
 			}
 
-			switch (ds->do_refill ()) {
+			switch (tr->do_refill ()) {
 			case 0:
-				bytes += ds->read_data_count();
+				bytes += tr->read_data_count();
 				break;
 			case 1:
-				bytes += ds->read_data_count();
+				bytes += tr->read_data_count();
 				disk_work_outstanding = true;
 				break;
 
@@ -242,7 +246,7 @@ Butler::thread_work ()
 
 		}
 
-		if (i != dsl->begin() && i != dsl->end()) {
+		if (i != rl->begin() && i != rl->end()) {
 			/* we didn't get to all the streams */
 			disk_work_outstanding = true;
 		}
@@ -264,18 +268,23 @@ Butler::thread_work ()
 		compute_io = true;
 		begin = get_microseconds();
 
-		for (i = dsl->begin(); !transport_work_requested() && should_run && i != dsl->end(); ++i) {
+		for (i = rl->begin(); !transport_work_requested() && should_run && i != rl->end(); ++i) {
 			// cerr << "write behind for " << (*i)->name () << endl;
 
+			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+			if (!tr) {
+				continue;
+			}
+			
 			/* note that we still try to flush diskstreams attached to inactive routes
 			 */
 
-			switch ((*i)->do_flush (ButlerContext)) {
+			switch (tr->do_flush (ButlerContext)) {
 			case 0:
-				bytes += (*i)->write_data_count();
+				bytes += tr->write_data_count();
 				break;
 			case 1:
-				bytes += (*i)->write_data_count();
+				bytes += tr->write_data_count();
 				disk_work_outstanding = true;
 				break;
 
@@ -296,7 +305,7 @@ Butler::thread_work ()
 			_session.request_stop ();
 		}
 
-		if (i != dsl->begin() && i != dsl->end()) {
+		if (i != rl->begin() && i != rl->end()) {
 			/* we didn't get to all the streams */
 			disk_work_outstanding = true;
 		}

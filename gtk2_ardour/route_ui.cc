@@ -50,9 +50,7 @@
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
 #include "ardour/audio_track.h"
-#include "ardour/audio_diskstream.h"
 #include "ardour/midi_track.h"
-#include "ardour/midi_diskstream.h"
 #include "ardour/template_utils.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/directory_names.h"
@@ -221,7 +219,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	if (_session->writable() && is_track()) {
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_route);
 
-		t->diskstream()->RecordEnableChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_rec_enable_changed, this), gui_context());
+		t->RecordEnableChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_rec_enable_changed, this), gui_context());
 
 		rec_enable_button->show();
  		rec_enable_button->set_controllable (t->rec_enable_control());
@@ -1326,18 +1324,6 @@ boost::shared_ptr<MidiTrack>
 RouteUI::midi_track() const
 {
 	return boost::dynamic_pointer_cast<MidiTrack>(_route);
-}
-
-boost::shared_ptr<Diskstream>
-RouteUI::get_diskstream () const
-{
-	boost::shared_ptr<Track> t;
-
-	if ((t = boost::dynamic_pointer_cast<Track>(_route)) != 0) {
-		return t->diskstream();
-	} else {
-		return boost::shared_ptr<Diskstream> ((Diskstream*) 0);
-	}
 }
 
 string

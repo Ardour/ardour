@@ -242,8 +242,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 
 		track()->TrackModeChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::track_mode_changed, this), gui_context());
 		track()->FreezeChange.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::map_frozen, this), gui_context());
-		track()->DiskstreamChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::diskstream_changed, this), gui_context());
-		get_diskstream()->SpeedChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::speed_changed, this), gui_context());
+		track()->SpeedChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::speed_changed, this), gui_context());
 
 		/* pick up the correct freeze state */
 		map_frozen ();
@@ -509,19 +508,21 @@ RouteTimeAxisView::build_display_menu ()
 		alignment_items.push_back (RadioMenuElem (align_group, _("Align With Existing Material"),
 					sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_style), ExistingMaterial)));
 		align_existing_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
-		if (get_diskstream()->alignment_style() == ExistingMaterial)
+		if (track()->alignment_style() == ExistingMaterial) {
 			align_existing_item->set_active();
+		}
 
 		alignment_items.push_back (RadioMenuElem (align_group, _("Align With Capture Time"),
 					sigc::bind (sigc::mem_fun(*this, &RouteTimeAxisView::set_align_style), CaptureTime)));
 		align_capture_item = dynamic_cast<RadioMenuItem*>(&alignment_items.back());
-		if (get_diskstream()->alignment_style() == CaptureTime)
+		if (track()->alignment_style() == CaptureTime) {
 			align_capture_item->set_active();
+		}
 
 		if (!Profile->get_sae()) {
 
 			items.push_back (MenuElem (_("Alignment"), *alignment_menu));
-			get_diskstream()->AlignmentStyleChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteTimeAxisView::align_style_changed, this), gui_context());
+			track()->AlignmentStyleChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteTimeAxisView::align_style_changed, this), gui_context());
 
 			RadioMenuItem::Group mode_group;
 			items.push_back (RadioMenuElem (mode_group, _("Normal Mode"), sigc::bind (
@@ -556,7 +557,7 @@ RouteTimeAxisView::build_display_menu ()
 			_ignore_track_mode_change = false;
 		}
 
-		get_diskstream()->AlignmentStyleChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteTimeAxisView::align_style_changed, this), gui_context());
+		track()->AlignmentStyleChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteTimeAxisView::align_style_changed, this), gui_context());
 
 		color_mode_menu = build_color_mode_menu();
 		if (color_mode_menu) {
@@ -900,8 +901,8 @@ RouteTimeAxisView::set_samples_per_unit (double spu)
 {
 	double speed = 1.0;
 
-	if (get_diskstream() != 0) {
-		speed = get_diskstream()->speed();
+	if (track()) {
+		speed = track()->speed();
 	}
 
 	if (_view) {
@@ -914,7 +915,7 @@ RouteTimeAxisView::set_samples_per_unit (double spu)
 void
 RouteTimeAxisView::align_style_changed ()
 {
-	switch (get_diskstream()->alignment_style()) {
+	switch (track()->alignment_style()) {
 	case ExistingMaterial:
 		if (!align_existing_item->get_active()) {
 			align_existing_item->set_active();
@@ -947,7 +948,7 @@ RouteTimeAxisView::set_align_style (AlignStyle style)
 	}
 
 	if (item->get_active()) {
-		get_diskstream()->set_align_style (style);
+		track()->set_align_style (style);
 	}
 }
 
@@ -957,13 +958,15 @@ RouteTimeAxisView::rename_current_playlist ()
 	ArdourPrompter prompter (true);
 	string name;
 
-	boost::shared_ptr<Diskstream> ds = get_diskstream();
-	if (!ds || ds->destructive())
+	boost::shared_ptr<Track> tr = track();
+	if (!tr || tr->destructive()) {
 		return;
+	}
 
-	boost::shared_ptr<Playlist> pl = ds->playlist();
-	if (!pl)
+	boost::shared_ptr<Playlist> pl = tr->playlist();
+	if (!pl) {
 		return;
+	}
 
 	prompter.set_prompt (_("Name for playlist"));
 	prompter.set_initial_text (pl->name());
@@ -1023,13 +1026,15 @@ RouteTimeAxisView::use_copy_playlist (bool prompt, vector<boost::shared_ptr<Play
 {
 	string name;
 
-	boost::shared_ptr<Diskstream> ds = get_diskstream();
-	if (!ds || ds->destructive())
+	boost::shared_ptr<Track> tr = track ();
+	if (!tr || tr->destructive()) {
 		return;
+	}
 
-	boost::shared_ptr<const Playlist> pl = ds->playlist();
-	if (!pl)
+	boost::shared_ptr<const Playlist> pl = tr->playlist();
+	if (!pl) {
 		return;
+	}
 
 	name = pl->name();
 
@@ -1065,8 +1070,8 @@ RouteTimeAxisView::use_copy_playlist (bool prompt, vector<boost::shared_ptr<Play
 	}
 
 	if (name.length()) {
-		ds->use_copy_playlist ();
-		ds->playlist()->set_name (name);
+		tr->use_copy_playlist ();
+		tr->playlist()->set_name (name);
 	}
 }
 
@@ -1075,13 +1080,15 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 {
 	string name;
 
-	boost::shared_ptr<Diskstream> ds = get_diskstream();
-	if (!ds || ds->destructive())
+	boost::shared_ptr<Track> tr = track ();
+	if (!tr || tr->destructive()) {
 		return;
+	}
 
-	boost::shared_ptr<const Playlist> pl = ds->playlist();
-	if (!pl)
+	boost::shared_ptr<const Playlist> pl = tr->playlist();
+	if (!pl) {
 		return;
+	}
 
 	name = pl->name();
 
@@ -1114,21 +1121,23 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 	}
 
 	if (name.length()) {
-		ds->use_new_playlist ();
-		ds->playlist()->set_name (name);
+		tr->use_new_playlist ();
+		tr->playlist()->set_name (name);
 	}
 }
 
 void
 RouteTimeAxisView::clear_playlist ()
 {
-	boost::shared_ptr<Diskstream> ds = get_diskstream();
-	if (!ds || ds->destructive())
+	boost::shared_ptr<Track> tr = track ();
+	if (!tr || tr->destructive()) {
 		return;
+	}
 
-	boost::shared_ptr<Playlist> pl = ds->playlist();
-	if (!pl)
+	boost::shared_ptr<Playlist> pl = tr->playlist();
+	if (!pl) {
 		return;
+	}
 
 	_editor.clear_playlist (pl);
 }
@@ -1140,16 +1149,11 @@ RouteTimeAxisView::speed_changed ()
 }
 
 void
-RouteTimeAxisView::diskstream_changed ()
-{
-	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&RouteTimeAxisView::update_diskstream_display, this));
-}
-
-void
 RouteTimeAxisView::update_diskstream_display ()
 {
-	if (!get_diskstream()) // bus
+	if (!track()) {
 		return;
+	}
 
 	map_frozen ();
 }
@@ -1212,8 +1216,8 @@ RouteTimeAxisView::get_selectables (nframes_t start, nframes_t end, double top, 
 {
 	double speed = 1.0;
 
-	if (get_diskstream() != 0) {
-		speed = get_diskstream()->speed();
+	if (track() != 0) {
+		speed = track()->speed();
 	}
 
 	nframes_t start_adjusted = session_frame_to_track_frame(start, speed);
@@ -1291,10 +1295,10 @@ RouteTimeAxisView::name() const
 boost::shared_ptr<Playlist>
 RouteTimeAxisView::playlist () const
 {
-	boost::shared_ptr<Diskstream> ds;
+	boost::shared_ptr<Track> tr;
 
-	if ((ds = get_diskstream()) != 0) {
-		return ds->playlist();
+	if ((tr = track()) != 0) {
+		return tr->playlist();
 	} else {
 		return boost::shared_ptr<Playlist> ();
 	}
@@ -1349,11 +1353,10 @@ RouteTimeAxisView::hide_click ()
 boost::shared_ptr<Region>
 RouteTimeAxisView::find_next_region (nframes_t pos, RegionPoint point, int32_t dir)
 {
-	boost::shared_ptr<Diskstream> stream;
-	boost::shared_ptr<Playlist> playlist;
+	boost::shared_ptr<Playlist> pl = playlist ();
 
-	if ((stream = get_diskstream()) != 0 && (playlist = stream->playlist()) != 0) {
-		return playlist->find_next_region (pos, point, dir);
+	if (pl) {
+		return pl->find_next_region (pos, point, dir);
 	}
 
 	return boost::shared_ptr<Region> ();
@@ -1362,11 +1365,10 @@ RouteTimeAxisView::find_next_region (nframes_t pos, RegionPoint point, int32_t d
 nframes64_t
 RouteTimeAxisView::find_next_region_boundary (nframes64_t pos, int32_t dir)
 {
-	boost::shared_ptr<Diskstream> stream;
-	boost::shared_ptr<Playlist> playlist;
+	boost::shared_ptr<Playlist> pl = playlist ();
 
-	if ((stream = get_diskstream()) != 0 && (playlist = stream->playlist()) != 0) {
-		return playlist->find_next_region_boundary (pos, dir);
+	if (pl) {
+		return pl->find_next_region_boundary (pos, dir);
 	}
 
 	return -1;
@@ -1376,19 +1378,19 @@ bool
 RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
 	boost::shared_ptr<Playlist> what_we_got;
-	boost::shared_ptr<Diskstream> ds = get_diskstream();
+	boost::shared_ptr<Track> tr = track ();
 	boost::shared_ptr<Playlist> playlist;
 	bool ret = false;
 
-	if (ds == 0) {
+	if (tr == 0) {
 		/* route is a bus, not a track */
 		return false;
 	}
 
-	playlist = ds->playlist();
+	playlist = tr->playlist();
 
 	TimeSelection time (selection.time);
-	float speed = ds->speed();
+	float const speed = tr->speed();
 	if (speed != 1.0f) {
 		for (TimeSelection::iterator i = time.begin(); i != time.end(); ++i) {
 			(*i).start = session_frame_to_track_frame((*i).start, speed);
@@ -1447,7 +1449,7 @@ RouteTimeAxisView::paste (nframes_t pos, float times, Selection& selection, size
 		return false;
 	}
 
-	boost::shared_ptr<Playlist> playlist = get_diskstream()->playlist();
+	boost::shared_ptr<Playlist> pl = playlist ();
 	PlaylistSelection::iterator p;
 
 	for (p = selection.playlists.begin(); p != selection.playlists.end() && nth; ++p, --nth) {}
@@ -1456,13 +1458,13 @@ RouteTimeAxisView::paste (nframes_t pos, float times, Selection& selection, size
 		return false;
 	}
 
-	if (get_diskstream()->speed() != 1.0f) {
-		pos = session_frame_to_track_frame(pos, get_diskstream()->speed() );
+	if (track()->speed() != 1.0f) {
+		pos = session_frame_to_track_frame (pos, track()->speed());
 	}
 
-        playlist->clear_history ();
-	playlist->paste (*p, pos, times);
-	_session->add_command (new StatefulDiffCommand (playlist));
+        pl->clear_history ();
+	pl->paste (*p, pos, times);
+	_session->add_command (new StatefulDiffCommand (pl));
 
 	return true;
 }
@@ -1504,30 +1506,30 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	delete playlist_menu;
 
 
-        vector<boost::shared_ptr<Playlist> > playlists, playlists_ds;
-	boost::shared_ptr<Diskstream> ds = get_diskstream();
+        vector<boost::shared_ptr<Playlist> > playlists, playlists_tr;
+	boost::shared_ptr<Track> tr = track();
 	RadioMenuItem::Group playlist_group;
 
 	_session->playlists->get (playlists);
 
         /* find the playlists for this diskstream */
         for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
-                if (((*i)->get_orig_diskstream_id() == ds->id()) || (ds->playlist()->id() == (*i)->id())) {
-                        playlists_ds.push_back(*i);
+                if (((*i)->get_orig_diskstream_id() == tr->diskstream_id()) || (tr->playlist()->id() == (*i)->id())) {
+                        playlists_tr.push_back(*i);
                 }
         }
 
         /* sort the playlists */
         PlaylistSorter cmp;
-        sort(playlists_ds.begin(), playlists_ds.end(), cmp);
+        sort (playlists_tr.begin(), playlists_tr.end(), cmp);
         
         /* add the playlists to the menu */
-        for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists_ds.begin(); i != playlists_ds.end(); ++i) {
+        for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists_tr.begin(); i != playlists_tr.end(); ++i) {
                 playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name()));
                 RadioMenuItem *item = static_cast<RadioMenuItem*>(&playlist_items.back());
                 item->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::use_playlist), item, boost::weak_ptr<Playlist> (*i)));
                 
-                if (ds->playlist()->id() == (*i)->id()) {
+                if (tr->playlist()->id() == (*i)->id()) {
                         item->set_active();
                         
 		}
@@ -1574,13 +1576,12 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist> (pl);
 
 	if (apl) {
-		if (get_diskstream()->playlist() == apl) {
+		if (track()->playlist() == apl) {
                         // exit when use_playlist is called by the creation of the playlist menu
                         // or the playlist choice is unchanged
 			return;
 		}
-		get_diskstream()->use_playlist (apl);
-
+		track()->use_playlist (apl);
 
 		if (route_group() && route_group()->is_active()) {
 			std::string group_string = "."+route_group()->name()+".";
@@ -1611,10 +1612,10 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 				boost::shared_ptr<Playlist> ipl = session()->playlists->by_name(playlist_name);
 				if (!ipl) {
 					// No playlist for this track for this take yet, make it
-					track->diskstream()->use_new_playlist();
-					track->diskstream()->playlist()->set_name(playlist_name);
+					track->use_new_playlist();
+					track->playlist()->set_name(playlist_name);
 				} else {
-					track->diskstream()->use_playlist(ipl);
+					track->use_playlist(ipl);
 				}
 			}
 		}

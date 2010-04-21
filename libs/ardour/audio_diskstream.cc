@@ -59,6 +59,7 @@
 #include "ardour/source_factory.h"
 #include "ardour/utils.h"
 #include "ardour/session_playlists.h"
+#include "ardour/route.h"
 
 #include "i18n.h"
 #include <locale.h>
@@ -321,7 +322,7 @@ AudioDiskstream::use_copy_playlist ()
 
 	newname = Playlist::bump_name (_playlist->name(), _session);
 
-	if ((playlist  = boost::dynamic_pointer_cast<AudioPlaylist>(PlaylistFactory::create (audio_playlist(), newname))) != 0) {
+	if ((playlist = boost::dynamic_pointer_cast<AudioPlaylist>(PlaylistFactory::create (audio_playlist(), newname))) != 0) {
 		playlist->set_orig_diskstream_id (id());
 		return use_playlist (playlist);
 	} else {
@@ -729,7 +730,7 @@ AudioDiskstream::set_pending_overwrite (bool yn)
 {
 	/* called from audio thread, so we can use the read ptr and playback sample as we wish */
 
-	pending_overwrite = yn;
+	_pending_overwrite = yn;
 
 	overwrite_frame = playback_sample;
 	overwrite_offset = channels.reader()->front()->playback_buf->get_read_ptr();
@@ -798,7 +799,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 	ret = 0;
 
   out:
-	pending_overwrite = false;
+	_pending_overwrite = false;
 	delete [] gain_buffer;
 	delete [] mixdown_buffer;
 	return ret;
@@ -1334,7 +1335,7 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 }
 
 void
-AudioDiskstream::transport_stopped (struct tm& when, time_t twhen, bool abort_capture)
+AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abort_capture)
 {
 	uint32_t buffer_position;
 	bool more_work = true;
@@ -1701,7 +1702,7 @@ AudioDiskstream::disengage_record_enable ()
 XMLNode&
 AudioDiskstream::get_state ()
 {
-	XMLNode* node = new XMLNode ("AudioDiskstream");
+	XMLNode* node = new XMLNode ("Diskstream");
 	char buf[64] = "";
 	LocaleGuard lg (X_("POSIX"));
 	boost::shared_ptr<ChannelList> c = channels.reader();
@@ -1827,7 +1828,7 @@ AudioDiskstream::set_state (const XMLNode& node, int /*version*/)
 		}
 
 		if (!had_playlist) {
-			_playlist->set_orig_diskstream_id (_id);
+			_playlist->set_orig_diskstream_id (id());
 		}
 
 		if (!destructive() && capture_pending_node) {
@@ -1884,7 +1885,7 @@ AudioDiskstream::use_new_write_source (uint32_t n)
 	}
 
 	try {
-		if ((chan->write_source = _session.create_audio_source_for_session (*this, n, destructive())) == 0) {
+		if ((chan->write_source = _session.create_audio_source_for_session (n_channels().n_audio(), name(), n, destructive())) == 0) {
 			throw failed_constructor();
 		}
 	}
@@ -1991,7 +1992,7 @@ AudioDiskstream::allocate_temporary_buffers ()
 	   when slaving to MTC, Timecode etc.
 	*/
 
-	double sp = max (fabsf (_actual_speed), 1.2f);
+	double const sp = max (fabsf (_actual_speed), 1.2f);
 	nframes_t required_wrap_size = (nframes_t) floor (_session.get_block_size() * sp) + 1;
 
 	if (required_wrap_size > wrap_buffer_size) {

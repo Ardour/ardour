@@ -42,7 +42,6 @@
 
 namespace ARDOUR {
 	class Session;
-	class AudioDiskstream;
 	class RouteGroup;
 	class IOProcessor;
 	class Processor;

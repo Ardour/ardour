@@ -152,7 +152,7 @@ AutomationStreamView::set_automation_state (AutoState state)
 }
 
 void
-AutomationStreamView::redisplay_diskstream ()
+AutomationStreamView::redisplay_track ()
 {
 	list<RegionView *>::iterator i, tmp;
 
@@ -164,7 +164,7 @@ AutomationStreamView::redisplay_diskstream ()
 
 	// Add and display region views, and flag them as valid
 	if (_trackview.is_track()) {
-		_trackview.get_diskstream()->playlist()->foreach_region (
+		_trackview.track()->playlist()->foreach_region (
 			sigc::hide_return (sigc::mem_fun (*this, &StreamView::add_region_view))
 			);
 	}

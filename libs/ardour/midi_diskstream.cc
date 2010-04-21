@@ -55,6 +55,7 @@
 #include "ardour/smf_source.h"
 #include "ardour/utils.h"
 #include "ardour/session_playlists.h"
+#include "ardour/route.h"
 
 #include "midi++/types.h"
 
@@ -608,7 +609,7 @@ MidiDiskstream::set_pending_overwrite (bool yn)
 {
 	/* called from audio thread, so we can use the read ptr and playback sample as we wish */
 
-	pending_overwrite = yn;
+	_pending_overwrite = yn;
 
 	overwrite_frame = playback_sample;
 }
@@ -618,7 +619,7 @@ MidiDiskstream::overwrite_existing_buffers ()
 {
 	//read(overwrite_frame, disk_io_chunk_frames, false);
 	overwrite_queued = false;
-	pending_overwrite = false;
+	_pending_overwrite = false;
 
 	return 0;
 }
@@ -882,7 +883,7 @@ out:
 }
 
 void
-MidiDiskstream::transport_stopped (struct tm& /*when*/, time_t /*twhen*/, bool abort_capture)
+MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen*/, bool abort_capture)
 {
 	bool more_work = true;
 	int err = 0;
@@ -1160,7 +1161,7 @@ MidiDiskstream::disengage_record_enable ()
 XMLNode&
 MidiDiskstream::get_state ()
 {
-	XMLNode* node = new XMLNode ("MidiDiskstream");
+	XMLNode* node = new XMLNode ("Diskstream");
 	char buf[64];
 	LocaleGuard lg (X_("POSIX"));
 
@@ -1276,7 +1277,7 @@ MidiDiskstream::set_state (const XMLNode& node, int /*version*/)
 		}
 
 		if (!had_playlist) {
-			_playlist->set_orig_diskstream_id (_id);
+			_playlist->set_orig_diskstream_id (id());
 		}
 
 		if (capture_pending_node) {
@@ -1329,7 +1330,7 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 	}
 
 	try {
-		_write_source = boost::dynamic_pointer_cast<SMFSource>(_session.create_midi_source_for_session (*this));
+		_write_source = boost::dynamic_pointer_cast<SMFSource>(_session.create_midi_source_for_session (name ()));
 		if (!_write_source) {
 			throw failed_constructor();
 		}

@@ -637,8 +637,8 @@ Editor::build_region_boundary_cache ()
 			RouteTimeAxisView *rtav;
 
 			if (ontrack != 0 && (rtav = dynamic_cast<RouteTimeAxisView*>(ontrack)) != 0 ) {
-				if (rtav->get_diskstream() != 0) {
-					speed = rtav->get_diskstream()->speed();
+				if (rtav->track() != 0) {
+					speed = rtav->track()->speed();
 				}
 			}
 
@@ -692,8 +692,8 @@ Editor::find_next_region (nframes64_t frame, RegionPoint point, int32_t dir, Tra
 
 		track_speed = 1.0f;
 		if ( (rtav = dynamic_cast<RouteTimeAxisView*>(*i)) != 0 ) {
-			if (rtav->get_diskstream()!=0)
-				track_speed = rtav->get_diskstream()->speed();
+			if (rtav->track()!=0)
+				track_speed = rtav->track()->speed();
 		}
 
 		track_frame = session_frame_to_track_frame(frame, track_speed);
@@ -893,8 +893,8 @@ Editor::cursor_to_region_point (EditorCursor* cursor, RegionPoint point, int32_t
 	RouteTimeAxisView *rtav;
 
 	if ( ontrack != 0 && (rtav = dynamic_cast<RouteTimeAxisView*>(ontrack)) != 0 ) {
-		if (rtav->get_diskstream() != 0) {
-			speed = rtav->get_diskstream()->speed();
+		if (rtav->track() != 0) {
+			speed = rtav->track()->speed();
 		}
 	}
 
@@ -1090,8 +1090,8 @@ Editor::selected_marker_to_region_point (RegionPoint point, int32_t dir)
 	RouteTimeAxisView *rtav;
 
 	if (ontrack != 0 && (rtav = dynamic_cast<RouteTimeAxisView*>(ontrack)) != 0) {
-		if (rtav->get_diskstream() != 0) {
-			speed = rtav->get_diskstream()->speed();
+		if (rtav->track() != 0) {
+			speed = rtav->track()->speed();
 		}
 	}
 
@@ -2782,7 +2782,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 
 				/* no edits to destructive tracks */
 
-				if (rtv->track()->diskstream()->destructive()) {
+				if (rtv->track()->destructive()) {
 					continue;
 				}
 
@@ -2792,7 +2792,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 
 					/* XXX need to consider musical time selections here at some point */
 
-					double speed = rtv->get_diskstream()->speed();
+					double speed = rtv->track()->speed();
 
 
 					for (list<AudioRange>::const_iterator t = ts.begin(); t != ts.end(); ++t) {
@@ -2939,7 +2939,7 @@ Editor::crop_region_to (nframes64_t start, nframes64_t end)
 
 			boost::shared_ptr<Track> t = rtv->track();
 
-			if (t != 0 && ! t->diskstream()->destructive()) {
+			if (t != 0 && ! t->destructive()) {
 
 				if ((playlist = rtv->playlist()) != 0) {
 					playlists.push_back (playlist);
@@ -3411,8 +3411,8 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 		nframes64_t start;
 		nframes64_t end;
 
-		if (tav->get_diskstream() != 0) {
-			speed = tav->get_diskstream()->speed();
+		if (tav->track() != 0) {
+			speed = tav->track()->speed();
 		}
 
 		start = session_frame_to_track_frame (loc.start(), speed);
@@ -3452,8 +3452,8 @@ Editor::trim_region_to_edit_point ()
 
 		float speed = 1.0;
 
-		if (tav->get_diskstream() != 0) {
-			speed = tav->get_diskstream()->speed();
+		if (tav->track() != 0) {
+			speed = tav->track()->speed();
 		}
 
                 rv->region()->clear_history ();
@@ -3490,8 +3490,8 @@ Editor::trim_region_from_edit_point ()
 
 		float speed = 1.0;
 
-		if (tav->get_diskstream() != 0) {
-			speed = tav->get_diskstream()->speed();
+		if (tav->track() != 0) {
+			speed = tav->track()->speed();
 		}
 
                 rv->region()->clear_history ();
@@ -3541,8 +3541,8 @@ Editor::trim_to_region(bool forward)
 
 		float speed = 1.0;
 
-		if (atav->get_diskstream() != 0) {
-			speed = atav->get_diskstream()->speed();
+		if (atav->track() != 0) {
+			speed = atav->track()->speed();
 		}
 
 
@@ -5937,9 +5937,9 @@ Editor::tab_to_transient (bool forward)
 			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*t);
 
 			if (rtv) {
-				boost::shared_ptr<Diskstream> ds = rtv->get_diskstream();
-				if (ds) {
-					boost::shared_ptr<Playlist> pl = rtv->get_diskstream()->playlist ();
+				boost::shared_ptr<Track> tr = rtv->track();
+				if (tr) {
+					boost::shared_ptr<Playlist> pl = tr->playlist ();
 					if (pl) {
 						nframes64_t result = pl->find_next_transient (pos, forward ? 1 : -1);
 

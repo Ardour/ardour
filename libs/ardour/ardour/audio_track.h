@@ -28,6 +28,7 @@ class Session;
 class AudioDiskstream;
 class AudioPlaylist;
 class RouteGroup;
+class AudioFileSource;	
 
 class AudioTrack : public Track
 {
@@ -55,6 +56,8 @@ class AudioTrack : public Track
 	boost::shared_ptr<Region> bounce_range (nframes_t start, nframes_t end, InterThreadInfo&, bool enable_processing);
 
 	int set_state(const XMLNode&, int version);
+
+	boost::shared_ptr<AudioFileSource> write_source (uint32_t n = 0);
 
   protected:
 	XMLNode& state (bool full);

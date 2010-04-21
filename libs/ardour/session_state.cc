@@ -605,40 +605,6 @@ Session::create (const string& mix_template, nframes_t initial_length, BusProfil
 	return 0;
 }
 
-
-int
-Session::load_diskstreams (const XMLNode& node)
-{
-	XMLNodeList          clist;
-	XMLNodeConstIterator citer;
-
-	clist = node.children();
-
-	for (citer = clist.begin(); citer != clist.end(); ++citer) {
-
-		try {
-			/* diskstreams added automatically by DiskstreamCreated handler */
-			if ((*citer)->name() == "AudioDiskstream" || (*citer)->name() == "DiskStream") {
-				AudioDiskstream* dsp (new AudioDiskstream (*this, **citer));
-				boost::shared_ptr<AudioDiskstream> dstream (dsp);
-				add_diskstream (dstream);
-			} else if ((*citer)->name() == "MidiDiskstream") {
-				boost::shared_ptr<MidiDiskstream> dstream (new MidiDiskstream (*this, **citer));
-				add_diskstream (dstream);
-			} else {
-				error << _("Session: unknown diskstream type in XML") << endmsg;
-			}
-		}
-
-		catch (failed_constructor& err) {
-			error << _("Session: could not load diskstream via XML state") << endmsg;
-			return -1;
-		}
-	}
-
-	return 0;
-}
-
 void
 Session::maybe_write_autosave()
 {
@@ -1075,17 +1041,6 @@ Session::state(bool full_state)
                 }
 	}
 
-	child = node->add_child ("DiskStreams");
-
-	{
-		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-			if (!(*i)->hidden()) {
-				child->add_child_nocopy ((*i)->get_state());
-			}
-		}
-	}
-
 	if (full_state) {
 		node->add_child_nocopy (_locations.get_state());
 	} else {
@@ -1236,7 +1191,6 @@ Session::set_state (const XMLNode& node, int version)
 	Locations
 	Sources
 	AudioRegions
-	AudioDiskstreams
 	Connections
 	Routes
 	RouteGroups
@@ -1327,13 +1281,6 @@ Session::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if ((child = find_named_node (node, "DiskStreams")) == 0) {
-		error << _("Session: XML state has no diskstreams section") << endmsg;
-		goto out;
-	} else if (load_diskstreams (*child)) {
-		goto out;
-	}
-
 	if (version >= 3000) {
 		if ((child = find_named_node (node, "Bundles")) == 0) {
 			warning << _("Session: XML state has no bundles section") << endmsg;
@@ -1353,12 +1300,22 @@ Session::set_state (const XMLNode& node, int version)
 		goto out;
 	}
 
+	if (version < 3000 && ((child = find_named_node (node, X_("DiskStreams"))) == 0)) {
+		error << _("Session: XML state has no diskstreams section") << endmsg;
+		goto out;
+	} else if (load_diskstreams_2X (*child, version)) {
+		goto out;
+	}
+
 	if ((child = find_named_node (node, "Routes")) == 0) {
 		error << _("Session: XML state has no routes section") << endmsg;
 		goto out;
 	} else if (load_routes (*child, version)) {
 		goto out;
 	}
+
+	/* our diskstreams list is no longer needed as they are now all owned by their Route */
+	_diskstreams_2X.clear ();
 
 	if (version >= 3000) {
 		
@@ -1419,8 +1376,13 @@ Session::load_routes (const XMLNode& node, int version)
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
-		boost::shared_ptr<Route> route (XMLRouteFactory (**niter, version));
-
+		boost::shared_ptr<Route> route;
+		if (version < 3000) {
+			route = XMLRouteFactory_2X (**niter, version);
+		} else {
+			route = XMLRouteFactory (**niter, version);
+		}
+		
 		if (route == 0) {
 			error << _("Session: cannot create Route from XML description.") << endmsg;
 			return -1;
@@ -1445,12 +1407,8 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 		return ret;
 	}
 
-        const XMLProperty* dsprop;
+	XMLNode* ds_child = find_named_node (node, X_("Diskstream"));
 
-        if ((dsprop = node.property (X_("diskstream-id"))) == 0) {
-                dsprop = node.property (X_("diskstream"));
-        }
-        
 	DataType type = DataType::AUDIO;
 	const XMLProperty* prop = node.property("default-type");
 
@@ -1460,28 +1418,7 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 
 	assert (type != DataType::NIL);
 
-	if (dsprop) {
-
-                boost::shared_ptr<Diskstream> ds;
-                PBD::ID diskstream_id (dsprop->value());
-		PBD::ID zero ("0");
-
-		/* this wierd hack is used when creating
-		   tracks from a template. We have a special
-		   ID for the diskstream that means "you
-		   should create a new diskstream here, not
-		   look for an old one."
-		*/
-                
-		if (diskstream_id != zero) {
-
-                        ds = diskstream_by_id (diskstream_id);
-
-                        if (!ds) {
-                                error << string_compose (_("cannot find diskstream ID %1"), diskstream_id.to_s()) << endmsg;
-                                return ret;
-                        }
-		} 
+	if (ds_child) {
 
                 Track* track;
                 
@@ -1497,16 +1434,85 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
                         return ret;
                 }
                 
-                if (ds) {
-                        track->set_diskstream (ds);
+                if (track->set_state (node, version)) {
+                        delete track;
+                        return ret;
+                }
+                
+                boost_debug_shared_ptr_mark_interesting (track, "Track");
+                ret.reset (track);
+                
+	} else {
+		Route* rt = new Route (*this, X_("toBeResetFroXML"));
+
+                if (rt->init () == 0 && rt->set_state (node, version) == 0) {
+                        boost_debug_shared_ptr_mark_interesting (rt, "Route");
+                        ret.reset (rt);
                 } else {
-                        track->use_new_diskstream ();
+                        delete rt;
+                }
+	}
+
+	return ret;
+}
+
+boost::shared_ptr<Route>
+Session::XMLRouteFactory_2X (const XMLNode& node, int version)
+{
+	boost::shared_ptr<Route> ret;
+
+	if (node.name() != "Route") {
+		return ret;
+	}
+
+	XMLProperty const * ds_prop = node.property (X_("diskstream-id"));
+	if (!ds_prop) {
+		ds_prop = node.property (X_("diskstream"));
+	}
+
+	cout << "ds_prop " << ds_prop << "\n";
+
+	DataType type = DataType::AUDIO;
+	const XMLProperty* prop = node.property("default-type");
+
+	if (prop) {
+		type = DataType (prop->value());
+	}
+
+	assert (type != DataType::NIL);
+
+	if (ds_prop) {
+
+		list<boost::shared_ptr<Diskstream> >::iterator i = _diskstreams_2X.begin ();
+		while (i != _diskstreams_2X.end() && (*i)->id() != ds_prop->value()) {
+			++i;
+		}
+
+		if (i == _diskstreams_2X.end()) {
+			error << _("Could not find diskstream for route") << endmsg;
+			return boost::shared_ptr<Route> ();
+		}
+
+                Track* track;
+                
+                if (type == DataType::AUDIO) {
+                        track = new AudioTrack (*this, X_("toBeResetFroXML"));
+                        
+                } else {
+                        track = new MidiTrack (*this, X_("toBeResetFroXML"));
+                }
+                
+                if (track->init()) {
+                        delete track;
+                        return ret;
                 }
                 
                 if (track->set_state (node, version)) {
                         delete track;
                         return ret;
                 }
+
+		track->set_diskstream (*i);
                 
                 boost_debug_shared_ptr_mark_interesting (track, "Track");
                 ret.reset (track);
@@ -3099,11 +3105,11 @@ Session::config_changed (std::string p, bool ours)
 		if (Config->get_monitoring_model() == HardwareMonitoring && transport_rolling()) {
 			/* auto-input only makes a difference if we're rolling */
 
-			boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-
-			for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-				if ((*i)->record_enabled ()) {
-					(*i)->monitor_input (!config.get_auto_input());
+			boost::shared_ptr<RouteList> rl = routes.reader ();
+			for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+				if (tr && tr->record_enabled ()) {
+					tr->monitor_input (!config.get_auto_input());
 				}
 			}
 		}
@@ -3316,4 +3322,33 @@ void
 Session::set_history_depth (uint32_t d)
 {
 	_history.set_depth (d);
+}
+
+int
+Session::load_diskstreams_2X (XMLNode const & node, int)
+{
+        XMLNodeList          clist;
+        XMLNodeConstIterator citer;
+
+        clist = node.children();
+
+        for (citer = clist.begin(); citer != clist.end(); ++citer) {
+
+                try {
+                        /* diskstreams added automatically by DiskstreamCreated handler */
+                        if ((*citer)->name() == "AudioDiskstream" || (*citer)->name() == "DiskStream") {
+				boost::shared_ptr<AudioDiskstream> dsp (new AudioDiskstream (*this, **citer));
+				_diskstreams_2X.push_back (dsp);
+                        } else {
+                                error << _("Session: unknown diskstream type in XML") << endmsg;
+                        }
+                }
+
+                catch (failed_constructor& err) {
+                        error << _("Session: could not load diskstream via XML state") << endmsg;
+                        return -1;
+                }
+        }
+
+        return 0;
 }

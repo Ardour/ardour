@@ -24,7 +24,6 @@
 #include <cmath>
 #include <cassert>
 
-#include "ardour/diskstream.h"
 #include "ardour/session.h"
 
 #include "editor.h"
@@ -458,7 +457,7 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 
 		if ((*x)->is_track()) {
 			boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> ((*x)->route());
-			t->diskstream()->RecordEnableChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
+			t->RecordEnableChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
 		}
 
 		(*x)->route()->mute_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_mute_display, this), gui_context());

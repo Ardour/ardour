@@ -151,7 +151,7 @@ class MidiDiskstream : public Diskstream
 	int read (nframes_t& start, nframes_t cnt, bool reversed);
 
 	void finish_capture (bool rec_monitors_input);
-	void transport_stopped (struct tm&, time_t, bool abort);
+	void transport_stopped_wallclock (struct tm&, time_t, bool abort);
 	void transport_looped (nframes_t transport_frame);
 
 	void init ();

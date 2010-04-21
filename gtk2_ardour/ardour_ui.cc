@@ -934,7 +934,7 @@ void
 ARDOUR_UI::count_recenabled_streams (Route& route)
 {
 	Track* track = dynamic_cast<Track*>(&route);
-	if (track && track->diskstream()->record_enabled()) {
+	if (track && track->record_enabled()) {
 		rec_enabled_streams += track->n_inputs().n_total();
 	}
 }
@@ -1701,7 +1701,7 @@ ARDOUR_UI::toggle_record_enable (uint32_t dstream)
 		Track* t;
 
 		if ((t = dynamic_cast<Track*>(r.get())) != 0) {
-			t->diskstream()->set_record_enabled (!t->diskstream()->record_enabled());
+			t->set_record_enabled (!t->record_enabled());
 		}
 	}
 	if (_session == 0) {
@@ -2102,7 +2102,7 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 	}
 
 	Session::RecordState const r = _session->record_status ();
-	bool const h = _session->have_rec_enabled_diskstream ();
+	bool const h = _session->have_rec_enabled_track ();
 
 	if (r == Session::Enabled || (r == Session::Recording && !h)) {
 		if (onoff) {
@@ -3399,7 +3399,7 @@ ARDOUR_UI::record_state_changed ()
 	}
 
 	Session::RecordState const r = _session->record_status ();
-	bool const h = _session->have_rec_enabled_diskstream ();
+	bool const h = _session->have_rec_enabled_track ();
 
 	if (r == Session::Recording && h)  {
 		big_clock.set_widget_name ("BigClockRecording");

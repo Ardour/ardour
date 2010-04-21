@@ -37,6 +37,7 @@
 #include "ardour/session_object.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
+#include "ardour/public_diskstream.h"
 
 struct tm;
 
@@ -46,10 +47,10 @@ class IO;
 class Playlist;
 class Processor;
 class Region;
-class Route;
 class Session;
+class Track;	
 
-class Diskstream : public SessionObject
+class Diskstream : public SessionObject, public PublicDiskstream
 {
   public:
 	enum Flag {
@@ -66,7 +67,7 @@ class Diskstream : public SessionObject
 	bool set_name (const std::string& str);
 
 	boost::shared_ptr<ARDOUR::IO> io() const { return _io; }
-	void set_route (ARDOUR::Route&);
+	void set_track (ARDOUR::Track *);
 
 	virtual float playback_buffer_load() const = 0;
 	virtual float capture_buffer_load() const = 0;
@@ -99,7 +100,6 @@ class Diskstream : public SessionObject
 	virtual void punch_in()  {}
 	virtual void punch_out() {}
 
-	void set_speed (double);
 	void non_realtime_set_speed ();
 	virtual void non_realtime_locate (nframes_t /*location*/) {};
 	virtual void playlist_modified ();
@@ -143,6 +143,14 @@ class Diskstream : public SessionObject
 	void move_processor_automation (boost::weak_ptr<Processor>,
 			std::list<Evoral::RangeMove<framepos_t> > const &);
 
+	/** For non-butler contexts (allocates temporary working buffers) */
+	virtual int do_refill_with_alloc() = 0;
+	virtual void set_block_size (nframes_t) = 0;
+
+	bool pending_overwrite () const {
+		return _pending_overwrite;
+	}
+
 	PBD::Signal0<void>            RecordEnableChanged;
 	PBD::Signal0<void>            SpeedChanged;
 	PBD::Signal0<void>            ReverseChanged;
@@ -163,7 +171,6 @@ class Diskstream : public SessionObject
 
 	virtual void set_pending_overwrite (bool) = 0;
 	virtual int  overwrite_existing_buffers () = 0;
-	virtual void set_block_size (nframes_t) = 0;
 	virtual int  internal_playback_seek (nframes_t distance) = 0;
 	virtual int  can_internal_playback_seek (nframes_t distance) = 0;
 	virtual int  rename_write_sources () = 0;
@@ -199,16 +206,13 @@ class Diskstream : public SessionObject
 	virtual int do_flush (RunContext context, bool force = false) = 0;
 	virtual int do_refill () = 0;
 
-	/** For non-butler contexts (allocates temporary working buffers) */
-	virtual int do_refill_with_alloc() = 0;
-
 	/* XXX fix this redundancy ... */
 
 	virtual void playlist_changed (const PBD::PropertyChange&);
 	virtual void playlist_deleted (boost::weak_ptr<Playlist>);
 	virtual void playlist_ranges_moved (std::list< Evoral::RangeMove<framepos_t> > const &);
 
-	virtual void transport_stopped (struct tm&, time_t, bool abort) = 0;
+	virtual void transport_stopped_wallclock (struct tm&, time_t, bool abort) = 0;
 	virtual void transport_looped (nframes_t transport_frame) = 0;
 
 	struct CaptureInfo {
@@ -245,7 +249,7 @@ class Diskstream : public SessionObject
 	uint32_t i_am_the_modifier;
 
 	boost::shared_ptr<ARDOUR::IO>  _io;
-	Route*       _route;
+	Track*       _track;
 	ChanCount    _n_channels;
 
 	boost::shared_ptr<Playlist> _playlist;
@@ -273,7 +277,7 @@ class Diskstream : public SessionObject
 	Location*     loop_location;
 	nframes_t     overwrite_frame;
 	off_t         overwrite_offset;
-	bool          pending_overwrite;
+	bool          _pending_overwrite;
 	bool          overwrite_queued;
 	IOChange      input_change_pending;
 	nframes_t     wrap_buffer_size;

@@ -35,11 +35,11 @@ namespace Gdk {
 
 namespace ARDOUR {
 	class Route;
-	class Diskstream;
 	class Crossfade;
 	class PeakData;
 	class Region;
 	class Source;
+	class Track;
 }
 
 struct RecBoxInfo {
@@ -104,7 +104,7 @@ public:
 	void region_layered (RegionView*);
 	virtual void update_contents_height ();
 
-	virtual void redisplay_diskstream () = 0;
+	virtual void redisplay_track () = 0;
 	double child_height () const;
 	ARDOUR::layer_t layers () const { return _layers; }
 
@@ -129,13 +129,13 @@ protected:
 		      bool wait_for_waves, bool recording = false) = 0;
 	virtual void remove_region_view (boost::weak_ptr<ARDOUR::Region> );
 
-	void         display_diskstream (boost::shared_ptr<ARDOUR::Diskstream>);
-	virtual void undisplay_diskstream ();
+	void         display_track (boost::shared_ptr<ARDOUR::Track>);
+	virtual void undisplay_track ();
 	void         diskstream_changed ();
 	void         layer_regions ();
 
-	virtual void playlist_switched (boost::weak_ptr<ARDOUR::Diskstream>);
-	virtual void playlist_layered (boost::weak_ptr<ARDOUR::Diskstream>);
+	virtual void playlist_switched (boost::weak_ptr<ARDOUR::Track>);
+	virtual void playlist_layered (boost::weak_ptr<ARDOUR::Track>);
 
 	virtual void color_handler () = 0;
 

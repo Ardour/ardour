@@ -19,7 +19,7 @@ class Region;
 struct SessionEvent {
     enum Type {
 	    SetTransportSpeed,
-	    SetDiskstreamSpeed,
+	    SetTrackSpeed,
 	    Locate,
 	    LocateRoll,
 	    LocateRollLocate,

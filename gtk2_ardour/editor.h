@@ -76,7 +76,6 @@ namespace Gtkmm2ext {
 }
 
 namespace ARDOUR {
-	class AudioDiskstream;
 	class RouteGroup;
 	class Playlist;
 	class AudioPlaylist;

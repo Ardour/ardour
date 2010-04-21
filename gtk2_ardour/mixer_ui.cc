@@ -33,7 +33,6 @@
 #include <gtkmm2ext/tearoff.h>
 #include <gtkmm2ext/window_title.h>
 
-#include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/route_group.h"

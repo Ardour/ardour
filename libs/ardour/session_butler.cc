@@ -40,6 +40,7 @@
 #include "ardour/midi_diskstream.h"
 #include "ardour/session.h"
 #include "ardour/timestamps.h"
+#include "ardour/track.h"
 
 #include "i18n.h"
 
@@ -73,30 +74,33 @@ Session::schedule_curve_reallocation ()
 }
 
 void
-Session::request_overwrite_buffer (Diskstream* stream)
+Session::request_overwrite_buffer (Track* t)
 {
 	SessionEvent *ev = new SessionEvent (SessionEvent::Overwrite, SessionEvent::Add, SessionEvent::Immediate, 0, 0, 0.0);
-	ev->set_ptr (stream);
+	ev->set_ptr (t);
 	queue_event (ev);
 }
 
 /** Process thread. */
 void
-Session::overwrite_some_buffers (Diskstream* ds)
+Session::overwrite_some_buffers (Track* t)
 {
 	if (actively_recording()) {
 		return;
 	}
 
-	if (ds) {
+	if (t) {
 
-		ds->set_pending_overwrite (true);
+		t->set_pending_overwrite (true);
 
 	} else {
 
-		boost::shared_ptr<DiskstreamList> dsl = diskstreams.reader();
-		for (DiskstreamList::iterator i = dsl->begin(); i != dsl->end(); ++i) {
-			(*i)->set_pending_overwrite (true);
+		boost::shared_ptr<RouteList> rl = routes.reader();
+		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+			if (tr) {
+				tr->set_pending_overwrite (true);
+			}
 		}
 	}
 
