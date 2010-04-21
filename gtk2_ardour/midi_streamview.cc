@@ -395,11 +395,9 @@ MidiStreamView::setup_rec_box ()
 
 				rec_data_ready_connections.drop_connections ();
 
-				boost::shared_ptr<MidiDiskstream> mds = _trackview.midi_track()->midi_diskstream();
-
 				sources.push_back (_trackview.midi_track()->write_source());
 
-				mds->write_source()->ViewDataRangeReady.connect 
+				_trackview.midi_track()->write_source()->ViewDataRangeReady.connect 
 					(rec_data_ready_connections, 
                                          invalidator (*this),
 					 ui_bind (&MidiStreamView::rec_data_range_ready, this, _1, _2, boost::weak_ptr<Source>(_trackview.midi_track()->write_source())),

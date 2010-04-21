@@ -195,13 +195,10 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess,
 
 	controls_vbox.pack_start(_midi_controls_box, false, false);
 
-	boost::shared_ptr<MidiDiskstream> diskstream = midi_track()->midi_diskstream();
-
 	// restore channel selector settings
-	_channel_selector.set_channel_mode(diskstream->get_channel_mode(),
-			diskstream->get_channel_mask());
+	_channel_selector.set_channel_mode(midi_track()->get_channel_mode(), midi_track()->get_channel_mask());
 	_channel_selector.mode_changed.connect(
-		sigc::mem_fun(*midi_track()->midi_diskstream(), &MidiDiskstream::set_channel_mode));
+		sigc::mem_fun(*midi_track(), &MidiTrack::set_channel_mode));
 	_channel_selector.mode_changed.connect(
 		sigc::mem_fun(*this, &MidiTimeAxisView::set_channel_mode));
 
@@ -782,8 +779,7 @@ void
 MidiTimeAxisView::show_all_automation ()
 {
 	if (midi_track()) {
-		const set<Evoral::Parameter> params = midi_track()->midi_diskstream()->
-				midi_playlist()->contained_automation();
+		const set<Evoral::Parameter> params = midi_track()->midi_playlist()->contained_automation();
 
 		for (set<Evoral::Parameter>::const_iterator i = params.begin(); i != params.end(); ++i) {
 			create_automation_child(*i, true);
@@ -797,8 +793,7 @@ void
 MidiTimeAxisView::show_existing_automation ()
 {
 	if (midi_track()) {
-		const set<Evoral::Parameter> params = midi_track()->midi_diskstream()->
-				midi_playlist()->contained_automation();
+		const set<Evoral::Parameter> params = midi_track()->midi_playlist()->contained_automation();
 
 		for (set<Evoral::Parameter>::const_iterator i = params.begin(); i != params.end(); ++i) {
 			create_automation_child(*i, true);

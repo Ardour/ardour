@@ -1461,7 +1461,7 @@ Session::new_midi_track (TrackMode mode, RouteGroup* route_group, uint32_t how_m
 
 			auto_connect_route (track, existing_inputs, existing_outputs);
 
-			track->midi_diskstream()->non_realtime_input_change();
+			track->non_realtime_input_change();
 			if (route_group) {
 				route_group->add (track);
 			}
@@ -1630,7 +1630,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 				route_group->add (track);
 			}
 
-			track->audio_diskstream()->non_realtime_input_change();
+			track->non_realtime_input_change();
 
 			track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this));
 			track->set_remote_control_id (control_id);
@@ -3327,7 +3327,7 @@ Session::write_one_track (AudioTrack& track, nframes_t start, nframes_t end,
 	boost::shared_ptr<AudioFileSource> fsource;
 	uint32_t x;
 	char buf[PATH_MAX+1];
-	ChanCount nchans(track.audio_diskstream()->n_channels());
+	ChanCount nchans(track.n_channels());
 	nframes_t position;
 	nframes_t this_chunk;
 	nframes_t to_do;

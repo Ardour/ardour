@@ -570,7 +570,29 @@ MidiTrack::set_midi_thru (bool yn)
 boost::shared_ptr<SMFSource>
 MidiTrack::write_source (uint32_t n)
 {
-	boost::shared_ptr<MidiDiskstream> ds = boost::dynamic_pointer_cast<MidiDiskstream> (_diskstream);
-	assert (ds);
-	return ds->write_source ();
+	return midi_diskstream()->write_source ();
+}
+
+void
+MidiTrack::set_channel_mode (ChannelMode mode, uint16_t mask)
+{
+	midi_diskstream()->set_channel_mode (mode, mask);
+}
+
+ChannelMode
+MidiTrack::get_channel_mode ()
+{
+	return midi_diskstream()->get_channel_mode ();
+}
+
+uint16_t
+MidiTrack::get_channel_mask ()
+{
+	return midi_diskstream()->get_channel_mask ();
+}
+
+boost::shared_ptr<MidiPlaylist>
+MidiTrack::midi_playlist ()
+{
+	return midi_diskstream()->midi_playlist ();
 }

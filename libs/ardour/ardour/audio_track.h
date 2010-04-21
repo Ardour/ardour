@@ -42,8 +42,6 @@ class AudioTrack : public Track
 	int roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
                   int declick, bool can_record, bool rec_monitors_input, bool& need_butler);
 
-	boost::shared_ptr<AudioDiskstream> audio_diskstream() const;
-
 	void use_new_diskstream ();
         void set_diskstream (boost::shared_ptr<Diskstream>);
 
@@ -60,6 +58,7 @@ class AudioTrack : public Track
 	boost::shared_ptr<AudioFileSource> write_source (uint32_t n = 0);
 
   protected:
+	boost::shared_ptr<AudioDiskstream> audio_diskstream () const;
 	XMLNode& state (bool full);
 	
 	int _set_state (const XMLNode&, int, bool call_base);

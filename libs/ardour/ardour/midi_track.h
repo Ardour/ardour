@@ -44,8 +44,6 @@ public:
 
 	void handle_transport_stopped (bool abort, bool did_locate, bool flush_processors);
 
-	boost::shared_ptr<MidiDiskstream> midi_diskstream() const;
-
 	void use_new_diskstream ();
         void set_diskstream (boost::shared_ptr<Diskstream>);
 
@@ -92,6 +90,10 @@ public:
 	void set_midi_thru (bool yn);
 
 	boost::shared_ptr<SMFSource> write_source (uint32_t n = 0);
+	void set_channel_mode (ChannelMode, uint16_t);
+	ChannelMode get_channel_mode ();
+	uint16_t get_channel_mask ();
+	boost::shared_ptr<MidiPlaylist> midi_playlist ();
 	
 protected:
 	XMLNode& state (bool full);
@@ -99,6 +101,8 @@ protected:
 	int _set_state (const XMLNode&, int, bool call_base);
 
 private:
+	boost::shared_ptr<MidiDiskstream> midi_diskstream () const;
+
 	void write_out_of_band_data (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
 
 	void set_state_part_two ();

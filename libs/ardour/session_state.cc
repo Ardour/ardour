@@ -1300,11 +1300,13 @@ Session::set_state (const XMLNode& node, int version)
 		goto out;
 	}
 
-	if (version < 3000 && ((child = find_named_node (node, X_("DiskStreams"))) == 0)) {
-		error << _("Session: XML state has no diskstreams section") << endmsg;
-		goto out;
-	} else if (load_diskstreams_2X (*child, version)) {
-		goto out;
+	if (version < 3000) {
+		if ((child = find_named_node (node, X_("DiskStreams"))) == 0) {
+			error << _("Session: XML state has no diskstreams section") << endmsg;
+			goto out;
+		} else if (load_diskstreams_2X (*child, version)) {
+			goto out;
+		}
 	}
 
 	if ((child = find_named_node (node, "Routes")) == 0) {
