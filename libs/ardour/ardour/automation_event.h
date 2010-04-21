@@ -101,6 +101,7 @@ class AutomationList : public PBD::StatefulDestructible
 	void add (double when, double value);
 	/* this should be private but old-school automation loading needs it in IO/Redirect */
 	void fast_simple_add (double when, double value);
+        void merge_nascent ();
 
 	void reset_range (double start, double end);
 	void erase_range (double start, double end);
@@ -203,6 +204,7 @@ class AutomationList : public PBD::StatefulDestructible
   protected:
 
 	AutomationEventList events;
+	AutomationEventList nascent_events;
 	mutable Glib::Mutex lock;
 	int8_t  _frozen;
 	bool    changed_when_thawed;
@@ -224,6 +226,7 @@ class AutomationList : public PBD::StatefulDestructible
 	double max_yval;
 	double default_value;
 	bool   sort_pending;
+        ControlEvent _touch_saved_point;
 
 	iterator rt_insertion_point;
 	double   rt_pos;

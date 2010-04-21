@@ -54,6 +54,7 @@ static void dumpit (const AutomationList& al, string prefix = "")
 #endif
 
 AutomationList::AutomationList (double defval)
+        : _touch_saved_point (-1.0, -1.0)
 {
 	_frozen = 0;
 	changed_when_thawed = false;
@@ -66,7 +67,6 @@ AutomationList::AutomationList (double defval)
 	max_xval = 0; // means "no limit" 
 	default_value = defval;
 	_dirty = false;
-	rt_insertion_point = events.end();
 	lookup_cache.left = -1;
 	lookup_cache.range.first = events.end();
 	sort_pending = false;
@@ -75,6 +75,7 @@ AutomationList::AutomationList (double defval)
 }
 
 AutomationList::AutomationList (const AutomationList& other)
+        : _touch_saved_point (-1.0, -1.0)
 {
 	_frozen = 0;
 	changed_when_thawed = false;
@@ -87,7 +88,6 @@ AutomationList::AutomationList (const AutomationList& other)
 	_touching = other._touching;
         _new_touch = false;
 	_dirty = false;
-	rt_insertion_point = events.end();
 	lookup_cache.left = -1;
 	lookup_cache.range.first = events.end();
 	sort_pending = false;
@@ -104,6 +104,7 @@ AutomationList::AutomationList (const AutomationList& other)
 }
 
 AutomationList::AutomationList (const AutomationList& other, double start, double end)
+        : _touch_saved_point (-1.0, -1.0)
 {
 	_frozen = 0;
 	changed_when_thawed = false;
@@ -115,7 +116,6 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 	_state = other._state;
 	_touching = other._touching;
 	_dirty = false;
-	rt_insertion_point = events.end();
 	lookup_cache.left = -1;
 	lookup_cache.range.first = events.end();
 	sort_pending = false;
@@ -138,6 +138,7 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 }
 
 AutomationList::AutomationList (const XMLNode& node)
+        : _touch_saved_point (-1.0, -1.0)
 {
 	_frozen = 0;
 	changed_when_thawed = false;
@@ -148,7 +149,6 @@ AutomationList::AutomationList (const XMLNode& node)
 	_dirty = false;
 	_state = Auto_Off;
 	_style = Auto_Absolute;
-	rt_insertion_point = events.end();
 	lookup_cache.left = -1;
 	lookup_cache.range.first = events.end();
 	sort_pending = false;
@@ -163,6 +163,10 @@ AutomationList::~AutomationList()
 	GoingAway ();
 	
 	for (AutomationEventList::iterator x = events.begin(); x != events.end(); ++x) {
+		delete (*x);
+	}
+
+	for (AutomationEventList::iterator x = nascent_events.begin(); x != nascent_events.end(); ++x) {
 		delete (*x);
 	}
 }
@@ -189,7 +193,6 @@ AutomationList::operator= (const AutomationList& other)
 		max_xval = other.max_xval;
 		default_value = other.default_value;
 
-		rt_insertion_point = events.end();
 		lookup_cache.range.first = events.end();
 	
 		mark_dirty ();
@@ -207,6 +210,7 @@ AutomationList::maybe_signal_changed ()
 	if (_frozen) {
 		changed_when_thawed = true;
 	} else {
+                cerr << " SC, events holds " << events.size() << endl;
 		StateChanged ();
 	}
 }
@@ -234,6 +238,7 @@ AutomationList::start_touch ()
 {
 	_touching = true;
 	_new_touch = true;
+        _touch_saved_point.when = -1.0;
 }
 
 void
@@ -241,37 +246,6 @@ AutomationList::stop_touch (bool mark, double when)
 {
 	_touching = false;
 	_new_touch = false;
-
-        if (mark) {
-                /* get the value of the next point after "when", and replicate
-                   it directly after when, unless of course its already there.
-                */
-
-                double val;
-                AutomationList::const_iterator i;
-
-                for (i = const_begin(); i != const_end(); ++i) {
-                        if ((*i)->when >= when) {
-                                break;
-                        }
-                }
-
-                if (i == const_end()) {
-                        val = default_value;
-                } else {
-                        val = (*i)->value;
-                }
-
-                /* if the existing point is at "when", add a new one right after it,
-                   otherwise add it directly where the touch ended.
-                */
-
-                if ((*i)->when == when) {
-                        when++;
-                }
-
-                add (when, val);
-        }
 }
 
 void
@@ -317,10 +291,8 @@ void AutomationList::_x_scale (double factor)
 void
 AutomationList::reposition_for_rt_add (double when)
 {
-	rt_insertion_point = events.end();
+        merge_nascent ();
 }
-
-#define last_rt_insertion_point rt_insertion_point
 
 void
 AutomationList::rt_add (double when, double value)
@@ -328,87 +300,66 @@ AutomationList::rt_add (double when, double value)
 	/* this is for automation recording */
 
 	if ((_state & Auto_Touch) && !_touching) {
-		return;
-	}
+                return;
+        }
 
-	// cerr << "RT: alist @ " << this << " add " << value << " @ " << when << endl;
+        assert (when > nascent_events.back()->when);
+        nascent_events.push_back (point_factory (when, value));
+}
 
-	{
-		Glib::Mutex::Lock lm (lock);
+void
+AutomationList::merge_nascent ()
+{
+        {
+                Glib::Mutex::Lock lm (lock);
 
-		iterator where;
-		TimeComparator cmp;
-		ControlEvent cp (when, 0.0);
-		bool done = false;
+                if (nascent_events.empty()) {
+                        return;
+                }
+                
+                cerr << "Merging " << nascent_events.size() << " nascent events\n";
+                
+                iterator i;
+                bool inserted = false;
+                double lower = nascent_events.front()->when;
+                double upper = nascent_events.back()->when;
+                
+                double clamp_time = upper+1;
+                double clamp_value = unlocked_eval (upper+1);
 
-		if ((last_rt_insertion_point != events.end()) && ((*last_rt_insertion_point)->when < when) ) {
+                cerr << "nascent range = " << lower << " .. " << upper << " will add clamp at " 
+                     << clamp_time << " = " << clamp_value << endl;
 
-			/* we have a previous insertion point, so we should delete
-			   everything between it and the position where we are going
-			   to insert this point.
-			*/
+                for (i = events.begin(); i != events.end(); ) {
+                        
+                        /* remove all events within the range defined by nascent events,
+                           and insert the contents of nascent events.
+                        */
 
-			iterator after = last_rt_insertion_point;
+                        if ((*i)->when >= lower) {
 
-			if (++after != events.end()) {
-				iterator far = after;
-
-				while (far != events.end()) {
-					if ((*far)->when > when) {
-						break;
-					}
-					++far;
-				}
-
-                                if(_new_touch) {
-                                        where = far;
-                                        last_rt_insertion_point = where;
-                                                                                             
-                                        if((*where)->when == when) {
-                                                (*where)->value = value;
-                                                done = true;
-                                        }
-                                } else {
-                                        where = events.erase (after, far);
+                                if (!inserted) {
+                                        events.insert (i, nascent_events.begin(), nascent_events.end());
+                                        cerr << "did insert, events how has " << events.size() << endl;
+                                        events.insert (i, point_factory (clamp_time, clamp_value));
+                                        inserted = true;
                                 }
 
-			} else {
+                                if ((*i)->when > upper) {
+                                        break;
+                                }
 
-				where = after;
+                                i = events.erase (i);
+                        } else {
+                                cerr << "skip event at " << (*i)->when << endl;
+                                ++i;
+                        }
+                }
+                
+                nascent_events.clear ();
+        }
 
-			}
-			
-			iterator previous = last_rt_insertion_point;
-                        --previous;
-			
-			if (last_rt_insertion_point != events.begin() && (*last_rt_insertion_point)->value == value && (*previous)->value == value) {
-				(*last_rt_insertion_point)->when = when;
-				done = true;
-				
-			}
-			
-		} else {
-
-			where = lower_bound (events.begin(), events.end(), &cp, cmp);
-
-			if (where != events.end()) {
-				if ((*where)->when == when) {
-					(*where)->value = value;
-					done = true;
-				}
-			}
-		}
-		
-		if (!done) {
-			last_rt_insertion_point = events.insert (where, point_factory (when, value));
-			// cerr << "\tINSERTED\n";
-		}
-		
-		_new_touch = false;
-		mark_dirty ();
-	}
-
-	maybe_signal_changed ();
+        maybe_signal_changed ();
 }
 
 void
@@ -417,8 +368,6 @@ AutomationList::fast_simple_add (double when, double value)
 	/* to be used only for loading pre-sorted data from saved state */
 	events.insert (events.end(), point_factory (when, value));
 }
-
-#undef last_rt_insertion_point
 
 void
 AutomationList::add (double when, double value)
@@ -448,10 +397,7 @@ AutomationList::add (double when, double value)
 		}
 
 		if (insert) {
-			
 			events.insert (insertion_point, point_factory (when, value));
-			reposition_for_rt_add (0);
-
 		} 
 
 		mark_dirty ();
@@ -466,7 +412,6 @@ AutomationList::erase (AutomationList::iterator i)
 	{
 		Glib::Mutex::Lock lm (lock);
 		events.erase (i);
-		reposition_for_rt_add (0);
 		mark_dirty ();
 	}
 	maybe_signal_changed ();
@@ -478,7 +423,6 @@ AutomationList::erase (AutomationList::iterator start, AutomationList::iterator 
 	{
 		Glib::Mutex::Lock lm (lock);
 		events.erase (start, end);
-		reposition_for_rt_add (0);
 		mark_dirty ();
 	}
 	maybe_signal_changed ();
@@ -532,7 +476,6 @@ AutomationList::erase_range (double start, double endt)
 			cp.when = endt;
 			e = upper_bound (events.begin(), events.end(), &cp, cmp);
 			events.erase (s, e);
-			reposition_for_rt_add (0);
 			erased = true;
 			mark_dirty ();
 		}
@@ -688,6 +631,7 @@ AutomationList::thaw ()
 	}
 
 	if (changed_when_thawed) {
+                cerr << " thaw SC, events holds " << events.size() << endl;
 		StateChanged(); /* EMIT SIGNAL */
 	}
 }
@@ -799,7 +743,6 @@ AutomationList::truncate_end (double last_coordinate)
 			events.back()->value = last_val;
 		}
 
-		reposition_for_rt_add (0);
 		mark_dirty();
 	}
 
@@ -904,8 +847,6 @@ AutomationList::truncate_start (double overall_length)
 			
 			events.push_front (point_factory (0, first_legal_value));
 		}	    
-
-		reposition_for_rt_add (0);
 
 		mark_dirty();
 	}
@@ -1062,8 +1003,6 @@ AutomationList::cut (iterator start, iterator end)
 			nal->events.push_back (point_factory (**x));
 			events.erase (x);
 			
-			reposition_for_rt_add (0);
-
 			x = tmp;
 		}
 
@@ -1123,10 +1062,6 @@ AutomationList::cut_copy_clear (double start, double end, int op)
 
 		if (op != 2 && nal->events.back()->when != end - start) {
 			nal->events.push_back (point_factory (end - start, unlocked_eval (end)));
-		}
-
-		if (changed) {
-			reposition_for_rt_add (0);
 		}
 
 		mark_dirty ();
@@ -1219,7 +1154,6 @@ AutomationList::paste (AutomationList& alist, double pos, float times)
 			}
 		}
 
-		reposition_for_rt_add (0);
 		mark_dirty ();
 	}
 
@@ -1344,7 +1278,6 @@ AutomationList::deserialize_events (const XMLNode& node)
 		error << _("automation list: cannot load coordinates from XML, all points ignored") << endmsg;
 	} else {
 		mark_dirty ();
-		reposition_for_rt_add (0);
 		maybe_signal_changed ();
 	}
 

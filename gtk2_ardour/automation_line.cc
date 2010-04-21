@@ -1199,6 +1199,7 @@ AutomationLine::hide_selection ()
 void
 AutomationLine::list_changed ()
 {
+        cerr << "AL " << &alist << " changed\n";
 	queue_reset ();
 }
 
@@ -1207,6 +1208,8 @@ AutomationLine::reset_callback (const AutomationList& events)
 {
 	ALPoints tmp_points;
 	uint32_t npoints = events.size();
+
+        cerr << "Redraw with " << npoints << endl;
 
 	if (npoints == 0) {
 		for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
