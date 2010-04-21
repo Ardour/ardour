@@ -80,7 +80,7 @@ MidiTrack::use_new_diskstream ()
 	ds->do_refill_with_alloc ();
 	ds->set_block_size (_session.get_block_size ());
 
-	set_diskstream (boost::dynamic_pointer_cast<MidiDiskstream> (ds));
+	set_diskstream (ds);
 }
 
 void
@@ -147,6 +147,14 @@ MidiTrack::_set_state (const XMLNode& node, int version, bool call_base)
 		if (child->name() == X_("recenable")) {
 			_rec_enable_control->set_state (*child, version);
 			_session.add_controllable (_rec_enable_control);
+		}
+	}
+
+	if (version >= 3000) {
+		if ((child = find_named_node (node, X_("Diskstream"))) != 0) {
+			boost::shared_ptr<MidiDiskstream> ds (new MidiDiskstream (_session, *child));
+			ds->do_refill_with_alloc ();
+			set_diskstream (ds);
 		}
 	}
 
