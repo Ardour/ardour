@@ -224,7 +224,7 @@ _	   the regular process() call to session->process() is not made.
 
 	/* this signal is sent if JACK ever disconnects us */
 
-	PBD::Signal0<void> Halted;
+	PBD::Signal1<void,const char*> Halted;
 
 	/* these two are emitted when the engine itself is
 	   started and stopped
@@ -306,6 +306,7 @@ _	   the regular process() call to session->process() is not made.
 	int connect_to_jack (std::string client_name, std::string session_uuid);
 
 	static void halted (void *);
+	static void halted_info (jack_status_t,const char*,void *);
 
 	void meter_thread ();
 	void start_metering_thread ();

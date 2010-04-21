@@ -269,7 +269,7 @@ Route::ensure_track_or_route_name(string name, Session &session)
 {
 	string newname = name;
 
-	while (session.route_by_name (newname) != NULL) {
+	while (!session.io_name_is_legal (newname)) {
 		newname = bump_name_once (newname);
 	}
 
@@ -3251,4 +3251,22 @@ Route::nth_send (uint32_t n)
 	}
 
 	return boost::shared_ptr<Processor> ();
+}
+
+bool
+Route::has_io_processor_named (const string& name)
+{
+        Glib::RWLock::ReaderLock lm (_processor_lock);
+        ProcessorList::iterator i;
+        
+        for (i = _processors.begin(); i != _processors.end(); ++i) {
+                if (boost::dynamic_pointer_cast<Send> (*i) ||
+                    boost::dynamic_pointer_cast<PortInsert> (*i)) {
+                        if ((*i)->name() == name) {
+                                return true;
+                        }
+                }
+        }
+        
+        return false;
 }

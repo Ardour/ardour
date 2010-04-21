@@ -1004,7 +1004,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 
 				current->suspend_property_changes ();
 				thawlist.push_back (current);
-				current->cut_end (pos2, this);
+				current->cut_end (pos2 - 1, this);
 
 			} else if (overlap == OverlapEnd) {
 
@@ -1043,7 +1043,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 
 				current->suspend_property_changes ();
 				thawlist.push_back (current);
-				current->cut_end (pos2, this);
+				current->cut_end (pos2 - 1, this);
 
 			} else if (overlap == OverlapStart) {
 
@@ -2490,22 +2490,48 @@ void
 Playlist::raise_region_to_top (boost::shared_ptr<Region> region)
 {
 	/* does nothing useful if layering mode is later=higher */
-	if ((_session.config.get_layer_model() == MoveAddHigher) ||
-	    (_session.config.get_layer_model() == AddHigher)) {
-		timestamp_layer_op (region);
-		relayer ();
+	switch (_session.config.get_layer_model()) {
+	case LaterHigher:
+		return;
+	default:
+		break;
 	}
+
+	layer_t top = regions.size() - 1;
+
+	if (region->layer() >= top) {
+		/* already on the top */
+		return;
+	}
+
+	move_region_to_layer (top, region, 1);
+	/* mark the region's last_layer_op as now, so that it remains on top when
+	   doing future relayers (until something else takes over)
+	 */
+	timestamp_layer_op (region);
 }
 
 void
 Playlist::lower_region_to_bottom (boost::shared_ptr<Region> region)
 {
 	/* does nothing useful if layering mode is later=higher */
-	if ((_session.config.get_layer_model() == MoveAddHigher) ||
-	    (_session.config.get_layer_model() == AddHigher)) {
-		region->set_last_layer_op (0);
-		relayer ();
+	switch (_session.config.get_layer_model()) {
+	case LaterHigher:
+		return;
+	default:
+		break;
 	}
+
+	if (region->layer() == 0) {
+		/* already on the bottom */
+		return;
+	}
+
+	move_region_to_layer (0, region, -1);
+	/* force region's last layer op to zero so that it stays at the bottom
+	   when doing future relayers
+	*/
+	region->set_last_layer_op (0);
 }
 
 int
@@ -2688,8 +2714,6 @@ Playlist::set_frozen (bool yn)
 void
 Playlist::timestamp_layer_op (boost::shared_ptr<Region> region)
 {
-//	struct timeval tv;
-//	gettimeofday (&tv, 0);
 	region->set_last_layer_op (++layer_op_counter);
 }
 

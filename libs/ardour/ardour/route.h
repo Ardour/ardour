@@ -188,6 +188,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	bool processor_is_prefader (boost::shared_ptr<Processor> p);
 
+        bool has_io_processor_named (const std::string&);
 	ChanCount max_processor_streams () const { return processor_max_streams; }
 
 	/* special processors */

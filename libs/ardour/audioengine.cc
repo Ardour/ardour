@@ -145,6 +145,19 @@ _thread_init_callback (void * /*arg*/)
 	MIDI::JACK_MidiPort::set_process_thread (pthread_self());
 }
 
+typedef void (*_JackInfoShutdownCallback)(jack_status_t code, const char* reason, void *arg);
+
+static void (*on_info_shutdown)(jack_client_t*, _JackInfoShutdownCallback, void *);
+extern void jack_on_info_shutdown (jack_client_t*, _JackInfoShutdownCallback, void *) __attribute__((weak));
+
+static void check_jack_symbols () __attribute__((constructor));
+
+void check_jack_symbols ()
+{
+       /* use weak linking to see if we really have various late-model JACK function */
+       on_info_shutdown = jack_on_info_shutdown;
+}
+
 static void
 ardour_jack_error (const char* msg)
 {
@@ -183,7 +196,11 @@ AudioEngine::start ()
 		_processed_frames = 0;
 		last_monitor_check = 0;
 
-		jack_on_shutdown (_priv_jack, halted, this);
+                if (on_info_shutdown) {
+                        jack_on_info_shutdown (_priv_jack, halted_info, this);
+                } else {
+                        jack_on_shutdown (_priv_jack, halted, this);
+                }
 		jack_set_graph_order_callback (_priv_jack, _graph_order_callback, this);
 		jack_set_thread_init_callback (_priv_jack, _thread_init_callback, this);
 		// jack_set_process_callback (_priv_jack, _process_callback, this);
@@ -969,6 +986,36 @@ AudioEngine::get_ports (const string& port_name_pattern, const string& type_name
 }
 
 void
+AudioEngine::halted_info (jack_status_t code, const char* reason, void *arg)
+{
+        /* called from jack shutdown handler  */
+        
+        AudioEngine* ae = static_cast<AudioEngine *> (arg);
+        bool was_running = ae->_running;
+        
+        ae->stop_metering_thread ();
+        
+        ae->_running = false;
+        ae->_buffer_size = 0;
+        ae->_frame_rate = 0;
+        ae->_jack = 0;
+        
+        if (was_running) {
+#ifdef HAVE_JACK_ON_INFO_SHUTDOWN
+                switch (code) {
+                case JackBackendError:
+                        ae->Halted(reason); /* EMIT SIGNAL */
+                        break;
+                default:
+                        ae->Halted(""); /* EMIT SIGNAL */
+                }
+#else
+                ae->Halted(""); /* EMIT SIGNAL */
+#endif
+        }
+}
+
+void
 AudioEngine::halted (void *arg)
 {
         cerr << "HALTED by JACK\n";
@@ -983,9 +1030,10 @@ AudioEngine::halted (void *arg)
 	ae->_running = false;
 	ae->_buffer_size = 0;
 	ae->_frame_rate = 0;
+        ae->_jack = 0;
 
 	if (was_running) {
-		ae->Halted(); /* EMIT SIGNAL */
+		ae->Halted(""); /* EMIT SIGNAL */
 		MIDI::JACK_MidiPort::JackHalted (); /* EMIT SIGNAL */
 	}
 }

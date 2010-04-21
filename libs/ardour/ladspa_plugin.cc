@@ -691,6 +691,7 @@ LadspaPluginInfo::load (Session& session)
 		if ((module = dlopen (path.c_str(), RTLD_NOW)) == 0) {
 			error << string_compose(_("LADSPA: cannot load module from \"%1\""), path) << endmsg;
 			error << dlerror() << endmsg;
+                        return PluginPtr ((Plugin*) 0);
 		} else {
 			plugin.reset (new LadspaPlugin (module, session.engine(), session, index, session.frame_rate()));
 		}

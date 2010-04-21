@@ -1242,11 +1242,27 @@ ProcessorBox::rename_processor (boost::shared_ptr<Processor> processor)
 	case Gtk::RESPONSE_ACCEPT:
 		name_prompter.get_result (result);
 		if (result.length()) {
-			if (_session->route_by_name (result)) {
-				ARDOUR_UI::instance()->popup_error (_("A track already exists with that name."));
-				return;
-			}
-			processor->set_name (result);
+
+                       int tries = 0;
+                       string test = result;
+
+                       while (tries < 100) {
+                               if (_session->io_name_is_legal (test)) {
+                                       result = test;
+                                       break;
+                               }
+                               tries++;
+
+                               test = string_compose ("%1-%2", result, tries);
+                       }
+
+                       if (tries < 100) {
+                               processor->set_name (result);
+                       } else {
+                               /* unlikely! */
+                               ARDOUR_UI::instance()->popup_error
+                                       (string_compose (_("At least 100 IO objects exist with a name like %1 - name not changed"), result));
+                       }
 		}
 		break;
 	}

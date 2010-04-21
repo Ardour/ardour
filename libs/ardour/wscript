@@ -244,7 +244,13 @@ def configure(conf):
 	conf.check(header_name='wordexp.h', define_name='HAVE_WORDEXP')
 
 	conf.check(header_name='jack/session.h', define_name='HAVE_JACK_SESSION')
-	
+        
+	conf.check_cc(fragment = "#include <jack/jack.h>\nvoid callback (int code, const char* reason, void* arg) { return; }\nint main(int argc, char **argv) { jack_client_t* c; jack_on_info_shutdown (c, callback, (void*) 0); return 0; }\n",
+                      linkflags = ['-ljack'],
+		      msg = 'Checking for jack_on_info_shutdown',
+                      define_name = 'HAVE_JACK_ON_INFO_SHUTDOWN',
+		      okmsg = 'ok')
+                      
 	if flac_supported():
 		conf.define ('HAVE_FLAC', 1)
 		autowaf.display_msg(conf, 'Checking for FLAC support', True)

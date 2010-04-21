@@ -343,8 +343,9 @@ ARDOUR_UI::create_engine ()
 
 	engine->Stopped.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_stopped, this), gui_context());
 	engine->Running.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_running, this), gui_context());
-	engine->Halted.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_halted, this), gui_context());
 	engine->SampleRateChanged.connect (forever_connections, MISSING_INVALIDATOR, ui_bind (&ARDOUR_UI::update_sample_rate, this, _1), gui_context());
+
+	engine->Halted.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
 
 	post_engine ();
 
@@ -726,10 +727,11 @@ void
 ARDOUR_UI::finish()
 {
 	if (_session) {
+                int tries = 0;
 
-		if (_session->transport_rolling()) {
-			_session->request_stop ();
-			usleep (250000);
+		if (_session->transport_rolling() && (++tries < 8)) {
+			_session->request_stop (false, true);
+			usleep (10000);
 		}
 
 		if (_session->dirty()) {
@@ -1444,14 +1446,14 @@ ARDOUR_UI::transport_stop ()
 		return;
 	}
 
-	_session->request_stop ();
+	_session->request_stop (false, true);
 }
 
 void
 ARDOUR_UI::transport_stop_and_forget_capture ()
 {
 	if (_session) {
-		_session->request_stop (true);
+		_session->request_stop (true, true);
 	}
 }
 
@@ -1519,7 +1521,12 @@ ARDOUR_UI::transport_roll ()
 	bool rolling = _session->transport_rolling();
 
 	if (_session->get_play_loop()) {
-		_session->request_play_loop (false, true);
+		/* XXX it is not possible to just leave seamless loop and keep
+		   playing at present (nov 4th 2009)
+		*/
+                if (!Config->get_seamless_loop()) {
+                        _session->request_play_loop (false, true);
+                }
 	} else if (_session->get_play_range () && !join_play_range_button.get_active()) {
 		/* stop playing a range if we currently are */
 		_session->request_play_range (0, true);
@@ -1576,7 +1583,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 			_session->request_play_loop (false, true);
 		} else if (_session->get_play_range ()) {
 			affect_transport = false;
-			_session->request_play_range (0, true);
+                        _session->request_play_range (0, true);
 		} 
 	} 
 
@@ -1826,23 +1833,46 @@ ARDOUR_UI::engine_running ()
 }
 
 void
-ARDOUR_UI::engine_halted ()
+ARDOUR_UI::engine_halted (const char* reason, bool free_reason)
 {
-	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::engine_halted)
+       if (!Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {
+               /* we can't rely on the original string continuing to exist when we are called
+                  again in the GUI thread, so make a copy and note that we need to
+                  free it later.
+               */
+               char *copy = strdup (reason);
+               Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&ARDOUR_UI::engine_halted, this, copy, true));
+               return;
+       }
 
 	ActionManager::set_sensitive (ActionManager::jack_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::jack_opposite_sensitive_actions, true);
 
 	update_sample_rate (0);
 
-	MessageDialog msg (*editor,
-			   _("\
+        string msgstr;
+
+	/* if the reason is a non-empty string, it means that the backend was shutdown
+	   rather than just Ardour.
+	*/
+
+	if (strlen (reason)) {
+		msgstr = string_compose (_("The audio backend (JACK) was shutdown because:\n\n%1"), reason);
+	} else {
+		msgstr = _("\
 JACK has either been shutdown or it\n\
 disconnected Ardour because Ardour\n\
 was not fast enough. Try to restart\n\
-JACK, reconnect and save the session."));
+JACK, reconnect and save the session.");
+	}
+
+	MessageDialog msg (*editor, msgstr);
 	pop_back_splash ();
 	msg.run ();
+
+        if (free_reason) {
+                free ((char*) reason);
+        }
 }
 
 int32_t
@@ -1940,24 +1970,29 @@ ARDOUR_UI::stop_blinking ()
 
 /** Ask the user for the name of a new shapshot and then take it.
  */
+
 void
-ARDOUR_UI::snapshot_session ()
+ARDOUR_UI::snapshot_session (bool switch_to_it)
 {
 	ArdourPrompter prompter (true);
 	string snapname;
-	char timebuf[128];
-	time_t n;
-	struct tm local_time;
-
-	time (&n);
-	localtime_r (&n, &local_time);
-	strftime (timebuf, sizeof(timebuf), "%FT%T", &local_time);
 
 	prompter.set_name ("Prompter");
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 	prompter.set_title (_("Take Snapshot"));
+	prompter.set_title (_("Take Snapshot"));
 	prompter.set_prompt (_("Name of New Snapshot"));
-	prompter.set_initial_text (timebuf);
+
+        if (!switch_to_it) {
+                char timebuf[128];
+                time_t n;
+                struct tm local_time;
+                
+                time (&n);
+                localtime_r (&n, &local_time);
+                strftime (timebuf, sizeof(timebuf), "%FT%T", &local_time);
+                prompter.set_initial_text (timebuf);
+        }
 
   again:
 	switch (prompter.run()) {
@@ -2000,7 +2035,7 @@ ARDOUR_UI::snapshot_session ()
 		}
 
 		if (do_save) {
-			save_state (snapname);
+			save_state (snapname, switch_to_it);
 		}
 		break;
 	}
@@ -2011,13 +2046,13 @@ ARDOUR_UI::snapshot_session ()
 }
 
 void
-ARDOUR_UI::save_state (const string & name)
+ARDOUR_UI::save_state (const string & name, bool switch_to_it)
 {
-	save_state_canfail (name);
+	save_state_canfail (name, switch_to_it);
 }
 
 int
-ARDOUR_UI::save_state_canfail (string name)
+ARDOUR_UI::save_state_canfail (string name, bool switch_to_it)
 {
 	if (_session) {
 		int ret;
@@ -2026,7 +2061,7 @@ ARDOUR_UI::save_state_canfail (string name)
 			name = _session->snap_name();
 		}
 
-		if ((ret = _session->save_state (name)) != 0) {
+		if ((ret = _session->save_state (name, false, switch_to_it)) != 0) {
 			return ret;
 		}
 	}

@@ -147,8 +147,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	int unload_session (bool hide_stuff = false);
 	void close_session();
 
-	int  save_state_canfail (std::string state_name = "");
-	void save_state (const std::string & state_name = "");
+	int  save_state_canfail (std::string state_name = "", bool switch_to_it = false);
+	void save_state (const std::string & state_name = "", bool switch_to_it = false);
 
 	static double gain_to_slider_position (ARDOUR::gain_t g);
 	static ARDOUR::gain_t slider_position_to_gain (double pos);
@@ -282,7 +282,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void map_transport_state ();
 	int32_t do_engine_start ();
 
-	void engine_halted ();
+	void engine_halted (const char* reason, bool free_reason);
 	void engine_stopped ();
 	void engine_running ();
 
@@ -567,7 +567,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	guint32  last_key_press_time;
 
-	void snapshot_session ();
+	void snapshot_session (bool switch_to_it);
 
 	Mixer_UI   *mixer;
 	int         create_mixer ();
@@ -694,6 +694,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 			Glib::RefPtr<Gtk::TextBuffer::Tag> ptag, Glib::RefPtr<Gtk::TextBuffer::Tag> mtag,
 			const char *msg);
 	Gtk::Label status_bar_label;
+        bool status_bar_button_press (GdkEventButton*);
 	Gtk::ToggleButton error_log_button;
 
 	void loading_message (const std::string& msg);

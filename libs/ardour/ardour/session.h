@@ -240,6 +240,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>));
 	template<class T, class A> void foreach_route (T *obj, void (T::*func)(Route&, A), A arg);
 
+        bool io_name_is_legal (const std::string&);
 	boost::shared_ptr<Route> route_by_name (std::string);
 	boost::shared_ptr<Route> route_by_id (PBD::ID);
 	boost::shared_ptr<Route> route_by_remote_id (uint32_t id);
@@ -356,7 +357,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 #ifdef HAVE_JACK_SESSION 
 	void jack_session_event (jack_session_event_t* event);
 #endif
-	int save_state (std::string snapshot_name, bool pending = false);
+	int save_state (std::string snapshot_name, bool pending = false, bool switch_to_snapshot = false);
 	int restore_state (std::string snapshot_name);
 	int save_template (std::string template_name);
 	int save_history (std::string snapshot_name = "");

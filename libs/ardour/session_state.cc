@@ -748,7 +748,7 @@ Session::jack_session_event (jack_session_event_t * event)
 #endif
 
 int
-Session::save_state (string snapshot_name, bool pending)
+Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot)
 {
 	XMLTree tree;
 	sys::path xml_path(_session_dir->root_path());
@@ -773,7 +773,9 @@ Session::save_state (string snapshot_name, bool pending)
 
 	if (snapshot_name.empty()) {
 		snapshot_name = _current_snapshot_name;
-	}
+	} else if (switch_to_snapshot) {
+                _current_snapshot_name = snapshot_name;
+        }
 
 	if (!pending) {
 

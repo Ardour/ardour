@@ -602,7 +602,7 @@ UI::handle_fatal (const char *message)
 }
 
 void
-UI::popup_error (const char *text)
+UI::popup_error (const string& text)
 {
 	PopUp *pup;
 
