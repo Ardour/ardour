@@ -515,6 +515,7 @@ Session::create (const string& mix_template, nframes_t initial_length, BusProfil
 
 			if (out){
 				out << in.rdbuf();
+                                _is_new = false;
 				return 0;
 
 			} else {
