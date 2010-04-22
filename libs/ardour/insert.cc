@@ -360,7 +360,7 @@ PluginInsert::transport_stopped (nframes_t now)
 		AutomationList* alist = *li;
 
 		if (alist) {
-			alist->reposition_for_rt_add (now);
+			alist->write_pass_finished (now);
 			if (alist->automation_state() == Auto_Touch || alist->automation_state() == Auto_Play) {
 				_plugins[0]->set_parameter (n, alist->eval (now));
 			}

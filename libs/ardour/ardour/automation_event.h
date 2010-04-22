@@ -96,12 +96,12 @@ class AutomationList : public PBD::StatefulDestructible
 	bool extend_to (double);
 	void slide (iterator before, double distance);
 	
-	void reposition_for_rt_add (double when);
+	void write_pass_finished (double when);
 	void rt_add (double when, double value);
 	void add (double when, double value);
 	/* this should be private but old-school automation loading needs it in IO/Redirect */
 	void fast_simple_add (double when, double value);
-        void merge_nascent ();
+        void merge_nascent (double when);
 
 	void reset_range (double start, double end);
 	void erase_range (double start, double end);
@@ -226,10 +226,6 @@ class AutomationList : public PBD::StatefulDestructible
 	double max_yval;
 	double default_value;
 	bool   sort_pending;
-        ControlEvent _touch_saved_point;
-
-	iterator rt_insertion_point;
-	double   rt_pos;
 
 	void maybe_signal_changed ();
 	void mark_dirty ();

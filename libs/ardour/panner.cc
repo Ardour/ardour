@@ -210,7 +210,7 @@ BaseStereoPanner::transport_stopped (nframes_t frame)
 		set_position (_automation.eval (frame));
 	}
 
-	_automation.reposition_for_rt_add (frame);
+	_automation.write_pass_finished (frame);
 }
 
 void

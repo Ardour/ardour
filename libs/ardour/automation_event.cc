@@ -54,7 +54,6 @@ static void dumpit (const AutomationList& al, string prefix = "")
 #endif
 
 AutomationList::AutomationList (double defval)
-        : _touch_saved_point (-1.0, -1.0)
 {
 	_frozen = 0;
 	changed_when_thawed = false;
@@ -75,7 +74,6 @@ AutomationList::AutomationList (double defval)
 }
 
 AutomationList::AutomationList (const AutomationList& other)
-        : _touch_saved_point (-1.0, -1.0)
 {
 	_frozen = 0;
 	changed_when_thawed = false;
@@ -104,7 +102,6 @@ AutomationList::AutomationList (const AutomationList& other)
 }
 
 AutomationList::AutomationList (const AutomationList& other, double start, double end)
-        : _touch_saved_point (-1.0, -1.0)
 {
 	_frozen = 0;
 	changed_when_thawed = false;
@@ -138,7 +135,6 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 }
 
 AutomationList::AutomationList (const XMLNode& node)
-        : _touch_saved_point (-1.0, -1.0)
 {
 	_frozen = 0;
 	changed_when_thawed = false;
@@ -299,9 +295,16 @@ void AutomationList::_x_scale (double factor)
 }
 
 void
-AutomationList::reposition_for_rt_add (double when)
+AutomationList::write_pass_finished (double when)
 {
-        merge_nascent ();
+        merge_nascent (when);
+
+        /* do not remain in Write mode after stopping - drop into Touch
+         */
+
+        if (_state == Auto_Write) {
+                set_automation_state (Auto_Touch);
+        }
 }
 
 void
@@ -325,7 +328,7 @@ AutomationList::rt_add (double when, double value)
 }
 
 void
-AutomationList::merge_nascent ()
+AutomationList::merge_nascent (double when)
 {
         {
                 Glib::Mutex::Lock lm (lock);
@@ -1290,7 +1293,14 @@ AutomationList::state (bool full)
 	root->add_property ("max_xval", buf);
 
 	if (full) {
-		root->add_property ("state", auto_state_to_string (_state));
+                /* never serialize state with Write enabled - too dangerous 
+                   for the user's data
+                */
+                if (_state != Auto_Write) {
+                        root->add_property ("state", auto_state_to_string (_state));
+                } else {
+                        root->add_property ("state", auto_state_to_string (Auto_Off));
+                }
 	} else {
 		/* never save anything but Off for automation state to a template */
 		root->add_property ("state", auto_state_to_string (Auto_Off));

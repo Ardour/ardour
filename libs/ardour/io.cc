@@ -2724,7 +2724,7 @@ IO::automation_snapshot (nframes_t now, bool force)
 void
 IO::transport_stopped (nframes_t frame)
 {
-	_gain_automation_curve.reposition_for_rt_add (frame);
+	_gain_automation_curve.write_pass_finished (frame);
 
 	if (_gain_automation_curve.automation_state() == Auto_Touch || _gain_automation_curve.automation_state() == Auto_Play) {
 		
