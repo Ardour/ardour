@@ -316,75 +316,69 @@ AutomationList::merge_nascent ()
                 if (nascent_events.empty()) {
                         return;
                 }
-                
-                iterator i;
-                iterator range_begin = events.end();
-                iterator range_end = events.end();
-                bool inserted = false;
 
                 double lower = nascent_events.front()->when;
-                double upper = nascent_events.back()->when;
                 bool preexisting = !events.empty();
-                double clamp_time;
-                double clamp_value;
+                double clamp_time = nascent_events.back()->when + 1; // XXX FIX ME
 
-                if (preexisting) {
-                        clamp_time = upper + 1; // XXX FIX ME
-                        clamp_value = unlocked_eval (clamp_time);
-                }
-                
-                for (i = events.begin(); i != events.end(); ++i) {
+                if (!preexisting) {
+
+                        events = nascent_events;
+                        
+                } else if (clamp_time < events.front()->when) {
+
+                        /* all points in nascent are before the first existing point */
+
+                        if (preexisting) {
+                                events.insert (events.begin(), point_factory (clamp_time, unlocked_eval (clamp_time)));
+                        }
+                        events.insert (events.begin(), nascent_events.begin(), nascent_events.end());
+
+                } else if (lower > events.back()->when) {
+
+                        /* all points in nascent are after the last existing point */
+
+                        events.insert (events.end(), nascent_events.begin(), nascent_events.end());
+
+                } else {
                         
                         /* find the range that overaps with nascent events,
                            and insert the contents of nascent events.
                         */
-
-                        if ((*i)->when >= lower) {
-
-                                if (range_begin == events.end()) {
-                                        range_begin = i;
-                                }
-
-                                if ((*i)->when > clamp_time) {
-                                        range_end = i;
-                                        break;
-                                }
-                        }
-                }
-
-                if (range_begin == events.end()) {
-
-                        if (range_end == events.end()) {
-
-                                /* nascent events are all after any events in the existing list. insert
-                                   at the back of the list. no clamp point is required.
-                                */
                                 
-                                events.insert (events.end(), nascent_events.begin(), nascent_events.end());
+                        iterator i;
+                        iterator range_begin = events.end();
+                        iterator range_end = events.end();
 
-                        } else {
-
-                                /* nascent events are all before any events in the existing list. insert
-                                   at the front of the list, with the clamp value to pull us back to
-                                   any existing points.
-                                */
+                        for (i = events.begin(); i != events.end(); ++i) {
                                 
-                                events.insert (events.begin(), nascent_events.begin(), nascent_events.end());
-                                if (preexisting) {
-                                        events.insert (events.begin(), point_factory (clamp_time, clamp_value));
+                                if ((*i)->when >= lower) {
+                                        
+                                        if (range_begin == events.end()) {
+                                                range_begin = i;
+                                        }
+                                        
+                                        if ((*i)->when > clamp_time) {
+                                                range_end = i;
+                                                break;
+                                        }
                                 }
                         }
 
-                } else {
-                        /* nascent events begin somewhere within in the existing list. insert them,
-                           along with the clamp point if necessary. then delete the existing events
-                           that correspond to the range of nascent events.
-                        */
+                        assert (range_begin != events.end());
 
-                        events.insert (range_end, nascent_events.begin(), nascent_events.end());
+                        double clamp_value;
+
                         if (preexisting) {
-                                events.insert (range_end, point_factory (clamp_time, clamp_value));
+                                clamp_value = unlocked_eval (clamp_time);
                         }
+
+                        events.insert (range_begin, nascent_events.begin(), nascent_events.end());
+
+                        if (preexisting) {
+                                events.insert (range_begin, point_factory (clamp_time, clamp_value));
+                        }
+
                         events.erase (range_begin, range_end);
                 }
 
