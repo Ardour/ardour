@@ -1448,7 +1448,10 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 
 	/* make sure we have sufficient scratch buffers to cope with the new processor
 	   configuration */
-	_session.ensure_buffers (n_process_buffers ());
+	{
+		Glib::Mutex::Lock em (_session.engine().process_lock ());
+		_session.ensure_buffers (n_process_buffers ());
+	}
 
 	_in_configure_processors = false;
 	return 0;

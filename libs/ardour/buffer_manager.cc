@@ -25,11 +25,14 @@ using namespace ARDOUR;
 using namespace PBD;
 
 RingBufferNPT<ThreadBuffers*>* BufferManager::thread_buffers = 0;
+std::list<ThreadBuffers*>* BufferManager::thread_buffers_list = 0;
+Glib::StaticMutex BufferManager::rb_mutex = GLIBMM_STATIC_MUTEX_INIT;
 
 void
 BufferManager::init (uint32_t size)
 {
         thread_buffers = new ThreadBufferFIFO (size+1); // must be one larger than requested
+	thread_buffers_list = new ThreadBufferList;
 
         /* and populate with actual ThreadBuffers 
          */
@@ -37,12 +40,14 @@ BufferManager::init (uint32_t size)
         for (uint32_t n = 0; n < size; ++n) {        
                 ThreadBuffers* ts = new ThreadBuffers;
                 thread_buffers->write (&ts, 1);
+		thread_buffers_list->push_back (ts);
         }
 }
 
 ThreadBuffers*
 BufferManager::get_thread_buffers ()
 {
+	Glib::Mutex::Lock em (rb_mutex);
         ThreadBuffers* tbp;
 
         if (thread_buffers->read (&tbp, 1) == 1) {
@@ -55,6 +60,7 @@ BufferManager::get_thread_buffers ()
 void
 BufferManager::put_thread_buffers (ThreadBuffers* tbp)
 {
+	Glib::Mutex::Lock em (rb_mutex);
         thread_buffers->write (&tbp, 1);
 }
 
@@ -63,7 +69,7 @@ BufferManager::ensure_buffers (ChanCount howmany)
 {
         /* this is protected by the audioengine's process lock: we do not  */
 
-        for (uint32_t n = 0; n < thread_buffers->bufsize() - 1; ++n) {
-                thread_buffers->buffer()[n]->ensure_buffers (howmany);
-        }
+	for (ThreadBufferList::iterator i = thread_buffers_list->begin(); i != thread_buffers_list_end(); ++i) {
+		(*i)->ensure_buffers (howmany);
+	}
 }

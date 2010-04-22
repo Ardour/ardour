@@ -6,6 +6,8 @@
 #include "pbd/ringbufferNPT.h"
 
 #include "ardour/chan_count.h"
+#include <list>
+#include <glibmm/thread.h>
 
 namespace ARDOUR {
 
@@ -22,8 +24,12 @@ class BufferManager
         static void ensure_buffers (ChanCount howmany = ChanCount::ZERO);
 
   private:
+	static Glib::StaticMutex rb_mutex;
+	
         typedef RingBufferNPT<ThreadBuffers*> ThreadBufferFIFO;
+	typedef std::list<ThreadBuffers*> ThreadBufferList;
         static ThreadBufferFIFO* thread_buffers;
+	static ThreadBufferList* thread_buffers_list;
 };
 
 }
