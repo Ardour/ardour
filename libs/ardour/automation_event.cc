@@ -1089,10 +1089,13 @@ AutomationList::cut_copy_clear (double start, double end, int op)
 	iterator s, e;
 	ControlEvent cp (start, 0.0);
 	TimeComparator cmp;
-	bool changed = false;
 	
 	{
 		Glib::Mutex::Lock lm (lock);
+
+                /* first, determine s & e, two iterators that define the range of points
+                   affected by this operation
+                */
 
 		if ((s = lower_bound (events.begin(), events.end(), &cp, cmp)) == events.end()) {
 			return nal;
@@ -1101,18 +1104,33 @@ AutomationList::cut_copy_clear (double start, double end, int op)
 		cp.when = end;
 		e = upper_bound (events.begin(), events.end(), &cp, cmp);
 
-		if (op != 2 && (*s)->when != start) {
-			nal->events.push_back (point_factory (0, unlocked_eval (start)));
-		}
+                /* if "start" isn't the location of an existing point,
+                   evaluate the curve to get a value for the start. Add a point to
+                   both the existing event list, and if its not a "clear" operation,
+                   to the copy ("nal") as well. 
+
+                   Note that the time positions of the points in each list are different 
+                   because we want the copy ("nal") to have a zero time reference.
+                */
+
+                if ((*s)->when != start) {
+                        
+                        double val = unlocked_eval (start);
+                        events.insert (s, (point_factory (start, val)));
+                        
+                        if (op != 2) {
+                                nal->events.push_back (point_factory (0, val));
+                        }
+                }
+                        
+                /* before we begin any cut/clear operations, get the value of the curve
+                   at "end".
+                */
+
+                double end_value = unlocked_eval (end);
 
 		for (iterator x = s; x != e; ) {
-			iterator tmp;
-			
-			tmp = x;
-			++tmp;
 
-			changed = true;
-			
 			/* adjust new points to be relative to start, which
 			   has been set to zero.
 			*/
@@ -1122,20 +1140,26 @@ AutomationList::cut_copy_clear (double start, double end, int op)
 			}
 
 			if (op != 1) {
-				events.erase (x);
-			}
-			
-			x = tmp;
+				x = events.erase (x);
+			} else {
+                                ++x;
+                        }
+		}
+                
+                if (e == events.end() || (*e)->when != end) {
+			events.insert (e, point_factory (end, end_value));
+
+                        if (op != 2) {
+                                nal->events.push_back (point_factory (end - start, end_value));
+                        }
 		}
 
-		if (op != 2 && nal->events.back()->when != end - start) {
-			nal->events.push_back (point_factory (end - start, unlocked_eval (end)));
-		}
-
-		mark_dirty ();
+                mark_dirty ();
 	}
-
-	maybe_signal_changed ();
+        
+        if (op != 1) {
+                maybe_signal_changed ();
+        }
 
 	return nal;
 
