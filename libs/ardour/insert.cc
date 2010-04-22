@@ -340,7 +340,7 @@ PluginInsert::automation_snapshot (nframes_t now, bool force)
 		
 		AutomationList *alist = *li;
 
-		if (alist && alist->automation_write ()) {
+		if (alist && alist->automation_write () && _session.transport_rolling()) {
 			
 			float val = _plugins[0]->get_parameter (n);
 			alist->rt_add (now, val);
@@ -361,7 +361,7 @@ PluginInsert::transport_stopped (nframes_t now)
 
 		if (alist) {
 			alist->reposition_for_rt_add (now);
-			if (alist->automation_state() != Auto_Off) {
+			if (alist->automation_state() == Auto_Touch || alist->automation_state() == Auto_Play) {
 				_plugins[0]->set_parameter (n, alist->eval (now));
 			}
 		}
@@ -423,7 +423,7 @@ PluginInsert::set_parameter (uint32_t port, float val)
 	
 	_plugins[0]->set_parameter (port, val);
 	
-	if (automation_list (port).automation_write()) {
+	if (automation_list (port).automation_write() && _session.transport_rolling()) {
 		if ( desc.toggled )  //store the previous value just before this so any interpolation works right 
 			automation_list (port).add (_session.audible_frame()-1, last_val);
 		automation_list (port).add (_session.audible_frame(), val);

@@ -198,7 +198,7 @@ BaseStereoPanner::~BaseStereoPanner ()
 void
 BaseStereoPanner::snapshot (nframes_t now)
 {
-	if (_automation.automation_state() == Auto_Write || _automation.automation_state() == Auto_Touch) {
+	if (_automation.automation_write () && parent.session().transport_rolling()) {
 		_automation.rt_add (now, x);
 	}
 }
@@ -206,7 +206,7 @@ BaseStereoPanner::snapshot (nframes_t now)
 void
 BaseStereoPanner::transport_stopped (nframes_t frame)
 {
-	if (_automation.automation_state() != Auto_Off) {
+	if (_automation.automation_state() == Auto_Touch || _automation.automation_state() == Auto_Play) {
 		set_position (_automation.eval (frame));
 	}
 

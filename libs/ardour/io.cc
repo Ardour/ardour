@@ -2567,6 +2567,13 @@ IO::meter ()
 	}
 }
 
+bool
+IO::gain_automation_recording ()
+{ 
+	return (_session.transport_rolling() &&	_gain_automation_curve.automation_write() );
+}
+
+
 void
 IO::clear_automation ()
 {
@@ -2719,7 +2726,7 @@ IO::transport_stopped (nframes_t frame)
 {
 	_gain_automation_curve.reposition_for_rt_add (frame);
 
-	if (_gain_automation_curve.automation_state() != Auto_Off) {
+	if (_gain_automation_curve.automation_state() == Auto_Touch || _gain_automation_curve.automation_state() == Auto_Play) {
 		
 		/* the src=0 condition is a special signal to not propagate 
 		   automation gain changes into the mix group when locating.
