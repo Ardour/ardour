@@ -1466,6 +1466,9 @@ AutomationList::set_state (const XMLNode& node)
 
 	if ((prop = node.property (X_("state"))) != 0) {
 		_state = string_to_auto_state (prop->value());
+                if (_state == Auto_Write) {
+                        _state = Auto_Off;
+                }
 	} else {
 		_state = Auto_Off;
 	}
