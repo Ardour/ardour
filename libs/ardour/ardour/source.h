@@ -29,7 +29,6 @@
 #include "ardour/ardour.h"
 #include "ardour/session_object.h"
 #include "ardour/data_type.h"
-#include "ardour/readable.h"
 
 namespace ARDOUR {
 

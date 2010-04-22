@@ -110,7 +110,6 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other)
 	, _amplitude_above_axis(1.0)
 	, _flags(0)
 	, fade_color(0)
-
 {
 	Gdk::Color c;
 	int r,g,b,a;
@@ -132,7 +131,6 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_pt
 	, _amplitude_above_axis(1.0)
 	, _flags(0)
 	, fade_color(0)
-
 {
 	Gdk::Color c;
 	int r,g,b,a;
@@ -249,6 +247,10 @@ AudioRegionView::~AudioRegionView ()
 
 	for (vector<GnomeCanvasWaveViewCache *>::iterator cache = wave_caches.begin(); cache != wave_caches.end() ; ++cache) {
 		gnome_canvas_waveview_cache_destroy (*cache);
+	}
+
+	for (vector<ScopedConnection*>::iterator i = _data_ready_connections.begin(); i != _data_ready_connections.end(); ++i) {
+		delete *i;
 	}
 
 	/* all waveviews etc will be destroyed when the group is destroyed */
@@ -860,6 +862,16 @@ AudioRegionView::create_waves ()
 		tmp_waves.push_back (0);
 	}
 
+	for (vector<ScopedConnection*>::iterator i = _data_ready_connections.begin(); i != _data_ready_connections.end(); ++i) {
+		delete *i;
+	}
+
+	_data_ready_connections.clear ();
+
+	for (uint32_t i = 0; i < nchans.n_audio(); ++i) {
+		_data_ready_connections.push_back (0);
+	}
+
 	for (uint32_t n = 0; n < nchans.n_audio(); ++n) {
 
 		if (n >= audio_region()->n_channels()) {
@@ -871,7 +883,7 @@ AudioRegionView::create_waves ()
 		// cerr << "\tchannel " << n << endl;
 
 		if (wait_for_data) {
-			if (audio_region()->audio_source(n)->peaks_ready (boost::bind (&AudioRegionView::peaks_ready_handler, this, n), data_ready_connection, gui_context())) {
+			if (audio_region()->audio_source(n)->peaks_ready (boost::bind (&AudioRegionView::peaks_ready_handler, this, n), &_data_ready_connections[n], gui_context())) {
 				// cerr << "\tData is ready\n";
 				create_one_wave (n, true);
 			} else {
@@ -967,7 +979,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		tmp_waves.clear ();
 
 		/* all waves created, don't hook into peaks ready anymore */
-		data_ready_connection.disconnect ();
+		delete _data_ready_connections[which];
+		_data_ready_connections[which] = 0;
 
 #if 0
 		if (!zero_line) {

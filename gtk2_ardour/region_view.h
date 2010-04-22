@@ -137,8 +137,7 @@ class RegionView : public TimeAxisViewItem
     double  _pixel_width;
     bool    in_destructor;
 
-    bool             wait_for_data;
-    PBD::ScopedConnection data_ready_connection;
+    bool wait_for_data;
 
     std::vector<GhostRegion*> ghosts;
 

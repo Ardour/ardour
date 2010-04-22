@@ -56,6 +56,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, std::list<boost::shared_ptr<
         , _wave_width (640)
         , _wave_height (64)
         , restart_queued (false)
+	, _peaks_ready_connection (0)
 {
         set_session (s);
 
@@ -148,6 +149,8 @@ StripSilenceDialog::~StripSilenceDialog ()
 		}
 	}
 
+	delete _peaks_ready_connection;
+
 	delete _canvas;
 }
 
@@ -156,8 +159,11 @@ StripSilenceDialog::create_waves ()
 {
 	int n = 0;
 
+	delete _peaks_ready_connection;
+	_peaks_ready_connection = 0;
+
 	for (std::list<Wave>::iterator i = _waves.begin(); i != _waves.end(); ++i) {
-		if (i->region->audio_source(0)->peaks_ready (boost::bind (&StripSilenceDialog::peaks_ready, this), _peaks_ready_connection, gui_context())) {
+		if (i->region->audio_source(0)->peaks_ready (boost::bind (&StripSilenceDialog::peaks_ready, this), &_peaks_ready_connection, gui_context())) {
 			i->view = new WaveView (*(_canvas->root()));
 			i->view->property_data_src() = static_cast<gpointer>(i->region.get());
 			i->view->property_cache() = WaveView::create_cache ();
@@ -182,7 +188,8 @@ StripSilenceDialog::create_waves ()
 void
 StripSilenceDialog::peaks_ready ()
 {
-	_peaks_ready_connection.disconnect ();
+	delete _peaks_ready_connection;
+	_peaks_ready_connection = 0;
 	create_waves ();
 }
 

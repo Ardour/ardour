@@ -85,7 +85,7 @@ private:
         ARDOUR::framecnt_t max_silence;
         ARDOUR::framecnt_t min_silence;
 
-	PBD::ScopedConnection _peaks_ready_connection;
+	PBD::ScopedConnection* _peaks_ready_connection;
     
         static bool  _detection_done (void*);
         static void* _detection_thread_work (void*);

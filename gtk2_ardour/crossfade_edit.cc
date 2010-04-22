@@ -93,7 +93,10 @@ CrossfadeEditor::CrossfadeEditor (Session* s, boost::shared_ptr<Crossfade> xf, d
 	  fade_out_table (3, 3),
 
 	  select_in_button (_("Fade In")),
-	  select_out_button (_("Fade Out"))
+	  select_out_button (_("Fade Out")),
+
+	  _peaks_ready_connection (0)
+	  
 {
 	set_session (s);
 
@@ -308,6 +311,8 @@ CrossfadeEditor::~CrossfadeEditor()
 	for (list<Point*>::iterator i = fade[Out].points.begin(); i != fade[Out].points.end(); ++i) {
 		delete *i;
 	}
+
+	delete _peaks_ready_connection;
 }
 
 void
@@ -1138,11 +1143,14 @@ CrossfadeEditor::make_waves (boost::shared_ptr<AudioRegion> region, WhichFade wh
 	ht = canvas->get_allocation().get_height() / (double) nchans;
 	spu = xfade->length() / (double) effective_width();
 
+	delete _peaks_ready_connection;
+	_peaks_ready_connection = 0;
+	
 	for (uint32_t n = 0; n < nchans; ++n) {
 
 		gdouble yoff = n * ht;
 
-		if (region->audio_source(n)->peaks_ready (boost::bind (&CrossfadeEditor::peaks_ready, this, boost::weak_ptr<AudioRegion>(region), which), peaks_ready_connection, gui_context())) {
+		if (region->audio_source(n)->peaks_ready (boost::bind (&CrossfadeEditor::peaks_ready, this, boost::weak_ptr<AudioRegion>(region), which), &_peaks_ready_connection, gui_context())) {
 			WaveView* waveview = new WaveView (*(canvas->root()));
 
 			waveview->property_data_src() = region.get();
@@ -1188,7 +1196,9 @@ CrossfadeEditor::peaks_ready (boost::weak_ptr<AudioRegion> wr, WhichFade which)
 	   will be ready by the time we want them. but our API forces us
 	   to provide this, so ..
 	*/
-	peaks_ready_connection.disconnect ();
+	delete _peaks_ready_connection;
+	_peaks_ready_connection = 0;
+	
 	make_waves (r, which);
 }
 

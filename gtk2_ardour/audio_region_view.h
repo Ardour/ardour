@@ -174,6 +174,11 @@ class AudioRegionView : public RegionView
   private:
 
     void setup_fade_handle_positions ();
+
+	/** A ScopedConnection for each PeaksReady callback (one per channel).  Each member
+	 *  may be 0 if no connection exists.
+	 */
+	std::vector<PBD::ScopedConnection*> _data_ready_connections;
 };
 
 #endif /* __gtk_ardour_audio_region_view_h__ */

@@ -148,8 +148,17 @@ AudioSource::update_length (sframes_t pos, sframes_t cnt)
   PEAK FILE STUFF
  ***********************************************************************/
 
+/** Checks to see if peaks are ready.  If so, we return true.  If not, we return false, and
+ *  things are set up so that doThisWhenReady is called when the peaks are ready.
+ *  A new PBD::ScopedConnection is created for the associated connection and written to
+ *  *connect_here_if_not.
+ *
+ *  @param doThisWhenReady Function to call when peaks are ready (if they are not already).
+ *  @param connect_here_if_not Address to write new ScopedConnection to.
+ *  @param event_loop Event loop for doThisWhenReady to be called in.
+ */
 bool
-AudioSource::peaks_ready (boost::function<void()> doThisWhenReady, ScopedConnection& connect_here_if_not, EventLoop* event_loop) const
+AudioSource::peaks_ready (boost::function<void()> doThisWhenReady, ScopedConnection** connect_here_if_not, EventLoop* event_loop) const
 {
 	bool ret;
 	Glib::Mutex::Lock lm (_peaks_ready_lock);
@@ -159,7 +168,8 @@ AudioSource::peaks_ready (boost::function<void()> doThisWhenReady, ScopedConnect
 	*/
 
 	if (!(ret = _peaks_built)) {
-		PeaksReady.connect (connect_here_if_not, MISSING_INVALIDATOR, doThisWhenReady, event_loop);
+		*connect_here_if_not = new ScopedConnection;
+		PeaksReady.connect (**connect_here_if_not, MISSING_INVALIDATOR, doThisWhenReady, event_loop);
 	}
 
 	return ret;
