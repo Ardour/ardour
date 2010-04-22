@@ -89,32 +89,27 @@ Location::set_start (nframes64_t s)
 		return -1;
 	}
 
-	if (is_mark()) {
-		if (_start != s) {
-
-			_start = s;
-			_end = s;
-
-			start_changed(this); /* EMIT SIGNAL */
-			end_changed(this); /* EMIT SIGNAL */
-
-		}
-		return 0;
-	}
-	
-	if (is_session_range()) {
-		start_changed (this); /* EMIT SIGNAL */
-		Session::StartTimeChanged (); /* EMIT SIGNAL */
-		AudioFileSource::set_header_position_offset (s);
-	}
-
 	if (((is_auto_punch() || is_auto_loop()) && s >= _end) || s > _end) {
 		return -1;
 	}
 
+	if (is_mark()) {
+		if (_start != s) {
+			_start = s;
+			_end = s;
+			start_changed (this); /* EMIT SIGNAL */
+			end_changed (this); /* EMIT SIGNAL */
+		}
+		return 0;
+	}
+	
 	if (s != _start) {
 		_start = s;
-		start_changed(this); /* EMIT SIGNAL */
+		start_changed (this); /* EMIT SIGNAL */
+		if (is_session_range ()) {
+			Session::StartTimeChanged (); /* EMIT SIGNAL */
+			AudioFileSource::set_header_position_offset (s);
+		}
 	}
 
 	return 0;
@@ -127,56 +122,37 @@ Location::set_end (nframes64_t e)
 		return -1;
 	}
 
+	if (((is_auto_punch() || is_auto_loop()) && e <= _start) || e < _start) {
+		return -1;
+	}
+	
 	if (is_mark()) {
 		if (_start != e) {
 			_start = e;
 			_end = e;
-			start_changed(this); /* EMIT SIGNAL */
-			end_changed(this); /* EMIT SIGNAL */
+			start_changed (this); /* EMIT SIGNAL */
+			end_changed (this); /* EMIT SIGNAL */
 		}
 		return 0;
 	}
 
-	if (is_session_range()) {
-		_end = e;
-		end_changed (this); /* EMIT SIGNAL */
-		Session::EndTimeChanged (); /* EMIT SIGNAL */
-	}
-
-	if (((is_auto_punch() || is_auto_loop()) && e <= _start) || e < _start) {
-		return -1;
-	}
-
 	if (e != _end) {
 		_end = e;
-		 end_changed(this); /* EMIT SIGNAL */
+		end_changed(this); /* EMIT SIGNAL */
+
+		if (is_session_range()) {
+			Session::EndTimeChanged (); /* EMIT SIGNAL */
+		}
 	}
+
 	return 0;
 }
 
 int
 Location::set (nframes64_t start, nframes64_t end)
 {
-	if (_locked) {
-		return -1;
-	}
-
-	if (is_mark() && start != end) {
-		return -1;
-	} else if (((is_auto_punch() || is_auto_loop()) && start >= end) || (start > end)) {
-		return -1;
-	}
-
-	if (_start != start) {
-		_start = start;
-		start_changed(this); /* EMIT SIGNAL */
-	}
-
-	if (_end != end) {
-		_end = end;
-		end_changed(this); /* EMIT SIGNAL */
-	}
-	return 0;
+	set_start (start);
+	set_end (end);
 }
 
 int
@@ -216,14 +192,6 @@ Location::set_cd (bool yn, void *src)
 	}
 
 	if (set_flag_internal (yn, IsCDMarker)) {
-		 FlagsChanged (this, src); /* EMIT SIGNAL */
-	}
-}
-
-void
-Location::set_is_session_range (bool yn, void *src)
-{
-	if (set_flag_internal (yn, IsSessionRange)) {
 		 FlagsChanged (this, src); /* EMIT SIGNAL */
 	}
 }

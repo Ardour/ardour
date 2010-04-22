@@ -93,7 +93,6 @@ class Location : public PBD::StatefulDestructible
 	void set_auto_loop (bool yn, void *src);
 	void set_hidden (bool yn, void *src);
 	void set_cd (bool yn, void *src);
-	void set_is_session_range (bool yn, void* src);
 	void set_is_range_marker (bool yn, void* src);
 
 	bool is_auto_punch () const { return _flags & IsAutoPunch; }
