@@ -151,8 +151,10 @@ Location::set_end (nframes64_t e)
 int
 Location::set (nframes64_t start, nframes64_t end)
 {
-	set_start (start);
-	set_end (end);
+	int const s = set_start (start);
+	int const e = set_end (end);
+
+	return (s == 0 && e == 0) ? 0 : -1;
 }
 
 int
