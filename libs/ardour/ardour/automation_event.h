@@ -204,7 +204,7 @@ class AutomationList : public PBD::StatefulDestructible
   protected:
 
 	AutomationEventList events;
-	AutomationEventList nascent_events;
+        std::list<AutomationEventList*> nascent;
 	mutable Glib::Mutex lock;
 	int8_t  _frozen;
 	bool    changed_when_thawed;
