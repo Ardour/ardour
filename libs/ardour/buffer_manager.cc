@@ -69,7 +69,7 @@ BufferManager::ensure_buffers (ChanCount howmany)
 {
         /* this is protected by the audioengine's process lock: we do not  */
 
-	for (ThreadBufferList::iterator i = thread_buffers_list->begin(); i != thread_buffers_list_end(); ++i) {
+	for (ThreadBufferList::iterator i = thread_buffers_list->begin(); i != thread_buffers_list->end(); ++i) {
 		(*i)->ensure_buffers (howmany);
 	}
 }
