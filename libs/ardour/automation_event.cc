@@ -314,13 +314,6 @@ void
 AutomationList::write_pass_finished (double when)
 {
         merge_nascent (when);
-
-        /* do not remain in Write mode after stopping - drop into Touch
-         */
-
-        if (_state == Auto_Write) {
-                set_automation_state (Auto_Touch);
-        }
 }
 
 void
