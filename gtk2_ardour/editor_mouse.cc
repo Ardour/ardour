@@ -499,7 +499,8 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	case StreamItem:
 		/* for context click, select track */
 		if (event->button.button == 3) {
-			set_selected_track_as_side_effect ();
+			selection->clear_tracks ();
+			set_selected_track_as_side_effect (true);
 		}
 		break;
 
