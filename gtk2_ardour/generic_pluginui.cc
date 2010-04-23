@@ -589,7 +589,7 @@ GenericPluginUI::build_control_ui (guint32 port_index, PBD::Controllable* mcontr
 void
 GenericPluginUI::start_touch (GenericPluginUI::ControlUI* cui)
 {
-	insert->automation_list (cui->port_index).start_touch ();
+	insert->automation_list (cui->port_index).start_touch (insert->session().transport_frame());
 }
 
 void

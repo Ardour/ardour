@@ -22,6 +22,7 @@
 #include <float.h>
 #include <cmath>
 #include <sstream>
+#include <iomanip>
 #include <algorithm>
 #include <sigc++/bind.h>
 #include <ardour/automation_event.h>
@@ -59,8 +60,7 @@ AutomationList::AutomationList (double defval)
 	changed_when_thawed = false;
 	_state = Auto_Off;
 	_style = Auto_Absolute;
-	_touching = false;
-        _new_touch = false;
+	g_atomic_int_set (&_touching, 0);
 	min_yval = FLT_MIN;
 	max_yval = FLT_MAX;
 	max_xval = 0; // means "no limit" 
@@ -83,8 +83,7 @@ AutomationList::AutomationList (const AutomationList& other)
 	max_xval = other.max_xval;
 	default_value = other.default_value;
 	_state = other._state;
-	_touching = other._touching;
-        _new_touch = false;
+	g_atomic_int_set (&_touching, 0);
 	_dirty = false;
 	lookup_cache.left = -1;
 	lookup_cache.range.first = events.end();
@@ -111,7 +110,7 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 	max_xval = other.max_xval;
 	default_value = other.default_value;
 	_state = other._state;
-	_touching = other._touching;
+	g_atomic_int_set (&_touching, other.touching());
 	_dirty = false;
 	lookup_cache.left = -1;
 	lookup_cache.range.first = events.end();
@@ -138,7 +137,7 @@ AutomationList::AutomationList (const XMLNode& node)
 {
 	_frozen = 0;
 	changed_when_thawed = false;
-	_touching = false;
+	g_atomic_int_set (&_touching, 0);
 	min_yval = FLT_MIN;
 	max_yval = FLT_MAX;
 	max_xval = 0; // means "no limit" 
@@ -162,8 +161,8 @@ AutomationList::~AutomationList()
 		delete (*x);
 	}
 
-	for (list<AutomationEventList*>::iterator n = nascent.begin(); n != nascent.end(); ++n) {
-                for (AutomationEventList::iterator x = (*n)->begin(); x != (*n)->end(); ++x) {
+	for (list<NascentInfo*>::iterator n = nascent.begin(); n != nascent.end(); ++n) {
+                for (AutomationEventList::iterator x = (*n)->events.begin(); x != (*n)->events.end(); ++x) {
                         delete *x;
                 }
 		delete (*n);
@@ -209,7 +208,6 @@ AutomationList::maybe_signal_changed ()
 	if (_frozen) {
 		changed_when_thawed = true;
 	} else {
-                cerr << " SC, events holds " << events.size() << endl;
 		StateChanged ();
 	}
 }
@@ -222,7 +220,7 @@ AutomationList::set_automation_state (AutoState s)
 
                 if (_state == Auto_Write) {
                         Glib::Mutex::Lock lm (lock);
-                        nascent.push_back (new AutomationEventList);
+                        nascent.push_back (new NascentInfo (false));
                 }
 
 		automation_state_changed (); /* EMIT SIGNAL */
@@ -239,19 +237,37 @@ AutomationList::set_automation_style (AutoStyle s)
 }
 
 void
-AutomationList::start_touch ()
+AutomationList::start_touch (double when)
 {
-	_touching = true;
-	_new_touch = true;
+        if (_state == Auto_Touch) {
+                Glib::Mutex::Lock lm (lock);
+                nascent.push_back (new NascentInfo (true, when));
+        }
 
-        nascent.push_back (new AutomationEventList);
+	g_atomic_int_set (&_touching, 1);
 }
 
 void
 AutomationList::stop_touch (bool mark, double when)
 {
-	_touching = false;
-	_new_touch = false;
+	g_atomic_int_set (&_touching, 0);
+
+        if (_state == Auto_Touch) {
+                Glib::Mutex::Lock lm (lock);
+                
+                if (mark) {
+                        nascent.back()->end_time = when;
+                        
+                } else {
+                        
+                        /* nascent info created in start touch but never used. just get rid of it.
+                         */
+                        
+                        NascentInfo* ninfo = nascent.back ();
+                        nascent.erase (nascent.begin());
+                        delete ninfo;
+                }
+        }
 }
 
 void
@@ -312,7 +328,7 @@ AutomationList::rt_add (double when, double value)
 {
 	/* this is for automation recording */
 
-	if ((_state & Auto_Touch) && !_touching) {
+	if ((_state & Auto_Touch) && !touching()) {
                 return;
         }
 
@@ -320,10 +336,10 @@ AutomationList::rt_add (double when, double value)
 
         if (lm.locked()) {
                 assert (!nascent.empty());
-                if (!nascent.front()->empty()) {
-                        assert (when > nascent.front()->back()->when);
+                if (!nascent.back()->events.empty()) {
+                        assert (when > nascent.back()->events.back()->when);
                 }
-                nascent.front()->push_back (point_factory (when, value));
+                nascent.back()->events.push_back (point_factory (when, value));
         }
 }
 
@@ -337,36 +353,41 @@ AutomationList::merge_nascent (double when)
                         return;
                 }
 
-                for (list<AutomationEventList*>::iterator n = nascent.begin(); n != nascent.end(); ++n) {
-                        AutomationEventList* nascent_events = *n;
+                for (list<NascentInfo*>::iterator n = nascent.begin(); n != nascent.end(); ++n) {
 
-                        if (nascent_events->empty()) {
-                                delete nascent_events;
+                        NascentInfo* ninfo = *n;
+                        AutomationEventList& nascent_events (ninfo->events);
+
+                        if (nascent_events.empty()) {
+                                delete ninfo;
                                 continue;
                         }
                         
-                        double lower = nascent_events->front()->when;
+                        if (ninfo->start_time < 0.0) {
+                                ninfo->start_time = nascent_events.front()->when;
+                        }
+
+                        if (ninfo->end_time < 0.0) {
+                                ninfo->end_time = when;
+                        }
+
                         bool preexisting = !events.empty();
-                        double clamp_time = nascent_events->back()->when + 1; // XXX FIX ME
-                        
+
                         if (!preexisting) {
                                 
-                                events = *nascent_events;
+                                events = nascent_events;
                                 
-                        } else if (clamp_time < events.front()->when) {
+                        } else if (ninfo->end_time < events.front()->when) {
                                 
                                 /* all points in nascent are before the first existing point */
                                 
-                                if (preexisting) {
-                                        events.insert (events.begin(), point_factory (clamp_time, unlocked_eval (clamp_time)));
-                                }
-                                events.insert (events.begin(), nascent_events->begin(), nascent_events->end());
+                                events.insert (events.begin(), nascent_events.begin(), nascent_events.end());
                                 
-                        } else if (lower > events.back()->when) {
+                        } else if (ninfo->start_time > events.back()->when) {
                                 
                                 /* all points in nascent are after the last existing point */
                                 
-                                events.insert (events.end(), nascent_events->begin(), nascent_events->end());
+                                events.insert (events.end(), nascent_events.begin(), nascent_events.end());
                                 
                         } else {
                                 
@@ -377,16 +398,16 @@ AutomationList::merge_nascent (double when)
                                 iterator i;
                                 iterator range_begin = events.end();
                                 iterator range_end = events.end();
-                                
+
                                 for (i = events.begin(); i != events.end(); ++i) {
                                         
-                                        if ((*i)->when >= lower) {
+                                        if ((*i)->when >= ninfo->start_time) {
                                                 
                                                 if (range_begin == events.end()) {
                                                         range_begin = i;
                                                 }
                                                 
-                                                if ((*i)->when > clamp_time) {
+                                                if ((*i)->when > ninfo->end_time) {
                                                         range_end = i;
                                                         break;
                                                 }
@@ -394,39 +415,31 @@ AutomationList::merge_nascent (double when)
                                 }
                                 
                                 assert (range_begin != events.end());
-                                
-                                double clamp_value;
-                                
-                                if (preexisting) {
-                                        clamp_value = unlocked_eval (clamp_time);
-                                        
-                                        if (range_begin != events.begin()) {
-                                                /* clamp point before */
-                                                double preclamp_time = nascent_events->front()->when - 1;
-                                                events.insert (range_begin, point_factory (preclamp_time, clamp_value));
-                                        }
-                                }
-                                
-                                events.insert (range_begin, nascent_events->begin(), nascent_events->end());
-                                
-                                if (preexisting) {
-                                        if (range_end != events.end()) {
-                                                /* clamp point after */
-                                                events.insert (range_begin, point_factory (clamp_time, clamp_value));
-                                        }
-                                }
-                                
 
+                                double end_value = unlocked_eval (ninfo->end_time);
+                                
+                                if (range_begin != events.begin()) {
+                                        /* clamp point before */
+                                        events.insert (range_begin, point_factory (ninfo->start_time, unlocked_eval (ninfo->start_time)));
+                                }
+                                                
+                                events.insert (range_begin, nascent_events.begin(), nascent_events.end());
+                                
+                                if (range_end != events.end()) {
+                                        /* clamp point after */
+                                        events.insert (range_begin, point_factory (ninfo->end_time, end_value));
+                                }
+                                
                                 events.erase (range_begin, range_end);
                         }
 
-                        delete nascent_events;
+                        delete ninfo;
                 }
 
                 nascent.clear ();
 
                 if (_state == Auto_Write) {
-                        nascent.push_back (new AutomationEventList);
+                        nascent.push_back (new NascentInfo (false));
                 }
         }
 
@@ -702,7 +715,6 @@ AutomationList::thaw ()
 	}
 
 	if (changed_when_thawed) {
-                cerr << " thaw SC, events holds " << events.size() << endl;
 		StateChanged(); /* EMIT SIGNAL */
 	}
 }
@@ -1116,21 +1128,25 @@ AutomationList::cut_copy_clear (double start, double end, int op)
                    because we want the copy ("nal") to have a zero time reference.
                 */
 
-                if ((*s)->when != start) {
-                        
-                        double val = unlocked_eval (start);
-                        events.insert (s, (point_factory (start, val)));
-                        
-                        if (op != 2) {
-                                nal->events.push_back (point_factory (0, val));
-                        }
-                }
                         
                 /* before we begin any cut/clear operations, get the value of the curve
                    at "end".
                 */
 
                 double end_value = unlocked_eval (end);
+
+                if ((*s)->when != start) {
+                        
+                        double val = unlocked_eval (start);
+
+                        if (start > events.front()->when) {
+                                events.insert (s, (point_factory (start, val)));
+                        }
+                        
+                        if (op != 2) {
+                                nal->events.push_back (point_factory (0, val));
+                        }
+                }
 
 		for (iterator x = s; x != e; ) {
 
@@ -1150,7 +1166,13 @@ AutomationList::cut_copy_clear (double start, double end, int op)
 		}
                 
                 if (e == events.end() || (*e)->when != end) {
-			events.insert (e, point_factory (end, end_value));
+
+                        /* only add a boundary point if there is a point after "end"
+                         */
+
+                        if (e != events.end() || end < (*e)->when) {
+                                events.insert (e, point_factory (end, end_value));
+                        }
 
                         if (op != 2) {
                                 nal->events.push_back (point_factory (end - start, end_value));

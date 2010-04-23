@@ -130,15 +130,15 @@ class AutomationList : public PBD::StatefulDestructible
 	sigc::signal<void> automation_state_changed;
 
 	bool automation_playback() {
-		return (_state & Auto_Play) || ((_state & Auto_Touch) && !_touching);
+		return (_state & Auto_Play) || ((_state & Auto_Touch) && !touching());
 	}
 	bool automation_write () {
-		return (_state & Auto_Write) || ((_state & Auto_Touch) && _touching);
+		return (_state & Auto_Write) || ((_state & Auto_Touch) && touching());
 	}
 
-	void start_touch ();
+	void start_touch (double when);
 	void stop_touch (bool mark, double when);
-	bool touching() const { return _touching; }
+        bool touching() const { return g_atomic_int_get (&_touching); }
 
 	void set_yrange (double min, double max) {
 		min_yval = min;
@@ -202,9 +202,22 @@ class AutomationList : public PBD::StatefulDestructible
         static sigc::signal<void, AutomationList*> AutomationListCreated;
 
   protected:
+        
+        struct NascentInfo {
+            AutomationEventList events;
+            bool   is_touch;
+            double start_time;
+            double end_time;
+            
+            NascentInfo (bool touching, double start = -1.0)
+                    : is_touch (touching)
+                    , start_time (start)
+                    , end_time (-1.0) 
+            {}
+        };
 
 	AutomationEventList events;
-        std::list<AutomationEventList*> nascent;
+        std::list<NascentInfo*> nascent;
 	mutable Glib::Mutex lock;
 	int8_t  _frozen;
 	bool    changed_when_thawed;
@@ -219,13 +232,13 @@ class AutomationList : public PBD::StatefulDestructible
 
 	AutoState  _state;
 	AutoStyle  _style;
-	bool  _touching;
-	bool  _new_touch;
-	double max_xval;
-	double min_yval;
-	double max_yval;
-	double default_value;
-	bool   sort_pending;
+        gint       _touching;
+	bool       _new_touch;
+	double      max_xval;
+	double      min_yval;
+	double      max_yval;
+	double      default_value;
+	bool        sort_pending;
 
 	void maybe_signal_changed ();
 	void mark_dirty ();

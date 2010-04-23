@@ -2669,7 +2669,7 @@ IO::set_gain (gain_t val, void *src)
 void
 IO::start_gain_touch ()
 {
-	_gain_automation_curve.start_touch ();
+	_gain_automation_curve.start_touch (_session.transport_frame());
 }
 
 void
@@ -2690,7 +2690,7 @@ void
 IO::start_pan_touch (uint32_t which)
 {
 	if (which < _panner->size()) {
-		(*_panner)[which]->automation().start_touch();
+		(*_panner)[which]->automation().start_touch (_session.transport_frame());
 	}
 }
 
