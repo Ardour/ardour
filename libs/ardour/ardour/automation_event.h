@@ -115,10 +115,6 @@ class AutomationList : public PBD::StatefulDestructible
 	AutomationList* copy (double, double);
 	void clear (double, double);
 
-	AutomationList* cut (iterator, iterator);
-	AutomationList* copy (iterator, iterator);
-	void clear (iterator, iterator);
-
 	bool paste (AutomationList&, double position, float times);
 
 	void set_automation_state (AutoState);

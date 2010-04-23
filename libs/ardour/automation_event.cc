@@ -1070,34 +1070,6 @@ AutomationList::multipoint_eval (double x)
 }
 
 AutomationList*
-AutomationList::cut (iterator start, iterator end)
-{
-	AutomationList* nal = new AutomationList (default_value);
-
-	{
-		Glib::Mutex::Lock lm (lock);
-
-		for (iterator x = start; x != end; ) {
-			iterator tmp;
-			
-			tmp = x;
-			++tmp;
-			
-			nal->events.push_back (point_factory (**x));
-			events.erase (x);
-			
-			x = tmp;
-		}
-
-		mark_dirty ();
-	}
-
-	maybe_signal_changed ();
-
-	return nal;
-}
-
-AutomationList*
 AutomationList::cut_copy_clear (double start, double end, int op)
 {
 	AutomationList* nal = new AutomationList (default_value);
@@ -1188,29 +1160,6 @@ AutomationList::cut_copy_clear (double start, double end, int op)
 
 	return nal;
 
-}
-
-AutomationList*
-AutomationList::copy (iterator start, iterator end)
-{
-	AutomationList* nal = new AutomationList (default_value);
-
-	{
-		Glib::Mutex::Lock lm (lock);
-		
-		for (iterator x = start; x != end; ) {
-			iterator tmp;
-			
-			tmp = x;
-			++tmp;
-			
-			nal->events.push_back (point_factory (**x));
-			
-			x = tmp;
-		}
-	}
-
-	return nal;
 }
 
 AutomationList*
