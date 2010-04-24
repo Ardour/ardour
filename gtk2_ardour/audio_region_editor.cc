@@ -48,7 +48,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion>
 	  _region_view (rv),
 	  name_label (_("Name:")),
 	  audition_button (_("Play")),
-	  time_table (6, 2),
+	  _table (8, 2),
 	  position_clock (X_("regionposition"), true, X_("AudioRegionEditorClock"), true, false),
 	  end_clock (X_("regionend"), true, X_("AudioRegionEditorClock"), true, false),
 	  length_clock (X_("regionlength"), true, X_("AudioRegionEditorClock"), true, false, true),
@@ -66,89 +66,88 @@ AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion>
 	sync_offset_absolute_clock.set_session (_session);
 	start_clock.set_session (_session);
 
-	name_entry.set_name ("AudioRegionEditorEntry");
-	name_label.set_name ("AudioRegionEditorLabel");
-
-	name_hbox.set_spacing (5);
-	name_hbox.pack_start (name_label, false, false);
-	name_hbox.pack_start (name_entry, false, false);
-
 	ARDOUR_UI::instance()->set_tip (audition_button, _("audition this region"));
 
 	audition_button.unset_flags (Gtk::CAN_FOCUS);
 
 	audition_button.set_events (audition_button.get_events() & ~(Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK));
 
-	top_row_button_hbox.set_border_width (5);
-	top_row_button_hbox.set_spacing (5);
-	top_row_button_hbox.set_homogeneous (false);
-	top_row_button_hbox.pack_end (audition_button, false, false);
-
-	top_row_hbox.pack_start (name_hbox, true, true);
-	top_row_hbox.pack_end (top_row_button_hbox, true, true);
-
+	name_entry.set_name ("AudioRegionEditorEntry");
+	name_label.set_name ("AudioRegionEditorLabel");
 	position_label.set_name ("AudioRegionEditorLabel");
-	position_label.set_text (_("Position"));
+	position_label.set_text (_("Position:"));
 	end_label.set_name ("AudioRegionEditorLabel");
-	end_label.set_text (_("End"));
+	end_label.set_text (_("End:"));
 	length_label.set_name ("AudioRegionEditorLabel");
-	length_label.set_text (_("Length"));
+	length_label.set_text (_("Length:"));
 	sync_relative_label.set_name ("AudioRegionEditorLabel");
-	sync_relative_label.set_text (_("Sync point (relative to region position)"));
+	sync_relative_label.set_text (_("Sync point (relative to region):"));
 	sync_absolute_label.set_name ("AudioRegionEditorLabel");
-	sync_absolute_label.set_text (_("Sync point (absolute)"));
+	sync_absolute_label.set_text (_("Sync point (absolute):"));
 	start_label.set_name ("AudioRegionEditorLabel");
-	start_label.set_text (_("File start"));
+	start_label.set_text (_("File start:"));
 
-	time_table.set_col_spacings (2);
-	time_table.set_row_spacings (5);
-	time_table.set_border_width (5);
+	_table.set_col_spacings (12);
+	_table.set_row_spacings (6);
+	_table.set_border_width (12);
 
+	name_label.set_alignment (1, 0.5);
 	position_label.set_alignment (1, 0.5);
-	time_table.attach (position_label, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
-	time_table.attach (position_clock, 1, 2, 0, 1, Gtk::FILL, Gtk::FILL);
+	end_label.set_alignment (1, 0.5);
+	length_label.set_alignment (1, 0.5);
+	sync_relative_label.set_alignment (1, 0.5);
+	sync_absolute_label.set_alignment (1, 0.5);
+	start_label.set_alignment (1, 0.5);
+	gain_label.set_alignment (1, 0.5);
 
- 	end_label.set_alignment (1, 0.5);
- 	time_table.attach (end_label, 0, 1, 1, 2, Gtk::FILL, Gtk::FILL);
-	time_table.attach (end_clock, 1, 2, 1, 2, Gtk::FILL, Gtk::FILL);
+	Gtk::HBox* nb = Gtk::manage (new Gtk::HBox);
+	nb->set_spacing (6);
+	nb->pack_start (name_entry);
+	nb->pack_start (audition_button);
+
+	_table.attach (name_label, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (*nb, 1, 2, 0, 1, Gtk::FILL, Gtk::FILL);
+
+	_table.attach (position_label, 0, 1, 1, 2, Gtk::FILL, Gtk::FILL);
+	_table.attach (position_clock, 1, 2, 1, 2, Gtk::FILL, Gtk::FILL);
+
+ 	_table.attach (end_label, 0, 1, 2, 3, Gtk::FILL, Gtk::FILL);
+	_table.attach (end_clock, 1, 2, 2, 3, Gtk::FILL, Gtk::FILL);
 	
- 	length_label.set_alignment (1, 0.5);
- 	time_table.attach (length_label, 0, 1, 2, 3, Gtk::FILL, Gtk::FILL);
-	time_table.attach (length_clock, 1, 2, 2, 3, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (length_label, 0, 1, 3, 4, Gtk::FILL, Gtk::FILL);
+	_table.attach (length_clock, 1, 2, 3, 4, Gtk::FILL, Gtk::FILL);
 	
- 	sync_relative_label.set_alignment (1, 0.5);
- 	time_table.attach (sync_relative_label, 0, 1, 3, 4, Gtk::FILL, Gtk::FILL);
- 	time_table.attach (sync_offset_relative_clock, 1, 2, 3, 4, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (sync_relative_label, 0, 1, 4, 5, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (sync_offset_relative_clock, 1, 2, 4, 5, Gtk::FILL, Gtk::FILL);
  
- 	sync_absolute_label.set_alignment (1, 0.5);
- 	time_table.attach (sync_absolute_label, 0, 1, 4, 5, Gtk::FILL, Gtk::FILL);
- 	time_table.attach (sync_offset_absolute_clock, 1, 2, 4, 5, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (sync_absolute_label, 0, 1, 5, 6, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (sync_offset_absolute_clock, 1, 2, 5, 6, Gtk::FILL, Gtk::FILL);
 
- 	start_label.set_alignment (1, 0.5);
- 	time_table.attach (start_label, 0, 1, 5, 6, Gtk::FILL, Gtk::FILL);
- 	time_table.attach (start_clock, 1, 2, 5, 6, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (start_label, 0, 1, 6, 7, Gtk::FILL, Gtk::FILL);
+ 	_table.attach (start_clock, 1, 2, 6, 7, Gtk::FILL, Gtk::FILL);
+
+	Gtk::HBox* gb = Gtk::manage (new Gtk::HBox);
+	gb->set_spacing (6);
+	gb->pack_start (gain_entry);
+	gb->pack_start (*Gtk::manage (new Gtk::Label (_("dB"))), false, false);
 
 	gain_label.set_name ("AudioRegionEditorLabel");
-	gain_label.set_text (_("Scale amplitude:"));
-	gain_label.set_alignment (1, 0.5);
+	gain_label.set_text (_("Region gain:"));
 	gain_entry.configure (gain_adjustment, 0.0, 1);
-	time_table.attach (gain_label, 0, 1, 6, 7, Gtk::FILL, Gtk::FILL);
-	time_table.attach (gain_entry, 1, 2, 6, 7, Gtk::FILL, Gtk::FILL);
+	_table.attach (gain_label, 0, 1, 7, 8, Gtk::FILL, Gtk::FILL);
+	_table.attach (*gb, 1, 2, 7, 8, Gtk::FILL, Gtk::FILL);
 	
-	lower_hbox.pack_start (time_table, true, true);
-	lower_hbox.pack_start (sep1, false, false);
-	lower_hbox.pack_start (sep2, false, false);
+	get_vbox()->pack_start (_table, true, true);
 
-	get_vbox()->pack_start (top_row_hbox, true, true);
-	get_vbox()->pack_start (sep3, false, false);
-	get_vbox()->pack_start (lower_hbox, true, true);
+	add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_ACCEPT);
 
 	set_name ("AudioRegionEditorWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (this)));
+	signal_response().connect (sigc::mem_fun (*this, &AudioRegionEditor::handle_response));
 
-	set_title (string_compose (_("Region %1"), _region->name()));
+	set_title (string_compose (_("Region '%1'"), _region->name()));
 
 	show_all();
 
@@ -434,4 +433,10 @@ AudioRegionEditor::on_delete_event (GdkEventAny* ev)
 	bounds_changed (change);
 
 	return RegionEditor::on_delete_event (ev);
+}
+
+void
+AudioRegionEditor::handle_response (int)
+{
+	hide ();
 }

@@ -63,16 +63,9 @@ class AudioRegionEditor : public RegionEditor
 
 	Gtk::Label name_label;
 	Gtk::Entry name_entry;
-	Gtk::HBox  name_hbox;
+	Gtk::ToggleButton audition_button;
 
-	Gtk::HBox  top_row_hbox;
-	Gtk::HBox  top_row_button_hbox;
-
-	Gtk::ToggleButton  audition_button;
-
-	Gtk::HBox  lower_hbox;
-
-	Gtk::Table time_table;
+	Gtk::Table _table;
 
 	Gtk::Label position_label;
 	Gtk::Label end_label;
@@ -90,10 +83,6 @@ class AudioRegionEditor : public RegionEditor
 	AudioClock start_clock;
 	Gtk::Adjustment gain_adjustment;
 	Gtk::SpinButton gain_entry;
-
-	Gtk::HSeparator sep3;
-	Gtk::VSeparator sep1;
-	Gtk::VSeparator sep2;
 
 	PBD::ScopedConnection state_connection;
 	PBD::ScopedConnection audition_connection;
@@ -121,6 +110,7 @@ class AudioRegionEditor : public RegionEditor
 	gint breleased (GdkEventButton* ev, Gtk::SpinButton* but, void (AudioRegionEditor::*pmf)());
 
 	bool on_delete_event (GdkEventAny *);
+	void handle_response (int);
 
 	bool spin_arrow_grab;
 };
