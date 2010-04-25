@@ -89,7 +89,7 @@ Location::set_start (nframes64_t s)
 		return -1;
 	}
 
-	if (((is_auto_punch() || is_auto_loop()) && s >= _end) || s > _end) {
+	if (((is_auto_punch() || is_auto_loop()) && s >= _end) || (!is_mark() && s > _end)) {
 		return -1;
 	}
 
