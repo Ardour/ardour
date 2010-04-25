@@ -1079,6 +1079,14 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_disable_disarm_during_roll)
 		     ));
 
+	add_option (_("Transport"),
+	     new BoolOption (
+		     "quieten_at_speed",
+		     _("Reduce output volume when transport is moving quickly"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_quieten_at_speed),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_quieten_at_speed)
+		     ));
+
 	/* EDITOR */
 
 	add_option (_("Editor"),

@@ -1504,7 +1504,7 @@ Panner::run (BufferSet& inbufs, BufferSet& outbufs, sframes_t start_frame, sfram
 		// Speed quietning
 		gain_t gain_coeff = 1.0;
 
-		if (fabsf(_session.transport_speed()) > 1.5f) {
+		if (fabsf(_session.transport_speed()) > 1.5f && Config->get_quieten_at_speed ()) {
 			gain_coeff = speed_quietning;
 		}
 

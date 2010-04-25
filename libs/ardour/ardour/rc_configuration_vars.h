@@ -90,6 +90,7 @@ CONFIG_VARIABLE (bool, solo_mute_override, "solo-mute-override", false)
 CONFIG_VARIABLE (bool, tape_machine_mode, "tape-machine-mode", false)
 CONFIG_VARIABLE (gain_t, solo_mute_gain, "solo-mute-gain", 0.0)
 CONFIG_VARIABLE (std::string, monitor_bus_preferred_bundle, "monitor-bus-preferred-bundle", "")
+CONFIG_VARIABLE (bool, quieten_at_speed, "quieten-at-speed", true)
 
 /* click */
 
