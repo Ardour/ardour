@@ -968,7 +968,8 @@ RouteTimeAxisView::rename_current_playlist ()
 		return;
 	}
 
-	prompter.set_prompt (_("Name for playlist"));
+	prompter.set_title (_("Rename Playlist"));
+	prompter.set_prompt (_("New name for playlist:"));
 	prompter.set_initial_text (pl->name());
 	prompter.add_button (_("Rename"), Gtk::RESPONSE_ACCEPT);
 	prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
@@ -1053,7 +1054,8 @@ RouteTimeAxisView::use_copy_playlist (bool prompt, vector<boost::shared_ptr<Play
 
 		ArdourPrompter prompter (true);
 
-		prompter.set_prompt (_("Name for Playlist"));
+		prompter.set_title (_("New Copy Playlist"));
+		prompter.set_prompt (_("Name for new playlist:"));
 		prompter.set_initial_text (name);
 		prompter.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
 		prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
@@ -1105,7 +1107,8 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 
 		ArdourPrompter prompter (true);
 
-		prompter.set_prompt (_("Name for Playlist"));
+		prompter.set_title (_("New Playlist"));
+		prompter.set_prompt (_("Name for new playlist:"));
 		prompter.set_initial_text (name);
 		prompter.add_button (Gtk::Stock::NEW, Gtk::RESPONSE_ACCEPT);
 		prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, true);
@@ -1536,12 +1539,12 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	}
         
 	playlist_items.push_back (SeparatorElem());
-	playlist_items.push_back (MenuElem (_("Rename"), sigc::mem_fun(*this, &RouteTimeAxisView::rename_current_playlist)));
+	playlist_items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteTimeAxisView::rename_current_playlist)));
 	playlist_items.push_back (SeparatorElem());
 
 	if (!route_group() || !route_group()->is_active()) {
-		playlist_items.push_back (MenuElem (_("New"), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::new_playlists), this)));
-		playlist_items.push_back (MenuElem (_("New Copy"), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::copy_playlists), this)));
+		playlist_items.push_back (MenuElem (_("New..."), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::new_playlists), this)));
+		playlist_items.push_back (MenuElem (_("New Copy..."), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::copy_playlists), this)));
 
 	} else {
 		// Use a label which tells the user what is happening
@@ -1554,7 +1557,7 @@ RouteTimeAxisView::build_playlist_menu (Gtk::Menu * menu)
 	playlist_items.push_back (MenuElem (_("Clear Current"), sigc::bind(sigc::mem_fun(_editor, &PublicEditor::clear_playlists), this)));
 	playlist_items.push_back (SeparatorElem());
 
-	playlist_items.push_back (MenuElem(_("Select from all ..."), sigc::mem_fun(*this, &RouteTimeAxisView::show_playlist_selector)));
+	playlist_items.push_back (MenuElem(_("Select from all..."), sigc::mem_fun(*this, &RouteTimeAxisView::show_playlist_selector)));
 }
 
 void
