@@ -723,10 +723,9 @@ public:
 		}
 
 		_db_slider = manage (new HSliderController (pix,
-							    &_db_adjustment,
-							    false,
-							    115));
-
+		 					    &_db_adjustment,
+		 					    115,
+							    false));
 
 		parameter_changed ("solo-mute-gain");
 
