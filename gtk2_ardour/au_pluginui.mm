@@ -198,7 +198,9 @@ AUPluginUI::~AUPluginUI ()
 		[[NSNotificationCenter defaultCenter] removeObserver:_notify];
 		[win removeChildWindow:cocoa_parent];
 
-	} else if (carbon_window) {
+	} 
+
+	if (carbon_window) {
 		/* not parented, just overlaid on top of our window */
 		DisposeWindow (carbon_window);
 	}
