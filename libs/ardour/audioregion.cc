@@ -243,6 +243,9 @@ AudioRegion::post_set ()
 		set_default_fade_in ();
 		_right_of_split = false;
 	}
+
+	/* If _length changed, adjust our gain envelope accordingly */
+	_envelope->truncate_end (_length);
 }
 
 void
