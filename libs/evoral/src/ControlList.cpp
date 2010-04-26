@@ -1151,21 +1151,25 @@ ControlList::cut (iterator start, iterator end)
 	return nal;
 }
 
+/** @param op 0 = cut, 1 = copy, 2 = clear */
 boost::shared_ptr<ControlList>
 ControlList::cut_copy_clear (double start, double end, int op)
 {
 	boost::shared_ptr<ControlList> nal = create (_parameter);
+	
 	iterator s, e;
-	ControlEvent cp (start, 0.0);
 	bool changed = false;
 
 	{
 		Glib::Mutex::Lock lm (_lock);
 
+		/* find the first event in our list that is at or before `start' in time */
+		ControlEvent cp (start, 0.0);
 		if ((s = lower_bound (_events.begin(), _events.end(), &cp, time_comparator)) == _events.end()) {
 			return nal;
 		}
 
+		/* and the last that is at or after `end' */
 		cp.when = end;
 		e = upper_bound (_events.begin(), _events.end(), &cp, time_comparator);
 
@@ -1174,9 +1178,7 @@ ControlList::cut_copy_clear (double start, double end, int op)
 		}
 
 		for (iterator x = s; x != e; ) {
-			iterator tmp;
-
-			tmp = x;
+			iterator tmp = x;
 			++tmp;
 
 			changed = true;
