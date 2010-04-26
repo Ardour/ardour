@@ -170,11 +170,6 @@ Editor::split_regions_at (nframes64_t where, RegionSelection& regions)
 			pl->freeze();
 		}
 
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*a);
-		if (arv) {
-			_new_regionviews_show_envelope = arv->envelope_visible();
-		}
-
 		if (pl) {
                         pl->clear_history ();
 			pl->split_region ((*a)->region(), where);
@@ -191,7 +186,6 @@ Editor::split_regions_at (nframes64_t where, RegionSelection& regions)
 	}
 
 	commit_reversible_command ();
-	_new_regionviews_show_envelope = false;
 }
 
 boost::shared_ptr<Region>

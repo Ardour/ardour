@@ -390,7 +390,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void scroll_tracks_down_line ();
 	void scroll_tracks_up_line ();
 
-	bool new_regionviews_display_gain () { return _new_regionviews_show_envelope; }
 	void prepare_for_cleanup ();
 	void finish_cleanup ();
 
@@ -1921,8 +1920,6 @@ public:
 	void set_entered_regionview (RegionView*);
 	void ensure_track_visible (TimeAxisView*);
 	gint left_automation_track ();
-
-	bool _new_regionviews_show_envelope;
 
 	void reset_canvas_action_sensitivity (bool);
 	void toggle_gain_envelope_visibility ();

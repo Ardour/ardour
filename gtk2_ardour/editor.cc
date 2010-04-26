@@ -360,7 +360,6 @@ Editor::Editor ()
 	entered_regionview = 0;
 	entered_marker = 0;
 	clear_entered_track = false;
-	_new_regionviews_show_envelope = false;
 	current_timefx = 0;
 	playhead_cursor = 0;
 	button_release_can_deselect = true;

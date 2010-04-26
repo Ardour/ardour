@@ -162,7 +162,8 @@ AudioRegionView::init (Gdk::Color const & basic_color, bool wfd)
 		store_flags ();
 	}
 
-	if (trackview.editor().new_regionviews_display_gain()) {
+	/* make envelope visible if it has anything interesting in it */
+	if (audio_region()->envelope()->size() > 2) {
 		_flags |= EnvelopeVisible;
 	}
 

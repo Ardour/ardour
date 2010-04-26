@@ -250,7 +250,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	virtual void temporal_zoom_step (bool coarser) = 0;
 	virtual void scroll_tracks_down_line () = 0;
 	virtual void scroll_tracks_up_line () = 0;
-	virtual bool new_regionviews_display_gain () = 0;
 	virtual void prepare_for_cleanup () = 0;
 	virtual void finish_cleanup () = 0;
 	virtual void reset_x_origin (nframes64_t frame) = 0;
