@@ -1069,7 +1069,7 @@ AutomationList::cut_copy_clear (double start, double end, int op)
 	iterator s, e;
 	ControlEvent cp (start, 0.0);
 	TimeComparator cmp;
-	
+
 	{
 		Glib::Mutex::Lock lm (lock);
 
@@ -1104,11 +1104,13 @@ AutomationList::cut_copy_clear (double start, double end, int op)
                         
                         double val = unlocked_eval (start);
 
-                        if (start > events.front()->when) {
-                                events.insert (s, (point_factory (start, val)));
-                        }
+			if (op == 0) { // cut
+				if (start > events.front()->when) {
+					events.insert (s, (point_factory (start, val)));
+				}
+			}
                         
-                        if (op != 2) {
+                        if (op != 2) { // ! clear
                                 nal->events.push_back (point_factory (0, val));
                         }
                 }
@@ -1135,24 +1137,23 @@ AutomationList::cut_copy_clear (double start, double end, int op)
                         /* only add a boundary point if there is a point after "end"
                          */
 
-                        if (e != events.end() || end < (*e)->when) {
+                        if (op == 0 && (e != events.end() || end < (*e)->when)) { // cut
                                 events.insert (e, point_factory (end, end_value));
                         }
 
-                        if (op != 2) {
+                        if (op != 2 && (e != events.end() || end < (*e)->when)) { // cut/copy
                                 nal->events.push_back (point_factory (end - start, end_value));
                         }
 		}
 
                 mark_dirty ();
 	}
-        
+
         if (op != 1) {
                 maybe_signal_changed ();
         }
 
 	return nal;
-
 }
 
 AutomationList*
