@@ -1081,7 +1081,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Transport"),
 	     new BoolOption (
 		     "quieten_at_speed",
-		     _("Reduce output volume when transport is moving quickly"),
+		     _("12dB gain reduction during fast-forward and fast-rewind"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_quieten_at_speed),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_quieten_at_speed)
 		     ));
