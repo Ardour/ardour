@@ -1333,7 +1333,7 @@ SoundFileOmega::SoundFileOmega (Gtk::Window& parent, string title, ARDOUR::Sessi
 	disposition_map.insert (pair<ustring,ImportDisposition>(_("one region per file"), ImportDistinctFiles));
 	disposition_map.insert (pair<ustring,ImportDisposition>(_("one region per channel"), ImportDistinctChannels));
 	disposition_map.insert (pair<ustring,ImportDisposition>(_("all files in one region"), ImportMergeFiles));
-	disposition_map.insert (pair<ustring,ImportDisposition>(_("all files in one track"), ImportSerializeFiles));
+	disposition_map.insert (pair<ustring,ImportDisposition>(_("all files in one track"), ImportMergeFiles));
 
 	chooser.signal_selection_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::file_selection_changed));
 
