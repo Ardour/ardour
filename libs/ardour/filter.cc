@@ -138,6 +138,7 @@ Filter::finish (boost::shared_ptr<Region> region, SourceList& nsrcs, string regi
 		audio_r->set_fade_in (audio_region->fade_in ());
 		audio_r->set_fade_out_active (audio_region->fade_out_active ());
 		audio_r->set_fade_out (audio_region->fade_out ());
+		*(audio_r->envelope()) = *(audio_region->envelope ());
 	}
 	results.push_back (r);
 

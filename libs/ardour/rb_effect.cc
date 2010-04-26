@@ -80,7 +80,8 @@ RBEffect::run (boost::shared_ptr<Region> r)
 	string::size_type at;
 	nframes_t pos = 0;
 	int avail = 0;
-
+	boost::shared_ptr<AudioRegion> result;
+	
 	cerr << "RBEffect: source region: position = " << region->position()
 	     << ", start = " << region->start()
 	     << ", length = " << region->length()
@@ -355,6 +356,15 @@ RBEffect::run (boost::shared_ptr<Region> r)
 					  shift);
 		(*x)->set_master_sources (region->master_sources());
 		(*x)->set_length( (*x)->length() * stretch, this);
+	}
+
+	/* stretch region gain envelope */
+	/* XXX: assuming we've only processed one input region into one result here */
+
+	if (tsr.time_fraction != 1) {
+		result = boost::dynamic_pointer_cast<AudioRegion> (results.front());
+		assert (result);
+		result->envelope()->x_scale (tsr.time_fraction);
 	}
 
   out:
