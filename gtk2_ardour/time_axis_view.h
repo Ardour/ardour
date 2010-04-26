@@ -155,7 +155,7 @@ class TimeAxisView : public virtual AxisView, public Stateful
 	virtual void hide ();
 	bool hidden() const { return _hidden; }
 
-	virtual void set_selected (bool);
+	virtual void set_selected (Selection&);
 
 	/**
 	 * potential handler for entered events
@@ -225,6 +225,7 @@ class TimeAxisView : public virtual AxisView, public Stateful
 	/* state/serialization management */
 
 	void set_parent (TimeAxisView& p);
+	TimeAxisView *get_parent () {return parent;}
 	bool has_state () const;
 
 	/* call this on the parent */

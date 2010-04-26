@@ -588,20 +588,32 @@ TimeAxisView::popup_size_menu (guint32 when)
 }
 
 void
-TimeAxisView::set_selected (bool yn)
+TimeAxisView::set_selected (Selection &selection)
 {
-	if (yn == _selected) {
+	//give children a chance to be selected
+	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
+		(*i)->set_selected (selection);
+	}
+
+	//determine if I am in the selection
+	bool selected = false;
+	if (find (selection.tracks.begin(), selection.tracks.end(), this) != selection.tracks.end()) {
+		selected = true;
+	}
+
+	//bail out here if my state is unchanged
+	if (selected == _selected) {
 		return;
 	}
 	
-	Selectable::set_selected (yn);
+	Selectable::set_selected (selected);
 
 	if (_selected) {
 		controls_ebox.set_name (controls_base_selected_name);
 		controls_frame.set_name (controls_base_selected_name);
 		controls_vbox.set_name (controls_base_selected_name);
-		/* propagate any existing selection, if the mode is right */
 
+		/* propagate any existing selection, if the mode is right */
 		if (editor.current_mouse_mode() == Editing::MouseRange && !editor.get_selection().time.empty()) {
 			show_selection (editor.get_selection().time);
 		}
@@ -611,15 +623,6 @@ TimeAxisView::set_selected (bool yn)
 		controls_frame.set_name (controls_base_unselected_name);
 		controls_vbox.set_name (controls_base_unselected_name);
 		hide_selection ();
-
-		/* children will be set for the yn=true case. but when deselecting
-		   the editor only has a list of top-level trackviews, so we
-		   have to do this here.
-		*/
-
-		for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
-			(*i)->set_selected (false);
-		}
 	}
 
 	resizer.queue_draw ();
@@ -692,10 +695,6 @@ TimeAxisView::show_selection (TimeSelection& ts)
 	double x2;
 	double y2;
 	SelectionRect *rect;
-
-	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
-		(*i)->show_selection (ts);
-	}
 
 	if (canvas_item_visible (selection_group)) {
 		while (!used_selection_rects.empty()) {

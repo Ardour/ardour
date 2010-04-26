@@ -30,6 +30,7 @@
 #include "ardour_ui.h"
 #include "selection.h"
 #include "audio_time_axis.h"
+#include "automation_time_axis.h"
 #include "actions.h"
 
 #include "i18n.h"
@@ -162,13 +163,11 @@ Editor::create_editor_mixer ()
 void
 Editor::set_selected_mixer_strip (TimeAxisView& view)
 {
-	AudioTimeAxisView* at;
 	bool show = false;
 	bool created;
 
-	if (!session || (at = dynamic_cast<AudioTimeAxisView*>(&view)) == 0) {
+	if (!session)
 		return;
-	}
 
 	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
 	if (act) {
@@ -186,9 +185,21 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 		created = false;
 	}
 
-	/* might be nothing to do */
+ 	//if this is an automation track then we should show the parent
+	boost::shared_ptr<ARDOUR::Route> route;
+	AutomationTimeAxisView *auto_tav;
+	if ( (auto_tav  = dynamic_cast<AutomationTimeAxisView*>(&view)) == 0 ) {
+		AudioTimeAxisView* at = dynamic_cast<AudioTimeAxisView*>(&view);
+		if (at != NULL)
+			route = at->route();
+	} else {
+		AudioTimeAxisView *parent = dynamic_cast<AudioTimeAxisView*>( view.get_parent() );
+		if (parent != NULL) {
+			route = parent->route();
+		}
+	}
 	
-	if (current_mixer_strip->route() == at->route()) {
+	if (current_mixer_strip->route() == route) {
 		return;
 	}
 	
@@ -196,7 +207,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 		show = true;
 	}
 
-	current_mixer_strip->set_route (at->route());
+	current_mixer_strip->set_route (route);
 
 	if (created) {
 		current_mixer_strip->set_width (editor_mixer_strip_width, (void*) this);
@@ -315,18 +326,6 @@ Editor::current_mixer_strip_removed ()
 void
 Editor::current_mixer_strip_hidden ()
 {
-	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		
-		AudioTimeAxisView* tmp;
-		
-		if ((tmp = dynamic_cast<AudioTimeAxisView*>(*i)) != 0) {
-			if (tmp->route() == current_mixer_strip->route()) {
-				(*i)->set_selected (false);
-				break;
-			}
-		}
-	}
-
 	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
 	if (act) {
 		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
