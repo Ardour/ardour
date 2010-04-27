@@ -17,6 +17,8 @@
 
 */
 
+#include <boost/scoped_array.hpp>
+
 #include <sigc++/retype.h>
 #include <sigc++/retype_return.h>
 #include <sigc++/bind.h>
@@ -754,9 +756,9 @@ AudioTrack::silent_roll (nframes_t nframes, nframes_t start_frame, nframes_t end
 int
 AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t start, nframes_t nframes, bool enable_processing)
 {
-	gain_t  gain_automation[nframes];
-	gain_t  gain_buffer[nframes];
-	float   mix_buffer[nframes];
+        boost::scoped_array<gain_t> gain_automation (new gain_t[nframes]);
+        boost::scoped_array<gain_t> gain_buffer (new gain_t[nframes]);
+        boost::scoped_array<Sample> mix_buffer (new Sample[nframes]);
 	RedirectList::iterator i;
 	bool post_fader_work = false;
 	gain_t this_gain = _gain;
@@ -769,7 +771,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t st
 	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(diskstream->playlist());
 	assert(apl);
 
-	if (apl->read (buffers[0], mix_buffer, gain_buffer, start, nframes) != nframes) {
+	if (apl->read (buffers[0], mix_buffer.get(), gain_buffer.get(), start, nframes) != nframes) {
 		return -1;
 	}
 
@@ -779,7 +781,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t st
 	++bi;
 	for (; bi != buffers.end(); ++bi, ++n) {
 		if (n < diskstream->n_channels()) {
-			if (apl->read ((*bi), mix_buffer, gain_buffer, start, nframes, n) != nframes) {
+			if (apl->read ((*bi), mix_buffer.get(), gain_buffer.get(), start, nframes, n) != nframes) {
 				return -1;
 			}
 			b = (*bi);
@@ -815,7 +817,7 @@ AudioTrack::export_stuff (vector<Sample*>& buffers, uint32_t nbufs, nframes_t st
 	
 	if (_gain_automation_curve.automation_state() == Auto_Play) {
 		
-		_gain_automation_curve.get_vector (start, start + nframes, gain_automation, nframes);
+		_gain_automation_curve.get_vector (start, start + nframes, gain_automation.get(), nframes);
 
 		for (bi = buffers.begin(); bi != buffers.end(); ++bi) {
 			Sample *b = *bi;
