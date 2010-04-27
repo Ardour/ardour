@@ -346,6 +346,8 @@ AutomationList::merge_nascent (double when)
                         return;
                 }
 
+                cerr << "We have " << nascent.size() << " NI's to merge\n";
+
                 for (list<NascentInfo*>::iterator n = nascent.begin(); n != nascent.end(); ++n) {
 
                         NascentInfo* ninfo = *n;
@@ -368,17 +370,22 @@ AutomationList::merge_nascent (double when)
 
                         if (!preexisting) {
                                 
+                                cerr << "no prexisting - merge\n";
                                 events = nascent_events;
                                 
                         } else if (ninfo->end_time < events.front()->when) {
                                 
                                 /* all points in nascent are before the first existing point */
+
+                                cerr << "all before first, prepend\n";
                                 
                                 events.insert (events.begin(), nascent_events.begin(), nascent_events.end());
                                 
                         } else if (ninfo->start_time > events.back()->when) {
                                 
                                 /* all points in nascent are after the last existing point */
+
+                                cerr << "all after last, append\n";
                                 
                                 events.insert (events.end(), nascent_events.begin(), nascent_events.end());
                                 
@@ -413,13 +420,16 @@ AutomationList::merge_nascent (double when)
                                 
                                 if (range_begin != events.begin()) {
                                         /* clamp point before */
+                                        cerr << "Add pre-clamp\n";
                                         events.insert (range_begin, point_factory (ninfo->start_time, unlocked_eval (ninfo->start_time)));
                                 }
-                                                
+
+                                cerr << "merge into event list\n";
                                 events.insert (range_begin, nascent_events.begin(), nascent_events.end());
                                 
                                 if (range_end != events.end()) {
                                         /* clamp point after */
+                                        cerr << "Add post-clamp\n";
                                         events.insert (range_begin, point_factory (ninfo->end_time, end_value));
                                 }
                                 

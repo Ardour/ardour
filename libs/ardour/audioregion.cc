@@ -21,8 +21,9 @@
 #include <climits>
 #include <cfloat>
 #include <algorithm>
-
 #include <set>
+
+#include <boost/scoped_array.hpp>
 
 #include <sigc++/bind.h>
 #include <sigc++/class_slot.h>
@@ -1330,11 +1331,11 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 
 		} else {
 
-			Sample buf[blocksize];
+                        boost::scoped_array<Sample> buf (new Sample[blocksize]);
 
 			for (uint32_t chan = 0; chan < spec.channels; ++chan) {
 				
-				if (sources[chan]->read (buf, _start + spec.pos, to_read) != to_read) {
+				if (sources[chan]->read (buf.get(), _start + spec.pos, to_read) != to_read) {
 					goto out;
 				}
 				
@@ -1402,7 +1403,7 @@ void
 AudioRegion::normalize_to (float target_dB)
 {
 	const nframes_t blocksize = 64 * 1024;
-	Sample buf[blocksize];
+        boost::scoped_array<Sample> buf (new Sample[blocksize]);
 	nframes_t fpos;
 	nframes_t fend;
 	nframes_t to_read;
@@ -1431,11 +1432,11 @@ AudioRegion::normalize_to (float target_dB)
 
 			/* read it in */
 
-			if (source (n)->read (buf, fpos, to_read) != to_read) {
+			if (source (n)->read (buf.get(), fpos, to_read) != to_read) {
 				return;
 			}
 			
-			maxamp = Session::compute_peak (buf, to_read, maxamp);
+			maxamp = Session::compute_peak (buf.get(), to_read, maxamp);
 		}
 
 		fpos += to_read;
