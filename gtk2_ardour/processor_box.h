@@ -197,7 +197,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void return_io_finished (IOSelector::Result, boost::weak_ptr<ARDOUR::Processor>, IOSelectorWindow*);
 	void choose_insert ();
 	void choose_plugin ();
-	void use_plugins (const SelectedPlugins&);
+	bool use_plugins (const SelectedPlugins&);
 
 	bool no_processor_redisplay;
 

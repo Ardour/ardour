@@ -30,7 +30,7 @@ class PluginInterestedObject {
 	PluginInterestedObject() {}
 	virtual ~PluginInterestedObject() {}
 
-	virtual void use_plugins (const SelectedPlugins&) = 0;
+	virtual bool use_plugins (const SelectedPlugins&) = 0;
 };
 
 #endif /* __gtkardour_plugin_interest_h__ */

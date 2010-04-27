@@ -742,7 +742,8 @@ ProcessorBox::choose_plugin ()
 	_get_plugin_selector()->set_interested_object (*this);
 }
 
-void
+/** @return true if an error occurred, otherwise false */
+bool
 ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 {
 	for (SelectedPlugins::const_iterator p = plugins.begin(); p != plugins.end(); ++p) {
@@ -757,6 +758,7 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 
 		if (_route->add_processor (processor, _placement, &err_streams)) {
 			weird_plugin_dialog (**p, err_streams);
+			return true;
 			// XXX SHAREDPTR delete plugin here .. do we even need to care?
 		} else {
 
@@ -765,12 +767,14 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 			}
 		}
 	}
+
+	return false;
 }
 
 void
 ProcessorBox::weird_plugin_dialog (Plugin& p, Route::ProcessorStreams streams)
 {
-	ArdourDialog dialog (_("ardour: weird plugin dialog"));
+	ArdourDialog dialog (_("Plugin Incompatibility"));
 	Label label;
 
 	string text = string_compose(_("You attempted to add the plugin \"%1\" at index %2.\n"),

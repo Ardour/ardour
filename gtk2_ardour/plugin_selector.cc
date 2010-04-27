@@ -63,7 +63,7 @@ static const char* _filter_mode_strings[] = {
 };
 
 PluginSelector::PluginSelector (PluginManager *mgr)
-	: ArdourDialog (_("ardour: plugins"), true, false),
+	: ArdourDialog (_("Plugin Manager"), true, false),
 	  filter_button (Stock::CLEAR)
 {
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -442,29 +442,36 @@ PluginSelector::run ()
 {
 	ResponseType r;
 	TreeModel::Children::iterator i;
-	SelectedPlugins plugins;
 
-	r = (ResponseType) Dialog::run ();
+	bool finish = false;
+	
+	while (!finish) {
 
-	switch (r) {
-	case RESPONSE_APPLY:
-		for (i = amodel->children().begin(); i != amodel->children().end(); ++i) {
-			PluginInfoPtr pp = (*i)[acols.plugin];
-			PluginPtr p = load_plugin (pp);
-			if (p) {
-				plugins.push_back (p);
+		SelectedPlugins plugins;
+		r = (ResponseType) Dialog::run ();
+		
+		switch (r) {
+		case RESPONSE_APPLY:
+			for (i = amodel->children().begin(); i != amodel->children().end(); ++i) {
+				PluginInfoPtr pp = (*i)[acols.plugin];
+				PluginPtr p = load_plugin (pp);
+				if (p) {
+					plugins.push_back (p);
+				}
 			}
+			if (interested_object && !plugins.empty()) {
+				finish = !interested_object->use_plugins (plugins);
+			}
+			
+			break;
+			
+		default:
+			finish = true;
+			break;
 		}
-		if (interested_object && !plugins.empty()) {
-			interested_object->use_plugins (plugins);
-		}
-
-		break;
-
-	default:
-		break;
 	}
-
+		
+		
 	hide();
 	amodel->clear();
 	interested_object = 0;
