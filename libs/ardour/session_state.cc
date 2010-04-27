@@ -1473,8 +1473,6 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 		ds_prop = node.property (X_("diskstream"));
 	}
 
-	cout << "ds_prop " << ds_prop << "\n";
-
 	DataType type = DataType::AUDIO;
 	const XMLProperty* prop = node.property("default-type");
 
