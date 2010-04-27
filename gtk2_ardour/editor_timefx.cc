@@ -58,6 +58,7 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
+/** @return -1 in case of error, 1 if operation was cancelled by the user, 0 if everything went ok */
 int
 Editor::time_stretch (RegionSelection& regions, float fraction)
 {
@@ -96,6 +97,7 @@ Editor::pitch_shift (RegionSelection& regions, float fraction)
 	return time_fx (regions, fraction, true);
 }
 
+/** @return -1 in case of error, 1 if operation was cancelled by the user, 0 if everything went ok */
 int
 Editor::time_fx (RegionSelection& regions, float val, bool pitching)
 {

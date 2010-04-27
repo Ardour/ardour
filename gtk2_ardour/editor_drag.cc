@@ -3100,7 +3100,7 @@ TimeFXDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 	RegionSelection rs;
 	rs.add (_primary);
 
-	if (!_editor->time_stretch (rs, percentage) == 0) {
+	if (_editor->time_stretch (rs, percentage) == -1) {
 		error << _("An error occurred while executing time stretch operation") << endmsg;
 	}
 }
