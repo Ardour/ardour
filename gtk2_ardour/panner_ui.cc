@@ -165,22 +165,6 @@ PannerUI::set_panner (boost::shared_ptr<Panner> p)
 	update_pan_sensitive ();
 	update_pan_linkage ();
 	pan_automation_state_changed ();
-
-#if WHERE_DOES_THIS_LIVE
-	pan_bar_packer.show();
-	panning_viewport.show();
-	panning_up.show();
-	panning_up_arrow.show();
-	panning_down.show();
-	panning_down_arrow.show();
-	pan_vbox.show();
-	panning_link_button.show();
-	panning_link_direction_button.show();
-	panning_link_box.show();
-	pan_automation_style_button.show();
-	pan_automation_state_button.show();
-	show();
-#endif
 }
 
 void
@@ -265,8 +249,8 @@ PannerUI::update_pan_linkage ()
 {
 	ENSURE_GUI_THREAD (*this, &PannerUI::update_pan_linkage)
 
-	bool x = _panner->linked();
-	bool bx = panning_link_button.get_active();
+	bool const x = _panner->linked();
+	bool const bx = panning_link_button.get_active();
 
 	if (x != bx) {
 
@@ -601,11 +585,11 @@ PannerUI::pan_changed (void *src)
 		panning_link_button.set_sensitive (false);
 		break;
 	default:
-		panning_link_direction_button.set_sensitive (true);
+		panning_link_direction_button.set_sensitive (_panner->linked ());
 		panning_link_button.set_sensitive (true);
 	}
 
-	uint32_t nouts = _panner->nouts();
+	uint32_t const nouts = _panner->nouts();
 
 	switch (nouts) {
 	case 0:
