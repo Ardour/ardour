@@ -591,10 +591,10 @@ AUPlugin::discover_parameters ()
 			d.upper = info.maxValue;
 			d.default_value = info.defaultValue;
 
-			d.integer_step = (info.unit & kAudioUnitParameterUnit_Indexed);
-			d.toggled = (info.unit & kAudioUnitParameterUnit_Boolean) ||
+			d.integer_step = (info.unit == kAudioUnitParameterUnit_Indexed);
+			d.toggled = (info.unit == kAudioUnitParameterUnit_Boolean) ||
 				(d.integer_step && ((d.upper - d.lower) == 1.0));
-			d.sr_dependent = (info.unit & kAudioUnitParameterUnit_SampleFrames);
+			d.sr_dependent = (info.unit == kAudioUnitParameterUnit_SampleFrames);
 			d.automatable = !d.toggled && 
 				!(info.flags & kAudioUnitParameterFlag_NonRealTime) &&
 				(info.flags & kAudioUnitParameterFlag_IsWritable);
