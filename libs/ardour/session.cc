@@ -2427,7 +2427,6 @@ Session::add_source (boost::shared_ptr<Source> source)
 	}
 
 	if (result.second) {
-		source->DropReferences.connect_same_thread (*this, boost::bind (&Session::remove_source, this, boost::weak_ptr<Source> (source)));
 		set_dirty();
 	}
 

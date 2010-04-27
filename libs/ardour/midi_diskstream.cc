@@ -924,7 +924,6 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 		if (_write_source) {
 
 			_write_source->mark_for_remove ();
-			_write_source->drop_references ();
 			_write_source.reset();
 		}
 
