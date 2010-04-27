@@ -2169,19 +2169,29 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 
 	solo_update_disabled = true;
 
-        /* from IRC: 
+        /*
 
-           <las> oofus_lt: solo a route, do NOT mute anything in the feed-forward chain for the route
-           <las> oofus_lt: and do solo-by-other everything in the feed-backward chain
+           solo a route:
+              for anything in the signal path for this route, increment its soloed-by-other count
+              for anything not in the signal path for this route, increment its muted-by-other count
+
+           unsolo a route:
+              for anything in the signal path for this route, decrement its soloed-by-other count
+              for anything not in the signal path for this route, decrement its muted-by-other count
 
         */
 
+        RouteList uninvolved;
+
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		bool via_sends_only;
+                bool in_signal_flow;
 
 		if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden()) {
 			continue;
 		} 
+
+                in_signal_flow = false;
 
                 /* feed-backwards (other route to solo change route):
 
@@ -2195,6 +2205,8 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
                 if ((*i)->feeds (route, &via_sends_only)) {
 			if (!via_sends_only) {
 				(*i)->mod_solo_by_others (delta);
+                                (*i)->mod_muted_by_others (-delta);
+                                in_signal_flow = true;
 			}
 		} 
                 
@@ -2208,6 +2220,12 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 
                 if (route->feeds (*i, &via_sends_only)) {
                         (*i)->mod_solo_by_others (delta);
+                        (*i)->mod_muted_by_others (-delta);
+                        in_signal_flow = true;
+                }
+                
+                if (!in_signal_flow) {
+                        (*i)->mod_muted_by_others (delta);
                 }
 	}
 

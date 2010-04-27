@@ -527,7 +527,7 @@ int
 AudioTrack::export_stuff (BufferSet& buffers, sframes_t start, nframes_t nframes, bool enable_processing)
 {
 	boost::scoped_array<gain_t> gain_buffer (new gain_t[nframes]);
-	boost::scoped_array<float> mix_buffer (new float[nframes]);
+	boost::scoped_array<Sample> mix_buffer (new Sample[nframes]);
 	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 
 	Glib::RWLock::ReaderLock rlock (_processor_lock);

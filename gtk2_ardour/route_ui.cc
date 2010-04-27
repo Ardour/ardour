@@ -295,7 +295,7 @@ RouteUI::mute_press (GdkEventButton* ev)
                                         return true;
                                 }
 
-				_mute_release = new SoloMuteRelease (_route->muted ());
+				_mute_release = new SoloMuteRelease (_route->self_muted ());
 			}
 
 			if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
@@ -306,7 +306,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 						_mute_release->routes = _session->get_routes ();
 					}
 
-					_session->set_mute (_session->get_routes(), !_route->muted());
+					_session->set_mute (_session->get_routes(), !_route->self_muted());
 
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -319,7 +319,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 							_mute_release->routes = _session->get_routes ();
 						}
 								
-						_session->set_mute (_session->get_routes(), !_route->muted(), Session::rt_cleanup, true);
+						_session->set_mute (_session->get_routes(), !_route->self_muted(), Session::rt_cleanup, true);
 					}
 
 				} else {
@@ -333,7 +333,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 						_mute_release->routes = rl;
 					}
 
-					_session->set_mute (rl, !_route->muted());
+					_session->set_mute (rl, !_route->self_muted());
 
 				}
 			}
@@ -390,7 +390,7 @@ RouteUI::solo_press(GdkEventButton* ev)
                                         return true;
                                 }
 
-				_solo_release = new SoloMuteRelease (_route->soloed());
+				_solo_release = new SoloMuteRelease (_route->self_soloed());
 			}
 			
 			if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
@@ -406,7 +406,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 					if (Config->get_solo_control_is_listen_control()) {
 						_session->set_listen (_session->get_routes(), !_route->listening(),  Session::rt_cleanup, true);
 					} else {
-						_session->set_solo (_session->get_routes(), !_route->soloed(),  Session::rt_cleanup, true);
+						_session->set_solo (_session->get_routes(), !_route->self_soloed(),  Session::rt_cleanup, true);
 					}
 					
 				} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
@@ -456,7 +456,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 						if (Config->get_solo_control_is_listen_control()) {
 							_session->set_listen (_route->route_group()->route_list(), !_route->listening(),  Session::rt_cleanup, true);
 						} else {
-							_session->set_solo (_route->route_group()->route_list(), !_route->soloed(),  Session::rt_cleanup, true);
+							_session->set_solo (_route->route_group()->route_list(), !_route->self_soloed(),  Session::rt_cleanup, true);
 						}
 					}
 					
@@ -474,7 +474,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 					if (Config->get_solo_control_is_listen_control()) {
 						_session->set_listen (rl, !_route->listening());
 					} else {
-						_session->set_solo (rl, !_route->soloed());
+						_session->set_solo (rl, !_route->self_soloed());
 					}
 				}
 			}
@@ -836,11 +836,10 @@ RouteUI::mute_visual_state (Session* s, boost::shared_ptr<Route> r)
 	
 	if (Config->get_show_solo_mutes()) {
 		
-		if (r->muted ()) {
+		if (r->self_muted ()) {
 			/* full mute */
 			return 2;
-		} else if (s->soloing() && !r->soloed() && !r->solo_isolated()) {
-			/* mute-because-not-soloed */
+		} else if (r->muted_by_others()) {
 			return 1;
 		} else {
 			/* no mute at all */
@@ -849,7 +848,7 @@ RouteUI::mute_visual_state (Session* s, boost::shared_ptr<Route> r)
 
 	} else {
 
-		if (r->muted()) {
+		if (r->self_muted()) {
 			/* full mute */
 			return 2;
 		} else {

@@ -687,13 +687,15 @@ Route::solo_isolated () const
 void
 Route::set_mute_points (MuteMaster::MutePoint mp)
 {
-	_mute_points = mp;
-	mute_points_changed (); /* EMIT SIGNAL */
+        if (mp != _mute_points) {
+                _mute_points = mp;
+                _mute_master->set_mute_points (_mute_points);
+                mute_points_changed (); /* EMIT SIGNAL */
 
-	if (_mute_master->muted()) {
-		_mute_master->mute_at (_mute_points);
-		mute_changed (this); /* EMIT SIGNAL */
-	}
+                if (_mute_master->muted()) {
+                        mute_changed (this); /* EMIT SIGNAL */
+                }
+        }
 }
 
 void
@@ -704,21 +706,40 @@ Route::set_mute (bool yn, void *src)
 		return;
 	}
 
-	if (muted() != yn) {
-		if (yn) {
-			_mute_master->mute_at (_mute_points);
-		} else {
-			_mute_master->clear_mute ();
-		}
-
+	if (self_muted() != yn) {
+                _mute_master->set_self_muted (yn);
 		mute_changed (src); /* EMIT SIGNAL */
 	}
 }
 
 bool
-Route::muted() const
+Route::muted () const
 {
-	return _mute_master->muted ();
+        return self_muted() || muted_by_others();
+}
+
+bool
+Route::self_muted() const
+{
+	return _mute_master->self_muted ();
+}
+
+bool
+Route::muted_by_others() const
+{
+	return _mute_master->muted_by_others ();
+}
+
+void
+Route::mod_muted_by_others (int delta)
+{
+        bool old = muted ();
+
+        _mute_master->mod_muted_by_others (delta);
+
+        if (old != muted()) {
+                mute_changed (this);
+        }
 }
 
 #if 0
@@ -1969,7 +1990,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 				}
 			}
 			
-			_mute_master->set_state (mute_point);
+			_mute_master->set_mute_points (mute_point);
 		}
 	}
 

@@ -44,28 +44,38 @@ class MuteMaster : public PBD::Stateful
 	MuteMaster (Session& s, const std::string& name);
 	~MuteMaster() {}
 
-	bool muted_pre_fader() const  { return _mute_point & PreFader; }
-	bool muted_post_fader() const { return _mute_point & PostFader; }
-	bool muted_listen() const     { return _mute_point & Listen; }
-	bool muted_main () const      { return _mute_point & Main; }
+	bool self_muted() const { return _self_muted && (_mute_point != MutePoint (0)); }
+	bool muted_by_others() const { return _muted_by_others && (_mute_point != MutePoint (0)); }
+	bool muted() const { return (_self_muted || (_muted_by_others > 0)) && (_mute_point != MutePoint (0)); }
+        bool muted_at (MutePoint mp) const { return (_self_muted || (_muted_by_others > 0)) && (_mute_point & mp); }
 
-	bool muted_at (MutePoint mp) const { return _mute_point & mp; }
-	bool muted() const { return _mute_point != MutePoint (0); }
+	bool muted_pre_fader() const  { return muted_at (PreFader); }
+	bool muted_post_fader() const { return muted_at (PostFader); }
+	bool muted_listen() const     { return muted_at (Listen); }
+        bool muted_main () const      { return muted_at (Main); }
 
 	gain_t mute_gain_at (MutePoint) const;
+
+        void set_self_muted (bool yn) { _self_muted = yn; }
+        void mod_muted_by_others (int delta);
 
 	void clear_mute ();
 	void mute_at (MutePoint);
 	void unmute_at (MutePoint);
 
+	void set_mute_points (const std::string& mute_point);
+        void set_mute_points (MutePoint);
+        MutePoint mute_points() const { return _mute_point; }
+
 	PBD::Signal0<void> MutePointChanged;
 
 	XMLNode& get_state();
 	int set_state(const XMLNode&, int version);
-	int set_state(std::string mute_point);
 
   private:
 	MutePoint _mute_point;
+        bool      _self_muted;
+        uint32_t  _muted_by_others;
 };
 
 } // namespace ARDOUR

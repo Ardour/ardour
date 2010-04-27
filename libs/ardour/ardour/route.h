@@ -124,8 +124,13 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	void set_mute_points (MuteMaster::MutePoint);
 	MuteMaster::MutePoint mute_points() const { return _mute_points; }
-	void set_mute (bool yn, void* src);
+
 	bool muted () const;
+	bool self_muted () const;
+	bool muted_by_others () const;
+
+	void set_mute (bool yn, void* src);
+        void mod_muted_by_others (int delta);
 
 	/* controls use set_solo() to modify this route's solo state
 	 */
