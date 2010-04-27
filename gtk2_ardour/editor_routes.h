@@ -74,7 +74,7 @@ private:
 	void handle_gui_changes (std::string const &, void *);
 	void update_rec_display ();
 	void update_mute_display ();
-	void update_solo_display ();
+	void update_solo_display (bool);
 	void update_solo_isolate_display ();
 	void update_solo_safe_display ();
 	void set_all_tracks_visibility (bool);

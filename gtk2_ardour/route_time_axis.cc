@@ -133,7 +133,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	}
 
 	mute_changed (0);
-	solo_changed (0);
+        update_solo_display ();
 
 	timestretch_rect = 0;
 	no_redraw = false;

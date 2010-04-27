@@ -238,7 +238,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	PBD::Signal0<void>       phase_invert_changed;
 	PBD::Signal0<void>       denormal_protection_changed;
 	PBD::Signal1<void,void*> listen_changed;
-	PBD::Signal1<void,void*> solo_changed;
+	PBD::Signal2<void,bool,void*> solo_changed;
 	PBD::Signal1<void,void*> solo_safe_changed;
 	PBD::Signal1<void,void*> solo_isolated_changed;
 	PBD::Signal1<void,void*> comment_changed;
@@ -273,8 +273,39 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	int listen_via (boost::shared_ptr<Route>, Placement p, bool active, bool aux);
 	void drop_listen (boost::shared_ptr<Route>);
 
-	bool feeds (boost::shared_ptr<Route>, bool* via_send_only = 0);
-	std::set<boost::weak_ptr<Route> > fed_by;
+       /** 
+        * return true if this route feeds the first argument via at least one
+        * (arbitrarily long) signal pathway.
+        */
+        bool feeds (boost::shared_ptr<Route>, bool* via_send_only = 0);
+
+       /** 
+        * return true if this route feeds the first argument directly, via
+        * either its main outs or a send.
+        */
+	bool direct_feeds (boost::shared_ptr<Route>, bool* via_send_only = 0);
+
+        struct FeedRecord {
+            boost::weak_ptr<Route> r;
+            bool sends_only;
+
+            FeedRecord (boost::shared_ptr<Route> rp, bool sendsonly)
+                    : r (rp)
+                    , sends_only (sendsonly) {}
+        };
+
+        struct FeedRecordCompare {
+            bool operator() (const FeedRecord& a, const FeedRecord& b) const {
+                    return a.r < b.r;
+            }
+        };
+
+        typedef std::set<FeedRecord,FeedRecordCompare> FedBy;
+
+        const FedBy& fed_by() const { return _fed_by; }
+        void clear_fed_by ();
+        bool add_fed_by (boost::shared_ptr<Route>, bool sends_only);
+        bool not_fed() const { return _fed_by.empty(); }
 
 	/* Controls (not all directly owned by the Route */
 
@@ -393,6 +424,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	bool           _have_internal_generator;
 	bool           _solo_safe;
 	DataType       _default_type;
+        FedBy          _fed_by;
 
         virtual ChanCount input_streams () const;
 

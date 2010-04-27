@@ -494,8 +494,6 @@ ARDOUR_UI::reattach_tearoff (Box* b, Widget* w, int32_t n)
 void
 ARDOUR_UI::soloing_changed (bool onoff)
 {
-        cerr << "solo change, " << onoff << endl;
-
 	if (solo_alert_button.get_active() != onoff) {
 		solo_alert_button.set_active (onoff);
 	}

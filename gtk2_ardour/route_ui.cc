@@ -209,10 +209,12 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	_route->active_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_active_changed, this), gui_context());
 	_route->mute_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::mute_changed, this, _1), gui_context());
-	_route->solo_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
-	_route->solo_safe_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
-	_route->listen_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::listen_changed, this, _1), gui_context());
-	_route->solo_isolated_changed.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::solo_changed, this, _1), gui_context());
+
+	_route->solo_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
+	_route->solo_safe_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
+	_route->listen_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
+	_route->solo_isolated_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
+
         _route->phase_invert_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::polarity_changed, this), gui_context());
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), ui_bind (&RouteUI::property_changed, this, _1), gui_context());
 
@@ -691,19 +693,6 @@ RouteUI::send_blink (bool onoff)
 	}
 }
 
-void
-RouteUI::solo_changed(void* /*src*/)
-{
-	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&RouteUI::update_solo_display, this));
-}
-
-
-void
-RouteUI::listen_changed(void* /*src*/)
-{
-	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&RouteUI::update_solo_display, this));
-}
-
 int
 RouteUI::solo_visual_state (boost::shared_ptr<Route> r)
 {
@@ -740,7 +729,7 @@ RouteUI::solo_visual_state_with_isolate (boost::shared_ptr<Route> r)
 		if (r->listening()) {
 			return 1;
 		} else {
-			return 0;
+                        return 0;
 		}
 
 	} 

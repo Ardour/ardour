@@ -581,7 +581,7 @@ Route::set_solo (bool yn, void *src)
 	if (self_soloed() != yn) {
 		set_self_solo (yn);
 		set_delivery_solo ();
-		solo_changed (src); /* EMIT SIGNAL */
+		solo_changed (true, src); /* EMIT SIGNAL */
 		_solo_control->Changed (); /* EMIT SIGNAL */
 	}
 }
@@ -610,7 +610,7 @@ Route::mod_solo_by_others (int32_t delta)
 	}
 
 	set_delivery_solo ();
-        solo_changed (this);
+        solo_changed (false, this);
 }
 
 void
@@ -649,7 +649,7 @@ Route::set_solo_isolated (bool yn, void *src)
 	boost::shared_ptr<RouteList> routes = _session.get_routes ();
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 		bool sends_only;
-		bool does_feed = feeds (*i, &sends_only);
+		bool does_feed = direct_feeds (*i, &sends_only);
 		
 		if (does_feed && !sends_only) {
 			(*i)->set_solo_isolated (yn, (*i)->route_group());
@@ -2465,7 +2465,53 @@ Route::set_comment (string cmt, void *src)
 }
 
 bool
-Route::feeds (boost::shared_ptr<Route> other, bool* only_send)
+Route::add_fed_by (boost::shared_ptr<Route> other, bool via_sends_only)
+{
+        FeedRecord fr (other, via_sends_only);
+
+        pair<FedBy::iterator,bool> result =  _fed_by.insert (fr);
+
+        if (!result.second) {
+
+                /* already a record for "other" - make sure sends-only information is correct */
+                if (!via_sends_only && result.first->sends_only) {
+                        FeedRecord* frp = const_cast<FeedRecord*>(&(*result.first));
+                        frp->sends_only = false;
+                }
+        }
+        
+        return result.second;
+}
+
+void
+Route::clear_fed_by ()
+{
+        _fed_by.clear ();
+}
+
+bool
+Route::feeds (boost::shared_ptr<Route> other, bool* via_sends_only)
+{
+        const FedBy& fed_by (other->fed_by());
+
+        for (FedBy::iterator f = fed_by.begin(); f != fed_by.end(); ++f) {
+                boost::shared_ptr<Route> sr = f->r.lock();
+
+                if (sr && (sr.get() == this)) {
+
+                        if (via_sends_only) {
+                                *via_sends_only = f->sends_only;
+                        }
+
+                        return true;
+                }
+        }
+
+        return false;
+}
+
+bool
+Route::direct_feeds (boost::shared_ptr<Route> other, bool* only_send)
 {
 	DEBUG_TRACE (DEBUG::Graph, string_compose ("Feeds? %1\n", _name));
 

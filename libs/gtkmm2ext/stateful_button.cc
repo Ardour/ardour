@@ -74,7 +74,6 @@ StateButton::set_visual_state (int n)
 	}
 
 	set_widget_name (name);
-
 	visual_state = n;
 }
 

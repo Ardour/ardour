@@ -395,6 +395,15 @@ style "mixer_solo_button_alternate" = "solo_button_alternate"
 	xthickness = 0
 	ythickness = 0
 }
+
+style "mixer_solo_button_alternate2" = "solo_button_alternate2"
+{
+	font_name = "@FONT_SMALLER@"
+	xthickness = 0
+	ythickness = 0
+}
+
+
 style "mixer_solo_button_active" = "solo_button_active"
 {
 	font_name = "@FONT_SMALLER@"
@@ -1457,6 +1466,7 @@ widget "*SoloButton-alternate2" style:highest "solo_button_alternate2"
 widget "*SoloButton-active" style:highest "solo_button_active"
 widget "*MixerSoloButton" style:highest "mixer_solo_button"
 widget "*MixerSoloButton-alternate" style:highest "mixer_solo_button_alternate"
+widget "*MixerSoloButton-alternate2" style:highest "mixer_solo_button_alternate2"
 widget "*MixerSoloButton-active" style:highest "mixer_solo_button_active"
 widget "*TrackLoopButton*" style:highest "track_loop_button"
 widget "*PanAutomationLineSelector*" style:highest "multiline_combo"

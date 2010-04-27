@@ -461,14 +461,14 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		}
 
 		(*x)->route()->mute_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_mute_display, this), gui_context());
-		(*x)->route()->solo_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_display, this), gui_context());
+		(*x)->route()->solo_changed.connect (*this, MISSING_INVALIDATOR, ui_bind (&EditorRoutes::update_solo_display, this, _1), gui_context());
 		(*x)->route()->solo_isolated_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_isolate_display, this), gui_context());
 		(*x)->route()->solo_safe_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_solo_safe_display, this), gui_context());
 	}
 
 	update_rec_display ();
 	update_mute_display ();
-	update_solo_display ();
+	update_solo_display (true);
 	update_solo_isolate_display ();
 	update_solo_safe_display ();
 	resume_redisplay ();
@@ -1026,7 +1026,7 @@ EditorRoutes::update_mute_display ()
 }
 
 void
-EditorRoutes::update_solo_display ()
+EditorRoutes::update_solo_display (bool /* selfsoloed */)
 {
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
@@ -1098,7 +1098,6 @@ EditorRoutes::name_edit (Glib::ustring const & path, Glib::ustring const & new_t
 void
 EditorRoutes::solo_changed_so_update_mute ()
 {
-	ENSURE_GUI_THREAD (*this, &EditorRoutes::solo_changed_so_update_mute)
 	update_mute_display ();
 }
 

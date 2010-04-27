@@ -1238,13 +1238,13 @@ Session::set_default_fade (float /*steepness*/, float /*fade_msecs*/)
 
 struct RouteSorter {
     bool operator() (boost::shared_ptr<Route> r1, boost::shared_ptr<Route> r2) {
-	    if (r1->fed_by.find (r2) != r1->fed_by.end()) {
+	    if (r2->feeds (r1)) {
 		    return false;
-	    } else if (r2->fed_by.find (r1) != r2->fed_by.end()) {
+	    } else if (r1->feeds (r2)) {
 		    return true;
 	    } else {
-		    if (r1->fed_by.empty()) {
-			    if (r2->fed_by.empty()) {
+		    if (r1->not_fed ()) {
+			    if (r2->not_fed ()) {
 				    /* no ardour-based connections inbound to either route. just use signal order */
 				    return r1->order_key(N_("signal")) < r2->order_key(N_("signal"));
 			    } else {
@@ -1263,21 +1263,21 @@ trace_terminal (shared_ptr<Route> r1, shared_ptr<Route> rbase)
 {
 	shared_ptr<Route> r2;
 
-	if ((r1->fed_by.find (rbase) != r1->fed_by.end()) && (rbase->fed_by.find (r1) != rbase->fed_by.end())) {
+	if (r1->feeds (rbase) && rbase->feeds (r1)) {
 		info << string_compose(_("feedback loop setup between %1 and %2"), r1->name(), rbase->name()) << endmsg;
 		return;
 	}
 
 	/* make a copy of the existing list of routes that feed r1 */
 
-	set<weak_ptr<Route> > existing = r1->fed_by;
-
+        Route::FedBy existing (r1->fed_by());
+                        
 	/* for each route that feeds r1, recurse, marking it as feeding
 	   rbase as well.
 	*/
 
-	for (set<weak_ptr<Route> >::iterator i = existing.begin(); i != existing.end(); ++i) {
-		if (!(r2 = (*i).lock ())) {
+	for (Route::FedBy::iterator i = existing.begin(); i != existing.end(); ++i) {
+		if (!(r2 = i->r.lock ())) {
 			/* (*i) went away, ignore it */
 			continue;
 		}
@@ -1286,7 +1286,7 @@ trace_terminal (shared_ptr<Route> r1, shared_ptr<Route> rbase)
 		   base as being fed by r2
 		*/
 
-		rbase->fed_by.insert (r2);
+		rbase->add_fed_by (r2, i->sends_only);
 
 		if (r2 != rbase) {
 
@@ -1294,7 +1294,7 @@ trace_terminal (shared_ptr<Route> r1, shared_ptr<Route> rbase)
 			   stop here.
 			*/
 
-			if ((r1->fed_by.find (r2) != r1->fed_by.end()) && (r2->fed_by.find (r1) != r2->fed_by.end())) {
+			if (r1->feeds (r2) && r2->feeds (r1)) {
 				continue;
 			}
 
@@ -1328,6 +1328,22 @@ Session::resort_routes ()
 		/* writer goes out of scope and forces update */
 	}
 
+#ifndef NDEBUG
+        boost::shared_ptr<RouteList> rl = routes.reader ();
+        for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+                DEBUG_TRACE (DEBUG::Graph, string_compose ("%1 fed by ...\n", (*i)->name()));
+                
+                const Route::FedBy& fb ((*i)->fed_by());
+
+                for (Route::FedBy::const_iterator f = fb.begin(); f != fb.end(); ++f) {
+                        boost::shared_ptr<Route> sf = f->r.lock();
+                        if (sf) {
+                                DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 (sends only ? %2)\n", sf->name(), f->sends_only));
+                        }
+                }
+        }
+#endif
+
 }
 void
 Session::resort_routes_using (shared_ptr<RouteList> r)
@@ -1336,7 +1352,7 @@ Session::resort_routes_using (shared_ptr<RouteList> r)
 
 	for (i = r->begin(); i != r->end(); ++i) {
 
-		(*i)->fed_by.clear ();
+		(*i)->clear_fed_by ();
 
 		for (j = r->begin(); j != r->end(); ++j) {
 
@@ -1350,8 +1366,10 @@ Session::resort_routes_using (shared_ptr<RouteList> r)
 				continue;
 			}
 
-			if ((*j)->feeds (*i)) {
-				(*i)->fed_by.insert (*j);
+                        bool via_sends_only;
+
+			if ((*j)->direct_feeds (*i, &via_sends_only)) {
+				(*i)->add_fed_by (*j, via_sends_only);
 			}
 		}
 	}
@@ -1363,13 +1381,11 @@ Session::resort_routes_using (shared_ptr<RouteList> r)
 	RouteSorter cmp;
 	r->sort (cmp);
 
-#if 0
-	cerr << "finished route resort\n";
-
+#ifndef NDEBUG
+        DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		cerr << " " << (*i)->name() << " signal order = " << (*i)->order_key ("signal") << endl;
+		DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 signal order %2\n", (*i)->name(), (*i)->order_key ("signal")));
 	}
-	cerr << endl;
 #endif
 
 }
@@ -1882,7 +1898,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 		boost::shared_ptr<Route> r (*x);
 
 		r->listen_changed.connect_same_thread (*this, boost::bind (&Session::route_listen_changed, this, _1, wpr));
-		r->solo_changed.connect_same_thread (*this, boost::bind (&Session::route_solo_changed, this, _1, wpr));
+		r->solo_changed.connect_same_thread (*this, boost::bind (&Session::route_solo_changed, this, _1, _2, wpr));
 		r->mute_changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this, _1));
 		r->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
 		r->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
@@ -2122,8 +2138,13 @@ Session::route_listen_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 }
 
 void
-Session::route_solo_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
+Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_ptr<Route> wpr)
 {
+        if (!self_solo_change) {
+                // session doesn't care about changes to soloed-by-others
+                return;
+        }
+
 	if (solo_update_disabled) {
 		// We know already
 		return;
@@ -2146,22 +2167,48 @@ Session::route_solo_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 		delta = -1;
 	}
 
-	/* now mod the solo level of all other routes except master/control outs/auditioner
-	   so that they will be silent if appropriate.
-	*/
-
 	solo_update_disabled = true;
+
+        /* from IRC: 
+
+           <las> oofus_lt: solo a route, do NOT mute anything in the feed-forward chain for the route
+           <las> oofus_lt: and do solo-by-other everything in the feed-backward chain
+
+        */
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		bool via_sends_only;
 
 		if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden()) {
 			continue;
-		} else if ((*i)->feeds (route, &via_sends_only)) {
+		} 
+
+                /* feed-backwards (other route to solo change route):
+
+                        if (*i) feeds the one whose solo status changed 
+                             it should be soloed by other if the change was -> solo OR de-soloed by other if change was -> !solo
+                        else 
+                             do nothing
+                            
+                 */
+
+                if ((*i)->feeds (route, &via_sends_only)) {
 			if (!via_sends_only) {
 				(*i)->mod_solo_by_others (delta);
 			}
 		} 
+                
+                /* feed-forward (solo change route to other routes):
+                    
+                      if the route whose solo status changed feeds (*i)
+                             do nothing
+                      else 
+                             mute if the change was -> solo OR demute if change was -> !solo
+                 */
+
+                if (route->feeds (*i, &via_sends_only)) {
+                        (*i)->mod_solo_by_others (delta);
+                }
 	}
 
 	solo_update_disabled = false;

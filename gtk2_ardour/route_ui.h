@@ -131,7 +131,7 @@ class RouteUI : public virtual AxisView
 	void create_sends (ARDOUR::Placement);
 	void create_selected_sends (ARDOUR::Placement);
 
-	void solo_changed(void*);
+	void solo_changed(bool, void*);
 	void solo_changed_so_update_mute ();
 	void mute_changed(void*);
 	void listen_changed(void*);
