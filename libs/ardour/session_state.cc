@@ -184,6 +184,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	play_loop = false;
 	have_looped = false;
 	_last_roll_location = 0;
+	_last_roll_or_reversal_location = 0;
 	_last_record_location = 0;
 	pending_locate_frame = 0;
 	pending_locate_roll = false;

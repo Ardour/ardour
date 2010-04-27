@@ -5175,6 +5175,7 @@ Editor::super_rapid_screen_update ()
 	 * 1.  we don't update things when there's a pending locate request, otherwise
 	 *     when the editor requests a locate there is a chance that this method
 	 *     will move the playhead before the locate request is processed, causing
+	 *     a visual glitch.
 	 * 2.  if we're not rolling, there's nothing to do here (locates are handled elsewhere).
 	 * 3.  if we're still at the same frame that we were last time, there's nothing to do.
 	 */
