@@ -1070,7 +1070,7 @@ class Session : public PBD::StatefulDestructible
 		set_worst_io_latencies ();
 	}
 
-	void update_latency_compensation_proxy (void* ignored);
+	void route_redirects_changed (void* ignored);
 
 	void ensure_passthru_buffers (uint32_t howmany);
 	

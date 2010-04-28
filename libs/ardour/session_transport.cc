@@ -1403,9 +1403,10 @@ Session::update_latency_compensation (bool with_stop, bool abort)
 }
 
 void
-Session::update_latency_compensation_proxy (void* ignored)
+Session::route_redirects_changed (void* ignored)
 {
 	update_latency_compensation (false, false);
+	resort_routes ();
 }
 
 void
