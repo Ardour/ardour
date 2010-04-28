@@ -1315,7 +1315,11 @@ Editor::select_range_between ()
 {
         nframes64_t start;
 	nframes64_t end;
-	
+
+        if (mouse_mode == MouseRange && !selection->time.empty()) {
+                selection->clear_time ();
+        }
+
 	if (!get_edit_op_range (start, end)) {
 		return;
 	}
