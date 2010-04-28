@@ -659,9 +659,11 @@ Route::set_solo_isolated (bool yn, void *src)
 	if (yn) {
 		_solo_isolated++;
                 _mute_master->clear_muted_by_others ();
+                solo_isolated_changed (src);
 	} else {
 		if (_solo_isolated > 0) {
 			_solo_isolated--;
+                        solo_isolated_changed (src);
 		}
 	}
 
