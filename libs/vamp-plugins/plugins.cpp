@@ -34,6 +34,10 @@
     authorization.
 */
 
+#ifdef WAF_BUILD
+#include "libvampplugins-config.h"
+#endif
+
 #include "vamp/vamp.h"
 #include "vamp-sdk/PluginAdapter.h"
 
