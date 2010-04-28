@@ -290,30 +290,6 @@ Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nfra
 
 		if (bufs.count().n_audio() > 0 && ports.count().n_audio () > 0) {
 			_output->copy_to_outputs (bufs, DataType::AUDIO, nframes, _output_offset);
-
-                        bool silent;
-                        
-                        for (uint32_t b = 0; b < bufs.count().n_audio(); ++b) {
-
-                                AudioBuffer& ab (bufs.get_audio (b));
-                                Sample* s = ab.data();
-                                nframes_t n;
-
-                                silent = false;
-
-                                for (n = 0; nframes < nframes; ++n) {
-                                        if (s[n] != 0) {
-                                                break;
-                                        }
-                                } 
-                                if (n == nframes) {
-                                        silent = true;
-                                }
-                                
-                                if (silent) {
-                                        cerr << _name << ": Buffer " << b << " is silent\n";
-                                }
-                        }
                 }
 
 		if (bufs.count().n_midi() > 0 && ports.count().n_midi () > 0) {
