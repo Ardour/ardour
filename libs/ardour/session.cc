@@ -2205,7 +2205,6 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
                 if ((*i)->feeds (route, &via_sends_only)) {
 			if (!via_sends_only) {
 				(*i)->mod_solo_by_others (delta);
-                                (*i)->mod_muted_by_others (-delta);
                                 in_signal_flow = true;
 			}
 		} 
@@ -2220,7 +2219,6 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 
                 if (route->feeds (*i, &via_sends_only)) {
                         (*i)->mod_solo_by_others (delta);
-                        (*i)->mod_muted_by_others (-delta);
                         in_signal_flow = true;
                 }
                 

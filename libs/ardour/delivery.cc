@@ -55,9 +55,6 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Mute
 	, _current_gain (1.0)
 	, _output_offset (0)
 	, _no_outs_cuz_we_no_monitor (false)
-	, _solo_level (0)
-	, _solo_isolated (false)
-        , _solo_ignored (false)
 	, _mute_master (mm)
 	, no_panner_reset (false)
 {
@@ -80,9 +77,6 @@ Delivery::Delivery (Session& s, boost::shared_ptr<MuteMaster> mm, const string& 
 	, _current_gain (1.0)
 	, _output_offset (0)
 	, _no_outs_cuz_we_no_monitor (false)
-	, _solo_level (0)
-	, _solo_isolated (false)
-        , _solo_ignored (false)
 	, _mute_master (mm)
 	, no_panner_reset (false)
 {
@@ -257,7 +251,6 @@ Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nfra
 	tgain = target_gain ();
 
 	if (tgain != _current_gain) {
-
 		/* target gain has changed */
 
 		Amp::apply_gain (bufs, nframes, _current_gain, tgain);
@@ -297,11 +290,37 @@ Delivery::run (BufferSet& bufs, sframes_t start_frame, sframes_t end_frame, nfra
 
 		if (bufs.count().n_audio() > 0 && ports.count().n_audio () > 0) {
 			_output->copy_to_outputs (bufs, DataType::AUDIO, nframes, _output_offset);
-		}
+
+                        bool silent;
+                        
+                        for (uint32_t b = 0; b < bufs.count().n_audio(); ++b) {
+
+                                AudioBuffer& ab (bufs.get_audio (b));
+                                Sample* s = ab.data();
+                                nframes_t n;
+
+                                silent = false;
+
+                                for (n = 0; nframes < nframes; ++n) {
+                                        if (s[n] != 0) {
+                                                break;
+                                        }
+                                } 
+                                if (n == nframes) {
+                                        silent = true;
+                                }
+                                
+                                if (silent) {
+                                        cerr << _name << ": Buffer " << b << " is silent\n";
+                                }
+                        }
+                }
 
 		if (bufs.count().n_midi() > 0 && ports.count().n_midi () > 0) {
 			_output->copy_to_outputs (bufs, DataType::MIDI, nframes, _output_offset);
 		}
+                
+                        
 	}
 
   out:
@@ -488,48 +507,35 @@ Delivery::target_gain ()
 
 	gain_t desired_gain = -1.0f;
 
-        if (_solo_level || _solo_ignored) {
-
-		desired_gain = 1.0;
-
-        } else {
-
-                if (_role == Listen && _session.monitor_out() && !_session.soloing()) {
-
-                        /* nobody is soloed, so control/monitor/listen bus gets its
-                           signal from master out, we should be silent
-                        */
-                        desired_gain = 0.0;
-
-                } else {
-                
-                        MuteMaster::MutePoint mp;
-                
-                        switch (_role) {
-                        case Main:
-                                mp = MuteMaster::Main;
-                                break;
-                        case Listen:
-                                mp = MuteMaster::Listen;
-                                break;
-                        case Send:
-                        case Insert:
-                        case Aux:
-                                /* XXX FIX ME this is wrong, we need per-delivery muting */
-                                mp = MuteMaster::PreFader;
-                                break;
-                        }
-                        
-                        if (!_solo_isolated && _session.soloing()) {
-
-                                desired_gain = min (Config->get_solo_mute_gain(), _mute_master->mute_gain_at (mp));
-                                
-                        } else {
-                                
-                                desired_gain = _mute_master->mute_gain_at (mp);
-                        }
-                }
+        MuteMaster::MutePoint mp;
+        
+        switch (_role) {
+        case Main:
+                mp = MuteMaster::Main;
+                break;
+        case Listen:
+                mp = MuteMaster::Listen;
+                break;
+        case Send:
+        case Insert:
+        case Aux:
+                /* XXX FIX ME this is wrong, we need per-delivery muting */
+                mp = MuteMaster::PreFader;
+                break;
         }
+
+        desired_gain = _mute_master->mute_gain_at (mp);
+        
+        if (_role == Listen && _session.monitor_out() && !_session.listening()) {
+                
+                /* nobody is soloed, and this delivery is a listen-send to the
+                   control/monitor/listen bus, we should be silent since
+                   it gets its signal from the master out.
+                */
+                
+                desired_gain = 0.0;
+                
+        } 
 
 	return desired_gain;
 }

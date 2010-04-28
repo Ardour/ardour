@@ -161,8 +161,6 @@ Route::init ()
                 _main_outs->panner()->set_bypassed (true);
 	}
 
-        markup_solo_ignore ();
-
 	/* now that we have _meter, its safe to connect to this */
 
 	Metering::Meter.connect_same_thread (*this, (boost::bind (&Route::meter, this)));
@@ -529,10 +527,8 @@ Route::set_listen (bool yn, void* src)
 	if (_monitor_send) {
 		if (yn != _monitor_send->active()) {
 			if (yn) {
-                                _monitor_send->set_solo_level (1);
 				_monitor_send->activate ();
 			} else {
-                                _monitor_send->set_solo_level (0);
 				_monitor_send->deactivate ();
 			}
 
@@ -580,7 +576,7 @@ Route::set_solo (bool yn, void *src)
 
 	if (self_soloed() != yn) {
 		set_self_solo (yn);
-		set_delivery_solo ();
+                set_mute_master_solo ();
 		solo_changed (true, src); /* EMIT SIGNAL */
 		_solo_control->Changed (); /* EMIT SIGNAL */
 	}
@@ -609,27 +605,24 @@ Route::mod_solo_by_others (int32_t delta)
 		_soloed_by_others += delta;
 	}
 
-	set_delivery_solo ();
+        set_mute_master_solo ();
         solo_changed (false, this);
 }
 
 void
-Route::set_delivery_solo ()
+Route::set_mute_master_solo ()
 {
-	/* tell all delivery processors what the solo situation is, so that they keep
-	   delivering even though Session::soloing() is true and they were not
-	   explicitly soloed.
-	*/
+        int32_t level;
 
-	Glib::RWLock::ReaderLock rm (_processor_lock);
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		boost::shared_ptr<Delivery> d;
-		
-		if ((d = boost::dynamic_pointer_cast<Delivery> (*i)) != 0) {
-			d->set_solo_level (soloed ());
-			d->set_solo_isolated (solo_isolated());
-		}
-	}
+        if (self_soloed()) {
+                level = 2;
+        } else if (soloed_by_others()) {
+                level = 1;
+        } else {
+                level = 0;
+        }
+
+        _mute_master->set_solo_level (level);
 }
 
 void
@@ -648,34 +641,30 @@ Route::set_solo_isolated (bool yn, void *src)
 
 	boost::shared_ptr<RouteList> routes = _session.get_routes ();
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+
+		if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden()) {
+                        continue;
+                }
+
 		bool sends_only;
-		bool does_feed = direct_feeds (*i, &sends_only);
+		bool does_feed = direct_feeds (*i, &sends_only); // we will recurse anyway, so don't use ::feeds()
 		
 		if (does_feed && !sends_only) {
 			(*i)->set_solo_isolated (yn, (*i)->route_group());
 		}
 	}
 
-        /* XXX should we back-propagate as well? */
-
-	bool changed = false;
+        /* XXX should we back-propagate as well? (April 2010: myself and chris goddard think not) */
 
 	if (yn) {
-		if (_solo_isolated == 0) {
-			changed = true;
-		}
 		_solo_isolated++;
+                _mute_master->clear_muted_by_others ();
 	} else {
-		changed = (_solo_isolated == 1);
 		if (_solo_isolated > 0) {
 			_solo_isolated--;
 		}
 	}
 
-	if (changed) {
-		set_delivery_solo ();
-		solo_isolated_changed (src);
-	}
 }
 
 bool
@@ -687,14 +676,12 @@ Route::solo_isolated () const
 void
 Route::set_mute_points (MuteMaster::MutePoint mp)
 {
-        if (mp != _mute_points) {
-                _mute_points = mp;
-                _mute_master->set_mute_points (_mute_points);
-                mute_points_changed (); /* EMIT SIGNAL */
-
-                if (_mute_master->muted()) {
-                        mute_changed (this); /* EMIT SIGNAL */
-                }
+        _mute_points = mp;
+        _mute_master->set_mute_points (MuteMaster::AllPoints);
+        mute_points_changed (); /* EMIT SIGNAL */
+        
+        if (_mute_master->muted()) {
+                mute_changed (this); /* EMIT SIGNAL */
         }
 }
 
@@ -734,6 +721,10 @@ void
 Route::mod_muted_by_others (int delta)
 {
         bool old = muted ();
+
+        if (_solo_isolated) {
+                return;
+        }
 
         _mute_master->mod_muted_by_others (delta);
 
@@ -846,12 +837,6 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 
                 if (isend && _session.monitor_out() && (isend->target_id() == _session.monitor_out()->id())) {
                         _monitor_send = isend;
-                        
-                        if (_monitor_send->active()) {
-                                _monitor_send->set_solo_level (1);
-                        } else {
-                                _monitor_send->set_solo_level (0);
-                        }
                 }
 
 		if (activation_allowed && (processor != _monitor_send)) {
@@ -1940,7 +1925,7 @@ Route::_set_state_2X (const XMLNode& node, int version)
 		bool first = true;
 		bool muted = string_is_affirmative (prop->value());
 		
-		if(muted){
+		if (muted){
 		  
 			string mute_point;
 			
@@ -2270,28 +2255,7 @@ Route::set_processor_state (const XMLNode& node)
                 }
         }
 
-        markup_solo_ignore ();
-
         processors_changed (RouteProcessorChange ());
-}
-
-void
-Route::markup_solo_ignore ()
-{
-        Glib::RWLock::ReaderLock lm (_processor_lock);
-        
-        for (ProcessorList::iterator p = _processors.begin(); p !=  _processors.end(); ++p) {
-
-                /* all delivery processors on master, monitor and auditioner never ever pay attention to solo
-                 */
-
-                boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery>(*p);
-                
-                if (d && (is_master() || is_monitor() || is_hidden())) {
-                        cerr << _name << " Found a delivery unit, mark solo ignored\n";
-                        d->set_solo_ignored (true);
-                }
-        }
 }
 
 void
@@ -2393,11 +2357,6 @@ Route::listen_via (boost::shared_ptr<Route> route, Placement placement, bool /*a
 
 				if (route == _session.monitor_out()) {
 					_monitor_send = boost::dynamic_pointer_cast<Delivery>(d);
-                                        if (_monitor_send->active()) {
-                                                _monitor_send->set_solo_level (1);
-                                        } else {
-                                                _monitor_send->set_solo_level (0);
-                                        }
 				}
 
 				/* already listening via the specified IO: do nothing */
@@ -3029,7 +2988,7 @@ Route::MuteControllable::set_value (float val)
 float
 Route::MuteControllable::get_value (void) const
 {
-	return route.muted() ? 1.0f : 0.0f;
+	return route.self_muted() ? 1.0f : 0.0f;
 }
 
 void

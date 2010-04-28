@@ -48,6 +48,8 @@ class MuteMaster : public PBD::Stateful
 	bool muted_by_others() const { return _muted_by_others && (_mute_point != MutePoint (0)); }
 	bool muted() const { return (_self_muted || (_muted_by_others > 0)) && (_mute_point != MutePoint (0)); }
         bool muted_at (MutePoint mp) const { return (_self_muted || (_muted_by_others > 0)) && (_mute_point & mp); }
+        bool self_muted_at (MutePoint mp) const { return _self_muted && (_mute_point & mp); }
+        bool muted_by_others_at (MutePoint mp) const { return (_muted_by_others > 0) && (_mute_point & mp); }
 
 	bool muted_pre_fader() const  { return muted_at (PreFader); }
 	bool muted_post_fader() const { return muted_at (PostFader); }
@@ -58,8 +60,8 @@ class MuteMaster : public PBD::Stateful
 
         void set_self_muted (bool yn) { _self_muted = yn; }
         void mod_muted_by_others (int delta);
+        void clear_muted_by_others ();
 
-	void clear_mute ();
 	void mute_at (MutePoint);
 	void unmute_at (MutePoint);
 
@@ -67,15 +69,18 @@ class MuteMaster : public PBD::Stateful
         void set_mute_points (MutePoint);
         MutePoint mute_points() const { return _mute_point; }
 
+        void set_solo_level (int32_t);
+
 	PBD::Signal0<void> MutePointChanged;
 
 	XMLNode& get_state();
 	int set_state(const XMLNode&, int version);
 
   private:
-	MutePoint _mute_point;
-        bool      _self_muted;
-        uint32_t  _muted_by_others;
+	volatile MutePoint _mute_point;
+        volatile bool      _self_muted;
+        volatile uint32_t  _muted_by_others;
+        volatile int32_t   _solo_level;
 };
 
 } // namespace ARDOUR

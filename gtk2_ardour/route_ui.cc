@@ -247,7 +247,6 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 void
 RouteUI::invert_toggled ()
 {
-        cerr << this << " button state = " << invert_button->get_active() << " PI = " << _route->phase_invert() << endl;
         _route->set_phase_invert (invert_button->get_active());
 }
 
@@ -833,9 +832,9 @@ RouteUI::mute_visual_state (Session* s, boost::shared_ptr<Route> r)
 	if (r->is_master() || r->is_monitor()) {
 		return 0;
 	}
-	
+
 	if (Config->get_show_solo_mutes()) {
-		
+
 		if (r->self_muted ()) {
 			/* full mute */
 			return 2;
@@ -867,7 +866,7 @@ RouteUI::update_mute_display ()
                 return;
         }
 
-	bool model = _route->muted();
+	bool model = _route->self_muted();
 	bool view = mute_button->get_active();
 
 	/* first make sure the button's "depressed" visual

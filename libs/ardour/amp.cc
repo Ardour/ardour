@@ -81,7 +81,7 @@ Amp::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_frame*/, n
 	}
 
 	if (_mute_master) {
-		mute_gain = _mute_master->mute_gain_at (MuteMaster::PreFader);
+		mute_gain = _mute_master->mute_gain_at (MuteMaster::PreFader); 
 	} else {
 		mute_gain = 1.0;
 	}

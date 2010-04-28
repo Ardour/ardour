@@ -476,8 +476,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	void placement_range (Placement p, ProcessorList::iterator& start, ProcessorList::iterator& end);
 
 	void set_self_solo (bool yn);
-	void set_delivery_solo ();
-        void markup_solo_ignore ();
+	void set_mute_master_solo ();
 };
 
 } // namespace ARDOUR

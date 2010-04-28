@@ -348,10 +348,10 @@ style "solo_button_alternate2" = "small_button"
         # this is the "half-bright" solo theme
         #
 
-	bg[NORMAL] = { 0.91, 0.97, 0.82 } 
-	bg[ACTIVE] = { 0.91, 0.97, 0.82 } 
-	bg[SELECTED] = { 0.91, 0.97, 0.82 } 
-	bg[PRELIGHT] = { 0.91, 0.97, 0.82 } 
+	bg[NORMAL] = { 0.752, 0.886, 0.752 } 
+	bg[ACTIVE] = { 0.752, 0.886, 0.752 } 
+	bg[SELECTED] = { 0.752, 0.886, 0.752 } 
+	bg[PRELIGHT] = { 0.752, 0.886, 0.752 } 
 
 	fg[ACTIVE] = { 0, 0, 0 }
 	fg[SELECTED] = { 0, 0, 0 }
