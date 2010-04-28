@@ -1212,7 +1212,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Audio"),
 	     new BoolOption (
 		     "solo-mute-override",
-		     _("Override muting"),
+		     _("Soloing overrides muting"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_override),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_override)
 		     ));

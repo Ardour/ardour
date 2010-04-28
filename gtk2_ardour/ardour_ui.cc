@@ -920,8 +920,6 @@ ARDOUR_UI::update_buffer_load ()
 		c = _session->capture_load ();
 		p = _session->playback_load ();
 
-		push_buffer_stats (c, p);
-
 		snprintf (buf, sizeof (buf), _("Buffers p:%" PRIu32 "%% c:%" PRIu32 "%%"),
 			  _session->playback_load(), _session->capture_load());
 		buffer_load_label.set_text (buf);
@@ -3142,60 +3140,9 @@ ARDOUR_UI::xrun_handler(nframes_t where)
 }
 
 void
-ARDOUR_UI::push_buffer_stats (uint32_t capture, uint32_t playback)
-{
-	time_t now;
-	time (&now);
-
-	while (disk_buffer_stats.size() > 60) {
-		disk_buffer_stats.pop_front ();
-	}
-
-	disk_buffer_stats.push_back (DiskBufferStat (now, capture, playback));
-}
-
-void
-ARDOUR_UI::write_buffer_stats ()
-{
-	std::ofstream fout;
-	struct tm tm;
-	char buf[64];
-	char path[PATH_MAX+1];	int fd;
-
-	strcpy (path, "ardourBufferingXXXXXX");
-
-	if ((fd = mkstemp (path )) < 0) {
-		cerr << X_("cannot find temporary name for buffer stats") << endl;
-		return;
-	}
-	
-	fout.open (path);
-	close (fd);
-
-	if (!fout) {
-		cerr << string_compose (X_("cannot open file %1 for buffer stats"), path) << endl;
-		return;
-	}
-
-	for (list<DiskBufferStat>::iterator i = disk_buffer_stats.begin(); i != disk_buffer_stats.end(); ++i) {
-		localtime_r (&(*i).when, &tm);
-		strftime (buf, sizeof (buf), "%T", &tm);
-		fout << buf << ' ' << (*i).capture << ' ' << (*i).playback << endl;
-	}
-	
-	disk_buffer_stats.clear ();
-
-	fout.close ();
-
-	cerr << "buffering statistics can be found in: " << path << endl;
-}
-
-void
 ARDOUR_UI::disk_overrun_handler ()
 {
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::disk_overrun_handler)
-
-	write_buffer_stats ();
 
 	if (!have_disk_speed_dialog_displayed) {
 		have_disk_speed_dialog_displayed = true;
@@ -3214,8 +3161,6 @@ void
 ARDOUR_UI::disk_underrun_handler ()
 {
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::disk_underrun_handler)
-
-	write_buffer_stats ();
 
 	if (!have_disk_speed_dialog_displayed) {
 		have_disk_speed_dialog_displayed = true;

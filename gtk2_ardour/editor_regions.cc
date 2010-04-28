@@ -304,8 +304,12 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 void
 EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange& what_changed)
 {
-	if (what_changed.contains (ARDOUR::Properties::name)) {
-		/* find the region in our model and change its name */
+	if (what_changed.contains (ARDOUR::Properties::name) ||
+            what_changed.contains (ARDOUR::Properties::start) ||
+            what_changed.contains (ARDOUR::Properties::position) ||
+            what_changed.contains (ARDOUR::Properties::length)) {
+
+		/* find the region in our model and update its row */
 		TreeModel::Children rows = _model->children ();
 		TreeModel::iterator i = rows.begin ();
 		while (i != rows.end ()) {
@@ -320,8 +324,7 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 			}
 
 			if (j != children.end()) {
-				(*j)[_columns.name] = r->name ();
-				break;
+                                populate_row (r, *j);
 			}
 
 			++i;
@@ -718,7 +721,7 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 
 	case AudioClock::Frames:
 		snprintf (start_str, sizeof (start_str), "%" PRId64, region->position());
-		snprintf (end_str, sizeof (end_str), "%" PRId64, (region->position() + region->length() - 1));
+		snprintf (end_str, sizeof (end_str), "%" PRId64, (region->last_frame()));
 		snprintf (length_str, sizeof (length_str), "%" PRId64, region->length());
 		snprintf (sync_str, sizeof (sync_str), "%" PRId64, region->sync_position() + region->position());
 
