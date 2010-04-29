@@ -77,22 +77,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 	switch (direction) {
 	case GDK_SCROLL_UP:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-			//if (ev->state == GDK_CONTROL_MASK) {
-			/* XXX
-			   the ev->x will be out of step with the canvas
-			   if we're in mid zoom, so we have to get the damn mouse
-			   pointer again
-			*/
-			track_canvas->get_pointer (x, y);
-			track_canvas->window_to_world (x, y, wx, wy);
-
-			GdkEvent event;
-			event.type = GDK_BUTTON_RELEASE;
-			event.button.x = wx;
-			event.button.y = wy;
-
-			nframes64_t where = event_frame (&event, 0, 0);
-			temporal_zoom_to_frame (false, where);
+			temporal_zoom_step (false);
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 			direction = GDK_SCROLL_LEFT;
@@ -117,17 +102,7 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 
 	case GDK_SCROLL_DOWN:
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-			//if (ev->state == GDK_CONTROL_MASK) {
-			track_canvas->get_pointer (x, y);
-			track_canvas->window_to_world (x, y, wx, wy);
-
-			GdkEvent event;
-			event.type = GDK_BUTTON_RELEASE;
-			event.button.x = wx;
-			event.button.y = wy;
-
-			nframes64_t where = event_frame (&event, 0, 0);
-			temporal_zoom_to_frame (true, where);
+			temporal_zoom_step (true);
 			return true;
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 			direction = GDK_SCROLL_RIGHT;
