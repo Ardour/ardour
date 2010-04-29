@@ -2020,8 +2020,9 @@ Route::silence (nframes_t nframes)
 			
 			if (lm.locked()) {
 				for (RedirectList::iterator i = _redirects.begin(); i != _redirects.end(); ++i) {
-					boost::shared_ptr<PluginInsert> pi;
-					if (!_active && (pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) != 0) {
+					boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (*i);
+
+					if (!_active && pi) {
 						// skip plugins, they don't need anything when we're not active
 						continue;
 					}

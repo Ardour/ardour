@@ -189,7 +189,7 @@ static CFPropertyListRef
 load_property_list (Glib::ustring path) 
 {
 	int fd;
-	CFPropertyListRef propertyList;
+	CFPropertyListRef propertyList = 0;
 	CFDataRef         xmlData;
 	CFStringRef       errorString;
 
@@ -1267,7 +1267,6 @@ AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, 
 	} 
 
 	// cerr << name() << " render error " << err << endl;
-
 	return -1;
 }
 
