@@ -400,7 +400,7 @@ NewSessionDialog::NewSessionDialog()
 
 	//if SYSTEM template folder exists, add it to the file chooser
 	const std::string sys_templates_path = ARDOUR::get_system_data_path() + "/" + template_dir_name;
-printf("system template path = %s\n", sys_templates_path.c_str());
+
 	if (Glib::file_test(sys_templates_path, Glib::FILE_TEST_IS_DIR))
 	{
 		m_template->add_shortcut_folder(sys_templates_path);
@@ -430,10 +430,6 @@ printf("system template path = %s\n", sys_templates_path.c_str());
 	m_open_filechooser->set_current_folder(getenv ("HOME"));
 	m_open_filechooser->set_title(_("select session file"));
 
-#ifdef GTKOSX
-	m_open_filechooser->add_shortcut_folder_uri("file:///Volumes");
-#endif
-
 	Gtk::FileFilter* template_filter = manage (new (Gtk::FileFilter));
 	template_filter->add_pattern(X_("*.ardour"));
 	template_filter->add_pattern(X_("*.ardour.bak"));
@@ -442,6 +438,11 @@ printf("system template path = %s\n", sys_templates_path.c_str());
 
 	m_folder->set_current_folder(getenv ("HOME"));
 	m_folder->set_title(_("select directory"));
+
+#ifdef GTKOSX
+	m_folder->add_shortcut_folder("/Volumes");
+	m_open_filechooser->add_shortcut_folder("/Volumes");
+#endif
 
 	on_new_session_page = true;
 	m_notebook->set_current_page(0);
