@@ -157,7 +157,18 @@ free_per_thread_pool (void* ptr)
 	CrossThreadPool* cp = static_cast<CrossThreadPool*> (ptr);
 	assert (cp);
 
-	cp->parent()->add_to_trash (cp);
+	if (cp->empty()) {
+		/* This CrossThreadPool is already empty, and the thread is finishing so nothing
+		 * more can be added to it.  We can just delete the pool.
+		 */
+		delete cp;
+	} else {
+		/* This CrossThreadPool is not empty, meaning that there's some Events in it
+		 * which another thread may yet read, so we can't delete the pool just yet.
+		 * Put it in the trash and hope someone deals with it at some stage.
+		 */
+		cp->parent()->add_to_trash (cp);
+	}
 }
  
 PerThreadPool::PerThreadPool ()
