@@ -73,7 +73,7 @@ CrossfadeEditor::Half::Half ()
 }
 
 CrossfadeEditor::CrossfadeEditor (Session* s, boost::shared_ptr<Crossfade> xf, double my, double mxy)
-	: ArdourDialog (_("ardour: x-fade edit")),
+	: ArdourDialog (_("Edit Crossfade")),
 	  xfade (xf),
 	  clear_button (_("Clear")),
 	  revert_button (_("Reset")),

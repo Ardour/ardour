@@ -779,7 +779,7 @@ If you still wish to quit, please use the\n\n\
 int
 ARDOUR_UI::ask_about_saving_session (const string & what)
 {
-	ArdourDialog window (_("ardour: save session?"));
+	ArdourDialog window (_("Unsaved Session"));
 	Gtk::HBox dhbox;  // the hbox for the image and text
 	Gtk::Label  prompt_label;
 	Gtk::Image* dimage = manage (new Gtk::Image(Stock::DIALOG_WARNING,  Gtk::ICON_SIZE_DIALOG));
@@ -2777,7 +2777,7 @@ require some unused files to continue to exist."));
 		return;
 	}
 
-	ArdourDialog results (_("ardour: cleanup"), true, false);
+	ArdourDialog results (_("Clean-up"), true, false);
 
 	struct CleanupResultsModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    CleanupResultsModelColumns() {

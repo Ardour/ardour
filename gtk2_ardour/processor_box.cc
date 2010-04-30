@@ -1020,7 +1020,7 @@ ProcessorBox::compute_processor_sort_keys ()
 
 		/* now tell them about the problem */
 
-		ArdourDialog dialog (_("ardour: weird plugin dialog"));
+		ArdourDialog dialog (_("Plugin Incompatibility"));
 		Label label;
 
 		label.set_text (_("\

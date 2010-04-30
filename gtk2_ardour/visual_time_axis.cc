@@ -222,7 +222,7 @@ VisualTimeAxis::choose_time_axis_color()
 	current[3] = 1.0 ;
 
 	current_color.set_rgb_p (current[0],current[1],current[2]);
-	color = Gtkmm2ext::UI::instance()->get_color(_("ardour: color selection"),picked, &current_color) ;
+	color = Gtkmm2ext::UI::instance()->get_color(_("Color Selection"),picked, &current_color) ;
 
 	if (picked)
 	{

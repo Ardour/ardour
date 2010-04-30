@@ -1073,7 +1073,7 @@ RouteUI::choose_color()
 	bool picked;
 	Gdk::Color color;
 
-	color = Gtkmm2ext::UI::instance()->get_color (_("ardour: color selection"), picked, &_color);
+	color = Gtkmm2ext::UI::instance()->get_color (_("Color Selection"), picked, &_color);
 
 	if (picked) {
 		set_color (color);

@@ -36,7 +36,7 @@ using namespace PBD;
 using namespace ARDOUR;
 
 AddMidiCCTrackDialog::AddMidiCCTrackDialog ()
-	: Dialog (_("ardour: add midi controller track"))
+	: Dialog (_("Add MIDI Controller Track"))
 	, _chan_adjustment (1, 1, 16, 1, 8, 8)
 	, _chan_spinner (_chan_adjustment)
 	, _cc_num_adjustment (1, 1, 128, 1, 10, 10)

@@ -38,7 +38,7 @@ using namespace std;
 ExportRangeMarkersDialog::ExportRangeMarkersDialog (PublicEditor& editor)
 	: ExportDialog(editor)
 {
-	set_title (_("ardour: export ranges"));
+	set_title (_("Export Ranges"));
 	file_frame.set_label (_("Export to Directory"));
 
 	do_not_allow_export_cd_markers();
