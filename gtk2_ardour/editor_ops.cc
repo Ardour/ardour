@@ -4437,6 +4437,8 @@ Editor::normalize_region ()
 
 	Dialog dialog (rs.size() > 1 ? _("Normalize regions") : _("Normalize region"));
 	HBox hbox;
+	hbox.set_spacing (6);
+	hbox.set_border_width (6);
 	hbox.pack_start (*manage (new Label (_("Normalize to:"))));
 	SpinButton spin (0.2, 2);
 	spin.set_range (-112, 0);
@@ -4446,6 +4448,7 @@ Editor::normalize_region ()
 	spin.set_value (_last_normalization_value);
 	hbox.pack_start (*manage (new Label (_("dbFS"))));
 	hbox.show_all ();
+	dialog.get_vbox()->set_spacing (12);
 	dialog.get_vbox()->pack_start (hbox);
 	dialog.add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	dialog.add_button (_("Normalize"), RESPONSE_ACCEPT);
