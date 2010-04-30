@@ -1386,16 +1386,13 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 					ActionManager::set_sensitive (ActionManager::edit_point_in_region_sensitive_actions, false);
 				}
 			}
-			/*
 			if (region_edit_menu_split_multichannel_item) {
-				if (clicked_regionview && clicked_regionview->region().n_channels() > 1) {
-					// GTK2FIX find the action, change its sensitivity
-					// region_edit_menu_split_multichannel_item->set_sensitive (true);
+				if (clicked_regionview && clicked_regionview->region()->n_channels() > 1) {
+					region_edit_menu_split_multichannel_item->set_sensitive (true);
 				} else {
-					// GTK2FIX see above
-					// region_edit_menu_split_multichannel_item->set_sensitive (false);
+					region_edit_menu_split_multichannel_item->set_sensitive (false);
 				}
-			}*/
+			}
 		}
 		break;
 
@@ -1705,11 +1702,11 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 	items.push_back (SeparatorElem());
 
 	items.push_back (MenuElem (_("Audition"), sigc::mem_fun(*this, &Editor::play_selected_region)));
-	items.push_back (MenuElem (_("Export"), sigc::mem_fun(*this, &Editor::export_region)));
+	items.push_back (MenuElem (_("Export..."), sigc::mem_fun(*this, &Editor::export_region)));
 	items.push_back (MenuElem (_("Bounce"), sigc::mem_fun(*this, &Editor::bounce_region_selection)));
 
 	if (ar) {
-		items.push_back (MenuElem (_("Spectral Analysis"), sigc::mem_fun(*this, &Editor::analyze_region_selection)));
+		items.push_back (MenuElem (_("Spectral Analysis..."), sigc::mem_fun(*this, &Editor::analyze_region_selection)));
 	}
 
 	items.push_back (SeparatorElem());
@@ -1753,7 +1750,7 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 		fooc.block (false);
 	}
         
-        items.push_back (MenuElem (_("Transpose"), mem_fun(*this, &Editor::pitch_shift_regions)));
+        items.push_back (MenuElem (_("Transpose..."), mem_fun(*this, &Editor::pitch_shift_regions)));
 
 	if (!Profile->get_sae()) {
 		items.push_back (CheckMenuElem (_("Opaque")));
@@ -1803,7 +1800,7 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 			items.push_back (SeparatorElem());
 		}
 
-		items.push_back (MenuElem (_("Normalize"), sigc::mem_fun(*this, &Editor::normalize_region)));
+		items.push_back (MenuElem (_("Normalize..."), sigc::mem_fun(*this, &Editor::normalize_region)));
 		if (ar->scale_amplitude() != 1) {
 			items.push_back (MenuElem (_("Reset Gain"), sigc::mem_fun(*this, &Editor::reset_region_scale_amplitude)));
 		}
@@ -1873,7 +1870,7 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 	region_edit_menu_split_multichannel_item = &items.back();
 
 	items.push_back (MenuElem (_("Duplicate"), (sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), false))));
-	items.push_back (MenuElem (_("Multi-Duplicate"), (sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), true))));
+	items.push_back (MenuElem (_("Multi-Duplicate..."), (sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), true))));
 	items.push_back (MenuElem (_("Fill Track"), (sigc::mem_fun(*this, &Editor::region_fill_track))));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::remove_selected_regions)));
@@ -3275,7 +3272,7 @@ Editor::duplicate_dialog (bool with_dialog)
 	if (with_dialog) {
 
 		ArdourDialog win (_("Duplicate"));
-		Label label (_("Number of Duplications:"));
+		Label label (_("Number of duplications:"));
 		Adjustment adjustment (1.0, 1.0, 1000000.0, 1.0, 5.0);
 		SpinButton spinner (adjustment, 0.0, 1);
 		HBox hbox;
