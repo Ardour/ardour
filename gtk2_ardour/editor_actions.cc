@@ -413,7 +413,7 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "duplicate-region", _("Duplicate Region"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "multi-duplicate-region", _("Multi-Duplicate Region"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), true));
+	act = ActionManager::register_action (editor_actions, "multi-duplicate-region", _("Multi-Duplicate Region..."), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "duplicate-range", _("Duplicate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_dialog), false));
@@ -422,13 +422,13 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "insert-region", _("Insert Region"), sigc::mem_fun(*this, &Editor::keyboard_insert_region_list_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "normalize-region", _("Normalize Region"), sigc::mem_fun(*this, &Editor::normalize_region));
+	act = ActionManager::register_action (editor_actions, "normalize-region", _("Normalize Region..."), sigc::mem_fun(*this, &Editor::normalize_region));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "rename-region", _("Rename"), sigc::mem_fun(*this, &Editor::rename_region));
+	act = ActionManager::register_action (editor_actions, "rename-region", _("Rename Region..."), sigc::mem_fun(*this, &Editor::rename_region));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "auto-rename-region", _("Auto-Rename"), sigc::mem_fun(*this, &Editor::rename_region));
+	act = ActionManager::register_action (editor_actions, "auto-rename-region", _("Auto-Rename Region"), sigc::mem_fun(*this, &Editor::rename_region));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "boost-region-gain", _("Boost Region Gain"), sigc::bind (sigc::mem_fun(*this, &Editor::adjust_region_scale_amplitude), true));
