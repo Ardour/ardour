@@ -272,6 +272,8 @@
 	      <menuitem action='set-punch-from-region'/>
 	      <menuitem action='add-range-marker-from-region'/>
 	      <menuitem action='add-range-markers-from-region'/>
+	      <separator/>
+	      <menuitem action='toggle-rhythm-ferret'/>
 	</menu>
 
         <menu action='TrackMenu'>
@@ -428,7 +430,6 @@
                <menuitem action='ToggleBundleManager'/>
                <menuitem action='ToggleThemeManager'/>
                <menuitem action='ToggleBigClock'/>
-               <menuitem action='toggle-rhythm-ferret'/>
                <menuitem action='toggle-audio-connection-manager'/>
                <menuitem action='toggle-midi-connection-manager'/>
                <menuitem action='toggle-log-window'/>

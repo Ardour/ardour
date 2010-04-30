@@ -46,55 +46,32 @@ static const gchar * _onset_function_strings[] = {
 	0
 };
 
+static const gchar * _operation_strings[] = {
+	N_("Split region"),
+	N_("Set tempo map"),
+	N_("Conform region"),
+	0
+};
+
 RhythmFerret::RhythmFerret (PublicEditor& e)
 	: ArdourDialog (_("Rhythm Ferret"))
 	, editor (e)
-	, operation_frame (_("Operation"))
-	, selection_frame (_("Selection"))
-	, ferret_frame (_("Analysis"))
-	, logo (0)
-	, region_split_button (operation_button_group, _("Split region"))
-	, tempo_button (operation_button_group, _("Set tempo map"))
-	, region_conform_button (operation_button_group, _("Conform region"))
-	, analysis_mode_label (_("Mode"))
 	, detection_threshold_adjustment (3, 0, 20, 1, 4)
 	, detection_threshold_scale (detection_threshold_adjustment)
-	, detection_threshold_label (_("Threshold"))
 	, sensitivity_adjustment (40, 0, 100, 1, 10)
 	, sensitivity_scale (sensitivity_adjustment)
-	, sensitivity_label (_("Sensitivity"))
 	, analyze_button (_("Analyze"))
-	, onset_function_label (_("Detection function"))
 	, peak_picker_threshold_adjustment (0.3, 0.0, 1.0, 0.01, 0.1)
 	, peak_picker_threshold_scale (peak_picker_threshold_adjustment)
-	, peak_picker_label (_("Peak Threshold"))
 	, silence_threshold_adjustment (-90.0, -120.0, 0.0, 1, 10)
 	, silence_threshold_scale (silence_threshold_adjustment)
-	, silence_label (_("Silent Threshold (dB)"))
 	, trigger_gap_adjustment (3, 0, 100, 1, 10)
 	, trigger_gap_spinner (trigger_gap_adjustment)
-	, trigger_gap_label (_("Trigger gap (msecs)"))
 	, action_button (Stock::APPLY)
-
 {
-	upper_hpacker.set_spacing (6);
-
-	upper_hpacker.pack_start (ferret_frame, true, true);
-	upper_hpacker.pack_start (selection_frame, true, true);
-	upper_hpacker.pack_start (operation_frame, true, true);
-
-	op_packer.pack_start (region_split_button, false, false);
-	op_packer.pack_start (tempo_button, false, false);
-	op_packer.pack_start (region_conform_button, false, false);
-
-	operation_frame.add (op_packer);
-
-	HBox* box;
-
-	ferret_packer.set_spacing (6);
-	ferret_packer.set_border_width (6);
-
-	vector<string> strings;
+	operation_strings = I18N (_operation_strings);
+	Gtkmm2ext::set_popdown_strings (operation_selector, operation_strings);
+	operation_selector.set_active (0);
 
 	analysis_mode_strings = I18N (_analysis_mode_strings);
 	Gtkmm2ext::set_popdown_strings (analysis_mode_selector, analysis_mode_strings);
@@ -108,100 +85,71 @@ RhythmFerret::RhythmFerret (PublicEditor& e)
 	 */
 	onset_detection_function_selector.set_active_text (onset_function_strings[3]);
 
-	box = manage (new HBox);
-	box->set_spacing (6);
-	box->pack_start (analysis_mode_label, false, false);
-	box->pack_start (analysis_mode_selector, true, true);
-	ferret_packer.pack_start (*box, false, false);
+	Table* t = manage (new Table (7, 3));
+	t->set_spacings (12);
 
-	ferret_packer.pack_start (analysis_packer, false, false);
+	int n = 0;
 
-	box = manage (new HBox);
-	box->set_spacing (6);
-	box->pack_start (trigger_gap_label, false, false);
-	box->pack_start (trigger_gap_spinner, false, false);
-	ferret_packer.pack_start (*box, false, false);
+	t->attach (*manage (new Label (_("Mode"), 1, 0.5)), 0, 1, n, n + 1, FILL);
+	t->attach (analysis_mode_selector, 1, 2, n, n + 1, FILL);
+	++n;
 
-	ferret_packer.pack_start (analyze_button, false, false);
+	t->attach (*manage (new Label (_("Detection function"), 1, 0.5)), 0, 1, n, n + 1, FILL);
+	t->attach (onset_detection_function_selector, 1, 2, n, n + 1, FILL);
+	++n;
+
+	t->attach (*manage (new Label (_("Trigger gap"), 1, 0.5)), 0, 1, n, n + 1, FILL);
+	t->attach (trigger_gap_spinner, 1, 2, n, n + 1, FILL);
+	t->attach (*manage (new Label (_("ms"))), 2, 3, n, n + 1, FILL);
+	++n;
+
+	t->attach (*manage (new Label (_("Threshold"), 1, 0.5)), 0, 1, n, n + 1, FILL);
+	t->attach (detection_threshold_scale, 1, 2, n, n + 1, FILL);
+	t->attach (*manage (new Label (_("dB"))), 2, 3, n, n + 1, FILL);
+	++n;
+
+	t->attach (*manage (new Label (_("Peak threshold"), 1, 0.5)), 0, 1, n, n + 1, FILL);
+	t->attach (peak_picker_threshold_scale, 1, 2, n, n + 1, FILL);
+	t->attach (*manage (new Label (_("dB"))), 2, 3, n, n + 1, FILL);
+	++n;
+	
+	t->attach (*manage (new Label (_("Silence threshold"), 1, 0.5)), 0, 1, n, n + 1, FILL);
+	t->attach (silence_threshold_scale, 1, 2, n, n + 1, FILL);
+	t->attach (*manage (new Label (_("dB"))), 2, 3, n, n + 1, FILL);
+	++n;
+
+	t->attach (*manage (new Label (_("Sensitivity"), 1, 0.5)), 0, 1, n, n + 1, FILL);
+	t->attach (sensitivity_scale, 1, 2, n, n + 1, FILL);
+	++n;
+
+	t->attach (*manage (new Label (_("Operation"), 1, 0.5)), 0, 1, n, n + 1, FILL);
+	t->attach (operation_selector, 1, 2, n, n + 1, FILL);
+	++n;
 
 	analyze_button.signal_clicked().connect (sigc::mem_fun (*this, &RhythmFerret::run_analysis));
-
-	box = manage (new HBox);
-	box->set_spacing (6);
-	box->pack_start (detection_threshold_label, false, false);
-	box->pack_start (detection_threshold_scale, true, true);
-	perc_onset_packer.pack_start (*box, false, false);
-
-	box = manage (new HBox);
-	box->set_spacing (6);
-	box->pack_start (sensitivity_label, false, false);
-	box->pack_start (sensitivity_scale, true, true);
-	perc_onset_packer.pack_start (*box, false, false);
-
-	box = manage (new HBox);
-	box->set_spacing (6);
-	box->pack_start (onset_function_label, false, false);
-	box->pack_start (onset_detection_function_selector, true, true);
-	note_onset_packer.pack_start (*box, false, false);
-
-	box = manage (new HBox);
-	box->set_spacing (6);
-	box->pack_start (peak_picker_label, false, false);
-	box->pack_start (peak_picker_threshold_scale, true, true);
-	note_onset_packer.pack_start (*box, false, false);
-
-	box = manage (new HBox);
-	box->set_spacing (6);
-	box->pack_start (silence_label, false, false);
-	box->pack_start (silence_threshold_scale, true, true);
-	note_onset_packer.pack_start (*box, false, false);
-
-	analysis_mode_changed ();
-
-	ferret_frame.add (ferret_packer);
-
-	logo = manage (new Gtk::Image (::get_icon (X_("ferret_02"))));
-
-	if (logo) {
-		lower_hpacker.pack_start (*logo, false, false);
-	}
-
-	lower_hpacker.pack_start (operation_clarification_label, true, true);
-	lower_hpacker.pack_start (action_button, false, false);
-	lower_hpacker.set_border_width (6);
-	lower_hpacker.set_spacing (6);
-
 	action_button.signal_clicked().connect (sigc::mem_fun (*this, &RhythmFerret::do_action));
 
 	get_vbox()->set_border_width (6);
 	get_vbox()->set_spacing (6);
-	get_vbox()->pack_start (upper_hpacker, true, true);
-	get_vbox()->pack_start (lower_hpacker, false, false);
+	get_vbox()->pack_start (*t);
+
+	add_action_widget (analyze_button, 1);
+	add_action_widget (action_button, 0);
 
 	show_all ();
-}
-
-RhythmFerret::~RhythmFerret()
-{
-	delete logo;
+	analysis_mode_changed ();
 }
 
 void
 RhythmFerret::analysis_mode_changed ()
 {
-	analysis_packer.children().clear ();
-
-	switch (get_analysis_mode()) {
-	case PercussionOnset:
-		analysis_packer.pack_start (perc_onset_packer);
-		break;
-
-	case NoteOnset:
-		analysis_packer.pack_start (note_onset_packer);
-		break;
-	}
-
-	analysis_packer.show_all ();
+	bool const perc = get_analysis_mode() == PercussionOnset;
+	
+	detection_threshold_scale.set_sensitive (perc);
+	sensitivity_scale.set_sensitive (perc);
+	onset_detection_function_selector.set_sensitive (!perc);
+	peak_picker_threshold_scale.set_sensitive (!perc);
+	silence_threshold_scale.set_sensitive (!perc);
 }
 
 RhythmFerret::AnalysisMode
@@ -219,9 +167,9 @@ RhythmFerret::get_analysis_mode () const
 RhythmFerret::Action
 RhythmFerret::get_action () const
 {
-	if (tempo_button.get_active()) {
+	if (operation_selector.get_active_row_number() == 1) {
 		return DefineTempoMap;
-	} else if (region_conform_button.get_active()) {
+	} else if (operation_selector.get_active_row_number() == 2) {
 		return ConformRegion;
 	}
 

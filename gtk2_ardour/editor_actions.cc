@@ -522,8 +522,9 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "split-region-at-transients", _("Split Regions At Percussion Onsets"), sigc::mem_fun(*this, &Editor::split_region_at_transients));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "toggle-rhythm-ferret", _("Rhythm Ferret"), sigc::mem_fun(*this, &Editor::show_rhythm_ferret));
+	act = ActionManager::register_action (editor_actions, "toggle-rhythm-ferret", _("Rhythm Ferret..."), sigc::mem_fun(*this, &Editor::show_rhythm_ferret));
 	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "toggle-audio-connection-manager", _("Audio Connection Manager"), sigc::bind (sigc::mem_fun (*this, &Editor::show_global_port_matrix), ARDOUR::DataType::AUDIO));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "toggle-midi-connection-manager", _("MIDI Connection Manager"), sigc::bind (sigc::mem_fun (*this, &Editor::show_global_port_matrix), ARDOUR::DataType::MIDI));
