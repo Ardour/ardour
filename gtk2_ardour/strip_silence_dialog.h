@@ -49,26 +49,32 @@ private:
 	void peaks_ready ();
 	void canvas_allocation (Gtk::Allocation &);
 	void update_silence_rects ();
-        void redraw_silence_rects ();
+        void resize_silence_rects ();
+	void update_threshold_line ();
+	void threshold_changed ();
 
 	Gtk::SpinButton _threshold;
 	AudioClock      _minimum_length;
         AudioClock      _fade_length;
         Gtk::Label      _segment_count_label;
+	Gtk::Label      _shortest_silence_label;
+	Gtk::Label      _shortest_audible_label;
         typedef std::list<std::pair<ARDOUR::frameoffset_t,ARDOUR::framecnt_t> > SilenceResult;
 
 	struct Wave {
             boost::shared_ptr<ARDOUR::AudioRegion> region;
             ArdourCanvas::WaveView* view;
             std::list<ArdourCanvas::SimpleRect*> silence_rects;
+	    ArdourCanvas::SimpleLine* threshold_line;
             double samples_per_unit;
             SilenceResult silence;
           
-            Wave() : view (0), samples_per_unit (1) { }
+	    Wave (ArdourCanvas::Group *, boost::shared_ptr<ARDOUR::AudioRegion>);
+	    ~Wave ();
 	};
 
 	ArdourCanvas::Canvas* _canvas;
-	std::list<Wave> _waves;
+	std::list<Wave*> _waves;
 	int _wave_width;
 	int _wave_height;
         bool restart_queued;
