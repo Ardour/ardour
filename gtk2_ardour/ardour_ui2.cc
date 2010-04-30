@@ -196,6 +196,7 @@ ARDOUR_UI::setup_transport ()
 	punch_out_button.set_name ("TransportButton");
 	click_button.set_name ("TransportButton");
 	time_master_button.set_name ("TransportButton");
+	sync_option_combo.set_name ("TransportButton");
 
 	stop_button.set_size_request(29, -1);
 	roll_button.set_size_request(29, -1);
@@ -359,7 +360,7 @@ ARDOUR_UI::setup_transport ()
 	sync_option_combo.signal_changed().connect (mem_fun (*this, &ARDOUR_UI::sync_option_changed));
 	// XXX HOW TO USE set_popdown_strings() and combo_fudge with this when we don't know
 	// the real strings till later?
-	set_size_request_to_display_given_text (sync_option_combo, X_("Igternal"), 4+COMBO_FUDGE, 10);
+	set_size_request_to_display_given_text (sync_option_combo, X_("Igternal"), 4+COMBO_FUDGE, 15);
 
 	shbox->pack_start (*sdframe, false, false);
 	shbox->pack_start (shuttle_units_button, true, true);
