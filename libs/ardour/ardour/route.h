@@ -129,6 +129,9 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	bool self_muted () const;
 	bool muted_by_others () const;
 
+        bool path_muted_by_others() const { return _path_muted_by_others > 0; }
+        void mod_path_muted_by_others (int delta);
+
 	void set_mute (bool yn, void* src);
         void mod_muted_by_others (int delta);
 
@@ -138,7 +141,9 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	void set_solo (bool yn, void *src);
 	bool soloed () const { return self_soloed () || soloed_by_others (); }
 
-	bool soloed_by_others () const { return !_solo_isolated && _soloed_by_others; }
+        bool soloed_by_others () const { return _soloed_by_others_upstream||_soloed_by_others_downstream; }
+	bool soloed_by_others_upstream () const { return _soloed_by_others_upstream; }
+	bool soloed_by_others_downstream () const { return _soloed_by_others_downstream; }
 	bool self_soloed () const { return _self_solo; }
 	
 	void set_solo_isolated (bool yn, void *src);
@@ -372,8 +377,15 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
   protected:
 	friend class Session;
 
+        void set_graph_level (int32_t);
+        int32_t graph_level() const { return _graph_level; } 
+        void check_physical_connections ();
+        // this functions may ONLY be called during a route resort
+        bool physically_connected () const { return _physically_connected; }
+
 	void catch_up_on_solo_mute_override ();
-	void mod_solo_by_others (int32_t);
+	void mod_solo_by_others_upstream (int32_t);
+	void mod_solo_by_others_downstream (int32_t);
 	bool has_external_redirects() const;
 	void curve_reallocate ();
 	void just_meter_input (sframes_t start_frame, sframes_t end_frame, nframes_t nframes);
@@ -411,7 +423,8 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	MeterPoint     _meter_point;
 	uint32_t       _phase_invert;
 	bool           _self_solo;
-	uint32_t       _soloed_by_others;
+	uint32_t       _soloed_by_others_upstream;
+	uint32_t       _soloed_by_others_downstream;
 	uint32_t       _solo_isolated;
 
 	bool           _denormal_protection;
@@ -424,9 +437,12 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	boost::shared_ptr<MuteControllable> _mute_control;
 	boost::shared_ptr<MuteMaster> _mute_master;
 	MuteMaster::MutePoint _mute_points;
-
+        volatile uint32_t     _path_muted_by_others;
+    
 	std::string    _comment;
 	bool           _have_internal_generator;
+        bool           _physically_connected; // valid ONLY during a route resort
+        int32_t        _graph_level;
 	bool           _solo_safe;
 	DataType       _default_type;
         FedBy          _fed_by;

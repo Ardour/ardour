@@ -306,6 +306,13 @@ namespace ARDOUR {
 		PreFaderListen
 	};
 
+        enum SoloLevel {
+                NotSoloed,
+                DownstreamSoloed,
+                UpstreamSoloed,
+                SelfSoloed
+        };
+
 	enum AutoConnectOption {
 		ManualConnect = 0x0,
 		AutoConnectPhysical = 0x1,

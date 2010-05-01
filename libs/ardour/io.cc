@@ -1553,3 +1553,15 @@ IO::port_by_name (const std::string& str) const
 
 	return 0;
 }
+
+bool
+IO::physically_connected () const
+{
+	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
+                if (i->physically_connected()) {
+                        return true;
+                }
+        }
+
+        return false;
+}

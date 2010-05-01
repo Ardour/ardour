@@ -80,7 +80,8 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
         , _meter_point (MeterPostFader)
         , _phase_invert (0)
         , _self_solo (false)
-        , _soloed_by_others (0)
+        , _soloed_by_others_upstream (0)
+        , _soloed_by_others_downstream (0)
         , _solo_isolated (0)
         , _denormal_protection (false)
         , _recordable (true)
@@ -90,7 +91,10 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _mute_control (new MuteControllable (X_("mute"), *this))
 	, _mute_master (new MuteMaster (sess, name))
         , _mute_points (MuteMaster::AllPoints)
+        , _path_muted_by_others (false)
         , _have_internal_generator (false)
+        , _physically_connected (false)
+        , _graph_level (-1)
         , _solo_safe (false)
 	, _default_type (default_type)
         , _remote_control_id (0)
@@ -447,6 +451,10 @@ Route::process_output_buffers (BufferSet& bufs,
 	Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
 
 	if (rm.locked()) {
+                //cerr << name() << " upstream solo " << _soloed_by_others_upstream
+                // << " downstream solo " << _soloed_by_others_downstream
+                // << " self " << _self_solo
+                //<< endl;
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 			if (bufs.count() != (*i)->input_streams()) {
@@ -589,20 +597,41 @@ Route::set_self_solo (bool yn)
 }
 
 void
-Route::mod_solo_by_others (int32_t delta)
+Route::mod_solo_by_others_upstream (int32_t delta)
 {
         if (_solo_safe) {
                 return;
         }
 
 	if (delta < 0) {
-		if (_soloed_by_others >= (uint32_t) abs (delta)) {
-			_soloed_by_others += delta;
+		if (_soloed_by_others_upstream >= (uint32_t) abs (delta)) {
+			_soloed_by_others_upstream += delta;
 		} else {
-			_soloed_by_others = 0;
+			_soloed_by_others_upstream = 0;
 		}
 	} else {
-		_soloed_by_others += delta;
+		_soloed_by_others_upstream += delta;
+	}
+
+        set_mute_master_solo ();
+        solo_changed (false, this);
+}
+
+void
+Route::mod_solo_by_others_downstream (int32_t delta)
+{
+        if (_solo_safe) {
+                return;
+        }
+
+	if (delta < 0) {
+		if (_soloed_by_others_downstream >= (uint32_t) abs (delta)) {
+			_soloed_by_others_downstream += delta;
+		} else {
+			_soloed_by_others_downstream = 0;
+		}
+	} else {
+		_soloed_by_others_downstream += delta;
 	}
 
         set_mute_master_solo ();
@@ -612,14 +641,16 @@ Route::mod_solo_by_others (int32_t delta)
 void
 Route::set_mute_master_solo ()
 {
-        int32_t level;
+        SoloLevel level;
 
         if (self_soloed()) {
-                level = 2;
-        } else if (soloed_by_others()) {
-                level = 1;
+                level = SelfSoloed;
+        } else if (soloed_by_others_upstream()) {
+                level = UpstreamSoloed;
+        } else if (soloed_by_others_downstream()) {
+                level = DownstreamSoloed;
         } else {
-                level = 0;
+                level = NotSoloed;
         }
 
         _mute_master->set_solo_level (level);
@@ -722,17 +753,29 @@ Route::muted_by_others() const
 void
 Route::mod_muted_by_others (int delta)
 {
-        bool old = muted ();
-
         if (_solo_isolated) {
                 return;
         }
 
+        bool old = muted ();
         _mute_master->mod_muted_by_others (delta);
-
         if (old != muted()) {
                 mute_changed (this);
         }
+}
+
+void
+Route::mod_path_muted_by_others (int32_t delta)
+{
+	if (delta < 0) {
+		if (_path_muted_by_others >= (uint32_t) abs (delta)) {
+			_path_muted_by_others += delta;
+		} else {
+			_path_muted_by_others = 0;
+		}
+	} else {
+		_path_muted_by_others += delta;
+	}
 }
 
 #if 0
@@ -1683,8 +1726,10 @@ Route::state(bool full_state)
 	}
 	node->add_property ("order-keys", order_string);
 	node->add_property ("self-solo", (_self_solo ? "yes" : "no"));
-	snprintf (buf, sizeof (buf), "%d", _soloed_by_others);
-	node->add_property ("soloed-by-others", buf);
+	snprintf (buf, sizeof (buf), "%d", _soloed_by_others_upstream);
+	node->add_property ("soloed-by-upstream", buf);
+	snprintf (buf, sizeof (buf), "%d", _soloed_by_others_downstream);
+	node->add_property ("soloed-by-downstream", buf);
 
 	node->add_child_nocopy (_input->state (full_state));
 	node->add_child_nocopy (_output->state (full_state));
@@ -1782,9 +1827,14 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 		set_self_solo (string_is_affirmative (prop->value()));
 	}
 
-	if ((prop = node.property ("soloed-by-others")) != 0) {
-		_soloed_by_others = 0; // needed for mod_solo_by_others () to work
-		mod_solo_by_others (atoi (prop->value()));
+	if ((prop = node.property ("soloed-by-upstream")) != 0) {
+		_soloed_by_others_upstream = 0; // needed for mod_.... () to work
+		mod_solo_by_others_upstream (atoi (prop->value()));
+	}
+
+	if ((prop = node.property ("soloed-by-downstream")) != 0) {
+		_soloed_by_others_downstream = 0; // needed for mod_.... () to work
+		mod_solo_by_others_downstream (atoi (prop->value()));
 	}
 
 	if ((prop = node.property ("solo-isolated")) != 0) {
@@ -2529,6 +2579,12 @@ Route::direct_feeds (boost::shared_ptr<Route> other, bool* only_send)
 
 	DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tdoes NOT feed %1\n", other->name()));
 	return false;
+}
+
+void
+Route::check_physical_connections ()
+{
+        _physically_connected = _output->physically_connected ();
 }
 
 void
@@ -3300,4 +3356,10 @@ Route::has_io_processor_named (const string& name)
         }
         
         return false;
+}
+
+void
+Route::set_graph_level (int32_t l)
+{
+        _graph_level = l;
 }

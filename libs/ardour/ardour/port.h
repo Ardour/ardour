@@ -116,6 +116,8 @@ public:
 	}
 	virtual void transport_stopped () {}
 
+        bool physically_connected () const;
+
 	static void set_engine (AudioEngine *);
 
 	PBD::Signal1<void,bool> MonitorInputChanged;
@@ -128,7 +130,7 @@ protected:
 
 	static nframes_t _port_offset;
 	static nframes_t _buffer_size;
-
+        
 	static AudioEngine* _engine; ///< the AudioEngine
 
 private:

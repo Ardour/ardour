@@ -108,7 +108,8 @@ class IO : public SessionObject, public Latent
 	int disconnect (void *src);
 	bool connected_to (boost::shared_ptr<const IO>) const;
         bool connected () const;
-
+        bool physically_connected () const;
+        
 	nframes_t signal_latency() const { return _own_latency; }
 	nframes_t latency() const;
 	void      set_port_latency (nframes_t);

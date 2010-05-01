@@ -17,6 +17,9 @@
 
 */
 
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
+
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -1351,6 +1354,10 @@ Session::resort_routes_using (shared_ptr<RouteList> r)
 	RouteList::iterator i, j;
 
 	for (i = r->begin(); i != r->end(); ++i) {
+                (*i)->check_physical_connections ();
+        }
+
+	for (i = r->begin(); i != r->end(); ++i) {
 
 		(*i)->clear_fed_by ();
 
@@ -1381,14 +1388,101 @@ Session::resort_routes_using (shared_ptr<RouteList> r)
 	RouteSorter cmp;
 	r->sort (cmp);
 
+        find_route_levels (r);
+
 #ifndef NDEBUG
         DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 signal order %2\n", (*i)->name(), (*i)->order_key ("signal")));
+		DEBUG_TRACE (DEBUG::Graph, string_compose ("\t%1 signal order %2 level %3\n", 
+                                                           (*i)->name(), (*i)->order_key ("signal"),
+                                                           (*i)->graph_level()));
 	}
 #endif
 
 }
+
+void
+Session::find_route_levels (shared_ptr<RouteList> rl)
+{
+        uint32_t setcnt = 0;
+        uint32_t limit = rl->size();
+        RouteList last_level;
+        RouteList this_level;
+
+        for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
+                
+                /* find routes with direct physical connections,
+                   or routes with no connections at all. Mark them
+                   with "special" level values, and push them into
+                   the "last_level" set.
+                
+                   All other routes get marked with a graph level
+                   of -1, which indicates that it needs to be set.
+
+                */
+                
+                if ((*r)->physically_connected()) {
+                        last_level.push_back (*r);
+                        (*r)->set_graph_level (0);
+                        setcnt++;
+                } else if (!(*r)->output()->connected()) {
+                        last_level.push_back (*r);
+                        (*r)->set_graph_level (INT32_MAX/2);
+                        setcnt++;
+                } else {
+                        (*r)->set_graph_level (-1);
+                }
+        }
+
+        // until we've set the graph level for every route ... 
+
+        while (setcnt < limit) {
+
+                for (RouteList::reverse_iterator r = rl->rbegin(); r != rl->rend(); ++r) {
+
+                        int32_t l = INT32_MAX;
+                        bool found = false;
+
+                        if ((*r)->graph_level() != -1) {
+                                // we already have the graph level for this route
+                                continue;
+                        }
+
+                        /* check if this route (r) has a direction connection to anything in
+                           the set of routes we processed last time. On the first pass
+                           through this, last_level will contain routes with either
+                           no connections or direct "physical" connections. If there is
+                           at least 1 connection, store the lowest graph level of whatever
+                           r is connected to.
+                        */
+
+                        for (RouteList::iterator o = last_level.begin(); o != last_level.end(); ++o) {
+                                bool sends_only;
+                                if ((*r)->direct_feeds (*o, &sends_only)) {
+                                        if (!sends_only) {
+                                                l = min (l, (*o)->graph_level());
+                                                found = true;
+                                        }
+                                }
+                        }
+
+                        /* if we found any connections, then mark the graph level of r, and push
+                           it into the "this_level" set that will become "last_level" next time
+                           around the while() loop.
+                        */
+
+                        if (found) {
+                                (*r)->set_graph_level (l + 1);
+                                this_level.push_back (*r);
+                                setcnt++;
+                        }
+                }
+
+                last_level = this_level;
+                this_level.clear ();
+        }
+}
+
 
 /** Find the route name starting with \a base with the lowest \a id.
  *
@@ -2185,13 +2279,14 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		bool via_sends_only;
-                bool in_signal_flow;
 
 		if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden()) {
 			continue;
 		} 
 
-                in_signal_flow = false;
+                if ((*i)->graph_level () == route->graph_level()) {
+                        (*i)->mod_muted_by_others (delta);                        
+                }
 
                 /* feed-backwards (other route to solo change route):
 
@@ -2204,8 +2299,7 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 
                 if ((*i)->feeds (route, &via_sends_only)) {
 			if (!via_sends_only) {
-				(*i)->mod_solo_by_others (delta);
-                                in_signal_flow = true;
+				(*i)->mod_solo_by_others_upstream (delta);
 			}
 		} 
                 
@@ -2218,12 +2312,7 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
                  */
 
                 if (route->feeds (*i, &via_sends_only)) {
-                        (*i)->mod_solo_by_others (delta);
-                        in_signal_flow = true;
-                }
-                
-                if (!in_signal_flow) {
-                        (*i)->mod_muted_by_others (delta);
+                        (*i)->mod_solo_by_others_downstream (delta);
                 }
 	}
 

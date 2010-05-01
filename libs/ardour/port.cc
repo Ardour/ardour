@@ -99,7 +99,8 @@ Port::get_connections (std::vector<std::string> & c) const
 			c.push_back (jc[i]);
 			++n;
 		}
-		free (jc);
+
+		jack_free (jc);
 	}
 
 	return n;
@@ -148,7 +149,7 @@ Port::disconnect (std::string const & other)
 		_connections.erase (other);
 	}
 
-return r;
+        return r;
 }
 
 
@@ -290,3 +291,24 @@ Port::set_latency (nframes_t n)
 	jack_port_set_latency (_jack_port, n);
 }
 
+bool
+Port::physically_connected () const
+{
+	const char** jc = jack_port_get_connections (_jack_port);
+
+	if (jc) {
+		for (int i = 0; jc[i]; ++i) {
+
+                        jack_port_t* port = jack_port_by_name (_engine->jack(), jc[i]);
+                        
+                        if (port && (jack_port_flags (port) & JackPortIsPhysical)) {
+                                jack_free (jc);
+                                return true;
+                        }
+		}
+                
+		jack_free (jc);
+	}
+
+        return false;
+}

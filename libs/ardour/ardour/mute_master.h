@@ -25,11 +25,13 @@
 #include "pbd/stateful.h"
 #include <string>
 
+#include "ardour/session_handle.h"
+
 namespace ARDOUR {
 
 class Session;
 
-class MuteMaster : public PBD::Stateful
+class MuteMaster : public SessionHandleRef, public PBD::Stateful
 {
   public:
 	enum MutePoint {
@@ -69,7 +71,7 @@ class MuteMaster : public PBD::Stateful
         void set_mute_points (MutePoint);
         MutePoint mute_points() const { return _mute_point; }
 
-        void set_solo_level (int32_t);
+        void set_solo_level (SoloLevel);
 
 	PBD::Signal0<void> MutePointChanged;
 
@@ -80,7 +82,7 @@ class MuteMaster : public PBD::Stateful
 	volatile MutePoint _mute_point;
         volatile bool      _self_muted;
         volatile uint32_t  _muted_by_others;
-        volatile int32_t   _solo_level;
+        volatile SoloLevel _solo_level;
 };
 
 } // namespace ARDOUR
