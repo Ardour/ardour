@@ -1739,7 +1739,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	nframes64_t frame_delta = 0;
 
 	bool left_direction;
-	bool obey_snap = event ? !Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier()) : false;
 
 	/* snap modifier works differently here..
 	   its current state has to be passed to the
@@ -1822,7 +1821,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		} else {
 
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				_editor->single_start_trim (*i->view, frame_delta, left_direction, obey_snap, non_overlap_trim);
+				_editor->single_start_trim (*i->view, frame_delta, left_direction, non_overlap_trim);
 			}
 			break;
 		}
@@ -1833,7 +1832,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		} else {
 
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				_editor->single_end_trim (*i->view, frame_delta, left_direction, obey_snap, non_overlap_trim);
+				_editor->single_end_trim (*i->view, frame_delta, left_direction, non_overlap_trim);
 			}
 			break;
 		}
@@ -1847,7 +1846,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			}
 
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				_editor->single_contents_trim (*i->view, frame_delta, left_direction, swap_direction, obey_snap);
+				_editor->single_contents_trim (*i->view, frame_delta, left_direction, swap_direction);
 			}
 		}
 		break;

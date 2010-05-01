@@ -2119,7 +2119,7 @@ Editor::cancel_selection ()
 
 
 void
-Editor::single_contents_trim (RegionView& rv, nframes64_t frame_delta, bool left_direction, bool swap_direction, bool obey_snap)
+Editor::single_contents_trim (RegionView& rv, nframes64_t frame_delta, bool left_direction, bool swap_direction)
 {
 	boost::shared_ptr<Region> region (rv.region());
 
@@ -2151,15 +2151,12 @@ Editor::single_contents_trim (RegionView& rv, nframes64_t frame_delta, bool left
 		}
 	}
 
-	if (obey_snap) {
-		snap_to (new_bound);
-	}
 	region->trim_start ((nframes64_t) (new_bound * speed), this);
 	rv.region_changed (PropertyChange (ARDOUR::Properties::start));
 }
 
 void
-Editor::single_start_trim (RegionView& rv, nframes64_t frame_delta, bool left_direction, bool obey_snap, bool no_overlap)
+Editor::single_start_trim (RegionView& rv, nframes64_t frame_delta, bool left_direction, bool no_overlap)
 {
 	boost::shared_ptr<Region> region (rv.region());
 
@@ -2181,10 +2178,6 @@ Editor::single_start_trim (RegionView& rv, nframes64_t frame_delta, bool left_di
 		new_bound = (nframes64_t) (region->position()/speed) - frame_delta;
 	} else {
 		new_bound = (nframes64_t) (region->position()/speed) + frame_delta;
-	}
-
-	if (obey_snap) {
-		snap_to (new_bound, (left_direction ? 0 : 1));
 	}
 
 	nframes64_t pre_trim_first_frame = region->first_frame();
@@ -2214,7 +2207,7 @@ Editor::single_start_trim (RegionView& rv, nframes64_t frame_delta, bool left_di
 }
 
 void
-Editor::single_end_trim (RegionView& rv, nframes64_t frame_delta, bool left_direction, bool obey_snap, bool no_overlap)
+Editor::single_end_trim (RegionView& rv, nframes64_t frame_delta, bool left_direction, bool no_overlap)
 {
 	boost::shared_ptr<Region> region (rv.region());
 
@@ -2236,10 +2229,6 @@ Editor::single_end_trim (RegionView& rv, nframes64_t frame_delta, bool left_dire
 		new_bound = (nframes64_t) ((region->last_frame() + 1)/speed) - frame_delta;
 	} else {
 		new_bound = (nframes64_t) ((region->last_frame() + 1)/speed) + frame_delta;
-	}
-
-	if (obey_snap) {
-		snap_to (new_bound);
 	}
 
 	nframes64_t pre_trim_last_frame = region->last_frame();

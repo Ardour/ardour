@@ -1675,9 +1675,9 @@ public:
 
 	/* trimming */
 	void point_trim (GdkEvent *, nframes64_t);
-	void single_contents_trim (RegionView&, nframes64_t, bool, bool, bool);
-	void single_start_trim (RegionView&, nframes64_t, bool, bool, bool);
-	void single_end_trim (RegionView&, nframes64_t, bool, bool, bool);
+	void single_contents_trim (RegionView&, nframes64_t, bool, bool);
+	void single_start_trim (RegionView&, nframes64_t, bool, bool);
+	void single_end_trim (RegionView&, nframes64_t, bool, bool);
 
 	void thaw_region_after_trim (RegionView& rv);
 
