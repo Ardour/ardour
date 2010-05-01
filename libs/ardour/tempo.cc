@@ -1204,7 +1204,7 @@ TempoMap::round_to_type (nframes64_t frame, int dir, BBTPointType type)
 
 	switch (type) {
 	case Bar:
-		DEBUG_TRACE(DEBUG::SnapBBT, string_compose ("round from %1 (%3) to bars in direction %2\n", frame, (dir < 0 ? "back" : "forward"), bbt));
+		DEBUG_TRACE(DEBUG::SnapBBT, string_compose ("round from %1 (%3) to bars in direction %2\n", frame, dir, bbt));
 
 		if (dir < 0) {
 
@@ -1237,7 +1237,7 @@ TempoMap::round_to_type (nframes64_t frame, int dir, BBTPointType type)
 			float midbar_beats;
 			float midbar_ticks;
 
-			midbar_beats = metric.meter().beats_per_bar() / 2;
+			midbar_beats = metric.meter().beats_per_bar() / 2 + 1;
 			midbar_ticks = Meter::ticks_per_beat * fmod (midbar_beats, 1.0f);
 			midbar_beats = floor (midbar_beats);
 			
