@@ -62,8 +62,6 @@ using Gtkmm2ext::Keyboard;
 bool
 Editor::track_canvas_scroll (GdkEventScroll* ev)
 {
-	int x, y;
-	double wx, wy;
 	nframes64_t xdelta;
 	int direction = ev->direction;
 
