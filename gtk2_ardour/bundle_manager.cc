@@ -435,14 +435,14 @@ BundleManager::row_activated (Gtk::TreeModel::Path const & p, Gtk::TreeViewColum
 }
 
 NameChannelDialog::NameChannelDialog ()
-	: ArdourDialog (_("Add channel")),
+	: ArdourDialog (_("Add Channel")),
 	  _adding (true)
 {
 	setup ();
 }
 
 NameChannelDialog::NameChannelDialog (boost::shared_ptr<Bundle> b, uint32_t c)
-	: ArdourDialog (_("Rename channel")),
+	: ArdourDialog (_("Rename Channel")),
 	  _bundle (b),
 	  _channel (c),
 	  _adding (false)

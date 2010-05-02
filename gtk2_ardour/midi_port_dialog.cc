@@ -17,7 +17,7 @@ using namespace Gtkmm2ext;
 static const char* mode_strings[] = { "duplex", "output", "input",  (char*) 0 };
 
 MidiPortDialog::MidiPortDialog ()
-	: ArdourDialog ("add MIDI port dialog")
+	: ArdourDialog (_("Add MIDI Port"))
 	, port_label (_("Port name:"))
 {
 	set_modal (true);
@@ -25,8 +25,6 @@ MidiPortDialog::MidiPortDialog ()
 	set_resizable (false);
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name (N_("MidiPortDialog"));
-
-	set_title (_("Add MIDI Port"));
 
 	vector<string> str = internationalize (PACKAGE, mode_strings);
 	set_popdown_strings (port_mode_combo, str);

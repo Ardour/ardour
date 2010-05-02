@@ -60,7 +60,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 RouteParams_UI::RouteParams_UI ()
-	: ArdourDialog ("track/bus inspector"),
+	: ArdourDialog (_("Tracks and Busses")),
 	  latency_apply_button (Stock::APPLY),
 	  track_menu(0)
 {
@@ -144,8 +144,6 @@ RouteParams_UI::RouteParams_UI ()
 	set_name ("RouteParamsWindow");
 	set_default_size (620,370);
 	set_wmclass (X_("ardour_route_parameters"), "Ardour");
-
-	set_title (_("Track/Bus Inspector"));
 
 	// events
 	route_display.get_selection()->signal_changed().connect(sigc::mem_fun(*this, &RouteParams_UI::route_selected));
@@ -509,7 +507,7 @@ RouteParams_UI::show_track_menu()
 		track_menu = new Menu;
 		track_menu->set_name ("ArdourContextMenu");
 		track_menu->items().push_back
-				(MenuElem (_("Add Track/Bus"),
+				(MenuElem (_("Add Track or Bus"),
 					   sigc::bind (sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::add_route), (Gtk::Window*) 0)));
 	}
 	track_menu->popup (1, gtk_get_current_event_time());
@@ -610,31 +608,15 @@ RouteParams_UI::processor_going_away (boost::weak_ptr<ARDOUR::Processor> wproc)
 void
 RouteParams_UI::update_title ()
 {
-	WindowTitle title(_("Track/Bus Inspector"));
+	WindowTitle title (_("Tracks and Busses"));
 
 	if (_route) {
-
-		// 		title += ": ";
-
-		// 		if (_redirect && (_current_view == PLUGIN_CONFIG_VIEW || _current_view == SEND_CONFIG_VIEW)) {
-		// 			title += _redirect->name();
-		// 		}
-		// 		else if (_current_view == INPUT_CONFIG_VIEW) {
-		// 			title += _("INPUT");
-		// 		}
-		// 		else if (_current_view == OUTPUT_CONFIG_VIEW) {
-		// 			title += _("OUTPUT");
-		// 		}
-
 		title_label.set_text(_route->name());
-
 		title += _route->name();
-
 		set_title(title.get_string());
-	}
-	else {
-		title_label.set_text(_("No Route Selected"));
-		title += _("No Route Selected");
+	} else {
+		title_label.set_text(_("No Track or Bus Selected"));
+		title += _("No Track or Bus Selected");
 		set_title(title.get_string());
 	}
 }

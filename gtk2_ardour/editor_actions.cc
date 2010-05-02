@@ -200,9 +200,9 @@ Editor::register_actions ()
 	act = ActionManager::register_action (editor_actions, "select-all-in-loop-range", _("Select All in Loop Range"), sigc::mem_fun(*this, &Editor::select_all_selectables_using_loop));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (editor_actions, "select-next-route", _("Select Next Track/Bus"), sigc::mem_fun(*this, &Editor::select_next_route));
+	act = ActionManager::register_action (editor_actions, "select-next-route", _("Select Next Track or Bus"), sigc::mem_fun(*this, &Editor::select_next_route));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "select-prev-route", _("Select Previous Track/Bus"), sigc::mem_fun(*this, &Editor::select_prev_route));
+	act = ActionManager::register_action (editor_actions, "select-prev-route", _("Select Previous Track or Bus"), sigc::mem_fun(*this, &Editor::select_prev_route));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, "track-record-enable-toggle", _("Toggle Record Enable"), sigc::mem_fun(*this, &Editor::toggle_record_enable));

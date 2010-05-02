@@ -120,7 +120,7 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("Close"), _("Close"),  sigc::mem_fun(*this, &ARDOUR_UI::close_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track/Bus..."),
+	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track or Bus..."),
 					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_route), (Gtk::Window*) 0));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
@@ -218,7 +218,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (common_actions, X_("toggle-editor-mixer-on-top"), _("Toggle Editor Mixer on Top"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_editor_mixer_on_top));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleRCOptionsEditor"), _("Preferences"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_rc_options_window));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleSessionOptionsEditor"), _("Preferences"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_session_options_window));
-	act = ActionManager::register_toggle_action (common_actions, X_("ToggleInspector"), _("Track/Bus Inspector"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_route_params_window));
+	act = ActionManager::register_toggle_action (common_actions, X_("ToggleInspector"), _("Tracks and Busses"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_route_params_window));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleLocations"), _("Locations"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_location_window));

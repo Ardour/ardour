@@ -99,7 +99,7 @@ ReturnUI::fast_update ()
 }
 
 ReturnUIWindow::ReturnUIWindow (boost::shared_ptr<Return> r, ARDOUR::Session* s)
-	: ArdourDialog (string("Ardour: return ") + r->name())
+	: ArdourDialog (string(_("Return ")) + r->name())
 {
 	ui = new ReturnUI (this, r, s);
 

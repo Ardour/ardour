@@ -119,7 +119,7 @@ SendUI::fast_update ()
 }
 
 SendUIWindow::SendUIWindow (boost::shared_ptr<Send> s, Session* session)
-	: ArdourDialog (string("Ardour: send ") + s->name())
+	: ArdourDialog (string (_("Send ")) + s->name())
 {
 	ui = new SendUI (this, s, session);
 

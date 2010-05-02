@@ -2020,7 +2020,7 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 		vector<string> n = get_file_names_no_extension (p);
 		if (find (n.begin(), n.end(), snapname) != n.end()) {
 
-			ArdourDialog confirm (_("Confirm snapshot overwrite"), true);
+			ArdourDialog confirm (_("Confirm Snapshot Overwrite"), true);
 			Label m (_("A snapshot already exists with that name.  Do you want to overwrite it?"));
 			confirm.get_vbox()->pack_start (m, true, true);
 			confirm.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);

@@ -38,7 +38,7 @@ using namespace std;
 using namespace ARDOUR;
 
 SessionImportDialog::SessionImportDialog (ARDOUR::Session* target) :
-  ArdourDialog (_("Import from session")),
+  ArdourDialog (_("Import From Session")),
   file_browse_button (_("Browse"))
 {
 	set_session (target);

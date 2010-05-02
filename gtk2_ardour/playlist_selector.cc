@@ -42,7 +42,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 PlaylistSelector::PlaylistSelector ()
-	: ArdourDialog ("playlist selector")
+	: ArdourDialog (_("Playlists"))
 {
 	rui = 0;
 
@@ -51,8 +51,6 @@ PlaylistSelector::PlaylistSelector ()
 	set_modal(true);
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 	set_size_request (300, 200);
-
-	set_title (_("Playlists"));
 
 	model = TreeStore::create (columns);
 	tree.set_model (model);

@@ -30,7 +30,7 @@ using namespace std;
 using namespace PBD;
 
 RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
-	: ArdourDialog (_("route group dialog")),
+	: ArdourDialog (_("Route Group")),
 	  _group (g),
 	  _active (_("Active")),
 	  _gain (_("Gain")),
@@ -46,8 +46,6 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, StockID const & s)
 	set_resizable (false);
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_name (N_("RouteGroupDialog"));
-
-	set_title (_("Route Group"));
 
 	VBox* vbox = manage (new VBox);
 	Gtk::Label* l;

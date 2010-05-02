@@ -322,7 +322,7 @@ PortInsertWindow::PortInsertWindow (ARDOUR::Session* sess, boost::shared_ptr<ARD
 {
 
 	set_name ("IOSelectorWindow");
-	string title = _("ardour: ");
+	string title = _("Port Insert ");
 	title += pi->name();
 	set_title (title);
 

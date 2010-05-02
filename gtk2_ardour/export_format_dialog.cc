@@ -28,7 +28,7 @@
 using namespace ARDOUR;
 
 ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
-  ArdourDialog (new_dialog ? _("New export format profile") : _("Edit export format profile")),
+  ArdourDialog (new_dialog ? _("New Export Format Profile") : _("Edit Export Format Profile")),
   format (format),
   manager (format),
   original_state (format->get_state()),

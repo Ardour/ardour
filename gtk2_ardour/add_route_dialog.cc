@@ -62,7 +62,7 @@ std::vector<std::string> AddRouteDialog::track_mode_strings;
 std::vector<std::string> AddRouteDialog::bus_mode_strings;
 
 AddRouteDialog::AddRouteDialog (Session* s)
-	: ArdourDialog (X_("add route dialog"))
+	: ArdourDialog (_("Add Track or Bus"))
 	, routes_adjustment (1, 1, 128, 1, 4)
 	, routes_spinner (routes_adjustment)
 	, mode_label (_("Track mode:"))
@@ -90,8 +90,6 @@ AddRouteDialog::AddRouteDialog (Session* s)
 	set_modal (true);
 	set_skip_taskbar_hint (true);
 	set_resizable (false);
-
-	set_title (_("Add Track/Bus"));
 
 	name_template_entry.set_name (X_("AddRouteDialogNameTemplateEntry"));
 	routes_spinner.set_name (X_("AddRouteDialogSpinner"));

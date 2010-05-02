@@ -547,7 +547,7 @@ Editor::Editor ()
 	nlabel = manage (new Label (_("Regions")));
 	nlabel->set_angle (-90);
 	the_notebook.append_page (_regions->widget (), *nlabel);
-	nlabel = manage (new Label (_("Tracks/Busses")));
+	nlabel = manage (new Label (_("Tracks & Busses")));
 	nlabel->set_angle (-90);
 	the_notebook.append_page (_routes->widget (), *nlabel);
 	nlabel = manage (new Label (_("Snapshots")));
@@ -3879,7 +3879,7 @@ Editor::session_range_location_changed (Location* location)
 int
 Editor::playlist_deletion_dialog (boost::shared_ptr<Playlist> pl)
 {
-	ArdourDialog dialog ("playlist deletion dialog");
+	ArdourDialog dialog (_("Playlist Deletion"));
 	Label  label (string_compose (_("Playlist %1 is currently unused.\n"
 					"If left alone, no audio files used by it will be cleaned.\n"
 					"If deleted, audio files used by it alone by will cleaned."),

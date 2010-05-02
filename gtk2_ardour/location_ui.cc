@@ -896,9 +896,8 @@ LocationUI::session_going_away()
 /*------------------------*/
 
 LocationUIWindow::LocationUIWindow ()
-	: ArdourDialog ("locations dialog")
+	: ArdourDialog (_("Locations"))
 {
-	set_title (_("Locations"));
 	set_wmclass(X_("ardour_locations"), "Ardour");
 	set_name ("LocationWindow");
 
