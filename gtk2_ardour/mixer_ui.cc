@@ -515,6 +515,8 @@ Mixer_UI::set_session (Session* sess)
 	_session->route_group_removed.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::route_groups_changed, this), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), ui_bind (&Mixer_UI::parameter_changed, this, _1), gui_context());
 
+	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&Mixer_UI::parameter_changed, this, _1), gui_context ());
+
 	route_groups_changed ();
 
 	if (_visible) {
@@ -1612,6 +1614,11 @@ Mixer_UI::parameter_changed (string const & p)
 			_group_tabs->show ();
 		} else {
 			_group_tabs->hide ();
+		}
+	} else if (p == "default-narrow_ms") {
+		bool const s = Config->get_default_narrow_ms ();
+		for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
+			(*i)->set_width_enum (s ? Narrow : Wide, this);
 		}
 	}
 }
