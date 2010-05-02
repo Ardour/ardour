@@ -28,6 +28,7 @@
 #include "ardour/export_status.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
+#include "ardour/process_thread.h"
 
 #include "i18n.h"
 
@@ -179,7 +180,9 @@ Session::process_export (nframes_t nframes)
 int
 Session::process_export_fw (nframes_t nframes)
 {
+        _engine.main_thread()->get_buffers ();
 	process_export (nframes);
+        _engine.main_thread()->drop_buffers ();
 	return 0;
 }
 
