@@ -267,8 +267,6 @@ StripSilenceDialog::update_threshold_line ()
 		
 		double const y = alt_log_meter (_threshold.get_value());
 
-		cout << "thresh " << _threshold.get_value() << " alt log " << alt_log_meter (_threshold.get_value()) << "\n";
-
 		(*i)->threshold_line->property_y1() = (n + 1 - y) * _wave_height;
 		(*i)->threshold_line->property_y2() = (n + 1 - y) * _wave_height;
 	}

@@ -146,10 +146,6 @@ Editor::bounce_region_selection ()
 
 		InterThreadInfo itt;
 
-		itt.done = false;
-		itt.cancel = false;
-		itt.progress = 0.0f;
-
 		boost::shared_ptr<Region> r = track->bounce_range (region->position(), region->position() + region->length(), itt);
 		cerr << "Result of bounce of "
 		     << region->name() << " len = " << region->length()

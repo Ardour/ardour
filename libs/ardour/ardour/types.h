@@ -320,6 +320,8 @@ namespace ARDOUR {
 	};
 
 	struct InterThreadInfo {
+		InterThreadInfo () : done (false), cancel (false), progress (0), thread (0) {}
+			
 		volatile bool  done;
 		volatile bool  cancel;
 		volatile float progress;

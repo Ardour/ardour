@@ -56,15 +56,6 @@ StripSilence::run (boost::shared_ptr<Region> r)
 		return -1;
 	}
 
-        /* we don't care about this but we need to fill out the fields
-           anyway. XXX should really be a default constructor for ITT
-        */
-
-        itt.done = false;
-        itt.cancel = false;
-        itt.progress = 0.0;
-        itt.thread = 0;
-
 	/* find periods of silence in the region */
 	std::list<std::pair<frameoffset_t, framecnt_t> > const silence =
 		region->find_silence (dB_to_coefficient (_threshold), _minimum_length, itt);

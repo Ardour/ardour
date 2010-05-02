@@ -3613,10 +3613,6 @@ Editor::freeze_route ()
 
 	InterthreadProgressWindow ipw (current_interthread_info, _("Freeze"), _("Cancel Freeze"));
 
-	itt.done = false;
-	itt.cancel = false;
-	itt.progress = 0.0f;
-
 	pthread_create_and_store (X_("freezer"), &itt.thread, _freeze_thread, this);
 
 	track_canvas->get_window()->set_cursor (Gdk::Cursor (Gdk::WATCH));
@@ -3659,10 +3655,6 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 		}
 
 		InterThreadInfo itt;
-
-		itt.done = false;
-		itt.cancel = false;
-		itt.progress = false;
 
                 playlist->clear_history ();
 		boost::shared_ptr<Region> r = rtv->track()->bounce_range (start, start+cnt, itt, enable_processing);
