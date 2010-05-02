@@ -451,11 +451,11 @@ RegionExportChannelSelector::RegionExportChannelSelector (ARDOUR::Session * _ses
 {
 	pack_start (vbox);
 
-	raw_button.set_label (string_compose (_("Region contents without fades (channels: %1)"), region_chans));
+	raw_button.set_label (string_compose (_("Region contents without fades nor region gain (channels: %1)"), region_chans));
 	raw_button.signal_toggled ().connect (sigc::mem_fun (*this, &RegionExportChannelSelector::handle_selection));
 	vbox.pack_start (raw_button);
 
-	fades_button.set_label (string_compose (_("Region contents with fades (channels: %1)"), region_chans));
+	fades_button.set_label (string_compose (_("Region contents with fades and region gain (channels: %1)"), region_chans));
 	fades_button.signal_toggled ().connect (sigc::mem_fun (*this, &RegionExportChannelSelector::handle_selection));
 	vbox.pack_start (fades_button);
 
