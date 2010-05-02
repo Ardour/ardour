@@ -346,7 +346,7 @@ Editor::Editor ()
 	session_range_marker_menu = 0;
 	range_marker_menu = 0;
 	marker_menu_item = 0;
-	tm_marker_menu = 0;
+	tempo_or_meter_marker_menu = 0;
 	transport_marker_menu = 0;
 	new_transport_marker_menu = 0;
 	editor_mixer_strip_width = Wide;

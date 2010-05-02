@@ -370,16 +370,46 @@ TempoMap::do_insert (MetricSection* section, bool with_bbt)
 {
 	Metrics::iterator i;
 
+	/* Look for any existing MetricSection that is of the same type and
+	   at the same time as the new one, and remove it before adding
+	   the new one.
+	*/
+
+	Metrics::iterator to_remove = metrics->end ();
+
 	for (i = metrics->begin(); i != metrics->end(); ++i) {
 
-		if (with_bbt) {
-			if ((*i)->start() < section->start()) {
-				continue;
-			}
-		} else {
-			if ((*i)->frame() < section->frame()) {
-				continue;
-			}
+		int const c = (*i)->compare (section, with_bbt);
+
+		if (c < 0) {
+			/* this section is before the one to be added; go back round */
+			continue;
+		} else if (c > 0) {
+			/* this section is after the one to be added; there can't be any at the same time */
+			break;
+		}
+
+		/* hacky comparison of type */
+		bool const a = dynamic_cast<TempoSection*> (*i) != 0;
+		bool const b = dynamic_cast<TempoSection*> (section) != 0;
+
+		if (a == b) {
+			to_remove = i;
+			break;
+		}
+	}
+
+	if (to_remove != metrics->end()) {
+		/* remove the MetricSection at the same time as the one we are about to add */
+		metrics->erase (to_remove);
+	}
+
+	/* Add the given MetricSection */
+
+	for (i = metrics->begin(); i != metrics->end(); ++i) {
+
+		if ((*i)->compare (section, with_bbt) < 0) {
+			continue;
 		}
 
 		metrics->insert (i, section);
@@ -400,7 +430,6 @@ TempoMap::add_tempo (const Tempo& tempo, BBT_Time where)
 		Glib::RWLock::WriterLock lm (lock);
 
 		/* new tempos always start on a beat */
-
 		where.ticks = 0;
 
 		do_insert (new TempoSection (where, tempo.beats_per_minute(), tempo.note_type()), true);
@@ -468,7 +497,6 @@ TempoMap::add_meter (const Meter& meter, BBT_Time where)
 		}
 
 		/* new meters *always* start on a beat. */
-
 		where.ticks = 0;
 
 		do_insert (new MeterSection (where, meter.beats_per_bar(), meter.note_divisor()), true);
@@ -1891,4 +1919,34 @@ TempoMap::bbt_subtract (const BBT_Time& start, const BBT_Time& decrement) const
 
 	result.bars -= op.bars;
 	return result;
+}
+
+/** Compare the time of this with that of another MetricSection.
+ *  @param with_bbt True to compare using ::start(), false to use ::frame().
+ *  @return -1 for less than, 0 for equal, 1 for greater than.
+ */
+
+int
+MetricSection::compare (MetricSection* other, bool with_bbt) const
+{
+	if (with_bbt) {
+		if (start() == other->start()) {
+			return 0;
+		} else if (start() < other->start()) {
+			return -1;
+		} else {
+			return 1;
+		}
+	} else {
+		if (frame() == other->frame()) {
+			return 0;
+		} else if (frame() < other->frame()) {
+			return -1;
+		} else {
+			return 1;
+		}
+	}
+
+	/* NOTREACHED */
+	return 0;
 }

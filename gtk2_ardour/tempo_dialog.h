@@ -35,20 +35,9 @@
 
 #include "ardour_dialog.h"
 
-struct TempoDialog : public ArdourDialog
+class TempoDialog : public ArdourDialog
 {
-	Gtk::ComboBoxText note_types;
-	std::vector<std::string> strings;
-	Gtk::Adjustment   bpm_adjustment;
-	Gtk::SpinButton   bpm_spinner;
-	Gtk::Button  ok_button;
-	Gtk::Button  cancel_button;
-	Gtk::Entry   when_bar_entry;
-	Gtk::Entry   when_beat_entry;
-	Gtk::Label   when_bar_label;
-	Gtk::Label   when_beat_label;
-	char buf[64];
-
+public:
 	TempoDialog (ARDOUR::TempoMap&, nframes_t, const std::string & action);
 	TempoDialog (ARDOUR::TempoSection&, const std::string & action);
 
@@ -63,18 +52,24 @@ private:
 	bool bpm_button_release (GdkEventButton* );
 	bool entry_key_release (GdkEventKey* );
 	void note_types_change ();
-};
 
-struct MeterDialog : public ArdourDialog
-{
-	Gtk::Entry   bpb_entry;
 	Gtk::ComboBoxText note_types;
 	std::vector<std::string> strings;
+	Gtk::Adjustment   bpm_adjustment;
+	Gtk::SpinButton   bpm_spinner;
 	Gtk::Button  ok_button;
 	Gtk::Button  cancel_button;
 	Gtk::Entry   when_bar_entry;
+	Gtk::Entry   when_beat_entry;
+	Gtk::Label   when_bar_label;
+	Gtk::Label   when_beat_label;
 	char buf[64];
+};
 
+class MeterDialog : public ArdourDialog
+{
+public:
+	
 	MeterDialog (ARDOUR::TempoMap&, nframes_t, const std::string & action);
 	MeterDialog (ARDOUR::MeterSection&, const std::string & action);
 
@@ -87,6 +82,14 @@ private:
 	bool entry_key_press (GdkEventKey* );
 	bool entry_key_release (GdkEventKey* );
 	void note_types_change ();
+
+	Gtk::Entry   bpb_entry;
+	Gtk::ComboBoxText note_types;
+	std::vector<std::string> strings;
+	Gtk::Button  ok_button;
+	Gtk::Button  cancel_button;
+	Gtk::Entry   when_bar_entry;
+	char buf[64];
 };
 
 #endif /* __ardour_gtk_tempo_dialog_h__ */

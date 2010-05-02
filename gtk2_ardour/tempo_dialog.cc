@@ -34,8 +34,8 @@ using namespace ARDOUR;
 using namespace PBD;
 
 TempoDialog::TempoDialog (TempoMap& map, nframes_t frame, const string & action)
-	: ArdourDialog (_("edit tempo")),
-	  bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0, 1.0),
+	: ArdourDialog (_("New Tempo")),
+	  bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0),
 	  bpm_spinner (bpm_adjustment),
 	  ok_button (action),
 	  cancel_button (_("Cancel")),
@@ -50,8 +50,8 @@ TempoDialog::TempoDialog (TempoMap& map, nframes_t frame, const string & action)
 }
 
 TempoDialog::TempoDialog (TempoSection& section, const string & action)
-	: ArdourDialog ("tempo dialog"),
-	  bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0, 1.0),
+	: ArdourDialog ("Edit Tempo"),
+	  bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0),
 	  bpm_spinner (bpm_adjustment),
 	  ok_button (action),
 	  cancel_button (_("Cancel")),
@@ -142,11 +142,18 @@ TempoDialog::init (const BBT_Time& when, double bpm, double note_type, bool mova
 	bpm_spinner.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
 	bpm_spinner.signal_button_press_event().connect (sigc::mem_fun (*this, &TempoDialog::bpm_button_press), false);
 	bpm_spinner.signal_button_release_event().connect (sigc::mem_fun (*this, &TempoDialog::bpm_button_release), false);
+	bpm_spinner.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::bpm_changed));
 	when_bar_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
 	when_bar_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &TempoDialog::entry_key_release), false);
 	when_beat_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
 	when_beat_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &TempoDialog::entry_key_release), false);
 	note_types.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::note_types_change));
+}
+
+void
+TempoDialog::bpm_changed ()
+{
+	set_response_sensitive (RESPONSE_ACCEPT, true);
 }
 
 bool
@@ -233,7 +240,7 @@ TempoDialog::note_types_change ()
 
 
 MeterDialog::MeterDialog (TempoMap& map, nframes_t frame, const string & action)
-	: ArdourDialog ("meter dialog"),
+	: ArdourDialog ("New Meter"),
 	  ok_button (action),
 	  cancel_button (_("Cancel"))
 {
@@ -246,7 +253,7 @@ MeterDialog::MeterDialog (TempoMap& map, nframes_t frame, const string & action)
 }
 
 MeterDialog::MeterDialog (MeterSection& section, const string & action)
-	: ArdourDialog ("meter dialog"),
+	: ArdourDialog ("Edit Meter"),
 	  ok_button (action),
 	  cancel_button (_("Cancel"))
 {

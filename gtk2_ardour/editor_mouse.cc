@@ -1152,11 +1152,11 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 
 			case TempoMarkerItem:
-				tm_marker_context_menu (&event->button, item);
+				tempo_or_meter_marker_context_menu (&event->button, item);
 				break;
 
 			case MeterMarkerItem:
-				tm_marker_context_menu (&event->button, item);
+				tempo_or_meter_marker_context_menu (&event->button, item);
 				break;
 
 			case CrossfadeViewItem:

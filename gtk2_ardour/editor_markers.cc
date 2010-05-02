@@ -490,15 +490,25 @@ Editor::location_gone (Location *location)
 }
 
 void
-Editor::tm_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
+Editor::tempo_or_meter_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 {
-	if (tm_marker_menu == 0) {
-		build_tm_marker_menu ();
-	}
-
 	marker_menu_item = item;
-	tm_marker_menu->popup (1, ev->time);
+	
+	MeterMarker* mm;
+	TempoMarker* tm;
+	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
 
+	bool can_remove = false;
+
+	if (mm) {
+		can_remove = mm->meter().movable ();
+	} else if (tm) {
+		can_remove = tm->tempo().movable ();
+	} 
+	
+	delete tempo_or_meter_marker_menu;
+	build_tempo_or_meter_marker_menu (can_remove);
+	tempo_or_meter_marker_menu->popup (1, ev->time);
 }
 
 void
@@ -662,16 +672,18 @@ Editor::build_range_marker_menu (bool loop_or_punch)
 }
 
 void
-Editor::build_tm_marker_menu ()
+Editor::build_tempo_or_meter_marker_menu (bool can_remove)
 {
 	using namespace Menu_Helpers;
 
-	tm_marker_menu = new Menu;
-	MenuList& items = tm_marker_menu->items();
-	tm_marker_menu->set_name ("ArdourContextMenu");
+	tempo_or_meter_marker_menu = new Menu;
+	MenuList& items = tempo_or_meter_marker_menu->items();
+	tempo_or_meter_marker_menu->set_name ("ArdourContextMenu");
 
 	items.push_back (MenuElem (_("Edit"), sigc::mem_fun(*this, &Editor::marker_menu_edit)));
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
+
+	items.back().set_sensitive (can_remove);
 }
 
 void
@@ -972,25 +984,35 @@ Editor::marker_menu_loop_range ()
 }
 
 void
-Editor::marker_menu_edit ()
+Editor::dynamic_cast_marker_object (void* p, MeterMarker** m, TempoMarker** t) const
 {
-	MeterMarker* mm;
-	TempoMarker* tm;
-	Marker* marker;
-
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+	Marker* marker = reinterpret_cast<Marker*> (p);
+	if (!marker) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		/*NOTREACHED*/
 	}
 
-	if ((mm = dynamic_cast<MeterMarker*> (marker)) != 0) {
-		edit_meter_section (&mm->meter());
-	} else if ((tm = dynamic_cast<TempoMarker*> (marker)) != 0) {
-		edit_tempo_section (&tm->tempo());
-	} else {
-		fatal << X_("programming erorr: unhandled marker type in Editor::marker_menu_edit")
+	*m = dynamic_cast<MeterMarker*> (marker);
+	*t = dynamic_cast<TempoMarker*> (marker);
+
+	if (*m == 0 && *t == 0) {
+		fatal << X_("programming erorr: unhandled marker type in Editor::dynamic_cast_marker_object")
 		      << endmsg;
 		/*NOTREACHED*/
+	}
+}
+
+void
+Editor::marker_menu_edit ()
+{
+	MeterMarker* mm;
+	TempoMarker* tm;
+	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
+
+	if (mm) {
+		edit_meter_section (&mm->meter());
+	} else if (tm) {
+		edit_tempo_section (&tm->tempo());
 	}
 }
 
@@ -999,16 +1021,11 @@ Editor::marker_menu_remove ()
 {
 	MeterMarker* mm;
 	TempoMarker* tm;
-	Marker* marker;
+	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
 
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
-		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
-	}
-
-	if ((mm = dynamic_cast<MeterMarker*> (marker)) != 0) {
+	if (mm) {
 		remove_meter_marker (marker_menu_item);
-	} else if ((tm = dynamic_cast<TempoMarker*> (marker)) != 0) {
+	} else if (tm) {
 		remove_tempo_marker (marker_menu_item);
 	} else {
 		remove_marker (*marker_menu_item, (GdkEvent*) 0);

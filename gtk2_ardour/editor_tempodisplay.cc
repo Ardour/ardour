@@ -296,7 +296,7 @@ Editor::remove_tempo_marker (ArdourCanvas::Item* item)
 	}
 
 	if (tempo_marker->tempo().movable()) {
-	  Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::real_remove_tempo_marker), &tempo_marker->tempo()));
+		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::real_remove_tempo_marker), &tempo_marker->tempo()));
 	}
 }
 

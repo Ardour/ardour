@@ -86,7 +86,7 @@ class MetricSection {
 	virtual ~MetricSection() {}
 
 	const BBT_Time& start() const { return _start; }
-	nframes64_t       frame() const { return _frame; }
+	nframes64_t     frame() const { return _frame; }
 
 	void set_movable (bool yn) { _movable = yn; }
 	bool movable() const { return _movable; }
@@ -105,9 +105,11 @@ class MetricSection {
 	*/
 	virtual XMLNode& get_state() const = 0;
 
+	int compare (MetricSection *, bool) const;
+
   private:
 	BBT_Time       _start;
-	nframes64_t      _frame;
+	nframes64_t    _frame;
 	bool           _movable;
 };
 

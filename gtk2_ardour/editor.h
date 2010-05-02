@@ -1454,15 +1454,16 @@ public:
 	void update_punch_range_view (bool visibility=false);
         void new_transport_marker_menu_popdown ();
 	void marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
-	void tm_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
+	void tempo_or_meter_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void new_transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void build_range_marker_menu (bool loop_or_punch);
 	void build_marker_menu (bool);
-	void build_tm_marker_menu ();
+	void build_tempo_or_meter_marker_menu (bool);
 	void build_new_transport_marker_menu ();
+	void dynamic_cast_marker_object (void*, MeterMarker**, TempoMarker**) const;
 
-	Gtk::Menu* tm_marker_menu;
+	Gtk::Menu* tempo_or_meter_marker_menu;
 	Gtk::Menu* marker_menu;
 	Gtk::Menu* session_range_marker_menu;
 	Gtk::Menu* range_marker_menu;
