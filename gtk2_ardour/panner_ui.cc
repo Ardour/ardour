@@ -155,10 +155,6 @@ PannerUI::set_panner (boost::shared_ptr<Panner> p)
 	_panner->LinkStateChanged.connect (connections, invalidator (*this), boost::bind (&PannerUI::update_pan_linkage, this), gui_context());
 	_panner->StateChanged.connect (connections, invalidator (*this), boost::bind (&PannerUI::update_pan_state, this), gui_context());
 
-	for (uint32_t i = 0; i < _panner->npanners(); ++i) {
-		connect_to_pan_control (i);
-	}
-
 	setup_pan ();
 
 	pan_changed (0);
@@ -332,6 +328,11 @@ PannerUI::setup_pan ()
 
 	if (int32_t (nouts) == _current_nouts && int32_t (npans) == _current_npans) {
 		return;
+	}
+
+	_pan_control_connections.drop_connections ();
+	for (uint32_t i = 0; i < _panner->npanners(); ++i) {
+		connect_to_pan_control (i);
 	}
 
 	_current_nouts = nouts;
@@ -646,7 +647,17 @@ PannerUI::pan_value_changed (uint32_t which)
 {
 	ENSURE_GUI_THREAD (*this, &PannerUI::pan_value_changed, which)
 
-	if (_panner->npanners() > 0 && which < _panner->npanners()) {
+	if (twod_panner) {
+
+		float x;
+		float y;
+		_panner->streampanner(which).get_position (x, y);
+
+		in_pan_update = true;
+		twod_panner->move_puck (which, x, y);
+		in_pan_update = false;
+
+	} else if (_panner->npanners() > 0 && which < _panner->npanners()) {
 		float xpos;
 		float val = pan_adjustments[which]->get_value ();
 
@@ -891,5 +902,7 @@ PannerUI::set_mono (bool yn)
 void
 PannerUI::connect_to_pan_control (uint32_t i)
 {
-	_panner->pan_control(i)->Changed.connect (connections, invalidator (*this), boost::bind (&PannerUI::pan_value_changed, this, i), gui_context ());
+	_panner->pan_control(i)->Changed.connect (
+		_pan_control_connections, invalidator (*this), boost::bind (&PannerUI::pan_value_changed, this, i), gui_context ()
+		);
 }

@@ -111,20 +111,11 @@ Panner2d::reset (uint32_t n_inputs)
 
 	case 1:
 		pucks[0]->set_text ("");
-		pucks[0]->x.set_value (0.0);
-		pucks[0]->y.set_value (0.5);
-		pucks[0]->visible = true;
 		break;
 
 	case 2:
 		pucks[0]->set_text ("R");
-		pucks[0]->visible = true;
 		pucks[1]->set_text ("L");
-		if (existing_pucks < 2) {
-			pucks[1]->x.set_value (0.25f);
-			pucks[1]->y.set_value (0.5f);
-		}
-		pucks[1]->visible = true;
 		break;
 
 	default:
@@ -132,17 +123,16 @@ Panner2d::reset (uint32_t n_inputs)
 			char buf[64];
 			snprintf (buf, sizeof (buf), "%" PRIu32, i);
 			pucks[i]->set_text (buf);
-
-			if (existing_pucks < i) {
-				float x, y;
-				panner->streampanner (i).get_position (x, y);
-				pucks[i]->x.set_value (x);
-				pucks[i]->y.set_value (y);
-			}
-
-			pucks[i]->visible = true;
 		}
 		break;
+	}
+
+	for (uint32_t i = existing_pucks; i < n_inputs; ++i) {
+		float x, y;
+		panner->streampanner (i).get_position (x, y);
+		pucks[i]->x.set_value (x);
+		pucks[i]->y.set_value (y);
+		pucks[i]->visible = true;
 	}
 
 	/* add all outputs */

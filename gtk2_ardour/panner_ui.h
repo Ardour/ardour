@@ -83,6 +83,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	boost::shared_ptr<ARDOUR::Panner> _panner;
 	PBD::ScopedConnectionList connections;
+	PBD::ScopedConnectionList _pan_control_connections;
 
 	bool ignore_toggle;
 	bool in_pan_update;

@@ -267,7 +267,7 @@ public:
 	StreamPanner &streampanner( uint32_t n ) const { assert( n < _streampanners.size() ); return *_streampanners[n]; }
 	uint32_t npanners() const { return _streampanners.size(); }
 
-	PBD::Signal0<void> Changed;
+	PBD::Signal0<void> Changed; /* panner and/or outputs count changed */
 	PBD::Signal0<void> LinkStateChanged;
 	PBD::Signal0<void> StateChanged; /* for bypass */
 

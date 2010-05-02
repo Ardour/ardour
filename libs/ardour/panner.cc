@@ -148,6 +148,7 @@ StreamPanner::set_position (float xpos, float ypos, bool link_call)
 		_y = ypos;
 		update ();
 		Changed ();
+		_control->Changed ();
 	}
 }
 
@@ -164,6 +165,7 @@ StreamPanner::set_position (float xpos, float ypos, float zpos, bool link_call)
 		_z = zpos;
 		update ();
 		Changed ();
+		_control->Changed ();
 	}
 }
 
