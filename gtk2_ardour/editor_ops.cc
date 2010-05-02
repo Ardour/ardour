@@ -4884,7 +4884,7 @@ Editor::toggle_region_lock ()
 }
 
 void
-Editor::set_region_lock_style (Region::PositionLockStyle ps)
+Editor::toggle_region_lock_style ()
 {
 	RegionSelection rs = get_equivalent_regions (selection->regions, ARDOUR::Properties::edit.property_id);
 
@@ -4896,7 +4896,8 @@ Editor::set_region_lock_style (Region::PositionLockStyle ps)
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
                 (*i)->region()->clear_history ();
-		(*i)->region()->set_position_lock_style (ps);
+		Region::PositionLockStyle const ns = (*i)->region()->positional_lock_style() == Region::AudioTime ? Region::MusicTime : Region::AudioTime;
+		(*i)->region()->set_position_lock_style (ns);
 		_session->add_command (new StatefulDiffCommand ((*i)->region()));
 	}
 

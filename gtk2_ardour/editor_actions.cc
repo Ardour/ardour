@@ -458,7 +458,7 @@ Editor::register_actions ()
 	act = ActionManager::register_toggle_action (editor_actions, "lock-region", _("Lock Region"), sigc::mem_fun(*this, &Editor::toggle_region_lock));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_toggle_action (editor_actions, "glue-region", _("Glue Region to Bars and Beats"), sigc::bind (sigc::mem_fun (*this, &Editor::set_region_lock_style), Region::MusicTime));
+	act = ActionManager::register_toggle_action (editor_actions, "glue-region", _("Glue Region to Bars and Beats"), sigc::mem_fun (*this, &Editor::toggle_region_lock_style));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::region_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "naturalize-region", _("Move to Original Position"), sigc::mem_fun (*this, &Editor::naturalize));

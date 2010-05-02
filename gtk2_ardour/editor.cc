@@ -1739,7 +1739,7 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 		break;
 	}
 
-	bbt_glue_item->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &Editor::set_region_lock_style), Region::MusicTime));
+	bbt_glue_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_region_lock_style));
 
 	items.push_back (CheckMenuElem (_("Mute")));
 	CheckMenuItem* region_mute_item = static_cast<CheckMenuItem*>(&items.back());

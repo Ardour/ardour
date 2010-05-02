@@ -1040,7 +1040,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_region_lock ();
 	void toggle_region_opaque ();
 	void toggle_record_enable ();
-	void set_region_lock_style (ARDOUR::Region::PositionLockStyle);
+	void toggle_region_lock_style ();
 	void raise_region ();
 	void raise_region_to_top ();
 	void lower_region ();
