@@ -99,11 +99,11 @@ MuteMaster::mute_gain_at (MutePoint mp) const
         // cerr << "solo level = " << _solo_level << " selfmuted " <<  self_muted_at (mp) << " omute " << muted_by_others_at (mp) << endl;
         
         if (Config->get_solo_mute_override()) {
-                if ((l == SelfSoloed) || (l == DownstreamSoloed)) { 
+                if ((l == SelfSoloed) || (l == UpstreamSoloed)) { 
                         gain = 1.0;
                 } else if (self_muted_at (mp)) { // self-muted 
                         gain = Config->get_solo_mute_gain ();
-                } else if (l == UpstreamSoloed) {
+                } else if (l == DownstreamSoloed) {
                         gain = 1.0;
                 } else if (muted_by_others_at (mp)) { // muted by others
                         gain = Config->get_solo_mute_gain ();
@@ -117,11 +117,11 @@ MuteMaster::mute_gain_at (MutePoint mp) const
         } else {
                 if (self_muted_at (mp)) { // self-muted 
                         gain = Config->get_solo_mute_gain ();
-                } else if ((l == SelfSoloed) || (l == DownstreamSoloed)) {
+                } else if ((l == SelfSoloed) || (l == UpstreamSoloed)) {
                         gain = 1.0;
                 } else if (muted_by_others_at (mp)) { // muted by others
                         gain = Config->get_solo_mute_gain ();
-                } else if (l == UpstreamSoloed) { // soloed by others
+                } else if (l == DownstreamSoloed) { // soloed by others
                         gain = 1.0;
                 } else {
                         if (!_solo_ignore && _session.soloing()) {

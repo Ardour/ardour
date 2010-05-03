@@ -2276,17 +2276,16 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
         */
 
         RouteList uninvolved;
-
+        
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		bool via_sends_only;
+                bool in_signal_flow;
 
 		if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden()) {
 			continue;
 		} 
 
-                if ((*i)->graph_level () == route->graph_level()) {
-                        (*i)->mod_muted_by_others (delta);                        
-                }
+                in_signal_flow = false;
 
                 /* feed-backwards (other route to solo change route):
 
@@ -2299,7 +2298,8 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 
                 if ((*i)->feeds (route, &via_sends_only)) {
 			if (!via_sends_only) {
-				(*i)->mod_solo_by_others_upstream (delta);
+				(*i)->mod_solo_by_others_downstream (delta);
+                                in_signal_flow = true;
 			}
 		} 
                 
@@ -2312,12 +2312,26 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
                  */
 
                 if (route->feeds (*i, &via_sends_only)) {
-                        (*i)->mod_solo_by_others_downstream (delta);
+                        (*i)->mod_solo_by_others_upstream (delta);
+                        in_signal_flow = true;
+                }
+
+                if (!in_signal_flow) {
+                        uninvolved.push_back (*i);
                 }
 	}
 
 	solo_update_disabled = false;
 	update_route_solo_state (r);
+
+        /* now notify that the mute state of the routes not involved in the signal
+           pathway of the just-solo-changed route may have altered.
+        */
+
+        for (RouteList::iterator i = uninvolved.begin(); i != uninvolved.end(); ++i) {
+                (*i)->mute_changed (this);
+        }
+
 	SoloChanged (); /* EMIT SIGNAL */
 	set_dirty();
 }
