@@ -40,6 +40,7 @@ MuteMaster::MuteMaster (Session& s, const std::string&)
         , _mute_point (AllPoints)
         , _self_muted (false)
         , _muted_by_others (0)
+        , _solo_ignore (false)
 {
 }
 
@@ -107,7 +108,11 @@ MuteMaster::mute_gain_at (MutePoint mp) const
                 } else if (muted_by_others_at (mp)) { // muted by others
                         gain = Config->get_solo_mute_gain ();
                 } else {
-                        gain = 1.0;
+                        if (!_solo_ignore && _session.soloing()) {
+                                gain = 0.0;
+                        } else {
+                                gain = 1.0;
+                        }
                 }
         } else {
                 if (self_muted_at (mp)) { // self-muted 
@@ -119,10 +124,14 @@ MuteMaster::mute_gain_at (MutePoint mp) const
                 } else if (l == UpstreamSoloed) { // soloed by others
                         gain = 1.0;
                 } else {
-                        gain = 1.0;
+                        if (!_solo_ignore && _session.soloing()) {
+                                gain = 0.0;
+                        } else {
+                                gain = 1.0;
+                        }
                 }
         }
-
+        
         // cerr << "\tgain = " << gain << endl;
         
         return gain;

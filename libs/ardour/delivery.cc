@@ -500,7 +500,7 @@ Delivery::target_gain ()
                 break;
         }
 
-        // cerr << name() << ' ';
+        //cerr << name() << ' ';
         desired_gain = _mute_master->mute_gain_at (mp);
         
         if (_role == Listen && _session.monitor_out() && !_session.listening()) {

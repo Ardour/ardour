@@ -838,7 +838,7 @@ RouteUI::mute_visual_state (Session* s, boost::shared_ptr<Route> r)
 		if (r->self_muted ()) {
 			/* full mute */
 			return 2;
-		} else if (r->muted_by_others() || r->path_muted_by_others()) {
+		} else if (!r->self_soloed() && (r->muted_by_others() || r->path_muted_by_others())) {
 			return 1;
 		} else {
 			/* no mute at all */

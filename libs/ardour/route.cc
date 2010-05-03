@@ -165,6 +165,10 @@ Route::init ()
                 _main_outs->panner()->set_bypassed (true);
 	}
 
+        if (is_master() || is_monitor() || is_hidden()) {
+                _mute_master->set_solo_ignore (true);
+        }
+
 	/* now that we have _meter, its safe to connect to this */
 
 	Metering::Meter.connect_same_thread (*this, (boost::bind (&Route::meter, this)));
@@ -1794,6 +1798,10 @@ Route::_set_state (const XMLNode& node, int version, bool /*call_base*/)
 	} else {
 		_flags = Flag (0);
 	}
+
+        if (is_master() || is_monitor() || is_hidden()) {
+                _mute_master->set_solo_ignore (true);
+        }
 
 	/* add all processors (except amp, which is always present) */
 

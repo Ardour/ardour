@@ -72,6 +72,7 @@ class MuteMaster : public SessionHandleRef, public PBD::Stateful
         MutePoint mute_points() const { return _mute_point; }
 
         void set_solo_level (SoloLevel);
+        void set_solo_ignore (bool yn) { _solo_ignore = yn; }
 
 	PBD::Signal0<void> MutePointChanged;
 
@@ -83,6 +84,7 @@ class MuteMaster : public SessionHandleRef, public PBD::Stateful
         volatile bool      _self_muted;
         volatile uint32_t  _muted_by_others;
         volatile SoloLevel _solo_level;
+        volatile bool      _solo_ignore;
 };
 
 } // namespace ARDOUR
