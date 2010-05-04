@@ -617,6 +617,16 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 		_soloed_by_others_upstream += delta;
 	}
 
+        /* push the inverse solo change to everything that feeds us. 
+         */
+
+        for (FedBy::iterator i = _fed_by.begin(); i != _fed_by.end(); ++i) {
+                boost::shared_ptr<Route> sr = i->r.lock();
+                if (sr) {
+                        sr->mod_solo_by_others_downstream (-delta);
+                }
+        }
+
         set_mute_master_solo ();
         solo_changed (false, this);
 }
