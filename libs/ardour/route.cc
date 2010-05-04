@@ -616,7 +616,6 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 		_soloed_by_others_upstream += delta;
 	}
 
-
         /* push the inverse solo change to everything that feeds us. 
            
            This is important for solo-within-group. When we solo 1 track out of N that
@@ -630,7 +629,7 @@ Route::mod_solo_by_others_upstream (int32_t delta)
            not in reverse.
          */
 
-        if (delta > 0) {
+        if (Config->get_solo_latched() || delta > 0) {
                 for (FedBy::iterator i = _fed_by.begin(); i != _fed_by.end(); ++i) {
                         boost::shared_ptr<Route> sr = i->r.lock();
                         if (sr) {
@@ -650,7 +649,7 @@ Route::mod_solo_by_others_downstream (int32_t delta)
                 return;
         }
 
-	if (delta < 0) {
+        if (delta < 0) {
 		if (_soloed_by_others_downstream >= (uint32_t) abs (delta)) {
 			_soloed_by_others_downstream += delta;
 		} else {
