@@ -2320,7 +2320,7 @@ Editor::cursor_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	show_verbose_time_cursor (cursor->current_frame, 10);
 
 #ifdef GTKOSX
-	track_canvas->update_now ();
+        flush_canvas ();
 #endif
 	UpdateAllTransportClocks (cursor->current_frame);
 
@@ -2634,7 +2634,7 @@ Editor::marker_drag_motion_callback (ArdourCanvas::Item* item, GdkEvent* event)
 	show_verbose_time_cursor (newframe, 10);
 
 #ifdef GTKOSX
-	track_canvas->update_now ();
+        flush_canvas ();
 #endif
 }
 
@@ -3273,7 +3273,7 @@ Editor::start_region_grab (ArdourCanvas::Item* item, GdkEvent* event)
 	_region_motion_group->raise_to_top ();
 
 	/* sync the canvas to what we think is its current state */
-	track_canvas->update_now();
+        flush_canvas ();
 }
 
 void
@@ -3399,7 +3399,7 @@ Editor::possibly_copy_regions_during_grab (GdkEvent* event)
 		   ..only if the mouse is in rapid motion at the time of the grab. 
 		   something to do with regionview creation raking so long?
 		 */
-		track_canvas->update_now();
+                flush_canvas ();
 	}
 }
 
@@ -4018,7 +4018,7 @@ Editor::region_drag_finished_callback (ArdourCanvas::Item* item, GdkEvent* event
 
 	drag_delta = clicked_regionview->region()->position() - drag_info.last_frame_position;
 
-	track_canvas->update_now ();
+        flush_canvas ();
 
 	for (list<RegionView*>::const_iterator i = selection->regions.by_layer().begin(); i != selection->regions.by_layer().end(); ) {
 			
