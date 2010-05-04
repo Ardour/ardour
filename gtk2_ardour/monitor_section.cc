@@ -51,7 +51,8 @@ MonitorSection::MonitorSection (Session* s)
         , dim_all_button (_("dim"))
         , mono_button (_("mono"))
         , rude_solo_button (_("soloing"))
-
+        , rude_audition_button (_("auditioning"))
+        , exclusive_solo_button (_("Exclusive solo"))
 {
         Glib::RefPtr<Action> act;
 
@@ -90,10 +91,16 @@ MonitorSection::MonitorSection (Session* s)
 	rude_solo_button.set_name ("TransportSoloAlert");
         rude_solo_button.show ();
 
-        ARDOUR_UI::Blink.connect (sigc::mem_fun (*this, &MonitorSection::solo_blink));
+	rude_audition_button.set_name ("TransportAuditioningAlert");
+        rude_audition_button.show ();
+
+        ARDOUR_UI::Blink.connect (sigc::mem_fun (*this, &MonitorSection::do_blink));
+
 	rude_solo_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_solo), false);
         UI::instance()->set_tip (rude_solo_button, _("When active, something is soloed.\nClick to de-solo everything"));
 
+	rude_audition_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_audition), false);
+        UI::instance()->set_tip (rude_audition_button, _("When active, auditioning is active.\nClick to stop the audition"));
 
         solo_model_box.set_spacing (6);
         solo_model_box.pack_start (solo_in_place_button, false, false);
@@ -151,9 +158,13 @@ MonitorSection::MonitorSection (Session* s)
 
         solo_packer->pack_start (*spin_packer, true, true);
 
+        exclusive_solo_button.set_name (X_("MonitorCutButton"));
+
         upper_packer.set_spacing (12);
         upper_packer.pack_start (rude_solo_button, false, false);
+        upper_packer.pack_start (rude_audition_button, false, false);
         upper_packer.pack_start (solo_model_box, false, false);
+        upper_packer.pack_start (exclusive_solo_button, false, false);
         upper_packer.pack_start (*solo_packer, false, false);
 
         act = ActionManager::get_action (X_("Monitor"), X_("monitor-cut-all"));
@@ -808,6 +819,32 @@ MonitorSection::map_state ()
 }
 
 void
+MonitorSection::do_blink (bool onoff)
+{
+        solo_blink (onoff);
+        audition_blink (onoff);
+}
+
+void
+MonitorSection::audition_blink (bool onoff)
+{
+	if (_session == 0) {
+		return;
+	}
+
+	if (_session->is_auditioning()) {
+		if (onoff) {
+			rude_audition_button.set_state (STATE_ACTIVE);
+		} else {
+			rude_audition_button.set_state (STATE_NORMAL);
+		}
+	} else {
+		rude_audition_button.set_active (false);
+		rude_audition_button.set_state (STATE_NORMAL);
+	}
+}
+
+void
 MonitorSection::solo_blink (bool onoff)
 {
 	if (_session == 0) {
@@ -837,6 +874,15 @@ MonitorSection::cancel_solo (GdkEventButton* ev)
                 }
         }
 
+        return true;
+}
+
+bool
+MonitorSection::cancel_audition (GdkEventButton* ev)
+{
+	if (_session) {
+		_session->cancel_audition();
+	}
         return true;
 }
 

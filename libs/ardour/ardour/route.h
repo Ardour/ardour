@@ -126,14 +126,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	MuteMaster::MutePoint mute_points() const { return _mute_points; }
 
 	bool muted () const;
-	bool self_muted () const;
-	bool muted_by_others () const;
-
-        bool path_muted_by_others() const { return _path_muted_by_others > 0; }
-        void mod_path_muted_by_others (int delta);
-
 	void set_mute (bool yn, void* src);
-        void mod_muted_by_others (int delta);
 
 	/* controls use set_solo() to modify this route's solo state
 	 */
@@ -437,7 +430,6 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	boost::shared_ptr<MuteControllable> _mute_control;
 	boost::shared_ptr<MuteMaster> _mute_master;
 	MuteMaster::MutePoint _mute_points;
-        volatile uint32_t     _path_muted_by_others;
     
 	std::string    _comment;
 	bool           _have_internal_generator;

@@ -328,18 +328,15 @@ style "solo_button" = "small_button"
 style "solo_button_alternate" = "small_button"
 {
         #
-        # this is the "solo-safe" solo theme
+        # this is the "solo-isolated" solo theme
         #
 
-	bg[NORMAL] = { 0.19, 0.97, 0.69 } # solo-safe
-	bg[ACTIVE] = { 0.19, 0.97, 0.69 } # solo-safe
-	bg[SELECTED] = { 0.19, 0.97, 0.69 } # solo-safe
-	bg[PRELIGHT] = { 0.19, 0.97, 0.69 } # solo-safe
+	bg[ACTIVE] = { 0.66, 0.97, 0.19 } 
 
-	fg[ACTIVE] = { 0, 0, 0 }
-	fg[SELECTED] = { 0, 0, 0 }
-	fg[NORMAL] = { 0, 0, 0 }
-	fg[PRELIGHT] = { 0, 0, 0 }
+	fg[ACTIVE] = { 1.0, 0, 0 }
+	fg[SELECTED] = { 1.0, 0, 0 }
+	fg[NORMAL] = { 1.0, 0, 0 }
+	fg[PRELIGHT] = { 1.0, 0, 0 }
 }
 
 style "solo_button_alternate2" = "small_button"

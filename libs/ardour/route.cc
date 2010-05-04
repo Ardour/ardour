@@ -91,7 +91,6 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _mute_control (new MuteControllable (X_("mute"), *this))
 	, _mute_master (new MuteMaster (sess, name))
         , _mute_points (MuteMaster::AllPoints)
-        , _path_muted_by_others (false)
         , _have_internal_generator (false)
         , _physically_connected (false)
         , _graph_level (-1)
@@ -617,13 +616,26 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 		_soloed_by_others_upstream += delta;
 	}
 
+
         /* push the inverse solo change to everything that feeds us. 
+           
+           This is important for solo-within-group. When we solo 1 track out of N that
+           feed a bus, that track will cause mod_solo_by_upstream (+1) to be called
+           on the bus. The bus then needs to call mod_solo_by_downstream (-1) on all
+           tracks that feed it. This will silence them if they were audible because
+           of a bus solo, but the newly soloed track will still be audible (because 
+           it is self-soloed).
+           
+           but .. do this only when we are being told to solo-by-upstream (i.e delta = +1),
+           not in reverse.
          */
 
-        for (FedBy::iterator i = _fed_by.begin(); i != _fed_by.end(); ++i) {
-                boost::shared_ptr<Route> sr = i->r.lock();
-                if (sr) {
-                        sr->mod_solo_by_others_downstream (-delta);
+        if (delta > 0) {
+                for (FedBy::iterator i = _fed_by.begin(); i != _fed_by.end(); ++i) {
+                        boost::shared_ptr<Route> sr = i->r.lock();
+                        if (sr) {
+                                sr->mod_solo_by_others_downstream (-delta);
+                        }
                 }
         }
 
@@ -655,19 +667,7 @@ Route::mod_solo_by_others_downstream (int32_t delta)
 void
 Route::set_mute_master_solo ()
 {
-        SoloLevel level;
-
-        if (self_soloed()) {
-                level = SelfSoloed;
-        } else if (soloed_by_others_upstream()) {
-                level = UpstreamSoloed;
-        } else if (soloed_by_others_downstream()) {
-                level = DownstreamSoloed;
-        } else {
-                level = NotSoloed;
-        }
-
-        _mute_master->set_solo_level (level);
+        _mute_master->set_soloed (self_soloed() || soloed_by_others_downstream() || soloed_by_others_upstream());
 }
 
 void
@@ -745,8 +745,8 @@ Route::set_mute (bool yn, void *src)
 		return;
 	}
 
-	if (self_muted() != yn) {
-                _mute_master->set_self_muted (yn);
+	if (muted() != yn) {
+                _mute_master->set_muted (yn);
 		mute_changed (src); /* EMIT SIGNAL */
 	}
 }
@@ -754,47 +754,7 @@ Route::set_mute (bool yn, void *src)
 bool
 Route::muted () const
 {
-        return self_muted() || muted_by_others();
-}
-
-bool
-Route::self_muted() const
-{
-	return _mute_master->self_muted ();
-}
-
-bool
-Route::muted_by_others() const
-{
-	return _mute_master->muted_by_others ();
-}
-
-void
-Route::mod_muted_by_others (int delta)
-{
-        if (_solo_isolated) {
-                return;
-        }
-
-        bool old = muted ();
-        _mute_master->mod_muted_by_others (delta);
-        if (old != muted()) {
-                mute_changed (this);
-        }
-}
-
-void
-Route::mod_path_muted_by_others (int32_t delta)
-{
-	if (delta < 0) {
-		if (_path_muted_by_others >= (uint32_t) abs (delta)) {
-			_path_muted_by_others += delta;
-		} else {
-			_path_muted_by_others = 0;
-		}
-	} else {
-		_path_muted_by_others += delta;
-	}
+        return _mute_master->muted();
 }
 
 #if 0
@@ -3069,7 +3029,7 @@ Route::MuteControllable::set_value (float val)
 float
 Route::MuteControllable::get_value (void) const
 {
-	return route.self_muted() ? 1.0f : 0.0f;
+	return route.muted() ? 1.0f : 0.0f;
 }
 
 void

@@ -294,7 +294,7 @@ RouteUI::mute_press (GdkEventButton* ev)
                                         return true;
                                 }
 
-				_mute_release = new SoloMuteRelease (_route->self_muted ());
+				_mute_release = new SoloMuteRelease (_route->muted ());
 			}
 
 			if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
@@ -305,7 +305,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 						_mute_release->routes = _session->get_routes ();
 					}
 
-					_session->set_mute (_session->get_routes(), !_route->self_muted());
+					_session->set_mute (_session->get_routes(), !_route->muted());
 
 				} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
@@ -318,7 +318,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 							_mute_release->routes = _session->get_routes ();
 						}
 								
-						_session->set_mute (_session->get_routes(), !_route->self_muted(), Session::rt_cleanup, true);
+						_session->set_mute (_session->get_routes(), !_route->muted(), Session::rt_cleanup, true);
 					}
 
 				} else {
@@ -332,7 +332,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 						_mute_release->routes = rl;
 					}
 
-					_session->set_mute (rl, !_route->self_muted());
+					_session->set_mute (rl, !_route->muted());
 
 				}
 			}
@@ -835,7 +835,7 @@ RouteUI::mute_visual_state (Session* s, boost::shared_ptr<Route> r)
 
 	if (Config->get_show_solo_mutes()) {
 
-		if (r->self_muted ()) {
+		if (r->muted ()) {
 			/* full mute */
 			return 2;
 		} else if (s->soloing() && !r->soloed() && !r->solo_isolated()) {
@@ -847,7 +847,7 @@ RouteUI::mute_visual_state (Session* s, boost::shared_ptr<Route> r)
 
 	} else {
 
-		if (r->self_muted()) {
+		if (r->muted()) {
 			/* full mute */
 			return 2;
 		} else {
@@ -866,7 +866,7 @@ RouteUI::update_mute_display ()
                 return;
         }
 
-	bool model = _route->self_muted();
+	bool model = _route->muted();
 	bool view = mute_button->get_active();
 
 	/* first make sure the button's "depressed" visual

@@ -2251,7 +2251,7 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 		error << string_compose (_("programming error: %1"), X_("invalid route weak ptr passed to route_solo_changed")) << endmsg;
 		return;
 	}
-
+        
 	shared_ptr<RouteList> r = routes.reader ();
 	int32_t delta;
 
@@ -2260,21 +2260,19 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 	} else {
 		delta = -1;
 	}
+ 
+        if (delta == 1 && !Config->get_solo_latched()) {
+                /* new solo: disable all other solos */
+                for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+                        if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden()) {
+                                continue;
+                        } 
+                        (*i)->set_solo (false, this);
+                }
+        }
 
 	solo_update_disabled = true;
-
-        /*
-
-           solo a route:
-              for anything in the signal path for this route, increment its soloed-by-other count
-              for anything not in the signal path for this route, increment its muted-by-other count
-
-           unsolo a route:
-              for anything in the signal path for this route, decrement its soloed-by-other count
-              for anything not in the signal path for this route, decrement its muted-by-other count
-
-        */
-
+        
         RouteList uninvolved;
         
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -2287,15 +2285,6 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 
                 in_signal_flow = false;
 
-                /* feed-backwards (other route to solo change route):
-
-                        if (*i) feeds the one whose solo status changed 
-                             it should be soloed by other if the change was -> solo OR de-soloed by other if change was -> !solo
-                        else 
-                             do nothing
-                            
-                 */
-
                 if ((*i)->feeds (route, &via_sends_only)) {
 			if (!via_sends_only) {
 				(*i)->mod_solo_by_others_downstream (delta);
@@ -2303,14 +2292,6 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 			}
 		} 
                 
-                /* feed-forward (solo change route to other routes):
-                    
-                      if the route whose solo status changed feeds (*i)
-                             do nothing
-                      else 
-                             mute if the change was -> solo OR demute if change was -> !solo
-                 */
-
                 if (route->feeds (*i, &via_sends_only)) {
                         (*i)->mod_solo_by_others_upstream (delta);
                         in_signal_flow = true;

@@ -46,12 +46,8 @@ class MuteMaster : public SessionHandleRef, public PBD::Stateful
 	MuteMaster (Session& s, const std::string& name);
 	~MuteMaster() {}
 
-	bool self_muted() const { return _self_muted && (_mute_point != MutePoint (0)); }
-	bool muted_by_others() const { return _muted_by_others && (_mute_point != MutePoint (0)); }
-	bool muted() const { return (_self_muted || (_muted_by_others > 0)) && (_mute_point != MutePoint (0)); }
-        bool muted_at (MutePoint mp) const { return (_self_muted || (_muted_by_others > 0)) && (_mute_point & mp); }
-        bool self_muted_at (MutePoint mp) const { return _self_muted && (_mute_point & mp); }
-        bool muted_by_others_at (MutePoint mp) const { return (_muted_by_others > 0) && (_mute_point & mp); }
+	bool muted() const { return _muted && (_mute_point != MutePoint (0)); }
+        bool muted_at (MutePoint mp) const { return _muted && (_mute_point & mp); }
 
 	bool muted_pre_fader() const  { return muted_at (PreFader); }
 	bool muted_post_fader() const { return muted_at (PostFader); }
@@ -60,9 +56,7 @@ class MuteMaster : public SessionHandleRef, public PBD::Stateful
 
 	gain_t mute_gain_at (MutePoint) const;
 
-        void set_self_muted (bool yn) { _self_muted = yn; }
-        void mod_muted_by_others (int delta);
-        void clear_muted_by_others ();
+        void set_muted (bool yn) { _muted = yn; }
 
 	void mute_at (MutePoint);
 	void unmute_at (MutePoint);
@@ -71,7 +65,7 @@ class MuteMaster : public SessionHandleRef, public PBD::Stateful
         void set_mute_points (MutePoint);
         MutePoint mute_points() const { return _mute_point; }
 
-        void set_solo_level (SoloLevel);
+        void set_soloed (bool);
         void set_solo_ignore (bool yn) { _solo_ignore = yn; }
 
 	PBD::Signal0<void> MutePointChanged;
@@ -81,9 +75,8 @@ class MuteMaster : public SessionHandleRef, public PBD::Stateful
 
   private:
 	volatile MutePoint _mute_point;
-        volatile bool      _self_muted;
-        volatile uint32_t  _muted_by_others;
-        volatile SoloLevel _solo_level;
+        volatile bool      _muted;
+        volatile bool      _soloed;
         volatile bool      _solo_ignore;
 };
 
