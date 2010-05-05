@@ -575,10 +575,13 @@ ARDOUR_UI::install_actions ()
 	   sensitive only if it makes sense.
 	*/
 
+#ifndef __APPLE__
+        /* JACK has no monitoring capabilities with the CoreAudio backend */
 	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseHardwareMonitoring"), _("JACK does monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), HardwareMonitoring));
 	if (!engine->can_request_hardware_monitoring()) {
 		act->set_sensitive (false);
 	}
+#endif
 	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseSoftwareMonitoring"), string_compose (_("%1 does monitoring"), PROGRAM_NAME).c_str(), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), SoftwareMonitoring));
 	act = ActionManager::register_radio_action (option_actions, monitoring_group, X_("UseExternalMonitoring"), _("Audio Hardware does monitoring"), bind (mem_fun (*this, &ARDOUR_UI::set_monitor_model), ExternalMonitoring));
 
