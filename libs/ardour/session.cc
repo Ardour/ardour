@@ -2287,7 +2287,9 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 
                 if ((*i)->feeds (route, &via_sends_only)) {
 			if (!via_sends_only) {
-				(*i)->mod_solo_by_others_downstream (delta);
+                                if (!route->soloed_by_others_upstream()) {
+                                        (*i)->mod_solo_by_others_downstream (delta);
+                                }
                                 in_signal_flow = true;
 			}
 		} 

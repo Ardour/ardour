@@ -606,6 +606,10 @@ Route::mod_solo_by_others_upstream (int32_t delta)
                 return;
         }
 
+        uint32_t old_sbu = _soloed_by_others_upstream;
+
+        cerr << name() << " SbU was " << old_sbu << " delta " << delta << " = ";
+
 	if (delta < 0) {
 		if (_soloed_by_others_upstream >= (uint32_t) abs (delta)) {
 			_soloed_by_others_upstream += delta;
@@ -615,6 +619,8 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 	} else {
 		_soloed_by_others_upstream += delta;
 	}
+
+        cerr << _soloed_by_others_upstream << endl;
 
         /* push the inverse solo change to everything that feeds us. 
            
@@ -629,7 +635,22 @@ Route::mod_solo_by_others_upstream (int32_t delta)
            not in reverse.
          */
 
-        if (Config->get_solo_latched() || delta > 0) {
+        cerr << name() << " SbU ... latched solo?  " << Config->get_solo_latched() << " delta = " << delta << endl;
+
+        bool push_inverse = false;
+
+        if (old_sbu > 0 && _soloed_by_others_upstream == 0 && _self_solo) {
+                /* we went back to non-soloed-by-others-upstream but we're still soloed push */
+                push_inverse = true;
+        }
+                
+        if (old_sbu == 0 && _soloed_by_others_upstream > 0) {
+                /* upstream made us solo when we weren't before */
+                push_inverse = true;
+        }
+
+        if (push_inverse) {
+                cerr << "\t ... INVERT push\n";
                 for (FedBy::iterator i = _fed_by.begin(); i != _fed_by.end(); ++i) {
                         boost::shared_ptr<Route> sr = i->r.lock();
                         if (sr) {
@@ -649,6 +670,8 @@ Route::mod_solo_by_others_downstream (int32_t delta)
                 return;
         }
 
+        cerr << name() << " SbD delta " << delta << " = ";	
+
         if (delta < 0) {
 		if (_soloed_by_others_downstream >= (uint32_t) abs (delta)) {
 			_soloed_by_others_downstream += delta;
@@ -658,6 +681,8 @@ Route::mod_solo_by_others_downstream (int32_t delta)
 	} else {
 		_soloed_by_others_downstream += delta;
 	}
+
+        cerr << _soloed_by_others_downstream << endl;
 
         set_mute_master_solo ();
         solo_changed (false, this);
