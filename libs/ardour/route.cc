@@ -635,27 +635,24 @@ Route::mod_solo_by_others_upstream (int32_t delta)
            not in reverse.
          */
 
-        cerr << name() << " SbU ... latched solo?  " << Config->get_solo_latched() << " delta = " << delta << endl;
+        cerr << name() << " SbU ... sbd = " << _soloed_by_others_downstream 
+             << " ss = " << _self_solo << " latched solo?  " << Config->get_solo_latched() << " delta = " 
+             << delta << endl;
 
-        bool push_inverse = false;
-
-        if (old_sbu > 0 && _soloed_by_others_upstream == 0 && _self_solo) {
-                /* we went back to non-soloed-by-others-upstream but we're still soloed push */
-                push_inverse = true;
-        }
+        if ((_self_solo || _soloed_by_others_downstream) &&
+            ((old_sbu == 0 && _soloed_by_others_upstream > 0) || 
+             (old_sbu > 0 && _soloed_by_others_upstream == 0))) {
                 
-        if (old_sbu == 0 && _soloed_by_others_upstream > 0) {
-                /* upstream made us solo when we weren't before */
-                push_inverse = true;
-        }
-
-        if (push_inverse) {
-                cerr << "\t ... INVERT push\n";
-                for (FedBy::iterator i = _fed_by.begin(); i != _fed_by.end(); ++i) {
-                        boost::shared_ptr<Route> sr = i->r.lock();
-                        if (sr) {
-                                sr->mod_solo_by_others_downstream (-delta);
+                if (delta > 0 || Config->get_solo_latched()) {
+                        cerr << "\t ... INVERT push\n";
+                        for (FedBy::iterator i = _fed_by.begin(); i != _fed_by.end(); ++i) {
+                                boost::shared_ptr<Route> sr = i->r.lock();
+                                if (sr) {
+                                        sr->mod_solo_by_others_downstream (-delta);
+                                }
                         }
+                } else {
+                        cerr << "\t... skip invert push\n";
                 }
         }
 
