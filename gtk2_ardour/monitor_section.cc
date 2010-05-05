@@ -458,11 +458,9 @@ MonitorSection::toggle_mute_overrides_solo ()
         Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), "toggle-mute-overrides-solo");
         if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-                cerr << "Set solo_mute_override to " << tact->get_active() << endl;
                 Config->set_solo_mute_override (tact->get_active());
         }
 }
-
 
 void
 MonitorSection::dim_all ()
@@ -817,13 +815,8 @@ MonitorSection::map_state ()
         if (act) {
                 Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
                 if (tact) {
-                        cerr << "Set monitor cut all action to " << _monitor->cut_all () << endl;
                         tact->set_active (_monitor->cut_all());
-                } else {
-                        cerr << " no global cut action\n";
                 }
-        } else {
-                cerr << " no global cut action2\n";
         }
 
         act = ActionManager::get_action (X_("Monitor"), "monitor-dim-all");
