@@ -1074,9 +1074,14 @@ bool
 RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 {
         bool view = (solo_isolated_led->visual_state() != 0);
-        cerr << _route->name() << "button release,  view is " << view << " set to " << !view << endl;
-        _route->set_solo_isolated (!view, this);
-        cerr << "DONE with SSI\n";
+        bool model = _route->solo_isolated();
+
+        /* called BEFORE the view has changed */
+
+        if (model == view) {
+                _route->set_solo_isolated (!view, this);
+        }
+
         return true;
 }
 
@@ -1090,7 +1095,14 @@ RouteUI::solo_safe_button_release (GdkEventButton* ev)
 void
 RouteUI::toggle_solo_isolated (Gtk::CheckMenuItem* check)
 {
-	_route->set_solo_isolated (check->get_active(), this);
+        bool view = check->get_active();
+        bool model = _route->solo_isolated();
+
+        /* called AFTER the view has changed */
+
+        if (model != view) {
+                _route->set_solo_isolated (view, this);
+        }
 }
 
 void
