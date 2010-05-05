@@ -1272,11 +1272,17 @@ AudioRegion::source_equivalent (boost::shared_ptr<const Region> o) const
 {
 	boost::shared_ptr<const AudioRegion> other = boost::dynamic_pointer_cast<const AudioRegion>(o);
 
-	if (!other)
+	if (!other) {
 		return false;
+        }
 
 	SourceList::const_iterator i;
 	SourceList::const_iterator io;
+        
+        if ((sources.size() != other->sources.size()) ||
+            (master_sources.size() != other->master_sources.size())) {
+                return false;
+        }
 
 	for (i = sources.begin(), io = other->sources.begin(); i != sources.end() && io != other->sources.end(); ++i, ++io) {
 		if ((*i)->id() != (*io)->id()) {
