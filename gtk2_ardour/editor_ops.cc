@@ -3760,7 +3760,7 @@ Editor::cut_copy (CutCopyOp op)
 			Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc));
 		}
 
-		_drags->break_drag ();
+		_drags->abort ();
 		return;
 	}
 
@@ -3841,7 +3841,7 @@ Editor::cut_copy (CutCopyOp op)
 	}
 
 	if (op == Cut || op == Clear) {
-		_drags->break_drag ();
+		_drags->abort ();
 	}
 }
 

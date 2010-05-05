@@ -44,6 +44,7 @@
 #include "region_view.h"
 #include "utils.h"
 #include "editor_regions.h"
+#include "editor_drag.h"
 
 #include "i18n.h"
 
@@ -1097,6 +1098,8 @@ EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 	vector<ustring> paths;
 
 	if (data.get_target() == "GTK_TREE_MODEL_ROW") {
+		/* something is being dragged over the region list */
+		_editor->_drags->abort ();
 		_display.on_drag_data_received (context, x, y, data, info, time);
 		return;
 	}
@@ -1155,12 +1158,18 @@ EditorRegions::name_edit (const Glib::ustring& path, const Glib::ustring& new_te
 
 }
 
+/** @return Region that has been dragged out of the list, or 0 */
 boost::shared_ptr<Region>
 EditorRegions::get_dragged_region ()
 {
 	list<boost::shared_ptr<Region> > regions;
 	TreeView* source;
 	_display.get_object_drag_data (regions, &source);
+
+	if (regions.empty()) {
+		return boost::shared_ptr<Region> ();
+	}
+	
 	assert (regions.size() == 1);
 	return regions.front ();
 }

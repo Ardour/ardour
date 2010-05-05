@@ -996,6 +996,10 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const & /*c*/, 
 
 		boost::shared_ptr<Region> region = _regions->get_dragged_region ();
 
+		if (!region) {
+			return true;
+		}
+
 		boost::shared_ptr<Region> region_copy = RegionFactory::create (region);
 
 		if (boost::dynamic_pointer_cast<AudioRegion> (region_copy) != 0 &&

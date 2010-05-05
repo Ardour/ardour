@@ -438,6 +438,7 @@ Editor::track_canvas_map_handler (GdkEventAny* /*ev*/)
 	return false;
 }
 
+/** This is called when something is dropped onto the track canvas */
 void
 Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context,
 					 int x, int y,

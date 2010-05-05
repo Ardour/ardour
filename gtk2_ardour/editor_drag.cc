@@ -67,24 +67,14 @@ DragManager::~DragManager ()
 	abort ();
 }
 
+/** Call abort for each active drag */
 void
 DragManager::abort ()
-{
-	for (list<Drag*>::const_iterator i = _drags.begin(); i != _drags.end(); ++i) {
-		(*i)->end_grab (0);
-		delete *i;
-	}
-
-	_drags.clear ();
-}
-
-void
-DragManager::break_drag ()
 {
 	_ending = true;
 	
 	for (list<Drag*>::const_iterator i = _drags.begin(); i != _drags.end(); ++i) {
-		(*i)->break_drag ();
+		(*i)->abort ();
 		delete *i;
 	}
 
@@ -119,6 +109,9 @@ DragManager::start_grab (GdkEvent* e)
 	}
 }
 
+/** Call end_grab for each active drag.
+ *  @return true if any drag reported movement having occurred.
+ */
 bool
 DragManager::end_grab (GdkEvent* e)
 {
@@ -243,7 +236,10 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	}
 }
 
-/** @param event GDK event, or 0.
+/** Call to end a drag `successfully'.  Ungrabs item and calls
+ *  subclass' finished() method.
+ *
+ *  @param event GDK event, or 0.
  *  @return true if some movement occurred, otherwise false.
  */
 bool
@@ -323,8 +319,9 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 	return false;
 }
 
+/** Call to abort a drag.  Ungrabs item and calls subclass's aborted () */
 void
-Drag::break_drag ()
+Drag::abort ()
 {
 	if (_item) {
 		_item->ungrab (0);
@@ -1450,7 +1447,9 @@ RegionInsertDrag::finished (GdkEvent* /*event*/, bool /*movement_occurred*/)
 void
 RegionInsertDrag::aborted ()
 {
-	/* XXX: TODO */
+	delete _primary;
+	_primary = 0;
+	_views.clear ();
 }
 
 RegionSpliceDrag::RegionSpliceDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)

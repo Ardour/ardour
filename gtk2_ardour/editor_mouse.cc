@@ -2551,7 +2551,7 @@ void
 Editor::escape ()
 {
 	if (_drags->active ()) {
-		_drags->break_drag ();
+		_drags->abort ();
 	} else {
 		selection->clear ();
 	}

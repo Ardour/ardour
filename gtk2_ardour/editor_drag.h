@@ -50,14 +50,13 @@ public:
 	bool motion_handler (GdkEvent *, bool);
 
 	void abort ();
-	void break_drag ();
 	void add (Drag *);
 	void set (Drag *, GdkEvent *, Gdk::Cursor* c = 0);
 	void start_grab (GdkEvent *);
 	bool end_grab (GdkEvent *);
 	bool have_item (ArdourCanvas::Item *) const;
 
-	/** @return true if an end drag or break_drag is in progress */
+	/** @return true if an end drag or abort is in progress */
 	bool ending () const {
 		return _ending;
 	}
@@ -84,7 +83,7 @@ public:
 private:
 	Editor* _editor;
 	std::list<Drag*> _drags;
-	bool _ending; ///< true if end_grab or break_drag is in progress, otherwise false
+	bool _ending; ///< true if end_grab or abort is in progress, otherwise false
 	double _current_pointer_x; ///< trackview x of the current pointer
 	double _current_pointer_y; ///< trackview y of the current pointer
 	nframes64_t _current_pointer_frame; ///< frame that the pointer is now at
@@ -108,7 +107,7 @@ public:
 
 	void swap_grab (ArdourCanvas::Item *, Gdk::Cursor *, uint32_t);
 	bool motion_handler (GdkEvent*, bool);
-	void break_drag ();
+	void abort ();
 
 	nframes64_t adjusted_frame (nframes64_t, GdkEvent const *, bool snap = true) const;
 	nframes64_t adjusted_current_frame (GdkEvent const *, bool snap = true) const;

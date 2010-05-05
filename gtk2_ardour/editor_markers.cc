@@ -1119,7 +1119,7 @@ Editor::new_transport_marker_menu_popdown ()
 	// hide rects
 	transport_bar_drag_rect->hide();
 
-	_drags->break_drag ();
+	_drags->abort ();
 }
 
 void
