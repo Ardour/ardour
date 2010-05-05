@@ -536,7 +536,6 @@ Route::set_listen (bool yn, void* src)
         }
 
 	if (_monitor_send) {
-                cerr << name() << " set listen = " << yn << " current = " << _monitor_send->active() << endl;
 		if (yn != _monitor_send->active()) {
 			if (yn) {
 				_monitor_send->activate ();
