@@ -608,7 +608,7 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 
         uint32_t old_sbu = _soloed_by_others_upstream;
 
-        cerr << name() << " SbU was " << old_sbu << " delta " << delta << " = ";
+        // cerr << name() << " SbU was " << old_sbu << " delta " << delta << " = ";
 
 	if (delta < 0) {
 		if (_soloed_by_others_upstream >= (uint32_t) abs (delta)) {
@@ -620,7 +620,7 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 		_soloed_by_others_upstream += delta;
 	}
 
-        cerr << _soloed_by_others_upstream << endl;
+        // cerr << _soloed_by_others_upstream << endl;
 
         /* push the inverse solo change to everything that feeds us. 
            
@@ -635,16 +635,16 @@ Route::mod_solo_by_others_upstream (int32_t delta)
            not in reverse.
          */
 
-        cerr << name() << " SbU ... sbd = " << _soloed_by_others_downstream 
-             << " ss = " << _self_solo << " latched solo?  " << Config->get_solo_latched() << " delta = " 
-             << delta << endl;
+        // cerr << name() << " SbU ... sbd = " << _soloed_by_others_downstream 
+        // << " ss = " << _self_solo << " latched solo?  " << Config->get_solo_latched() << " delta = " 
+        // << delta << endl;
 
         if ((_self_solo || _soloed_by_others_downstream) &&
             ((old_sbu == 0 && _soloed_by_others_upstream > 0) || 
              (old_sbu > 0 && _soloed_by_others_upstream == 0))) {
                 
                 if (delta > 0 || Config->get_solo_latched()) {
-                        cerr << "\t ... INVERT push\n";
+                        // cerr << "\t ... INVERT push\n";
                         for (FedBy::iterator i = _fed_by.begin(); i != _fed_by.end(); ++i) {
                                 boost::shared_ptr<Route> sr = i->r.lock();
                                 if (sr) {
@@ -652,7 +652,7 @@ Route::mod_solo_by_others_upstream (int32_t delta)
                                 }
                         }
                 } else {
-                        cerr << "\t... skip invert push\n";
+                        // cerr << "\t... skip invert push\n";
                 }
         }
 
@@ -667,7 +667,7 @@ Route::mod_solo_by_others_downstream (int32_t delta)
                 return;
         }
 
-        cerr << name() << " SbD delta " << delta << " = ";	
+        // cerr << name() << " SbD delta " << delta << " = ";	
 
         if (delta < 0) {
 		if (_soloed_by_others_downstream >= (uint32_t) abs (delta)) {
@@ -679,7 +679,7 @@ Route::mod_solo_by_others_downstream (int32_t delta)
 		_soloed_by_others_downstream += delta;
 	}
 
-        cerr << _soloed_by_others_downstream << endl;
+        // cerr << _soloed_by_others_downstream << endl;
 
         set_mute_master_solo ();
         solo_changed (false, this);
