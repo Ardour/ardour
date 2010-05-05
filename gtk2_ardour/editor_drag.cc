@@ -1736,9 +1736,6 @@ void
 TrimDrag::motion (GdkEvent* event, bool first_move)
 {
 	RegionView* rv = _primary;
-	nframes64_t frame_delta = 0;
-
-	bool left_direction;
 
 	/* snap modifier works differently here..
 	   its current state has to be passed to the
@@ -1755,12 +1752,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	nframes64_t const pf = adjusted_current_frame (event);
-
-	if (last_pointer_frame() > pf) {
-		left_direction = true;
-	} else {
-		left_direction = false;
-	}
 
 	if (first_move) {
 
@@ -1802,12 +1793,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		}
 	}
 
-	if (left_direction) {
-		frame_delta = (last_pointer_frame() - pf);
-	} else {
-		frame_delta = (pf - last_pointer_frame());
-	}
-
 	bool non_overlap_trim = false;
 
 	if (event && Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
@@ -1816,26 +1801,16 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 	switch (_operation) {
 	case StartTrim:
-		if ((left_direction == false) && (pf <= rv->region()->first_frame()/speed)) {
-			break;
-		} else {
-
-			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				_editor->single_start_trim (*i->view, frame_delta, left_direction, non_overlap_trim);
-			}
-			break;
+		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+			_editor->single_start_trim (*i->view, pf, non_overlap_trim);
 		}
+		break;
 
 	case EndTrim:
-		if ((left_direction == true) && (pf > (nframes64_t) (rv->region()->last_frame()/speed))) {
-			break;
-		} else {
-
-			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-				_editor->single_end_trim (*i->view, frame_delta, left_direction, non_overlap_trim);
-			}
-			break;
+		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+			_editor->single_end_trim (*i->view, pf, non_overlap_trim);
 		}
+		break;
 
 	case ContentsTrim:
 		{
@@ -1843,6 +1818,19 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 			if (event && Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 				swap_direction = true;
+			}
+
+			nframes64_t frame_delta = 0;
+			
+			bool left_direction = false;
+			if (last_pointer_frame() > pf) {
+				left_direction = true;
+			}
+
+			if (left_direction) {
+				frame_delta = (last_pointer_frame() - pf);
+			} else {
+				frame_delta = (pf - last_pointer_frame());
 			}
 
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {

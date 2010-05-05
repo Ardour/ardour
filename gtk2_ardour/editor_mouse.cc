@@ -2156,7 +2156,7 @@ Editor::single_contents_trim (RegionView& rv, nframes64_t frame_delta, bool left
 }
 
 void
-Editor::single_start_trim (RegionView& rv, nframes64_t frame_delta, bool left_direction, bool no_overlap)
+Editor::single_start_trim (RegionView& rv, nframes64_t new_bound, bool no_overlap)
 {
 	boost::shared_ptr<Region> region (rv.region());
 
@@ -2164,20 +2164,12 @@ Editor::single_start_trim (RegionView& rv, nframes64_t frame_delta, bool left_di
 		return;
 	}
 
-	nframes64_t new_bound;
-
 	double speed = 1.0;
 	TimeAxisView* tvp = clicked_axisview;
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
 	if (tv && tv->is_track()) {
 		speed = tv->track()->speed();
-	}
-
-	if (left_direction) {
-		new_bound = (nframes64_t) (region->position()/speed) - frame_delta;
-	} else {
-		new_bound = (nframes64_t) (region->position()/speed) + frame_delta;
 	}
 
 	nframes64_t pre_trim_first_frame = region->first_frame();
@@ -2207,7 +2199,7 @@ Editor::single_start_trim (RegionView& rv, nframes64_t frame_delta, bool left_di
 }
 
 void
-Editor::single_end_trim (RegionView& rv, nframes64_t frame_delta, bool left_direction, bool no_overlap)
+Editor::single_end_trim (RegionView& rv, nframes64_t new_bound, bool no_overlap)
 {
 	boost::shared_ptr<Region> region (rv.region());
 
@@ -2215,20 +2207,12 @@ Editor::single_end_trim (RegionView& rv, nframes64_t frame_delta, bool left_dire
 		return;
 	}
 
-	nframes64_t new_bound;
-
 	double speed = 1.0;
 	TimeAxisView* tvp = clicked_axisview;
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
 	if (tv && tv->is_track()) {
 		speed = tv->track()->speed();
-	}
-
-	if (left_direction) {
-		new_bound = (nframes64_t) ((region->last_frame() + 1)/speed) - frame_delta;
-	} else {
-		new_bound = (nframes64_t) ((region->last_frame() + 1)/speed) + frame_delta;
 	}
 
 	nframes64_t pre_trim_last_frame = region->last_frame();
@@ -2242,8 +2226,8 @@ Editor::single_end_trim (RegionView& rv, nframes64_t frame_delta, bool left_dire
 
 		bool regions_touching = false;
 
-		if (region_right != 0 && (pre_trim_last_frame == region_right->first_frame() - 1)){
-		    regions_touching = true;
+		if (region_right != 0 && (pre_trim_last_frame == region_right->first_frame() - 1)) {
+			regions_touching = true;
 		}
 
 		//Only trim region on the right if the last frame has gone beyond the right region's first frame.
