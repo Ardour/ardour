@@ -3,9 +3,13 @@
 #include <gtkmm/scale.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/slider_controller.h>
+
 #include "pbd/fpu.h"
+
 #include "midi++/manager.h"
 #include "midi++/factory.h"
+
+#include "ardour/audioengine.h"
 #include "ardour/dB.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/control_protocol_manager.h"
@@ -443,10 +447,10 @@ static const struct {
 	{ "Command", GDK_META_MASK },
 	{ "Control", GDK_CONTROL_MASK },
 	{ "Option", GDK_MOD1_MASK },
-	{ "Command-Shift", GDK_MOD1_MASK|GDK_SHIFT_MASK },
-	{ "Command-Option", GDK_MOD1_MASK|GDK_MOD5_MASK },
-	{ "Shift-Option", GDK_SHIFT_MASK|GDK_MOD5_MASK },
-	{ "Shift-Command-Option", GDK_MOD5_MASK|GDK_SHIFT_MASK|GDK_MOD1_MASK },
+	{ "Command-Shift", GDK_META_MASK|GDK_SHIFT_MASK },
+	{ "Command-Option", GDK_MOD1_MASK|GDK_META_MASK },
+	{ "Shift-Option", GDK_SHIFT_MASK|GDK_MOD1_MASK },
+	{ "Shift-Command-Option", GDK_MOD5_MASK|GDK_SHIFT_MASK|GDK_META_MASK },
 
 #else
 	{ "Shift", GDK_SHIFT_MASK },
@@ -1234,7 +1238,12 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_monitoring_model)
 		);
 
-	mm->add (HardwareMonitoring, _("JACK"));
+#ifndef __APPLE__
+        /* no JACK monitoring on CoreAudio */
+        if (AudioEngine::instance()->can_request_hardware_monitoring()) {
+                mm->add (HardwareMonitoring, _("JACK"));
+        }
+#endif
 	mm->add (SoftwareMonitoring, _("ardour"));
 	mm->add (ExternalMonitoring, _("audio hardware"));
 

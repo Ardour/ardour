@@ -536,11 +536,14 @@ Route::set_listen (bool yn, void* src)
         }
 
 	if (_monitor_send) {
+                cerr << name() << " set listen = " << yn << " current = " << _monitor_send->active() << endl;
 		if (yn != _monitor_send->active()) {
 			if (yn) {
 				_monitor_send->activate ();
-			} else {
+                                _mute_master->set_soloed (true);
+                        } else {
 				_monitor_send->deactivate ();
+                                _mute_master->set_soloed (false);
 			}
 
 			listen_changed (src); /* EMIT SIGNAL */

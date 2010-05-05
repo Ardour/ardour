@@ -2225,8 +2225,22 @@ Session::route_listen_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 	}
 
 	if (route->listening()) {
+
+                if (Config->get_exclusive_solo()) {
+                        /* new listen: disable all other listen */
+                        shared_ptr<RouteList> r = routes.reader ();
+                        for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+                                if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden()) {
+                                        continue;
+                                } 
+                                (*i)->set_listen (false, this);
+                        }
+                }
+
 		_listen_cnt++;
+
 	} else if (_listen_cnt > 0) {
+
 		_listen_cnt--;
 	}
 }
