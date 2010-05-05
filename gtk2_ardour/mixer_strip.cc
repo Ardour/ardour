@@ -54,6 +54,7 @@
 #include "mixer_strip.h"
 #include "mixer_ui.h"
 #include "keyboard.h"
+#include "led.h"
 #include "public_editor.h"
 #include "send_ui.h"
 #include "io_selector.h"
@@ -84,7 +85,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, panners (sess)
 	, _mono_button (_("Mono"))
 	, button_table (4, 2)
-	, middle_button_table (1, 2)
+	, middle_button_table (2, 2)
 	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
 	, comment_button (_("Comments"))
@@ -184,6 +185,22 @@ MixerStrip::init ()
 	solo_button->set_name ("MixerSoloButton");
         invert_button->set_name ("MixerInvertButton");
 
+        solo_isolated_led = manage (new LED);
+        solo_isolated_led->show ();
+        solo_isolated_led->set_no_show_all (true);
+        solo_isolated_led->set_name (X_("SoloIsolatedLED"));
+        solo_isolated_led->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+        solo_isolated_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_isolate_button_release));
+	UI::instance()->set_tip (solo_isolated_led, _("Isolate Solo"), "");
+
+        solo_safe_led = manage (new LED);
+        solo_safe_led->show ();
+        solo_safe_led->set_no_show_all (true);
+        solo_safe_led->set_name (X_("SoloSafeLED"));
+        solo_safe_led->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+        solo_safe_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_safe_button_release));
+	UI::instance()->set_tip (solo_safe_led, _("Lock Solo Status"), "");
+
 	button_table.set_homogeneous (true);
 	button_table.set_spacings (0);
 
@@ -193,8 +210,10 @@ MixerStrip::init ()
 
 	middle_button_table.set_homogeneous (true);
 	middle_button_table.set_spacings (0);
-	middle_button_table.attach (*mute_button, 0, 1, 0, 1);
-        middle_button_table.attach (*solo_button, 1, 2, 0, 1);
+	middle_button_table.attach (*solo_safe_led, 0, 1, 0, 1);
+        middle_button_table.attach (*solo_isolated_led, 1, 2, 0, 1);
+	middle_button_table.attach (*mute_button, 0, 1, 1, 2);
+        middle_button_table.attach (*solo_button, 1, 2, 1, 2);
 
 	bottom_button_table.set_col_spacings (0);
 	bottom_button_table.set_homogeneous (true);
@@ -346,8 +365,12 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
         if (route()->is_master()) {
                 solo_button->hide ();
+                solo_isolated_led->hide ();
+                solo_safe_led->hide ();
         } else {
                 solo_button->show ();
+                solo_isolated_led->show ();
+                solo_safe_led->show ();
         }
 
 	if (_mixer_owned && (route()->is_master() || route()->is_monitor())) {

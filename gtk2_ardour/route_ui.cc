@@ -35,6 +35,7 @@
 #include "ardour_ui.h"
 #include "editor.h"
 #include "route_ui.h"
+#include "led.h"
 #include "keyboard.h"
 #include "utils.h"
 #include "prompter.h"
@@ -99,6 +100,8 @@ RouteUI::init ()
 	main_mute_check = 0;
         solo_safe_check = 0;
         solo_isolated_check = 0;
+        solo_isolated_led = 0;
+        solo_safe_led = 0;
 	ignore_toggle = false;
 	_solo_release = 0;
 	_mute_release = 0;
@@ -372,11 +375,14 @@ RouteUI::solo_press(GdkEventButton* ev)
 		
 		if (Keyboard::is_context_menu_event (ev)) {
 			
-			if (solo_menu == 0) {
-				build_solo_menu ();
-			}
-			
-			solo_menu->popup (1, ev->time);
+                        if (!solo_isolated_led) {
+
+                                if (solo_menu == 0) {
+                                        build_solo_menu ();
+                                }
+                                
+                                solo_menu->popup (1, ev->time);
+                        }
 			
 		} else {
 			
@@ -811,7 +817,16 @@ RouteUI::update_solo_display ()
 
         set_button_names ();
 
-	solo_button->set_visual_state (solo_visual_state_with_isolate (_route));
+        if (solo_isolated_led) {
+                cerr << _route->name() << " reset iso vis = " << (_route->solo_isolated() ? 1 : 0) << endl;
+                solo_isolated_led->set_visual_state (_route->solo_isolated() ? 1 : 0);
+        }
+
+        if (solo_safe_led) {
+                solo_safe_led->set_visual_state (_route->solo_safe() ? 1 : 0);
+        }
+
+	solo_button->set_visual_state (solo_visual_state (_route));
 }
 
 void
@@ -1053,6 +1068,23 @@ RouteUI::muting_change ()
 	if (main_mute_check->get_active() != yn) {
 		main_mute_check->set_active (yn);
 	}
+}
+
+bool
+RouteUI::solo_isolate_button_release (GdkEventButton* ev)
+{
+        bool view = (solo_isolated_led->visual_state() != 0);
+        cerr << _route->name() << "button release,  view is " << view << " set to " << !view << endl;
+        _route->set_solo_isolated (!view, this);
+        cerr << "DONE with SSI\n";
+        return true;
+}
+
+bool
+RouteUI::solo_safe_button_release (GdkEventButton* ev)
+{
+        _route->set_solo_safe (!(solo_safe_led->visual_state() > 0), this);
+        return true;
 }
 
 void

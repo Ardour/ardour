@@ -325,6 +325,18 @@ style "solo_button" = "small_button"
 	fg[ACTIVE] = { 0, 0, 0 }
 }
 
+style "solo_isolate_led"
+{
+       	fg[ACTIVE] = { 1.0, 0, 0 }
+       	fg[NORMAL] = { 1, 1, 1 } 
+}
+
+style "solo_safe_led"
+{
+       	fg[ACTIVE] = { 0.26, 0.47, 0.69 } 
+       	fg[NORMAL] = { 0, 1.0, 0 } 
+}
+
 style "solo_button_alternate" = "small_button"
 {
         #
@@ -1787,3 +1799,5 @@ widget "*MidiListView*" style:highest "white_tree_view"
 widget "*ProcessorSelector*" style:highest "processor_list_display"
 widget "*PortMatrixLabel*" style:highest "small_text"
 widget "*MidiTracerTextView" style:highest "midi_tracer_textview"
+widget "*SoloIsolatedLED" style:highest "solo_isolate_led"
+widget "*SoloSafeLED" style:highest "solo_safe_led"

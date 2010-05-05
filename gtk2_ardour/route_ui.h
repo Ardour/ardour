@@ -47,6 +47,7 @@ namespace Gtk {
 }
 
 class BindableToggleButton;
+class LED;
 
 class RouteUI : public virtual AxisView
 {
@@ -88,6 +89,9 @@ class RouteUI : public virtual AxisView
 	BindableToggleButton* solo_button;
 	BindableToggleButton* rec_enable_button; /* audio tracks */
 	BindableToggleButton* show_sends_button; /* busses */
+
+        LED* solo_safe_led;
+        LED* solo_isolated_led;
 
 	Gtk::Label solo_button_label;
 	Gtk::Label mute_button_label;
@@ -143,6 +147,9 @@ class RouteUI : public virtual AxisView
 
 	void solo_isolated_toggle (void*, Gtk::CheckMenuItem*);
 	void toggle_solo_isolated (Gtk::CheckMenuItem*);
+
+        bool solo_isolate_button_release (GdkEventButton*);
+        bool solo_safe_button_release (GdkEventButton*);
 
 	void solo_safe_toggle (void*, Gtk::CheckMenuItem*);
 	void toggle_solo_safe (Gtk::CheckMenuItem*);

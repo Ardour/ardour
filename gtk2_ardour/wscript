@@ -121,6 +121,7 @@ gtk2_ardour_sources = [
 	'keyboard.cc',
 	'keyeditor.cc',
 	'latency_gui.cc',
+        'led.cc',
 	'level_meter.cc',
 	'lineset.cc',
 	'location_ui.cc',
