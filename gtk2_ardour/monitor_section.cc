@@ -52,7 +52,8 @@ MonitorSection::MonitorSection (Session* s)
         , mono_button (_("mono"))
         , rude_solo_button (_("soloing"))
         , rude_audition_button (_("auditioning"))
-        , exclusive_solo_button (_("Exclusive solo"))
+        , exclusive_solo_button (_("Exclusive"))
+        , solo_mute_override_button (_("Solo/Mute"))
 {
         Glib::RefPtr<Action> act;
 
@@ -127,7 +128,6 @@ MonitorSection::MonitorSection (Session* s)
                 act->connect_proxy (pfl_button);
         } 
 
-
         /* Solo Boost */
 
         solo_boost_control = new VolumeController (little_knob_pixbuf, &solo_boost_adjustment, false, 30, 30);
@@ -158,13 +158,34 @@ MonitorSection::MonitorSection (Session* s)
 
         solo_packer->pack_start (*spin_packer, true, true);
 
-        exclusive_solo_button.set_name (X_("MonitorCutButton"));
+        exclusive_solo_button.set_name (X_("MonitorOptButton"));
+        ARDOUR_UI::instance()->set_tip (&exclusive_solo_button, _("Exclusive solo means that only 1 solo is active at a time"));
 
+        act = ActionManager::get_action (X_("Monitor"), X_("toggle-exclusive-solo"));
+        if (act) {
+                act->connect_proxy (exclusive_solo_button);
+        } 
+
+        solo_mute_override_button.set_name (X_("MonitorOptButton"));
+        ARDOUR_UI::instance()->set_tip (&solo_mute_override_button, _("If enabled, solo will override mute\n(a soloed & muted track or bus will be audible)"));
+        
+        act = ActionManager::get_action (X_("Monitor"), X_("toggle-mute-overrides-solo"));
+        if (act) {
+                act->connect_proxy (solo_mute_override_button);
+        } 
+
+        HBox* solo_opt_box = manage (new HBox);
+        solo_opt_box->set_spacing (12);
+        solo_opt_box->set_homogeneous (true);
+        solo_opt_box->pack_start (exclusive_solo_button);
+        solo_opt_box->pack_start (solo_mute_override_button);
+        solo_opt_box->show ();
+        
         upper_packer.set_spacing (12);
         upper_packer.pack_start (rude_solo_button, false, false);
         upper_packer.pack_start (rude_audition_button, false, false);
         upper_packer.pack_start (solo_model_box, false, false);
-        upper_packer.pack_start (exclusive_solo_button, false, false);
+        upper_packer.pack_start (*solo_opt_box, false, false);
         upper_packer.pack_start (*solo_packer, false, false);
 
         act = ActionManager::get_action (X_("Monitor"), X_("monitor-cut-all"));
@@ -412,6 +433,38 @@ MonitorSection::set_button_names ()
 }
 
 void
+MonitorSection::toggle_exclusive_solo ()
+{
+        if (!_monitor) {
+                return;
+        }
+
+        Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), "toggle-exclusive-solo");
+        if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+                Config->set_exclusive_solo (tact->get_active());
+        }
+
+}
+
+
+void
+MonitorSection::toggle_mute_overrides_solo ()
+{
+        if (!_monitor) {
+                return;
+        }
+
+        Glib::RefPtr<Action> act = ActionManager::get_action (X_("Monitor"), "toggle-mute-overrides-solo");
+        if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+                cerr << "Set solo_mute_override to " << tact->get_active() << endl;
+                Config->set_solo_mute_override (tact->get_active());
+        }
+}
+
+
+void
 MonitorSection::dim_all ()
 {
         if (!_monitor) {
@@ -537,6 +590,7 @@ MonitorSection::register_actions ()
 {
         string action_name;
         string action_descr;
+        Glib::RefPtr<Action> act;
 
         monitor_actions = ActionGroup::create (X_("Monitor"));
 	ActionManager::add_action_group (monitor_actions);
@@ -549,6 +603,22 @@ MonitorSection::register_actions ()
 
         ActionManager::register_toggle_action (monitor_actions, "monitor-dim-all", "", 
                                                sigc::mem_fun (*this, &MonitorSection::dim_all));
+
+        act = ActionManager::register_toggle_action (monitor_actions, "toggle-exclusive-solo", "", 
+                                               sigc::mem_fun (*this, &MonitorSection::toggle_exclusive_solo));
+
+        Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+        tact->set_active (Config->get_exclusive_solo());
+
+        act = ActionManager::register_toggle_action (monitor_actions, "toggle-mute-overrides-solo", "", 
+                                                     sigc::mem_fun (*this, &MonitorSection::toggle_mute_overrides_solo));
+        
+        tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+        tact->set_active (Config->get_solo_mute_override());
+
+        /* map from RC config */
+
+
 
         /* note the 1-based counting (for naming - backend uses 0-based) */
 

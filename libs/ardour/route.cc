@@ -618,9 +618,9 @@ Route::mod_solo_by_others_upstream (int32_t delta)
 		_soloed_by_others_upstream += delta;
 	}
 
-        DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 SbU delta %2 = %3 old = %4 sbd %5 ss %6 latched %7\n",
+        DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 SbU delta %2 = %3 old = %4 sbd %5 ss %6 exclusive %7\n",
                                                   name(), delta, _soloed_by_others_upstream, old_sbu, 
-                                                  _soloed_by_others_downstream, _self_solo, Config->get_solo_latched()));
+                                                  _soloed_by_others_downstream, _self_solo, Config->get_exclusive_solo()));
 
         /* push the inverse solo change to everything that feeds us. 
            
@@ -639,7 +639,7 @@ Route::mod_solo_by_others_upstream (int32_t delta)
             ((old_sbu == 0 && _soloed_by_others_upstream > 0) || 
              (old_sbu > 0 && _soloed_by_others_upstream == 0))) {
                 
-                if (delta > 0 || Config->get_solo_latched()) {
+                if (delta > 0 || !Config->get_exclusive_solo()) {
                         DEBUG_TRACE (DEBUG::Solo, "\t ... INVERT push\n");
                         for (FedBy::iterator i = _fed_by.begin(); i != _fed_by.end(); ++i) {
                                 boost::shared_ptr<Route> sr = i->r.lock();

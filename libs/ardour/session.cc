@@ -2261,7 +2261,7 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 		delta = -1;
 	}
  
-        if (delta == 1 && !Config->get_solo_latched()) {
+        if (delta == 1 && Config->get_exclusive_solo()) {
                 /* new solo: disable all other solos */
                 for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
                         if ((*i) == route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_hidden()) {

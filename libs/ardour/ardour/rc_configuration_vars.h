@@ -82,7 +82,7 @@ CONFIG_VARIABLE (ListenPosition, listen_position, "listen-position", AfterFaderL
 CONFIG_VARIABLE (bool, use_monitor_bus, "use-monitor-bus", false)
 
 CONFIG_VARIABLE (bool, solo_control_is_listen_control, "solo-control-is-listen-control", false)
-CONFIG_VARIABLE (bool, solo_latched, "solo-latched", true)
+CONFIG_VARIABLE (bool, exclusive_solo, "exclusive-solo", false)
 CONFIG_VARIABLE (bool, latched_record_enable, "latched-record-enable", false)
 CONFIG_VARIABLE (bool, all_safe, "all-safe", false)
 CONFIG_VARIABLE (bool, show_solo_mutes, "show-solo-mutes", true)

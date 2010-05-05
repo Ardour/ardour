@@ -92,6 +92,8 @@ class MonitorSection : public RouteUI
         void dim_all ();
         void cut_all ();
         void mono ();
+        void toggle_exclusive_solo ();
+        void toggle_mute_overrides_solo ();
         void dim_level_changed ();
         void solo_boost_changed ();
         void gain_value_changed ();
@@ -115,6 +117,7 @@ class MonitorSection : public RouteUI
         BindableToggleButton rude_solo_button;
         BindableToggleButton rude_audition_button;
         BindableToggleButton exclusive_solo_button;
+        BindableToggleButton solo_mute_override_button;
 
         void do_blink (bool);
         void solo_blink (bool);
@@ -124,7 +127,7 @@ class MonitorSection : public RouteUI
         void solo_cut_changed ();
         void update_solo_model ();
         void parameter_changed (std::string);
-
+        
         PBD::ScopedConnection config_connection;
         PBD::ScopedConnectionList control_connections;
         

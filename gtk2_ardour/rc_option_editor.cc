@@ -1195,10 +1195,10 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Audio"),
 	     new BoolOption (
-		     "solo-latched",
-		     _("Latched solo"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_latched),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_latched)
+		     "exclusive-solo",
+		     _("Exclusive solo"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_exclusive_solo),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_exclusive_solo)
 		     ));
 
 	add_option (_("Audio"),
