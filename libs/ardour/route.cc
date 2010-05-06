@@ -696,8 +696,6 @@ Route::set_solo_isolated (bool yn, void *src)
 		_route_group->apply (&Route::set_solo_isolated, yn, _route_group);
 		return;
 	}
-
-        cerr << name() << " SET SOLO ISO " << yn << " cur = " << _solo_isolated << endl;
 	
 	/* forward propagate solo-isolate status to everything fed by this route, but not those via sends only */
 

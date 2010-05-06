@@ -52,21 +52,28 @@ LED::render (cairo_t* cr)
 
         //background
 
-        RefPtr<Style> style = get_style();
+        Widget* parent;
+        RefPtr<Style> style;
         Color c;
-        
-        switch (_visual_state) {
-        case 0:
-                c = style->get_bg (STATE_NORMAL);
-                break;
-        default:
-                c = style->get_bg (STATE_ACTIVE);
-                break;
+
+        parent = get_parent ();
+
+        while (parent && !parent->get_has_window()) {
+                parent = parent->get_parent();
         }
+
+        if (parent && parent->get_has_window()) {
+                style = parent->get_style ();
+                c = style->get_bg (parent->get_state());
+        } else {
+                style = get_style ();
+                c = style->get_bg (get_state());
+        }
+
 
         cairo_rectangle(cr, 0, 0, _width, _height);
         cairo_stroke_preserve(cr);
-        cairo_set_source_rgb(cr, c.get_green_p(), c.get_red_p(), c.get_blue_p());
+        cairo_set_source_rgb(cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
         cairo_fill(cr);
 
 	cairo_translate(cr, _width/2, _height/2);

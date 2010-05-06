@@ -818,7 +818,6 @@ RouteUI::update_solo_display ()
         set_button_names ();
 
         if (solo_isolated_led) {
-                cerr << _route->name() << " reset iso vis = " << (_route->solo_isolated() ? 1 : 0) << endl;
                 solo_isolated_led->set_visual_state (_route->solo_isolated() ? 1 : 0);
         }
 
