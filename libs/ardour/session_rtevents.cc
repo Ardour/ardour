@@ -130,6 +130,24 @@ Session::rt_set_mute (boost::shared_ptr<RouteList> rl, bool yn, bool /*group_ove
 }
 
 void
+Session::set_solo_isolated (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
+{
+	queue_event (get_rt_event (rl, yn, after, group_override, &Session::rt_set_solo_isolated));
+}
+
+void
+Session::rt_set_solo_isolated (boost::shared_ptr<RouteList> rl, bool yn, bool /*group_override*/)
+{
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		if (!(*i)->is_master() && !(*i)->is_monitor() && !(*i)->is_hidden()) {
+			(*i)->set_solo_isolated (yn, this);
+		}
+	}
+	
+	set_dirty();
+}
+
+void
 Session::set_record_enable (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
 {
 	if (!writable()) {

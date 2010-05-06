@@ -115,6 +115,7 @@ class MonitorSection : public RouteUI
         BindableToggleButton dim_all_button;
         BindableToggleButton mono_button;
         BindableToggleButton rude_solo_button;
+        BindableToggleButton rude_iso_button;
         BindableToggleButton rude_audition_button;
         BindableToggleButton exclusive_solo_button;
         BindableToggleButton solo_mute_override_button;
@@ -123,11 +124,13 @@ class MonitorSection : public RouteUI
         void solo_blink (bool);
         void audition_blink (bool);
         bool cancel_solo (GdkEventButton*);
+        bool cancel_isolate (GdkEventButton*);
         bool cancel_audition (GdkEventButton*);
         void solo_cut_changed ();
         void update_solo_model ();
         void parameter_changed (std::string);
-        
+        void isolated_changed ();
+
         PBD::ScopedConnection config_connection;
         PBD::ScopedConnectionList control_connections;
         

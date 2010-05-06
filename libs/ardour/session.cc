@@ -1993,6 +1993,7 @@ Session::add_routes (RouteList& new_routes, bool save)
 
 		r->listen_changed.connect_same_thread (*this, boost::bind (&Session::route_listen_changed, this, _1, wpr));
 		r->solo_changed.connect_same_thread (*this, boost::bind (&Session::route_solo_changed, this, _1, _2, wpr));
+		r->solo_isolated_changed.connect_same_thread (*this, boost::bind (&Session::route_solo_isolated_changed, this, _1, wpr));
 		r->mute_changed.connect_same_thread (*this, boost::bind (&Session::route_mute_changed, this, _1));
 		r->output()->changed.connect_same_thread (*this, boost::bind (&Session::set_worst_io_latencies_x, this, _1, _2));
 		r->processors_changed.connect_same_thread (*this, boost::bind (&Session::route_processors_changed, this, _1));
@@ -2161,14 +2162,13 @@ Session::remove_route (shared_ptr<Route> route)
 			_monitor_out.reset ();
 		}
 
-		update_route_solo_state ();
-
 		/* writer goes out of scope, forces route list update */
 	}
-
+        
+        update_route_solo_state ();
 	find_current_end ();
 
-	// We need to disconnect the routes inputs and outputs
+	// We need to disconnect the route's inputs and outputs
 
 	route->input()->disconnect (0);
 	route->output()->disconnect (0);
@@ -2244,7 +2244,36 @@ Session::route_listen_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 		_listen_cnt--;
 	}
 }
+void
+Session::route_solo_isolated_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
+{
+	boost::shared_ptr<Route> route = wpr.lock ();
 
+	if (!route) {
+		/* should not happen */
+		error << string_compose (_("programming error: %1"), X_("invalid route weak ptr passed to route_solo_changed")) << endmsg;
+		return;
+	}
+        
+        bool send_changed = false;
+
+        if (route->solo_isolated()) {
+                if (_solo_isolated_cnt == 0) {
+                        send_changed = true;
+                }
+                _solo_isolated_cnt++;
+        } else if (_solo_isolated_cnt > 0) {
+                _solo_isolated_cnt--;
+                if (_solo_isolated_cnt == 0) {
+                        send_changed = true;
+                }
+        }
+
+        if (send_changed) {
+                IsolatedChanged (); /* EMIT SIGNAL */
+        }
+}
+            
 void
 Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_ptr<Route> wpr)
 {
@@ -2340,6 +2369,7 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 
 	bool something_soloed = false;
         uint32_t listeners = 0;
+        uint32_t isolated = 0;
 
 	if (!r) {
 		r = routes.reader();
@@ -2348,7 +2378,6 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->is_master() && !(*i)->is_monitor() && !(*i)->is_hidden() && (*i)->self_soloed()) {
 			something_soloed = true;
-			break;
 		}
 
                 if (!(*i)->is_hidden() && (*i)->listening()) {
@@ -2358,6 +2387,10 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
                                 (*i)->set_listen (false, this);
                         }
                 }
+
+                if ((*i)->solo_isolated()) {
+                        isolated++;
+                }
 	}
 
         if (something_soloed != _non_soloed_outs_muted) {
@@ -2365,8 +2398,11 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
                 SoloActive (_non_soloed_outs_muted); /* EMIT SIGNAL */
         }
 
-        if (listeners) {
-                 _listen_cnt = listeners;
+        _listen_cnt = listeners;
+
+        if (isolated != _solo_isolated_cnt) {
+                _solo_isolated_cnt = isolated;
+                IsolatedChanged (); /* EMIT SIGNAL */
         }
 }
 

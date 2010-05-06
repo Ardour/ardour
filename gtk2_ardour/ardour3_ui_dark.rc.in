@@ -332,14 +332,14 @@ style "solo_button" = "small_button"
 
 style "solo_isolate_led"
 {
+        fg[NORMAL] = { 0.725, 0.925, 0.949 }
        	fg[ACTIVE] = { 1.0, 0, 0 }
-       	fg[NORMAL] = { 0, 1.0, 0 } 
 }
 
 style "solo_safe_led"
 {
-       	fg[ACTIVE] = { 0.26, 0.47, 0.69 } 
-       	fg[NORMAL] = { 0, 1.0, 0 } 
+	fg[NORMAL] = { 0.725, 0.925, 0.949 }
+       	fg[ACTIVE] = { 1.0, 0, 0 } 
 }
 
 style "solo_button_alternate" = "small_button"
@@ -453,6 +453,13 @@ style "monitor_mute_button" = "small_button"
 style "monitor_dim_button" = "small_button"
 {
 	bg[ACTIVE] = { 0.90, 0.89, 0.73 }
+	fg[ACTIVE] = { 0, 0, 0 }
+}
+
+style "monitor_iso_button" = "small_button"
+{
+	font_name = "@FONT_SMALLER@"
+	bg[ACTIVE] = { 0.725, 0.925, 0.949 }
 	fg[ACTIVE] = { 0, 0, 0 }
 }
 
@@ -1689,6 +1696,8 @@ widget "*MonitorInvertButton" style:highest "monitor_invert_button"
 widget "*MonitorInvertButton*" style:highest "monitor_invert_button"
 widget "*MonitorOptButton" style:highest "monitor_opt_button"
 widget "*MonitorOptButton*" style:highest "monitor_opt_button"
+widget "*MonitorIsoAlert" style:highest "monitor_iso_button"
+widget "*MonitorIsoAlert*" style:highest "monitor_iso_button"
 widget "*BypassButton" style:highest "red_when_active"
 widget "*BypassButton*" style:highest "red_when_active"
 widget "*TransportSoloAlert" style:highest "flashing_alert"
@@ -1806,4 +1815,4 @@ widget "*PortMatrixLabel*" style:highest "small_text"
 widget "*MidiTracerTextView" style:highest "midi_tracer_textview"
 widget "*SoloIsolatedLED" style:highest "solo_isolate_led"
 widget "*SoloSafeLED" style:highest "solo_safe_led"
-widget "*SoloLEDLabel" style:highest "smallest_text"
+widget "*SoloLEDLabel" style:highest "very_small_text"

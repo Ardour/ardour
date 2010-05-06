@@ -51,6 +51,7 @@ MonitorSection::MonitorSection (Session* s)
         , dim_all_button (_("dim"))
         , mono_button (_("mono"))
         , rude_solo_button (_("soloing"))
+        , rude_iso_button (_("isolated"))
         , rude_audition_button (_("auditioning"))
         , exclusive_solo_button (_("Exclusive"))
         , solo_mute_override_button (_("Solo/Mute"))
@@ -92,6 +93,9 @@ MonitorSection::MonitorSection (Session* s)
 	rude_solo_button.set_name ("TransportSoloAlert");
         rude_solo_button.show ();
 
+	rude_iso_button.set_name ("MonitorIsoAlert");
+        rude_iso_button.show ();
+
 	rude_audition_button.set_name ("TransportAuditioningAlert");
         rude_audition_button.show ();
 
@@ -99,6 +103,9 @@ MonitorSection::MonitorSection (Session* s)
 
 	rude_solo_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_solo), false);
         UI::instance()->set_tip (rude_solo_button, _("When active, something is soloed.\nClick to de-solo everything"));
+
+	rude_iso_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_isolate), false);
+        UI::instance()->set_tip (rude_iso_button, _("When active, something is solo-isolated.\nClick to de-isolate everything"));
 
 	rude_audition_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_audition), false);
         UI::instance()->set_tip (rude_audition_button, _("When active, auditioning is active.\nClick to stop the audition"));
@@ -182,7 +189,12 @@ MonitorSection::MonitorSection (Session* s)
         solo_opt_box->show ();
         
         upper_packer.set_spacing (12);
-        upper_packer.pack_start (rude_solo_button, false, false);
+
+        Gtk::HBox* rude_box = manage (new HBox);
+        rude_box->pack_start (rude_solo_button, true, true);
+        rude_box->pack_start (rude_iso_button, true, true);
+
+        upper_packer.pack_start (*rude_box, false, false);
         upper_packer.pack_start (rude_audition_button, false, false);
         upper_packer.pack_start (solo_model_box, false, false);
         upper_packer.pack_start (*solo_opt_box, false, false);
@@ -306,12 +318,13 @@ MonitorSection::set_session (Session* s)
                         _route.reset ();
                 }
                 
-                        
         } else {
                 /* no session */
                 _monitor.reset ();
                 _route.reset ();
                 control_connections.drop_connections ();
+                rude_iso_button.set_active (false);
+                rude_solo_button.set_active (false);
         }
 
         /* both might be null */
@@ -920,9 +933,15 @@ MonitorSection::solo_blink (bool onoff)
 		} else {
 			rude_solo_button.set_state (STATE_NORMAL);
 		}
+
+                if (_session->soloing()) {
+                        rude_iso_button.set_active (_session->solo_isolated());
+                }
+
 	} else {
 		// rude_solo_button.set_active (false);
 		rude_solo_button.set_state (STATE_NORMAL);
+                rude_iso_button.set_active (false);
 	}
 }
 
@@ -935,6 +954,17 @@ MonitorSection::cancel_solo (GdkEventButton* ev)
                 } else if (_session->listening()) {
                         _session->set_listen (_session->get_routes(), false);
                 }
+        }
+
+        return true;
+}
+
+bool
+MonitorSection::cancel_isolate (GdkEventButton* ev)
+{
+        if (_session) {
+                boost::shared_ptr<RouteList> rl (_session->get_routes ());
+                _session->set_solo_isolated (rl, false, Session::rt_cleanup, true);
         }
 
         return true;

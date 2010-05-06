@@ -188,7 +188,7 @@ MixerStrip::init ()
 
         solo_isolated_led = manage (new LED);
         solo_isolated_led->show ();
-        solo_isolated_led->set_diameter (5);
+        solo_isolated_led->set_diameter (6);
         solo_isolated_led->set_no_show_all (true);
         solo_isolated_led->set_name (X_("SoloIsolatedLED"));
         solo_isolated_led->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
@@ -197,7 +197,7 @@ MixerStrip::init ()
 
         solo_safe_led = manage (new LED);
         solo_safe_led->show ();
-        solo_safe_led->set_diameter (5);
+        solo_safe_led->set_diameter (6);
         solo_safe_led->set_no_show_all (true);
         solo_safe_led->set_name (X_("SoloSafeLED"));
         solo_safe_led->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
@@ -215,10 +215,10 @@ MixerStrip::init ()
 
         solo_led_table.set_spacings (0);
         solo_led_table.set_border_width (1);
-        solo_led_table.attach (*solo_isolated_led, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
-        solo_led_table.attach (*iso_label, 1, 2, 0, 1, Gtk::FILL, Gtk::FILL);
-        solo_led_table.attach (*solo_safe_led, 0, 1, 1, 2, Gtk::FILL, Gtk::FILL);
-        solo_led_table.attach (*safe_label, 1, 2, 1, 2, Gtk::FILL, Gtk::FILL);
+        solo_led_table.attach (*iso_label, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
+        solo_led_table.attach (*solo_isolated_led, 1, 2, 0, 1, Gtk::FILL, Gtk::FILL);
+        solo_led_table.attach (*safe_label, 0, 1, 1, 2, Gtk::FILL, Gtk::FILL);
+        solo_led_table.attach (*solo_safe_led, 1, 2, 1, 2, Gtk::FILL, Gtk::FILL);
 
         solo_led_table.show ();
         solo_led_box.pack_end (solo_led_table, false, false);

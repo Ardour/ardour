@@ -37,7 +37,8 @@ class LED : public CairoWidget
   protected:
 	void render (cairo_t *);
         void on_size_request (Gtk::Requisition* req);
-        
+        void on_realize ();
+
   private:
         int32_t _visual_state;
         bool  _active;
@@ -46,6 +47,8 @@ class LED : public CairoWidget
         float _red;
         float _green;
         float _blue;
+
+        void set_colors_from_style ();
 };
 
 #endif /* __gtk2_ardour_led_h__ */

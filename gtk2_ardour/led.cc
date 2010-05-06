@@ -122,24 +122,7 @@ LED::set_visual_state (int32_t s)
         if (s != _visual_state) {
 
                 _visual_state = s;
-
-                RefPtr<Style> style = get_style();
-                Color c;
-                
-                switch (_visual_state) {
-                case 0:
-                        c = style->get_fg (STATE_NORMAL);
-                        break;
-                default:
-                        c = style->get_fg (STATE_ACTIVE);
-                        break;
-                }
-
-                _red = c.get_red_p ();
-                _green = c.get_green_p ();
-                _blue = c.get_blue_p ();
-                
-                set_dirty ();
+                set_colors_from_style ();
         }
 }
 
@@ -156,6 +139,13 @@ LED::set_diameter (float d)
 }
 
 void
+LED::on_realize ()
+{
+        set_colors_from_style ();
+        CairoWidget::on_realize ();
+}
+
+void
 LED::on_size_request (Gtk::Requisition* req)
 {
         if (_fixed_diameter) {
@@ -164,4 +154,26 @@ LED::on_size_request (Gtk::Requisition* req)
         } else {
                 CairoWidget::on_size_request (req);
         }
+}
+
+void
+LED::set_colors_from_style ()
+{
+        RefPtr<Style> style = get_style();
+        Color c;
+        
+        switch (_visual_state) {
+        case 0:
+                c = style->get_fg (STATE_NORMAL);
+                break;
+        default:
+                c = style->get_fg (STATE_ACTIVE);
+                break;
+        }
+        
+        _red = c.get_red_p ();
+        _green = c.get_green_p ();
+        _blue = c.get_blue_p ();
+        
+        set_dirty ();
 }

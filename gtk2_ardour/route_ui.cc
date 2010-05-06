@@ -1072,13 +1072,33 @@ RouteUI::muting_change ()
 bool
 RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 {
+        if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS) {
+                return true;
+        }
+
         bool view = (solo_isolated_led->visual_state() != 0);
         bool model = _route->solo_isolated();
 
         /* called BEFORE the view has changed */
 
-        if (model == view) {
-                _route->set_solo_isolated (!view, this);
+        if (ev->button == 1) {
+                if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
+
+                        if (model) {
+                                /* disable isolate for all routes */
+                                _session->set_solo_isolated (_session->get_routes(), false, Session::rt_cleanup, true);
+                        }
+
+                } else {
+                        if (model == view) {
+
+                                /* flip just this route */
+
+                                boost::shared_ptr<RouteList> rl (new RouteList);
+                                rl->push_back (_route);
+                                _session->set_solo_isolated (rl, !view, Session::rt_cleanup, true);
+                        }
+                }
         }
 
         return true;

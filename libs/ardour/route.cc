@@ -716,22 +716,27 @@ Route::set_solo_isolated (bool yn, void *src)
 
         /* XXX should we back-propagate as well? (April 2010: myself and chris goddard think not) */
 
+        bool changed = false;
+
 	if (yn) {
                 if (_solo_isolated == 0) {
                         _mute_master->set_solo_ignore (true);
+                        changed = true;
                 }
 		_solo_isolated++;
-                solo_isolated_changed (src);
 	} else {
 		if (_solo_isolated > 0) {
 			_solo_isolated--;
                         if (_solo_isolated == 0) {
                                 _mute_master->set_solo_ignore (false);
+                                changed = true;
                         }
-                        solo_isolated_changed (src);
 		}
 	}
 
+        if (changed) {
+                solo_isolated_changed (src);
+        }
 }
 
 bool

@@ -583,6 +583,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	bool soloing() const { return _non_soloed_outs_muted; }
 	bool listening() const { return _listen_cnt > 0; }
+        bool solo_isolated() const { return _solo_isolated_cnt > 0; }
 
 	static const SessionEvent::RTeventCallback rt_cleanup;
 
@@ -591,11 +592,12 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void set_mute (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_listen (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_record_enable (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
+        void set_solo_isolated (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 
 	PBD::Signal1<void,bool> SoloActive;
 	PBD::Signal0<void> SoloChanged;
+        PBD::Signal0<void> IsolatedChanged;
 	
-
 	/* control/master out */
 
 	boost::shared_ptr<Route> monitor_out() const { return _monitor_out; }
@@ -861,6 +863,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	float                   _meter_falloff;
 	bool                    _non_soloed_outs_muted;
 	uint32_t                _listen_cnt;
+	uint32_t                _solo_isolated_cnt;
 	bool                    _writable;
 	bool                    _was_seamless;
 
@@ -1220,6 +1223,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void route_listen_changed (void *src, boost::weak_ptr<Route>);
 	void route_mute_changed (void *src);
 	void route_solo_changed (bool self_solo_change, void *src, boost::weak_ptr<Route>);
+	void route_solo_isolated_changed (void *src, boost::weak_ptr<Route>);
 	void update_route_solo_state (boost::shared_ptr<RouteList> r = boost::shared_ptr<RouteList>());
 
 	void listen_position_changed ();
@@ -1437,6 +1441,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void rt_set_just_one_solo (boost::shared_ptr<RouteList>, bool yn, bool /* ignored*/ );
 	void rt_set_mute (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 	void rt_set_listen (boost::shared_ptr<RouteList>, bool yn, bool group_override);
+	void rt_set_solo_isolated (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 	void rt_set_record_enable (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 
 	/** temporary list of Diskstreams used only during load of 2.X sessions */
