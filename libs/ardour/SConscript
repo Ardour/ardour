@@ -130,7 +130,6 @@ if ardour['LV2']:
 if ardour['LIBLO']:
     extra_sources += osc_files
 
-ardour.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64")
 ardour.Append(CXXFLAGS="-DDATA_DIR=\\\"" + os.path.join (final_prefix, 'share') + "\\\"")
 ardour.Append(CXXFLAGS="-DMODULE_DIR=\\\"" + os.path.join (final_prefix, env['LIBDIR']) + "\\\"")
 ardour.Append(CXXFLAGS="-DVAMP_DIR=\\\"" + os.path.join (final_prefix, env['LIBDIR'], 'ardour2', 'vamp') + "\\\"")

@@ -854,6 +854,12 @@ env.Append(CCFLAGS='-DPROGRAM_NAME=\\"' + env['PROGRAM_NAME'] + '\\"')
 env.Append(CXXFLAGS='-DPROGRAM_NAME=\\"' + env['PROGRAM_NAME'] + '\\"')
 
 #
+# we deal with threads and big files
+#
+env.Append(CCFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64")
+env.Append(CXXFLAGS="-D_REENTRANT -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64")
+
+#
 # fix scons nitpickiness on APPLE
 #
 
