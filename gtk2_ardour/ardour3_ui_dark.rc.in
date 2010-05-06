@@ -2,6 +2,11 @@
 # This is the GTK style file for Ardour
 #
 
+style "smallest_text"
+{
+	font_name = "@FONT_TINY@"
+}
+
 style "very_small_text"
 {
  	font_name = "@FONT_SMALLER@"
@@ -328,7 +333,7 @@ style "solo_button" = "small_button"
 style "solo_isolate_led"
 {
        	fg[ACTIVE] = { 1.0, 0, 0 }
-       	fg[NORMAL] = { 1, 1, 1 } 
+       	fg[NORMAL] = { 0, 1.0, 0 } 
 }
 
 style "solo_safe_led"
@@ -1801,3 +1806,4 @@ widget "*PortMatrixLabel*" style:highest "small_text"
 widget "*MidiTracerTextView" style:highest "midi_tracer_textview"
 widget "*SoloIsolatedLED" style:highest "solo_isolate_led"
 widget "*SoloSafeLED" style:highest "solo_safe_led"
+widget "*SoloLEDLabel" style:highest "smallest_text"

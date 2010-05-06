@@ -85,7 +85,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, panners (sess)
 	, _mono_button (_("Mono"))
 	, button_table (4, 2)
-	, middle_button_table (2, 2)
+	, solo_led_table (2, 2)
+	, middle_button_table (1, 2)
 	, bottom_button_table (1, 2)
 	, meter_point_label (_("pre"))
 	, comment_button (_("Comments"))
@@ -187,6 +188,7 @@ MixerStrip::init ()
 
         solo_isolated_led = manage (new LED);
         solo_isolated_led->show ();
+        solo_isolated_led->set_diameter (5);
         solo_isolated_led->set_no_show_all (true);
         solo_isolated_led->set_name (X_("SoloIsolatedLED"));
         solo_isolated_led->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
@@ -195,11 +197,32 @@ MixerStrip::init ()
 
         solo_safe_led = manage (new LED);
         solo_safe_led->show ();
+        solo_safe_led->set_diameter (5);
         solo_safe_led->set_no_show_all (true);
         solo_safe_led->set_name (X_("SoloSafeLED"));
         solo_safe_led->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
         solo_safe_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_safe_button_release));
 	UI::instance()->set_tip (solo_safe_led, _("Lock Solo Status"), "");
+
+        Label* iso_label = manage (new Label (_("iso")));
+        Label* safe_label = manage (new Label (_("lock")));
+        
+        iso_label->set_name (X_("SoloLEDLabel"));
+        safe_label->set_name (X_("SoloLEDLabel"));
+
+        iso_label->show ();
+        safe_label->show (); 
+
+        solo_led_table.set_spacings (0);
+        solo_led_table.set_border_width (1);
+        solo_led_table.attach (*solo_isolated_led, 0, 1, 0, 1, Gtk::FILL, Gtk::FILL);
+        solo_led_table.attach (*iso_label, 1, 2, 0, 1, Gtk::FILL, Gtk::FILL);
+        solo_led_table.attach (*solo_safe_led, 0, 1, 1, 2, Gtk::FILL, Gtk::FILL);
+        solo_led_table.attach (*safe_label, 1, 2, 1, 2, Gtk::FILL, Gtk::FILL);
+
+        solo_led_table.show ();
+        solo_led_box.pack_end (solo_led_table, false, false);
+        solo_led_box.show ();
 
 	button_table.set_homogeneous (true);
 	button_table.set_spacings (0);
@@ -210,10 +233,8 @@ MixerStrip::init ()
 
 	middle_button_table.set_homogeneous (true);
 	middle_button_table.set_spacings (0);
-	middle_button_table.attach (*solo_safe_led, 0, 1, 0, 1);
-        middle_button_table.attach (*solo_isolated_led, 1, 2, 0, 1);
-	middle_button_table.attach (*mute_button, 0, 1, 1, 2);
-        middle_button_table.attach (*solo_button, 1, 2, 1, 2);
+	middle_button_table.attach (*mute_button, 0, 1, 0, 1);
+        middle_button_table.attach (*solo_button, 1, 2, 0, 1);
 
 	bottom_button_table.set_col_spacings (0);
 	bottom_button_table.set_homogeneous (true);
@@ -255,6 +276,7 @@ MixerStrip::init ()
 	global_vpacker.pack_start (whvbox, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (button_table,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (processor_box, true, true);
+	global_vpacker.pack_start (solo_led_box,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (middle_button_table,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (gain_meter_alignment,Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (bottom_button_table,Gtk::PACK_SHRINK);
@@ -365,12 +387,10 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
         if (route()->is_master()) {
                 solo_button->hide ();
-                solo_isolated_led->hide ();
-                solo_safe_led->hide ();
+                solo_led_box.hide ();
         } else {
                 solo_button->show ();
-                solo_isolated_led->show ();
-                solo_safe_led->show ();
+                solo_led_box.show ();
         }
 
 	if (_mixer_owned && (route()->is_master() || route()->is_monitor())) {

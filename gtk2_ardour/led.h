@@ -32,13 +32,17 @@ class LED : public CairoWidget
         
         void set_visual_state (int32_t s);
         int32_t visual_state() const { return _visual_state; }
+        void set_diameter (float);
 
   protected:
 	void render (cairo_t *);
+        void on_size_request (Gtk::Requisition* req);
         
   private:
         int32_t _visual_state;
         bool  _active;
+        float _diameter;
+        bool  _fixed_diameter;
         float _red;
         float _green;
         float _blue;
