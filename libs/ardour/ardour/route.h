@@ -370,12 +370,6 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
   protected:
 	friend class Session;
 
-        void set_graph_level (int32_t);
-        int32_t graph_level() const { return _graph_level; } 
-        void check_physical_connections ();
-        // this functions may ONLY be called during a route resort
-        bool physically_connected () const { return _physically_connected; }
-
 	void catch_up_on_solo_mute_override ();
 	void mod_solo_by_others_upstream (int32_t);
 	void mod_solo_by_others_downstream (int32_t);
@@ -433,8 +427,6 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
     
 	std::string    _comment;
 	bool           _have_internal_generator;
-        bool           _physically_connected; // valid ONLY during a route resort
-        int32_t        _graph_level;
 	bool           _solo_safe;
 	DataType       _default_type;
         FedBy          _fed_by;

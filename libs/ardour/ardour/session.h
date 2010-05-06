@@ -415,15 +415,11 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void   remove_route (boost::shared_ptr<Route>);
 	void   resort_routes ();
 	void   resort_routes_using (boost::shared_ptr<RouteList>);
-        void   find_route_levels (boost::shared_ptr<RouteList>);
 
 	void   set_remote_control_ids();
 
 	AudioEngine & engine() { return _engine; }
 	AudioEngine const & engine () const { return _engine; }
-
-	int32_t  max_level;
-	int32_t  min_level;
 
 	/* Time */
 

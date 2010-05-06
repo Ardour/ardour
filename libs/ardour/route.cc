@@ -92,8 +92,6 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _mute_master (new MuteMaster (sess, name))
         , _mute_points (MuteMaster::AllPoints)
         , _have_internal_generator (false)
-        , _physically_connected (false)
-        , _graph_level (-1)
         , _solo_safe (false)
 	, _default_type (default_type)
         , _remote_control_id (0)
@@ -2585,12 +2583,6 @@ Route::direct_feeds (boost::shared_ptr<Route> other, bool* only_send)
 }
 
 void
-Route::check_physical_connections ()
-{
-        _physically_connected = _output->physically_connected ();
-}
-
-void
 Route::handle_transport_stopped (bool /*abort_ignored*/, bool did_locate, bool can_flush_processors)
 {
 	nframes_t now = _session.transport_frame();
@@ -3361,8 +3353,3 @@ Route::has_io_processor_named (const string& name)
         return false;
 }
 
-void
-Route::set_graph_level (int32_t l)
-{
-        _graph_level = l;
-}

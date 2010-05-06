@@ -25,6 +25,7 @@
 #include <gtkmm/eventbox.h>
 
 #include "gtkmm2ext/binding_proxy.h"
+#include "gtkmm2ext/prolooks-helpers.h"
 
 namespace Gtk {
 	class Adjustment;
@@ -62,6 +63,7 @@ class MotionFeedback : public Gtk::VBox
 	gfloat range () { return _range; }
 
 	void set_controllable (boost::shared_ptr<PBD::Controllable> c) { binding_proxy.set_controllable (c); }
+        void set_lamp_color (const Gdk::Color&);
 
  protected:
 	gfloat _range;
@@ -100,6 +102,11 @@ class MotionFeedback : public Gtk::VBox
         int subwidth;
         int subheight;
 	void adjustment_changed ();
+
+	ProlooksHSV* lamp_hsv;
+        Gdk::Color _lamp_color;
+
+        void core_draw (cairo_t*, int, double, double, double);
 };
 
 } /* namespace */
