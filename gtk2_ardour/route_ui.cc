@@ -716,7 +716,11 @@ RouteUI::solo_visual_state (boost::shared_ptr<Route> r)
 	} 
 	
 	if (r->soloed()) {
-		return 1;
+                if (!r->self_soloed()) {
+                        return 3;
+                } else {
+                        return 1;
+                }
 	} else {
 		return 0;
 	}
