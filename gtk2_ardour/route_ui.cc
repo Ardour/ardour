@@ -1260,7 +1260,12 @@ RouteUI::route_rename ()
 {
 	ArdourPrompter name_prompter (true);
 	string result;
-	name_prompter.set_prompt (_("New Name: "));
+	if (is_track()) {
+		name_prompter.set_title (_("Rename Track"));
+	} else {
+		name_prompter.set_title (_("Rename Bus"));
+	}
+	name_prompter.set_prompt (_("New name:"));
 	name_prompter.set_initial_text (_route->name());
 	name_prompter.add_button (_("Rename"), Gtk::RESPONSE_ACCEPT);
 	name_prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
@@ -1427,6 +1432,7 @@ RouteUI::save_as_template ()
 
 	Prompter p (true); // modal
 
+	p.set_title (_("Save As Template"));
 	p.set_prompt (_("Template name:"));
 	switch (p.run()) {
 	case RESPONSE_ACCEPT:

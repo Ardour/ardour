@@ -1422,8 +1422,8 @@ MixerStrip::build_route_ops_menu ()
 
 	MenuList& items = route_ops_menu->items();
 
-	items.push_back (MenuElem (_("Save As Template"), sigc::mem_fun(*this, &RouteUI::save_as_template)));
-	items.push_back (MenuElem (_("Rename"), sigc::mem_fun(*this, &RouteUI::route_rename)));
+	items.push_back (MenuElem (_("Save As Template..."), sigc::mem_fun(*this, &RouteUI::save_as_template)));
+	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &RouteUI::route_rename)));
 	rename_menu_item = &items.back();
 	items.push_back (SeparatorElem());
 	items.push_back (CheckMenuElem (_("Active"), sigc::mem_fun (*this, &RouteUI::toggle_route_active)));
@@ -1432,10 +1432,10 @@ MixerStrip::build_route_ops_menu ()
 
 	items.push_back (SeparatorElem());
 
-	items.push_back (MenuElem (_("Adjust latency"), sigc::mem_fun (*this, &RouteUI::adjust_latency)));
+	items.push_back (MenuElem (_("Adjust Latency..."), sigc::mem_fun (*this, &RouteUI::adjust_latency)));
 
 	items.push_back (SeparatorElem());
-	items.push_back (CheckMenuElem (_("Protect against denormals"), sigc::mem_fun (*this, &RouteUI::toggle_denormal_protection)));
+	items.push_back (CheckMenuElem (_("Protect Against Denormals"), sigc::mem_fun (*this, &RouteUI::toggle_denormal_protection)));
 	denormal_menu_item = dynamic_cast<CheckMenuItem *> (&items.back());
 	denormal_menu_item->set_active (_route->denormal_protection());
 
