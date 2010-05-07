@@ -368,13 +368,13 @@ const char*
 Mixer_UI::get_order_key() 
 {
 	return X_("signal");
-#if 0
+
 	if (Config->get_sync_all_route_ordering()) {
 		return X_("editor");
 	} else {
 		return X_("signal");
 	}
-#endif
+
 }
 
 
