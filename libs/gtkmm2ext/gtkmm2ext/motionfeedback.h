@@ -82,6 +82,7 @@ class MotionFeedback : public Gtk::VBox
 	bool pixwin_focus_out_event (GdkEventFocus *);
 	bool pixwin_expose_event (GdkEventExpose*);
 	bool pixwin_scroll_event (GdkEventScroll*);
+	void pixwin_realized ();
 
   private:
 	Type type;
@@ -105,6 +106,8 @@ class MotionFeedback : public Gtk::VBox
 
 	ProlooksHSV* lamp_hsv;
         Gdk::Color _lamp_color;
+	GdkColor lamp_bright;
+	GdkColor lamp_dark;
 
         void core_draw (cairo_t*, int, double, double, double);
 };

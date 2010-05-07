@@ -63,8 +63,6 @@ MotionFeedback::MotionFeedback (Glib::RefPtr<Gdk::Pixbuf> pix,
 	pack_start (*hpacker, false, false);
 	pixwin.show ();
 
-        set_lamp_color (Gdk::Color ("#b9feff"));
-
 	if (with_numeric_display) {
 
                 value_packer = new HBox;
@@ -109,6 +107,7 @@ MotionFeedback::MotionFeedback (Glib::RefPtr<Gdk::Pixbuf> pix,
 	pixwin.signal_scroll_event().connect(mem_fun (*this,&MotionFeedback::pixwin_scroll_event));
 	pixwin.signal_expose_event().connect(mem_fun (*this,&MotionFeedback::pixwin_expose_event), true);
 	pixwin.signal_size_request().connect(mem_fun (*this,&MotionFeedback::pixwin_size_request));
+	pixwin.signal_realize().connect(mem_fun (*this,&MotionFeedback::pixwin_realized));
 }
 
 MotionFeedback::~MotionFeedback()
@@ -204,7 +203,7 @@ MotionFeedback::pixwin_motion_notify_event (GdkEventMotion *ev)
 	gfloat x_delta;
 	gfloat y_delta;
 
-	if(!pixwin.has_grab()) {
+	if (!pixwin.has_grab()) {
 		return VBox::on_motion_notify_event (ev); 
 	}
 
@@ -212,19 +211,42 @@ MotionFeedback::pixwin_motion_notify_event (GdkEventMotion *ev)
                 ((ev->state & Keyboard::SecondaryModifier) ? 10 : 1) * 
                 ((ev->state & Keyboard::PrimaryModifier) ? 2 : 1);
 
-	y_delta = grabbed_y - ev->y_root;
-	grabbed_y = ev->y_root;
 
-	x_delta = ev->x_root - grabbed_x;
+        if (ev->state & Gdk::BUTTON1_MASK) {
 
-	if (y_delta == 0) return TRUE;
+                y_delta = grabbed_y - ev->y_root;
+                grabbed_y = ev->y_root;
+                
+                x_delta = ev->x_root - grabbed_x;
+                
+                if (y_delta == 0) return TRUE;
+                
+                y_delta *= 1 + (x_delta/100);
+                y_delta *= multiplier;
+                y_delta /= 10;
+                
+                adjustment->set_value (adjustment->get_value() + 
+                                       ((grab_is_fine ? step_inc : page_inc) * y_delta));
+                
+        } else if (ev->state & Gdk::BUTTON3_MASK) {
 
-	y_delta *= 1 + (x_delta/100);
-	y_delta *= multiplier;
-	y_delta /= 10;
+                double range = adjustment->get_upper() - adjustment->get_lower();
+                double x = ev->x - subwidth/2;
+                double y = - ev->y + subwidth/2;
+                double angle = std::atan2 (y, x) / M_PI;
+                
+                if (angle < -0.5) {
+                        angle += 2.0;
+                }
+                
+                angle = -(2.0/3.0) * (angle - 1.25);
+                angle *= range;
+                angle *= multiplier;
+                angle += adjustment->get_lower();
+                
+                adjustment->set_value (angle);
+        }
 
-	adjustment->set_value (adjustment->get_value() + 
-			       ((grab_is_fine ? step_inc : page_inc) * y_delta));
 
 	return true;
 }
@@ -322,10 +344,6 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double radius, double x, doub
 	double progress_radius_outer;
 	double knob_disc_radius;
 	cairo_pattern_t* pattern;
-	GdkColor col2 = {0,0,0,0};
-	GdkColor lamp_bright;
-	GdkColor col3 = {0,0,0,0};
-	GdkColor lamp_dark;
 	double progress_rim_width;
 	cairo_pattern_t* progress_shine;
 	double degrees;
@@ -346,8 +364,8 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double radius, double x, doub
 	value_angle = 0.0;
 	value = (phase * 1.0) / (65 - 1);
 
-        start_angle = ((180 - 45) * G_PI) / 180;
-        end_angle = ((360 + 45) * G_PI) / 180;
+        start_angle = ((180 - 65) * G_PI) / 180;
+        end_angle = ((360 + 65) * G_PI) / 180;
 
 	value_angle = start_angle + (value * (end_angle - start_angle));
 	value_x = cos (value_angle);
@@ -368,7 +386,7 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double radius, double x, doub
 	cairo_arc (cr, xc, yc, 31.5, 0.0, 2 * G_PI);
 	cairo_stroke (cr);
 
-	progress_width = 20.0;
+	progress_width = 10.0;
 	progress_radius = 40.0;
 	progress_radius_inner = progress_radius - (progress_width / 2.0);
 	progress_radius_outer = progress_radius + (progress_width / 2.0);
@@ -380,11 +398,6 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double radius, double x, doub
 	cairo_set_line_width (cr, progress_width);
 	cairo_arc (cr, xc, yc, progress_radius, start_angle, end_angle);
 	cairo_stroke (cr);
-
-	lamp_bright = (prolooks_hsv_to_gdk_color (lamp_hsv, &col2), col2);
-	prolooks_hsv_set_saturation (lamp_hsv, 0.66);
-	prolooks_hsv_set_value (lamp_hsv, 0.67);
-	lamp_dark = (prolooks_hsv_to_gdk_color (lamp_hsv, &col3), col3);
 
         pattern = prolooks_create_gradient ((double) 20, (double) 20, (double) 89, (double) 87, &lamp_bright, &lamp_dark, 1.0, 1.0);
 	cairo_set_source (cr, pattern);
@@ -403,12 +416,13 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double radius, double x, doub
 	cairo_line_to (cr, xc + (progress_radius_inner * start_angle_x), yc + (progress_radius_inner * start_angle_y));
 	cairo_stroke (cr);
 
-	prolooks_set_source_color_string (cr, "#b3a190", 1.0);
+	prolooks_set_source_color_string (cr, "#000000", 1.0);
 	cairo_move_to (cr, xc + (progress_radius_outer * end_angle_x), yc + (progress_radius_outer * end_angle_y));
 	cairo_line_to (cr, xc + (progress_radius_inner * end_angle_x), yc + (progress_radius_inner * end_angle_y));
 	cairo_stroke (cr);
 
-        pattern = prolooks_create_gradient_str ((double) 95, (double) 6, (double) 5, (double) 44, "#dfd5c9", "#b0a090", 1.0, 1.0);
+        // pattern = prolooks_create_gradient_str ((double) 95, (double) 6, (double) 5, (double) 44, "#dfd5c9", "#b0a090", 1.0, 1.0);
+        pattern = prolooks_create_gradient_str ((double) 95, (double) 6, (double) 5, (double) 44, "#000000", "#000000", 1.0, 1.0);
 	cairo_set_source (cr, pattern);
 	cairo_pattern_destroy (pattern);
 	cairo_arc (cr, xc, yc, progress_radius_outer, start_angle, end_angle);
@@ -422,13 +436,18 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double radius, double x, doub
 	cairo_arc (cr, xc, yc, progress_radius, start_angle, value_angle + (G_PI / 180.0));
 	cairo_stroke (cr);
 
-	progress_shine = prolooks_create_gradient_str ((double) 89, (double) 73, (double) 34, (double) 16, "#ffffff", "#ffffff", 0.3, 0.04);
-	cairo_pattern_add_color_stop_rgba (progress_shine, 0.5, 1.0, 1.0, 1.0, 0.0);
-	cairo_pattern_add_color_stop_rgba (progress_shine, 0.75, 1.0, 1.0, 1.0, 0.3);
-	cairo_set_source (cr, progress_shine);
-	cairo_set_line_width (cr, progress_width);
-	cairo_arc (cr, xc, yc, progress_radius, start_angle, end_angle);
-	cairo_stroke (cr);
+        progress_shine = prolooks_create_gradient_str ((double) 89, (double) 73, (double) 34, (double) 16, "#ffffff", "#ffffff", 0.3, 0.04);
+        cairo_pattern_add_color_stop_rgba (progress_shine, 0.5, 1.0, 1.0, 1.0, 0.0);
+        if (subwidth > 50) {
+                cairo_pattern_add_color_stop_rgba (progress_shine, 0.75, 1.0, 1.0, 1.0, 0.3);
+        } else {
+                cairo_pattern_add_color_stop_rgba (progress_shine, 0.75, 1.0, 1.0, 1.0, 0.2);
+        }
+        cairo_set_source (cr, progress_shine);
+        cairo_set_line_width (cr, progress_width);
+        cairo_arc (cr, xc, yc, progress_radius, start_angle, end_angle);
+        cairo_stroke (cr);
+        cairo_pattern_destroy (progress_shine);
 
 	cairo_set_line_width (cr, 1.0);
 	cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
@@ -511,13 +530,13 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double radius, double x, doub
 	cairo_stroke (cr);
 	cairo_restore (cr);
 
-	cairo_pattern_destroy (progress_shine);
 	cairo_pattern_destroy (knob_ripples);
 }
 
 bool
 MotionFeedback::pixwin_expose_event (GdkEventExpose* ev)
 {
+	// GtkWidget* widget = GTK_WIDGET(pixwin.gobj());
 	GdkWindow *window = pixwin.get_window()->gobj();
 	GtkAdjustment* adj = adjustment->gobj();
 
@@ -551,6 +570,7 @@ MotionFeedback::pixwin_expose_event (GdkEventExpose* ev)
 			phase = (phase + 63) % 64;
 	}
 
+#if 1
 	cairo_t* cr = gdk_cairo_create (GDK_DRAWABLE (window));
 
 	gdk_cairo_rectangle (cr, &ev->area);
@@ -558,6 +578,14 @@ MotionFeedback::pixwin_expose_event (GdkEventExpose* ev)
 
         core_draw (cr, phase, subheight/2, subwidth/2, subheight/2);
         cairo_destroy (cr);
+
+#else
+        
+	gdk_draw_pixbuf (GDK_DRAWABLE(window), widget->style->fg_gc[0], 
+			 pixbuf->gobj(), 
+			 phase * subwidth, type * subheight, 
+			 0, 0, subwidth, subheight, GDK_RGB_DITHER_NORMAL, 0, 0);
+#endif	
 
 	return true;
 }
@@ -598,8 +626,21 @@ MotionFeedback::pixwin_size_request (GtkRequisition* req)
 }
 
 void
+MotionFeedback::pixwin_realized ()
+{
+        set_lamp_color (Gdk::Color ("#b9feff"));
+}
+
+void
 MotionFeedback::set_lamp_color (const Gdk::Color& c)
 {
+	GdkColor col2 = {0,0,0,0};
+	GdkColor col3 = {0,0,0,0};
+
 	_lamp_color = c;
 	lamp_hsv = prolooks_hsv_new_for_gdk_color (_lamp_color.gobj());
+	lamp_bright = (prolooks_hsv_to_gdk_color (lamp_hsv, &col2), col2);
+	prolooks_hsv_set_saturation (lamp_hsv, 0.66);
+	prolooks_hsv_set_value (lamp_hsv, 0.67);
+	lamp_dark = (prolooks_hsv_to_gdk_color (lamp_hsv, &col3), col3);
 }
