@@ -308,8 +308,8 @@ StripSilenceDialog::update_silence_rects ()
 
         if (min_audible > 0) {
                 float ms, ma;
-                char* aunits;
-                char* sunits;
+                char const * aunits;
+                char const * sunits;
 
                 ma = (float) min_audible/_session->frame_rate();
                 ms = (float) min_silence/_session->frame_rate();
