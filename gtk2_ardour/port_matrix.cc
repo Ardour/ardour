@@ -840,3 +840,9 @@ PortMatrix::port_connected_or_disconnected ()
 {
 	_body->rebuild_and_draw_grid ();
 }
+
+string
+PortMatrix::channel_noun () const
+{
+	return _("channel");
+}

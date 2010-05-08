@@ -32,8 +32,6 @@
 #include "ardour/element_import_handler.h"
 #include "ardour/types.h"
 
-#include "i18n.h"
-
 namespace ARDOUR {
 
 class AudioRegionImportHandler;
@@ -63,8 +61,8 @@ class UnusedAudioPlaylistImportHandler : public AudioPlaylistImportHandler
 {
   public:
 	UnusedAudioPlaylistImportHandler (XMLTree const & source, Session & session, AudioRegionImportHandler & region_handler) :
-		AudioPlaylistImportHandler (source, session, region_handler, X_("UnusedPlaylists")) { }
-	std::string get_info () const { return _("Audio Playlists (unused)"); }
+		AudioPlaylistImportHandler (source, session, region_handler, "UnusedPlaylists") { }
+	std::string get_info () const;
 };
 
 class AudioPlaylistImporter : public ElementImporter

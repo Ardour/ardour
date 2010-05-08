@@ -34,8 +34,6 @@
 
 #include <gtkmm.h>
 
-#include "i18n.h"
-
 namespace ARDOUR {
 	class ExportStatus;
 	class ExportHandler;
@@ -48,7 +46,7 @@ class ExportDialog : public ArdourDialog {
 
   public:
 
-	explicit ExportDialog (PublicEditor & editor, Glib::ustring title = _("Export"));
+	explicit ExportDialog (PublicEditor & editor, Glib::ustring title);
 	~ExportDialog ();
 
 	void set_session (ARDOUR::Session* s);

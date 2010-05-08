@@ -157,6 +157,18 @@ IOSelector::list_is_global (int dim) const
 	return (dim == _other);
 }
 
+string
+IOSelector::disassociation_verb () const
+{
+	return _("Disconnect");
+}
+
+string
+IOSelector::channel_noun () const
+{
+	return _("port");
+}
+
 IOSelectorWindow::IOSelectorWindow (ARDOUR::Session* session, boost::shared_ptr<ARDOUR::IO> io, bool /*can_cancel*/)
 	: _selector (this, session, io)
 {

@@ -28,6 +28,8 @@
 #include "port_matrix_row_labels.h"
 #include "port_matrix_grid.h"
 
+#include "i18n.h"
+
 using namespace std;
 
 PortMatrixBody::PortMatrixBody (PortMatrix* p)

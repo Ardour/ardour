@@ -28,8 +28,6 @@
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
-#include "i18n.h"
-
 namespace ARDOUR {
 
 namespace Properties {

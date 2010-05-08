@@ -174,6 +174,12 @@ BundleEditorMatrix::list_is_global (int dim) const
 	return (dim == OTHER);
 }
 
+string
+BundleEditorMatrix::disassociation_verb () const
+{
+	return _("Disassociate");
+}
+
 BundleEditor::BundleEditor (Session* session, boost::shared_ptr<UserBundle> bundle)
 	: ArdourDialog (_("Edit Bundle")), _matrix (this, session, bundle), _bundle (bundle)
 {

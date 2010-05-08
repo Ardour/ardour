@@ -21,6 +21,8 @@
 #include "ardour/session_object.h"
 #include "ardour/debug.h"
 
+#include "i18n.h"
+
 using namespace ARDOUR;
 using namespace PBD;
 using namespace std;

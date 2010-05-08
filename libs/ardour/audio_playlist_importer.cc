@@ -32,6 +32,8 @@
 #include "ardour/playlist_factory.h"
 #include "ardour/session_playlists.h"
 
+#include "i18n.h"
+
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
@@ -252,3 +254,8 @@ AudioPlaylistImporter::populate_region_list ()
 	}
 }
 
+string
+UnusedAudioPlaylistImportHandler::get_info () const
+{
+	return _("Audio Playlists (unused)");
+}

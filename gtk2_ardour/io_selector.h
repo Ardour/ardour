@@ -22,7 +22,6 @@
 
 #include "ardour_dialog.h"
 #include "port_matrix.h"
-#include "i18n.h"
 
 namespace ARDOUR {
 	class PortInsert;
@@ -36,13 +35,8 @@ class IOSelector : public PortMatrix
 	void set_state (ARDOUR::BundleChannel c[2], bool);
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
 
-	std::string disassociation_verb () const {
-		return _("Disconnect");
-	}
-
-	std::string channel_noun () const {
-		return _("port");
-	}
+	std::string disassociation_verb () const;
+	std::string channel_noun () const;
 
 	uint32_t n_io_ports () const;
 	boost::shared_ptr<ARDOUR::IO> const io () { return _io; }

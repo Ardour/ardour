@@ -18,32 +18,16 @@
 
 */
 
-#ifndef __ardour_export_failed_h__
-#define __ardour_export_failed_h__
+#include "pbd/error.h"
+#include "ardour/export_failed.h"
 
-#include <exception>
-#include <string>
+#include "i18n.h"
 
-namespace ARDOUR
+using namespace std;
+using namespace ARDOUR;
+
+ExportFailed::ExportFailed (string const & reason)
+	: reason (reason.c_str())
 {
-
-class ExportFailed : public std::exception
-{
-  public:
-	ExportFailed (std::string const &);
-	~ExportFailed () throw() { }
-
-	const char* what() const throw()
-	{
-		return reason;
-	}
-
-  private:
-
-	const char * reason;
-
-};
-
-} // namespace ARDOUR
-
-#endif /* __ardour_export_failed_h__ */
+	PBD::error << string_compose (_("Export failed: %1"), reason) << endmsg;
+}

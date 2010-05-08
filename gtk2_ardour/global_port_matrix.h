@@ -24,7 +24,6 @@
 #include "port_matrix.h"
 #include "port_group.h"
 #include "ardour_dialog.h"
-#include "i18n.h"
 
 class GlobalPortMatrix : public PortMatrix
 {
@@ -36,13 +35,8 @@ public:
 	void set_state (ARDOUR::BundleChannel c[2], bool);
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
 
-	std::string disassociation_verb () const {
-		return _("Disconnect");
-	}
-
-	std::string channel_noun () const {
-		return _("port");
-	}
+	std::string disassociation_verb () const;
+	std::string channel_noun () const;
 
 	bool list_is_global (int) const {
 		return true;

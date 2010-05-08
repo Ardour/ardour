@@ -25,6 +25,8 @@
 #include "port_matrix_body.h"
 #include "utils.h"
 
+#include "i18n.h"
+
 using namespace std;
 
 PortMatrixColumnLabels::PortMatrixColumnLabels (PortMatrix* m, PortMatrixBody* b)

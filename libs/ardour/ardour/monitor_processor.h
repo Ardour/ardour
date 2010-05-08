@@ -178,23 +178,7 @@ class MonitorProcessor : public Processor
             MPControl<gain_t>& polarity;
             MPControl<bool>&   soloed;
             
-            ChannelRecord (uint32_t chn) : current_gain(1.0)
-            , cut_ptr (new MPControl<gain_t> (1.0, string_compose (_("cut control %1"), chn), PBD::Controllable::GainLike))
-                    , dim_ptr (new MPControl<bool> (false, string_compose (_("dim control"), chn), PBD::Controllable::Toggle))
-                    , polarity_ptr (new MPControl<gain_t> (1.0, string_compose (_("polarity control"), chn), PBD::Controllable::Toggle))
-                    , soloed_ptr (new MPControl<bool> (false, string_compose (_("solo control"), chn), PBD::Controllable::Toggle))
-
-                    , cut_control (cut_ptr)
-                    , dim_control (dim_ptr)
-                    , polarity_control (polarity_ptr)
-                    , soloed_control (soloed_ptr)
-
-                    , cut (*cut_ptr)
-                    , dim (*dim_ptr)
-                    , polarity (*polarity_ptr)
-                    , soloed (*soloed_ptr)
-                    
-            {}
+	    ChannelRecord (uint32_t);
         };
         
         std::vector<ChannelRecord*> _channels;

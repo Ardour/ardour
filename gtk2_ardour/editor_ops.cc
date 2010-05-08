@@ -4976,7 +4976,7 @@ Editor::set_fade_length (bool in)
 
 	nframes64_t pos = get_preferred_edit_position();
 	nframes64_t len;
-	char* cmd;
+	char const * cmd;
 
 	if (pos > rv->region()->last_frame() || pos < rv->region()->first_frame()) {
 		/* edit point is outside the relevant region */
@@ -6192,7 +6192,8 @@ Editor::do_insert_time ()
 		return;
 	}
 
-	InsertTimeOption opt;
+	/* only setting this to keep GCC quiet */
+	InsertTimeOption opt = LeaveIntersected;
 
 	switch (intersected_combo.get_active_row_number ()) {
 	case 0:

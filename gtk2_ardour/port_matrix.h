@@ -35,7 +35,6 @@
 
 #include "port_group.h"
 #include "port_matrix_types.h"
-#include "i18n.h"
 
 /** The `port matrix' UI.  This is a widget which lets the user alter
  *  associations between one set of ports and another.  e.g. to connect
@@ -146,7 +145,7 @@ public:
 	}
 	virtual void rename_channel (ARDOUR::BundleChannel) {}
 	virtual std::string disassociation_verb () const = 0;
-	virtual std::string channel_noun () const { return _("channel"); }
+	virtual std::string channel_noun () const;
 
 	enum Result {
 		Cancelled,

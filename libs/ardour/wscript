@@ -80,6 +80,7 @@ libardour_sources = [
 	'event_type_map.cc',
 	'export_channel.cc',
 	'export_channel_configuration.cc',
+	'export_failed.cc',
 	'export_filename.cc',
 	'export_format_base.cc',
 	'export_format_manager.cc',

@@ -29,6 +29,8 @@
 #include "export_dialog.h"
 #include "gui_thread.h"
 
+#include "i18n.h"
+
 using namespace ARDOUR;
 using namespace PBD;
 

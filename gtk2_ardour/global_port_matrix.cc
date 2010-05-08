@@ -165,3 +165,16 @@ GlobalPortMatrixWindow::on_show ()
 	pair<uint32_t, uint32_t> const pm_max = _port_matrix.max_size ();
 	resize_window_to_proportion_of_monitor (this, pm_max.first, pm_max.second);
 }
+
+string
+GlobalPortMatrix::disassociation_verb () const
+{
+	return _("Disconnect");
+}
+
+string
+GlobalPortMatrix::channel_noun () const
+{
+	return _("port");
+}
+		 

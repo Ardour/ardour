@@ -31,8 +31,6 @@
 #include "pbd/id.h"
 #include "pbd/property_basics.h"
 
-#include "i18n.h"
-
 namespace PBD {
 
 /** A base class for properties whose state is a container of other
@@ -83,23 +81,23 @@ class SequenceProperty : public PropertyBase
 
 		if (!_change.added.empty()) {
 			for (typename ChangeContainer::iterator i = _change.added.begin(); i != _change.added.end(); ++i) {
-                                XMLNode* add_node = new XMLNode (X_("Add"));
+                                XMLNode* add_node = new XMLNode ("Add");
                                 child->add_child_nocopy (*add_node);
-                                add_node->add_property (X_("id"), (*i)->id().to_s());
+                                add_node->add_property ("id", (*i)->id().to_s());
 			}
 		}
 		if (!_change.removed.empty()) {
 			for (typename ChangeContainer::iterator i = _change.removed.begin(); i != _change.removed.end(); ++i) {
-                                XMLNode* remove_node = new XMLNode (X_("Remove"));
+                                XMLNode* remove_node = new XMLNode ("Remove");
                                 child->add_child_nocopy (*remove_node);
-                                remove_node->add_property (X_("id"), (*i)->id().to_s());
+                                remove_node->add_property ("id", (*i)->id().to_s());
 			}
 		}
 	}
 
 	bool set_state_from_owner_state (XMLNode const& owner_state) {
 
-		XMLProperty const* n = owner_state.property (X_("name"));
+		XMLProperty const* n = owner_state.property ("name");
 
                 if (!n) {
                         return false;
@@ -111,10 +109,10 @@ class SequenceProperty : public PropertyBase
 
 		for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
 
-			if ((*c)->name() == X_("Added")) {
+			if ((*c)->name() == "Added") {
 				const XMLNodeList& grandchildren = (*c)->children();
 				for (XMLNodeList::const_iterator gc = grandchildren.begin(); gc != grandchildren.end(); ++gc) {
-					const XMLProperty* prop = (*gc)->property (X_("id"));
+					const XMLProperty* prop = (*gc)->property ("id");
 					if (prop) {
 						typename Container::value_type v = lookup_id (PBD::ID (prop->value()));
 						if (v) {
@@ -122,10 +120,10 @@ class SequenceProperty : public PropertyBase
 						}
 					}
 				}
-			} else if ((*c)->name() == X_("Removed")) {
+			} else if ((*c)->name() == "Removed") {
 				const XMLNodeList& grandchildren = (*c)->children();
 				for (XMLNodeList::const_iterator gc = grandchildren.begin(); gc != grandchildren.end(); ++gc) {
-					const XMLProperty* prop = (*gc)->property (X_("id"));
+					const XMLProperty* prop = (*gc)->property ("id");
 					if (prop) {
 						typename Container::value_type v = lookup_id (PBD::ID (prop->value()));
 						if (v) {

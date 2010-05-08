@@ -35,6 +35,8 @@
 #include "ardour/export_filename.h"
 #include "ardour/export_failed.h"
 
+#include "i18n.h"
+
 using namespace std;
 using namespace PBD;
 
