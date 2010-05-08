@@ -869,12 +869,12 @@ IO::make_connections (const XMLNode& node, int version, bool in)
 					if ((prop = cnode->property (X_("other"))) == 0) {
 						continue;
 					}
-
+                                        
 					if (prop) {
 						p->connect (prop->value());
 					}
 				}
-			}
+			} 
 		}
 	}
 

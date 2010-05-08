@@ -769,10 +769,11 @@ If you still wish to quit, please use the\n\n\
 		_session = 0;
 	}
 
-	ArdourDialog::close_all_dialogs ();
-	engine->stop (true);
         cerr << "Save before quit\n";
 	save_ardour_state ();
+
+	ArdourDialog::close_all_dialogs ();
+	engine->stop (true);
 	quit ();
 }
 
