@@ -383,7 +383,7 @@ IO::ensure_ports_locked (ChanCount count, bool clear, void* /*src*/)
 
 			catch (AudioEngine::PortRegistrationFailure& err) {
 				/* pass it on */
-				throw AudioEngine::PortRegistrationFailure();
+				throw;
 			}
 
 			_ports.add (port);
