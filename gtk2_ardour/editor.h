@@ -898,7 +898,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Table          edit_packer;
 
 	Gtk::Adjustment     vertical_adjustment;
-	double _horizontal_position;
 
 	Gtk::Layout         controls_layout;
 	bool control_layout_scroll (GdkEventScroll* ev);
@@ -936,6 +935,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	double last_trackview_group_vertical_offset;
 	void tie_vertical_scrolling ();
 	void set_horizontal_position (double);
+	double horizontal_position () const;
 	void scroll_canvas_vertically ();
 
 	struct VisualChange {

@@ -127,7 +127,7 @@ Auditioner::audition_current_playlist ()
 
 	Glib::Mutex::Lock lm (lock);
 	_diskstream->seek (0);
-	length = _diskstream->playlist()->get_maximum_extent();
+	length = _diskstream->playlist()->get_extent().second;
 	current_frame = 0;
 
 	/* force a panner reset now that we have all channels */

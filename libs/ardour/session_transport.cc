@@ -408,36 +408,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	if (did_record) {
 		begin_reversible_command ("capture");
-
-		Location* loc = _locations.session_range_location();
-		bool change_end = false;
-
-		if (_transport_frame < loc->end()) {
-
-			/* stopped recording before current end */
-
-			if (config.get_end_marker_is_free()) {
-
-				/* first capture for this session, move end back to where we are */
-
-				change_end = true;
-			}
-
-		} else if (_transport_frame > loc->end()) {
-
-			/* stopped recording after the current end, extend it */
-
-			change_end = true;
-		}
-
-		if (change_end) {
-                        XMLNode &before = loc->get_state();
-                        loc->set_end(_transport_frame);
-                        XMLNode &after = loc->get_state();
-                        add_command (new MementoCommand<Location>(*loc, &before, &after));
-		}
-
-		config.set_end_marker_is_free (false);
 		_have_captured = true;
 	}
 
@@ -585,10 +555,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	if (did_record && !saved) {
 		save_state (_current_snapshot_name);
-	}
-
-	if (ptw & PostTransportDuration) {
-		DurationChanged (); /* EMIT SIGNAL */
 	}
 
 	if (ptw & PostTransportStop) {

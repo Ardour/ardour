@@ -2227,7 +2227,8 @@ Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 }
 
 void
-Editor::insert_route_list_drag (boost::shared_ptr<Route> route, int x, int y) {
+Editor::insert_route_list_drag (boost::shared_ptr<Route> route, int x, int y)
+{
 	double wx, wy;
 	double cx, cy;
 	nframes_t where;
@@ -2235,7 +2236,7 @@ Editor::insert_route_list_drag (boost::shared_ptr<Route> route, int x, int y) {
 	RouteTimeAxisView *source_rtv = 0;
 
 	track_canvas->window_to_world (x, y, wx, wy);
-	wx += _horizontal_position;
+	wx += horizontal_position ();
 	wy += vertical_adjustment.get_value();
 
 	GdkEvent event;

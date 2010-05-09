@@ -270,7 +270,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	PBD::Signal0<void> TransportStateChange; /* generic */
 	PBD::Signal1<void,nframes64_t> PositionChanged; /* sent after any non-sequential motion */
-	PBD::Signal0<void> DurationChanged;
 	PBD::Signal1<void,nframes64_t> Xrun;
 	PBD::Signal0<void> TransportLooped;
 
@@ -291,10 +290,10 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	bool get_play_loop () const { return play_loop; }
 
 	nframes_t  last_transport_start() const { return _last_roll_location; }
-	void goto_end ()   { request_locate (_session_range_location->end(), false);}
-	void goto_start () { request_locate (_session_range_location->start(), false); }
-	void set_session_start (nframes_t start) { _session_range_location->set_start(start); }
-	void set_session_end (nframes_t end) { _session_range_location->set_end(end); config.set_end_marker_is_free (false); }
+	void goto_end ();
+	void goto_start ();
+	void set_session_start (nframes_t);
+	void set_session_end (nframes_t);
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
 	void request_transport_speed (double speed);
@@ -307,9 +306,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	int wipe ();
 
-	nframes_t get_maximum_extent () const;
-	nframes_t current_end_frame() const { return _session_range_location->end(); }
-	nframes_t current_start_frame() const { return _session_range_location->start(); }
+	std::pair<nframes_t, nframes_t> get_extent () const;
+	nframes_t current_end_frame () const;
+	nframes_t current_start_frame () const;
 	/// "actual" sample rate of session, set by current audioengine rate, pullup/down etc.
 	nframes_t frame_rate() const   { return _current_frame_rate; }
 	/// "native" sample rate of session, regardless of current audioengine rate, pullup/down etc
@@ -805,10 +804,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void update_latency_compensation (bool, bool);
 
   private:
-	int  create (const std::string& mix_template, nframes_t initial_length, BusProfile*);
+	int  create (const std::string& mix_template, BusProfile*);
 	void destroy ();
-
-	nframes_t compute_initial_length ();
 
 	enum SubState {
 		PendingDeclickIn   = 0x1,
@@ -836,7 +833,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	int                      transport_sub_state;
 	mutable gint            _record_status;
 	volatile nframes64_t    _transport_frame;
-	Location*               _session_range_location;
+	Location*               _session_range_location; ///< session range, or 0 if there is nothing in the session yet
 	Slave*                  _slave;
 	bool                    _silent;
 
@@ -1056,7 +1053,7 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	void first_stage_init (std::string path, std::string snapshot_name);
 	int  second_stage_init ();
-	void find_current_end ();
+	void update_session_range_location_marker ();
 	void remove_empty_sounds ();
 
 	void setup_midi_control ();
@@ -1442,6 +1439,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	/** temporary list of Diskstreams used only during load of 2.X sessions */
 	std::list<boost::shared_ptr<Diskstream> > _diskstreams_2X;
+
+	void add_session_range_location (nframes_t, nframes_t);
 };
 
 } // namespace ARDOUR

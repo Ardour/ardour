@@ -222,7 +222,7 @@ AudioFileSource::old_peak_path (ustring audio_path)
 #ifdef __APPLE__
 	snprintf (buf, sizeof (buf), "%u-%u-%d.peak", stat_mount.st_ino, stat_file.st_ino, _channel);
 #else
-	snprintf (buf, sizeof (buf), "%ld-%ld-%d.peak", stat_mount.st_ino, stat_file.st_ino, _channel);
+	snprintf (buf, sizeof (buf), "%lld-%lld-%d.peak", stat_mount.st_ino, stat_file.st_ino, _channel);
 #endif
 
 	ustring res = peak_dir;

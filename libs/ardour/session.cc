@@ -172,7 +172,7 @@ Session::Session (AudioEngine &eng,
         _is_new = !Glib::file_test (_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
 
 	if (_is_new) {
-		if (create (mix_template, compute_initial_length(), bus_profile)) {
+		if (create (mix_template, bus_profile)) {
 			destroy ();
 			throw failed_constructor ();
 		}
@@ -700,13 +700,7 @@ Session::hookup_io ()
 void
 Session::playlist_length_changed ()
 {
-	/* we can't just increase session_range_location->end() if pl->get_maximum_extent()
-	   if larger. if the playlist used to be the longest playlist,
-	   and its now shorter, we have to decrease session_range_location->end(). hence,
-	   we have to iterate over all diskstreams and check the
-	   playlists currently in use.
-	*/
-	find_current_end ();
+	update_session_range_location_marker ();
 }
 
 void
@@ -723,8 +717,7 @@ Session::track_playlist_changed (boost::weak_ptr<Track> wp)
 		playlist->LengthChanged.connect_same_thread (*this, boost::bind (&Session::playlist_length_changed, this));
 	}
 
-	/* see comment in playlist_length_changed () */
-	find_current_end ();
+	update_session_range_location_marker ();
 }
 
 bool
@@ -2082,7 +2075,7 @@ Session::remove_route (shared_ptr<Route> route)
 	}
         
         update_route_solo_state ();
-	find_current_end ();
+	update_session_range_location_marker ();
 
 	// We need to disconnect the route's inputs and outputs
 
@@ -2396,43 +2389,64 @@ Session::route_by_remote_id (uint32_t id)
 	return shared_ptr<Route> ((Route*) 0);
 }
 
+/** If either end of the session range location marker lies inside the current
+ *  session extent, move it to the corresponding session extent.
+ */
 void
-Session::find_current_end ()
+Session::update_session_range_location_marker ()
 {
 	if (_state_of_the_state & Loading) {
 		return;
 	}
 
-	nframes_t max = get_maximum_extent ();
+	pair<nframes_t, nframes_t> const ext = get_extent ();
 
-	if (max > _session_range_location->end()) {
-		_session_range_location->set_end (max);
-		set_dirty();
-		DurationChanged(); /* EMIT SIGNAL */
+	if (_session_range_location == 0) {
+		/* we don't have a session range yet; use this one (provided it is valid) */
+		if (ext.first != max_frames) {
+			add_session_range_location (ext.first, ext.second);
+		}
+	} else {
+		/* update the existing session range */
+		if (ext.first < _session_range_location->start()) {
+			_session_range_location->set_start (ext.first);
+			set_dirty ();
+		}
+		
+		if (ext.second > _session_range_location->end()) {
+			_session_range_location->set_end (ext.second);
+			set_dirty ();
+		}
+		
 	}
 }
 
-nframes_t
-Session::get_maximum_extent () const
+/** @return Extent of the session's contents; if the session is empty, the first value of
+ *  the pair will equal max_frames.
+ */
+pair<nframes_t, nframes_t>
+Session::get_extent () const
 {
-	nframes_t max = 0;
-	nframes_t me;
+	pair<nframes_t, nframes_t> ext (max_frames, 0);
 	
 	boost::shared_ptr<RouteList> rl = routes.reader ();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (!tr || tr->destructive()) {
-			//ignore tape tracks when getting max extents
+			// ignore tape tracks when getting extents
 			continue;
 		}
-		
-		boost::shared_ptr<Playlist> pl = tr->playlist();
-		if ((me = pl->get_maximum_extent()) > max) {
-			max = me;
+
+		pair<nframes_t, nframes_t> e = tr->playlist()->get_extent ();
+		if (e.first < ext.first) {
+			ext.first = e.first;
+		}
+		if (e.second > ext.second) {
+			ext.second = e.second;
 		}
 	}
 
-	return max;
+	return ext;
 }
 
 /* Region management */
@@ -3693,12 +3707,6 @@ Session::add_automation_list(AutomationList *al)
 	automation_lists[al->id()] = al;
 }
 
-nframes_t
-Session::compute_initial_length ()
-{
-	return _engine.frame_rate() * 60 * 5;
-}
-
 void
 Session::sync_order_keys (std::string const & base)
 {
@@ -3837,4 +3845,63 @@ Session::get_routes_with_regions_at (nframes64_t const p) const
 	}
 
 	return rl;
+}
+
+void
+Session::goto_end ()
+{
+	if (_session_range_location) {
+		request_locate (_session_range_location->end(), false);
+	} else {
+		request_locate (0, false);
+	}
+}
+
+void
+Session::goto_start ()
+{
+	if (_session_range_location) {
+		request_locate (_session_range_location->start(), false);
+	} else {
+		request_locate (0, false);
+	}
+}
+
+void
+Session::set_session_start (nframes_t start)
+{
+	if (_session_range_location) {
+		_session_range_location->set_start (start);
+	} else {
+		add_session_range_location (start, start);
+	}
+}
+	      
+void
+Session::set_session_end (nframes_t end)
+{
+	if (_session_range_location) {
+		_session_range_location->set_end (end);
+	} else {
+		add_session_range_location (end, end);
+	}
+}
+
+nframes_t
+Session::current_start_frame () const
+{
+	return _session_range_location ? _session_range_location->start() : 0;
+}
+
+nframes_t
+Session::current_end_frame () const
+{
+	return _session_range_location ? _session_range_location->end() : 0;
+}
+
+void
+Session::add_session_range_location (nframes_t start, nframes_t end)
+{
+	_session_range_location = new Location (start, end, _("session"), Location::IsSessionRange);
+	_locations.add (_session_range_location);
 }

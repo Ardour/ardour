@@ -780,20 +780,18 @@ Editor::tie_vertical_scrolling ()
 void
 Editor::set_horizontal_position (double p)
 {
-	_horizontal_position = p;
-	
 	/* horizontal scrolling only */
 	double x1, y1, x2, y2, x_delta;
 	_master_group->get_bounds (x1, y1, x2, y2);
 
-	x_delta = - (x1 + _horizontal_position);
+	x_delta = - (x1 + p);
 
 	_master_group->move (x_delta, 0);
 	timebar_group->move (x_delta, 0);
 	time_line_group->move (x_delta, 0);
 	cursor_group->move (x_delta, 0);
 
-	leftmost_frame = (nframes64_t) floor (_horizontal_position * frames_per_unit);
+	leftmost_frame = (nframes64_t) floor (p * frames_per_unit);
 
 	update_fixed_rulers ();
 	redisplay_tempo (true);
@@ -920,4 +918,10 @@ Editor::update_canvas_now ()
 	if (c->need_update || c->need_redraw) {
 		track_canvas->update_now ();
 	}
+}
+
+double
+Editor::horizontal_position () const
+{
+	return frame_to_unit (leftmost_frame);
 }

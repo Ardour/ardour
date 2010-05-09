@@ -179,7 +179,7 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	transport_sub_state = 0;
 	_transport_frame = 0;
 	_requested_return_frame = -1;
-	_session_range_location = new Location (0, 0, _("session"), Location::IsSessionRange);
+	_session_range_location = 0;
 	g_atomic_int_set (&_record_status, Disabled);
 	loop_changing = false;
 	play_loop = false;
@@ -365,8 +365,6 @@ Session::second_stage_init ()
 
 	ControlProtocolManager::instance().set_session (this);
 
-	config.set_end_marker_is_free (_is_new);
-
 	_state_of_the_state = Clean;
 
 	DirtyChanged (); /* EMIT SIGNAL */
@@ -491,7 +489,7 @@ Session::ensure_subdirs ()
 }
 
 int
-Session::create (const string& mix_template, nframes_t initial_length, BusProfile* bus_profile)
+Session::create (const string& mix_template, BusProfile* bus_profile)
 {
 
 	if (g_mkdir_with_parents (_path.c_str(), 0755) < 0) {
@@ -539,9 +537,6 @@ Session::create (const string& mix_template, nframes_t initial_length, BusProfil
 	_metadata = new SessionMetadata ();
 
 	/* set initial start + end point */
-
-	_session_range_location->set (0, initial_length);
-	_locations.add (_session_range_location);
 
 	_state_of_the_state = Clean;
         
@@ -1051,7 +1046,7 @@ Session::state(bool full_state)
 		// with the default start and end, and get the state for that.
 		Locations loc;
 		Location* range = new Location (0, 0, _("session"), Location::IsSessionRange);
-		range->set (0, compute_initial_length ());
+		range->set (max_frames, 0);
 		loc.add (range);
 		node->add_child_nocopy (loc.get_state());
 	}
@@ -1242,14 +1237,14 @@ Session::set_state (const XMLNode& node, int version)
 		set_auto_punch_location (location);
 	}
 
-	if ((location = _locations.session_range_location()) == 0) {
-		_locations.add (_session_range_location);
-	} else {
+	if ((location = _locations.session_range_location()) != 0) {
 		delete _session_range_location;
 		_session_range_location = location;
 	}
 
-	AudioFileSource::set_header_position_offset (_session_range_location->start());
+	if (_session_range_location) {
+		AudioFileSource::set_header_position_offset (_session_range_location->start());
+	}
 
 	if ((child = find_named_node (node, "Sources")) == 0) {
 		error << _("Session: XML state has no sources section") << endmsg;

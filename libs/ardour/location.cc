@@ -548,6 +548,8 @@ Locations::clear_ranges ()
 void
 Locations::add (Location *loc, bool make_current)
 {
+	assert (loc);
+	
 	{
 		Glib::Mutex::Lock lm (lock);
 		locations.push_back (loc);

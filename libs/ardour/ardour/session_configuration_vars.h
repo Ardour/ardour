@@ -37,7 +37,6 @@ CONFIG_VARIABLE (TimecodeFormat, timecode_format, "timecode-format", timecode_30
 CONFIG_VARIABLE_SPECIAL(Glib::ustring, raid_path, "raid-path", "", path_expand)
 CONFIG_VARIABLE (std::string, bwf_country_code, "bwf-country-code", "US")
 CONFIG_VARIABLE (std::string, bwf_organization_code, "bwf-organization-code", "US")
-CONFIG_VARIABLE (bool, end_marker_is_free, "end-marker-is-free", true)
 CONFIG_VARIABLE (LayerModel, layer_model, "layer-model", MoveAddHigher)
 CONFIG_VARIABLE (std::string, auditioner_output_left, "auditioner-output-left", "default")
 CONFIG_VARIABLE (std::string, auditioner_output_right, "auditioner-output-right", "default")

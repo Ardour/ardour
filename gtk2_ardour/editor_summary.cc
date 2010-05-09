@@ -153,7 +153,11 @@ EditorSummary::render (cairo_t* cr)
 		max_height = max (max_height, t);
 	}
 
-	_x_scale = static_cast<double> (_width) / (_end - _start);
+	if (_end != _start) {
+		_x_scale = static_cast<double> (_width) / (_end - _start);
+	} else {
+		_x_scale = 1;
+	}
 	_y_scale = static_cast<double> (_height) / h;
 
 	/* tallest a region should ever be in the summary, in pixels */

@@ -4251,8 +4251,6 @@ Editor::post_zoom ()
 		}
 	}
 
-	leftmost_frame = (nframes64_t) floor (_horizontal_position * frames_per_unit);
-
 	ZoomChanged (); /* EMIT_SIGNAL */
 
 	//reset_scrolling_region ();
@@ -4313,7 +4311,7 @@ Editor::idle_visual_changer ()
 	VisualChange::Type p = pending_visual_change.pending;
 	pending_visual_change.pending = (VisualChange::Type) 0;
 
-	double last_time_origin = _horizontal_position;
+	double last_time_origin = horizontal_position ();
 
 	if (p & VisualChange::ZoomLevel) {
 		set_frames_per_unit (pending_visual_change.frames_per_unit);
@@ -4330,7 +4328,7 @@ Editor::idle_visual_changer ()
 		vertical_adjustment.set_value (pending_visual_change.y_origin);
 	}
 
-	if (last_time_origin == _horizontal_position) {
+	if (last_time_origin == horizontal_position ()) {
 		/* changed signal not emitted */
 		update_fixed_rulers ();
 		redisplay_tempo (true);

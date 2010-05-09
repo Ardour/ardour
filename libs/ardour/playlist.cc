@@ -452,7 +452,7 @@ void
 Playlist::delay_notifications ()
 {
 	g_atomic_int_inc (&block_notifications);
-	freeze_length = _get_maximum_extent();
+	freeze_length = _get_extent().second;
 }
 
 void
@@ -574,7 +574,7 @@ Playlist::flush_notifications ()
 	if (!pending_bounds.empty() || !pending_removes.empty() || !pending_adds.empty()) {
 		regions_changed = true;
 		if (!pending_length) {
-			old_length = _get_maximum_extent ();
+			old_length = _get_extent ().second;
 			check_length = true;
 		}
 	}
@@ -608,13 +608,13 @@ Playlist::flush_notifications ()
 	}
 
 	if (check_length) {
-		if (old_length != _get_maximum_extent()) {
+		if (old_length != _get_extent().second) {
 			pending_length = true;
 			// cerr << _name << " length has changed\n";
 		}
 	}
 
-	if (pending_length || (freeze_length != _get_maximum_extent())) {
+	if (pending_length || (freeze_length != _get_extent().second)) {
 		pending_length = false;
 		// cerr << _name << " sends LengthChanged\n";
 		LengthChanged(); /* EMIT SIGNAL */
@@ -737,7 +737,7 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t posi
 	framecnt_t old_length = 0;
 
 	if (!holding_state()) {
-		 old_length = _get_maximum_extent();
+		 old_length = _get_extent().second;
 	}
 
 	if (!first_set_state) {
@@ -767,7 +767,7 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t posi
 
 		check_dependents (region, false);
 
-		if (old_length != _get_maximum_extent()) {
+		if (old_length != _get_extent().second) {
 			notify_length_changed ();
 		}
 	}
@@ -808,7 +808,7 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region)
 	int ret = -1;
 
 	if (!holding_state()) {
-		old_length = _get_maximum_extent();
+		old_length = _get_extent().second;
 	}
 
 	if (!in_set_state) {
@@ -832,7 +832,7 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region)
                                 relayer ();
 				remove_dependents (region);
 
-				if (old_length != _get_maximum_extent()) {
+				if (old_length != _get_extent().second) {
 					notify_length_changed ();
 				}
 			}
@@ -1203,7 +1203,7 @@ Playlist::copy (framepos_t start, framecnt_t cnt, bool result_is_hidden)
 	new_name += '.';
 	new_name += buf;
 
-	cnt = min (_get_maximum_extent() - start, cnt);
+	cnt = min (_get_extent().second - start, cnt);
 	return PlaylistFactory::create (shared_from_this(), start, cnt, new_name, result_is_hidden);
 }
 
@@ -1216,11 +1216,11 @@ Playlist::paste (boost::shared_ptr<Playlist> other, framepos_t position, float t
 		RegionLock rl1 (this);
 		RegionLock rl2 (other.get());
 
-		framecnt_t old_length = _get_maximum_extent();
+		framecnt_t const old_length = _get_extent().second;
 
 		int itimes = (int) floor (times);
 		framepos_t pos = position;
-		framecnt_t shift = other->_get_maximum_extent();
+		framecnt_t const shift = other->_get_extent().second;
 		layer_t top_layer = regions.size();
 
 		while (itimes--) {
@@ -1240,7 +1240,7 @@ Playlist::paste (boost::shared_ptr<Playlist> other, framepos_t position, float t
 
 		/* XXX shall we handle fractional cases at some point? */
 
-		if (old_length != _get_maximum_extent()) {
+		if (old_length != _get_extent().second) {
 			notify_length_changed ();
 		}
 
@@ -2280,27 +2280,29 @@ Playlist::n_regions() const
 	return regions.size();
 }
 
-framecnt_t
-Playlist::get_maximum_extent () const
+pair<framecnt_t, framecnt_t>
+Playlist::get_extent () const
 {
 	RegionLock rlock (const_cast<Playlist *>(this), false);
-	return _get_maximum_extent ();
+	return _get_extent ();
 }
 
-framecnt_t
-Playlist::_get_maximum_extent () const
+pair<framecnt_t, framecnt_t>
+Playlist::_get_extent () const
 {
-	RegionList::const_iterator i;
-	framecnt_t max_extent = 0;
-	framepos_t end = 0;
+	pair<framecnt_t, framecnt_t> ext (max_frames, 0);
 
-	for (i = regions.begin(); i != regions.end(); ++i) {
-		if ((end = (*i)->position() + (*i)->length()) > max_extent) {
-			max_extent = end;
+	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+		pair<framecnt_t, framecnt_t> const e ((*i)->position(), (*i)->position() + (*i)->length());
+		if (e.first < ext.first) {
+			ext.first = e.first;
+		}
+		if (e.second > ext.second) {
+			ext.second = e.second;
 		}
 	}
 
-	return max_extent;
+	return ext;
 }
 
 string
