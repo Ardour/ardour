@@ -2191,8 +2191,6 @@ Editor::insert_region_list_drag (boost::shared_ptr<Region> region, int x, int y)
 	boost::shared_ptr<Playlist> playlist;
 
 	track_canvas->window_to_world (x, y, wx, wy);
-	//wx += horizontal_adjustment.get_value();
-	//wy += vertical_adjustment.get_value();
 
 	GdkEvent event;
 	event.type = GDK_BUTTON_RELEASE;
@@ -2237,7 +2235,7 @@ Editor::insert_route_list_drag (boost::shared_ptr<Route> route, int x, int y) {
 	RouteTimeAxisView *source_rtv = 0;
 
 	track_canvas->window_to_world (x, y, wx, wy);
-	wx += horizontal_adjustment.get_value();
+	wx += _horizontal_position;
 	wy += vertical_adjustment.get_value();
 
 	GdkEvent event;

@@ -898,7 +898,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Table          edit_packer;
 
 	Gtk::Adjustment     vertical_adjustment;
-	Gtk::Adjustment     horizontal_adjustment;
+	double _horizontal_position;
 
 	Gtk::Layout         controls_layout;
 	bool control_layout_scroll (GdkEventScroll* ev);
@@ -935,7 +935,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Group* get_trackview_group () const { return _trackview_group; }
 	double last_trackview_group_vertical_offset;
 	void tie_vertical_scrolling ();
-	void scroll_canvas_horizontally ();
+	void set_horizontal_position (double);
 	void scroll_canvas_vertically ();
 
 	struct VisualChange {
@@ -968,8 +968,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void queue_visual_change (double);
 	void queue_visual_change_y (double);
 	void ensure_visual_change_idle_handler ();
-
-	void session_range_location_changed (ARDOUR::Location*);
 
 	/* track views */
 	TrackViewList track_views;
@@ -1396,7 +1394,6 @@ public:
 	void kbd_do_brush (GdkEvent*);
 	void kbd_do_audition (GdkEvent*);
 
-	void handle_new_duration ();
 	void initialize_canvas ();
 
 	/* display control */

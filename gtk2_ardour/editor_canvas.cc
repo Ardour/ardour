@@ -361,7 +361,6 @@ Editor::track_canvas_size_allocated ()
 		}
 	}
 
-	handle_new_duration ();
 	update_fixed_rulers();
 	redisplay_tempo (false);
 	_summary->set_overlays_dirty ();
@@ -779,20 +778,22 @@ Editor::tie_vertical_scrolling ()
 }
 
 void
-Editor::scroll_canvas_horizontally ()
+Editor::set_horizontal_position (double p)
 {
+	_horizontal_position = p;
+	
 	/* horizontal scrolling only */
 	double x1, y1, x2, y2, x_delta;
 	_master_group->get_bounds (x1, y1, x2, y2);
 
-	x_delta = - (x1 +  horizontal_adjustment.get_value());
+	x_delta = - (x1 + _horizontal_position);
 
 	_master_group->move (x_delta, 0);
 	timebar_group->move (x_delta, 0);
 	time_line_group->move (x_delta, 0);
 	cursor_group->move (x_delta, 0);
 
-	leftmost_frame = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
+	leftmost_frame = (nframes64_t) floor (_horizontal_position * frames_per_unit);
 
 	update_fixed_rulers ();
 	redisplay_tempo (true);

@@ -66,7 +66,7 @@ Editor::kbd_driver (sigc::slot<void,GdkEvent*> theslot, bool use_track_canvas, b
 		}
 
 		track_canvas->window_to_world (x, y, worldx, worldy);
-		worldx += horizontal_adjustment.get_value();
+		worldx += _horizontal_position;
 		worldy += vertical_adjustment.get_value();
 
 		ev.type = GDK_BUTTON_PRESS;

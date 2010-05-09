@@ -560,7 +560,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, nframes64_t* pending_
 				rv->get_canvas_frame()->get_bounds (ix1, iy1, ix2, iy2);
 				rv->get_canvas_frame()->i2w (ix1, iy1);
 
-				if (-x_delta > ix1 + _editor->horizontal_adjustment.get_value()) {
+				if (-x_delta > ix1 + _editor->_horizontal_position) {
 					x_delta = 0;
 					*pending_region_position = _last_frame_position;
 					break;
@@ -3321,7 +3321,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		break;
 	}
 
-	if (event->button.x >= _editor->horizontal_adjustment.get_value() + _editor->_canvas_width) {
+	if (event->button.x >= _editor->_horizontal_position + _editor->_canvas_width) {
 		_editor->start_canvas_autoscroll (1, 0);
 	}
 
@@ -3478,7 +3478,7 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 		}
 	}
 
-	if (event->button.x >= _editor->horizontal_adjustment.get_value() + _editor->_canvas_width) {
+	if (event->button.x >= _editor->_horizontal_position + _editor->_canvas_width) {
 		_editor->start_canvas_autoscroll (1, 0);
 	}
 

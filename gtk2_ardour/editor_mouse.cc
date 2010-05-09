@@ -2005,7 +2005,7 @@ Editor::show_verbose_time_cursor (nframes64_t frame, double offset, double xpos,
 	if (xpos >= 0 && ypos >=0) {
 		set_verbose_canvas_cursor (buf, xpos + offset, ypos + offset);
 	} else {
-		set_verbose_canvas_cursor (buf, _drags->current_pointer_x() + offset - horizontal_adjustment.get_value(), _drags->current_pointer_y() + offset - vertical_adjustment.get_value() + canvas_timebars_vsize);
+		set_verbose_canvas_cursor (buf, _drags->current_pointer_x() + offset - _horizontal_position, _drags->current_pointer_y() + offset - vertical_adjustment.get_value() + canvas_timebars_vsize);
 	}
 	show_verbose_canvas_cursor ();
 }

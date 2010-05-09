@@ -262,7 +262,6 @@ Editor::Editor ()
 	  */
 
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
-	, horizontal_adjustment (0.0, 0.0, 20.0, 1200.0)
 
 	  /* tool bar related */
 
@@ -468,7 +467,6 @@ Editor::Editor ()
 	selection->MarkersChanged.connect (sigc::mem_fun(*this, &Editor::marker_selection_changed));
 
 	edit_controls_vbox.set_spacing (0);
-	horizontal_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &Editor::scroll_canvas_horizontally), false);
 	vertical_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &Editor::tie_vertical_scrolling), true);
 	track_canvas->signal_map_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_map_handler));
 
@@ -992,24 +990,6 @@ Editor::center_screen_internal (nframes64_t frame, float page)
 	reset_x_origin (frame);
 }
 
-void
-Editor::handle_new_duration ()
-{
-	if (!_session) {
-		return;
-	}
-
-	ENSURE_GUI_THREAD (*this, &Editor::handle_new_duration)
-	nframes64_t new_end = _session->current_end_frame() + (nframes64_t) floorf (current_page_frames() * 0.10f);
-
-	horizontal_adjustment.set_upper (new_end / frames_per_unit);
-	horizontal_adjustment.set_page_size (current_page_frames()/frames_per_unit);
-
-	if (horizontal_adjustment.get_value() + _canvas_width > horizontal_adjustment.get_upper()) {
-		horizontal_adjustment.set_value (horizontal_adjustment.get_upper() - _canvas_width);
-	}
-	//cerr << "Editor::handle_new_duration () called ha v:l:u:ps:lcf = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << endl;//DEBUG
-}
 
 void
 Editor::update_title ()
@@ -1092,7 +1072,6 @@ Editor::set_session (Session *t)
 	_session->TransportStateChange.connect (_session_connections, invalidator (*this), boost::bind (&Editor::map_transport_state, this), gui_context());
 	_session->PositionChanged.connect (_session_connections, invalidator (*this), ui_bind (&Editor::map_position_change, this, _1), gui_context());
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), ui_bind (&Editor::handle_new_route, this, _1), gui_context());
-	_session->DurationChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::handle_new_duration, this), gui_context());
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_title, this), gui_context());
 	_session->TimecodeOffsetChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_just_timecode, this), gui_context());
 	_session->tempo_map().PropertyChanged.connect (_session_connections, invalidator (*this), ui_bind (&Editor::tempo_map_changed, this, _1), gui_context());
@@ -1103,7 +1082,6 @@ Editor::set_session (Session *t)
 	_session->locations()->removed.connect (_session_connections, invalidator (*this), ui_bind (&Editor::location_gone, this, _1), gui_context());
 	_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->locations()->StateChanged.connect (_session_connections, invalidator (*this), ui_bind (&Editor::refresh_location_display_s, this, _1), gui_context());
-	_session->locations()->session_range_location()->changed.connect (_session_connections, invalidator (*this), ui_bind (&Editor::session_range_location_changed, this, _1), gui_context());
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
 
 	if (Profile->get_sae()) {
@@ -1152,7 +1130,6 @@ Editor::set_session (Session *t)
 	_session->config.map_parameters (pc);
 
 	refresh_location_display ();
-	handle_new_duration ();
 
 	restore_ruler_visibility ();
 	//tempo_map_changed (PropertyChange (0));
@@ -3867,15 +3844,6 @@ Editor::get_nudge_distance (nframes64_t pos, nframes64_t& next)
 	return ret;
 }
 
-void
-Editor::session_range_location_changed (Location* location)
-{
-	ENSURE_GUI_THREAD (*this, &Editor::session_range_location_changed, location)
-	//reset_scrolling_region ();
-	nframes64_t const session_span = location->end() + (nframes64_t) floorf (current_page_frames() * 0.10f);
-	horizontal_adjustment.set_upper (session_span / frames_per_unit);
-}
-
 int
 Editor::playlist_deletion_dialog (boost::shared_ptr<Playlist> pl)
 {
@@ -4139,7 +4107,6 @@ Editor::reset_zoom (double fpu)
 void
 Editor::reposition_and_zoom (nframes64_t frame, double fpu)
 {
-	//cerr << "Editor::reposition_and_zoom () called ha v:l:u:ps:fpu = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << frames_per_unit << endl;//DEBUG
 	reset_x_origin (frame);
 	reset_zoom (fpu);
 
@@ -4270,8 +4237,6 @@ Editor::set_frames_per_unit (double fpu)
 void
 Editor::post_zoom ()
 {
-	nframes64_t cef = 0;
-
 	// convert fpu to frame count
 
 	nframes64_t frames = (nframes64_t) floor (frames_per_unit * _canvas_width);
@@ -4286,14 +4251,9 @@ Editor::post_zoom ()
 		}
 	}
 
-	leftmost_frame = (nframes64_t) floor (horizontal_adjustment.get_value() * frames_per_unit);
+	leftmost_frame = (nframes64_t) floor (_horizontal_position * frames_per_unit);
 
 	ZoomChanged (); /* EMIT_SIGNAL */
-
-	if (_session) {
-		cef = _session->current_end_frame() + (current_page_frames() / 10);// Add a little extra so we can see the end marker
-	}
-	horizontal_adjustment.set_upper (cef / frames_per_unit);
 
 	//reset_scrolling_region ();
 
@@ -4311,17 +4271,7 @@ void
 Editor::queue_visual_change (nframes64_t where)
 {
 	pending_visual_change.add (VisualChange::TimeOrigin);
-
-	/* if we're moving beyond the end, make sure the upper limit of the horizontal adjustment
-	   can reach.
-	*/
-
-	if (_session && (where > _session->current_end_frame())) {
-		horizontal_adjustment.set_upper ((where + current_page_frames()) / frames_per_unit);
-	}
-
 	pending_visual_change.time_origin = where;
-
 	ensure_visual_change_idle_handler ();
 }
 
@@ -4363,7 +4313,7 @@ Editor::idle_visual_changer ()
 	VisualChange::Type p = pending_visual_change.pending;
 	pending_visual_change.pending = (VisualChange::Type) 0;
 
-	double last_time_origin = horizontal_adjustment.get_value();
+	double last_time_origin = _horizontal_position;
 
 	if (p & VisualChange::ZoomLevel) {
 		set_frames_per_unit (pending_visual_change.frames_per_unit);
@@ -4374,13 +4324,13 @@ Editor::idle_visual_changer ()
 		update_tempo_based_rulers ();
 	}
 	if (p & VisualChange::TimeOrigin) {
-		horizontal_adjustment.set_value (pending_visual_change.time_origin / frames_per_unit);
+		set_horizontal_position (pending_visual_change.time_origin / frames_per_unit);
 	}
 	if (p & VisualChange::YOrigin) {
 		vertical_adjustment.set_value (pending_visual_change.y_origin);
 	}
 
-	if (last_time_origin == horizontal_adjustment.get_value()) {
+	if (last_time_origin == _horizontal_position) {
 		/* changed signal not emitted */
 		update_fixed_rulers ();
 		redisplay_tempo (true);
@@ -4388,7 +4338,6 @@ Editor::idle_visual_changer ()
 
 	_summary->set_overlays_dirty ();
 
-	// cerr << "Editor::idle_visual_changer () called ha v:l:u:ps:fpu = " << horizontal_adjustment.get_value() << ":" << horizontal_adjustment.get_lower() << ":" << horizontal_adjustment.get_upper() << ":" << horizontal_adjustment.get_page_size() << ":" << frames_per_unit << endl;//DEBUG
 	pending_visual_change.idle_handler_id = -1;
 	return 0; /* this is always a one-shot call */
 }
@@ -5209,7 +5158,7 @@ Editor::super_rapid_screen_update ()
                         }
                         
                         current = target;
-                        horizontal_adjustment.set_value (current);
+                        set_horizontal_position (current);
 #endif
                 }
 		
