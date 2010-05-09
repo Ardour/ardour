@@ -504,7 +504,9 @@ Editor::tempo_or_meter_marker_context_menu (GdkEventButton* ev, ArdourCanvas::It
 		can_remove = mm->meter().movable ();
 	} else if (tm) {
 		can_remove = tm->tempo().movable ();
-	} 
+	} else {
+		return;
+	}
 	
 	delete tempo_or_meter_marker_menu;
 	build_tempo_or_meter_marker_menu (can_remove);
@@ -994,12 +996,6 @@ Editor::dynamic_cast_marker_object (void* p, MeterMarker** m, TempoMarker** t) c
 
 	*m = dynamic_cast<MeterMarker*> (marker);
 	*t = dynamic_cast<TempoMarker*> (marker);
-
-	if (*m == 0 && *t == 0) {
-		fatal << X_("programming erorr: unhandled marker type in Editor::dynamic_cast_marker_object")
-		      << endmsg;
-		/*NOTREACHED*/
-	}
 }
 
 void
