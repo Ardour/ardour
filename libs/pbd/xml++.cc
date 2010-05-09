@@ -5,6 +5,7 @@
  * Modified for Ardour and released under the same terms.
  */
 
+#include <iostream>
 #include "pbd/xml++.h"
 #include <libxml/debugXML.h>
 #include <libxml/xpath.h>
@@ -589,3 +590,17 @@ static XMLSharedNodeList* find_impl(xmlXPathContext* ctxt, const string& xpath)
 	return nodes;
 }
 
+/** Dump a node, its properties and children to a stream */
+void
+XMLNode::debug (ostream& s, string p)
+{
+	s << p << _name << " ";
+	for (XMLPropertyList::iterator i = _proplist.begin(); i != _proplist.end(); ++i) {
+		s << (*i)->name() << "=" << (*i)->value() << " ";
+	}
+	s << "\n";
+	
+	for (XMLNodeList::iterator i = _children.begin(); i != _children.end(); ++i) {
+		(*i)->debug (s, p + "  ");
+	}
+}
