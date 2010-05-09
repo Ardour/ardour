@@ -1828,13 +1828,19 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 			/*NOTREACHED*/
 		}
 
-		IO::set_name_in_state (*node_copy.children().front(), name);
+		/* set IO children to use the new name */
+		XMLNodeList const & children = node_copy.children ();
+		for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+			if ((*i)->name() == IO::state_node_name) {
+				IO::set_name_in_state (**i, name);
+			}
+		}
 
 		Track::zero_diskstream_id_in_xml (node_copy);
 
 		try {
 			shared_ptr<Route> route (XMLRouteFactory (node_copy, 3000));
-	    
+
 			if (route == 0) {
 				error << _("Session: cannot create track/bus from template description") << endmsg;
 				goto out;
