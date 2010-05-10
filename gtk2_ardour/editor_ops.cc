@@ -1776,7 +1776,13 @@ Editor::temporal_zoom_session ()
 	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_session)
 
 	if (_session) {
-		temporal_zoom_by_frame (_session->current_start_frame(), _session->current_end_frame(), "zoom to _session");
+		nframes_t const l = _session->current_end_frame() - _session->current_start_frame();
+		double s = _session->current_start_frame() - l * 0.01;
+		if (s < 0) {
+			s = 0;
+		}
+		nframes_t const e = _session->current_end_frame() + l * 0.01;
+		temporal_zoom_by_frame (nframes_t (s), e, "zoom to _session");
 	}
 }
 
