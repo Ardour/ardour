@@ -62,6 +62,8 @@ public:
 
 	virtual ~CanvasNoteEvent();
 
+        static PBD::Signal1<void,CanvasNoteEvent*> CanvasNoteEventDeleted;
+
 	virtual void show() = 0;
 	virtual void hide() = 0;
 	virtual bool on_event(GdkEvent* ev);

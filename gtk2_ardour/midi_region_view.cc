@@ -178,6 +178,10 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 void
 MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 {
+        CanvasNoteEvent::CanvasNoteEventDeleted.connect (note_delete_connection, MISSING_INVALIDATOR, 
+                                                         ui_bind (&MidiRegionView::maybe_remove_deleted_note_from_selection, this, _1),
+                                                         gui_context());
+
 	if (wfd) {
 		midi_region()->midi_source(0)->load_model();
 	}
@@ -789,6 +793,8 @@ MidiRegionView::redisplay_model()
 	MidiModel::Notes& notes (_model->notes());
 	_optimization_iterator = _events.begin();
 
+        cerr << "++++++++++ MIDI REdisplay\n";
+
 	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
 
 		boost::shared_ptr<NoteType> note (*n);
@@ -829,6 +835,7 @@ MidiRegionView::redisplay_model()
 			}
 		}
 	}
+
 
 	/* remove note items that are no longer valid */
 
@@ -947,6 +954,8 @@ MidiRegionView::display_sysexes()
 MidiRegionView::~MidiRegionView ()
 {
 	in_destructor = true;
+
+        note_delete_connection.disconnect ();
 
 	delete _list_editor;
 
@@ -1473,6 +1482,18 @@ MidiRegionView::next_program(CanvasProgramChange& program)
 }
 
 void
+MidiRegionView::maybe_remove_deleted_note_from_selection (CanvasNoteEvent* cne)
+{
+        if (_selection.empty()) {
+                return;
+        }
+ 
+        if (_selection.erase (cne) > 0) {
+                cerr << "Erased a CNE from selection\n";
+        }
+}
+
+void
 MidiRegionView::delete_selection()
 {
 	if (_selection.empty()) {
@@ -1756,7 +1777,6 @@ MidiRegionView::add_to_selection (CanvasNoteEvent* ev)
 	}
 
 	if (_selection.insert (ev).second) {
-                cerr << "Added CNE to selection, size now " << _selection.size() << endl;
 		ev->selected (true);
 		play_midi_note ((ev)->note());
 	}
@@ -2453,21 +2473,23 @@ MidiRegionView::cut_copy_clear (Editing::CutCopyOp op)
 		break;
 	}
 
-	start_delta_command();
+        if (op != Copy) {
 
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		switch (op) {
-		case Copy:
-			break;
-		case Cut:
-			delta_remove_note (*i);
-			break;
-		case Clear:
-			break;
-		}
-	}
-
-	apply_delta();
+                start_delta_command();
+                
+                for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+                        switch (op) {
+                        case Copy:
+                                break;
+                        case Cut:
+                        case Clear:
+                                delta_remove_note (*i);
+                                break;
+                        }
+                }
+                
+                apply_delta();
+        }
 }
 
 MidiCutBuffer*
@@ -2475,11 +2497,8 @@ MidiRegionView::selection_as_cut_buffer () const
 {
 	Notes notes;
 
-        cerr << "Convert selection of " << _selection.size() << " into a cut buffer\n";
-
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
                 NoteType* n = (*i)->note().get();
-                cerr << "CNE's note is " << n << endl;
 		notes.insert (boost::shared_ptr<NoteType> (new NoteType (*n)));
 	}
 

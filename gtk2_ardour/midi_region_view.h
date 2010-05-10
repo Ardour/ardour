@@ -403,6 +403,9 @@ class MidiRegionView : public RegionView
 
 	MidiListEditor* _list_editor;
 	bool no_sound_notes;
+
+        PBD::ScopedConnection note_delete_connection;
+        void maybe_remove_deleted_note_from_selection (ArdourCanvas::CanvasNoteEvent*);
 };
 
 

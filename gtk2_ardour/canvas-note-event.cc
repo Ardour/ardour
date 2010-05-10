@@ -30,6 +30,8 @@ using ARDOUR::MidiModel;
 namespace Gnome {
 namespace Canvas {
 
+PBD::Signal1<void,CanvasNoteEvent*> CanvasNoteEvent::CanvasNoteEventDeleted;
+
 /// dividing the hue circle in 16 parts, hand adjusted for equal look, courtesy Thorsten Wilms
 const uint32_t CanvasNoteEvent::midi_channel_colors[16] = {
 	  0xd32d2dff,  0xd36b2dff,  0xd3972dff,  0xd3d12dff,
@@ -53,7 +55,7 @@ CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item,
 
 CanvasNoteEvent::~CanvasNoteEvent()
 {
-        cerr << "Destroying CNE @ " << this << endl;
+        CanvasNoteEventDeleted (this);
 
 	if (_text) {
 		_text->hide();
