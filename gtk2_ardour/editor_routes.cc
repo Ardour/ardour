@@ -398,14 +398,11 @@ EditorRoutes::route_deleted (Gtk::TreeModel::Path const &)
 void
 EditorRoutes::visible_changed (Glib::ustring const & path)
 {
-	cout << "vis cha earl\n";
 	if (_session && _session->deletion_in_progress()) {
 		return;
 	}
 
 	TreeIter iter;
-
-	cout << "ER vis cha\n";
 
 	if ((iter = _model->get_iter (path))) {
 		TimeAxisView* tv = (*iter)[_columns.tv];
@@ -570,11 +567,8 @@ EditorRoutes::hide_track_in_display (TimeAxisView& tv)
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
 
-	cout << "hide.\n";
-
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		if ((*i)[_columns.tv] == &tv) {
-			cout << "weee\n";
 			(*i)[_columns.visible] = false;
 			break;
 		}
