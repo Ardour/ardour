@@ -334,7 +334,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void create_editor_mixer ();
 	void show_editor_list (bool yn);
 	void set_selected_mixer_strip (TimeAxisView&);
-	void hide_track_in_display (TimeAxisView& tv, bool temporary = false);
+	void hide_track_in_display (TimeAxisView* tv, bool temporary = false);
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
 

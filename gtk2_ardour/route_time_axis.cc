@@ -110,9 +110,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	, button_table (3, 3)
 	, route_group_button (_("g"))
 	, playlist_button (_("p"))
-	, size_button (_("h"))
 	, automation_button (_("a"))
-	, visual_button (_("v"))
 	, gm (sess, slider, true, 115)
 	, _ignore_track_mode_change (false)
 {
@@ -146,26 +144,14 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	route_group_button.set_name ("TrackGroupButton");
 	playlist_button.set_name ("TrackPlaylistButton");
 	automation_button.set_name ("TrackAutomationButton");
-	size_button.set_name ("TrackSizeButton");
-	visual_button.set_name ("TrackVisualButton");
-	hide_button.set_name ("TrackRemoveButton");
 
 	route_group_button.unset_flags (Gtk::CAN_FOCUS);
 	playlist_button.unset_flags (Gtk::CAN_FOCUS);
 	automation_button.unset_flags (Gtk::CAN_FOCUS);
-	size_button.unset_flags (Gtk::CAN_FOCUS);
-	visual_button.unset_flags (Gtk::CAN_FOCUS);
-	hide_button.unset_flags (Gtk::CAN_FOCUS);
-
-	hide_button.add (*(manage (new Image (::get_icon("hide")))));
-	hide_button.show_all ();
 
  	route_group_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::edit_click), false);
 	playlist_button.signal_clicked().connect (sigc::mem_fun(*this, &RouteTimeAxisView::playlist_click));
 	automation_button.signal_clicked().connect (sigc::mem_fun(*this, &RouteTimeAxisView::automation_click));
-	size_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::size_click), false);
-	visual_button.signal_clicked().connect (sigc::mem_fun(*this, &RouteTimeAxisView::visual_click));
-	hide_button.signal_clicked().connect (sigc::mem_fun(*this, &RouteTimeAxisView::hide_click));
 
 	if (is_track()) {
 
@@ -207,27 +193,12 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	ARDOUR_UI::instance()->set_tip(*solo_button,_("Solo"));
 	ARDOUR_UI::instance()->set_tip(*mute_button,_("Mute"));
 	ARDOUR_UI::instance()->set_tip(route_group_button, _("Route Group"));
-	ARDOUR_UI::instance()->set_tip(size_button,_("Display Height"));
 	ARDOUR_UI::instance()->set_tip(playlist_button,_("Playlist"));
 	ARDOUR_UI::instance()->set_tip(automation_button, _("Automation"));
-	ARDOUR_UI::instance()->set_tip(visual_button, _("Visual options"));
-	ARDOUR_UI::instance()->set_tip(hide_button, _("Hide this track"));
 
 	label_view ();
 
-	if (0) {
-
-		/* old school - when we used to put an extra row of buttons in place */
-
-		controls_table.attach (hide_button, 0, 1, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-		controls_table.attach (visual_button, 1, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-		controls_table.attach (size_button, 2, 3, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-		controls_table.attach (automation_button, 3, 4, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-
-	} else {
-
-		controls_table.attach (automation_button, 6, 7, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
-	}
+	controls_table.attach (automation_button, 6, 7, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
 
 	if (is_track() && track()->mode() == ARDOUR::Normal) {
 		controls_table.attach (playlist_button, 5, 6, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND);
@@ -453,10 +424,6 @@ RouteTimeAxisView::build_display_menu ()
 {
 	using namespace Menu_Helpers;
 
-	/* get the size menu ready */
-
-	build_size_menu ();
-
 	/* prepare it */
 
 	TimeAxisView::build_display_menu ();
@@ -466,7 +433,6 @@ RouteTimeAxisView::build_display_menu ()
 	MenuList& items = display_menu->items();
 	display_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Height"), *size_menu));
 	items.push_back (MenuElem (_("Color"), sigc::mem_fun(*this, &RouteTimeAxisView::select_track_color)));
 
 	items.push_back (SeparatorElem());
@@ -572,7 +538,7 @@ RouteTimeAxisView::build_display_menu ()
 	route_active_menu_item->set_active (_route->active());
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Hide"), sigc::mem_fun(*this, &RouteTimeAxisView::hide_click)));
+	items.push_back (MenuElem (_("Hide"), sigc::bind (sigc::mem_fun(_editor, &PublicEditor::hide_track_in_display), this, false)));
 	if (!Profile->get_sae()) {
 		items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &RouteUI::remove_this_route)));
 	} else {
@@ -806,9 +772,6 @@ RouteTimeAxisView::set_height (uint32_t h)
 			rec_enable_button->show();
 
 		route_group_button.show();
-		hide_button.show();
-		visual_button.show();
-		size_button.show();
 		automation_button.show();
 
 		if (is_track() && track()->mode() == ARDOUR::Normal) {
@@ -832,9 +795,6 @@ RouteTimeAxisView::set_height (uint32_t h)
 			rec_enable_button->show();
 
 		route_group_button.hide ();
-		hide_button.hide ();
-		visual_button.hide ();
-		size_button.hide ();
 		automation_button.hide ();
 
 		if (is_track() && track()->mode() == ARDOUR::Normal) {
@@ -865,9 +825,6 @@ RouteTimeAxisView::set_height (uint32_t h)
 			rec_enable_button->hide();
 
 		route_group_button.hide ();
-		hide_button.hide ();
-		visual_button.hide ();
-		size_button.hide ();
 		automation_button.hide ();
 		playlist_button.hide ();
 		name_label.set_text (_route->name());
@@ -1334,23 +1291,6 @@ RouteTimeAxisView::name_entry_changed ()
 	} else {
 		_route->set_name (x);
 	}
-}
-
-void
-RouteTimeAxisView::visual_click ()
-{
-	popup_display_menu (0);
-}
-
-void
-RouteTimeAxisView::hide_click ()
-{
-	// LAME fix for hide_button refresh fix
-	hide_button.set_sensitive(false);
-
-	_editor.hide_track_in_display (*this);
-
-	hide_button.set_sensitive(true);
 }
 
 boost::shared_ptr<Region>

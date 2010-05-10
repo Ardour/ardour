@@ -1736,7 +1736,7 @@ Editor::temporal_zoom_region (bool both_axes)
 
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if (find (tracks.begin(), tracks.end(), (*i)) == tracks.end()) {
-				hide_track_in_display (**i, true);
+				hide_track_in_display (*i, true);
 			}
 		}
 
@@ -6357,7 +6357,7 @@ Editor::fit_tracks (TrackViewList & tracks)
 			first_y_pos = std::min ((*t)->y_position (), first_y_pos);
 		} else {
 			if (prev_was_selected && next_is_selected) {
-				hide_track_in_display (**t);
+				hide_track_in_display (*t);
 			}
 		}
 

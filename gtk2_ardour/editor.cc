@@ -4890,16 +4890,16 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 }
 
 void
-Editor::hide_track_in_display (TimeAxisView& tv, bool /*temponly*/)
+Editor::hide_track_in_display (TimeAxisView* tv, bool /*temponly*/)
 {
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&tv);
+	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 
 	if (rtv && current_mixer_strip && (rtv->route() == current_mixer_strip->route())) {
 		// this will hide the mixer strip
-		set_selected_mixer_strip (tv);
+		set_selected_mixer_strip (*tv);
 	}
 
-	_routes->hide_track_in_display (tv);
+	_routes->hide_track_in_display (*tv);
 }
 
 bool

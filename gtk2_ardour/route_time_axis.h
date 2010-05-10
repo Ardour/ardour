@@ -249,9 +249,6 @@ protected:
 
 	void timestretch (nframes_t start, nframes_t end);
 
-	void visual_click ();
-	void hide_click ();
-
 	void speed_changed ();
 
 	void map_frozen ();
@@ -269,10 +266,7 @@ protected:
 	Gtk::Button processor_button;
 	Gtk::Button route_group_button;
 	Gtk::Button playlist_button;
-	Gtk::Button size_button;
 	Gtk::Button automation_button;
-	Gtk::Button hide_button;
-	Gtk::Button visual_button;
 
 	Gtk::Menu           subplugin_menu;
 	Gtk::Menu*          automation_action_menu;

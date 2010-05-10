@@ -490,10 +490,6 @@ AutomationTimeAxisView::build_display_menu ()
 {
 	using namespace Menu_Helpers;
 
-	/* get the size menu ready */
-
-	build_size_menu ();
-
 	/* prepare it */
 
 	TimeAxisView::build_display_menu ();
@@ -502,8 +498,6 @@ AutomationTimeAxisView::build_display_menu ()
 
 	MenuList& items = display_menu->items();
 
-	items.push_back (MenuElem (_("Height"), *size_menu));
-	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Hide"), sigc::mem_fun(*this, &AutomationTimeAxisView::hide_clicked)));
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Clear"), sigc::mem_fun(*this, &AutomationTimeAxisView::clear_clicked)));

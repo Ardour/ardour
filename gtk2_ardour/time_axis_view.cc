@@ -101,7 +101,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 
 	control_parent = 0;
 	display_menu = 0;
-	size_menu = 0;
 	_hidden = false;
 	in_destructor = false;
 	height = 0;
@@ -599,23 +598,6 @@ TimeAxisView::popup_display_menu (guint32 when)
 	display_menu->popup (1, when);
 }
 
-gint
-TimeAxisView::size_click (GdkEventButton *ev)
-{
-	conditionally_add_to_selection ();
-	popup_size_menu (ev->time);
-	return TRUE;
-}
-
-void
-TimeAxisView::popup_size_menu (guint32 when)
-{
-	if (size_menu == 0) {
-		build_size_menu ();
-	}
-	size_menu->popup (1, when);
-}
-
 void
 TimeAxisView::set_selected (bool yn)
 {
@@ -646,23 +628,6 @@ TimeAxisView::set_selected (bool yn)
 	}
 
 	resizer.queue_draw ();
-}
-
-void
-TimeAxisView::build_size_menu ()
-{
-	using namespace Menu_Helpers;
-
-	size_menu = new Menu;
-	size_menu->set_name ("ArdourContextMenu");
-	MenuList& items = size_menu->items();
-
-	items.push_back (MenuElem (_("Largest"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_heights), hLargest)));
-	items.push_back (MenuElem (_("Large"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_heights), hLarge)));
-	items.push_back (MenuElem (_("Larger"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_heights), hLarger)));
-	items.push_back (MenuElem (_("Normal"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_heights), hNormal)));
-	items.push_back (MenuElem (_("Smaller"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_heights),hSmaller)));
-	items.push_back (MenuElem (_("Small"), sigc::bind (sigc::mem_fun (*this, &TimeAxisView::set_heights), hSmall)));
 }
 
 void

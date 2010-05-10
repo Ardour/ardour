@@ -277,26 +277,9 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	 */
 	virtual bool handle_display_menu_map_event (GdkEventAny * /*ev*/) { return false; }
 
-	/** Build the standard LHS control size menu for the default heights options.
-	 */
-	virtual void build_size_menu();
-
-	/** Displays the standard LHS controls size menu for the track heights
-	 *
-	 * @param when the popup activation time
-	 */
- 	void popup_size_menu(guint32 when);
-
-	/** Handle the size option of our main menu.
-	 *
-	 * @param ev the event
-	 */
-	gint size_click(GdkEventButton *ev);
-
 	/* The standard LHS Track control popup-menus */
 
 	Gtk::Menu *display_menu;
-	Gtk::Menu *size_menu;
 
 	Gtk::Label    name_label;
 

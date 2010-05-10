@@ -536,7 +536,7 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 	} else {
 		for (TrackViewList::const_iterator j = _editor->get_track_views().begin(); j != _editor->get_track_views().end(); ++j) {
 			if ((*j)->route_group() == group) {
-				_editor->hide_track_in_display (**j);
+				_editor->hide_track_in_display (*j);
 			}
 		}
 	}
