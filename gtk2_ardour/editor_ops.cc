@@ -6016,7 +6016,7 @@ Editor::playhead_backward_to_grid ()
 }
 
 void
-Editor::set_track_height (uint32_t h)
+Editor::set_track_height (Height h)
 {
 	TrackSelection& ts (selection->tracks);
 
@@ -6325,7 +6325,7 @@ Editor::fit_tracks (TrackViewList & tracks)
 	uint32_t h = (uint32_t) floor ((_canvas_height - child_heights - canvas_timebars_vsize) / tracks.size());
 	double first_y_pos = DBL_MAX;
 
-	if (h < TimeAxisView::hSmall) {
+	if (h < TimeAxisView::preset_height (HeightSmall)) {
 		MessageDialog msg (*this, _("There are too many tracks to fit in the current window"));
 		/* too small to be displayed */
 		return;

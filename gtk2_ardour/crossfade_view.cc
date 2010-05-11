@@ -108,7 +108,7 @@ CrossfadeView::reset_width_dependent_items (double pixel_width)
 void
 CrossfadeView::set_height (double h)
 {
-	if (h <= TimeAxisView::hSmall) {
+	if (h <= TimeAxisView::preset_height (HeightSmall)) {
 		h -= 3.0;
 	} else {
 		h -= NAME_HIGHLIGHT_SIZE + 3.0;

@@ -1973,7 +1973,7 @@ public:
 
 	void fit_tracks (TrackViewList &);
 	void fit_selected_tracks ();
-	void set_track_height (uint32_t h);
+	void set_track_height (Height);
 
 	void remove_tracks ();
 	void toggle_tracks_active ();

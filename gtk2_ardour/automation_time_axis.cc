@@ -381,10 +381,9 @@ AutomationTimeAxisView::clear_clicked ()
 void
 AutomationTimeAxisView::set_height (uint32_t h)
 {
-	bool changed = (height != (uint32_t) h) || first_call_to_set_height;
-	bool changed_between_small_and_normal = (
-		   (height < hNormal && h >= hNormal)
-		|| (height >= hNormal || h < hNormal) );
+	bool const changed = (height != (uint32_t) h) || first_call_to_set_height;
+	uint32_t const normal = preset_height (HeightNormal);
+	bool const changed_between_small_and_normal = ( (height < normal && h >= normal) || (height >= normal || h < normal) );
 
 	TimeAxisView* state_parent = get_parent_with_state ();
 	assert(state_parent);
@@ -411,7 +410,7 @@ AutomationTimeAxisView::set_height (uint32_t h)
 
 		first_call_to_set_height = false;
 
-		if (h >= hNormal) {
+		if (h >= preset_height (HeightNormal)) {
 			controls_table.remove (name_hbox);
 
 			if (plugname) {
@@ -432,7 +431,7 @@ AutomationTimeAxisView::set_height (uint32_t h)
 			auto_button.show();
 			hide_button.show_all();
 
-		} else if (h >= hSmall) {
+		} else if (h >= preset_height (HeightSmall)) {
 			controls_table.remove (name_hbox);
 			if (plugname) {
 				if (plugname_packed) {
@@ -449,7 +448,7 @@ AutomationTimeAxisView::set_height (uint32_t h)
 			auto_button.hide();
 			hide_button.hide();
 		}
-	} else if (h >= hNormal){
+	} else if (h >= preset_height (HeightNormal)) {
 		cerr << "track grown, but neither changed_between_small_and_normal nor first_call_to_set_height set!" << endl;
 	}
 

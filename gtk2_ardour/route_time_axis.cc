@@ -756,7 +756,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 	snprintf (buf, sizeof (buf), "%u", height);
 	xml_node->add_property ("height", buf);
 
-	if (height >= hNormal) {
+	if (height >= preset_height (HeightNormal)) {
 		reset_meter();
 		show_name_entry ();
 		hide_name_label ();
@@ -778,7 +778,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 			playlist_button.show();
 		}
 
-	} else if (height >= hSmaller) {
+	} else if (height >= preset_height (HeightSmaller)) {
 
 		reset_meter();
 		show_name_entry ();

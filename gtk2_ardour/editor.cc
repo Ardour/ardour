@@ -4698,8 +4698,8 @@ Editor::add_to_idle_resize (TimeAxisView* view, int32_t h)
 	}
 
 	/* clamp */
-	if (uint32_t (min_resulting) < TimeAxisView::hSmall) {
-		_pending_resize_amount += TimeAxisView::hSmall - min_resulting;
+	if (uint32_t (min_resulting) < TimeAxisView::preset_height (HeightSmall)) {
+		_pending_resize_amount += TimeAxisView::preset_height (HeightSmall) - min_resulting;
 	}
 }
 

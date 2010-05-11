@@ -153,9 +153,9 @@ AutomationLine::control_point_box_size ()
 				4.0);
 	}
 
-	if (_height > TimeAxisView::hLarger) {
+	if (_height > TimeAxisView::preset_height (HeightLarger)) {
 		return 8.0;
-	} else if (_height > (guint32) TimeAxisView::hNormal) {
+	} else if (_height > (guint32) TimeAxisView::preset_height (HeightNormal)) {
 		return 6.0;
 	}
 	return 4.0;

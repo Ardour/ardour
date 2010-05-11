@@ -45,6 +45,15 @@ struct SelectionRect {
     uint32_t id;
 };
 
+enum Height {
+	HeightLargest,
+	HeightLarger,
+	HeightLarge,
+	HeightNormal,
+	HeightSmall,
+	HeightSmaller
+};
+
 extern void setup_gtk_ardour_enums ();
 
 #endif /* __ardour_gtk_enums_h__ */

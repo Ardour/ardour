@@ -83,12 +83,6 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	};
 
   public:
-	static uint32_t hLargest;
-	static uint32_t hLarge;
-	static uint32_t hLarger;
-	static uint32_t hNormal;
-	static uint32_t hSmaller;
-	static uint32_t hSmall;
 
 	TimeAxisView(ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* parent, ArdourCanvas::Canvas& canvas);
 	virtual ~TimeAxisView ();
@@ -155,6 +149,7 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	virtual void exited () {}
 
 	virtual void set_height (uint32_t h);
+	void set_height (Height);
 	void reset_height();
 
 	std::pair<TimeAxisView*, ARDOUR::layer_t> covers_y_position (double);
@@ -222,6 +217,8 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	typedef std::vector<boost::shared_ptr<TimeAxisView> > Children;
 
 	SelectionRect* get_selection_rect(uint32_t id);
+
+	static uint32_t preset_height (Height);
 	
   protected:
 	/* The Standard LHS Controls */
@@ -310,9 +307,6 @@ class TimeAxisView : public virtual AxisView, public PBD::Stateful
 	bool in_destructor;
 	NamePackingBits name_packing;
 
-	static void compute_controls_size_info ();
-	static bool need_size_info;
-
 	void set_heights (uint32_t h);
 	void color_handler ();
 
@@ -334,6 +328,10 @@ private:
 	uint32_t _effective_height;
 	double _resize_drag_start;
 	ArdourCanvas::Group* _ghost_group;
+
+	void compute_heights ();
+	static uint32_t extra_height;
+	static uint32_t smaller_height;
 
 	static int const _max_order;
 

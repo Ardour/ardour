@@ -66,14 +66,8 @@ using namespace ArdourCanvas;
 using Gtkmm2ext::Keyboard;
 
 const double trim_handle_size = 6.0; /* pixels */
-
-uint32_t TimeAxisView::hLargest = 0;
-uint32_t TimeAxisView::hLarge = 0;
-uint32_t TimeAxisView::hLarger = 0;
-uint32_t TimeAxisView::hNormal = 0;
-uint32_t TimeAxisView::hSmaller = 0;
-uint32_t TimeAxisView::hSmall = 0;
-bool TimeAxisView::need_size_info = true;
+uint32_t TimeAxisView::extra_height;
+uint32_t TimeAxisView::smaller_height;
 int const TimeAxisView::_max_order = 512;
 PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
 
@@ -84,10 +78,10 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	  _editor (ed),
 	  _order (0)
 {
-	if (need_size_info) {
-		compute_controls_size_info ();
-		need_size_info = false;
+	if (extra_height == 0) {
+		compute_heights ();
 	}
+	
 	_canvas_background = new Group (*ed.get_background_group (), 0.0, 0.0);
 	_canvas_display = new Group (*ed.get_trackview_group (), 0.0, 0.0);
 	_canvas_display->hide(); // reveal as needed 
@@ -395,9 +389,9 @@ TimeAxisView::step_height (bool bigger)
 		set_height (height + step);
 	} else {
 		if (height > step) {
-			set_height (std::max (height - step, hSmall));
-		} else if (height != hSmall) {
-			set_height (hSmall);
+			set_height (std::max (height - step, preset_height (HeightSmall)));
+		} else if (height != preset_height (HeightSmall)) {
+			set_height (HeightSmall);
 		}
 	}
 }
@@ -410,6 +404,12 @@ TimeAxisView::set_heights (uint32_t h)
 	for (TrackSelection::iterator i = ts.begin(); i != ts.end(); ++i) {
 		(*i)->set_height (h);
 	}
+}
+
+void
+TimeAxisView::set_height (Height h)
+{
+	set_height (preset_height (h));
 }
 
 void
@@ -474,8 +474,8 @@ TimeAxisView::name_entry_key_release (GdkEventKey* ev)
 		
 		/* resize to show editable name display */
 		
-		if ((*i)->current_height() <= hSmaller) {
-			(*i)->set_height (hSmaller);
+		if ((*i)->current_height() <= preset_height (HeightSmaller)) {
+			(*i)->set_height (HeightSmaller);
 		}
 		
 		(*i)->name_entry.grab_focus();
@@ -990,20 +990,20 @@ TimeAxisView::set_state (const XMLNode& node, int /*version*/)
 	if ((prop = node.property ("track-height")) != 0) {
 
 		if (prop->value() == "largest") {
-			set_height (hLargest);
+			set_height (HeightLargest);
 		} else if (prop->value() == "large") {
-			set_height (hLarge);
+			set_height (HeightLarge);
 		} else if (prop->value() == "larger") {
-			set_height (hLarger);
+			set_height (HeightLarger);
 		} else if (prop->value() == "normal") {
-			set_height (hNormal);
+			set_height (HeightNormal);
 		} else if (prop->value() == "smaller") {
-			set_height (hSmaller);
+			set_height (HeightSmaller);
 		} else if (prop->value() == "small") {
-			set_height (hSmall);
+			set_height (HeightSmall);
 		} else {
 			error << string_compose(_("unknown track height name \"%1\" in XML GUI information"), prop->value()) << endmsg;
-			set_height (Normal);
+			set_height (HeightNormal);
 		}
 
 	} else if ((prop = node.property ("height")) != 0) {
@@ -1012,7 +1012,7 @@ TimeAxisView::set_state (const XMLNode& node, int /*version*/)
 
 	} else {
 
-		set_height (hNormal);
+		set_height (HeightNormal);
 	}
 
 	return 0;
@@ -1029,14 +1029,14 @@ TimeAxisView::reset_height()
 }
 
 void
-TimeAxisView::compute_controls_size_info ()
+TimeAxisView::compute_heights ()
 {
 	Gtk::Window window (Gtk::WINDOW_TOPLEVEL);
 	Gtk::Table two_row_table (2, 8);
 	Gtk::Table one_row_table (1, 8);
 	Button* buttons[5];
 	const int border_width = 2;
-	const int extra_height = (2 * border_width)
+	extra_height = (2 * border_width)
 		//+ 2   // 2 pixels for the hseparator between TimeAxisView control areas
 		+ 10; // resizer button (3 x 2 pixel elements + 2 x 2 pixel gaps)
 
@@ -1062,36 +1062,9 @@ TimeAxisView::compute_controls_size_info ()
 	one_row_table.show_all ();
 	Gtk::Requisition req(one_row_table.size_request ());
 
-
 	// height required to show 1 row of buttons
 
-	hSmaller = req.height + extra_height;
-
-	window.remove ();
-	window.add (two_row_table);
-
-	two_row_table.attach (*buttons[1], 5, 6, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	two_row_table.attach (*buttons[2], 6, 7, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	two_row_table.attach (*buttons[3], 7, 8, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-	two_row_table.attach (*buttons[4], 8, 9, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
-
-	two_row_table.show_all ();
-	req = two_row_table.size_request ();
-
-	// height required to show all normal buttons
-
-	hNormal = /*req.height*/ 48 + extra_height;
-
-	// these heights are all just larger than normal. no more
-	// elements are visible (yet).
-
-	hLarger = hNormal + 50;
-	hLarge = hNormal + 150;
-	hLargest = hNormal + 250;
-
-	// height required to show track name
-
-	hSmall = 27;
+	smaller_height = req.height + extra_height;
 }
 
 void
@@ -1337,4 +1310,26 @@ TimeAxisView::set_visibility (bool yn)
 	}
 	
 	return false;
+}
+
+uint32_t
+TimeAxisView::preset_height (Height h)
+{
+	switch (h) {
+	case HeightLargest:
+		return extra_height + 48 + 250;
+	case HeightLarger:
+		return extra_height + 48 + 150;
+	case HeightLarge:
+		return extra_height + 48 + 50;
+	case HeightNormal:
+		return extra_height + 48;
+	case HeightSmall:
+		return 27;
+	case HeightSmaller:
+		return smaller_height;
+	}
+
+	/* NOTREACHED */
+	return 0;
 }

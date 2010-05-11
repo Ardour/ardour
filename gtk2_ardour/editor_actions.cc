@@ -579,28 +579,28 @@ Editor::register_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
         ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "track-height-largest", _("Largest"), sigc::bind (
-				sigc::mem_fun(*this, &Editor::set_track_height), TimeAxisView::hLargest));
+				sigc::mem_fun(*this, &Editor::set_track_height), HeightLargest));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "track-height-larger", _("Larger"), sigc::bind (
-				sigc::mem_fun(*this, &Editor::set_track_height), TimeAxisView::hLarger));
+				sigc::mem_fun(*this, &Editor::set_track_height), HeightLarger));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "track-height-large", _("Large"), sigc::bind (
-				sigc::mem_fun(*this, &Editor::set_track_height), TimeAxisView::hLarge));
+				sigc::mem_fun(*this, &Editor::set_track_height), HeightLarge));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "track-height-normal", _("Normal"), sigc::bind (
-				sigc::mem_fun(*this, &Editor::set_track_height), TimeAxisView::hNormal));
+				sigc::mem_fun(*this, &Editor::set_track_height), HeightNormal));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "track-height-small", _("Small"), sigc::bind (
-				sigc::mem_fun(*this, &Editor::set_track_height), TimeAxisView::hSmall));
+				sigc::mem_fun(*this, &Editor::set_track_height), HeightSmall));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (editor_actions, "track-height-smaller", _("Smaller"), sigc::bind (
-				sigc::mem_fun(*this, &Editor::set_track_height), TimeAxisView::hSmaller));
+				sigc::mem_fun(*this, &Editor::set_track_height), HeightSmaller));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
