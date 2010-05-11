@@ -359,6 +359,8 @@ Session::process_with_events (nframes_t nframes)
 					return;
 				}
 
+				get_track_statistics ();
+
 				nframes -= this_nframes;
 
 				if (frames_moved < 0) {
@@ -706,6 +708,8 @@ Session::follow_slave_silently (nframes_t nframes, float slave_speed)
 
 		silent_process_routes (nframes, need_butler);
 
+		get_track_statistics ();
+
 		if (need_butler) {
 			_butler->summon ();
 		}
@@ -794,6 +798,8 @@ Session::process_without_events (nframes_t nframes)
 		fail_roll (nframes);
 		return;
 	}
+
+	get_track_statistics ();
 
 	if (frames_moved < 0) {
 		decrement_transport_position (-frames_moved);
