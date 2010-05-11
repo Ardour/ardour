@@ -1980,7 +1980,7 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 	prompter.set_title (_("Take Snapshot"));
 	prompter.set_title (_("Take Snapshot"));
-	prompter.set_prompt (_("Name of New Snapshot"));
+	prompter.set_prompt (_("Name of new snapshot"));
 
         if (!switch_to_it) {
                 char timebuf[128];
