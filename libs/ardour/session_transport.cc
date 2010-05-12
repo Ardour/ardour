@@ -237,6 +237,9 @@ Session::realtime_stop (bool abort, bool clear_state)
 	_transport_speed = 0;
 	_target_transport_speed = 0;
 
+	g_atomic_int_set (&_playback_load, 100);
+	g_atomic_int_set (&_capture_load, 100);
+
 	if (config.get_use_video_sync()) {
 		waiting_for_sync_offset = true;
 	}

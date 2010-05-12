@@ -714,11 +714,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	uint32_t playback_load ();
 	uint32_t capture_load ();
-	uint32_t playback_load_min ();
-	uint32_t capture_load_min ();
-
-	void reset_playback_load_min ();
-	void reset_capture_load_min ();
 
 	/* ranges */
 
@@ -1318,8 +1313,6 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 
 	mutable gint _playback_load;
 	mutable gint _capture_load;
-	mutable gint _playback_load_min;
-	mutable gint _capture_load_min;
 
 	/* I/O bundles */
 

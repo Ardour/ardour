@@ -119,28 +119,3 @@ Session::capture_load ()
 {
 	return (uint32_t) g_atomic_int_get (&_capture_load);
 }
-
-uint32_t
-Session::playback_load_min ()
-{
-	return (uint32_t) g_atomic_int_get (&_playback_load_min);
-}
-
-uint32_t
-Session::capture_load_min ()
-{
-	return (uint32_t) g_atomic_int_get (&_capture_load_min);
-}
-
-void
-Session::reset_capture_load_min ()
-{
-	g_atomic_int_set (&_capture_load_min, 100);
-}
-
-void
-Session::reset_playback_load_min ()
-{
-	g_atomic_int_set (&_playback_load_min, 100);
-}
-

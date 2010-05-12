@@ -207,8 +207,6 @@ Session::first_stage_init (string fullpath, string snapshot_name)
 	session_send_mtc = false;
 	g_atomic_int_set (&_playback_load, 100);
 	g_atomic_int_set (&_capture_load, 100);
-	g_atomic_int_set (&_playback_load_min, 100);
-	g_atomic_int_set (&_capture_load_min, 100);
 	_play_range = false;
 	_exporting = false;
 	pending_abort = false;

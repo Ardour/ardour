@@ -212,15 +212,8 @@ Session::get_track_statistics ()
 		cworst = min (cworst, tr->capture_buffer_load());
 	}
 
-	uint32_t pmin = g_atomic_int_get (&_playback_load);
-	uint32_t pminold = g_atomic_int_get (&_playback_load_min);
-	uint32_t cmin = g_atomic_int_get (&_capture_load);
-	uint32_t cminold = g_atomic_int_get (&_capture_load_min);
-
 	g_atomic_int_set (&_playback_load, (uint32_t) floor (pworst * 100.0f));
 	g_atomic_int_set (&_capture_load, (uint32_t) floor (cworst * 100.0f));
-	g_atomic_int_set (&_playback_load_min, min (pmin, pminold));
-	g_atomic_int_set (&_capture_load_min, min (cmin, cminold));
 
 	if (actively_recording()) {
 		set_dirty();
