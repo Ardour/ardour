@@ -2531,6 +2531,8 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 
 	for (int n = 0; n < (int) times; ++n) {
 
+                cerr << "Pasting " << mcb.notes().size() << " for the " << n+1 << "th time\n";
+                
 		for (Notes::const_iterator i = mcb.notes().begin(); i != mcb.notes().end(); ++i) {
 
 			boost::shared_ptr<NoteType> copied_note (new NoteType (*((*i).get())));
@@ -2552,6 +2554,8 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 
 	if (end_frame > region_end) {
 
+                cerr << "region end is now " << end_frame << " to extend from " << region_end << endl;
+
 		trackview.session()->begin_reversible_command (_("paste"));
 
                 _region->clear_history ();
@@ -2559,6 +2563,7 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 		trackview.session()->add_command (new StatefulDiffCommand (_region));
 	}
 
+        cerr << "region end finally at " << _region->position() + _region->length() - 1;
 	apply_delta ();
 }
 
