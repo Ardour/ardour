@@ -29,6 +29,7 @@
 #include "ardour/midi_diskstream.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
+#include "ardour/auditioner.h"
 
 #include "i18n.h"
 
@@ -210,11 +211,14 @@ Butler::thread_work ()
 
 		boost::shared_ptr<RouteList> rl = _session.get_routes();
 
+		RouteList rl_with_auditioner = *rl;
+		rl_with_auditioner.push_back (_session.the_auditioner());
+
 //		for (i = dsl->begin(); i != dsl->end(); ++i) {
 //			cerr << "BEFORE " << (*i)->name() << ": pb = " << (*i)->playback_buffer_load() << " cp = " << (*i)->capture_buffer_load() << endl;
 //		}
 
-		for (i = rl->begin(); !transport_work_requested() && should_run && i != rl->end(); ++i) {
+		for (i = rl_with_auditioner.begin(); !transport_work_requested() && should_run && i != rl_with_auditioner.end(); ++i) {
 
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 			if (!tr) {
@@ -246,7 +250,7 @@ Butler::thread_work ()
 
 		}
 
-		if (i != rl->begin() && i != rl->end()) {
+		if (i != rl_with_auditioner.begin() && i != rl_with_auditioner.end()) {
 			/* we didn't get to all the streams */
 			disk_work_outstanding = true;
 		}
