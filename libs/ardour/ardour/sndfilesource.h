@@ -24,6 +24,7 @@
 
 #include "ardour/audiofilesource.h"
 #include "ardour/broadcast_info.h"
+#include "ardour/file_manager.h"
 
 namespace ARDOUR {
 
@@ -72,13 +73,14 @@ class SndFileSource : public AudioFileSource {
 	framecnt_t write_float (Sample* data, framepos_t pos, framecnt_t cnt);
 
   private:
-	SNDFILE *sf;
+	SndFileDescriptor* _descriptor;
 	SF_INFO _info;
 	BroadcastInfo *_broadcast_info;
 
 	void init_sndfile ();
 	int open();
 	int setup_broadcast_info (framepos_t when, struct tm&, time_t);
+	void file_closed ();
 
 	/* destructive */
 
@@ -100,6 +102,7 @@ class SndFileSource : public AudioFileSource {
 	framecnt_t nondestructive_write_unlocked (Sample *dst, framecnt_t cnt);
 	void handle_header_position_change ();
 	PBD::ScopedConnection header_position_connection;
+	PBD::ScopedConnection file_manager_connection;
 };
 
 } // namespace ARDOUR

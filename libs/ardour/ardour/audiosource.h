@@ -32,6 +32,7 @@
 #include "ardour/source.h"
 #include "ardour/ardour.h"
 #include "ardour/readable.h"
+#include "ardour/file_manager.h"
 #include "pbd/stateful.h"
 #include "pbd/xml++.h"
 
@@ -140,7 +141,8 @@ class AudioSource : virtual public Source,
 				     framecnt_t frames_per_peak);
 
   private:
-	int        peakfile;
+	FdFileDescriptor* _peakfile_descriptor;
+	int        _peakfile_fd;
 	framecnt_t peak_leftover_cnt;
 	framecnt_t peak_leftover_size;
 	Sample*    peak_leftovers;

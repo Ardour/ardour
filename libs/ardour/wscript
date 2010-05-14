@@ -92,6 +92,7 @@ libardour_sources = [
 	'export_profile_manager.cc',
 	'export_status.cc',
 	'export_timespan.cc',
+	'file_manager.cc',
 	'file_source.cc',
 	'filename_extensions.cc',
 	'filesystem_paths.cc',

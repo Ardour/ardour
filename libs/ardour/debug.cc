@@ -43,4 +43,5 @@ uint64_t PBD::DEBUG::MackieControl = PBD::new_debug_bit ("mackiecontrol");
 uint64_t PBD::DEBUG::MidiClock = PBD::new_debug_bit ("midiclock");
 uint64_t PBD::DEBUG::Monitor = PBD::new_debug_bit ("monitor");
 uint64_t PBD::DEBUG::Solo = PBD::new_debug_bit ("solo");
+uint64_t PBD::DEBUG::FileManager = PBD::new_debug_bit ("filemanager");
 

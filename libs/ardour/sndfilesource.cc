@@ -149,6 +149,12 @@ SndFileSource::SndFileSource (Session& s, const ustring& path,
 
 	if (writable() && (_flags & Broadcast)) {
 
+		SNDFILE* sf = _descriptor->allocate ();
+		if (sf == 0) {
+			error << string_compose (_("could not allocate file %1"), _path) << endmsg;
+			throw failed_constructor ();
+		}
+
 		if (!_broadcast_info) {
 			_broadcast_info = new BroadcastInfo;
 		}
@@ -164,6 +170,8 @@ SndFileSource::SndFileSource (Session& s, const ustring& path,
 			delete _broadcast_info;
 			_broadcast_info = 0;
 		}
+
+		_descriptor->release ();
 	}
 }
 
@@ -174,7 +182,6 @@ SndFileSource::init_sndfile ()
 
 	// lets try to keep the object initalizations here at the top
 	xfade_buf = 0;
-	sf = 0;
 	_broadcast_info = 0;
 
 	/* although libsndfile says we don't need to set this,
@@ -198,7 +205,11 @@ SndFileSource::init_sndfile ()
 int
 SndFileSource::open ()
 {
-	if ((sf = sf_open (_path.c_str(), (writable() ? SFM_RDWR : SFM_READ), &_info)) == 0) {
+	_descriptor = new SndFileDescriptor (_path, writable(), &_info);
+	_descriptor->Closed.connect_same_thread (file_manager_connection, boost::bind (&SndFileSource::file_closed, this));
+	SNDFILE* sf = _descriptor->allocate ();
+	
+	if (sf == 0) {
 		char errbuf[256];
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 #ifndef HAVE_COREAUDIO
@@ -216,8 +227,8 @@ SndFileSource::open ()
 #ifndef HAVE_COREAUDIO
 		error << string_compose(_("SndFileSource: file only contains %1 channels; %2 is invalid as a channel number"), _info.channels, _channel) << endmsg;
 #endif
-		sf_close (sf);
-		sf = 0;
+		delete _descriptor;
+		_descriptor = 0;
 		return -1;
 	}
 
@@ -241,24 +252,13 @@ SndFileSource::open ()
 		sf_command (sf, SFC_SET_UPDATE_HEADER_AUTO, 0, SF_FALSE);
 	}
 
+	_descriptor->release ();
 	return 0;
 }
 
 SndFileSource::~SndFileSource ()
 {
-	if (sf) {
-		sf_close (sf);
-		sf = 0;
-
-		/* stupid libsndfile updated the headers on close,
-		   so touch the peakfile if it exists and has data
-		   to make sure its time is as new as the audio
-		   file.
-		*/
-
-		touch_peakfile ();
-	}
-
+	delete _descriptor;
 	delete _broadcast_info;
 	delete [] xfade_buf;
 }
@@ -276,6 +276,12 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 	float *ptr;
 	uint32_t real_cnt;
 	framepos_t file_cnt;
+
+	SNDFILE* sf = _descriptor->allocate ();
+	if (sf == 0) {
+		error << string_compose (_("could not allocate file %1 for reading."), _path) << endmsg;
+		return 0;
+	}
 
 	if (start > _length) {
 
@@ -307,6 +313,7 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 			char errbuf[256];
 			sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 			error << string_compose(_("SndFileSource: could not seek to frame %1 within %2 (%3)"), start, _name.val().substr (1), errbuf) << endmsg;
+			_descriptor->release ();
 			return 0;
 		}
 
@@ -316,8 +323,9 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 			if (ret != file_cnt) {
 				char errbuf[256];
 				sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-				cerr << string_compose(_("SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5)"), start, file_cnt, _name.val().substr (1), errbuf, _length) << endl;
+				error << string_compose(_("SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5)"), start, file_cnt, _name.val().substr (1), errbuf, _length) << endl;
 			}
+			_descriptor->release ();
 			return ret;
 		}
 	}
@@ -339,6 +347,7 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 
 	_read_data_count = cnt * sizeof(float);
 
+	_descriptor->release ();
 	return nread;
 }
 
@@ -494,11 +503,21 @@ SndFileSource::update_header (sframes_t when, struct tm& now, time_t tnow)
 int
 SndFileSource::flush_header ()
 {
-	if (!writable() || (sf == 0)) {
+	if (!writable()) {
 		warning << string_compose (_("attempt to flush a non-writable audio file source (%1)"), _path) << endmsg;
 		return -1;
 	}
-	return (sf_command (sf, SFC_UPDATE_HEADER_NOW, 0, 0) != SF_TRUE);
+
+	SNDFILE* sf = _descriptor->allocate ();
+	if (sf == 0) {
+		error << string_compose (_("could not allocate file %1 to write header"), _path) << endmsg;
+		return -1;
+	}
+	
+	int const r = sf_command (sf, SFC_UPDATE_HEADER_NOW, 0, 0) != SF_TRUE;
+	_descriptor->release ();
+
+	return r;
 }
 
 int
@@ -520,7 +539,9 @@ SndFileSource::setup_broadcast_info (sframes_t /*when*/, struct tm& now, time_t 
 
 	set_header_timeline_position ();
 
-	if (!_broadcast_info->write_to_file (sf)) {
+	SNDFILE* sf = _descriptor->allocate ();
+
+	if (sf == 0 || !_broadcast_info->write_to_file (sf)) {
 		error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"),
 		                           _path, _broadcast_info->get_error())
 		      << endmsg;
@@ -529,6 +550,7 @@ SndFileSource::setup_broadcast_info (sframes_t /*when*/, struct tm& now, time_t 
 		_broadcast_info = 0;
 	}
 
+	_descriptor->release ();
 	return 0;
 }
 
@@ -541,7 +563,9 @@ SndFileSource::set_header_timeline_position ()
 
 	_broadcast_info->set_time_reference (_timeline_position);
 
-	if (!_broadcast_info->write_to_file (sf)) {
+	SNDFILE* sf = _descriptor->allocate ();
+	
+	if (sf == 0 || !_broadcast_info->write_to_file (sf)) {
 		error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"),
 		                           _path, _broadcast_info->get_error())
 		      << endmsg;
@@ -549,22 +573,29 @@ SndFileSource::set_header_timeline_position ()
 		delete _broadcast_info;
 		_broadcast_info = 0;
 	}
+
+	_descriptor->release ();
 }
 
 framecnt_t
 SndFileSource::write_float (Sample* data, framepos_t frame_pos, framecnt_t cnt)
 {
-	if (sf_seek (sf, frame_pos, SEEK_SET|SFM_WRITE) < 0) {
+	SNDFILE* sf = _descriptor->allocate ();
+	
+	if (sf == 0 || sf_seek (sf, frame_pos, SEEK_SET|SFM_WRITE) < 0) {
 		char errbuf[256];
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 		error << string_compose (_("%1: cannot seek to %2 (libsndfile error: %3"), _path, frame_pos, errbuf) << endmsg;
+		_descriptor->release ();
 		return 0;
 	}
 
 	if (sf_writef_float (sf, data, cnt) != (ssize_t) cnt) {
+		_descriptor->release ();
 		return 0;
 	}
 
+	_descriptor->release ();
 	return cnt;
 }
 
@@ -845,4 +876,16 @@ SndFileSource::clamped_at_unity () const
 	int const sub = _info.format & SF_FORMAT_SUBMASK;
 	/* XXX: this may not be the full list of formats that are unclamped */
 	return (sub != SF_FORMAT_FLOAT && sub != SF_FORMAT_DOUBLE);
+}
+
+void
+SndFileSource::file_closed ()
+{
+	/* stupid libsndfile updated the headers on close,
+	   so touch the peakfile if it exists and has data
+	   to make sure its time is as new as the audio
+	   file.
+	*/
+	
+	touch_peakfile ();
 }

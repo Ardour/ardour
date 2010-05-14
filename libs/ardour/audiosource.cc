@@ -63,7 +63,7 @@ AudioSource::AudioSource (Session& s, ustring name)
 {
 	_peaks_built = false;
 	_peak_byte_max = 0;
-	peakfile = -1;
+	_peakfile_descriptor = 0;
 	_read_data_count = 0;
 	_write_data_count = 0;
 	peak_leftover_cnt = 0;
@@ -78,7 +78,7 @@ AudioSource::AudioSource (Session& s, const XMLNode& node)
 
 	_peaks_built = false;
 	_peak_byte_max = 0;
-	peakfile = -1;
+	_peakfile_descriptor = 0;
 	_read_data_count = 0;
 	_write_data_count = 0;
 	peak_leftover_cnt = 0;
@@ -98,10 +98,7 @@ AudioSource::~AudioSource ()
 		cerr << "AudioSource destroyed with leftover peak data pending" << endl;
 	}
 
-	if (peakfile >= 0) {
-		::close (peakfile);
-	}
-
+	delete _peakfile_descriptor;
 	delete [] peak_leftovers;
 }
 
@@ -316,7 +313,9 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	int ret = -1;
 	PeakData* staging = 0;
 	Sample* raw_staging = 0;
-	int _peakfile = -1;
+
+	FdFileDescriptor* peakfile_descriptor = new FdFileDescriptor (peakpath, false, 0664);
+	int peakfile_fd = -1;
 
 	expected_peaks = (cnt / (double) samples_per_file_peak);
 	scale = npeaks/expected_peaks;
@@ -367,6 +366,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 			peaks[i].min = raw_staging[i];
 		}
 
+		delete peakfile_descriptor;
 		delete [] raw_staging;
 		return 0;
 	}
@@ -377,8 +377,9 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 		/* open, read, close */
 
-		if ((_peakfile = ::open (peakpath.c_str(), O_RDONLY, 0664)) < 0) {
+		if ((peakfile_fd = peakfile_descriptor->allocate ()) < 0) {
 			error << string_compose(_("AudioSource: cannot open peakpath (a) \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
+			delete peakfile_descriptor;
 			return -1;
 		}
 
@@ -386,8 +387,8 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		cerr << "DIRECT PEAKS\n";
 #endif
 
-		nread = ::pread (_peakfile, peaks, sizeof (PeakData)* npeaks, first_peak_byte);
-		close (_peakfile);
+		nread = ::pread (peakfile_fd, peaks, sizeof (PeakData)* npeaks, first_peak_byte);
+		delete peakfile_descriptor;
 
 		if (nread != sizeof (PeakData) * npeaks) {
 			cerr << "AudioSource["
@@ -402,6 +403,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 			     << first_peak_byte
 			     << ')'
 			     << endl;
+			delete peakfile_descriptor;
 			return -1;
 		}
 
@@ -409,6 +411,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 			memset (&peaks[npeaks], 0, sizeof (PeakData) * zero_fill);
 		}
 
+		delete peakfile_descriptor;
 		return 0;
 	}
 
@@ -451,8 +454,9 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 		/* open ... close during out: handling */
 
-		if ((_peakfile = ::open (peakpath.c_str(), O_RDONLY, 0664)) < 0) {
+		if ((peakfile_fd = peakfile_descriptor->allocate ()) < 0) {
 			error << string_compose(_("AudioSource: cannot open peakpath (b) \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
+			delete peakfile_descriptor;
 			delete [] staging;
 			return 0;
 		}
@@ -469,10 +473,10 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 				cerr << "read " << sizeof (PeakData) * to_read << " from peakfile @ " << start_byte << endl;
 #endif
 
-				if ((nread = ::pread (_peakfile, staging, sizeof (PeakData) * to_read, start_byte))
+				if ((nread = ::pread (peakfile_fd, staging, sizeof (PeakData) * to_read, start_byte))
 				    != sizeof (PeakData) * to_read) {
 
-					off_t fend = lseek (_peakfile, 0, SEEK_END);
+					off_t fend = lseek (peakfile_fd, 0, SEEK_END);
 
 					cerr << "AudioSource["
 					     << _name
@@ -611,9 +615,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	}
 
   out:
-	if (_peakfile >= 0) {
-		close (_peakfile);
-	}
+	delete peakfile_descriptor;
 
 	delete [] staging;
 	delete [] raw_staging;
@@ -700,7 +702,8 @@ AudioSource::build_peaks_from_scratch ()
 int
 AudioSource::prepare_for_peakfile_writes ()
 {
-	if ((peakfile = ::open (peakpath.c_str(), O_RDWR|O_CREAT, 0664)) < 0) {
+	_peakfile_descriptor = new FdFileDescriptor (peakpath, true, 0664);
+	if ((_peakfile_fd = _peakfile_descriptor->allocate()) < 0) {
 		error << string_compose(_("AudioSource: cannot open peakpath (c) \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
 		return -1;
 	}
@@ -718,10 +721,8 @@ AudioSource::done_with_peakfile_writes (bool done)
 		_peaks_built = true;
 	}
 
-	if (peakfile >= 0) {
-		close (peakfile);
-		peakfile = -1;
-	}
+	delete _peakfile_descriptor;
+	_peakfile_descriptor = 0;
 }
 
 int
@@ -745,7 +746,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, framepos_t first_frame, frame
 	const size_t blocksize = (128 * 1024);
 	off_t first_peak_byte;
 
-	if (peakfile < 0) {
+	if (_peakfile_descriptor == 0) {
 		prepare_for_peakfile_writes ();
 	}
 
@@ -766,7 +767,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, framepos_t first_frame, frame
 
 			off_t byte = (peak_leftover_frame / fpp) * sizeof (PeakData);
 
-			if (::pwrite (peakfile, &x, sizeof (PeakData), byte) != sizeof (PeakData)) {
+			if (::pwrite (_peakfile_fd, &x, sizeof (PeakData), byte) != sizeof (PeakData)) {
 				error << string_compose(_("%1: could not write peak file data (%2)"), _name, strerror (errno)) << endmsg;
 				goto out;
 			}
@@ -869,16 +870,16 @@ AudioSource::compute_and_write_peaks (Sample* buf, framepos_t first_frame, frame
 		   less than BLOCKSIZE bytes.  only call ftruncate if we'll make the file larger.
 		*/
 
-		off_t endpos = lseek (peakfile, 0, SEEK_END);
+		off_t endpos = lseek (_peakfile_fd, 0, SEEK_END);
 		off_t target_length = blocksize * ((first_peak_byte + blocksize + 1) / blocksize);
 
 		if (endpos < target_length) {
-			ftruncate (peakfile, target_length);
+			ftruncate (_peakfile_fd, target_length);
 			/* error doesn't actually matter though, so continue on without testing */
 		}
 	}
 
-	if (::pwrite (peakfile, peakbuf, sizeof (PeakData) * peaks_computed, first_peak_byte) != (ssize_t) (sizeof (PeakData) * peaks_computed)) {
+	if (::pwrite (_peakfile_fd, peakbuf, sizeof (PeakData) * peaks_computed, first_peak_byte) != (ssize_t) (sizeof (PeakData) * peaks_computed)) {
 		error << string_compose(_("%1: could not write peak file data (%2)"), _name, strerror (errno)) << endmsg;
 		goto out;
 	}
@@ -905,7 +906,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, framepos_t first_frame, frame
 void
 AudioSource::truncate_peakfile ()
 {
-	if (peakfile < 0) {
+	if (_peakfile_descriptor == 0) {
 		error << string_compose (_("programming error: %1"), "AudioSource::truncate_peakfile() called without open peakfile descriptor")
 		      << endmsg;
 		return;
@@ -913,10 +914,10 @@ AudioSource::truncate_peakfile ()
 
 	/* truncate the peakfile down to its natural length if necessary */
 
-	off_t end = lseek (peakfile, 0, SEEK_END);
+	off_t end = lseek (_peakfile_fd, 0, SEEK_END);
 
 	if (end > _peak_byte_max) {
-		ftruncate (peakfile, _peak_byte_max);
+		ftruncate (_peakfile_fd, _peak_byte_max);
 	}
 }
 
