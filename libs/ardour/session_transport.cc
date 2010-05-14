@@ -931,6 +931,7 @@ Session::set_transport_speed (float speed, bool abort, bool clear_state)
 		if ((_transport_speed && speed * _transport_speed < 0.0f) || (_last_transport_speed * speed < 0.0f) || (_last_transport_speed == 0.0f && speed < 0.0f)) {
 			todo = PostTransportWork (todo | PostTransportReverse);
 			last_stop_frame = _transport_frame;
+ 			_last_roll_or_reversal_location = _transport_frame;
 		}
 		
 		_last_transport_speed = _transport_speed;
@@ -1010,6 +1011,8 @@ void
 Session::start_transport ()
 {
 	_last_roll_location = _transport_frame;
+	_last_roll_or_reversal_location = _transport_frame;
+	
 	have_looped = false;
 
 	/* if record status is Enabled, move it to Recording. if its

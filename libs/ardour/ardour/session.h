@@ -1176,6 +1176,7 @@ class Session : public PBD::StatefulDestructible
 	bool     save_config_options_predicate (ConfigVariableBase::Owner owner) const;
 
 	nframes_t   _last_roll_location;
+ 	nframes_t _last_roll_or_reversal_location;
 	nframes_t   _last_record_location;
 	bool              pending_locate_roll;
 	nframes_t    pending_locate_frame;

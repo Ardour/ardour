@@ -1449,14 +1449,16 @@ Session::audible_frame () const
 		   audible frame past our last stopping position. if not,
 		   the return that last stopping point because in terms
 		   of audible frames, we have not moved yet.
+ 
+ 		   `Start position' in this context means the time we last
+ 		   either started or changed transport direction.
 		*/
 
 		if (_transport_speed > 0.0f) {
 
 			if (!play_loop || !have_looped) {
-				if (tf < last_stop_frame + offset) {
-					return last_stop_frame;
-					
+ 				if (tf < _last_roll_or_reversal_location + offset) {
+ 					return _last_roll_or_reversal_location;
 				}
 			} 
 			
@@ -1468,8 +1470,8 @@ Session::audible_frame () const
 
 			/* XXX wot? no backward looping? */
 
-			if (tf > last_stop_frame - offset) {
-				return last_stop_frame;
+ 			if (tf > _last_roll_or_reversal_location - offset) {
+ 				return _last_roll_or_reversal_location;
 			} else {
 				/* backwards */
 				ret += offset;
