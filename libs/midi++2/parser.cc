@@ -196,7 +196,7 @@ Parser::trace_event (Parser &, byte *msg, size_t len)
 		*o << trace_prefix 
 		   << "Channel "
 		   << (msg[0]&0xF)+1
-		   <<  " Program PropertyChange ProgNum "
+		   <<  " Program Change ProgNum "
 		   << (int) msg[1]
 		   << endmsg;
 		break;

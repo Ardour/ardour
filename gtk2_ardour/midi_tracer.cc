@@ -148,9 +148,9 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 		
 	case program:
 		if (show_hex) {
-			s += snprintf (&buf[s], bufsize, "%16s chn %2d %02x\n", "Program PropertyChange", (msg[0]&0xf)+1, (int) msg[1]);
+			s += snprintf (&buf[s], bufsize, "%16s chn %2d %02x\n", "Program Change", (msg[0]&0xf)+1, (int) msg[1]);
 		} else {
-			s += snprintf (&buf[s], bufsize, "%16s chn %2d %-3d\n", "Program PropertyChange", (msg[0]&0xf)+1, (int) msg[1]);
+			s += snprintf (&buf[s], bufsize, "%16s chn %2d %-3d\n", "Program Change", (msg[0]&0xf)+1, (int) msg[1]);
 		}
 		break;
 		

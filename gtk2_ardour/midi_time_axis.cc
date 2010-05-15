@@ -393,7 +393,7 @@ MidiTimeAxisView::build_automation_action_menu ()
 		   something about MIDI (!) would not expect to find them there.
 		*/
 
-		add_channel_command_menu_item (automation_items, _("Program PropertyChange"), MidiPgmChangeAutomation, MIDI_CMD_PGM_CHANGE);
+		add_channel_command_menu_item (automation_items, _("Program Change"), MidiPgmChangeAutomation, MIDI_CMD_PGM_CHANGE);
 		add_channel_command_menu_item (automation_items, _("Bender"), MidiPitchBenderAutomation, MIDI_CMD_BENDER);
 		add_channel_command_menu_item (automation_items, _("Pressure"), MidiChannelPressureAutomation, MIDI_CMD_CHANNEL_PRESSURE);
 		
