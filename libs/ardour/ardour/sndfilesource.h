@@ -24,7 +24,7 @@
 
 #include "ardour/audiofilesource.h"
 #include "ardour/broadcast_info.h"
-#include "ardour/file_manager.h"
+#include "pbd/file_manager.h"
 
 namespace ARDOUR {
 
@@ -73,7 +73,7 @@ class SndFileSource : public AudioFileSource {
 	framecnt_t write_float (Sample* data, framepos_t pos, framecnt_t cnt);
 
   private:
-	SndFileDescriptor* _descriptor;
+	PBD::SndFileDescriptor* _descriptor;
 	SF_INFO _info;
 	BroadcastInfo *_broadcast_info;
 

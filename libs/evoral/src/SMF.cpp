@@ -26,6 +26,7 @@
 #include "evoral/Event.hpp"
 #include "evoral/SMF.hpp"
 #include "evoral/midi_util.h"
+#include "pbd/file_manager.h"
 
 using namespace std;
 
@@ -82,7 +83,14 @@ SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 	}
 
 	_file_path = path;
-	_smf = smf_load(_file_path.c_str());
+
+	PBD::StdioFileDescriptor d (_file_path, "r");
+	FILE* f = d.allocate ();
+	if (f == 0) {
+		return -1;
+	}
+	
+	_smf = smf_load (f);
 	if (_smf == NULL) {
 		return -1;
 	}
@@ -149,7 +157,13 @@ void
 SMF::close() THROW_FILE_ERROR
 {
 	if (_smf) {
-		if (smf_save(_smf, _file_path.c_str()) != 0) {
+		PBD::StdioFileDescriptor d (_file_path, "w+");
+		FILE* f = d.allocate ();
+		if (f == 0) {
+			throw FileError ();
+		}
+		
+		if (smf_save(_smf, f) != 0) {
 			throw FileError();
 		}
 		smf_delete(_smf);
@@ -259,8 +273,15 @@ SMF::begin_write()
 void
 SMF::end_write() THROW_FILE_ERROR
 {
-	if (smf_save(_smf, _file_path.c_str()) != 0)
+	PBD::StdioFileDescriptor d (_file_path, "w+");
+	FILE* f = d.allocate ();
+	if (f == 0) {
+		throw FileError ();
+	}
+	
+	if (smf_save(_smf, f) != 0) {
 		throw FileError();
+	}
 }
 
 double

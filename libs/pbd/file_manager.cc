@@ -25,16 +25,15 @@
 #include <cassert>
 #include <iostream>
 #include "pbd/compose.h"
-#include "ardour/file_manager.h"
-#include "ardour/debug.h"
+#include "pbd/file_manager.h"
+#include "pbd/debug.h"
 
 using namespace std;
 using namespace PBD;
-using namespace ARDOUR;
 
 FileManager* FileDescriptor::_manager;
 
-namespace ARDOUR {
+namespace PBD {
 
 /** Class to limit the number of files held open */
 class FileManager
@@ -103,9 +102,9 @@ FileManager::allocate (FileDescriptor* d)
 			list<FileDescriptor*>::iterator oldest = _files.end ();
 
 			for (list<FileDescriptor*>::iterator i = _files.begin(); i != _files.end(); ++i) {
-				if ((*i)->is_open() && (*i)->refcount == 0) {
-					if ((*i)->last_used < lowest_last_used) {
-						lowest_last_used = (*i)->last_used;
+				if ((*i)->is_open() && (*i)->_refcount == 0) {
+					if ((*i)->_last_used < lowest_last_used) {
+						lowest_last_used = (*i)->_last_used;
 						oldest = i;
 					}
 				}
@@ -121,25 +120,26 @@ FileManager::allocate (FileDescriptor* d)
 				DEBUG::FileManager,
 				string_compose (
 					"closed file for %1 to release file handle; now have %2 of %3 open\n",
-					(*oldest)->name, _open, _max_open
+					(*oldest)->_name, _open, _max_open
 					)
 				);
 		}
 
 		if (d->open ()) {
+			DEBUG_TRACE (DEBUG::FileManager, string_compose ("open of %1 failed.\n", d->_name));
 			return true;
 		}
 
 		_open++;
 
-		DEBUG_TRACE (DEBUG::FileManager, string_compose ("opened file for %1; now have %2 of %3 open.\n", d->name, _open, _max_open));
+		DEBUG_TRACE (DEBUG::FileManager, string_compose ("opened file for %1; now have %2 of %3 open.\n", d->_name, _open, _max_open));
 	}
 
 	struct timespec t;
 	clock_gettime (CLOCK_MONOTONIC, &t);
-	d->last_used = t.tv_sec + (double) t.tv_nsec / 10e9;
+	d->_last_used = t.tv_sec + (double) t.tv_nsec / 10e9;
 
-	d->refcount++;
+	d->_refcount++;
 	
 	return false;
 }
@@ -150,8 +150,8 @@ FileManager::release (FileDescriptor* d)
 {
 	Glib::Mutex::Lock lm (_mutex);
 
-	d->refcount--;
-	assert (d->refcount >= 0);
+	d->_refcount--;
+	assert (d->_refcount >= 0);
 }
 
 /** Remove a file from our lists.  It will be closed if it is currently open. */
@@ -164,7 +164,7 @@ FileManager::remove (FileDescriptor* d)
 		close (d);
 		DEBUG_TRACE (
 			DEBUG::FileManager,
-			string_compose ("closed file for %1; file is being removed; now have %2 of %3 open\n", d->name, _open, _max_open)
+			string_compose ("closed file for %1; file is being removed; now have %2 of %3 open\n", d->_name, _open, _max_open)
 			);
 	}
 
@@ -182,10 +182,10 @@ FileManager::close (FileDescriptor* d)
 }
 
 FileDescriptor::FileDescriptor (string const & n, bool w)
-	: refcount (0)
-	, last_used (0)
-	, name (n)
-	, writeable (w)
+	: _refcount (0)
+	, _last_used (0)
+	, _name (n)
+	, _writeable (w)
 {
 
 }
@@ -262,7 +262,7 @@ SndFileDescriptor::open ()
 {
 	/* we must have a lock on the FileManager's mutex */
 	
-	_sndfile = sf_open (name.c_str(), writeable ? SFM_RDWR : SFM_READ, _info);
+	_sndfile = sf_open (_name.c_str(), _writeable ? SFM_RDWR : SFM_READ, _info);
 	return (_sndfile == 0);
 }
 
@@ -298,7 +298,7 @@ FdFileDescriptor::open ()
 {
 	/* we must have a lock on the FileManager's mutex */
 	
-	_fd = ::open (name.c_str(), writeable ? (O_RDWR | O_CREAT) : O_RDONLY, _mode);
+	_fd = ::open (_name.c_str(), _writeable ? (O_RDWR | O_CREAT) : O_RDONLY, _mode);
 	return (_fd == -1);
 }
 
@@ -324,4 +324,63 @@ FdFileDescriptor::allocate ()
 	   the Descriptor's refcount, so the file will not be closed
 	*/
 	return _fd;
+}
+
+
+/** @param n Filename.
+ *  @param w true to open writeable, otherwise false.
+ */
+
+StdioFileDescriptor::StdioFileDescriptor (string const & n, std::string const & m)
+	: FileDescriptor (n, false)
+	, _file (0)
+	, _mode (m)
+{
+	manager()->add (this);
+}
+
+StdioFileDescriptor::~StdioFileDescriptor ()
+{
+	manager()->remove (this);
+}
+
+bool
+StdioFileDescriptor::is_open () const
+{
+	/* we must have a lock on the FileManager's mutex */
+
+	return _file != 0;
+}
+
+bool
+StdioFileDescriptor::open ()
+{
+	/* we must have a lock on the FileManager's mutex */
+	
+	_file = fopen (_name.c_str(), _mode.c_str());
+	return (_file == 0);
+}
+
+void
+StdioFileDescriptor::close ()
+{
+	/* we must have a lock on the FileManager's mutex */
+
+	fclose (_file);
+	_file = 0;
+}
+
+/** @return FILE*, or 0 on error */
+FILE*
+StdioFileDescriptor::allocate ()
+{
+	bool const f = manager()->allocate (this);
+	if (f) {
+		return 0;
+	}
+
+	/* this is ok thread-wise because allocate () has incremented
+	   the Descriptor's refcount, so the file will not be closed
+	*/
+	return _file;
 }

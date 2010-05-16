@@ -387,11 +387,11 @@ char *smf_event_decode(const smf_event_t *event) WARN_UNUSED_RESULT;
 char *smf_event_extract_text(const smf_event_t *event) WARN_UNUSED_RESULT;
 
 /* Routines for loading SMF files. */
-smf_t *smf_load(const char *file_name) WARN_UNUSED_RESULT;
+smf_t *smf_load(FILE *) WARN_UNUSED_RESULT;
 smf_t *smf_load_from_memory(const void *buffer, const size_t buffer_length) WARN_UNUSED_RESULT;
 
 /* Routine for writing SMF files. */
-int smf_save(smf_t *smf, const char *file_name) WARN_UNUSED_RESULT;
+int smf_save(smf_t *smf, FILE *file) WARN_UNUSED_RESULT;
 
 /* Routines for manipulating smf_tempo_t. */
 smf_tempo_t *smf_get_tempo_by_pulses(const smf_t *smf, size_t pulses) WARN_UNUSED_RESULT;

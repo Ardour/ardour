@@ -67,6 +67,7 @@ def build(bld):
 		error.cc
 		filesystem.cc
 		filesystem_paths.cc
+		file_manager.cc
 		file_utils.cc
 		fpu.cc
 		id.cc

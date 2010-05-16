@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __file_manager_h__
-#define __file_manager_h__
+#ifndef __pbd_file_manager_h__
+#define __pbd_file_manager_h__
 
 #include <sys/types.h>
 #include <string>
@@ -27,7 +27,7 @@
 #include <glibmm/thread.h>
 #include "pbd/signals.h"
 
-namespace ARDOUR {
+namespace PBD {
 
 class FileManager;
 
@@ -69,10 +69,10 @@ protected:
 	virtual void close () = 0;
 	virtual bool is_open () const = 0;
 
-	int refcount; ///< number of active users of this file
-	double last_used; ///< monotonic time that this file was last allocated
-	std::string name; ///< filename
-	bool writeable; ///< true if it should be opened writeable, otherwise false
+	int _refcount; ///< number of active users of this file
+	double _last_used; ///< monotonic time that this file was last allocated
+	std::string _name; ///< filename
+	bool _writeable; ///< true if it should be opened writeable, otherwise false
 
 	FileManager* manager ();
 	
@@ -121,6 +121,27 @@ private:
 
 	int _fd; ///< file descriptor, or -1 if the file is closed
 	mode_t _mode; ///< mode to use when creating files
+};
+
+/** FileDescriptor for a file opened using stdio */
+class StdioFileDescriptor : public FileDescriptor
+{
+public:
+	StdioFileDescriptor (std::string const &, std::string const &);
+	~StdioFileDescriptor ();
+
+	FILE* allocate ();
+
+private:
+
+	friend class FileManager;
+
+	bool open ();
+	void close ();
+	bool is_open () const;
+
+	FILE* _file;
+	std::string _mode;
 };
 
 }

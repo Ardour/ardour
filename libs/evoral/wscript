@@ -91,7 +91,7 @@ def build(bld):
 	obj.name           = 'libevoral'
 	obj.target         = 'evoral'
 	obj.uselib         = 'GLIBMM GTHREAD SMF'
-	obj.uselib_local   = 'libsmf'
+	obj.uselib_local   = 'libsmf libpbd'
 	obj.vnum           = EVORAL_LIB_VERSION
 	obj.install_path   = os.path.join(bld.env['LIBDIR'], 'ardour3')
 

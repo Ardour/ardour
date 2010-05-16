@@ -391,27 +391,12 @@ write_track(smf_track_t *track)
  * Takes smf->file_buffer and saves it to the file.
  */
 static int
-write_file(smf_t *smf, const char *file_name)
+write_file(smf_t *smf, FILE* stream)
 {
-	FILE *stream;
-
-	stream = fopen(file_name, "w+");
-	if (stream == NULL) {
-		g_critical("Cannot open input file: %s", strerror(errno));
-
-		return (-1);
-	}
-
 	if (fwrite(smf->file_buffer, 1, smf->file_buffer_length, stream) != smf->file_buffer_length) {
 		g_critical("fwrite(3) failed: %s", strerror(errno));
 
 		return (-2);
-	}
-
-	if (fclose(stream)) {
-		g_critical("fclose(3) failed: %s", strerror(errno));
-
-		return (-3);
 	}
 
 	return (0);
@@ -593,11 +578,11 @@ assert_smf_is_identical(const smf_t *a, const smf_t *b)
 }
 
 static void
-assert_smf_saved_correctly(const smf_t *smf, const char *file_name)
+assert_smf_saved_correctly(const smf_t *smf, FILE* file)
 {
 	smf_t *saved;
 
-	saved = smf_load(file_name);
+	saved = smf_load (file);
 	assert(saved != NULL);
 
 	assert_smf_is_identical(smf, saved);
@@ -610,11 +595,11 @@ assert_smf_saved_correctly(const smf_t *smf, const char *file_name)
 /**
   * Writes the contents of SMF to the file given.
   * \param smf SMF.
-  * \param file_name Path to the file.
+  * \param file File descriptor.
   * \return 0, if saving was successfull.
   */
 int
-smf_save(smf_t *smf, const char *file_name)
+smf_save(smf_t *smf, FILE* file)
 {
 	int i, error;
 	smf_track_t *track;
@@ -641,7 +626,7 @@ smf_save(smf_t *smf, const char *file_name)
 		}
 	}
 
-	error = write_file(smf, file_name);
+	error = write_file(smf, file);
 
 	free_buffer(smf);
 
@@ -649,7 +634,7 @@ smf_save(smf_t *smf, const char *file_name)
 		return (error);
 
 #ifndef NDEBUG
-	assert_smf_saved_correctly(smf, file_name);
+	assert_smf_saved_correctly(smf, file);
 #endif
 
 	return (0);

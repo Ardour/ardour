@@ -794,12 +794,11 @@ parse_mtrk_chunk(smf_track_t *track)
 }
 
 /**
- * Allocate buffer of proper size and read file contents into it.  Close file afterwards.
+ * Allocate buffer of proper size and read file contents into it.
  */
 static int
-load_file_into_buffer(void **file_buffer, size_t *file_buffer_length, const char *file_name)
+load_file_into_buffer(void **file_buffer, size_t *file_buffer_length, FILE* stream)
 {
-	FILE *stream = fopen(file_name, "r");
 	long offset;
 
 	if (stream == NULL) {
@@ -841,12 +840,6 @@ load_file_into_buffer(void **file_buffer, size_t *file_buffer_length, const char
 		return (-6);
 	}
 	
-	if (fclose(stream)) {
-		g_critical("fclose(3) failed: %s", strerror(errno));
-
-		return (-7);
-	}
-
 	return (0);
 }
 
@@ -903,17 +896,17 @@ smf_load_from_memory(const void *buffer, const size_t buffer_length)
 /**
  * Loads SMF file.
  *
- * \param file_name Path to the file.
+ * \param file Open file.
  * \return SMF or NULL, if loading failed.
  */
 smf_t *
-smf_load(const char *file_name)
+smf_load(FILE *file)
 {
 	size_t file_buffer_length;
 	void *file_buffer;
 	smf_t *smf;
 
-	if (load_file_into_buffer(&file_buffer, &file_buffer_length, file_name))
+	if (load_file_into_buffer(&file_buffer, &file_buffer_length, file))
 		return (NULL);
 
 	smf = smf_load_from_memory(file_buffer, file_buffer_length);
