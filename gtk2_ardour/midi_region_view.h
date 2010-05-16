@@ -347,7 +347,6 @@ class MidiRegionView : public RegionView
 
 	int8_t   _force_channel;
 	uint16_t _last_channel_selection;
-	double   _default_note_length;
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;
 

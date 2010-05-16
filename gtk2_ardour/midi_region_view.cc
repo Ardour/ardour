@@ -76,7 +76,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	: RegionView (parent, tv, r, spu, basic_color)
 	, _force_channel(-1)
 	, _last_channel_selection(0xFFFF)
-	, _default_note_length(1.0)
 	, _current_range_min(0)
 	, _current_range_max(0)
 	, _model_name(string())
@@ -101,7 +100,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	: RegionView (parent, tv, r, spu, basic_color, false, visibility)
 	, _force_channel(-1)
 	, _last_channel_selection(0xFFFF)
-	, _default_note_length(1.0)
 	, _model_name(string())
 	, _custom_device_mode(string())
 	, _active_notes(0)
@@ -125,7 +123,6 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, RegionView (other)
 	, _force_channel(-1)
 	, _last_channel_selection(0xFFFF)
-	, _default_note_length(1.0)
 	, _model_name(string())
 	, _custom_device_mode(string())
 	, _active_notes(0)
@@ -152,7 +149,6 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	: RegionView (other, boost::shared_ptr<Region> (region))
 	, _force_channel(-1)
 	, _last_channel_selection(0xFFFF)
-	, _default_note_length(1.0)
 	, _model_name(string())
 	, _custom_device_mode(string())
 	, _active_notes(0)
@@ -493,8 +489,16 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				clear_selection();
 				break;
 			case MouseRange:
-				create_note_at(event_x, event_y, _default_note_length);
+			{
+				bool success;
+				Evoral::MusicalTime beats = trackview.editor().get_grid_type_as_beats (success, trackview.editor().pixel_to_frame (event_x));
+				if (!success) {
+					beats = 1;
+				}
+				
+				create_note_at (event_x, event_y, beats);
 				break;
+			}
 			default:
 				break;
 			}
