@@ -377,6 +377,17 @@ MidiTimeAxisView::build_automation_action_menu ()
 {
 	using namespace Menu_Helpers;
 
+	/* If we have a controller menu, we need to detach it before
+	   RouteTimeAxis::build_automation_action_menu destroys the
+	   menu it is attached to.  Otherwise GTK destroys
+	   controller_menu's gobj, meaning that it can't be reattached
+	   below.  See bug #3134.
+	*/
+	   
+	if (controller_menu) {
+		detach_menu (*controller_menu);
+	}
+
 	RouteTimeAxisView::build_automation_action_menu ();
 
 	MenuList& automation_items = automation_action_menu->items();
@@ -403,7 +414,6 @@ MidiTimeAxisView::build_automation_action_menu ()
 		*/
 		
 		build_controller_menu ();
-		detach_menu (*controller_menu);
 		
 		automation_items.push_back (SeparatorElem());
 		automation_items.push_back (MenuElem (_("Controllers"), *controller_menu));
