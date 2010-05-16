@@ -70,6 +70,8 @@ class DnDTreeViewBase : public Gtk::TreeView
 	std::string                 object_type;
 
 	struct DragData {
+	    DragData () : source (0) {}
+		
 	    Gtk::TreeView* source;
 	    int            data_column;
 	    std::string    object_type;
@@ -134,11 +136,16 @@ class DnDTreeView : public DnDTreeViewBase
 	}
 
 	/**
-	 * this can be called by the Treeview itself or by some other
+	 * This can be called by the Treeview itself or by some other
 	 * object that wants to get the list of dragged items.
 	 */
 
 	void get_object_drag_data (std::list<DataType>& l, Gtk::TreeView** source) {
+
+		if (drag_data.source == 0) {
+			return;
+		}
+			
 		Glib::RefPtr<Gtk::TreeModel> model = drag_data.source->get_model();
 		DataType v;
 		Gtk::TreeSelection::ListHandle_Path selection = drag_data.source->get_selection()->get_selected_rows ();

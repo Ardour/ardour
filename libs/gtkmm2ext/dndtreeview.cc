@@ -69,6 +69,7 @@ bool
 DnDTreeViewBase::on_drag_drop(const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, guint time)
 {
 	suggested_action = Gdk::DragAction (0);
+	drag_data.source = 0;
 	return TreeView::on_drag_drop (context, x, y, time);
 }
 
