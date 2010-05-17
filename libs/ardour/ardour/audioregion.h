@@ -98,7 +98,6 @@ class AudioRegion : public Region
 	};
 	
 	virtual nframes64_t read (Sample*, nframes64_t pos, nframes64_t cnt, int channel) const;
-	virtual nframes64_t read_with_ops (Sample*, nframes64_t pos, nframes64_t cnt, int channel, ReadOps rops) const;
 	virtual nframes64_t readable_length() const { return length(); }
 
 	virtual nframes_t read_at (Sample *buf, Sample *mixdown_buf,

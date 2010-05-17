@@ -129,6 +129,7 @@
                <menuitem action='toggle-follow-playhead'/>
                <menuitem action='toggle-stationary-playhead'/>
 	       <separator/>
+
        </menu>
 
        <menu name='Edit' action='Edit'>

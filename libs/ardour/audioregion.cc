@@ -498,12 +498,6 @@ AudioRegion::read (Sample* buf, nframes64_t timeline_position, nframes64_t cnt, 
 	return _read_at (sources, _length, buf, 0, 0, _position + timeline_position, cnt, channel, 0, 0, ReadOps (0));
 }
 
-nframes64_t
-AudioRegion::read_with_ops (Sample* buf, nframes64_t file_position, nframes64_t cnt, int channel, ReadOps rops) const
-{
-	return _read_at (sources, _length, buf, 0, 0, file_position, cnt, channel, 0, 0, rops);
-}
-
 nframes_t
 AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nframes_t file_position, 
 		      nframes_t cnt, 
@@ -693,7 +687,7 @@ AudioRegion::_read_at (const SourceList& srcs, nframes_t limit,
 		Session::apply_gain_to_buffer (mixdown_buffer, to_read, _scale_amplitude);
 	}
 	
-	if (!opaque()) {
+	if (!opaque() && (buf != mixdown_buffer)) {
 		
 		/* gack. the things we do for users.
 		 */
@@ -1311,7 +1305,9 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 {
 	const nframes_t blocksize = 4096;
 	nframes_t to_read;
+        nframes_t nread;
 	int status = -1;
+        boost::scoped_array<Sample> gain_buffer (new Sample[blocksize]);
 
 	spec.channels = sources.size();
 
@@ -1319,19 +1315,23 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 		goto out;
 	}
 
-	spec.pos = 0;
-	spec.total_frames = _length;
+        /* the ::read_at() methods expect a starting position that is absolute, not relative
+           to our bounds. So we begin at our _position on the timeline ...
+        */
 
-	while (spec.pos < _length && !spec.stop) {
-		
+	spec.pos = _position;
+	spec.total_frames = _length;
+        nread = 0;
+
+	while (spec.pos < last_frame() && !spec.stop) {
 		
 		/* step 1: interleave */
 		
-		to_read = min (_length - spec.pos, blocksize);
-		
+		to_read = min (_length - nread, blocksize);
+                
 		if (spec.channels == 1) {
-
-			if (sources.front()->read (spec.dataF, _start + spec.pos, to_read) != to_read) {
+                        
+			if (read_at (spec.dataF, spec.dataF, gain_buffer.get(), spec.pos, to_read) != to_read) {
 				goto out;
 			}
 
@@ -1341,7 +1341,7 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 
 			for (uint32_t chan = 0; chan < spec.channels; ++chan) {
 				
-				if (sources[chan]->read (buf.get(), _start + spec.pos, to_read) != to_read) {
+				if (read_at (buf.get(), buf.get(), gain_buffer.get(), spec.pos, to_read, chan) != to_read) {
 					goto out;
 				}
 				
@@ -1356,8 +1356,8 @@ AudioRegion::exportme (Session& session, AudioExportSpecification& spec)
 		}
 		
 		spec.pos += to_read;
-		spec.progress = (double) spec.pos /_length;
-		
+                nread += to_read;
+		spec.progress = (double) nread /_length;
 	}
 	
 	status = 0;

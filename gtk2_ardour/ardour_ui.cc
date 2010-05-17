@@ -1667,10 +1667,7 @@ ARDOUR_UI::toggle_record_enable (uint32_t dstream)
 		if ((t = dynamic_cast<Track*>(r.get())) != 0) {
 			t->diskstream()->set_record_enabled (!t->diskstream()->record_enabled());
 		}
-	}
-	if (session == 0) {
-		return;
-	}
+	} 
 }
 
 void
