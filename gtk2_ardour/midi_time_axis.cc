@@ -641,9 +641,9 @@ MidiTimeAxisView::build_controller_menu ()
 				}
 				
 				/* add the per-channel menu to the list of controllers, with the name of the controller */
-				
-				ctl_items.push_back (MenuElem (midi_name (ctl), *chn_menu));
-
+				ctl_items.push_back (MenuElem (string_compose ("<b>%1</b>: %2", ctl, midi_name (ctl)), *chn_menu));
+				dynamic_cast<Label*> (ctl_items.back().get_child())->set_use_markup (true);
+				      
 			} else {
 
 				/* just one channel - create a single menu item for this ctl+channel combination*/
@@ -683,7 +683,7 @@ MidiTimeAxisView::build_controller_menu ()
 			
 		/* add the menu for this block of controllers to the overall controller menu */
 
-		items.push_back (MenuElem (string_compose (_("Controllers %1-%2"), i+1, i+16), *ctl_menu));
+		items.push_back (MenuElem (string_compose (_("Controllers %1-%2"), i, i+15), *ctl_menu));
 	}
 }
 
