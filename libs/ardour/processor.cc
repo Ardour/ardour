@@ -68,6 +68,7 @@ Processor::Processor(Session& session, const string& name)
 	, _configured(false)
 	, _gui(0)
 	, _display_to_user (true)
+	, _pre_fader (false)
 {
 }
 
@@ -263,3 +264,8 @@ Processor::set_display_to_user (bool yn)
 	_display_to_user = yn;
 }
 
+void
+Processor::set_pre_fader (bool p)
+{
+	_pre_fader = p;
+}

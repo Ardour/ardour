@@ -495,12 +495,14 @@ Delivery::target_gain ()
         case Send:
         case Insert:
         case Aux:
-                /* XXX FIX ME this is wrong, we need per-delivery muting */
-                mp = MuteMaster::PreFader;
+		if (_pre_fader) {
+			mp = MuteMaster::PreFader;
+		} else {
+			mp = MuteMaster::PostFader;
+		}
                 break;
         }
 
-        // cerr << name() << ' ';
         desired_gain = _mute_master->mute_gain_at (mp);
         
         if (_role == Listen && _session.monitor_out() && !_session.listening()) {

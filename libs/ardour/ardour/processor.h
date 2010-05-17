@@ -97,6 +97,8 @@ class Processor : public SessionObject, public AutomatableControls, public Laten
 	void *get_gui () const { return _gui; }
 	void  set_gui (void *p) { _gui = p; }
 
+	void set_pre_fader (bool);
+
 	PBD::Signal0<void>                     ActiveChanged;
 	PBD::Signal2<void,ChanCount,ChanCount> ConfigurationChanged;
 
@@ -108,7 +110,8 @@ protected:
 	ChanCount _configured_input;
 	ChanCount _configured_output;
 	void*     _gui;  /* generic, we don't know or care what this is */
-	bool        _display_to_user;
+	bool      _display_to_user;
+	bool      _pre_fader;
 
 private:
 	int set_state_2X (const XMLNode&, int version);

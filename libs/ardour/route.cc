@@ -90,7 +90,6 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _solo_control (new SoloControllable (X_("solo"), *this))
 	, _mute_control (new MuteControllable (X_("mute"), *this))
 	, _mute_master (new MuteMaster (sess, name))
-        , _mute_points (MuteMaster::AllPoints)
         , _have_internal_generator (false)
         , _solo_safe (false)
 	, _default_type (default_type)
@@ -122,7 +121,7 @@ Route::init ()
 
 	/* add amp processor  */
 
-	_amp.reset (new Amp (_session, _mute_master));
+	_amp.reset (new Amp (_session));
 	add_processor (_amp, PostFader);
 
 	/* add standard processors: meter, main outs, monitor out */
@@ -746,8 +745,7 @@ Route::solo_isolated () const
 void
 Route::set_mute_points (MuteMaster::MutePoint mp)
 {
-        _mute_points = mp;
-        _mute_master->set_mute_points (MuteMaster::AllPoints);
+        _mute_master->set_mute_points (mp);
         mute_points_changed (); /* EMIT SIGNAL */
         
         if (_mute_master->muted()) {
@@ -891,6 +889,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, ProcessorList::ite
 	}
 
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+	set_processor_positions ();
 
 	return 0;
 }
@@ -1035,6 +1034,7 @@ Route::add_processors (const ProcessorList& others, ProcessorList::iterator iter
 	}
 
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+	set_processor_positions ();
 
 	return 0;
 }
@@ -1235,6 +1235,7 @@ Route::clear_processors (Placement p)
 	processor_max_streams.reset();
 	_have_internal_generator = false;
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+	set_processor_positions ();
 
 	if (!already_deleting) {
 		_session.clear_deletion_in_progress();
@@ -1326,6 +1327,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 
 	processor->drop_references ();
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+	set_processor_positions ();
 
 	return 0;
 }
@@ -1417,6 +1419,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 	}
 
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+	set_processor_positions ();
 
 	return 0;
 }
@@ -1662,6 +1665,7 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 
         if (true) {
                 processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+		set_processor_positions ();
         }
 
 	return 0;
@@ -2309,6 +2313,7 @@ Route::set_processor_state (const XMLNode& node)
         }
 
         processors_changed (RouteProcessorChange ());
+	set_processor_positions ();
 }
 
 void
@@ -3353,3 +3358,22 @@ Route::has_io_processor_named (const string& name)
         return false;
 }
 
+MuteMaster::MutePoint
+Route::mute_points () const
+{
+	return _mute_master->mute_points ();
+}
+
+void
+Route::set_processor_positions ()
+{
+	Glib::RWLock::ReaderLock lm (_processor_lock);
+
+	bool had_amp = false;
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		(*i)->set_pre_fader (!had_amp);
+		if (boost::dynamic_pointer_cast<Amp> (*i)) {
+			had_amp = true;
+		}
+	}
+}

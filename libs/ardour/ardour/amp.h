@@ -28,14 +28,13 @@ namespace ARDOUR {
 
 class BufferSet;
 class IO;
-class MuteMaster;
 
 /** Applies a declick operation to all audio inputs, passing the same number of
  * audio outputs, and passing through any other types unchanged.
  */
 class Amp : public Processor {
 public:
-	Amp(Session& s, boost::shared_ptr<MuteMaster> m);
+	Amp(Session& s);
 
 	std::string display_name() const;
 
@@ -101,7 +100,6 @@ private:
 	float  _current_gain;
 
 	boost::shared_ptr<GainControl> _gain_control;
-	boost::shared_ptr<MuteMaster>  _mute_master;
 };
 
 

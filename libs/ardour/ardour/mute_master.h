@@ -34,11 +34,12 @@ class Session;
 class MuteMaster : public SessionHandleRef, public PBD::Stateful
 {
   public:
+	/** deliveries to mute when the channel is "muted" */
 	enum MutePoint {
-		PreFader  = 0x1,
-		PostFader = 0x2,
-		Listen    = 0x4,
-		Main      = 0x8
+		PreFader  = 0x1, ///< mute all pre-fader sends
+		PostFader = 0x2, ///< mute all post-fader sends
+		Listen    = 0x4, ///< mute listen out
+		Main      = 0x8  ///< mute main out
 	};
 
 	static const MutePoint AllPoints;

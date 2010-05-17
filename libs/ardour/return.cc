@@ -30,6 +30,7 @@
 #include "ardour/port.h"
 #include "ardour/return.h"
 #include "ardour/session.h"
+#include "ardour/mute_master.h"
 
 #include "i18n.h"
 
@@ -43,7 +44,7 @@ Return::Return (Session& s, bool internal)
 {
 	/* never muted */
 
-	_amp.reset (new Amp (_session, boost::shared_ptr<MuteMaster>()));
+	_amp.reset (new Amp (_session));
 	_meter.reset (new PeakMeter (_session));
 }
 

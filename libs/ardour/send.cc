@@ -42,7 +42,7 @@ Send::Send (Session& s, boost::shared_ptr<MuteMaster> mm, Role r)
 	: Delivery (s, mm, string_compose (_("send %1"), (_bitslot = s.next_send_id()) + 1), r)
 	, _metering (false)
 {
-	_amp.reset (new Amp (_session, _mute_master));
+	_amp.reset (new Amp (_session));
 	_meter.reset (new PeakMeter (_session));
 }
 

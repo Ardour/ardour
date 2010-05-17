@@ -29,19 +29,17 @@
 #include "ardour/configuration.h"
 #include "ardour/io.h"
 #include "ardour/midi_buffer.h"
-#include "ardour/mute_master.h"
 #include "ardour/session.h"
 
 #include "i18n.h"
 
 using namespace ARDOUR;
 
-Amp::Amp(Session& s, boost::shared_ptr<MuteMaster> mm)
+Amp::Amp (Session& s)
 	: Processor(s, "Amp")
 	, _apply_gain(true)
 	, _apply_gain_automation(false)
 	, _current_gain(1.0)
-	, _mute_master (mm)
 {
 	boost::shared_ptr<AutomationList> gl(new AutomationList(Evoral::Parameter(GainAutomation)));
 	_gain_control = boost::shared_ptr<GainControl>( new GainControl(X_("gaincontrol"), s, this, Evoral::Parameter(GainAutomation), gl ));
@@ -74,16 +72,8 @@ Amp::configure_io (ChanCount in, ChanCount out)
 void
 Amp::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_frame*/, nframes_t nframes, bool)
 {
-	gain_t mute_gain;
-
 	if (!_active && !_pending_active) {
 		return;
-	}
-
-	if (_mute_master) {
-		mute_gain = _mute_master->mute_gain_at (MuteMaster::PreFader); 
-	} else {
-		mute_gain = 1.0;
 	}
 
 	if (_apply_gain) {
@@ -92,57 +82,18 @@ Amp::run (BufferSet& bufs, sframes_t /*start_frame*/, sframes_t /*end_frame*/, n
 
 			gain_t* gab = _session.gain_automation_buffer ();
 
-			if (mute_gain == 0.0) {
-
-				/* absolute mute */
-
-				if (_current_gain == 0.0) {
-
-					/* already silent */
-
-					for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-						i->clear ();
-					}
-				} else {
-
-					/* cut to silence */
-
-					Amp::apply_gain (bufs, nframes, _current_gain, 0.0);
-					_current_gain = 0.0;
+			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+				Sample* const sp = i->data();
+				for (nframes_t nx = 0; nx < nframes; ++nx) {
+					sp[nx] *= gab[nx];
 				}
-
-
-			} else if (mute_gain != 1.0) {
-
-				/* mute dimming */
-
-				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-					Sample* const sp = i->data();
-					for (nframes_t nx = 0; nx < nframes; ++nx) {
-						sp[nx] *= gab[nx] * mute_gain;
-					}
-				}
-
-				_current_gain = gab[nframes-1] * mute_gain;
-
-			} else {
-
-				/* no mute */
-
-				for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-					Sample* const sp = i->data();
-					for (nframes_t nx = 0; nx < nframes; ++nx) {
-						sp[nx] *= gab[nx];
-					}
-				}
-
-				_current_gain = gab[nframes-1];
 			}
-
+			
+			_current_gain = gab[nframes-1];
 
 		} else { /* manual (scalar) gain */
 
-			gain_t dg = _gain_control->user_float() * mute_gain;
+			gain_t const dg = _gain_control->user_float();
 
 			if (_current_gain != dg) {
 

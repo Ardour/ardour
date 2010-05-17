@@ -123,7 +123,7 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	void inc_gain (gain_t delta, void *src);
 
 	void set_mute_points (MuteMaster::MutePoint);
-	MuteMaster::MutePoint mute_points() const { return _mute_points; }
+	MuteMaster::MutePoint mute_points () const;
 
 	bool muted () const;
 	void set_mute (bool yn, void* src);
@@ -423,7 +423,6 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	boost::shared_ptr<SoloControllable> _solo_control;
 	boost::shared_ptr<MuteControllable> _mute_control;
 	boost::shared_ptr<MuteMaster> _mute_master;
-	MuteMaster::MutePoint _mute_points;
     
 	std::string    _comment;
 	bool           _have_internal_generator;
@@ -477,6 +476,8 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 
 	void set_self_solo (bool yn);
 	void set_mute_master_solo ();
+
+	void set_processor_positions ();
 };
 
 } // namespace ARDOUR
