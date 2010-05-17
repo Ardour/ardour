@@ -893,7 +893,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			/* drag notes if we're in internal edit mode */
 			_drags->set (new NoteResizeDrag (this, item), event);
 			return true;
-		} else if (!internal_editing() || dynamic_cast<AudioRegionView*> (clicked_regionview)) {
+		} else if ((!internal_editing() || dynamic_cast<AudioRegionView*> (clicked_regionview)) && clicked_regionview) {
 			/* do time-FX if we're not in internal edit mode, or we are but we clicked on an audio region */
 			_drags->set (new TimeFXDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
 			return true;
