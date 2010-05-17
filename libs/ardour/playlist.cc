@@ -1445,18 +1445,26 @@ Playlist::regions_to_read (nframes_t start, nframes_t end)
 
 		case OverlapStart:
 			to_check.insert ((*i)->position());
+                        if ((*i)->position() != 0) {
+                                to_check.insert ((*i)->position()-1);
+                        }
 			covering.push_back (*i);
 			break;
 
 		case OverlapEnd:
 			to_check.insert ((*i)->last_frame());
+			to_check.insert ((*i)->last_frame()+1);
 			covering.push_back (*i);
 			break;
 
 		case OverlapExternal:
 			covering.push_back (*i);
 			to_check.insert ((*i)->position());
+                        if ((*i)->position() != 0) {
+                                to_check.insert ((*i)->position()-1);
+                        }
 			to_check.insert ((*i)->last_frame());
+			to_check.insert ((*i)->last_frame()+1);
 			break;
 		}
 
