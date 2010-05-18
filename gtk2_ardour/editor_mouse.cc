@@ -2565,6 +2565,7 @@ Editor::set_internal_edit (bool yn)
 	if (yn) {
 		mouse_select_button.set_image (*(manage (new Image (::get_icon("midi_tool_pencil")))));
 		mouse_select_button.get_image ()->show ();
+                ARDOUR_UI::instance()->tooltips().set_tip (mouse_select_button, _("Draw/Edit MIDI Notes"));
 
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*> (*i);
@@ -2572,12 +2573,14 @@ Editor::set_internal_edit (bool yn)
 				mtv->start_step_editing ();
 			}
 		}
+
 		start_step_editing ();
 
 	} else {
 
 		mouse_select_button.set_image (*(manage (new Image (::get_icon("tool_range")))));
 		mouse_select_button.get_image ()->show ();
+                ARDOUR_UI::instance()->tooltips().set_tip (mouse_select_button, _("Select/Move Ranges"));
 		stop_step_editing ();
 
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
