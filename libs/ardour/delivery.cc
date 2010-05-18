@@ -481,8 +481,6 @@ Delivery::target_gain ()
 		return 0.0;
 	}
 
-	gain_t desired_gain = -1.0f;
-
         MuteMaster::MutePoint mp;
         
         switch (_role) {
@@ -503,7 +501,7 @@ Delivery::target_gain ()
                 break;
         }
 
-        desired_gain = _mute_master->mute_gain_at (mp);
+        gain_t desired_gain = _mute_master->mute_gain_at (mp);
         
         if (_role == Listen && _session.monitor_out() && !_session.listening()) {
                 
