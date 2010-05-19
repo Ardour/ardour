@@ -47,17 +47,13 @@ class MuteMaster : public SessionHandleRef, public PBD::Stateful
 	MuteMaster (Session& s, const std::string& name);
 	~MuteMaster() {}
 
-	bool muted() const { return _muted && (_mute_point != MutePoint (0)); }
-        bool muted_at (MutePoint mp) const { return _muted && (_mute_point & mp); }
-
-	bool muted_pre_fader() const  { return muted_at (PreFader); }
-	bool muted_post_fader() const { return muted_at (PostFader); }
-	bool muted_listen() const     { return muted_at (Listen); }
-        bool muted_main () const      { return muted_at (Main); }
+	bool muted_by_self () const { return _muted_by_self && (_mute_point != MutePoint (0)); }
+        bool muted_by_self_at (MutePoint mp) const { return _muted_by_self && (_mute_point & mp); }
+	bool muted_by_others_at (MutePoint mp) const;
 
 	gain_t mute_gain_at (MutePoint) const;
 
-        void set_muted (bool yn) { _muted = yn; }
+        void set_muted_by_self (bool yn) { _muted_by_self = yn; }
 
 	void mute_at (MutePoint);
 	void unmute_at (MutePoint);
@@ -76,7 +72,7 @@ class MuteMaster : public SessionHandleRef, public PBD::Stateful
 
   private:
 	volatile MutePoint _mute_point;
-        volatile bool      _muted;
+        volatile bool      _muted_by_self;
         volatile bool      _soloed;
         volatile bool      _solo_ignore;
 };

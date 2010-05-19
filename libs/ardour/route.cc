@@ -748,7 +748,7 @@ Route::set_mute_points (MuteMaster::MutePoint mp)
         _mute_master->set_mute_points (mp);
         mute_points_changed (); /* EMIT SIGNAL */
         
-        if (_mute_master->muted()) {
+        if (_mute_master->muted_by_self()) {
                 mute_changed (this); /* EMIT SIGNAL */
         }
 }
@@ -762,7 +762,7 @@ Route::set_mute (bool yn, void *src)
 	}
 
 	if (muted() != yn) {
-                _mute_master->set_muted (yn);
+                _mute_master->set_muted_by_self (yn);
 		mute_changed (src); /* EMIT SIGNAL */
 	}
 }
@@ -770,7 +770,7 @@ Route::set_mute (bool yn, void *src)
 bool
 Route::muted () const
 {
-        return _mute_master->muted();
+        return _mute_master->muted_by_self();
 }
 
 #if 0

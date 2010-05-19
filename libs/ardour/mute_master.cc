@@ -38,7 +38,7 @@ const MuteMaster::MutePoint MuteMaster::AllPoints = MutePoint (MuteMaster::PreFa
 MuteMaster::MuteMaster (Session& s, const std::string&)
 	: SessionHandleRef (s) 
         , _mute_point (AllPoints)
-        , _muted (false)
+        , _muted_by_self (false)
         , _soloed (false)
         , _solo_ignore (false)
 {
@@ -76,22 +76,22 @@ MuteMaster::mute_gain_at (MutePoint mp) const
         if (Config->get_solo_mute_override()) {
                 if (_soloed) {
                         gain = 1.0;
-                } else if (muted_at (mp)) { // self-muted 
+                } else if (muted_by_self_at (mp)) {
                         gain = Config->get_solo_mute_gain ();
                 } else {
-                        if (!_solo_ignore && _session.soloing()) {
+                        if (muted_by_others_at (mp)) {
                                 gain = 0.0;
                         } else {
                                 gain = 1.0;
                         }
                 }
         } else {
-                if (muted_at (mp)) { // self-muted 
+                if (muted_by_self_at (mp)) {
                         gain = Config->get_solo_mute_gain ();
                 } else if (_soloed) {
                         gain = 1.0;
                 } else {
-                        if (!_solo_ignore && _session.soloing()) {
+                        if (muted_by_others_at (mp)) {
                                 gain = 0.0;
                         } else {
                                 gain = 1.0;
@@ -133,9 +133,9 @@ MuteMaster::set_state (const XMLNode& node, int /*version*/)
 	}
 
 	if ((prop = node.property ("muted")) != 0) {
-		_muted = string_is_affirmative (prop->value());
+		_muted_by_self = string_is_affirmative (prop->value());
 	} else {
-                _muted = (_mute_point != MutePoint (0));
+                _muted_by_self = (_mute_point != MutePoint (0));
         }
 
 	return 0;
@@ -146,6 +146,13 @@ MuteMaster::get_state()
 {
 	XMLNode* node = new XMLNode (X_("MuteMaster"));
 	node->add_property ("mute-point", enum_2_string (_mute_point));
-	node->add_property ("muted", (_muted ? X_("yes") : X_("no")));
+	node->add_property ("muted", (_muted_by_self ? X_("yes") : X_("no")));
 	return *node;
 }
+
+bool
+MuteMaster::muted_by_others_at (MutePoint mp) const
+{
+	return (!_solo_ignore && _session.soloing() && (_mute_point & mp));
+}
+	
