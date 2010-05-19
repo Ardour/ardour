@@ -1075,6 +1075,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void reset_region_scale_amplitude ();
 	void adjust_region_scale_amplitude (bool up);
 	void quantize_region ();
+	void fork_region ();
 
 	void do_insert_time ();
 	void insert_time (nframes64_t, nframes64_t, Editing::InsertTimeOption, bool, bool, bool);

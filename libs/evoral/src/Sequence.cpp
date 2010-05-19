@@ -398,6 +398,32 @@ Sequence<Time>::Sequence(const TypeMap& type_map)
 	assert( ! _end_iter._lock);
 }
 
+template<typename Time>
+Sequence<Time>::Sequence(const Sequence<Time>& other)
+	: ControlSet (other)
+        , _edited(false)
+	, _type_map(other._type_map)
+	, _writing(false)
+	, _end_iter(*this, DBL_MAX)
+	, _percussive(other._percussive)
+	, _lowest_note(other._lowest_note)
+	, _highest_note(other._highest_note)
+{
+        for (typename Notes::const_iterator i = other._notes.begin(); i != other._notes.end(); ++i) {
+                boost::shared_ptr<Note<Time> > n (new Note<Time> (**i));
+                _notes.insert (n);
+        }
+
+        for (typename SysExes::const_iterator i = other._sysexes.begin(); i != other._sysexes.end(); ++i) {
+                boost::shared_ptr<Event<Time> > n (new Event<Time> (**i, true));
+                _sysexes.push_back (n);
+        }
+
+	DUMP(format("Sequence copied: %1%\n") % this);
+	assert(_end_iter._is_end);
+	assert(! _end_iter._lock);
+}
+
 /** Write the controller event pointed to by \a iter to \a ev.
  * The buffer of \a ev will be allocated or resized as necessary.
  * The event_type of \a ev should be set to the expected output type.

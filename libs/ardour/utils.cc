@@ -72,17 +72,19 @@ legalize_for_path (ustring str)
 	return legal;
 }
 
-string bump_name_once(std::string name)
+string 
+bump_name_once (const std::string& name, char delimiter)
 {
-	string::size_type period;
+	string::size_type delim;
 	string newname;
 
-	if ((period = name.find_last_of ('.')) == string::npos) {
+	if ((delim = name.find_last_of (delimiter)) == string::npos) {
 		newname  = name;
-		newname += ".1";
+		newname += delimiter;
+		newname += "1";
 	} else {
 		int isnumber = 1;
-		const char *last_element = name.c_str() + period + 1;
+		const char *last_element = name.c_str() + delim + 1;
 		for (size_t i = 0; i < strlen(last_element); i++) {
 			if (!isdigit(last_element[i])) {
 				isnumber = 0;
@@ -91,18 +93,19 @@ string bump_name_once(std::string name)
 		}
 
 		errno = 0;
-		long int version = strtol (name.c_str()+period+1, (char **)NULL, 10);
+		long int version = strtol (name.c_str()+delim+1, (char **)NULL, 10);
 
 		if (isnumber == 0 || errno != 0) {
 			// last_element is not a number, or is too large
 			newname  = name;
-			newname += ".1";
+			newname  += delimiter;
+			newname += "1";
 		} else {
 			char buf[32];
 
 			snprintf (buf, sizeof(buf), "%ld", version+1);
 
-			newname  = name.substr (0, period+1);
+			newname  = name.substr (0, delim+1);
 			newname += buf;
 		}
 	}

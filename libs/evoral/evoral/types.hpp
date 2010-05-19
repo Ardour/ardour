@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include <list>
 #include <cmath>
+#include <cfloat>
 
 namespace Evoral {
 
@@ -30,6 +31,8 @@ typedef uint32_t FrameTime;
 
 /** Musical time: beats relative to some defined origin */
 typedef double MusicalTime;
+const MusicalTime MaxMusicalTime = DBL_MAX;
+const MusicalTime MinMusicalTime = DBL_MIN;
 
 static inline bool musical_time_equal (MusicalTime a, MusicalTime b) {
 	/* acceptable tolerance is 1 tick. Nice if there was no magic number here */

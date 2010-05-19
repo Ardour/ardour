@@ -61,6 +61,7 @@ template<typename Time>
 class Sequence : virtual public ControlSet {
 public:
 	Sequence(const TypeMap& type_map);
+        Sequence(const Sequence<Time>& other);
 
 protected:
 	struct WriteLockImpl {

@@ -36,6 +36,7 @@ class ControlEvent;
 class ControlSet : public boost::noncopyable {
 public:
 	ControlSet();
+        ControlSet (const ControlSet&);
 	virtual ~ControlSet() {}
 
 	virtual boost::shared_ptr<Evoral::Control>

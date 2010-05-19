@@ -1724,6 +1724,8 @@ Playlist::regions_to_read (framepos_t start, framepos_t end)
 	to_check.insert (start);
 	to_check.insert (end);
 
+        DEBUG_TRACE (DEBUG::AudioPlayback, ">>>>> REGIONS TO READ\n");
+
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 
 		/* find all/any regions that span start+end */
@@ -1734,22 +1736,38 @@ Playlist::regions_to_read (framepos_t start, framepos_t end)
 
 		case OverlapInternal:
 			covering.push_back (*i);
+                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("toread: will cover %1 (OInternal)\n", (*i)->name()));
 			break;
 
 		case OverlapStart:
 			to_check.insert ((*i)->position());
+                        if ((*i)->position() != 0) {
+                                to_check.insert ((*i)->position()-1);
+                        }
+                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("toread: will check %1 for %2\n", (*i)->position(), (*i)->name()));
 			covering.push_back (*i);
 			break;
 
 		case OverlapEnd:
 			to_check.insert ((*i)->last_frame());
+			to_check.insert ((*i)->last_frame()+1);
+                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("toread: will cover %1 (OEnd)\n", (*i)->name()));
+                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("\ttoread: will check %1 for %2\n", (*i)->last_frame(), (*i)->name()));
+                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("\ttoread: will check %1 for %2\n", (*i)->last_frame(), (*i)->name()));
 			covering.push_back (*i);
 			break;
 
 		case OverlapExternal:
 			covering.push_back (*i);
 			to_check.insert ((*i)->position());
+                        if ((*i)->position() != 0) {
+                                to_check.insert ((*i)->position()-1);
+                        }
 			to_check.insert ((*i)->last_frame());
+			to_check.insert ((*i)->last_frame()+1);
+                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("toread: will cover %1 (OExt)\n", (*i)->name()));
+                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("\ttoread: will check %1 for %2\n", (*i)->position(), (*i)->name()));
+                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("\ttoread: will check %1 for %2\n", (*i)->last_frame(), (*i)->name()));
 			break;
 		}
 
@@ -1767,6 +1785,7 @@ Playlist::regions_to_read (framepos_t start, framepos_t end)
 	if (covering.size() == 1) {
 
 		rlist->push_back (covering.front());
+                DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Just one covering region (%1)\n", covering.front()->name()));
 
 	} else {
 
@@ -1775,11 +1794,21 @@ Playlist::regions_to_read (framepos_t start, framepos_t end)
 
 			here.clear ();
 
+                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("++++ Considering %1\n", *t));
+
 			for (RegionList::iterator x = covering.begin(); x != covering.end(); ++x) {
 
 				if ((*x)->covers (*t)) {
 					here.push_back (*x);
-				}
+                                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("region %1 covers %2\n",
+                                                                                           (*x)->name(),
+                                                                                           (*t)));
+				} else {
+                                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("region %1 does NOT covers %2\n",
+                                                                                           (*x)->name(),
+                                                                                           (*t)));
+                                }
+                                        
 			}
 
 			RegionSortByLayer cmp;
@@ -1794,7 +1823,8 @@ Playlist::regions_to_read (framepos_t start, framepos_t end)
 				if ((*c)->opaque()) {
 
 					/* the other regions at this position are hidden by this one */
-
+                                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("%1 is opaque, ignore all others\n",
+                                                                                           (*c)->name()));
 					break;
 				}
 			}
@@ -1811,6 +1841,8 @@ Playlist::regions_to_read (framepos_t start, framepos_t end)
 			rlist->sort (cmp);
 		}
 	}
+
+        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("<<<<< REGIONS TO READ returns %1\n", rlist->size()));
 
 	return rlist;
 }
@@ -2311,7 +2343,7 @@ Playlist::bump_name (string name, Session &session)
 	string newname = name;
 
 	do {
-		newname = bump_name_once (newname);
+		newname = bump_name_once (newname, '.');
 	} while (session.playlists->by_name (newname)!=NULL);
 
 	return newname;

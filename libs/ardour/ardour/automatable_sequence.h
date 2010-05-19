@@ -29,11 +29,18 @@ namespace ARDOUR {
 template<typename T>
 class AutomatableSequence : public Automatable, public Evoral::Sequence<T> {
 public:
-	AutomatableSequence(Session& s, size_t /*size*/)
+	AutomatableSequence(Session& s)
 		: Evoral::ControlSet()
 		, Automatable(s)
 		, Evoral::Sequence<T>(EventTypeMap::instance())
 	{}
+
+	AutomatableSequence(const AutomatableSequence<T>& other)
+		: Evoral::ControlSet(other)
+		, Automatable(other._a_session)
+		, Evoral::Sequence<T>(other)
+	{}
+
 };
 
 } // namespace ARDOUR

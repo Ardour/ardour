@@ -272,7 +272,7 @@ Route::ensure_track_or_route_name(string name, Session &session)
 	string newname = name;
 
 	while (!session.io_name_is_legal (newname)) {
-		newname = bump_name_once (newname);
+		newname = bump_name_once (newname, '.');
 	}
 
 	return newname;

@@ -37,6 +37,7 @@
 #include "ardour/dB.h"
 #include "ardour/playlist.h"
 #include "ardour/midi_source.h"
+#include "ardour/region_factory.h"
 #include "ardour/types.h"
 #include "ardour/midi_ring_buffer.h"
 
@@ -66,6 +67,28 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t
 
 MidiRegion::~MidiRegion ()
 {
+}
+
+/** Create a new MidiRegion that has its own version of some/all of the Source used by another. 
+ */
+boost::shared_ptr<MidiRegion>
+MidiRegion::clone ()
+{
+        BeatsFramesConverter bfc (_session.tempo_map(), _position);
+        double bbegin = bfc.from (_position);
+        double bend = bfc.from (last_frame() + 1);
+
+        boost::shared_ptr<MidiSource> ms = midi_source(0)->clone (bbegin, bend);
+
+        PropertyList plist;
+
+        plist.add (Properties::name, ms->name());
+        plist.add (Properties::whole_file, true);
+        plist.add (Properties::start, 0);
+        plist.add (Properties::length, _length);
+        plist.add (Properties::layer, 0);
+
+        return boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (ms, plist, true));
 }
 
 void

@@ -107,7 +107,6 @@ class AudioRegion : public Region
 	};
 
 	virtual framecnt_t read (Sample*, framepos_t pos, framecnt_t cnt, int channel) const;
-	virtual framecnt_t read_with_ops (Sample*, framepos_t pos, framecnt_t cnt, int channel, ReadOps rops) const;
 	virtual framecnt_t readable_length() const { return length(); }
 
 	virtual framecnt_t read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,

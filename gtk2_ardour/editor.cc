@@ -1792,6 +1792,7 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 
 	} else if (mr) {
 		items.push_back (MenuElem (_("Quantize"), sigc::mem_fun(*this, &Editor::quantize_region)));
+		items.push_back (MenuElem (_("Fork"), sigc::mem_fun(*this, &Editor::fork_region)));
 		items.push_back (SeparatorElem());
 	}
 

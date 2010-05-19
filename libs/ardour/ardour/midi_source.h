@@ -47,6 +47,9 @@ class MidiSource : virtual public Source
 	MidiSource (Session& session, const XMLNode&);
 	virtual ~MidiSource ();
 
+        boost::shared_ptr<MidiSource> clone (Evoral::MusicalTime begin = Evoral::MinMusicalTime, 
+                                             Evoral::MusicalTime end = Evoral::MaxMusicalTime);
+
 	/** Read the data in a given time range from the MIDI source.
 	 * All time stamps in parameters are in audio frames (even if the source has tempo time).
 	 * \param dst Ring buffer where read events are written

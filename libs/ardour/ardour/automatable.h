@@ -42,6 +42,7 @@ class Automatable : virtual public Evoral::ControlSet
 {
 public:
 	Automatable(Session&);
+        Automatable (const Automatable& other);
 	Automatable();
 
 	virtual ~Automatable() {}

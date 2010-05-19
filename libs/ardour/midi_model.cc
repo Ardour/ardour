@@ -30,6 +30,7 @@
 
 #include "ardour/midi_model.h"
 #include "ardour/midi_source.h"
+#include "ardour/midi_state_tracker.h"
 #include "ardour/smf_source.h"
 #include "ardour/types.h"
 #include "ardour/session.h"
@@ -38,8 +39,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-MidiModel::MidiModel(MidiSource* s, size_t size)
-	: AutomatableSequence<TimeType>(s->session(), size)
+MidiModel::MidiModel(MidiSource* s)
+	: AutomatableSequence<TimeType>(s->session())
 	, _midi_source(s)
 {
 }
@@ -675,7 +676,7 @@ MidiModel::DiffCommand::get_state ()
 	return *diff_command;
 }
 
-/** Write the model to a MidiSource (i.e. save the model).
+/** Write part or all of the model to a MidiSource (i.e. save the model).
  * This is different from manually using read to write to a source in that
  * note off events are written regardless of the track mode.  This is so the
  * user can switch a recorded track (with note durations from some instrument)
@@ -683,9 +684,11 @@ MidiModel::DiffCommand::get_state ()
  * destroying the original note durations.
  */
 bool
-MidiModel::write_to(boost::shared_ptr<MidiSource> source)
+MidiModel::write_to (boost::shared_ptr<MidiSource> source, Evoral::MusicalTime begin_time, Evoral::MusicalTime end_time)
 {
 	ReadLock lock(read_lock());
+        MidiStateTracker mst;
+        Evoral::MusicalTime extra_note_on_time = end_time;
 
 	const bool old_percussive = percussive();
 	set_percussive(false);
@@ -694,8 +697,57 @@ MidiModel::write_to(boost::shared_ptr<MidiSource> source)
 	source->mark_streaming_midi_write_started(note_mode(), _midi_source->timeline_position());
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(); i != end(); ++i) {
-		source->append_event_unlocked_beats(*i);
+                const Evoral::Event<Evoral::MusicalTime>& ev (*i);
+                
+                if (ev.time() >= begin_time && ev.time() < end_time) {
+
+                        const Evoral::MIDIEvent<Evoral::MusicalTime>* mev = 
+                                static_cast<const Evoral::MIDIEvent<Evoral::MusicalTime>* > (&ev);
+                        
+                        if (!mev) {
+                                continue;
+                        }
+
+
+                        if (mev->is_note_off()) {
+                                
+                                if (!mst.active (mev->note(), mev->channel())) {
+                                        
+                                        /* add a note-on at the start of the range we're writing
+                                           to the file. velocity is just an arbitary reasonable value.
+                                        */
+                                        
+                                        Evoral::MIDIEvent<Evoral::MusicalTime> on (mev->event_type(), extra_note_on_time, 3, 0, true);
+                                        on.set_type (mev->type());
+                                        on.set_note (mev->note());
+                                        on.set_channel (mev->channel());
+                                        on.set_velocity (mev->velocity());
+                                        
+                                        cerr << "Add note on for odd note off, note = " << (int) on.note() << endl;
+                                        source->append_event_unlocked_beats (on);
+                                        mst.add (on.note(), on.channel());
+                                        mst.dump (cerr);
+                                        extra_note_on_time += 1.0/128.0;
+                                }
+                                        
+                                cerr << "MIDI Note off (note = " << (int) mev->note() << endl;
+                                source->append_event_unlocked_beats (*i);
+                                mst.remove (mev->note(), mev->channel());
+                                mst.dump (cerr);
+                                        
+                        } else if (mev->is_note_on()) {
+                                cerr << "MIDI Note on (note = " << (int) mev->note() << endl;
+                                mst.add (mev->note(), mev->channel());
+                                source->append_event_unlocked_beats(*i);
+                                mst.dump (cerr);
+                        } else {
+                                cerr << "MIDI other event type\n";
+                                source->append_event_unlocked_beats(*i);
+                        }
+                }
 	}
+
+        mst.resolve_notes (*source, end_time);
 
 	set_percussive(old_percussive);
 	source->mark_streaming_write_completed();

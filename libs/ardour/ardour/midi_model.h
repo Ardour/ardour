@@ -51,7 +51,7 @@ class MidiModel : public AutomatableSequence<Evoral::MusicalTime> {
 public:
 	typedef double TimeType;
 
-	MidiModel(MidiSource* s, size_t size=0);
+	MidiModel(MidiSource* s);
 
 	NoteMode note_mode() const { return (percussive() ? Percussive : Sustained); }
 	void set_note_mode(NoteMode mode) { set_percussive(mode == Percussive); };
@@ -151,7 +151,8 @@ public:
 	void                     apply_command(Session& session, Command* cmd);
 	void                     apply_command_as_subcommand(Session& session, Command* cmd);
 
-	bool write_to(boost::shared_ptr<MidiSource> source);
+	bool write_to(boost::shared_ptr<MidiSource> source, Evoral::MusicalTime begin = Evoral::MinMusicalTime,
+                      Evoral::MusicalTime end = Evoral::MaxMusicalTime);
 
 	// MidiModel doesn't use the normal AutomationList serialisation code
 	// since controller data is stored in the .mid

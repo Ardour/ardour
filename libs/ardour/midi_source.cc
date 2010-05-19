@@ -28,6 +28,8 @@
 #include <iomanip>
 #include <algorithm>
 
+#include <glibmm/fileutils.h>
+
 #include "pbd/xml++.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/basename.h"
@@ -80,6 +82,7 @@ MidiSource::MidiSource (Session& s, const XMLNode& node)
 		throw failed_constructor();
 	}
 }
+
 
 MidiSource::~MidiSource ()
 {
@@ -223,44 +226,59 @@ MidiSource::mark_streaming_write_completed ()
 	_writing = false;
 }
 
+boost::shared_ptr<MidiSource>
+MidiSource::clone (Evoral::MusicalTime begin, Evoral::MusicalTime end)
+{
+        string newname = PBD::basename_nosuffix(_name.val());
+        string newpath;
+
+        /* get a new name for the MIDI file we're going to write to
+         */
+
+        do { 
+
+                newname = bump_name_once (newname, '-');
+                /* XXX build path safely */
+                newpath = _session.session_directory().midi_path().to_string() +"/"+ newname + ".mid";
+
+        } while (Glib::file_test (newpath, Glib::FILE_TEST_EXISTS));
+        
+        boost::shared_ptr<MidiSource> newsrc = boost::dynamic_pointer_cast<MidiSource>(
+                SourceFactory::createWritable(DataType::MIDI, _session,
+                                              newpath, false, _session.frame_rate()));
+        
+        newsrc->set_timeline_position(_timeline_position);
+
+        if (_model) {
+                _model->write_to (newsrc, begin, end);
+        } else {
+                error << string_compose (_("programming error: %1"), X_("no model for MidiSource during ::clone()"));
+                return boost::shared_ptr<MidiSource>();
+        }
+
+        newsrc->flush_midi();
+
+        /* force a reload of the model if the range is partial */
+        
+        if (begin != Evoral::MinMusicalTime || end != Evoral::MaxMusicalTime) {
+                newsrc->load_model (true, true);
+        }
+        
+        return newsrc;
+}
+
 void
 MidiSource::session_saved()
 {
 	flush_midi();
 
 	if (_model && _model->edited()) {
-		string newname;
-		const string basename = PBD::basename_nosuffix(_name.val());
-		string::size_type last_dash = basename.find_last_of("-");
-		if (last_dash == string::npos || last_dash == basename.find_first_of("-")) {
-			newname = basename + "-1";
-		} else {
-			stringstream ss(basename.substr(last_dash+1));
-			unsigned write_count = 0;
-			ss >> write_count;
-			// cerr << "WRITE COUNT: " << write_count << endl;
-			++write_count; // start at 1
-			ss.clear();
-			ss << basename.substr(0, last_dash) << "-" << write_count;
-			newname = ss.str();
-		}
+		boost::shared_ptr<MidiSource> newsrc = clone ();
 
-		string newpath = _session.session_directory().midi_path().to_string() +"/"+ newname + ".mid";
-
-		boost::shared_ptr<MidiSource> newsrc = boost::dynamic_pointer_cast<MidiSource>(
-				SourceFactory::createWritable(DataType::MIDI, _session,
-						newpath, false, _session.frame_rate()));
-
-		newsrc->set_timeline_position(_timeline_position);
-		_model->write_to(newsrc);
-
-		// cyclic dependency here, ugly :(
-		newsrc->set_model(_model);
-		_model->set_midi_source(newsrc.get());
-
-		newsrc->flush_midi();
-
-		Switched (newsrc); /* EMIT SIGNAL */
+                if (newsrc) {
+                        _model->set_midi_source (newsrc.get());
+                        Switched (newsrc); /* EMIT SIGNAL */
+                }
 	}
 }
 

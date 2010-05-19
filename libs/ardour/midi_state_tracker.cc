@@ -20,6 +20,7 @@
 #include <iostream>
 #include "ardour/event_type_map.h"
 #include "ardour/midi_ring_buffer.h"
+#include "ardour/midi_source.h"
 #include "ardour/midi_state_tracker.h"
 
 using namespace std;
@@ -126,6 +127,35 @@ MidiStateTracker::resolve_notes (Evoral::EventSink<nframes_t> &dst, nframes64_t 
 				buf[2] = 0;
 				dst.write (time, EventTypeMap::instance().midi_event_type (buf[0]), 3, buf);
 				_active_notes[note + 128 * channel]--;
+			}
+		}
+	}
+	_on = 0;
+}
+
+void
+MidiStateTracker::resolve_notes (MidiSource& src, Evoral::MusicalTime time)
+{
+	if (!_on) {
+		return;
+	}
+
+        /* NOTE: the src must be locked */
+
+	for (int channel = 0; channel < 16; ++channel) {
+		for (int note = 0; note < 128; ++note) {
+			while (_active_notes[note + 128 * channel]) {
+                                Evoral::MIDIEvent<Evoral::MusicalTime> ev ((MIDI_CMD_NOTE_OFF|channel), time, 3, 0, true);
+                                ev.set_type (MIDI_CMD_NOTE_OFF);
+                                ev.set_channel (channel);
+                                ev.set_note (note);
+                                ev.set_velocity (0);
+                                src.append_event_unlocked_beats (ev);
+				_active_notes[note + 128 * channel]--;
+                                cerr << "Resolved " << ev << endl;
+                                /* don't stack events up at the same time
+                                 */
+                                time += 1.0/128.0;
 			}
 		}
 	}

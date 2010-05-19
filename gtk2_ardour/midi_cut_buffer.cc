@@ -21,7 +21,7 @@
 using namespace ARDOUR;
 
 MidiCutBuffer::MidiCutBuffer (Session* s)
-	: AutomatableSequence<MidiModel::TimeType> (*s, 0)
+	: AutomatableSequence<MidiModel::TimeType> (*s)
 	, _origin (0)
 {
 	

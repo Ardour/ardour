@@ -318,12 +318,6 @@ AudioRegion::read (Sample* buf, framepos_t timeline_position, framecnt_t cnt, in
 }
 
 framecnt_t
-AudioRegion::read_with_ops (Sample* buf, framepos_t file_position, framecnt_t cnt, int channel, ReadOps rops) const
-{
-	return _read_at (_sources, _length, buf, 0, 0, file_position, cnt, channel, 0, 0, rops);
-}
-
-framecnt_t
 AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 		      framepos_t file_position, framecnt_t cnt, uint32_t chan_n,
 		      framecnt_t read_frames, framecnt_t skip_frames) const

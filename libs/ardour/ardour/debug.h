@@ -46,6 +46,7 @@ namespace PBD {
                 extern uint64_t MidiClock;
                 extern uint64_t Monitor;
                 extern uint64_t Solo;
+                extern uint64_t AudioPlayback;
 	}
 }
 

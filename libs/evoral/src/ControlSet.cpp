@@ -31,6 +31,12 @@ ControlSet::ControlSet()
 {
 }
 
+ControlSet::ControlSet (const ControlSet& other)
+        : noncopyable ()
+{
+        /* derived class must copy controls */
+}
+
 void
 ControlSet::add_control(boost::shared_ptr<Control> ac)
 {

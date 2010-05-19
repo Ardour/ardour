@@ -23,6 +23,7 @@
 
 
 #include "ardour/types.h"
+#include "ardour/debug.h"
 #include "ardour/configuration.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
@@ -163,7 +164,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nf
 		if ((*i)->coverage (start, end) != OverlapNone) {
 			relevant_regions[(*i)->layer()].push_back (*i);
 			relevant_layers.push_back ((*i)->layer());
-		}
+                }
 	}
 
 	for (Crossfades::iterator i = _crossfades.begin(); i != _crossfades.end(); ++i) {
@@ -188,8 +189,10 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, nf
 		vector<boost::shared_ptr<Region> > r (relevant_regions[*l]);
 		vector<boost::shared_ptr<Crossfade> >& x (relevant_xfades[*l]);
 
+
 		for (vector<boost::shared_ptr<Region> >::iterator i = r.begin(); i != r.end(); ++i) {
 			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(*i);
+                        DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("read from region %1\n", ar->name()));
 			assert(ar);
 			ar->read_at (buf, mixdown_buffer, gain_buffer, start, cnt, chan_n, read_frames, skip_frames);
 			_read_data_count += ar->read_data_count();

@@ -4649,6 +4649,47 @@ Editor::apply_midi_note_edit_op (MidiOperator& op)
 }
 
 void
+Editor::fork_region ()
+{
+	RegionSelection rs;
+
+	get_regions_for_action (rs);
+
+	if (rs.empty()) {
+		return;
+	}
+
+	begin_reversible_command (_("Fork Region(s)"));
+
+	track_canvas->get_window()->set_cursor (*wait_cursor);
+	gdk_flush ();
+
+	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ) {
+		RegionSelection::iterator tmp = r;
+		++tmp;
+
+		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*>(*r);
+
+		if (mrv) {
+			boost::shared_ptr<Playlist> playlist = mrv->region()->playlist();
+                        boost::shared_ptr<MidiRegion> newregion = mrv->midi_region()->clone ();
+                        
+                        playlist->clear_history ();
+                        cerr << "Replace region with " << newregion->name() << endl;
+                        playlist->replace_region (mrv->region(), newregion, mrv->region()->position());
+                        _session->add_command(new StatefulDiffCommand (playlist));
+		}
+
+		r = tmp;
+	}
+
+	commit_reversible_command ();
+	rs.clear ();
+
+	track_canvas->get_window()->set_cursor (*current_canvas_cursor);
+}
+
+void
 Editor::quantize_region ()
 {
 	if (!_session) {

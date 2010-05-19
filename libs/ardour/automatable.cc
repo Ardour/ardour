@@ -49,6 +49,18 @@ Automatable::Automatable(Session& session)
 {
 }
 
+Automatable::Automatable (const Automatable& other)
+        : ControlSet (other)
+        , _a_session (other._a_session)
+        , _last_automation_snapshot (0)
+{
+        Glib::Mutex::Lock lm (other._control_lock);
+
+        for (Controls::const_iterator i = other._controls.begin(); i != other._controls.end(); ++i) {
+                boost::shared_ptr<Evoral::Control> ac (control_factory (i->first));
+                _controls[ac->parameter()] = ac;
+        }
+}
 int
 Automatable::old_set_automation_state (const XMLNode& node)
 {
