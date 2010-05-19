@@ -308,6 +308,11 @@ SoundFileBox::audition ()
 		return;
 	}
 
+	if (SMFSource::safe_midi_file_extension (path)) {
+		error << _("Auditioning of MIDI files is not yet supported") << endmsg;
+		return;
+	}
+
 	_session->cancel_audition();
 
 	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
