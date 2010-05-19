@@ -47,6 +47,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/source_factory.h"
 #include "ardour/session.h"
+#include "ardour/smf_source.h"
 #include "pbd/memento_command.h"
 
 #include "ardour_ui.h"
@@ -726,8 +727,9 @@ Editor::add_sources (vector<Glib::ustring> paths, SourceList& sources, nframes64
 	}
 
 	// kludge (for MIDI we're abusing "channel" for "track" here)
-	if (paths.front().rfind(".mid") != Glib::ustring::npos)
+	if (SMFSource::safe_midi_file_extension (paths.front())) {
 		target_regions = -1;
+	}
 
 	if (target_regions == 1) {
 

@@ -169,8 +169,7 @@ get_paths_for_new_sources (const bool allow_replacing, const string& import_file
 
 	for (uint n = 0; n < channels; ++n) {
 
-		const DataType type = (import_file_path.rfind(".mid") != string::npos)
-				? DataType::MIDI : DataType::AUDIO;
+		const DataType type = SMFSource::safe_midi_file_extension (import_file_path) ? DataType::MIDI : DataType::AUDIO;
 
 		std::string filepath = (type == DataType::MIDI)
 				? sdir.midi_path().to_string() : sdir.sound_path().to_string();
@@ -213,8 +212,7 @@ create_mono_sources_for_writing (const vector<string>& new_paths, Session& sess,
 
 		try
 		{
-			const DataType type = ((*i).rfind(".mid") != string::npos)
-				? DataType::MIDI : DataType::AUDIO;
+			const DataType type = SMFSource::safe_midi_file_extension (*i) ? DataType::MIDI : DataType::AUDIO;
 
 
 			source = SourceFactory::createWritable (type, sess,
@@ -453,8 +451,7 @@ Session::import_audiofiles (ImportStatus& status)
 	{
 		boost::shared_ptr<ImportableSource> source;
 		std::auto_ptr<Evoral::SMF>          smf_reader;
-		const DataType type = ((*p).rfind(".mid") != string::npos) ?
-			DataType::MIDI : DataType::AUDIO;
+		const DataType type = SMFSource::safe_midi_file_extension (*p) ? DataType::MIDI : DataType::AUDIO;
 
 		if (type == DataType::AUDIO) {
 			try {
