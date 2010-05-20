@@ -87,22 +87,13 @@ static const gchar* _automation_mode_strings[] = {
 {
 	NSWindow* notification_window = (NSWindow *)[notification object];
 
-	cerr << "KeyNotification Handler\n";
-
 	if (top_level_parent == notification_window || cocoa_parent == notification_window) {
-		cerr << "\tKeyHandler, top level parent is key: " <<  ([top_level_parent isKeyWindow] ? "yes" : "no") << endl;
-		cerr << "\tKeyHandler, cocoa parent is key: " <<  ([cocoa_parent isKeyWindow] ? "yes" : "no") << endl;
-		
 		if ([notification_window isKeyWindow]) {
-			cerr << "\t\tActivating plugin UI\n";
 			plugin_ui->activate();
 		} else {
-			cerr << "\t\tDeActivating plugin UI\n";
 			plugin_ui->deactivate();
 		}
-	} else {
-		cerr << "\tsome other window become Key (" << notification_window << ") CP is " << cocoa_parent << "\n";
-	}
+	} 
 }
 
 - (void)auViewResized:(NSNotification *)notification;
@@ -381,8 +372,6 @@ AUPluginUI::create_cocoa_view ()
 	prefheight = packFrame.size.height;
 	low_box.set_size_request (prefwidth, prefheight);
 	
-	cerr << "AU Cocoa plugin PREF view is " << packFrame.size.width << " x " << packFrame.size.height << endl;
-
 	return 0;
 }
 
@@ -390,7 +379,6 @@ void
 AUPluginUI::cocoa_view_resized ()
 {
 	NSRect packFrame = [au_view frame];
-	cerr << "View was resized to " << packFrame.size.width << " x " << packFrame.size.height << endl;
 }
 
 int
@@ -550,8 +538,6 @@ AUPluginUI::parent_cocoa_window ()
 		return -1;
 	}
 
-	cerr << "AU Cocoa plugin view is " << prefwidth << " x " << prefheight << endl;
-	
 	NSView* view = gdk_quartz_window_get_nsview (get_toplevel()->get_window()->gobj());
 	GtkRequisition a = top_box.size_request ();
 
