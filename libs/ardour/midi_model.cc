@@ -676,6 +676,36 @@ MidiModel::DiffCommand::get_state ()
 	return *diff_command;
 }
 
+/** Write all of the model to a MidiSource (i.e. save the model).
+ * This is different from manually using read to write to a source in that
+ * note off events are written regardless of the track mode.  This is so the
+ * user can switch a recorded track (with note durations from some instrument)
+ * to percussive, save, reload, then switch it back to sustained without
+ * destroying the original note durations.
+ */
+bool
+MidiModel::write_to (boost::shared_ptr<MidiSource> source)
+{
+	ReadLock lock(read_lock());
+
+	const bool old_percussive = percussive();
+	set_percussive(false);
+
+	source->drop_model();
+	source->mark_streaming_midi_write_started(note_mode(), _midi_source->timeline_position());
+
+	for (Evoral::Sequence<TimeType>::const_iterator i = begin(); i != end(); ++i) {
+                source->append_event_unlocked_beats(*i);
+	}
+
+	set_percussive(old_percussive);
+	source->mark_streaming_write_completed();
+
+	set_edited(false);
+
+	return true;
+}
+
 /** Write part or all of the model to a MidiSource (i.e. save the model).
  * This is different from manually using read to write to a source in that
  * note off events are written regardless of the track mode.  This is so the
@@ -684,7 +714,7 @@ MidiModel::DiffCommand::get_state ()
  * destroying the original note durations.
  */
 bool
-MidiModel::write_to (boost::shared_ptr<MidiSource> source, Evoral::MusicalTime begin_time, Evoral::MusicalTime end_time)
+MidiModel::write_section_to (boost::shared_ptr<MidiSource> source, Evoral::MusicalTime begin_time, Evoral::MusicalTime end_time)
 {
 	ReadLock lock(read_lock());
         MidiStateTracker mst;

@@ -669,7 +669,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		switch (item_type) {
 		case NoteItem:
 			if (internal_editing()) {
-				/* Note: we don't get here if not in internal_editing() mode */
 				_drags->set (new NoteDrag (this, item), event);
 				return true;
 			}

@@ -41,6 +41,7 @@
 
 #include "evoral/Parameter.hpp"
 #include "evoral/Control.hpp"
+#include "evoral/midi_util.h"
 
 #include "automation_region_view.h"
 #include "automation_time_axis.h"
@@ -566,6 +567,10 @@ MidiRegionView::create_note_at(double x, double y, double length)
 			frames_to_beats(start_frames + _region->start()), length,
 			(uint8_t)note, 0x40));
 
+        if (_model->contains (new_note)) {
+                return;
+        }
+
 	view->update_note_range(new_note->note());
 
 	MidiModel::DeltaCommand* cmd = _model->new_delta_command("add note");
@@ -796,8 +801,6 @@ MidiRegionView::redisplay_model()
 
 	MidiModel::Notes& notes (_model->notes());
 	_optimization_iterator = _events.begin();
-
-        cerr << "++++++++++ MIDI REdisplay\n";
 
 	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
 
@@ -2394,12 +2397,10 @@ MidiRegionView::note_entered(ArdourCanvas::CanvasNoteEvent* ev)
 		note_selected(ev, true);
 	}
 
-	char buf[4];
-	snprintf (buf, sizeof (buf), "%d", (int) ev->note()->note());
-	// This causes an infinite loop on note add sometimes
-	//PublicEditor& editor (trackview.editor());
-	//editor.show_verbose_canvas_cursor_with (Evoral::midi_note_name (ev->note()->note()));
-	//editor.show_verbose_canvas_cursor_with (buf);
+	char buf[12];
+	snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (ev->note()->note()).c_str(), (int) ev->note()->note());
+	PublicEditor& editor (trackview.editor());
+	editor.show_verbose_canvas_cursor_with (buf);
 }
 
 void

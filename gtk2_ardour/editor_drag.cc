@@ -3243,7 +3243,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 			} else {
 				/* new selection */
 
-				if (!_editor->selection->selected (_editor->clicked_axisview)) {
+				if (_editor->clicked_axisview && !_editor->selection->selected (_editor->clicked_axisview)) {
 					_editor->selection->set (_editor->clicked_axisview);
 				}
 				
@@ -3361,7 +3361,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 			_editor->selection->clear_time();
 		}
 
-		if (!_editor->selection->selected (_editor->clicked_axisview)) {
+		if (_editor->clicked_axisview && !_editor->selection->selected (_editor->clicked_axisview)) {
 			_editor->selection->set (_editor->clicked_axisview);
 		}
 		
@@ -3747,9 +3747,10 @@ NoteDrag::motion (GdkEvent*, bool)
 		region->move_selection (dx, dy);
 
 		CanvasNoteEvent* cnote = dynamic_cast<CanvasNoteEvent*>(_item);
-                char buf[4];
-		snprintf (buf, sizeof (buf), "%g", (int) cnote->note()->note() + drag_delta_note);
-		//editor.show_verbose_canvas_cursor_with (Evoral::midi_note_name (ev->note()->note()));
+
+                char buf[12];
+                snprintf (buf, sizeof (buf), "%s (%g)", Evoral::midi_note_name (cnote->note()->note()).c_str(),
+                          (int) cnote->note()->note() + drag_delta_note);
 		_editor->show_verbose_canvas_cursor_with (buf);
         }
 }

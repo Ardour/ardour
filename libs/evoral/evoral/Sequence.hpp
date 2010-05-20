@@ -202,7 +202,8 @@ public:
 	bool edited() const      { return _edited; }
 	void set_edited(bool yn) { _edited = yn; }
 
-	void add_note_unlocked(const boost::shared_ptr< Note<Time> > note);
+        bool contains (const boost::shared_ptr< Note<Time> > ev) const;
+	bool add_note_unlocked(const boost::shared_ptr< Note<Time> > note);
 	void remove_note_unlocked(const boost::shared_ptr< const Note<Time> > note);
 
 	uint8_t lowest_note()  const { return _lowest_note; }

@@ -111,7 +111,7 @@ class MidiSource : virtual public Source
 
 	boost::shared_ptr<MidiModel> model() { return _model; }
 	void set_model(boost::shared_ptr<MidiModel> m) { _model = m; }
-	void drop_model() { _model.reset(); }
+	void drop_model();
 
   protected:
 	virtual void flush_midi() = 0;

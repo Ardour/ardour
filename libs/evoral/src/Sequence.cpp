@@ -730,12 +730,38 @@ Sequence<Time>::append_sysex_unlocked(const MIDIEvent<Time>& ev)
 }
 
 template<typename Time>
-void
+bool
+Sequence<Time>::contains(const boost::shared_ptr< Note<Time> > note) const
+{
+        ReadLock lock (read_lock());
+
+	for (typename Sequence<Time>::Notes::const_iterator i = note_lower_bound(note->time());
+			i != _notes.end() && (*i)->time() == note->time(); ++i) {
+		if (*i == note) {
+                        cerr << "Existing note matches: " << *i << endl;
+			return true;
+		}
+	}
+        cerr << "No matching note for " << note << endl;
+        return false;
+}
+
+template<typename Time>
+bool
 Sequence<Time>::add_note_unlocked(const boost::shared_ptr< Note<Time> > note)
 {
 	DUMP(format("%1% add note %2% @ %3%\n") % this % (int)note->note() % note->time());
+
+	for (typename Sequence<Time>::Notes::iterator i = note_lower_bound(note->time());
+			i != _notes.end() && (*i)->time() == note->time(); ++i) {
+		if (*i == note) {
+			return false;
+		}
+	}
+
 	_edited = true;
 	_notes.insert(note);
+        return true;
 }
 
 template<typename Time>

@@ -151,8 +151,9 @@ public:
 	void                     apply_command(Session& session, Command* cmd);
 	void                     apply_command_as_subcommand(Session& session, Command* cmd);
 
-	bool write_to(boost::shared_ptr<MidiSource> source, Evoral::MusicalTime begin = Evoral::MinMusicalTime,
-                      Evoral::MusicalTime end = Evoral::MaxMusicalTime);
+	bool write_to(boost::shared_ptr<MidiSource> source);
+	bool write_section_to(boost::shared_ptr<MidiSource> source, Evoral::MusicalTime begin = Evoral::MinMusicalTime,
+                              Evoral::MusicalTime end = Evoral::MaxMusicalTime);
 
 	// MidiModel doesn't use the normal AutomationList serialisation code
 	// since controller data is stored in the .mid

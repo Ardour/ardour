@@ -250,7 +250,11 @@ MidiSource::clone (Evoral::MusicalTime begin, Evoral::MusicalTime end)
         newsrc->set_timeline_position(_timeline_position);
 
         if (_model) {
-                _model->write_to (newsrc, begin, end);
+                if (begin == Evoral::MinMusicalTime && end == Evoral::MaxMusicalTime) {
+                        _model->write_to (newsrc);
+                } else {
+                        _model->write_section_to (newsrc, begin, end);
+                }
         } else {
                 error << string_compose (_("programming error: %1"), X_("no model for MidiSource during ::clone()"));
                 return boost::shared_ptr<MidiSource>();
@@ -290,3 +294,9 @@ MidiSource::set_note_mode(NoteMode mode)
 	}
 }
 
+void
+MidiSource::drop_model ()
+{
+        cerr << name() << " drop model\n";
+        _model.reset(); 
+}
