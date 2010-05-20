@@ -713,82 +713,6 @@ private:
 	HScale _dpi_slider;
 };
 
-class SoloMuteOptions : public OptionEditorBox
-{
-public:
-	SoloMuteOptions (RCConfiguration* c) :
-		_rc_config (c),
-		// 0.781787 is the value needed for gain to be set to 0.
-		_db_adjustment (0.781787, 0.0, 1.0, 0.01, 0.1)
-
-	{
-		if ((pix = ::get_icon ("fader_belt_h")) == 0) {
-			throw failed_constructor();
-		}
-
-		_db_slider = manage (new HSliderController (pix,
-		 					    &_db_adjustment,
-		 					    115,
-							    false));
-
-		parameter_changed ("solo-mute-gain");
-
-		Label* l = manage (new Label (_("Solo mute cut (dB):")));
-		l->set_name ("OptionsLabel");
-
-		HBox* h = manage (new HBox);
-		h->set_spacing (4);
-		h->pack_start (*l, false, false);
-		h->pack_start (*_db_slider, false, false);
-		h->pack_start (_db_display, false, false);
-                h->show_all ();
-
-		set_size_request_to_display_given_text (_db_display, "-99.0", 12, 12);
-
-		_box->pack_start (*h, false, false);
-
-		_db_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &SoloMuteOptions::db_changed));
-	}
-
-	void parameter_changed (string const & p)
-	{
-		if (p == "solo-mute-gain") {
-			gain_t val = _rc_config->get_solo_mute_gain();
-
-			_db_adjustment.set_value (gain_to_slider_position (val));
-
-			char buf[16];
-
-			if (val == 0.0) {
-				snprintf (buf, sizeof (buf), "-inf");
-			} else {
-				snprintf (buf, sizeof (buf), "%.2f", accurate_coefficient_to_dB (val));
-			}
-
-			_db_display.set_text (buf);
-		}
-	}
-
-	void set_state_from_config ()
-	{
-		parameter_changed ("solo-mute-gain");
-	}
-
-private:
-
-	void db_changed ()
-	{
-		_rc_config->set_solo_mute_gain (slider_position_to_gain (_db_adjustment.get_value()));
-	}
-
-	RCConfiguration* _rc_config;
-	Adjustment _db_adjustment;
-        Gtkmm2ext::HSliderController* _db_slider;
-        Glib::RefPtr<Gdk::Pixbuf> pix;
-        Entry _db_display;
-};
-
-
 class ControlSurfacesOptions : public OptionEditorBox
 {
 public:
@@ -1024,6 +948,10 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_name_new_markers)
 		     ));
 
+	add_option (_("Misc"), new OptionEditorHeading (_("Click")));
+	
+	add_option (_("Misc"), new ClickOptions (_rc_config, this));
+
 	/* TRANSPORT */
 
 	add_option (_("Transport"),
@@ -1174,53 +1102,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* AUDIO */
 
-	add_option (_("Audio"), new OptionEditorHeading (_("Solo")));
-
-	add_option (_("Audio"),
-	     new BoolOption (
-		     "solo-control-is-listen-control",
-		     _("Solo controls are Listen controls"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_control_is_listen_control),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_control_is_listen_control)
-		     ));
-
-	ComboOption<ListenPosition>* lp = new ComboOption<ListenPosition> (
-		"listen-position",
-		_("Listen Position"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_listen_position),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_listen_position)
-		);
-
-	lp->add (AfterFaderListen, _("after-fader listen"));
-	lp->add (PreFaderListen, _("pre-fader listen"));
-
-	add_option (_("Audio"), lp);
-	add_option (_("Audio"), new SoloMuteOptions (_rc_config));
-
-	add_option (_("Audio"),
-	     new BoolOption (
-		     "exclusive-solo",
-		     _("Exclusive solo"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_exclusive_solo),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_exclusive_solo)
-		     ));
-
-	add_option (_("Audio"),
-	     new BoolOption (
-		     "show-solo-mutes",
-		     _("Show solo muting"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_solo_mutes),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_solo_mutes)
-		     ));
-
-	add_option (_("Audio"),
-	     new BoolOption (
-		     "solo-mute-override",
-		     _("Soloing overrides muting"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_override),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_override)
-		     ));
-
 	add_option (_("Audio"), new OptionEditorHeading (_("Monitoring")));
 
 	add_option (_("Audio"),
@@ -1361,6 +1242,96 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_auto_analyse_audio)
 		     ));
 
+	/* SOLO AND MUTE */
+
+	cout << "FUCK: " << _rc_config->get_solo_mute_gain() << "\n";
+
+	add_option (_("Solo / mute"),
+	     new FaderOption (
+		     "solo-mute-gain",
+		     _("Solo mute cut (dB)"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_gain),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_gain)
+		     ));
+		     
+	add_option (_("Solo / mute"),
+	     new BoolOption (
+		     "solo-control-is-listen-control",
+		     _("Solo controls are Listen controls"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_control_is_listen_control),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_control_is_listen_control)
+		     ));
+
+	ComboOption<ListenPosition>* lp = new ComboOption<ListenPosition> (
+		"listen-position",
+		_("Listen Position"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_listen_position),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_listen_position)
+		);
+
+	lp->add (AfterFaderListen, _("after-fader listen"));
+	lp->add (PreFaderListen, _("pre-fader listen"));
+
+	add_option (_("Solo / mute"), lp);
+
+	add_option (_("Solo / mute"),
+	     new BoolOption (
+		     "exclusive-solo",
+		     _("Exclusive solo"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_exclusive_solo),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_exclusive_solo)
+		     ));
+
+	add_option (_("Solo / mute"),
+	     new BoolOption (
+		     "show-solo-mutes",
+		     _("Show solo muting"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_solo_mutes),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_solo_mutes)
+		     ));
+
+	add_option (_("Solo / mute"),
+	     new BoolOption (
+		     "solo-mute-override",
+		     _("Soloing overrides muting"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_solo_mute_override),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_solo_mute_override)
+		     ));
+
+	add_option (_("Solo / mute"), new OptionEditorHeading (_("Default track / bus muting options")));
+	
+	add_option (_("Solo / mute"),
+	     new BoolOption (
+		     "mute-affects-pre-fader",
+		     _("Mute affects pre-fader sends"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_pre_fader),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_pre_fader)
+		     ));
+
+	add_option (_("Solo / mute"),
+	     new BoolOption (
+		     "mute-affects-post-fader",
+		     _("Mute affects post-fader sends"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_post_fader),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_post_fader)
+		     ));
+	
+	add_option (_("Solo / mute"),
+	     new BoolOption (
+		     "mute-affects-control-outs",
+		     _("Mute affects control outputs"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_control_outs),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_control_outs)
+		     ));
+	
+	add_option (_("Solo / mute"),
+	     new BoolOption (
+		     "mute-affects-main-outs",
+		     _("Mute affects main outputs"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mute_affects_main_outs),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mute_affects_main_outs)
+		     ));
+
 	/* MIDI CONTROL */
 
 	list<ComboOption<string>* > midi_combos;
@@ -1475,10 +1446,6 @@ RCOptionEditor::RCOptionEditor ()
 	rm->add (EditorOrdered, _("follows order of editor"));
 
 	add_option (_("Control surfaces"), rm);
-
-	/* CLICK */
-
-	add_option (_("Click"), new ClickOptions (_rc_config, this));
 
 	/* KEYBOARD */
 

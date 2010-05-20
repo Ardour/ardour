@@ -30,18 +30,29 @@
 using namespace ARDOUR;
 using namespace std;
 
-const MuteMaster::MutePoint MuteMaster::AllPoints = MutePoint (MuteMaster::PreFader|
-							       MuteMaster::PostFader|
-							       MuteMaster::Listen|
-							       MuteMaster::Main);
-
 MuteMaster::MuteMaster (Session& s, const std::string&)
-	: SessionHandleRef (s) 
-        , _mute_point (AllPoints)
+	: SessionHandleRef (s)
+	, _mute_point (MutePoint (0))
         , _muted_by_self (false)
         , _soloed (false)
         , _solo_ignore (false)
 {
+	
+	if (Config->get_mute_affects_pre_fader ()) {
+		_mute_point = MutePoint (_mute_point | PreFader);
+	}
+
+	if (Config->get_mute_affects_post_fader ()) {
+		_mute_point = MutePoint (_mute_point | PostFader);
+	}
+
+	if (Config->get_mute_affects_control_outs ()) {
+		_mute_point = MutePoint (_mute_point | Listen);
+	}
+
+	if (Config->get_mute_affects_main_outs ()) {
+		_mute_point = MutePoint (_mute_point | Main);
+	}
 }
 
 void

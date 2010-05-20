@@ -1,4 +1,4 @@
- /*
+/*
     Copyright (C) 2001-2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
@@ -19,13 +19,18 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/alignment.h>
+#include "gtkmm2ext/utils.h"
 #include "ardour/configuration.h"
+#include "ardour/utils.h"
+#include "ardour/dB.h"
 #include "option_editor.h"
 #include "gui_thread.h"
+#include "utils.h"
 #include "i18n.h"
 
 using namespace std;
 using namespace Gtk;
+using namespace Gtkmm2ext;
 using namespace ARDOUR;
 
 void
@@ -127,6 +132,65 @@ EntryOption::activated ()
 	_set (_entry->get_text ());
 }
 
+FaderOption::FaderOption (string const & i, string const & n, sigc::slot<gain_t> g, sigc::slot<bool, gain_t> s)
+	: Option (i, n)
+	// 0.781787 is the value needed for gain to be set to 0.
+	, _db_adjustment (0.781787, 0, 1, 0.01, 0.1)
+	, _get (g)
+	, _set (s)
+{
+	_pix = ::get_icon (X_("fader_belt_h"));
+	if (_pix == 0) {
+		throw failed_constructor ();
+	}
+
+	_db_slider = manage (new HSliderController (_pix,
+						    &_db_adjustment,
+						    115,
+						    false));
+
+	_label.set_text (n + ":");
+	_label.set_name (X_("OptionsLabel"));
+
+	_box.set_spacing (4);
+	_box.pack_start (*_db_slider, false, false);
+	_box.pack_start (_db_display, false, false);
+	_box.show_all ();
+	
+	set_size_request_to_display_given_text (_db_display, "-99.0", 12, 12);
+
+	_db_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &FaderOption::db_changed));
+}
+
+void
+FaderOption::set_state_from_config ()
+{
+	gain_t const val = _get ();
+	_db_adjustment.set_value (gain_to_slider_position (val));
+
+	char buf[16];
+
+	if (val == 0.0) {
+		snprintf (buf, sizeof (buf), "-inf");
+	} else {
+		snprintf (buf, sizeof (buf), "%.2f", accurate_coefficient_to_dB (val));
+	}
+	
+	_db_display.set_text (buf);
+}
+
+void
+FaderOption::db_changed ()
+{
+	_set (slider_position_to_gain (_db_adjustment.get_value ()));
+}
+
+void
+FaderOption::add_to_page (OptionEditorPage* p)
+{
+	add_widgets_to_page (p, &_label, &_box);
+}
+
 OptionEditorPage::OptionEditorPage (Gtk::Notebook& n, std::string const & t)
 	: table (1, 3)
 {
@@ -202,6 +266,8 @@ OptionEditor::add_option (std::string const & pn, OptionEditorComponent* o)
 	if (_pages.find (pn) == _pages.end()) {
 		_pages[pn] = new OptionEditorPage (_notebook, pn);
 	}
+
+	cout << "add thing to " << pn << "\n";
 
 	OptionEditorPage* p = _pages[pn];
 	p->components.push_back (o);

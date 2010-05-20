@@ -25,7 +25,9 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/table.h>
+#include "gtkmm2ext/slider_controller.h"
 #include "ardour_dialog.h"
+#include "ardour/types.h"
 
 /** @file option_editor.h
  *  @brief Base class for option editing dialog boxes.
@@ -106,8 +108,8 @@ protected:
 };
 
 /** Base class for components which provide UI to change an option */
-class Option : public OptionEditorComponent {
-
+class Option : public OptionEditorComponent
+{
 public:
 	/** Construct an Option.
 	 *  @param i Option id (e.g. "plugins-stop-with-transport")
@@ -141,8 +143,8 @@ private:
 };
 
 /** Component which provides the UI to handle a boolean option using a GTK CheckButton */
-class BoolOption : public Option {
-
+class BoolOption : public Option
+{
 public:
 
 	BoolOption (std::string const &, std::string const &, sigc::slot<bool>, sigc::slot<bool, bool>);
@@ -159,8 +161,8 @@ private:
 };
 
 /** Component which provides the UI to handle a string option using a GTK Entry */
-class EntryOption : public Option {
-
+class EntryOption : public Option
+{
 public:
 
 	EntryOption (std::string const &, std::string const &, sigc::slot<std::string>, sigc::slot<bool, std::string>);
@@ -182,8 +184,8 @@ private:
  *  The template parameter is the enumeration.
  */
 template <class T>
-class ComboOption : public Option {
-
+class ComboOption : public Option
+{
 public:
 
 	/** Construct an ComboOption.
@@ -332,6 +334,27 @@ private:
 	Gtk::Label* _label;
 	Gtk::HBox* _box;
 	Gtk::SpinButton* _spin;
+};
+
+class FaderOption : public Option
+{
+public:
+
+	FaderOption (std::string const &, std::string const &, sigc::slot<ARDOUR::gain_t> g, sigc::slot<bool, ARDOUR::gain_t> s);
+	void set_state_from_config ();
+	void add_to_page (OptionEditorPage *);
+
+private:
+	void db_changed ();
+	
+	Gtk::Adjustment _db_adjustment;
+	Gtkmm2ext::HSliderController* _db_slider;
+	Glib::RefPtr<Gdk::Pixbuf> _pix;
+	Gtk::Entry _db_display;
+	Gtk::Label _label;
+	Gtk::HBox _box;
+	sigc::slot<ARDOUR::gain_t> _get;
+	sigc::slot<bool, ARDOUR::gain_t> _set;
 };
 
 /** Class to represent a single page in an OptionEditor's notebook.
