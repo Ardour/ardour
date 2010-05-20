@@ -372,6 +372,7 @@ def sub_config_and_use(conf, name, has_objects = True):
 
 def configure(conf):
 	create_stored_revision()
+        conf.env['VERSION'] = VERSION
 	autowaf.set_recursive()
 	autowaf.configure(conf)
 	

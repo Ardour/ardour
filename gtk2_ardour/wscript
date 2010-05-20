@@ -8,9 +8,9 @@ import TaskGen
 import re
 
 # Version of this package (even if built as a child)
-MAJOR = '1'
+MAJOR = '3'
 MINOR = '0'
-MICRO = '2'
+MICRO = '0'
 GTK2_ARDOUR_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 
 # Variables for 'waf dist'
@@ -250,7 +250,7 @@ def build(bld):
 	                      libgtkmm2ext libtaglib'''
 	obj.cflags       = ['-DPACKAGE="gtk2_ardour"']
 	obj.cxxflags     = ['-DPACKAGE="gtk2_ardour"']
-	obj.cxxflags     += ['-DVERSIONSTRING="' + GTK2_ARDOUR_VERSION + '"']
+	obj.cxxflags     += ['-DVERSIONSTRING="' + bld.env['VERSION'] + '"']
 	obj.cxxflags     += ['-DDATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"']
 	obj.cxxflags     += ['-DCONFIG_DIR="' + os.path.normpath(bld.env['CONFIGDIR']) + '"']
 	obj.cxxflags     += ['-DMODULE_DIR="' + os.path.normpath(bld.env['LIBDIR']) + '"']
