@@ -4605,7 +4605,7 @@ Command*
 Editor::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiRegionView& mrv)
 {
 	Evoral::Sequence<Evoral::MusicalTime>::Notes selected;
-	mrv.selection_as_notelist (selected);
+	mrv.selection_as_notelist (selected, true);
 
 	vector<Evoral::Sequence<Evoral::MusicalTime>::Notes> v;
 	v.push_back (selected);

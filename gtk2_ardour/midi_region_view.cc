@@ -2648,13 +2648,22 @@ MidiRegionView::goto_previous_note ()
 }
 
 void
-MidiRegionView::selection_as_notelist (Notes& selected)
+MidiRegionView::selection_as_notelist (Notes& selected, bool allow_all_if_none_selected)
 {
+        bool had_selected = false;
+
 	time_sort_events ();
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		if ((*i)->selected()) {
 			selected.insert ((*i)->note());
+                        had_selected = true;
+		}
+	}
+        
+        if (allow_all_if_none_selected && !had_selected) {
+                for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
+                        selected.insert ((*i)->note());
 		}
 	}
 }

@@ -173,7 +173,7 @@ QuantizeDialog::end_grid_size () const
 double
 QuantizeDialog::grid_size_to_musical_time (const string& txt) const
 {
-	if (txt == "main_grid") {
+	if (txt == "main grid") {
 		bool success;
 
 		Evoral::MusicalTime b = editor.get_grid_type_as_beats (success, 0);
@@ -200,7 +200,7 @@ QuantizeDialog::grid_size_to_musical_time (const string& txt) const
 	} else if (txt == _("Beats")) {
 		return 1.0;
 	}
-
+        
 	return 1.0;
 }
 
