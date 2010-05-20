@@ -1266,7 +1266,7 @@ AUPlugin::connect_and_run (vector<Sample*>& bufs, uint32_t maxbuf, int32_t& in, 
 		return 0;
 	} 
 
-	// cerr << name() << " render error " << err << endl;
+	cerr << name() << " render status " << err << endl;
 	return -1;
 }
 

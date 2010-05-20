@@ -175,7 +175,6 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	_notify = 0;
 	cocoa_window = 0;
 	au_view = 0;
-	packView = 0;
 	editView = 0;
 
 	/* prefer cocoa, fall back to cocoa, but use carbon if its there */
@@ -209,12 +208,12 @@ AUPluginUI::~AUPluginUI ()
 		CloseComponent (editView);
 	}
 
-	if (packView) {
+	if (au_view) {
 		/* remove whatever we packed into low_box so that GTK doesn't
 		   mess with it.
 		*/
 
-		[packView removeFromSuperview];
+		[au_view removeFromSuperview];
 	}
 }
 
@@ -368,8 +367,6 @@ AUPluginUI::create_cocoa_view ()
 		[(AUGenericView *)au_view setShowsExpertParameters:YES];
 	}
 
-	packView = au_view;
-
 	// watch for size changes of the view
 
 	 [[NSNotificationCenter defaultCenter] addObserver:_notify
@@ -382,6 +379,9 @@ AUPluginUI::create_cocoa_view ()
 	packFrame = [au_view frame];
 	prefwidth = packFrame.size.width;
 	prefheight = packFrame.size.height;
+	low_box.set_size_request (prefwidth, prefheight);
+	
+	cerr << "AU Cocoa plugin PREF view is " << packFrame.size.width << " x " << packFrame.size.height << endl;
 
 	return 0;
 }
@@ -549,18 +549,59 @@ AUPluginUI::parent_cocoa_window ()
 		error << _("AUPluginUI: no top level window!") << endmsg;
 		return -1;
 	}
+
+	cerr << "AU Cocoa plugin view is " << prefwidth << " x " << prefheight << endl;
 	
-	// Get the size of the new AU View's frame 
-	packFrame = [au_view frame];
+	NSView* view = gdk_quartz_window_get_nsview (get_toplevel()->get_window()->gobj());
+	GtkRequisition a = top_box.size_request ();
 
-	NSView* view = gdk_quartz_window_get_nsview (low_box.get_window()->gobj());
+	/* move the au_view down so that it doesn't overlap the top_box contents */
 
-	[view setFrame:packFrame];
-	[view addSubview:packView]; 
+	NSPoint origin = { 0, a.height };
 
-	low_box.set_size_request (packFrame.size.width, packFrame.size.height);
+	[au_view setFrameOrigin:origin];
+	[view addSubview:au_view]; 
 
 	return 0;
+}
+
+static void
+dump_view_tree (NSView* view, int depth)
+{
+	NSArray* subviews = [view subviews];
+	unsigned long cnt = [subviews count];
+
+	for (int d = 0; d < depth; d++) {
+		cerr << '\t';
+	}
+	cerr << " view @ " << view << endl;
+	
+	for (unsigned long i = 0; i < cnt; ++i) {
+		NSView* subview = [subviews objectAtIndex:i];
+		dump_view_tree (subview, depth+1);
+	}
+}
+
+void
+AUPluginUI::forward_key_event (GdkEventKey* ev)
+{
+	NSEvent* nsevent = gdk_quartz_event_get_nsevent ((GdkEvent*)ev);
+
+	if (au_view && nsevent) {
+
+		/* filter on nsevent type here because GDK massages FlagsChanged
+		   messages into GDK_KEY_{PRESS,RELEASE} but Cocoa won't
+		   handle a FlagsChanged message as a keyDown or keyUp
+		*/
+
+		if ([nsevent type] == NSKeyDown) {
+			[[[au_view window] firstResponder] keyDown:nsevent];
+		} else if ([nsevent type] == NSKeyUp) {
+			[[[au_view window] firstResponder] keyUp:nsevent];
+		} else if ([nsevent type] == NSFlagsChanged) {
+			[[[au_view window] firstResponder] flagsChanged:nsevent];
+		}
+	}
 }
 
 void

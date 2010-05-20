@@ -61,6 +61,7 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	bool on_map_event (GdkEventAny*);
 	bool on_focus_in_event (GdkEventFocus*);
 	bool on_focus_out_event (GdkEventFocus*);
+	void forward_key_event (GdkEventKey*);
 
 	OSStatus carbon_event (EventHandlerCallRef nextHandlerRef, EventRef event);
 
@@ -69,9 +70,9 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	int prefheight;
 	int prefwidth;
 
-	Gtk::HBox     top_box;
-	Gtk::EventBox low_box;
-	Gtk::VBox vpacker;
+	Gtk::HBox  top_box;
+	Gtk::HBox  low_box;
+	Gtk::VBox  vpacker;
 	Gtk::Label automation_mode_label;
 	Gtk::ComboBoxText automation_mode_selector;
 	Gtk::Label preset_label;
@@ -91,7 +92,6 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	WindowRef            carbon_window;	
  	EventHandlerRef      carbon_event_handler;
 	bool                 _activating_from_app;
-	NSView*              packView;
 	NotificationObject* _notify;
 
 	bool test_cocoa_view_support ();
