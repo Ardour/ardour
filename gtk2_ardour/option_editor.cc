@@ -267,8 +267,6 @@ OptionEditor::add_option (std::string const & pn, OptionEditorComponent* o)
 		_pages[pn] = new OptionEditorPage (_notebook, pn);
 	}
 
-	cout << "add thing to " << pn << "\n";
-
 	OptionEditorPage* p = _pages[pn];
 	p->components.push_back (o);
 

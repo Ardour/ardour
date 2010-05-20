@@ -1244,8 +1244,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* SOLO AND MUTE */
 
-	cout << "FUCK: " << _rc_config->get_solo_mute_gain() << "\n";
-
 	add_option (_("Solo / mute"),
 	     new FaderOption (
 		     "solo-mute-gain",
