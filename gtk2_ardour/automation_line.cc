@@ -1249,9 +1249,9 @@ void
 AutomationLine::clear ()
 {
 	/* parent must create command */
-        XMLNode &before = get_state();
+        XMLNode &before = alist.get_state();
 	alist.clear();
-	trackview.editor.current_session()->add_command (new MementoCommand<AutomationLine>(*this, &before, &get_state()));
+	trackview.editor.current_session()->add_command (new MementoCommand<AutomationList>(alist, &before, &get_state()));
 	trackview.editor.current_session()->commit_reversible_command ();
 	trackview.editor.current_session()->set_dirty ();
 }
