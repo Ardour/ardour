@@ -830,6 +830,11 @@ RouteUI::update_solo_display ()
         }
 
 	solo_button->set_visual_state (solo_visual_state (_route));
+        
+        /* some changes to solo status can affect mute display, so catch up 
+         */
+
+        update_mute_display ();
 }
 
 void
