@@ -3005,7 +3005,6 @@ void
 Editor::setup_tooltips ()
 {
 	ARDOUR_UI::instance()->set_tip (mouse_move_button, _("Select/Move Objects"));
-	ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Select/Move Ranges"));
 	ARDOUR_UI::instance()->set_tip (mouse_gain_button, _("Draw Gain Automation"));
 	ARDOUR_UI::instance()->set_tip (mouse_zoom_button, _("Select Zoom Range"));
 	ARDOUR_UI::instance()->set_tip (mouse_timefx_button, _("Stretch/Shrink Regions"));
