@@ -588,11 +588,11 @@ TimeAxisView::popup_size_menu (guint32 when)
 }
 
 void
-TimeAxisView::set_selected (Selection &selection)
+TimeAxisView::reflect_selected (Selection &selection)
 {
 	//give children a chance to be selected
 	for (vector<TimeAxisView*>::iterator i = children.begin(); i != children.end(); ++i) {
-		(*i)->set_selected (selection);
+		(*i)->reflect_selected (selection);
 	}
 
 	//determine if I am in the selection
