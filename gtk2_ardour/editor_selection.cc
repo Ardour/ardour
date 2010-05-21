@@ -829,7 +829,7 @@ Editor::track_selection_changed ()
 	}
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			(*i)->reflect_selected (*selection);
+			(*i)->show_selection (*selection);
 	}
 
 	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, !selection->tracks.empty());

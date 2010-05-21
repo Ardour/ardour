@@ -155,7 +155,7 @@ class TimeAxisView : public virtual AxisView, public Stateful
 	virtual void hide ();
 	bool hidden() const { return _hidden; }
 
-	virtual void reflect_selected (Selection&);
+	virtual void show_selection (Selection&);
 
 	/**
 	 * potential handler for entered events
