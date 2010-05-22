@@ -52,67 +52,20 @@ class AudioRegionView;
 class AudioRegionEditor : public RegionEditor
 {
   public:
-	AudioRegionEditor (ARDOUR::Session*, boost::shared_ptr<ARDOUR::AudioRegion>, AudioRegionView& rv);
-	~AudioRegionEditor ();
+	AudioRegionEditor (ARDOUR::Session*, boost::shared_ptr<ARDOUR::AudioRegion>);
 
   private:
-	boost::shared_ptr<ARDOUR::AudioRegion> _region;
-	AudioRegionView& _region_view;
 
-	void connect_editor_events ();
+	void region_changed (PBD::PropertyChange const &);
+	
+	void gain_changed ();
+	void gain_adjustment_changed ();
+	
+	boost::shared_ptr<ARDOUR::AudioRegion> _audio_region;
 
-	Gtk::Label name_label;
-	Gtk::Entry name_entry;
-	Gtk::ToggleButton audition_button;
-
-	Gtk::Table _table;
-
-	Gtk::Label position_label;
-	Gtk::Label end_label;
-	Gtk::Label length_label;
-	Gtk::Label sync_relative_label;
-	Gtk::Label sync_absolute_label;
-	Gtk::Label start_label;
 	Gtk::Label gain_label;
-
-	AudioClock position_clock;
-	AudioClock end_clock;
-	AudioClock length_clock;
-	AudioClock sync_offset_relative_clock; ///< sync offset relative to the start of the region
-	AudioClock sync_offset_absolute_clock; ///< sync offset relative to the start of the timeline
-	AudioClock start_clock;
 	Gtk::Adjustment gain_adjustment;
 	Gtk::SpinButton gain_entry;
-
-	PBD::ScopedConnection state_connection;
-	PBD::ScopedConnection audition_connection;
-
-	void region_changed (const PBD::PropertyChange&);
-	void bounds_changed (const PBD::PropertyChange&);
-	void name_changed ();
-	void gain_changed ();
-
-	void audition_state_changed (bool);
-
-	void activation ();
-
-	void name_entry_changed ();
-	void position_clock_changed ();
-	void end_clock_changed ();
-	void length_clock_changed ();
-	void sync_offset_absolute_clock_changed ();
-	void sync_offset_relative_clock_changed ();
-	void gain_adjustment_changed ();
-
-	void audition_button_toggled ();
-
-	gint bpressed (GdkEventButton* ev, Gtk::SpinButton* but, void (AudioRegionEditor::*pmf)());
-	gint breleased (GdkEventButton* ev, Gtk::SpinButton* but, void (AudioRegionEditor::*pmf)());
-
-	bool on_delete_event (GdkEventAny *);
-	void handle_response (int);
-
-	bool spin_arrow_grab;
 };
 
 #endif /* __gtk_ardour_audio_region_edit_h__ */

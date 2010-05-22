@@ -72,8 +72,8 @@ class RegionView : public TimeAxisViewItem
 	bool set_position(nframes64_t pos, void* src, double* delta = 0);
 	void fake_set_opaque (bool yn);
 
-	virtual void show_region_editor () {}
-	virtual void hide_region_editor();
+	virtual void show_region_editor ();
+	void hide_region_editor ();
 
 	virtual void region_changed (const PBD::PropertyChange&);
 

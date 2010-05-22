@@ -776,20 +776,6 @@ AudioRegionView::set_colors ()
 }
 
 void
-AudioRegionView::show_region_editor ()
-{
-	if (editor == 0) {
-		editor = new AudioRegionEditor (trackview.session(), audio_region(), *this);
-		// GTK2FIX : how to ensure float without realizing
-		// editor->realize ();
-		// trackview.editor.ensure_float (*editor);
-	}
-
-	editor->present ();
-	editor->show_all();
-}
-
-void
 AudioRegionView::set_waveform_visible (bool yn)
 {
 	if (((_flags & WaveformVisible) != yn)) {
@@ -1386,4 +1372,15 @@ AudioRegionView::update_coverage_frames (LayerDisplay d)
 
 	fade_in_handle->raise_to_top ();
 	fade_out_handle->raise_to_top ();
+}
+
+void
+AudioRegionView::show_region_editor ()
+{
+	if (editor == 0) {
+		editor = new AudioRegionEditor (trackview.session(), audio_region());
+	}
+
+	editor->present ();
+	editor->show_all();
 }

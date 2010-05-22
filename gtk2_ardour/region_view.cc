@@ -403,6 +403,17 @@ RegionView::fake_set_opaque (bool yn)
 }
 
 void
+RegionView::show_region_editor ()
+{
+	if (editor == 0) {
+		editor = new RegionEditor (trackview.session(), region());
+	}
+
+	editor->present ();
+	editor->show_all();
+}
+
+void
 RegionView::hide_region_editor()
 {
 	if (editor) {

@@ -40,7 +40,6 @@ namespace ARDOUR {
 
 class AudioTimeAxisView;
 class AudioRegionGainLine;
-class AudioRegionEditor;
 class GhostRegion;
 class AutomationTimeAxisView;
 class RouteTimeAxisView;
@@ -91,8 +90,6 @@ class AudioRegionView : public RegionView
 	bool waveform_visible()   const { return _flags & WaveformVisible; }
 	bool envelope_visible()   const { return _flags & EnvelopeVisible; }
 
-	void show_region_editor ();
-
 	void add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
 	void remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
 
@@ -108,6 +105,8 @@ class AudioRegionView : public RegionView
 
 	void set_fade_visibility (bool);
 	void update_coverage_frames (LayerDisplay);
+
+	void show_region_editor ();
 
 	virtual void entered ();
 	virtual void exited ();
