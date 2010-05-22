@@ -146,8 +146,9 @@ AutomationStreamView::set_automation_state (AutoState state)
 	std::list<RegionView *>::iterator i;
 	for (i = region_views.begin(); i != region_views.end(); ++i) {
 		boost::shared_ptr<AutomationLine> line = ((AutomationRegionView*)(*i))->line();
-		if (line && line->the_list())
+		if (line && line->the_list()) {
 			line->the_list()->set_automation_state (state);
+		}
 	}
 }
 
@@ -191,3 +192,19 @@ AutomationStreamView::color_handler ()
 	}*/
 }
 
+AutoState
+AutomationStreamView::automation_state () const
+{
+	/* XXX: bit of a hack: just return the state of our first RegionView */
+
+	if (region_views.empty()) {
+		return Off;
+	}
+
+	boost::shared_ptr<AutomationLine> line = ((AutomationRegionView*) region_views.front())->line ();
+	if (!line || !line->the_list()) {
+		return Off;
+	}
+
+	return line->the_list()->automation_state ();
+}

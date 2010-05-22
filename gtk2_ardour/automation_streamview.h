@@ -46,6 +46,7 @@ class AutomationStreamView : public StreamView
 	~AutomationStreamView ();
 
 	void set_automation_state (ARDOUR::AutoState state);
+	ARDOUR::AutoState automation_state () const;
 
 	void redisplay_track ();
 

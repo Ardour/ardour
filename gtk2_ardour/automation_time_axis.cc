@@ -272,6 +272,11 @@ AutomationTimeAxisView::set_automation_state (AutoState state)
 
 	if (_view) {
 		_view->set_automation_state (state);
+
+		/* AutomationStreamViews don't signal when their automation state changes, so handle
+		   our updates `manually'.
+		*/
+		automation_state_changed ();
 	}
 }
 
@@ -282,10 +287,12 @@ AutomationTimeAxisView::automation_state_changed ()
 
 	/* update button label */
 
-	if (!_line) {
-		state = Off;
-	} else {
+	if (_line) {
 		state = _control->alist()->automation_state ();
+	} else if (_view) {
+		state = _view->automation_state ();
+	} else {
+		state = Off;
 	}
 
 	switch (state & (Off|Play|Touch|Write)) {
