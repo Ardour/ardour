@@ -85,16 +85,24 @@ bool
 AutomationRegionView::canvas_event(GdkEvent* ev)
 {
 	if (ev->type == GDK_BUTTON_RELEASE) {
-		const nframes_t when = trackview.editor().pixel_to_frame((nframes_t)ev->button.x)
-			- _region->position();
-		add_automation_event(ev, when, ev->button.y);
+
+		double x = ev->button.x;
+		double y = ev->button.y;
+
+		/* convert to item coordinates in the time axis view */
+		automation_view()->canvas_display()->w2i (x, y);
+
+		add_automation_event (ev, trackview.editor().pixel_to_frame (x) - _region->position(), y);
 	}
 
 	return false;
 }
 
+/** @param when Position in frames, where 0 is the start of the region.
+ *  @param y y position, relative to our TimeAxisView.
+ */
 void
-AutomationRegionView::add_automation_event (GdkEvent* /*event*/, nframes_t when, double y)
+AutomationRegionView::add_automation_event (GdkEvent *, nframes_t when, double y)
 {
 	if (!_line) {
 		boost::shared_ptr<Evoral::Control> c = _region->control(_parameter, true);
@@ -105,11 +113,8 @@ AutomationRegionView::add_automation_event (GdkEvent* /*event*/, nframes_t when,
 	}
 	assert(_line);
 
-	double x = when;
-	AutomationTimeAxisView* const view = automation_view();
-
-	view->canvas_display()->w2i (x, y);
-
+	AutomationTimeAxisView* const view = automation_view ();
+	
 	/* compute vertical fractional position */
 
 	const double h = trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2;
@@ -117,12 +122,13 @@ AutomationRegionView::add_automation_event (GdkEvent* /*event*/, nframes_t when,
 
 	/* map using line */
 
-	_line->view_to_model_coord (x, y);
+	double when_d = when;
+	_line->view_to_model_coord (when_d, y);
 
 	view->session()->begin_reversible_command (_("add automation event"));
 	XMLNode& before = _line->the_list()->get_state();
 
-	_line->the_list()->add (x, y);
+	_line->the_list()->add (when_d, y);
 
 	XMLNode& after = _line->the_list()->get_state();
 	view->session()->commit_reversible_command (new MementoCommand<ARDOUR::AutomationList>(
