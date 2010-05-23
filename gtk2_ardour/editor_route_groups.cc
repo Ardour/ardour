@@ -556,6 +556,8 @@ EditorRouteGroups::row_change (const Gtk::TreeModel::Path&, const Gtk::TreeModel
 	plist.add (Properties::edit, val);
 	plist.add (Properties::name, string ((*iter)[_columns.text]));
 	
+	group->set_hidden (!(*iter)[_columns.is_visible], this);
+	
 	group->set_properties (plist);
 }
 
