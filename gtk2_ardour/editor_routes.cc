@@ -573,6 +573,8 @@ EditorRoutes::hide_track_in_display (TimeAxisView& tv)
 			break;
 		}
 	}
+
+	redisplay ();
 }
 
 void
@@ -587,6 +589,8 @@ EditorRoutes::show_track_in_display (TimeAxisView& tv)
 			break;
 		}
 	}
+
+	redisplay ();
 }
 
 void
