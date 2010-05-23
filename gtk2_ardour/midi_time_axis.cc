@@ -282,7 +282,7 @@ MidiTimeAxisView::set_height (uint32_t h)
 	RouteTimeAxisView::set_height (h);
 
 	if (height >= MIDI_CONTROLS_BOX_MIN_HEIGHT) {
-		_midi_controls_box.show();
+		_midi_controls_box.show_all ();
 	} else {
 		_midi_controls_box.hide();
 	}
