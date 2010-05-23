@@ -91,7 +91,15 @@ ImportProgressWindow::update ()
 	/* use overall progress for the bar, rather than that for individual files */
 	_bar.set_fraction ((_import_status->current - 1 + _import_status->progress) / _import_status->total);
 
-	_bar.set_text (string_compose (_("Importing file: %1 of %2"), _import_status->current, _import_status->total));
+	/* some of the code which sets up _import_status->current may briefly increment it too far
+	   at the end of an import, so check for that to avoid a visual glitch
+	*/
+	uint32_t c = _import_status->current;
+	if (c > _import_status->total) {
+		c = _import_status->total;
+	}
+	
+	_bar.set_text (string_compose (_("Importing file: %1 of %2"), c, _import_status->total));
 	
 	return !(_import_status->done || _import_status->cancel);
 }
