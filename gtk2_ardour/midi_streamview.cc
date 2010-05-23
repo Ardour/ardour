@@ -71,12 +71,12 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	}
 
 	/* use a group dedicated to MIDI underlays. Audio underlays are not in this group. */
-	midi_underlay_group = new ArdourCanvas::Group (*canvas_group);
+	midi_underlay_group = new ArdourCanvas::Group (*_canvas_group);
 	midi_underlay_group->lower_to_bottom();
 
 	/* put the note lines in the timeaxisview's group, so it
 	   can be put below ghost regions from MIDI underlays*/
-	_note_lines = new ArdourCanvas::LineSet(*canvas_group, ArdourCanvas::LineSet::Horizontal);
+	_note_lines = new ArdourCanvas::LineSet(*_canvas_group, ArdourCanvas::LineSet::Horizontal);
 
 	_note_lines->property_x1() = 0;
 	_note_lines->property_y1() = 0;
@@ -137,7 +137,7 @@ MidiStreamView::create_region_view (boost::shared_ptr<Region> r, bool /*wfd*/, b
 		return 0;
 	}
 
-	RegionView* region_view = new MidiRegionView (canvas_group, _trackview, region,
+	RegionView* region_view = new MidiRegionView (_canvas_group, _trackview, region,
 						      _samples_per_unit, region_color);
 
 	region_view->init (region_color, false);
@@ -444,7 +444,7 @@ MidiStreamView::setup_rec_box ()
 			xend = xstart;
 			fill_color = ARDOUR_UI::config()->canvasvar_RecordingRect.get();
 
-			ArdourCanvas::SimpleRect * rec_rect = new Gnome::Canvas::SimpleRect (*canvas_group);
+			ArdourCanvas::SimpleRect * rec_rect = new Gnome::Canvas::SimpleRect (*_canvas_group);
 			rec_rect->property_x1() = xstart;
 			rec_rect->property_y1() = 1.0;
 			rec_rect->property_x2() = xend;

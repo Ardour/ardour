@@ -46,11 +46,12 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
 
-StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
+StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* background_group, ArdourCanvas::Group* canvas_group)
 	: _trackview (tv)
-	, owns_canvas_group(group == 0)
-	, _background_group (new ArdourCanvas::Group (*_trackview.canvas_background()))
-	, canvas_group(group ? group : new ArdourCanvas::Group(*_trackview.canvas_display()))
+	, owns_background_group (background_group == 0)
+	, owns_canvas_group (canvas_group == 0)
+	, _background_group (background_group ? background_group : new ArdourCanvas::Group (*_trackview.canvas_background()))
+	, _canvas_group (canvas_group ? canvas_group : new ArdourCanvas::Group(*_trackview.canvas_display()))
 	, _samples_per_unit (_trackview.editor().get_current_zoom ())
 	, rec_updating(false)
 	, rec_active(false)
@@ -63,7 +64,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 {
 	/* set_position() will position the group */
 
-	canvas_rect = new ArdourCanvas::SimpleRect (*canvas_group);
+	canvas_rect = new ArdourCanvas::SimpleRect (*_background_group);
 	canvas_rect->property_x1() = 0.0;
 	canvas_rect->property_y1() = 0.0;
 	canvas_rect->property_x2() = _trackview.editor().get_physical_screen_width ();
@@ -94,8 +95,12 @@ StreamView::~StreamView ()
 
 	delete canvas_rect;
 
+	if (owns_background_group) {
+		delete _background_group;
+	}
+	
 	if (owns_canvas_group) {
-		delete canvas_group;
+		delete _canvas_group;
 	}
 }
 
@@ -110,8 +115,8 @@ StreamView::attach ()
 int
 StreamView::set_position (gdouble x, gdouble y)
 {
-	canvas_group->property_x() = x;
-	canvas_group->property_y() = y;
+	_canvas_group->property_x() = x;
+	_canvas_group->property_y() = y;
 	return 0;
 }
 

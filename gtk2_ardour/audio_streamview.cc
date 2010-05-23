@@ -119,16 +119,16 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 	case NonLayered:
 	case Normal:
 		if (recording) {
-			region_view = new AudioRegionView (canvas_group, _trackview, region,
+			region_view = new AudioRegionView (_canvas_group, _trackview, region,
 					_samples_per_unit, region_color, recording, TimeAxisViewItem::Visibility(
 							TimeAxisViewItem::ShowFrame | TimeAxisViewItem::HideFrameRight));
 		} else {
-			region_view = new AudioRegionView (canvas_group, _trackview, region,
+			region_view = new AudioRegionView (_canvas_group, _trackview, region,
 					_samples_per_unit, region_color);
 		}
 		break;
 	case Destructive:
-		region_view = new TapeAudioRegionView (canvas_group, _trackview, region,
+		region_view = new TapeAudioRegionView (_canvas_group, _trackview, region,
 				_samples_per_unit, region_color);
 		break;
 	default:
@@ -516,7 +516,7 @@ AudioStreamView::setup_rec_box ()
 				break;
 			}
 
-			ArdourCanvas::SimpleRect * rec_rect = new Gnome::Canvas::SimpleRect (*canvas_group);
+			ArdourCanvas::SimpleRect * rec_rect = new Gnome::Canvas::SimpleRect (*_canvas_group);
 			rec_rect->property_x1() = xstart;
 			rec_rect->property_y1() = 1.0;
 			rec_rect->property_x2() = xend;

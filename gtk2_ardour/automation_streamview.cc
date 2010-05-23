@@ -110,7 +110,7 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 		}
 	}
 
-	region_view = new AutomationRegionView (canvas_group, _automation_view, region,
+	region_view = new AutomationRegionView (_canvas_group, _automation_view, region,
 			_controller->controllable()->parameter(), list,
 			_samples_per_unit, region_color);
 

@@ -77,7 +77,7 @@ public:
 	LayerDisplay layer_display () const { return _layer_display; }
 
 	ArdourCanvas::Group* background_group() { return _background_group; }
-	ArdourCanvas::Group* canvas_item() { return canvas_group; }
+	ArdourCanvas::Group* canvas_item() { return _canvas_group; }
 
 	enum ColorTarget {
 		RegionColor,
@@ -116,7 +116,7 @@ public:
 	sigc::signal<void> HeightChanged;
 
 protected:
-	StreamView (RouteTimeAxisView&, ArdourCanvas::Group* group = NULL);
+	StreamView (RouteTimeAxisView&, ArdourCanvas::Group* background_group = 0, ArdourCanvas::Group* canvas_group = 0);
 
 	void         transport_changed();
 	void         transport_looped();
@@ -140,9 +140,10 @@ protected:
 	virtual void color_handler () = 0;
 
 	RouteTimeAxisView&        _trackview;
+	bool                      owns_background_group;
 	bool                      owns_canvas_group;
 	ArdourCanvas::Group*      _background_group;
-	ArdourCanvas::Group*      canvas_group;
+	ArdourCanvas::Group*      _canvas_group;
 	ArdourCanvas::SimpleRect* canvas_rect; /* frame around the whole thing */
 
 	typedef std::list<RegionView* > RegionViewList;
