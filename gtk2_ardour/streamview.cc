@@ -63,7 +63,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Group* group)
 {
 	/* set_position() will position the group */
 
-	canvas_rect = new ArdourCanvas::SimpleRect (*_background_group);
+	canvas_rect = new ArdourCanvas::SimpleRect (*canvas_group);
 	canvas_rect->property_x1() = 0.0;
 	canvas_rect->property_y1() = 0.0;
 	canvas_rect->property_x2() = _trackview.editor().get_physical_screen_width ();
