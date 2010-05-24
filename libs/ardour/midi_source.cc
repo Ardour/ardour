@@ -266,7 +266,9 @@ MidiSource::clone (Evoral::MusicalTime begin, Evoral::MusicalTime end)
         
         if (begin != Evoral::MinMusicalTime || end != Evoral::MaxMusicalTime) {
                 newsrc->load_model (true, true);
-        }
+        } else {
+		newsrc->set_model (_model);
+	}
         
         return newsrc;
 }
