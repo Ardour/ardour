@@ -56,6 +56,7 @@ SMFSource::SMFSource (Session& s, const ustring& path, Source::Flag flags)
 	, _last_ev_time_beats(0.0)
 	, _last_ev_time_frames(0)
 	, _smf_last_read_end (0)
+	, _smf_last_read_time (0)
 {
 	if (init(_path, false)) {
 		throw failed_constructor ();
@@ -76,6 +77,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 	, _last_ev_time_beats(0.0)
 	, _last_ev_time_frames(0)
 	, _smf_last_read_end (0)
+	, _smf_last_read_time (0)
 {
 	if (set_state(node, Stateful::loading_state_version)) {
 		throw failed_constructor ();
@@ -134,6 +136,8 @@ SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t s
 			}
 			time += ev_delta_t; // accumulate delta time
 		}
+	} else {
+		time = _smf_last_read_time;
 	}
 
 	_smf_last_read_end = start + duration;
@@ -145,6 +149,7 @@ SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t s
 		}
 
 		time += ev_delta_t; // accumulate delta time
+		_smf_last_read_time = time;
 
 		if (ret == 0) { // meta-event (skipped, just accumulate time)
 			continue;

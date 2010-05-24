@@ -86,7 +86,10 @@ private:
 
 	double    _last_ev_time_beats;
 	sframes_t _last_ev_time_frames;
+	/** end time (start + duration) of last call to read_unlocked */
 	mutable sframes_t _smf_last_read_end;
+	/** time (in SMF ticks, 1 tick per _ppqn) of the last event read by read_unlocked */
+	mutable sframes_t _smf_last_read_time;
 };
 
 }; /* namespace ARDOUR */
