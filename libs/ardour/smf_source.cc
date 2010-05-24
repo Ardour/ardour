@@ -41,11 +41,13 @@
 #include "ardour/midi_state_tracker.h"
 #include "ardour/session.h"
 #include "ardour/smf_source.h"
+#include "ardour/debug.h"
 
 #include "i18n.h"
 
 using namespace ARDOUR;
 using namespace Glib;
+using namespace PBD;
 
 /** Constructor used for new internal-to-session files.  File cannot exist. */
 SMFSource::SMFSource (Session& s, const ustring& path, Source::Flag flags)
@@ -111,6 +113,8 @@ SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t s
 	int      ret  = 0;
 	uint64_t time = 0; // in SMF ticks, 1 tick per _ppqn
 
+	DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked: start %1 duration %2\n", start, duration));
+
 	_read_data_count = 0;
 
 	// Output parameters for read_event (which will allocate scratch in buffer as needed)
@@ -124,9 +128,10 @@ SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t s
 	BeatsFramesConverter converter(_session.tempo_map(), source_start);
 
 	const uint64_t start_ticks = (uint64_t)(converter.from(start) * ppqn());
+	DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked: start in ticks %1\n", start_ticks));
 
 	if (_smf_last_read_end == 0 || start != _smf_last_read_end) {
-		//cerr << "SMFSource::read_unlocked seeking to " << start << endl;
+		DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked: seek to %1\n", start));
 		Evoral::SMF::seek_to_start();
 		while (time < start_ticks) {
 			ret = read_event(&ev_delta_t, &ev_size, &ev_buffer);
@@ -137,6 +142,7 @@ SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t s
 			time += ev_delta_t; // accumulate delta time
 		}
 	} else {
+		DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked: set time to %1\n", _smf_last_read_time));
 		time = _smf_last_read_time;
 	}
 
@@ -157,13 +163,8 @@ SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t s
 
 		ev_type = EventTypeMap::instance().midi_event_type(ev_buffer[0]);
 
-#if 0
-		cerr << "+++ SMF source read "
-		     << " delta = " << ev_delta_t
-		     << " time = " << time
-		     << " buf[0] " << hex << (int) ev_buffer[0] << dec
-		     << " type = " << ev_type;
-#endif
+		DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF read_unlocked delta %1, time %2, buf[0] %3, type %4\n",
+								  ev_delta_t, time, ev_buffer[0], ev_type));
 
 		assert(time >= start_ticks);
 		const sframes_t ev_frame_time = converter.to(time / (double)ppqn()) + stamp_offset;
