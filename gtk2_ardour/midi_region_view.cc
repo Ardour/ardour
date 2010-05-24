@@ -347,6 +347,10 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		return false;
 
 	case GDK_BUTTON_PRESS:
+		last_x = ev->button.x;
+		last_y = ev->button.y;
+		group->w2i (last_x, last_y);
+
 		if (_mouse_state != SelectTouchDragging && ev->button.button == 1) {
 			_pressed_button = ev->button.button;
 			_mouse_state = Pressed;
@@ -376,7 +380,12 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		event_frame -= _region->position();
 
 		switch (_mouse_state) {
-		case Pressed: // Drag start
+		case Pressed: // Maybe start a drag, if we've moved a bit
+
+			if (fabs (event_x - last_x) < 1 && fabs (event_y - last_y) < 1) {
+				/* no appreciable movement since the button was pressed */
+				return false;
+			}
 
 			// Select drag start
 			if (_pressed_button == 1 && editor.current_mouse_mode() == MouseObject) {
@@ -496,7 +505,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				if (!success) {
 					beats = 1;
 				}
-				
+
 				create_note_at (event_x, event_y, beats);
 				break;
 			}
