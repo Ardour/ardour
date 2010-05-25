@@ -105,6 +105,8 @@ class AutomationTimeAxisView : public TimeAxisView {
 		return _base_rect;
 	}
 
+	bool has_automation () const;
+
   protected:
 	boost::shared_ptr<ARDOUR::Route> _route; ///< Parent route
 	boost::shared_ptr<ARDOUR::AutomationControl> _control; ///< Control

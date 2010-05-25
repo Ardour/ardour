@@ -941,3 +941,10 @@ AutomationTimeAxisView::set_visibility (bool yn)
 
 	return changed;
 }
+
+/** @return true if this view has any automation data to display */
+bool
+AutomationTimeAxisView::has_automation () const
+{
+	return ( (_line && _line->npoints() > 0) || (_view && _view->has_automation()) );
+}

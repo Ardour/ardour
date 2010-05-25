@@ -1676,7 +1676,7 @@ RouteTimeAxisView::show_existing_automation ()
 	/* Show our automation */
 
 	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-		if (i->second->line() && i->second->line()->npoints() > 0) {
+		if (i->second->has_automation()) {
 			i->second->set_marked_for_display (true);
 			i->second->canvas_display()->show();
 			i->second->get_state_node()->add_property ("shown", X_("yes"));

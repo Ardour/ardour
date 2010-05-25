@@ -209,3 +209,20 @@ AutomationStreamView::automation_state () const
 
 	return line->the_list()->automation_state ();
 }
+
+bool
+AutomationStreamView::has_automation () const
+{
+	list<RegionView*>::const_iterator i = region_views.begin ();
+	while (i != region_views.end()) {
+		AutomationRegionView* rv = static_cast<AutomationRegionView*> (*i);
+		if (rv->line() && rv->line()->npoints() > 0) {
+			return true;
+		}
+		++i;
+	}
+
+	return false;
+}
+
+			

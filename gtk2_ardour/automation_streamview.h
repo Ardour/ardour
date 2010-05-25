@@ -54,6 +54,8 @@ class AutomationStreamView : public StreamView
 		return (_trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2);
 	}
 
+	bool has_automation () const;
+
   private:
 	void setup_rec_box ();
 
