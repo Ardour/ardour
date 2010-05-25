@@ -411,7 +411,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 				return true;
 
 			// Add note drag start
-			} else if (editor.current_mouse_mode() == MouseRange) {
+			} else if (editor.internal_editing()) {
 				group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
 						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
 				last_x = event_x;

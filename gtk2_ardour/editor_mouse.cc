@@ -324,30 +324,32 @@ Editor::mouse_mode_toggled (MouseMode m)
 	mouse_mode = m;
 
 	instant_save ();
-
-	if (mouse_mode != MouseRange && _join_object_range_state == JOIN_OBJECT_RANGE_NONE) {
-
-		/* in all modes except range and joined object/range, hide the range selection,
-		   show the object (region) selection.
-		*/
-
-		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
-			(*i)->set_should_show_selection (true);
-		}
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			(*i)->hide_selection ();
-		}
-
-	} else {
-
-		/*
-		   in range or object/range mode, show the range selection.
-		*/
-
-		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-			(*i)->show_selection (selection->time);
-		}
-	}
+        
+        if (!internal_editing()) {
+                if (mouse_mode != MouseRange && _join_object_range_state == JOIN_OBJECT_RANGE_NONE) {
+                        
+                        /* in all modes except range and joined object/range, hide the range selection,
+                           show the object (region) selection.
+                        */
+                        
+                        for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
+                                (*i)->set_should_show_selection (true);
+                        }
+                        for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+                                (*i)->hide_selection ();
+                        }
+                        
+                } else {
+                        
+                        /*
+                          in range or object/range mode, show the range selection.
+                        */
+                        
+                        for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+                                (*i)->show_selection (selection->time);
+                        }
+                }
+        }
 
 	set_canvas_cursor ();
 }
@@ -660,7 +662,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		default:
-			_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
+                        if (!internal_editing()) {
+                                _drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
+                        }
 		}
 		return true;
 		break;
@@ -2573,7 +2577,12 @@ Editor::set_internal_edit (bool yn)
 			}
 		}
 
+		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+			(*i)->hide_selection ();
+		}
+
 		start_step_editing ();
+                set_canvas_cursor ();
 
 	} else {
 
@@ -2588,11 +2597,9 @@ Editor::set_internal_edit (bool yn)
 				mtv->stop_step_editing ();
 			}
 		}
+
+                mouse_mode_toggled (mouse_mode);
 	}
-
-	set_canvas_cursor ();
-
-
 }
 
 /** Update _join_object_range_state which indicate whether we are over the top or bottom half of a region view,
