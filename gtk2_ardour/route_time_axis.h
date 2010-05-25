@@ -85,7 +85,6 @@ public:
 	void set_selected_regionviews (RegionSelection&);
 	void get_selectables (nframes_t start, nframes_t end, double top, double bot, std::list<Selectable *>&);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>&);
-	bool show_automation(Evoral::Parameter param);
 	void set_layer_display (LayerDisplay d);
 	LayerDisplay layer_display () const;
 
@@ -117,27 +116,18 @@ public:
 	
 	int set_state (const XMLNode&, int version);
 	
-	/* This is a bit nasty to expose :/ */
-	struct RouteAutomationNode {
-		Evoral::Parameter                         param;
-		Gtk::CheckMenuItem*                       menu_item;
-		boost::shared_ptr<AutomationTimeAxisView> track;
-
-		RouteAutomationNode (Evoral::Parameter par, Gtk::CheckMenuItem* mi, boost::shared_ptr<AutomationTimeAxisView> tr)
-		    : param (par), menu_item (mi), track (tr) {}
-	};
-
 	virtual void create_automation_child (const Evoral::Parameter& param, bool show) = 0;
 
 	/* make sure we get the right version of this */
 
 	XMLNode* get_automation_child_xml_node (Evoral::Parameter param) { return RouteUI::get_automation_child_xml_node (param); }
 
-	typedef std::map<Evoral::Parameter, RouteAutomationNode*> AutomationTracks;
+	typedef std::map<Evoral::Parameter, boost::shared_ptr<AutomationTimeAxisView> > AutomationTracks;
 	AutomationTracks automation_tracks() { return _automation_tracks; }
 
 	boost::shared_ptr<AutomationTimeAxisView> automation_child(Evoral::Parameter param);
-
+	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
+	
 	std::string         name() const;
 	StreamView*         view() const { return _view; }
 	ARDOUR::RouteGroup* route_group() const;
@@ -199,9 +189,6 @@ protected:
 
 	void automation_track_hidden (Evoral::Parameter param);
 	
-	RouteAutomationNode* automation_track(Evoral::Parameter param);
-	RouteAutomationNode* automation_track(ARDOUR::AutomationType type);
-
 	ProcessorAutomationNode*
 	find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> i, Evoral::Parameter);
 
@@ -298,10 +285,9 @@ protected:
 	typedef std::vector<boost::shared_ptr<AutomationLine> > ProcessorAutomationCurves;
 	ProcessorAutomationCurves processor_automation_curves;
 
-	// Set from XML so context menu automation buttons can be correctly initialized
-	std::set<Evoral::Parameter> _show_automation;
-
 	AutomationTracks _automation_tracks;
+	typedef std::map<Evoral::Parameter, Gtk::CheckMenuItem*> ParameterMenuMap;
+	ParameterMenuMap _parameter_menu_map;
 
 	void post_construct ();
 

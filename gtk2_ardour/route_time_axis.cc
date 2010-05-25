@@ -253,10 +253,6 @@ RouteTimeAxisView::~RouteTimeAxisView ()
 	delete _view;
 	_view = 0;
 
-	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-		delete i->second;
-	}
-
 	_automation_tracks.clear ();
 
 	delete route_group_menu;
@@ -1212,34 +1208,6 @@ RouteTimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& 
 	return;
 }
 
-bool
-RouteTimeAxisView::show_automation(Evoral::Parameter param)
-{
-	return (_show_automation.find(param) != _show_automation.end());
-}
-
-/** Retuns 0 if track for \a param doesn't exist.
- */
-RouteTimeAxisView::RouteAutomationNode*
-RouteTimeAxisView::automation_track (Evoral::Parameter param)
-{
-	map<Evoral::Parameter, RouteAutomationNode*>::iterator i = _automation_tracks.find (param);
-
-	if (i != _automation_tracks.end()) {
-		return i->second;
-	} else {
-		return 0;
-	}
-}
-
-/** Shorthand for GainAutomation, etc.
- */
-RouteTimeAxisView::RouteAutomationNode*
-RouteTimeAxisView::automation_track (AutomationType type)
-{
-	return automation_track (Evoral::Parameter(type));
-}
-
 RouteGroup*
 RouteTimeAxisView::route_group () const
 {
@@ -1613,14 +1581,16 @@ RouteTimeAxisView::color_handler ()
 void
 RouteTimeAxisView::toggle_automation_track (const Evoral::Parameter& param)
 {
-	RouteAutomationNode* node = automation_track(param);
+	boost::shared_ptr<AutomationTimeAxisView> track = automation_child (param);
+	Gtk::CheckMenuItem* menu = automation_child_menu_item (param);
 	
-	if (!node) {
+	if (!track) {
 		/* it doesn't exist yet, so we don't care about the button state: just add it */
 		create_automation_child (param, true);
 	} else {
-		bool yn = node->menu_item->get_active();
-		if (node->track->set_visibility (node->menu_item->get_active()) && yn) {
+		assert (menu);
+		bool yn = menu->get_active();
+		if (track->set_visibility (menu->get_active()) && yn) {
 			
 			/* we made it visible, now trigger a redisplay. if it was hidden, then automation_track_hidden()
 			   will have done that for us.
@@ -1636,19 +1606,20 @@ RouteTimeAxisView::toggle_automation_track (const Evoral::Parameter& param)
 void
 RouteTimeAxisView::automation_track_hidden (Evoral::Parameter param)
 {
-	RouteAutomationNode* ran = automation_track(param);
+	boost::shared_ptr<AutomationTimeAxisView> track = automation_child (param);
 
-	if (!ran) {
+	if (!track) {
 		return;
 	}
 
-	// if Evoral::Parameter::operator< doesn't obey strict weak ordering, we may crash here....
-	_show_automation.erase (param);
-	ran->track->get_state_node()->add_property (X_("shown"), X_("no"));
+	Gtk::CheckMenuItem* menu = automation_child_menu_item (param);
 
-	if (ran->menu_item && !_hidden) {
+	// if Evoral::Parameter::operator< doesn't obey strict weak ordering, we may crash here....
+	track->get_state_node()->add_property (X_("shown"), X_("no"));
+
+	if (menu && !_hidden) {
 		ignore_toggle = true;
-		ran->menu_item->set_active (false);
+		menu->set_active (false);
 		ignore_toggle = false;
 	}
 
@@ -1665,13 +1636,15 @@ RouteTimeAxisView::show_all_automation ()
 
 	/* Show our automation */
 
-	map<Evoral::Parameter, RouteAutomationNode*>::iterator i;
-	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-		i->second->track->set_marked_for_display (true);
-		i->second->track->canvas_display()->show();
-		i->second->track->get_state_node()->add_property ("shown", X_("yes"));
-		if (i->second->menu_item) {
-			i->second->menu_item->set_active(true);
+	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+		i->second->set_marked_for_display (true);
+		i->second->canvas_display()->show();
+		i->second->get_state_node()->add_property ("shown", X_("yes"));
+
+		Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
+		
+		if (menu) {
+			menu->set_active(true);
 		}
 	}
 
@@ -1702,13 +1675,15 @@ RouteTimeAxisView::show_existing_automation ()
 
 	/* Show our automation */
 
-	map<Evoral::Parameter, RouteAutomationNode*>::iterator i;
-	for (i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-		if (i->second->track->line() && i->second->track->line()->npoints() > 0) {
-			i->second->track->set_marked_for_display (true);
-			i->second->track->canvas_display()->show();
-			i->second->track->get_state_node()->add_property ("shown", X_("yes"));
-			i->second->menu_item->set_active(true);
+	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+		if (i->second->line() && i->second->line()->npoints() > 0) {
+			i->second->set_marked_for_display (true);
+			i->second->canvas_display()->show();
+			i->second->get_state_node()->add_property ("shown", X_("yes"));
+
+			Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
+			assert (menu);
+			menu->set_active(true);
 		}
 	}
 
@@ -1735,12 +1710,15 @@ RouteTimeAxisView::hide_all_automation ()
 
 	/* Hide our automation */
 
-	for (map<Evoral::Parameter, RouteAutomationNode*>::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-		i->second->track->set_marked_for_display (false);
-		i->second->track->hide ();
-		i->second->track->get_state_node()->add_property ("shown", X_("no"));
-		if (i->second->menu_item) {
-			i->second->menu_item->set_active (false);
+	for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
+		i->second->set_marked_for_display (false);
+		i->second->hide ();
+		i->second->get_state_node()->add_property ("shown", X_("no"));
+
+		Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
+		
+		if (menu) {
+			menu->set_active (false);
 		}
 	}
 
@@ -1751,8 +1729,6 @@ RouteTimeAxisView::hide_all_automation ()
 			(*ii)->menu_item->set_active (false);
 		}
 	}
-
-	_show_automation.clear();
 
 	no_redraw = false;
 	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
@@ -1947,14 +1923,10 @@ RouteTimeAxisView::add_automation_child (Evoral::Parameter param, boost::shared_
 		}
 	}
 
-	_automation_tracks.insert (std::make_pair (param, new RouteAutomationNode(param, NULL, track)));
+	_automation_tracks[param] = track;
 
 	track->set_visibility (!hideit);
 
-	if (!hideit) {
-		_show_automation.insert (param);
-	}
-	
 	if (!no_redraw) {
 		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 	}
@@ -2196,7 +2168,7 @@ RouteTimeAxisView::automation_child(Evoral::Parameter param)
 {
 	AutomationTracks::iterator i = _automation_tracks.find(param);
 	if (i != _automation_tracks.end()) {
-		return i->second->track;
+		return i->second;
 	} else {
 		return boost::shared_ptr<AutomationTimeAxisView>();
 	}
@@ -2387,4 +2359,15 @@ RouteTimeAxisView::set_button_names ()
                 }
         }
 	mute_button_label.set_text (_("m"));
+}
+
+Gtk::CheckMenuItem*
+RouteTimeAxisView::automation_child_menu_item (Evoral::Parameter param)
+{
+	ParameterMenuMap::iterator i = _parameter_menu_map.find (param);
+	if (i == _parameter_menu_map.end()) {
+		return 0;
+	}
+
+	return i->second;
 }

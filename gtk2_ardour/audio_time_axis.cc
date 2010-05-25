@@ -103,7 +103,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, boost::sh
 	set_state (*xml_node, Stateful::loading_state_version);
 
 	/* if set_state above didn't create a gain automation child, we need to make one */
-	if (automation_track (GainAutomation) == 0) {
+	if (automation_child (GainAutomation) == 0) {
 		create_automation_child (GainAutomation, false);
 	}
 

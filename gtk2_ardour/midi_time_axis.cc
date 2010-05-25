@@ -432,10 +432,10 @@ MidiTimeAxisView::change_all_channel_tracks_visibility (bool yn, Evoral::Paramet
 		if (selected_channels & (0x0001 << chn)) {
 			
 			Evoral::Parameter fully_qualified_param (param.type(), chn, param.id());
-			RouteAutomationNode* node = automation_track (fully_qualified_param);
+			Gtk::CheckMenuItem* menu = automation_child_menu_item (fully_qualified_param);
 
-			if (node && node->menu_item) {
-				node->menu_item->set_active (yn);
+			if (menu) {
+				menu->set_active (yn);
 			}
 		}
 	}
@@ -487,23 +487,18 @@ MidiTimeAxisView::add_channel_command_menu_item (Menu_Helpers::MenuList& items, 
 								    sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
 										fully_qualified_param)));
 				
-				RouteAutomationNode* node = automation_track (fully_qualified_param);
+				boost::shared_ptr<AutomationTimeAxisView> track = automation_child (fully_qualified_param);
 				bool visible = false;
 				
-				if (node) {
-					if (node->track->marked_for_display()) {
+				if (track) {
+					if (track->marked_for_display()) {
 						visible = true;
 					}
 				}
 				
 				CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&chn_items.back());
-				if (node) {
-					node->menu_item = cmi;
-				}
-
+				_parameter_menu_map[fully_qualified_param] = cmi;
 				cmi->set_active (visible);
-
-				parameter_menu_map[fully_qualified_param] = cmi;
 			}
 		}
 		
@@ -523,24 +518,19 @@ MidiTimeAxisView::add_channel_command_menu_item (Menu_Helpers::MenuList& items, 
 								sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
 									    fully_qualified_param)));
 				
-				RouteAutomationNode* node = automation_track (fully_qualified_param);
+				boost::shared_ptr<AutomationTimeAxisView> track = automation_child (fully_qualified_param);
 				bool visible = false;
 				
-				if (node) {
-					if (node->track->marked_for_display()) {
+				if (track) {
+					if (track->marked_for_display()) {
 						visible = true;
 					}
 				}
 				
 				CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&items.back());
-				if (node) {
-					node->menu_item = cmi;
-				}
-
+				_parameter_menu_map[fully_qualified_param] = cmi;
 				cmi->set_active (visible);
 				
-				parameter_menu_map[fully_qualified_param] = cmi;
-
 				/* one channel only */
 				break;
 			}
@@ -619,24 +609,18 @@ MidiTimeAxisView::build_controller_menu ()
 										    sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
 												fully_qualified_param)));
 
-						RouteAutomationNode* node = automation_track (fully_qualified_param);
+						boost::shared_ptr<AutomationTimeAxisView> track = automation_child (fully_qualified_param);
 						bool visible = false;
 						
-						if (node) {
-							if (node->track->marked_for_display()) {
+						if (track) {
+							if (track->marked_for_display()) {
 								visible = true;
 							}
 						}
 						
 						CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&chn_items.back());
-
-						if (node) {
-							node->menu_item = cmi;
-						}
-
+						_parameter_menu_map[fully_qualified_param] = cmi;
 						cmi->set_active (visible);
-						
-						parameter_menu_map[fully_qualified_param] = cmi;
 					}
 				}
 				
@@ -656,24 +640,19 @@ MidiTimeAxisView::build_controller_menu ()
 										    sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
 												fully_qualified_param)));
 						
-						RouteAutomationNode* node = automation_track (fully_qualified_param);
+						boost::shared_ptr<AutomationTimeAxisView> track = automation_child (fully_qualified_param);
 						bool visible = false;
 						
-						if (node) {
-							if (node->track->marked_for_display()) {
+						if (track) {
+							if (track->marked_for_display()) {
 								visible = true;
 							}
 						}
 						
 						CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&ctl_items.back());
-						if (node) {
-							node->menu_item = cmi;
-						}
-
+						_parameter_menu_map[fully_qualified_param] = cmi;
 						cmi->set_active (visible);
 						
-
-						parameter_menu_map[fully_qualified_param] = cmi;
 						/* one channel only */
 						break;
 					}
@@ -1080,9 +1059,9 @@ MidiTimeAxisView::set_channel_mode (ChannelMode, uint16_t)
 
 		for (uint32_t chn = 0; chn < 16; ++chn) {
 			Evoral::Parameter fully_qualified_param (MidiCCAutomation, chn, ctl);
-			RouteAutomationNode* node = automation_track (fully_qualified_param);
+			boost::shared_ptr<AutomationTimeAxisView> track = automation_child (fully_qualified_param);
 
-			if (!node) {
+			if (!track) {
 				continue;
 			}
 			
@@ -1090,9 +1069,9 @@ MidiTimeAxisView::set_channel_mode (ChannelMode, uint16_t)
 				/* channel not in use. hiding it will trigger RouteTimeAxisView::automation_track_hidden() 
 				   which will cause a redraw. We don't want one per channel, so block that with no_redraw.
 				 */
-				changed = node->track->set_visibility (false) || changed;
+				changed = track->set_visibility (false) || changed;
 			} else {
-				changed = node->track->set_visibility (true) || changed;
+				changed = track->set_visibility (true) || changed;
 			}
 		}
 	}

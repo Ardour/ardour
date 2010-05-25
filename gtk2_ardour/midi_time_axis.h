@@ -143,9 +143,6 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void add_basic_parameter_menu_item (Gtk::Menu_Helpers::MenuList& items, const std::string& label, Evoral::Parameter param);
 	void add_channel_command_menu_item (Gtk::Menu_Helpers::MenuList& items, const std::string& label, ARDOUR::AutomationType auto_type, uint8_t cmd);
 
-	typedef std::map<Evoral::Parameter,Gtk::CheckMenuItem*> ParameterMenuMap;
-	ParameterMenuMap parameter_menu_map;
-
 	Gtk::Menu* controller_menu;
 	void build_controller_menu ();
 	void set_channel_mode (ARDOUR::ChannelMode, uint16_t);
