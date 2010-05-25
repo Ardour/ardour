@@ -2128,7 +2128,9 @@ Editor::set_snap_to (SnapType st)
 	default:
 		/* relax */
 		break;
-    }
+	}
+
+	SnapChanged (); /* EMIT SIGNAL */
 }
 
 void

@@ -55,6 +55,22 @@ public:
 	}
 };
 
+class NoEventCanvasNote : public CanvasNote
+{
+public:
+	NoEventCanvasNote (
+		MidiRegionView& region,
+		Group& group,
+		const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>()
+		)
+		: CanvasNote (region, group, note) {}
+
+	double point_vfunc(double, double, int, int, GnomeCanvasItem**) {
+		/* return a huge value to tell the canvas that we're never the item for an event */
+		return 9999999999999.0;
+	}
+};
+
 } // namespace Gnome
 } // namespace Canvas
 

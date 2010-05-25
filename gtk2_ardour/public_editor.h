@@ -364,6 +364,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 
 	friend bool relay_key_press (GdkEventKey*, Gtk::Window*);
 	friend bool forward_key_press (GdkEventKey*);
+
+	PBD::Signal0<void> SnapChanged;
 };
 
 #endif // __gtk_ardour_public_editor_h__

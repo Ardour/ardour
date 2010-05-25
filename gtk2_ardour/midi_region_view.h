@@ -369,6 +369,9 @@ class MidiRegionView : public RegionView
 	ArdourCanvas::Group*                 _note_group;
 	ARDOUR::MidiModel::DeltaCommand*     _delta_command;
 	ARDOUR::MidiModel::DiffCommand*      _diff_command;
+	ArdourCanvas::CanvasNote*            _ghost_note;
+	double                               _last_ghost_x;
+	double                               _last_ghost_y;
 
 	MouseState _mouse_state;
 	int _pressed_button;
@@ -400,12 +403,17 @@ class MidiRegionView : public RegionView
 
 	void update_note (ArdourCanvas::CanvasNote*);
 	void update_hit (ArdourCanvas::CanvasHit*);
+	void create_ghost_note (double, double);
+	void update_ghost_note (double, double);
 
 	MidiListEditor* _list_editor;
 	bool no_sound_notes;
 
         PBD::ScopedConnection note_delete_connection;
         void maybe_remove_deleted_note_from_selection (ArdourCanvas::CanvasNoteEvent*);
+
+	void snap_changed ();
+	PBD::ScopedConnection snap_changed_connection;
 };
 
 

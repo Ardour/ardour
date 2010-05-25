@@ -85,6 +85,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _note_group(new ArdourCanvas::Group(*parent))
 	, _delta_command(0)
 	, _diff_command(0)
+	, _ghost_note(0)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -107,6 +108,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _note_group(new ArdourCanvas::Group(*parent))
 	, _delta_command(0)
 	, _diff_command(0)
+	, _ghost_note(0)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -130,6 +132,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _note_group(new ArdourCanvas::Group(*get_canvas_group()))
 	, _delta_command(0)
 	, _diff_command(0)
+	, _ghost_note(0)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -156,6 +159,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _note_group(new ArdourCanvas::Group(*get_canvas_group()))
 	, _delta_command(0)
 	, _diff_command(0)
+	, _ghost_note(0)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -216,6 +220,8 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 
 	midi_view()->signal_midi_patch_settings_changed().connect(
 			sigc::mem_fun(this, &MidiRegionView::midi_patch_settings_changed));
+
+	trackview.editor().SnapChanged.connect (snap_changed_connection, invalidator (*this), ui_bind (&MidiRegionView::snap_changed, this), gui_context ());
 }
 
 bool
@@ -363,12 +369,26 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		return true;
 
 	case GDK_ENTER_NOTIFY:
+	{
 		/* FIXME: do this on switch to note tool, too, if the pointer is already in */
 		Keyboard::magic_widget_grab_focus();
 		group->grab_focus();
+
+		if (editor.current_mouse_mode() == MouseRange) {
+			create_ghost_note (ev->crossing.x, ev->crossing.y);
+		}
 		break;
+	}
+
+	case GDK_LEAVE_NOTIFY:
+	{
+		delete _ghost_note;
+		_ghost_note = 0;
+		break;
+	}
 
 	case GDK_MOTION_NOTIFY:
+	{
 		event_x = ev->motion.x;
 		event_y = ev->motion.y;
 		group->w2i(event_x, event_y);
@@ -379,6 +399,10 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 		// convert event_frame back to local coordinates relative to position
 		event_frame -= _region->position();
 
+		if (_ghost_note) {
+			update_ghost_note (ev->motion.x, ev->motion.y);
+		}
+		
 		switch (_mouse_state) {
 		case Pressed: // Maybe start a drag, if we've moved a bit
 
@@ -477,6 +501,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			break;
 		}
 		break;
+	}
 
 	case GDK_BUTTON_RELEASE:
 		event_x = ev->motion.x;
@@ -533,7 +558,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 			drag_rect = 0;
 		default: break;
 		}
-
+		
 	default: break;
 	}
 
@@ -2688,4 +2713,55 @@ MidiRegionView::selection_as_notelist (Notes& selected, bool allow_all_if_none_s
                         selected.insert ((*i)->note());
 		}
 	}
+}
+
+void
+MidiRegionView::update_ghost_note (double x, double y)
+{
+	_last_ghost_x = x;
+	_last_ghost_y = y;
+	
+	group->w2i (x, y);
+	nframes64_t f = trackview.editor().pixel_to_frame (x) + _region->position ();
+	trackview.editor().snap_to (f);
+	f -= _region->position ();
+
+	bool success;
+	Evoral::MusicalTime beats = trackview.editor().get_grid_type_as_beats (success, f);
+	if (!success) {
+		beats = 1;
+	}
+	
+	double length = frames_to_beats (snap_frame_to_frame (f + beats_to_frames (beats)) - f);
+	
+	_ghost_note->note()->set_time (frames_to_beats (f + _region->start()));
+	_ghost_note->note()->set_length (length);
+	_ghost_note->note()->set_note (midi_stream_view()->y_to_note (y));
+
+	update_note (_ghost_note);
+}
+
+void
+MidiRegionView::create_ghost_note (double x, double y)
+{
+	delete _ghost_note;
+	_ghost_note = 0;
+
+	boost::shared_ptr<NoteType> g (new NoteType);
+	_ghost_note = new NoEventCanvasNote (*this, *group, g);
+	update_ghost_note (x, y);
+	_ghost_note->show ();
+
+	_last_ghost_x = x;
+	_last_ghost_y = y;
+}
+
+void
+MidiRegionView::snap_changed ()
+{
+	if (!_ghost_note) {
+		return;
+	}
+	
+	create_ghost_note (_last_ghost_x, _last_ghost_y);
 }
