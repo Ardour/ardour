@@ -392,6 +392,12 @@ RouteTimeAxisView::build_automation_action_menu ()
 {
 	using namespace Menu_Helpers;
 
+	/* detach subplugin_menu from automation_action_menu before we delete automation_action_menu,
+	   otherwise bad things happen (see comment for similar case in MidiTimeAxisView::build_automation_action_menu)
+	*/
+
+	detach_menu (subplugin_menu);
+
 	delete automation_action_menu;
 	automation_action_menu = new Menu;
 
@@ -408,9 +414,9 @@ RouteTimeAxisView::build_automation_action_menu ()
 	items.push_back (MenuElem (_("Hide All Automation"),
 				   sigc::mem_fun(*this, &RouteTimeAxisView::hide_all_automation)));
 	
-	/* attach the plugin submenu. It may have previously been used elsewhere, so we detach it first. */
+	/* Attach the plugin submenu. It may have previously been used elsewhere,
+	   so it was detached above */
 
-	detach_menu (subplugin_menu);
 	items.push_back (MenuElem (_("Plugins"),  subplugin_menu));
 	items.back().set_sensitive (!subplugin_menu.items().empty());
 }

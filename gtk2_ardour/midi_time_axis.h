@@ -108,10 +108,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	void route_active_changed ();
 
-	void add_insert_to_subplugin_menu (ARDOUR::Processor *);
-
 	bool                         _ignore_signals;
-	Gtk::Menu                    _subplugin_menu;
 	MidiScroomer*                _range_scroomer;
 	PianoRollHeader*             _piano_roll_header;
 	ARDOUR::NoteMode             _note_mode;
