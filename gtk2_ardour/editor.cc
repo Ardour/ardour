@@ -157,6 +157,7 @@ static const gchar *_snap_type_strings[] = {
 	N_("Beats/5"),
 	N_("Beats/4"),
 	N_("Beats/3"),
+	N_("Beats/2"),
 	N_("Beats"),
 	N_("Bars"),
 	N_("Marks"),
@@ -2112,6 +2113,7 @@ Editor::set_snap_to (SnapType st)
 	case SnapToBeatDiv5:
 	case SnapToBeatDiv4:
 	case SnapToBeatDiv3:
+	case SnapToBeatDiv2:
 		compute_bbt_ruler_scale (leftmost_frame, leftmost_frame + current_page_frames());
 		update_tempo_based_rulers ();
 		break;
@@ -2659,12 +2661,17 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 		start = _session->tempo_map().round_to_beat (start, direction);
 		break;
 
+	case SnapToBeatDiv32:
+		start = _session->tempo_map().round_to_beat_subdivision (start, 32, direction);
+		break;
 	case SnapToBeatDiv28:
 		start = _session->tempo_map().round_to_beat_subdivision (start, 28, direction);
 		break;
-
 	case SnapToBeatDiv24:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 32, direction);
+		start = _session->tempo_map().round_to_beat_subdivision (start, 24, direction);
+		break;
+	case SnapToBeatDiv16:
+		start = _session->tempo_map().round_to_beat_subdivision (start, 16, direction);
 		break;
 	case SnapToBeatDiv14:
 		start = _session->tempo_map().round_to_beat_subdivision (start, 14, direction);
@@ -2675,6 +2682,9 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 	case SnapToBeatDiv10:
 		start = _session->tempo_map().round_to_beat_subdivision (start, 10, direction);
 		break;
+	case SnapToBeatDiv8:
+		start = _session->tempo_map().round_to_beat_subdivision (start, 8, direction);
+		break;
 	case SnapToBeatDiv7:
 		start = _session->tempo_map().round_to_beat_subdivision (start, 7, direction);
 		break;
@@ -2684,20 +2694,14 @@ Editor::snap_to_internal (nframes64_t& start, int32_t direction, bool for_mark)
 	case SnapToBeatDiv5:
 		start = _session->tempo_map().round_to_beat_subdivision (start, 5, direction);
 		break;
-	case SnapToBeatDiv32:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 32, direction);
-		break;
-	case SnapToBeatDiv16:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 16, direction);
-		break;
-	case SnapToBeatDiv8:
-		start = _session->tempo_map().round_to_beat_subdivision (start, 8, direction);
-		break;
 	case SnapToBeatDiv4:
 		start = _session->tempo_map().round_to_beat_subdivision (start, 4, direction);
 		break;
 	case SnapToBeatDiv3:
 		start = _session->tempo_map().round_to_beat_subdivision (start, 3, direction);
+		break;
+	case SnapToBeatDiv2:
+		start = _session->tempo_map().round_to_beat_subdivision (start, 2, direction);
 		break;
 
 	case SnapToMark:
@@ -3456,32 +3460,34 @@ Editor::snap_type_selection_done ()
 	string choice = snap_type_selector.get_active_text();
 	SnapType snaptype = SnapToBeat;
 
-	if (choice == _("Beats/3")) {
+	if (choice == _("Beats/2")) {
+		snaptype = SnapToBeatDiv2;
+	} else if (choice == _("Beats/3")) {
 		snaptype = SnapToBeatDiv3;
 	} else if (choice == _("Beats/4")) {
 		snaptype = SnapToBeatDiv4;
-	} else if (choice == _("Beats/8")) {
-		snaptype = SnapToBeatDiv8;
-	} else if (choice == _("Beats/16")) {
-		snaptype = SnapToBeatDiv16;
-	} else if (choice == _("Beats/32")) {
-		snaptype = SnapToBeatDiv32;
 	} else if (choice == _("Beats/5")) {
 		snaptype = SnapToBeatDiv5;
 	} else if (choice == _("Beats/6")) {
 		snaptype = SnapToBeatDiv6;
 	} else if (choice == _("Beats/7")) {
 		snaptype = SnapToBeatDiv7;
+	} else if (choice == _("Beats/8")) {
+		snaptype = SnapToBeatDiv8;
 	} else if (choice == _("Beats/10")) {
 		snaptype = SnapToBeatDiv10;
 	} else if (choice == _("Beats/12")) {
 		snaptype = SnapToBeatDiv12;
 	} else if (choice == _("Beats/14")) {
 		snaptype = SnapToBeatDiv14;
+	} else if (choice == _("Beats/16")) {
+		snaptype = SnapToBeatDiv16;
 	} else if (choice == _("Beats/24")) {
 		snaptype = SnapToBeatDiv24;
 	} else if (choice == _("Beats/28")) {
 		snaptype = SnapToBeatDiv28;
+	} else if (choice == _("Beats/32")) {
+		snaptype = SnapToBeatDiv32;
 	} else if (choice == _("Beats")) {
 		snaptype = SnapToBeat;
 	} else if (choice == _("Bars")) {
@@ -3842,11 +3848,17 @@ Editor::get_grid_type_as_beats (bool& success, nframes64_t position)
 		return 1.0;
 		break;
 
+	case SnapToBeatDiv32:
+		return 1.0/32.0;
+		break;
 	case SnapToBeatDiv28:
 		return 1.0/28.0;
 		break;
 	case SnapToBeatDiv24:
 		return 1.0/24.0;
+		break;
+	case SnapToBeatDiv16:
+		return 1.0/16.0;
 		break;
 	case SnapToBeatDiv14:
 		return 1.0/14.0;
@@ -3857,6 +3869,9 @@ Editor::get_grid_type_as_beats (bool& success, nframes64_t position)
 	case SnapToBeatDiv10:
 		return 1.0/10.0;
 		break;
+	case SnapToBeatDiv8:
+		return 1.0/8.0;
+		break;
 	case SnapToBeatDiv7:
 		return 1.0/7.0;
 		break;
@@ -3866,25 +3881,14 @@ Editor::get_grid_type_as_beats (bool& success, nframes64_t position)
 	case SnapToBeatDiv5:
 		return 1.0/5.0;
 		break;
-
-	case SnapToBeatDiv32:
-		return 1.0/32.0;
-		break;
-
-	case SnapToBeatDiv16:
-		return 1.0/16.0;
-		break;
-
-	case SnapToBeatDiv8:
-		return 1.0/8.0;
-		break;
-
 	case SnapToBeatDiv4:
 		return 1.0/4.0;
 		break;
-
 	case SnapToBeatDiv3:
 		return 1.0/3.0;
+		break;
+	case SnapToBeatDiv2:
+		return 1.0/2.0;
 		break;
 
 	case SnapToBar:

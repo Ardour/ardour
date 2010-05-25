@@ -1153,55 +1153,58 @@ Editor::compute_bbt_ruler_scale (nframes64_t lower, nframes64_t upper)
 	bbt_ruler_scale =  bbt_over;
 
 	switch (_snap_type) {
+	case SnapToBeatDiv2:
+		bbt_beat_subdivision = 2;
+		break;
 	case SnapToBeatDiv3:
                 bbt_beat_subdivision = 3;
 		break;
 	case SnapToBeatDiv4:
                 bbt_beat_subdivision = 4;
 		break;
-	case SnapToBeatDiv8:
-                bbt_beat_subdivision = 8;
-		bbt_accent_modulo = 2;
-		break;
-	case SnapToBeatDiv16:
-                bbt_beat_subdivision = 16;
-		bbt_accent_modulo = 4;
-		break;
-	case SnapToBeatDiv32:
-                bbt_beat_subdivision = 32;
-		bbt_accent_modulo = 8;
-		break;
-	case SnapToBeatDiv28:
-                bbt_beat_subdivision = 28;
-		bbt_accent_modulo = 7;
-		break;
-	case SnapToBeatDiv24:
-                bbt_beat_subdivision = 24;
-		bbt_accent_modulo = 6;
-		break;
-	case SnapToBeatDiv14:
-                bbt_beat_subdivision = 14;
-		bbt_accent_modulo = 3; // XXX YIKES!
-		break;
-	case SnapToBeatDiv12:
-                bbt_beat_subdivision = 12;
-		bbt_accent_modulo = 3;
-		break;
-	case SnapToBeatDiv10:
-                bbt_beat_subdivision = 10;
-		bbt_accent_modulo = 2; // XXX YIKES
-		break;
-	case SnapToBeatDiv7:
-                bbt_beat_subdivision = 7;
+	case SnapToBeatDiv5:
+                bbt_beat_subdivision = 5;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
 	case SnapToBeatDiv6:
                 bbt_beat_subdivision = 6;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
-	case SnapToBeatDiv5:
-                bbt_beat_subdivision = 5;
+	case SnapToBeatDiv7:
+                bbt_beat_subdivision = 7;
 		bbt_accent_modulo = 2; // XXX YIKES
+		break;
+	case SnapToBeatDiv8:
+                bbt_beat_subdivision = 8;
+		bbt_accent_modulo = 2;
+		break;
+	case SnapToBeatDiv10:
+                bbt_beat_subdivision = 10;
+		bbt_accent_modulo = 2; // XXX YIKES
+		break;
+	case SnapToBeatDiv12:
+                bbt_beat_subdivision = 12;
+		bbt_accent_modulo = 3;
+		break;
+	case SnapToBeatDiv14:
+                bbt_beat_subdivision = 14;
+		bbt_accent_modulo = 3; // XXX YIKES!
+		break;
+	case SnapToBeatDiv16:
+                bbt_beat_subdivision = 16;
+		bbt_accent_modulo = 4;
+		break;
+	case SnapToBeatDiv24:
+                bbt_beat_subdivision = 24;
+		bbt_accent_modulo = 6;
+		break;
+	case SnapToBeatDiv28:
+                bbt_beat_subdivision = 28;
+		bbt_accent_modulo = 7;
+		break;
+	case SnapToBeatDiv32:
+                bbt_beat_subdivision = 32;
+		bbt_accent_modulo = 8;
 		break;
 	default:
                 bbt_beat_subdivision = 4;
