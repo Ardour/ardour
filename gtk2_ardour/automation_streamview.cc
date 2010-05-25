@@ -54,6 +54,7 @@ using namespace Editing;
 
 AutomationStreamView::AutomationStreamView (AutomationTimeAxisView& tv)
 	: StreamView (*dynamic_cast<RouteTimeAxisView*>(tv.get_parent()),
+		      new ArdourCanvas::Group(*tv.canvas_background()),
 		      new ArdourCanvas::Group(*tv.canvas_display()))
 	, _controller(tv.controller())
 	, _automation_view(tv)
