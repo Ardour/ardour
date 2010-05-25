@@ -1532,6 +1532,16 @@ MidiRegionView::delete_selection()
 }
 
 void
+MidiRegionView::delete_note (boost::shared_ptr<NoteType> n)
+{
+	start_delta_command (_("delete note"));
+	_delta_command->remove (n);
+	apply_delta ();
+
+	trackview.editor().hide_verbose_canvas_cursor ();
+}
+
+void
 MidiRegionView::clear_selection_except(ArdourCanvas::CanvasNoteEvent* ev)
 {
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {

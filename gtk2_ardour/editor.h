@@ -197,6 +197,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void step_mouse_mode (bool next);
 	Editing::MouseMode current_mouse_mode () const { return mouse_mode; }
 	Editing::MidiEditMode current_midi_edit_mode () const;
+	void remove_midi_note (ArdourCanvas::Item *, GdkEvent *);
 
 	bool internal_editing() const { return _internal_editing ; }
 	void set_internal_edit (bool yn);

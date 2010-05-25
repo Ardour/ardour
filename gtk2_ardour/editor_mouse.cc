@@ -1222,6 +1222,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 			break;
 
+		case NoteItem:
+			remove_midi_note (item, event);
+			break;
+
 		default:
 			break;
 		}
@@ -2653,4 +2657,13 @@ Editor::effective_mouse_mode () const
 	}
 
 	return mouse_mode;
+}
+
+void
+Editor::remove_midi_note (ArdourCanvas::Item* item, GdkEvent *)
+{
+	ArdourCanvas::CanvasNoteEvent* e = dynamic_cast<ArdourCanvas::CanvasNoteEvent*> (item);
+	assert (e);
+
+	e->region_view().delete_note (e->note ());
 }

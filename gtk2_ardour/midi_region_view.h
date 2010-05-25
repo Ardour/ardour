@@ -193,6 +193,7 @@ class MidiRegionView : public RegionView
 	void   note_selected(ArdourCanvas::CanvasNoteEvent* ev, bool add, bool extend=false);
 	void   note_deselected(ArdourCanvas::CanvasNoteEvent* ev);
 	void   delete_selection();
+	void   delete_note (boost::shared_ptr<NoteType>);
 	size_t selection_size() { return _selection.size(); }
 
 	void move_selection(double dx, double dy);
