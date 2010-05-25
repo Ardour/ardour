@@ -424,7 +424,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 				drag_rect->property_y1() = midi_stream_view()->note_to_y(
 						midi_stream_view()->y_to_note(event_y));
-				drag_rect->property_x2() = event_x;
+				drag_rect->property_x2() = trackview.editor().frame_to_pixel(event_frame);
 				drag_rect->property_y2() = drag_rect->property_y1()
 				                         + floor(midi_stream_view()->note_height());
 				drag_rect->property_outline_what() = 0xFF;
@@ -565,12 +565,14 @@ MidiRegionView::create_note_at(double x, double y, double length)
 	assert(note <= 127.0);
 
 	// Start of note in frames relative to region start
-	nframes64_t start_frames = snap_frame_to_frame(trackview.editor().pixel_to_frame(x));
+	nframes64_t const start_frames = snap_frame_to_frame(trackview.editor().pixel_to_frame(x));
 	assert(start_frames >= 0);
 
 	// Snap length
 	length = frames_to_beats(
 			snap_frame_to_frame(start_frames + beats_to_frames(length)) - start_frames);
+
+	assert (length != 0);
 
 	const boost::shared_ptr<NoteType> new_note(new NoteType(0,
 			frames_to_beats(start_frames + _region->start()), length,

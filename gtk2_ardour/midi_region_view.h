@@ -281,7 +281,7 @@ class MidiRegionView : public RegionView
 	nframes64_t beats_to_frames(double beats) const;
 
 	/** Convert a timestamp in frames to beats (both relative to region start) */
-	double frames_to_beats(nframes64_t beats) const;
+	double frames_to_beats(nframes64_t) const;
 
 	void goto_previous_note ();
 	void goto_next_note ();
