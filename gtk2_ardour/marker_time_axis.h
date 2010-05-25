@@ -33,9 +33,6 @@
 namespace ARDOUR {
 	class Session;
 }
-namespace ARDOUR {
-	class Menu;
-}
 
 class PublicEditor;
 class ImageFrameView ;
