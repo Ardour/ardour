@@ -225,4 +225,14 @@ AutomationStreamView::has_automation () const
 	return false;
 }
 
-			
+void
+AutomationStreamView::set_interpolation (AutomationList::InterpolationStyle s)
+{
+	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (*i);
+		assert (arv);
+		if (arv->line()) {
+			arv->line()->set_interpolation (s);
+		}
+	}
+}

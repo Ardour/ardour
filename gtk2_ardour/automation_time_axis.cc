@@ -364,6 +364,10 @@ AutomationTimeAxisView::interpolation_changed ()
 	if (_line) {
 		_line->set_interpolation(style);
 	}
+
+	if (_view) {
+		_view->set_interpolation (style);
+	}
 }
 
 void
@@ -372,6 +376,9 @@ AutomationTimeAxisView::set_interpolation (AutomationList::InterpolationStyle st
 	_control->list()->set_interpolation(style);
 	if (_line) {
 		_line->set_interpolation(style);
+	}
+	if (_view) {
+		_view->set_interpolation (style);
 	}
 }
 
