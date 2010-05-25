@@ -684,7 +684,7 @@ key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 
 		uint32_t fakekey = ev->keyval;
 
-		if (possibly_translate_keyval_to_make_legal_accelerator (fakekey)) {
+		if (Gtkmm2ext::possibly_translate_keyval_to_make_legal_accelerator (fakekey)) {
 			if (allow_activating && gtk_accel_groups_activate(G_OBJECT(win), fakekey, GdkModifierType(ev->state))) {
 				return true;
 			}
@@ -914,88 +914,6 @@ reset_dpi ()
 	gtk_settings_set_long_property (gtk_settings_get_default(),
 					"gtk-xft-dpi", val, "ardour");
 	DPIReset();//Emit Signal
-}
-
-bool
-possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval)
-{
-	int fakekey = GDK_VoidSymbol;
-
-	switch (keyval) {
-	case GDK_Tab:
-	case GDK_ISO_Left_Tab:
-		fakekey = GDK_nabla;
-		break;
-
-	case GDK_Up:
-		fakekey = GDK_uparrow;
-		break;
-
-	case GDK_Down:
-		fakekey = GDK_downarrow;
-		break;
-
-	case GDK_Right:
-		fakekey = GDK_rightarrow;
-		break;
-
-	case GDK_Left:
-		fakekey = GDK_leftarrow;
-		break;
-
-	case GDK_Return:
-		fakekey = GDK_3270_Enter;
-		break;
-
-	case GDK_KP_Enter:
-		fakekey = GDK_F35;
-		break;
-
-	default:
-		break;
-	}
-
-	if (fakekey != GDK_VoidSymbol) {
-		keyval = fakekey;
-		return true;
-	}
-
-	return false;
-}
-
-uint32_t
-possibly_translate_legal_accelerator_to_real_key (uint32_t keyval)
-{
-	switch (keyval) {
-	case GDK_nabla:
-		return GDK_Tab;
-		break;
-
-	case GDK_uparrow:
-		return GDK_Up;
-		break;
-
-	case GDK_downarrow:
-		return GDK_Down;
-		break;
-
-	case GDK_rightarrow:
-		return GDK_Right;
-		break;
-
-	case GDK_leftarrow:
-		return GDK_Left;
-		break;
-
-	case GDK_3270_Enter:
-		return GDK_Return;
-
-	case GDK_F35:
-		return GDK_KP_Enter;
-		break;
-	}
-
-	return keyval;
 }
 
 

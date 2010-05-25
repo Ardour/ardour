@@ -83,6 +83,7 @@ def build(bld):
 		search_path.cc
 		shortpath.cc
 		signals.cc
+                sndfile_manager.cc
 		stacktrace.cc
 		stateful_diff_command.cc
 		stateful.cc

@@ -23,7 +23,7 @@
 #include <sys/types.h>
 #include <string>
 #include <map>
-#include <sndfile.h>
+#include <list>
 #include <glibmm/thread.h>
 #include "pbd/signals.h"
 
@@ -81,26 +81,6 @@ private:
 	static FileManager* _manager;
 };
 
-/** FileDescriptor for a file to be opened using libsndfile */	
-class SndFileDescriptor : public FileDescriptor
-{
-public:
-	SndFileDescriptor (std::string const &, bool, SF_INFO *);
-	~SndFileDescriptor ();
-
-	SNDFILE* allocate ();
-
-private:	
-
-	friend class FileManager;
-
-	bool open ();
-	void close ();
-	bool is_open () const;
-
-	SNDFILE* _sndfile; ///< SNDFILE* pointer, or 0 if the file is closed
-	SF_INFO* _info; ///< libsndfile's info for this file
-};
 
 /** FileDescriptor for a file to be opened using POSIX open */	
 class FdFileDescriptor : public FileDescriptor
@@ -142,6 +122,29 @@ private:
 
 	FILE* _file;
 	std::string _mode;
+};
+
+
+/** Class to limit the number of files held open */
+class FileManager
+{
+public:
+	FileManager ();
+	
+	void add (FileDescriptor *);
+	void remove (FileDescriptor *);
+
+	void release (FileDescriptor *);
+	bool allocate (FileDescriptor *);
+
+private:
+	
+	void close (FileDescriptor *);
+
+	std::list<FileDescriptor*> _files; ///< files we know about
+	Glib::Mutex _mutex; ///< mutex for _files, _open and FileDescriptor contents
+	int _open; ///< number of open files
+	int _max_open; ///< maximum number of open files
 };
 
 }

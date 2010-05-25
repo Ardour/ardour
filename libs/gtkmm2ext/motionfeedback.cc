@@ -37,7 +37,9 @@ MotionFeedback::MotionFeedback (Glib::RefPtr<Gdk::Pixbuf> pix,
 				Type t,
 				const char *widget_name, 
 				Adjustment *adj,
-				bool with_numeric_display, int subw, int subh) 
+				bool with_numeric_display, 
+                                int subw, 
+                                int subh) 
 	: type (t)
         , value_packer (0)
         , value (0)
@@ -351,7 +353,7 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double radius, double x, doub
 
 	g_return_if_fail (cr != NULL);
 
-	cairo_set_source_rgba (cr, 0.75, 0.75, 0.75, (double) 0);
+	cairo_set_source_rgba (cr, 0.75, 0.75, 0.75, (double) 1.0);
 	cairo_rectangle (cr, (double) 0, (double) 0, subwidth, subheight);
 	cairo_fill (cr);
 
@@ -536,7 +538,6 @@ MotionFeedback::core_draw (cairo_t* cr, int phase, double radius, double x, doub
 bool
 MotionFeedback::pixwin_expose_event (GdkEventExpose* ev)
 {
-	// GtkWidget* widget = GTK_WIDGET(pixwin.gobj());
 	GdkWindow *window = pixwin.get_window()->gobj();
 	GtkAdjustment* adj = adjustment->gobj();
 
@@ -570,22 +571,23 @@ MotionFeedback::pixwin_expose_event (GdkEventExpose* ev)
 			phase = (phase + 63) % 64;
 	}
 
-#if 1
-	cairo_t* cr = gdk_cairo_create (GDK_DRAWABLE (window));
-
-	gdk_cairo_rectangle (cr, &ev->area);
-	cairo_clip (cr);
-
-        core_draw (cr, phase, subheight/2, subwidth/2, subheight/2);
-        cairo_destroy (cr);
-
-#else
-        
-	gdk_draw_pixbuf (GDK_DRAWABLE(window), widget->style->fg_gc[0], 
-			 pixbuf->gobj(), 
-			 phase * subwidth, type * subheight, 
-			 0, 0, subwidth, subheight, GDK_RGB_DITHER_NORMAL, 0, 0);
-#endif	
+        if (pixbuf) {
+                std::cerr << "Render from pixbuf\n";
+                GtkWidget* widget = GTK_WIDGET(pixwin.gobj());
+                gdk_draw_pixbuf (GDK_DRAWABLE(window), widget->style->fg_gc[0], 
+                                 pixbuf->gobj(), 
+                                 phase * subwidth, type * subheight, 
+                                 0, 0, subwidth, subheight, GDK_RGB_DITHER_NORMAL, 0, 0);
+        } else {
+                std::cerr << "Render with cairo\n";
+                cairo_t* cr = gdk_cairo_create (GDK_DRAWABLE (window));
+                
+                gdk_cairo_rectangle (cr, &ev->area);
+                cairo_clip (cr);
+                
+                core_draw (cr, phase, subheight/2, subwidth/2, subheight/2);
+                cairo_destroy (cr);
+        }
 
 	return true;
 }
@@ -643,4 +645,38 @@ MotionFeedback::set_lamp_color (const Gdk::Color& c)
 	prolooks_hsv_set_saturation (lamp_hsv, 0.66);
 	prolooks_hsv_set_value (lamp_hsv, 0.67);
 	lamp_dark = (prolooks_hsv_to_gdk_color (lamp_hsv, &col3), col3);
+}
+
+void
+MotionFeedback::render_file (const std::string& path, int w, int h)
+{
+        GdkPixmap* pixmap = gdk_pixmap_new (0, w, h, 24);
+        GdkPixbuf* pixbuf = gdk_pixbuf_new (GDK_COLORSPACE_RGB, 1, 8, w * 65, h);
+        GError* err = 0;
+        GdkRectangle r;
+        
+        r.x = 0;
+        r.y = 0;
+        r.width = w;
+        r.height = h;
+
+        set_lamp_color (Gdk::Color ("#b9feff"));
+        
+        for (int i = 0; i < 65; ++i) {
+                cairo_t* cr = gdk_cairo_create (GDK_DRAWABLE (pixmap));
+                gdk_cairo_rectangle (cr, &r);
+                cairo_clip (cr);
+                core_draw (cr, i, h/2, w/2, h/2);
+                gdk_pixbuf_get_from_drawable (pixbuf, pixmap, gdk_colormap_get_system(), 0, 0, w*i, 0, w, h);
+                cairo_destroy (cr);
+        }
+
+        if (gdk_pixbuf_save (pixbuf, path.c_str(), "png", &err, 0)) {
+                if (err) {
+                        std::cerr << "could not save image set to " << path << ": " << err->message << std::endl;
+                }
+        }
+
+        g_object_unref (G_OBJECT (pixbuf));
+        g_object_unref (G_OBJECT (pixmap));
 }

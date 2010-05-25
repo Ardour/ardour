@@ -24,7 +24,7 @@
 
 #include "ardour/audiofilesource.h"
 #include "ardour/broadcast_info.h"
-#include "pbd/file_manager.h"
+#include "pbd/sndfile_manager.h"
 
 namespace ARDOUR {
 

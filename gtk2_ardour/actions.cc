@@ -186,16 +186,3 @@ ActionManager::map_some_state (const char* group, const char* action, sigc::slot
 	}
 }
 
-string
-ActionManager::get_key_representation (const string& accel_path, AccelKey& key)
-{
-	bool known = lookup_entry (accel_path, key);
-	
-	if (known) {
-		uint32_t k = possibly_translate_legal_accelerator_to_real_key (key.get_key());
-		key = AccelKey (k, Gdk::ModifierType (key.get_mod()));
-		return ui_manager->get_accel_group()->name (key.get_key(), Gdk::ModifierType (key.get_mod()));
-	} 
-	
-	return unbound_string;
-}

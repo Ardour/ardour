@@ -8,6 +8,8 @@
 #include <gtkmm/accelmap.h>
 #include <gtkmm/uimanager.h>
 
+#include "gtkmm2ext/utils.h"
+
 #include "pbd/strsplit.h"
 #include "pbd/replace_all.h"
 
@@ -173,7 +175,7 @@ KeyEditor::on_key_release_event (GdkEventKey* ev)
 		}
 
 		cerr << "real lkeyval: " << ev->keyval << endl;
-		possibly_translate_keyval_to_make_legal_accelerator (ev->keyval);
+                Gtkmm2ext::possibly_translate_keyval_to_make_legal_accelerator (ev->keyval);
 		cerr << "using keyval = " << ev->keyval << endl;
 
 

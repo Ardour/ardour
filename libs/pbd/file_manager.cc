@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <cassert>
 #include <iostream>
+#include <cstdio>
 #include "pbd/compose.h"
 #include "pbd/file_manager.h"
 #include "pbd/debug.h"
@@ -32,32 +33,6 @@ using namespace std;
 using namespace PBD;
 
 FileManager* FileDescriptor::_manager;
-
-namespace PBD {
-
-/** Class to limit the number of files held open */
-class FileManager
-{
-public:
-	FileManager ();
-	
-	void add (FileDescriptor *);
-	void remove (FileDescriptor *);
-
-	void release (FileDescriptor *);
-	bool allocate (FileDescriptor *);
-
-private:
-	
-	void close (FileDescriptor *);
-
-	std::list<FileDescriptor*> _files; ///< files we know about
-	Glib::Mutex _mutex; ///< mutex for _files, _open and FileDescriptor contents
-	int _open; ///< number of open files
-	int _max_open; ///< maximum number of open files
-};
-
-}
 
 FileManager::FileManager ()
 	: _open (0)
@@ -207,64 +182,6 @@ FileDescriptor::release ()
 	manager()->release (this);
 }
 
-/** @param n Filename.
- *  @param w true to open writeable, otherwise false.
- *  @param i SF_INFO for the file.
- */
-
-SndFileDescriptor::SndFileDescriptor (string const & n, bool w, SF_INFO* i)
-	: FileDescriptor (n, w)
-	, _sndfile (0)
-	, _info (i)
-{
-	manager()->add (this);
-}
-
-SndFileDescriptor::~SndFileDescriptor ()
-{
-	manager()->remove (this);
-}
-
-/** @return SNDFILE*, or 0 on error */
-SNDFILE*
-SndFileDescriptor::allocate ()
-{
-	bool const f = manager()->allocate (this);
-	if (f) {
-		return 0;
-	}
-
-	/* this is ok thread-wise because allocate () has incremented
-	   the Descriptor's refcount, so the file will not be closed
-	*/
-	return _sndfile;
-}
-
-void
-SndFileDescriptor::close ()
-{
-	/* we must have a lock on the FileManager's mutex */
-
-	sf_close (_sndfile);
-	_sndfile = 0;
-}
-
-bool
-SndFileDescriptor::is_open () const
-{
-	/* we must have a lock on the FileManager's mutex */
-
-	return _sndfile != 0;
-}
-
-bool
-SndFileDescriptor::open ()
-{
-	/* we must have a lock on the FileManager's mutex */
-	
-	_sndfile = sf_open (_name.c_str(), _writeable ? SFM_RDWR : SFM_READ, _info);
-	return (_sndfile == 0);
-}
 
 
 /** @param n Filename.

@@ -21,6 +21,7 @@
 #include <vector>
 #include <string>
 #include <list>
+#include <stdint.h>
 
 #include <gtk/gtkaccelmap.h>
 #include <gtk/gtkuimanager.h>
@@ -32,6 +33,7 @@
 #include "pbd/error.h"
 
 #include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/utils.h"
 
 #include "i18n.h"
 
@@ -40,6 +42,7 @@ using namespace Gtk;
 using namespace Glib;
 using namespace sigc;
 using namespace PBD;
+using namespace Gtkmm2ext;
 
 RefPtr<UIManager> ActionManager::ui_manager;
 string ActionManager::unbound_string = "--";
@@ -293,4 +296,18 @@ ActionManager::uncheck_toggleaction (const char * name)
 	}
 
 	delete [] group_name;
+}
+
+string
+ActionManager::get_key_representation (const string& accel_path, AccelKey& key)
+{
+	bool known = lookup_entry (accel_path, key);
+	
+	if (known) {
+		uint32_t k = possibly_translate_legal_accelerator_to_real_key (key.get_key());
+		key = AccelKey (k, Gdk::ModifierType (key.get_mod()));
+		return ui_manager->get_accel_group()->name (key.get_key(), Gdk::ModifierType (key.get_mod()));
+	} 
+	
+	return unbound_string;
 }

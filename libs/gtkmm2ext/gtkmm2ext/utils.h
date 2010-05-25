@@ -22,6 +22,7 @@
 
 #include <vector>
 #include <string>
+#include <stdint.h>
 
 #include <gtkmm/treeview.h>
 #include <gdkmm/window.h> /* for WMDecoration */
@@ -71,6 +72,9 @@ namespace Gtkmm2ext {
 	void set_treeview_header_as_default_label(Gtk::TreeViewColumn *c);
 	Glib::RefPtr<Gdk::Drawable> get_bogus_drawable();
 	void detach_menu (Gtk::Menu&);
+
+        bool possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval);
+        uint32_t possibly_translate_legal_accelerator_to_real_key (uint32_t keyval);
 };
 
 #endif /*  __gtkmm2ext_utils_h__ */

@@ -75,8 +75,6 @@ void set_color (Gdk::Color&, int);
 bool relay_key_press (GdkEventKey* ev, Gtk::Window* win);
 bool forward_key_press (GdkEventKey* ev);
 bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev);
-bool possibly_translate_keyval_to_make_legal_accelerator (uint32_t& keyval);
-uint32_t possibly_translate_legal_accelerator_to_real_key (uint32_t keyval);
 
 Glib::RefPtr<Gdk::Pixbuf> get_xpm (std::string);
 Glib::ustring get_icon_path (const char*);
