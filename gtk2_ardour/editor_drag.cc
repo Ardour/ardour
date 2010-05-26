@@ -1626,7 +1626,10 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 		relative = true;
 	}
 
-	region->note_selected (cnote, true);
+	/* select this note; if it is already selected, preserve the existing selection,
+	   otherwise make this note the only one selected.
+	*/
+	region->note_selected (cnote, cnote->selected ());
 
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ) {
 		MidiRegionSelection::iterator next;
