@@ -136,6 +136,7 @@ class Playlist : public SessionObject
 
 	void add_region (boost::shared_ptr<Region>, framepos_t position, float times = 1, bool auto_partition = false);
 	void remove_region (boost::shared_ptr<Region>);
+	void remove_region_by_source (boost::shared_ptr<Source>);
 	void get_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
 	void get_region_list_equivalent_regions (boost::shared_ptr<Region>, std::vector<boost::shared_ptr<Region> >&);
 	void replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Region> newr, framepos_t pos);

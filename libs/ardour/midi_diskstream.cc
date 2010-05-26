@@ -1321,6 +1321,10 @@ MidiDiskstream::use_new_write_source (uint32_t n)
 	if (_write_source) {
 
 		if (_write_source->is_empty ()) {
+			/* remove any region that is using this empty source; they can result when MIDI recordings
+			   are made, but no MIDI data is received.
+			*/
+			_playlist->remove_region_by_source (_write_source);
 			_write_source->mark_for_remove ();
 			_write_source->drop_references ();
 			_write_source.reset();

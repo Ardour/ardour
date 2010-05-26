@@ -2939,3 +2939,22 @@ Playlist::has_region_at (framepos_t const p) const
 
 	return (i != regions.end());
 }
+
+/** Remove any region that uses a given source */
+void
+Playlist::remove_region_by_source (boost::shared_ptr<Source> s)
+{
+	RegionLock rl (this);
+	
+	RegionList::iterator i = regions.begin();
+	while (i != regions.end()) {
+		RegionList::iterator j = i;
+		++j;
+		
+		if ((*i)->uses_source (s)) {
+			remove_region_internal (*i);
+		}
+
+		i = j;
+	}
+}
