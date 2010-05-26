@@ -382,6 +382,7 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 	case GDK_LEAVE_NOTIFY:
 	{
+		trackview.editor().hide_verbose_canvas_cursor ();
 		delete _ghost_note;
 		_ghost_note = 0;
 		break;
@@ -2443,10 +2444,7 @@ MidiRegionView::note_entered(ArdourCanvas::CanvasNoteEvent* ev)
 		note_selected(ev, true);
 	}
 
-	char buf[12];
-	snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (ev->note()->note()).c_str(), (int) ev->note()->note());
-	PublicEditor& editor (trackview.editor());
-	editor.show_verbose_canvas_cursor_with (buf);
+	show_verbose_canvas_cursor (ev->note ());
 }
 
 void
@@ -2739,6 +2737,8 @@ MidiRegionView::update_ghost_note (double x, double y)
 	_ghost_note->note()->set_note (midi_stream_view()->y_to_note (y));
 
 	update_note (_ghost_note);
+
+	show_verbose_canvas_cursor (_ghost_note->note ());
 }
 
 void
@@ -2754,6 +2754,8 @@ MidiRegionView::create_ghost_note (double x, double y)
 
 	_last_ghost_x = x;
 	_last_ghost_y = y;
+
+	show_verbose_canvas_cursor (_ghost_note->note ());
 }
 
 void
@@ -2764,4 +2766,12 @@ MidiRegionView::snap_changed ()
 	}
 	
 	create_ghost_note (_last_ghost_x, _last_ghost_y);
+}
+
+void
+MidiRegionView::show_verbose_canvas_cursor (boost::shared_ptr<NoteType> n) const
+{
+	char buf[12];
+	snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (n->note()).c_str(), (int) n->note ());
+	trackview.editor().show_verbose_canvas_cursor_with (buf);
 }

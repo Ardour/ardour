@@ -414,6 +414,8 @@ class MidiRegionView : public RegionView
 
 	void snap_changed ();
 	PBD::ScopedConnection snap_changed_connection;
+
+	void show_verbose_canvas_cursor (boost::shared_ptr<NoteType>) const;
 };
 
 
