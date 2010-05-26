@@ -437,6 +437,10 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 			// Add note drag start
 			} else if (editor.internal_editing()) {
+
+				delete _ghost_note;
+				_ghost_note = 0;
+				
 				group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
 						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
 				last_x = event_x;
@@ -557,6 +561,8 @@ MidiRegionView::canvas_event(GdkEvent* ev)
 
 			delete drag_rect;
 			drag_rect = 0;
+
+			create_ghost_note (ev->button.x, ev->button.y);
 		default: break;
 		}
 		
