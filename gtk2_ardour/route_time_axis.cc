@@ -413,11 +413,13 @@ RouteTimeAxisView::build_automation_action_menu ()
 	
 	items.push_back (MenuElem (_("Hide All Automation"),
 				   sigc::mem_fun(*this, &RouteTimeAxisView::hide_all_automation)));
+
+	items.push_back (SeparatorElem ());
 	
 	/* Attach the plugin submenu. It may have previously been used elsewhere,
 	   so it was detached above */
 
-	items.push_back (MenuElem (_("Plugins"),  subplugin_menu));
+	items.push_back (MenuElem (_("Plugins"), subplugin_menu));
 	items.back().set_sensitive (!subplugin_menu.items().empty());
 }
 

@@ -178,7 +178,7 @@ protected:
 
 	void processors_changed (ARDOUR::RouteProcessorChange);
 
-	void add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Processor>);
+	virtual void add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Processor>);
 	void remove_processor_automation_node (ProcessorAutomationNode* pan);
 
 	void processor_menu_item_toggled (RouteTimeAxisView::ProcessorAutomationInfo*,

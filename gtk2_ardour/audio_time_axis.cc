@@ -196,14 +196,13 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 			return;
 		}
 
-		boost::shared_ptr<AutomationTimeAxisView>
-			gain_track(new AutomationTimeAxisView (_session,
-							       _route, _route->amp(), c,
-							       _editor,
-							       *this,
-							       false,
-							       parent_canvas,
-							       _route->amp()->describe_parameter(param)));
+		gain_track.reset (new AutomationTimeAxisView (_session,
+							      _route, _route->amp(), c,
+							      _editor,
+							      *this,
+							      false,
+							      parent_canvas,
+							      _route->amp()->describe_parameter(param)));
 
 		add_automation_child(Evoral::Parameter(GainAutomation), gain_track, show);
 
@@ -248,30 +247,32 @@ AudioTimeAxisView::ensure_pan_views (bool show)
 
 			std::string const name = _route->panner()->describe_parameter (pan_control->parameter ());
 
-			boost::shared_ptr<AutomationTimeAxisView> pan_track (
+			boost::shared_ptr<AutomationTimeAxisView> t (
 				new AutomationTimeAxisView (_session,
 							    _route, _route->panner(), pan_control,
 							    _editor,
 							    *this,
 							    false,
 							    parent_canvas,
-							    name));
+							    name)
+				);
 
-			add_automation_child (*p, pan_track, show);
+			pan_tracks.push_back (t);
+			add_automation_child (*p, t, show);
 		}
 	}
 }
-#if 0
+
 void
-AudioTimeAxisView::toggle_gain_track ()
+AudioTimeAxisView::update_gain_track_visibility ()
 {
-	bool showit = gain_automation_item->get_active();
+	bool const showit = gain_automation_item->get_active();
 
 	if (showit != gain_track->marked_for_display()) {
 		if (showit) {
 			gain_track->set_marked_for_display (true);
-			gain_track->canvas_display->show();
-			gain_track->canvas_background->show();
+			gain_track->canvas_display()->show();
+			gain_track->canvas_background()->show();
 			gain_track->get_state_node()->add_property ("shown", X_("yes"));
 		} else {
 			gain_track->set_marked_for_display (false);
@@ -288,38 +289,31 @@ AudioTimeAxisView::toggle_gain_track ()
 }
 
 void
-AudioTimeAxisView::gain_hidden ()
+AudioTimeAxisView::update_pan_track_visibility ()
 {
-	gain_track->get_state_node()->add_property (X_("shown"), X_("no"));
+	bool const showit = pan_automation_item->get_active();
 
-	if (gain_automation_item && !_hidden) {
-		gain_automation_item->set_active (false);
-	}
+	for (list<boost::shared_ptr<AutomationTimeAxisView> >::iterator i = pan_tracks.begin(); i != pan_tracks.end(); ++i) {
 
-	 _route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
-}
-
-void
-AudioTimeAxisView::toggle_pan_track ()
-{
-	bool showit = pan_automation_item->get_active();
-
-	if (showit != pan_track->marked_for_display()) {
-		if (showit) {
-			pan_track->set_marked_for_display (true);
-			pan_track->canvas_display->show();
-			pan_track->canvas_background->show();
-			pan_track->get_state_node()->add_property ("shown", X_("yes"));
-		} else {
-			pan_track->set_marked_for_display (false);
-			pan_track->hide ();
-			pan_track->get_state_node()->add_property ("shown", X_("no"));
+		if (showit != (*i)->marked_for_display()) {
+			if (showit) {
+				(*i)->set_marked_for_display (true);
+				(*i)->canvas_display()->show();
+				(*i)->canvas_background()->show();
+				(*i)->get_state_node()->add_property ("shown", X_("yes"));
+			} else {
+				(*i)->set_marked_for_display (false);
+				(*i)->hide ();
+				(*i)->get_state_node()->add_property ("shown", X_("no"));
+			}
+			
+			/* now trigger a redisplay */
+			if (!no_redraw) {
+				_route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
+			}
 		}
-
-		/* now trigger a redisplay */
 	}
 }
-#endif
 
 void
 AudioTimeAxisView::show_all_automation ()
@@ -330,7 +324,7 @@ AudioTimeAxisView::show_all_automation ()
 
 	no_redraw = false;
 
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -342,7 +336,7 @@ AudioTimeAxisView::show_existing_automation ()
 
 	no_redraw = false;
 
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -353,7 +347,7 @@ AudioTimeAxisView::hide_all_automation ()
 	RouteTimeAxisView::hide_all_automation();
 
 	no_redraw = false;
-	 _route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
 }
 
 void
@@ -437,5 +431,41 @@ AudioTimeAxisView::update_control_names ()
 		controls_ebox.set_name (controls_base_selected_name);
 	} else {
 		controls_ebox.set_name (controls_base_unselected_name);
+	}
+}
+
+void
+AudioTimeAxisView::build_automation_action_menu ()
+{
+	using namespace Menu_Helpers;
+
+	RouteTimeAxisView::build_automation_action_menu ();
+
+	MenuList& automation_items = automation_action_menu->items ();
+
+	automation_items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &AudioTimeAxisView::update_gain_track_visibility)));
+	gain_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
+	gain_automation_item->set_active (gain_track->marked_for_display ());
+
+	automation_items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &AudioTimeAxisView::update_pan_track_visibility)));
+	pan_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
+	pan_automation_item->set_active (pan_tracks.front()->marked_for_display ());
+}
+
+void
+AudioTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> wp)
+{
+	/* we use this override to veto the Amp processor from the plugin menu,
+	   as its automation lane can be accessed using the special "Fader" menu
+	   option
+	*/
+	
+	boost::shared_ptr<Processor> p = wp.lock ();
+	if (!p) {
+		return;
+	}
+
+	if (boost::dynamic_pointer_cast<Amp> (p) == 0) {
+		RouteTimeAxisView::add_processor_to_subplugin_menu (wp);
 	}
 }

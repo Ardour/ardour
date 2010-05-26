@@ -92,6 +92,7 @@ class AudioTimeAxisView : public RouteTimeAxisView
 
 	void append_extra_display_menu_items ();
 	Gtk::Menu* build_mode_menu();
+	void build_automation_action_menu ();
 
 	void show_all_automation ();
 	void show_existing_automation ();
@@ -102,6 +103,16 @@ class AudioTimeAxisView : public RouteTimeAxisView
 
 	void ensure_pan_views (bool show = true);
 	void update_control_names ();
+
+	void update_gain_track_visibility ();
+	void update_pan_track_visibility ();
+
+	void add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Processor>);
+	
+	boost::shared_ptr<AutomationTimeAxisView> gain_track;
+	Gtk::CheckMenuItem* gain_automation_item;
+	std::list<boost::shared_ptr<AutomationTimeAxisView> > pan_tracks;
+	Gtk::CheckMenuItem* pan_automation_item;
 };
 
 #endif /* __ardour_audio_time_axis_h__ */
