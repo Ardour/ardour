@@ -1147,11 +1147,11 @@ AutomationList::cut_copy_clear (double start, double end, int op)
                         /* only add a boundary point if there is a point after "end"
                          */
 
-                        if (op == 0 && (e != events.end() || end < (*e)->when)) { // cut
+                        if (op == 0 && (e != events.end() && end < (*e)->when)) { // cut
                                 events.insert (e, point_factory (end, end_value));
                         }
 
-                        if (op != 2 && (e != events.end() || end < (*e)->when)) { // cut/copy
+                        if (op != 2 && (e != events.end() && end < (*e)->when)) { // cut/copy
                                 nal->events.push_back (point_factory (end - start, end_value));
                         }
 		}
