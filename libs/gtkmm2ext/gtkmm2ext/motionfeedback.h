@@ -64,8 +64,8 @@ class MotionFeedback : public Gtk::VBox
 
 	void set_controllable (boost::shared_ptr<PBD::Controllable> c) { binding_proxy.set_controllable (c); }
         void set_lamp_color (const Gdk::Color&);
-
-        void render_file (const std::string& path, int width, int height);
+        
+        static Glib::RefPtr<Gdk::Pixbuf> render_pixbuf (int size);
 
  protected:
 	gfloat _range;
@@ -111,7 +111,7 @@ class MotionFeedback : public Gtk::VBox
 	GdkColor lamp_bright;
 	GdkColor lamp_dark;
 
-        void core_draw (cairo_t*, int, double, double, double);
+        static void core_draw (cairo_t*, int, double, double, double, double, const GdkColor* bright, const GdkColor* dark);
 };
 
 } /* namespace */

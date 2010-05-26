@@ -6,6 +6,7 @@
 #include "gtkmm2ext/bindable_button.h"
 #include "gtkmm2ext/tearoff.h"
 #include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/motionfeedback.h"
 
 #include "ardour/dB.h"
 #include "ardour/monitor_processor.h"
@@ -738,27 +739,34 @@ MonitorSection::setup_knob_images ()
 {
         try {
                 
-                big_knob_pixbuf = ::get_icon ("bigknob");
-                
+                big_knob_pixbuf = MotionFeedback::render_pixbuf (80);                
+
         }  catch (...) {
                 
-                error << "No knob image found (or not loadable) at "
-                      << " .... "
-                      << endmsg;
+                error << "No usable large knob image" << endmsg;
+                throw failed_constructor ();
+        }
+
+        if (!big_knob_pixbuf) {
+                error << "No usable large knob image" << endmsg;
                 throw failed_constructor ();
         }
         
         try {
-                
-                little_knob_pixbuf = ::get_icon ("littleknob");
+
+                little_knob_pixbuf = MotionFeedback::render_pixbuf (30);
                 
         }  catch (...) {
                 
-                error << "No knob image found (or not loadable) at "
-                      << " .... "
-                      << endmsg;
+                error << "No usable small knob image" << endmsg;
                 throw failed_constructor ();
         }
+
+        if (!little_knob_pixbuf) {
+                error << "No usable small knob image" << endmsg;
+                throw failed_constructor ();
+        }
+                
 }
 
 bool

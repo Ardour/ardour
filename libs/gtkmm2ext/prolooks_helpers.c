@@ -361,7 +361,7 @@ void prolooks_color_from_string (const char* webcolor, GdkColor* result) {
 }
 
 
-char* prolooks_color_to_string (GdkColor* color) {
+char* prolooks_color_to_string (const GdkColor* color) {
 	char* result = NULL;
 	guint16 scale;
 	scale = G_MAXUINT16 / G_MAXUINT8;
@@ -380,20 +380,20 @@ CairoColor* prolooks_cairo_color_from_string (const char* webcolor) {
 }
 
 
-void prolooks_set_source_color (cairo_t* cr, GdkColor* color, double alpha) {
+void prolooks_set_source_color (cairo_t* cr, const GdkColor* color, double alpha) {
 	g_return_if_fail (cr != NULL);
 	cairo_set_source_rgba (cr, ((double) (*color).red) / ((double) G_MAXUINT16), ((double) (*color).green) / ((double) G_MAXUINT16), ((double) (*color).blue) / ((double) G_MAXUINT16), alpha);
 }
 
 
-void prolooks_gdk_color_to_cairo_color (GdkColor* color, double* red, double* green, double* blue) {
+void prolooks_gdk_color_to_cairo_color (const GdkColor* color, double* red, double* green, double* blue) {
 	*red = ((double) (*color).red) / ((double) G_MAXUINT16);
 	*green = ((double) (*color).green) / ((double) G_MAXUINT16);
 	*blue = ((double) (*color).blue) / ((double) G_MAXUINT16);
 }
 
 
-CairoColor* prolooks_gdk_color_to_cairo (GdkColor* color) {
+CairoColor* prolooks_gdk_color_to_cairo (const GdkColor* color) {
 	CairoColor* result = NULL;
 	double r;
 	double g;
@@ -428,7 +428,7 @@ void prolooks_set_source_color_string (cairo_t* cr, const char* color, double al
 }
 
 
-void prolooks_add_color_stop (cairo_pattern_t* p, double offset, GdkColor* color, double alpha) {
+void prolooks_add_color_stop (cairo_pattern_t* p, double offset, const GdkColor* color, double alpha) {
 	g_return_if_fail (p != NULL);
 	cairo_pattern_add_color_stop_rgba (p, offset, ((double) (*color).red) / ((double) G_MAXUINT16), ((double) (*color).green) / ((double) G_MAXUINT16), ((double) (*color).blue) / ((double) G_MAXUINT16), alpha);
 }
@@ -443,7 +443,7 @@ void prolooks_add_color_stop_str (cairo_pattern_t* p, double offset, const char*
 }
 
 
-cairo_pattern_t* prolooks_create_gradient (double x1, double y1, double x2, double y2, GdkColor* start, GdkColor* stop, double alpha_start, double alpha_stop) {
+cairo_pattern_t* prolooks_create_gradient (double x1, double y1, double x2, double y2, const GdkColor* start, const GdkColor* stop, double alpha_start, double alpha_stop) {
 	cairo_pattern_t* result = NULL;
 	cairo_pattern_t* gradient;
 	gradient = cairo_pattern_create_linear (x1, y1, x2, y2);
@@ -614,7 +614,7 @@ void prolooks_hsl_to_gdk_color (ProlooksHSL* self, GdkColor* result) {
 }
 
 
-void prolooks_hsl_from_gdk_color (ProlooksHSL* self, GdkColor* color) {
+void prolooks_hsl_from_gdk_color (ProlooksHSL* self, const GdkColor* color) {
 	CairoColor* _tmp0_;
 	g_return_if_fail (self != NULL);
 	prolooks_hsl_from_cairo_color (self, _tmp0_ = prolooks_gdk_color_to_cairo (color));
@@ -910,7 +910,7 @@ char* prolooks_hsv_to_string (ProlooksHSV* self) {
 }
 
 
-ProlooksHSV* prolooks_hsv_construct_for_gdk_color (GType object_type, GdkColor* color) {
+ProlooksHSV* prolooks_hsv_construct_for_gdk_color (GType object_type, const GdkColor* color) {
 	ProlooksHSV* self;
 	self = (ProlooksHSV*) g_type_create_instance (object_type);
 	prolooks_hsv_from_gdk_color (self, color);
@@ -918,7 +918,7 @@ ProlooksHSV* prolooks_hsv_construct_for_gdk_color (GType object_type, GdkColor* 
 }
 
 
-ProlooksHSV* prolooks_hsv_new_for_gdk_color (GdkColor* color) {
+ProlooksHSV* prolooks_hsv_new_for_gdk_color (const GdkColor* color) {
 	return prolooks_hsv_construct_for_gdk_color (PROLOOKS_TYPE_HSV, color);
 }
 
@@ -1023,7 +1023,7 @@ void prolooks_hsv_to_gdk_color (ProlooksHSV* self, GdkColor* result) {
 }
 
 
-void prolooks_hsv_from_gdk_color (ProlooksHSV* self, GdkColor* color) {
+void prolooks_hsv_from_gdk_color (ProlooksHSV* self, const GdkColor* color) {
 	CairoColor* _tmp0_;
 	g_return_if_fail (self != NULL);
 	prolooks_hsv_from_cairo_color (self, _tmp0_ = prolooks_gdk_color_to_cairo (color));
@@ -1311,7 +1311,7 @@ void prolooks_hsv_unref (gpointer instance) {
 }
 
 
-void prolooks_shade_color (GdkColor* orig, double shade_ratio, GdkColor* result) {
+void prolooks_shade_color (const GdkColor* orig, double shade_ratio, GdkColor* result) {
 	ProlooksHSL* HSL;
 	GdkColor _tmp0_ = {0,0,0,0};
 	GdkColor _result_;

@@ -91,16 +91,6 @@ def build(bld):
         else:
                 obj.source += ['gtkapplication_x11.c']
 
-	mfimg = bld.new_task_gen(features = 'cc cxx cprogram')
-	mfimg.source = 'mfimg.cc'
-	mfimg.export_incdirs = ['.']
-	mfimg.includes     = ['.']
-	mfimg.name         = 'mfimg'
-	mfimg.target       = 'mfimg'
-	mfimg.uselib       = 'GTKMM GTK GTKOSX OSX GDK'
-	mfimg.uselib_local = 'libpbd libgtkmm2ext'
-        mfimg.ldflags = [ '-lpthread', '-lrt', '-lsndfile' ]
-
 def shutdown():
 	autowaf.shutdown()
 
