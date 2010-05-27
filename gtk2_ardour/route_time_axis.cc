@@ -2009,6 +2009,8 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 		items.push_back (CheckMenuElem (name));
 		mitem = dynamic_cast<CheckMenuItem*> (&items.back());
 
+		_parameter_menu_map[*i] = mitem;
+
 		if (has_visible_automation.find((*i)) != has_visible_automation.end()) {
 			mitem->set_active(true);
 		}
