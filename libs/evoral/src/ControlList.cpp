@@ -167,8 +167,9 @@ ControlList::maybe_signal_changed ()
 {
 	mark_dirty ();
 
-	if (_frozen)
+	if (_frozen) {
 		_changed_when_thawed = true;
+	}
 }
 
 void

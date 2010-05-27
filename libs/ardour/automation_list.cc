@@ -338,7 +338,7 @@ AutomationList::deserialize_events (const XMLNode& node)
 		maybe_signal_changed ();
 	}
 
-        ControlList::thaw ();
+        thaw ();
         
 	return 0;
 }
@@ -391,7 +391,7 @@ AutomationList::set_state (const XMLNode& node, int version)
 			fast_simple_add (x, y);
 		}
 
-                ControlList::thaw ();
+                thaw ();
 
 		return 0;
 	}
