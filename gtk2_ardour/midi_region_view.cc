@@ -2404,10 +2404,8 @@ MidiRegionView::nudge_notes (bool forward)
 			next_pos -= 1;
 		}
 
-		cerr << "ref point was " << ref_point << " next was " << next_pos;
 		trackview.editor().snap_to (next_pos, (forward ? 1 : -1), false);
 		distance = ref_point - next_pos;
-		cerr << " final is " << next_pos << " distance = " << distance << endl;
 	}
 
 	if (distance == 0) {

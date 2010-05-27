@@ -1131,7 +1131,6 @@ TempoMap::round_to_beat (nframes64_t fr, int dir)
 nframes64_t
 TempoMap::round_to_beat_subdivision (nframes64_t fr, int sub_num, int dir)
 {
-
 	BBT_Time the_beat;
 	uint32_t ticks_one_half_subdivisions_worth;
 	uint32_t ticks_one_subdivisions_worth;
@@ -1158,13 +1157,7 @@ TempoMap::round_to_beat_subdivision (nframes64_t fr, int sub_num, int dir)
 			difference = ticks_one_subdivisions_worth - mod;
 		}
 
-		if (the_beat.ticks + difference >= (uint32_t)Meter::ticks_per_beat) {
-			the_beat.beats++;
-			the_beat.ticks += difference;
-			the_beat.ticks -= (uint32_t)Meter::ticks_per_beat;
-		} else {
-			the_beat.ticks += difference;
-		}
+		the_beat = bbt_add (the_beat, BBT_Time (0, 0, difference));
 
 	} else if (dir < 0) {
 
@@ -1175,41 +1168,22 @@ TempoMap::round_to_beat_subdivision (nframes64_t fr, int sub_num, int dir)
 		if (mod == 0) {
 			/* right on the subdivision, so the difference is just the subdivision ticks */
 			difference = ticks_one_subdivisions_worth;
-			cerr << "On the sub, move by 1 sub = " << difference << endl;
 		} else {
 			/* not on subdivision, compute distance to previous subdivision, which
 			   is just the modulus.
 			*/
 
 			difference = mod;
-			cerr << "off the sub, move by 1 sub = " << difference << endl;
 		}
 
-
-		cerr << "ticks = " << the_beat.ticks << endl;
-
-		if (the_beat.ticks < difference) {
-			cerr << "backup beats, set ticks to "
-			     << (uint32_t)Meter::ticks_per_beat - difference << endl;
-			the_beat.beats--;
-			the_beat.ticks = (uint32_t)Meter::ticks_per_beat - difference;
-		} else {
-			cerr << " reduce ticks\n";
-			the_beat.ticks -= difference;
-		}
+		the_beat = bbt_subtract (the_beat, BBT_Time (0, 0, difference));
 
 	} else {
 		/* round to nearest */
 
 		if (the_beat.ticks % ticks_one_subdivisions_worth > ticks_one_half_subdivisions_worth) {
 			difference = ticks_one_subdivisions_worth - (the_beat.ticks % ticks_one_subdivisions_worth);
-			if (the_beat.ticks + difference >= (uint32_t)Meter::ticks_per_beat) {
-				the_beat.beats++;
-				the_beat.ticks += difference;
-				the_beat.ticks -= (uint32_t)Meter::ticks_per_beat;
-			} else {
-				the_beat.ticks += difference;
-			}
+			the_beat = bbt_add (the_beat, BBT_Time (0, 0, difference));
 		} else {
 			// difference = ticks_one_subdivisions_worth - (the_beat.ticks % ticks_one_subdivisions_worth);
 			the_beat.ticks -= the_beat.ticks % ticks_one_subdivisions_worth;
@@ -1724,7 +1698,9 @@ TempoMap::bbt_add (const BBT_Time& start, const BBT_Time& increment, const Tempo
 	if (ticks >= Meter::ticks_per_beat) {
 		op.beats++;
 		result.ticks = ticks % (uint32_t) Meter::ticks_per_beat;
-	} 
+	} else {
+		result.ticks += op.ticks;
+	}
 
 	/* now comes the complicated part. we have to add one beat a time,
 	   checking for a new metric on every beat.
