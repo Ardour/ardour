@@ -1044,6 +1044,14 @@ Session::start_transport ()
 		(*i)->realtime_set_speed ((*i)->speed(), true);
 	}
 
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+        /* force an automation snapshot as we start up */
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+                (*i)->automation_snapshot (transport_frame(), true);
+        }
+
 	send_mmc_in_another_thread (MIDI::MachineControl::cmdDeferredPlay, 0);
 	
 	TransportStateChange (); /* EMIT SIGNAL */
