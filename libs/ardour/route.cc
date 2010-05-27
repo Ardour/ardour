@@ -451,10 +451,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
 
 	if (rm.locked()) {
-                //cerr << name() << " upstream solo " << _soloed_by_others_upstream
-                // << " downstream solo " << _soloed_by_others_downstream
-                // << " self " << _self_solo
-                //<< endl;
+
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 			if (bufs.count() != (*i)->input_streams()) {
