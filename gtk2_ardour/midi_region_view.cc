@@ -86,6 +86,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _delta_command(0)
 	, _diff_command(0)
 	, _ghost_note(0)
+        , _drag_rect (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -109,13 +110,13 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _delta_command(0)
 	, _diff_command(0)
 	, _ghost_note(0)
+        , _drag_rect (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, no_sound_notes (false)
-
 {
 	_note_group->raise_to_top();
 }
@@ -133,6 +134,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _delta_command(0)
 	, _diff_command(0)
 	, _ghost_note(0)
+        , _drag_rect (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -160,6 +162,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _delta_command(0)
 	, _diff_command(0)
 	, _ghost_note(0)
+        , _drag_rect (0)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _sort_needed (true)
@@ -227,349 +230,394 @@ MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 bool
 MidiRegionView::canvas_event(GdkEvent* ev)
 {
-	PublicEditor& editor (trackview.editor());
-
-	if (!editor.internal_editing()) {
+	if (!trackview.editor().internal_editing()) {
 		return false;
 	}
 
-	static double drag_start_x, drag_start_y;
-	static double last_x, last_y;
-	double event_x, event_y;
-	nframes64_t event_frame = 0;
-	bool fine;
-
-	static ArdourCanvas::SimpleRect* drag_rect = 0;
-
-	/* XXX: note that as of August 2009, the GnomeCanvas does not propagate scroll events
+	/* XXX: note that until version 2.30, the GnomeCanvas did not propagate scroll events
 	   to its items, which means that ev->type == GDK_SCROLL will never be seen
 	*/
 
 	switch (ev->type) {
 	case GDK_SCROLL:
-		fine = Keyboard::modifier_state_equals (ev->scroll.state, Keyboard::Level4Modifier);
-
-		if (ev->scroll.direction == GDK_SCROLL_UP) {
-			change_velocities (true, fine, false);
-			return true;
-		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
-			change_velocities (false, fine, false);
-			return true;
-		} else {
-			return false;
-		}
-		break;
+                return scroll (&ev->scroll);
 
 	case GDK_KEY_PRESS:
-
-		/* since GTK bindings are generally activated on press, and since
-		   detectable auto-repeat is the name of the game and only sends
-		   repeated presses, carry out key actions at key press, not release.
-		*/
-
-		if (ev->key.keyval == GDK_Alt_L || ev->key.keyval == GDK_Alt_R){
-			_mouse_state = SelectTouchDragging;
-			return true;
-
-		} else if (ev->key.keyval == GDK_Escape) {
-			clear_selection();
-			_mouse_state = None;
-
-		} else if (ev->key.keyval == GDK_comma || ev->key.keyval == GDK_period) {
-
-			bool start = (ev->key.keyval == GDK_comma);
-			bool end = (ev->key.keyval == GDK_period);
-			bool shorter = Keyboard::modifier_state_contains (ev->key.state, Keyboard::PrimaryModifier);
-			fine = Keyboard::modifier_state_contains (ev->key.state, Keyboard::SecondaryModifier);
-
-			change_note_lengths (fine, shorter, start, end);
-
-			return true;
-
-		} else if (ev->key.keyval == GDK_Delete) {
-
-			delete_selection();
-			return true;
-
-		} else if (ev->key.keyval == GDK_Tab) {
-
-			if (Keyboard::modifier_state_equals (ev->key.state, Keyboard::PrimaryModifier)) {
-				goto_previous_note ();
-			} else {
-				goto_next_note ();
-			}
-			return true;
-
-		} else if (ev->key.keyval == GDK_Up) {
-
-			bool allow_smush = Keyboard::modifier_state_contains (ev->key.state, Keyboard::SecondaryModifier);
-			bool fine = Keyboard::modifier_state_contains (ev->key.state, Keyboard::TertiaryModifier);
-
-			if (Keyboard::modifier_state_contains (ev->key.state, Keyboard::PrimaryModifier)) {
-				change_velocities (true, fine, allow_smush);
-			} else {
-				transpose (true, fine, allow_smush);
-			}
-			return true;
-
-		} else if (ev->key.keyval == GDK_Down) {
-
-			bool allow_smush = Keyboard::modifier_state_contains (ev->key.state, Keyboard::SecondaryModifier);
-			fine = Keyboard::modifier_state_contains (ev->key.state, Keyboard::TertiaryModifier);
-
-			if (Keyboard::modifier_state_contains (ev->key.state, Keyboard::PrimaryModifier)) {
-				change_velocities (false, fine, allow_smush);
-			} else {
-				transpose (false, fine, allow_smush);
-			}
-			return true;
-
-		} else if (ev->key.keyval == GDK_Left) {
-
-			nudge_notes (false);
-			return true;
-
-		} else if (ev->key.keyval == GDK_Right) {
-
-			nudge_notes (true);
-			return true;
-
-		} else if (ev->key.keyval == GDK_Control_L) {
-			return true;
-
-		} else if (ev->key.keyval == GDK_r) {
-			/* if we're not step editing, this really doesn't matter */
-			midi_view()->step_edit_rest ();
-			return true;
-		}
-
-		return false;
+                return key_press (&ev->key);
 
 	case GDK_KEY_RELEASE:
-		if (ev->key.keyval == GDK_Alt_L || ev->key.keyval == GDK_Alt_R) {
-			_mouse_state = None;
-			return true;
-		}
-		return false;
+                return key_release (&ev->key);
 
 	case GDK_BUTTON_PRESS:
-		last_x = ev->button.x;
-		last_y = ev->button.y;
-		group->w2i (last_x, last_y);
-
-		if (_mouse_state != SelectTouchDragging && ev->button.button == 1) {
-			_pressed_button = ev->button.button;
-			_mouse_state = Pressed;
-			return true;
-		}
-		_pressed_button = ev->button.button;
-		return true;
+                return button_press (&ev->button);
 
 	case GDK_2BUTTON_PRESS:
 		return true;
 
+	case GDK_BUTTON_RELEASE:
+                return button_release (&ev->button);
+		
 	case GDK_ENTER_NOTIFY:
-	{
-		/* FIXME: do this on switch to note tool, too, if the pointer is already in */
-		Keyboard::magic_widget_grab_focus();
-		group->grab_focus();
-
-		if (editor.current_mouse_mode() == MouseRange) {
-			create_ghost_note (ev->crossing.x, ev->crossing.y);
-		}
-		break;
-	}
+                return enter_notify (&ev->crossing);
 
 	case GDK_LEAVE_NOTIFY:
-	{
-		trackview.editor().hide_verbose_canvas_cursor ();
-		delete _ghost_note;
-		_ghost_note = 0;
-		break;
-	}
+                return leave_notify (&ev->crossing);
 
 	case GDK_MOTION_NOTIFY:
-	{
-		event_x = ev->motion.x;
-		event_y = ev->motion.y;
-		group->w2i(event_x, event_y);
+                return motion (&ev->motion);
 
-		// convert event_x to global frame
-		event_frame = trackview.editor().pixel_to_frame(event_x) + _region->position();
-		trackview.editor().snap_to(event_frame);
-		// convert event_frame back to local coordinates relative to position
-		event_frame -= _region->position();
-
-		if (_ghost_note) {
-			update_ghost_note (ev->motion.x, ev->motion.y);
-		}
-		
-		switch (_mouse_state) {
-		case Pressed: // Maybe start a drag, if we've moved a bit
-
-			if (fabs (event_x - last_x) < 1 && fabs (event_y - last_y) < 1) {
-				/* no appreciable movement since the button was pressed */
-				return false;
-			}
-
-			// Select drag start
-			if (_pressed_button == 1 && editor.current_mouse_mode() == MouseObject) {
-				group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
-						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
-				last_x = event_x;
-				last_y = event_y;
-				drag_start_x = event_x;
-				drag_start_y = event_y;
-
-				drag_rect = new ArdourCanvas::SimpleRect(*group);
-				drag_rect->property_x1() = event_x;
-				drag_rect->property_y1() = event_y;
-				drag_rect->property_x2() = event_x;
-				drag_rect->property_y2() = event_y;
-				drag_rect->property_outline_what() = 0xFF;
-				drag_rect->property_outline_color_rgba()
-					= ARDOUR_UI::config()->canvasvar_MidiSelectRectOutline.get();
-				drag_rect->property_fill_color_rgba()
-					= ARDOUR_UI::config()->canvasvar_MidiSelectRectFill.get();
-
-				_mouse_state = SelectRectDragging;
-				return true;
-
-			// Add note drag start
-			} else if (editor.internal_editing()) {
-
-				delete _ghost_note;
-				_ghost_note = 0;
-				
-				group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
-						Gdk::Cursor(Gdk::FLEUR), ev->motion.time);
-				last_x = event_x;
-				last_y = event_y;
-				drag_start_x = event_x;
-				drag_start_y = event_y;
-
-				drag_rect = new ArdourCanvas::SimpleRect(*group);
-				drag_rect->property_x1() = trackview.editor().frame_to_pixel(event_frame);
-
-				drag_rect->property_y1() = midi_stream_view()->note_to_y(
-						midi_stream_view()->y_to_note(event_y));
-				drag_rect->property_x2() = trackview.editor().frame_to_pixel(event_frame);
-				drag_rect->property_y2() = drag_rect->property_y1()
-				                         + floor(midi_stream_view()->note_height());
-				drag_rect->property_outline_what() = 0xFF;
-				drag_rect->property_outline_color_rgba() = 0xFFFFFF99;
-				drag_rect->property_fill_color_rgba()    = 0xFFFFFF66;
-
-				_mouse_state = AddDragging;
-				return true;
-			}
-
-			return false;
-
-		case SelectRectDragging: // Select drag motion
-		case AddDragging: // Add note drag motion
-			if (ev->motion.is_hint) {
-				int t_x;
-				int t_y;
-				GdkModifierType state;
-				gdk_window_get_pointer(ev->motion.window, &t_x, &t_y, &state);
-				event_x = t_x;
-				event_y = t_y;
-			}
-
-			if (_mouse_state == AddDragging)
-				event_x = trackview.editor().frame_to_pixel(event_frame);
-
-			if (drag_rect) {
-				if (event_x > drag_start_x)
-					drag_rect->property_x2() = event_x;
-				else
-					drag_rect->property_x1() = event_x;
-			}
-
-			if (drag_rect && _mouse_state == SelectRectDragging) {
-				if (event_y > drag_start_y)
-					drag_rect->property_y2() = event_y;
-				else
-					drag_rect->property_y1() = event_y;
-
-				update_drag_selection(drag_start_x, event_x, drag_start_y, event_y);
-			}
-
-			last_x = event_x;
-			last_y = event_y;
-
-		case SelectTouchDragging:
-			return false;
-
-		default:
-			break;
-		}
-		break;
-	}
-
-	case GDK_BUTTON_RELEASE:
-		event_x = ev->motion.x;
-		event_y = ev->motion.y;
-		group->w2i(event_x, event_y);
-		group->ungrab(ev->button.time);
-		event_frame = trackview.editor().pixel_to_frame(event_x);
-
-		if (ev->button.button == 3) {
-			return false;
-		} else if (_pressed_button != 1) {
-			return false;
-		}
-
-		switch (_mouse_state) {
-		case Pressed: // Clicked
-			switch (editor.current_mouse_mode()) {
-			case MouseObject:
-			case MouseTimeFX:
-				clear_selection();
-				break;
-			case MouseRange:
-			{
-				bool success;
-				Evoral::MusicalTime beats = trackview.editor().get_grid_type_as_beats (success, trackview.editor().pixel_to_frame (event_x));
-				if (!success) {
-					beats = 1;
-				}
-
-				create_note_at (event_x, event_y, beats);
-				break;
-			}
-			default:
-				break;
-			}
-			_mouse_state = None;
-			break;
-		case SelectRectDragging: // Select drag done
-			_mouse_state = None;
-			delete drag_rect;
-			drag_rect = 0;
-			break;
-		case AddDragging: // Add drag done
-			_mouse_state = None;
-			if (drag_rect->property_x2() > drag_rect->property_x1() + 2) {
-				const double x      = drag_rect->property_x1();
-				const double length = trackview.editor().pixel_to_frame(
-				                        drag_rect->property_x2() - drag_rect->property_x1());
-
-				create_note_at(x, drag_rect->property_y1(), frames_to_beats(length));
-			}
-
-			delete drag_rect;
-			drag_rect = 0;
-
-			create_ghost_note (ev->button.x, ev->button.y);
-		default: break;
-		}
-		
-	default: break;
+	default: 
+                break;
 	}
 
 	return false;
+}
+
+bool
+MidiRegionView::enter_notify (GdkEventCrossing* ev)
+{
+        /* FIXME: do this on switch to note tool, too, if the pointer is already in */
+        Keyboard::magic_widget_grab_focus();
+        group->grab_focus();
+        
+        if (trackview.editor().current_mouse_mode() == MouseRange) {
+                create_ghost_note (ev->x, ev->y);
+        }
+
+        return false;
+}
+
+bool
+MidiRegionView::leave_notify (GdkEventCrossing* ev)
+{
+        trackview.editor().hide_verbose_canvas_cursor ();
+        delete _ghost_note;
+        _ghost_note = 0;
+        return false;
+}
+
+bool
+MidiRegionView::button_press (GdkEventButton* ev)
+{
+        _last_x = ev->x;
+        _last_y = ev->y;
+        group->w2i (_last_x, _last_y);
+        
+        if (_mouse_state != SelectTouchDragging && ev->button == 1) {
+                _pressed_button = ev->button;
+                _mouse_state = Pressed;
+                return true;
+        }
+        _pressed_button = ev->button;
+
+        return true;
+}
+
+bool
+MidiRegionView::button_release (GdkEventButton* ev)
+{
+	double event_x, event_y;
+	nframes64_t event_frame = 0;
+
+        event_x = ev->x;
+        event_y = ev->y;
+        group->w2i(event_x, event_y);
+        group->ungrab(ev->time);
+        event_frame = trackview.editor().pixel_to_frame(event_x);
+
+        if (ev->button == 3) {
+                return false;
+        } else if (_pressed_button != 1) {
+                return false;
+        }
+
+        switch (_mouse_state) {
+        case Pressed: // Clicked
+                switch (trackview.editor().current_mouse_mode()) {
+                case MouseObject:
+                case MouseTimeFX:
+                        clear_selection();
+                        break;
+                case MouseRange:
+                {
+                        bool success;
+                        Evoral::MusicalTime beats = trackview.editor().get_grid_type_as_beats (success, trackview.editor().pixel_to_frame (event_x));
+                        if (!success) {
+                                beats = 1;
+                        }
+
+                        create_note_at (event_x, event_y, beats);
+                        break;
+                }
+                default:
+                        break;
+                }
+                _mouse_state = None;
+                break;
+        case SelectRectDragging: // Select drag done
+                _mouse_state = None;
+                delete _drag_rect;
+                _drag_rect = 0;
+                break;
+
+        case AddDragging: // Add drag done
+                _mouse_state = None;
+                if (_drag_rect->property_x2() > _drag_rect->property_x1() + 2) {
+                        const double x      = _drag_rect->property_x1();
+                        const double length = trackview.editor().pixel_to_frame 
+                                (_drag_rect->property_x2() - _drag_rect->property_x1());
+
+                        create_note_at (x, _drag_rect->property_y1(), frames_to_beats(length));
+                }
+
+                delete _drag_rect;
+                _drag_rect = 0;
+
+                create_ghost_note (ev->x, ev->y);
+
+        default:
+                break;
+        }
+
+        return false;
+}
+
+bool
+MidiRegionView::motion (GdkEventMotion* ev)
+{
+	double event_x, event_y;
+	nframes64_t event_frame = 0;
+
+        event_x = ev->x;
+        event_y = ev->y;
+        group->w2i(event_x, event_y);
+
+        // convert event_x to global frame
+        event_frame = trackview.editor().pixel_to_frame(event_x) + _region->position();
+        trackview.editor().snap_to(event_frame);
+        // convert event_frame back to local coordinates relative to position
+        event_frame -= _region->position();
+
+        if (_ghost_note) {
+                update_ghost_note (ev->x, ev->y);
+        }
+		
+        switch (_mouse_state) {
+        case Pressed: // Maybe start a drag, if we've moved a bit
+
+                if (fabs (event_x - _last_x) < 1 && fabs (event_y - _last_y) < 1) {
+                        /* no appreciable movement since the button was pressed */
+                        return false;
+                }
+
+                // Select drag start
+                if (_pressed_button == 1 && trackview.editor().current_mouse_mode() == MouseObject) {
+                        group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
+                                    Gdk::Cursor(Gdk::FLEUR), ev->time);
+                        _last_x = event_x;
+                        _last_y = event_y;
+                        _drag_start_x = event_x;
+                        _drag_start_y = event_y;
+
+                        _drag_rect = new ArdourCanvas::SimpleRect(*group);
+                        _drag_rect->property_x1() = event_x;
+                        _drag_rect->property_y1() = event_y;
+                        _drag_rect->property_x2() = event_x;
+                        _drag_rect->property_y2() = event_y;
+                        _drag_rect->property_outline_what() = 0xFF;
+                        _drag_rect->property_outline_color_rgba()
+                                = ARDOUR_UI::config()->canvasvar_MidiSelectRectOutline.get();
+                        _drag_rect->property_fill_color_rgba()
+                                = ARDOUR_UI::config()->canvasvar_MidiSelectRectFill.get();
+
+                        _mouse_state = SelectRectDragging;
+                        return true;
+
+			// Add note drag start
+                } else if (trackview.editor().internal_editing()) {
+
+                        delete _ghost_note;
+                        _ghost_note = 0;
+				
+                        group->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK,
+                                    Gdk::Cursor(Gdk::FLEUR), ev->time);
+                        _last_x = event_x;
+                        _last_y = event_y;
+                        _drag_start_x = event_x;
+                        _drag_start_y = event_y;
+
+                        _drag_rect = new ArdourCanvas::SimpleRect(*group);
+                        _drag_rect->property_x1() = trackview.editor().frame_to_pixel(event_frame);
+
+                        _drag_rect->property_y1() = midi_stream_view()->note_to_y(
+                                midi_stream_view()->y_to_note(event_y));
+                        _drag_rect->property_x2() = trackview.editor().frame_to_pixel(event_frame);
+                        _drag_rect->property_y2() = _drag_rect->property_y1()
+                                + floor(midi_stream_view()->note_height());
+                        _drag_rect->property_outline_what() = 0xFF;
+                        _drag_rect->property_outline_color_rgba() = 0xFFFFFF99;
+                        _drag_rect->property_fill_color_rgba()    = 0xFFFFFF66;
+
+                        _mouse_state = AddDragging;
+                        return true;
+                }
+
+                return false;
+
+        case SelectRectDragging: // Select drag motion
+        case AddDragging: // Add note drag motion
+                if (ev->is_hint) {
+                        int t_x;
+                        int t_y;
+                        GdkModifierType state;
+                        gdk_window_get_pointer(ev->window, &t_x, &t_y, &state);
+                        event_x = t_x;
+                        event_y = t_y;
+                }
+
+                if (_mouse_state == AddDragging)
+                        event_x = trackview.editor().frame_to_pixel(event_frame);
+
+                if (_drag_rect) {
+                        if (event_x > _drag_start_x)
+                                _drag_rect->property_x2() = event_x;
+                        else
+                                _drag_rect->property_x1() = event_x;
+                }
+
+                if (_drag_rect && _mouse_state == SelectRectDragging) {
+                        if (event_y > _drag_start_y)
+                                _drag_rect->property_y2() = event_y;
+                        else
+                                _drag_rect->property_y1() = event_y;
+
+                        update_drag_selection(_drag_start_x, event_x, _drag_start_y, event_y);
+                }
+
+                _last_x = event_x;
+                _last_y = event_y;
+
+        case SelectTouchDragging:
+                return false;
+
+        default:
+                break;
+        }
+
+        return false;
+}
+
+
+bool
+MidiRegionView::scroll (GdkEventScroll* ev)
+{
+        bool fine = Keyboard::modifier_state_equals (ev->state, Keyboard::Level4Modifier);
+        
+        if (ev->direction == GDK_SCROLL_UP) {
+                change_velocities (true, fine, false);
+                return true;
+        } else if (ev->direction == GDK_SCROLL_DOWN) {
+                change_velocities (false, fine, false);
+                return true;
+        } 
+        return false;
+}
+
+bool
+MidiRegionView::key_press (GdkEventKey* ev)
+{ 
+        /* since GTK bindings are generally activated on press, and since
+           detectable auto-repeat is the name of the game and only sends
+           repeated presses, carry out key actions at key press, not release.
+        */
+        
+        if (ev->keyval == GDK_Alt_L || ev->keyval == GDK_Alt_R){
+                _mouse_state = SelectTouchDragging;
+                return true;
+                
+        } else if (ev->keyval == GDK_Escape) {
+                clear_selection();
+                _mouse_state = None;
+                
+        } else if (ev->keyval == GDK_comma || ev->keyval == GDK_period) {
+                
+                bool start = (ev->keyval == GDK_comma);
+                bool end = (ev->keyval == GDK_period);
+                bool shorter = Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier);
+                bool fine = Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
+                
+                change_note_lengths (fine, shorter, start, end);
+                
+                return true;
+                
+        } else if (ev->keyval == GDK_Delete) {
+                
+                delete_selection();
+                return true;
+                
+        } else if (ev->keyval == GDK_Tab) {
+                
+                if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+                        goto_previous_note ();
+                } else {
+                        goto_next_note ();
+                }
+                return true;
+                
+        } else if (ev->keyval == GDK_Up) {
+                
+                bool allow_smush = Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
+                bool fine = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
+                
+                if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
+                        change_velocities (true, fine, allow_smush);
+                } else {
+                        transpose (true, fine, allow_smush);
+                }
+                return true;
+                
+        } else if (ev->keyval == GDK_Down) {
+                
+                bool allow_smush = Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
+                bool fine = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
+                
+                if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
+                        change_velocities (false, fine, allow_smush);
+                } else {
+                        transpose (false, fine, allow_smush);
+                }
+                return true;
+                
+        } else if (ev->keyval == GDK_Left) {
+                
+                nudge_notes (false);
+                return true;
+                
+        } else if (ev->keyval == GDK_Right) {
+                
+                nudge_notes (true);
+                return true;
+                
+        } else if (ev->keyval == GDK_Control_L) {
+                return true;
+                
+        } else if (ev->keyval == GDK_r) {
+                /* if we're not step editing, this really doesn't matter */
+                midi_view()->step_edit_rest ();
+                return true;
+        }
+        
+        return false;
+}
+
+bool
+MidiRegionView::key_release (GdkEventKey* ev)
+{
+        if (ev->keyval == GDK_Alt_L || ev->keyval == GDK_Alt_R) {
+                _mouse_state = None;
+                return true;
+        }
+        return false;
 }
 
 void

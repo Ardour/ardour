@@ -372,6 +372,11 @@ class MidiRegionView : public RegionView
 	ArdourCanvas::CanvasNote*            _ghost_note;
 	double                               _last_ghost_x;
 	double                               _last_ghost_y;
+        double                               _drag_start_x;
+        double                               _drag_start_y;
+        double                               _last_x;
+        double                               _last_y;
+	ArdourCanvas::SimpleRect*            _drag_rect;
 
 	MouseState _mouse_state;
 	int _pressed_button;
@@ -416,6 +421,15 @@ class MidiRegionView : public RegionView
 	PBD::ScopedConnection snap_changed_connection;
 
 	void show_verbose_canvas_cursor (boost::shared_ptr<NoteType>) const;
+
+        bool motion (GdkEventMotion*);
+        bool scroll (GdkEventScroll*);
+        bool key_press (GdkEventKey*);
+        bool key_release (GdkEventKey*);
+        bool button_press (GdkEventButton*);
+        bool button_release (GdkEventButton*);
+        bool enter_notify (GdkEventCrossing*);
+        bool leave_notify (GdkEventCrossing*);
 };
 
 
