@@ -1670,11 +1670,10 @@ Editor::add_region_context_items (StreamView* sv, boost::shared_ptr<Region> regi
 			sigc::bind (sigc::mem_fun(*this, &Editor::set_selected_regionview_from_map_event), sv, boost::weak_ptr<Region>(region)));
 
 		items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &Editor::rename_region)));
-		if (mr && internal_editing()) {
-			items.push_back (MenuElem (_("List editor..."), sigc::mem_fun(*this, &Editor::show_midi_list_editor)));
-		} else {
-			items.push_back (MenuElem (_("Region Properties..."), sigc::mem_fun(*this, &Editor::edit_region)));
+		if (mr) {
+			items.push_back (MenuElem (_("List Editor..."), sigc::mem_fun(*this, &Editor::show_midi_list_editor)));
 		}
+		items.push_back (MenuElem (_("Region Properties..."), sigc::mem_fun(*this, &Editor::edit_region)));
 	}
 
 	items.push_back (MenuElem (_("Raise to Top Layer"), sigc::mem_fun(*this, &Editor::raise_region_to_top)));
