@@ -1295,23 +1295,20 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case MouseGain:
-			// Gain only makes sense for audio regions
-
-			if (!dynamic_cast<AudioRegionView*>(clicked_regionview)) {
-				break;
-			}
-
 			switch (item_type) {
 			case RegionItem:
+			{
 				/* check that we didn't drag before releasing, since
 				   its really annoying to create new control
 				   points when doing this.
 				*/
-				if (were_dragging) {
-					dynamic_cast<AudioRegionView*>(clicked_regionview)->add_gain_point_event (item, event);
+				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (clicked_regionview);
+				if (were_dragging && arv) {
+					arv->add_gain_point_event (item, event);
 				}
 				return true;
 				break;
+			}
 
 			case AutomationTrackItem:
 				dynamic_cast<AutomationTimeAxisView*>(clicked_axisview)->
