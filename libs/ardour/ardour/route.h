@@ -440,7 +440,8 @@ class Route : public SessionObject, public AutomatableControls, public RouteGrou
 	void passthru_silence (sframes_t start_frame, sframes_t end_frame,
 	                       nframes_t nframes, int declick);
 
-	void silence (nframes_t nframes);
+	void silence (nframes_t);
+	void silence_unlocked (nframes_t);
 
 	ChanCount processor_max_streams;
 	uint32_t _remote_control_id;

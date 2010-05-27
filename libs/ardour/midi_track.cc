@@ -280,17 +280,15 @@ int
 MidiTrack::roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
 		 bool can_record, bool rec_monitors_input, bool& needs_butler)
 {
+	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
+	if (!lm.locked()) {
+		return 0;
+	}
+
 	int dret;
 	boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
 
-	{
-		Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
-		if (lm.locked()) {
-			// automation snapshot can also be called from the non-rt context
-			// and it uses the redirect list, so we take the lock out here
-			automation_snapshot (start_frame);
-		}
-	}
+	automation_snapshot (start_frame);
 
 	if (n_outputs().n_total() == 0 && _processors.empty()) {
 		return 0;

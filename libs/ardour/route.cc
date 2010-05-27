@@ -448,22 +448,17 @@ Route::process_output_buffers (BufferSet& bufs,
 	   and go ....
 	   ----------------------------------------------------------------------------------------- */
 
-	Glib::RWLock::ReaderLock rm (_processor_lock, Glib::TRY_LOCK);
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
-	if (rm.locked()) {
-
-		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-
-			if (bufs.count() != (*i)->input_streams()) {
-				cerr << _name << " bufs = " << bufs.count()
-				     << " input for " << (*i)->name() << " = " << (*i)->input_streams()
-				     << endl;
-			}
-			assert (bufs.count() == (*i)->input_streams());
-
-			(*i)->run (bufs, start_frame, end_frame, nframes, *i != _processors.back());
-			bufs.set_count ((*i)->output_streams());
+		if (bufs.count() != (*i)->input_streams()) {
+			cerr << _name << " bufs = " << bufs.count()
+			     << " input for " << (*i)->name() << " = " << (*i)->input_streams()
+			     << endl;
 		}
+		assert (bufs.count() == (*i)->input_streams());
+		
+		(*i)->run (bufs, start_frame, end_frame, nframes, *i != _processors.back());
+		bufs.set_count ((*i)->output_streams());
 	}
 }
 
@@ -483,7 +478,7 @@ Route::passthru (sframes_t start_frame, sframes_t end_frame, nframes_t nframes, 
 	assert (bufs.available() >= input_streams());
 
 	if (_input->n_ports() == ChanCount::ZERO) {
-		silence (nframes);
+		silence_unlocked (nframes);
 	}
 
 	bufs.set_count (input_streams());
@@ -1457,18 +1452,16 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	uint32_t index = 0;
 
 	DEBUG_TRACE (DEBUG::Processors, string_compose ("%1: configure processors\n", _name));
-#ifndef NDEBUG
 	DEBUG_TRACE (DEBUG::Processors, "{\n");
 	for (list<boost::shared_ptr<Processor> >::const_iterator p = _processors.begin(); p != _processors.end(); ++p) {
 		DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1 ID = %2\n", (*p)->name(), (*p)->id()));
 	}
 	DEBUG_TRACE (DEBUG::Processors, "}\n");
-#endif
 
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++index) {
 
 		if ((*p)->can_support_io_configuration(in, out)) {
-			DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1in = %2 out = %3\n",(*p)->name(), in, out));
+			DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1 in = %2 out = %3\n",(*p)->name(), in, out));
 			configuration.push_back(make_pair(in, out));
 			in = out;
 		} else {
@@ -1500,6 +1493,8 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 		Glib::Mutex::Lock em (_session.engine().process_lock ());
 		_session.ensure_buffers (n_process_buffers ());
 	}
+
+	DEBUG_TRACE (DEBUG::Processors, string_compose ("%1: configuration complete\n", _name));
 
 	_in_configure_processors = false;
 	return 0;
@@ -2323,31 +2318,37 @@ Route::curve_reallocate ()
 void
 Route::silence (nframes_t nframes)
 {
+	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
+	if (!lm.locked()) {
+		return;
+	}
+
+	silence_unlocked (nframes);
+}
+
+void
+Route::silence_unlocked (nframes_t nframes)
+{
+	/* Must be called with the processor lock held */
+	
 	if (!_silent) {
 
 		_output->silence (nframes);
 
-		{
-			Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
-
-			if (lm.locked()) {
-				for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-					boost::shared_ptr<PluginInsert> pi;
-
-					if (!_active && (pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) != 0) {
-						// skip plugins, they don't need anything when we're not active
-						continue;
-					}
-
-					(*i)->silence (nframes);
-				}
-
-				if (nframes == _session.get_block_size()) {
-					// _silent = true;
-				}
+		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+			boost::shared_ptr<PluginInsert> pi;
+			
+			if (!_active && (pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) != 0) {
+				// skip plugins, they don't need anything when we're not active
+				continue;
 			}
+			
+			(*i)->silence (nframes);
 		}
-
+		
+		if (nframes == _session.get_block_size()) {
+			// _silent = true;
+		}
 	}
 }
 
@@ -2643,12 +2644,17 @@ int
 Route::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 		bool session_state_changing, bool /*can_record*/, bool /*rec_monitors_input*/)
 {
+	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
+	if (!lm.locked()) {
+		return 0;
+	}
+
 	if (n_outputs().n_total() == 0) {
 		return 0;
 	}
 
 	if (!_active || n_inputs() == ChanCount::ZERO)  {
-		silence (nframes);
+		silence_unlocked (nframes);
 		return 0;
 	}
 	if (session_state_changing) {
@@ -2658,7 +2664,7 @@ Route::no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
 			   
 			   XXX note the absurdity of ::no_roll() being called when we ARE rolling!
 			*/
-			silence (nframes);
+			silence_unlocked (nframes);
 			return 0;
 		}
 		/* we're really not rolling, so we're either delivery silence or actually
@@ -2678,14 +2684,14 @@ Route::check_initial_delay (nframes_t nframes, nframes_t& transport_frame)
 	if (_roll_delay > nframes) {
 
 		_roll_delay -= nframes;
-		silence (nframes);
+		silence_unlocked (nframes);
 		/* transport frame is not legal for caller to use */
 		return 0;
 
 	} else if (_roll_delay > 0) {
 
 		nframes -= _roll_delay;
-		silence (_roll_delay);
+		silence_unlocked (_roll_delay);
 		/* we've written _roll_delay of samples into the
 		   output ports, so make a note of that for
 		   future reference.
@@ -2703,22 +2709,19 @@ int
 Route::roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, int declick,
 	     bool /*can_record*/, bool /*rec_monitors_input*/, bool& /* need_butler */)
 {
-	{
-		// automation snapshot can also be called from the non-rt context
-		// and it uses the processor list, so we try to acquire the lock here
-		Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
-
-		if (lm.locked()) {
-			automation_snapshot (_session.transport_frame(), false);
-		}
+	Glib::RWLock::ReaderLock lm (_processor_lock, Glib::TRY_LOCK);
+	if (!lm.locked()) {
+		return 0;
 	}
+	
+	automation_snapshot (_session.transport_frame(), false);
 
 	if (n_outputs().n_total() == 0) {
 		return 0;
 	}
 
 	if (!_active || n_inputs().n_total() == 0) {
-		silence (nframes);
+		silence_unlocked (nframes);
 		return 0;
 	}
 
