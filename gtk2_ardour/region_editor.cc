@@ -389,7 +389,7 @@ RegionEditor::on_delete_event (GdkEventAny* ev)
 
 	bounds_changed (change);
 
-	return RegionEditor::on_delete_event (ev);
+	return true;
 }
 
 void
