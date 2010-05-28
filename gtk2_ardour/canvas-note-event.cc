@@ -85,14 +85,15 @@ CanvasNoteEvent::show_velocity()
 {
 	if (!_text) {
 		_text = new NoEventText (*(_item->property_parent()));
+                _text->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiNoteVelocityText.get();
+                _text->property_justification() = Gtk::JUSTIFY_CENTER;
 	}
+
 	_text->property_x() = (x1() + x2()) /2;
 	_text->property_y() = (y1() + y2()) /2;
 	ostringstream velo(ios::ate);
 	velo << int(_note->velocity());
 	_text->property_text() = velo.str();
-	_text->property_justification() = Gtk::JUSTIFY_CENTER;
-	_text->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiNoteVelocityText.get();
 	_text->show();
 	_text->raise_to_top();
 }
@@ -221,8 +222,6 @@ CanvasNoteEvent::base_color()
 bool
 CanvasNoteEvent::on_event(GdkEvent* ev)
 {
-        cerr << "CNE: on_event type " << ev->type << endl;
-        
 	if (!_region.get_time_axis_view().editor().internal_editing()) {
 		return false;
 	}

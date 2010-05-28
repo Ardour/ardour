@@ -953,7 +953,6 @@ Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
 		return false;
 	}
 
-        cerr << "Forward note event item on to editor\n";
 	return typed_event (item, event, NoteItem);
 }
 

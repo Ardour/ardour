@@ -291,7 +291,6 @@ MidiRegionView::enter_notify (GdkEventCrossing* ev)
 bool
 MidiRegionView::leave_notify (GdkEventCrossing* ev)
 {
-        _mouse_state = None;
         trackview.editor().hide_verbose_canvas_cursor ();
         delete _ghost_note;
         _ghost_note = 0;
@@ -403,7 +402,13 @@ MidiRegionView::motion (GdkEventMotion* ev)
         if (_ghost_note) {
                 update_ghost_note (ev->x, ev->y);
         }
+
+        /* any motion immediately hides velocity text that may have been visible */
 		
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		(*i)->hide_velocity ();
+	}
+
         switch (_mouse_state) {
         case Pressed: // Maybe start a drag, if we've moved a bit
 
@@ -1678,6 +1683,10 @@ MidiRegionView::select_matching_notes (uint8_t notenum, uint16_t channel_mask, b
 	MidiModel::Notes& notes (_model->notes());
 	_optimization_iterator = _events.begin();
 
+        if (!add) {
+                clear_selection ();
+        }
+
 	if (extend && _selection.empty()) {
 		extend = false;
 	}
@@ -2512,7 +2521,10 @@ MidiRegionView::note_entered(ArdourCanvas::CanvasNoteEvent* ev)
 void
 MidiRegionView::note_left (ArdourCanvas::CanvasNoteEvent* note)
 {
-        note->hide_velocity ();
+	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+		(*i)->hide_velocity ();
+	}
+
 	trackview.editor().hide_verbose_canvas_cursor ();
 }
 
