@@ -78,7 +78,7 @@ PortMatrixRowLabels::compute_dimensions ()
 	}
 
 	cairo_destroy (cr);
-	gdk_pixmap_unref (pm);
+	g_object_unref (pm);
 
 	_width = _longest_bundle_name +
 		name_pad() * 2;

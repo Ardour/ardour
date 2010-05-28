@@ -91,7 +91,7 @@ PortMatrixColumnLabels::compute_dimensions ()
 	}
 
 	cairo_destroy (cr);
-	gdk_pixmap_unref (pm);
+	g_object_unref (pm);
 
 	/* height of the whole thing */
 

@@ -32,7 +32,7 @@ CairoWidget::CairoWidget ()
 CairoWidget::~CairoWidget ()
 {
 	if (_pixmap) {
-		gdk_pixmap_unref (_pixmap);
+		g_object_unref (_pixmap);
 	}
 }
 
@@ -55,7 +55,7 @@ CairoWidget::on_expose_event (GdkEventExpose *event)
 		if (_dirty) {
 
 			if (_pixmap) {
-				gdk_pixmap_unref (_pixmap);
+				g_object_unref (_pixmap);
 			}
 
 			_pixmap = gdk_pixmap_new (drawable, _width, _height, -1);
