@@ -29,9 +29,15 @@
 namespace Gnome {
 namespace Canvas {
 
-class CanvasNote : public SimpleRect, public CanvasNoteEvent {
-public:
+class CanvasNote : public SimpleRect, public CanvasNoteEvent 
+{
+ public:
 	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
+
+	CanvasNote (MidiRegionView&                   region,
+		    Group&                            group,
+		    const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>(),
+                    bool with_events = true);
 
 	double x1() { return property_x1(); }
 	double y1() { return property_y1(); }
@@ -46,25 +52,16 @@ public:
 
 	bool on_event(GdkEvent* ev);
 	void move_event(double dx, double dy);
-
-	CanvasNote (MidiRegionView&                   region,
-		    Group&                            group,
-		    const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>())
-		: SimpleRect(group), CanvasNoteEvent(region, this, note)
-	{
-	}
 };
 
 class NoEventCanvasNote : public CanvasNote
 {
-public:
-	NoEventCanvasNote (
-		MidiRegionView& region,
-		Group& group,
-		const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>()
-		)
-		: CanvasNote (region, group, note) {}
-
+  public:
+	NoEventCanvasNote (MidiRegionView& region,
+                           Group& group,
+                           const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>())
+		: CanvasNote (region, group, note, false) {}
+        
 	double point_vfunc(double, double, int, int, GnomeCanvasItem**) {
 		/* return a huge value to tell the canvas that we're never the item for an event */
 		return 9999999999999.0;

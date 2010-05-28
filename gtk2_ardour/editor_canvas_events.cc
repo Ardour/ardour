@@ -44,7 +44,6 @@
 #include "control_point.h"
 #include "canvas_impl.h"
 #include "simplerect.h"
-#include "interactive-item.h"
 #include "editor_drag.h"
 #include "midi_time_axis.h"
 #include "editor_regions.h"
@@ -64,12 +63,6 @@ Editor::track_canvas_scroll (GdkEventScroll* ev)
 {
 	nframes64_t xdelta;
 	int direction = ev->direction;
-
-	Gnome::Canvas::Item* item = track_canvas->get_item_at(ev->x, ev->y);
-	InteractiveItem* interactive_item = dynamic_cast<InteractiveItem*>(item);
-	if (interactive_item) {
-		return interactive_item->on_event(reinterpret_cast<GdkEvent*>(ev));
-	}
 
   retry:
 	switch (direction) {
@@ -153,8 +146,7 @@ bool
 Editor::track_canvas_scroll_event (GdkEventScroll *event)
 {
 	track_canvas->grab_focus();
-	track_canvas_scroll (event);
-	return false;
+	return track_canvas_scroll (event);
 }
 
 bool
@@ -961,6 +953,7 @@ Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
 		return false;
 	}
 
+        cerr << "Forward note event item on to editor\n";
 	return typed_event (item, event, NoteItem);
 }
 

@@ -28,8 +28,8 @@
 
 #include "rgb_macros.h"
 #include "ardour_ui.h"
+#include "canvas-noevent-text.h"
 #include "ui_config.h"
-#include "interactive-item.h"
 
 class Editor;
 class MidiRegionView;
@@ -51,8 +51,9 @@ namespace Canvas {
  *
  * A newer, better canvas should remove the need for all the ugly here.
  */
-class CanvasNoteEvent : virtual public sigc::trackable, public InteractiveItem {
-public:
+class CanvasNoteEvent : virtual public sigc::trackable
+{
+  public:
 	typedef Evoral::Note<ARDOUR::MidiModel::TimeType> NoteType;
 
 	CanvasNoteEvent(
@@ -129,7 +130,7 @@ protected:
 
 	MidiRegionView&                   _region;
 	Item* const                       _item;
-	InteractiveText*                  _text;
+	NoEventText*                      _text;
 	Widget*                           _channel_selector_widget;
 	State                             _state;
 	const boost::shared_ptr<NoteType> _note;

@@ -18,6 +18,9 @@
 */
 
 #include <iostream>
+
+#include "gtkmm2ext/keyboard.h"
+
 #include "canvas-note-event.h"
 #include "midi_region_view.h"
 #include "public_editor.h"
@@ -25,6 +28,7 @@
 #include "keyboard.h"
 
 using namespace std;
+using namespace Gtkmm2ext;
 using ARDOUR::MidiModel;
 
 namespace Gnome {
@@ -40,8 +44,7 @@ const uint32_t CanvasNoteEvent::midi_channel_colors[16] = {
 	  0x832dd3ff,  0xa92dd3ff,  0xd32dbfff,  0xd32d67ff
 	};
 
-CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item,
-		const boost::shared_ptr<NoteType> note)
+CanvasNoteEvent::CanvasNoteEvent(MidiRegionView& region, Item* item, const boost::shared_ptr<NoteType> note)
 	: _region(region)
 	, _item(item)
 	, _text(0)
@@ -81,7 +84,7 @@ void
 CanvasNoteEvent::show_velocity()
 {
 	if (!_text) {
-		_text = new InteractiveText(*(_item->property_parent()), this);
+		_text = new NoEventText (*(_item->property_parent()));
 	}
 	_text->property_x() = (x1() + x2()) /2;
 	_text->property_y() = (y1() + y2()) /2;
@@ -218,35 +221,31 @@ CanvasNoteEvent::base_color()
 bool
 CanvasNoteEvent::on_event(GdkEvent* ev)
 {
-	PublicEditor& editor (_region.get_time_axis_view().editor());
-
-	if (!editor.internal_editing()) {
+        cerr << "CNE: on_event type " << ev->type << endl;
+        
+	if (!_region.get_time_axis_view().editor().internal_editing()) {
 		return false;
 	}
 
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
 		_region.note_entered(this);
-		//Keyboard::magic_widget_grab_focus();
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		//Keyboard::magic_widget_drop_focus();
 		_region.note_left (this);
-		if (!selected()) {
-			hide_velocity();
-		}
 		break;
 
 	case GDK_BUTTON_PRESS:
-		if (ev->button.button == 3) {
-			show_channel_selector();
+                cerr << "button press, bton = " << ev->button.button << endl;
+		if (ev->button.button == 3 && Keyboard::no_modifiers_active (ev->button.state)) {
+                        show_channel_selector();
 			return true;
 		}
 		break;
 
 	case GDK_BUTTON_RELEASE:
-		if (ev->button.button == 3) {
+		if (ev->button.button == 3 && Keyboard::no_modifiers_active (ev->button.state)) {
 			return true;
 		}
 		break;

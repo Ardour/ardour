@@ -277,6 +277,7 @@ bool
 MidiRegionView::enter_notify (GdkEventCrossing* ev)
 {
         /* FIXME: do this on switch to note tool, too, if the pointer is already in */
+
         Keyboard::magic_widget_grab_focus();
         group->grab_focus();
         
@@ -290,6 +291,7 @@ MidiRegionView::enter_notify (GdkEventCrossing* ev)
 bool
 MidiRegionView::leave_notify (GdkEventCrossing* ev)
 {
+        _mouse_state = None;
         trackview.editor().hide_verbose_canvas_cursor ();
         delete _ghost_note;
         _ghost_note = 0;
@@ -511,16 +513,20 @@ MidiRegionView::motion (GdkEventMotion* ev)
 bool
 MidiRegionView::scroll (GdkEventScroll* ev)
 {
-        bool fine = Keyboard::modifier_state_equals (ev->state, Keyboard::Level4Modifier);
+        if (_selection.empty()) {
+                return false;
+        }
+
+	trackview.editor().hide_verbose_canvas_cursor ();
+
+        bool fine = Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier);
         
         if (ev->direction == GDK_SCROLL_UP) {
                 change_velocities (true, fine, false);
-                return true;
         } else if (ev->direction == GDK_SCROLL_DOWN) {
                 change_velocities (false, fine, false);
-                return true;
         } 
-        return false;
+        return true;
 }
 
 bool
@@ -566,8 +572,8 @@ MidiRegionView::key_press (GdkEventKey* ev)
                 
         } else if (ev->keyval == GDK_Up) {
                 
-                bool allow_smush = Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
-                bool fine = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
+                bool allow_smush = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
+                bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
                 
                 if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
                         change_velocities (true, fine, allow_smush);
@@ -578,8 +584,8 @@ MidiRegionView::key_press (GdkEventKey* ev)
                 
         } else if (ev->keyval == GDK_Down) {
                 
-                bool allow_smush = Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
-                bool fine = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
+                bool allow_smush = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
+                bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
                 
                 if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
                         change_velocities (false, fine, allow_smush);
@@ -1305,6 +1311,7 @@ void
 MidiRegionView::update_note (CanvasNote* ev)
 {
 	boost::shared_ptr<NoteType> note = ev->note();
+
 
 	const nframes64_t note_start_frames = beats_to_frames(note->time());
 	const nframes64_t note_end_frames   = beats_to_frames(note->end_time());
@@ -2179,6 +2186,8 @@ MidiRegionView::change_note_velocity(CanvasNoteEvent* event, int8_t velocity, bo
 		new_velocity = velocity;
 	}
 
+        event->show_velocity ();
+
 	diff_add_change (event, MidiModel::DiffCommand::Velocity, new_velocity);
 }
 
@@ -2485,6 +2494,7 @@ MidiRegionView::change_channel(uint8_t channel)
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		diff_add_change (*i, MidiModel::DiffCommand::Channel, channel);
 	}
+
 	apply_diff();
 }
 
@@ -2493,19 +2503,18 @@ void
 MidiRegionView::note_entered(ArdourCanvas::CanvasNoteEvent* ev)
 {
 	if (_mouse_state == SelectTouchDragging) {
-		note_selected(ev, true);
+		note_selected (ev, true);
 	}
 
 	show_verbose_canvas_cursor (ev->note ());
 }
 
 void
-MidiRegionView::note_left (ArdourCanvas::CanvasNoteEvent*)
+MidiRegionView::note_left (ArdourCanvas::CanvasNoteEvent* note)
 {
-	PublicEditor& editor (trackview.editor());
-	editor.hide_verbose_canvas_cursor ();
+        note->hide_velocity ();
+	trackview.editor().hide_verbose_canvas_cursor ();
 }
-
 
 void
 MidiRegionView::switch_source(boost::shared_ptr<Source> src)

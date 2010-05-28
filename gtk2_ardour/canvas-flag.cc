@@ -5,6 +5,26 @@
 using namespace Gnome::Canvas;
 using namespace std;
 
+CanvasFlag::CanvasFlag (MidiRegionView& region,
+                        Group&          parent,
+                        double          height,
+                        guint           outline_color_rgba,
+                        guint           fill_color_rgba,
+                        double          x,
+                        double          y)
+        : Group(parent, x, y)
+        , _text(0)
+        , _height(height)
+        , _outline_color_rgba(outline_color_rgba)
+        , _fill_color_rgba(fill_color_rgba)
+        , _region(region)
+        , _line(0)
+        , _rect(0)
+{
+        /* XXX this connection is needed if ::on_event() is changed to actually do anything */
+        signal_event().connect (sigc::mem_fun (*this, &CanvasFlag::on_event));
+}
+
 void
 CanvasFlag::delete_allocated_objects()
 {
@@ -23,7 +43,7 @@ CanvasFlag::set_text(const string& a_text)
 {
 	delete_allocated_objects();
 
-	_text = new InteractiveText(*this, this, 0.0, 0.0, Glib::ustring(a_text));
+	_text = new Text (*this, 0.0, 0.0, Glib::ustring(a_text));
 	_text->property_justification() = Gtk::JUSTIFY_CENTER;
 	_text->property_fill_color_rgba() = _outline_color_rgba;
 	double flagwidth  = _text->property_text_width()  + 10.0;
@@ -33,10 +53,14 @@ CanvasFlag::set_text(const string& a_text)
 	_text->show();
 	_line = new SimpleLine(*this, 0.0, 0.0, 0.0, _height);
 	_line->property_color_rgba() = _outline_color_rgba;
-	_rect = new InteractiveRect(*this, this, 0.0, 0.0, flagwidth, flagheight);
+	_rect = new SimpleRect(*this, 0.0, 0.0, flagwidth, flagheight);
 	_rect->property_outline_color_rgba() = _outline_color_rgba;
 	_rect->property_fill_color_rgba() = _fill_color_rgba;
 	_text->raise_to_top();
+
+        /* XXX these two connections are needed if ::on_event() is changed to actually do anything */
+        //_rect->signal_event().connect (sigc::mem_fun (*this, &CanvasFlag::on_event));
+        //_text->signal_event().connect (sigc::mem_fun (*this, &CanvasFlag::on_event));
 }
 
 CanvasFlag::~CanvasFlag()
@@ -47,5 +71,8 @@ CanvasFlag::~CanvasFlag()
 bool
 CanvasFlag::on_event(GdkEvent* /*ev*/)
 {
+        /* XXX if you change this function to actually do anything, be sure
+           to fix the connections commented out elsewhere in this file.
+        */
 	return false;
 }

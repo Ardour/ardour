@@ -35,11 +35,8 @@ public:
 			MidiRegionView&                   region,
 			Group&                            group,
 			double                            size,
-			const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>())
-
-		: Diamond(group, size), CanvasNoteEvent(region, this, note)
-	{
-	}
+			const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>(),
+                        bool with_events = true);
 
 	void show() { Diamond::show(); }
 	void hide() { Diamond::hide(); }
