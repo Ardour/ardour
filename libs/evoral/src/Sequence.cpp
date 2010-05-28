@@ -797,6 +797,73 @@ Sequence<Time>::note_lower_bound (Time t) const
 	return i;
 }
 
+template<typename Time>
+void
+Sequence<Time>::get_notes (Notes& n, NoteOperator op, uint8_t val, int chan_mask) const
+{
+        ReadLock lock (read_lock());
+
+        for (typename Notes::const_iterator i = _notes.begin(); i != _notes.end(); ++i) {
+
+                if (chan_mask != 0 && !((1<<(*i)->channel()) & chan_mask)) {
+                        continue;
+                }
+
+                switch (op) {
+                case PitchEqual:
+                        if ((*i)->note() == val) {
+                                n.insert (*i);
+                        }
+                        break;
+                case PitchLessThan:
+                        if ((*i)->note() < val) {
+                                n.insert (*i);
+                        }
+                        break;
+                case PitchLessThanOrEqual:
+                        if ((*i)->note() <= val) {
+                                n.insert (*i);
+                        }
+                        break;
+                case PitchGreater:
+                        if ((*i)->note() > val) {
+                                n.insert (*i);
+                        }
+                        break;
+                case PitchGreaterThanOrEqual:
+                        if ((*i)->note() >= val) {
+                                n.insert (*i);
+                        }
+                        break;
+                case VelocityEqual:
+                        if ((*i)->velocity() == val) {
+                                n.insert (*i);
+                        }
+                        break;
+                case VelocityLessThan:
+                        if ((*i)->velocity() < val) {
+                                n.insert (*i);
+                        }
+                        break;
+                case VelocityLessThanOrEqual:
+                        if ((*i)->velocity() <= val) {
+                                n.insert (*i);
+                        }
+                        break;
+                case VelocityGreater:
+                        if ((*i)->velocity() > val) {
+                                n.insert (*i);
+                        }
+                        break;
+                case VelocityGreaterThanOrEqual:
+                        if ((*i)->velocity() >= val) {
+                                n.insert (*i);
+                        }
+                        break;
+                }
+        }
+}
+
 template class Sequence<Evoral::MusicalTime>;
 
 } // namespace Evoral

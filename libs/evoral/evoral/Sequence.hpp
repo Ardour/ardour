@@ -137,6 +137,24 @@ public:
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
 
+        enum NoteOperator { 
+                PitchEqual,
+                PitchLessThan,
+                PitchLessThanOrEqual,
+                PitchGreater,
+                PitchGreaterThanOrEqual,
+                VelocityEqual,
+                VelocityLessThan,
+                VelocityLessThanOrEqual,
+                VelocityGreater,
+                VelocityGreaterThanOrEqual,
+        };
+
+        void get_notes (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
+
+        void remove_overlapping_notes ();
+        void remove_duplicate_notes ();
+
 	void set_notes (const Sequence<Time>::Notes& n);
 
 	typedef std::vector< boost::shared_ptr< Event<Time> > > SysExes;
