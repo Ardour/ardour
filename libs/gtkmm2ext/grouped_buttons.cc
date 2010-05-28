@@ -91,6 +91,6 @@ GroupedButtons::one_clicked (uint32_t which)
 		   it as inactive causes a segfault ...
 		*/
 
-		gtk_idle_add (reactivate_button, buttons[which]);
+		g_idle_add (reactivate_button, buttons[which]);
 	}
 }

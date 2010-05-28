@@ -80,7 +80,7 @@ PopUp::remove ()
 
 	if (delete_on_hide) {
 		std::cerr << "deleting prompter\n";
-		gtk_idle_add (idle_delete, this);
+		g_idle_add (idle_delete, this);
 	}
 }
 #define ENSURE_GUI_THREAD(slot) \
