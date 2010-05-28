@@ -750,6 +750,7 @@ Editor::stop_canvas_autoscroll ()
 bool
 Editor::left_track_canvas (GdkEventCrossing */*ev*/)
 {
+        DropDownKeys ();
 	set_entered_track (0);
 	set_entered_regionview (0);
 	reset_canvas_action_sensitivity (false);

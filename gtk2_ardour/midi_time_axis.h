@@ -91,6 +91,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void check_step_edit ();
 	void step_edit_rest ();
 
+	const MidiMultipleChannelSelector& channel_selector() { return _channel_selector; }
+
   private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
 

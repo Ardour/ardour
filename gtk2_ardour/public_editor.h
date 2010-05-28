@@ -283,6 +283,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible {
 	sigc::signal<void> Realized;
 	sigc::signal<void,nframes64_t> UpdateAllTransportClocks;
 
+        static sigc::signal<void> DropDownKeys;
+        
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
 
 	virtual void reset_focus () = 0;

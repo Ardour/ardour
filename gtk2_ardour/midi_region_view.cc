@@ -95,6 +95,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, no_sound_notes (false)
 {
 	_note_group->raise_to_top();
+        PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 }
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &tv,
@@ -119,8 +120,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, no_sound_notes (false)
 {
 	_note_group->raise_to_top();
+        PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 }
-
 
 MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	: sigc::trackable(other)
@@ -182,6 +183,8 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 void
 MidiRegionView::init (Gdk::Color const & basic_color, bool wfd)
 {
+        PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
+
         CanvasNoteEvent::CanvasNoteEventDeleted.connect (note_delete_connection, MISSING_INVALIDATOR, 
                                                          ui_bind (&MidiRegionView::maybe_remove_deleted_note_from_selection, this, _1),
                                                          gui_context());
@@ -338,7 +341,9 @@ MidiRegionView::button_release (GdkEventButton* ev)
                 case MouseObject:
                 case MouseTimeFX:
                         clear_selection();
+                        maybe_select_by_position (ev, event_x, event_y);
                         break;
+
                 case MouseRange:
                 {
                         bool success;
@@ -880,6 +885,20 @@ MidiRegionView::find_canvas_note (boost::shared_ptr<NoteType> note)
 	}
 
 	return 0;
+}
+
+void
+MidiRegionView::get_events (Events& e, Evoral::Sequence<Evoral::MusicalTime>::NoteOperator op, uint8_t val, int chan_mask)
+{
+        MidiModel::Notes notes;
+        _model->get_notes (notes, op, val, chan_mask);
+
+        for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
+                CanvasNoteEvent* cne = find_canvas_note (*n);
+                if (cne) {
+                        e.push_back (cne);
+                }
+        }
 }
 
 void
@@ -1716,7 +1735,7 @@ MidiRegionView::select_matching_notes (uint8_t notenum, uint16_t channel_mask, b
 		CanvasNoteEvent* cne;
 		bool select = false;
 
-		if (((0x0001 << note->channel()) & channel_mask) != 0) {
+		if (((1 << note->channel()) & channel_mask) != 0) {
 			if (extend) {
 				if ((note->note() >= low_note && note->note() <= high_note)) {
 					select = true;
@@ -2848,3 +2867,44 @@ MidiRegionView::show_verbose_canvas_cursor (boost::shared_ptr<NoteType> n) const
 	snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (n->note()).c_str(), (int) n->note ());
 	trackview.editor().show_verbose_canvas_cursor_with (buf);
 }
+
+void
+MidiRegionView::drop_down_keys ()
+{
+        _mouse_state = None;
+}
+
+void
+MidiRegionView::maybe_select_by_position (GdkEventButton* ev, double x, double y)
+{
+	double note = midi_stream_view()->y_to_note(y);
+        Events e;
+	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+        
+	uint16_t chn_mask = mtv->channel_selector().get_selected_channels();
+
+        if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+                get_events (e, Evoral::Sequence<Evoral::MusicalTime>::PitchGreaterThanOrEqual, (uint8_t) floor (note), chn_mask);
+        } else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+                get_events (e, Evoral::Sequence<Evoral::MusicalTime>::PitchLessThanOrEqual, (uint8_t) floor (note), chn_mask);
+        } else {
+                return;
+        }
+
+	bool add_mrv_selection = false;
+
+	if (_selection.empty()) {
+		add_mrv_selection = true;
+	}
+
+        for (Events::iterator i = e.begin(); i != e.end(); ++i) {
+                if (_selection.insert (*i).second) {
+                        (*i)->selected (true);
+                }
+	}
+
+	if (add_mrv_selection) {
+		PublicEditor& editor (trackview.editor());
+		editor.get_selection().add (this);
+	}
+}                
