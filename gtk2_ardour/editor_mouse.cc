@@ -661,6 +661,13 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 			break;
 
+                case StreamItem:
+                        if (internal_editing()) {
+                                _drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
+                                return true;
+                        }
+                        break;
+
 		default:
                         if (!internal_editing()) {
                                 _drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
