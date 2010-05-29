@@ -212,7 +212,9 @@ void
 MidiStreamView::display_track (boost::shared_ptr<Track> tr)
 {
 	StreamView::display_track (tr);
+
 	draw_note_lines();
+	
 	NoteRangeChanged();
 }
 
@@ -296,6 +298,7 @@ MidiStreamView::update_contents_height ()
 {
 	StreamView::update_contents_height();
 	_note_lines->property_y2() = height;
+	
 	draw_note_lines();
 }
 
@@ -307,6 +310,10 @@ MidiStreamView::draw_note_lines()
 	uint32_t color;
 
 	_note_lines->clear();
+	
+	if(height < 140){
+		return;
+	}
 
 	for (int i = lowest_note(); i <= highest_note(); ++i) {
 		y = floor(note_to_y(i));
