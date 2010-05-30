@@ -229,8 +229,7 @@ void
 MidiRegion::recompute_at_end ()
 {
 	/* our length has changed
-	 * (non destructively) "chop" notes that pass the end boundary, to
-	 * prevent stuck notes.
+         * so what? stuck notes are dealt with via a note state tracker
 	 */
 }
 

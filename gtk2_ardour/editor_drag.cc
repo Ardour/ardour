@@ -315,7 +315,6 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 			return true;
 		}
 	}
-
 	return false;
 }
 

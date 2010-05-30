@@ -169,7 +169,7 @@ SMFSource::read_unlocked (Evoral::EventSink<nframes_t>& destination, sframes_t s
 		assert(time >= start_ticks);
 		const sframes_t ev_frame_time = converter.to(time / (double)ppqn()) + stamp_offset;
 
-#if 0
+#if 1
 		cerr << " frames = " << ev_frame_time
 		     << " w/offset = " << ev_frame_time - negative_stamp_offset
 		     << endl;
@@ -438,6 +438,18 @@ SMFSource::load_model (bool lock, bool force_reload)
 
 		if (ret > 0) { // didn't skip (meta) event
 			ev.set_event_type(EventTypeMap::instance().midi_event_type(buf[0]));
+
+                        std::string ss;
+                        
+                        for (int xx = 0; xx < size; ++xx) {
+                                char b[8];
+                                snprintf (b, sizeof (b), "0x%x ", buf[xx]);
+                                ss += b;
+                        }
+
+                        DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF %6 load model delta %1, time %2, size %3 buf %4, type %5\n",
+                                                                          delta_t, time, size, ss , ev.event_type(), name()));
+                        
 			_model->append(ev);
 		}
 

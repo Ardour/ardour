@@ -458,7 +458,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 
 	switch (item_type) {
 	case RegionItem:
-		if (mouse_mode != MouseRange || _join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
+		if (mouse_mode != MouseRange || internal_editing() || _join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
 			set_selected_regionview_from_click (press, op, true);
 		} else if (event->type == GDK_BUTTON_PRESS) {
 			selection->clear_tracks ();
@@ -472,7 +472,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 
  	case RegionViewNameHighlight:
  	case RegionViewName:
-		if (mouse_mode != MouseRange || _join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
+		if (mouse_mode != MouseRange || internal_editing() || _join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
 			set_selected_regionview_from_click (press, op, true);
 		} else if (event->type == GDK_BUTTON_PRESS) {
 			set_selected_track_as_side_effect ();
@@ -667,6 +667,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                                 return true;
                         }
                         break;
+
+                case RegionViewNameHighlight:
+                {
+                        RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
+                        _drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer()), event);
+                        return true;
+                        break;
+                }
 
 		default:
                         if (!internal_editing()) {
@@ -1402,6 +1410,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	ControlPoint* cp;
 	Marker * marker;
 	double fraction;
+        bool ret = true;
 
 	if (last_item_entered != item) {
 		last_item_entered = item;
@@ -1460,7 +1469,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 
 	case RegionViewNameHighlight:
-		if (is_drawable() && mouse_mode == MouseObject) {
+		if (is_drawable() && (mouse_mode == MouseObject || (internal_editing() && mouse_mode == MouseRange))) {
 			track_canvas->get_window()->set_cursor (*trimmer_cursor);
 		}
 		break;
@@ -1590,7 +1599,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 	}
 
-	return false;
+	return ret;
 }
 
 bool
@@ -1602,6 +1611,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	Location *loc;
 	RegionView* rv;
 	bool is_start;
+        bool ret = true;
 
 	switch (item_type) {
 	case ControlPointItem:
@@ -1712,7 +1722,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 	}
 
-	return false;
+	return ret;
 }
 
 gint
@@ -1843,7 +1853,6 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 	if (_drags->active ()) {
 		handled = _drags->motion_handler (event, from_autoscroll);
 	}
-
 	if (!handled) {
 		return false;
 	}
