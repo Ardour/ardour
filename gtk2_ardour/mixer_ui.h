@@ -31,6 +31,7 @@
 #include <gtkmm/paned.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/treeview.h>
+#include <gtkmm/liststore.h>
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
