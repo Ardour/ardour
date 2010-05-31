@@ -81,6 +81,7 @@ def build(bld):
 		src/Note.cpp
 		src/SMF.cpp
 		src/Sequence.cpp
+                src/debug.cpp
 	'''
 
 	# Library

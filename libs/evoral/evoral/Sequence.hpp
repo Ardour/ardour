@@ -220,7 +220,9 @@ public:
 	bool edited() const      { return _edited; }
 	void set_edited(bool yn) { _edited = yn; }
 
+        bool overlaps (const boost::shared_ptr< Note<Time> > ev) const;
         bool contains (const boost::shared_ptr< Note<Time> > ev) const;
+
 	bool add_note_unlocked(const boost::shared_ptr< Note<Time> > note);
 	void remove_note_unlocked(const boost::shared_ptr< const Note<Time> > note);
 
@@ -234,8 +236,11 @@ protected:
 private:
 	friend class const_iterator;
 
+        bool overlaps_unlocked (const boost::shared_ptr< Note<Time> > ev) const;
+        bool contains_unlocked (const boost::shared_ptr< Note<Time> > ev) const;
+
 	void append_note_on_unlocked(uint8_t chan, Time time, uint8_t note, uint8_t velocity);
-	void append_note_off_unlocked(uint8_t chan, Time time, uint8_t note);
+        void append_note_off_unlocked(uint8_t chan, Time time, uint8_t note, uint8_t velocity);
 	void append_control_unlocked(const Parameter& param, Time time, double value);
 	void append_sysex_unlocked(const MIDIEvent<Time>& ev);
 
@@ -244,7 +249,7 @@ private:
 	Notes   _notes;
 	SysExes _sysexes;
 
-	typedef std::set<boost::shared_ptr< Note<Time> >, NoteNumberComparator> WriteNotes;
+	typedef std::multiset<boost::shared_ptr< Note<Time> >, EarlierNoteComparator> WriteNotes;
 	WriteNotes _write_notes[16];
 	bool       _writing;
 

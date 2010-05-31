@@ -24,6 +24,9 @@
 #include <stdexcept>
 #include <stdint.h>
 #include <cstdio>
+
+#include "pbd/compose.h"
+
 #include "evoral/Control.hpp"
 #include "evoral/ControlList.hpp"
 #include "evoral/ControlSet.hpp"
@@ -33,16 +36,8 @@
 #include "evoral/TypeMap.hpp"
 #include "evoral/midi_util.h"
 
-// #define DEBUG_SEQUENCE 1
-#ifdef DEBUG_SEQUENCE
-	#include <boost/format.hpp>
-	using boost::format;
-	#define DUMP(x) cerr << (x);
-#else
-	#define DUMP(x)
-#endif
-
 using namespace std;
+using namespace PBD;
 
 namespace Evoral {
 
@@ -66,7 +61,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	, _sysex_iter(seq.sysexes().end())
 	, _control_iter(_control_iters.end())
 {
-	DUMP(format("Created Iterator @ %1% (is end: %2%)\n)") % t % _is_end);
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("Created Iterator @ %1 (is end: %2)\n)", t, _is_end));
 
 	if (!_is_end) {
 		_lock = seq.read_lock();
@@ -95,12 +90,12 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	bool   found                  = false;
 	size_t earliest_control_index = 0;
 	for (Controls::const_iterator i = seq._controls.begin(); i != seq._controls.end(); ++i) {
-		DUMP(format("Iterator: control: %1%\n") % seq._type_map.to_symbol(i->first));
+		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Iterator: control: %1\n", seq._type_map.to_symbol(i->first)));
 		double x, y;
 		bool ret = i->second->list()->rt_safe_earliest_event_unlocked(t, DBL_MAX, x, y, true);
 		if (!ret) {
-			DUMP(format("Iterator: CC %1% (size %2%) has no events past %3%\n")
-					% i->first.id() % i->second->list()->size() % t);
+			DEBUG_TRACE (DEBUG::Sequence, string_compose ("Iterator: CC %1 (size %2) has no events past %3\n",
+                                                                      i->first.id(), i->second->list()->size(), t));
 			continue;
 		}
 
@@ -113,7 +108,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 			continue;
 		}
 
-		DUMP(format("Iterator: CC %1% added (%2%, %3%)\n") % i->first.id() % x % y);
+		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Iterator: CC %1 added (%2, %3)\n", i->first.id(), x, y));
 
 		const ControlIterator new_iter(i->second->list(), x, y);
 		_control_iters.push_back(new_iter);
@@ -156,18 +151,18 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 
 	switch (_type) {
 	case NOTE_ON:
-		DUMP(format("Starting at note on event @ %1%\n") % earliest_t);
+		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Starting at note on event @ %1\n", earliest_t));
 		_event = boost::shared_ptr< Event<Time> >(
 				new Event<Time>((*_note_iter)->on_event(), true));
 		_active_notes.push(*_note_iter);
 		break;
 	case SYSEX:
-		DUMP(format("Starting at sysex event @ %1%\n") % earliest_t);
+		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Starting at sysex event @ %1\n", earliest_t));
 		_event = boost::shared_ptr< Event<Time> >(
 				new Event<Time>(*(*_sysex_iter), true));
 		break;
 	case CONTROL:
-		DUMP(format("Starting at control event @ %1%\n") % earliest_t);
+		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Starting at control event @ %1\n", earliest_t));
 		seq.control_to_midi_event(_event, earliest_control);
 		break;
 	default:
@@ -175,14 +170,14 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	}
 
 	if (_type == NIL || !_event || _event->size() == 0) {
-		DUMP(format("Starting at end @ %1%\n") % t);
+		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Starting at end @ %1\n", t));
 		_type   = NIL;
 		_is_end = true;
 	} else {
-		DUMP(printf("New iterator = 0x%x : 0x%x @ %f\n",
-			    (int)_event->event_type(),
-			    (int)((MIDIEvent<Time>*)_event.get())->type(),
-			    _event->time()));
+		DEBUG_TRACE (DEBUG::Sequence, string_compose ("New iterator = 0x%x : 0x%x @ %f\n",
+                                                              (int)_event->event_type(),
+                                                              (int)((MIDIEvent<Time>*)_event.get())->type(),
+                                                              _event->time()));
 		assert(midi_event_is_valid(_event->buffer(), _event->size()));
 	}
 }
@@ -217,7 +212,7 @@ Sequence<Time>::const_iterator::operator++()
 		throw std::logic_error("Attempt to iterate past end of Sequence");
 	}
 
-	DUMP("Sequence::const_iterator++\n");
+	DEBUG_TRACE(DEBUG::Sequence, "Sequence::const_iterator++\n");
 	assert(_event && _event->buffer() && _event->size() > 0);
 
 	const MIDIEvent<Time>& ev = *((MIDIEvent<Time>*)_event.get());
@@ -310,26 +305,26 @@ Sequence<Time>::const_iterator::operator++()
 	// Set event to reflect new position
 	switch (_type) {
 	case NOTE_ON:
-		DUMP("iterator = note on\n");
+                DEBUG_TRACE(DEBUG::Sequence, "iterator = note on\n");
 		*_event = (*_note_iter)->on_event();
 		_active_notes.push(*_note_iter);
 		break;
 	case NOTE_OFF:
-		DUMP("iterator = note off\n");
+                DEBUG_TRACE(DEBUG::Sequence, "iterator = note off\n");
 		assert(!_active_notes.empty());
 		*_event = _active_notes.top()->off_event();
 		_active_notes.pop();
 		break;
 	case CONTROL:
-		DUMP("iterator = control\n");
+                DEBUG_TRACE(DEBUG::Sequence, "iterator = control\n");
 		_seq->control_to_midi_event(_event, *_control_iter);
 		break;
 	case SYSEX:
-		DUMP("iterator = sysex\n");
+                DEBUG_TRACE(DEBUG::Sequence, "iterator = sysex\n");
 		*_event = *(*_sysex_iter);
 		break;
 	default:
-		DUMP("iterator = end\n");
+                DEBUG_TRACE(DEBUG::Sequence, "iterator = end\n");
 		_is_end = true;
 	}
 
@@ -393,7 +388,7 @@ Sequence<Time>::Sequence(const TypeMap& type_map)
 	, _lowest_note(127)
 	, _highest_note(0)
 {
-	DUMP(format("Sequence constructed: %1%\n") % this);
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("Sequence constructed: %1\n", this));
 	assert(_end_iter._is_end);
 	assert( ! _end_iter._lock);
 }
@@ -419,7 +414,7 @@ Sequence<Time>::Sequence(const Sequence<Time>& other)
                 _sysexes.push_back (n);
         }
 
-	DUMP(format("Sequence copied: %1%\n") % this);
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("Sequence copied: %1\n", this));
 	assert(_end_iter._is_end);
 	assert(! _end_iter._lock);
 }
@@ -523,7 +518,7 @@ template<typename Time>
 void
 Sequence<Time>::start_write()
 {
-	DUMP(format("%1% : start_write (percussive = %2%)\n") % this % _percussive);
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 : start_write (percussive = %2)\n", this, _percussive));
 	WriteLock lock(write_lock());
 	_writing = true;
 	for (int i = 0; i < 16; ++i) {
@@ -548,7 +543,7 @@ Sequence<Time>::end_write(bool delete_stuck)
 		return;
 	}
 
-	DUMP(format("%1% : end_write (%2% notes)\n") % this % _notes.size());
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 : end_write (%2 notes)\n", this, _notes.size()));
 
 	if (!_percussive && delete_stuck) {
 		for (typename Notes::iterator n = _notes.begin(); n != _notes.end() ;) {
@@ -603,7 +598,7 @@ Sequence<Time>::append(const Event<Time>& event)
 	if (ev.is_note_on()) {
 		append_note_on_unlocked(ev.channel(), ev.time(), ev.note(), ev.velocity());
 	} else if (ev.is_note_off()) {
-		append_note_off_unlocked(ev.channel(), ev.time(), ev.note());
+		append_note_off_unlocked(ev.channel(), ev.time(), ev.note(), ev.velocity());
 	} else if (ev.is_sysex()) {
 		append_sysex_unlocked(ev);
 	} else if (!_type_map.type_is_midi(ev.event_type())) {
@@ -638,15 +633,15 @@ template<typename Time>
 void
 Sequence<Time>::append_note_on_unlocked(uint8_t chan, Time time, uint8_t note_num, uint8_t velocity)
 {
-	DUMP(format("%1% c=%2% note %3% on @ %4% v=%5%\n")
-			% this % (int)chan % (int)note_num % time % (int)velocity);
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 c=%2 note %3 on @ %4 v=%5\n",
+                                                      this, (int)chan, (int)note_num, time, (int)velocity));
 	assert(note_num <= 127);
 	assert(chan < 16);
 	assert(_writing);
 	_edited = true;
 
 	if (velocity == 0) {
-		append_note_off_unlocked(chan, time, note_num);
+		append_note_off_unlocked(chan, time, note_num, velocity);
 		return;
 	}
 
@@ -658,41 +653,46 @@ Sequence<Time>::append_note_on_unlocked(uint8_t chan, Time time, uint8_t note_nu
 	boost::shared_ptr< Note<Time> > new_note(new Note<Time>(chan, time, 0, note_num, velocity));
 	_notes.insert(new_note);
 	if (!_percussive) {
-		DUMP(format("Sustained: Appending active note on %1% channel %2%\n")
-				% (unsigned)(uint8_t)note_num % chan);
+		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Sustained: Appending active note on %1 channel %2\n",
+                                                              (unsigned)(uint8_t)note_num, chan));
 		_write_notes[chan].insert(new_note);
 	} else {
-		DUMP("Percussive: NOT appending active note on\n");
+                DEBUG_TRACE(DEBUG::Sequence, "Percussive: NOT appending active note on\n");
 	}
 }
 
 template<typename Time>
 void
-Sequence<Time>::append_note_off_unlocked(uint8_t chan, Time time, uint8_t note_num)
+Sequence<Time>::append_note_off_unlocked(uint8_t chan, Time time, uint8_t note_num, uint8_t velocity)
 {
-	DUMP(format("%1% c=%2% note %3% off @ %4%\n")
-			% this % (int)chan % (int)note_num % time);
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 c=%2 note %3 off @ %4\n",
+                                                      this, (int)chan, (int)note_num, time));
 	assert(note_num <= 127);
 	assert(chan < 16);
 	assert(_writing);
 	_edited = true;
 
 	if (_percussive) {
-		DUMP("Sequence Ignoring note off (percussive mode)\n");
+                DEBUG_TRACE(DEBUG::Sequence, "Sequence Ignoring note off (percussive mode)\n");
 		return;
 	}
 
-	// TODO: support note off velocity
-
 	bool resolved = false;
-	for (typename WriteNotes::iterator n = _write_notes[chan].begin();
-			n != _write_notes[chan].end(); ++n) {
+
+        /* _write_notes is sorted earliest-latest, so this will find the first matching note (FIFO) that
+           matches this note (by pitch & channel). the MIDI specification doesn't provide any guidance
+           whether to use FIFO or LIFO for this matching process, so SMF is fundamentally a lossy
+           format.
+        */
+
+	for (typename WriteNotes::iterator n = _write_notes[chan].begin(); n != _write_notes[chan].end(); ++n) {
 		boost::shared_ptr< Note<Time> > note = *n;
-		if (note->note() == note_num) {
+		if (note->note() == note_num && note->channel() == chan) {
 			assert(time >= note->time());
-			note->set_length(time - note->time());
+			note->set_length (time - note->time());
+                        note->set_off_velocity (velocity);
 			_write_notes[chan].erase(n);
-			DUMP(format("resolved note, length: %1%\n") % note->length());
+			DEBUG_TRACE (DEBUG::Sequence, string_compose ("resolved note, length: %1\n", note->length()));
 			resolved = true;
 			break;
 		}
@@ -708,8 +708,8 @@ template<typename Time>
 void
 Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, double value)
 {
-	DUMP(format("%1% %2% @ %3%\t=\t%4% # controls: %5%\n")
-			% this % _type_map.to_symbol(param) % time % value % _controls.size());
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 %2 @ %3\t=\t%4 # controls: %5\n",
+                                                      this, _type_map.to_symbol(param), time, value, _controls.size()));
 	boost::shared_ptr<Control> c = control(param, true);
 	c->list()->rt_add(time, value);
 }
@@ -731,10 +731,15 @@ Sequence<Time>::append_sysex_unlocked(const MIDIEvent<Time>& ev)
 
 template<typename Time>
 bool
-Sequence<Time>::contains(const boost::shared_ptr< Note<Time> > note) const
+Sequence<Time>::contains (const boost::shared_ptr< Note<Time> > note) const
 {
-        ReadLock lock (read_lock());
+        return contains_unlocked (note);
+}
 
+template<typename Time>
+bool
+Sequence<Time>::contains_unlocked (const boost::shared_ptr< Note<Time> > note) const
+{
 	for (typename Sequence<Time>::Notes::const_iterator i = note_lower_bound(note->time());
 			i != _notes.end() && (*i)->time() == note->time(); ++i) {
 		if (*i == note) {
@@ -748,16 +753,53 @@ Sequence<Time>::contains(const boost::shared_ptr< Note<Time> > note) const
 
 template<typename Time>
 bool
+Sequence<Time>::overlaps (const boost::shared_ptr< Note<Time> > note) const
+{
+        ReadLock lock (read_lock());
+        return overlaps_unlocked (note);
+}
+
+template<typename Time>
+bool
+Sequence<Time>::overlaps_unlocked (const boost::shared_ptr< Note<Time> > note) const
+{
+        Time sa = note->time();
+        Time ea  = note->end_time();
+
+	for (typename Sequence<Time>::Notes::const_iterator i = note_lower_bound (note->time()); i != _notes.end(); ++i) {
+
+                if ((note->note() != (*i)->note()) ||
+                    (note->channel() != (*i)->channel())) {
+                        continue;
+                }
+
+                Time sb = (*i)->time();
+                Time eb = (*i)->end_time();
+
+                if (((sb > sa) && (eb <= ea)) ||
+                    ((eb >= sa) && (eb <= ea)) ||
+                    ((sb > sa) && (sb <= ea)) ||
+                    ((sa >= sb) && (sa <= eb) && (ea <= eb))) {
+                        return true;
+                }
+        }
+
+        return false;
+}
+
+template<typename Time>
+bool
 Sequence<Time>::add_note_unlocked(const boost::shared_ptr< Note<Time> > note)
 {
-	DUMP(format("%1% add note %2% @ %3%\n") % this % (int)note->note() % note->time());
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 add note %2 @ %3\n", this, (int)note->note(), note->time()));
 
-	for (typename Sequence<Time>::Notes::iterator i = note_lower_bound(note->time());
-			i != _notes.end() && (*i)->time() == note->time(); ++i) {
-		if (*i == note) {
-			return false;
-		}
+        if (contains_unlocked (note)) {
+                return false;
 	}
+
+        if (overlaps_unlocked (note)) {
+                return false;
+        }
 
 	_edited = true;
 	_notes.insert(note);
@@ -769,7 +811,7 @@ void
 Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> > note)
 {
 	_edited = true;
-	DUMP(format("%1% remove note %2% @ %3%\n") % this % (int)note->note() % note->time());
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 remove note %2 @ %3\n", this, (int)note->note(), note->time()));
 	for (typename Sequence<Time>::Notes::iterator i = note_lower_bound(note->time());
 			i != _notes.end() && (*i)->time() == note->time(); ++i) {
 		if (*i == note) {

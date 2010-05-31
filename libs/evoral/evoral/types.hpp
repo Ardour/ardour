@@ -24,6 +24,8 @@
 #include <cmath>
 #include <cfloat>
 
+#include "pbd/debug.h"
+
 namespace Evoral {
 
 /** Frame count (i.e. length of time in audio frames) */
@@ -52,5 +54,12 @@ struct RangeMove {
 };
 
 } // namespace Evoral
+
+namespace PBD {
+        namespace DEBUG {
+                extern uint64_t Sequence;
+                extern uint64_t Note;
+        }
+}
 
 #endif // EVORAL_TYPES_HPP

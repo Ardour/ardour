@@ -42,6 +42,7 @@ public:
 			note() == other.note() &&
 			musical_time_equal (length(), other.length()) &&
 			velocity() == other.velocity() &&
+			off_velocity() == other.off_velocity() &&
 			channel()  == other.channel();
 	}
 
@@ -49,6 +50,7 @@ public:
 	inline Time        end_time() const { return _off_event.time(); }
 	inline uint8_t     note()     const { return _on_event.note(); }
 	inline uint8_t     velocity() const { return _on_event.velocity(); }
+	inline uint8_t     off_velocity() const { return _off_event.velocity(); }
 	inline Time        length()   const { return _off_event.time() - _on_event.time(); }
 	inline uint8_t     channel()  const {
 		assert(_on_event.channel() == _off_event.channel());
@@ -58,6 +60,7 @@ public:
 	inline void set_time(Time t)        { _off_event.time() = t + length(); _on_event.time() = t; }
 	inline void set_note(uint8_t n)     { _on_event.buffer()[1] = n; _off_event.buffer()[1] = n; }
 	inline void set_velocity(uint8_t n) { _on_event.buffer()[2] = n; }
+        inline void set_off_velocity(uint8_t n) { _off_event.buffer()[2] = n; }
 	inline void set_length(Time l)      { _off_event.time() = _on_event.time() + l; }
 	inline void set_channel(uint8_t c)  { _on_event.set_channel(c);  _off_event.set_channel(c); }
 

@@ -82,9 +82,9 @@ namespace ARDOUR {
 		OverlapEnd,       // overlap begins within and covers end
 		OverlapExternal   // overlap extends to (at least) begin+end
 	};
-
-	OverlapType coverage (nframes_t start_a, nframes_t end_a,
-	                      nframes_t start_b, nframes_t end_b);
+        
+        ARDOUR::OverlapType coverage (framepos_t sa, framepos_t ea,
+                                      framepos_t sb, framepos_t eb);
 
 	/** See parameter.h
 	 * XXX: I don't think/hope these hex values matter anymore.

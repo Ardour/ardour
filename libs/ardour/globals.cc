@@ -535,8 +535,8 @@ ARDOUR::setup_fpu ()
 }
 
 ARDOUR::OverlapType
-ARDOUR::coverage (nframes_t sa, nframes_t ea,
-		  nframes_t sb, nframes_t eb)
+ARDOUR::coverage (framepos_t sa, framepos_t ea,
+		  framepos_t sb, framepos_t eb)
 {
 	/* OverlapType returned reflects how the second (B)
 	   range overlaps the first (A).
@@ -563,11 +563,8 @@ ARDOUR::coverage (nframes_t sa, nframes_t ea,
              "B is internal to A"
 
 	*/
-#ifdef OLD_COVERAGE
-	if ((sb >= sa) && (eb <= ea)) {
-#else
+
 	if ((sb > sa) && (eb <= ea)) {
-#endif
 		return OverlapInternal;
 	}
 
