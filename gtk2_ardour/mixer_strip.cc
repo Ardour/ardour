@@ -28,7 +28,6 @@
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/choice.h>
-#include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/bindable_button.h>

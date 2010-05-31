@@ -20,7 +20,6 @@
 #include <cstdlib>
 #include <cmath>
 
-#include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include "ardour/route_group.h"
 

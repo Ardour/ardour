@@ -49,7 +49,6 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/click_box.h"
 #include "gtkmm2ext/fastmeter.h"
-#include "gtkmm2ext/stop_signal.h"
 #include "gtkmm2ext/popup.h"
 #include "gtkmm2ext/window_title.h"
 

@@ -26,7 +26,6 @@
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/fastmeter.h>
-#include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/barcontroller.h>
 #include "midi++/manager.h"
 #include "pbd/fastlog.h"

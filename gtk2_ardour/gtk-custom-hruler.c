@@ -251,9 +251,9 @@ gtk_custom_hruler_draw_pos (GtkCustomRuler * ruler)
 		if ((bs_width > 0) && (bs_height > 0)) {
 			/*  If a backing store exists, restore the ruler  */
 			if (ruler->backing_store && ruler->non_gr_exp_gc)
-				gdk_draw_pixmap (ruler->widget.window,
-						 ruler->non_gr_exp_gc,
-						 ruler->backing_store, ruler->xsrc, ruler->ysrc, ruler->xsrc, ruler->ysrc, bs_width, bs_height);
+				gdk_draw_drawable (ruler->widget.window,
+                                                   ruler->non_gr_exp_gc,
+                                                   GDK_DRAWABLE(ruler->backing_store), ruler->xsrc, ruler->ysrc, ruler->xsrc, ruler->ysrc, bs_width, bs_height);
 
 			increment = (gfloat) width / (ruler->upper - ruler->lower);
 			x = ROUND ((ruler->position - ruler->lower) * increment) + (xthickness - bs_width) / 2 - 1;

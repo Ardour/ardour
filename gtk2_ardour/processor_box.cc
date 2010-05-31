@@ -37,7 +37,6 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/choice.h>
 #include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/doi.h>
 
 #include "ardour/amp.h"

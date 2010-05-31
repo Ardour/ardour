@@ -227,10 +227,10 @@ class VisualTimeAxis : public TimeAxisView
 		// Handle name entry signals
 
 		void name_entry_changed() ;
-		gint name_entry_focus_out_handler(GdkEventFocus*) ;
-		gint name_entry_key_release_handler(GdkEventKey*) ;
-		gint name_entry_button_release_handler(GdkEventButton*) ;
-		gint name_entry_button_press_handler(GdkEventButton*) ;
+		bool name_entry_focus_out_handler(GdkEventFocus*) ;
+		bool name_entry_key_release_handler(GdkEventKey*) ;
+		bool name_entry_button_release_handler(GdkEventButton*) ;
+		bool name_entry_button_press_handler(GdkEventButton*) ;
 
 		//---------------------------------------------------------------------------------------//
 		// VisualTimeAxis Widgets

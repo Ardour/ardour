@@ -27,8 +27,6 @@
 #include "ardour/session_selection.h"
 #include "ardour/playlist.h"
 
-#include <gtkmm2ext/stop_signal.h>
-
 #include "editor.h"
 #include "keyboard.h"
 #include "selection.h"

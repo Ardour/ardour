@@ -32,7 +32,6 @@
 #include <gdkmm/color.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/fastmeter.h>
-#include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/barcontroller.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include "midi++/manager.h"

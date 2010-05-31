@@ -30,7 +30,6 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/selector.h>
 #include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/choice.h>
 
 #include "ardour/session.h"
@@ -373,22 +372,22 @@ VisualTimeAxis::name_entry_changed()
 	}
 }
 
-gint
+bool
 VisualTimeAxis::name_entry_button_press_handler(GdkEventButton *ev)
 {
 	if (ev->button == 3) {
-		return stop_signal (name_entry, "button_press_event");
+                return true;
 	}
-	return FALSE;
+	return false
 }
 
-gint
+bool
 VisualTimeAxis::name_entry_button_release_handler(GdkEventButton *ev)
 {
-	return FALSE;
+	return false;
 }
 
-gint
+bool
 VisualTimeAxis::name_entry_key_release_handler(GdkEventKey* ev)
 {
 	switch (ev->keyval) {
@@ -396,11 +395,13 @@ VisualTimeAxis::name_entry_key_release_handler(GdkEventKey* ev)
 	case GDK_Up:
 	case GDK_Down:
 		name_entry_changed ();
-		return TRUE;
+		return true;
 
 	default:
-		return FALSE;
+		break;
 	}
+
+        return false;
 }
 
 

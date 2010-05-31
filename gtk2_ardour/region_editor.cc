@@ -26,7 +26,6 @@
 #include "ardour/utils.h"
 #include "ardour/dB.h"
 #include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/stop_signal.h>
 #include <cmath>
 
 #include "region_editor.h"

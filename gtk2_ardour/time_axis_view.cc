@@ -32,7 +32,6 @@
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/selector.h>
-#include <gtkmm2ext/stop_signal.h>
 
 #include "ardour/session.h"
 #include "ardour/utils.h"

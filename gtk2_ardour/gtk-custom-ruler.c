@@ -442,9 +442,9 @@ gtk_custom_ruler_expose (GtkWidget * widget, GdkEventExpose * event)
 
 		gtk_custom_ruler_draw_ticks (ruler);
 
-		gdk_draw_pixmap (widget->window,
-				 ruler->non_gr_exp_gc,
-				 ruler->backing_store, 0, 0, 0, 0, widget->allocation.width, widget->allocation.height);
+		gdk_draw_drawable (widget->window,
+                                   ruler->non_gr_exp_gc,
+                                   GDK_DRAWABLE(ruler->backing_store), 0, 0, 0, 0, widget->allocation.width, widget->allocation.height);
 
 		gtk_custom_ruler_draw_pos (ruler);
 	}

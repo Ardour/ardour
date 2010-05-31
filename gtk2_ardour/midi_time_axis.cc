@@ -35,7 +35,6 @@
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/selector.h>
-#include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/bindable_button.h>
 #include <gtkmm2ext/utils.h>
 

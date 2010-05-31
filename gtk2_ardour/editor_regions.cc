@@ -33,8 +33,6 @@
 #include "ardour/silentfilesource.h"
 #include "ardour/profile.h"
 
-#include <gtkmm2ext/stop_signal.h>
-
 #include "editor.h"
 #include "editing.h"
 #include "keyboard.h"
