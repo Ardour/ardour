@@ -29,7 +29,6 @@
 
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/stop_signal.h>
 #include <gtkmm2ext/tearoff.h>
 #include <gtkmm2ext/window_title.h>
 
