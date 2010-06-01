@@ -674,21 +674,9 @@ if env['DIST_TARGET'] != 'tiger' and env['DIST_TARGET'] != 'leopard':
 
 if config[config_cpu] == 'powerpc' and env['DIST_TARGET'] != 'none':
     #
-    # Apple/PowerPC optimization options
-    #
-    # -mcpu=7450 does not reliably work with gcc 3.*
-    #
-    if env['DIST_TARGET'] == 'panther' or env['DIST_TARGET'] == 'tiger':
-        if config[config_arch] == 'apple':
-            ## opt_flags.extend ([ "-mcpu=7450", "-faltivec"])
-            # to support g3s but still have some optimization for above
-            opt_flags.extend ([ "-mcpu=G3", "-mtune=7450"])
-        else:
-            opt_flags.extend ([ "-mcpu=7400", "-maltivec", "-mabi=altivec"])
-    else:
-        opt_flags.extend([ "-mcpu=750", "-mmultiple" ])
-    opt_flags.extend (["-mhard-float", "-mpowerpc-gfxopt"])
-    opt_flags.extend (["-Os"])
+    # PowerPC options
+    # 
+    opt_flags.extend ([ "-mcpu=7450", "-mcpu=7450" ])
 
 elif ((re.search ("i[0-9]86", config[config_cpu]) != None) or (re.search ("x86_64", config[config_cpu]) != None)) and env['DIST_TARGET'] != 'none':
     
