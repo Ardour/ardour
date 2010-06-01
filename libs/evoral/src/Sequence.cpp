@@ -535,7 +535,7 @@ Sequence<Time>::start_write()
  */
 template<typename Time>
 void
-Sequence<Time>::end_write(bool delete_stuck)
+Sequence<Time>::end_write (bool delete_stuck)
 {
 	WriteLock lock(write_lock());
 
@@ -545,17 +545,18 @@ Sequence<Time>::end_write(bool delete_stuck)
 
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 : end_write (%2 notes)\n", this, _notes.size()));
 
-	if (!_percussive && delete_stuck) {
-		for (typename Notes::iterator n = _notes.begin(); n != _notes.end() ;) {
-			typename Notes::iterator next = n;
-			++next;
-			if ((*n)->length() == 0) {
-				cerr << "WARNING: Stuck note lost: " << (*n)->note() << endl;
-				_notes.erase(n);
-			}
-			n = next;
-		}
-	}
+        if (!_percussive && delete_stuck) {
+                for (typename Notes::iterator n = _notes.begin(); n != _notes.end() ;) {
+                        typename Notes::iterator next = n;
+                        ++next;
+                        if ((*n)->length() == 0) {
+                                cerr << "WARNING: Stuck note lost: " << (*n)->note() << endl;
+                                _notes.erase(n);
+                        }
+                        
+                        n = next;
+                }
+        }
 
 	for (int i = 0; i < 16; ++i) {
 		if (!_write_notes[i].empty()) {
@@ -572,9 +573,79 @@ Sequence<Time>::end_write(bool delete_stuck)
 	_writing = false;
 }
 
+
+template<typename Time>
+bool
+Sequence<Time>::add_note_unlocked(const boost::shared_ptr< Note<Time> > note)
+{
+        /* This is the core method to add notes to a Sequence 
+         */
+
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 add note %2 @ %3\n", this, (int)note->note(), note->time()));
+
+        if (contains_unlocked (note)) {
+                return false;
+	}
+
+        if (overlaps_unlocked (note)) {
+                return false;
+        }
+
+	_edited = true;
+
+	if (note->note() < _lowest_note)
+		_lowest_note = note->note();
+	if (note->note() > _highest_note)
+		_highest_note = note->note();
+
+	_notes.insert(note);
+
+        return true;
+}
+
+template<typename Time>
+void
+Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> > note)
+{
+        bool erased = false;
+
+	_edited = true;
+
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 remove note %2 @ %3\n", this, (int)note->note(), note->time()));
+
+	for (typename Sequence<Time>::Notes::iterator i = note_lower_bound(note->time()); 
+             i != _notes.end() && (*i)->time() == note->time(); ++i) {
+
+		if (*i == note) {
+                        
+			_notes.erase (i);
+
+                        if ((*i)->note() == _lowest_note || (*i)->note() == _highest_note) {
+
+                                _lowest_note = 127;
+                                _highest_note = 0;
+
+                                for (typename Sequence<Time>::Notes::iterator ii = _notes.begin(); ii != _notes.end(); ++ii) {
+                                        if ((*ii)->note() < _lowest_note)
+                                                _lowest_note = (*ii)->note();
+                                        if ((*ii)->note() > _highest_note)
+                                                _highest_note = (*ii)->note();
+                                }
+                        }
+
+                        erased = true;
+		}
+                
+	}
+
+        if (!erased) {
+                cerr << "Unable to find note to erase" << endl;
+        }
+}
+
 /** Append \a ev to model.  NOT realtime safe.
  *
- * Timestamps of events in \a buf are expected to be relative to
+ * The timestamp of event is expected to be relative to
  * the start of this model (t=0) and MUST be monotonically increasing
  * and MUST be >= the latest event currently in the model.
  */
@@ -596,9 +667,11 @@ Sequence<Time>::append(const Event<Time>& event)
 	}
 
 	if (ev.is_note_on()) {
-		append_note_on_unlocked(ev.channel(), ev.time(), ev.note(), ev.velocity());
+                boost::shared_ptr< Note<Time> > note(new Note<Time>(ev.channel(), ev.time(), 0, ev.note(), ev.velocity()));
+		append_note_on_unlocked (note);
 	} else if (ev.is_note_off()) {
-		append_note_off_unlocked(ev.channel(), ev.time(), ev.note(), ev.velocity());
+                boost::shared_ptr< Note<Time> > note(new Note<Time>(ev.channel(), ev.time(), 0, ev.note(), ev.velocity()));
+		append_note_off_unlocked (note);
 	} else if (ev.is_sysex()) {
 		append_sysex_unlocked(ev);
 	} else if (!_type_map.type_is_midi(ev.event_type())) {
@@ -631,31 +704,26 @@ Sequence<Time>::append(const Event<Time>& event)
 
 template<typename Time>
 void
-Sequence<Time>::append_note_on_unlocked(uint8_t chan, Time time, uint8_t note_num, uint8_t velocity)
+Sequence<Time>::append_note_on_unlocked (boost::shared_ptr< Note<Time> > note)
 {
-	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 c=%2 note %3 on @ %4 v=%5\n",
-                                                      this, (int)chan, (int)note_num, time, (int)velocity));
-	assert(note_num <= 127);
-	assert(chan < 16);
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 c=%2 note %3 on @ %4 v=%5\n", this, 
+                                                      (int) note->channel(), (int) note->note(), 
+                                                      note->time(), (int) note->velocity()));
+	assert(note->note() <= 127);
+	assert(note->channel() < 16);
 	assert(_writing);
-	_edited = true;
 
-	if (velocity == 0) {
-		append_note_off_unlocked(chan, time, note_num, velocity);
+	if (note->velocity() == 0) {
+		append_note_off_unlocked (note);
 		return;
 	}
 
-	if (note_num < _lowest_note)
-		_lowest_note = note_num;
-	if (note_num > _highest_note)
-		_highest_note = note_num;
-
-	boost::shared_ptr< Note<Time> > new_note(new Note<Time>(chan, time, 0, note_num, velocity));
-	_notes.insert(new_note);
+        add_note_unlocked (note);
+        
 	if (!_percussive) {
 		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Sustained: Appending active note on %1 channel %2\n",
-                                                              (unsigned)(uint8_t)note_num, chan));
-		_write_notes[chan].insert(new_note);
+                                                              (unsigned)(uint8_t)note->note(), note->channel()));
+		_write_notes[note->channel()].insert (note);
 	} else {
                 DEBUG_TRACE(DEBUG::Sequence, "Percussive: NOT appending active note on\n");
 	}
@@ -663,12 +731,13 @@ Sequence<Time>::append_note_on_unlocked(uint8_t chan, Time time, uint8_t note_nu
 
 template<typename Time>
 void
-Sequence<Time>::append_note_off_unlocked(uint8_t chan, Time time, uint8_t note_num, uint8_t velocity)
+Sequence<Time>::append_note_off_unlocked (boost::shared_ptr< Note<Time> > note)
 {
-	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 c=%2 note %3 off @ %4\n",
-                                                      this, (int)chan, (int)note_num, time));
-	assert(note_num <= 127);
-	assert(chan < 16);
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 c=%2 note %3 on @ %4 v=%5\n",
+                                                      this, (int)note->channel(), 
+                                                      (int)note->note(), note->time(), (int)note->velocity()));
+	assert(note->note() <= 127);
+	assert(note->channel() < 16);
 	assert(_writing);
 	_edited = true;
 
@@ -685,13 +754,15 @@ Sequence<Time>::append_note_off_unlocked(uint8_t chan, Time time, uint8_t note_n
            format.
         */
 
-	for (typename WriteNotes::iterator n = _write_notes[chan].begin(); n != _write_notes[chan].end(); ++n) {
-		boost::shared_ptr< Note<Time> > note = *n;
-		if (note->note() == note_num && note->channel() == chan) {
-			assert(time >= note->time());
-			note->set_length (time - note->time());
-                        note->set_off_velocity (velocity);
-			_write_notes[chan].erase(n);
+	for (typename WriteNotes::iterator n = _write_notes[note->channel()].begin(); n != _write_notes[note->channel()].end(); ++n) {
+		boost::shared_ptr< Note<Time> > nn = *n;
+		if (note->note() == nn->note() && nn->channel() == note->channel()) {
+			assert(note->time() >= nn->time());
+
+			nn->set_length (note->time() - nn->time());
+                        nn->set_off_velocity (note->velocity());
+
+			_write_notes[note->channel()].erase(n);
 			DEBUG_TRACE (DEBUG::Sequence, string_compose ("resolved note, length: %1\n", note->length()));
 			resolved = true;
 			break;
@@ -699,8 +770,8 @@ Sequence<Time>::append_note_off_unlocked(uint8_t chan, Time time, uint8_t note_n
 	}
 
 	if (!resolved) {
-		cerr << this << " spurious note off chan " << (int)chan
-				<< ", note " << (int)note_num << " @ " << time << endl;
+		cerr << this << " spurious note off chan " << (int)note->channel()
+                     << ", note " << (int)note->note() << " @ " << note->time() << endl;
 	}
 }
 
@@ -747,7 +818,6 @@ Sequence<Time>::contains_unlocked (const boost::shared_ptr< Note<Time> > note) c
 			return true;
 		}
 	}
-        cerr << "No matching note for " << note << endl;
         return false;
 }
 
@@ -785,40 +855,6 @@ Sequence<Time>::overlaps_unlocked (const boost::shared_ptr< Note<Time> > note) c
         }
 
         return false;
-}
-
-template<typename Time>
-bool
-Sequence<Time>::add_note_unlocked(const boost::shared_ptr< Note<Time> > note)
-{
-	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 add note %2 @ %3\n", this, (int)note->note(), note->time()));
-
-        if (contains_unlocked (note)) {
-                return false;
-	}
-
-        if (overlaps_unlocked (note)) {
-                return false;
-        }
-
-	_edited = true;
-	_notes.insert(note);
-        return true;
-}
-
-template<typename Time>
-void
-Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> > note)
-{
-	_edited = true;
-	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 remove note %2 @ %3\n", this, (int)note->note(), note->time()));
-	for (typename Sequence<Time>::Notes::iterator i = note_lower_bound(note->time());
-			i != _notes.end() && (*i)->time() == note->time(); ++i) {
-		if (*i == note) {
-			_notes.erase(i);
-		}
-	}
-	cerr << "Unable to find note to erase" << endl;
 }
 
 template<typename Time>

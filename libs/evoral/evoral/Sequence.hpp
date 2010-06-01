@@ -239,8 +239,8 @@ private:
         bool overlaps_unlocked (const boost::shared_ptr< Note<Time> > ev) const;
         bool contains_unlocked (const boost::shared_ptr< Note<Time> > ev) const;
 
-	void append_note_on_unlocked(uint8_t chan, Time time, uint8_t note, uint8_t velocity);
-        void append_note_off_unlocked(uint8_t chan, Time time, uint8_t note, uint8_t velocity);
+        void append_note_on_unlocked (boost::shared_ptr< Note<Time> >);
+        void append_note_off_unlocked(boost::shared_ptr< Note<Time> >);
 	void append_control_unlocked(const Parameter& param, Time time, double value);
 	void append_sysex_unlocked(const MIDIEvent<Time>& ev);
 

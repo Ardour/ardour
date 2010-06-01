@@ -291,13 +291,13 @@ MidiModel::DeltaCommand::get_state()
 	XMLNode* added_notes = delta_command->add_child(ADDED_NOTES_ELEMENT);
 	for_each(_added_notes.begin(), _added_notes.end(), 
 		 boost::bind(
-			 boost::bind (&XMLNode::add_child_nocopy, *added_notes, _1),
+			 boost::bind (&XMLNode::add_child_nocopy, added_notes, _1),
 			 boost::bind (&DeltaCommand::marshal_note, this, _1)));
 
 	XMLNode* removed_notes = delta_command->add_child(REMOVED_NOTES_ELEMENT);
 	for_each(_removed_notes.begin(), _removed_notes.end(), 
 		 boost::bind (
-			 boost::bind (&XMLNode::add_child_nocopy, *removed_notes, _1),
+			 boost::bind (&XMLNode::add_child_nocopy, removed_notes, _1),
 			 boost::bind (&DeltaCommand::marshal_note, this, _1)));
 
 	return *delta_command;
@@ -329,17 +329,27 @@ MidiModel::DiffCommand::change(const boost::shared_ptr< Evoral::Note<TimeType> >
 {
 	NoteChange change;
 
-	change.note = note;
-	change.property = prop;
-	change.new_value = new_value;
-
 	switch (prop) {
 	case NoteNumber:
+                if (new_value == note->note()) {
+                        return;
+                }
 		change.old_value = note->note();
 		break;
 	case Velocity:
+                if (new_value == note->velocity()) {
+                        return;
+                }
 		change.old_value = note->velocity();
 		break;
+	case Channel:
+                if (new_value == note->channel()) {
+                        return;
+                }
+		change.old_value = note->channel();
+		break;
+
+
 	case StartTime:
 		fatal << "MidiModel::DiffCommand::change() with integer argument called for start time" << endmsg;
 		/*NOTREACHED*/
@@ -348,10 +358,11 @@ MidiModel::DiffCommand::change(const boost::shared_ptr< Evoral::Note<TimeType> >
 		fatal << "MidiModel::DiffCommand::change() with integer argument called for length" << endmsg;
 		/*NOTREACHED*/
 		break;
-	case Channel:
-		change.old_value = note->channel();
-		break;
 	}
+
+	change.note = note;
+	change.property = prop;
+	change.new_value = new_value;
 
 	_changes.push_back (change);
 }
@@ -362,23 +373,30 @@ MidiModel::DiffCommand::change(const boost::shared_ptr< Evoral::Note<TimeType> >
 {
 	NoteChange change;
 
-	change.note = note;
-	change.property = prop;
-	change.new_time = new_time;
-
 	switch (prop) {
 	case NoteNumber:
 	case Channel:
 	case Velocity:
 		fatal << "MidiModel::DiffCommand::change() with time argument called for note, channel or velocity" << endmsg;
 		break;
+
 	case StartTime:
+                if (Evoral::musical_time_equal (note->time(), new_time)) {
+                        return;
+                }
 		change.old_time = note->time();
 		break;
 	case Length:
+                if (Evoral::musical_time_equal (note->length(), new_time)) {
+                        return;
+                }
 		change.old_time = note->length();
 		break;
 	}
+
+	change.note = note;
+	change.property = prop;
+	change.new_time = new_time;
 
 	_changes.push_back (change);
 }
@@ -386,60 +404,99 @@ MidiModel::DiffCommand::change(const boost::shared_ptr< Evoral::Note<TimeType> >
 void
 MidiModel::DiffCommand::operator()()
 {
-	MidiModel::WriteLock lock(_model->edit_lock());
+        {
+                MidiModel::WriteLock lock(_model->edit_lock());
+                
+                set<boost::shared_ptr<Evoral::Note<TimeType> > > removed_notes;
 
-	for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
-		Property prop = i->property;
-		switch (prop) {
-		case NoteNumber:
-			i->note->set_note (i->new_value);
-			break;
-		case Velocity:
-			i->note->set_velocity (i->new_value);
-			break;
-		case StartTime:
-			i->note->set_time (i->new_time);
-			break;
-		case Length:
-			i->note->set_length (i->new_time);
-			break;
-		case Channel:
-			i->note->set_channel (i->new_value);
-			break;
-		}
-	}
+                for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
+                        Property prop = i->property;
+                        switch (prop) {
+                        case NoteNumber:
+                                if (removed_notes.find (i->note) == removed_notes.end()) {
+                                        _model->remove_note_unlocked (i->note);
+                                        removed_notes.insert (i->note);
+                                }
+                                i->note->set_note (i->new_value);
+                                break;
+                        case Velocity:
+                                i->note->set_velocity (i->new_value);
+                                break;
+                        case StartTime:
+                                if (removed_notes.find (i->note) == removed_notes.end()) {
+                                        _model->remove_note_unlocked (i->note);
+                                        removed_notes.insert (i->note);
 
-	lock.reset();
+                                }
+                                i->note->set_time (i->new_time);
+                                break;
+                        case Length:
+                                i->note->set_length (i->new_time);
+                                break;
+                        case Channel:
+                                if (removed_notes.find (i->note) == removed_notes.end()) {
+                                        _model->remove_note_unlocked (i->note);
+                                        removed_notes.insert (i->note);
+                                }
+                                i->note->set_channel (i->new_value);
+                                break;
+                        }
+                }
+
+                for (set<boost::shared_ptr<Evoral::Note<TimeType> > >::iterator i = removed_notes.begin(); i != removed_notes.end(); ++i) {
+                        _model->add_note_unlocked (*i);
+                }
+        }
+
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
 
 void
 MidiModel::DiffCommand::undo()
 {
-	MidiModel::WriteLock lock(_model->edit_lock());
+        {
+                MidiModel::WriteLock lock(_model->edit_lock());
+                
+                set<boost::shared_ptr<Evoral::Note<TimeType> > > removed_notes;
 
-	for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
-		Property prop = i->property;
-		switch (prop) {
-		case NoteNumber:
-			i->note->set_note (i->old_value);
-			break;
-		case Velocity:
-			i->note->set_velocity (i->old_value);
-			break;
-		case StartTime:
-			i->note->set_time (i->old_time);
-			break;
-		case Length:
-			i->note->set_length (i->old_time);
-			break;
-		case Channel:
-			i->note->set_channel (i->old_value);
-			break;
-		}
-	}
+                for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
+                        Property prop = i->property;
+                        switch (prop) {
+                        case NoteNumber:
+                                if (removed_notes.find (i->note) == removed_notes.end()) {
+                                        _model->remove_note_unlocked (i->note);
+                                        removed_notes.insert (i->note);
+                                }
+                                i->note->set_note (i->old_value);
+                                break;
+                        case Velocity:
+                                i->note->set_velocity (i->old_value);
+                                break;
+                        case StartTime:
+                                if (removed_notes.find (i->note) == removed_notes.end()) {
+                                        _model->remove_note_unlocked (i->note);
+                                        removed_notes.insert (i->note);
+                                }
+                                i->note->set_time (i->old_time);
+                                break;
+                        case Length:
+                                i->note->set_length (i->old_time);
+                                break;
+                        case Channel:
+                                if (removed_notes.find (i->note) == removed_notes.end()) {
+                                        _model->remove_note_unlocked (i->note);
+                                        removed_notes.insert (i->note);
+                                }
+                                i->note->set_channel (i->old_value);
+                                break;
+                        }
+                }
 
-	lock.reset();
+                for (set<boost::shared_ptr<Evoral::Note<TimeType> > >::iterator i = removed_notes.begin(); i != removed_notes.end(); ++i) {
+                        _model->add_note_unlocked (*i);
+                }
+        }
+
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
 
@@ -670,7 +727,7 @@ MidiModel::DiffCommand::get_state ()
 	XMLNode* changes = diff_command->add_child(DIFF_NOTES_ELEMENT);
 	for_each(_changes.begin(), _changes.end(), 
 		 boost::bind (
-			 boost::bind (&XMLNode::add_child_nocopy, *changes, _1),
+			 boost::bind (&XMLNode::add_child_nocopy, changes, _1),
 			 boost::bind (&DiffCommand::marshal_change, this, _1)));
 
 	return *diff_command;
@@ -801,7 +858,12 @@ MidiModel::find_note (boost::shared_ptr<Evoral::Note<TimeType> > other)
 
 	if (l != notes().end()) {
 		for (; (*l)->time() == other->time(); ++l) {
-			if (*l == other) {
+                        /* NB: compare note contents, not note pointers.
+                           If "other" was a ptr to a note already in
+                           the model, we wouldn't be looking for it,
+                           would we now?
+                         */
+			if (**l == *other) {
 				return *l;
 			}
 		}

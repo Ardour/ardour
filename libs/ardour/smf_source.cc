@@ -299,7 +299,7 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<double>& ev)
 	_write_data_count += ev.size();
 
 	if (_model) {
-		_model->append(ev);
+		_model->append (ev);
 	}
 }
 
@@ -338,7 +338,7 @@ SMFSource::append_event_unlocked_frames (const Evoral::Event<nframes_t>& ev, sfr
 		const double ev_time_beats = converter.from(ev.time());
 		const Evoral::Event<double> beat_ev(
 				ev.event_type(), ev_time_beats, ev.size(), (uint8_t*)ev.buffer());
-		_model->append(beat_ev);
+		_model->append (beat_ev);
 	}
 }
 
@@ -439,9 +439,10 @@ SMFSource::load_model (bool lock, bool force_reload)
 		if (ret > 0) { // didn't skip (meta) event
 			ev.set_event_type(EventTypeMap::instance().midi_event_type(buf[0]));
 
+#ifndef NDEBUG
                         std::string ss;
                         
-                        for (int xx = 0; xx < size; ++xx) {
+                        for (uint32_t xx = 0; xx < size; ++xx) {
                                 char b[8];
                                 snprintf (b, sizeof (b), "0x%x ", buf[xx]);
                                 ss += b;
@@ -449,8 +450,9 @@ SMFSource::load_model (bool lock, bool force_reload)
 
                         DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF %6 load model delta %1, time %2, size %3 buf %4, type %5\n",
                                                                           delta_t, time, size, ss , ev.event_type(), name()));
+#endif
                         
-			_model->append(ev);
+			_model->append (ev);
 		}
 
 		if (ev.size() > scratch_size) {
