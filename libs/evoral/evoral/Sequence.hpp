@@ -137,6 +137,10 @@ public:
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
 
+	typedef std::multiset<boost::shared_ptr< Note<Time> >, NoteNumberComparator>  Pitches;
+	inline       Pitches& pitches(uint8_t chan)       { return _pitches[chan&0xf]; }
+        inline const Pitches& pitches(uint8_t chan) const { return _pitches[chan&0xf]; }
+
         enum NoteOperator { 
                 PitchEqual,
                 PitchLessThan,
@@ -244,9 +248,13 @@ private:
 	void append_control_unlocked(const Parameter& param, Time time, double value);
 	void append_sysex_unlocked(const MIDIEvent<Time>& ev);
 
+        void get_notes_by_pitch (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
+        void get_notes_by_velocity (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
+
 	const TypeMap& _type_map;
 
-	Notes   _notes;
+        Notes   _notes;       // notes indexed by time
+        Pitches _pitches[16]; // notes indexed by channel+pitch
 	SysExes _sysexes;
 
 	typedef std::multiset<boost::shared_ptr< Note<Time> >, EarlierNoteComparator> WriteNotes;
