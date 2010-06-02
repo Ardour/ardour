@@ -2014,7 +2014,7 @@ Editor::show_verbose_time_cursor (nframes64_t frame, double offset, double xpos,
 		mins = frame / (frame_rate * 60);
 		frame = frame % (frame_rate * 60);
 		secs = (float) frame / (float) frame_rate;
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%.4f", hours, mins, secs);
+		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%07.4f", hours, mins, secs);
 		break;
 
 	default:
@@ -2095,7 +2095,7 @@ Editor::show_verbose_duration_cursor (nframes64_t start, nframes64_t end, double
 		mins = distance / (frame_rate * 60);
 		distance = distance % (frame_rate * 60);
 		secs = (float) distance / (float) frame_rate;
-		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%.4f", hours, mins, secs);
+		snprintf (buf, sizeof (buf), "%02" PRId32 ":%02" PRId32 ":%07.4f", hours, mins, secs);
 		break;
 
 	default:
