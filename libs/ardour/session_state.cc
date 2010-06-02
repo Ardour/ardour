@@ -700,7 +700,7 @@ Session::jack_session_event (jack_session_event_t * event)
                 if (save_template( timebuf )) {
                         event->flags = JackSessionSaveError; 
                 } else {
-                        string cmd ("ardour3 -U ");
+                        string cmd ("ardour3 -P -U ");
                         cmd += event->client_uuid;
                         cmd += " -T ";
                         cmd += timebuf;
@@ -716,7 +716,7 @@ Session::jack_session_event (jack_session_event_t * event)
                         sys::path xml_path (_session_dir->root_path());
                         xml_path /= legalize_for_path (timebuf) + statefile_suffix;
 
-                        string cmd ("ardour3 -U ");
+                        string cmd ("ardour3 -P -U ");
                         cmd += event->client_uuid;
                         cmd += " \"";
                         cmd += xml_path.to_string();
