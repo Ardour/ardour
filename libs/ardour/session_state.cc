@@ -684,20 +684,44 @@ Session::remove_state (string snapshot_name)
 void
 Session::jack_session_event (jack_session_event_t * event)
 {
-	if (save_state ("jacksession_snap")) {
-                event->flags = JackSessionSaveError; 
-	} else {
-                sys::path xml_path (_session_dir->root_path());
-                xml_path /= legalize_for_path ("jacksession_snap") + statefile_suffix;
-                
-                string cmd ("PROG_NAME -U ");
-                cmd += event->client_uuid;
-                cmd += " \"";
-                cmd += xml_path.to_string();
-                cmd += '\"';
-                
-                event->command_line = strdup (cmd.c_str());
-	}
+        char timebuf[128];
+        time_t n;
+        struct tm local_time;
+
+        time (&n);
+        localtime_r (&n, &local_time);
+        strftime (timebuf, sizeof(timebuf), "JS_%FT%T", &local_time);
+
+        if (event->type == JackSessionSaveTemplate)
+        {
+                if (save_template( timebuf )) {
+                        event->flags = JackSessionSaveError; 
+                } else {
+                        string cmd ("ardour3 -U ");
+                        cmd += event->client_uuid;
+                        cmd += " -T ";
+                        cmd += timebuf;
+
+                        event->command_line = strdup (cmd.c_str());
+                }
+        }
+        else
+        {
+                if (save_state (timebuf)) {
+                        event->flags = JackSessionSaveError; 
+                } else {
+                        sys::path xml_path (_session_dir->root_path());
+                        xml_path /= legalize_for_path (timebuf) + statefile_suffix;
+
+                        string cmd ("ardour3 -U ");
+                        cmd += event->client_uuid;
+                        cmd += " \"";
+                        cmd += xml_path.to_string();
+                        cmd += '\"';
+
+                        event->command_line = strdup (cmd.c_str());
+                }
+        }
 
 	jack_session_reply (_engine.jack(), event);
 
