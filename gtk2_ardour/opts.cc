@@ -40,6 +40,7 @@ bool ARDOUR_COMMAND_LINE::use_vst = true;
 bool ARDOUR_COMMAND_LINE::new_session = false;
 char* ARDOUR_COMMAND_LINE::curvetest_file = 0;
 bool ARDOUR_COMMAND_LINE::try_hw_optimization = true;
+bool ARDOUR_COMMAND_LINE::no_connect_ports = false;
 string ARDOUR_COMMAND_LINE::keybindings_path = ""; /* empty means use builtin default */
 Glib::ustring ARDOUR_COMMAND_LINE::menus_file = "ardour.menus";
 bool ARDOUR_COMMAND_LINE::finder_invoked_ardour = false;
@@ -79,7 +80,7 @@ print_help (const char *execname)
 int
 ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 {
-	const char *optstring = "bc:C:dD:hk:E:m:N:nOp:ST:U:vV";
+	const char *optstring = "bc:C:dD:hk:E:m:N:nOp:PST:U:vV";
 	const char *execname = strrchr (argv[0], '/');
 
 	if (getenv ("ARDOUR_SAE")) {
@@ -109,6 +110,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		{ "save", 1, 0, 'E' },
 		{ "uuid", 1, 0, 'U' },
 		{ "template", 1, 0, 'T' },
+		{ "no-connect-ports", 0, 0, 'P' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -175,6 +177,10 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 
 		case 'O':
 			try_hw_optimization = false;
+			break;
+
+		case 'P':
+			no_connect_ports = true;
 			break;
 
 		case 'V':

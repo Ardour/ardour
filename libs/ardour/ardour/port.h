@@ -56,6 +56,13 @@ public:
 	static void set_buffer_size (nframes_t sz) {
 		_buffer_size = sz;
 	}
+	static void set_connecting_blocked( bool yn ) { 
+		_connecting_blocked = yn;
+	}
+	static bool connecting_blocked() { 
+		return _connecting_blocked;
+	}
+
 
 	/** @return Port short name */
 	std::string name () const {
@@ -130,6 +137,7 @@ protected:
 
 	static nframes_t _port_offset;
 	static nframes_t _buffer_size;
+	static bool	 _connecting_blocked;
         
 	static AudioEngine* _engine; ///< the AudioEngine
 

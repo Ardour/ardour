@@ -34,6 +34,7 @@ extern bool   use_vst;
 extern bool   new_session;
 extern char*  curvetest_file;
 extern bool   try_hw_optimization;
+extern bool no_connect_ports;
 extern bool   use_gtk_theme;
 extern std::string keybindings_path;
 extern Glib::ustring menus_file;

@@ -92,6 +92,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/named_selection.h"
 #include "ardour/processor.h"
+#include "ardour/port.h"
 #include "ardour/region_factory.h"
 #include "ardour/route_group.h"
 #include "ardour/send.h"
@@ -364,6 +365,8 @@ Session::second_stage_init ()
 	ControlProtocolManager::instance().set_session (this);
 
 	_state_of_the_state = Clean;
+
+	Port::set_connecting_blocked (false);
 
 	DirtyChanged (); /* EMIT SIGNAL */
 

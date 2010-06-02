@@ -349,6 +349,8 @@ ARDOUR_UI::create_engine ()
 
 	engine->Halted.connect_same_thread (forever_connections, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
 
+        ARDOUR::Port::set_connecting_blocked (ARDOUR_COMMAND_LINE::no_connect_ports);
+
 	post_engine ();
 
 	return 0;

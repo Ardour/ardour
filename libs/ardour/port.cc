@@ -36,6 +36,7 @@ using namespace ARDOUR;
 AudioEngine* Port::_engine = 0;
 nframes_t Port::_port_offset = 0;
 nframes_t Port::_buffer_size = 0;
+bool Port::_connecting_blocked = false;
 
 /** @param n Port short name */
 Port::Port (std::string const & n, DataType t, Flags f)
@@ -115,6 +116,9 @@ Port::connect (std::string const & other)
 	std::string const this_shrt = _engine->make_port_name_non_relative (_name);
 
 	int r = 0;
+
+	if (_connecting_blocked)
+		return r;
 
 	if (sends_output ()) {
 		r = jack_connect (_engine->jack (), this_shrt.c_str (), other_shrt.c_str ());
