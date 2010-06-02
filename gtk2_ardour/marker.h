@@ -96,8 +96,10 @@ class Marker : public PBD::Destructible
 	unsigned char shift; /* should be double, but its always small and integral */
 	Type          _type;
 	int           name_height;
+	std::string   _annotation;
 
 	void reposition ();
+	void color_handler ();
 };
 
 class TempoMarker : public Marker

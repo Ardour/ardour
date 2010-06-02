@@ -255,9 +255,10 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Group& parent, guint32 rgba, con
 	name_pixbuf->property_x() = label_offset;
 	name_pixbuf->property_y() = (13 / 2) - (name_height / 2);
 
-	set_name (annotation.c_str());
+	set_name (annotation);
 
 	editor.ZoomChanged.connect (mem_fun (*this, &Marker::reposition));
+	ColorsChanged.connect (mem_fun (*this, &Marker::color_handler));
 
 	mark->set_data ("marker", this);
 
@@ -343,11 +344,20 @@ Marker::the_item() const
 }
 
 void
+Marker::color_handler ()
+{
+	set_name (_annotation);
+}
+
+void
 Marker::set_name (const string& new_name)
 {
 	int name_width = pixel_width (new_name, *name_font) + 2;
 
-	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(new_name, name_font, name_width, name_height);
+	_annotation = new_name;
+	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(new_name, name_font, 
+							     ARDOUR_UI::config()->canvasvar_MarkerLabel.get(), 
+							     name_width, name_height);
 
 	if (_type == End || _type == LoopEnd || _type == PunchOut) {
 		name_pixbuf->property_x() = - (name_width);

@@ -239,6 +239,8 @@ TimeAxisViewItem::init (const string& it_name, double spu, Gdk::Color& base_colo
 	
 	set_duration (item_duration, this) ;
 	set_position (start, this) ;
+
+	ColorsChanged.connect (mem_fun (*this, &TimeAxisViewItem::color_handler));
 }
 
 /**
@@ -552,9 +554,19 @@ TimeAxisViewItem::set_name_text(const ustring& new_name)
 		return;
 	}
 
+	_name = new_name;
+
 	last_item_width = trackview.editor.frame_to_pixel(item_duration);
 	name_pixbuf_width = pixel_width (new_name, *NAME_FONT) + 2;
-	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(new_name, NAME_FONT, name_pixbuf_width, NAME_HEIGHT);
+	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(new_name, NAME_FONT, 
+							     ARDOUR_UI::config()->canvasvar_TimeAxisViewItemName.get(),
+							     name_pixbuf_width, NAME_HEIGHT);
+}
+
+void
+TimeAxisViewItem::color_handler ()
+{
+	set_name_text (_name);
 }
 
 /**
@@ -919,7 +931,9 @@ TimeAxisViewItem::reset_name_width (double pix_width)
 		name_pixbuf->show();
 	}
 
-	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(item_name, NAME_FONT, pb_width, NAME_HEIGHT);
+	name_pixbuf->property_pixbuf() = pixbuf_from_ustring(item_name, NAME_FONT, 
+							     ARDOUR_UI::config()->canvasvar_TimeAxisViewItemName.get(),
+							     pb_width, NAME_HEIGHT);
 }
 
 

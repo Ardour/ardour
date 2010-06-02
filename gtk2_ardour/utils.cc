@@ -887,14 +887,21 @@ convert_bgra_to_rgba (guint8 const* src,
 }
 
 Glib::RefPtr<Gdk::Pixbuf>
-pixbuf_from_ustring(const ustring& name, Pango::FontDescription* font, int clip_width, int clip_height)
+pixbuf_from_ustring(const ustring& name, Pango::FontDescription* font, uint32_t rgba, int clip_width, int clip_height)
 {
 	Glib::RefPtr<Gdk::Pixbuf> buf = Gdk::Pixbuf::create(Gdk::COLORSPACE_RGB, true, 8, clip_width, clip_height);
 	cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, clip_width, clip_height);
 	cairo_t* cr = cairo_create (surface);
 	cairo_text_extents_t te;
 
-	cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1.0);
+	float fr, fg, fb, fa;
+
+	fr = ((rgba & 0xff000000) >> 24) / 255.0f;
+	fg = ((rgba & 0xff0000) >> 16) / 255.0f;
+	fb = ((rgba & 0xff00) >> 8) / 255.0f;
+	fa = (rgba & 0xff) / 255.0f;
+
+	cairo_set_source_rgba (cr, fr, fg, fb, fa);
 	cairo_select_font_face (cr, font->get_family().c_str(),
 				CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
 	cairo_set_font_size (cr,  font->get_size() / Pango::SCALE);

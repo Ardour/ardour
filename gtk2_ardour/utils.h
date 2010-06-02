@@ -96,6 +96,7 @@ void convert_bgra_to_rgba (guint8 const* src,
 		      int           height);
 Glib::RefPtr<Gdk::Pixbuf> pixbuf_from_ustring (const Glib::ustring& name,
 					       Pango::FontDescription* font,
+					       uint32_t rgba,
 					       int clip_width,
 					       int clip_height);
 

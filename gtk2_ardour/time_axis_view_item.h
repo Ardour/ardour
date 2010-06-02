@@ -373,6 +373,8 @@ class TimeAxisViewItem : public Selectable
     virtual void reset_width_dependent_items (double pixel_width);
     void reset_name_width (double pixel_width);
 
+    void color_handler ();
+
     /**
      * Callback used to remove this item during the gtk idle loop
      * This is used to avoid deleting the obejct while inside the remove_this_group
@@ -465,7 +467,7 @@ class TimeAxisViewItem : public Selectable
     double  _height;
     Visibility visibility;
     bool _recregion;
-
+    std::string _name;
 
 }; /* class TimeAxisViewItem */
 
