@@ -28,6 +28,11 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
+/* this needs to come before ardour.h, since it may include
+   headers that use this function.
+*/
+bool string_is_affirmative (const std::string& str);
+
 #include "ardour.h"
 
 class XMLNode;
@@ -37,7 +42,6 @@ Glib::ustring legalize_for_path (Glib::ustring);
 void elapsed_time_to_str (char *buf, uint32_t seconds);
 std::ostream& operator<< (std::ostream& o, const ARDOUR::BBT_Time& bbt);
 XMLNode* find_named_node (const XMLNode& node, std::string name);
-bool string_is_affirmative (const std::string& str);
 
 static inline float f_max(float x, float a) {
 	x -= a;

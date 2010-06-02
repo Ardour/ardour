@@ -25,6 +25,8 @@
 
 #include <pbd/xml++.h>
 
+#include "ardour/utils.h"
+
 namespace ARDOUR {
 
 class ConfigVariableBase {
@@ -155,6 +157,102 @@ class ConfigVariable : public ConfigVariableBase
   protected:
 	virtual T get_for_save() { return value; }
 	T value;
+};
+
+/* full specialization for bool, required because ::set_from_node() needs
+   special handling.
+*/
+
+template<>
+class ConfigVariable<bool> : public ConfigVariableBase
+{
+  public:
+	ConfigVariable (std::string str) : ConfigVariableBase (str), value (false) {}
+	ConfigVariable (std::string str, bool val) : ConfigVariableBase (str), value (val) {}
+
+	virtual bool set (bool val, Owner owner) {
+		if (val == value) {
+			miss ();
+			return false;
+		}
+		value = val;
+		_owner = (ConfigVariableBase::Owner)(_owner |owner);
+		notify ();
+		return true;
+	}
+
+	bool get() const {
+		return value;
+	}
+
+	void add_to_node (XMLNode& node) {
+		XMLNode* child = new XMLNode ("Option");
+		child->add_property ("name", _name);
+		child->add_property ("value", (value ? "yes" : "no"));
+		node.add_child_nocopy (*child);
+	}
+
+	bool set_from_node (const XMLNode& node, Owner owner) {
+
+		if (node.name() == "Config") {
+
+			/* ardour.rc */
+
+			const XMLProperty* prop;
+			XMLNodeList nlist;
+			XMLNodeConstIterator niter;
+			XMLNode* child;
+			
+			nlist = node.children();
+			
+			for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+				
+				child = *niter;
+				
+				if (child->name() == "Option") {
+					if ((prop = child->property ("name")) != 0) {
+						if (prop->value() == _name) {
+							if ((prop = child->property ("value")) != 0) {
+                                                                value = ::string_is_affirmative (prop->value());
+								_owner = (ConfigVariableBase::Owner)(_owner |owner);
+								return true;
+							}
+						}
+					}
+				}
+			}
+			
+		} else if (node.name() == "Options") {
+
+			/* session file */
+
+			XMLNodeList olist;
+			XMLNodeConstIterator oiter;
+			XMLNode* option;
+			const XMLProperty* opt_prop;
+			
+			olist = node.children();
+			
+			for (oiter = olist.begin(); oiter != olist.end(); ++oiter) {
+				
+				option = *oiter;
+				
+				if (option->name() == _name) {
+					if ((opt_prop = option->property ("val")) != 0) {
+                                                value = ::string_is_affirmative (opt_prop->value());
+						_owner = (ConfigVariableBase::Owner)(_owner |owner);
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+  protected:
+	virtual bool get_for_save() { return value; }
+	bool value;
 };
 
 template<class T>
