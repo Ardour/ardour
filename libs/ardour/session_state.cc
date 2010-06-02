@@ -856,13 +856,17 @@ Session::load_state (string snapshot_name)
 
 	if (!state_was_pending) {
 		xmlpath = _session_dir->root_path();
-		xmlpath /= legalize_for_path (snapshot_name) + statefile_suffix;
+		xmlpath /= snapshot_name;
 	}
 
-	if (!sys::exists (xmlpath)) {
-		error << string_compose(_("%1: session state information file \"%2\" doesn't exist!"), _name, xmlpath.to_string()) << endmsg;
-		return 1;
-	}
+        if (!sys::exists (xmlpath)) {
+                xmlpath = _session_dir->root_path();
+                xmlpath /= legalize_for_path (snapshot_name) + statefile_suffix;
+                if (!sys::exists (xmlpath)) {
+                        error << string_compose(_("%1: session state information file \"%2\" doesn't exist!"), _name, xmlpath.to_string()) << endmsg;
+                        return 1;
+                }
+        }
 
 	state_tree = new XMLTree;
 
