@@ -32,6 +32,8 @@
 #include <CoreFoundation/CoreFoundation.h>
 #endif
 
+bool string_is_affirmative (const std::string&);
+
 #include "ardour.h"
 
 class XMLNode;
@@ -39,7 +41,6 @@ class XMLNode;
 Glib::ustring legalize_for_path (Glib::ustring str);
 XMLNode* find_named_node (const XMLNode& node, std::string name);
 std::string bool_as_string (bool);
-bool string_is_affirmative (const std::string&);
 
 static inline float f_max(float x, float a) {
 	x -= a;

@@ -25,6 +25,7 @@
 
 #include "pbd/xml++.h"
 #include "ardour/types.h"
+#include "ardour/utils.h"
 
 namespace ARDOUR {
 
@@ -85,6 +86,43 @@ class ConfigVariable : public ConfigVariableBase
   protected:
 	virtual T get_for_save() { return value; }
 	T value;
+};
+
+template<>
+class ConfigVariable<bool> : public ConfigVariableBase
+{
+  public:
+
+	ConfigVariable (std::string str) : ConfigVariableBase (str), value (false) {}
+	ConfigVariable (std::string str, bool val) : ConfigVariableBase (str), value (val) {}
+
+	bool get() const {
+		return value;
+	}
+
+	std::string get_as_string () const {
+		std::ostringstream ss;
+		ss << value;
+		return ss.str ();
+	}
+
+	virtual bool set (bool val) {
+		if (val == value) {
+			miss ();
+			return false;
+		}
+		value = val;
+		notify ();
+		return true;
+	}
+
+	void set_from_string (std::string const & s) {
+                value = string_is_affirmative (s);
+	}
+
+  protected:
+	virtual bool get_for_save() { return value; }
+	bool value;
 };
 
 template<class T>
