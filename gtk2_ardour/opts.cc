@@ -45,6 +45,7 @@ Glib::ustring ARDOUR_COMMAND_LINE::menus_file = "ardour.menus";
 bool ARDOUR_COMMAND_LINE::finder_invoked_ardour = false;
 string ARDOUR_COMMAND_LINE::immediate_save;
 string ARDOUR_COMMAND_LINE::jack_session_uuid;
+string ARDOUR_COMMAND_LINE::load_template;
 
 using namespace ARDOUR_COMMAND_LINE;
 
@@ -78,7 +79,7 @@ print_help (const char *execname)
 int
 ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 {
-	const char *optstring = "bc:C:dD:hk:E:m:N:nOp:SU:vV";
+	const char *optstring = "bc:C:dD:hk:E:m:N:nOp:ST:U:vV";
 	const char *execname = strrchr (argv[0], '/');
 
 	if (getenv ("ARDOUR_SAE")) {
@@ -107,6 +108,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		{ "curvetest", 1, 0, 'C' },
 		{ "save", 1, 0, 'E' },
 		{ "uuid", 1, 0, 'U' },
+		{ "template", 1, 0, 'T' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -161,6 +163,9 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 
 		case 'S':
 		//	; just pass this through to gtk it will figure it out
+			break;
+		case 'T':
+			load_template = optarg;
 			break;
 
 		case 'N':

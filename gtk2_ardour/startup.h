@@ -30,6 +30,7 @@ class ArdourStartup : public Gtk::Assistant {
 	~ArdourStartup ();
 
 	void set_new_only (bool);
+        void set_load_template( std::string load_template );
 
 	Glib::ustring session_name (bool& should_be_new);
 	Glib::ustring session_folder ();
@@ -177,6 +178,7 @@ class ArdourStartup : public Gtk::Assistant {
 	Gtk::RadioButtonGroup session_template_group;
 	Gtk::RadioButton use_session_as_template_button;
 	Gtk::RadioButton use_template_button;
+        std::string load_template_override;
 
 	void more_new_session_options_button_clicked();
 	void new_name_changed ();

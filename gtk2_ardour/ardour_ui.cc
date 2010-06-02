@@ -294,7 +294,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 
 /** @return true if a session was chosen and `apply' clicked, otherwise false if `cancel' was clicked */
 bool
-ARDOUR_UI::run_startup (bool should_be_new)
+ARDOUR_UI::run_startup (bool should_be_new, string load_template)
 {
 	if (_startup == 0) {
 		_startup = new ArdourStartup ();
@@ -307,6 +307,9 @@ ARDOUR_UI::run_startup (bool should_be_new)
 	}
 
 	_startup->set_new_only (should_be_new);
+        if (!load_template.empty()) {
+            _startup->set_load_template( load_template );
+        }
 	_startup->present ();
 
 	main().run();
@@ -642,7 +645,7 @@ Please consider the possibilities, and perhaps (re)start JACK."));
 void
 ARDOUR_UI::startup ()
 {
-	if (get_session_parameters (true, ARDOUR_COMMAND_LINE::new_session)) {
+	if (get_session_parameters (true, ARDOUR_COMMAND_LINE::new_session, ARDOUR_COMMAND_LINE::load_template)) {
 		exit (1);
 	}
 
@@ -2388,13 +2391,18 @@ ARDOUR_UI::loading_message (const std::string& /*msg*/)
 
 /** @param quit_on_cancel true if exit() should be called if the user clicks `cancel' in the new session dialog */
 int
-ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new)
+ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, string load_template)
 {
 	Glib::ustring session_name;
 	Glib::ustring session_path;
 	Glib::ustring template_name;
 	int ret = -1;
 	bool likely_new = false;
+
+        if (! load_template.empty()) {
+            should_be_new = true;
+            template_name = load_template;
+        }
 
 	while (ret != 0) {
 
@@ -2415,7 +2423,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new)
 
 		} else {
 
-			bool const apply = run_startup (should_be_new);
+			bool const apply = run_startup (should_be_new, load_template);
 			if (!apply) {
 				if (quit_on_cancel) {
 					exit (1);

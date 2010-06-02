@@ -142,9 +142,19 @@ ArdourStartup::set_new_only (bool yn)
 	}
 }
 
+void
+ArdourStartup::set_load_template( string load_template )
+{
+    use_template_button.set_active( false );
+    load_template_override = load_template;
+}
+
 bool
 ArdourStartup::use_session_template ()
 {
+        if (!load_template_override.empty())
+                return true;
+
 	if (use_template_button.get_active()) {
 		return template_chooser.get_active_row_number() > 0;
 	} else {
@@ -155,6 +165,11 @@ ArdourStartup::use_session_template ()
 Glib::ustring
 ArdourStartup::session_template_name ()
 {
+        if (!load_template_override.empty()) {
+            string the_path = (ARDOUR::user_template_directory()/ (load_template_override + ".template")).to_string();
+                return the_path;
+        }
+
 	if (ic_existing_session_button.get_active()) {
 		return ustring();
 	}
