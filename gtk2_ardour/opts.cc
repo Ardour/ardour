@@ -201,6 +201,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 
 		case 'U':
 			jack_session_uuid = optarg;
+                        break;
 
 		default:
 			return print_help(execname);
