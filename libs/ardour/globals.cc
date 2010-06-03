@@ -408,7 +408,7 @@ ARDOUR::init (bool use_vst, bool try_optimization)
 	new PluginManager ();
 
         ProcessThread::init ();
-        BufferManager::init (2); // XX should be num_processors_for_dsp
+        BufferManager::init (10); // XX should be num_processors_for_dsp
 
 	return 0;
 }

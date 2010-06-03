@@ -119,6 +119,7 @@ class Slave;
 class Source;
 class TempoMap;
 class VSTPlugin;
+class Graph;
 class Track;
 
 extern void setup_enum_writer ();
@@ -1188,6 +1189,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	std::list<RouteGroup *> _route_groups;
 
 	/* routes stuff */
+
+	boost::shared_ptr<Graph> route_graph;
 
 	SerializedRCUManager<RouteList>  routes;
 

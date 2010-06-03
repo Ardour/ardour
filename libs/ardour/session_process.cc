@@ -36,6 +36,7 @@
 #include "ardour/session.h"
 #include "ardour/slave.h"
 #include "ardour/timestamps.h"
+#include "ardour/graph.h"
 #include "ardour/port.h"
 
 #include "midi++/manager.h"
@@ -104,6 +105,8 @@ Session::no_roll (nframes_t nframes)
 		_click_io->silence (nframes);
 	}
 
+	route_graph->routes_no_roll( nframes, _transport_frame, end_frame, non_realtime_work_pending(), actively_recording(), declick);
+        /*
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
 		if ((*i)->is_hidden()) {
@@ -119,6 +122,7 @@ Session::no_roll (nframes_t nframes)
 			break;
 		}
 	}
+        */
 
 	return ret;
 }
@@ -141,6 +145,8 @@ Session::process_routes (nframes_t nframes, bool& need_butler)
 	const nframes_t start_frame = _transport_frame;
 	const nframes_t end_frame = _transport_frame + (nframes_t)floor(nframes * _transport_speed);
 
+	route_graph->process_routes( nframes, start_frame, end_frame, declick, record_active, rec_monitors, need_butler);
+/*
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
 		int ret;
@@ -156,7 +162,7 @@ Session::process_routes (nframes_t nframes, bool& need_butler)
 			return -1;
 		}
 	}
-
+*/
 	return 0;
 }
 
@@ -176,6 +182,8 @@ Session::silent_process_routes (nframes_t nframes, bool& need_butler)
 	const nframes_t start_frame = _transport_frame;
 	const nframes_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
 
+	route_graph->silent_process_routes( nframes, start_frame, end_frame, record_active, rec_monitors, need_butler);
+/*
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 
 		int ret;
@@ -189,7 +197,7 @@ Session::silent_process_routes (nframes_t nframes, bool& need_butler)
 			return -1;
 		}
 	}
-
+*/
 	return 0;
 }
 

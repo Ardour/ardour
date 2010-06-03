@@ -99,6 +99,8 @@ libardour_sources = [
 	'find_session.cc',
 	'gain.cc',
 	'globals.cc',
+	'graph.cc',
+	'graphnode.cc',
 	'import.cc',
 	'internal_return.cc',
 	'internal_send.cc',
@@ -245,6 +247,8 @@ def configure(conf):
 	conf.check(header_name='wordexp.h', define_name='HAVE_WORDEXP')
 
 	conf.check(header_name='jack/session.h', define_name='HAVE_JACK_SESSION')
+
+	conf.check(header_name='unistd.h', define_name='HAVE_UNISTD')
         
 	conf.check_cc(fragment = "#include <jack/jack.h>\nvoid callback (int code, const char* reason, void* arg) { return; }\nint main(int argc, char **argv) { jack_client_t* c; jack_on_info_shutdown (c, callback, (void*) 0); return 0; }\n",
                       linkflags = ['-ljack'],

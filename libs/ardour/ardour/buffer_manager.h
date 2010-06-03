@@ -28,6 +28,7 @@ class BufferManager
 	
         typedef RingBufferNPT<ThreadBuffers*> ThreadBufferFIFO;
 	typedef std::list<ThreadBuffers*> ThreadBufferList;
+
         static ThreadBufferFIFO* thread_buffers;
 	static ThreadBufferList* thread_buffers_list;
 };

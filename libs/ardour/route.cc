@@ -58,6 +58,7 @@
 #include "ardour/session.h"
 #include "ardour/timestamps.h"
 #include "ardour/utils.h"
+#include "ardour/graph.h"
 
 #include "i18n.h"
 
@@ -72,6 +73,7 @@ PBD::Signal0<void> Route::RemoteControlIDChange;
 Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	: SessionObject (sess, name)
 	, AutomatableControls (sess)
+	, GraphNode( sess.route_graph )
         , _active (true)
         , _initial_delay (0)
         , _roll_delay (0)

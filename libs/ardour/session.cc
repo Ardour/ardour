@@ -96,6 +96,7 @@
 #include "ardour/tape_file_matcher.h"
 #include "ardour/tempo.h"
 #include "ardour/utils.h"
+#include "ardour/graph.h"
 
 #include "midi++/jack.h"
 
@@ -144,6 +145,7 @@ Session::Session (AudioEngine &eng,
 	  _butler (new Butler (*this)),
 	  _post_transport_work (0),
 	  _send_timecode_update (false),
+	  route_graph (new Graph(*this)),
 	  routes (new RouteList),
 	  _total_free_4k_blocks (0),
 	  _bundles (new BundleList),
@@ -1322,7 +1324,10 @@ Session::resort_routes ()
 		shared_ptr<RouteList> r = writer.get_copy ();
 		resort_routes_using (r);
 		/* writer goes out of scope and forces update */
+                route_graph->rechain( r );
 	}
+
+	route_graph->dump(1);
 
 #ifndef NDEBUG
         boost::shared_ptr<RouteList> rl = routes.reader ();

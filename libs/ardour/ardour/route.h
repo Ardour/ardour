@@ -43,6 +43,7 @@
 #include "ardour/types.h"
 #include "ardour/mute_master.h"
 #include "ardour/route_group_member.h"
+#include "ardour/graphnode.h"
 
 namespace ARDOUR {
 
@@ -56,7 +57,7 @@ class Send;
 class InternalReturn;
 class MonitorProcessor;
 
-class Route : public SessionObject, public AutomatableControls, public RouteGroupMember
+class Route : public SessionObject, public AutomatableControls, public RouteGroupMember, public GraphNode
 {
   public:
 
