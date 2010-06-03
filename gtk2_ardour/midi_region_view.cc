@@ -1336,14 +1336,12 @@ MidiRegionView::update_note (CanvasNote* ev)
 {
 	boost::shared_ptr<NoteType> note = ev->note();
 
-
 	const nframes64_t note_start_frames = beats_to_frames(note->time());
 	const nframes64_t note_end_frames   = beats_to_frames(note->end_time());
 
 	const double x = trackview.editor().frame_to_pixel(note_start_frames - _region->start());
 	const double y1 = midi_stream_view()->note_to_y(note->note());
-	const double note_endpixel =
-		trackview.editor().frame_to_pixel(note_end_frames - _region->start());
+	const double note_endpixel = trackview.editor().frame_to_pixel(note_end_frames - _region->start());
 
 	ev->property_x1() = x;
 	ev->property_y1() = y1;

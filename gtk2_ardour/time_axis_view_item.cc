@@ -49,7 +49,6 @@ using namespace PBD;
 using namespace ARDOUR;
 
 Pango::FontDescription* TimeAxisViewItem::NAME_FONT = 0;
-bool TimeAxisViewItem::have_name_font = false;
 const double TimeAxisViewItem::NAME_X_OFFSET = 15.0;
 const double TimeAxisViewItem::GRAB_HANDLE_LENGTH = 6;
 
@@ -57,6 +56,28 @@ int    TimeAxisViewItem::NAME_HEIGHT;
 double TimeAxisViewItem::NAME_Y_OFFSET;
 double TimeAxisViewItem::NAME_HIGHLIGHT_SIZE;
 double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
+
+void
+TimeAxisViewItem::set_constant_heights ()
+{
+        NAME_FONT = get_font_for_style (X_("TimeAxisViewItemName"));
+        
+        Gtk::Window win;
+        Gtk::Label foo;
+        win.add (foo);
+        
+        Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (X_("Hg")); /* ascender + descender */
+        int width = 0;
+        int height = 0;
+        
+        layout->set_font_description (*NAME_FONT);
+        Gtkmm2ext::get_ink_pixel_size (layout, width, height);
+        
+        NAME_HEIGHT = height;
+        NAME_Y_OFFSET = height + 3;
+        NAME_HIGHLIGHT_SIZE = height + 2;
+        NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 3;
+}
 
 /**
  * Construct a new TimeAxisViewItem.
@@ -76,31 +97,6 @@ TimeAxisViewItem::TimeAxisViewItem(const string & it_name, ArdourCanvas::Group& 
 	, _height (1.0)
 	, _recregion (recording)
 {
-	if (!have_name_font) {
-
-		/* first constructed item sets up font info */
-
-		NAME_FONT = get_font_for_style (N_("TimeAxisViewItemName"));
-
-		Gtk::Window win;
-		Gtk::Label foo;
-		win.add (foo);
-
-		Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (X_("Hg")); /* ascender + descender */
-		int width = 0;
-		int height = 0;
-
-		layout->set_font_description (*NAME_FONT);
-		Gtkmm2ext::get_ink_pixel_size (layout, width, height);
-
-		NAME_HEIGHT = height;
-		NAME_Y_OFFSET = height + 3;
-		NAME_HIGHLIGHT_SIZE = height + 2;
-		NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 3;
-
-		have_name_font = true;
-	}
-
 	group = new ArdourCanvas::Group (parent);
 
 	init (it_name, spu, base_color, start, duration, vis, true, true);

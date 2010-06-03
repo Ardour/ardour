@@ -96,6 +96,7 @@ typedef uint64_t microseconds_t;
 #include "startup.h"
 #include "engine_dialog.h"
 #include "processor_box.h"
+#include "time_axis_view_item.h"
 
 #include "i18n.h"
 
@@ -285,6 +286,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[])
 	}
 
 	reset_dpi();
+
+        TimeAxisViewItem::set_constant_heights ();
 
 	starting.connect (sigc::mem_fun(*this, &ARDOUR_UI::startup));
 	stopping.connect (sigc::mem_fun(*this, &ARDOUR_UI::shutdown));

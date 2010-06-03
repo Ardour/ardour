@@ -298,7 +298,7 @@ MidiStreamView::update_contents_height ()
 {
 	StreamView::update_contents_height();
 	_note_lines->property_y2() = height;
-	
+
 	draw_note_lines();
 }
 
