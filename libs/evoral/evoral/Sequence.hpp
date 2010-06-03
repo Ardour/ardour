@@ -137,10 +137,6 @@ public:
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
 
-	typedef std::multiset<boost::shared_ptr< Note<Time> >, NoteNumberComparator>  Pitches;
-	inline       Pitches& pitches(uint8_t chan)       { return _pitches[chan&0xf]; }
-        inline const Pitches& pitches(uint8_t chan) const { return _pitches[chan&0xf]; }
-
         enum NoteOperator { 
                 PitchEqual,
                 PitchLessThan,
@@ -157,7 +153,18 @@ public:
         void get_notes (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
 
         void remove_overlapping_notes ();
+        void trim_overlapping_notes ();
         void remove_duplicate_notes ();
+
+        enum OverlapPitchResolution { 
+                LastOnFirstOff,
+                FirstOnFirstOff
+        };
+
+        bool overlapping_pitches_accepted() const { return _overlapping_pitches_accepted; }
+        void overlapping_pitches_accepted(bool yn)  { _overlapping_pitches_accepted = yn; }
+        OverlapPitchResolution overlap_pitch_resolution() const { return _overlap_pitch_resolution; }
+        void set_overlap_pitch_resolution(OverlapPitchResolution opr);
 
 	void set_notes (const Sequence<Time>::Notes& n);
 
@@ -224,8 +231,8 @@ public:
 	bool edited() const      { return _edited; }
 	void set_edited(bool yn) { _edited = yn; }
 
-        bool overlaps (const boost::shared_ptr< Note<Time> > ev) const;
-        bool contains (const boost::shared_ptr< Note<Time> > ev) const;
+        bool overlaps (const boost::shared_ptr< Note<Time> >& ev) const;
+        bool contains (const boost::shared_ptr< Note<Time> >& ev) const;
 
 	bool add_note_unlocked(const boost::shared_ptr< Note<Time> > note);
 	void remove_note_unlocked(const boost::shared_ptr< const Note<Time> > note);
@@ -233,15 +240,22 @@ public:
 	uint8_t lowest_note()  const { return _lowest_note; }
 	uint8_t highest_note() const { return _highest_note; }
 
+
 protected:
-	bool                 _edited;
-	mutable Glib::RWLock _lock;
+	bool                   _edited;
+        bool                   _overlapping_pitches_accepted;
+        OverlapPitchResolution _overlap_pitch_resolution;
+	mutable Glib::RWLock   _lock;
 
 private:
 	friend class const_iterator;
 
-        bool overlaps_unlocked (const boost::shared_ptr< Note<Time> > ev) const;
-        bool contains_unlocked (const boost::shared_ptr< Note<Time> > ev) const;
+	typedef std::multiset<boost::shared_ptr< Note<Time> >, NoteNumberComparator>  Pitches;
+	inline       Pitches& pitches(uint8_t chan)       { return _pitches[chan&0xf]; }
+        inline const Pitches& pitches(uint8_t chan) const { return _pitches[chan&0xf]; }
+
+        bool overlaps_unlocked (const boost::shared_ptr< Note<Time> >& ev) const;
+        bool contains_unlocked (const boost::shared_ptr< Note<Time> >& ev) const;
 
         void append_note_on_unlocked (boost::shared_ptr< Note<Time> >);
         void append_note_off_unlocked(boost::shared_ptr< Note<Time> >);

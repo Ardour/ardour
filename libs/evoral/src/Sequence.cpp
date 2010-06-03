@@ -381,6 +381,8 @@ Sequence<Time>::const_iterator::operator=(const const_iterator& other)
 template<typename Time>
 Sequence<Time>::Sequence(const TypeMap& type_map)
 	: _edited(false)
+        , _overlapping_pitches_accepted (true)
+        , _overlap_pitch_resolution (FirstOnFirstOff)
 	, _type_map(type_map)
 	, _writing(false)
 	, _end_iter(*this, DBL_MAX)
@@ -397,6 +399,8 @@ template<typename Time>
 Sequence<Time>::Sequence(const Sequence<Time>& other)
 	: ControlSet (other)
         , _edited(false)
+        , _overlapping_pitches_accepted (other._overlapping_pitches_accepted)
+        , _overlap_pitch_resolution (other._overlap_pitch_resolution)
 	, _type_map(other._type_map)
 	, _writing(false)
 	, _end_iter(*this, DBL_MAX)
@@ -583,13 +587,9 @@ Sequence<Time>::add_note_unlocked(const boost::shared_ptr< Note<Time> > note)
 
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 add note %2 @ %3\n", this, (int)note->note(), note->time()));
 
-        if (contains_unlocked (note)) {
+        if (!_overlapping_pitches_accepted && overlaps_unlocked (note)) {
                 return false;
 	}
-
-        if (overlaps_unlocked (note)) {
-                return false;
-        }
 
 	_edited = true;
 
@@ -767,6 +767,8 @@ Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> >
             format.
          */
 
+         /* XXX use _overlap_pitch_resolution to determine FIFO/LIFO ... */
+
          for (typename WriteNotes::iterator n = _write_notes[note->channel()].begin(); n != _write_notes[note->channel()].end(); ++n) {
                  boost::shared_ptr< Note<Time> > nn = *n;
                  if (note->note() == nn->note() && nn->channel() == note->channel()) {
@@ -815,28 +817,33 @@ Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> >
 
  template<typename Time>
  bool
- Sequence<Time>::contains (const boost::shared_ptr< Note<Time> > note) const
+ Sequence<Time>::contains (const boost::shared_ptr< Note<Time> >& note) const
  {
          return contains_unlocked (note);
  }
 
  template<typename Time>
  bool
- Sequence<Time>::contains_unlocked (const boost::shared_ptr< Note<Time> > note) const
+ Sequence<Time>::contains_unlocked (const boost::shared_ptr< Note<Time> >& note) const
  {
-         for (typename Sequence<Time>::Notes::const_iterator i = note_lower_bound(note->time());
-                         i != _notes.end() && (*i)->time() == note->time(); ++i) {
-                 if (*i == note) {
+         const Pitches& p (pitches (note->channel()));
+         boost::shared_ptr< Note<Time> > search_note(new Note<Time>(0, 0, 0, 0, note->note()));
+
+         for (typename Pitches::const_iterator i = p.lower_bound (search_note); 
+              i != p.end() && (*i)->note() == note->note(); ++i) {
+
+                 if (**i == *note) {
                          cerr << "Existing note matches: " << *i << endl;
                          return true;
                  }
          }
+
          return false;
  }
 
  template<typename Time>
  bool
- Sequence<Time>::overlaps (const boost::shared_ptr< Note<Time> > note) const
+ Sequence<Time>::overlaps (const boost::shared_ptr< Note<Time> >& note) const
  {
          ReadLock lock (read_lock());
          return overlaps_unlocked (note);
@@ -844,17 +851,16 @@ Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> >
 
  template<typename Time>
  bool
- Sequence<Time>::overlaps_unlocked (const boost::shared_ptr< Note<Time> > note) const
+ Sequence<Time>::overlaps_unlocked (const boost::shared_ptr< Note<Time> >& note) const
  {
          Time sa = note->time();
          Time ea  = note->end_time();
+         
+         const Pitches& p (pitches (note->channel()));
+         boost::shared_ptr< Note<Time> > search_note(new Note<Time>(0, 0, 0, 0, note->note()));
 
-         for (typename Sequence<Time>::Notes::const_iterator i = note_lower_bound (note->time()); i != _notes.end(); ++i) {
-
-                 if ((note->note() != (*i)->note()) ||
-                     (note->channel() != (*i)->channel())) {
-                         continue;
-                 }
+         for (typename Pitches::const_iterator i = p.lower_bound (search_note); 
+              i != p.end() && (*i)->note() == note->note(); ++i) {
 
                  Time sb = (*i)->time();
                  Time eb = (*i)->end_time();
@@ -887,7 +893,6 @@ Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> >
          assert(i == _notes.end() || (*i)->time() >= t);
          return i;
  }
-
 
 template<typename Time>
 void
@@ -1010,6 +1015,15 @@ Sequence<Time>::get_notes_by_velocity (Notes& n, NoteOperator op, uint8_t val, i
 
                 }
         }
+}
+
+template<typename Time>
+void
+Sequence<Time>::set_overlap_pitch_resolution (OverlapPitchResolution opr)
+{
+        _overlap_pitch_resolution = opr;
+
+        /* XXX todo: clean up existing overlaps in source data? */
 }
 
 template class Sequence<Evoral::MusicalTime>;
