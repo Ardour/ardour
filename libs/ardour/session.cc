@@ -1327,7 +1327,7 @@ Session::resort_routes ()
                 route_graph->rechain( r );
 	}
 
-	route_graph->dump(1);
+	//route_graph->dump(1);
 
 #ifndef NDEBUG
         boost::shared_ptr<RouteList> rl = routes.reader ();
