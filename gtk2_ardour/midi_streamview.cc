@@ -299,7 +299,7 @@ MidiStreamView::update_contents_height ()
 	StreamView::update_contents_height();
 	_note_lines->property_y2() = height;
 
-	draw_note_lines();
+        apply_note_range (lowest_note(), highest_note(), true);
 }
 
 void
@@ -362,13 +362,42 @@ MidiStreamView::apply_note_range(uint8_t lowest, uint8_t highest, bool to_region
 {
 	_highest_note = highest;
 	_lowest_note = lowest;
+	
+	int range = _highest_note - _lowest_note;  
+	int pixels_per_note = floor (height/range);
+	
+	/* do not grow note display beyont 10 pixels */
+	if (pixels_per_note > 10){
+		
+		int available_note_range = floor ((height)/10);
+		int additional_notes = available_note_range - range;
+		
+		/* distribute additional notes to higher and lower ranges, clamp at 0 and 127 */
+		for (int i = 0; i < additional_notes; i++){
+			
+			if (i % 2 && _highest_note < 127){
+				_highest_note++;
+			}
+			else if (i % 2) {
+				_lowest_note--;
+			}
+			else if (_lowest_note > 0){
+				_lowest_note--;
+			}
+			else {
+				_highest_note++;
+			}
+		}
+	}
+	
 	note_range_adjustment.set_page_size(_highest_note - _lowest_note);
 	note_range_adjustment.set_value(_lowest_note);
+	
 	draw_note_lines();
 
 	if (to_region_views) {
 		for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-			((MidiRegionView*)(*i))->apply_note_range(lowest, highest);
+			((MidiRegionView*)(*i))->apply_note_range(_lowest_note, _highest_note);
 		}
 	}
 
