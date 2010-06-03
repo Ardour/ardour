@@ -32,6 +32,7 @@ uint64_t PBD::DEBUG::SnapBBT = PBD::new_debug_bit ("snapbbt");
 uint64_t PBD::DEBUG::Configuration = PBD::new_debug_bit ("configuration");
 uint64_t PBD::DEBUG::Latency = PBD::new_debug_bit ("latency");
 uint64_t PBD::DEBUG::Processors = PBD::new_debug_bit ("processors");
+uint64_t PBD::DEBUG::ProcessThreads = PBD::new_debug_bit ("processthreads");
 uint64_t PBD::DEBUG::Graph = PBD::new_debug_bit ("graph");
 uint64_t PBD::DEBUG::Destruction = PBD::new_debug_bit ("destruction");
 uint64_t PBD::DEBUG::MTC = PBD::new_debug_bit ("mtc");

@@ -17,6 +17,9 @@
 
 */
 
+#include "pbd/compose.h"
+
+#include "ardour/debug.h"
 #include "ardour/graph.h"
 #include "ardour/types.h"
 #include "ardour/session.h"
@@ -39,6 +42,7 @@
 #include <cmath>
 
 using namespace ARDOUR;
+using namespace PBD;
 
 static    unsigned int hardware_concurrency()
     {
@@ -76,7 +80,7 @@ Graph::Graph( Session & session )
     _graph_empty = true;
 
     int num_cpu = hardware_concurrency();
-    printf( "found %d cpus\n", num_cpu );
+    DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("Using %1 CPUs via %1 threads\n", num_cpu));
     _thread_list.push_back( Glib::Thread::create( sigc::mem_fun( *this, &Graph::main_thread ), 100000, true, true, Glib::THREAD_PRIORITY_NORMAL ) );
     for (int i=1; i<num_cpu; i++)
         _thread_list.push_back( Glib::Thread::create( sigc::mem_fun( *this, &Graph::helper_thread ), 100000, true, true, Glib::THREAD_PRIORITY_NORMAL ) );
@@ -305,11 +309,11 @@ Graph::run_one()
     {
 	_execution_tokens += 1;
 	pthread_mutex_unlock( &_trigger_mutex );
-	//printf( "going to sleep...\n" ); 
+        DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 goes to sleep\n", pthread_self()));
 	sem_wait( &_execution_sem );
         if (_quit_threads)
             return true;
-	//printf( "wake up...\n" ); 
+        DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 is awake\n", pthread_self()));
 	pthread_mutex_lock( &_trigger_mutex );
 	if (_trigger_queue.size())
 	{
@@ -386,6 +390,7 @@ again:
 void
 Graph::dump( int chain )
 {
+#ifndef NDEBUG
     node_list_t::iterator ni;
     node_set_t::iterator ai;
 
@@ -409,6 +414,7 @@ Graph::dump( int chain )
     }
 
     printf( "final activation refcount: %d\n", _init_finished_refcount[chain] );
+#endif
 }
 
 int
@@ -489,6 +495,8 @@ Graph::process_one_route( Route * route )
     int retval;
 
     assert( route );
+
+    DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 runs route %2\n", pthread_self(), route->name()));
 
     if (_process_silent)
 	retval = route->silent_roll (_process_nframes, _process_start_frame, _process_end_frame, _process_can_record, _process_rec_monitors_input, need_butler);
