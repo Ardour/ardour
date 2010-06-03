@@ -44,6 +44,12 @@ def fetch_svn_revision (path):
 	cmd = "LANG= svn info " + path + " | awk '/^Revision:/ { print $2}'"
 	return commands.getoutput(cmd)
 
+def fetch_gcc_version ():
+	cmd = "LANG= gcc --version"
+	output = commands.getoutput(cmd).splitlines()
+        version = output[0].split(' ')[2].split('.')
+	return version
+
 def fetch_git_revision (path):
 	cmd = "LANG= git log --abbrev HEAD^..HEAD " + path
 	output = commands.getoutput(cmd).splitlines()
@@ -375,7 +381,13 @@ def configure(conf):
         conf.env['VERSION'] = VERSION
 	autowaf.set_recursive()
 	autowaf.configure(conf)
-	
+
+	gcc_versions = fetch_gcc_version()
+        if Options.options.debug and gcc_versions[0] == '4' and gcc_versions[1] > '4':
+                print 'Version 4.5 of gcc is not ready for use when compiling Ardour with optimization.'
+                print 'Please use a different version or re-configure with --debug'
+                exit (1)
+
 	if sys.platform == 'darwin':
 		#
 		#	Define OSX as a uselib to use when compiling
