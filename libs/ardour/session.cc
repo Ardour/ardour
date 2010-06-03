@@ -1324,7 +1324,6 @@ Session::resort_routes ()
 		shared_ptr<RouteList> r = writer.get_copy ();
 		resort_routes_using (r);
 		/* writer goes out of scope and forces update */
-                route_graph->rechain( r );
 	}
 
 	//route_graph->dump(1);
@@ -1381,6 +1380,8 @@ Session::resort_routes_using (shared_ptr<RouteList> r)
 
 	RouteSorter cmp;
 	r->sort (cmp);
+
+	route_graph->rechain( r );
 
 #ifndef NDEBUG
         DEBUG_TRACE (DEBUG::Graph, "Routes resorted, order follows:\n");
