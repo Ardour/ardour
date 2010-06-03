@@ -3746,13 +3746,35 @@ NoteDrag::motion (GdkEvent*, bool)
 	}
 
 	if (dx || dy) {
+                
+		CanvasNoteEvent* cnote = dynamic_cast<CanvasNoteEvent*>(_item);
+                Evoral::MusicalTime new_time;
+                
+                if (drag_delta_x) {
+                        nframes64_t start_frames = region->beats_to_frames(cnote->note()->time());
+                        if (drag_delta_x >= 0) {
+                                start_frames += region->snap_frame_to_frame(_editor->pixel_to_frame(drag_delta_x));
+                        } else {
+                                start_frames -= region->snap_frame_to_frame(_editor->pixel_to_frame(-drag_delta_x));
+                        }
+                        new_time = region->frames_to_beats(start_frames);
+                } else {
+                        new_time = cnote->note()->time();
+                }
+                
+                boost::shared_ptr<Evoral::Note<Evoral::MusicalTime> > check_note (
+                        new Evoral::Note<Evoral::MusicalTime> (cnote->note()->channel(), 
+                                                               new_time,
+                                                               cnote->note()->length(), 
+                                                               cnote->note()->note() + drag_delta_note,
+                                                               cnote->note()->velocity()));
+                bool overlaps = cnote->region_view().midi_region()->model()->overlaps (check_note, cnote->note());
+
 		region->move_selection (dx, dy);
 
-		CanvasNoteEvent* cnote = dynamic_cast<CanvasNoteEvent*>(_item);
-
                 char buf[12];
-                snprintf (buf, sizeof (buf), "%s (%g)", Evoral::midi_note_name (cnote->note()->note()).c_str(),
-                          (int) cnote->note()->note() + drag_delta_note);
+                snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (cnote->note()->note()).c_str(),
+                          (int) floor ((cnote->note()->note() + drag_delta_note)));
 		_editor->show_verbose_canvas_cursor_with (buf);
         }
 }

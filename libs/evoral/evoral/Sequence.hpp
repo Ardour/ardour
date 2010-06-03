@@ -231,7 +231,8 @@ public:
 	bool edited() const      { return _edited; }
 	void set_edited(bool yn) { _edited = yn; }
 
-        bool overlaps (const boost::shared_ptr< Note<Time> >& ev) const;
+        bool overlaps (const boost::shared_ptr< Note<Time> >& ev, 
+                       const boost::shared_ptr< Note<Time> >& ignore_this_note) const;
         bool contains (const boost::shared_ptr< Note<Time> >& ev) const;
 
 	bool add_note_unlocked(const boost::shared_ptr< Note<Time> > note);
@@ -254,7 +255,8 @@ private:
 	inline       Pitches& pitches(uint8_t chan)       { return _pitches[chan&0xf]; }
         inline const Pitches& pitches(uint8_t chan) const { return _pitches[chan&0xf]; }
 
-        bool overlaps_unlocked (const boost::shared_ptr< Note<Time> >& ev) const;
+        bool overlaps_unlocked (const boost::shared_ptr< Note<Time> >& ev, 
+                                const boost::shared_ptr< Note<Time> >& ignore_this_note) const;
         bool contains_unlocked (const boost::shared_ptr< Note<Time> >& ev) const;
 
         void append_note_on_unlocked (boost::shared_ptr< Note<Time> >);

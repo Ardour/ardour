@@ -587,7 +587,7 @@ Sequence<Time>::add_note_unlocked(const boost::shared_ptr< Note<Time> > note)
 
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 add note %2 @ %3\n", this, (int)note->note(), note->time()));
 
-        if (!_overlapping_pitches_accepted && overlaps_unlocked (note)) {
+        if (!_overlapping_pitches_accepted && overlaps_unlocked (note, boost::shared_ptr<Note<Time> >())) {
                 return false;
 	}
 
@@ -827,7 +827,7 @@ Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> >
  Sequence<Time>::contains_unlocked (const boost::shared_ptr< Note<Time> >& note) const
  {
          const Pitches& p (pitches (note->channel()));
-         boost::shared_ptr< Note<Time> > search_note(new Note<Time>(0, 0, 0, 0, note->note()));
+         boost::shared_ptr< Note<Time> > search_note(new Note<Time>(0, 0, 0, note->note()));
 
          for (typename Pitches::const_iterator i = p.lower_bound (search_note); 
               i != p.end() && (*i)->note() == note->note(); ++i) {
@@ -843,24 +843,28 @@ Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> >
 
  template<typename Time>
  bool
- Sequence<Time>::overlaps (const boost::shared_ptr< Note<Time> >& note) const
+ Sequence<Time>::overlaps (const boost::shared_ptr< Note<Time> >& note, const boost::shared_ptr<Note<Time> >& without) const
  {
          ReadLock lock (read_lock());
-         return overlaps_unlocked (note);
+         return overlaps_unlocked (note, without);
  }
 
  template<typename Time>
  bool
- Sequence<Time>::overlaps_unlocked (const boost::shared_ptr< Note<Time> >& note) const
+ Sequence<Time>::overlaps_unlocked (const boost::shared_ptr< Note<Time> >& note, const boost::shared_ptr<Note<Time> >& without) const
  {
          Time sa = note->time();
          Time ea  = note->end_time();
          
          const Pitches& p (pitches (note->channel()));
-         boost::shared_ptr< Note<Time> > search_note(new Note<Time>(0, 0, 0, 0, note->note()));
+         boost::shared_ptr< Note<Time> > search_note(new Note<Time>(0, 0, 0, note->note()));
 
          for (typename Pitches::const_iterator i = p.lower_bound (search_note); 
               i != p.end() && (*i)->note() == note->note(); ++i) {
+
+                 if (without && (**i) == *without) {
+                         continue;
+                 }
 
                  Time sb = (*i)->time();
                  Time eb = (*i)->end_time();
