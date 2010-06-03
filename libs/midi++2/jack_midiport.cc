@@ -145,8 +145,14 @@ JACK_MidiPort::write(byte * msg, size_t msglen, timestamp_t timestamp)
 		}
 
 		if (vec.len[0]) {
+                        if (!vec.buf[0]->owns_buffer()) {
+                                vec.buf[0]->set_buffer (0, 0, true);
+                        }
 			vec.buf[0]->set (msg, msglen, timestamp);
 		} else {
+                        if (!vec.buf[1]->owns_buffer()) {
+                                vec.buf[1]->set_buffer (0, 0, true);
+                        }
 			vec.buf[1]->set (msg, msglen, timestamp);
 		}
 
