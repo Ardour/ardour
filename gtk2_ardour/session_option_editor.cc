@@ -138,9 +138,11 @@ private:
 };
 
 SessionOptionEditor::SessionOptionEditor (Session* s)
-	: OptionEditor (&(s->config), _("Session Preferences"))
+	: OptionEditor (&(s->config), _("Session Properties"))
 	, _session_config (&(s->config))
 {
+        set_name ("SessionProperties");
+
 	/* SYNC */
 
 	ComboOption<uint32_t>* spf = new ComboOption<uint32_t> (

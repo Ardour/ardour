@@ -217,7 +217,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (common_actions, X_("goto-mixer"), _("Show Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::goto_mixer_window));
 	ActionManager::register_action (common_actions, X_("toggle-editor-mixer-on-top"), _("Toggle Editor Mixer on Top"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_editor_mixer_on_top));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleRCOptionsEditor"), _("Preferences"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_rc_options_window));
-	ActionManager::register_toggle_action (common_actions, X_("ToggleSessionOptionsEditor"), _("Preferences"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_session_options_window));
+	ActionManager::register_toggle_action (common_actions, X_("ToggleSessionOptionsEditor"), _("Properties"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_session_options_window));
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleInspector"), _("Tracks and Busses"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_route_params_window));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
