@@ -143,7 +143,7 @@ Graph::prep()
 }
 
 void
-Graph::trigger (GraphNode * n)
+Graph::trigger (GraphNode* n)
 {
         pthread_mutex_lock (&_trigger_mutex);
         _trigger_queue.push_back( n);
@@ -188,7 +188,7 @@ Graph::restart_cycle()
 }
 
 static bool
-is_feedback (boost::shared_ptr<RouteList> routelist, Route * from, boost::shared_ptr<Route> to)
+is_feedback (boost::shared_ptr<RouteList> routelist, Route* from, boost::shared_ptr<Route> to)
 {
         for (RouteList::iterator ri=routelist->begin(); ri!=routelist->end(); ri++) {
                 if ((*ri).get() == from)
@@ -201,7 +201,7 @@ is_feedback (boost::shared_ptr<RouteList> routelist, Route * from, boost::shared
 }
 
 static bool
-is_feedback (boost::shared_ptr<RouteList> routelist, boost::shared_ptr<Route> from, Route * to)
+is_feedback (boost::shared_ptr<RouteList> routelist, boost::shared_ptr<Route> from, Route* to)
 {
         for (RouteList::iterator ri=routelist->begin(); ri!=routelist->end(); ri++) {
                 if ((*ri).get() == to)
@@ -244,27 +244,26 @@ Graph::rechain (boost::shared_ptr<RouteList> routelist)
 
                 boost::shared_ptr<Route> rp = boost::dynamic_pointer_cast<Route>( *ni);
 
-                for (RouteList::iterator ri=routelist->begin(); ri!=routelist->end(); ri++)
-                {
-                        if (rp->direct_feeds (*ri))
-                        {
-                                if (is_feedback (routelist, rp.get(), *ri))
+                for (RouteList::iterator ri=routelist->begin(); ri!=routelist->end(); ri++) {
+                        if (rp->direct_feeds (*ri)) {
+                                if (is_feedback (routelist, rp.get(), *ri)) {
                                         continue; 
-		    
+                                }
+
                                 has_output = true;
                                 (*ni)->_activation_set[chain].insert (boost::dynamic_pointer_cast<GraphNode> (*ri) );
                         }
                 }
 
-                for (Route::FedBy::iterator fi=rp->fed_by().begin(); fi!=rp->fed_by().end(); fi++)
-                {
-                        if (boost::shared_ptr<Route> r = fi->r.lock())
-                                if (!is_feedback (routelist, r, rp.get() ))
+                for (Route::FedBy::iterator fi=rp->fed_by().begin(); fi!=rp->fed_by().end(); fi++) {
+                        if (boost::shared_ptr<Route> r = fi->r.lock()) {
+                                if (!is_feedback (routelist, r, rp.get())) {
                                         has_input = true;
+                                }
+                        }
                 }
 
-                for (node_set_t::iterator ai=(*ni)->_activation_set[chain].begin(); ai!=(*ni)->_activation_set[chain].end(); ai++)
-                {
+                for (node_set_t::iterator ai=(*ni)->_activation_set[chain].begin(); ai!=(*ni)->_activation_set[chain].end(); ai++) {
                         (*ai)->_init_refcount[chain] += 1;
                 }
 
@@ -284,7 +283,7 @@ Graph::rechain (boost::shared_ptr<RouteList> routelist)
 bool
 Graph::run_one()
 {
-        GraphNode * to_run;
+        GraphNode* to_run;
 
         pthread_mutex_lock (&_trigger_mutex);
         if (_trigger_queue.size()) {
@@ -483,7 +482,7 @@ Graph::routes_no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end
         return _process_retval;
 }
 void
-Graph::process_one_route (Route * route)
+Graph::process_one_route (Route* route)
 {
         bool need_butler = false;
         int retval;
