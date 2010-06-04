@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2010 Paul Davis
+    Author: Torben Hohn 
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,13 +15,11 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 
 #ifndef __ardour_graph_h__
 #define __ardour_graph_h__
-
 
 #include <list>
 #include <set>
@@ -53,18 +52,16 @@ typedef boost::shared_ptr<Graph> graph_ptr_t;
 typedef std::list< node_ptr_t > node_list_t;
 typedef std::set< node_ptr_t > node_set_t;
 
-
-
 class Graph : public SessionHandleRef
 {
     public:
-	Graph( Session & session );
+	Graph (Session & session);
 
 	void prep();
-	void trigger( GraphNode * n );
-	void rechain( boost::shared_ptr<RouteList> r );
+	void trigger (GraphNode * n);
+	void rechain (boost::shared_ptr<RouteList> r);
 
-	void dump( int chain );
+	void dump (int chain);
 	void process();
 	void dec_ref();
 	void restart_cycle();
@@ -73,16 +70,16 @@ class Graph : public SessionHandleRef
 	void helper_thread();
 	void main_thread();
 
-	int silent_process_routes (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
-                bool can_record, bool rec_monitors_input, bool& need_butler );
+	int silent_process_routes (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+                bool can_record, bool rec_monitors_input, bool& need_butler);
 
-	int process_routes (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, int declick,
-                bool can_record, bool rec_monitors_input, bool& need_butler );
+	int process_routes (nframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
+                bool can_record, bool rec_monitors_input, bool& need_butler);
 
-        int routes_no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
+        int routes_no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame, 
                 bool non_rt_pending, bool can_record, int declick);
 
-	void process_one_route( Route * route );
+	void process_one_route (Route * route);
 
     protected:
         virtual void session_going_away ();
@@ -119,8 +116,8 @@ class Graph : public SessionHandleRef
 
 	// parameter caches.
 	nframes_t	_process_nframes;
-	sframes_t	_process_start_frame;
-	sframes_t	_process_end_frame;
+	framepos_t	_process_start_frame;
+	framepos_t	_process_end_frame;
 	bool		_process_can_record;
 	bool		_process_rec_monitors_input;
 	bool		_process_non_rt_pending;
@@ -132,6 +129,6 @@ class Graph : public SessionHandleRef
 	bool		_process_need_butler;
 };
 
-}
+} // namespace 
 
-#endif
+#endif /* __ardour_graph_h__ */

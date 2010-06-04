@@ -290,15 +290,16 @@ Graph::run_one()
         if (_trigger_queue.size()) {
                 to_run = _trigger_queue.back();
                 _trigger_queue.pop_back();
-        }
-        else
+        } else {
                 to_run = 0;
+        }
 
-        int wakeup = std::min ((int) _execution_tokens, (int) _trigger_queue.size() );
+        int wakeup = std::min ((int) _execution_tokens, (int) _trigger_queue.size());
         _execution_tokens -= wakeup;
 
-        for (int i=0; i<wakeup; i++ )
+        for (int i=0; i<wakeup; i++ ) {
                 sem_post (&_execution_sem);
+        }
 
         while (to_run == 0) {
                 _execution_tokens += 1;
@@ -324,6 +325,10 @@ Graph::run_one()
 
 static void get_rt()
 {
+        if (!jack_is_realtime (AudioEngine::instance()->jack())) {
+                return;
+        }
+
         int priority = jack_client_real_time_priority (AudioEngine::instance()->jack());
 
         if (priority) {
@@ -344,11 +349,12 @@ Graph::helper_thread()
         pt->get_buffers();
         get_rt();
 
-
         while(1) {
-                if (run_one())
+                if (run_one()) {
                         break;
+                }
         }
+
         pt->drop_buffers();
 }
 
@@ -370,10 +376,12 @@ Graph::main_thread()
                 goto again;
         }
 
-        while(1) {
-                if (run_one())
+        while (1) {
+                if (run_one()) {
                         break;
+                }
         }
+
         pt->drop_buffers();
 }
 
@@ -405,7 +413,7 @@ Graph::dump (int chain)
 }
 
 int
-Graph::silent_process_routes (nframes_t nframes, sframes_t start_frame, sframes_t end_frame,
+Graph::silent_process_routes (nframes_t nframes, framepos_t start_frame, framepos_t end_frame,
                               bool can_record, bool rec_monitors_input, bool& need_butler)
 {
         _process_nframes = nframes;
@@ -430,7 +438,7 @@ Graph::silent_process_routes (nframes_t nframes, sframes_t start_frame, sframes_
 }
 
 int
-Graph::process_routes (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, int declick,
+Graph::process_routes (nframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
                        bool can_record, bool rec_monitors_input, bool& need_butler)
 {
         _process_nframes = nframes;
@@ -454,7 +462,7 @@ Graph::process_routes (nframes_t nframes, sframes_t start_frame, sframes_t end_f
 }
 
 int
-Graph::routes_no_roll (nframes_t nframes, sframes_t start_frame, sframes_t end_frame, 
+Graph::routes_no_roll (nframes_t nframes, framepos_t start_frame, framepos_t end_frame, 
                        bool non_rt_pending, bool can_record, int declick)
 {
         _process_nframes = nframes;
