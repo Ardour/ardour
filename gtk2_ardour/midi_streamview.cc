@@ -64,11 +64,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	, _data_note_min(60)
 	, _data_note_max(71)
 {
-	if (tv.is_track()) {
-		stream_base_color = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
-	} else {
-		stream_base_color = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();
-	}
+	color_handler ();
 
 	/* use a group dedicated to MIDI underlays. Audio underlays are not in this group. */
 	midi_underlay_group = new ArdourCanvas::Group (*_canvas_group);
@@ -366,8 +362,8 @@ MidiStreamView::apply_note_range(uint8_t lowest, uint8_t highest, bool to_region
 	int range = _highest_note - _lowest_note;  
 	int pixels_per_note = floor (height/range);
 	
-	/* do not grow note display beyont 10 pixels */
-	if (pixels_per_note > 10){
+	/* do not grow note height beyond 10 pixels */
+	if (pixels_per_note > 10) {
 		
 		int available_note_range = floor ((height)/10);
 		int additional_notes = available_note_range - range;
@@ -703,14 +699,10 @@ MidiStreamView::rec_data_range_ready (nframes_t start, nframes_t cnt, boost::wea
 void
 MidiStreamView::color_handler ()
 {
-	//case cMidiTrackBase:
 	if (_trackview.is_midi_track()) {
-		//canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
-	}
-
-	//case cMidiBusBase:
-	if (!_trackview.is_midi_track()) {
-		//canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();;
+		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiTrackBase.get();
+	} else {
+		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->canvasvar_MidiBusBase.get();;
 	}
 }
 
