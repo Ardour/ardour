@@ -17,6 +17,9 @@
 
 */
 
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
+
 #include <set>
 #include <fstream>
 #include <algorithm>
@@ -2392,7 +2395,7 @@ Playlist::relayer ()
 	int const divisions = 512;
 
 	/* find the start and end positions of the regions on this playlist */
-	framepos_t start = UINT_MAX;
+	framepos_t start = INT64_MAX;
 	framepos_t end = 0;
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 		start = min (start, (*i)->position());
