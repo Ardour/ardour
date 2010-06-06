@@ -303,6 +303,8 @@ EditorRoutes::build_menu ()
 	items.push_back (MenuElem (_("Hide All Audio Tracks"), sigc::mem_fun (*this, &EditorRoutes::hide_all_audiotracks)));
 	items.push_back (MenuElem (_("Show All Audio Busses"), sigc::mem_fun (*this, &EditorRoutes::show_all_audiobus)));
 	items.push_back (MenuElem (_("Hide All Audio Busses"), sigc::mem_fun (*this, &EditorRoutes::hide_all_audiobus)));
+	items.push_back (MenuElem (_("Show All Midi Tracks"), sigc::mem_fun (*this, &EditorRoutes::show_all_miditracks)));
+	items.push_back (MenuElem (_("Hide All Midi Tracks"), sigc::mem_fun (*this, &EditorRoutes::hide_all_miditracks)));
 	items.push_back (MenuElem (_("Show Tracks With Regions Under Playhead"), sigc::mem_fun (*this, &EditorRoutes::show_tracks_with_regions_at_playhead)));
 }
 
@@ -694,7 +696,7 @@ EditorRoutes::set_all_tracks_visibility (bool yn)
 }
 
 void
-EditorRoutes::set_all_audio_visibility (int tracks, bool yn)
+EditorRoutes::set_all_audio_midi_visibility (int tracks, bool yn)
 {
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator i;
@@ -702,10 +704,13 @@ EditorRoutes::set_all_audio_visibility (int tracks, bool yn)
 	suspend_redisplay ();
 
 	for (i = rows.begin(); i != rows.end(); ++i) {
+	  
 		TreeModel::Row row = (*i);
 		TimeAxisView* tv = row[_columns.tv];
+		
 		AudioTimeAxisView* atv;
-
+		MidiTimeAxisView* mtv;
+		
 		if (tv == 0) {
 			continue;
 		}
@@ -729,6 +734,19 @@ EditorRoutes::set_all_audio_visibility (int tracks, bool yn)
 				break;
 			}
 		}
+		else if ((mtv = dynamic_cast<MidiTimeAxisView*>(tv)) != 0) {
+			switch (tracks) {
+			case 0:
+				(*i)[_columns.visible] = yn;
+				break;
+
+			case 3:
+				if (mtv->is_midi_track()) {
+					(*i)[_columns.visible] = yn;
+				}
+				break;
+			}
+		}
 	}
 
 	resume_redisplay ();
@@ -747,25 +765,36 @@ EditorRoutes::show_all_routes ()
 }
 
 void
-EditorRoutes::show_all_audiobus ()
-{
-	set_all_audio_visibility (2, true);
-}
-void
-EditorRoutes::hide_all_audiobus ()
-{
-	set_all_audio_visibility (2, false);
-}
-
-void
 EditorRoutes::show_all_audiotracks()
 {
-	set_all_audio_visibility (1, true);
+	set_all_audio_midi_visibility (1, true);
 }
 void
 EditorRoutes::hide_all_audiotracks ()
 {
-	set_all_audio_visibility (1, false);
+	set_all_audio_midi_visibility (1, false);
+}
+
+void
+EditorRoutes::show_all_audiobus ()
+{
+	set_all_audio_midi_visibility (2, true);
+}
+void
+EditorRoutes::hide_all_audiobus ()
+{
+	set_all_audio_midi_visibility (2, false);
+}
+
+void
+EditorRoutes::show_all_miditracks()
+{
+	set_all_audio_midi_visibility (3, true);
+}
+void
+EditorRoutes::hide_all_miditracks ()
+{
+	set_all_audio_midi_visibility (3, false);
 }
 
 bool

@@ -78,13 +78,15 @@ private:
 	void update_solo_isolate_display ();
 	void update_solo_safe_display ();
 	void set_all_tracks_visibility (bool);
-	void set_all_audio_visibility (int, bool);
+	void set_all_audio_midi_visibility (int, bool);
 	void show_all_routes ();
 	void hide_all_routes ();
 	void show_all_audiotracks ();
 	void hide_all_audiotracks ();
 	void show_all_audiobus ();
 	void hide_all_audiobus ();
+	void show_all_miditracks ();
+	void hide_all_miditracks ();
 	void show_tracks_with_regions_at_playhead ();
 	
 	void display_drag_data_received (
