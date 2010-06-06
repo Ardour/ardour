@@ -108,10 +108,8 @@ CrossfadeView::reset_width_dependent_items (double pixel_width)
 void
 CrossfadeView::set_height (double h)
 {
-	if (h <= TimeAxisView::preset_height (HeightSmall)) {
-		h -= 3.0;
-	} else {
-		h -= NAME_HIGHLIGHT_SIZE + 3.0;
+	if (h > TimeAxisView::preset_height (HeightSmall)) {
+		h -= NAME_HIGHLIGHT_SIZE;
 	}
 
 	TimeAxisViewItem::set_height (h);
@@ -183,8 +181,8 @@ CrossfadeView::redraw_curves ()
 
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
-		p.set_x(i);
-		p.set_y(2.0 + _height - (_height * vec[i]));
+		p.set_x (i + 1);
+		p.set_y (_height - ((_height - 2) * vec[i]));
 	}
 	
 	fade_in->property_points() = *points;
@@ -193,8 +191,8 @@ CrossfadeView::redraw_curves ()
 
 	for (int i = 0, pci = 0; i < npoints; ++i) {
 		Art::Point &p = (*points)[pci++];
-		p.set_x(i);
-		p.set_y(2.0 + _height - (_height * vec[i]));
+		p.set_x (i + 1);
+		p.set_y (_height - ((_height - 2) * vec[i]));
 	}
 	
 	fade_out->property_points() = *points;
