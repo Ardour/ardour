@@ -73,7 +73,6 @@ PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert
         , _keyboard_focused (false)
 {
 	bool have_gui = false;
-	was_visible = false;
 
 	if (insert->plugin()->has_editor()) {
 		switch (insert->type()) {
