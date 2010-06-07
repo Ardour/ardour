@@ -2432,14 +2432,22 @@ Playlist::relayer ()
 		/* reset the pending explicit relayer flag for every region, now that we're relayering */
 		(*i)->set_pending_explicit_relayer (false);
 
-		/* find the time divisions that this region covers */
-		int const start_division = floor ( ((*i)->position() - start) / division_size);
-		int end_division = floor ( ((*i)->position() + (*i)->length() - start) / division_size );
-		if (end_division == divisions) {
-			end_division--;
+		/* find the time divisions that this region covers; if there are no regions on the list,
+		   division_size will equal 0 and in this case we'll just say that
+		   start_division = end_division = 0.
+		*/
+		int start_division = 0;
+		int end_division = 0;
+
+		if (division_size > 0) {
+			start_division = floor ( ((*i)->position() - start) / division_size);
+			end_division = floor ( ((*i)->position() + (*i)->length() - start) / division_size );
+			if (end_division == divisions) {
+				end_division--;
+			}
 		}
 
-		assert (end_division < divisions);
+		assert (divisions == 0 || end_division < divisions);
 
 		/* find the lowest layer that this region can go on */
 		size_t j = layers.size();
