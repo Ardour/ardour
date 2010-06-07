@@ -69,10 +69,11 @@ using namespace sigc;
 
 PluginUIWindow::PluginUIWindow (Gtk::Window* win, boost::shared_ptr<PluginInsert> insert, bool scrollable)
 	: parent (win)
+        , was_visible (false)
+        , _keyboard_focused (false)
 {
 	bool have_gui = false;
 	was_visible = false;
-	_keyboard_focused = false;
 
 	if (insert->plugin()->has_editor()) {
 		switch (insert->type()) {
@@ -248,7 +249,6 @@ PluginUIWindow::create_vst_editor(boost::shared_ptr<PluginInsert> insert)
 		add (*vpu);
 		vpu->package (*this);
 	}
-
 	return true;
 #endif
 }
@@ -329,13 +329,16 @@ PluginUIWindow::on_key_press_event (GdkEventKey* event)
 		}
 		return true;
 	} else {
-		/* pass editor window as the window for the event
-		   to be handled in, not this one, because there are
-		   no widgets in this window that we want to have
-		   key focus.
-		*/
-		 
-		return relay_key_press (event, &PublicEditor::instance());
+                if (_pluginui->non_gtk_gui()) {
+                        /* pass editor window as the window for the event
+                           to be handled in, not this one, because there are
+                           no widgets in this window that we want to have
+                           key focus.
+                        */
+                        return relay_key_press (event, &PublicEditor::instance());
+                } else {
+                        return relay_key_press (event, this);
+                }
 	}
 }
 

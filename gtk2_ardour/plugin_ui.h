@@ -86,6 +86,8 @@ class PlugUIBase : public virtual sigc::trackable
 	virtual void on_window_hide() {}
 
 	virtual void forward_key_event (GdkEventKey*) {}
+        virtual bool non_gtk_gui() const { return false; }
+        
 
 	sigc::signal<void,bool> KeyboardFocused;
 
@@ -270,6 +272,7 @@ class VSTPluginUI : public PlugUIBase, public Gtk::VBox
 	bool stop_updating(GdkEventAny*) {return false;}
 
 	int package (Gtk::Window&);
+        bool non_gtk_gui() const { return true; }
 
   private:
 	boost::shared_ptr<ARDOUR::VSTPlugin>  vst;

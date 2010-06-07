@@ -55,6 +55,8 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	bool on_window_show (const Glib::ustring&);
 	void on_window_hide ();
 
+        bool non_gtk_gui() const { return true; }
+
 	void lower_box_realized ();
 	void cocoa_view_resized ();
 	void on_realize ();
