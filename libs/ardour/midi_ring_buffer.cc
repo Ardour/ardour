@@ -104,7 +104,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		}
 
 		// write MIDI buffer contents
-		success = Evoral::EventRingBuffer<T>::full_read(ev_size, write_loc);
+		success = read_contents (ev_size, write_loc);
 
 #ifndef NDEBUG
 		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, "wrote MidiEvent to Buffer: ");
