@@ -1592,15 +1592,15 @@ NoteResizeDrag::NoteResizeDrag (Editor* e, ArdourCanvas::Item* i)
 void
 NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
-	Gdk::Cursor     cursor;
-	ArdourCanvas::CanvasNote*     cnote = dynamic_cast<ArdourCanvas::CanvasNote*>(_item);
+	Gdk::Cursor cursor;
+	ArdourCanvas::CanvasNote* cnote = dynamic_cast<ArdourCanvas::CanvasNote*>(_item);
 
 	Drag::start_grab (event);
 
 	region = &cnote->region_view();
 
-	double region_start = region->get_position_pixels();
-	double middle_point = region_start + cnote->x1() + (cnote->x2() - cnote->x1()) / 2.0L;
+	double const region_start = region->get_position_pixels();
+	double const middle_point = region_start + cnote->x1() + (cnote->x2() - cnote->x1()) / 2.0L;
 
 	if (grab_x() <= middle_point) {
 		cursor = Gdk::Cursor(Gdk::LEFT_SIDE);
@@ -1644,7 +1644,7 @@ NoteResizeDrag::motion (GdkEvent* /*event*/, bool /*first_move*/)
 {
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
-		(*r)->update_resizing (at_front, _drags->current_pointer_x() - grab_x(), relative);
+		(*r)->update_resizing (dynamic_cast<ArdourCanvas::CanvasNote*>(_item), at_front, _drags->current_pointer_x() - grab_x(), relative);
 	}
 }
 
@@ -1653,7 +1653,7 @@ NoteResizeDrag::finished (GdkEvent*, bool /*movement_occurred*/)
 {
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
-		(*r)->commit_resizing (at_front, _drags->current_pointer_x() - grab_x(), relative);
+		(*r)->commit_resizing (dynamic_cast<ArdourCanvas::CanvasNote*>(_item), at_front, _drags->current_pointer_x() - grab_x(), relative);
 	}
 }
 

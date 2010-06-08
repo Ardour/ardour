@@ -2107,8 +2107,17 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
 	}
 }
 
+/** Update resizing notes while user drags.
+ * @param primary `primary' note for the drag; ie the one that is used as the reference in non-relative mode.
+ * @param at_front which end of the note (true == note on, false == note off)
+ * @param delta_x change in mouse position since the start of the drag 
+ * @param relative true if relative resizing is taking place, false if absolute resizing.  This only makes
+ * a difference when multiple notes are being resized; in relative mode, each note's length is changed by the
+ * amount of the drag.  In non-relative mode, all selected notes are set to have the same start or end point
+ * as the \a primary note.
+ */
 void
-MidiRegionView::update_resizing (bool at_front, double delta_x, bool relative)
+MidiRegionView::update_resizing (ArdourCanvas::CanvasNote* primary, bool at_front, double delta_x, bool relative)
 {
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
 		SimpleRect* resize_rect = (*i)->resize_rect;
@@ -2119,15 +2128,13 @@ MidiRegionView::update_resizing (bool at_front, double delta_x, bool relative)
 			if (relative) {
 				current_x = canvas_note->x1() + delta_x;
 			} else {
-				// x is in track relative, transform it to region relative
-				current_x = delta_x - get_position_pixels();
+				current_x = primary->x1() + delta_x;
 			}
 		} else {
 			if (relative) {
 				current_x = canvas_note->x2() + delta_x;
 			} else {
-				// x is in track relative, transform it to region relative
-				current_x = delta_x - get_end_position_pixels ();
+				current_x = primary->x2() + delta_x;
 			}
 		}
 
@@ -2141,30 +2148,33 @@ MidiRegionView::update_resizing (bool at_front, double delta_x, bool relative)
 	}
 }
 
+
+/** Finish resizing notes when the user releases the mouse button.
+ *  Parameters the same as for \a update_resizing().
+ */
 void
-MidiRegionView::commit_resizing (bool at_front, double delta_x, bool relative)
+MidiRegionView::commit_resizing (ArdourCanvas::CanvasNote* primary, bool at_front, double delta_x, bool relative)
 {
 	start_diff_command(_("resize notes"));
 
+	CanvasNote* first = _resize_data.empty() ? 0 : _resize_data.front()->canvas_note;
+	
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
 		CanvasNote*  canvas_note = (*i)->canvas_note;
 		SimpleRect*  resize_rect = (*i)->resize_rect;
-		const double region_start = get_position_pixels();
 		double current_x;
 
 		if (at_front) {
 			if (relative) {
 				current_x = canvas_note->x1() + delta_x;
 			} else {
-				// x is in track relative, transform it to region relative
-				current_x = region_start + delta_x;
+				current_x = primary->x1() + delta_x;
 			}
 		} else {
 			if (relative) {
 				current_x = canvas_note->x2() + delta_x;
 			} else {
-				// x is in track relative, transform it to region relative
-				current_x = region_start + delta_x;
+				current_x = primary->x2() + delta_x;
 			}
 		}
 
