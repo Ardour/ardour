@@ -574,10 +574,11 @@ Editor::Editor ()
 	the_notebook.show_all ();
 	
 	post_maximal_editor_width = 0;
-	post_maximal_pane_position = 0;
+	post_maximal_horizontal_pane_position = 0;
+	post_maximal_editor_height = 0;
+	post_maximal_vertical_pane_position = 0;
 
-	VPaned *editor_summary_pane = manage(new VPaned());
-	editor_summary_pane->pack1(edit_packer);
+	editor_summary_pane.pack1(edit_packer);
 
 	Button* summary_arrows_left_left = manage (new Button);
 	summary_arrows_left_left->add (*manage (new Arrow (ARROW_LEFT, SHADOW_NONE)));
@@ -608,10 +609,14 @@ Editor::Editor ()
 	_summary_hbox.pack_start (*summary_frame, true, true);
 	_summary_hbox.pack_start (*summary_arrows_right, false, false);
 	
-	editor_summary_pane->pack2 (_summary_hbox);
+	editor_summary_pane.pack2 (_summary_hbox);
 
-	edit_pane.pack1 (*editor_summary_pane, true, true);
+	edit_pane.pack1 (editor_summary_pane, true, true);
 	edit_pane.pack2 (the_notebook, false, true);
+
+	editor_summary_pane.signal_size_allocate().connect (sigc::bind (sigc::mem_fun (*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&editor_summary_pane)));
+
+	/* XXX: editor_summary_pane might need similar special OS X treatment to the edit_pane */
 
 	edit_pane.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Editor::pane_allocation_handler), static_cast<Paned*> (&edit_pane)));
 #ifdef GTKOSX
@@ -2406,10 +2411,6 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		the_notebook.set_current_page (atoi (prop->value ()));
 	}
 
-	if ((prop = node.property (X_("editor-pane-position")))) {
-		edit_pane.set_position (atoi (prop->value ()));
-	}
-
 	return 0;
 }
 
@@ -2445,7 +2446,9 @@ Editor::get_state ()
 		snprintf(buf, sizeof(buf), "%d", yoff);
 		geometry->add_property("y-off", string(buf));
 		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&edit_pane)->gobj()));
-		geometry->add_property("edit_pane_pos", string(buf));
+		geometry->add_property("edit-horizontal-pane-pos", string(buf));
+		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&editor_summary_pane)->gobj()));
+		geometry->add_property("edit-vertical-pane-pos", string(buf));
 
 		node->add_child_nocopy (*geometry);
 	}
@@ -2493,9 +2496,6 @@ Editor::get_state ()
 
 	snprintf (buf, sizeof (buf), "%d", the_notebook.get_current_page ());
 	node->add_property (X_("editor-list-page"), buf);
-
-	snprintf (buf, sizeof (buf), "%d", edit_pane.get_position ());
-	node->add_property (X_("editor-pane-position"), buf);
 
 	return *node;
 }
@@ -3669,7 +3669,14 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 	char buf[32];
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
 	int width, height;
-	static int32_t done;
+
+	enum Pane {
+		Horizontal = 0x1,
+		Vertical = 0x2
+	};
+
+	static Pane done;
+	
 	XMLNode* geometry;
 
 	width = default_width;
@@ -3677,15 +3684,11 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 
 	if ((geometry = find_named_node (*node, "geometry")) != 0) {
 
-		if ((prop = geometry->property ("x_size")) == 0) {
-			prop = geometry->property ("x-size");
-		}
+		prop = geometry->property ("x-size");
 		if (prop) {
 			width = atoi (prop->value());
 		}
-		if ((prop = geometry->property ("y_size")) == 0) {
-			prop = geometry->property ("y-size");
-		}
+		prop = geometry->property ("y-size");
 		if (prop) {
 			height = atoi (prop->value());
 		}
@@ -3693,11 +3696,11 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 
 	if (which == static_cast<Paned*> (&edit_pane)) {
 
-		if (done) {
+		if (done & Horizontal) {
 			return;
 		}
 
-		if (!geometry || (prop = geometry->property ("edit-pane-pos")) == 0) {
+		if (!geometry || (prop = geometry->property ("edit-horizontal-pane-pos")) == 0) {
 			/* initial allocation is 90% to canvas, 10% to notebook */
 			pos = (int) floor (alloc.get_width() * 0.90f);
 			snprintf (buf, sizeof(buf), "%d", pos);
@@ -3705,10 +3708,33 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 			pos = atoi (prop->value());
 		}
 
-		if ((done = GTK_WIDGET(edit_pane.gobj())->allocation.width > pos)) {
+		if (GTK_WIDGET(edit_pane.gobj())->allocation.width > pos) {
 			edit_pane.set_position (pos);
-			pre_maximal_pane_position = pos;
+			pre_maximal_horizontal_pane_position = pos;
 		}
+
+		done = (Pane) (done | Horizontal);
+		
+	} else if (which == static_cast<Paned*> (&editor_summary_pane)) {
+
+		if (done & Vertical) {
+			return;
+		}
+
+		if (!geometry || (prop = geometry->property ("edit-vertical-pane-pos")) == 0) {
+			/* initial allocation is 90% to canvas, 10% to summary */
+			pos = (int) floor (alloc.get_height() * 0.90f);
+			snprintf (buf, sizeof(buf), "%d", pos);
+		} else {
+			pos = atoi (prop->value());
+		}
+
+		if (GTK_WIDGET(editor_summary_pane.gobj())->allocation.height > pos) {
+			editor_summary_pane.set_position (pos);
+			pre_maximal_vertical_pane_position = pos;
+		}
+
+		done = (Pane) (done | Vertical);
 	}
 }
 
@@ -4053,39 +4079,58 @@ Editor::maximise_editing_space ()
 	_mouse_mode_tearoff->set_visible (false);
 	_tools_tearoff->set_visible (false);
 
-	pre_maximal_pane_position = edit_pane.get_position();
-	pre_maximal_editor_width = this->get_width();
+	pre_maximal_horizontal_pane_position = edit_pane.get_position ();
+	pre_maximal_vertical_pane_position = editor_summary_pane.get_position ();
+	pre_maximal_editor_width = this->get_width ();
+	pre_maximal_editor_height = this->get_height ();
 
-	if(post_maximal_pane_position == 0) {
-		post_maximal_pane_position = edit_pane.get_width();
+	if (post_maximal_horizontal_pane_position == 0) {
+		post_maximal_horizontal_pane_position = edit_pane.get_width();
 	}
 
-	fullscreen();
+	if (post_maximal_vertical_pane_position == 0) {
+		post_maximal_vertical_pane_position = editor_summary_pane.get_height();
+	}
+	
+	fullscreen ();
 
-	if(post_maximal_editor_width) {
-		edit_pane.set_position (post_maximal_pane_position -
+	if (post_maximal_editor_width) {
+		edit_pane.set_position (post_maximal_horizontal_pane_position -
 			abs(post_maximal_editor_width - pre_maximal_editor_width));
 	} else {
-		edit_pane.set_position (post_maximal_pane_position);
+		edit_pane.set_position (post_maximal_horizontal_pane_position);
+	}
+
+	if (post_maximal_editor_height) {
+		editor_summary_pane.set_position (post_maximal_vertical_pane_position -
+			abs(post_maximal_editor_height - pre_maximal_editor_height));
+	} else {
+		editor_summary_pane.set_position (post_maximal_vertical_pane_position);
 	}
 }
 
 void
 Editor::restore_editing_space ()
 {
-	// user changed width of pane during fullscreen
+	// user changed width/height of panes during fullscreen
 
-	if(post_maximal_pane_position != edit_pane.get_position()) {
-		post_maximal_pane_position = edit_pane.get_position();
+	if (post_maximal_horizontal_pane_position != edit_pane.get_position()) {
+		post_maximal_horizontal_pane_position = edit_pane.get_position();
 	}
 
+	if (post_maximal_vertical_pane_position != editor_summary_pane.get_position()) {
+		post_maximal_vertical_pane_position = editor_summary_pane.get_position();
+	}
+	
 	unfullscreen();
 
 	_mouse_mode_tearoff->set_visible (true);
 	_tools_tearoff->set_visible (true);
 	post_maximal_editor_width = this->get_width();
+	post_maximal_editor_height = this->get_height();
 
-	edit_pane.set_position (pre_maximal_pane_position + abs(this->get_width() - pre_maximal_editor_width));
+	edit_pane.set_position (pre_maximal_horizontal_pane_position + abs(this->get_width() - pre_maximal_editor_width));
+	editor_summary_pane.set_position (pre_maximal_vertical_pane_position + abs(this->get_height() - pre_maximal_editor_height));
 }
 
 /**

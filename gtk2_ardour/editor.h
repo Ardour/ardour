@@ -513,13 +513,18 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void update_join_object_range_location (double, double);
 
 	int  post_maximal_editor_width;
-	int  post_maximal_pane_position;
-	int  pre_maximal_pane_position;
+	int  post_maximal_editor_height;
+	int  post_maximal_horizontal_pane_position;
+	int  post_maximal_vertical_pane_position;
+	int  pre_maximal_horizontal_pane_position;
+	int  pre_maximal_vertical_pane_position;
 	int  pre_maximal_editor_width;
+	int  pre_maximal_editor_height;
 	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);
 
 	Gtk::Notebook the_notebook;
 	Gtk::HPaned   edit_pane;
+	Gtk::VPaned   editor_summary_pane;
 
 	Gtk::EventBox meter_base;
 	Gtk::HBox     meter_box;
