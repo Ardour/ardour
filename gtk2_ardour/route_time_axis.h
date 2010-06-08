@@ -126,7 +126,7 @@ public:
 	AutomationTracks automation_tracks() { return _automation_tracks; }
 
 	boost::shared_ptr<AutomationTimeAxisView> automation_child(Evoral::Parameter param);
-	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
+	virtual Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
 	
 	std::string         name() const;
 	StreamView*         view() const { return _view; }
@@ -287,7 +287,10 @@ protected:
 
 	AutomationTracks _automation_tracks;
 	typedef std::map<Evoral::Parameter, Gtk::CheckMenuItem*> ParameterMenuMap;
-	ParameterMenuMap _parameter_menu_map;
+	/** parameter -> menu item map for the main automation menu */
+	ParameterMenuMap _main_automation_menu_map;
+	/** parameter -> menu item map for the plugin automation menu */
+	ParameterMenuMap _subplugin_menu_map;
 
 	void post_construct ();
 

@@ -264,6 +264,7 @@ RouteTimeAxisView::post_construct ()
 
 	update_diskstream_display ();
 
+	_subplugin_menu_map.clear ();
 	subplugin_menu.items().clear ();
 	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
 	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_existing_processor_automation_curves));
@@ -397,6 +398,7 @@ RouteTimeAxisView::build_automation_action_menu ()
 
 	detach_menu (subplugin_menu);
 
+	_main_automation_menu_map.clear ();
 	delete automation_action_menu;
 	automation_action_menu = new Menu;
 
@@ -1689,8 +1691,9 @@ RouteTimeAxisView::show_existing_automation ()
 			i->second->get_state_node()->add_property ("shown", X_("yes"));
 
 			Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
-			assert (menu);
-			menu->set_active(true);
+			if (menu) {
+				menu->set_active(true);
+			}
 		}
 	}
 
@@ -2008,7 +2011,7 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (boost::weak_ptr<Processor> p
 		items.push_back (CheckMenuElem (name));
 		mitem = dynamic_cast<CheckMenuItem*> (&items.back());
 
-		_parameter_menu_map[*i] = mitem;
+		_subplugin_menu_map[*i] = mitem;
 
 		if (has_visible_automation.find((*i)) != has_visible_automation.end()) {
 			mitem->set_active(true);
@@ -2089,6 +2092,7 @@ RouteTimeAxisView::processors_changed (RouteProcessorChange c)
 		(*i)->valid = false;
 	}
 
+	_subplugin_menu_map.clear ();
 	subplugin_menu.items().clear ();
 
 	_route->foreach_processor (sigc::mem_fun (*this, &RouteTimeAxisView::add_processor_to_subplugin_menu));
@@ -2373,10 +2377,15 @@ RouteTimeAxisView::set_button_names ()
 Gtk::CheckMenuItem*
 RouteTimeAxisView::automation_child_menu_item (Evoral::Parameter param)
 {
-	ParameterMenuMap::iterator i = _parameter_menu_map.find (param);
-	if (i == _parameter_menu_map.end()) {
-		return 0;
+	ParameterMenuMap::iterator i = _main_automation_menu_map.find (param);
+	if (i != _main_automation_menu_map.end()) {
+		return i->second;
+	}
+	
+	i = _subplugin_menu_map.find (param);
+	if (i != _subplugin_menu_map.end()) {
+		return i->second;
 	}
 
-	return i->second;
+	return 0;
 }

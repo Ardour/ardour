@@ -93,6 +93,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	const MidiMultipleChannelSelector& channel_selector() { return _channel_selector; }
 
+	Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
+	
   private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
 
@@ -152,6 +154,11 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void add_note_selection_region_view (RegionView* rv, uint8_t note, uint16_t chn_mask);
 	void extend_note_selection_region_view (RegionView*, uint8_t note, uint16_t chn_mask);
 	void toggle_note_selection_region_view (RegionView*, uint8_t note, uint16_t chn_mask);
+
+	/** parameter -> menu item map for the channel command items */
+	ParameterMenuMap _channel_command_menu_map;
+	/** parameter -> menu item map for the controller menu */
+	ParameterMenuMap _controller_menu_map;
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

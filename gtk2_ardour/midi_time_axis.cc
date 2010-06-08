@@ -387,6 +387,7 @@ MidiTimeAxisView::build_automation_action_menu ()
 		detach_menu (*controller_menu);
 	}
 
+	_channel_command_menu_map.clear ();
 	RouteTimeAxisView::build_automation_action_menu ();
 
 	MenuList& automation_items = automation_action_menu->items();
@@ -403,9 +404,9 @@ MidiTimeAxisView::build_automation_action_menu ()
 		   something about MIDI (!) would not expect to find them there.
 		*/
 
-		add_channel_command_menu_item (automation_items, _("Program Change"), MidiPgmChangeAutomation, MIDI_CMD_PGM_CHANGE);
-		add_channel_command_menu_item (automation_items, _("Bender"), MidiPitchBenderAutomation, MIDI_CMD_BENDER);
-		add_channel_command_menu_item (automation_items, _("Pressure"), MidiChannelPressureAutomation, MIDI_CMD_CHANNEL_PRESSURE);
+		add_channel_command_menu_item (automation_items, _("Program Change"), MidiPgmChangeAutomation, 0);
+		add_channel_command_menu_item (automation_items, _("Bender"), MidiPitchBenderAutomation, 0);
+		add_channel_command_menu_item (automation_items, _("Pressure"), MidiChannelPressureAutomation, 0);
 		
 		/* now all MIDI controllers. Always offer the possibility that we will rebuild the controllers menu
 		   since it might need to be updated after a channel mode change or other change. Also detach it
@@ -494,9 +495,9 @@ MidiTimeAxisView::add_channel_command_menu_item (Menu_Helpers::MenuList& items, 
 						visible = true;
 					}
 				}
-				
+
 				CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&chn_items.back());
-				_parameter_menu_map[fully_qualified_param] = cmi;
+				_channel_command_menu_map[fully_qualified_param] = cmi;
 				cmi->set_active (visible);
 			}
 		}
@@ -527,7 +528,7 @@ MidiTimeAxisView::add_channel_command_menu_item (Menu_Helpers::MenuList& items, 
 				}
 				
 				CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&items.back());
-				_parameter_menu_map[fully_qualified_param] = cmi;
+				_channel_command_menu_map[fully_qualified_param] = cmi;
 				cmi->set_active (visible);
 				
 				/* one channel only */
@@ -618,7 +619,7 @@ MidiTimeAxisView::build_controller_menu ()
 						}
 						
 						CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&chn_items.back());
-						_parameter_menu_map[fully_qualified_param] = cmi;
+						_controller_menu_map[fully_qualified_param] = cmi;
 						cmi->set_active (visible);
 					}
 				}
@@ -649,7 +650,7 @@ MidiTimeAxisView::build_controller_menu ()
 						}
 						
 						CheckMenuItem* cmi = static_cast<CheckMenuItem*>(&ctl_items.back());
-						_parameter_menu_map[fully_qualified_param] = cmi;
+						_controller_menu_map[fully_qualified_param] = cmi;
 						cmi->set_active (visible);
 						
 						/* one channel only */
@@ -791,7 +792,7 @@ MidiTimeAxisView::show_existing_automation ()
 	RouteTimeAxisView::show_existing_automation ();
 }
 
-/** Hide an automation track for the given parameter (pitch bend, channel pressure).
+/** Create an automation track for the given parameter (pitch bend, channel pressure).
  */
 void
 MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool show)
@@ -1080,10 +1081,32 @@ MidiTimeAxisView::set_channel_mode (ChannelMode, uint16_t)
 	/* TODO: Bender, PgmChange, Pressure */
 
 	/* invalidate the controller menu, so that we rebuilt it next time */
+	_controller_menu_map.clear ();
 	delete controller_menu;
 	controller_menu = 0;
 
 	if (changed) {
 		_route->gui_changed ("track_height", this);
 	}
+}
+
+Gtk::CheckMenuItem*
+MidiTimeAxisView::automation_child_menu_item (Evoral::Parameter param)
+{
+	Gtk::CheckMenuItem* m = RouteTimeAxisView::automation_child_menu_item (param);
+	if (m) {
+		return m;
+	}
+
+	ParameterMenuMap::iterator i = _controller_menu_map.find (param);
+	if (i != _controller_menu_map.end()) {
+		return i->second;
+	}
+
+	i = _channel_command_menu_map.find (param);
+	if (i != _channel_command_menu_map.end()) {
+		return i->second;
+	}
+
+	return 0;
 }

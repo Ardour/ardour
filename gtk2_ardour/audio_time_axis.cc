@@ -446,7 +446,7 @@ AudioTimeAxisView::build_automation_action_menu ()
 	gain_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
 	gain_automation_item->set_active (gain_track->marked_for_display ());
 
-	_parameter_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
+	_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
 
 	automation_items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &AudioTimeAxisView::update_pan_track_visibility)));
 	pan_automation_item = dynamic_cast<CheckMenuItem*> (&automation_items.back ());
@@ -454,7 +454,7 @@ AudioTimeAxisView::build_automation_action_menu ()
 
 	set<Evoral::Parameter> const & params = _route->panner()->what_can_be_automated ();
 	for (set<Evoral::Parameter>::iterator p = params.begin(); p != params.end(); ++p) {
-		_parameter_menu_map[*p] = pan_automation_item;
+		_main_automation_menu_map[*p] = pan_automation_item;
 	}
 }
 
