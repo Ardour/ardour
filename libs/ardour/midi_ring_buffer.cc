@@ -99,6 +99,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		uint8_t* write_loc = dst.reserve(ev_time, ev_size);
 		if (write_loc == NULL) {
 			// cerr << "MRB: Unable to reserve space in buffer, event skipped";
+			this->skip (ev_size); // Advance read pointer to next event
 			continue;
 		}
 
