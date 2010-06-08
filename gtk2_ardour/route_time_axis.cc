@@ -436,7 +436,7 @@ RouteTimeAxisView::build_display_menu ()
 	MenuList& items = display_menu->items();
 	display_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Color"), sigc::mem_fun(*this, &RouteTimeAxisView::select_track_color)));
+	items.push_back (MenuElem (_("Color..."), sigc::mem_fun(*this, &RouteTimeAxisView::select_track_color)));
 
 	items.push_back (SeparatorElem());
 
