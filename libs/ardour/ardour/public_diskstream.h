@@ -72,6 +72,8 @@ public:
 	virtual void set_align_style (AlignStyle) = 0;
 	virtual int use_copy_playlist () = 0;
 	virtual int use_new_playlist () = 0;
+        virtual void adjust_playback_buffering () = 0;
+        virtual void adjust_capture_buffering () = 0;
 	
 };
 

@@ -50,11 +50,26 @@ Butler::Butler(Session& s)
 {
 	g_atomic_int_set(&should_do_transport_work, 0);
 	SessionEvent::pool->set_trash (&pool_trash);
+
+        Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Butler::config_changed, this, _1));
 }
 
 Butler::~Butler()
 {
 	terminate_thread ();
+}
+
+void
+Butler::config_changed (std::string p)
+{
+        if (p == "playback-buffer-seconds") {
+                /* size is in Samples, not bytes */
+                audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.frame_rate());
+                _session.adjust_playback_buffering ();
+        } else if (p == "capture-buffer-seconds") {
+                audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.frame_rate());
+                _session.adjust_capture_buffering ();
+        }
 }
 
 int

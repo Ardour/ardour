@@ -260,7 +260,28 @@ Session::butler_transport_work ()
 	ptw = post_transport_work();
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler transport work, todo = %1\n", enum_2_string (ptw)));
-		     
+
+        if (ptw & PostTransportAdjustPlaybackBuffering) {
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+			if (tr) {
+				tr->adjust_playback_buffering ();
+                                /* and refill those buffers ... */
+                                tr->non_realtime_locate (_transport_frame);
+			}
+		}
+                
+        }
+
+        if (ptw & PostTransportAdjustCaptureBuffering) {
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+			if (tr) {
+				tr->adjust_capture_buffering ();
+			}
+		}
+        }
+
 	if (ptw & PostTransportCurveRealloc) {
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->curve_reallocate();

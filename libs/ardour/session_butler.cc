@@ -67,6 +67,36 @@ static inline uint32_t next_power_of_two (uint32_t n)
  ---------------------------------------------------------------------------*/
 
 void
+Session::adjust_playback_buffering ()
+{
+        request_stop (false, false);
+	SessionEvent *ev = new SessionEvent (SessionEvent::AdjustPlaybackBuffering, SessionEvent::Add, SessionEvent::Immediate, 0, 0, 0.0);
+	queue_event (ev);
+}
+
+void
+Session::adjust_capture_buffering ()
+{
+        request_stop (false, false);
+	SessionEvent *ev = new SessionEvent (SessionEvent::AdjustCaptureBuffering, SessionEvent::Add, SessionEvent::Immediate, 0, 0, 0.0);
+	queue_event (ev);
+}
+
+void
+Session::schedule_playback_buffering_adjustment ()
+{
+	add_post_transport_work (PostTransportAdjustPlaybackBuffering);
+	_butler->schedule_transport_work ();
+}
+
+void
+Session::schedule_capture_buffering_adjustment ()
+{
+	add_post_transport_work (PostTransportAdjustCaptureBuffering);
+	_butler->schedule_transport_work ();
+}
+
+void
 Session::schedule_curve_reallocation ()
 {
 	add_post_transport_work (PostTransportCurveRealloc);

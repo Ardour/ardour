@@ -216,6 +216,9 @@ class AudioDiskstream : public Diskstream
 		RingBufferNPT<CaptureTransition> * capture_transition_buf;
 		// the following are used in the butler thread only
 		nframes_t                     curr_capture_cnt;
+
+                void resize_playback (nframes_t);
+                void resize_capture (nframes_t);
 	};
 
 	typedef std::vector<ChannelInfo*> ChannelList;
@@ -254,6 +257,9 @@ class AudioDiskstream : public Diskstream
 	void set_align_style_from_io();
 	void setup_destructive_playlist ();
 	void use_destructive_playlist ();
+
+        void adjust_playback_buffering ();
+        void adjust_capture_buffering ();
 
 	void engage_record_enable ();
 	void disengage_record_enable ();

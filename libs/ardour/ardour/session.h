@@ -299,6 +299,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	void allow_auto_play (bool yn);
 	void request_transport_speed (double speed);
 	void request_overwrite_buffer (Track *);
+	void adjust_playback_buffering();
+	void adjust_capture_buffering();
 	void request_track_speed (Track *, double speed);
 	void request_input_change_handling ();
 
@@ -776,7 +778,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 		PostTransportReverse            = 0x10000,
 		PostTransportInputChange        = 0x20000,
 		PostTransportCurveRealloc       = 0x40000,
-		PostTransportClearSubstate      = 0x80000
+		PostTransportClearSubstate      = 0x80000,
+		PostTransportAdjustPlaybackBuffering  = 0x100000,
+		PostTransportAdjustCaptureBuffering   = 0x200000
 	};
 
 	enum SlaveState {
@@ -1027,6 +1031,9 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	PostTransportWork post_transport_work() const        { return (PostTransportWork) g_atomic_int_get (&_post_transport_work); }
 	void set_post_transport_work (PostTransportWork ptw) { g_atomic_int_set (&_post_transport_work, (gint) ptw); }
 	void add_post_transport_work (PostTransportWork ptw);
+
+        void schedule_playback_buffering_adjustment ();
+        void schedule_capture_buffering_adjustment ();
 
 	uint32_t    cumulative_rf_motion;
 	uint32_t    rf_scale;
@@ -1437,6 +1444,8 @@ class Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionLi
 	std::list<boost::shared_ptr<Diskstream> > _diskstreams_2X;
 
 	void add_session_range_location (nframes_t, nframes_t);
+
+
 };
 
 } // namespace ARDOUR

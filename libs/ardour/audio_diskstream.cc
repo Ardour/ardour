@@ -2297,6 +2297,26 @@ AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 	return true;
 }
 
+void 
+AudioDiskstream::adjust_playback_buffering ()
+{
+	boost::shared_ptr<ChannelList> c = channels.reader();
+
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+                (*chan)->resize_playback (_session.butler()->audio_diskstream_playback_buffer_size());
+        }
+}
+
+void 
+AudioDiskstream::adjust_capture_buffering ()
+{
+	boost::shared_ptr<ChannelList> c = channels.reader();
+
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+                (*chan)->resize_capture (_session.butler()->audio_diskstream_capture_buffer_size());
+        }
+}
+
 AudioDiskstream::ChannelInfo::ChannelInfo (nframes_t playback_bufsize, nframes_t capture_bufsize, nframes_t speed_size, nframes_t wrap_size)
 {
 	peak_power = 0.0f;
@@ -2324,6 +2344,22 @@ AudioDiskstream::ChannelInfo::ChannelInfo (nframes_t playback_bufsize, nframes_t
 	memset (capture_transition_buf->buffer(), 0, sizeof (CaptureTransition) * capture_transition_buf->bufsize());
 }
 
+void
+AudioDiskstream::ChannelInfo::resize_playback (nframes_t playback_bufsize)
+{
+        delete playback_buf;
+	playback_buf = new RingBufferNPT<Sample> (playback_bufsize);
+	memset (playback_buf->buffer(), 0, sizeof (Sample) * playback_buf->bufsize());
+}
+
+void
+AudioDiskstream::ChannelInfo::resize_capture (nframes_t capture_bufsize)
+{
+        delete capture_buf;
+	capture_buf = new RingBufferNPT<Sample> (capture_bufsize);
+	memset (capture_buf->buffer(), 0, sizeof (Sample) * capture_buf->bufsize());
+}
+
 AudioDiskstream::ChannelInfo::~ChannelInfo ()
 {
         write_source.reset ();
@@ -2346,3 +2382,4 @@ AudioDiskstream::ChannelInfo::~ChannelInfo ()
 	delete capture_transition_buf;
 	capture_transition_buf = 0;
 }
+

@@ -665,3 +665,19 @@ Track::set_block_size (nframes_t n)
 	Route::set_block_size (n);
 	_diskstream->set_block_size (n);
 }
+
+void 
+Track::adjust_playback_buffering ()
+{
+        if (_diskstream) {
+                _diskstream->adjust_playback_buffering ();
+        }
+}
+
+void 
+Track::adjust_capture_buffering ()
+{
+        if (_diskstream) {
+                _diskstream->adjust_capture_buffering ();
+        }
+}

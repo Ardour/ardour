@@ -138,6 +138,8 @@ class Track : public Route, public PublicDiskstream
 	void set_align_style (AlignStyle);
 	int use_copy_playlist ();
 	int use_new_playlist ();
+        void adjust_playback_buffering ();
+        void adjust_capture_buffering ();
 
 	PBD::Signal0<void> DiskstreamChanged;
 	PBD::Signal0<void> FreezeChange;

@@ -1091,6 +1091,14 @@ Session::process_event (SessionEvent* ev)
 		del = false; // other side of RT request needs to clean up
 		break;
 
+        case SessionEvent::AdjustPlaybackBuffering:
+                schedule_playback_buffering_adjustment ();
+                break;
+
+        case SessionEvent::AdjustCaptureBuffering:
+                schedule_capture_buffering_adjustment ();
+                break;
+
 	default:
 	  fatal << string_compose(_("Programming error: illegal event type in process_event (%1)"), ev->type) << endmsg;
 		/*NOTREACHED*/

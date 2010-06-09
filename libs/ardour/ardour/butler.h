@@ -83,6 +83,7 @@ class Butler : public SessionHandleRef
 
 private:
 	void empty_pool_trash ();
+        void config_changed (std::string);
 };
 
 } // namespace ARDOUR

@@ -165,6 +165,12 @@ class MidiDiskstream : public Diskstream
 	void get_input_sources ();
 	void set_align_style_from_io();
 
+        /* fixed size buffers per instance of ardour for now (non-dynamic)
+         */
+
+        void adjust_playback_buffering () {}
+        void adjust_capture_buffering () {}
+
 	void engage_record_enable ();
 	void disengage_record_enable ();
 
