@@ -2157,8 +2157,6 @@ MidiRegionView::commit_resizing (ArdourCanvas::CanvasNote* primary, bool at_fron
 {
 	start_diff_command(_("resize notes"));
 
-	CanvasNote* first = _resize_data.empty() ? 0 : _resize_data.front()->canvas_note;
-	
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
 		CanvasNote*  canvas_note = (*i)->canvas_note;
 		SimpleRect*  resize_rect = (*i)->resize_rect;
