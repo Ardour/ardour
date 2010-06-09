@@ -2056,8 +2056,10 @@ int
 AudioDiskstream::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_many)
 {
 	while (how_many--) {
-		c->push_back (new ChannelInfo(_session.butler()->audio_diskstream_buffer_size(), speed_buffer_size, wrap_buffer_size));
-		interpolation.add_channel_to (_session.butler()->audio_diskstream_buffer_size(), speed_buffer_size);
+		c->push_back (new ChannelInfo(_session.butler()->audio_diskstream_playback_buffer_size(), 
+                                              _session.butler()->audio_diskstream_capture_buffer_size(),
+                                              speed_buffer_size, wrap_buffer_size));
+		interpolation.add_channel_to (_session.butler()->audio_diskstream_playback_buffer_size(), speed_buffer_size);
 	}
 
 	_n_channels.set(DataType::AUDIO, c->size());
@@ -2295,7 +2297,7 @@ AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 	return true;
 }
 
-AudioDiskstream::ChannelInfo::ChannelInfo (nframes_t bufsize, nframes_t speed_size, nframes_t wrap_size)
+AudioDiskstream::ChannelInfo::ChannelInfo (nframes_t playback_bufsize, nframes_t capture_bufsize, nframes_t speed_size, nframes_t wrap_size)
 {
 	peak_power = 0.0f;
 	source = 0;
@@ -2307,8 +2309,8 @@ AudioDiskstream::ChannelInfo::ChannelInfo (nframes_t bufsize, nframes_t speed_si
 	playback_wrap_buffer = new Sample[wrap_size];
 	capture_wrap_buffer = new Sample[wrap_size];
 
-	playback_buf = new RingBufferNPT<Sample> (bufsize);
-	capture_buf = new RingBufferNPT<Sample> (bufsize);
+	playback_buf = new RingBufferNPT<Sample> (playback_bufsize);
+	capture_buf = new RingBufferNPT<Sample> (capture_bufsize);
 	capture_transition_buf = new RingBufferNPT<CaptureTransition> (256);
 
 	/* touch the ringbuffer buffers, which will cause

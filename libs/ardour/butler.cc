@@ -43,7 +43,8 @@ namespace ARDOUR {
 Butler::Butler(Session& s)
 	: SessionHandleRef (s)
 	, thread(0)
-	, audio_dstream_buffer_size(0)
+	, audio_dstream_capture_buffer_size(0)
+	, audio_dstream_playback_buffer_size(0)
 	, midi_dstream_buffer_size(0)
 	, pool_trash(16)
 {
@@ -62,7 +63,8 @@ Butler::start_thread()
 	const float rate = (float)_session.frame_rate();
 
 	/* size is in Samples, not bytes */
-	audio_dstream_buffer_size = (uint32_t) floor (Config->get_audio_track_buffer_seconds() * rate);
+	audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * rate);
+	audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * rate);
 
 	/* size is in bytes
 	 * XXX: Jack needs to tell us the MIDI buffer size
@@ -72,7 +74,7 @@ Butler::start_thread()
 
 	MidiDiskstream::set_readahead_frames ((nframes_t)(Config->get_midi_readahead() * rate));
 
-	Crossfade::set_buffer_size (audio_dstream_buffer_size);
+	Crossfade::set_buffer_size (audio_dstream_playback_buffer_size);
 
 	should_run = false;
 

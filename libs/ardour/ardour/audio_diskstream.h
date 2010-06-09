@@ -28,6 +28,8 @@
 
 #include <time.h>
 
+#include <boost/utility.hpp>
+
 #include "pbd/fastlog.h"
 #include "pbd/ringbufferNPT.h"
 #include "pbd/stateful.h"
@@ -179,9 +181,12 @@ class AudioDiskstream : public Diskstream
 
   private:
 
-	struct ChannelInfo {
+	struct ChannelInfo : public boost::noncopyable {
 
-		ChannelInfo (nframes_t buffer_size, nframes_t speed_buffer_size, nframes_t wrap_buffer_size);
+		ChannelInfo (nframes_t playback_buffer_size, 
+                             nframes_t capture_buffer_size,
+                             nframes_t speed_buffer_size, 
+                             nframes_t wrap_buffer_size);
 		~ChannelInfo ();
 
 		Sample     *playback_wrap_buffer;
