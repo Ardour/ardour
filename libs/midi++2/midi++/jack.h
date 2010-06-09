@@ -30,6 +30,7 @@
 
 #include <glibmm/thread.h>
 
+#include <jack/weakjack.h>
 #include <jack/jack.h>
 #include <jack/midiport.h>
 

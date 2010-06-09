@@ -137,8 +137,14 @@ MidiPort::flush_buffers (nframes_t nframes, nframes64_t time, nframes_t offset)
 			assert(ev.time() < (nframes+offset+_port_offset));
 
 			if (ev.time() >= offset + _port_offset) {
-				jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size());
-			}
+				if (jack_midi_event_write (jack_buffer, (jack_nframes_t) ev.time(), ev.buffer(), ev.size()) != 0) {
+                                        cerr << "write failed, drop flushed note off on the floor, time " << ev.time() << " > " << offset << " + " << _port_offset 
+                                             << endl;			
+                                }
+                        } else {
+                                cerr << "drop flushed note off on the floor, time " << ev.time() << " > " << offset << " + " << _port_offset 
+                                     << endl;
+                        }
 		}
 	}
 }

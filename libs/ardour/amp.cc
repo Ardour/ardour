@@ -167,9 +167,8 @@ Amp::apply_gain (BufferSet& bufs, nframes_t nframes, gain_t initial, gain_t targ
 			Evoral::MIDIEvent<MidiBuffer::TimeType> ev = *m;
 
 			if (ev.is_note_on()) {
-				gain_t scale = delta * (ev.time()/nframes);
-				std::cerr << "scale by " << scale << " for " << ev.time() << " of " << nframes << std::endl;
-				ev.scale_velocity (scale);
+				gain_t scale = delta * (ev.time()/(double) nframes);
+				ev.scale_velocity (initial+scale);
 			}
 		}
 	}

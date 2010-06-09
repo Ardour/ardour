@@ -316,3 +316,4 @@ Port::physically_connected () const
 
         return false;
 }
+

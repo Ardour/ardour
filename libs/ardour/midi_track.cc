@@ -25,6 +25,7 @@
 
 #include "ardour/amp.h"
 #include "ardour/buffer_set.h"
+#include "ardour/debug.h"
 #include "ardour/delivery.h"
 #include "ardour/io_processor.h"
 #include "ardour/meter.h"
@@ -412,8 +413,12 @@ MidiTrack::write_out_of_band_data (BufferSet& bufs, sframes_t /*start*/, sframes
 {
 	// Append immediate events
 	MidiBuffer& buf (bufs.get_midi (0));
-	_immediate_events.read (buf, 0, 0, nframes - 1); // all stamps = 0
-
+        if (_immediate_events.read_space()) {
+                DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 has %2 of immediate events to deliver\n", 
+                                                            name(), _immediate_events.read_space()));
+        }
+	_immediate_events.read (buf, 0, 1, nframes-1); // all stamps = 0
+        
 	// MIDI thru: send incoming data "through" output
 	if (_midi_thru && _session.transport_speed() != 0.0f && _input->n_ports().n_midi()) {
 		buf.merge_in_place (_input->midi(0)->get_midi_buffer(nframes));
@@ -474,6 +479,7 @@ MidiTrack::set_note_mode (NoteMode m)
 void
 MidiTrack::midi_panic()
 {
+        DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 delivers panic data\n", name()));
 	for (uint8_t channel = 0; channel <= 0xF; channel++) {
 		uint8_t ev[3] = { MIDI_CMD_CONTROL | channel, MIDI_CTL_SUSTAIN, 0 };
 		write_immediate_event(3, ev);

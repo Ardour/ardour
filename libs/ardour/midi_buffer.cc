@@ -18,11 +18,17 @@
 */
 
 #include <iostream>
+
 #include "pbd/malign.h"
+#include "pbd/compose.h"
+#include "pbd/debug.h"
+
+#include "ardour/debug.h"
 #include "ardour/midi_buffer.h"
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 
 // FIXME: mirroring for MIDI buffers?
 MidiBuffer::MidiBuffer(size_t capacity)
@@ -93,7 +99,10 @@ MidiBuffer::read_from (const Buffer& src, nframes_t nframes, nframes_t dst_offse
 		const Evoral::MIDIEvent<TimeType> ev(*i, false);
 		if (ev.time() >= src_offset && ev.time() < (nframes+src_offset)) {
 			push_back (ev);
-		}
+		} else {
+                        cerr << "MIDI event @ " <<  ev.time() << " skipped, not within range " << src_offset << " .. " 
+                             << (nframes + src_offset) << endl;
+                }
 	}
 
 	_silent = src.silent();
@@ -128,7 +137,7 @@ MidiBuffer::push_back(const Evoral::MIDIEvent<TimeType>& ev)
 		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
 		return false;
 	}
-
+        
 	if (!Evoral::midi_event_is_valid(ev.buffer(), ev.size())) {
 		cerr << "WARNING: MidiBuffer ignoring illegal MIDI event" << endl;
 		return false;
@@ -147,8 +156,22 @@ bool
 MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 {
 	const size_t stamp_size = sizeof(TimeType);
-	/*cerr << "MidiBuffer: pushing event @ " << ev.time()
-		<< " size = " << ev.size() << endl;*/
+
+#ifndef NDEBUG
+                DEBUG_STR_DECL(a);
+                DEBUG_STR_APPEND(a, string_compose ("midibuffer %1 push event @ %2 sz %3 ", this, time, size));
+		for (size_t i=0; i < size; ++i) {
+			DEBUG_STR_APPEND(a,hex);
+			DEBUG_STR_APPEND(a,"0x");
+			DEBUG_STR_APPEND(a,(int)data[i]);
+                        DEBUG_STR_APPEND(a,' ');
+		}
+                DEBUG_STR_APPEND(a,'\n');
+                DEBUG_TRACE (DEBUG::MidiIO, DEBUG_STR(a).str());
+#endif
+
+	// cerr << "MidiBuffer: pushing event @ " << time
+        // << " size = " << size << endl;
 
 	if (_size + stamp_size + size >= _capacity) {
 		cerr << "MidiBuffer::push_back failed (buffer is full)" << endl;
@@ -302,10 +325,12 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 			++them;
 		}
 
+#if 0                
 		if (us != end())
 			cerr << "us @ " << (*us).time() << endl;
 		if (them != other.end())
 			cerr << "them @ " << (*them).time() << endl;
+#endif
 
 		if (sz) {
 			assert(src >= 0);
@@ -342,7 +367,7 @@ MidiBuffer::merge_in_place(const MidiBuffer &other)
 	size_t test_final_count = 0;
 	test_time = 0;
 	for (iterator i = begin(); i != end(); ++i) {
-		cerr << "CHECK " << test_final_count << " / " << test_us_count + test_them_count << endl;
+		// cerr << "CHECK " << test_final_count << " / " << test_us_count + test_them_count << endl;
 		assert(Evoral::midi_event_is_valid((*i).buffer(), (*i).size()));
 		assert((*i).time() >= test_time);
 		test_time = (*i).time();

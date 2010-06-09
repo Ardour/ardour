@@ -232,6 +232,15 @@ AudioEngine::start ()
 		}
 
 		_raw_buffer_sizes[DataType::AUDIO] = blocksize * sizeof(float);
+
+                jack_port_t* midi_port = jack_port_register (_priv_jack, "m", JACK_DEFAULT_MIDI_TYPE, JackPortIsOutput, 0);
+                if (!midi_port) {
+                        error << _("Cannot create temporary MIDI port to determine MIDI buffer size") << endmsg;
+                } else {
+                        _raw_buffer_sizes[DataType::MIDI] = jack_midi_max_event_size (jack_port_get_buffer(midi_port, blocksize));
+                        cerr << "MIDI port buffers = " << _raw_buffer_sizes[DataType::MIDI] << endl;
+                        jack_port_unregister (_priv_jack, midi_port);
+                }
 	}
 
 	return _running ? 0 : -1;
@@ -420,6 +429,7 @@ AudioEngine::process_thread ()
                 jack_nframes_t nframes = jack_cycle_wait (_jack);
 
                 if (process_callback (nframes)) {
+                        cerr << "--- process\n";
                         return 0;
                 }
 
@@ -583,16 +593,40 @@ AudioEngine::_bufsize_callback (nframes_t nframes, void *arg)
 int
 AudioEngine::jack_bufsize_callback (nframes_t nframes)
 {
+        bool need_midi_size = true;
+        bool need_audio_size = true;
+
 	_buffer_size = nframes;
-	_raw_buffer_sizes[DataType::AUDIO] = nframes * sizeof(float);
-	cout << "FIXME: Assuming maximum MIDI buffer size " << nframes * 4 << "bytes" << endl;
-	_raw_buffer_sizes[DataType::MIDI] = nframes * 4;
 	_usecs_per_cycle = (int) floor ((((double) nframes / frame_rate())) * 1000000.0);
 	last_monitor_check = 0;
 
 	boost::shared_ptr<Ports> p = ports.reader();
 
+        /* crude guesses, see below where we try to get the right answers.
+
+           Note that our guess for MIDI deliberatey tries to overestimate
+           by a little. It would be nicer if we could get the actual
+           size from a port, but we have to use this estimate in the 
+           event that there are no MIDI ports currently. If there are
+           the value will be adjusted below.
+         */
+
+        _raw_buffer_sizes[DataType::AUDIO] = nframes * sizeof (Sample);
+        _raw_buffer_sizes[DataType::MIDI] = nframes * 4 - (nframes/2);
+
 	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
+
+                if (need_audio_size && (*i)->type() == DataType::AUDIO) {
+                        _raw_buffer_sizes[DataType::AUDIO] = (*i)->raw_buffer_size (nframes);
+                        need_audio_size = false;
+                }
+                
+                        
+                if (need_midi_size && (*i)->type() == DataType::MIDI) {
+                        _raw_buffer_sizes[DataType::MIDI] = (*i)->raw_buffer_size (nframes);
+                        need_midi_size = false;
+                }
+                
 		(*i)->reset();
 	}
 

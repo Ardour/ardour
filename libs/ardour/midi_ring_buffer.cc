@@ -50,7 +50,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 
 		this->full_peek(sizeof(T), (uint8_t*)&ev_time);
 
-		if (ev_time > end) {
+		if (ev_time >= end) {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 past end @ %2\n", ev_time, end));
 			break;
 		} else if (ev_time < start) {
@@ -70,7 +70,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		if (ev_type == LoopEventType) {
 			/*ev_time -= start;
 			  ev_time += offset;*/
-			// cerr << "MRB loop boundary @ " << ev_time << endl;
+			cerr << "MRB loop boundary @ " << ev_time << endl;
 
 			// Return without reading data or writing to buffer (loop events have no data)
 			// FIXME: This is not correct, loses events after the loop this cycle
@@ -98,7 +98,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		// write the timestamp to address (write_loc - 1)
 		uint8_t* write_loc = dst.reserve(ev_time, ev_size);
 		if (write_loc == NULL) {
-			// cerr << "MRB: Unable to reserve space in buffer, event skipped";
+			cerr << "MRB: Unable to reserve space in buffer, event skipped";
 			this->skip (ev_size); // Advance read pointer to next event
 			continue;
 		}
@@ -107,15 +107,16 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, nframes_t start, nframes_t end, nframes
 		success = read_contents (ev_size, write_loc);
 
 #ifndef NDEBUG
-		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, "wrote MidiEvent to Buffer: ");
+                DEBUG_STR_DECL(a);
+                DEBUG_STR_APPEND(a, string_compose ("wrote MidiEvent to Buffer (time=%1, start=%2 offset=%3)", ev_time, start, offset));
 		for (size_t i=0; i < ev_size; ++i) {
-			DEBUG_STR_DECL(a);
 			DEBUG_STR_APPEND(a,hex);
 			DEBUG_STR_APPEND(a,"0x");
 			DEBUG_STR_APPEND(a,(int)write_loc[i]);
-			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, DEBUG_STR(a).str());
+                        DEBUG_STR_APPEND(a,' ');
 		}
-		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, "\n");
+                DEBUG_STR_APPEND(a,'\n');
+                DEBUG_TRACE (DEBUG::MidiDiskstreamIO, DEBUG_STR(a).str());
 #endif
 
 		if (success) {

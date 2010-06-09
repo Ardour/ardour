@@ -163,11 +163,11 @@ MidiPlaylist::read (MidiRingBuffer<nframes_t>& dst, nframes_t start, nframes_t d
 				DEBUG_TRACE (DEBUG::MidiPlaylistIO, "\tBEFORE: new tracker\n");
 			} else {
 				tracker = t->second;
-				DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\tBEFORE: tracker says there are %1 on notes", tracker->on()));
+				DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\tBEFORE: tracker says there are %1 on notes\n", tracker->on()));
 			}
 
 			mr->read_at (dst, start, dur, chan_n, _note_mode, tracker);
-			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\tAFTER: tracker says there are %1 on notes", tracker->on()));
+			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\tAFTER: tracker says there are %1 on notes\n", tracker->on()));
 
 			if (new_tracker) {
 				pair<Region*,MidiStateTracker*> newpair;

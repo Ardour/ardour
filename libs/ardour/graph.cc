@@ -220,7 +220,7 @@ Graph::rechain (boost::shared_ptr<RouteList> routelist)
 
         pthread_mutex_lock (&_swap_mutex);
         int chain = _setup_chain;
-        printf ("============== setup %d\n", chain);
+        DEBUG_TRACE (DEBUG::Graph, string_compose ("============== setup %1\n", chain));
         // set all refcounts to 0;
 
         _init_finished_refcount[chain] = 0;
@@ -393,21 +393,21 @@ Graph::dump (int chain)
 
         chain = _pending_chain;
 
-        printf ("--------------------------------------------Graph dump:\n" );
+        DEBUG_TRACE (DEBUG::Graph, "--------------------------------------------Graph dump:\n");
         for (ni=_nodes_rt[chain].begin(); ni!=_nodes_rt[chain].end(); ni++) {
                 boost::shared_ptr<Route> rp = boost::dynamic_pointer_cast<Route>( *ni);
-                printf ("GraphNode: %s  refcount: %d\n", rp->name().c_str(), (*ni)->_init_refcount[chain] );
+                DEBUG_TRACE (DEBUG::Graph, string_compose ("GraphNode: %1  refcount: %2\n", rp->name().c_str(), (*ni)->_init_refcount[chain]));
                 for (ai=(*ni)->_activation_set[chain].begin(); ai!=(*ni)->_activation_set[chain].end(); ai++) {
-                        printf ("  triggers: %s\n", boost::dynamic_pointer_cast<Route>(*ai)->name().c_str() );
+                        DEBUG_TRACE (DEBUG::Graph, string_compose ("  triggers: %1\n", boost::dynamic_pointer_cast<Route>(*ai)->name().c_str()));
                 }
         }
 
-        printf ("------------- trigger list:\n" );
+        DEBUG_TRACE (DEBUG::Graph, "------------- trigger list:\n");
         for (ni=_init_trigger_list[chain].begin(); ni!=_init_trigger_list[chain].end(); ni++) {
-                printf ("GraphNode: %s  refcount: %d\n", boost::dynamic_pointer_cast<Route>(*ni)->name().c_str(), (*ni)->_init_refcount[chain] );
+                DEBUG_TRACE (DEBUG::Graph, string_compose ("GraphNode: %1  refcount: %2\n", boost::dynamic_pointer_cast<Route>(*ni)->name().c_str(), (*ni)->_init_refcount[chain]));
         }
 
-        printf ("final activation refcount: %d\n", _init_finished_refcount[chain] );
+        DEBUG_TRACE (DEBUG::Graph, string_compose ("final activation refcount: %1\n", _init_finished_refcount[chain]));
 #endif
 }
 

@@ -3768,7 +3768,6 @@ NoteDrag::motion (GdkEvent*, bool)
                                                                cnote->note()->length(), 
                                                                cnote->note()->note() + drag_delta_note,
                                                                cnote->note()->velocity()));
-                bool overlaps = cnote->region_view().midi_region()->model()->overlaps (check_note, cnote->note());
 
 		region->move_selection (dx, dy);
 
