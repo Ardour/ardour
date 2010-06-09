@@ -713,6 +713,80 @@ private:
 	HScale _dpi_slider;
 };
 
+class BufferingOptions : public OptionEditorBox
+{
+public:
+	BufferingOptions (RCConfiguration* c) 
+                : _rc_config (c)
+		, _playback_adjustment (5, 1, 60, 1, 4)
+                , _capture_adjustment (5, 1, 60, 1, 4)
+                , _playback_slider (_playback_adjustment)
+		, _capture_slider (_capture_adjustment)
+	{
+		_playback_adjustment.set_value (_rc_config->get_audio_playback_buffer_seconds());
+
+		Label* l = manage (new Label (_("Playback (seconds of buffering):")));
+		l->set_name ("OptionsLabel");
+
+		_playback_slider.set_update_policy (UPDATE_DISCONTINUOUS);
+		HBox* h = manage (new HBox);
+		h->set_spacing (4);
+		h->pack_start (*l, false, false);
+		h->pack_start (_playback_slider, true, true);
+
+		_box->pack_start (*h, false, false);
+                
+		_capture_adjustment.set_value (_rc_config->get_audio_capture_buffer_seconds());
+
+		l = manage (new Label (_("Recording (seconds of buffering):")));
+		l->set_name ("OptionsLabel");
+
+		_capture_slider.set_update_policy (UPDATE_DISCONTINUOUS);
+		h = manage (new HBox);
+		h->set_spacing (4);
+		h->pack_start (*l, false, false);
+		h->pack_start (_capture_slider, true, true);
+
+		_box->pack_start (*h, false, false);
+                
+		_capture_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &BufferingOptions::capture_changed));
+		_playback_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &BufferingOptions::playback_changed));
+	}
+
+	void parameter_changed (string const & p)
+	{
+		if (p == "playback-buffer-seconds") {
+			_playback_adjustment.set_value (_rc_config->get_audio_playback_buffer_seconds());
+		} else if (p == "capture-buffer-seconds") {
+			_capture_adjustment.set_value (_rc_config->get_audio_capture_buffer_seconds());
+                }
+	}
+
+	void set_state_from_config ()
+	{
+		parameter_changed ("playback-buffer-seconds");
+		parameter_changed ("capture-buffer-seconds");
+	}
+
+private:
+
+	void playback_changed ()
+	{
+		_rc_config->set_audio_playback_buffer_seconds ((long) _playback_adjustment.get_value());
+	}
+
+	void capture_changed ()
+	{
+		_rc_config->set_audio_capture_buffer_seconds ((long) _capture_adjustment.get_value());
+	}
+
+	RCConfiguration* _rc_config;
+	Adjustment _playback_adjustment;
+	Adjustment _capture_adjustment;
+	HScale _playback_slider;
+	HScale _capture_slider;
+};
+
 class ControlSurfacesOptions : public OptionEditorBox
 {
 public:
@@ -1101,6 +1175,10 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 	/* AUDIO */
+
+	add_option (_("Audio"), new OptionEditorHeading (_("Buffering")));
+
+	add_option (_("Audio"), new BufferingOptions (_rc_config));
 
 	add_option (_("Audio"), new OptionEditorHeading (_("Monitoring")));
 
