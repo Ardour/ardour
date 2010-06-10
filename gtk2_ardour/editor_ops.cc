@@ -3662,6 +3662,8 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 		InterThreadInfo itt;
 
                 playlist->clear_history ();
+		playlist->clear_owned_history ();
+		
 		boost::shared_ptr<Region> r = rtv->track()->bounce_range (start, start+cnt, itt, enable_processing);
 
 		if (replace) {
@@ -3671,7 +3673,13 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 			playlist->add_region (r, start);
 		}
 
-		_session->add_command (new StatefulDiffCommand (playlist));
+		vector<StatefulDiffCommand*> cmds;
+		playlist->rdiff (cmds);
+		for (vector<StatefulDiffCommand*>::iterator j = cmds.begin(); j != cmds.end(); ++j) {
+			_session->add_command (*j);
+		}
+
+                _session->add_command (new StatefulDiffCommand (playlist));
 	}
 
 	commit_reversible_command ();
