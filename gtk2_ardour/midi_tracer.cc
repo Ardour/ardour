@@ -110,7 +110,7 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 
 	s = strftime (buf, bufsize, "%H:%M:%S", &now);
 	bufsize -= s;
-	s += snprintf (&buf[s], bufsize, ".%-9" PRId64, (int64_t) tv.tv_usec);
+	s += snprintf (&buf[s], bufsize, ".%06" PRId64, (int64_t) tv.tv_usec);
 	bufsize -= s;
 
 	switch ((eventType) msg[0]&0xf0) {

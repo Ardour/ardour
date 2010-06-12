@@ -810,12 +810,11 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 	/* Duration of one quarter frame */
 	nframes_t quarter_frame_duration = ((long) _frames_per_timecode_frame) >> 2;
 
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("TF %1 SF %2 NQ %3 FD %\4n",  _transport_frame, outbound_mtc_timecode_frame,
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("TF %1 SF %2 NQ %3 FD %4\n",  _transport_frame, outbound_mtc_timecode_frame,
 						 next_quarter_frame_to_send, quarter_frame_duration));
 
-	// FIXME: this should always be true
-	//assert((outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration))
-	//		> _transport_frame);
+	assert((outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration))
+			>= _transport_frame);
 
 
 	// Send quarter frames for this cycle
@@ -887,8 +886,6 @@ Session::send_midi_time_code_for_cycle(nframes_t nframes)
 			// Re-calculate timing of first quarter frame
 			//timecode_to_sample( transmitting_timecode_time, outbound_mtc_timecode_frame, true /* use_offset */, false );
 			outbound_mtc_timecode_frame += 8 * quarter_frame_duration;
-			// Compensate for audio latency
-			outbound_mtc_timecode_frame += _worst_output_latency;
 		}
 	}
 
