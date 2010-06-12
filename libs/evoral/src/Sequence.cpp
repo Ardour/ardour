@@ -383,8 +383,8 @@ Sequence<Time>::Sequence(const TypeMap& type_map)
 	: _edited(false)
         , _overlapping_pitches_accepted (true)
         , _overlap_pitch_resolution (FirstOnFirstOff)
-	, _type_map(type_map)
 	, _writing(false)
+	, _type_map(type_map)
 	, _end_iter(*this, DBL_MAX)
 	, _percussive(false)
 	, _lowest_note(127)
@@ -401,15 +401,15 @@ Sequence<Time>::Sequence(const Sequence<Time>& other)
         , _edited(false)
         , _overlapping_pitches_accepted (other._overlapping_pitches_accepted)
         , _overlap_pitch_resolution (other._overlap_pitch_resolution)
-	, _type_map(other._type_map)
 	, _writing(false)
+	, _type_map(other._type_map)
 	, _end_iter(*this, DBL_MAX)
 	, _percussive(other._percussive)
 	, _lowest_note(other._lowest_note)
 	, _highest_note(other._highest_note)
 {
         for (typename Notes::const_iterator i = other._notes.begin(); i != other._notes.end(); ++i) {
-                boost::shared_ptr<Note<Time> > n (new Note<Time> (**i));
+                NotePtr n (new Note<Time> (**i));
                 _notes.insert (n);
         }
 
@@ -580,14 +580,15 @@ Sequence<Time>::end_write (bool delete_stuck)
 
 template<typename Time>
 bool
-Sequence<Time>::add_note_unlocked(const boost::shared_ptr< Note<Time> > note)
+Sequence<Time>::add_note_unlocked(const NotePtr note,
+                                  set<NotePtr >* removed)
 {
         /* This is the core method to add notes to a Sequence 
          */
 
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 add note %2 @ %3\n", this, (int)note->note(), note->time()));
 
-        if (!_overlapping_pitches_accepted && overlaps_unlocked (note, boost::shared_ptr<Note<Time> >())) {
+        if (resolve_overlaps_unlocked (note, removed)) {
                 return false;
 	}
 
@@ -606,7 +607,7 @@ Sequence<Time>::add_note_unlocked(const boost::shared_ptr< Note<Time> > note)
 
 template<typename Time>
 void
-Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> > note)
+Sequence<Time>::remove_note_unlocked(const constNotePtr note)
 {
         bool erased = false;
 
@@ -641,7 +642,7 @@ Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> >
 
         Pitches& p (pitches (note->channel()));
         
-        boost::shared_ptr< Note<Time> > search_note(new Note<Time>(0, 0, 0, note->note(), 0));
+        NotePtr search_note(new Note<Time>(0, 0, 0, note->note(), 0));
 
         for (typename Pitches::iterator i = p.lower_bound (search_note); 
              i != p.end() && (*i)->note() == note->note(); ++i) {
@@ -650,74 +651,74 @@ Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> >
                         p.erase (i);
                 }
         }
+        
+        if (!erased) {
+                cerr << "Unable to find note to erase" << endl;
+        }
+}
 
-         if (!erased) {
-                 cerr << "Unable to find note to erase" << endl;
-         }
- }
+/** Append \a ev to model.  NOT realtime safe.
+ *
+ * The timestamp of event is expected to be relative to
+ * the start of this model (t=0) and MUST be monotonically increasing
+ * and MUST be >= the latest event currently in the model.
+ */
+template<typename Time>
+void
+Sequence<Time>::append(const Event<Time>& event)
+{
+        WriteLock lock(write_lock());
+        _edited = true;
 
- /** Append \a ev to model.  NOT realtime safe.
-  *
-  * The timestamp of event is expected to be relative to
-  * the start of this model (t=0) and MUST be monotonically increasing
-  * and MUST be >= the latest event currently in the model.
-  */
- template<typename Time>
+        const MIDIEvent<Time>& ev = (const MIDIEvent<Time>&)event;
+
+        assert(_notes.empty() || ev.time() >= (*_notes.rbegin())->time());
+        assert(_writing);
+
+        if (!midi_event_is_valid(ev.buffer(), ev.size())) {
+                cerr << "WARNING: Sequence ignoring illegal MIDI event" << endl;
+                return;
+        }
+
+        if (ev.is_note_on()) {
+                NotePtr note(new Note<Time>(ev.channel(), ev.time(), 0, ev.note(), ev.velocity()));
+                append_note_on_unlocked (note);
+        } else if (ev.is_note_off()) {
+                NotePtr note(new Note<Time>(ev.channel(), ev.time(), 0, ev.note(), ev.velocity()));
+                append_note_off_unlocked (note);
+        } else if (ev.is_sysex()) {
+                append_sysex_unlocked(ev);
+        } else if (!_type_map.type_is_midi(ev.event_type())) {
+                printf("WARNING: Sequence: Unknown event type %X: ", ev.event_type());
+                for (size_t i=0; i < ev.size(); ++i) {
+                        printf("%X ", ev.buffer()[i]);
+                }
+                printf("\n");
+        } else if (ev.is_cc()) {
+                append_control_unlocked(
+                        Evoral::MIDI::ContinuousController(ev.event_type(), ev.channel(), ev.cc_number()),
+                        ev.time(), ev.cc_value());
+        } else if (ev.is_pgm_change()) {
+                append_control_unlocked(
+                        Evoral::MIDI::ProgramChange(ev.event_type(), ev.channel()),
+                        ev.time(), ev.pgm_number());
+        } else if (ev.is_pitch_bender()) {
+                append_control_unlocked(
+                        Evoral::MIDI::PitchBender(ev.event_type(), ev.channel()),
+                        ev.time(), double(  (0x7F & ev.pitch_bender_msb()) << 7
+                                            | (0x7F & ev.pitch_bender_lsb()) ));
+        } else if (ev.is_channel_pressure()) {
+                append_control_unlocked(
+                        Evoral::MIDI::ChannelPressure(ev.event_type(), ev.channel()),
+                        ev.time(), ev.channel_pressure());
+        } else {
+                printf("WARNING: Sequence: Unknown MIDI event type %X\n", ev.type());
+        }
+}
+
+template<typename Time>
  void
- Sequence<Time>::append(const Event<Time>& event)
- {
-         WriteLock lock(write_lock());
-         _edited = true;
-
-         const MIDIEvent<Time>& ev = (const MIDIEvent<Time>&)event;
-
-         assert(_notes.empty() || ev.time() >= (*_notes.rbegin())->time());
-         assert(_writing);
-
-         if (!midi_event_is_valid(ev.buffer(), ev.size())) {
-                 cerr << "WARNING: Sequence ignoring illegal MIDI event" << endl;
-                 return;
-         }
-
-         if (ev.is_note_on()) {
-                 boost::shared_ptr< Note<Time> > note(new Note<Time>(ev.channel(), ev.time(), 0, ev.note(), ev.velocity()));
-                 append_note_on_unlocked (note);
-         } else if (ev.is_note_off()) {
-                 boost::shared_ptr< Note<Time> > note(new Note<Time>(ev.channel(), ev.time(), 0, ev.note(), ev.velocity()));
-                 append_note_off_unlocked (note);
-         } else if (ev.is_sysex()) {
-                 append_sysex_unlocked(ev);
-         } else if (!_type_map.type_is_midi(ev.event_type())) {
-                 printf("WARNING: Sequence: Unknown event type %X: ", ev.event_type());
-                 for (size_t i=0; i < ev.size(); ++i) {
-                         printf("%X ", ev.buffer()[i]);
-                 }
-                 printf("\n");
-         } else if (ev.is_cc()) {
-                 append_control_unlocked(
-                                 Evoral::MIDI::ContinuousController(ev.event_type(), ev.channel(), ev.cc_number()),
-                                 ev.time(), ev.cc_value());
-         } else if (ev.is_pgm_change()) {
-                 append_control_unlocked(
-                                 Evoral::MIDI::ProgramChange(ev.event_type(), ev.channel()),
-                                 ev.time(), ev.pgm_number());
-         } else if (ev.is_pitch_bender()) {
-                 append_control_unlocked(
-                                 Evoral::MIDI::PitchBender(ev.event_type(), ev.channel()),
-                                 ev.time(), double(  (0x7F & ev.pitch_bender_msb()) << 7
-                                         | (0x7F & ev.pitch_bender_lsb()) ));
-         } else if (ev.is_channel_pressure()) {
-                 append_control_unlocked(
-                                 Evoral::MIDI::ChannelPressure(ev.event_type(), ev.channel()),
-                                 ev.time(), ev.channel_pressure());
-         } else {
-                 printf("WARNING: Sequence: Unknown MIDI event type %X\n", ev.type());
-         }
- }
-
- template<typename Time>
- void
- Sequence<Time>::append_note_on_unlocked (boost::shared_ptr< Note<Time> > note)
+ Sequence<Time>::append_note_on_unlocked (NotePtr note)
  {
          DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 c=%2 note %3 on @ %4 v=%5\n", this, 
                                                        (int) note->channel(), (int) note->note(), 
@@ -744,7 +745,7 @@ Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> >
 
  template<typename Time>
  void
- Sequence<Time>::append_note_off_unlocked (boost::shared_ptr< Note<Time> > note)
+ Sequence<Time>::append_note_off_unlocked (NotePtr note)
  {
          DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 c=%2 note %3 on @ %4 v=%5\n",
                                                        this, (int)note->channel(), 
@@ -770,7 +771,7 @@ Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> >
          /* XXX use _overlap_pitch_resolution to determine FIFO/LIFO ... */
 
          for (typename WriteNotes::iterator n = _write_notes[note->channel()].begin(); n != _write_notes[note->channel()].end(); ++n) {
-                 boost::shared_ptr< Note<Time> > nn = *n;
+                 NotePtr nn = *n;
                  if (note->note() == nn->note() && nn->channel() == note->channel()) {
                          assert(note->time() >= nn->time());
 
@@ -817,17 +818,17 @@ Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> >
 
  template<typename Time>
  bool
- Sequence<Time>::contains (const boost::shared_ptr< Note<Time> >& note) const
+ Sequence<Time>::contains (const NotePtr& note) const
  {
          return contains_unlocked (note);
  }
 
  template<typename Time>
  bool
- Sequence<Time>::contains_unlocked (const boost::shared_ptr< Note<Time> >& note) const
+ Sequence<Time>::contains_unlocked (const NotePtr& note) const
  {
          const Pitches& p (pitches (note->channel()));
-         boost::shared_ptr< Note<Time> > search_note(new Note<Time>(0, 0, 0, note->note()));
+         NotePtr search_note(new Note<Time>(0, 0, 0, note->note()));
 
          for (typename Pitches::const_iterator i = p.lower_bound (search_note); 
               i != p.end() && (*i)->note() == note->note(); ++i) {
@@ -843,7 +844,7 @@ Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> >
 
  template<typename Time>
  bool
- Sequence<Time>::overlaps (const boost::shared_ptr< Note<Time> >& note, const boost::shared_ptr<Note<Time> >& without) const
+ Sequence<Time>::overlaps (const NotePtr& note, const NotePtr& without) const
  {
          ReadLock lock (read_lock());
          return overlaps_unlocked (note, without);
@@ -851,13 +852,13 @@ Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> >
 
  template<typename Time>
  bool
- Sequence<Time>::overlaps_unlocked (const boost::shared_ptr< Note<Time> >& note, const boost::shared_ptr<Note<Time> >& without) const
+ Sequence<Time>::overlaps_unlocked (const NotePtr& note, const NotePtr& without) const
  {
          Time sa = note->time();
          Time ea  = note->end_time();
          
          const Pitches& p (pitches (note->channel()));
-         boost::shared_ptr< Note<Time> > search_note(new Note<Time>(0, 0, 0, note->note()));
+         NotePtr search_note(new Note<Time>(0, 0, 0, note->note()));
 
          for (typename Pitches::const_iterator i = p.lower_bound (search_note); 
               i != p.end() && (*i)->note() == note->note(); ++i) {
@@ -892,7 +893,7 @@ Sequence<Time>::remove_note_unlocked(const boost::shared_ptr< const Note<Time> >
  typename Sequence<Time>::Notes::const_iterator
  Sequence<Time>::note_lower_bound (Time t) const
  {
-         boost::shared_ptr< Note<Time> > search_note(new Note<Time>(0, t, 0, 0, 0));
+         NotePtr search_note(new Note<Time>(0, t, 0, 0, 0));
          typename Sequence<Time>::Notes::const_iterator i = _notes.lower_bound(search_note);
          assert(i == _notes.end() || (*i)->time() >= t);
          return i;
@@ -932,7 +933,7 @@ Sequence<Time>::get_notes_by_pitch (Notes& n, NoteOperator op, uint8_t val, int 
                 }
 
                 const Pitches& p (pitches (c));
-                boost::shared_ptr< Note<Time> > search_note(new Note<Time>(0, 0, 0, val, 0));
+                NotePtr search_note(new Note<Time>(0, 0, 0, val, 0));
                 typename Pitches::const_iterator i;
                 switch (op) {
                 case PitchEqual:

@@ -19,7 +19,7 @@
 */
 
 #define __STDC_LIMIT_MACROS 1
-
+#include <set>
 #include <iostream>
 #include <algorithm>
 #include <stdexcept>
@@ -43,19 +43,6 @@ MidiModel::MidiModel(MidiSource* s)
 	: AutomatableSequence<TimeType>(s->session())
 	, _midi_source(s)
 {
-}
-
-/** Start a new Delta command.
- *
- * This has no side-effects on the model or Session, the returned command
- * can be held on to for as long as the caller wishes, or discarded without
- * formality, until apply_command is called and ownership is taken.
- */
-MidiModel::DeltaCommand*
-MidiModel::new_delta_command(const string name)
-{
-	DeltaCommand* cmd = new DeltaCommand(_midi_source->model(), name);
-	return cmd;
 }
 
 /** Start a new Diff command.
@@ -98,10 +85,15 @@ MidiModel::apply_command_as_subcommand(Session& session, Command* cmd)
 	set_edited(true);
 }
 
+/************** DIFF COMMAND ********************/
 
-// DeltaCommand
+#define DIFF_COMMAND_ELEMENT "DiffCommand"
+#define DIFF_NOTES_ELEMENT "ChangedNotes"
+#define ADDED_NOTES_ELEMENT "AddedNotes"
+#define REMOVED_NOTES_ELEMENT "RemovedNotes"
+#define SIDE_EFFECT_REMOVALS_ELEMENT "SideEffectRemovals"
 
-MidiModel::DeltaCommand::DeltaCommand(boost::shared_ptr<MidiModel> m, const std::string& name)
+MidiModel::DiffCommand::DiffCommand(boost::shared_ptr<MidiModel> m, const std::string& name)
 	: Command(name)
 	, _model(m)
 	, _name(name)
@@ -109,7 +101,7 @@ MidiModel::DeltaCommand::DeltaCommand(boost::shared_ptr<MidiModel> m, const std:
 	assert(_model);
 }
 
-MidiModel::DeltaCommand::DeltaCommand(boost::shared_ptr<MidiModel> m, const XMLNode& node)
+MidiModel::DiffCommand::DiffCommand(boost::shared_ptr<MidiModel> m, const XMLNode& node)
 	: _model(m)
 {
 	assert(_model);
@@ -117,63 +109,242 @@ MidiModel::DeltaCommand::DeltaCommand(boost::shared_ptr<MidiModel> m, const XMLN
 }
 
 void
-MidiModel::DeltaCommand::add(const boost::shared_ptr< Evoral::Note<TimeType> > note)
+MidiModel::DiffCommand::add(const NotePtr note)
 {
 	_removed_notes.remove(note);
 	_added_notes.push_back(note);
 }
 
 void
-MidiModel::DeltaCommand::remove(const boost::shared_ptr< Evoral::Note<TimeType> > note)
+MidiModel::DiffCommand::remove(const NotePtr note)
 {
 	_added_notes.remove(note);
 	_removed_notes.push_back(note);
 }
 
 void
-MidiModel::DeltaCommand::operator()()
+MidiModel::DiffCommand::change(const NotePtr note, Property prop,
+			       uint8_t new_value)
 {
-	// This could be made much faster by using a priority_queue for added and
-	// removed notes (or sort here), and doing a single iteration over _model
+	NoteChange change;
 
-	MidiModel::WriteLock lock(_model->edit_lock());
+	switch (prop) {
+	case NoteNumber:
+                if (new_value == note->note()) {
+                        return;
+                }
+		change.old_value = note->note();
+		break;
+	case Velocity:
+                if (new_value == note->velocity()) {
+                        return;
+                }
+		change.old_value = note->velocity();
+		break;
+	case Channel:
+                if (new_value == note->channel()) {
+                        return;
+                }
+		change.old_value = note->channel();
+		break;
 
-	for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
-		_model->add_note_unlocked(*i);
+
+	case StartTime:
+		fatal << "MidiModel::DiffCommand::change() with integer argument called for start time" << endmsg;
+		/*NOTREACHED*/
+		break;
+	case Length:
+		fatal << "MidiModel::DiffCommand::change() with integer argument called for length" << endmsg;
+		/*NOTREACHED*/
+		break;
 	}
 
-	for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i) {
-		_model->remove_note_unlocked(*i);
+	change.note = note;
+	change.property = prop;
+	change.new_value = new_value;
+
+	_changes.push_back (change);
+}
+
+void
+MidiModel::DiffCommand::change(const NotePtr note, Property prop,
+			       TimeType new_time)
+{
+	NoteChange change;
+
+	switch (prop) {
+	case NoteNumber:
+	case Channel:
+	case Velocity:
+		fatal << "MidiModel::DiffCommand::change() with time argument called for note, channel or velocity" << endmsg;
+		break;
+
+	case StartTime:
+                if (Evoral::musical_time_equal (note->time(), new_time)) {
+                        return;
+                }
+		change.old_time = note->time();
+		break;
+	case Length:
+                if (Evoral::musical_time_equal (note->length(), new_time)) {
+                        return;
+                }
+		change.old_time = note->length();
+		break;
 	}
 
-	lock.reset();
+	change.note = note;
+	change.property = prop;
+	change.new_time = new_time;
+
+	_changes.push_back (change);
+}
+
+void
+MidiModel::DiffCommand::operator()()
+{
+        {
+                MidiModel::WriteLock lock(_model->edit_lock());
+                
+                for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
+                        _model->add_note_unlocked(*i);
+                }
+                
+                for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i) {
+                        _model->remove_note_unlocked(*i);
+                }
+
+                /* notes we modify in a way that requires remove-then-add to maintain ordering */
+                set<NotePtr> temporary_removals;
+
+                for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
+                        Property prop = i->property;
+                        switch (prop) {
+                        case NoteNumber:
+                                if (temporary_removals.find (i->note) == temporary_removals.end()) {
+                                        _model->remove_note_unlocked (i->note);
+                                        temporary_removals.insert (i->note);
+                                }
+                                i->note->set_note (i->new_value);
+                                break;
+
+                        case Velocity:
+                                i->note->set_velocity (i->new_value);
+                                break;
+
+                        case StartTime:
+                                if (temporary_removals.find (i->note) == temporary_removals.end()) {
+                                        _model->remove_note_unlocked (i->note);
+                                        temporary_removals.insert (i->note);
+
+                                }
+                                i->note->set_time (i->new_time);
+                                break;
+
+                        case Length:
+                                i->note->set_length (i->new_time);
+                                break;
+
+                        case Channel:
+                                if (temporary_removals.find (i->note) == temporary_removals.end()) {
+                                        _model->remove_note_unlocked (i->note);
+                                        temporary_removals.insert (i->note);
+                                }
+                                i->note->set_channel (i->new_value);
+                                break;
+                        }
+                }
+
+                for (set<NotePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
+                        _model->add_note_unlocked (*i, &side_effect_removals);
+                }
+
+                if (!side_effect_removals.empty()) {
+                        cerr << "SER: \n";
+                        for (set<NotePtr>::iterator i = side_effect_removals.begin(); i != side_effect_removals.end(); ++i) {
+                                cerr << "\t" << *i << ' ' << **i << endl;
+                        }
+                }
+        }
+
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
 
 void
-MidiModel::DeltaCommand::undo()
+MidiModel::DiffCommand::undo()
 {
-	// This could be made much faster by using a priority_queue for added and
-	// removed notes (or sort here), and doing a single iteration over _model
+        {
+                MidiModel::WriteLock lock(_model->edit_lock());
+                
+                for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
+                        _model->remove_note_unlocked(*i);
+                }
+                
+                for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i) {
+                        _model->add_note_unlocked(*i);
+                }
 
-	MidiModel::WriteLock lock(_model->edit_lock());;
+                /* notes we modify in a way that requires remove-then-add to maintain ordering */
+                set<NotePtr> temporary_removals;
 
-	for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
-		_model->remove_note_unlocked(*i);
-	}
+                for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
+                        Property prop = i->property;
+                        switch (prop) {
+                        case NoteNumber:
+                                if (temporary_removals.find (i->note) == temporary_removals.end()) {
+                                        _model->remove_note_unlocked (i->note);
+                                        temporary_removals.insert (i->note);
+                                }
+                                i->note->set_note (i->old_value);
+                                break;
+                        case Velocity:
+                                i->note->set_velocity (i->old_value);
+                                break;
+                        case StartTime:
+                                if (temporary_removals.find (i->note) == temporary_removals.end()) {
+                                        _model->remove_note_unlocked (i->note);
+                                        temporary_removals.insert (i->note);
+                                }
+                                i->note->set_time (i->old_time);
+                                break;
+                        case Length:
+                                i->note->set_length (i->old_time);
+                                break;
+                        case Channel:
+                                if (temporary_removals.find (i->note) == temporary_removals.end()) {
+                                        _model->remove_note_unlocked (i->note);
+                                        temporary_removals.insert (i->note);
+                                }
+                                i->note->set_channel (i->old_value);
+                                break;
+                        }
+                }
 
-	for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i) {
-		_model->add_note_unlocked(*i);
-	}
+                for (set<NotePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
+                        _model->add_note_unlocked (*i);
+                }
 
-	lock.reset();
+                /* finally add back notes that were removed by the "do". we don't care
+                   about side effects here since the model should be back to its original
+                   state once this is done.
+                 */
+
+                cerr << "This undo has " << side_effect_removals.size() << " SER's\n";
+                for (set<NotePtr>::iterator i = side_effect_removals.begin(); i != side_effect_removals.end(); ++i) {
+                        _model->add_note_unlocked (*i);
+                }
+        }
+
 	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
 
 XMLNode&
-MidiModel::DeltaCommand::marshal_note(const boost::shared_ptr< Evoral::Note<TimeType> > note)
+MidiModel::DiffCommand::marshal_note(const NotePtr note)
 {
 	XMLNode* xml_note = new XMLNode("note");
+
+        cerr << "Marshalling note: " << *note << endl;
+
 	ostringstream note_str(ios::ate);
 	note_str << int(note->note());
 	xml_note->add_property("note", note_str.str());
@@ -183,11 +354,11 @@ MidiModel::DeltaCommand::marshal_note(const boost::shared_ptr< Evoral::Note<Time
 	xml_note->add_property("channel", channel_str.str());
 
 	ostringstream time_str(ios::ate);
-	time_str << int(note->time());
+	time_str << note->time();
 	xml_note->add_property("time", time_str.str());
-
+        
 	ostringstream length_str(ios::ate);
-	length_str <<(unsigned int) note->length();
+	length_str << note->length();
 	xml_note->add_property("length", length_str.str());
 
 	ostringstream velocity_str(ios::ate);
@@ -197,8 +368,8 @@ MidiModel::DeltaCommand::marshal_note(const boost::shared_ptr< Evoral::Note<Time
 	return *xml_note;
 }
 
-boost::shared_ptr< Evoral::Note<MidiModel::TimeType> >
-MidiModel::DeltaCommand::unmarshal_note(XMLNode *xml_note)
+Evoral::Sequence<MidiModel::TimeType>::NotePtr
+MidiModel::DiffCommand::unmarshal_note(XMLNode *xml_note)
 {
 	unsigned int note;
 	XMLProperty* prop;
@@ -247,257 +418,9 @@ MidiModel::DeltaCommand::unmarshal_note(XMLNode *xml_note)
 		velocity = 127;
 	}
 
-	boost::shared_ptr< Evoral::Note<TimeType> > note_ptr(new Evoral::Note<TimeType>(
-			channel, time, length, note, velocity));
+	NotePtr note_ptr(new Evoral::Note<TimeType>(channel, time, length, note, velocity));
+
 	return note_ptr;
-}
-
-#define ADDED_NOTES_ELEMENT "AddedNotes"
-#define REMOVED_NOTES_ELEMENT "RemovedNotes"
-#define DELTA_COMMAND_ELEMENT "DeltaCommand"
-
-int
-MidiModel::DeltaCommand::set_state (const XMLNode& delta_command, int /*version*/)
-{
-	if (delta_command.name() != string(DELTA_COMMAND_ELEMENT)) {
-		return 1;
-	}
-
-	_added_notes.clear();
-	XMLNode* added_notes = delta_command.child(ADDED_NOTES_ELEMENT);
-	if (added_notes) {
-		XMLNodeList notes = added_notes->children();
-		transform(notes.begin(), notes.end(), back_inserter(_added_notes),
-			  boost::bind (&DeltaCommand::unmarshal_note, this, _1));
-	}
-
-	_removed_notes.clear();
-	XMLNode* removed_notes = delta_command.child(REMOVED_NOTES_ELEMENT);
-	if (removed_notes) {
-		XMLNodeList notes = removed_notes->children();
-		transform(notes.begin(), notes.end(), back_inserter(_removed_notes),
-			  boost::bind (&DeltaCommand::unmarshal_note, this, _1));
-	}
-
-	return 0;
-}
-
-XMLNode&
-MidiModel::DeltaCommand::get_state()
-{
-	XMLNode* delta_command = new XMLNode(DELTA_COMMAND_ELEMENT);
-	delta_command->add_property("midi-source", _model->midi_source()->id().to_s());
-
-	XMLNode* added_notes = delta_command->add_child(ADDED_NOTES_ELEMENT);
-	for_each(_added_notes.begin(), _added_notes.end(), 
-		 boost::bind(
-			 boost::bind (&XMLNode::add_child_nocopy, added_notes, _1),
-			 boost::bind (&DeltaCommand::marshal_note, this, _1)));
-
-	XMLNode* removed_notes = delta_command->add_child(REMOVED_NOTES_ELEMENT);
-	for_each(_removed_notes.begin(), _removed_notes.end(), 
-		 boost::bind (
-			 boost::bind (&XMLNode::add_child_nocopy, removed_notes, _1),
-			 boost::bind (&DeltaCommand::marshal_note, this, _1)));
-
-	return *delta_command;
-}
-
-/************** DIFF COMMAND ********************/
-
-#define DIFF_NOTES_ELEMENT "ChangedNotes"
-#define DIFF_COMMAND_ELEMENT "DiffCommand"
-
-MidiModel::DiffCommand::DiffCommand(boost::shared_ptr<MidiModel> m, const std::string& name)
-	: Command(name)
-	, _model(m)
-	, _name(name)
-{
-	assert(_model);
-}
-
-MidiModel::DiffCommand::DiffCommand(boost::shared_ptr<MidiModel> m, const XMLNode& node)
-	: _model(m)
-{
-	assert(_model);
-	set_state(node, Stateful::loading_state_version);
-}
-
-void
-MidiModel::DiffCommand::change(const boost::shared_ptr< Evoral::Note<TimeType> > note, Property prop,
-			       uint8_t new_value)
-{
-	NoteChange change;
-
-	switch (prop) {
-	case NoteNumber:
-                if (new_value == note->note()) {
-                        return;
-                }
-		change.old_value = note->note();
-		break;
-	case Velocity:
-                if (new_value == note->velocity()) {
-                        return;
-                }
-		change.old_value = note->velocity();
-		break;
-	case Channel:
-                if (new_value == note->channel()) {
-                        return;
-                }
-		change.old_value = note->channel();
-		break;
-
-
-	case StartTime:
-		fatal << "MidiModel::DiffCommand::change() with integer argument called for start time" << endmsg;
-		/*NOTREACHED*/
-		break;
-	case Length:
-		fatal << "MidiModel::DiffCommand::change() with integer argument called for length" << endmsg;
-		/*NOTREACHED*/
-		break;
-	}
-
-	change.note = note;
-	change.property = prop;
-	change.new_value = new_value;
-
-	_changes.push_back (change);
-}
-
-void
-MidiModel::DiffCommand::change(const boost::shared_ptr< Evoral::Note<TimeType> > note, Property prop,
-			       TimeType new_time)
-{
-	NoteChange change;
-
-	switch (prop) {
-	case NoteNumber:
-	case Channel:
-	case Velocity:
-		fatal << "MidiModel::DiffCommand::change() with time argument called for note, channel or velocity" << endmsg;
-		break;
-
-	case StartTime:
-                if (Evoral::musical_time_equal (note->time(), new_time)) {
-                        return;
-                }
-		change.old_time = note->time();
-		break;
-	case Length:
-                if (Evoral::musical_time_equal (note->length(), new_time)) {
-                        return;
-                }
-		change.old_time = note->length();
-		break;
-	}
-
-	change.note = note;
-	change.property = prop;
-	change.new_time = new_time;
-
-	_changes.push_back (change);
-}
-
-void
-MidiModel::DiffCommand::operator()()
-{
-        {
-                MidiModel::WriteLock lock(_model->edit_lock());
-                
-                set<boost::shared_ptr<Evoral::Note<TimeType> > > removed_notes;
-
-                for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
-                        Property prop = i->property;
-                        switch (prop) {
-                        case NoteNumber:
-                                if (removed_notes.find (i->note) == removed_notes.end()) {
-                                        _model->remove_note_unlocked (i->note);
-                                        removed_notes.insert (i->note);
-                                }
-                                i->note->set_note (i->new_value);
-                                break;
-                        case Velocity:
-                                i->note->set_velocity (i->new_value);
-                                break;
-                        case StartTime:
-                                if (removed_notes.find (i->note) == removed_notes.end()) {
-                                        _model->remove_note_unlocked (i->note);
-                                        removed_notes.insert (i->note);
-
-                                }
-                                i->note->set_time (i->new_time);
-                                break;
-                        case Length:
-                                i->note->set_length (i->new_time);
-                                break;
-                        case Channel:
-                                if (removed_notes.find (i->note) == removed_notes.end()) {
-                                        _model->remove_note_unlocked (i->note);
-                                        removed_notes.insert (i->note);
-                                }
-                                i->note->set_channel (i->new_value);
-                                break;
-                        }
-                }
-
-                for (set<boost::shared_ptr<Evoral::Note<TimeType> > >::iterator i = removed_notes.begin(); i != removed_notes.end(); ++i) {
-                        _model->add_note_unlocked (*i);
-                }
-        }
-
-	_model->ContentsChanged(); /* EMIT SIGNAL */
-}
-
-void
-MidiModel::DiffCommand::undo()
-{
-        {
-                MidiModel::WriteLock lock(_model->edit_lock());
-                
-                set<boost::shared_ptr<Evoral::Note<TimeType> > > removed_notes;
-
-                for (ChangeList::iterator i = _changes.begin(); i != _changes.end(); ++i) {
-                        Property prop = i->property;
-                        switch (prop) {
-                        case NoteNumber:
-                                if (removed_notes.find (i->note) == removed_notes.end()) {
-                                        _model->remove_note_unlocked (i->note);
-                                        removed_notes.insert (i->note);
-                                }
-                                i->note->set_note (i->old_value);
-                                break;
-                        case Velocity:
-                                i->note->set_velocity (i->old_value);
-                                break;
-                        case StartTime:
-                                if (removed_notes.find (i->note) == removed_notes.end()) {
-                                        _model->remove_note_unlocked (i->note);
-                                        removed_notes.insert (i->note);
-                                }
-                                i->note->set_time (i->old_time);
-                                break;
-                        case Length:
-                                i->note->set_length (i->old_time);
-                                break;
-                        case Channel:
-                                if (removed_notes.find (i->note) == removed_notes.end()) {
-                                        _model->remove_note_unlocked (i->note);
-                                        removed_notes.insert (i->note);
-                                }
-                                i->note->set_channel (i->old_value);
-                                break;
-                        }
-                }
-
-                for (set<boost::shared_ptr<Evoral::Note<TimeType> > >::iterator i = removed_notes.begin(); i != removed_notes.end(); ++i) {
-                        _model->add_note_unlocked (*i);
-                }
-        }
-
-	_model->ContentsChanged(); /* EMIT SIGNAL */
 }
 
 XMLNode&
@@ -570,6 +493,8 @@ MidiModel::DiffCommand::marshal_change(const NoteChange& change)
 		velocity_str << int (change.note->velocity());
 		xml_change->add_property("velocity", velocity_str.str());
 	}
+
+        /* and now notes that were remove as a side-effect */
 
 	return *xml_change;
 }
@@ -684,7 +609,7 @@ MidiModel::DiffCommand::unmarshal_change(XMLNode *xml_change)
 	   so go look for it ...
 	*/
 
-	boost::shared_ptr<Evoral::Note<TimeType> > new_note (new Evoral::Note<TimeType> (channel, time, length, note, velocity));
+	NotePtr new_note (new Evoral::Note<TimeType> (channel, time, length, note, velocity));
 
 	change.note = _model->find_note (new_note);
 
@@ -704,6 +629,30 @@ MidiModel::DiffCommand::set_state(const XMLNode& diff_command, int /*version*/)
 		return 1;
 	}
 
+        /* additions */
+
+	_added_notes.clear();
+	XMLNode* added_notes = diff_command.child(ADDED_NOTES_ELEMENT);
+	if (added_notes) {
+		XMLNodeList notes = added_notes->children();
+		transform(notes.begin(), notes.end(), back_inserter(_added_notes),
+			  boost::bind (&DiffCommand::unmarshal_note, this, _1));
+	}
+
+
+        /* removals */
+
+	_removed_notes.clear();
+	XMLNode* removed_notes = diff_command.child(REMOVED_NOTES_ELEMENT);
+	if (removed_notes) {
+		XMLNodeList notes = removed_notes->children();
+		transform(notes.begin(), notes.end(), back_inserter(_removed_notes),
+			  boost::bind (&DiffCommand::unmarshal_note, this, _1));
+	}
+
+
+        /* changes */
+
 	_changes.clear();
 
 	XMLNode* changed_notes = diff_command.child(DIFF_NOTES_ELEMENT);
@@ -713,6 +662,20 @@ MidiModel::DiffCommand::set_state(const XMLNode& diff_command, int /*version*/)
 		transform (notes.begin(), notes.end(), back_inserter(_changes),
 			   boost::bind (&DiffCommand::unmarshal_change, this, _1));
 
+	}
+
+        /* side effect removals caused by changes */
+        
+	side_effect_removals.clear();
+
+	XMLNode* side_effect_notes = diff_command.child(SIDE_EFFECT_REMOVALS_ELEMENT);
+
+	if (side_effect_notes) {
+		XMLNodeList notes = side_effect_notes->children();
+                cerr << "Reconstruct DiffCommand with " << notes.size() << " SER's\n";
+                for (XMLNodeList::iterator n = notes.begin(); n != notes.end(); ++n) {
+                        side_effect_removals.insert (unmarshal_note (*n));
+                }
 	}
 
 	return 0;
@@ -729,6 +692,29 @@ MidiModel::DiffCommand::get_state ()
 		 boost::bind (
 			 boost::bind (&XMLNode::add_child_nocopy, changes, _1),
 			 boost::bind (&DiffCommand::marshal_change, this, _1)));
+
+	XMLNode* added_notes = diff_command->add_child(ADDED_NOTES_ELEMENT);
+	for_each(_added_notes.begin(), _added_notes.end(), 
+		 boost::bind(
+			 boost::bind (&XMLNode::add_child_nocopy, added_notes, _1),
+			 boost::bind (&DiffCommand::marshal_note, this, _1)));
+
+	XMLNode* removed_notes = diff_command->add_child(REMOVED_NOTES_ELEMENT);
+	for_each(_removed_notes.begin(), _removed_notes.end(), 
+		 boost::bind (
+			 boost::bind (&XMLNode::add_child_nocopy, removed_notes, _1),
+			 boost::bind (&DiffCommand::marshal_note, this, _1)));
+
+        /* if this command had side-effects, store that state too 
+         */
+
+        if (!side_effect_removals.empty()) {
+                XMLNode* side_effect_notes = diff_command->add_child(SIDE_EFFECT_REMOVALS_ELEMENT);
+                for_each(side_effect_removals.begin(), side_effect_removals.end(), 
+                         boost::bind (
+                                 boost::bind (&XMLNode::add_child_nocopy, side_effect_notes, _1),
+                                 boost::bind (&DiffCommand::marshal_note, this, _1)));
+        }
 
 	return *diff_command;
 }
@@ -851,8 +837,8 @@ MidiModel::get_state()
 	return *node;
 }
 
-boost::shared_ptr<Evoral::Note<MidiModel::TimeType> >
-MidiModel::find_note (boost::shared_ptr<Evoral::Note<TimeType> > other)
+Evoral::Sequence<MidiModel::TimeType>::NotePtr
+MidiModel::find_note (NotePtr other)
 {
 	Notes::iterator l = notes().lower_bound(other);
 
@@ -869,7 +855,7 @@ MidiModel::find_note (boost::shared_ptr<Evoral::Note<TimeType> > other)
 		}
 	}
 
-	return boost::shared_ptr<Evoral::Note<TimeType> >();
+	return NotePtr();
 }
 
 /** Lock and invalidate the source.
@@ -892,3 +878,198 @@ MidiModel::write_lock()
 	assert(!_midi_source->mutex().trylock());
 	return WriteLock(new WriteLockImpl(NULL, _lock, _control_lock));
 }
+
+int
+MidiModel::resolve_overlaps_unlocked (const NotePtr note, set<NotePtr>* removed)
+
+{
+        using namespace Evoral;
+
+        if (_writing || insert_merge_policy() == InsertMergeRelax) {
+                return 0;
+        }
+
+        TimeType sa = note->time();
+        TimeType ea  = note->end_time();
+        
+        const Pitches& p (pitches (note->channel()));
+        NotePtr search_note(new Note<TimeType>(0, 0, 0, note->note()));
+        set<NotePtr> to_be_deleted;
+        bool set_note_length = false;
+        bool set_note_time = false;
+        TimeType note_time = note->time();
+        TimeType note_length = note->length();
+
+        for (Pitches::const_iterator i = p.lower_bound (search_note); 
+             i != p.end() && (*i)->note() == note->note(); ++i) {
+                
+                TimeType sb = (*i)->time();
+                TimeType eb = (*i)->end_time();
+                OverlapType overlap = OverlapNone;
+                
+                if ((sb > sa) && (eb <= ea)) {
+                        overlap = OverlapInternal;
+                } else if ((eb >= sa) && (eb <= ea)) {
+                        overlap = OverlapStart;
+                } else if ((sb > sa) && (sb <= ea)) {
+                        overlap = OverlapEnd;
+                } else if ((sa >= sb) && (sa <= eb) && (ea <= eb)) {
+                        overlap = OverlapExternal;
+                } else {
+                        /* no overlap */
+                        continue;
+                }
+
+                if (insert_merge_policy() == InsertMergeReject) {
+                        return -1;
+                }
+
+                switch (overlap) {
+                case OverlapStart:
+                        /* existing note covers start of new note */
+                        switch (insert_merge_policy()) {
+                        case InsertMergeReplace:
+                                to_be_deleted.insert (*i);
+                                break;
+                        case InsertMergeTruncateExisting:
+                                (*i)->set_length (note->time() - (*i)->time());
+                                break;
+                        case InsertMergeTruncateAddition:
+                                set_note_time = true;
+                                note_time = (*i)->time() + (*i)->length();
+                                break;
+                        case InsertMergeExtend:
+                                (*i)->set_length (note->end_time() - (*i)->time());
+                                return -1; /* do not add the new note */
+                                break;
+                        default:
+                                /*NOTREACHED*/
+                                /* stupid gcc */
+                                break;
+                        }
+                        break;
+
+                case OverlapEnd:
+                        /* existing note covers end of new note */
+                        switch (insert_merge_policy()) {
+                        case InsertMergeReplace:
+                                to_be_deleted.insert (*i);
+                                break;
+
+                        case InsertMergeTruncateExisting:
+                                /* resetting the start time of the existing note
+                                   is a problem because of time ordering.
+                                */
+                                break;
+
+                        case InsertMergeTruncateAddition:
+                                set_note_length = true;
+                                note_length = min (note_length, ((*i)->time() - note->time()));
+                                break;
+                                
+                        case InsertMergeExtend:
+                                /* we can't reset the time of the existing note because
+                                   that will corrupt time ordering. So remove the
+                                   existing note and change the position/length
+                                   of the new note (which has not been added yet)
+                                */
+                                to_be_deleted.insert (*i);
+                                set_note_length = true;
+                                note_length = min (note_length, (*i)->end_time() - note->time());
+                                break;
+                        default:
+                                /*NOTREACHED*/
+                                /* stupid gcc */
+                                break;
+                        }
+                        break;
+
+                case OverlapExternal:
+                        /* existing note overlaps all the new note */
+                        switch (insert_merge_policy()) {
+                        case InsertMergeReplace:
+                                to_be_deleted.insert (*i);
+                                break;
+                        case InsertMergeTruncateExisting:
+                        case InsertMergeTruncateAddition:
+                        case InsertMergeExtend:
+                                /* cannot add in this case */
+                                return -1;
+                        default:
+                                /*NOTREACHED*/
+                                /* stupid gcc */
+                                break;
+                        }
+                        break;
+
+                case OverlapInternal:
+                        /* new note fully overlaps an existing note */
+                        switch (insert_merge_policy()) {
+                        case InsertMergeReplace:
+                        case InsertMergeTruncateExisting:
+                        case InsertMergeTruncateAddition:
+                        case InsertMergeExtend:
+                                /* delete the existing note, the new one will cover it */
+                                to_be_deleted.insert (*i);
+                                break;
+                        default:
+                                /*NOTREACHED*/
+                                /* stupid gcc */
+                                break;
+                        }
+                        break;
+
+                default:
+                        /*NOTREACHED*/
+                        /* stupid gcc */
+                        break;
+                }
+        }
+
+        for (set<NotePtr>::iterator i = to_be_deleted.begin(); i != to_be_deleted.end(); ++i) {
+                remove_note_unlocked (*i);
+
+                if (removed) {
+                        removed->insert (*i);
+                }
+        }
+
+        if (set_note_time) {
+                note->set_time (note_time);
+        }
+
+        if (set_note_length) {
+                note->set_length (note_length);
+        }
+
+        return 0;
+}
+
+InsertMergePolicy
+MidiModel::insert_merge_policy () const 
+{
+        char* c = getenv ("AMP");
+
+        if (!c || c[0] == 0) {
+                return InsertMergeReject;
+        }
+
+        switch (c[0]) {
+        case 'x':
+                return InsertMergeRelax;
+        case 'p':
+                return InsertMergeReplace;
+        case 't':
+                return InsertMergeTruncateExisting;
+        case 'a':
+                return InsertMergeTruncateAddition;
+        case 'e':
+        default:
+                return InsertMergeExtend;
+        }
+}
+                        
+
+
+
+

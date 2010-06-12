@@ -83,7 +83,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _custom_device_mode(string())
 	, _active_notes(0)
 	, _note_group(new ArdourCanvas::Group(*parent))
-	, _delta_command(0)
 	, _diff_command(0)
 	, _ghost_note(0)
         , _drag_rect (0)
@@ -108,7 +107,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Group *parent, RouteTimeAxisView &
 	, _custom_device_mode(string())
 	, _active_notes(0)
 	, _note_group(new ArdourCanvas::Group(*parent))
-	, _delta_command(0)
 	, _diff_command(0)
 	, _ghost_note(0)
         , _drag_rect (0)
@@ -132,7 +130,6 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _custom_device_mode(string())
 	, _active_notes(0)
 	, _note_group(new ArdourCanvas::Group(*get_canvas_group()))
-	, _delta_command(0)
 	, _diff_command(0)
 	, _ghost_note(0)
         , _drag_rect (0)
@@ -160,7 +157,6 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _custom_device_mode(string())
 	, _active_notes(0)
 	, _note_group(new ArdourCanvas::Group(*get_canvas_group()))
-	, _delta_command(0)
 	, _diff_command(0)
 	, _ghost_note(0)
         , _drag_rect (0)
@@ -680,7 +676,7 @@ MidiRegionView::create_note_at(double x, double y, double length)
 
 	view->update_note_range(new_note->note());
 
-	MidiModel::DeltaCommand* cmd = _model->new_delta_command("add note");
+	MidiModel::DiffCommand* cmd = _model->new_diff_command("add note");
 	cmd->add(new_note);
 	_model->apply_command(*trackview.session(), cmd);
 
@@ -724,15 +720,6 @@ MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 	}
 }
 
-
-void
-MidiRegionView::start_delta_command(string name)
-{
-	if (!_delta_command) {
-		_delta_command = _model->new_delta_command(name);
-	}
-}
-
 void
 MidiRegionView::start_diff_command(string name)
 {
@@ -742,10 +729,10 @@ MidiRegionView::start_diff_command(string name)
 }
 
 void
-MidiRegionView::delta_add_note(const boost::shared_ptr<NoteType> note, bool selected, bool show_velocity)
+MidiRegionView::diff_add_note(const boost::shared_ptr<NoteType> note, bool selected, bool show_velocity)
 {
-	if (_delta_command) {
-		_delta_command->add(note);
+	if (_diff_command) {
+		_diff_command->add(note);
 	}
 	if (selected) {
 		_marked_for_selection.insert(note);
@@ -756,10 +743,10 @@ MidiRegionView::delta_add_note(const boost::shared_ptr<NoteType> note, bool sele
 }
 
 void
-MidiRegionView::delta_remove_note(ArdourCanvas::CanvasNoteEvent* ev)
+MidiRegionView::diff_remove_note(ArdourCanvas::CanvasNoteEvent* ev)
 {
-	if (_delta_command && ev->note()) {
-		_delta_command->remove(ev->note());
+	if (_diff_command && ev->note()) {
+		_diff_command->remove(ev->note());
 	}
 }
 
@@ -784,84 +771,63 @@ MidiRegionView::diff_add_change (ArdourCanvas::CanvasNoteEvent* ev,
 }
 
 void
-MidiRegionView::apply_delta()
-{
-	if (!_delta_command) {
-		return;
-	}
-
-	// Mark all selected notes for selection when model reloads
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		_marked_for_selection.insert((*i)->note());
-	}
-
-	_model->apply_command(*trackview.session(), _delta_command);
-	_delta_command = 0;
-	midi_view()->midi_track()->playlist_modified();
-
-	_marked_for_selection.clear();
-	_marked_for_velocity.clear();
-}
-
-void
 MidiRegionView::apply_diff ()
 {
+        bool add_or_remove;
+
 	if (!_diff_command) {
 		return;
 	}
+
+        if ((add_or_remove = _diff_command->adds_or_removes())) {
+                // Mark all selected notes for selection when model reloads
+                for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+                        _marked_for_selection.insert((*i)->note());
+                }
+        }
 
 	_model->apply_command(*trackview.session(), _diff_command);
 	_diff_command = 0;
 	midi_view()->midi_track()->playlist_modified();
 
-	_marked_for_velocity.clear();
-}
+        
+        if (add_or_remove) {
+        	_marked_for_selection.clear();
+        }
 
-void
-MidiRegionView::apply_delta_as_subcommand()
-{
-	if (!_delta_command) {
-		return;
-	}
-
-	// Mark all selected notes for selection when model reloads
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		_marked_for_selection.insert((*i)->note());
-	}
-
-	_model->apply_command_as_subcommand(*trackview.session(), _delta_command);
-	_delta_command = 0;
-	midi_view()->midi_track()->playlist_modified();
-
-	_marked_for_selection.clear();
 	_marked_for_velocity.clear();
 }
 
 void
 MidiRegionView::apply_diff_as_subcommand()
 {
+        bool add_or_remove;
+
 	if (!_diff_command) {
 		return;
 	}
 
-	// Mark all selected notes for selection when model reloads
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		_marked_for_selection.insert((*i)->note());
-	}
+        if ((add_or_remove = _diff_command->adds_or_removes())) {
+                // Mark all selected notes for selection when model reloads
+                for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
+                        _marked_for_selection.insert((*i)->note());
+                }
+        }
 
 	_model->apply_command_as_subcommand(*trackview.session(), _diff_command);
 	_diff_command = 0;
 	midi_view()->midi_track()->playlist_modified();
 
-	_marked_for_selection.clear();
+        if (add_or_remove) {
+                _marked_for_selection.clear();
+        }
 	_marked_for_velocity.clear();
 }
+
 
 void
 MidiRegionView::abort_command()
 {
-	delete _delta_command;
-	_delta_command = 0;
 	delete _diff_command;
 	_diff_command = 0;
 	clear_selection();
@@ -1096,7 +1062,7 @@ MidiRegionView::~MidiRegionView ()
 	_selection.clear();
 	clear_events();
 	delete _note_group;
-	delete _delta_command;
+	delete _diff_command;
 }
 
 void
@@ -1457,9 +1423,9 @@ MidiRegionView::add_note (uint8_t channel, uint8_t number, uint8_t velocity,
 {
 	boost::shared_ptr<NoteType> new_note (new NoteType (channel, pos, len, number, velocity));
 
-	start_delta_command (_("step add"));
-	delta_add_note (new_note, true, false);
-	apply_delta();
+	start_diff_command (_("step add"));
+	diff_add_note (new_note, true, false);
+	apply_diff();
 
 	/* potentially extend region to hold new note */
 
@@ -1627,25 +1593,25 @@ MidiRegionView::delete_selection()
 		return;
 	}
 
-	start_delta_command (_("delete selection"));
+	start_diff_command (_("delete selection"));
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		if ((*i)->selected()) {
-			_delta_command->remove((*i)->note());
+			_diff_command->remove((*i)->note());
 		}
 	}
 
 	_selection.clear();
 
-	apply_delta ();
+	apply_diff ();
 }
 
 void
 MidiRegionView::delete_note (boost::shared_ptr<NoteType> n)
 {
-	start_delta_command (_("delete note"));
-	_delta_command->remove (n);
-	apply_delta ();
+	start_diff_command (_("delete note"));
+	_diff_command->remove (n);
+	apply_diff ();
 
 	trackview.editor().hide_verbose_canvas_cursor ();
 }
@@ -2622,7 +2588,7 @@ MidiRegionView::cut_copy_clear (Editing::CutCopyOp op)
 
         if (op != Copy) {
 
-                start_delta_command();
+                start_diff_command();
                 
                 for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
                         switch (op) {
@@ -2630,12 +2596,12 @@ MidiRegionView::cut_copy_clear (Editing::CutCopyOp op)
                                 break;
                         case Cut:
                         case Clear:
-                                delta_remove_note (*i);
+                                diff_remove_note (*i);
                                 break;
                         }
                 }
                 
-                apply_delta();
+                apply_diff();
         }
 }
 
@@ -2662,7 +2628,7 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 		return;
 	}
 
-	start_delta_command (_("paste"));
+	start_diff_command (_("paste"));
 
 	Evoral::MusicalTime beat_delta;
 	Evoral::MusicalTime paste_pos_beats;
@@ -2678,8 +2644,6 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 
 	for (int n = 0; n < (int) times; ++n) {
 
-                cerr << "Pasting " << mcb.notes().size() << " for the " << n+1 << "th time\n";
-                
 		for (Notes::const_iterator i = mcb.notes().begin(); i != mcb.notes().end(); ++i) {
 
 			boost::shared_ptr<NoteType> copied_note (new NoteType (*((*i).get())));
@@ -2687,7 +2651,7 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 
 			/* make all newly added notes selected */
 
-			delta_add_note (copied_note, true);
+			diff_add_note (copied_note, true);
 			end_point = copied_note->end_time();
 		}
 
@@ -2701,8 +2665,6 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 
 	if (end_frame > region_end) {
 
-                cerr << "region end is now " << end_frame << " to extend from " << region_end << endl;
-
 		trackview.session()->begin_reversible_command (_("paste"));
 
                 _region->clear_history ();
@@ -2710,8 +2672,7 @@ MidiRegionView::paste (nframes64_t pos, float times, const MidiCutBuffer& mcb)
 		trackview.session()->add_command (new StatefulDiffCommand (_region));
 	}
 
-        cerr << "region end finally at " << _region->position() + _region->length() - 1;
-	apply_delta ();
+	apply_diff ();
 }
 
 struct EventNoteTimeEarlyFirstComparator {

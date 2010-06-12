@@ -86,6 +86,19 @@ namespace ARDOUR {
         ARDOUR::OverlapType coverage (framepos_t sa, framepos_t ea,
                                       framepos_t sb, framepos_t eb);
 
+        /* policies for inserting/pasting material where overlaps
+           might be an issue.
+        */
+
+        enum InsertMergePolicy {
+                InsertMergeReject,  // no overlaps allowed
+                InsertMergeRelax,   // we just don't care about overlaps
+                InsertMergeReplace, // replace old with new
+                InsertMergeTruncateExisting, // shorten existing to avoid overlap
+                InsertMergeTruncateAddition, // shorten new to avoid overlap
+                InsertMergeExtend   // extend new (or old) to the range of old+new
+        };
+
 	/** See parameter.h
 	 * XXX: I don't think/hope these hex values matter anymore.
 	 */

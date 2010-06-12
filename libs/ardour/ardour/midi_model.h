@@ -49,53 +49,13 @@ class MidiSource;
  */
 class MidiModel : public AutomatableSequence<Evoral::MusicalTime> {
 public:
-	typedef double TimeType;
+	typedef Evoral::MusicalTime TimeType;
 
 	MidiModel(MidiSource* s);
 
 	NoteMode note_mode() const { return (percussive() ? Percussive : Sustained); }
 	void set_note_mode(NoteMode mode) { set_percussive(mode == Percussive); };
 
-	/** Add/Remove notes.
-	 * Technically all note operations can be implemented as one of these, but
-	 * a custom command can be more efficient.
-	 */
-	class DeltaCommand : public Command {
-	public:
-		DeltaCommand (boost::shared_ptr<MidiModel> m, const std::string& name);
-		DeltaCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node);
-
-		const std::string& name() const { return _name; }
-
-		void operator()();
-		void undo();
-
-		int set_state (const XMLNode&, int version);
-		XMLNode& get_state ();
-
-		void add(const boost::shared_ptr< Evoral::Note<TimeType> > note);
-		void remove(const boost::shared_ptr< Evoral::Note<TimeType> > note);
-
-	private:
-		XMLNode &marshal_note(const boost::shared_ptr< Evoral::Note<TimeType> > note);
-		boost::shared_ptr< Evoral::Note<TimeType> > unmarshal_note(XMLNode *xml_note);
-
-		boost::shared_ptr<MidiModel> _model;
-		const std::string            _name;
-
-		typedef std::list< boost::shared_ptr< Evoral::Note<TimeType> > > NoteList;
-
-		NoteList _added_notes;
-		NoteList _removed_notes;
-	};
-
-
-	/** Change note properties.
-	 * More efficient than DeltaCommand and has the important property that
-	 * it leaves the objects in the MidiModel (Notes) the same, thus
-	 * enabling selection and other state to persist across command
-	 * do/undo/redo.
-	 */
 	class DiffCommand : public Command {
 	public:
 		enum Property {
@@ -117,18 +77,23 @@ public:
 		int set_state (const XMLNode&, int version);
 		XMLNode& get_state ();
 
-		void change (const boost::shared_ptr<Evoral::Note<TimeType> > note,
-				Property prop, uint8_t new_value);
-		void change (const boost::shared_ptr<Evoral::Note<TimeType> > note,
-				Property prop, TimeType new_time);
+		void add(const NotePtr note);
+		void remove(const NotePtr note);
 
-	private:
+		void change (const NotePtr note, Property prop, uint8_t new_value);
+		void change (const NotePtr note, Property prop, TimeType new_time);
+
+                bool adds_or_removes() const { 
+                        return !_added_notes.empty() || !_removed_notes.empty();
+                }
+
+          private:
 		boost::shared_ptr<MidiModel> _model;
 		const std::string            _name;
 
 		struct NoteChange {
 			DiffCommand::Property property;
-			boost::shared_ptr< Evoral::Note<TimeType> > note;
+			NotePtr note;
 			union {
 				uint8_t  old_value;
 				TimeType old_time;
@@ -142,11 +107,19 @@ public:
 		typedef std::list<NoteChange> ChangeList;
 		ChangeList _changes;
 
+		typedef std::list< boost::shared_ptr< Evoral::Note<TimeType> > > NoteList;
+		NoteList _added_notes;
+		NoteList _removed_notes;
+
+                std::set<NotePtr> side_effect_removals;
+
 		XMLNode &marshal_change(const NoteChange&);
 		NoteChange unmarshal_change(XMLNode *xml_note);
+
+		XMLNode &marshal_note(const NotePtr note);
+		NotePtr unmarshal_note(XMLNode *xml_note);
 	};
 
-	MidiModel::DeltaCommand* new_delta_command(const std::string name="midi edit");
 	MidiModel::DiffCommand*  new_diff_command(const std::string name="midi edit");
 	void                     apply_command(Session& session, Command* cmd);
 	void                     apply_command_as_subcommand(Session& session, Command* cmd);
@@ -165,12 +138,18 @@ public:
 	const MidiSource* midi_source() const { return _midi_source; }
 	void set_midi_source(MidiSource* source) { _midi_source = source; }
 
-	boost::shared_ptr<Evoral::Note<TimeType> > find_note (boost::shared_ptr<Evoral::Note<TimeType> >);
+	boost::shared_ptr<Evoral::Note<TimeType> > find_note (NotePtr);
+
+        InsertMergePolicy insert_merge_policy () const;
+        void set_insert_merge_policy (InsertMergePolicy);
+        
+protected:
+        int resolve_overlaps_unlocked (const NotePtr, std::set<NotePtr>* removed = 0);
 
 private:
-	struct WriteLockImpl : public AutomatableSequence<Evoral::MusicalTime>::WriteLockImpl {
+	struct WriteLockImpl : public AutomatableSequence<TimeType>::WriteLockImpl {
 		WriteLockImpl(Glib::Mutex::Lock* source_lock, Glib::RWLock& s, Glib::Mutex& c)
-			: AutomatableSequence<Evoral::MusicalTime>::WriteLockImpl(s, c)
+			: AutomatableSequence<TimeType>::WriteLockImpl(s, c)
 			, source_lock(source_lock)
 		{}
 		~WriteLockImpl() {
@@ -188,6 +167,7 @@ private:
 
 	// We cannot use a boost::shared_ptr here to avoid a retain cycle
 	MidiSource* _midi_source;
+        InsertMergePolicy _insert_merge_policy;
 };
 
 } /* namespace ARDOUR */

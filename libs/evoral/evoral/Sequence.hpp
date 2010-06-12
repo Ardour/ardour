@@ -22,6 +22,7 @@
 #include <vector>
 #include <queue>
 #include <set>
+#include <list>
 #include <utility>
 #include <boost/shared_ptr.hpp>
 #include <glibmm/thread.h>
@@ -78,6 +79,9 @@ protected:
 	};
 
 public:
+        typedef typename boost::shared_ptr<Evoral::Note<Time> >  NotePtr;
+        typedef typename boost::shared_ptr<const Evoral::Note<Time> >  constNotePtr;
+
 	typedef boost::shared_ptr<Glib::RWLock::ReaderLock> ReadLock;
 	typedef boost::shared_ptr<WriteLockImpl>            WriteLock;
 
@@ -133,7 +137,7 @@ public:
 		}
 	};
 
-	typedef std::multiset<boost::shared_ptr< Note<Time> >, EarlierNoteComparator> Notes;
+	typedef std::multiset<NotePtr, EarlierNoteComparator> Notes;
 	inline       Notes& notes()       { return _notes; }
 	inline const Notes& notes() const { return _notes; }
 
@@ -173,10 +177,7 @@ public:
 	inline const SysExes& sysexes() const { return _sysexes; }
 
 private:
-	typedef std::priority_queue< boost::shared_ptr< Note<Time> >,
-	                             std::deque< boost::shared_ptr< Note<Time> > >,
-	                             LaterNoteEndComparator >
-	        ActiveNotes;
+	typedef std::priority_queue<NotePtr, std::deque<NotePtr>, LaterNoteEndComparator> ActiveNotes;
 public:
 
 	/** Read iterator */
@@ -231,12 +232,12 @@ public:
 	bool edited() const      { return _edited; }
 	void set_edited(bool yn) { _edited = yn; }
 
-        bool overlaps (const boost::shared_ptr< Note<Time> >& ev, 
-                       const boost::shared_ptr< Note<Time> >& ignore_this_note) const;
-        bool contains (const boost::shared_ptr< Note<Time> >& ev) const;
+        bool overlaps (const NotePtr& ev, 
+                       const NotePtr& ignore_this_note) const;
+        bool contains (const NotePtr& ev) const;
 
-	bool add_note_unlocked(const boost::shared_ptr< Note<Time> > note);
-	void remove_note_unlocked(const boost::shared_ptr< const Note<Time> > note);
+        bool add_note_unlocked (const NotePtr note, std::set<NotePtr>* removed = 0);
+	void remove_note_unlocked(const constNotePtr note);
 
 	uint8_t lowest_note()  const { return _lowest_note; }
 	uint8_t highest_note() const { return _highest_note; }
@@ -247,20 +248,24 @@ protected:
         bool                   _overlapping_pitches_accepted;
         OverlapPitchResolution _overlap_pitch_resolution;
 	mutable Glib::RWLock   _lock;
+	bool                   _writing;
+
+        virtual int resolve_overlaps_unlocked (const NotePtr, std::set<NotePtr>* removed = 0) {
+                return 0;
+        }
+
+	typedef std::multiset<NotePtr, NoteNumberComparator>  Pitches;
+	inline       Pitches& pitches(uint8_t chan)       { return _pitches[chan&0xf]; }
+        inline const Pitches& pitches(uint8_t chan) const { return _pitches[chan&0xf]; }
 
 private:
 	friend class const_iterator;
 
-	typedef std::multiset<boost::shared_ptr< Note<Time> >, NoteNumberComparator>  Pitches;
-	inline       Pitches& pitches(uint8_t chan)       { return _pitches[chan&0xf]; }
-        inline const Pitches& pitches(uint8_t chan) const { return _pitches[chan&0xf]; }
+        bool overlaps_unlocked (const NotePtr& ev, const NotePtr& ignore_this_note) const;
+        bool contains_unlocked (const NotePtr& ev) const;
 
-        bool overlaps_unlocked (const boost::shared_ptr< Note<Time> >& ev, 
-                                const boost::shared_ptr< Note<Time> >& ignore_this_note) const;
-        bool contains_unlocked (const boost::shared_ptr< Note<Time> >& ev) const;
-
-        void append_note_on_unlocked (boost::shared_ptr< Note<Time> >);
-        void append_note_off_unlocked(boost::shared_ptr< Note<Time> >);
+        void append_note_on_unlocked (NotePtr);
+        void append_note_off_unlocked(NotePtr);
 	void append_control_unlocked(const Parameter& param, Time time, double value);
 	void append_sysex_unlocked(const MIDIEvent<Time>& ev);
 
@@ -273,9 +278,8 @@ private:
         Pitches _pitches[16]; // notes indexed by channel+pitch
 	SysExes _sysexes;
 
-	typedef std::multiset<boost::shared_ptr< Note<Time> >, EarlierNoteComparator> WriteNotes;
+	typedef std::multiset<NotePtr, EarlierNoteComparator> WriteNotes;
 	WriteNotes _write_notes[16];
-	bool       _writing;
 
 	typedef std::vector< boost::shared_ptr<const ControlList> > ControlLists;
 	ControlLists _dirty_controls;
