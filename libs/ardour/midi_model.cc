@@ -123,6 +123,12 @@ MidiModel::DiffCommand::remove(const NotePtr note)
 }
 
 void
+MidiModel::DiffCommand::side_effect_remove(const NotePtr note)
+{
+	side_effect_removals.insert (note);
+}
+
+void
 MidiModel::DiffCommand::change(const NotePtr note, Property prop,
 			       uint8_t new_value)
 {
@@ -200,12 +206,31 @@ MidiModel::DiffCommand::change(const NotePtr note, Property prop,
 	_changes.push_back (change);
 }
 
+MidiModel::DiffCommand&
+MidiModel::DiffCommand::operator+= (const DiffCommand& other)
+{
+        if (this == &other) {
+                return *this;
+        }
+
+        if (_model != other._model) {
+                return *this;
+        }
+
+        _added_notes.insert (_added_notes.end(), other._added_notes.begin(), other._added_notes.end());
+        _removed_notes.insert (_removed_notes.end(), other._removed_notes.begin(), other._removed_notes.end());
+        side_effect_removals.insert (other.side_effect_removals.begin(), other.side_effect_removals.end());
+        _changes.insert (_changes.end(), other._changes.begin(), other._changes.end());
+
+        return *this;
+}
+
 void
 MidiModel::DiffCommand::operator()()
 {
         {
                 MidiModel::WriteLock lock(_model->edit_lock());
-                
+
                 for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
                         _model->add_note_unlocked(*i);
                 }
@@ -228,10 +253,6 @@ MidiModel::DiffCommand::operator()()
                                 i->note->set_note (i->new_value);
                                 break;
 
-                        case Velocity:
-                                i->note->set_velocity (i->new_value);
-                                break;
-
                         case StartTime:
                                 if (temporary_removals.find (i->note) == temporary_removals.end()) {
                                         _model->remove_note_unlocked (i->note);
@@ -241,10 +262,6 @@ MidiModel::DiffCommand::operator()()
                                 i->note->set_time (i->new_time);
                                 break;
 
-                        case Length:
-                                i->note->set_length (i->new_time);
-                                break;
-
                         case Channel:
                                 if (temporary_removals.find (i->note) == temporary_removals.end()) {
                                         _model->remove_note_unlocked (i->note);
@@ -252,11 +269,26 @@ MidiModel::DiffCommand::operator()()
                                 }
                                 i->note->set_channel (i->new_value);
                                 break;
+                                
+                        /* no remove-then-add required for these properties, since we do not index them
+                         */
+
+                        case Velocity:
+                                i->note->set_velocity (i->new_value);
+                                break;
+
+                        case Length:
+                                i->note->set_length (i->new_time);
+                                break;
+
                         }
                 }
 
+
                 for (set<NotePtr>::iterator i = temporary_removals.begin(); i != temporary_removals.end(); ++i) {
-                        _model->add_note_unlocked (*i, &side_effect_removals);
+                        DiffCommand side_effects (model(), "side effects");
+                        _model->add_note_unlocked (*i, &side_effects);
+                        *this += side_effects;
                 }
 
                 if (!side_effect_removals.empty()) {
@@ -329,7 +361,7 @@ MidiModel::DiffCommand::undo()
                    state once this is done.
                  */
 
-                cerr << "This undo has " << side_effect_removals.size() << " SER's\n";
+                cerr << "This undo has " << side_effect_removals.size() << " SER's to be re-added\n";
                 for (set<NotePtr>::iterator i = side_effect_removals.begin(); i != side_effect_removals.end(); ++i) {
                         _model->add_note_unlocked (*i);
                 }
@@ -880,14 +912,15 @@ MidiModel::write_lock()
 }
 
 int
-MidiModel::resolve_overlaps_unlocked (const NotePtr note, set<NotePtr>* removed)
-
+MidiModel::resolve_overlaps_unlocked (const NotePtr note, void* arg)
 {
         using namespace Evoral;
-
+        
         if (_writing || insert_merge_policy() == InsertMergeRelax) {
                 return 0;
         }
+
+        DiffCommand* cmd = static_cast<DiffCommand*>(arg);
 
         TimeType sa = note->time();
         TimeType ea  = note->end_time();
@@ -926,19 +959,28 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, set<NotePtr>* removed)
 
                 switch (overlap) {
                 case OverlapStart:
+                        cerr << "OverlapStart\n";
                         /* existing note covers start of new note */
                         switch (insert_merge_policy()) {
                         case InsertMergeReplace:
                                 to_be_deleted.insert (*i);
                                 break;
                         case InsertMergeTruncateExisting:
+                                if (cmd) {
+                                        cmd->change (*i, DiffCommand::Length, (note->time() - (*i)->time()));
+                                }
                                 (*i)->set_length (note->time() - (*i)->time());
                                 break;
                         case InsertMergeTruncateAddition:
                                 set_note_time = true;
+                                set_note_length = true;
                                 note_time = (*i)->time() + (*i)->length();
+                                note_length = min (note_length, (*i)->length() - ((*i)->end_time() - note->time()));
                                 break;
                         case InsertMergeExtend:
+                                if (cmd) {
+                                        cmd->change ((*i), DiffCommand::Length, note->end_time() - (*i)->time());
+                                } 
                                 (*i)->set_length (note->end_time() - (*i)->time());
                                 return -1; /* do not add the new note */
                                 break;
@@ -950,6 +992,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, set<NotePtr>* removed)
                         break;
 
                 case OverlapEnd:
+                        cerr << "OverlapEnd\n";
                         /* existing note covers end of new note */
                         switch (insert_merge_policy()) {
                         case InsertMergeReplace:
@@ -985,6 +1028,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, set<NotePtr>* removed)
                         break;
 
                 case OverlapExternal:
+                        cerr << "OverlapExt\n";
                         /* existing note overlaps all the new note */
                         switch (insert_merge_policy()) {
                         case InsertMergeReplace:
@@ -1003,6 +1047,7 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, set<NotePtr>* removed)
                         break;
 
                 case OverlapInternal:
+                        cerr << "OverlapInt\n";
                         /* new note fully overlaps an existing note */
                         switch (insert_merge_policy()) {
                         case InsertMergeReplace:
@@ -1029,16 +1074,22 @@ MidiModel::resolve_overlaps_unlocked (const NotePtr note, set<NotePtr>* removed)
         for (set<NotePtr>::iterator i = to_be_deleted.begin(); i != to_be_deleted.end(); ++i) {
                 remove_note_unlocked (*i);
 
-                if (removed) {
-                        removed->insert (*i);
+                if (cmd) {
+                        cmd->side_effect_remove (*i);
                 }
         }
 
         if (set_note_time) {
+                if (cmd) {
+                        cmd->change (note, DiffCommand::StartTime, note_time);
+                } 
                 note->set_time (note_time);
         }
 
         if (set_note_length) {
+                if (cmd) {
+                        cmd->change (note, DiffCommand::Length, note_length);
+                } 
                 note->set_length (note_length);
         }
 

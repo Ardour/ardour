@@ -580,15 +580,14 @@ Sequence<Time>::end_write (bool delete_stuck)
 
 template<typename Time>
 bool
-Sequence<Time>::add_note_unlocked(const NotePtr note,
-                                  set<NotePtr >* removed)
+Sequence<Time>::add_note_unlocked(const NotePtr note, void* arg)
 {
         /* This is the core method to add notes to a Sequence 
          */
 
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 add note %2 @ %3\n", this, (int)note->note(), note->time()));
 
-        if (resolve_overlaps_unlocked (note, removed)) {
+        if (resolve_overlaps_unlocked (note, arg)) {
                 return false;
 	}
 

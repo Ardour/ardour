@@ -77,8 +77,9 @@ public:
 		int set_state (const XMLNode&, int version);
 		XMLNode& get_state ();
 
-		void add(const NotePtr note);
-		void remove(const NotePtr note);
+		void add (const NotePtr note);
+		void remove (const NotePtr note);
+                void side_effect_remove (const NotePtr note);
 
 		void change (const NotePtr note, Property prop, uint8_t new_value);
 		void change (const NotePtr note, Property prop, TimeType new_time);
@@ -86,6 +87,9 @@ public:
                 bool adds_or_removes() const { 
                         return !_added_notes.empty() || !_removed_notes.empty();
                 }
+
+                DiffCommand& operator+= (const DiffCommand& other);
+                boost::shared_ptr<MidiModel> model() const { return _model; }
 
           private:
 		boost::shared_ptr<MidiModel> _model;
@@ -144,7 +148,7 @@ public:
         void set_insert_merge_policy (InsertMergePolicy);
         
 protected:
-        int resolve_overlaps_unlocked (const NotePtr, std::set<NotePtr>* removed = 0);
+        int resolve_overlaps_unlocked (const NotePtr, void* arg = 0);
 
 private:
 	struct WriteLockImpl : public AutomatableSequence<TimeType>::WriteLockImpl {

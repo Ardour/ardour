@@ -236,7 +236,7 @@ public:
                        const NotePtr& ignore_this_note) const;
         bool contains (const NotePtr& ev) const;
 
-        bool add_note_unlocked (const NotePtr note, std::set<NotePtr>* removed = 0);
+        bool add_note_unlocked (const NotePtr note, void* arg = 0);
 	void remove_note_unlocked(const constNotePtr note);
 
 	uint8_t lowest_note()  const { return _lowest_note; }
@@ -250,7 +250,7 @@ protected:
 	mutable Glib::RWLock   _lock;
 	bool                   _writing;
 
-        virtual int resolve_overlaps_unlocked (const NotePtr, std::set<NotePtr>* removed = 0) {
+        virtual int resolve_overlaps_unlocked (const NotePtr, void* arg = 0) {
                 return 0;
         }
 
