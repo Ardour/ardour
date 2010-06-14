@@ -143,39 +143,42 @@ EditorSummary::render (cairo_t* cr)
 	_start = theoretical_start > 0 ? theoretical_start : 0;
 	_end = _session->current_end_frame() + session_length * _overhang_fraction;
 
-	/* compute total height of all tracks */
-
-	int h = 0;
-	int max_height = 0;
-	for (TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
-		int const t = (*i)->effective_height ();
-		h += t;
-		max_height = max (max_height, t);
-	}
+	/* compute x and y scale */
 
 	if (_end != _start) {
 		_x_scale = static_cast<double> (_width) / (_end - _start);
 	} else {
 		_x_scale = 1;
 	}
-	_y_scale = static_cast<double> (_height) / h;
 
-	/* tallest a region should ever be in the summary, in pixels */
-	int const tallest_region_pixels = _height / 16;
-
-	if (max_height * _y_scale > tallest_region_pixels) {
-		_y_scale = static_cast<double> (tallest_region_pixels) / max_height;
+	double h = 0;
+	for (TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+		h += (*i)->effective_height ();
 	}
 
-	/* render regions */
+	double vh = _editor->canvas_height() - _editor->get_canvas_timebars_vsize();
+	if (vh > h) {
+		_y_scale = _height / vh;
+	} else {
+		_y_scale = _height / h;
+	}
+
+	/* render tracks and regions */
 
 	double y = 0;
 	for (TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+
+		double const h = (*i)->effective_height () * _y_scale;
+		cairo_set_source_rgb (cr, 0.2, 0.2, 0.2);
+		cairo_set_line_width (cr, h - 2);
+		cairo_move_to (cr, 0, y + h / 2);
+		cairo_line_to (cr, _width, y + h / 2);
+		cairo_stroke (cr);
+		
 		StreamView* s = (*i)->view ();
 
 		if (s) {
-			double const h = (*i)->effective_height () * _y_scale;
-			cairo_set_line_width (cr, h);
+			cairo_set_line_width (cr, h * 0.6);
 
 			s->foreach_regionview (sigc::bind (
 						       sigc::mem_fun (*this, &EditorSummary::render_region),
