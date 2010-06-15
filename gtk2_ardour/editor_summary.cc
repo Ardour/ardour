@@ -144,7 +144,13 @@ EditorSummary::render (cairo_t* cr)
 	_end = _session->current_end_frame() + session_length * _overhang_fraction;
 
 	/* compute track height */
-	size_t const N = _editor->track_views.size ();
+	int N = 0;
+	for (TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+		if (!(*i)->hidden()) {
+			++N;
+		}
+	}
+	
 	if (N == 0) {
 		_track_height = 16;
 	} else {
@@ -162,6 +168,10 @@ EditorSummary::render (cairo_t* cr)
 
 	double y = 0;
 	for (TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+
+		if ((*i)->hidden()) {
+			continue;
+		}
 
 		cairo_set_source_rgb (cr, 0.2, 0.2, 0.2);
 		cairo_set_line_width (cr, _track_height - 2);
@@ -535,6 +545,12 @@ EditorSummary::summary_y_to_editor (double y) const
 	double ey = 0;
 	TrackViewList::const_iterator i = _editor->track_views.begin ();
 	while (i != _editor->track_views.end()) {
+		
+		if ((*i)->hidden()) {
+			++i;
+			continue;
+		}
+		
 		double const h = (*i)->effective_height ();
 		if (y < _track_height) {
 			/* in this track */
@@ -555,6 +571,12 @@ EditorSummary::editor_y_to_summary (double y) const
 	double sy = 0;
 	TrackViewList::const_iterator i = _editor->track_views.begin ();
 	while (i != _editor->track_views.end()) {
+		
+		if ((*i)->hidden()) {
+			++i;
+			continue;
+		}
+
 		double const h = (*i)->effective_height ();
 		if (y < h) {
 			/* in this track */
