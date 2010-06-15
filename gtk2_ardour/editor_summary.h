@@ -56,6 +56,7 @@ private:
 	void set_editor (std::pair<double, double> const &, double);
 	void playhead_position_changed (nframes64_t);
 	double summary_y_to_editor (double) const;
+	double editor_y_to_summary (double) const;
 
 	nframes_t _start; ///< start frame of the overview
 	nframes_t _end; ///< end frame of the overview

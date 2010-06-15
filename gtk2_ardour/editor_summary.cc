@@ -266,7 +266,13 @@ EditorSummary::centre_on_click (GdkEventButton* ev)
 		xr.first = _width - w;
 	}
 
-	set_editor (xr, ev->y);
+	double ey = summary_y_to_editor (ev->y);
+	ey -= (_editor->canvas_height() - _editor->get_canvas_timebars_vsize ()) / 2;
+	if (ey < 0) {
+		ey = 0;
+	}
+	
+	set_editor (xr, editor_y_to_summary (ey));
 }
 
 /** Handle a button press.
@@ -354,31 +360,8 @@ EditorSummary::get_editor (pair<double, double>* x, pair<double, double>* y) con
 	x->first = (_editor->leftmost_position () - _start) * _x_scale;
 	x->second = x->first + _editor->current_page_frames() * _x_scale;
 
-	/* set these here in case the loop below does not change them */
-	y->first = 0;
-	y->second = _height;
-
-	TrackViewList::const_iterator i = _editor->track_views.begin ();
-	double ty = 0;
-	double const top = _editor->vertical_adjustment.get_value ();
-	double const bottom = top + _editor->canvas_height() - _editor->get_canvas_timebars_vsize ();
-	int n = 0;
-	while (i != _editor->track_views.end()) {
-
-		double const h = (*i)->effective_height ();
-		if (ty <= top && top <= (ty + h)) {
-			y->first = (n + (top - ty) / h) * _track_height;
-		}
-
-		if (ty <= bottom && bottom <= (ty + h)) {
-			y->second = (n + (bottom - ty) / h) * _track_height;
-			break;
-		}
-
-		++i;
-		++n;
-		ty += h;
-	}
+	y->first = editor_y_to_summary (_editor->vertical_adjustment.get_value ());
+	y->second = editor_y_to_summary (_editor->vertical_adjustment.get_value () + _editor->canvas_height() - _editor->get_canvas_timebars_vsize());
 }
 
 bool
@@ -386,7 +369,7 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 {
 	pair<double, double> xr = _start_editor_x;
 	pair<double, double> yr = _start_editor_y;
-	double y = (_start_editor_y.first + _start_editor_y.second) / 2;
+	double y = _start_editor_y.first;
 
 	if (_move_dragging) {
 
@@ -447,7 +430,7 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 	pair<double, double> xr;
 	pair<double, double> yr;
 	get_editor (&xr, &yr);
-	double y = (yr.first + yr.second) / 2;
+	double y = yr.first;
 
 	double amount = 8;
 
@@ -488,7 +471,7 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 	return true;
 }
 
-/** Set the editor to display a given x range and a y range centred on a given position.
+/** Set the editor to display a given x range and a y range with the top at a given position.
  *  The editor's x zoom is adjusted if necessary, but the y zoom is not changed.
  *  x and y parameters are specified in summary coordinates.
  */
@@ -511,11 +494,10 @@ EditorSummary::set_editor (pair<double,double> const & x, double const y)
 		return;
 	}
 	
-	double const ey = summary_y_to_editor (y);
+	double y1 = summary_y_to_editor (y);
 	double const eh = _editor->canvas_height() - _editor->get_canvas_timebars_vsize ();
-	double y1 = ey - eh / 2;
-
 	double y2 = y1 + eh;
+	
 	double const full_editor_height = _editor->full_canvas_height - _editor->get_canvas_timebars_vsize();
 
 	if (y2 > full_editor_height) {
@@ -565,4 +547,24 @@ EditorSummary::summary_y_to_editor (double y) const
 	}
 
 	return ey;
+}
+
+double
+EditorSummary::editor_y_to_summary (double y) const
+{
+	double sy = 0;
+	TrackViewList::const_iterator i = _editor->track_views.begin ();
+	while (i != _editor->track_views.end()) {
+		double const h = (*i)->effective_height ();
+		if (y < h) {
+			/* in this track */
+			return sy + y * _track_height / h;
+		}
+
+		sy += _track_height;
+		y -= h;
+		++i;
+	}
+
+	return sy;
 }
