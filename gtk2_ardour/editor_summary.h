@@ -53,8 +53,9 @@ private:
 	void render (cairo_t *);
 	void render_region (RegionView*, cairo_t*, double) const;
 	void get_editor (std::pair<double, double> *, std::pair<double, double> *) const;
-	void set_editor (std::pair<double, double> const &, std::pair<double, double> const &);
+	void set_editor (std::pair<double, double> const &, double);
 	void playhead_position_changed (nframes64_t);
+	double summary_y_to_editor (double) const;
 
 	nframes_t _start; ///< start frame of the overview
 	nframes_t _end; ///< end frame of the overview
@@ -63,7 +64,7 @@ private:
 	double _overhang_fraction;
 
 	double _x_scale; ///< pixels per frame for the x axis of the pixmap
-	double _y_scale;
+	double _track_height;
 	double _last_playhead;
 
 	std::pair<double, double> _start_editor_x;
