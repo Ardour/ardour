@@ -433,7 +433,9 @@ ARDOUR::get_user_ardour_path ()
 	/* create it if necessary */
 
 	if (g_mkdir_with_parents (path.c_str (), 0755)) {
-		throw exception ();
+                cerr << "\n\n\nYour home folder is not writable (Ardour cannot create its settings folder there). Please fix this before running Ardour again."
+                     << endl;
+                _exit (1);
 	}
 
 	return path;
