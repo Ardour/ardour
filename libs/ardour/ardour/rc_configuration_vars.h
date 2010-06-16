@@ -152,6 +152,7 @@ CONFIG_VARIABLE (bool, show_waveforms, "show-waveforms", true)
 CONFIG_VARIABLE (bool, show_waveforms_while_recording, "show-waveforms-while-recording", true)
 CONFIG_VARIABLE (WaveformScale, waveform_scale, "waveform-scale", Linear)
 CONFIG_VARIABLE (WaveformShape, waveform_shape, "waveform-shape", Traditional)
+CONFIG_VARIABLE (bool, allow_special_bus_removal, "allow-special-bus-removal", false)
 
 /* denormal management */
 

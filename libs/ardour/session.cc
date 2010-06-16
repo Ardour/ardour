@@ -2051,6 +2051,10 @@ Session::add_internal_sends (boost::shared_ptr<Route> dest, Placement p, boost::
 void
 Session::remove_route (shared_ptr<Route> route)
 {
+        if (((route == _master_out) || (route == _monitor_out)) && !Config->get_allow_special_bus_removal()) {
+                return;
+        }
+
 	{
 		RCUWriter<RouteList> writer (routes);
 		shared_ptr<RouteList> rs = writer.get_copy ();

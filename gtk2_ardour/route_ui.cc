@@ -1226,6 +1226,25 @@ RouteUI::set_color_from_route ()
 void
 RouteUI::remove_this_route ()
 {
+        if ((route()->is_master() || route()->is_monitor()) &&
+            !Config->get_allow_special_bus_removal()) {
+                MessageDialog msg (_("That would be bad news ...."),
+                                   false,
+                                   Gtk::MESSAGE_INFO,
+                                   Gtk::BUTTONS_OK);
+                msg.set_secondary_text (string_compose (_(
+"Removing the master or monitor bus is such a bad idea\n\
+that %1 is not going to allow it.\n\
+\n\
+If you really want to do this sort of thing\n\
+edit your ardour.rc file to set the\n\
+\"allow-special-bus-removal\" option to be \"yes\""), PROGRAM_NAME));
+
+                msg.present ();
+                msg.run ();
+                return;
+        }
+
 	vector<string> choices;
 	string prompt;
 
@@ -1255,7 +1274,7 @@ RouteUI::remove_this_route ()
 gint
 RouteUI::idle_remove_this_route (RouteUI *rui)
 {
-	rui->_session->remove_route (rui->_route);
+	rui->_session->remove_route (rui->route());
 	return false;
 }
 

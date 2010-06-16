@@ -6114,6 +6114,7 @@ Editor::remove_tracks ()
 	const char* trackstr;
 	const char* busstr;
 	vector<boost::shared_ptr<Route> > routes;
+        bool special_bus = false;
 
 	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*x);
@@ -6125,8 +6126,30 @@ Editor::remove_tracks ()
 			}
 		}
 		routes.push_back (rtv->_route);
-	}
 
+                if (rtv->route()->is_master() || rtv->route()->is_monitor()) {
+                        special_bus = true;
+                }
+        }
+
+        if (special_bus && !Config->get_allow_special_bus_removal()) {
+                MessageDialog msg (_("That would be bad news ...."),
+                                   false,
+                                   Gtk::MESSAGE_INFO,
+                                   Gtk::BUTTONS_OK);
+                msg.set_secondary_text (string_compose (_(
+"Removing the master or monitor bus is such a bad idea\n\
+that %1 is not going to allow it.\n\
+\n\
+If you really want to do this sort of thing\n\
+edit your ardour.rc file to set the\n\
+\"allow-special-bus-removal\" option to be \"yes\""), PROGRAM_NAME));
+
+                msg.present ();
+                msg.run ();
+                return;
+        }
+                
 	if (ntracks + nbusses == 0) {
  		return;
 	}
