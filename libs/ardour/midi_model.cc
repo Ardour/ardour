@@ -232,7 +232,12 @@ MidiModel::DiffCommand::operator()()
                 MidiModel::WriteLock lock(_model->edit_lock());
 
                 for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
-                        _model->add_note_unlocked(*i);
+                        if (!_model->add_note_unlocked(*i)) {
+                                /* failed to add it, so don't leave it in the removed list, to
+                                   avoid apparent errors on undo.
+                                 */
+                                _removed_notes.remove (*i);
+                        }
                 }
                 
                 for (NoteList::iterator i = _removed_notes.begin(); i != _removed_notes.end(); ++i) {
