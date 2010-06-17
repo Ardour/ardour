@@ -1257,12 +1257,12 @@ Editor::build_cursors ()
 
 	{
 		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("fade_in_cursor"));
-		fade_in_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 1, 41);
+		fade_in_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 1, 40);
 	}
 
 	{
 		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("fade_out_cursor"));
-		fade_out_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 28, 41);
+		fade_out_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 27, 40);
 	}
 
 	selector_cursor = new Gdk::Cursor (XTERM);
