@@ -1257,7 +1257,7 @@ Editor::build_cursors ()
 
 	{
 		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("fade_in_cursor"));
-		fade_in_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 1, 40);
+		fade_in_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 0, 40);
 	}
 
 	{
