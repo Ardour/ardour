@@ -1242,8 +1242,17 @@ Editor::build_cursors ()
 
 	cross_hair_cursor = new Gdk::Cursor (CROSSHAIR);
 	trimmer_cursor =  new Gdk::Cursor (SB_H_DOUBLE_ARROW);
-	left_side_trim_cursor =  new Gdk::Cursor (SB_LEFT_ARROW);
-	right_side_trim_cursor =  new Gdk::Cursor (SB_RIGHT_ARROW);
+
+	{
+		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("trim_left_cursor"));
+		left_side_trim_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 5, 17);
+	}
+
+	{
+		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("trim_right_cursor"));
+		right_side_trim_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 5, 17);
+	}
+
 	selector_cursor = new Gdk::Cursor (XTERM);
 	time_fx_cursor = new Gdk::Cursor (SIZING);
 	wait_cursor = new Gdk::Cursor  (WATCH);
