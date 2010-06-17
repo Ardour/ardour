@@ -1245,12 +1245,12 @@ Editor::build_cursors ()
 
 	{
 		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("trim_left_cursor"));
-		left_side_trim_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 5, 17);
+		left_side_trim_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 5, 11);
 	}
 
 	{
 		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("trim_right_cursor"));
-		right_side_trim_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 5, 17);
+		right_side_trim_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 23, 11);
 	}
 
 	selector_cursor = new Gdk::Cursor (XTERM);

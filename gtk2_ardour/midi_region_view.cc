@@ -308,6 +308,7 @@ MidiRegionView::button_press (GdkEventButton* ev)
                 _mouse_state = Pressed;
                 return true;
         }
+        
         _pressed_button = ev->button;
 
         return true;
@@ -347,7 +348,6 @@ MidiRegionView::button_release (GdkEventButton* ev)
                         if (!success) {
                                 beats = 1;
                         }
-
                         create_note_at (event_x, event_y, beats);
                         break;
                 }

@@ -663,6 +663,13 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 			break;
 
+                case NoteItem:
+                        if (internal_editing()) {
+                                /* trim notes if we're in internal edit mode and near the ends of the note */
+                                _drags->set (new NoteResizeDrag (this, item), event);
+                        }
+			return true;
+
                 case StreamItem:
                         if (internal_editing()) {
                                 _drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);

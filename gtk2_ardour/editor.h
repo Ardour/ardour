@@ -447,6 +447,27 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void begin_reversible_command (std::string cmd_name);
 	void commit_reversible_command ();
 
+        /* handy cursors for everyone to use */
+
+	static Gdk::Cursor* cross_hair_cursor;
+	static Gdk::Cursor* trimmer_cursor;
+	static Gdk::Cursor* right_side_trim_cursor;
+	static Gdk::Cursor* left_side_trim_cursor;
+	static Gdk::Cursor* selector_cursor;
+	static Gdk::Cursor* grabber_cursor;
+	static Gdk::Cursor* grabber_edit_point_cursor;
+	static Gdk::Cursor* zoom_cursor;
+	static Gdk::Cursor* time_fx_cursor;
+	static Gdk::Cursor* fader_cursor;
+	static Gdk::Cursor* speaker_cursor;
+	static Gdk::Cursor* midi_pencil_cursor;
+	static Gdk::Cursor* midi_select_cursor;
+	static Gdk::Cursor* midi_resize_cursor;
+	static Gdk::Cursor* midi_erase_cursor;
+	static Gdk::Cursor* wait_cursor;
+	static Gdk::Cursor* timebar_cursor;
+	static Gdk::Cursor* transparent_cursor;
+
   protected:
 	void map_transport_state ();
 	void map_position_change (nframes64_t);
@@ -985,25 +1006,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	TimeAxisView* axis_view_from_route (boost::shared_ptr<ARDOUR::Route>) const;
 
 	TrackViewList get_tracks_for_range_action () const;
-
-	static Gdk::Cursor* cross_hair_cursor;
-	static Gdk::Cursor* trimmer_cursor;
-	static Gdk::Cursor* right_side_trim_cursor;
-	static Gdk::Cursor* left_side_trim_cursor;
-	static Gdk::Cursor* selector_cursor;
-	static Gdk::Cursor* grabber_cursor;
-	static Gdk::Cursor* grabber_edit_point_cursor;
-	static Gdk::Cursor* zoom_cursor;
-	static Gdk::Cursor* time_fx_cursor;
-	static Gdk::Cursor* fader_cursor;
-	static Gdk::Cursor* speaker_cursor;
-	static Gdk::Cursor* midi_pencil_cursor;
-	static Gdk::Cursor* midi_select_cursor;
-	static Gdk::Cursor* midi_resize_cursor;
-	static Gdk::Cursor* midi_erase_cursor;
-	static Gdk::Cursor* wait_cursor;
-	static Gdk::Cursor* timebar_cursor;
-	static Gdk::Cursor* transparent_cursor;
 
 	static void build_cursors ();
 

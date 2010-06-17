@@ -1592,7 +1592,7 @@ NoteResizeDrag::NoteResizeDrag (Editor* e, ArdourCanvas::Item* i)
 void
 NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
-	Gdk::Cursor cursor;
+	Gdk::Cursor* cursor;
 	ArdourCanvas::CanvasNote* cnote = dynamic_cast<ArdourCanvas::CanvasNote*>(_item);
 
 	Drag::start_grab (event);
@@ -1603,14 +1603,15 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 	double const middle_point = region_start + cnote->x1() + (cnote->x2() - cnote->x1()) / 2.0L;
 
 	if (grab_x() <= middle_point) {
-		cursor = Gdk::Cursor(Gdk::LEFT_SIDE);
+		cursor = _editor->left_side_trim_cursor;
 		at_front = true;
 	} else {
-		cursor = Gdk::Cursor(Gdk::RIGHT_SIDE);
+		cursor = _editor->right_side_trim_cursor;
 		at_front = false;
 	}
+        cerr << "Set cursor for note resize\n";
 
-	_item->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK, cursor, event->motion.time);
+	_item->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK, *cursor, event->motion.time);
 
 	if (event->motion.state & Keyboard::PrimaryModifier) {
 		relative = false;
