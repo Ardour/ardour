@@ -308,40 +308,36 @@ AudioRegionView::fade_out_changed ()
 void
 AudioRegionView::fade_in_active_changed ()
 {
-	uint32_t r,g,b,a;
-	uint32_t col;
-	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
+//	uint32_t r,g,b,a;
+//	uint32_t col;
+//	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
 
 	if (audio_region()->fade_in_active()) {
-		col = RGBA_TO_UINT(r,g,b,120);
-		fade_in_shape->property_fill_color_rgba() = col;
-		fade_in_shape->property_width_pixels() = 0;
-		fade_in_shape->property_outline_color_rgba() = RGBA_TO_UINT(r,g,b,0);
-	} else {
-		col = RGBA_TO_UINT(r,g,b,0);
-		fade_in_shape->property_fill_color_rgba() = col;
+		fade_in_shape->property_fill_color_rgba() = RGBA_TO_UINT(45,45,45,90);				// FIXME make a themeable colour
 		fade_in_shape->property_width_pixels() = 1;
-		fade_in_shape->property_outline_color_rgba() = RGBA_TO_UINT(r,g,b,255);
+		fade_in_shape->property_outline_color_rgba() = RGBA_TO_UINT(180,180,180,190);			// FIXME make a themeable colour
+	} else {
+		fade_in_shape->property_fill_color_rgba() = RGBA_TO_UINT(45,45,45,20);				// FIXME make a themeable colour
+		fade_in_shape->property_width_pixels() = 1;
+		fade_in_shape->property_outline_color_rgba() = RGBA_TO_UINT(45,45,45,150);			// FIXME make a themeable colour
 	}
 }
 
 void
 AudioRegionView::fade_out_active_changed ()
 {
-	uint32_t r,g,b,a;
-	uint32_t col;
-	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
+//	uint32_t r,g,b,a;
+//	uint32_t col;
+//	UINT_TO_RGBA(fade_color,&r,&g,&b,&a);
 
 	if (audio_region()->fade_out_active()) {
-		col = RGBA_TO_UINT(r,g,b,120);
-		fade_out_shape->property_fill_color_rgba() = col;
-		fade_out_shape->property_width_pixels() = 0;
-		fade_out_shape->property_outline_color_rgba() = RGBA_TO_UINT(r,g,b,0);
-	} else {
-		col = RGBA_TO_UINT(r,g,b,0);
-		fade_out_shape->property_fill_color_rgba() = col;
+		fade_out_shape->property_fill_color_rgba() = RGBA_TO_UINT(45,45,45,90);				// FIXME make a themeable colour
 		fade_out_shape->property_width_pixels() = 1;
-		fade_out_shape->property_outline_color_rgba() = RGBA_TO_UINT(r,g,b,255);
+		fade_out_shape->property_outline_color_rgba() = RGBA_TO_UINT(180,180,180,200);			// FIXME make a themeable colour
+	} else {
+		fade_out_shape->property_fill_color_rgba() = RGBA_TO_UINT(45,45,45,20);				// FIXME make a themeable colour
+		fade_out_shape->property_width_pixels() = 1;
+		fade_out_shape->property_outline_color_rgba() = RGBA_TO_UINT(45,45,45,200);			// FIXME make a themeable colour
 	}
 }
 

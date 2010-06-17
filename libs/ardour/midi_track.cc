@@ -564,6 +564,7 @@ MidiTrack::MidiControl::set_value(float val)
 void
 MidiTrack::set_step_editing (bool yn)
 {
+        cerr << name() << " IS NOW STEP EDITING\n";
 	_step_editing = yn;
 }
 

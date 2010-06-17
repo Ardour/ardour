@@ -470,6 +470,9 @@ MTC_Slave::speed_and_position (double& speed, nframes64_t& pos)
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::speed_and_position FINAL %1 %2\n", last.speed, pos));
 
+	
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("last = %1 elapsed = %2 pos = %3 speed = %4\n", last.position, elapsed, pos, speed));
+	
 	return true;
 }
 

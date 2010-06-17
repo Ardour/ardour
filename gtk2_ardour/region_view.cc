@@ -375,8 +375,8 @@ RegionView::set_colors ()
 	TimeAxisViewItem::set_colors ();
 
 	if (sync_mark) {
-		sync_mark->property_fill_color_rgba() = fill_color;
-		sync_line->property_fill_color_rgba() = fill_color;
+		sync_mark->property_fill_color_rgba() = RGBA_TO_UINT(0,255,0,255);     // fill_color;			// FIXME make a themeable colour
+		sync_line->property_fill_color_rgba() = RGBA_TO_UINT(0,255,0,255);     // fill_color;			// FIXME make a themeable colour
 	}
 }
 
@@ -481,10 +481,10 @@ RegionView::region_sync_changed ()
 		/* points set below */
 
 		sync_mark = new ArdourCanvas::Polygon (*group);
-		sync_mark->property_fill_color_rgba() = fill_color;
+		sync_mark->property_fill_color_rgba() = RGBA_TO_UINT(0,255,0,255);     // fill_color;			// FIXME make a themeable colour
 
 		sync_line = new ArdourCanvas::Line (*group);
-		sync_line->property_fill_color_rgba() = fill_color;
+		sync_line->property_fill_color_rgba() = RGBA_TO_UINT(0,255,0,255);     // fill_color;			// FIXME make a themeable colour	
 		sync_line->property_width_pixels() = 1;
 	}
 

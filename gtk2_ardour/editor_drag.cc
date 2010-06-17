@@ -2184,6 +2184,7 @@ FadeInDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	_pointer_frame_offset = grab_frame() - ((nframes64_t) r->fade_in()->back()->when + r->position());
 	_editor->show_verbose_duration_cursor (r->position(), r->position() + r->fade_in()->back()->when, 10);
+	
 }
 
 void
