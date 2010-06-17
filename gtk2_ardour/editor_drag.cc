@@ -1590,7 +1590,7 @@ NoteResizeDrag::NoteResizeDrag (Editor* e, ArdourCanvas::Item* i)
 }
 
 void
-NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
+NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 {
 	Gdk::Cursor* cursor;
 	ArdourCanvas::CanvasNote* cnote = dynamic_cast<ArdourCanvas::CanvasNote*>(_item);
@@ -1609,7 +1609,6 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 		cursor = _editor->right_side_trim_cursor;
 		at_front = false;
 	}
-        cerr << "Set cursor for note resize\n";
 
 	_item->grab(GDK_POINTER_MOTION_MASK | GDK_BUTTON_RELEASE_MASK, *cursor, event->motion.time);
 

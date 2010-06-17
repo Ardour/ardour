@@ -325,6 +325,8 @@ Editor::mouse_mode_toggled (MouseMode m)
 
 	instant_save ();
         
+        cerr << "Mouse mode toggled to " << m << endl;
+
         if (!internal_editing()) {
                 if (mouse_mode != MouseRange && _join_object_range_state == JOIN_OBJECT_RANGE_NONE) {
                         
@@ -1592,7 +1594,18 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			track_canvas->get_window()->set_cursor (*timebar_cursor);
 		}
 		break;
+
 	case FadeInHandleItem:
+		if (mouse_mode == MouseObject) {
+			ArdourCanvas::SimpleRect *rect = dynamic_cast<ArdourCanvas::SimpleRect *> (item);
+			if (rect) {
+				rect->property_fill_color_rgba() = 0;
+				rect->property_outline_pixels() = 1;
+			}
+			track_canvas->get_window()->set_cursor (*fade_in_cursor);
+		}
+                break;
+
 	case FadeOutHandleItem:
 		if (mouse_mode == MouseObject) {
 			ArdourCanvas::SimpleRect *rect = dynamic_cast<ArdourCanvas::SimpleRect *> (item);
@@ -1600,7 +1613,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 				rect->property_fill_color_rgba() = 0;
 				rect->property_outline_pixels() = 1;
 			}
-			track_canvas->get_window()->set_cursor (*grabber_cursor);
+			track_canvas->get_window()->set_cursor (*fade_out_cursor);
 		}
 		break;
 

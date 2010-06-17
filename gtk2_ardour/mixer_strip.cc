@@ -1838,6 +1838,7 @@ MixerStrip::on_key_press_event (GdkEventKey* ev)
 		break;
 
 	case GDK_r:
+                cerr << "Stole that r\n";
 		rec_enable_press (&fake);
 		return true;
 		break;
@@ -1890,6 +1891,7 @@ MixerStrip::on_key_release_event (GdkEventKey* ev)
 		break;
 
 	case GDK_r:
+                cerr << "Stole that r\n";
 		rec_enable_release (&fake);
 		return true;
 		break;

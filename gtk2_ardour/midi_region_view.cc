@@ -538,6 +538,8 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 bool
 MidiRegionView::key_press (GdkEventKey* ev)
 { 
+        cerr << "MRV key press\n";
+
         /* since GTK bindings are generally activated on press, and since
            detectable auto-repeat is the name of the game and only sends
            repeated presses, carry out key actions at key press, not release.
@@ -614,9 +616,13 @@ MidiRegionView::key_press (GdkEventKey* ev)
                 return true;
                 
         } else if (ev->keyval == GDK_r) {
-                /* if we're not step editing, this really doesn't matter */
-                midi_view()->step_edit_rest ();
-                return true;
+                /* yes, this steals r */
+                if (midi_view()->midi_track()->step_editing()) {
+                        midi_view()->step_edit_rest ();
+                        cerr << "Stole that r because " << midi_view()->midi_track()->name()
+                             << " is step editing!\n";
+                        return true;
+                }
         }
         
         return false;
@@ -2085,6 +2091,8 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
 void
 MidiRegionView::update_resizing (ArdourCanvas::CanvasNote* primary, bool at_front, double delta_x, bool relative)
 {
+        bool cursor_set = false;
+
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
 		SimpleRect* resize_rect = (*i)->resize_rect;
 		CanvasNote* canvas_note = (*i)->canvas_note;
@@ -2111,6 +2119,37 @@ MidiRegionView::update_resizing (ArdourCanvas::CanvasNote* primary, bool at_fron
 			resize_rect->property_x2() = snap_to_pixel(current_x);
 			resize_rect->property_x1() = canvas_note->x1();
 		}
+
+                if (!cursor_set) {
+                        double beats;
+
+                        beats = snap_pixel_to_frame (current_x);
+                        beats = frames_to_beats (beats);
+                        
+                        double len;
+
+                        if (at_front) {
+                                if (beats < canvas_note->note()->end_time()) {
+                                        len = canvas_note->note()->time() - beats;
+                                        len += canvas_note->note()->length();
+                                } else {
+                                        len = 0;
+                                }
+                        } else {
+                                if (beats >= canvas_note->note()->end_time()) { 
+                                        len = beats - canvas_note->note()->time();
+                                } else {
+                                        len = 0;
+                                }
+                        }
+
+                        char buf[16];
+                        snprintf (buf, sizeof (buf), "%.3g beats", len);
+                        trackview.editor().show_verbose_canvas_cursor_with (buf);
+
+                        cursor_set = true;
+                }
+
 	}
 }
 
@@ -2186,8 +2225,8 @@ MidiRegionView::change_note_velocity(CanvasNoteEvent* event, int8_t velocity, bo
 		new_velocity = velocity;
 	}
 
-        event->show_velocity ();
-
+        // event->show_velocity ();
+        
 	diff_add_change (event, MidiModel::DiffCommand::Velocity, new_velocity);
 }
 
@@ -2335,6 +2374,13 @@ MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush)
 		change_note_velocity (*i, delta, true);
 		i = next;
 	}
+
+        if (!_selection.empty()) {
+                char buf[24];
+                snprintf (buf, sizeof (buf), "Vel %d", 
+                          (int) (*_selection.begin())->note()->velocity());
+                trackview.editor().show_verbose_canvas_cursor_with (buf);
+        }
 
 	apply_diff();
 }
@@ -2830,8 +2876,11 @@ MidiRegionView::snap_changed ()
 void
 MidiRegionView::show_verbose_canvas_cursor (boost::shared_ptr<NoteType> n) const
 {
-	char buf[12];
-	snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (n->note()).c_str(), (int) n->note ());
+	char buf[24];
+	snprintf (buf, sizeof (buf), "%s (%d)\nVel %d", 
+                  Evoral::midi_note_name (n->note()).c_str(), 
+                  (int) n->note (),
+                  (int) n->velocity());
 	trackview.editor().show_verbose_canvas_cursor_with (buf);
 }
 
@@ -2848,6 +2897,8 @@ MidiRegionView::maybe_select_by_position (GdkEventButton* ev, double x, double y
         Events e;
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
         
+        cerr << "Selecting by position\n";
+
 	uint16_t chn_mask = mtv->channel_selector().get_selected_channels();
 
         if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {

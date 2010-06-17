@@ -211,6 +211,8 @@ Gdk::Cursor* Editor::selector_cursor = 0;
 Gdk::Cursor* Editor::trimmer_cursor = 0;
 Gdk::Cursor* Editor::left_side_trim_cursor = 0;
 Gdk::Cursor* Editor::right_side_trim_cursor = 0;
+Gdk::Cursor* Editor::fade_in_cursor = 0;
+Gdk::Cursor* Editor::fade_out_cursor = 0;
 Gdk::Cursor* Editor::grabber_cursor = 0;
 Gdk::Cursor* Editor::grabber_edit_point_cursor = 0;
 Gdk::Cursor* Editor::zoom_cursor = 0;
@@ -1251,6 +1253,16 @@ Editor::build_cursors ()
 	{
 		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("trim_right_cursor"));
 		right_side_trim_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 23, 11);
+	}
+
+	{
+		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("fade_in_cursor"));
+		fade_in_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 1, 41);
+	}
+
+	{
+		Glib::RefPtr<Gdk::Pixbuf> apixbuf (::get_icon ("fade_out_cursor"));
+		fade_out_cursor = new Gdk::Cursor (Gdk::Display::get_default(), apixbuf, 28, 41);
 	}
 
 	selector_cursor = new Gdk::Cursor (XTERM);
