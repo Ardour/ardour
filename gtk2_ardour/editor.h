@@ -910,8 +910,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void controls_layout_size_request (Gtk::Requisition*);
 	sigc::connection controls_layout_size_request_connection;
 
-	void horizontal_scroll_left ();
-	void horizontal_scroll_right ();
+	bool horizontal_scroll_left_press ();
+	void horizontal_scroll_left_release ();
+	bool horizontal_scroll_right_press ();
+	void horizontal_scroll_right_release ();
+	sigc::connection _scroll_connection;
+	int _scroll_callbacks;
 
 	double _canvas_width;
 	double _canvas_height;

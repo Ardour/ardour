@@ -399,6 +399,8 @@ Editor::Editor ()
 
 	frames_per_unit = 2048; /* too early to use reset_zoom () */
 
+	_scroll_callbacks = 0;
+
 	zoom_focus = ZoomFocusLeft;
 	set_zoom_focus (ZoomFocusLeft);
 	zoom_range_clock.ValueChanged.connect (sigc::mem_fun(*this, &Editor::zoom_adjustment_changed));
@@ -582,20 +584,24 @@ Editor::Editor ()
 
 	Button* summary_arrows_left_left = manage (new Button);
 	summary_arrows_left_left->add (*manage (new Arrow (ARROW_LEFT, SHADOW_NONE)));
-	summary_arrows_left_left->signal_clicked().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_left));
+	summary_arrows_left_left->signal_pressed().connect (sigc::hide_return (sigc::mem_fun (*this, &Editor::horizontal_scroll_left_press)));
+	summary_arrows_left_left->signal_released().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_left_release));
 	Button* summary_arrows_left_right = manage (new Button);
 	summary_arrows_left_right->add (*manage (new Arrow (ARROW_RIGHT, SHADOW_NONE)));
-	summary_arrows_left_right->signal_clicked().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_right));
+	summary_arrows_left_right->signal_pressed().connect (sigc::hide_return (sigc::mem_fun (*this, &Editor::horizontal_scroll_right_press)));
+	summary_arrows_left_right->signal_released().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_right_release));
 	VBox* summary_arrows_left = manage (new VBox);
 	summary_arrows_left->pack_start (*summary_arrows_left_left);
 	summary_arrows_left->pack_start (*summary_arrows_left_right);
 
 	Button* summary_arrows_right_left = manage (new Button);
 	summary_arrows_right_left->add (*manage (new Arrow (ARROW_LEFT, SHADOW_NONE)));
-	summary_arrows_right_left->signal_clicked().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_left));
+	summary_arrows_right_left->signal_pressed().connect (sigc::hide_return (sigc::mem_fun (*this, &Editor::horizontal_scroll_left_press)));
+	summary_arrows_right_left->signal_released().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_left_release));
 	Button* summary_arrows_right_right = manage (new Button);
 	summary_arrows_right_right->add (*manage (new Arrow (ARROW_RIGHT, SHADOW_NONE)));
-	summary_arrows_right_right->signal_clicked().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_right));
+	summary_arrows_right_right->signal_pressed().connect (sigc::hide_return (sigc::mem_fun (*this, &Editor::horizontal_scroll_right_press)));
+	summary_arrows_right_right->signal_released().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_right_release));
 	VBox* summary_arrows_right = manage (new VBox);
 	summary_arrows_right->pack_start (*summary_arrows_right_left);
 	summary_arrows_right->pack_start (*summary_arrows_right_right);
@@ -5149,21 +5155,63 @@ Editor::check_step_edit ()
 	return true; // do it again, till we stop
 }
 
-void
-Editor::horizontal_scroll_left ()
+bool
+Editor::horizontal_scroll_left_press ()
 {
+	++_scroll_callbacks;
+	
+	if (_scroll_connection.connected() && _scroll_callbacks < 5) {
+		/* delay the first auto-repeat */
+		return true;
+	}
+		
 	double x = leftmost_position() - current_page_frames() / 5;
 	if (x < 0) {
 		x = 0;
 	}
 	
 	reset_x_origin (x);
+
+	/* do hacky auto-repeat */
+	if (!_scroll_connection.connected ()) {
+		_scroll_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_left_press), 100);
+		_scroll_callbacks = 0;
+	}
+
+	return true;
 }
 
 void
-Editor::horizontal_scroll_right ()
+Editor::horizontal_scroll_left_release ()
 {
+	_scroll_connection.disconnect ();
+}
+
+bool
+Editor::horizontal_scroll_right_press ()
+{
+	++_scroll_callbacks;
+	
+	if (_scroll_connection.connected() && _scroll_callbacks < 5) {
+		/* delay the first auto-repeat */
+		return true;
+	}
+
 	reset_x_origin (leftmost_position() + current_page_frames() / 5);
+
+	/* do hacky auto-repeat */
+	if (!_scroll_connection.connected ()) {
+		_scroll_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &Editor::horizontal_scroll_right_press), 100);
+		_scroll_callbacks = 0;
+	}
+
+	return true;
+}
+
+void
+Editor::horizontal_scroll_right_release ()
+{
+	_scroll_connection.disconnect ();
 }
 
 /** Queue a change for the Editor viewport x origin to follow the playhead */
