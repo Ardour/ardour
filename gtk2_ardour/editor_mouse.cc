@@ -472,6 +472,8 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 
  	case RegionViewNameHighlight:
  	case RegionViewName:
+        case LeftFrameHandle:
+        case RightFrameHandle:
 		if (mouse_mode != MouseRange || internal_editing() || _join_object_range_state == JOIN_OBJECT_RANGE_OBJECT) {
 			set_selected_regionview_from_click (press, op, true);
 		} else if (event->type == GDK_BUTTON_PRESS) {
@@ -669,6 +671,8 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                         break;
 
                 case RegionViewNameHighlight:
+                case LeftFrameHandle:
+                case RightFrameHandle:
                 {
                         RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
                         _drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer()), event);
@@ -736,6 +740,8 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 
 			case RegionViewNameHighlight:
+			case LeftFrameHandle:
+                        case RightFrameHandle:
 			{
 				RegionSelection s = get_equivalent_regions (selection->regions, Properties::edit.property_id);
 				_drags->set (new TrimDrag (this, item, clicked_regionview, s.by_layer()), event);
@@ -962,6 +968,8 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		switch (item_type) {
 		case RegionViewNameHighlight:
+                case LeftFrameHandle:
+                case RightFrameHandle:
 			_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
 			return true;
 			break;
@@ -1144,6 +1152,8 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			case RegionItem:
 			case RegionViewNameHighlight:
+			case LeftFrameHandle:
+			case RightFrameHandle:
 			case RegionViewName:
 				popup_track_context_menu (1, event->button.time, item_type, false, where);
 				break;
@@ -1474,6 +1484,18 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		break;
 
+	case LeftFrameHandle:
+		if (is_drawable() && (mouse_mode == MouseObject || (internal_editing() && mouse_mode == MouseRange))) {
+			track_canvas->get_window()->set_cursor (*left_side_trim_cursor);
+		}
+                break;
+
+	case RightFrameHandle:
+		if (is_drawable() && (mouse_mode == MouseObject || (internal_editing() && mouse_mode == MouseRange))) {
+			track_canvas->get_window()->set_cursor (*right_side_trim_cursor);
+		}
+                break;
+
 	case StartSelectionTrimItem:
 	case EndSelectionTrimItem:
 
@@ -1630,6 +1652,8 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 
 	case RegionViewNameHighlight:
+	case LeftFrameHandle:
+	case RightFrameHandle:
 	case StartSelectionTrimItem:
 	case EndSelectionTrimItem:
 	case PlayheadCursorItem:

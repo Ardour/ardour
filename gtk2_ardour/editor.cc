@@ -209,6 +209,8 @@ static const gchar *_rb_opt_strings[] = {
 Gdk::Cursor* Editor::cross_hair_cursor = 0;
 Gdk::Cursor* Editor::selector_cursor = 0;
 Gdk::Cursor* Editor::trimmer_cursor = 0;
+Gdk::Cursor* Editor::left_side_trim_cursor = 0;
+Gdk::Cursor* Editor::right_side_trim_cursor = 0;
 Gdk::Cursor* Editor::grabber_cursor = 0;
 Gdk::Cursor* Editor::grabber_edit_point_cursor = 0;
 Gdk::Cursor* Editor::zoom_cursor = 0;
@@ -1240,6 +1242,8 @@ Editor::build_cursors ()
 
 	cross_hair_cursor = new Gdk::Cursor (CROSSHAIR);
 	trimmer_cursor =  new Gdk::Cursor (SB_H_DOUBLE_ARROW);
+	left_side_trim_cursor =  new Gdk::Cursor (SB_LEFT_ARROW);
+	right_side_trim_cursor =  new Gdk::Cursor (SB_RIGHT_ARROW);
 	selector_cursor = new Gdk::Cursor (XTERM);
 	time_fx_cursor = new Gdk::Cursor (SIZING);
 	wait_cursor = new Gdk::Cursor  (WATCH);
@@ -1334,6 +1338,8 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 	case RegionItem:
 	case RegionViewName:
 	case RegionViewNameHighlight:
+	case LeftFrameHandle:
+	case RightFrameHandle:
 		if (with_selection) {
 			build_menu_function = &Editor::build_track_selection_context_menu;
 		} else {
@@ -1375,6 +1381,8 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 	case RegionItem:
 	case RegionViewName:
 	case RegionViewNameHighlight:
+        case LeftFrameHandle:
+        case RightFrameHandle:
 		if (!with_selection) {
 			if (region_edit_menu_split_item) {
 				if (clicked_regionview && clicked_regionview->region()->covers (get_preferred_edit_position())) {

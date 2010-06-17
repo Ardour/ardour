@@ -768,6 +768,14 @@ Editor::canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item* item, Re
 	   perspective. XXX change this ??
 	*/
 
+        ItemType type;
+
+        if (item->get_data ("isleft")) {
+                type = LeftFrameHandle;
+        } else {
+                type = RightFrameHandle;
+        }
+
 	switch (event->type) {
 	case GDK_BUTTON_PRESS:
 	case GDK_2BUTTON_PRESS:
@@ -776,20 +784,20 @@ Editor::canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item* item, Re
 		clicked_control_point = 0;
 		clicked_axisview = &clicked_regionview->get_time_axis_view();
 		clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
-		ret = button_press_handler (item, event, RegionViewNameHighlight);
+		ret = button_press_handler (item, event, type);
 		break;
 	case GDK_BUTTON_RELEASE:
-		ret = button_release_handler (item, event, RegionViewNameHighlight);
+		ret = button_release_handler (item, event, type);
 		break;
 	case GDK_MOTION_NOTIFY:
 		ret = motion_handler (item, event);
 		break;
 	case GDK_ENTER_NOTIFY:
-		ret = enter_handler (item, event, RegionViewNameHighlight);
+		ret = enter_handler (item, event, type);
 		break;
 
 	case GDK_LEAVE_NOTIFY:
-		ret = leave_handler (item, event, RegionViewNameHighlight);
+		ret = leave_handler (item, event, type);
 		break;
 
 	default:

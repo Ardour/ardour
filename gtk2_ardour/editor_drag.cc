@@ -215,8 +215,8 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	_last_pointer_y = _grab_y;
 
 	_item->grab (Gdk::POINTER_MOTION_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK,
-			      *cursor,
-			      event->button.time);
+                     *cursor,
+                     event->button.time);
 
 	if (_editor->session() && _editor->session()->transport_rolling()) {
 		_was_rolling = true;
@@ -1703,21 +1703,23 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 	nframes64_t region_end = (nframes64_t) (_primary->region()->last_frame() / speed);
 	nframes64_t region_length = (nframes64_t) (_primary->region()->length() / speed);
 
-	Drag::start_grab (event, _editor->trimmer_cursor);
 
 	nframes64_t const pf = adjusted_current_frame (event);
 
 	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 		_operation = ContentsTrim;
+                Drag::start_grab (event, _editor->trimmer_cursor);
 	} else {
 		/* These will get overridden for a point trim.*/
 		if (pf < (region_start + region_length/2)) {
 			/* closer to start */
 			_operation = StartTrim;
-		} else if (pf > (region_end - region_length/2)) {
+                        Drag::start_grab (event, _editor->left_side_trim_cursor);
+		} else {
 			/* closer to end */
 			_operation = EndTrim;
-		}
+                        Drag::start_grab (event, _editor->right_side_trim_cursor);
+                }
 	}
 
 	switch (_operation) {
@@ -3164,7 +3166,7 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		if (_editor->clicked_axisview) {
 			_editor->clicked_axisview->order_selection_trims (_item, true);
 		}
-		Drag::start_grab (event, _editor->trimmer_cursor);
+		Drag::start_grab (event, _editor->left_side_trim_cursor);
 		start = _editor->selection->time[_editor->clicked_selection].start;
 		_pointer_frame_offset = grab_frame() - start;
 		break;
@@ -3173,7 +3175,7 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		if (_editor->clicked_axisview) {
 			_editor->clicked_axisview->order_selection_trims (_item, false);
 		}
-		Drag::start_grab (event, _editor->trimmer_cursor);
+		Drag::start_grab (event, _editor->right_side_trim_cursor);
 		end = _editor->selection->time[_editor->clicked_selection].end;
 		_pointer_frame_offset = grab_frame() - end;
 		break;
