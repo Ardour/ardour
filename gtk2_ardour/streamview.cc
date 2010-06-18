@@ -136,8 +136,6 @@ StreamView::set_height (double h)
 	canvas_rect->property_y2() = height;
 	update_contents_height ();
 
-	HeightChanged ();
-
 	return 0;
 }
 

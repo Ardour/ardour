@@ -2020,7 +2020,6 @@ public:
 	void region_view_added (RegionView *);
 
 	void update_canvas_now ();
-	void streamview_height_changed ();
 
 	EditorGroupTabs* _group_tabs;
 	void fit_route_group (ARDOUR::RouteGroup *);

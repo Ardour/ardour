@@ -4911,12 +4911,6 @@ Editor::region_view_added (RegionView *)
 	_summary->set_dirty ();
 }
 
-void
-Editor::streamview_height_changed ()
-{
-	_summary->set_dirty ();
-}
-
 TimeAxisView*
 Editor::axis_view_from_route (boost::shared_ptr<Route> r) const
 {
@@ -4980,7 +4974,6 @@ Editor::handle_new_route (RouteList& routes)
 		rtv->effective_gain_display ();
 
 		rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
-		rtv->view()->HeightChanged.connect (sigc::mem_fun (*this, &Editor::streamview_height_changed));
 	}
 
 	_routes->routes_added (new_views);
