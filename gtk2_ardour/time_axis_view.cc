@@ -968,6 +968,8 @@ TimeAxisView::get_parent_with_state ()
 XMLNode&
 TimeAxisView::get_state ()
 {
+	/* XXX: is this method used? */
+	
 	XMLNode* node = new XMLNode ("TAV-" + name());
 	char buf[32];
 
@@ -982,8 +984,13 @@ TimeAxisView::set_state (const XMLNode& node, int /*version*/)
 {
 	const XMLProperty *prop;
 
+	/* XXX: I think this might be vestigial */
 	if ((prop = node.property ("marked-for-display")) != 0) {
 		_marked_for_display = (prop->value() == "1");
+	}
+
+	if ((prop = node.property ("shown-editor")) != 0) {
+		_marked_for_display = string_is_affirmative (prop->value ());
 	}
 
 	if ((prop = node.property ("track-height")) != 0) {
