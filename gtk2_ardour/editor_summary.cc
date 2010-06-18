@@ -404,7 +404,7 @@ EditorSummary::set_cursor (Position p)
 {
 	switch (p) {
 	case LEFT:
-		get_window()->set_cursor (Gdk::Cursor (Gdk::LEFT_SIDE));
+		get_window()->set_cursor (*_editor->left_side_trim_cursor);
 		break;
 	case LEFT_TOP:
 		get_window()->set_cursor (Gdk::Cursor (Gdk::TOP_LEFT_CORNER));
@@ -416,7 +416,7 @@ EditorSummary::set_cursor (Position p)
 		get_window()->set_cursor (Gdk::Cursor (Gdk::TOP_RIGHT_CORNER));
 		break;
 	case RIGHT:
-		get_window()->set_cursor (Gdk::Cursor (Gdk::RIGHT_SIDE));
+		get_window()->set_cursor (*_editor->right_side_trim_cursor);
 		break;
 	case RIGHT_BOTTOM:
 		get_window()->set_cursor (Gdk::Cursor (Gdk::BOTTOM_RIGHT_CORNER));
