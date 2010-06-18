@@ -114,6 +114,7 @@
 #include "editor_regions.h"
 #include "editor_locations.h"
 #include "editor_snapshots.h"
+#include "editor_summary.h"
 
 #include "i18n.h"
 

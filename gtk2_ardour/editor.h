@@ -65,7 +65,6 @@
 #include "editor_items.h"
 #include "region_selection.h"
 #include "canvas.h"
-#include "editor_summary.h"
 
 namespace Gnome { namespace Canvas {
 	class NoEventText;
@@ -128,6 +127,7 @@ class EditorRouteGroups;
 class EditorRegions;
 class EditorLocations;
 class EditorSnapshots;
+class EditorSummary;
 
 /* <CMT Additions> */
 class ImageFrameView;

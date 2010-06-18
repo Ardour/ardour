@@ -45,6 +45,7 @@
 #include "region_view.h"
 #include "editor_group_tabs.h"
 #include "editor_routes.h"
+#include "editor_summary.h"
 
 #include "i18n.h"
 

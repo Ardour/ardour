@@ -44,11 +44,14 @@ EditorSummary::EditorSummary (Editor* e)
 	  _last_playhead (-1),
 	  _move_dragging (false),
 	  _moved (false),
+	  _view_rectangle_x (0, 0),
+	  _view_rectangle_y (0, 0),
 	  _zoom_dragging (false)
-
 {
 	Region::RegionPropertyChanged.connect (region_property_connection, invalidator (*this), boost::bind (&CairoWidget::set_dirty, this), gui_context());
 	_editor->playhead_cursor->PositionChanged.connect (position_connection, invalidator (*this), ui_bind (&EditorSummary::playhead_position_changed, this, _1), gui_context());
+
+	add_events (Gdk::POINTER_MOTION_MASK);	
 }
 
 /** Connect to a session.
@@ -86,17 +89,26 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 
 	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
 
-	/* Render the view rectangle */
+	/* Render the view rectangle.  If there is an editor visual pending, don't update
+	   the view rectangle now --- wait until the expose event that we'll get after
+	   the visual change.  This prevents a flicker.
+	*/
 
-	pair<double, double> x;
-	pair<double, double> y;
-	get_editor (&x, &y);
+	if (_editor->pending_visual_change.idle_handler_id < 0) {
+		   
+		   if (_zoom_dragging) {
+			   _view_rectangle_x = _pending_zoom_x;
+			   _view_rectangle_y = _pending_zoom_y;
+		   } else {
+			   get_editor (&_view_rectangle_x, &_view_rectangle_y);
+		   }
+	}
 
-	cairo_move_to (cr, x.first, y.first);
-	cairo_line_to (cr, x.second, y.first);
-	cairo_line_to (cr, x.second, y.second);
-	cairo_line_to (cr, x.first, y.second);
-	cairo_line_to (cr, x.first, y.first);
+	cairo_move_to (cr, _view_rectangle_x.first, _view_rectangle_y.first);
+	cairo_line_to (cr, _view_rectangle_x.second, _view_rectangle_y.first);
+	cairo_line_to (cr, _view_rectangle_x.second, _view_rectangle_y.second);
+	cairo_line_to (cr, _view_rectangle_x.first, _view_rectangle_y.second);
+	cairo_line_to (cr, _view_rectangle_x.first, _view_rectangle_y.first);
 	cairo_set_source_rgba (cr, 1, 1, 1, 0.25);
 	cairo_fill_preserve (cr);
 	cairo_set_line_width (cr, 1);
@@ -301,44 +313,19 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 		_start_editor_y = yr;
 		_start_mouse_x = ev->x;
 		_start_mouse_y = ev->y;
+		_start_position = get_position (ev->x, ev->y);
 
-		if (
-			_start_editor_x.first <= _start_mouse_x && _start_mouse_x <= _start_editor_x.second &&
-			_start_editor_y.first <= _start_mouse_y && _start_mouse_y <= _start_editor_y.second
+		if (_start_position != INSIDE && _start_position != BELOW_OR_ABOVE &&
+		    _start_position != TO_LEFT_OR_RIGHT && _start_position != OTHERWISE_OUTSIDE
 			) {
 
-			_start_position = IN_VIEWBOX;
+			/* start a zoom drag */
 
-		} else if (_start_editor_x.first <= _start_mouse_x && _start_mouse_x <= _start_editor_x.second) {
-
-			_start_position = BELOW_OR_ABOVE_VIEWBOX;
-
-		} else {
-
-			_start_position = TO_LEFT_OR_RIGHT_OF_VIEWBOX;
-		}
-
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-
-			/* primary-modifier-click: start a zoom drag */
-
-			double const hx = (xr.first + xr.second) * 0.5;
-			_zoom_left = ev->x < hx;
+			_zoom_position = get_position (ev->x, ev->y);
 			_zoom_dragging = true;
 			_editor->_dragging_playhead = true;
-
-
-			/* In theory, we could support vertical dragging, which logically
-			   might scale track heights in order to make the editor reflect
-			   the dragged viewbox.  However, having tried this:
-			   a) it's hard to do
-			   b) it's quite slow
-			   c) it doesn't seem particularly useful, especially with the
-			   limited height of the summary
-
-			   So at the moment we don't support that...
-			*/
-
+			_pending_zoom_x = xr;
+			_pending_zoom_y = yr;
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 
@@ -353,7 +340,7 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 
 		} else {
 
-			/* ordinary click: start a move drag */
+			/* start a move drag */
 
 			_move_dragging = true;
 			_moved = false;
@@ -364,14 +351,97 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 	return true;
 }
 
+/** Fill in x and y with the editor's current viewable area in summary coordinates */
 void
 EditorSummary::get_editor (pair<double, double>* x, pair<double, double>* y) const
 {
+	assert (x);
+	assert (y);
+	
 	x->first = (_editor->leftmost_position () - _start) * _x_scale;
 	x->second = x->first + _editor->current_page_frames() * _x_scale;
 
 	y->first = editor_y_to_summary (_editor->vertical_adjustment.get_value ());
 	y->second = editor_y_to_summary (_editor->vertical_adjustment.get_value () + _editor->canvas_height() - _editor->get_canvas_timebars_vsize());
+}
+
+/** Get an expression of the position of a point with respect to the view rectangle */
+EditorSummary::Position
+EditorSummary::get_position (double x, double y) const
+{
+	/* how close the mouse has to be to the edge of the view rectangle to be considered `on it',
+	   in pixels */
+	int const edge_size = 8;
+	
+	bool const near_left = (std::abs (x - _view_rectangle_x.first) < edge_size);
+	bool const near_right = (std::abs (x - _view_rectangle_x.second) < edge_size);
+ 	bool const near_top = (std::abs (y - _view_rectangle_y.first) < edge_size);
+ 	bool const near_bottom = (std::abs (y - _view_rectangle_y.second) < edge_size);
+	bool const within_x = _view_rectangle_x.first < x && x < _view_rectangle_x.second;
+	bool const within_y = _view_rectangle_y.first < y && y < _view_rectangle_y.second;
+
+	if (near_left && near_top) {
+		return LEFT_TOP;
+	} else if (near_left && near_bottom) {
+		return LEFT_BOTTOM;
+	} else if (near_right && near_top) {
+		return RIGHT_TOP;
+	} else if (near_right && near_bottom) {
+		return RIGHT_BOTTOM;
+	} else if (near_left && within_y) {
+		return LEFT;
+	} else if (near_right && within_y) {
+		return RIGHT;
+	} else if (near_top && within_x) {
+		return TOP;
+	} else if (near_bottom && within_x) {
+		return BOTTOM;
+	} else if (within_x && within_y) {
+		return INSIDE;
+	} else if (within_x) {
+		return BELOW_OR_ABOVE;
+	} else if (within_y) {
+		return TO_LEFT_OR_RIGHT;
+	} else {
+		return OTHERWISE_OUTSIDE;
+	}
+}
+
+void
+EditorSummary::set_cursor (Position p)
+{
+	switch (p) {
+	case LEFT:
+		get_window()->set_cursor (Gdk::Cursor (Gdk::LEFT_SIDE));
+		break;
+	case LEFT_TOP:
+		get_window()->set_cursor (Gdk::Cursor (Gdk::TOP_LEFT_CORNER));
+		break;
+	case TOP:
+		get_window()->set_cursor (Gdk::Cursor (Gdk::TOP_SIDE));
+		break;
+	case RIGHT_TOP:
+		get_window()->set_cursor (Gdk::Cursor (Gdk::TOP_RIGHT_CORNER));
+		break;
+	case RIGHT:
+		get_window()->set_cursor (Gdk::Cursor (Gdk::RIGHT_SIDE));
+		break;
+	case RIGHT_BOTTOM:
+		get_window()->set_cursor (Gdk::Cursor (Gdk::BOTTOM_RIGHT_CORNER));
+		break;
+	case BOTTOM:
+		get_window()->set_cursor (Gdk::Cursor (Gdk::BOTTOM_SIDE));
+		break;
+	case LEFT_BOTTOM:
+		get_window()->set_cursor (Gdk::Cursor (Gdk::BOTTOM_LEFT_CORNER));
+		break;
+	case INSIDE:
+		get_window()->set_cursor (Gdk::Cursor (Gdk::FLEUR));
+		break;
+	default:
+		get_window()->set_cursor ();
+		break;
+	}
 }
 
 bool
@@ -386,13 +456,13 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 		_moved = true;
 
 		/* don't alter x if we clicked outside and above or below the viewbox */
-		if (_start_position == IN_VIEWBOX || _start_position == TO_LEFT_OR_RIGHT_OF_VIEWBOX) {
+		if (_start_position == INSIDE || _start_position == TO_LEFT_OR_RIGHT) {
 			xr.first += ev->x - _start_mouse_x;
 			xr.second += ev->x - _start_mouse_x;
 		}
 
 		/* don't alter y if we clicked outside and to the left or right of the viewbox */
-		if (_start_position == IN_VIEWBOX || _start_position == BELOW_OR_ABOVE_VIEWBOX) {
+		if (_start_position == INSIDE || _start_position == BELOW_OR_ABOVE) {
 			y += ev->y - _start_mouse_y;
 		}
 
@@ -406,18 +476,32 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 		}
 
 		set_editor (xr, y);
+		set_cursor (INSIDE);
 
 	} else if (_zoom_dragging) {
 
 		double const dx = ev->x - _start_mouse_x;
+		double const dy = ev->y - _start_mouse_y;
 
-		if (_zoom_left) {
-			xr.first += dx;
-		} else {
-			xr.second += dx;
+		if (_zoom_position == LEFT || _zoom_position == LEFT_TOP || _zoom_position == LEFT_BOTTOM) {
+			_pending_zoom_x.first = _start_editor_x.first + dx;
+		} else if (_zoom_position == RIGHT || _zoom_position == RIGHT_TOP || _zoom_position == RIGHT_BOTTOM) {
+			_pending_zoom_x.second = _start_editor_x.second + dx;
 		}
 
-		set_editor (xr, y);
+		if (_zoom_position == TOP || _zoom_position == LEFT_TOP || _zoom_position == RIGHT_TOP) {
+			_pending_zoom_y.first = _start_editor_y.first + dy;
+		} else if (_zoom_position == BOTTOM || _zoom_position == LEFT_BOTTOM || _zoom_position == RIGHT_BOTTOM) {
+			_pending_zoom_y.second = _start_editor_y.second + dy;
+		}
+
+		set_overlays_dirty ();
+		set_cursor (_zoom_position);
+
+	} else {
+
+		set_cursor (get_position (ev->x, ev->y));
+
 	}
 
 	return true;
@@ -426,6 +510,10 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 bool
 EditorSummary::on_button_release_event (GdkEventButton*)
 {
+	if (_zoom_dragging) {
+		set_editor (_pending_zoom_x, _pending_zoom_y);
+	}
+	
 	_move_dragging = false;
 	_zoom_dragging = false;
 	_editor->_dragging_playhead = false;
@@ -504,6 +592,52 @@ EditorSummary::set_editor (pair<double,double> const & x, double const y)
 		return;
 	}
 	
+	set_editor_x (x);
+	set_editor_y (y);
+}
+
+/** Set the editor to display given x and y ranges.  x zoom and track heights are
+ *  adjusted if necessary.
+ *  x and y parameters are specified in summary coordinates.
+ */
+void
+EditorSummary::set_editor (pair<double,double> const & x, pair<double, double> const & y)
+{
+	if (_editor->pending_visual_change.idle_handler_id >= 0) {
+		/* see comment in other set_editor () */
+		return;
+	}
+	
+	set_editor_x (x);
+	set_editor_y (y);
+}
+
+/** Set the x range visible in the editor.
+ *  Caller should have checked that Editor::pending_visual_change.idle_handler_id is < 0
+ *  @param x new x range in summary coordinates.
+ */
+void
+EditorSummary::set_editor_x (pair<double, double> const & x)
+{
+	_editor->reset_x_origin (x.first / _x_scale + _start);
+
+	double const nx = (
+		((x.second - x.first) / _x_scale) /
+		_editor->frame_to_unit (_editor->current_page_frames())
+		);
+	
+	if (nx != _editor->get_current_zoom ()) {
+		_editor->reset_zoom (nx);
+	}	
+}
+
+/** Set the top of the y range visible in the editor.
+ *  Caller should have checked that Editor::pending_visual_change.idle_handler_id is < 0
+ *  @param y new editor top in summary coodinates.
+ */
+void
+EditorSummary::set_editor_y (double const y)
+{
 	double y1 = summary_y_to_editor (y);
 	double const eh = _editor->canvas_height() - _editor->get_canvas_timebars_vsize ();
 	double y2 = y1 + eh;
@@ -518,17 +652,68 @@ EditorSummary::set_editor (pair<double,double> const & x, double const y)
 		y1 = 0;
 	}
 
-	_editor->reset_x_origin (x.first / _x_scale + _start);
 	_editor->reset_y_origin (y1);
+}
+
+/** Set the y range visible in the editor.  This is achieved by scaling track heights,
+ *  if necessary.
+ *  Caller should have checked that Editor::pending_visual_change.idle_handler_id is < 0
+ *  @param y new editor range in summary coodinates.
+ */
+void
+EditorSummary::set_editor_y (pair<double, double> const & y)
+{
+	/* Compute current height of tracks between y.first and y.second.  We add up
+	   the total height into `total_height' and the height of complete tracks into
+	   `scale height'.
+	*/
+	pair<double, double> yc = y;
+	double total_height = 0;
+	double scale_height = 0;
+	for (TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+
+		if ((*i)->hidden()) {
+			continue;
+		}
+
+		double const h = (*i)->effective_height ();
+
+		if (yc.first >= 0 && yc.first < _track_height) {
+			total_height += (_track_height - yc.first) * h / _track_height;
+		} else if (yc.first < 0 && yc.second > _track_height) {
+			total_height += h;
+			scale_height += h;
+		} else if (yc.second >= 0 && yc.second < _track_height) {
+			total_height += yc.second * h / _track_height;
+			break;
+		}
+
+		yc.first -= _track_height;
+		yc.second -= _track_height;
+	}
+
+	/* hence required scale factor of the complete tracks to fit the required y range */
+	double const scale = ((_editor->canvas_height() - _editor->get_canvas_timebars_vsize()) - (total_height - scale_height)) / scale_height;
+
+	yc = y;
+
+	/* Scale complete tracks within the range to make it fit */
 	
-	double const nx = (
-		((x.second - x.first) / _x_scale) /
-		_editor->frame_to_unit (_editor->current_page_frames())
-		);
-	
-	if (nx != _editor->get_current_zoom ()) {
-		_editor->reset_zoom (nx);
-	}	
+	for (TrackViewList::const_iterator i = _editor->track_views.begin(); i != _editor->track_views.end(); ++i) {
+
+		if ((*i)->hidden()) {
+			continue;
+		}
+
+		if (yc.first < 0 && yc.second > _track_height) {
+	        	(*i)->set_height ((*i)->effective_height() * scale);
+		}
+
+		yc.first -= _track_height;
+		yc.second -= _track_height;
+	}
+
+        set_editor_y (y.first);
 }
 
 void
@@ -543,11 +728,9 @@ double
 EditorSummary::summary_y_to_editor (double y) const
 {
 	double ey = 0;
-	TrackViewList::const_iterator i = _editor->track_views.begin ();
-	while (i != _editor->track_views.end()) {
+	for (TrackViewList::const_iterator i = _editor->track_views.begin (); i != _editor->track_views.end(); ++i) {
 		
 		if ((*i)->hidden()) {
-			++i;
 			continue;
 		}
 		
@@ -559,7 +742,6 @@ EditorSummary::summary_y_to_editor (double y) const
 
 		ey += h;
 		y -= _track_height;
-		++i;
 	}
 
 	return ey;
@@ -569,11 +751,9 @@ double
 EditorSummary::editor_y_to_summary (double y) const
 {
 	double sy = 0;
-	TrackViewList::const_iterator i = _editor->track_views.begin ();
-	while (i != _editor->track_views.end()) {
+	for (TrackViewList::const_iterator i = _editor->track_views.begin (); i != _editor->track_views.end(); ++i) {
 		
 		if ((*i)->hidden()) {
-			++i;
 			continue;
 		}
 
@@ -585,7 +765,6 @@ EditorSummary::editor_y_to_summary (double y) const
 
 		sy += _track_height;
 		y -= h;
-		++i;
 	}
 
 	return sy;

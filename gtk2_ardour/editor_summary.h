@@ -42,6 +42,22 @@ public:
 	void set_overlays_dirty ();
 
 private:
+
+	enum Position {
+		LEFT,
+		LEFT_TOP,
+		TOP,
+		RIGHT_TOP,
+		RIGHT,
+		RIGHT_BOTTOM,
+		BOTTOM,
+		LEFT_BOTTOM,
+		INSIDE,
+		BELOW_OR_ABOVE,
+		TO_LEFT_OR_RIGHT,
+		OTHERWISE_OUTSIDE
+	};
+
 	bool on_expose_event (GdkEventExpose *);
 	void on_size_request (Gtk::Requisition *);
 	bool on_button_press_event (GdkEventButton *);
@@ -54,9 +70,15 @@ private:
 	void render_region (RegionView*, cairo_t*, double) const;
 	void get_editor (std::pair<double, double> *, std::pair<double, double> *) const;
 	void set_editor (std::pair<double, double> const &, double);
+	void set_editor (std::pair<double, double> const &, std::pair<double, double> const &);
+	void set_editor_x (std::pair<double, double> const &);
+	void set_editor_y (double);
+	void set_editor_y (std::pair<double, double> const &);
 	void playhead_position_changed (nframes64_t);
 	double summary_y_to_editor (double) const;
 	double editor_y_to_summary (double) const;
+	Position get_position (double, double) const;
+	void set_cursor (Position);
 
 	nframes_t _start; ///< start frame of the overview
 	nframes_t _end; ///< end frame of the overview
@@ -72,19 +94,18 @@ private:
 	std::pair<double, double> _start_editor_y;
 	double _start_mouse_x;
 	double _start_mouse_y;
-	enum {
-		IN_VIEWBOX,
-		BELOW_OR_ABOVE_VIEWBOX,
-		TO_LEFT_OR_RIGHT_OF_VIEWBOX
-	} _start_position;
+
+	Position _start_position;
 
 	bool _move_dragging;
-	double _x_offset;
-	double _y_offset;
 	bool _moved;
+	std::pair<double, double> _view_rectangle_x;
+	std::pair<double, double> _view_rectangle_y;
 
 	bool _zoom_dragging;
-	bool _zoom_left;
+	Position _zoom_position;
+	std::pair<double, double> _pending_zoom_x;
+	std::pair<double, double> _pending_zoom_y;
 
 	PBD::ScopedConnectionList position_connection;
 	PBD::ScopedConnectionList region_property_connection;
