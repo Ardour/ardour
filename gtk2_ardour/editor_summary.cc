@@ -95,13 +95,7 @@ EditorSummary::on_expose_event (GdkEventExpose* event)
 	*/
 
 	if (_editor->pending_visual_change.idle_handler_id < 0) {
-		   
-		   if (_zoom_dragging) {
-			   _view_rectangle_x = _pending_zoom_x;
-			   _view_rectangle_y = _pending_zoom_y;
-		   } else {
-			   get_editor (&_view_rectangle_x, &_view_rectangle_y);
-		   }
+		get_editor (&_view_rectangle_x, &_view_rectangle_y);
 	}
 
 	cairo_move_to (cr, _view_rectangle_x.first, _view_rectangle_y.first);
@@ -324,8 +318,6 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 			_zoom_position = get_position (ev->x, ev->y);
 			_zoom_dragging = true;
 			_editor->_dragging_playhead = true;
-			_pending_zoom_x = xr;
-			_pending_zoom_y = yr;
 
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 
@@ -484,19 +476,20 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 		double const dy = ev->y - _start_mouse_y;
 
 		if (_zoom_position == LEFT || _zoom_position == LEFT_TOP || _zoom_position == LEFT_BOTTOM) {
-			_pending_zoom_x.first = _start_editor_x.first + dx;
+			xr.first += dx;
 		} else if (_zoom_position == RIGHT || _zoom_position == RIGHT_TOP || _zoom_position == RIGHT_BOTTOM) {
-			_pending_zoom_x.second = _start_editor_x.second + dx;
+			xr.second += dx;
 		}
 
 		if (_zoom_position == TOP || _zoom_position == LEFT_TOP || _zoom_position == RIGHT_TOP) {
-			_pending_zoom_y.first = _start_editor_y.first + dy;
+			yr.first += dy;
 		} else if (_zoom_position == BOTTOM || _zoom_position == LEFT_BOTTOM || _zoom_position == RIGHT_BOTTOM) {
-			_pending_zoom_y.second = _start_editor_y.second + dy;
+			yr.second += dy;
 		}
 
 		set_overlays_dirty ();
 		set_cursor (_zoom_position);
+		set_editor (xr, yr);
 
 	} else {
 
@@ -510,10 +503,6 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 bool
 EditorSummary::on_button_release_event (GdkEventButton*)
 {
-	if (_zoom_dragging) {
-		set_editor (_pending_zoom_x, _pending_zoom_y);
-	}
-	
 	_move_dragging = false;
 	_zoom_dragging = false;
 	_editor->_dragging_playhead = false;

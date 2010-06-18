@@ -104,8 +104,6 @@ private:
 
 	bool _zoom_dragging;
 	Position _zoom_position;
-	std::pair<double, double> _pending_zoom_x;
-	std::pair<double, double> _pending_zoom_y;
 
 	PBD::ScopedConnectionList position_connection;
 	PBD::ScopedConnectionList region_property_connection;
