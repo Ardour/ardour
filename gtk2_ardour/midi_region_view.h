@@ -169,7 +169,7 @@ class MidiRegionView : public RegionView
 	void end_write();
 	void extend_active_notes();
 
-	void create_note_at(double x, double y, double length);
+	void create_note_at(double x, double y, double length, bool);
 
 	void display_model(boost::shared_ptr<ARDOUR::MidiModel> model);
 

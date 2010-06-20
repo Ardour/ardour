@@ -348,7 +348,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
                         if (!success) {
                                 beats = 1;
                         }
-                        create_note_at (event_x, event_y, beats);
+                        create_note_at (event_x, event_y, beats, true);
                         break;
                 }
                 default:
@@ -369,7 +369,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
                         const double length = trackview.editor().pixel_to_frame 
                                 (_drag_rect->property_x2() - _drag_rect->property_x1());
 
-                        create_note_at (x, _drag_rect->property_y1(), frames_to_beats(length));
+                        create_note_at (x, _drag_rect->property_y1(), frames_to_beats(length), false);
                 }
 
                 delete _drag_rect;
@@ -650,9 +650,11 @@ MidiRegionView::show_list_editor ()
 /** Add a note to the model, and the view, at a canvas (click) coordinate.
  * \param x horizontal position in pixels
  * \param y vertical position in pixels
- * \param length duration of the note in beats */
+ * \param length duration of the note in beats, which will be snapped to the grid
+ * \param sh true to make the note 1 frame shorter than the snapped version of \a length.
+ */
 void
-MidiRegionView::create_note_at(double x, double y, double length)
+MidiRegionView::create_note_at(double x, double y, double length, bool sh)
 {
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	MidiStreamView* const view = mtv->midi_view();
@@ -671,6 +673,10 @@ MidiRegionView::create_note_at(double x, double y, double length)
 			snap_frame_to_frame(start_frames + beats_to_frames(length)) - start_frames);
 
 	assert (length != 0);
+
+	if (sh) {
+		length = frames_to_beats (beats_to_frames (length) - 1);
+	}
 
 	const boost::shared_ptr<NoteType> new_note(new NoteType(0,
 			frames_to_beats(start_frames + _region->start()), length,
