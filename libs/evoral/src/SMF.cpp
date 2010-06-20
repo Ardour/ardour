@@ -202,10 +202,12 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf) const
 	assert(buf);
 
 	if ((event = smf_track_get_next_event(_smf_track)) != NULL) {
+
+		*delta_t = event->delta_time_pulses;
+
 		if (smf_event_is_metadata(event)) {
 			return 0;
 		}
-		*delta_t = event->delta_time_pulses;
 
 		int event_size = event->midi_buffer_length;
 		assert(event_size > 0);
