@@ -140,7 +140,7 @@ public:
 	PBD::Signal0<void> ContentsChanged;
 
 	const MidiSource* midi_source() const { return _midi_source; }
-	void set_midi_source(MidiSource* source) { _midi_source = source; }
+	void set_midi_source (MidiSource *);
 
 	boost::shared_ptr<Evoral::Note<TimeType> > find_note (NotePtr);
 

@@ -1125,7 +1125,9 @@ MidiModel::insert_merge_policy () const
         }
 }
                         
-
-
-
-
+void
+MidiModel::set_midi_source (MidiSource* s)
+{
+	_midi_source->invalidate ();
+	_midi_source = s;
+}
