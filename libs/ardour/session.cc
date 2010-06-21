@@ -1541,9 +1541,6 @@ Session::auto_connect_route (boost::shared_ptr<Route> route,
 		? ChanCount::max(existing_inputs, existing_outputs)
 		: existing_outputs;
 
-	static string empty_string;
-	string& port = empty_string;
-
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		vector<string> physinputs;
 		vector<string> physoutputs;
@@ -1554,7 +1551,7 @@ Session::auto_connect_route (boost::shared_ptr<Route> route,
 		if (!physinputs.empty()) {
 			uint32_t nphysical_in = physinputs.size();
 			for (uint32_t i = 0; i < route->n_inputs().get(*t) && i < nphysical_in; ++i) {
-				port = empty_string;
+				string port;
 
 				if (Config->get_input_auto_connect() & AutoConnectPhysical) {
 					port = physinputs[(in_offset.get(*t) + i) % nphysical_in];
@@ -1570,7 +1567,7 @@ Session::auto_connect_route (boost::shared_ptr<Route> route,
 		if (!physoutputs.empty()) {
 			uint32_t nphysical_out = physoutputs.size();
 			for (uint32_t i = 0; i < route->n_outputs().get(*t); ++i) {
-				port = empty_string;
+				string port;
 
 				if (Config->get_output_auto_connect() & AutoConnectPhysical) {
 					port = physoutputs[(out_offset.get(*t) + i) % nphysical_out];
