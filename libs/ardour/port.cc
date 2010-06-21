@@ -117,8 +117,9 @@ Port::connect (std::string const & other)
 
 	int r = 0;
 
-	if (_connecting_blocked)
+	if (_connecting_blocked) {
 		return r;
+	}
 
 	if (sends_output ()) {
 		r = jack_connect (_engine->jack (), this_shrt.c_str (), other_shrt.c_str ());
