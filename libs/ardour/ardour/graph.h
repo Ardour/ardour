@@ -88,7 +88,6 @@ class Graph : public SessionHandleRef
         std::list<Glib::Thread *> _thread_list;
         volatile bool _quit_threads;
         
-	node_list_t _nodes;
 	node_list_t _nodes_rt[2];
 
 	node_list_t _init_trigger_list[2];

@@ -103,7 +103,6 @@ Graph::session_going_away()
         }
 
         // now drop all references on the nodes.
-        _nodes.clear();
         _nodes_rt[0].clear();
         _nodes_rt[1].clear();
         _init_trigger_list[0].clear();
