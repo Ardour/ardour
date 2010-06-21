@@ -46,8 +46,10 @@ MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 	: Playlist (session, node, DataType::MIDI, hidden)
 	, _note_mode(Sustained)
 {
+#ifndef NDEBUG
 	const XMLProperty* prop = node.property("type");
 	assert(prop && DataType(prop->value()) == DataType::MIDI);
+#endif
 
 	in_set_state++;
 	set_state (node, Stateful::loading_state_version);

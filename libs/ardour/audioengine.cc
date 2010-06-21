@@ -492,9 +492,9 @@ AudioEngine::process_callback (nframes_t nframes)
 
 	if (_freewheeling) {
 		/* emit the Freewheel signal and stop freewheeling in the event of trouble 
-		 * the indirection is to pick up the return value of the signal.
 		 */
-		if (*Freewheel (nframes)) {
+                boost::optional<int> r = Freewheel (nframes);
+		if (r.get_value_or (0)) {
 			jack_set_freewheel (_priv_jack, false);
 		}
 

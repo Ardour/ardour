@@ -167,8 +167,10 @@ Playlist::Playlist (Session& sess, const XMLNode& node, DataType type, bool hide
         , _type(type)
 
 {
+#ifndef NDEBUG
 	const XMLProperty* prop = node.property("type");
 	assert(!prop || DataType(prop->value()) == _type);
+#endif
 
 	init (hide);
 	_name = "unnamed"; /* reset by set_state */

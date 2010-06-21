@@ -852,7 +852,8 @@ Session::load_state (string snapshot_name)
 
 		/* there is pending state from a crashed capture attempt */
 
-		if (*AskAboutPendingState()) {
+                boost::optional<int> r = AskAboutPendingState();
+		if (r.get_value_or (1)) {
 			state_was_pending = true;
 		}
 	}
@@ -1184,7 +1185,8 @@ Session::set_state (const XMLNode& node, int version)
 		_nominal_frame_rate = atoi (prop->value());
 
 		if (_nominal_frame_rate != _current_frame_rate) {
-			if (*AskAboutSampleRateMismatch (_nominal_frame_rate, _current_frame_rate)) {
+                        boost::optional<int> r = AskAboutSampleRateMismatch (_nominal_frame_rate, _current_frame_rate);
+			if (r.get_value_or (0)) {
 				return -1;
 			}
 		}
@@ -2447,7 +2449,8 @@ struct RegionCounter {
 int
 Session::ask_about_playlist_deletion (boost::shared_ptr<Playlist> p)
 {
-	return *AskAboutPlaylistDeletion (p);
+        boost::optional<int> r = AskAboutPlaylistDeletion (p);
+	return r.get_value_or (1);
 }
 
 int
