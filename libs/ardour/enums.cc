@@ -69,6 +69,7 @@ setup_enum_writer ()
 	DenormalModel _DenormalModel;
 	CrossfadeModel _CrossfadeModel;
 	LayerModel _LayerModel;
+	InsertMergePolicy _InsertMergePolicy;
 	ListenPosition _ListenPosition;
 	SampleFormat _SampleFormat;
 	CDMarkerFormat _CDMarkerFormat;
@@ -238,6 +239,14 @@ setup_enum_writer ()
 	REGISTER_ENUM (MoveAddHigher);
 	REGISTER_ENUM (AddHigher);
 	REGISTER (_LayerModel);
+        
+        REGISTER_ENUM (InsertMergeReject);
+        REGISTER_ENUM (InsertMergeRelax);
+        REGISTER_ENUM (InsertMergeReplace);
+        REGISTER_ENUM (InsertMergeTruncateExisting);
+        REGISTER_ENUM (InsertMergeTruncateAddition);
+        REGISTER_ENUM (InsertMergeExtend);
+        REGISTER (_InsertMergePolicy);
 
 	REGISTER_ENUM (AfterFaderListen);
 	REGISTER_ENUM (PreFaderListen);
@@ -655,6 +664,20 @@ std::ostream& operator<<(std::ostream& o, const LayerModel& var)
 	std::string s = enum_2_string (var);
 	return o << s;
 }
+
+std::istream& operator>>(std::istream& o, InsertMergePolicy& var) 
+{ 
+	std::string s;
+	o >> s;
+	var = (InsertMergePolicy) string_2_enum (s, var);
+	return o;
+}
+std::ostream& operator<<(std::ostream& o, const InsertMergePolicy& var) 
+{ 
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
 std::istream& operator>>(std::istream& o, CrossfadeModel& var) 
 { 
 	std::string s;

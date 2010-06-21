@@ -332,6 +332,24 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Misc"), lm);
 
+	add_option (_("Misc"), new OptionEditorHeading (_("MIDI Note Overlaps")));
+
+	ComboOption<InsertMergePolicy>* li = new ComboOption<InsertMergePolicy> (
+		"insert-merge-policy",
+		_("Handle same note+channel overlaps by"),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_insert_merge_policy),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_insert_merge_policy)
+		);
+
+        li->add (InsertMergeReject, _("Never allowing them"));
+        li->add (InsertMergeRelax, _("Don't do anything in particular"));
+        li->add (InsertMergeReplace, _("Replace any overlapped existing note"));
+        li->add (InsertMergeTruncateExisting, _("Shorten the overlapped existing note"));
+        li->add (InsertMergeTruncateAddition, _("Shorten the overlapping new note"));
+        li->add (InsertMergeExtend, _("Replace both overlapping notes with a single note"));
+
+	add_option (_("Misc"), li);
+
 	add_option (_("Misc"), new OptionEditorHeading (_("Broadcast WAVE metadata")));
 
 	add_option (_("Misc"), new EntryOption (
