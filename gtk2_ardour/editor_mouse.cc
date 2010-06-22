@@ -676,7 +676,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                         if (internal_editing()) {
                                 _drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
                                 return true;
-                        }
+                        } else {
+				_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
+				return true;
+			}
                         break;
 
                 case RegionViewNameHighlight:
