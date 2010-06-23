@@ -41,8 +41,10 @@ using namespace PBD;
 AudioPlaylist::AudioPlaylist (Session& session, const XMLNode& node, bool hidden)
 	: Playlist (session, node, DataType::AUDIO, hidden)
 {
+#ifndef NDEBUG
 	const XMLProperty* prop = node.property("type");
 	assert(!prop || DataType(prop->value()) == DataType::AUDIO);
+#endif
 
 	in_set_state++;
 	set_state (node, Stateful::loading_state_version);
